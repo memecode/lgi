@@ -1309,7 +1309,7 @@ ssize_t BuildThread::Write(const void *Buffer, ssize_t Size, int Flags)
 struct ProjInfo
 {
 	GString Guid, Name, File;
-	LHashTbl<StrKey<char>,int> Configs;
+	LHashTbl<StrKey<char>,ssize_t> Configs;
 };
 
 GString BuildThread::FindExe()
@@ -1434,7 +1434,7 @@ GString BuildThread::FindExe()
 						{
 							if (!i->Configs.Find(p[1]))
 							{
-								int Idx = i->Configs.Length() + 1;
+								auto Idx = i->Configs.Length() + 1;
 								i->Configs.Add(p[1], Idx);
 							}
 						}

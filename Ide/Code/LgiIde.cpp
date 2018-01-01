@@ -1979,7 +1979,7 @@ void AppWnd::OnDebugState(bool Debugging, bool Running)
 	PostEvent(M_DEBUG_ON_STATE, Debugging, Running);
 }
 
-bool IsVarChar(GString &s, int pos)
+bool IsVarChar(GString &s, ssize_t pos)
 {
 	if (pos < 0)
 		return false;
@@ -1991,7 +1991,7 @@ bool IsVarChar(GString &s, int pos)
 
 bool ReplaceWholeWord(GString &Ln, GString Word, GString NewWord)
 {
-	int Pos = 0;
+	ssize_t Pos = 0;
 	bool Status = false;
 
 	while (Pos >= 0)
@@ -2000,7 +2000,7 @@ bool ReplaceWholeWord(GString &Ln, GString Word, GString NewWord)
 		if (Pos < 0)
 			return Status;
 
-		int End = Pos + Word.Length();
+		ssize_t End = Pos + Word.Length();
 		if (!IsVarChar(Ln, Pos-1) && !IsVarChar(Ln, End))
 		{
 			GString NewLn = Ln(0,Pos) + NewWord + Ln(End,-1);

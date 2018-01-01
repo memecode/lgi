@@ -346,17 +346,29 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 		r = *rc;
 	else
 		r = GetClient();
+	if (!r.Valid())
+		return false;
 	
+	auto w = GetWindow();
 	for (GViewI *v = this; v; v = v->GetParent())
 	{
 		if (!v->Visible())
 			return true;
+		if (v == (GViewI*)w)
+			break;
 
 		auto p = v->GetPos();
 		r.Offset(p.x1, p.y1);
 	}
 
-	// FIXME: real invalidate here...
+	auto v = w ? w->Handle() : NULL;
+	if (v)
+	{
+		[v setNeedsDisplayInRect:r];
+		printf("%s::Inval r=%s\n", GetClass(), r.GetStr());
+	}
+	else
+		LgiTrace("%s:%i - No contentView? %s\n", _FL, GetClass());
 	
 	return false;
 }

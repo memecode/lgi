@@ -149,6 +149,9 @@ public:
 		self.contentViewController = ctrl;
 		[ctrl release];
 		
+		self.acceptsMouseMovedEvents = true;
+		self.ignoresMouseEvents = false;
+		
 		printf("LNsWindow.init\n");
 	}
 	return self;
@@ -284,6 +287,14 @@ GWindow::~GWindow()
 	DeleteObj(Menu);
 	DeleteObj(d);
 	DeleteObj(_Lock);
+}
+
+NSView *GWindow::Handle()
+{
+	if (Wnd.p != nil)
+		return Wnd.p.contentViewController.view;
+	
+	return NULL;
 }
 
 bool &GWindow::CloseRequestDone()
@@ -1214,7 +1225,7 @@ bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 		
 		bool ParentPopup = false;
 		GViewI *p = m.Target;
-		while (p->GetParent())
+		while (p && p->GetParent())
 		{
 			if (dynamic_cast<GPopup*>(p))
 			{

@@ -824,7 +824,7 @@ bool BuildCppDefnList(char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns, int 
 
 								GArray<char16*> a;
 								char16 *t;
-								int StartRd = -1, EndRd = -1;
+								ssize_t StartRd = -1, EndRd = -1;
 								while ((t = LexCpp(s, LexStrdup)))
 								{
 									if (StartRd < 0 && !StrcmpW(t, L"("))
@@ -839,7 +839,7 @@ bool BuildCppDefnList(char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns, int 
 
 								if (a.Length())
 								{
-									int iName = StartRd > 0 && EndRd > StartRd ? StartRd - 1 : a.Length() - 1;
+									auto iName = StartRd > 0 && EndRd > StartRd ? StartRd - 1 : a.Length() - 1;
 									auto sName = a[iName];
 									Defns.New().Set(DefnTypedef, FileName, sName, Line + 1);
 									a.DeleteArrays();

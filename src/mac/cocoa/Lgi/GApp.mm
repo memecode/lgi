@@ -138,11 +138,12 @@ OsAppArguments &OsAppArguments::operator =(OsAppArguments &a)
 
 void GMouse::SetFromEvent(NSEvent *ev, NSView *view)
 {
-	auto r = view.superview.frame;
+	auto r = view.frame;
+	auto pt = ev.locationInWindow;
 
 	GMouse m;
-	x = (int)ev.locationInWindow.x;
-	y = (int)(r.size.height - ev.locationInWindow.y);
+	x = (int)pt.x;
+	y = (int)(r.size.height - pt.y);
 	SetModifer((uint32)ev.modifierFlags);
 	Double(ev.clickCount == 2);
 
@@ -172,6 +173,21 @@ void GMouse::SetFromEvent(NSEvent *ev, NSView *view)
 		default:
 			LgiAssert(!"Unknown event.");
 			break;
+	}
+	
+	if (Target)
+	{
+		auto t = Target->WindowFromPoint(x, y);
+		if (t)
+		{
+			for (auto i = t; i && i != Target; i = i->GetParent())
+			{
+				auto p = i->GetPos();
+				x -= p.x1;
+				y -= p.y1;
+			}
+			Target = t;
+		}
 	}
 }
 

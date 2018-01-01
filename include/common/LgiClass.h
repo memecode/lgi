@@ -235,9 +235,9 @@ public:
 	/// The y co-ordinate of the mouse relative to the current view
 	int y;
 	
-	GMouse()
+	GMouse(GViewI *target = NULL)
 	{
-		Target = 0;
+		Target = target;
 		ViewCoords = true;
 		x = y = 0;
 	}

@@ -586,6 +586,7 @@ void GToolButton::OnPaint(GSurface *pDC)
 	GToolBar *Par = dynamic_cast<GToolBar*>(GetParent());
 	bool e = Enabled();
 
+	printf("%s OnPaint\n", GetClass());
 	if (Par)
 	{
 		GRect p = GetClient();

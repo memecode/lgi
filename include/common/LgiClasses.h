@@ -489,52 +489,49 @@ protected:
 	
 	#if defined WINNATIVE
 
-	uint32_t GetStyle();
-	void SetStyle(uint32_t i);
-	uint32_t GetExStyle();
-	void SetExStyle(uint32_t i);
-	uint32_t GetDlgCode();
-	void SetDlgCode(uint32_t i);
+		uint32_t GetStyle();
+		void SetStyle(uint32_t i);
+		uint32_t GetExStyle();
+		void SetExStyle(uint32_t i);
+		uint32_t GetDlgCode();
+		void SetDlgCode(uint32_t i);
 
-    /// \brief Gets the win32 class passed to CreateWindowEx()
-	const char *GetClassW32();
-	/// \brief Sets the win32 class passed to CreateWindowEx()
-	void SetClassW32(const char *s);
-	/// \brief Creates a class to pass to CreateWindowEx(). If this methed is not
-	/// explicitly called then the string from GetClass() is used to create a class,
-	/// which is usually the name of the object.
-	GWin32Class *CreateClassW32(const char *Class = 0, HICON Icon = 0, int AddStyles = 0);
+		/// \brief Gets the win32 class passed to CreateWindowEx()
+		const char *GetClassW32();
+		/// \brief Sets the win32 class passed to CreateWindowEx()
+		void SetClassW32(const char *s);
+		/// \brief Creates a class to pass to CreateWindowEx(). If this methed is not
+		/// explicitly called then the string from GetClass() is used to create a class,
+		/// which is usually the name of the object.
+		GWin32Class *CreateClassW32(const char *Class = 0, HICON Icon = 0, int AddStyles = 0);
 
-	virtual int		SysOnNotify(int Msg, int Code) { return 0; }
-	
-	#elif defined BEOS
-
-	struct OsMouseInfo;
-	friend long _lgi_mouse_thread(OsMouseInfo *Info);
-
-	OsMouseInfo		*_MouseInfo;
-	OsThread		_CaptureThread;
-	OsThread		_PulseThread;
-	int				_PulseRate;
-	BWindow			*_QuitMe;
-
-	void _Key(const char *bytes, int32 numBytes, bool down);
-	virtual bool QuitRequested() {}
+		virtual int		SysOnNotify(int Msg, int Code) { return 0; }
 	
 	#elif defined MAC
 	
-	bool _Attach(GViewI *parent);
-	#if defined(COCOA)
-public:
-	GdcPt2 Flip(GdcPt2 p);
-	GRect Flip(GRect p);
-protected:
-	#elif defined(LGI_CARBON)
-	OsView _CreateCustomView();
-	virtual bool _OnGetInfo(HISize &size, HISize &line, HIRect &bounds, HIPoint &origin) { return false; }
-	virtual void _OnScroll(HIPoint &origin) {}
+		bool _Attach(GViewI *parent);
+		#if defined(COCOA)
+		public:
+			GdcPt2 Flip(GdcPt2 p);
+			GRect Flip(GRect p);
+		#elif defined(LGI_CARBON)
+			OsView _CreateCustomView();
+			virtual bool _OnGetInfo(HISize &size, HISize &line, HIRect &bounds, HIPoint &origin) { return false; }
+			virtual void _OnScroll(HIPoint &origin) {}
+		#endif
+	
+	#endif
+
+	#if !WINNATIVE
+
+		GView *&PopupChild();
+		virtual bool	_Mouse(GMouse &m, bool Move);
+		void			_Focus(bool f);
+
 	#endif
 	
+	#if defined(COCOA)
+		protected:
 	#endif
 
 
@@ -561,14 +558,6 @@ protected:
 	bool HandleCapture(GView *Wnd, bool c);
 
 	
-	#if !WINNATIVE
-
-	GView *&PopupChild();
-	virtual bool	_Mouse(GMouse &m, bool Move);
-	void			_Focus(bool f);
-
-	#endif
-
 	virtual bool OnViewMouse(GView *v, GMouse &m) { return true; }
 	virtual bool OnViewKey(GView *v, GKey &k) { return false; }
 	virtual void OnNcPaint(GSurface *pDC, GRect &r);
@@ -1251,9 +1240,6 @@ class LgiClass GWindow :
 	friend class GApp;
 	friend class GWindowPrivate;
 	friend struct GDialogPriv;
-	#if defined(CARBON)
-	friend pascal OSStatus LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *inUserData);
-	#endif
 
 	bool _QuitOnClose;
 
@@ -1262,35 +1248,36 @@ protected:
 
 	#if WINNATIVE
 
-	GRect OldPos;
-	GWindow *_Dialog;
+		GRect OldPos;
+		GWindow *_Dialog;
 
 	#else
 
-	OsWindow Wnd;
-	void _OnViewDelete();
-	void _SetDynamic(bool i);
+		OsWindow Wnd;
+		void _OnViewDelete();
+		void _SetDynamic(bool i);
 
 	#endif
 
-	#if defined BEOS
+	#if defined __GTK_H__
 
-	friend class LMenu;
-	friend class GView;
-
-	#elif defined __GTK_H__
-
-	friend class LMenu;	
-	friend void lgi_widget_size_allocate(Gtk::GtkWidget *widget, Gtk::GtkAllocation *allocation);
+		friend class LMenu;
+		friend void lgi_widget_size_allocate(Gtk::GtkWidget *widget, Gtk::GtkAllocation *allocation);
 	
-	Gtk::GtkWidget *_Root, *_VBox, *_MenuBar;
-	void OnGtkDelete();
-	Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
+		Gtk::GtkWidget *_Root, *_VBox, *_MenuBar;
+		void OnGtkDelete();
+		Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
 
-	#endif
+	#elif defined(LGI_CARBON)
+
+		friend pascal OSStatus LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *inUserData);
+		void _Delete();
 	
-	#if defined(LGI_CARBON)
-	void _Delete();
+	#elif defined(__OBJC__)
+	
+		// This returns the root level content NSView
+		NSView *Handle();
+
 	#endif
 
 	/// The default button
@@ -1304,12 +1291,12 @@ protected:
 
 public:
 	#ifdef __GTK_H__
-	GWindow(Gtk::GtkWidget *w = NULL);
+		GWindow(Gtk::GtkWidget *w = NULL);
 	#else
-	GWindow();
+		GWindow();
 	#endif
 	#if CARBON
-	GWindow(WindowRef wr);
+		GWindow(WindowRef wr);
 	#endif
 	~GWindow();
 
@@ -1449,19 +1436,19 @@ public:
 
 	#if !WINNATIVE
 	
-	bool Attach(GViewI *p);
+		bool Attach(GViewI *p);
 
-	// Props
-	OsWindow WindowHandle() { return Wnd; }
-	bool Name(const char *n);
-	char *Name();
-	bool SetPos(GRect &p, bool Repaint = false);
-	GRect &GetClient(bool InClientSpace = true);
+		// Props
+		OsWindow WindowHandle() { return Wnd; }
+		bool Name(const char *n);
+		char *Name();
+		bool SetPos(GRect &p, bool Repaint = false);
+		GRect &GetClient(bool InClientSpace = true);
 	
-	// Events
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
-	void OnCreate();
-	virtual void OnFrontSwitch(bool b);
+		// Events
+		void OnChildrenChanged(GViewI *Wnd, bool Attaching);
+		void OnCreate();
+		virtual void OnFrontSwitch(bool b);
 
 	#endif
 
@@ -1484,12 +1471,13 @@ public:
 		bool &CloseRequestDone();
 		bool PostEvent(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0);
 		void Quit(bool DontDelete = false);
-		#if defined(LGI_CARBON)
-		OSErr HandlerCallback(DragTrackingMessage *tracking, DragRef theDrag);
-		#endif
 		int OnCommand(int Cmd, int Event, OsView Wnd);
 		GViewI *WindowFromPoint(int x, int y, bool Debug = false);
 		
+		#if defined(LGI_CARBON)
+			OSErr HandlerCallback(DragTrackingMessage *tracking, DragRef theDrag);
+		#endif
+
 	#endif
 };
 
