@@ -11,6 +11,7 @@ public:
 	GAutoWString Wide;
 };
 
+#if 0
 class LFileEnum : public GUnknownImpl<IEnumFORMATETC>
 {
 	int Idx;
@@ -92,7 +93,7 @@ public:
 
 	LFileData(GString::Array &files) : Files(files)
 	{
-		TraceRefs = true;
+		// TraceRefs = true;
 		Type = GClipBoard::StrToFmt(CFSTR_FILENAMEA);
 		PrefDrop = GClipBoard::StrToFmt(CFSTR_PREFERREDDROPEFFECT);
 		ShellIdList = GClipBoard::StrToFmt(CFSTR_SHELLIDLIST);
@@ -114,6 +115,7 @@ public:
 		
 		if (!Med)
 			return E_INVALIDARG;
+
 		if (Fmt->cfFormat == PrefDrop)
 		{
 			Med->tymed = TYMED_HGLOBAL;
@@ -125,9 +127,6 @@ public:
 		}
 		else if (Fmt->cfFormat == Type)
 		{
-			if (!Med)
-				return E_INVALIDARG;
-
 			new LFileName(Med, Files[Cur++]);
 		}
 		else if (Fmt->cfFormat == CF_HDROP)
@@ -136,13 +135,19 @@ public:
 			GDragData Data;
 			GMouse m;
 			if (!Src.CreateFileDrop(&Data, m, Files))
+			{
+				LgiTrace("%s:%i - CreateFileDrop failed.\n", _FL);
 				return E_FAIL;
+			}
 
 			GVariant &d = Data.Data[0];
 			Med->tymed = TYMED_HGLOBAL;
 			Med->hGlobal = GlobalAlloc(GHND, d.Value.Binary.Length);
 			if (Med->hGlobal == NULL)
+			{
+				LgiTrace("%s:%i - GlobalAlloc failed.\n", _FL);
 				return E_FAIL;
+			}
 
 			char* data = (char*)GlobalLock(Med->hGlobal);
 			memcpy(data, d.Value.Binary.Data, d.Value.Binary.Length);
@@ -151,6 +156,7 @@ public:
 		}
 		else if (Fmt->cfFormat == ShellIdList)
 		{
+			LgiTrace("%s:%i - GetData ShellIdList not supported.\n", _FL);
 			return E_NOTIMPL;
 
 			/*
@@ -253,6 +259,7 @@ public:
 		return E_NOTIMPL;
 	}
 };
+#endif
 
 GString::Array GClipBoard::Files()
 {
@@ -343,8 +350,6 @@ GString::Array GClipBoard::Files()
 			pEnum->Release();
 		}
 
-
-
 		pObj->Release();
 	}
 	else
@@ -365,15 +370,31 @@ GString::Array GClipBoard::Files()
 
 bool GClipBoard::Files(GString::Array &Paths, bool AutoEmpty)
 {
-	if (Open)
-	{
-		CloseClipboard();
-		Open = FALSE;
-	}
+	GDragDropSource Src;
+	GDragData Output;
+	GMouse m;
+	if (Owner)
+		Owner->GetMouse(m, true);
 
-	// CFSTR_FILEDESCRIPTOR
-	HRESULT r = OleSetClipboard(new LFileData(Paths));
-	return SUCCEEDED(r);
+	if (!Src.CreateFileDrop(&Output, m, Paths))
+		return false;
+
+	GVariant &v = Output.Data[0];
+	if (v.Type != GV_BINARY)
+		return false;
+
+	HGLOBAL hMem = GlobalAlloc(GMEM_ZEROINIT|GMEM_MOVEABLE|GMEM_DDESHARE, v.Value.Binary.Length);
+    auto *p = GlobalLock(hMem);
+    CopyMemory(p, v.Value.Binary.Data, v.Value.Binary.Length);
+    GlobalUnlock(hMem);
+
+	OpenClipboard(NULL);
+	if (AutoEmpty)
+		EmptyClipboard();
+	auto r = SetClipboardData(CF_HDROP, hMem);
+	CloseClipboard();
+	
+	return r != NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
