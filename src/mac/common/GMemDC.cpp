@@ -458,7 +458,20 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 
 	if (Src->IsScreen())
 	{
-		LgiAssert(!"Impl me.");
+		CGRect r;
+		if (a)
+			r = *a;
+		else
+			r = Src->Bounds();
+
+		CGImageRef Img = CGWindowListCreateImage(r, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
+		if (Img)
+		{
+			GRect r(0, 0, CGImageGetWidth(Img)-1, CGImageGetHeight(Img)-1);
+			CGContextDrawImage(d->Bmp, r, Img);
+			CGImageRelease(Img);
+		}
+		else printf("%s:%i - CGWindowListCreateImage failed.\n", _FL);
 	}
 	else
 	{
