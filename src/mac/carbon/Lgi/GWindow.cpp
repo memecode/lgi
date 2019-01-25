@@ -565,7 +565,7 @@ pascal OSStatus LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inE
 	UInt32 eventClass = GetEventClass( inEvent );
 	UInt32 eventKind = GetEventKind( inEvent );
 
-	#if 0
+	#if 1
 	UInt32 ev = LgiSwap32(eventClass);
 	printf("WndProc %4.4s-%i\n", (char*)&ev, eventKind);
 	#endif

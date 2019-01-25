@@ -760,6 +760,8 @@ void GMdiParent::OnPaint(GSurface *pDC)
 	::GArray<GMdiChild*> Views;
 	GMdiChild *Last = dynamic_cast<GMdiChild*>(d->Children.Last());
 	GetChildren(Views);
+	GColour cActive(LC_WORKSPACE, 24);
+	GColour cInactive(GColour(LC_MED,24).Mix(cActive));
 	
 	for (int Idx=0; Idx<Views.Length(); Idx++)
 	{
@@ -781,7 +783,7 @@ void GMdiParent::OnPaint(GSurface *pDC)
 		else c->d->Btn.ZOff(-1, -1);
 		
 		c->Visible(Active);
-		GColour Bk(Active ? LC_WORKSPACE : LC_MED, 24);
+		GColour Bk(Active ? cActive : cInactive);
 		GColour Edge(LC_BLACK, 24);
 		GColour Txt(LC_TEXT, 24);
 		
