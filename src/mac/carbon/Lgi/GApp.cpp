@@ -301,7 +301,7 @@ pascal OSStatus AppProc(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, 
 	#if 0
 	UInt32 ec = LgiSwap32(eventClass);
 	UInt32 ek = LgiSwap32(eventKind);
-	printf("AppProc %4.4s - %u\n", (char*)&ec, (unsigned)eventKind);
+	printf("AppProc %4.4s.%4.4s - %u\n", (char*)&ec, (char*)&ek, (unsigned)eventKind);
 	#endif
 
 	switch (eventClass)

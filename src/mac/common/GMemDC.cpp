@@ -467,7 +467,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 		CGImageRef Img = CGWindowListCreateImage(r, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
 		if (Img)
 		{
-			GRect r(0, 0, CGImageGetWidth(Img)-1, CGImageGetHeight(Img)-1);
+			GRect r(0, 0, (int)CGImageGetWidth(Img)-1, (int)CGImageGetHeight(Img)-1);
 			CGContextDrawImage(d->Bmp, r, Img);
 			CGImageRelease(Img);
 		}

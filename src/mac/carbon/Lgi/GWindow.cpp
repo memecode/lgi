@@ -565,9 +565,9 @@ pascal OSStatus LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inE
 	UInt32 eventClass = GetEventClass( inEvent );
 	UInt32 eventKind = GetEventKind( inEvent );
 
-	#if 1
+	#if 0
 	UInt32 ev = LgiSwap32(eventClass);
-	printf("WndProc %4.4s-%i\n", (char*)&ev, eventKind);
+	printf("WndProc %4.4s-%u\n", (char*)&ev, (uint32)eventKind);
 	#endif
 
 	switch (eventClass)
@@ -927,16 +927,19 @@ pascal OSStatus LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inE
 		{
 			switch (eventKind)
 			{
-				case kEventRawKeyDown:
+				case kEventHotKeyReleased:
+				case kEventHotKeyPressed:
 				{
-					break;
-				}
-				case kEventRawKeyRepeat:
-				{
-					break;
-				}
-				case kEventRawKeyUp:
-				{
+					EventHotKeyID hotKeyID;
+					bool Down = eventKind == kEventHotKeyPressed;
+					
+					auto e = GetEventParameter(inEvent, kEventParamDirectObject, typeEventHotKeyID, NULL, sizeof(EventHotKeyID), NULL, &hotKeyID);
+					if (e) printf("%s:%i - error %i\n", _FL, (int)e);
+
+					GKey k;
+					k.Down(Down);
+					k.vkey = hotKeyID.id;
+					v->OnKey(k);
 					break;
 				}
 			}
@@ -1115,6 +1118,8 @@ bool GWindow::Attach(GViewI *p)
 			{ kEventClassControl, kEventControlDragLeave },
 			{ kEventClassControl, kEventControlDragReceive },
 			
+			{ kEventClassKeyboard, kEventHotKeyPressed },
+
 			{ kEventClassUser, kEventUser }
 		};
 		

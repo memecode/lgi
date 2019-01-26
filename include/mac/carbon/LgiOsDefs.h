@@ -237,37 +237,40 @@ enum MessageBoxType
 #define LGI_VMOUSE_DOUBLE			0x400
 
 // Keys
-#define VK_F1						1
-#define VK_F2						2
-#define VK_ENTER					3
-#define VK_F3						4
-#define VK_F4						5
-#define VK_F5						6
-#define VK_F6						7
-#define VK_BACKSPACE				8
-#define VK_TAB						9
-#define VK_F7						11
-#define VK_F8						12
-#define VK_RETURN					13
-#define VK_F9						14
-#define VK_F10						15
-#define VK_F11						16
-#define VK_F12						17
-#define VK_SHIFT					18
-#define VK_PAGEUP					19
-#define VK_PAGEDOWN					20
-#define VK_HOME						21
-#define VK_END						22
-#define VK_INSERT					23
-#define VK_DELETE					24
-#define VK_APPS						25
+enum LVirtualKeys
+{
+	VK_F1			= kVK_F1,
+	VK_F2			= kVK_F2,
+	VK_F3			= kVK_F3,
+	VK_F4			= kVK_F4,
+	VK_F5			= kVK_F5,
+	VK_F6			= kVK_F6,
+	VK_F7			= kVK_F7,
+	VK_F8			= kVK_F8,
+	VK_F9			= kVK_F9,
+	VK_F10			= kVK_F10,
+	VK_F11			= kVK_F11,
+	VK_F12			= kVK_F12,
 
-#define VK_ESCAPE					27
-#define VK_LEFT						28
-#define VK_RIGHT					29
-#define VK_UP						30
-#define VK_DOWN						31
+	VK_ENTER		= 0x25, // IDK??
+	VK_BACKSPACE	= kVK_Delete,
+	VK_TAB			= kVK_Tab,
+	VK_RETURN		= kVK_Return,
+	VK_SHIFT		= kVK_Shift,
+	VK_PAGEUP		= kVK_PageUp,
+	VK_PAGEDOWN		= kVK_PageDown,
+	VK_HOME			= kVK_Home,
+	VK_END			= kVK_End,
+	VK_INSERT		= 0x26,
+	VK_DELETE		= kVK_ForwardDelete,
+	VK_APPS			= kVK_Command,
 
+	VK_ESCAPE		= kVK_Escape,
+	VK_LEFT			= kVK_LeftArrow,
+	VK_RIGHT		= kVK_RightArrow,
+	VK_UP			= kVK_UpArrow,
+	VK_DOWN			= kVK_DownArrow,
+};
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs
