@@ -101,11 +101,6 @@ GView *GWindowFromHandle(OsView h)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-void _lgi_yield()
-{
-	LgiApp->Run(false);
-}
-
 bool LgiIsKeyDown(int Key)
 {
 	LgiAssert(!"Not impl.");
@@ -172,44 +167,6 @@ GViewPrivate::~GViewPrivate()
 const char *GView::GetClass()
 {
 	return "GView";
-}
-
-void GView::_Delete()
-{
-	LAutoPool Pool;
-	if (_Over == this) _Over = 0;
-	if (_Capturing == this) _Capturing = 0;
-
-	if (LgiApp && LgiApp->AppWnd == this)
-	{
-		LgiApp->AppWnd = 0;
-	}
-
-	SetPulse();
-	Pos.ZOff(-1, -1);
-
-	GViewI *c;
-	while ((c = Children.First()))
-	{
-		GViewI *p = c->GetParent();
-		if (p != (GViewI*)this)
-		{
-			printf("Error: GView::_Delete, child not attached correctly: %p(%s) Parent: %p(%s)\n",
-				c, c->Name(),
-				c->GetParent(), c->GetParent() ? c->GetParent()->Name() : "");
-			Children.Delete(c);
-		}
-
-		DeleteObj(c);
-	}
-	
-	Detach();
-
-	if (_View)
-	{
-		[_View.p release];
-		_View.p = nil;
-	}
 }
 
 GView *&GView::PopupChild()
@@ -957,7 +914,13 @@ bool GView::_Attach(GViewI *parent)
 		LgiAssert(ph);
 
 		if (!_View)
+		{
 			_View.p = [[LCocoaView alloc] init:this];
+		}
+		
+		if (!_View)
+			return false;
+		
 		if (_View.p.superview)
 		{
 			// Already atteched?
@@ -968,7 +931,7 @@ bool GView::_Attach(GViewI *parent)
 			GRect f = Flip(Pos);
 			[_View.p setFrame:f];
 			[ph addSubview:_View.p];
-			
+
 			OnCreate();
 		}
 	}
@@ -1003,6 +966,44 @@ bool GView::Attach(GViewI *parent)
 	return false;
 }
 
+void GView::_Delete()
+{
+	LAutoPool Pool;
+	if (_Over == this) _Over = 0;
+	if (_Capturing == this) _Capturing = 0;
+
+	if (LgiApp && LgiApp->AppWnd == this)
+	{
+		LgiApp->AppWnd = 0;
+	}
+
+	SetPulse();
+	Pos.ZOff(-1, -1);
+
+	GViewI *c;
+	while ((c = Children.First()))
+	{
+		GViewI *p = c->GetParent();
+		if (p != (GViewI*)this)
+		{
+			printf("Error: GView::_Delete, child not attached correctly: %p(%s) Parent: %p(%s)\n",
+				c, c->Name(),
+				c->GetParent(), c->GetParent() ? c->GetParent()->Name() : "");
+			Children.Delete(c);
+		}
+
+		DeleteObj(c);
+	}
+	
+	Detach();
+
+	if (_View)
+	{
+		[_View.p release];
+		_View.p = nil;
+	}
+}
+
 bool GView::Detach()
 {
 	LAutoPool Pool;
@@ -1019,7 +1020,6 @@ bool GView::Detach()
 
 	if (_View)
 	{
-		[_View.p retain];
 		[_View.p removeFromSuperview];
 	}
 	

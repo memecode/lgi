@@ -181,7 +181,7 @@ public:
 		
 		if (Attach(0))
 		{
-			#if 0
+			#if 1
 
 			GTabView *t = new GTabView(100);
 			t->Attach(this);
@@ -194,7 +194,7 @@ public:
 			tab->GetCss(true)->Color("red");
 			t->OnStyleChange();
 
-			#elif 1
+			#elif 0
 
 			AddView(Tbl = new GTableLayout(100));
 			GLayoutCell *c = Tbl->GetCell(0, 0);

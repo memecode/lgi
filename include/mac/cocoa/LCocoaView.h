@@ -14,6 +14,7 @@
 {
 }
 @property GView *v;
+@property GString Cls;
 - (id)init:(GView*)view;
 - (void)dealloc;
 - (void)drawRect:(NSRect)dirtyRect;
