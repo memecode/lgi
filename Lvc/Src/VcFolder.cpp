@@ -1616,7 +1616,9 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 					}
 				}
 				break;
-			}		
+			}
+			default:
+				break;
 		}
 		
 		return false;

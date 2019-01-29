@@ -34,6 +34,7 @@ VcFile::FileStatus VcFile::GetStatus()
 		else STATE("M", SModified);
 		else STATE("C", SConflicted);
 		else STATE("!", SMissing);
+		else STATE("D", SDeleted);
 		else
 		{
 			LgiAssert(!"Impl state");

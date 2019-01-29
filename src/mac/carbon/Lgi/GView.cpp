@@ -918,11 +918,15 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 		}
 
 		m.SetModifer(GetCurrentKeyModifiers());
-		m.SetButton(GetCurrentButtonState());
+		
+		auto Btn = GetCurrentButtonState();
+		m.SetButton(Btn);
+		m.Down(Btn != 0);
 
 		m.ViewCoords = !ScreenCoords;
 		m.Target = this;
 
+		m.Trace("GetMouse");
 		return true;
 	}
 	else if (GetParent())
@@ -1044,109 +1048,127 @@ void SetDefaultFocus(GViewI *v)
 	}
 }
 
-int VirtualKeyToLgi(UInt32 Virt)
+#define AppleLgiKeyMap() \
+	_(kVK_F1, VK_F1) \
+	_(kVK_F2, VK_F2) \
+	_(kVK_F3, VK_F3) \
+	_(kVK_F4, VK_F4) \
+	_(kVK_F5, VK_F5) \
+	_(kVK_F6, VK_F6) \
+	_(kVK_F7, VK_F7) \
+	_(kVK_F8, VK_F8) \
+	_(kVK_F9, VK_F9) \
+	_(kVK_F10, VK_F10) \
+	_(kVK_F11, VK_F11) \
+	_(kVK_F12, VK_F12) \
+	_(110, VK_APPS) \
+	_(kVK_LeftArrow, VK_LEFT) \
+	_(kVK_RightArrow, VK_RIGHT) \
+	_(kVK_DownArrow, VK_DOWN) \
+	_(kVK_UpArrow, VK_UP) \
+	_(114, VK_INSERT) \
+	_(kVK_PageUp, VK_PAGEUP) \
+	_(kVK_PageDown, VK_PAGEDOWN) \
+	_(kVK_Escape, VK_ESCAPE) \
+	_(kVK_Delete, VK_BACKSPACE) \
+	_(kVK_ForwardDelete, VK_DELETE) \
+	_(kVK_Home, VK_HOME) \
+	_(kVK_End, VK_END) \
+	_(kVK_ANSI_KeypadEnter, VK_RETURN) \
+	_(kVK_Return, '\r') \
+	_(kVK_Tab, '\t') \
+	_(kVK_Space, ' ') \
+	_(kVK_ANSI_Minus, '-') \
+	_(kVK_ANSI_Equal, '=') \
+	_(kVK_ANSI_LeftBracket, '{') \
+	_(kVK_ANSI_RightBracket, '}') \
+	_(kVK_ANSI_Backslash, '\\') \
+	_(kVK_ANSI_Period, '.') \
+	_(kVK_ANSI_Grave, '`') \
+	_(kVK_ANSI_Comma, ',') \
+	_(kVK_ANSI_Slash, '/') \
+	_(kVK_ANSI_Quote, '\'') \
+	_(kVK_ANSI_Semicolon, ';') \
+	_(kVK_ANSI_1, '1') \
+	_(kVK_ANSI_2, '2') \
+	_(kVK_ANSI_3, '3') \
+	_(kVK_ANSI_4, '4') \
+	_(kVK_ANSI_5, '5') \
+	_(kVK_ANSI_6, '6') \
+	_(kVK_ANSI_7, '7') \
+	_(kVK_ANSI_8, '8') \
+	_(kVK_ANSI_9, '9') \
+	_(kVK_ANSI_0, '0') \
+	_(kVK_ANSI_A, 'a') \
+	_(kVK_ANSI_B, 'b') \
+	_(kVK_ANSI_C, 'c') \
+	_(kVK_ANSI_D, 'd') \
+	_(kVK_ANSI_E, 'e') \
+	_(kVK_ANSI_F, 'f') \
+	_(kVK_ANSI_G, 'g') \
+	_(kVK_ANSI_H, 'h') \
+	_(kVK_ANSI_I, 'i') \
+	_(kVK_ANSI_J, 'j') \
+	_(kVK_ANSI_K, 'k') \
+	_(kVK_ANSI_L, 'l') \
+	_(kVK_ANSI_M, 'm') \
+	_(kVK_ANSI_N, 'n') \
+	_(kVK_ANSI_O, 'o') \
+	_(kVK_ANSI_P, 'p') \
+	_(kVK_ANSI_Q, 'q') \
+	_(kVK_ANSI_R, 'r') \
+	_(kVK_ANSI_S, 's') \
+	_(kVK_ANSI_T, 't') \
+	_(kVK_ANSI_U, 'u') \
+	_(kVK_ANSI_V, 'v') \
+	_(kVK_ANSI_W, 'w') \
+	_(kVK_ANSI_X, 'x') \
+	_(kVK_ANSI_Y, 'y') \
+	_(kVK_ANSI_Z, 'z')
+
+
+unsigned LOsKeyToLgi(unsigned k)
 {
-	switch (Virt)
+	switch (k)
 	{
 		// various cmdKeyBit
-		case kVK_F1: return VK_F1;
-		case kVK_F2: return VK_F2;
-		case kVK_F3: return VK_F3;
-		case kVK_F4: return VK_F4;
-		case kVK_F5: return VK_F5;
-		case kVK_F6: return VK_F6;
-		case kVK_F7: return VK_F7;
-		case kVK_F8: return VK_F8;
-		case kVK_F9: return VK_F9;
-		case kVK_F10: return VK_F10;
-		case kVK_F11: return VK_F11;
-		case 110: return VK_APPS;
-		case kVK_F12: return VK_F12;
-		
-		case kVK_LeftArrow: return VK_LEFT;
-		case kVK_RightArrow: return VK_RIGHT;
-		case kVK_DownArrow: return VK_DOWN;
-		case kVK_UpArrow: return VK_UP;
-		case 114: return VK_INSERT;
-		case kVK_PageUp: return VK_PAGEUP;
-		case kVK_PageDown: return VK_PAGEDOWN;
-
-		case kVK_Escape: return VK_ESCAPE;
-		case kVK_Delete: return VK_BACKSPACE;
-		case kVK_ForwardDelete: return VK_DELETE;
-		
-		case kVK_Home: return VK_HOME;
-		case kVK_End: return VK_END;
-		
-		// whitespace
-		case 76: return VK_RETURN;
-		case kVK_Return: return '\r';
-		case kVK_Tab: return '\t';
-		case kVK_Space: return ' ';
-		
-		// delimiters
-		case 27: return '-';
-		case 24: return '=';
-		case kVK_ANSI_LeftBracket: return '{';
-		case kVK_ANSI_RightBracket: return '}';
-		case 42: return '\\';
-		case 47: return '.';
-		case 50: return '`';
-		case kVK_ANSI_Comma: return ',';
-		case kVK_ANSI_Slash: return '/';
-		case kVK_ANSI_Quote: return '\'';
-		case kVK_ANSI_Semicolon: return ';';
-		
-		// digits
-		case 18: return '1';
-		case 19: return '2';
-		case 20: return '3';
-		case 21: return '4';
-		case 23: return '5';
-		case 22: return '6';
-		case 26: return '7';
-		case 28: return '8';
-		case 25: return '9';
-		case 29: return '0';
-		
-		// alpha
-		case 0:  return 'a';
-		case 11: return 'b';
-		case 8:  return 'c';
-		case 2:  return 'd';
-		case 14: return 'e';
-		case 3:  return 'f';
-		case 5:  return 'g';
-		case 4:  return 'h';
-		case 34: return 'i';
-		case 38: return 'j';
-		case 40: return 'k';
-		case 37: return 'l';
-		case 46: return 'm';
-		case 45: return 'n';
-		case 31: return 'o';
-		case 35: return 'p';
-		case 12: return 'q';
-		case 15: return 'r';
-		case 1:  return 's';
-		case 17: return 't';
-		case 32: return 'u';
-		case 9:  return 'v';
-		case 13: return 'w';
-		case 7:  return 'x';
-		case 16: return 'y';
-		case 6:  return 'z';
+		#define _(apple, lgi) \
+			case apple: return lgi;
+		AppleLgiKeyMap()
+		#undef _
 		
 		default:
 			printf("%s:%i - unimplemented virt->lgi code mapping: %d 0x%x '%c'\n",
 				_FL,
-				(unsigned)Virt,
-				(unsigned)Virt,
-				(char)Virt);
+				(unsigned)k,
+				(unsigned)k,
+				(char)k);
 			break;
 	}
 	
-	return Virt;
+	return 0;
+}
+
+unsigned LLgiToOsKey(unsigned k)
+{
+	switch (k)
+	{
+		// various cmdKeyBit
+		#define _(apple, lgi) \
+			case lgi: return apple;
+		AppleLgiKeyMap()
+		#undef _
+		
+		default:
+			printf("%s:%i - unimplemented lgi->virt code mapping: %d 0x%x '%c'\n",
+				_FL,
+				(unsigned)k,
+				(unsigned)k,
+				(char)k);
+			break;
+	}
+	
+	return 0;
 }
 
 static int GetIsChar(GKey &k, int mods)
@@ -1419,9 +1441,9 @@ CarbonControlProc
 					if (e) printf("%s:%i - error %i\n", _FL, (int)e);
 					
 					GKey k;
-					if ((k.c16 = VirtualKeyToLgi(key)))
+					k.vkey = key;
+					if ((k.c16 = LOsKeyToLgi(key)))
 					{
-						k.vkey = k.c16;
 						k.Down(true);
 						if (mods & 0x200) k.Shift(true);
 						if (mods & 0x1000) k.Ctrl(true);
@@ -1473,9 +1495,9 @@ CarbonControlProc
 					if (e) printf("%s:%i - error %i\n", _FL, (int)e);
 					
 					GKey k;
-					if ((k.c16 = VirtualKeyToLgi(key)))
+					k.vkey = key;
+					if ((k.c16 = LOsKeyToLgi(key)))
 					{
-						k.vkey = k.c16;
 						k.Down(false);
 						if (mods & 0x200) k.Shift(true);
 						if (mods & 0x1000) k.Ctrl(true);
@@ -1543,31 +1565,13 @@ CarbonControlProc
 
 					UniChar *utf = text;
 					ssize_t size = actualSize;
-					k.c16 = k.vkey = LgiUtf16To32((const uint16 *&)utf, size);
-					
-					// printf("%s:%i - char=%i\n", _FL, k.c16);
-					
-					switch (k.c16)
-					{
-						#define MapKey(v, kc) case v: { k.vkey=kc; k.c16 = kc; break; }
-						MapKey(1, VK_HOME);
-						MapKey(3, VK_RETURN);
-						MapKey(4, VK_END);
-						MapKey(5, VK_INSERT);
-						MapKey(11, VK_PAGEUP);				
-						MapKey(12, VK_PAGEDOWN);			
-						MapKey(127, VK_DELETE);
-						case 16:
-						{
-							int c = VirtualKeyToLgi(key);
-							if (c)
-							{
-								k.vkey = c;
-								k.c16 = c;
-							}
-							break;
-						}
-					}
+					k.c16 = LgiUtf16To32((const uint16 *&)utf, size);
+					// k.c16 = LOsKeyToLgi(k.vkey);
+
+					printf("key=%u(0x%x)%u, c16=%u(0x%x), utf=%.1S\n",
+						(unsigned)key, (unsigned)key, (unsigned)actualSize,
+						(unsigned)k.c16, (unsigned)k.c16,
+						(wchar_t*)&k.c16);
 
 					GetIsChar(k, mods);
 					k.Down(true);

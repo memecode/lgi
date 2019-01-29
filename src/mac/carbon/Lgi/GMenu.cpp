@@ -785,7 +785,7 @@ bool GMenuItem::ScanForAccel()
 		return false;
 
 	int Flags = 0;
-	uchar Key = 0;
+	unsigned Key = 0;
 	
 	for (int i=0; i<Keys.Length(); i++)
 	{
