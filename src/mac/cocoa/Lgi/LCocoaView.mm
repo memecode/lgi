@@ -11,14 +11,21 @@
 #import "LCocoaView.h"
 
 #define Check() if (!self.v) return
+static int LCocoaView_Count = 0;
 @implementation LCocoaView
 
 - (id)init:(GView*)view
 {
 	LAutoPool Pool;
+	LCocoaView_Count++;
+
 	if ((self = [super initWithFrame:view->GetPos()]) != nil)
 	{
+		self.Cls = view->GetClass();
+		printf("LCocoaView.alloc... (%i, %s)\n", LCocoaView_Count, self.Cls.Get());
+	
 		self.v = view;
+	
 		[self setAutoresizingMask:NSViewNotSizable];
 		[self setTranslatesAutoresizingMaskIntoConstraints:YES];
 	}
@@ -28,9 +35,12 @@
 - (void)dealloc
 {
 	LAutoPool Pool;
+
+	printf("LCocoaView.dealloc... (%i, %s)\n", LCocoaView_Count-1, self.Cls.Get());
+
 	self.v = nil;
 	[super dealloc];
-	printf("LCocoaView.dealloc...\n");
+	LCocoaView_Count--;
 }
 
 - (void)drawRect:(NSRect)dirtyRect

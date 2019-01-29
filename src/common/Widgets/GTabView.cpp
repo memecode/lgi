@@ -374,7 +374,8 @@ void GTabView::OnCreate()
 
 void GTabView::Value(int64 i)
 {
-	if (i != d->Current)
+	if (Children.Length() > 0 &&
+		i != d->Current)
 	{
 		// change tab
 		TabIterator it(Children);
@@ -647,6 +648,8 @@ bool GTabView::OnKey(GKey &k)
 
 void GTabView::OnFocus(bool f)
 {
+	if (!Children.Length())
+		return;
 	TabIterator it(Children);
 	GTabPage *p = it[d->Current];
 	if (p)
