@@ -163,11 +163,6 @@ HIRect &ConvertRect(GRect &g)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-void _lgi_yield()
-{
-	LgiApp->Run(false);
-}
-
 bool LgiIsKeyDown(int Key)
 {
 	LgiAssert(!"Not impl.");

@@ -14,6 +14,8 @@
 #include "Gdc2.h"
 #include "GdiLeak.h"
 #include "GPalette.h"
+#import <AppKit/NSCursor.h>
+
 
 #define AlphaType		kCGImageAlphaPremultipliedLast
 
@@ -467,9 +469,32 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 		CGImageRef Img = CGWindowListCreateImage(r, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
 		if (Img)
 		{
-			GRect r(0, 0, (int)CGImageGetWidth(Img)-1, (int)CGImageGetHeight(Img)-1);
-			CGContextDrawImage(d->Bmp, r, Img);
+			GRect dr(0, 0, (int)CGImageGetWidth(Img)-1, (int)CGImageGetHeight(Img)-1);
+			CGContextDrawImage(d->Bmp, dr, Img);
 			CGImageRelease(Img);
+
+			// Overlay any effects between the screen and cursor layers...
+			OnCaptureScreen();
+
+			// Do we need to capture the cursor as well?
+			if (TestFlag(Flags, GDC_CAPTURE_CURSOR))
+			{
+				// Capture the cursor as well..
+				NSImage *cursor = [[[NSCursor currentSystemCursor] image] copy];
+				if (cursor)
+				{
+					NSPoint hotSpot = [[NSCursor currentSystemCursor] hotSpot];
+					HIPoint p;
+					HIGetMousePosition(kHICoordSpaceScreenPixel, NULL, &p);
+					GRect msr(0, 0, (int)cursor.size.width-1, (int)cursor.size.height-1);
+					msr.Offset(p.x - (int)r.origin.x, p.y - (int)r.origin.y);
+
+					printf("msr=%s\n", msr.GetStr());
+					CGContextDrawImage(d->Bmp, msr, [cursor CGImageForProposedRect: NULL context: NULL hints: NULL]);
+					
+					[cursor release];
+				}
+			}
 		}
 		else printf("%s:%i - CGWindowListCreateImage failed.\n", _FL);
 	}

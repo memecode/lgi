@@ -223,7 +223,7 @@
 		3444A36012275BDD004ADADE /* GToolBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GToolBar.cpp; path = ../../common/Widgets/GToolBar.cpp; sourceTree = "<group>"; };
 		34463F2411FBE25E009BB91F /* GTextView3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GTextView3.h; path = ../../../include/common/GTextView3.h; sourceTree = "<group>"; };
 		3446E2B508D0E4AF005024EB /* Gdc2.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Gdc2.cpp; path = Gdc2/Gdc2.cpp; sourceTree = "<group>"; };
-		3446E2B608D0E4AF005024EB /* GMemDC.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GMemDC.cpp; path = ../common/GMemDC.cpp; sourceTree = "<group>"; };
+		3446E2B608D0E4AF005024EB /* GMemDC.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 30; name = GMemDC.cpp; path = ../common/GMemDC.cpp; sourceTree = "<group>"; };
 		3446E2B708D0E4AF005024EB /* GPrintDC.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GPrintDC.cpp; path = ../common/GPrintDC.cpp; sourceTree = "<group>"; };
 		3446E2B808D0E4AF005024EB /* GScreenDC.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GScreenDC.cpp; path = ../common/GScreenDC.cpp; sourceTree = "<group>"; };
 		3446E2CF08D0E5C2005024EB /* Gdc2.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Gdc2.h; path = ../../../include/common/Gdc2.h; sourceTree = "<group>"; };
