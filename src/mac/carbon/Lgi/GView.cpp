@@ -926,7 +926,7 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 		m.ViewCoords = !ScreenCoords;
 		m.Target = this;
 
-		m.Trace("GetMouse");
+		// m.Trace("GetMouse");
 		return true;
 	}
 	else if (GetParent())
@@ -1173,13 +1173,14 @@ unsigned LLgiToOsKey(unsigned k)
 
 static int GetIsChar(GKey &k, int mods)
 {
-	k.IsChar =	(mods & 0x100) == 0 &&
-	(
-		k.c16 >= ' ' ||
-		k.c16 == VK_RETURN ||
-		k.c16 == VK_TAB ||
-		k.c16 == VK_BACKSPACE
-	);
+	k.IsChar = (mods & 0x100) == 0
+				&&
+				(
+					k.c16 >= ' ' ||
+					k.vkey == VK_RETURN ||
+					k.vkey == VK_TAB ||
+					k.vkey == VK_BACKSPACE
+				);
 	
 	return k.IsChar;
 }
@@ -1565,13 +1566,8 @@ CarbonControlProc
 
 					UniChar *utf = text;
 					ssize_t size = actualSize;
+					k.vkey = LOsKeyToLgi(key);
 					k.c16 = LgiUtf16To32((const uint16 *&)utf, size);
-					// k.c16 = LOsKeyToLgi(k.vkey);
-
-					printf("key=%u(0x%x)%u, c16=%u(0x%x), utf=%.1S\n",
-						(unsigned)key, (unsigned)key, (unsigned)actualSize,
-						(unsigned)k.c16, (unsigned)k.c16,
-						(wchar_t*)&k.c16);
 
 					GetIsChar(k, mods);
 					k.Down(true);
@@ -1581,6 +1577,11 @@ CarbonControlProc
 					if (mods & 0x100) k.System(true);
 
 					#if 0
+					printf("key=%u(0x%x)%u, c16=%u(0x%x), utf=%.1S\n",
+						(unsigned)key, (unsigned)key, (unsigned)actualSize,
+						(unsigned)k.c16, (unsigned)k.c16,
+						(wchar_t*)&k.c16);
+
 					GString Msg;
 					Msg.Printf("%s", v->GetClass());
 					k.Trace(Msg);
