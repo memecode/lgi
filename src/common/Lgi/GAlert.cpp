@@ -33,13 +33,13 @@ GAlert::GAlert(	GViewI *parent,
 	Tbl->GetCss(true)->Padding("10px");
 	AddView(Tbl);
 
-	GLayoutCell *c = Tbl->GetCell(0, 0, true, (int)Names.Length());
+	GLayoutCell *c = Tbl->GetCell(0, 0, true);
 	c->Add(new GTextLabel(-1, 8, 8, -1, -1, Text));
 	c->PaddingBottom(GCss::Len("10px"));
 
+	c = Tbl->GetCell(0, 1, true);
 	for (unsigned i=0; i<Names.Length(); i++)
 	{
-		c = Tbl->GetCell(i, 1, true);
 		c->TextAlign(GCss::Len(GCss::AlignCenter));
 		c->Add(new GButton(CMD_BASE + i,
 							0, 0, -1, -1,
