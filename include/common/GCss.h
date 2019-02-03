@@ -345,15 +345,15 @@ public:
 		}
 
 		bool Parse(const char *&s, PropType Prop = PropNull, ParsingStyle Type = ParseStrict);
-		bool IsValid() { return Type != LenInherit; }
-		bool IsDynamic() { return	Type == LenPercent ||
+		bool IsValid() const { return Type != LenInherit; }
+		bool IsDynamic() const { return	Type == LenPercent ||
 									Type == LenInherit ||
 									Type == LenAuto ||
 									Type == SizeSmaller ||
 									Type == SizeLarger; }
-		bool operator ==(const Len &l) { return Type == l.Type && FloatIsEqual(Value, l.Value); }
-		bool operator !=(const Len &l) { return !(*this == l); }
-		bool ToString(GStream &p);
+		bool operator ==(const Len &l) const { return Type == l.Type && FloatIsEqual(Value, l.Value); }
+		bool operator !=(const Len &l) const { return !(*this == l); }
+		bool ToString(GStream &p) const;
 		
 		/// Convert the length to pixels
 		int ToPx
@@ -365,6 +365,8 @@ public:
 			/// The DPI of the relevant device if known, or -1 if unknown
 			int Dpi = -1
 		);
+
+		Len operator *(const Len &l) const;
 	};
 
 	struct LgiClass ColorStop

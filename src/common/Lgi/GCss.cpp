@@ -348,7 +348,33 @@ int GCss::Len::ToPx(int Box, GFont *Font, int Dpi)
 	}
 }
 
-bool GCss::Len::ToString(GStream &p)
+GCss::Len GCss::Len::operator *(const Len &b) const
+{
+	if (b.IsDynamic())
+	{
+		GCss::Len a;
+		switch (b.Type)
+		{
+			case LenPercent:
+			{
+				a.Type = Type;
+				a.Value = Value * b.Value / 100.0f;
+				break;
+			}
+			default:
+			{
+				LgiAssert(!"Impl me.");
+				return b;
+			}
+		}
+
+		return a;
+	}
+
+	return b;
+}
+
+bool GCss::Len::ToString(GStream &p) const
 {
 	const char *Unit = 0;
 	switch (Type)

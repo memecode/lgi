@@ -520,7 +520,7 @@ public:
 	void Insert(GFlowRect *Tr);
 	GRect *LineBounds();
 
-	void Indent(GFont *Font,
+	void Indent(GTag *Tag,
 				GCss::Len Left,
 				GCss::Len Top,
 				GCss::Len Right,
@@ -530,9 +530,9 @@ public:
 		GFlowRegion This(*this);
 		GFlowStack &Fs = Stack.New();
 
-		Fs.LeftAbs = Left.IsValid() ? ResolveX(Left, Font, IsMargin) : 0;
-		Fs.RightAbs = Right.IsValid() ? ResolveX(Right, Font, IsMargin) : 0;
-		Fs.TopAbs = Top.IsValid() ? ResolveY(Top, Font, IsMargin) : 0;
+		Fs.LeftAbs = Left.IsValid() ? ResolveX(Left, Tag, IsMargin) : 0;
+		Fs.RightAbs = Right.IsValid() ? ResolveX(Right, Tag, IsMargin) : 0;
+		Fs.TopAbs = Top.IsValid() ? ResolveY(Top, Tag, IsMargin) : 0;
 
 		x1 += Fs.LeftAbs;
 		cx += Fs.LeftAbs;
@@ -587,7 +587,7 @@ public:
 		else LgiAssert(!"Nothing to pop.");
 	}
 
-	void Outdent(GFont *Font,
+	void Outdent(GTag *Tag,
 				GCss::Len Left,
 				GCss::Len Top,
 				GCss::Len Right,
@@ -601,7 +601,7 @@ public:
 		{
 			GFlowStack &Fs = Stack[len-1];
 
-			int BottomAbs = Bottom.IsValid() ? ResolveY(Bottom, Font, IsMargin) : 0;
+			int BottomAbs = Bottom.IsValid() ? ResolveY(Bottom, Tag, IsMargin) : 0;
 
 			x1 -= Fs.LeftAbs;
 			cx -= Fs.LeftAbs;
@@ -615,8 +615,9 @@ public:
 		else LgiAssert(!"Nothing to pop.");
 	}
 
-	int ResolveX(GCss::Len l, GFont *f, bool IsMargin)
+	int ResolveX(GCss::Len l, GTag *t, bool IsMargin)
 	{
+		GFont *f = t->GetFont();
 		switch (l.Type)
 		{
 			default:
@@ -702,8 +703,9 @@ public:
 		return Limited;
 	}
 
-	int ResolveY(GCss::Len l, GFont *f, bool IsMargin)
+	int ResolveY(GCss::Len l, GTag *t, bool IsMargin)
 	{
+		GFont *f = t->GetFont();
 		switch (l.Type)
 		{
 			case GCss::LenInherit:
@@ -736,9 +738,28 @@ public:
 			}
 			case GCss::LenPercent:
 			{
-				LgiAssert(Html != NULL);
-				int TotalY = Html ? Html->Y() : 0;
-				return (int) (((double)l.Value * TotalY) / 100);
+				// Walk up tree of tags to find an absolute size...
+				GCss::Len Ab;
+				for (GTag *p = ToTag(t->Parent); p; p = ToTag(p->Parent))
+				{
+					auto h = p->Height();
+					if (h.IsValid() && !h.IsDynamic())
+					{
+						Ab = h;
+						break;
+					}
+				}
+
+				if (!Ab.IsValid())
+				{
+					LgiAssert(Html != NULL);
+					Ab.Type = GCss::LenPx;
+					Ab.Value = Html->Y();
+				}
+
+				GCss::Len m = Ab * l;
+				
+				return (int)m.ToPx(0, f);;
 			}
 			case GCss::SizeSmall:
 			{
@@ -803,33 +824,33 @@ public:
 		return Limited;
 	}
 
-	GRect ResolveMargin(GCss *Src, GFont *Font)
+	GRect ResolveMargin(GCss *Src, GTag *Tag)
 	{
 		GRect r;
-		r.x1 = ResolveX(Src->MarginLeft(), Font, true);
-		r.y1 = ResolveY(Src->MarginTop(), Font, true);
-		r.x2 = ResolveX(Src->MarginRight(), Font, true);
-		r.y2 = ResolveY(Src->MarginBottom(), Font, true);
+		r.x1 = ResolveX(Src->MarginLeft(), Tag, true);
+		r.y1 = ResolveY(Src->MarginTop(), Tag, true);
+		r.x2 = ResolveX(Src->MarginRight(), Tag, true);
+		r.y2 = ResolveY(Src->MarginBottom(), Tag, true);
 		return r;
 	}
 
-	GRect ResolveBorder(GCss *Src, GFont *Font)
+	GRect ResolveBorder(GCss *Src, GTag *Tag)
 	{
 		GRect r;
-		r.x1 = ResolveX(Src->BorderLeft(), Font, true);
-		r.y1 = ResolveY(Src->BorderTop(), Font, true);
-		r.x2 = ResolveX(Src->BorderRight(), Font, true);
-		r.y2 = ResolveY(Src->BorderBottom(), Font, true);
+		r.x1 = ResolveX(Src->BorderLeft(), Tag, true);
+		r.y1 = ResolveY(Src->BorderTop(), Tag, true);
+		r.x2 = ResolveX(Src->BorderRight(), Tag, true);
+		r.y2 = ResolveY(Src->BorderBottom(), Tag, true);
 		return r;
 	}
 
-	GRect ResolvePadding(GCss *Src, GFont *Font)
+	GRect ResolvePadding(GCss *Src, GTag *Tag)
 	{
 		GRect r;
-		r.x1 = ResolveX(Src->PaddingLeft(), Font, true);
-		r.y1 = ResolveY(Src->PaddingTop(), Font, true);
-		r.x2 = ResolveX(Src->PaddingRight(), Font, true);
-		r.y2 = ResolveY(Src->PaddingBottom(), Font, true);
+		r.x1 = ResolveX(Src->PaddingLeft(), Tag, true);
+		r.y1 = ResolveY(Src->PaddingTop(), Tag, true);
+		r.x2 = ResolveX(Src->PaddingRight(), Tag, true);
+		r.y2 = ResolveY(Src->PaddingBottom(), Tag, true);
 		return r;
 	}
 };
@@ -4269,21 +4290,21 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 	// Resolve total table width.
 	TableWidth = Table->Width();
 	if (TableWidth.IsValid())
-		AvailableX = f->ResolveX(TableWidth, Font, false);
+		AvailableX = f->ResolveX(TableWidth, Table, false);
 	else
 		AvailableX = f->X();
 
 	GCss::Len MaxWidth = Table->MaxWidth();
 	if (MaxWidth.IsValid())
 	{
-	    int Px = f->ResolveX(MaxWidth, Font, false);
+	    int Px = f->ResolveX(MaxWidth, Table, false);
 	    if (Px < AvailableX)
 	        AvailableX = Px;
 	}
 	
-	TableBorder = f->ResolveBorder(Table, Font);
+	TableBorder = f->ResolveBorder(Table, Table);
 	if (Table->BorderCollapse() != GCss::CollapseCollapse)
-		TablePadding = f->ResolvePadding(Table, Font);
+		TablePadding = f->ResolvePadding(Table, Table);
 	else
 		TablePadding.ZOff(0, 0);
 	
@@ -4313,8 +4334,8 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 			{
 				// This is needed for the metrics...
 				t->GetFont();
-				t->Cell->BorderPx = f->ResolveBorder(t, Font);
-				t->Cell->PaddingPx = f->ResolvePadding(t, Font);
+				t->Cell->BorderPx = f->ResolveBorder(t, t);
+				t->Cell->PaddingPx = f->ResolvePadding(t, t);
 
 				if (t->Cell->Pos.x == x && t->Cell->Pos.y == y)
 				{
@@ -4327,8 +4348,8 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 					{
 						if (SizeCol[x].IsValid())
 						{
-							int OldPx = f->ResolveX(SizeCol[x], Font, false);
-							int NewPx = f->ResolveX(Content, Font, false);
+							int OldPx = f->ResolveX(SizeCol[x], t, false);
+							int NewPx = f->ResolveX(Content, t, false);
 							if (NewPx > OldPx)
 							{
 								SizeCol[x] = Content;
@@ -4426,7 +4447,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 					GCss::Len Width = t->Width();
 					if (Width.IsValid())
 					{
-						int Px = f->ResolveX(Width, Font, false);
+						int Px = f->ResolveX(Width, t, false);
 						t->Cell->MinContent = MAX(t->Cell->MinContent, Px);
 						t->Cell->MaxContent = MAX(t->Cell->MaxContent, Px);
 					}
@@ -4477,7 +4498,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 			GCss::Len w = SizeCol[x];
 			if (w.IsValid())
 			{
-				int Px = f->ResolveX(w, Font, false);
+				int Px = f->ResolveX(w, Table, false);
 				
 				if (w.Type == GCss::LenPercent)
 				{
@@ -4575,7 +4596,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 					if (Ht.IsValid() &&
 						Ht.Type != GCss::LenPercent)
 					{
-						int h = f->ResolveY(Ht, Font, false);
+						int h = f->ResolveY(Ht, t, false);
 						t->Size.y = MAX(h, t->Size.y);
 
 						DistributeSize(MaxRow, y, t->Cell->Span.y, t->Size.y, CellSpacing);
@@ -5183,7 +5204,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		{
 			GFlowRegion Temp = *Flow;
 			Flow->EndBlock(GetAlign(true));
-			Flow->Indent(f, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
+			Flow->Indent(this, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
 
 			// Flow children
 			for (unsigned i=0; i<Children.Length(); i++)
@@ -5197,7 +5218,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 				}
 			}
 
-			Flow->Outdent(f, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
+			Flow->Outdent(this, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
 			BoundParents();
 			return;
 			break;
@@ -5242,7 +5263,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 
 			if (w.IsValid() && w.Type != LenAuto)
 			{
-				Size.x = Flow->ResolveX(w, GetFont(), false);
+				Size.x = Flow->ResolveX(w, this, false);
 				XLimit = true;
 			}
 			else
@@ -5263,7 +5284,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 
 			if (h.IsValid() && h.Type != LenAuto)
 			{
-				Size.y = Flow->ResolveY(h, GetFont(), false);
+				Size.y = Flow->ResolveY(h, this, false);
 				YLimit = true;
 			}
 			else
@@ -5290,13 +5311,13 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			}
 			if (MinY.IsValid())
 			{
-				int Px = Flow->ResolveY(MinY, GetFont(), false);
+				int Px = Flow->ResolveY(MinY, this, false);
 				if (Size.y < Px)
 					Size.y = Px;
 			}
 			if (MaxY.IsValid())
 			{
-				int Px = Flow->ResolveY(MaxY, GetFont(), false);
+				int Px = Flow->ResolveY(MaxY, this, false);
 				if (Size.y > Px)
 					Size.y = Px;
 			}
@@ -5362,7 +5383,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			GCss::Len top = GetCssLen(MarginTop, Margin);
 			GCss::Len right = GetCssLen(MarginRight, Margin);
 			GCss::Len bottom = GetCssLen(MarginBottom, Margin);
-			Flow->Indent(f, left, top, right, bottom, true);
+			Flow->Indent(this, left, top, right, bottom, true);
 
 			LayoutTable(Flow, Depth + 1);
 
@@ -5372,7 +5393,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			Flow->my = 0;
 			Flow->MAX.y = MAX(Flow->MAX.y, Flow->y2);
 
-			Flow->Outdent(f, left, top, right, bottom, true);
+			Flow->Outdent(this, left, top, right, bottom, true);
 			BoundParents();
 			return;
 		}
@@ -5386,10 +5407,8 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			Flow->EndBlock(GetAlign(true));
 		}
 		
-		/*
 		if (Debug)
 			LgiTrace("Before %s\n", Flow->ToString().Get());
-		*/
 
 		BlockFlowWidth = Flow->X();
 		
@@ -5398,14 +5417,14 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		GCss::Len top = GetCssLen(MarginTop, Margin);
 		GCss::Len right = GetCssLen(MarginRight, Margin);
 		GCss::Len bottom = GetCssLen(MarginBottom, Margin);
-		Flow->Indent(f, left, top, right, bottom, true);
+		Flow->Indent(this, left, top, right, bottom, true);
 
 		// Set the width if any
 		if (Disp == DispBlock)
 		{
 			GCss::Len Wid = Width();
 			if (!IsTableCell(TagId) && Wid.IsValid())
-				Size.x = Flow->ResolveX(Wid, f, false);
+				Size.x = Flow->ResolveX(Wid, this, false);
 			else if (TagId != TAG_IMG)
 			{
 				if (Flow->Inline)
@@ -5416,7 +5435,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 
 			if (MaxWidth().IsValid())
 			{
-				int Px = Flow->ResolveX(MaxWidth(), GetFont(), false);
+				int Px = Flow->ResolveX(MaxWidth(), this, false);
 				if (Size.x > Px)
 					Size.x = Px;
 			}
@@ -5439,17 +5458,17 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			Flow->x2 = Flow->x1 + Size.x;
 			Flow->cx -= Pos.x;
 
-			Flow->Indent(f, GCss::BorderLeft(), GCss::BorderTop(), GCss::BorderRight(), GCss::BorderBottom(), false);
+			Flow->Indent(this, GCss::BorderLeft(), GCss::BorderTop(), GCss::BorderRight(), GCss::BorderBottom(), false);
 			Flow->Indent(PadPx, false);
 		}
 		else
 		{
 			Flow->x2 = Flow->X();
-			Flow->x1 =	Flow->ResolveX(BorderLeft(), GetFont(), true) +
-						Flow->ResolveX(PaddingLeft(), GetFont(), true);
+			Flow->x1 =	Flow->ResolveX(BorderLeft(), this, true) +
+						Flow->ResolveX(PaddingLeft(), this, true);
 			Flow->cx = Flow->x1;
-			Flow->y1 += Flow->ResolveY(BorderTop(), GetFont(), true) +
-						Flow->ResolveY(PaddingTop(), GetFont(), true);
+			Flow->y1 += Flow->ResolveY(BorderTop(), this, true) +
+						Flow->ResolveY(PaddingTop(), this, true);
 			Flow->y2 = Flow->y1;
 			
 			if (!IsTableTag())
@@ -5608,13 +5627,13 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		{
 			if (Ht.IsValid())
 			{
-				int HtPx = Flow->ResolveY(Ht, GetFont(), false);
+				int HtPx = Flow->ResolveY(Ht, this, false);
 				if (HtPx > Flow->y2)
 					Flow->y2 = HtPx;
 			}
 			if (MaxHt.IsValid())
 			{
-				int MaxHtPx = Flow->ResolveY(MaxHt, GetFont(), false);
+				int MaxHtPx = Flow->ResolveY(MaxHt, this, false);
 				if (MaxHtPx < Flow->y2)
 					Flow->y2 = MaxHtPx;
 			}
@@ -5625,12 +5644,12 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			Flow->EndBlock(GetAlign(true));
 
 			int OldFlowSize = Flow->x2 - Flow->x1 + 1;
-			Flow->Outdent(f, PaddingLeft(), PaddingTop(), PaddingRight(), PaddingBottom(), false);
-			Flow->Outdent(f, GCss::BorderLeft(), GCss::BorderTop(), GCss::BorderRight(), GCss::BorderBottom(), false);
+			Flow->Outdent(this, PaddingLeft(), PaddingTop(), PaddingRight(), PaddingBottom(), false);
+			Flow->Outdent(this, GCss::BorderLeft(), GCss::BorderTop(), GCss::BorderRight(), GCss::BorderBottom(), false);
 
 			Size.y = Flow->y2 > 0 ? Flow->y2 : 0;
 
-			Flow->Outdent(f, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
+			Flow->Outdent(this, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
 			
 			int NewFlowSize = Flow->x2 - Flow->x1 + 1;
 			int Diff = NewFlowSize - OldFlowSize;
@@ -5650,14 +5669,14 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		else
 		{
 			GCss::Len Wid = Width();
-			int WidPx = Wid.IsValid() ? Flow->ResolveX(Wid, GetFont(), true) : 0;
+			int WidPx = Wid.IsValid() ? Flow->ResolveX(Wid, this, true) : 0;
 			
 			Size.x = MAX(WidPx, Size.x);
-			Size.x += Flow->ResolveX(PaddingRight(), GetFont(), true);
-			Size.x += Flow->ResolveX(BorderRight(), GetFont(), true);
+			Size.x += Flow->ResolveX(PaddingRight(), this, true);
+			Size.x += Flow->ResolveX(BorderRight(), this, true);
 
-			int MarginR = Flow->ResolveX(MarginRight(), GetFont(), true);
-			int MarginB = Flow->ResolveX(MarginBottom(), GetFont(), true);
+			int MarginR = Flow->ResolveX(MarginRight(), this, true);
+			int MarginB = Flow->ResolveX(MarginBottom(), this, true);
 
 			Flow->x1 = Local.x1 - Pos.x;
 			Flow->cx = Local.cx + Size.x + MarginR - Pos.x;
@@ -5665,13 +5684,13 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 
 			if (Height().IsValid())
 			{
-				Size.y = Flow->ResolveY(Height(), GetFont(), false);
+				Size.y = Flow->ResolveY(Height(), this, false);
 				Flow->y2 = MAX(Flow->y1 + Size.y + MarginB - 1, Flow->y2);
 			}
 			else
 			{
-				Flow->y2 += Flow->ResolveX(PaddingBottom(), GetFont(), true);
-				Flow->y2 += Flow->ResolveX(BorderBottom(), GetFont(), true);
+				Flow->y2 += Flow->ResolveX(PaddingBottom(), this, true);
+				Flow->y2 += Flow->ResolveX(BorderBottom(), this, true);
 				Size.y = Flow->y2;
 			}
 
@@ -5698,11 +5717,11 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 					GRect r = Ctrl->GetPos();
 
 					if (Width().IsValid())
-						Size.x = Flow->ResolveX(Width(), GetFont(), false);
+						Size.x = Flow->ResolveX(Width(), this, false);
 					else
 						Size.x = r.X();
 					if (Height().IsValid())
-						Size.y = Flow->ResolveY(Height(), GetFont(), false);
+						Size.y = Flow->ResolveY(Height(), this, false);
 					else
 						Size.y = r.Y();
 					
