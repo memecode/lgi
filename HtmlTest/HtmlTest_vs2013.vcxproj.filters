@@ -120,16 +120,10 @@
     </Manifest>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Files\Evite.html">
-      <Filter>Test cases</Filter>
-    </None>
-    <None Include="Files\eve.html">
-      <Filter>Test cases</Filter>
-    </None>
-    <None Include="Files\WeirdFont.html">
-      <Filter>Test cases</Filter>
-    </None>
     <None Include="Files\gumtree2.html">
+      <Filter>Test cases</Filter>
+    </None>
+    <None Include="Files\apple2.html">
       <Filter>Test cases</Filter>
     </None>
   </ItemGroup>

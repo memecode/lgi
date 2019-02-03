@@ -1193,7 +1193,10 @@ void GFlowRegion::FinishLine(GCss::LengthType Align, bool Margin)
 				Offset = Total - Used;
 			if (Offset)
 				for (auto l : Line)
-					l->Offset(Offset, 0);
+				{
+					if (l->Tag->Display() != GCss::DispInlineBlock)
+						l->Offset(Offset, 0);
+				}
 		}
 	}
 
@@ -5616,11 +5619,18 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		}
 	}
 
-	GCss::LengthType XAlign = LenInherit;
+	GCss::LengthType XAlign = GetAlign(true);
 	if (Disp == DispBlock || Disp == DispInlineBlock)
 	{		
 		GCss::Len Ht = Height();
 		GCss::Len MaxHt = MaxHeight();
+
+		// I dunno, there should be a better way... :-(
+		if (MarginLeft().Type == LenAuto &&
+			MarginRight().Type == LenAuto)
+		{
+			XAlign = GCss::AlignCenter;
+		}
 
 		bool AcceptHt = !IsTableCell(TagId) && Ht.Type != LenPercent;
 		if (AcceptHt)
@@ -5641,7 +5651,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 
 		if (Disp == DispBlock)
 		{
-			Flow->EndBlock(GetAlign(true));
+			Flow->EndBlock(XAlign);
 
 			int OldFlowSize = Flow->x2 - Flow->x1 + 1;
 			Flow->Outdent(this, PaddingLeft(), PaddingTop(), PaddingRight(), PaddingBottom(), false);
@@ -5658,13 +5668,6 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			
 			Flow->y1 = Flow->y2;
 			Flow->x2 = Flow->x1 + BlockFlowWidth;
-
-			// I dunno, there should be a better way... :-(
-			if (MarginLeft().Type == LenAuto &&
-				MarginRight().Type == LenAuto)
-			{
-				XAlign = GCss::AlignCenter;
-			}
 		}
 		else
 		{
@@ -5700,6 +5703,23 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			if (!IsTableTag())
 				Flow->Inline--;
 			CenterText();
+		}
+
+		if (XAlign == GCss::AlignCenter)
+		{
+			int OffX = (Flow->x2 - Flow->x1 - Size.x) >> 1;
+			if (OffX > 0)
+			{
+				Pos.x += OffX;
+			}
+		}
+		else if (XAlign == GCss::AlignRight)
+		{
+			int OffX = Flow->x2 - Flow->x1 - Size.x;
+			if (OffX > 0)
+			{
+				Pos.x += OffX;
+			}
 		}
 	}
 	else
@@ -5783,15 +5803,6 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 	if (Debug)
 		LgiTrace("After %s\n", Flow->ToString().Get());
 	*/
-
-	if (XAlign == GCss::AlignCenter)
-	{
-		int OffX = (Flow->x2 - Flow->x1 - Size.x) >> 1;
-		if (OffX > 0)
-		{
-			Pos.x += OffX;
-		}
-	}
 
 	if (TagId == TAG_BODY && Flow->InBody > 0)
 	{
