@@ -5410,8 +5410,10 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			Flow->EndBlock(GetAlign(true));
 		}
 		
+		/*
 		if (Debug)
 			LgiTrace("Before %s\n", Flow->ToString().Get());
+		*/
 
 		BlockFlowWidth = Flow->X();
 		
