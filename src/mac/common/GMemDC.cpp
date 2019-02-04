@@ -16,7 +16,6 @@
 #include "GPalette.h"
 #import <AppKit/NSCursor.h>
 
-
 #define AlphaType		kCGImageAlphaPremultipliedLast
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -483,6 +482,9 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 				NSImage *cursor = [[[NSCursor currentSystemCursor] image] copy];
 				if (cursor)
 				{
+					#ifdef COCOA
+					#warning "Impl cursor blt"
+					#else
 					NSPoint hotSpot = [[NSCursor currentSystemCursor] hotSpot];
 					HIPoint p;
 					HIGetMousePosition(kHICoordSpaceScreenPixel, NULL, &p);
@@ -491,6 +493,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 
 					printf("msr=%s\n", msr.GetStr());
 					CGContextDrawImage(d->Bmp, msr, [cursor CGImageForProposedRect: NULL context: NULL hints: NULL]);
+					#endif
 					
 					[cursor release];
 				}
