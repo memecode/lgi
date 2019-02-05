@@ -268,8 +268,6 @@ public:
 
 class GMimeQuotedPrintableDecode : public GCoderStream
 {
-	GStringPipe Buf;
-
 	char ConvHexToBin(char c)
 	{
 		if (c >= '0' && c <= '9')
@@ -286,51 +284,56 @@ public:
 
 	ssize_t Write(const void *p, ssize_t size, int f = 0)
 	{
-		int Written = 0;
+		ssize_t Written = 0;
 		
-		Buf.Push((char*)p, size);
+		char Line[1024];
+		char *o = Line;
+		const char *s = (const char*) p;
+		const char *e = s + size;
 
-		char In[1024];
-		while (Buf.Pop(In, sizeof(In)))
+		#define NEXT(ptr) if (++ptr >= e) break
+		for (const char *s = (const char*)p; s < e; )
 		{
-			char Line[1024];
-			char *o = Line;
-
-			for (char *s=In; *s; )
+			if (*s == '=')
 			{
-				if (*s == '=')
+				NEXT(s); // skip '='
+
+				if (*s == '\r' || *s == '\n')
 				{
-					s++; // skip '='
-					if (*s == '\r' || *s == '\n')
-					{
-						if (*s == '\r')
-							s++;
-						if (*s == '\n')
-							s++;
-					}
-					else if (*s)
-					{
-						char c = ConvHexToBin(*s++);
-						*o++ = (c << 4) | (ConvHexToBin(*s++) & 0xF);
-					}
-					else break;
+					if (*s == '\r')
+						NEXT(s);
+					if (*s == '\n')
+						NEXT(s);
 				}
+				else if (*s)
+				{
+					uint8 hi = ConvHexToBin(*s++);
+					if (s >= e) break;
+					uint8 low = ConvHexToBin(*s++);
+					if (s >= e) break;
+					*o++ = (hi << 4) | (low & 0xF);
+				}
+				else break;
+			}
+			else
+			{
+				*o++ = *s++;
+			}
+
+			if (o - Line > 1000)
+			{
+				auto w = Out->Write(Line, o - Line);
+				if (w > 0)
+					Written += w;
 				else
-				{
-					*o++ = *s++;
-				}
+					break; // Error
 			}
-
-			size_t Len = o - Line;
-			if (Out->Write(Line, CastInt(Len)) < (int64)Len)
-			{
-				// Error
-				return 0;
-			}
-			Written += Len;
-			o = Line;
 		}
 
+		auto w = Out->Write(Line, o - Line);
+		if (w > 0)
+			Written += w;
+		
 		return Written;
 	}
 };

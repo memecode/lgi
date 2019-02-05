@@ -492,7 +492,7 @@ void FileTransferProgress::UpdateUi()
 		return;
 
 	uint64 Now = LgiCurrentTime();
-	LgiTrace("Update UI %i, %i  InThread()=%i\n", (int)Val, (int)DspVal, InThread());
+	// LgiTrace("Update UI %i, %i  InThread()=%i\n", (int)Val, (int)DspVal, InThread());
 	bool Start = Val == 0;
 	
 	// Tell everyone about the new value
