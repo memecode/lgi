@@ -20,7 +20,7 @@ public:
 	const char *GetClass() { return "GTimePopup"; }
 
 	void SetTime(LDateTime *t);
-	GAutoString GetTime();
+	GString GetTime();
 
 	void OnCreate();
 	void OnPaint(GSurface *pDC);
@@ -37,13 +37,11 @@ class GTimeDropDown :
 	public ResObject
 {
 	GTimePopup *Drop;
-	GViewI *DateSrc;
 
 public:
 	GTimeDropDown();
 
 	/// This sets the date source control is the notify control is empty.
-	void SetDateSrc(GViewI *ds) { DateSrc = ds; }
 	void SetDate(char *d);
 	void OnMouseClick(GMouse &m);
 	bool OnLayout(GViewLayoutInfo &Inf);

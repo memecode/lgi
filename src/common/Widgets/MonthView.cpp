@@ -2,10 +2,10 @@
 #include "Gdc2.h"
 #include "MonthView.h"
 
-const char *ShortDayNames[7];
-const char *FullDayNames[7];
-const char *ShortMonthNames[12];
-const char *FullMonthNames[12];
+const char *ShortDayNames[7] = {"Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"};
+const char *FullDayNames[7] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+const char *ShortMonthNames[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+const char *FullMonthNames[12] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 char MonthView::Buf[256];
 
 MonthView::MonthView(LDateTime *dt)
@@ -69,8 +69,11 @@ void MonthView::SelectCell(int x, int y)
 {
 	Sx = limit(x, 0, MonthX);
 	Sy = limit(y, 0, MonthY);
-	Cell = Start;
-	Cell.AddDays( (Sy * MonthX) + Sx );
+	if (Start.IsValid())
+	{
+		Cell = Start;
+		Cell.AddDays( (Sy * MonthX) + Sx );
+	}
 }
 
 char *MonthView::Title()

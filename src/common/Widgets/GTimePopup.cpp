@@ -13,24 +13,23 @@
 /// This class is the list of times in a popup, it is used by GTimeDropDown
 GTimeDropDown::GTimeDropDown() : ResObject(Res_Custom), GDropDown(-1, 0, 0, 10, 10, 0)
 {
-	DateSrc = 0;
 	SetPopup(Drop = new GTimePopup(this));
 }
 
 int GTimeDropDown::OnNotify(GViewI *Ctrl, int Flags)
 {
+	GViewI *DateSrc = GetNotify();
 	if (Ctrl == (GViewI*)Drop && DateSrc)
 	{
-		GAutoString a = Drop->GetTime();
+		auto a = Drop->GetTime();
 		
 		LDateTime ts;
 		char *str = DateSrc->Name();
 		ts.Set(str);
 		ts.SetTime(a);
 		
-		char s[256];
-		ts.Get(s, sizeof(s));
-		DateSrc->Name(s);
+		DateSrc->Name(ts.Get());
+		return true;
 	}
 	
 	return GDropDown::OnNotify(Ctrl, Flags);
@@ -71,9 +70,9 @@ void GTimeDropDown::SetDate(char *d)
 		{
 			New.Set(Old);
 		}
-		else if (DateSrc)
+		else
 		{
-			Old = DateSrc->Name();
+			Old = n->Name();
 			if (ValidStr(Old))
 			{
 				New.Set(Old);
@@ -230,7 +229,8 @@ int GTimePopup::OnNotify(GViewI *c, int f)
 {
 	if (c->GetId() == 100 && !Ignore)
 	{
-		if (f == GNotifyItem_Click || f == GNotify_ReturnKey)
+		GNotifyType Type = (GNotifyType)f;
+		if (Type == GNotifyItem_Select || Type == GNotify_ReturnKey)
 		{
 			LListItem *Sel = Times->GetSelected();
 			if (Sel)
@@ -242,13 +242,13 @@ int GTimePopup::OnNotify(GViewI *c, int f)
 					if (n)
 					{
 						n->Name(t);
-						n->SendNotify(GNotifyValueChanged);
+						n->OnNotify(this, GNotifyValueChanged);
 						Visible(false);
 					}
 				}
 			}
 		}
-		else if (f == GNotify_EscapeKey)
+		else if (Type == GNotify_EscapeKey)
 		{
 			Visible(false);
 		}
@@ -257,45 +257,42 @@ int GTimePopup::OnNotify(GViewI *c, int f)
 	return 0;
 }
 
-GAutoString GTimePopup::GetTime()
+GString GTimePopup::GetTime()
 {
-	GAutoString a;
 	if (Times)
 	{
 		LListItem *s = Times->GetSelected();
 		if (s)
-		{
-			a.Reset(NewStr(s->GetText(0)));
-		}
+			return s->GetText(0);
 	}
-	return a;
+	return GString();
 }
 
 void GTimePopup::SetTime(LDateTime *t)
 {
-	if (t && Times)
-	{
-		for (auto i : *Times)
-		{
-			char *s = i->GetText(0);
-			if (s)
-			{
-				LDateTime p;
-				p.SetTime(s);
+	if (!t || !Times)
+		return;
 
-				if (p.Hours() == t->Hours())
-				{
-					if (	(p.Minutes() < 30 && t->Minutes() < 30) ||
-							(p.Minutes() >= 30 && t->Minutes() >= 30) )
-					{
-						Ignore = true;
-						i->Select(true);
-						i->ScrollTo();
-						Ignore = false;
-						break;
-					}
-				}
-			}
+	for (auto i : *Times)
+	{
+		char *s = i->GetText(0);
+		if (!s)
+			continue;
+
+		LDateTime p;
+		p.SetTime(s);
+
+		if (p.Hours() != t->Hours())
+			continue;
+
+		if (	(p.Minutes() < 30 && t->Minutes() < 30) ||
+				(p.Minutes() >= 30 && t->Minutes() >= 30) )
+		{
+			Ignore = true;
+			i->Select(true);
+			i->ScrollTo();
+			Ignore = false;
+			break;
 		}
 	}
 }
@@ -312,4 +309,5 @@ class GTimePopupFactory : public GViewFactory
 
 		return 0;
 	}
-} TimePopupFactory;
+}
+	TimePopupFactory;

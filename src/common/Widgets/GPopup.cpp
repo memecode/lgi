@@ -1092,7 +1092,7 @@ void GDropDown::OnPaint(GSurface *pDC)
 	}
 
 	char *Nm = Name();
-	if (Nm)
+	if (Nm && X() >= 32)
 	{
 		GDisplayString Ds(SysFont, Nm);
 		SysFont->Colour(LC_TEXT, LC_MED);
