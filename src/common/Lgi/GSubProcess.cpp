@@ -711,8 +711,6 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		LgiTrace("%s:%i - Args='%S'\n", _FL, WArg);
 		#endif
 		
-		HANDLE OldStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-		HANDLE OldStdin = GetStdHandle(STD_INPUT_HANDLE);
 		bool HasExternIn = ExternIn != NULL_PIPE;
 
 		#if DEBUG_SUBPROCESS
@@ -720,9 +718,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		#endif
 		
 		if (ChildOutput.Create(&Attr) &&
-			(HasExternIn || ChildInput.Create(&Attr)) &&
-			SetStdHandle(STD_OUTPUT_HANDLE, ChildOutput.Write) &&
-			SetStdHandle(STD_INPUT_HANDLE,  HasExternIn ? ExternIn : ChildInput.Read))
+			(HasExternIn || ChildInput.Create(&Attr)))
 		{
 			if (!SetHandleInformation(ChildOutput.Read, HANDLE_FLAG_INHERIT, 0))
 				LgiTrace("%s:%i - SetHandleInformation failed.\n", _FL);
@@ -808,8 +804,6 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		LgiTrace("%s:%i - Restoring original handles\n", _FL, OldStdout, OldStdin);
 		#endif
 
-		SetStdHandle(STD_OUTPUT_HANDLE, OldStdout);
-		SetStdHandle(STD_INPUT_HANDLE, OldStdin);
 		#endif
 	
 	#endif
