@@ -74,7 +74,7 @@ public:
 			return p(argname);							\
 		}												\
 		GLibBreakPoint									\
-		return 0;										\
+		return (ret)0;									\
 	}
 
 #define GLibFunc2(ret, func, argtype1, argname1, argtype2, argname2) \
@@ -87,7 +87,7 @@ public:
 			return p(argname1, argname2);				\
 		}												\
 		GLibBreakPoint									\
-		return 0;										\
+		return (ret)0;									\
 	}
 
 #define GLibFunc3(ret, func, argtype1, argname1,		\
