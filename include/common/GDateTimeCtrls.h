@@ -85,7 +85,6 @@ class GDateDropDown :
 	public ResObject
 {
 	GDatePopup *Drop;
-	GViewI *DateSrc;
 
 public:
 	GDateDropDown();
@@ -93,7 +92,6 @@ public:
 	/// This function sets the date src edit box, the date source is used
 	/// to select an appropriate starting point if the Notify control is
 	/// empty.
-	void SetDateSrc(GViewI *ds) { DateSrc = ds; }
 	void SetDate(char *d);
 	void OnMouseClick(GMouse &m);
 	bool OnLayout(GViewLayoutInfo &Inf);

@@ -252,7 +252,6 @@ bool GDatePopup::OnKey(GKey &k)
 //////////////////////////////////////////////////////////////////////////////////////////////////
 GDateDropDown::GDateDropDown() : ResObject(Res_Custom), GDropDown(-1, 0, 0, 10, 10, 0)
 {
-	DateSrc = 0;
 	SetPopup(Drop = new GDatePopup(this));
 }
 
@@ -335,6 +334,8 @@ void GDateDropDown::OnMouseClick(GMouse &m)
 			{
 				LDateTime New;
 				char *Old = n->Name();
+				GViewI *DateSrc = GetNotify();
+				
 				if (!ValidStr(Old) && DateSrc)
 				{
 					Old = DateSrc->Name();
