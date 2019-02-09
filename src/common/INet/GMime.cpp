@@ -324,15 +324,21 @@ public:
 			{
 				auto w = Out->Write(Line, o - Line);
 				if (w > 0)
+				{
 					Written += w;
+					o = Line;
+				}
 				else
 					break; // Error
 			}
 		}
 
-		auto w = Out->Write(Line, o - Line);
-		if (w > 0)
-			Written += w;
+		if (o > Line)
+		{
+			auto w = Out->Write(Line, o - Line);
+			if (w > 0)
+				Written += w;
+		}
 		
 		return Written;
 	}
