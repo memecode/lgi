@@ -239,7 +239,25 @@ enum MessageBoxType
 // Keys
 enum LVirtualKeys
 {
-	VK_F1			= 0x100,
+	VK_SHIFT = 1,
+	VK_PAGEUP,
+	VK_PAGEDOWN,
+	VK_HOME,
+	VK_END,
+	VK_INSERT,
+	VK_APPS,
+
+	VK_BACKSPACE = '\b',
+	VK_TAB = '\t',
+	VK_RETURN = '\r',
+
+	VK_ESCAPE,
+	VK_LEFT,
+	VK_RIGHT,
+	VK_UP,
+	VK_DOWN,
+
+	VK_F1,
 	VK_F2,
 	VK_F3,
 	VK_F4,
@@ -251,25 +269,9 @@ enum LVirtualKeys
 	VK_F10,
 	VK_F11,
 	VK_F12,
-
 	VK_ENTER,
-	VK_BACKSPACE,
-	VK_TAB,
-	VK_RETURN,
-	VK_SHIFT,
-	VK_PAGEUP,
-	VK_PAGEDOWN,
-	VK_HOME,
-	VK_END,
-	VK_INSERT,
-	VK_DELETE,
-	VK_APPS,
 
-	VK_ESCAPE,
-	VK_LEFT,
-	VK_RIGHT,
-	VK_UP,
-	VK_DOWN,
+	VK_DELETE = 127,
 };
 
 /////////////////////////////////////////////////////////////////////////////////////

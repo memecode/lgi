@@ -1069,8 +1069,8 @@ void SetDefaultFocus(GViewI *v)
 	_(kVK_ForwardDelete, VK_DELETE) \
 	_(kVK_Home, VK_HOME) \
 	_(kVK_End, VK_END) \
-	_(kVK_ANSI_KeypadEnter, VK_RETURN) \
-	_(kVK_Return, '\r') \
+	_(kVK_ANSI_KeypadEnter, VK_ENTER) \
+	_(kVK_Return, VK_RETURN) \
 	_(kVK_Tab, '\t') \
 	_(kVK_Space, ' ') \
 	_(kVK_ANSI_Minus, '-') \
@@ -1171,7 +1171,8 @@ static int GetIsChar(GKey &k, int mods)
 	k.IsChar = (mods & 0x100) == 0
 				&&
 				(
-					k.c16 >= ' ' ||
+					(
+					k.c16 >= ' ' && k.c16 != 127) ||
 					k.vkey == VK_RETURN ||
 					k.vkey == VK_TAB ||
 					k.vkey == VK_BACKSPACE

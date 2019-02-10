@@ -3800,7 +3800,7 @@ bool GTextView3::OnKey(GKey &k)
 	}
 	else if (k.IsChar)
 	{
-		switch (k.c16)
+		switch (k.vkey)
 		{
 			default:
 			{
