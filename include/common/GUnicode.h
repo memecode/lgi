@@ -662,6 +662,32 @@ T *Stristr(const T *Data, const T *Value)
 
 /// Searches the string 'Data' for the 'Value' in a case insensitive manner
 template<typename T>
+T *Strstr(const T *Data, const T *Value)
+{
+	if (!Data || !Value)
+		return NULL;
+
+	const T v = *Value;
+	while (*Data)
+	{
+		if (*Data == v)
+		{
+			int i;
+			for (i=1; Data[i] && Data[i] == Value[i]; i++)
+				;
+
+			if (Value[i] == 0)
+				return (T*)Data;
+		}
+
+		Data++;
+	}
+
+	return NULL;
+}
+
+/// Searches the string 'Data' for the 'Value' in a case insensitive manner
+template<typename T>
 T *Strnstr(const T *Data, const T *Value, ssize_t DataLen)
 {
 	if (!Data || !Value)
