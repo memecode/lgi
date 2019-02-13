@@ -1208,6 +1208,10 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, bool rele
 	{
 		Compiler = PythonScript;
 	}
+	else if (Ext && !_stricmp(Ext, "sln"))
+	{
+		Compiler = VisualStudio;
+	}
 	else
 	{
 		GAutoString Comp(NewStr(Proj->GetSettings()->GetStr(ProjCompiler)));
@@ -1284,6 +1288,12 @@ ssize_t BuildThread::Write(const void *Buffer, ssize_t Size, int Flags)
 
 #pragma comment(lib, "version.lib")
 
+struct ProjInfo
+{
+	GString Guid, Name, File;
+	LHashTbl<StrKey<char>,int> Configs;
+};
+
 GString BuildThread::FindExe()
 {
 	GToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
@@ -1339,7 +1349,8 @@ GString BuildThread::FindExe()
 		// Find the version we need:
 		double fVer = 0.0;
 
-		GString ProjFile;
+		ProjInfo *First = NULL;
+		LHashTbl<StrKey<char>, ProjInfo*> Projects;
 		const char *Ext = LgiGetExtension(Makefile);
 		if (Ext && !_stricmp(Ext, "sln"))
 		{
@@ -1348,6 +1359,9 @@ GString BuildThread::FindExe()
 			{
 				GString VerKey = "Format Version ";
 				GString ProjKey = "Project(";
+				GString StartSection = "GlobalSection(";
+				GString EndSection = "EndGlobalSection";
+				GString Section;
 				ssize_t Pos;
 
 				GString::Array Ln = f.Read().SplitDelimit("\r\n");
@@ -1362,20 +1376,49 @@ GString BuildThread::FindExe()
 					else if ((Pos = s.Find(ProjKey)) >= 0)
 					{
 						GString::Array p = s.SplitDelimit("(),=");
-						if (p.Length() > 4)
+						if (p.Length() > 5)
 						{
-							ProjFile = p[4].Strip(" \t\'\"");
-							if (LgiIsRelativePath(ProjFile))
+							ProjInfo *i = new ProjInfo;
+							i->Name = p[3].Strip(" \t\"");
+							i->File = p[4].Strip(" \t\'\"");
+							i->Guid = p[5].Strip(" \t\"");
+							if (LgiIsRelativePath(i->File))
 							{
 								char f[MAX_PATH];
 								LgiMakePath(f, sizeof(f), Makefile, "..");
-								LgiMakePath(f, sizeof(f), f, ProjFile);
+								LgiMakePath(f, sizeof(f), f, i->File);
 								if (FileExists(f))
-									ProjFile = f;
+									i->File = f;
 								else
 									LgiAssert(0);
 							}
-							break;
+
+							if (!First)
+								First = i;
+
+							Projects.Add(i->Guid, i);
+						}
+					}
+					else if (s.Find(StartSection) >= 0)
+					{
+						auto p = s.SplitDelimit("() \t");
+						Section = p[1];
+					}
+					else if (s.Find(EndSection) >= 0)
+					{
+						Section.Empty();
+					}
+					else if (Section == "ProjectConfigurationPlatforms")
+					{
+						auto p = s.SplitDelimit(". \t");
+						auto i = Projects.Find(p[0]);
+						if (i)
+						{
+							if (!i->Configs.Find(p[1]))
+							{
+								int Idx = i->Configs.Length() + 1;
+								i->Configs.Add(p[1], Idx);
+							}
 						}
 					}
 				}
@@ -1383,7 +1426,7 @@ GString BuildThread::FindExe()
 		}
 		else if (Ext && !_stricmp(Ext, "vcxproj"))
 		{
-			ProjFile = Makefile;
+			// ProjFile = Makefile;
 		}
 		else
 		{
@@ -1431,12 +1474,21 @@ GString BuildThread::FindExe()
 			#endif
 		}
 
+		/*
 		if (ProjFile && FileExists(ProjFile))
 		{
 			GString sVer;
 			if (ReadVsProjFile(ProjFile, sVer, BuildConfigs))
 			{
 				fVer = sVer.Float();
+			}
+		}
+		*/
+		if (First)
+		{
+			for (auto i: First->Configs)
+			{
+				BuildConfigs[i.value - 1] = i.key;
 			}
 		}
 
@@ -1725,6 +1777,7 @@ int BuildThread::Main()
 		Msg.Printf("Making: %s\n", MakePath.Get());
 		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (GMessage::Param)NewStr(Msg), 0);
 
+		LgiTrace("%s %s\n", Exe.Get(), TmpArgs.Get());
 		if (SubProc.Reset(new GSubProcess(Exe, TmpArgs)))
 		{
 			SubProc->SetInitFolder(InitDir);

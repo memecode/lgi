@@ -80,11 +80,11 @@
 		<Node File="./Makefile.linux" Type="3" Platforms="15" />
 		<Node File="./Resources/resource.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
 	<Settings>
 		<General>
 			<Makefile>
-				<Windows>.\Makefile.windows</Windows>
+				<Windows>.\LgiIde_vs2013.sln</Windows>
 				<Linux>Makefile.linux</Linux>
 				<Mac>Makefile.macosx</Mac>
 				<Haiku>Makefile.haiku</Haiku>
@@ -236,6 +236,7 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<OtherMakefileRules />
 			<PostBuildCommands>
 				<Linux />
+				<Windows />
 			</PostBuildCommands>
 		</Advanced>
 	</Settings>
