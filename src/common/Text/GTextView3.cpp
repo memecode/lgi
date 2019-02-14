@@ -2314,6 +2314,7 @@ bool GTextView3::Open(const char *Name, const char *CharSet)
 		}
 			
 		SetCaret(0, false);
+		Line.DeleteObjects();
 		
 		char *c8 = new char[Bytes + 4];
 		if (c8)

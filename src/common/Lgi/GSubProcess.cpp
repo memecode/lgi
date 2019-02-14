@@ -90,6 +90,7 @@ GSubProcess::GSubProcess(const char *exe, const char *args)
 	ChildHnd = NULL;
 	ExitValue = 0;
 	#endif
+	NewGroup = true;
 	ErrorCode = 0;
 	Parent = Child = NULL;
 	Exe = exe;
@@ -771,7 +772,8 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 								&Attr,				// lpProcessAttributes
 								NULL,				// lpThreadAttributes
 								TRUE,				// bInheritHandles
-								CREATE_NO_WINDOW|CREATE_UNICODE_ENVIRONMENT|CREATE_NEW_PROCESS_GROUP, // dwCreationFlags
+								CREATE_NO_WINDOW|CREATE_UNICODE_ENVIRONMENT/*|
+									(NewGroup?CREATE_NEW_PROCESS_GROUP:0)*/, // dwCreationFlags
 								WEnv,				// lpEnvironment
 								WInitialFolder,		// lpCurrentDirectory
 								&Info,				// lpStartupInfo
@@ -842,34 +844,90 @@ int GSubProcess::Wait()
 	return Status;
 }
 
-void GSubProcess::Interrupt()
+bool GSubProcess::Interrupt()
 {
 	#if defined(POSIX)
-		if (ChildPid != INVALID_PID)
-			kill(ChildPid, SIGINT);
+		if (ChildPid == INVALID_PID)
+			return false;
+		return kill(ChildPid, SIGINT) == 0;
 	#elif defined(WIN32)
-		if (ChildHnd)
-			GenerateConsoleCtrlEvent(CTRL_C_EVENT, ChildPid);
+		if (!ChildHnd)
+			return false;
+
+		#if 1
+		// It's impossible to be attached to 2 consoles at the same time,
+		// so release the current one.
+		FreeConsole();
+ 
+		// This does not require the console window to be visible.
+		if (AttachConsole(ChildPid))
+		{
+			// Disable Ctrl-C handling for our program
+			SetConsoleCtrlHandler(NULL, true);
+			bool b = GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0);
+ 
+			// Must wait here. If we don't and re-enable Ctrl-C
+			// handling below too fast, we might terminate ourselves.
+			LgiSleep(1000);
+ 
+			FreeConsole();
+ 
+			// Re-enable Ctrl-C handling or any subsequently started
+			// programs will inherit the disabled state.
+			SetConsoleCtrlHandler(NULL, false);
+
+			return b;
+		}
+		#else
+
+		if (GenerateConsoleCtrlEvent(CTRL_C_EVENT, ChildPid))
+			return true;
+
+		auto Err = GetLastError();
+		LgiTrace("%s:%i - GenerateConsoleCtrlEvent failed with 0x%x\n", _FL, Err);
+		#endif
+
+		return false;
+	#else
+		return false;
 	#endif
 }
 
-int GSubProcess::Kill()
+bool GSubProcess::Kill()
 {
 	#if defined(POSIX)
-		if (ChildPid != INVALID_PID)
+		if (ChildPid == INVALID_PID)
 		{
-			kill(ChildPid, SIGTERM);
+			printf("%s:%i - child pid doesn't exist.\n", _FL);
+			return false;
+		}
+
+		if (kill(ChildPid, SIGTERM) == 0)
+		{
 			printf("%s:%i - kill(%i).\n", _FL, ChildPid);
 			ChildPid = INVALID_PID;
 		}
-		else printf("%s:%i - child pid doesn't exist.\n", _FL);
-	#elif defined(WIN32)
-		if (ChildHnd)
+		else
 		{
-			TerminateProcess(ChildHnd, -1);
+			printf("%s:%i - kill(%i) failed.\n", _FL, ChildPid);
+			return false;
+		}
+	#elif defined(WIN32)
+		if (!ChildHnd)
+		{
+			LgiTrace("%s:%i - No child process.\n", _FL);
+			return false;
+		}
+
+		if (TerminateProcess(ChildHnd, -1))
+		{
 			ChildHnd = NULL;
 		}
-		else return false;;
+		else
+		{
+			LgiTrace("%s:%i - TerminateProcess failed with 0x%x.\n", _FL, GetLastError());
+			return false;
+		}
 	#endif
 	
 	return true;

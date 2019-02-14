@@ -38,6 +38,8 @@
 #define OPT_ENTIRE_SOLUTION		"SearchSolution"
 #define OPT_SPLIT_PX			"SplitPos"
 #define OPT_OUTPUT_PX			"OutputPx"
+#define OPT_FIX_RENAMED			"FixRenamed"
+#define OPT_RENAMED_SYM			"RenamedSym"
 
 #define IsSymbolChar(c)			( IsDigit(c) || IsAlpha(c) || strchr("-_", c) )
 
@@ -1257,7 +1259,7 @@ public:
 
 		// Scan back to the start of the filename
 		auto Line = i;
-		while (Line > 0 && Txt[Line-1] != '\n')
+		while (Line > 0 && !strchr("\n>", Txt[Line-1]))
 		{
 			Line--;
 		}
@@ -1923,10 +1925,198 @@ void AppWnd::OnDebugState(bool Debugging, bool Running)
 	PostEvent(M_DEBUG_ON_STATE, Debugging, Running);
 }
 
+bool IsVarChar(GString &s, int pos)
+{
+	if (pos < 0)
+		return false;
+	if (pos >= s.Length())
+		return false;
+	char i = s[pos];
+	return IsAlpha(i) || IsDigit(i) || i == '_';
+}
+
+bool ReplaceWholeWord(GString &Ln, GString Word, GString NewWord)
+{
+	int Pos = 0;
+	bool Status = false;
+
+	while (Pos >= 0)
+	{
+		Pos = Ln.Find(Word, Pos);
+		if (Pos < 0)
+			return Status;
+
+		int End = Pos + Word.Length();
+		if (!IsVarChar(Ln, Pos-1) && !IsVarChar(Ln, End))
+		{
+			GString NewLn = Ln(0,Pos) + NewWord + Ln(End,-1);
+			Ln = NewLn;
+			Status = true;
+		}
+
+		Pos++;
+	}
+
+	return Status;
+}
+
+struct FileInfo
+{
+	GString Path;
+	GString::Array Lines;
+	bool Dirty;
+
+	FileInfo()
+	{
+		Dirty = false;
+	}
+
+	bool Save()
+	{
+		GFile f;
+		if (!f.Open(Path, O_WRITE))
+			return false;
+
+		GString NewFile = GString("\n").Join(Lines);
+
+		f.SetSize(0);
+		f.Write(NewFile);
+
+		f.Close();
+		return true;
+	}
+};
+
+
+void AppWnd::OnFixBuildErrors()
+{
+	LHashTbl<StrKey<char>, GString> Map;
+	GVariant v;
+	if (GetOptions()->GetValue(OPT_RENAMED_SYM, v))
+	{
+		auto Lines = GString(v.Str()).Split("\n");
+		for (auto Ln: Lines)
+		{
+			auto p = Ln.SplitDelimit();
+			if (p.Length() == 2)
+				Map.Add(p[0], p[1]);
+		}
+
+		if (Map.Length() == 0)
+		{
+			LgiMsg(this, "No renamed symbols defined.", AppName);
+			return;
+		}
+	}
+	else return;
+
+	GString Raw = d->Output->Txt[AppWnd::BuildTab]->Name();
+	GString::Array Lines = Raw.Split("\n");
+	GProgressDlg Prog(this);
+	Prog.SetDescription("Parsing errors...");
+	Prog.SetLimits(0, Lines.Length());
+	Prog.SetYieldTime(300);
+	int i = 0;
+	int Replacements = 0;
+	GArray<FileInfo> Files;
+
+	for (auto Ln : Lines)
+	{
+		if (Ln.Find("error") >= 0)
+		{
+			GString::Array p = Ln.SplitDelimit(">()");
+			if (p.Length() > 2)
+			{
+				int Base = p[0].IsNumeric() ? 1 : 0;
+				GString Fn = p[Base];
+				if (Fn.Find("Program Files") >= 0)
+					continue;
+
+				GAutoString Full;
+				if (d->FindSource(Full, p[Base], NULL))
+				{
+					auto LineNo = p[Base+1].Int();
+
+					FileInfo *Fi = NULL;
+					for (auto &i: Files)
+					{
+						if (i.Path.Equals(Full))
+						{
+							Fi = &i;
+							break;
+						}
+					}
+					if (!Fi)
+					{
+						GFile f(Full, O_READ);
+						if (f.IsOpen())
+						{
+							Fi = &Files.New();
+							Fi->Path = Full.Get();
+							auto OldFile = f.Read();
+							Fi->Lines = OldFile.SplitDelimit("\n", -1, false);
+						}
+					}
+
+
+					if (Fi)
+					{
+						if (LineNo <= Fi->Lines.Length())
+						{
+							GString &s = Fi->Lines[LineNo-1];
+							for (auto i: Map)
+							{
+								if (ReplaceWholeWord(s, i.key, i.value))
+								{
+									Fi->Dirty = true;
+									Replacements++;
+								}
+							}
+						}
+					}
+					else
+					{
+						int asd=0;
+					}
+				}
+			}
+		}
+
+		Prog.Value(++i);
+		if (Prog.IsCancelled())
+			break;
+	}
+
+	for (auto &Fi : Files)
+	{
+		if (Fi.Dirty)
+			Fi.Save();
+	}
+
+	if (Replacements)
+		LgiMsg(this, "%i replacements made.", AppName, MB_OK, Replacements);
+}
+
+void AppWnd::OnBuildStateChanged(bool NewState)
+{
+	GVariant v;
+	if (!NewState &&
+		GetOptions()->GetValue(OPT_FIX_RENAMED, v) &&
+		v.CastInt32())
+	{
+		OnFixBuildErrors();
+	}
+}
+
 void AppWnd::UpdateState(int Debugging, int Building)
 {
 	if (Debugging >= 0) d->Debugging = Debugging;
-	if (Building >= 0) d->Building = Building;
+	if (Building >= 0)
+	{
+		if (d->Building != (Building != 0))
+			OnBuildStateChanged(Building);
+		d->Building = Building;
+	}
 
 	SetCtrlEnabled(IDM_COMPILE, !d->Building);
 	SetCtrlEnabled(IDM_BUILD, !d->Building);
@@ -2863,6 +3053,46 @@ bool AppWnd::Build()
 	return false;
 }
 
+class RenameDlg : public GDialog
+{
+	AppWnd *App;
+
+public:
+	RenameDlg(AppWnd *a)
+	{
+		SetParent(App = a);
+		MoveSameScreen(a);
+
+		if (LoadFromResource(IDC_RENAME))
+		{
+			GVariant v;
+			if (App->GetOptions()->GetValue(OPT_FIX_RENAMED, v))
+				SetCtrlValue(IDC_FIX_RENAMED, v.CastInt32());
+			if (App->GetOptions()->GetValue(OPT_RENAMED_SYM, v))
+				SetCtrlName(IDC_SYM, v.Str());
+		}
+	}
+
+	int OnNotify(GViewI *c, int f)
+	{
+		switch (c->GetId())
+		{
+			case IDOK:
+			{
+				GVariant v;
+				App->GetOptions()->SetValue(OPT_RENAMED_SYM, v = GetCtrlName(IDC_SYM));
+				App->GetOptions()->SetValue(OPT_FIX_RENAMED, v = GetCtrlValue(IDC_FIX_RENAMED));
+			}
+			case IDCANCEL:
+			{
+				EndModal(c->GetId() == IDOK);
+				break;
+			}
+		}
+		return 0;
+	}
+};
+
 bool AppWnd::ShowInProject(const char *Fn)
 {
 	if (!Fn)
@@ -3339,6 +3569,12 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				p->FindDuplicateSymbols();
 			else
 				LgiMsg(this, "No project loaded.", AppName);
+			break;
+		}
+		case IDM_RENAME_SYM:
+		{
+			RenameDlg Dlg(this);
+			Dlg.DoModal();
 			break;
 		}
 		case IDM_START_DEBUG:

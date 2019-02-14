@@ -32,6 +32,13 @@
 		<String Ref="36" Cid="-1" Define="IDC_STATIC" en="File type:" />
 		<String Ref="37" Cid="544" Define="IDC_PLATFORMS" en="Platforms:" />
 		<String Ref="38" Cid="37" Define="IDC_TYPE" />
+		<String Ref="43" Cid="43" Define="IDC_RENAME" en="Renamed Symbols" />
+		<String Ref="44" Cid="44" Define="IDC_44" />
+		<String Ref="45" Cid="45" Define="IDC_SYM" />
+		<String Ref="46" Cid="1" Define="IDOK" en="Ok" />
+		<String Ref="47" Cid="2" Define="IDCANCEL" en="Cancel" />
+		<String Ref="48" Cid="48" Define="IDC_FIX_RENAMED" en="Try and fix renamed symbols from compile errors" />
+		<String Ref="49" Cid="-1" Define="IDC_STATIC" en="Enter symbol pairs, one per line. Each line should contain the old symbol and the new symbol separated by whitespace:" />
 		<String Ref="63" Cid="63" Define="IDD_OPTIONS" en="Options" />
 		<String Ref="64" Cid="8" Define="IDC_TABLE" />
 		<String Ref="65" Cid="-1" Define="IDC_STATIC" en="Editor font:" />
@@ -490,6 +497,31 @@
 			</tr>
 		</TableLayout>
 	</Dialog>
+	<Dialog pos="7,7,506,406" ref="43">
+		<TableLayout pos="7,7,482,356" ref="44" cols="1.000" rows="0.250,0.250,0.250,0.250">
+			<tr>
+				<td>
+					<CheckBox pos="28,14,328,34" ref="48" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<StaticText pos="21,91,433,160" ref="49" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<EditBox Pos="14,168,405,250" MultiLine="1" ref="45" />
+				</td>
+			</tr>
+			<tr>
+				<td align="Max">
+					<Button pos="168,286,209,306" ref="46" />
+					<Button pos="238,286,300,306" ref="47" />
+				</td>
+			</tr>
+		</TableLayout>
+	</Dialog>
 	<menu Name="IDM_MENU">
 		<string-group Name="&lt;untitled&gt;">
 			<String Ref="175" en="&File" />
@@ -579,6 +611,7 @@
 			<String Ref="39" Cid="550" Define="IDM_MENU_550" />
 			<String Ref="40" Cid="556" Define="IDM_ESCAPE" en="Escape Selection" />
 			<String Ref="41" Cid="557" Define="IDM_DESCAPE" en="De-escape Selection" />
+			<String Ref="42" Cid="585" Define="IDM_RENAME_SYM" en="Renamed Symbols" />
 		</string-group>
 		<submenu Ref="175">
 			<menuitem Ref="174" Shortcut="Ctrl+N" />
@@ -636,6 +669,7 @@
 			</submenu>
 			<menuitem Ref="6" />
 			<menuitem Ref="16" />
+			<menuitem Ref="42" />
 			<menuitem Sep="1" />
 			<menuitem Ref="142" />
 			<menuitem Ref="141" />

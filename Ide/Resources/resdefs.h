@@ -17,6 +17,10 @@
 #define IDC_COPY_PATH							34
 #define IDC_MSG									36
 #define IDC_TYPE								37
+#define IDC_RENAME								43
+#define IDC_44									44
+#define IDC_SYM									45
+#define IDC_FIX_RENAMED							48
 #define IDD_OPTIONS								63
 #define IDC_FONT								65
 #define IDC_SET_FONT							66
@@ -148,3 +152,4 @@
 #define IDM_RUN_TO								582
 #define IDM_PREV_MSG							583
 #define IDM_FIND_PROJECT_FILE					584
+#define IDM_RENAME_SYM							585
