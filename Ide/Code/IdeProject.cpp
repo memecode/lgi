@@ -31,7 +31,7 @@ const char *AddFilesProgress::DefaultExt = "c,cpp,cc,cxx,h,hpp,hxx,html,css,json
 
 #define USE_OPEN_PROGRESS			1
 
-#define STOP_BUILD_TIMEOUT			3000
+#define STOP_BUILD_TIMEOUT			2000
 #ifdef WINDOWS
 #define LGI_STATIC_LIBRARY_EXT		"lib"
 #else
@@ -1249,7 +1249,11 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, bool rele
 BuildThread::~BuildThread()
 {
 	if (SubProc)
-		SubProc->Interrupt();
+	{
+		bool b = SubProc->Interrupt();
+		LgiTrace("%s:%i - Sub process interrupt = %i.\n", _FL, b);
+	}
+	else LgiTrace("%s:%i - No sub process to interrupt.\n", _FL);
 
 	uint64 Start = LgiCurrentTime();
 	bool Killed = false;
@@ -1264,13 +1268,16 @@ BuildThread::~BuildThread()
 			{
 				// Thread is stuck as well... ok kill that too!!! Argh - kill all the things!!!!
 				Terminate();
+				LgiTrace("%s:%i - Thread killed.\n", _FL);
+				Proj->GetApp()->PostEvent(M_BUILD_DONE);
 				break;
 			}
 			else
 			{
 				// Kill the sub-process...
-				SubProc->Kill();
+				bool b = SubProc->Kill();
 				Killed = true;
+				LgiTrace("%s:%i - Sub process killed.\n", _FL, b);
 				Start = LgiCurrentTime();
 			}
 		}
@@ -1780,6 +1787,7 @@ int BuildThread::Main()
 		LgiTrace("%s %s\n", Exe.Get(), TmpArgs.Get());
 		if (SubProc.Reset(new GSubProcess(Exe, TmpArgs)))
 		{
+			SubProc->SetNewGroup(false);
 			SubProc->SetInitFolder(InitDir);
 			if (Include)
 				SubProc->SetEnvironment("INCLUDE", Include);

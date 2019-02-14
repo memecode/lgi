@@ -255,6 +255,8 @@ public:
 	IdeDoc *FocusDoc();
 	GTextView3 *FocusEdit();
 	void AppendOutput(char *Txt, Channels Channel);
+	void OnFixBuildErrors();
+	void OnBuildStateChanged(bool NewState);
 	void UpdateState(int Debugging = -1, int Building = -1);
 	void OnReceiveFiles(GArray<char*> &Files) override;
 	int GetBuildMode();

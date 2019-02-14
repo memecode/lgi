@@ -79,6 +79,7 @@ protected:
 	GString Exe;
 	GArray<char*> Args;
 	GString InitialFolder;
+	bool NewGroup;
 	
 	struct Variable
 	{
@@ -111,7 +112,7 @@ public:
 	GSubProcess(const char *exe, const char *args = NULL);	
 	~GSubProcess();
 
-	// Environment	
+	// Environment
 	void SetInitFolder(const char *f);
 	const char *GetEnvironment(const char *Var);	
 	bool SetEnvironment(const char *Var, const char *Value);
@@ -124,6 +125,8 @@ public:
 	void SetStdout(PipeHandle Hnd);
 
 	// Process lifecycle
+	bool GetNewGroup() { return NewGroup; }
+	void SetNewGroup(bool ng) { NewGroup = ng; }
 	ProcessId Handle() { return ChildPid; }
 	bool IsRunning();
 	uint32 GetErrorCode();
@@ -131,8 +134,8 @@ public:
 	void Connect(GSubProcess *child);
 	bool Start(bool ReadAccess = true, bool WriteAccess = false, bool MapStderrToStdout = true);
 	int Wait();
-	void Interrupt();
-	int Kill();
+	bool Interrupt();
+	bool Kill();
 	
 	// IO
 	int Peek();
