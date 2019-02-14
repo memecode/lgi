@@ -504,7 +504,7 @@ bool GSocket::GetLocalIp(char *IpAddr)
 	return false;
 }
 
-bool GSocket::GetRemoteIp(uint32 *IpAddr)
+bool GSocket::GetRemoteIp(uint32_t *IpAddr)
 {
 	if (IpAddr)
 	{
@@ -525,7 +525,7 @@ bool GSocket::GetRemoteIp(char *IpAddr)
 	if (!IpAddr)
 		return false;
 
-	uint32 Ip = 0;
+	uint32_t Ip = 0;
 	if (!GetRemoteIp(&Ip))
 		return false;
 
@@ -1298,7 +1298,7 @@ void GSocket::SetBroadcast()
 	d->Broadcast = true;
 }
 
-bool GSocket::AddMulticastMember(uint32 MulticastIp, uint32 LocalInterface)
+bool GSocket::AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface)
 {
 	if (!MulticastIp)
 		return false;
@@ -1314,7 +1314,7 @@ bool GSocket::AddMulticastMember(uint32 MulticastIp, uint32 LocalInterface)
 	return false;
 }
 
-bool GSocket::SetMulticastInterface(uint32 Interface)
+bool GSocket::SetMulticastInterface(uint32_t Interface)
 {
 	if (!Interface)
 		return false;
@@ -1348,7 +1348,7 @@ bool GSocket::CreateUdpSocket()
 	return ValidSocket(d->Socket);
 }
 
-int GSocket::ReadUdp(void *Buffer, int Size, int Flags, uint32 *Ip, uint16 *Port)
+int GSocket::ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip, uint16_t *Port)
 {
 	if (!Buffer || Size < 0)
 		return -1;
@@ -1398,7 +1398,7 @@ int GSocket::ReadUdp(void *Buffer, int Size, int Flags, uint32 *Ip, uint16 *Port
 	return (int)b;
 }
 
-int GSocket::WriteUdp(void *Buffer, int Size, int Flags, uint32 Ip, uint16 Port)
+int GSocket::WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port)
 {
 	if (!Buffer || Size < 0)
 		return -1;
@@ -1504,7 +1504,7 @@ bool HaveNetConnection()
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GString LIpStr(uint32 ip)
+GString LIpStr(uint32_t ip)
 {
 	GString s;
 	s.Printf("%i.%i.%i.%i",
@@ -1515,13 +1515,13 @@ GString LIpStr(uint32 ip)
 	return s;
 }
 
-uint32 LIpHostInt(GString str)
+uint32_t LIpHostInt(GString str)
 {
 	auto p = str.Split(".");
 	if (p.Length() != 4)
 		return 0;
 	
-	uint32 ip = 0;
+	uint32_t ip = 0;
 	for (auto &s : p)
 	{
 		ip <<= 8;
@@ -1531,7 +1531,7 @@ uint32 LIpHostInt(GString str)
 			LgiAssert(0);
 			return 0;
 		}
-		ip |= (uint8)s.Int();
+		ip |= (uint8_t)s.Int();
 	}
 	return ip;
 }

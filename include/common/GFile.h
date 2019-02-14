@@ -302,7 +302,7 @@ public:
 #define GFileOps()						\
 	GFilePre char GFilePost;			\
 	GFilePre int8 GFilePost;			\
-	GFilePre uint8 GFilePost;			\
+	GFilePre uint8_t GFilePost;			\
 	GFilePre int16 GFilePost;			\
 	GFilePre uint16 GFilePost;			\
 	GFilePre signed int GFilePost;		\
@@ -318,7 +318,7 @@ public:
 #define GFileOps()						\
 	GFilePre char GFilePost;			\
 	GFilePre int8 GFilePost;			\
-	GFilePre uint8 GFilePost;			\
+	GFilePre uint8_t GFilePost;			\
 	GFilePre int16 GFilePost;			\
 	GFilePre uint16 GFilePost;			\
 	GFilePre signed int GFilePost;		\

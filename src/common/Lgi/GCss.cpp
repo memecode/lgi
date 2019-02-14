@@ -22,7 +22,7 @@
 	( \
 		((s) >= 'a' && (s) <= 'z') || \
 		((s) >= 'A' && (s) <= 'Z') || \
-		(((uint8)s) > 0xa0) \
+		(((uint8_t)s) > 0xa0) \
 	)
 
 #define CopyPropOnSave(Type, Id) \
@@ -1130,7 +1130,7 @@ bool GCss::CopyStyle(const GCss &c)
 			case TypeEnum:
 			{
 				void *n = new DisplayType;
-				*(uint32*)n = *(uint32*)p.value;
+				*(uint32_t*)n = *(uint32_t*)p.value;
 				Props.Add(p.key, n);
 				break;
 			}
@@ -1176,7 +1176,7 @@ bool GCss::operator ==(GCss &c)
 					break; \
 				}
 
-			CmpType(TypeEnum, uint32);
+			CmpType(TypeEnum, uint32_t);
 			CmpType(TypeLen, Len);
 			CmpType(TypeGRect, GRect);
 			CmpType(TypeColor, ColorDef);
@@ -2428,9 +2428,9 @@ bool GCss::Selector::IsAtMedia()
 	return p.Type == SelMedia;
 }
 
-uint32 GCss::Selector::GetSpecificity()
+uint32_t GCss::Selector::GetSpecificity()
 {
-	uint8 s[4] = {0};
+	uint8_t s[4] = {0};
 	
 	for (unsigned i=0; i<Parts.Length(); i++)
 	{
@@ -2453,10 +2453,10 @@ uint32 GCss::Selector::GetSpecificity()
 		}
 	}
 	
-	return	((uint32)s[3]<<24) |
-			((uint32)s[2]<<16) |
-			((uint32)s[1]<<8) |
-			((uint32)s[0]);
+	return	((uint32_t)s[3]<<24) |
+			((uint32_t)s[2]<<16) |
+			((uint32_t)s[1]<<8) |
+			((uint32_t)s[0]);
 }
 
 bool GCss::Selector::ToString(GStream &p)
@@ -2788,8 +2788,8 @@ bool GCss::Store::Dump(GStream &out)
 
 int GCssSelectorCmp(class GCss::Selector **a, GCss::Selector **b)
 {
-	uint32 as = (*a)->GetSpecificity();
-	uint32 bs = (*b)->GetSpecificity();
+	uint32_t as = (*a)->GetSpecificity();
+	uint32_t bs = (*b)->GetSpecificity();
 	if (as == bs)
 		return (*a)->SourceIndex - (*b)->SourceIndex;
 	return as - bs;

@@ -551,7 +551,7 @@ bool GXmlTag::GetVariant(const char *Name, GVariant &Value, char *Array)
 						s++;
 						int Low = HexToBin();
 						s++;
-						((uint8*)Value.Value.Binary.Data)[i] = High << 4 | Low;						
+						((uint8_t*)Value.Value.Binary.Data)[i] = High << 4 | Low;						
 					}
 				}
 			}
@@ -622,7 +622,7 @@ bool GXmlTag::SetVariant(const char *Name, GVariant &Value, char *Array)
 				p.Print("binary(");
 				for (int i=0; i<Value.Value.Binary.Length; i++)
 				{
-					p.Print("%02.2x", ((uint8*)Value.Value.Binary.Data)[i]);
+					p.Print("%02.2x", ((uint8_t*)Value.Value.Binary.Data)[i]);
 				}
 				p.Print(")");
 				char *s = p.NewStr();

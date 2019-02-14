@@ -43,7 +43,7 @@
 #include "GVariant.h"
 
 // Pixel formats
-typedef uint8   Png8;
+typedef uint8_t   Png8;
 typedef GRgb24  Png24;
 typedef GRgba32 Png32;
 typedef GRgb48  Png48;
@@ -825,11 +825,11 @@ GFilter::IoStatus GdcPng::ReadImage(GSurface *pDeviceContext, GStream *In)
 							{
 								if (ColourType == PNG_COLOR_TYPE_GRAY_ALPHA)
 								{
-									uint8 *grey = Scan;
-									uint8 *alpha = (*(pDC->AlphaDC()))[y];
+									uint8_t *grey = Scan;
+									uint8_t *alpha = (*(pDC->AlphaDC()))[y];
 									LgiAssert(grey && alpha);
-									uint8 *end = grey + pDC->X();
-									uint8 *in = Scan0[y];
+									uint8_t *end = grey + pDC->X();
+									uint8_t *in = Scan0[y];
 									
 									while (grey < end)
 									{
@@ -1103,9 +1103,9 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 		{
 			for (int y=0; y<a->Y() && !HasTransparency; y++)
 			{
-				uint8 *p = (*a)[y];
+				uint8_t *p = (*a)[y];
 				if (!p) break;
-				uint8 *e = p + a->X();
+				uint8_t *e = p + a->X();
 				while (p < e)
 				{
 					if (*p < 255)

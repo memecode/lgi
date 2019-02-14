@@ -11,7 +11,7 @@ class LgiClass GSlider :
 	public ResObject
 {
 	#if WINNATIVE
-	uint32 Style();
+	uint32_t Style();
 	// int SysOnNotify(int Msg, int Code);
 	#endif
 

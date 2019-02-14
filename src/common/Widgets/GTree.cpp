@@ -79,7 +79,7 @@ public:
 class GTreeItemPrivate
 {
 	GArray<GDisplayString*> Ds;
-	GArray<uint32> ColPx;
+	GArray<uint32_t> ColPx;
 
 public:
 	GTreeItem *Item;

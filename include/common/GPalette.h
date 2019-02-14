@@ -46,7 +46,7 @@ public:
 	bool Update();
 	bool SetSize(int s = 256);
 	void SwapRAndB();
-	int MatchRgb(uint32 Rgb);
+	int MatchRgb(uint32_t Rgb);
 	void CreateCube();
 	void CreateGreyScale();
 	bool Load(GFile &F);

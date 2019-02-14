@@ -14,7 +14,7 @@ GColour::GColour()
 	pal = NULL;
 }
 
-GColour::GColour(uint8 idx8, GPalette *palette)
+GColour::GColour(uint8_t idx8, GPalette *palette)
 {
 	c8(idx8, palette);
 }
@@ -24,7 +24,7 @@ GColour::GColour(int r, int g, int b, int a)
 	c32(Rgba32(r, g, b, a));
 }
 
-GColour::GColour(uint32 c, int bits, GPalette *palette)
+GColour::GColour(uint32_t c, int bits, GPalette *palette)
 {
 	Set(c, bits, palette);
 }
@@ -70,7 +70,7 @@ void GColour::Rgb(int r, int g, int b, int a)
 	c32(Rgba32(r, g, b, a));
 }
 
-void GColour::Set(uint32 c, int bits, GPalette *palette)
+void GColour::Set(uint32_t c, int bits, GPalette *palette)
 {
 	pal = 0;
 	switch (bits)
@@ -130,7 +130,7 @@ void GColour::Set(uint32 c, int bits, GPalette *palette)
 	}
 }
 
-uint32 GColour::Get(int bits)
+uint32_t GColour::Get(int bits)
 {
 	switch (bits)
 	{
@@ -148,39 +148,39 @@ uint32 GColour::Get(int bits)
 	return 0;
 }
 
-uint8 GColour::r() const
+uint8_t GColour::r() const
 {
 	return R32(c32());
 }
 
-uint8 GColour::g() const
+uint8_t GColour::g() const
 {
 	return G32(c32());
 }
 
-uint8 GColour::b() const
+uint8_t GColour::b() const
 {
 	return B32(c32());
 }
 
-uint8 GColour::a() const
+uint8_t GColour::a() const
 {
 	return A32(c32());
 }
 
-uint8 GColour::c8() const
+uint8_t GColour::c8() const
 {
 	return index;
 }
 
-void GColour::c8(uint8 c, GPalette *p)
+void GColour::c8(uint8_t c, GPalette *p)
 {
 	space = CsIndex8;
 	pal = p;
 	index = c;
 }
 
-uint32 GColour::c24() const
+uint32_t GColour::c24() const
 {
 	if (space == System32BitColourSpace)
 	{
@@ -214,7 +214,7 @@ uint32 GColour::c24() const
 	return 0;
 }
 
-void GColour::c24(uint32 c)
+void GColour::c24(uint32_t c)
 {
 	space = System32BitColourSpace;
 	rgb.r = R24(c);
@@ -224,7 +224,7 @@ void GColour::c24(uint32 c)
 	pal = NULL;
 }
 
-uint32 GColour::c32() const
+uint32_t GColour::c32() const
 {
 	if (space == System32BitColourSpace)
 	{
@@ -261,7 +261,7 @@ uint32 GColour::c32() const
 	return 0;
 }
 
-void GColour::c32(uint32 c)
+void GColour::c32(uint32_t c)
 {
 	space = System32BitColourSpace;
 	pal = NULL;
@@ -286,7 +286,7 @@ GColour GColour::Mix(GColour Tint, float RatioOfTint) const
 	return GColour(r, g, b, a);
 }
 
-uint32 GColour::GetH()
+uint32_t GColour::GetH()
 {
 	ToHLS();
 	return hls.h;
@@ -298,13 +298,13 @@ bool GColour::HueIsUndefined()
 	return hls.h == HUE_UNDEFINED;
 }
 
-uint32 GColour::GetL()
+uint32_t GColour::GetL()
 {
 	ToHLS();
 	return hls.l;
 }
 
-uint32 GColour::GetS()
+uint32_t GColour::GetS()
 {
 	ToHLS();
 	return hls.s;
@@ -315,7 +315,7 @@ bool GColour::ToHLS()
 	if (space == CsHls32)
 		return true;
 
-	uint32 nMax, nMin, nDelta, c = c32();
+	uint32_t nMax, nMin, nDelta, c = c32();
 	int R = R32(c), G = G32(c), B = B32(c);
 	double fHue;
 
@@ -350,7 +350,7 @@ bool GColour::ToHLS()
 	return true;
 }
 
-void GColour::SetHLS(uint16 h, uint8 l, uint8 s)
+void GColour::SetHLS(uint16 h, uint8_t l, uint8_t s)
 {
 	space = CsHls32;
 	hls.h = h;
@@ -406,7 +406,7 @@ int GColour::GetGray(int BitDepth)
 	return (R + G + B) >> BitDepth;
 }
 
-uint32 GColour::GetNative()
+uint32_t GColour::GetNative()
 {
 	#ifdef WIN32
 	if (space == CsIndex8)
@@ -513,7 +513,7 @@ bool GColour::SetStr(const char *str)
 	else if (!Stricmp(Str.Get(), "hls"))
 	{
 		if (Comp.Length() == 3)
-			SetHLS((uint16) Comp[0].Int(), (uint8) Comp[1].Int(), (uint8) Comp[2].Int());
+			SetHLS((uint16) Comp[0].Int(), (uint8_t) Comp[1].Int(), (uint8_t) Comp[2].Int());
 		else
 			return false;
 	}
@@ -521,7 +521,7 @@ bool GColour::SetStr(const char *str)
 	{
 		if (Comp.Length() == 1)
 		{
-			index = (uint8) Comp[0].Int();
+			index = (uint8_t) Comp[0].Int();
 			space = CsIndex8;
 		}
 		else return false;

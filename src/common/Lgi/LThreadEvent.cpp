@@ -417,7 +417,7 @@ LThreadEvent::WaitStatus LThreadEvent::Wait(int32 Timeout)
 	return WaitError;
 }
 
-uint32 LThreadEvent::GetError()
+uint32_t LThreadEvent::GetError()
 {
 	return LastError;
 }

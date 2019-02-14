@@ -303,7 +303,7 @@ char *InetGetSubField(const char *s, const char *Field)
 				while (*s && (strchr(White, *s) || *s == ';')) s++;
 
 				// Parse field name
-				if (IsAlpha((uint8)*s))
+				if (IsAlpha((uint8_t)*s))
 				{
 					const char *f = s;
 					while (*s && (IsAlpha(*s) || *s == '-')) s++;

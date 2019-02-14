@@ -49,9 +49,9 @@ public:
 	bool SetStr(const char *Name, const char *Value);
 
 	/// Get an int value
-	bool GetInt(const char *Name, uint32 &Value);
+	bool GetInt(const char *Name, uint32_t &Value);
 	/// Set an int value
-	bool SetInt(const char *Name, uint32 Value);
+	bool SetInt(const char *Name, uint32_t Value);
 
 	/// Get a binary value
 	bool GetBinary(char *Name, void *&Ptr, int &Len);

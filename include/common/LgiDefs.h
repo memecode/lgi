@@ -15,6 +15,8 @@
 #define PLATFORM_MINGW
 #endif
 
+#include <stdint.h>
+
 // Unsafe typedefs, for backward compatibility
 typedef		unsigned char				uchar;
 typedef		unsigned short				ushort;
@@ -22,28 +24,6 @@ typedef		unsigned int				uint;
 typedef		unsigned long				ulong;
 
 // Length safe typedesf, use these in new code
-
-#ifndef BEOS
-	/// 8-bit signed int type (size safe, guaranteed to be 8 bits)
-	typedef		signed char				int8;
-	/// 8-bit unsigned int type (size safe, guaranteed to be 8 bits)
-	typedef		unsigned char			uint8;
-#else
-	#include <AppKit.h>
-#endif
-
-/// 16-bit signed int type (size safe, guaranteed to be 16 bits)
-typedef		short						int16;
-/// 16-bit unsigned int type (size safe, guaranteed to be 16 bits)
-typedef		unsigned short				uint16;
-
-#ifndef BEOS
-	/// 32-bit signed int type (size safe, guaranteed to be 32 bits)
-	typedef		int						int32;
-	/// 32-bit unsigned int type (size safe, guaranteed to be 32 bits)
-	typedef		unsigned int			uint32;
-#endif
-
 #ifdef _MSC_VER
 	/// 64-bit signed int type (size safe, guaranteed to be 64 bits)
 	typedef		signed __int64				int64;
@@ -168,12 +148,12 @@ typedef		char						TCHAR;
 /// different types.
 typedef union
 {
-	int8 *s8;
-	uint8 *u8;
-	int16 *s16;
-	uint16 *u16;
-	int32 *s32;
-	uint32 *u32;
+	int8_t *s8;
+	uint8_t *u8;
+	int16_t *s16;
+	uint16_t *u16;
+	int32_t *s32;
+	uint32_t *u32;
 	int64 *s64;
 	uint64 *u64;
 	NativeInt *ni;

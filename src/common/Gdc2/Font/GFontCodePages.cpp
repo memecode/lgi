@@ -19,7 +19,7 @@ MissingMaps[] =
 	{0, 0}
 };
 
-typedef uint32 iso2022jp_block[16];
+typedef uint32_t iso2022jp_block[16];
 iso2022jp_block *iso2022jp_map[128];
 iso2022jp_block iso2022jp_blocks[] =
 {
@@ -199,7 +199,7 @@ Utf8Error:
 	LgiTrace("%s:%i - Invalid utf, len=%i, bytes=", _FL, len);
 	for (int i=0; len < 0 ? s[i] : i<MIN(6, len); i++)
 	{
-		LgiTrace("%02.2x,", (uint8)s[i]);
+		LgiTrace("%02.2x,", (uint8_t)s[i]);
 	}
 	LgiTrace("\n");
 	return false;
@@ -823,7 +823,7 @@ ssize_t LgiBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void
 						InLen = StringLen((uint16*)In) << 1;
 						break;
 					case CpUtf32:
-						InLen = StringLen((uint32*)In) << 2;
+						InLen = StringLen((uint32_t*)In) << 2;
 						break;
 					default:
 						LgiAssert(0);
@@ -900,7 +900,7 @@ ssize_t LgiBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void
 			else
 			{
 				// Mapped or Utf conversion
-				uint32 Utf32 = 0;
+				uint32_t Utf32 = 0;
 				while (OutLen > 0 && InLen > 0)
 				{
 					char *RewindIn = In8;
@@ -934,12 +934,12 @@ ssize_t LgiBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void
 						}
 						case CpUtf8:
 						{
-							Utf32 = LgiUtf8To32((uint8 *&)In8, InLen);
+							Utf32 = LgiUtf8To32((uint8_t *&)In8, InLen);
 							break;
 						}
 						case CpUtf16:
 						{
-							Utf32 = LgiUtf16To32((const uint16 *&)In8, InLen);
+							Utf32 = LgiUtf16To32((const uint16_t *&)In8, InLen);
 
 							if (Utf32 == 0xfeff || Utf32 == 0xfffe)
 								continue;
@@ -947,7 +947,7 @@ ssize_t LgiBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void
 						}
 						case CpUtf32:
 						{
-							Utf32 = *((uint32*&)In8)++;
+							Utf32 = *((uint32_t*&)In8)++;
 							InLen -= 4;
 							break;
 						}
@@ -1005,7 +1005,7 @@ ssize_t LgiBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void
 						case CpUtf8:
 						{
 							// uchar *PrevOut8 = Out8;
-							if (!LgiUtf32To8(Utf32, (uint8*&) Out8, OutLen))
+							if (!LgiUtf32To8(Utf32, (uint8_t*&) Out8, OutLen))
 							{
 								// Not enough buffer to encode the character
 								In8 = RewindIn;
@@ -1016,12 +1016,12 @@ ssize_t LgiBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void
 						}
 						case CpUtf16:
 						{
-							LgiUtf32To16(Utf32, (uint16*&)Out8, OutLen);
+							LgiUtf32To16(Utf32, (uint16_t*&)Out8, OutLen);
 							break;
 						}
 						case CpUtf32:
 						{
-							*((uint32*&)Out8)++ = Utf32;
+							*((uint32_t*&)Out8)++ = Utf32;
 							OutLen -= 4;
 							break;
 						}
@@ -1089,7 +1089,7 @@ void *LgiNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 				InLen = StringLen((uint16*)In) << 1;
 				break;
 			case CpUtf32:
-				InLen = StringLen((uint32*)In) << 2;
+				InLen = StringLen((uint32_t*)In) << 2;
 				break;
 			default:
 				LgiAssert(0);
@@ -1125,7 +1125,7 @@ void *LgiNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 		}
 		else if (InInfo->Type == CpUtf32)
 		{
-			return DupeString((uint32*)In, InLen/sizeof(uint32));
+			return DupeString((uint32_t*)In, InLen/sizeof(uint32_t));
 		}
 		else
 		{
@@ -1216,7 +1216,7 @@ int LgiCharLen(const void *Str, const char *Cp, int Bytes)
 				}
 				case CpUtf32:
 				{
-					return StringLen((uint32*)Str);
+					return StringLen((uint32_t*)Str);
 				}
 			}
 		}

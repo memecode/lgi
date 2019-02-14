@@ -281,7 +281,7 @@ class GCompiledCode
 	GVariables Globals;
 	
 	/// The byte code of all the instructions
-	GArray<uint8> ByteCode;
+	GArray<uint8_t> ByteCode;
 	
 	/// All the methods defined in the byte code and their arguments.
 	GArray< GAutoRefPtr<GFunctionInfo> > Methods;

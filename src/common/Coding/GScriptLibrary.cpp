@@ -286,8 +286,8 @@ bool SystemFunctions::Sprintf(LScriptArguments &Args)
 						double Dbl;
 						struct
 						{
-							uint32 High;
-							uint32 Low;
+							uint32_t High;
+							uint32_t Low;
 						};
 					} Tmp;
 					Tmp.Dbl = Args[i++]->CastDouble();
@@ -626,7 +626,7 @@ bool SystemFunctions::New(LScriptArguments &Args)
 				{
 					Ret->Type = GV_CUSTOM;
 					Ret->Value.Custom.Dom = t;
-					Ret->Value.Custom.Data = new uint8[t->Sizeof() * ArrayLength];
+					Ret->Value.Custom.Data = new uint8_t[t->Sizeof() * ArrayLength];
 				}
 			}
 		}
@@ -835,7 +835,7 @@ bool SystemFunctions::MessageDlg(LScriptArguments &Args)
 	GViewI *Parent = CastGView(*Args[0]);
 	char *Msg = Args[1]->Str();
 	char *Title = Args[2]->Str();
-	uint32 Btns = Args[3]->CastInt32();
+	uint32_t Btns = Args[3]->CastInt32();
 
 	int Btn = LgiMsg(Parent, Msg, Title, Btns);
 	*Args.GetReturn() = Btn;
@@ -899,7 +899,7 @@ bool SystemFunctions::Execute(LScriptArguments &Args)
 	}
 	else if (Log)
 	{
-		uint32 ErrCode = e.GetErrorCode();
+		uint32_t ErrCode = e.GetErrorCode();
 		GAutoString ErrMsg = LgiErrorCodeToString(ErrCode);
 		if (ErrMsg)
 			Log->Print("Error: Execute(\"%s\",\"%s\") failed with '%s'\n", Exe, Arguments, ErrMsg.Get());

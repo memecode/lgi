@@ -251,7 +251,7 @@ public:
 	}
 
 	template<typename T>
-	void SolidRop16(T *d, int Len, uint8 *Alpha, COLOUR c32)
+	void SolidRop16(T *d, int Len, uint8_t *Alpha, COLOUR c32)
 	{
 		uchar *DivLut = Div255Lut;
 		T *end = d + Len;
@@ -283,7 +283,7 @@ public:
 	}
 	
 	template<typename T>
-	void SolidRop24(T *d, int Len, uint8 *Alpha, COLOUR c32)
+	void SolidRop24(T *d, int Len, uint8_t *Alpha, COLOUR c32)
 	{
 		uchar *DivLut = Div255Lut;
 		T *end = d + Len;
@@ -313,7 +313,7 @@ public:
 	}
 
 	template<typename T>
-	void SolidRop32(T *d, int Len, uint8 *Alpha, COLOUR c32)
+	void SolidRop32(T *d, int Len, uint8_t *Alpha, COLOUR c32)
 	{
 		uchar *DivLut = Div255Lut;
 		T *end = d + Len;

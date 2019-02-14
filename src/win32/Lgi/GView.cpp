@@ -541,32 +541,32 @@ void GView::Quit(bool DontDelete)
 	}
 }
 
-uint32 GView::GetDlgCode()
+uint32_t GView::GetDlgCode()
 {
 	return d->WndDlgCode;
 }
 
-void GView::SetDlgCode(uint32 i)
+void GView::SetDlgCode(uint32_t i)
 {
 	d->WndDlgCode = i;
 }
 
-uint32 GView::GetStyle()
+uint32_t GView::GetStyle()
 {
 	return d->WndStyle;
 }
 
-void GView::SetStyle(uint32 i)
+void GView::SetStyle(uint32_t i)
 {
 	d->WndStyle = i;
 }
 
-uint32 GView::GetExStyle()
+uint32_t GView::GetExStyle()
 {
 	return d->WndExStyle;
 }
 
-void GView::SetExStyle(uint32 i)
+void GView::SetExStyle(uint32_t i)
 {
 	d->WndExStyle = i;
 }
@@ -1046,7 +1046,7 @@ bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
 
 void
 CALLBACK
-GView::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, uint32 dwTime)
+GView::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, uint32_t dwTime)
 {
 	GView *View = (GView*) idEvent;
 	if (View)
@@ -1880,7 +1880,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 					GKey Key((int)Msg->a, (int)Msg->b);
 
 					Key.Flags = KeyFlags;
-					Key.Data = (uint32)Msg->b;
+					Key.Data = (uint32_t)Msg->b;
 					Key.Down(IsDown);
 					Key.IsChar = false;
 
@@ -1938,7 +1938,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			{
 				GKey Key((int)Msg->a, (int)Msg->b);
 				Key.Flags = _lgi_get_key_flags();
-				Key.Data = (uint32)Msg->b;
+				Key.Data = (uint32_t)Msg->b;
 				Key.Down(true);
 				Key.IsChar = true;
 

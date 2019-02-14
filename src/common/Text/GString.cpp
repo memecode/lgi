@@ -949,7 +949,7 @@ GString LUrlEncode(const char *s, const char *delim)
 	while (*s)
 	{
 		if (*s == '%' || strchr(delim, *s))
-			ch += sprintf_s(buf+ch, sizeof(buf)-ch, "%%%02.2x", (uint8)*s);
+			ch += sprintf_s(buf+ch, sizeof(buf)-ch, "%%%02.2x", (uint8_t)*s);
 		else
 			buf[ch++] = *s;
 		s++;

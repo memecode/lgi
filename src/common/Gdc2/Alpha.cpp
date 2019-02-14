@@ -167,13 +167,13 @@ public:
 		switch (Bytes)
 		{
 			case 1:
-				return *((uint8*)Ptr);
+				return *((uint8_t*)Ptr);
 			case 2:
 				return *((uint16*)Ptr);
 			case 3:
 				return Rgb24(Ptr[2], Ptr[1], Ptr[0]);
 			case 4:
-				return *((uint32*)Ptr);
+				return *((uint32_t*)Ptr);
 		}
 		return 0;
 	}
@@ -319,9 +319,9 @@ public:
 			{
 				System24BitPixel dst = dc[*d];
 				GRgba32 src = {
-					(uint8)(s->r >> 8),
-					(uint8)(s->g >> 8),
-					(uint8)(s->b >> 8),
+					(uint8_t)(s->r >> 8),
+					(uint8_t)(s->g >> 8),
+					(uint8_t)(s->b >> 8),
 					alpha };
 				OverNpm32toNpm24(&src, &dst);
 				*d++ = Lut[Rgb15(dst.r, dst.g, dst.b)];
@@ -364,13 +364,13 @@ class GdcAlpha : public GApplicator
 {
 protected:
 	union {
-		uint8 *u8;
+		uint8_t *u8;
 		uint16 *u16;
-		uint32 *u32;
+		uint32_t *u32;
 		Pixel *p;
 	};
 	
-	uint8 alpha, one_minus_alpha;
+	uint8_t alpha, one_minus_alpha;
 	
 public:
 	GdcAlpha()
@@ -459,11 +459,11 @@ public:
 	#define Div2040(c) ((c) / 2040)
 
 	#define Setup15() \
-		REG uint8 r = Rc15(this->c); \
-		REG uint8 g = Gc15(this->c); \
-		REG uint8 b = Bc15(this->c); \
-		REG uint8 a = this->alpha; \
-		REG uint8 oma = 255 - a; \
+		REG uint8_t r = Rc15(this->c); \
+		REG uint8_t g = Gc15(this->c); \
+		REG uint8_t b = Bc15(this->c); \
+		REG uint8_t a = this->alpha; \
+		REG uint8_t oma = 255 - a; \
 		REG Pixel *d = this->p
 
 	#define Comp15() \
@@ -485,7 +485,7 @@ public:
 		while (height--)
 		{
 			Comp15();
-			d = (Pixel*)(((uint8*)d) + line);
+			d = (Pixel*)(((uint8_t*)d) + line);
 		}
 		this->p = d;
 	}
@@ -575,11 +575,11 @@ public:
 	#define Div1020(c) ((c) / 1020)
 
 	#define Setup16() \
-		REG uint8 r = Rc16(this->c); \
-		REG uint8 g = Gc16(this->c); \
-		REG uint8 b = Bc16(this->c); \
-		REG uint8 a = this->alpha; \
-		REG uint8 oma = 255 - a; \
+		REG uint8_t r = Rc16(this->c); \
+		REG uint8_t g = Gc16(this->c); \
+		REG uint8_t b = Bc16(this->c); \
+		REG uint8_t a = this->alpha; \
+		REG uint8_t oma = 255 - a; \
 		REG Pixel *d = this->p
 
 	#define Comp16() \
@@ -601,7 +601,7 @@ public:
 		while (height--)
 		{
 			Comp16();
-			d = (Pixel*)(((uint8*)d) + line);
+			d = (Pixel*)(((uint8_t*)d) + line);
 		}
 		this->p = d;
 	}
@@ -688,8 +688,8 @@ public:
 
 	#define InitComposite24() \
 		uchar *DivLut = Div255Lut; \
-		REG uint8 a = this->alpha; \
-		REG uint8 oma = this->one_minus_alpha; \
+		REG uint8_t a = this->alpha; \
+		REG uint8_t oma = this->one_minus_alpha; \
 		REG int r = this->p24.r * a; \
 		REG int g = this->p24.g * a; \
 		REG int b = this->p24.b * a
@@ -770,8 +770,8 @@ public:
 	void CompositeBlt24(GBmpMem *Src)
 	{
 		uchar *Lut = Div255Lut;
-		REG uint8 a = this->alpha;
-		REG uint8 oma = this->one_minus_alpha;
+		REG uint8_t a = this->alpha;
+		REG uint8_t oma = this->one_minus_alpha;
 		
 		for (int y=0; y<Src->y; y++)
 		{
@@ -811,7 +811,7 @@ public:
 	void CompositeBlt32(GBmpMem *Src)
 	{
 		uchar *Lut = Div255Lut;
-		REG uint8 a = this->alpha;
+		REG uint8_t a = this->alpha;
 		
 		if (a == 0xff)
 		{
@@ -823,8 +823,8 @@ public:
 				SrcPx *src = (SrcPx*)(Src->Base + (y * Src->Line));
 				while (dst < dst_end)
 				{
-					REG uint8 sa = src->a;
-					REG uint8 soma = 0xff - sa;
+					REG uint8_t sa = src->a;
+					REG uint8_t soma = 0xff - sa;
 					dst->r = Lut[(dst->r * soma) + (src->r * sa)];
 					dst->g = Lut[(dst->g * soma) + (src->g * sa)];
 					dst->b = Lut[(dst->b * soma) + (src->b * sa)];
@@ -845,8 +845,8 @@ public:
 				SrcPx *src = (SrcPx*)(Src->Base + (y * Src->Line));
 				while (dst < dst_end)
 				{
-					REG uint8 sa = Lut[a * src->a];
-					REG uint8 soma = 0xff - sa;
+					REG uint8_t sa = Lut[a * src->a];
+					REG uint8_t soma = 0xff - sa;
 					dst->r = Lut[(dst->r * soma) + (src->r * sa)];
 					dst->g = Lut[(dst->g * soma) + (src->g * sa)];
 					dst->b = Lut[(dst->b * soma) + (src->b * sa)];
@@ -952,7 +952,7 @@ public:
 		REG int r = this->p32.r * a; \
 		REG int g = this->p32.g * a; \
 		REG int b = this->p32.b * a; \
-		REG uint8 oma = 0xff - a
+		REG uint8_t oma = 0xff - a
 	#define InitFlat32() \
 		Pixel px; \
 		px.r = this->p32.r; \
@@ -1059,8 +1059,8 @@ public:
 		if (!Src) return 0;
 		REG uchar *DivLut = Div255Lut;
 		uchar lookup[256];
-		REG uint8 a = this->alpha;
-		REG uint8 oma = this->one_minus_alpha;
+		REG uint8_t a = this->alpha;
+		REG uint8_t oma = this->one_minus_alpha;
 		for (int i=0; i<256; i++)
 		{
 			lookup[i] = DivLut[i * this->alpha];

@@ -185,9 +185,9 @@ struct GVarRef
 
 union GPtr
 {
-	uint8 *u8;
+	uint8_t *u8;
 	uint16 *u16;
-	uint32 *u32;
+	uint32_t *u32;
 	int8 *i8;
 	int16 *i16;
 	int32 *i32;
@@ -399,7 +399,7 @@ public:
 		/// [In] The code to execute
 		GCompiledCode *Code,
 		/// [In] The instruction to start at... [defaults to the start of script)
-		uint32 StartOffset = 0,
+		uint32_t StartOffset = 0,
 		/// [Optional] Log file for execution
 		GStream *Log = NULL,
 		/// Start the script execution straight away?

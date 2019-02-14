@@ -56,7 +56,7 @@ public:
 			NonMatch->Empty();
 
 			GUtf8Str Utf(ch);
-			uint32 c = Utf;
+			uint32_t c = Utf;
 
 			char msg[256];
 			sprintf(msg, "%i 0x%x", c, c);

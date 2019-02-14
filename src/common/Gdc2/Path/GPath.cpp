@@ -968,7 +968,7 @@ bool GPath::Text(	GFont *Font,
 										#endif
 
 										TTPOLYCURVE *c = (TTPOLYCURVE*) (tt + 1);
-										while ((uint8*)c < ((uint8*)tt) + tt->cb)
+										while ((uint8_t*)c < ((uint8_t*)tt) + tt->cb)
 										{
 											switch (c->wType)
 											{

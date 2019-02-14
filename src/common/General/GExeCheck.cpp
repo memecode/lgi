@@ -18,19 +18,19 @@ typedef uint32 Elf32_Word;
 struct ElfProgramHeader
 {
 	uchar		Magic[4];	// == { 0x7f, 'E', 'L', 'F' }
-	uint8		Class;		// 1 == 32bit, 2 == 64bit
-	uint8		DataEnc;	// 1 == LSB, 2 == MSB
-	uint8		FileVer;	// 1 == current
+	uint8_t		Class;		// 1 == 32bit, 2 == 64bit
+	uint8_t		DataEnc;	// 1 == LSB, 2 == MSB
+	uint8_t		FileVer;	// 1 == current
 	char		Pad[8];
-	uint8		IdentLen;	// size of struct
+	uint8_t		IdentLen;	// size of struct
 	
 	uint16		Type;
 	uint16		Machine;	// > 0 AND <= 8
-	uint32		Version;	// == 1
-	uint32		Entry;		// Entry point or 0 if none
-	uint32		PhOff;
-	uint32		ShOff;
-	uint32		Flags;
+	uint32_t		Version;	// == 1
+	uint32_t		Entry;		// Entry point or 0 if none
+	uint32_t		PhOff;
+	uint32_t		ShOff;
+	uint32_t		Flags;
 	uint16		EhSize;
 	uint16		PhEntSize;
 	uint16		PhNum;

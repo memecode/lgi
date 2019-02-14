@@ -307,7 +307,7 @@ char *ReadStr(GFile &f DeclDebugArgs)
 	char *s = 0;
 
 	// read the strings length...
-	uint32 Len;
+	uint32_t Len;
 	f >> Len;
 
 	if (Len > 0)
@@ -348,7 +348,7 @@ char *ReadStr(GFile &f DeclDebugArgs)
 
 ssize_t SizeofStr(const char *s)
 {
-	return sizeof(uint32) + ((s) ? strlen(s) : 0);
+	return sizeof(uint32_t) + ((s) ? strlen(s) : 0);
 }
 
 bool LgiGetDriveInfo
@@ -1121,7 +1121,7 @@ bool GDirectory::Path(char *s, int BufLen) const
 }
 
 
-size_t Utf8To16Cpy(uint16 *out, ssize_t outChar, uint8 *in, ssize_t inChar = -1)
+size_t Utf8To16Cpy(uint16_t *out, ssize_t outChar, uint8_t *in, ssize_t inChar = -1)
 {
 	auto start = out;
 	int32 u32;
@@ -1149,7 +1149,7 @@ size_t Utf8To16Cpy(uint16 *out, ssize_t outChar, uint8 *in, ssize_t inChar = -1)
 	return out - start;
 }
 
-size_t Utf16To8Cpy(uint8 *out, ssize_t outChar, const uint16 *in, ssize_t inChar = -1)
+size_t Utf16To8Cpy(uint8_t *out, ssize_t outChar, const uint16_t *in, ssize_t inChar = -1)
 {
 	auto start = out;
 	int32 u32;
@@ -1183,9 +1183,9 @@ size_t UnicodeCpy(O *out, ssize_t outChar, I *in, ssize_t inChar = -1)
 	if (out == NULL || in == NULL)
 		return 0;
 	if (sizeof(O) == 2 && sizeof(I) == 1)
-		return Utf8To16Cpy((uint16*)out, outChar, (uint8*)in, inChar);
+		return Utf8To16Cpy((uint16_t*)out, outChar, (uint8_t*)in, inChar);
 	else if (sizeof(O) == 1 && sizeof(I) == 2)
-		return Utf16To8Cpy((uint8*)out, outChar, (uint16*)in, inChar);
+		return Utf16To8Cpy((uint8_t*)out, outChar, (uint16_t*)in, inChar);
 	else
 		LgiAssert(0);
 	return 0;

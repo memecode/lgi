@@ -24,7 +24,7 @@ class App32Base : public GApplicator
 protected:
 	union
 	{
-		uint8 *u8;
+		uint8_t *u8;
 		Pixel *p;
 	};
 	
@@ -137,11 +137,11 @@ public:
 			REG Pixel *d = this->p;
 			REG T *s = (T*) (Src->Base + (y * Src->Line));
 			REG T *e = s + Src->x;
-			REG uint8 *a = Src->Base + (y * SrcAlpha->Line);
+			REG uint8_t *a = Src->Base + (y * SrcAlpha->Line);
 
 			while (s < e)
 			{
-				uint8 sa = *a++;
+				uint8_t sa = *a++;
 				if (sa == 255)
 				{
 					d->r = s->r;
@@ -150,7 +150,7 @@ public:
 				}
 				else if (sa > 0)
 				{
-					uint8 o = 255 - sa;
+					uint8_t o = 255 - sa;
 
 					// NonPreMulAlpha;
 					#define NonPreMulOver32NoAlpha(c)		d->c = ((s->c * sa) + (DivLut[d->c * 255] * o)) / 255
@@ -208,7 +208,7 @@ public:
 				}
 				for (int y=0; y<Src->y; y++)
 				{
-					REG uint8 *s = Src->Base + (y * Src->Line);
+					REG uint8_t *s = Src->Base + (y * Src->Line);
 					REG Pixel *d = this->p, *e = d + Src->x;
 					while (d < e)
 					{
@@ -383,11 +383,11 @@ public:
 			REG Pixel *d = this->p;
 			REG T *s = (T*) (Src->Base + (y * Src->Line));
 			REG T *e = s + Src->x;
-			REG uint8 *a = Src->Base + (y * SrcAlpha->Line);
+			REG uint8_t *a = Src->Base + (y * SrcAlpha->Line);
 
 			while (s < e)
 			{
-				uint8 sa = *a++;
+				uint8_t sa = *a++;
 				if (sa == 255)
 				{
 					d->r = s->r;
@@ -420,11 +420,11 @@ public:
 			REG Pixel *d = this->p;
 			REG T *s = (T*) (Src->Base + (y * Src->Line));
 			REG T *e = s + Src->x;
-			REG uint8 *a = Src->Base + (y * SrcAlpha->Line);
+			REG uint8_t *a = Src->Base + (y * SrcAlpha->Line);
 
 			while (s < e)
 			{
-				uint8 sa = *a++;
+				uint8_t sa = *a++;
 				if (sa == 255)
 				{
 					d->r = s->r;
@@ -488,16 +488,16 @@ public:
 				map[i].a = 255;
 			}
 			
-			uint8 *in = Src->Base;
+			uint8_t *in = Src->Base;
 			REG uchar *DivLut = Div255Lut;
 			for (int y=0; y<Src->y; y++)
 			{
-				REG uint8 *i = in;
+				REG uint8_t *i = in;
 				REG Pixel *o = this->p, *e = this->p + Src->x;
 				
 				if (SrcAlpha)
 				{
-					REG uint8 *alpha = SrcAlpha->Base + (y * SrcAlpha->Line);
+					REG uint8_t *alpha = SrcAlpha->Base + (y * SrcAlpha->Line);
 					while (o < e)
 					{
 						REG Pixel *src = map + *i++;
@@ -614,7 +614,7 @@ public:
 		COLOUR Get() { return Rgb32(this->p->r, this->p->g, this->p->b); }						\
 		void VLine(int height)																	\
 		{																						\
-			REG uint8 r = this->p32.r, g = this->p32.g, b = this->p32.b;	\
+			REG uint8_t r = this->p32.r, g = this->p32.g, b = this->p32.b;	\
 			while (height-- > 0)																\
 			{																					\
 				this->p->r opcode r; this->p->g opcode g; this->p->b opcode b;					\
@@ -623,7 +623,7 @@ public:
 		}																						\
 		void Rectangle(int x, int y)															\
 		{																						\
-			REG uint8 r = this->p32.r, g = this->p32.g, b = this->p32.b;						\
+			REG uint8_t r = this->p32.r, g = this->p32.g, b = this->p32.b;						\
 			REG int lines = y;																	\
 			REG ssize_t ystep = this->Dest->Line;													\
 			while (lines-- > 0)																	\
@@ -650,7 +650,7 @@ public:
 		COLOUR Get() { return Rgba32(this->p->r, this->p->g, this->p->b, this->p->a); }			\
 		void VLine(int height)																	\
 		{																						\
-			REG uint8 r = this->p32.r, g = this->p32.g, b = this->p32.b, a = this->p32.a;	\
+			REG uint8_t r = this->p32.r, g = this->p32.g, b = this->p32.b, a = this->p32.a;	\
 			while (height-- > 0)																\
 			{																					\
 				this->p->r opcode r; this->p->g opcode g; this->p->b opcode b;					\
@@ -660,7 +660,7 @@ public:
 		}																						\
 		void Rectangle(int x, int y)															\
 		{																						\
-			REG uint8 r = this->p32.r, g = this->p32.g, b = this->p32.b, a = this->p32.a;	\
+			REG uint8_t r = this->p32.r, g = this->p32.g, b = this->p32.b, a = this->p32.a;	\
 			REG int lines = y;																\
 			REG ssize_t ystep = this->Dest->Line;												\
 			while (lines-- > 0)																	\

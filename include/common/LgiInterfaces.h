@@ -183,9 +183,9 @@ public:
 	/// Set UPD mode
 	virtual void SetUdp(bool b) {}
 	/// Read UPD packet
-	virtual int ReadUdp(void *Buffer, int Size, int Flags, uint32 *Ip = 0, uint16 *Port = 0) { return 0; }
+	virtual int ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip = 0, uint16_t *Port = 0) { return 0; }
 	/// Write UPD packet
-	virtual int WriteUdp(void *Buffer, int Size, int Flags, uint32 Ip, uint16 Port) { return 0; }
+	virtual int WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port) { return 0; }
 
 // Server
 

@@ -21,7 +21,7 @@ void GWindow::BuildShortcuts(ShortcutMap &Map, GViewI *v)
 			amp++;
 			if (*amp && *amp != '&')
 			{
-				uint8 *i = (uint8*)amp;
+				uint8_t *i = (uint8_t*)amp;
 				ssize_t sz = Strlen(amp);
 				int32 ch = LgiUtf8To32(i, sz);
 				if (ch)

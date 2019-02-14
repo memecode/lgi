@@ -151,7 +151,7 @@ public:
 
 	#if defined(_WIN32) || defined(MAC)
 	/// const uint32* constructor
-	GString(const uint32 *str, ptrdiff_t chars = -1)
+	GString(const uint32_t *str, ptrdiff_t chars = -1)
 	{
 		Str = NULL;
 
@@ -159,21 +159,21 @@ public:
 			chars = Strlen(str);
 		
 		ptrdiff_t utf_len = 0;
-		const uint32 *end = str + chars;
-		const uint32 *c = str;
+		const uint32_t *end = str + chars;
+		const uint32_t *c = str;
 		while (c < end)
 		{
-			uint8 utf[6], *u = utf;
+			uint8_t utf[6], *u = utf;
 			ssize_t len = sizeof(utf);
 			if (!LgiUtf32To8(*c++, u, len))
 				break;
 			utf_len += u - utf;
 		}
 
-		if (Length((uint32)utf_len))
+		if (Length((uint32_t)utf_len))
 		{
 			c = str;
-			uint8 *u = (uint8*)Str->Str;
+			uint8_t *u = (uint8_t*)Str->Str;
 			ssize_t len = Str->Len;
 			while (c < end)
 			{
@@ -244,7 +244,7 @@ public:
 			return false;
 		
 		Str->Refs = 1;
-		Str->Len = (uint32)bytes;
+		Str->Len = (uint32_t)bytes;
 		#ifdef LGI_UNIT_TESTS
 		RefStrCount++;
 		#endif
@@ -275,10 +275,10 @@ public:
 
 			assert(sizeof(*i) == sizeof(*str));
 
-			uint8 *o = (uint8*)Str->Str;
+			uint8_t *o = (uint8_t*)Str->Str;
 			ssize_t OutLen = Str->Len;
 
-			for (uint32 ch; ch = LgiUtf16To32(i, InLen); )
+			for (uint32_t ch; ch = LgiUtf16To32(i, InLen); )
 			{
 				if (!LgiUtf32To8(ch, o, OutLen))
 				{
@@ -408,7 +408,7 @@ public:
 			// If you try and set a string to the start, it's a NOP
 			ptrdiff_t Off = s - Str->Str;
 			memmove(Str->Str, s, Str->Len - Off + 1);
-			Str->Len -= (uint32)Off;
+			Str->Len -= (uint32_t)Off;
 		}
 		
 		return *this;
@@ -575,7 +575,7 @@ public:
 						a.New().Set(Prev, s - Prev);
 					s += SepLen;
 					Prev = s;
-					if (Count > 0 && a.Length() >= (uint32)Count)
+					if (Count > 0 && a.Length() >= (uint32_t)Count)
 						break;
 				}
 			
@@ -620,7 +620,7 @@ public:
 					p.Set(part, seps[i+1]-part);
 				a.AddAt(0, p);
 				
-				if (Count > 0 && a.Length() >= (uint32)Count)
+				if (Count > 0 && a.Length() >= (uint32_t)Count)
 					break;
 			}
 			
@@ -662,7 +662,7 @@ public:
 				}
 
 				// Create the string			
-				if (Count > 0 && a.Length() >= (uint32)Count)
+				if (Count > 0 && a.Length() >= (uint32_t)Count)
 					break;
 			}
 			
@@ -742,7 +742,7 @@ public:
 			}
 
 			size_t NewSize = Str->Len + (Matches.Length() * (NewLen - OldLen));
-			s.Length((uint32)NewSize);
+			s.Length((uint32_t)NewSize);
 			char *Out = s.Get();
 			char *In = Str->Str;
 
@@ -949,10 +949,10 @@ public:
 		if (Str)
 		{
 			ptrdiff_t start_idx = start < 0 ? Str->Len + start + 1 : start;
-			if (start_idx >= 0 && (uint32)start_idx < Str->Len)
+			if (start_idx >= 0 && (uint32_t)start_idx < Str->Len)
 			{
 				ptrdiff_t end_idx = end < 0 ? Str->Len + end + 1 : end;
-				if (end_idx >= start_idx && (uint32)end_idx <= Str->Len)
+				if (end_idx >= start_idx && (uint32_t)end_idx <= Str->Len)
 					s.Set(Str->Str + start_idx, end_idx - start_idx);
 			}
 		}

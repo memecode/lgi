@@ -124,7 +124,7 @@ public:
 	#if defined COCOA
 	void SetModifer(uint32 modifierKeys);
 	#else
-	void SetModifer(uint32 modifierKeys)
+	void SetModifer(uint32_t modifierKeys)
 	{
 		#if defined(MAC)
 
@@ -156,7 +156,7 @@ public:
 	/// The unicode character for the key
 	char16 c16;
 	/// OS Specific
-	uint32 Data;
+	uint32_t Data;
 	/// True if this is a standard character (ie not a control key)
 	bool IsChar;
 
@@ -264,7 +264,7 @@ public:
 	#if defined __OBJC__
 	void SetFromEvent(NSEvent *ev, NSView *view);
 	#else
-	void SetButton(uint32 Btn)
+	void SetButton(uint32_t Btn)
 	{
 		#if defined(MAC) && defined(__CARBONEVENTS__)
 		Left(Btn == kEventMouseButtonPrimary);

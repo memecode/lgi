@@ -412,9 +412,9 @@ protected:
 
 	// Protected functions
 	GApplicator		*CreateApplicator(int Op, GColourSpace Cs = CsNone);
-	uint32			LineBits;
-	uint32			LineMask;
-	uint32			LineReset;
+	uint32_t			LineBits;
+	uint32_t			LineMask;
+	uint32_t			LineReset;
 
 	#if WINNATIVE
 	OsPainter	hDC;
@@ -478,7 +478,7 @@ public:
 
 	/// Lowers the alpha of the whole image to Alpha/255.0.
 	/// Only works on bitmaps with an alpha channel (i.e. CsRgba32 or it's variants)
-	bool SetConstantAlpha(uint8 Alpha);
+	bool SetConstantAlpha(uint8_t Alpha);
 
 	// Create sub-images (that reference the memory of this object)
 	GSurface *SubImage(GRect r);
@@ -586,9 +586,9 @@ public:
 		LineDashDotDot = 0xf0ccf0cc,
 	};
 	
-	virtual uint LineStyle(uint32 Bits, uint32 Reset = 0x80000000)
+	virtual uint LineStyle(uint32_t Bits, uint32_t Reset = 0x80000000)
 	{
-		uint32 B = LineBits;
+		uint32_t B = LineBits;
 		LineBits = Bits;
 		LineMask = LineReset = Reset;
 		return B;
@@ -758,7 +758,7 @@ public:
 	void Palette(GPalette *pPal, bool bOwnIt = true);
 
 	uint LineStyle();
-	uint LineStyle(uint Bits, uint32 Reset = 0x80000000);
+	uint LineStyle(uint Bits, uint32_t Reset = 0x80000000);
 
 	int GetBits();
 	GScreenDC *IsScreen() { return this; }
@@ -1253,10 +1253,10 @@ public:
 	/// The bitdepth of the image (8, 15, 16, 24, 32).
 	int Bits;
 	/// Pointer to the raw data.
-	uint32 *Data;
+	uint32_t *Data;
 
 	/// Creates a memory DC of the image.
-	GSurface *Create(uint32 TransparentPx = 0xffffffff);
+	GSurface *Create(uint32_t TransparentPx = 0xffffffff);
 };
 
 // file filter support
@@ -1360,11 +1360,11 @@ LgiFunc void LgiDrawIcon(GSurface *pDC, int Dx, int Dy, HICON ico);
 LgiFunc bool LgiRopRgb
 (
 	// Pointer to destination pixel buffer
-	uint8 *Dst,
+	uint8_t *Dst,
 	// Destination colour space (must be 8bit components)
 	GColourSpace DstCs,
 	// Pointer to source pixel buffer (if this overlaps 'Dst', set 'Overlap' to true)
-	uint8 *Src,
+	uint8_t *Src,
 	// Source colour space (must be 8bit components)
 	GColourSpace SrcCs,
 	// Number of pixels to convert

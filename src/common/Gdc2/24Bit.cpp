@@ -13,7 +13,7 @@
 #include "Gdc2.h"
 #include "GPalette.h"
 
-#define BytePtr	((uint8*&)Ptr)
+#define BytePtr	((uint8_t*&)Ptr)
 #undef NonPreMulOver24
 #define NonPreMulOver24(c)	d->c = ((s->c * sa) + (DivLut[d->c * 255] * o)) / 255
 
@@ -23,7 +23,7 @@ class LgiClass GdcApp24 : public GApplicator
 protected:
 	union
 	{
-		uint8 *u8;
+		uint8_t *u8;
 		System24BitPixel *Ptr;
 	};
 
@@ -83,7 +83,7 @@ class App24 : public GApplicator
 {
 	union
 	{
-		uint8 *u8;
+		uint8_t *u8;
 		Pixel *p;
 	};
 	
@@ -234,11 +234,11 @@ public:
 			Pixel *d = p;
 			T *s = (T*) (Src->Base + (y * Src->Line));
 			T *e = s + Src->x;
-			uint8 *a = Src->Base + (y * SrcAlpha->Line);
+			uint8_t *a = Src->Base + (y * SrcAlpha->Line);
 
 			while (s < e)
 			{
-				uint8 sa = *a++;
+				uint8_t sa = *a++;
 				if (sa == 255)
 				{
 					d->r = s->r;
@@ -247,7 +247,7 @@ public:
 				}
 				else if (sa > 0)
 				{
-					uint8 o = 255 - sa;
+					uint8_t o = 255 - sa;
 					NonPreMulOver24(r);
 					NonPreMulOver24(g);
 					NonPreMulOver24(b);
@@ -291,7 +291,7 @@ public:
 				}
 				for (int y=0; y<Src->y; y++)
 				{
-					REG uint8 *s = Src->Base + (y * Src->Line);
+					REG uint8_t *s = Src->Base + (y * Src->Line);
 					REG Pixel *d = p, *e = d + Src->x;
 					while (d < e)
 					{
@@ -380,9 +380,9 @@ GApplicator *GApp24::Create(GColourSpace Cs, int Op)
 
 //////////////////////////////////////////////////////////////////////////////////////
 #define GetRGB(c) \
-	REG uint8 R = p24.r; \
-	REG uint8 G = p24.g; \
-	REG uint8 B = p24.b
+	REG uint8_t R = p24.r; \
+	REG uint8_t G = p24.g; \
+	REG uint8_t B = p24.b
 
 bool GdcApp24::SetSurface(GBmpMem *d, GPalette *p, GBmpMem *a)
 {
@@ -400,7 +400,7 @@ bool GdcApp24::SetSurface(GBmpMem *d, GPalette *p, GBmpMem *a)
 void GdcApp24::SetPtr(int x, int y)
 {
 	LgiAssert(Dest && Dest->Base);
-	Ptr = (System24BitPixel*) ((uint8*)Dest->Base + (y * Dest->Line) + (x * 3));
+	Ptr = (System24BitPixel*) ((uint8_t*)Dest->Base + (y * Dest->Line) + (x * 3));
 }
 
 void GdcApp24::IncX()
@@ -506,7 +506,7 @@ bool GdcApp24Set::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 							d++;
 						}
 
-						((uint8*&)Ptr) += Dest->Line;
+						((uint8_t*&)Ptr) += Dest->Line;
 					}
 				}
 				else
@@ -525,7 +525,7 @@ bool GdcApp24Set::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 							d++;
 						}
 
-						((uint8*&)Ptr) += Dest->Line;
+						((uint8_t*&)Ptr) += Dest->Line;
 					}
 				}
 				break;

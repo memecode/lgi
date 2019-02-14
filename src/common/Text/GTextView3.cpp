@@ -156,7 +156,7 @@ public:
 		DirtyStart = DirtyLen = 0;
 		UrlColour.Rgb(0, 0, 255);
 		
-		uint32 c24 = 0;
+		uint32_t c24 = 0;
 		if (_lgi_read_colour_config("colour.LC_URL", &c24))
 			UrlColour.c24(c24);
 
@@ -566,7 +566,7 @@ void GTextView3::SetCrLf(bool crlf)
 	CrLf = crlf;
 }
 
-void GTextView3::SetTabSize(uint8 i)
+void GTextView3::SetTabSize(uint8_t i)
 {
 	TabSize = limit(i, 2, 32);
 	OnFontChange();
@@ -1384,7 +1384,7 @@ void GTextView3::PourStyle(size_t Start, ssize_t EditSize)
 		LgiAssert((ssize_t)Start + Length <= Size);		
 		if (LgiDetectLinks(Links, Text + Start, Length))
 		{
-			for (uint32 i=0; i<Links.Length(); i++)
+			for (uint32_t i=0; i<Links.Length(); i++)
 			{
 				GLinkInfo &Inf = Links[i];
                 GAutoPtr<GTextView3::GStyle> Url(new GStyle(STYLE_URL));

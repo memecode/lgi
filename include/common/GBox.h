@@ -16,7 +16,7 @@ public:
 	{
 		GRect Pos; // Position on screen in view coords
 		GColour Colour; // Colour of the spacer
-		uint32 SizePx; // Size in pixels
+		uint32_t SizePx; // Size in pixels
 	};
 
 	GBox(int Id = -1, bool Vertical = false, const char *name = NULL);
@@ -28,7 +28,7 @@ public:
 	void SetVertical(bool v);
 	Spacer *GetSpacer(int i);
 	GViewI *GetViewAt(int i);
-	bool SetViewAt(uint32 i, GViewI *v);
+	bool SetViewAt(uint32_t i, GViewI *v);
 	int64 Value();
 	void Value(int64 i);
 	

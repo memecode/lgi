@@ -82,11 +82,11 @@ bool GMouse::ToView()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-uint32 _LgiColours[LC_MAXIMUM];
+uint32_t _LgiColours[LC_MAXIMUM];
 
 #define ReadColourConfig(def)	_lgi_read_colour_config("Colour."#def, _LgiColours+i++)
 
-bool _lgi_read_colour_config(const char *Tag, uint32 *c)
+bool _lgi_read_colour_config(const char *Tag, uint32_t *c)
 {
 	if (!c || !Tag)
 		return false;
@@ -115,7 +115,7 @@ COLOUR ColTo24(Gtk::GdkColor &c)
 #endif
 
 #if defined(WINDOWS)
-static uint32 ConvertWinColour(uint32 c)
+static uint32_t ConvertWinColour(uint32_t c)
 {
 	return Rgb24(GetRValue(c), GetGValue(c), GetBValue(c));
 }

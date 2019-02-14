@@ -19,7 +19,7 @@ GDocumentEnv::GDocumentEnv(GDocView *v)
 
 GDocumentEnv::~GDocumentEnv()
 {
-	for (uint32 i=0; i<Viewers.Length(); i++)
+	for (uint32_t i=0; i<Viewers.Length(); i++)
 	{
 		Viewers[i]->Environment = 0;
 	}

@@ -34,15 +34,15 @@ protected:
 	GSurface *pDC;
 	OsChar *Str;
 	GFont *Font;
-	uint32 x, y;
+	uint32_t x, y;
 	ssize_t len;
 	int xf, yf;
 	int DrawOffsetF;
 	
 	// Flags
-	uint8 LaidOut : 1;
-	uint8 AppendDots : 1;
-	uint8 VisibleTab : 1;
+	uint8_t LaidOut : 1;
+	uint8_t AppendDots : 1;
+	uint8_t VisibleTab : 1;
 
 	#if LGI_DSP_STR_CACHE
 	// Wide char cache
@@ -79,7 +79,7 @@ protected:
 		OsChar *Str;
 		int Len;
 		int X;
-		uint8 FontId;
+		uint8_t FontId;
 		int8 SizeDelta;
 
 		CharInfo()
@@ -91,7 +91,7 @@ protected:
 			SizeDelta = 0;
 		}
 
-		uint32 First()
+		uint32_t First()
 		{
 			auto s = (const uint16*)Str;
 			ssize_t l = Len * sizeof(*Str);
@@ -135,7 +135,7 @@ public:
 		/// The base font. Must not be destroyed during the lifetime of this object.
 		GFont *f,
 		/// A wide character input string
-		const uint32 *s,
+		const uint32_t *s,
 		/// The number of characters in the input string (NOT the number of bytes) or -1 for NULL terminated
 		ssize_t l = -1,
 		GSurface *pdc = 0

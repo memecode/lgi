@@ -21,7 +21,7 @@ class App64 : public GApplicator
 {
 	union
 	{
-		uint8 *u8;
+		uint8_t *u8;
 		Pixel *p;
 	};
 
@@ -328,7 +328,7 @@ public:
 				}
 				for (int y=0; y<Src->y; y++)
 				{
-					REG uint8 *s = Src->Base + (y * Src->Line);
+					REG uint8_t *s = Src->Base + (y * Src->Line);
 					REG Pixel *d = p, *e = d + Src->x;
 					while (d < e)
 					{

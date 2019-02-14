@@ -379,7 +379,7 @@ COLOUR GScreenDC::Colour(COLOUR c, int Bits)
 			d->Col = d->Gc->GetColour(d->Col);
 		}
 
-		uint32 WinCol = RGB( R24(d->Col), G24(d->Col), B24(d->Col) );
+		uint32_t WinCol = RGB( R24(d->Col), G24(d->Col), B24(d->Col) );
 		LOGBRUSH LogBrush;
 		LogBrush.lbStyle = BS_SOLID;
 		LogBrush.lbColor = WinCol;
@@ -512,7 +512,7 @@ bool GScreenDC::SupportsAlphaCompositing()
 
 void GScreenDC::Set(int x, int y)
 {
-	uint32 WinCol = RGB( R24(d->Col), G24(d->Col), B24(d->Col) );
+	uint32_t WinCol = RGB( R24(d->Col), G24(d->Col), B24(d->Col) );
 	SetPixel(hDC, x, y, WinCol);
 }
 
@@ -521,7 +521,7 @@ COLOUR GScreenDC::Get(int x, int y)
 	return GetPixel(hDC, x, y);
 }
 
-uint GScreenDC::LineStyle(uint32 Bits, uint32 Reset)
+uint GScreenDC::LineStyle(uint32_t Bits, uint32_t Reset)
 {
 	uint Old = LineBits;
 	LineBits = Bits;
@@ -561,7 +561,7 @@ void GScreenDC::Line(int x1, int y1, int x2, int y2)
 {
 	MoveToEx(hDC, x1, y1, NULL);
 	LineTo(hDC, x2, y2);
-	uint32 WinCol = RGB( R24(d->Col), G24(d->Col), B24(d->Col) );
+	uint32_t WinCol = RGB( R24(d->Col), G24(d->Col), B24(d->Col) );
 	SetPixel(hDC, x2, y2, WinCol);
 }
 

@@ -33,7 +33,7 @@ class LUnicodeString
 		return true;
 	}
 
-	uint32 Read(const uint8 *&s)
+	uint32_t Read(const uint8_t *&s)
 	{
 		if (IsUtf8_1Byte(*s))
 			return *s++;
@@ -44,14 +44,14 @@ class LUnicodeString
 
 		if (IsUtf8_2Byte(*s))
 		{
-			uint32 Out = ((int)(*s++ & 0x1f)) << 6;
+			uint32_t Out = ((int)(*s++ & 0x1f)) << 6;
 			Trailing(0);
 			return Out;
 		}
 
 		if (IsUtf8_3Byte(*s))
 		{
-			uint32 Out = ((int)(*s++ & 0x1f)) << 12;
+			uint32_t Out = ((int)(*s++ & 0x1f)) << 12;
 			Trailing(6);
 			Trailing(0);
 			return Out;
@@ -59,7 +59,7 @@ class LUnicodeString
 
 		if (IsUtf8_4Byte(*s))
 		{
-			uint32 Out = ((int)(*s++ & 0x1f)) << 18;
+			uint32_t Out = ((int)(*s++ & 0x1f)) << 18;
 			Trailing(12);
 			Trailing(6);
 			Trailing(0);
@@ -71,10 +71,10 @@ class LUnicodeString
 		return 0;
 	}
 
-	uint32 Read(uint8 *&s) { return Read((const uint8*&)s); }
-	uint32 Read(char *&s) { return Read((const uint8*&)s); }
+	uint32_t Read(uint8_t *&s) { return Read((const uint8_t*&)s); }
+	uint32_t Read(char *&s) { return Read((const uint8_t*&)s); }
 
-	uint32 Read(const uint16 *&s)
+	uint32_t Read(const uint16_t *&s)
 	{
 		int n = *s & 0xfc00;
 		if (n == 0xd800 || n == 0xdc00)
@@ -86,9 +86,9 @@ class LUnicodeString
 		return *s++;
 	}
 
-	uint32 Read(uint16 *&s) { return Read((const uint16*&)s); }
+	uint32_t Read(uint16_t *&s) { return Read((const uint16_t*&)s); }
 
-	void Write(uint16 *&s, uint32 ch)
+	void Write(uint16_t *&s, uint32_t ch)
 	{
 		if (ch < 0x10000)
 		{
@@ -110,19 +110,19 @@ class LUnicodeString
 	}
 
 	#ifdef WINDOWS
-	uint32 Read(char16 *&s) { return Read((const uint16*&)s); }
-	void Write(char16 *&s, uint32 ch) { Write((uint16*&)s, ch); }
+	uint32_t Read(char16 *&s) { return Read((const uint16_t*&)s); }
+	void Write(char16 *&s, uint32_t ch) { Write((uint16_t*&)s, ch); }
 	#else
 	uint32 Read(char16 *&s) { return Read((const uint32*&)s); }
 	void Write(char16 *&s, uint32 ch) { Write((uint32*&)s, ch); }
 	#endif
 
-	uint32 Read(const uint32 *&s)
+	uint32_t Read(const uint32_t *&s)
 	{
 		return *s++;
 	}
 
-	void Write(uint32 *&s, uint32 ch)
+	void Write(uint32_t *&s, uint32_t ch)
 	{
 		*s++ = ch;
 	}
@@ -197,12 +197,12 @@ public:
 	public:
 		Iter(LUnicodeString<T> *str, T *cur) : u(str), p(cur) {}
 		
-		operator uint32()
+		operator uint32_t()
 		{
 			return u->Read(p);
 		}
 
-		Iter &operator =(uint32 ch)
+		Iter &operator =(uint32_t ch)
 		{
 			LgiAssert(u->start != NULL);
 			u->Write(p, ch);

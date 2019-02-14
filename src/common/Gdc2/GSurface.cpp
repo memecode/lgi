@@ -137,9 +137,9 @@ GSurface *GSurface::SubImage(GRect r)
 }
 
 template<typename Px>
-void SetAlphaPm(Px *src, int x, uint8 a)
+void SetAlphaPm(Px *src, int x, uint8_t a)
 {
-	REG uint8 *Lut = Div255Lut;
+	REG uint8_t *Lut = Div255Lut;
 	REG Px *s = src;
 	REG Px *e = s + x;
 	while (s < e)
@@ -153,9 +153,9 @@ void SetAlphaPm(Px *src, int x, uint8 a)
 }
 
 template<typename Px>
-void SetAlphaNpm(Px *src, int x, uint8 a)
+void SetAlphaNpm(Px *src, int x, uint8_t a)
 {
-	REG uint8 *Lut = Div255Lut;
+	REG uint8_t *Lut = Div255Lut;
 	REG Px *s = src;
 	REG Px *e = s + x;
 	while (s < e)
@@ -165,7 +165,7 @@ void SetAlphaNpm(Px *src, int x, uint8 a)
 	}
 }
 
-bool GSurface::SetConstantAlpha(uint8 Alpha)
+bool GSurface::SetConstantAlpha(uint8_t Alpha)
 {
 	bool HasAlpha = GColourSpaceHasAlpha(GetColourSpace());
 	if (!HasAlpha)
@@ -176,7 +176,7 @@ bool GSurface::SetConstantAlpha(uint8 Alpha)
 	
 	for (int y=0; y<pMem->y; y++)
 	{
-		uint8 *src = pMem->Base + (y * pMem->Line);
+		uint8_t *src = pMem->Base + (y * pMem->Line);
 		if (pMem->PreMul())
 		{
 			switch (pMem->Cs)
@@ -1654,7 +1654,7 @@ GColour GSurface::Colour(GColour c)
 	LgiAssert(pApp != NULL);
 	GColour cPrev(pApp->c, GetBits());
 	
-	uint32 c32 = c.c32();
+	uint32_t c32 = c.c32();
 	GColourSpace Cs = pApp->GetColourSpace();
 	switch (Cs)
 	{
@@ -1945,7 +1945,7 @@ bool GSurface::ConvertPreMulAlpha(bool ToPreMul)
 	
 	for (int y=0; y<pMem->y; y++)
 	{
-		uint8 *src = pMem->Base + (y * pMem->Line);
+		uint8_t *src = pMem->Base + (y * pMem->Line);
 		if (ToPreMul)
 		{
 			switch (pMem->Cs)
@@ -2013,7 +2013,7 @@ bool GSurface::MakeOpaque()
 	
 	for (int y=0; y<pMem->y; y++)
 	{
-		uint8 *src = pMem->Base + (y * pMem->Line);
+		uint8_t *src = pMem->Base + (y * pMem->Line);
 		switch (pMem->Cs)
 		{
 			#define OpaqueCase(px, sz) \

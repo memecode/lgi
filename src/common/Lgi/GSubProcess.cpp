@@ -242,7 +242,7 @@ bool GSubProcess::IsRunning()
 	#endif
 }
 
-uint32 GSubProcess::GetErrorCode()
+uint32_t GSubProcess::GetErrorCode()
 {
 	return ErrorCode;
 }

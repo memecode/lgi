@@ -8,7 +8,7 @@
 
 struct ImgColour
 {
-	uint8 c[DIMENSIONS];
+	uint8_t c[DIMENSIONS];
 	int count;
 };
 
@@ -171,7 +171,7 @@ int LumaSort(GColour *a, GColour *b)
 }
 
 template<typename B>
-uint32 ColourDistance16(ImgColour *a, B *b)
+uint32_t ColourDistance16(ImgColour *a, B *b)
 {
 	// calculate distance
 	int dr = a->c[0] - G5bitTo8bit(b->r);
@@ -183,7 +183,7 @@ uint32 ColourDistance16(ImgColour *a, B *b)
 }
 
 template<typename B>
-uint32 ColourDistance24(ImgColour *a, B *b)
+uint32_t ColourDistance24(ImgColour *a, B *b)
 {
 	// calculate distance
 	int dr = a->c[0] - b->r;

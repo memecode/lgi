@@ -221,9 +221,9 @@ Ret HexToInt
 }
 
 template<typename Char>
-uint32 htoi(const Char *s)
+uint32_t htoi(const Char *s)
 {
-	return HexToInt<uint32,Char>(s);
+	return HexToInt<uint32_t,Char>(s);
 }
 
 template<typename Char>

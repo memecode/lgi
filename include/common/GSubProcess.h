@@ -86,7 +86,7 @@ protected:
 	};
 	bool EnvironmentChanged;
 	GArray<Variable> Environment;
-	uint32 ErrorCode;
+	uint32_t ErrorCode;
 
 	PipeHandle ExternIn, ExternOut;
 
@@ -126,7 +126,7 @@ public:
 	// Process lifecycle
 	ProcessId Handle() { return ChildPid; }
 	bool IsRunning();
-	uint32 GetErrorCode();
+	uint32_t GetErrorCode();
 	int32 GetExitValue();
 	void Connect(GSubProcess *child);
 	bool Start(bool ReadAccess = true, bool WriteAccess = false, bool MapStderrToStdout = true);

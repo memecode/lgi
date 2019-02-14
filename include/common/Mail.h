@@ -163,7 +163,7 @@ public:
 class AddressDescriptor : public GBase
 {
 public:
-	uint8 Status;
+	uint8_t Status;
 	uchar CC;	// MAIL_ADDR_??
 	char *Name;
 	char *Addr;
@@ -383,13 +383,13 @@ struct ImapMailFlags
 	{
 		struct
 		{
-			uint8 ImapAnswered : 1;
-			uint8 ImapDeleted : 1;
-			uint8 ImapDraft : 1;
-			uint8 ImapFlagged : 1;
-			uint8 ImapRecent : 1;
-			uint8 ImapSeen : 1;
-			uint8 ImapExpunged :1;
+			uint8_t ImapAnswered : 1;
+			uint8_t ImapDeleted : 1;
+			uint8_t ImapDraft : 1;
+			uint8_t ImapFlagged : 1;
+			uint8_t ImapRecent : 1;
+			uint8_t ImapSeen : 1;
+			uint8_t ImapExpunged :1;
 		};
 		uint16 All;
 	};

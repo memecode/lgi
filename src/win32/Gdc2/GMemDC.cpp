@@ -269,7 +269,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	if (x > 0 && y > 0)
 	{
 		int Colours = Bits <= 8 ? 1 << Bits : 0;
-		int SizeOf = sizeof(BITMAPINFO)+(3*sizeof(uint32))+(sizeof(RGBQUAD)*Colours);
+		int SizeOf = sizeof(BITMAPINFO)+(3*sizeof(uint32_t))+(sizeof(RGBQUAD)*Colours);
 		d->Info = (PBITMAPINFO) new char[SizeOf];
 		if (d->Info)
 		{
@@ -283,7 +283,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 			d->Info->bmiHeader.biClrUsed = 0;
 			d->Info->bmiHeader.biClrImportant = 0;
 
-			uint32 *BitFeilds = (uint32*) d->Info->bmiColors;
+			uint32_t *BitFeilds = (uint32_t*) d->Info->bmiColors;
 			switch (Cs)
 			{
 				case CsIndex1:
@@ -303,7 +303,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 					#if 1
 					union
 					{
-						uint32 u16;
+						uint32_t u16;
 						System15BitPixel p;
 					};
 
@@ -329,7 +329,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 					#if 1
 					union
 					{
-						uint32 u16;
+						uint32_t u16;
 						System16BitPixel p;
 					};
 
@@ -361,7 +361,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 					ColourSpace = Cs;
 					union
 					{
-						uint32 u32;
+						uint32_t u32;
 						System32BitPixel p;
 					};
 

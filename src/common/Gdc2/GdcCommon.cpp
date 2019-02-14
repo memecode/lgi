@@ -410,10 +410,10 @@ void LgiFillGradient(GSurface *pDC, GRect &r, bool Vert, GArray<GColourStop> &St
 				float d = Next->Pos - This->Pos;
 				float t = (Next->Pos - p) / d;
 				float n = (p - This->Pos) / d;
-				uint8 r = (uint8) ((R32(This->Colour) * t) + (R32(Next->Colour) * n));
-				uint8 g = (uint8) ((G32(This->Colour) * t) + (G32(Next->Colour) * n));
-				uint8 b = (uint8) ((B32(This->Colour) * t) + (B32(Next->Colour) * n));
-				uint8 a = (uint8) ((A32(This->Colour) * t) + (A32(Next->Colour) * n));
+				uint8_t r = (uint8_t) ((R32(This->Colour) * t) + (R32(Next->Colour) * n));
+				uint8_t g = (uint8_t) ((G32(This->Colour) * t) + (G32(Next->Colour) * n));
+				uint8_t b = (uint8_t) ((B32(This->Colour) * t) + (B32(Next->Colour) * n));
+				uint8_t a = (uint8_t) ((A32(This->Colour) * t) + (A32(Next->Colour) * n));
 				c = Rgba32(r, g, b, a);
 			}
 			else if (p >= Next->Pos)
@@ -452,10 +452,10 @@ GColour GdcMixColour(GColour c1, GColour c2, float HowMuchC1)
 {
 	float HowMuchC2 = 1.0f - HowMuchC1;
 
-	uint8 r = (uint8) ((c1.r()*HowMuchC1) + (c2.r()*HowMuchC2));
-	uint8 g = (uint8) ((c1.g()*HowMuchC1) + (c2.g()*HowMuchC2));
-	uint8 b = (uint8) ((c1.b()*HowMuchC1) + (c2.b()*HowMuchC2));
-	uint8 a = (uint8) ((c1.a()*HowMuchC1) + (c2.a()*HowMuchC2));
+	uint8_t r = (uint8_t) ((c1.r()*HowMuchC1) + (c2.r()*HowMuchC2));
+	uint8_t g = (uint8_t) ((c1.g()*HowMuchC1) + (c2.g()*HowMuchC2));
+	uint8_t b = (uint8_t) ((c1.b()*HowMuchC1) + (c2.b()*HowMuchC2));
+	uint8_t a = (uint8_t) ((c1.a()*HowMuchC1) + (c2.a()*HowMuchC2));
 	
 	return GColour(r, g, b, a);
 }
@@ -463,9 +463,9 @@ GColour GdcMixColour(GColour c1, GColour c2, float HowMuchC1)
 COLOUR GdcMixColour(COLOUR c1, COLOUR c2, float HowMuchC1)
 {
 	double HowMuchC2 = 1.0 - HowMuchC1;
-	uint8 r = (uint8) ((R24(c1)*HowMuchC1) + (R24(c2)*HowMuchC2));
-	uint8 g = (uint8) ((G24(c1)*HowMuchC1) + (G24(c2)*HowMuchC2));
-	uint8 b = (uint8) ((B24(c1)*HowMuchC1) + (B24(c2)*HowMuchC2));
+	uint8_t r = (uint8_t) ((R24(c1)*HowMuchC1) + (R24(c2)*HowMuchC2));
+	uint8_t g = (uint8_t) ((G24(c1)*HowMuchC1) + (G24(c2)*HowMuchC2));
+	uint8_t b = (uint8_t) ((B24(c1)*HowMuchC1) + (B24(c2)*HowMuchC2));
 	return Rgb24(r, g, b);
 }
 
@@ -705,7 +705,7 @@ const char *GColourSpaceToString(GColourSpace cs)
 // printf("Converting Cs to String: 0x%x\n", cs);
 	for (int i=3; i>=0; i--)
 	{
-		int c = (((uint32)cs) >> (i << 3)) & 0xff;
+		int c = (((uint32_t)cs) >> (i << 3)) & 0xff;
 // printf("    c[%i] = 0x%x\n", i, c);
 		if (c)
 		{
@@ -735,7 +735,7 @@ int GColourSpaceChannels(GColourSpace Cs)
 	
 	while (Cs)
 	{
-		uint8 c = Cs & 0xff;
+		uint8_t c = Cs & 0xff;
 		if (!c)
 			break;
 		
@@ -750,7 +750,7 @@ bool GColourSpaceHasAlpha(GColourSpace Cs)
 {
 	while (Cs)
 	{
-		uint8 c = Cs & 0xff;
+		uint8_t c = Cs & 0xff;
 		GComponentType type = (GComponentType)(c >> 4);
 		if (type == CtAlpha)
 			return true;
@@ -763,7 +763,7 @@ bool GColourSpaceHasAlpha(GColourSpace Cs)
 
 int GColourSpaceToBits(GColourSpace ColourSpace)
 {
-	uint32 c = ColourSpace;
+	uint32_t c = ColourSpace;
 	int bits = 0;
 	while (c)
 	{
@@ -941,8 +941,8 @@ GColourSpace GBitsToColourSpace(int Bits)
 bool GColourSpaceTest()
 {
 	union {
-		uint8 b4[4];
-		uint32 u32;
+		uint8_t b4[4];
+		uint32_t u32;
 		GBgrx32 bgrx32;
 		GXrgb32 xrgb32;
 		GRgba32 rgba32;
@@ -991,14 +991,14 @@ bool GColourSpaceTest()
 }
 
 ////////////////////////////////////////////////////////////////////////
-GSurface *GInlineBmp::Create(uint32 TransparentPx)
+GSurface *GInlineBmp::Create(uint32_t TransparentPx)
 {
 	GSurface *pDC = new GMemDC;
 	if (pDC->Create(X, Y, System32BitColourSpace, GSurface::SurfaceRequireExactCs))
 	{
 		GBmpMem Src, Dst;
 		
-		Src.Base = (uint8*)Data;
+		Src.Base = (uint8_t*)Data;
 		Src.Line = X * Bits >> 3;
 		Src.x = X;
 		Src.y = Y;
@@ -1025,8 +1025,8 @@ GSurface *GInlineBmp::Create(uint32 TransparentPx)
 			for (int y=0; y<Y; y++)
 			{
 				GPointer s;
-				s.u8 = (uint8*)Data + (y * Src.Line);
-				uint32 *d = (uint32*)(*pDC)[y];
+				s.u8 = (uint8_t*)Data + (y * Src.Line);
+				uint32_t *d = (uint32_t*)(*pDC)[y];
 				
 				switch (Bits >> 3)
 				{
@@ -1050,9 +1050,9 @@ GSurface *GInlineBmp::Create(uint32 TransparentPx)
 					}
 					case 3:
 					{
-						REG uint8 r = R24(TransparentPx);
-						REG uint8 g = G24(TransparentPx);
-						REG uint8 b = B24(TransparentPx);
+						REG uint8_t r = R24(TransparentPx);
+						REG uint8_t g = G24(TransparentPx);
+						REG uint8_t b = B24(TransparentPx);
 						REG GRgb24 *px = (GRgb24*) s.u8;
 						REG GRgb24 *e = px + X;
 						while (px < e)
@@ -1091,7 +1091,7 @@ GSurface *GInlineBmp::Create(uint32 TransparentPx)
 /////////////////////////////////////////////////////////////////////////////////////////////
 #include "GRops.h"
 
-bool LgiRopRgb(uint8 *d, GColourSpace DstCs, uint8 *s, GColourSpace SrcCs, int x, bool Composite)
+bool LgiRopRgb(uint8_t *d, GColourSpace DstCs, uint8_t *s, GColourSpace SrcCs, int x, bool Composite)
 {
 	// This is just a huge switch statement that takes care of all possible combinations
 	// of src and dst RGB colour space formats. The 'GRopsCases.cpp' code is generated
@@ -1131,8 +1131,8 @@ bool LgiRopUniversal(GBmpMem *Dst, GBmpMem *Src, bool Composite)
 	if (Dst->Cs == Src->Cs && !Composite)
 	{
 		// No conversion idiom
-		uint8 *d = Dst->Base;
-		uint8 *s = Src->Base;
+		uint8_t *d = Dst->Base;
+		uint8_t *s = Src->Base;
 		int BytesPerPx = (SrcBits + 7) / 8;
 		int Bytes = BytesPerPx * Cx;
 		for (int y=0; y<Cy; y++)
@@ -1146,8 +1146,8 @@ bool LgiRopUniversal(GBmpMem *Dst, GBmpMem *Src, bool Composite)
 
 	if (SrcBits > 8 && DstBits > 8)
 	{
-		uint8 *d = Dst->Base;
-		uint8 *s = Src->Base;
+		uint8_t *d = Dst->Base;
+		uint8_t *s = Src->Base;
 
 		for (int y=0; y<Cy; y++)
 		{

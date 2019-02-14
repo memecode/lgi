@@ -216,7 +216,7 @@ GAutoString GUri::Encode(const char *s, const char *ExtraCharsToEncode)
 			if (*s == ' ' || (ExtraCharsToEncode && strchr(ExtraCharsToEncode, *s)))
 			{
 				char h[4];
-				sprintf_s(h, sizeof(h), "%%%2.2X", (uint32)(uchar)*s++);
+				sprintf_s(h, sizeof(h), "%%%2.2X", (uint32_t)(uchar)*s++);
 				p.Write(h, 3);
 			}
 			else
@@ -294,7 +294,7 @@ GProxyUri::GProxyUri()
 	GRegKey k(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
 	if (k.IsOk())
 	{
-	    uint32 Enabled = 0;
+	    uint32_t Enabled = 0;
 	    if (k.GetInt("ProxyEnable", Enabled) && Enabled)
 	    {
 		    char *p = k.GetStr("ProxyServer");

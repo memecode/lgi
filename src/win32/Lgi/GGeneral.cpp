@@ -492,7 +492,7 @@ static char *LgiFindArgsStart(char *File)
 
 #include <lmerr.h>
 
-GAutoString LgiErrorCodeToString(uint32 ErrorCode)
+GAutoString LgiErrorCodeToString(uint32_t ErrorCode)
 {
 	GAutoString Str;
     HMODULE hModule = NULL;
@@ -798,7 +798,7 @@ bool GRegKey::SetStr(const char *Name, const char *Value)
 	return true;
 }
 
-bool GRegKey::GetInt(const char *Name, uint32 &Value)
+bool GRegKey::GetInt(const char *Name, uint32_t &Value)
 {
 	if (!k) return false;
 	DWORD Size = sizeof(Value), Type;
@@ -806,7 +806,7 @@ bool GRegKey::GetInt(const char *Name, uint32 &Value)
 	return r == ERROR_SUCCESS;
 }
 
-bool GRegKey::SetInt(const char *Name, uint32 Value)
+bool GRegKey::SetInt(const char *Name, uint32_t Value)
 {
 	if (!k) return false;
 	LONG r = RegSetValueExA(k, Name, 0, REG_DWORD, (uchar*)&Value, sizeof(Value));

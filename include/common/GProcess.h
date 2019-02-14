@@ -22,7 +22,7 @@ public:
 	/// \returns the value the process exited with
 	ulong ExitValue();
 	/// \returns the any error code
-	uint32 GetErrorCode();
+	uint32_t GetErrorCode();
 	/// Stops the process right now, use with care
 	bool Terminate();
 	/// \returns true if still running, else false.
