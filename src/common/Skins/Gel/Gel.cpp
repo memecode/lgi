@@ -519,7 +519,7 @@ public:
 			DeleteObj(RadioBtn[i]);
 	}
 
-	uint32 GetFeatures()
+	uint32_t GetFeatures()
 	{
 		return
 				#if CUSTOM_COLOURS

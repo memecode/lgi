@@ -1300,7 +1300,7 @@ public:
 		return true;
 	}
 
-	bool ReadMemory(GString &BaseAddr, int Length, GArray<uint8> &OutBuf, GString *ErrorMsg)
+	bool ReadMemory(GString &BaseAddr, int Length, GArray<uint8_t> &OutBuf, GString *ErrorMsg)
 	{
 		if (!BaseAddr)
 		{
@@ -1366,9 +1366,9 @@ public:
 			return false;
 		}
 		
-		uint32 *buf = (uint32*) &(OutBuf)[0];
-		uint32 *ptr = buf;
-		uint32 *end = ptr + (OutBuf.Length() / sizeof(*buf));
+		uint32_t *buf = (uint32_t*) &(OutBuf)[0];
+		uint32_t *ptr = buf;
+		uint32_t *end = ptr + (OutBuf.Length() / sizeof(*buf));
 		
 		for (int i=0; i<Out.Length() && ptr < end; i++)
 		{
@@ -1384,7 +1384,7 @@ public:
 			while (*s)
 			{
 				while (*s && strchr(WhiteSpace, *s)) s++;
-				uint32 word = atoi(s);
+				uint32_t word = atoi(s);
 				*ptr++ = word;
 				while (*s && !strchr(WhiteSpace, *s)) s++;
 				

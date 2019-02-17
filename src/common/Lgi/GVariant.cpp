@@ -105,7 +105,7 @@ GVariant::GVariant(int32 i)
 	Value.Int = i;
 }
 
-GVariant::GVariant(uint32 i)
+GVariant::GVariant(uint32_t i)
 {
 	Type = GV_INT32;
 	Value.Int = i;
@@ -350,7 +350,7 @@ GVariant &GVariant::operator =(int32 i)
 	return *this;
 }
 
-GVariant &GVariant::operator =(uint32 i)
+GVariant &GVariant::operator =(uint32_t i)
 {
 	Empty();
 	Type = GV_INT32;
@@ -2142,7 +2142,7 @@ ssize_t GCustomType::CustomField::Sizeof()
 	return 0;
 }
 
-bool GCustomType::Get(int Index, GVariant &Out, uint8 *This, int ArrayIndex)
+bool GCustomType::Get(int Index, GVariant &Out, uint8_t *This, int ArrayIndex)
 {
 	if (Index < 0 ||
 		Index >= Flds.Length() ||
@@ -2159,7 +2159,7 @@ bool GCustomType::Get(int Index, GVariant &Out, uint8 *This, int ArrayIndex)
 		return false;
 	}
 
-	uint8 *Ptr = This + Def->Offset;
+	uint8_t *Ptr = This + Def->Offset;
 	Out.Empty();
 	
 	switch (Def->Type)
@@ -2200,7 +2200,7 @@ bool GCustomType::Get(int Index, GVariant &Out, uint8 *This, int ArrayIndex)
 				}
 				case 4:
 				{
-					Out.Value.Int = ((uint32*)Ptr)[ArrayIndex];
+					Out.Value.Int = ((uint32_t*)Ptr)[ArrayIndex];
 					Out.Type = GV_INT32;
 					break;
 				}
@@ -2233,7 +2233,7 @@ bool GCustomType::Get(int Index, GVariant &Out, uint8 *This, int ArrayIndex)
 	return true;
 }
 
-bool GCustomType::Set(int Index, GVariant &In, uint8 *This, int ArrayIndex)
+bool GCustomType::Set(int Index, GVariant &In, uint8_t *This, int ArrayIndex)
 {
 	if (Index < 0 ||
 		Index >= Flds.Length() ||
@@ -2244,7 +2244,7 @@ bool GCustomType::Set(int Index, GVariant &In, uint8 *This, int ArrayIndex)
 	}
 
 	CustomField *Def = Flds[Index];
-	uint8 *Ptr = This + Def->Offset;
+	uint8_t *Ptr = This + Def->Offset;
 	if (ArrayIndex < 0 || ArrayIndex >= Def->ArrayLen)
 	{
 		LgiAssert(!"Array out of bounds.");
@@ -2340,7 +2340,7 @@ bool GCustomType::Set(int Index, GVariant &In, uint8 *This, int ArrayIndex)
 				}
 				case 4:
 				{
-					((uint32*)Ptr)[ArrayIndex] = In.CastInt32();
+					((uint32_t*)Ptr)[ArrayIndex] = In.CastInt32();
 					break;
 				}
 				case 8:
@@ -2431,7 +2431,7 @@ bool GCustomType::CallMethod(const char *MethodName, GVariant *ReturnValue, GArr
 		ReturnValue->Empty();
 		ReturnValue->Type = GV_CUSTOM;
 		ReturnValue->Value.Custom.Dom = this;
-		ReturnValue->Value.Custom.Data = new uint8[Sizeof()];
+		ReturnValue->Value.Custom.Data = new uint8_t[Sizeof()];
 		return true;
 	}
 	

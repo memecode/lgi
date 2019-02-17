@@ -290,7 +290,7 @@ public:
 		if (!s || !pv) return E_INVALIDARG;
 
 		ULONG TotalRd = 0;
-		uint8 *Ptr = (uint8*)pv;
+		uint8_t *Ptr = (uint8_t*)pv;
 		size_t i = 0;
 		while (i < cb)
 		{

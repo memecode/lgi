@@ -17,7 +17,7 @@ protected:
 	{
 	    if (Sem.Lock(_FL))
 	    {
-	        for (uint32 i=0; i<Txt.Length(); i++)
+	        for (uint32_t i=0; i<Txt.Length(); i++)
 	        {
 			    Add(Txt[i]);
 			}

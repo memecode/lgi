@@ -100,11 +100,11 @@ public:
 	// on the bottom and then Lgi queries the class to see if it can call them
 	// by using the flags returned from this function. At no time should the
 	// existing functions change order or be removed.
-	virtual uint32 GetFeatures() { return 0; }	
+	virtual uint32_t GetFeatures() { return 0; }	
 
 	// Return the RGB24 for the LC_??? colour index
 	// Will only be called if you return GSKIN_COLOUR from GetFeatures()
-	virtual uint32 GetColour(int i) { return 0; }
+	virtual uint32_t GetColour(int i) { return 0; }
 
 	// Do painting for the various controls, the relevant GSKIN_??? flag needs to
 	// be returned from GetFeatures before you can call any of these.

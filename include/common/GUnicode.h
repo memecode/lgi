@@ -14,12 +14,12 @@
 #else
 #define REG register
 #endif
-typedef unsigned char uint8;
+typedef unsigned char uint8_t;
 typedef signed char int8;
 typedef signed short int16;
 typedef unsigned short uint16;
 typedef signed int int32;
-typedef unsigned int uint32;
+typedef unsigned int uint32_t;
 #ifdef _MSC_VER
 	typedef signed __int64 int64;
 	typedef unsigned __int64 uint64;
@@ -34,18 +34,18 @@ typedef unsigned int uint32;
 #endif
 
 // Defines for decoding UTF8
-#define IsUtf8_1Byte(c)		( ((uint8)(c) & 0x80) == 0x00 )
-#define IsUtf8_2Byte(c)		( ((uint8)(c) & 0xe0) == 0xc0 )
-#define IsUtf8_3Byte(c)		( ((uint8)(c) & 0xf0) == 0xe0 )
-#define IsUtf8_4Byte(c)		( ((uint8)(c) & 0xf8) == 0xf0 )
+#define IsUtf8_1Byte(c)		( ((uint8_t)(c) & 0x80) == 0x00 )
+#define IsUtf8_2Byte(c)		( ((uint8_t)(c) & 0xe0) == 0xc0 )
+#define IsUtf8_3Byte(c)		( ((uint8_t)(c) & 0xf0) == 0xe0 )
+#define IsUtf8_4Byte(c)		( ((uint8_t)(c) & 0xf8) == 0xf0 )
 
-#define IsUtf8_Lead(c)		( ((uint8)(c) & 0xc0) == 0xc0 )
-#define IsUtf8_Trail(c)		( ((uint8)(c) & 0xc0) == 0x80 )
+#define IsUtf8_Lead(c)		( ((uint8_t)(c) & 0xc0) == 0xc0 )
+#define IsUtf8_Trail(c)		( ((uint8_t)(c) & 0xc0) == 0x80 )
 
 // Stand-alone functions
 
 /// Convert a single utf-8 char to utf-32 or returns -1 on error.
-inline int32 LgiUtf8To32(uint8 *&i, ssize_t &Len)
+inline int32 LgiUtf8To32(uint8_t *&i, ssize_t &Len)
 {
 	int32 Out = 0;
 
@@ -141,7 +141,7 @@ inline int32 LgiUtf8To32(uint8 *&i, ssize_t &Len)
 }
 
 /// Convert a single utf-32 char to utf-8
-inline bool LgiUtf32To8(uint32 c, uint8 *&i, ssize_t &Len)
+inline bool LgiUtf32To8(uint32_t c, uint8_t *&i, ssize_t &Len)
 {
 	if ((c & ~0x7f) == 0)
 	{
@@ -194,7 +194,7 @@ inline bool LgiUtf32To8(uint32 c, uint8 *&i, ssize_t &Len)
 #define IsUtf16_Trail(c)	( ((uint16)(c) & 0xfc00) == 0xDc00 )
 
 /// Convert a single utf-16 char to utf-32
-inline uint32 LgiUtf16To32(const uint16 *&i, ssize_t &Len)
+inline uint32_t LgiUtf16To32(const uint16_t *&i, ssize_t &Len)
 {
 	if (Len > 1)
 	{
@@ -226,7 +226,7 @@ inline uint32 LgiUtf16To32(const uint16 *&i, ssize_t &Len)
 }
 
 /// Convert a single utf-32 char to utf-16
-inline bool LgiUtf32To16(uint32 c, uint16 *&i, ssize_t &Len)
+inline bool LgiUtf32To16(uint32_t c, uint16_t *&i, ssize_t &Len)
 {
 	if (c >= 0x10000)
 	{
@@ -284,15 +284,15 @@ inline void LgiPrevUtf8(char *&p)
 class LgiClass GUtf8Ptr
 {
 protected:
-	uint8 *Ptr;
+	uint8_t *Ptr;
 
 public:
 	GUtf8Ptr(const void *p = 0);
 
 	/// Assign a new pointer to the string
-	GUtf8Ptr &operator =(char *s) { Ptr = (uint8*)s; return *this; }
+	GUtf8Ptr &operator =(char *s) { Ptr = (uint8_t*)s; return *this; }
 	/// Assign a new pointer to the string
-	GUtf8Ptr &operator =(uint8 *s) { Ptr = s; return *this; }
+	GUtf8Ptr &operator =(uint8_t *s) { Ptr = s; return *this; }
 	/// \returns the current character in the string or -1 on error.
 	operator int32();
 
@@ -323,15 +323,15 @@ public:
 	void Add(wchar_t c);
 
 	/// Returns the current pointer.
-	uint8 *GetPtr() { return Ptr; }
+	uint8_t *GetPtr() { return Ptr; }
 };
 
 /// Unicode string class. Allows traversing a utf-8 strings.
 class LgiClass GUtf8Str : public GUtf8Ptr
 {
 	// Complete buffer
-	uint8 *Start;
-	uint8 *End;
+	uint8_t *Start;
+	uint8_t *End;
 	GUtf8Ptr Cur;
 	bool Own;
 
@@ -811,14 +811,14 @@ inline size_t WideToUtf8Len(const wchar_t *s, ssize_t wchars = -1)
 {
 	if (!s) return 0;
 	size_t Out = 0;
-	uint8 Buf[6];
+	uint8_t Buf[6];
 
 	#ifdef _MSC_VER
 	const uint16 *i = (const uint16*) s;
 	ssize_t Len = wchars >= 0 ? wchars << 1 : 0x7fffffff;
-	for (uint32 ch; ch = LgiUtf16To32(i, Len); )
+	for (uint32_t ch; ch = LgiUtf16To32(i, Len); )
 	{
-		uint8 *b = Buf;
+		uint8_t *b = Buf;
 		ssize_t len = sizeof(Buf);
 		if (!LgiUtf32To8(ch, b, len))
 			break;

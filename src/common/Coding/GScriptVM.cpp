@@ -39,7 +39,7 @@
 
 
 #ifdef WIN32
-extern "C" uint64 __cdecl CallExtern64(void *FuncAddr, NativeInt *Ret, uint32 Args, void *Arg);
+extern "C" uint64 __cdecl CallExtern64(void *FuncAddr, NativeInt *Ret, uint32_t Args, void *Arg);
 #elif defined(LINUX)
 #include <signal.h>
 #endif
@@ -308,7 +308,7 @@ GExecutionStatus GExternFunc::Call(GScriptContext *Ctx, LScriptArguments &Args)
 		#if defined(_WIN64)
 			// 64bit... boooo no inline asm!
 			void *b = &Val[0];
-			r = CallExtern64(c, &r, (uint32)a, b);
+			r = CallExtern64(c, &r, (uint32_t)a, b);
 		#else
 			// 32bit... yay inline asm!
 			void *b = Ptr.ni - 1;
@@ -408,7 +408,7 @@ class GVirtualMachinePriv : public GRefCount
 public:
 	struct StackFrame
 	{
-		uint32 CurrentFrameSize;
+		uint32_t CurrentFrameSize;
 		ssize_t PrevFrameStart;
 		size_t ReturnIp;
 		GVarRef ReturnValue;
@@ -528,7 +528,7 @@ public:
 				{
 					int i;
 					for (i=0; i<16 && i < v.Value.Binary.Length; i++)
-						Log->Print(" %.2x", ((uint8*)v.Value.Binary.Data)[i]);
+						Log->Print(" %.2x", ((uint8_t*)v.Value.Binary.Data)[i]);
 					if (i < v.Value.Binary.Length)
 						Log->Print("...");
 				}
@@ -598,9 +598,9 @@ public:
 		LgiAssert(sizeof(GVarRef) == 4);
 
 		GPtr c;
-		uint8 *Base = &Code->ByteCode[0];
+		uint8_t *Base = &Code->ByteCode[0];
 		c.u8 = Base;
-		uint8 *e = c.u8 + Code->ByteCode.Length();
+		uint8_t *e = c.u8 + Code->ByteCode.Length();
 
 		GStream *OldLog = Log;
 		if (log)
@@ -652,7 +652,7 @@ public:
 		return Status;
 	}
 
-	GExecutionStatus Setup(GCompiledCode *code, uint32 StartOffset, GStream *log, GFunctionInfo *Func, LScriptArguments *Args)
+	GExecutionStatus Setup(GCompiledCode *code, uint32_t StartOffset, GStream *log, GFunctionInfo *Func, LScriptArguments *Args)
 	{
 		Status = ScriptSuccess;
 		
@@ -670,8 +670,8 @@ public:
 			
 		LgiAssert(sizeof(GVarRef) == 4);
 
-		uint8 *Base = c.u8 = &Code->ByteCode[0];
-		uint8 *e = c.u8 + Code->ByteCode.Length();
+		uint8_t *Base = c.u8 = &Code->ByteCode[0];
+		uint8_t *e = c.u8 + Code->ByteCode.Length();
 
 		Scope[SCOPE_REGISTER] = Reg;
 		Scope[SCOPE_LOCAL] = NULL;
@@ -830,8 +830,8 @@ public:
 	{
 		LgiAssert(Code != NULL);
 		
-		uint8 *Base = &Code->ByteCode[0];
-		uint8 *e = Base + Code->ByteCode.Length();
+		uint8_t *Base = &Code->ByteCode[0];
+		uint8_t *e = Base + Code->ByteCode.Length();
 		
 		if (Type == RunContinue && BreakPts.Length() == 0)
 		{
@@ -979,7 +979,7 @@ GVirtualMachine::~GVirtualMachine()
 	d->DecRef();
 }
 
-GExecutionStatus GVirtualMachine::Execute(GCompiledCode *Code, uint32 StartOffset, GStream *Log, bool StartImmediately, GVariant *Return)
+GExecutionStatus GVirtualMachine::Execute(GCompiledCode *Code, uint32_t StartOffset, GStream *Log, bool StartImmediately, GVariant *Return)
 {
 	if (!Code)
 		return ScriptError;
@@ -1182,7 +1182,7 @@ bool GTypeDef::SetVariant(const char *Name, GVariant &Value, char *Arr)
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-uint32 IconsData[] =
+uint32_t IconsData[] =
 {
 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0x9D9CCEBE, 0x3B166419, 0x74594357, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0x543CF81F, 0xCEDE647C, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 
 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0x7C998D1B, 0xF81FB61C, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xCEBFF81F, 0x43DB4C1C, 0xDF1E955B, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 0xF81FF81F, 

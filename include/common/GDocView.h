@@ -108,7 +108,7 @@ public:
 		// View data
 		GDocumentEnv *Env;
 		void *UserData;
-		uint32 UserUid;
+		uint32_t UserUid;
 		PrefFormat Pref;
 
 		// Input data
@@ -259,8 +259,8 @@ public:
 	_TvMenuProp(bool, UrlDetect)
 	_TvMenuProp(bool, ReadOnly)
 	_TvMenuProp(LDocWrapType, WrapType)
-	_TvMenuProp(uint8, TabSize)
-	_TvMenuProp(uint8, IndentSize)
+	_TvMenuProp(uint8_t, TabSize)
+	_TvMenuProp(uint8_t, IndentSize)
 	_TvMenuProp(bool, HardTabs)
 	_TvMenuProp(bool, ShowWhiteSpace)
 	_TvMenuProp(bool, ObscurePassword)

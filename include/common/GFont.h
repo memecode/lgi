@@ -439,7 +439,7 @@ public:
 	GFont *GetGlyph
 	(
 		/// A utf-32 character
-		uint32 u,
+		uint32_t u,
 		/// The base font used for rendering
 		GFont *UserFont
 	);

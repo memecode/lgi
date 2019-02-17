@@ -134,10 +134,10 @@ class GdcBmpFactory : public GFilterFactory
 class BMP_FILE {
 public:
 	char		Type[2];
-	uint32		Size;
+	uint32_t		Size;
 	uint16		Reserved1;
 	uint16		Reserved2;
-	uint32		OffsetToData;
+	uint32_t		OffsetToData;
 };
 
 class BMP_WININFO {
@@ -150,31 +150,31 @@ public:
 	uint16		Bits;
 	
 	// Win3 hdr (40 bytes)
-	uint32		Compression;
-	uint32		DataSize;
+	uint32_t		Compression;
+	uint32_t		DataSize;
 	int32		XPels;
 	int32		YPels;
-	uint32		ColoursUsed;
-	uint32		ColourImportant;
+	uint32_t		ColoursUsed;
+	uint32_t		ColourImportant;
 
 	// Win4 hdr (108 bytes)
-	uint32 RedMask;       /* Mask identifying bits of red component */
-	uint32 GreenMask;     /* Mask identifying bits of green component */
-	uint32 BlueMask;      /* Mask identifying bits of blue component */
-	uint32 AlphaMask;     /* Mask identifying bits of alpha component */
-	uint32 CSType;        /* Color space type */
-	uint32 RedX;          /* X coordinate of red endpoint */
-	uint32 RedY;          /* Y coordinate of red endpoint */
-	uint32 RedZ;          /* Z coordinate of red endpoint */
-	uint32 GreenX;        /* X coordinate of green endpoint */
-	uint32 GreenY;        /* Y coordinate of green endpoint */
-	uint32 GreenZ;        /* Z coordinate of green endpoint */
-	uint32 BlueX;         /* X coordinate of blue endpoint */
-	uint32 BlueY;         /* Y coordinate of blue endpoint */
-	uint32 BlueZ;         /* Z coordinate of blue endpoint */
-	uint32 GammaRed;      /* Gamma red coordinate scale value */
-	uint32 GammaGreen;    /* Gamma green coordinate scale value */
-	uint32 GammaBlue;     /* Gamma blue coordinate scale value */
+	uint32_t RedMask;       /* Mask identifying bits of red component */
+	uint32_t GreenMask;     /* Mask identifying bits of green component */
+	uint32_t BlueMask;      /* Mask identifying bits of blue component */
+	uint32_t AlphaMask;     /* Mask identifying bits of alpha component */
+	uint32_t CSType;        /* Color space type */
+	uint32_t RedX;          /* X coordinate of red endpoint */
+	uint32_t RedY;          /* Y coordinate of red endpoint */
+	uint32_t RedZ;          /* Z coordinate of red endpoint */
+	uint32_t GreenX;        /* X coordinate of green endpoint */
+	uint32_t GreenY;        /* Y coordinate of green endpoint */
+	uint32_t GreenZ;        /* Z coordinate of green endpoint */
+	uint32_t BlueX;         /* X coordinate of blue endpoint */
+	uint32_t BlueY;         /* Y coordinate of blue endpoint */
+	uint32_t BlueZ;         /* Z coordinate of blue endpoint */
+	uint32_t GammaRed;      /* Gamma red coordinate scale value */
+	uint32_t GammaGreen;    /* Gamma green coordinate scale value */
+	uint32_t GammaBlue;     /* Gamma blue coordinate scale value */
 
 	bool Read(GStream &f)
 	{
@@ -243,7 +243,7 @@ public:
 #pragma pack(pop, before_pack)
 #endif
 
-static int CountSetBits(uint32 b)
+static int CountSetBits(uint32_t b)
 {
 	int Count = 0;
 	for (int i=0; i<sizeof(b)<<3; i++)
@@ -257,7 +257,7 @@ static int CountSetBits(uint32 b)
 struct MaskComp
 {
 	GComponentType Type;
-	uint32 Mask;
+	uint32_t Mask;
 	int Bits;
 	
 	void Set(GComponentType t, int mask)
@@ -563,7 +563,7 @@ GFilter::IoStatus GdcBmp::ReadImage(GSurface *pDC, GStream *In)
 				GColourSpace DstCs = pDC->GetColourSpace();
 				for (int i=pMem->y-1; i>=0; i--)
 				{
-					uint8 *Ptr = pMem->Base + (pMem->Line * i);
+					uint8_t *Ptr = pMem->Base + (pMem->Line * i);
 					ssize_t r = In->Read(Ptr, ScanSize);
 					if (r != ScanSize)
 					{

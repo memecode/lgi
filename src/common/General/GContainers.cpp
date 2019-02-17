@@ -450,7 +450,7 @@ ssize_t GStringPipe::LineChars()
 	ssize_t Len = 0;
 	for (Block *m = Mem.First(); m; m = Mem.Next())
 	{
-		uint8 *p = m->Ptr();
+		uint8_t *p = m->Ptr();
 
 		for (int i = m->Next; i < m->Used; i++)
 		{
@@ -785,8 +785,8 @@ ssize_t GMemFile::Read(void *Ptr, ssize_t Size, int Flags)
 	if (!Ptr || Size < 1)
 		return 0;
 	
-	uint8 *p = (uint8*) Ptr;
-	uint8 *end = p + Size;
+	uint8_t *p = (uint8_t*) Ptr;
+	uint8_t *end = p + Size;
 	while (p < end)
 	{
 		int Cur = CurBlock();
@@ -812,7 +812,7 @@ ssize_t GMemFile::Read(void *Ptr, ssize_t Size, int Flags)
 			break;		// Exit loop
 	}	
 	
-	return p - (uint8*) Ptr;
+	return p - (uint8_t*) Ptr;
 }
 
 ssize_t GMemFile::Write(const void *Ptr, ssize_t Size, int Flags)
@@ -820,7 +820,7 @@ ssize_t GMemFile::Write(const void *Ptr, ssize_t Size, int Flags)
 	if (!Ptr || Size < 1)
 		return 0;
 
-	uint8 *p = (uint8*) Ptr;
+	uint8_t *p = (uint8_t*) Ptr;
 	ssize_t len = Size;
 	
 	Block *b = GetLast();

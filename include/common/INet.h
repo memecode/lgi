@@ -64,8 +64,8 @@ typedef int SOCKET;
 // Functions
 LgiNetFunc bool HaveNetConnection();
 LgiNetFunc bool WhatsMyIp(GAutoString &Ip);
-LgiExtern GString LIpStr(uint32 ip);
-LgiExtern uint32 LIpHostInt(GString str);
+LgiExtern GString LIpStr(uint32_t ip);
+LgiExtern uint32_t LIpHostInt(GString str);
 
 /// Make md5 hash
 LgiNetFunc void MDStringToDigest
@@ -120,7 +120,7 @@ public:
 	int GetLocalPort();
 	
 	/// Gets the IP address at the remote end of the socket.
-	bool GetRemoteIp(uint32 *IpAddr);
+	bool GetRemoteIp(uint32_t *IpAddr);
 	bool GetRemoteIp(char *IpAddr);
 
 	/// Gets the IP address at the remote end of the socket.
@@ -249,12 +249,12 @@ public:
 	/// Makes the socket able to broadcast
 	void SetBroadcast();
 	/// Read UPD packet
-	int ReadUdp(void *Buffer, int Size, int Flags, uint32 *Ip = 0, uint16 *Port = 0);
+	int ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip = 0, uint16_t *Port = 0);
 	/// Write UPD packet
-	int WriteUdp(void *Buffer, int Size, int Flags, uint32 Ip, uint16 Port);
+	int WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port);
 	
-	bool AddMulticastMember(uint32 MulticastIp, uint32 LocalInterface);
-	bool SetMulticastInterface(uint32 Interface);
+	bool AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface);
+	bool SetMulticastInterface(uint32_t Interface);
 
 	// Impl
 	GStreamI *Clone()
@@ -271,8 +271,8 @@ public:
 	struct Interface
 	{
 		GString Name;
-		uint32 Ip4; // Host order...
-		uint32 Netmask4;
+		uint32_t Ip4; // Host order...
+		uint32_t Netmask4;
 
 		bool IsLoopBack()
 		{
@@ -281,10 +281,10 @@ public:
 		
 		bool IsPrivate()
 		{
-			uint8 h1 = (Ip4 >> 24) & 0xff;
+			uint8_t h1 = (Ip4 >> 24) & 0xff;
 			if (h1 == 192)
 			{
-				uint8 h2 = ((Ip4 >> 16) & 0xff);
+				uint8_t h2 = ((Ip4 >> 16) & 0xff);
 				return h2 == 168;
 			}
 			else if (h1 == 10)
@@ -293,7 +293,7 @@ public:
 			}
 			else if (h1 == 172)
 			{
-				uint8 h2 = ((Ip4 >> 16) & 0xff);
+				uint8_t h2 = ((Ip4 >> 16) & 0xff);
 				return h2 >= 16 && h2 <= 31;
 			}
 			
@@ -302,10 +302,10 @@ public:
 		
 		bool IsLinkLocal()
 		{
-			uint8 h1 = (Ip4 >> 24) & 0xff;
+			uint8_t h1 = (Ip4 >> 24) & 0xff;
 			if (h1 == 169)
 			{
-				uint8 h2 = ((Ip4 >> 16) & 0xff);
+				uint8_t h2 = ((Ip4 >> 16) & 0xff);
 				return h2 == 254;
 			}
 			
@@ -411,7 +411,7 @@ class LUdpListener : public GSocket
 	GString Context;
 
 public:
-	LUdpListener(GArray<uint32> interface_ips, uint32 mc_ip, uint16 port, GStream *log = NULL) : Log(log)
+	LUdpListener(GArray<uint32_t> interface_ips, uint32_t mc_ip, uint16_t port, GStream *log = NULL) : Log(log)
 	{
 		//SetBroadcast();
 		SetUdp(true);
@@ -454,7 +454,7 @@ public:
 
 	}
 
-	bool ReadPacket(GString &d, uint32 &Ip, uint16 &Port)
+	bool ReadPacket(GString &d, uint32_t &Ip, uint16_t &Port)
 	{
 		if (!IsReadable(10))
 			return false;
@@ -478,22 +478,22 @@ public:
 class LUdpBroadcast : public GSocket
 {
 	GArray<Interface> Intf;
-	uint32 SelectIf;
+	uint32_t SelectIf;
 
 public:
-	LUdpBroadcast(uint32 selectIf) : SelectIf(selectIf)
+	LUdpBroadcast(uint32_t selectIf) : SelectIf(selectIf)
 	{
         SetBroadcast();
 		SetUdp(true);
 		EnumInterfaces(Intf);
 	}
 
-	bool BroadcastPacket(GString Data, uint32 Ip, uint16 Port)
+	bool BroadcastPacket(GString Data, uint32_t Ip, uint16_t Port)
 	{
 		return BroadcastPacket(Data.Get(), Data.Length(), Ip, Port);
 	}
 
-	bool BroadcastPacket(void *Ptr, size_t Size, uint32 Ip, uint16 Port)
+	bool BroadcastPacket(void *Ptr, size_t Size, uint32_t Ip, uint16_t Port)
 	{
 		if (Size > MAX_UDP_SIZE)
 			return false;
@@ -522,7 +522,7 @@ public:
 		}
 		*/
 		
-		uint32 BroadcastIp = Ip;
+		uint32_t BroadcastIp = Ip;
 		#if 0
 		printf("Broadcast %i.%i.%i.%i\n", 
 			(BroadcastIp >> 24) & 0xff,

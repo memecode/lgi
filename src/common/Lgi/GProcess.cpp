@@ -128,7 +128,7 @@ public:
 	OsProcess Pid;
 	OsProcessId ProcessId;
 	ulong ExitValue;
-	uint32 ErrorCode;
+	uint32_t ErrorCode;
 	char *Exe;
 	
 	GProcessPrivate()
@@ -166,7 +166,7 @@ OsProcessId GProcess::GetId()
 	return d->ProcessId;
 }
 
-uint32 GProcess::GetErrorCode()
+uint32_t GProcess::GetErrorCode()
 {
 	return d->ErrorCode;
 }

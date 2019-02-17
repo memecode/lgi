@@ -12,7 +12,7 @@
 
 class LgiClass LThreadEvent : public GBase
 {
-	uint32 LastError;
+	uint32_t LastError;
 	#if USE_MACH_SEM
 		task_t Task;
 		semaphore_t Sem;
@@ -50,7 +50,7 @@ public:
 	bool IsOk();
 	bool Signal();
 	WaitStatus Wait(int32 Timeout = -1);
-	uint32 GetError();
+	uint32_t GetError();
 };
 
 #endif

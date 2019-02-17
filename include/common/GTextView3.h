@@ -340,7 +340,7 @@ public:
 	void SetFixedWidthFont(bool i);
 
 	// Options
-	void SetTabSize(uint8 i);
+	void SetTabSize(uint8_t i);
 	void SetBorder(int b);
 	void SetReadOnly(bool i);
 	void SetCrLf(bool crlf);

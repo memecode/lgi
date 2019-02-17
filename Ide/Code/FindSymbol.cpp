@@ -105,7 +105,7 @@ struct FindSymbolSystemPriv : public GEventTargetThread
 	GArray<FileSyms*> Files;
 	#endif	
 	
-	uint32 Tasks;
+	uint32_t Tasks;
 	uint64 MsgTs;
 	bool DoingProgress;
 	
@@ -397,7 +397,7 @@ struct FindSymbolSystemPriv : public GEventTargetThread
 				{
 					MsgTs = Now;
 					DoingProgress = true;
-					uint32 Remaining = (uint32) (Tasks - GetQueueSize());
+					uint32_t Remaining = (uint32_t) (Tasks - GetQueueSize());
 					if (Remaining > 0)
 						Log("FindSym: %i of %i (%.1f%%)\n", Remaining, Tasks, (double)Remaining * 100.0 / MAX(Tasks, 1));
 				}

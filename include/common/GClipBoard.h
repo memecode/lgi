@@ -15,7 +15,7 @@ class LgiClass GClipBoard
 
 public:
 	/// On windows, this equates to a CF_TEXT, CF_BITMAP, CF_DIB type #define
-	typedef uint32 FormatType;
+	typedef uint32_t FormatType;
 	static GString FmtToStr(FormatType Fmt);
 	static FormatType StrToFmt(GString Fmt);
 
@@ -53,8 +53,8 @@ public:
 	bool Files(GString::Array &Paths, bool AutoEmpty = true);
 
 	// Binary
-	bool Binary(FormatType Format, uint8 *Ptr, ssize_t Len, bool AutoEmpty);	// Set
-	bool Binary(FormatType Format, GAutoPtr<uint8> &Ptr, ssize_t *Len);	// Get
+	bool Binary(FormatType Format, uint8_t *Ptr, ssize_t Len, bool AutoEmpty);	// Set
+	bool Binary(FormatType Format, GAutoPtr<uint8_t> &Ptr, ssize_t *Len);	// Get
 };
 
 #endif

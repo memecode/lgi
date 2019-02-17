@@ -218,7 +218,7 @@ GImageList::GImageList(int x, int y, GSurface *pDC)
 
 	// BeOS transparent pixels:
 	// B_TRANSPARENT_MAGIC_CMAP8, B_TRANSPARENT_MAGIC_RGBA15, B_TRANSPARENT_MAGIC_RGBA32
-	uint32 Transparent =
+	uint32_t Transparent =
 		#ifdef BEOS
 		B_TRANSPARENT_MAGIC_RGBA32;
 		#else
@@ -249,14 +249,14 @@ GImageList::GImageList(int x, int y, GSurface *pDC)
 			if (!pDC->HasAlpha())
 			{
 				// No source alpha, do colour keying to create the alpha channel
-				REG uint32 *p = (uint32*)(*this)[0];
+				REG uint32_t *p = (uint32_t*)(*this)[0];
 				if (p)
 				{
-					uint32 key = *p;
+					uint32_t key = *p;
 					for (int y=0; y<Y(); y++)
 					{
-						p = (uint32*) (*this)[y];
-						REG uint32 *e = p + X();
+						p = (uint32_t*) (*this)[y];
+						REG uint32_t *e = p + X();
 						while (p < e)
 						{
 							if (*p == key)

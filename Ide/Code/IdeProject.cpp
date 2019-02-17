@@ -1308,7 +1308,7 @@ GString BuildThread::FindExe()
 	if (Compiler == PythonScript)
 	{
 		#if defined(WINDOWS)
-		uint32 BestVer = 0;
+		uint32_t BestVer = 0;
 		#endif
 		GString Best;
 
@@ -1816,7 +1816,7 @@ int BuildThread::Main()
 					Write(Buf, rd);
 				}
 					
-				uint32 ex = SubProc->Wait();
+				uint32_t ex = SubProc->Wait();
 				Print("Make exited with %i (0x%x)\n", ex, ex);
 
 				if (Compiler == IAR &&
@@ -3058,7 +3058,7 @@ bool IdeProject::InProject(bool FuzzyMatch, const char *Path, bool Open, IdeDoc 
 		const char *Leaf = LgiGetLeaf(Path);
 		auto PathLen = strlen(Path);
 		auto LeafLen = strlen(Leaf);
-		uint32 MatchingScore = 0;
+		uint32_t MatchingScore = 0;
 
 		// Traverse all nodes and try and find the best fit.
 		// const char *p;
@@ -3066,7 +3066,7 @@ bool IdeProject::InProject(bool FuzzyMatch, const char *Path, bool Open, IdeDoc 
 		for (auto Cur : d->Nodes)
 		{
 			int CurPlatform = Cur.value->GetPlatforms();
-			uint32 Score = 0;
+			uint32_t Score = 0;
 
 			if (stristr(Cur.key, Path))
 			{

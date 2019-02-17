@@ -100,14 +100,14 @@ bool LStringLayout::Add(const char *Str, GCss *Style)
 	return true;
 }
 
-uint32 LStringLayout::NextChar(char *s)
+uint32_t LStringLayout::NextChar(char *s)
 {
 	ssize_t Len = 0;
 	while (s[Len] && Len < 6) Len++;
-	return LgiUtf8To32((uint8*&)s, Len);
+	return LgiUtf8To32((uint8_t*&)s, Len);
 }
 
-uint32 LStringLayout::PrevChar(char *s)
+uint32_t LStringLayout::PrevChar(char *s)
 {
 	if (IsUtf8_Lead(*s) || IsUtf8_1Byte(*s))
 	{
@@ -115,7 +115,7 @@ uint32 LStringLayout::PrevChar(char *s)
 		ssize_t Len = 1;
 		while (IsUtf8_Trail(*s) && Len < 6) { s--; Len++; }
 
-		return LgiUtf8To32((uint8*&)s, Len);
+		return LgiUtf8To32((uint8_t*&)s, Len);
 	}
 
 	return 0;
@@ -175,7 +175,7 @@ void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
 			char *e = s;
 			while (*e)
 			{
-				uint32 c = NextChar(e);
+				uint32_t c = NextChar(e);
 				if (c == 0)
 					break;
 				if (e > s && LGI_BreakableChar(c))
@@ -297,7 +297,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 			#if DEBUG_LAYOUT
 			if (Debug) LgiTrace("    Breaks: ");
 			#endif
-			for (uint32 Ch; (Ch = e); e++)
+			for (uint32_t Ch; (Ch = e); e++)
 			{
 				if (Ch == '\n')
 					break;
@@ -448,7 +448,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 						// Break at next word break
 						e = s;
 						e += Chars;
-						for (uint32 Ch; (Ch = e); e++)
+						for (uint32_t Ch; (Ch = e); e++)
 						{
 							if (LGI_BreakableChar(Ch))
 								break;

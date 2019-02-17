@@ -170,8 +170,8 @@ public:
 
 	// Field access. You can't use the GDom interface to get/set member variables because
 	// there is no provision for the 'This' pointer.
-	bool Get(int Index, GVariant &Out, uint8 *This, int ArrayIndex = 0);
-	bool Set(int Index, GVariant &In, uint8 *This, int ArrayIndex = 0);
+	bool Get(int Index, GVariant &Out, uint8_t *This, int ArrayIndex = 0);
+	bool Set(int Index, GVariant &In, uint8_t *This, int ArrayIndex = 0);
 	
 	// Dom access. However the DOM can be used to access information about the type itself.
 	// Which doesn't need a 'This' pointer.
@@ -224,7 +224,7 @@ public:
 		struct _Custom
 		{
 			GCustomType *Dom;
-			uint8 *Data;
+			uint8_t *Data;
 
 			bool operator == (_Custom &c)
 			{
@@ -266,7 +266,7 @@ public:
 	GVariant();
 	/// Constructor for integers
 	GVariant(int32 i);
-	GVariant(uint32 i);
+	GVariant(uint32_t i);
 	GVariant(int64 i);
 	GVariant(uint64 i);
 	#if GVARIANT_SIZET
@@ -300,7 +300,7 @@ public:
 	GVariant &operator =(bool i);
 	/// Assign an integer value
 	GVariant &operator =(int32 i);
-	GVariant &operator =(uint32 i);
+	GVariant &operator =(uint32_t i);
 	GVariant &operator =(int64 i);
 	GVariant &operator =(uint64 i);
 	#if GVARIANT_SIZET

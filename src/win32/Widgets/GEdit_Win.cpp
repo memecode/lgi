@@ -540,7 +540,7 @@ bool GEdit::SysEmptyText()
 
 		if (_View)
 		{
-			uint32 Style = GetStyle();
+			uint32_t Style = GetStyle();
 			bool HasPass = (Style & ES_PASSWORD) != 0;
 			if (HasPass)
 			{

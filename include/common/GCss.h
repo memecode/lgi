@@ -372,7 +372,7 @@ public:
 	struct LgiClass ColorStop
 	{
 		float Pos;
-		uint32 Rgb32;
+		uint32_t Rgb32;
 		
 		bool operator ==(const ColorStop &c)
 		{
@@ -384,10 +384,10 @@ public:
 	struct LgiClass ColorDef
 	{
 		ColorType Type;
-		uint32 Rgb32;
+		uint32_t Rgb32;
 		GArray<ColorStop> Stops;
 
-		ColorDef(ColorType ct = ColorInherit, uint32 rgb32 = 0)
+		ColorDef(ColorType ct = ColorInherit, uint32_t rgb32 = 0)
 		{
 			Type = ct;
 			Rgb32 = rgb32;
@@ -436,7 +436,7 @@ public:
 				return Rgb32 == c.Rgb32;
 			if (Stops.Length() != c.Stops.Length())
 				return false;
-			for (uint32 i=0; i<Stops.Length(); i++)
+			for (uint32_t i=0; i<Stops.Length(); i++)
 			{
 				if (Stops[i] != c.Stops.ItemAt(i))
 					return false;
@@ -739,7 +739,7 @@ public:
 		size_t GetSimpleIndex() { return Combs.Length() ? Combs[Combs.Length()-1] + 1 : 0; }
 		bool IsAtMedia();
 		bool ToString(GStream &p);
-		uint32 GetSpecificity();
+		uint32_t GetSpecificity();
 		
 		Selector &operator =(const Selector &s);
 	};

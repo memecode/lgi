@@ -31,7 +31,7 @@ void LgiDrawIcon(GSurface *pDC, int Dx, int Dy, HICON ico)
 	BITMAP bm, msk;
 	GetObject(iconinfo.hbmColor, sizeof(bm), &bm);
 	GetObject(iconinfo.hbmMask, sizeof(msk), &msk);
-	GArray<uint8> bits, mask;
+	GArray<uint8_t> bits, mask;
 	int bmp_bpp = bm.bmPlanes * bm.bmBitsPixel;
 	int msk_bpp = msk.bmPlanes * msk.bmBitsPixel;
 	bits.Length(bm.bmWidthBytes * bm.bmHeight);
@@ -56,8 +56,8 @@ void LgiDrawIcon(GSurface *pDC, int Dx, int Dy, HICON ico)
 
 	for (y=0; y<bm.bmHeight; y++)
 	{
-		uint32 *c = (uint32*) &bits[y * bm.bmWidthBytes];
-		uint8 *m = &mask[y * msk.bmWidthBytes];
+		uint32_t *c = (uint32_t*) &bits[y * bm.bmWidthBytes];
+		uint8_t *m = &mask[y * msk.bmWidthBytes];
 		for (int x=0; x<bm.bmWidth; x++)
 		{
 			int bit = 1 << (7 - (x&7));
@@ -405,9 +405,9 @@ bool GPalette::Load(GFile &F)
 		if (p.Length() == 3)
 		{
 			auto e = (*this)[i-2];
-			e->r = (uint8) p[0].Int();
-			e->g = (uint8) p[1].Int();
-			e->b = (uint8) p[2].Int();
+			e->r = (uint8_t) p[0].Int();
+			e->g = (uint8_t) p[1].Int();
+			e->b = (uint8_t) p[2].Int();
 		}
 		else
 		{

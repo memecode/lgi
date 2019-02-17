@@ -5,12 +5,12 @@ static bool Warn = true;
 
 GUtf8Ptr::GUtf8Ptr(const void *p)
 {
-	Ptr = (uint8*)p;
+	Ptr = (uint8_t*)p;
 }
 
 GUtf8Ptr::operator int32()
 {
-	uint8 *p = Ptr;
+	uint8_t *p = Ptr;
 	ssize_t l = 6;
 	return LgiUtf8To32(p, l);
 }
@@ -149,7 +149,7 @@ int GUtf8Ptr::GetBytes()
 int GUtf8Ptr::GetChars()
 {
 	int Count = 0;
-	uint8 *p = Ptr;
+	uint8_t *p = Ptr;
 
 	while (*p)
 	{
@@ -176,7 +176,7 @@ int GUtf8Ptr::GetChars()
 GUtf8Str::GUtf8Str(char *utf, int bytes, bool Copy)
 {
 	Own = Copy;
-	Ptr = Start = Copy ? (uint8*)NewStr(utf) : (uint8*)utf;
+	Ptr = Start = Copy ? (uint8_t*)NewStr(utf) : (uint8_t*)utf;
 	End = bytes >= 0 ? Start + bytes : 0;
 	Cur = Start;
 }
@@ -184,7 +184,7 @@ GUtf8Str::GUtf8Str(char *utf, int bytes, bool Copy)
 GUtf8Str::GUtf8Str(wchar_t *wide, int chars)
 {
 	Own = true;
-	Start = (uint8*)WideToUtf8(wide);
+	Start = (uint8_t*)WideToUtf8(wide);
 	End = chars >= 0 ? Start + chars : 0;
 	Cur = Start;
 }
@@ -209,7 +209,7 @@ void GUtf8Str::Empty()
 GUtf8Str &GUtf8Str::operator =(char *s)
 {
 	Empty();
-	Start = (uint8*)s;
+	Start = (uint8_t*)s;
 	Cur = Start;
 	End = 0;
 	return *this;

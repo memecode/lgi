@@ -94,8 +94,8 @@ public:
 
 	/// Adds a run of text with the same style
 	bool Add(const char *Str, GCss *Style);
-	uint32 NextChar(char *s);
-	uint32 PrevChar(char *s);
+	uint32_t NextChar(char *s);
+	uint32_t PrevChar(char *s);
 	GFont *GetBaseFont();
 	void SetBaseFont(GFont *f);
 

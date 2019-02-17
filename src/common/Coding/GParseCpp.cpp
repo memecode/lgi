@@ -201,7 +201,7 @@ struct GSymbol
 {
 	GSymbolType Type;
 	char *File;
-	uint32 Line;
+	uint32_t Line;
 	GArray<char16*> Tokens;
 	
 	GSymbol *Parent;
@@ -290,7 +290,7 @@ char16 *LexPoolAlloc(void *Context, const char16 *s, ssize_t len)
 
 struct GSourceFile
 {
-	uint32 Id;
+	uint32_t Id;
 	GAutoString Path;
 	GCppStringPool Pool;
 

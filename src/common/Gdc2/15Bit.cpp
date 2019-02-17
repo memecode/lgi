@@ -20,7 +20,7 @@ class GdcApp15 : public GApplicator
 protected:
 	union
 	{
-		uint8 *u8;
+		uint8_t *u8;
 		uint16 *u16;
 		Pixel *p;
 	};
@@ -98,7 +98,7 @@ public:
 			uint16 upx; \
 		}; \
 		REG union { \
-			uint8 *d8; \
+			uint8_t *d8; \
 			uint16 *d16; \
 		}; \
 		px.r = R15(this->c); \

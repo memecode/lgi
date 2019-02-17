@@ -219,7 +219,7 @@ public:
 		Length(a.Length());
 		if (p && a.p)
 		{
-			for (uint32 i=0; i<len; i++)
+			for (uint32_t i=0; i<len; i++)
 			{
 				p[i] = a.p[i];
 			}
@@ -255,7 +255,7 @@ public:
 	/// where the array is const.
 	const Type &ItemAt(size_t i) const
 	{
-		if (i >= 0 && (uint32)i < len)
+		if (i >= 0 && (uint32_t)i < len)
 			return p[i];
 
 		static Type t;
@@ -278,11 +278,11 @@ public:
 
 		if
 		(
-			(fixed && (uint32)i >= len)
+			(fixed && (uint32_t)i >= len)
 		)
 		{
 			memset(&t, 0, sizeof(t));
-			if (fixed && (uint32)i >= len)
+			if (fixed && (uint32_t)i >= len)
 			{
 				assert(!"Attempt to enlarged fixed array.");
 			}
@@ -293,7 +293,7 @@ public:
 		{
 			// increase array length
 			size_t nalloc = MAX(alloc, GARRAY_MIN_SIZE);
-			while (nalloc <= (uint32)i)
+			while (nalloc <= (uint32_t)i)
 			{
 				nalloc <<= 1;
 			}
@@ -337,7 +337,7 @@ public:
 		}
 
 		// adjust length of the the array
-		if ((uint32)i + 1 > len)
+		if ((uint32_t)i + 1 > len)
 		{
 			len = i + 1;
 		}
@@ -376,7 +376,7 @@ public:
 	/// Delete all the entries as if they are pointers to arrays
 	void DeleteArrays()
 	{
-		for (uint32 i=0; i<len; i++)
+		for (uint32_t i=0; i<len; i++)
 		{
 			DeleteArray(p[i]);
 		}
@@ -536,7 +536,7 @@ public:
 		// Make room
 		if (Length(len + 1))
 		{
-			if (Index >= 0 && (uint32)Index < len - 1)
+			if (Index >= 0 && (uint32_t)Index < len - 1)
 			{
 				// Shift elements after insert point up one
 				memmove(p + Index + 1, p + Index, (len - Index - 1) * sizeof(Type) );

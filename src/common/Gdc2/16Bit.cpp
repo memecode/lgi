@@ -20,7 +20,7 @@ class GdcApp16 : public GApplicator
 protected:
 	union
 	{
-		uint8 *u8;
+		uint8_t *u8;
 		uint16 *u16;
 		Pixel *p;
 	}	Ptr;

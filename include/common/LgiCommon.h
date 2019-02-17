@@ -293,7 +293,7 @@ LgiFunc void LgiRandomize(uint Seed);
 /// \ingroup Base
 LgiFunc uint LgiRand(uint Max = 0);
 
-LgiFunc bool _lgi_read_colour_config(const char *Tag, uint32 *c);
+LgiFunc bool _lgi_read_colour_config(const char *Tag, uint32_t *c);
 
 /// Plays a sound
 /// \ingroup Base

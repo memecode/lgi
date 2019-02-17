@@ -216,13 +216,13 @@ void GdcApp8Set::Rectangle(int x, int y)
 #else
 
 	int x4, n;
-	uint32 *p;
+	uint32_t *p;
 	uchar *cp;
 
 	while (y--)
 	{	
 		x4 = x >> 2;
-		p = (uint32*) Ptr;
+		p = (uint32_t*) Ptr;
 
 		for (n=0; n<x4; n++)
 		{
@@ -397,7 +397,7 @@ void Convert(System24BitPixel *Dst, GBmpMem *Src, int Line, GPalette *SPal)
 				break
 		
 		case CsIndex8:
-			GConvertIndexed<System24BitPixel, uint8>(Dst, In, Src->x, Src->Cs, SPal);
+			GConvertIndexed<System24BitPixel, uint8_t>(Dst, In, Src->x, Src->Cs, SPal);
 			break;
 		ConvertCase(Rgb15);
 		ConvertCase(Bgr15);
@@ -416,7 +416,7 @@ void Convert(System24BitPixel *Dst, GBmpMem *Src, int Line, GPalette *SPal)
 }
 
 template<typename Pixel>
-void BltNearest16(uchar *Lookup, uint8 *out, Pixel *p, int x)
+void BltNearest16(uchar *Lookup, uint8_t *out, Pixel *p, int x)
 {
 	REG Pixel *src = p, *e = src + x;
 	while (src < e)
@@ -427,7 +427,7 @@ void BltNearest16(uchar *Lookup, uint8 *out, Pixel *p, int x)
 }
 
 template<typename Pixel>
-void BltNearest24(uchar *Lookup, uint8 *out, Pixel *p, int x)
+void BltNearest24(uchar *Lookup, uint8_t *out, Pixel *p, int x)
 {
 	REG Pixel *src = p, *e = src + x;
 	while (src < e)
@@ -438,7 +438,7 @@ void BltNearest24(uchar *Lookup, uint8 *out, Pixel *p, int x)
 }
 
 template<typename Pixel>
-void BltNearest48(uchar *Lookup, uint8 *out, Pixel *p, int x)
+void BltNearest48(uchar *Lookup, uint8_t *out, Pixel *p, int x)
 {
 	REG Pixel *src = p, *e = src + x;
 	while (src < e)

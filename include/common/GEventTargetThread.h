@@ -203,7 +203,7 @@ class LgiClass GEventTargetThread :
 protected:
 	int PostTimeout;
 	size_t Processing;
-	uint32 TimerMs; // Milliseconds between timer ticks.
+	uint32_t TimerMs; // Milliseconds between timer ticks.
 	uint64 TimerTs; // Time for next tick
 
 public:
@@ -228,7 +228,7 @@ public:
 	
 	/// Set or clear a timer. Every time the timer expires, the function
 	/// OnPulse is called. Until SetPulse() is called.
-	bool SetPulse(uint32 Ms = 0)
+	bool SetPulse(uint32_t Ms = 0)
 	{
 		TimerMs = Ms;
 		TimerTs = Ms ? LgiCurrentTime() + Ms : 0;

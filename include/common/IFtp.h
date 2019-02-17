@@ -86,11 +86,11 @@ public:
 
 	// App specific fields
 	void *UserData;
-	uint8 Updated : 1;
-	uint8 Added : 1;
-	uint8 Deleted: 1;
-	uint8 Selected : 1;
-	uint8 Unchanged : 1;
+	uint8_t Updated : 1;
+	uint8_t Added : 1;
+	uint8_t Deleted: 1;
+	uint8_t Selected : 1;
+	uint8_t Unchanged : 1;
 
 	IFtpEntry();
 	IFtpEntry(ftpparse *Fp, const char *Cs);

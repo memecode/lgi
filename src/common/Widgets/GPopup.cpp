@@ -64,7 +64,7 @@ enum PopupNotifications
 
 #endif
 
-uint32 LgiGetViewPid(OsView View)
+uint32_t LgiGetViewPid(OsView View)
 {
 	#if WINNATIVE
 	DWORD hWndProcess = 0;
@@ -342,8 +342,8 @@ public:
 				
 				OsView hWnd = (Inside) ? hOver : 0;
 
-				uint32 hProcess = LgiProcessId();
-				uint32 hWndProcess = 0;
+				uint32_t hProcess = LgiProcessId();
+				uint32_t hWndProcess = 0;
 				if (hWnd != hMouseOver)
 				{
 					// Window has changed

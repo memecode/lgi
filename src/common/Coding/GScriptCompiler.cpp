@@ -508,7 +508,7 @@ public:
 	}
 
 	/// Assemble a zero argument instruction
-	bool Asm0(int Tok, uint8 Op)
+	bool Asm0(int Tok, uint8_t Op)
 	{
 		DebugInfo(Tok);
 
@@ -525,7 +525,7 @@ public:
 	}
 
 	/// Assemble one arg instruction
-	bool Asm1(int Tok, uint8 Op, GVarRef a)
+	bool Asm1(int Tok, uint8_t Op, GVarRef a)
 	{
 		DebugInfo(Tok);
 
@@ -543,7 +543,7 @@ public:
 	}
 
 	/// Assemble two arg instruction
-	bool Asm2(int Tok, uint8 Op, GVarRef a, GVarRef b)
+	bool Asm2(int Tok, uint8_t Op, GVarRef a, GVarRef b)
 	{
 		DebugInfo(Tok);
 
@@ -562,7 +562,7 @@ public:
 	}
 
 	/// Assemble three arg instruction
-	bool Asm3(int Tok, uint8 Op, GVarRef a, GVarRef b, GVarRef c)
+	bool Asm3(int Tok, uint8_t Op, GVarRef a, GVarRef b, GVarRef c)
 	{
 		DebugInfo(Tok);
 
@@ -582,7 +582,7 @@ public:
 	}
 
 	/// Assemble four arg instruction
-	bool Asm4(int Tok, uint8 Op, GVarRef a, GVarRef b, GVarRef c, GVarRef d)
+	bool Asm4(int Tok, uint8_t Op, GVarRef a, GVarRef b, GVarRef c, GVarRef d)
 	{
 		DebugInfo(Tok);
 
@@ -608,7 +608,7 @@ public:
 	}
 
 	/// Assemble 'n' length arg instruction
-	bool AsmN(int Tok, uint8 Op, GArray<GVarRef> &Args)
+	bool AsmN(int Tok, uint8_t Op, GArray<GVarRef> &Args)
 	{
 		DebugInfo(Tok);
 
@@ -1515,7 +1515,7 @@ public:
 				ssize_t Size = 1 + sizeof(GFunc*) + sizeof(GVarRef) + 2 + (a.Length() * sizeof(GVarRef));
 				Code->ByteCode.Length(Len + Size);
 				GPtr p;
-				uint8 *Start = &Code->ByteCode[Len];
+				uint8_t *Start = &Code->ByteCode[Len];
 				p.u8 = Start;
 				*p.u8++ = ICallMethod;
 				*p.fn++ = n.ContextFunc;
@@ -1583,7 +1583,7 @@ public:
 
 				size_t Len = Code->ByteCode.Length();
 				size_t Size =	1 + // instruction
-								sizeof(uint32) + // address of function
+								sizeof(uint32_t) + // address of function
 								sizeof(uint16) + // size of frame
 								sizeof(GVarRef) + // return value
 								2 + // number of args
@@ -1591,7 +1591,7 @@ public:
 
 				Code->ByteCode.Length(Len + Size);
 				GPtr p;
-				uint8 *Start = &Code->ByteCode[Len];
+				uint8_t *Start = &Code->ByteCode[Len];
 				p.u8 = Start;
 				*p.u8++ = ICallScript;
 				
@@ -1638,7 +1638,7 @@ public:
 		return true;
 	}
 	
-	bool DoVariableNode(uint32 &Cur, Node &Var, char16 *&t)
+	bool DoVariableNode(uint32_t &Cur, Node &Var, char16 *&t)
 	{
 		Var.SetVar(t, Cur);
 
@@ -1714,7 +1714,7 @@ public:
 	}
 
 	/// Parse expression into a node tree
-	bool Expression(uint32 &Cur, GArray<Node> &n, int Depth = 0)
+	bool Expression(uint32_t &Cur, GArray<Node> &n, int Depth = 0)
 	{
 		if (Cur >= Tokens.Length())
 			return OnError(Cur, "Unexpected end of file.");
@@ -2303,7 +2303,7 @@ public:
 	}
 
 	/// Parses and assembles an expression
-	bool DoExpression(uint32 &Cur, GVarRef *Result)
+	bool DoExpression(uint32_t &Cur, GVarRef *Result)
 	{
 		GArray<Node> n;
 		if (Expression(Cur, n))
@@ -2316,7 +2316,7 @@ public:
 	}
 
 	/// Converts a variable to it's type information
-	bool DoTypeId(uint32 &Cur, char16 *&Var)
+	bool DoTypeId(uint32_t &Cur, char16 *&Var)
 	{
 		if (GetTokType(Cur) != TTypeId)
 			return OnError(Cur, "Expecting 'typeid'.");
@@ -2337,7 +2337,7 @@ public:
 	}
 
 	/// Parses statements
-	bool DoStatements(uint32 &Cur, bool *LastWasReturn, bool MoreThanOne = true)
+	bool DoStatements(uint32_t &Cur, bool *LastWasReturn, bool MoreThanOne = true)
 	{
 		while (Cur < Tokens.Length())
 		{
@@ -2435,7 +2435,7 @@ public:
 	}
 
 	/// Parses if/else if/else construct
-	bool DoIf(uint32 &Cur)
+	bool DoIf(uint32_t &Cur)
 	{
 		Cur++;
 		char16 *t;
@@ -2571,7 +2571,7 @@ public:
 		return false;
 	}
 
-	GArray<uint8> &GetByteCode()
+	GArray<uint8_t> &GetByteCode()
 	{
 		return Code->ByteCode;
 	}
@@ -2582,7 +2582,7 @@ public:
 		int JzOffset;
 
 	public:
-		GJumpZero(GCompilerPriv *d, uint32 &Cur, GVarRef &r)
+		GJumpZero(GCompilerPriv *d, uint32_t &Cur, GVarRef &r)
 		{
 			// Create jump instruction to jump over the body if the expression evaluates to false
 			Comp = d;
@@ -2601,7 +2601,7 @@ public:
 	};
 
 	/// Parses while construct
-	bool DoWhile(uint32 &Cur)
+	bool DoWhile(uint32_t &Cur)
 	{
 		Cur++;
 		char16 *t = GetTok(Cur);
@@ -2668,7 +2668,7 @@ public:
 	}
 
 	/// Parses for construct
-	bool DoFor(uint32 &Cur)
+	bool DoFor(uint32_t &Cur)
 	{
 		/*
 			For loop asm structure:
@@ -2739,7 +2739,7 @@ public:
 				return false;
 
 			// Store post expression code in temp variable
-			GArray<uint8> PostCode;
+			GArray<uint8_t> PostCode;
 			size_t PostCodeLen = Code->ByteCode.Length() - PostCodeStart;
 			if (PostCodeLen)
 			{
@@ -2798,7 +2798,7 @@ public:
 	}
 
 	/// Compiles return construct
-	bool DoReturn(uint32 &Cur)
+	bool DoReturn(uint32_t &Cur)
 	{
 		GVarRef ReturnValue;
 		char16 *t;
@@ -2830,7 +2830,7 @@ public:
 	bool DoFunction
 	(
 		/// Cursor token index
-		uint32 &Cur,
+		uint32_t &Cur,
 		/// [Optional] Current struct / class.
 		/// If not NULL this is a method definition for said class.
 		GCustomType *Struct = NULL
@@ -2904,7 +2904,7 @@ public:
 					return OnError(Cur, "Can't define method '%s'.", FunctionName.Get());
 
 				ScriptMethod->Params = Params;
-				ScriptMethod->StartAddr = (uint32)Code->ByteCode.Length();
+				ScriptMethod->StartAddr = (uint32_t)Code->ByteCode.Length();
 			}
 
 			// Parse start of body
@@ -3022,7 +3022,7 @@ public:
 		return Type;
 	}
 
-	bool DoExtern(uint32 &Cur)
+	bool DoExtern(uint32_t &Cur)
 	{
 		GArray<const char16*> Tok;
 		const char16 *t;
@@ -3259,7 +3259,7 @@ public:
 	}
 
 	/// Compiles struct construct
-	bool DoStruct(uint32 &Cur)
+	bool DoStruct(uint32_t &Cur)
 	{
 		bool Status = false;
 
@@ -3382,7 +3382,7 @@ public:
 	/// Compiler entry point
 	bool Compile()
 	{
-		uint32 Cur = 0;
+		uint32_t Cur = 0;
 		JumpLoc = 0;
 
 		// Setup the global scope
@@ -3426,7 +3426,7 @@ public:
 				{
 					GPtr p;
 					p.u8 = &Code->ByteCode[JumpLoc];
-					*p.u32 = (uint32) (Code->ByteCode.Length() - (JumpLoc + 4));
+					*p.u32 = (uint32_t) (Code->ByteCode.Length() - (JumpLoc + 4));
 					JumpLoc = 0;
 				}
 
@@ -3441,7 +3441,7 @@ public:
 		{
 			GPtr p;
 			p.u8 = &Code->ByteCode[JumpLoc];
-			*p.u32 = (uint32) (Code->ByteCode.Length() - (JumpLoc + 4));
+			*p.u32 = (uint32_t) (Code->ByteCode.Length() - (JumpLoc + 4));
 			JumpLoc = 0;
 		}
 
@@ -3653,7 +3653,7 @@ GExecutionStatus GScriptEngine::RunTemporary(GCompiledCode *Obj, char *Script, G
 	if (Script && Code)
 	{
 		GAutoPtr<GCompiledCode> Temp(new GCompiledCode(*Code));
-		uint32 TempLen = (uint32) Temp->Length();
+		uint32_t TempLen = (uint32_t) Temp->Length();
 		d->Code = Temp;
 		
 		GCompiler Comp;

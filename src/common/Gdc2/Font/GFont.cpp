@@ -575,7 +575,7 @@ CFDictionaryRef GFont::GetAttributes()
 GdcPt2 GFont::StringBounds(const char *s, int len)
 {
 	GdcPt2 Sz(0, GetHeight());
-	GArray<uint32> CacheMiss;
+	GArray<uint32_t> CacheMiss;
 	
 	if (s)
 	{
@@ -583,7 +583,7 @@ GdcPt2 GFont::StringBounds(const char *s, int len)
 		GUtf8Ptr end(s + (len < 0 ? strlen(s) : len);
 		while (p < end)
 		{
-			uint32 c = p;
+			uint32_t c = p;
 			if (c < 0x80)
 			{
 				Sz.x += d->CharX[c];
@@ -714,7 +714,7 @@ class cmap_encoding_subtable
 public:
 	uint16 platform_id;
 	uint16 encoding_id;
-	uint32 offset;
+	uint32_t offset;
 };
 
 #define INT16_SWAP(i)					(	((i)>>8) | (((i)&0xff)<<8) )
@@ -723,7 +723,7 @@ public:
 											( ((i)&0x00ff0000) >> 8 ) |		\
 											( ((i)&0xff000000) >> 24) )
 #define MAKE_TT_TABLE_NAME(c1, c2, c3, c4) \
-	(((uint32)c4) << 24 | ((uint32)c3) << 16 | ((uint32)c2) << 8 | ((uint32)c1))
+	(((uint32_t)c4) << 24 | ((uint32_t)c3) << 16 | ((uint32_t)c2) << 8 | ((uint32_t)c1))
 #define CMAP							(MAKE_TT_TABLE_NAME('c','m','a','p'))
 #define CMAP_HEADER_SIZE				4
 #define APPLE_UNICODE_PLATFORM_ID		0
@@ -734,7 +734,7 @@ public:
 #define UNICODE_ENCODING_ID				1
 #define UCS4_ENCODING_ID				10
 
-type_4_cmap *GetUnicodeTable(HFONT hFont, uint16 &Length)
+type_4_cmap *GetUnicodeTable(HFONT hFont, uint16_t &Length)
 {
 	bool Status = false;
 	type_4_cmap *Table = 0;
@@ -744,12 +744,12 @@ type_4_cmap *GetUnicodeTable(HFONT hFont, uint16 &Length)
 	{
 		HFONT Old = (HFONT)SelectObject(hDC, hFont);
 
-		uint16 Tables = 0;
-		uint32 Offset = 0;
+		uint16_t Tables = 0;
+		uint32_t Offset = 0;
 
 		// Get The number of encoding tables, at offset 2
-		int32 Res = GetFontData(hDC, CMAP, 2, &Tables, sizeof(uint16));
-		if (Res == sizeof (uint16))
+		auto Res = GetFontData(hDC, CMAP, 2, &Tables, sizeof(uint16_t));
+		if (Res == sizeof (uint16_t))
 		{
 			Tables = INT16_SWAP(Tables);
 			cmap_encoding_subtable *Sub = (cmap_encoding_subtable*)malloc(ENCODING_TABLE_SIZE*Tables);
@@ -778,7 +778,7 @@ type_4_cmap *GetUnicodeTable(HFONT hFont, uint16 &Length)
 		if (Offset)
 		{
 			Length = 0;
-			uint Res = GetFontData(hDC, CMAP, Offset + 2, &Length, sizeof(uint16));
+			uint Res = GetFontData(hDC, CMAP, Offset + 2, &Length, sizeof(uint16_t));
 			if (Res == sizeof(uint16))
 			{
 				Length = INT16_SWAP(Length);

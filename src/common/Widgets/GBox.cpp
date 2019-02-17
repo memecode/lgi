@@ -115,7 +115,7 @@ GViewI *GBox::GetViewAt(int i)
 	return Children[i];
 }
 
-bool GBox::SetViewAt(uint32 i, GViewI *v)
+bool GBox::SetViewAt(uint32_t i, GViewI *v)
 {
 	if (!v || i > Children.Length())
 	{

@@ -303,7 +303,7 @@ public:
 				break;
 
 			// if (i >= 0)
-			addr[i] = (Addr) *((uint8**)RegEbp + 1);
+			addr[i] = (Addr) *((uint8_t**)RegEbp + 1);
 			RegEbp = *(Addr*)RegEbp;
 		}
 

@@ -30,7 +30,7 @@ extern bool LgiCheckFile(char *Path, int PathSize);
 LgiFunc bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a = 0, GMessage::Param b = 0);
 LgiFunc GViewI *GetNextTabStop(GViewI *v, bool Back);
 /// Converts an OS error code into a text string
-LgiClass GAutoString LgiErrorCodeToString(uint32 ErrorCode);
+LgiClass GAutoString LgiErrorCodeToString(uint32_t ErrorCode);
 #if defined(MAC) && !defined(COCOA)
 LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
 #endif
@@ -423,7 +423,7 @@ private:
 		friend		class GWin32Class;
 		friend		class GCombo;
 		friend		LRESULT CALLBACK DlgRedir(OsView hWnd, UINT m, WPARAM a, LPARAM b);
-		static		void CALLBACK TimerProc(OsView hwnd, UINT uMsg, UINT_PTR idEvent, uint32 dwTime);
+		static		void CALLBACK TimerProc(OsView hwnd, UINT uMsg, UINT_PTR idEvent, uint32_t dwTime);
 
 	#elif defined MAC
 	
@@ -491,12 +491,12 @@ protected:
 	
 	#if defined WINNATIVE
 
-	uint32 GetStyle();
-	void SetStyle(uint32 i);
-	uint32 GetExStyle();
-	void SetExStyle(uint32 i);
-	uint32 GetDlgCode();
-	void SetDlgCode(uint32 i);
+	uint32_t GetStyle();
+	void SetStyle(uint32_t i);
+	uint32_t GetExStyle();
+	void SetExStyle(uint32_t i);
+	uint32_t GetDlgCode();
+	void SetDlgCode(uint32_t i);
 
     /// \brief Gets the win32 class passed to CreateWindowEx()
 	const char *GetClassW32();

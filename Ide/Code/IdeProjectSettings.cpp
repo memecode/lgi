@@ -90,12 +90,12 @@ struct SettingInfo
 {
 	struct BitFlags
 	{
-		uint32 MultiLine : 1;
-		uint32 CrossPlatform : 1;
-		uint32 PlatformSpecific : 1;
-		uint32 ConfigSpecific : 1;
-		uint32 Enum : 1;
-		uint32 FileSelect : 1;
+		uint32_t MultiLine : 1;
+		uint32_t CrossPlatform : 1;
+		uint32_t PlatformSpecific : 1;
+		uint32_t ConfigSpecific : 1;
+		uint32_t Enum : 1;
+		uint32_t FileSelect : 1;
 	};
 	
 	ProjSetting Setting;
@@ -103,7 +103,7 @@ struct SettingInfo
 	const char *Name;
 	const char *Category;
 	union {
-		uint32 Flags;
+		uint32_t Flags;
 		BitFlags Flag;
 	};
 };

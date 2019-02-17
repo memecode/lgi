@@ -566,14 +566,14 @@ bool GFontSystem::AddFont(GAutoPtr<GFont> Fnt)
 	auto *Map = Fnt->GetGlyphMap();
 	if (Map)
 	{
-		uint8 Used = d->Used;
+		uint8_t Used = d->Used;
 
 		// Insert all the characters of this font into the LUT
 		// so that we can map from a character back to the font
 		for (int k=0; k<=MAX_UNICODE; k += 8)
 		{
 			// unroll the loop for maximum speed..
-			uint8 m = Map[k >> 3];
+			uint8_t m = Map[k >> 3];
 			
 			#define TestLut(i) \
 				if (!Lut[k+i] && (m & (1 << i))) \
@@ -593,7 +593,7 @@ bool GFontSystem::AddFont(GAutoPtr<GFont> Fnt)
 	return true;
 }
 
-GFont *GFontSystem::GetGlyph(uint32 u, GFont *UserFont)
+GFont *GFontSystem::GetGlyph(uint32_t u, GFont *UserFont)
 {
 	if (u > MAX_UNICODE || !UserFont)
 	{

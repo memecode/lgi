@@ -33,7 +33,7 @@ public:
 	}
 
 	void EmptyKeys() {}
-	uint32 Hash(T k) { return (uint32)k; }
+	uint32_t Hash(T k) { return (uint32_t)k; }
 	T CopyKey(T a) { return a; }
 	size_t SizeKey(T a) { return sizeof(a); }
 	void FreeKey(T &a) { a = NullKey; }
@@ -58,7 +58,7 @@ public:
 	}
 
 	void EmptyKeys() {}
-	uint32 Hash(T k) { return (uint32)(((size_t)k)/31); }
+	uint32_t Hash(T k) { return (uint32_t)(((size_t)k)/31); }
 	T CopyKey(T a) { return a; }
 	size_t SizeKey(T a) { return sizeof(a); }
 	void FreeKey(T &a) { a = NullKey; }
@@ -83,7 +83,7 @@ public:
 	}
 
 	void EmptyKeys() {}
-	uint32 Hash(T *k) { return LHash<uint32,T>(k, Strlen(k), CaseSen); }
+	uint32_t Hash(T *k) { return LHash<uint32_t,T>(k, Strlen(k), CaseSen); }
 	T *CopyKey(T *a) { return Strdup(a); }
 	size_t SizeKey(T *a) { return (Strlen(a)+1)*sizeof(*a); }
 	void FreeKey(T *&a) { if (a) delete [] a; a = NullKey; }
@@ -147,7 +147,7 @@ public:
 	}
 
 	void EmptyKeys() {}
-	uint32 Hash(const T *k) { return LHash<uint32,T>(k, Strlen(k), CaseSen); }
+	uint32_t Hash(const T *k) { return LHash<uint32_t,T>(k, Strlen(k), CaseSen); }
 	T *CopyKey(const T *a) { return Strdup(a); }
 	size_t SizeKey(const T *a) { return (Strlen(a)+1)*sizeof(*a); }
 	void FreeKey(const T *&a) { if (a) delete [] a; a = NullKey; }
@@ -169,7 +169,7 @@ public:
 		NullKey = DefaultNull;
 	}
 
-	uint32 Hash(T *k) { return LHash<uint32,T>(k, Strlen(k), CaseSen); }
+	uint32_t Hash(T *k) { return LHash<uint32_t,T>(k, Strlen(k), CaseSen); }
 	size_t SizeKey(T *a) { return (Strlen(a)+1)*sizeof(*a); }
 	bool CmpKey(T *a, T *b) { return !(CaseSen ? Strcmp(a, b) : Stricmp(a, b)); }
 
@@ -205,7 +205,7 @@ public:
 		NullKey = DefaultNull;
 	}
 
-	uint32 Hash(const T *k) { return LHash<uint32,T>(k, Strlen(k), CaseSen); }
+	uint32_t Hash(const T *k) { return LHash<uint32_t,T>(k, Strlen(k), CaseSen); }
 	size_t SizeKey(const T *a) { return (Strlen(a)+1)*sizeof(*a); }
 	bool CmpKey(const T *a, const T *b) { return !(CaseSen ? Strcmp(a, b) : Stricmp(a, b)); }
 
@@ -261,7 +261,7 @@ protected:
 	{
 		if (k != this->NullKey && Table)
 		{
-			uint32 h = this->Hash(k);
+			uint32_t h = this->Hash(k);
 
 			for (size_t i=0; i<Size; i++)
 			{
@@ -486,7 +486,7 @@ public:
 			return false;
 		}
 
-		uint32 h = this->Hash(k);
+		uint32_t h = this->Hash(k);
 
 		ssize_t Index = -1;
 		for (size_t i=0; i<Size; i++)
@@ -548,8 +548,8 @@ public:
 			{
 				if (Table[i].key != this->NullKey)
 				{
-					uint32 Hsh = this->Hash(Table[i].key);
-					uint32 HashIndex = Hsh % Size;
+					uint32_t Hsh = this->Hash(Table[i].key);
+					uint32_t HashIndex = Hsh % Size;
 					
 					if (HashIndex != i && Between(Hole, HashIndex, i))
 					{

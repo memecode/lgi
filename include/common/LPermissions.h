@@ -7,57 +7,57 @@ struct LPermissions
 {
 	struct _Win
 	{
-		uint32 ReadOnly : 1;	// FILE_ATTRIBUTE_READONLY
-		uint32 Hidden : 1;
-		uint32 System : 1;
-		uint32 Reserved1 : 1;
+		uint32_t ReadOnly : 1;	// FILE_ATTRIBUTE_READONLY
+		uint32_t Hidden : 1;
+		uint32_t System : 1;
+		uint32_t Reserved1 : 1;
 
-		uint32 Folder : 1;		// FILE_ATTRIBUTE_DIRECTORY
-		uint32 Archive : 1;
-		uint32 Device : 1;
-		uint32 Normal : 1;
+		uint32_t Folder : 1;		// FILE_ATTRIBUTE_DIRECTORY
+		uint32_t Archive : 1;
+		uint32_t Device : 1;
+		uint32_t Normal : 1;
 
-		uint32 Temporary : 1;	// FILE_ATTRIBUTE_TEMPORARY
-		uint32 Sparse : 1;
-		uint32 ReparsePoint : 1;
-		uint32 Compressed : 1;
+		uint32_t Temporary : 1;	// FILE_ATTRIBUTE_TEMPORARY
+		uint32_t Sparse : 1;
+		uint32_t ReparsePoint : 1;
+		uint32_t Compressed : 1;
 
-		uint32 Offline : 1;		// FILE_ATTRIBUTE_OFFLINE
-		uint32 ContentNotIndexed : 1;
-		uint32 Encrypted : 1;
-		uint32 IntegrityStream : 1;
+		uint32_t Offline : 1;		// FILE_ATTRIBUTE_OFFLINE
+		uint32_t ContentNotIndexed : 1;
+		uint32_t Encrypted : 1;
+		uint32_t IntegrityStream : 1;
 
-		uint32 Virtual : 1;		// FILE_ATTRIBUTE_VIRTUAL
-		uint32 NoScrub : 1;
-		uint32 Ea : 1;
+		uint32_t Virtual : 1;		// FILE_ATTRIBUTE_VIRTUAL
+		uint32_t NoScrub : 1;
+		uint32_t Ea : 1;
 	};
 
 	struct _Unix
 	{
-		uint32 GlobalExecute : 1;	// S_IXOTH
-		uint32 GlobalWrite : 1;		// S_IWOTH
-		uint32 GlobalRead : 1;		// S_IROTH
-		uint32 GlobalReserved : 1;
+		uint32_t GlobalExecute : 1;	// S_IXOTH
+		uint32_t GlobalWrite : 1;		// S_IWOTH
+		uint32_t GlobalRead : 1;		// S_IROTH
+		uint32_t GlobalReserved : 1;
 		
-		uint32 GroupExecute : 1;	// S_IXGRP
-		uint32 GroupWrite : 1;		// S_IWGRP
-		uint32 GroupRead : 1;		// S_IRGRP
-		uint32 GroupReserved : 1;
+		uint32_t GroupExecute : 1;	// S_IXGRP
+		uint32_t GroupWrite : 1;		// S_IWGRP
+		uint32_t GroupRead : 1;		// S_IRGRP
+		uint32_t GroupReserved : 1;
 
-		uint32 UserExecute : 1;		// S_IXUSR
-		uint32 UserWrite : 1;		// S_IWUSR
-		uint32 UserRead : 1;		// S_IRUSR
-		uint32 UserReserved : 1;
+		uint32_t UserExecute : 1;		// S_IXUSR
+		uint32_t UserWrite : 1;		// S_IWUSR
+		uint32_t UserRead : 1;		// S_IRUSR
+		uint32_t UserReserved : 1;
 
-		uint32 Sticky : 1;
-		uint32 SetGid : 1;
-		uint32 SetUid : 1;
+		uint32_t Sticky : 1;
+		uint32_t SetGid : 1;
+		uint32_t SetUid : 1;
 	};
 
 	bool IsWindows; // switch between Win and Unix members in the union
 	union
 	{
-		uint32 u32;
+		uint32_t u32;
 		_Win Win;
 		_Unix Unix;
 	};
@@ -68,7 +68,7 @@ struct LPermissions
 		u32 = 0;
 	}
 
-	typedef LHashTbl<IntKey<uint32>,const char*> FlagMap;
+	typedef LHashTbl<IntKey<uint32_t>,const char*> FlagMap;
 	FlagMap &EnumFlags()
 	{
 		static FlagMap fWin, fUnix;

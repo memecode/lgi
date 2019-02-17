@@ -166,7 +166,7 @@ bool GFile::CallMethod(const char *Name, GVariant *Dst, GArray<GVariant*> &Arg)
 				{
 					case 1:
 					{
-						uint8 i;
+						uint8_t i;
 						if (Read(&i, sizeof(i)) == sizeof(i))
 							*Dst = i;
 						break;
@@ -180,7 +180,7 @@ bool GFile::CallMethod(const char *Name, GVariant *Dst, GArray<GVariant*> &Arg)
 					}
 					case 4:
 					{
-						uint32 i;
+						uint32_t i;
 						if (Read(&i, sizeof(i)) == sizeof(i))
 							*Dst = (int)i;
 						break;
@@ -259,7 +259,7 @@ bool GFile::CallMethod(const char *Name, GVariant *Dst, GArray<GVariant*> &Arg)
 						{
 							if (WrLen == 1)
 							{
-								uint8 i = v->Value.Int;
+								uint8_t i = v->Value.Int;
 								*Dst = Write(&i, sizeof(i));
 							}
 							else if (WrLen == 2)
@@ -277,7 +277,7 @@ bool GFile::CallMethod(const char *Name, GVariant *Dst, GArray<GVariant*> &Arg)
 						{
 							if (WrLen == 1)
 							{
-								uint8 i = (uint8) v->Value.Int64;
+								uint8_t i = (uint8_t) v->Value.Int64;
 								*Dst = Write(&i, sizeof(i));
 							}
 							else if (WrLen == 2)
@@ -287,7 +287,7 @@ bool GFile::CallMethod(const char *Name, GVariant *Dst, GArray<GVariant*> &Arg)
 							}
 							else if (WrLen == 4)
 							{
-								uint32 i = (uint32)v->Value.Int64;
+								uint32_t i = (uint32_t)v->Value.Int64;
 								*Dst = Write(&i, sizeof(i));
 							}
 							else

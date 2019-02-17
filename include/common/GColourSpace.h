@@ -42,7 +42,7 @@ enum GColourSpace
 {
 	CsNone = 0,
 
-	// uint8 types
+	// uint8_t types
 	CsIndex1 = GDC_COLOUR_SPACE_1(CtIndex, 1), // Monochrome
 	CsIndex4 = GDC_COLOUR_SPACE_1(CtIndex, 4), // 16 colour
 	CsIndex8 = GDC_COLOUR_SPACE_1(CtIndex, 8), // 256 colour
@@ -96,10 +96,10 @@ enum GColourSpace
 
 struct GRgb15 {
 	#if LEAST_SIG_BIT_FIRST
-	uint16 b : 5;
-	uint16 g : 5;
-	uint16 r : 5;
-	uint16 pad : 1;
+	uint16_t b : 5;
+	uint16_t g : 5;
+	uint16_t r : 5;
+	uint16_t pad : 1;
 	#else
 	uint16 pad : 1;
 	uint16 r : 5;
@@ -110,10 +110,10 @@ struct GRgb15 {
 
 struct GArgb15 {
 	#if LEAST_SIG_BIT_FIRST
-	uint16 b : 5;
-	uint16 g : 5;
-	uint16 r : 5;
-	uint16 a : 1;
+	uint16_t b : 5;
+	uint16_t g : 5;
+	uint16_t r : 5;
+	uint16_t a : 1;
 	#else
 	uint16 a : 1;
 	uint16 r : 5;
@@ -124,10 +124,10 @@ struct GArgb15 {
 
 struct GBgr15 {
 	#if LEAST_SIG_BIT_FIRST
-	uint16 r : 5;
-	uint16 g : 5;
-	uint16 b : 5;
-	uint16 pad : 1;
+	uint16_t r : 5;
+	uint16_t g : 5;
+	uint16_t b : 5;
+	uint16_t pad : 1;
 	#else
 	uint16 pad : 1;
 	uint16 b : 5;
@@ -138,10 +138,10 @@ struct GBgr15 {
 
 struct GAbgr15 {
 	#if LEAST_SIG_BIT_FIRST
-	uint16 r : 5;
-	uint16 g : 5;
-	uint16 b : 5;
-	uint16 a : 1;
+	uint16_t r : 5;
+	uint16_t g : 5;
+	uint16_t b : 5;
+	uint16_t a : 1;
 	#else
 	uint16 a : 1;
 	uint16 b : 5;
@@ -152,9 +152,9 @@ struct GAbgr15 {
 
 struct GRgb16 {
 	#if LEAST_SIG_BIT_FIRST
-	uint16 b : 5;
-	uint16 g : 6;
-	uint16 r : 5;
+	uint16_t b : 5;
+	uint16_t g : 6;
+	uint16_t r : 5;
 	#else
 	uint16 r : 5;
 	uint16 g : 6;
@@ -164,9 +164,9 @@ struct GRgb16 {
 
 struct GBgr16 {
 	#if LEAST_SIG_BIT_FIRST
-	uint16 r : 5;
-	uint16 g : 6;
-	uint16 b : 5;
+	uint16_t r : 5;
+	uint16_t g : 6;
+	uint16_t b : 5;
 	#else
 	uint16 b : 5;
 	uint16 g : 6;
@@ -176,81 +176,81 @@ struct GBgr16 {
 
 struct GRgb24 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint8 r, g, b;
+	uint8_t r, g, b;
 	#else
-	uint8 b, g, r;
+	uint8_t b, g, r;
 	#endif
 };
 
 struct GBgr24 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint8 b, g, r;
+	uint8_t b, g, r;
 	#else
-	uint8 r, g, b;
+	uint8_t r, g, b;
 	#endif
 };
 
 struct GRgba32 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint8 r, g, b, a;
+	uint8_t r, g, b, a;
 	#else
-	uint8 a, b, g, r;
+	uint8_t a, b, g, r;
 	#endif
 };
 
 struct GBgra32 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint8 b, g, r, a;
+	uint8_t b, g, r, a;
 	#else
-	uint8 a, r, g, b;
+	uint8_t a, r, g, b;
 	#endif
 };
 
 struct GArgb32 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint8 a, r, g, b;
+	uint8_t a, r, g, b;
 	#else
-	uint8 b, g, r, a;
+	uint8_t b, g, r, a;
 	#endif
 };
 
 struct GAbgr32 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint8 a, b, g, r;
+	uint8_t a, b, g, r;
 	#else
-	uint8 r, g, b, a;
+	uint8_t r, g, b, a;
 	#endif
 };
 
 struct GXrgb32 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint8 pad, r, g, b;
+	uint8_t pad, r, g, b;
 	#else
-	uint8 b, g, r, pad;
+	uint8_t b, g, r, pad;
 	#endif
 };
 
 struct GRgbx32 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint8 r, g, b, pad;
+	uint8_t r, g, b, pad;
 	#else
-	uint8 pad, b, g, r;
+	uint8_t pad, b, g, r;
 	#endif
 };
 
 struct GXbgr32 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint8 pad, b, g, r;
+	uint8_t pad, b, g, r;
 	#else
-	uint8 r, g, b, pad;
+	uint8_t r, g, b, pad;
 	#endif
 };
 
 struct GBgrx32 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint8 b, g, r, pad;
+	uint8_t b, g, r, pad;
 	#else
-	uint8 pad, r, g, b;
+	uint8_t pad, r, g, b;
 	#endif
 };
 
@@ -259,7 +259,7 @@ struct GBgrx32 {
 #endif
 struct GRgb48 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint16 r, g, b;
+	uint16_t r, g, b;
 	#else
 	uint16 b, g, r;
 	#endif
@@ -267,7 +267,7 @@ struct GRgb48 {
 
 struct GBgr48 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint16 b, g, r;
+	uint16_t b, g, r;
 	#else
 	uint16 r, g, b;
 	#endif
@@ -275,7 +275,7 @@ struct GBgr48 {
 
 struct GRgba64 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint16 r, g, b, a;
+	uint16_t r, g, b, a;
 	#else
 	uint16 a, b, g, r;
 	#endif
@@ -283,7 +283,7 @@ struct GRgba64 {
 
 struct GBgra64 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint16 b, g, r, a;
+	uint16_t b, g, r, a;
 	#else
 	uint16 a, r, g, b;
 	#endif
@@ -291,7 +291,7 @@ struct GBgra64 {
 
 struct GArgb64 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint16 a, r, g, b;
+	uint16_t a, r, g, b;
 	#else
 	uint16 b, g, r, a;
 	#endif
@@ -299,7 +299,7 @@ struct GArgb64 {
 
 struct GAbgr64 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint16 a, b, g, r;
+	uint16_t a, b, g, r;
 	#else
 	uint16 r, g, b, a;
 	#endif
@@ -309,32 +309,32 @@ struct GAbgr64 {
 #endif
 
 struct GHls32 {
-	uint16 h;
-	uint8 l, s;
+	uint16_t h;
+	uint8_t l, s;
 };
 
 struct GCmyk32 {
 	#if LEAST_SIG_BYTE_FIRST
-	uint8 c, m, y, k;
+	uint8_t c, m, y, k;
 	#else
-	uint8 k, y, m, c;
+	uint8_t k, y, m, c;
 	#endif
 };
 
 struct GColourComponent
 {
 	// ((type << 4) | (size))
-	uint8 Bits;
+	uint8_t Bits;
 	
 	GComponentType Type() { return (GComponentType) ((Bits >> 4) & 0xf); }
-	void Type(GComponentType t) { Bits = (Bits & 0xf) | ((uint8)t << 4); }
-	uint8 Size() { return Bits & 0xf; }
-	void Size(uint8 t) { Bits = (Bits & 0xf0) | (t & 0xf); }
+	void Type(GComponentType t) { Bits = (Bits & 0xf) | ((uint8_t)t << 4); }
+	uint8_t Size() { return Bits & 0xf; }
+	void Size(uint8_t t) { Bits = (Bits & 0xf0) | (t & 0xf); }
 };
 
 union GColourSpaceBits
 {
-	uint32 All;
+	uint32_t All;
 	GColourComponent Bits[4];
 	
 	GColourComponent &operator[](int i)
@@ -425,9 +425,9 @@ LgiFunc GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits);
 
 typedef union
 {
-	uint8 *u8;
-	uint16 *u16;
-	uint32 *u32;
+	uint8_t *u8;
+	uint16_t *u16;
+	uint32_t *u32;
 	int i;
 	
 	GRgb15  *rgb15;
@@ -467,10 +467,10 @@ typedef union
     Note:		In 15bit mode the T bit can toggle between 8-bit indexing and RGB, or it 
 				can also just be a 1 bit alpha channel.
 */
-typedef uint32						COLOUR;
+typedef uint32_t						COLOUR;
 
 /// Alpha value, 0 - transparent, 255 - solid
-typedef uint8						ALPHA;
+typedef uint8_t						ALPHA;
 
 // colour conversion defines
 // RGB colour space
@@ -518,8 +518,8 @@ typedef uint8						ALPHA;
 #define Gc16(c)						( (((c) & 0x07E0) >> 3) | (((c) & 0x07E0) >> 9) )
 #define Bc16(c)						( (((c) & 0x001F) << 3) | (((c) & 0x001F) >> 2) )
 
-#define G5bitTo8bit(c)				(uint8) ( ((c) << 3) | ((c) >> 2) )
-#define G6bitTo8bit(c)				(uint8) ( ((c) << 2) | ((c) >> 4) )
+#define G5bitTo8bit(c)				(uint8_t) ( ((c) << 3) | ((c) >> 2) )
+#define G6bitTo8bit(c)				(uint8_t) ( ((c) << 2) | ((c) >> 4) )
 #define G8bitTo5bit(c)				( (c) >> 3 )
 #define G8bitTo6bit(c)				( (c) >> 2 )
 #define G8bitTo16bit(c)				( ((uint16)(c) << 8) | ((c) & 0xff) )
@@ -553,7 +553,7 @@ typedef uint8						ALPHA;
 #define A32(c32)					( (uchar) (c32 >> (C32A << 3)) )
 
 #define RgbPreMul(c, a)				( Div255Lut[(c)*a] )
-#define Rgb32(r, g, b)				( ((((uint32)r)&0xFF)<<(C32R<<3)) | (((g)&0xFF)<<(C32G<<3)) | (((b)&0xFF)<<(C32B<<3)) | (0xFF<<(C32A<<3)) )
+#define Rgb32(r, g, b)				( ((((uint32_t)r)&0xFF)<<(C32R<<3)) | (((g)&0xFF)<<(C32G<<3)) | (((b)&0xFF)<<(C32B<<3)) | (0xFF<<(C32A<<3)) )
 #define Rgba32(r, g, b, a)			( ((((unsigned)r)&0xFF)<<(C32R<<3)) | (((g)&0xFF)<<(C32G<<3)) | (((b)&0xFF)<<(C32B<<3)) | (((a)&0xFF)<<(C32A<<3)) )
 #define Rgbpa32(r, g, b, a)			( (RgbPreMul(r, a)<<(C32R<<3)) | (RgbPreMul(g, a)<<(C32G<<3)) | (RgbPreMul(b, a)<<(C32B<<3)) | ((a&0xFF)<<(C32A<<3)) )
 #define Rgb24To32(c24)				Rgba32( R24(c24), G24(c24), B24(c24), 255 )

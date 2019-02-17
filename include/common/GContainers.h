@@ -29,7 +29,7 @@ class List
 	struct LstBlk
 	{
 		LstBlk *Next, *Prev;
-		uint8 Count;
+		uint8_t Count;
 		T *Ptr[ITEM_PTRS];
 
 		LstBlk()
@@ -551,7 +551,7 @@ public:
 				{
 					LgiAssert(!"Offset error");
 				}
-				i.i->Count = (uint8) (Len - Base);
+				i.i->Count = (uint8_t) (Len - Base);
 				LgiAssert(i.i->Count >= 0 && i.i->Count < ITEM_PTRS);
 				while (i.i->Next)
 				{
@@ -1020,7 +1020,7 @@ protected:
 		/// Total size of the memory block
 		/// Type 3 or 'unused' bytes are in [Used,Size-1].
 		int Size;
-		uint8 *Ptr() { return (uint8*) (this + 1); }
+		uint8_t *Ptr() { return (uint8_t*) (this + 1); }
 
 		Block()
 		{
@@ -1119,7 +1119,7 @@ class LgiClass GMemFile : public GStream
 	{
 		size_t Offset;
 		size_t Used;
-		uint8 Data[1];
+		uint8_t Data[1];
 	};
 
 	// The current file pointer

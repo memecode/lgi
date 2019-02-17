@@ -27,7 +27,7 @@ public:
 	
 	GString MemDumpAddr;
 	NativeInt MemDumpStart;
-	GArray<uint8> MemDump;
+	GArray<uint8_t> MemDump;
 
 	GDebugContextPriv(GDebugContext *ctx) : LMutex("GDebugContextPriv")
 	{
@@ -557,7 +557,7 @@ void GDebugContext::OnUserCommand(const char *Cmd)
 		d->Db->UserCommand(Cmd);
 }
 
-void NonPrintable(uint64 ch, uint8 *&out, ssize_t &len)
+void NonPrintable(uint64 ch, uint8_t *&out, ssize_t &len)
 {
 	if (ch == '\r')
 	{
@@ -621,7 +621,7 @@ void GDebugContext::FormatMemoryDump(int WordSize, int Width, bool InHex)
 		p.Print("%p  ", iAddr);
 		
 		char Char[256] = "";
-		uint8 *ChPtr = (uint8*)Char;
+		uint8_t *ChPtr = (uint8_t*)Char;
 		ssize_t Len = sizeof(Char);
 		
 		for (int n=0; n<DisplayWords; n++)
@@ -669,7 +669,7 @@ void GDebugContext::FormatMemoryDump(int WordSize, int Width, bool InHex)
 					if (*ptr.u64 < ' ')
 						NonPrintable(*ptr.u64, ChPtr, Len);
 					else
-						LgiUtf32To8((uint32)*ptr.u64, ChPtr, Len);
+						LgiUtf32To8((uint32_t)*ptr.u64, ChPtr, Len);
 
 					if (InHex)
 						#ifdef WIN32

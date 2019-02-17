@@ -20,7 +20,7 @@ protected:
 	bool InEndOfLine;
 	GPointer Pos;
 	EncodingType Type;
-	GArray<uint8> Buf;
+	GArray<uint8_t> Buf;
 	GAutoString Charset;
 
 public:
@@ -72,7 +72,7 @@ public:
 		int64 Sz = GetSize();
 		if (Sz > 0)
 		{
-			GAutoPtr<uint8, true> Buf(new uint8[Sz]);
+			GAutoPtr<uint8_t, true> Buf(new uint8_t[Sz]);
 			if (Buf)
 			{
 				ssize_t Rd = Read(Buf, (ssize_t)Sz);
@@ -98,7 +98,7 @@ public:
 		int Sz = (int)GetSize();
 		if (Sz > 0)
 		{
-			GAutoPtr<uint8, true> Buf(new uint8[Sz]);
+			GAutoPtr<uint8_t, true> Buf(new uint8_t[Sz]);
 			if (Buf)
 			{
 				ssize_t Rd = Read(Buf, Sz);
@@ -115,9 +115,9 @@ public:
 	}
 
 	template<typename T>
-	bool CheckForNull(T *ptr, uint8 *end)
+	bool CheckForNull(T *ptr, uint8_t *end)
 	{
-		while ((uint8*)ptr < (end-sizeof(T)))
+		while ((uint8_t*)ptr < (end-sizeof(T)))
 		{
 			if (*ptr == 0)
 				return false;
@@ -137,8 +137,8 @@ public:
 			{
 				First = false;
 
-				uint8 *buf = (uint8*)Buffer;
-				uint8 *start = buf;
+				uint8_t *buf = (uint8_t*)Buffer;
+				uint8_t *start = buf;
 				if (Used > 2 && buf[0] == 0xEF && buf[1] == 0xBB && buf[2] == 0xBF)
 				{
 					Type = Utf8;
@@ -167,7 +167,7 @@ public:
 				else
 				{
 					// Try and detect the char type
-					uint8 *end = buf + Rd;
+					uint8_t *end = buf + Rd;
 					if (CheckForNull(buf, end))
 						Type = Utf8;
 					else if (CheckForNull((uint16*)buf, end))

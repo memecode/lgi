@@ -45,7 +45,7 @@ LgiFunc int FindHeader(int Offset, const char *Str, GStream *f);
 /// GFilterFactory.
 class LgiClass GFilter : public GDom
 {
-	GArray<uint8> Buf;
+	GArray<uint8_t> Buf;
 
 protected:
 	GBmpMem *GetSurface(GSurface *pDC) { return pDC->pMem; }
@@ -54,7 +54,7 @@ protected:
 
 	Progress *Meter;
 
-	inline void Swap(uint8 *out, const void *in, ssize_t len)
+	inline void Swap(uint8_t *out, const void *in, ssize_t len)
 	{
 		#ifdef __BIG_ENDIAN__
 		// Swap the bytes...
@@ -72,20 +72,20 @@ protected:
 
 	bool Read(GStream *s, void *p, ssize_t len)
 	{
-		if (Buf.Length() < (uint32)len)
+		if (Buf.Length() < (uint32_t)len)
 			Buf.Length(len);
 
 		ssize_t r = s->Read(&Buf[0], len);
 		if (r != len)
 			return false;
 
-		Swap((uint8*)p, &Buf[0], len);
+		Swap((uint8_t*)p, &Buf[0], len);
 		return true;
 	}
 
 	bool Write(GStream *s, const void *p, ssize_t len)
 	{
-		if (Buf.Length() < (uint32)len)
+		if (Buf.Length() < (uint32_t)len)
 			Buf.Length(len);
 		Swap(&Buf[0], p, len);
 		ssize_t w = s->Write(&Buf[0], len);

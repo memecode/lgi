@@ -46,7 +46,7 @@ case ICast:
 					c.r[0].GetStr());
 	#endif
 	GResolveRef(Var) Resolve();
-	uint8 Type = *c.u8++;
+	uint8_t Type = *c.u8++;
 	#if VM_DECOMP
 	if (Log)
 		Log->Print(" to %s\n", GVariant::TypeToString((GVariantType)Type));
@@ -608,7 +608,7 @@ case ICallMethod:
 case ICallScript:
 {
 	int32 FuncAddr = *c.i32++;
-	if (FuncAddr < 0 || (uint32)FuncAddr >= Code->ByteCode.Length())
+	if (FuncAddr < 0 || (uint32_t)FuncAddr >= Code->ByteCode.Length())
 	{
 		Log->Print(	"%s ICallScript error: Script function call invalid addr '%p'.\n",
 					Code->AddrToSourceRef(CurrentScriptAddress - sizeof(FuncAddr)),

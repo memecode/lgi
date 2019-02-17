@@ -496,7 +496,7 @@ bool GClipBoard::Text(char *Str, bool AutoEmpty)
 char *GClipBoard::Text()
 {
 	ssize_t Len = 0;
-	GAutoPtr<uint8> Str;
+	GAutoPtr<uint8_t> Str;
 	if (Binary(CF_TEXT, Str, &Len))
 	{
 		d->Utf8.Reset(LgiFromNativeCp((char*)Str.Get()));
@@ -520,7 +520,7 @@ bool GClipBoard::TextW(char16 *Str, bool AutoEmpty)
 char16 *GClipBoard::TextW()
 {
 	ssize_t Len = 0;
-	GAutoPtr<uint8> Str;
+	GAutoPtr<uint8_t> Str;
 	if (Binary(CF_UNICODETEXT, Str, &Len))
 	{
 		d->Wide.Reset(NewStrW((char16*) Str.Get(), Len / 2));
@@ -563,7 +563,7 @@ bool GClipBoard::Html(const char *Doc, bool AutoEmpty)
 
 GString GClipBoard::Html()
 {
-	GAutoPtr<uint8> Buf;
+	GAutoPtr<uint8_t> Buf;
 	ssize_t Len;
 	if (!Binary(CF_HTML, Buf, &Len))
 		return NULL;
@@ -846,7 +846,7 @@ bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	return Status;
 }
 
-bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8> &Ptr, ssize_t *Length)
+bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8_t> &Ptr, ssize_t *Length)
 {
 	bool Status = false;
 

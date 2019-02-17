@@ -179,7 +179,7 @@ static GAutoString ParseVer(void *Resource, char *Part)
 	if (Parts.Length() == 3)
 	{
 		GPointer p;
-		p.u8 = (uint8*)Resource;
+		p.u8 = (uint8_t*)Resource;
 		uint16 Len = *p.u16++;
 		uint16 ValueLen = *p.u16++;
 		uint16 Type = *p.u16++;
@@ -205,10 +205,10 @@ static GAutoString ParseVer(void *Resource, char *Part)
 			p.u8++;
 
 		// Children
-		while (p.u8 < (uint8*)Resource + Len)
+		while (p.u8 < (uint8_t*)Resource + Len)
 		{
 			// Read StringFileInfo structures...
-			uint8 *fStart = p.u8;
+			uint8_t *fStart = p.u8;
 			uint16 fLength = *p.u16++;
 			uint16 fValueLength = *p.u16++;
 			uint16 fType = *p.u16++;
@@ -219,7 +219,7 @@ static GAutoString ParseVer(void *Resource, char *Part)
 			while (p.u8 < fStart + fLength)
 			{
 				// Read StringTable entries
-				uint8 *tStart = p.u8;
+				uint8_t *tStart = p.u8;
 				uint16 tLength = *p.u16++;
 				uint16 tValueLength = *p.u16++;
 				uint16 tType = *p.u16++;
@@ -228,7 +228,7 @@ static GAutoString ParseVer(void *Resource, char *Part)
 				while (p.u8 < tStart + tLength)
 				{
 					// Read String entries
-					uint8 *sStart = p.u8;
+					uint8_t *sStart = p.u8;
 					uint16 sLength = *p.u16++;
 					uint16 sValueLength = *p.u16++;
 					uint16 sType = *p.u16++;
@@ -284,13 +284,13 @@ int64 Time = LgiCurrentTime();
 
 	// Sanity Checks
 	LgiAssert(sizeof(int8) == 1);
-	LgiAssert(sizeof(uint8) == 1);
+	LgiAssert(sizeof(uint8_t) == 1);
 
 	LgiAssert(sizeof(int16) == 2);
 	LgiAssert(sizeof(uint16) == 2);
 
 	LgiAssert(sizeof(int32) == 4);
-	LgiAssert(sizeof(uint32) == 4);
+	LgiAssert(sizeof(uint32_t) == 4);
 
 	LgiAssert(sizeof(int64) == 8);
 	LgiAssert(sizeof(uint64) == 8);

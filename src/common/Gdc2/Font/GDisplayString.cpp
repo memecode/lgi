@@ -233,7 +233,7 @@ GDisplayString::GDisplayString(GFont *f, const char16 *s, ssize_t l, GSurface *p
 }
 
 #ifdef _MSC_VER
-GDisplayString::GDisplayString(GFont *f, const uint32 *s, ssize_t l, GSurface *pdc)
+GDisplayString::GDisplayString(GFont *f, const uint32_t *s, ssize_t l, GSurface *pdc)
 {
 	pDC = pdc;
 	Font = f;
@@ -663,7 +663,7 @@ void GDisplayString::Layout(bool Debug)
 			}
 
 			bool Debug = WasTab;			
-			uint32 u32;
+			uint32_t u32;
 			for (LUnicodeString<wchar_t> u(Str, len); true; u++)
 			{
 				u32 = *u;

@@ -10,7 +10,7 @@ class LgiClass GCssTools
 	GFont *Font;
 	
 	GColour Fore, Back;
-	uint8 ForeInit : 1, BackInit : 1;
+	uint8_t ForeInit : 1, BackInit : 1;
 	
 	bool SetLineStyle(GSurface *pDC, GCss::BorderDef &d);
 	

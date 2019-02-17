@@ -51,7 +51,7 @@ void LThreadWorker::Stop()
 			LgiSleep(1);
 		if (Lock(_FL))
 		{
-			for (uint32 i=0; i<Owners.Length(); i++)
+			for (uint32_t i=0; i<Owners.Length(); i++)
 				Owners[i]->Detach();
 			Unlock();
 		}

@@ -3,7 +3,7 @@
 
 #include "GPixelRops.h"
 
-#define IsOverlapping()	 ((uint8*)dst == (uint8*)src)
+#define IsOverlapping()	 ((uint8_t*)dst == (uint8_t*)src)
 
 #define OverlapCheck()							\
 	if (IsOverlapping())						\
@@ -139,7 +139,7 @@ void GRop15To16(DstPx *dst, SrcPx *src, int px)
 
 	if (IsOverlapping())
 	{
-		REG uint8 r, g, b;
+		REG uint8_t r, g, b;
 		while (Px--)
 		{
 			r = s->r;
@@ -174,7 +174,7 @@ void GRop16To16(DstPx *dst, SrcPx *src, int px)
 
 	if (IsOverlapping())
 	{
-		REG uint8 r, g, b;
+		REG uint8_t r, g, b;
 		while (Px--)
 		{
 			r = s->r;
@@ -323,9 +323,9 @@ void GRop24To24(DstPx *dst, SrcPx *src, int px)
 	REG SrcPx *s = src;
 	REG int Px = px;
 
-	if ((uint8*)d == (uint8*)s)
+	if ((uint8_t*)d == (uint8_t*)s)
 	{
-		REG uint8 r, g, b;
+		REG uint8_t r, g, b;
 		d += px - 1;
 		s += px - 1;
 		while (Px--)
@@ -462,7 +462,7 @@ void GRop24To32(DstPx *dst, SrcPx *src, int px)
 
 	if (IsOverlapping())
 	{
-		REG uint8 r, g, b;
+		REG uint8_t r, g, b;
 		d += px - 1;
 		s += px - 1;
 		
@@ -502,7 +502,7 @@ void GRop32To32(DstPx *dst, SrcPx *src, int px)
 
 	if (IsOverlapping())
 	{
-		REG uint8 r, g, b, a;
+		REG uint8_t r, g, b, a;
 		while (Px--)
 		{
 			r = s->r;
@@ -952,8 +952,8 @@ template<typename OutPx, typename InPx>
 void GComposite32To15(OutPx *d, InPx *s, int Len)
 {
 	InPx *end = s + Len;
-	uint8 *DivLut = Div255Lut;
-	REG uint8 sa;
+	uint8_t *DivLut = Div255Lut;
+	REG uint8_t sa;
 
 	while (s < end)
 	{
@@ -970,8 +970,8 @@ void GComposite32To15(OutPx *d, InPx *s, int Len)
 			// Composite pixel
 			//		Dc'  = (Sca + Dc.Da.(1 - Sa)) / Da'
 			//		Da'  = Sa + Da.(1 - Sa)
-			REG uint8 o = 0xff - sa;
-			REG uint8 val;
+			REG uint8_t o = 0xff - sa;
+			REG uint8_t val;
 			
 			#define NonPreMul(c)	\
 				val = DivLut[(s->c * sa) + (G5bitTo8bit(d->c) * o)]; \
@@ -991,8 +991,8 @@ template<typename OutPx, typename InPx>
 void GComposite32To16(OutPx *d, InPx *s, int Len)
 {
 	InPx *end = s + Len;
-	uint8 *DivLut = Div255Lut;
-	REG uint8 sa;
+	uint8_t *DivLut = Div255Lut;
+	REG uint8_t sa;
 
 	while (s < end)
 	{
@@ -1009,8 +1009,8 @@ void GComposite32To16(OutPx *d, InPx *s, int Len)
 			// Composite pixel
 			//		Dc'  = (Sca + Dc.Da.(1 - Sa)) / Da'
 			//		Da'  = Sa + Da.(1 - Sa)
-			REG uint8 o = 0xff - sa;
-			REG uint8 val;
+			REG uint8_t o = 0xff - sa;
+			REG uint8_t val;
 			
 			#define NonPreMul(c, up, down)	\
 				val = DivLut[(s->c * sa) + (G##up(d->c) * o)]; \
@@ -1030,8 +1030,8 @@ template<typename OutPx, typename InPx>
 void GComposite32To24(OutPx *d, InPx *s, int Len)
 {
 	InPx *end = s + Len;
-	uint8 *DivLut = Div255Lut;
-	REG uint8 sa;
+	uint8_t *DivLut = Div255Lut;
+	REG uint8_t sa;
 
 	while (s < end)
 	{
@@ -1048,7 +1048,7 @@ void GComposite32To24(OutPx *d, InPx *s, int Len)
 			// Composite pixel
 			//		Dc'  = (Sca + Dc.Da.(1 - Sa)) / Da'
 			//		Da'  = Sa + Da.(1 - Sa)
-			REG uint8 o = 0xff - sa;
+			REG uint8_t o = 0xff - sa;
 			
 			#define NonPreMul(c)	\
 				d->c = DivLut[(s->c * sa) + (d->c * o)]
@@ -1067,8 +1067,8 @@ template<typename OutPx, typename InPx>
 void GComposite32To32(OutPx *d, InPx *s, int Len)
 {
 	InPx *end = s + Len;
-	uint8 *DivLut = Div255Lut;
-	REG uint8 sa;
+	uint8_t *DivLut = Div255Lut;
+	REG uint8_t sa;
 
 	while (s < end)
 	{
@@ -1098,7 +1098,7 @@ template<typename OutPx, typename InPx>
 void GComposite32To48(OutPx *d, InPx *s, int Len)
 {
 	InPx *end = s + Len;
-	REG uint8 sa;
+	REG uint8_t sa;
 
 	while (s < end)
 	{
@@ -1127,7 +1127,7 @@ template<typename OutPx, typename InPx>
 void GComposite32To64(OutPx *d, InPx *s, int Len)
 {
 	InPx *end = s + Len;
-	REG uint8 sa;
+	REG uint8_t sa;
 
 	while (s < end)
 	{
@@ -1198,7 +1198,7 @@ void GComposite64To15(DstPx *dst, SrcPx *src, int px)
 	REG DstPx *d = dst;
 	REG SrcPx *s = src;
 	REG int Px = px;
-	REG uint8 *DivLut = Div255Lut;
+	REG uint8_t *DivLut = Div255Lut;
 	
 	OverlapCheck()
 	
@@ -1226,7 +1226,7 @@ void GComposite64To16(DstPx *dst, SrcPx *src, int px)
 	REG DstPx *d = dst;
 	REG SrcPx *s = src;
 	REG int Px = px;
-	REG uint8 *DivLut = Div255Lut;
+	REG uint8_t *DivLut = Div255Lut;
 	
 	OverlapCheck()
 	
@@ -1254,7 +1254,7 @@ void GComposite64To24(DstPx *dst, SrcPx *src, int px)
 	REG DstPx *d = dst;
 	REG SrcPx *s = src;
 	REG int Px = px;
-	REG uint8 *DivLut = Div255Lut;
+	REG uint8_t *DivLut = Div255Lut;
 	
 	OverlapCheck()
 	
@@ -1272,7 +1272,7 @@ void GComposite64To32(DstPx *dst, SrcPx *src, int px)
 	REG DstPx *d = dst;
 	REG SrcPx *s = src;
 	REG int Px = px;
-	REG uint8 *DivLut = Div255Lut;
+	REG uint8_t *DivLut = Div255Lut;
 	
 	OverlapCheck()
 	
