@@ -157,6 +157,7 @@ class VcFolder : public GTreeItem, public GCss
 	void ClearError();
 	void OnChange(PropType Prop) { Update(); }
 	VcFile *FindFile(const char *Path);
+	void LinkParents();
 
 	bool ParseDiffs(GString s, GString Rev, bool IsWorking);
 	

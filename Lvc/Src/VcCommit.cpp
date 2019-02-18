@@ -1,11 +1,13 @@
 #include "Lvc.h"
 #include "GClipBoard.h"
 #include "../Resources/resdefs.h"
+#include "GPath.h"
 
 VcCommit::VcCommit(AppPriv *priv)
 {
 	d = priv;
 	Current = false;
+	NodeIdx = -1;
 	Parents.SetFixedLength(false);
 }
 
@@ -29,12 +31,69 @@ void VcCommit::SetCurrent(bool b)
 	Current = b;
 }
 
+void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
+{
+	LListItem::OnPaintColumn(Ctx, i, c);
+
+	if (i == 0)
+	{
+		double Px = 12;
+		int Ht = Ctx.Y();
+		double Half = 5.5;
+		#define MAP(col) ((col) * Px + Half)
+
+		GMemDC Mem(Ctx.X(), Ctx.Y(), System32BitColourSpace);
+		double r = Half - 2;
+
+		bool Dbg = IsRev("938e8ccfdac365e91ca7ca732aab538d8769a37e");
+		if (Dbg)
+		{
+			Mem.Colour(GColour::Red);
+			// Mem.Rectangle();
+		}
+
+		double x = MAP(NodeIdx);
+		if (NodeIdx >= 0)
+		{
+			double Cx = x;
+			double Cy = Ht / 2;
+			GPath p;
+			p.Circle(Cx, Cy, r);
+			//p.Circle(Cx, Cy, r - 1);
+			GSolidBrush sb(GColour::Black);
+			p.Fill(&Mem, sb);
+		}
+
+		Mem.Colour(GColour::Black);
+		for (unsigned i=0; i<Nodes.Length(); i++)
+		{
+			auto &n = Nodes[i];
+			double mx = MAP(i);
+			for (auto pi:n.Prev)
+			{
+				double px = MAP(pi);
+				Mem.Line(px, -(Ht/2), mx, (Ht/2));
+			}
+			for (auto ni:n.Next)
+			{
+				double nx = MAP(ni);
+				Mem.Line(nx, Ht+(Ht/2), mx, (Ht/2));
+			}
+		}
+
+		// Mem.ConvertPreMulAlpha(false);
+		Ctx.pDC->Op(GDC_ALPHA);
+		Ctx.pDC->Blt(Ctx.x1, Ctx.y1, &Mem);
+	}
+}
+
 char *VcCommit::GetText(int Col)
 {
 	switch (Col)
 	{
 		case 0:
-			return Current ? (char*)"***" : NULL;
+			// Cache.Printf("%i%s", (int)Parents.Length(), Current ? " ***" : "");
+			return NULL;
 		case 1:
 			return Rev;
 		case 2:
@@ -70,7 +129,11 @@ bool VcCommit::GitParse(GString s, bool RevList)
 		{
 			GString &Ln = lines[i];
 			if (IsWhiteSpace(Ln(0)))
-				Msg += Ln.LStrip() + "\n";
+			{
+				if (Msg)
+					Msg += "\n";
+				Msg += Ln.Strip();
+			}
 			else
 			{
 				a = Ln.SplitDelimit(" \t\r", 1);
@@ -79,7 +142,7 @@ bool VcCommit::GitParse(GString s, bool RevList)
 				if (a[0].Equals("parent"))
 					Parents.Add(a[1]);
 				else if (a[0].Equals("author"))
-					Author = a[1];
+					Author = a[1].RStrip("0123456789+ ");
 			}
 		}
 	}

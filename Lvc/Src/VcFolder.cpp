@@ -565,6 +565,9 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 					Errors++;
 				}
 			}
+
+			Log.Sort(CommitDateCmp);
+			LinkParents();
 			break;
 		}
 	}
@@ -746,6 +749,147 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 	IsLogging = false;
 
 	return true;
+}
+
+void VcFolder::LinkParents()
+{
+	GString Dbg = "21ccae56b8bc707be6d7af7c055a86cdb697b1f1";
+
+	VcCommit *p = NULL;
+	for (auto i = Log.Length()-1; i > 0; i--)
+	{
+		VcCommit *c = Log[i];
+		if (p)
+		{
+			c->Nodes.Empty();
+			c->NodeIdx = -1;
+
+			// Match the parent nodes...
+			auto Par = c->GetParents();
+
+			if (c->IsRev("1802edf955ff9037e66b1481121be3a6e21bf0a7"))
+			{
+				int asd=0;
+			}
+
+
+			LgiAssert(Par->Length() > 0);
+			for (unsigned n = 0; n < Par->Length(); n++)
+			{
+				bool Found = false;
+				GString &pRev = (*Par)[n];
+				for (unsigned k = 0; k < p->Nodes.Length(); k++)
+				{
+					auto &PrevNode = p->Nodes[k];
+					if (pRev.Equals(PrevNode.Rev, false))
+					{
+						if (c->NodeIdx < 0)
+							c->NodeIdx = k;
+
+						auto &CurNode = c->Nodes[c->NodeIdx];
+						CurNode.Prev.Add(k);
+						CurNode.Rev = c->GetRev();
+
+						PrevNode.Next.Add(c->NodeIdx);
+						Found = true;
+						break;
+					}
+				}
+				
+				if (!Found)
+				{
+					// Go and find it...
+					size_t end;
+					for (end = i + 1; end < Log.Length(); end++)
+					{
+						if (!_stricmp(Log[end]->GetRev(), pRev))
+							break;
+					}
+					if (end < Log.Length())
+					{
+						// Found..
+						VcCommit *Cur = c;
+						VcCommit *Next = Log[i+1];
+						
+						if (Cur->NodeIdx < 0)
+						{
+							Cur->NodeIdx = (int)Next->Nodes.Length();
+							Cur->Nodes[Cur->NodeIdx].Rev = Cur->GetRev();
+						}
+
+						int CurIdx = Cur->NodeIdx;
+						for (auto n = i; n < end; n++)
+						{
+							auto *Next = Log[n + 1];
+							int NextIdx = (int)Next->Nodes.Length();
+							for (unsigned k=0; k<Next->Nodes.Length(); k++)
+							{
+								if (Next->Nodes[k].Rev.Equals(pRev.Get(), false))
+								{
+									NextIdx = k;
+									break;
+								}
+							}
+
+							if (Cur->IsRev(Dbg) && CurIdx > 0)
+							{
+								int asd=0;
+							}
+							auto &CurNode = Cur->Nodes[CurIdx];
+							CurNode.Next.Add(NextIdx);
+
+							if (Next->IsRev(Dbg) && NextIdx > 0)
+							{
+								int asd=0;
+							}
+							auto &NextNode = Next->Nodes[NextIdx];
+							NextNode.Prev.Add(CurIdx);
+							NextNode.Rev = pRev;
+
+							CurIdx = NextIdx;
+							Cur = Next;
+						}
+					}
+					else
+					{
+						int asd=0;
+					}
+				}
+			}
+
+			int CurIdx = 0;
+			for (unsigned PrevIdx = 0; PrevIdx < p->Nodes.Length(); PrevIdx++)
+			{
+				auto &PrevNode = p->Nodes[PrevIdx];
+				if (PrevNode.Next.Length() == 0)
+				{
+					while (1)
+					{
+						auto &CurNode = c->Nodes[CurIdx];
+						if (CurNode.Rev)
+						{
+							CurIdx++;
+						}
+						else
+						{
+							CurNode.Rev = PrevNode.Rev;
+							CurNode.Prev.Add(PrevIdx);
+							PrevNode.Next.Add(CurIdx);
+							break;
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			// First node
+			c->NodeIdx = 0;
+			auto &n = c->Nodes[0];
+			n.Rev = c->GetRev();
+		}
+		p = c;
+	}
 }
 
 VcFile *VcFolder::FindFile(const char *Path)
