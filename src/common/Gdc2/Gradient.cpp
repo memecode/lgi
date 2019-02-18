@@ -224,7 +224,7 @@ public:
 						r = Div255[(Fr*a) + (Br*oma)];
 						g = Div255[(Fg*a) + (Bg*oma)];
 						b = Div255[(Fb*a) + (Bb*oma)];
-						*((uint32*)p) = Rgb16(r, g, b);
+						*((uint32_t*)p) = Rgb16(r, g, b);
 					}
 					break;
 				}
@@ -251,7 +251,7 @@ public:
 						r = Div255[(Fr*a) + (Br*oma)];
 						g = Div255[(Fg*a) + (Bg*oma)];
 						b = Div255[(Fb*a) + (Bb*oma)];
-						*((uint32*)p) = Rgb32(r, g, b);
+						*((uint32_t*)p) = Rgb32(r, g, b);
 					}
 					break;
 				}
@@ -305,7 +305,7 @@ public:
 						r = Div255[(Fr*a) + (Br*oma)];
 						g = Div255[(Fg*a) + (Bg*oma)];
 						b = Div255[(Fb*a) + (Bb*oma)];
-						*((uint32*)p) = Rgb16(r, g, b);
+						*((uint32_t*)p) = Rgb16(r, g, b);
 					}
 					break;
 				}
@@ -332,7 +332,7 @@ public:
 						r = Div255[(Fr*a) + (Br*oma)];
 						g = Div255[(Fg*a) + (Bg*oma)];
 						b = Div255[(Fb*a) + (Bb*oma)];
-						*((uint32*)p) = Rgb32(r, g, b);
+						*((uint32_t*)p) = Rgb32(r, g, b);
 					}
 					break;
 				}

@@ -260,7 +260,7 @@ bool GClipBoard::Files(::GString::Array &a, bool AutoEmpty)
 
 struct ReceiveData
 {
-	GAutoPtr<uint8> *Ptr;
+	GAutoPtr<uint8_t> *Ptr;
 	ssize_t *Len;
 };
 
@@ -271,7 +271,7 @@ void LgiClipboardReceivedFunc(GtkClipboard *clipboard,
 	ReceiveData *r = (ReceiveData*)	user_data;
 	if (data && r)
 	{
-		uint8 *d = new uint8[data->length];
+		uint8_t *d = new uint8_t[data->length];
 		if (d)
 		{
 			memcpy(d, data->data, data->length);
@@ -288,7 +288,7 @@ void LgiClipboardReceivedFunc(GtkClipboard *clipboard,
 	else LgiTrace("%s:%i - Missing ptr: %p %p\n", _FL, data, r);
 }
 
-bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8> &Ptr, ssize_t *Len)
+bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8_t> &Ptr, ssize_t *Len)
 {
 	ReceiveData r = {&Ptr, Len};
 

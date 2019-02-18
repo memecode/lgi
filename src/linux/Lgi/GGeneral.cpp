@@ -69,7 +69,7 @@ GString LCurrentUserName()
 }
 
 
-void LgiSleep(uint32 i)
+void LgiSleep(uint32_t i)
 {
 	struct timespec request, remain;
 
@@ -342,7 +342,7 @@ int LgiRand(int Limit)
 	return rand() % Limit;
 }
 
-GAutoString LgiErrorCodeToString(uint32 ErrorCode)
+GAutoString LgiErrorCodeToString(uint32_t ErrorCode)
 {
 	GAutoString e;
 	char *s = strerror(ErrorCode);

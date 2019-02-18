@@ -890,7 +890,7 @@ union EndianTest
 
 GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 {
-	uint32 c = CsNone;
+	uint32_t c = CsNone;
 	
 	if (v)
 	{
