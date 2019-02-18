@@ -160,6 +160,7 @@ class VcFolder : public GTreeItem, public GCss
 
 	bool ParseDiffs(GString s, GString Rev, bool IsWorking);
 	
+	bool ParseRevList(int Result, GString s, ParseParams *Params);
 	bool ParseLog(int Result, GString s, ParseParams *Params);
 	bool ParseInfo(int Result, GString s, ParseParams *Params);
 	bool ParseFiles(int Result, GString s, ParseParams *Params);

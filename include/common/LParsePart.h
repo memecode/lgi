@@ -47,7 +47,7 @@ struct LParsePart
 			if (c >= End) LgiAssert(!"Off the end");
 			#endif
 
-			char End = Lut[(uint8)*c];
+			char End = Lut[(uint8_t)*c];
 			if (End)
 			{
 				if (c > prev)

@@ -70,9 +70,9 @@ bool GreyScaleDC(GSurface *pDest, GSurface *pSrc)
 							GdcRGB *n = (*Pal)[i];
 							if (n)
 							{
-								uint32 r = ((uint32) n->r << 16) * FP_RED_TO_GREY;
-								uint32 g = ((uint32) n->g << 16) * FP_GREEN_TO_GREY;
-								uint32 b = ((uint32) n->b << 16) * FP_BLUE_TO_GREY;
+								uint32_t r = ((uint32_t) n->r << 16) * FP_RED_TO_GREY;
+								uint32_t g = ((uint32_t) n->g << 16) * FP_GREEN_TO_GREY;
+								uint32_t b = ((uint32_t) n->b << 16) * FP_BLUE_TO_GREY;
 								Map[i] = (r + g + b) >> 16;
 
 								n->r = n->g = n->b = i;
@@ -608,7 +608,7 @@ bool ResampleDC(GSurface *pDest, GSurface *pSrc, GRect *FromRgn, Progress *Prog)
 	int SrcBits = pSrc->GetBits();
 	int OutBits = pDest->GetBits() == 32 ? 32 : 24;
 	RgbLut<uint16> ToLinear(RgbLutLinear, RgbLutSRGB);
-	RgbLut<uint8, 1<<16> ToSRGB(RgbLutSRGB, RgbLutLinear);
+	RgbLut<uint8_t, 1<<16> ToSRGB(RgbLutSRGB, RgbLutLinear);
 
 	if (Prog)
 	{
@@ -710,7 +710,7 @@ bool ResampleDC(GSurface *pDest, GSurface *pSrc, GRect *FromRgn, Progress *Prog)
 
 						if (pAlpha)
 						{
-							uint8 Alpha;
+							uint8_t Alpha;
 							REG int SrcX, SrcY;
 							for (REG int x=Dx*Sx+Sr.x1; x<NextX; x=Nx)
 							{

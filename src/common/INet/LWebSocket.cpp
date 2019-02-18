@@ -210,8 +210,8 @@ struct LWebSocketPriv
 		if (Used < 2)
 			return false; // too short
 
-		uint8 *p = (uint8*)Data.AddressOf(Start);
-		uint8 *End = p + Used;
+		uint8_t *p = (uint8_t*)Data.AddressOf(Start);
+		uint8_t *End = p + Used;
 		bool Fin = (p[0] & 0x80) != 0;
 		WsOpCode OpCode = (WsOpCode) (p[0] & 0xf);
 		bool Masked = (p[1] & 0x80) != 0;
@@ -234,7 +234,7 @@ struct LWebSocketPriv
 		}
 		else p += 2;
 
-		uint8 Mask[4];
+		uint8_t Mask[4];
 		if (Masked)
 		{
 			if (p > End - 4)
@@ -319,7 +319,7 @@ struct LWebSocketPriv
 		if (!SHA1Result(&Ctx))
 			return Error("SHA1Result failed");
 
-		uint32 Digest[5];
+		uint32_t Digest[5];
 		for (int i=0; i<CountOf(Digest); i++)
 			Digest[i] = htonl(Ctx.Message_Digest[i]);
 
@@ -364,7 +364,7 @@ bool LWebSocket::SendMessage(char *Data, uint64 Len)
 	if (d->State != WsMessages)
 		return false;
 
-	uint8 Masked = d->Server ? 0 : 0x80;
+	uint8_t Masked = d->Server ? 0 : 0x80;
 	int8 Hdr[2 + 8 + 4];
 	GPointer p = {Hdr};
 	*p.u8++ =	0x80 | // Fin
@@ -372,7 +372,7 @@ bool LWebSocket::SendMessage(char *Data, uint64 Len)
 	if (Len < 126) // 1 byte
 	{
 		// Direct len
-		*p.u8++ = Masked | (uint8)Len;
+		*p.u8++ = Masked | (uint8_t)Len;
 	}
 	else if (Len <= 0xffff) // 2 byte
 	{
@@ -387,15 +387,15 @@ bool LWebSocket::SendMessage(char *Data, uint64 Len)
 		*p.u64++ = htonll(Len);
 	}
 
-	GAutoPtr<uint8> MaskData;
+	GAutoPtr<uint8_t> MaskData;
 	if (Masked)
 	{
-		uint8 *Mask = p.u8;
+		uint8_t *Mask = p.u8;
 		*p.u32++ = LgiRand();
-		if (!MaskData.Reset(new uint8[Len]))
+		if (!MaskData.Reset(new uint8_t[Len]))
 			return d->Error("Alloc failed.");
 		
-		uint8 *Out = MaskData.Get();
+		uint8_t *Out = MaskData.Get();
 		for (uint64 i=0; i<Len; i++)	
 			Out[i] = Data[i] ^ Mask[i&3];
 	}
@@ -405,7 +405,7 @@ bool LWebSocket::SendMessage(char *Data, uint64 Len)
 	if (Wr != Sz)
 		return d->Error("SendMessage.Hdr failed to write to socket");
 
-	Wr = d->Write(MaskData ? MaskData.Get() : (uint8*)Data, Len);
+	Wr = d->Write(MaskData ? MaskData.Get() : (uint8_t*)Data, Len);
 	if (Wr != Len)
 		return d->Error("SendMessage.Body failed to write to socket");
 

@@ -1455,8 +1455,8 @@ static bool TextToStream(GStream &Out, char16 *Text)
 	if (!Text)
 		return true;
 
-	uint8 Buf[256];
-	uint8 *s = Buf;
+	uint8_t Buf[256];
+	uint8_t *s = Buf;
 	ssize_t Len = sizeof(Buf);
 	while (*Text)
 	{
@@ -5864,9 +5864,9 @@ void GTag::BoundParents()
 struct DrawBorder
 {
 	GSurface *pDC;
-	uint32 LineStyle;
-	uint32 LineReset;
-	uint32 OldStyle;
+	uint32_t LineStyle;
+	uint32_t LineReset;
+	uint32_t OldStyle;
 
 	DrawBorder(GSurface *pdc, GCss::BorderDef &d)
 	{
@@ -6009,8 +6009,8 @@ public:
 
 					// Setup the stops					
 					GBlendStop stops[2] = { {0.0, 0}, {1.0, 0} };
-					uint32 iColour = defs[i]->Color.IsValid() ? defs[i]->Color.Rgb32 : Back.c32();
-					uint32 kColour = defs[k]->Color.IsValid() ? defs[k]->Color.Rgb32 : Back.c32();
+					uint32_t iColour = defs[i]->Color.IsValid() ? defs[i]->Color.Rgb32 : Back.c32();
+					uint32_t kColour = defs[k]->Color.IsValid() ? defs[k]->Color.Rgb32 : Back.c32();
 					if (defs[i]->IsValid() && defs[k]->IsValid())
 					{
 						stops[0].c32 = iColour;

@@ -357,7 +357,7 @@ bool IFD::Read(TiffIo &f)
 				}
 				case TYPE_ULONG:
 				{
-					uint32 *p = (uint32*)Data;
+					uint32_t *p = (uint32_t*)Data;
 					for (int i=0; i<Count; i++)
 					{
 						f.Read(p+i, sizeof(p[i]));
@@ -817,7 +817,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
 							class Tiff24
 							{
 							public:
-								uint8 r, g, b;
+								uint8_t r, g, b;
 							};
 							
 							// swap R and B
@@ -848,7 +848,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
 							class Tiff32
 							{
 							public:
-								uint8 r, g, b, a;
+								uint8_t r, g, b, a;
 							};
 							
 							// swap R and B
@@ -882,7 +882,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
 						class TiffCmyk
 						{
 						public:
-							uint8 c, m, y, k;
+							uint8_t c, m, y, k;
 						};
 
 						// 32 bit CMYK -> RGBA conversion

@@ -241,10 +241,10 @@ public:
 		void NewLine()
 		{
 			bool Valid = false;
-			const uint8 Ws[] = {' ', '\t', 0xa0, 0};
+			const uint8_t Ws[] = {' ', '\t', 0xa0, 0};
 			
 			GUtf8Ptr p(&Buf[0]);
-			uint8 *End = (uint8*) &Buf[CharsOnLine];
+			uint8_t *End = (uint8_t*) &Buf[CharsOnLine];
 			while (p.GetPtr() < End)
 			{
 				if (!strchr((char*)Ws, p))

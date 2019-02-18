@@ -32,18 +32,18 @@ public:
 	{
 		union
 		{
-			uint32 IntId;
+			uint32_t IntId;
 			char StrId[4];
 		};
-		uint32 Size;	// If size is zero, the all the remaining data in 
+		uint32_t Size;	// If size is zero, the all the remaining data in 
 						// the file or memory is part of the chunk.
 	};
 	
 	struct Base
 	{
-		bool Io(uint8 &i8, GPointer &p, bool write);
+		bool Io(uint8_t &i8, GPointer &p, bool write);
 		bool Io(uint16 &i16, GPointer &p, bool write);
-		bool Io(uint32 &i32, GPointer &p, bool write);
+		bool Io(uint32_t &i32, GPointer &p, bool write);
 		bool Io(uint64 &i64, GPointer &p, bool write);
 		bool Io(GAutoString &str, GPointer &p, bool write);
 	};
@@ -52,12 +52,12 @@ public:
 	{
 	public:
 		union {
-			uint32 Id;
+			uint32_t Id;
 			char IdStr[4];
 		};
 		char Null;
-		uint8 Type;
-		uint8 Flags;
+		uint8_t Type;
+		uint8_t Flags;
 		GAutoString Name;
 		
 		Field();
@@ -107,26 +107,26 @@ public:
 		// Row operations
 		
 		/// Create a new row for a auto-numbered table
-		RowId NewRow(uint32 *Auto);
+		RowId NewRow(uint32_t *Auto);
 		/// Create a new row with the specified integer key
-		RowId NewRow(uint32 Key);
+		RowId NewRow(uint32_t Key);
 		/// Create a new row with the specified string key
 		RowId NewRow(const char *Key);
 
 		/// Finds the first matching record for the specified key
-		RowId SeekKey(uint32 key);
+		RowId SeekKey(uint32_t key);
 		/// Finds the first matching record for the specified key
 		RowId SeekKey(const char *key);
 		
 		/// Sets an integer value
-		bool Set(RowId row, uint32 Fld, uint32 i);
+		bool Set(RowId row, uint32_t Fld, uint32_t i);
 		/// Sets a string value
-		bool Set(RowId row, uint32 Fld, const char *str);
+		bool Set(RowId row, uint32_t Fld, const char *str);
 
 		/// Gets an integer value
-		uint32 GetInt32(RowId row, uint32 Fld);
+		uint32_t GetInt32(RowId row, uint32_t Fld);
 		/// Gets a string value
-		const char *GetStr(RowId row, uint32 Fld);
+		const char *GetStr(RowId row, uint32_t Fld);
 	};
 
 	GTableDb(const char *BaseFolder);

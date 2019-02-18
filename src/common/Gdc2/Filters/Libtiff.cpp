@@ -60,9 +60,9 @@ public:
 	DynFunc1(t::TIFFErrorHandler, TIFFSetErrorHandler, t::TIFFErrorHandler, e);
 	DynFunc4(int, TIFFRGBAImageBegin, t::TIFFRGBAImage*, a, t::TIFF*, b, int, c, char*, d);
 	DynFunc1(int, TIFFRGBAImageEnd, t::TIFFRGBAImage*, a);
-	DynFunc4(int, TIFFRGBAImageGet, t::TIFFRGBAImage*, img, uint32*, ptr, uint32, x, uint32, y);
-	DynFunc4(int, TIFFWriteScanline, t::TIFF*, tif, t::tdata_t, ptr, uint32, a, t::tsample_t, b);
-	DynFunc4(int, TIFFReadScanline, t::TIFF*, tif, t::tdata_t, ptr, uint32, a, t::tsample_t, b);
+	DynFunc4(int, TIFFRGBAImageGet, t::TIFFRGBAImage*, img, uint32_t*, ptr, uint32_t, x, uint32_t, y);
+	DynFunc4(int, TIFFWriteScanline, t::TIFF*, tif, t::tdata_t, ptr, uint32_t, a, t::tsample_t, b);
+	DynFunc4(int, TIFFReadScanline, t::TIFF*, tif, t::tdata_t, ptr, uint32_t, a, t::tsample_t, b);
 	DynFunc1(int, TIFFScanlineSize, t::TIFF*, t);
 	
 	int TIFFGetField(t::TIFF *tif, t::ttag_t tag, ...)
@@ -225,7 +225,7 @@ void SwapRBandY(GSurface *pDC)
 
 				if (y1 == y2)
 				{
-					uint8 t;
+					uint8_t t;
 					while (s1 < e1)
 					{
 						t = s1->r;
@@ -263,7 +263,7 @@ void SwapRBandY(GSurface *pDC)
 
 				if (y1 == y2)
 				{
-					uint8 t;
+					uint8_t t;
 					while (s1 < e1)
 					{
 						t = s1->r;
@@ -319,7 +319,7 @@ void SwapRB(GSurface *pDC)
 				System24BitPixel *s1 = (System24BitPixel*)(*pDC)[y1];
 				System24BitPixel *e1 = (System24BitPixel*) ((*pDC)[y1] + (pDC->X() * sizeof(System24BitPixel)));
 
-				uint8 t;
+				uint8_t t;
 				while (s1 < e1)
 				{
 					t = s1->r;
@@ -334,7 +334,7 @@ void SwapRB(GSurface *pDC)
 				System32BitPixel *s1 = (System32BitPixel*)(*pDC)[y1];
 				System32BitPixel *e1 = s1 + pDC->X();
 
-				uint8 t;
+				uint8_t t;
 				while (s1 < e1)
 				{
 					t = s1->r;
@@ -355,7 +355,7 @@ void SwapRB(GSurface *pDC)
 
 struct Cmyka
 {
-	uint8 c, m, y, k, a;
+	uint8_t c, m, y, k, a;
 };
 
 template<typename D, typename S>
@@ -481,7 +481,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 			if (img.samplesperpixel == 5)
 			{
 				int rowlen = img.width * img.samplesperpixel * img.bitspersample / 8;
-				GArray<uint8> a;
+				GArray<uint8_t> a;
 				if (a.Length(rowlen) &&
 					pDC->Create(img.width, img.height, System32BitColourSpace))
 				{
@@ -536,13 +536,13 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 						}
 						case 1:
 						{
-							GArray<uint8> Buf;
+							GArray<uint8_t> Buf;
 							Buf.Length(img.width + 7 / 8);
 							
 							for (unsigned y=0; y<img.height; y++)
 							{
-								uint8 *d = (*pDC)[y];
-								uint8 *Ptr = &Buf[0];
+								uint8_t *d = (*pDC)[y];
+								uint8_t *Ptr = &Buf[0];
 								Lib->TIFFReadScanline(tif, (t::tdata_t)Ptr, y, 0);
 								
 								// Unpack bits into bytes..
@@ -591,7 +591,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 							// Read in the pixels
 							for (unsigned y=0; y<img.height; y++)
 							{
-								uint8 *d = (*pDC)[y];
+								uint8_t *d = (*pDC)[y];
 								Lib->TIFFReadScanline(tif, (t::tdata_t)d, y, 0);
 								if (Meter && (y % 32) == 0)
 									Meter->Value(y);
@@ -609,7 +609,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 
 							for (unsigned y=0; y<img.height; y++)
 							{
-								uint8 *d = (*pDC)[y];
+								uint8_t *d = (*pDC)[y];
 								Lib->TIFFReadScanline(tif, (t::tdata_t)b, y, 0);
 					            
 								switch (pDC->GetColourSpace())
@@ -643,15 +643,15 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 						}
 						case 32:
 						{
-							GArray<uint32> Buf;
+							GArray<uint32_t> Buf;
 							Buf.Length(img.width);
-							uint32 *b = &Buf[0];
+							uint32_t *b = &Buf[0];
 							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
 							GColourSpace DestCs = pDC->GetColourSpace();
 
 							for (unsigned y=0; y<img.height; y++)
 							{
-								uint8 *d = (*pDC)[y];
+								uint8_t *d = (*pDC)[y];
 								Lib->TIFFReadScanline(tif, (t::tdata_t)b, y, 0);
 
 								if (Photometric == PHOTOMETRIC_SEPARATED)
@@ -721,7 +721,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 
 							for (unsigned y=0; y<img.height; y++)
 							{
-								uint8 *d = (*pDC)[y];
+								uint8_t *d = (*pDC)[y];
 								Lib->TIFFReadScanline(tif, (t::tdata_t)b, y, 0);
 					            
 								switch (pDC->GetColourSpace())
@@ -753,7 +753,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 
 							for (unsigned y=0; y<img.height; y++)
 							{
-								uint8 *d = (*pDC)[y];
+								uint8_t *d = (*pDC)[y];
 								Lib->TIFFReadScanline(tif, (t::tdata_t)b, y, 0);
 					            
 								switch (pDC->GetColourSpace())
@@ -885,7 +885,7 @@ GFilter::IoStatus GdcLibTiff::WriteImage(GStream *Out, GSurface *pDC)
 
 		for (int y=0; y<pDC->Y(); y++)
 		{
-			uint8 *Scan = (*pDC)[y];
+			uint8_t *Scan = (*pDC)[y];
 			if (Lib->TIFFWriteScanline(tif, Scan, y, 0) != 1)
 			{
 				Status = IoError;

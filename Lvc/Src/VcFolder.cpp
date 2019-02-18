@@ -15,7 +15,7 @@ int Ver2Int(GString v)
 		if (Int < 256)
 		{
 			i <<= 8;
-			i |= (uint8)Int;
+			i |= (uint8_t)Int;
 		}
 		else
 		{
@@ -332,10 +332,27 @@ void VcFolder::Select(bool b)
 
 		if ((Log.Length() == 0 || CommitListDirty) && !IsLogging)
 		{
-			if (GetType() == VcSvn && CommitListDirty)
-				IsLogging = StartCmd("up", &VcFolder::ParsePull, new ParseParams("log"));
-			else
-				IsLogging = StartCmd("log", &VcFolder::ParseLog);
+			switch (GetType())
+			{
+				case VcGit:
+				{
+					IsLogging = StartCmd("rev-list --all --header --timestamp", &VcFolder::ParseRevList);
+					break;
+				}
+				case VcSvn:
+				{
+					if (CommitListDirty)
+					{
+						IsLogging = StartCmd("up", &VcFolder::ParsePull, new ParseParams("log"));
+						break;
+					}
+					// else fall through
+				}
+				default:
+				{
+					IsLogging = StartCmd("log", &VcFolder::ParseLog);
+				}
+			}
 
 			CommitListDirty = false;
 		}
@@ -505,6 +522,56 @@ int CommitDateCmp(VcCommit **a, VcCommit **b)
 	return (diff > 0) ? 1 : 0;
 }
 
+bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
+{
+	LHashTbl<StrKey<char>, VcCommit*> Map;
+	for (VcCommit **pc = NULL; Log.Iterate(pc); )
+		Map.Add((*pc)->GetRev(), *pc);
+
+	int Skipped = 0, Errors = 0;
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			GString::Array Commits;
+			Commits.SetFixedLength(false);
+			
+			// Split on the NULL chars...
+			char *c = s.Get();
+			char *e = c + s.Length();
+			while (c < e)
+			{
+				char *nul = c;
+				while (nul < e && *nul) nul++;
+				if (nul <= c) break;
+				Commits.New().Set(c, nul-c);
+				if (nul >= e) break;
+				c = nul + 1;
+			}
+
+			for (auto Commit: Commits)
+			{
+				GAutoPtr<VcCommit> Rev(new VcCommit(d));
+				if (Rev->GitParse(Commit, true))
+				{
+					if (!Map.Find(Rev->GetRev()))
+						Log.Add(Rev.Release());
+					else
+						Skipped++;
+				}
+				else
+				{
+					LgiTrace("%s:%i - Failed:\n%s\n\n", _FL, Commit.Get());
+					Errors++;
+				}
+			}
+			break;
+		}
+	}
+
+	return true;
+}
+
 bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 {
 	LHashTbl<StrKey<char>, VcCommit*> Map;
@@ -542,7 +609,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 			for (unsigned i=0; i<c.Length(); i++)
 			{
 				GAutoPtr<VcCommit> Rev(new VcCommit(d));
-				if (Rev->GitParse(c[i]))
+				if (Rev->GitParse(c[i], false))
 				{
 					if (!Map.Find(Rev->GetRev()))
 						Log.Add(Rev.Release());
@@ -1274,7 +1341,7 @@ void VcFolder::ListCommit(VcCommit *c)
 
 GString ConvertUPlus(GString s)
 {
-	GArray<uint32> c;
+	GArray<uint32_t> c;
 	GUtf8Ptr p(s);
 	int32 ch;
 	while ((ch = p))

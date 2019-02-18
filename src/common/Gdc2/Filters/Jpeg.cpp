@@ -339,7 +339,7 @@ typedef GRgb24 JpegRgb;
 typedef GCmyk32 JpegCmyk;
 struct JpegXyz
 {
-	uint8 x, y, z;
+	uint8_t x, y, z;
 };
 
 template<typename T>
@@ -1035,8 +1035,8 @@ GFilter::IoStatus GdcJpeg::_Write(GStream *Out, GSurface *pDC, int Quality, SubS
 						GdcRGB *p = (*Pal)[0];
 						if (p)
 						{
-						    uint8 *c = (*pDC)[cinfo.next_scanline];
-						    uint8 *end = c + pDC->X();
+						    uint8_t *c = (*pDC)[cinfo.next_scanline];
+						    uint8_t *end = c + pDC->X();
 							while (c < end)
 							{
 							    GdcRGB &rgb = p[*c++];

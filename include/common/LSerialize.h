@@ -18,7 +18,7 @@ class LSerialize
 	#endif
 	struct Str
 	{
-		uint32 Length;
+		uint32_t Length;
 		union {
 			char u[1];
 			char16 w[1];
@@ -26,15 +26,15 @@ class LSerialize
 	};
 	struct Field
 	{
-		uint8 Type;
-		uint8 Size;
+		uint8_t Type;
+		uint8_t Size;
 		uint16 Id;
 		union {
 			char bytes[1];
 			Str s;
-			uint8 u8;
+			uint8_t u8;
 			uint16 u16;
-			uint32 u32;
+			uint32_t u32;
 			uint64 u64;
 			float f;
 			double d;
@@ -73,7 +73,7 @@ class LSerialize
 			return false;
 		}
 
-		uint32 Sizeof()
+		uint32_t Sizeof()
 		{
 			switch (Type)
 			{
@@ -104,7 +104,7 @@ class LSerialize
 	GStreamI *Stream;
 	GArray<char> FieldMem;
 	LHashTbl<IntKey<int>, ssize_t> Fields;
-	uint32 Bytes;
+	uint32_t Bytes;
 
 protected:
 	Field *GetField(int Id)
@@ -157,7 +157,7 @@ protected:
 			f.Type = LString;
 			f.Size = 1;
 			f.Id = Id;
-			f.s.Length = (uint32)s.Length();
+			f.s.Length = (uint32_t)s.Length();
 			ssize_t bytes = (char*)&f.s.u - (char*)&f;
 			if (Stream->Write(&f, bytes) != bytes)
 				return false;
@@ -348,25 +348,25 @@ public:
 		
 		f->Type = LBinary;
 		f->Size = 1;
-		f->s.Length = (uint32) Size;
+		f->s.Length = (uint32_t) Size;
 		if (Ptr && Size > 0)
 			memcpy(f->s.u, Ptr, Size);
 		
 		return true;
 	}
 
-	bool GetBinary(int Id, uint8 *&Ptr, uint32 &Size)
+	bool GetBinary(int Id, uint8_t *&Ptr, uint32_t &Size)
 	{
 		Field *f = GetField(Id);
 		if (!f || f->Type != LBinary)
 			return false;
 		
-		Ptr = (uint8*) f->s.u;
+		Ptr = (uint8_t*) f->s.u;
 		Size = f->s.Length;
 
 		#ifdef _DEBUG
-		uint8 *End = Ptr + Size;
-		uint8 *Flds = (uint8*)FieldMem.AddressOf();
+		uint8_t *End = Ptr + Size;
+		uint8_t *Flds = (uint8_t*)FieldMem.AddressOf();
 		LgiAssert(Ptr >= Flds && End <= Flds + FieldMem.Length());
 		#endif
 		
@@ -411,7 +411,7 @@ public:
 
 		f->Type = LString;
 		f->Size = 1;
-		f->s.Length = (uint32) (len - 1);
+		f->s.Length = (uint32_t) (len - 1);
 		memcpy(f->s.u, u, len);
 		return true;
 	}
@@ -428,7 +428,7 @@ public:
 
 		f->Type = LString;
 		f->Size = sizeof(*w);
-		f->s.Length = (uint32) (len - 1);
+		f->s.Length = (uint32_t) (len - 1);
 		memcpy(f->s.u, w, len * sizeof(*w));
 		return true;
 	}
@@ -452,7 +452,7 @@ public:
 	{
 		if ((ToStream = write))
 		{
-			uint32 Size = 0;
+			uint32_t Size = 0;
 			// for (ssize_t o = Fields.First(); o >= 0; o = Fields.Next())
 			for (auto o : Fields)
 			{

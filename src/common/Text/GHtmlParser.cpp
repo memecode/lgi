@@ -159,7 +159,7 @@ char16 *GHtmlParser::DecodeEntities(const char *s, ssize_t len)
 					}
 					
 					GAutoWString Var(Utf8ToWide(i, e-i));
-					uint32 Char = GHtmlStatic::Inst->VarMap.Find(Var);
+					uint32_t Char = GHtmlStatic::Inst->VarMap.Find(Var);
 					if (Char)
 					{
 						*o++ = Char;
@@ -1494,7 +1494,7 @@ bool GHtmlParser::ParseColour(const char *s, GCss::ColorDef &c)
 			if (*s == '(')
 			{
 				s++;
-				GArray<uint8> Col;
+				GArray<uint8_t> Col;
 				while (Col.Length() < 3)
 				{
 					SkipWhiteSpace(s);

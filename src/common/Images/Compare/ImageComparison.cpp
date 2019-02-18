@@ -37,7 +37,7 @@ GArray<uint32> RDiff, GDiff, BDiff;
 #endif
 
 template<typename Px>
-void CompareRgb(GSurface *A, GSurface *B, uint8 *c, GdcPt2 size, int threshold)
+void CompareRgb(GSurface *A, GSurface *B, uint8_t *c, GdcPt2 size, int threshold)
 {
 	if (!A || !B || !c)
 		return;
@@ -77,7 +77,7 @@ void CompareRgb(GSurface *A, GSurface *B, uint8 *c, GdcPt2 size, int threshold)
 }
 
 template<typename Px>
-void CompareRgba(GSurface *A, GSurface *B, uint8 *c, GdcPt2 size, int threshold)
+void CompareRgba(GSurface *A, GSurface *B, uint8_t *c, GdcPt2 size, int threshold)
 {
 	Px *a = (Px*) (*A)[size.y];
 	Px *b = (Px*) (*B)[size.y];
@@ -138,7 +138,7 @@ GAutoPtr<GMemDC> CreateDiff(GViewI *Parent, GSurface *A, GSurface *B)
 		for (int y=0; y<Cy; y++)
 		{
 			int32 Diff, Mask, Value;
-			uint8 *c = (*C)[y];
+			uint8_t *c = (*C)[y];
 			
 			switch (A->GetColourSpace())
 			{
@@ -150,9 +150,9 @@ GAutoPtr<GMemDC> CreateDiff(GViewI *Parent, GSurface *A, GSurface *B)
 					{
 						GdcRGB *ap = (*apal)[0];
 						GdcRGB *bp = (*bpal)[0];
-						uint8 *a = (*A)[y];
-						uint8 *b = (*B)[y];
-						uint8 *e = a + Cx;
+						uint8_t *a = (*A)[y];
+						uint8_t *b = (*B)[y];
+						uint8_t *e = a + Cx;
 						while (a < e)
 						{
 							Value = (int32)ap[*a].r - bp[*b].r;
@@ -815,8 +815,8 @@ struct CompareThread : public LThread
 						int bytes = (left_img->X() * left_img->GetBits()) / 8;
 						for (int y=0; y<left_img->Y(); y++)
 						{
-							uint8 *left_scan = (*left_img)[y];
-							uint8 *right_scan = (*right_img)[y];
+							uint8_t *left_scan = (*left_img)[y];
+							uint8_t *right_scan = (*right_img)[y];
 							if (memcmp(left_scan, right_scan, bytes))
 							{
 								diff = true;

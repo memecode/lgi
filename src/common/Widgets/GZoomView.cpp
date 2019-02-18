@@ -340,7 +340,7 @@ public:
 
 	union Pal32
 	{
-		uint32 u32;
+		uint32_t u32;
 		System32BitPixel p32;
 	};
 	
@@ -500,9 +500,9 @@ public:
 				{
 					if (SampleMode == GZoomView::SampleNearest)
 					{
-						uint8 *src = (*Src)[yy];
-						uint8 *end = src + Ex;
-						uint32 *dst = (uint32*) (*Dst)[y];
+						uint8_t *src = (*Src)[yy];
+						uint8_t *end = src + Ex;
+						uint32_t *dst = (uint32_t*) (*Dst)[y];
 						src += Sx;
 						
 						LgiAssert(Dst->GetColourSpace() == System32BitColourSpace);
@@ -515,7 +515,7 @@ public:
 					}
 					else if (SampleMode == GZoomView::SampleMax)
 					{
-						uint8 *s[32];
+						uint8_t *s[32];
 						LgiAssert(Factor < 32);
 						for (int f=0; f<Factor; f++)
 						{
@@ -523,18 +523,18 @@ public:
 							if (s[f])
 								s[f] += Sx;
 						}
-						uint8 *scan_end = s[0] + (Ex - Sx);
+						uint8_t *scan_end = s[0] + (Ex - Sx);
 						
-						uint32 *dst_start = (uint32*) (*Dst)[y];
-						uint32 *dst = dst_start;
+						uint32_t *dst_start = (uint32_t*) (*Dst)[y];
+						uint32_t *dst = dst_start;
 						while (s[0] < scan_end)
 						{
-							uint8 val = 0;
+							uint8_t val = 0;
 							
 							for (int oy=0; oy<Factor && s[oy]; oy++)
 							{
-								uint8 *src = s[oy];
-								uint8 *px_end = src + Factor;
+								uint8_t *src = s[oy];
+								uint8_t *px_end = src + Factor;
 								while (src < px_end)
 								{
 									if (*src > val)
@@ -611,7 +611,7 @@ public:
 							}
 							else if (src->a)
 							{
-								uint8 o = 255 - src->a;
+								uint8_t o = 255 - src->a;
 								int ra = (dst->a + src->a) - DivLut[dst->a * src->a];
 								rop(r);
 								rop(g);
@@ -682,8 +682,8 @@ public:
 							else if (s->a)
 							{
 								// Composite with dest
-								uint8 o = (0xffff - s->a) >> 8;
-								uint8 dc, sc;
+								uint8_t o = (0xffff - s->a) >> 8;
+								uint8_t dc, sc;
 								
 								Rgb16to8PreMul(r);
 								Rgb16to8PreMul(g);
@@ -805,8 +805,8 @@ public:
 			{
 				case CsIndex8:
 				{
-					uint8 *src = (*Src)[SrcY];
-					uint8 *end = src + EndX;
+					uint8_t *src = (*Src)[SrcY];
+					uint8_t *end = src + EndX;
 					src += Sx;
 					
 					while (src < end)
@@ -928,12 +928,12 @@ public:
 					
 					if (HasGrid)
 					{
-						uint32 *s = (uint32*)src;
-						uint32 *e = (uint32*)end;
+						uint32_t *s = (uint32_t*)src;
+						uint32_t *e = (uint32_t*)end;
 						if (Factor == 2)
 						{
-							uint32 *dst0 = (uint32*) (*Dst)[DstY];
-							uint32 *dst1 = (uint32*) (*Dst)[DstY+1];
+							uint32_t *dst0 = (uint32_t*) (*Dst)[DstY];
+							uint32_t *dst1 = (uint32_t*) (*Dst)[DstY+1];
 
 							LgiAssert(Src->GetColourSpace() == Dst->GetColourSpace());
 							
@@ -958,9 +958,9 @@ public:
 						}
 						else if (Factor == 3)
 						{
-							uint32 *dst0 = (uint32*) (*Dst)[DstY];
-							uint32 *dst1 = (uint32*) (*Dst)[DstY+1];
-							uint32 *dst2 = (uint32*) (*Dst)[DstY+2];
+							uint32_t *dst0 = (uint32_t*) (*Dst)[DstY];
+							uint32_t *dst1 = (uint32_t*) (*Dst)[DstY+1];
+							uint32_t *dst2 = (uint32_t*) (*Dst)[DstY+2];
 
 							LgiAssert(Src->GetColourSpace() == Dst->GetColourSpace());
 							

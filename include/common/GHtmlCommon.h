@@ -96,7 +96,7 @@ public:
 	static GHtmlStatic *Inst;
 
 	int Refs;
-	LHashTbl<StrKey<char16,true>,uint32>				VarMap;
+	LHashTbl<StrKey<char16,true>,uint32_t>				VarMap;
 	LHashTbl<ConstStrKey<char,false>,GCss::PropType>	StyleMap;
 	LHashTbl<ConstStrKey<char,false>,int>				ColourMap;
 
@@ -161,7 +161,7 @@ class GHtmlElement : public GDom, public GCss
 
 protected:
 	GAutoWString Txt;
-	uint8 WasClosed : 1;
+	uint8_t WasClosed : 1;
 	GCssStyle StyleDom;
 
 public:

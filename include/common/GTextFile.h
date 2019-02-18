@@ -233,7 +233,7 @@ public:
 	template<typename T>
 	int GetLine(GArray<T> &Out)
 	{
-		uint8 *End = NULL;
+		uint8_t *End = NULL;
 		
 		int OutPos = 0;
 		if (Buf.Length())

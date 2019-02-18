@@ -575,41 +575,41 @@ short GdcGif::decoder(int BitDepth, uchar interlaced)
 
 union LogicalScreenBits
 {
-	uint8 u8;
+	uint8_t u8;
 	
 	struct
 	{
-		uint8 TableSize : 3;
-		uint8 SortFlag : 1;
-		uint8 ColourRes : 3;
-		uint8 GlobalColorTable : 1;
+		uint8_t TableSize : 3;
+		uint8_t SortFlag : 1;
+		uint8_t ColourRes : 3;
+		uint8_t GlobalColorTable : 1;
 	};
 };
 
 union LocalColourBits
 {
-	uint8 u8;
+	uint8_t u8;
 	
 	struct
 	{
-		uint8 TableBits : 3;
-		uint8 Reserved : 2;
-		uint8 SortFlag : 1;
-		uint8 Interlaced : 1;
-		uint8 LocalColorTable : 1;
+		uint8_t TableBits : 3;
+		uint8_t Reserved : 2;
+		uint8_t SortFlag : 1;
+		uint8_t Interlaced : 1;
+		uint8_t LocalColorTable : 1;
 	};
 };
 
 union GfxCtrlExtBits
 {
-	uint8 u8;
+	uint8_t u8;
 	
 	struct
 	{
-		uint8 Transparent : 1;
-		uint8 UserInput : 1;
-		uint8 DisposalMethod : 3;
-		uint8 Reserved : 3;
+		uint8_t Transparent : 1;
+		uint8_t UserInput : 1;
+		uint8_t DisposalMethod : 3;
+		uint8_t Reserved : 3;
 	};
 };
 
@@ -623,7 +623,7 @@ bool GifLoadPalette(GStream *s, GSurface *pDC, int TableBits)
 	if (s->Read(Rgb, Bytes) != Bytes)
 		return false;
 
-	GPalette *Pal = new GPalette((uint8*)Rgb, 256);
+	GPalette *Pal = new GPalette((uint8_t*)Rgb, 256);
 	if (!Pal)
 		return false;
 		
@@ -653,8 +653,8 @@ GFilter::IoStatus GdcGif::ReadImage(GSurface *pdc, GStream *in)
 			uchar interlace = false;
 			uint16 LogicalX = 0;
 			uint16 LogicalY = 0;
-			uint8 BackgroundColour = 0;
-			uint8 PixelAspectRatio = 0;
+			uint8_t BackgroundColour = 0;
+			uint8_t PixelAspectRatio = 0;
 
 
 			// read header
@@ -753,8 +753,8 @@ GFilter::IoStatus GdcGif::ReadImage(GSurface *pdc, GStream *in)
 					}
 					case 0x21:
 					{
-						uint8 GraphicControlLabel;
-						uint8 BlockSize;
+						uint8_t GraphicControlLabel;
+						uint8_t BlockSize;
 						GfxCtrlExtBits ExtBits;
 						uint16 Delay;
 
@@ -853,11 +853,11 @@ GFilter::IoStatus GdcGif::WriteImage(GStream *Out, GSurface *pDC)
 		        ZeroObj(Used);
 	            for (int y=0; y<pDC->Y(); y++)
 	            {
-	                uint8 *p = (*pDC)[y];
-	                uint8 *a = (*pDC->AlphaDC())[y];
+	                uint8_t *p = (*pDC)[y];
+	                uint8_t *a = (*pDC->AlphaDC())[y];
 	                LgiAssert(p && a);
 	                if (!p || !a) break;
-	                uint8 *e = p + pDC->X();
+	                uint8_t *e = p + pDC->X();
 	                while (p < e)
 	                {
 	                    if (*a)
@@ -921,7 +921,7 @@ GFilter::IoStatus GdcGif::WriteImage(GStream *Out, GSurface *pDC)
 	Write(Out, &s, sizeof(s));
 
 	bool Ordered = false;
-	uint8 c =	((Pal != 0) ? 0x80 : 0) | // global colour table/transparent
+	uint8_t c =	((Pal != 0) ? 0x80 : 0) | // global colour table/transparent
 				(pDC->GetBits() - 1)    | // bits per pixel
 				((Ordered) ? 0x08 : 0)  | // colours are sorted
 				(pDC->GetBits() - 1);
@@ -987,19 +987,19 @@ GFilter::IoStatus GdcGif::WriteImage(GStream *Out, GSurface *pDC)
 
 	// Get input ready
 	int Len = (pDC->X() * pDC->GetBits() + 7) / 8;
-	uint8 *buf = pDC->AlphaDC() ? new uint8[Len] : 0;
+	uint8_t *buf = pDC->AlphaDC() ? new uint8_t[Len] : 0;
 	for (int y=0; y<pDC->Y(); y++)
 	{
-		uint8 *p = (*pDC)[y];
+		uint8_t *p = (*pDC)[y];
 		if (!p) continue;
 		
 		if (pDC->AlphaDC())
 		{
 		    // Preprocess pixels to make the alpha channel into the 
 		    // transparent colour.
-		    uint8 *a = (*pDC->AlphaDC())[y];
-		    uint8 *e = p + pDC->X();
-		    uint8 *o = buf;
+		    uint8_t *a = (*pDC->AlphaDC())[y];
+		    uint8_t *e = p + pDC->X();
+		    uint8_t *o = buf;
 		    while (p < e)
 		    {
 		        if (*a++)

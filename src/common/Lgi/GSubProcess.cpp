@@ -864,7 +864,7 @@ bool GSubProcess::Interrupt()
 		{
 			// Disable Ctrl-C handling for our program
 			SetConsoleCtrlHandler(NULL, true);
-			bool b = GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0);
+			BOOL b = GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0);
  
 			// Must wait here. If we don't and re-enable Ctrl-C
 			// handling below too fast, we might terminate ourselves.
@@ -876,7 +876,7 @@ bool GSubProcess::Interrupt()
 			// programs will inherit the disabled state.
 			SetConsoleCtrlHandler(NULL, false);
 
-			return b;
+			return b != 0;
 		}
 		#else
 

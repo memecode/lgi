@@ -6,6 +6,7 @@ VcCommit::VcCommit(AppPriv *priv)
 {
 	d = priv;
 	Current = false;
+	Parents.SetFixedLength(false);
 }
 
 char *VcCommit::GetRev()
@@ -51,26 +52,54 @@ char *VcCommit::GetText(int Col)
 	return NULL;
 }
 
-bool VcCommit::GitParse(GString s)
+bool VcCommit::GitParse(GString s, bool RevList)
 {
 	GString::Array lines = s.Split("\n");
 	if (lines.Length() < 3)
 		return false;
 
-	for (unsigned ln = 0; ln < lines.Length(); ln++)
+	if (RevList)
 	{
-		GString &l = lines[ln];
-		if (ln == 0)
-			Rev = l.SplitDelimit().Last();
-		else if (l.Find("Author:") >= 0)
-			Author = l.Split(":", 1)[1].Strip();
-		else if (l.Find("Date:") >= 0)
-			Ts.Parse(l.Split(":", 1)[1].Strip());
-		else if (l.Strip().Length() > 0)
+		auto a = lines[0].SplitDelimit();
+		if (a.Length() != 2)
+			return false;
+		Ts.Set(a[0].Int());
+		Rev = a[1];
+
+		for (int i=0; i<lines.Length(); i++)
 		{
-			if (Msg)
-				Msg += "\n";
-			Msg += l.Strip();
+			GString &Ln = lines[i];
+			if (IsWhiteSpace(Ln(0)))
+				Msg += Ln.LStrip() + "\n";
+			else
+			{
+				a = Ln.SplitDelimit(" \t\r", 1);
+				if (a.Length() <= 1)
+					continue;
+				if (a[0].Equals("parent"))
+					Parents.Add(a[1]);
+				else if (a[0].Equals("author"))
+					Author = a[1];
+			}
+		}
+	}
+	else
+	{
+		for (unsigned ln = 0; ln < lines.Length(); ln++)
+		{
+			GString &l = lines[ln];
+			if (ln == 0)
+				Rev = l.SplitDelimit().Last();
+			else if (l.Find("Author:") >= 0)
+				Author = l.Split(":", 1)[1].Strip();
+			else if (l.Find("Date:") >= 0)
+				Ts.Parse(l.Split(":", 1)[1].Strip());
+			else if (l.Strip().Length() > 0)
+			{
+				if (Msg)
+					Msg += "\n";
+				Msg += l.Strip();
+			}
 		}
 	}
 

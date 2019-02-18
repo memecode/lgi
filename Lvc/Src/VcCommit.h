@@ -8,6 +8,7 @@ class VcCommit : public LListItem
 	AppPriv *d;
 	bool Current;
 	GString Rev;
+	GString::Array Parents;
 	GString Author;
 	LDateTime Ts;
 	GString Cache;
@@ -25,7 +26,7 @@ public:
 
 	void SetCurrent(bool b);
 	char *GetText(int Col);
-	bool GitParse(GString s);
+	bool GitParse(GString s, bool RevList);
 	bool SvnParse(GString s);
 	bool HgParse(GString s);
 	bool CvsParse(LDateTime &Dt, GString Auth, GString Msg);

@@ -32,7 +32,7 @@
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-uint32 Swap32(uint32 i)
+uint32_t Swap32(uint32_t i)
 {
 	#if LGI_LITTLE_ENDIAN
 	return	((i & 0xff000000) >> 24) |
@@ -129,8 +129,8 @@ struct U1Fixed15
 
 struct U8Fixed8
 {
-	uint8 i;
-	uint8 f;
+	uint8_t i;
+	uint8_t f;
 
 	double d()
 	{
@@ -164,37 +164,37 @@ struct IccXYZ
 
 struct IccProfileHeader
 {
-	uint32 ProfileSize;
-	uint32 PreferedCmmType;
-	uint32 Version;
+	uint32_t ProfileSize;
+	uint32_t PreferedCmmType;
+	uint32_t Version;
 	IccProfileClass Class;
 	IccColourSpace InputSpace;
-	uint32 ConnectionSpace;
+	uint32_t ConnectionSpace;
 	IccDateTime CreationDate;
-	uint32 Magic; // 'acsp'
-	uint32 PlatformSig;
-	uint32 Flags;
-	uint32 DeviceManufacturer;
-	uint32 DeviceModel;
-	uint8 DeviceAttributes[8];
-	uint32 RenderingIntent;
+	uint32_t Magic; // 'acsp'
+	uint32_t PlatformSig;
+	uint32_t Flags;
+	uint32_t DeviceManufacturer;
+	uint32_t DeviceModel;
+	uint8_t DeviceAttributes[8];
+	uint32_t RenderingIntent;
 	IccXYZ PcsD50;
-	uint32 CreatorSig;
+	uint32_t CreatorSig;
 	char ProfileId[16];
 
-	uint8 Reserved[28];
+	uint8_t Reserved[28];
 };
 
 struct IccTag
 {
-	uint32 Sig;
-	uint32 Offset;
-	uint32 Size;
+	uint32_t Sig;
+	uint32_t Offset;
+	uint32_t Size;
 };
 
 struct IccTagTable
 {
-	uint32 Tags;
+	uint32_t Tags;
 	IccTag Tag[1];
 };
 
@@ -202,24 +202,24 @@ struct IccLocalString
 {
 	uint16 Lang;
 	uint16 Country;
-	uint32 Len;
-	uint32 Offset;
+	uint32_t Len;
+	uint32_t Offset;
 };
 
 struct IccMultiLocalUnicode
 {
-	uint32 Sig;
-	uint32 Reserved;
-	uint32 Count;
-	uint32 RecordSize;
+	uint32_t Sig;
+	uint32_t Reserved;
+	uint32_t Count;
+	uint32_t RecordSize;
 	IccLocalString Str[1];
 };
 
 struct IccDescTag
 {
-	uint32 Sig;
-	uint32 Reserved;
-	uint32 Size;
+	uint32_t Sig;
+	uint32_t Reserved;
+	uint32_t Size;
 	char String[1];
 
 	bool IsOk() { return Swap32(Sig) == 'desc'; }
@@ -239,11 +239,11 @@ struct NamedColour
 
 struct IccNameColourTag
 {
-	uint32 Sig;
-	uint32 Reserved;
-	uint32 Flags;
-	uint32 Count;
-	uint32 Coords;
+	uint32_t Sig;
+	uint32_t Reserved;
+	uint32_t Flags;
+	uint32_t Count;
+	uint32_t Coords;
 	char Prefix[32];
 	char Suffix[32];
 	NamedColour Colours[1];
@@ -253,8 +253,8 @@ struct IccNameColourTag
 
 struct IccTextTag
 {
-	uint32 Sig;
-	uint32 Reserved;
+	uint32_t Sig;
+	uint32_t Reserved;
 	char String[1];
 
 	bool IsOk() { return Swap32(Sig) == 'text'; }
@@ -262,9 +262,9 @@ struct IccTextTag
 
 struct IccCurve
 {
-	uint32 Sig;
-	uint32 Reserved;
-	uint32 Count;
+	uint32_t Sig;
+	uint32_t Reserved;
+	uint32_t Count;
 	uint16 Values[1];
 
 	bool IsOk() { return Swap32(Sig) == 'curv'; }
@@ -272,8 +272,8 @@ struct IccCurve
 
 struct IccXYZTag
 {
-	uint32 Sig;
-	uint32 Reserved;
+	uint32_t Sig;
+	uint32_t Reserved;
 	IccXYZ Values[1];
 
 	bool IsOk() { return Swap32(Sig) == 'XYZ '; }
@@ -284,10 +284,10 @@ class ValueDom : public GDom
 	char *Txt;
 
 public:
-	ValueDom(uint32 i, const char *name)
+	ValueDom(uint32_t i, const char *name)
 	{
 		char s[256];
-		uint32 is = i;
+		uint32_t is = i;
 		sprintf(s, "%s: %i (%4.4s)", name, Swap32(i), (char*)&is);
 		Txt = NewStr(s);
 	}
@@ -295,7 +295,7 @@ public:
 	ValueDom(IccProfileClass i, const char *name)
 	{
 		char s[256];
-		uint32 is = i;
+		uint32_t is = i;
 		sprintf(s, "%s: %i (%4.4s)", name, Swap32(i), (char*)&is);
 		Txt = NewStr(s);
 	}
@@ -303,7 +303,7 @@ public:
 	ValueDom(IccColourSpace i, const char *name)
 	{
 		char s[256];
-		uint32 is = i;
+		uint32_t is = i;
 		sprintf(s, "%s: %i (%4.4s)", name, Swap32(i), (char*)&is);
 		Txt = NewStr(s);
 	}	
@@ -698,7 +698,7 @@ TagDom::TagDom(IccTag *tag, char *header)
 	DomAdd(Size);
 
 	int Off = Swap32(h->Offset);
-	uint32 *Ptr = (uint32*) (header + Off);
+	uint32_t *Ptr = (uint32_t*) (header + Off);
 	switch (Swap32(h->Sig))
 	{
 		case 'desc':
@@ -906,7 +906,7 @@ public:
 		Len = 0;
 	}
 
-	bool GetTag(uint32 Tag, char *&Ptr, int &Size)
+	bool GetTag(uint32_t Tag, char *&Ptr, int &Size)
 	{
 		IccTagTable *t = TagTable();
 		if (t)
