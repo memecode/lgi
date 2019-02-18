@@ -884,7 +884,7 @@ ssize_t GRichTextPriv::ImageBlock::GetTextAt(ssize_t Offset, GArray<StyleText*> 
 	return 0;
 }
 
-ssize_t GRichTextPriv::ImageBlock::CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32> *Text)
+ssize_t GRichTextPriv::ImageBlock::CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text)
 {
 	// No text to copy
 	return 0;
@@ -932,7 +932,7 @@ bool GRichTextPriv::ImageBlock::Seek(SeekType To, BlockCursor &Cursor)
 	return true;
 }
 
-ssize_t GRichTextPriv::ImageBlock::FindAt(ssize_t StartIdx, const uint32 *Str, GFindReplaceCommon *Params)
+ssize_t GRichTextPriv::ImageBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params)
 {
 	// No text to find in
 	return -1;
@@ -1311,7 +1311,7 @@ GMessage::Result GRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 	return true;
 }
 
-bool GRichTextPriv::ImageBlock::AddText(Transaction *Trans, ssize_t AtOffset, const uint32 *Str, ssize_t Chars, GNamedStyle *Style)
+bool GRichTextPriv::ImageBlock::AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars, GNamedStyle *Style)
 {
 	// Can't add text to image block
 	return false;
@@ -1323,7 +1323,7 @@ bool GRichTextPriv::ImageBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, 
 	return false;
 }
 
-ssize_t GRichTextPriv::ImageBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32> *DeletedText)
+ssize_t GRichTextPriv::ImageBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText)
 {
 	// The image is one "character"
 	IsDeleted = BlkOffset == 0;

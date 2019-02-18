@@ -211,7 +211,7 @@ public:
 	~GCssCache();
 
 	void SetPrefix(GString s) { Prefix = s; }
-	uint32 GetStyles();
+	uint32_t GetStyles();
 	void ZeroRefCounts();
 	bool OutputStyles(GStream &s, int TabDepth);
 	GNamedStyle *AddStyleToCache(GAutoPtr<GCss> &s);
@@ -247,7 +247,7 @@ class EmojiMenu : public GPopup
 	struct Emoji
 	{
 		GRect Src, Dst;
-		uint32 u;
+		uint32_t u;
 	};
 	struct Pane
 	{
@@ -263,7 +263,7 @@ public:
 	void OnPaint(GSurface *pDC);
 	void OnMouseClick(GMouse &m);
 	void Visible(bool i);
-	bool InsertEmoji(uint32 Ch);
+	bool InsertEmoji(uint32_t Ch);
 };
 
 struct CtrlCap
@@ -279,13 +279,13 @@ struct CtrlCap
 
 struct ButtonState
 {
-	uint8 IsMenu : 1;
-	uint8 IsPress : 1;
-	uint8 Pressed : 1;
-	uint8 MouseOver : 1;
+	uint8_t IsMenu : 1;
+	uint8_t IsPress : 1;
+	uint8_t Pressed : 1;
+	uint8_t MouseOver : 1;
 };
 
-extern bool Utf16to32(GArray<uint32> &Out, const uint16 *In, int Len);
+extern bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int Len);
 
 class GEmojiContext
 {
@@ -437,7 +437,7 @@ public:
 	};
 
 	/// This is a run of text, all of the same style
-	class StyleText : public GArray<uint32>
+	class StyleText : public GArray<uint32_t>
 	{
 		GNamedStyle *Style; // owned by the CSS cache
 	
@@ -448,8 +448,8 @@ public:
 		bool Emoji;
 
 		StyleText(const StyleText *St);
-		StyleText(const uint32 *t = NULL, ssize_t Chars = -1, GNamedStyle *style = NULL);
-		uint32 *At(ssize_t i);
+		StyleText(const uint32_t *t = NULL, ssize_t Chars = -1, GNamedStyle *style = NULL);
+		uint32_t *At(ssize_t i);
 		GNamedStyle *GetStyle();
 		void SetStyle(GNamedStyle *s);
 	};
@@ -723,7 +723,7 @@ public:
 			virtual bool OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY) = 0;
 			virtual int LineToOffset(int Line) = 0;
 			virtual int GetLines() = 0;
-			virtual ssize_t FindAt(ssize_t StartIdx, const uint32 *Str, GFindReplaceCommon *Params) = 0;
+			virtual ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params) = 0;
 			virtual void SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, GRange r) {}
 			virtual void IncAllStyleRefs() {}
 			virtual void Dump() {}
@@ -739,7 +739,7 @@ public:
 			virtual void OnComponentInstall(GString Name) {}
 
 			// Copy some or all of the text out
-			virtual ssize_t CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32> *Text) { return false; }
+			virtual ssize_t CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text) { return false; }
 
 			/// This method moves a cursor index.
 			/// \returns the new cursor index or -1 on error.
@@ -762,7 +762,7 @@ public:
 				/// The index to add at (-1 = the end)
 				ssize_t AtOffset,
 				/// The text itself
-				const uint32 *Str,
+				const uint32_t *Str,
 				/// [Optional] The number of characters
 				ssize_t Chars = -1,
 				/// [Optional] Style to give the text, NULL means "use the existing style"
@@ -776,7 +776,7 @@ public:
 				Transaction *Trans,
 				ssize_t Offset,
 				ssize_t Chars,
-				GArray<uint32> *DeletedText = NULL
+				GArray<uint32_t> *DeletedText = NULL
 			)	{ return false; }
 
 			/// Changes the style of a range of characters
@@ -866,7 +866,7 @@ public:
 						// is using UTF-16 (i.e. Windows).
 		int OffsetY;	// Offset of this string from the TextLine's box in the Y axis
 		
-		DisplayStr(StyleText *src, GFont *f, const uint32 *s, ssize_t l = -1, GSurface *pdc = NULL) :
+		DisplayStr(StyleText *src, GFont *f, const uint32_t *s, ssize_t l = -1, GSurface *pdc = NULL) :
 			GDisplayString(f,
 				#ifndef WINDOWS
 				(char16*)
@@ -931,7 +931,7 @@ public:
 					if (Utf16to32(Tmp, (const uint16*)s, e - s))
 						c.Reset(new DisplayStr(Src, GetFont(), &Tmp[0], Tmp.Length(), pDC));
 					#else
-					c.Reset(new DisplayStr(Src, GetFont(), (uint32*)Str + Start, Len, pDC));
+					c.Reset(new DisplayStr(Src, GetFont(), (uint32_t*)Str + Start, Len, pDC));
 					#endif
 				}
 			}		
@@ -963,7 +963,7 @@ public:
 		GArray<uint32> Utf32;
 		#endif
 
-		EmojiDisplayStr(StyleText *src, GSurface *img, GFont *f, const uint32 *s, ssize_t l = -1);
+		EmojiDisplayStr(StyleText *src, GSurface *img, GFont *f, const uint32_t *s, ssize_t l = -1);
 		GAutoPtr<DisplayStr> Clone(ssize_t Start, ssize_t Len = -1);
 		void Paint(GSurface *pDC, int &FixX, int FixY, GColour &Back);
 		double GetAscent();
@@ -981,7 +981,7 @@ public:
 		GArray<DisplayStr*> Strs;
 
 		/// Is '1' for lines that have a new line character at the end.
-		uint8 NewLine;
+		uint8_t NewLine;
 		
 		TextLine(int XOffsetPx, int WidthPx, int YOffsetPx);
 		int Length();
@@ -1045,9 +1045,9 @@ public:
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
 		ssize_t GetTextAt(ssize_t Offset, GArray<StyleText*> &t);
-		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32> *Text);
+		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text);
 		bool Seek(SeekType To, BlockCursor &Cursor);
-		ssize_t FindAt(ssize_t StartIdx, const uint32 *Str, GFindReplaceCommon *Params);
+		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
 		void IncAllStyleRefs();
 		void SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, GRange r);
 		bool DoContext(GSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling);
@@ -1062,9 +1062,9 @@ public:
 		GMessage::Result OnEvent(GMessage *Msg);
 
 		// Transactional changes
-		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32 *Str, ssize_t Chars = -1, GNamedStyle *Style = NULL);
+		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, GNamedStyle *Style = NULL);
 		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, GCss *Style, bool Add);
-		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32> *DeletedText = NULL);
+		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText = NULL);
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
 		Block *Split(Transaction *Trans, ssize_t AtOffset);
 		bool StripLast(Transaction *Trans, const char *Set = " \t\r\n"); // Strip trailing new line if present..
@@ -1099,9 +1099,9 @@ public:
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
 		ssize_t GetTextAt(ssize_t Offset, GArray<StyleText*> &t);
-		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32> *Text);
+		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text);
 		bool Seek(SeekType To, BlockCursor &Cursor);
-		ssize_t FindAt(ssize_t StartIdx, const uint32 *Str, GFindReplaceCommon *Params);
+		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
 		void IncAllStyleRefs();
 		bool DoContext(GSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
@@ -1113,9 +1113,9 @@ public:
 		GMessage::Result OnEvent(GMessage *Msg);
 
 		// Transactional changes
-		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32 *Str, ssize_t Chars = -1, GNamedStyle *Style = NULL);
+		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, GNamedStyle *Style = NULL);
 		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, GCss *Style, bool Add);
-		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32> *DeletedText = NULL);
+		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText = NULL);
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
 		Block *Split(Transaction *Trans, ssize_t AtOffset);
 	};
@@ -1194,9 +1194,9 @@ public:
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
 		ssize_t GetTextAt(ssize_t Offset, GArray<StyleText*> &t);
-		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32> *Text);
+		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text);
 		bool Seek(SeekType To, BlockCursor &Cursor);
-		ssize_t FindAt(ssize_t StartIdx, const uint32 *Str, GFindReplaceCommon *Params);
+		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
 		void IncAllStyleRefs();
 		bool DoContext(GSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
@@ -1209,9 +1209,9 @@ public:
 		GMessage::Result OnEvent(GMessage *Msg);
 
 		// Transactional changes
-		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32 *Str, ssize_t Chars = -1, GNamedStyle *Style = NULL);
+		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, GNamedStyle *Style = NULL);
 		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, GCss *Style, bool Add);
-		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32> *DeletedText = NULL);
+		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText = NULL);
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
 	};
 	
@@ -1255,7 +1255,7 @@ public:
 		TextBlock *Tb;
 		ImageBlock *Ib;
 		HorzRuleBlock *Hrb;
-		GArray<uint32> Buf;
+		GArray<uint32_t> Buf;
 		char16 LastChar;
 		GFontCache *FontCache;
 		GCss::Store StyleStore;

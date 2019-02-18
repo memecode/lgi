@@ -209,11 +209,11 @@ void VIo::Fold(GStreamI &o, char *i, int pre_chars)
 			x = 0;
 			i = s;
 		}
-		else if (*s == '=' || ((((uint8)*s) & 0x80) != 0))
+		else if (*s == '=' || ((((uint8_t)*s) & 0x80) != 0))
 		{
 			// quoted printable
 			o.Write(i, (int)(s-i));
-			GStreamPrint(&o, "=%02.2x", (uint8)*s);
+			GStreamPrint(&o, "=%02.2x", (uint8_t)*s);
 			x += 3;
 			i = ++s;
 		}
@@ -356,7 +356,7 @@ bool VCard::Import(GDataPropI *c, GStreamI *s)
 				else if (IsVar(Field, "tel"))
 				{
 					GToken Phone(Data, ";", false);
-					for (uint32 p=0; p<Phone.Length(); p++)
+					for (uint32_t p=0; p<Phone.Length(); p++)
 					{
 						if (IsType("cell"))
 						{
@@ -466,7 +466,7 @@ bool VCard::Import(GDataPropI *c, GStreamI *s)
 				{
 					size_t B64Len = strlen(Data);
 					ssize_t BinLen = BufferLen_64ToBin(B64Len);
-					GAutoPtr<uint8> Bin(new uint8[BinLen]);
+					GAutoPtr<uint8_t> Bin(new uint8_t[BinLen]);
 					if (Bin)
 					{
 						ssize_t Bytes = ConvertBase64ToBinary(Bin.Get(), BinLen, Data, B64Len);
@@ -493,7 +493,7 @@ bool VCard::Import(GDataPropI *c, GStreamI *s)
 		if (Emails.Length())
 		{
 			GStringPipe p;
-			for (uint32 i=0; i<Emails.Length(); i++)
+			for (uint32_t i=0; i<Emails.Length(); i++)
 			{
 				if (i) p.Print(",%s", Emails[i]);
 				else p.Print("%s", Emails[i]);
@@ -614,7 +614,7 @@ bool VIo::ReadField(GStreamI &s, GString &Name, ParamArray *Params, GString &Dat
 			if (t.Length() > 0)
 			{
 				Name = t[0];
-				for (uint32 i=1; i<t.Length(); i++)
+				for (uint32_t i=1; i<t.Length(); i++)
 				{
 					char *var = t[i];
 					char *val = strchr(var, '=');
@@ -669,7 +669,7 @@ void VIo::WriteField(GStreamI &s, const char *Name, ParamArray *Params, char *Da
 		GStreamPrint(&s, "%s", Name);
 		if (Params)
 		{
-			for (uint32 i=0; i<Params->Length(); i++)
+			for (uint32_t i=0; i<Params->Length(); i++)
 			{
 				Parameter &p = (*Params)[i];
 				GStreamPrint(&s, "%s%s=%s", i?"":";", p.Field.Get(), p.Value.Get());
@@ -678,7 +678,7 @@ void VIo::WriteField(GStreamI &s, const char *Name, ParamArray *Params, char *Da
 		
 		bool Is8Bit = false;
 		bool HasEq = false;
-		for (uint8 *c = (uint8*)Data; *c; c++)
+		for (uint8_t *c = (uint8_t*)Data; *c; c++)
 		{
 			if ((*c & 0x80) != 0)
 			{

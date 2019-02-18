@@ -82,7 +82,7 @@ bool StringConvert(Out *&out, ssize_t *OutLen, const In *in, ssize_t InLen)
 		}
 
 		wchar_t *w = StrCache.Get();
-		CFStringRef string = CFStringCreateWithBytes(kCFAllocatorDefault, (const uint8*)w, StrlenW(w) * sizeof(*w), kCFStringEncodingUTF32LE, false);
+		CFStringRef string = CFStringCreateWithBytes(kCFAllocatorDefault, (const uint8_t*)w, StrlenW(w) * sizeof(*w), kCFStringEncodingUTF32LE, false);
 		if (string)
 		{
 			CFDictionaryRef attributes = Font->GetAttributes();

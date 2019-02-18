@@ -826,7 +826,7 @@ inline size_t WideToUtf8Len(const wchar_t *s, ssize_t wchars = -1)
 	}
 	#else
 	const wchar_t *end = wchars < 0 ? NULL : s + wchars;
-	for (uint32 ch = 0;
+	for (uint32_t ch = 0;
 		(
 			wchars < 0
 			||
@@ -836,7 +836,7 @@ inline size_t WideToUtf8Len(const wchar_t *s, ssize_t wchars = -1)
 		(ch = *s);
 		s++)
 	{
-		uint8 *b = Buf;
+		uint8_t *b = Buf;
 		ssize_t len = sizeof(Buf);
 		if (!LgiUtf32To8(ch, b, len))
 			break;

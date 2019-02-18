@@ -122,7 +122,7 @@ bool VcCommit::GitParse(GString s, bool RevList)
 		auto a = lines[0].SplitDelimit();
 		if (a.Length() != 2)
 			return false;
-		Ts.Set(a[0].Int());
+		Ts.Set((uint64) a[0].Int());
 		Rev = a[1];
 
 		for (int i=0; i<lines.Length(); i++)

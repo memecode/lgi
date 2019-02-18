@@ -190,7 +190,7 @@ void GRichTextEdit::ShowStyleTools(bool b)
 	}
 }
 
-void GRichTextEdit::SetTabSize(uint8 i)
+void GRichTextEdit::SetTabSize(uint8_t i)
 {
 	TabSize = limit(i, 2, 32);
 	OnFontChange();
@@ -492,7 +492,7 @@ void GRichTextEdit::SetStylePrefix(GString s)
 
 size_t GRichTextEdit::GetLines()
 {
-	uint32 Count = 0;
+	uint32_t Count = 0;
 	for (size_t i=0; i<d->Blocks.Length(); i++)
 	{
 		GRichTextPriv::Block *b = d->Blocks[i];
@@ -754,7 +754,7 @@ bool GRichTextEdit::Paste()
 	}
 	else if (Text)
 	{
-		GAutoPtr<uint32,true> Utf32((uint32*)LgiNewConvertCp("utf-32", Text, LGI_WideCharset));
+		GAutoPtr<uint32_t,true> Utf32((uint32_t*)LgiNewConvertCp("utf-32", Text, LGI_WideCharset));
 		ptrdiff_t Len = Strlen(Utf32.Get());
 		if (!d->Cursor->Blk->AddText(Trans, d->Cursor->Offset, Utf32.Get(), (int)Len))
 		{
@@ -1014,7 +1014,7 @@ bool GRichTextEdit::OnFind(GFindReplaceCommon *Params)
 		return false;
 	}
 	
-	GAutoPtr<uint32,true> w((uint32*)LgiNewConvertCp("utf-32", Params->Find, "utf-8", Params->Find.Length()));
+	GAutoPtr<uint32_t,true> w((uint32_t*)LgiNewConvertCp("utf-32", Params->Find, "utf-8", Params->Find.Length()));
 	ssize_t Idx = d->Blocks.IndexOf(d->Cursor->Blk);
 	if (Idx < 0)
 	{
@@ -1062,7 +1062,7 @@ void GRichTextEdit::SelectWord(size_t From)
 	if (!b)
 		return;
 
-	GArray<uint32> Txt;
+	GArray<uint32_t> Txt;
 	if (!b->CopyAt(0, b->Length(), &Txt))
 		return;
 
@@ -1581,7 +1581,7 @@ void GRichTextEdit::OnMouseMove(GMouse &m)
 					if (!d->CursorFirst())
 					{
 						// Extend towards the end of the doc...
-						GArray<uint32> Txt;
+						GArray<uint32_t> Txt;
 						if (c->Blk->CopyAt(0, c->Blk->Length(), &Txt))
 						{
 							while
@@ -1595,7 +1595,7 @@ void GRichTextEdit::OnMouseMove(GMouse &m)
 					else
 					{
 						// Extend towards the start of the doc...
-						GArray<uint32> Txt;
+						GArray<uint32_t> Txt;
 						if (c->Blk->CopyAt(0, c->Blk->Length(), &Txt))
 						{
 							while
@@ -1688,9 +1688,9 @@ bool GRichTextEdit::OnKey(GKey &k)
 								if (d->StyleDirty.HasItem(UnderlineBtn))
 									Mod->TextDecoration(d->Values[UnderlineBtn].CastInt32() ? GCss::TextDecorUnderline : GCss::TextDecorNone);
 								if (d->StyleDirty.HasItem(ForegroundColourBtn))
-									Mod->Color(GCss::ColorDef(GCss::ColorRgb, (uint32)d->Values[ForegroundColourBtn].CastInt64()));
+									Mod->Color(GCss::ColorDef(GCss::ColorRgb, (uint32_t)d->Values[ForegroundColourBtn].CastInt64()));
 								if (d->StyleDirty.HasItem(BackgroundColourBtn))
-									Mod->BackgroundColor(GCss::ColorDef(GCss::ColorRgb, (uint32)d->Values[BackgroundColourBtn].CastInt64()));
+									Mod->BackgroundColor(GCss::ColorDef(GCss::ColorRgb, (uint32_t)d->Values[BackgroundColourBtn].CastInt64()));
 							
 								AddStyle = d->AddStyleToCache(Mod);
 							}
@@ -1701,7 +1701,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 						AutoTrans Trans(new GRichTextPriv::Transaction);						
 						d->DeleteSelection(Trans, NULL);
 
-						uint32 Ch = k.c16;
+						uint32_t Ch = k.c16;
 						if (b->AddText(Trans, d->Cursor->Offset, &Ch, 1, AddStyle))
 						{
 							d->Cursor->Set(d->Cursor->Offset + 1);
@@ -2103,7 +2103,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 					{
 						// letter/number etc
 						GRichTextPriv::Block *b = d->Cursor->Blk;
-						uint32 Nbsp[] = {0xa0};
+						uint32_t Nbsp[] = {0xa0};
 						if (b->AddText(NoTransaction, d->Cursor->Offset, Nbsp, 1))
 						{
 							d->Cursor->Set(d->Cursor->Offset + 1);
@@ -2328,7 +2328,7 @@ void GRichTextEdit::OnEnter(GKey &k)
 		d->Cursor->Blk)
 	{
 		GRichTextPriv::Block *b = d->Cursor->Blk;
-		const uint32 Nl[] = {'\n'};
+		const uint32_t Nl[] = {'\n'};
 
 		if (b->AddText(Trans, d->Cursor->Offset, Nl, 1))
 		{
@@ -2841,7 +2841,7 @@ EmojiMenu::EmojiMenu(GRichTextPriv *priv, GdcPt2 p) : GPopup(priv->View)
 		GRange &r = EmojiBlocks[b];
 		for (int i=0; i<r.Len; i++)
 		{
-			uint32 u = (int)r.Start + i;
+			uint32_t u = (int)r.Start + i;
 			int Idx = EmojiToIconIndex(&u, 1);
 			if (Idx >= 0)
 			{
@@ -2877,7 +2877,7 @@ EmojiMenu::EmojiMenu(GRichTextPriv *priv, GdcPt2 p) : GPopup(priv->View)
 		
 		while ((int)p.e.Length() < PaneSz && ImgIdx <= MaxIdx)
 		{
-			uint32 u = Map.Find(ImgIdx);
+			uint32_t u = Map.Find(ImgIdx);
 			if (u)
 			{
 				Emoji &Ch = p.e.New();
@@ -2955,7 +2955,7 @@ void EmojiMenu::OnPaint(GSurface *pDC)
 	}
 }
 
-bool EmojiMenu::InsertEmoji(uint32 Ch)
+bool EmojiMenu::InsertEmoji(uint32_t Ch)
 {
 	if (!d->Cursor || !d->Cursor->Blk)
 		return false;

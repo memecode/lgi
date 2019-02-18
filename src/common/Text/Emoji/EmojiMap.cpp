@@ -3,7 +3,7 @@
 #include "Lgi.h"
 #include "Emoji.h"
 
-int EmojiToIconIndex(const uint32 *Str, ssize_t Len)
+int EmojiToIconIndex(const uint32_t *Str, ssize_t Len)
 {
 	switch (*Str)
 	{

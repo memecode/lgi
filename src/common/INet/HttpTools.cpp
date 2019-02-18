@@ -113,7 +113,7 @@ GXmlTag *ExtractForms(char *Html, GStream *Log)
 										if (*c == ' ')
 										{
 											char h[6];
-											sprintf_s(h, sizeof(h), "%%%2.2X", (uint8)*c);
+											sprintf_s(h, sizeof(h), "%%%2.2X", (uint8_t)*c);
 											p.Push(h);
 										}
 										else p.Push(c, 1);
@@ -676,7 +676,7 @@ void HttpTools::DumpView(GViewI *v, char *p)
 {
 	if (v && p)
 	{
-		uint8 *c = (uint8*) p;
+		uint8_t *c = (uint8_t*) p;
 		while (*c)
 		{
 			if (*c & 0x80)

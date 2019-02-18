@@ -1960,13 +1960,13 @@ bool ReplaceWholeWord(GString &Ln, GString Word, GString NewWord)
 	return Status;
 }
 
-struct FileInfo
+struct LFileInfo
 {
 	GString Path;
 	GString::Array Lines;
 	bool Dirty;
 
-	FileInfo()
+	LFileInfo()
 	{
 		Dirty = false;
 	}
@@ -2018,7 +2018,7 @@ void AppWnd::OnFixBuildErrors()
 	Prog.SetYieldTime(300);
 	int i = 0;
 	int Replacements = 0;
-	GArray<FileInfo> Files;
+	GArray<LFileInfo> Files;
 
 	for (auto Ln : Lines)
 	{
@@ -2037,7 +2037,7 @@ void AppWnd::OnFixBuildErrors()
 				{
 					auto LineNo = p[Base+1].Int();
 
-					FileInfo *Fi = NULL;
+					LFileInfo *Fi = NULL;
 					for (auto &i: Files)
 					{
 						if (i.Path.Equals(Full))

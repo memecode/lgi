@@ -139,7 +139,7 @@ ssize_t GRichTextPriv::HorzRuleBlock::GetTextAt(ssize_t Offset, GArray<StyleText
 	return 0;
 }
 
-ssize_t GRichTextPriv::HorzRuleBlock::CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32> *Text)
+ssize_t GRichTextPriv::HorzRuleBlock::CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text)
 {
 	return 0;
 }
@@ -186,7 +186,7 @@ bool GRichTextPriv::HorzRuleBlock::Seek(SeekType To, BlockCursor &Cursor)
 	return true;
 }
 
-ssize_t GRichTextPriv::HorzRuleBlock::FindAt(ssize_t StartIdx, const uint32 *Str, GFindReplaceCommon *Params)
+ssize_t GRichTextPriv::HorzRuleBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params)
 {
 	return 0;
 }
@@ -217,7 +217,7 @@ GMessage::Result GRichTextPriv::HorzRuleBlock::OnEvent(GMessage *Msg)
 	return false;
 }
 
-bool GRichTextPriv::HorzRuleBlock::AddText(Transaction *Trans, ssize_t AtOffset, const uint32 *Str, ssize_t Chars, GNamedStyle *Style)
+bool GRichTextPriv::HorzRuleBlock::AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars, GNamedStyle *Style)
 {
 	return false;
 }
@@ -227,7 +227,7 @@ bool GRichTextPriv::HorzRuleBlock::ChangeStyle(Transaction *Trans, ssize_t Offse
 	return false;
 }
 
-ssize_t GRichTextPriv::HorzRuleBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32> *DeletedText)
+ssize_t GRichTextPriv::HorzRuleBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText)
 {
 	IsDeleted = BlkOffset == 0;
 	if (IsDeleted)

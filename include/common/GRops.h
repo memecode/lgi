@@ -1159,8 +1159,8 @@ void GComposite32to24(OutPx *d, InPx *s, int Len)
 	REG OutPx *dst = d;
 	REG InPx *src = s;
 	REG InPx *end = src + Len;
-	uint8 *DivLut = Div255Lut;
-	REG uint8 sa;
+	uint8_t *DivLut = Div255Lut;
+	REG uint8_t sa;
 
 	while (src < end)
 	{
@@ -1177,7 +1177,7 @@ void GComposite32to24(OutPx *d, InPx *s, int Len)
 			// Composite pixel
 			//		Dc'  = (Sc.Sa + Dc.Da.(1 - Sa)) / Da'
 			//		Da'  = Sa + Da.(1 - Sa)
-			REG uint8 o = 0xff - sa;
+			REG uint8_t o = 0xff - sa;
 			
 			#define NonPreMul24(c)	\
 				dst->c = DivLut[(src->c * sa) + (dst->c * o)]

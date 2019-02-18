@@ -122,7 +122,7 @@ public:
 	}
 	
 	#if defined COCOA
-	void SetModifer(uint32 modifierKeys);
+	void SetModifer(uint32_t modifierKeys);
 	#else
 	void SetModifer(uint32_t modifierKeys)
 	{

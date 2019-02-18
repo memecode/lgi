@@ -570,6 +570,9 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 			LinkParents();
 			break;
 		}
+		default:
+			LgiAssert(!"Impl me.");
+			break;
 	}
 
 	return true;

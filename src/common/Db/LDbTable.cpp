@@ -6,7 +6,7 @@
 
 #define OBJ_HEAD(magic) \
 	char *Start = p.c; \
-	uint32 *Sz = NULL; \
+	uint32_t *Sz = NULL; \
 	if (Write) \
 	{ \
 		*p.u32++ = magic; \
@@ -34,7 +34,7 @@
 
 #define OBJ_TAIL() \
 	if (Write) \
-		*Sz = (uint32) (p.c - Start); \
+		*Sz = (uint32_t) (p.c - Start); \
 	else \
 		p.c = Start + *Sz; \
 	LgiAssert(Sizeof() == *Sz); \
@@ -160,7 +160,7 @@ struct DbTablePriv
 		{
 			LDbField &f = Fields[i];
 			f.Offset = Pos;
-			Pos += IsFixed(f.Type) ? f.DataSize() : sizeof(uint32);
+			Pos += IsFixed(f.Type) ? f.DataSize() : sizeof(uint32_t);
 			
 			if (IsFixed(f.Type))
 			{
@@ -440,7 +440,7 @@ bool LDbField::Serialize(GPointer &p, bool Write)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-int LDbRow::HeaderSz = sizeof(uint32) << 1; // Magic + Size
+int LDbRow::HeaderSz = sizeof(uint32_t) << 1; // Magic + Size
 
 LDbRow::LDbRow(DbTablePriv *priv)
 {
@@ -477,9 +477,9 @@ int VarCmp(VarBlock *a, VarBlock *b)
 	return (int) (a->Start - b->Start);
 }
 
-uint32 LDbRow::GetInitialSize()
+uint32_t LDbRow::GetInitialSize()
 {
-	return HeaderSz + d->FixedSz + (d->Variable * sizeof(uint32));
+	return HeaderSz + d->FixedSz + (d->Variable * sizeof(uint32_t));
 }
 
 bool LDbRow::Compact()
@@ -499,7 +499,7 @@ bool LDbRow::Compact()
 			}
 		}
 		v.Sort(VarCmp);
-		uint32 Pos = GetInitialSize();
+		uint32_t Pos = GetInitialSize();
 		for (unsigned i=0; i<v.Length(); i++)
 		{
 			VarBlock &b = v[i];
@@ -560,7 +560,7 @@ GString LDbRow::ToString()
 	return Sep.Join(a);
 }
 
-uint32 LDbRow::Size(uint32 Set)
+uint32_t LDbRow::Size(uint32_t Set)
 {
 	if (Base.c)
 	{
@@ -648,7 +648,7 @@ void LDbRow::PostEdit()
 	Base.c = Edit.AddressOf();
 	if (Base.c)
 	{
-		Size((uint32)Edit.Length());
+		Size((uint32_t)Edit.Length());
 		Offsets[VariableOff] = (int32*) Edit.AddressOf(8 + d->FixedSz);
 	}
 }
@@ -936,7 +936,7 @@ bool LDbTable::Serialize(const char *Path, bool Write)
 	{
 		if (d->Fields.Length() > 0)
 		{
-			size_t Sz = sizeof(uint32) +
+			size_t Sz = sizeof(uint32_t) +
 				d->Fields.Length() * d->Fields[0].Sizeof();
 			if (d->Data.Length() < Sz)
 				d->Data.Length(Sz);
