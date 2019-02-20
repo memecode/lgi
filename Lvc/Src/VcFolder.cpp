@@ -794,7 +794,7 @@ void VcFolder::LinkParents()
 	GArray<EdgeArr> Active;
 	for (auto c:Log)
 	{
-		if (c->IsRev("9f20d16606897f3ad88a3b0035d961cdbebd9fe4"))
+		if (c->IsRev("cb4583f3bbffea7ddc3f8d3a8eecfc4bc0a3b6a5"))
 		{
 			int asd=0;
 		}
@@ -828,18 +828,21 @@ void VcFolder::LinkParents()
 		// Now for all active edges... assign positions
 		for (unsigned i=0; i<Active.Length(); i++)
 		{
-			for (auto e: Active[i])
+			EdgeArr &Edges = Active[i];
+			for (unsigned n=0; n<Edges.Length(); n++)
 			{
+				auto e = Edges[n];
+
 				if (c == e->Child || c == e->Parent)
 				{
-					LgiAssert(e->Idx == i);
-					c->Pos.Add(e, i);
+					LgiAssert(c->NodeIdx >= 0);
+					c->Pos.Add(e, c->NodeIdx);
 				}
 				else
 				{
 					// May need to untangle edges with different parents here
 					bool Diff = false;
-					for (auto edge: Active[i])
+					for (auto edge: Edges)
 					{
 						if (edge != e &&
 							edge->Child != c &&
@@ -875,10 +878,11 @@ void VcFolder::LinkParents()
 							// Create new index for this parent
 							NewIndex = (int)Active.Length();
 
-						Active[i].Delete(e);
+						Edges.Delete(e);
 						Active[NewIndex].Add(e);
 						e->Idx = NewIndex;
 						c->Pos.Add(e, NewIndex);
+						n--;
 					}
 					else
 					{
