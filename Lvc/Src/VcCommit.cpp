@@ -2,13 +2,47 @@
 #include "GClipBoard.h"
 #include "../Resources/resdefs.h"
 #include "GPath.h"
+#include "LHashTable.h"
 
-VcCommit::VcCommit(AppPriv *priv)
+VcEdge::~VcEdge()
+{
+	if (Parent)
+		Parent->Edges.Delete(this);
+	if (Child)
+		Child->Edges.Delete(this);
+}
+
+void VcEdge::Detach(VcCommit *c)
+{
+	if (Parent == c)
+		Parent = NULL;
+	if (Child == c)
+		Child = NULL;
+	if (Parent == NULL && Child == NULL)
+		delete this;
+}
+
+void VcEdge::Set(VcCommit *p, VcCommit *c)
+{
+	if ((Parent = p))
+		Parent->Edges.Add(this);
+	if ((Child = c))
+		Child->Edges.Add(this);
+}
+
+VcCommit::VcCommit(AppPriv *priv, VcFolder *folder) : Pos(32, -1)
 {
 	d = priv;
+	Folder = folder;
 	Current = false;
 	NodeIdx = -1;
 	Parents.SetFixedLength(false);
+}
+
+VcCommit::~VcCommit()
+{
+	for (auto e: Edges)
+		e->Detach(this);
 }
 
 char *VcCommit::GetRev()
@@ -65,19 +99,58 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 		}
 
 		Mem.Colour(GColour::Black);
-		for (unsigned i=0; i<Nodes.Length(); i++)
+
+		if (IsRev("9f20d16606897f3ad88a3b0035d961cdbebd9fe4"))
 		{
-			auto &n = Nodes[i];
-			double mx = MAP(i);
-			for (auto pi:n.Prev)
+			int asd=0;
+		}
+		
+		VcCommit *Prev = NULL, *Next = NULL;
+		Prev = Idx > 0 ? Folder->Log[Idx - 1] : NULL;
+		Next = Idx < Folder->Log.Length() - 1 ? Folder->Log[Idx + 1] : NULL;
+		
+		for (auto it: Pos)
+		{
+			VcEdge *e = it.key;
+			int CurIdx = it.value;
+			if (CurIdx < 0)
 			{
-				double px = MAP(pi);
-				Mem.Line(px, -(Ht/2), mx, (Ht/2));
+				continue;
 			}
-			for (auto ni:n.Next)
+
+			double CurX = MAP(CurIdx);
+			
+			if (e->Child != this)
 			{
-				double nx = MAP(ni);
-				Mem.Line(nx, Ht+(Ht/2), mx, (Ht/2));
+				// Line to previous commit
+				int PrevIdx = Prev ? Prev->Pos.Find(e) : -1;
+				if (PrevIdx >= 0)
+				{
+					double PrevX = MAP(PrevIdx);
+					Mem.Line(PrevX, -(Ht/2), CurX, Ht/2);
+				}
+				else
+				{
+					Mem.Colour(GColour::Red);
+					Mem.Line(CurX, Ht/2, CurX, Ht/2-5);
+					Mem.Colour(GColour::Black);
+				}
+			}
+
+			if (e->Parent != this)
+			{
+				int NextIdx = Next ? Next->Pos.Find(e) : -1;
+				if (NextIdx >= 0)
+				{
+					double NextX = MAP(NextIdx);
+					Mem.Line(NextX, Ht+(Ht/2), CurX, Ht/2);
+				}
+				else
+				{
+					Mem.Colour(GColour::Red);
+					Mem.Line(CurX, Ht/2, CurX, Ht/2+5);
+					Mem.Colour(GColour::Black);
+				}
 			}
 		}
 
@@ -122,7 +195,13 @@ bool VcCommit::GitParse(GString s, bool RevList)
 		auto a = lines[0].SplitDelimit();
 		if (a.Length() != 2)
 			return false;
+
+		#ifdef WINDOWS
+		// Unix timestamp to windows ticks
+		Ts.Set((uint64)a[0].Int() * LDateTime::Second64Bit + 116445168000000000LL);
+		#else
 		Ts.Set((uint64) a[0].Int());
+		#endif
 		Rev = a[1];
 
 		for (int i=0; i<lines.Length(); i++)
