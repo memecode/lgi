@@ -277,6 +277,61 @@ public:
 	}
 };
 
+class CommitList : public LList
+{
+public:
+	CommitList(int id) : LList(id, 0, 0, 200, 200)
+	{
+	}
+
+	bool OnKey(GKey &k)
+	{
+		switch (k.c16)
+		{
+			case 'p':
+			case 'P':
+			{
+				if (k.Down())
+				{
+					GArray<VcCommit*> Sel;
+					GetSelection(Sel);
+					if (Sel.Length())
+					{
+						auto p = Sel[0]->GetParents();
+						if (p->Length() == 0)
+							break;
+
+						for (auto c:Sel)
+							c->Select(false);
+
+						VcCommit *Scroll = NULL;
+						for (auto it = begin(); it != end(); it++)
+						{
+							VcCommit *item = dynamic_cast<VcCommit*>(*it);
+							if (item &&
+								!Sel.HasItem(item))
+							{
+								for (auto r:*p)
+									if (item->IsRev(r))
+									{
+										if (!Scroll)
+											Scroll = item;
+										item->Select(true);
+									}
+							}
+						}
+						if (Scroll)
+							Scroll->ScrollTo();
+					}
+				}
+				return true;
+			}
+		}
+
+		return LList::OnKey(k);
+	}
+};
+
 class App : public GWindow, public AppPriv
 {
 	GAutoPtr<GImageList> ImgLst;
@@ -332,7 +387,7 @@ public:
 			Tree->SetImageList(ImgLst, false);
 			CommitsBox->Attach(FoldersBox);
 
-			Lst = new LList(IDC_LIST, 0, 0, 200, 200);
+			Lst = new CommitList(IDC_LIST);
 			Lst->Attach(CommitsBox);
 			Lst->GetCss(true)->Height("40%");
 			Lst->AddColumn("---", 40);

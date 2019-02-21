@@ -100,10 +100,12 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 
 		Mem.Colour(GColour::Black);
 
+		#if 0
 		if (IsRev("9f20d16606897f3ad88a3b0035d961cdbebd9fe4"))
 		{
 			int asd=0;
 		}
+		#endif
 		
 		VcCommit *Prev = NULL, *Next = NULL;
 		Prev = Idx > 0 ? Folder->Log[Idx - 1] : NULL;
@@ -120,6 +122,7 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 
 			double CurX = MAP(CurIdx);
 			
+			#define I(v) ((int)(v))
 			if (e->Child != this)
 			{
 				// Line to previous commit
@@ -127,12 +130,12 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 				if (PrevIdx >= 0)
 				{
 					double PrevX = MAP(PrevIdx);
-					Mem.Line(PrevX, -(Ht/2), CurX, Ht/2);
+					Mem.Line(I(PrevX), I(-(Ht/2)), I(CurX), I(Ht/2));
 				}
 				else
 				{
 					Mem.Colour(GColour::Red);
-					Mem.Line(CurX, Ht/2, CurX, Ht/2-5);
+					Mem.Line(I(CurX), I(Ht/2), I(CurX), I(Ht/2-5));
 					Mem.Colour(GColour::Black);
 				}
 			}
@@ -143,12 +146,12 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 				if (NextIdx >= 0)
 				{
 					double NextX = MAP(NextIdx);
-					Mem.Line(NextX, Ht+(Ht/2), CurX, Ht/2);
+					Mem.Line(I(NextX), I(Ht+(Ht/2)), I(CurX), I(Ht/2));
 				}
 				else
 				{
 					Mem.Colour(GColour::Red);
-					Mem.Line(CurX, Ht/2, CurX, Ht/2+5);
+					Mem.Line(I(CurX), I(Ht/2), I(CurX), I(Ht/2+5));
 					Mem.Colour(GColour::Black);
 				}
 			}

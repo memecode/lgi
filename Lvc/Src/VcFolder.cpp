@@ -794,10 +794,12 @@ void VcFolder::LinkParents()
 	GArray<EdgeArr> Active;
 	for (auto c:Log)
 	{
+		#if 0
 		if (c->IsRev("cb4583f3bbffea7ddc3f8d3a8eecfc4bc0a3b6a5"))
 		{
 			int asd=0;
 		}
+		#endif
 
 		for (unsigned i=0; c->NodeIdx<0 && i<Active.Length(); i++)
 		{
