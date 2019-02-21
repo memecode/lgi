@@ -284,6 +284,29 @@ public:
 	{
 	}
 
+	void SelectRevisions(GString::Array &Revs)
+	{
+		VcCommit *Scroll = NULL;
+		for (auto it = begin(); it != end(); it++)
+		{
+			VcCommit *item = dynamic_cast<VcCommit*>(*it);
+			if (item)
+			{
+				for (auto r: Revs)
+				{
+					if (item->IsRev(r))
+					{
+						if (!Scroll)
+							Scroll = item;
+						item->Select(true);
+					}
+				}
+			}
+		}
+		if (Scroll)
+			Scroll->ScrollTo();
+	}
+
 	bool OnKey(GKey &k)
 	{
 		switch (k.c16)
@@ -304,24 +327,7 @@ public:
 						for (auto c:Sel)
 							c->Select(false);
 
-						VcCommit *Scroll = NULL;
-						for (auto it = begin(); it != end(); it++)
-						{
-							VcCommit *item = dynamic_cast<VcCommit*>(*it);
-							if (item &&
-								!Sel.HasItem(item))
-							{
-								for (auto r:*p)
-									if (item->IsRev(r))
-									{
-										if (!Scroll)
-											Scroll = item;
-										item->Select(true);
-									}
-							}
-						}
-						if (Scroll)
-							Scroll->ScrollTo();
+						SelectRevisions(*p);
 					}
 				}
 				return true;
@@ -498,6 +504,20 @@ public:
 			{
 				OptionsDlg Dlg(this, Opts);
 				Dlg.DoModal();
+				break;
+			}
+			case IDM_FIND:
+			{
+				GInput i(this, "", "Search string:");
+				if (i.DoModal())
+				{
+					GString::Array Revs;
+					Revs.Add(i.GetStr());
+
+					CommitList *cl;
+					if (GetViewById(IDC_LIST, cl))
+						cl->SelectRevisions(Revs);
+				}
 				break;
 			}
 		}

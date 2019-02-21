@@ -794,8 +794,8 @@ void VcFolder::LinkParents()
 	GArray<EdgeArr> Active;
 	for (auto c:Log)
 	{
-		#if 0
-		if (c->IsRev("cb4583f3bbffea7ddc3f8d3a8eecfc4bc0a3b6a5"))
+		#if 1
+		if (c->IsRev("49d6765e37dfffb0ad4e924da5169c076c87c871"))
 		{
 			int asd=0;
 		}
@@ -912,21 +912,26 @@ void VcFolder::LinkParents()
 
 				LgiAssert(Active[i].HasItem(e));
 				Active[i].Delete(e);
-				
-				if (Active[i].Length() == 0)
+			}
+		}
+
+		// Collapse any empty active columns
+		for (unsigned i=0; i<Active.Length(); i++)
+		{
+			if (Active[i].Length() == 0)
+			{
+				// No more edges using this index, bump any higher ones down
+				Active.DeleteAt(i, true);
+				for (int n=i; n<Active.Length(); n++)
 				{
-					// No more edges using this index, bump any higher ones down
-					Active.DeleteAt(i, true);
-					for (int n=i; n<Active.Length(); n++)
+					for (auto edge:Active[n])
 					{
-						for (auto edge:Active[n])
-						{
-							LgiAssert(edge->Idx > 0);
-							edge->Idx--;
-							c->Pos.Add(edge, edge->Idx);
-						}
+						LgiAssert(edge->Idx > 0);
+						edge->Idx--;
+						c->Pos.Add(edge, edge->Idx);
 					}
 				}
+				i--;
 			}
 		}
 	}
