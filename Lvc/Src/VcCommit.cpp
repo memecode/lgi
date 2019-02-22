@@ -36,6 +36,7 @@ VcCommit::VcCommit(AppPriv *priv, VcFolder *folder) : Pos(32, -1)
 	Folder = folder;
 	Current = false;
 	NodeIdx = -1;
+	NodeColour.Rgb(150, 150, 255);
 	Parents.SetFixedLength(false);
 }
 
@@ -77,35 +78,10 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 		#define MAP(col) ((col) * Px + Half)
 
 		GMemDC Mem(Ctx.X(), Ctx.Y(), System32BitColourSpace);
-		double r = Half - 2;
-
-		bool Dbg = IsRev("938e8ccfdac365e91ca7ca732aab538d8769a37e");
-		if (Dbg)
-		{
-			Mem.Colour(GColour::Red);
-			// Mem.Rectangle();
-		}
+		double r = Half - 1;
 
 		double x = MAP(NodeIdx);
-		if (NodeIdx >= 0)
-		{
-			double Cx = x;
-			double Cy = Ht / 2;
-			GPath p;
-			p.Circle(Cx, Cy, r);
-			//p.Circle(Cx, Cy, r - 1);
-			GSolidBrush sb(GColour::Black);
-			p.Fill(&Mem, sb);
-		}
-
 		Mem.Colour(GColour::Black);
-
-		#if 0
-		if (IsRev("9f20d16606897f3ad88a3b0035d961cdbebd9fe4"))
-		{
-			int asd=0;
-		}
-		#endif
 		
 		VcCommit *Prev = NULL, *Next = NULL;
 		Prev = Idx > 0 ? Folder->Log[Idx - 1] : NULL;
@@ -154,6 +130,24 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 					Mem.Line(I(CurX), I(Ht/2), I(CurX), I(Ht/2+5));
 					Mem.Colour(GColour::Black);
 				}
+			}
+		}
+
+		if (NodeIdx >= 0)
+		{
+			double Cx = x;
+			double Cy = Ht / 2;
+			{
+				GPath p;
+				p.Circle(Cx, Cy, r + (Current ? 1 : 0));
+				GSolidBrush sb(GColour::Black);
+				p.Fill(&Mem, sb);
+			}
+			{
+				GPath p;
+				p.Circle(Cx, Cy, r-1);
+				GSolidBrush sb(NodeColour);
+				p.Fill(&Mem, sb);
 			}
 		}
 

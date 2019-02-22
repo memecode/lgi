@@ -37,6 +37,7 @@ public:
 	GArray<VcEdge*> Edges;
 	int NodeIdx;
 	int Idx;
+	GColour NodeColour;
 	LHashTbl<PtrKey<VcEdge*>, int> Pos;
 
 	VcCommit(AppPriv *priv, VcFolder *folder);
