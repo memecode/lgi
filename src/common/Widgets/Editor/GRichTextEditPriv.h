@@ -281,8 +281,8 @@ struct ButtonState
 {
 	uint8_t IsMenu : 1;
 	uint8_t IsPress : 1;
-	uint8 Pressed : 1;
-	uint8 MouseOver : 1;
+	uint8_t Pressed : 1;
+	uint8_t MouseOver : 1;
 };
 
 extern bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int Len);
@@ -927,11 +927,11 @@ public:
 					LgiAssert(Str != NULL);
 					const char16 *s = Utf16Seek(Str, Start);
 					const char16 *e = Utf16Seek(s, Len);
-					GArray<uint32> Tmp;
-					if (Utf16to32(Tmp, (const uint16*)s, e - s))
+					GArray<uint32_t> Tmp;
+					if (Utf16to32(Tmp, (const uint16_t*)s, e - s))
 						c.Reset(new DisplayStr(Src, GetFont(), &Tmp[0], Tmp.Length(), pDC));
 					#else
-					c.Reset(new DisplayStr(Src, GetFont(), (uint32*)Str + Start, Len, pDC));
+					c.Reset(new DisplayStr(Src, GetFont(), (uint32_t*)Str + Start, Len, pDC));
 					#endif
 				}
 			}		

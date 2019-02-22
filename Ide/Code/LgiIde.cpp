@@ -1960,13 +1960,13 @@ bool ReplaceWholeWord(GString &Ln, GString Word, GString NewWord)
 	return Status;
 }
 
-struct FileInfo
+struct LFileInfo
 {
 	GString Path;
 	GString::Array Lines;
 	bool Dirty;
 
-	FileInfo()
+	LFileInfo()
 	{
 		Dirty = false;
 	}
@@ -2012,32 +2012,43 @@ void AppWnd::OnFixBuildErrors()
 
 	GString Raw = d->Output->Txt[AppWnd::BuildTab]->Name();
 	GString::Array Lines = Raw.Split("\n");
-	GProgressDlg Prog(this);
-	Prog.SetDescription("Parsing errors...");
-	Prog.SetLimits(0, Lines.Length());
-	Prog.SetYieldTime(300);
+	auto *Log = d->Output->Txt[AppWnd::OutputTab];
+
+	Log->Name(NULL);
+	Log->Print("Parsing errors...\n");
 	int i = 0;
 	int Replacements = 0;
-	GArray<FileInfo> Files;
+	GArray<LFileInfo> Files;
 
 	for (auto Ln : Lines)
 	{
-		if (Ln.Find("error") >= 0)
+		auto ErrPos = Ln.Find("error");
+		if (ErrPos >= 0)
 		{
+			Log->Print("Error pos = %i\n", (int)ErrPos);
+			#ifdef WINDOWS
 			GString::Array p = Ln.SplitDelimit(">()");
+			#else
+			GString::Array p = Ln(0, ErrPos).Strip().SplitDelimit(":");
+			#endif
+			Log->Print("p.Len = %i\n", (int)p.Length());
 			if (p.Length() > 2)
 			{
+				#ifdef WINDOWS
 				int Base = p[0].IsNumeric() ? 1 : 0;
 				GString Fn = p[Base];
 				if (Fn.Find("Program Files") >= 0)
 					continue;
+				auto LineNo = p[Base+1].Int();
+				#else
+				GString Fn = p[0];
+				auto LineNo = p[1].Int();
+				#endif
 
 				GAutoString Full;
-				if (d->FindSource(Full, p[Base], NULL))
+				if (d->FindSource(Full, Fn, NULL))
 				{
-					auto LineNo = p[Base+1].Int();
-
-					FileInfo *Fi = NULL;
+					LFileInfo *Fi = NULL;
 					for (auto &i: Files)
 					{
 						if (i.Path.Equals(Full))
@@ -2081,10 +2092,6 @@ void AppWnd::OnFixBuildErrors()
 				}
 			}
 		}
-
-		Prog.Value(++i);
-		if (Prog.IsCancelled())
-			break;
 	}
 
 	for (auto &Fi : Files)
@@ -2093,8 +2100,8 @@ void AppWnd::OnFixBuildErrors()
 			Fi.Save();
 	}
 
-	if (Replacements)
-		LgiMsg(this, "%i replacements made.", AppName, MB_OK, Replacements);
+	Log->Print("%i replacements made.\n", Replacements);
+	d->Output->Value(AppWnd::OutputTab);
 }
 
 void AppWnd::OnBuildStateChanged(bool NewState)

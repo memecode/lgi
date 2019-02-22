@@ -65,7 +65,7 @@ ObjCWrapper(NSView, OsView)
 typedef pthread_t           OsThread;
 typedef uint64_t			OsThreadId;
 typedef pthread_mutex_t		OsSemaphore;
-typedef uint16				OsChar;
+typedef uint16_t			OsChar;
 typedef int					OsProcessId;
 typedef int					OsProcess;
 typedef CGContextRef		OsPainter;
@@ -117,7 +117,7 @@ LgiFunc OsThreadId					GetCurrentThreadId();
 typedef int OsSocket;
 
 // Sleep the current thread
-LgiFunc void LgiSleep(uint32 i);
+LgiFunc void LgiSleep(uint32_t i);
 
 // Run the message loop to process any pending messages
 #define LgiYield()					GApp::ObjInstance()->Run(false)

@@ -244,7 +244,7 @@ void GPrintDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
 		return;
 	}
 	
-	uint8 *Scan0 = (*Src)[0];
+	uint8_t *Scan0 = (*Src)[0];
 	if (!Scan0)
 	{
 		LgiAssert(0);

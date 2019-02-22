@@ -2193,26 +2193,32 @@ bool WriteDC(const char *Name, GSurface *pDC)
     return GdcD->Save(Name, pDC);
 }
 
-bool GdcDevice::Save(const char *Name, GSurface *pDC)
+bool GdcDevice::Save(GStream *Out, GSurface *In, const char *FileType)
 {
-	bool Status = false;
+	if (!Out || !In || !FileType)
+		return false;
 
-	if (Name && pDC)
+	GAutoPtr<GFilter> F(GFilterFactory::New(FileType, FILTER_CAP_WRITE, 0));
+	if (!F)
 	{
-		GAutoPtr<GFilter> F(GFilterFactory::New(Name, FILTER_CAP_WRITE, 0));
-		if (F)
-		{
-			GFile File;
-			if (File.Open(Name, O_WRITE))
-			{
-				Status = F->WriteImage(&File, pDC) == GFilter::IoSuccess;
-			}
-		}
-		else
-		{
-			LgiTrace("No filter to write '%s'\n", Name);
-		}
+		LgiTrace("%s:%i - No filter for '%s'\n", _FL, FileType);
+		return false;
 	}
 
-	return Status;
+	return F->WriteImage(Out, In) == GFilter::IoSuccess;
+}
+
+bool GdcDevice::Save(const char *Name, GSurface *pDC)
+{
+	if (!Name || !pDC)
+		return false;
+
+	GFile File;
+	if (!File.Open(Name, O_WRITE))
+	{
+		LgiTrace("%s:%i - Can't open '%s'\n", _FL, Name);
+		return false;
+	}
+
+	return Save(&File, pDC, Name);
 }

@@ -277,6 +277,67 @@ public:
 	}
 };
 
+class CommitList : public LList
+{
+public:
+	CommitList(int id) : LList(id, 0, 0, 200, 200)
+	{
+	}
+
+	void SelectRevisions(GString::Array &Revs)
+	{
+		VcCommit *Scroll = NULL;
+		for (auto it = begin(); it != end(); it++)
+		{
+			VcCommit *item = dynamic_cast<VcCommit*>(*it);
+			if (item)
+			{
+				for (auto r: Revs)
+				{
+					if (item->IsRev(r))
+					{
+						if (!Scroll)
+							Scroll = item;
+						item->Select(true);
+					}
+				}
+			}
+		}
+		if (Scroll)
+			Scroll->ScrollTo();
+	}
+
+	bool OnKey(GKey &k)
+	{
+		switch (k.c16)
+		{
+			case 'p':
+			case 'P':
+			{
+				if (k.Down())
+				{
+					GArray<VcCommit*> Sel;
+					GetSelection(Sel);
+					if (Sel.Length())
+					{
+						auto p = Sel[0]->GetParents();
+						if (p->Length() == 0)
+							break;
+
+						for (auto c:Sel)
+							c->Select(false);
+
+						SelectRevisions(*p);
+					}
+				}
+				return true;
+			}
+		}
+
+		return LList::OnKey(k);
+	}
+};
+
 class App : public GWindow, public AppPriv
 {
 	GAutoPtr<GImageList> ImgLst;
@@ -332,7 +393,7 @@ public:
 			Tree->SetImageList(ImgLst, false);
 			CommitsBox->Attach(FoldersBox);
 
-			Lst = new LList(IDC_LIST, 0, 0, 200, 200);
+			Lst = new CommitList(IDC_LIST);
 			Lst->Attach(CommitsBox);
 			Lst->GetCss(true)->Height("40%");
 			Lst->AddColumn("---", 40);
@@ -443,6 +504,20 @@ public:
 			{
 				OptionsDlg Dlg(this, Opts);
 				Dlg.DoModal();
+				break;
+			}
+			case IDM_FIND:
+			{
+				GInput i(this, "", "Search string:");
+				if (i.DoModal())
+				{
+					GString::Array Revs;
+					Revs.Add(i.GetStr());
+
+					CommitList *cl;
+					if (GetViewById(IDC_LIST, cl))
+						cl->SelectRevisions(Revs);
+				}
 				break;
 			}
 		}

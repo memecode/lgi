@@ -75,7 +75,19 @@ public:
 			f->Italic(Style == GCss::FontStyleItalic);
 			f->Underline(Decor == GCss::TextDecorUnderline);
 			
-			if (!f->Create(Face, Size))
+			auto Sz = Size;
+			if (Sz.Type == GCss::SizeLarger)
+			{
+				Sz = SysFont->Size();
+				Sz.Value++;
+			}
+			else if (Sz.Type == GCss::SizeSmaller)
+			{
+				Sz = SysFont->Size();
+				Sz.Value--;
+			}
+
+			if (!f->Create(Face, Sz))
 			{
 				LgiAssert(0);
 				DeleteObj(f);

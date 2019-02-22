@@ -1477,7 +1477,7 @@ bool MailSmtp::Open(GSocketI *S,
 
 									// Decode the server response:
 									uint8_t Txt[128];
-									int InLen = strlen(Sp);
+									auto InLen = strlen(Sp);
 									ssize_t TxtLen = ConvertBase64ToBinary(Txt, sizeof(Txt), Sp, InLen);
 
 									// Calc the hash:

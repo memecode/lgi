@@ -6,7 +6,7 @@
 
 #define OBJ_HEAD(magic) \
 	char *Start = p.c; \
-	uint32 *Sz = NULL; \
+	uint32_t *Sz = NULL; \
 	if (Write) \
 	{ \
 		*p.u32++ = magic; \
@@ -34,7 +34,7 @@
 
 #define OBJ_TAIL() \
 	if (Write) \
-		*Sz = (uint32) (p.c - Start); \
+		*Sz = (uint32_t) (p.c - Start); \
 	else \
 		p.c = Start + *Sz; \
 	LgiAssert(Sizeof() == *Sz); \

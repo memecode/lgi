@@ -289,7 +289,7 @@ public:
 
 			#else
 
-			uint8 *o = (uint8*)Str->Str;
+			uint8_t *o = (uint8_t*)Str->Str;
 			ssize_t OutLen = Str->Len;
 			if (wchars >= 0)
 			{

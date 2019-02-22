@@ -32,3 +32,5 @@
 #define IDM_HELP								512
 #define IDM_ABOUT								513
 #define IDC_PUSH_ALL							514
+#define IDM_EDIT_MENU							515
+#define IDM_FIND								516

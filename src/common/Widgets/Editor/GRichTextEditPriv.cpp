@@ -28,8 +28,8 @@ bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int Len)
 	// Convert the string...
 	Ptr = (uint16*)In;
 	Bytes = sizeof(*In) * Len;
-	uint32 *o = &Out[0];
-	uint32 *e = o + Out.Length();
+	uint32_t *o = &Out[0];
+	uint32_t *e = o + Out.Length();
 	while (	Bytes >= sizeof(*In))
 	{
 		*o++ = LgiUtf16To32(Ptr, Bytes);
@@ -89,7 +89,7 @@ GCssCache::~GCssCache()
 
 uint32_t GCssCache::GetStyles()
 {
-	uint32 c = 0;
+	uint32_t c = 0;
 	for (unsigned i=0; i<Styles.Length(); i++)
 	{
 		c += Styles[i]->RefCount != 0;
@@ -391,8 +391,8 @@ bool GRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 	if (!Cursor || !Selection)
 		return false;
 
-	GArray<uint32> DeletedText;
-	GArray<uint32> *DelTxt = Cut ? &DeletedText : NULL;
+	GArray<uint32_t> DeletedText;
+	GArray<uint32_t> *DelTxt = Cut ? &DeletedText : NULL;
 
 	bool Cf = CursorFirst();
 	GRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
@@ -487,7 +487,7 @@ bool GRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 	if (Cut)
 	{
 		DelTxt->Add(0);
-		*Cut = (char16*)LgiNewConvertCp(LGI_WideCharset, &DelTxt->First(), "utf-32", DelTxt->Length()*sizeof(uint32));
+		*Cut = (char16*)LgiNewConvertCp(LGI_WideCharset, &DelTxt->First(), "utf-32", DelTxt->Length()*sizeof(uint32_t));
 	}
 
 	return true;
@@ -828,7 +828,7 @@ bool GRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 
 			if (c->Offset > 0)
 			{
-				GArray<uint32> a;
+				GArray<uint32_t> a;
 				c->Blk->CopyAt(0, c->Offset, &a);
 					
 				ssize_t i = c->Offset;
@@ -902,7 +902,7 @@ bool GRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 
 			if (c->Offset < c->Blk->Length())
 			{
-				GArray<uint32> a;
+				GArray<uint32_t> a;
 				ssize_t RemainingCh = c->Blk->Length() - c->Offset;
 				c->Blk->CopyAt(c->Offset, RemainingCh, &a);
 					
@@ -1373,14 +1373,14 @@ void GRichTextPriv::OnStyleChange(GRichTextEdit::RectType t)
 		}
 		case GRichTextEdit::ForegroundColourBtn:
 		{
-			s.Color(GCss::ColorDef(GCss::ColorRgb, (uint32) Values[t].Value.Int64));
+			s.Color(GCss::ColorDef(GCss::ColorRgb, (uint32_t) Values[t].Value.Int64));
 			if (!ChangeSelectionStyle(&s, true))
 				StyleDirty.Add(t);
 			break;
 		}
 		case GRichTextEdit::BackgroundColourBtn:
 		{
-			s.BackgroundColor(GCss::ColorDef(GCss::ColorRgb, (uint32) Values[t].Value.Int64));
+			s.BackgroundColor(GCss::ColorDef(GCss::ColorRgb, (uint32_t) Values[t].Value.Int64));
 			if (!ChangeSelectionStyle(&s, true))
 				StyleDirty.Add(t);
 			break;
@@ -1474,7 +1474,7 @@ void GRichTextPriv::PaintBtn(GSurface *pDC, GRichTextEdit::RectType t)
 		{
 			if (v.Value.Int64)
 			{
-				pDC->Colour((uint32)v.Value.Int64, 32);
+				pDC->Colour((uint32_t)v.Value.Int64, 32);
 				pDC->Rectangle(&r);
 			}
 			else
@@ -2218,7 +2218,7 @@ bool GRichTextPriv::FromHtml(GHtmlElement *e, CreateContext &ctx, GCss *ParentSt
 
 			if (ctx.Tb)
 			{
-				const uint32 Nl[] = {'\n', 0};
+				const uint32_t Nl[] = {'\n', 0};
 				ctx.Tb->AddText(NoTransaction, -1, Nl, 1, NULL);
 				ctx.LastChar = '\n';
 				ctx.StartOfLine = true;
@@ -2343,7 +2343,7 @@ bool GRichTextPriv::GetSelection(GArray<char16> *Text, GAutoString *Html)
 	if (!Text && !Html)
 		return false;
 
-	GArray<uint32> Utf32;
+	GArray<uint32_t> Utf32;
 
 	bool Cf = CursorFirst();
 	GRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
@@ -2387,7 +2387,7 @@ bool GRichTextPriv::GetSelection(GArray<char16> *Text, GAutoString *Html)
 			End->Blk->CopyAt(0, End->Offset, &Utf32);
 		}
 
-		char16 *w = (char16*)LgiNewConvertCp(LGI_WideCharset, &Utf32[0], "utf-32", Utf32.Length() * sizeof(uint32));
+		char16 *w = (char16*)LgiNewConvertCp(LGI_WideCharset, &Utf32[0], "utf-32", Utf32.Length() * sizeof(uint32_t));
 		if (!w)
 			return Error(_FL, "Failed to convert %i utf32 to wide.", Utf32.Length());
 

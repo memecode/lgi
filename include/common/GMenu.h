@@ -522,7 +522,7 @@ public:
 	#elif defined(BEOS)
 	GRect GetPos();
 	#elif defined(MAC)
-	int GetIdForCommand(uint32 Cmd);
+	int GetIdForCommand(uint32_t Cmd);
 	#endif
 };
 

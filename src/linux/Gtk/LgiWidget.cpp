@@ -284,7 +284,7 @@ static gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
         if (e->keyval > 0xff && e->string != NULL)
         {
         	// Convert string to unicode char
-        	uint8 *i = e->string;
+        	uint8_t *i = e->string;
         	ptrdiff_t len = strlen(i);
 			k.c16 = LgiUtf8To32(i, len);
         }

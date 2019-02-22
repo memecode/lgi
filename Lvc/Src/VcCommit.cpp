@@ -2,13 +2,48 @@
 #include "GClipBoard.h"
 #include "../Resources/resdefs.h"
 #include "GPath.h"
+#include "LHashTable.h"
 
-VcCommit::VcCommit(AppPriv *priv)
+VcEdge::~VcEdge()
+{
+	if (Parent)
+		Parent->Edges.Delete(this);
+	if (Child)
+		Child->Edges.Delete(this);
+}
+
+void VcEdge::Detach(VcCommit *c)
+{
+	if (Parent == c)
+		Parent = NULL;
+	if (Child == c)
+		Child = NULL;
+	if (Parent == NULL && Child == NULL)
+		delete this;
+}
+
+void VcEdge::Set(VcCommit *p, VcCommit *c)
+{
+	if ((Parent = p))
+		Parent->Edges.Add(this);
+	if ((Child = c))
+		Child->Edges.Add(this);
+}
+
+VcCommit::VcCommit(AppPriv *priv, VcFolder *folder) : Pos(32, -1)
 {
 	d = priv;
+	Folder = folder;
 	Current = false;
 	NodeIdx = -1;
+	NodeColour.Rgb(150, 150, 255);
 	Parents.SetFixedLength(false);
+}
+
+VcCommit::~VcCommit()
+{
+	for (auto e: Edges)
+		e->Detach(this);
 }
 
 char *VcCommit::GetRev()
@@ -43,41 +78,76 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 		#define MAP(col) ((col) * Px + Half)
 
 		GMemDC Mem(Ctx.X(), Ctx.Y(), System32BitColourSpace);
-		double r = Half - 2;
-
-		bool Dbg = IsRev("938e8ccfdac365e91ca7ca732aab538d8769a37e");
-		if (Dbg)
-		{
-			Mem.Colour(GColour::Red);
-			// Mem.Rectangle();
-		}
+		double r = Half - 1;
 
 		double x = MAP(NodeIdx);
+		Mem.Colour(GColour::Black);
+		
+		VcCommit *Prev = NULL, *Next = NULL;
+		Prev = Idx > 0 ? Folder->Log[Idx - 1] : NULL;
+		Next = Idx < Folder->Log.Length() - 1 ? Folder->Log[Idx + 1] : NULL;
+		
+		for (auto it: Pos)
+		{
+			VcEdge *e = it.key;
+			int CurIdx = it.value;
+			if (CurIdx < 0)
+			{
+				continue;
+			}
+
+			double CurX = MAP(CurIdx);
+			
+			#define I(v) ((int)(v))
+			if (e->Child != this)
+			{
+				// Line to previous commit
+				int PrevIdx = Prev ? Prev->Pos.Find(e) : -1;
+				if (PrevIdx >= 0)
+				{
+					double PrevX = MAP(PrevIdx);
+					Mem.Line(I(PrevX), I(-(Ht/2)), I(CurX), I(Ht/2));
+				}
+				else
+				{
+					Mem.Colour(GColour::Red);
+					Mem.Line(I(CurX), I(Ht/2), I(CurX), I(Ht/2-5));
+					Mem.Colour(GColour::Black);
+				}
+			}
+
+			if (e->Parent != this)
+			{
+				int NextIdx = Next ? Next->Pos.Find(e) : -1;
+				if (NextIdx >= 0)
+				{
+					double NextX = MAP(NextIdx);
+					Mem.Line(I(NextX), I(Ht+(Ht/2)), I(CurX), I(Ht/2));
+				}
+				else
+				{
+					Mem.Colour(GColour::Red);
+					Mem.Line(I(CurX), I(Ht/2), I(CurX), I(Ht/2+5));
+					Mem.Colour(GColour::Black);
+				}
+			}
+		}
+
 		if (NodeIdx >= 0)
 		{
 			double Cx = x;
 			double Cy = Ht / 2;
-			GPath p;
-			p.Circle(Cx, Cy, r);
-			//p.Circle(Cx, Cy, r - 1);
-			GSolidBrush sb(GColour::Black);
-			p.Fill(&Mem, sb);
-		}
-
-		Mem.Colour(GColour::Black);
-		for (unsigned i=0; i<Nodes.Length(); i++)
-		{
-			auto &n = Nodes[i];
-			double mx = MAP(i);
-			for (auto pi:n.Prev)
 			{
-				double px = MAP(pi);
-				Mem.Line(px, -(Ht/2), mx, (Ht/2));
+				GPath p;
+				p.Circle(Cx, Cy, r + (Current ? 1 : 0));
+				GSolidBrush sb(GColour::Black);
+				p.Fill(&Mem, sb);
 			}
-			for (auto ni:n.Next)
 			{
-				double nx = MAP(ni);
-				Mem.Line(nx, Ht+(Ht/2), mx, (Ht/2));
+				GPath p;
+				p.Circle(Cx, Cy, r-1);
+				GSolidBrush sb(NodeColour);
+				p.Fill(&Mem, sb);
 			}
 		}
 
@@ -122,7 +192,13 @@ bool VcCommit::GitParse(GString s, bool RevList)
 		auto a = lines[0].SplitDelimit();
 		if (a.Length() != 2)
 			return false;
-		Ts.Set(a[0].Int());
+
+		#ifdef WINDOWS
+		// Unix timestamp to windows ticks
+		Ts.Set((uint64)a[0].Int() * LDateTime::Second64Bit + 116445168000000000LL);
+		#else
+		Ts.Set((uint64) a[0].Int());
+		#endif
 		Rev = a[1];
 
 		for (int i=0; i<lines.Length(); i++)

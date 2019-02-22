@@ -336,7 +336,7 @@ void VcFolder::Select(bool b)
 			{
 				case VcGit:
 				{
-					IsLogging = StartCmd("rev-list --all --header --timestamp", &VcFolder::ParseRevList);
+					IsLogging = StartCmd("rev-list --all --header --timestamp --author-date-order", &VcFolder::ParseRevList);
 					break;
 				}
 				case VcSvn:
@@ -467,7 +467,7 @@ void VcFolder::Select(bool b)
 		}
 
 		d->Lst->Insert(Ls);
-		d->Lst->Sort(LogDateCmp);
+		// d->Lst->Sort(LogDateCmp);
 
 		if (GetType() == VcGit)
 		{
@@ -524,6 +524,14 @@ int CommitDateCmp(VcCommit **a, VcCommit **b)
 
 bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 {
+	GFile f("C:\\Users\\matthew\\Code\\Lgi\\trunk\\rev-list.txt", O_WRITE);
+	if (f.IsOpen())
+	{
+		f.SetSize(0);
+		f.Write(s);
+		f.Close();
+	}
+
 	LHashTbl<StrKey<char>, VcCommit*> Map;
 	for (VcCommit **pc = NULL; Log.Iterate(pc); )
 		Map.Add((*pc)->GetRev(), *pc);
@@ -551,7 +559,7 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 
 			for (auto Commit: Commits)
 			{
-				GAutoPtr<VcCommit> Rev(new VcCommit(d));
+				GAutoPtr<VcCommit> Rev(new VcCommit(d, this));
 				if (Rev->GitParse(Commit, true))
 				{
 					if (!Map.Find(Rev->GetRev()))
@@ -566,10 +574,13 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 				}
 			}
 
-			Log.Sort(CommitDateCmp);
+			// Log.Sort(CommitDateCmp);
 			LinkParents();
 			break;
 		}
+		default:
+			LgiAssert(!"Impl me.");
+			break;
 	}
 
 	return true;
@@ -611,7 +622,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 
 			for (unsigned i=0; i<c.Length(); i++)
 			{
-				GAutoPtr<VcCommit> Rev(new VcCommit(d));
+				GAutoPtr<VcCommit> Rev(new VcCommit(d, this));
 				if (Rev->GitParse(c[i], false))
 				{
 					if (!Map.Find(Rev->GetRev()))
@@ -633,7 +644,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 			GString::Array c = s.Split("------------------------------------------------------------------------");
 			for (unsigned i=0; i<c.Length(); i++)
 			{
-				GAutoPtr<VcCommit> Rev(new VcCommit(d));
+				GAutoPtr<VcCommit> Rev(new VcCommit(d, this));
 				GString Raw = c[i].Strip();
 				if (Rev->SvnParse(Raw))
 				{
@@ -656,7 +667,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 			GString::Array c = s.Split("\n\n");
 			for (GString *Commit = NULL; c.Iterate(Commit); )
 			{
-				GAutoPtr<VcCommit> Rev(new VcCommit(d));
+				GAutoPtr<VcCommit> Rev(new VcCommit(d, this));
 				if (Rev->HgParse(*Commit))
 				{
 					if (!Map.Find(Rev->GetRev()))
@@ -725,7 +736,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 									VcCommit *Cc = Map.Find(Ts);
 									if (!Cc)
 									{
-										Map.Add(Ts, Cc = new VcCommit(d));
+										Map.Add(Ts, Cc = new VcCommit(d, this));
 										Log.Add(Cc);
 										Cc->CvsParse(Dt, Author, Msg);
 									}
@@ -753,142 +764,176 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 
 void VcFolder::LinkParents()
 {
-	GString Dbg = "21ccae56b8bc707be6d7af7c055a86cdb697b1f1";
-
-	VcCommit *p = NULL;
-	for (auto i = Log.Length()-1; i > 0; i--)
+	LHashTbl<StrKey<char>,VcCommit*> Map;
+	
+	// Index all the commits
+	int i = 0;
+	for (auto c:Log)
 	{
-		VcCommit *c = Log[i];
-		if (p)
+		c->Idx = i++;
+		c->NodeIdx = -1;
+		Map.Add(c->GetRev(), c);
+	}
+
+	// Create all the edges...
+	for (auto c:Log)
+	{
+		auto *Par = c->GetParents();
+		for (auto &pRev : *Par)
 		{
-			c->Nodes.Empty();
-			c->NodeIdx = -1;
+			auto *p = Map.Find(pRev);
+			if (p)
+				new VcEdge(p, c);
+			else
+				LgiAssert(0);
+		}
+	}
 
-			// Match the parent nodes...
-			auto Par = c->GetParents();
+	// Map the edges to positions
+	typedef GArray<VcEdge*> EdgeArr;
+	GArray<EdgeArr> Active;
+	for (auto c:Log)
+	{
+		#if 1
+		if (c->IsRev("49d6765e37dfffb0ad4e924da5169c076c87c871"))
+		{
+			int asd=0;
+		}
+		#endif
 
-			if (c->IsRev("1802edf955ff9037e66b1481121be3a6e21bf0a7"))
+		for (unsigned i=0; c->NodeIdx<0 && i<Active.Length(); i++)
+		{
+			for (auto e:Active[i])
 			{
-				int asd=0;
-			}
-
-
-			LgiAssert(Par->Length() > 0);
-			for (unsigned n = 0; n < Par->Length(); n++)
-			{
-				bool Found = false;
-				GString &pRev = (*Par)[n];
-				for (unsigned k = 0; k < p->Nodes.Length(); k++)
+				if (e->Parent == c)
 				{
-					auto &PrevNode = p->Nodes[k];
-					if (pRev.Equals(PrevNode.Rev, false))
-					{
-						if (c->NodeIdx < 0)
-							c->NodeIdx = k;
-
-						auto &CurNode = c->Nodes[c->NodeIdx];
-						CurNode.Prev.Add(k);
-						CurNode.Rev = c->GetRev();
-
-						PrevNode.Next.Add(c->NodeIdx);
-						Found = true;
-						break;
-					}
+					c->NodeIdx = i;
+					break;
 				}
-				
-				if (!Found)
-				{
-					// Go and find it...
-					size_t end;
-					for (end = i + 1; end < Log.Length(); end++)
-					{
-						if (!_stricmp(Log[end]->GetRev(), pRev))
-							break;
-					}
-					if (end < Log.Length())
-					{
-						// Found..
-						VcCommit *Cur = c;
-						VcCommit *Next = Log[i+1];
-						
-						if (Cur->NodeIdx < 0)
-						{
-							Cur->NodeIdx = (int)Next->Nodes.Length();
-							Cur->Nodes[Cur->NodeIdx].Rev = Cur->GetRev();
-						}
+			}
+		}
 
-						int CurIdx = Cur->NodeIdx;
-						for (auto n = i; n < end; n++)
+		// Add starting edges to active set
+		for (auto e:c->Edges)
+		{
+			if (e->Child == c)
+			{
+				if (c->NodeIdx < 0)
+					c->NodeIdx = (int)Active.Length();
+
+				e->Idx = c->NodeIdx;
+				c->Pos.Add(e, e->Idx);
+				Active[e->Idx].Add(e);
+			}
+		}
+
+		// Now for all active edges... assign positions
+		for (unsigned i=0; i<Active.Length(); i++)
+		{
+			EdgeArr &Edges = Active[i];
+			for (unsigned n=0; n<Edges.Length(); n++)
+			{
+				auto e = Edges[n];
+
+				if (c == e->Child || c == e->Parent)
+				{
+					LgiAssert(c->NodeIdx >= 0);
+					c->Pos.Add(e, c->NodeIdx);
+				}
+				else
+				{
+					// May need to untangle edges with different parents here
+					bool Diff = false;
+					for (auto edge: Edges)
+					{
+						if (edge != e &&
+							edge->Child != c &&
+							edge->Parent != e->Parent)
 						{
-							auto *Next = Log[n + 1];
-							int NextIdx = (int)Next->Nodes.Length();
-							for (unsigned k=0; k<Next->Nodes.Length(); k++)
+							Diff = true;
+							break;
+						}
+					}
+					if (Diff)
+					{
+						int NewIndex = -1;
+						
+						// Look through existing indexes for a parent match
+						for (unsigned ii=0; ii<Active.Length(); ii++)
+						{
+							if (ii == i) continue;
+							// Match e->Parent?
+							bool Match = true;
+							for (auto ee:Active[ii])
 							{
-								if (Next->Nodes[k].Rev.Equals(pRev.Get(), false))
+								if (ee->Parent != e->Parent)
 								{
-									NextIdx = k;
+									Match = false;
 									break;
 								}
 							}
-
-							if (Cur->IsRev(Dbg) && CurIdx > 0)
-							{
-								int asd=0;
-							}
-							auto &CurNode = Cur->Nodes[CurIdx];
-							CurNode.Next.Add(NextIdx);
-
-							if (Next->IsRev(Dbg) && NextIdx > 0)
-							{
-								int asd=0;
-							}
-							auto &NextNode = Next->Nodes[NextIdx];
-							NextNode.Prev.Add(CurIdx);
-							NextNode.Rev = pRev;
-
-							CurIdx = NextIdx;
-							Cur = Next;
+							if (Match)
+								NewIndex = ii;
 						}
+
+						if (NewIndex < 0)
+							// Create new index for this parent
+							NewIndex = (int)Active.Length();
+
+						Edges.Delete(e);
+						Active[NewIndex].Add(e);
+						e->Idx = NewIndex;
+						c->Pos.Add(e, NewIndex);
+						n--;
 					}
 					else
 					{
-						int asd=0;
-					}
-				}
-			}
-
-			int CurIdx = 0;
-			for (unsigned PrevIdx = 0; PrevIdx < p->Nodes.Length(); PrevIdx++)
-			{
-				auto &PrevNode = p->Nodes[PrevIdx];
-				if (PrevNode.Next.Length() == 0)
-				{
-					while (1)
-					{
-						auto &CurNode = c->Nodes[CurIdx];
-						if (CurNode.Rev)
-						{
-							CurIdx++;
-						}
-						else
-						{
-							CurNode.Rev = PrevNode.Rev;
-							CurNode.Prev.Add(PrevIdx);
-							PrevNode.Next.Add(CurIdx);
-							break;
-						}
+						LgiAssert(e->Idx == i);
+						c->Pos.Add(e, i);
 					}
 				}
 			}
 		}
-		else
+		
+		// Process terminating edges
+		for (auto e:c->Edges)
 		{
-			// First node
-			c->NodeIdx = 0;
-			auto &n = c->Nodes[0];
-			n.Rev = c->GetRev();
+			if (e->Parent == c)
+			{
+				if (e->Idx < 0)
+				{
+					// This happens with out of order commits..?
+					continue;
+				}
+
+				int i = e->Idx;
+				if (c->NodeIdx < 0)
+					c->NodeIdx = i;
+
+				LgiAssert(Active[i].HasItem(e));
+				Active[i].Delete(e);
+			}
 		}
-		p = c;
+
+		// Collapse any empty active columns
+		for (unsigned i=0; i<Active.Length(); i++)
+		{
+			if (Active[i].Length() == 0)
+			{
+				// No more edges using this index, bump any higher ones down
+				Active.DeleteAt(i, true);
+				for (int n=i; n<Active.Length(); n++)
+				{
+					for (auto edge:Active[n])
+					{
+						LgiAssert(edge->Idx > 0);
+						edge->Idx--;
+						c->Pos.Add(edge, edge->Idx);
+					}
+				}
+				i--;
+			}
+		}
 	}
 }
 

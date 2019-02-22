@@ -3008,7 +3008,7 @@ bool AppWnd::WriteDefines(GFile &Defs)
 
 			char s[4];
 			memcpy(s, &p.Value, 4);
-			#define IsPrintable(c) ((uint8)(c)>=' ' && (uint8)(c) <= 127)
+			#define IsPrintable(c) ((uint8_t)(c)>=' ' && (uint8_t)(c) <= 127)
 			if (IsPrintable(s[0]) &&
 				IsPrintable(s[1]) &&
 				IsPrintable(s[2]) &&

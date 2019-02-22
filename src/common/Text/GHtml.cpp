@@ -5707,22 +5707,8 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			CenterText();
 		}
 
-		if (XAlign == GCss::AlignCenter)
-		{
-			int OffX = (Flow->x2 - Flow->x1 - Size.x) >> 1;
-			if (OffX > 0)
-			{
-				Pos.x += OffX;
-			}
-		}
-		else if (XAlign == GCss::AlignRight)
-		{
-			int OffX = Flow->x2 - Flow->x1 - Size.x;
-			if (OffX > 0)
-			{
-				Pos.x += OffX;
-			}
-		}
+		// Can't do alignment here because pos is used to
+		// restart the parents flow region...
 	}
 	else
 	{
@@ -5801,10 +5787,25 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		Flow->MAX.y = MAX(Flow->MAX.y, Flow->y2);
 	}
 
-	/*
-	if (Debug)
-		LgiTrace("After %s\n", Flow->ToString().Get());
-	*/
+	if (Disp == DispBlock || Disp == DispInlineBlock)
+	{
+		if (XAlign == GCss::AlignCenter)
+		{
+			int OffX = (Flow->x2 - Flow->x1 - Size.x) >> 1;
+			if (OffX > 0)
+			{
+				Pos.x += OffX;
+			}
+		}
+		else if (XAlign == GCss::AlignRight)
+		{
+			int OffX = Flow->x2 - Flow->x1 - Size.x;
+			if (OffX > 0)
+			{
+				Pos.x += OffX;
+			}
+		}
+	}
 
 	if (TagId == TAG_BODY && Flow->InBody > 0)
 	{

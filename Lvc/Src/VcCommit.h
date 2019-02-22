@@ -2,17 +2,28 @@
 #define _VcCommit_h_
 
 class VcFolder;
+class VcCommit;
 
-struct Node
+struct VcEdge
 {
-	GColour c;
-	GString Rev;
-	GArray<uint8_t> Next, Prev;
+	VcCommit *Parent, *Child;
+	int Idx;
+
+	VcEdge(VcCommit *p, VcCommit *c)
+	{
+		Set(p, c);
+		Idx = -1;
+	}
+
+	~VcEdge();
+	void Set(VcCommit *p, VcCommit *c);
+	void Detach(VcCommit *c);
 };
 
 class VcCommit : public LListItem
 {
 	AppPriv *d;
+	VcFolder *Folder;
 	bool Current;
 	GString Rev;
 	GString::Array Parents;
@@ -23,10 +34,14 @@ class VcCommit : public LListItem
 
 public:
 	GString::Array Files;
-	GArray<Node> Nodes;
+	GArray<VcEdge*> Edges;
 	int NodeIdx;
+	int Idx;
+	GColour NodeColour;
+	LHashTbl<PtrKey<VcEdge*>, int> Pos;
 
-	VcCommit(AppPriv *priv);
+	VcCommit(AppPriv *priv, VcFolder *folder);
+	~VcCommit();
 
 	char *GetRev();
 	bool IsRev(const char *r) { return !Strcmp(GetRev(), r); }

@@ -35,6 +35,7 @@ extern int ToolVersion[VcMax];
 
 class VcFolder : public GTreeItem, public GCss
 {
+	friend class VcCommit;
 	struct ParseParams
 	{
 		GString Str;

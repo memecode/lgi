@@ -614,7 +614,7 @@ bool VIo::ReadField(GStreamI &s, GString &Name, ParamArray *Params, GString &Dat
 			if (t.Length() > 0)
 			{
 				Name = t[0];
-				for (uint32 i=1; i<t.Length(); i++)
+				for (uint32_t i=1; i<t.Length(); i++)
 				{
 					char *var = t[i];
 					char *val = strchr(var, '=');

@@ -34,7 +34,7 @@ bool HasEmoji(uint32_t *Txt)
 	if (!Txt)
 		return false;
 
-	for (uint32 *s = Txt; *s; s++)
+	for (uint32_t *s = Txt; *s; s++)
 	{
 		int IcoIdx = EmojiToIconIndex(s, 2);
 		if (IcoIdx >= 0)
@@ -171,7 +171,7 @@ GAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 	LgiMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "resources/EmojiMap.png");
 	#endif
 
-	LgiAssert(sizeof(WChar) == sizeof(uint32));
+	LgiAssert(sizeof(WChar) == sizeof(uint32_t));
 	
 	if (!IsHtml)
 	{
@@ -212,7 +212,7 @@ GAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 		}
 		else
 		{
-			int IcoIdx = EmojiToIconIndex((uint32*)s, 2);
+			int IcoIdx = EmojiToIconIndex((uint32_t*)s, 2);
 			if (IcoIdx >= 0)
 			{
 				// Emoji character, convert to <IMG>

@@ -162,7 +162,7 @@ typedef int OsSocket;
 #ifdef WIN32
 LgiFunc void LgiSleep(DWORD i);
 #else
-LgiFunc void LgiSleep(uint32 i);
+LgiFunc void LgiSleep(uint32_t i);
 #endif
 
 #ifndef WIN32

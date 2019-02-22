@@ -454,7 +454,7 @@ char *ReadStr(GFile &f DeclDebugArgs)
 	char *s = 0;
 
 	// read the strings length...
-	uint32 Len;
+	uint32_t Len;
 	f >> Len;
 
 	if (Len > 0)
@@ -1242,12 +1242,12 @@ uint64 GDirectory::GetLastWriteTime() const
 
 uint64 GDirectory::GetSize() const
 {
-	return (uint32)d->Stat.st_size;
+	return (uint32_t)d->Stat.st_size;
 }
 
 int64 GDirectory::GetSizeOnDisk()
 {
-	return (uint32)d->Stat.st_size;
+	return (uint32_t)d->Stat.st_size;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

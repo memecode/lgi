@@ -278,7 +278,7 @@ uint GScreenDC::LineStyle()
 	return GSurface::LineStyle();
 }
 
-uint GScreenDC::LineStyle(uint32 Bits, uint32 Reset)
+uint GScreenDC::LineStyle(uint32_t Bits, uint32_t Reset)
 {
 	return GSurface::LineStyle(Bits);
 }
