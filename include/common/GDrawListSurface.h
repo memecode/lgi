@@ -43,7 +43,7 @@ public:
 	void HLine(int x1, int x2, int y);
 	void VLine(int x, int y1, int y2);
 	void Line(int x1, int y1, int x2, int y2);
-	uint LineStyle(uint32 Bits, uint32 Reset = 0x80000000);
+	uint LineStyle(uint32_t Bits, uint32_t Reset = 0x80000000);
 	void Circle(double cx, double cy, double radius);
 	void FilledCircle(double cx, double cy, double radius);
 	void Arc(double cx, double cy, double radius, double start, double end);

@@ -268,7 +268,7 @@ public:
 
 class GMimeQuotedPrintableDecode : public GCoderStream
 {
-	char ConvHexToBin(char c)
+	uint8_t ConvHexToBin(char c)
 	{
 		if (c >= '0' && c <= '9')
 			return c - '0';
@@ -307,9 +307,9 @@ public:
 				}
 				else if (*s)
 				{
-					uint8 hi = ConvHexToBin(*s++);
+					uint8_t hi = ConvHexToBin(*s++);
 					if (s >= e) break;
-					uint8 low = ConvHexToBin(*s++);
+					uint8_t low = ConvHexToBin(*s++);
 					if (s >= e) break;
 					*o++ = (hi << 4) | (low & 0xF);
 				}
@@ -400,7 +400,7 @@ public:
 class GMimeBase64Decode : public GCoderStream
 {
 	GStringPipe Buf;
-	uint8 Lut[256];
+	uint8_t Lut[256];
 
 public:
 	GMimeBase64Decode(GStreamI *o) : GCoderStream(o)
@@ -666,7 +666,7 @@ void GMime::Remove()
 	}
 }
 
-GMime *GMime::operator[](uint32 i)
+GMime *GMime::operator[](uint32_t i)
 {
 	if (i >= Children.Length())
 		return 0;

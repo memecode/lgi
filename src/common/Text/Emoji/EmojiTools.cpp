@@ -7,7 +7,7 @@
 #include "GDocView.h"
 
 #ifdef WIN32
-typedef uint32 WChar;
+typedef uint32_t WChar;
 #else
 typedef wchar_t WChar;
 #endif
@@ -21,7 +21,7 @@ bool HasEmoji(char *Txt)
 	WChar u;
 	while ((u = p++))
 	{
-		int IcoIdx = EmojiToIconIndex((uint32*)&u, 1);
+		int IcoIdx = EmojiToIconIndex((uint32_t*)&u, 1);
 		if (IcoIdx >= 0)
 			return true;
 	}
@@ -29,7 +29,7 @@ bool HasEmoji(char *Txt)
 	return false;
 }
 
-bool HasEmoji(uint32 *Txt)
+bool HasEmoji(uint32_t *Txt)
 {
 	if (!Txt)
 		return false;
@@ -142,9 +142,9 @@ struct EmojiMemQ : GMemQueue
 	#ifdef WINDOWS
 	int WriteWide(const char16 *s, ssize_t bytes)
 	{
-		GAutoPtr<uint32> c((uint32*)LgiNewConvertCp("utf-32", s, LGI_WideCharset, bytes));
+		GAutoPtr<uint32_t> c((uint32_t*)LgiNewConvertCp("utf-32", s, LGI_WideCharset, bytes));
 		int len = Strlen(c.Get());
-		return GMemQueue::Write(c, len * sizeof(uint32));
+		return GMemQueue::Write(c, len * sizeof(uint32_t));
 	}
 	#endif
 	
@@ -154,7 +154,7 @@ struct EmojiMemQ : GMemQueue
 	}
 };
 
-GAutoWString TextToEmoji(uint32 *Txt, bool IsHtml)
+GAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 {
 	EmojiMemQ p;
 	GArray<GLinkInfo> Links;

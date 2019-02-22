@@ -75,10 +75,10 @@ public:
 	int64 StreamPos;
 	uint16 Tag;
 	uint16 Type;
-	uint32 Size;
+	uint32_t Size;
 	GVariant Value;
 
-	uint32 Prop()
+	uint32_t Prop()
 	{
 		return ATT(Type, Tag);
 	}
@@ -106,7 +106,7 @@ public:
 			{
 				case atpDword:
 				{
-					uint32 d;
+					uint32_t d;
 					if (Size == sizeof(d) &&
 						s->Read(&d, sizeof(d)) == sizeof(d))
 					{
@@ -186,7 +186,7 @@ bool TnefReadIndex(GStreamI *Tnef, GArray<TnefFileInfo*> &Index)
 
 	if (Tnef)
 	{
-		uint32 Sig;
+		uint32_t Sig;
 		uint16 Key;
 		TnefFileInfo *Cur = 0;
 
@@ -195,9 +195,9 @@ bool TnefReadIndex(GStreamI *Tnef, GArray<TnefFileInfo*> &Index)
 			Sig == TNEF_SIGNATURE &&
 			Key > 0)
 		{
-			uint8 b;
+			uint8_t b;
 			bool Done = false;
-			GArray<uint32> Tags;
+			GArray<uint32_t> Tags;
 			while (!Done && Tnef->Read(&b, sizeof(b)) == sizeof(b))
 			{
 				switch (b)

@@ -37,7 +37,7 @@
 #include "des.h"
 
 /* C89 compliant way to cast 'char' to 'unsigned char'. */
-static inline unsigned char
+static unsigned char
 to_uchar (char ch)
 {
   return ch;

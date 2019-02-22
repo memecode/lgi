@@ -38,7 +38,7 @@ void LEmojiFont::_Measure(int &x, int &y, OsChar *Str, int len)
 	y = priv->Cell;
 	for (auto s = (const uint16*)Str; *s && Len > 0; )
 	{
-		uint32 u32 = LgiUtf16To32(s, Len);
+		uint32_t u32 = LgiUtf16To32(s, Len);
 		if (u32)
 			x += priv->Cell;
 	}
@@ -52,7 +52,7 @@ int LEmojiFont::_CharAt(int xPos, OsChar *Str, int len, LgiPxToIndexType Type)
 	int Char = 0;
 	for (auto s = (const uint16*)Str; *s && Len > 0; )
 	{
-		uint32 u32 = LgiUtf16To32(s, Len);
+		uint32_t u32 = LgiUtf16To32(s, Len);
 		if (u32)
 		{
 			if (xPos >= x && xPos < x + priv->Cell)
@@ -78,7 +78,7 @@ void LEmojiFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int len, GRect 
 
 	for (auto s = (const uint16*)Str; *s && Bytes > 0; )
 	{
-		uint32 u32 = LgiUtf16To32(s, Bytes);
+		uint32_t u32 = LgiUtf16To32(s, Bytes);
 		if (!u32)
 			break;
 
@@ -157,12 +157,12 @@ bool LEmojiFont::Create(const char *Face, GCss::Len Sz, GSurface *pSurface)
 		{
 			memset(d->GlyphMap, 0, Bytes);
 			
-			for (uint32 u=0x203c; u<=0x3299; u++)
+			for (uint32_t u=0x203c; u<=0x3299; u++)
 			{
 				if (EmojiToIconIndex(&u, 1) >= 0)
 					d->GlyphMap[u>>3] |= 1 << (u & 7);
 			}
-			for (uint32 u=0x1f004; u<=0x1f6c5; u++)
+			for (uint32_t u=0x1f004; u<=0x1f6c5; u++)
 			{
 				if (EmojiToIconIndex(&u, 1) >= 0)
 					d->GlyphMap[u>>3] |= 1 << (u & 7);

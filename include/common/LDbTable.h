@@ -64,7 +64,7 @@ class LDbRow : public GDataPropI
 	bool StartEdit();
 	void PostEdit();
 	bool Compact();
-	uint32 GetInitialSize();
+	uint32_t GetInitialSize();
 
 public:
 	static int HeaderSz;
@@ -77,7 +77,7 @@ public:
 
 	// Row level op
 	bool Delete();
-	uint32 Size(uint32 Set = 0);
+	uint32_t Size(uint32_t Set = 0);
 	GString ToString();
 
 	// Data access

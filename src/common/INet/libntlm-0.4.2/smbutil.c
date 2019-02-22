@@ -152,8 +152,8 @@ dumpRaw (FILE * fp, const unsigned char *buf, size_t len)
   fprintf (fp, "\n");
 }
 
-static inline void
-dumpBuffer (FILE * fp, uint32 offset, uint32 len, char *structPtr,
+static void
+dumpBuffer (FILE * fp, uint32_t offset, uint32_t len, char *structPtr,
 	    size_t buf_start, size_t buf_len)
 {
   /* prevent buffer reading overflow */
@@ -182,7 +182,7 @@ unicodeToString (const char *p, size_t len, char *buf)
 	return buf;
 }
 
-static inline char *
+static char *
 getUnicodeString(uint32 offset,
 				uint32 len,
 				char *structPtr,

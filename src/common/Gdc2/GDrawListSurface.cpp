@@ -381,7 +381,7 @@ void GDrawListSurface::Line(int x1, int y1, int x2, int y2)
 		LgiAssert(0);
 }
 
-uint GDrawListSurface::LineStyle(uint32 Bits, uint32 Reset)
+uint GDrawListSurface::LineStyle(uint32_t Bits, uint32_t Reset)
 {
 	LgiAssert(!"Impl me.");
 	return 0;

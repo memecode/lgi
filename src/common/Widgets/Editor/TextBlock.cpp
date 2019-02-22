@@ -18,7 +18,7 @@ GRichTextPriv::StyleText::StyleText(const StyleText *St)
 	Add((uint32*)&St->ItemAt(0), St->Length());
 }
 		
-GRichTextPriv::StyleText::StyleText(const uint32 *t, ssize_t Chars, GNamedStyle *style)
+GRichTextPriv::StyleText::StyleText(const uint32_t *t, ssize_t Chars, GNamedStyle *style)
 {
 	Emoji = false;
 	Style = NULL;
@@ -33,7 +33,7 @@ GRichTextPriv::StyleText::StyleText(const uint32 *t, ssize_t Chars, GNamedStyle 
 	}
 }
 
-uint32 *GRichTextPriv::StyleText::At(ssize_t i)
+uint32_t *GRichTextPriv::StyleText::At(ssize_t i)
 {
 	if (i >= 0 && i < (int)Length())
 		return &(*this)[i];
@@ -66,7 +66,7 @@ void GRichTextPriv::StyleText::SetStyle(GNamedStyle *s)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-GRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, GSurface *img, GFont *f, const uint32 *s, ssize_t l) :
+GRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, GSurface *img, GFont *f, const uint32_t *s, ssize_t l) :
 	DisplayStr(src, NULL, s, l)
 {
 	Img = img;
@@ -1373,7 +1373,7 @@ bool GRichTextPriv::TextBlock::PreEdit(Transaction *Trans)
 	return true;
 }
 
-ssize_t GRichTextPriv::TextBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32> *DeletedText)
+ssize_t GRichTextPriv::TextBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText)
 {
 	ssize_t Pos = 0;
 	ssize_t Deleted = 0;
@@ -1489,7 +1489,7 @@ GMessage::Result GRichTextPriv::TextBlock::OnEvent(GMessage *Msg)
 	return false;
 }
 
-bool GRichTextPriv::TextBlock::AddText(Transaction *Trans, ssize_t AtOffset, const uint32 *InStr, ssize_t InChars, GNamedStyle *Style)
+bool GRichTextPriv::TextBlock::AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *InStr, ssize_t InChars, GNamedStyle *Style)
 {
 	if (!InStr)
 		return d->Error(_FL, "No input text.");
@@ -1965,7 +1965,7 @@ GRichTextPriv::Block *GRichTextPriv::TextBlock::Clone()
 	return new TextBlock(this);
 }
 
-ssize_t GRichTextPriv::TextBlock::CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32> *Text)
+ssize_t GRichTextPriv::TextBlock::CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text)
 {
 	if (!Text)
 		return 0;
@@ -1992,7 +1992,7 @@ ssize_t GRichTextPriv::TextBlock::CopyAt(ssize_t Offset, ssize_t Chars, GArray<u
 	return Text->Length();
 }
 
-ssize_t GRichTextPriv::TextBlock::FindAt(ssize_t StartIdx, const uint32 *Str, GFindReplaceCommon *Params)
+ssize_t GRichTextPriv::TextBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params)
 {
 	if (!Str || !Params)
 		return -1;

@@ -106,7 +106,7 @@ public:
 	void SetFixedWidthFont(bool i);
 
 	// Options
-	void SetTabSize(uint8 i);
+	void SetTabSize(uint8_t i);
 	void SetReadOnly(bool i);
 	bool ShowStyleTools();
 	void ShowStyleTools(bool b);

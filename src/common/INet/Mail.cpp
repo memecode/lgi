@@ -1336,7 +1336,7 @@ bool MailSmtp::Open(GSocketI *S,
 				if (Response)
 				{
 					GToken Lines(Response, "\n");
-					for (uint32 i=0; i<Lines.Length(); i++)
+					for (uint32_t i=0; i<Lines.Length(); i++)
 					{
 						char *l = Lines[i];
 						char *AuthStr = strstr(l, "AUTH");
@@ -1344,7 +1344,7 @@ bool MailSmtp::Open(GSocketI *S,
 						{
 							// walk through AUTH types
 							GToken Types(AuthStr + 4, " ,;");
-							for (uint32 a=0; a<Types.Length(); a++)
+							for (uint32_t a=0; a<Types.Length(); a++)
 							{
 								AuthTypes.Add(Types[a]);
 							}
@@ -1455,7 +1455,7 @@ bool MailSmtp::Open(GSocketI *S,
 
 							char B64[256];
 							ZeroObj(B64);
-							ConvertBinaryToBase64(B64, sizeof(B64), (uint8*)Tmp, ch);
+							ConvertBinaryToBase64(B64, sizeof(B64), (uint8_t*)Tmp, ch);
 
 							sprintf_s(Buffer, sizeof(Buffer), "AUTH PLAIN %s\r\n", B64);
 							VERIFY_RET_VAL(Write(0, true));
@@ -1476,7 +1476,7 @@ bool MailSmtp::Open(GSocketI *S,
 									Sp++;
 
 									// Decode the server response:
-									uint8 Txt[128];
+									uint8_t Txt[128];
 									int InLen = strlen(Sp);
 									ssize_t TxtLen = ConvertBase64ToBinary(Txt, sizeof(Txt), Sp, InLen);
 
@@ -1484,7 +1484,7 @@ bool MailSmtp::Open(GSocketI *S,
 									// https://tools.ietf.org/html/rfc2104
 									char Key[64] = {0};
 									memcpy(Key, Password, MIN(strlen(Password), sizeof(Key)));
-									uint8 iKey[256];
+									uint8_t iKey[256];
 									char oKey[256];
 									for (unsigned i=0; i<64; i++)
 									{
@@ -1498,17 +1498,17 @@ bool MailSmtp::Open(GSocketI *S,
 									md5_finish(&md5, oKey + 64);
 
 									md5_init(&md5);
-									md5_append(&md5, (uint8*)oKey, 64 + 16);
+									md5_append(&md5, (uint8_t*)oKey, 64 + 16);
 									char digest[16];
 									md5_finish(&md5, digest);
 
 									char r[256];
 									int ch = sprintf_s(r, sizeof(r), "%s ", UserName);
 									for (unsigned i=0; i<16; i++)
-										ch += sprintf_s(r+ch, sizeof(r)-ch, "%02x", (uint8)digest[i]);
+										ch += sprintf_s(r+ch, sizeof(r)-ch, "%02x", (uint8_t)digest[i]);
 
 									// Base64 encode
-									ssize_t Len = ConvertBinaryToBase64(Buffer, sizeof(Buffer), (uint8*)r, ch);
+									ssize_t Len = ConvertBinaryToBase64(Buffer, sizeof(Buffer), (uint8_t*)r, ch);
 									Buffer[Len++] = '\r';
 									Buffer[Len++] = '\n';
 									Buffer[Len++] = 0;
@@ -1649,7 +1649,7 @@ char *CreateAddressTag(List<AddressDescriptor> &l, int Type, List<char> *Charset
 			{
 				// Multiple address format
 				GToken t(a->Addr, ",");
-				for (uint32 i=0; i<t.Length(); i++)
+				for (uint32_t i=0; i<t.Length(); i++)
 				{
 					sprintf_s(Buffer, sizeof(Buffer), "<%s>", t[i]);
 					if (i < t.Length()-1) strcat(Buffer, ",\r\n\t");

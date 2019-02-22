@@ -5,7 +5,7 @@
 #include "GCssTools.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Utf16to32(GArray<uint32> &Out, const uint16 *In, int Len)
+bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int Len)
 {
 	if (Len == 0)
 	{
@@ -87,7 +87,7 @@ GCssCache::~GCssCache()
 	Styles.DeleteObjects();
 }
 
-uint32 GCssCache::GetStyles()
+uint32_t GCssCache::GetStyles()
 {
 	uint32 c = 0;
 	for (unsigned i=0; i<Styles.Length(); i++)

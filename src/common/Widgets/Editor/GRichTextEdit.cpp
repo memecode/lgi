@@ -190,7 +190,7 @@ void GRichTextEdit::ShowStyleTools(bool b)
 	}
 }
 
-void GRichTextEdit::SetTabSize(uint8 i)
+void GRichTextEdit::SetTabSize(uint8_t i)
 {
 	TabSize = limit(i, 2, 32);
 	OnFontChange();
