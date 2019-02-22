@@ -1218,6 +1218,17 @@ public:
         bool UseOSLoader = true
     );
     
+    /// Save an image to a stream.
+    bool Save
+    (
+        /// The file to write to
+        GStream *Out,
+        /// The pixels to store
+        GSurface *In,
+		/// Dummy file name to determine the file type, eg: "img.jpg"
+		const char *FileType
+    );
+
     /// Save an image to a file.
     bool Save
     (

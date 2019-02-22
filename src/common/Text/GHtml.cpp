@@ -5181,11 +5181,6 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 	if (Disp == DispNone)
 		return;
 
-	if (Debug)
-	{
-		int asd=0;
-	}
-
 	GFont *f = GetFont();
 	GFlowRegion Local(*Flow);
 	bool Restart = true;

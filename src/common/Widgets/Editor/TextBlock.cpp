@@ -71,8 +71,8 @@ GRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, GSurface *img, G
 {
 	Img = img;
 	#if defined(_MSC_VER)
-	Utf16to32(Utf32, (const uint16*) StrCache.Get(), len);
-	uint32 *u = &Utf32[0];
+	Utf16to32(Utf32, (const uint16_t*) StrCache.Get(), len);
+	uint32_t *u = &Utf32[0];
 	#else
 	LgiAssert(sizeof(char16) == 4);
 	uint32_t *u = (uint32_t*)StrCache.Get();

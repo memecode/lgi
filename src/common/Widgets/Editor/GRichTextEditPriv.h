@@ -927,8 +927,8 @@ public:
 					LgiAssert(Str != NULL);
 					const char16 *s = Utf16Seek(Str, Start);
 					const char16 *e = Utf16Seek(s, Len);
-					GArray<uint32> Tmp;
-					if (Utf16to32(Tmp, (const uint16*)s, e - s))
+					GArray<uint32_t> Tmp;
+					if (Utf16to32(Tmp, (const uint16_t*)s, e - s))
 						c.Reset(new DisplayStr(Src, GetFont(), &Tmp[0], Tmp.Length(), pDC));
 					#else
 					c.Reset(new DisplayStr(Src, GetFont(), (uint32_t*)Str + Start, Len, pDC));
@@ -960,7 +960,7 @@ public:
 		GArray<GRect> SrcRect;
 		GSurface *Img;
 		#if defined(_MSC_VER)
-		GArray<uint32> Utf32;
+		GArray<uint32_t> Utf32;
 		#endif
 
 		EmojiDisplayStr(StyleText *src, GSurface *img, GFont *f, const uint32_t *s, ssize_t l = -1);

@@ -24,6 +24,10 @@
 
 # define MD4_DIGEST_SIZE 16
 
+#ifdef _WIN32
+	#define inline
+#endif
+
 /* Structure to save state of computation between the single steps.  */
 struct md4_ctx
 {
