@@ -85,10 +85,10 @@ public:
 	}
 
 	/// Returns the width
-	int X() { return x2 - x1 + 1; }
+	int X() const { return x2 - x1 + 1; }
 	
 	/// Returns the height
-	int Y() { return y2 - y1 + 1; }
+	int Y() const { return y2 - y1 + 1; }
 	
 	/// Sets the rectangle
 	void Set(int X1, int Y1, int X2, int Y2)
