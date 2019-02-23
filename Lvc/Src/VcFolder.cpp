@@ -524,6 +524,7 @@ int CommitDateCmp(VcCommit **a, VcCommit **b)
 
 bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 {
+	/*
 	GFile f("C:\\Users\\matthew\\Code\\Lgi\\trunk\\rev-list.txt", O_WRITE);
 	if (f.IsOpen())
 	{
@@ -531,6 +532,7 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 		f.Write(s);
 		f.Close();
 	}
+	*/
 
 	LHashTbl<StrKey<char>, VcCommit*> Map;
 	for (VcCommit **pc = NULL; Log.Iterate(pc); )

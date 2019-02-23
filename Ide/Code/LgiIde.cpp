@@ -1889,9 +1889,9 @@ void AppWnd::OnReceiveFiles(GArray<char*> &Files)
 		}
 		else if
 		(
-			LgiIsFileNameExecutable(Files[i])
+			LgiIsFileNameExecutable(f)
 			||
-			!stricmp(ext, "lib")
+			(ext != NULL && !stricmp(ext, "lib"))
 		)
 		{
 			// dumpbin /exports csp.dll
