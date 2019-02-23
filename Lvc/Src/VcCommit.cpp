@@ -84,8 +84,8 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 		Mem.Colour(GColour::Black);
 		
 		VcCommit *Prev = NULL, *Next = NULL;
-		Prev = Idx > 0 ? Folder->Log[Idx - 1] : NULL;
-		Next = Idx < Folder->Log.Length() - 1 ? Folder->Log[Idx + 1] : NULL;
+		Prev = Folder->Log.IdxCheck(Idx - 1) ? Folder->Log[Idx - 1] : NULL;
+		Next = Folder->Log.IdxCheck(Idx + 1) ? Folder->Log[Idx + 1] : NULL;
 		
 		for (auto it: Pos)
 		{
