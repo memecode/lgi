@@ -74,6 +74,7 @@ enum AppIds
 	IDM_BROWSE_FOLDER,
 	IDM_TERMINAL,
 	IDM_RESOLVE,
+	IDM_MERGE,
 };
 
 enum VersionCtrl
@@ -150,6 +151,7 @@ extern VersionCtrl DetectVcs(const char *Path);
 extern bool ConvertEol(const char *Path, bool Cr);
 extern int GetEol(const char *Path);
 extern GString::Array GetProgramsInPath(const char *Program);
+extern GColour GetPaletteColour(int i);
 
 #include "VcFile.h"
 #include "VcCommit.h"

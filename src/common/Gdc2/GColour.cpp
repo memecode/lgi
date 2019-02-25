@@ -46,6 +46,22 @@ GColourSpace GColour::GetColourSpace()
 	return space;
 }
 
+bool GColour::SetColourSpace(GColourSpace cs)
+{
+	if (space == CsNone)
+	{
+		space = cs;
+		rgb.a = 255;
+		return true;
+	}
+	
+	if (space == cs)
+		return true;
+
+	LgiAssert(!"Impl conversion.");
+	return false;
+}
+
 bool GColour::IsValid()
 {
 	return space != CsNone;
@@ -153,9 +169,25 @@ uint8_t GColour::r() const
 	return R32(c32());
 }
 
+void GColour::r(uint8_t i)
+{
+	if (SetColourSpace(System32BitColourSpace))
+		rgb.r = i;
+	else
+		LgiAssert(0);
+}
+
 uint8_t GColour::g() const
 {
 	return G32(c32());
+}
+
+void GColour::g(uint8_t i)
+{
+	if (SetColourSpace(System32BitColourSpace))
+		rgb.g = i;
+	else
+		LgiAssert(0);
 }
 
 uint8_t GColour::b() const
@@ -163,9 +195,25 @@ uint8_t GColour::b() const
 	return B32(c32());
 }
 
+void GColour::b(uint8_t i)
+{
+	if (SetColourSpace(System32BitColourSpace))
+		rgb.b = i;
+	else
+		LgiAssert(0);
+}
+
 uint8_t GColour::a() const
 {
 	return A32(c32());
+}
+
+void GColour::a(uint8_t i)
+{
+	if (SetColourSpace(System32BitColourSpace))
+		rgb.a = i;
+	else
+		LgiAssert(0);
 }
 
 uint8_t GColour::c8() const

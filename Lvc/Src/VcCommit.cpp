@@ -4,6 +4,19 @@
 #include "GPath.h"
 #include "LHashTable.h"
 
+const char *sPalette[] = { "9696ff", "5D6D66", "4E3A35", "68B3C5", "9A92B0", "462D4C", "C5A378", "302D65" };
+
+GColour GetPaletteColour(int i)
+{
+	GColour c;
+	const char *s = sPalette[i % CountOf(sPalette)];
+	#define Comp(comp, off) { const char h[3] = {s[off], s[off+1], 0}; c.comp(htoi(h)); }
+	Comp(r, 0);
+	Comp(g, 2);
+	Comp(b, 4);
+	return c;
+}
+
 VcEdge::~VcEdge()
 {
 	if (Parent)
@@ -36,7 +49,7 @@ VcCommit::VcCommit(AppPriv *priv, VcFolder *folder) : Pos(32, -1)
 	Folder = folder;
 	Current = false;
 	NodeIdx = -1;
-	NodeColour.Rgb(150, 150, 255);
+	NodeColour = GetPaletteColour(0);
 	Parents.SetFixedLength(false);
 }
 
@@ -358,11 +371,16 @@ void VcCommit::OnMouseClick(GMouse &m)
 	if (m.IsContextMenu())
 	{
 		GSubMenu s;
+		s.AppendItem("Merge With Local", IDM_MERGE, !Current);
 		s.AppendItem("Update", IDM_UPDATE, !Current);
 		s.AppendItem("Copy Revision", IDM_COPY_REV);
 		int Cmd = s.Float(GetList(), m);
 		switch (Cmd)
 		{
+			case IDM_MERGE:
+			{
+				break;
+			}
 			case IDM_UPDATE:
 			{
 				VcFolder *f = GetFolder();

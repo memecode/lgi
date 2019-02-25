@@ -37,6 +37,7 @@ public:
 	/// Conversion from COLOUR
 	GColour(uint32_t c, int bits, GPalette *palette = NULL);
 	GColourSpace GetColourSpace();
+	bool SetColourSpace(GColourSpace cs);
 	
 	bool operator ==(const GColour &c)
 	{
@@ -55,14 +56,20 @@ public:
 	/// Sets the colour
 	void Set(uint32_t c, int bits, GPalette *palette = NULL);
 	uint32_t Get(int bits);
-	/// Gets the red component (0-255)
+	
+	/// Gets/sets the red component (0-255)
 	uint8_t r() const;
-	/// Gets the green component (0-255)
+	void r(uint8_t i);
+	/// Gets/sets the green component (0-255)
 	uint8_t g() const;
-	/// Gets the blue component (0-255)
+	void g(uint8_t i);
+	/// Gets/sets the blue component (0-255)
 	uint8_t b() const;
-	/// Gets the alpha component (0-255)
+	void b(uint8_t i);
+	/// Gets/sets the alpha component (0-255)
 	uint8_t a() const;
+	void a(uint8_t i);
+	
 	// Gets the indexed colour
 	uint8_t c8() const;
 	// Sets indexed colour

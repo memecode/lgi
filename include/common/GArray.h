@@ -116,7 +116,7 @@ public:
 	/// Does a range check on an index...
 	bool IdxCheck(ssize_t i)
 	{
-		return i >= 0 && i < len;
+		return i >= 0 && i < (ssize_t)len;
 	}
 	
 	/// Returns the number of used entries
