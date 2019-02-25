@@ -2148,6 +2148,39 @@ bool VcFolder::ParsePull(int Result, GString s, ParseParams *Params)
 	return true; // Yes - reselect and update
 }
 
+void VcFolder::MergeToLocal(GString Rev)
+{
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			GString Args;
+			Args.Printf("merge -m \"Merge with %s\" %s", Rev.Get(), Rev.Get());
+			StartCmd(Args, &VcFolder::ParseMerge, NULL, LogNormal);
+			break;
+		}
+		default:
+			LgiMsg(GetTree(), "Not implemented.", AppName);
+			break;
+	}
+}
+
+bool VcFolder::ParseMerge(int Result, GString s, ParseParams *Params)
+{
+	switch (GetType())
+	{
+		case VcGit:
+			if (Result == 0)
+				CommitListDirty = true;
+			break;
+		default:
+			LgiAssert(!"Impl me.");
+			break;
+	}
+
+	return true;
+}
+
 void VcFolder::Clean()
 {
 	switch (GetType())

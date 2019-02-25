@@ -379,6 +379,14 @@ void VcCommit::OnMouseClick(GMouse &m)
 		{
 			case IDM_MERGE:
 			{
+				VcFolder *f = GetFolder();
+				if (!f)
+				{
+					LgiAssert(!"No folder?");
+					break;
+				}
+
+				f->MergeToLocal(Rev);
 				break;
 			}
 			case IDM_UPDATE:

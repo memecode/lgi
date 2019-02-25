@@ -183,6 +183,7 @@ class VcFolder : public GTreeItem, public GCss
 	bool ParseVersion(int Result, GString s, ParseParams *Params);
 	bool ParseClean(int Result, GString s, ParseParams *Params);
 	bool ParseDiff(int Result, GString s, ParseParams *Params);
+	bool ParseMerge(int Result, GString s, ParseParams *Params);
 	
 public:
 	VcFolder(AppPriv *priv, const char *p);
@@ -211,6 +212,7 @@ public:
 	void SetEol(const char *Path, int Type);
 	void GetVersion();
 	void Diff(VcFile *file);
+	void MergeToLocal(GString Rev);
 
 	void OnPulse();
 	void OnUpdate(const char *Rev);
