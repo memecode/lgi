@@ -1,5 +1,6 @@
 #include "Lvc.h"
 #include "../Resources/resdefs.h"
+#include "GCombo.h"
 
 #ifndef CALL_MEMBER_FN
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
@@ -796,13 +797,6 @@ void VcFolder::LinkParents()
 	GArray<EdgeArr> Active;
 	for (auto c:Log)
 	{
-		#if 1
-		if (c->IsRev("49d6765e37dfffb0ad4e924da5169c076c87c871"))
-		{
-			int asd=0;
-		}
-		#endif
-
 		for (unsigned i=0; c->NodeIdx<0 && i<Active.Length(); i++)
 		{
 			for (auto e:Active[i])
@@ -936,6 +930,28 @@ void VcFolder::LinkParents()
 				i--;
 			}
 		}
+	}
+
+	// Find all the "heads", i.e. a commit without any children
+	GCombo *Heads;
+	if (d->Files->GetWindow()->GetViewById(IDC_HEADS, Heads))
+	{
+		Heads->Empty();
+		for (auto c:Log)
+		{
+			bool Has = false;
+			for (auto e:c->Edges)
+			{
+				if (e->Parent == c)
+				{
+					Has = true;
+					break;
+				}
+			}
+			if (!Has)
+				Heads->Insert(c->GetRev());
+		}
+		Heads->SendNotify(GNotifyTableLayout_Refresh);
 	}
 }
 

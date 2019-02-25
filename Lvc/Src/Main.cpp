@@ -85,21 +85,7 @@ public:
 		GRect Pos;
 		if (LoadFromResource(IDD_TOOLBAR, this, &Pos, &Name))
 		{
-			GTableLayout *v;
-			if (GetViewById(IDC_TABLE, v))
-			{
-				GRect r = v->GetPos();
-				r.Offset(-r.x1, -r.y1);
-				r.x2++;
-				v->SetPos(r);
-				
-				v->OnPosChange();
-				r = v->GetUsedArea();
-				if (r.Y() <= 1)
-					r.Set(0, 0, 30, 30);
-				GetCss(true)->Height(GCss::Len(GCss::LenPx, (float)r.Y()+3));
-			}
-			else LgiAssert(!"Missing table ctrl");
+			OnPosChange();
 		}
 		else LgiAssert(!"Missing toolbar resource");
 	}
@@ -107,6 +93,24 @@ public:
 	void OnCreate()
 	{
 		AttachChildren();
+	}
+
+	void OnPosChange()
+	{
+		GRect Cli = GetClient();
+
+		GTableLayout *v;
+		if (GetViewById(IDC_TABLE, v))
+		{
+			v->SetPos(Cli);
+				
+			v->OnPosChange();
+			auto r = v->GetUsedArea();
+			if (r.Y() <= 1)
+				r.Set(0, 0, 30, 30);
+			GetCss(true)->Height(GCss::Len(GCss::LenPx, (float)r.Y()+3));
+		}
+		else LgiAssert(!"Missing table ctrl");
 	}
 
 	void OnPaint(GSurface *pDC)
@@ -686,6 +690,18 @@ public:
 				for (auto f : Folders)
 				{
 					f->FolderStatus();
+				}
+				break;
+			}
+			case IDC_HEADS:
+			{
+				if (flag == GNotifyValueChanged)
+				{
+					GString Rev = c->Name();
+
+					CommitList *cl;
+					if (GetViewById(IDC_LIST, cl))
+						cl->SelectRevisions(Rev.SplitDelimit());
 				}
 				break;
 			}
