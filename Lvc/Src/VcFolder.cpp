@@ -1912,6 +1912,7 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 		case VcGit:
 		{
 			Unpushed++;
+			CommitListDirty = true;
 			Update();
 
 			if (Params && Params->Str.Find("Push") >= 0)
