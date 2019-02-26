@@ -534,27 +534,21 @@ public:
 	)
 	{
 		// Make room
-		if (Length(len + 1))
-		{
-			if (Index >= 0 && (uint32_t)Index < len - 1)
-			{
-				// Shift elements after insert point up one
-				memmove(p + Index + 1, p + Index, (len - Index - 1) * sizeof(Type) );
-			}
-			else
-			{
-				// Add at the end, not after the end...
-				Index = len - 1;
-			}
+		if (!Length(len + 1))
+			return false;
 
-			// Insert item
-			memset(p + Index, 0, sizeof(*p));
-			p[Index] = n;
+		if (Index < len - 1)
+			// Shift elements after insert point up one
+			memmove(p + Index + 1, p + Index, (len - Index - 1) * sizeof(Type) );
+		else
+			// Add at the end, not after the end...
+			Index = len - 1;
 
-			return true;
-		}
+		// Insert item
+		memset(p + Index, 0, sizeof(*p));
+		p[Index] = n;
 
-		return false;
+		return true;
 	}
 
 	/// Sorts the array
