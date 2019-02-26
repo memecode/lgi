@@ -540,6 +540,7 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 	for (unsigned i=0; i<Log.Length(); i++)
 		Map.Add(Log[i]->GetRev(), i);
 	*/
+	Log.DeleteObjects();
 
 	int Skipped = 0, Errors = 0;
 	switch (GetType())
@@ -567,15 +568,7 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 				GAutoPtr<VcCommit> Rev(new VcCommit(d, this));
 				if (Rev->GitParse(Commit, true))
 				{
-					/*
-					int ExistingIdx = Map.Find(Rev->GetRev());
-					if (ExistingIdx < 0)
-					*/
 					Log.Add(Rev.Release());
-					/*
-					else
-						Skipped++;
-					*/
 				}
 				else
 				{
