@@ -311,7 +311,12 @@ void VcFolder::OnBranchesChange()
 		if (w->GetViewById(IDC_BRANCH, b))
 		{
 			if (!ValidStr(b->Name()))
-				b->Name(Branches.First());
+			{
+				if (CurrentBranch)
+					b->Name(CurrentBranch);
+				else
+					b->Name(Branches.First());
+			}
 		}
 	}
 }
