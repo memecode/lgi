@@ -535,9 +535,11 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 	}
 	*/
 
+	/*
 	LHashTbl<StrKey<char>, int> Map(0, -1);
 	for (unsigned i=0; i<Log.Length(); i++)
 		Map.Add(Log[i]->GetRev(), i);
+	*/
 
 	int Skipped = 0, Errors = 0;
 	switch (GetType())
@@ -560,24 +562,26 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 				c = nul + 1;
 			}
 
-			int Idx = 0;
 			for (auto Commit: Commits)
 			{
 				GAutoPtr<VcCommit> Rev(new VcCommit(d, this));
 				if (Rev->GitParse(Commit, true))
 				{
+					/*
 					int ExistingIdx = Map.Find(Rev->GetRev());
 					if (ExistingIdx < 0)
-						Log.AddAt(Idx, Rev.Release());
+					*/
+					Log.Add(Rev.Release());
+					/*
 					else
 						Skipped++;
+					*/
 				}
 				else
 				{
 					LgiTrace("%s:%i - Failed:\n%s\n\n", _FL, Commit.Get());
 					Errors++;
 				}
-				Idx++;
 			}
 
 			// Log.Sort(CommitDateCmp);
