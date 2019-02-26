@@ -586,6 +586,7 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 			break;
 	}
 
+	IsLogging = false;
 	return true;
 }
 
