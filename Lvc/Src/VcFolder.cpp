@@ -1916,7 +1916,6 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 			CommitListDirty = true;
 			Update();
 
-
 			if (Params && Params->Str.Find("Push") >= 0)
 				Push();
 			break;
