@@ -1517,20 +1517,18 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 					}
 				}
 				
-				png_bytep *row = new png_bytep[pDC->Y()];
-				if (row)
+				GArray<png_bytep> row;
+				if (row.Length(pDC->Y()))
 				{
 					for (int y=0; y<pDC->Y(); y++)
 					{
 						row[y] = TempBits + (TempLine * y);
 					}
 					
-					LIBPNG png_set_rows(png_ptr, info_ptr, row);
+					LIBPNG png_set_rows(png_ptr, info_ptr, row.AddressOf());
 					LIBPNG png_write_png(png_ptr, info_ptr, 0, 0);
 
 					Status = IoSuccess;
-
-					DeleteArray(row);
 				}
 
 				DeleteArray(TempBits);
