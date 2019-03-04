@@ -1394,12 +1394,16 @@ bool MailSmtp::Open(GSocketI *S,
 							else if (TestFlag(Flags, MAIL_USE_CRAM_MD5))
 								// Force CRAM MD5 type
 								AuthTypes.Add("CRAM-MD5");
+							else if (TestFlag(Flags, MAIL_USE_OAUTH2))
+								// Force OAUTH2 type
+								AuthTypes.Add("XOAUTH2");
 							else
 							{
 								// Try all
 								AuthTypes.Add("PLAIN");
 								AuthTypes.Add("LOGIN");
 								AuthTypes.Add("CRAM-MD5");
+								AuthTypes.Add("XOAUTH2");
 							}
 						}
 						else
@@ -1418,6 +1422,8 @@ bool MailSmtp::Open(GSocketI *S,
 								Reorder(AuthTypes, "LOGIN");
 							else if (TestFlag(Flags, MAIL_USE_CRAM_MD5))
 								Reorder(AuthTypes, "CRAM-MD5");
+							else if (TestFlag(Flags, MAIL_USE_OAUTH2))
+								Reorder(AuthTypes, "XOAUTH2");
 						}
 					}
 
@@ -1516,6 +1522,17 @@ bool MailSmtp::Open(GSocketI *S,
 									if (ReadReply("235"))
 										Authed = true;
 								}
+							}
+						}
+						else if (Auth.Equals("XOAUTH2"))
+						{
+							LOAuth2 Auth(OAuth2, UserName);
+							auto Tok = Auth.GetAccessToken();
+							if (Tok)
+							{
+							}
+							else
+							{
 							}
 						}
 						else

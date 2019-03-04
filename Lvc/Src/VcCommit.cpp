@@ -206,12 +206,7 @@ bool VcCommit::GitParse(GString s, bool RevList)
 		if (a.Length() != 2)
 			return false;
 
-		#ifdef WINDOWS
-		// Unix timestamp to windows ticks
-		Ts.Set((uint64)a[0].Int() * LDateTime::Second64Bit + 116445168000000000LL);
-		#else
-		Ts.Set((uint64) a[0].Int());
-		#endif
+		Ts.SetUnix((uint64) a[0].Int());
 		Rev = a[1];
 
 		for (int i=0; i<lines.Length(); i++)

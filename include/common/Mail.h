@@ -9,6 +9,7 @@
 #include "Base64.h"
 #include "Progress.h"
 #include "GVariant.h"
+#include "LOAuth2.h"
 
 #ifndef GPL_COMPATIBLE
 #define GPL_COMPATIBLE						0
@@ -269,6 +270,7 @@ protected:
 	char Buffer[4<<10];
 	LMutex SocketLock;
 	GAutoPtr<GSocketI> Socket;
+	LOAuth2::Params OAuth2;
 
 	bool Error(const char *file, int line, const char *msg, ...);
 	bool Read();
@@ -299,7 +301,7 @@ public:
 	virtual ~MailProtocol();
 
 	// Methods
-	// GSocketI *GetSocket() { return Socket; }
+	void SetOAuthParams(LOAuth2::Params &p) { OAuth2 = p; }
 	
 	/// Thread safe hard close (quit now)
 	bool CloseSocket()
@@ -818,39 +820,6 @@ public:
 		int Id;
 	};
 	
-	struct OAuthParams
-	{
-		enum ServiceProvider
-		{
-			OAuthGoogle,
-			OAuthMicrosoft,
-		}	Provider;
-		
-		GString ClientID;
-		GString ClientSecret;
-		GString RedirURIs;
-		GString AuthUri;
-		GString ApiUri;
-		// GString RevokeUri;
-		GString Scope;
-		GUri Proxy;
-		
-		GString AccessToken;
-		GString RefreshToken;
-		int ExpiresIn;
-		
-		bool IsValid()
-		{
-			return ClientID &&
-				ClientSecret &&
-				RedirURIs &&
-				AuthUri &&
-				// RevokeUri &&
-				Scope &&
-				ApiUri;
-		}
-	};
-
 	/// This callback is used to notify the application using this object of IMAP fetch responses.
 	/// \returns true if the application wants to continue reading and has taken ownership of the strings in "Parts".
 	typedef bool (*FetchCallback)
@@ -883,7 +852,6 @@ public:
 	bool ServerOption(char *Opt);
 	bool IsOnline();
 	const char *GetWebLoginUri();
-	void SetOAuthParams(OAuthParams &p);
 	void SetParentWindow(GViewI *wnd);
 	void SetCancel(LCancel *Cancel);
 	ssize_t ParseImapResponse(char *Buffer, ssize_t BufferLen, GArray<StrRange> &Ranges, int Names);
