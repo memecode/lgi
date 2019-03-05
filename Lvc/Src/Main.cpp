@@ -697,11 +697,11 @@ public:
 			{
 				if (flag == GNotifyValueChanged)
 				{
-					GString Rev = c->Name();
+					auto Revs = GString(c->Name()).SplitDelimit();
 
 					CommitList *cl;
 					if (GetViewById(IDC_LIST, cl))
-						cl->SelectRevisions(Rev.SplitDelimit());
+						cl->SelectRevisions(Revs);
 				}
 				break;
 			}
