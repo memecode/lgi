@@ -129,56 +129,46 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		GString p;
 		p.Printf("Assert failed, file: %s, line: %i\n%s", file, line, test);
 
-		int Result = 0;
+		int Result = 2;
 		
-		#if 0
-		if (LgiApp->AppWnd)
+		if (LgiApp && LgiApp->InThread())
 		{
-			LgiApp->AppWnd->PostEvent(	M_ASSERT_DLG,
-										(GMessage::Param)&Result,
-										(GMessage::Param)new GString(p));
-			while (Result == 0)
-				LgiSleep(10);
+			SInt16 r;
+			Str255 t;
+			Str255 s;
+			Str63 sAbort = {5, 'A', 'b', 'o', 'r', 't'},
+				  sBreak = {5, 'B', 'r', 'e', 'a', 'k'},
+				  sIgnore = {6, 'I', 'g', 'n', 'o', 'r', 'e'};
+			AlertStdAlertParamRec Params;
+
+			c2p255(t, "Assert");
+			c2p255(s, p.Get());
+			Params.movable = true;
+			Params.helpButton = false;
+			Params.filterProc = 0;
+
+			Params.defaultButton = kAlertStdAlertOKButton;
+			Params.defaultText = sAbort;
+
+			Params.cancelButton = kAlertStdAlertCancelButton;
+			Params.cancelText = sIgnore;
+
+			Params.otherText = sBreak;
+
+			Params.position = kWindowDefaultPosition;
+			
+			// Params.filterProc = AssertProc;
+			
+			StandardAlert(kAlertStopAlert, t, s, &Params, &r);
+
+			if (r == kAlertStdAlertOKButton)
+				Result = 1;
+			else if (r == kAlertStdAlertOtherButton)
+				Result = 2;
+			else
+				Result = 3;
 		}
-		#else
-
-		SInt16 r;
-		Str255 t;
-		Str255 s;
-		Str63 sAbort = {5, 'A', 'b', 'o', 'r', 't'},
-			  sBreak = {5, 'B', 'r', 'e', 'a', 'k'},
-			  sIgnore = {6, 'I', 'g', 'n', 'o', 'r', 'e'};
-		AlertStdAlertParamRec Params;
-
-		c2p255(t, "Assert");
-		c2p255(s, p.Get());
-		Params.movable = true;
-		Params.helpButton = false;
-		Params.filterProc = 0;
-
-		Params.defaultButton = kAlertStdAlertOKButton;
-		Params.defaultText = sAbort;
-
-		Params.cancelButton = kAlertStdAlertCancelButton;
-		Params.cancelText = sIgnore;
-
-		Params.otherText = sBreak;
-
-		Params.position = kWindowDefaultPosition;
 		
-		// Params.filterProc = AssertProc;
-		
-		StandardAlert(kAlertStopAlert, t, s, &Params, &r);
-
-		if (r == kAlertStdAlertOKButton)
-			Result = 1;
-		else if (r == kAlertStdAlertOtherButton)
-			Result = 2;
-		else
-			Result = 3;
-		
-		#endif
-
 		switch (Result)
 		{
 			default:
