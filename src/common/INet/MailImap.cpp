@@ -66,6 +66,16 @@ bool UnBase64Str(GString &s)
 	return true;
 }
 
+struct TraceLog : public GStream
+{
+	ssize_t Read(void *Buffer, ssize_t Size, int Flags = 0) { return 0; }
+	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0)
+	{
+		LgiTrace("%.*s", (int)Size, Buffer);
+		return Size;
+	}
+};
+
 /*
 #define SkipWhiteSpace(s)			while (*s && IsWhiteSpace(*s)) s++;
 bool JsonDecode(GXmlTag &t, const char *s)
@@ -1756,9 +1766,10 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 							continue;
 						}
 
-						LOAuth2 Auth(OAuth2, User);
-						auto t = Auth.GetAccessToken();
-						if (!t)
+						TraceLog TLog;
+						LOAuth2 Auth(OAuth2, User, &TLog);
+						auto AccessToken = Auth.GetAccessToken();
+						if (!AccessToken)
 						{
 							sprintf_s(Buf, sizeof(Buf), "Warning: No OAUTH2 Access Token.");
 							#if DEBUG_OAUTH2
@@ -1770,7 +1781,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 
 						// Construct the XOAUTH2 parameter
 						GString s;
-						s.Printf("user=%s\001auth=Bearer %s\001\001", User, OAuth2.AccessToken.Get());
+						s.Printf("user=%s\001auth=Bearer %s\001\001", User, AccessToken.Get());
 						#if DEBUG_OAUTH2
 						LgiTrace("%s:%i - s=%s.\n", _FL, s.Replace("\001", "%01").Get());
 						#endif
@@ -1823,7 +1834,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 											if (SettingStore)
 											{
 												// Login successful, so persist the AuthCode for next time
-												GVariant v = OAuth2.AccessToken.Get();
+												GVariant v = AccessToken.Get();
 												bool b = SettingStore->SetValue(OPT_ImapOAuth2AccessToken, v);
 												if (!b)
 												{

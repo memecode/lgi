@@ -31,14 +31,14 @@ public:
 		GString Scope;
 		GUri Proxy;
 		
-		GString AccessToken;
-		GString RefreshToken;
-		int ExpiresIn;
+		// GString AccessToken;
+		// GString RefreshToken;
+		// int ExpiresIn;
 		
 		Params()
 		{
 			Provider = None;
-			ExpiresIn = 0;
+			// ExpiresIn = 0;
 		}
 
 		bool IsValid()

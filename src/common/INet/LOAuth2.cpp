@@ -5,6 +5,7 @@
 #include "Base64.h"
 #include "INetTools.h"
 #include "LOAuth2.h"
+#include "LJSon.h"
 
 //////////////////////////////////////////////////////////////////
 #define LOCALHOST_PORT		54900
@@ -33,11 +34,35 @@ static GString GetHeaders(GSocketI *s)
 	return NULL;
 }
 
+ssize_t ChunkSize(ssize_t &Pos, GString &Buf, GString &Body)
+{
+	static GString Eol("\r\n");
+	auto End = Buf.Find(Eol, Pos);
+	if (End > Pos)
+	{
+		auto Sz = Buf(Pos, End).Int(16);
+		if (Sz >= 0)
+		{
+			End += Eol.Length();
+
+			auto Bytes = End + Sz + Eol.Length();
+			if (Buf.Length() >= Bytes)
+			{
+				Body += Buf(End, End + Sz);
+				Pos = End + Sz + Eol.Length();
+				return Sz;
+			}
+		}
+	}
+
+	return -1;
+}
+
 static bool GetHttp(GSocketI *s, GString &Hdrs, GString &Body, bool IsResponse)
 {
 	GString Resp = GetHeaders(s);
 
-	char Buf[256];
+	char Buf[512];
 	ssize_t Rd;
 	auto BodyPos = Resp.Find("\r\n\r\n");
 	GAutoString Len(InetGetHeaderField(Resp, "Content-Length", BodyPos));
@@ -57,12 +82,43 @@ static bool GetHttp(GSocketI *s, GString &Hdrs, GString &Body, bool IsResponse)
 	else if (s->IsOpen() && IsResponse)
 	{
 		GAutoString Te(InetGetHeaderField(Resp, "Transfer-Encoding", BodyPos));
-		while ((Rd = s->Read(Buf, sizeof(Buf))) > 0)
-			Resp += GString(Buf, Rd);
+		bool Chunked = Te && !_stricmp(Te, "chunked");
+
+		if (Chunked)
+		{
+			ssize_t Pos = 0;
+
+			Hdrs = Resp(0, BodyPos);
+			GString Raw = Resp(BodyPos + 4, -1);
+			Body.Empty();
+
+			while (s->IsOpen())
+			{
+				auto Sz = ChunkSize(Pos, Raw, Body);
+				if (Sz == 0)
+					break;
+				if (Sz < 0)
+				{
+					Rd = s->Read(Buf, sizeof(Buf));
+					if (Rd > 0)
+						Raw += GString(Buf, Rd);
+					else
+						break;
+				}
+			}
+
+			return true;
+		}
+		else
+		{
+			while ((Rd = s->Read(Buf, sizeof(Buf))) > 0)
+				Resp += GString(Buf, Rd);
+		}
 	}
 
-	Body = Resp(BodyPos + 4, -1);
 	Hdrs = Resp(0, BodyPos);
+	Body = Resp(BodyPos + 4, -1);
+
 	return true;
 }
 
@@ -119,6 +175,9 @@ struct LOAuth2Priv : public LCancel
 	GString Token;
 	GString CodeVerifier;
 	GStringPipe LocalLog;
+
+	GString AccessToken, RefreshToken;
+	int64 ExpiresIn;
 
 	struct Server : public GSocket
 	{
@@ -295,6 +354,13 @@ struct LOAuth2Priv : public LCancel
 		}
 
 		Log->Print("Body=%s\n", Body.Get());
+
+		LJson j(Body);
+
+		AccessToken = j.Get("access_token");
+		RefreshToken = j.Get("refresh_token");
+		ExpiresIn = j.Get("expires_in").Int();
+
 		return true;
 	}
 
@@ -323,7 +389,7 @@ GString LOAuth2::GetAccessToken()
 		d->Log->Print("Got token.\n");
 		if (d->GetAccess())
 		{
-			return true;
+			return d->AccessToken;
 		}
 	}
 	else d->Log->Print("No token.\n");
