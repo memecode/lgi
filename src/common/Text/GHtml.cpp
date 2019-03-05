@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
+#include <cmath>
 
 #include "Lgi.h"
 #include "GHtml.h"
@@ -311,7 +312,7 @@ public:
 				if (f->Face() &&
 					_stricmp(f->Face(), Face[0]) == 0 &&
 					FntSz.Type == GCss::LenPt &&
-					abs(FntSz.Value - Pt) < 0.001 &&
+					std::abs(FntSz.Value - Pt) < 0.001 &&
 					f->Bold() == IsBold &&
 					f->Italic() == IsItalic &&
 					f->Underline() == IsUnderline)

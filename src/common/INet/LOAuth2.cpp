@@ -181,7 +181,7 @@ struct LOAuth2Priv : public LCancel
 		GSocket s;
 
 	public:
-		LHashTbl<StrKey<char,false>,GString> Params;
+		LHashTbl<ConstStrKey<char,false>,GString> Params;
 		GString Body;
 
 		Server(LOAuth2Priv *cd) : d(cd)

@@ -1554,8 +1554,8 @@ bool MailSmtp::Open(GSocketI *S,
 						}
 						else if (Auth.Equals("XOAUTH2"))
 						{
-							LOAuth2 OAuth2(OAuth2, UserName, SettingStore);
-							auto Tok = OAuth2.GetAccessToken();
+							LOAuth2 Authenticator(OAuth2, UserName, SettingStore);
+							auto Tok = Authenticator.GetAccessToken();
 							if (Tok)
 							{
 								GString s;
