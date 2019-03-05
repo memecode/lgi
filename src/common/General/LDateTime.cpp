@@ -724,6 +724,15 @@ uint64 LDateTime::Ts()
 	return ts;
 }
 
+bool LDateTime::SetUnix(uint64 s)
+{
+	#if defined(WINDOWS)
+	return Set(s * LDateTime::Second64Bit + 116445168000000000LL);
+	#else
+	return Set(s);
+	#endif
+}
+
 bool LDateTime::Set(uint64 s)
 {
 	#if defined WIN32
@@ -1670,7 +1679,25 @@ bool LDateTime::Decode(const char *In)
 
 	// Tokenize delimited by whitespace
 	GString::Array T = GString(In).SplitDelimit(", \t\r\n");
-	if (T.Length() >= 2)
+	if (T.Length() < 2)
+	{
+		if (T[0].IsNumeric())
+		{
+			// Some sort of timestamp?
+			uint64_t Ts = Atoi(T[0].Get());
+			if (Ts > 0)
+			{
+				return SetUnix(Ts);
+			}
+			else return false;
+		}
+		else
+		{
+			// What now?
+			return false;
+		}
+	}
+	else
 	{
 		bool GotDate = false;
 

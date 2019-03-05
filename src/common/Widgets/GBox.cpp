@@ -3,6 +3,7 @@
 #include "GCssTools.h"
 #include "LgiRes.h"
 #include "GPopup.h"
+#include "GNotifications.h"
 
 #define DEFAULT_SPACER_PX			5
 // #define DEFAULT_SPACER_COLOUR24		LC_MED
@@ -640,6 +641,18 @@ void GBox::OnMouseMove(GMouse &m)
 	
 	OnPosChange();
 	Invalidate((GRect*)NULL, true);
+}
+
+int GBox::OnNotify(GViewI *Ctrl, int Flags)
+{
+	if (Flags == GNotifyTableLayout_Refresh)
+	{
+		d->Dirty = true;
+		if (Handle())
+			PostEvent(M_CHILDREN_CHANGED);
+	}
+		
+	return GView::OnNotify(Ctrl, Flags);
 }
 
 void GBox::OnChildrenChanged(GViewI *Wnd, bool Attaching)

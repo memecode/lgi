@@ -311,7 +311,12 @@ void VcFolder::OnBranchesChange()
 		if (w->GetViewById(IDC_BRANCH, b))
 		{
 			if (!ValidStr(b->Name()))
-				b->Name(Branches.First());
+			{
+				if (CurrentBranch)
+					b->Name(CurrentBranch);
+				else
+					b->Name(Branches.First());
+			}
 		}
 	}
 }
@@ -535,9 +540,12 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 	}
 	*/
 
-	LHashTbl<StrKey<char>, VcCommit*> Map;
-	for (VcCommit **pc = NULL; Log.Iterate(pc); )
-		Map.Add((*pc)->GetRev(), *pc);
+	/*
+	LHashTbl<StrKey<char>, int> Map(0, -1);
+	for (unsigned i=0; i<Log.Length(); i++)
+		Map.Add(Log[i]->GetRev(), i);
+	*/
+	Log.DeleteObjects();
 
 	int Skipped = 0, Errors = 0;
 	switch (GetType())
@@ -565,10 +573,7 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 				GAutoPtr<VcCommit> Rev(new VcCommit(d, this));
 				if (Rev->GitParse(Commit, true))
 				{
-					if (!Map.Find(Rev->GetRev()))
-						Log.Add(Rev.Release());
-					else
-						Skipped++;
+					Log.Add(Rev.Release());
 				}
 				else
 				{
@@ -586,6 +591,7 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 			break;
 	}
 
+	IsLogging = false;
 	return true;
 }
 
@@ -1912,6 +1918,7 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 		case VcGit:
 		{
 			Unpushed++;
+			CommitListDirty = true;
 			Update();
 
 			if (Params && Params->Str.Find("Push") >= 0)

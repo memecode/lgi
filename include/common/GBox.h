@@ -43,6 +43,7 @@ public:
 	bool Pour(GRegion &r);
 	LgiCursor GetCursor(int x, int y);
 	bool OnLayout(GViewLayoutInfo &Inf);
+	int OnNotify(GViewI *Ctrl, int Flags);
 
 	bool Serialize(GDom *Dom, const char *OptName, bool Write);	
 	bool SetSize(int ViewIndex, GCss::Len Size);

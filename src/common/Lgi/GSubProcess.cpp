@@ -781,6 +781,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			{
 				ChildPid = ProcInfo.dwProcessId;
 				ChildHnd = ProcInfo.hProcess;
+				CloseHandle(ProcInfo.hThread);
 
 				#if DEBUG_SUBPROCESS
 				LgiTrace("%s:%i - CreateProcessW OK, ChildPid=%p, ChildHnd=%p\n", _FL, ChildPid, ChildHnd);

@@ -74,7 +74,7 @@ int
 #if _CONSOLE
 main(int args, char *arg[])
 #else
-WINAPI
+WINAPI CALLBACK
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 #endif
 {

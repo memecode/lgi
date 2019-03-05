@@ -108,7 +108,15 @@ public:
 			auto r = v->GetUsedArea();
 			if (r.Y() <= 1)
 				r.Set(0, 0, 30, 30);
-			GetCss(true)->Height(GCss::Len(GCss::LenPx, (float)r.Y()+3));
+			
+			// printf("Used = %s\n", r.GetStr());
+			GCss::Len NewSz(GCss::LenPx, (float)r.Y()+3);
+			auto OldSz = GetCss(true)->Height();
+			if (OldSz != NewSz)
+			{
+				GetCss(true)->Height(NewSz);
+				SendNotify(GNotifyTableLayout_Refresh);
+			}
 		}
 		else LgiAssert(!"Missing table ctrl");
 	}
