@@ -9,14 +9,8 @@
 
 //////////////////////////////////////////////////////////////////
 #define LOCALHOST_PORT		54900
-
-/*
-const char *ClientID = "";
-const char *ClientSecret = "";
-const char *Api = "https://apidata.googleusercontent.com/caldav/v2/%s/user";
-const char *Scope = "https://www.googleapis.com/auth/calendar";
-const char *AuthServer = "https://accounts.google.com/o/oauth2/v2/auth";
-*/
+#define OPT_AccessToken		"AccessToken"
+#define OPT_RefreshToken	"RefreshToken"
 
 static GString GetHeaders(GSocketI *s)
 {
@@ -175,6 +169,7 @@ struct LOAuth2Priv : public LCancel
 	GString Token;
 	GString CodeVerifier;
 	GStringPipe LocalLog;
+	GDom *Store;
 
 	GString AccessToken, RefreshToken;
 	int64 ExpiresIn;
@@ -255,6 +250,7 @@ struct LOAuth2Priv : public LCancel
 		GString b;
 		b.Length(BufferLen_BinTo64(s.Length()));
 		auto ch = ConvertBinaryToBase64(b.Get(), b.Length(), (uchar*)s.Get(), s.Length());
+		b.Get()[b.Length()] = 0;
 		return b;
 	}
 
@@ -311,79 +307,114 @@ struct LOAuth2Priv : public LCancel
 
 	bool GetAccess()
 	{
-		GStringPipe p(1024);
-		GUri u(Params.Scope);
-		SslSocket sock(NULL, NULL, true);
-		if (!sock.Open(u.Host, HTTPS_PORT))
+		if (!AccessToken)
 		{
-			Log->Print("Error: Can't connect to '%s:%i'\n", u.Host, HTTPS_PORT);
-			return NULL;
-		}
+			GStringPipe p(1024);
+			GUri u(Params.Scope);
+			SslSocket sock(NULL, NULL, true);
+			if (!sock.Open(u.Host, HTTPS_PORT))
+			{
+				Log->Print("Error: Can't connect to '%s:%i'\n", u.Host, HTTPS_PORT);
+				return NULL;
+			}
 		
-		GString Body, Http;
-		Body.Printf("code=%s&"
-					"client_id=%s&"
-					"client_secret=%s&"
-					"redirect_uri=http://localhost:%i&"
-					"code_verifier=%s&"
-					"grant_type=authorization_code",
-					FormEncode(Token).Get(),
-					Params.ClientID.Get(),
-					Params.ClientSecret.Get(),
-					LOCALHOST_PORT,
-					FormEncode(CodeVerifier).Get());
+			GString Body, Http;
+			Body.Printf("code=%s&"
+						"client_id=%s&"
+						"client_secret=%s&"
+						"redirect_uri=http://localhost:%i&"
+						"code_verifier=%s&"
+						"grant_type=authorization_code",
+						FormEncode(Token).Get(),
+						Params.ClientID.Get(),
+						Params.ClientSecret.Get(),
+						LOCALHOST_PORT,
+						FormEncode(CodeVerifier).Get());
 
-		Http.Printf("POST /oauth2/v4/token HTTP/1.1\r\n"
-					"Host: www.googleapis.com\r\n"
-					"Content-Type: application/x-www-form-urlencoded\r\n"
-					"Content-length: " LPrintfSizeT "\r\n"
-					"\r\n"
-					"%s",
-					Body.Length(),
-					Body.Get());
-		if (!Write(&sock, Http))
-		{
-			Log->Print("%s:%i - Error writing to socket.\n", _FL);
-			return false;
+			Http.Printf("POST /oauth2/v4/token HTTP/1.1\r\n"
+						"Host: www.googleapis.com\r\n"
+						"Content-Type: application/x-www-form-urlencoded\r\n"
+						"Content-length: " LPrintfSizeT "\r\n"
+						"\r\n"
+						"%s",
+						Body.Length(),
+						Body.Get());
+			if (!Write(&sock, Http))
+			{
+				Log->Print("%s:%i - Error writing to socket.\n", _FL);
+				return false;
+			}
+
+			GString Hdrs;
+			if (!GetHttp(&sock, Hdrs, Body, true))
+			{
+				return false;
+			}
+
+			// Log->Print("Body=%s\n", Body.Get());
+			LJson j(Body);
+
+			AccessToken = j.Get("access_token");
+			RefreshToken = j.Get("refresh_token");
+			ExpiresIn = j.Get("expires_in").Int();
 		}
 
-		GString Hdrs;
-		if (!GetHttp(&sock, Hdrs, Body, true))
-		{
+		return AccessToken.Get() != NULL;
+	}
+
+	LOAuth2Priv(LOAuth2::Params &params, const char *account, GDom *store, GStream *log)
+	{
+		Params = params;
+		Id = account;
+		Store = store;
+		Log = log ? log : &LocalLog;
+	}
+
+	bool Serialize(bool Write)
+	{
+		if (!Store)
 			return false;
+
+		GVariant v;
+		GString Key, kAccTok;
+		Key.Printf("%s.%s", Params.Scope.Get(), Id.Get());
+		auto KeyB64 = Base64(Key);
+		kAccTok.Printf("OAuth2-%s-%s", OPT_AccessToken, KeyB64.Get());
+		kAccTok = kAccTok.RStrip("=");
+
+		if (Write)
+		{
+			Store->SetValue(kAccTok, v = AccessToken.Get());
 		}
-
-		Log->Print("Body=%s\n", Body.Get());
-
-		LJson j(Body);
-
-		AccessToken = j.Get("access_token");
-		RefreshToken = j.Get("refresh_token");
-		ExpiresIn = j.Get("expires_in").Int();
+		else
+		{
+			if (Store->GetValue(kAccTok, v))
+				AccessToken = v.Str();
+			else
+				return false;
+		}
 
 		return true;
 	}
-
-	LOAuth2Priv(GStream *log, const char *id)
-	{
-		Log = log ? log : &LocalLog;
-		Id = id;
-	}
 };
 
-LOAuth2::LOAuth2(LOAuth2::Params &params, const char *Account, GStream *log)
+LOAuth2::LOAuth2(LOAuth2::Params &params, const char *account, GDom *store, GStream *log)
 {
-	d = new LOAuth2Priv(log, Account);
-	d->Params = params;
+	d = new LOAuth2Priv(params, account, store, log);
+	d->Serialize(false);
 }
 
 LOAuth2::~LOAuth2()
 {
+	d->Serialize(true);
 	delete d;
 }
 
 GString LOAuth2::GetAccessToken()
 {
+	if (d->AccessToken)
+		return d->AccessToken;
+
 	if (d->GetToken())
 	{
 		d->Log->Print("Got token.\n");

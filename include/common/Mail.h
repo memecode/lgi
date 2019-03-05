@@ -48,6 +48,8 @@ extern bool Is8Bit(char *Text);
 extern int MaxLineLen(char *Text);
 extern char *EncodeImapString(const char *s);
 extern char *DecodeImapString(const char *s);
+extern bool UnBase64Str(GString &s);
+extern bool Base64Str(GString &s);
 
 extern const char *sTextPlain;
 extern const char *sTextHtml;
@@ -271,6 +273,7 @@ protected:
 	LMutex SocketLock;
 	GAutoPtr<GSocketI> Socket;
 	LOAuth2::Params OAuth2;
+	GDom *SettingStore;
 
 	bool Error(const char *file, int line, const char *msg, ...);
 	bool Read();
@@ -302,6 +305,7 @@ public:
 
 	// Methods
 	void SetOAuthParams(LOAuth2::Params &p) { OAuth2 = p; }
+	void SetSettingStore(GDom *store) { SettingStore = store; }
 	
 	/// Thread safe hard close (quit now)
 	bool CloseSocket()

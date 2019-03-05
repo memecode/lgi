@@ -63,6 +63,33 @@ bool LogEntry::Add(const char *t, ssize_t len)
 	return Txt.Add(w, ch);	
 }
 	
+bool Base64Str(GString &s)
+{
+	GString b64;
+	ssize_t Base64Len = BufferLen_BinTo64(s.Length());
+	if (!b64.Set(NULL, Base64Len))
+		return false;
+	
+	ssize_t Ch = ConvertBinaryToBase64(b64.Get(), b64.Length(), (uchar*)s.Get(), s.Length());
+	LgiAssert(Ch == b64.Length());
+	s = b64;
+	return true;
+}
+
+bool UnBase64Str(GString &s)
+{
+	GString Bin;
+	ssize_t BinLen = BufferLen_64ToBin(s.Length());
+	if (!Bin.Set(NULL, BinLen))
+		return false;
+	
+	ssize_t Ch = ConvertBase64ToBinary((uchar*)Bin.Get(), Bin.Length(), s.Get(), s.Length());
+	LgiAssert(Ch <= (int)Bin.Length());
+	s = Bin;
+	s.Get()[Ch] = 0;
+	return true;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // return true if there are any characters with the 0x80 bit set
 bool Is8Bit(char *Text)
@@ -1153,6 +1180,7 @@ MailProtocol::MailProtocol()
 	Buffer[0] = 0;
 	Logger = 0;
 	ErrMsgId = 0;
+	SettingStore = NULL;
 
 	Items = 0;
 	Transfer = 0;
@@ -1526,13 +1554,17 @@ bool MailSmtp::Open(GSocketI *S,
 						}
 						else if (Auth.Equals("XOAUTH2"))
 						{
-							LOAuth2 Auth(OAuth2, UserName);
-							auto Tok = Auth.GetAccessToken();
+							LOAuth2 OAuth2(OAuth2, UserName, SettingStore);
+							auto Tok = OAuth2.GetAccessToken();
 							if (Tok)
 							{
-							}
-							else
-							{
+								GString s;
+								s.Printf("user=%s\001auth=Bearer %s\001\001\0", UserName, Tok.Get());
+								Base64Str(s);
+
+								sprintf_s(Buffer, sizeof(Buffer), "AUTH %s %s\r\n", Auth.Get(), s.Get());
+								VERIFY_RET_VAL(Write(0, true));
+								Authed = ReadReply("235");
 							}
 						}
 						else

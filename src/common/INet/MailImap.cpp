@@ -39,33 +39,6 @@
 static const char *sRfc822Header	= "RFC822.HEADER";
 static const char *sRfc822Size		= "RFC822.SIZE";
 
-bool Base64Str(GString &s)
-{
-	GString b64;
-	ssize_t Base64Len = BufferLen_BinTo64(s.Length());
-	if (!b64.Set(NULL, Base64Len))
-		return false;
-	
-	ssize_t Ch = ConvertBinaryToBase64(b64.Get(), b64.Length(), (uchar*)s.Get(), s.Length());
-	LgiAssert(Ch == b64.Length());
-	s = b64;
-	return true;
-}
-
-bool UnBase64Str(GString &s)
-{
-	GString Bin;
-	ssize_t BinLen = BufferLen_64ToBin(s.Length());
-	if (!Bin.Set(NULL, BinLen))
-		return false;
-	
-	ssize_t Ch = ConvertBase64ToBinary((uchar*)Bin.Get(), Bin.Length(), s.Get(), s.Length());
-	LgiAssert(Ch <= (int)Bin.Length());
-	s = Bin;
-	s.Get()[Ch] = 0;
-	return true;
-}
-
 struct TraceLog : public GStream
 {
 	ssize_t Read(void *Buffer, ssize_t Size, int Flags = 0) { return 0; }
@@ -1197,9 +1170,12 @@ void MailIMap::CommandFinished()
 	d->LastWrite.Empty();
 }
 
-bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags)
+bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *settingStore, int Flags)
 {
 	bool Status = false;
+	
+	if (settingStore)
+		SettingStore = settingStore;
 
 	if (SocketLock.Lock(_FL))
 	{
@@ -1767,7 +1743,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 						}
 
 						TraceLog TLog;
-						LOAuth2 Auth(OAuth2, User, &TLog);
+						LOAuth2 Auth(OAuth2, User, SettingStore, &TLog);
 						auto AccessToken = Auth.GetAccessToken();
 						if (!AccessToken)
 						{

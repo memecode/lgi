@@ -3,7 +3,7 @@
 
 //////////////////////////////////////////////////////////////////
 
-/* Do this elsewhere?
+/* Do this somewhere?
 GAutoString ErrorMsg;
 StartSSL(ErrorMsg, NULL);
 */
@@ -55,7 +55,7 @@ public:
 	};
 
 
-	LOAuth2(Params &params, const char *account, GStream *log = NULL);
+	LOAuth2(Params &params, const char *account, GDom *store, GStream *log = NULL);
 	virtual ~LOAuth2();
 
 	GString GetAccessToken();
