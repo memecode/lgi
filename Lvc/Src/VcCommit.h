@@ -22,14 +22,20 @@ struct VcEdge
 
 class VcCommit : public LListItem
 {
+	GString Cache;
+	bool Current;
+
+protected:
 	AppPriv *d;
 	VcFolder *Folder;
-	bool Current;
+
+	// Commit Meta
 	GString Rev;
+	int64_t Index;
 	GString::Array Parents;
+	GString Branch;
 	GString Author;
 	LDateTime Ts;
-	GString Cache;
 	GString Msg;
 
 public:
@@ -44,6 +50,7 @@ public:
 	~VcCommit();
 
 	char *GetRev();
+	int64_t GetIndex() { return Index; }
 	bool IsRev(const char *r) { return !Strcmp(GetRev(), r); }
 	char *GetAuthor();
 	char *GetMsg();

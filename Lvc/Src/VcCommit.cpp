@@ -46,6 +46,7 @@ void VcEdge::Set(VcCommit *p, VcCommit *c)
 VcCommit::VcCommit(AppPriv *priv, VcFolder *folder) : Pos(32, -1)
 {
 	d = priv;
+	Index = -1;
 	Folder = folder;
 	Current = false;
 	NodeIdx = -1;
@@ -178,6 +179,11 @@ char *VcCommit::GetText(int Col)
 			// Cache.Printf("%i%s", (int)Parents.Length(), Current ? " ***" : "");
 			return NULL;
 		case 1:
+			if (Index >= 0)
+			{
+				Cache.Printf(LPrintfInt64 " %s", Index, Rev.Get());
+				return Cache;
+			}			
 			return Rev;
 		case 2:
 			return Author;
@@ -278,13 +284,24 @@ bool VcCommit::HgParse(GString s)
 		if (f.Length() == 2)
 		{
 			if (f[0].Equals("changeset"))
-				Rev = f[1].Strip();
+			{
+				auto p = f[1].Strip().Split(":");
+				Index = p[0].Int();
+				Rev = p[1];
+			}
 			else if (f[0].Equals("user"))
 				Author = f[1].Strip();
 			else if (f[0].Equals("date"))
 				Ts.Parse(f[1].Strip());
 			else if (f[0].Equals("summary"))
 				Msg = f[1].Strip();
+			else if (f[0].Equals("parent"))
+			{
+				auto p = f[1].Strip().Split(":");
+				Parents.Add(p.Last());
+			}
+			else if (f[0].Equals("branch"))
+				Branch = f[1].Strip();
 		}
 	}
 
@@ -367,8 +384,12 @@ void VcCommit::OnMouseClick(GMouse &m)
 	{
 		GSubMenu s;
 		s.AppendItem("Merge With Local", IDM_MERGE, !Current);
-		s.AppendItem("Update", IDM_UPDATE, !Current);
-		s.AppendItem("Copy Revision", IDM_COPY_REV);
+		s.AppendItem("Update", IDM_UPDATE, !Current);		
+		if (Rev)
+			s.AppendItem("Copy Revision", IDM_COPY_REV);		
+		if (Index >= 0)
+			s.AppendItem("Copy Index", IDM_COPY_INDEX);
+		
 		int Cmd = s.Float(GetList(), m);
 		switch (Cmd)
 		{
@@ -400,6 +421,14 @@ void VcCommit::OnMouseClick(GMouse &m)
 			{
 				GClipBoard c(GetList());
 				c.Text(Rev);
+				break;
+			}
+			case IDM_COPY_INDEX:
+			{
+				GClipBoard c(GetList());
+				GString b;
+				b.Printf(LPrintfInt64, Index);
+				c.Text(b);
 				break;
 			}
 		}

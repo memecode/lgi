@@ -674,15 +674,36 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 		case VcHg:
 		{
 			GString::Array c = s.Split("\n\n");
+			LHashTbl<IntKey<int64_t>, VcCommit*> Idx;
 			for (GString *Commit = NULL; c.Iterate(Commit); )
 			{
 				GAutoPtr<VcCommit> Rev(new VcCommit(d, this));
 				if (Rev->HgParse(*Commit))
 				{
-					if (!Map.Find(Rev->GetRev()))
-						Log.Add(Rev.Release());
+					auto Existing = Map.Find(Rev->GetRev());
+					if (!Existing)
+						Log.Add(Existing = Rev.Release());
+					if (Existing->GetIndex() >= 0)
+						Idx.Add(Existing->GetIndex(), Existing);
 				}
 			}
+
+			// Patch all the trivial parents...
+			for (auto c: Log)
+			{
+				if (c->GetParents()->Length() > 0)
+					continue;
+
+				auto CIdx = c->GetIndex();
+				if (CIdx <= 0)
+					continue;
+
+				auto Par = Idx.Find(CIdx - 1);
+				if (Par)
+					c->GetParents()->Add(Par->GetRev());
+			}
+
+			LinkParents();
 			break;
 		}
 		case VcCvs:
@@ -1540,6 +1561,12 @@ void VcFolder::ListCommit(VcCommit *c)
 					}
 				}
 				d->Files->ResizeColumnsToContent();
+				break;
+			}
+			case VcHg:
+			{
+				Args.Printf("diff --change %s", c->GetRev());
+				IsFilesCmd = StartCmd(Args, &VcFolder::ParseFiles, new ParseParams(c->GetRev()));				
 				break;
 			}
 			default:
