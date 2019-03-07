@@ -33,6 +33,12 @@ public:
 extern int Ver2Int(GString v);
 extern int ToolVersion[VcMax];
 
+struct Result
+{
+	int Code;
+	GString Out;
+};
+
 class VcFolder : public GTreeItem, public GCss
 {
 	friend class VcCommit;
@@ -154,6 +160,7 @@ class VcFolder : public GTreeItem, public GCss
 	void Init(AppPriv *priv);
 	const char *GetVcName();
 	bool StartCmd(const char *Args, ParseFn Parser = NULL, ParseParams *Params = NULL, LoggingType Logging = LogNone);
+	Result RunCmd(const char *Args, LoggingType Logging = LogNone);
 	void OnBranchesChange();
 	void OnCmdError(GString Output, const char *Msg);
 	void ClearError();
@@ -214,6 +221,7 @@ public:
 	void GetVersion();
 	void Diff(VcFile *file);
 	void MergeToLocal(GString Rev);
+	void RenameBranch(GString NewName, GArray<VcCommit*> &Revs);
 
 	void OnPulse();
 	void OnUpdate(const char *Rev);

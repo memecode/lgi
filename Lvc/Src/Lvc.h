@@ -59,6 +59,7 @@ enum AppIds
 	IDM_UPDATE,
 	IDM_COPY_REV,
 	IDM_COPY_INDEX,
+	IDM_RENAME_BRANCH,
 	IDM_REMOVE,
 	IDM_CLEAN,
 	IDM_REVERT,
@@ -125,6 +126,8 @@ struct AppPriv
 		if (Diff)
 			Diff->Name(NULL);		
 	}
+
+	GArray<class VcCommit*> GetRevs(GString::Array &Revs);
 };
 
 class BlameUi : public GWindow

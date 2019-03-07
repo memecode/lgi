@@ -289,6 +289,29 @@ public:
 	}
 };
 
+GArray<VcCommit*> AppPriv::GetRevs(GString::Array &Revs)
+{
+	GArray<VcCommit*> a;
+	
+	for (auto i = Lst->begin(); i != Lst->end(); i++)
+	{
+		VcCommit *c = dynamic_cast<VcCommit*>(*i);
+		if (c)
+		{
+			for (auto r: Revs)
+			{
+				if (r.Equals(c->GetRev()))
+				{
+					a.Add(c);
+					break;
+				}
+			}
+		}
+	}
+
+	return a;
+}
+
 class CommitList : public LList
 {
 public:
@@ -340,6 +363,44 @@ public:
 							c->Select(false);
 
 						SelectRevisions(*p);
+					}
+				}
+				return true;
+			}
+			case 'c':
+			case 'C':
+			{
+				if (k.Down())
+				{
+					GArray<VcCommit*> Sel;
+					GetSelection(Sel);
+					if (Sel.Length())
+					{
+						LHashTbl<StrKey<char>,VcCommit*> Map;
+						for (auto s:Sel)
+							Map.Add(s->GetRev(), s);
+						
+						GString::Array n;
+						for (auto it = begin(); it != end(); it++)
+						{
+							VcCommit *c = dynamic_cast<VcCommit*>(*it);
+							if (c)
+							{
+								for (auto r:*c->GetParents())
+								{
+									if (Map.Find(r))
+									{
+										n.Add(c->GetRev());
+										break;
+									}
+								}
+							}
+						}
+
+						for (auto c:Sel)
+							c->Select(false);
+
+						SelectRevisions(n);
 					}
 				}
 				return true;

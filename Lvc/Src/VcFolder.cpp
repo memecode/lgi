@@ -203,6 +203,50 @@ const char *VcFolder::GetVcName()
 	return VcCmd;
 }
 
+Result VcFolder::RunCmd(const char *Args, LoggingType Logging)
+{
+	Result Ret;
+	Ret.Code = -1;
+
+	const char *Exe = GetVcName();
+	if (!Exe || CmdErrors > 2)
+		return Ret;
+
+	GSubProcess Process(Exe, Args);
+	Process.SetInitFolder(Path);
+	if (!Process.Start())
+	{
+		Ret.Out.Printf("Process failed with %i", Process.GetErrorCode());
+		return Ret;
+	}
+
+	if (Logging == LogNormal)
+		d->Log->Print("%s %s\n", Exe, Args);
+
+	while (Process.IsRunning())
+	{
+		auto Rd = Process.Read();
+		if (Rd.Length())
+		{
+			Ret.Out += Rd;
+			if (Logging == LogNormal)
+				d->Log->Write(Rd.Get(), Rd.Length());
+		}
+
+		LgiYield();
+	}
+
+	auto Rd = Process.Read();
+	if (Rd.Length())
+	{
+		Ret.Out += Rd;
+		if (Logging == LogNormal)
+			d->Log->Write(Rd.Get(), Rd.Length());
+	}
+
+	return Ret;
+}
+
 bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, LoggingType Logging)
 {
 	const char *Exe = GetVcName();
@@ -1510,6 +1554,10 @@ void VcFolder::OnUpdate(const char *Rev)
 				Args.Printf("up -r %s", Rev);
 				IsUpdate = StartCmd(Args, &VcFolder::ParseUpdate, NULL, LogNormal);
 				break;
+			case VcHg:
+				Args.Printf("update -r %s", Rev);
+				IsUpdate = StartCmd(Args, &VcFolder::ParseUpdate, NULL, LogNormal);
+				break;
 			default:
 			{
 				LgiAssert(!"Impl me.");
@@ -2306,6 +2354,97 @@ bool VcFolder::ParseClean(int Result, GString s, ParseParams *Params)
 	}
 
 	return false;
+}
+
+void VcFolder::RenameBranch(GString NewName, GArray<VcCommit*> &Revs)
+{
+	switch (GetType())
+	{
+		case VcHg:
+		{
+			// Update to the ancestor of the commits
+			LHashTbl<StrKey<char>,int> Refs(0, -1);
+			for (auto c:Revs)
+			{
+				for (auto p:*c->GetParents())
+					if (Refs.Find(p) < 0)
+						Refs.Add(p, 0);
+				if (Refs.Find(c->GetRev()) >= 0)
+					Refs.Add(c->GetRev(), 1);
+			}
+			GString::Array Ans;
+			for (auto i:Refs)
+			{
+				if (i.value == 0)
+					Ans.Add(i.key);
+			}
+
+			GArray<VcCommit*> Ancestors = d->GetRevs(Ans);
+			if (Ans.Length() != 1)
+			{
+				// We should only have one ancestor
+				GString s, m;
+				s.Printf("Wrong number of ancestors: " LPrintfInt64 ".\n", Ans.Length());
+				for (auto i: Ancestors)
+				{
+					m.Printf("\t%s\n", i->GetRev());
+					s += m;
+				}
+				LgiMsg(GetTree(), s, AppName, MB_OK);
+				break;
+			}
+
+			// Create the new branch...
+			GString Cmd;
+			Cmd.Printf("update -r %s", Ancestors.First()->GetRev());
+			Result r = RunCmd(Cmd);
+			if (r.Code)
+				break;
+			Cmd.Printf("hg branch \"%s\"", NewName.Get());
+			r = RunCmd(Cmd);
+			if (r.Code)
+				break;
+
+			// Graft over the change sets
+			auto In = Revs;
+			LHashTbl<StrKey<char>,VcCommit*> Parents;
+			LHashTbl<StrKey<char>,GString> RevMap;
+			Parents.Add(Ancestors.First()->GetRev(), Ancestors.First());
+			while (In.Length())
+			{
+				VcCommit *c = NULL;
+				for (auto i:In)
+				{
+					for (auto p:*i->GetParents())
+					{
+						if (Parents.Find(p))
+						{
+							c = i;
+							break;
+						}
+					}
+				}
+				if (c)
+				{
+					Parents.Add(c->GetRev(), c);
+
+				}
+				else break;
+			}
+
+			// Strip out the old branch
+
+
+			// Push the changes
+
+			break;
+		}
+		default:
+		{
+			LgiMsg(GetTree(), "Not impl for this VCS.", AppName);
+			break;
+		}
+	}
 }
 
 void VcFolder::GetVersion()

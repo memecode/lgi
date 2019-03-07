@@ -410,6 +410,7 @@ void VcCommit::OnMouseClick(GMouse &m)
 			s.AppendItem("Copy Revision", IDM_COPY_REV);		
 		if (Index >= 0)
 			s.AppendItem("Copy Index", IDM_COPY_INDEX);
+		s.AppendItem("Rename Branch", IDM_RENAME_BRANCH);
 		
 		int Cmd = s.Float(GetList(), m);
 		switch (Cmd)
@@ -450,6 +451,19 @@ void VcCommit::OnMouseClick(GMouse &m)
 				GString b;
 				b.Printf(LPrintfInt64, Index);
 				c.Text(b);
+				break;
+			}
+			case IDM_RENAME_BRANCH:
+			{
+				GArray<VcCommit*> Revs;
+				if (GetList()->GetSelection(Revs))
+				{
+					GInput Inp(GetList(), "", "New branch name:", AppName);
+					if (Inp.DoModal())
+					{
+						Folder->RenameBranch(Inp.GetStr(), Revs);
+					}
+				}
 				break;
 			}
 		}
