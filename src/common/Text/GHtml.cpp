@@ -7135,11 +7135,26 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 						if (Tag->HasChild(r))
 						{
 							// Process the returned data...
-							if (j->pDC)
+							if (r->TagId == TAG_IMG)
 							{
-								r->SetImage(j->Uri, j->pDC.Release());
-								ViewWidth = 0;
-								Update = true;
+								if (j->pDC)
+								{
+									r->SetImage(j->Uri, j->pDC.Release());
+									ViewWidth = 0;
+									Update = true;
+								}
+								else if (j->Stream)
+								{
+									GAutoPtr<GSurface> pDC(GdcD->Load(dynamic_cast<GStream*>(j->Stream.Get())));
+									if (pDC)
+									{
+										r->SetImage(j->Uri, pDC.Release());
+										ViewWidth = 0;
+										Update = true;
+									}
+									else LgiTrace("%s:%i - Image decode failed for '%s'\n", _FL, j->Uri.Get());
+								}
+								else LgiTrace("%s:%i - Unexpected job type for '%s'\n", _FL, j->Uri.Get());
 							}
 							else if (r->TagId == TAG_LINK)
 							{
@@ -7162,13 +7177,17 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 									}
 								}
 							}
+							else LgiTrace("%s:%i - Unexpected tag '%s' for URI '%s'\n", _FL,
+								r->Tag.Get(),
+								j->Uri.Get());
 						}
 						else
 						{
 							Html1::GTag *p = ToTag(r->Parent);
 							while (p->Parent)
 								p = ToTag(p->Parent);
-							int asd=0;
+							
+							LgiTrace("%s:%i - No child tag for job.\n", _FL);
 						}
 					}
 					// else it's from another (historical) HTML control, ignore
