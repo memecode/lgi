@@ -75,6 +75,11 @@ char *VcCommit::GetMsg()
 	return Msg;
 }
 
+char *VcCommit::GetBranch()
+{
+	return Branch;
+}
+
 void VcCommit::SetCurrent(bool b)
 {
 	Current = b;
@@ -171,26 +176,25 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 	}
 }
 
-char *VcCommit::GetText(int Col)
+const char *VcCommit::GetFieldText(CommitField Fld)
 {
-	switch (Col)
+	switch (Fld)
 	{
-		case 0:
-			// Cache.Printf("%i%s", (int)Parents.Length(), Current ? " ***" : "");
-			return NULL;
-		case 1:
-			if (Index >= 0)
-			{
-				Cache.Printf(LPrintfInt64 " %s", Index, Rev.Get());
-				return Cache;
-			}			
+		case LRevision:
 			return Rev;
-		case 2:
+		case LIndex:
+			Cache.Printf(LPrintfInt64, Index);
+			return Cache;
+		case LBranch:
+			if (Branch)
+				return Branch;
+			return "default";
+		case LAuthor:
 			return Author;
-		case 3:
+		case LTimeStamp:
 			Cache = Ts.Get();
 			return Cache;
-		case 4:
+		case LMessage:
 			if (!Msg)
 				return NULL;
 			Cache = Msg.Split("\n", 1)[0];
@@ -198,6 +202,23 @@ char *VcCommit::GetText(int Col)
 	}
 
 	return NULL;
+}
+
+char *VcCommit::GetText(int Col)
+{
+	if (!Folder)
+	{
+		LgiAssert(0);
+		return NULL;
+	}
+
+	if (!Folder->Fields.IdxCheck(Col))
+	{
+		LgiAssert(0);
+		return NULL;
+	}
+
+	return (char*)GetFieldText(Folder->Fields[Col]);
 }
 
 bool VcCommit::GitParse(GString s, bool RevList)

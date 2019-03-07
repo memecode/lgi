@@ -336,6 +336,54 @@ void VcFolder::Select(bool b)
 		if (!DirExists(Path))
 			return;
 
+		if (Fields.Length() == 0)
+		{
+			switch (GetType())
+			{
+				case VcHg:
+				{
+					Fields.Add(LGraph);
+					Fields.Add(LIndex);
+					Fields.Add(LRevision);
+					Fields.Add(LBranch);
+					Fields.Add(LAuthor);
+					Fields.Add(LTimeStamp);
+					Fields.Add(LMessage);
+					break;
+				}
+				default:
+				{
+					Fields.Add(LGraph);
+					Fields.Add(LRevision);
+					Fields.Add(LAuthor);
+					Fields.Add(LTimeStamp);
+					Fields.Add(LMessage);
+					break;
+				}
+			}
+		}
+
+		if (GetType() != d->PrevType)
+		{
+			d->PrevType = GetType();
+			d->Lst->EmptyColumns();
+
+			for (auto c: Fields)
+			{
+				switch (c)
+				{
+					case LGraph: d->Lst->AddColumn("---", 60); break;
+					case LIndex: d->Lst->AddColumn("Index", 60); break;
+					case LBranch: d->Lst->AddColumn("Branch", 60); break;
+					case LRevision: d->Lst->AddColumn("Revision", 60); break;
+					case LAuthor: d->Lst->AddColumn("Author", 240); break;
+					case LTimeStamp: d->Lst->AddColumn("Date", 130); break;
+					case LMessage: d->Lst->AddColumn("Message", 400); break;
+					default: LgiAssert(0); break;
+				}
+			}
+		}
+
 		if ((Log.Length() == 0 || CommitListDirty) && !IsLogging)
 		{
 			switch (GetType())

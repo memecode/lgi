@@ -132,6 +132,7 @@ class VcFolder : public GTreeItem, public GCss
 	GString CountCache;
 	GTreeItem *Tmp;
 	int CmdErrors;
+	GArray<CommitField> Fields;
 	
 	struct GitCommit
 	{

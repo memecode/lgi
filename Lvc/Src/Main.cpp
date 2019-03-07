@@ -408,11 +408,6 @@ public:
 			Lst = new CommitList(IDC_LIST);
 			Lst->Attach(CommitsBox);
 			Lst->GetCss(true)->Height("40%");
-			Lst->AddColumn("---", 40);
-			Lst->AddColumn("Commit", 270);
-			Lst->AddColumn("Author", 240);
-			Lst->AddColumn("Date", 130);
-			Lst->AddColumn("Message", 400);
 
 			GBox *FilesBox = new GBox(IDC_FILES_BOX, false);
 			FilesBox->Attach(CommitsBox);

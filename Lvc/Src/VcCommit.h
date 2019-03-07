@@ -4,6 +4,19 @@
 class VcFolder;
 class VcCommit;
 
+enum CommitField
+{
+	LNone,
+	LGraph,
+	LRevision,
+	LIndex,
+	LBranch,
+	LAuthor,
+	LTimeStamp,
+	LMessage,
+	LParents,
+};
+
 struct VcEdge
 {
 	VcCommit *Parent, *Child;
@@ -54,12 +67,14 @@ public:
 	bool IsRev(const char *r) { return !Strcmp(GetRev(), r); }
 	char *GetAuthor();
 	char *GetMsg();
+	char *GetBranch();
 	GString::Array *GetParents() { return &Parents; }
 	LDateTime &GetTs() { return Ts; }
 
 	void SetCurrent(bool b);
 	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c);
 	char *GetText(int Col);
+	const char *GetFieldText(CommitField Fld);
 	bool GitParse(GString s, bool RevList);
 	bool SvnParse(GString s);
 	bool HgParse(GString s);

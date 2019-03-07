@@ -103,10 +103,12 @@ struct AppPriv
 	GTextLog *Diff;
 	GTextLog *Log;
 	GTabView *Tabs;
+	VersionCtrl PrevType;
 
 	AppPriv()  : Opts(GOptionsFile::PortableMode, AppName)
 	{
 		Lst = NULL;
+		PrevType = VcNone;
 		Tree = NULL;
 		Files = NULL;
 		Diff = NULL;
