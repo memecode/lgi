@@ -1743,7 +1743,10 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 						}
 
 						TraceLog TLog;
+						int RefreshCount = 0;
 						LOAuth2 Auth(OAuth2, User, SettingStore, &TLog);
+
+						RetryAccessToken:
 						auto AccessToken = Auth.GetAccessToken();
 						if (!AccessToken)
 						{
@@ -1794,6 +1797,13 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 										if (StatusCode == 400)
 										{
 											// Refresh the token...?
+											if (Auth.Refresh())
+											{
+												RefreshCount++;
+												CommandFinished();
+												if (RefreshCount < 2)
+													goto RetryAccessToken;
+											}
 										}
 									}
 									else if (*l == '*')

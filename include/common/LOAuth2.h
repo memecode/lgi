@@ -59,6 +59,7 @@ public:
 	virtual ~LOAuth2();
 
 	GString GetAccessToken();
+	bool Refresh();
 };
 
 #endif

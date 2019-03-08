@@ -376,22 +376,25 @@ struct LOAuth2Priv : public LCancel
 			return false;
 
 		GVariant v;
-		GString Key, kAccTok;
+		GString Key, kAccTok, kRefreshTok;
 		Key.Printf("%s.%s", Params.Scope.Get(), Id.Get());
 		auto KeyB64 = Base64(Key);
 		kAccTok.Printf("OAuth2-%s-%s", OPT_AccessToken, KeyB64.Get());
 		kAccTok = kAccTok.RStrip("=");
+		kRefreshTok.Printf("OAuth2-%s-%s", OPT_RefreshToken, KeyB64.Get());
+		kRefreshTok= kRefreshTok.RStrip("=");
 
 		if (Write)
 		{
 			Store->SetValue(kAccTok, v = AccessToken.Get());
+			Store->SetValue(kRefreshTok, v = RefreshToken.Get());
 		}
 		else
 		{
-			if (Store->GetValue(kAccTok, v))
-				AccessToken = v.Str();
-			else
-				return false;
+			if (Store->GetValue(kAccTok, v)) AccessToken = v.Str();
+			else return false;
+			if (Store->GetValue(kRefreshTok, v)) RefreshToken = v.Str();
+			else return false;
 		}
 
 		return true;
@@ -408,6 +411,13 @@ LOAuth2::~LOAuth2()
 {
 	d->Serialize(true);
 	delete d;
+}
+
+bool LOAuth2::Refresh()
+{
+	d->AccessToken.Empty();
+	d->Serialize(true);
+	return true;
 }
 
 GString LOAuth2::GetAccessToken()
