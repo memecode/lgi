@@ -1746,7 +1746,6 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 						int RefreshCount = 0;
 						LOAuth2 Auth(OAuth2, User, SettingStore, &TLog);
 
-						RetryAccessToken:
 						auto AccessToken = Auth.GetAccessToken();
 						if (!AccessToken)
 						{
@@ -1799,10 +1798,11 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 											// Refresh the token...?
 											if (Auth.Refresh())
 											{
-												RefreshCount++;
 												CommandFinished();
-												if (RefreshCount < 2)
-													goto RetryAccessToken;
+												
+												// We need to restart the connection to use the refreshed token
+												// Seems we can't just re-try the authentication command.
+												return false;
 											}
 										}
 									}
@@ -1838,14 +1838,6 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 							}
 							CommandFinished();
 						}
-
-						if (!LoggedIn && SettingStore)
-						{
-							GVariant v;
-							SettingStore->SetValue(OPT_ImapOAuth2AccessToken, v);
-							break;
-						}
-
 					}
 					else
 					{

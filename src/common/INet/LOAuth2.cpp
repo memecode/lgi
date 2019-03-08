@@ -331,12 +331,15 @@ struct LOAuth2Priv : public LCancel
 						LOCALHOST_PORT,
 						FormEncode(CodeVerifier).Get());
 
-			Http.Printf("POST /oauth2/v4/token HTTP/1.1\r\n"
-						"Host: www.googleapis.com\r\n"
+			GUri Api(Params.ApiUri);
+			Http.Printf("POST %s HTTP/1.1\r\n"
+						"Host: %s\r\n"
 						"Content-Type: application/x-www-form-urlencoded\r\n"
 						"Content-length: " LPrintfSizeT "\r\n"
 						"\r\n"
 						"%s",
+						Api.Path,
+						Api.Host,
 						Body.Length(),
 						Body.Get());
 			if (!Write(&sock, Http))
@@ -358,6 +361,61 @@ struct LOAuth2Priv : public LCancel
 			RefreshToken = j.Get("refresh_token");
 			ExpiresIn = j.Get("expires_in").Int();
 		}
+
+		return AccessToken.Get() != NULL;
+	}
+
+	bool Refresh()
+	{
+		if (!RefreshToken)
+			return false;
+
+		GStringPipe p(1024);
+		GUri u(Params.Scope);
+		SslSocket sock(NULL, NULL, true);
+		if (!sock.Open(u.Host, HTTPS_PORT))
+		{
+			Log->Print("Error: Can't connect to '%s:%i'\n", u.Host, HTTPS_PORT);
+			return NULL;
+		}
+		
+		GString Body, Http;
+		Body.Printf("refresh_token=%s&"
+					"client_id=%s&"
+					"client_secret=%s&"
+					"grant_type=refresh_token",
+					FormEncode(RefreshToken).Get(),
+					Params.ClientID.Get(),
+					Params.ClientSecret.Get());
+
+		GUri Api(Params.ApiUri);
+		Http.Printf("POST %s HTTP/1.1\r\n"
+					"Host: %s\r\n"
+					"Content-Type: application/x-www-form-urlencoded\r\n"
+					"Content-length: " LPrintfSizeT "\r\n"
+					"\r\n"
+					"%s",
+					Api.Path,
+					Api.Host,
+					Body.Length(),
+					Body.Get());
+		if (!Write(&sock, Http))
+		{
+			Log->Print("%s:%i - Error writing to socket.\n", _FL);
+			return false;
+		}
+
+		GString Hdrs;
+		if (!GetHttp(&sock, Hdrs, Body, true))
+		{
+			return false;
+		}
+
+		Log->Print("Body=%s\n", Body.Get());
+		LJson j(Body);
+
+		AccessToken = j.Get("access_token");
+		ExpiresIn = j.Get("expires_in").Int();
 
 		return AccessToken.Get() != NULL;
 	}
@@ -417,7 +475,7 @@ bool LOAuth2::Refresh()
 {
 	d->AccessToken.Empty();
 	d->Serialize(true);
-	return true;
+	return d->Refresh();
 }
 
 GString LOAuth2::GetAccessToken()
