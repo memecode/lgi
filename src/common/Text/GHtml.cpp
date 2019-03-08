@@ -5648,7 +5648,10 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			{
 				int MaxHtPx = Flow->ResolveY(MaxHt, this, false);
 				if (MaxHtPx < Flow->y2)
+				{
 					Flow->y2 = MaxHtPx;
+					Flow->MAX.y = MIN(Flow->y2, Flow->MAX.y);
+				}
 			}
 		}
 
