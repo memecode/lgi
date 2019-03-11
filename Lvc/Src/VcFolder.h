@@ -167,6 +167,7 @@ class VcFolder : public GTreeItem, public GCss
 	void OnChange(PropType Prop) { Update(); }
 	VcFile *FindFile(const char *Path);
 	void LinkParents();
+	GString CurrentRev();
 
 	bool ParseDiffs(GString s, GString Rev, bool IsWorking);
 	
@@ -221,7 +222,7 @@ public:
 	void GetVersion();
 	void Diff(VcFile *file);
 	void MergeToLocal(GString Rev);
-	void RenameBranch(GString NewName, GArray<VcCommit*> &Revs);
+	bool RenameBranch(GString NewName, GArray<VcCommit*> &Revs);
 
 	void OnPulse();
 	void OnUpdate(const char *Rev);
