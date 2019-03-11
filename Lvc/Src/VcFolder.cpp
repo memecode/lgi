@@ -2405,6 +2405,19 @@ bool VcFolder::RenameBranch(GString NewName, GArray<VcCommit*> &Revs)
 				break;
 			}
 
+			GArray<VcCommit*> Top;
+			for (auto c:Revs)
+			{
+				for (auto p:*c->GetParents())
+					if (Refs.Find(p) == 0)
+						Top.Add(c);
+			}
+			if (Top.Length() != 1)
+			{
+				d->Log->Print("Error: Can't find top most commit. (%s:%i)\n", _FL);
+				return false;
+			}
+
 			// Create the new branch...
 			auto First = Ancestors.First();
 			GString Cmd;
@@ -2415,6 +2428,7 @@ bool VcFolder::RenameBranch(GString NewName, GArray<VcCommit*> &Revs)
 				d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
 				return false;
 			}
+
 			Cmd.Printf("branch \"%s\"", NewName.Get());
 			r = RunCmd(Cmd, LogNormal);
 			if (r.Code)
@@ -2423,164 +2437,24 @@ bool VcFolder::RenameBranch(GString NewName, GArray<VcCommit*> &Revs)
 				return false;
 			}
 
-			// Graft over the change sets
-			auto In = Revs;
-			LHashTbl<StrKey<char>,VcCommit*> Parents;
-			LHashTbl<StrKey<char>,GString> RevMap;
-			
-			Parents.Add(First->GetRev(), First);			
-			GString BranchRev = CurrentRev();
-			if (!BranchRev)
+			// Commit it to get a revision point to rebase to
+			Cmd.Printf("commit -m \"Branch: %s\"", NewName.Get());
+			r = RunCmd(Cmd, LogNormal);
+			if (r.Code)
 			{
-				d->Log->Print("Error: No current rev. (%s:%i)\n", _FL);
+				d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
 				return false;
 			}
-			RevMap.Add(First->GetRev(), BranchRev);
-			
-			// For each input revision
-			while (In.Length())
+
+			auto BranchNode = CurrentRev();
+
+			// Rebase the old tree to this point
+			Cmd.Printf("rebase -s %s -d %s", Top.First()->GetRev(), BranchNode.Get());
+			r = RunCmd(Cmd, LogNormal);
+			if (r.Code)
 			{
-				VcCommit *child = NULL;
-
-				// Find an input commit that has all it's parents
-				for (auto i:In)
-				{
-					int Found = 0;
-					for (auto p:*i->GetParents())
-					{
-						if (Parents.Find(p))
-							Found++;
-					}
-					if (Found == i->GetParents()->Length())
-					{
-						child = i;
-						break;
-					}
-				}
-
-				if (child)
-				{
-					Parents.Add(child->GetRev(), child);
-					In.Delete(child);
-
-					if (child->GetParents()->Length() > 1)
-					{
-						LgiAssert(child->GetParents()->Length() == 2);
-
-						// Do merge of new revisions to match the old merge
-						GString::Array a;
-						for (auto p:*child->GetParents())
-						{
-							auto Rev = RevMap.Find(p);
-							if (Rev)
-							{
-								a.Add(Rev);
-							}
-							else
-							{
-								d->Log->Print("Error: No rev for parent '%s'. (%s:%i)\n", p.Get(), _FL);
-								return false;
-							}
-						}
-
-						// Update to the first parent..
-						Cmd.Printf("update %s", a[0].Get());
-						r = RunCmd(Cmd, LogNormal);
-						if (r.Code)
-						{
-							d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
-							return false;
-						}
-
-						// Merge with the second...
-						Cmd.Printf("merge %s", a[1].Get());
-						r = RunCmd(Cmd, LogNormal);
-						if (r.Code)
-						{
-							d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
-							return false;
-						}
-
-						// Commit the result...
-						Cmd.Printf("commit -m 'Merge'");
-						r = RunCmd(Cmd, LogNormal);
-						if (r.Code)
-						{
-							d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
-							return false;
-						}
-
-						// Add the new rev's location to the map
-						auto Rev = CurrentRev();
-						if (!Rev)
-						{
-							d->Log->Print("Error: No current rev. (%s:%i)\n", _FL);
-							return false;
-						}
-						else
-						{
-							RevMap.Add(child->GetRev(), Rev);
-							d->Log->Print("RevMap %s -> %s\n", child->GetRev(), Rev.Get());
-						}
-					}
-					else
-					{
-						// Update to the parent's new rev
-						auto parent = child->GetParents()->First();
-						GString ParentNew = RevMap.Find(parent);
-						if (!ParentNew)
-						{
-							d->Log->Print("Error: No rev for parent '%s'. (%s:%i)\n", parent.Get(), _FL);
-							return false;
-						}
-						Cmd.Printf("update %s", ParentNew.Get());
-						r = RunCmd(Cmd, LogNormal);
-						if (r.Code)
-						{
-							d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
-							return false;
-						}
-
-						// Graft over the change
-						Cmd.Printf("graft %s", child->GetRev());
-						r = RunCmd(Cmd, LogNormal);
-						if (r.Code)
-						{
-							d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
-							return false;
-						}
-
-						// Add the new rev's location to the map
-						auto Rev = CurrentRev();
-						if (!Rev)
-						{
-							d->Log->Print("Error: No current rev. (%s:%i)\n", _FL);
-							return false;
-						}
-						else
-						{
-							RevMap.Add(child->GetRev(), Rev);
-							d->Log->Print("RevMap %s -> %s\n", child->GetRev(), Rev.Get());
-						}
-					}
-				}
-				else
-				{
-					d->Log->Print("Error: No parent rev. (%s:%i)\n", _FL);
-					return false;
-				}
-			}
-
-			// Strip out the old branch
-			for (auto Rev: Revs)
-			{
-				Cmd.Printf("strip %s", Rev->GetRev());
-				r = RunCmd(Cmd, LogNormal);
-				if (r.Code)
-				{
-					d->Log->Print("Error: Strip failed. (%s:%i)\n", _FL);
-					return false;
-				}
+				d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
+				return false;
 			}
 
 			CommitListDirty = true;
