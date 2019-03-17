@@ -1292,6 +1292,8 @@ bool VcFolder::ParseDiffs(GString s, GString Rev, bool IsWorking)
 			GString::Array a = s.Split("\n");
 			GString Diff;
 			VcFile *f = NULL;
+			List<LListItem> Files;
+
 			for (unsigned i=0; i<a.Length(); i++)
 			{
 				const char *Ln = a[i];
@@ -1302,9 +1304,13 @@ bool VcFolder::ParseDiffs(GString s, GString Rev, bool IsWorking)
 					Diff.Empty();
 
 					GString Fn = a[i].Split(" ").Last();
-					f = new VcFile(d, this, Rev, IsWorking);
+
+					f = FindFile(Fn);
+					if (!f)
+						f = new VcFile(d, this, Rev, IsWorking);
+
 					f->SetText(Fn.Replace("\\","/"), COL_FILENAME);
-					d->Files->Insert(f);
+					Files.Insert(f);
 				}
 				else if (!_strnicmp(Ln, "index", 5) ||
 						 !_strnicmp(Ln, "commit", 6)   ||
@@ -1326,6 +1332,7 @@ bool VcFolder::ParseDiffs(GString s, GString Rev, bool IsWorking)
 				f->SetDiff(Diff);
 				Diff.Empty();
 			}
+			d->Files->Insert(Files);
 			break;
 		}
 		case VcSvn:
@@ -2149,6 +2156,10 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 					d->Tabs->Value(1);
 					GetTree()->SendNotify(LvcCommandStart);
 				}
+				break;
+			}
+			case VcHg:
+			{
 				break;
 			}
 			default:

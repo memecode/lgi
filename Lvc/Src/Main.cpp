@@ -428,14 +428,14 @@ int LstCmp(LListItem *a, LListItem *b, int Col)
 		case LGraph:
 		case LIndex:
 		case LParents:
+		case LRevision:
 		default:
 			return (int) (B->GetIndex() - A->GetIndex());
 
-		case LRevision:
 		case LBranch:
 		case LAuthor:
 		case LMessage:
-			return Stricmp(B->GetFieldText(fld), A->GetFieldText(fld));
+			return Stricmp(A->GetFieldText(fld), B->GetFieldText(fld));
 
 		case LTimeStamp:
 			return B->GetTs().Compare(&A->GetTs());

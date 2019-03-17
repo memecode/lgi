@@ -358,6 +358,7 @@ bool VcCommit::SvnParse(GString s)
 			if (a.Length() > 3)
 			{
 				Rev = a[0].Strip(" \tr");
+				Index = Rev.Int();
 				Author = a[1].Strip();
 				Ts.Parse(a[2]);
 			}
