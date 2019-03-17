@@ -32,7 +32,7 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		500
+// #define DEBUG_LAYOUT		539
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
 
@@ -1897,8 +1897,9 @@ void GTableLayoutPrivate::Layout(GRect &Client)
 	#if DEBUG_LAYOUT
 	if (DebugLayout)
 	{
-		GAutoString DbgStr(Dbg.NewStr());
-		LgiTrace("%s", DbgStr.Get());
+		auto Lines = Dbg.NewGStr().Split("\n");
+		for (auto l: Lines)
+			LgiTrace("%s\n", l.Get());
 	}
 	#endif
 	
