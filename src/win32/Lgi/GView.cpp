@@ -123,11 +123,12 @@ int GetInputACP()
 	return _wtoi(Str);
 }
 
-GKey::GKey(int v, int flags)
+GKey::GKey(int v, uint32_t flags)
 {
 	const char *Cp = 0;
 
 	vkey = v;
+	Data = flags;
 	c16 = 0;
 
 	#if OLD_WM_CHAR_MODE
@@ -1880,7 +1881,6 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 					GKey Key((int)Msg->a, (int)Msg->b);
 
 					Key.Flags = KeyFlags;
-					Key.Data = (uint32_t)Msg->b;
 					Key.Down(IsDown);
 					Key.IsChar = false;
 
@@ -1938,7 +1938,6 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			{
 				GKey Key((int)Msg->a, (int)Msg->b);
 				Key.Flags = _lgi_get_key_flags();
-				Key.Data = (uint32_t)Msg->b;
 				Key.Down(true);
 				Key.IsChar = true;
 

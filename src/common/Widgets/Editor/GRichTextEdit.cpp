@@ -1634,6 +1634,9 @@ bool GRichTextEdit::OnKey(GKey &k)
 		d->Cursor)
 		d->Cursor->Blink = true;
 
+	if (k.c16 == 17)
+		return false;
+
 	// k.Trace("GRichTextEdit::OnKey");
 	if (k.IsContextMenu())
 	{

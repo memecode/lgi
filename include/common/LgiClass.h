@@ -147,6 +147,19 @@ public:
 	#endif
 };
 
+#ifdef WINDOWS
+struct GKeyWinBits
+{
+	unsigned Repeat : 16;
+	unsigned Scan : 8;
+	unsigned Extended : 1;
+	unsigned Reserved : 4;
+	unsigned Context : 1;
+	unsigned Previous : 1;
+	unsigned Pressed : 1;
+};
+#endif
+
 /// All the information related to a keyboard event
 class LgiClass GKey : public GUiEvent
 {
@@ -156,7 +169,14 @@ public:
 	/// The unicode character for the key
 	char16 c16;
 	/// OS Specific
-	uint32_t Data;
+	#ifdef WINDOWS
+	union {
+	#endif
+		uint32_t Data;
+	#ifdef WINDOWS
+		GKeyWinBits WinBits;
+	};
+	#endif
 	/// True if this is a standard character (ie not a control key)
 	bool IsChar;
 
@@ -168,7 +188,7 @@ public:
 		IsChar = 0;
 	}
 
-	GKey(int vkey, int flags);
+	GKey(int vkey, uint32_t flags);
 
 	void Trace(const char *Msg)
 	{

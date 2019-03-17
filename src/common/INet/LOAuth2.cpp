@@ -1,5 +1,4 @@
 #include "Lgi.h"
-#include "resdefs.h"
 #include "GTextLog.h"
 #include "OpenSSLSocket.h"
 #include "Base64.h"
