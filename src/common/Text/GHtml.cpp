@@ -494,6 +494,11 @@ public:
 		x2 = x1 + newx - 1;
 	}
 
+	int Width()
+	{
+		return x2 - x1 + 1;
+	}
+
 	GFlowRegion &operator +=(GRect r)
 	{
 		x1 += r.x1;
@@ -5623,6 +5628,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 	}
 
 	GCss::LengthType XAlign = GetAlign(true);
+	int FlowSz = Flow->Width();
 	if (Disp == DispBlock || Disp == DispInlineBlock)
 	{		
 		GCss::Len Ht = Height();
@@ -5795,7 +5801,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 	{
 		if (XAlign == GCss::AlignCenter)
 		{
-			int OffX = (Flow->x2 - Flow->x1 - Size.x) >> 1;
+			int OffX = (FlowSz - Size.x) >> 1;
 			if (OffX > 0)
 			{
 				Pos.x += OffX;
@@ -5803,7 +5809,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		}
 		else if (XAlign == GCss::AlignRight)
 		{
-			int OffX = Flow->x2 - Flow->x1 - Size.x;
+			int OffX = FlowSz - Size.x;
 			if (OffX > 0)
 			{
 				Pos.x += OffX;
