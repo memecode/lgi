@@ -87,8 +87,6 @@ void VcCommit::SetCurrent(bool b)
 
 void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 {
-	LListItem::OnPaintColumn(Ctx, i, c);
-
 	if (i == 0)
 	{
 		double Px = 12;
@@ -97,6 +95,18 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 		#define MAP(col) ((col) * Px + Half)
 
 		GMemDC Mem(Ctx.X(), Ctx.Y(), System32BitColourSpace);
+
+		#ifdef LINUX
+		{
+			GItem::ItemPaintCtx TmpCtx = Ctx;
+			TmpCtx.Offset(-TmpCtx.x1, -TmpCtx.y1);
+			TmpCtx.pDC = &Mem;
+			LListItem::OnPaintColumn(TmpCtx, i, c);
+		}
+		#else
+		LListItem::OnPaintColumn(Ctx, i, c);
+		#endif
+
 		double r = Half - 1;
 
 		double x = MAP(NodeIdx);
@@ -173,6 +183,10 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 		// Mem.ConvertPreMulAlpha(false);
 		Ctx.pDC->Op(GDC_ALPHA);
 		Ctx.pDC->Blt(Ctx.x1, Ctx.y1, &Mem);
+	}
+	else
+	{
+		LListItem::OnPaintColumn(Ctx, i, c);
 	}
 }
 

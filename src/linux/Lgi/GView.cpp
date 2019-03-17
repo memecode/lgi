@@ -105,7 +105,7 @@ bool LgiIsKeyDown(int Key)
 	return false;
 }
 
-GKey::GKey(int vkey, int flags)
+GKey::GKey(int vkey, uint32_t flags)
 {
 }
 
