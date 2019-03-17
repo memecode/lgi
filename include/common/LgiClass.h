@@ -67,7 +67,7 @@ LgiFunc bool LgiTraceGetFilePath(char *LogPath, int BufLen);
 /// then to a log file (see LgiTraceSetStream for details)
 ///
 /// Default path is ./<app_name>.txt relative to the executable.
-/// Fallback path is LgiGetSystemPath(LSP_APP_ROOT).
+/// Fall back path is LgiGetSystemPath(LSP_APP_ROOT).
 LgiFunc void LgiTrace(const char *Format, ...);
 
 #ifndef LGI_STATIC
@@ -220,7 +220,7 @@ public:
 ///
 /// The parent class GUiEvent keeps information about whether it was a Down()
 /// or Double() click. You can also query whether the Alt(), Ctrl() or Shift()
-/// keys were pressed at the time the event occured.
+/// keys were pressed at the time the event occurred.
 ///
 /// To get the position of the mouse in screen co-ordinates you can either use
 /// GView::GetMouse() and pass true in the 'ScreenCoords' parameter. Or you can
@@ -233,11 +233,11 @@ public:
 	class GViewI *Target;
 	/// True if specified in view coordinates, false if in screen coords
 	bool ViewCoords;
-	/// The x co-ordinate of the mouse relitive to the current view
+	/// The x co-ordinate of the mouse relative to the current view
 	int x;
-	/// The y co-ordinate of the mouse relitive to the current view
+	/// The y co-ordinate of the mouse relative to the current view
 	int y;
-
+	
 	GMouse()
 	{
 		Target = 0;

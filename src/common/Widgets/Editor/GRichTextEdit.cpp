@@ -1637,6 +1637,28 @@ bool GRichTextEdit::OnKey(GKey &k)
 	if (k.c16 == 17)
 		return false;
 
+	#ifdef WINDOWS
+	// Wtf is this?
+	// Weeeelll, windows likes to send a VK_TAB after a Ctrl+I doesn't it?
+	// And this just takes care of that TAB before it can overwrite your
+	// selection.
+	if (ToLower(k.c16) == 'i' &&
+		k.Ctrl())
+	{
+		d->EatVkeys.Add(0x9);
+	}
+	else if (d->EatVkeys.Length())
+	{
+		auto Idx = d->EatVkeys.IndexOf(k.vkey);
+		if (Idx >= 0)
+		{
+			// Yum yum
+			d->EatVkeys.DeleteAt(Idx);
+			return true;
+		}
+	}
+	#endif
+
 	// k.Trace("GRichTextEdit::OnKey");
 	if (k.IsContextMenu())
 	{

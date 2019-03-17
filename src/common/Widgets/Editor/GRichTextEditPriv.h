@@ -375,8 +375,8 @@ public:
 	int ScrollOffsetPx;
 	bool ScrollChange;
 
-	// Capabilities
-	// GArray<CtrlCap> NeedsCap;
+	// Eat keys (OS bug work arounds)
+	GArray<uint32_t> EatVkeys;
 
 	// Debug stuff
 	GArray<GRect> DebugRects;
