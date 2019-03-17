@@ -2194,6 +2194,19 @@ bool GRichTextEdit::OnKey(GKey &k)
 							return true;
 							break;
 						}
+						case 'l':
+						case 'L':
+						{
+							if (k.Down())
+							{
+								// Underline selection
+								GMouse m;
+								GetMouse(m);
+								d->ClickBtn(m, UnderlineBtn);
+							}
+							return true;
+							break;
+						}
 						case 'i':
 						case 'I':
 						{
