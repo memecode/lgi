@@ -411,6 +411,39 @@ public:
 	}
 };
 
+int LstCmp(LListItem *a, LListItem *b, int Col)
+{
+	VcCommit *A = dynamic_cast<VcCommit*>(a);
+	VcCommit *B = dynamic_cast<VcCommit*>(b);
+
+	if (A == NULL || B == NULL)
+	{
+		return (A ? 1 : -1) - (B ? 1 : -1);
+	}
+
+	auto f = A->GetFolder();
+	auto fld = f->GetFields()[Col];
+	switch (fld)
+	{
+		case LGraph:
+		case LIndex:
+		case LParents:
+		default:
+			return (int) (B->GetIndex() - A->GetIndex());
+
+		case LRevision:
+		case LBranch:
+		case LAuthor:
+		case LMessage:
+			return Stricmp(B->GetFieldText(fld), A->GetFieldText(fld));
+
+		case LTimeStamp:
+			return B->GetTs().Compare(&A->GetTs());
+	}
+
+	return 0;
+}
+
 class App : public GWindow, public AppPriv
 {
 	GAutoPtr<GImageList> ImgLst;
@@ -766,6 +799,21 @@ public:
 					CommitList *cl;
 					if (GetViewById(IDC_LIST, cl))
 						cl->SelectRevisions(Revs);
+				}
+				break;
+			}
+			case IDC_LIST:
+			{
+				switch (flag)
+				{
+					case GNotifyItem_ColumnClicked:
+					{
+						int Col = -1;
+						GMouse Ms;
+						Lst->GetColumnClickInfo(Col, Ms);
+						Lst->Sort(LstCmp, Col);
+						break;
+					}
 				}
 				break;
 			}

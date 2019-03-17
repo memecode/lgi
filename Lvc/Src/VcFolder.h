@@ -202,6 +202,7 @@ public:
 	AppPriv *GetPriv() { return d; }
 	const char *GetPath() { return Path; }
 	char *GetText(int Col);
+	GArray<CommitField> &GetFields() { return Fields; }
 	bool Serialize(GXmlTag *t, bool Write);
 	GXmlTag *Save();
 	void Select(bool b);
