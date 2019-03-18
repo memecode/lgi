@@ -739,7 +739,7 @@ const char *MailIMap::GetWebLoginUri()
 
 bool MailIMap::IsOnline()
 {
-	return Socket ? Socket->IsOpen() : 0;
+	return Socket ? Socket->IsOpen() : false;
 }
 
 char MailIMap::GetFolderSep()
@@ -826,7 +826,7 @@ bool MailIMap::WriteBuf(bool ObsurePass, const char *Buffer, bool Continuation)
 
 			return true;
 		}
-		else Log("Failed to write data to socket.", GSocketI::SocketMsgError);
+		// else Log("Failed to write data to socket.", GSocketI::SocketMsgError);
 	}
 	else Log("Not connected.", GSocketI::SocketMsgError);
 
@@ -1921,12 +1921,15 @@ bool MailIMap::Close()
 		int Cmd = d->NextCmd++;
 		sprintf_s(Buf, sizeof(Buf), "A%4.4i LOGOUT\r\n", Cmd);
 		if (WriteBuf())
-		{
 			Status = true;
-		}
+		
 		CommandFinished();
+		
+		Socket->Close();
+		
 		Unlock();
 	}
+
 	return Status;
 }
 
