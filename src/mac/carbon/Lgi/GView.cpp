@@ -143,7 +143,7 @@ GView *GWindowFromHandle(OsView h)
 	return 0;
 }
 
-GKey::GKey(int Vkey, int flags)
+GKey::GKey(int Vkey, uint32_t flags)
 {
 	c16 = vkey = Vkey;
 	Flags = flags;
