@@ -433,9 +433,9 @@ bool IFtp::IsOpen()
 	return Socket ? Socket->IsOpen() : false;
 }
 
-void IFtp::GetHost(GAutoString *Host, int *Port)
+void IFtp::GetHost(GString *Host, int *Port)
 {
-	Host->Reset(NewStr(d->Host));
+	*Host = d->Host.Get();
 	*Port = d->Port;
 }
 
