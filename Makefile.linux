@@ -952,7 +952,8 @@ GBox.o : ./src/common/Widgets/GBox.cpp ./include/common/Lgi.h \
 	./include/common/GBox.h \
 	./include/common/GCssTools.h \
 	./include/common/LgiRes.h \
-	./include/common/GPopup.h
+	./include/common/GPopup.h \
+	./include/common/GNotifications.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -1101,7 +1102,8 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 ./include/common/Mail.h : ./include/common/INet.h \
 	./include/common/Base64.h \
 	./include/common/Progress.h \
-	./include/common/GVariant.h
+	./include/common/GVariant.h \
+	./include/common/LOAuth2.h
 
 ./include/common/GVariant.h : ./include/common/GDom.h \
 	./include/common/LDateTime.h \
@@ -1125,12 +1127,7 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 
 ./include/common/GMessage.h : 
 
-./include/common/LgiInc.h : 
-
 ./include/common/GArray.h : ./include/common/GRange.h
-
-./include/common/GString.h : ./include/common/LgiDefs.h \
-	./include/linux/Gtk/LgiOsDefs.h
 
 ./include/common/LMutex.h : 
 
@@ -1228,6 +1225,8 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 ./include/common/GTextLabel.h : 
 
 ./include/linux/Gtk/LgiWidget.h : 
+
+./include/common/LOAuth2.h : 
 
 ./include/common/GPopup.h : 
 
@@ -1365,6 +1364,11 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 
 ./include/common/GTableLayout.h : ./include/common/GCss.h \
 	./include/common/GNotifications.h
+
+./include/common/LgiInc.h : 
+
+./include/common/GString.h : ./include/common/LgiDefs.h \
+	./include/linux/Gtk/LgiOsDefs.h
 
 ./include/common/GUnicode.h : ./include/common/LgiInc.h
 

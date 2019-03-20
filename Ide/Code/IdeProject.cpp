@@ -345,6 +345,7 @@ public:
 			1 << Platform
 		);
 		
+		GAutoString Base = Proj->GetBasePath();
 		if (IsExecutableTarget)
 		{
 			GString Exe = Proj->GetExecutable(Platform);
@@ -354,7 +355,6 @@ public:
 					m.Print("Target = %s\n", Exe.Get());
 				else
 				{
-					GAutoString Base = Proj->GetBasePath();
 					GAutoString RelExe = LgiMakeRelativePath(Base, Exe);
 					if (Base && RelExe)
 					{
@@ -468,7 +468,13 @@ public:
 					if (in(0) == '-')
 						s.Printf(" \\\n\t\t%s", in.Get());
 					else
-						s.Printf(" \\\n\t\t-L%s", ToUnixPath(in.Get()));
+					{
+						GAutoString Rel;
+						if (!LgiIsRelativePath(in))
+							Rel = LgiMakeRelativePath(Base, in);
+						s.Printf(" \\\n\t\t-L%s", ToUnixPath(Rel ? Rel.Get() : in.Get()));
+					}
+					
 					sLibs[Cfg] += s;
 				}
 			}
@@ -506,10 +512,16 @@ public:
 					s.Printf(" \\\n\t\t-l%s$(Tag)", ToUnixPath(t));
 					sLibs[Cfg] += s;
 
-					GAutoString Base = dep->GetBasePath();
-					if (Base)
+					GAutoString DepBase = dep->GetBasePath();
+					if (DepBase)
 					{
-						s.Printf(" \\\n\t\t-L%s/$(BuildDir)", ToUnixPath(Base));
+						GString DepPath;
+						DepPath.Printf("%s/$(BuildDir)", ToUnixPath(DepBase));
+						
+						GAutoString Rel;
+						Rel = LgiMakeRelativePath(Base, DepPath);
+
+						s.Printf(" \\\n\t\t-L%s", ToUnixPath(Rel?Rel:DepPath));
 						sLibs[Cfg] += s;
 					}
 				}

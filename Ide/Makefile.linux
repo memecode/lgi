@@ -27,7 +27,7 @@ ifeq ($(Build),Debug)
 		`pkg-config --libs gtk+-2.0` \
 		-static-libgcc \
 		-llgi$(Tag) \
-		-L/home/matthew/Code/Lgi/trunk/$(BuildDir)
+		-L../$(BuildDir)
 	Inc =  \
 		-I../include/common \
 		-I../include/linux \
@@ -45,7 +45,7 @@ else
 		`pkg-config --libs gtk+-2.0` \
 		-static-libgcc \
 		-llgi$(Tag) \
-		-L/home/matthew/Code/Lgi/trunk/$(BuildDir)
+		-L../$(BuildDir)
 	Inc =  \
 		-I../include/common \
 		-I../include/linux \
@@ -207,9 +207,9 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../include/common/LgiWidgets.h \
 	../include/common/LHashTable.h \
 	../include/common/LList.h \
-	../include/common/LListItemCheckBox.h \
 	../include/common/LListItemRadioBtn.h \
 	../include/common/LMutex.h \
+	../include/common/LOAuth2.h \
 	../include/common/LStringLayout.h \
 	../include/common/LThread.h \
 	../include/common/LThreadEvent.h \
@@ -316,9 +316,6 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../src/common/Widgets/GTableLayout.cpp \
 	../src/common/Widgets/GTabView.cpp \
 	../src/common/Widgets/GTextLabel.cpp \
-	../src/common/Widgets/GToolBar.cpp \
-	../src/common/Widgets/GTree.cpp \
-	../src/common/Widgets/LList.cpp \
 	../src/linux/General/GFile.cpp \
 	../src/linux/General/GMem.cpp \
 	../src/linux/General/ShowFileProp_Linux.cpp \
@@ -901,7 +898,8 @@ Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/common/Lgi.h \
 	../include/common/GBox.h \
 	../include/common/GCssTools.h \
 	../include/common/LgiRes.h \
-	../include/common/GPopup.h
+	../include/common/GPopup.h \
+	../include/common/GNotifications.h
 
 ../src/linux/Gtk/Gdc2.cpp : ../include/common/Lgi.h \
 	../include/common/GPalette.h
@@ -973,14 +971,7 @@ Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/common/Lgi.h \
 	../include/common/GNotifications.h \
 	../include/common/GCss.h
 
-../src/common/Widgets/GToolBar.cpp : ../include/common/Lgi.h \
-	../include/common/GToken.h \
-	../include/common/GVariant.h \
-	../include/common/GDisplayString.h \
-	../include/common/GPalette.h \
-	../include/common/GNotifications.h \
-	../include/common/LgiRes.h \
-	../include/common/GCssTools.h
+../include/common/LOAuth2.h : 
 
 ../include/common/GFontCache.h : 
 
@@ -1337,22 +1328,8 @@ Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/common/Lgi.h \
 
 ../include/common/GSkinEngine.h : ../include/common/LList.h
 
-../src/common/Widgets/GTree.cpp : ../include/common/Lgi.h \
-	../include/common/GTree.h \
-	../include/common/GScrollBar.h \
-	../include/common/GDisplayString.h \
-	../include/common/GPalette.h \
-	../include/common/LgiRes.h
-
 ../src/common/Lgi/GLibrary.cpp : ../include/common/Lgi.h \
 	../include/common/GToken.h
-
-../src/common/Widgets/LList.cpp : ../include/common/Lgi.h \
-	../include/common/GSkinEngine.h \
-	../include/common/LList.h \
-	../include/common/GScrollBar.h \
-	../include/common/GDisplayString.h \
-	../include/common/LgiRes.h
 
 ../include/common/GToken.h : ../include/common/GArray.h \
 	../include/common/GString.h
@@ -1575,7 +1552,8 @@ Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/common/Lgi.h \
 ../include/common/Mail.h : ../include/common/INet.h \
 	../include/common/Base64.h \
 	../include/common/Progress.h \
-	../include/common/GVariant.h
+	../include/common/GVariant.h \
+	../include/common/LOAuth2.h
 
 ../include/common/Base64.h : ../include/common/LgiDefs.h
 
@@ -1735,10 +1713,13 @@ Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/common/Lgi.h \
 
 ../include/common/GMenuImpl.h : ../include/common/GPopup.h
 
+../include/common/LOAuth2.h : 
+
 ../include/common/Mail.h : ../include/common/INet.h \
 	../include/common/Base64.h \
 	../include/common/Progress.h \
-	../include/common/GVariant.h
+	../include/common/GVariant.h \
+	../include/common/LOAuth2.h
 
 ../include/common/LMutex.h : 
 
