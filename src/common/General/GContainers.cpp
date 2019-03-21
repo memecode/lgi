@@ -133,11 +133,9 @@ GMemQueue &GMemQueue::operator=(GMemQueue &p)
 
 void GMemQueue::Empty()
 {
-	for (Block *b = Mem.First(); b; b = Mem.First())
-	{
-		Mem.Delete(b);
+	for (auto b: Mem)
 		free(b);
-	}
+	Mem.Empty();
 }
 
 int64 GMemQueue::GetSize()
