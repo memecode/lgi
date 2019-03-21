@@ -521,7 +521,7 @@ public:
 						GAutoString Rel;
 						Rel = LgiMakeRelativePath(Base, DepPath);
 
-						s.Printf(" \\\n\t\t-L%s", ToUnixPath(Rel?Rel:DepPath));
+						s.Printf(" \\\n\t\t-L%s", ToUnixPath(Rel?Rel.Get():DepPath.Get()));
 						sLibs[Cfg] += s;
 					}
 				}
@@ -2857,8 +2857,11 @@ bool IdeProject::SetClean()
 		SaveFile();
 	}
 
-	ForAllProjectNodes(p)
+	for (auto i:*this)
 	{
+		ProjectNode *p = dynamic_cast<ProjectNode*>(i);
+		if (!p) break;
+
 		p->SetClean();
 	}
 
@@ -3024,8 +3027,11 @@ char *IdeProject::FindFullPath(const char *File, ProjectNode **Node)
 {
 	char *Full = 0;
 	
-	ForAllProjectNodes(c)
+	for (auto i:*this)
 	{
+		ProjectNode *c = dynamic_cast<ProjectNode*>(i);
+		if (!c) break;
+
 		ProjectNode *n = c->FindFile(File, &Full);
 		if (n)
 		{
@@ -3040,8 +3046,11 @@ char *IdeProject::FindFullPath(const char *File, ProjectNode **Node)
 
 bool IdeProject::HasNode(ProjectNode *Node)
 {
-	ForAllProjectNodes(c)
+	for (auto i:*this)
 	{
+		ProjectNode *c = dynamic_cast<ProjectNode*>(i);
+		if (!c) break;
+
 		if (c->HasNode(Node))
 			return true;
 	}
@@ -3050,8 +3059,11 @@ bool IdeProject::HasNode(ProjectNode *Node)
 
 bool IdeProject::GetAllNodes(GArray<ProjectNode*> &Nodes)
 {
-	ForAllProjectNodes(c)
+	for (auto i:*this)
 	{
+		ProjectNode *c = dynamic_cast<ProjectNode*>(i);
+		if (!c) break;
+
 		c->AddNodes(Nodes);
 	}
 	return true;
@@ -3376,7 +3388,7 @@ bool IdeProject::BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool In
 
 void IdeProjectPrivate::CollectAllFiles(GTreeNode *Base, GArray<ProjectNode*> &Files, bool SubProjects, int Platform)
 {
-	for (GTreeItem *i = Base->GetChild(); i; i = i->GetNext())
+	for (auto i:*Base)
 	{
 		IdeProject *Proj = dynamic_cast<IdeProject*>(i);
 		if (Proj)

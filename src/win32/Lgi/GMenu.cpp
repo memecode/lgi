@@ -258,7 +258,7 @@ GMenuItem *GSubMenu::ItemAt(int Id)
 
 GSubMenu *GSubMenu::FindSubMenu(int Id)
 {
-	for (GMenuItem *i = Items.First(); i; i = Items.Next())
+	for (auto i: Items)
 	{
 		GSubMenu *Sub = i->Sub();
 
@@ -281,7 +281,7 @@ GSubMenu *GSubMenu::FindSubMenu(int Id)
 
 GMenuItem *GSubMenu::FindItem(int Id)
 {
-	for (GMenuItem *i = Items.First(); i; i = Items.Next())
+	for (auto i: Items)
 	{
 		GSubMenu *Sub = i->Sub();
 

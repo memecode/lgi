@@ -44,8 +44,11 @@ bool IdeCommon::OnOpen(GProgressDlg *Prog, GXmlTag *Src)
 
 void IdeCommon::CollectAllSubProjects(List<IdeProject> &c)
 {
-	ForAllProjectNodes(p)
+	for (auto i:*this)
 	{
+		ProjectNode *p = dynamic_cast<ProjectNode*>(i);
+		if (!p) break;
+
 		if (p->GetType() == NodeDependancy)
 		{
 			if (p->GetDep())
@@ -73,8 +76,11 @@ IdePlatform GetCurrentPlatform()
 
 void IdeCommon::CollectAllSource(GArray<GString> &c, IdePlatform Platform)
 {
-	ForAllProjectNodes(p)
+	for (auto i:*this)
 	{
+		ProjectNode *p = dynamic_cast<ProjectNode*>(i);
+		if (!p) break;
+
 		switch (p->GetType())
 		{
 			case NodeSrc:
@@ -214,8 +220,11 @@ IdeCommon *IdeCommon::GetSubFolder(IdeProject *Project, char *Name, bool Create)
 {
 	if (Name)
 	{
-		ForAllProjectNodes(c)
+		for (auto i:*this)
 		{
+			ProjectNode *c = dynamic_cast<ProjectNode*>(i);
+			if (!c) break;
+
 			if (c->GetType() == NodeDir)
 			{
 				if (c->GetName() && stricmp(c->GetName(), Name) == 0)

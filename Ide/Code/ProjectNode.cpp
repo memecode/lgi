@@ -170,8 +170,11 @@ void ProjectNode::OpenLocalCache(IdeDoc *&Doc)
 int64 ProjectNode::CountNodes()
 {
 	int64 n = 1;
-	for (ProjectNode *c = ChildNode(); c; c = c->NextNode())
+
+	for (auto i:*this)
 	{
+		ProjectNode *c = dynamic_cast<ProjectNode *>(i);
+		if (!c) break;
 		n += c->CountNodes();
 	}
 	return n;
@@ -295,16 +298,6 @@ bool ProjectNode::IsWeb()
 	return false;
 }
 
-ProjectNode *ProjectNode::ChildNode()
-{
-	return dynamic_cast<ProjectNode*>(GetChild());
-}
-
-ProjectNode *ProjectNode::NextNode()
-{
-	return dynamic_cast<ProjectNode*>(GetNext());
-}
-
 bool ProjectNode::HasNode(ProjectNode *Node)
 {
 	printf("Has %s %s %p\n", File, Name, Dep);
@@ -314,8 +307,11 @@ bool ProjectNode::HasNode(ProjectNode *Node)
 	if (Dep && Dep->HasNode(Node))
 		return true;
 
-	for (ProjectNode *c = ChildNode(); c; c = c->NextNode())
+	for (auto i:*this)
 	{
+		ProjectNode *c = dynamic_cast<ProjectNode *>(i);
+		if (!c) break;
+
 		if (c->HasNode(Node))
 			return true;
 	}
@@ -326,8 +322,12 @@ bool ProjectNode::HasNode(ProjectNode *Node)
 void ProjectNode::AddNodes(GArray<ProjectNode*> &Nodes)
 {
 	Nodes.Add(this);
-	for (ProjectNode *c = ChildNode(); c; c = c->NextNode())
+
+	for (auto i:*this)
 	{
+		ProjectNode *c = dynamic_cast<ProjectNode *>(i);
+		if (!c) break;
+
 		c->AddNodes(Nodes);
 	}
 }
@@ -339,8 +339,11 @@ void ProjectNode::SetClean()
 		Dep->SetClean();
 	}
 	
-	ForAllProjectNodes(p)
+	for (auto i:*this)
 	{
+		ProjectNode *p = dynamic_cast<ProjectNode*>(i);
+		if (!p) break;
+
 		p->SetClean();
 	}
 }
@@ -1085,8 +1088,12 @@ void ProjectNode::OnMouseClick(GMouse &m)
 							{
 								// Find existing node...
 								bool Found = false;
-								for (ProjectNode *c=Insert->ChildNode(); c; c=c->NextNode())
+
+								for (auto it:*Insert)
 								{
+									ProjectNode *c = dynamic_cast<ProjectNode *>(it);
+									if (!c) break;
+
 									if (c->GetType() == NodeDir &&
 										c->GetName() &&
 										stricmp(c->GetName(), p[i]) == 0)
@@ -1332,8 +1339,11 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 		}
 	}
 	
-	ForAllProjectNodes(c)
+	for (auto i:*this)
 	{
+		ProjectNode *c = dynamic_cast<ProjectNode*>(i);
+		if (!c) break;
+
 		ProjectNode *n = c->FindFile(In, Full);
 		if (n)
 		{

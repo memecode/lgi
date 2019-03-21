@@ -57,12 +57,27 @@ public:
 		List<T> *Lst;
 		LstBlk *i;
 		int Cur;
+		OsThreadId Thread;
+
+		bool CheckThread() const
+		{
+			auto Cur = GetCurrentThreadId();
+			bool Ok = Thread == Cur;
+			LgiAssert(Ok);
+			return Ok;
+		}
+		#ifdef _DEBUG
+		#define CHECK_THREAD CheckThread();
+		#else
+		#define CHECK_THREAD
+		#endif
 
 		Iter(List<T> *lst)
 		{
 			Lst = lst;
 			i = 0;
 			Cur = 0;
+			Thread = GetCurrentThreadId();
 		}
 
 		Iter(List<T> *lst, LstBlk *item, int c)
@@ -70,10 +85,12 @@ public:
 			Lst = lst;
 			i = item;
 			Cur = c;
+			Thread = GetCurrentThreadId();
 		}
 
 		bool operator ==(const Iter &it) const
 		{
+			CHECK_THREAD
 			int x = (int)In() + (int)it.In();
 			if (x == 2)
 				return (i == it.i) && (Cur == it.Cur);
@@ -82,11 +99,13 @@ public:
 
 		bool operator !=(const Iter &it) const
 		{
+			CHECK_THREAD
 			return !(*this == it);
 		}
 
 		bool In() const
 		{
+			CHECK_THREAD
 			return	i &&
 					Cur >= 0 &&
 					Cur < i->Count;
@@ -94,16 +113,19 @@ public:
 
 		operator T*() const
 		{
+			CHECK_THREAD
 			return In() ? i->Ptr[Cur] : NULL;
 		}
 
 		T *operator *() const
 		{
+			CHECK_THREAD
 			return In() ? i->Ptr[Cur] : NULL;
 		}
 	
 		Iter &operator =(LstBlk *item)
 		{
+			CHECK_THREAD
 			i = item;
 			if (!i)
 				Cur = 0;
@@ -112,12 +134,14 @@ public:
 	
 		Iter &operator =(int c)
 		{
+			CHECK_THREAD
 			Cur = c;
 			return *this;
 		}
 
 		Iter &operator =(Iter *iter)
 		{
+			CHECK_THREAD
 			Lst = iter->Lst;
 			i = iter->i;
 			Cur = iter->Cur;
@@ -126,6 +150,7 @@ public:
 
 		int GetIndex(int Base)
 		{
+			CHECK_THREAD
 			if (i)
 				return Base + Cur;
 
@@ -134,6 +159,7 @@ public:
 
 		bool Next()
 		{
+			CHECK_THREAD
 			if (i)
 			{
 				Cur++;
@@ -154,6 +180,7 @@ public:
 
 		bool Prev()
 		{
+			CHECK_THREAD
 			if (i)
 			{
 				Cur--;
@@ -174,6 +201,7 @@ public:
 
 		bool Delete()
 		{
+			CHECK_THREAD
 			if (i)
 			{
 				LgiAssert(Lst);

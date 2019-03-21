@@ -58,17 +58,16 @@ public:
 	/// \returns number of child.
 	size_t GetItems();
 
-	/// Iterate all children
-	template<typename T>
-	bool Iterate(T *&ptr)
+	List<GTreeItem>::I begin()
 	{
-		if (ptr)
-			ptr = dynamic_cast<T*>(ptr->GetNext());
-		else
-			ptr = dynamic_cast<T*>(GetChild());
-		return ptr != NULL;
+		return Items.begin();
 	}
 	
+	List<GTreeItem>::I end()
+	{
+		return Items.end();
+	}
+
 	/// Sorts the child items
 	template<typename T>
 	bool Sort(int (*Compare)(GTreeItem*, GTreeItem*, T user_param), T user_param)

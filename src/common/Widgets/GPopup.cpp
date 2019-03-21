@@ -194,8 +194,10 @@ public:
 					uint64 Now = LgiCurrentTime();
 					GPopup *Over = 0;
 					GPopup *w;
-					for (w = Popups.First(); w; w = Popups.Next())
+
+					for (auto it = Popups.begin(); it != Popups.end(); it++)
 					{
+						w = *it;
 						if (w->GetPos().Overlap(m.x, m.y))
 						{
 							Over = w;
@@ -203,8 +205,9 @@ public:
 						}
 					}
 					
-					for (w = Popups.First(); w; w = Popups.Next())
+					for (auto it = Popups.begin(); it != Popups.end(); it++)
 					{
+						w = *it;
 						#if 0
 						LgiTrace("PopupLoop: Over=%p w=%p, w->Vis=%i, Time=%i\n",
 							Over,

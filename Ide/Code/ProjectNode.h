@@ -20,12 +20,6 @@ enum NodeType
 	NodeMax, // Always last
 };
 
-#define ForAllProjectNodes(Var) \
-	for (ProjectNode *Var=dynamic_cast<ProjectNode*>(GetChild()); \
-		Var; \
-		Var=dynamic_cast<ProjectNode*>(Var->GetNext()))
-
-
 extern int NodeSort(GTreeItem *a, GTreeItem *b, NativeInt d);
 extern int XmlSort(GXmlTag *a, GXmlTag *b, NativeInt d);
 
@@ -49,10 +43,6 @@ class ProjectNode : public IdeCommon, public GDragDropSource, public FtpCallback
 public:
 	ProjectNode(IdeProject *p);
 	~ProjectNode();
-
-	// Tree hierarchy
-	ProjectNode *ChildNode();
-	ProjectNode *NextNode();
 
 	// Actions
 	IdeDoc *Open();
