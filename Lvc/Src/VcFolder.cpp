@@ -472,7 +472,6 @@ void VcFolder::Select(bool b)
 				case VcCvs:
 					break;
 				default:
-					LgiAssert(!"Impl me.");
 					break;
 			}				
 		}
@@ -595,7 +594,6 @@ void VcFolder::Select(bool b)
 				case VcCvs:
 					break;
 				default:
-					LgiAssert(!"Impl me.");
 					break;
 			}				
 		}
