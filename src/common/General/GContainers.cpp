@@ -141,10 +141,8 @@ void GMemQueue::Empty()
 int64 GMemQueue::GetSize()
 {
 	int Size = 0;
-	for (Block *b = Mem.First(); b; b = Mem.Next())
-	{
+	for (auto b: Mem)
 		Size += b->Used - b->Next;
-	}
 	return Size;
 }
 
@@ -346,9 +344,11 @@ ssize_t GMemQueue::Read(void *Ptr, ssize_t Size, int Flags)
 
 	if (Ptr && Size > 0)
 	{
-		Block *b = 0;
-		for (b = Mem.First(); b && Size > 0; b = Mem.Next())
+		for (auto b: Mem)
 		{
+			if (Size <= 0)
+				break;
+
 			int Copy = (int) MIN(Size, b->Used - b->Next);
 			if (Copy > 0)
 			{
@@ -360,11 +360,13 @@ ssize_t GMemQueue::Read(void *Ptr, ssize_t Size, int Flags)
 			}
 		}
 
-		for (b = Mem.First(); b && b->Next >= b->Used; b = Mem.First())
+		for (auto b: Mem)
 		{
-			Mem.Delete(b);
+			if (b->Next < b->Used)
+				break;
 			free(b);
 		}
+		Mem.Empty();
 	}
 
 	return Status;
