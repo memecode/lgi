@@ -119,7 +119,7 @@ bool LgiMountVolume(char *Name)
 	return false;
 }
 
-GKey::GKey(int Vkey, int flags)
+GKey::GKey(int Vkey, uint32_t flags)
 {
 	c16 = vkey = Vkey;
 	Flags = flags;
