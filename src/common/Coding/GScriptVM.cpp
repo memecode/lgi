@@ -64,17 +64,29 @@ int GVariantCmp(GVariant *a, GVariant *b, NativeInt Data)
 			 Param)
 	{
 		const char *Fld = Param->Str();
+		int Dir = 1;
+		if (Fld && *Fld == '-')
+		{
+			Fld++;
+			Dir = -1;
+		}
+
 		GVariant av, bv;
 		if (a->Value.Dom->GetValue(Fld, av) &&
 			b->Value.Dom->GetValue(Fld, bv))
 		{
-			return GVariantCmp(&av, &bv, 0);
+			return GVariantCmp(&av, &bv, 0) * Dir;
 		}
 	}
 	else if (a->Type == GV_INT32 &&
 			 b->Type == GV_INT32)
 	{
 		return a->CastInt32() - b->CastInt32();
+	}
+	else if (a->Type == GV_DATETIME &&
+			 b->Type == GV_DATETIME)
+	{
+		return a->Value.Date->Compare(b->Value.Date);
 	}
 	else
 	{
