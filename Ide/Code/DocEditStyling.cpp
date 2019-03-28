@@ -17,7 +17,7 @@
 #define ColourLiteral			GColour(192, 0, 0)
 #define ColourKeyword			GColour::Black
 #define ColourType				GColour(0, 0, 222)
-#define ColourPhp				GColour(140, 140, 180)
+#define ColourCode				GColour(140, 140, 180)
 #define ColourHtml				GColour(80, 80, 255)
 #define ColourPre				GColour(150, 110, 110)
 #define ColourStyle				GColour(110, 110, 150)
@@ -885,7 +885,8 @@ GColour DocEditStyling::ColourFromType(DocType t)
 		default:
 			return GColour::Black;
 		case CodePhp:
-			return ColourPhp;
+		case CodeJavascript:
+			return ColourCode;
 		case CodeCss:
 			return ColourStyle;
 		case CodePre:
@@ -998,8 +999,8 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 						!Strnicmp(tag, L ## #name, tmp))
 				#define SCAN_TAG() \
 					char16 *tag = s + 1; \
+					while (tag < e && strchr(WhiteSpace, *tag)) tag++; \
 					char16 *c = tag; \
-					while (c < e && strchr(WhiteSpace, *c)) c++; \
 					while (c < e && (IsAlpha(*c) || strchr("!_/0123456789", *c))) c++; \
 					size_t len = c - tag, tmp;
 
@@ -1041,6 +1042,13 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 							Type = CodeCss;
 							while (*c && *c != '>') c++;
 							if (*c) c++;
+							start = true;
+						}
+						else if (IS_TAG(script))
+						{
+							Type = CodeJavascript;
+							while (c < e && *c != '>') c++;
+							if (c < e) c++;
 							start = true;
 						}
 
@@ -1098,6 +1106,24 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 					{
 						s++;
 						END_CODE();
+						Type = CodeHtml;
+					}
+				}
+				else if (Type == CodeJavascript)
+				{
+					// Check for </script>
+					if (!Strnicmp(s - 8, L"</script>", 9))
+					{
+						s -= 8;
+						END_CODE();
+
+						auto &st = Style.New().Construct(View, STYLE_IDE);
+						st.Start = s - Text;
+						st.Font = View->GetFont();
+						st.Fore = ColourHtml;
+						st.Len = 9;
+						
+						s += 9;						
 						Type = CodeHtml;
 					}
 				}

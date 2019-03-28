@@ -28,6 +28,7 @@ public:
 		CodeCss,
 		CodeComment,
 		CodePre,
+		CodeJavascript
 	};
 
 protected:
