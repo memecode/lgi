@@ -299,6 +299,11 @@ bool GFontSystem::EnumerateFonts(GString::Array &Fonts)
 	return true;
 }
 
+void GFontSystem::ResetLibCheck()
+{
+	d->LibCheck = false;
+}
+
 bool GFontSystem::HasIconv(bool Quiet)
 {
 	if (d->IsLoaded())

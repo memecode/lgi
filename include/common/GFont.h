@@ -458,6 +458,7 @@ public:
 	
 	#endif
 
+	void ResetLibCheck();
 	/// \returns true if iconv services are available.
 	bool HasIconv(bool Quiet);
 	/// Converts a string into a buffer using iconv
