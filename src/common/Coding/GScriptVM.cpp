@@ -794,6 +794,14 @@ public:
 
 			if (Args)
 			{
+				// Check the local frame size is at least big enough for the args...
+				if (Sf.CurrentFrameSize < Args->Length())
+				{
+					Log->Print("%s:%i - Too many args for local frame size (%i->%i).\n",
+						_FL, (int)Args->Length(), (int)Sf.CurrentFrameSize);
+					return ScriptError;
+				}
+
 				// Put the arguments of the function call into the local array
 				for (unsigned i=0; i<Args->Length(); i++)
 				{
