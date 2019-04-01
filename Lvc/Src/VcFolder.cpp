@@ -2066,6 +2066,18 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 			}
 			break;
 		}
+		case VcHg:
+		{
+			CurrentCommit.Empty();
+			CommitListDirty = true;
+			GetTree()->SendNotify(LvcCommandEnd);
+			if (!Result)
+			{
+				Unpushed = 0;
+				Update();
+			}
+			break;
+		}
 		default:
 		{
 			LgiAssert(!"Impl me.");
@@ -2137,9 +2149,9 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 			{
 				GString::Array a;
 				a.New().Printf("commit -m \"%s\"", Msg);
-				for (VcFile **pf = NULL; Add.Iterate(pf); )
+				for (auto pf: Add)
 				{
-					GString s = (*pf)->GetFileName();
+					GString s = pf->GetFileName();
 					if (s.Find(" ") >= 0)
 						a.New().Printf("\"%s\"", s.Get());
 					else
@@ -2158,6 +2170,25 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 			}
 			case VcHg:
 			{
+				GString::Array a;
+				a.New().Printf("commit -m \"%s\"", Msg);
+				for (auto pf: Add)
+				{
+					GString s = pf->GetFileName();
+					if (s.Find(" ") >= 0)
+						a.New().Printf("\"%s\"", s.Get());
+					else
+						a.New() = s;
+				}
+
+				Args = GString(" ").Join(a);
+				IsCommit = StartCmd(Args, &VcFolder::ParseCommit, NULL, LogNormal);
+
+				if (d->Tabs && IsCommit)
+				{
+					d->Tabs->Value(1);
+					GetTree()->SendNotify(LvcCommandStart);
+				}
 				break;
 			}
 			default:
