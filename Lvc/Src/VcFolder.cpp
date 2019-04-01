@@ -2133,6 +2133,10 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 				Unpushed = 0;
 				Update();
 			}
+			else if (Params && Params->Str.Find("Push") >= 0)
+			{
+				Push();
+			}
 			break;
 		}
 		default:
