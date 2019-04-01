@@ -566,7 +566,11 @@ void VcFolder::Select(bool b)
 		}
 
 		d->Lst->Insert(Ls);
-		// d->Lst->Sort(LogDateCmp);
+		if (d->Resort >= 0)
+		{
+			d->Lst->Sort(LstCmp, d->Resort);
+			d->Resort = -1;
+		}
 
 		if (GetType() == VcGit)
 		{
@@ -806,7 +810,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 
 			Log.Sort(CommitIndexCmp);
 			LinkParents();
-			d->Lst->Sort(LstCmp, 1);
+			d->Resort = 1;
 			break;
 		}
 		case VcCvs:
@@ -895,8 +899,17 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 	return true;
 }
 
+#ifdef _DEBUG
+#define PROF(s) // Prof.Add(s)
+#else
+#define PROF(s)
+#endif
+
 void VcFolder::LinkParents()
 {
+	#ifdef _DEBUG
+	GProfile Prof("LinkParents");
+	#endif	
 	LHashTbl<StrKey<char>,VcCommit*> Map;
 	
 	// Index all the commits
@@ -909,6 +922,7 @@ void VcFolder::LinkParents()
 	}
 
 	// Create all the edges...
+	PROF("Create edges.");
 	for (auto c:Log)
 	{
 		auto *Par = c->GetParents();
@@ -923,6 +937,7 @@ void VcFolder::LinkParents()
 	}
 
 	// Map the edges to positions
+	PROF("Map edges.");
 	typedef GArray<VcEdge*> EdgeArr;
 	GArray<EdgeArr> Active;
 	for (auto c:Log)
@@ -1063,6 +1078,7 @@ void VcFolder::LinkParents()
 	}
 
 	// Find all the "heads", i.e. a commit without any children
+	PROF("Find heads.");
 	GCombo *Heads;
 	if (d->Files->GetWindow()->GetViewById(IDC_HEADS, Heads))
 	{

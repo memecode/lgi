@@ -105,6 +105,7 @@ struct AppPriv
 	GTextLog *Log;
 	GTabView *Tabs;
 	VersionCtrl PrevType;
+	int Resort;
 
 	AppPriv()  : Opts(GOptionsFile::PortableMode, AppName)
 	{
@@ -117,6 +118,7 @@ struct AppPriv
 		Msg = NULL;
 		Tabs = NULL;
 		CurFolder = NULL;
+		Resort = -1;
 	}
 
 	void ClearFiles()
