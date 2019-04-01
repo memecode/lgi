@@ -450,6 +450,7 @@ void VcFolder::Select(bool b)
 				default:
 				{
 					IsLogging = StartCmd("log", &VcFolder::ParseLog);
+					break;
 				}
 			}
 
@@ -605,6 +606,15 @@ int CommitRevCmp(VcCommit **a, VcCommit **b)
 	int64 arev = Atoi((*a)->GetRev());
 	int64 brev = Atoi((*b)->GetRev());
 	int64 diff = (int64)brev - arev;
+	if (diff < 0) return -1;
+	return (diff > 0) ? 1 : 0;
+}
+
+int CommitIndexCmp(VcCommit **a, VcCommit **b)
+{
+	auto ai = (*a)->GetIndex();
+	auto bi = (*b)->GetIndex();
+	auto diff = (int64)bi - ai;
 	if (diff < 0) return -1;
 	return (diff > 0) ? 1 : 0;
 }
@@ -794,6 +804,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 					c->GetParents()->Add(Par->GetRev());
 			}
 
+			Log.Sort(CommitIndexCmp);
 			LinkParents();
 			break;
 		}
