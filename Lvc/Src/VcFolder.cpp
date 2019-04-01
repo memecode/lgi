@@ -580,7 +580,11 @@ void VcFolder::Select(bool b)
 			d->Lst->ColumnAt(3)->Width(130);
 			d->Lst->ColumnAt(4)->Width(400);
 		}
-		else d->Lst->ResizeColumnsToContent();
+		else
+		{
+			d->Lst->ResizeColumnsToContent();
+			d->Lst->ColumnAt(0)->Width(70);
+		}
 		d->Lst->UpdateAllItems();
 
 		if (!CurrentCommit && !IsGetCur)
