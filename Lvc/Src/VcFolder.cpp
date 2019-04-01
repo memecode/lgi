@@ -806,6 +806,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 
 			Log.Sort(CommitIndexCmp);
 			LinkParents();
+			d->Lst->Sort(LstCmp, 1);
 			break;
 		}
 		case VcCvs:
@@ -2217,6 +2218,7 @@ void VcFolder::Push()
 	bool Working = false;
 	switch (GetType())
 	{
+		case VcHg:
 		case VcGit:
 			Working = StartCmd("push", &VcFolder::ParsePush, NULL, LogNormal);
 			break;

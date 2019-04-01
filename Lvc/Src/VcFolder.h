@@ -32,6 +32,7 @@ public:
 
 extern int Ver2Int(GString v);
 extern int ToolVersion[VcMax];
+extern int LstCmp(LListItem *a, LListItem *b, int Col);
 
 struct Result
 {
