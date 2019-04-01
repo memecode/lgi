@@ -593,15 +593,7 @@ void VcFolder::Select(bool b)
 		}
 
 		PROF("ColSizing");
-		if (GetType() == VcGit)
-		{
-			d->Lst->ColumnAt(0)->Width(40);
-			d->Lst->ColumnAt(1)->Width(270);
-			d->Lst->ColumnAt(2)->Width(240);
-			d->Lst->ColumnAt(3)->Width(130);
-			d->Lst->ColumnAt(4)->Width(400);
-		}
-		else if (GetType() == VcHg)
+		if (GetType() == VcHg)
 		{
 			int i = 0;
 			d->Lst->ColumnAt(i++)->Width(60); // LGraph
@@ -609,18 +601,18 @@ void VcFolder::Select(bool b)
 			d->Lst->ColumnAt(i++)->Width(100); // LRevision
 			d->Lst->ColumnAt(i++)->Width(60); // LBranch
 			d->Lst->ColumnAt(i++)->Width(240); // LAuthor
-			d->Lst->ColumnAt(i++)->Width(125); // LTimeStamp
+			d->Lst->ColumnAt(i++)->Width(130); // LTimeStamp
 			d->Lst->ColumnAt(i++)->Width(400); // LMessage
 		}
 		else
 		{
 			// This is too slow, over 2 seconds for Lgi
 			// d->Lst->ResizeColumnsToContent();
-			d->Lst->ColumnAt(0)->Width(40);
-			d->Lst->ColumnAt(1)->Width(270);
-			d->Lst->ColumnAt(2)->Width(240);
-			d->Lst->ColumnAt(3)->Width(130);
-			d->Lst->ColumnAt(4)->Width(400);
+			d->Lst->ColumnAt(0)->Width(40); // LGraph
+			d->Lst->ColumnAt(1)->Width(270); // LRevision
+			d->Lst->ColumnAt(2)->Width(240); // LAuthor
+			d->Lst->ColumnAt(3)->Width(130); // LTimeStamp
+			d->Lst->ColumnAt(4)->Width(400); // LMessage
 		}
 		PROF("UpdateAll");
 		d->Lst->UpdateAllItems();
@@ -2224,7 +2216,7 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 				}
 
 				Args = GString(" ").Join(a);
-				IsCommit = StartCmd(Args, &VcFolder::ParseCommit, NULL, LogNormal);
+				IsCommit = StartCmd(Args, &VcFolder::ParseCommit, Param, LogNormal);
 
 				if (d->Tabs && IsCommit)
 				{
@@ -2247,7 +2239,7 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 				}
 
 				Args = GString(" ").Join(a);
-				IsCommit = StartCmd(Args, &VcFolder::ParseCommit, NULL, LogNormal);
+				IsCommit = StartCmd(Args, &VcFolder::ParseCommit, Param, LogNormal);
 
 				if (d->Tabs && IsCommit)
 				{
