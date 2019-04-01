@@ -6,6 +6,13 @@
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 #endif
 
+#ifdef _DEBUG
+#define PROF(s) Prof.Add(s)
+#else
+#define PROF(s)
+#endif
+
+
 int Ver2Int(GString v)
 {
 	auto p = v.Split(".");
@@ -368,12 +375,16 @@ void VcFolder::OnBranchesChange()
 
 void VcFolder::Select(bool b)
 {
+	#ifdef _DEBUG
+	GProfile Prof("Select");
+	#endif
 	if (!b)
 	{
 		GWindow *w = d->Tree->GetWindow();
 		w->SetCtrlName(IDC_BRANCH, NULL);
 	}
 
+	PROF("Parent.Select");
 	GTreeItem::Select(b);
 	
 	if (b)
@@ -381,6 +392,7 @@ void VcFolder::Select(bool b)
 		if (!DirExists(Path))
 			return;
 
+		PROF("DefaultFields");
 		if (Fields.Length() == 0)
 		{
 			switch (GetType())
@@ -408,6 +420,7 @@ void VcFolder::Select(bool b)
 			}
 		}
 
+		PROF("Type Change");
 		if (GetType() != d->PrevType)
 		{
 			d->PrevType = GetType();
@@ -429,6 +442,7 @@ void VcFolder::Select(bool b)
 			}
 		}
 
+		PROF("UpdateCommitList");
 		if ((Log.Length() == 0 || CommitListDirty) && !IsLogging)
 		{
 			switch (GetType())
@@ -457,6 +471,7 @@ void VcFolder::Select(bool b)
 			CommitListDirty = false;
 		}
 
+		PROF("GetBranches");
 		if (Branches.Length() == 0)
 		{
 			switch (GetType())
@@ -501,14 +516,17 @@ void VcFolder::Select(bool b)
 
 		if (d->CurFolder != this)
 		{
+			PROF("RemoveAll");
 			d->CurFolder = this;
 			d->Lst->RemoveAll();
 		}
 
+		PROF("Uncommit");
 		if (!Uncommit)
 			Uncommit.Reset(new UncommitedItem(d));
 		d->Lst->Insert(Uncommit, 0);
 
+		PROF("Log Loop");
 		int64 CurRev = Atoi(CurrentCommit.Get());
 		List<LListItem> Ls;
 		for (unsigned i=0; i<Log.Length(); i++)
@@ -565,13 +583,16 @@ void VcFolder::Select(bool b)
 			}
 		}
 
+		PROF("Ls Ins");
 		d->Lst->Insert(Ls);
 		if (d->Resort >= 0)
 		{
+			PROF("Resort");
 			d->Lst->Sort(LstCmp, d->Resort);
 			d->Resort = -1;
 		}
 
+		PROF("ColSizing");
 		if (GetType() == VcGit)
 		{
 			d->Lst->ColumnAt(0)->Width(40);
@@ -580,15 +601,33 @@ void VcFolder::Select(bool b)
 			d->Lst->ColumnAt(3)->Width(130);
 			d->Lst->ColumnAt(4)->Width(400);
 		}
+		else if (GetType() == VcHg)
+		{
+			int i = 0;
+			d->Lst->ColumnAt(i++)->Width(60); // LGraph
+			d->Lst->ColumnAt(i++)->Width(40); // LIndex
+			d->Lst->ColumnAt(i++)->Width(100); // LRevision
+			d->Lst->ColumnAt(i++)->Width(60); // LBranch
+			d->Lst->ColumnAt(i++)->Width(240); // LAuthor
+			d->Lst->ColumnAt(i++)->Width(125); // LTimeStamp
+			d->Lst->ColumnAt(i++)->Width(400); // LMessage
+		}
 		else
 		{
-			d->Lst->ResizeColumnsToContent();
-			d->Lst->ColumnAt(0)->Width(70);
+			// This is too slow, over 2 seconds for Lgi
+			// d->Lst->ResizeColumnsToContent();
+			d->Lst->ColumnAt(0)->Width(40);
+			d->Lst->ColumnAt(1)->Width(270);
+			d->Lst->ColumnAt(2)->Width(240);
+			d->Lst->ColumnAt(3)->Width(130);
+			d->Lst->ColumnAt(4)->Width(400);
 		}
+		PROF("UpdateAll");
 		d->Lst->UpdateAllItems();
 
 		if (!CurrentCommit && !IsGetCur)
 		{
+			PROF("GetCur");
 			switch (GetType())
 			{
 				case VcGit:
@@ -902,12 +941,6 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 
 	return true;
 }
-
-#ifdef _DEBUG
-#define PROF(s) // Prof.Add(s)
-#else
-#define PROF(s)
-#endif
 
 void VcFolder::LinkParents()
 {
