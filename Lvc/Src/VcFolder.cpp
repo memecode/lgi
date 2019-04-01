@@ -595,24 +595,30 @@ void VcFolder::Select(bool b)
 		PROF("ColSizing");
 		if (GetType() == VcHg)
 		{
-			int i = 0;
-			d->Lst->ColumnAt(i++)->Width(60); // LGraph
-			d->Lst->ColumnAt(i++)->Width(40); // LIndex
-			d->Lst->ColumnAt(i++)->Width(100); // LRevision
-			d->Lst->ColumnAt(i++)->Width(60); // LBranch
-			d->Lst->ColumnAt(i++)->Width(240); // LAuthor
-			d->Lst->ColumnAt(i++)->Width(130); // LTimeStamp
-			d->Lst->ColumnAt(i++)->Width(400); // LMessage
+			if (d->Lst->GetColumns() >= 7)
+			{
+				int i = 0;
+				d->Lst->ColumnAt(i++)->Width(60); // LGraph
+				d->Lst->ColumnAt(i++)->Width(40); // LIndex
+				d->Lst->ColumnAt(i++)->Width(100); // LRevision
+				d->Lst->ColumnAt(i++)->Width(60); // LBranch
+				d->Lst->ColumnAt(i++)->Width(240); // LAuthor
+				d->Lst->ColumnAt(i++)->Width(130); // LTimeStamp
+				d->Lst->ColumnAt(i++)->Width(400); // LMessage
+			}
 		}
 		else
 		{
-			// This is too slow, over 2 seconds for Lgi
-			// d->Lst->ResizeColumnsToContent();
-			d->Lst->ColumnAt(0)->Width(40); // LGraph
-			d->Lst->ColumnAt(1)->Width(270); // LRevision
-			d->Lst->ColumnAt(2)->Width(240); // LAuthor
-			d->Lst->ColumnAt(3)->Width(130); // LTimeStamp
-			d->Lst->ColumnAt(4)->Width(400); // LMessage
+			if (d->Lst->GetColumns() >= 5)
+			{
+				// This is too slow, over 2 seconds for Lgi
+				// d->Lst->ResizeColumnsToContent();
+				d->Lst->ColumnAt(0)->Width(40); // LGraph
+				d->Lst->ColumnAt(1)->Width(270); // LRevision
+				d->Lst->ColumnAt(2)->Width(240); // LAuthor
+				d->Lst->ColumnAt(3)->Width(130); // LTimeStamp
+				d->Lst->ColumnAt(4)->Width(400); // LMessage
+			}
 		}
 		PROF("UpdateAll");
 		d->Lst->UpdateAllItems();
@@ -2323,6 +2329,8 @@ void VcFolder::Pull(LoggingType Logging)
 	bool Status = false;
 	switch (GetType())
 	{
+		case VcNone:
+			return;
 		case VcHg:
 		case VcGit:
 			Status = StartCmd("pull", &VcFolder::ParsePull, NULL, Logging);
