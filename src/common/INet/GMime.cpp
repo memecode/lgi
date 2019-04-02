@@ -374,7 +374,8 @@ public:
 	{
 		Buf.Write((uchar*)p, size);
 
-		while (Buf.GetSize() >= BASE64_READ_SZ)
+		int64 Sz;
+		while ((Sz = Buf.GetSize()) >= BASE64_READ_SZ)
 		{
 			uchar b[100];
 			ssize_t r = Buf.Read(b, BASE64_READ_SZ);
@@ -1357,7 +1358,7 @@ ssize_t GMime::GMimeText::GMimeEncode::Push(GStreamI *Dest, GStreamEnd *End)
 							{
 								Has8Bit = true;
 							}
-							if (Buf[n] < ' ' &&
+							if (((uint8_t)Buf[n]) < ' ' &&
 								Buf[n] != '\t' &&
 								Buf[n] != '\r' &&
 								Buf[n] != '\n')

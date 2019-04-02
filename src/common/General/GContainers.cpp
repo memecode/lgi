@@ -360,13 +360,15 @@ ssize_t GMemQueue::Read(void *Ptr, ssize_t Size, int Flags)
 			}
 		}
 
-		for (auto b: Mem)
+		while (Mem.Length() > 0)
 		{
+			auto it = Mem.begin();
+			auto b = *it;
 			if (b->Next < b->Used)
 				break;
+			Mem.Delete(b);
 			free(b);
 		}
-		Mem.Empty();
 	}
 
 	return Status;

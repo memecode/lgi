@@ -2014,7 +2014,9 @@ bool GRichTextPriv::ToHtml(GArray<GDocView::ContentMedia> *Media, BlockCursor *F
 	}
 		
 	p.Print("</body>\n</html>\n");
-	return UtfNameCache.Reset(p.NewStr());
+	GAutoString a(p.NewStr());
+	UtfNameCache = a;
+	return UtfNameCache.Get() != NULL;
 }
 	
 void GRichTextPriv::DumpBlocks()
