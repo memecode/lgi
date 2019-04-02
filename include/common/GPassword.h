@@ -18,6 +18,7 @@ public:
 
 	bool IsValid() { return Data && Len > 0; }
 	void Get(char *Buf);
+	GString Get();
 	void Set(char *Buf);
 	
 	// bool Serialize(ObjProperties *Options, char *Option, int Write);

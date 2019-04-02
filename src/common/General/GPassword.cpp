@@ -68,6 +68,17 @@ void GPassword::Process(char *Out, char *In, ssize_t Len)
 	}
 }
 
+GString GPassword::Get()
+{
+	GString p;
+	
+	p.Length(Len);
+	Process(p, Data, Len);
+	p.Get()[Len] = 0;
+	
+	return p;
+}
+
 void GPassword::Get(char *Buf)
 {
 	if (Buf)

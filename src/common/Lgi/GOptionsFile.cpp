@@ -7,7 +7,10 @@
 void GOptionsFile::_Init()
 {
 	Dirty = false;
+	LockFile = NULL;
+	LockLine = -1;
 	Tag = Allocator->Alloc("Options");
+	
 	if (Lock(_FL))
 	{
 		_Defaults();
@@ -20,7 +23,7 @@ GOptionsFile::GOptionsFile(const char *FileName) : LMutex("GOptionsFile")
 	_Init();
 
 	if (FileExists(FileName))
-		File.Reset(NewStr(FileName));
+		File = FileName;
 	else
 	{
 		char e[MAX_PATH] = "";
@@ -63,7 +66,7 @@ bool GOptionsFile::SetMode(PortableType Mode, const char *BaseName)
 	LgiMakePath(FullPath, sizeof(FullPath), FullPath, BaseName ? BaseName : (char*)"Options");
 	if (!LgiGetExtension(FullPath))
 		strcat_s(FullPath, sizeof(FullPath), ".xml");
-	File.Reset(NewStr(FullPath));
+	File = FullPath;
 	Dirty = !FileExists(File);
 
 	return true;
@@ -100,7 +103,7 @@ bool GOptionsFile::IsValid()
 
 void GOptionsFile::SetFile(const char *f)
 {
-	File.Reset(NewStr(f));
+	File = f;
 	Dirty = true;
 }
 

@@ -1405,54 +1405,50 @@ bool MailSmtp::Open(GSocketI *S,
 				}
 
 
-				if (ValidStr(UserName) &&
-					ValidStr(Password))
+				if (TestFlag(Flags, MAIL_USE_AUTH))
 				{
+					if (!ValidStr(UserName))
+					{
+						// We need a user name in all authentication types.
+						SetError(L_ERROR_ESMTP_NO_USERNAME, "No username for authentication.");
+						return false;
+					}
+
 					if (AuthTypes.Length() == 0)
 					{
 						// No auth types? huh?
-						if (TestFlag(Flags, MAIL_USE_AUTH))
-						{
-							if (TestFlag(Flags, MAIL_USE_PLAIN))
-								// Force plain type
-								AuthTypes.Add("PLAIN");
-							else if (TestFlag(Flags, MAIL_USE_LOGIN))
-								// Force login type
-								AuthTypes.Add("LOGIN");
-							else if (TestFlag(Flags, MAIL_USE_CRAM_MD5))
-								// Force CRAM MD5 type
-								AuthTypes.Add("CRAM-MD5");
-							else if (TestFlag(Flags, MAIL_USE_OAUTH2))
-								// Force OAUTH2 type
-								AuthTypes.Add("XOAUTH2");
-							else
-							{
-								// Try all
-								AuthTypes.Add("PLAIN");
-								AuthTypes.Add("LOGIN");
-								AuthTypes.Add("CRAM-MD5");
-								AuthTypes.Add("XOAUTH2");
-							}
-						}
+						if (TestFlag(Flags, MAIL_USE_PLAIN))
+							// Force plain type
+							AuthTypes.Add("PLAIN");
+						else if (TestFlag(Flags, MAIL_USE_LOGIN))
+							// Force login type
+							AuthTypes.Add("LOGIN");
+						else if (TestFlag(Flags, MAIL_USE_CRAM_MD5))
+							// Force CRAM MD5 type
+							AuthTypes.Add("CRAM-MD5");
+						else if (TestFlag(Flags, MAIL_USE_OAUTH2))
+							// Force OAUTH2 type
+							AuthTypes.Add("XOAUTH2");
 						else
-						{						
-							NoAuthTypes = true;
+						{
+							// Try all
+							AuthTypes.Add("PLAIN");
+							AuthTypes.Add("LOGIN");
+							AuthTypes.Add("CRAM-MD5");
+							AuthTypes.Add("XOAUTH2");
 						}
 					}
 					else
 					{
-						if (TestFlag(Flags, MAIL_USE_AUTH))
-						{
-							// Force user preference
-							if (TestFlag(Flags, MAIL_USE_PLAIN))
-								Reorder(AuthTypes, "PLAIN");
-							else if (TestFlag(Flags, MAIL_USE_LOGIN))
-								Reorder(AuthTypes, "LOGIN");
-							else if (TestFlag(Flags, MAIL_USE_CRAM_MD5))
-								Reorder(AuthTypes, "CRAM-MD5");
-							else if (TestFlag(Flags, MAIL_USE_OAUTH2))
-								Reorder(AuthTypes, "XOAUTH2");
-						}
+						// Force user preference
+						if (TestFlag(Flags, MAIL_USE_PLAIN))
+							Reorder(AuthTypes, "PLAIN");
+						else if (TestFlag(Flags, MAIL_USE_LOGIN))
+							Reorder(AuthTypes, "LOGIN");
+						else if (TestFlag(Flags, MAIL_USE_CRAM_MD5))
+							Reorder(AuthTypes, "CRAM-MD5");
+						else if (TestFlag(Flags, MAIL_USE_OAUTH2))
+							Reorder(AuthTypes, "XOAUTH2");
 					}
 
 					for (auto Auth : AuthTypes)

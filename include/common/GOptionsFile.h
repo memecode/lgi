@@ -16,8 +16,8 @@ public:
 	};
 
 private:
-	GAutoString File;
-	GAutoString Error;
+	GString File;
+	GString Error;
 	bool Dirty;
 	
 	char *LockFile;
