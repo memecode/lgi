@@ -69,7 +69,7 @@ public:
 	GAutoString Read()
 	{
 		GAutoString Ret;
-		int64 Sz = GetSize();
+		size_t Sz = (size_t)GetSize();
 		if (Sz > 0)
 		{
 			GAutoPtr<uint8_t, true> Buf(new uint8_t[Sz]);
