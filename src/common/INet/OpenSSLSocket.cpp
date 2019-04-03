@@ -50,6 +50,7 @@ static const char*
 
 void
 SSL_locking_function(int mode, int n, const char *file, int line);
+
 unsigned long
 SSL_id_function();
 
@@ -504,7 +505,7 @@ SSL_locking_function(int mode, int n, const char *file, int line)
 unsigned long
 SSL_id_function()
 {
-	return (unsigned long) LgiGetCurrentThread();
+	return (unsigned long) GetCurrentThreadId();
 }
 
 bool StartSSL(GAutoString &ErrorMsg, SslSocket *sock)

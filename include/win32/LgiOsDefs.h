@@ -143,7 +143,7 @@ extern p_vscprintf						lgi_vscprintf;
 typedef DWORD							OsThreadId;
 typedef CRITICAL_SECTION				OsSemaphore;
 #define LgiGetCurrentThread()			GetCurrentThread()
-#define GetCurrentThreadId()			GetCurrentThreadId()
+// #define GetCurrentThreadId()			GetCurrentThreadId()
 
 // Socket/Network
 #define ValidSocket(s)					((s) != INVALID_SOCKET)
