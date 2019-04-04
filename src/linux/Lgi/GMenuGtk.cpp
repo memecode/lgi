@@ -156,7 +156,7 @@ GSubMenu *GSubMenu::AppendSub(const char *Str, int Where)
 void GSubMenu::ClearHandle()
 {
 	Info = NULL;
-	for (LgiMenuItem *i = Items.First(); i; i = Items.Next())
+	for (auto i: Items)
 	{
 		i->ClearHandle();
 	}
@@ -283,7 +283,7 @@ int GSubMenu::Float(GView *From, int x, int y, int Button)
 
 GSubMenu *GSubMenu::FindSubMenu(int Id)
 {
-	for (LgiMenuItem *i = Items.First(); i; i = Items.Next())
+	for (auto i: Items)
 	{
 		GSubMenu *Sub = i->Sub();
 
@@ -307,7 +307,7 @@ GSubMenu *GSubMenu::FindSubMenu(int Id)
 
 LgiMenuItem *GSubMenu::FindItem(int Id)
 {
-	for (LgiMenuItem *i = Items.First(); i; i = Items.Next())
+	for (auto i: Items)
 	{
 		GSubMenu *Sub = i->Sub();
 
@@ -1181,7 +1181,7 @@ bool ::GMenu::OnKey(GView *v, GKey &k)
 {
 	if (k.Down())
 	{
-		for (GAccelerator *a = Accel.First(); a; a = Accel.Next())
+		for (auto a: Accel)
 		{
 			if (a->Match(k))
 			{
@@ -1197,7 +1197,7 @@ bool ::GMenu::OnKey(GView *v, GKey &k)
 		{
 			bool Hide = false;
 			
-			for (LgiMenuItem *s=Items.First(); s; s=Items.Next())
+			for (auto s: Items)
 			{
 				if (!s->Separator())
 				{
