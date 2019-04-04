@@ -519,7 +519,7 @@ bool LgiResources::Load(const char *FileName)
 		return false;
 	}
 
-	for (GXmlTag *t = Root->Children.First(); t; )
+	for (auto t: Root->Children)
 	{
 		if (t->IsTag("string-group"))
 		{
@@ -530,7 +530,7 @@ bool LgiResources::Load(const char *FileName)
 				IsString = stricmp("_Dialog Symbols_", Name) != 0;
 			}
 
-			for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+			for (auto c: t->Children)
 			{
 				LgiStringRes *s = new LgiStringRes(this);
 				if (s && s->Read(c, d->Format))
@@ -601,11 +601,6 @@ bool LgiResources::Load(const char *FileName)
 			const char *c = t->GetContent();
 			CssStore.Parse(c);
 		}
-
-		if (t)
-			t = Root->Children.Next();
-		else
-			t = Root->Children.Current();
 	}
 
 	return true;
@@ -1170,11 +1165,11 @@ bool LgiMenuRes::Read(GXmlTag *t, ResFileFormat Format)
 			GBase::Name(n);
 		}
 
-		for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+		for (auto c: t->Children)
 		{
 			if (stricmp(c->GetTag(), "string-group") == 0)
 			{
-				for (GXmlTag *i = c->Children.First(); i; i = c->Children.Next())
+				for (auto i: c->Children)
 				{
 					LgiStringRes *s = new LgiStringRes(Res);
 					if (s && s->Read(i, Format))
@@ -1355,7 +1350,7 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 		ScriptEngine = Engine;
 		TagHash Tags(TagList);
 
-		for (LgiDialogRes *Dlg = Dialogs.First(); Dlg; Dlg = Dialogs.Next())
+		for (auto Dlg: Dialogs)
 		{
 			if (Dlg->Id() == ((int) Resource))
 			{
@@ -1463,8 +1458,10 @@ bool GMenuLoader::Load(LgiMenuRes *MenuRes, GXmlTag *Tag, ResFileFormat Format, 
 		#endif
 		{
 			Status = true;
-			for (GXmlTag *t = Tag->Children.First(); t && Status; t = Tag->Children.Next())
+			for (auto t: Tag->Children)
 			{
+				if (!Status)
+					break;
 				if (t->IsTag("submenu"))
 				{
 					LgiStringRes *Str = MenuRes->GetString(t);
@@ -1534,7 +1531,7 @@ bool GMenu::Load(GView *w, const char *Res, const char *TagList)
 	if (r)
 	{
 		TagHash Tags(TagList);
-		for (LgiMenuRes *m = r->Menus.First(); m; m = r->Menus.Next())
+		for (auto m: r->Menus)
 		{
 			if (stricmp(m->Name(), Res) == 0)
 			{

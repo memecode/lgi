@@ -651,6 +651,7 @@
     <ClInclude Include="include\common\LStringLayout.h" />
     <ClInclude Include="include\common\LThread.h" />
     <ClInclude Include="include\common\LThreadEvent.h" />
+    <ClInclude Include="include\common\LUnrolledList.h" />
     <ClInclude Include="include\common\Res.h" />
     <ClInclude Include="include\win32\GCom.h" />
     <ClInclude Include="include\win32\LgiOsClasses.h" />

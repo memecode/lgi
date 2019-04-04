@@ -147,21 +147,21 @@ int GWindow::WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState)
 	#if DEBUG_DND	
 	LgiTrace("%s:%i - WillAccept Formats=%i Pt=%i,%i Key=0x%x\n", _FL, Formats.Length(), Pt.x, Pt.y, KeyState);
 	#endif
-	for (char *f=Formats.First(); f; )
+	for (auto It = Formats.begin(); It != Formats.end(); )
 	{
 		#if DEBUG_DND
 		LgiTrace("\tFmt=%s\n", f);
 		#endif
+		auto f = *It;
 		if (!stricmp(f, LGI_FileDropFormat))
 		{
-			f = Formats.Next();
+			It++;
 			Status = DROPEFFECT_COPY;
 		}
 		else
 		{
-			Formats.Delete(f);
+			Formats.Delete(It);
 			DeleteArray(f);
-			f = Formats.Current();
 		}
 	}
 	
@@ -202,7 +202,7 @@ int GWindow::OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
 				}
 				else if (Data->Type == GV_LIST)
 				{
-					for (GVariant *v=Data->Value.Lst->First(); v; v=Data->Value.Lst->Next())
+					for (auto v: *Data->Value.Lst)
 					{
 						char *f = v->Str();
 						Uri.New() = f;

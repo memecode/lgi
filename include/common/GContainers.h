@@ -224,7 +224,6 @@ public:
 protected:
 	size_t Items;
 	LstBlk *FirstObj, *LastObj;
-	Iter Local;
 
 	LstBlk *NewBlock(LstBlk *Where)
 	{
@@ -503,7 +502,7 @@ protected:
 
 
 public:
-	List<T>() : Local(this, NULL, 0)
+	List<T>()
 	{
 		FirstObj = LastObj = NULL;
 		Items = 0;
@@ -567,8 +566,6 @@ public:
 	{
 		VALIDATE();
 
-		Local.i = NULL;
-
 		LstBlk *n;
 		for (LstBlk *i = FirstObj; i; i = n)
 		{
@@ -580,14 +577,6 @@ public:
 
 		VALIDATE();
 		return true;
-	}
-
-	bool Delete()
-	{
-		VALIDATE();
-		bool Status = Delete(Local);
-		VALIDATE();
-		return Status;
 	}
 
 	bool DeleteAt(size_t i)
@@ -616,15 +605,11 @@ public:
 		{
 			// This Item is now empty, remove and reset current
 			// into the next Item
-			bool ClearLocal = i == Local.i;
-
 			LstBlk *n = i->Next;
 			bool Status = DeleteBlock(i);
 			Pos.Cur = 0;
 			Pos.i = n;
 
-			if (ClearLocal)
-				Local.i = NULL;
 			return Status;
 		}
 		else if (Index >= i->Count)
@@ -640,10 +625,13 @@ public:
 	bool Delete(T *Ptr)
 	{
 		VALIDATE();
-		Local = GetPtr(Ptr);
-		if (!Local.In())
+		
+		Iter It = GetPtr(Ptr);
+		if (!It.In())
 			return false;
-		bool Status = Delete(Local);
+
+		bool Status = Delete(It);
+
 		VALIDATE();
 		return Status;
 	}
@@ -687,40 +675,6 @@ public:
 		return Insert(p);
 	}
 	
-	DEPRECATED_PRE T *First() DEPRECATED_POST
-	{
-		VALIDATE();
-		Local = FirstObj;
-		Local.Cur = 0;
-		VALIDATE();
-		return Local;
-	}
-
-	DEPRECATED_PRE T *Last() DEPRECATED_POST
-	{
-		VALIDATE();
-		Local = LastObj;
-		if (Local.i) Local.Cur = Local.i->Count - 1;
-		VALIDATE();
-		return Local;
-	}
-
-	DEPRECATED_PRE T *Next() DEPRECATED_POST
-	{
-		return ++Local;
-	}
-
-	DEPRECATED_PRE T *Prev() DEPRECATED_POST
-	{
-		return --Local;
-	}
-
-	DEPRECATED_PRE T *Current() const DEPRECATED_POST
-	{
-		VALIDATE();
-		return Local;
-	}
-
 	T *operator [](size_t Index)
 	{
 		VALIDATE();
@@ -730,13 +684,13 @@ public:
 		return it;
 	}
 	
-	DEPRECATED_PRE ssize_t IndexOf(T *p) DEPRECATED_POST
+	ssize_t IndexOf(T *p)
 	{
 		VALIDATE();
 		size_t Base = -1;
-		Local = GetPtr(p, &Base);
+		auto It = GetPtr(p, &Base);
 		LgiAssert(Base != -1);
-		ssize_t Idx = Local.In() ? Base + Local.Cur : -1;
+		ssize_t Idx = It.In() ? Base + It.Cur : -1;
 		VALIDATE();
 		return Idx;
 	}
@@ -750,12 +704,12 @@ public:
 		return Status;
 	}
 
-	DEPRECATED_PRE T *ItemAt(ssize_t i) DEPRECATED_POST
+	T *ItemAt(ssize_t i)
 	{
 		VALIDATE();
-		Local = GetIndex(i);
+		Iter It = GetIndex(i);
 		VALIDATE();
-		return Local;
+		return It;
 	}
 
 	/// Sorts the list
@@ -821,7 +775,6 @@ public:
 		}
 		FirstObj = LastObj = NULL;
 		Items = 0;
-		Local.i = NULL;
 		VALIDATE();
 	}
 
@@ -842,7 +795,6 @@ public:
 		}
 		FirstObj = LastObj = NULL;
 		Items = 0;
-		Local.i = NULL;
 		VALIDATE();
 	}
 
@@ -851,9 +803,6 @@ public:
 		LSwap(FirstObj, other.FirstObj);
 		LSwap(LastObj, other.LastObj);
 		LSwap(Items, other.Items);
-		LSwap(Local.Lst, other.Local.Lst);
-		LSwap(Local.i, other.Local.i);
-		LSwap(Local.Cur, other.Local.Cur);
 	}
 
 	/// Assign the contents of another list to this one
@@ -947,12 +896,8 @@ public:
 
 		size_t n = 0;
 		LstBlk *Prev = NULL;
-		bool SeenLocalBlk = false;
 		for (LstBlk *i = FirstObj; i; i = i->Next)
 		{
-			if (Local.i == i)
-				SeenLocalBlk = true;
-
 			for (int k=0; k<i->Count; k++)
 			{
 				if (!i->Ptr[k])
@@ -994,15 +939,6 @@ public:
 			Prev = i;
 		}
 
-		if (Local.i != NULL)
-		{
-			if (!SeenLocalBlk && Local.i != NULL)
-			{
-				LgiAssert(!"The local iterator is not present in the list.");
-				return false;
-			}
-		}
-		
 		if (Items != n)
 		{
 			LgiAssert(!"Item count cache incorrect.");

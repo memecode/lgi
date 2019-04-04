@@ -275,7 +275,8 @@ protected:
 	struct GTextView3Undo *UndoCur;
 
 	// private methods
-	GTextLine *GetTextLine(ssize_t Offset, ssize_t *Index = 0);
+	List<GTextLine>::I GetTextLineIt(ssize_t Offset, ssize_t *Index = 0);
+	GTextLine *GetTextLine(ssize_t Offset, ssize_t *Index = 0) { return *GetTextLineIt(Offset, Index); }
 	ssize_t SeekLine(ssize_t Offset, GTextViewSeek Where);
 	int TextWidth(GFont *f, char16 *s, int Len, int x, int Origin);
 	bool ScrollToOffset(size_t Off);
