@@ -388,7 +388,8 @@ ssize_t GMemQueue::Write(const void *Ptr, ssize_t Size, int Flags)
 	{
 		if (PreAlloc > 0)
 		{
-			Block *Last = Mem.Last();
+			auto it = Mem.rbegin();
+			Block *Last = *it;
 			if (Last)
 			{
 				int Len = (int) MIN(Size, Last->Size - Last->Used);
