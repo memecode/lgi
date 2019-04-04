@@ -6,7 +6,7 @@
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 #endif
 
-#ifdef _DEBUG
+#if 0 // def _DEBUG
 #define PROF(s) Prof.Add(s)
 #else
 #define PROF(s)
@@ -36,8 +36,9 @@ int Ver2Int(GString v)
 
 int ToolVersion[VcMax] = {0};
 
-ReaderThread::ReaderThread(GSubProcess *p, GStream *out) : LThread("ReaderThread")
+ReaderThread::ReaderThread(VersionCtrl vcs, GSubProcess *p, GStream *out) : LThread("ReaderThread")
 {
+	Vcs = vcs;
 	Process = p;
 	Out = out;
 	Run();
@@ -67,7 +68,16 @@ int ReaderThread::Main()
 			char Buf[1024];
 			ssize_t r = Process->Read(Buf, sizeof(Buf));
 			if (r > 0)
+			{
 				Out->Write(Buf, r);
+
+				if (Vcs == VcCvs &&
+					stristr(Buf, "No such file or directory"))
+				{
+					Process->Kill();
+					return -1;
+				}
+			}
 		}
 		else
 		{
@@ -283,7 +293,7 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 
 	c->PostOp = Parser;
 	c->Params.Reset(Params);
-	c->Rd.Reset(new ReaderThread(Process.Release(), c));
+	c->Rd.Reset(new ReaderThread(GetType(), Process.Release(), c));
 	Cmds.Add(c.Release());
 
 	Update();
@@ -856,6 +866,12 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 		}
 		case VcCvs:
 		{
+			if (Result)
+			{
+				OnCmdError(s, "Cvs command failed.");
+				break;
+			}
+
 			LHashTbl<IntKey<uint64>, VcCommit*> Map;
 			GString::Array c = s.Split("=============================================================================");
 			for (GString *Commit = NULL; c.Iterate(Commit);)
@@ -937,7 +953,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 	// LgiTrace("%s:%i - ParseLog: Skip=%i, Error=%i\n", _FL, Skipped, Errors);
 	IsLogging = false;
 
-	return true;
+	return !Result;
 }
 
 void VcFolder::LinkParents()
@@ -2642,7 +2658,13 @@ bool VcFolder::ParseVersion(int Result, GString s, ParseParams *Params)
 			for (auto i : p)
 				printf("i='%s'\n", i.Get());
 			#endif
-			LgiAssert(!"Impl me.");
+
+			if (p.Length() > 1)
+			{
+				auto Ver = p[2];
+				ToolVersion[GetType()] = Ver2Int(Ver);
+				printf("Cvs version: %s\n", Ver.Get());
+			}
 			break;
 		}
 		default:

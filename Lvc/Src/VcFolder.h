@@ -20,11 +20,12 @@ enum LvcError
 
 class ReaderThread : public LThread
 {
+	VersionCtrl Vcs;
 	GStream *Out;
 	GSubProcess *Process;
 
 public:
-	ReaderThread(GSubProcess *p, GStream *out);
+	ReaderThread(VersionCtrl vcs, GSubProcess *p, GStream *out);
 	~ReaderThread();
 
 	int Main();
