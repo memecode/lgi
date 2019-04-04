@@ -341,42 +341,6 @@ protected:
 		return true;
 	}
 
-	bool Delete(Iter &Pos)
-	{
-		if (!Pos.In())
-			return false;
-
-		int &Index = Pos.Cur;
-		LstBlk *&i = Pos.i;
-		if (Index < i->Count-1)
-			memmove(i->Ptr+Index, i->Ptr+Index+1, (i->Count-Index-1) * sizeof(T*));
-
-		Items--;
-		if (--i->Count == 0)
-		{
-			// This Item is now empty, remove and reset current
-			// into the next Item
-			bool ClearLocal = i == Local.i;
-
-			LstBlk *n = i->Next;
-			bool Status = DeleteBlock(i);
-			Pos.Cur = 0;
-			Pos.i = n;
-
-			if (ClearLocal)
-				Local.i = NULL;
-			return Status;
-		}
-		else if (Index >= i->Count)
-		{
-			// Carry current item over to next Item
-			Pos.i = Pos.i->Next;
-			Pos.Cur = 0;
-		}
-		
-		return true;
-	}
-
 	Iter GetIndex(size_t Index, size_t *Base = NULL)
 	{
 		size_t n = 0;
@@ -637,6 +601,42 @@ public:
 		return Status;
 	}
 
+	bool Delete(Iter &Pos)
+	{
+		if (!Pos.In())
+			return false;
+
+		int &Index = Pos.Cur;
+		LstBlk *&i = Pos.i;
+		if (Index < i->Count-1)
+			memmove(i->Ptr+Index, i->Ptr+Index+1, (i->Count-Index-1) * sizeof(T*));
+
+		Items--;
+		if (--i->Count == 0)
+		{
+			// This Item is now empty, remove and reset current
+			// into the next Item
+			bool ClearLocal = i == Local.i;
+
+			LstBlk *n = i->Next;
+			bool Status = DeleteBlock(i);
+			Pos.Cur = 0;
+			Pos.i = n;
+
+			if (ClearLocal)
+				Local.i = NULL;
+			return Status;
+		}
+		else if (Index >= i->Count)
+		{
+			// Carry current item over to next Item
+			Pos.i = Pos.i->Next;
+			Pos.Cur = 0;
+		}
+		
+		return true;
+	}
+
 	bool Delete(T *Ptr)
 	{
 		VALIDATE();
@@ -687,7 +687,7 @@ public:
 		return Insert(p);
 	}
 	
-	T *First()
+	DEPRECATED_PRE T *First() DEPRECATED_POST
 	{
 		VALIDATE();
 		Local = FirstObj;
@@ -696,7 +696,7 @@ public:
 		return Local;
 	}
 
-	T *Last()
+	DEPRECATED_PRE T *Last() DEPRECATED_POST
 	{
 		VALIDATE();
 		Local = LastObj;
@@ -705,17 +705,17 @@ public:
 		return Local;
 	}
 
-	T *Next()
+	DEPRECATED_PRE T *Next() DEPRECATED_POST
 	{
 		return ++Local;
 	}
 
-	T *Prev()
+	DEPRECATED_PRE T *Prev() DEPRECATED_POST
 	{
 		return --Local;
 	}
 
-	T *Current() const
+	DEPRECATED_PRE T *Current() const DEPRECATED_POST
 	{
 		VALIDATE();
 		return Local;
@@ -724,12 +724,13 @@ public:
 	T *operator [](size_t Index)
 	{
 		VALIDATE();
-		Local = GetIndex(Index);
+		auto it = GetIndex(Index);
 		VALIDATE();
-		return Local;
+		
+		return it;
 	}
 	
-	ssize_t IndexOf(T *p)
+	DEPRECATED_PRE ssize_t IndexOf(T *p) DEPRECATED_POST
 	{
 		VALIDATE();
 		size_t Base = -1;
@@ -749,7 +750,7 @@ public:
 		return Status;
 	}
 
-	T *ItemAt(ssize_t i)
+	DEPRECATED_PRE T *ItemAt(ssize_t i) DEPRECATED_POST
 	{
 		VALIDATE();
 		Local = GetIndex(i);

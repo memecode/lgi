@@ -890,10 +890,8 @@ GPointF &PointConv(POINTFX pt, double x, double y, double Scale)
 void GPath::Append(GPath &p)
 {
 	Unflatten();
-	for (GSeg *s = p.Segs.First(); s; s = p.Segs.Next())
-	{
+	for (auto s: p.Segs)
 		Segs.Insert(s);
-	}
 	p.Segs.Empty();
 }
 
@@ -1067,7 +1065,7 @@ bool GPath::Text(	GFont *Font,
 
 			double Dx = x - b.x1;
 			double Dy = y - b.y1 - Font->Ascent();
-			for (GSeg *s=Temp.Segs.First(); s; s = Temp.Segs.Next())
+			for (auto s: Temp.Segs)
 			{
 				s->Translate(Dx, Dy);
 			}
@@ -1093,8 +1091,10 @@ void GPath::DeleteSeg(int i)
 
 bool GPath::IsClosed()
 {
-	GSeg *f = Segs.First();
-	GSeg *l = Segs.Last();
+	auto b = Segs.begin();
+	auto e = Segs.rbegin();
+	GSeg *f = *b;
+	GSeg *l = *e;
 	if (f && l)
 	{
 		GPointF *Start = f->First();
@@ -1113,10 +1113,12 @@ void GPath::Close()
 	if (!IsClosed())
 	{
 		// Find last moveto
-		GSeg *f = Segs.Last();
+		auto e = Segs.rbegin();
+		GSeg *f = *e;
 		while (f && f->Type != SegMove)
 		{
-			f = Segs.Prev();
+			e--;
+			f = *e;
 		}
 
 		// If there is a moveto...
@@ -1151,7 +1153,7 @@ bool GPath::Flatten()
 
 	Unflatten();
 
-	for (GSeg *s=Segs.First(); s; s=Segs.Next())
+	for (auto s: Segs)
 	{
 		switch (s->Type)
 		{
@@ -1182,7 +1184,7 @@ bool GPath::Flatten()
 
 		GPointF *c = Point;
 		GPointF *OutlineStart = Point;
-		for (GSeg *s=Segs.First(); s; s=Segs.Next(), n++)
+		for (auto s: Segs)
 		{
 			switch (s->Type)
 			{
@@ -1255,6 +1257,8 @@ bool GPath::Flatten()
 					break;
 				}
 			}
+
+			n++;
 		}
 
 		// Close the last shape
@@ -1421,7 +1425,7 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 
 		// Loop scanlines
 		List<GVector> In;
-		for (GVector *v=Vecs.First(); v; v=Vecs.Next())
+		for (auto v: Vecs)
 		{
 			In.Insert(v);
 		}
@@ -1491,7 +1495,7 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 				{
 					// Setup events
 					memset(Events, 0, Height);
-					for (GVector *New=In.First(); New; New=In.Next())
+					for (auto New: In)
 					{
 						int Aay1 = (New->aay1 - y1) >> SUB_SHIFT;
 						int Aay2 = (New->aay2 - y1) >> SUB_SHIFT;
@@ -1517,17 +1521,17 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 								if (Events[(y-y1)>>SUB_SHIFT] & ADD_EVENT)
 								{
 									// Add new active vecs
-									for (GVector *New=In.First(); New;)
+									for (auto it = In.begin(); it != In.end(); )
 									{
+										GVector *New = *it;
 										if (New->aay1 == y)
 										{
 											Active.Insert(New);
-											In.Delete(New);
-											New = In.Current();
+											In.Delete(it);
 										}
 										else
 										{
-											New = In.Next();
+											it++;
 										}
 									}
 								}
@@ -1535,19 +1539,15 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 								if (Events[(y-y1)>>SUB_SHIFT] & REMOVE_EVENT)
 								{
 									// Remove old active vecs
-									for (GVector *Old=Active.First(); Old; )
+									for (auto it = Active.begin(); it != Active.end(); )
 									{
+										GVector *Old = *it;
 										PathAssert(Old->aay2 >= y);
 										
 										if (Old->aay2 == y)
-										{
-											Active.Delete(Old);
-											Old = Active.Current();
-										}
+											Active.Delete(it);
 										else
-										{
-											Old = Active.Next();
-										}
+											it++;
 									}
 								}
 							}
@@ -1558,13 +1558,15 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 								// Sort X values from active vectors
 								if (FillRule == FILLRULE_NONZERO)
 								{
-									GVector *a=Active.First();
+									auto it = Active.begin();
+									GVector *a = *it;
 									if (a)
 									{
 										// bool Up = a->Up;
 										int n = 0;
-										for (; a; a=Active.Next())
+										for (; it != Active.end(); it++)
 										{
+											a = *it;
 											a->Cx = a->aax[(y>>SUB_SHIFT) - a->y1].x[s];
 
 											#if defined(_DEBUG) && DEBUG_NEGITIVE_X
@@ -1627,7 +1629,7 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 								}
 								else
 								{
-									for (GVector *a=Active.First(); a; a=Active.Next())
+									for (auto a: Active)
 									{
 										double Cx = a->aax[(y>>SUB_SHIFT) - a->y1].x[s];
 
@@ -1761,7 +1763,7 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 					memset(Alpha, 0, Width);
 
 					// Add new active vecs
-					for (GVector *New=In.First(); New; New=In.First())
+					for (auto New: In)
 					{
 						if (New->y1 == y)
 						{
@@ -1773,7 +1775,7 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 
 					// Sort X values from active vectors
 					int Xs = 0;
-					for (GVector *v=Active.First(); v; v=Active.Next())
+					for (auto v: Active)
 					{
 						if (y < v->y1 || y > v->y2)
 						{
@@ -1829,17 +1831,14 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 					}
 
 					// Remove old active vecs
-					for (GVector *Old=Active.First(); Old; )
+					for (auto it = Active.begin(); it != Active.end(); )
 					{
+						GVector *Old = *it;
+
 						if (Old->y2 == y)
-						{
-							Active.Delete(Old);
-							Old = Active.Current();
-						}
+							Active.Delete(it);
 						else
-						{
-							Old = Active.Next();
-						}
+							it++;
 					}
 				}
 			}
@@ -2012,8 +2011,9 @@ bool GBlendBrush::Start(GRopArgs &Args)
 	}
 	s.Sort(StopCompare);
 
-	GBlendStop *Prev = s.First();
-	GBlendStop *Next = s.Next();
+	auto it = s.begin();
+	GBlendStop *Prev = *it++;
+	GBlendStop *Next = *it;
 	if (Prev && Next)
 	{
 		for (int i=0; i<CountOf(Lut); i++)
@@ -2022,7 +2022,8 @@ bool GBlendBrush::Start(GRopArgs &Args)
 
 			if (p > Next->Pos)
 			{
-				GBlendStop *n = s.Next();
+				it++;
+				GBlendStop *n = *it;
 				if (n)
 				{
 					Prev = Next;
