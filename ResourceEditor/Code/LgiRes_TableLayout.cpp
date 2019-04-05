@@ -207,7 +207,7 @@ public:
 		}
 		else if (stricmp(Name, VAL_Children) == 0)
 		{
-			for (GVariant *v = Value.Value.Lst->First(); v; v = Value.Value.Lst->Next())
+			for (auto v: *Value.Value.Lst)
 			{
 				LgiAssert(v->Type == GV_VOID_PTR);
 				ResDialogCtrl *Obj = dynamic_cast<ResDialogCtrl*>((ResObject*) v->Value.Ptr);
@@ -1474,7 +1474,7 @@ static bool HasTableLayout(GXmlTag *t)
 {
 	if (t->IsTag("TableLayout"))
 		return true;
-	for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+	for (auto c: t->Children)
 	{
 		if (HasTableLayout(c))
 			return true;
@@ -1600,8 +1600,8 @@ public:
     
     void OnDialog(LgiDialogRes *d)
     {
-        while (Children.First())
-            delete Children.First();
+        while (Children.Length())
+            delete Children[0];
     
         if ((Dlg = d))
         {

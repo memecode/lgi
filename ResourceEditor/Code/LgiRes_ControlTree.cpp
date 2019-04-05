@@ -270,7 +270,7 @@ void ReadTree(GXmlTag *t, GTreeNode *n, CtrlControlTreePriv *d, GView *v)
 		ct->Tag.Reset(NewStr(t->GetAttr(VAL_ControlTag)));
 	}
 
-	for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+	for (auto c: t->Children)
 	{
 		int StrRef = c->GetAsInt("ref");
 		CtNode *nw = new CtNode(d, v, StrRef);
