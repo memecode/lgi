@@ -26,9 +26,9 @@ if ver:
 		z.write("x64Release12\\LgiIde.exe", "LgiIde.exe")
 		z.write("..\\lib\\Lgi12x64.dll", "Lgi12x64.dll")
 	elif sys.platform.find("linux") >= 0:
-		subprocess.call(["strip", "clipshare", "../Lgi/trunk/Release/liblgi.so"])
+		subprocess.call(["strip", "lgiide", "../Release/liblgi.so"])
 		z.write("./lgiide")
-		z.write("../Lgi/trunk/Release/liblgi.so")
+		z.write("../Release/liblgi.so")
 	else:
 		print("Unexpected platform:", sys.platform)
 	
