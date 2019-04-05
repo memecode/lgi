@@ -4845,7 +4845,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 	#endif
 			// loop through all visible lines
 			int y = d->rPadding.y1;
-			while ((l == *It) &&
+			while ((l = *It) &&
 					l->r.y1+Dy < r.Y())
 			{
 				GRect Tr = l->r;
