@@ -73,7 +73,7 @@ void SerializeHistory(GHistory *h, const char *opt, GOptionsFile *p, bool Write)
 			if (Edit)
 				EdTxt = Edit->Name();
 
-			for (char *s=h->First(); s; s=h->Next(), i++)
+			for (auto s: *h)
 			{
 				if (EdTxt && EdTxt.Equals(s))
 				{
@@ -84,6 +84,7 @@ void SerializeHistory(GHistory *h, const char *opt, GOptionsFile *p, bool Write)
 				#if DEBUG_HIST
 				LgiTrace("\t[%i]='%s'\n", i, s);
 				#endif
+				i++;
 			}
 
 			GString strs = GString("|").Join(a);

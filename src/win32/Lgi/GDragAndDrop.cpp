@@ -117,7 +117,7 @@ HRESULT GDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 	List<char> Formats;
 	Source->d->CurData.Length(0);
 	Source->GetFormats(Formats);
-	for (char *f=Formats.First(); f; f=Formats.Next())
+	for (auto f: Formats)
 	{
 		int n = FormatToInt(f);
 		char *efmt = FormatToStr(pFormatEtc->cfFormat);
@@ -239,7 +239,7 @@ HRESULT GDataObject::QueryGetData(FORMATETC *pFormatEtc)
 		List<char> Formats;
 		Source->GetFormats(Formats);
 		bool HaveFormat = false;
-		for (char *i=Formats.First(); i; i=Formats.Next())
+		for (auto i: Formats)
 		{
 			if (pFormatEtc->cfFormat == FormatToInt(i))
 			{
@@ -313,7 +313,7 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::
 		Dp->pt.y = m.y;
 
 		char16 *f = (char16*) (((char*)Dp) + Dp->pFiles);
-		for (char16 *File=NativeW.First(); File; File=NativeW.Next())
+		for (auto File: NativeW)
 		{
 			auto Len = StrlenW(File) + 1;
 			StrcpyW(f, File);
@@ -698,7 +698,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::Drop(IDataObject *pDataObject, DWORD 
 	GdcPt2 Pt(p.x, p.y);
 
 	GArray<GDragData> Data;	
-	for (char *FormatName = Formats.First(); FormatName; FormatName = Formats.Next())
+	for (auto FormatName: Formats)
 	{
 		GString Str;
 		bool IsStreamDrop = !_stricmp(FormatName, Str = LGI_StreamDropFormat);

@@ -44,9 +44,7 @@ void GStatusBar::OnPosChange()
 	auto c = GetClient();
 	c.y2 -= 6;
 
-	for (	GViewI *w = Children.Last();
-			w;
-			w = Children.Prev(), i--)
+	for (auto w: Children)
 	{
 		GStatusPane *Pane = dynamic_cast<GStatusPane*>(w);
 		if (Pane)
@@ -77,6 +75,8 @@ void GStatusBar::OnPosChange()
 				x = 0;
 			}
 		}
+
+		i--;
 	}
 }
 

@@ -1531,12 +1531,13 @@ case IDomCall:
 							GStringPipe p(256);
 							List<GVariant> *Lst = Arg[0]->Value.Lst;
 							const char *Sep = Dom->CastString();
-							GVariant *v = Lst->First();
+							auto It = Lst->begin();
+							GVariant *v = *It;
 							if (v)
 							{
 								GVariant Tmp = *v;
 								p.Print("%s", Tmp.CastString());
-								while ((v = Lst->Next()))
+								while ((v = *(++It)))
 								{
 									Tmp = *v;
 									p.Print("%s%s", Sep, Tmp.CastString());

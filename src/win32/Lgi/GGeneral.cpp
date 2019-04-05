@@ -116,7 +116,7 @@ GString LGetFileMimeType(const char *File)
 					GRegKey Db(false, "HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\MIME\\Database\\Content Type");
 					List<char> Sub;
 					Db.GetKeyNames(Sub);
-					for (char *k = Sub.First(); k; k = Sub.Next())
+					for (auto k: Sub)
 					{
 						GRegKey Type(false, "HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\MIME\\Database\\Content Type\\%s", k);
 						char *Ext = Type.GetStr("Extension");
@@ -364,7 +364,7 @@ bool LgiGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 								List<char> Keys;
 								if (Shell.GetKeyNames(Keys))
 								{
-									GRegKey First(false, "HKEY_CLASSES_ROOT\\Applications\\%s\\shell\\%s\\command", Application, Keys.First());
+									GRegKey First(false, "HKEY_CLASSES_ROOT\\Applications\\%s\\shell\\%s\\command", Application, Keys[0]);
 									char *Path;
 									if (Path = First.GetStr())
 									{
@@ -841,7 +841,7 @@ bool GRegKey::GetKeyNames(List<char> &n)
 		n.Insert(WideToUtf8(Buf));
 		Size = sizeof(Buf);
 	}
-	return n.First() != 0;
+	return n.Length() > 0;
 }
 
 bool GRegKey::GetValueNames(List<char> &n)
@@ -853,7 +853,7 @@ bool GRegKey::GetValueNames(List<char> &n)
 		n.Insert(WideToUtf8(Buf));
 		Size = sizeof(Buf);
 	}
-	return n.First() != 0;
+	return n.Length() > 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

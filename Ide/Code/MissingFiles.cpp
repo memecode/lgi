@@ -186,7 +186,7 @@ public:
 
 			GArray<ProjectNode*> Nodes;
 
-			for (IdeProject *p = Child.First(); p; p = Child.Next())
+			for (auto p: Child)
 			{
 				if (p->GetAllNodes(Nodes))
 				{

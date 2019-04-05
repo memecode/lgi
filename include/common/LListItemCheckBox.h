@@ -59,12 +59,12 @@ public:
 		{
 			LList *l = GetList();
 			List<LListItem> Sel;
-			if (l->GetSelection(Sel) && Sel.First())
+			if (l->GetSelection(Sel) && Sel.Length())
 			{
 				bool v = !Value();
 				Sel.Delete(GetItem());
 
-				for (LListItem *i=Sel.First(); i; i=Sel.Next())
+				for (auto i: Sel)
 				{
 					LListItemColumn *c = GetItemCol(i, GetColumn());
 					if (c)

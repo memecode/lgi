@@ -519,10 +519,11 @@ public:
 				Log->Print("(LList*) %p {", v.Value.Lst);
 
 				int n=0; 
-				for (GVariant *i=v.Value.Lst->First(); i; i = v.Value.Lst->Next(), n++)
+				for (auto i: *v.Value.Lst)
 				{
 					Log->Print("%s%i=", n?",":"", n);
 					DumpVariant(Log, *i);
+					n++;
 				}
 
 				Log->Print("}");
@@ -1410,7 +1411,8 @@ void GDebugView::OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour)
 	int Rad = (Fy >> 1) - 1;
 	int PadY = GetCss(true)->PaddingTop().ToPx(Y(), f) + ((Fy - Rad) >> 1);
 
-	for (GTextLine *i = Line[Start]; i && Ln <= Start + Page; i = Line.Next(), Ln++)
+	auto It = Line.begin(Start);
+	for (auto i = *It; i && Ln <= Start + Page; i = *(++It), Ln++)
 	{
 		int OffY = (Ln - Start) * f->GetHeight();
 		/*
@@ -1470,7 +1472,7 @@ void GDebugView::PourText(size_t Start, ssize_t Len)
 	}
 
 	unsigned Idx = 0;
-	for (GTextLine *l=Line.First(); l; l=Line.Next(), Idx++)
+	for (auto l: Line)
 	{
 		// char16 *t = Text + l->Start;
 		// char16 *e = t + l->Len;
@@ -1488,6 +1490,7 @@ void GDebugView::PourText(size_t Start, ssize_t Len)
 				l->Back.Rgb(0xf0, 0xf0, 0xf0);
 			}
 		}
+		Idx++;
 	}
 }
 

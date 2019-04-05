@@ -349,7 +349,8 @@ ssize_t IFtp::ReadLine(char *Msg, ssize_t MsgSize)
 	{
 		// look through the input list for result codes
 		char *s;
-		while ((s = d->In.First()))
+		auto It = d->In.begin();
+		while ((s = *It))
 		{
 			int i = 0;
 			if (isdigit(*s))
@@ -372,7 +373,7 @@ ssize_t IFtp::ReadLine(char *Msg, ssize_t MsgSize)
 				}
 			}
 
-			d->In.Delete(s);
+			d->In.Delete(It);
 			d->ErrBuf.Empty();
 			
 			if (i)

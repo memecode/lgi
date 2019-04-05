@@ -449,15 +449,10 @@ bool GMouseHook::OnViewKey(GView *v, GKey &k)
 
 	if (d->Lock(_FL))
 	{
-		GView *l = d->Popups.Last();
-		
-		/*
-		if (k.c16 == 13)
-			LgiTrace("GMouseHook::OnViewKey d->p.Items=%i l=%p\n", d->p.Length(), l);
-		*/
-
-		if (l)
+		auto It = d->Popups.rbegin();		
+		if (It != d->Popups.end())
 		{
+			GView *l = *It;
 			if (l->OnKey(k))
 			{
 				Status = true;
@@ -606,14 +601,15 @@ GPopup::~GPopup()
 	GMouseHook *Hook = LgiApp->GetMouseHook();
 	if (Hook) Hook->UnregisterPopup(this);
 
-	for (GViewI *c; (c = Children.First()); )
+	while (Children.Length())
 	{
-		if (!c)
-			break; // ?
+		auto It = Children.begin();
+		auto c = *It;
 		if (!c->GetParent())
-			Children.Delete(c);
+			Children.Delete(It);
 		delete c;
 	}
+
 	DeleteObj(d);
 }
 

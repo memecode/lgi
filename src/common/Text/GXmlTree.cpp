@@ -1484,7 +1484,8 @@ void GXmlTree::Output(GXmlTag *t, int Depth)
 	
 	// Write the child tags
 	bool HasContent = ValidStr(t->Content);
-	GXmlTag *c = t->Children.First();
+	auto It = t->Children.begin();
+	GXmlTag *c = *It;
 	if (c || HasContent)
 	{
 		if (ValidTag)
@@ -1507,7 +1508,7 @@ void GXmlTree::Output(GXmlTag *t, int Depth)
 				d->File->Write((char*)"\n", 1);
 			}
 
-			for (; c; c=t->Children.Next())
+			for (; c; c = ++It)
 			{
 				Output(c, Depth + (d->NoDom() ? 0 : 1));
 			}

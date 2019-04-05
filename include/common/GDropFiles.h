@@ -182,7 +182,7 @@ public:
 			GVariant &v = dd.Data[i];
 			if (v.Type == GV_LIST)
 			{
-				for (GVariant *f = v.Value.Lst->First(); f; f = v.Value.Lst->Next())
+				for (auto f: *v.Value.Lst)
 				{
 					if (f->Type == GV_STREAM)
 					{

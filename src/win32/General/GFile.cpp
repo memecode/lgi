@@ -401,9 +401,10 @@ class GWin32Volume : public GVolume
 {
 	bool IsRoot;
 	List<GVolume> _Sub;
+	List<GVolume>::I _It;
 
 public:
-	GWin32Volume(LgiSystemPath Type, char *Name)
+	GWin32Volume(LgiSystemPath Type, char *Name) : _It(_Sub.end())
 	{
 		IsRoot = Type == LSP_ROOT;
 		_Name = Name;
@@ -431,7 +432,7 @@ public:
 			_Path = LGetSystemPath(Type);
 	}
 
-	GWin32Volume(const char *Drive)
+	GWin32Volume(const char *Drive) : _It(_Sub.end())
 	{
 		IsRoot = false;
 		int type = GetDriveTypeA(Drive);
@@ -537,12 +538,13 @@ public:
 			}
 		}
 
-		return _Sub.First();
+		_It = _Sub.begin();
+		return *_It;
 	}
 
 	GVolume *Next()
 	{
-		return _Sub.Next();
+		return *(++_It);
 	}
 
 	GDirectory *GetContents()
