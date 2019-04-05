@@ -519,8 +519,9 @@ bool LgiResources::Load(const char *FileName)
 		return false;
 	}
 
-	for (auto t: Root->Children)
+	for (auto It = Root->Children.begin(); It != Root->Children.end(); )
 	{
+		auto t = *It;
 		if (t->IsTag("string-group"))
 		{
 			bool IsString = true;
@@ -571,8 +572,10 @@ bool LgiResources::Load(const char *FileName)
 			{
 				Dialogs.Insert(n);
 				d->Ok = true;
-				t->RemoveTag();
-				t = 0;
+
+				// This allows the menu to take ownership of the XML tag
+				Root->Children.Delete(It);
+				t = NULL;
 			}
 			else
 			{
@@ -587,8 +590,10 @@ bool LgiResources::Load(const char *FileName)
 			{
 				Menus.Insert(m);
 				d->Ok = true;
-				t->RemoveTag();
-				t = 0;
+
+				// This allows the menu to take ownership of the XML tag
+				Root->Children.Delete(It);
+				t = NULL;
 			}
 			else
 			{
@@ -601,6 +606,9 @@ bool LgiResources::Load(const char *FileName)
 			const char *c = t->GetContent();
 			CssStore.Parse(c);
 		}
+
+		if (t)
+			It++;
 	}
 
 	return true;
@@ -1441,9 +1449,9 @@ bool GMenuLoader::Load(LgiMenuRes *MenuRes, GXmlTag *Tag, ResFileFormat Format, 
 {
 	bool Status = false;
 
-	if (Tag && Tag->GetTag())
+	if (Tag)
 	{
-		if (stricmp(Tag->GetTag(), "menu") == 0)
+		if (Tag->IsTag("menu"))
 		{
 			#if WINNATIVE
 			if (!Info)
