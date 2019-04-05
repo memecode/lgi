@@ -34,7 +34,7 @@ GSubMenu::~GSubMenu()
 {
 	while (Items.Length())
 	{
-		LgiMenuItem *i = Items.First();
+		LgiMenuItem *i = Items[0];
 		LgiAssert(i->Parent == this);
 		DeleteObj(i);
 	}
@@ -165,7 +165,7 @@ void GSubMenu::ClearHandle()
 void GSubMenu::Empty()
 {
 	LgiMenuItem *i;
-	while (i = Items.First())
+	while (i = Items[0])
 	{
 		RemoveItem(i);
 		DeleteObj(i);

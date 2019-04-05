@@ -225,6 +225,7 @@ public:
 		return Items.end();
 	}
 
+	/*
 	template<typename T>
 	bool Iterate(T *&Ptr)
 	{
@@ -237,6 +238,7 @@ public:
 
 		return Ptr != NULL;
 	}
+	*/
 };
 
 /// List widget

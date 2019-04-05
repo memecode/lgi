@@ -199,7 +199,7 @@ void GView::_Delete()
 
 	// Heirarchy
 	GViewI *c;
-	while (c = Children.First())
+	while (c = Children[0])
 	{
 		if (c->GetParent() != (GViewI*)this)
 		{
@@ -937,7 +937,7 @@ bool GView::Detach()
 			int Detached = 0;
 			GViewI *c, *prev = NULL;
 
-			while (c = Children.First())
+			while (c = Children[0])
 			{
 				LgiAssert(!prev || c != prev);
 				if (c->GetParent())

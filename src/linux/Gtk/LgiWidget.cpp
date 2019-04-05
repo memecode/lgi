@@ -572,7 +572,7 @@ lgi_widget_drag_drop(GtkWidget	       *widget,
 	if (Result == DROPEFFECT_NONE)
 		return false;
 
-	char *drop_format = Formats.First();
+	char *drop_format = Formats[0];
 	Formats.Delete(drop_format);
 	Formats.DeleteArrays();
 	#if DEBUG_DND

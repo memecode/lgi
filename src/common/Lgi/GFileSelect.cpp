@@ -839,7 +839,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 		ShowHidden->Value(d->InitShowHiddenFiles);
 
 	// Load types
-	if (!d->Types.First())
+	if (!d->Types.Length())
 	{
 		GFileType *t = new GFileType;
 		if (t)
@@ -849,7 +849,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 			d->Types.Insert(t);
 		}
 	}
-	for (GFileType *t=d->Types.First(); t; t=d->Types.Next())
+	for (auto t: d->Types)
 	{
 		char s[256];
 		sprintf(s, "%s (%s)", t->Description(), t->Extension());
@@ -859,7 +859,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	d->CurrentType = 0;
 
 	// File + Path
-	char *File = d->Files.First();
+	char *File = d->Files[0];
 	if (File)
 	{
 		char *Dir = strrchr(File, DIR_CHAR);
@@ -1068,7 +1068,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 					int TypeIndex = -1;
 					
 					int n = 0;
-					for (GFileType *t = d->Types.First(); t; t = d->Types.Next(), n++)
+					for (auto t: d->Types)
 					{
 						if (t->Extension() &&
 							stricmp(t->Extension(), f) == 0)
@@ -1076,6 +1076,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 							TypeIndex = n;
 							break;
 						}
+						n++;
 					}
 					
 					// insert the new type if not already there

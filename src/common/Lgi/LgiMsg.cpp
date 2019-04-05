@@ -265,7 +265,7 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 
 		int x = (p.X() - BtnsX) / 2;
 		int y = Text->Y() + 20;
-		for (GButton *b=Btns.First(); b; b=Btns.Next())
+		for (auto b: Btns)
 		{
 			GRect r(x, y, x+BtnX-1, y+BtnY-1);
 			b->SetPos(r);
