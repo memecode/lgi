@@ -574,7 +574,7 @@ bool LgiResources::Load(const char *FileName)
 				d->Ok = true;
 
 				// This allows the menu to take ownership of the XML tag
-				Root->Children.Delete(It);
+				t->RemoveTag();
 				t = NULL;
 			}
 			else
@@ -592,7 +592,7 @@ bool LgiResources::Load(const char *FileName)
 				d->Ok = true;
 
 				// This allows the menu to take ownership of the XML tag
-				Root->Children.Delete(It);
+				t->RemoveTag();
 				t = NULL;
 			}
 			else
