@@ -3662,9 +3662,9 @@ int IdeTree::WillAccept(List<char> &Formats, GdcPt2 p, int KeyState)
 {
 	static bool First = true;
 	
-	auto It = Formats.begin();
-	for (char *f=*It; f; )
+	for (auto It = Formats.begin(); It != Formats.end(); )
 	{
+		auto f = *It;
 		if (stricmp(f, NODE_DROP_FORMAT) == 0 ||
 			stricmp(f, LGI_FileDropFormat) == 0)
 		{
