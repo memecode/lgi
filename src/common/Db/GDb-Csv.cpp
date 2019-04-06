@@ -732,7 +732,7 @@ SvDb::~SvDb()
 bool SvDb::Connect(const char *Init)
 {
 	Tables.Insert(new SvRecordset(this, Init, HasHeaders));
-	return Tables.First() != 0;
+	return Tables[0] != 0;
 }
 
 bool SvDb::Disconnect()
