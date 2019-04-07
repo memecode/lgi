@@ -1668,8 +1668,7 @@ char *CreateAddressTag(List<AddressDescriptor> &l, int Type, List<char> *Charset
 {
 	char *Result = 0;
 	List<AddressDescriptor> Addr;
-	AddressDescriptor *a;
-	for (a = l.First(); a; a = l.Next())
+	for (auto a: l)
 	{
 		if (a->CC == Type)
 		{
@@ -1682,9 +1681,10 @@ char *CreateAddressTag(List<AddressDescriptor> &l, int Type, List<char> *Charset
 		GStringPipe StrBuf;
 		StrBuf.Push((Type == 0) ? (char*)"To: " : (char*)"Cc: ");
 
-		for (a = Addr.First(); a; )
+		for (auto It = Addr.begin(); It != Addr.end(); )
 		{
-			AddressDescriptor *NextA = Addr.Next();
+			auto a = *It;
+			AddressDescriptor *NextA = *(++It);
 			char Buffer[256] = "";
 			
 			StripChars(a->Name);
@@ -2032,7 +2032,7 @@ public:
 			F.Print("Forward-Path: ");
 
 			int i = 0;
-			for (AddressDescriptor *a=To.First(); a; a=To.Next())
+			for (auto a: To)
 			{
 				a->Status = true;
 				GToken Addrs(a->Addr, ",");
@@ -2149,7 +2149,7 @@ public:
 
 	void Empty()
 	{
-		for (MailItem *m = Mail.First(); m; m = Mail.Next())
+		for (auto m: Mail)
 		{
 			if (m->Delete)
 			{

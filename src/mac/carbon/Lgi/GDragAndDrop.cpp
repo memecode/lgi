@@ -348,7 +348,7 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect)
 	if (status == dragNotAcceptedErr)
 	{
 		printf("%s:%i - error 'dragNotAcceptedErr', formats were:\n", _FL);
-		for (char *f = Formats.First(); f; f = Formats.Next())
+		for (auto f: Formats)
 		{
 			printf("\t'%s'\n", f);
 		}
@@ -676,7 +676,7 @@ OSStatus GDragDropTarget::OnDragWithin(GView *v, DragRef Drag)
 	}
 	if (Accept)
 	{
-		v->d->AcceptedDropFormat.Reset(NewStr(param->Formats.First()));
+		v->d->AcceptedDropFormat.Reset(NewStr(param->Formats[0]));
 		LgiAssert(v->d->AcceptedDropFormat.Get());
 	}
 

@@ -116,7 +116,7 @@ public:
 			GArray<GVariant*> a;
 			if (v.Type == GV_LIST)
 			{
-				for (GVariant *f = v.Value.Lst->First(); f; f = v.Value.Lst->Next())
+				for (auto f: *v.Value.Lst)
 				{
 					a.Add(f);
 				}

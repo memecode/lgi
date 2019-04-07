@@ -2723,7 +2723,7 @@ void GHtmlEdit::OnPosChange()
 	if (Client.X() > 16)
 	{
 		Btn *btn;
-		for (GViewI *c = Children.First(); c; c = Children.Next())
+		for (auto c: Children)
 		{
 			if (c != (GView*)d->e)
 			{

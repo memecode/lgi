@@ -4817,7 +4817,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 			// draw lines of text
 			int k = ScrollYLine();
 			auto It = Line.begin(k);
-			GTextLine *l;
+			GTextLine *l = NULL;
 			int Dy = 0;
 			if (It != Line.end())
 				Dy = -(*It)->r.y1;

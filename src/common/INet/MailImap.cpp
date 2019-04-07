@@ -920,8 +920,9 @@ bool MailIMap::ReadResponse(int Cmd, bool Plus)
 		{
 			if (Read(NULL))
 			{
-				for (char *Dlg = Dialog[Pos]; !Done && Dlg; Dlg = Dialog.Next())
+				for (auto It = Dialog.begin(Pos); !Done && It != Dialog.end(); It++)
 				{
+					auto Dlg = *It;
 					Pos++;
 					if (Cmd < 0 || (Plus && *Dlg == '+'))
 					{
@@ -1232,7 +1233,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 				CommandFinished();
 				if (Rd)
 				{
-					for (char *r=Dialog.First(); r; r=Dialog.Next())
+					for (auto r: Dialog)
 					{
 						GToken T(r, " ");
 						if (T.Length() > 1 &&
@@ -1425,7 +1426,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 									else
 									{
 										// Look for WEBALERT from Google
-										for (char *s = Dialog.First(); s; s = Dialog.Next())
+										for (auto s: Dialog)
 										{
 											char *start = strchr(s, '[');
 											char *end = start ? strrchr(start, ']') : NULL;
@@ -1699,7 +1700,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 										
 										if (WriteBuf(false, NULL, true) && Read())
 										{
-											for (char *Dlg = Dialog.First(); Dlg; Dlg=Dialog.Next())
+											for (auto Dlg: Dialog)
 											{
 												if (Dlg[0] == '+' && Dlg[1] == ' ')
 												{
@@ -1774,7 +1775,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 							Dialog.DeleteArrays();
 							if (Read(NULL))
 							{
-								for (char *l = Dialog.First(); l; l = Dialog.Next())
+								for (auto l: Dialog)
 								{
 									if (*l == '+')
 									{
@@ -1860,7 +1861,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 						Buf[0] = 0;
 						if (ReadResponse(Cmd))
 						{
-							for (char *Dlg = Dialog.First(); Dlg; Dlg=Dialog.Next())
+							for (auto Dlg: Dialog)
 							{
 								GArray<GAutoString> t;
 								char *s = Dlg;
@@ -1975,7 +1976,7 @@ bool MailIMap::SelectFolder(const char *Path, StrMap *Values)
 
 				if (Values)
 				{
-					for (GString Dlg = Dialog.First(); Dlg; Dlg = Dialog.Next())
+					for (GString Dlg: Dialog)
 					{
 						GString::Array t = Dlg.SplitDelimit(" []");
 						if (t.Length() > 0 &&
@@ -2509,7 +2510,7 @@ bool MailIMap::Append(const char *Folder, ImapMailFlags *Flags, const char *Msg,
 			if (Read())
 			{
 				bool GotPlus = false;
-				for (char *Dlg = Dialog.First(); Dlg; Dlg = Dialog.Next())
+				for (auto Dlg: Dialog)
 				{
 					if (Dlg[0] == '+')
 					{
@@ -2554,7 +2555,7 @@ bool MailIMap::Append(const char *Folder, ImapMailFlags *Flags, const char *Msg,
 					{
 						char Tmp[16];
 						sprintf_s(Tmp, sizeof(Tmp), "A%4.4i", Cmd);
-						for (char *Line = Dialog.First(); Line; Line = Dialog.Next())
+						for (auto Line: Dialog)
 						{
 							GAutoString c = ImapBasicTokenize(Line);
 							if (!c) break;
@@ -2641,7 +2642,7 @@ int MailIMap::Sizeof(int Message)
 			Buf[0] = 0;
 			if (ReadResponse(Cmd))
 			{
-				char *d = Dialog.First();
+				char *d = Dialog[0];
 				if (d)
 				{
 					char *t = strstr(d, sRfc822Size);
@@ -2718,7 +2719,7 @@ bool MailIMap::FillUidList()
 				ClearDialog();
 				if (ReadResponse(Cmd))
 				{
-					for (char *d = Dialog.First(); d && !Status; d=Dialog.Next())
+					for (auto d: Dialog)
 					{
 						GToken T(d, " ");
 						if (T[1] && strcmp(T[1], "SEARCH") == 0)
@@ -2754,7 +2755,7 @@ bool MailIMap::GetUidList(List<char> &Id)
 	{
 		if (FillUidList())
 		{
-			for (char *s=Uid.First(); s; s=Uid.Next())
+			for (auto s: Uid)
 			{
 				Id.Insert(NewStr(s));
 			}
@@ -2783,7 +2784,7 @@ bool MailIMap::GetFolders(GArray<MailImapFolder*> &Folders)
 			{
 				char Sep[] = { GetFolderSep(), 0 };
 
-				for (char *d = Dialog.First(); d; d=Dialog.Next())
+				for (auto d: Dialog)
 				{
 					GArray<GAutoString> t;
 					char *s;
@@ -3085,7 +3086,7 @@ bool MailIMap::Search(bool Uids, GArray<GAutoString> &SeqNumbers, const char *Fi
 			ClearDialog();
 			if (ReadResponse(Cmd))
 			{
-				for (char *d = Dialog.First(); d; d = Dialog.Next())
+				for (auto d: Dialog)
 				{
 					if (*d != '*')
 						continue;
@@ -3126,7 +3127,7 @@ bool MailIMap::Status(char *Path, int *Recent)
 			ClearDialog();
 			if (ReadResponse(Cmd))
 			{
-				for (char *d=Dialog.First(); d; d=Dialog.Next())
+				for (auto d: Dialog)
 				{
 					if (*d != '*')
 						continue;
@@ -3183,7 +3184,7 @@ bool MailIMap::Poll(int *Recent, GArray<GAutoString> *New)
 					Recent = &LocalRecent;
 
 				*Recent = 0;
-				for (char *Dlg=Dialog.First(); Dlg; Dlg=Dialog.Next())
+				for (auto Dlg: Dialog)
 				{
 					if (Recent && stristr(Dlg, " RECENT"))
 					{
@@ -3245,7 +3246,7 @@ bool MailIMap::OnIdle(int Timeout, GArray<Untagged> &Resp)
 		Socket->IsBlocking(Blk);
 
 		char *Dlg;
-		while ((Dlg = Dialog.First()))
+		while ((Dlg = Dialog[0]))
 		{
 			Dialog.Delete(Dlg);
 			Log(Dlg, GSocketI::SocketMsgReceive);

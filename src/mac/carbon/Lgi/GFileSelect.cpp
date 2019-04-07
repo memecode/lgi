@@ -76,7 +76,7 @@ public:
 			{
 				Dir++;
 				
-				for (GFileType *t = Types.First(); t; t = Types.Next())
+				for (auto t: Types)
 				{
 					char *e = t->Extension();
 					if (e)
@@ -98,7 +98,7 @@ public:
 		if (Types.Length())
 		{
 			int Len = 0;
-			for (GFileType *t = Types.First(); t; t = Types.Next())
+			for (auto t: Types)
 			{
 				if (t->Extension())
 				{
@@ -112,7 +112,7 @@ public:
 				CFMutableArrayRef identifiers = CFArrayCreateMutable( kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks );
 				if (identifiers)
 				{
-					for (GFileType *t = Types.First(); t; t = Types.Next())
+					for (auto t: Types)
 					{
 						char *Ext = t->Extension();
 						GToken e(Ext, ";");
@@ -226,7 +226,7 @@ bool GFileSelect::ReadOnly()
 
 char *GFileSelect::Name()
 {
-	return d->Files.First();
+	return d->Files[0];
 }
 
 bool GFileSelect::Name(const char *n)
