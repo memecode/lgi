@@ -441,7 +441,7 @@ public:
 						DeleteObj(d);
 						Files.Sort(InfCmp);
 
-						for (FileInf *f = Files.First(); f; f = Files.Next())
+						for (auto f: Files)
 						{
 							char *d = strrchr(f->File, DIR_CHAR);
 							if (d)

@@ -419,7 +419,7 @@ bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 	if (s.Open())
 	{
 		Args.GetReturn()->SetList();
-		for (int i=0; i<s.Length(); i++)
+		for (unsigned i=0; i<s.Length(); i++)
 		{
 			Args.GetReturn()->Value.Lst->Insert(new GVariant(s[i]));
 		}

@@ -789,7 +789,7 @@ public:
 		if (Func)
 		{
 			// Set up stack for function call
-			LgiAssert(Func->FrameSize.Get());
+			LgiAssert(Func->FrameSize.Get() != NULL);
 			Sf.CurrentFrameSize = *Func->FrameSize.Get();
 			AddLocalSize(Sf.CurrentFrameSize);
 
@@ -1834,7 +1834,7 @@ void GVmDebuggerWnd::UpdateVariables(LList *Lst, GVariant *Arr, ssize_t Len, cha
 	Lst->GetAll(all);
 	
 	LListItem *it;
-	for (int i=0; i<Len; i++)
+	for (ssize_t i=0; i<Len; i++)
 	{
 		GVariant *v = Arr + i;
 		GStringPipe p(64);
@@ -1843,13 +1843,13 @@ void GVmDebuggerWnd::UpdateVariables(LList *Lst, GVariant *Arr, ssize_t Len, cha
 		char nm[32];
 		sprintf_s(nm, sizeof(nm), "%c%i", Prefix, i);
 		
-		if (i >= all.Length())
+		if (i >= (ssize_t)all.Length())
 		{
 			it = new LListItem;
 			all.Insert(it);
 			Lst->Insert(it);
 		}
-		it = i < all.Length() ? all[i] : NULL;
+		it = i < (ssize_t)all.Length() ? all[i] : NULL;
 		if (it)
 		{
 			it->SetText(nm, 0);

@@ -210,7 +210,7 @@ public:
 					break;
 				}
 
-				for (GXmlTag *c = r.Children.First(); c; c = r.Children.Next())
+				for (auto c: r.Children)
 				{
 					if (c->IsTag("file"))
 					{
