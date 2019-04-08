@@ -12,6 +12,26 @@
 #define PROF(s)
 #endif
 
+bool TerminalAt(GString Path)
+{
+	#if defined(MAC)
+		return LgiExecute("/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal", Path);
+	#elif defined(WINDOWS)
+		TCHAR w[MAX_PATH];
+		auto r = GetWindowsDirectory(w, CountOf(w));
+		if (r > 0)
+		{
+			GFile::Path p = GString(w);
+			p += "system32\\cmd.exe";
+			FileDev->SetCurrentFolder(Path);
+			return LgiExecute(p);
+		}
+	#elif defined(LINUX)
+		// #error "Impl me."
+	#endif
+
+	return false;
+}
 
 int Ver2Int(GString v)
 {
@@ -90,8 +110,8 @@ int ReaderThread::Main()
 	if (Out)
 	{
 		char Buf[1024];
-		ssize_t r = Process->Read(Buf, sizeof(Buf));
-		if (r > 0)
+		ssize_t r;
+		while ((r = Process->Read(Buf, sizeof(Buf))) > 0)
 			Out->Write(Buf, r);
 	}
 
@@ -1290,6 +1310,8 @@ void VcFolder::Diff(VcFile *file)
 			StartCmd(a, &VcFolder::ParseDiff);
 			break;
 		}
+		case VcCvs:
+			break;
 		default:
 			LgiAssert(!"Impl me.");
 			break;
@@ -1544,7 +1566,14 @@ void VcFolder::OnRemove()
 	GXmlTag *t = d->Opts.LockTag(NULL, _FL);
 	if (t)
 	{
-		for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+		Uncommit.Reset();
+		if (GTreeItem::Select())
+		{
+			d->Files->Empty();
+			d->Lst->Empty();
+		}
+
+		for (auto c: t->Children)
 		{
 			if (c->IsTag(OPT_Folder) &&
 				c->GetContent() &&
@@ -1585,21 +1614,7 @@ void VcFolder::OnMouseClick(GMouse &m)
 			}
 			case IDM_TERMINAL:
 			{
-				#if defined(MAC)
-					LgiExecute("/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal", Path);
-				#elif defined(WINDOWS)
-					TCHAR w[MAX_PATH];
-					auto r = GetWindowsDirectory(w, CountOf(w));
-					if (r > 0)
-					{
-						GFile::Path p = GString(w);
-						p += "system32\\cmd.exe";
-						FileDev->SetCurrentFolder(Path);
-						LgiExecute(p);
-					}
-				#elif defined(LINUX)
-					// #error "Impl me."
-				#endif
+				TerminalAt(Path);
 				break;
 			}
 			case IDM_CLEAN:
@@ -1804,15 +1819,31 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 	{
 		case VcCvs:
 		{
+			LHashTbl<StrKey<char>,VcFile*> Map;
+			for (auto i: *d->Files)
+			{
+				VcFile *f = dynamic_cast<VcFile*>(i);
+				if (f)
+					Map.Add(f->GetText(COL_FILENAME), f);
+			}
+
+			#if 0
+			GFile Tmp("C:\\tmp\\output.txt", O_WRITE);
+			Tmp.Write(s);
+			Tmp.Close();
+			#endif
+
 			GString::Array a = s.Split("===================================================================");
 			for (auto i : a)
 			{
 				GString::Array Lines = i.SplitDelimit("\r\n");
+				if (Lines.Length() == 0)
+					continue;
 				GString f = Lines[0].Strip();
 				if (f.Find("File:") == 0)
 				{
 					GString::Array Parts = f.SplitDelimit("\t");
-					GString File = Parts[0].Split(": ").Last();
+					GString File = Parts[0].Split(": ").Last().Strip();
 					GString Status = Parts[1].Split(": ").Last();
 					GString WorkingRev;
 
@@ -1826,19 +1857,46 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 						}
 					}
 
-					VcFile *f = new VcFile(d, this, WorkingRev, IsWorking);
-					f->SetText(Status, COL_STATE);
-					f->SetText(File, COL_FILENAME);
-					Ins.Insert(f);
+					VcFile *f = Map.Find(File);
+					if (!f)
+					{
+						if (f = new VcFile(d, this, WorkingRev, IsWorking))
+							Ins.Insert(f);
+					}
+					if (f)
+					{
+						f->SetText(Status, COL_STATE);
+						f->SetText(File, COL_FILENAME);
+						f->Update();
+					}
 				}
 				else if (f(0) == '?' &&
 						ShowUntracked)
 				{
 					GString File = f(2, -1);
-					VcFile *f = new VcFile(d, this, NULL, IsWorking);
-					f->SetText("?", COL_STATE);
-					f->SetText(File, COL_FILENAME);
-					Ins.Insert(f);
+
+					VcFile *f = Map.Find(File);
+					if (!f)
+					{
+						if (f = new VcFile(d, this, NULL, IsWorking))
+							Ins.Insert(f);
+					}
+					if (f)
+					{
+						f->SetText("?", COL_STATE);
+						f->SetText(File, COL_FILENAME);
+						f->Update();
+					}
+				}
+			}
+
+			for (auto i: *d->Files)
+			{
+				VcFile *f = dynamic_cast<VcFile*>(i);
+				if (f)
+				{
+					if (f->GetStatus() == VcFile::SUnknown)
+						f->SetStatus(VcFile::SUntracked);
 				}
 			}
 			break;
@@ -1962,6 +2020,9 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 	{
 		Ins.DeleteObjects();
 	}
+
+	if (Params && Params->Leaf)
+		Params->Leaf->AfterBrowse();
 
 	return false; // Don't refresh list
 }
@@ -2988,15 +3049,12 @@ GString VcLeaf::Full()
 
 void VcLeaf::OnBrowse()
 {
-	Parent->FolderStatus(Full(), this);
-}
+	auto f = Full();
 
-void VcLeaf::AfterBrowse()
-{
 	LList *Files = d->Files;
 	Files->Empty();
 	GDirectory Dir;
-	for (int b = Dir.First(Full()); b; b = Dir.Next())
+	for (int b = Dir.First(f); b; b = Dir.Next())
 	{
 		if (Dir.IsDir())
 			continue;
@@ -3004,12 +3062,18 @@ void VcLeaf::AfterBrowse()
 		VcFile *f = new VcFile(d, Parent, NULL);
 		if (f)
 		{
-			// f->SetText(COL_STATE, 
 			f->SetText(Dir.GetName(), COL_FILENAME);
 			Files->Insert(f);
 		}
 	}
 	Files->ResizeColumnsToContent();
+
+	Parent->FolderStatus(f, this);
+}
+
+void VcLeaf::AfterBrowse()
+{
+	int asd=0;
 }
 
 void VcLeaf::OnExpand(bool b)
@@ -3066,6 +3130,10 @@ void VcLeaf::OnMouseClick(GMouse &m)
 		GSubMenu s;
 		s.AppendItem("Log", IDM_LOG);
 		s.AppendItem("Blame", IDM_BLAME, !Folder);
+		s.AppendSeparator();
+		s.AppendItem("Browse To", IDM_BROWSE_FOLDER);
+		s.AppendItem("Terminal At", IDM_TERMINAL);
+		
 		int Cmd = s.Float(GetTree(), m);
 		switch (Cmd)
 		{
@@ -3076,6 +3144,16 @@ void VcLeaf::OnMouseClick(GMouse &m)
 			case IDM_BLAME:
 			{
 				Parent->Blame(Full());
+				break;
+			}
+			case IDM_BROWSE_FOLDER:
+			{
+				LgiBrowseToFile(Full());
+				break;
+			}
+			case IDM_TERMINAL:
+			{
+				TerminalAt(Full());
 				break;
 			}
 		}

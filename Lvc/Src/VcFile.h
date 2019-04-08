@@ -36,6 +36,7 @@ public:
 	const char *GetDiff() { return Diff; }
 	const char *GetFileName() { return GetText(COL_FILENAME); }
 	FileStatus GetStatus();
+	void SetStatus(FileStatus s) { Status = s; Update(); }
 	
 	void SetDiff(GString d);
 	void Select(bool b);
