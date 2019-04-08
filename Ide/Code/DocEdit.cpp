@@ -63,6 +63,7 @@ DocEdit::~DocEdit()
 
 void DocEdit::OnCreate()
 {
+	GTextView3::OnCreate();
 	Run();
 }
 
