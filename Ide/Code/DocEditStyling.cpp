@@ -904,7 +904,7 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 	auto &Style = p.Styles;
 
 	char *Ext = LgiGetExtension(p.FileName);
-	DocType Type = Ext && !stricmp(Ext, "js") ? CodePhp : CodeHtml;
+	DocType Type = CodeHtml;
 	GTextView3::GStyle *Cur = NULL;
 
 	#define START_CODE() \
@@ -926,7 +926,22 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 			Cur = NULL; \
 		}
 
-	char16 *s;
+	char16 *s = Text;
+	if (Ext)
+	{
+		if (!stricmp(Ext, "js") ||
+			!stricmp(Ext, "php"))
+		{
+			Type = CodePhp;
+			START_CODE();
+		}
+		else if (!stricmp(Ext, "css"))
+		{
+			Type = CodeCss;
+			START_CODE();
+		}
+	}
+
 	for (s = Text; s < e; s++)
 	{
 		switch (*s)
@@ -952,8 +967,9 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 			}
 			case '/':
 			{
-				if (Type != CodeHtml &&
-					Type != CodePre)
+				if (Type == CodeJavascript ||
+					Type == CodePhp ||
+					Type == CodeCss)
 				{
 					if (s[1] == '/')
 					{
