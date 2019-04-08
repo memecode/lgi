@@ -1504,7 +1504,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 
 										#if 1
 											ZeroObj(challenge);
-											char *Line = Dialog.First();
+											char *Line = Dialog[0];
 											LgiAssert(Line != NULL);
 											ChopNewLine(Line);
 											int LineLen = strlen(Line);
