@@ -297,7 +297,7 @@ bool DbTesting()
 	GXmlTag *Emails = r.GetChildTag("Emails");
 	if (!Emails)
 		return false;
-	for (GXmlTag *c = Emails->Children.First(); c; c = Emails->Children.Next())
+	for (auto c: Emails->Children)
 	{
 		LDbRow *m = Tbl.NewRow();
 		m->SetInt(M_UID, c->GetAsInt("Uid"));
