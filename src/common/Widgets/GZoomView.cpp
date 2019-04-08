@@ -1162,7 +1162,7 @@ public:
 GZoomView::GZoomView(GZoomViewCallback *callback) : ResObject(Res_Custom)
 {
 	d = new GZoomViewPriv(this, callback);
-	Sunken(true);
+	// Sunken(true);
 }
 
 GZoomView::~GZoomView()

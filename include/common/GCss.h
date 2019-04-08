@@ -480,6 +480,11 @@ public:
 			Style = db.Style;
 			Important = db.Important;
 		}
+
+		BorderDef(const char *Init)
+		{
+			Parse(NULL, Init);
+		}
 		
 		bool Parse(GCss *Css, const char *&s);
 		bool ParseStyle(const char *&s);
