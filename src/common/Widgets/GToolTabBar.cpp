@@ -284,11 +284,10 @@ void GToolTabBar::OnPaint(GSurface *pScreen)
 	pDC->Rectangle(&r);
 
 	// Draw tabs
-	GViewI *w;
 	GArray<GToolTab*> Down;
-	for (w = Children.Last(); w; w = Children.Prev())
+	for (auto It = Children.rbegin(); It != Children.end(); It--)
 	{
-		GToolTab *Tab = dynamic_cast<GToolTab*>(w);
+		GToolTab *Tab = dynamic_cast<GToolTab*>(*It);
 		if (Tab)
 		{
 			if (!Tab->Value())
@@ -322,7 +321,7 @@ void GToolTabBar::OnMouseClick(GMouse &m)
 {
 	if (m.Down())
 	{
-		for (GViewI *c = Children.First(); c; c = Children.Next())
+		for (auto c: Children)
 		{
 			GToolTab *Tab = dynamic_cast<GToolTab*>(c);
 			if (Tab)
@@ -348,7 +347,7 @@ bool GToolTabBar::Pour(GRegion &r)
 	int x = (IsVertical()) ? Tab.y1 : Tab.x1;
 	int y = (IsVertical()) ? Tab.x1 : Tab.y1;
 	
-	for (GViewI *w = Children.First(); w; w = Children.Next())
+	for (auto w: Children)
 	{
 		GToolTab *Btn = dynamic_cast<GToolTab*>(w);
 		if (Btn)
@@ -452,7 +451,7 @@ void GToolTabBar::OnCreate()
 {
 	AttachChildren();
 	
-	GToolButton *Btn = dynamic_cast<GToolButton*>(Children.First());
+	GToolButton *Btn = dynamic_cast<GToolButton*>(Children[0]);
 	if (Btn)
 	{
 		Btn->Value(true);
