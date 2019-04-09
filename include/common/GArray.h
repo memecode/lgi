@@ -446,6 +446,31 @@ public:
 		return false;
 	}
 
+	/// Deletes a range.
+	/// This operation always maintains order. 
+	/// \returns the number of removed elements
+	ssize_t DeleteRange(GRange r)
+	{
+		// Truncate range to the size of this array
+		if (r.Start < 0)
+			r.Start = 0;
+		if (r.End() >= len)
+			r.Len = len - r.Start;
+
+		// Delete all the elements we are removing
+		for (ssize_t i=r.Start; i<r.End(); i++)
+			p[i].~Type();
+
+		// Move the elements donw
+		auto Remain = len - r.End();
+		if (Remain > 0)
+			memmove(&p[r.Start], &p[r.End()], sizeof(Type)*Remain);
+
+		len = r.Start + Remain;
+
+		return r.Len;
+	}
+
 	/// Deletes the entry 'n'
 	bool Delete
 	(
