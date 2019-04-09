@@ -2339,6 +2339,13 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 				}
 				break;
 			}
+			case VcCvs:
+			{
+				GString a;
+				a.Printf("commit -m \"%s\"", Msg);
+				IsCommit = StartCmd(a, &VcFolder::ParseCommit, NULL, LogNormal);
+				break;
+			}
 			default:
 			{
 				LgiAssert(!"Impl me.");
@@ -2745,6 +2752,13 @@ bool VcFolder::ParseAddFile(int Result, GString s, ParseParams *Params)
 	{
 		case VcCvs:
 		{
+			if (Result)
+			{
+				d->Tabs->Value(1);
+				OnCmdError(s, "Add file failed");
+			}
+			else ClearError();
+
 			break;
 		}
 		default:
@@ -2763,9 +2777,19 @@ bool VcFolder::AddFile(const char *Path, bool AsBinary)
 	{
 		case VcCvs:
 		{
+			GString p = Path;
+			auto dir = strrchr(p, DIR_CHAR);
+			ParseParams *params = NULL;
+			if (dir)
+			{
+				*dir++ = 0;
+				if (params = new ParseParams)
+					params->AltInitPath = p;
+			}
+
 			GString a;
-			a.Printf("add%s \"%s\"", AsBinary ? " -kb" : "", Path);
-			return StartCmd(a, &VcFolder::ParseAddFile);
+			a.Printf("add%s \"%s\"", AsBinary ? " -kb" : "", dir ? dir : Path);
+			return StartCmd(a, &VcFolder::ParseAddFile, params);
 			break;
 		}
 		default:
@@ -3053,12 +3077,12 @@ GString VcLeaf::Full()
 
 void VcLeaf::OnBrowse()
 {
-	auto f = Full();
+	auto full = Full();
 
 	LList *Files = d->Files;
 	Files->Empty();
 	GDirectory Dir;
-	for (int b = Dir.First(f); b; b = Dir.Next())
+	for (int b = Dir.First(full); b; b = Dir.Next())
 	{
 		if (Dir.IsDir())
 			continue;
@@ -3066,13 +3090,13 @@ void VcLeaf::OnBrowse()
 		VcFile *f = new VcFile(d, Parent, NULL);
 		if (f)
 		{
+			f->SetPath(full);
 			f->SetText(Dir.GetName(), COL_FILENAME);
 			Files->Insert(f);
 		}
 	}
 	Files->ResizeColumnsToContent();
-
-	Parent->FolderStatus(f, this);
+	Parent->FolderStatus(full, this);
 }
 
 void VcLeaf::AfterBrowse()
