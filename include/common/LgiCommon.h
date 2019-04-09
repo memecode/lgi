@@ -295,6 +295,10 @@ LgiFunc uint LgiRand(uint Max = 0);
 
 LgiFunc bool _lgi_read_colour_config(const char *Tag, uint32_t *c);
 
+#ifndef SND_ASYNC
+#define SND_ASYNC	0x0001
+#endif
+
 /// Plays a sound
 /// \ingroup Base
 LgiFunc bool LgiPlaySound
