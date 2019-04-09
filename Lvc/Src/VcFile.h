@@ -25,6 +25,7 @@ private:
 	bool LoadDiff;
 	GString Diff;
 	GString Revision;
+	GString Path;
 	LListItemCheckBox *Chk;
 	FileStatus Status;
 
@@ -36,6 +37,7 @@ public:
 	const char *GetDiff() { return Diff; }
 	const char *GetFileName() { return GetText(COL_FILENAME); }
 	FileStatus GetStatus();
+	void SetPath(GString s) { Path = s; }
 	void SetStatus(FileStatus s) { Status = s; Update(); }
 	
 	void SetDiff(GString d);
