@@ -129,7 +129,7 @@ class ProjectNode;
 class BuildThread : public LThread, public GStream
 {
 	IdeProject *Proj;
-	GString Makefile;
+	GString Makefile, CygwinPath;
 	bool Clean, Release, All;
 	int WordSize;
 	GAutoPtr<GSubProcess> SubProc;
@@ -145,7 +145,8 @@ class BuildThread : public LThread, public GStream
 		CrossCompiler,
 		PythonScript,
 		IAR,
-		Nmake
+		Nmake,
+		Cygwin
 	}
 		Compiler;
 
@@ -1241,6 +1242,8 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, bool rele
 				Compiler = CrossCompiler;
 			else if (!stricmp(Comp, "IAR"))
 				Compiler = IAR;
+			else if (!stricmp(Comp, "Cygwin"))
+				Compiler = Cygwin;
 			else
 				LgiAssert(!"Unknown compiler.");
 		}
@@ -1555,6 +1558,31 @@ GString BuildThread::FindExe()
 				return p;
 		}
 	}
+	else if (Compiler == Cygwin)
+	{
+		#ifdef WINDOWS
+		GRegKey k(false, "HKEY_CURRENT_USER\\Software\\Cygwin\\Installations");
+		List<char> n;
+		k.GetValueNames(n);
+		GString s;
+		for (auto i:n)
+		{
+			s = k.GetStr(i);
+			if (s.Find("\\??\\") == 0)
+				s = s(4,-1);
+			if (DirExists(s))
+			{
+				CygwinPath = s;
+				break;
+			}
+		}
+		n.DeleteArrays();
+
+		GFile::Path p(s, "bin\\make.exe");
+		if (p.Exists())
+			return p.GetFull();
+		#endif
+	}
 	else
 	{
 		if (Compiler == MingW)
@@ -1744,6 +1772,12 @@ int BuildThread::Main()
 		}
 		else
 		{
+			if (Compiler == Cygwin)
+			{
+				GFile::Path p(CygwinPath, "bin");
+				Path = p.GetFull();
+			}
+
 			if (Compiler == MingW)
 			{
 				GString a;
@@ -1781,13 +1815,9 @@ int BuildThread::Main()
 			if (Clean)
             {
 				if (All)
-                {
 					TmpArgs += " cleanall";
-                }
 				else
-                {
 					TmpArgs += " clean";
-                }
             }
 			if (Release)
 				TmpArgs += " Build=Release";

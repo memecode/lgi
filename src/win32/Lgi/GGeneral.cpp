@@ -836,7 +836,8 @@ bool GRegKey::GetKeyNames(List<char> &n)
 	FILETIME t;
 	TCHAR Buf[256];
 	DWORD Size = CountOf(Buf), i = 0;
-	while (RegEnumKeyEx(k, i++, Buf, &Size, 0, 0, 0, &t) == ERROR_SUCCESS)
+	LSTATUS Status;
+	while ((Status = RegEnumKeyEx(k, i++, Buf, &Size, 0, 0, 0, &t)) == ERROR_SUCCESS)
 	{
 		n.Insert(WideToUtf8(Buf));
 		Size = sizeof(Buf);

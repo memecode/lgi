@@ -1564,9 +1564,8 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 									{
 										// bool Up = a->Up;
 										int n = 0;
-										for (; it != Active.end(); it++)
+										for (; (a = *it); it++)
 										{
-											a = *it;
 											a->Cx = a->aax[(y>>SUB_SHIFT) - a->y1].x[s];
 
 											#if defined(_DEBUG) && DEBUG_NEGITIVE_X

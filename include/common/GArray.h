@@ -454,7 +454,7 @@ public:
 		// Truncate range to the size of this array
 		if (r.Start < 0)
 			r.Start = 0;
-		if (r.End() >= len)
+		if (r.End() >= (ssize_t)len)
 			r.Len = len - r.Start;
 
 		// Delete all the elements we are removing
