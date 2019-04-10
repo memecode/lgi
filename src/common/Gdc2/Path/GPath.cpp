@@ -2011,8 +2011,8 @@ bool GBlendBrush::Start(GRopArgs &Args)
 	s.Sort(StopCompare);
 
 	auto it = s.begin();
-	GBlendStop *Prev = *it++;
-	GBlendStop *Next = *it;
+	GBlendStop *Prev = *it;
+	GBlendStop *Next = *(++it);
 	if (Prev && Next)
 	{
 		for (int i=0; i<CountOf(Lut); i++)
@@ -2021,8 +2021,7 @@ bool GBlendBrush::Start(GRopArgs &Args)
 
 			if (p > Next->Pos)
 			{
-				it++;
-				GBlendStop *n = *it;
+				GBlendStop *n = *(++it);
 				if (n)
 				{
 					Prev = Next;
