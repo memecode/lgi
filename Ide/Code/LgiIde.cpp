@@ -400,19 +400,28 @@ public:
 	
 	void PourText(size_t Start, ssize_t Len) override
 	{
+		auto Ts = LgiCurrentTime();
 		GTextView3::PourText(Start, Len);
-
-		for (GTextLine *l=Line.First(); l; l=Line.Next())
+		auto Dur = LgiCurrentTime() - Ts;
+		if (Dur > 1500)
 		{
-			char16 *t = Text + l->Start;
-			
-			if (l->Len > 5 && !StrnicmpW(t, L"(gdb)", 5))
+			// Yo homes, too much text bro...
+			Name(NULL);
+		}
+		else
+		{
+			for (GTextLine *l=Line.First(); l; l=Line.Next())
 			{
-				l->c.Rgb(0, 160, 0);
-			}
-			else if (l->Len > 1 && t[0] == '[')
-			{
-				l->c.Rgb(192, 192, 192);
+				char16 *t = Text + l->Start;
+				
+				if (l->Len > 5 && !StrnicmpW(t, L"(gdb)", 5))
+				{
+					l->c.Rgb(0, 160, 0);
+				}
+				else if (l->Len > 1 && t[0] == '[')
+				{
+					l->c.Rgb(192, 192, 192);
+				}
 			}
 		}
 	}

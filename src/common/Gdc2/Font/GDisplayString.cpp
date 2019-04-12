@@ -182,7 +182,7 @@ GDisplayString::GDisplayString(GFont *f, const char16 *s, ssize_t l, GSurface *p
 
 	#endif
 
-    #if defined(MAC) || WINNATIVE || defined(LGI_SDL)
+	#if defined(MAC) || WINNATIVE || defined(LGI_SDL)
 
 		StringConvert(Str, &len, s, l);
 
@@ -245,7 +245,7 @@ GDisplayString::GDisplayString(GFont *f, const uint32_t *s, ssize_t l, GSurface 
 
 	#endif
 
-    #if defined(MAC) || defined(LGI_SDL) || defined(_MSC_VER)
+	#if defined(MAC) || defined(LGI_SDL) || defined(_MSC_VER)
 
 		StringConvert(Str, &len, s, l);
 
@@ -359,13 +359,13 @@ void GDisplayString::DrawWhiteSpace(GSurface *pDC, char Ch, GRect &r)
 
 void GDisplayString::Layout(bool Debug)
 {
-    if (LaidOut || !Font)
-        return;
+	if (LaidOut || !Font)
+		return;
 
-    LaidOut = 1;
+	LaidOut = 1;
 
 	#if defined(LGI_SDL)
-    
+	
 		FT_Face Fnt = Font->Handle();
 		FT_Error error;
 		
@@ -477,7 +477,7 @@ void GDisplayString::Layout(bool Debug)
 			}
 		}
 		else LgiTrace("::Layout Create MemDC failed\n");
-    
+	
 	#elif defined(__GTK_H__)
 	
 		y = Font->GetHeight();
@@ -591,9 +591,9 @@ void GDisplayString::Layout(bool Debug)
 			if (pDC)
 			{
 				OsPainter dc = pDC->Handle();
-				ATSUAttributeTag        Tags[1] = {kATSUCGContextTag};
-				ByteCount               Sizes[1] = {sizeof(CGContextRef)};
-				ATSUAttributeValuePtr   Values[1] = {&dc};
+				ATSUAttributeTag		Tags[1] = {kATSUCGContextTag};
+				ByteCount				Sizes[1] = {sizeof(CGContextRef)};
+				ATSUAttributeValuePtr	Values[1] = {&dc};
 
 				e = ATSUSetLayoutControls(Hnd, 1, Tags, Sizes, Values);
 				if (e) printf("%s:%i - ATSUSetLayoutControls failed (e=%i)\n", _FL, (int)e);
@@ -827,14 +827,14 @@ void GDisplayString::Layout(bool Debug)
 
 int GDisplayString::GetDrawOffset()
 {
-    return DrawOffsetF >> FShift;
+	return DrawOffsetF >> FShift;
 }
 
 void GDisplayString::SetDrawOffset(int Px)
 {
 	if (LaidOut)
 		LgiAssert(!"No point setting TabOrigin after string is laid out.\n");
-    DrawOffsetF = Px << FShift;
+	DrawOffsetF = Px << FShift;
 }
 
 bool GDisplayString::ShowVisibleTab()
@@ -854,16 +854,16 @@ bool GDisplayString::IsTruncated()
 
 void GDisplayString::TruncateWithDots(int Width)
 {
-    Layout();
-    
+	Layout();
+	
 	#if defined __GTK_H__
-	    
+		
 	if (Hnd)
 	{
 		Gtk::pango_layout_set_ellipsize(Hnd, Gtk::PANGO_ELLIPSIZE_END);
 		Gtk::pango_layout_set_width(Hnd, Width * PANGO_SCALE);
 	}
-    
+	
 	#elif WINNATIVE
 	
 	if (Width < X() + 8)
@@ -962,7 +962,7 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 {
 	int Status = -1;
 
-    Layout();
+	Layout();
 	if (Px < 0)
 	{
 		return 0;
@@ -1038,10 +1038,10 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 		}
 		else if (Trailing)
 		{
-		    GUtf8Str u(Str + Index);
-		    if (u)
-		        u++;		    
-		    Status = (OsChar*)u.GetPtr() - Str;
+			GUtf8Str u(Str + Index);
+			if (u)
+				u++;			
+			Status = (OsChar*)u.GetPtr() - Str;
 		}
 		else Status = 0;
 	}
@@ -1162,7 +1162,7 @@ ssize_t GDisplayString::Length()
 
 void GDisplayString::Length(int New)
 {
-    Layout();
+	Layout();
 
 	#if WINNATIVE
 	
@@ -1224,19 +1224,19 @@ void GDisplayString::Length(int New)
 
 int GDisplayString::X()
 {
-    Layout();
+	Layout();
 	return x;
 }
 
 int GDisplayString::Y()
 {
-    Layout();
+	Layout();
 	return y;
 }
 
 GdcPt2 GDisplayString::Size()
 {
-    Layout();
+	Layout();
 	return GdcPt2(x, y);
 }
 
@@ -1581,7 +1581,7 @@ bool CompositeText5NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 
 void GDisplayString::Draw(GSurface *pDC, int px, int py, GRect *r, bool Debug)
 {
-    Layout();
+	Layout();
 
 	#if DISPLAY_STRING_FRACTIONAL_NATIVE
 
@@ -1879,37 +1879,37 @@ void GDisplayString::Draw(GSurface *pDC, int px, int py, GRect *r, bool Debug)
 
 int GDisplayString::GetDrawOffsetF()
 {
-    return DrawOffsetF;
+	return DrawOffsetF;
 }
 
 void GDisplayString::SetDrawOffsetF(int Fpx)
 {
 	if (LaidOut)
 		LgiAssert(!"No point setting TabOrigin after string is laid out.\n");
-    DrawOffsetF = Fpx;
+	DrawOffsetF = Fpx;
 }
 
 int GDisplayString::FX()
 {
-    Layout();
+	Layout();
 	return xf;
 }
 
 int GDisplayString::FY()
 {
-    Layout();
+	Layout();
 	return y;
 }
 
 GdcPt2 GDisplayString::FSize()
 {
-    Layout();
+	Layout();
 	return GdcPt2(xf, yf);
 }
 
 void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug)
 {
-    Layout(Debug);
+	Layout(Debug);
 
 	#if !DISPLAY_STRING_FRACTIONAL_NATIVE
 
@@ -1954,7 +1954,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	}
 	
 	GColour b = Font->Back();
-	
+
 	Gtk::cairo_set_source_rgb(cr,
 								(double)b.r()/255.0,
 								(double)b.g()/255.0,
@@ -1987,31 +1987,31 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	}
 	if (Hnd)
 	{
-	    GColour f = Font->Fore();
-	    Gtk::cairo_set_source_rgb(	cr,
-								    (double)f.r()/255.0,
-								    (double)f.g()/255.0,
-								    (double)f.b()/255.0);
-	    Gtk::pango_cairo_show_layout(cr, Hnd);
-	    
-	    if (VisibleTab && Str)
-	    {
+		GColour f = Font->Fore();
+		Gtk::cairo_set_source_rgb(	cr,
+									(double)f.r()/255.0,
+									(double)f.g()/255.0,
+									(double)f.b()/255.0);
+		Gtk::pango_cairo_show_layout(cr, Hnd);
+		
+		if (VisibleTab && Str)
+		{
 			GUtf8Str Ptr(Str);
 			pDC->Colour(Font->WhitespaceColour());
 			
-	    	for (int32 u, Idx = 0; u = Ptr; Idx++)
-	    	{
-	    		if (IsTabChar(u) || u == ' ')
-	    		{
-	    			Gtk::PangoRectangle pos;
+			for (int32 u, Idx = 0; u = Ptr; Idx++)
+			{
+				if (IsTabChar(u) || u == ' ')
+				{
+					Gtk::PangoRectangle pos;
 					Gtk::pango_layout_index_to_pos(Hnd, Idx, &pos);
 					GRect r(0, 0, pos.width / FScale, pos.height / FScale);
 					r.Offset(Dx + (pos.x / FScale), Dy + (pos.y / FScale));					
 					DrawWhiteSpace(pDC, u, r);
 				}
 				Ptr++;
-	    	}
-	    }
+			}
+		}
 	}
 	
 	Gtk::cairo_restore(cr);
@@ -2094,9 +2094,9 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 
 		#else
 
-			ATSUAttributeTag        Tags[1] = {kATSUCGContextTag};
-			ByteCount               Sizes[1] = {sizeof(CGContextRef)};
-			ATSUAttributeValuePtr   Values[1] = {&dc};
+			ATSUAttributeTag		Tags[1] = {kATSUCGContextTag};
+			ByteCount				Sizes[1] = {sizeof(CGContextRef)};
+			ATSUAttributeValuePtr	Values[1] = {&dc};
 
 			e = ATSUSetLayoutControls(Hnd, 1, Tags, Sizes, Values);
 			if (e)
@@ -2108,16 +2108,16 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 				// Set style attr
 				ATSURGBAlphaColor c;
 				GColour Fore = Font->Fore();
-				c.red   = (double) Fore.r() / 255.0;
+				c.red	= (double) Fore.r() / 255.0;
 				c.green = (double) Fore.g() / 255.0;
-				c.blue  = (double) Fore.b() / 255.0;
+				c.blue	= (double) Fore.b() / 255.0;
 				c.alpha = 1.0;
 				
 				ATSUAttributeTag Tags[]			= {kATSURGBAlphaColorTag};
 				ATSUAttributeValuePtr Values[]	= {&c};
 				ByteCount Lengths[]				= {sizeof(c)};
 				
-				e = ATSUSetAttributes(  Font->Handle(),
+				e = ATSUSetAttributes(	Font->Handle(),
 										CountOf(Tags),
 										Tags,
 										Lengths,

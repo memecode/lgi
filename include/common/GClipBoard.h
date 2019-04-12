@@ -54,7 +54,7 @@ public:
 
 	// Binary
 	bool Binary(FormatType Format, uint8_t *Ptr, ssize_t Len, bool AutoEmpty);	// Set
-	bool Binary(FormatType Format, GAutoPtr<uint8_t> &Ptr, ssize_t *Len);	// Get
+	bool Binary(FormatType Format, GAutoPtr<uint8_t,true> &Ptr, ssize_t *Len);	// Get
 };
 
 #endif

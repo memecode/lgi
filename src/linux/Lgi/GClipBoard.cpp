@@ -177,8 +177,9 @@ void LgiClipboardGetFunc(GtkClipboard *clipboard,
 			{
 				if (p->Type == info)
 				{
-					data->data = p->Value.Binary.Data;
-					data->length = p->Value.Binary.Length;
+					// data->data = p->Value.Binary.Data;
+					// data->length = p->Value.Binary.Length;
+  					gtk_selection_data_set(data, gtk_selection_data_get_target(data), 8, (guchar*)p->Value.Binary.Data, p->Value.Binary.Length);
 				}
 				else LgiTrace("%s:%i - Variant is the wrong type: %i\n", _FL, p->Type);
 				break;
@@ -228,6 +229,14 @@ bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 		Data.Unlock();
 	}
 	
+	if (!p)
+	{
+		#if DEBUG_CLIPBOARD
+		printf("%s:%i - no slots to store data\n", _FL);
+		#endif
+		return false;
+	}
+	
 	GtkTargetEntry te;
 	te.target = LGI_CLIP_BINARY;
 	te.flags = 0; // GTK_TARGET_SAME_APP?
@@ -260,7 +269,7 @@ bool GClipBoard::Files(::GString::Array &a, bool AutoEmpty)
 
 struct ReceiveData
 {
-	GAutoPtr<uint8_t> *Ptr;
+	GAutoPtr<uint8_t,true> *Ptr;
 	ssize_t *Len;
 };
 
@@ -288,7 +297,7 @@ void LgiClipboardReceivedFunc(GtkClipboard *clipboard,
 	else LgiTrace("%s:%i - Missing ptr: %p %p\n", _FL, data, r);
 }
 
-bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8_t> &Ptr, ssize_t *Len)
+bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8_t,true> &Ptr, ssize_t *Len)
 {
 	ReceiveData r = {&Ptr, Len};
 
