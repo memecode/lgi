@@ -341,42 +341,6 @@ protected:
 		return true;
 	}
 
-	bool Delete(Iter &Pos)
-	{
-		if (!Pos.In())
-			return false;
-
-		int &Index = Pos.Cur;
-		LstBlk *&i = Pos.i;
-		if (Index < i->Count-1)
-			memmove(i->Ptr+Index, i->Ptr+Index+1, (i->Count-Index-1) * sizeof(T*));
-
-		Items--;
-		if (--i->Count == 0)
-		{
-			// This Item is now empty, remove and reset current
-			// into the next Item
-			bool ClearLocal = i == Local.i;
-
-			LstBlk *n = i->Next;
-			bool Status = DeleteBlock(i);
-			Pos.Cur = 0;
-			Pos.i = n;
-
-			if (ClearLocal)
-				Local.i = NULL;
-			return Status;
-		}
-		else if (Index >= i->Count)
-		{
-			// Carry current item over to next Item
-			Pos.i = Pos.i->Next;
-			Pos.Cur = 0;
-		}
-		
-		return true;
-	}
-
 	Iter GetIndex(size_t Index, size_t *Base = NULL)
 	{
 		size_t n = 0;
@@ -646,6 +610,42 @@ public:
 		bool Status = Delete(Local);
 		VALIDATE();
 		return Status;
+	}
+
+	bool Delete(Iter &Pos)
+	{
+		if (!Pos.In())
+			return false;
+
+		int &Index = Pos.Cur;
+		LstBlk *&i = Pos.i;
+		if (Index < i->Count-1)
+			memmove(i->Ptr+Index, i->Ptr+Index+1, (i->Count-Index-1) * sizeof(T*));
+
+		Items--;
+		if (--i->Count == 0)
+		{
+			// This Item is now empty, remove and reset current
+			// into the next Item
+			bool ClearLocal = i == Local.i;
+
+			LstBlk *n = i->Next;
+			bool Status = DeleteBlock(i);
+			Pos.Cur = 0;
+			Pos.i = n;
+
+			if (ClearLocal)
+				Local.i = NULL;
+			return Status;
+		}
+		else if (Index >= i->Count)
+		{
+			// Carry current item over to next Item
+			Pos.i = Pos.i->Next;
+			Pos.Cur = 0;
+		}
+		
+		return true;
 	}
 
 	bool Insert(T *p, ssize_t Index = -1)
