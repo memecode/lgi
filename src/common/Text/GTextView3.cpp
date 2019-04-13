@@ -3823,7 +3823,7 @@ bool GTextView3::OnKey(GKey &k)
 						if (SelStart >= 0)
 						{
 							bool MultiLine = false;
-							if (k.c16 == VK_TAB)
+							if (k.vkey == VK_TAB)
 							{
 								size_t Min = MIN(SelStart, SelEnd), Max = MAX(SelStart, SelEnd);
 								for (size_t i=Min; i<Max; i++)
@@ -3850,7 +3850,7 @@ bool GTextView3::OnKey(GKey &k)
 						GTextLine *l = GetTextLine(Cursor);
 						size_t Len = (l) ? l->Len : 0;
 						
-						if (l && k.c16 == VK_TAB && (!HardTabs || IndentSize != TabSize))
+						if (l && k.vkey == VK_TAB && (!HardTabs || IndentSize != TabSize))
 						{
 							int x = GetColumn();							
 							int Add = IndentSize - (x % IndentSize);

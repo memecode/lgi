@@ -165,8 +165,10 @@ class LgiClass GKey : public GUiEvent
 {
 public:
 	/// The virtual code for key
+	/// Rule: Only compare with VK_??? symbols
 	char16 vkey;
 	/// The unicode character for the key
+	/// Rule: Never compare with VK_??? symbols
 	char16 c16;
 	/// OS Specific
 	#ifdef WINDOWS

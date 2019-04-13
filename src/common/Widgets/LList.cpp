@@ -402,7 +402,7 @@ bool LListItem::GridLines()
 
 void LListItem::OnMouseClick(GMouse &m)
 {
-	int Col = Parent->ColumnAtX(m.x);
+	int Col = Parent ? Parent->ColumnAtX(m.x) : -1;
 	for (LListItemColumn *h = d->Cols.First(); h; h=d->Cols.Next())
 	{
 		if (Col == h->GetColumn())

@@ -228,6 +228,7 @@ void GButton::OnMouseClick(GMouse &m)
 		bool Click = IsCapturing();
 		Capture(m.Down());
 		
+		printf("but click %i, %i, %i, %i\n", Click, m.Down(), d->Over, d->Pressed);
 		if (Click ^ m.Down())
 		{
 			if (d->Over)
@@ -304,7 +305,7 @@ bool GButton::OnKey(GKey &k)
 			}
 			// else fall thru
 		}
-		case ' ':
+		case VK_SPACE:
 		case VK_RETURN:
 		#ifdef LINUX
 		case VK_KP_ENTER:
