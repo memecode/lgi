@@ -228,7 +228,6 @@ void GButton::OnMouseClick(GMouse &m)
 		bool Click = IsCapturing();
 		Capture(m.Down());
 		
-		printf("but click %i, %i, %i, %i\n", Click, m.Down(), d->Over, d->Pressed);
 		if (Click ^ m.Down())
 		{
 			if (d->Over)

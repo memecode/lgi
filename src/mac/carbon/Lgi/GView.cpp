@@ -1458,7 +1458,7 @@ CarbonControlProc
 					else Processed = v->OnKey(k);
 					DeleteArray(text);
 					
-					if (!Processed && k.c16 == VK_TAB)
+					if (!Processed && k.vkey == VK_TAB)
 					{
 						NextTabStop(v, k.Shift() ? -1 : 1);
 					}
