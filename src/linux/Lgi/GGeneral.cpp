@@ -498,6 +498,7 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GAutoString
 
 			int e;
 			if (Dir) chdir(Dir);
+			printf("a=\n%s\n", a.Get());
 			if (e = system(a))
 			{
 				if (Error)

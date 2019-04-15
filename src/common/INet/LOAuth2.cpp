@@ -160,7 +160,7 @@ static GString FormEncode(const char *s, bool InValue = true)
 	return p.NewGStr();
 }
 
-struct LOAuth2Priv : public LCancel
+struct LOAuth2Priv
 {
 	LOAuth2::Params Params;
 	GString Id;
@@ -169,6 +169,7 @@ struct LOAuth2Priv : public LCancel
 	GString CodeVerifier;
 	GStringPipe LocalLog;
 	GDom *Store;
+	LCancel *Cancel;
 
 	GString AccessToken, RefreshToken;
 	int64 ExpiresIn;
@@ -185,45 +186,44 @@ struct LOAuth2Priv : public LCancel
 
 		Server(LOAuth2Priv *cd) : d(cd)
 		{
-			while (!Listen.Listen(LOCALHOST_PORT))
+			auto Start = LgiCurrentTime();
+			while (	!d->Cancel->IsCancelled() &&
+					!Listen.Listen(LOCALHOST_PORT) &&
+					(LgiCurrentTime() - Start) < 60000)
 			{
-				if (d->IsCancelled())
-					break;
-				d->Log->Print("Error: Can't listen on %i...\n", LOCALHOST_PORT);
+				d->Log->Print("Error: Can't listen on %i... (%s)\n", LOCALHOST_PORT, Listen.GetErrorString());
 				LgiSleep(1000);
 			}
 		}
 
 		bool GetReq()
 		{
-			while (!d->IsCancelled())
+			while (!d->Cancel->IsCancelled())
 			{
-				if (Listen.IsReadable(100))
+				if (Listen.IsReadable(100) &&
+					Listen.Accept(&s))
 				{
-					if (Listen.Accept(&s))
+					// Read access code out of response
+					GString Hdrs;
+					if (GetHttp(&s, Hdrs, Body, false))
 					{
-						// Read access code out of response
-						GString Hdrs;
-						if (GetHttp(&s, Hdrs, Body, false))
+						auto Url = UrlFromHeaders(Hdrs);
+						auto Vars = Url.Split("?", 1);
+						if (Vars.Length() != 2)
 						{
-							auto Url = UrlFromHeaders(Hdrs);
-							auto Vars = Url.Split("?", 1);
-							if (Vars.Length() != 2)
-							{
-								return false;
-							}
-
-							Vars = Vars[1].Split("&");
-							for (auto v : Vars)
-							{
-								auto p = v.Split("=", 1);
-								if (p.Length() != 2)
-									continue;
-								Params.Add(p[0], p[1]);
-							}
-
-							return true;
+							return false;
 						}
+
+						Vars = Vars[1].Split("&");
+						for (auto v : Vars)
+						{
+							auto p = v.Split("=", 1);
+							if (p.Length() != 2)
+								continue;
+							Params.Add(p[0], p[1]);
+						}
+
+						return true;
 					}
 				}
 			}
@@ -419,11 +419,12 @@ struct LOAuth2Priv : public LCancel
 		return AccessToken.Get() != NULL;
 	}
 
-	LOAuth2Priv(LOAuth2::Params &params, const char *account, GDom *store, GStream *log)
+	LOAuth2Priv(LOAuth2::Params &params, const char *account, GDom *store, GStream *log, LCancel *cancel)
 	{
 		Params = params;
 		Id = account;
 		Store = store;
+		Cancel = cancel;
 		Log = log ? log : &LocalLog;
 	}
 
@@ -458,9 +459,9 @@ struct LOAuth2Priv : public LCancel
 	}
 };
 
-LOAuth2::LOAuth2(LOAuth2::Params &params, const char *account, GDom *store, GStream *log)
+LOAuth2::LOAuth2(LOAuth2::Params &params, const char *account, GDom *store, LCancel *cancel, GStream *log)
 {
-	d = new LOAuth2Priv(params, account, store, log);
+	d = new LOAuth2Priv(params, account, store, log, cancel);
 	d->Serialize(false);
 }
 
