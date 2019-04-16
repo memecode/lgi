@@ -249,10 +249,12 @@
 #include "LgiClasses.h" 					// Xp
 #include "LgiCommon.h"						// Xp
 
-#ifdef LGI_SDL
-#define HAS_GSTREAMER						0
-#else
-#define HAS_GSTREAMER						1
+#ifndef HAS_GSTREAMER
+	#ifdef LGI_SDL
+	#define HAS_GSTREAMER					0
+	#else
+	#define HAS_GSTREAMER					1
+	#endif
 #endif
 
 #endif

@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 3.5)
 
 SET (CMAKE_OSX_ARCHITECTURES "i386")
+set (CMAKE_CXX_STANDARD 11)
 
 project (Lgi)
 set (LGI_VERSION_MAJOR 1)
@@ -11,18 +12,26 @@ if (UNIX AND NOT APPLE)
 endif()
 
 if (APPLE)
+
 	add_definitions("-DMAC -DLGI_LIBRARY -D_DEBUG -DLGI_RES")
 	#SET(GUI_TYPE MACOSX_BUNDLE)
-	INCLUDE_DIRECTORIES ( /Developer/Headers/FlatCarbon )
-	FIND_LIBRARY(CARBON_LIBRARY Carbon)
-	FIND_LIBRARY(COCOA_LIBRARY Cocoa)
-	MARK_AS_ADVANCED (CARBON_LIBRARY COCOA_LIBRARY)
-	SET(EXTRA_LIBS ${CARBON_LIBRARY} ${COCOA_LIBRARY})
+	include_directories ( /Developer/Headers/FlatCarbon )
+	find_library(CARBON_LIBRARY Carbon)
+	find_library(COCOA_LIBRARY Cocoa)
+	mark_as_advanced (CARBON_LIBRARY COCOA_LIBRARY)
+	set(EXTRA_LIBS ${CARBON_LIBRARY} ${COCOA_LIBRARY})
+
 elseif (LINUX)
+
 	add_definitions("-DLINUX -DLGI_LIBRARY -D_DEBUG -DLGI_RES -fPIC -w -fno-inline -fpermissive")
-	FIND_PACKAGE(GTK2 COMPONENTS gtk)
+	find_package(GTK2 COMPONENTS gtk)
+	find_package(PkgConfig)
+	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4)
+	                               
 elseif (MSVC)
+
 	add_definitions("/W2 -DWINDOWS -DWIN32 -DLGI_LIBRARY -D_DEBUG -DLGI_RES -D_WINDLL -D_UNICODE -DUNICODE")
+
 endif ()
 
 set (CommonSource
@@ -110,6 +119,7 @@ set (CommonSource
 	src/common/Widgets/GTextLabel.cpp
 	src/common/Widgets/GToolBar.cpp	
 	src/common/Widgets/GTree.cpp
+	src/common/Widgets/GProgress.cpp
 	)
 
 set (WindowsSource
@@ -151,6 +161,7 @@ set (LinuxSource
 	src/linux/Gtk/GMemDC.cpp
 	src/linux/Gtk/GPrintDC.cpp
 	src/linux/Gtk/GScreenDC.cpp
+	src/linux/Gtk/LgiWidget.cpp
 	src/linux/General/GFile.cpp
 	src/linux/General/GMem.cpp
 	src/linux/General/ShowFileProp_Linux.cpp
@@ -165,6 +176,13 @@ set (LinuxSource
 	src/linux/Lgi/GView.cpp
 	src/linux/Lgi/GWidgets.cpp
 	src/linux/Lgi/GWindow.cpp
+	src/common/Lgi/GFileSelect.cpp
+	src/common/Widgets/GCheckBox.cpp
+	src/common/Widgets/GEdit.cpp
+	src/common/Widgets/GScrollBar.cpp
+	src/common/Widgets/GCombo.cpp
+	src/common/Widgets/GButton.cpp
+	src/common/Widgets/GRadioGroup.cpp
 	)
 
 set (MacSource
@@ -210,8 +228,8 @@ if (APPLE)
 	target_include_directories(Lgi PUBLIC "include/mac/carbon" "include/posix")
 	target_link_libraries(Lgi ${EXTRA_LIBS})
 elseif (LINUX)
-	target_include_directories(Lgi PUBLIC "include/linux/Gtk" "include/linux" ${GTK2_INCLUDE_DIRS})
-	target_link_libraries(Lgi ${GTK2_LIBRARIES})
+	target_include_directories(Lgi PUBLIC "include/linux/Gtk" "include/linux" ${GTK2_INCLUDE_DIRS} ${GST_INCLUDE_DIRS})
+	target_link_libraries(Lgi ${GTK2_LIBRARIES} ${GST_LIBRARIES} magic)
 elseif (MSVC)
 	target_include_directories(Lgi PUBLIC "include/win32")
 	target_link_libraries(	Lgi

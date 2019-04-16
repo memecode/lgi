@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 3.5)
 
 SET (CMAKE_OSX_ARCHITECTURES "i386")
+set (CMAKE_CXX_STANDARD 11)
 
 project (LgiIde)
 
@@ -17,8 +18,9 @@ if (APPLE)
 	MARK_AS_ADVANCED (CARBON_LIBRARY)
 	SET(EXTRA_LIBS ${CARBON_LIBRARY})
 elseif (LINUX)
-	add_definitions("-DLINUX -DLGI_LIBRARY -D_DEBUG -DLGI_RES -fPIC -w -fno-inline -fpermissive")
-	FIND_PACKAGE(GTK2 COMPONENTS gtk)
+	add_definitions("-DLINUX -DLGI_LIBRARY -D_DEBUG -DLGI_RES -DPOSIX -fPIC -w -fno-inline -fpermissive")
+	find_package(GTK2 COMPONENTS gtk)
+	find_package(PNG REQUIRED)
 elseif (MSVC)
 	add_definitions("/W2 -DWINDOWS -DWIN32 -D_DEBUG -DLGI_RES -D_UNICODE -DUNICODE")
 endif ()
@@ -43,8 +45,16 @@ set (CommonSource
 	Code/FindInFiles.cpp
 	Code/FindSymbol.cpp
 	Code/FtpThread.cpp
+	Code/DocEdit.cpp
+	Code/PythonParser.cpp
+	Code/MissingFiles.cpp
+	Code/DocEditStyling.cpp
+	Code/levenshtein.c
+	../src/common/INet/OpenSSLSocket.cpp
+	../src/common/INet/IHttp.cpp
 	../src/common/INet/IFtp.cpp
 	../src/common/Gdc2/Filters/Png.cpp
+	../src/common/Lgi/GAbout.cpp
 	../src/common/Lgi/GSubProcess.cpp
 	../src/common/Lgi/GMdi.cpp
 	../src/common/Lgi/LgiMain.cpp
@@ -90,8 +100,8 @@ if (APPLE)
 		RESOURCE "${RESOURCE_FILES}"
 		)
 elseif (LINUX)
-	target_include_directories(LgiIde PUBLIC "../include/linux/Gtk" "../include/linux" ${GTK2_INCLUDE_DIRS})
-	target_link_libraries(LgiIde Lgi ${GTK2_LIBRARIES})
+	target_include_directories(LgiIde PUBLIC "../include/linux/Gtk" "../include/linux" ${GTK2_INCLUDE_DIRS} ${PNG_INCLUDE_DIR})
+	target_link_libraries(LgiIde Lgi pthread ${GTK2_LIBRARIES} ${PNG_LIBRARY})
 elseif (MSVC)
 	target_include_directories(LgiIde PUBLIC "../include/win32")
 	target_link_libraries(	LgiIde
@@ -112,7 +122,8 @@ endif ()
 
 target_include_directories (LgiIde PUBLIC
 							"../include/common"
-							"${CMAKE_CURRENT_SOURCE_DIR}/../../../../CodeLib/libpng"
-							"${CMAKE_CURRENT_SOURCE_DIR}/../../../../CodeLib/libpng-1.6.26"
+							"Resources"
 							"${CMAKE_CURRENT_SOURCE_DIR}/../../../../CodeLib/libiconv-1.14/include")
+# "${CMAKE_CURRENT_SOURCE_DIR}/../../../../CodeLib/libpng"
+# "${CMAKE_CURRENT_SOURCE_DIR}/../../../../CodeLib/libpng-1.6.26"
 
