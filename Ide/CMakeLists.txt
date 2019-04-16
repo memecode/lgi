@@ -11,18 +11,54 @@ endif()
 add_subdirectory(.. LgiDir)
 
 if (APPLE)
+
 	add_definitions("-DMAC -DLGI_LIBRARY -D_DEBUG -DLGI_RES")
 	SET(GUI_TYPE MACOSX_BUNDLE)
 	INCLUDE_DIRECTORIES ( /Developer/Headers/FlatCarbon )
 	FIND_LIBRARY(CARBON_LIBRARY Carbon)
 	MARK_AS_ADVANCED (CARBON_LIBRARY)
 	SET(EXTRA_LIBS ${CARBON_LIBRARY})
+
 elseif (LINUX)
+
 	add_definitions("-DLINUX -DLGI_LIBRARY -D_DEBUG -DLGI_RES -DPOSIX -fPIC -w -fno-inline -fpermissive")
 	find_package(GTK2 COMPONENTS gtk)
 	find_package(PNG REQUIRED)
+
 elseif (MSVC)
+
+	if ("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+		set(WORDSIZE 64)
+		set(OPENSSL_INCLUDE_DIR "c:/Program Files/OpenSSL-Win64/include")
+	else()
+		set(WORDSIZE 32)
+		set(OPENSSL_INCLUDE_DIR "c:/Program Files (x86)/OpenSSL-Win32/include")
+	endif()
+	
+	if (NOT EXISTS ${OPENSSL_INCLUDE_DIR})
+		message(FATAL_ERROR "OpenSSL not found @ ${OPENSSL_INCLUDE_DIR}")
+	endif()
+
 	add_definitions("/W2 -DWINDOWS -DWIN32 -D_DEBUG -DLGI_RES -D_UNICODE -DUNICODE")
+	get_filename_component(CODELIB "${CMAKE_CURRENT_SOURCE_DIR}/../../../../CodeLib" ABSOLUTE)
+	get_filename_component(LIBPNG_SEARCH "${CODELIB}/libpng" ABSOLUTE)
+	get_filename_component(ZLIB_SEARCH "${CODELIB}/zlib" ABSOLUTE)
+	set(_FIND_ZLIB_ARG HINTS ${LIBPNG_SEARCH})
+	include(FindPNG)
+	if (NOT PNG_FOUND)
+		set(PNG_CMAKE "${LIBPNG_SEARCH}/CMakeLists.txt")
+		if (EXISTS "${PNG_CMAKE}")
+			set(PNG_INCLUDE_DIR
+				${LIBPNG_SEARCH}
+				${LIBPNG_SEARCH}/build${WORDSIZE}
+				${ZLIB_SEARCH}
+				${ZLIB_SEARCH}/build${WORDSIZE})
+		else()
+			message(FATAL_ERROR "PNG not found @ ${LIBPNG_SEARCH}")
+		endif()
+	endif ()
+	
+	
 endif ()
 
 set (CommonSource
@@ -64,10 +100,10 @@ set (CommonSource
 	)
 
 set(CommonResourceFiles
-	Code/cmds-32px.png
-	Code/icons.png
-	Code/cmds-16px.png
-	Code/LgiIde.lr8
+	Resources/cmds-32px.png
+	Resources/icons.png
+	Resources/cmds-16px.png
+	Resources/LgiIde.lr8
 	)
 
 
@@ -103,9 +139,10 @@ elseif (LINUX)
 	target_include_directories(LgiIde PUBLIC "../include/linux/Gtk" "../include/linux" ${GTK2_INCLUDE_DIRS} ${PNG_INCLUDE_DIR})
 	target_link_libraries(LgiIde Lgi pthread ${GTK2_LIBRARIES} ${PNG_LIBRARY})
 elseif (MSVC)
-	target_include_directories(LgiIde PUBLIC "../include/win32")
+	target_include_directories(LgiIde PUBLIC "../include/win32" ${PNG_INCLUDE_DIRS})
 	target_link_libraries(	LgiIde
 							Lgi
+							png15
 							ComCtl32.lib
 							Ws2_32.lib
 							UxTheme.lib
@@ -123,6 +160,8 @@ endif ()
 target_include_directories (LgiIde PUBLIC
 							"../include/common"
 							"Resources"
+							${PNG_INCLUDE_DIR}
+							${OPENSSL_INCLUDE_DIR}
 							"${CMAKE_CURRENT_SOURCE_DIR}/../../../../CodeLib/libiconv-1.14/include")
 # "${CMAKE_CURRENT_SOURCE_DIR}/../../../../CodeLib/libpng"
 # "${CMAKE_CURRENT_SOURCE_DIR}/../../../../CodeLib/libpng-1.6.26"

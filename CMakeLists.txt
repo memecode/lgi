@@ -119,7 +119,6 @@ set (CommonSource
 	src/common/Widgets/GTextLabel.cpp
 	src/common/Widgets/GToolBar.cpp	
 	src/common/Widgets/GTree.cpp
-	src/common/Widgets/GProgress.cpp
 	)
 
 set (WindowsSource
@@ -150,9 +149,9 @@ set (WindowsSource
 	src/win32/Widgets/GCombo_Win.cpp
 	src/win32/Widgets/GDialog.cpp
 	src/win32/Widgets/GEdit_Win.cpp
-	src/win32/Widgets/GProgress.cpp
 	src/win32/Widgets/GRadioGroup_Win.cpp
 	src/win32/Widgets/GSlider.cpp
+	src/win32/Widgets/GProgress.cpp
 	)
 
 
@@ -183,6 +182,7 @@ set (LinuxSource
 	src/common/Widgets/GCombo.cpp
 	src/common/Widgets/GButton.cpp
 	src/common/Widgets/GRadioGroup.cpp
+	src/common/Widgets/GProgress.cpp
 	)
 
 set (MacSource
@@ -233,14 +233,15 @@ elseif (LINUX)
 elseif (MSVC)
 	target_include_directories(Lgi PUBLIC "include/win32")
 	target_link_libraries(	Lgi
-						ComCtl32.lib
-						Ws2_32.lib
-						UxTheme.lib
-						imm32.lib)
+							ComCtl32.lib
+							Ws2_32.lib
+							UxTheme.lib
+							imm32.lib)
 endif ()
 
 target_include_directories (Lgi PUBLIC
 							"include/common"
+							${PNGLIB_INCLUDE_DIR}
 							"${CMAKE_CURRENT_SOURCE_DIR}/../../../CodeLib/libiconv-1.14/include")
 
 
