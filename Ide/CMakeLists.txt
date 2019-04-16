@@ -116,15 +116,16 @@ set(CommonResourceFiles
 	Resources/LgiIde.lr8
 	)
 
-
 if (APPLE)
 	set(MacResourceFiles
-		Mac/Info.plist
-		Mac/English.lproj/InfoPlist.strings
-		Mac/English.lproj/main.nib)
+		MacCarbon/Info.plist
+		MacCarbon/English.lproj/InfoPlist.strings
+		MacCarbon/English.lproj/main.nib)
+	
 	set_source_files_properties(${MacResourceFiles} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
 	add_executable(LgiIde MACOSX_BUNDLE ${CommonSource} ${CommonResourceFiles} ${MacResourceFiles})
+	
 	# set(MACOSX_BUNDLE_ICON_FILE ".icns")
 	add_custom_command(TARGET LgiIde POST_BUILD 
 					COMMAND "${CMAKE_COMMAND}" -E copy 

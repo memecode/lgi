@@ -14,7 +14,7 @@ endif()
 if (APPLE)
 
 	add_definitions("-DMAC -DLGI_LIBRARY -D_DEBUG -DLGI_RES")
-	#SET(GUI_TYPE MACOSX_BUNDLE)
+	# SET(GUI_TYPE MACOSX_BUNDLE)
 	include_directories ( /Developer/Headers/FlatCarbon )
 	find_library(CARBON_LIBRARY Carbon)
 	find_library(COCOA_LIBRARY Cocoa)
@@ -196,9 +196,9 @@ set (MacSource
 	src/common/Widgets/GProgress.cpp
 	src/mac/cocoa/General/ShowFileProp_Mac.mm
 	src/mac/carbon/Gdc2/Gdc2.cpp
-	src/mac/carbon/Gdc2/GMemDC.cpp
-	src/mac/carbon/Gdc2/GPrintDC.cpp
-	src/mac/carbon/Gdc2/GScreenDC.cpp
+	src/mac/common/GMemDC.cpp
+	src/mac/common/GPrintDC.cpp
+	src/mac/common/GScreenDC.cpp
 	src/mac/carbon/General/GFile.cpp
 	src/mac/carbon/General/GMem.cpp
 	src/mac/carbon/Lgi/GApp.cpp
@@ -225,8 +225,21 @@ endif ()
 add_library(Lgi SHARED ${Source})
 
 if (APPLE)
-	target_include_directories(Lgi PUBLIC "include/mac/carbon" "include/posix")
+	target_include_directories(Lgi PUBLIC
+		"include/mac/carbon"
+		"include/posix"
+		"/opt/local/include"
+		"${CMAKE_CURRENT_SOURCE_DIR}/../../../CodeLib/libpng"
+		"${CMAKE_CURRENT_SOURCE_DIR}/../../../CodeLib/libpng/build"
+		)
 	target_link_libraries(Lgi ${EXTRA_LIBS})
+	set(	OBJCPP_SOURCE
+		src/common/Lgi/LgiCommon.cpp
+		src/mac/common/GMemDC.cpp
+		src/mac/carbon/Lgi/GGeneral.cpp
+		)
+	set_source_files_properties(${OBJCPP_SOURCE} PROPERTIES 
+                            COMPILE_FLAGS "-x objective-c++")
 elseif (LINUX)
 	target_include_directories(Lgi PUBLIC "include/linux/Gtk" "include/linux" ${GTK2_INCLUDE_DIRS} ${GST_INCLUDE_DIRS})
 	target_link_libraries(Lgi ${GTK2_LIBRARIES} ${GST_LIBRARIES} magic)

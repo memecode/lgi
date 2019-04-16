@@ -3811,7 +3811,7 @@ bool GTextView3::OnKey(GKey &k)
 					!GetReadOnly()
 					&&
 					(
-						(k.c16 >= ' ' || k.c16 == VK_TAB)
+						(k.c16 >= ' ' || k.vkey == VK_TAB)
 						&&
 						k.c16 != 127
 					)
