@@ -35,6 +35,7 @@ set (CommonSource
 	src/common/Gdc2/Alpha.cpp
 	src/common/Gdc2/Filters/GFilter.cpp
 	src/common/Gdc2/Font/GDisplayString.cpp
+	src/common/Gdc2/Font/LStringLayout.cpp
 	src/common/Gdc2/Font/GFont.cpp
 	src/common/Gdc2/Font/GFont_A.cpp
 	src/common/Gdc2/Font/GFont_W.cpp
@@ -47,7 +48,7 @@ set (CommonSource
 	src/common/Gdc2/Path/GPath.cpp
 	src/common/Gdc2/Tools/GColourReduce.cpp
 	src/common/General/GContainers.cpp
-	src/common/General/GDateTime.cpp
+	src/common/General/LDateTime.cpp
 	src/common/General/GExeCheck.cpp
 	src/common/General/GFileCommon.cpp
 	src/common/General/GGrowl.cpp
@@ -69,21 +70,22 @@ set (CommonSource
 	src/common/Lgi/GLibrary.cpp
 	src/common/Lgi/GMemStream.cpp
 	src/common/Lgi/GMru.cpp
-	src/common/Lgi/GMutex.cpp
+	src/common/Lgi/LMutex.cpp
 	src/common/Lgi/GObject.cpp
 	src/common/Lgi/GOptionsFile.cpp
 	src/common/Lgi/GProcess.cpp
 	src/common/Lgi/GStream.cpp
-	src/common/Lgi/GThreadCommon.cpp
-	src/common/Lgi/GThreadEvent.cpp
+	src/common/Lgi/LThreadCommon.cpp
+	src/common/Lgi/LThreadEvent.cpp
 	src/common/Lgi/GToolTip.cpp
 	src/common/Lgi/GTrayIcon.cpp
 	src/common/Lgi/GVariant.cpp
 	src/common/Lgi/GViewCommon.cpp
 	src/common/Lgi/GWindowCommon.cpp
-	src/common/Lgi/Lgi.cpp
+	src/common/Lgi/LgiCommon.cpp
 	src/common/Lgi/LgiMsg.cpp
 	src/common/Lgi/LgiRand.cpp
+	src/common/Lgi/GMenuCommon.cpp
 	src/common/Resource/LgiRes.cpp
 	src/common/Resource/Res.cpp
 	src/common/Skins/Gel/Gel.cpp
@@ -97,7 +99,7 @@ set (CommonSource
 	src/common/Widgets/GBitmap.cpp
 	src/common/Widgets/GBox.cpp
 	src/common/Widgets/GItemContainer.cpp
-	src/common/Widgets/GList.cpp
+	src/common/Widgets/LList.cpp
 	src/common/Widgets/GPanel.cpp
 	src/common/Widgets/GPopup.cpp
 	src/common/Widgets/GProgressDlg.cpp
@@ -129,7 +131,7 @@ set (WindowsSource
 	src/win32/Lgi/GMenu.cpp
 	src/win32/Lgi/GPrinter.cpp
 	src/win32/Lgi/GScrollBar.cpp
-	src/win32/Lgi/GThread.cpp
+	src/win32/Lgi/LThread.cpp
 	src/win32/Lgi/GView.cpp
 	src/win32/Lgi/GWindow.cpp
 	src/win32/Lgi/LgiException.cpp
@@ -159,7 +161,7 @@ set (LinuxSource
 	src/linux/Lgi/GLayout.cpp
 	src/linux/Lgi/GMenuGtk.cpp
 	src/linux/Lgi/GPrinter.cpp
-	src/linux/Lgi/GThread.cpp
+	src/linux/Lgi/LThread.cpp
 	src/linux/Lgi/GView.cpp
 	src/linux/Lgi/GWidgets.cpp
 	src/linux/Lgi/GWindow.cpp
@@ -188,7 +190,7 @@ set (MacSource
 	src/mac/carbon/Lgi/GFileSelect.cpp
 	src/mac/carbon/Lgi/GMenu.cpp
 	src/mac/carbon/Lgi/GPrinter.cpp
-	src/mac/carbon/Lgi/GThread.cpp
+	src/mac/carbon/Lgi/LThread.cpp
 	src/mac/carbon/Lgi/GView.cpp
 	src/mac/carbon/Lgi/GWidgets.cpp
 	src/mac/carbon/Lgi/GWindow.cpp
