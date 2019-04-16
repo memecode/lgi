@@ -38,6 +38,14 @@ elseif (MSVC)
 	if (NOT EXISTS ${OPENSSL_INCLUDE_DIR})
 		message(FATAL_ERROR "OpenSSL not found @ ${OPENSSL_INCLUDE_DIR}")
 	endif()
+	
+	if (${MSVC_VERSION} GREATER_EQUAL 1900)
+		set(VS_VER 14)
+	elseif (${MSVC_VERSION} EQUAL 1800)
+		set(VS_VER 12)
+	else()
+		message(FATAL_ERROR "Unknown Visual Studio version: ${MSVC_VERSION}")
+	endif()
 
 	add_definitions("/W2 -DWINDOWS -DWIN32 -D_DEBUG -DLGI_RES -D_UNICODE -DUNICODE")
 	get_filename_component(CODELIB "${CMAKE_CURRENT_SOURCE_DIR}/../../../../CodeLib" ABSOLUTE)
@@ -53,6 +61,8 @@ elseif (MSVC)
 				${LIBPNG_SEARCH}/build${WORDSIZE}
 				${ZLIB_SEARCH}
 				${ZLIB_SEARCH}/build${WORDSIZE})
+			set(PNG_DLL
+				${LIBPNG_SEARCH}/build${WORDSIZE}/Release/libpng15.dll)
 		else()
 			message(FATAL_ERROR "PNG not found @ ${LIBPNG_SEARCH}")
 		endif()
@@ -142,7 +152,6 @@ elseif (MSVC)
 	target_include_directories(LgiIde PUBLIC "../include/win32" ${PNG_INCLUDE_DIRS})
 	target_link_libraries(	LgiIde
 							Lgi
-							png15
 							ComCtl32.lib
 							Ws2_32.lib
 							UxTheme.lib
@@ -155,6 +164,13 @@ elseif (MSVC)
 						"$<TARGET_FILE:Lgi>"
 						"$<TARGET_FILE_DIR:LgiIde>/$<TARGET_FILE_NAME:Lgi>" 
 					COMMENT "Copying Lgi to output directory")
+	if (EXISTS ${PNG_DLL})
+		add_custom_command(TARGET LgiIde POST_BUILD 
+					COMMAND "${CMAKE_COMMAND}" -E copy 
+						"${PNG_DLL}"
+						"$<TARGET_FILE_DIR:LgiIde>/libpng${VS_VER}x${WORDSIZE}.dll" 
+					COMMENT "Copying Lgi to output directory")
+	endif()
 endif ()
 
 target_include_directories (LgiIde PUBLIC
