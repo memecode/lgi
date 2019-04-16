@@ -1043,141 +1043,18 @@ void SetDefaultFocus(GViewI *v)
 	}
 }
 
-#define AppleLgiKeyMap() \
-	_(kVK_F1, VK_F1) \
-	_(kVK_F2, VK_F2) \
-	_(kVK_F3, VK_F3) \
-	_(kVK_F4, VK_F4) \
-	_(kVK_F5, VK_F5) \
-	_(kVK_F6, VK_F6) \
-	_(kVK_F7, VK_F7) \
-	_(kVK_F8, VK_F8) \
-	_(kVK_F9, VK_F9) \
-	_(kVK_F10, VK_F10) \
-	_(kVK_F11, VK_F11) \
-	_(kVK_F12, VK_F12) \
-	_(110, VK_APPS) \
-	_(kVK_LeftArrow, VK_LEFT) \
-	_(kVK_RightArrow, VK_RIGHT) \
-	_(kVK_DownArrow, VK_DOWN) \
-	_(kVK_UpArrow, VK_UP) \
-	_(114, VK_INSERT) \
-	_(kVK_PageUp, VK_PAGEUP) \
-	_(kVK_PageDown, VK_PAGEDOWN) \
-	_(kVK_Escape, VK_ESCAPE) \
-	_(kVK_Delete, VK_BACKSPACE) \
-	_(kVK_ForwardDelete, VK_DELETE) \
-	_(kVK_Home, VK_HOME) \
-	_(kVK_End, VK_END) \
-	_(kVK_ANSI_KeypadEnter, VK_ENTER) \
-	_(kVK_Return, VK_RETURN) \
-	_(kVK_Tab, '\t') \
-	_(kVK_Space, ' ') \
-	_(kVK_ANSI_Minus, '-') \
-	_(kVK_ANSI_Equal, '=') \
-	_(kVK_ANSI_LeftBracket, '{') \
-	_(kVK_ANSI_RightBracket, '}') \
-	_(kVK_ANSI_Backslash, '\\') \
-	_(kVK_ANSI_Period, '.') \
-	_(kVK_ANSI_Grave, '`') \
-	_(kVK_ANSI_Comma, ',') \
-	_(kVK_ANSI_Slash, '/') \
-	_(kVK_ANSI_Quote, '\'') \
-	_(kVK_ANSI_Semicolon, ';') \
-	_(kVK_ANSI_1, '1') \
-	_(kVK_ANSI_2, '2') \
-	_(kVK_ANSI_3, '3') \
-	_(kVK_ANSI_4, '4') \
-	_(kVK_ANSI_5, '5') \
-	_(kVK_ANSI_6, '6') \
-	_(kVK_ANSI_7, '7') \
-	_(kVK_ANSI_8, '8') \
-	_(kVK_ANSI_9, '9') \
-	_(kVK_ANSI_0, '0') \
-	_(kVK_ANSI_A, 'a') \
-	_(kVK_ANSI_B, 'b') \
-	_(kVK_ANSI_C, 'c') \
-	_(kVK_ANSI_D, 'd') \
-	_(kVK_ANSI_E, 'e') \
-	_(kVK_ANSI_F, 'f') \
-	_(kVK_ANSI_G, 'g') \
-	_(kVK_ANSI_H, 'h') \
-	_(kVK_ANSI_I, 'i') \
-	_(kVK_ANSI_J, 'j') \
-	_(kVK_ANSI_K, 'k') \
-	_(kVK_ANSI_L, 'l') \
-	_(kVK_ANSI_M, 'm') \
-	_(kVK_ANSI_N, 'n') \
-	_(kVK_ANSI_O, 'o') \
-	_(kVK_ANSI_P, 'p') \
-	_(kVK_ANSI_Q, 'q') \
-	_(kVK_ANSI_R, 'r') \
-	_(kVK_ANSI_S, 's') \
-	_(kVK_ANSI_T, 't') \
-	_(kVK_ANSI_U, 'u') \
-	_(kVK_ANSI_V, 'v') \
-	_(kVK_ANSI_W, 'w') \
-	_(kVK_ANSI_X, 'x') \
-	_(kVK_ANSI_Y, 'y') \
-	_(kVK_ANSI_Z, 'z')
-
-
-unsigned LOsKeyToLgi(unsigned k)
-{
-	switch (k)
-	{
-		// various cmdKeyBit
-		#define _(apple, lgi) \
-			case apple: return lgi;
-		AppleLgiKeyMap()
-		#undef _
-		
-		default:
-			printf("%s:%i - unimplemented virt->lgi code mapping: %d 0x%x '%c'\n",
-				_FL,
-				(unsigned)k,
-				(unsigned)k,
-				(char)k);
-			break;
-	}
-	
-	return 0;
-}
-
-unsigned LLgiToOsKey(unsigned k)
-{
-	switch (k)
-	{
-		// various cmdKeyBit
-		#define _(apple, lgi) \
-			case lgi: return apple;
-		AppleLgiKeyMap()
-		#undef _
-		
-		default:
-			printf("%s:%i - unimplemented lgi->virt code mapping: %d 0x%x '%c'\n",
-				_FL,
-				(unsigned)k,
-				(unsigned)k,
-				(char)k);
-			break;
-	}
-	
-	return 0;
-}
-
 static int GetIsChar(GKey &k, int mods)
 {
 	k.IsChar = (mods & 0x100) == 0
 				&&
 				(
-					(
-					k.c16 >= ' ' && k.c16 != 127) ||
+					k.c16 >= ' ' ||
 					k.vkey == VK_RETURN ||
 					k.vkey == VK_TAB ||
 					k.vkey == VK_BACKSPACE
 				);
-	
+
+	// printf("IsChar %i,%i -> %i\n", k.vkey,k.c16,k.IsChar);
 	return k.IsChar;
 }
 
@@ -1188,6 +1065,62 @@ struct WasteOfSpace
 };
 
 OsThread LgiThreadInPaint = 0;
+
+bool GKeyFromEvent(GKey &k, EventRef inEvent)
+{
+	UInt32		key = 0;
+
+	OSStatus e = GetEventParameter(	inEvent,
+									kEventParamKeyCode,
+									typeUInt32,
+									NULL,
+									sizeof(UInt32),
+									NULL,
+									&key);
+	if (e)
+	{
+		printf("%s:%i - error %i\n", _FL, (int)e);
+		return false;
+	}
+	
+	k.vkey = key;
+
+	UInt32		mods = 0;
+	e = GetEventParameter(	inEvent,
+							kEventParamKeyModifiers,
+							typeUInt32,
+							NULL,
+							sizeof(mods),
+							NULL,
+							&mods);
+	if (e)
+	{
+		printf("%s:%i - error %i\n", _FL, (int)e);
+	}
+
+	if (mods & 0x200) k.Shift(true);
+	if (mods & 0x1000) k.Ctrl(true);
+	if (mods & 0x800) k.Alt(true);
+	if (mods & 0x100) k.System(true);
+
+	ByteCount len = 0;
+	if (GetEventParameter(inEvent, kEventParamKeyUnicodes, typeUnicodeText, 0, 0, &len, 0) == noErr)
+	{
+		UniChar *unicode = new UniChar[len];
+		if (unicode &&
+			GetEventParameter(inEvent, kEventParamKeyUnicodes, typeUnicodeText, 0, len, 0, unicode) == noErr)
+		{
+			auto utf = (const uint16 *)unicode;
+			ssize_t bytes = len;
+			k.c16 = LgiUtf16To32(utf, bytes);
+		}
+		
+		delete [] unicode;
+	}
+
+	GetIsChar(k, mods);
+	return true;
+}
 
 pascal
 OSStatus
@@ -1417,41 +1350,11 @@ CarbonControlProc
 			{
 				case kEventRawKeyDown:
 				{
-					UInt32		key = 0;
-					UInt32		mods = 0;
-
-					OSStatus e = GetEventParameter(	inEvent,
-													kEventParamKeyCode,
-													typeUInt32,
-													NULL,
-													sizeof(UInt32),
-													NULL,
-													&key);
-					if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-					e = GetEventParameter(	inEvent,
-											kEventParamKeyModifiers,
-											typeUInt32,
-											NULL,
-											sizeof(mods),
-											NULL,
-											&mods);
-					if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-					
 					GKey k;
-					k.vkey = key;
-					if ((k.c16 = LOsKeyToLgi(key)))
+					if (GKeyFromEvent(k, inEvent))
 					{
 						k.Down(true);
-						if (mods & 0x200) k.Shift(true);
-						if (mods & 0x1000) k.Ctrl(true);
-						if (mods & 0x800) k.Alt(true);
-						if (mods & 0x100) k.System(true);
-
-						if
-						(
-							k.c16 == VK_APPS
-							/* || k.c16 == VK_DELETE */
-						)
+						if (k.c16 == VK_APPS)
 						{
 							printf("%s:%i - %s key=%i sh=%i,alt=%i,ctrl=%i v=%p\n",
 								_FL, v->GetClass(), k.c16, k.Shift(), k.Alt(), k.Ctrl(), v->Handle());
@@ -1461,7 +1364,6 @@ CarbonControlProc
 							else v->OnKey(k);
 						}
 					}
-					
 					// Status = noErr;
 					break;
 				}
@@ -1471,43 +1373,10 @@ CarbonControlProc
 				}
 				case kEventRawKeyUp:
 				{
-					UInt32		key = 0;
-					UInt32		mods = 0;
-
-					OSStatus e = GetEventParameter(	inEvent,
-													kEventParamKeyCode,
-													typeUInt32,
-													NULL,
-													sizeof(UInt32),
-													NULL,
-													&key);
-					if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-					e = GetEventParameter(	inEvent,
-											kEventParamKeyModifiers,
-											typeUInt32,
-											NULL,
-											sizeof(mods),
-											NULL,
-											&mods);
-					if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-					
 					GKey k;
-					k.vkey = key;
-					if ((k.c16 = LOsKeyToLgi(key)))
+					if (GKeyFromEvent(k, inEvent))
 					{
 						k.Down(false);
-						if (mods & 0x200) k.Shift(true);
-						if (mods & 0x1000) k.Ctrl(true);
-						if (mods & 0x800) k.Alt(true);
-						if (mods & 0x100) k.System(true);
-						GetIsChar(k, mods);
-
-						/*
-						printf("%s:%i - RawUp key=%i sh=%i,alt=%i,ctrl=%i\n",
-							_FL,
-							k.c16, k.Shift(), k.Alt(), k.Ctrl());
-							*/
-						
 						GWindow *Wnd = v->GetWindow();
 						if (Wnd) Wnd->HandleViewKey(v, k);
 						else v->OnKey(k);
@@ -1562,7 +1431,7 @@ CarbonControlProc
 
 					UniChar *utf = text;
 					ssize_t size = actualSize;
-					k.vkey = LOsKeyToLgi(key);
+					k.vkey = key;
 					k.c16 = LgiUtf16To32((const uint16 *&)utf, size);
 
 					GetIsChar(k, mods);
@@ -1589,7 +1458,7 @@ CarbonControlProc
 					else Processed = v->OnKey(k);
 					DeleteArray(text);
 					
-					if (!Processed && k.c16 == VK_TAB)
+					if (!Processed && k.vkey == VK_TAB)
 					{
 						NextTabStop(v, k.Shift() ? -1 : 1);
 					}

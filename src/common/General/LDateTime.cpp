@@ -773,7 +773,13 @@ bool LDateTime::Set(time_t tt)
 {
 	struct tm *t;
 	#if !defined(_MSC_VER) || _MSC_VER < _MSC_VER_VS2005
-	t = localtime(&tt);
+	
+	if (_Tz)
+	{
+		tt += _Tz * 60;
+	}
+	
+	t = gmtime(&tt);
 	if (t)
 	#else
 	struct tm tmp;
@@ -789,7 +795,7 @@ bool LDateTime::Set(time_t tt)
 		_Seconds = t->tm_sec;
 		_Thousands = 0;
 		
-		_Tz = SystemTimeZone();
+		// _Tz = SystemTimeZone();
 
 		return true;
 	}
@@ -842,26 +848,16 @@ bool LDateTime::Get(uint64 &s)
 	t.tm_sec = _Seconds;
 	t.tm_isdst = -1;
 	
-	/*
-	mktime assumes input is in localtime. This is fine if CurTz == _Tz but if it's different
-	we need to adjust the output to give the correct value.
-	*/
-	time_t sec = mktime(&t);
+	time_t sec = timegm(&t);
 	if (sec == -1)
 		return false;
 	
-	/*
-	int CurTz = SystemTimeZone();
-	if (CurTz != _Tz)
+	if (_Tz)
 	{
-		// Adjust the output to the correct time zone..
-		int Diff = _Tz - CurTz;
-		sec += Diff * 60;
-		printf("Adjusting += %i (%i -> %i)\n", Diff * 60, CurTz, _Tz);
+		// Adjust the output to UTC from the current timezone.
+		sec -= _Tz * 60;
+		// printf("Adjusting -= %i (%i)\n", _Tz * 60, _Tz);
 	}
-	else
-		printf("No Adjusting\n");
-		*/
 	
 	s = (uint64)sec * Second64Bit + _Thousands;
 	
@@ -1585,6 +1581,12 @@ void LDateTime::AddMinutes(int64 Minutes)
 		uint64 n = i + delta;
 		// printf("AddMin " LPrintfInt64 " + " LPrintfInt64 " = " LPrintfInt64 "\n", i, delta, n);
 		Set(n);
+		
+		#if 0
+		uint64 i2;
+		Get(i2);
+		int64 diff = (int64)i2-(int64)i;
+		#endif
 	}
 }
 

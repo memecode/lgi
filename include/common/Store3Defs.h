@@ -127,6 +127,7 @@ enum CalendarReminderType
 {
 	CalEmail,
 	CalPopup,
+	CalScriptCallback,
 	CalMaxType,
 };
 

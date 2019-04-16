@@ -103,6 +103,7 @@ class LgiClass GSubMenu :
 	friend void GSubMenuDeactivate(Gtk::GtkMenuShell *widget, GSubMenu *Sub);
 
 	int *_ContextMenuId;
+	bool InLoop;
 	bool IsContext(GMenuItem *Item);
 	void OnDeactivate();
 	#elif defined(WINNATIVE)

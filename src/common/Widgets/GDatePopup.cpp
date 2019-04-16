@@ -183,7 +183,7 @@ void GDatePopup::Move(int Dx, int Dy)
 
 bool GDatePopup::OnKey(GKey &k)
 {
-	switch (k.c16)
+	switch (k.vkey)
 	{
 		case VK_ESCAPE:
 		{

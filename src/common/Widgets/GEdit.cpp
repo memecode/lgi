@@ -172,19 +172,13 @@ bool GEdit::OnKey(GKey &k)
 	(
 		!d->Multiline &&
 		(
-			#ifdef VK_TAB
 			k.vkey == VK_TAB ||
-			#else
-			k.vkey == '\t' ||
-			#endif
 			k.vkey == VK_RETURN
 		)
 	)
 	{	
-		if (k.c16 == VK_RETURN)
-		{
+		if (k.vkey == VK_RETURN)
 			GTextView3::OnKey(k);
-		}
 		
 		return false;
 	}

@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 3.5)
 
 SET (CMAKE_OSX_ARCHITECTURES "i386")
+set (CMAKE_CXX_STANDARD 11)
 
 project (Lgi)
 set (LGI_VERSION_MAJOR 1)
@@ -11,18 +12,26 @@ if (UNIX AND NOT APPLE)
 endif()
 
 if (APPLE)
+
 	add_definitions("-DMAC -DLGI_LIBRARY -D_DEBUG -DLGI_RES")
-	#SET(GUI_TYPE MACOSX_BUNDLE)
-	INCLUDE_DIRECTORIES ( /Developer/Headers/FlatCarbon )
-	FIND_LIBRARY(CARBON_LIBRARY Carbon)
-	FIND_LIBRARY(COCOA_LIBRARY Cocoa)
-	MARK_AS_ADVANCED (CARBON_LIBRARY COCOA_LIBRARY)
-	SET(EXTRA_LIBS ${CARBON_LIBRARY} ${COCOA_LIBRARY})
+	# SET(GUI_TYPE MACOSX_BUNDLE)
+	include_directories ( /Developer/Headers/FlatCarbon )
+	find_library(CARBON_LIBRARY Carbon)
+	find_library(COCOA_LIBRARY Cocoa)
+	mark_as_advanced (CARBON_LIBRARY COCOA_LIBRARY)
+	set(EXTRA_LIBS ${CARBON_LIBRARY} ${COCOA_LIBRARY})
+
 elseif (LINUX)
+
 	add_definitions("-DLINUX -DLGI_LIBRARY -D_DEBUG -DLGI_RES -fPIC -w -fno-inline -fpermissive")
-	FIND_PACKAGE(GTK2 COMPONENTS gtk)
+	find_package(GTK2 COMPONENTS gtk)
+	find_package(PkgConfig)
+	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4)
+	                               
 elseif (MSVC)
+
 	add_definitions("/W2 -DWINDOWS -DWIN32 -DLGI_LIBRARY -D_DEBUG -DLGI_RES -D_WINDLL -D_UNICODE -DUNICODE")
+
 endif ()
 
 set (CommonSource
@@ -35,6 +44,7 @@ set (CommonSource
 	src/common/Gdc2/Alpha.cpp
 	src/common/Gdc2/Filters/GFilter.cpp
 	src/common/Gdc2/Font/GDisplayString.cpp
+	src/common/Gdc2/Font/LStringLayout.cpp
 	src/common/Gdc2/Font/GFont.cpp
 	src/common/Gdc2/Font/GFont_A.cpp
 	src/common/Gdc2/Font/GFont_W.cpp
@@ -47,7 +57,7 @@ set (CommonSource
 	src/common/Gdc2/Path/GPath.cpp
 	src/common/Gdc2/Tools/GColourReduce.cpp
 	src/common/General/GContainers.cpp
-	src/common/General/GDateTime.cpp
+	src/common/General/LDateTime.cpp
 	src/common/General/GExeCheck.cpp
 	src/common/General/GFileCommon.cpp
 	src/common/General/GGrowl.cpp
@@ -69,21 +79,22 @@ set (CommonSource
 	src/common/Lgi/GLibrary.cpp
 	src/common/Lgi/GMemStream.cpp
 	src/common/Lgi/GMru.cpp
-	src/common/Lgi/GMutex.cpp
+	src/common/Lgi/LMutex.cpp
 	src/common/Lgi/GObject.cpp
 	src/common/Lgi/GOptionsFile.cpp
 	src/common/Lgi/GProcess.cpp
 	src/common/Lgi/GStream.cpp
-	src/common/Lgi/GThreadCommon.cpp
-	src/common/Lgi/GThreadEvent.cpp
+	src/common/Lgi/LThreadCommon.cpp
+	src/common/Lgi/LThreadEvent.cpp
 	src/common/Lgi/GToolTip.cpp
 	src/common/Lgi/GTrayIcon.cpp
 	src/common/Lgi/GVariant.cpp
 	src/common/Lgi/GViewCommon.cpp
 	src/common/Lgi/GWindowCommon.cpp
-	src/common/Lgi/Lgi.cpp
+	src/common/Lgi/LgiCommon.cpp
 	src/common/Lgi/LgiMsg.cpp
 	src/common/Lgi/LgiRand.cpp
+	src/common/Lgi/GMenuCommon.cpp
 	src/common/Resource/LgiRes.cpp
 	src/common/Resource/Res.cpp
 	src/common/Skins/Gel/Gel.cpp
@@ -97,7 +108,7 @@ set (CommonSource
 	src/common/Widgets/GBitmap.cpp
 	src/common/Widgets/GBox.cpp
 	src/common/Widgets/GItemContainer.cpp
-	src/common/Widgets/GList.cpp
+	src/common/Widgets/LList.cpp
 	src/common/Widgets/GPanel.cpp
 	src/common/Widgets/GPopup.cpp
 	src/common/Widgets/GProgressDlg.cpp
@@ -129,7 +140,7 @@ set (WindowsSource
 	src/win32/Lgi/GMenu.cpp
 	src/win32/Lgi/GPrinter.cpp
 	src/win32/Lgi/GScrollBar.cpp
-	src/win32/Lgi/GThread.cpp
+	src/win32/Lgi/LThread.cpp
 	src/win32/Lgi/GView.cpp
 	src/win32/Lgi/GWindow.cpp
 	src/win32/Lgi/LgiException.cpp
@@ -138,9 +149,9 @@ set (WindowsSource
 	src/win32/Widgets/GCombo_Win.cpp
 	src/win32/Widgets/GDialog.cpp
 	src/win32/Widgets/GEdit_Win.cpp
-	src/win32/Widgets/GProgress.cpp
 	src/win32/Widgets/GRadioGroup_Win.cpp
 	src/win32/Widgets/GSlider.cpp
+	src/win32/Widgets/GProgress.cpp
 	)
 
 
@@ -149,6 +160,7 @@ set (LinuxSource
 	src/linux/Gtk/GMemDC.cpp
 	src/linux/Gtk/GPrintDC.cpp
 	src/linux/Gtk/GScreenDC.cpp
+	src/linux/Gtk/LgiWidget.cpp
 	src/linux/General/GFile.cpp
 	src/linux/General/GMem.cpp
 	src/linux/General/ShowFileProp_Linux.cpp
@@ -159,10 +171,18 @@ set (LinuxSource
 	src/linux/Lgi/GLayout.cpp
 	src/linux/Lgi/GMenuGtk.cpp
 	src/linux/Lgi/GPrinter.cpp
-	src/linux/Lgi/GThread.cpp
+	src/linux/Lgi/LThread.cpp
 	src/linux/Lgi/GView.cpp
 	src/linux/Lgi/GWidgets.cpp
 	src/linux/Lgi/GWindow.cpp
+	src/common/Lgi/GFileSelect.cpp
+	src/common/Widgets/GCheckBox.cpp
+	src/common/Widgets/GEdit.cpp
+	src/common/Widgets/GScrollBar.cpp
+	src/common/Widgets/GCombo.cpp
+	src/common/Widgets/GButton.cpp
+	src/common/Widgets/GRadioGroup.cpp
+	src/common/Widgets/GProgress.cpp
 	)
 
 set (MacSource
@@ -176,9 +196,9 @@ set (MacSource
 	src/common/Widgets/GProgress.cpp
 	src/mac/cocoa/General/ShowFileProp_Mac.mm
 	src/mac/carbon/Gdc2/Gdc2.cpp
-	src/mac/carbon/Gdc2/GMemDC.cpp
-	src/mac/carbon/Gdc2/GPrintDC.cpp
-	src/mac/carbon/Gdc2/GScreenDC.cpp
+	src/mac/common/GMemDC.cpp
+	src/mac/common/GPrintDC.cpp
+	src/mac/common/GScreenDC.cpp
 	src/mac/carbon/General/GFile.cpp
 	src/mac/carbon/General/GMem.cpp
 	src/mac/carbon/Lgi/GApp.cpp
@@ -188,7 +208,7 @@ set (MacSource
 	src/mac/carbon/Lgi/GFileSelect.cpp
 	src/mac/carbon/Lgi/GMenu.cpp
 	src/mac/carbon/Lgi/GPrinter.cpp
-	src/mac/carbon/Lgi/GThread.cpp
+	src/mac/carbon/Lgi/LThread.cpp
 	src/mac/carbon/Lgi/GView.cpp
 	src/mac/carbon/Lgi/GWidgets.cpp
 	src/mac/carbon/Lgi/GWindow.cpp
@@ -205,22 +225,36 @@ endif ()
 add_library(Lgi SHARED ${Source})
 
 if (APPLE)
-	target_include_directories(Lgi PUBLIC "include/mac/carbon" "include/posix")
+	target_include_directories(Lgi PUBLIC
+		"include/mac/carbon"
+		"include/posix"
+		"/opt/local/include"
+		"${CMAKE_CURRENT_SOURCE_DIR}/../../../CodeLib/libpng"
+		"${CMAKE_CURRENT_SOURCE_DIR}/../../../CodeLib/libpng/build"
+		)
 	target_link_libraries(Lgi ${EXTRA_LIBS})
+	set(	OBJCPP_SOURCE
+		src/common/Lgi/LgiCommon.cpp
+		src/mac/common/GMemDC.cpp
+		src/mac/carbon/Lgi/GGeneral.cpp
+		)
+	set_source_files_properties(${OBJCPP_SOURCE} PROPERTIES 
+                            COMPILE_FLAGS "-x objective-c++")
 elseif (LINUX)
-	target_include_directories(Lgi PUBLIC "include/linux/Gtk" "include/linux" ${GTK2_INCLUDE_DIRS})
-	target_link_libraries(Lgi ${GTK2_LIBRARIES})
+	target_include_directories(Lgi PUBLIC "include/linux/Gtk" "include/linux" ${GTK2_INCLUDE_DIRS} ${GST_INCLUDE_DIRS})
+	target_link_libraries(Lgi ${GTK2_LIBRARIES} ${GST_LIBRARIES} magic)
 elseif (MSVC)
 	target_include_directories(Lgi PUBLIC "include/win32")
 	target_link_libraries(	Lgi
-						ComCtl32.lib
-						Ws2_32.lib
-						UxTheme.lib
-						imm32.lib)
+							ComCtl32.lib
+							Ws2_32.lib
+							UxTheme.lib
+							imm32.lib)
 endif ()
 
 target_include_directories (Lgi PUBLIC
 							"include/common"
+							${PNGLIB_INCLUDE_DIR}
 							"${CMAKE_CURRENT_SOURCE_DIR}/../../../CodeLib/libiconv-1.14/include")
 
 

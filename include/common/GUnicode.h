@@ -194,13 +194,13 @@ inline bool LgiUtf32To8(uint32_t c, uint8_t *&i, ssize_t &Len)
 #define IsUtf16_Trail(c)	( ((uint16)(c) & 0xfc00) == 0xDc00 )
 
 /// Convert a single utf-16 char to utf-32
-inline uint32_t LgiUtf16To32(const uint16_t *&i, ssize_t &Len)
+inline uint32_t LgiUtf16To32(const uint16_t *&i, ssize_t &Bytes)
 {
-	if (Len > 1)
+	if (Bytes > 1)
 	{
 		if (!*i)
 		{
-			Len = 0;
+			Bytes = 0;
 			return 0;
 		}
 
@@ -208,9 +208,9 @@ inline uint32_t LgiUtf16To32(const uint16_t *&i, ssize_t &Len)
 		if (n == 0xd800 || n == 0xdc00)
 		{
 			// 2 word UTF
-			if (Len > 3)
+			if (Bytes > 3)
 			{
-				Len -= sizeof(uint16)<<1;
+				Bytes -= sizeof(uint16)<<1;
 				int w = (*i & 0x3c0) >> 6;
 				int zy = *i++ & 0x3f;
 				return ((w + 1) << 16) | (zy << 10) | (*i++ & 0x3ff);
@@ -218,7 +218,7 @@ inline uint32_t LgiUtf16To32(const uint16_t *&i, ssize_t &Len)
 		}
 
 		// 1 word UTF
-		Len -= sizeof(uint16);
+		Bytes -= sizeof(uint16);
 		return *i++;
 	}
 

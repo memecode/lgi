@@ -255,12 +255,10 @@ bool GCheckBox::OnKey(GKey &k)
 {
 	switch (k.vkey)
 	{
-		case ' ':
+		case VK_SPACE:
 		{
 			if (!k.Down())
-			{
 				Value(!Value());
-			}
 
 			return true;
 		}

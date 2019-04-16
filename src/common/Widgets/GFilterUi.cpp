@@ -959,7 +959,7 @@ bool GFilterItem::OnKey(GKey &k)
 {
 	if (k.IsChar)
 	{
-		if (k.vkey == ' ')
+		if (k.vkey == VK_SPACE)
 		{
 			if (k.Down())
 			{

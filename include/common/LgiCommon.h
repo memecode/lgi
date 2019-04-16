@@ -140,12 +140,6 @@ LgiFunc char *LgiToNativeCp(const char *In, ssize_t InLen = -1);
 /// \ingroup Text
 LgiFunc char *LgiFromNativeCp(const char *In, ssize_t InLen = -1);
 
-/// Map an OS virtual key to an Lgi keycode
-LgiFunc unsigned LOsKeyToLgi(unsigned k);
-
-/// Map a Lgi keycode to a OS virtual key
-LgiFunc unsigned LLgiToOsKey(unsigned k);
-
 /// Returns the next token in a string, leaving the argument pointing to the end of the token
 /// \ingroup Text
 LgiFunc char *LgiTokStr(const char *&s);

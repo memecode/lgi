@@ -639,7 +639,7 @@ bool GRadioButton::OnKey(GKey &k)
 			Status = true;
 			break;
 		}
-		case ' ':
+		case VK_SPACE:
 		{
 			if (k.Down())
 			{

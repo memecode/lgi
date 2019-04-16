@@ -1038,6 +1038,7 @@ public:
 						EscChar('\v', 'v');
 						EscChar('\'', '\'');
 						EscChar('\"', '\"');
+						EscChar('&', '&');
 						EscChar('?', '?');
 						#undef EscChar
 						default: Ch += sprintf_s(Buf+Ch, sizeof(Buf)-Ch, "x%02x", *In); break;

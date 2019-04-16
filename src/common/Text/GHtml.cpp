@@ -7812,38 +7812,17 @@ bool GHtml::OnKey(GKey &k)
 		int LineY = GetFont()->GetHeight();
 		int Page = GetClient().Y() / LineY;
 
-		switch (k.c16)
+		switch (k.vkey)
 		{
-			case 'f':
-			case 'F':
-			{
-				if (k.Modifier())
-				{
-					GFindDlg Dlg(this, 0, FindCallback, this);
-					Dlg.DoModal();
-					Status = true;
-				}
-				break;
-			}
 			case VK_F3:
 			{
 				OnFind(NULL);
 				break;
 			}
-			case 'c':
-			case 'C':
 			#ifdef WIN32
 			case VK_INSERT:
+				goto DoCopy;
 			#endif
-			{
-				printf("Got 'c', mod=%i\n", k.Modifier());
-				if (k.Modifier())
-				{
-					Copy();
-					Status = true;
-				}
-				break;
-			}
 			case VK_UP:
 			{
 				Dy = -1;
@@ -7883,6 +7862,35 @@ bool GHtml::OnKey(GKey &k)
 					Dy = (int) ((High - Page) - VScroll->Value());
 				}
 				Status = true;
+				break;
+			}
+			default:
+			{
+				switch (k.c16)
+				{
+					case 'f':
+					case 'F':
+					{
+						if (k.Modifier())
+						{
+							GFindDlg Dlg(this, 0, FindCallback, this);
+							Dlg.DoModal();
+							Status = true;
+						}
+						break;
+					}
+					case 'c':
+					case 'C':
+					{
+						DoCopy:
+						if (k.Modifier())
+						{
+							Copy();
+							Status = true;
+						}
+						break;
+					}
+				}
 				break;
 			}
 		}

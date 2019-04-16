@@ -303,10 +303,6 @@ public:
 	virtual GStreamI *GetLogger(GDataStoreI *store) { return 0; }
 	/// Search for a object by type and name
 	virtual bool Match(GDataStoreI *store, GDataPropI *Addr, int ObjectType, GArray<GDom*> &Matches) { return 0; }
-
-	#ifdef _DEBUG
-	virtual void DebugDelete(GDataI *Obj) {}
-	#endif
 };
 
 /// The virtual mail storage interface from which all mail stores inherit from.

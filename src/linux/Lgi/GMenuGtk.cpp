@@ -23,6 +23,7 @@ GSubMenu::GSubMenu(const char *name, bool Popup)
 	Parent = NULL;
 	Info = NULL;
 	_ContextMenuId = NULL;
+	InLoop = false;
 	
 	if (name)
 	{
@@ -215,7 +216,12 @@ void GSubMenu::OnDeactivate()
 {
 	if (_ContextMenuId)
 		*_ContextMenuId = 0;
-	Gtk::gtk_main_quit();
+		
+	if (InLoop)
+	{
+		Gtk::gtk_main_quit();
+		InLoop = false;
+	}
 }
                                                          
 int GSubMenu::Float(GView *From, int x, int y, int Button)
@@ -273,9 +279,11 @@ int GSubMenu::Float(GView *From, int x, int y, int Button)
 			mask & (GDK_BUTTON1_MASK|GDK_BUTTON2_MASK|GDK_BUTTON3_MASK|GDK_BUTTON4_MASK|GDK_BUTTON5_MASK)
 		)
 	)
+	{
+		InLoop = true;
 		Gtk::gtk_main();
-	else
-		LgiTrace("%s:%i - Popup loop avoided, no button down?\n", _FL);
+	}
+	else LgiTrace("%s:%i - Popup loop avoided, no button down?\n", _FL);
 
 	_ContextMenuId = NULL;
 	return MenuId;

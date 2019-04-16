@@ -1644,7 +1644,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 	if (ToLower(k.c16) == 'i' &&
 		k.Ctrl())
 	{
-		d->EatVkeys.Add(0x9);
+		d->EatVkeys.Add(VK_TAB);
 	}
 	else if (d->EatVkeys.Length())
 	{
@@ -1666,7 +1666,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 	}
 	else if (k.IsChar)
 	{
-		switch (k.c16)
+		switch (k.vkey)
 		{
 			default:
 			{
@@ -1676,7 +1676,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 					!GetReadOnly()
 					&&
 					(
-						(k.c16 >= ' ' || k.c16 == VK_TAB)
+						(k.c16 >= ' ' || k.vkey == VK_TAB)
 						&&
 						k.c16 != 127
 					)

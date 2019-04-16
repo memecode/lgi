@@ -437,7 +437,7 @@ bool GCombo::OnKey(GKey &k)
 	{
 		switch (k.vkey)
 		{
-			case ' ':
+			case VK_SPACE:
 			{
 				// Open the submenu
 				Status = true;

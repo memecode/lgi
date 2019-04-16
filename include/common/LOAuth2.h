@@ -55,7 +55,7 @@ public:
 	};
 
 
-	LOAuth2(Params &params, const char *account, GDom *store, GStream *log = NULL);
+	LOAuth2(Params &params, const char *account, GDom *store, LCancel *cancel, GStream *log = NULL);
 	virtual ~LOAuth2();
 
 	GString GetAccessToken();

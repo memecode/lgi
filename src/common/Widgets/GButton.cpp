@@ -304,7 +304,7 @@ bool GButton::OnKey(GKey &k)
 			}
 			// else fall thru
 		}
-		case ' ':
+		case VK_SPACE:
 		case VK_RETURN:
 		#ifdef LINUX
 		case VK_KP_ENTER:
