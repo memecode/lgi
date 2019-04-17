@@ -173,11 +173,13 @@ elseif (MSVC)
 endif ()
 
 # Create a resources sub-folder and copy over the resource files (images and lr8)
-add_custom_target(build-time-make-directory ALL
-    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:LgiIde>/Resources)
+set(RESOURCE_DIR ${CMAKE_BINARY_DIR}/Resources)
+if (NOT EXISTS ${RESOURCE_DIR})
+	add_custom_target(build-time-make-directory ALL
+	    COMMAND ${CMAKE_COMMAND} -E make_directory ${RESOURCE_DIR})
+endif()
 foreach(infileName ${CommonResourceFiles})
-	set(OUT $<TARGET_FILE_DIR:LgiIde>)
-	add_custom_command(TARGET LgiIde POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${infileName} ${OUT}/Resources)
+	add_custom_command(TARGET LgiIde POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${infileName} ${RESOURCE_DIR})
 endforeach()
 
 target_include_directories (LgiIde PUBLIC
