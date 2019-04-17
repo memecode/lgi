@@ -114,6 +114,7 @@ set(CommonResourceFiles
 	Resources/icons.png
 	Resources/cmds-16px.png
 	Resources/LgiIde.lr8
+	Resources/icon64.png
 	)
 
 if (APPLE)
@@ -157,9 +158,6 @@ elseif (MSVC)
 							Ws2_32.lib
 							UxTheme.lib
 							imm32.lib)
-	foreach(infileName ${CommonResourceFiles})
-		add_custom_command(TARGET LgiIde POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${infileName} $<TARGET_FILE_DIR:LgiIde>)
-	endforeach()
 	add_custom_command(TARGET LgiIde POST_BUILD 
 					COMMAND "${CMAKE_COMMAND}" -E copy 
 						"$<TARGET_FILE:Lgi>"
@@ -173,6 +171,14 @@ elseif (MSVC)
 					COMMENT "Copying Lgi to output directory")
 	endif()
 endif ()
+
+# Create a resources sub-folder and copy over the resource files (images and lr8)
+add_custom_target(build-time-make-directory ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:LgiIde>/Resources)
+foreach(infileName ${CommonResourceFiles})
+	set(OUT $<TARGET_FILE_DIR:LgiIde>)
+	add_custom_command(TARGET LgiIde POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${infileName} ${OUT}/Resources)
+endforeach()
 
 target_include_directories (LgiIde PUBLIC
 							"../include/common"

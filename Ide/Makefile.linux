@@ -207,6 +207,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../include/common/LgiWidgets.h \
 	../include/common/LHashTable.h \
 	../include/common/LList.h \
+	../include/common/LListItemCheckBox.h \
 	../include/common/LListItemRadioBtn.h \
 	../include/common/LMutex.h \
 	../include/common/LOAuth2.h \
@@ -316,6 +317,9 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../src/common/Widgets/GTableLayout.cpp \
 	../src/common/Widgets/GTabView.cpp \
 	../src/common/Widgets/GTextLabel.cpp \
+	../src/common/Widgets/GToolBar.cpp \
+	../src/common/Widgets/GTree.cpp \
+	../src/common/Widgets/LList.cpp \
 	../src/linux/General/GFile.cpp \
 	../src/linux/General/GMem.cpp \
 	../src/linux/General/ShowFileProp_Linux.cpp \
@@ -975,7 +979,14 @@ Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/common/Lgi.h \
 
 ../include/common/GFontCache.h : 
 
-../include/linux/Gtk/LgiOsClasses.h : 
+../src/common/Widgets/GToolBar.cpp : ../include/common/Lgi.h \
+	../include/common/GToken.h \
+	../include/common/GVariant.h \
+	../include/common/GDisplayString.h \
+	../include/common/GPalette.h \
+	../include/common/GNotifications.h \
+	../include/common/LgiRes.h \
+	../include/common/GCssTools.h
 
 ../include/common/GCheckBox.h : 
 
@@ -986,6 +997,8 @@ Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/common/Lgi.h \
 	../include/common/GDisplayString.h \
 	../include/common/LgiRes.h \
 	../include/common/LStringLayout.h
+
+../include/linux/Gtk/LgiOsClasses.h : 
 
 ../include/common/LDateTime.h : ../include/common/GStringClass.h
 
@@ -1328,8 +1341,22 @@ Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/common/Lgi.h \
 
 ../include/common/GSkinEngine.h : ../include/common/LList.h
 
+../src/common/Widgets/GTree.cpp : ../include/common/Lgi.h \
+	../include/common/GTree.h \
+	../include/common/GScrollBar.h \
+	../include/common/GDisplayString.h \
+	../include/common/GPalette.h \
+	../include/common/LgiRes.h
+
 ../src/common/Lgi/GLibrary.cpp : ../include/common/Lgi.h \
 	../include/common/GToken.h
+
+../src/common/Widgets/LList.cpp : ../include/common/Lgi.h \
+	../include/common/GSkinEngine.h \
+	../include/common/LList.h \
+	../include/common/GScrollBar.h \
+	../include/common/GDisplayString.h \
+	../include/common/LgiRes.h
 
 ../include/common/GToken.h : ../include/common/GArray.h \
 	../include/common/GString.h

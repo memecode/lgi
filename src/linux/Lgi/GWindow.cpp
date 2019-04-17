@@ -143,7 +143,7 @@ bool GWindow::SetIcon(const char *FileName)
 
 		if (!FileExists(FileName))
 		{
-			LgiTrace("%s:%i - SetIcon failed to find '%s'\n", _FL);
+			LgiTrace("%s:%i - SetIcon failed to find '%s'\n", _FL, FileName);
 			return false;
 		}
 		else

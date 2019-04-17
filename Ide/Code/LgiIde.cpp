@@ -1516,7 +1516,7 @@ Chk;
 	#if WINNATIVE
 	SetIcon((char*)MAKEINTRESOURCE(IDI_APP));
 	#else
-	SetIcon("Icon64.png");
+	SetIcon("icon64.png");
 	#endif
 Chk;
 	if (Attach(0))

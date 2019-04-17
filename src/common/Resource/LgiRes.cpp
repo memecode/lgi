@@ -518,8 +518,10 @@ bool LgiResources::Load(const char *FileName)
 		// LgiAssert(0);
 		return false;
 	}
+	
+	if (Root->Children.Length() == 0)
+		return false;
 
-	for (GXmlTag *t = Root->Children.First(); t; )
 	{
 		if (t->IsTag("string-group"))
 		{
@@ -1446,83 +1448,90 @@ bool GMenuLoader::Load(LgiMenuRes *MenuRes, GXmlTag *Tag, ResFileFormat Format, 
 {
 	bool Status = false;
 
-	if (Tag && Tag->GetTag())
+	if (!Tag)
 	{
-		if (stricmp(Tag->GetTag(), "menu") == 0)
-		{
-			#if WINNATIVE
-			if (!Info)
-			{
-				Info = ::CreateMenu();
-			}
-			#endif
-		}
-
+		LgiTrace("%s:%i - No tag?", _FL);
+		return false;
+	}
+	
+	if (Tag->IsTag("menu"))
+	{
 		#if WINNATIVE
-		if (Info)
-		#endif
+		if (!Info)
 		{
-			Status = true;
-			for (GXmlTag *t = Tag->Children.First(); t && Status; t = Tag->Children.Next())
+			Info = ::CreateMenu();
+		}
+		#endif
+	}
+
+	#if WINNATIVE
+	if (Info)
+	#endif
+	{
+		Status = true;
+		
+		for (auto t: Tag->Children)
+		{
+			if (!Status)
+				break;
+			if (t->IsTag("submenu"))
 			{
-				if (t->IsTag("submenu"))
+				LgiStringRes *Str = MenuRes->GetString(t);
+				if (Str && Str->Str)
+				{
+					bool Add = !TagList || TagList->Check(Str->Tag);
+					GSubMenu *Sub = AppendSub(Str->Str);
+					if (Sub)
+					{
+						GMenuItem *p = Sub->GetParent();
+						if (p)
+							p->Id(Str->Id);
+						else
+							LgiTrace("%s:%i - No Parent to set menu item ID.\n", _FL);
+						
+						Status = Sub->Load(MenuRes, t, Format, TagList);
+
+						if (!Add)
+						{
+							// printf("Sub->GetParent()=%p this=%p\n", Sub->GetParent(), this);
+							Sub->GetParent()->Remove();
+							delete Sub->GetParent();
+						}
+					}
+				}
+				else
+				{
+					LgiAssert(0);
+				}
+			}
+			else if (t->IsTag("menuitem"))
+			{
+				if (t->GetAsInt("sep") > 0)
+				{
+					AppendSeparator();
+				}
+				else
 				{
 					LgiStringRes *Str = MenuRes->GetString(t);
 					if (Str && Str->Str)
 					{
-						bool Add = !TagList || TagList->Check(Str->Tag);
-						GSubMenu *Sub = AppendSub(Str->Str);
-						if (Sub)
+						if (!TagList || TagList->Check(Str->Tag))
 						{
-							GMenuItem *p = Sub->GetParent();
-							if (p)
-								p->Id(Str->Id);
-							else
-								LgiTrace("%s:%i - No Parent to set menu item ID.\n", _FL);
-							
-							Status = Sub->Load(MenuRes, t, Format, TagList);
-
-							if (!Add)
-							{
-								// printf("Sub->GetParent()=%p this=%p\n", Sub->GetParent(), this);
-								Sub->GetParent()->Remove();
-								delete Sub->GetParent();
-							}
+							int Enabled = t->GetAsInt("enabled");
+							char *Shortcut = t->GetAttr("shortcut");
+							Status = AppendItem(Str->Str, Str->Id, Enabled != 0, -1, Shortcut) != 0;
 						}
+						else Status = true;
 					}
 					else
 					{
 						LgiAssert(0);
 					}
 				}
-				else if (t->IsTag("menuitem"))
-				{
-					if (t->GetAsInt("sep") > 0)
-					{
-						AppendSeparator();
-					}
-					else
-					{
-						LgiStringRes *Str = MenuRes->GetString(t);
-						if (Str && Str->Str)
-						{
-							if (!TagList || TagList->Check(Str->Tag))
-							{
-								int Enabled = t->GetAsInt("enabled");
-								char *Shortcut = t->GetAttr("shortcut");
-								Status = AppendItem(Str->Str, Str->Id, Enabled != 0, -1, Shortcut) != 0;
-							}
-							else Status = true;
-						}
-						else
-						{
-							LgiAssert(0);
-						}
-					}
-				}
 			}
 		}
 	}
+
 	return Status;
 }
 
