@@ -522,7 +522,9 @@ bool LgiResources::Load(const char *FileName)
 	if (Root->Children.Length() == 0)
 		return false;
 
+	for (auto It = Root->Children.begin(); It != Root->Children.end(); )
 	{
+		auto t = *It;
 		if (t->IsTag("string-group"))
 		{
 			bool IsString = true;
