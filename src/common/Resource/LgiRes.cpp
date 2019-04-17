@@ -534,7 +534,7 @@ bool LgiResources::Load(const char *FileName)
 				IsString = stricmp("_Dialog Symbols_", Name) != 0;
 			}
 
-			for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+			for (auto c: t->Children)
 			{
 				LgiStringRes *s = new LgiStringRes(this);
 				if (s && s->Read(c, d->Format))
@@ -607,9 +607,7 @@ bool LgiResources::Load(const char *FileName)
 		}
 
 		if (t)
-			t = Root->Children.Next();
-		else
-			t = Root->Children.Current();
+			It++;
 	}
 
 	return true;
