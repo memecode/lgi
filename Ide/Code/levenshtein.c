@@ -23,7 +23,7 @@ levenshtein(const char *a, const char *b) {
   char code;
 
   /* Shortcut optimizations / degenerate cases. */
-  if (a == b) {
+  if (a == b || cache == NULL) {
     return 0;
   }
 
