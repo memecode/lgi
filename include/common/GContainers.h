@@ -56,7 +56,7 @@ public:
 	public:
 		List<T> *Lst;
 		LstBlk *i;
-		int Cur;
+		int Cur, Ver;
 		OsThreadId Thread;
 
 		bool CheckThread() const
@@ -77,6 +77,7 @@ public:
 			Lst = lst;
 			i = 0;
 			Cur = 0;
+			Ver = lst->Ver;
 			Thread = GetCurrentThreadId();
 		}
 
@@ -85,6 +86,7 @@ public:
 			Lst = lst;
 			i = item;
 			Cur = c;
+			Ver = lst->Ver;
 			Thread = GetCurrentThreadId();
 		}
 
@@ -106,6 +108,10 @@ public:
 		bool In() const
 		{
 			CHECK_THREAD
+
+			if (Ver != Lst->Ver && !Lst->ValidBlock(i))
+				return false;
+
 			return	i &&
 					Cur >= 0 &&
 					Cur < i->Count;
@@ -223,7 +229,16 @@ public:
 
 protected:
 	size_t Items;
+	int Ver;
 	LstBlk *FirstObj, *LastObj;
+
+	bool ValidBlock(LstBlk *b)
+	{
+		for (LstBlk *i = FirstObj; i; i = i->Next)
+			if (i == b)
+				return true;
+		return false;
+	}
 
 	LstBlk *NewBlock(LstBlk *Where)
 	{
@@ -295,6 +310,7 @@ protected:
 		}
 
 		delete i;
+		Ver++; // This forces the iterators to recheck their block ptr
 
 		return true;
 	}
@@ -506,6 +522,7 @@ public:
 	{
 		FirstObj = LastObj = NULL;
 		Items = 0;
+		Ver = 0;
 	}
 
 	~List<T>()
@@ -574,6 +591,7 @@ public:
 		}
 		FirstObj = LastObj = NULL;
 		Items = 0;
+		Ver++;
 
 		VALIDATE();
 		return true;
@@ -775,6 +793,7 @@ public:
 		}
 		FirstObj = LastObj = NULL;
 		Items = 0;
+		Ver++;
 		VALIDATE();
 	}
 
@@ -795,6 +814,7 @@ public:
 		}
 		FirstObj = LastObj = NULL;
 		Items = 0;
+		Ver++;
 		VALIDATE();
 	}
 
@@ -803,6 +823,7 @@ public:
 		LSwap(FirstObj, other.FirstObj);
 		LSwap(LastObj, other.LastObj);
 		LSwap(Items, other.Items);
+		LSwap(Ver, other.Ver);
 	}
 
 	/// Assign the contents of another list to this one
