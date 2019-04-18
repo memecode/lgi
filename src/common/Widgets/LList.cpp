@@ -403,7 +403,7 @@ bool LListItem::GridLines()
 void LListItem::OnMouseClick(GMouse &m)
 {
 	int Col = Parent ? Parent->ColumnAtX(m.x) : -1;
-	for (LListItemColumn *h = d->Cols.First(); h; h=d->Cols.Next())
+	for (auto h: d->Cols)
 	{
 		if (Col == h->GetColumn())
 		{
@@ -563,7 +563,8 @@ void LListItem::OnPaint(GItem::ItemPaintCtx &Ctx)
 	}
 	
 	// draw columns
-	LListItemColumn *h = d->Cols.First();
+	auto It = d->Cols.begin();
+	LListItemColumn *h = *It;
 	GItem::ItemPaintCtx ColCtx = Ctx;
 	
 	for (int i=0; i<Parent->Columns.Length(); i++)
@@ -579,7 +580,7 @@ void LListItem::OnPaint(GItem::ItemPaintCtx &Ctx)
 		if (h && i == h->GetColumn())
 		{
 			h->OnPaintColumn(ColCtx, i, c);
-			h = d->Cols.Next();
+			h = *(++It);
 		}
 		x = ColCtx.x2 + 1;
 		
