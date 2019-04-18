@@ -827,6 +827,19 @@ public:
 		}
 		return true;
 	}
+
+	/// Check for non whitespace
+	bool IsEmpty()
+	{
+		if (!Str)
+			return true;
+		for (char *s = Str->Str; *s; s++)
+		{
+			if (*s != ' ' && *s != '\t' && *s != '\r' && *s != '\n')
+				return false;
+		}
+		return true;
+	}
 	
 	/// Reverses all the characters in the string
 	GString Reverse()

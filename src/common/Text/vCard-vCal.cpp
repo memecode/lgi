@@ -6,6 +6,7 @@
 #include "vCard-vCal.h"
 #include "GToken.h"
 #include "ScribeDefs.h"
+#include "LJson.h"
 
 #define Push(s) Write(s, (int)strlen(s))
 
@@ -958,6 +959,8 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 	GArray<TimeZoneInfo> TzInfos;
 	TimeZoneInfo *TzInfo = NULL;
 	bool IsNormalTz = false, IsDaylightTz = false;
+	LJson To;
+	int Attendee = 0;
 
 	while (ReadField(*In, Field, &Params, Data))
 	{
@@ -1061,14 +1064,44 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 			}
 			else if (IsVar(Field, "attendee"))
 			{
-				char *e = stristr(Data, "mailto=");
-				if (e)
+				auto Email = Data.SplitDelimit(":=").Last();
+				if (LIsValidEmail(Email))
 				{
-					e += 7;
+					const char *Name = Params.Find("CN");
+					const char *Role = Params.Find("Role");
+					
+					GString k;
+					k.Printf("[%i].email", Attendee);
+					To.Set(k, Email);
+
+					if (Name)
+					{
+						k.Printf("[%i].name", Attendee);
+						To.Set(k, Name);
+					}
+
+					if (Role)
+					{
+						k.Printf("[%i].role", Attendee);
+						To.Set(k, Role);
+					}
+
+					Attendee++;
 
 					/*
-					char *Name = Variables["CN"];
-					char *Role = Variables["Role"];
+					GString Guests = o->GetStr(FIELD_TO);
+					if (Guests)
+					{
+						GString::Array a = Guests.SplitDelimit(",");
+						for (unsigned i=0; i<a.Length(); i++)
+						{
+							GAutoPtr<ListAddr> la(new ListAddr(App));
+							if (la->Serialize(a[i], false))
+							{
+								d->Guests->Insert(la.Release());
+							}
+						}
+					}
 
 					GDataPropI *a = c->CreateAttendee();
 					if (a)
@@ -1131,6 +1164,12 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 					Sect.Rule = Data;				
 			}			
 		}
+	}
+
+	if (Attendee > 0)
+	{
+		auto j = To.GetJson();
+		c->SetStr(FIELD_ATTENDEE_JSON, j);
 	}
 	
 	if (StartTz || EndTz)
@@ -1342,56 +1381,30 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 		{
 			for (GDataPropI *a=Attendees.First(); a; a=Attendees.Next())
 			{
-				// ATTENDEE;CN="Matthew Allen";ROLE=REQ-PARTICIPANT;RSVP=TRUE:MAILTO:matthew@cisra.canon.com.au
-
-				int Attend = 2;
-				char *Name = 0;
-				char *Email = 0;
-				int Response = 0;
-
-				a->GetStr(FIELD_ATTENDEE_ATTENDENCE, Attend);
-				a->GetStr(FIELD_ATTENDEE_NAME, Name);
-				a->GetStr(FIELD_ATTENDEE_EMAIL, Email);
-				a->GetStr(FIELD_ATTENDEE_RESPONSE, Response);
-
-				if (Email)
-				{
-					strcpy(s, "ATTENDEE");
-					if (Name)
-					{
-						int len = strlen(s);
-						sprintf_s(s+len, sizeof(s)-len, ";CN=\"%s\"", Name);
-					}
-					switch (Attend)
-					{
-						case 1:
-						{
-							strcat(s, ";ROLE=CHAIR");
-							break;
-						}
-						default:
-						case 2:
-						{
-							strcat(s, ";ROLE=REQ-PARTICIPANT");
-							break;
-						}
-						case 3:
-						{
-							strcat(s, ";ROLE=OPT-PARTICIPANT");
-							break;
-						}
-					}
-					if (Email)
-					{
-						int len = strlen(s)
-						sprintf_s(s+len, sizeof(s)-len, ":MAILTO=%s", Email);
-					}
-					strcat(s, "\r\n");
-					o->Push(s);
-				}				
 			}
 		}
 		*/
+
+		LJson j(c->GetStr(FIELD_ATTENDEE_JSON));
+		for (auto g: j.GetArray(NULL))
+		{
+			// ATTENDEE;CN="Matthew Allen";ROLE=REQ-PARTICIPANT;RSVP=TRUE:MAILTO:matthew@cisra.canon.com.au
+			auto Email = g.Get("email");
+			if (Email)
+			{
+				auto Name = g.Get("name");
+				auto Role = g.Get("role");
+
+				char s[400];
+				int ch = sprintf_s(s, sizeof(s), "ATTENDEE");
+				if (Name)
+					ch += sprintf_s(s+ch, sizeof(s)-ch, ";CN=\"%s\"", Name.Get());
+				if (Role)
+					ch += sprintf_s(s+ch, sizeof(s)-ch, ";ROLE=\"%s\"", Role.Get());
+				ch += sprintf_s(s+ch, sizeof(s)-ch, ":MAILTO=%s\r\n", Email.Get());
+				o->Write(s, ch);
+			}				
+		}
 
 		GStreamPrint(o, "END:%s\r\n", TypeStr);
 	}

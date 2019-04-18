@@ -285,11 +285,11 @@ enum Store3Fields
 	FIELD_CAL_PRIVACY = 84,				// (CalendarPrivacyType) The privacy setting
 
 	// Attendee fields
-	FIELD_ATTENDEE_NAME = 85,			// (char*)
-	FIELD_ATTENDEE_EMAIL = 86,			// (char*)
-	FIELD_ATTENDEE_ATTENDENCE = 87,		// (int)
-	FIELD_ATTENDEE_NOTE = 88,			// (char*)
-	FIELD_ATTENDEE_RESPONSE = 89,		// (int)
+	FIELD_ATTENDEE_JSON = 85,
+	// FIELD_ATTENDEE_EMAIL = 86,
+	// FIELD_ATTENDEE_ATTENDENCE = 87,
+	// FIELD_ATTENDEE_NOTE = 88,
+	// FIELD_ATTENDEE_RESPONSE = 89,
 
 	// 2nd lot of contact fields
 	FIELD_WORK_STREET = 90,				// (char*)
