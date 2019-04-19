@@ -37,6 +37,11 @@ class LJson
 
 					GString n;
 					n.Set(name, ArrStart - name);
+					if (n.IsEmpty())
+					{
+						return &Array[Idx];
+					}
+
 					for (unsigned i=0; i<Obj.Length(); i++)
 					{
 						if (Obj[i].Get(n))
@@ -189,30 +194,78 @@ class LJson
 		return IsDigit(s) || strchr("-.e", s) != NULL;
 	}
 
-	bool ParseValue(Key &k, const char *&c)
+	bool ParseArray(GArray<Key> &Array, const char *&c)
+	{
+		if (*c != '[')
+		{
+			LgiAssert(0);
+			return false;
+		}
+
+		c++;
+		SkipWs(c);
+		while (*c != ']')
+		{
+			auto Idx = Array.Length();
+			Key &a = Array[Idx];
+			if (!Parse(a, c))
+			{
+				Array.Length(Idx); // Delete failed object
+				return false;
+			}
+
+			SkipWs(c);
+			if (*c == ',')
+			{
+				c++;
+				SkipWs(c);
+			}
+		}
+		if (*c != ']')
+		{
+			LgiAssert(!"Unexpected token.");
+			return false;
+		}
+
+		c++;
+		return true;
+	}
+
+	// Value parser: can be one of:
+	// - Object
+	// - Array
+	// - String
+	// - Number
+	// - Boolean (true or false)
+	// - NULL
+	bool Parse(Key &k, const char *&c)
 	{
 		SkipWs(c);
 
-		if (*c == '{')
+		if (*c == '\"')
+		{
+			// String
+			return ParseString(k.Str, c);
+		}
+		else if (*c == '{')
 		{
 			// Objects
 			c++;
-
-			if (!Parse(k.Obj, c))
-				return false;
-			if (!ParseChar('}', c))
-				return false;
-		}
-		else if (*c == '[')
-		{
-			// Array
-			c++;
 			SkipWs(c);
-			while (*c != ']')
+			while (*c && *c != '}')
 			{
-				Key &a = k.Array.New();
-				if (!ParseValue(a, c))
+				GString n;
+				if (!ParseString(n, c))
+					return false;
+				if (!ParseChar(':', c))
+					return false;
+				
+				auto Idx = k.Obj.Length();
+				auto &Member = k.Obj[Idx];
+				Member.Name = n;
+				if (!Parse(Member, c))
 				{
+					k.Obj.Length(Idx); // Delete incomplete obj.
 					return false;
 				}
 
@@ -223,20 +276,17 @@ class LJson
 					SkipWs(c);
 				}
 			}
-			if (*c == ']')
-				c++;
-			else
+
+			if (*c == '}')
 			{
-				LgiAssert(!"Unexpected token.");
-				return false;
+				c++;
+				return true;
 			}
 		}
-		else if (*c == '\"')
+		else if (*c == '[')
 		{
-			if (!ParseString(k.Str, c))
-			{
-				return false;
-			}
+			// Parse array
+			return ParseArray(k.Array, c);
 		}
 		else if (IsNumeric(*c))
 		{
@@ -245,6 +295,7 @@ class LJson
 				e++;
 			k.Str.Set(c, e - c);
 			c = e;
+			return true;
 		}
 		else if (IsAlpha(*c))
 		{
@@ -254,55 +305,10 @@ class LJson
 				e++;
 			k.Str.Set(c, e - c);
 			c = e;
-		}
-		else
-		{
-			return false;
+			return true;
 		}
 
-		return true;
-	}
-
-	bool Parse(GArray<Key> &Ks, const char *&c)
-	{
-		while (true)
-		{
-			SkipWs(c);
-
-			if (*c == '\"')
-			{
-				Key &k = Ks.New();
-				if (!ParseString(k.Name, c))
-					return false;
-				if (!ParseChar(':', c))
-					return false;
-				if (!ParseValue(k, c))
-					return false;
-			}
-			else if (*c == '{')
-			{
-				// Objects
-				c++;
-				if (!Parse(Ks, c))
-					return false;
-				if (!ParseChar('}', c))
-					return false;
-			}
-			else if (*c == '}')
-			{
-				// Empty object i.e. {}
-				return true;
-			}
-			else 
-				return false;
-
-			SkipWs(c);
-			if (*c != ',')
-				break;
-			c++;
-		}
-
-		return true;
+		return false;
 	}
 
 	Key *Deref(GString Addr, bool Create)
@@ -333,7 +339,7 @@ public:
 			return false;
 
 		Start = c;
-		bool b = Parse(Root.Obj, c);
+		bool b = Parse(Root, c);
 		if (!b)
 			LgiTrace("%s:%i - Error at char " LPrintfSizeT "\n", _FL, c - Start);
 		return b;

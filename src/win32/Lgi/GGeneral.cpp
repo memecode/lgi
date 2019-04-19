@@ -922,22 +922,10 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 				// We are in the GUI thread, show the dialog inline
 				Result = LgiAssertDlg(Msg);
 			}
-			/* This could not work if the app is locked up somewhere...
-			else if (LgiApp->AppWnd)
-			{
-				// Ask the GUI thread to show the dialog
-				LgiApp->AppWnd->PostEvent(M_ASSERT_UI, (GMessage::Param)&Result, (GMessage::Param)&Msg);
-				while (!Result)
-					LgiSleep(10);
-			}
-			*/
 			else
 			{
 				// Fall back to windows UI
-				int r = MessageBoxA(LgiApp->AppWnd ? LgiApp->AppWnd->Handle() : NULL, Msg, "Lgi.Assert", MB_ABORTRETRYIGNORE);
-				if (r == IDABORT) Result = 1;
-				else if (r == IDRETRY) Result = 2;
-				else Result = 3;
+				assert(0);
 			}
 
 			switch (Result)
