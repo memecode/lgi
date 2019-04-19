@@ -1045,14 +1045,16 @@ void SetDefaultFocus(GViewI *v)
 
 static int GetIsChar(GKey &k, int mods)
 {
-	k.IsChar = (mods & 0x100) == 0
+	k.IsChar =	(mods & 0x100) == 0
 				&&
 				(
 					k.c16 >= ' ' ||
 					k.vkey == VK_RETURN ||
 					k.vkey == VK_TAB ||
 					k.vkey == VK_BACKSPACE
-				);
+				)
+				&&
+				k.vkey != VK_DELETE;
 
 	// printf("IsChar %i,%i -> %i\n", k.vkey,k.c16,k.IsChar);
 	return k.IsChar;
