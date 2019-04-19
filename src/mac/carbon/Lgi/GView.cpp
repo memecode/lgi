@@ -1122,6 +1122,165 @@ bool GKeyFromEvent(GKey &k, EventRef inEvent)
 	return true;
 }
 
+OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent)
+{
+	OSStatus Status = eventNotHandledErr;
+	UInt32 eventClass = GetEventClass(inEvent);
+	UInt32 eventKind = GetEventKind(inEvent);
+
+	switch (eventClass)
+	{
+		case kEventClassKeyboard:
+		{
+			/*
+			kEventClassKeyboard quick reference:
+			
+				kEventRawKeyDown
+				kEventRawKeyRepeat
+				kEventRawKeyUp
+				kEventRawKeyModifiersChanged
+				kEventHotKeyPressed
+				kEventHotKeyReleased
+			*/
+
+			switch (eventKind)
+			{
+				case kEventRawKeyDown:
+				{
+					GKey k;
+					if (GKeyFromEvent(k, inEvent))
+					{
+						k.Down(true);
+						switch (k.vkey)
+						{
+						 	case VK_APPS:
+						 	case VK_LEFT:
+						 	case VK_RIGHT:
+						 	case VK_UP:
+						 	case VK_DOWN:
+							{
+								#if 1
+								printf("%s:%i - %s key=%i sh=%i,alt=%i,ctrl=%i v=%p\n",
+									_FL, v->GetClass(), k.c16, k.Shift(), k.Alt(), k.Ctrl(), v->Handle());
+								#endif
+
+								GWindow *Wnd = v->GetWindow();
+								if (Wnd) Wnd->HandleViewKey(v, k);
+								else v->OnKey(k);
+								break;
+							}
+						}
+					}
+					// Status = noErr;
+					break;
+				}
+				case kEventRawKeyRepeat:
+				{
+					break;
+				}
+				case kEventRawKeyUp:
+				{
+					GKey k;
+					if (GKeyFromEvent(k, inEvent))
+					{
+						k.Down(false);
+						GWindow *Wnd = v->GetWindow();
+						if (Wnd) Wnd->HandleViewKey(v, k);
+						else v->OnKey(k);
+					}
+					
+					Status = noErr;
+					break;
+				}
+			}
+			
+			break;
+		}
+		case kEventClassTextInput:
+		{
+			/*
+			kEventClassTextInput quick reference:
+			 
+				kEventTextInputUpdateActiveInputArea
+				kEventTextInputUnicodeForKeyEvent
+				kEventTextInputOffsetToPos
+				kEventTextInputPosToOffset
+				kEventTextInputShowHideBottomWindow
+				kEventTextInputGetSelectedText
+				kEventTextInputUnicodeText
+				kEventTextInputFilterText
+			*/
+		
+			switch (eventKind)
+			{
+				case kEventTextInputUnicodeForKeyEvent:
+				{
+					UniChar		*text;
+					UInt32		actualSize;
+					EventRef	src;
+					UInt32		mods = 0;
+					UInt32		key = 0;
+	 
+					OSStatus e = GetEventParameter(inEvent, kEventParamTextInputSendText, typeUnicodeText, NULL, 0, &actualSize, NULL);
+					text = new UniChar[actualSize+1];
+					e = GetEventParameter(inEvent, kEventParamTextInputSendText, typeUnicodeText, NULL, actualSize, NULL, text);
+					e = GetEventParameter(inEvent, kEventParamTextInputSendKeyboardEvent, typeEventRef, NULL, sizeof(src), NULL, &src);
+					if (e) printf("%s:%i - error %i\n", _FL, (int)e);
+					else
+					{
+						e = GetEventParameter(src, kEventParamKeyModifiers, typeUInt32, NULL, sizeof(mods), NULL, &mods);
+						if (e) printf("%s:%i - error %i\n", _FL, (int)e);
+						e = GetEventParameter(src, kEventParamKeyCode, typeUInt32, NULL, sizeof(UInt32), NULL, &key);
+						if (e) printf("%s:%i - error %i\n", _FL, (int)e);
+					}
+					
+					GKey k;
+
+					UniChar *utf = text;
+					ssize_t size = actualSize;
+					k.vkey = key;
+					k.c16 = LgiUtf16To32((const uint16 *&)utf, size);
+
+					GetIsChar(k, mods);
+					k.Down(true);
+					if (mods & 0x200) k.Shift(true);
+					if (mods & 0x1000) k.Ctrl(true);
+					if (mods & 0x800) k.Alt(true);
+					if (mods & 0x100) k.System(true);
+
+					#if 0
+					printf("key=%u(0x%x)%u, c16=%u(0x%x), utf=%.1S\n",
+						(unsigned)key, (unsigned)key, (unsigned)actualSize,
+						(unsigned)k.c16, (unsigned)k.c16,
+						(wchar_t*)&k.c16);
+
+					GString Msg;
+					Msg.Printf("%s", v->GetClass());
+					k.Trace(Msg);
+					#endif
+
+					bool Processed;
+					GWindow *Wnd = v->GetWindow();
+					if (Wnd) Processed = Wnd->HandleViewKey(v, k);
+					else Processed = v->OnKey(k);
+					DeleteArray(text);
+					
+					if (!Processed && k.vkey == VK_TAB)
+					{
+						NextTabStop(v, k.Shift() ? -1 : 1);
+					}
+					
+					Status = noErr;
+					break;
+				}
+			}
+			break;
+		}
+	}
+	
+	return Status;
+}
+
 pascal
 OSStatus
 CarbonControlProc
@@ -1334,139 +1493,9 @@ CarbonControlProc
 			break;
 		}
 		case kEventClassKeyboard:
-		{
-			/*
-			kEventClassKeyboard quick reference:
-			
-				kEventRawKeyDown
-				kEventRawKeyRepeat
-				kEventRawKeyUp
-				kEventRawKeyModifiersChanged
-				kEventHotKeyPressed
-				kEventHotKeyReleased
-			*/
-
-			switch (eventKind)
-			{
-				case kEventRawKeyDown:
-				{
-					GKey k;
-					if (GKeyFromEvent(k, inEvent))
-					{
-						k.Down(true);
-						if (k.c16 == VK_APPS)
-						{
-							printf("%s:%i - %s key=%i sh=%i,alt=%i,ctrl=%i v=%p\n",
-								_FL, v->GetClass(), k.c16, k.Shift(), k.Alt(), k.Ctrl(), v->Handle());
-
-							GWindow *Wnd = v->GetWindow();
-							if (Wnd) Wnd->HandleViewKey(v, k);
-							else v->OnKey(k);
-						}
-					}
-					// Status = noErr;
-					break;
-				}
-				case kEventRawKeyRepeat:
-				{
-					break;
-				}
-				case kEventRawKeyUp:
-				{
-					GKey k;
-					if (GKeyFromEvent(k, inEvent))
-					{
-						k.Down(false);
-						GWindow *Wnd = v->GetWindow();
-						if (Wnd) Wnd->HandleViewKey(v, k);
-						else v->OnKey(k);
-					}
-					
-					Status = noErr;
-					break;
-				}
-			}
-			
-			break;
-		}
 		case kEventClassTextInput:
 		{
-			/*
-			kEventClassTextInput quick reference:
-				
-				kEventTextInputUpdateActiveInputArea
-				kEventTextInputUnicodeForKeyEvent
-				kEventTextInputOffsetToPos
-				kEventTextInputPosToOffset
-				kEventTextInputShowHideBottomWindow
-				kEventTextInputGetSelectedText
-				kEventTextInputUnicodeText
-				kEventTextInputFilterText
-			*/
-		
-			switch (eventKind)
-			{
-				case kEventTextInputUnicodeForKeyEvent:
-				{
-					UniChar		*text;
-					UInt32		actualSize;
-					EventRef	src;
-					UInt32		mods = 0;
-					UInt32		key = 0;
-	 
-					OSStatus e = GetEventParameter(inEvent, kEventParamTextInputSendText, typeUnicodeText, NULL, 0, &actualSize, NULL);
-					text = new UniChar[actualSize+1];
-					e = GetEventParameter(inEvent, kEventParamTextInputSendText, typeUnicodeText, NULL, actualSize, NULL, text);
-					e = GetEventParameter(inEvent, kEventParamTextInputSendKeyboardEvent, typeEventRef, NULL, sizeof(src), NULL, &src);
-					if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-					else
-					{
-						e = GetEventParameter(src, kEventParamKeyModifiers, typeUInt32, NULL, sizeof(mods), NULL, &mods);
-						if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-						e = GetEventParameter(src, kEventParamKeyCode, typeUInt32, NULL, sizeof(UInt32), NULL, &key);
-						if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-					}
-					
-					GKey k;
-
-					UniChar *utf = text;
-					ssize_t size = actualSize;
-					k.vkey = key;
-					k.c16 = LgiUtf16To32((const uint16 *&)utf, size);
-
-					GetIsChar(k, mods);
-					k.Down(true);
-					if (mods & 0x200) k.Shift(true);
-					if (mods & 0x1000) k.Ctrl(true);
-					if (mods & 0x800) k.Alt(true);
-					if (mods & 0x100) k.System(true);
-
-					#if 0
-					printf("key=%u(0x%x)%u, c16=%u(0x%x), utf=%.1S\n",
-						(unsigned)key, (unsigned)key, (unsigned)actualSize,
-						(unsigned)k.c16, (unsigned)k.c16,
-						(wchar_t*)&k.c16);
-
-					GString Msg;
-					Msg.Printf("%s", v->GetClass());
-					k.Trace(Msg);
-					#endif
-
-					bool Processed;
-					GWindow *Wnd = v->GetWindow();
-					if (Wnd) Processed = Wnd->HandleViewKey(v, k);
-					else Processed = v->OnKey(k);
-					DeleteArray(text);
-					
-					if (!Processed && k.vkey == VK_TAB)
-					{
-						NextTabStop(v, k.Shift() ? -1 : 1);
-					}
-					
-					Status = noErr;
-					break;
-				}
-			}
+			Status = CarbonKeyboardProc(v, inEvent);
 			break;
 		}
 		case kEventClassToolbarItem:

@@ -10,7 +10,7 @@
 class GTimePopup : public GPopup
 {
 	GView *Owner;
-	LList *Times;
+	class TimeList *Times;
 	bool Ignore;
 
 public:

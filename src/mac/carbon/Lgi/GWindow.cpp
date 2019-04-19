@@ -10,7 +10,7 @@
 extern void NextTabStop(GViewI *v, int dir);
 extern void SetDefaultFocus(GViewI *v);
 
-#define DEBUG_KEYS			0
+#define DEBUG_KEYS			1
 #define DEBUG_SETFOCUS		0
 
 WindowGroupRef OnTopGroup = NULL;
@@ -552,6 +552,8 @@ bool GWindow::PostEvent(int Event, int a, int b)
 	return Status;
 }
 
+extern OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent);
+
 #define InRect(r, x, y) \
 	( (x >= r.left) && (y >= r.top) && (x <= r.right) && (y <= r.bottom) )
 
@@ -942,6 +944,18 @@ pascal OSStatus LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inE
 					v->OnKey(k);
 					break;
 				}
+				case kEventTextInputUnicodeForKeyEvent:
+				case kEventRawKeyUp:
+				case kEventRawKeyDown:
+				{
+					result = CarbonKeyboardProc(v, inEvent);
+					break;
+				}
+				default:
+				{
+					printf("%s:%i - Unhandled key event.\n", _FL);
+					break;
+				}
 			}
 			break;
 		}
@@ -1060,6 +1074,7 @@ pascal OSStatus LgiRootCtrlProc(EventHandlerCallRef inHandlerCallRef, EventRef i
 				}
 				case kEventClassKeyboard:
 				{
+					printf("%s:%i - Unhandled key event.\n", _FL);
 					switch (eventKind)
 					{
 						case kEventRawKeyDown:
@@ -1119,6 +1134,9 @@ bool GWindow::Attach(GViewI *p)
 			{ kEventClassControl, kEventControlDragReceive },
 			
 			{ kEventClassKeyboard, kEventHotKeyPressed },
+			{ kEventClassKeyboard, kEventRawKeyUp },
+			{ kEventClassKeyboard, kEventRawKeyDown },
+			{ kEventClassTextInput, kEventTextInputUnicodeForKeyEvent },
 
 			{ kEventClassUser, kEventUser }
 		};
@@ -1265,11 +1283,11 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	GViewI *Ctrl = 0;
 
 	// Give key to popups
-	if (LgiApp &&
-		LgiApp->GetMouseHook() &&
-		LgiApp->GetMouseHook()->OnViewKey(v, k))
+	if (LgiApp)
 	{
-		goto AllDone;
+		auto mh = LgiApp->GetMouseHook();
+		if (mh && mh->OnViewKey(v, k))
+			goto AllDone;
 	}
 
 	// Allow any hooks to see the key...
@@ -1277,12 +1295,15 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	{
 		if (d->Hooks[i].Flags & GKeyEvents)
 		{
-			if (d->Hooks[i].Target->OnViewKey(v, k))
+			auto h = d->Hooks[i].Target;
+			if (h->OnViewKey(v, k))
 			{
 				Status = true;
 				
 				#if DEBUG_KEYS
-				printf("Hook ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n", k.c16, k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
+				printf("Hook '%s/%s/%i' ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n",
+					h->GetClass(), h->Name(), h->GetId(),
+					k.c16, k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
 				#endif
 				
 				goto AllDone;
@@ -1294,7 +1315,8 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	if (v->OnKey(k))
 	{
 		#if DEBUG_KEYS
-		printf("View ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n",
+		printf("View '%s/%s/%i' ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n",
+			v->GetClass(), v->Name(), v->GetId(),
 			k.c16, k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
 		#endif
 		
@@ -1371,6 +1393,9 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	}
 
 AllDone:
+	#if DEBUG_KEYS
+	printf("No view wants '%c' down=%i alt=%i ctrl=%i sh=%i\n", k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
+	#endif
 	if (d)
 		d->LastKey = k;
 

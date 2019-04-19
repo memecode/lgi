@@ -188,45 +188,35 @@ bool GDatePopup::OnKey(GKey &k)
 		case VK_ESCAPE:
 		{
 			if (!k.Down())
-			{
 				Visible(false);
-			}
 			return true;
 			break;
 		}
 		case VK_UP:
 		{
 			if (k.Down())
-			{
 				Move(0, -1);
-			}
 			return true;
 			break;
 		}
 		case VK_DOWN:
 		{
 			if (k.Down())
-			{
 				Move(0, 1);
-			}
 			return true;
 			break;
 		}
 		case VK_LEFT:
 		{
 			if (k.Down())
-			{
 				Move(-1, 0);
-			}
 			return true;
 			break;
 		}
 		case VK_RIGHT:
 		{
 			if (k.Down())
-			{
 				Move(1, 0);
-			}
 			return true;
 			break;
 		}
@@ -245,6 +235,9 @@ bool GDatePopup::OnKey(GKey &k)
 			return true;
 		}
 	}
+
+	if (Owner && Owner->OnKey(k))
+		return true;
 
 	return false;
 }

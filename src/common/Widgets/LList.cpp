@@ -918,86 +918,83 @@ bool LList::OnKey(GKey &k)
 		Status = Item->OnKey(k);
 	}
 
-	#ifdef MAC
-	#define Modifier System
-	#else
-	#define Modifier Ctrl
-	#endif
-
-	if (k.Down())
+	if (k.vkey != VK_UP && k.vkey != VK_DOWN && k.Modifier())
 	{
-		if (k.vkey != VK_UP && k.vkey != VK_DOWN && k.Modifier())
+		switch (k.c16)
 		{
-			switch (k.c16)
+			case 'A':
+			case 'a':
 			{
-				case 'A':
-				case 'a':
-				{
+				if (k.Down())
 					SelectAll();
-					Status = true;
-					break;
-				}
+				Status = true;
+				break;
 			}
 		}
-		else
+	}
+	else
+	{
+		switch (k.vkey)
 		{
-			switch (k.vkey)
+			case VK_RETURN:
 			{
-				case VK_RETURN:
+				#if WINNATIVE
+				if (!k.IsChar)
+				#endif
 				{
-					#if WINNATIVE
-					if (!k.IsChar)
-					#endif
-					{
-						SendNotify(GNotify_ReturnKey);
-					}
-					break;
+					SendNotify(GNotify_ReturnKey);
 				}
-				case VK_BACKSPACE:
-				{
-					SendNotify(GNotify_BackspaceKey);
-					break;
-				}
-				case VK_ESCAPE:
-				{
-					SendNotify(GNotify_EscapeKey);
-					break;
-				}
-				case VK_DELETE:
-				{
-					SendNotify(GNotify_DeleteKey);
-					break;					
-				}
-				case VK_UP:
-				{
-					// int i = Value();
-					#ifdef MAC
-					if (k.Ctrl())
-						goto LList_PageUp;
-					else if (k.System())
-						goto LList_Home;
-					#endif
-					
+				break;
+			}
+			case VK_BACKSPACE:
+			{
+				SendNotify(GNotify_BackspaceKey);
+				break;
+			}
+			case VK_ESCAPE:
+			{
+				SendNotify(GNotify_EscapeKey);
+				break;
+			}
+			case VK_DELETE:
+			{
+				SendNotify(GNotify_DeleteKey);
+				break;
+			}
+			case VK_UP:
+			{
+				// int i = Value();
+				#ifdef MAC
+				if (k.Ctrl())
+					goto LList_PageUp;
+				else if (k.System())
+					goto LList_Home;
+				#endif
+				
+				if (k.Down())
 					KeyScroll(Keyboard-1, Keyboard, k.Shift());
-					Status = true;
-					break;
-				}
-				case VK_DOWN:
-				{
-					#ifdef MAC
-					if (k.Ctrl())
-						goto LList_PageDown;
-					else if (k.System())
-						goto LList_End;
-					#endif
+				Status = true;
+				break;
+			}
+			case VK_DOWN:
+			{
+				#ifdef MAC
+				if (k.Ctrl())
+					goto LList_PageDown;
+				else if (k.System())
+					goto LList_End;
+				#endif
 
+				if (k.Down())
 					KeyScroll(Keyboard+1, Keyboard, k.Shift());
-					Status = true;
-					break;
-				}
-				case VK_LEFT:
+				Status = true;
+				break;
+			}
+			case VK_LEFT:
+			{
+				if (GetMode() == LListColumns)
 				{
-					if (GetMode() == LListColumns)
+					if (k.Down())
 					{
 						LListItem *Hit = GetSelected();
 						if (Hit)
@@ -1024,7 +1021,7 @@ bool LList::OnKey(GKey &k)
 							{
 								if (Hit->d->LayoutColumn == HScroll->Value() + 1)
 								{
-									// Seek back to the start of the column before the 
+									// Seek back to the start of the column before the
 									// first visible column
 									for (List<LListItem>::I it = Items.begin(FirstVisible); it.In(); it--)
 									{
@@ -1049,11 +1046,14 @@ bool LList::OnKey(GKey &k)
 						}
 					}
 					Status = true;
-					break;
 				}
-				case VK_RIGHT:
+				break;
+			}
+			case VK_RIGHT:
+			{
+				if (GetMode() == LListColumns)
 				{
-					if (GetMode() == LListColumns)
+					if (k.Down())
 					{
 						LListItem *Hit = GetSelected();
 						if (Hit)
@@ -1085,52 +1085,61 @@ bool LList::OnKey(GKey &k)
 						}
 					}
 					Status = true;
-					break;
 				}
-				case VK_PAGEUP:
+				break;
+			}
+			case VK_PAGEUP:
+			{
+				#ifdef MAC
+				LList_PageUp:
+				#endif
+				if (k.Down())
 				{
-					#ifdef MAC
-					LList_PageUp:
-					#endif
 					int Vis = VisibleItems();
 					Vis = MAX(Vis, 0);
-
 					KeyScroll(Keyboard-Vis, Keyboard, k.Shift());
-					Status = true;
-					break;
 				}
-				case VK_PAGEDOWN:
+				Status = true;
+				break;
+			}
+			case VK_PAGEDOWN:
+			{
+				#ifdef MAC
+				LList_PageDown:
+				#endif
+				if (k.Down())
 				{
-					#ifdef MAC
-					LList_PageDown:
-					#endif
 					int Vis = VisibleItems();
 					Vis = MAX(Vis, 0);
 					KeyScroll(Keyboard+Vis, Keyboard, k.Shift());
-					Status = true;
-					break;
 				}
-				case VK_END:
-				{
-					#ifdef MAC
-					LList_End:
-					#endif
-					printf("End handler\n");
+				Status = true;
+				break;
+			}
+			case VK_END:
+			{
+				#ifdef MAC
+				LList_End:
+				#endif
+				if (k.Down())
 					KeyScroll((int)Items.Length()-1, Keyboard, k.Shift());
-					Status = true;
-					break;
-				}
-				case VK_HOME:
-				{
-					#ifdef MAC
-					LList_Home:
-					#endif
+				Status = true;
+				break;
+			}
+			case VK_HOME:
+			{
+				#ifdef MAC
+				LList_Home:
+				#endif
+				if (k.Down())
 					KeyScroll(0, Keyboard, k.Shift());
-					Status = true;
-					break;
-				}
-				#ifdef VK_APPS
-				case VK_APPS:
+				Status = true;
+				break;
+			}
+			#ifdef VK_APPS
+			case VK_APPS:
+			{
+				if (k.Down())
 				{
 					LListItem *s = GetSelected();
 					if (s)
@@ -1151,26 +1160,30 @@ bool LList::OnKey(GKey &k)
 							
 							OnMouseClick(m);
 						}
+						Status = true;
 					}
-					break;
 				}
-				#endif
-				default:
-				{
-					if
+				break;
+			}
+			#endif
+			default:
+			{
+				if
+				(
+					!Status
+					&&
+					k.IsChar
+					&&
 					(
-						!Status
-						&&
-						k.IsChar
-						&&
-						(
-							IsDigit(k.c16)
-							||
-							IsAlpha(k.c16)
-							||
-							strchr("_.-", k.c16)
-						)
+						IsDigit(k.c16)
+						||
+						IsAlpha(k.c16)
+						||
+						strchr("_.-", k.c16)
 					)
+				)
+				{
+					if (k.Down())
 					{
 						uint64 Now = LgiCurrentTime();
 						GStringPipe p;
@@ -1228,11 +1241,11 @@ bool LList::OnKey(GKey &k)
 								
 								DeleteArray(c8);
 							}
-						}						
-						Status = true;
+						}
 					}
-					break;
+					Status = true;
 				}
+				break;
 			}
 		}
 	}

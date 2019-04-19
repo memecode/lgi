@@ -117,6 +117,47 @@ void GTimeDropDown::OnMouseClick(GMouse &m)
 	GDropDown::OnMouseClick(m);
 }
 
+class TimeList : public LList
+{
+	GView *Owner;
+
+public:
+	bool Key, Mouse;
+	
+	TimeList(GView *owner) : LList(100, 1, 1, 50, 50, "TimeList")
+	{
+		Owner = owner;
+		Key = Mouse = false;
+	}
+	
+	bool OnKey(GKey &k)
+	{
+		bool b = false;
+		
+		if (k.vkey == VK_UP ||
+			k.vkey == VK_DOWN ||
+			k.vkey == VK_ESCAPE ||
+			k.vkey == VK_RETURN)
+		{
+			Key = true;
+			b = LList::OnKey(k);
+			Key = false;
+		}
+
+		if (!b && Owner)
+			b = Owner->OnKey(k);
+
+		return b;
+	}
+
+	void OnMouseClick(GMouse &m)
+	{
+		Mouse = true;
+		LList::OnMouseClick(m);
+		Mouse = false;
+	}
+};
+
 GTimePopup::GTimePopup(GView *owner) : GPopup(owner)
 {
 	SetParent(owner);
@@ -124,7 +165,7 @@ GTimePopup::GTimePopup(GView *owner) : GPopup(owner)
 	Owner = owner;
 	Ignore = true;
 	
-	Children.Insert(Times = new LList(100, 1, 1, 50, 50));
+	Children.Insert(Times = new TimeList(owner));
 	if (Times)
 	{
 		Times->Sunken(false);
@@ -230,7 +271,7 @@ int GTimePopup::OnNotify(GViewI *c, int f)
 	if (c->GetId() == 100 && !Ignore)
 	{
 		GNotifyType Type = (GNotifyType)f;
-		if (Type == GNotifyItem_Select || Type == GNotify_ReturnKey)
+		if 	(Type == GNotifyItem_Select || Type == GNotify_ReturnKey)
 		{
 			LListItem *Sel = Times->GetSelected();
 			if (Sel)
@@ -243,7 +284,9 @@ int GTimePopup::OnNotify(GViewI *c, int f)
 					{
 						n->Name(t);
 						n->OnNotify(this, GNotifyValueChanged);
-						Visible(false);
+						
+						if (Times->Mouse || Type == GNotify_ReturnKey)
+							Visible(false);
 					}
 				}
 			}

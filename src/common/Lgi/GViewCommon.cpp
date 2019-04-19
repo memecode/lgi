@@ -1328,11 +1328,16 @@ void GView::Focus(bool i)
 			GViewI *Wnd = GetWindow();
 			if (Wnd && i)
 			{
-				OSErr e = SetKeyboardFocus(Wnd->WindowHandle(), _View, 1);
+				OSErr e = SetKeyboardFocus(Wnd->WindowHandle(), _View, kControlFocusNoPart);
 				if (e)
 				{
-					HIViewRef p = HIViewGetSuperview(_View);
-					printf("%s:%i - SetKeyboardFocus failed: %i (%s, %p)\n", _FL, e, GetClass(), p);
+					e = SetKeyboardFocus(Wnd->WindowHandle(), _View, kControlFocusNextPart);
+					if (e)
+					{
+						HIViewRef p = HIViewGetSuperview(_View);
+						// errCouldntSetFocus
+						printf("%s:%i - SetKeyboardFocus failed: %i (%s, %p)\n", _FL, e, GetClass(), p);
+					}
 				}
 				// else printf("%s:%i - SetFocus v=%p(%s)\n", _FL, _View, GetClass());
 			}

@@ -290,7 +290,6 @@ LCancel *GSocket::GetCancel()
 void GSocket::SetCancel(LCancel *c)
 {
 	d->Cancel = c;
-	printf("d->Cancel=%p\n", c);
 }
 
 void GSocket::OnDisconnect()
@@ -759,7 +758,6 @@ int GSocket::Open(const char *HostAddr, int Port)
 							#if CONNECT_LOGGING
 							printf("%p - Remaining "LPrintfInt64"\n", d->Socket, Remaining);
 							#endif
-							printf("open d->Cancel=%p, %i\n", d->Cancel, d->Cancel->IsCancelled());
 
 							if (Remaining < 0)
 							{
