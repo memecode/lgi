@@ -60,6 +60,7 @@ class GDatePopup : public GPopup
 
 	int Cx, Cy; // Cell Dimensions
 	MonthView Mv;
+	bool FirstPaint;
 	
 public:
 	GDatePopup(GView *owner);

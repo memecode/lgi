@@ -5,6 +5,7 @@
 
 GDatePopup::GDatePopup(GView *owner) : GPopup(owner)
 {
+	FirstPaint = true;
 	SetNotify(owner);
 	SetParent(owner);
 	Owner = owner;
@@ -41,6 +42,12 @@ void GDatePopup::Set(LDateTime &Ts)
 
 void GDatePopup::OnPaint(GSurface *pDC)
 {
+	if (FirstPaint)
+	{
+		Focus(true);
+		FirstPaint = false;
+	}
+
 	// Border
 	GRect r = GetClient();
 	LgiWideBorder(pDC, r, DefaultRaisedEdge);
@@ -136,8 +143,11 @@ void GDatePopup::OnChange()
 		Mv.Get().GetDate(s, sizeof(s));
 		n->Name(s);
 		n->SendNotify(GNotifyValueChanged);
+		n->Focus(true);
 	}
+
 	Visible(false);
+
 }
 
 void GDatePopup::OnMouseClick(GMouse &m)

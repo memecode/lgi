@@ -464,11 +464,6 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	k.Trace(msg);
 	#endif
 
-	if (!(k.vkey == 17 && k.IsChar == false))
-	{
-		int asd=0;
-	}
-
 	// Any window in a pop up always gets the key...
 	GViewI *p;
 	for (p = v->GetParent(); p; p = p->GetParent())
@@ -483,6 +478,9 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	}
 
 	// Allow any hooks to see the key...
+	#if DEBUG_HANDLE_VIEW_KEY
+	LgiTrace("    d->Hooks.Length()=%i.\n", (int)d->Hooks.Length());
+	#endif
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{
 		if (d->Hooks[i].Flags & GKeyEvents)
@@ -515,7 +513,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 		else
 			p = _Default;
 		#if DEBUG_HANDLE_VIEW_KEY
-		LgiTrace("    Using _Default ctrl (%s).\n", p->GetClass());
+		LgiTrace("    Using _Default ctrl (%s).\n", p ? p->GetClass() : "NULL");
 		#endif
 	}
 	else if (k.c16 == VK_ESCAPE)
