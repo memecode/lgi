@@ -535,9 +535,7 @@ public:
 	}
 };
 
-#if !WINNATIVE
 ::GArray<GPopup*> GPopup::CurrentPopups;
-#endif
 
 GPopup::GPopup(GView *owner)
 	#ifdef CARBON
@@ -554,9 +552,8 @@ GPopup::GPopup(GView *owner)
     #ifdef __GTK_H__
     Wnd = NULL;
     #endif
-    #if !WINNATIVE
+
     CurrentPopups.Add(this);
-    #endif
 
 	if ((Owner = owner))
 	{
@@ -575,11 +572,7 @@ GPopup::GPopup(GView *owner)
 
 GPopup::~GPopup()
 {
-	// LgiTrace("GPopup::~GPopup %p %p\n", this, d);
-
-    #if !WINNATIVE
 	CurrentPopups.Delete(this);
-	#endif
 	SendNotify(POPUP_DELETE);
 
 	if (Owner)
@@ -790,6 +783,15 @@ bool GPopup::Attach(GViewI *p)
 
 void GPopup::Visible(bool i)
 {
+	if (i)
+	{
+		for (auto p: CurrentPopups)
+		{
+			if (p != this && p->Visible())
+				p->Visible(false);
+		}
+	}
+
 	#if defined __GTK_H__
 	
 		if (i && !Wnd)

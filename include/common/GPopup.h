@@ -24,9 +24,7 @@ class LgiClass GPopup :
     Gtk::GtkWidget *Wnd;
     #endif
 
-    #if !WINNATIVE
     static GArray<GPopup*> CurrentPopups;
-    #endif
 
 protected:
 	class GPopupPrivate *d;

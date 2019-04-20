@@ -287,13 +287,19 @@ int GTimePopup::OnNotify(GViewI *c, int f)
 						n->OnNotify(this, GNotifyValueChanged);
 						
 						if (Times->Mouse || Type == GNotify_ReturnKey)
+						{
+							n->Focus(true);
 							Visible(false);
+						}
 					}
 				}
 			}
 		}
 		else if (Type == GNotify_EscapeKey)
 		{
+			GViewI *n = GetNotify();
+			if (n)
+				n->Focus(true);			
 			Visible(false);
 		}
 	}

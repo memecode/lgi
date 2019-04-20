@@ -254,17 +254,15 @@ GView::~GView()
 	LockHandler(this, OpDelete);
 	#endif
 
-    #if !WINNATIVE
 	for (unsigned i=0; i<GPopup::CurrentPopups.Length(); i++)
 	{
 		GPopup *pu = GPopup::CurrentPopups[i];
 		if (pu->Owner == this)
 		{
-			printf("%s:%i - ~%s setting %s->Owner to NULL\n", _FL, GetClass(), pu->GetClass());
+			// printf("%s:%i - ~%s setting %s->Owner to NULL\n", _FL, GetClass(), pu->GetClass());
 			pu->Owner = NULL;
 		}
 	}
-	#endif
 
 	_Delete();
 	DeleteObj(d);
