@@ -485,7 +485,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 					#ifdef COCOA
 					#warning "Impl cursor blt"
 					#else
-					NSPoint hotSpot = [[NSCursor currentSystemCursor] hotSpot];
+					// NSPoint hotSpot = [[NSCursor currentSystemCursor] hotSpot];
 					HIPoint p;
 					HIGetMousePosition(kHICoordSpaceScreenPixel, NULL, &p);
 					GRect msr(0, 0, (int)cursor.size.width-1, (int)cursor.size.height-1);

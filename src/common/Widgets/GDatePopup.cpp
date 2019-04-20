@@ -127,6 +127,19 @@ void GDatePopup::OnPaint(GSurface *pDC)
 	}
 }
 
+void GDatePopup::OnChange()
+{
+	GViewI *n = GetNotify() ? GetNotify() : GetParent();
+	if (n)
+	{
+		char s[64];
+		Mv.Get().GetDate(s, sizeof(s));
+		n->Name(s);
+		n->SendNotify(GNotifyValueChanged);
+	}
+	Visible(false);
+}
+
 void GDatePopup::OnMouseClick(GMouse &m)
 {
 	if (m.Down())
@@ -157,15 +170,7 @@ void GDatePopup::OnMouseClick(GMouse &m)
 	{
 		if (Date.Overlap(m.x, m.y))
 		{
-			GViewI *n = GetNotify() ? GetNotify() : GetParent();
-			if (n)
-			{
-				char s[64];
-				Mv.Get().GetDate(s, sizeof(s));
-				n->Name(s);
-				n->SendNotify(GNotifyValueChanged);
-			}
-			Visible(false);
+			OnChange();
 			return;
 		}
 	}
@@ -223,15 +228,7 @@ bool GDatePopup::OnKey(GKey &k)
 		case VK_RETURN:
 		{
 			if (k.Down() && k.IsChar)
-			{
-				if (Owner)
-				{
-					Owner->SendNotify(GNotifyValueChanged);
-					// Popup->SetDate(Mv.Date(true));
-				}
-				Visible(false);
-			}
-
+				OnChange();
 			return true;
 		}
 	}

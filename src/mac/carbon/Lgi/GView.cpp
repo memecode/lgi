@@ -1095,15 +1095,9 @@ bool GKeyFromEvent(GKey &k, EventRef inEvent)
 							sizeof(mods),
 							NULL,
 							&mods);
-	if (e)
-	{
-		printf("%s:%i - error %i\n", _FL, (int)e);
-	}
-
-	if (mods & 0x200) k.Shift(true);
-	if (mods & 0x1000) k.Ctrl(true);
-	if (mods & 0x800) k.Alt(true);
-	if (mods & 0x100) k.System(true);
+	if (e) printf("%s:%i - error %i\n", _FL, (int)e);
+	
+	k.SetModifer(mods);
 
 	ByteCount len = 0;
 	if (GetEventParameter(inEvent, kEventParamKeyUnicodes, typeUnicodeText, 0, 0, &len, 0) == noErr)
@@ -1124,7 +1118,9 @@ bool GKeyFromEvent(GKey &k, EventRef inEvent)
 	return true;
 }
 
-OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent)
+#define KeyboardProc_LOG	0
+
+OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent, bool Handle)
 {
 	OSStatus Status = eventNotHandledErr;
 	UInt32 eventClass = GetEventClass(inEvent);
@@ -1153,6 +1149,8 @@ OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent)
 					if (GKeyFromEvent(k, inEvent))
 					{
 						k.Down(true);
+						
+						/*
 						switch (k.vkey)
 						{
 						 	case VK_APPS:
@@ -1161,19 +1159,26 @@ OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent)
 						 	case VK_UP:
 						 	case VK_DOWN:
 							{
-								#if 1
-								printf("%s:%i - %s key=%i sh=%i,alt=%i,ctrl=%i v=%p\n",
-									_FL, v->GetClass(), k.c16, k.Shift(), k.Alt(), k.Ctrl(), v->Handle());
-								#endif
-
-								GWindow *Wnd = v->GetWindow();
-								if (Wnd) Wnd->HandleViewKey(v, k);
-								else v->OnKey(k);
-								break;
-							}
+						*/
+						
+						if (Handle)
+						{
+							GWindow *Wnd = v->GetWindow();
+							if (Wnd && Wnd->HandleViewKey(v, k))
+								Status = noErr;
 						}
+						
+						if (!Handle && Status == eventNotHandledErr)
+						{
+							if (v->OnKey(k))
+								Status = noErr;
+						}
+
+						#if KeyboardProc_LOG
+						printf("%s:%i - kEventRawKeyDown '%i' for '%s' = %i\n",
+							LgiGetLeaf(__FILE__), __LINE__, k.vkey, v->GetClass(), (int)Status);
+						#endif
 					}
-					// Status = noErr;
 					break;
 				}
 				case kEventRawKeyRepeat:
@@ -1186,12 +1191,25 @@ OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent)
 					if (GKeyFromEvent(k, inEvent))
 					{
 						k.Down(false);
-						GWindow *Wnd = v->GetWindow();
-						if (Wnd) Wnd->HandleViewKey(v, k);
-						else v->OnKey(k);
+						
+						if (Handle)
+						{
+							GWindow *Wnd = v->GetWindow();
+							if (Wnd && Wnd->HandleViewKey(v, k))
+								Status = noErr;
+						}
+						
+						if (!Handle && Status == eventNotHandledErr)
+						{
+							if (v->OnKey(k))
+								Status = noErr;
+						}
+
+						#if KeyboardProc_LOG
+						printf("%s:%i - kEventRawKeyUp '%i' for '%s' = %i\n",
+							LgiGetLeaf(__FILE__), __LINE__, k.vkey, v->GetClass(), (int)Status);
+						#endif
 					}
-					
-					Status = noErr;
 					break;
 				}
 			}
@@ -1261,18 +1279,31 @@ OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent)
 					k.Trace(Msg);
 					#endif
 
-					bool Processed;
-					GWindow *Wnd = v->GetWindow();
-					if (Wnd) Processed = Wnd->HandleViewKey(v, k);
-					else Processed = v->OnKey(k);
-					DeleteArray(text);
-					
-					if (!Processed && k.vkey == VK_TAB)
+					if (Handle)
 					{
-						NextTabStop(v, k.Shift() ? -1 : 1);
+						GWindow *Wnd = v->GetWindow();
+						if (Wnd && Wnd->HandleViewKey(v, k))
+							Status = noErr;
 					}
 					
-					Status = noErr;
+					if (!Handle && Status == eventNotHandledErr)
+					{
+						if (v->OnKey(k))
+							Status = noErr;
+					}
+					
+					DeleteArray(text);
+					
+					if (Status == eventNotHandledErr && k.vkey == VK_TAB)
+					{
+						NextTabStop(v, k.Shift() ? -1 : 1);
+						Status = noErr;
+					}
+
+					#if KeyboardProc_LOG
+					printf("%s:%i - kEventTextInputUnicodeForKeyEvent '%i' for '%s' = %i\n",
+						LgiGetLeaf(__FILE__), __LINE__, k.vkey, v->GetClass(), (int)Status);
+					#endif
 					break;
 				}
 			}
@@ -1497,7 +1528,7 @@ CarbonControlProc
 		case kEventClassKeyboard:
 		case kEventClassTextInput:
 		{
-			Status = CarbonKeyboardProc(v, inEvent);
+			Status = CarbonKeyboardProc(v, inEvent, true);
 			break;
 		}
 		case kEventClassToolbarItem:

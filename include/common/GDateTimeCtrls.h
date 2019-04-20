@@ -68,6 +68,7 @@ public:
 	const char *GetClass() { return "GDatePopup"; }
 
 	LDateTime Get();
+	void OnChange();
 	void Set(LDateTime &Ts);
 	void OnPaint(GSurface *pDC);
 	void OnMouseClick(GMouse &m);

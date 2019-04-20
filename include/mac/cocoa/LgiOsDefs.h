@@ -315,10 +315,10 @@ LgiFunc void LgiSleep(uint32_t i);
 #define VK_F5						6
 #define VK_F6						7
 #define VK_BACKSPACE				8
-#define VK_TAB						9
+#define VK_TAB						'\t' // 9
 #define VK_F7						11
 #define VK_F8						12
-#define VK_RETURN					13
+#define VK_RETURN					'\r' // 13
 #define VK_F9						14
 #define VK_F10						15
 #define VK_F11						16
@@ -331,6 +331,7 @@ LgiFunc void LgiSleep(uint32_t i);
 #define VK_INSERT					23
 #define VK_DELETE					24
 #define VK_APPS						25
+#define VK_SPACE					' '
 
 #define VK_ESCAPE					27
 #define VK_LEFT						28

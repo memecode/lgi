@@ -140,7 +140,8 @@ public:
 			k.vkey == VK_RETURN)
 		{
 			Key = true;
-			b = LList::OnKey(k);
+			LList::OnKey(k);
+			b = true;
 			Key = false;
 		}
 

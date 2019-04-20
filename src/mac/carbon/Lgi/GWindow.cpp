@@ -552,7 +552,7 @@ bool GWindow::PostEvent(int Event, int a, int b)
 	return Status;
 }
 
-extern OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent);
+extern OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent, bool Handle);
 
 #define InRect(r, x, y) \
 	( (x >= r.left) && (y >= r.top) && (x <= r.right) && (y <= r.bottom) )
@@ -948,7 +948,7 @@ pascal OSStatus LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inE
 				case kEventRawKeyUp:
 				case kEventRawKeyDown:
 				{
-					result = CarbonKeyboardProc(v, inEvent);
+					result = CarbonKeyboardProc(v, inEvent, false);
 					break;
 				}
 				default:
@@ -1134,9 +1134,11 @@ bool GWindow::Attach(GViewI *p)
 			{ kEventClassControl, kEventControlDragReceive },
 			
 			{ kEventClassKeyboard, kEventHotKeyPressed },
+			#if 1
 			{ kEventClassKeyboard, kEventRawKeyUp },
 			{ kEventClassKeyboard, kEventRawKeyDown },
 			{ kEventClassTextInput, kEventTextInputUnicodeForKeyEvent },
+			#endif
 
 			{ kEventClassUser, kEventUser }
 		};
