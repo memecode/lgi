@@ -1379,8 +1379,6 @@ char *GVariant::CastString()
 
 	switch (Type)
 	{
-		default:
-			break;
 		case GV_LIST:
 		{
 			GStringPipe p(256);
@@ -1472,6 +1470,17 @@ char *GVariant::CastString()
 				*this = s;
 				return Str();
 			}
+			break;
+		}
+		case GV_DOM:
+		{
+			sprintf_s(i, sizeof(i), "dom:%p", Value.Dom);
+			*this = i;
+			break;
+		}
+		default:
+		{
+			int asd=0;
 			break;
 		}
 	}

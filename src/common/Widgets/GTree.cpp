@@ -332,7 +332,7 @@ ssize_t GTreeNode::IndexOf()
 
 GTreeItem *GTreeNode::GetChild()
 {
-	return Items.First();
+	return Items[0];
 }
 
 GTreeItem *GTreeNode::GetPrev()

@@ -464,11 +464,10 @@ void GView::_Delete()
 		RevokeDragDrop(_View);
 	}
 
-	GViewI *c;
 	#ifdef _DEBUG
 	// Sanity check..
 	// GArray<GViewI*> HasView;
-	for (c = Children.First(); c; c = Children.Next())
+	for (auto c: Children)
 	{
 		// LgiAssert(!HasView.HasItem(c));
 		// HasView.Add(c);
@@ -486,7 +485,8 @@ void GView::_Delete()
 	}
 
 	// Delete all children
-	while (c = Children.First())
+	GViewI *c;
+	while (c = Children[0])
 	{
 		// If it has no parent, remove the pointer from the child list,
 		// Because the child isn't going to do it...
