@@ -376,6 +376,10 @@ enum Store3Fields
 										// Number, CalendarReminderUnits, CalendarReminderType
 	FIELD_CAL_LAST_CHECK,				// (LDateTime) Ts the calendar event was last checked for reminders
 	FIELD_DATE_MODIFIED,				// (LDateTime) Ts of modification
+	FIELD_INBOX,						// (GDataFolderI*) Inbox for mail store
+	FIELD_OUTBOX,						// (GDataFolderI*) Outbox for mail store
+	FIELD_SENT,							// (GDataFolderI*) Sent folder for mail store
+	FIELD_TRASH,						// (GDataFolderI*) Trash folder for mail store
 
 	FIELD_MAX,
 };

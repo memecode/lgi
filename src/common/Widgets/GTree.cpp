@@ -1995,7 +1995,7 @@ bool GTree::Delete(GTreeItem *Obj)
 	if (Obj)
 	{
 		GTreeItem *i;
-		while ((i = Obj->Items.First()))
+		while ((i = Obj->Items[0]))
 		{
 			Delete(i);
 		}

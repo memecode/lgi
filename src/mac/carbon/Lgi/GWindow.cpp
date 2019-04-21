@@ -10,7 +10,7 @@
 extern void NextTabStop(GViewI *v, int dir);
 extern void SetDefaultFocus(GViewI *v);
 
-#define DEBUG_KEYS			1
+#define DEBUG_KEYS			0
 #define DEBUG_SETFOCUS		0
 
 WindowGroupRef OnTopGroup = NULL;
@@ -1298,14 +1298,20 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 		if (d->Hooks[i].Flags & GKeyEvents)
 		{
 			auto h = d->Hooks[i].Target;
+
+			#if DEBUG_KEYS
+			GString Msg;
+			Msg.Printf("Hook '%s/%s/%i' ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n",
+				h->GetClass(), h->Name(), h->GetId(),
+				k.c16, k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
+			#endif
+			
 			if (h->OnViewKey(v, k))
 			{
 				Status = true;
 				
 				#if DEBUG_KEYS
-				printf("Hook '%s/%s/%i' ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n",
-					h->GetClass(), h->Name(), h->GetId(),
-					k.c16, k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
+				printf("%s", Msg.Get());
 				#endif
 				
 				goto AllDone;
