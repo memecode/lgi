@@ -34,6 +34,7 @@ public:
 	::GString Icon;
 	GRect Decor;
 	gulong DestroySig;
+	GAutoPtr<GSurface> IconImg;
 	
 	// State
 	GdkWindowState State;
@@ -154,8 +155,14 @@ bool GWindow::SetIcon(const char *FileName)
 			LgiApp->SetApplicationIcon(FileName);
 			#endif
 			
+			/*
 			if (gtk_window_set_icon_from_file(Wnd, FileName, &error))
 				return true;
+			*/
+			if (d->IconImg.Reset(GdcD->Load(a)))
+			{
+				gtk_window_set_icon(Wnd, d->IconImg->CreatePixBuf());
+			}
 		}
 	}
 	

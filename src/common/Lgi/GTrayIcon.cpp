@@ -33,6 +33,7 @@ public:
 
 	#elif defined(__GTK_H__)
 	
+	::GArray<GSurface*> Images;
 	GtkStatusIcon *tray_icon;
 	typedef GdkPixbuf *IconRef;
 	uint64 LastClickTime;
@@ -125,6 +126,7 @@ public:
 		{
 			g_object_unref(Icon[n]);
 		}
+		Images.DeleteObjects();
 		#else
 		Icon.DeleteObjects();
 		#endif
@@ -173,14 +175,22 @@ bool GTrayIcon::Load(const TCHAR *Str)
 	if (Str)	
 	{
 		::GString sStr = Str;
-		GAutoString File(LgiFindFile(sStr));
-		// d->Icon.Add(new GAutoString(NewStr(File ? File : Str)));
-		GError *err = NULL;
-		Gtk::GdkPixbuf *pb =  Gtk::gdk_pixbuf_new_from_file(File ? File : sStr.Get(), &err);
-		if (!pb)
-			return false;
-		
-		d->Icon.Add(pb);
+		GAutoString File(LgiFindFile(sStr));		
+		if (File)
+		{
+			GAutoPtr<GSurface> Ico(GdcD->Load(File));
+			if (Ico)
+			{
+				Gtk::GdkPixbuf *Pb = Ico->CreatePixBuf();
+            	if (Pb)
+            	{
+            		d->Icon.Add(Pb);
+	            	d->Images.Add(Ico.Release());
+	            }
+			}
+			else printf("%s:%i - Failed to load '%s'\n", _FL, sStr.Get());
+		}
+		else printf("%s:%i - Can't find '%s'\n", _FL, sStr.Get());
 	}
 	
 	#else

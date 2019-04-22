@@ -153,6 +153,23 @@ OsPainter GMemDC::Handle()
 	return Cairo;
 }
 
+Gtk::GdkPixbuf *GMemDC::CreatePixBuf()
+{
+	Gtk::GdkPixbuf *Pb =
+		gdk_pixbuf_new_from_data ((*this)[0],
+              GDK_COLORSPACE_RGB,
+              HasAlpha(),
+              8,
+              X(),
+              Y(),
+              GetRowStep(),
+              NULL,
+              NULL);
+	if (!Pb)
+		printf("%s:%i - gdk_pixbuf_new_from_data failed.\n", _FL);
+	return Pb;
+}
+
 bool GMemDC::SupportsAlphaCompositing()
 {
 	// We can blend RGBA into memory buffers, mostly because the code is in Lgi not GTK.

@@ -220,10 +220,10 @@ int main(int Args, char **Arg)
 		#if COCOA
 		#else
 		OSStatus e = AEInstallEventHandler(	kInternetEventClass,
-									kAEGetURL,
-									NewAEEventHandlerUPP(AppEventHandler),
-									0,
-									false);
+											kAEGetURL,
+											NewAEEventHandlerUPP(AppEventHandler),
+											0,
+											false);
 		if (e) LgiTrace("%s:%i - AEInstallEventHandler error %i\n", _FL, e);
 		#endif
 	

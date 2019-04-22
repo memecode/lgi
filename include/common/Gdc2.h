@@ -434,6 +434,7 @@ public:
 	/// Gets the drawable size, regardless of clipping or client rect
 	virtual GdcPt2 GetSize() { GdcPt2 p; return p; }
 	virtual Gtk::GtkPrintContext *GetPrintContext() { return NULL; }
+	virtual Gtk::GdkPixbuf *CreatePixBuf() { return NULL; }
 
 	#elif defined(WINNATIVE)
 
@@ -959,6 +960,7 @@ public:
 			GdcPt2 GetSize();
 			Gtk::cairo_surface_t *GetSurface(GRect &r);
 			GColourSpace GetCreateCs();
+			Gtk::GdkPixbuf *CreatePixBuf();
 
 		#elif defined(BEOS) || defined(LGI_SDL)
 
