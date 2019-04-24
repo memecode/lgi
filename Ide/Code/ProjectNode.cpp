@@ -926,7 +926,10 @@ void ProjectNode::Delete()
 	}
 			
 	if (nView)
+	{
 		nView->OnDelete();
+		nView = NULL;
+	}
 
 	Project->SetDirty();
 	GXmlTag::RemoveTag();							

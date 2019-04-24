@@ -11,7 +11,9 @@
 class GLayoutCell : public GDom, public GCss
 {
 public:
-	GLayoutCell() {}
+	bool Debug;
+
+	GLayoutCell() { Debug = false; }
 	virtual ~GLayoutCell() {}
 
 	virtual class GTableLayout *GetTable() = 0;
