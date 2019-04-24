@@ -152,8 +152,8 @@ public:
 			// Scaling down (zoomed out)
 			s.x1 /= f;
 			s.y1 /= f;
-			s.x2 = (s.x2 + f - 1) / f;
-			s.y2 = (s.y2 + f - 1) / f;
+			s.x2 = ((s.x2 + 1) / f) - 1;
+			s.y2 = ((s.y2 + 1) / f) - 1;
 		}
 		else if (Zoom > 0)
 		{
@@ -454,6 +454,11 @@ public:
 		// ImageViewTarget *App = View->GetApp();
 		uchar *DivLut = Div255Lut;
 
+		#if 0 // def _DEBUG
+		Dst->Colour(GColour(255, 0, 255));
+		Dst->Rectangle();
+		#endif
+		
 		Pal32 pal[256];
 		if (Src->GetColourSpace() == CsIndex8)
 		{
@@ -476,11 +481,6 @@ public:
 
 				pal[i].p32.a = 255;
 			}
-
-			#if 0 // def _DEBUG
-			Dst->Colour(GColour(255, 0, 255));
-			Dst->Rectangle();
-			#endif
 		}
 
 		// Now copy the right pixels over using the selected sampling method...
@@ -1142,8 +1142,32 @@ public:
 				s.ZOff(TileSize-1, TileSize-1);
 				s.Offset(x * TileSize, y * TileSize);
 				
+				#if 0
+				GRect dd = s;
+				dd.Bound(&Src->Bounds());
+				dd.Offset(-x * TileSize, -y * TileSize);
+
+				Dst->Colour(GColour(0xbb, 0, 0xbb));
+				Dst->Rectangle();
+				if (s.y2 > Src->Y())
+				{
+					int asd=0;
+				}
+
+				int sy = s.Y();
+				auto sm2 = (*Src)[s.y2-1];
+				auto sm1 = (*Src)[s.y2];
+
+				auto dm2 = (*Dst)[dd.y2-1];
+				auto dm1 = (*Dst)[dd.y2];
+				auto dm0 = (*Dst)[dd.y2+1];
+				#endif
+
 				Dst->Op(GDC_ALPHA);
 				Dst->Blt(0, 0, Src, &s);
+
+
+				// LgiTrace("Dst %i,%i - %s\n", x, y, s.GetStr());
 			}
 			
 			// Draw any foreground elements
@@ -1760,9 +1784,9 @@ void GZoomView::OnPaint(GSurface *pDC)
 						// Work out how much image is in the tile
 						GRect img = r;
 						if (img.x2 >= ScaledDocSize.X())
-							img.x2 = ScaledDocSize.X();
+							img.x2 = ScaledDocSize.X() - 1;
 						if (img.y2 >= ScaledDocSize.Y())
-							img.y2 = ScaledDocSize.Y();
+							img.y2 = ScaledDocSize.Y() - 1;
 						
 						// Work out the image pixels in tile co-ords
 						GRect tile_source(0, 0, img.X()-1, img.Y()-1);
@@ -1774,16 +1798,20 @@ void GZoomView::OnPaint(GSurface *pDC)
 						// Blt the tile image pixels to the screen
 						GSurface *pTile = d->Tile[x][y];
 						pDC->Blt(px, py, pTile, &tile_source);
-						/*
-						printf("Zoom: %s->%s (%s)\n",
+						
+						#if 0
+						LgiTrace("Zoom: %i,%i %s %s->%s (%s)\n",
+							px, py, tile_source.GetStr(),
 							GColourSpaceToString(pTile->GetColourSpace()),
 							GColourSpaceToString(pDC->GetColourSpace()),
 							GColourSpaceToString(GdcD->GetColourSpace()));
-						*/
+						#endif
 
 						#if DEBUG_TILE_BOUNDARIES
+						uint32_t old = pDC->LineStyle(GSurface::LineAlternate);
 						pDC->Colour(GColour(0, 0, 255));
 						pDC->Box(&screen_source);
+						pDC->LineStyle(old);
 						#endif
 
 						screen_source.Offset(-ScaledScroll.x, -ScaledScroll.y);
