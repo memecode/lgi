@@ -343,6 +343,12 @@ public:
 			Value = (float)v;
 		}
 		
+		Len(LengthType t, int64_t v)
+		{
+			Type = t;
+			Value = (float)v;
+		}
+		
 		Len &operator =(const Len &l)
 		{
 			Type = l.Type;
