@@ -607,12 +607,13 @@ void GMemDC::SetClient(GRect *c)
 {
 	if (c)
 	{
-		GRect Doc(0, 0, pMem->x-1, pMem->y-1);
-		Clip = d->Client = *c;
-		Clip.Bound(&Doc);
+		GRect Doc = Bounds();
+		d->Client = *c;
+		d->Client.Bound(&Doc);
+		Clip = d->Client;
 		
-		OriginX = -c->x1;
-		OriginY = -c->y1;
+		OriginX = -d->Client.x1;
+		OriginY = -d->Client.y1;
 	}
 	else
 	{

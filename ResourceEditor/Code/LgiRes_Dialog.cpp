@@ -1471,7 +1471,8 @@ void CtrlTabs::OnPaint(GSurface *pDC)
 			}
 		}
 
-		Tab->View()->SetPos(t);
+		if (Tab->View()->GetPos() != t)
+			Tab->View()->SetPos(t);
 
 		pDC->Colour(LC_LIGHT, 24);
 		pDC->Line(t.x1, t.y1+2, t.x1, t.y2);
@@ -3429,29 +3430,21 @@ void ResDialog::DrawSelection(GSurface *pDC)
 	}
 }
 
+#define USE_MEM_DC		1
+
 void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 {
-	#ifndef MAC
-	GScreenDC DC(this);
-	pDC = &DC;
-	#endif
-
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children.First());
 	if (Ctrl)
 	{
 		GRect c = Ctrl->View()->GetPos();
 		c.Size(-GOOBER_BORDER, -GOOBER_BORDER);
 
-		#ifdef MAC
-		GSurface *pMemDC = pDC;
-		if (pMemDC)
-		#else
 		GAutoPtr<GSurface> pMemDC(new GMemDC);
 		if (pMemDC &&
 			pMemDC->Create(c.X(), c.Y(), GdcD->GetColourSpace()))
-		#endif
 		{
-            #ifdef MAC
+            #if 0 //def MAC
             GScreenDC *Scr = dynamic_cast<GScreenDC*>(pDC);
             if (Scr) Scr->PushState();
             #endif
@@ -3468,14 +3461,13 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 			
 			if (GetParent())
 			{
-                #ifdef MAC
+                #if 0 //def MAC
                 if (Scr) Scr->PopState();
                 #endif
 				// Draw selection
 				DrawSelection(pMemDC);
 			}
 
-			#ifndef MAC
 			// Put on screen
 			pMemDC->SetOrigin(0, 0);
 			pDC->Blt(0, 0, pMemDC);
@@ -3490,7 +3482,6 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 			{
 				pDC->Rectangle(0, c.y2 + 1, X()-1, Y()-1);
 			}
-			#endif
 		}
 		else
 		{

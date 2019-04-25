@@ -263,16 +263,17 @@ void GScreenDC::GetOrigin(int &x, int &y)
 
 void GScreenDC::SetOrigin(int x, int y)
 {
-	if (d->Ctx && (OriginX != 0 || OriginY != 0))
-	{
-		CGContextTranslateCTM(d->Ctx, OriginX, OriginY);
-	}
+	int Ox = OriginX;
+	int Oy = OriginY;
 
 	GSurface::SetOrigin(x, y);
 
 	if (d->Ctx)
 	{
-		CGContextTranslateCTM(d->Ctx, -x, -y);
+		CGContextTranslateCTM(d->Ctx,
+			Ox - x,
+			Oy - y
+			);
 	}
 }
 
