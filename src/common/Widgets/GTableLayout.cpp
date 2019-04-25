@@ -315,7 +315,6 @@ public:
 	GArray<Child> Children;
 	GCss::DisplayType Disp;
 	GString ClassName;
-	bool Debug;
 
 	TableCell(GTableLayout *t, int Cx, int Cy);
 	GTableLayout *GetTable() { return Table; }
@@ -388,7 +387,6 @@ TableCell::TableCell(GTableLayout *t, int Cx, int Cy)
 	TextAlign(AlignLeft);
 	VerticalAlign(VerticalTop);
 	Table = t;
-	Debug = false;
 	Cell.ZOff(0, 0);
 	Cell.Offset(Cx, Cy);
 	Padding.ZOff(0, 0);
@@ -699,11 +697,15 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 			{
 				Flag = SizeFixed;
 
+				/*	This is breaking normal usage, where 'Min' == 0.
+					Need to redesign for edge case.
+
 				if (Padding.x1 + Padding.x2 > Min)
 				{
 					// Remove padding as it's going to oversize the cell
 					Padding.x1 = Padding.x2 = 0;
 				}
+				*/
 			}
 			else
 			{

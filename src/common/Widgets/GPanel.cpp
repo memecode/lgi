@@ -12,6 +12,7 @@
 #include "GPanel.h"
 #include "GDisplayString.h"
 #include "LgiRes.h"
+#include "GTableLayout.h"
 
 //////////////////////////////////////////////////////////////////////////////
 GPanel::GPanel(const char *name, int size, bool open)
@@ -168,6 +169,17 @@ bool GPanel::Pour(GRegion &r)
 		}
 
 		SetPos(r, true);
+		
+		if (IsOpen)
+		{
+			GTableLayout *Tbl = dynamic_cast<GTableLayout*>(Children[0]);
+			if (Tbl)
+			{
+				GRect c = GetClient();
+				c.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
+				Tbl->SetPos(c);
+			}
+		}
 
 		return true;
 	}
