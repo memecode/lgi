@@ -213,6 +213,8 @@ const char *VcCommit::GetFieldText(CommitField Fld)
 				return NULL;
 			Cache = Msg.Split("\n", 1)[0];
 			return Cache;
+		default:
+			break;
 	}
 
 	return NULL;

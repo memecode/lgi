@@ -90,7 +90,7 @@ void VcFile::OnMouseClick(GMouse &m)
 	{
 		GSubMenu s;
 		char *File = GetText(COL_FILENAME);
-		GFile::Path p = Path ? Path : Owner->GetPath();
+		GFile::Path p = Path ? Path.Get() : Owner->GetPath();
 		p += File;
 
 		GetStatus();

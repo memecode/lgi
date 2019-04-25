@@ -536,61 +536,37 @@ public:
 				}
 			}
 
-			/*
-			// Get mount list
-			// this is just a hack at this stage to establish some base
-			// functionality. I would appreciate someone telling me how
-			// to do this properly. Till then...
-			GFile f;
-			if (f.Open("/etc/fstab", O_READ))
+			FSVolumeRefNum volume;
+			FSVolumeInfo info;
+			HFSUniStr255 volName;
+			FSRef ref;
+			int i = 0;
+
+			while (FSGetVolumeInfo(kFSInvalidVolumeRefNum, ++i, &volume, kFSVolInfoFSInfo, &info, &volName, &ref) == 0)
 			{
-				int Len = f.GetSize();
-				char *Buf = new char[Len+1];
-				if (Buf)
+				uint8_t path[PATH_MAX + 1];
+				if (FSRefMakePath(&ref, path, PATH_MAX) == 0 &&
+					Stricmp((char*)path, "/") &&
+					Stricmp((char*)path, "/net") && 
+					Stricmp((char*)path, "/home"))
 				{
-					f.Read(Buf, Len);
-					Buf[Len] = 0;
-					f.Close();
+					v = new GMacVolume(0);
+					v->_Path = (char*)path;
+					GAutoString vol((char*)LgiNewConvertCp("utf-8", volName.unicode, "utf-16", volName.length * 2));
+					v->_Name = vol.Get();
+					
+					// printf("Vol '%s' '%s'\n", v->_Name.Get(), v->_Path.Get());
 
-					GToken L(Buf, "\r\n");
-					for (int l=0; l<L.Length(); l++)
-					{
-						GToken M(L[l], " \t");
-						if (M.Length() > 2)
-						{
-							char *Mount = M[1];
-							if (Mount AND
-								strnicmp(M[0], "/dev/", 5) == 0 AND
-								strlen(M[1]) > 1 AND
-								stricmp(M[2], "swap") != 0)
-							{
-								v = new GMacVolume(0);
-								if (v)
-								{
-									char *MountName = strrchr(Mount, '/');
-									v->_Name = NewStr(MountName ? MountName + 1 : Mount);
-									v->_Path = NewStr(Mount);
-									v->_Type = VT_HARDDISK;
+					// FSGetVolumeInfo(volume, 0, 0, kFSVolInfoSizes, &info, 0, 0);
+					// v.setSize(quint64(info.totalBytes));
+					// v.setAvailableSpace(quint64(info.freeBytes));
+					// struct statfs data;
+					// if (statfs(qPrintable(v.path()), &data) == 0)
+					//	v.setFileSystemType(QLatin1String(data.f_fstypename));
 
-									char *Device = M[0];
-									char *FileSys = M[2];
-									if (stristr(Device, "fd"))
-									{
-										v->_Type = VT_3_5FLOPPY;
-									}
-									else if (stristr(Device, "cdrom"))
-									{
-										v->_Type = VT_CDROM;
-									}
-
-									_Sub.Insert(v);
-								}
-							}
-						}
-					}
+					_Sub.Insert(v);
 				}
-			}
-			*/
+		}
 		}
 
 		return _Sub.First();
