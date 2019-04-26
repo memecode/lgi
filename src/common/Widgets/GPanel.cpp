@@ -200,18 +200,14 @@ int GPanel::OnNotify(GViewI *Ctrl, int Flags)
 void GPanel::OnPaint(GSurface *pDC)
 {
 	GRect r = GetClient();
-	GColour Fore(LC_TEXT, 24), Back(LC_MED, 24);
-	if (GetCss())
-	{
-		Fore = GetCss()->Color();
-		Back = GetCss()->BackgroundColor();
-	}
+	GColour cFore = StyleColour(GCss::PropColor, GColour(LC_TEXT, 24));
+	GColour cBack = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
 
-	pDC->Colour(Back);
+	pDC->Colour(cBack);
 	pDC->Rectangle(&r);
 	SysFont->Transparent(false);
-	SysFont->Fore(Fore);
-	SysFont->Back(Back);
+	SysFont->Fore(cFore);
+	SysFont->Back(cBack);
 	if (!Open())
 	{
 		// title
