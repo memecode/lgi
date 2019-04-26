@@ -610,6 +610,8 @@ bool GTabView::OnKey(GKey &k)
 		{
 			case VK_LEFT:
 			{
+				if (k.Alt())
+					break;
 				if (d->Current > 0)
 				{
 					TabIterator it(Children);
@@ -626,6 +628,8 @@ bool GTabView::OnKey(GKey &k)
 			}
 			case VK_RIGHT:
 			{
+				if (k.Alt())
+					break;
 				TabIterator it(Children);
 				if (d->Current < it.Length() - 1)
 				{

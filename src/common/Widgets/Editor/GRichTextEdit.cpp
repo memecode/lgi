@@ -1870,7 +1870,11 @@ bool GRichTextEdit::OnKey(GKey &k)
 			}
 			case VK_LEFT:
 			{
+				#ifdef MAC
+				if (k.Ctrl())
+				#else
 				if (k.Alt())
+				#endif
 					return false;
 
 				if (k.Down())
@@ -1892,7 +1896,12 @@ bool GRichTextEdit::OnKey(GKey &k)
 						#endif
 
 						d->Seek(d->Cursor,
-								k.Ctrl() ? GRichTextPriv::SkLeftWord : GRichTextPriv::SkLeftChar,
+								#ifdef MAC
+								k.Alt() ?
+								#else
+								k.Ctrl() ?
+								#endif
+									GRichTextPriv::SkLeftWord : GRichTextPriv::SkLeftChar,
 								k.Shift());
 					}
 				}
@@ -1900,7 +1909,11 @@ bool GRichTextEdit::OnKey(GKey &k)
 			}
 			case VK_RIGHT:
 			{
+				#ifdef MAC
+				if (k.Ctrl())
+				#else
 				if (k.Alt())
+				#endif
 					return false;
 
 				if (k.Down())
@@ -1921,7 +1934,12 @@ bool GRichTextEdit::OnKey(GKey &k)
 						#endif
 
 						d->Seek(d->Cursor,
-								k.Ctrl() ? GRichTextPriv::SkRightWord : GRichTextPriv::SkRightChar,
+								#ifdef MAC
+								k.Alt() ?
+								#else
+								k.Ctrl() ?
+								#endif
+									GRichTextPriv::SkRightWord : GRichTextPriv::SkRightChar,
 								k.Shift());
 					}
 				}

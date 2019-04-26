@@ -170,6 +170,7 @@ bool GPanel::Pour(GRegion &r)
 
 		SetPos(r, true);
 		
+		#if 0 // This break the scribe status panel
 		if (IsOpen)
 		{
 			GTableLayout *Tbl = dynamic_cast<GTableLayout*>(Children[0]);
@@ -180,6 +181,7 @@ bool GPanel::Pour(GRegion &r)
 				Tbl->SetPos(c);
 			}
 		}
+		#endif
 
 		return true;
 	}
