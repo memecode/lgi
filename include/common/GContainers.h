@@ -109,8 +109,11 @@ public:
 		{
 			CHECK_THREAD
 
-			if (Ver != Lst->Ver && !Lst->ValidBlock(i))
-				return false;
+			if (Ver != Lst->Ver)
+			{
+				if (!Lst->ValidBlock(i))
+					return false;
+			}
 
 			return	i &&
 					Cur >= 0 &&
@@ -519,11 +522,10 @@ protected:
 
 
 public:
-	List<T>() : Local(this, NULL, 0)
+	List<T>() : Ver(0), Local(this, NULL, 0)
 	{
 		FirstObj = LastObj = NULL;
 		Items = 0;
-		Ver = 0;
 	}
 
 	~List<T>()

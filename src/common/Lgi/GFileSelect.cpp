@@ -789,7 +789,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	c = Tbl->GetCell(x, y, true, 6, 1);
 	c->Add(Sub = new GBox(IDC_SUB_TBL));
 	Sub->AddView(Bookmarks = new GTree(IDC_BOOKMARKS, 0, 0, -1, -1));
-	Bookmarks->GetCss(true)->Width(GCss::Len(GCss::LenPx, 150.0));
+	Bookmarks->GetCss(true)->Width(GCss::Len(GCss::LenPx, 150.0f));
 	
 	GTableLayout *t;
 	Sub->AddView(t = new GTableLayout(11));
