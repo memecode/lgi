@@ -838,15 +838,17 @@ void GToolButton::OnMouseClick(GMouse &m)
 		m.Ctrl(), m.Alt(), m.Shift(), m.Double());
 	#endif
 
-	if (!NeedsRightClick &&
-		ToolBar &&
-		ToolBar->IsCustomizable() &&
-		m.IsContextMenu())
+	if (m.IsContextMenu())
 	{
-		m.ToScreen();
-		ToolBar->ContextMenu(m);
+		if (!NeedsRightClick &&
+			ToolBar &&
+			ToolBar->IsCustomizable())
+		{		
+			m.ToScreen();
+			ToolBar->ContextMenu(m);
+		}
 	}
-	else
+	else if (m.Left())
 	{
 		// left click action...
 		if (GetId() >= 0 && Enabled())
