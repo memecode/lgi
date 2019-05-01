@@ -64,10 +64,10 @@ GRect GCssTools::ApplyMargin(GRect &in)
 	GRect r = in;
 	
 	// Insert by the margin
-	GCss::Len margin = Css->Padding();
+	GCss::Len margin = Css->Margin();
 	#define DoMargin(name, edge, box, sign) \
-		{ GCss::Len m = Css->Padding##name(); \
-		r.edge sign (m.IsValid() ? m : margin).ToPx(in.box(), Font); }
+		{ GCss::Len m = Css->Margin##name(); \
+		r.edge sign (m.IsValid() ? &m : &margin)->ToPx(in.box(), Font); }
 	DoMargin(Left, x1, X, +=)
 	DoMargin(Top, y1, Y, +=)
 	DoMargin(Right, x2, X, -=)

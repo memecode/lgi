@@ -12,7 +12,7 @@
 #include "GPanel.h"
 #include "GDisplayString.h"
 #include "LgiRes.h"
-#include "GTableLayout.h"
+#include "GCssTools.h"
 
 //////////////////////////////////////////////////////////////////////////////
 GPanel::GPanel(const char *name, int size, bool open)
@@ -170,18 +170,22 @@ bool GPanel::Pour(GRegion &r)
 
 		SetPos(r, true);
 		
-		#if 0 // This break the scribe status panel
 		if (IsOpen)
 		{
-			GTableLayout *Tbl = dynamic_cast<GTableLayout*>(Children[0]);
-			if (Tbl)
+			for (auto v: Children)
 			{
-				GRect c = GetClient();
-				c.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
-				Tbl->SetPos(c);
+				auto css = v->GetCss();
+				if (css &&
+					css->Width() == GCss::LenAuto &&
+					css->Height() == GCss::LenAuto)
+				{
+					GRect c = GetClient();
+					GCssTools tools(css, v->GetFont());
+					v->SetPos(tools.ApplyMargin(c));
+					break;
+				}
 			}
 		}
-		#endif
 
 		return true;
 	}
