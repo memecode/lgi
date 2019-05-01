@@ -753,6 +753,10 @@ public:
 	I begin() { return I(this, 0); }
 	I rbegin() { return I(this, len-1); }
 	I end() { return I(this); }
+	bool Delete(I &It)
+	{
+		return DeleteAt(It.i, true);
+	}
 
 	/*
 	To use this iteration method in a for loop:
