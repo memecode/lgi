@@ -1079,6 +1079,7 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 						{
 							s++;
 							START_CODE();
+							s--;
 						}
 					}
 				}
