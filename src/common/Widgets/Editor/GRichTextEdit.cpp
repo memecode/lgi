@@ -1690,6 +1690,9 @@ bool GRichTextEdit::OnKey(GKey &k)
 						// letter/number etc
 						GRichTextPriv::Block *b = d->Cursor->Blk;
 
+						AutoTrans Trans(new GRichTextPriv::Transaction);						
+						d->DeleteSelection(Trans, NULL);
+
 						GNamedStyle *AddStyle = NULL;
 						if (d->StyleDirty.Length() > 0)
 						{
@@ -1698,7 +1701,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 							{
 								// Get base styles at the cursor..
 								GNamedStyle *Base = b->GetStyle(d->Cursor->Offset);
-								if (Base && Mod)
+								if (Base)
 									*Mod = *Base;
 
 								// Apply dirty toolbar styles...
@@ -1722,9 +1725,27 @@ bool GRichTextEdit::OnKey(GKey &k)
 							
 							d->StyleDirty.Length(0);
 						}
-
-						AutoTrans Trans(new GRichTextPriv::Transaction);						
-						d->DeleteSelection(Trans, NULL);
+						else if (b->Length() == 0)
+						{
+							// We have no existing style to modify, so create one from scratch.
+							GAutoPtr<GCss> Mod(new GCss);
+							if (Mod)
+							{
+								// Apply dirty toolbar styles...
+								Mod->FontFamily(GCss::StringsDef(d->Values[FontFamilyBtn].Str()));
+								Mod->FontSize(GCss::Len(GCss::LenPt, (float)d->Values[FontSizeBtn].CastDouble()));
+								Mod->FontWeight(d->Values[BoldBtn].CastInt32() ? GCss::FontWeightBold : GCss::FontWeightNormal);
+								Mod->FontStyle(d->Values[ItalicBtn].CastInt32() ? GCss::FontStyleItalic : GCss::FontStyleNormal);
+								Mod->TextDecoration(d->Values[UnderlineBtn].CastInt32() ? GCss::TextDecorUnderline : GCss::TextDecorNone);
+								Mod->Color(GCss::ColorDef(GCss::ColorRgb, (uint32_t)d->Values[ForegroundColourBtn].CastInt64()));
+								
+								auto Bk = d->Values[BackgroundColourBtn].CastInt64();
+								if (Bk > 0)
+									Mod->BackgroundColor(GCss::ColorDef(GCss::ColorRgb, (uint32_t)Bk));
+							
+								AddStyle = d->AddStyleToCache(Mod);
+							}
+						}
 
 						uint32_t Ch = k.c16;
 						if (b->AddText(Trans, d->Cursor->Offset, &Ch, 1, AddStyle))
