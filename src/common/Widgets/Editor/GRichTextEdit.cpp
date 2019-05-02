@@ -1788,6 +1788,12 @@ bool GRichTextEdit::OnKey(GKey &k)
 										d->Blocks.Delete(b, true);
 										d->Cursor.Reset(new GRichTextPriv::BlockCursor(n, 0, 0));
 									}
+									else
+									{
+										// No other block to go to, so leave this empty block at the end
+										// of the documnent but set the cursor correctly.
+										d->Cursor->Set(0);
+									}
 								}
 								else
 								{
