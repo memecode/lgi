@@ -681,16 +681,26 @@ bool IHttp::Request
 					{
 						ssize_t r = Socket->Read(s + Used, sizeof(s) - Used);
 						if (r <= 0)
+						{
+							LgiTrace("%s:%i - Socket read failed.\n", _FL);
 							break;
+						}
 
 						ssize_t w = Out->Write(s, r);
 						if (w <= 0)
+						{
+							LgiTrace("%s:%i - File write failed.\n", _FL);
 							break;
+						}
 						
 						Written += w;
 					}
 
 					Status = Written == ContentLen;
+					if (Written != ContentLen)
+					{
+						LgiTrace("%s:%i - HTTP length not reached.\n", _FL);
+					}
 				}
 			}
 		}
