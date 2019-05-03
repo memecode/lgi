@@ -215,7 +215,7 @@ struct GSoftwareUpdatePriv
 		}
 	};
 
-	class UpdateDownload : public LThread
+	class UpdateDownload : public LThread, public GProxyStream
 	{
 		GSoftwareUpdate::UpdateInfo *Info;
 		GUri *Uri;
@@ -225,12 +225,14 @@ struct GSoftwareUpdatePriv
 		int *Status;
 
 	public:
+		int64 Progress, Total;
+
 		UpdateDownload( GSoftwareUpdate::UpdateInfo *info,
 		                GUri *uri,
 		                GUri *proxy,		                
 		                GStream *local,
 		                GAutoString *err,
-		                int *status) : LThread("UpdateDownload")
+		                int *status) : LThread("UpdateDownload"), GProxyStream(local)
 		{
 			Info = info;
 			Uri = uri;
@@ -238,8 +240,22 @@ struct GSoftwareUpdatePriv
 			Local = local;
 			Err = err;
 			Status = status;
+			Progress = Total = 0;
 
 			Run();
+		}
+
+		int64 SetSize(int64 Size) override
+		{
+			Total = Size;
+			return s->SetSize(Size);
+		}
+
+		ssize_t Write(const void *b, ssize_t l, int f = 0) override
+		{
+			auto ret = s->Write(b, l, f);
+			Progress = s->GetPos();
+			return ret;
 		}
 
 		int Main()
@@ -256,7 +272,7 @@ struct GSoftwareUpdatePriv
 			{
 				Err->Reset(NewStr(LgiLoadString(L_ERROR_CONNECT_FAILED, sSocketConnectFailed)));
 			}
-			else if (!Http.Get(Info->Uri, 0, Status, Local, &Enc))
+			else if (!Http.Get(Info->Uri, 0, Status, this, &Enc))
 			{
 				Err->Reset(NewStr(LgiLoadString(L_ERROR_HTTP_FAILED, sHttpDownloadFailed)));
 			}
@@ -355,19 +371,13 @@ bool GSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, GViewI *W
 
 		if (!Size)
 		{
-			Size = Local.GetSize();
-			if (Size)
-			{
-				Dlg->SetLimits(0, Size);
-			}
+			if (Thread.Total)
+				Dlg->SetLimits(0, Size = Thread.Total);
 		}
 		else
 		{
-			int64 Cur = Local.GetPos();
-			if (Cur > Dlg->Value())
-			{
-				Dlg->Value(Cur);
-			}
+			if (Thread.Progress > Dlg->Value())
+				Dlg->Value(Thread.Progress);
 		}
 	}
 

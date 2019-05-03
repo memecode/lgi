@@ -547,6 +547,7 @@ bool IHttp::Request
 				{
 					GAutoString sTransferEncoding(InetGetHeaderField(h, "Transfer-Encoding"));
 					IsChunked = sTransferEncoding && !_stricmp(sTransferEncoding, "chunked");
+					Out->SetSize(0);
 				}
 				GAutoString sContentEncoding(InetGetHeaderField(h, "Content-Encoding"));
 				ContentEncoding Encoding = EncodeRaw;
@@ -662,14 +663,20 @@ bool IHttp::Request
 					int64 Written = 0;
 					if (Used > 0)
 					{
+						// auto Pos = Out->GetPos();
 						ssize_t w = Out->Write(s, Used);
-						if (w >= 0)
+						/*
+						LgiTrace("%s:%i - Write @ " LPrintfInt64 " of " LPrintfSSizeT " = " LPrintfSSizeT " (%x,%x,%x,%x)\n",
+							_FL, Pos, Used, w, (uint8_t)s[0], (uint8_t)s[1], (uint8_t)s[2], (uint8_t)s[3]);
+						*/
+						if (w == Used)
 						{
 							Written += w;
 							Used = 0;
 						}
 						else
 						{
+							LgiAssert(0);
 							Written = -1;
 						}
 					}
@@ -679,15 +686,22 @@ bool IHttp::Request
 							Written < ContentLen &&
 							Socket->IsOpen())
 					{
-						ssize_t r = Socket->Read(s + Used, sizeof(s) - Used);
+						ssize_t r = Socket->Read(s, sizeof(s));
 						if (r <= 0)
 						{
 							LgiTrace("%s:%i - Socket read failed.\n", _FL);
 							break;
 						}
-
+						
+						// auto Pos = Out->GetPos();
 						ssize_t w = Out->Write(s, r);
-						if (w <= 0)
+						/*
+						auto NewPos = Out->GetPos();
+						LgiTrace("%s:%i - Write @ " LPrintfInt64 " of " LPrintfSSizeT " = " LPrintfSSizeT " (%x,%x,%x,%x) " LPrintfSSizeT "\n",
+							_FL, Pos, r, w, (uint8_t)s[0], (uint8_t)s[1], (uint8_t)s[2], (uint8_t)s[3], NewPos);
+						*/
+
+						if (w != r)
 						{
 							LgiTrace("%s:%i - File write failed.\n", _FL);
 							break;

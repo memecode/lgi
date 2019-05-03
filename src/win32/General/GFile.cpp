@@ -1658,18 +1658,21 @@ ssize_t GFile::Write(const void *Buffer, ssize_t Size, int Flags)
 		DWORD Bytes = 0;
 		int BlockSz = (int) MIN( Size - Pos, 1 << 30 ); // 1 GiB blocks
 
-		if (WriteFile(d->hFile, (const char*)Buffer + Pos, BlockSz, &Bytes, NULL) &&
-			Bytes == BlockSz)
+		if (WriteFile(d->hFile, (const char*)Buffer + Pos, BlockSz, &Bytes, NULL))
 		{
+			if (Bytes != BlockSz)
+			{
+				LgiAssert(!"Is this ok?");
+			}
+
 			Wr += Bytes;
 			Pos += Bytes;
 			d->Status &= Bytes > 0;
 		}
 		else
 		{
-			Wr += Bytes;
-			d->Status &= Bytes > 0;
 			d->LastError = GetLastError();
+			LgiTrace("%s:%i - LastErr = %x\n", _FL, d->LastError);
 			break;
 		}
 	}
