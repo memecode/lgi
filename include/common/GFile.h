@@ -397,7 +397,7 @@ public:
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override;
 
 	/// Gets the path used to open the file
-	virtual char *GetName();
+	virtual const char *GetName();
 	
 	/// Moves the current file pointer.
 	virtual int64 Seek(int64 To, int Whence);

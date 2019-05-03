@@ -85,11 +85,14 @@ uint WINAPI ThreadEntryPoint(void *i)
 	return 0;
 }
 
+const OsThread LThread::InvalidHandle = 0;
+const OsThreadId LThread::InvalidId = 0;
+
 LThread::LThread(const char *name)
 {
 	State = THREAD_INIT;
-	hThread = 0;
-	ThreadId = 0;
+	hThread = InvalidHandle;
+	ThreadId = InvalidId;
 	ReturnValue = 0;
 	DeleteOnExit = false;
 	Priority = ThreadPriorityNormal;
@@ -103,7 +106,8 @@ LThread::~LThread()
 	if (hThread)
 	{
 		CloseHandle(hThread);
-		hThread = 0;
+		hThread = InvalidHandle;
+		ThreadId = InvalidId;
 	}
 }
 
@@ -163,7 +167,7 @@ void LThread::Run()
 	if (State == THREAD_EXITED)
 	{
 		Create(this, hThread, ThreadId);
-		if (hThread != INVALID_HANDLE_VALUE)
+		if (hThread != InvalidHandle)
 		{
 			State = THREAD_INIT;
 		}
@@ -198,7 +202,7 @@ void LThread::Run()
 
 void LThread::Terminate()
 {
-	if (hThread)
+	if (hThread != InvalidHandle)
 	{
 		TerminateThread(hThread, 1);
 

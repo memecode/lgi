@@ -36,6 +36,7 @@
 #include "LMutex.h"
 #include "GString.h"
 #include "GLibrary.h"
+#include "LThread.h"
 
 /****************************** Defines *************************************************************************************/
 #define FILEDEBUG
@@ -1389,26 +1390,51 @@ class GFilePrivate
 {
 public:
 	OsFile		hFile;
-	char		*Name;
+	GString		Name;
 	int			Attributes;
 	bool		Swap;
 	bool		Status;
-	OsThread	CreateThread;
 	DWORD		LastError;
+
+	// Threading check stuff
+	OsThreadId	CreateId, UseId;
+	bool ThreadWarn;
 
 	GFilePrivate()
 	{
 		hFile = INVALID_HANDLE;
-		Name = 0;
 		Attributes = 0;
 		Swap = false;
 		Status = false;
 		LastError = 0;
+
+		ThreadWarn = true;
+		CreateId = LThread::InvalidId;
+		UseId = LThread::InvalidId;
 	}
 
-	~GFilePrivate()
+	bool UseThreadCheck()
 	{
-		DeleteArray(Name);
+		auto Cur = GetCurrentThreadId();
+		if (UseId == LThread::InvalidId)
+		{
+			UseId = Cur;
+		}
+		else if (Cur != UseId)
+		{
+			if (ThreadWarn)
+			{
+				ThreadWarn = false;
+				#ifdef _DEBUG
+				LgiAssert(!"Using GFile in multiple threads.");
+				#else
+				LgiTrace("%s:%i - Warning: multi-threaded file access.\n", _FL);
+				#endif
+			}
+			return false;
+		}
+
+		return true;
 	}
 };
 
@@ -1434,7 +1460,7 @@ OsFile GFile::Handle()
 	return d->hFile;
 }
 
-char *GFile::GetName()
+const char *GFile::GetName()
 {
 	return d->Name;
 }
@@ -1534,11 +1560,11 @@ int GFile::Open(const char *File, int Mode)
 		else
 		{
 			d->Attributes = Mode;
-			d->Name = NewStr(File);
+			d->Name = File;
 
 			Status = true;
 			d->Status = true;
-			d->CreateThread = LgiGetCurrentThread();
+			d->CreateId = GetCurrentThreadId();
 		}
 	}
 
@@ -1559,20 +1585,21 @@ int GFile::Close()
 {
 	int Status = false;
 
+	d->UseThreadCheck();
 	if (ValidHandle(d->hFile))
 	{
 		::CloseHandle(d->hFile);
 		d->hFile = INVALID_HANDLE;
 	}
 
-	DeleteArray(d->Name);
-
+	d->Name.Empty();
 	return Status;
 }
 
 int64 GFile::GetSize()
 {
 	LgiAssert(IsOpen());
+	d->UseThreadCheck();
 
 	DWORD High = -1;
 	DWORD Low = GetFileSize(d->hFile, &High);
@@ -1582,6 +1609,7 @@ int64 GFile::GetSize()
 int64 GFile::SetSize(int64 Size)
 {
 	LgiAssert(IsOpen());
+	d->UseThreadCheck();
 
 	LONG OldPosHigh = 0;
 	DWORD OldPosLow = SetFilePointer(d->hFile, 0, &OldPosHigh, SEEK_CUR);
@@ -1604,6 +1632,7 @@ int64 GFile::SetSize(int64 Size)
 int64 GFile::GetPos()
 {
 	LgiAssert(IsOpen());
+	d->UseThreadCheck();
 
 	LONG PosHigh = 0;
 	DWORD PosLow = SetFilePointer(d->hFile, 0, &PosHigh, FILE_CURRENT);
@@ -1613,6 +1642,7 @@ int64 GFile::GetPos()
 int64 GFile::SetPos(int64 Pos)
 {
 	LgiAssert(IsOpen());
+	d->UseThreadCheck();
 
 	LONG PosHigh = Pos >> 32;
 	DWORD PosLow = SetFilePointer(d->hFile, (LONG)Pos, &PosHigh, FILE_BEGIN);
@@ -1622,6 +1652,7 @@ int64 GFile::SetPos(int64 Pos)
 ssize_t GFile::Read(void *Buffer, ssize_t Size, int Flags)
 {
 	ssize_t Rd = 0;
+	d->UseThreadCheck();
 
 	// This loop allows ReadFile (32bit) to read more than 4GB in one go. If need be.
 	for (ssize_t Pos = 0; Pos < Size; )
@@ -1651,6 +1682,7 @@ ssize_t GFile::Read(void *Buffer, ssize_t Size, int Flags)
 ssize_t GFile::Write(const void *Buffer, ssize_t Size, int Flags)
 {
 	ssize_t Wr = 0;
+	d->UseThreadCheck();
 
 	// This loop allows WriteFile (32bit) to read more than 4GB in one go. If need be.
 	for (ssize_t Pos = 0; Pos < Size; )
@@ -1683,6 +1715,7 @@ ssize_t GFile::Write(const void *Buffer, ssize_t Size, int Flags)
 int64 GFile::Seek(int64 To, int Whence)
 {
 	LgiAssert(IsOpen());
+	d->UseThreadCheck();
 
 	int Mode;
 	switch (Whence)
@@ -1713,6 +1746,8 @@ bool GFile::Eof()
 ssize_t GFile::SwapRead(uchar *Buf, ssize_t Size)
 {
 	DWORD r = 0;
+	d->UseThreadCheck();
+
 	if (!ReadFile(d->hFile, Buf, (DWORD)Size, &r, NULL) || r != Size)
 	{
 		d->LastError = GetLastError();
@@ -1735,12 +1770,15 @@ ssize_t GFile::SwapWrite(uchar *Buf, ssize_t Size)
 	int i = 0;
 	DWORD w;
 	Buf = &Buf[Size-1];
+	d->UseThreadCheck();
+
 	while (Size--)
 	{
 		if (!(d->Status &= WriteFile(d->hFile, Buf--, 1, &w, NULL) != 0 && w == 1))
 			break;
 		i += w;
 	}
+
 	return i;
 }
 
@@ -1748,6 +1786,8 @@ ssize_t GFile::ReadStr(char *Buf, ssize_t Size)
 {
 	int i = 0;
 	DWORD r;
+	d->UseThreadCheck();
+
 	if (Buf && Size > 0)
 	{
 		char c;
@@ -1777,6 +1817,7 @@ ssize_t GFile::WriteStr(char *Buf, ssize_t Size)
 {
 	int i = 0;
 	DWORD w;
+	d->UseThreadCheck();
 
 	while (i <= Size)
 	{

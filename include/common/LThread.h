@@ -56,6 +56,9 @@ protected:
 	bool DeleteOnExit;
 
 public:
+	static const OsThread InvalidHandle;
+	static const OsThreadId InvalidId;
+
 	LThread(const char *Name);
 	virtual ~LThread();
 
