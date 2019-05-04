@@ -18,6 +18,13 @@ enum LvcError
 	ErrSubProcessFailed = GSUBPROCESS_ERROR,
 };
 
+enum LvcStatus
+{
+	StatusNone,
+	StatusActive,
+	StatusError,
+};
+
 class ReaderThread : public LThread
 {
 	VersionCtrl Vcs;
@@ -25,6 +32,8 @@ class ReaderThread : public LThread
 	GSubProcess *Process;
 
 public:
+	int Result;
+
 	ReaderThread(VersionCtrl vcs, GSubProcess *p, GStream *out);
 	~ReaderThread();
 
@@ -157,7 +166,8 @@ class VcFolder : public GTreeItem, public GCss
 	void GitAdd();
 
 	GArray<Cmd*> Cmds;
-	bool IsLogging, IsGetCur, IsUpdate, IsFilesCmd, IsWorkingFld, IsCommit, IsUpdatingCounts;
+	bool IsLogging, IsUpdate, IsFilesCmd, IsWorkingFld, IsCommit, IsUpdatingCounts;
+	LvcStatus IsBranches, IsIdent;
 
 	void Init(AppPriv *priv);
 	const char *GetVcName();

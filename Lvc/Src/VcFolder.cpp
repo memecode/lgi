@@ -61,6 +61,8 @@ ReaderThread::ReaderThread(VersionCtrl vcs, GSubProcess *p, GStream *out) : LThr
 	Vcs = vcs;
 	Process = p;
 	Out = out;
+	Result = -1;
+	
 	Run();
 }
 
@@ -115,7 +117,13 @@ int ReaderThread::Main()
 			Out->Write(Buf, r);
 	}
 
-	return (int) Process->GetExitValue();
+	Result = (int) Process->GetExitValue();
+	#if _DEBUG
+	if (Result)
+		printf("%s:%i - Process err: %i 0x%x\n", _FL, Result, Result);
+	#endif
+	
+	return Result;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -125,12 +133,13 @@ void VcFolder::Init(AppPriv *priv)
 
 	IsCommit = false;
 	IsLogging = false;
-	IsGetCur = false;
 	IsUpdate = false;
 	IsFilesCmd = false;
 	IsWorkingFld = false;
 	CommitListDirty = false;
 	IsUpdatingCounts = false;
+	IsBranches = StatusNone;
+	IsIdent = StatusNone;
 
 	Unpushed = Unpulled = -1;
 	Type = VcNone;
@@ -371,6 +380,7 @@ bool VcFolder::ParseBranches(int Result, GString s, ParseParams *Params)
 		}
 	}
 
+	IsBranches = Result ? StatusError : StatusNone;
 	OnBranchesChange();
 	return false;
 }
@@ -502,24 +512,26 @@ void VcFolder::Select(bool b)
 		}
 
 		PROF("GetBranches");
-		if (Branches.Length() == 0)
+		if (Branches.Length() == 0 && IsBranches == StatusNone)
 		{
 			switch (GetType())
 			{
 				case VcGit:
-					StartCmd("branch -a", &VcFolder::ParseBranches);
+					if (StartCmd("branch -a", &VcFolder::ParseBranches))
+						IsBranches = StatusActive;
 					break;
 				case VcSvn:
 					Branches.New() = "trunk";
 					break;
 				case VcHg:
-					StartCmd("branch", &VcFolder::ParseBranches);
+					if (StartCmd("branch", &VcFolder::ParseBranches))
+						IsBranches = StatusActive;
 					break;
 				case VcCvs:
 					break;
 				default:
 					break;
-			}				
+			}
 		}
 		OnBranchesChange();
 
@@ -653,19 +665,22 @@ void VcFolder::Select(bool b)
 		PROF("UpdateAll");
 		d->Lst->UpdateAllItems();
 
-		if (!CurrentCommit && !IsGetCur)
+		if (!CurrentCommit && IsIdent == StatusNone)
 		{
 			PROF("GetCur");
 			switch (GetType())
 			{
 				case VcGit:
-					IsGetCur = StartCmd("rev-parse HEAD", &VcFolder::ParseInfo);
+					if (StartCmd("rev-parse HEAD", &VcFolder::ParseInfo))
+						IsIdent = StatusActive;
 					break;
 				case VcSvn:
-					IsGetCur = StartCmd("info", &VcFolder::ParseInfo);
+					if (StartCmd("info", &VcFolder::ParseInfo))
+						IsIdent = StatusActive;
 					break;
 				case VcHg:
-					IsGetCur = StartCmd("id -i", &VcFolder::ParseInfo);
+					if (StartCmd("id -i", &VcFolder::ParseInfo))
+						IsIdent = StatusActive;
 					break;
 				case VcCvs:
 					break;
@@ -1224,7 +1239,7 @@ bool VcFolder::ParseInfo(int Result, GString s, ParseParams *Params)
 		case VcGit:
 		case VcHg:
 		{
-			CurrentCommit = s.Strip();
+			CurrentCommit = s.Strip(" \t\r\n+");
 			break;
 		}
 		case VcSvn:
@@ -1251,7 +1266,7 @@ bool VcFolder::ParseInfo(int Result, GString s, ParseParams *Params)
 			break;
 	}
 
-	IsGetCur = false;
+	IsIdent = Result ? StatusError : StatusNone;
 
 	return true;
 }
@@ -2684,8 +2699,10 @@ void VcFolder::GetVersion()
 
 bool VcFolder::ParseVersion(int Result, GString s, ParseParams *Params)
 {
+	if (Result)
+		return false;
+	
 	auto p = s.SplitDelimit();
-
 	switch (GetType())
 	{
 		case VcGit:

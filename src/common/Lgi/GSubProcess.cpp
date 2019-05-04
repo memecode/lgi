@@ -224,7 +224,10 @@ bool GSubProcess::IsRunning()
 		if (r == ChildPid)
 		{
 			ChildPid = INVALID_PID;
-			ExitValue = Status;
+			if (WIFEXITED(Status))
+				ExitValue = WEXITSTATUS(Status);
+			else
+				ExitValue = 255;
 		}
 		return ChildPid != INVALID_PID;
 	#elif defined(WIN32)
@@ -468,6 +471,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 
 			// Execution will pass to here if the 'Exe' can't run or doesn't exist
 			// So by exiting with an error the parent process can handle it.
+			printf("GSUBPROCESS_ERROR\n");
 			exit(GSUBPROCESS_ERROR);
 		}
 		else
@@ -821,11 +825,15 @@ int GSubProcess::Wait()
 	#if defined(POSIX)
 		if (ChildPid != INVALID_PID)
 		{
-			pid_t r = waitpid(ChildPid, &Status, NULL);
+			int Status = 0;
+			pid_t r = waitpid(ChildPid, &Status, 0);
 			if (r == ChildPid)
 			{
 				ChildPid = INVALID_PID;
-				ExitValue = Status;
+				if (WIFEXITED(Status))
+					ExitValue = WEXITSTATUS(Status);
+				else
+					ExitValue = 255;
 			}
 		}
 	#elif defined(WIN32)

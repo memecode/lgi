@@ -181,7 +181,8 @@ bool GPanel::Pour(GRegion &r)
 				{
 					GRect c = GetClient();
 					GCssTools tools(css, v->GetFont());
-					v->SetPos(tools.ApplyMargin(c));
+					c = tools.ApplyMargin(c);
+					v->SetPos(c);
 					break;
 				}
 			}

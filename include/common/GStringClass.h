@@ -203,7 +203,11 @@ public:
 	{
 		if (!Str) return;
 		Str->Refs--;
-		assert(Str->Refs >= 0);
+		if (Str->Refs < 0)
+		{
+			LgiAssert(!"Invalid refs");
+		}
+		
 		if (Str->Refs == 0)
 		{
 			free(Str);
