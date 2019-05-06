@@ -421,8 +421,9 @@ void VcCommit::OnMouseClick(GMouse &m)
 	if (m.IsContextMenu())
 	{
 		GSubMenu s;
+		s.AppendItem("Update", IDM_UPDATE, !Current);
+		s.AppendSeparator();
 		s.AppendItem("Merge With Local", IDM_MERGE, !Current);
-		s.AppendItem("Update", IDM_UPDATE, !Current);		
 		if (Rev)
 			s.AppendItem("Copy Revision", IDM_COPY_REV);		
 		if (Index >= 0)
