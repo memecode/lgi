@@ -629,7 +629,9 @@ Prof.Add("open");
 Prof.Add("write");
 #endif
 	if (Output && Ch > 0)
+	{
 		Output->Write(Buffer, Ch);
+	}
 #if LGI_TRACE_TS
 Prof.Add("close");
 #endif
