@@ -2359,7 +2359,7 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 			}
 			default:
 			{
-				LgiAssert(!"Impl me.");
+				OnCmdError(NULL, "No commit impl for type.");
 				break;
 			}
 		}
@@ -2380,7 +2380,7 @@ void VcFolder::Push()
 			// Nothing to do here.. the commit pushed the data already
 			break;
 		default:
-			LgiAssert(!"Impl me.");
+			OnCmdError(NULL, "No push impl for type.");
 			break;
 	}
 
@@ -2438,7 +2438,7 @@ void VcFolder::Pull(LoggingType Logging)
 			Status = StartCmd("up", &VcFolder::ParsePull, NULL, Logging);
 			break;
 		default:
-			LgiAssert(!"Impl me.");
+			OnCmdError(NULL, "No pull impl for type.");
 			break;
 	}
 
