@@ -1646,7 +1646,7 @@ int GFile::GetOpenMode()
 	return d->Attributes;
 }
 
-char *GFile::GetName()
+const char *GFile::GetName()
 {
 	return d->Name;
 }

@@ -1418,12 +1418,16 @@ bool VcFolder::ParseDiffs(GString s, GString Rev, bool IsWorking)
 					Diff.Empty();
 
 					GString Fn = a[i].Split(" ").Last();
+					GString Status = "M";
 
 					f = FindFile(Fn);
 					if (!f)
 						f = new VcFile(d, this, Rev, IsWorking);
 
+					printf("a='%s'\n", a[i].Get());
+
 					f->SetText(Fn.Replace("\\","/"), COL_FILENAME);
+					f->SetText(Status, COL_STATE);
 					Files.Insert(f);
 				}
 				else if (!_strnicmp(Ln, "index", 5) ||
