@@ -2839,6 +2839,7 @@ bool VcFolder::Revert(const char *Path, const char *Revision)
 			return StartCmd(a, &VcFolder::ParseRevert);
 			break;
 		}
+		case VcHg:
 		case VcSvn:
 		{
 			GString a;
