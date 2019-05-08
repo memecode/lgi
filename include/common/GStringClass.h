@@ -205,7 +205,7 @@ public:
 		Str->Refs--;
 		if (Str->Refs < 0)
 		{
-			LgiAssert(!"Invalid refs");
+			assert(!"Invalid refs");
 		}
 		
 		if (Str->Refs == 0)

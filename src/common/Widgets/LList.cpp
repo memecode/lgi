@@ -1583,8 +1583,8 @@ void LList::OnMouseClick(GMouse &m)
 							OnColumnReindex(Col, OldIndex, NewIndex))
 						{
 							Columns.SetFixedLength(false);
-							Columns.Delete(Col);
-							Columns.AddAt(NewIndex, Col);
+							Columns.Delete(Col, true);
+							Columns.AddAt(OldIndex < NewIndex ? NewIndex-1 : NewIndex, Col);
 							Columns.SetFixedLength(true);
 
 							UpdateAllItems();
