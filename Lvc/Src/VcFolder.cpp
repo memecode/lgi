@@ -1417,7 +1417,7 @@ bool VcFolder::ParseDiffs(GString s, GString Rev, bool IsWorking)
 						f->SetDiff(Diff);
 					Diff.Empty();
 
-					GString Fn = a[i].Split(" ").Last();
+					GString Fn = a[i].Split(" ", 3).Last();
 					GString Status = "M";
 
 					f = FindFile(Fn);
