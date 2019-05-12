@@ -7172,6 +7172,8 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 									GStreamI *s = j->GetStream();
 									if (s)
 									{
+										s->ChangeThread();
+
 										int Size = (int)s->GetSize();
 										GAutoString Style(new char[Size+1]);
 										ssize_t rd = s->Read(Style, Size);
