@@ -1462,6 +1462,11 @@ OsFile GFile::Handle()
 	return d->hFile;
 }
 
+void GFile::ChangeThread()
+{
+	d->UseId = GetCurrentThreadId();
+}
+
 const char *GFile::GetName()
 {
 	return d->Name;

@@ -99,6 +99,8 @@ public:
 	/// This new stream is not connected to anything.
 	/// \return The new stream or NULL on error.
 	virtual GStreamI *Clone() { return 0; }
+
+	virtual void ChangeThread() {}
 };
 
 /// Socket logging types..
