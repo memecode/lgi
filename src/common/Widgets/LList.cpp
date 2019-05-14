@@ -165,7 +165,7 @@ LListItemColumn *LListItemColumn::GetItemCol(LListItem *i, int Col)
 {
 	if (i)
 	{
-		for (LListItemColumn *c=i->d->Cols.First(); c; c=i->d->Cols.Next())
+		for (auto c: i->d->Cols)
 		{
 			if (c->_Column == Col)
 			{
@@ -1002,7 +1002,8 @@ bool LList::OnKey(GKey &k)
 							LListItem *To = 0;
 							int ToDist = 0x7fffffff;
 							
-							for (LListItem *i=Items[FirstVisible]; i && i->Pos.Valid(); i=Items.Next())
+							auto It = Items.begin(FirstVisible);
+							for (LListItem *i=*It; i && i->Pos.Valid(); i = *(++It))
 							{
 								if (i->Pos.x2 < Hit->Pos.x1)
 								{
@@ -1061,7 +1062,8 @@ bool LList::OnKey(GKey &k)
 							LListItem *To = 0;
 							int ToDist = 0x7fffffff;
 							
-							for (LListItem *i=Items[FirstVisible]; i && i->Pos.Valid(); i=Items.Next())
+							auto It = Items.begin(FirstVisible);
+							for (LListItem *i=*It; i && i->Pos.Valid(); i=*(++It))
 							{
 								if (i->Pos.x1 > Hit->Pos.x2)
 								{
@@ -1457,7 +1459,7 @@ void LList::OnMouseClick(GMouse &m)
 							Keyboard = (int)Items.IndexOf(Item);
 						}
 
-						if (!m.Modifier() && Items.First() && !m.IsContextMenu())
+						if (!m.Modifier() && Items.Length() && !m.IsContextMenu())
 						{
 							DragMode = SELECT_ITEMS;
 							SetPulse(100);
@@ -1640,7 +1642,8 @@ void LList::OnPulse()
 							int Space = -m.y;
 
 							int n = FirstVisible - 1;
-							for (LListItem *i = Items[n]; i; i=Items.Prev(), n--)
+							auto It = Items.begin(n);
+							for (LListItem *i = *It; i; i=*(--It), n--)
 							{
 								GdcPt2 Info;
 								i->OnMeasure(&Info);
@@ -1658,7 +1661,7 @@ void LList::OnPulse()
 
 							if (!Over)
 							{
-								Over = Items.First();
+								Over = Items[0];
 								OverIndex = 0;
 							}
 						}
@@ -1666,7 +1669,9 @@ void LList::OnPulse()
 						{
 							int Space = m.y - Y();
 							int n = LastVisible + 1;
-							for (LListItem *i = Items[n]; i; i=Items.Next(), n++)
+
+							auto It = Items.begin(n);
+							for (LListItem *i = *It; i; i=*(++It), n++)
 							{
 								GdcPt2 Info;
 								i->OnMeasure(&Info);
@@ -1684,7 +1689,7 @@ void LList::OnPulse()
 
 							if (!Over)
 							{
-								Over = Items.Last();
+								Over = *Items.rbegin();
 								OverIndex = (int)Items.Length()-1;
 							}
 						}
@@ -1692,7 +1697,9 @@ void LList::OnPulse()
 						int Min = MIN(d->DragData, OverIndex);
 						int Max = MAX(d->DragData, OverIndex);
 						int n = Min;
-						for (LListItem *i = Items[Min]; i && n <= Max; i=Items.Next(), n++)
+
+						auto It = Items.begin(Min);
+						for (LListItem *i = *It; i && n <= Max; i=*(++It), n++)
 						{
 							if (!i->Select())
 								i->Select(true);
@@ -1864,7 +1871,7 @@ void LList::OnMouseMove(GMouse &m)
 				List<LListItem> s;
 				if (GetSelection(s))
 				{
-					for (LListItem *c=s.First(); c; c=s.Next())
+					for (auto c: s)
 					{
 						GMouse ms = m;
 						ms.x -= c->Pos.x1;
@@ -2009,7 +2016,7 @@ bool LList::Insert(List<LListItem> &l, int Index, bool Update)
 		bool First = Items.Length() == 0;
 		
 		// Insert list of items
-		for (LListItem *i=l.First(); i; i=l.Next())
+		for (auto i: l)
 		{
 			if (i->Parent != this)
 			{
@@ -2046,12 +2053,7 @@ bool LList::Insert(List<LListItem> &l, int Index, bool Update)
 	return Status;
 }
 
-bool LList::Delete()
-{
-	return Delete(Items.Current());
-}
-
-bool LList::Delete(int Index)
+bool LList::Delete(ssize_t Index)
 {
 	return Delete(Items.ItemAt(Index));
 }
@@ -2227,7 +2229,7 @@ void LList::RemoveAll()
 			OnItemSelect(s);
 		}
 
-		for (LListItem *i = Items.First(); i; i = Items.Next())
+		for (auto i: Items)
 		{
 			i->OnRemove();
 			i->Parent = 0;
@@ -2519,7 +2521,8 @@ void LList::OnPaint(GSurface *pDC)
 		Ctx.pDC = pDC;
 
 		GRegion Rgn(ItemsPos);
-		for (LListItem *i = Items.ItemAt(n); i; i = Items.Next(), n++)
+		auto It = Items.begin(n);
+		for (LListItem *i = *It; i; i = *(++It), n++)
 		{
 			if (i->Pos.Valid())
 			{
@@ -2584,14 +2587,15 @@ void LList::OnFocus(bool b)
 	LListItem *s = GetSelected();
 	if (!s)
 	{
-		s = Items.First();
+		s = Items[0];
 		if (s)
 		{
 			s->Select(true);
 		}
 	}
 
-	for (LListItem *i = Items.ItemAt(FirstVisible); i; i = Items.Next())
+	auto It = Items.begin(FirstVisible);
+	for (LListItem *i = *It; i; i = *(++It))
 	{
 		if (i->Pos.Valid() &&
 			i->d->Selected)

@@ -644,7 +644,8 @@ void FieldView::OnDelete(FieldSource *s)
 		Fields.Empty();
 
 		// remove all children
-		for (GViewI *c = Children.First(); c; c = Children.First())
+		GViewI *c;
+		while ((c = Children[0]))
 		{
 			c->Detach();
 			DeleteObj(c);
@@ -667,7 +668,8 @@ void FieldView::OnSelect(FieldSource *s)
 		Fields.Empty();
 
 		// remove all children
-		for (GViewI *c = Children.First(); c; c = Children.First())
+		GViewI *c;
+		while ((c = Children[0]))
 		{
 			c->Detach();
 			DeleteObj(c);
@@ -1111,7 +1113,7 @@ void AppWnd::ShowLang(GLanguageId Lang, bool Show)
 	List<Resource> res;
 	if (ListObjects(res))
 	{
-		for (Resource *r = res.First(); r; r = res.Next())
+		for (auto r: res)
 		{
 			r->OnShowLanguages();
 		}
@@ -1139,7 +1141,7 @@ void AppWnd::SetCurLang(GLanguage *L)
 			List<Resource> res;
 			if (ListObjects(res))
 			{
-				for (Resource *r = res.First(); r; r = res.Next())
+				for (auto r: res)
 				{
 					r->OnShowLanguages();
 				}
@@ -1202,7 +1204,7 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 #include "GToken.h"
 void _CountGroup(ResStringGroup *Grp, int &Words, int &Multi)
 {
-	for (ResString *s = Grp->GetStrs()->First(); s; s=Grp->GetStrs()->Next())
+	for (auto s: *Grp->GetStrs())
 	{
 		if (s->Items.Length() > 1)
 		{
@@ -1279,7 +1281,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 				int Words = 0;
 				int MultiLingual = 0;
 
-				for (Resource *r = l.First(); r; r = l.Next())
+				for (auto r: l)
 				{
 					switch (r->Type())
 					{
@@ -1446,7 +1448,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 				List<Resource> res;
 				if (ListObjects(res))
 				{
-					for (Resource *r = res.First(); r; r = res.Next())
+					for (auto r: res)
 					{
 						r->OnShowLanguages();
 					}
@@ -1478,12 +1480,12 @@ void AppWnd::FindStrings(List<ResString> &Strs, char *Define, int *CtrlId)
 		List<Resource> l;
 		if (Objs->ListObjects(l))
 		{
-			for (Resource *r = l.First(); r; r = l.Next())
+			for (auto r: l)
 			{
 				StringList *s = r->GetStrs();
 				if (s)
 				{
-					for (ResString *Str = s->First(); Str; Str = s->Next())
+					for (auto Str: *s)
 					{
 						if (Define && ValidStr(Str->GetDefine()))
 						{
@@ -1519,12 +1521,12 @@ int AppWnd::GetUniqueCtrlId()
 		if (Objs->ListObjects(l))
 		{
 			LHashTbl<IntKey<int>, int> t;
-			for (Resource *r = l.First(); r; r = l.Next())
+			for (auto r: l)
 			{
 				StringList *sl = r->GetStrs();
 				if (sl)
 				{
-					for (ResString *s = sl->First(); s; s = sl->Next())
+					for (auto s: *sl)
 					{
 						if (s->GetId() > 0 &&
 						    !t.Find(s->GetId()))
@@ -1567,7 +1569,7 @@ int AppWnd::GetUniqueStrRef(int	Start)
 	LHashTbl<IntKey<int>, ResString*> Map;
 	GArray<ResString*> Dupes;
 
-	for (Resource *r = l.First(); r; r = l.Next())
+	for (auto r: l)
 	{
 		ResStringGroup *Grp = r->GetStringGroup();
 		if (Grp)
@@ -1629,7 +1631,7 @@ ResString *AppWnd::GetStrFromRef(int Ref)
 		List<Resource> l;
 		if (Objs->ListObjects(l))
 		{
-			for (Resource *r = l.First(); r && !Str; r = l.Next())
+			for (auto r: l)
 			{
 				ResStringGroup *Grp = dynamic_cast<ResStringGroup*>(r);
 				if (Grp)
@@ -1651,7 +1653,7 @@ ResStringGroup *AppWnd::GetDialogSymbols()
 		List<Resource> l;
 		if (Objs->ListObjects(l))
 		{
-			for (Resource *r = l.First(); r; r = l.Next())
+			for (auto r: l)
 			{
 				ResStringGroup *Grp = dynamic_cast<ResStringGroup*>(r);
 				if (Grp)
@@ -2125,9 +2127,8 @@ public:
 
 		if (t1->IsTag("string-group"))
 		{
-			GXmlTag *t;
 			GArray<GXmlTag*> r1, r2;
-			for (t = t1->Children.First(); t; t = t1->Children.Next())
+			for (auto t: t1->Children)
 			{
 				char *Ref;
 				if ((Ref = t->GetAttr("ref")))
@@ -2139,7 +2140,7 @@ public:
 					}
 				}
 			}
-			for (t = t2->Children.First(); t; t = t2->Children.Next())
+			for (auto t: t2->Children)
 			{
 				char *Ref;
 				if ((Ref = t->GetAttr("ref")))
@@ -2185,13 +2186,13 @@ public:
 		}
 		else
 		{
-			GXmlTag *c1 = t1->Children.First();
-			GXmlTag *c2 = t2->Children.First();
+			GXmlTag *c1 = t1->Children[0];
+			GXmlTag *c2 = t2->Children[0];
 			while (c1 && c2)
 			{
 				Compare(c1, c2);
-				c1 = t1->Children.Next();
-				c2 = t2->Children.Next();
+				c1 = t1->Children[0];
+				c2 = t2->Children[0];
 			}
 		}
 
@@ -2245,9 +2246,7 @@ void AppWnd::ImportLang()
 				{
 					List<ResMenu> Menus;
 					List<ResStringGroup> Groups;
-					GXmlTag *t;
-
-					for (t = Root->Children.First(); t; t = Root->Children.Next())
+					for (auto t: Root->Children)
 					{
 						if (t->IsTag("menu"))
 						{
@@ -2272,7 +2271,7 @@ void AppWnd::ImportLang()
 					Ctx.PostLoad(this);
 
 					bool HasData = false;
-					for (ResStringGroup *g=Groups.First(); g; g=Groups.Next())
+					for (auto g: Groups)
 					{
 						g->SetLanguages();
 
@@ -2286,7 +2285,7 @@ void AppWnd::ImportLang()
 					if (HasData)
 					{
 						List<GLanguage> Langs;
-						for (ResStringGroup *g=Groups.First(); g; g=Groups.Next())
+						for (auto g: Groups)
 						{
 							for (int i=0; i<g->GetLanguages(); i++)
 							{
@@ -2294,7 +2293,7 @@ void AppWnd::ImportLang()
 								if (Lang)
 								{
 									bool Has = false;
-									for (GLanguage *l=Langs.First(); l; l=Langs.Next())
+									for (auto l: Langs)
 									{
 										if (stricmp((char*)l, (char*)Lang) == 0)
 										{
@@ -2321,7 +2320,7 @@ void AppWnd::ImportLang()
 							int Imported = 0;
 							int Different = 0;
 							
-							for (ResStringGroup *g=Groups.First(); g; g=Groups.Next())
+							for (auto g: Groups)
 							{
 								List<ResString>::I Strings = g->GetStrs()->begin();
 								for (ResString *s=*Strings; s; s=*++Strings)
@@ -2366,11 +2365,11 @@ void AppWnd::ImportLang()
 							List<Resource> Lst;
 							if (ListObjects(Lst))
 							{
-								for (ResMenu *m=Menus.First(); m; m=Menus.Next())
+								for (auto m: Menus)
 								{
 									// find matching menu in our list
 									ResMenu *Match = 0;
-									for (Resource *r=Lst.First(); r; r=Lst.Next())
+									for (auto r: Lst)
 									{
 										ResMenu *n = dynamic_cast<ResMenu*>(r);
 										if (n && stricmp(n->Name(), m->Name()) == 0)
@@ -2386,10 +2385,10 @@ void AppWnd::ImportLang()
 										List<ResString> *Src = m->GetStrs();
 										List<ResString> *Dst = Match->GetStrs();
 										
-										for (ResString *s=Src->First(); s; s = Src->Next())
+										for (auto s: *Src)
 										{
 											bool FoundRef = false;
-											for (ResString *d=Dst->First(); d; d=Dst->Next())
+											for (auto d: *Dst)
 											{
 												if (s->GetRef() == d->GetRef())
 												{
@@ -2424,7 +2423,7 @@ void AppWnd::ImportLang()
 									}
 								}
 
-								for (Resource *r=Lst.First(); r; r=Lst.Next())
+								for (auto r: Lst)
 								{
 									ResStringGroup *StrRes = dynamic_cast<ResStringGroup*>(r);
 									if (StrRes)
@@ -2480,21 +2479,16 @@ void AppWnd::Empty()
 	List<Resource> l;
 	if (ListObjects(l))
 	{
-		Resource *r;
-		for (r = l.First(); r; )
+		for (auto It = l.begin(); It != l.end(); )
 		{
+			auto r = *It;
 			if (r->SystemObject())
-			{
-				l.Delete(r);
-				r = l.Current();
-			}
+				l.Delete(It);
 			else
-			{
-				r=l.Next();
-			}
+				It++;
 		}
 
-		for (r = l.First(); r; r=l.Next())
+		for (auto r: l)
 		{
 			DelObject(r);
 		}
@@ -2548,7 +2542,7 @@ bool AppWnd::TestLgi(bool Quite)
 	if (ListObjects(l))
 	{
 		ErrorCollection Errors;
-		for (Resource *r = l.First(); r; r = l.Next())
+		for (auto r: l)
 		{
 			Status &= r->Test(&Errors);
 		}
@@ -2608,7 +2602,7 @@ bool AppWnd::LoadLgi(char *FileName)
 					int i=0;
 					DoEvery Timer(500);
 					SerialiseContext Ctx;
-					for (GXmlTag *t = Root->Children.First(); t; t = Root->Children.Next(), i++)
+					for (auto t: Root->Children)
 					{
 						if (Timer.DoNow())
 						{
@@ -2642,6 +2636,8 @@ bool AppWnd::LoadLgi(char *FileName)
 						{
 							NewObject(Ctx, t, RType, false);
 						}
+
+						i++;
 					}
 					
 					Ctx.PostLoad(this);
@@ -2662,7 +2658,7 @@ bool AppWnd::LoadLgi(char *FileName)
 						List<Resource> res;
 						if (ListObjects(res))
 						{
-							for (Resource *r = res.First(); r; r = res.Next())
+							for (auto r: res)
 							{
 								ResStringGroup *Sg = r->IsStringGroup();
 								if (Sg)
@@ -2745,7 +2741,7 @@ void AppWnd::SortDialogs()
 	if (ListObjects(Lst))
 	{
 		List<ResDialog> Dlgs;
-		for (Resource *r = Lst.First(); r; r = Lst.Next())
+		for (auto r: Lst)
 		{
 			ResDialog *Dlg = dynamic_cast<ResDialog*>(r);
 			if (Dlg)
@@ -2757,7 +2753,7 @@ void AppWnd::SortDialogs()
 
 		Dlgs.Sort(DialogNameCompare);
 
-		for (ResDialog *d = Dlgs.First(); d; d = Dlgs.Next())
+		for (auto d: Dlgs)
 		{
 			Objs->Dialogs->Insert(d->Item);
 		}
@@ -2907,7 +2903,7 @@ bool AppWnd::WriteDefines(GFile &Defs)
 		LHashTbl<StrKey<char>,int> Def;
 		LHashTbl<StrKey<char>,char*> Ident;
 
-		for (Resource *r = Lst.First(); r; r = Lst.Next())
+		for (auto r: Lst)
 		{
 			List<ResString> *StrList = r->GetStrs();
 			if (StrList)
@@ -2947,7 +2943,7 @@ bool AppWnd::WriteDefines(GFile &Defs)
 									List<ResString> n;
 									FindStrings(n, s->GetDefine());
 									int NewId = GetUniqueCtrlId();
-									for (ResString *Ns = n.First(); Ns; Ns = n.Next())
+									for (auto Ns: n)
 									{
 										Ns->SetId(NewId);
 									}
@@ -3082,8 +3078,7 @@ bool AppWnd::SaveLgi(char *FileName)
 			if (ListObjects(l))
 			{
 				// Remove all duplicate symbol Id's from the dialogs
-				Resource *r;
-				for (r = l.First(); r; r = l.Next())
+				for (auto r: l)
 				{
 					ResDialog *Dlg = dynamic_cast<ResDialog*>(r);
 					if (Dlg)
@@ -3099,7 +3094,7 @@ bool AppWnd::SaveLgi(char *FileName)
 				// Write all string lists out first so that when we load objects
 				// back in again the strings will already be loaded and can
 				// be referenced
-				for (r = l.First(); r; r = l.Next())
+				for (auto r: l)
 				{
 					if (r->Type() == TYPE_STRING)
 					{
@@ -3117,7 +3112,7 @@ bool AppWnd::SaveLgi(char *FileName)
 				}
 
 				// now write the rest of the objects out
-				for (r = l.First(); r; r = l.Next())
+				for (auto r: l)
 				{
 					if (r->Type() != TYPE_STRING)
 					{
@@ -3243,12 +3238,12 @@ public:
 
 	~DefineList()
 	{
-		for (ImportDefine *i = First(); i; i = Next())
+		for (auto i: *this)
 		{
 			DeleteObj(i);
 		}
 
-		for (char *c = IncludeDirs.First(); c; c = IncludeDirs.Next())
+		for (auto c: IncludeDirs)
 		{
 			DeleteArray(c);
 		}
@@ -3269,7 +3264,7 @@ public:
 	{
 		if (Name)
 		{
-			for (ImportDefine *i = First(); i; i = Next())
+			for (auto i: *this)
 			{
 				if (i->Name && stricmp(i->Name, Name) == 0)
 				{
@@ -3316,7 +3311,7 @@ public:
 					GFile F;
 					if (T.Length() > 1)
 					{
-						for (char *IncPath = IncludeDirs.First(); IncPath; IncPath = IncludeDirs.Next())
+						for (auto IncPath: IncludeDirs)
 						{
 							char FullPath[256];
 
@@ -3580,7 +3575,7 @@ bool AppWnd::LoadWin32(char *FileName)
 
 									// Check for preexisting menu in another language
 									MenuNewLang = false;
-									for (ResMenu *m = Menus.First(); m; m = Menus.Next())
+									for (auto m: Menus)
 									{
 										if (stricmp(m->Name(), T[0]) == 0)
 										{
@@ -3947,7 +3942,7 @@ bool AppWnd::LoadWin32(char *FileName)
 								// another language
 								ResDialog *Match = 0;
 								CtrlDlg *MatchObj = 0;
-								for (ResDialog *d = DlLList.First(); d; d = DlLList.Next())
+								for (auto d: DlLList)
 								{
 									GAutoPtr<GViewIterator> It(d->IterateViews());
 									GViewI *Wnd = It->First();
@@ -3978,8 +3973,7 @@ bool AppWnd::LoadWin32(char *FileName)
 									// add the language strings for the caption
 									// without clobbering the languages already
 									// present
-									for (StrLang *s = Dlg->Str->Items.First();
-										s; s = Dlg->Str->Items.Next())
+									for (auto s: Dlg->Str->Items)
 									{
 										if (!MatchObj->Str->Get(s->GetLang()))
 										{
@@ -3987,13 +3981,13 @@ bool AppWnd::LoadWin32(char *FileName)
 										}
 									}
 
-									for (ResDialogCtrl *c = New.First(); c; c = New.Next())
+									for (auto c: New)
 									{
 										ResDialogCtrl *MatchCtrl = 0;
 
 										// try matching by Id
 										{
-											for (ResDialogCtrl *Mc = Old.First(); Mc; Mc = Old.Next())
+											for (auto Mc: Old)
 											{
 												if (Mc->Str->GetId() == c->Str->GetId() &&
 													Mc->Str->GetId() > 0)
@@ -4008,7 +4002,7 @@ bool AppWnd::LoadWin32(char *FileName)
 										if (!MatchCtrl)
 										{
 											List<ResDialogCtrl> Overlapping;
-											for (ResDialogCtrl *Mc = Old.First(); Mc; Mc = Old.Next())
+											for (auto Mc: Old)
 											{
 												GRect a = Mc->View()->GetPos();
 												GRect b = c->View()->GetPos();
@@ -4031,15 +4025,14 @@ bool AppWnd::LoadWin32(char *FileName)
 
 											if (Overlapping.Length() == 1)
 											{
-												MatchCtrl = Overlapping.First();
+												MatchCtrl = Overlapping[0];
 											}
 										}
 
 										if (MatchCtrl)
 										{
 											// woohoo we are cool
-											for (StrLang *s = c->Str->Items.First();
-												s; s = c->Str->Items.Next())
+											for (auto s: c->Str->Items)
 											{
 												MatchCtrl->Str->Set(s->GetStr(), s->GetLang());
 											}
@@ -4103,7 +4096,14 @@ bool AppWnd::LoadWin32(char *FileName)
 										StrLang *s = 0;
 
 										// look for language present in string object
-										for (s = Str->Items.First(); s && *s != SLang; s = Str->Items.Next());
+										for (auto ss: Str->Items)
+										{
+											if (*ss == SLang)
+											{
+												s = ss;
+												break;
+											}
+										}
 										
 										// if not present then add it
 										if (!s)

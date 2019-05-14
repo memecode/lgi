@@ -18,7 +18,7 @@ GXmlTag *GetFormField(GXmlTag *Form, char *Field)
 		char *Ast = strchr(Field, '*');
 		GArray<GXmlTag*> Matches;
 
-		for (GXmlTag *x = Form->Children.First(); x; x = Form->Children.Next())
+		for (auto x: Form->Children)
 		{
 			char *Name = x->GetAttr("Name");
 			if (Name)
@@ -89,8 +89,9 @@ GXmlTag *ExtractForms(char *Html, GStream *Log)
 			GXmlTag *x = Page.GetRoot(Log);
 			if (x)
 			{
-				for (GXmlTag *c = x->Children.First(); c; c = x->Children.Next())
+				for (auto It = x->Children.begin(); It != x->Children.end(); It++)
 				{
+					auto c = *It;
 					if (c->IsTag("form"))
 					{
 						if (!f)
@@ -169,7 +170,7 @@ GXmlTag *ExtractForms(char *Html, GStream *Log)
 													}
 												}
 
-												c = x->Children.Next();
+												c = *(++It);
 											}
 										}
 									}
@@ -178,8 +179,6 @@ GXmlTag *ExtractForms(char *Html, GStream *Log)
 									{
 										break;
 									}
-
-									c = x->Children.Next();
 								}
 							}
 						}
@@ -335,7 +334,7 @@ char *WebPage::GetFormValue(char *field)
 	GXmlTag *x = GetRoot();
 	if (x)
 	{
-		for (GXmlTag *t = x->Children.First(); t; t = x->Children.Next())
+		for (auto t: x->Children)
 		{
 			if (t->IsTag("input"))
 			{
@@ -362,7 +361,7 @@ GXmlTag *FormPost::GetField(char *n)
 	{
 		char *a = strchr(n, '*');
 
-		for (GXmlTag *t = Form->Children.First(); t; t = Form->Children.Next())
+		for (auto t: Form->Children)
 		{
 			char *Name = t->GetAttr("name");
 			if (Name)
@@ -551,7 +550,7 @@ bool FormPost::Set(char *field, char *value, GStream *Log, bool AllowCreate)
 					char *Nm = f->GetAttr("Name");
 					if (Nm && Match(Nm, field))
 					{
-						for (GXmlTag *o = f->Children.First(); o; o = f->Children.Next())
+						for (auto o: f->Children)
 						{
 							char *Value = o->GetAttr("Value");
 							char *Content = o->GetContent();

@@ -155,12 +155,13 @@ int GHistory::Add(char *Str)
 		return -1;
 
 	int Idx = 0;
-	for (char *s=First(); s; s=Next(), Idx++)
+	for (auto s: *this)
 	{
 		if (strcmp(s, Str) == 0)
 		{
 			return Idx;
 		}
+		Idx++;
 	}
 
 	Idx = (int)Length();
@@ -184,7 +185,7 @@ void GHistory::Update()
 	if (Lst)
 	{
 		Lst->Empty();
-		for (char *s=First(); s; s=Next())
+		for (auto s: *this)
 		{
 			LListItem *i = new LListItem;
 			if (i)

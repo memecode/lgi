@@ -425,7 +425,7 @@ bool MailPhp::Close()
 		p.Print("%s?time=%i&delete=", d->Uri, LgiCurrentTime());
 		
 		bool First = true;
-		for (Msg *m = d->Msgs.First(); m; m = d->Msgs.Next())
+		for (auto m: d->Msgs)
 		{
 			if (m->Delete)
 			{
@@ -568,7 +568,7 @@ int MailPhp::Sizeof(int Message)
 
 bool MailPhp::GetSizes(GArray<int> &Sizes)
 {
-	for (Msg *m = d->Msgs.First(); m; m = d->Msgs.Next())
+	for (auto m: d->Msgs)
 	{
 		Sizes.Add(m->Size);
 	}
@@ -587,7 +587,7 @@ bool MailPhp::GetUid(int Message, char *Id, int IdLen)
 
 bool MailPhp::GetUidList(List<char> &Id)
 {
-	for (Msg *m=d->Msgs.First(); m; m=d->Msgs.Next())
+	for (auto m: d->Msgs)
 	{
 		if (m->Uid)
 		{

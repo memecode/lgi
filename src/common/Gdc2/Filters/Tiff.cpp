@@ -439,7 +439,7 @@ OsView GdcTiff::Handle()
 
 IFD *GdcTiff::FindTag(ushort n)
 {
-	for (IFD *i = Blocks.First(); i; i = Blocks.Next())
+	for (auto i: Blocks)
 	{
 		if (i->Tag == n)
 		{

@@ -419,7 +419,7 @@ void EditTray::OnSymbolList(GMouse &m)
 				int n=1;
 				
 				#if USE_OLD_FIND_DEFN
-				for (DefnInfo *Def = Matches.First(); Def; Def = Matches.Next())
+				for (auto Def: Matches)
 				{
 					char m[512];
 					char *d = strrchr(Def->File, DIR_CHAR);
@@ -1727,7 +1727,7 @@ int IdeDoc::OnNotify(GViewI *v, int f)
 							List<IdeProject> All;
 							p->GetChildProjects(All);
 							All.Insert(p);							
-							for (IdeProject *p=All.First(); p; p=All.Next())
+							for (auto p: All)
 							{
 								p->GetAllNodes(d->FilePopup->Nodes);
 							}

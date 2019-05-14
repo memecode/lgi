@@ -129,7 +129,7 @@ class ProjectNode;
 class BuildThread : public LThread, public GStream
 {
 	IdeProject *Proj;
-	GString Makefile;
+	GString Makefile, CygwinPath;
 	bool Clean, Release, All;
 	int WordSize;
 	GAutoPtr<GSubProcess> SubProc;
@@ -145,7 +145,8 @@ class BuildThread : public LThread, public GStream
 		CrossCompiler,
 		PythonScript,
 		IAR,
-		Nmake
+		Nmake,
+		Cygwin
 	}
 		Compiler;
 
@@ -495,7 +496,7 @@ public:
 				}
 			}
 
-			for (IdeProject *dep=Deps.First(); dep; dep=Deps.Next())
+			for (auto dep: Deps)
 			{
 				GString Target = dep->GetTargetName(Platform);
 				if (Target)
@@ -613,7 +614,7 @@ public:
 			}
 			Incs.Sort(StrCmp);
 			
-			for (auto i = Incs.First(); i; i = Incs.Next())
+			for (auto i: Incs)
 			{
 				GString s;
 				if (*i == '`')
@@ -694,7 +695,8 @@ public:
 						
 						uint64 Last = LgiCurrentTime();
 						int Count = 0;
-						for (Dep=Deps.First(); Dep && !IsCancelled(); Dep=Deps.Next(), Count++)
+						auto It = Deps.begin();
+						for (Dep=*It; Dep && !IsCancelled(); Dep=*(++It), Count++)
 						{
 							// Get dependency to create it's own makefile...
 							Dep->CreateMakefile(Platform, false);
@@ -824,7 +826,7 @@ public:
 								"	@echo Cleaned $(BuildDir)\n",
 								LGI_EXECUTABLE_EXT);
 						
-						for (IdeProject *d=Deps.First(); d; d=Deps.Next())
+						for (auto d: Deps)
 						{
 							GAutoString mk = d->GetMakefile();
 							if (mk)
@@ -1184,7 +1186,7 @@ bool ReadVsProjFile(GString File, GString &Ver, GString::Array &Configs)
 
 		GXmlTag *ItemGroup = r.GetChildTag("ItemGroup");
 		if (ItemGroup)
-			for (GXmlTag *c = ItemGroup->Children.First(); c; c = ItemGroup->Children.Next())
+			for (auto c: ItemGroup->Children)
 			{
 				if (c->IsTag("ProjectConfiguration"))
 				{
@@ -1240,6 +1242,8 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, bool rele
 				Compiler = CrossCompiler;
 			else if (!stricmp(Comp, "IAR"))
 				Compiler = IAR;
+			else if (!stricmp(Comp, "Cygwin"))
+				Compiler = Cygwin;
 			else
 				LgiAssert(!"Unknown compiler.");
 		}
@@ -1554,6 +1558,31 @@ GString BuildThread::FindExe()
 				return p;
 		}
 	}
+	else if (Compiler == Cygwin)
+	{
+		#ifdef WINDOWS
+		GRegKey k(false, "HKEY_CURRENT_USER\\Software\\Cygwin\\Installations");
+		List<char> n;
+		k.GetValueNames(n);
+		GString s;
+		for (auto i:n)
+		{
+			s = k.GetStr(i);
+			if (s.Find("\\??\\") == 0)
+				s = s(4,-1);
+			if (DirExists(s))
+			{
+				CygwinPath = s;
+				break;
+			}
+		}
+		n.DeleteArrays();
+
+		GFile::Path p(s, "bin\\make.exe");
+		if (p.Exists())
+			return p.GetFull();
+		#endif
+	}
 	else
 	{
 		if (Compiler == MingW)
@@ -1743,6 +1772,12 @@ int BuildThread::Main()
 		}
 		else
 		{
+			if (Compiler == Cygwin)
+			{
+				GFile::Path p(CygwinPath, "bin");
+				Path = p.GetFull();
+			}
+
 			if (Compiler == MingW)
 			{
 				GString a;
@@ -1780,13 +1815,9 @@ int BuildThread::Main()
 			if (Clean)
             {
 				if (All)
-                {
 					TmpArgs += " cleanall";
-                }
 				else
-                {
 					TmpArgs += " clean";
-                }
             }
 			if (Release)
 				TmpArgs += " Build=Release";
@@ -1975,7 +2006,7 @@ void IdeProject::SetParentProject(IdeProject *p)
 bool IdeProject::GetChildProjects(List<IdeProject> &c)
 {
 	CollectAllSubProjects(c);
-	return c.First() != 0;
+	return c.Length() > 0;
 }
 
 bool IdeProject::RelativePath(char *Out, const char *In, bool Debug)
@@ -2282,7 +2313,7 @@ bool IdeProject::IsMakefileUpToDate()
 	{
 		Proj.Insert(this);
 		
-		for (IdeProject *p = Proj.First(); p; p = Proj.Next())
+		for (auto p: Proj)
 		{
 			// Is the project file modified after the makefile?
 			GAutoString Proj = p->GetFullPath();
@@ -2334,7 +2365,7 @@ bool IdeProject::FindDuplicateSymbols()
 	
 	LHashTbl<StrKey<char,false>,int64> Map(200000);
 	int Found = 0;
-	for (IdeProject *p = Proj.First(); p; p = Proj.Next())
+	for (auto p: Proj)
 	{
 		GString s = p->GetExecutable(GetCurrentPlatform());
 		if (s)
@@ -2887,7 +2918,7 @@ int IdeProject::GetImage(int Flags)
 void IdeProject::Empty()
 {
 	GXmlTag *t;
-	while ((t = Children.First()))
+	while ((t = Children[0]))
 	{
 		ProjectNode *n = dynamic_cast<ProjectNode*>(t);
 		if (n)
@@ -3241,7 +3272,7 @@ bool IdeProject::BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool In
 
 	LHashTbl<StrKey<char>, bool> Map;
 	
-	for (IdeProject *p=Projects.First(); p; p=Projects.Next())
+	for (auto p: Projects)
 	{
 		GString ProjInclude = d->Settings.GetStr(ProjIncludePaths, NULL, Platform);
 		GAutoString Base = p->GetBasePath();
@@ -3661,23 +3692,18 @@ int IdeTree::WillAccept(List<char> &Formats, GdcPt2 p, int KeyState)
 {
 	static bool First = true;
 	
-	for (char *f=Formats.First(); f; )
+	for (auto It = Formats.begin(); It != Formats.end(); )
 	{
-		/*
-		if (First)
-			LgiTrace("	  WillAccept='%s'\n", f);
-		*/
-		
+		auto f = *It;
 		if (stricmp(f, NODE_DROP_FORMAT) == 0 ||
 			stricmp(f, LGI_FileDropFormat) == 0)
 		{
-			f = Formats.Next();
+			It++;
 		}
 		else
 		{
-			Formats.Delete(f);
+			Formats.Delete(It);
 			DeleteArray(f);
-			f = Formats.Current();
 		}
 	}
 	
@@ -3688,7 +3714,7 @@ int IdeTree::WillAccept(List<char> &Formats, GdcPt2 p, int KeyState)
 		Hit = ItemAtPoint(p.x, p.y);
 		if (Hit)
 		{
-			if (!stricmp(Formats.First(), LGI_FileDropFormat))
+			if (!stricmp(Formats[0], LGI_FileDropFormat))
 			{
 				SelectDropTarget(Hit);
 				return DROPEFFECT_LINK;

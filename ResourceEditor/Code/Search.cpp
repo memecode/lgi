@@ -29,7 +29,7 @@ Search::Search(AppWnd *app)
 		List<Resource> Res;
 		if (App->ListObjects(Res))
 		{
-			for (Resource *r = Res.First(); r; r = Res.Next())
+			for (auto r: Res)
 			{
 				ResStringGroup *g = r->IsStringGroup();
 				if (g)
@@ -40,7 +40,7 @@ Search::Search(AppWnd *app)
 						if (Lang)
 						{
 							bool Has = false;
-							for (GLanguage *i=l.First(); i; i=l.Next())
+							for (auto i: l)
 							{
 								if (i == Lang)
 								{
@@ -61,7 +61,7 @@ Search::Search(AppWnd *app)
 		GCombo *c;
 		if (GetViewById(IDC_LANG, c))
 		{
-			for (GLanguage *li = l.First(); li; li = l.Next())
+			for (auto li: l)
 			{
 				c->Insert(li->Name);
 			}
@@ -73,7 +73,7 @@ Search::Search(AppWnd *app)
 		
 		if (GetViewById(IDC_NOT_LANG, c))
 		{
-			for (GLanguage *li = l.First(); li; li = l.Next())
+			for (auto li: l)
 			{
 				c->Insert(li->Name);
 			}
@@ -305,7 +305,7 @@ public:
 				}
 				else
 				{
-					for (StrLang *t=s->Items.First(); t; t=s->Items.Next())
+					for (auto t: s->Items)
 					{
 						if (t->GetStr() && stristr(t->GetStr(), Text))
 						{
@@ -404,8 +404,11 @@ Results::Results(AppWnd *app, Search *params)
 			List<Resource> Res;
 			d->App->ListObjects(Res);
 			d->Searching = true;
-			for (Resource *r=Res.First(); r && d && d->Searching; r=Res.Next())
+			for (auto r: Res)
 			{
+				if (!d || !d->Searching)
+					break;
+
 				if (r->IsStringGroup())
 				{
 					List<ResString>::I it = r->IsStringGroup()->GetStrs()->begin();
@@ -425,8 +428,11 @@ Results::Results(AppWnd *app, Search *params)
 				{
 					List<ResDialogCtrl> Ctrls;
 					r->IsDialog()->EnumCtrls(Ctrls);
-					for (ResDialogCtrl *c = Ctrls.First(); c && d->Searching; c = Ctrls.Next())
+					for (auto c: Ctrls)
 					{
+						if (!d || !d->Searching)
+							break;
+
 						Result *Res = d->Test(c->Str);
 						if (Res)
 						{
@@ -442,8 +448,11 @@ Results::Results(AppWnd *app, Search *params)
 				{
 					List<ResMenuItem> Items;
 					r->IsMenu()->EnumItems(Items);
-					for (ResMenuItem *c = Items.First(); c && d->Searching; c = Items.Next())
+					for (auto c: Items)
 					{
+						if (!d || !d->Searching)
+							break;
+
 						Result *Res = d->Test(c);
 						if (Res)
 						{

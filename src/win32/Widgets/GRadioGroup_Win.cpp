@@ -123,7 +123,7 @@ int64 GRadioGroup::Value()
 	if (Handle())
 	{
 		int n = 0;
-		for (GViewI *c = Children.First(); c; c = Children.Next())
+		for (auto c: Children)
 		{
 			GRadioButton *Check = dynamic_cast<GRadioButton*>(c);
 			if (Check)
@@ -147,7 +147,7 @@ void GRadioGroup::Value(int64 Which)
 	if (Handle())
 	{
 		int n = 0;
-		for (GViewI *c = Children.First(); c; c = Children.Next())
+		for (auto c: Children)
 		{
 			GRadioButton *Check = dynamic_cast<GRadioButton*>(c);
 			if (Check)

@@ -559,7 +559,7 @@ public:
 		{
 			bool Req[VcMax] = {0};
 			
-			for (GXmlTag *c = f->Children.First(); c; c = f->Children.Next())
+			for (auto c: f->Children)
 			{
 				if (c->IsTag(OPT_Folder))
 				{
@@ -673,9 +673,9 @@ public:
 								if (Files->GetAll(n))
 								{
 									bool Checked = false;
-									for (VcFile *f = n.First(); f; f = n.Next())
+									for (auto f: n)
 										Checked |= f->Checked() > 0;
-									for (VcFile *f = n.First(); f; f = n.Next())
+									for (auto f: n)
 										f->Checked(Checked ? 0 : 1);
 								}
 							}

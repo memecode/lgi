@@ -234,7 +234,14 @@ protected:
 	size_t Items;
 	int Ver;
 	LstBlk *FirstObj, *LastObj;
-	Iter Local;
+
+	bool ValidBlock(LstBlk *b)
+	{
+		for (LstBlk *i = FirstObj; i; i = i->Next)
+			if (i == b)
+				return true;
+		return false;
+	}
 
 	bool ValidBlock(LstBlk *b)
 	{
@@ -522,10 +529,11 @@ protected:
 
 
 public:
-	List<T>() : Ver(0), Local(this, NULL, 0)
+	List<T>()
 	{
 		FirstObj = LastObj = NULL;
 		Items = 0;
+		Ver = 0;
 	}
 
 	~List<T>()
@@ -586,8 +594,6 @@ public:
 	{
 		VALIDATE();
 
-		Local.i = NULL;
-
 		LstBlk *n;
 		for (LstBlk *i = FirstObj; i; i = n)
 		{
@@ -602,14 +608,6 @@ public:
 		return true;
 	}
 
-	bool Delete()
-	{
-		VALIDATE();
-		bool Status = Delete(Local);
-		VALIDATE();
-		return Status;
-	}
-
 	bool DeleteAt(size_t i)
 	{
 		VALIDATE();
@@ -617,17 +615,6 @@ public:
 		if (!p.In())
 			return false;
 		bool Status = Delete(p);
-		VALIDATE();
-		return Status;
-	}
-
-	bool Delete(T *Ptr)
-	{
-		VALIDATE();
-		Local = GetPtr(Ptr);
-		if (!Local.In())
-			return false;
-		bool Status = Delete(Local);
 		VALIDATE();
 		return Status;
 	}
@@ -647,15 +634,11 @@ public:
 		{
 			// This Item is now empty, remove and reset current
 			// into the next Item
-			bool ClearLocal = i == Local.i;
-
 			LstBlk *n = i->Next;
 			bool Status = DeleteBlock(i);
 			Pos.Cur = 0;
 			Pos.i = n;
 
-			if (ClearLocal)
-				Local.i = NULL;
 			return Status;
 		}
 		else if (Index >= i->Count)
@@ -666,6 +649,20 @@ public:
 		}
 		
 		return true;
+	}
+
+	bool Delete(T *Ptr)
+	{
+		VALIDATE();
+		
+		Iter It = GetPtr(Ptr);
+		if (!It.In())
+			return false;
+
+		bool Status = Delete(It);
+
+		VALIDATE();
+		return Status;
 	}
 
 	bool Insert(T *p, ssize_t Index = -1)
@@ -707,55 +704,22 @@ public:
 		return Insert(p);
 	}
 	
-	T *First()
-	{
-		VALIDATE();
-		Local = FirstObj;
-		Local.Cur = 0;
-		VALIDATE();
-		return Local;
-	}
-
-	T *Last()
-	{
-		VALIDATE();
-		Local = LastObj;
-		if (Local.i) Local.Cur = Local.i->Count - 1;
-		VALIDATE();
-		return Local;
-	}
-
-	T *Next()
-	{
-		return ++Local;
-	}
-
-	T *Prev()
-	{
-		return --Local;
-	}
-
-	T *Current() const
-	{
-		VALIDATE();
-		return Local;
-	}
-
 	T *operator [](size_t Index)
 	{
 		VALIDATE();
-		Local = GetIndex(Index);
+		auto it = GetIndex(Index);
 		VALIDATE();
-		return Local;
+		
+		return it;
 	}
 	
 	ssize_t IndexOf(T *p)
 	{
 		VALIDATE();
 		size_t Base = -1;
-		Local = GetPtr(p, &Base);
+		auto It = GetPtr(p, &Base);
 		LgiAssert(Base != -1);
-		ssize_t Idx = Local.In() ? Base + Local.Cur : -1;
+		ssize_t Idx = It.In() ? Base + It.Cur : -1;
 		VALIDATE();
 		return Idx;
 	}
@@ -772,9 +736,9 @@ public:
 	T *ItemAt(ssize_t i)
 	{
 		VALIDATE();
-		Local = GetIndex(i);
+		Iter It = GetIndex(i);
 		VALIDATE();
-		return Local;
+		return It;
 	}
 
 	/// Sorts the list
@@ -840,7 +804,7 @@ public:
 		}
 		FirstObj = LastObj = NULL;
 		Items = 0;
-		Local.i = NULL;
+		Ver++;
 		VALIDATE();
 	}
 
@@ -862,7 +826,6 @@ public:
 		FirstObj = LastObj = NULL;
 		Items = 0;
 		Ver++;
-		Local.i = NULL;
 		VALIDATE();
 	}
 
@@ -872,9 +835,6 @@ public:
 		LSwap(LastObj, other.LastObj);
 		LSwap(Items, other.Items);
 		LSwap(Ver, other.Ver);
-		LSwap(Local.Lst, other.Local.Lst);
-		LSwap(Local.i, other.Local.i);
-		LSwap(Local.Cur, other.Local.Cur);
 	}
 
 	/// Assign the contents of another list to this one
@@ -968,12 +928,8 @@ public:
 
 		size_t n = 0;
 		LstBlk *Prev = NULL;
-		bool SeenLocalBlk = false;
 		for (LstBlk *i = FirstObj; i; i = i->Next)
 		{
-			if (Local.i == i)
-				SeenLocalBlk = true;
-
 			for (int k=0; k<i->Count; k++)
 			{
 				if (!i->Ptr[k])
@@ -1015,15 +971,6 @@ public:
 			Prev = i;
 		}
 
-		if (Local.i != NULL)
-		{
-			if (!SeenLocalBlk && Local.i != NULL)
-			{
-				LgiAssert(!"The local iterator is not present in the list.");
-				return false;
-			}
-		}
-		
 		if (Items != n)
 		{
 			LgiAssert(!"Item count cache incorrect.");

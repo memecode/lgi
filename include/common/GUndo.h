@@ -27,8 +27,9 @@ public:
 	{
 		while (Events.Length() > Pos)
 		{
-			GUndoEvent *u = Events.Last();
-			Events.Delete(u);
+			auto It = Events.rbegin();
+			GUndoEvent *u = *It;
+			Events.Delete(It);
 			DeleteObj(u);
 		}
 

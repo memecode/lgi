@@ -65,7 +65,7 @@ class GMap
 protected:
 	Mapping *Get(N n)
 	{
-		for (Mapping *m=Maps.First(); m; m=Maps.Next())
+		for (auto m: Maps)
 		{
 			if (Cmp(m->Name, n) == 0)
 			{
@@ -90,7 +90,7 @@ public:
 
 	void Empty()
 	{
-		for (Mapping *m=Maps.First(); m; m=Maps.Next())
+		for (auto m: Maps)
 		{
 			Delete(m->Name);
 			Delete(m->Value);
@@ -112,7 +112,7 @@ public:
 
 	N Reverse(const V v)
 	{
-		for (Mapping *m=Maps.First(); m; m=Maps.Next())
+		for (auto m: Maps)
 		{
 			if (Cmp(v, m->Value) == 0)
 			{

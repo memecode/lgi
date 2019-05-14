@@ -537,9 +537,10 @@ class GLinuxVolume : public GVolume
 {
 	int Which;
 	List<GVolume> _Sub;
+	List<GVolume>::I _It;
 
 public:
-	GLinuxVolume(int w)
+	GLinuxVolume(int w) : _It(_Sub.end())
 	{
 		Which = w;
 		_Type = VT_NONE;
@@ -657,12 +658,13 @@ public:
 			}
 		}
 
-		return _Sub.First();
+		_It = _Sub.begin();
+		return *_It;
 	}
 
 	GVolume *Next()
 	{
-		return _Sub.Next();
+		return *(++_It);
 	}
 
 	GDirectory *GetContents()

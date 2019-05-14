@@ -218,7 +218,7 @@ bool ResMenuItem::Read(GXmlTag *t, ResMenuItem *Parent)
 			// Read sub items
 			if (SubMenu)
 			{
-				for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+				for (auto c: t->Children)
 				{
 					ResMenuItem *i = new ResMenuItem(Menu);
 					if (i && i->Read(c, this))
@@ -534,7 +534,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 
 ResMenuItem *ResMenuItem::FindByRef(int Ref)
 {
-	for (GTreeItem *i = Items.First(); i; i = Items.Next())
+	for (auto i: Items)
 	{
 		ResMenuItem *m = dynamic_cast<ResMenuItem*>(i);
 		if (m)
@@ -550,7 +550,7 @@ ResMenuItem *ResMenuItem::FindByRef(int Ref)
 
 ResMenuItem *ResMenu::GetItemByRef(int Ref)
 {
-	for (GTreeItem *i = Items.First(); i; i = Items.Next())
+	for (auto i: Items)
 	{
 		ResMenuItem *m = dynamic_cast<ResMenuItem*>(i);
 		if (m)
@@ -584,7 +584,7 @@ bool ResMenu::Read(GXmlTag *t, SerialiseContext &Ctx)
 		Name(p);
 	}
 
-	for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+	for (auto c: t->Children)
 	{
 		if (c->IsTag("string-group"))
 		{
@@ -650,7 +650,7 @@ bool ResMenu::Write(GXmlTag *t, SerialiseContext &Ctx)
 	}
 
 	// Write submenus/items
-	for (GTreeItem *i = Items.First(); i; i = Items.Next())
+	for (auto i: Items)
 	{
 		ResMenuItem *m = dynamic_cast<ResMenuItem*>(i);
 		if (m)
@@ -691,7 +691,7 @@ ResMenuUi::~ResMenuUi()
 void ResMenuUi::OnPaint(GSurface *pDC)
 {
 	GRegion Client(0, 0, X()-1, Y()-1);
-	for (GViewI *w = Children.First(); w; w = Children.Next())
+	for (auto w: Children)
 	{
 		GRect r = w->GetPos();
 		Client.Subtract(&r);
@@ -709,7 +709,7 @@ void ResMenuUi::PourAll()
 	GRegion Client(GetClient());
 	GRegion Update;
 
-	for (GViewI *v = Children.First(); v; v = Children.Next())
+	for (auto v: Children)
 	{
 		GRect OldPos = v->GetPos();
 		Update.Union(&OldPos);

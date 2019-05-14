@@ -1048,9 +1048,10 @@ void GToolBar::ContextMenu(GMouse &m)
 		if (Sub)
 		{
 			int n = 1;
-			GViewI *v;
-			for (v = Children.First(); v; v = Children.Next(), n++)
+			for (auto it = Children.begin(); it != Children.end(); it++, n++)
 			{
+				GViewI *v = *it;
+
 				GToolButton *Btn = dynamic_cast<GToolButton*>(v);
 				if (Btn && Btn->Separator())
 				{
@@ -1098,7 +1099,7 @@ void GToolBar::ContextMenu(GMouse &m)
 			{
 				GStringPipe p(256);
 				p.Push((char*) (d->Text ? "text" : "no"));
-				for (v = Children.First(); v; v = Children.Next())
+				for (auto v: Children)
 				{
 					if (v->Visible())
 					{
@@ -1118,7 +1119,7 @@ void GToolBar::ContextMenu(GMouse &m)
 				
 				d->FixSeparators(this);
 
-				for (GViewI *v = Children.First(); v; v = Children.Next())
+				for (auto v: Children)
 				{
 					GToolButton *b = dynamic_cast<GToolButton*>(v);
 					if (b && b->TipId >= 0)
@@ -1207,8 +1208,7 @@ bool GToolBar::Pour(GRegion &r)
 	int PosY = BorderSpacing + Border.y1 + Padding.y1;
 
 	GRect ButPos;
-	GViewI *But = Children.First();
-	while (But)
+	for (auto But: Children)
 	{
 		if (But->Visible())
 		{
@@ -1305,11 +1305,9 @@ bool GToolBar::Pour(GRegion &r)
 			GRect p(-100, -100, -90, -90);
 			But->SetPos(p);
 		}
-		
-		But = Children.Next();
 	}
 
-	for (GViewI *w = Children.First(); w; w = Children.Next())
+	for (auto w: Children)
 	{
 		GRect p = w->GetPos();
 
@@ -1551,7 +1549,7 @@ bool GToolBar::AppendControl(GView *Ctrl)
 
 void GToolBar::Empty()
 {
-	for (GViewI *But = Children.First(); But; But = Children.Next())
+	for (auto But: Children)
 	{
 		DeleteObj(But);
 	}

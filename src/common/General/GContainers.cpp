@@ -115,7 +115,7 @@ GMemQueue &GMemQueue::operator=(GMemQueue &p)
 	Empty();
 
 	PreAlloc = p.PreAlloc;
-	for (Block *b = p.Mem.First(); b; b = p.Mem.Next())
+	for (auto b: p.Mem)
 	{
 		int Alloc = sizeof(Block) + b->Size;
 		Alloc = LGI_ALLOC_ALIGN(Alloc);
@@ -305,9 +305,10 @@ int64 GMemQueue::Peek(uchar *Ptr, int Size)
 
 	if (Ptr && Size <= GetSize())
 	{
-		Block *b = 0;
-		for (b = Mem.First(); b && Size > 0; b = Mem.Next())
+		for (auto b: Mem)
 		{
+			if (Size <= 0)
+				break;
 			int Copy = MIN(Size, b->Size - b->Next);
 			if (Copy > 0)
 			{
@@ -451,7 +452,7 @@ GString GStringPipe::NewGStr()
 ssize_t GStringPipe::LineChars()
 {
 	ssize_t Len = 0;
-	for (Block *m = Mem.First(); m; m = Mem.Next())
+	for (auto m: Mem)
 	{
 		uint8_t *p = m->Ptr();
 
@@ -471,7 +472,8 @@ ssize_t GStringPipe::SaveToBuffer(char *Start, ssize_t BufSize, ssize_t Chars)
 	char *Str = Start;
 	char *End = Str + BufSize; // Not including NULL
 
-	Block *m = Mem.First();
+	auto it = Mem.begin();
+	Block *m = *it;
 	while (m)
 	{
 		for (	char *MPtr = (char*)m->Ptr();
@@ -489,9 +491,10 @@ ssize_t GStringPipe::SaveToBuffer(char *Start, ssize_t BufSize, ssize_t Chars)
 
 		if (m->Next >= m->Used)
 		{
-			Mem.Delete(m);
+			Mem.Delete(it);
 			free(m);
-			m = Mem.First();
+			it = Mem.begin();
+			m = *it;
 		}
 	}
 

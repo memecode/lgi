@@ -244,7 +244,7 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect)
 	}
 	
 	::GArray<GtkTargetEntry> e;
-	for (char *f = Formats.First(); f; f = Formats.Next())
+	for (auto f: Formats)
 	{
 		Gtk::GtkTargetEntry &entry = e.New();
 		entry.target = f;

@@ -68,7 +68,7 @@ public:
 			return S_OK;
 		}
 
-		for (Interface *i = Interfaces.First(); i; i=Interfaces.Next())
+		for (auto i: Interfaces)
 		{
 			if (memcmp(&i->iid, &iid, sizeof(IID)) == 0)
 			{

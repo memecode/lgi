@@ -332,7 +332,7 @@ ssize_t GTreeNode::IndexOf()
 
 GTreeItem *GTreeNode::GetChild()
 {
-	return Items[0];
+	return Items.Length() ? Items[0] : NULL;
 }
 
 GTreeItem *GTreeNode::GetPrev()
@@ -413,9 +413,11 @@ GTreeItem::~GTreeItem()
 	}
 
 	_Remove();
-	GTreeItem *c;
-	while ((c = Items.First()))
-		delete c;
+	while (Items.Length())
+	{
+		auto It = Items.begin();
+		delete *It;
+	}
 	DeleteObj(d);
 
 	if (t)
@@ -1269,7 +1271,7 @@ void GTree::_OnSelect(GTreeItem *Item)
 		)
 	)
 	{
-		for (GTreeItem *i=d->Selection.First(); i; i=d->Selection.Next())
+		for (auto i: d->Selection)
 		{
 			if (i != Item)
 				i->Select(false);
@@ -1408,7 +1410,7 @@ GTreeItem *GTree::GetAdjacent(GTreeItem *i, bool Down)
 				while (p->GetChild() &&
 						p->GetChild()->d->Visible)
 				{
-					if (p->Items.First())
+					if (p->Items.Length())
 					{
 						p = p->Items.ItemAt(p->Items.Length()-1);
 					}
@@ -1429,10 +1431,10 @@ bool GTree::OnKey(GKey &k)
 		return false;
 	
 	bool Status = false;
-	GTreeItem *i = d->Selection.First();
+	GTreeItem *i = d->Selection[0];
 	if (!i)
 	{
-		i = Items.First();
+		i = Items[0];
 		if (i)
 			i->Select();
 	}
@@ -1468,7 +1470,7 @@ bool GTree::OnKey(GKey &k)
 			case VK_HOME:
 			{
 				GTreeItem *i;
-				if ((i = Items.First()))
+				if ((i = Items[0]))
 				{
 					i->Select(true);
 					i->ScrollTo();
@@ -1495,7 +1497,7 @@ bool GTree::OnKey(GKey &k)
 			{
 				if (i)
 				{
-					if (i->Items.First() && i->Expanded())
+					if (i->Items.Length() && i->Expanded())
 					{
 						i->Expanded(false);
 						break;
@@ -1982,7 +1984,7 @@ void GTree::Empty()
 	TREELOCK
 		
 	GTreeItem *i;
-	while ((i = Items.First()))
+	while ((i = Items[0]))
 		Delete(i);	
 }
 
@@ -2158,7 +2160,7 @@ bool GTree::Select(GTreeItem *Obj)
 GTreeItem *GTree::Selection()
 {
 	TREELOCK
-	return d->Selection.First();
+	return d->Selection[0];
 }
 
 bool GTree::ForAllItems(std::function<void(GTreeItem*)> Callback)

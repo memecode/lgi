@@ -170,7 +170,7 @@ public:
 			Serialize(false);
 
 			// Set controls enabled flag correctly
-			for (DataDlgField *f = Fields->First(); f; f = Fields->Next())
+			for (auto f: Fields)
 			{
 				GView *Ctrl = dynamic_cast<GView*>(Dlg->FindControl(f->GetCtrl()));
 				if (Ctrl)

@@ -670,22 +670,27 @@ void GBox::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 
 int64 GBox::Value()
 {
-	GViewI *v = Children.First();
+	GViewI *v = Children.Length() ? Children[0] : NULL;
 	if (!v) return 0;
+
 	GCss *css = v->GetCss();
 	if (!css) return 0;
+
 	GCss::Len l = d->Vertical ? css->Height() : css->Width();
 	if (l.Type != GCss::LenPx)
 		return 0;
+
 	return (int64)l.Value;
 }
 
 void GBox::Value(int64 i)
 {
-	GViewI *v = Children.First();
+	GViewI *v = Children.Length() ? Children[0] : NULL;
 	if (!v) return;
+
 	GCss *css = v->GetCss(true);
 	if (!css) return;
+
 	if (d->Vertical)
 		css->Height(GCss::Len(GCss::LenPx, (float)i));
 	else

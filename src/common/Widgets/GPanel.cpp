@@ -276,7 +276,7 @@ void GPanel::RePour()
 
 void GPanel::SetChildrenVisibility(bool i)
 {
-	for (GViewI *w = Children.First(); w; w = Children.Next())
+	for (auto w: Children)
 	{
 		if (i &&
 			!w->IsAttached())

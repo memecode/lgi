@@ -161,13 +161,14 @@ bool GCombo::Name(const char *n)
 	if (ValidStr(n))
 	{
 		int Index = 0;
-		for (char *i=d->Items.First(); i; i=d->Items.Next(), Index++)
+		for (auto i: d->Items)
 		{
 			if (stricmp(n, i) == 0)
 			{
 				Value(Index);
 				return true;
 			}
+			Index++;
 		}
 
 		char *New = NewStr(n);
@@ -311,7 +312,8 @@ void GCombo::DoMenu()
 			d->Items.Sort(StringCompare);
 		}
 
-		char *c = d->Items.First();
+		auto It = d->Items.begin();
+		char *c = *It;
 		if (c)
 		{
 			if (d->Sub)
@@ -320,7 +322,7 @@ void GCombo::DoMenu()
 				double dbl = 0;
 				char16 f = 0;
 				GSubMenu *m = 0;
-				for (; c; c = d->Items.Next(), i++)
+				for (; c; c = *(++It), i++)
 				{
 					GUtf8Ptr u(c);
 					if (d->Sub == GV_INT32)
@@ -378,7 +380,7 @@ void GCombo::DoMenu()
 			}
 			else
 			{
-				for (; c; c = d->Items.Next(), i++)
+				for (; c; c = *(++It), i++)
 				{
 					switch (d->SelState)
 					{
@@ -488,13 +490,14 @@ bool GCombo::OnKey(GKey &k)
 					if (Len > 0 && d->Find)
 					{
 						int Index = 0;
-						for (char *i=d->Items.First(); i; i=d->Items.Next(), Index++)
+						for (auto i: d->Items)
 						{
 							if (strnicmp(i, d->Find, Len) == 0)
 							{
 								Value(Index);
 								break;
 							}
+							Index++;
 						}
 					}
 					d->LastKey = Now;

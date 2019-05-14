@@ -260,11 +260,12 @@ char *DocEdit::TemplateMerge(const char *Template, char *Name, List<char> *Param
 					while (Line > Template && Line[-1] != '\n') Line--;
 						
 					int i = 0;
-					for (char *p=Params->First(); p; p=Params->Next(), i++)
+					for (auto p: *Params)
 					{
 						if (i) T.Push(Line, TagStart-Line);
 						T.Push(p);
 						if (i < Params->Length()-1) T.Push("\n");
+						i++;
 					}
 				}
 					

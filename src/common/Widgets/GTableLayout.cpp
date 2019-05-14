@@ -541,7 +541,7 @@ bool TableCell::SetVariant(const char *Name, GVariant &Value, char *Array)
 				return false;
 			}
 			
-			for (GVariant *v = Value.Value.Lst->First(); v; v = Value.Value.Lst->Next())
+			for (auto v: *Value.Value.Lst)
 			{
 				if (v->Type == GV_VOID_PTR)
 				{

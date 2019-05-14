@@ -1348,7 +1348,7 @@ bool GTabPage::Attach(GViewI *parent)
 			Status = true;
 		}
 		
-		for (GViewI *w = Children.First(); w; w = Children.Next())
+		for (auto w: Children)
 		{
 			if (!w->IsAttached())
 			{

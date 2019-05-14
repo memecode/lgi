@@ -382,7 +382,8 @@ void GXmlTag::EmptyAttributes()
 void GXmlTag::EmptyChildren()
 {
 	GXmlTag *c;
-	while ((c = Children[0]))
+	while (Children.Length() &&
+		(c = Children[0]))
 	{
 		LgiAssert(c->Parent == this);
 		DeleteObj(c);
@@ -689,7 +690,7 @@ bool GXmlTag::Dump(int Depth)
 	}	
 	LgiTrace("\n");
 	
-	for (GXmlTag *t=Children.First(); t; t=Children.Next())
+	for (auto t: Children)
 	{
 		t->Dump(Depth + 1);
 	}
@@ -1362,7 +1363,7 @@ bool GXmlTree::Read(GXmlTag *Root, GStreamI *File, GXmlFactory *Factory)
 				t->Tag[0] == '!' &&
 				strcmp(t->Tag, "!DOCTYPE") == 0)
 			{
-				for (GXmlTag *c=t->Children.First(); c; c=t->Children.Next())
+				for (auto c: t->Children)
 				{
 					if (c->Tag &&
 						strcmp(c->Tag, "!ENTITY") == 0)

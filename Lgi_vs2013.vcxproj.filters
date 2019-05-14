@@ -745,6 +745,9 @@
     <ClInclude Include="include\common\LError.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\common\LUnrolledList.h">
+      <Filter>Source Files\Core\Memory Subsystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\win32\Lgi.natvis">

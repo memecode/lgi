@@ -492,25 +492,25 @@ char *ObjProperties::KeyName()
 
 bool ObjProperties::FirstKey()
 {
-	Current = Properties.First();
+	//Current = Properties.First();
 	return Current != 0;
 }
 
 bool ObjProperties::LastKey()
 {
-	Current = Properties.Last();
+//	Current = Properties.Last();
 	return Current != 0;
 }
 
 bool ObjProperties::NextKey()
 {
-	Current = Properties.Next();
+//	Current = Properties.Next();
 	return Current != 0;
 }
 
 bool ObjProperties::PrevKey()
 {
-	Current = Properties.Prev();
+//	Current = Properties.Prev();
 	return Current != 0;
 }
 
@@ -524,7 +524,7 @@ bool ObjProperties::DeleteKey(char *Name)
 		Status = Properties.Delete(Current);
 		DeleteObj(Current);
 
-		Current = Properties.Current();
+		// Current = Properties.Current();
 	}
 	
 	return Status;
@@ -856,11 +856,9 @@ bool ObjProperties::Serialize(GFile &f, bool Write)
 			f << Us;
 		}
 
-		Prop *p = Properties.First();
-		while (p)
+		for (auto p: Properties)
 		{
 			p->Serialize(f, Write);
-			p = Properties.Next();
 		}
 
 		Us = 0xABCD;
@@ -992,11 +990,9 @@ bool ObjProperties::SerializeText(GFile &f, bool Write)
 		f.Write(s, strlen(s));
 		f.Write((char*)"\r\n", 2);
 
-		Prop *p = Properties.First();
-		while (p)
+		for (auto p: Properties)
 		{
 			p->SerializeText(f, Write);
-			p = Properties.Next();
 		}
 	}
 	else

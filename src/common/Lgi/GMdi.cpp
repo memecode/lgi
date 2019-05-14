@@ -220,7 +220,7 @@ bool GMdiChild::PourAll()
 		Name(), c.GetStr(), Visible(), Children.Length());
 	#endif
 
-	for (GViewI *w = Children.First(); w; w = Children.Next())
+	for (auto w: Children)
 	{
 		if (Visible())
 		{
@@ -862,7 +862,7 @@ bool GMdiParent::OnViewMouse(GView *View, GMouse &m)
 	if (m.Down())
 	{
 		GMdiChild *v = IsChild(View);
-		GMdiChild *l = IsChild(Children.Last());
+		GMdiChild *l = IsChild(*Children.rbegin());
 		if (v != NULL && v != l)
 		{
 			v->Raise();
@@ -1011,7 +1011,7 @@ GRect GMdiParent::NewPos()
 		for (int x=0; x<X()>>Block; x++)
 		{
 			bool Has = false;
-			for (GViewI *c = Children.First(); c; c = Children.Next())
+			for (auto c: Children)
 			{
 				GRect p = c->GetPos();
 				if (p.x1 >> Block == x &&

@@ -223,15 +223,18 @@ bool GVariant::operator ==(GVariant &v)
 			if (Value.Lst->Length() != v.Value.Lst->Length())
 				return false;
 
+			auto ValIt = Value.Lst->begin();
+			auto VIt = v.Value.Lst->begin();
 			GVariant *a, *b;
-			for (a = Value.Lst->First(), b = v.Value.Lst->First();
-				a && b;
-				a = Value.Lst->Next(), b = v.Value.Lst->Next())
+			while ( (a = *ValIt) && (b = *VIt) )
 			{
 				if (!(*a == *b))
-					break;
+					return false;
+				
+				ValIt++;
+				VIt++;
 			}
-			return !a && !b;
+			return true;
 		}
 		case GV_DOMREF:
 		{
@@ -682,7 +685,7 @@ bool GVariant::SetList(List<GVariant> *Lst)
 
 	if ((Value.Lst = new List<GVariant>) && Lst)
 	{
-		for (GVariant *s=Lst->First(); s; s=Lst->Next())
+		for (auto s: *Lst)
 		{
 			GVariant *New = new GVariant;
 			if (New)

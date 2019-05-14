@@ -72,7 +72,7 @@ int AddFtpFile::OnNotify(GViewI *c, int f)
 			if (Files)
 			{
 				Files->GetAll(a);
-				for (LListItem *i=a.First(); i; i=a.Next())
+				for (auto i: a)
 				{
 					FtpFile *f=dynamic_cast<FtpFile*>(i);
 					if (!f) break;

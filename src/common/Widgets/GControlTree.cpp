@@ -485,7 +485,7 @@ GTreeItem *GControlTree::Insert(const char *DomPath, int CtrlId, GVariantType Ty
 
 void GControlTree::ReadTree(GXmlTag *t, GTreeNode *n)
 {
-	for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+	for (auto c: t->Children)
 	{
 		int CtrlId = -1;
 		int StrRef = c->GetAsInt("ref");

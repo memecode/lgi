@@ -575,8 +575,10 @@ bool LgiResources::Load(const char *FileName)
 			{
 				Dialogs.Insert(n);
 				d->Ok = true;
+
+				// This allows the menu to take ownership of the XML tag
 				t->RemoveTag();
-				t = 0;
+				t = NULL;
 			}
 			else
 			{
@@ -591,8 +593,10 @@ bool LgiResources::Load(const char *FileName)
 			{
 				Menus.Insert(m);
 				d->Ok = true;
+
+				// This allows the menu to take ownership of the XML tag
 				t->RemoveTag();
-				t = 0;
+				t = NULL;
 			}
 			else
 			{
@@ -1172,11 +1176,11 @@ bool LgiMenuRes::Read(GXmlTag *t, ResFileFormat Format)
 			GBase::Name(n);
 		}
 
-		for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+		for (auto c: t->Children)
 		{
 			if (stricmp(c->GetTag(), "string-group") == 0)
 			{
-				for (GXmlTag *i = c->Children.First(); i; i = c->Children.Next())
+				for (auto i: c->Children)
 				{
 					LgiStringRes *s = new LgiStringRes(Res);
 					if (s && s->Read(i, Format))
@@ -1357,7 +1361,7 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 		ScriptEngine = Engine;
 		TagHash Tags(TagList);
 
-		for (LgiDialogRes *Dlg = Dialogs.First(); Dlg; Dlg = Dialogs.Next())
+		for (auto Dlg: Dialogs)
 		{
 			if (Dlg->Id() == ((int) Resource))
 			{
@@ -1543,7 +1547,7 @@ bool GMenu::Load(GView *w, const char *Res, const char *TagList)
 	if (r)
 	{
 		TagHash Tags(TagList);
-		for (LgiMenuRes *m = r->Menus.First(); m; m = r->Menus.Next())
+		for (auto m: r->Menus)
 		{
 			if (stricmp(m->Name(), Res) == 0)
 			{

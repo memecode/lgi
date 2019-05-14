@@ -93,7 +93,7 @@ GString::Array DropDownBtn::GetList()
 	GString::Array a;
 	if (Pu && Pu->Lst)
 	{
-		for (LListItem *i = NULL; Pu->Lst->Iterate(i); )
+		for (auto i: *Pu->Lst)
 		{
 			a.New() = i->GetText(0);
 		}
