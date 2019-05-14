@@ -160,6 +160,7 @@ set (WindowsSource
 	src/win32/General/ShowFileProp_Win.cpp
 	src/win32/Lgi/GGeneral.cpp
 	src/win32/Lgi/LThread.cpp
+	src/win32/INet/MibAccess.cpp
 	)
 
 set (LinuxSource
@@ -216,12 +217,17 @@ elseif (MSVC)
 							"${ROOT}/include/linux"
 							"${ROOT}/include/linux/gtk"
 							"${VCPKG}/installed/x64-windows/include")
-	target_link_libraries(	Lgi
+	target_link_libraries(	Lgi							
 							gdk-3.0.lib
-							ComCtl32.lib
-							Ws2_32.lib
-							UxTheme.lib
-							imm32.lib)
+							pango-1.0.lib
+							glib-2.0.lib
+							gtk-3.0.lib
+							cairo.lib
+							gobject-2.0.lib
+							pangocairo-1.0.lib
+							gdk_pixbuf-2.0.lib
+							Ws2_32.lib)
+	target_link_directories(Lgi PUBLIC ${VCPKG}/installed/x64-windows/lib)
 endif ()
 
 target_include_directories (Lgi PUBLIC

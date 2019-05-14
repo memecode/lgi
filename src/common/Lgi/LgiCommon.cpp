@@ -1662,6 +1662,15 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 	return Path;
 }
 
+OsProcessId LgiGetCurrentProcess()
+{
+	#ifdef WIN32
+	return GetCurrentProcessId();
+	#else
+	return getpid();
+	#endif
+}
+
 bool LgiGetExeFile(char *Dst, int DstSize)
 {
 	if (Dst)
