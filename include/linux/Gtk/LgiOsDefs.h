@@ -96,7 +96,11 @@ typedef Gtk::cairo_t					*OsPainter;
 typedef Gtk::PangoFontDescription       *OsFont;
 typedef void							*OsBitmap;
 
-LgiFunc OsProcessId LgiGetCurrentProcess();
+#ifdef WIN32
+#define LgiGetCurrentProcess			GetCurrentProcessId
+#else
+#define LgiGetCurrentProcess			getpid
+#endif
 
 // Because of namespace issues you can't use the built in GTK casting macros.
 // So this is basically the same thing:

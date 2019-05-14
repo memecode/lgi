@@ -64,7 +64,7 @@ const char sLibrary[] =
 			"cygpng12"
 		#else
 			"libpng"
-			#ifdef _MSC_VER
+			#ifdef _MSC_VER_STR
 				_MSC_VER_STR
 				#if defined(WIN64)
 				"x64"

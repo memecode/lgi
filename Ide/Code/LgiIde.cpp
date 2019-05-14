@@ -4076,69 +4076,12 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 	return true;
 }
 
-/*
-#include "GSubProcess.h"
-void Test()
-{
-	GDirectory d;
-	for (int b = d.First("C:\\Users\\matthew\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Cache"); b; b = d.Next())
-	{
-		if (!d.IsDir())
-		{
-			char p[MAX_PATH];
-			d.Path(p, sizeof(p));
-			
-			GFile f;
-			if (f.Open(p, O_READ))
-			{
-				char Buf[256];
-				ssize_t Rd = f.Read(Buf, sizeof(Buf));
-				if (Rd > 3 && !strnicmp(Buf, "Ogg", 3))
-				{
-					char out[MAX_PATH];
-					f.Close();
-					LgiMakePath(out, sizeof(out), "C:\\Users\\matthew\\Desktop\\new day", d.GetName());
-					strcat(out, ".ogg");
-					if (!FileDev->Copy(p, out))
-					{
-						LgiTrace("%s:%i - Failed to copy '%s'\n", _FL, d.GetName());
-					}
-				}
-				else
-				{
-					LgiTrace("%s:%i - Not an ogg '%s'\n", _FL, d.GetName());
-				}
-			}
-			else
-			{
-				LgiTrace("%s:%i - Can't open '%s'\n", _FL, d.GetName());
-			}
-		}
-	}
-}
-*/
-
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);
 	GApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
-		/*
-		GString mt = LGetAppForProtocol("mailto");
-		GString https = LGetAppForProtocol("https");
-		printf("%s\n%s\n", mt.Get(), https.Get());
-
-		GArray<GSocket::Interface> Out;
-		if (GSocket::EnumInterfaces(Out))
-		{
-			for (auto &i : Out)
-			{
-				printf("%s %s %s\n", i.Name.Get(), i.ToString().Get(), i.ToString(i.Netmask4).Get());
-			}
-		}
-		*/
-
 		a.AppWnd = new AppWnd;
 		a.Run();
 	}

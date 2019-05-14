@@ -24,6 +24,7 @@
 #include "GTableLayout.h"
 #include "GTextLabel.h"
 #include "GButton.h"
+#include "GRegKey.h"
 
 extern const char *Untitled;
 const char SourcePatterns[] = "*.c;*.h;*.cpp;*.cc;*.java;*.d;*.php;*.html;*.css;*.js";
@@ -1466,6 +1467,7 @@ GString BuildThread::FindExe()
 			GString NmakePath;
 			switch (_MSC_VER)
 			{
+				#ifdef _MSC_VER_VS2013
 				case _MSC_VER_VS2013:
 				{
 					if (Arch == ArchX32)
@@ -1474,6 +1476,8 @@ GString BuildThread::FindExe()
 						NmakePath = "c:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\bin\\amd64\\nmake.exe";
 					break;
 				}
+				#endif
+				#ifdef _MSC_VER_VS2015
 				case _MSC_VER_VS2015:
 				{
 					if (Arch == ArchX32)
@@ -1482,6 +1486,7 @@ GString BuildThread::FindExe()
 						NmakePath = "c:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake.exe";
 					break;
 				}
+				#endif
 				default:
 				{
 					LgiAssert(!"Impl me.");

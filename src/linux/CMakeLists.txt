@@ -1,6 +1,5 @@
 cmake_minimum_required (VERSION 3.12)
 
-set (CMAKE_OSX_ARCHITECTURES "i386")
 set (CMAKE_CXX_STANDARD 11)
 
 project (Lgi)
@@ -168,6 +167,7 @@ set (LinuxSource
 	src/linux/General/ShowFileProp_Linux.cpp
 	src/linux/Lgi/GGeneral.cpp
 	src/linux/Lgi/LThread.cpp
+	include/linux/Gtk/LgiOsDefs.h
 	)
 
 set (MacSource
