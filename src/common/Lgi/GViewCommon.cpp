@@ -2382,7 +2382,10 @@ void GView::Debug()
 	#if defined(__GTK_H__)
     if (_View)
     {
-    	if (LGI_IS_WIDGET(_View))
+		#if GTK_MAJOR_VERSION == 3
+			LgiAssert(!"Gtk3 FIXME");
+		#else
+		if (LGI_IS_WIDGET(_View))
     	{
     		LgiWidget *w = LGI_WIDGET(_View);
     		if (w)
@@ -2392,6 +2395,7 @@ void GView::Debug()
     		else LgiTrace("%s:%i - NULL widget.\n", _FL);
     	}
     	else LgiTrace("%s:%i - Not a widget.\n", _FL);
+		#endif
     }
 	#endif
 }

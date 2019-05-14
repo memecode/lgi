@@ -36,7 +36,10 @@ struct _LgiWidgetClass
 	GtkContainerClass parent_class;
 };
 
+#if GTK_MAJOR_VERSION == 3
+#else
 GtkType lgi_widget_get_type();
+#endif
 GtkWidget *lgi_widget_new(GViewI *target, int width, int height, bool pour_largest);
 
 // Children management

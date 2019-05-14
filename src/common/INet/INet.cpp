@@ -1555,7 +1555,7 @@ bool WhatsMyIp(GAutoString &Ip)
 		Which--;
 
 		char IpAddr[32];
-		sprintf_s(IpAddr,
+		sprintf_s(IpAddr, sizeof(IpAddr),
 					"%i.%i.%i.%i",
 					(uchar)e->h_addr_list[Which][0],
 					(uchar)e->h_addr_list[Which][1],

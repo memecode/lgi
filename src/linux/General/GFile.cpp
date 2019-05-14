@@ -19,7 +19,9 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <dirent.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #include "LgiDefs.h"
 #include "GFile.h"

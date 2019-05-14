@@ -30,7 +30,7 @@ public:
 	bool OnLayout(GViewLayoutInfo &Inf);
 	bool Pour(GRegion &r);
 
-	#if WINDOWS
+	#if WINNATIVE
 	bool SetCssStyle(const char *CssStyle);
 	#else
 	void OnPaint(GSurface *pDC);

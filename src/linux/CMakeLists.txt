@@ -128,48 +128,13 @@ set (CommonSource
 	include/common/GMessage.h
 	)
 
-set (WindowsSource
-	src/win32/Gdc2/Gdc2.cpp
-	src/win32/Gdc2/GdiLeak.cpp
-	src/win32/Gdc2/GMemDC.cpp
-	src/win32/Gdc2/GPrintDC.cpp
-	src/win32/Gdc2/GScreenDC.cpp
-	src/win32/General/GFile.cpp
-	src/win32/General/GMem.cpp
-	src/win32/General/ShowFileProp_Win.cpp
-	src/win32/INet/MibAccess.cpp
-	src/win32/Lgi/GApp.cpp
-	src/win32/Lgi/GClipBoard.cpp
-	src/win32/Lgi/GDragAndDrop.cpp
-	src/win32/Lgi/GFileSelect.cpp
-	src/win32/Lgi/GGeneral.cpp
-	src/win32/Lgi/GLayout.cpp
-	src/win32/Lgi/GMenu.cpp
-	src/win32/Lgi/GPrinter.cpp
-	src/win32/Lgi/GScrollBar.cpp
-	src/win32/Lgi/LThread.cpp
-	src/win32/Lgi/GView.cpp
-	src/win32/Lgi/GWindow.cpp
-	src/win32/Lgi/LgiException.cpp
-	src/win32/Widgets/GButton_Win.cpp
-	src/win32/Widgets/GCheckBox_Win.cpp
-	src/win32/Widgets/GCombo_Win.cpp
-	src/win32/Widgets/GDialog.cpp
-	src/win32/Widgets/GEdit_Win.cpp
-	src/win32/Widgets/GRadioGroup_Win.cpp
-	src/win32/Widgets/GSlider.cpp
-	src/win32/Widgets/GProgress.cpp
-	)
-
-set (LinuxSource
+set (GtkSource
 	src/linux/Gtk/Gdc2.cpp
 	src/linux/Gtk/GMemDC.cpp
 	src/linux/Gtk/GPrintDC.cpp
 	src/linux/Gtk/GScreenDC.cpp
 	src/linux/Gtk/LgiWidget.cpp
-	src/linux/General/GFile.cpp
 	src/linux/General/GMem.cpp
-	src/linux/General/ShowFileProp_Linux.cpp
 	src/linux/Lgi/GApp.cpp
 	src/linux/Lgi/GClipBoard.cpp
 	src/linux/Lgi/GDragAndDrop.cpp
@@ -191,41 +156,34 @@ set (LinuxSource
 	src/common/Widgets/GProgress.cpp
 	)
 
+set (WindowsSource
+	src/win32/General/GFile.cpp
+	src/win32/General/ShowFileProp_Win.cpp
+	)
+
+set (LinuxSource
+	src/linux/General/GFile.cpp
+	src/linux/General/ShowFileProp_Linux.cpp
+	)
+
 set (MacSource
-	src/common/Widgets/GCheckBox.cpp
-	src/common/Widgets/GCombo.cpp
-	src/common/Widgets/GScrollBar.cpp
-	src/common/Widgets/GButton.cpp
-	src/common/Widgets/GRadioGroup.cpp
-	src/common/Widgets/GEdit.cpp
-	src/common/Lgi/GLayout.cpp
-	src/common/Widgets/GProgress.cpp
 	src/mac/cocoa/General/ShowFileProp_Mac.mm
-	src/mac/carbon/Gdc2/Gdc2.cpp
-	src/mac/common/GMemDC.cpp
-	src/mac/common/GPrintDC.cpp
-	src/mac/common/GScreenDC.cpp
 	src/mac/carbon/General/GFile.cpp
-	src/mac/carbon/General/GMem.cpp
-	src/mac/carbon/Lgi/GApp.cpp
-	src/mac/carbon/Lgi/GClipBoard.cpp
-	src/mac/carbon/Lgi/GDragAndDrop.cpp
-	src/mac/carbon/Lgi/GGeneral.cpp
-	src/mac/carbon/Lgi/GFileSelect.cpp
-	src/mac/carbon/Lgi/GMenu.cpp
-	src/mac/carbon/Lgi/GPrinter.cpp
-	src/mac/carbon/Lgi/LThread.cpp
-	src/mac/carbon/Lgi/GView.cpp
-	src/mac/carbon/Lgi/GWidgets.cpp
-	src/mac/carbon/Lgi/GWindow.cpp
 	)
 
 list(TRANSFORM CommonSource PREPEND ${ROOT}/)
+list(TRANSFORM GtkSource PREPEND ${ROOT}/)
 list(TRANSFORM WindowsSource PREPEND ${ROOT}/)
 list(TRANSFORM LinuxSource PREPEND ${ROOT}/)
 list(TRANSFORM MacSource PREPEND ${ROOT}/)
 
-set(Source ${CommonSource} ${LinuxSource})
+if (APPLE)
+	set(Source ${CommonSource} ${GtkSource} ${MacSource})
+elseif (LINUX)
+	set(Source ${CommonSource} ${GtkSource} ${LinuxSource})
+elseif (MSVC)
+	set(Source ${CommonSource} ${GtkSource} ${WindowsSource})
+endif ()
 
 add_library(Lgi SHARED ${Source})
 

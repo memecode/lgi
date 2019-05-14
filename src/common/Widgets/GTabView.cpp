@@ -295,7 +295,7 @@ void GTabView::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 	}
 }
 
-#if WINNATIVE
+#if defined(WINNATIVE)
 GViewI *GTabView::FindControl(HWND hCtrl)
 {
 	GViewI *Ctrl = 0;

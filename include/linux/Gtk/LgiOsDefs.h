@@ -516,14 +516,17 @@ enum MessageBoxType
 #define vsprintf_s		vsnprintf
 #define swprintf_s		swprintf
 
-#ifndef WIN32 // __CYGWIN__
+#ifndef WINNATIVE // __CYGWIN__
 
+	#ifdef _MSC_VER
+	#else
 	// LgiFunc char *strnistr(char *a, char *b, int n);
 	#define _strnicmp strncasecmp // LgiFunc int _strnicmp(char *a, char *b, int i);
 	LgiFunc char *strupr(char *a);
 	LgiFunc char *strlwr(char *a);
 	LgiFunc int stricmp(const char *a, const char *b);
 	#define _stricmp strcasecmp // LgiFunc int _stricmp(const char *a, const char *b);
+	#endif
 	#define sprintf_s snprintf
 
 #else
@@ -532,7 +535,6 @@ enum MessageBoxType
 	LgiFunc int GetMouseWheelLines();
 	LgiFunc int WinPointToHeight(int Pt, HDC hDC = NULL);
 	LgiFunc int WinHeightToPoint(int Ht, HDC hDC = NULL);
-	LgiExtern class GString WinGetSpecialFolderPath(int Id);
 
 	typedef BOOL (__stdcall *pSHGetSpecialFolderPathA)(HWND hwndOwner, LPSTR lpszPath, int nFolder, BOOL fCreate);
 	typedef BOOL (__stdcall *pSHGetSpecialFolderPathW)(HWND hwndOwner, LPWSTR lpszPath, int nFolder, BOOL fCreate);
@@ -549,6 +551,10 @@ enum MessageBoxType
 	/// Convert a Os dependant integer d'n'd format to a string.
 	LgiFunc char *FormatToStr(int f);
 
+#endif
+
+#ifdef WINDOWS
+	LgiExtern class GString WinGetSpecialFolderPath(int Id);
 #endif
 
 #endif
