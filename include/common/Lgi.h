@@ -228,7 +228,11 @@
 #endif
 #define HAS_SHARED_OBJECT_SKIN				0
 #define HAS_LIBGSASL						0
+#ifdef _MSC_VER
+#define HAS_LIB_MAGIC						0
+#else
 #define HAS_LIB_MAGIC						1
+#endif
 
 // My includes
 #include "LgiInc.h"							// Xp

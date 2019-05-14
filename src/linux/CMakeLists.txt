@@ -129,6 +129,7 @@ set (CommonSource
 	)
 
 set (GtkSource
+	include/linux/Gtk/LgiWidget.h
 	src/linux/Gtk/Gdc2.cpp
 	src/linux/Gtk/GMemDC.cpp
 	src/linux/Gtk/GPrintDC.cpp
@@ -138,11 +139,9 @@ set (GtkSource
 	src/linux/Lgi/GApp.cpp
 	src/linux/Lgi/GClipBoard.cpp
 	src/linux/Lgi/GDragAndDrop.cpp
-	src/linux/Lgi/GGeneral.cpp
 	src/linux/Lgi/GLayout.cpp
 	src/linux/Lgi/GMenuGtk.cpp
 	src/linux/Lgi/GPrinter.cpp
-	src/linux/Lgi/LThread.cpp
 	src/linux/Lgi/GView.cpp
 	src/linux/Lgi/GWidgets.cpp
 	src/linux/Lgi/GWindow.cpp
@@ -159,16 +158,22 @@ set (GtkSource
 set (WindowsSource
 	src/win32/General/GFile.cpp
 	src/win32/General/ShowFileProp_Win.cpp
+	src/win32/Lgi/GGeneral.cpp
+	src/win32/Lgi/LThread.cpp
 	)
 
 set (LinuxSource
 	src/linux/General/GFile.cpp
 	src/linux/General/ShowFileProp_Linux.cpp
+	src/linux/Lgi/GGeneral.cpp
+	src/linux/Lgi/LThread.cpp
 	)
 
 set (MacSource
 	src/mac/cocoa/General/ShowFileProp_Mac.mm
 	src/mac/carbon/General/GFile.cpp
+	src/mac/carbon/Lgi/GGeneral.cpp
+	src/mac/carbon/Lgi/LThread.cpp
 	)
 
 list(TRANSFORM CommonSource PREPEND ${ROOT}/)

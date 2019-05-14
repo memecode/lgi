@@ -142,7 +142,7 @@ gboolean GDialog::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 {
 	if (!event)
 	{
-		printf("%s:%i - No event %i\n", _FL);
+		printf("%s:%i - No event.\n", _FL);
 		return FALSE;
 	}
 
@@ -203,7 +203,10 @@ bool GDialog::SetupDialog(bool Modal)
 	if (GBase::Name())
 		gtk_window_set_title(GTK_WINDOW(Wnd), GBase::Name());
 
+	#if GTK_MAJOR_VERSION == 3
+	#else
 	gtk_dialog_set_has_separator(GTK_DIALOG(Wnd), false);
+	#endif
 	if (IsResizeable())
 	{
 	    gtk_window_set_default_size(Wnd, Pos.X(), Pos.Y());
@@ -400,7 +403,7 @@ GdcPt2 GControl::SizeOfStr(const char *Str)
 		for (const char *s = Str; s && *s; s = e?e+1:0)
 		{
 			e = strchr(s, '\n');
-			int Len = e ? (int)e-(int)s : strlen(s);
+			auto Len = e ? e - s : strlen(s);
 
 			GDisplayString ds(SysFont, s, Len);
 			Pt.x = MAX(Pt.x, ds.X());

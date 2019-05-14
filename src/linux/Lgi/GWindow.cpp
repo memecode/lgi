@@ -8,7 +8,10 @@
 #include "GNotifications.h"
 
 using namespace Gtk;
+#if GTK_MAJOR_VERSION == 3
+#else
 #include <gdk/gdkx.h>
+#endif
 #undef Status
 #include "LgiWidget.h"
 
@@ -267,7 +270,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 {
 	if (!event)
 	{
-		printf("%s:%i - No event %i\n", _FL);
+		printf("%s:%i - No event.\n", _FL);
 		return FALSE;
 	}
 

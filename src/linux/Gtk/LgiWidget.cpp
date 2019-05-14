@@ -27,9 +27,17 @@ GType lgi_widget_child_type(GtkContainer   *container)
 	return GTK_TYPE_WIDGET;
 }
 
+#if GTK_MAJOR_VERSION == 3
+GType
+#else
 GtkType
+#endif
 lgi_widget_get_type(void)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	return 0;
+	#else
 	static GtkType lgi_widget_type = 0;
 
 	if (!lgi_widget_type)
@@ -49,11 +57,16 @@ lgi_widget_get_type(void)
 	}
 
 	return lgi_widget_type;
+	#endif
 }
 
 GtkWidget *lgi_widget_new(GViewI *target, int w, int h, bool pour_largest)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiWidget *p = LGI_WIDGET(g_object_new(lgi_widget_get_type(), NULL));
+	#else
 	LgiWidget *p = LGI_WIDGET(gtk_type_new(lgi_widget_get_type()));
+	#endif
 	if (p)
 	{
 		// printf("Created %p for %s:%p\n", p, target->GetClass(), target);
@@ -89,7 +102,7 @@ lgi_widget_remove(GtkContainer *wid, GtkWidget *child)
 			_LgiWidget::ChildInfo &c = p->child[i];
 			if (c.w == child)
 			{
-				bool widget_was_visible = GTK_WIDGET_VISIBLE(child);
+				bool widget_was_visible = gtk_widget_get_visible(child);
 				
 				LgiWidget *cw = LGI_WIDGET(c.w);
 				// if (cw)
@@ -208,6 +221,8 @@ static gboolean lgi_widget_mouse_enter_leave(GtkWidget *widget, GdkEventCrossing
 	return TRUE;
 }
 
+#if GTK_MAJOR_VERSION == 3
+#else
 static gboolean lgi_widget_client_event(GtkWidget *wid, GdkEventClient *ev)
 {
 	LgiWidget *p = LGI_WIDGET(wid);
@@ -219,6 +234,7 @@ static gboolean lgi_widget_client_event(GtkWidget *wid, GdkEventClient *ev)
     }
 	return TRUE;
 }
+#endif
 
 static gboolean lgi_widget_focus_event(GtkWidget *wid, GdkEventFocus *e)
 {
@@ -247,6 +263,12 @@ void BuildTabStops(GViewI *v, ::GArray<GViewI*> &a)
             BuildTabStops(c, a);
     }
 }
+
+#if GTK_MAJOR_VERSION == 3
+#define KEY(name) GDK_KEY_##name
+#else
+#define KEY(name) GDK_##name
+#endif
 
 static gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 {
@@ -284,84 +306,84 @@ static gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
         if (e->keyval > 0xff && e->string != NULL)
         {
         	// Convert string to unicode char
-        	uint8_t *i = e->string;
+        	auto *i = e->string;
         	ptrdiff_t len = strlen(i);
-			k.c16 = LgiUtf8To32(i, len);
+			k.c16 = LgiUtf8To32((uint8_t *&) i, len);
         }
         
         switch (k.vkey)
         {
-            case GDK_ISO_Left_Tab:
-            case GDK_Tab:
+			case KEY(ISO_Left_Tab):
+			case KEY(Tab):
             	k.IsChar = true;
             	k.c16 = k.vkey = VK_TAB;
             	break;
-            case GDK_Return:
-            case GDK_KP_Enter:
+			case KEY(Return):
+			case KEY(KP_Enter):
             	k.IsChar = true;
             	k.c16 = k.vkey = VK_RETURN;
             	break;
-            case GDK_BackSpace:
+            case KEY(BackSpace):
             	k.c16 = k.vkey = VK_BACKSPACE;
             	k.IsChar = !k.Ctrl() && !k.Alt();
             	break;
-            case GDK_Left:
+            case KEY(Left):
             	k.vkey = k.c16 = VK_LEFT;
             	break;
-            case GDK_Right:
+            case KEY(Right):
             	k.vkey = k.c16 = VK_RIGHT;
             	break;
-            case GDK_Up:
+            case KEY(Up):
             	k.vkey = k.c16 = VK_UP;
             	break;
-            case GDK_Down:
+            case KEY(Down):
             	k.vkey = k.c16 = VK_DOWN;
             	break;
-            case GDK_Home:
+            case KEY(Home):
             	k.vkey = k.c16 = VK_HOME;
             	break;
-            case GDK_End:
+            case KEY(End):
             	k.vkey = k.c16 = VK_END;
             	break;
             
             #define KeyPadMap(gdksym, ch, is) \
             	case gdksym: k.c16 = ch; k.IsChar = is; break;
             
-            KeyPadMap(GDK_KP_0, '0', true)
-            KeyPadMap(GDK_KP_1, '1', true)
-            KeyPadMap(GDK_KP_2, '2', true)
-            KeyPadMap(GDK_KP_3, '3', true)
-            KeyPadMap(GDK_KP_4, '4', true)
-            KeyPadMap(GDK_KP_5, '5', true)
-            KeyPadMap(GDK_KP_6, '6', true)
-            KeyPadMap(GDK_KP_7, '7', true)
-            KeyPadMap(GDK_KP_8, '8', true)
-            KeyPadMap(GDK_KP_9, '9', true)
+            KeyPadMap(KEY(KP_0), '0', true)
+            KeyPadMap(KEY(KP_1), '1', true)
+            KeyPadMap(KEY(KP_2), '2', true)
+            KeyPadMap(KEY(KP_3), '3', true)
+            KeyPadMap(KEY(KP_4), '4', true)
+            KeyPadMap(KEY(KP_5), '5', true)
+            KeyPadMap(KEY(KP_6), '6', true)
+            KeyPadMap(KEY(KP_7), '7', true)
+            KeyPadMap(KEY(KP_8), '8', true)
+            KeyPadMap(KEY(KP_9), '9', true)
 
-            KeyPadMap(GDK_KP_Space, ' ', true)
-            KeyPadMap(GDK_KP_Tab, '\t', true)
-			KeyPadMap(GDK_KP_F1, VK_F1, false)
-			KeyPadMap(GDK_KP_F2, VK_F2, false)
-			KeyPadMap(GDK_KP_F3, VK_F3, false)
-			KeyPadMap(GDK_KP_F4, VK_F4, false)
-			KeyPadMap(GDK_KP_Home, VK_HOME, false)
-			KeyPadMap(GDK_KP_Left, VK_LEFT, false)
-			KeyPadMap(GDK_KP_Up, VK_UP, false)
-			KeyPadMap(GDK_KP_Right, VK_RIGHT, false)
-			KeyPadMap(GDK_KP_Down, VK_DOWN, false)
-			KeyPadMap(GDK_KP_Page_Up, VK_PAGEUP, false)
-			KeyPadMap(GDK_KP_Page_Down, VK_PAGEDOWN, false)
-			KeyPadMap(GDK_KP_End, VK_END, false)
-			KeyPadMap(GDK_KP_Begin, VK_HOME, false)
-			KeyPadMap(GDK_KP_Insert, VK_INSERT, false)
-			KeyPadMap(GDK_KP_Delete, VK_DELETE, false)
-			KeyPadMap(GDK_KP_Equal, '=', true)
-			KeyPadMap(GDK_KP_Multiply, '*', true)
-			KeyPadMap(GDK_KP_Add, '+', true)
-			KeyPadMap(GDK_KP_Separator, '|', true) // is this right?
-			KeyPadMap(GDK_KP_Subtract, '-', true)
-			KeyPadMap(GDK_KP_Decimal, '.', true)
-			KeyPadMap(GDK_KP_Divide, '/', true)
+            KeyPadMap(KEY(KP_Space), ' ', true)
+            KeyPadMap(KEY(KP_Tab), '\t', true)
+			KeyPadMap(KEY(KP_F1), VK_F1, false)
+			KeyPadMap(KEY(KP_F2), VK_F2, false)
+			KeyPadMap(KEY(KP_F3), VK_F3, false)
+			KeyPadMap(KEY(KP_F4), VK_F4, false)
+			KeyPadMap(KEY(KP_Home), VK_HOME, false)
+			KeyPadMap(KEY(KP_Left), VK_LEFT, false)
+			KeyPadMap(KEY(KP_Up), VK_UP, false)
+			KeyPadMap(KEY(KP_Right), VK_RIGHT, false)
+			KeyPadMap(KEY(KP_Down), VK_DOWN, false)
+			KeyPadMap(KEY(KP_Page_Up), VK_PAGEUP, false)
+			KeyPadMap(KEY(KP_Page_Down), VK_PAGEDOWN, false)
+			KeyPadMap(KEY(KP_End), VK_END, false)
+			KeyPadMap(KEY(KP_Begin), VK_HOME, false)
+			KeyPadMap(KEY(KP_Insert), VK_INSERT, false)
+			KeyPadMap(KEY(KP_Delete), VK_DELETE, false)
+			KeyPadMap(KEY(KP_Equal), '=', true)
+			KeyPadMap(KEY(KP_Multiply), '*', true)
+			KeyPadMap(KEY(KP_Add), '+', true)
+			KeyPadMap(KEY(KP_Separator), '|', true) // is this right?
+			KeyPadMap(KEY(KP_Subtract), '-', true)
+			KeyPadMap(KEY(KP_Decimal), '.', true)
+			KeyPadMap(KEY(KP_Divide), '/', true)
         }
         
         #if DEBUG_KEY_EVENT
@@ -372,7 +394,7 @@ static gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
         if (w)
         {
             if (!w->HandleViewKey(v, k) &&
-                (k.vkey == VK_TAB || k.vkey == GDK_ISO_Left_Tab) &&
+                (k.vkey == VK_TAB || k.vkey == KEY(ISO_Left_Tab)) &&
                 k.Down())
             {
             	// Do tab between controls
@@ -658,18 +680,28 @@ lgi_widget_drag_data_received(	GtkWidget			*widget,
 }
 
 static void
-lgi_widget_destroy(GtkObject *object)
+lgi_widget_destroy(
+	#if GTK_MAJOR_VERSION == 3
+	GtkWidget *object
+	#else
+	GtkObject *object
+	#endif
+	)
 {
 	g_return_if_fail(object != NULL);
 	g_return_if_fail(LGI_IS_WIDGET(object));
 
 	LgiWidget *p = LGI_WIDGET(object);
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	void *klass = gtk_type_class(gtk_widget_get_type());
 
 	if (GTK_OBJECT_CLASS(klass)->destroy)
 	{
 		(* GTK_OBJECT_CLASS(klass)->destroy)(object);
 	}
+	#endif
 }
 
 static void
@@ -679,6 +711,9 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 	g_return_if_fail(LGI_IS_WIDGET(widget));
 	g_return_if_fail(allocation != NULL);
 
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	widget->allocation = *allocation;
 
 	if (GTK_WIDGET_REALIZED(widget))
@@ -713,6 +748,7 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 			}
 		}
 	}
+	#endif
 }
 
 static void
@@ -724,6 +760,9 @@ lgi_widget_realize(GtkWidget *widget)
 	g_return_if_fail(widget != NULL);
 	g_return_if_fail(LGI_IS_WIDGET(widget));
 
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	GTK_WIDGET_SET_FLAGS(widget, GTK_REALIZED);
 	LgiWidget *w = LGI_WIDGET(widget);
 
@@ -754,6 +793,7 @@ lgi_widget_realize(GtkWidget *widget)
 		v->OnGtkRealize();
 	else
 		LgiTrace("%s:%i - Failed to cast target to GView.\n", _FL);
+	#endif
 }
 
 static gboolean
@@ -765,6 +805,9 @@ lgi_widget_expose(GtkWidget *widget, GdkEventExpose *event)
 
 	LgiWidget *p = LGI_WIDGET(widget);
 	
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	if (GTK_WIDGET_DRAWABLE(widget))
 	{
 		if (p && p->target)
@@ -779,6 +822,7 @@ lgi_widget_expose(GtkWidget *widget, GdkEventExpose *event)
 		}
 		else printf("%s:%i - No view to paint widget.\n", _FL);
 	}
+	#endif
 
 	return FALSE;
 }
@@ -795,8 +839,12 @@ lgi_widget_setsize(GtkWidget *wid, int width, int height)
 		    p->w = width;
 		    p->h = height;
 		    
-		    wid->requisition.width = width;
+			#if GTK_MAJOR_VERSION == 3
+			LgiAssert(!"Gtk3 FIXME");
+			#else
+			wid->requisition.width = width;
 		    wid->requisition.height = height;
+			#endif
 		}
 	}
 }
@@ -821,6 +869,9 @@ lgi_widget_setchildpos(GtkWidget *parent, GtkWidget *child, int x, int y)
 				c.x = x;
 				c.y = y;
 				
+				#if GTK_MAJOR_VERSION == 3
+				LgiAssert(!"Gtk3 FIXME");
+				#else
 				if (GTK_WIDGET_REALIZED(c.w))
 				{
                 	LgiWidget *child_wid = LGI_WIDGET(c.w);
@@ -841,6 +892,7 @@ lgi_widget_setchildpos(GtkWidget *parent, GtkWidget *child, int x, int y)
 							            		#endif
             									, &a, FALSE);
 				}
+				#endif
 				return;
 			}
 		}
@@ -908,6 +960,9 @@ lgi_widget_configure(GtkWidget *widget, GdkEventConfigure *ev)
 static void
 lgi_widget_class_init(LgiWidgetClass *klass)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	GtkObjectClass *object_class = (GtkObjectClass *)klass;
 	object_class->destroy = lgi_widget_destroy;
 
@@ -942,11 +997,15 @@ lgi_widget_class_init(LgiWidgetClass *klass)
 	container_class->remove = lgi_widget_remove;
 	container_class->forall = lgi_widget_forall;
 	container_class->child_type = lgi_widget_child_type;
+	#endif
 }
 
 static void
 lgi_widget_init(LgiWidget *w)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	GTK_WIDGET_UNSET_FLAGS(w, GTK_NO_WINDOW);
 	w->target = 0;
 	w->w = 0;
@@ -955,5 +1014,6 @@ lgi_widget_init(LgiWidget *w)
 	w->drag_over_widget = false;
 	w->drop_format = NULL;
 	w->debug = false;
+	#endif
 }
 

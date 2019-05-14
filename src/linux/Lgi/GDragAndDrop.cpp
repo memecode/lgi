@@ -90,7 +90,11 @@ void RemoveExistingSignals(OsView w)
 		{
 			if (Si.Sig > 0)
 			{
+				#if GTK_MAJOR_VERSION == 3
+				LgiAssert(!"Gtk3 FIXME");
+				#else
 				gtk_signal_disconnect(GTK_OBJECT(w), Si.Sig);
+				#endif
 				Si.Sig = 0;
 			}
 			
@@ -263,7 +267,11 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect)
 	RemoveExistingSignals(d->SignalWnd);
 	SignalInfo &Si = ExistingSignals.New();
 	Si.Wnd = d->SignalWnd;
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	Si.Sig = gtk_signal_connect(GTK_OBJECT(d->SignalWnd), "drag-data-get", G_CALLBACK(LgiDragDataGet), this);
+	#endif
 
 	d->Ctx = Gtk::gtk_drag_begin(d->SignalWnd,
 								Targets,

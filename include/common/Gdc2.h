@@ -686,6 +686,14 @@ struct GPrintDcParams
 
 #endif
 
+#if defined(__GTK_H__)
+	#if GTK_MAJOR_VERSION == 3
+	typedef Gtk::GdkWindow OsDrawable;
+	#else
+	typedef Gtk::GdkDrawable OsDrawable;
+	#endif
+#endif
+
 /// \brief An implemenation of GSurface to draw onto the screen.
 ///
 /// This is the class given to GView::OnPaint() most of the time. Which most of
@@ -728,11 +736,7 @@ public:
 			/// Constructs a server size pixmap
 			GScreenDC(int x, int y, int bits);		
 			/// Constructs a wrapper around a drawable
-			#if GTK_MAJOR_VERSION == 3
-			GScreenDC(Gtk::GdkWindow *Drawable);
-			#else
-			GScreenDC(Gtk::GdkDrawable *Drawable);
-			#endif
+			GScreenDC(OsDrawable *Drawable);
 			/// Constructs a DC for drawing on a window
 			///GScreenDC(OsView View);
 			
@@ -961,7 +965,7 @@ public:
 		#elif defined(__GTK_H__)
 
 			#if GTK_MAJOR_VERSION == 3
-			Gtk::GdkPixbuf *GetImage();
+			Gtk::cairo_surface_t *GetImage();
 			#else
 			Gtk::GdkImage *GetImage();
 			#endif

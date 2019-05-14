@@ -40,7 +40,7 @@ namespace Gtk {
 typedef GArray<GAppInfo*> AppArray;
 using namespace Gtk;
 
-__thread int GtkLockCount = 0;
+LTHREAD_DATA int GtkLockCount = 0;
 bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth = 0);
 
 ////////////////////////////////////////////////////////////////
@@ -252,8 +252,10 @@ public:
 	GMouse LastMove;
 	GAutoString Name;
 	
+	#if defined(LINUX)
 	/// Desktop info
 	GAutoPtr<GApp::DesktopInfo> DesktopInfo;
+	#endif
 
 	#if HAS_LIB_MAGIC
 	LMutex MagicLock;
@@ -274,7 +276,10 @@ public:
 	int LastClickX;
 	int LastClickY;
 
-	GAppPrivate() : Args(0, 0), MagicLock("MagicLock")
+	GAppPrivate() : Args(0, 0)
+		#if HAS_LIB_MAGIC
+		, MagicLock("MagicLock")
+		#endif
 	{
 		CurEvent = 0;
 		GuiThread = LgiGetCurrentThread();
@@ -814,7 +819,7 @@ bool GApp::GetOption(const char *Option, ::GString &Buf)
 							char *End = strchr(Arg, Delim);
 							if (End)
 							{
-								int Len = (int)End-(int)Arg;
+								auto Len = End-Arg;
 								if (Len > 0)
 								    Buf.Set(Arg, Len);
 								else
@@ -1358,9 +1363,13 @@ void GMessage::Set(int Msg, Param ParamA, Param ParamB)
 	
 	if (Event)
 	{
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
 		Event->client.data.l[0] = m;
 		Event->client.data.l[1] = a;
 		Event->client.data.l[2] = b;
+		#endif
 	}
 }
 
@@ -1432,8 +1441,14 @@ GlibPostMessage(GlibEventParams *p)
 {
 	#if 1
 	GtkWindow *w = NULL;
+
+
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	if (p->e->client.window)
 		gdk_window_get_user_data(p->e->client.window, (gpointer*)&w);
+	#endif
 	
 	if (!w)
 	{

@@ -136,7 +136,7 @@ public:
 typedef HANDLE  					OsThread;
 typedef DWORD						OsThreadId;
 typedef CRITICAL_SECTION			OsSemaphore;
-#define LgiGetCurrentThread()		GetCurrentThreadId()
+#define LgiGetCurrentThread()		GetCurrentThread()
 
 #else
 
@@ -513,7 +513,6 @@ enum MessageBoxType
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs
-#define vsprintf_s		vsnprintf
 #define swprintf_s		swprintf
 
 #ifndef WINNATIVE // __CYGWIN__
@@ -531,16 +530,12 @@ enum MessageBoxType
 
 #else
 
+	#define vsprintf_s		vsnprintf
+	
 	LgiFunc class GViewI *GWindowFromHandle(OsView hWnd);
 	LgiFunc int GetMouseWheelLines();
 	LgiFunc int WinPointToHeight(int Pt, HDC hDC = NULL);
 	LgiFunc int WinHeightToPoint(int Ht, HDC hDC = NULL);
-
-	typedef BOOL (__stdcall *pSHGetSpecialFolderPathA)(HWND hwndOwner, LPSTR lpszPath, int nFolder, BOOL fCreate);
-	typedef BOOL (__stdcall *pSHGetSpecialFolderPathW)(HWND hwndOwner, LPWSTR lpszPath, int nFolder, BOOL fCreate);
-	typedef int (__stdcall *pSHFileOperationA)(LPSHFILEOPSTRUCTA lpFileOp);
-	typedef int (__stdcall *pSHFileOperationW)(LPSHFILEOPSTRUCTW lpFileOp);
-	typedef int (__stdcall *p_vscprintf)(const char *format, va_list argptr);
 
 	#if _MSC_VER >= 1400
 		#define snprintf sprintf_s
@@ -554,6 +549,11 @@ enum MessageBoxType
 #endif
 
 #ifdef WINDOWS
+	typedef BOOL (__stdcall *pSHGetSpecialFolderPathA)(HWND hwndOwner, LPSTR lpszPath, int nFolder, BOOL fCreate);
+	typedef BOOL (__stdcall *pSHGetSpecialFolderPathW)(HWND hwndOwner, LPWSTR lpszPath, int nFolder, BOOL fCreate);
+	typedef int (__stdcall *pSHFileOperationA)(LPSHFILEOPSTRUCTA lpFileOp);
+	typedef int (__stdcall *pSHFileOperationW)(LPSHFILEOPSTRUCTW lpFileOp);
+	typedef int (__stdcall *p_vscprintf)(const char *format, va_list argptr);
 	LgiExtern class GString WinGetSpecialFolderPath(int Id);
 #endif
 

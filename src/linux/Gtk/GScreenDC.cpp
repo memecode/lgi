@@ -24,8 +24,12 @@ public:
 
 	GView *View;
 	OsView v;
-	GdkDrawable *d;
+	OsDrawable *d;
+	#if GTK_MAJOR_VERSION == 3
+	void *gc;
+	#else
 	GdkGC *gc;
+	#endif
 
 	GScreenPrivate()
 	{
@@ -91,11 +95,14 @@ GScreenDC::GScreenDC(int x, int y, int bits)
 	d->Bits = bits;
 }
 
-GScreenDC::GScreenDC(Gtk::GdkDrawable *Drawable)
+GScreenDC::GScreenDC(OsDrawable *Drawable)
 {
 	d = new GScreenPrivate;
 	d->Own = false;
 	d->d = Drawable;
+
+	#if GTK_MAJOR_VERSION == 3
+	#else
 	if (d->gc = gdk_gc_new(Drawable))
 	{
 	    GdkScreen *s = gdk_gc_get_screen(d->gc);
@@ -109,6 +116,7 @@ GScreenDC::GScreenDC(Gtk::GdkDrawable *Drawable)
 	        }
 	    }
 	}
+	#endif
 }
 
 GScreenDC::GScreenDC(GView *view, void *param)
@@ -121,6 +129,10 @@ GScreenDC::GScreenDC(GView *view, void *param)
 		if (v)
 		{
 			d->v = v;
+
+			#if GTK_MAJOR_VERSION == 3
+			LgiAssert(!"Gtk3 FIXME");
+			#else
 			d->d = v->window;	
 			d->x = v->allocation.width;
 			d->y = v->allocation.height;	
@@ -137,23 +149,7 @@ GScreenDC::GScreenDC(GView *view, void *param)
 			        }
 			    }
 			}
-	
-			/*
-			d->d = v->window;
-			if (d->gc = gdk_gc_new(v->window))
-			{
-			    GdkScreen *s = gdk_gc_get_screen(d->gc);
-			    if (s)
-			    {
-			        GdkVisual *v = gdk_screen_get_system_visual(s);
-			        if (v)
-			        {
-			            d->Bits = v->depth;
-				        ColourSpace = GdkVisualToColourSpace(v, v->depth);
-			        }
-			    }
-			}
-			*/
+			#endif
 		}
 		else
 		{
@@ -168,8 +164,12 @@ GScreenDC::GScreenDC(GView *view, void *param)
 		        GdkVisual *v = gdk_screen_get_system_visual(s);
 		        if (v)
 		        {
+					#if GTK_MAJOR_VERSION == 3
+					LgiAssert(!"Gtk3 FIXME");
+					#else
 		            d->Bits = v->depth;
 			        ColourSpace = GdkVisualToColourSpace(v, v->depth);
+					#endif
 		        }
 		    }
 		}
@@ -207,6 +207,10 @@ OsPainter GScreenDC::Handle()
 				d->View->_Debug)
 			{
 				int width, height;
+
+				#if GTK_MAJOR_VERSION == 3
+				LgiAssert(!"Gtk3 FIXME");
+				#else
 				gdk_drawable_get_size (d->d, &width, &height);
 				
 				printf("%s:%i %s %g,%g,%g,%g %i,%i  %i,%i  %i,%i\n",
@@ -216,6 +220,7 @@ OsPainter GScreenDC::Handle()
 					x,y,
 					d->x, d->y,
 					width, height);
+				#endif
 			}
 			#endif
 		}
@@ -251,7 +256,12 @@ void GScreenDC::SetClient(GRect *c)
 		d->Client = *c;
 
         GdkRectangle r = {c->x1, c->y1, c->X(), c->Y()};
+
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
         gdk_gc_set_clip_rectangle(d->gc, &r);
+		#endif
 
 		OriginX = -c->x1;
 		OriginY = -c->y1;	
@@ -264,7 +274,11 @@ void GScreenDC::SetClient(GRect *c)
 		d->Client.ZOff(-1, -1);
 
         GdkRectangle r = {0, 0, X(), Y()};
-        gdk_gc_set_clip_rectangle(d->gc, &r);
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
+		gdk_gc_set_clip_rectangle(d->gc, &r);
+		#endif
 	}
 }
 
@@ -316,7 +330,11 @@ GRect GScreenDC::ClipRgn(GRect *c)
 		// LgiTrace("Setting clip %s client=%s\n", Clip.GetStr(), d->Client.GetStr());
 
         GdkRectangle r = {c->x1+d->Client.x1, c->y1+d->Client.y1, c->X(), c->Y()};
-        gdk_gc_set_clip_rectangle(d->gc, &r);
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
+		gdk_gc_set_clip_rectangle(d->gc, &r);
+		#endif
 	}
 	else
 	{
@@ -324,7 +342,11 @@ GRect GScreenDC::ClipRgn(GRect *c)
 		// LgiTrace("Removing clip\n");
 
         GdkRectangle r = {d->Client.x1, d->Client.y1, X(), Y()};
-        gdk_gc_set_clip_rectangle(d->gc, &r);
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
+		gdk_gc_set_clip_rectangle(d->gc, &r);
+		#endif
 	}
 
 	Translate();
@@ -363,8 +385,12 @@ GColour GScreenDC::Colour(GColour c)
 		
 		// printf("Setting Col %x, %x, %x\n", col.red, col.green, col.blue);
 		
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
 		gdk_gc_set_rgb_fg_color(d->gc, &col);
 		gdk_gc_set_rgb_bg_color(d->gc, &col);
+		#endif
 	}
 
 	return Prev;
@@ -458,7 +484,11 @@ void GScreenDC::Palette(GPalette *pPal, bool bOwnIt)
 
 void GScreenDC::Set(int x, int y)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_point(d->d, d->gc, x-OriginX, y-OriginY);
+	#endif
 }
 
 COLOUR GScreenDC::Get(int x, int y)
@@ -468,82 +498,122 @@ COLOUR GScreenDC::Get(int x, int y)
 
 void GScreenDC::HLine(int x1, int x2, int y)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_line(d->d, d->gc, x1-OriginX, y-OriginY, x2-OriginX, y-OriginY);
+	#endif
 }
 
 void GScreenDC::VLine(int x, int y1, int y2)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_line(d->d, d->gc, x-OriginX, y1-OriginY, x-OriginX, y2-OriginY);
+	#endif
 }
 
 void GScreenDC::Line(int x1, int y1, int x2, int y2)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_line(d->d, d->gc, x1-OriginX, y1-OriginY, x2-OriginX, y2-OriginY);
+	#endif
 }
 
 void GScreenDC::Circle(double cx, double cy, double radius)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_arc(d->d, d->gc, false,
 			 	cx - radius, cy - radius,
 			 	radius * 2.0,
 			 	radius * 2.0,
 			 	0,
 			 	360 * 64);
+	#endif
 }
 
 void GScreenDC::FilledCircle(double cx, double cy, double radius)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_arc(d->d, d->gc, true,
 			 	cx - radius, cy - radius,
 			 	radius * 2.0,
 			 	radius * 2.0,
 			 	0,
 			 	360 * 64);
+	#endif
 }
 
 void GScreenDC::Arc(double cx, double cy, double radius, double start, double end)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_arc(d->d, d->gc, false,
 			 	cx - radius, cy - radius,
 			 	radius * 2.0,
 			 	radius * 2.0,
 			 	start * 64.0,
 			 	end * 64.0);
+	#endif
 }
 
 void GScreenDC::FilledArc(double cx, double cy, double radius, double start, double end)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_arc(d->d, d->gc, true,
 			 	cx - radius, cy - radius,
 			 	radius * 2.0,
 			 	radius * 2.0,
 			 	start * 64.0,
 			 	end * 64.0);
+	#endif
 }
 
 void GScreenDC::Ellipse(double cx, double cy, double x, double y)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_arc(d->d, d->gc, false,
 			 	cx - (x / 2), cy - (y / 2),
 			 	x,
 			 	y,
 			 	0,
 			 	360 * 64);
+	#endif
 }
 
 void GScreenDC::FilledEllipse(double cx, double cy, double x, double y)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_arc(d->d, d->gc, true,
 			 	cx - (x / 2), cy - (y / 2),
 			 	x,
 			 	y,
 			 	0,
 			 	360 * 64);
+	#endif
 }
 
 void GScreenDC::Box(int x1, int y1, int x2, int y2)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_rectangle(d->d, d->gc, false, x1-OriginX, y1-OriginY, x2-x1, y2-y1);
+	#endif
 }
 
 void GScreenDC::Box(GRect *a)
@@ -563,7 +633,11 @@ void GScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 	if (x2 >= x1 &&
 		y2 >= y1)
 	{
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
 		gdk_draw_rectangle(d->d, d->gc, true, x1-OriginX, y1-OriginY, x2-x1+1, y2-y1+1);
+		#endif
 	}
 }
 
@@ -574,12 +648,20 @@ void GScreenDC::Rectangle(GRect *a)
 		if (a->X() > 0 &&
 			a->Y() > 0)
 		{
+			#if GTK_MAJOR_VERSION == 3
+			LgiAssert(!"Gtk3 FIXME");
+			#else
 			gdk_draw_rectangle(d->d, d->gc, true, a->x1-OriginX, a->y1-OriginY, a->X(), a->Y());
+			#endif
 		}
 	}
 	else
 	{
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
 		gdk_draw_rectangle(d->d, d->gc, true, -OriginX, -OriginY, X(), Y());
+		#endif
 	}
 }
 
@@ -595,11 +677,15 @@ void GScreenDC::Polygon(int Points, GdcPt2 *Data)
 			out.y = Data[p].y;
 		}
 		
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
 		gdk_draw_polygon(d->d,
 						 d->gc,
 						 true,
 						 &pt.First(),
 						 pt.Length());
+		#endif
 	}
 }
 
@@ -661,12 +747,16 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 
 		if (d->d && d->gc && Mem->GetImage())
 		{
+			#if GTK_MAJOR_VERSION == 3
+			LgiAssert(!"Gtk3 FIXME");
+			#else
 			gdk_draw_image( d->d,
 							d->gc,
 							Mem->GetImage(),
 							br.SrcClip.x1, br.SrcClip.y1,
 							Dx, Dy,
 							br.SrcClip.X(), br.SrcClip.Y());
+			#endif
 		}
 		else
 		{

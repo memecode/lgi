@@ -3,9 +3,14 @@
 
 G_BEGIN_DECLS
 
-#define LGI_WIDGET(obj) GTK_CHECK_CAST(obj, lgi_widget_get_type(), LgiWidget)
+#if GTK_MAJOR_VERSION == 3
+	#define LGI_WIDGET(obj) 	G_TYPE_CHECK_INSTANCE_CAST(obj, lgi_widget_get_type(), LgiWidget)
+	#define LGI_IS_WIDGET(obj)	G_TYPE_CHECK_INSTANCE_TYPE(obj, lgi_widget_get_type())
+#else
+	#define LGI_WIDGET(obj)		GTK_CHECK_CAST(obj, lgi_widget_get_type(), LgiWidget)
+	#define LGI_IS_WIDGET(obj)	GTK_CHECK_TYPE(obj, lgi_widget_get_type())
+#endif
 #define LGI_WIDGET_CLASS(klass) GTK_CHECK_CLASS_CAST(klass, lgi_widget_get_type(), LgiWidgetClass)
-#define LGI_IS_WIDGET(obj) GTK_CHECK_TYPE(obj, lgi_widget_get_type())
 
 typedef struct _LgiWidget LgiWidget;
 typedef struct _LgiWidgetClass LgiWidgetClass;
@@ -37,6 +42,7 @@ struct _LgiWidgetClass
 };
 
 #if GTK_MAJOR_VERSION == 3
+Gtk::GType lgi_widget_get_type();
 #else
 GtkType lgi_widget_get_type();
 #endif

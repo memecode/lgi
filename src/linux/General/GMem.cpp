@@ -267,7 +267,7 @@ void MemorySizeToStr(char *Str, uint64 Size)
 	}
 	else
 	{
-		sprintf(Str, "%ld bytes", Size);
+		sprintf(Str, LPrintfInt64 " bytes", Size);
 	}
 
 	#undef K

@@ -368,9 +368,12 @@ public:
 
 		DesktopInfo *GetDesktopInfo();
 		bool SetApplicationIcon(const char *FileName);
-		bool PostEvent(GViewI *View, int Msg, GMessage::Param a = 0, GMessage::Param b = 0);
-		void OnDetach(GViewI *View);
 		
+	#endif
+
+	#ifdef __GTK_H__
+		void OnDetach(GViewI *View);
+		bool PostEvent(GViewI *View, int Msg, GMessage::Param a = 0, GMessage::Param b = 0);
 	#endif
 };
 

@@ -25,7 +25,11 @@ class GMemDCPrivate
 {
 public:
 	GRect Client;
+	#if GTK_MAJOR_VERSION == 3
+	cairo_surface_t *Img;
+	#else
 	GdkImage *Img;
+	#endif
 	cairo_surface_t *Surface;
 	GColourSpace CreateCs;
 
@@ -76,9 +80,12 @@ GMemDC::~GMemDC()
 
 cairo_surface_t *GMemDC::GetSurface(GRect &r)
 {
+	#if GTK_MAJOR_VERSION == 3
+	return d->Img;
+	#else
 	if (!d->Img)
 		return NULL;
-
+	
 	cairo_format_t fmt = CAIRO_FORMAT_ARGB32;
 	switch (d->Img->depth)
 	{
@@ -97,12 +104,15 @@ cairo_surface_t *GMemDC::GetSurface(GRect &r)
 												r.X(),
 												r.Y(),
 												d->Img->bpl);
+	#endif
 }
 
 OsPainter GMemDC::Handle()
 {
 	if (!Cairo)
 	{
+		#if GTK_MAJOR_VERSION == 3
+		#else
 		cairo_format_t fmt = CAIRO_FORMAT_ARGB32;
 		int bits;
 		if (d->Img)
@@ -148,6 +158,7 @@ OsPainter GMemDC::Handle()
 			Cairo = cairo_create(d->Surface);
 			LgiAssert(Cairo);
 		}
+		#endif
 	}
 
 	return Cairo;
@@ -176,7 +187,11 @@ bool GMemDC::SupportsAlphaCompositing()
 	return true;
 }
 
+#if GTK_MAJOR_VERSION == 3
+Gtk::cairo_surface_t *GMemDC::GetImage()
+#else
 GdkImage *GMemDC::GetImage()
+#endif
 {
     return d->Img;
 }
@@ -267,6 +282,9 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	Empty();
 	d->CreateCs = Cs;
 	
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	GdkVisual Fallback;
 	GdkVisual *Vis = gdk_visual_get_system();
 	GColourSpace VisCs = Vis ? GdkVisualToColourSpace(Vis, Bits) : CsNone;
@@ -384,6 +402,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	}
 
 	Clip.ZOff(X()-1, Y()-1);
+	#endif
 
 	return true;
 }
@@ -410,6 +429,9 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 				gint x_orig, y_orig;
 				gint width, height;
 
+				#if GTK_MAJOR_VERSION == 3
+				LgiAssert(!"Gtk3 FIXME");
+				#else
 				gdk_drawable_get_size(root_window, &width, &height);      
 				gdk_window_get_origin(root_window, &x_orig, &y_orig);
 				gdk_drawable_copy_to_image(	root_window,
@@ -420,6 +442,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 											y,
 											br.SrcClip.X(),
 											br.SrcClip.Y());
+				#endif
 				
 				// Call the capture screen handler to draw anything between the screen and
 				// cursor layers

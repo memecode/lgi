@@ -316,6 +316,9 @@ void LgiToGtkCursor(GViewI *v, LgiCursor c)
 	OsView h = Wnd ? Wnd->Handle() : v->Handle();
 	
 	LgiAssert(v->InThread());
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	LgiAssert(h->window);
 	if (type == GDK_ARROW)
 	{
@@ -336,6 +339,7 @@ void LgiToGtkCursor(GViewI *v, LgiCursor c)
 			// printf("gdk_window_set_cursor(%s, gdk_cursor_new_for_display fail)\n", v->GetClass());
 		}
 	}
+	#endif
 }
 
 bool GView::_Mouse(GMouse &m, bool Move)
@@ -704,17 +708,14 @@ void GView::PointToScreen(GdcPt2 &p)
 	if (c && c->WindowHandle())
 	{
 	    gint x = 0, y = 0;
-	    // GdkRectangle rect;
 		Gtk::GtkWindow *wnd = c->WindowHandle();
 		Gtk::GtkWidget *w = GTK_WIDGET(wnd);
-		// Gtk::GdkWindow *gdk_wnd = gtk_widget_get_window(w);
 
-		// gdk_window_get_frame_extents(gdk_wnd, &rect);
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
 		gdk_window_get_origin(w->window, &x, &y);
-		
-		// int DecorX = x - rect.x;
-		// int DecorY = y - rect.y;		
-		// printf("%s:%i - rect=%i,%i-%i,%i  origin=%i,%i\n", _FL, rect.x, rect.y, rect.width, rect.height, x, y);
+		#endif
 		
 		p.x += x;
 		p.y += y;
@@ -732,7 +733,11 @@ void GView::PointToView(GdcPt2 &p)
 	if (_View)
 	{
 		gint x = 0, y = 0;
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
 		gdk_window_get_origin(GetWindow()->Handle()->window, &x, &y);
+		#endif
 		p.x -= x;
 		p.y -= y;
 		
@@ -825,7 +830,12 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 
 bool GView::IsAttached()
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	return false;
+	#else
 	return	_View && _View->parent;
+	#endif
 }
 
 const char *GView::GetClass()
@@ -953,7 +963,10 @@ bool GView::Detach()
 
 	if (_View)
 	{
+		#if GTK_MAJOR_VERSION == 3
+		#else
 		LgiAssert(_View->object.parent_instance.g_type_instance.g_class);
+		#endif
 		LgiApp->OnDetach(this);
 		gtk_widget_destroy(_View);
 		_View = 0;

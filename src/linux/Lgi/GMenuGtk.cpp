@@ -42,12 +42,14 @@ GSubMenu::~GSubMenu()
 	
 	if (Info)
 	{
-		// bool IsMenu = Menu == this;
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
 		LgiAssert(Info->container.widget.object.parent_instance.g_type_instance.g_class);
 		Gtk::GtkWidget *w = GtkCast(Info, gtk_widget, GtkWidget);
-		// LgiTrace("%p::~GSubMenu w=%p name=%s IsMenu=%i\n", this, w, Name(), IsMenu);
 		Gtk::gtk_widget_destroy(w);
 		Info = NULL;
+		#endif
 	}
 }
 
@@ -735,6 +737,9 @@ bool LgiMenuItem::Remove()
 
 	if (Info)
 	{
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
 		LgiAssert(Info->item.bin.container.widget.object.parent_instance.g_type_instance.g_class);
 		Gtk::GtkWidget *w = GtkCast(Info, gtk_widget, GtkWidget);
 		if (Gtk::gtk_widget_get_parent(w))
@@ -742,6 +747,7 @@ bool LgiMenuItem::Remove()
 			Gtk::GtkContainer *c = GtkCast(Parent->Info, gtk_container, GtkContainer);
 			Gtk::gtk_container_remove(c, w);
 		}
+		#endif
 	}
 
 	Parent->Items.Delete(this);
@@ -908,15 +914,18 @@ void LgiMenuItem::Icon(int i)
 				IconImg->Blt(0, 0, lst, &r);
 				
 				// Get the sub-image of the icon
-				GdkImage *img = IconImg->GetImage();
+				auto img = IconImg->GetImage();
 				if (!img)
 				{
 					LgiTrace("%s:%i - GetImage failed.\n", _FL);
 					return;
 				}
-				
 				// Create a new widget to wrap it...
-				GtkWidget *img_wid = gtk_image_new_from_image(img, NULL);
+				#if GTK_MAJOR_VERSION == 3
+				auto img_wid = gtk_image_new_from_surface(img);
+				#else
+				auto img_wid = gtk_image_new_from_image(img, NULL);
+				#endif
 				if (!img_wid)
 				{
 					LgiTrace("%s:%i - gtk_image_new_from_image failed.\n", _FL);

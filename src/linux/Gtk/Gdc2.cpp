@@ -447,12 +447,17 @@ public:
 			{
 				ScrX = Gtk::gdk_screen_get_width(Scr);
 				ScrY = Gtk::gdk_screen_get_height(Scr);
+
+				#if GTK_MAJOR_VERSION == 3
+				LgiAssert(!"Gtk3 FIXME");
+				#else
 				Gtk::GdkVisual *Vis = Gtk::gdk_screen_get_system_visual(Scr);
 				if (Vis)
 				{
 					ScrBits = Vis->depth;
 					ScrColourSpace = GdkVisualToColourSpace(Vis, Vis->depth);
 				}
+				#endif
 			}
 		}
 		
@@ -890,8 +895,11 @@ union EndianTest
 
 GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	return CsNone;
+	#else
 	uint32_t c = CsNone;
-	
 	if (v)
 	{
 		EndianTest Test;
@@ -994,6 +1002,8 @@ GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 	#if VisualToColourSpaceDebug
 	printf("GdkVisualToColourSpace %x %s\n", Cs, GColourSpaceToString(Cs));
 	#endif
+	
 	return Cs;
+	#endif
 }
 
