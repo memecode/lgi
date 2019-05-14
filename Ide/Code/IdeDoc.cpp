@@ -1422,6 +1422,36 @@ bool IdeDoc::HasFocus(int Set)
 	return d->Edit->Focus();
 }
 
+void IdeDoc::SplitSelection(GString Sep)
+{
+	if (!d->Edit)
+		return;
+
+	auto r = d->Edit->GetSelectionRange();
+	GString s = d->Edit->GetSelection();
+	if (!s)
+		return;
+
+	GAutoWString w(Utf8ToWide(s.Replace(Sep, "\n")));
+	d->Edit->DeleteSelection();
+	d->Edit->Insert(r.Start, w, StrlenW(w));
+}
+
+void IdeDoc::JoinSelection(GString Sep)
+{
+	if (!d->Edit)
+		return;
+
+	auto r = d->Edit->GetSelectionRange();
+	GString s = d->Edit->GetSelection();
+	if (!s)
+		return;
+
+	GAutoWString w(Utf8ToWide(s.Replace("\n", Sep)));
+	d->Edit->DeleteSelection();
+	d->Edit->Insert(r.Start, w, StrlenW(w));
+}
+
 void IdeDoc::EscapeSelection(bool ToEscaped)
 {
 	if (!d->Edit)

@@ -137,10 +137,10 @@ public:
 
 		#elif defined(__GTK_H__)
 		
-		System(modifierKeys & Gtk::GDK_MOD4_MASK);
-		Shift(modifierKeys & Gtk::GDK_SHIFT_MASK);
-		Alt(modifierKeys & Gtk::GDK_MOD1_MASK);
-		Ctrl(modifierKeys & Gtk::GDK_CONTROL_MASK);
+		System((modifierKeys & Gtk::GDK_MOD4_MASK) != 0);
+		Shift((modifierKeys & Gtk::GDK_SHIFT_MASK) != 0);
+		Alt((modifierKeys & Gtk::GDK_MOD1_MASK) != 0);
+		Ctrl((modifierKeys & Gtk::GDK_CONTROL_MASK) != 0);
 		
 		#endif
 	}

@@ -15,17 +15,16 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <wchar.h>
-#include <unistd.h>
 #ifdef WIN32
 	#include "winsock2.h"
 	#define WIN32GTK                    1
-	#define WINNATIVE					0
 	#ifdef _WIN64
 		#define LGI_64BIT				1
 	#else
 		#define LGI_32BIT				1
 	#endif
 #else
+	#include <unistd.h>
 	#define _MULTI_THREADED
 	#include <pthread.h>
 	#define LINUX						1
@@ -97,7 +96,7 @@ typedef Gtk::cairo_t					*OsPainter;
 typedef Gtk::PangoFontDescription       *OsFont;
 typedef void							*OsBitmap;
 
-#define LgiGetCurrentProcess()			getpid()
+LgiFunc OsProcessId LgiGetCurrentProcess();
 
 // Because of namespace issues you can't use the built in GTK casting macros.
 // So this is basically the same thing:
@@ -119,7 +118,7 @@ public:
 	OsApplication(int Args, char **Arg);
 	~OsApplication();
 	
-	static OsApplication *GetInst() { LgiAssert(Inst); return Inst; }
+	static OsApplication *GetInst() { LgiAssert(Inst != NULL); return Inst; }
 };
 
 #define XcbConn()					(OsApplication::GetInst()->GetConn())
@@ -265,6 +264,7 @@ LgiFunc void LgiSleep(uint32_t i);
 /// Tests a char for being a quote
 #define IsQuote(c)					(((c)=='\"')||((c)=='\''))
 
+#ifndef WIN32
 /// ID's returned by LgiMsg.
 /// \sa LgiMsg
 enum MessageBoxResponse
@@ -294,6 +294,7 @@ enum MessageBoxType
 };
 
 #define MB_SYSTEMMODAL				0x1000
+#endif
 
 /// The CTRL key is pressed
 /// \sa GKey

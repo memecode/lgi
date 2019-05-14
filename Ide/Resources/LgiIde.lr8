@@ -158,6 +158,31 @@
 			</tr>
 		</TableLayout>
 	</Dialog>
+	<Dialog pos="7,7,506,406" ref="43">
+		<TableLayout pos="7,7,482,356" ref="44" cols="1.000" rows="0.250,0.250,0.250,0.250">
+			<tr>
+				<td>
+					<CheckBox pos="28,14,328,34" ref="48" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<StaticText pos="21,91,433,160" ref="49" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<EditBox Pos="14,168,405,250" MultiLine="1" ref="45" />
+				</td>
+			</tr>
+			<tr>
+				<td align="Max">
+					<Button pos="168,286,209,306" ref="46" />
+					<Button pos="238,286,300,306" ref="47" />
+				</td>
+			</tr>
+		</TableLayout>
+	</Dialog>
 	<Dialog pos="7,7,553,426" ref="82">
 		<EditBox Pos="7,21,160,41" ref="83" />
 		<StaticText pos="7,7,104,20" ref="84" />
@@ -497,31 +522,6 @@
 			</tr>
 		</TableLayout>
 	</Dialog>
-	<Dialog pos="7,7,506,406" ref="43">
-		<TableLayout pos="7,7,482,356" ref="44" cols="1.000" rows="0.250,0.250,0.250,0.250">
-			<tr>
-				<td>
-					<CheckBox pos="28,14,328,34" ref="48" />
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<StaticText pos="21,91,433,160" ref="49" />
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<EditBox Pos="14,168,405,250" MultiLine="1" ref="45" />
-				</td>
-			</tr>
-			<tr>
-				<td align="Max">
-					<Button pos="168,286,209,306" ref="46" />
-					<Button pos="238,286,300,306" ref="47" />
-				</td>
-			</tr>
-		</TableLayout>
-	</Dialog>
 	<menu Name="IDM_MENU">
 		<string-group Name="&lt;untitled&gt;">
 			<String Ref="175" en="&File" />
@@ -612,6 +612,9 @@
 			<String Ref="40" Cid="556" Define="IDM_ESCAPE" en="Escape Selection" />
 			<String Ref="41" Cid="557" Define="IDM_DESCAPE" en="De-escape Selection" />
 			<String Ref="42" Cid="585" Define="IDM_RENAME_SYM" en="Renamed Symbols" />
+			<String Ref="50" Cid="586" Define="IDM_MENU_586" />
+			<String Ref="51" Cid="587" Define="IDM_SPLIT" en="Split Selection" />
+			<String Ref="52" Cid="588" Define="IDM_JOIN" en="Join Selection" />
 		</string-group>
 		<submenu Ref="175">
 			<menuitem Ref="174" Shortcut="Ctrl+N" />
@@ -710,6 +713,9 @@
 			<menuitem Sep="1" />
 			<menuitem Ref="1" />
 			<menuitem Ref="5" />
+			<menuitem Sep="1" />
+			<menuitem Ref="51" />
+			<menuitem Ref="52" />
 			<menuitem Sep="1" />
 			<menuitem Ref="129" />
 			<menuitem Ref="128" />

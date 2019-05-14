@@ -217,13 +217,18 @@ public:
 
 			if (Event && Event->type == Gtk::GDK_CLIENT_EVENT)
 			{
-				m = Event->client.data.l[0];
-				a = Event->client.data.l[1];
-				b = Event->client.data.l[2];
+				#if GTK_MAJOR_VERSION == 3
+					LgiAssert(!"Gtk3 FIXME");
+				#else
+					m = Event->client.data.l[0];
+					a = Event->client.data.l[1];
+					b = Event->client.data.l[2];
+				#endif
 			}
 			else 
 			{
-				m = a = b = 0;
+				m = 0;
+				a = b = 0;
 			}
 		}
 	#endif

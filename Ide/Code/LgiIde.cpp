@@ -3762,6 +3762,32 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				Doc->EscapeSelection(false);
 			break;
 		}
+		case IDM_SPLIT:
+		{
+			IdeDoc *Doc = FocusDoc();
+			if (!Doc)
+				break;
+
+			GInput i(this, "", "Separator:", AppName);
+			if (!i.DoModal())
+				break;
+				
+			Doc->SplitSelection(i.GetStr());
+			break;
+		}
+		case IDM_JOIN:
+		{
+			IdeDoc *Doc = FocusDoc();
+			if (!Doc)
+				break;
+
+			GInput i(this, "", "Separator:", AppName);
+			if (!i.DoModal())
+				break;
+				
+			Doc->JoinSelection(i.GetStr());
+			break;
+		}
 		case IDM_EOL_LF:
 		{
 			IdeDoc *Doc = FocusDoc();

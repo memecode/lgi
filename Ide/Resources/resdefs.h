@@ -153,3 +153,6 @@
 #define IDM_PREV_MSG							583
 #define IDM_FIND_PROJECT_FILE					584
 #define IDM_RENAME_SYM							585
+#define IDM_MENU_586							586
+#define IDM_SPLIT								587
+#define IDM_JOIN								588

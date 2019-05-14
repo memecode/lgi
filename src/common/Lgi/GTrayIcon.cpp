@@ -274,7 +274,11 @@ void GTrayIcon::Visible(bool v)
 					if (Ref)
 					{
 						Gtk::gtk_status_icon_set_from_pixbuf(d->tray_icon, Ref);
+						#if GTK_MAJOR_VERSION == 3
+						Gtk::gtk_status_icon_set_tooltip_text(d->tray_icon, GBase::Name());
+						#else
 						Gtk::gtk_status_icon_set_tooltip(d->tray_icon, GBase::Name());
+						#endif
 						Gtk::gtk_status_icon_set_visible(d->tray_icon, true);
 					}
 				}

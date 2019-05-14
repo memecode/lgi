@@ -1,7 +1,13 @@
 #ifndef __OS_CLASS_H
 #define __OS_CLASS_H
 
-extern __thread int GtkLockCount;
+extern 
+	#ifdef _MSC_VER
+	__declspec( thread )
+	#else
+	__thread
+	#endif
+	int GtkLockCount;
 
 class LgiClass GtkLock
 {

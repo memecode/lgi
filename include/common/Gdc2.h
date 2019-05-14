@@ -728,7 +728,11 @@ public:
 			/// Constructs a server size pixmap
 			GScreenDC(int x, int y, int bits);		
 			/// Constructs a wrapper around a drawable
+			#if GTK_MAJOR_VERSION == 3
+			GScreenDC(Gtk::GdkWindow *Drawable);
+			#else
 			GScreenDC(Gtk::GdkDrawable *Drawable);
+			#endif
 			/// Constructs a DC for drawing on a window
 			///GScreenDC(OsView View);
 			
@@ -956,7 +960,11 @@ public:
 		
 		#elif defined(__GTK_H__)
 
+			#if GTK_MAJOR_VERSION == 3
+			Gtk::GdkPixbuf *GetImage();
+			#else
 			Gtk::GdkImage *GetImage();
+			#endif
 			GdcPt2 GetSize();
 			Gtk::cairo_surface_t *GetSurface(GRect &r);
 			GColourSpace GetCreateCs();
