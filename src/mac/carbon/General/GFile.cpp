@@ -1352,6 +1352,10 @@ GFile::~GFile()
 	DeleteObj(d);
 }
 
+void GFile::ChangeThread()
+{
+}
+
 int GFile::GetError()
 {
 	return d->LastError;

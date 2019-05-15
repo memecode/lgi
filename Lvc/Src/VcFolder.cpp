@@ -2519,6 +2519,13 @@ void VcFolder::MergeToLocal(GString Rev)
 			StartCmd(Args, &VcFolder::ParseMerge, NULL, LogNormal);
 			break;
 		}
+		case VcHg:
+		{
+			GString Args;
+			Args.Printf("merge -r %s", Rev.Get());
+			StartCmd(Args, &VcFolder::ParseMerge, NULL, LogNormal);
+			break;
+		}
 		default:
 			LgiMsg(GetTree(), "Not implemented.", AppName);
 			break;
@@ -2530,8 +2537,11 @@ bool VcFolder::ParseMerge(int Result, GString s, ParseParams *Params)
 	switch (GetType())
 	{
 		case VcGit:
+		case VcHg:
 			if (Result == 0)
 				CommitListDirty = true;
+			else
+				OnCmdError(s, "Merge failed.");
 			break;
 		default:
 			LgiAssert(!"Impl me.");
