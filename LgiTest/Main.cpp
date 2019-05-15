@@ -223,6 +223,7 @@ public:
 			#endif
 			
 			AttachChildren();
+			// Debug();
 			Visible(true);
 		}
 	}
@@ -377,56 +378,12 @@ bool DbTesting()
 	return true;
 }
 
-/*
-@interface TestWindow : NSWindow
-{
-}
-
-- (id)init:(NSRect)rc;
-- (void)dealloc;
-
-@end
-
-
-@implementation TestWindow
-
-- (id)init:(NSRect)rc
-{
-	NSUInteger windowStyleMask = NSTitledWindowMask | NSResizableWindowMask |
-								 NSClosableWindowMask | NSMiniaturizableWindowMask;
-	if ((self = [super initWithContentRect:rc
-					styleMask:windowStyleMask
-					backing:NSBackingStoreBuffered
-					defer:NO ]) != nil)
-	{
-	}
-	return self;
-}
-
-- (void)dealloc
-{
-	[super dealloc];
-	printf("TestWindow dealloc...\n");
-}
-
-@end
-*/
 
 int LgiMain(OsAppArguments &AppArgs)
 {
 	GApp a(AppArgs, "Lgi Test");
 	if (a.IsOk())
 	{
-		/*
-		{
-			NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-			NSRect rc = {{100.0, 100.0},{200.0,100.0}};
-			TestWindow *w = [[TestWindow alloc] init:rc];
-			[w release];
-			[pool release];
-		}
-		*/
-
 		a.AppWnd = new App;
 		a.Run();
 	}

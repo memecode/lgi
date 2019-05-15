@@ -350,6 +350,11 @@ GRect GView::Flip(GRect p)
 	return p;
 }
 
+void GView::OnCocoaDealloc()
+{
+	_View.p = nil;
+}
+
 void GView::OnCocoaLayout()
 {
 	LAutoPool Pool;
@@ -699,22 +704,6 @@ bool GView::IsAttached()
 	return false;
 }
 
-/*
-void GView::OnNcPaint(GSurface *pDC, GRect &r)
-{
-	int Border = Sunken() || Raised() ? _BorderSize : 0;
-	if (Border == 2)
-	{
-		LgiWideBorder(pDC, r, Sunken() ? SUNKEN : RAISED);
-	}
-	else if (Border == 1)
-	{
-		LgiThinBorder(pDC, r, Sunken() ? SUNKEN : RAISED);
-	}
-	// r.Offset(Border, Border);
-}
-*/
-
 void BuildTabStops(GArray<GViewI*> &Stops, GViewI *v)
 {
 	if (v && v->Visible())
@@ -892,6 +881,10 @@ bool GView::_Attach(GViewI *parent)
 		return false;
 	}
 
+	#if COCOA
+	d->ClassName = GetClass();
+	#endif
+	
 	d->ParentI = parent;
 	d->Parent = d->ParentI ? parent->GetGView() : NULL;
 
@@ -997,6 +990,11 @@ void GView::_Delete()
 	
 	Detach();
 
+	if (d->ClassName.Equals("GTabView"))
+	{
+		int asd=0;
+	}
+	
 	if (_View)
 	{
 		[_View.p release];

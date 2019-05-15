@@ -38,6 +38,7 @@ static int LCocoaView_Count = 0;
 
 	printf("LCocoaView.dealloc... (%i, %s)\n", LCocoaView_Count-1, self.Cls.Get());
 
+	self.v->OnCocoaDealloc();
 	self.v = nil;
 	[super dealloc];
 	LCocoaView_Count--;
