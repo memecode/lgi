@@ -97,10 +97,32 @@ void GWindow::MoveOnScreen()
 void GWindow::MoveToCenter()
 {
 	GRect Screen(0, 0, GdcD->X()-1, GdcD->Y()-1);
+	::GArray<GDisplayInfo*> Displays;
 	GRect p = GetPos();
 
 	p.Offset(-p.x1, -p.y1);
-	p.Offset((Screen.X() - p.X()) / 2, (Screen.Y() - p.Y()) / 2);
+	if (LgiGetDisplays(Displays, &Screen) && Displays.Length() > 0)
+	{
+		GDisplayInfo *Dsp = NULL;
+		for (auto d: Displays)
+		{
+			if (d->r.Overlap(&p))
+			{
+				Dsp = d;
+				break;
+			}
+		}
+
+		if (!Dsp)
+			goto ScreenPos;
+
+		p.Offset(Dsp->r.x1 + ((Dsp->r.X() - p.X()) / 2), Dsp->r.y1 + ((Dsp->r.Y() - p.Y()) / 2));
+	}
+	else
+	{
+		ScreenPos:
+		p.Offset((Screen.X() - p.X()) / 2, (Screen.Y() - p.Y()) / 2);
+	}
 
 	SetPos(p, true);
 }

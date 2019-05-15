@@ -125,6 +125,7 @@ set (CommonSource
 	src/common/Widgets/GToolBar.cpp	
 	src/common/Widgets/GTree.cpp
 	include/common/GMessage.h
+	include/common/LgiClasses.h
 	)
 
 set (GtkSource

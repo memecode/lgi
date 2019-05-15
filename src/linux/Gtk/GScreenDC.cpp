@@ -26,7 +26,7 @@ public:
 	OsView v;
 	OsDrawable *d;
 	#if GTK_MAJOR_VERSION == 3
-	void *gc;
+	cairo_t *cr;
 	#else
 	GdkGC *gc;
 	#endif
@@ -38,14 +38,21 @@ public:
 		Own = false;
 		v = 0;
 		d = NULL;
+		#if GTK_MAJOR_VERSION == 3
+		cr = NULL;
+		#else
 		gc = NULL;
+		#endif
 		Client.ZOff(-1, -1);
 	}
 	
 	~GScreenPrivate()
 	{
+		#if GTK_MAJOR_VERSION == 3
+		#else
 		if (gc)
 			g_object_unref((Gtk::GObject*)g_type_check_instance_cast((Gtk::GTypeInstance*)gc, G_TYPE_OBJECT));
+		#endif
 	}
 };
 
@@ -61,38 +68,19 @@ GScreenDC::GScreenDC()
 	d->y = GdcD->Y();
 }
 
-/*
-GScreenDC::GScreenDC(OsView View)
-{
-	d = new GScreenPrivate;
-	d->v = View;
-	d->d = View->window;	
-	d->x = View->allocation.width;
-	d->y = View->allocation.height;	
-	if (d->gc = gdk_gc_new(View->window))
-	{
-	    GdkScreen *s = gdk_gc_get_screen(d->gc);
-	    if (s)
-	    {
-	        GdkVisual *v = gdk_screen_get_system_visual(s);
-	        if (v)
-	        {
-	            d->Bits = v->depth;
-		        ColourSpace = GdkVisualToColourSpace(v, v->depth);
-	        }
-	    }
-	}
-	
-	// printf("%s:%i %p, %ix%i, %i\n", _FL, View, d->x, d->y, d->Bits);
-}
-*/
-
 GScreenDC::GScreenDC(int x, int y, int bits)
 {
 	d = new GScreenPrivate;
 	d->x = x;
 	d->y = y;
 	d->Bits = bits;
+}
+
+GScreenDC::GScreenDC(Gtk::cairo_t *cr)
+{
+	d = new GScreenPrivate;
+	d->Own = false;
+	d->cr = cr;
 }
 
 GScreenDC::GScreenDC(OsDrawable *Drawable)
@@ -360,14 +348,24 @@ COLOUR GScreenDC::Colour()
 
 COLOUR GScreenDC::Colour(COLOUR c, int Bits)
 {
-	GColour col(c, Bits ? Bits : GetBits());
-	return Colour(col).Get(GetBits());
+	d->Col.Set(c, Bits);
+	return Colour(d->Col).Get(Bits);
 }
 
 GColour GScreenDC::Colour(GColour c)
 {
 	GColour Prev = d->Col;
 	d->Col = c;
+
+	#if GTK_MAJOR_VERSION == 3
+	if (d->cr)
+	{
+		cairo_set_source_rgb(d->cr,
+							(double)d->Col.r()/255.0,
+							(double)d->Col.g()/255.0,
+							(double)d->Col.b()/255.0);
+	}
+	#else
 	if (d->gc)
 	{
 		GdkColor col;
@@ -385,13 +383,10 @@ GColour GScreenDC::Colour(GColour c)
 		
 		// printf("Setting Col %x, %x, %x\n", col.red, col.green, col.blue);
 		
-		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
-		#else
 		gdk_gc_set_rgb_fg_color(d->gc, &col);
 		gdk_gc_set_rgb_bg_color(d->gc, &col);
-		#endif
 	}
+	#endif
 
 	return Prev;
 }
@@ -634,7 +629,7 @@ void GScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 		y2 >= y1)
 	{
 		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
+		cairo_rectangle (d->cr, x1, y1, x2-x1+1, y2-y1+1);
 		#else
 		gdk_draw_rectangle(d->d, d->gc, true, x1-OriginX, y1-OriginY, x2-x1+1, y2-y1+1);
 		#endif
@@ -649,7 +644,7 @@ void GScreenDC::Rectangle(GRect *a)
 			a->Y() > 0)
 		{
 			#if GTK_MAJOR_VERSION == 3
-			LgiAssert(!"Gtk3 FIXME");
+			cairo_rectangle (d->cr, a->x1, a->y1, a->X(), a->Y());
 			#else
 			gdk_draw_rectangle(d->d, d->gc, true, a->x1-OriginX, a->y1-OriginY, a->X(), a->Y());
 			#endif
@@ -658,7 +653,7 @@ void GScreenDC::Rectangle(GRect *a)
 	else
 	{
 		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
+		cairo_rectangle(d->cr, -OriginX, -OriginY, X(), Y());
 		#else
 		gdk_draw_rectangle(d->d, d->gc, true, -OriginX, -OriginY, X(), Y());
 		#endif
@@ -745,24 +740,24 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 			}
 		}
 
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
 		if (d->d && d->gc && Mem->GetImage())
 		{
-			#if GTK_MAJOR_VERSION == 3
-			LgiAssert(!"Gtk3 FIXME");
-			#else
 			gdk_draw_image( d->d,
 							d->gc,
 							Mem->GetImage(),
 							br.SrcClip.x1, br.SrcClip.y1,
 							Dx, Dy,
 							br.SrcClip.X(), br.SrcClip.Y());
-			#endif
 		}
 		else
 		{
 			LgiTrace("%s:%i - Error missing d=%p, gc=%p, img=%p\n",
 				_FL, d->d, d->gc, Mem->GetImage());
 		}
+		#endif
 	}
 }
 

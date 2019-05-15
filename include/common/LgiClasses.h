@@ -407,6 +407,7 @@ class LgiClass GView : virtual public GViewI, virtual public GBase
 	#if defined(__GTK_H__)
 
 		friend Gtk::gboolean lgi_widget_expose(Gtk::GtkWidget *widget, Gtk::GdkEventExpose *e);
+		friend Gtk::gboolean lgi_widget_draw(Gtk::GtkWidget *widget, Gtk::cairo_t *cr);
 		friend Gtk::gboolean lgi_widget_click(Gtk::GtkWidget *widget, Gtk::GdkEventButton *ev);
 		friend Gtk::gboolean lgi_widget_motion(Gtk::GtkWidget *widget, Gtk::GdkEventMotion *ev);
 		friend Gtk::gboolean GViewCallback(Gtk::GtkWidget *widget, Gtk::GdkEvent  *event, GView *view);

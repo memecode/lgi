@@ -275,6 +275,15 @@ public:
 	    r.height = Y();
 	    return r;
 	}
+
+	GRect &operator =(const Gtk::GdkRectangle r)
+	{
+		x1 = r.x;
+		y1 = r.y;
+		x2 = x1 + r.width - 1;
+		y2 = y1 + r.height - 1;
+		return *this;
+	}
 	#endif
 	
 	#ifdef LGI_SDL

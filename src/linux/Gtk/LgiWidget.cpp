@@ -237,21 +237,6 @@ static gboolean lgi_widget_mouse_enter_leave(GtkWidget *widget, GdkEventCrossing
 	return TRUE;
 }
 
-#if GTK_MAJOR_VERSION == 3
-#else
-static gboolean lgi_widget_client_event(GtkWidget *wid, GdkEventClient *ev)
-{
-	LgiWidget *p = LGI_WIDGET(wid);
-    GView *v = dynamic_cast<GView*>(p->target);
-    if (v)
-    {
-		GMessage m(ev->data.l[0], ev->data.l[1], ev->data.l[2]);
-        v->OnEvent(&m);
-    }
-	return TRUE;
-}
-#endif
-
 static gboolean lgi_widget_focus_event(GtkWidget *wid, GdkEventFocus *e)
 {
 	LgiWidget *p = LGI_WIDGET(wid);
@@ -845,36 +830,97 @@ lgi_widget_realize(GtkWidget *widget)
 		LgiTrace("%s:%i - Failed to cast target to GView.\n", _FL);
 }
 
-static gboolean
-lgi_widget_expose(GtkWidget *widget, GdkEventExpose *event)
-{
-	g_return_val_if_fail(widget != NULL, FALSE);
-	g_return_val_if_fail(LGI_IS_WIDGET(widget), FALSE);
-	g_return_val_if_fail(event != NULL, FALSE);
+#if GTK_MAJOR_VERSION == 3
 
-	LgiWidget *p = LGI_WIDGET(widget);
-	
-	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
-	#else
-	if (GTK_WIDGET_DRAWABLE(widget))
+	static gboolean
+	lgi_widget_draw(GtkWidget *widget, cairo_t *cr)
 	{
-		if (p && p->target)
+		g_return_val_if_fail(widget != NULL, FALSE);
+		g_return_val_if_fail(LGI_IS_WIDGET(widget), FALSE);
+
+		LgiWidget *p = LGI_WIDGET(widget);
+		if (gtk_widget_is_drawable(widget))
 		{
-			GScreenDC Dc(p->target->GetGView());
+			if (p && p->target)
+			{
+				GScreenDC Dc(cr);
 
-			GView *v = dynamic_cast<GView*>(p->target);
-			if (v)
-			    v->_Paint(&Dc);
-			else
-			    p->target->OnPaint(&Dc);
+				GView *v = dynamic_cast<GView*>(p->target);
+				if (v)
+					v->_Paint(&Dc);
+				else
+					p->target->OnPaint(&Dc);
+			}
+			else printf("%s:%i - No view to paint widget.\n", _FL);
 		}
-		else printf("%s:%i - No view to paint widget.\n", _FL);
-	}
-	#endif
 
-	return FALSE;
-}
+		return FALSE;
+	}
+
+#else
+
+	static void
+	lgi_widget_size_request(GtkWidget *widget, GtkRequisition *requisition)
+	{
+		g_return_if_fail(widget != NULL);
+		g_return_if_fail(LGI_IS_WIDGET(widget));
+		g_return_if_fail(requisition != NULL);
+
+		LgiWidget *p = LGI_WIDGET(widget);
+		if (p->pour_largest)
+		{
+			requisition->width = 10;
+			requisition->height = 10;
+		}
+		else
+		{
+			requisition->width = p->w;
+			requisition->height = p->h;
+		}
+
+		// LgiTrace("%s::req %i,%i\n", p->target->GetClass(), requisition->width, requisition->height);
+	}
+
+	static gboolean
+	lgi_widget_expose(GtkWidget *widget, GdkEventExpose *event)
+	{
+		g_return_val_if_fail(widget != NULL, FALSE);
+		g_return_val_if_fail(LGI_IS_WIDGET(widget), FALSE);
+		g_return_val_if_fail(event != NULL, FALSE);
+
+		LgiWidget *p = LGI_WIDGET(widget);
+	
+		if (GTK_WIDGET_DRAWABLE(widget))
+		{
+			if (p && p->target)
+			{
+				GScreenDC Dc(p->target->GetGView());
+
+				GView *v = dynamic_cast<GView*>(p->target);
+				if (v)
+					v->_Paint(&Dc);
+				else
+					p->target->OnPaint(&Dc);
+			}
+			else printf("%s:%i - No view to paint widget.\n", _FL);
+		}
+
+		return FALSE;
+	}
+
+	static gboolean lgi_widget_client_event(GtkWidget *wid, GdkEventClient *ev)
+	{
+		LgiWidget *p = LGI_WIDGET(wid);
+		GView *v = dynamic_cast<GView*>(p->target);
+		if (v)
+		{
+			GMessage m(ev->data.l[0], ev->data.l[1], ev->data.l[2]);
+			v->OnEvent(&m);
+		}
+		return TRUE;
+	}
+	
+#endif
 
 void
 lgi_widget_setsize(GtkWidget *wid, int width, int height)
@@ -972,28 +1018,6 @@ lgi_widget_add(GtkContainer *wid, GtkWidget *child)
 	}
 }
 
-static void
-lgi_widget_size_request(GtkWidget *widget, GtkRequisition *requisition)
-{
-	g_return_if_fail(widget != NULL);
-	g_return_if_fail(LGI_IS_WIDGET(widget));
-	g_return_if_fail(requisition != NULL);
-
-	LgiWidget *p = LGI_WIDGET(widget);
-	if (p->pour_largest)
-	{
-	    requisition->width = 10;
-	    requisition->height = 10;
-	}
-	else
-	{
-        requisition->width = p->w;
-        requisition->height = p->h;
-	}
-
-	// LgiTrace("%s::req %i,%i\n", p->target->GetClass(), requisition->width, requisition->height);
-}
-
 gboolean
 lgi_widget_configure(GtkWidget *widget, GdkEventConfigure *ev)
 {
@@ -1020,10 +1044,11 @@ lgi_widget_class_init(LgiWidgetClass *cls)
 	widget_class->realize = lgi_widget_realize;
 
 	#if GTK_MAJOR_VERSION == 3
+		widget_class->draw			= lgi_widget_draw;
 	#else
-	widget_class->size_request = lgi_widget_size_request;
-	widget_class->expose_event = lgi_widget_expose;
-	widget_class->client_event = lgi_widget_client_event;
+		widget_class->size_request = lgi_widget_size_request;
+		widget_class->expose_event = lgi_widget_expose;
+		widget_class->client_event = lgi_widget_client_event;
 	#endif
 	widget_class->size_allocate = lgi_widget_size_allocate;
 	widget_class->button_press_event = lgi_widget_click;
