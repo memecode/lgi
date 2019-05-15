@@ -831,8 +831,7 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 bool GView::IsAttached()
 {
 	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
-	return false;
+	return	_View && gtk_widget_get_parent(_View);
 	#else
 	return	_View && _View->parent;
 	#endif

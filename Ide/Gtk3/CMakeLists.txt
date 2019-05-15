@@ -2,6 +2,7 @@
 cmake_minimum_required (VERSION 3.12)
 
 set (CMAKE_CXX_STANDARD 11)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 project (LgiIde)
 
@@ -158,16 +159,6 @@ elseif (MSVC)
 	target_include_directories(LgiIde PUBLIC ${PNG_INCLUDE_DIRS} ${VCPKG}/installed/x64-windows/include)
 	target_link_libraries(	LgiIde
 							Lgi)
-	add_custom_command(TARGET LgiIde POST_BUILD 
-					COMMAND "${CMAKE_COMMAND}" -E copy 
-						"$<TARGET_FILE:Lgi>"
-						"$<TARGET_FILE_DIR:LgiIde>/$<TARGET_FILE_NAME:Lgi>" 
-					COMMENT "Copying Lgi to output directory")
-	add_custom_command(TARGET LgiIde POST_BUILD 
-					COMMAND "${CMAKE_COMMAND}" -E copy 
-						"$<TARGET_FILE_DIR:Lgi>/Lgi.pdb"
-						"$<TARGET_FILE_DIR:LgiIde>/Lgi.pdb" 
-					COMMENT "Copying Lgi to output directory")
 	if (EXISTS ${PNG_DLL})
 		add_custom_command(TARGET LgiIde POST_BUILD 
 					COMMAND "${CMAKE_COMMAND}" -E copy 

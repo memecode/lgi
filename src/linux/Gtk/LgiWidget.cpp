@@ -7,8 +7,30 @@ using namespace Gtk;
 #include "LgiWidget.h"
 #include "gdk/gdkkeysyms.h"
 
+typedef struct _LgiWidget LgiWidget;
+
+struct _LgiWidget
+{
+	GtkContainer widget;
+
+	GViewI *target;
+	int w, h;
+	bool pour_largest;
+	bool drag_over_widget;
+	char *drop_format;
+	bool debug;
+
+	struct ChildInfo
+	{
+		int x;
+		int y;
+		GtkWidget *w;
+	};
+
+	::GArray<ChildInfo> child;
+};
+
 static void lgi_widget_class_init(LgiWidgetClass *klass);
-static void lgi_widget_init(LgiWidget *w);
 
 static void
 lgi_widget_forall(	GtkContainer   *container,
@@ -28,16 +50,10 @@ GType lgi_widget_child_type(GtkContainer   *container)
 }
 
 #if GTK_MAJOR_VERSION == 3
-GType
+G_DEFINE_TYPE(LgiWidget, lgi_widget, GTK_TYPE_CONTAINER)
 #else
-GtkType
-#endif
 lgi_widget_get_type(void)
 {
-	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
-	return 0;
-	#else
 	static GtkType lgi_widget_type = 0;
 
 	if (!lgi_widget_type)
@@ -57,8 +73,8 @@ lgi_widget_get_type(void)
 	}
 
 	return lgi_widget_type;
-	#endif
 }
+#endif
 
 GtkWidget *lgi_widget_new(GViewI *target, int w, int h, bool pour_largest)
 {
@@ -693,14 +709,14 @@ lgi_widget_destroy(
 
 	LgiWidget *p = LGI_WIDGET(object);
 	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
+	void *cls = g_type_class_peek(gtk_widget_get_type());
+	if (cls && GTK_WIDGET_CLASS(cls)->destroy)
+		(*GTK_WIDGET_CLASS(cls)->destroy)(object);
 	#else
 	void *klass = gtk_type_class(gtk_widget_get_type());
 
 	if (GTK_OBJECT_CLASS(klass)->destroy)
-	{
 		(* GTK_OBJECT_CLASS(klass)->destroy)(object);
-	}
 	#endif
 }
 
@@ -712,35 +728,54 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 	g_return_if_fail(allocation != NULL);
 
 	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
+	auto Wnd = gtk_widget_get_parent_window(widget);
+	gtk_widget_set_allocation(widget, allocation);
+	if (gtk_widget_get_realized(widget))
 	#else
+	auto Wnd = widget->window;
 	widget->allocation = *allocation;
-
 	if (GTK_WIDGET_REALIZED(widget))
+	#endif
 	{
-		gdk_window_move_resize( widget->window,
+		gdk_window_move_resize( Wnd,
 			                    allocation->x, allocation->y,
 			                    allocation->width, allocation->height);
 		
 		LgiWidget *w = LGI_WIDGET(widget);
 		GtkAllocation child_allocation;
 		GtkRequisition child_requisition;
-		guint16 border_width = GTK_CONTAINER(w)->border_width;
+		#if GTK_MAJOR_VERSION == 3
+		auto border_width = gtk_container_get_border_width(GTK_CONTAINER(w));
+		#else
+		auto border_width = GTK_CONTAINER(w)->border_width;
+		#endif
 
 		for (int i=0; i<w->child.Length(); i++)
 		{
 			_LgiWidget::ChildInfo &c = w->child[i];
+			#if GTK_MAJOR_VERSION == 3
+			if (gtk_widget_get_visible(c.w))
+			#else
 			if (GTK_WIDGET_VISIBLE(c.w))
+			#endif
 			{
 				gtk_widget_size_request(c.w, &child_requisition);
 				child_allocation.x = c.x + border_width;
 				child_allocation.y = c.y + border_width;
 
+				#if GTK_MAJOR_VERSION == 3
+				if (!gtk_widget_get_has_window(widget))
+				{
+					child_allocation.x += allocation->x;
+					child_allocation.y += allocation->y;
+				}
+				#else
 				if (GTK_WIDGET_NO_WINDOW(widget))
 				{
 					child_allocation.x += widget->allocation.x;
 					child_allocation.y += widget->allocation.y;
 				}
+				#endif
 
 				child_allocation.width = MAX(child_requisition.width, 1);
 				child_allocation.height = MAX(child_requisition.height, 1);
@@ -748,7 +783,7 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 			}
 		}
 	}
-	#endif
+	// #endif
 }
 
 static void
@@ -761,14 +796,22 @@ lgi_widget_realize(GtkWidget *widget)
 	g_return_if_fail(LGI_IS_WIDGET(widget));
 
 	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
+		gtk_widget_set_realized(widget, TRUE);
 	#else
-	GTK_WIDGET_SET_FLAGS(widget, GTK_REALIZED);
+		GTK_WIDGET_SET_FLAGS(widget, GTK_REALIZED);
+	#endif
 	LgiWidget *w = LGI_WIDGET(widget);
 
 	attributes.window_type = GDK_WINDOW_CHILD;
-	attributes.x = widget->allocation.x;
-	attributes.y = widget->allocation.y;
+	#if GTK_MAJOR_VERSION == 3
+		GtkAllocation allocation;
+		gtk_widget_get_allocation(widget, &allocation);
+		attributes.x = allocation.x;
+		attributes.y = allocation.y;
+	#else
+		attributes.x = widget->allocation.x;
+		attributes.y = widget->allocation.y;
+	#endif
 	attributes.width = w->w;
 	attributes.height = w->h;
 
@@ -777,23 +820,29 @@ lgi_widget_realize(GtkWidget *widget)
 
 	attributes_mask = GDK_WA_X | GDK_WA_Y;
 
-	widget->window = gdk_window_new(gtk_widget_get_parent_window(widget),
-		                            &attributes,
-                            		attributes_mask);
+	auto ParWnd = gdk_window_new(gtk_widget_get_parent_window(widget),
+								&attributes,
+								attributes_mask);
+	#if GTK_MAJOR_VERSION == 3
+	gtk_widget_set_parent_window (widget, ParWnd);
+	#else
+	widget->window = ParWnd;
+	#endif
+	gdk_window_set_user_data(ParWnd, widget);
 
-	gdk_window_set_user_data(widget->window, widget);
-
-	widget->style = gtk_style_attach(widget->style, widget->window);
-	gtk_style_set_background(widget->style, widget->window, GTK_STATE_NORMAL);
-
+	#if GTK_MAJOR_VERSION == 3
+	lgi_widget_size_allocate(widget, &allocation);
+	#else
+	widget->style = gtk_style_attach(widget->style, ParWnd);
+	gtk_style_set_background(widget->style, ParWnd, GTK_STATE_NORMAL);
 	lgi_widget_size_allocate(widget, &widget->allocation);
+	#endif
 	
 	GView *v = dynamic_cast<GView*>(w->target);
 	if (v)
 		v->OnGtkRealize();
 	else
 		LgiTrace("%s:%i - Failed to cast target to GView.\n", _FL);
-	#endif
 }
 
 static gboolean
@@ -870,9 +919,10 @@ lgi_widget_setchildpos(GtkWidget *parent, GtkWidget *child, int x, int y)
 				c.y = y;
 				
 				#if GTK_MAJOR_VERSION == 3
-				LgiAssert(!"Gtk3 FIXME");
+				if (gtk_widget_get_realized(c.w))
 				#else
 				if (GTK_WIDGET_REALIZED(c.w))
+				#endif
 				{
                 	LgiWidget *child_wid = LGI_WIDGET(c.w);
                 	
@@ -892,7 +942,6 @@ lgi_widget_setchildpos(GtkWidget *parent, GtkWidget *child, int x, int y)
 							            		#endif
             									, &a, FALSE);
 				}
-				#endif
 				return;
 			}
 		}
@@ -958,27 +1007,31 @@ lgi_widget_configure(GtkWidget *widget, GdkEventConfigure *ev)
 }
 
 static void
-lgi_widget_class_init(LgiWidgetClass *klass)
+lgi_widget_class_init(LgiWidgetClass *cls)
 {
 	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
+	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (cls);
+	widget_class->destroy = lgi_widget_destroy;
 	#else
-	GtkObjectClass *object_class = (GtkObjectClass *)klass;
+	GtkObjectClass *object_class = (GtkObjectClass*) cls;
 	object_class->destroy = lgi_widget_destroy;
-
-	GtkWidgetClass *widget_class = (GtkWidgetClass *)klass;
+	GtkWidgetClass *widget_class = (GtkWidgetClass*) cls;
+	#endif
 	widget_class->realize = lgi_widget_realize;
-	// widget_class->configure_event = lgi_widget_configure;
+
+	#if GTK_MAJOR_VERSION == 3
+	#else
 	widget_class->size_request = lgi_widget_size_request;
-	widget_class->size_allocate = lgi_widget_size_allocate;
 	widget_class->expose_event = lgi_widget_expose;
+	widget_class->client_event = lgi_widget_client_event;
+	#endif
+	widget_class->size_allocate = lgi_widget_size_allocate;
 	widget_class->button_press_event = lgi_widget_click;
 	widget_class->button_release_event = lgi_widget_click;
 	widget_class->motion_notify_event = lgi_widget_motion;
 	widget_class->scroll_event = lgi_widget_scroll;
 	widget_class->enter_notify_event = lgi_widget_mouse_enter_leave;
 	widget_class->leave_notify_event = lgi_widget_mouse_enter_leave;
-	widget_class->client_event = lgi_widget_client_event;
 	widget_class->focus_in_event = lgi_widget_focus_event;
 	widget_class->focus_out_event = lgi_widget_focus_event;
 	widget_class->key_press_event = lgi_widget_key_event;
@@ -992,21 +1045,21 @@ lgi_widget_class_init(LgiWidgetClass *klass)
 	widget_class->drag_drop = lgi_widget_drag_drop;
 	widget_class->drag_data_received = lgi_widget_drag_data_received;
 
-	GtkContainerClass *container_class = (GtkContainerClass*)klass;
+	GtkContainerClass *container_class = (GtkContainerClass*)cls;
 	container_class->add = lgi_widget_add;
 	container_class->remove = lgi_widget_remove;
 	container_class->forall = lgi_widget_forall;
 	container_class->child_type = lgi_widget_child_type;
-	#endif
 }
 
-static void
+void
 lgi_widget_init(LgiWidget *w)
 {
 	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
+	// gtk_widget_unset_state_flags(w, GtkStateFlags flags);
 	#else
 	GTK_WIDGET_UNSET_FLAGS(w, GTK_NO_WINDOW);
+	#endif
 	w->target = 0;
 	w->w = 0;
 	w->h = 0;
@@ -1014,6 +1067,5 @@ lgi_widget_init(LgiWidget *w)
 	w->drag_over_widget = false;
 	w->drop_format = NULL;
 	w->debug = false;
-	#endif
 }
 
