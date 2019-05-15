@@ -531,6 +531,7 @@ public:
 	GdcPt2 Flip(GdcPt2 p);
 	GRect Flip(GRect p);
 	void OnCocoaLayout();
+	void OnCocoaDealloc();
 protected:
 	#else
 	OsView _CreateCustomView();

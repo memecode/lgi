@@ -171,6 +171,7 @@ public:
 
 	#if defined(MAC)
 		#ifdef COCOA
+		GString ClassName;
 		#else
 		EventHandlerRef DndHandler;
 		GAutoString AcceptedDropFormat;
