@@ -705,6 +705,7 @@ lgi_widget_destroy(
 	#endif
 }
 
+
 static void
 lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 {
@@ -805,7 +806,8 @@ lgi_widget_realize(GtkWidget *widget)
 
 	attributes_mask = GDK_WA_X | GDK_WA_Y;
 
-	auto ParWnd = gdk_window_new(gtk_widget_get_parent_window(widget),
+	auto Par = gtk_widget_get_parent_window(widget);
+	auto ParWnd = gdk_window_new(Par,
 								&attributes,
 								attributes_mask);
 	#if GTK_MAJOR_VERSION == 3
@@ -855,6 +857,34 @@ lgi_widget_realize(GtkWidget *widget)
 		}
 
 		return FALSE;
+	}
+
+	static void
+	lgi_widget_get_preferred_height(GtkWidget *widget, gint *minimum_height, gint *natural_height)
+	{
+		LgiWidget *p = LGI_WIDGET(widget);
+		if (p)
+		{
+			if (minimum_height)
+				*minimum_height = p->h;
+			if (natural_height)
+				*natural_height = p->h;
+		}
+		else LgiAssert(0);
+	}
+
+	static void
+	lgi_widget_get_preferred_width(GtkWidget *widget, gint *minimum_width, gint *natural_width)
+	{
+		LgiWidget *p = LGI_WIDGET(widget);
+		if (p)
+		{
+			if (minimum_width)
+				*minimum_width = p->w;
+			if (natural_width)
+				*natural_width = p->w;
+		}
+		else LgiAssert(0);
 	}
 
 #else
@@ -926,21 +956,20 @@ void
 lgi_widget_setsize(GtkWidget *wid, int width, int height)
 {
 	LgiWidget *p = LGI_WIDGET(wid);
-	if (p)
+	if (!p) return;
+
+	if (p->w != width ||
+	    p->h != height)
 	{
-	    if (p->w != width ||
-	        p->h != height)
-	    {
-		    p->w = width;
-		    p->h = height;
+		p->w = width;
+		p->h = height;
 		    
-			#if GTK_MAJOR_VERSION == 3
-			LgiAssert(!"Gtk3 FIXME");
-			#else
-			wid->requisition.width = width;
-		    wid->requisition.height = height;
-			#endif
-		}
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
+		wid->requisition.width = width;
+		wid->requisition.height = height;
+		#endif
 	}
 }
 
@@ -998,35 +1027,32 @@ void
 lgi_widget_add(GtkContainer *wid, GtkWidget *child)
 {
 	LgiWidget *p = LGI_WIDGET(wid);
-	if (p)
+	if (!p)
+		return;
+
+	for (int i=0; i<p->child.Length(); i++)
 	{
-		for (int i=0; i<p->child.Length(); i++)
+		_LgiWidget::ChildInfo &c = p->child[i];
+		if (c.w == child)
 		{
-			_LgiWidget::ChildInfo &c = p->child[i];
-			if (c.w == child)
-			{
-				printf("%s:%i - Already a child.\n", _FL);
-				return;
-			}
+			printf("%s:%i - Already a child.\n", _FL);
+			return;
 		}
-		
-		_LgiWidget::ChildInfo &c = p->child.New();
-		c.w = child;
-		c.x = 0;
-		c.y = 0;
-		gtk_widget_set_parent(child, GTK_WIDGET(wid));
 	}
+		
+	_LgiWidget::ChildInfo &c = p->child.New();
+	c.w = child;
+	c.x = 0;
+	c.y = 0;
+	gtk_widget_set_parent(child, GTK_WIDGET(wid));
 }
 
 gboolean
 lgi_widget_configure(GtkWidget *widget, GdkEventConfigure *ev)
 {
 	LgiWidget *p = LGI_WIDGET(widget);
-	printf("lgi_widget_configure %p\n", p);
 	if (p)
-	{
 	    p->target->OnPosChange();
-    }    
     return TRUE;
 }
 
@@ -1034,47 +1060,49 @@ static void
 lgi_widget_class_init(LgiWidgetClass *cls)
 {
 	#if GTK_MAJOR_VERSION == 3
-	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (cls);
-	widget_class->destroy = lgi_widget_destroy;
+		GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(cls);
+		widget_class->destroy = lgi_widget_destroy;
 	#else
-	GtkObjectClass *object_class = (GtkObjectClass*) cls;
-	object_class->destroy = lgi_widget_destroy;
-	GtkWidgetClass *widget_class = (GtkWidgetClass*) cls;
+		GtkObjectClass *object_class = (GtkObjectClass*) cls;
+		object_class->destroy = lgi_widget_destroy;
+		GtkWidgetClass *widget_class = (GtkWidgetClass*) cls;
 	#endif
-	widget_class->realize = lgi_widget_realize;
 
 	#if GTK_MAJOR_VERSION == 3
-		widget_class->draw			= lgi_widget_draw;
+		widget_class->draw					= lgi_widget_draw;
+		widget_class->get_preferred_height	= lgi_widget_get_preferred_height;
+		widget_class->get_preferred_width	= lgi_widget_get_preferred_width;
 	#else
-		widget_class->size_request = lgi_widget_size_request;
-		widget_class->expose_event = lgi_widget_expose;
-		widget_class->client_event = lgi_widget_client_event;
+		widget_class->size_request			= lgi_widget_size_request;
+		widget_class->expose_event			= lgi_widget_expose;
+		widget_class->client_event			= lgi_widget_client_event;
 	#endif
-	widget_class->size_allocate = lgi_widget_size_allocate;
-	widget_class->button_press_event = lgi_widget_click;
-	widget_class->button_release_event = lgi_widget_click;
-	widget_class->motion_notify_event = lgi_widget_motion;
-	widget_class->scroll_event = lgi_widget_scroll;
-	widget_class->enter_notify_event = lgi_widget_mouse_enter_leave;
-	widget_class->leave_notify_event = lgi_widget_mouse_enter_leave;
-	widget_class->focus_in_event = lgi_widget_focus_event;
-	widget_class->focus_out_event = lgi_widget_focus_event;
-	widget_class->key_press_event = lgi_widget_key_event;
-	widget_class->key_release_event = lgi_widget_key_event;
-	widget_class->drag_begin = lgi_widget_drag_begin;
-	widget_class->drag_end = lgi_widget_drag_end;
-	widget_class->drag_data_get = lgi_widget_drag_data_get;
-	widget_class->drag_data_delete = lgi_widget_drag_data_delete;
-	widget_class->drag_leave = lgi_widget_drag_leave;
-	widget_class->drag_motion = lgi_widget_drag_motion;
-	widget_class->drag_drop = lgi_widget_drag_drop;
-	widget_class->drag_data_received = lgi_widget_drag_data_received;
+	widget_class->realize					= lgi_widget_realize;
+	widget_class->size_allocate				= lgi_widget_size_allocate;
+	widget_class->button_press_event		= lgi_widget_click;
+	widget_class->button_release_event		= lgi_widget_click;
+	widget_class->motion_notify_event		= lgi_widget_motion;
+	widget_class->scroll_event				= lgi_widget_scroll;
+	widget_class->enter_notify_event		= lgi_widget_mouse_enter_leave;
+	widget_class->leave_notify_event		= lgi_widget_mouse_enter_leave;
+	widget_class->focus_in_event			= lgi_widget_focus_event;
+	widget_class->focus_out_event			= lgi_widget_focus_event;
+	widget_class->key_press_event			= lgi_widget_key_event;
+	widget_class->key_release_event			= lgi_widget_key_event;
+	widget_class->drag_begin				= lgi_widget_drag_begin;
+	widget_class->drag_end					= lgi_widget_drag_end;
+	widget_class->drag_data_get				= lgi_widget_drag_data_get;
+	widget_class->drag_data_delete			= lgi_widget_drag_data_delete;
+	widget_class->drag_leave				= lgi_widget_drag_leave;
+	widget_class->drag_motion				= lgi_widget_drag_motion;
+	widget_class->drag_drop					= lgi_widget_drag_drop;
+	widget_class->drag_data_received		= lgi_widget_drag_data_received;
 
 	GtkContainerClass *container_class = (GtkContainerClass*)cls;
-	container_class->add = lgi_widget_add;
-	container_class->remove = lgi_widget_remove;
-	container_class->forall = lgi_widget_forall;
-	container_class->child_type = lgi_widget_child_type;
+	container_class->add					= lgi_widget_add;
+	container_class->remove					= lgi_widget_remove;
+	container_class->forall					= lgi_widget_forall;
+	container_class->child_type				= lgi_widget_child_type;
 }
 
 void
