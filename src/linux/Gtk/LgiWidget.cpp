@@ -783,15 +783,16 @@ lgi_widget_realize(GtkWidget *widget)
 
 	#if GTK_MAJOR_VERSION == 3
 		gtk_widget_set_realized(widget, TRUE);
+		GtkAllocation allocation;
+		gtk_widget_get_allocation(widget, &allocation);
 	#else
 		GTK_WIDGET_SET_FLAGS(widget, GTK_REALIZED);
 	#endif
 	LgiWidget *w = LGI_WIDGET(widget);
 
+	/*
 	attributes.window_type = GDK_WINDOW_CHILD;
 	#if GTK_MAJOR_VERSION == 3
-		GtkAllocation allocation;
-		gtk_widget_get_allocation(widget, &allocation);
 		attributes.x = allocation.x;
 		attributes.y = allocation.y;
 	#else
@@ -816,6 +817,7 @@ lgi_widget_realize(GtkWidget *widget)
 	widget->window = ParWnd;
 	#endif
 	gdk_window_set_user_data(ParWnd, widget);
+	*/
 
 	#if GTK_MAJOR_VERSION == 3
 	lgi_widget_size_allocate(widget, &allocation);
