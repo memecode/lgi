@@ -2474,7 +2474,7 @@ void AppWnd::ImportLang()
 	}
 }
 
-void AppWnd::Empty()
+bool AppWnd::Empty()
 {
 	// Delete any existing objects
 	List<Resource> l;
@@ -2499,6 +2499,8 @@ void AppWnd::Empty()
 			DelObject(r);
 		}
 	}
+
+	return true;
 }
 
 bool AppWnd::OpenFile(char *FileName, bool Ro)
