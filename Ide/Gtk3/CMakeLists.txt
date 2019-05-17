@@ -169,14 +169,9 @@ elseif (MSVC)
 endif ()
 
 # Create a resources sub-folder and copy over the resource files (images and lr8)
-set(RESOURCE_DIR ${CMAKE_BINARY_DIR}/Resources)
-if (NOT EXISTS ${RESOURCE_DIR})
-	add_custom_target(build-time-make-directory ALL
-	    COMMAND ${CMAKE_COMMAND} -E make_directory ${RESOURCE_DIR})
-endif()
-foreach(infileName ${CommonResourceFiles})
-	add_custom_command(TARGET LgiIde POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${infileName} ${RESOURCE_DIR})
-endforeach()
+add_custom_command(	TARGET LgiIde
+					POST_BUILD 
+					COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/../Resources $<TARGET_FILE_DIR:LgiIde>/Resources)
 
 target_include_directories (LgiIde PUBLIC
 							"${ROOT}/include/common"
@@ -185,5 +180,3 @@ target_include_directories (LgiIde PUBLIC
 							${PNG_INCLUDE_DIR}
 							${OPENSSL_INCLUDE_DIR}
 							"${CODELIB}/libiconv-1.14/include")
-# "${CODELIB}/libpng"
-# "${CODELIB}/libpng-1.6.26"
