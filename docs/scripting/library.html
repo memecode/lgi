@@ -99,6 +99,7 @@
 					<a href="#upper">obj.Upper</a><br>
 					<a href="#lower">obj.Lower</a><br>
 					<a href="#sub">obj.Sub</a><br>
+					<a href="#sub">obj.Strip</a><br>
 				<td>
 					<a href="#add">obj.Add</a><br>
 					<a href="#haskey">obj.HasKey</a><br>
@@ -367,6 +368,26 @@ Print(c.Sub(4), "\n");</pre>
 				<pre class=output>str
 ring</pre>
 			</div>
+
+		<h4>string <a name="sub">obj.Strip</a>([delimiters]);</h4>
+		<div>
+			Strips the specified characters off the start and end of the string.
+			<br><br>
+			Arguments:
+			<ul>
+				<li> [optional] delimiters - The characters to strip, defaults to whitespace (' \t\r\n').
+			</ul>
+			<br>
+			Returns:
+			<ul>
+				<li> A string.
+			</ul>
+			<br>
+			Example:
+			<pre>c = "[A string]";
+Print(c.Strip("[]"), "\n");</pre>
+			<pre class=output>A String</pre>
+		</div>
 
 		<h4>object <a name="New">New</a>(object);</h4>
 			<div>
