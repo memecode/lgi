@@ -346,7 +346,7 @@ public:
 	virtual ~GFile();
 
 	OsFile Handle();
-	void ChangeThread();
+	void ChangeThread() override;
 
 	/// \brief Opens a file
 	/// \return Non zero on success

@@ -258,7 +258,7 @@ struct GSoftwareUpdatePriv
 			return ret;
 		}
 
-		int Main()
+		int Main() override
 		{
 			IHttp Http;
 			if (Proxy->Host)
