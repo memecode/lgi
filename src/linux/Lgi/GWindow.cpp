@@ -399,6 +399,7 @@ bool GWindow::Attach(GViewI *p)
 	{
 		_View = GTK_WIDGET(Wnd);
 		GView *i = this;
+		gtk_window_set_default_size(GTK_WINDOW(Wnd), Pos.X(), Pos.Y());
 		
 		d->DestroySig = g_signal_connect(
 							G_OBJECT(Wnd),
@@ -409,14 +410,12 @@ bool GWindow::Attach(GViewI *p)
 							"delete_event",
 							G_CALLBACK(GtkViewCallback),
 							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"configure-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
+							/*
 		g_signal_connect(	G_OBJECT(Wnd),
 							"button-press-event",
 							G_CALLBACK(GtkViewCallback),
-							i);
+							i);*/
+
 		g_signal_connect(	G_OBJECT(Wnd),
 							"focus-in-event",
 							G_CALLBACK(GtkViewCallback),
@@ -441,16 +440,21 @@ bool GWindow::Attach(GViewI *p)
 							"realize",
 							G_CALLBACK(GtkWindowRealize),
 							i);							
+		g_signal_connect(	G_OBJECT(Wnd),
+							"configure-event",
+							G_CALLBACK(GtkViewCallback),
+							i);
 
-		gtk_window_set_default_size(GTK_WINDOW(Wnd), Pos.X(), Pos.Y());
 		gtk_widget_add_events(GTK_WIDGET(Wnd), GDK_ALL_EVENTS_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
-		
+
+		/*
         if (_Root = lgi_widget_new(this, Pos.X(), Pos.Y(), true))
         {
             gtk_container_add(GTK_CONTAINER(Wnd), _Root);
             gtk_widget_show(_Root);
         }
+		*/
 
 		// This call sets up the GdkWindow handle
 		gtk_widget_realize(GTK_WIDGET(Wnd));

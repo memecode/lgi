@@ -54,23 +54,8 @@ elseif (MSVC)
 	get_filename_component(VCPKG "${CODELIB}/vcpkg" ABSOLUTE)
 	get_filename_component(LIBPNG_SEARCH "${CODELIB}/libpng" ABSOLUTE)
 	get_filename_component(ZLIB_SEARCH "${CODELIB}/zlib" ABSOLUTE)
-	set(_FIND_ZLIB_ARG HINTS ${LIBPNG_SEARCH})
-	include(FindPNG)
-	if (NOT PNG_FOUND)
-		set(PNG_CMAKE "${LIBPNG_SEARCH}/CMakeLists.txt")
-		if (EXISTS "${PNG_CMAKE}")
-			set(PNG_INCLUDE_DIR
-				${LIBPNG_SEARCH}
-				${LIBPNG_SEARCH}/build${WORDSIZE}
-				${ZLIB_SEARCH}
-				${ZLIB_SEARCH}/build${WORDSIZE})
-			set(PNG_DLL
-				${LIBPNG_SEARCH}/build${WORDSIZE}/Release/libpng15.dll)
-		else()
-			message(FATAL_ERROR "PNG not found @ ${LIBPNG_SEARCH}")
-		endif()
-	endif ()
 	
+	add_subdirectory(${LIBPNG_SEARCH} libpng_dir)
 	
 endif ()
 

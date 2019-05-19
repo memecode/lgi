@@ -66,7 +66,7 @@ const char sLibrary[] =
 			"libpng"
 			#ifdef _MSC_VER_STR
 				_MSC_VER_STR
-				#if defined(WIN64)
+				#if defined(LGI_64BIT)
 				"x64"
 				#else
 				"x32"

@@ -656,10 +656,12 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 			#else
 			GtkLock _Lock;
 			#endif
+			/* Stopping main from exiting?
 			Gtk::guint Id = Gtk::gdk_threads_add_idle_full(	G_PRIORITY_DEFAULT_IDLE,
 															IdleWrapper,
 															&idle,
 															NULL);
+			*/
 		}
 
 		static bool CmdLineDone = false;
