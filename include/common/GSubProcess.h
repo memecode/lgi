@@ -136,6 +136,7 @@ public:
 	int Wait();
 	bool Interrupt();
 	bool Kill();
+	int32 Communicate(GStreamI *Out, GStreamI *In = NULL);
 	
 	// IO
 	int Peek();
