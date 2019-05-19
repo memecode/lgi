@@ -40,7 +40,10 @@ namespace Gtk {
 typedef GArray<GAppInfo*> AppArray;
 using namespace Gtk;
 
+#if GTK_MAJOR_VERSION == 3
+#else
 LTHREAD_DATA int GtkLockCount = 0;
+#endif
 bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth = 0);
 
 ////////////////////////////////////////////////////////////////
@@ -369,7 +372,10 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	#endif
 
   	Gtk::gdk_threads_init();	
+	#if GTK_MAJOR_VERSION == 3
+	#else
 	GtkLock _Lock;
+	#endif
   	
 	// We want our printf's NOW!
 	setvbuf(stdout,(char *)NULL,_IONBF,0); // print mesgs immediately.
@@ -433,7 +439,10 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 
 GApp::~GApp()
 {
+	#if GTK_MAJOR_VERSION == 3
+	#else
 	GtkLock _Lock;
+	#endif
 
 	DeleteObj(AppWnd);
 	DeleteObj(SystemNormal);
@@ -643,7 +652,10 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 		}
 
 		{			
+			#if GTK_MAJOR_VERSION == 3
+			#else
 			GtkLock _Lock;
+			#endif
 			Gtk::guint Id = Gtk::gdk_threads_add_idle_full(	G_PRIORITY_DEFAULT_IDLE,
 															IdleWrapper,
 															&idle,
@@ -657,12 +669,18 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 			OnCommandLine();
 		}
 		
+		#if GTK_MAJOR_VERSION == 3
+		#else
 		GtkLock _Lock;
+		#endif
 	    Gtk::gtk_main();
 	}
 	else
 	{
+		#if GTK_MAJOR_VERSION == 3
+		#else
 		GtkLock _Lock;
+		#endif
 	    Gtk::gtk_main_iteration_do(false);
 	}
 
@@ -679,7 +697,10 @@ void GApp::Exit(int Code)
 	else
 	{
 		// soft exit
+		#if GTK_MAJOR_VERSION == 3
+		#else
 		GtkLock _Lock;
+		#endif
 		Gtk::gtk_main_quit();
 	}
 }

@@ -1,6 +1,16 @@
 #include <stdio.h>
 #include "Lgi.h"
 
+#if defined(__GTK_H__)
+#include "gtk/gtkdialog.h"
+
+void MsgCb(Gtk::GtkDialog *dialog, Gtk::gint response_id, Gtk::gpointer user_data)
+{
+	*((int*)user_data) = response_id;
+}
+
+#endif
+
 #if defined(__GTK_H__) || defined(MAC) || defined(LGI_SDL)
 #include "GTextLabel.h"
 #include "GButton.h"
@@ -207,6 +217,66 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 	[alert runModal];
 	[msg release];
 	[title release];
+
+	#elif defined(__GTK_H__)
+
+	using namespace Gtk;
+
+	GtkButtonsType GtkType;
+	switch (Type & ~MB_SYSTEMMODAL)
+	{
+		default:
+		case MB_OK:
+			GtkType = GTK_BUTTONS_OK;
+			break;
+		case MB_OKCANCEL:
+			GtkType = GTK_BUTTONS_OK_CANCEL;
+			break;
+		case MB_YESNO:
+		case MB_YESNOCANCEL: // ugh, soz
+			GtkType = GTK_BUTTONS_YES_NO;
+			break;
+	}
+	GtkWidget *dlg = gtk_message_dialog_new(
+		Parent ? Parent->WindowHandle() : NULL,
+		GTK_DIALOG_MODAL,
+		GTK_MESSAGE_INFO,
+		GtkType,
+		"%s",
+		Msg.Get());
+	if (dlg)
+	{
+		if (Type == MB_YESNOCANCEL)
+			gtk_dialog_add_button(GTK_DIALOG(dlg), "Cancel", -30);
+		int Response = 0;
+		g_signal_connect(GTK_DIALOG(dlg), "response", G_CALLBACK(MsgCb), &Response);
+		auto r = gtk_dialog_run(GTK_DIALOG(dlg));
+		gtk_widget_destroy(dlg);
+	
+		switch (Response)
+		{
+			case GTK_RESPONSE_NONE:
+			case GTK_RESPONSE_REJECT:
+			case GTK_RESPONSE_ACCEPT:
+			case GTK_RESPONSE_DELETE_EVENT:
+			case GTK_RESPONSE_CLOSE:
+			case GTK_RESPONSE_APPLY:
+			case GTK_RESPONSE_HELP:
+				break;
+			case GTK_RESPONSE_OK:
+				Res = IDOK;
+				break;
+			case GTK_RESPONSE_CANCEL:
+				Res = IDCANCEL;
+				break;
+			case GTK_RESPONSE_YES:
+				Res = IDYES;
+				break;
+			case GTK_RESPONSE_NO:
+				Res = IDNO;
+				break;
+		}
+	}
 	
 	#else // Lgi only controls (used for Linux + Mac)
 

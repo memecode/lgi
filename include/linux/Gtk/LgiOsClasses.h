@@ -9,6 +9,8 @@
 
 extern LTHREAD_DATA int GtkLockCount;
 
+#if GTK_MAJOR_VERSION == 3
+#else
 class LgiClass GtkLock
 {
 public:
@@ -26,6 +28,7 @@ public:
 			Gtk::gdk_threads_leave();
 	}
 };
+#endif
 
 
 #endif

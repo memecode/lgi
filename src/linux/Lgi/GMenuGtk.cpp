@@ -42,14 +42,12 @@ GSubMenu::~GSubMenu()
 	
 	if (Info)
 	{
-		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
-		#else
+		#if GTK_MAJOR_VERSION == 2
 		LgiAssert(Info->container.widget.object.parent_instance.g_type_instance.g_class);
+		#endif
 		Gtk::GtkWidget *w = GtkCast(Info, gtk_widget, GtkWidget);
 		Gtk::gtk_widget_destroy(w);
 		Info = NULL;
-		#endif
 	}
 }
 

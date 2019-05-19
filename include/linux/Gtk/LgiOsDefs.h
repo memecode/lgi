@@ -192,10 +192,23 @@ LgiFunc void LgiSleep(uint32_t i);
 #else
 #define LGI_WideCharset				"utf-32"
 #endif
-#define LPrintfInt64				"%Li"
-#define LPrintfHex64				"%Lx"
-#define LPrintfSizeT				"%zu"
-#define LPrintfSSizeT				"%zi"
+
+#ifdef _MSC_VER
+	#define LPrintfInt64			"%I64i"
+	#define LPrintfHex64			"%I64x"
+	#if LGI_64BIT
+		#define LPrintfSizeT		"%I64u"
+		#define LPrintfSSizeT		"%I64d"
+	#else
+		#define LPrintfSizeT		"%u"
+		#define LPrintfSSizeT		"%d"
+	#endif
+#else
+	#define LPrintfInt64			"%Li"
+	#define LPrintfHex64			"%Lx"
+	#define LPrintfSizeT			"%zu"
+	#define LPrintfSSizeT			"%zi"
+#endif
 
 #ifndef SND_ASYNC
 #define SND_ASYNC					0x0001
