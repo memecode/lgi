@@ -868,7 +868,7 @@ lgi_widget_realize(GtkWidget *widget)
 		if (p)
 		{
 			if (minimum_height)
-				*minimum_height = p->h;
+				*minimum_height = p->pour_largest ? 80 : p->h;
 			if (natural_height)
 				*natural_height = p->h;
 		}
@@ -882,7 +882,7 @@ lgi_widget_realize(GtkWidget *widget)
 		if (p)
 		{
 			if (minimum_width)
-				*minimum_width = p->w;
+				*minimum_width = p->pour_largest ? 80 :p->w;
 			if (natural_width)
 				*natural_width = p->w;
 		}

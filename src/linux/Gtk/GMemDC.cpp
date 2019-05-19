@@ -283,7 +283,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	d->CreateCs = Cs;
 	
 	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
+	LgiTrace("%s:%i - Gtk3 FIXME\n", _FL);
 	#else
 	GdkVisual Fallback;
 	GdkVisual *Vis = gdk_visual_get_system();

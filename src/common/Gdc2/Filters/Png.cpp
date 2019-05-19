@@ -71,6 +71,9 @@ const char sLibrary[] =
 				#else
 				"x32"
 				#endif
+				#ifdef _DEBUG
+				"d"
+				#endif
 			#endif
 		#endif
 	#endif
@@ -82,7 +85,8 @@ class LibPng : public GLibrary
 public:
 	LibPng() : GLibrary(sLibrary)
 	{
-		if (!IsLoaded())
+		auto Loaded = IsLoaded();
+		if (!Loaded)
 		{
 			#if defined(MAC)
 			if (!Load("/opt/local/lib/libpng.dylib"))

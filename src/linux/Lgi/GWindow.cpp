@@ -448,13 +448,11 @@ bool GWindow::Attach(GViewI *p)
 		gtk_widget_add_events(GTK_WIDGET(Wnd), GDK_ALL_EVENTS_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
 
-		/*
         if (_Root = lgi_widget_new(this, Pos.X(), Pos.Y(), true))
         {
             gtk_container_add(GTK_CONTAINER(Wnd), _Root);
             gtk_widget_show(_Root);
         }
-		*/
 
 		// This call sets up the GdkWindow handle
 		gtk_widget_realize(GTK_WIDGET(Wnd));

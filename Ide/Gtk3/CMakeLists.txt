@@ -25,7 +25,7 @@ elseif (LINUX)
 	add_definitions("-DLINUX -DLGI_LIBRARY -D_DEBUG -DLGI_RES -DPOSIX -fPIC -w -fno-inline -fpermissive")
 	find_package(GTK2 COMPONENTS gtk)
 	find_package(PNG REQUIRED)
-
+	
 elseif (MSVC)
 
 	if ("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
