@@ -52,6 +52,9 @@ LgiExtern GString LGetAppForMimeType
 	const char *Mime
 );
 
+/// \return a formatted file size
+LgiExtern GString LFormatSize(uint64 Size);
+
 /// URL encode a string
 LgiExtern GString LUrlEncode(const char *s, const char *delim);
 

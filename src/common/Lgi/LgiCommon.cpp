@@ -2139,6 +2139,13 @@ bool LgiIsVolumeRoot(const char *Path)
 	return false;
 }
 
+GString LFormatSize(uint64 Size)
+{
+	char Buf[64];
+	LgiFormatSize(Buf, sizeof(Buf), Size);
+	return Buf;
+}
+
 void LgiFormatSize(char *Str, int SLen, uint64 Size)
 {
 	uint64 K = 1024;
