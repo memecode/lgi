@@ -1348,35 +1348,14 @@ OsApplication::~OsApplication()
 ////////////////////////////////////////////////////////////////
 void GMessage::Set(int Msg, Param ParamA, Param ParamB)
 {
-	if (!Event)
-	{
-		OwnEvent = true;
-		if (LgiApp->InThread())
-		{
-			Event = gdk_event_new(GDK_CLIENT_EVENT);
-		}
-	}
-	
 	m = Msg;
 	a = ParamA;
 	b = ParamB;
-	
-	if (Event)
-	{
-		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
-		#else
-		Event->client.data.l[0] = m;
-		Event->client.data.l[1] = a;
-		Event->client.data.l[2] = b;
-		#endif
-	}
 }
 
-struct GlibEventParams
+struct GlibEventParams : public GMessage
 {
     GtkWidget *w;
-    GdkEvent *e;
 };
 
 bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth)
@@ -1436,20 +1415,17 @@ bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth)
 	return false;
 }
 
+#if GTK_MAJOR_VERSION == 3
+#else
 static gboolean 
 GlibPostMessage(GlibEventParams *p)
 {
 	#if 1
 	GtkWindow *w = NULL;
 
-
-	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
-	#else
 	if (p->e->client.window)
 		gdk_window_get_user_data(p->e->client.window, (gpointer*)&w);
-	#endif
-	
+
 	if (!w)
 	{
 		// Window must of been destroyed...
@@ -1481,9 +1457,10 @@ GlibPostMessage(GlibEventParams *p)
 	
     gdk_event_free(p->e);
     DeleteObj(p);
-
+	
     return FALSE;
 }
+#endif
 
 void GApp::OnDetach(GViewI *View)
 {

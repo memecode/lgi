@@ -167,12 +167,18 @@ gboolean GDialog::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			GWindow::OnGtkEvent(widget, event);
 			break;
 		}
+		#if GTK_MAJOR_VERSION == 3
+		#else
 		case GDK_CLIENT_EVENT:
 		{
-			GMessage m(event);
+			GMessage m;
+			m.m = event->client.data.l[0];
+			m.a = event->client.data.l[1];
+			m.b = event->client.data.l[2];
 			OnEvent(&m);
 			break;
 		}
+		#endif
 		default:
 		{
 			printf("%s:%i - Unknown event %i\n", _FL, event->type);

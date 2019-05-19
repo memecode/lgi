@@ -75,30 +75,48 @@ elseif (MSVC)
 endif ()
 
 set (CommonSource
-	Code/SimpleCppParser.cpp
-	Code/WebFldDlg.cpp
-	Code/IdeCommon.cpp
+	Code/AddFtpFile.h
 	Code/AddFtpFile.cpp
-	Code/ProjectNode.cpp
+	Code/DocEdit.h
+	Code/DocEdit.cpp
+	Code/DocEditStyling.cpp
+	Code/FindInFiles.h
+	Code/FindInFiles.cpp
+	Code/FindSymbol.h
+	Code/FindSymbol.cpp
+	Code/FtpThread.h
+	Code/FtpThread.cpp
+	Code/GDebugContext.h
+	Code/GDebugContext.cpp
+	Code/GDebugger.h
+	Code/GDebugger.cpp
+	Code/GHistory.h
+	Code/GHistory.cpp
+	Code/IdeDoc.h
+	Code/IdeDocPrivate.h
 	Code/IdeDoc.cpp
+	Code/IdeProject.h
 	Code/IdeProject.cpp
+	Code/IdeProjectSettings.h
 	Code/IdeProjectSettings.cpp
+	Code/levenshtein.h
+	Code/levenshtein.c
+	Code/LgiIde.h
 	Code/LgiIde.cpp
 	Code/LgiUtils.cpp
 	Code/MemDumpViewer.cpp
+	Code/MissingFiles.cpp
+	Code/ParserCommon.h
+	Code/SimpleCppParser.cpp
+	Code/PythonParser.cpp
+	Code/IdeCommon.cpp
+	Code/ProjectNode.h
+	Code/ProjectNode.cpp
+	Code/SpaceTabConv.h
 	Code/SpaceTabConv.cpp
 	Code/SysCharSupport.cpp
-	Code/GDebugContext.cpp
-	Code/GDebugger.cpp
-	Code/GHistory.cpp
-	Code/FindInFiles.cpp
-	Code/FindSymbol.cpp
-	Code/FtpThread.cpp
-	Code/DocEdit.cpp
-	Code/PythonParser.cpp
-	Code/MissingFiles.cpp
-	Code/DocEditStyling.cpp
-	Code/levenshtein.c
+	Code/WebFldDlg.h
+	Code/WebFldDlg.cpp
 	../src/common/INet/OpenSSLSocket.cpp
 	../src/common/INet/IHttp.cpp
 	../src/common/INet/IFtp.cpp

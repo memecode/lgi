@@ -656,12 +656,18 @@ gboolean PopupEvent(GtkWidget *widget, GdkEvent *event, GPopup *This)
 			This->OnFocus(event->focus_change.in);
 			break;
 		}
+		#if GTK_MAJOR_VERSION == 3
+		#else
 		case GDK_CLIENT_EVENT:
 		{
-			GMessage m(event);
+			GMessage m;
+			m.m = event->client.data.l[0];
+			m.a = event->client.data.l[1];
+			m.b = event->client.data.l[2];
 			This->OnEvent(&m);
 			break;
 		}
+		#endif
 		case GDK_BUTTON_PRESS:
 		{
 			break;

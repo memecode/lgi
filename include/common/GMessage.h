@@ -206,33 +206,6 @@ public:
 		Param b;
 	#endif
 
-	#ifdef __GTK_H__
-		bool OwnEvent;
-		Gtk::GdkEvent *Event;
-
-		GMessage(Gtk::GdkEvent *e)
-		{
-			Event = e;
-			OwnEvent = false;
-
-			if (Event && Event->type == Gtk::GDK_CLIENT_EVENT)
-			{
-				#if GTK_MAJOR_VERSION == 3
-					LgiAssert(!"Gtk3 FIXME");
-				#else
-					m = Event->client.data.l[0];
-					a = Event->client.data.l[1];
-					b = Event->client.data.l[2];
-				#endif
-			}
-			else 
-			{
-				m = 0;
-				a = b = 0;
-			}
-		}
-	#endif
-
 	GMessage()
 	{
 		#if defined(LGI_SDL)
@@ -241,11 +214,6 @@ public:
 			#if defined(WINNATIVE)
 				hWnd = 0;
 			#endif
-			#ifdef __GTK_H__
-				Event = NULL;
-				OwnEvent = false;
-			#endif
-		
 			#if !defined(LGI_SDL)
 				m = 0;
 				a = 0;
@@ -267,11 +235,6 @@ public:
 		#if defined(WINNATIVE)
 			hWnd = 0;
 		#endif
-		#ifdef __GTK_H__
-			Event = NULL;
-			OwnEvent = false;
-		#endif
-
 		Set(M, A, B);
 	}
 	

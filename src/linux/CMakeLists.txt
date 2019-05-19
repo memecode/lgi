@@ -40,6 +40,9 @@ elseif (MSVC)
 endif ()
 
 set (CommonSource
+	include/common/GString.h
+	include/common/GClipBoard.h
+	include/common/GArray.h
 	src/common/Gdc2/15Bit.cpp
 	src/common/Gdc2/16Bit.cpp
 	src/common/Gdc2/24Bit.cpp
@@ -47,82 +50,135 @@ set (CommonSource
 	src/common/Gdc2/64Bit.cpp
 	src/common/Gdc2/8Bit.cpp
 	src/common/Gdc2/Alpha.cpp
+	include/common/GFilter.h
 	src/common/Gdc2/Filters/GFilter.cpp
+	include/common/GDisplayString.h
 	src/common/Gdc2/Font/GDisplayString.cpp
+	include/common/LStringLayout.h
 	src/common/Gdc2/Font/LStringLayout.cpp
+	include/common/GFont.h
 	src/common/Gdc2/Font/GFont.cpp
 	src/common/Gdc2/Font/GFont_A.cpp
 	src/common/Gdc2/Font/GFont_W.cpp
 	src/common/Gdc2/Font/GFontCodePages.cpp
 	src/common/Gdc2/Font/GFontSystem.cpp
+	include/common/GColour.h
 	src/common/Gdc2/GColour.cpp
 	src/common/Gdc2/GdcCommon.cpp
+	include/common/GRect.h
 	src/common/Gdc2/GRect.cpp
 	src/common/Gdc2/GSurface.cpp
+	include/common/GPath.h
 	src/common/Gdc2/Path/GPath.cpp
+	include/common/GPalette.h
+	include/common/Gdc2.h
 	src/common/Gdc2/Tools/GColourReduce.cpp
+	include/common/GContainers.h
 	src/common/General/GContainers.cpp
+	include/common/LDateTime.h
 	src/common/General/LDateTime.cpp
+	include/common/GFile.h
 	src/common/General/GExeCheck.cpp
 	src/common/General/GFileCommon.cpp
+	include/common/GGrowl.h
 	src/common/General/GGrowl.cpp
+	include/common/GPassword.h
 	src/common/General/GPassword.cpp
+	src/common/Hash/md5/md5.h
 	src/common/Hash/md5/md5.c
+	src/common/Hash/sha1/sha1.h
 	src/common/Hash/sha1/sha1.c
+	include/common/Base64.h
 	src/common/INet/Base64.cpp
 	src/common/INet/GUri.cpp
+	include/common/INet.h
 	src/common/INet/INet.cpp
+	include/common/INetTools.h
 	src/common/INet/INetTools.cpp
 	src/common/INet/MDStringToDigest.cpp
 	src/common/Lgi/GAlert.cpp
+	include/common/GCss.h
 	src/common/Lgi/GCss.cpp
+	include/common/GCssTools.h
 	src/common/Lgi/GCssTools.cpp
+	include/common/GFindReplaceDlg.h
 	src/common/Lgi/GFindReplace.cpp
+	include/common/GFontSelect.h
 	src/common/Lgi/GFontSelect.cpp
 	src/common/Lgi/GGuiUtils.cpp
+	include/common/GInput.h
 	src/common/Lgi/GInput.cpp
+	include/common/GLibrary.h
 	src/common/Lgi/GLibrary.cpp
+	include/common/GStream.h
 	src/common/Lgi/GMemStream.cpp
+	include/common/GMru.h
 	src/common/Lgi/GMru.cpp
+	include/common/LMutex.h
 	src/common/Lgi/LMutex.cpp
+	include/common/LgiClass.h
 	src/common/Lgi/GObject.cpp
+	include/common/GOptionsFile.h
 	src/common/Lgi/GOptionsFile.cpp
-	src/common/Lgi/GProcess.cpp
 	src/common/Lgi/GStream.cpp
+	include/common/LThread.h
 	src/common/Lgi/LThreadCommon.cpp
+	include/common/LThreadEvent.h
 	src/common/Lgi/LThreadEvent.cpp
 	src/common/Lgi/GToolTip.cpp
 	src/common/Lgi/GTrayIcon.cpp
+	include/common/GVariant.h
 	src/common/Lgi/GVariant.cpp
 	src/common/Lgi/GViewCommon.cpp
 	src/common/Lgi/GWindowCommon.cpp
+	include/common/LgiCommon.h
 	src/common/Lgi/LgiCommon.cpp
 	src/common/Lgi/LgiMsg.cpp
 	src/common/Lgi/LgiRand.cpp
 	src/common/Lgi/GMenuCommon.cpp
+	include/common/LgiRes.h
 	src/common/Resource/LgiRes.cpp
+	include/common/Res.h
 	src/common/Resource/Res.cpp
 	src/common/Skins/Gel/Gel.cpp
+	include/common/GDocView.h
 	src/common/Text/GDocView.cpp
+	include/common/GStringClass.h
 	src/common/Text/GString.cpp
+	include/common/GTextView3.h
 	src/common/Text/GTextView3.cpp
+	include/common/GToken.h
 	src/common/Text/GToken.cpp
+	include/common/GUnicode.h
 	src/common/Text/GUnicode.cpp
 	src/common/Text/GUtf8.cpp
+	include/common/GXmlTree.h
 	src/common/Text/GXmlTree.cpp
+	include/common/GBitmap.h
 	src/common/Widgets/GBitmap.cpp
+	include/common/GBox.h
 	src/common/Widgets/GBox.cpp
+	include/common/GItemContainer.h
 	src/common/Widgets/GItemContainer.cpp
+	include/common/LList.h
 	src/common/Widgets/LList.cpp
+	include/common/GPanel.h
 	src/common/Widgets/GPanel.cpp
+	include/common/GPopup.h
 	src/common/Widgets/GPopup.cpp
+	include/common/GProgressDlg.h
 	src/common/Widgets/GProgressDlg.cpp
 	src/common/Widgets/GSplitter.cpp
 	src/common/Widgets/GStatusBar.cpp
+	include/common/GTableLayout.h
 	src/common/Widgets/GTableLayout.cpp
+	include/common/GTabView.h
 	src/common/Widgets/GTabView.cpp
+	include/common/GTextLabel.h
 	src/common/Widgets/GTextLabel.cpp
+	include/common/GToolBar.h
 	src/common/Widgets/GToolBar.cpp	
+	include/common/GTree.h
 	src/common/Widgets/GTree.cpp
 	include/common/GMessage.h
 	include/common/LgiClasses.h

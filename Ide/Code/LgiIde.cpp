@@ -8,7 +8,6 @@
 #include "GToken.h"
 #include "GXmlTree.h"
 #include "GPanel.h"
-#include "GProcess.h"
 #include "GButton.h"
 #include "GTabView.h"
 #include "FtpThread.h"
@@ -285,9 +284,11 @@ public:
 			char Args[256];
 			sprintf(Args, "-d %s", File);
 			
-			GProcess p;
-			if (p.Run("readelf", Args, 0, true, 0, &Out))
+			GSubProcess p("readelf", Args);
+			if (p.Start())
 			{
+				p.Communicate(&Out);
+
 				char *o = Out.NewStr();
 				// LgiTrace("o=%s\n", o);
 				if (o)

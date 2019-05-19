@@ -967,7 +967,7 @@ lgi_widget_setsize(GtkWidget *wid, int width, int height)
 		p->h = height;
 		    
 		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
+		// LgiAssert(!"Gtk3 FIXME");
 		#else
 		wid->requisition.width = width;
 		wid->requisition.height = height;

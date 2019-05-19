@@ -737,17 +737,15 @@ bool LgiMenuItem::Remove()
 
 	if (Info)
 	{
-		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
-		#else
+		#if GTK_MAJOR_VERSION == 2
 		LgiAssert(Info->item.bin.container.widget.object.parent_instance.g_type_instance.g_class);
+		#endif
 		Gtk::GtkWidget *w = GtkCast(Info, gtk_widget, GtkWidget);
 		if (Gtk::gtk_widget_get_parent(w))
 		{		
 			Gtk::GtkContainer *c = GtkCast(Parent->Info, gtk_container, GtkContainer);
 			Gtk::gtk_container_remove(c, w);
 		}
-		#endif
 	}
 
 	Parent->Items.Delete(this);
