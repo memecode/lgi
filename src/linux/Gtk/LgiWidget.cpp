@@ -12,6 +12,9 @@ typedef struct _LgiWidget LgiWidget;
 struct _LgiWidget
 {
 	GtkContainer widget;
+	#if GTK_MAJOR_VERSION == 3
+	GdkWindow *window;
+	#endif
 
 	GViewI *target;
 	int w, h;
@@ -714,62 +717,65 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 	g_return_if_fail(allocation != NULL);
 
 	#if GTK_MAJOR_VERSION == 3
-	auto Wnd = gtk_widget_get_parent_window(widget);
-	gtk_widget_set_allocation(widget, allocation);
-	if (gtk_widget_get_realized(widget))
+
+		gtk_widget_set_allocation (widget, allocation);
+
 	#else
-	auto Wnd = widget->window;
-	widget->allocation = *allocation;
-	if (GTK_WIDGET_REALIZED(widget))
-	#endif
-	{
-		gdk_window_move_resize( Wnd,
-			                    allocation->x, allocation->y,
-			                    allocation->width, allocation->height);
-		
-		LgiWidget *w = LGI_WIDGET(widget);
-		GtkAllocation child_allocation;
-		GtkRequisition child_requisition;
-		#if GTK_MAJOR_VERSION == 3
-		auto border_width = gtk_container_get_border_width(GTK_CONTAINER(w));
-		#else
-		auto border_width = GTK_CONTAINER(w)->border_width;
-		#endif
 
-		for (int i=0; i<w->child.Length(); i++)
+		auto Wnd = widget->window;
+		widget->allocation = *allocation;
+		if (GTK_WIDGET_REALIZED(widget))
 		{
-			_LgiWidget::ChildInfo &c = w->child[i];
+			gdk_window_move_resize( Wnd,
+									allocation->x, allocation->y,
+									allocation->width, allocation->height);
+			LgiWidget *w = LGI_WIDGET(widget);
+			if (!_stricmp(w->target->GetClass(), "GWindow"))
+				LgiTrace("%s - %i x %i\n", w->target->GetClass(), allocation->width, allocation->height);
+
+			GtkAllocation child_allocation;
+			GtkRequisition child_requisition;
 			#if GTK_MAJOR_VERSION == 3
-			if (gtk_widget_get_visible(c.w))
+			auto border_width = gtk_container_get_border_width(GTK_CONTAINER(w));
 			#else
-			if (GTK_WIDGET_VISIBLE(c.w))
+			auto border_width = GTK_CONTAINER(w)->border_width;
 			#endif
+
+			for (int i=0; i<w->child.Length(); i++)
 			{
-				gtk_widget_size_request(c.w, &child_requisition);
-				child_allocation.x = c.x + border_width;
-				child_allocation.y = c.y + border_width;
-
+				_LgiWidget::ChildInfo &c = w->child[i];
 				#if GTK_MAJOR_VERSION == 3
-				if (!gtk_widget_get_has_window(widget))
-				{
-					child_allocation.x += allocation->x;
-					child_allocation.y += allocation->y;
-				}
+				if (gtk_widget_get_visible(c.w))
 				#else
-				if (GTK_WIDGET_NO_WINDOW(widget))
-				{
-					child_allocation.x += widget->allocation.x;
-					child_allocation.y += widget->allocation.y;
-				}
+				if (GTK_WIDGET_VISIBLE(c.w))
 				#endif
+				{
+					gtk_widget_size_request(c.w, &child_requisition);
+					child_allocation.x = c.x + border_width;
+					child_allocation.y = c.y + border_width;
 
-				child_allocation.width = MAX(child_requisition.width, 1);
-				child_allocation.height = MAX(child_requisition.height, 1);
-				gtk_widget_size_allocate(c.w, &child_allocation);
+					#if GTK_MAJOR_VERSION == 3
+					if (!gtk_widget_get_has_window(widget))
+					{
+						child_allocation.x += allocation->x;
+						child_allocation.y += allocation->y;
+					}
+					#else
+					if (GTK_WIDGET_NO_WINDOW(widget))
+					{
+						child_allocation.x += widget->allocation.x;
+						child_allocation.y += widget->allocation.y;
+					}
+					#endif
+
+					child_allocation.width = MAX(child_requisition.width, 1);
+					child_allocation.height = MAX(child_requisition.height, 1);
+					gtk_widget_size_allocate(c.w, &child_allocation);
+				}
 			}
 		}
-	}
-	// #endif
+	
+	#endif
 }
 
 static void
@@ -781,60 +787,97 @@ lgi_widget_realize(GtkWidget *widget)
 	g_return_if_fail(widget != NULL);
 	g_return_if_fail(LGI_IS_WIDGET(widget));
 
-	#if GTK_MAJOR_VERSION == 3
-		gtk_widget_set_realized(widget, TRUE);
-		GtkAllocation allocation;
-		gtk_widget_get_allocation(widget, &allocation);
-	#else
-		GTK_WIDGET_SET_FLAGS(widget, GTK_REALIZED);
-	#endif
 	LgiWidget *w = LGI_WIDGET(widget);
 
-	/*
-	attributes.window_type = GDK_WINDOW_CHILD;
 	#if GTK_MAJOR_VERSION == 3
+
+		GtkAllocation allocation;
+		GdkWindow *window;
+
+		gtk_widget_get_allocation (widget, &allocation);
+
+		gtk_widget_set_realized (widget, TRUE);
+
+		attributes.window_type = GDK_WINDOW_CHILD;
 		attributes.x = allocation.x;
 		attributes.y = allocation.y;
+		attributes.width = allocation.width;
+		attributes.height = allocation.height;
+		attributes.wclass = GDK_INPUT_ONLY;
+		attributes.event_mask = gtk_widget_get_events (widget);
+		attributes.event_mask |= (GDK_BUTTON_PRESS_MASK |
+								GDK_BUTTON_RELEASE_MASK |
+								GDK_TOUCH_MASK |
+								GDK_ENTER_NOTIFY_MASK |
+								GDK_LEAVE_NOTIFY_MASK);
+
+		attributes_mask = GDK_WA_X | GDK_WA_Y;
+
+		window = gtk_widget_get_parent_window (widget);
+		if (window)
+		{
+			gtk_widget_set_window (widget, window);
+			g_object_ref (window);
+
+			w->window = gdk_window_new (window, &attributes, attributes_mask);
+			gtk_widget_register_window (widget, w->window);
+		}
+		else assert(0);
+
 	#else
+
+		GTK_WIDGET_SET_FLAGS(widget, GTK_REALIZED);
+
+		attributes.window_type = GDK_WINDOW_CHILD;
 		attributes.x = widget->allocation.x;
 		attributes.y = widget->allocation.y;
-	#endif
-	attributes.width = w->w;
-	attributes.height = w->h;
+		attributes.width = w->w;
+		attributes.height = w->h;
 
-	attributes.wclass = GDK_INPUT_OUTPUT;
-	attributes.event_mask = gtk_widget_get_events(widget) | GDK_EXPOSURE_MASK;
+		attributes.wclass = GDK_INPUT_OUTPUT;
+		attributes.event_mask = gtk_widget_get_events(widget) | GDK_EXPOSURE_MASK;
 
-	attributes_mask = GDK_WA_X | GDK_WA_Y;
+		attributes_mask = GDK_WA_X | GDK_WA_Y;
 
-	auto Par = gtk_widget_get_parent_window(widget);
-	auto ParWnd = gdk_window_new(Par,
-								&attributes,
-								attributes_mask);
-	#if GTK_MAJOR_VERSION == 3
-	gtk_widget_set_parent_window (widget, ParWnd);
-	#else
-	widget->window = ParWnd;
-	#endif
-	gdk_window_set_user_data(ParWnd, widget);
-	*/
+		auto Par = gtk_widget_get_parent_window(widget);
+		auto ParWnd = gdk_window_new(Par,
+									&attributes,
+									attributes_mask);
+		widget->window = ParWnd;
+		gdk_window_set_user_data(ParWnd, widget);
 
-	#if GTK_MAJOR_VERSION == 3
-	lgi_widget_size_allocate(widget, &allocation);
-	#else
-	widget->style = gtk_style_attach(widget->style, ParWnd);
-	gtk_style_set_background(widget->style, ParWnd, GTK_STATE_NORMAL);
-	lgi_widget_size_allocate(widget, &widget->allocation);
-	#endif
+		widget->style = gtk_style_attach(widget->style, ParWnd);
+		gtk_style_set_background(widget->style, ParWnd, GTK_STATE_NORMAL);
+		lgi_widget_size_allocate(widget, &widget->allocation);
 	
-	GView *v = dynamic_cast<GView*>(w->target);
-	if (v)
-		v->OnGtkRealize();
-	else
-		LgiTrace("%s:%i - Failed to cast target to GView.\n", _FL);
+		GView *v = dynamic_cast<GView*>(w->target);
+		if (v)
+			v->OnGtkRealize();
+		else
+			LgiTrace("%s:%i - Failed to cast target to GView.\n", _FL);
+	
+	#endif
 }
 
 #if GTK_MAJOR_VERSION == 3
+
+	static void
+	lgi_widget_unrealize (GtkWidget *widget)
+	{
+		LgiWidget *w = LGI_WIDGET(widget);
+
+		if (w->window)
+		{
+			gpointer user_data = NULL;
+			gdk_window_get_user_data(w->window, &user_data);
+
+			gtk_widget_unregister_window (widget, w->window);
+			gdk_window_destroy (w->window);
+			gtk_widget_set_window(widget, w->window = NULL);
+		}
+
+		GTK_WIDGET_CLASS(lgi_widget_parent_class)->unrealize (widget);
+	}
 
 	static gboolean
 	lgi_widget_draw(GtkWidget *widget, cairo_t *cr)
@@ -1074,6 +1117,7 @@ lgi_widget_class_init(LgiWidgetClass *cls)
 		widget_class->draw					= lgi_widget_draw;
 		widget_class->get_preferred_height	= lgi_widget_get_preferred_height;
 		widget_class->get_preferred_width	= lgi_widget_get_preferred_width;
+		widget_class->unrealize				= lgi_widget_unrealize;
 	#else
 		widget_class->size_request			= lgi_widget_size_request;
 		widget_class->expose_event			= lgi_widget_expose;
@@ -1111,7 +1155,7 @@ void
 lgi_widget_init(LgiWidget *w)
 {
 	#if GTK_MAJOR_VERSION == 3
-	// gtk_widget_unset_state_flags(w, GtkStateFlags flags);
+	w->window = NULL;
 	#else
 	GTK_WIDGET_UNSET_FLAGS(w, GTK_NO_WINDOW);
 	#endif

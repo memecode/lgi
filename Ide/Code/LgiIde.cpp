@@ -1062,7 +1062,8 @@ public:
 	{
 		FindSym.Reset();
 		Finder.Reset();
-		Output->Save();
+		if (Output)
+			Output->Save();
 		App->SerializeState(&Options, "WndPos", false);
 		SerializeStringList("RecentFiles", &RecentFiles, true);
 		SerializeStringList("RecentProjects", &RecentProjects, true);
@@ -1604,6 +1605,7 @@ Chk;
 			Tools->Attach(this);
 		}
 		else LgiTrace("%s:%i - No tools obj?", _FL);
+		/*
 		
 Chk;
 		GVariant v = 270, OutPx = 250;
@@ -1639,6 +1641,7 @@ Chk;
 			d->Output->GetCss(true)->Height(y);
 		}
 
+		*/
 		AttachChildren();
 		OnPosChange();
 	
@@ -1666,7 +1669,8 @@ Chk;
 	#endif
 	
 	#if USE_HAIKU_PULSE_HACK
-	d->Output->SetPulse(1000);
+	if (d->Output)
+		d->Output->SetPulse(1000);
 	#endif
 Chk;
 }
