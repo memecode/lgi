@@ -1605,7 +1605,6 @@ Chk;
 			Tools->Attach(this);
 		}
 		else LgiTrace("%s:%i - No tools obj?", _FL);
-		/*
 		
 Chk;
 		GVariant v = 270, OutPx = 250;
@@ -1641,7 +1640,6 @@ Chk;
 			d->Output->GetCss(true)->Height(y);
 		}
 
-		*/
 		AttachChildren();
 		OnPosChange();
 	

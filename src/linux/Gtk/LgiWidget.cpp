@@ -876,7 +876,7 @@ lgi_widget_realize(GtkWidget *widget)
 			gtk_widget_set_window(widget, w->window = NULL);
 		}
 
-		GTK_WIDGET_CLASS(lgi_widget_parent_class)->unrealize (widget);
+		GTK_WIDGET_CLASS(lgi_widget_parent_class)->unrealize(widget);
 	}
 
 	static gboolean
@@ -890,8 +890,8 @@ lgi_widget_realize(GtkWidget *widget)
 		{
 			if (p && p->target)
 			{
-				GScreenDC Dc(cr);
-
+				GScreenDC Dc(cr, p->w, p->h);
+				LgiTrace("%s:%i - painting %s\n", _FL, p->target->GetClass());
 				GView *v = dynamic_cast<GView*>(p->target);
 				if (v)
 					v->_Paint(&Dc);
@@ -901,6 +901,7 @@ lgi_widget_realize(GtkWidget *widget)
 			else printf("%s:%i - No view to paint widget.\n", _FL);
 		}
 
+		GTK_WIDGET_CLASS(lgi_widget_parent_class)->draw(widget, cr);
 		return FALSE;
 	}
 
@@ -930,6 +931,42 @@ lgi_widget_realize(GtkWidget *widget)
 				*natural_width = p->w;
 		}
 		else LgiAssert(0);
+	}
+
+	static void
+	lgi_widget_get_preferred_width_for_height (GtkWidget *widget,
+											   gint       for_size,
+											   gint      *minimum_size,
+											   gint      *natural_size)
+	{
+		lgi_widget_get_preferred_width(widget, minimum_size, natural_size);
+	}
+
+	static void
+	gtk_button_get_preferred_height_for_width (GtkWidget *widget,
+                                           gint       for_size,
+                                           gint      *minimum_size,
+                                           gint      *natural_size)
+	{
+		lgi_widget_get_preferred_height(widget, minimum_size, natural_size);
+	}
+
+	static void
+	lgi_widget_map(GtkWidget *widget)
+	{
+		LgiWidget *p = LGI_WIDGET(widget);
+		GTK_WIDGET_CLASS (lgi_widget_parent_class)->map(widget);		
+		if (p->window)
+			gdk_window_show(p->window);
+	}
+
+	static void
+	lgi_widget_unmap (GtkWidget *widget)
+	{
+		LgiWidget *p = LGI_WIDGET(widget);
+		if (p->window)
+			gdk_window_hide(p->window);
+		GTK_WIDGET_CLASS(lgi_widget_parent_class)->unmap(widget);
 	}
 
 #else
@@ -1117,7 +1154,11 @@ lgi_widget_class_init(LgiWidgetClass *cls)
 		widget_class->draw					= lgi_widget_draw;
 		widget_class->get_preferred_height	= lgi_widget_get_preferred_height;
 		widget_class->get_preferred_width	= lgi_widget_get_preferred_width;
+		widget_class->get_preferred_width_for_height = lgi_widget_get_preferred_width_for_height;
+		widget_class->get_preferred_height_for_width = gtk_button_get_preferred_height_for_width;
 		widget_class->unrealize				= lgi_widget_unrealize;
+		widget_class->map					= lgi_widget_map;
+		widget_class->unmap					= lgi_widget_unmap;
 	#else
 		widget_class->size_request			= lgi_widget_size_request;
 		widget_class->expose_event			= lgi_widget_expose;
@@ -1156,6 +1197,7 @@ lgi_widget_init(LgiWidget *w)
 {
 	#if GTK_MAJOR_VERSION == 3
 	w->window = NULL;
+	gtk_widget_set_has_window(GTK_WIDGET(w), FALSE);
 	#else
 	GTK_WIDGET_UNSET_FLAGS(w, GTK_NO_WINDOW);
 	#endif

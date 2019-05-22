@@ -417,10 +417,13 @@ protected:
 	uint32_t			LineReset;
 
 	#if WINNATIVE
-	OsPainter	hDC;
-	OsBitmap	hBmp;
+		OsPainter	hDC;
+		OsBitmap	hBmp;
 	#elif defined __GTK_H__
-	OsPainter	Cairo;
+		#if GTK_MAJOR_VERSION == 3
+		#else
+			OsPainter	Cairo;
+		#endif
 	#endif
 
 public:
@@ -738,7 +741,7 @@ public:
 			/// Constructs a wrapper around a drawable
 			GScreenDC(OsDrawable *Drawable);
 			/// Constructs a DC for drawing on a cairo context
-			GScreenDC(Gtk::cairo_t *cr);
+			GScreenDC(Gtk::cairo_t *cr, int x, int y);
 			
 			// Gtk::cairo_surface_t *GetSurface(bool Render);
 			GdcPt2 GetSize();

@@ -47,7 +47,10 @@ void GSurface::Init()
 	LineMask = LineReset = 0x80000000;
 	
 	#if defined(__GTK_H__)
-	Cairo = 0;
+		#if GTK_MAJOR_VERSION == 3
+		#else
+		Cairo = 0;
+		#endif
 	#endif
 }
 
@@ -228,7 +231,11 @@ OsPainter GSurface::Handle()
 	#if WINNATIVE
 	return hDC;
 	#elif defined(__GTK_H__)
-	return Cairo;
+		#if GTK_MAJOR_VERSION == 3
+		return NULL;
+		#else
+		return Cairo;
+		#endif
 	#else
 	return 0;
 	#endif

@@ -76,11 +76,14 @@ GScreenDC::GScreenDC(int x, int y, int bits)
 	d->Bits = bits;
 }
 
-GScreenDC::GScreenDC(Gtk::cairo_t *cr)
+GScreenDC::GScreenDC(Gtk::cairo_t *cr, int x, int y)
 {
 	d = new GScreenPrivate;
 	d->Own = false;
 	d->cr = cr;
+	d->x = x;
+	d->y = y;
+	d->Bits = 32;
 }
 
 GScreenDC::GScreenDC(OsDrawable *Drawable)
@@ -174,6 +177,9 @@ GScreenDC::~GScreenDC()
 
 OsPainter GScreenDC::Handle()
 {
+	#if GTK_MAJOR_VERSION == 3
+	return d->cr;
+	#else
 	if (!Cairo)
 	{
 		Cairo = gdk_cairo_create(d->d);
@@ -193,9 +199,6 @@ OsPainter GScreenDC::Handle()
 			{
 				int width, height;
 
-				#if GTK_MAJOR_VERSION == 3
-				LgiAssert(!"Gtk3 FIXME");
-				#else
 				gdk_drawable_get_size (d->d, &width, &height);
 				
 				printf("%s:%i %s %g,%g,%g,%g %i,%i  %i,%i  %i,%i\n",
@@ -205,13 +208,13 @@ OsPainter GScreenDC::Handle()
 					x,y,
 					d->x, d->y,
 					width, height);
-				#endif
 			}
 			#endif
 		}
 	}
 	
 	return Cairo;
+	#endif
 }
 
 bool GScreenDC::SupportsAlphaCompositing()
@@ -243,7 +246,7 @@ void GScreenDC::SetClient(GRect *c)
         GdkRectangle r = {c->x1, c->y1, c->X(), c->Y()};
 
 		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
+		LgiTrace("%s:%i - Gtk3 FIXME\n", _FL);
 		#else
         gdk_gc_set_clip_rectangle(d->gc, &r);
 		#endif
@@ -260,7 +263,7 @@ void GScreenDC::SetClient(GRect *c)
 
         GdkRectangle r = {0, 0, X(), Y()};
 		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
+		LgiTrace("%s:%i - Gtk3 FIXME\n", _FL);
 		#else
 		gdk_gc_set_clip_rectangle(d->gc, &r);
 		#endif
@@ -345,8 +348,9 @@ COLOUR GScreenDC::Colour()
 
 COLOUR GScreenDC::Colour(COLOUR c, int Bits)
 {
-	d->Col.Set(c, Bits);
-	return Colour(d->Col).Get(Bits);
+	auto b = Bits?Bits:GetBits();
+	d->Col.Set(c, b);
+	return Colour(d->Col).Get(b);
 }
 
 GColour GScreenDC::Colour(GColour c)
@@ -752,7 +756,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 		}
 
 		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
+		LgiTrace("%s:%i - Gtk3 FIXME\n", _FL);
 		#else
 		if (d->d && d->gc && Mem->GetImage())
 		{

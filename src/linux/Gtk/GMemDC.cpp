@@ -25,6 +25,7 @@ class GMemDCPrivate
 {
 public:
 	GRect Client;
+	cairo_t *cr;
 	#if GTK_MAJOR_VERSION == 3
 	cairo_surface_t *Img;
 	#else
@@ -35,6 +36,7 @@ public:
 
     GMemDCPrivate()
     {
+		cr = NULL;
 		Client.ZOff(-1, -1);
 		Img = 0;
 		Surface = 0;
@@ -109,6 +111,11 @@ cairo_surface_t *GMemDC::GetSurface(GRect &r)
 
 OsPainter GMemDC::Handle()
 {
+	#if GTK_MAJOR_VERSION == 3
+	if (!d->cr)
+		d->cr = cairo_create(d->Img);
+	return d->cr;
+	#else
 	if (!Cairo)
 	{
 		#if GTK_MAJOR_VERSION == 3
@@ -162,6 +169,7 @@ OsPainter GMemDC::Handle()
 	}
 
 	return Cairo;
+	#endif
 }
 
 Gtk::GdkPixbuf *GMemDC::CreatePixBuf()
@@ -283,9 +291,9 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	d->CreateCs = Cs;
 	
 	#if GTK_MAJOR_VERSION == 3
-	LgiTrace("%s:%i - Gtk3 FIXME\n", _FL);
 	#else
 	GdkVisual Fallback;
+	#endif
 	GdkVisual *Vis = gdk_visual_get_system();
 	GColourSpace VisCs = Vis ? GdkVisualToColourSpace(Vis, Bits) : CsNone;
 	if (Bits == 8)
@@ -309,17 +317,35 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 		Vis = NULL;
 	}
 	
-	if (Vis)
+	#if GTK_MAJOR_VERSION == 3
+	cairo_format_t fmt = CAIRO_FORMAT_RGB24;
+	switch (Bits)
 	{
+		case 8:
+			fmt = CAIRO_FORMAT_A8;
+			break;
+		case 16:
+			fmt = CAIRO_FORMAT_RGB16_565;
+			break;
+		case 24:
+			fmt = CAIRO_FORMAT_RGB24;
+			break;
+		case 32:
+			fmt = CAIRO_FORMAT_ARGB32;
+			break;
+		default:
+			return false;
+	}
+	d->Img = cairo_image_surface_create (fmt, x, y);
+	#else
+	if (Vis)
 		d->Img = gdk_image_new(	GDK_IMAGE_FASTEST,
 								Vis,
 								x,
 								y);
-	}
 	else
-	{
 		d->Img = NULL;
-	}
+	#endif
 
 	if (!pMem)
 		pMem = new GBmpMem;
@@ -329,6 +355,33 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	pMem->x = x;
 	pMem->y = y;
 	pMem->Flags = 0;
+	pMem->Cs = CsNone;
+
+	#if GTK_MAJOR_VERSION == 3
+	if (d->Img)
+	{
+		switch (cairo_image_surface_get_format(d->Img))
+		{
+			case CAIRO_FORMAT_ARGB32:
+				pMem->Cs = CsArgb32;
+				break;
+			case CAIRO_FORMAT_RGB24:
+				pMem->Cs = CsRgb24;
+				break;
+			case CAIRO_FORMAT_A8:
+				pMem->Cs = CsAlpha8;
+				break;
+			case CAIRO_FORMAT_RGB16_565:
+				pMem->Cs = CsRgb16;
+				break;
+			default:
+				LgiAssert(0);
+				return false;
+		}			
+		pMem->Base = cairo_image_surface_get_data(d->Img);
+		pMem->Line = cairo_image_surface_get_stride(d->Img);
+	}
+	#else
 	if (d->Img)
 	{
 		// Use the GdkImage memory
@@ -344,6 +397,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 		pMem->Cs = Cs;
 		pMem->Flags |= GBmpMem::BmpOwnMemory;
 	}
+	#endif
 	
 	ColourSpace = pMem->Cs;
 
@@ -402,7 +456,6 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	}
 
 	Clip.ZOff(X()-1, Y()-1);
-	#endif
 
 	return true;
 }
