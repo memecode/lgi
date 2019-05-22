@@ -756,22 +756,42 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 		}
 
 		#if GTK_MAJOR_VERSION == 3
-		LgiTrace("%s:%i - Gtk3 FIXME\n", _FL);
+
+			cairo_surface_t *Sub = Mem->GetSurface(br.SrcClip);
+			if (Sub)
+			{
+				cairo_pattern_t *Pat = cairo_pattern_create_for_surface(Sub);
+				if (Pat)
+				{
+					cairo_save(d->cr);
+					cairo_set_source(d->cr, Pat);
+		
+					cairo_new_path(d->cr);
+					cairo_rectangle(d->cr, br.DstClip.x1, br.DstClip.y1, br.DstClip.X(), br.DstClip.Y());
+					cairo_fill(d->cr);
+		
+					cairo_restore(d->cr);
+					
+					cairo_pattern_destroy(Pat);
+				}
+				cairo_surface_destroy(Sub);				
+			}
+
 		#else
-		if (d->d && d->gc && Mem->GetImage())
-		{
-			gdk_draw_image( d->d,
-							d->gc,
-							Mem->GetImage(),
-							br.SrcClip.x1, br.SrcClip.y1,
-							Dx, Dy,
-							br.SrcClip.X(), br.SrcClip.Y());
-		}
-		else
-		{
-			LgiTrace("%s:%i - Error missing d=%p, gc=%p, img=%p\n",
-				_FL, d->d, d->gc, Mem->GetImage());
-		}
+			if (d->d && d->gc && Mem->GetImage())
+			{
+				gdk_draw_image( d->d,
+								d->gc,
+								Mem->GetImage(),
+								br.SrcClip.x1, br.SrcClip.y1,
+								Dx, Dy,
+								br.SrcClip.X(), br.SrcClip.Y());
+			}
+			else
+			{
+				LgiTrace("%s:%i - Error missing d=%p, gc=%p, img=%p\n",
+					_FL, d->d, d->gc, Mem->GetImage());
+			}
 		#endif
 	}
 }

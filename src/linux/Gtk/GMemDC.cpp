@@ -82,12 +82,12 @@ GMemDC::~GMemDC()
 
 cairo_surface_t *GMemDC::GetSurface(GRect &r)
 {
-	#if GTK_MAJOR_VERSION == 3
-	return d->Img;
-	#else
 	if (!d->Img)
 		return NULL;
 	
+	#if GTK_MAJOR_VERSION == 3
+	cairo_format_t fmt = cairo_image_surface_get_format(d->Img);
+	#else
 	cairo_format_t fmt = CAIRO_FORMAT_ARGB32;
 	switch (d->Img->depth)
 	{
@@ -99,8 +99,16 @@ cairo_surface_t *GMemDC::GetSurface(GRect &r)
 			printf("%s:%i - '%i' bit depth that cairo supports\n", _FL, d->Img->depth);
 			return NULL;
 	}
+	#endif
 
 	int pixel_bytes = GColourSpaceToBits(ColourSpace) >> 3;
+	#if GTK_MAJOR_VERSION == 3
+	return cairo_image_surface_create_for_data(	pMem->Base + (r.y1 * pMem->Line) + (r.x1 * pixel_bytes),
+												fmt,
+												r.X(),
+												r.Y(),
+												pMem->Line);
+	#else
 	return cairo_image_surface_create_for_data(	((uchar*)d->Img->mem) + (r.y1 * d->Img->bpl) + (r.x1 * pixel_bytes),
 												fmt,
 												r.X(),
