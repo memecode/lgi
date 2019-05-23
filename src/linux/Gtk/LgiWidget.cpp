@@ -891,7 +891,6 @@ lgi_widget_realize(GtkWidget *widget)
 			if (p && p->target)
 			{
 				GScreenDC Dc(cr, p->w, p->h);
-				LgiTrace("%s:%i - painting %s\n", _FL, p->target->GetClass());
 				GView *v = dynamic_cast<GView*>(p->target);
 				if (v)
 					v->_Paint(&Dc);

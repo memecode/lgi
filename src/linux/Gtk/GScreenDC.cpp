@@ -243,11 +243,12 @@ void GScreenDC::SetClient(GRect *c)
 	{
 		d->Client = *c;
 
-        GdkRectangle r = {c->x1, c->y1, c->X(), c->Y()};
-
 		#if GTK_MAJOR_VERSION == 3
-		LgiTrace("%s:%i - Gtk3 FIXME\n", _FL);
+		cairo_save(d->cr);
+		cairo_rectangle(d->cr, c->x1, c->y1, c->X(), c->Y());
+		cairo_clip(d->cr);
 		#else
+        GdkRectangle r = {c->x1, c->y1, c->X(), c->Y()};
         gdk_gc_set_clip_rectangle(d->gc, &r);
 		#endif
 
@@ -263,7 +264,7 @@ void GScreenDC::SetClient(GRect *c)
 
         GdkRectangle r = {0, 0, X(), Y()};
 		#if GTK_MAJOR_VERSION == 3
-		LgiTrace("%s:%i - Gtk3 FIXME\n", _FL);
+		cairo_restore(d->cr);
 		#else
 		gdk_gc_set_clip_rectangle(d->gc, &r);
 		#endif

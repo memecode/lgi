@@ -2317,7 +2317,7 @@ bool GFontType::GetSystemFont(const char *Which)
 		{
 			#if LGI_SDL
 			
-				LgiAssert(!"Impl me.");
+			LgiAssert(!"Impl me.");
 			
 			#elif defined WINNATIVE
 
@@ -2332,7 +2332,7 @@ bool GFontType::GetSystemFont(const char *Which)
 			Info.PointSize(12);
 			Status = true;
 
-			#elif defined LINUX
+			#elif defined __GTK_H__
 
 			Info.Face("Courier New");
 			Info.PointSize(DefSize);
@@ -2341,6 +2341,10 @@ bool GFontType::GetSystemFont(const char *Which)
 			#elif defined MAC
 			
 			Status = MacGetSystemFont(Info, kCTFontUIFontUserFixedPitch);
+
+			#else
+
+			#error "Impl me"
 
 			#endif
 		}
