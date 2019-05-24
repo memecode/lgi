@@ -17,6 +17,12 @@ using namespace Gtk;
 typedef ::GMenuItem LgiMenuItem;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+static void SubMenuDestroy(GSubMenu *Item)
+{
+	LgiTrace("DestroySub %p %p\n", Item, Item->Info);
+	Item->Info = NULL;
+}
+
 GSubMenu::GSubMenu(const char *name, bool Popup)
 {
 	Menu = NULL;
@@ -28,6 +34,13 @@ GSubMenu::GSubMenu(const char *name, bool Popup)
 	if (name)
 	{
 		Info = GtkCast(Gtk::gtk_menu_new(), gtk_menu_shell, GtkMenuShell);
+		LgiTrace("CreateSub %p %p\n", this, Info);
+		auto ret = Gtk::g_signal_connect_data(Info,
+										"destroy",
+										(Gtk::GCallback) SubMenuDestroy,
+										this,
+										NULL,
+										Gtk::G_CONNECT_SWAPPED);
 	}
 }
 
@@ -370,39 +383,60 @@ static GAutoString MenuItemParse(const char *s)
 	return GAutoString(NewStr(buf));
 }
 
-static void MenuItemCallback(LgiMenuItem *Item)
+static void MenuItemActivate(LgiMenuItem *Item)
 {
-	if (!Item->Sub() && !Item->InSetCheck)
+	Item->OnGtkEvent("activate");
+}
+
+static void MenuItemDestroy(LgiMenuItem *Item)
+{
+	Item->OnGtkEvent("destroy");
+}
+
+void LgiMenuItem::OnGtkEvent(::GString Event)
+{
+	if (Event.Equals("activate"))
 	{
-		GSubMenu *Parent = Item->GetParent();
-		
-		if (!Parent || !Parent->IsContext(Item))
+		if (!Sub() && !InSetCheck)
 		{
-			::GMenu *m = Item->GetMenu();
-			if (m)
+			GSubMenu *Parent = GetParent();
+		
+			if (!Parent || !Parent->IsContext(this))
 			{
-				// Attached to a mean, so send an event to the window
-				GViewI *w = m->WindowHandle();
-				if (w)
-					w->PostEvent(M_COMMAND, Item->Id());
+				::GMenu *m = GetMenu();
+				if (m)
+				{
+					// Attached to a mean, so send an event to the window
+					GViewI *w = m->WindowHandle();
+					if (w)
+						w->PostEvent(M_COMMAND, Id());
+					else
+						LgiAssert(!"No window for menu to send to");
+				}
 				else
-					LgiAssert(!"No window for menu to send to");
-			}
-			else
-			{
-				// Could be just a popup menu... in which case do nothing.				
+				{
+					// Could be just a popup menu... in which case do nothing.				
+				}
 			}
 		}
+	}
+	else if (Event.Equals("destroy"))
+	{
+		LgiTrace("DestroyItem %p %p\n", this, Info);
+		Info = NULL;
 	}
 }
 
 LgiMenuItem::GMenuItem()
 {
-	Info = GtkCast(Gtk::gtk_separator_menu_item_new(), gtk_menu_item, GtkMenuItem);
+	d = NULL;
+	Info = NULL;
 	Child = NULL;
 	Menu = NULL;
 	Parent = NULL;
 	InSetCheck = false;
+
+	Handle(GtkCast(Gtk::gtk_separator_menu_item_new(), gtk_menu_item, GtkMenuItem));
 	
 	Position = -1;
 	
@@ -413,17 +447,13 @@ LgiMenuItem::GMenuItem()
 
 LgiMenuItem::GMenuItem(::GMenu *m, GSubMenu *p, const char *txt, int Pos, const char *shortcut)
 {
+	d = NULL;
 	GAutoString Txt = MenuItemParse(txt);
 	GBase::Name(txt);
-	Info = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(Txt));
-	
-	Gtk::gulong ret = Gtk::g_signal_connect_data(Info,
-												"activate",
-												(Gtk::GCallback) MenuItemCallback,
-												this,
-												NULL,
-												Gtk::G_CONNECT_SWAPPED);
+	Info = NULL;
 
+	Handle(GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(Txt)));
+	
 	Child = NULL;
 	Menu = m;
 	Parent = p;
@@ -439,10 +469,31 @@ LgiMenuItem::GMenuItem(::GMenu *m, GSubMenu *p, const char *txt, int Pos, const 
 	ScanForAccel();
 }
 
+void LgiMenuItem::Handle(GtkMenuItem *mi)
+{
+	LgiAssert(Info == NULL);
+	
+	Info = mi;
+	LgiTrace("CreateItem %p %p\n", this, Info);
+
+	Gtk::gulong ret = Gtk::g_signal_connect_data(Info,
+									"activate",
+									(Gtk::GCallback) MenuItemActivate,
+									this,
+									NULL,
+									Gtk::G_CONNECT_SWAPPED);
+
+	ret = Gtk::g_signal_connect_data(Info,
+									"destroy",
+									(Gtk::GCallback) MenuItemDestroy,
+									this,
+									NULL,
+									Gtk::G_CONNECT_SWAPPED);
+}
+
 LgiMenuItem::~GMenuItem()
 {
-	if (Info)
-		Remove();
+	Remove();
 	DeleteObj(Child);
 }
 
@@ -744,8 +795,10 @@ bool LgiMenuItem::Remove()
 			Gtk::GtkContainer *c = GtkCast(Parent->Info, gtk_container, GtkContainer);
 			Gtk::gtk_container_remove(c, w);
 		}
+		Info = NULL;
 	}
 
+	LgiAssert(Parent->Items.HasItem(this));
 	Parent->Items.Delete(this);
 	Parent = NULL;
 	return true;
@@ -858,7 +911,7 @@ void LgiMenuItem::Icon(int i)
 			// Attach our signal
 			gulong ret = g_signal_connect_data(	w,
 												"activate",
-												(GCallback) MenuItemCallback,
+												(GCallback) MenuItemActivate,
 												this,
 												NULL,
 												G_CONNECT_SWAPPED);
@@ -962,7 +1015,7 @@ void LgiMenuItem::Checked(bool c)
 			// Attach our signal
 			gulong ret = g_signal_connect_data(	w,
 												"activate",
-												(GCallback) MenuItemCallback,
+												(GCallback) MenuItemActivate,
 												this,
 												NULL,
 												G_CONNECT_SWAPPED);

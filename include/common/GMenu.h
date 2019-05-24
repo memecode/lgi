@@ -99,8 +99,8 @@ class LgiClass GSubMenu :
 	#endif
 
 	#if defined(__GTK_H__)
-	friend void MenuItemCallback(class GMenuItem *Item);
 	friend void GSubMenuDeactivate(Gtk::GtkMenuShell *widget, GSubMenu *Sub);
+	friend void SubMenuDestroy(GSubMenu *Item);
 
 	int *_ContextMenuId;
 	bool InLoop;
@@ -320,14 +320,17 @@ protected:
 	#endif
 
 	#if defined(__GTK_H__)
-	friend void MenuItemCallback(GMenuItem *Item);
-	bool InSetCheck;
-	GAutoPtr<GMemDC> IconImg;
-	bool Replace(Gtk::GtkWidget *newWid);
+		bool InSetCheck;
+		GAutoPtr<GMemDC> IconImg;
+		bool Replace(Gtk::GtkWidget *newWid);
+	public:
+		void Handle(Gtk::GtkMenuItem *mi);
+		void OnGtkEvent(GString Event);
+	protected:
 	#else
-	virtual void _Measure(GdcPt2 &Size);
-	virtual void _Paint(GSurface *pDC, int Flags);
-	virtual void _PaintText(GSurface *pDC, int x, int y, int Width);
+		virtual void _Measure(GdcPt2 &Size);
+		virtual void _Paint(GSurface *pDC, int Flags);
+		virtual void _PaintText(GSurface *pDC, int x, int y, int Width);
 	#endif
 
 	void OnAttach(bool Attach);

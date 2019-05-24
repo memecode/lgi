@@ -1176,40 +1176,38 @@ bool GMemDC::SwapRedAndBlue()
 {
 	switch (GetColourSpace())
 	{
-		case System24BitColourSpace:
-		{
-			for (int y=0; y<Y(); y++)
-			{
-				auto p = (System24BitPixel*)((*this)[y]);
-				if (!p)
-					break;
-				auto e = p + X();
-				while (p < e)
-				{
-					LSwap(p->r, p->b);
-					p++;
-				}
-				break;
+		#define ROP(cs)								\
+			case Cs##cs:							\
+			{										\
+				for (int y=0; y<Y(); y++)			\
+				{									\
+					auto p = (G##cs*)((*this)[y]);	\
+					if (!p)							\
+						break;						\
+					auto e = p + X();				\
+					while (p < e)					\
+					{								\
+						LSwap(p->r, p->b);			\
+						p++;						\
+					}								\
+					break;							\
+				}									\
+				break;								\
 			}
-			break;
-		}
-		case System32BitColourSpace:
-		{
-			for (int y=0; y<Y(); y++)
-			{
-				auto p = (System32BitPixel*)((*this)[y]);
-				if (!p)
-					break;
-				auto e = p + X();
-				while (p < e)
-				{
-					LSwap(p->r, p->b);
-					p++;
-				}
-				break;
-			}
-			break;
-		}
+
+		ROP(Rgb24)
+		ROP(Bgr24)
+
+		ROP(Rgbx32)
+		ROP(Bgrx32)
+		ROP(Xrgb32)
+		ROP(Xbgr32)
+
+		ROP(Argb32)
+		ROP(Abgr32)
+		ROP(Rgba32)
+		ROP(Bgra32)
+
 		default:
 			return false;
 	}

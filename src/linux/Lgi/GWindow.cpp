@@ -158,14 +158,14 @@ bool GWindow::SetIcon(const char *FileName)
 			LgiApp->SetApplicationIcon(FileName);
 			#endif
 			
-			/*
+			#if _MSC_VER
 			if (gtk_window_set_icon_from_file(Wnd, FileName, &error))
 				return true;
-			*/
+			#else
+			// On windows this is giving a red for blue channel swap error...
 			if (d->IconImg.Reset(GdcD->Load(a)))
-			{
 				gtk_window_set_icon(Wnd, d->IconImg->CreatePixBuf());
-			}
+			#endif
 		}
 	}
 	
