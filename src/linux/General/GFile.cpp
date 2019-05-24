@@ -1396,6 +1396,10 @@ int GFile::Close()
 	return true;
 }
 
+void GFile::ChangeThread()
+{
+}
+
 /*
 int GFile::Print(char *Format, ...)
 {
