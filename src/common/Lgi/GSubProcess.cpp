@@ -821,14 +821,15 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 int32 GSubProcess::Communicate(GStreamI *Out, GStreamI *In)
 {
 	char Buf[1024];
+	ssize_t r;
 	while (!IsRunning())
 	{
-		int r = Read(Buf, sizeof(Buf));
+		r = Read(Buf, sizeof(Buf));
 		if (r > 0 && Out)
 			Out->Write(Buf, r);
 	}
 
-	int r = Read(Buf, sizeof(Buf));
+	r = Read(Buf, sizeof(Buf));
 	if (r > 0 && Out)
 		Out->Write(Buf, r);
 

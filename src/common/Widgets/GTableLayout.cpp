@@ -32,7 +32,7 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		539
+// #define DEBUG_LAYOUT		24
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
 
@@ -691,7 +691,7 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 			Flag = SizeFill;
 		else
 		{
-			Max = Wid.ToPx(Tx, Table->GetFont()) - Padding.x1 - Padding.x2;
+			Min = Max = Wid.ToPx(Tx, Table->GetFont()) - Padding.x1 - Padding.x2;
 			
 			if (Wid.Type == GCss::LenPercent  || !Wid.IsDynamic())
 			{
@@ -1501,22 +1501,22 @@ void GTableLayoutPrivate::LayoutHorizontal(GRect &Client, int *MinX, int *MaxX, 
 						}
 					}
 					
-					DistributeSize(MinCol, ColFlags, c->Cell.x1, c->Cell.X(), Min, BorderSpacing);
-					
 					// This is the total size of all the px currently allocated
 					int AllPx = CountRange(MinCol, 0, Cols.Length()-1) + (((int)Cols.Length() - 1) * BorderSpacing);
 					
 					// This is the minimum size of this cell's cols
 					int MyPx = CountRange(MinCol, c->Cell.x1, c->Cell.x2) + ((c->Cell.X() - 1) * BorderSpacing);
 					
-					// This is the total remaining px we could add...
 					int Remaining = Client.X() - AllPx;
+			
+					// This is the total remaining px we could add...
 					if (Remaining > 0)
 					{
 						// Limit the max size of this cell to the existing + remaining px
 						Max = MIN(Max, MyPx + Remaining);
 						
 						// Distribute the max px across the cell's columns.
+						DistributeSize(MinCol, ColFlags, c->Cell.x1, c->Cell.X(), Max, BorderSpacing);
 						DistributeSize(MaxCol, ColFlags, c->Cell.x1, c->Cell.X(), Max, BorderSpacing);
 					}
 				}
