@@ -270,6 +270,7 @@ elseif (LINUX)
 	target_include_directories(Lgi PUBLIC "include/linux/Gtk" "include/linux" ${GTK2_INCLUDE_DIRS} ${GST_INCLUDE_DIRS})
 	target_link_libraries(Lgi ${GTK2_LIBRARIES} ${GST_LIBRARIES} magic)
 elseif (MSVC)
+	set(LIBPOSTFIX "d")
 	target_include_directories(Lgi PUBLIC
 							"${ROOT}/include/linux"
 							"${ROOT}/include/linux/gtk"
@@ -279,12 +280,13 @@ elseif (MSVC)
 							pango-1.0.lib
 							glib-2.0.lib
 							gtk-3.0.lib
-							cairo.lib
+							cairo${LIBPOSTFIX}.lib
 							gobject-2.0.lib
 							pangocairo-1.0.lib
 							gdk_pixbuf-2.0.lib
 							Ws2_32.lib)
-	target_link_directories(Lgi PUBLIC ${VCPKG}/installed/x64-windows/lib)
+	# target_link_directories(Lgi PUBLIC ${VCPKG}/installed/x64-windows/lib)
+	target_link_directories(Lgi PUBLIC ${VCPKG}/installed/x64-windows/debug/lib)
 endif ()
 
 target_include_directories (Lgi PUBLIC

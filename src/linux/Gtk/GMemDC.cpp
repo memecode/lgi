@@ -182,10 +182,16 @@ OsPainter GMemDC::Handle()
 
 Gtk::GdkPixbuf *GMemDC::CreatePixBuf()
 {
+	auto Alpha = HasAlpha() || GColourSpaceHasAlpha(GetColourSpace());
+
+	#ifdef _MSC_VER
+	SwapRedAndBlue();
+	#endif
+
 	Gtk::GdkPixbuf *Pb =
 		gdk_pixbuf_new_from_data ((*this)[0],
               GDK_COLORSPACE_RGB,
-              HasAlpha(),
+              Alpha,
               8,
               X(),
               Y(),
@@ -194,6 +200,11 @@ Gtk::GdkPixbuf *GMemDC::CreatePixBuf()
               NULL);
 	if (!Pb)
 		printf("%s:%i - gdk_pixbuf_new_from_data failed.\n", _FL);
+
+	#ifdef _MSC_VER
+	SwapRedAndBlue();
+	#endif
+
 	return Pb;
 }
 

@@ -1003,6 +1003,7 @@ public:
 	void SetOrigin(int x, int y);
 	void Empty();
 	bool SupportsAlphaCompositing();
+	bool SwapRedAndBlue();
 	
 	bool Create(int x, int y, GColourSpace Cs, int Flags = SurfaceCreateNone);
 	void Blt(int x, int y, GSurface *Src, GRect *a = NULL);

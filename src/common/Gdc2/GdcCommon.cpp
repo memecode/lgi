@@ -1167,8 +1167,53 @@ bool LgiRopUniversal(GBmpMem *Dst, GBmpMem *Src, bool Composite)
 	return false;
 }
 
-////////////////////////////////////////////////////////////////////////////////
 int LgiScreenDpi()
 {
 	return 96; // A reasonable default.
 }
+
+bool GMemDC::SwapRedAndBlue()
+{
+	switch (GetColourSpace())
+	{
+		case System24BitColourSpace:
+		{
+			for (int y=0; y<Y(); y++)
+			{
+				auto p = (System24BitPixel*)((*this)[y]);
+				if (!p)
+					break;
+				auto e = p + X();
+				while (p < e)
+				{
+					LSwap(p->r, p->b);
+					p++;
+				}
+				break;
+			}
+			break;
+		}
+		case System32BitColourSpace:
+		{
+			for (int y=0; y<Y(); y++)
+			{
+				auto p = (System32BitPixel*)((*this)[y]);
+				if (!p)
+					break;
+				auto e = p + X();
+				while (p < e)
+				{
+					LSwap(p->r, p->b);
+					p++;
+				}
+				break;
+			}
+			break;
+		}
+		default:
+			return false;
+	}
+
+	return true;
+}
+

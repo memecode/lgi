@@ -371,10 +371,15 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	LgiAssert(WCharSz == 4);
 	#endif
 
-  	Gtk::gdk_threads_init();	
+	#ifdef _MSC_VER
+	SetEnvironmentVariable(_T("GTK_CSD"), _T("0"));
+	#else
+	setenv("GTK_CSD", "0", true);
+	#endif
 	#if GTK_MAJOR_VERSION == 3
 	#else
 	GtkLock _Lock;
+  	Gtk::gdk_threads_init();	
 	#endif
   	
 	// We want our printf's NOW!
