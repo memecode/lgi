@@ -40,7 +40,7 @@
 	#include <sys/types.h>
 	#include <pwd.h>
 	#include <sys/utsname.h>
-	#include "GProcess.h"
+	#include "GSubProcess.h"
 #elif defined BEOS
 	#include <Path.h>
 #endif
@@ -1572,10 +1572,11 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 					if (!ValidStr(KdeTrash))
 					{
 						// Ask KDE where the current trash is...
-						GProcess p;
 						GStringPipe o;
-						if (p.Run("kde-config", "--userpath trash", 0, true, 0, &o))
+						GSubProcess p("kde-config", "--userpath trash");
+						if (p.Start())
 						{
+							p.Communicate(&o);
 							char *s = o.NewStr();
 							if (s)
 							{
@@ -1799,9 +1800,10 @@ bool LgiGetExeFile(char *Dst, int DstSize)
 					// sprintf_s(Cmd, sizeof(Cmd), "ps | grep \"%i\"", getpid());
 					
 					GStringPipe Ps;
-					GProcess p;
-					if (p.Run("ps", 0, 0, true, 0, &Ps))
+					GSubProcess p("ps");
+					if (p.Start())
 					{
+						p.Communicate(&Ps);
 						char *PsOutput = Ps.NewStr();
 						if (PsOutput)
 						{

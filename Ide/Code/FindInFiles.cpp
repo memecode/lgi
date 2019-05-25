@@ -3,7 +3,6 @@
 
 #include "Lgi.h"
 #include "LgiIde.h"
-#include "GProcess.h"
 #include "GDocView.h"
 #include "GToken.h"
 #include "GEdit.h"

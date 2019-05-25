@@ -5,7 +5,7 @@
 #include "GScripting.h"
 #include "GScriptingPriv.h"
 #include "GToken.h"
-#include "GProcess.h"
+#include "GSubProcess.h"
 #include "LgiRes.h"
 
 //////////////////////////////////////////////////////////////////////////////////////

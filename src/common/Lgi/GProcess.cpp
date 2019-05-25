@@ -17,7 +17,7 @@
 #endif
 
 #include "Lgi.h"
-#include "GProcess.h"
+#include "GSubProcess.h"
 #include "GToken.h"
 
 #ifndef STILL_ACTIVE

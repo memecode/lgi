@@ -5,7 +5,6 @@
 #include "LgiIde.h"
 #include "FindSymbol.h"
 #include "LList.h"
-#include "GProcess.h"
 #include "GToken.h"
 #include "GEventTargetThread.h"
 #include "GTextFile.h"

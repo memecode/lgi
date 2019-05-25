@@ -8,7 +8,7 @@
 #include <sys/uio.h>
 
 #include <cxxabi.h>
-#include "GProcess.h"
+#include "GSubProcess.h"
 
 #include <stdlib.h>
 #include <stdio.h>

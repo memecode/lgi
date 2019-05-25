@@ -9,7 +9,6 @@
 #include <time.h>
 
 #include "Lgi.h"
-#include "GProcess.h"
 #include "GTextLabel.h"
 #include "GButton.h"
 #include <Carbon/Carbon.h>

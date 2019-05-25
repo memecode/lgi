@@ -3,7 +3,7 @@
 #ifndef _GSYMLOOKUP_H_
 #define _GSYMLOOKUP_H_
 
-#include "GProcess.h"
+#include "GSubProcess.h"
 
 /// Lookup the file/line information for an instruction pointer value
 class GSymLookup

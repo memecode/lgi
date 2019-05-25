@@ -9,7 +9,6 @@
 #include <ctype.h>
 
 #include "Lgi.h"
-#include "GProcess.h"
 #include "GSkinEngine.h"
 #include "GArray.h"
 #include "LgiWinManGlue.h"
@@ -998,9 +997,10 @@ GAutoString GApp::GetFileMimeType(const char *File)
 	GStringPipe Output;
 	char Args[256];
 	sprintf(Args, "-i \"%s\"", File);
-	GProcess p;
-	if (p.Run("file", Args, 0, true, 0, &Output))
+	GSubProcess p("file", Args);
+	if (p.Start())
 	{
+		p.Communicate(&Output);
 		char *Out = Output.NewStr();
 		if (Out)
 		{
