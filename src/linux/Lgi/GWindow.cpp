@@ -879,8 +879,8 @@ void ClientCallback(GtkWidget *w, CallbackParams *p)
 	const char *Name = gtk_widget_get_name(w);
 	if (Name && !_stricmp(Name, "GtkMenuBar"))
 	{
-		GtkRequisition alloc;
-		gtk_widget_size_request(w, &alloc);
+		GtkAllocation alloc = {0};
+		gtk_widget_get_allocation(w, &alloc);
 		p->Menu.ZOff(alloc.width-1, alloc.height-1);
 	}
 	
@@ -898,30 +898,13 @@ GRect &GWindow::GetClient(bool ClientSpace)
 	static GRect r;
 	r = GView::GetClient(ClientSpace);
 
-	#if GTK_MAJOR_VERSION == 3
-
-	if (_Root)
-	{
-		GtkAllocation alloc;
-		gtk_widget_get_allocation (_Root, &alloc);
-		r.ZOff(alloc.width-1, alloc.height-1);
-	}
-	else LgiAssert(0);
-
-	#else
-
 	if (Wnd)
 	{
 		CallbackParams p;
 		gtk_container_forall(GTK_CONTAINER(Wnd), (GtkCallback)ClientCallback, &p);
 		if (p.Menu.Valid())
-		{
-			// printf("MenuSize=%s\n", p.Menu.GetStr());
-			r.y2 -= p.Menu.Y();
-		}
+			r.y1 += p.Menu.Y();
 	}
-
-	#endif
 
 	return r;
 }
@@ -1069,7 +1052,8 @@ void GWindow::OnPosChange()
 
 void GWindow::PourAll()
 {
-	GRegion Client(GetClient());
+	auto c = GetClient();
+	GRegion Client(c);
 	GViewI *MenuView = 0;
 
 	GRegion Update(Client);
@@ -1086,7 +1070,8 @@ void GWindow::PourAll()
 			if (!IsMenu && IsTool(v))
 			{
 				GRect OldPos = v->GetPos();
-				Update.Union(&OldPos);
+				if (OldPos.Valid())
+					Update.Union(&OldPos);
 				
 				if (HasTools)
 				{
@@ -1126,6 +1111,7 @@ void GWindow::PourAll()
 						}
 
 						GRect Bar(v->GetPos());
+						// LgiTrace("%s = %s\n", v->GetClass(), Bar.GetStr());
 						Bar.x2 = GetClient().x2;
 
 						Tools = Bar;
@@ -1145,16 +1131,16 @@ void GWindow::PourAll()
 		if (!IsMenu && !IsTool(v))
 		{
 			GRect OldPos = v->GetPos();
-			Update.Union(&OldPos);
+			if (OldPos.Valid())
+				Update.Union(&OldPos);
 
 			if (v->Pour(Client))
 			{
 				GRect p = v->GetPos();
+				// LgiTrace("%s = %s\n", v->GetClass(), p.GetStr());
 
 				if (!v->Visible())
-				{
 					v->Visible(true);
-				}
 
 				v->Invalidate();
 

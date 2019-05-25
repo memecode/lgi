@@ -651,8 +651,6 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 		{
 			#ifndef LGI_SDL
 			if (!w->Handle())
-			#else
-			if (1)
 			#endif
 			{
 				GRect p = w->GetPos();

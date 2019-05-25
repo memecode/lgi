@@ -2,13 +2,14 @@
 	\author Matthew Allen
  */
 
+#if defined(_MSC_VER) && defined(_DEBUG)
+#include "crtdbg.h"
+#endif
+
 #include "Lgi.h"
 #include "GToken.h"
 #ifdef LGI_SDL
 #include <SDL.h>
-#endif
-#if defined(WINDOWS) && defined(_DEBUG)
-#include "crtdbg.h"
 #endif
 
 /** \brief The main entry point of a Lgi program
@@ -78,8 +79,8 @@ WINAPI CALLBACK
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 #endif
 {
-	#ifdef _DEBUG
-	_CrtSetDbgFlag(_CRTDBG_CHECK_ALWAYS_DF);
+	#if defined(_MSC_VER) && defined(_DEBUG)
+	// _CrtSetDbgFlag(_CRTDBG_CHECK_ALWAYS_DF);
 	#endif
 
 	int Status = 0;

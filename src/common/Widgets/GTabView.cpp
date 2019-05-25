@@ -929,6 +929,7 @@ void GTabView::OnPaint(GSurface *pDC)
 				{
 					if (pScreen->SupportsAlphaCompositing())
 						pScreen->Op(GDC_ALPHA);
+
 					pScreen->Blt(r.x1, r.y1, &Mem);
 				}
 				#endif

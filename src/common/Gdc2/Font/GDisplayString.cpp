@@ -1937,7 +1937,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	}
 
 	int Ox = 0, Oy = 0;
-	pDC->GetOrigin(Ox, Oy);
+	// pDC->GetOrigin(Ox, Oy);
 	
 	Gtk::cairo_save(cr);
 	

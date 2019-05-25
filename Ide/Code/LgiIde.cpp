@@ -1636,7 +1636,8 @@ Chk;
 		GRect c = GetClient();
 		if (c.Y() > OutPx.CastInt32())
 		{
-			GCss::Len y(GCss::LenPx, (float)OutPx.CastDouble());
+			auto Px = OutPx.CastInt32();
+			GCss::Len y(GCss::LenPx, (float)MAX(Px, 120));
 			d->Output->GetCss(true)->Height(y);
 		}
 

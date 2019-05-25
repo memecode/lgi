@@ -57,9 +57,6 @@ public:
 };
 
 // Translates are cumulative... so we undo the last one before resetting it.
-#define UnTranslate()		// d->p.translate(OriginX, OriginY);
-#define Translate()			// d->p.translate(-OriginX, -OriginY);
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 GScreenDC::GScreenDC()
 {
@@ -170,8 +167,6 @@ GScreenDC::GScreenDC(GView *view, void *param)
 
 GScreenDC::~GScreenDC()
 {
-	UnTranslate();
-	
 	DeleteObj(d);
 }
 
@@ -246,7 +241,8 @@ void GScreenDC::SetClient(GRect *c)
 		#if GTK_MAJOR_VERSION == 3
 		cairo_save(d->cr);
 		cairo_rectangle(d->cr, c->x1, c->y1, c->X(), c->Y());
-		cairo_clip(d->cr);
+		// cairo_clip(d->cr);		
+		cairo_translate(d->cr, c->x1, c->y1);
 		#else
         GdkRectangle r = {c->x1, c->y1, c->X(), c->Y()};
         gdk_gc_set_clip_rectangle(d->gc, &r);
@@ -298,9 +294,7 @@ void GScreenDC::GetOrigin(int &x, int &y)
 
 void GScreenDC::SetOrigin(int x, int y)
 {
-	UnTranslate();
 	GSurface::SetOrigin(x, y);
-	Translate();
 }
 
 GRect GScreenDC::ClipRgn()
@@ -311,7 +305,6 @@ GRect GScreenDC::ClipRgn()
 GRect GScreenDC::ClipRgn(GRect *c)
 {
 	GRect Prev = Clip;
-	UnTranslate();
 
 	if (c)
 	{
@@ -338,7 +331,6 @@ GRect GScreenDC::ClipRgn(GRect *c)
 		#endif
 	}
 
-	Translate();
 	return Prev;
 }
 
@@ -668,7 +660,7 @@ void GScreenDC::Rectangle(GRect *a)
 	else
 	{
 		#if GTK_MAJOR_VERSION == 3
-		cairo_rectangle(d->cr, -OriginX, -OriginY, X(), Y());
+		cairo_rectangle(d->cr, 0, 0, X(), Y());
 		cairo_fill(d->cr);
 		#else
 		gdk_draw_rectangle(d->d, d->gc, true, -OriginX, -OriginY, X(), Y());
@@ -716,12 +708,9 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 		
 	// memory -> screen blt
 	GRect RealClient = d->Client;
-	int Dx, Dy;
-	Dx = x - OriginX;
-	Dy = y - OriginY;
 	d->Client.ZOff(-1, -1); // Clear this so the blit rgn calculation uses the
 							// full context size rather than just the client.
-	GBlitRegions br(this, Dx, Dy, Src, a);
+	GBlitRegions br(this, x, y, Src, a);
 	d->Client = RealClient;
 	if (!br.Valid())
 	{
@@ -731,6 +720,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	GMemDC *Mem;
 	if (Mem = dynamic_cast<GMemDC*>(Src))
 	{
+		/*
 		GMemDC Tmp;
 		if (Mem->GetCreateCs() != GetColourSpace() &&
 			Mem->GetBits() > 16 &&
@@ -755,6 +745,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 				return;
 			}
 		}
+		*/
 
 		#if GTK_MAJOR_VERSION == 3
 
@@ -765,10 +756,11 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 				if (Pat)
 				{
 					cairo_save(d->cr);
+					cairo_translate(d->cr, br.DstClip.x1, br.DstClip.y1);
 					cairo_set_source(d->cr, Pat);
 		
 					cairo_new_path(d->cr);
-					cairo_rectangle(d->cr, br.DstClip.x1, br.DstClip.y1, br.DstClip.X(), br.DstClip.Y());
+					cairo_rectangle(d->cr, 0, 0, br.DstClip.X(), br.DstClip.Y());
 					cairo_fill(d->cr);
 		
 					cairo_restore(d->cr);

@@ -833,6 +833,8 @@ lgi_widget_realize(GtkWidget *widget)
 		}
 		else assert(0);
 
+		w->target->OnCreate();
+
 	#else
 
 		GTK_WIDGET_SET_FLAGS(widget, GTK_REALIZED);

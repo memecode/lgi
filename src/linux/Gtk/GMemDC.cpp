@@ -379,10 +379,10 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 		switch (cairo_image_surface_get_format(d->Img))
 		{
 			case CAIRO_FORMAT_ARGB32:
-				pMem->Cs = CsArgb32;
+				pMem->Cs = CsBgra32;
 				break;
 			case CAIRO_FORMAT_RGB24:
-				pMem->Cs = CsRgb24;
+				pMem->Cs = CsBgrx32;
 				break;
 			case CAIRO_FORMAT_A8:
 				pMem->Cs = CsAlpha8;
