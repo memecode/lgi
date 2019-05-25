@@ -556,7 +556,9 @@ enum MessageBoxType
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs
 #define swprintf_s		swprintf
+#ifndef _MSC_VER
 #define vsprintf_s		vsnprintf
+#endif
 
 #ifndef WINNATIVE // __CYGWIN__
 
