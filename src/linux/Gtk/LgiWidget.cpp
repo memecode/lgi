@@ -696,6 +696,7 @@ lgi_widget_destroy(
 	g_return_if_fail(LGI_IS_WIDGET(object));
 
 	LgiWidget *p = LGI_WIDGET(object);
+	// printf("%s:%i - lgi_widget_destroy(%p) %s\n", _FL, p, p->target->GetClass());
 	#if GTK_MAJOR_VERSION == 3
 	void *cls = g_type_class_peek(gtk_widget_get_type());
 	if (cls && GTK_WIDGET_CLASS(cls)->destroy)
@@ -866,14 +867,13 @@ lgi_widget_realize(GtkWidget *widget)
 	{
 		LgiWidget *w = LGI_WIDGET(widget);
 
+		printf("%s:%i - unrealize(%p) %s\n", _FL, w, w->target->GetClass());
 		if (w->window)
 		{
-			gpointer user_data = NULL;
-			gdk_window_get_user_data(w->window, &user_data);
-
-			gtk_widget_unregister_window (widget, w->window);
-			gdk_window_destroy (w->window);
-			gtk_widget_set_window(widget, w->window = NULL);
+			// gtk_widget_unregister_window (widget, w->window);
+			// gtk_widget_set_window(widget, NULL);
+			// gdk_window_destroy(w->window);
+			// w->window = NULL;
 		}
 
 		GTK_WIDGET_CLASS(lgi_widget_parent_class)->unrealize(widget);

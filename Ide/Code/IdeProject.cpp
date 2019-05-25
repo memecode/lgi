@@ -3140,11 +3140,11 @@ bool IdeProject::InProject(bool FuzzyMatch, const char *Path, bool Open, IdeDoc 
 			const char *pLeaf = LgiGetLeaf(Cur.key);
 			if (pLeaf && !stricmp(pLeaf, Leaf))
 			{
-				Score |= 0x80000000;
+				Score |= 0x40000000;
 			}
 			if (Score && (CurPlatform & PLATFORM_CURRENT) != 0)
 			{
-				Score |= 0x40000000;
+				Score |= 0x80000000;
 			}
 
 			if (Score > MatchingScore)

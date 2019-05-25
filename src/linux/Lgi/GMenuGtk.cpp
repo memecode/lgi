@@ -19,7 +19,7 @@ typedef ::GMenuItem LgiMenuItem;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 static void SubMenuDestroy(GSubMenu *Item)
 {
-	LgiTrace("DestroySub %p %p\n", Item, Item->Info);
+	// LgiTrace("DestroySub %p %p\n", Item, Item->Info);
 	Item->Info = NULL;
 }
 
@@ -34,7 +34,7 @@ GSubMenu::GSubMenu(const char *name, bool Popup)
 	if (name)
 	{
 		Info = GtkCast(Gtk::gtk_menu_new(), gtk_menu_shell, GtkMenuShell);
-		LgiTrace("CreateSub %p %p\n", this, Info);
+		// LgiTrace("CreateSub %p %p\n", this, Info);
 		auto ret = Gtk::g_signal_connect_data(Info,
 										"destroy",
 										(Gtk::GCallback) SubMenuDestroy,
@@ -422,7 +422,7 @@ void LgiMenuItem::OnGtkEvent(::GString Event)
 	}
 	else if (Event.Equals("destroy"))
 	{
-		LgiTrace("DestroyItem %p %p\n", this, Info);
+		// LgiTrace("DestroyItem %p %p\n", this, Info);
 		Info = NULL;
 	}
 }
@@ -474,7 +474,7 @@ void LgiMenuItem::Handle(GtkMenuItem *mi)
 	LgiAssert(Info == NULL);
 	
 	Info = mi;
-	LgiTrace("CreateItem %p %p\n", this, Info);
+	// LgiTrace("CreateItem %p %p\n", this, Info);
 
 	Gtk::gulong ret = Gtk::g_signal_connect_data(Info,
 									"activate",
@@ -789,7 +789,7 @@ bool LgiMenuItem::Remove()
 		#if GTK_MAJOR_VERSION == 2
 		LgiAssert(Info->item.bin.container.widget.object.parent_instance.g_type_instance.g_class);
 		#endif
-		LgiTrace("Remove %p %p\n", this, Info);
+		// LgiTrace("Remove %p %p\n", this, Info);
 		Gtk::GtkWidget *w = GtkCast(Info, gtk_widget, GtkWidget);
 		if (Gtk::gtk_widget_get_parent(w))
 		{		

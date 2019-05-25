@@ -424,10 +424,12 @@ bool GWindow::Attach(GViewI *p)
 							"focus-out-event",
 							G_CALLBACK(GtkViewCallback),
 							i);
+		/*
 		g_signal_connect(	G_OBJECT(Wnd),
 							"client-event",
 							G_CALLBACK(GtkViewCallback),
 							i);
+							*/
 		g_signal_connect(	G_OBJECT(Wnd),
 							"window-state-event",
 							G_CALLBACK(GtkViewCallback),

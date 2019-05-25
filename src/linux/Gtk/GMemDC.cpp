@@ -30,16 +30,19 @@ public:
 	cairo_surface_t *Img;
 	#else
 	GdkImage *Img;
-	#endif
 	cairo_surface_t *Surface;
+	#endif
 	GColourSpace CreateCs;
 
     GMemDCPrivate()
     {
-		cr = NULL;
 		Client.ZOff(-1, -1);
-		Img = 0;
-		Surface = 0;
+		cr = NULL;
+		Img = NULL;
+		#if GTK_MAJOR_VERSION == 3
+		#else
+		Surface = NULL;
+		#endif
 		CreateCs = CsNone;
     }
 
@@ -47,12 +50,17 @@ public:
     {
 		if (Img)
 		{
-			g_object_unref(Img);
+			cairo_surface_destroy(Img);
+			Img = NULL;
 		}
+		#if GTK_MAJOR_VERSION == 3
+		#else
 		if (Surface)
 		{
 			cairo_surface_destroy(Surface);
+			Surface = NULL;
 		}
+		#endif
 	}
 };
 
@@ -126,8 +134,6 @@ OsPainter GMemDC::Handle()
 	#else
 	if (!Cairo)
 	{
-		#if GTK_MAJOR_VERSION == 3
-		#else
 		cairo_format_t fmt = CAIRO_FORMAT_ARGB32;
 		int bits;
 		if (d->Img)
@@ -173,7 +179,6 @@ OsPainter GMemDC::Handle()
 			Cairo = cairo_create(d->Surface);
 			LgiAssert(Cairo);
 		}
-		#endif
 	}
 
 	return Cairo;
@@ -260,8 +265,8 @@ void GMemDC::Empty()
 {
 	if (d->Img)
 	{
-		g_object_unref(d->Img);
-		d->Img = 0;
+		cairo_surface_destroy(d->Img);
+		d->Img = NULL;
 	}
 }
 

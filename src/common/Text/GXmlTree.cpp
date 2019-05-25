@@ -1345,7 +1345,7 @@ bool GXmlTree::Read(GXmlTag *Root, GStreamI *File, GXmlFactory *Factory)
 	bool First = true;
 	while (d->Current && Ptr && *Ptr)
 	{
-		bool NoChildren;
+		bool NoChildren = true;
 		
 		GAutoPtr<GXmlTag> t
 		(
