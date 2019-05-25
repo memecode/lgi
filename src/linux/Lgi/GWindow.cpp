@@ -871,10 +871,11 @@ struct CallbackParams
 void ClientCallback(GtkWidget *w, CallbackParams *p)
 {
 	/*
-	printf("%.*sCallback %s\n",
-		p->Depth,
+	LgiTrace("%.*sCallback %s\n",
+		p->Depth * 2,
 		"                                         ", gtk_widget_get_name(w));
 	*/
+
 	const char *Name = gtk_widget_get_name(w);
 	if (Name && !_stricmp(Name, "GtkMenuBar"))
 	{
@@ -896,6 +897,19 @@ GRect &GWindow::GetClient(bool ClientSpace)
 {
 	static GRect r;
 	r = GView::GetClient(ClientSpace);
+
+	#if GTK_MAJOR_VERSION == 3
+
+	if (_Root)
+	{
+		GtkAllocation alloc;
+		gtk_widget_get_allocation (_Root, &alloc);
+		r.ZOff(alloc.width-1, alloc.height-1);
+	}
+	else LgiAssert(0);
+
+	#else
+
 	if (Wnd)
 	{
 		CallbackParams p;
@@ -906,6 +920,9 @@ GRect &GWindow::GetClient(bool ClientSpace)
 			r.y2 -= p.Menu.Y();
 		}
 	}
+
+	#endif
+
 	return r;
 }
 

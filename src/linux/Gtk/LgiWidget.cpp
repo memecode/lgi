@@ -716,10 +716,19 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 	g_return_if_fail(widget != NULL);
 	g_return_if_fail(LGI_IS_WIDGET(widget));
 	g_return_if_fail(allocation != NULL);
+	LgiWidget *w = LGI_WIDGET(widget);
 
 	#if GTK_MAJOR_VERSION == 3
 
 		gtk_widget_set_allocation (widget, allocation);
+
+		if (w->w != allocation->width ||
+			w->h != allocation->height)
+		{
+			w->w = allocation->width;
+			w->h = allocation->height;
+			w->target->OnPosChange();
+		}
 
 	#else
 
@@ -730,7 +739,6 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 			gdk_window_move_resize( Wnd,
 									allocation->x, allocation->y,
 									allocation->width, allocation->height);
-			LgiWidget *w = LGI_WIDGET(widget);
 			if (!_stricmp(w->target->GetClass(), "GWindow"))
 				LgiTrace("%s - %i x %i\n", w->target->GetClass(), allocation->width, allocation->height);
 
@@ -1133,7 +1141,11 @@ lgi_widget_configure(GtkWidget *widget, GdkEventConfigure *ev)
 {
 	LgiWidget *p = LGI_WIDGET(widget);
 	if (p)
+	{
+		LgiTrace("Configure %s = %i x %i\n", p->target->GetClass(), ev->width, ev->height);
 	    p->target->OnPosChange();
+	}
+
     return TRUE;
 }
 
