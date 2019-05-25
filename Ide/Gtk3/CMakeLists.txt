@@ -23,7 +23,8 @@ if (APPLE)
 elseif (LINUX)
 
 	add_definitions("-DLINUX -DLGI_LIBRARY -D_DEBUG -DLGI_RES -DPOSIX -fPIC -w -fno-inline -fpermissive")
-	find_package(GTK2 COMPONENTS gtk)
+	find_package(PkgConfig REQUIRED)
+	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 	find_package(PNG REQUIRED)
 	
 elseif (MSVC)
@@ -156,7 +157,11 @@ if (APPLE)
 		RESOURCE "${RESOURCE_FILES}"
 		)
 elseif (LINUX)
-	target_include_directories(LgiIde PUBLIC "${ROOT}/include/linux/Gtk" "${ROOT}/include/linux" ${GTK2_INCLUDE_DIRS} ${PNG_INCLUDE_DIR})
+	target_include_directories(LgiIde PUBLIC
+								"${ROOT}/include/linux/Gtk"
+								"${ROOT}/include/linux"
+								${GTK3_INCLUDE_DIRS}
+								${PNG_INCLUDE_DIR})
 	target_link_libraries(LgiIde Lgi pthread ${GTK2_LIBRARIES} ${PNG_LIBRARY})
 elseif (MSVC)
 	target_include_directories(LgiIde PUBLIC ${PNG_INCLUDE_DIRS} ${VCPKG}/installed/x64-windows/include)

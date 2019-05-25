@@ -556,6 +556,7 @@ enum MessageBoxType
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs
 #define swprintf_s		swprintf
+#define vsprintf_s		vsnprintf
 
 #ifndef WINNATIVE // __CYGWIN__
 
@@ -572,8 +573,6 @@ enum MessageBoxType
 
 #else
 
-	#define vsprintf_s		vsnprintf
-	
 	LgiFunc class GViewI *GWindowFromHandle(OsView hWnd);
 	LgiFunc int GetMouseWheelLines();
 	LgiFunc int WinPointToHeight(int Pt, HDC hDC = NULL);

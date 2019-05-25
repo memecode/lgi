@@ -1,3 +1,6 @@
+# Linux:
+# sudo apt install libgtk-3-dev
+
 cmake_minimum_required (VERSION 3.12)
 
 set (CMAKE_CXX_STANDARD 11)
@@ -29,8 +32,8 @@ if (APPLE)
 elseif (LINUX)
 
 	add_definitions("-DLINUX -DLGI_LIBRARY -D_DEBUG -DLGI_RES -fPIC -w -fno-inline -fpermissive")
-	find_package(GTK2 COMPONENTS gtk)
-	find_package(PkgConfig)
+	find_package(PkgConfig REQUIRED)
+	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4)
 	                               
 elseif (MSVC)
@@ -267,8 +270,15 @@ if (APPLE)
 	set_source_files_properties(${OBJCPP_SOURCE} PROPERTIES 
                             COMPILE_FLAGS "-x objective-c++")
 elseif (LINUX)
-	target_include_directories(Lgi PUBLIC "include/linux/Gtk" "include/linux" ${GTK2_INCLUDE_DIRS} ${GST_INCLUDE_DIRS})
-	target_link_libraries(Lgi ${GTK2_LIBRARIES} ${GST_LIBRARIES} magic)
+	target_include_directories(Lgi PUBLIC
+							"${ROOT}/include/linux/Gtk"
+							"${ROOT}/include/linux"
+							${GTK3_INCLUDE_DIRS}
+							${GST_INCLUDE_DIRS})
+	target_link_libraries(Lgi
+							${GTK3_LIBRARIES}
+							${GST_LIBRARIES}
+							magic)
 elseif (MSVC)
 	set(LIBPOSTFIX "d")
 	target_include_directories(Lgi PUBLIC
