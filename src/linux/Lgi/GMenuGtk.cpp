@@ -789,6 +789,7 @@ bool LgiMenuItem::Remove()
 		#if GTK_MAJOR_VERSION == 2
 		LgiAssert(Info->item.bin.container.widget.object.parent_instance.g_type_instance.g_class);
 		#endif
+		LgiTrace("Remove %p %p\n", this, Info);
 		Gtk::GtkWidget *w = GtkCast(Info, gtk_widget, GtkWidget);
 		if (Gtk::gtk_widget_get_parent(w))
 		{		
@@ -891,7 +892,7 @@ bool LgiMenuItem::Replace(Gtk::GtkWidget *newWid)
 		g_object_unref(Info);
 	}
 	
-	Info = GTK_MENU_ITEM(newWid);
+	Handle(GTK_MENU_ITEM(newWid));
 	return Info != NULL;
 }
 
