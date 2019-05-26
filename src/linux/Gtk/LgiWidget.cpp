@@ -791,7 +791,6 @@ static void
 lgi_widget_realize(GtkWidget *widget)
 {
 	GdkWindowAttr attributes;
-	guint attributes_mask;
 
 	g_return_if_fail(widget != NULL);
 	g_return_if_fail(LGI_IS_WIDGET(widget));
@@ -800,7 +799,7 @@ lgi_widget_realize(GtkWidget *widget)
 
 	#if GTK_MAJOR_VERSION == 3
 
-		GtkAllocation allocation;
+		GtkAllocation allocation = {0};
 		GdkWindow *window;
 
 		gtk_widget_get_allocation (widget, &allocation);
@@ -812,15 +811,8 @@ lgi_widget_realize(GtkWidget *widget)
 		attributes.y = allocation.y;
 		attributes.width = allocation.width;
 		attributes.height = allocation.height;
-		attributes.wclass = GDK_INPUT_ONLY;
-		attributes.event_mask = gtk_widget_get_events (widget);
-		attributes.event_mask |= (GDK_BUTTON_PRESS_MASK |
-								GDK_BUTTON_RELEASE_MASK |
-								GDK_TOUCH_MASK |
-								GDK_ENTER_NOTIFY_MASK |
-								GDK_LEAVE_NOTIFY_MASK);
-
-		attributes_mask = GDK_WA_X | GDK_WA_Y;
+		attributes.wclass = GDK_INPUT_OUTPUT;
+		attributes.event_mask = GDK_ALL_EVENTS_MASK & ~(GDK_POINTER_MOTION_HINT_MASK | GDK_SMOOTH_SCROLL_MASK);
 
 		window = gtk_widget_get_parent_window (widget);
 		if (window)
@@ -828,7 +820,7 @@ lgi_widget_realize(GtkWidget *widget)
 			gtk_widget_set_window (widget, window);
 			g_object_ref (window);
 
-			w->window = gdk_window_new (window, &attributes, attributes_mask);
+			w->window = gdk_window_new (window, &attributes, GDK_WA_X | GDK_WA_Y);
 			gtk_widget_register_window (widget, w->window);
 		}
 		else assert(0);
@@ -848,12 +840,10 @@ lgi_widget_realize(GtkWidget *widget)
 		attributes.wclass = GDK_INPUT_OUTPUT;
 		attributes.event_mask = gtk_widget_get_events(widget) | GDK_EXPOSURE_MASK;
 
-		attributes_mask = GDK_WA_X | GDK_WA_Y;
-
 		auto Par = gtk_widget_get_parent_window(widget);
 		auto ParWnd = gdk_window_new(Par,
 									&attributes,
-									attributes_mask);
+									GDK_WA_X | GDK_WA_Y);
 		widget->window = ParWnd;
 		gdk_window_set_user_data(ParWnd, widget);
 

@@ -6,6 +6,7 @@
 #include "GPopup.h"
 #include "GPanel.h"
 #include "GNotifications.h"
+#include "GViewPriv.h"
 
 using namespace Gtk;
 #if GTK_MAJOR_VERSION == 3
@@ -292,6 +293,41 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			delete this;
 			return true;
 		}
+		case GDK_BUTTON_PRESS:
+		case GDK_BUTTON_RELEASE:
+		{
+			GMouse m;
+			m.x = event->button.x;
+			m.y = event->button.y;
+			GViewI *t = WindowFromPoint(m.x, m.y, false);
+			m.Target = this;
+			m.SetButton(event->button.button);
+			m.SetModifer(event->button.state);
+			m.Down(event->type == GDK_BUTTON_PRESS);
+
+			auto gt = m.Target->GetGView();
+			if (gt) gt->_Mouse(m, false);
+			else gt->OnMouseClick(m);
+			break;
+		}
+		case GDK_MOTION_NOTIFY:
+		{
+			GMouse m;
+			m.x = event->motion.x;
+			m.y = event->motion.y;
+			GViewI *t = WindowFromPoint(m.x, m.y, false);
+			m.Target = t ? t : this;
+			m.SetModifer(event->motion.state);
+			m.Down(false);
+			m.IsMove(true);
+
+			LgiTrace("Move %i,%i = %s\n", m.x, m.y, t ? t->GetClass() : "");
+
+			auto gt = m.Target->GetGView();
+			if (gt) gt->_Mouse(m, true);
+			else gt->OnMouseClick(m);
+			break;
+		}
 		case GDK_CONFIGURE:
 		{
 			GdkEventConfigure *c = (GdkEventConfigure*)event;
@@ -410,12 +446,14 @@ bool GWindow::Attach(GViewI *p)
 							"delete_event",
 							G_CALLBACK(GtkViewCallback),
 							i);
-							/*
 		g_signal_connect(	G_OBJECT(Wnd),
 							"button-press-event",
 							G_CALLBACK(GtkViewCallback),
-							i);*/
-
+							i);
+		g_signal_connect(	G_OBJECT(Wnd),
+							"motion-notify-event",
+							G_CALLBACK(GtkViewCallback),
+							i);
 		g_signal_connect(	G_OBJECT(Wnd),
 							"focus-in-event",
 							G_CALLBACK(GtkViewCallback),
@@ -424,12 +462,6 @@ bool GWindow::Attach(GViewI *p)
 							"focus-out-event",
 							G_CALLBACK(GtkViewCallback),
 							i);
-		/*
-		g_signal_connect(	G_OBJECT(Wnd),
-							"client-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-							*/
 		g_signal_connect(	G_OBJECT(Wnd),
 							"window-state-event",
 							G_CALLBACK(GtkViewCallback),

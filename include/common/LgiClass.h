@@ -292,6 +292,10 @@ public:
 		Left(Btn == kEventMouseButtonPrimary);
 		Right(Btn == kEventMouseButtonSecondary);
 		Middle(Btn == kEventMouseButtonTertiary);
+		#elif defined(__GTK_H__)
+		if (Btn == 1) Left(true);
+		else if (Btn == 2) Middle(true);
+		else if (Btn == 3) Right(true);
 		#endif
 	}
 	#endif

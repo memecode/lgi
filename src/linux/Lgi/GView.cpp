@@ -21,7 +21,7 @@
 using namespace Gtk;
 #include "LgiWidget.h"
 
-#define DEBUG_MOUSE_EVENTS			0
+#define DEBUG_MOUSE_EVENTS			1
 
 #define ADJ_LEFT					1
 #define ADJ_RIGHT					2

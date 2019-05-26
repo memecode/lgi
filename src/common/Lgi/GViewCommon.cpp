@@ -1841,6 +1841,7 @@ GViewI *GView::WindowFromPoint(int x, int y, bool Debug)
 	// end of the list is on "top". So they should get the click or whatever
 	// before the the lower windows.
 	auto it = Children.rbegin();
+	int n = (int)Children.Length() - 1;
 	for (GViewI *c = *it; c; c = *--it)
 	{
 		GRect CPos = c->GetPos();
@@ -1854,8 +1855,8 @@ GViewI *GView::WindowFromPoint(int x, int y, bool Debug)
             int Oy = CPos.y1 + CClient.y1;
 			if (Debug)
 			{
-				LgiTrace("%s%s Pos=%s Client=%s m(%i,%i)->(%i,%i)\n",
-						Tabs,
+				LgiTrace("%s[%i] %s Pos=%s Client=%s m(%i,%i)->(%i,%i)\n",
+						Tabs, n--,
 						c->GetClass(),
 						CPos.GetStr(),
 						CClient.GetStr(),
@@ -1873,7 +1874,7 @@ GViewI *GView::WindowFromPoint(int x, int y, bool Debug)
 		}
 		else if (Debug)
 		{
-			LgiTrace("%sMISSED %s Pos=%s m(%i,%i)\n", Tabs, c->GetClass(), CPos.GetStr(), x, y);
+			LgiTrace("%s[%i] MISSED %s Pos=%s m(%i,%i)\n", Tabs, n--, c->GetClass(), CPos.GetStr(), x, y);
 		}
 	}
 
