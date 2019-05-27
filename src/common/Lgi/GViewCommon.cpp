@@ -680,9 +680,11 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 					
 					pDC->SetClient(&p);
 
+					#if 0
 					double ex[4];
 					cairo_clip_extents (pDC->Handle(), ex+0, ex+1, ex+2, ex+3);
 					LgiTrace("	_Paint %s:%s %s (%g,%g,%g,%g)\n", w->GetClass(), w->Name(), p.GetStr(), ex[0], ex[1], ex[2], ex[3]);
+					#endif
 
 					w->_Paint(pDC, &co);
 					pDC->SetClient(NULL);
@@ -2292,11 +2294,37 @@ void DumpHiview(HIViewRef v, int Depth = 0)
 }
 #endif
 
+#if defined(__GTK_H__)
+void DumpGtk(Gtk::GtkWidget *w, Gtk::gpointer Depth = NULL)
+{
+	using namespace Gtk;
+	if (!w)
+		return;
+
+	char Sp[65] = {0};
+	if (Depth)
+		memset(Sp, ' ', *((int*)Depth)*2);
+
+	auto *Obj = G_OBJECT(w);
+	GViewI *View = (GViewI*) g_object_get_data(Obj, "GViewI");
+
+	GtkAllocation a;
+	gtk_widget_get_allocation(w, &a);
+	LgiTrace("%s%p(%s) = %i,%i-%i,%i\n", Sp, w, View?View->GetClass():G_OBJECT_TYPE_NAME(Obj), a.x, a.y, a.width, a.height);
+
+	auto *c = GTK_CONTAINER(w);
+	if (c)
+	{
+		int Next = Depth ? *((int*)Depth)+1 : 1;
+		gtk_container_foreach(c, DumpGtk, &Next);
+	}
+}
+#endif
+
 void GView::_Dump(int Depth)
 {
-	char Sp[65];
-	memset(Sp, ' ', Depth << 2);
-	Sp[Depth<<2] = 0;
+	char Sp[65] = {0};
+	memset(Sp, ' ', Depth*2);
 	
 	#if 0
 	
@@ -2314,6 +2342,10 @@ void GView::_Dump(int Depth)
 	#elif defined(CARBON)
 	
 	DumpHiview(_View);
+
+	#elif defined(__GTK_H__)
+
+	DumpGtk(_View);
 	
 	#endif
 }

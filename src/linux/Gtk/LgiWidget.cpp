@@ -8,6 +8,7 @@ using namespace Gtk;
 #include "gdk/gdkkeysyms.h"
 
 typedef struct _LgiWidget LgiWidget;
+extern GdcPt2 GtkAbsPos(GtkWidget *w);
 
 struct _LgiWidget
 {
@@ -886,6 +887,7 @@ lgi_widget_realize(GtkWidget *widget)
 			{
 				GScreenDC Dc(cr, p->w, p->h);
 
+				#if 0
 				{
 					Gtk::cairo_matrix_t matrix;
 					cairo_get_matrix(cr, &matrix);
@@ -900,6 +902,7 @@ lgi_widget_realize(GtkWidget *widget)
 					#endif
 					LgiTrace("%s::_Paint (%p) = %g,%g,%g,%g - %g,%g\n", p->target->GetClass(), widget, ex[0], ex[1], ex[2], ex[3], matrix.x0, matrix.y0);
 				}
+				#endif
 
 				GView *v = dynamic_cast<GView*>(p->target);
 				if (v)
@@ -1104,8 +1107,17 @@ lgi_widget_setchildpos(GtkWidget *parent, GtkWidget *child, int x, int y)
                 	LgiWidget *child_wid = LGI_WIDGET(c.w);
                 	
 				    GtkAllocation a;
+
+					#if GTK_MAJOR_VERSION == 3
+					GtkAllocation palloc = {0};
+					gtk_widget_get_allocation(parent, &palloc);
+				    a.x = c.x + palloc.x;
+				    a.y = c.y + palloc.y;
+					#else
 				    a.x = c.x;
 				    a.y = c.y;
+					#endif
+
 				    a.width = MAX(1, child_wid->w);
 				    a.height = MAX(1, child_wid->h);
 				    
@@ -1132,20 +1144,16 @@ lgi_widget_add(GtkContainer *wid, GtkWidget *child)
 	if (!p)
 		return;
 
-	for (int i=0; i<p->child.Length(); i++)
+	for (auto c: p->child)
 	{
-		_LgiWidget::ChildInfo &c = p->child[i];
 		if (c.w == child)
-		{
-			printf("%s:%i - Already a child.\n", _FL);
 			return;
-		}
 	}
 		
-	_LgiWidget::ChildInfo &c = p->child.New();
-	c.w = child;
-	c.x = 0;
-	c.y = 0;
+	auto &i = p->child.New();
+	i.w = child;
+	i.x = 0;
+	i.y = 0;
 	gtk_widget_set_parent(child, GTK_WIDGET(wid));
 }
 

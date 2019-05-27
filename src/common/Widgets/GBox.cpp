@@ -259,6 +259,9 @@ void GBox::OnPaint(GSurface *pDC)
 			pDC->Rectangle(r);
 		}
 	}
+
+	pDC->Colour(GColour::Red);
+	pDC->Line(0, 0, X()-1, Y()-1);
 }
 
 struct BoxRange

@@ -315,13 +315,13 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			GMouse m;
 			m.x = event->motion.x;
 			m.y = event->motion.y;
-			// GViewI *t = WindowFromPoint(m.x, m.y, false);
 			// m.Target = t ? t : this;
 			m.SetModifer(event->motion.state);
 			m.Down(false);
 			m.IsMove(true);
 
-			// LgiTrace("Move %i,%i = %s\n", m.x, m.y, t ? t->GetClass() : "");
+			GViewI *t = WindowFromPoint(m.x, m.y, false);
+			LgiTrace("Move %i,%i = %s\n", m.x, m.y, t ? t->GetClass() : "");
 
 			// auto gt = m.Target->GetGView();
 			// if (gt) gt->_Mouse(m, true);
@@ -936,7 +936,7 @@ GRect &GWindow::GetClient(bool ClientSpace)
 		CallbackParams p;
 		gtk_container_forall(GTK_CONTAINER(Wnd), (GtkCallback)ClientCallback, &p);
 		if (p.Menu.Valid())
-			r.y1 += p.Menu.Y();
+			r.y2 -= p.Menu.Y();
 	}
 
 	return r;
@@ -1086,6 +1086,13 @@ void GWindow::OnPosChange()
 void GWindow::PourAll()
 {
 	auto c = GetClient();
+
+	/*
+	GtkAllocation alloc;
+	gtk_widget_get_allocation(GTK_WIDGET(Wnd), &alloc);
+	LgiTrace("Client=%s Alloc=%i,%i-%i,%i\n", c.GetStr(), alloc.x, alloc.y, alloc.width, alloc.height);
+	*/
+
 	GRegion Client(c);
 	GViewI *MenuView = 0;
 
@@ -1170,7 +1177,7 @@ void GWindow::PourAll()
 			if (v->Pour(Client))
 			{
 				GRect p = v->GetPos();
-				// LgiTrace("%s = %s\n", v->GetClass(), p.GetStr());
+				LgiTrace("%s = %s\n", v->GetClass(), p.GetStr());
 
 				if (!v->Visible())
 					v->Visible(true);
@@ -1191,6 +1198,8 @@ void GWindow::PourAll()
 	{
 		Invalidate(Update[i]);
 	}
+
+	_Dump();
 }
 
 /*

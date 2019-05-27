@@ -561,6 +561,25 @@ bool GView::SetPos(GRect &p, bool Repaint)
 	return true;
 }
 
+GdcPt2 GtkAbsPos(GtkWidget *w)
+{
+	GdcPt2 Off;
+	
+	do
+	{
+		if (GTK_IS_WINDOW(w))
+			break;
+
+		GtkAllocation a = {0};
+		gtk_widget_get_allocation (w, &a);
+		Off.x += a.x;
+		Off.y += a.y;
+	}
+	while (w = gtk_widget_get_parent(w));
+	
+	return Off;
+}
+
 bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
 {
 	if (IsAttached())
@@ -591,15 +610,22 @@ bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
 						cr.Offset(Client.x1, Client.y1);
 						Gtk::GdkRectangle gr = cr;
 						
-	            		LgiTrace("Inval.r %s, _View=%p, gtk.rect=%i,%i-%i,%i alloc=%i,%i-%i,%i\n", GetClass(), _View,
+						// This loop seems so wrong, but it works:
+						auto Off = GtkAbsPos(_View);
+						gr.x += a.x;
+						gr.y += a.y;
+						
+	            		/*
+						LgiTrace("Inval.r %s, _View=%p, gtk.rect=%i,%i-%i,%i alloc=%i,%i-%i,%i\n", GetClass(), _View,
 							gr.x, gr.y, gr.width, gr.height,
 							a.x, a.y, a.width, a.height);
+						*/
 						gdk_window_invalidate_rect(hnd, &gr, FALSE);
 					}
 					else
 					#endif
 					{
-	            		LgiTrace("Inval.a %s %i,%i-%i,%i\n", GetClass(), a.x, a.y, a.width, a.height);
+	            		// LgiTrace("Inval.a %s %i,%i-%i,%i\n", GetClass(), a.x, a.y, a.width, a.height);
 	            		gdk_window_invalidate_rect(hnd, NULL, FALSE);
 					}
 				}
