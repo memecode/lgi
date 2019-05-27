@@ -312,34 +312,30 @@ void LgiToGtkCursor(GViewI *v, LgiCursor c)
 		*/
 	}
 	
-	GWindow *Wnd = v->GetWindow();
-	OsView h = Wnd ? Wnd->Handle() : v->Handle();
+	OsView h = v->Handle();
+	if (!h)
+	{
+		GWindow *w = v->GetWindow();
+		if (w)
+			h = w->Handle();
+	}
 	
 	LgiAssert(v->InThread());
-	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
-	#else
-	LgiAssert(h->window);
-	if (type == GDK_ARROW)
+	auto wnd = gtk_widget_get_parent_window(h);
+	LgiAssert(wnd);
+	if (wnd)
 	{
-		gdk_window_set_cursor(h->window, NULL);
-		// printf("gdk_window_set_cursor(%s, NULL)\n", v->GetClass());
-	}
-	else
-	{
-		GdkCursor *cursor = gdk_cursor_new_for_display(gdk_display_get_default(), type);
-		if (cursor)
-		{
-			gdk_window_set_cursor(h->window, cursor);
-			// printf("gdk_window_set_cursor(%s, cursor)\n", v->GetClass());
-		}
+		if (type == GDK_ARROW)
+			gdk_window_set_cursor(wnd, NULL);
 		else
 		{
-			gdk_window_set_cursor(h->window, NULL);
-			// printf("gdk_window_set_cursor(%s, gdk_cursor_new_for_display fail)\n", v->GetClass());
+			GdkCursor *cursor = gdk_cursor_new_for_display(gdk_display_get_default(), type);
+			if (cursor)
+				gdk_window_set_cursor(wnd, cursor);
+			else
+				gdk_window_set_cursor(wnd, NULL);
 		}
 	}
-	#endif
 }
 
 bool GView::_Mouse(GMouse &m, bool Move)

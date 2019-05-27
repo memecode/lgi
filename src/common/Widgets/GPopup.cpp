@@ -713,7 +713,7 @@ bool GPopup::Attach(GViewI *p)
 	    Wnd = gtk_window_new(GTK_WINDOW_POPUP);
 	    
 	    gtk_window_set_decorated(GTK_WINDOW(Wnd), FALSE);
-		gtk_widget_add_events(Wnd, GDK_ALL_EVENTS_MASK);
+		gtk_widget_add_events(Wnd, GDK_ALL_EVENTS_MASK & ~GDK_POINTER_MOTION_HINT_MASK);
 
 		if (!p)
 			p = Owner;

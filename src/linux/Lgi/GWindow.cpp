@@ -479,7 +479,7 @@ bool GWindow::Attach(GViewI *p)
 							G_CALLBACK(GtkViewCallback),
 							i);
 
-		gtk_widget_add_events(GTK_WIDGET(Wnd), GDK_ALL_EVENTS_MASK);
+		gtk_widget_add_events(GTK_WIDGET(Wnd), GDK_POINTER_MOTION_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
 
 		#if 0

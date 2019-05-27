@@ -88,7 +88,6 @@ GtkWidget *lgi_widget_new(GViewI *target, int w, int h, bool pour_largest)
 	#endif
 	if (p)
 	{
-		// printf("Created %p for %s:%p\n", p, target->GetClass(), target);
 		p->target = target;
 		p->w = w;
 		p->h = h;
@@ -104,9 +103,8 @@ GtkWidget *lgi_widget_new(GViewI *target, int w, int h, bool pour_largest)
 			GTK_OBJECT_FLAGS(GTK_WIDGET(p)) |= GTK_CAN_FOCUS;
 			#endif
         }
-
-		gtk_widget_add_events(GTK_WIDGET(p), GDK_ALL_EVENTS_MASK);
 	}	
+
 	return GTK_WIDGET(p);
 }
 
@@ -811,8 +809,13 @@ lgi_widget_realize(GtkWidget *widget)
 		attributes.y = allocation.y;
 		attributes.width = allocation.width;
 		attributes.height = allocation.height;
-		attributes.wclass = GDK_INPUT_OUTPUT;
-		attributes.event_mask = GDK_ALL_EVENTS_MASK & ~(GDK_POINTER_MOTION_HINT_MASK | GDK_SMOOTH_SCROLL_MASK);
+		attributes.wclass = GDK_INPUT_ONLY;
+		attributes.event_mask = gtk_widget_get_events(widget) |
+								GDK_POINTER_MOTION_MASK |
+								GDK_BUTTON_PRESS_MASK |
+								GDK_BUTTON_RELEASE_MASK |
+								GDK_ENTER_NOTIFY_MASK |
+								GDK_LEAVE_NOTIFY_MASK;
 
 		window = gtk_widget_get_parent_window (widget);
 		if (window)
@@ -866,16 +869,7 @@ lgi_widget_realize(GtkWidget *widget)
 	lgi_widget_unrealize (GtkWidget *widget)
 	{
 		LgiWidget *w = LGI_WIDGET(widget);
-
-		printf("%s:%i - unrealize(%p) %s\n", _FL, w, w->target->GetClass());
-		if (w->window)
-		{
-			// gtk_widget_unregister_window (widget, w->window);
-			// gtk_widget_set_window(widget, NULL);
-			// gdk_window_destroy(w->window);
-			// w->window = NULL;
-		}
-
+		w->window = NULL;
 		GTK_WIDGET_CLASS(lgi_widget_parent_class)->unrealize(widget);
 	}
 
