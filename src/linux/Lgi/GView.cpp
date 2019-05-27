@@ -321,8 +321,8 @@ void LgiToGtkCursor(GViewI *v, LgiCursor c)
 	}
 	
 	LgiAssert(v->InThread());
-	auto wnd = gtk_widget_get_parent_window(h);
-	LgiAssert(wnd);
+	auto wnd = gtk_widget_get_window(h);
+	// LgiAssert(wnd);
 	if (wnd)
 	{
 		if (type == GDK_ARROW)
@@ -363,13 +363,15 @@ bool GView::_Mouse(GMouse &m, bool Move)
 	#endif
 
 	#if DEBUG_MOUSE_EVENTS
-	LgiTrace("%s:%i - _Mouse([%i,%i], %i)\n", _FL, m.x, m.y, Move);
+	// LgiTrace("%s:%i - _Mouse([%i,%i], %i)\n", _FL, m.x, m.y, Move);
 	#endif
 
 	if
 	(
+		/*
 		!_View
 		||
+		*/
 		(
 			GetWindow()
 			&&
@@ -385,7 +387,7 @@ bool GView::_Mouse(GMouse &m, bool Move)
 
 	GViewI *cap = _Capturing;
 	#if DEBUG_MOUSE_EVENTS
-	LgiTrace("%s:%i - _Capturing=%p/%s\n", _FL, _Capturing, _Capturing ? _Capturing->GetClass() : NULL);
+	// LgiTrace("%s:%i - _Capturing=%p/%s\n", _FL, _Capturing, _Capturing ? _Capturing->GetClass() : NULL);
 	#endif
 	if (_Capturing)
 	{
@@ -412,6 +414,8 @@ bool GView::_Mouse(GMouse &m, bool Move)
 			if (_Over != o)
 			{
 				#if DEBUG_MOUSE_EVENTS
+				if (!o)
+					WindowFromPoint(m.x, m.y, true);
 				LgiTrace("%s:%i - _Over changing from %p/%s to %p/%s\n", _FL,
 						_Over, _Over ? _Over->GetClass() : NULL,
 						o, o ? o->GetClass() : NULL);
@@ -577,19 +581,26 @@ bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
 				GdkWindow *hnd = gtk_widget_get_window(_View);
 				if (hnd)
 				{
+					GtkAllocation a;
+					gtk_widget_get_allocation (_View, &a);
+
+					#if 1
 					if (r)
 					{
 						GRect cr = *r;
 						cr.Offset(Client.x1, Client.y1);
 						Gtk::GdkRectangle gr = cr;
 						
-	            		gdk_window_invalidate_rect(hnd, &gr, FALSE);
+	            		LgiTrace("Inval.r %s, _View=%p, gtk.rect=%i,%i-%i,%i alloc=%i,%i-%i,%i\n", GetClass(), _View,
+							gr.x, gr.y, gr.width, gr.height,
+							a.x, a.y, a.width, a.height);
+						gdk_window_invalidate_rect(hnd, &gr, FALSE);
 					}
 					else
+					#endif
 					{
-						Gtk::GdkRectangle r = {0, 0, Pos.X(), Pos.Y()};
-
-	            		gdk_window_invalidate_rect(hnd, &r, FALSE);
+	            		LgiTrace("Inval.a %s %i,%i-%i,%i\n", GetClass(), a.x, a.y, a.width, a.height);
+	            		gdk_window_invalidate_rect(hnd, NULL, FALSE);
 					}
 				}
 				Repainting = false;

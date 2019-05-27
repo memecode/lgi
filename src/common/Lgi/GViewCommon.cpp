@@ -550,6 +550,21 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 	}
 
 	#if 0
+	{
+		Gtk::cairo_matrix_t matrix;
+		cairo_get_matrix(pDC->Handle(), &matrix);
+
+		double ex[4];
+		cairo_clip_extents(pDC->Handle(), ex+0, ex+1, ex+2, ex+3);
+		ex[0] += matrix.x0;
+		ex[1] += matrix.y0;
+		ex[2] += matrix.x0;
+		ex[3] += matrix.y0;
+		LgiTrace("%s::_Paint (%p) = %g,%g,%g,%g - %g,%g\n", GetClass(), _View, ex[0], ex[1], ex[2], ex[3], matrix.x0, matrix.y0);
+	}
+	#endif
+
+	#if 0
 	// This is useful for coverage checking
 	pDC->Colour(Rgb24(255, 0, 255), 24);
 	pDC->Rectangle();
@@ -664,8 +679,13 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 					GdcPt2 co(p.x1, p.y1);
 					
 					pDC->SetClient(&p);
+
+					double ex[4];
+					cairo_clip_extents (pDC->Handle(), ex+0, ex+1, ex+2, ex+3);
+					LgiTrace("	_Paint %s:%s %s (%g,%g,%g,%g)\n", w->GetClass(), w->Name(), p.GetStr(), ex[0], ex[1], ex[2], ex[3]);
+
 					w->_Paint(pDC, &co);
-					pDC->SetClient(0);
+					pDC->SetClient(NULL);
 				}
 				/*
 				else

@@ -885,6 +885,22 @@ lgi_widget_realize(GtkWidget *widget)
 			if (p && p->target)
 			{
 				GScreenDC Dc(cr, p->w, p->h);
+
+				{
+					Gtk::cairo_matrix_t matrix;
+					cairo_get_matrix(cr, &matrix);
+
+					double ex[4];
+					cairo_clip_extents(cr, ex+0, ex+1, ex+2, ex+3);
+					#if 0
+					ex[0] += matrix.x0;
+					ex[1] += matrix.y0;
+					ex[2] += matrix.x0;
+					ex[3] += matrix.y0;
+					#endif
+					LgiTrace("%s::_Paint (%p) = %g,%g,%g,%g - %g,%g\n", p->target->GetClass(), widget, ex[0], ex[1], ex[2], ex[3], matrix.x0, matrix.y0);
+				}
+
 				GView *v = dynamic_cast<GView*>(p->target);
 				if (v)
 					v->_Paint(&Dc);
@@ -1040,7 +1056,18 @@ lgi_widget_setsize(GtkWidget *wid, int width, int height)
 		p->h = height;
 		    
 		#if GTK_MAJOR_VERSION == 3
-		// LgiAssert(!"Gtk3 FIXME");
+		if (!stricmp(p->target->GetClass(), "GToolBar"))
+		{
+			int asd=0;
+		}
+		GtkAllocation a;
+		gtk_widget_get_allocation(wid, &a);
+		if (a.width != width || a.height != height)
+		{
+			a.width = width;
+			a.height = height;
+			gtk_widget_size_allocate(wid, &a);
+		}
 		#else
 		wid->requisition.width = width;
 		wid->requisition.height = height;

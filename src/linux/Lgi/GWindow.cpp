@@ -315,17 +315,18 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			GMouse m;
 			m.x = event->motion.x;
 			m.y = event->motion.y;
-			GViewI *t = WindowFromPoint(m.x, m.y, false);
-			m.Target = t ? t : this;
+			// GViewI *t = WindowFromPoint(m.x, m.y, false);
+			// m.Target = t ? t : this;
 			m.SetModifer(event->motion.state);
 			m.Down(false);
 			m.IsMove(true);
 
-			LgiTrace("Move %i,%i = %s\n", m.x, m.y, t ? t->GetClass() : "");
+			// LgiTrace("Move %i,%i = %s\n", m.x, m.y, t ? t->GetClass() : "");
 
-			auto gt = m.Target->GetGView();
-			if (gt) gt->_Mouse(m, true);
-			else gt->OnMouseClick(m);
+			// auto gt = m.Target->GetGView();
+			// if (gt) gt->_Mouse(m, true);
+			// else gt->OnMouseClick(m);
+			_Mouse(m, true);
 			break;
 		}
 		case GDK_CONFIGURE:

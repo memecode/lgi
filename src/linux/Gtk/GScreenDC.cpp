@@ -240,7 +240,7 @@ void GScreenDC::SetClient(GRect *c)
 
 		#if GTK_MAJOR_VERSION == 3
 		cairo_save(d->cr);
-		cairo_rectangle(d->cr, c->x1, c->y1, c->X(), c->Y());
+		// cairo_rectangle(d->cr, c->x1, c->y1, c->X(), c->Y());
 		// cairo_clip(d->cr);		
 		cairo_translate(d->cr, c->x1, c->y1);
 		#else
