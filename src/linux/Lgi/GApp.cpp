@@ -586,7 +586,7 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 		(Msgs = MsgQue.Lock(_FL)))
 	{
 		// Copy the messages out of the locked structure..
-		// This allows new messages to arrive independant
+		// This allows new messages to arrive independent
 		// of us processing them here...
 		LMessageQue::MsgArray q = *Msgs;
 		Msgs->Empty();
@@ -660,12 +660,13 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 			#else
 			GtkLock _Lock;
 			#endif
-			/* Stopping main from exiting?
+			
+			#if 1
 			Gtk::guint Id = Gtk::gdk_threads_add_idle_full(	G_PRIORITY_DEFAULT_IDLE,
 															IdleWrapper,
 															&idle,
 															NULL);
-			*/
+			#endif
 		}
 
 		static bool CmdLineDone = false;

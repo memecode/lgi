@@ -1487,6 +1487,8 @@ public:
 		void OnMap(bool m);
 		void Quit(bool DontDelete = false);
 		GRect *GetDecorSize();
+		bool TranslateMouse(GMouse &m);
+		GViewI *WindowFromPoint(int x, int y, bool Debug);
 	
 	#endif
 };

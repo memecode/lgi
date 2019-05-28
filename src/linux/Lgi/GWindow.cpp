@@ -267,6 +267,41 @@ GRect *GWindow::GetDecorSize()
 	return d->Decor.x2 >= 0 ? &d->Decor : NULL;
 }
 
+GViewI *GWindow::WindowFromPoint(int x, int y, bool Debug)
+{
+	if (!_Root)
+		return NULL;
+
+	auto rpos = GtkGetPos(_Root);
+	if (!rpos.Overlap(x, y))
+		return NULL;
+
+	return GView::WindowFromPoint(x - rpos.x1, y - rpos.y1, Debug);
+}
+
+bool GWindow::TranslateMouse(GMouse &m)
+{
+	m.Target = WindowFromPoint(m.x, m.y, false);
+	for (auto p = m.Target; p; p = p->GetParent())
+	{
+		if (p->Handle())
+		{
+			auto ppos = GtkGetPos(p->Handle());
+			m.x -= ppos.x1;
+			m.y -= ppos.y1;
+			break;
+		}
+		else
+		{
+			auto pos = p->GetPos();
+			m.x -= pos.x1;
+			m.y -= pos.y1;
+		}
+	}
+
+	return true;
+}
+
 gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 {
 	if (!event)
@@ -303,20 +338,9 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			m.SetModifer(event->button.state);
 			m.Down(event->type == GDK_BUTTON_PRESS);
 
-			GViewI *t = NULL;
-			if (!_Root)
+			if (!TranslateMouse(m))
 				break;
-
-			auto rpos = GtkGetPos(_Root);
-			if (rpos.Overlap(m.x, m.y))
-			{
-				t = WindowFromPoint(m.x - rpos.x1, m.y - rpos.y1, false);
-				if (t)
-				{
-					m.x -= rpos.x1;
-					m.y -= rpos.y1;
-				}
-			}
+			m.Trace(m.Target ? m.Target->GetClass() : "-none-");
 
 			_Mouse(m, false);
 			break;
@@ -330,20 +354,9 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			m.Down(false);
 			m.IsMove(true);
 
-			GViewI *t = NULL;
-			if (!_Root)
+			if (!TranslateMouse(m))
 				break;
-
-			auto rpos = GtkGetPos(_Root);
-			if (rpos.Overlap(m.x, m.y))
-			{
-				t = WindowFromPoint(m.x - rpos.x1, m.y - rpos.y1, false);
-				if (t)
-				{
-					m.x -= rpos.x1;
-					m.y -= rpos.y1;
-				}
-			}
+			// m.Trace(m.Target ? m.Target->GetClass() : "-none-");
 
 			_Mouse(m, true);
 			break;
@@ -468,6 +481,10 @@ bool GWindow::Attach(GViewI *p)
 							i);
 		g_signal_connect(	G_OBJECT(Wnd),
 							"button-press-event",
+							G_CALLBACK(GtkViewCallback),
+							i);
+		g_signal_connect(	G_OBJECT(Wnd),
+							"button-release-event",
 							G_CALLBACK(GtkViewCallback),
 							i);
 		g_signal_connect(	G_OBJECT(Wnd),

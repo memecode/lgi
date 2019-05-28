@@ -410,12 +410,15 @@ bool GView::_Mouse(GMouse &m, bool Move)
 		if (Move)
 		{
 			bool Change = false;
+			#if 1
+			auto *o = m.Target;
+			#else
 			GViewI *o = WindowFromPoint(m.x, m.y);
+			#endif
 			if (_Over != o)
 			{
 				#if DEBUG_MOUSE_EVENTS
-				if (!o)
-					WindowFromPoint(m.x, m.y, true);
+				// if (!o) WindowFromPoint(m.x, m.y, true);
 				LgiTrace("%s:%i - _Over changing from %p/%s to %p/%s\n", _FL,
 						_Over, _Over ? _Over->GetClass() : NULL,
 						o, o ? o->GetClass() : NULL);
