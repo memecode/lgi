@@ -22,12 +22,15 @@ endif()
 if (APPLE)
 
 	add_definitions("-DMAC -DLGI_LIBRARY -D_DEBUG -DLGI_RES")
-	# SET(GUI_TYPE MACOSX_BUNDLE)
-	include_directories ( /Developer/Headers/FlatCarbon )
-	find_library(CARBON_LIBRARY Carbon)
-	find_library(COCOA_LIBRARY Cocoa)
-	mark_as_advanced (CARBON_LIBRARY COCOA_LIBRARY)
-	set(EXTRA_LIBS ${CARBON_LIBRARY} ${COCOA_LIBRARY})
+	set(GTK3_PATH "/Users/Shared/inst")
+	set(GTK3_INCLUDE_DIRS
+				"${GTK3_PATH}/include/gtk-3.0"
+				"${GTK3_PATH}/include/glib-2.0"
+				"${GTK3_PATH}/lib/glib-2.0/include"
+				"${GTK3_PATH}/include/pango-1.0"
+				"${GTK3_PATH}/include/cairo"
+				"${GTK3_PATH}/include/gdk-pixbuf-2.0"
+				"${GTK3_PATH}/include/atk-1.0")
 
 elseif (LINUX)
 
@@ -255,18 +258,11 @@ add_library(Lgi SHARED ${Source})
 
 if (APPLE)
 	target_include_directories(Lgi PUBLIC
-		"include/mac/carbon"
-		"include/posix"
-		"/opt/local/include"
-		"${ROOT}/../../../CodeLib/libpng"
-		"${ROOT}/../../../CodeLib/libpng/build"
-		)
+							"${ROOT}/include/linux/Gtk"
+							"${ROOT}/include/linux"
+							${GTK3_INCLUDE_DIRS}
+							)
 	target_link_libraries(Lgi ${EXTRA_LIBS})
-	set(OBJCPP_SOURCE
-		src/common/Lgi/LgiCommon.cpp
-		src/mac/common/GMemDC.cpp
-		src/mac/carbon/Lgi/GGeneral.cpp
-		)
 	set_source_files_properties(${OBJCPP_SOURCE} PROPERTIES 
                             COMPILE_FLAGS "-x objective-c++")
 elseif (LINUX)

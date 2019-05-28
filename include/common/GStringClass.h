@@ -1144,7 +1144,9 @@ public:
 
 	static GString UnEscape(GString s) { return UnEscape(s.Get(), s.Length()); }
 
-	#if defined(MAC) // && __COREFOUNDATION_CFBASE__
+	#if defined(__GTK_H__)
+
+	#elif defined(MAC) // && __COREFOUNDATION_CFBASE__
 
 	GString(const CFStringRef r)
 	{

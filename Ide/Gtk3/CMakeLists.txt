@@ -15,10 +15,6 @@ if (APPLE)
 
 	add_definitions("-DMAC -DLGI_LIBRARY -D_DEBUG -DLGI_RES")
 	SET(GUI_TYPE MACOSX_BUNDLE)
-	INCLUDE_DIRECTORIES ( /Developer/Headers/FlatCarbon )
-	FIND_LIBRARY(CARBON_LIBRARY Carbon)
-	MARK_AS_ADVANCED (CARBON_LIBRARY)
-	SET(EXTRA_LIBS ${CARBON_LIBRARY})
 
 elseif (LINUX)
 
@@ -131,6 +127,7 @@ if (APPLE)
 		MacCarbon/Info.plist
 		MacCarbon/English.lproj/InfoPlist.strings
 		MacCarbon/English.lproj/main.nib)
+	list(TRANSFORM MacResourceFiles PREPEND ../)
 	
 	set_source_files_properties(${MacResourceFiles} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
@@ -149,7 +146,9 @@ elseif (MSVC)
 endif ()
 
 if (APPLE)
-	target_include_directories(LgiIde PUBLIC "../include/mac/carbon" "../include/posix")
+	target_include_directories(LgiIde PUBLIC
+							"${ROOT}/include/linux/Gtk"
+							"${ROOT}/include/linux")
 	target_link_libraries(LgiIde Lgi ${EXTRA_LIBS})
 	set_target_properties(LgiIde PROPERTIES
 		MACOSX_BUNDLE TRUE
