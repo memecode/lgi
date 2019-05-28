@@ -23,6 +23,8 @@ extern GMouse &lgi_adjust_click(GMouse &Info,
 								GViewI *Wnd,
 								bool Capturing = false,
 								bool Debug = false);
+extern GdcPt2 GtkAbsPos(Gtk::GtkWidget *w);
+extern GRect GtkGetPos(Gtk::GtkWidget *w);
 
 class GViewIter : public GViewIterator
 {

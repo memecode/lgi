@@ -6,8 +6,8 @@
 #include "GPopup.h"
 #include "GPanel.h"
 #include "GNotifications.h"
-#include "GViewPriv.h"
 
+#include "GViewPriv.h"
 using namespace Gtk;
 #if GTK_MAJOR_VERSION == 3
 #else
@@ -299,15 +299,26 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			GMouse m;
 			m.x = event->button.x;
 			m.y = event->button.y;
-			GViewI *t = WindowFromPoint(m.x, m.y, false);
-			m.Target = this;
 			m.SetButton(event->button.button);
 			m.SetModifer(event->button.state);
 			m.Down(event->type == GDK_BUTTON_PRESS);
 
-			auto gt = m.Target->GetGView();
-			if (gt) gt->_Mouse(m, false);
-			else gt->OnMouseClick(m);
+			GViewI *t = NULL;
+			if (!_Root)
+				break;
+
+			auto rpos = GtkGetPos(_Root);
+			if (rpos.Overlap(m.x, m.y))
+			{
+				t = WindowFromPoint(m.x - rpos.x1, m.y - rpos.y1, false);
+				if (t)
+				{
+					m.x -= rpos.x1;
+					m.y -= rpos.y1;
+				}
+			}
+
+			_Mouse(m, false);
 			break;
 		}
 		case GDK_MOTION_NOTIFY:
@@ -315,17 +326,25 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			GMouse m;
 			m.x = event->motion.x;
 			m.y = event->motion.y;
-			// m.Target = t ? t : this;
 			m.SetModifer(event->motion.state);
 			m.Down(false);
 			m.IsMove(true);
 
-			GViewI *t = WindowFromPoint(m.x, m.y, false);
-			LgiTrace("Move %i,%i = %s\n", m.x, m.y, t ? t->GetClass() : "");
+			GViewI *t = NULL;
+			if (!_Root)
+				break;
 
-			// auto gt = m.Target->GetGView();
-			// if (gt) gt->_Mouse(m, true);
-			// else gt->OnMouseClick(m);
+			auto rpos = GtkGetPos(_Root);
+			if (rpos.Overlap(m.x, m.y))
+			{
+				t = WindowFromPoint(m.x - rpos.x1, m.y - rpos.y1, false);
+				if (t)
+				{
+					m.x -= rpos.x1;
+					m.y -= rpos.y1;
+				}
+			}
+
 			_Mouse(m, true);
 			break;
 		}
@@ -483,19 +502,11 @@ bool GWindow::Attach(GViewI *p)
 		gtk_widget_add_events(GTK_WIDGET(Wnd), GDK_POINTER_MOTION_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
 
-		#if 0
-		auto Btn = gtk_button_new_with_label("test");
-		if (Btn)
-		{
-            gtk_container_add(GTK_CONTAINER(Wnd), Btn);
-		}
-		#else
 		if (_Root = lgi_widget_new(this, Pos.X(), Pos.Y(), true))
         {
             gtk_container_add(GTK_CONTAINER(Wnd), _Root);
             gtk_widget_show(_Root);
         }
-		#endif
 
 		// This call sets up the GdkWindow handle
 		gtk_widget_realize(GTK_WIDGET(Wnd));
@@ -936,7 +947,7 @@ GRect &GWindow::GetClient(bool ClientSpace)
 		CallbackParams p;
 		gtk_container_forall(GTK_CONTAINER(Wnd), (GtkCallback)ClientCallback, &p);
 		if (p.Menu.Valid())
-			r.y2 -= p.Menu.Y();
+			r.y1 += p.Menu.Y();
 	}
 
 	return r;
@@ -1085,14 +1096,11 @@ void GWindow::OnPosChange()
 
 void GWindow::PourAll()
 {
-	auto c = GetClient();
-
-	/*
-	GtkAllocation alloc;
-	gtk_widget_get_allocation(GTK_WIDGET(Wnd), &alloc);
-	LgiTrace("Client=%s Alloc=%i,%i-%i,%i\n", c.GetStr(), alloc.x, alloc.y, alloc.width, alloc.height);
-	*/
-
+	GRect c;
+	if (_Root)
+		c = GtkGetPos(_Root).ZeroTranslate();
+	else
+		c = GetClient();
 	GRegion Client(c);
 	GViewI *MenuView = 0;
 

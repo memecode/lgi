@@ -169,6 +169,11 @@ public:
 	/// Returns how near a point is to a rectangle
 	int Near(GRect &r);
 
+	GRect ZeroTranslate()
+	{
+		return GRect(0, 0, X()-1, Y()-1);
+	}
+
 	#ifdef COCOA
 
 		operator OsRect()
@@ -283,6 +288,14 @@ public:
 		x2 = x1 + r.width - 1;
 		y2 = y1 + r.height - 1;
 		return *this;
+	}
+
+	GRect(const Gtk::GtkAllocation &a)
+	{
+		x1 = a.x;
+		y1 = a.y;
+		x2 = a.x + a.width - 1;
+		y2 = a.y + a.height - 1;
 	}
 	#endif
 	

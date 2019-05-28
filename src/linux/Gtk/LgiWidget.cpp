@@ -1,5 +1,6 @@
 #include "Lgi.h"
 #include "GDragAndDrop.h"
+#include "GViewPriv.h"
 
 #define DEBUG_KEY_EVENT		0
 
@@ -8,7 +9,6 @@ using namespace Gtk;
 #include "gdk/gdkkeysyms.h"
 
 typedef struct _LgiWidget LgiWidget;
-extern GdcPt2 GtkAbsPos(GtkWidget *w);
 
 struct _LgiWidget
 {

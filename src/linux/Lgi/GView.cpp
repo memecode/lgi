@@ -561,6 +561,13 @@ bool GView::SetPos(GRect &p, bool Repaint)
 	return true;
 }
 
+GRect GtkGetPos(GtkWidget *w)
+{
+	GtkAllocation a = {0};
+	gtk_widget_get_allocation(w, &a);
+	return a;
+}
+
 GdcPt2 GtkAbsPos(GtkWidget *w)
 {
 	GdcPt2 Off;
@@ -570,10 +577,9 @@ GdcPt2 GtkAbsPos(GtkWidget *w)
 		if (GTK_IS_WINDOW(w))
 			break;
 
-		GtkAllocation a = {0};
-		gtk_widget_get_allocation (w, &a);
-		Off.x += a.x;
-		Off.y += a.y;
+		auto p = GtkGetPos(w);
+		Off.x += p.x1;
+		Off.y += p.y1;
 	}
 	while (w = gtk_widget_get_parent(w));
 	
