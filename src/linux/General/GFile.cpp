@@ -1400,10 +1400,6 @@ void GFile::ChangeThread()
 {
 }
 
-{
-
-}
-
 #define CHUNK		0xFFF0
 
 ssize_t GFile::Read(void *Buffer, ssize_t Size, int Flags)

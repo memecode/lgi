@@ -61,10 +61,14 @@ public:
 
 		bool CheckThread() const
 		{
+			#if 1
+			return true;
+			#else
 			auto Cur = GetCurrentThreadId();
 			bool Ok = Thread == Cur;
 			LgiAssert(Ok);
 			return Ok;
+			#endif
 		}
 		#ifdef _DEBUG
 		#define CHECK_THREAD CheckThread();

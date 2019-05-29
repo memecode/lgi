@@ -1570,7 +1570,13 @@ bool GTextView3::Insert(size_t At, const char16 *Data, ssize_t Len)
 				Prof.Add("PourText");
 				PourText(At, Len);
 				Prof.Add("PourStyle");
+				auto Start = LgiCurrentTime();
 				PourStyle(At, Len);
+				auto End = LgiCurrentTime();
+				if (End - Start > 1000)
+				{
+					PourStyle(At, Len);
+				}
 			}
 			SendNotify(GNotifyDocChanged);
 
