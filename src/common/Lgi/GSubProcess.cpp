@@ -818,11 +818,14 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 	return Status;
 }
 
-int32 GSubProcess::Communicate(GStreamI *Out, GStreamI *In)
+int32 GSubProcess::Communicate(GStreamI *Out, GStreamI *In, LCancel *Cancel)
 {
 	char Buf[1024];
 	ssize_t r;
-	while (!IsRunning())
+
+	LgiAssert(In == NULL); // Impl me.
+
+	while (IsRunning() && (!Cancel || !Cancel->IsCancelled()))
 	{
 		r = Read(Buf, sizeof(Buf));
 		if (r > 0 && Out)
