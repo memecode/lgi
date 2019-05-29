@@ -4,7 +4,7 @@
 #include "GPath.h"
 #include "LHashTable.h"
 
-const char *sPalette[] = { "9696ff", "5D6D66", "4E3A35", "68B3C5", "9A92B0", "462D4C", "C5A378", "302D65" };
+const char *sPalette[] = { "9696ff", "ff8787", "ff934b", "a8d200", "00f0c0", "87e7ff", "a5a5ff", "f3c3ff", "b40090", "00b400" };
 
 GColour GetPaletteColour(int i)
 {
@@ -175,6 +175,8 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 			{
 				GPath p;
 				p.Circle(Cx, Cy, r-1);
+				LgiAssert(NodeColour.IsValid());
+				// LgiTrace("%s = %s\n", Branch.Get(), NodeColour.GetStr());
 				GSolidBrush sb(NodeColour);
 				p.Fill(&Mem, sb);
 			}
@@ -293,6 +295,7 @@ bool VcCommit::GitParse(GString s, bool RevList)
 		}
 	}
 
+	OnParse();
 	return Author && Rev;
 }
 
@@ -306,7 +309,14 @@ bool VcCommit::CvsParse(LDateTime &Dt, GString Auth, GString Message)
 		Rev.Printf(LPrintfInt64, i);
 	Author = Auth;
 	Msg = Message;
+
+	OnParse();
 	return true;
+}
+
+void VcCommit::OnParse()
+{
+	NodeColour = Folder->BranchColour(Branch);
 }
 
 bool VcCommit::HgParse(GString s)
@@ -342,6 +352,7 @@ bool VcCommit::HgParse(GString s)
 		}
 	}
 
+	OnParse();
 	return Rev.Get() != NULL;
 }
 
@@ -374,6 +385,7 @@ bool VcCommit::SvnParse(GString s)
 	}
 
 	Msg = Msg.Strip();
+	OnParse();
 
 	return Author && Rev && Ts.IsValid();
 }

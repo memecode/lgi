@@ -361,17 +361,22 @@ bool VcFolder::ParseBranches(int Result, GString s, ParseParams *Params)
 				{
 					GString::Array c = n.SplitDelimit(" \t", 1);
 					if (c.Length() > 1)
-						Branches.New() = CurrentBranch = c[1];
+					{
+						CurrentBranch = c[1];
+						Branches.Add(CurrentBranch, new VcBranch(CurrentBranch));
+					}
 					else
-						Branches.New() = n;
+						Branches.Add(n, new VcBranch(n));
 				}
-				else Branches.New() = n;
+				else Branches.Add(n, new VcBranch(n));
 			}
 			break;
 		}
 		case VcHg:
 		{
-			Branches = s.SplitDelimit("\r\n");
+			auto a = s.SplitDelimit("\r\n");
+			for (auto b: a)
+				Branches.Add(b, new VcBranch(b));
 			break;
 		}
 		default:
@@ -391,10 +396,40 @@ void VcFolder::OnBranchesChange()
 	if (!w)
 		return;
 
+	if (Branches.Length())
+	{
+		// Set the colours up
+		GString Default;
+		for (auto b: Branches)
+		{
+			if (!stricmp(b.key, "default") ||
+				!stricmp(b.key, "trunk"))
+				Default = b.key;
+		}
+		if (!Default)
+			LgiAssert(!"What is the default name?");
+		int Idx = 1;
+		for (auto b: Branches)
+		{
+			if (!b.value->Colour.IsValid())
+			{
+				if (!stricmp(b.key, Default))
+					b.value->Colour = GetPaletteColour(0);
+				else
+					b.value->Colour = GetPaletteColour(Idx++);
+			}
+		}
+	}
+
 	DropDownBtn *dd;
 	if (w->GetViewById(IDC_BRANCH_DROPDOWN, dd))
 	{
-		dd->SetList(IDC_BRANCH, Branches);
+		GString::Array a;
+		for (auto b: Branches)
+		{
+			a.Add(b.key);
+		}
+		dd->SetList(IDC_BRANCH, a);
 	}
 
 	if (Branches.Length() > 0)
@@ -407,7 +442,10 @@ void VcFolder::OnBranchesChange()
 				if (CurrentBranch)
 					b->Name(CurrentBranch);
 				else
-					b->Name(Branches.First());
+				{
+					auto it = Branches.begin();
+					b->Name((*it).key);
+				}
 			}
 		}
 	}
@@ -521,7 +559,7 @@ void VcFolder::Select(bool b)
 						IsBranches = StatusActive;
 					break;
 				case VcSvn:
-					Branches.New() = "trunk";
+					Branches.Add("trunk", new VcBranch("trunk"));
 					break;
 				case VcHg:
 					if (StartCmd("branch", &VcFolder::ParseBranches))
@@ -928,7 +966,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 							if (Var.Equals("branch"))
 							{
 								if (Val.Length())
-									Branches.Add(Val);
+									Branches.Add(Val, new VcBranch(Val));
 							}
 							else if (Var.Equals("head"))
 							{
@@ -1424,7 +1462,7 @@ bool VcFolder::ParseDiffs(GString s, GString Rev, bool IsWorking)
 					if (!f)
 						f = new VcFile(d, this, Rev, IsWorking);
 
-					printf("a='%s'\n", a[i].Get());
+					// printf("a='%s'\n", a[i].Get());
 
 					f->SetText(Fn.Replace("\\","/"), COL_FILENAME);
 					f->SetText(Status, COL_STATE);
@@ -2578,6 +2616,34 @@ bool VcFolder::ParseClean(int Result, GString s, ParseParams *Params)
 	}
 
 	return false;
+}
+
+GColour VcFolder::BranchColour(const char *Name)
+{
+	if (!Name)
+		return GetPaletteColour(0);
+
+	auto b = Branches.Find(Name);
+	if (!b) // Must be a new one?
+	{
+
+		int i = 1;
+		for (auto b: Branches)
+		{
+			auto &v = b.value;
+			if (!v->Colour.IsValid())
+			{
+				if (v->Default)
+					v->Colour = GetPaletteColour(0);
+				else
+					v->Colour = GetPaletteColour(i++);
+			}
+		}
+		Branches.Add(Name, b = new VcBranch(Name));
+		b->Colour = GetPaletteColour((int)Branches.Length());
+	}
+
+	return b ? b->Colour : GetPaletteColour(0);
 }
 
 GString VcFolder::CurrentRev()
