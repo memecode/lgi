@@ -32,7 +32,7 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		24
+#define DEBUG_LAYOUT		7
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
 
@@ -691,9 +691,11 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 			Flag = SizeFill;
 		else
 		{
-			Min = Max = Wid.ToPx(Tx, Table->GetFont()) - Padding.x1 - Padding.x2;
+			// If we set Min here too the console app breaks because the percentage 
+			// is over-subscribe (95%) to force one cell to grow to fill available space.
+			Max = Wid.ToPx(Tx, Table->GetFont()) - Padding.x1 - Padding.x2;
 			
-			if (Wid.Type == GCss::LenPercent  || !Wid.IsDynamic())
+			if (!Wid.IsDynamic())
 			{
 				Flag = SizeFixed;
 
