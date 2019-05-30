@@ -3742,7 +3742,7 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
 				if (Src)
 				{
 					ProjectNode *Folder = dynamic_cast<ProjectNode*>(Hit);
-					while (Folder && Folder->GetType() > NodeDir)
+					while (Folder && Folder->GetType() != NodeDir)
 					{
 						Folder = dynamic_cast<ProjectNode*>(Folder->GetParent());
 					}
