@@ -12,7 +12,7 @@ namespace Gtk {
 using namespace Gtk;
 
 class GTrayIconPrivate;
-void tray_icon_on_click(GtkStatusIcon *status_icon, GTrayIconPrivate *d);
+static void tray_icon_on_click(GtkStatusIcon *status_icon, GTrayIconPrivate *d);
 static void tray_icon_on_menu(GtkStatusIcon *status_icon, guint button, guint activate_time, GTrayIconPrivate *d);
 #endif
 
@@ -135,12 +135,12 @@ public:
 };
 
 #if defined(__GTK_H__)
-static void tray_icon_on_click(GtkStatusIcon *status_icon, GTrayIconPrivate *d)
+void tray_icon_on_click(GtkStatusIcon *status_icon, GTrayIconPrivate *d)
 {
 	d->OnClick();
 }
 
-static void tray_icon_on_menu(GtkStatusIcon *status_icon, guint button, guint activate_time, GTrayIconPrivate *d)
+void tray_icon_on_menu(GtkStatusIcon *status_icon, guint button, guint activate_time, GTrayIconPrivate *d)
 {
 	d->OnMenu(button, activate_time);
 }

@@ -27,7 +27,7 @@
 	#include <unistd.h>
 	#define _MULTI_THREADED
 	#include <pthread.h>
-	#define LINUX						1
+	//#define LINUX						1
 	#define XP_CTRLS					1
 	#define POSIX						1
 
@@ -46,6 +46,8 @@
 #undef stricmp
 
 #include "LgiInc.h"
+#include <sys/stat.h>
+#include <netinet/in.h>
 namespace Gtk {
 #include <gtk/gtk.h>
 #ifdef WIN32

@@ -1965,6 +1965,7 @@ GSurface *GdcDevice::Load(GStream *In, const char *Name, bool UseOSLoader)
 	{
 		#if LGI_SDL
 		
+		#elif defined(__GTK_H__)
 		
 		#elif defined MAC && !defined COCOA
 		

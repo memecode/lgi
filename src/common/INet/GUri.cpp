@@ -274,7 +274,7 @@ GAutoString GUri::Decode(char *s)
 	return GAutoString(p.NewStr());
 }
 
-#ifdef MAC
+#if defined LGI_CARBON
 int CFNumberRefToInt(CFNumberRef r, int Default = 0)
 {
 	int i = Default;

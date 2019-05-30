@@ -50,7 +50,7 @@ protected:
 	int			TipId;
 	bool		NeedsRightClick;
 
-	#if defined(MAC) && !defined(COCOA)
+	#if defined LGI_CARBON
 	HIToolbarItemRef ItemRef;
 	#endif
 
@@ -129,7 +129,7 @@ protected:
 	virtual void ContextMenu(GMouse &m);	
 	virtual int PostDescription(GView *Ctrl, const char *Text);
 	
-	#if defined(MAC) && !defined(COCOA)
+	#if defined(LGI_CARBON)
 	HIToolbarRef ToolbarRef;
 	#endif
 

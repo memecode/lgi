@@ -208,7 +208,7 @@ int GToolTip::NewTip(char *Name, GRect &Pos)
 		#if COCOA
 
 
-		#else
+		#elif defined LGI_CARBON
 	
 			#ifdef __MACHELP__
 			HMSetHelpTagsDisplayed(true);

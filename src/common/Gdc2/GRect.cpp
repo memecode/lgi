@@ -371,7 +371,7 @@ GRegion::GRegion(const GRect &r) : GRect(r)
 	}
 }
 
-#if !defined COCOA
+#if defined LGI_CARBON
 GRegion::GRegion(OsRect &r) : GRect(0, 0, 0, 0)
 {
 	Size = Alloc = 0;	

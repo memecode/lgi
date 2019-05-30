@@ -1142,7 +1142,7 @@ void GView::Enabled(bool i)
 	{
 		#if WINNATIVE
 		EnableWindow(_View, i);
-		#elif defined MAC && !defined COCOA && !defined(LGI_SDL)
+		#elif defined LGI_CARBON
 		if (i)
 		{
 			OSStatus e = EnableControl(_View);
@@ -1385,7 +1385,7 @@ GDragDropTarget *GView::DropTarget(GDragDropTarget *Set)
 	return d->DropTarget;
 }
 
-#if defined MAC && !COCOA
+#if defined LGI_CARBON
 extern pascal OSStatus LgiViewDndHandler(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *inUserData);
 #endif
 
@@ -1467,7 +1467,7 @@ bool GView::DropTarget(bool t)
 
 	#if COCOA
 	#warning FIXME
-	#else
+	#elif defined LGI_CARBON
 	if (t)
 	{
 		static EventTypeSpec DragEvents[] =

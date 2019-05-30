@@ -23,6 +23,10 @@
 	#define CornerOffset 0
 	typedef os::Rect OsRect;
 
+#elif defined __GTK_H__
+
+	typedef Gtk::GdkRectangle OsRect;
+
 #elif defined MAC
 
 	#define CornerOffset 1
@@ -205,7 +209,7 @@ public:
 			y2 = y1 + r.size.height - 1;
 		}
 	
-	#else
+	#elif !defined(__GTK_H__)
 	
 	/// Returns an operating system specific rectangle
 		operator OsRect()

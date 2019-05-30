@@ -1,7 +1,7 @@
 #ifndef _GFONT_PRIV_H_
 #define _GFONT_PRIV_H_
 
-#if defined MAC && !defined COCOA
+#if defined LGI_COCOA
 typedef ATSUTextMeasurement OsTextSize;
 #else
 typedef double OsTextSize;

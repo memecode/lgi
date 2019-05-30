@@ -87,7 +87,7 @@
 			<Makefile>
 				<Windows>.\LgiIde_vs2013.sln</Windows>
 				<Linux>./Gtk3/build/Makefile</Linux>
-				<Mac>Makefile.macosx</Mac>
+				<Mac>./Gtk3/build/Makefile</Mac>
 				<Haiku>Makefile.haiku</Haiku>
 			</Makefile>
 			<Executable>
@@ -99,6 +99,7 @@
 					<Debug>LgiIde.exe</Debug>
 					<Release>LgiIde.exe</Release>
 				</Windows>
+				<Mac />
 			</Executable>
 			<Defines>
 				<Windows>
@@ -113,6 +114,7 @@ WINNATIVE</Release>
 				</Haiku>
 				<All />
 				<Linux />
+				<Mac />
 			</Defines>
 			<Compiler>
 				<Windows>MingW</Windows>
@@ -154,6 +156,7 @@ WINNATIVE</Release>
 					<Debug>../include/beos</Debug>
 					<Release>../include/beos</Release>
 				</Haiku>
+				<Mac />
 			</IncludePaths>
 			<Libraries>
 				<Windows>
@@ -175,6 +178,7 @@ pthread
 					<Release>be</Release>
 				</Haiku>
 				<All />
+				<Mac />
 			</Libraries>
 			<LibraryPaths>
 				<All>
@@ -183,6 +187,7 @@ pthread
 				</All>
 				<Linux />
 				<Windows />
+				<Mac />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -200,6 +205,7 @@ pthread
 					<Debug>lgiide</Debug>
 					<Release>lgiide</Release>
 				</Linux>
+				<Mac />
 			</TargetName>
 			<SystemIncludes>
 				<Windows>
@@ -212,6 +218,7 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 					<Debug>`pkg-config --cflags gtk+-2.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-2.0`</Release>
 				</Linux>
+				<Mac />
 			</SystemIncludes>
 			<ApplicationIcon>
 				<Haiku>./Code/icon-haiku</Haiku>
@@ -238,6 +245,7 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<PostBuildCommands>
 				<Linux />
 				<Windows />
+				<Mac />
 			</PostBuildCommands>
 		</Advanced>
 	</Settings>

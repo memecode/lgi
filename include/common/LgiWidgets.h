@@ -343,7 +343,7 @@ struct GLabelData
 	}
 };
 
-#ifndef COCOA
+#if defined LGI_CARBON
 void LgiLabelProc(	const Rect *r,
 					ThemeButtonKind kind,
 					const ThemeButtonDrawInfo *info,

@@ -11,6 +11,41 @@
 
 #include <fcntl.h>
 
+#ifdef WIN32
+
+	typedef HANDLE							OsFile;
+	#define INVALID_HANDLE					INVALID_HANDLE_VALUE
+	#define ValidHandle(hnd)				((hnd) != INVALID_HANDLE_VALUE)
+	#define DIR_PATH_SIZE					512
+
+	#define O_READ							GENERIC_READ
+	#define O_WRITE							GENERIC_WRITE
+	#define O_READWRITE						(GENERIC_READ | GENERIC_WRITE)
+	#define O_SHARE							0x01000000
+	#define O_NO_CACHE						0x00800000
+
+#else
+
+	#include <sys/types.h>
+	#include <sys/stat.h>
+	#include <dirent.h>
+	#include <unistd.h>
+
+	typedef int								OsFile;
+	#define INVALID_HANDLE					-1
+	#define ValidHandle(hnd)				((hnd) >= 0)
+
+	#define O_READ							O_RDONLY
+	#define O_WRITE							O_WRONLY
+	#ifdef MAC
+		#define O_SHARE							O_SHLOCK
+	#else
+		#define O_SHARE							0
+	#endif
+	#define O_READWRITE						O_RDWR
+
+#endif
+
 #include "GMem.h"
 #include "LgiClass.h"
 #include "GStream.h"
@@ -18,41 +53,6 @@
 #include "GRefCount.h"
 #include "GStringClass.h"
 #include "LError.h"
-
-#ifdef WIN32
-
-typedef HANDLE							OsFile;
-#define INVALID_HANDLE					INVALID_HANDLE_VALUE
-#define ValidHandle(hnd)				((hnd) != INVALID_HANDLE_VALUE)
-#define DIR_PATH_SIZE					512
-
-#define O_READ							GENERIC_READ
-#define O_WRITE							GENERIC_WRITE
-#define O_READWRITE						(GENERIC_READ | GENERIC_WRITE)
-#define O_SHARE							0x01000000
-#define O_NO_CACHE						0x00800000
-
-#else
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <unistd.h>
-
-typedef int								OsFile;
-#define INVALID_HANDLE					-1
-#define ValidHandle(hnd)				((hnd) >= 0)
-
-#define O_READ							O_RDONLY
-#define O_WRITE							O_WRONLY
-#ifdef MAC
-#define O_SHARE							O_SHLOCK
-#else
-#define O_SHARE							0
-#endif
-#define O_READWRITE						O_RDWR
-
-#endif
 
 /////////////////////////////////////////////////////////////////////
 // Defines
@@ -346,7 +346,7 @@ public:
 	virtual ~GFile();
 
 	OsFile Handle();
-	void ChangeThread();
+	void ChangeThread() override;
 
 	/// \brief Opens a file
 	/// \return Non zero on success

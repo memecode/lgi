@@ -168,7 +168,7 @@ int LDateTime::SystemTimeZone(bool ForceUpdate)
 
 				LgiAssert(!"Fixme");
 
-			#else
+			#elif defined LGI_CARBON
 			
 				CFTimeZoneRef tz = CFTimeZoneCopySystem();
 				CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();

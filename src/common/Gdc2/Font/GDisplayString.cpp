@@ -132,7 +132,24 @@ GDisplayString::GDisplayString(GFont *f, const char *s, ssize_t l, GSurface *pdc
 	AppendDots = 0;
 	VisibleTab = 0;
 	
-	#if defined MAC && !defined(LGI_SDL)
+	#if defined __GTK_H__
+	
+		Hnd = 0;
+		LastTabOffset = -1;
+		if (Font && Str)
+		{
+			len = l >= 0 ? l : strlen(Str);
+			if (len > 0)
+			{
+				Gtk::GtkPrintContext *PrintCtx = pDC ? pDC->GetPrintContext() : NULL;
+				if (PrintCtx)
+					Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+				else
+					Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
+			}
+		}
+	
+	#elif defined MAC && !defined(LGI_SDL)
 	
 		Hnd = 0;
 		#if USE_CORETEXT
@@ -148,23 +165,6 @@ GDisplayString::GDisplayString(GFont *f, const char *s, ssize_t l, GSurface *pdc
 				#else
 					ATSUCreateTextLayout(&Hnd);
 				#endif
-			}
-		}
-	
-	#elif defined __GTK_H__
-	
-		Hnd = 0;
-		LastTabOffset = -1;
-		if (Font && Str)
-		{
-			len = l >= 0 ? l : strlen(Str);
-			if (len > 0)
-			{
-				Gtk::GtkPrintContext *PrintCtx = pDC ? pDC->GetPrintContext() : NULL;
-				if (PrintCtx)
-					Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
-				else
-					Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
 			}
 		}
 	
@@ -201,7 +201,19 @@ GDisplayString::GDisplayString(GFont *f, const char16 *s, ssize_t l, GSurface *p
 	AppendDots = 0;
 	VisibleTab = 0;
 
-	#if defined MAC && !defined(LGI_SDL)
+	#if defined __GTK_H__
+	
+		Hnd = 0;
+		if (Font && Str && len > 0)
+		{
+			Gtk::GtkPrintContext *PrintCtx = pDC ? pDC->GetPrintContext() : NULL;
+			if (PrintCtx)
+				Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+			else
+				Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
+		}
+	
+	#elif defined MAC && !defined(LGI_SDL)
 	
 		Hnd = NULL;
 		#if USE_CORETEXT
@@ -215,18 +227,6 @@ GDisplayString::GDisplayString(GFont *f, const char16 *s, ssize_t l, GSurface *p
 				OSStatus e = ATSUCreateTextLayout(&Hnd);
 				if (e) printf("%s:%i - ATSUCreateTextLayout failed with %i.\n", _FL, (int)e);
 			#endif
-		}
-	
-	#elif defined __GTK_H__
-	
-		Hnd = 0;
-		if (Font && Str && len > 0)
-		{
-			Gtk::GtkPrintContext *PrintCtx = pDC ? pDC->GetPrintContext() : NULL;
-			if (PrintCtx)
-				Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
-			else
-				Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
 		}
 	
 	#endif
@@ -272,6 +272,11 @@ GDisplayString::~GDisplayString()
 	
 		Img.Reset();
 	
+	#elif defined __GTK_H__
+
+		if (Hnd)
+			g_object_unref(Hnd);
+
 	#elif defined MAC
 
 		#if USE_CORETEXT
@@ -293,11 +298,6 @@ GDisplayString::~GDisplayString()
 			ATSUDisposeTextLayout(Hnd);
 
 		#endif
-
-	#elif defined __GTK_H__
-
-		if (Hnd)
-			g_object_unref(Hnd);
 
 	#endif
 	
@@ -981,7 +981,33 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 		#endif
 	}
 
-	#if defined MAC && !defined(LGI_SDL)
+	#if defined __GTK_H__
+	
+	if (Hnd)
+	{
+		int Index = 0, Trailing = 0;
+		if (Gtk::pango_layout_xy_to_index(Hnd, Px * PANGO_SCALE, 0, &Index, &Trailing))
+		{
+			// printf("Index = %i, Trailing = %i\n", Index, Trailing);
+			GUtf8Str u(Str);
+			Status = 0;
+			while ((OsChar*)u.GetPtr() < Str + Index)
+			{
+				u++;
+				Status++;
+			}
+		}
+		else if (Trailing)
+		{
+			GUtf8Str u(Str + Index);
+			if (u)
+				u++;			
+			Status = (OsChar*)u.GetPtr() - Str;
+		}
+		else Status = 0;
+	}
+	
+	#elif defined MAC && !defined(LGI_SDL)
 
 		if (Hnd && Str)
 		{
@@ -1019,32 +1045,6 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 
 			#endif
 		}
-	
-	#elif defined __GTK_H__
-	
-	if (Hnd)
-	{
-		int Index = 0, Trailing = 0;
-		if (Gtk::pango_layout_xy_to_index(Hnd, Px * PANGO_SCALE, 0, &Index, &Trailing))
-		{
-			// printf("Index = %i, Trailing = %i\n", Index, Trailing);
-			GUtf8Str u(Str);
-			Status = 0;
-			while ((OsChar*)u.GetPtr() < Str + Index)
-			{
-				u++;
-				Status++;
-			}
-		}
-		else if (Trailing)
-		{
-			GUtf8Str u(Str + Index);
-			if (u)
-				u++;			
-			Status = (OsChar*)u.GetPtr() - Str;
-		}
-		else Status = 0;
-	}
 	
 	#elif defined(LGI_SDL)
 	
@@ -1999,7 +1999,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 			GUtf8Str Ptr(Str);
 			pDC->Colour(Font->WhitespaceColour());
 			
-			for (int32 u, Idx = 0; u = Ptr; Idx++)
+			for (int32 u, Idx = 0 ; (u = Ptr); Idx++)
 			{
 				if (IsTabChar(u) || u == ' ')
 				{

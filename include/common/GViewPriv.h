@@ -173,7 +173,7 @@ public:
 
 	#if defined(MAC)
 		#ifdef COCOA
-		#else
+		#elif defined LGI_CARBON
 		EventHandlerRef DndHandler;
 		GAutoString AcceptedDropFormat;
 		#endif

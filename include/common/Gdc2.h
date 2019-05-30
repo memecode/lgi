@@ -675,7 +675,7 @@ public:
 	bool CallMethod(const char *Name, GVariant *ReturnValue, GArray<GVariant*> &Args);
 };
 
-#ifdef MAC
+#if defined(MAC) && !defined(__GTK_H__)
 
 struct GPrintDcParams
 {
@@ -726,14 +726,6 @@ public:
 		GScreenDC(GView *view, void *Param = 0);
 	
 		#if defined(LGI_SDL)
-		#elif defined(MAC)
-	
-			GScreenDC(GWindow *wnd, void *Param = 0);
-			GScreenDC(GPrintDcParams *Params); // Used by GPrintDC
-			GRect GetPos();
-			void PushState();
-			void PopState();
-	
 		#elif defined(__GTK_H__)
 		
 			/// Constructs a server size pixmap
@@ -746,6 +738,14 @@ public:
 			// Gtk::cairo_surface_t *GetSurface(bool Render);
 			GdcPt2 GetSize();
 		
+		#elif defined(MAC)
+	
+			GScreenDC(GWindow *wnd, void *Param = 0);
+			GScreenDC(GPrintDcParams *Params); // Used by GPrintDC
+			GRect GetPos();
+			void PushState();
+			void PopState();
+	
 		#elif defined(BEOS)
 		
 			GScreenDC(BView *view);
@@ -895,7 +895,7 @@ public:
 	}
 };
 
-#if defined(MAC)
+#if defined(MAC) && !defined(__GTK_H__)
 class CGImg
 {
 	class CGImgPriv *d;
@@ -957,15 +957,7 @@ public:
 
 		GRect ClipRgn() { return Clip; }
 
-		#if defined MAC
-				
-			OsBitmap GetBitmap();
-			#if !defined(LGI_SDL)
-				CGColorSpaceRef GetColourSpaceRef();
-				CGImg *GetImg(GRect *Sub = 0);
-			#endif
-		
-		#elif defined(__GTK_H__)
+		#if defined(__GTK_H__)
 
 			#if GTK_MAJOR_VERSION == 3
 			Gtk::cairo_surface_t *GetImage();
@@ -977,6 +969,14 @@ public:
 			GColourSpace GetCreateCs();
 			Gtk::GdkPixbuf *CreatePixBuf();
 
+		#elif defined MAC
+				
+			OsBitmap GetBitmap();
+			#if !defined(LGI_SDL)
+				CGColorSpaceRef GetColourSpaceRef();
+				CGImg *GetImg(GRect *Sub = 0);
+			#endif
+		
 		#elif defined(BEOS) || defined(LGI_SDL)
 
 			OsBitmap GetBitmap();

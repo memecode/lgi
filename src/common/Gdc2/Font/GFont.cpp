@@ -537,19 +537,19 @@ bool GFont::Destroy()
 			FT_Done_Face(d->hFont);
 		#elif defined(WIN32)
 			DeleteObject(d->hFont);
-		#elif defined MAC
-			#if USE_CORETEXT
-			CFRelease(d->hFont);
-			#else
-			ATSUDisposeStyle(d->hFont);
-			#endif
-		#elif defined LINUX
+		#elif defined __GTK_H__
 			if (d->PangoCtx)
 			{
 				g_object_unref(d->PangoCtx);
 				d->PangoCtx = NULL;
 			}
 			Gtk::pango_font_description_free(d->hFont);
+		#elif defined MAC
+			#if USE_CORETEXT
+			CFRelease(d->hFont);
+			#else
+			ATSUDisposeStyle(d->hFont);
+			#endif
 		#elif defined BEOS
 			DeleteObj(d->hFont);
 		#else
@@ -563,7 +563,7 @@ bool GFont::Destroy()
 	return Status;
 }
 
-#if defined(MAC)
+#if defined LGI_CARBON
 CFDictionaryRef GFont::GetAttributes()
 {
 	return d->Attributes;
@@ -1826,7 +1826,7 @@ public:
 	}
 };
 
-#ifdef MAC
+#if defined LGI_CARBON
 
 bool MacGetSystemFont(GTypeFace &Info, CTFontUIFontType Which)
 {

@@ -53,6 +53,12 @@ protected:
 	
 	GAutoPtr<GMemDC> Img;
 	
+	#elif defined(__GTK_H__)
+	
+	Gtk::PangoLayout *Hnd;
+	int LastTabOffset;
+	void UpdateTabs(int Offset, int Size, bool Debug = false);
+	
 	#elif defined(MAC)
 	
 	#if USE_CORETEXT
@@ -64,12 +70,6 @@ protected:
 		ATSUTextMeasurement fAscent;
 		ATSUTextMeasurement fDescent;
 	#endif
-	
-	#elif defined(__GTK_H__)
-	
-	Gtk::PangoLayout *Hnd;
-	int LastTabOffset;
-	void UpdateTabs(int Offset, int Size, bool Debug = false);
 	
 	#elif defined(WINNATIVE) || defined(BEOS)
 	

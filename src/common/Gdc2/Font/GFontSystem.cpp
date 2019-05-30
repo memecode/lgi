@@ -332,7 +332,7 @@ bool GFontSystem::HasIconv(bool Quiet)
 	return Status;
 }
 
-#if defined MAC && !defined COCOA
+#if defined LGI_CARBON
 // This converts a normal charset to an Apple encoding ID
 static CFStringEncoding CharsetToEncoding(const char *cs)
 {
@@ -355,7 +355,7 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, GStreamI *Out, const char *
 	    
 #if defined(MAC)
 
-	#if !defined COCOA
+	#if defined LGI_CARBON
 	char Buf[2 << 10];
 	CFStringEncoding InEnc = CharsetToEncoding(InCs);
 	CFStringEncoding OutEnc = CharsetToEncoding(OutCs);
@@ -431,7 +431,7 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, char *Out, ssize_t OutLen, 
 
 #if defined(MAC)
 
-	#if !defined COCOA
+	#if defined LGI_CARBON
 	CFStringEncoding InEnc = CharsetToEncoding(InCs);
 	CFStringEncoding OutEnc = CharsetToEncoding(OutCs);
 	if (InEnc != kCFStringEncodingInvalidId &&

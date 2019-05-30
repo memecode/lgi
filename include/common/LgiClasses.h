@@ -31,7 +31,7 @@ LgiFunc bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a = 0, GMessage
 LgiFunc GViewI *GetNextTabStop(GViewI *v, bool Back);
 /// Converts an OS error code into a text string
 LgiClass GAutoString LgiErrorCodeToString(uint32_t ErrorCode);
-#if defined(MAC) && !defined(COCOA)
+#if defined(LGI_CARBON)
 LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
 #endif
 
@@ -433,7 +433,7 @@ private:
 	
 		#if defined(COCOA)
 
-		#else
+		#elif defined(LGI_CARBON)
 
 			friend OSStatus LgiWindowProc(EventHandlerCallRef, EventRef, void *);
 			friend OSStatus LgiRootCtrlProc(EventHandlerCallRef, EventRef, void *);
@@ -536,7 +536,7 @@ public:
 	GRect Flip(GRect p);
 	void OnCocoaLayout();
 protected:
-	#else
+	#elif defined(LGI_CARBON)
 	OsView _CreateCustomView();
 	virtual bool _OnGetInfo(HISize &size, HISize &line, HIRect &bounds, HIPoint &origin) { return false; }
 	virtual void _OnScroll(HIPoint &origin) {}
@@ -1471,17 +1471,6 @@ public:
 		virtual bool PushWindow(GWindow *v);
 		virtual GWindow *PopWindow();
 	
-	#elif defined(MAC)
-	
-		bool &CloseRequestDone();
-		bool PostEvent(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0);
-		void Quit(bool DontDelete = false);
-		#ifndef COCOA
-		OSErr HandlerCallback(DragTrackingMessage *tracking, DragRef theDrag);
-		#endif
-		int OnCommand(int Cmd, int Event, OsView Wnd);
-		GViewI *WindowFromPoint(int x, int y, bool Debug = false);
-		
 	#elif defined __GTK_H__
 	
 		void OnMap(bool m);
@@ -1490,6 +1479,17 @@ public:
 		bool TranslateMouse(GMouse &m);
 		GViewI *WindowFromPoint(int x, int y, bool Debug);
 	
+	#elif defined(MAC)
+	
+		bool &CloseRequestDone();
+		bool PostEvent(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0);
+		void Quit(bool DontDelete = false);
+		#if defined(LGI_CARBON)
+		OSErr HandlerCallback(DragTrackingMessage *tracking, DragRef theDrag);
+		#endif
+		int OnCommand(int Cmd, int Event, OsView Wnd);
+		GViewI *WindowFromPoint(int x, int y, bool Debug = false);
+		
 	#endif
 };
 
