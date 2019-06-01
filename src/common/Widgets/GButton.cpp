@@ -40,7 +40,7 @@ public:
 	GSurface *Image;
 	bool OwnImage;
 	
-	GButtonPrivate() : Cache(SysFont), LStringLayout(&Cache)
+	GButtonPrivate() : LStringLayout(&Cache), Cache(SysFont)
 	{
 		AmpersandToUnderline = true;
 		Pressed = 0;

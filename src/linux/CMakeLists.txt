@@ -267,6 +267,7 @@ endif ()
 add_library(Lgi SHARED ${Source})
 
 if (APPLE)
+	set(OBJCPP_SOURCE "${ROOT}/src/common/Lgi/LgiCommon.cpp")
 	target_include_directories(Lgi PUBLIC
 							"${ROOT}/include/linux/Gtk"
 							"${ROOT}/include/linux"

@@ -20,7 +20,7 @@ public:
 	GString ThreadName;
 	int PrevX;
 
-	GTextPrivate(GTextLabel *ctrl) : Cache(), LStringLayout(&Cache), LMutex("GTextPrivate")
+	GTextPrivate(GTextLabel *ctrl) : Cache(SysFont), LStringLayout(&Cache), LMutex("GTextPrivate")
 	{
 		Ctrl = ctrl;
 		PrevX = -1;

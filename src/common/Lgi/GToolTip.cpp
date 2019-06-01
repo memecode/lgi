@@ -104,7 +104,7 @@ public:
 		}
 	}
 	
-	bool Name(char *n)
+	bool Name(const char *n)
 	{
 		bool Status = GView::Name(n);
 		if (s.Reset(new GDisplayString(SysFont, GView::Name())))

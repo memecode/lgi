@@ -718,7 +718,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	}
 
 	GMemDC *Mem;
-	if (Mem = dynamic_cast<GMemDC*>(Src))
+	if ((Mem = dynamic_cast<GMemDC*>(Src)))
 	{
 		/*
 		GMemDC Tmp;

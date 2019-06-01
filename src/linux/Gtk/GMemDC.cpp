@@ -487,7 +487,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 		return;
 
 	GScreenDC *Screen;
-	if (Screen = Src->IsScreen())
+	if ((Screen = Src->IsScreen()))
 	{
 		if (pMem->Base)
 		{

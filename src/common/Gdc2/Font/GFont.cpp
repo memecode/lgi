@@ -39,96 +39,95 @@
 
 #if defined(LGI_SDL)
 
-class FreetypeLib
-{
-	FT_Library  lib;
-	FT_Error	err;
-	
-public:
-	FreetypeLib()
+	class FreetypeLib
 	{
-		err = FT_Init_FreeType(&lib);
-		if (err)
+		FT_Library  lib;
+		FT_Error	err;
+		
+	public:
+		FreetypeLib()
 		{
-			LgiAssert(0);
+			err = FT_Init_FreeType(&lib);
+			if (err)
+			{
+				LgiAssert(0);
+			}
 		}
-	}
-	
-	~FreetypeLib()
-	{
-		if (!err)
+		
+		~FreetypeLib()
 		{
-			FT_Done_FreeType(lib);
+			if (!err)
+			{
+				FT_Done_FreeType(lib);
+			}
 		}
-	}
-	
-	FT_Library Handle()
-	{
-		return lib;
-	}
-	
-	GString GetVersion()
-	{
-		FT_Int amajor = 0, aminor = 0, apatch = 0;
-		FT_Library_Version(lib, &amajor, &aminor, &apatch);
-		GString s;
-		s.Printf("%i.%i.%i", amajor, aminor, apatch);
-		return s;
-	}
-	
-} Freetype2;
+		
+		FT_Library Handle()
+		{
+			return lib;
+		}
+		
+		GString GetVersion()
+		{
+			FT_Int amajor = 0, aminor = 0, apatch = 0;
+			FT_Library_Version(lib, &amajor, &aminor, &apatch);
+			GString s;
+			s.Printf("%i.%i.%i", amajor, aminor, apatch);
+			return s;
+		}
+		
+	} Freetype2;
 
-GString GetFreetypeLibraryVersion()
-{
-	return Freetype2.GetVersion();
-}
+	GString GetFreetypeLibraryVersion()
+	{
+		return Freetype2.GetVersion();
+	}
 
 #elif defined(WIN32)
 
-#ifndef __GNUC__
-#include <mbctype.h>
-#endif
+	#ifndef __GNUC__
+	#include <mbctype.h>
+	#endif
 
-int WinPointToHeight(int Pt, HDC hDC)
-{
-	int Ht = 0;
+	int WinPointToHeight(int Pt, HDC hDC)
+	{
+		int Ht = 0;
 
-	HWND hDestktop = NULL;
-	if (!hDC)
-		hDC = GetDC(hDestktop = GetDesktopWindow());
-	
-	if (hDC)
-		Ht = -MulDiv(Pt, GetDeviceCaps(hDC, LOGPIXELSY), 72);
+		HWND hDestktop = NULL;
+		if (!hDC)
+			hDC = GetDC(hDestktop = GetDesktopWindow());
+		
+		if (hDC)
+			Ht = -MulDiv(Pt, GetDeviceCaps(hDC, LOGPIXELSY), 72);
 
-	if (hDestktop)
-		ReleaseDC(hDestktop, hDC);
+		if (hDestktop)
+			ReleaseDC(hDestktop, hDC);
 
-	return Ht;
-}
+		return Ht;
+	}
 
-int WinHeightToPoint(int Ht, HDC hDC)
-{
-	int Pt = 0;
+	int WinHeightToPoint(int Ht, HDC hDC)
+	{
+		int Pt = 0;
 
-	HWND hDestktop = NULL;
-	if (!hDC)
-		hDC = GetDC(hDestktop = GetDesktopWindow());
-	
-	if (hDC)
-		Pt = -MulDiv(Ht, 72, GetDeviceCaps(hDC, LOGPIXELSY));
+		HWND hDestktop = NULL;
+		if (!hDC)
+			hDC = GetDC(hDestktop = GetDesktopWindow());
+		
+		if (hDC)
+			Pt = -MulDiv(Ht, 72, GetDeviceCaps(hDC, LOGPIXELSY));
 
-	if (hDestktop)
-		ReleaseDC(hDestktop, hDC);
+		if (hDestktop)
+			ReleaseDC(hDestktop, hDC);
 
-	return Pt;
-}
+		return Pt;
+	}
 
-#elif defined(__GTK_H__)
-#elif defined(MAC)
+#elif USE_CORETEXT
 
-// CTFontCreateUIFontForLanguage
-// #include <HIToolbox/HITheme.h>
-#include <CoreText/CTFont.h>
+	// CTFontCreateUIFontForLanguage
+	// #include <HIToolbox/HITheme.h>
+	#include <CoreText/CTFont.h>
 
 #endif
 
@@ -1827,7 +1826,7 @@ public:
 	}
 };
 
-#if defined LGI_CARBON
+#if defined USE_CORETEXT
 
 bool MacGetSystemFont(GTypeFace &Info, CTFontUIFontType Which)
 {
@@ -2032,7 +2031,7 @@ bool GFontType::GetSystemFont(const char *Which)
 			#elif defined MAC
 			
 
-				#if USE_CORETEXT
+				#ifdef USE_CORETEXT
 
 				Status = MacGetSystemFont(Info, kCTFontUIFontControlContent);
 

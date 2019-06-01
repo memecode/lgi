@@ -62,7 +62,11 @@ public:
 		Sx = Sy = 0;
 		Dynamic = true;
 		SnapToEdge = false;
-		ZeroObj(LastKey);		
+
+		LastKey.vkey = 0;
+		LastKey.c16 = 0;
+		LastKey.Data = 0;
+		LastKey.IsChar = 0;
 	}
 	
 	int GetHookIndex(GView *Target, bool Create = false)
@@ -459,7 +463,7 @@ bool GWindow::Attach(GViewI *p)
 	
 	if (!Wnd)
 	{
-		if (Wnd = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL)))
+		if ((Wnd = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL))))
 		{
 			g_object_set_data(G_OBJECT(Wnd), "GViewI", (GViewI*)this);
 		}
@@ -519,7 +523,7 @@ bool GWindow::Attach(GViewI *p)
 		gtk_widget_add_events(GTK_WIDGET(Wnd), GDK_POINTER_MOTION_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
 
-		if (_Root = lgi_widget_new(this, Pos.X(), Pos.Y(), true))
+		if ((_Root = lgi_widget_new(this, Pos.X(), Pos.Y(), true)))
         {
             gtk_container_add(GTK_CONTAINER(Wnd), _Root);
             gtk_widget_show(_Root);
@@ -843,6 +847,8 @@ GWindowZoom GWindow::GetZoom()
 			return GZoomMin;
 		case GDK_WINDOW_STATE_MAXIMIZED:
 			return GZoomMax;
+		default:
+			break;
 	}
 
 	return GZoomNormal;

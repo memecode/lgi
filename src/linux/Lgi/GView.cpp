@@ -199,7 +199,7 @@ void GView::_Delete()
 
 	// Heirarchy
 	GViewI *c;
-	while (c = Children[0])
+	while ((c = Children[0]))
 	{
 		if (c->GetParent() != (GViewI*)this)
 		{

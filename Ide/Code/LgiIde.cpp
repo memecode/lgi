@@ -2397,7 +2397,7 @@ IdeDoc *AppWnd::NewDocWnd(const char *FileName, NodeSource *Src)
 		d->Docs.Insert(Doc);
 
 		GRect p = d->Mdi->NewPos();
-		Doc->SetPos(p);
+		Doc->GView::SetPos(p);
 		Doc->Attach(d->Mdi);
 		Doc->Focus(true);
 		Doc->Raise();
@@ -2534,7 +2534,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 		if (Doc)
 		{
 			GRect p = d->Mdi->NewPos();
-			Doc->SetPos(p);
+			Doc->GView::SetPos(p);
 			d->Docs.Insert(Doc);
 			d->OnFile(File);
 		}
@@ -3179,7 +3179,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (Doc)
 			{
 				GRect p = d->Mdi->NewPos();
-				Doc->SetPos(p);
+				Doc->GView::SetPos(p);
 				Doc->Attach(d->Mdi);
 				Doc->Focus(true);
 			}

@@ -1,7 +1,7 @@
 #ifndef _GFONT_PRIV_H_
 #define _GFONT_PRIV_H_
 
-#if defined LGI_COCOA
+#if defined USE_CORETEXT
 typedef ATSUTextMeasurement OsTextSize;
 #else
 typedef double OsTextSize;
@@ -32,7 +32,7 @@ public:
 	LHashTbl<IntKey<int>,int> UnicodeX; // Widths of any other characters
 	#endif
 
-	#ifdef LGI_CARBON
+	#ifdef USE_CORETEXT
 	CFDictionaryRef Attributes;
 	#endif
 

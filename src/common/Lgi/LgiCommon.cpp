@@ -62,11 +62,11 @@ namespace Gtk {
 
 //////////////////////////////////////////////////////////////////////////
 // Misc stuff
-#if defined MAC && !defined(__GTK_H__)
+#if defined MAC
 	#import <foundation/foundation.h>
-	#if COCOA
+	#if COCOA || defined(__GTK_H__)
 		GString LgiArgsAppPath;
-	#else
+	#elif defined LGI_CARBON
 		bool _get_path_FSRef(FSRef &fs, GStringPipe &a)
 		{
 			HFSUniStr255 Name;
@@ -1852,7 +1852,7 @@ bool LgiGetExeFile(char *Dst, int DstSize)
 		
 			bool Status = false;
 		
-			#if COCOA
+			#if COCOA || defined __GTK_H__
 		
 			if (FileExists(LgiArgsAppPath))
 			{
@@ -1860,7 +1860,7 @@ bool LgiGetExeFile(char *Dst, int DstSize)
 				Status = true;
 			}
 		
-			#elif defined LGI_CARBON
+			#else
 		
 			ProcessSerialNumber ps;
 			OSErr e = GetCurrentProcess(&ps);

@@ -31,7 +31,11 @@ public:
 	
 	bool IsOk()
 	{
+		#ifndef __clang__
 		return	this != 0;
+		#else
+		return true;
+		#endif
 	}
 };
 

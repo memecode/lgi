@@ -470,8 +470,11 @@ GApp *GApp::ObjInstance()
 
 bool GApp::IsOk()
 {
-	bool Status = 	(this != 0) &&
-					(d != 0);
+	bool Status =
+		#ifndef __clang__
+		(this != 0) &&
+		#endif
+		(d != 0);
 					
 	LgiAssert(Status);
 	return Status;
@@ -487,17 +490,13 @@ int GApp::GetMetric(LgiSystemMetric Metric)
 	switch (Metric)
 	{
 		case LGI_MET_DECOR_X:
-		{
 			return 8;
-		}
 		case LGI_MET_DECOR_Y:
-		{
 			return 8 + 19;
-		}
 		case LGI_MET_DECOR_CAPTION:
-		{
 			return 19;
-		}
+		default:
+			break;
 	}
 
 	return 0;

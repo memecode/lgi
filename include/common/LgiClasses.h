@@ -185,9 +185,6 @@ public:
 	/// Destroys the object
 	virtual ~GApp();
 
-	/// Returns the version of Lgi used. String returned is in the form '#.#.#'
-	const char *GetLgiVersion() { return LGI_VER; }
-
 	/// Resets the arguments
 	void SetAppArgs(OsAppArguments &AppArgs);
 	
@@ -1156,7 +1153,7 @@ public:
 	GLayout();
 	~GLayout();
 
-	const char *GetClass() { return "GLayout"; }
+	const char *GetClass() override { return "GLayout"; }
 
 	/// Gets the current scroll bar values.
 	virtual void GetScrollPos(int &x, int &y);
@@ -1174,19 +1171,19 @@ public:
 	void SetPourLargest(bool i);
 
 	/// Handles the incoming events.
-	GMessage::Result OnEvent(GMessage *Msg);
+	GMessage::Result OnEvent(GMessage *Msg) override;
 
 	/// Lay out all the children views into the client area according to their
 	/// own internal rules. Space is given in a first come first served basis.
-	bool Pour(GRegion &r);
+	bool Pour(GRegion &r) override;
 
 	// Impl
 	#if defined(__GTK_H__) || !defined(WINNATIVE)
 
-	bool Attach(GViewI *p);
-	bool Detach();
-	GRect &GetClient(bool InClientSpace = true);
-	void OnCreate();
+	bool Attach(GViewI *p) override;
+	bool Detach() override;
+	GRect &GetClient(bool InClientSpace = true) override;
+	void OnCreate() override;
 	
 	#if defined(MAC) && !XPLATFORM_GLAYOUT
 
@@ -1197,14 +1194,15 @@ public:
 
 	#else
 	
-	void OnPosChange();
-	int OnNotify(GViewI *c, int f);
-	void OnNcPaint(GSurface *pDC, GRect &r);
+	void OnPosChange() override;
+	int OnNotify(GViewI *c, int f) override;
+	void OnNcPaint(GSurface *pDC, GRect &r) override;
 
 	#endif
 	#endif
 	
-	GViewI *FindControl(int Id);
+	GViewI *FindControl(int Id) override;
+	GViewI *FindControl(OsView hnd) override { return GView::FindControl(hnd); }
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1548,13 +1546,13 @@ public:
 	GSplitter();
 	~GSplitter();
 
-	const char *GetClass() { return "GSplitter"; }
+	const char *GetClass() override { return "GSplitter"; }
 
 	/// Get the position of the split in px
-	int64 Value(); // Use to set/get the split position
+	int64 Value() override; // Use to set/get the split position
 	
 	/// Sets the position of the split
-	void Value(int64 i);
+	void Value(int64 i) override;
 
 	/// True if the split is vertical
 	bool IsVertical();
@@ -1592,18 +1590,18 @@ public:
 	/// Set the bar size
 	void BarSize(int i);
 
-	GViewI *FindControl(OsView hCtrl);
+	GViewI *FindControl(OsView hCtrl) override;
 
-	bool Attach(GViewI *p);
-	bool Pour(GRegion &r);
-	void OnPaint(GSurface *pDC);
-	void OnPosChange();
-	void OnMouseClick(GMouse &m);
-	void OnMouseMove(GMouse &m);
-	void OnMouseExit(GMouse &m);
-	int OnHitTest(int x, int y);
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
-	LgiCursor GetCursor(int x, int y);
+	bool Attach(GViewI *p) override;
+	bool Pour(GRegion &r) override;
+	void OnPaint(GSurface *pDC) override;
+	void OnPosChange() override;
+	void OnMouseClick(GMouse &m) override;
+	void OnMouseMove(GMouse &m) override;
+	void OnMouseExit(GMouse &m) override;
+	int OnHitTest(int x, int y) override;
+	void OnChildrenChanged(GViewI *Wnd, bool Attaching) override;
+	LgiCursor GetCursor(int x, int y) override;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
