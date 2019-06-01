@@ -563,7 +563,7 @@ bool GFont::Destroy()
 	return Status;
 }
 
-#if defined LGI_CARBON
+#if USE_CORETEXT
 CFDictionaryRef GFont::GetAttributes()
 {
 	return d->Attributes;

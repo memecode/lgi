@@ -264,7 +264,7 @@ public:
 	
 	#if defined(BEOS)
 	GdcPt2 StringBounds(const char *s, int len = -1);
-	#elif defined(MAC) && !defined(__GTK_H__)
+	#elif USE_CORETEXT
 	CFDictionaryRef GetAttributes();
 	#endif
 };

@@ -598,11 +598,13 @@ void GWindow::_OnViewDelete()
 	}
 }
 
+/*
 void GWindow::_Delete()
 {
 	SetDragHandlers(false);
 	GView::_Delete();
 }
+*/
 
 void GWindow::SetAlwaysOnTop(bool b)
 {

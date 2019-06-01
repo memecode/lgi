@@ -2,6 +2,7 @@
 #define _GFONT_PRIV_H_
 
 #if defined USE_CORETEXT
+#include <ApplicationServices/ApplicationServices.h>
 typedef ATSUTextMeasurement OsTextSize;
 #else
 typedef double OsTextSize;
