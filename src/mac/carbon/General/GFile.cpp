@@ -376,7 +376,7 @@ bool ResolveShortcut(const char *LinkFile, char *Path, ssize_t Len)
 
 void WriteStr(GFile &f, const char *s)
 {
-	uint32 Len = (s) ? strlen(s) : 0;
+	uint32_t Len = (s) ? strlen(s) : 0;
 	f << Len;
 	if (Len > 0)
 	{
@@ -389,7 +389,7 @@ char *ReadStr(GFile &f DeclDebugArgs)
 	char *s = 0;
 
 	// read the strings length...
-	uint32 Len;
+	uint32_t Len;
 	f >> Len;
 
 	if (Len > 0)
@@ -428,7 +428,7 @@ char *ReadStr(GFile &f DeclDebugArgs)
 
 ssize_t SizeofStr(const char *s)
 {
-	return sizeof(uint32) + ((s) ? strlen(s) : 0);
+	return sizeof(uint32_t) + ((s) ? strlen(s) : 0);
 }
 
 bool LgiGetDriveInfo
@@ -537,6 +537,7 @@ public:
 				}
 			}
 
+			#if defined LGI_CARBON
 			FSVolumeRefNum volume;
 			FSVolumeInfo info;
 			HFSUniStr255 volName;
@@ -567,7 +568,8 @@ public:
 
 					_Sub.Insert(v);
 				}
-		}
+			}
+			#endif
 		}
 
 		_It = _Sub.begin();
@@ -631,6 +633,7 @@ int FloppyType(int Letter)
 	return 0;
 }
 
+#if defined LGI_CARBON
 OSType gFinderSignature = 'MACS';
 
 OSStatus MoveFileToTrash(CFURLRef fileURL, LError *Status)
@@ -679,12 +682,15 @@ OSStatus MoveFileToTrash(CFURLRef fileURL, LError *Status)
 	
 	return err;
 }
+#endif
 
 bool GFileSystem::Copy(const char *From, const char *To, LError *ErrorCode, CopyFileCallback Callback, void *Token)
 {
 	if (!From || !To)
 	{
+		#if defined LGI_CARBON
 		if (ErrorCode) *ErrorCode = paramErr;
+		#endif
 		return false;
 	}
 
@@ -703,7 +709,9 @@ bool GFileSystem::Copy(const char *From, const char *To, LError *ErrorCode, Copy
 
 	if (Out.SetSize(0))
 	{
+		#if defined LGI_CARBON
 		if (ErrorCode) *ErrorCode = writErr;
+		#endif
 		return false;
 	}
 
@@ -717,7 +725,9 @@ bool GFileSystem::Copy(const char *From, const char *To, LError *ErrorCode, Copy
 	char *Buf = new char[Block];
 	if (!Buf)
 	{
+		#if defined LGI_CARBON
 		if (ErrorCode) *ErrorCode = notEnoughBufferSpace;
+		#endif
 		return false;
 	}
 
@@ -737,7 +747,9 @@ bool GFileSystem::Copy(const char *From, const char *To, LError *ErrorCode, Copy
 				}
 				else
 				{
+					#if defined LGI_CARBON
 					if (ErrorCode) *ErrorCode = writErr;
+					#endif
 					goto ExitCopyLoop;
 				}
 			}
@@ -758,7 +770,9 @@ bool GFileSystem::Copy(const char *From, const char *To, LError *ErrorCode, Copy
 	DeleteArray(Buf);
 	if (i == Size)
 	{
+		#if defined LGI_CARBON
 		if (ErrorCode) *ErrorCode = noErr;
+		#endif
 	}
 	else
 	{
@@ -767,63 +781,6 @@ bool GFileSystem::Copy(const char *From, const char *To, LError *ErrorCode, Copy
 	}
 
 	return i == Size;
-
-	/*
-	bool Status = false;
-
-	if (From AND To)
-	{
-		GFile In, Out;
-		if (In.Open(From, O_READ) AND
-			Out.Open(To, O_WRITE))
-		{
-			Out.SetSize(0);
-			int64 Size = In.GetSize();
-			int64 Block = min((1 << 20), Size);
-			char *Buf = new char[Block];
-			if (Buf)
-			{
-				int64 i = 0;
-				while (i < Size)
-				{
-					int r = In.Read(Buf, Block);
-					if (r > 0)
-					{
-						int Written = 0;
-						while (Written < r)
-						{
-							int w = Out.Write(Buf + Written, r - Written);
-							if (w > 0)
-							{
-								Written += w;
-							}
-							else goto ExitCopyLoop;
-						}
-						i += Written;
-						if (Callback)
-						{
-							if (!Callback(Token, i, Size))
-							{
-								break;
-							}
-						}
-					}
-					else break;
-				}
-
-				ExitCopyLoop:
-				DeleteArray(Buf);
-				Status = i == Size;
-				if (!Status)
-				{
-					Delete(To, false);
-				}
-			}
-		}
-	}
-
-	return Status;
-	*/
 }
 
 bool GFileSystem::Delete(GArray<const char*> &Files, GArray<LError> *Status, bool ToTrash)
@@ -1334,7 +1291,11 @@ public:
 		Swap = false;
 		Status = true;
 		Attributes = 0;
+		#if defined LGI_CARBON
 		LastError = noErr;
+		#else
+		LastError = 0;
+		#endif
 	}
 };
 
@@ -1352,6 +1313,10 @@ GFile::~GFile()
 		Close();
 	}
 	DeleteObj(d);
+}
+
+void GFile::ChangeThread()
+{
 }
 
 int GFile::GetError()
@@ -1393,7 +1358,9 @@ int GFile::Open(const char *File, int Mode)
 {
 	if (!File)
 	{
+		#if defined LGI_CARBON
 		d->LastError = paramErr;
+		#endif
 		return false;
 	}
 	
@@ -1593,7 +1560,7 @@ ssize_t GFile::SwapRead(uchar *Buf, ssize_t Size)
 	int r = Read(Buf, Size);
 	if (r == Size)
 	{
-		uint8 *s = Buf, *e = Buf + r - 1;
+		uint8_t *s = Buf, *e = Buf + r - 1;
 		for (; s < e; s++, e--)
 		{
 			uchar c = *s;
@@ -1617,21 +1584,21 @@ ssize_t GFile::SwapWrite(uchar *Buf, ssize_t Size)
 		}
 		case 2:
 		{
-			uint16 i = *((uint16*)Buf);
+			uint16_t i = *((uint16_t*)Buf);
 			i = LgiSwap16(i);
 			return Write(&i, Size);
 			break;
 		}
 		case 4:
 		{
-			uint32 i = *((uint32*)Buf);
+			uint32_t i = *((uint32_t*)Buf);
 			i = LgiSwap32(i);
 			return Write(&i, Size);
 			break;
 		}
 		case 8:
 		{
-			uint64 i = *((uint64*)Buf);
+			uint64_t i = *((uint64_t*)Buf);
 			i = LgiSwap64(i);
 			return Write(&i, Size);
 			break;
@@ -1646,7 +1613,7 @@ ssize_t GFile::SwapWrite(uchar *Buf, ssize_t Size)
 				Buf[n] = c;
 			}
 
-			int w = Write(Buf, Size);
+			auto w = Write(Buf, Size);
 
 			for (i=0, n=Size-1; i<n; i++, n--)
 			{

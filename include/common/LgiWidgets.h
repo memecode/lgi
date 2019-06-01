@@ -264,14 +264,14 @@ public:
     void PourAll() {}
 	void Quit(bool DontDelete = false);
 	
-	#if defined(MAC) && !defined(LGI_SDL)
-	void OnPaint(GSurface *pDC);
-	#elif defined(__GTK_H__)
+	#if defined(__GTK_H__)
 	friend Gtk::gboolean GtkDialogDestroy(Gtk::GtkWidget *widget, GDialog *This);
     bool IsResizeable();
     void IsResizeable(bool r);
 	Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
 	bool SetupDialog(bool Modal);
+	#elif defined(LGI_CARBON)
+	void OnPaint(GSurface *pDC);
 	#endif
 };
 

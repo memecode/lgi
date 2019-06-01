@@ -1,9 +1,12 @@
 #include "Lgi.h"
 #include <stdlib.h>
+#if !defined(__GTK_H__)
 #import <Cocoa/Cocoa.h>
+#endif
 
 void LgiShowFileProperties(OsView Parent, const char *Filename)
 {
+	#if !defined(__GTK_H__)
 	NSPasteboard *pboard = [NSPasteboard pasteboardWithUniqueName];
 	[pboard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
 
@@ -15,6 +18,7 @@ void LgiShowFileProperties(OsView Parent, const char *Filename)
 
 	[pboard setPropertyList:fileList forType:NSFilenamesPboardType];
 	NSPerformService(@"Finder/Show Info", pboard);
+	#endif
 }
 
 bool LgiBrowseToFile(const char *Filename)

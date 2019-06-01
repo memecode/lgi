@@ -228,7 +228,7 @@
 #endif
 #define HAS_SHARED_OBJECT_SKIN				0
 #define HAS_LIBGSASL						0
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(MAC)
 #define HAS_LIB_MAGIC						0
 #else
 #define HAS_LIB_MAGIC						1

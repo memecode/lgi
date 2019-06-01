@@ -373,7 +373,7 @@ void GButton::OnFocus(bool f)
 
 void GButton::OnPaint(GSurface *pDC)
 {
-	#if defined(MAC) && !defined(COCOA) && !defined(LGI_SDL)
+	#if defined LGI_CARBON
 
 	GColour NoPaintColour = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
 	if (!NoPaintColour.IsTransparent())

@@ -3,7 +3,7 @@
 
 #include "LgiInc.h"
 #include "LgiDefs.h"
-#if defined __OBJC__
+#if defined(__OBJC__) && !defined(__GTK_H__)
 #include <Cocoa/Cocoa.h>
 #endif
 
@@ -283,7 +283,7 @@ public:
 	/// \returns true if this event should show a context menu
 	bool IsContextMenu();
 	
-	#if defined __OBJC__
+	#if defined(__OBJC__) && !defined(__GTK_H__)
 	void SetFromEvent(NSEvent *ev, NSView *view);
 	#else
 	void SetButton(uint32_t Btn)

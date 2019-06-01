@@ -1268,7 +1268,7 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 					LIBPNG png_set_iCCP(png_ptr,
 								info_ptr,
 								(png_charp)"ColourProfile",
-								NULL,
+								0,
 								(png_const_bytep) ColProfile.Value.Binary.Data,
 								(png_uint_32) ColProfile.Value.Binary.Length);
 				}

@@ -189,7 +189,6 @@ gboolean GDialog::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 	return true;
 }
 
-static
 gboolean
 GtkDialogDestroy(GtkWidget *widget, GDialog *This)
 {

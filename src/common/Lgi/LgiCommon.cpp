@@ -62,7 +62,7 @@ namespace Gtk {
 
 //////////////////////////////////////////////////////////////////////////
 // Misc stuff
-#if defined MAC
+#if defined MAC && !defined(__GTK_H__)
 	#import <foundation/foundation.h>
 	#if COCOA
 		GString LgiArgsAppPath;
@@ -356,6 +356,7 @@ int LgiGetOs
 
 	#elif defined MAC
 
+	#if !defined(__GTK_H__)
 	if (Ver)
 	{
 		NSOperatingSystemVersion v = [[NSProcessInfo processInfo] operatingSystemVersion];
@@ -363,6 +364,7 @@ int LgiGetOs
 		Ver->Add((int)v.minorVersion);
 		Ver->Add((int)v.patchVersion);
 	}
+	#endif
 	
 	return LGI_OS_MAC_OS_X;
 
@@ -1105,7 +1107,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 
 			Path = WinGetSpecialFolderPath(CSIDL_MYMUSIC);
 			
-			#elif defined MAC && !defined COCOA
+			#elif defined LGI_CARBON
 			
 			FSRef Ref;
 			OSErr e = FSFindFolder(kUserDomain, kMusicDocumentsFolderType, kDontCreateFolder, &Ref);
@@ -1135,7 +1137,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 
 			Path = WinGetSpecialFolderPath(CSIDL_MYVIDEO);
 
-			#elif defined MAC && !defined COCOA
+			#elif defined LGI_CARBON
 
 			FSRef Ref;
 			OSErr e = FSFindFolder(kUserDomain, kMovieDocumentsFolderType, kDontCreateFolder, &Ref);
@@ -1252,7 +1254,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 				{
 					Path = [[paths objectAtIndex:0] UTF8String];
 				}
-				#else
+				#elif defined LGI_CARBON
 				FSRef Ref;
 				OSErr e = FSFindFolder(kUserDomain, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
 				if (e)
@@ -1312,7 +1314,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			if (GetWindowsDirectoryW(p, CountOf(p)) > 0)
 				Path = p;
 
-			#elif defined MAC && !defined COCOA
+			#elif defined LGI_CARBON
 			
 			FSRef Ref;
 			OSErr e = FSFindFolder(kOnAppropriateDisk,  kSystemFolderType, kDontCreateFolder, &Ref);
@@ -1378,7 +1380,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 					Path = utf;
 			}
 
-			#elif defined MAC && !defined COCOA
+			#elif defined LGI_CARBON
 			
 			FSRef Ref;
 			OSErr e = FSFindFolder(kUserDomain, kTemporaryFolderType, kCreateFolder, &Ref);
@@ -1414,7 +1416,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 
 			Path = WinGetSpecialFolderPath(CSIDL_COMMON_APPDATA);
 			
-			#elif defined MAC && !defined COCOA
+			#elif defined LGI_CARBON
 			
 			FSRef Ref;
 			OSErr e = FSFindFolder(kOnSystemDisk, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
@@ -1443,7 +1445,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			
 			Path = WinGetSpecialFolderPath(CSIDL_APPDATA);
 
-			#elif defined MAC && !defined COCOA
+			#elif defined LGI_CARBON
 			
 			FSRef Ref;
 			OSErr e = FSFindFolder(kUserDomain, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
@@ -1484,7 +1486,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			#elif defined(MAC)
 			
 				#if defined COCOA
-				#else
+				#elif defined LGI_CARBON
 				FSRef Ref;
 				OSErr e = FSFindFolder(kOnAppropriateDisk, kDesktopFolderType, kDontCreateFolder, &Ref);
 				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", __FILE__, __LINE__, e);
@@ -1628,7 +1630,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 				}
 			}
 			
-			#elif defined MAC && !defined COCOA
+			#elif defined LGI_CARBON
 			
 			FSRef Ref;
 			OSErr e = FSFindFolder(kUserDomain, kTrashFolderType, kDontCreateFolder, &Ref);
@@ -1858,7 +1860,7 @@ bool LgiGetExeFile(char *Dst, int DstSize)
 				Status = true;
 			}
 		
-			#else
+			#elif defined LGI_CARBON
 		
 			ProcessSerialNumber ps;
 			OSErr e = GetCurrentProcess(&ps);
@@ -2047,7 +2049,7 @@ uint64 LgiCurrentTime()
 
 	return system_time() / 1000;
 
-	#elif defined MAC && !defined COCOA
+	#elif defined LGI_CARBON
 	
 	UnsignedWide t;
 	Microseconds(&t);
@@ -2089,7 +2091,7 @@ uint64 LgiMicroTime()
 	LgiAssert(!"Not impl.");
 	return 0;
 
-	#elif defined MAC && !defined COCOA
+	#elif defined LGI_CARBON
 	
 	UnsignedWide t;
 	Microseconds(&t);
@@ -2616,6 +2618,8 @@ GString LGetAppForProtocol(const char *Protocol)
 				break;
 			}
 		}
+	#elif defined(__GTK_H__)
+		LgiAssert(!"What to do?");
 	#elif defined(MAC)
 		// Get the handler type
 		CFStringRef Type = GString(Protocol).CreateStringRef();

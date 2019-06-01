@@ -153,7 +153,7 @@ public:
 				Cur.x = (int)p.x;
 				Cur.y = (int)p.y;
 				
-				#else
+				#elif defined LGI_CARBON
 				
 				HIPoint p;
 				HIGetMousePosition(kHICoordSpaceScreenPixel, NULL, &p);
@@ -1014,7 +1014,7 @@ void GDropDown::OnPaint(GSurface *pDC)
 	if (!r.Valid())
 		return;
 
-	#if defined(MAC) && !defined(COCOA) && !defined(LGI_SDL)
+	#if defined(LGI_CARBON)
 	GColour NoPaintColour(LC_MED, 24);
 	if (GetCss())
 	{

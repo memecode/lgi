@@ -149,7 +149,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
 
 #else
 
-#if defined(MAC) && !COCOA
+#if defined(LGI_CARBON)
 pascal OSErr AppEventHandler(const AppleEvent *ae, AppleEvent *reply, SRefCon handlerRefcon)
 {
 	OSErr err = eventNotHandledErr;
@@ -219,7 +219,7 @@ int main(int Args, char **Arg)
 		
 		// Setup apple event handlers
 		#if COCOA
-		#else
+		#elif defined LGI_CARBON
 		OSStatus e = AEInstallEventHandler(	kInternetEventClass,
 											kAEGetURL,
 											NewAEEventHandlerUPP(AppEventHandler),

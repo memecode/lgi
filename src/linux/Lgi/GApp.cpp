@@ -29,12 +29,14 @@
 #define DEBUG_MSG_TYPES				0
 #define DEBUG_HND_WARNINGS			0
 
+/*
 #ifndef WIN32
 namespace Gtk {
 #include <gdk/gdkx.h>
 #undef Status
 }
 #endif
+*/
 
 typedef GArray<GAppInfo*> AppArray;
 using namespace Gtk;
@@ -547,11 +549,13 @@ bool GApp::InThread()
 	return Gui == Me;
 }
 
+/*
 #ifndef WIN32
 void GApp::OnEvents()
 {
 }
 #endif
+*/
 
 struct GtkIdle
 {
@@ -1062,7 +1066,7 @@ bool GApp::GetAppsForMimeType(char *Mime, ::GArray<::GAppInfo*> &Apps)
 	return Apps.Length() > 0;
 }
 
-#ifndef WIN32
+#if defined(LINUX)
 GLibrary *GApp::GetWindowManagerLib()
 {
 	if (this != NULL && !d->WmLib)
@@ -1362,7 +1366,7 @@ OsApplication::OsApplication(int Args, char **Arg)
     Inst = this;
     d = new OsApplicationPriv;	
 	
-	#ifdef __GNUC__
+	#if defined(__GNUC__) && defined(LINUX)
 	XInitThreads();
 	#endif
     gtk_init(&Args, &Arg);

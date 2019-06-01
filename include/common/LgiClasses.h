@@ -1290,7 +1290,7 @@ protected:
 
 	#endif
 	
-	#if defined(MAC) && !defined(LGI_SDL)
+	#if defined(LGI_CARBON)
 	void _Delete();
 	#endif
 

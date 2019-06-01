@@ -11,15 +11,18 @@
 #include "Lgi.h"
 #include "GTextLabel.h"
 #include "GButton.h"
+#if defined LGI_CARBON
 #include <Carbon/Carbon.h>
+#endif
 #include "INet.h"
 
 #include <sys/types.h>
 #include <pwd.h>
 #include <uuid/uuid.h>
 
-
+#if defined LGI_CARBON
 #import <Cocoa/Cocoa.h>
+#endif
 
 ////////////////////////////////////////////////////////////////
 // Local helper functions
@@ -58,7 +61,7 @@ bool _lgi_check_file(char *Path)
 	return false;
 }
 
-void LgiSleep(uint32 i)
+void LgiSleep(uint32_t i)
 {
 	struct timespec request, remain;
 
@@ -84,6 +87,7 @@ char *p2c(unsigned char *s)
 	return 0;
 }
 
+#if defined LGI_CARBON
 void c2p255(Str255 &d, const char *s)
 {
 	if (s)
@@ -95,7 +99,7 @@ void c2p255(Str255 &d, const char *s)
 			d[1+i] = s[i];
 	}
 }
-
+#endif
 
 /*
 Boolean AssertProc(DialogRef theDialog, EventRecord *theEvent, DialogItemIndex *itemHit)
@@ -130,6 +134,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 
 		int Result = 2;
 		
+		#if defined LGI_CARBON
 		if (LgiApp && LgiApp->InThread())
 		{
 			SInt16 r;
@@ -186,6 +191,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 			}
 		}
 
+		#endif
 		#endif
 
 		Asserting = false;
@@ -255,7 +261,7 @@ bool _GetIniField(char *Grp, char *Field, char *In, char *Out, int OutSize)
 					while (*v && strchr(" \t", *v)) v++;
 					
 					// Calculate the length of the field
-					int flen = (int)e-(int)Line;
+					auto flen = e - Line;
 
 					// Check the current field against the input field
 					if (strnicmp(Field, Line, flen) == 0)
@@ -310,6 +316,7 @@ bool LgiPlaySound(const char *FileName, int ASync)
 	return LgiExecute(FileName);
 }
 
+#if defined LGI_CARBON
 OSErr FinderLaunch(long nTargets, FSRef *targetList)
 {
 	OSErr err;
@@ -410,8 +417,9 @@ OSErr FinderLaunch(long nTargets, FSRef *targetList)
 
 	return err;
 }
+#endif
 
-GAutoString LgiErrorCodeToString(uint32 ErrorCode)
+GAutoString LgiErrorCodeToString(uint32_t ErrorCode)
 {
     const char *e = strerror(ErrorCode);
 	static char tmp[32];
@@ -434,6 +442,7 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GAutoString
 		
 		if (uri.Protocol)
 		{
+			#if defined LGI_CARBON
 			CFStringRef s = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)File, strlen(File), kCFStringEncodingUTF8, false);
 			if (s)
 			{
@@ -445,9 +454,13 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GAutoString
 				}
 				CFRelease(s);
 			}
+			#else
+			LgiAssert(0);
+			#endif
 		}
 		else
 		{
+			#if defined LGI_CARBON
 			FSRef r;
 			OSStatus e = FSPathMakeRef((UInt8*)File, &r, NULL);
 			char Path[MAX_PATH];
@@ -544,12 +557,16 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GAutoString
 					}
 				}
 			}
+			#else
+			LgiAssert(0);
+			#endif
 		}
 	}
 	
 	return Status;
 }
 
+#if defined LGI_CARBON
 CFStringRef Utf8ToCFString(char *s, int len)
 {
 	if (s && len < 0)
@@ -592,6 +609,7 @@ char *CFStringToUtf8(CFStringRef r)
 	
 	return Buffer;
 }
+#endif
 
 bool LgiGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
 {

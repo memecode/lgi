@@ -109,7 +109,7 @@ GtkWidget *lgi_widget_new(GViewI *target, int w, int h, bool pour_largest)
 	return GTK_WIDGET(p);
 }
 
-static void
+void
 lgi_widget_remove(GtkContainer *wid, GtkWidget *child)
 {
 	LgiWidget *p = LGI_WIDGET(wid);
@@ -136,7 +136,7 @@ lgi_widget_remove(GtkContainer *wid, GtkWidget *child)
 	}
 }
 
-static gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
+gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 {
     bool BtnDown =  ev->type == GDK_BUTTON_PRESS ||
                     ev->type == GDK_2BUTTON_PRESS ||
@@ -173,7 +173,7 @@ static gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
     return TRUE;
 }
 
-static gboolean lgi_widget_motion(GtkWidget *widget, GdkEventMotion *ev)
+gboolean lgi_widget_motion(GtkWidget *widget, GdkEventMotion *ev)
 {
 	LgiWidget *p = LGI_WIDGET(widget);
     GView *v = dynamic_cast<GView*>(p->target);
@@ -874,7 +874,7 @@ lgi_widget_realize(GtkWidget *widget)
 		GTK_WIDGET_CLASS(lgi_widget_parent_class)->unrealize(widget);
 	}
 
-	static gboolean
+	gboolean
 	lgi_widget_draw(GtkWidget *widget, cairo_t *cr)
 	{
 		g_return_val_if_fail(widget != NULL, FALSE);

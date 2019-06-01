@@ -343,7 +343,7 @@ void GCheckBox::OnPaint(GSurface *pDC)
 			d->Unlock();
 		}
 
-		#if defined MAC && !defined COCOA && !defined(LGI_SDL)
+		#if defined LGI_CARBON
 
 			if (!cBack.IsTransparent())
 			{

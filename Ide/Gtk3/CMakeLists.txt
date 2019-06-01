@@ -13,6 +13,7 @@ add_subdirectory(../../src/linux LgiDir)
 
 if (APPLE)
 
+	set(GTK3_PATH "/Users/Shared/inst")
 	add_definitions("-DMAC -DLGI_LIBRARY -D_DEBUG -DLGI_RES")
 	SET(GUI_TYPE MACOSX_BUNDLE)
 
@@ -146,9 +147,11 @@ elseif (MSVC)
 endif ()
 
 if (APPLE)
+	message(STATUS "${GTK3_PATH}/include")
 	target_include_directories(LgiIde PUBLIC
 							"${ROOT}/include/linux/Gtk"
-							"${ROOT}/include/linux")
+							"${ROOT}/include/linux"
+							"${GTK3_PATH}/include")
 	target_link_libraries(LgiIde Lgi ${EXTRA_LIBS})
 	set_target_properties(LgiIde PROPERTIES
 		MACOSX_BUNDLE TRUE

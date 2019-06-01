@@ -36,6 +36,10 @@
 				<Node File="./src/common/General/GExeCheck.cpp" Type="2" Platforms="15" />
 				<Node File="./include/common/GFile.h" Type="3" Platforms="15" />
 				<Node File="./src/common/General/GFileCommon.cpp" Type="2" Platforms="15" />
+				<Node Name="Mac" Type="1" Platforms="15" Id="1">
+					<Node File="./src/mac/carbon/General/GFile.cpp" Type="2" Platforms="15" />
+					<Node File="./src/mac/cocoa/General/ShowFileProp_Mac.mm" Type="8" Platforms="15" />
+				</Node>
 			</Node>
 			<Node Name="Interface" Type="1" Platforms="15" Open="1" Id="12">
 				<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="13">
@@ -385,8 +389,8 @@
 			<Node File=".\src\win32\INet\MibAccess.cpp" Type="2" Platforms="1" />
 		</Node>
 		<Node Name="Header" Type="1" Platforms="15" Open="0" Id="71">
-			<Node File=".\include\common\INet.h" Type="3" Platforms="15" />
-			<Node File=".\include\common\INetTools.h" Type="3" Platforms="15" />
+			<Node File="./include/common/INet.h" Type="3" Platforms="15" />
+			<Node File="./include/common/INetTools.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Mime Message" Type="1" Platforms="15" Open="0" Id="72">
 			<Node File="./include/common/GMime.h" Type="3" Platforms="15" />
@@ -422,6 +426,7 @@
 				<Windows>.\Makefile.windows</Windows>
 				<Linux>./Makefile.linux</Linux>
 				<Haiku>Makefile.haiku</Haiku>
+				<Mac>Makefile.macosx</Mac>
 			</Makefile>
 			<Defines>
 				<All>

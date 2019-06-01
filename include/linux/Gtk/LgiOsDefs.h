@@ -231,8 +231,8 @@ LgiFunc void LgiSleep(uint32_t i);
 		#define LPrintfSSizeT		"%d"
 	#endif
 #else
-	#define LPrintfInt64			"%Li"
-	#define LPrintfHex64			"%Lx"
+	#define LPrintfInt64			"%lld"
+	#define LPrintfHex64			"%llx"
 	#define LPrintfSizeT			"%zu"
 	#define LPrintfSSizeT			"%zi"
 #endif

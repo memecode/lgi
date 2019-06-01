@@ -4,7 +4,7 @@
 
 #if defined(WIN32)
 	#include <commctrl.h>
-#elif defined(MAC)
+#elif defined(LGI_CARBON)
 	#include <Carbon/Carbon.h>
 #elif !defined(BEOS)
 	#define LGI_NATIVE_TIPS 1
@@ -160,7 +160,7 @@ class GToolTipPrivate
 public:
 	int NextUid;
 
-	#if defined(MAC)
+	#if defined(LGI_CARBON)
 	HMHelpContentRec Tag;
 	#elif LGI_NATIVE_TIPS
 	GView *Parent;

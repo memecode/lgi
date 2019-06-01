@@ -45,7 +45,7 @@ public:
 	GCombo::SelectedState SelState;
 	bool LayoutDirty;
 
-	#if defined MAC && !defined COCOA
+	#if defined LGI_CARBON
 	ThemeButtonDrawInfo Cur;
 	#endif
 
@@ -60,7 +60,7 @@ public:
 		Menu = 0;
 		Text = 0;
 
-		#if defined MAC && !defined COCOA
+		#if defined LGI_CARBON
 		Cur.state = kThemeStateInactive;
 		Cur.value = kThemeButtonOff;
 		Cur.adornment = kThemeAdornmentNone;
@@ -547,7 +547,7 @@ void GCombo::OnPaint(GSurface *pDC)
 
 	GColour cBack = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
 
-	#if defined MAC && !defined COCOA && !defined(LGI_SDL)
+	#if defined LGI_CARBON
 
 		pDC->Colour(cBack);
 		pDC->Rectangle();

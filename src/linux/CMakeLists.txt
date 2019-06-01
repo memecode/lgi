@@ -31,6 +31,16 @@ if (APPLE)
 				"${GTK3_PATH}/include/cairo"
 				"${GTK3_PATH}/include/gdk-pixbuf-2.0"
 				"${GTK3_PATH}/include/atk-1.0")
+	set(GTK3_LIBRARIES
+				"-L${GTK3_PATH}/lib"
+				"cairo"
+				"glib-2.0"
+				"gobject-2.0.0"
+				"gdk-3"
+				"gdk_pixbuf-2.0"
+				"gtk-3"
+				"pango-1.0"
+				"pangocairo-1.0")
 
 elseif (LINUX)
 
@@ -262,7 +272,7 @@ if (APPLE)
 							"${ROOT}/include/linux"
 							${GTK3_INCLUDE_DIRS}
 							)
-	target_link_libraries(Lgi ${EXTRA_LIBS})
+	target_link_libraries(Lgi ${GTK3_LIBRARIES})
 	set_source_files_properties(${OBJCPP_SOURCE} PROPERTIES 
                             COMPILE_FLAGS "-x objective-c++")
 elseif (LINUX)

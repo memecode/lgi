@@ -17,7 +17,7 @@ using namespace Gtk;
 typedef ::GMenuItem LgiMenuItem;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-static void SubMenuDestroy(GSubMenu *Item)
+void SubMenuDestroy(GSubMenu *Item)
 {
 	// LgiTrace("DestroySub %p %p\n", Item, Item->Info);
 	Item->Info = NULL;
@@ -179,7 +179,7 @@ void GSubMenu::ClearHandle()
 void GSubMenu::Empty()
 {
 	LgiMenuItem *i;
-	while (i = Items[0])
+	while ((i = Items[0]))
 	{
 		RemoveItem(i);
 		DeleteObj(i);

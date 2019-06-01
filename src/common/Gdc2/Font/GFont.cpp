@@ -123,6 +123,7 @@ int WinHeightToPoint(int Ht, HDC hDC)
 	return Pt;
 }
 
+#elif defined(__GTK_H__)
 #elif defined(MAC)
 
 // CTFontCreateUIFontForLanguage
