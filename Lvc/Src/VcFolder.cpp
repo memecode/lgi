@@ -405,15 +405,15 @@ void VcFolder::OnBranchesChange()
 			if (!stricmp(b.key, "default") ||
 				!stricmp(b.key, "trunk"))
 				Default = b.key;
+			else
+				printf("Other=%s\n", b.key);
 		}
-		if (!Default)
-			LgiAssert(!"What is the default name?");
 		int Idx = 1;
 		for (auto b: Branches)
 		{
 			if (!b.value->Colour.IsValid())
 			{
-				if (!stricmp(b.key, Default))
+				if (Default && !stricmp(b.key, Default))
 					b.value->Colour = GetPaletteColour(0);
 				else
 					b.value->Colour = GetPaletteColour(Idx++);
