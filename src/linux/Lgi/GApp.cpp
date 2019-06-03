@@ -364,7 +364,8 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	SystemBold = 0;
 	d = new GAppPrivate;
 	Name(name);
-	
+	LgiArgsAppPath = AppArgs.Arg[0];
+
 	int WCharSz = sizeof(wchar_t);
 	#if defined(_MSC_VER)
 	LgiAssert(WCharSz == 2);

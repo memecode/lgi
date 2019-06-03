@@ -6,7 +6,7 @@ cmake_minimum_required (VERSION 3.12)
 set (CMAKE_CXX_STANDARD 11)
 
 project (Lgi)
-set (LGI_VERSION_MAJOR 1)
+set (LGI_VERSION_MAJOR 4)
 set (LGI_VERSION_MINOR 0)
 get_filename_component(ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." REALPATH)
 get_filename_component(CODELIB "${ROOT}/../../../CodeLib" REALPATH)
