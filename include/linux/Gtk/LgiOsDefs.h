@@ -297,7 +297,11 @@ LgiFunc void LgiSleep(uint32_t i);
 	/// The pattern that matches all files in Linux
 	#define LGI_ALL_FILES			"*"
 	/// The stardard extension for dynamically linked code
+	#ifdef MAC
+	#define LGI_LIBRARY_EXT			"dylib"
+	#else
 	#define LGI_LIBRARY_EXT			"so"
+	#endif
 	/// The standard executable extension
 	#define LGI_EXECUTABLE_EXT		""
 #endif
