@@ -246,7 +246,7 @@ bool GDialog::SetupDialog(bool Modal)
 		g_list_free(list);
     
 		// Add our own root control to contain LGI widgets
-		if ((_Root = lgi_widget_new(this, Pos.X(), Pos.Y(), true)))
+		if ((_Root = lgi_widget_new(this, true)))
 		{
 			gtk_container_add(container, _Root);
 			gtk_widget_show(_Root);

@@ -18,20 +18,12 @@ struct _LgiWidget
 	#endif
 
 	GViewI *target;
-	int w, h;
 	bool pour_largest;
 	bool drag_over_widget;
 	char *drop_format;
 	bool debug;
 
-	struct ChildInfo
-	{
-		int x;
-		int y;
-		GtkWidget *w;
-	};
-
-	::GArray<ChildInfo> child;
+	::GArray<GtkWidget*> child;
 };
 
 static void lgi_widget_class_init(LgiWidgetClass *klass);
@@ -49,7 +41,7 @@ lgi_widget_forall(	GtkContainer   *container,
 {
 	LgiWidget *w = LGI_WIDGET(container);
 	for (int i=0; i<w->child.Length(); i++)
-		(*callback)(w->child[i].w, callback_data);
+		(*callback)(w->child[i], callback_data);
 }
 
 static
@@ -85,7 +77,7 @@ lgi_widget_get_type(void)
 }
 #endif
 
-GtkWidget *lgi_widget_new(GViewI *target, int w, int h, bool pour_largest)
+GtkWidget *lgi_widget_new(GViewI *target, bool pour_largest)
 {
 	#if GTK_MAJOR_VERSION == 3
 	LgiWidget *p = LGI_WIDGET(g_object_new(lgi_widget_get_type(), NULL));
@@ -95,8 +87,6 @@ GtkWidget *lgi_widget_new(GViewI *target, int w, int h, bool pour_largest)
 	if (p)
 	{
 		p->target = target;
-		p->w = w;
-		p->h = h;
 		p->pour_largest = pour_largest;
 		
 		g_object_set_data(G_OBJECT(p), "GViewI", target);
@@ -118,27 +108,19 @@ void
 lgi_widget_remove(GtkContainer *wid, GtkWidget *child)
 {
 	LgiWidget *p = LGI_WIDGET(wid);
-	if (p)
-	{
-		for (int i=0; i<p->child.Length(); i++)
-		{
-			_LgiWidget::ChildInfo &c = p->child[i];
-			if (c.w == child)
-			{
-				bool widget_was_visible = gtk_widget_get_visible(child);
+	if (!p)
+		return;
+
+	auto Idx = p->child.IndexOf(child);
+	if (Idx < 0)
+		return;
+
+	bool widget_was_visible = gtk_widget_get_visible(child);
 				
-				LgiWidget *cw = LGI_WIDGET(c.w);
-				// if (cw)
-					// printf("Unparenting %p, %s.%p\n", cw, cw->target->GetClass(), cw->target);
-				gtk_widget_unparent(child);
-				
-				p->child.DeleteAt(i, true);
-				if (widget_was_visible)
-					gtk_widget_queue_resize(GTK_WIDGET(wid));
-				break;
-			}
-		}
-	}
+	gtk_widget_unparent(child);
+	p->child.DeleteAt(Idx, true);
+	if (widget_was_visible)
+		gtk_widget_queue_resize(GTK_WIDGET(wid));
 }
 
 gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
@@ -726,6 +708,7 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 
 		gtk_widget_set_allocation (widget, allocation);
 
+		#if 0
 		if (is_debug(w))
 		{
 			LgiTrace("lgi_widget_size_allocate(%s) %i,%i-%i,%i\n",
@@ -733,14 +716,9 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 						allocation->x, allocation->y,
 						allocation->width, allocation->height);
 		}
+		#endif
 
-		if (w->w != allocation->width ||
-			w->h != allocation->height)
-		{
-			w->w = allocation->width;
-			w->h = allocation->height;
-			w->target->OnPosChange();
-		}
+		w->target->OnPosChange();
 
 	#else
 
@@ -811,18 +789,6 @@ lgi_widget_realize(GtkWidget *widget)
 
 	#if GTK_MAJOR_VERSION == 3
 
-		GdkWindow *window;
-		auto parentWidget = gtk_widget_get_parent(widget);
-		auto parent = LGI_IS_WIDGET(parentWidget) ? LGI_WIDGET(parentWidget) : NULL;
-		_LgiWidget::ChildInfo *c = NULL;
-		if (parent)
-			for (auto &i: parent->child)
-				if (i.w == widget)
-				{
-					c = &i;
-					break;
-				}
-
 		gtk_widget_set_realized (widget, TRUE);
 
 		attributes.window_type = GDK_WINDOW_CHILD;
@@ -846,8 +812,7 @@ lgi_widget_realize(GtkWidget *widget)
 
 		if (is_debug(w))
 		{
-			LgiTrace("lgi_widget_realize(%s) lgi=%i,%i-%i,%i gtk=%i,%i-%i,%i\n", w->target->GetClass(),
-				c?c->x:-1, c?c->y:-1, w->w, w->h,
+			LgiTrace("lgi_widget_realize(%s) gtk=%i,%i-%i,%i\n", w->target->GetClass(),
 				pos.x1, pos.y1, pos.X(), pos.Y());
 		}
 
@@ -859,7 +824,7 @@ lgi_widget_realize(GtkWidget *widget)
 								GDK_ENTER_NOTIFY_MASK |
 								GDK_LEAVE_NOTIFY_MASK;
 
-		window = gtk_widget_get_parent_window (widget);
+		auto window = gtk_widget_get_parent_window (widget);
 		if (window)
 		{
 			gtk_widget_set_window (widget, window);
@@ -926,7 +891,8 @@ lgi_widget_realize(GtkWidget *widget)
 		{
 			if (p && p->target)
 			{
-				GScreenDC Dc(cr, p->w, p->h);
+				auto Pos = p->target->GetPos();
+				GScreenDC Dc(cr, Pos.X(), Pos.Y());
 
 				#if 0
 				{
@@ -965,9 +931,9 @@ lgi_widget_realize(GtkWidget *widget)
 		if (p)
 		{
 			if (minimum_height)
-				*minimum_height = p->pour_largest ? 80 : p->h;
+				*minimum_height = p->pour_largest ? 80 : p->target->Y();
 			if (natural_height)
-				*natural_height = p->h;
+				*natural_height = p->target->Y();
 		}
 		else LgiAssert(0);
 	}
@@ -979,9 +945,9 @@ lgi_widget_realize(GtkWidget *widget)
 		if (p)
 		{
 			if (minimum_width)
-				*minimum_width = p->pour_largest ? 80 :p->w;
+				*minimum_width = p->pour_largest ? 80 :p->target->X();
 			if (natural_width)
-				*natural_width = p->w;
+				*natural_width = p->target->X();
 		}
 		else LgiAssert(0);
 	}
@@ -997,9 +963,9 @@ lgi_widget_realize(GtkWidget *widget)
 
 	static void
 	gtk_button_get_preferred_height_for_width (GtkWidget *widget,
-                                           gint       for_size,
-                                           gint      *minimum_size,
-                                           gint      *natural_size)
+											   gint       for_size,
+											   gint      *minimum_size,
+											   gint      *natural_size)
 	{
 		lgi_widget_get_preferred_height(widget, minimum_size, natural_size);
 	}
@@ -1010,30 +976,18 @@ lgi_widget_realize(GtkWidget *widget)
 		LgiWidget *p = LGI_WIDGET(widget);
 
 		auto pos = GtkGetPos(widget);
-		if (pos.x1 == -1)
+		auto parentWidget = gtk_widget_get_parent(widget);
+		if (pos.x1 == -1 && parentWidget)
 		{
-			GdkWindow *window;
-			auto parentWidget = gtk_widget_get_parent(widget);
-			auto parent = LGI_IS_WIDGET(parentWidget) ? LGI_WIDGET(parentWidget) : NULL;
-			_LgiWidget::ChildInfo *c = NULL;
-			if (parent)
-				for (auto &i: parent->child)
-					if (i.w == widget)
-					{
-						c = &i;
-						break;
-					}
+			auto pp = GtkGetPos(parentWidget);
+			auto cp = p->target->GetPos();
 
-			if (c)
-			{
-				auto pp = GtkGetPos(parentWidget);
-				GtkAllocation a;
-				a.x = pp.x1 + c->x;
-				a.y = pp.y1 + c->y;
-				a.width = p->w;
-				a.height = p->h;
-	    		gtk_widget_size_allocate(widget, &a);
-			}
+			GtkAllocation a;
+			a.x = pp.x1 + cp.x1;
+			a.y = pp.y1 + cp.y1;
+			a.width = cp.X();
+			a.height = cp.Y();
+	    	gtk_widget_size_allocate(widget, &a);
 		}
 
 		if (is_debug(p))
@@ -1130,102 +1084,18 @@ lgi_widget_realize(GtkWidget *widget)
 #endif
 
 void
-lgi_widget_setsize(GtkWidget *wid, int width, int height)
+lgi_widget_setpos(GtkWidget *widget, GRect rc)
 {
-	LgiWidget *p = LGI_WIDGET(wid);
-	if (!p) return;
-
-	if (p->w != width ||
-	    p->h != height)
+	auto parentWidget = gtk_widget_get_parent(widget);
+	if (parentWidget)
 	{
-		p->w = width;
-		p->h = height;
-		    
-		#if GTK_MAJOR_VERSION == 3
-		if (!stricmp(p->target->GetClass(), "GToolBar"))
-		{
-			int asd=0;
-		}
+		GRect pp = GtkGetPos(parentWidget);
 		GtkAllocation a;
-		gtk_widget_get_allocation(wid, &a);
-		if (a.width != width || a.height != height)
-		{
-			a.width = width;
-			a.height = height;
-			gtk_widget_size_allocate(wid, &a);
-		}
-		#else
-		wid->requisition.width = width;
-		wid->requisition.height = height;
-		#endif
-	}
-}
-
-void
-lgi_widget_setchildpos(GtkWidget *parent, GtkWidget *child, int x, int y)
-{
-	if (!LGI_IS_WIDGET(parent))
-	{
-		LgiAssert(0); // should this ever happen?
-		return;
-	}
-
-	LgiWidget *p = LGI_WIDGET(parent);
-	if (!p)
-		return;
-
-	for (int i=0; i<p->child.Length(); i++)
-	{
-		auto &c = p->child[i];
-		if (c.w != child)
-			continue;
-
-		c.x = x;
-		c.y = y;
-
-		#if GTK_MAJOR_VERSION == 3
-		if (!gtk_widget_get_realized(c.w))
-		#else
-		if (!GTK_WIDGET_REALIZED(c.w))
-		#endif
-			return;
-
-		LgiWidget *child_wid = LGI_WIDGET(c.w);
-                	
-		GtkAllocation a;
-
-		#if GTK_MAJOR_VERSION == 3
-		GtkAllocation palloc = {0};
-		gtk_widget_get_allocation(parent, &palloc);
-		a.x = c.x + palloc.x;
-		a.y = c.y + palloc.y;
-		#else
-		a.x = c.x;
-		a.y = c.y;
-		#endif
-
-		a.width = MAX(1, child_wid->w);
-		a.height = MAX(1, child_wid->h);
-				    
-    	gtk_widget_size_allocate(c.w, &a);
-
-		if (is_debug(child_wid))
-		{
-			LgiTrace("lgi_widget_setchildpos(%s) gtk=%i,%i-%i,%i (%s)\n", child_wid->target->GetClass(),
-				a.x, a.y, a.width, a.height,
-				GtkGetPos(c.w).GetStr());
-		}
-
-		/*
-        gdk_window_invalidate_rect(
-									#if GtkVer(2, 14)
-            						gtk_widget_get_window(c.w)
-            						#else
-            						c.w->window
-							        #endif
-            						, &a, FALSE);
-								*/
-		return;
+		a.x = pp.x1 + rc.x1;
+		a.y = pp.y1 + rc.y1;
+		a.width = rc.X();
+		a.height = rc.Y();
+		gtk_widget_size_allocate(widget, &a);
 	}
 }
 
@@ -1236,23 +1106,13 @@ lgi_widget_add(GtkContainer *wid, GtkWidget *child)
 	if (!p)
 		return;
 
-	for (auto c: p->child)
-	{
-		if (c.w == child)
-			return;
-	}
+	if (p->child.HasItem(child))
+		return;
 	
 	auto parent = GTK_WIDGET(wid);
-	auto &i = p->child.New();
-	i.w = child;
-	i.x = 0;
-	i.y = 0;
+	p->child.Add(child);
 	gtk_widget_set_parent(child, parent);
-
-	GtkAllocation a = {0};
-	a.width = p->w;
-	a.height = p->h;
-	gtk_widget_size_allocate(child, &a);
+	lgi_widget_setpos(child, p->target->GetPos());
 }
 
 gboolean
@@ -1332,8 +1192,6 @@ lgi_widget_init(LgiWidget *w)
 	GTK_WIDGET_UNSET_FLAGS(w, GTK_NO_WINDOW);
 	#endif
 	w->target = 0;
-	w->w = 0;
-	w->h = 0;
 	w->pour_largest = false;
 	w->drag_over_widget = false;
 	w->drop_format = NULL;

@@ -764,7 +764,7 @@ bool GPopup::Attach(GViewI *p)
 
     if (!_View)
     {
-	    _View = lgi_widget_new(this, Pos.X(), Pos.Y(), true);
+	    _View = lgi_widget_new(this, true);
 	    gtk_container_add(GTK_CONTAINER(Wnd), _View);
 	}
 

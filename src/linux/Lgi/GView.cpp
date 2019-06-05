@@ -547,11 +547,7 @@ bool GView::SetPos(GRect &p, bool Repaint)
 		{
 			if (LGI_IS_WIDGET(GtkPar))
 			{
-				lgi_widget_setsize(_View, Pos.X(), Pos.Y());
-				lgi_widget_setchildpos(	GtkPar,
-										_View,
-										Pos.x1 + o,
-										Pos.y1 + o);
+				lgi_widget_setpos(_View, Pos);
 			}
 			else
 			{
@@ -899,7 +895,7 @@ bool GView::Attach(GViewI *parent)
 	
 	if (!_View)
 	{
-		_View = lgi_widget_new(this, Pos.X(), Pos.Y(), false);
+		_View = lgi_widget_new(this, false);
 	}
 	
 	if (_View)
@@ -922,27 +918,17 @@ bool GView::Attach(GViewI *parent)
 				p = w->_Root;
 			
 			if (p && gtk_widget_get_parent(_View) != p)
-			{
 				lgi_widget_add(GTK_CONTAINER(p), _View);
-				lgi_widget_setchildpos(p, _View, Pos.x1 + o, Pos.y1 + o);
-			}
 		}
 
 		if (Visible())
-		{
 			gtk_widget_show(_View);
-		}
 		
 		if (DropTarget())
-		{
 			DropTarget(true);
-		}
 		
 		if (TestFlag(WndFlags, GWF_FOCUS))
-		{
-			// LgiTrace("OnCreate Focus %s\n", GetClass());
 			gtk_widget_grab_focus(_View);
-		}
 
 		OnAttach();
 		Status = true;

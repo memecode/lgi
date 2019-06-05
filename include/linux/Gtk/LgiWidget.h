@@ -27,15 +27,14 @@ struct _LgiWidgetClass
 GtkType lgi_widget_get_type();
 void lgi_widget_init(LgiWidget *w);
 #endif
-GtkWidget *lgi_widget_new(GViewI *target, int width, int height, bool pour_largest);
+GtkWidget *lgi_widget_new(GViewI *target, bool pour_largest);
 
 // Children management
 void lgi_widget_add(GtkContainer *wid, GtkWidget *child);
 void lgi_widget_remove(GtkContainer *wid, GtkWidget *child);
 
 // Positioning of widgets
-void lgi_widget_setsize(GtkWidget *wid, int width, int height);
-void lgi_widget_setchildpos(GtkWidget *wid, GtkWidget *child, int x, int y);
+void lgi_widget_setpos(GtkWidget *wid, GRect rc);
 
 G_END_DECLS
 
