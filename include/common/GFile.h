@@ -11,6 +11,14 @@
 
 #include <fcntl.h>
 
+#include "GMem.h"
+#include "LgiClass.h"
+#include "GStream.h"
+#include "GArray.h"
+#include "GRefCount.h"
+#include "GStringClass.h"
+#include "LError.h"
+
 #ifdef WIN32
 
 	typedef HANDLE							OsFile;
@@ -45,14 +53,6 @@
 	#define O_READWRITE						O_RDWR
 
 #endif
-
-#include "GMem.h"
-#include "LgiClass.h"
-#include "GStream.h"
-#include "GArray.h"
-#include "GRefCount.h"
-#include "GStringClass.h"
-#include "LError.h"
 
 /////////////////////////////////////////////////////////////////////
 // Defines

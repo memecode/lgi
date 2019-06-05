@@ -62,11 +62,12 @@ namespace Gtk {
 
 //////////////////////////////////////////////////////////////////////////
 // Misc stuff
+#if LGI_COCOA || defined(__GTK_H__)
+	GString LgiArgsAppPath;
+#endif
 #if defined MAC
 	#import <foundation/foundation.h>
-	#if COCOA || defined(__GTK_H__)
-		GString LgiArgsAppPath;
-	#elif defined LGI_CARBON
+	#if defined LGI_CARBON
 		bool _get_path_FSRef(FSRef &fs, GStringPipe &a)
 		{
 			HFSUniStr255 Name;

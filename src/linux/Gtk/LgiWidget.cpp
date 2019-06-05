@@ -36,6 +36,11 @@ struct _LgiWidget
 
 static void lgi_widget_class_init(LgiWidgetClass *klass);
 
+static bool is_debug(LgiWidget *w)
+{
+	return w->target->GetGView()->_Debug;
+}
+
 static void
 lgi_widget_forall(	GtkContainer   *container,
 					gboolean	include_internals,
@@ -721,6 +726,14 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 
 		gtk_widget_set_allocation (widget, allocation);
 
+		if (is_debug(w))
+		{
+			LgiTrace("lgi_widget_size_allocate(%s) %i,%i-%i,%i\n",
+						w->target->GetClass(),
+						allocation->x, allocation->y,
+						allocation->width, allocation->height);
+		}
+
 		if (w->w != allocation->width ||
 			w->h != allocation->height)
 		{
@@ -798,18 +811,46 @@ lgi_widget_realize(GtkWidget *widget)
 
 	#if GTK_MAJOR_VERSION == 3
 
-		GtkAllocation allocation = {0};
 		GdkWindow *window;
-
-		gtk_widget_get_allocation (widget, &allocation);
+		auto parentWidget = gtk_widget_get_parent(widget);
+		auto parent = LGI_IS_WIDGET(parentWidget) ? LGI_WIDGET(parentWidget) : NULL;
+		_LgiWidget::ChildInfo *c = NULL;
+		if (parent)
+			for (auto &i: parent->child)
+				if (i.w == widget)
+				{
+					c = &i;
+					break;
+				}
 
 		gtk_widget_set_realized (widget, TRUE);
 
 		attributes.window_type = GDK_WINDOW_CHILD;
-		attributes.x = allocation.x;
-		attributes.y = allocation.y;
-		attributes.width = allocation.width;
-		attributes.height = allocation.height;
+		auto pos = GtkGetPos(widget);
+		/*
+		if (c)
+		{
+			attributes.x = c->x;
+			attributes.y = c->y;
+			attributes.width = w->w;
+			attributes.height = w->h;
+		}
+		else
+		*/
+		{
+			attributes.x = pos.x1;
+			attributes.y = pos.x1;
+			attributes.width = pos.X();
+			attributes.height = pos.Y();
+		}
+
+		if (is_debug(w))
+		{
+			LgiTrace("lgi_widget_realize(%s) lgi=%i,%i-%i,%i gtk=%i,%i-%i,%i\n", w->target->GetClass(),
+				c?c->x:-1, c?c->y:-1, w->w, w->h,
+				pos.x1, pos.y1, pos.X(), pos.Y());
+		}
+
 		attributes.wclass = GDK_INPUT_ONLY;
 		attributes.event_mask = gtk_widget_get_events(widget) |
 								GDK_POINTER_MOTION_MASK |
@@ -967,6 +1008,41 @@ lgi_widget_realize(GtkWidget *widget)
 	lgi_widget_map(GtkWidget *widget)
 	{
 		LgiWidget *p = LGI_WIDGET(widget);
+
+		auto pos = GtkGetPos(widget);
+		if (pos.x1 == -1)
+		{
+			GdkWindow *window;
+			auto parentWidget = gtk_widget_get_parent(widget);
+			auto parent = LGI_IS_WIDGET(parentWidget) ? LGI_WIDGET(parentWidget) : NULL;
+			_LgiWidget::ChildInfo *c = NULL;
+			if (parent)
+				for (auto &i: parent->child)
+					if (i.w == widget)
+					{
+						c = &i;
+						break;
+					}
+
+			if (c)
+			{
+				auto pp = GtkGetPos(parentWidget);
+				GtkAllocation a;
+				a.x = pp.x1 + c->x;
+				a.y = pp.y1 + c->y;
+				a.width = p->w;
+				a.height = p->h;
+	    		gtk_widget_size_allocate(widget, &a);
+			}
+		}
+
+		if (is_debug(p))
+		{
+			LgiTrace("lgi_widget_map(%s) %s\n",
+				p->target->GetClass(),
+				GtkGetPos(widget).GetStr());
+		}
+
 		GTK_WIDGET_CLASS (lgi_widget_parent_class)->map(widget);		
 		if (p->window)
 			gdk_window_show(p->window);
@@ -1003,6 +1079,13 @@ lgi_widget_realize(GtkWidget *widget)
 		}
 
 		// LgiTrace("%s::req %i,%i\n", p->target->GetClass(), requisition->width, requisition->height);
+
+		if (is_debug(w))
+		{
+			LgiTrace("lgi_widget_size_request(%s) %i,%i\n",
+						w->target->GetClass(),
+						requisition->w, requisition->h);
+		}
 	}
 
 	static gboolean
@@ -1088,52 +1171,61 @@ lgi_widget_setchildpos(GtkWidget *parent, GtkWidget *child, int x, int y)
 	}
 
 	LgiWidget *p = LGI_WIDGET(parent);
-	if (p)
+	if (!p)
+		return;
+
+	for (int i=0; i<p->child.Length(); i++)
 	{
-		for (int i=0; i<p->child.Length(); i++)
-		{
-			_LgiWidget::ChildInfo &c = p->child[i];
-			if (c.w == child)
-			{
-				c.x = x;
-				c.y = y;
-				
-				#if GTK_MAJOR_VERSION == 3
-				if (gtk_widget_get_realized(c.w))
-				#else
-				if (GTK_WIDGET_REALIZED(c.w))
-				#endif
-				{
-                	LgiWidget *child_wid = LGI_WIDGET(c.w);
+		auto &c = p->child[i];
+		if (c.w != child)
+			continue;
+
+		c.x = x;
+		c.y = y;
+
+		#if GTK_MAJOR_VERSION == 3
+		if (!gtk_widget_get_realized(c.w))
+		#else
+		if (!GTK_WIDGET_REALIZED(c.w))
+		#endif
+			return;
+
+		LgiWidget *child_wid = LGI_WIDGET(c.w);
                 	
-				    GtkAllocation a;
+		GtkAllocation a;
 
-					#if GTK_MAJOR_VERSION == 3
-					GtkAllocation palloc = {0};
-					gtk_widget_get_allocation(parent, &palloc);
-				    a.x = c.x + palloc.x;
-				    a.y = c.y + palloc.y;
-					#else
-				    a.x = c.x;
-				    a.y = c.y;
-					#endif
+		#if GTK_MAJOR_VERSION == 3
+		GtkAllocation palloc = {0};
+		gtk_widget_get_allocation(parent, &palloc);
+		a.x = c.x + palloc.x;
+		a.y = c.y + palloc.y;
+		#else
+		a.x = c.x;
+		a.y = c.y;
+		#endif
 
-				    a.width = MAX(1, child_wid->w);
-				    a.height = MAX(1, child_wid->h);
+		a.width = MAX(1, child_wid->w);
+		a.height = MAX(1, child_wid->h);
 				    
-    				gtk_widget_size_allocate(c.w, &a);
+    	gtk_widget_size_allocate(c.w, &a);
 
-            		gdk_window_invalidate_rect(
-												#if GtkVer(2, 14)
-            									gtk_widget_get_window(c.w)
-            									#else
-            									c.w->window
-							            		#endif
-            									, &a, FALSE);
-				}
-				return;
-			}
+		if (is_debug(child_wid))
+		{
+			LgiTrace("lgi_widget_setchildpos(%s) gtk=%i,%i-%i,%i (%s)\n", child_wid->target->GetClass(),
+				a.x, a.y, a.width, a.height,
+				GtkGetPos(c.w).GetStr());
 		}
+
+		/*
+        gdk_window_invalidate_rect(
+									#if GtkVer(2, 14)
+            						gtk_widget_get_window(c.w)
+            						#else
+            						c.w->window
+							        #endif
+            						, &a, FALSE);
+								*/
+		return;
 	}
 }
 
@@ -1149,12 +1241,18 @@ lgi_widget_add(GtkContainer *wid, GtkWidget *child)
 		if (c.w == child)
 			return;
 	}
-		
+	
+	auto parent = GTK_WIDGET(wid);
 	auto &i = p->child.New();
 	i.w = child;
 	i.x = 0;
 	i.y = 0;
-	gtk_widget_set_parent(child, GTK_WIDGET(wid));
+	gtk_widget_set_parent(child, parent);
+
+	GtkAllocation a = {0};
+	a.width = p->w;
+	a.height = p->h;
+	gtk_widget_size_allocate(child, &a);
 }
 
 gboolean

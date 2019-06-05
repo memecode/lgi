@@ -46,8 +46,10 @@
 #undef stricmp
 
 #include "LgiInc.h"
-#include <sys/stat.h>
-#include <netinet/in.h>
+#ifdef MAC
+	#include <sys/stat.h>
+	#include <netinet/in.h>
+#endif
 namespace Gtk {
 #include <gtk/gtk.h>
 #ifdef WIN32

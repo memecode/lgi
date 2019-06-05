@@ -230,7 +230,10 @@ bool GMdiChild::PourAll()
 			if (w->Pour(Client))
 			{
 				if (!w->IsAttached())
+				{
+					w->GetGView()->Debug();
 					w->Attach(this);
+				}
 
 				if (!w->Visible())
 					w->Visible(true);

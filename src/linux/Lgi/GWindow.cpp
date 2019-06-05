@@ -1208,7 +1208,7 @@ void GWindow::PourAll()
 			if (v->Pour(Client))
 			{
 				GRect p = v->GetPos();
-				LgiTrace("%s = %s\n", v->GetClass(), p.GetStr());
+				// LgiTrace("%s = %s\n", v->GetClass(), p.GetStr());
 
 				if (!v->Visible())
 					v->Visible(true);
@@ -1230,7 +1230,7 @@ void GWindow::PourAll()
 		Invalidate(Update[i]);
 	}
 
-	_Dump();
+	// _Dump();
 }
 
 /*

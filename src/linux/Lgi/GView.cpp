@@ -21,7 +21,7 @@
 using namespace Gtk;
 #include "LgiWidget.h"
 
-#define DEBUG_MOUSE_EVENTS			1
+#define DEBUG_MOUSE_EVENTS			0
 
 #define ADJ_LEFT					1
 #define ADJ_RIGHT					2
@@ -872,10 +872,13 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 
 bool GView::IsAttached()
 {
+	if (!_View)
+		return false;
 	#if GTK_MAJOR_VERSION == 3
-	return	_View && gtk_widget_get_parent(_View);
+	auto p = gtk_widget_get_parent(_View);
+	return p != NULL;
 	#else
-	return	_View && _View->parent;
+	return	_View->parent;
 	#endif
 }
 
@@ -922,8 +925,6 @@ bool GView::Attach(GViewI *parent)
 			{
 				lgi_widget_add(GTK_CONTAINER(p), _View);
 				lgi_widget_setchildpos(p, _View, Pos.x1 + o, Pos.y1 + o);
-				
-				// printf("%s:%i - Attach %s @ %i,%i - %i,%i\n", _FL, GetClass(), Pos.x1 + o, Pos.y1 + o, Pos.X(), Pos.Y());
 			}
 		}
 
