@@ -1223,7 +1223,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 {
 	int Status = 0;
 
-	if (MsgCode(Msg) == MouseRollMsg)
+	if (Msg->Msg() == MouseRollMsg)
 	{
 		HWND hFocus = GetFocus();
 		if (_View)
@@ -1243,8 +1243,8 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			case WM_CTLCOLOREDIT:
 			case WM_CTLCOLORSTATIC:
 			{
-				HDC hdc = (HDC)MsgA(Msg);
-				HWND hwnd = (HWND)MsgB(Msg);
+				HDC hdc = (HDC)Msg->A();
+				HWND hwnd = (HWND)Msg->B();
 
 				GViewI *v = FindControl(hwnd);
 				GView *gv = v ? v->GetGView() : NULL;

@@ -900,7 +900,7 @@ bool SystemFunctions::Execute(LScriptArguments &Args)
 	else if (Log)
 	{
 		uint32_t ErrCode = e.GetErrorCode();
-		GAutoString ErrMsg = LgiErrorCodeToString(ErrCode);
+		GString ErrMsg = LErrorCodeToString(ErrCode);
 		if (ErrMsg)
 			Log->Print("Error: Execute(\"%s\",\"%s\") failed with '%s'\n", Exe, Arguments, ErrMsg.Get());
 		else

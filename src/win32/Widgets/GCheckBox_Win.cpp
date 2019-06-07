@@ -122,7 +122,7 @@ int GCheckBox::OnNotify(GViewI *Ctrl, int Flags)
 
 GMessage::Result GCheckBox::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case WM_DESTROY:
 		{

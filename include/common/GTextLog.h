@@ -102,7 +102,7 @@ public:
 
 	GMessage::Result OnEvent(GMessage *m)
 	{
-		if (MsgCode(m) == M_LOG_TEXT)
+		if (m->Msg() == M_LOG_TEXT)
 		{
 			ProcessTxt();
 		}

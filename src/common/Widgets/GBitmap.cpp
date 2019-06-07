@@ -37,7 +37,7 @@ public:
 	{
 		if (Bmp)
 		{
-			GSurface *pDC = LoadDC(File);
+			GSurface *pDC = GdcD->Load(File);
 			if (pDC)
 			{
 				Bmp->SetDC(pDC);

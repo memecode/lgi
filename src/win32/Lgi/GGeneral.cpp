@@ -492,11 +492,11 @@ static char *LgiFindArgsStart(char *File)
 
 #include <lmerr.h>
 
-GAutoString LgiErrorCodeToString(uint32_t ErrorCode)
+GString LErrorCodeToString(uint32_t ErrorCode)
 {
-	GAutoString Str;
+	GString Str;
     HMODULE hModule = NULL;
-    LPSTR MessageBuffer;
+    LPSTR MessageBuffer = NULL;
     DWORD dwBufferLength;
     DWORD dwFormatFlags =	FORMAT_MESSAGE_ALLOCATE_BUFFER |
 							FORMAT_MESSAGE_IGNORE_INSERTS |
@@ -519,8 +519,7 @@ GAutoString LgiErrorCodeToString(uint32_t ErrorCode)
 										0,
 										NULL))
     {
-        // DWORD dwBytesWritten;
-		Str.Reset(TrimStr(NewStr(MessageBuffer, dwBufferLength)));
+		Str.Set(MessageBuffer, dwBufferLength);
         LocalFree(MessageBuffer);
     }
 
@@ -530,7 +529,7 @@ GAutoString LgiErrorCodeToString(uint32_t ErrorCode)
     return Str;
 }
 
-bool LgiExecute(const char *File, const char *Arguments, const char *Dir, GAutoString *ErrorMsg)
+bool LgiExecute(const char *File, const char *Arguments, const char *Dir, GString *ErrorMsg)
 {
 	int Error = 0;
 	HINSTANCE Status = NULL;
@@ -572,7 +571,7 @@ bool LgiExecute(const char *File, const char *Arguments, const char *Dir, GAutoS
 	#endif
 
 	if (ErrorMsg)
-		*ErrorMsg = LgiErrorCodeToString(Error);
+		*ErrorMsg = LErrorCodeToString(Error);
 	
 	return (size_t)Status > 32;
 }

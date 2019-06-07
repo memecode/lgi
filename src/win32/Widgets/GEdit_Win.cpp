@@ -309,7 +309,7 @@ GMessage::Result GEdit::OnEvent(GMessage *Msg)
 	auto Status = GControl::OnEvent(Msg);
 
 	#if EDIT_PROCESSING
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case WM_CREATE:
 		{

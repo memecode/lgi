@@ -75,7 +75,7 @@ void GSlider::SetLimits(int64 min, int64 max)
 
 GMessage::Result GSlider::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case WM_HSCROLL:
 		case WM_VSCROLL:
@@ -90,7 +90,7 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 				GCss::ColorDef f = GetCss()->BackgroundColor();
 				if (f.Type == GCss::ColorRgb)
 				{
-					HDC hDC = (HDC)MsgA(Msg);
+					HDC hDC = (HDC)Msg->A();
 					GScreenDC dc(hDC, Handle());
 					dc.Colour(f.Rgb32, 32);
 					dc.Rectangle();
@@ -135,7 +135,7 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 
 	GMessage::Result Status = GControl::OnEvent(Msg);
 
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case WM_CREATE:
 		{

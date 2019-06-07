@@ -592,16 +592,13 @@ enum LgiSystemPath
 };
 
 // Deprecated method defines
-#if defined(__GNUC__) || defined(__clang__)
-	#define DEPRECATED_PRE
-	#define DEPRECATED_POST	__attribute__((deprecated))
+#ifdef __GNUC__
+#define DEPRECATED(func) func __attribute__ ((deprecated))
 #elif defined(_MSC_VER)
-	#define DEPRECATED_PRE	__declspec(deprecated)
-	#define DEPRECATED_POST
+#define DEPRECATED(func) __declspec(deprecated) func
 #else
-	#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
-	#define DEPRECATED_PRE
-	#define DEPRECATED_POST
+#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
+#define DEPRECATED(func) func
 #endif
 
 //

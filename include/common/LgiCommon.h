@@ -290,7 +290,7 @@ LgiFunc bool LgiExecute
 	/// The directory to run in
 	const char *Dir = 0,
 	/// An error message
-	GAutoString *ErrorMsg = NULL
+	GString *ErrorMsg = NULL
 );
 
 /// Initializes the random number generator

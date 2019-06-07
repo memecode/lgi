@@ -199,7 +199,7 @@ bool GDefaultDocumentEnv::OnNavigate(GDocView *Parent, const char *Uri)
 				GAutoString Exe(TrimStr(First->Path, "\"\'"));
 				GAutoString Args(a.NewStr());
 
-				GAutoString ErrorMsg;
+				GString ErrorMsg;
 				if (LgiExecute(Exe, Args, ".", &ErrorMsg))
 					return true;
 
@@ -213,7 +213,7 @@ bool GDefaultDocumentEnv::OnNavigate(GDocView *Parent, const char *Uri)
 		else
 		{
 			// webpage
-			GAutoString ErrorMsg;
+			GString ErrorMsg;
 			if (LgiExecute(Uri, NULL, NULL, &ErrorMsg))
 				return true;
 

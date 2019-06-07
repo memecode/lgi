@@ -1084,12 +1084,12 @@ bool GMenu::OnKey(GView *v, GKey &k)
 
 int GMenu::_OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case WM_MENUCHAR:
 		{
-			short Key = MsgA(Msg) & 0xffff;
-			HMENU View = (HMENU)MsgB(Msg);
+			short Key = Msg->A() & 0xffff;
+			HMENU View = (HMENU)Msg->B();
 			MENUITEMINFO Info;
 
 			ZeroObj(Info);

@@ -760,7 +760,7 @@ public:
 				{
 					LgiAssert(Html != NULL);
 					Ab.Type = GCss::LenPx;
-					Ab.Value = Html->Y();
+					Ab.Value = (float)Html->Y();
 				}
 
 				GCss::Len m = Ab * l;
@@ -7113,7 +7113,7 @@ char *GHtml::Name()
 
 GMessage::Result GHtml::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case M_COPY:
 		{
@@ -8247,7 +8247,7 @@ void GHtml::OnMouseClick(GMouse &m)
 								F.Write(u, strlen(u));
 							F.Close();
 							
-							GAutoString Err;
+							GString Err;
 							if (!LgiExecute(Path, NULL, NULL, &Err))
 							{
 								LgiMsg(	this,

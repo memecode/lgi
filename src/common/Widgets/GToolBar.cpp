@@ -1378,7 +1378,7 @@ int GToolBar::PostDescription(GView *Ctrl, const char *Text)
 
 GMessage::Result GToolBar::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case M_CHANGE:
 		{

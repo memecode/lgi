@@ -142,7 +142,7 @@ bool LEmojiFont::Create(const char *Face, GCss::Len Sz, GSurface *pSurface)
 
 	if (priv->Fn && !priv->Img)
 	{
-		if (priv->Img.Reset(LoadDC(priv->Fn)))
+		if (priv->Img.Reset(GdcD->Load(priv->Fn)))
 		{
 			LgiAssert(priv->Img->GetBits() == 32);
 		}

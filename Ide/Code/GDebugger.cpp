@@ -494,7 +494,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 		if (!Sp->Start(true, true, false))
 		{
 			State = ProcessError;
-			GAutoString ErrMsg = LgiErrorCodeToString(Sp->GetErrorCode());
+			GString ErrMsg = LErrorCodeToString(Sp->GetErrorCode());
 			char s[256];
 			sprintf_s(s, sizeof(s), "Failed to start gdb, error: 0x%x (%s)\n", Sp->GetErrorCode(), ErrMsg.Get());
 			Events->OnError(Sp->GetErrorCode(), s);

@@ -433,13 +433,13 @@ GMessage::Result GTrayIcon::OnEvent(GMessage *Message)
 {
 	#if WINNATIVE
 	
-	if (MsgCode(Message) == M_TRAY_NOTIFY &&
-		MsgA(Message) == d->MyId)
+	if (Message->Msg() == M_TRAY_NOTIFY &&
+		Message->A() == d->MyId)
 	{
 		// got a notification from the icon
 		GMouse m;
 		ZeroObj(m);
-		switch (MsgB(Message))
+		switch (Message->B())
 		{
 			case WM_LBUTTONDBLCLK:
 			case WM_RBUTTONDBLCLK:
@@ -458,7 +458,7 @@ GMessage::Result GTrayIcon::OnEvent(GMessage *Message)
 			}
 		}
 
-		switch (MsgB(Message))
+		switch (Message->B())
 		{
 			case WM_LBUTTONDBLCLK:
 			case WM_LBUTTONDOWN:
@@ -483,7 +483,7 @@ GMessage::Result GTrayIcon::OnEvent(GMessage *Message)
 			}
 		}
 
-		switch (MsgB(Message))
+		switch (Message->B())
 		{
 			case WM_LBUTTONDBLCLK:
 			case WM_RBUTTONDBLCLK:
@@ -499,7 +499,7 @@ GMessage::Result GTrayIcon::OnEvent(GMessage *Message)
 			d->Parent->OnTrayClick(m);
 		}
 	}
-	else if (MsgCode(Message) == d->TrayCreateMsg)
+	else if (Message->Msg() == d->TrayCreateMsg)
 	{
 		// explorer crashed... reinit the icon
 		ZeroObj(d->TrayIcon);

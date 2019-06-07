@@ -798,7 +798,7 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 {
 	int Status = 0;
 
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case M_ASSERT_UI:
 		{
@@ -977,12 +977,12 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 	 	case WM_CLOSE:
 		{
 			bool QuitApp;
-			if (QuitApp = OnRequestClose(MsgCode(Msg) == WM_QUERYENDSESSION))
+			if (QuitApp = OnRequestClose(Msg->Msg() == WM_QUERYENDSESSION))
 			{
 				Quit();
 			}
 
-			if (MsgCode(Msg) == WM_CLOSE)
+			if (Msg->Msg() == WM_CLOSE)
 			{
 				return 0;
 			}
@@ -1037,10 +1037,10 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 		{
 			// This receives events fired from the GMouseHookPrivate class so that
 			// non-LGI windows create mouse hook events as well.
-			GTempView v((OsView)MsgB(Msg));
+			GTempView v((OsView)Msg->B());
 			GMouse m;
-			m.x = LOWORD(MsgA(Msg));
-			m.y = HIWORD(MsgA(Msg));
+			m.x = LOWORD(Msg->A());
+			m.y = HIWORD(Msg->A());
 			HandleViewMouse(&v, m);
 			break;
 		}

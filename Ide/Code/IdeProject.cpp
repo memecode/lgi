@@ -1864,10 +1864,10 @@ int BuildThread::Main()
 			else
 			{
 				// Create a nice error message.
-				GAutoString ErrStr = LgiErrorCodeToString(SubProc->GetErrorCode());
+				GString ErrStr = LErrorCodeToString(SubProc->GetErrorCode());
 				if (ErrStr)
 				{
-					char *e = ErrStr + strlen(ErrStr);
+					char *e = ErrStr.Get() + ErrStr.Length();
 					while (e > ErrStr && strchr(" \t\r\n.", e[-1]))
 						*(--e) = 0;
 				}
