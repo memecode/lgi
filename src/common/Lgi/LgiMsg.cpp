@@ -143,16 +143,14 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 	{
 		if (LgiGetOs() == LGI_OS_WIN9X)
 		{
-			char *t = LgiToNativeCp(Title ? Title : (char*)"Message");
-			char *m = LgiToNativeCp(Msg);
+			auto t = LToNativeCp(Title ? Title : (char*)"Message");
+			auto m = LToNativeCp(Msg);
 			Res = MessageBoxA(Parent ? Parent->Handle() : 0, m?m:"", t?t:"", Type);
 			if (Res == 0)
 			{
 				auto Err = GetLastError();
 				LgiAssert(!"MessageBoxA failed.");
 			}
-			DeleteArray(t);
-			DeleteArray(m);
 		}
 		else
 		{

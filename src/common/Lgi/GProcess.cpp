@@ -226,77 +226,62 @@ class GNativeString
 {
 	static bool WinNT;
 
-	char *n;
-	char16 *w;
+	GString n;
+	GAutoWString w;
 
 public:
-	GNativeString()
+	GNativeString(const char *utf = NULL)
 	{
-		n = 0;
-		w = 0;
+		if (utf)
+			*this = utf;
 	}
 
-	GNativeString(const char *utf)
+	void Empty()
 	{
-		n = 0;
-		w = 0;
-
-		*this = utf;
-	}
-
-	~GNativeString()
-	{
-		DeleteArray(n);
-		DeleteArray(w);
+		n.Empty();
+		w.Reset();
 	}
 
 	GNativeString &operator =(const char *utf)
 	{
-		DeleteArray(w);
-		DeleteArray(n);
-		#ifdef WIN32
-		if (WinNT)
+		Empty();
+		if (utf)
 		{
-			if (utf) w = Utf8ToWide(utf);
+			#ifdef WIN32
+			if (WinNT)
+				w.Reset(Utf8ToWide(utf));
+			else
+				n = LToNativeCp(utf);
+			#else
+			n = NewStr(utf);
+			#endif
 		}
-		else
-		{
-			if (utf) n = LgiToNativeCp(utf);
-		}
-		#else
-		n = NewStr(utf);
-		#endif
 		
 		return *this;
 	}
 
 	GNativeString &operator =(GNativeString &s)
 	{
-		DeleteArray(w);
-		DeleteArray(n);
+		Empty();
 		#ifdef WIN32
 		if (WinNT)
-		{
-			w = NewStrW(s.w);
-		}
+			w.Reset(NewStrW(s.w));
 		else
-		{
-			n = NewStr(s.n);
-		}
+			n = s.n;
 		#else
-		n = NewStr(s.n);
+			n = NewStr(s.n);
 		#endif
 		return *this;
 	}
 
 	GNativeString &operator += (GNativeString &add)
 	{
-		size_t AddSize = add.GetSize();
-		if (AddSize)
+		if (WinNT)
 		{
-			size_t Len = GetSize() + AddSize;
-			if (WinNT)
+			size_t AddSize = add.GetSize();
+			if (AddSize)
 			{
+				size_t Len = GetSize() + AddSize;
 				char16 *s = new char16[Len+1];
 				if (s)
 				{
@@ -305,24 +290,13 @@ public:
 					else
 						s[0] = 0;
 					StrcatW(s, (char16*)add);
-					DeleteArray(w);
-					w = s;
+					w.Reset(s);
 				}
 			}
-			else
-			{
-				char *s = new char[Len+1];
-				if (s)
-				{
-					if (n)
-						strcpy_s(s, Len+1, n);
-					else
-						s[0] = 0;
-					strcat(s, (char*)add);
-					DeleteArray(n);
-					n = s;
-				}
-			}
+		}
+		else
+		{
+			n += (char*)add;
 		}
 		return *this;
 	}
@@ -339,29 +313,22 @@ public:
 		return w;
 	}
 
-	char *NewUtf8()
+	GString GetString()
 	{
 		if (w)
-		{
-			return WideToUtf8(w);
-		}
+			return LNewConvertCp("utf-8", w, LGI_WideCharset);
 		else if (n)
-		{
-			return LgiFromNativeCp(n);
-		}
-		return 0;
+			return n;
+
+		return GString();
 	}
 
 	size_t GetSize()
 	{
 		if (n)
-		{
-			return strlen(n);
-		}
+			return n.Length();
 		else if (w)
-		{
 			return StrlenW(w);
-		}
 		return 0;
 	}
 };
@@ -511,12 +478,11 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 				}
 				else
 				{
-					char *u = NExe.NewUtf8();
+					GString u = NExe.GetString();
 					if (u)
 					{
 						LgiTrimDir(u);
 						StartingPath = u;
-						DeleteArray(u);
 					}
 				}
 

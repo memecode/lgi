@@ -541,9 +541,9 @@ bool LgiExecute(const char *File, const char *Arguments, const char *Dir, GAutoS
 	uint64 Now = LgiCurrentTime();
 	if (LgiGetOs() == LGI_OS_WIN9X)
 	{
-		GAutoString f(LgiToNativeCp(File));
-		GAutoString a(LgiToNativeCp(Arguments));
-		GAutoString d(LgiToNativeCp(Dir));
+		auto f = LToNativeCp(File);
+		auto a = LToNativeCp(Arguments);
+		auto d = LToNativeCp(Dir);
 		if (f)
 		{
 			Status = ShellExecuteA(NULL, "open", f, a, d, 5);

@@ -1064,6 +1064,87 @@ T *DupeString(T *s, ssize_t Len = -1)
 	return ns;
 }
 
+GString LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t InLen)
+{
+	if (!OutCp || !In || !InCp)
+		return GString();
+
+	GCharset *InInfo = LgiGetCpInfo(InCp);
+	GCharset *OutInfo = LgiGetCpInfo(OutCp);
+	if (!InInfo || !OutInfo)
+		return GString();
+
+	if (InLen < 0)
+	{
+		switch (InInfo->Type)
+		{
+			case CpMapped:
+			case CpUtf8:
+			case CpIconv:
+				InLen = (int)strlen((char*)In);
+				break;
+			case CpUtf16:
+			case CpWindowsDb:
+				InLen = StringLen((uint16*)In) << 1;
+				break;
+			case CpUtf32:
+				InLen = StringLen((uint32_t*)In) << 2;
+				break;
+			default:
+				return GString();
+		}
+	}
+
+	switch (OutInfo->Type)
+	{
+		case CpMapped:
+		case CpUtf8:
+		case CpIconv:
+			break;
+		case CpUtf16:
+		case CpWindowsDb:
+		case CpUtf32:
+		default:
+			LgiAssert(!"GString doesn't >8bit char (yet).");
+			return GString();
+	}
+
+	if (!stricmp(InCp, OutCp))
+		return GString((char*)In, InLen);
+
+	GStringPipe b;
+	if (InInfo->Type == CpIconv ||
+		OutInfo->Type == CpIconv)
+	{
+		#ifndef LGI_STATIC
+		GFontSystem *Fs = GFontSystem::Inst();
+		if (Fs)
+		{
+			auto InCs = InInfo->GetIconvName();
+			auto OutCs = OutInfo->GetIconvName();
+			if (Fs->IconvConvert(OutCs, &b, InCs, (const char*&)In, InLen))
+				return b.NewGStr();
+
+			InCp = "iso-8859-1";
+		}
+		#else
+		LgiAssert(!"No inconv in static build");
+		#endif
+	}
+
+	char Buf[2 << 10];
+	while (InLen > 0)
+	{
+		ssize_t Bytes = LgiBufConvertCp(Buf, OutCp, sizeof(Buf), In, InCp, InLen);
+		if (Bytes > 0)
+			b.Write((uchar*)Buf, (int)Bytes);
+		else
+			break;
+	}
+
+	return b.NewGStr();
+}
+
 void *LgiNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t InLen)
 {
 	if (!OutCp || !In || !InCp)
@@ -1419,9 +1500,10 @@ const char *LgiDetectCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
 	return Status;
 }
 
-char *LgiToNativeCp(const char *In, ssize_t InLen)
+GString LToNativeCp(const char *In, ssize_t InLen)
 {
 	const char *Cp = LgiAnsiToLgiCp();
+	GString s;
 
 	#ifdef WIN32
 	GCharset *CpInfo = LgiGetCpInfo(Cp);
@@ -1436,31 +1518,31 @@ char *LgiToNativeCp(const char *In, ssize_t InLen)
 			if (InLen < 0)
 				InLen = strlen(In);
 
-			char16 *Wide = Utf8ToWide(In, InLen);
+			GAutoWString Wide(Utf8ToWide(In, InLen));
 			if (Wide)
 			{
 				size_t Converted;
-				size_t Len = wcstombs_s(&Converted, NULL, 0, Wide, 0);
-				char *Buf = Len > 0 ? new char[Len+1] : 0;
-				if (Buf)
+				auto Len = wcstombs_s(&Converted, NULL, 0, Wide, 0);
+				if (s.Length(Len))
 				{
-					wcstombs_s(&Converted, Buf, Len+1, Wide, Len+1);
-					Buf[Len] = 0;
+					wcstombs_s(&Converted, s.Get(), Len+1, Wide, Len+1);
+					s.Get()[Len] = 0;
 				}
-				DeleteArray(Wide);
-				return Buf;
 			}
 		}
-		return 0;
 	}
 	#endif
 
-	return (char*)LgiNewConvertCp(Cp, In, "utf-8", InLen);
+	if (!s)
+		s = LNewConvertCp(Cp, In, "utf-8", InLen);
+
+	return s;
 }
 
-char *LgiFromNativeCp(const char *In, ssize_t InLen)
+GString LFromNativeCp(const char *In, ssize_t InLen)
 {
 	const char *Cp = LgiAnsiToLgiCp();
+	GString s;
 
 	#ifdef WIN32
 	GCharset *CpInfo = LgiGetCpInfo(Cp);
@@ -1506,23 +1588,22 @@ char *LgiFromNativeCp(const char *In, ssize_t InLen)
 			size_t Len = mbstowcs_s(&Converted, NULL, 0, In, 0);
 			if (Len)
 			{
-				char16 *Buf = new char16[Len+1];
+				GAutoWString Buf(new char16[Len+1]);
 				if (Buf)
 				{
 					mbstowcs_s(&Converted, Buf, Len, In, Len);
 					Buf[Len] = 0;
-					char *Utf8 = WideToUtf8(Buf);
-					DeleteArray(Buf);
-					return Utf8;
+					s = Buf;
 				}
 			}
 		}
-
-		return 0;
 	}
 	#endif
 
-	return (char*)LgiNewConvertCp("utf-8", In, Cp, InLen);
+	if (!s)
+		s = LNewConvertCp("utf-8", In, Cp, InLen);
+
+	return s;
 }
 
 ///////////////////////////////////////////////////////////////////////////

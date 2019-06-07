@@ -7,7 +7,7 @@
 class GClipBoardPriv
 {
 public:
-	GAutoString Utf8;
+	GString Utf8;
 	GAutoWString Wide;
 };
 
@@ -317,7 +317,7 @@ GString::Array GClipBoard::Files()
 										char *n = (char*)p + p->pFiles;
 										while (n < End.c && *n)
 										{
-											GAutoString u(LgiFromNativeCp(n));
+											auto u = LFromNativeCp(n);
 											f.Add(u.Get());
 											n += Strlen(n) + 1;
 										}
@@ -468,7 +468,7 @@ bool GClipBoard::EnumFormats(GArray<FormatType> &Formats)
 
 bool GClipBoard::Empty()
 {
-	d->Utf8.Reset();
+	d->Utf8.Empty();
 	d->Wide.Reset();
 
 	return EmptyClipboard() != 0;
@@ -481,7 +481,7 @@ bool GClipBoard::Text(char *Str, bool AutoEmpty)
 
 	if (Str)
 	{
-		GAutoString Native(LgiToNativeCp(Str));
+		auto Native = LToNativeCp(Str);
 		if (Native)
 		{
 			Status = Binary(CF_TEXT, (uchar*)Native.Get(), strlen(Native)+1, AutoEmpty);
@@ -499,7 +499,7 @@ char *GClipBoard::Text()
 	GAutoPtr<uint8_t,true> Str;
 	if (Binary(CF_TEXT, Str, &Len))
 	{
-		d->Utf8.Reset(LgiFromNativeCp((char*)Str.Get()));
+		d->Utf8 = LFromNativeCp((char*)Str.Get());
 		return d->Utf8;
 	}
 
