@@ -264,7 +264,7 @@ int GLayout::OnEvent(GMessage *Msg)
         if (HScroll) HScroll->OnEvent(Msg);
     }
 	int Status = GView::OnEvent(Msg);
-	if (MsgCode(Msg) == M_CHANGE &&
+	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&
 		GetParent())
 	{

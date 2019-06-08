@@ -412,20 +412,15 @@ OSErr FinderLaunch(long nTargets, FSRef *targetList)
 	return err;
 }
 
-GAutoString LgiErrorCodeToString(uint32 ErrorCode)
+GString LErrorCodeToString(uint32 ErrorCode)
 {
-    const char *e = strerror(ErrorCode);
-	static char tmp[32];
+    GString e = strerror(ErrorCode);
 	if (!e)
-	{
-		sprintf_s(tmp, sizeof(tmp), "Error(%i)", ErrorCode);
-		e = tmp;
-	}
-	
-    return GAutoString(NewStr(e));
+		e.Printf("Error(%i)", ErrorCode);
+    return e;
 }
 
-bool LgiExecute(const char *File, const char *Args, const char *Dir, GAutoString *ErrorMsg)
+bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *ErrorMsg)
 {
 	bool Status = false;
 	

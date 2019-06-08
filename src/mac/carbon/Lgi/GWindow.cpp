@@ -1798,7 +1798,7 @@ void GWindow::PourAll()
 
 int GWindow::OnEvent(GMessage *m)
 {
-	switch (MsgCode(m))
+	switch (m->Msg())
 	{
 		case M_CLOSE:
 		{
