@@ -281,7 +281,7 @@ public:
 					)
 				)
 				{
-					j->pDC.Reset(LoadDC(p));
+					j->pDC.Reset(GdcD->Load(p));
 					return LoadImmediate;
 				}
 				else
@@ -604,7 +604,7 @@ int GBrowser::OnNotify(GViewI *c, int f)
 
 GMessage::Result GBrowser::OnEvent(GMessage *m)
 {
-	switch (MsgCode(m))
+	switch (m->Msg())
 	{
 		case M_LOADED:
 		{
@@ -622,7 +622,7 @@ GMessage::Result GBrowser::OnEvent(GMessage *m)
 		}
 		case M_BUSY:
 		{
-			d->Loading = MsgA(m) != 0;
+			d->Loading = m->A() != 0;
 			if (d->Loading)
 				SetCtrlName(IDC_REFRESH_STOP, "Stop");
 			else

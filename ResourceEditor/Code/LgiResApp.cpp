@@ -771,11 +771,11 @@ void FieldView::OnPosChange()
 
 GMessage::Result FieldView::OnEvent(GMessage *m)
 {
-	switch (MsgCode(m))
+	switch (m->Msg())
 	{
 		case M_OBJECT_CHANGED:
 		{
-			FieldSource *Src = (FieldSource*)MsgA(m);
+			FieldSource *Src = (FieldSource*)m->A();
 			if (Src == Source)
 			{
 				Fields.SetMode(FieldTree::ObjToUi);
@@ -1180,15 +1180,15 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 {
 	GMru::OnEvent(m);
 
-	switch (MsgCode(m))
+	switch (m->Msg())
 	{
 		case M_CHANGE:
 		{
-			return OnNotify((GViewI*) MsgA(m), MsgB(m));
+			return OnNotify((GViewI*) m->A(), m->B());
 		}
 		case M_DESCRIBE:
 		{
-			char *Text = (char*) MsgA(m);
+			char *Text = (char*) m->A();
 			if (Text)
 			{
 				SetStatusText(Text, STATUS_NORMAL);

@@ -263,7 +263,7 @@ public:
 	int Main()
 	{
 		// Load the file...
-		Img.Reset(LoadDC(File));
+		Img.Reset(GdcD->Load(File));
 		
 		if (!Owner->Handle())
 		{
@@ -373,11 +373,11 @@ public:
 	
 	GMessage::Param OnEvent(GMessage *Msg)
 	{
-		switch (MsgCode(Msg))
+		switch (Msg->Msg())
 		{
 			case M_LOAD:
 			{
-				ThreadLoader *t = (ThreadLoader*) MsgB(Msg);
+				ThreadLoader *t = (ThreadLoader*) Msg->B();
 				if (t)
 				{
 					if (t->Param == 0)
@@ -803,8 +803,8 @@ struct CompareThread : public LThread
 			{
 				char *left = i->GetText(0);
 				char *right = i->GetText(1);
-				GAutoPtr<GSurface> left_img(LoadDC(left));
-				GAutoPtr<GSurface> right_img(LoadDC(right));
+				GAutoPtr<GSurface> left_img(GdcD->Load(left));
+				GAutoPtr<GSurface> right_img(GdcD->Load(right));
 				if (left_img && right_img)
 				{
 					if (left_img->X() == right_img->X() &&

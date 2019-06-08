@@ -1129,7 +1129,7 @@ GSurface *GetHttpImage(char *Uri)
 						c.Copy(&Data, &f);
 						f.Close();
 
-						if ((Img = LoadDC(n)))
+						if ((Img = GdcD->Load(n)))
 						{
 							// LgiTrace("Read uri '%s'\n", __FILE__, __LINE__, Uri);
 						}

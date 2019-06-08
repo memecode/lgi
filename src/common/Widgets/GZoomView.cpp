@@ -1664,7 +1664,7 @@ void GZoomView::OnPulse()
 
 GMessage::Param GZoomView::OnEvent(GMessage *m)
 {
-	switch (MsgCode(m))
+	switch (m->Msg())
 	{
 		case M_RENDER_FINISHED:
 		{
