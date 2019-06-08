@@ -236,6 +236,14 @@ public:
 			*this = utf;
 	}
 
+	GNativeString(const GNativeString &ns)
+	{
+		if (ns.n)
+			n = ns.n;
+		if (ns.w)
+			w.Reset(NewStrW(ns.w));
+	}
+
 	void Empty()
 	{
 		n.Empty();

@@ -342,25 +342,15 @@ int LgiRand(int Limit)
 	return rand() % Limit;
 }
 
-GAutoString LgiErrorCodeToString(uint32_t ErrorCode)
+GString LErrorCodeToString(uint32_t ErrorCode)
 {
-	GAutoString e;
-	char *s = strerror(ErrorCode);
-	if (s)
-	{
-		e.Reset(NewStr(s));
-	}
-	else
-	{
-		char buf[256];
-		sprintf_s(buf, sizeof(buf), "UnknownError(%i)", ErrorCode);
-		e.Reset(NewStr(buf));
-	}
-	
+	GString e = strerror(ErrorCode);
+	if (!e)
+		e.Printf("UnknownError(%i)", ErrorCode);
 	return e;
 }
 
-bool LgiExecute(const char *File, const char *Args, const char *Dir, GAutoString *Error)
+bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Error)
 {
 	if (File)
 	{
@@ -440,11 +430,7 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GAutoString
 				}
 			}
 			else if (Error)
-			{
-				char m[MAX_PATH];
-				sprintf_s(m, sizeof(m), "'%s' doesn't exist.\n", File);
-				Error->Reset(NewStr(m));
-			}
+				Error->Printf("'%s' doesn't exist.\n", File);
 		}
 
 		if (App[0])
@@ -502,7 +488,7 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GAutoString
 			if (e = system(a))
 			{
 				if (Error)
-					*Error = LgiErrorCodeToString(errno);
+					*Error = LErrorCodeToString(errno);
 				return false;
 			}
 
