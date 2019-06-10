@@ -265,6 +265,7 @@ GView::~GView()
 	}
 
 	_Delete();
+	// printf("~%s\n", d->ClassName.Get());
 	DeleteObj(d);
 }
 
@@ -2448,6 +2449,8 @@ void GView::Debug()
     	else LgiTrace("%s:%i - Not a widget.\n", _FL);
 		#endif
     }
+    #elif defined COCOA
+    d->ClassName = GetClass();
 	#endif
 }
 #endif

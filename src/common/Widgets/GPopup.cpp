@@ -873,11 +873,6 @@ void GPopup::Visible(bool i)
 	
 		#elif defined(CARBON)
 	
-			if (!i)
-			{
-				int asd=0;
-			}
-	
 			SetAlwaysOnTop(true);
 			GWindow::Visible(i);
 	

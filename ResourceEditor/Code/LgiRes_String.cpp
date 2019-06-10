@@ -421,17 +421,6 @@ bool ResString::Read(GXmlTag *t, SerialiseContext &Ctx)
 		if (v->GetName())
 		{
 			GLanguage *Lang = GFindLang(v->GetName());
-			if (!Lang &&
-				v->GetName()[0] == 'T' &&
-				v->GetName()[1] == 'e' &&
-				v->GetName()[2] == 'x' &&
-				v->GetName()[3] == 't' &&
-				v->GetName()[4] == '(')
-			{
-				Lang = GFindOldLang(atoi(v->GetName()+5));
-				LgiAssert(Lang); // This really should be a valid string
-			}
-
 			if (Lang)
 			{
 				if (Ctx.Format == Lr8File)
@@ -1665,16 +1654,16 @@ void ResStringUi::OnCreate()
 
 GMessage::Result ResStringUi::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case M_COMMAND:
 		{
-			StringGrp->OnCommand(MsgA(Msg)&0xffff, MsgA(Msg)>>16, (OsView) MsgB(Msg));
+			StringGrp->OnCommand(Msg->A()&0xffff, Msg->A()>>16, (OsView) Msg->B());
 			break;
 		}
 		case M_DESCRIBE:
 		{
-			char *Text = (char*) MsgB(Msg);
+			char *Text = (char*) Msg->B();
 			if (Text)
 			{
 				StatusInfo->Name(Text);

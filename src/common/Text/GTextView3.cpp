@@ -1571,7 +1571,13 @@ bool GTextView3::Insert(size_t At, const char16 *Data, ssize_t Len)
 				Prof.Add("PourText");
 				PourText(At, Len);
 				Prof.Add("PourStyle");
+				auto Start = LgiCurrentTime();
 				PourStyle(At, Len);
+				auto End = LgiCurrentTime();
+				if (End - Start > 1000)
+				{
+					PourStyle(At, Len);
+				}
 			}
 			SendNotify(GNotifyDocChanged);
 
@@ -2496,7 +2502,7 @@ bool GTextView3::Save(const char *Name, const char *CharSet)
 	else
 	{
 		int Err = f.GetError();
-		GAutoString sErr = LgiErrorCodeToString(Err);		
+		GString sErr = LErrorCodeToString(Err);		
 		d->LastError.Printf("Failed to open '%s' for writing: %i - %s\n", Name, Err, sErr.Get());
 	}
 
@@ -5167,7 +5173,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 
 GMessage::Result GTextView3::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case M_TEXT_UPDATE_NAME:
 		{
@@ -5214,8 +5220,8 @@ GMessage::Result GTextView3::OnEvent(GMessage *Msg)
 		}
 		case WM_GETTEXT:
 		{
-			int Chars = (int)MsgA(Msg);
-			char *Out = (char*)MsgB(Msg);
+			int Chars = (int)Msg->A();
+			char *Out = (char*)Msg->B();
 			if (Out)
 			{
 				char *In = (char*)LgiNewConvertCp(LgiAnsiToLgiCp(), NameW(), LGI_WideCharset, Chars);

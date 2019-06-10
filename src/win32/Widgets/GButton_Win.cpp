@@ -189,7 +189,7 @@ int GButton::SysOnNotify(int Msg, int Code)
 
 GMessage::Result GButton::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case WM_CREATE:
 		{
@@ -199,7 +199,7 @@ GMessage::Result GButton::OnEvent(GMessage *Msg)
 		}
 		case WM_GETDLGCODE:
 		{
-			return CallWindowProc(d->ButtonClassProc, Handle(), MsgCode(Msg), MsgA(Msg), MsgB(Msg)) |
+			return CallWindowProc(d->ButtonClassProc, Handle(), Msg->Msg(), Msg->A(), Msg->B()) |
 				DLGC_WANTTAB;
 		}
 		case WM_SYSKEYUP:

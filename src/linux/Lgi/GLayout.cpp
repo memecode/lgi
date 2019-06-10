@@ -274,7 +274,7 @@ GRect &GLayout::GetClient(bool ClientSpace)
 GMessage::Param GLayout::OnEvent(GMessage *Msg)
 {
 	#ifdef M_SET_SCROLL
-	if (MsgCode(Msg) == M_SET_SCROLL)
+	if (Msg->Msg() == M_SET_SCROLL)
 	{
 		_SetScrollBars(Msg->A(), Msg->B());
 		
@@ -289,7 +289,7 @@ GMessage::Param GLayout::OnEvent(GMessage *Msg)
 	if (VScroll) VScroll->OnEvent(Msg);
 	if (HScroll) HScroll->OnEvent(Msg);
 	int Status = GView::OnEvent(Msg);
-	if (MsgCode(Msg) == M_CHANGE &&
+	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&
 		GetParent())
 	{

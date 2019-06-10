@@ -3438,6 +3438,10 @@ void ResDialog::DrawSelection(GSurface *pDC)
 void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 {
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
+	GAutoPtr<GSurface> ScreenDC;
+	if (!pDC)
+		ScreenDC.Reset(pDC = new GScreenDC(Handle()));
+
 	if (Ctrl)
 	{
 		GRect c = Ctrl->View()->GetPos();
@@ -4287,16 +4291,16 @@ void ResDialogUi::SelectTool(int i)
 
 GMessage::Result ResDialogUi::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case M_COMMAND:
 		{
-			Dialog->OnCommand(MsgA(Msg)&0xffff, MsgA(Msg)>>16, (OsView) MsgB(Msg));
+			Dialog->OnCommand(Msg->A()&0xffff, Msg->A()>>16, (OsView) Msg->B());
 			break;
 		}
 		case M_DESCRIBE:
 		{
-			char *Text = (char*) MsgB(Msg);
+			char *Text = (char*) Msg->B();
 			if (Text)
 			{
 				StatusInfo->Name(Text);

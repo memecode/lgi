@@ -1483,7 +1483,6 @@ char *GVariant::CastString()
 		}
 		default:
 		{
-			int asd=0;
 			break;
 		}
 	}

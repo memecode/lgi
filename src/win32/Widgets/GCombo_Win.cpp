@@ -374,7 +374,7 @@ int GCombo::SysOnNotify(int Msg, int Code)
 
 GMessage::Result GCombo::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case WM_SYSKEYUP:
 		case WM_SYSKEYDOWN:
@@ -417,7 +417,7 @@ GMessage::Result GCombo::OnEvent(GMessage *Msg)
 
 	GMessage::Result Status = GControl::OnEvent(Msg);
 	
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case WM_PAINT:
 		{

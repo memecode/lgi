@@ -2000,6 +2000,8 @@ ResObjectImpl::SStatus ResListView::Res_Read(GXmlTag *t, ResReadCtx &Ctx)
 
 	if (!Object->GetObjectName() || stricmp(t->GetTag(), Object->GetObjectName()) != 0)
 	{
+		auto tag = t->GetTag();
+		auto obj = Object->GetObjectName();
 		LgiAssert(0);
 		return SError;
 	}

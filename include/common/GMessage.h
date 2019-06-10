@@ -256,11 +256,6 @@ public:
 	bool Send(class GViewI *View);
 };
 
-// These are deprecated.
-#define MsgCode(msg)					((msg)->Msg())
-#define MsgA(msg)						((msg)->A())
-#define MsgB(msg)						((msg)->B())
-
 #ifdef LINUX
 extern GMessage CreateMsg(int m, int a = 0, int b = 0);
 #else

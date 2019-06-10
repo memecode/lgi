@@ -2643,7 +2643,7 @@ IdeProject *AppWnd::OpenProject(char *FileName, IdeProject *ParentProj, bool Cre
 
 GMessage::Result AppWnd::OnEvent(GMessage *m)
 {
-	switch (MsgCode(m))
+	switch (m->Msg())
 	{
 		case M_START_BUILD:
 		{
@@ -2665,7 +2665,7 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 		}
 		case M_BUILD_ERR:
 		{
-			char *Msg = (char*)MsgB(m);
+			char *Msg = (char*)m->B();
 			if (Msg)
 			{
 				d->Output->Txt[AppWnd::BuildTab]->Print("Build Error: %s\n", Msg);
@@ -2675,8 +2675,8 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 		}
 		case M_APPEND_TEXT:
 		{
-			char *Text = (char*) MsgA(m);
-			Channels Ch = (Channels) MsgB(m);
+			char *Text = (char*) m->A();
+			Channels Ch = (Channels) m->B();
 			AppendOutput(Text, Ch);
 			DeleteArray(Text);
 			break;

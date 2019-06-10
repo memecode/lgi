@@ -177,9 +177,9 @@ public:
 
 	GMessage::Result OnEvent(GMessage *m)
 	{
-		if (MsgCode(m) == M_FTP_CMD)
+		if (m->Msg() == M_FTP_CMD)
 		{
-			FtpCmd *c = (FtpCmd*) MsgA(m);
+			FtpCmd *c = (FtpCmd*) m->A();
 			c->Callback->OnCmdComplete(c);
 			DeleteObj(c);
 		}

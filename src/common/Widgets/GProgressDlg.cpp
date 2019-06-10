@@ -481,7 +481,7 @@ int GProgressDlg::OnNotify(GViewI *Ctrl, int Flags)
 
 GMessage::Result GProgressDlg::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		#ifdef WIN32
 		case WM_CLOSE:

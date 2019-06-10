@@ -319,18 +319,29 @@ public:
 	{
 	}
 
-	void SelectRevisions(GString::Array &Revs)
+	void SelectRevisions(GString::Array &Revs, const char *BranchHint = NULL)
 	{
 		VcCommit *Scroll = NULL;
-		for (auto it = begin(); it != end(); it++)
+		for (auto i: *this)
 		{
-			VcCommit *item = dynamic_cast<VcCommit*>(*it);
+			VcCommit *item = dynamic_cast<VcCommit*>(i);
 			if (item)
 			{
 				for (auto r: Revs)
 				{
 					if (item->IsRev(r))
 					{
+						auto b = item->GetBranch();
+						if (BranchHint)
+						{
+							if (!b || Stricmp(b, BranchHint))
+								continue;
+						}
+						else if (b)
+						{
+							continue;
+						}
+
 						if (!Scroll)
 							Scroll = item;
 						item->Select(true);
@@ -355,14 +366,16 @@ public:
 					GetSelection(Sel);
 					if (Sel.Length())
 					{
-						auto p = Sel[0]->GetParents();
+						auto first = Sel[0];
+						auto branch = first->GetBranch();
+						auto p = first->GetParents();
 						if (p->Length() == 0)
 							break;
 
 						for (auto c:Sel)
 							c->Select(false);
 
-						SelectRevisions(*p);
+						SelectRevisions(*p, branch);
 					}
 				}
 				return true;
@@ -400,7 +413,7 @@ public:
 						for (auto c:Sel)
 							c->Select(false);
 
-						SelectRevisions(n);
+						SelectRevisions(n, Sel[0]->GetBranch());
 					}
 				}
 				return true;

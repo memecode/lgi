@@ -57,7 +57,7 @@ int VcFile::Checked(int Set)
 
 void VcFile::SetDiff(GString diff)
 {
-	GAutoString n(LgiFromNativeCp(diff));
+	auto n = LFromNativeCp(diff);
 	Diff = n;
 	if (LListItem::Select())
 		d->Diff->Name(Diff);

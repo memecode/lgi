@@ -1561,6 +1561,10 @@ bool MailSmtp::Open(GSocketI *S,
 								sprintf_s(Buffer, sizeof(Buffer), "AUTH %s %s\r\n", Auth.Get(), s.Get());
 								VERIFY_RET_VAL(Write(0, true));
 								Authed = ReadReply("235");
+								if (!Authed)
+								{
+									Authenticator.Refresh();
+								}
 							}
 						}
 						else

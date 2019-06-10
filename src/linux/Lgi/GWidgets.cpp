@@ -371,10 +371,6 @@ extern GButton *FindDefault(GView *w);
 
 GMessage::Param GDialog::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
-	{
-	}
-
 	return GView::OnEvent(Msg);
 }
 
@@ -391,9 +387,6 @@ GControl::~GControl()
 
 GMessage::Param GControl::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
-	{
-	}
 	return 0;
 }
 

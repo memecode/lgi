@@ -82,10 +82,6 @@ LgiExtern GLanguage *GFindLang
 	const char *Name = NULL
 );
 
-/// Finds a language by it's OldId.
-/// \deprecated Use ::GFindLang in any new code.
-LgiExtern GLanguage *GFindOldLang(int OldId) DEPRECATED_POST;
-
 ////////////////////////////////////////////////////////////////////
 // All the names of the controls as strings
 LgiExtern char Res_Dialog[];

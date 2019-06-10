@@ -51,6 +51,8 @@ protected:
 	LDateTime Ts;
 	GString Msg;
 
+	void OnParse();
+
 public:
 	GString::Array Files;
 	GArray<VcEdge*> Edges;

@@ -90,8 +90,8 @@ public:
 	/// Gets the options file name
 	char *GetOptionsFileName();
 
-	/// Implement this to clear your docment from memory, i.e. "Close".
-	virtual void Empty() {}
+	/// Implement this to clear your document from memory, i.e. "Close".
+	virtual bool Empty() { return false; }
 	/// Implement this to read/write your application specific options.
 	virtual bool SerializeOptions(OptionsFmt *Options, bool Write) { return false; }
 	/// This is called when the dirty state changes.

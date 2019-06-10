@@ -1404,34 +1404,9 @@ void GFile::ChangeThread()
 {
 }
 
-/*
-int GFile::Print(char *Format, ...)
+void GFile::ChangeThread()
 {
-	int Chars = 0;
-
-	if (Format)
-	{
-		va_list Arg;
-
-		va_start(Arg, Format);
-		int Size = vsnprintf(0, 0, Format, Arg);
-		char *Buffer = new char[Size+1];
-		if (Buffer)
-		{
-			vsprintf(Buffer, Format, Arg);
-		}
-		va_end(Arg);
-
-		if (Size > 0)
-		{
-			Write(Buffer, Size);
-		}
-		DeleteArray(Buffer);
-	}
-
-	return Chars;
 }
-*/
 
 #define CHUNK		0xFFF0
 

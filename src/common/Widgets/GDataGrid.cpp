@@ -483,7 +483,7 @@ void GDataGrid::OnCreate()
 
 GMessage::Result GDataGrid::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case M_DELETE_LATER:
 		{

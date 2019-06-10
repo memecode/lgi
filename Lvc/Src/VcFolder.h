@@ -50,6 +50,18 @@ struct Result
 	GString Out;
 };
 
+struct VcBranch
+{
+	bool Default;
+	GColour Colour;
+
+	VcBranch(const char *n)
+	{
+		Default =	!stricmp(n, "default") ||
+					!stricmp(n, "trunk");
+	}
+};
+
 class VcFolder : public GTreeItem, public GCss
 {
 	friend class VcCommit;
@@ -141,7 +153,7 @@ class VcFolder : public GTreeItem, public GCss
 	GString Path, CurrentCommit, RepoUrl, VcCmd;
 	GArray<VcCommit*> Log;
 	GString CurrentBranch;
-	GString::Array Branches;
+	LHashTbl<ConstStrKey<char>,VcBranch*> Branches;
 	GAutoPtr<UncommitedItem> Uncommit;
 	GString Cache, NewRev;
 	bool CommitListDirty;
@@ -180,6 +192,7 @@ class VcFolder : public GTreeItem, public GCss
 	VcFile *FindFile(const char *Path);
 	void LinkParents();
 	GString CurrentRev();
+	GColour BranchColour(const char *Name);
 
 	bool ParseDiffs(GString s, GString Rev, bool IsWorking);
 	

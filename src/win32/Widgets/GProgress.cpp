@@ -91,7 +91,7 @@ bool GProgress::OnLayout(GViewLayoutInfo &Inf)
 
 GMessage::Result GProgress::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case WM_CREATE:
 		{

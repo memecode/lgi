@@ -50,7 +50,7 @@ int ScoreCmp(FindSymResult **a, FindSymResult **b)
 
 #define USE_HASH	1
 
-struct FindSymbolSystemPriv : public GEventTargetThread
+struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 {
 	struct FileSyms
 	{
@@ -119,6 +119,8 @@ struct FindSymbolSystemPriv : public GEventTargetThread
 
 	~FindSymbolSystemPriv()
 	{
+		Cancel(true);
+		
 		// Wait for the queue of messages to complete...
 		while (GetQueueSize())
 			LgiSleep(1);
@@ -266,6 +268,9 @@ struct FindSymbolSystemPriv : public GEventTargetThread
 
 	GMessage::Result OnEvent(GMessage *Msg)
 	{
+		if (IsCancelled())
+			return -1;
+			
 		switch (Msg->Msg())
 		{
 			case M_FIND_SYM_REQUEST:

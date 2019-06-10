@@ -359,7 +359,7 @@ GMessage::Result GScrollBar::OnEvent(GMessage *Msg)
 		}
 	}
 
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case WM_CREATE:
 		{
@@ -368,7 +368,7 @@ GMessage::Result GScrollBar::OnEvent(GMessage *Msg)
 		}
 		case M_SCROLL_BAR_CHANGED:
 		{
-            if (MsgB(Msg) == (GMessage::Param)this)
+            if (Msg->B() == (GMessage::Param)this)
 			{
 				Update();
 			}

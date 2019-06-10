@@ -1672,7 +1672,7 @@ int TableLayoutTest::OnNotify(GViewI *Ctrl, int Flags)
 
 GMessage::Param TableLayoutTest::OnEvent(GMessage *m)
 {
-    if (MsgCode(m) == M_FINISHED)
+    if (m->Msg() == M_FINISHED)
     {
         Tree->Invalidate();
         Msg->Name("Finished.");

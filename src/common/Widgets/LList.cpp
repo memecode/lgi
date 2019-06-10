@@ -26,7 +26,7 @@
 #define DRAG_THRESHOLD					4
 
 // Switches for various profiling code..
-#define LList_POUR_PROFILE				0
+#define LList_POUR_PROFILE				1
 #define LList_ONPAINT_PROFILE			0
 
 // Options
@@ -2293,7 +2293,7 @@ void LList::UpdateScrollBars()
 void LList::PourAll()
 {
 	#if LList_POUR_PROFILE
-	int Start = LgiCurrentTime();
+	GProfile Prof("PourAll()", 100);
 	#endif
 
 	// Layout all the elements
@@ -2324,6 +2324,9 @@ void LList::PourAll()
 		CompletelyVisible = 0;
 		bool SomeHidden = false;
 
+		#if LList_POUR_PROFILE
+		Prof.Add("List items");
+		#endif
 		ForAllItems(i)
 		{
 			if (n < FirstVisible || n > LastVisible)
@@ -2385,6 +2388,10 @@ void LList::PourAll()
 		FirstVisible = -1;
 		
 		int n = 0;
+		#if LList_POUR_PROFILE
+		Prof.Add("List cols");
+		#endif
+
 		ForAllItems(i)
 		{
 			GdcPt2 Info;
@@ -2463,10 +2470,6 @@ void LList::PourAll()
 		SetScrollBars(d->VisibleColumns < d->Columns, false);
 		UpdateScrollBars();
 	}
-	
-	#if LList_POUR_PROFILE
-	printf("LList::Pour() %i ms\n", LgiCurrentTime() - Start);
-	#endif
 }
 
 void LList::OnPaint(GSurface *pDC)

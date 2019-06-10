@@ -791,16 +791,16 @@ void ResMenuUi::OnCreate()
 
 GMessage::Result ResMenuUi::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case M_COMMAND:
 		{
-			Menu->OnCommand(MsgA(Msg)&0xffff, MsgA(Msg)>>16, (OsView) MsgB(Msg));
+			Menu->OnCommand(Msg->A()&0xffff, Msg->A()>>16, (OsView) Msg->B());
 			break;
 		}
 		case M_DESCRIBE:
 		{
-			char *Text = (char*) MsgB(Msg);
+			char *Text = (char*) Msg->B();
 			if (Text)
 			{
 				StatusInfo->Name(Text);

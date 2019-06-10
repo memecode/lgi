@@ -272,7 +272,7 @@ public:
 				else
 				{
 					// Local document?
-					if (Job->pDC.Reset(LoadDC(Job->Uri)))
+					if (Job->pDC.Reset(GdcD->Load(Job->Uri)))
 					{
 						GDocumentEnv *e = Job->Env;
 						if (e)
@@ -321,7 +321,7 @@ class AppWnd : public GWindow, public GDefaultDocumentEnv
 				}
 				else
 				{
-					j->pDC.Reset(LoadDC(p));
+					j->pDC.Reset(GdcD->Load(p));
 					if (j->pDC)
 						return LoadImmediate;
 				}

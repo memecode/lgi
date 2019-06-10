@@ -738,7 +738,7 @@ public:
 	ResString *GetStrFromRef(int Ref);
 	ResStringGroup *GetDialogSymbols();
 
-	void Empty();
+	bool Empty();
 	void OnObjChange(FieldSource *r);
 	void OnObjSelect(FieldSource *r);
 	void OnObjDelete(FieldSource *r);

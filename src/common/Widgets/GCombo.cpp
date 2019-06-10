@@ -215,10 +215,6 @@ int64 GCombo::Value()
 
 GMessage::Result GCombo::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
-	{
-	}
-
 	return GView::OnEvent(Msg);
 }
 

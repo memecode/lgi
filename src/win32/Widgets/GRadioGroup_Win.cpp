@@ -75,7 +75,7 @@ void GRadioGroup::OnAttach()
 
 GMessage::Result GRadioGroup::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case WM_ERASEBKGND:
 		{

@@ -798,15 +798,15 @@ int GView::OnEvent(GMessage *Msg)
 		case M_CHANGE:
 		{
 			GViewI *Ctrl;
-			if (GetViewById(MsgA(Msg), Ctrl))
+			if (GetViewById(Msg->A(), Ctrl))
 			{
-				return OnNotify(Ctrl, MsgB(Msg));
+				return OnNotify(Ctrl, Msg->B());
 			}
 			break;
 		}
 		case M_COMMAND:
 		{
-			return OnCommand(MsgA(Msg), 0, (OsView) MsgB(Msg));
+			return OnCommand(Msg->A(), 0, (OsView) Msg->B());
 		}
 		default:
 		{

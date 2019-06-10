@@ -673,8 +673,13 @@ void FilterFiles(GArray<ProjectNode*> &Perfect, GArray<ProjectNode*> &Nodes, GSt
 		InputLen = InputStr.Length();
 
 	GArray<ProjectNode*> Partial;
+	auto Start = LgiCurrentTime();
 	for (unsigned i=0; i<Nodes.Length(); i++)
 	{
+		if (i % 100 == 0 && LgiCurrentTime() - Start > 400)
+		{
+			break;
+		}
 		ProjectNode *Pn = Nodes[i];
 		char *Fn = Pn->GetFileName();
 		if (Fn)

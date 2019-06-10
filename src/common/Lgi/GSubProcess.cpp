@@ -694,7 +694,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		LgiTrace("%s:%i - Exe='%S'\n", _FL, WExe.Get());
 		#endif
 		
-		char16 WArg[1024];
+		char16 WArg[2048];
 		int Ch = 0;
 		for (unsigned i=0; i<Args.Length(); i++)
 		{
@@ -816,6 +816,27 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 	#endif
 	
 	return Status;
+}
+
+int32 GSubProcess::Communicate(GStreamI *Out, GStreamI *In, LCancel *Cancel)
+{
+	char Buf[1024];
+	ssize_t r;
+
+	LgiAssert(In == NULL); // Impl me.
+
+	while (IsRunning() && (!Cancel || !Cancel->IsCancelled()))
+	{
+		r = Read(Buf, sizeof(Buf));
+		if (r > 0 && Out)
+			Out->Write(Buf, r);
+	}
+
+	r = Read(Buf, sizeof(Buf));
+	if (r > 0 && Out)
+		Out->Write(Buf, r);
+
+	return GetExitValue();
 }
 
 int32 GSubProcess::Communicate(GStreamI *Out, GStreamI *In)

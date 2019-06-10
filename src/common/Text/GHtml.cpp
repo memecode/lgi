@@ -2586,6 +2586,8 @@ void GTag::LoadImage(const char *Uri)
 		j->UserData = this;
 		j->UserUid = Html->GetDocumentUid();
 
+		// LgiTrace("%s:%i - new job %p, %p\n", _FL, j, j->UserData);
+
 		GDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
 		if (Result == GDocumentEnv::LoadImmediate)
 		{
@@ -7114,7 +7116,7 @@ char *GHtml::Name()
 
 GMessage::Result GHtml::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case M_COPY:
 		{
@@ -7132,6 +7134,8 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 				{
 					GDocumentEnv::LoadJob *j = JobSem.Jobs[i];
 					int MyUid = GetDocumentUid();
+
+					// LgiTrace("%s:%i - Receive job %p, %p\n", _FL, j, j->UserData);
 					
 					if (j->UserUid == MyUid &&
 						j->UserData != NULL)
@@ -7188,6 +7192,10 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 										}
 									}
 								}
+							}
+							else if (r->TagId == TAG_IFRAME)
+							{
+								// Remote IFRAME loading not support for security reasons.
 							}
 							else LgiTrace("%s:%i - Unexpected tag '%s' for URI '%s'\n", _FL,
 								r->Tag.Get(),
@@ -8248,7 +8256,7 @@ void GHtml::OnMouseClick(GMouse &m)
 								F.Write(u, strlen(u));
 							F.Close();
 							
-							GAutoString Err;
+							GString Err;
 							if (!LgiExecute(Path, NULL, NULL, &Err))
 							{
 								LgiMsg(	this,

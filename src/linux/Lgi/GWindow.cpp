@@ -1317,7 +1317,7 @@ int GWindow::OnDrop(char *Format, ::GVariant *Data, GdcPt2 Pt, int KeyState)
 
 GMessage::Param GWindow::OnEvent(GMessage *m)
 {
-	switch (MsgCode(m))
+	switch (m->Msg())
 	{
 		case M_CLOSE:
 		{

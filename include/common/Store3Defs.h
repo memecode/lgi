@@ -304,6 +304,7 @@ enum Store3Fields
 	FIELD_WORK_WEBPAGE = 98,			// (char*)
 	FIELD_COMPANY = 99,					// (char*)
 
+	/* Deprecated
 	FIELD_CONTACT_CUST_FLD1 = 100,		// (char*)
 	FIELD_CONTACT_CUST_VAL1 = 101,		// (char*)
 	FIELD_CONTACT_CUST_FLD2 = 102,		// (char*)
@@ -312,7 +313,9 @@ enum Store3Fields
 	FIELD_CONTACT_CUST_VAL3 = 105,		// (char*)
 	FIELD_CONTACT_CUST_FLD4 = 106,		// (char*)
 	FIELD_CONTACT_CUST_VAL4 = 107,		// (char*)
+	*/
 	FIELD_CONTACT_IMAGE	= 108,			// (GSurface*)
+	FIELD_CONTACT_JSON = 109,			// (char*)
 
 	// Misc additional fields
 	FIELD_LABEL = 110,					// (char*) Mail label

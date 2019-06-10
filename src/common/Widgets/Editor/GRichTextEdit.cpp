@@ -2539,7 +2539,7 @@ void GRichTextEdit::OnPaint(GSurface *pDC)
 
 GMessage::Result GRichTextEdit::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case M_CUT:
 		{
@@ -2660,8 +2660,8 @@ GMessage::Result GRichTextEdit::OnEvent(GMessage *Msg)
 		}
 		case WM_GETTEXT:
 		{
-			int Chars = (int)MsgA(Msg);
-			char *Out = (char*)MsgB(Msg);
+			int Chars = (int)Msg->A();
+			char *Out = (char*)Msg->B();
 			if (Out)
 			{
 				char *In = (char*)LgiNewConvertCp(LgiAnsiToLgiCp(), NameW(), LGI_WideCharset, Chars);

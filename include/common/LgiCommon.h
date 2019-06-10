@@ -76,6 +76,25 @@ LgiExtern bool LIsValidEmail(GString Email);
 /// Finds an application to handle a protocol request (e.g. 'mailto', 'http' etc)
 LgiExtern GString LGetAppForProtocol(const char *Protocol);
 
+/// Converts a string to the native 8bit charset of the OS from utf-8
+/// \ingroup Text
+LgiExtern GString LToNativeCp(const char *In, ssize_t InLen = -1);
+
+/// Converts a string from the native 8bit charset of the OS to utf-8
+/// \ingroup Text
+LgiExtern GString LFromNativeCp(const char *In, ssize_t InLen = -1);
+
+LgiExtern GString LNewConvertCp
+(
+	/// Output charset
+	const char *OutCp,
+	/// Input buffer
+	const void *In,
+	/// The input data's charset
+	const char *InCp,
+	/// Bytes of valid data in the input
+	ssize_t InLen = -1
+);
 
 #ifdef __cplusplus
 extern "C"
@@ -134,14 +153,6 @@ LgiFunc char *LgiSeekUtf8
 /// Return true if the string is valid utf-8
 /// \ingroup Text
 LgiFunc bool LgiIsUtf8(const char *s, ssize_t len = -1);
-
-/// Converts a string to the native 8bit charset of the OS from utf-8
-/// \ingroup Text
-LgiFunc char *LgiToNativeCp(const char *In, ssize_t InLen = -1);
-
-/// Converts a string from the native 8bit charset of the OS to utf-8
-/// \ingroup Text
-LgiFunc char *LgiFromNativeCp(const char *In, ssize_t InLen = -1);
 
 /// Returns the next token in a string, leaving the argument pointing to the end of the token
 /// \ingroup Text
@@ -279,7 +290,7 @@ LgiFunc bool LgiExecute
 	/// The directory to run in
 	const char *Dir = 0,
 	/// An error message
-	GAutoString *ErrorMsg = NULL
+	GString *ErrorMsg = NULL
 );
 
 /// Initializes the random number generator
