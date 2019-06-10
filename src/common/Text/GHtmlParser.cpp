@@ -932,8 +932,10 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 							{
 								j->Uri.Reset(Src.ReleaseStr());
 								j->Env = View->GetEnv();
-								j->UserData = this;
+								j->UserData = Elem;
 								j->UserUid = View ? View->GetDocumentUid() : 0;
+
+								// LgiTrace("%s:%i - new job %p, %p\n", _FL, j, j->UserData);
 
 								GDocumentEnv::LoadType Result = View->GetEnv()->GetContent(j);
 								if (Result == GDocumentEnv::LoadImmediate)
