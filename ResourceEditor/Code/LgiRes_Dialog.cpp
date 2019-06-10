@@ -3434,6 +3434,10 @@ void ResDialog::DrawSelection(GSurface *pDC)
 
 void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 {
+	GAutoPtr<GSurface> ScreenDC;
+	if (!pDC)
+		ScreenDC.Reset(pDC = new GScreenDC(Handle()));
+
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children.First());
 	if (Ctrl)
 	{
