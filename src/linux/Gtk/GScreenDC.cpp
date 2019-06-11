@@ -309,25 +309,26 @@ GRect GScreenDC::ClipRgn(GRect *c)
 	if (c)
 	{
 		Clip = *c;
-		// LgiTrace("Setting clip %s client=%s\n", Clip.GetStr(), d->Client.GetStr());
 
         GdkRectangle r = {c->x1+d->Client.x1, c->y1+d->Client.y1, c->X(), c->Y()};
 		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
+			cairo_save(d->cr);
+			cairo_new_path(d->cr);
+			cairo_rectangle(d->cr, c->x1 + d->Client.x1, c->y1 + d->Client.y1, c->X(), c->Y());
+			cairo_clip(d->cr);
 		#else
-		gdk_gc_set_clip_rectangle(d->gc, &r);
+			gdk_gc_set_clip_rectangle(d->gc, &r);
 		#endif
 	}
 	else
 	{
 	    Clip.ZOff(-1, -1);
-		// LgiTrace("Removing clip\n");
 
         GdkRectangle r = {d->Client.x1, d->Client.y1, X(), Y()};
 		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
+			cairo_restore(d->cr);
 		#else
-		gdk_gc_set_clip_rectangle(d->gc, &r);
+			gdk_gc_set_clip_rectangle(d->gc, &r);
 		#endif
 	}
 

@@ -467,65 +467,33 @@ bool GWindow::Attach(GViewI *p)
 	ThreadCheck();
 	
 	if (!Wnd)
-	{
-		if ((Wnd = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL))))
-		{
-			g_object_set_data(G_OBJECT(Wnd), "GViewI", (GViewI*)this);
-		}
-	}
+		Wnd = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
+
 	if (Wnd)
 	{
 		_View = GTK_WIDGET(Wnd);
 		GView *i = this;
-		gtk_window_set_default_size(GTK_WINDOW(Wnd), Pos.X(), Pos.Y());
+		gtk_window_set_default_size(Wnd, Pos.X(), Pos.Y());
 		
-		d->DestroySig = g_signal_connect(
-							G_OBJECT(Wnd),
-							"destroy",
-							G_CALLBACK(GtkWindowDestroy),
-							this);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"delete_event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"button-press-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"button-release-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"motion-notify-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"focus-in-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"focus-out-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"window-state-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"property-notify-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"realize",
-							G_CALLBACK(GtkWindowRealize),
-							i);							
-		g_signal_connect(	G_OBJECT(Wnd),
-							"configure-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
+		auto Obj = G_OBJECT(Wnd);
+		g_object_set_data(Obj, "GViewI", (GViewI*)this);
 
-		gtk_widget_add_events(GTK_WIDGET(Wnd), GDK_POINTER_MOTION_MASK);
+		d->DestroySig = g_signal_connect(Obj, "destroy", G_CALLBACK(GtkWindowDestroy), this);
+		g_signal_connect(Obj, "realize",				G_CALLBACK(GtkWindowRealize), i);							
+		g_signal_connect(Obj, "delete_event",			G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "button-press-event",		G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "button-release-event",	G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "motion-notify-event",	G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "focus-in-event",			G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "focus-out-event",		G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "window-state-event",		G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "property-notify-event",	G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "configure-event",		G_CALLBACK(GtkViewCallback), i);
+
+		gtk_widget_add_events(	_View,
+								GDK_POINTER_MOTION_MASK|
+								GDK_BUTTON_PRESS_MASK|
+								GDK_BUTTON_RELEASE_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
 
 		if ((_Root = lgi_widget_new(this, true)))
