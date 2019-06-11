@@ -140,7 +140,7 @@ void GItemContainer::PaintColumnHeadings(GSurface *pDC)
 			else LgiAssert(0);
 		}
 
-		// Draw ending peice
+		// Draw ending piece
 		cr.x1 = cx;
 		cr.x2 = ColumnHeader.x2 + 2;
 
@@ -834,7 +834,13 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 		}
 		else if (ValidStr(d->cName) && d->Txt)
 		{
-			GFont *f = d->Parent ? d->Parent->GetFont() : SysFont;
+			GFont *f = d->Txt->GetFont();
+			if (!f)
+			{
+				LgiAssert(0);
+				return;
+			}
+
 			f->Transparent(!FillBackground);
 			f->Colour(LC_TEXT, LC_MED);
 			d->Txt->Draw(pDC, r.x1 + Off + 3, r.y1 + Off, &r);
