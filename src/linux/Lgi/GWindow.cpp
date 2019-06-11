@@ -314,7 +314,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		return FALSE;
 	}
 
-	#if 0
+	#if 1
 	if (event->type != 28)
 		printf("%s::OnGtkEvent(%i) name=%s\n", GetClass(), event->type, Name());
 	#endif
@@ -452,6 +452,11 @@ static
 void
 GtkWindowRealize(GtkWidget *widget, GWindow *This)
 {
+	#if 0
+	LgiTrace("GtkWindowRealize, This=%p(%s\"%s\")\n",
+		This, (NativeInt)This > 0x1000 ? This->GetClass() : 0, (NativeInt)This > 0x1000 ? This->Name() : 0);
+	#endif
+
 	This->OnGtkRealize();
 }
 
@@ -525,7 +530,28 @@ bool GWindow::Attach(GViewI *p)
 
 		if ((_Root = lgi_widget_new(this, true)))
         {
-            gtk_container_add(GTK_CONTAINER(Wnd), _Root);
+			if (GTK_IS_DIALOG(Wnd))
+			{
+				auto content = gtk_dialog_get_content_area(GTK_DIALOG(Wnd));
+				if (!content)
+				{
+					LgiAssert(!"No content area");
+					return false;
+				}
+				gtk_container_add(GTK_CONTAINER(content), _Root);
+			}
+			else
+			{
+				gtk_container_add(GTK_CONTAINER(Wnd), _Root);
+			}
+
+			auto p = gtk_widget_get_parent(_Root);
+			if (!p)
+			{
+				LgiAssert(!"Add failed");
+				return false;
+			}
+
             gtk_widget_show(_Root);
         }
 
@@ -1084,6 +1110,7 @@ void GWindow::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 
 void GWindow::OnCreate()
 {
+	AttachChildren();
 }
 
 void GWindow::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)

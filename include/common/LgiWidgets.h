@@ -268,7 +268,7 @@ public:
 	friend Gtk::gboolean GtkDialogDestroy(Gtk::GtkWidget *widget, GDialog *This);
     bool IsResizeable();
     void IsResizeable(bool r);
-	Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
+	// Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
 	bool SetupDialog(bool Modal);
 	#elif defined(LGI_CARBON)
 	void OnPaint(GSurface *pDC);

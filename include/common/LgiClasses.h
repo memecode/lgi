@@ -1304,7 +1304,7 @@ protected:
 
 public:
 	#ifdef __GTK_H__
-	GWindow(Gtk::GtkWidget *w = 0);
+	GWindow(Gtk::GtkWidget *w = NULL);
 	#else
 	GWindow();
 	#endif
