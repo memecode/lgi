@@ -839,23 +839,6 @@ int32 GSubProcess::Communicate(GStreamI *Out, GStreamI *In, LCancel *Cancel)
 	return GetExitValue();
 }
 
-int32 GSubProcess::Communicate(GStreamI *Out, GStreamI *In)
-{
-	char Buf[1024];
-	while (!IsRunning())
-	{
-		int r = Read(Buf, sizeof(Buf));
-		if (r > 0 && Out)
-			Out->Write(Buf, r);
-	}
-
-	int r = Read(Buf, sizeof(Buf));
-	if (r > 0 && Out)
-		Out->Write(Buf, r);
-
-	return GetExitValue();
-}
-
 int GSubProcess::Wait()
 {
 	int Status = -1;

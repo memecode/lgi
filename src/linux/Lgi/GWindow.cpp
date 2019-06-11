@@ -523,7 +523,7 @@ bool GWindow::Attach(GViewI *p)
 		gtk_widget_add_events(GTK_WIDGET(Wnd), GDK_POINTER_MOTION_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
 
-		if ((_Root = lgi_widget_new(this, Pos.X(), Pos.Y(), true)))
+		if ((_Root = lgi_widget_new(this, true)))
         {
             gtk_container_add(GTK_CONTAINER(Wnd), _Root);
             gtk_widget_show(_Root);
