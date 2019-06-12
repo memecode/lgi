@@ -132,7 +132,7 @@ public:
 		Shift((modifierKeys & Gtk::GDK_SHIFT_MASK) != 0);
 		Alt((modifierKeys & Gtk::GDK_MOD1_MASK) != 0);
 		Ctrl((modifierKeys & Gtk::GDK_CONTROL_MASK) != 0);
-		
+
 		#elif defined(MAC)
 
 			#if !defined COCOA

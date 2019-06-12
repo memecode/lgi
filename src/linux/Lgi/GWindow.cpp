@@ -355,7 +355,12 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			m.x = event->motion.x;
 			m.y = event->motion.y;
 			m.SetModifer(event->motion.state);
-			m.Down(false);
+
+			if (event->motion.state & GDK_BUTTON1_MASK) m.Left(true);
+			if (event->motion.state & GDK_BUTTON2_MASK) m.Middle(true);
+			if (event->motion.state & GDK_BUTTON3_MASK) m.Right(true);
+			m.Down(m.Left() || m.Middle() || m.Right());
+
 			m.IsMove(true);
 
 			if (!TranslateMouse(m))
