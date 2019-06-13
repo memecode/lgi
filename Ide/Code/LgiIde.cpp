@@ -913,18 +913,38 @@ public:
 			if (Size)
 			{
 				char *Utf = &Buf[Channel][0];
-				#ifdef _DEBUG
-				
+				GAutoPtr<char16, true> w;
+
 				if (!LgiIsUtf8(Utf, (ssize_t)Size))
 				{
 					LgiTrace("Ch %i not utf len=" LPrintfInt64 "\n", Channel, Size);
-					continue;
+					
+					// Clear out the invalid UTF?
+					uint8_t *u = (uint8_t*) Utf, *e = u + Size;
+					ssize_t len = Size;
+					GArray<wchar_t> out;
+					while (u < e)
+					{
+						int32 u32 = LgiUtf8To32(u, len);
+						if (u32)
+						{
+							out.Add(u32);
+						}
+						else
+						{
+							out.Add(0xFFFD);
+							u++;
+						}
+					}
+					out.Add(0);
+					w.Reset(out.Release());
 				}
-				#endif
-
-				RemoveAnsi(Buf[Channel]);
+				else
+				{
+					RemoveAnsi(Buf[Channel]);
+					w.Reset(Utf8ToWide(Utf, (ssize_t)Size));
+				}
 				
-				GAutoPtr<char16, true> w(Utf8ToWide(Utf, (ssize_t)Size));
 				char16 *OldText = Txt[Channel]->NameW();
 				size_t OldLen = 0;
 				if (OldText)

@@ -355,7 +355,7 @@ clean :
 cleanall :
 	rm -f $(BuildDir)/*.o $(Target)
 	@echo Cleaned $(BuildDir)
-	+make -C "../" -f "Makefile.linux" clean
+	+export Build=$(Build); make -C "../" -f "Makefile.linux" clean
 
 GDebugContext.o : ./Code/GDebugContext.cpp ../include/common/Lgi.h \
 	./Code/LgiIde.h \
