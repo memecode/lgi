@@ -1178,10 +1178,16 @@ lgi_widget_class_init(LgiWidgetClass *cls)
 	#endif
 	widget_class->realize					= lgi_widget_realize;
 	widget_class->size_allocate				= lgi_widget_size_allocate;
+	
+	/*
+	Seems if we don't set these, the GWindow::OnGtkEvent handler takes care of it.
+
 	widget_class->button_press_event		= lgi_widget_click;
 	widget_class->button_release_event		= lgi_widget_click;
 	widget_class->motion_notify_event		= lgi_widget_motion;
 	widget_class->scroll_event				= lgi_widget_scroll;
+	*/
+
 	widget_class->enter_notify_event		= lgi_widget_mouse_enter_leave;
 	widget_class->leave_notify_event		= lgi_widget_mouse_enter_leave;
 	widget_class->focus_in_event			= lgi_widget_focus_event;

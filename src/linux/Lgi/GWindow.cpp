@@ -333,6 +333,8 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			return true;
 		}
 		case GDK_BUTTON_PRESS:
+		case GDK_2BUTTON_PRESS:
+		case GDK_3BUTTON_PRESS:
 		case GDK_BUTTON_RELEASE:
 		{
 			GMouse m;
@@ -341,6 +343,12 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			m.SetButton(event->button.button);
 			m.SetModifer(event->button.state);
 			m.Down(event->type == GDK_BUTTON_PRESS);
+			if (event->type == GDK_2BUTTON_PRESS || event->type == GDK_3BUTTON_PRESS)
+			{
+				m.Double(true);
+				m.Down(true);
+			}
+			else m.Down(event->type == GDK_BUTTON_PRESS);
 
 			if (!TranslateMouse(m))
 				break;
