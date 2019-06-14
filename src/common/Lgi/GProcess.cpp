@@ -17,7 +17,7 @@
 #endif
 
 #include "Lgi.h"
-#include "GSubProcess.h"
+#include "GProcess.h"
 #include "GToken.h"
 
 #ifndef STILL_ACTIVE
@@ -90,11 +90,15 @@ bool LgiIsProcess(OsProcessId Pid)
 		NSRunningApplication* app = [NSRunningApplication runningApplicationWithProcessIdentifier: Pid];
 		return app != nil;
 	
-		#else
+		#elif LGI_CARBON
 	
         ProcessSerialNumber psn;
         OSStatus e = GetProcessForPID(Pid, &psn);
 		return e == 0;
+	
+		#else
+	
+		#warning FIXME
 	
 		#endif
 

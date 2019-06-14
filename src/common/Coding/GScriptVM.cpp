@@ -344,7 +344,7 @@ GExecutionStatus GExternFunc::Call(GScriptContext *Ctx, LScriptArguments &Args)
 	#elif defined(MAC)
 		#ifdef COCOA
 		#warning FIXME
-		#else
+		#elif LGI_32BIT
 		// 32bit only
 		void *b = Ptr.ni - 1;
         asm (	"movl %2, %%ecx;"
@@ -1841,7 +1841,7 @@ void GVmDebuggerWnd::UpdateVariables(LList *Lst, GVariant *Arr, ssize_t Len, cha
 		d->Vm->d->DumpVariant(&p, *v);
 		GAutoString a(p.NewStr());
 		char nm[32];
-		sprintf_s(nm, sizeof(nm), "%c%i", Prefix, i);
+		sprintf_s(nm, sizeof(nm), "%c" LPrintfSSizeT, Prefix, i);
 		
 		if (i >= (ssize_t)all.Length())
 		{
