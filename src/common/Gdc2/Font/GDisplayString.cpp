@@ -1941,6 +1941,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	
 	Gtk::cairo_save(cr);
 	
+	/* This is wrong, but shouldn't we already be clipped correctly?
 	GRect Client;
 	if (pDC->GetClient(&Client) && Client.Valid())
 	{
@@ -1952,6 +1953,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	{
 		Client.ZOff(-1, -1);
 	}
+	*/
 	
 	GColour b = Font->Back();
 

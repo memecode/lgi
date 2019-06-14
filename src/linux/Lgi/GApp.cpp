@@ -607,33 +607,8 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 			}
 			else
 			{
-				#if VIEW_REF_MODE
-				
-				GdkEvent *e = gdk_event_new(GDK_CLIENT_EVENT);
-				if (e)
-				{
-					e->client.data.l[0] = m.m;
-					e->client.data.l[1] = m.a;
-					e->client.data.l[2] = m.b;			
-					
-					auto Widget = m.v->Handle();
-					if (Widget)
-					{
-						gtk_propagate_event(Widget, e);
-						gdk_event_free(e);
-						
-						// printf("Unref %p %s.%p\n", Widget, m.v->GetClass(), m.v);
-						g_object_unref(Widget);
-					}
-				}
-				else printf("%s:%i - gdk_event_new failed.\n", _FL);
-				
-				#else
-
 				GMessage Msg(m.m, m.a, m.b);
 				m.v->OnEvent(&Msg);
-				
-				#endif
 			}
 		}
 	}

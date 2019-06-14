@@ -783,6 +783,14 @@ GMessage::Param GView::OnEvent(GMessage *Msg)
 	return 0;
 }
 
+GdcPt2 GtkGetOrigin(GWindow *w)
+{
+	GdkWindow *Wnd = gtk_widget_get_parent_window(w->Handle());
+	gint x = 0, y = 0;
+	gdk_window_get_origin(Wnd, &x, &y);
+	return GdcPt2(x, y);
+}
+
 void GView::PointToScreen(GdcPt2 &p)
 {
 	ThreadCheck();
@@ -800,18 +808,9 @@ void GView::PointToScreen(GdcPt2 &p)
 	
 	if (c && c->WindowHandle())
 	{
-	    gint x = 0, y = 0;
-		Gtk::GtkWindow *wnd = c->WindowHandle();
-		Gtk::GtkWidget *w = GTK_WIDGET(wnd);
-
-		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
-		#else
-		gdk_window_get_origin(w->window, &x, &y);
-		#endif
-		
-		p.x += x;
-		p.y += y;
+	    auto Origin = GtkGetOrigin(GetWindow());
+		p.x += Origin.x;
+		p.y += Origin.y;
 	}
 	else
 	{
@@ -825,14 +824,9 @@ void GView::PointToView(GdcPt2 &p)
 	
 	if (_View)
 	{
-		gint x = 0, y = 0;
-		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
-		#else
-		gdk_window_get_origin(GetWindow()->Handle()->window, &x, &y);
-		#endif
-		p.x -= x;
-		p.y -= y;
+	    auto Origin = GtkGetOrigin(GetWindow());
+		p.x -= Origin.x;
+		p.y -= Origin.y;
 		
 		GViewI *w = GetWindow();
 		for (GViewI *i = this; i && i != w; i = i->GetParent())
