@@ -370,6 +370,18 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			_Mouse(m, true);
 			break;
 		}
+		case GDK_SCROLL:
+		{
+			GMouse m;
+			m.x = event->scroll.x;
+			m.y = event->scroll.y;
+			if (!TranslateMouse(m))
+				break;
+
+			double Lines = event->scroll.direction == GDK_SCROLL_DOWN ? 3 : -3;
+			m.Target->OnMouseWheel(Lines);
+			break;
+		}
 		case GDK_CONFIGURE:
 		{
 			GdkEventConfigure *c = (GdkEventConfigure*)event;
@@ -489,6 +501,7 @@ bool GWindow::Attach(GViewI *p)
 		g_signal_connect(Obj, "button-press-event",		G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "button-release-event",	G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "motion-notify-event",	G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "scroll-event",			G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "focus-in-event",			G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "focus-out-event",		G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "window-state-event",		G_CALLBACK(GtkViewCallback), i);
@@ -498,7 +511,8 @@ bool GWindow::Attach(GViewI *p)
 		gtk_widget_add_events(	_View,
 								GDK_POINTER_MOTION_MASK|
 								GDK_BUTTON_PRESS_MASK|
-								GDK_BUTTON_RELEASE_MASK);
+								GDK_BUTTON_RELEASE_MASK|
+								GDK_SCROLL_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
 
 		if ((_Root = lgi_widget_new(this, true)))
