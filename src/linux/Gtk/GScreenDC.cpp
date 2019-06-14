@@ -313,9 +313,9 @@ GRect GScreenDC::ClipRgn(GRect *c)
         GdkRectangle r = {c->x1+d->Client.x1, c->y1+d->Client.y1, c->X(), c->Y()};
 		#if GTK_MAJOR_VERSION == 3
 			cairo_save(d->cr);
-			cairo_new_path(d->cr);
-			cairo_rectangle(d->cr, c->x1 + d->Client.x1, c->y1 + d->Client.y1, c->X(), c->Y());
-			cairo_clip(d->cr);
+			// cairo_new_path(d->cr);
+			// cairo_rectangle(d->cr, c->x1 + d->Client.x1, c->y1 + d->Client.y1, c->X(), c->Y());
+			// cairo_clip(d->cr);
 		#else
 			gdk_gc_set_clip_rectangle(d->gc, &r);
 		#endif

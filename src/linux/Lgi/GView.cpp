@@ -525,7 +525,7 @@ const char *EventTypeToString(int i)
 
 gboolean GtkViewCallback(GtkWidget *widget, GdkEvent *event, GView *This)
 {
-	#if 1
+	#if 0
 	LgiTrace("GtkViewCallback, Event=%s, This=%p(%s\"%s\")\n",
 		EventTypeToString(event->type),
 		This, (NativeInt)This > 0x1000 ? This->GetClass() : 0, (NativeInt)This > 0x1000 ? This->Name() : 0);

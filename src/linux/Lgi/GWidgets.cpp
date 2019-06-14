@@ -41,7 +41,7 @@ struct GDialogPriv
 GDialog::GDialog()
 	: ResObject(Res_Dialog)
 	#ifdef __GTK_H__
-	, GWindow(gtk_dialog_new())
+	// , GWindow(gtk_dialog_new())
 	#endif
 {
 	d = new GDialogPriv();
@@ -170,12 +170,7 @@ void GDialog::EndModal(int Code)
 	{
 		d->IsModal = false;
 		d->ModalStatus = Code;
-
-		#if 0
-		gtk_main_quit();
-		#else
 		LgiApp->Exit();
-		#endif
 	}
 	else
 	{

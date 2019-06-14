@@ -123,6 +123,40 @@ lgi_widget_remove(GtkContainer *wid, GtkWidget *child)
 		gtk_widget_queue_resize(GTK_WIDGET(wid));
 }
 
+GMouse _map_mouse_event(GView *v, int x, int y, bool Motion)
+{
+	GMouse m;
+
+	auto View = v->WindowFromPoint(x, y);
+	GdcPt2 Offset;
+	bool FoundParent = false;
+	for (auto i=View; i != NULL; i=i->GetParent())
+	{
+		if (i == v)
+		{
+			FoundParent = true;
+			break;
+		}
+
+		auto Pos = i->GetPos();
+		Offset.x += Pos.x1;
+		Offset.y += Pos.y1;
+	}
+
+    m.x = x - Offset.x;
+    m.y = y - Offset.y;
+    m.Target = View;
+
+	LgiTrace("Widget%s %i,%i on %s -> offset: %i,%i -> %i,%i on %s, FoundParent=%i\n",
+		Motion ? "Motion" : "Click",
+		x, y, v->GetClass(),
+		Offset.x, Offset.y,
+		m.x, m.y, m.Target->GetClass(),
+		FoundParent);
+
+	return m;
+}
+
 gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 {
     bool BtnDown =  ev->type == GDK_BUTTON_PRESS ||
@@ -133,10 +167,7 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
     GView *v = dynamic_cast<GView*>(p->target);
     if (v)
     {
-        GMouse m;
-        m.Target = v;
-        m.x = ev->x;
-        m.y = ev->y;
+        GMouse m = _map_mouse_event(v, ev->x, ev->y, false);
         m.Double(ev->type == GDK_2BUTTON_PRESS ||
                 ev->type == GDK_3BUTTON_PRESS);
         m.Down( ev->type == GDK_BUTTON_PRESS ||
@@ -149,7 +180,7 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
         m.Shift((ev->state & GDK_SHIFT_MASK) != 0);
         m.Ctrl((ev->state & GDK_CONTROL_MASK) != 0);
 
-		#if 0
+		#if 1
 		char s[256];
 		sprintf_s(s, sizeof(s), "%s::MouseClick", v->GetClass());
 		m.Trace(s);
@@ -166,22 +197,13 @@ gboolean lgi_widget_motion(GtkWidget *widget, GdkEventMotion *ev)
     GView *v = dynamic_cast<GView*>(p->target);
     if (v)
     {
-        GMouse m;
-        m.Target = v;
-        m.x = ev->x;
-        m.y = ev->y;
+        GMouse m = _map_mouse_event(v, ev->x, ev->y, true);
         m.Flags |= LGI_EF_MOVE;
         m.Down((ev->state & GDK_BUTTON_PRESS_MASK) != 0);
         m.Left(ev->state & GDK_BUTTON1_MASK);
         m.Middle(ev->state & GDK_BUTTON2_MASK);
         m.Right(ev->state & GDK_BUTTON3_MASK);
 
-		#if 0
-		char s[256];
-		sprintf_s(s, sizeof(s), "%s::MouseMove", v->GetClass());
-		m.Trace(s);
-		#endif
-        
         v->_Mouse(m, true);
     }
     
@@ -709,7 +731,7 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 		gtk_widget_set_allocation (widget, allocation);
 
 		#if 0
-		if (is_debug(w))
+		if (w->pour_largest)
 		{
 			LgiTrace("lgi_widget_size_allocate(%s) %i,%i-%i,%i\n",
 						w->target->GetClass(),

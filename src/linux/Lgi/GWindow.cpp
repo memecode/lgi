@@ -314,7 +314,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		return FALSE;
 	}
 
-	#if 1
+	#if 0
 	if (event->type != 28)
 		printf("%s::OnGtkEvent(%i) name=%s\n", GetClass(), event->type, Name());
 	#endif

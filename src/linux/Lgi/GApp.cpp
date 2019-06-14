@@ -255,6 +255,7 @@ public:
 	::GArray<GViewI*> DeleteLater;
 	GMouse LastMove;
 	GAutoString Name;
+	::GArray<Gtk::guint> IdleId;
 	
 	#if defined(LINUX)
 	/// Desktop info
@@ -285,6 +286,7 @@ public:
 		, MagicLock("MagicLock")
 		#endif
 	{
+		IdleId = 0;
 		CurEvent = 0;
 		GuiThread = LgiGetCurrentThread();
 		GuiThreadId = GetCurrentThreadId();
@@ -598,10 +600,10 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 		
 		for (auto m : q)
 		{
-			// printf("Process %p,%i,%i,%i\n", m.v, m.m, m.a, m.b);
+			// LgiTrace("Process %p,%i,%i,%i\n", m.v, m.m, m.a, m.b);
 			if (!GView::LockHandler(m.v, GView::OpExists))
 			{
-				// printf("%s:%i - Invalid view to post event to.\n", _FL);
+				// LgiTrace("%s:%i - Invalid view to post event to.\n", _FL);
 			}
 			else
 			{
@@ -666,10 +668,12 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 			#endif
 			
 			#if 1
-			Gtk::guint Id = Gtk::gdk_threads_add_idle_full(	G_PRIORITY_DEFAULT_IDLE,
-															IdleWrapper,
-															&idle,
-															NULL);
+			auto Id = Gtk::gdk_threads_add_idle_full(G_PRIORITY_DEFAULT_IDLE,
+													IdleWrapper,
+													&idle,
+													NULL);
+			if (Id)
+				d->IdleId.Add(Id);
 			#endif
 		}
 
@@ -713,6 +717,12 @@ void GApp::Exit(int Code)
 		GtkLock _Lock;
 		#endif
 		Gtk::gtk_main_quit();
+		if (d->IdleId.Length() > 0)
+		{
+			size_t Last = d->IdleId.Length() - 1;
+			g_source_remove(d->IdleId[Last]);
+			d->IdleId.Length(Last);
+		}
 	}
 }
 
