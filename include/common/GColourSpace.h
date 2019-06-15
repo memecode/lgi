@@ -418,8 +418,13 @@ LgiFunc GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits);
 	#define System24BitColourSpace CsRgb24
 	typedef GRgb24 System24BitPixel;
 
-	#define System32BitColourSpace CsRgba32
-	typedef GRgba32 System32BitPixel;
+	#ifdef __GTK_H__
+		#define System32BitColourSpace CsBgra32
+		typedef GBgra32 System32BitPixel;
+	#else
+		#define System32BitColourSpace CsRgba32
+		typedef GRgba32 System32BitPixel;
+	#endif
 
 #endif
 

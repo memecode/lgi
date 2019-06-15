@@ -306,7 +306,12 @@ bool GView::AddView(GViewI *v, int Where)
 
 bool GView::DelView(GViewI *v)
 {
-	return Children.Delete(v);
+	bool Has = Children.HasItem(v);
+	// LgiAssert(Has);
+	bool b = Children.Delete(v);
+	Has = Children.HasItem(v);
+	LgiAssert(!Has);
+	return b;
 }
 
 bool GView::HasView(GViewI *v)

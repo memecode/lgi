@@ -134,10 +134,12 @@ GWindow::~GWindow()
 	DeleteObj(_Lock);
 }
 
+/*
 static void PixbufDestroyNotify(guchar *pixels, GSurface *data)
 {
 	delete data;
 }
+*/
 
 bool GWindow::SetIcon(const char *FileName)
 {

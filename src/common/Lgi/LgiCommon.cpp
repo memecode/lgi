@@ -1651,12 +1651,17 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			else
 				LgiAssert(0);
 
-			#elif defined WIN32
+			#elif defined(WIN32)
 
-			// This should work but doesn't... *shrug*
-			// char *f = GetWin32Folder(CSIDL_BITBUCKET);
+			LgiAssert(0);
 
-			#else
+			#elif defined(MAC)
+
+			// Non carbon mac builds (e.g. GTK3)
+			struct passwd *pw = getpwuid(getuid());
+			if (!pw)
+				return GString();
+			Path.Printf("%s/.Trash", pw->pw_dir);
 
 			#endif
 			break;

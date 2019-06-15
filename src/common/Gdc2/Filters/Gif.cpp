@@ -152,6 +152,7 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	switch (pDC->GetColourSpace())
 	{
 	    case CsIndex8:
+	    case CsAlpha8:
 	    {
 	        memcpy((*pDC)[lines], pixels, pDC->X());
 	        break;

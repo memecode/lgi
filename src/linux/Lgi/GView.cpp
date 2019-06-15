@@ -785,7 +785,11 @@ GMessage::Param GView::OnEvent(GMessage *Msg)
 
 GdcPt2 GtkGetOrigin(GWindow *w)
 {
-	GdkWindow *Wnd = gtk_widget_get_parent_window(w->Handle());
+	auto Hnd = w->Handle();
+	LgiAssert(Hnd);
+	auto Wnd = gtk_widget_get_parent_window(Hnd);
+	LgiAssert(Wnd);
+	
 	gint x = 0, y = 0;
 	gdk_window_get_origin(Wnd, &x, &y);
 	return GdcPt2(x, y);
@@ -1024,7 +1028,7 @@ bool GView::Detach()
 			int Detached = 0;
 			GViewI *c, *prev = NULL;
 
-			while (c = Children[0])
+			while ((c = Children[0]))
 			{
 				LgiAssert(!prev || c != prev);
 				if (c->GetParent())
