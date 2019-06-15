@@ -608,8 +608,10 @@ void GScreenDC::FilledEllipse(double cx, double cy, double x, double y)
 void GScreenDC::Box(int x1, int y1, int x2, int y2)
 {
 	#if GTK_MAJOR_VERSION == 3
-	cairo_rectangle(d->cr, x1, y1, x2, y2);
-	cairo_rectangle(d->cr, x1+1, y1+1, x2-1, y2-1);
+	double w = x2 - x1 + 1;
+	double h = y2 - y1 + 1;
+	cairo_rectangle(d->cr, x1, y1, w, h);
+	cairo_rectangle(d->cr, x1+1, y1+1, w-2, h-2);
 	cairo_set_fill_rule(d->cr, CAIRO_FILL_RULE_EVEN_ODD);
 	cairo_fill(d->cr);
 	#else

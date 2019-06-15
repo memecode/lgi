@@ -787,12 +787,19 @@ GdcPt2 GtkGetOrigin(GWindow *w)
 {
 	auto Hnd = w->Handle();
 	LgiAssert(Hnd);
-	auto Wnd = gtk_widget_get_parent_window(Hnd);
-	LgiAssert(Wnd);
+	auto Wnd = gtk_widget_get_window(Hnd);
+	if (Wnd)
+	{
+		gint x = 0, y = 0;
+		gdk_window_get_origin(Wnd, &x, &y);
+		return GdcPt2(x, y);
+	}
+	else
+	{
+		LgiTrace("%s:%i - can't get Wnd for %s\n", _FL, G_OBJECT_TYPE_NAME(Hnd));
+	}
 	
-	gint x = 0, y = 0;
-	gdk_window_get_origin(Wnd, &x, &y);
-	return GdcPt2(x, y);
+	return GdcPt2();
 }
 
 void GView::PointToScreen(GdcPt2 &p)

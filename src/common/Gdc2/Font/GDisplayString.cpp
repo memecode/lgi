@@ -1592,7 +1592,7 @@ void GDisplayString::Draw(GSurface *pDC, int px, int py, GRect *r, bool Debug)
 		rc = *r;
 		rc.x1 <<= FShift;
 		rc.y1 <<= FShift;
-		#ifdef MAC
+		#if defined(MAC) && !defined(__GTK_H__)
 		rc.x2 <<= FShift;
 		rc.y2 <<= FShift;
 		#else
@@ -1937,7 +1937,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	}
 
 	int Ox = 0, Oy = 0;
-	// pDC->GetOrigin(Ox, Oy);
+	pDC->GetOrigin(Ox, Oy);
 	
 	Gtk::cairo_save(cr);
 	
@@ -1964,6 +1964,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 
 	if (!Font->Transparent() && frc)
 	{
+		#if 1 // Background fill
 		Gtk::cairo_new_path(cr);
 		Gtk::cairo_rectangle
 		(
@@ -1974,6 +1975,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 			(double)frc->Y() / FScale
 		);
 		Gtk::cairo_fill(cr);
+		#endif
 	}
 
 	double Dx = ((double)fx / FScale) - Ox;
