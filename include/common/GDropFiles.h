@@ -65,10 +65,8 @@ public:
 		
 			if (v.IsBinary())
 			{
-				GToken Uri(	(char*)v.Value.Binary.Data,
-							"\r\n,",
-							true,
-							v.Value.Binary.Length);
+				GString s((char*)v.Value.Binary.Data, v.Value.Binary.Length);
+				auto Uri = s.SplitDelimit("\r\n,");
 
 				for (int i=0; i<Uri.Length(); i++)
 				{
