@@ -306,7 +306,12 @@ bool GView::AddView(GViewI *v, int Where)
 
 bool GView::DelView(GViewI *v)
 {
-	return Children.Delete(v);
+	bool Has = Children.HasItem(v);
+	// LgiAssert(Has);
+	bool b = Children.Delete(v);
+	Has = Children.HasItem(v);
+	LgiAssert(!Has);
+	return b;
 }
 
 bool GView::HasView(GViewI *v)
@@ -2313,11 +2318,14 @@ void DumpGtk(Gtk::GtkWidget *w, Gtk::gpointer Depth = NULL)
 	gtk_widget_get_allocation(w, &a);
 	LgiTrace("%s%p(%s) = %i,%i-%i,%i\n", Sp, w, View?View->GetClass():G_OBJECT_TYPE_NAME(Obj), a.x, a.y, a.width, a.height);
 
-	auto *c = GTK_CONTAINER(w);
-	if (c)
+	if (GTK_IS_CONTAINER(w))
 	{
-		int Next = Depth ? *((int*)Depth)+1 : 1;
-		gtk_container_foreach(c, DumpGtk, &Next);
+		auto *c = GTK_CONTAINER(w);
+		if (c)
+		{
+			int Next = Depth ? *((int*)Depth)+1 : 1;
+			gtk_container_foreach(c, DumpGtk, &Next);
+		}
 	}
 }
 #endif

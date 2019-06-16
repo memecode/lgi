@@ -1186,6 +1186,24 @@ GFont *::GMenu::GetFont()
 	return _Font ? _Font : SysFont;
 }
 
+/*
+void
+GtkMenuShow(GtkWidget *widget,
+               GdkRectangle *alloc,
+               GWindow *w)
+{
+	
+	gtk_widget_set_allocation(widget, alloc);
+
+	GRect Cli = w->GetClient();
+	printf("$$$$$$$$$$$$$$$ GtkMenuShow %i,%i %s\n", alloc->width, alloc->height, Cli.GetStr());
+	if (alloc->height > 1)
+	{
+		w->PourAll();
+	}
+}
+*/
+
 bool ::GMenu::Attach(GViewI *p)
 {
 	if (!p)
@@ -1202,7 +1220,6 @@ bool ::GMenu::Attach(GViewI *p)
 	}
 		
 	Window = Wnd;
-	Gtk::GtkWidget *Root = NULL;
 	if (Wnd->_VBox)
 	{
 		LgiAssert(!"Already has a menu");
@@ -1211,19 +1228,21 @@ bool ::GMenu::Attach(GViewI *p)
 
 	
 	Gtk::GtkWidget *menubar = GtkCast(Info, gtk_widget, GtkWidget);
+	// gtk_widget_add_events(Wnd->Handle(), GDK_STRUCTURE_MASK);
+	// g_signal_connect(menubar, "size-allocate", G_CALLBACK(GtkMenuShow), Wnd);
 
-	Wnd->_VBox = Gtk::gtk_vbox_new(false, 0);
+	Wnd->_VBox = Gtk::gtk_box_new(Gtk::GTK_ORIENTATION_VERTICAL, 0);
 
 	Gtk::GtkBox *vbox = GtkCast(Wnd->_VBox, gtk_box, GtkBox);
 	Gtk::GtkContainer *wndcontainer = GtkCast(Wnd->Wnd, gtk_container, GtkContainer);
 
 	g_object_ref(Wnd->_Root);
+	
 	gtk_container_remove(wndcontainer, Wnd->_Root);
-
-	gtk_container_add(wndcontainer, Wnd->_VBox);
-
 	gtk_box_pack_start(vbox, menubar, false, false, 0);
 	gtk_box_pack_end(vbox, Wnd->_Root, true, true, 0);
+	gtk_container_add(wndcontainer, Wnd->_VBox);
+
 	g_object_unref(Wnd->_Root);
 
 	gtk_widget_show_all(GtkCast(Wnd->Wnd, gtk_widget, GtkWidget));

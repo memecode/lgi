@@ -1071,6 +1071,7 @@ public:
 			switch (Src->Cs)
 			{
 				case CsIndex8:
+				case CsAlpha8:
 				{
 					System24BitPixel c[256];
 					CreatePaletteLut(c, SPal);

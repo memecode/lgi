@@ -134,10 +134,12 @@ GWindow::~GWindow()
 	DeleteObj(_Lock);
 }
 
+/*
 static void PixbufDestroyNotify(guchar *pixels, GSurface *data)
 {
 	delete data;
 }
+*/
 
 bool GWindow::SetIcon(const char *FileName)
 {
@@ -352,7 +354,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 
 			if (!TranslateMouse(m))
 				break;
-			m.Trace(m.Target ? m.Target->GetClass() : "-none-");
+			// m.Trace(m.Target ? m.Target->GetClass() : "-none-");
 
 			_Mouse(m, false);
 			break;
@@ -485,6 +487,15 @@ GtkWindowRealize(GtkWidget *widget, GWindow *This)
 	This->OnGtkRealize();
 }
 
+static
+void
+GtkRootResize(GtkWidget *widget, GdkRectangle *alloc, GView *This)
+{
+	GWindow *w = This->GetWindow();
+	if (w)
+		w->PourAll();
+}
+
 bool GWindow::Attach(GViewI *p)
 {
 	bool Status = false;
@@ -520,11 +531,14 @@ bool GWindow::Attach(GViewI *p)
 								GDK_POINTER_MOTION_MASK|
 								GDK_BUTTON_PRESS_MASK|
 								GDK_BUTTON_RELEASE_MASK|
-								GDK_SCROLL_MASK);
+								GDK_SCROLL_MASK|
+								GDK_STRUCTURE_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
 
 		if ((_Root = lgi_widget_new(this, true)))
         {
+			g_signal_connect(_Root, "size-allocate", G_CALLBACK(GtkRootResize), i);
+
 			if (GTK_IS_DIALOG(Wnd))
 			{
 				auto content = gtk_dialog_get_content_area(GTK_DIALOG(Wnd));
@@ -958,18 +972,13 @@ struct CallbackParams
 
 void ClientCallback(GtkWidget *w, CallbackParams *p)
 {
-	/*
-	LgiTrace("%.*sCallback %s\n",
-		p->Depth * 2,
-		"                                         ", gtk_widget_get_name(w));
-	*/
-
 	const char *Name = gtk_widget_get_name(w);
 	if (Name && !_stricmp(Name, "GtkMenuBar"))
 	{
 		GtkAllocation alloc = {0};
 		gtk_widget_get_allocation(w, &alloc);
 		p->Menu.ZOff(alloc.width-1, alloc.height-1);
+		// LgiTrace("GtkMenuBar = %s\n", p->Menu.GetStr());
 	}
 	
 	if (!p->Menu.Valid())
@@ -1110,7 +1119,7 @@ void GWindow::OnCreate()
 
 void GWindow::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 {
-	GRect r = GetClient();
+	// GRect r = GetClient();
 	GView::_Paint(pDC, Offset, Update);
 }
 
@@ -1229,9 +1238,8 @@ void GWindow::PourAll()
 
 			if (v->Pour(Client))
 			{
-				GRect p = v->GetPos();
+				// GRect p = v->GetPos();
 				// LgiTrace("%s = %s\n", v->GetClass(), p.GetStr());
-
 				if (!v->Visible())
 					v->Visible(true);
 

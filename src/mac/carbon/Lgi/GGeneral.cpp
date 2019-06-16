@@ -419,7 +419,7 @@ OSErr FinderLaunch(long nTargets, FSRef *targetList)
 }
 #endif
 
-GString LErrorCodeToString(uint32 ErrorCode)
+GString LErrorCodeToString(uint32_t ErrorCode)
 {
     GString e = strerror(ErrorCode);
 	if (!e)

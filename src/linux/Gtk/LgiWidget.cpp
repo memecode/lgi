@@ -857,7 +857,11 @@ lgi_widget_realize(GtkWidget *widget)
 		}
 		else assert(0);
 
-		w->target->OnCreate();
+		auto gv = w->target->GetGView();
+		if (gv)
+			gv->OnGtkRealize();
+		else
+			w->target->OnCreate();
 
 	#else
 
@@ -955,7 +959,7 @@ lgi_widget_realize(GtkWidget *widget)
 			if (minimum_height)
 				*minimum_height = p->pour_largest ? 80 : p->target->Y();
 			if (natural_height)
-				*natural_height = p->target->Y();
+				*natural_height = p->pour_largest ? MAX(80, p->target->Y()) : p->target->Y();
 		}
 		else LgiAssert(0);
 	}
@@ -967,9 +971,9 @@ lgi_widget_realize(GtkWidget *widget)
 		if (p)
 		{
 			if (minimum_width)
-				*minimum_width = p->pour_largest ? 80 :p->target->X();
+				*minimum_width = p->pour_largest ? 80 : p->target->X();
 			if (natural_width)
-				*natural_width = p->target->X();
+				*natural_width = p->pour_largest ? MAX(80, p->target->X()) : p->target->X();
 		}
 		else LgiAssert(0);
 	}
@@ -1007,9 +1011,9 @@ lgi_widget_realize(GtkWidget *widget)
 			GtkAllocation a;
 			a.x = pp.x1 + cp.x1;
 			a.y = pp.y1 + cp.y1;
-			a.width = cp.X();
-			a.height = cp.Y();
-	    	gtk_widget_size_allocate(widget, &a);
+			a.width = MAX(cp.X(), 1);
+			a.height = MAX(cp.Y(), 1);
+    		gtk_widget_size_allocate(widget, &a);
 		}
 
 		if (is_debug(p))
@@ -1115,8 +1119,8 @@ lgi_widget_setpos(GtkWidget *widget, GRect rc)
 		GtkAllocation a;
 		a.x = pp.x1 + rc.x1;
 		a.y = pp.y1 + rc.y1;
-		a.width = rc.X();
-		a.height = rc.Y();
+		a.width = MAX(rc.X(), 1);
+		a.height = MAX(rc.Y(), 1);
 		gtk_widget_size_allocate(widget, &a);
 	}
 }

@@ -123,6 +123,10 @@
 		return Pt;
 	}
 
+#elif defined(__GTK_H__)
+
+	#include <pango/pangocairo.h>
+
 #elif USE_CORETEXT
 
 	// CTFontCreateUIFontForLanguage
@@ -1208,6 +1212,16 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 	
 	Destroy();
 	
+	#ifdef MAC
+	Gtk::PangoFontMap *fm = Gtk::pango_cairo_font_map_get_default();
+	if (fm)
+	{
+		using namespace Gtk;
+		auto cfm = PANGO_CAIRO_FONT_MAP(fm);
+		pango_cairo_font_map_set_resolution(cfm, 82.0);
+	}
+	#endif
+	
 	d->hFont = Gtk::pango_font_description_new();
 	if (!d->hFont)
 		printf("%s:%i - pango_font_description_new failed: Face='%s' Size=%i Bold=%i Italic=%i\n",
@@ -1219,7 +1233,8 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 	else
 	{
 		auto Sz = Size();
-		Gtk::pango_font_description_set_family(d->hFont, Face());
+		GString sFace = Face();
+		Gtk::pango_font_description_set_family(d->hFont, sFace);
 		if (Sz.Type == GCss::LenPt)
 			Gtk::pango_font_description_set_size(d->hFont, Sz.Value * PANGO_SCALE);
 		else if (Sz.Type == GCss::LenPx)

@@ -64,6 +64,7 @@ bool LgiFindBounds(GSurface *pDC, GRect *rc)
 	if (!pDC || ! rc)
 		return false;
 
+	auto Cs = pDC->GetColourSpace();
 	LgiAssert(pDC->GetColourSpace() == System32BitColourSpace);
 
 	// Move top border down to image
