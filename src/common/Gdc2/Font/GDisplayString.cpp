@@ -1938,11 +1938,16 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 
 	int Ox = 0, Oy = 0;
 	pDC->GetOrigin(Ox, Oy);
-	
+	GRect Client;
+	if (pDC->GetClient(&Client) && Client.Valid())
+	{
+		Ox += Client.x1;
+		Oy += Client.y1;
+	}
+
 	Gtk::cairo_save(cr);
 	
 	/* This is wrong, but shouldn't we already be clipped correctly?
-	GRect Client;
 	if (pDC->GetClient(&Client) && Client.Valid())
 	{
 		Gtk::cairo_rectangle(cr, Client.x1, Client.y1, Client.X(), Client.Y());

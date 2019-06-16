@@ -57,7 +57,7 @@ public:
 	GString GetErrorMsg();
 
 	/// Write the user selected printer to a string for storage
-	bool Serialize(char *&Str, bool Write);
+	bool Serialize(GString &Str, bool Write);
 };
 
 #endif
