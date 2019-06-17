@@ -84,7 +84,7 @@ LgiMenuItem *GSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Whe
 
 		Items.Insert(i, Where);
 
-		GtkWidget *item = GtkCast(i->Handle(), gtk_widget, GtkWidget);
+		GtkWidget *item = GTK_WIDGET(i->Handle());
 		LgiAssert(item);
 		if (item)
 		{
@@ -109,12 +109,12 @@ LgiMenuItem *GSubMenu::AppendSeparator(int Where)
 
 		Items.Insert(i, Where);
 
-		Gtk::GtkWidget *item = GtkCast(i->Handle(), gtk_widget, GtkWidget);
+		GtkWidget *item = GTK_WIDGET(i->Handle());
 		LgiAssert(item);
 		if (item)
 		{
-			Gtk::gtk_menu_shell_append(Info, item);
-			Gtk::gtk_widget_show(item);
+			gtk_menu_shell_append(Info, item);
+			gtk_widget_show(item);
 		}
 		
 		return i;
@@ -132,15 +132,15 @@ GSubMenu *GSubMenu::AppendSub(const char *Str, int Where)
 		i->Id(-1);
 		Items.Insert(i, Where);
 
-		Gtk::GtkWidget *item = GtkCast(i->Handle(), gtk_widget, GtkWidget);
+		GtkWidget *item = GTK_WIDGET(i->Handle());
 		LgiAssert(item);
 		if (item)
 		{
 			if (Where < 0)
-				Gtk::gtk_menu_shell_append(Info, item);
+				gtk_menu_shell_append(Info, item);
 			else
-				Gtk::gtk_menu_shell_insert(Info, item, Where);
-			Gtk::gtk_widget_show(item);
+				gtk_menu_shell_insert(Info, item, Where);
+			gtk_widget_show(item);
 		}
 
 		i->Child = new GSubMenu(Str);
@@ -150,12 +150,12 @@ GSubMenu *GSubMenu::AppendSub(const char *Str, int Where)
 			i->Child->Menu = Menu;
 			i->Child->Window = Window;
 			
-			Gtk::GtkWidget *sub = GtkCast(i->Child->Handle(), gtk_widget, GtkWidget);
+			GtkWidget *sub = GTK_WIDGET(i->Child->Handle());
 			LgiAssert(sub);
 			if (i->Handle() && sub)
 			{
-				Gtk::gtk_menu_item_set_submenu(i->Handle(), sub);
-				Gtk::gtk_widget_show(sub);
+				gtk_menu_item_set_submenu(i->Handle(), sub);
+				gtk_widget_show(sub);
 			}
 			else
 				LgiTrace("%s:%i Error: gtk_menu_item_set_submenu(%p,%p) failed\n", _FL, i->Handle(), sub);
@@ -436,7 +436,7 @@ LgiMenuItem::GMenuItem()
 	Parent = NULL;
 	InSetCheck = false;
 
-	Handle(GtkCast(Gtk::gtk_separator_menu_item_new(), gtk_menu_item, GtkMenuItem));
+	Handle(GTK_MENU_ITEM(gtk_separator_menu_item_new()));
 	
 	Position = -1;
 	
@@ -1186,24 +1186,6 @@ GFont *::GMenu::GetFont()
 	return _Font ? _Font : SysFont;
 }
 
-/*
-void
-GtkMenuShow(GtkWidget *widget,
-               GdkRectangle *alloc,
-               GWindow *w)
-{
-	
-	gtk_widget_set_allocation(widget, alloc);
-
-	GRect Cli = w->GetClient();
-	printf("$$$$$$$$$$$$$$$ GtkMenuShow %i,%i %s\n", alloc->width, alloc->height, Cli.GetStr());
-	if (alloc->height > 1)
-	{
-		w->PourAll();
-	}
-}
-*/
-
 bool ::GMenu::Attach(GViewI *p)
 {
 	if (!p)
@@ -1228,8 +1210,6 @@ bool ::GMenu::Attach(GViewI *p)
 
 	
 	Gtk::GtkWidget *menubar = GtkCast(Info, gtk_widget, GtkWidget);
-	// gtk_widget_add_events(Wnd->Handle(), GDK_STRUCTURE_MASK);
-	// g_signal_connect(menubar, "size-allocate", G_CALLBACK(GtkMenuShow), Wnd);
 
 	Wnd->_VBox = Gtk::gtk_box_new(Gtk::GTK_ORIENTATION_VERTICAL, 0);
 

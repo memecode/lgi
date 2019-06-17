@@ -288,6 +288,9 @@ GViewI *GWindow::WindowFromPoint(int x, int y, bool Debug)
 bool GWindow::TranslateMouse(GMouse &m)
 {
 	m.Target = WindowFromPoint(m.x, m.y, false);
+	if (!m.Target)
+		return false;
+
 	for (auto p = m.Target; p; p = p->GetParent())
 	{
 		if (p->Handle())
@@ -318,7 +321,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 
 	#if 0
 	if (event->type != 28)
-		printf("%s::OnGtkEvent(%i) name=%s\n", GetClass(), event->type, Name());
+		LgiTrace("%s::OnGtkEvent(%i) name=%s\n", GetClass(), event->type, Name());
 	#endif
 	switch (event->type)
 	{
@@ -334,6 +337,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			delete this;
 			return true;
 		}
+		#if 0
 		case GDK_BUTTON_PRESS:
 		case GDK_2BUTTON_PRESS:
 		case GDK_3BUTTON_PRESS:
@@ -353,7 +357,10 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			else m.Down(event->type == GDK_BUTTON_PRESS);
 
 			if (!TranslateMouse(m))
-				break;
+			{
+				LgiTrace("Can't translate click.\n");
+				return false;
+			}
 			// m.Trace(m.Target ? m.Target->GetClass() : "-none-");
 
 			_Mouse(m, false);
@@ -374,7 +381,10 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			m.IsMove(true);
 
 			if (!TranslateMouse(m))
-				break;
+			{
+				LgiTrace("Can't translate move.\n");
+				return false;
+			}
 			// m.Trace(m.Target ? m.Target->GetClass() : "-none-");
 
 			_Mouse(m, true);
@@ -392,6 +402,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			m.Target->OnMouseWheel(Lines);
 			break;
 		}
+		#endif
 		case GDK_CONFIGURE:
 		{
 			GdkEventConfigure *c = (GdkEventConfigure*)event;
@@ -460,7 +471,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		default:
 		{
 			printf("%s:%i - Unknown event %i\n", _FL, event->type);
-			break;
+			return false;
 		}
 	}
 	
@@ -517,10 +528,15 @@ bool GWindow::Attach(GViewI *p)
 		d->DestroySig = g_signal_connect(Obj, "destroy", G_CALLBACK(GtkWindowDestroy), this);
 		g_signal_connect(Obj, "realize",				G_CALLBACK(GtkWindowRealize), i);							
 		g_signal_connect(Obj, "delete_event",			G_CALLBACK(GtkViewCallback), i);
+
+		#if 0
 		g_signal_connect(Obj, "button-press-event",		G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "button-release-event",	G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "motion-notify-event",	G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "scroll-event",			G_CALLBACK(GtkViewCallback), i);
+		#endif
+
+		/*
 		g_signal_connect(Obj, "focus-in-event",			G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "focus-out-event",		G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "window-state-event",		G_CALLBACK(GtkViewCallback), i);
@@ -532,7 +548,7 @@ bool GWindow::Attach(GViewI *p)
 								GDK_BUTTON_PRESS_MASK|
 								GDK_BUTTON_RELEASE_MASK|
 								GDK_SCROLL_MASK|
-								GDK_STRUCTURE_MASK);
+								GDK_STRUCTURE_MASK);*/
 		gtk_window_set_title(Wnd, GBase::Name());
 
 		if ((_Root = lgi_widget_new(this, true)))

@@ -91,14 +91,14 @@ GtkWidget *lgi_widget_new(GViewI *target, bool pour_largest)
 		
 		g_object_set_data(G_OBJECT(p), "GViewI", target);
 
-        if (target->GetTabStop())
-        {
+		if (target->GetTabStop())
+		{
 			#if GtkVer(2, 18)
-            gtk_widget_set_can_focus(GTK_WIDGET(p), TRUE);
+			gtk_widget_set_can_focus(GTK_WIDGET(p), TRUE);
 			#else			
 			GTK_OBJECT_FLAGS(GTK_WIDGET(p)) |= GTK_CAN_FOCUS;
 			#endif
-        }
+		}
 	}	
 
 	return GTK_WIDGET(p);
@@ -138,20 +138,32 @@ GMouse _map_mouse_event(GView *v, int x, int y, bool Motion)
 			break;
 		}
 
-		auto Pos = i->GetPos();
+		auto h = i->Handle();
+		GRect Pos;
+		if (h)
+			Pos = GtkGetPos(i->Handle());
+		else
+			Pos = i->GetPos();
 		Offset.x += Pos.x1;
 		Offset.y += Pos.y1;
+		if (i)
+		{
+			Pos = i->GetClient(false);
+			Offset.x += Pos.x1;
+			Offset.y += Pos.y1;
+			break;
+		}
 	}
 
-    m.x = x - Offset.x;
-    m.y = y - Offset.y;
-    m.Target = View;
+	m.x = x - Offset.x;
+	m.y = y - Offset.y;
+	m.Target = View;
 
 	LgiTrace("Widget%s %i,%i on %s -> offset: %i,%i -> %i,%i on %s, FoundParent=%i\n",
 		Motion ? "Motion" : "Click",
-		x, y, v->GetClass(),
+		x, y, v?v->GetClass():"NULL",
 		Offset.x, Offset.y,
-		m.x, m.y, m.Target->GetClass(),
+		m.x, m.y, m.Target?m.Target->GetClass():"NULL",
 		FoundParent);
 
 	return m;
@@ -159,80 +171,93 @@ GMouse _map_mouse_event(GView *v, int x, int y, bool Motion)
 
 gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 {
-    bool BtnDown =  ev->type == GDK_BUTTON_PRESS ||
-                    ev->type == GDK_2BUTTON_PRESS ||
-                    ev->type == GDK_3BUTTON_PRESS;
-
+	bool BtnDown =  ev->type == GDK_BUTTON_PRESS ||
+					ev->type == GDK_2BUTTON_PRESS ||
+					ev->type == GDK_3BUTTON_PRESS;
 	LgiWidget *p = LGI_WIDGET(widget);
-    GView *v = dynamic_cast<GView*>(p->target);
-    if (v)
-    {
-        GMouse m = _map_mouse_event(v, ev->x, ev->y, false);
-        m.Double(ev->type == GDK_2BUTTON_PRESS ||
-                ev->type == GDK_3BUTTON_PRESS);
-        m.Down( ev->type == GDK_BUTTON_PRESS ||
-                ev->type == GDK_2BUTTON_PRESS ||
-                ev->type == GDK_3BUTTON_PRESS);
-        m.Left(ev->button == 1);
-        m.Middle(ev->button == 2);
-        m.Right(ev->button == 3);
-        m.Alt((ev->state & GDK_MOD1_MASK) != 0);
-        m.Shift((ev->state & GDK_SHIFT_MASK) != 0);
-        m.Ctrl((ev->state & GDK_CONTROL_MASK) != 0);
+	if (!p)
+		return false;
+	
+	GView *v = dynamic_cast<GView*>(p->target);
+	if (!v)
+		return false;
 
-		#if 1
-		char s[256];
-		sprintf_s(s, sizeof(s), "%s::MouseClick", v->GetClass());
-		m.Trace(s);
-		#endif
+	GMouse m = _map_mouse_event(v, ev->x, ev->y, false);
+	if (!m.Target)
+	{
+		v->GetWindow()->_Dump();
+		return false;
+	}
 
-        v->_Mouse(m, false);
-    }    
-    return TRUE;
+	m.Double(ev->type == GDK_2BUTTON_PRESS ||
+			ev->type == GDK_3BUTTON_PRESS);
+	m.Down( ev->type == GDK_BUTTON_PRESS ||
+			ev->type == GDK_2BUTTON_PRESS ||
+			ev->type == GDK_3BUTTON_PRESS);
+	m.Left(ev->button == 1);
+	m.Middle(ev->button == 2);
+	m.Right(ev->button == 3);
+	m.Alt((ev->state & GDK_MOD1_MASK) != 0);
+	m.Shift((ev->state & GDK_SHIFT_MASK) != 0);
+	m.Ctrl((ev->state & GDK_CONTROL_MASK) != 0);
+
+	#if 1
+	char s[256];
+	sprintf_s(s, sizeof(s), "%s::MouseClick", v->GetClass());
+	m.Trace(s);
+	#endif
+
+	v->_Mouse(m, false);
+	return true;
 }
 
 gboolean lgi_widget_motion(GtkWidget *widget, GdkEventMotion *ev)
 {
 	LgiWidget *p = LGI_WIDGET(widget);
-    GView *v = dynamic_cast<GView*>(p->target);
-    if (v)
-    {
-        GMouse m = _map_mouse_event(v, ev->x, ev->y, true);
-        m.Flags |= LGI_EF_MOVE;
-        m.Down((ev->state & GDK_BUTTON_PRESS_MASK) != 0);
-        m.Left(ev->state & GDK_BUTTON1_MASK);
-        m.Middle(ev->state & GDK_BUTTON2_MASK);
-        m.Right(ev->state & GDK_BUTTON3_MASK);
+	if (!p)
+		return false;
 
-        v->_Mouse(m, true);
-    }
-    
-    return TRUE;
+	GView *v = dynamic_cast<GView*>(p->target);
+	if (!v)
+		return false;
+
+	GMouse m = _map_mouse_event(v, ev->x, ev->y, true);
+	if (!m.Target)
+		return false;
+
+	m.Flags |= LGI_EF_MOVE;
+	m.Down((ev->state & GDK_BUTTON_PRESS_MASK) != 0);
+	m.Left(ev->state & GDK_BUTTON1_MASK);
+	m.Middle(ev->state & GDK_BUTTON2_MASK);
+	m.Right(ev->state & GDK_BUTTON3_MASK);
+
+	v->_Mouse(m, true);
+	return true;
 }
 
 static gboolean lgi_widget_scroll(GtkWidget *widget, GdkEventScroll *ev)
 {
 	LgiWidget *p = LGI_WIDGET(widget);
-    GView *v = dynamic_cast<GView*>(p->target);
-    if (v)
-    {
+	GView *v = dynamic_cast<GView*>(p->target);
+	if (v)
+	{
 		double Lines = ev->direction == GDK_SCROLL_DOWN ? 3 : -3;
 		// LgiTrace("%s::OnMouseWheel %g\n", v->GetClass(), Lines);
-        v->OnMouseWheel(Lines);
-    }    
+		v->OnMouseWheel(Lines);
+	}    
 	return TRUE;
 }
 
 static gboolean lgi_widget_mouse_enter_leave(GtkWidget *widget, GdkEventCrossing *ev)
 {
 	LgiWidget *p = LGI_WIDGET(widget);
-    GView *v = dynamic_cast<GView*>(p->target);
-    if (v)
-    {
-        GMouse m;
-        m.Target = v;
-        m.x = ev->x;
-        m.y = ev->y;
+	GView *v = dynamic_cast<GView*>(p->target);
+	if (v)
+	{
+		GMouse m;
+		m.Target = v;
+		m.x = ev->x;
+		m.y = ev->y;
 
 		if (ev->type == GDK_LEAVE_NOTIFY)
 		{
@@ -244,36 +269,36 @@ static gboolean lgi_widget_mouse_enter_leave(GtkWidget *widget, GdkEventCrossing
 			// LgiTrace("%s::OnMouseEnter %i,%i\n", v->GetClass(), m.x, m.y);
 			v->OnMouseEnter(m);
 		}
-    }    
+	}    
 	return TRUE;
 }
 
 static gboolean lgi_widget_focus_event(GtkWidget *wid, GdkEventFocus *e)
 {
 	LgiWidget *p = LGI_WIDGET(wid);
-    GView *v = dynamic_cast<GView*>(p->target);
-    if (v)
-        v->OnFocus(e->in);
-    else
+	GView *v = dynamic_cast<GView*>(p->target);
+	if (v)
+		v->OnFocus(e->in);
+	else
 		LgiAssert(0);
-    
+	
 	return TRUE;
 }
 
 void BuildTabStops(GViewI *v, ::GArray<GViewI*> &a)
 {
-    if (v->Enabled() &&
-        v->Visible() &&
-        v->GetTabStop())
-        a.Add(v);
-    
-    GAutoPtr<GViewIterator> it(v->IterateViews());
-    for (GViewI *c = it->First(); c; c = it->Next())
-    {
-        if (c->Enabled() &&
-            c->Visible())
-            BuildTabStops(c, a);
-    }
+	if (v->Enabled() &&
+		v->Visible() &&
+		v->GetTabStop())
+		a.Add(v);
+	
+	GAutoPtr<GViewIterator> it(v->IterateViews());
+	for (GViewI *c = it->First(); c; c = it->Next())
+	{
+		if (c->Enabled() &&
+			c->Visible())
+			BuildTabStops(c, a);
+	}
 }
 
 #if GTK_MAJOR_VERSION == 3
@@ -284,96 +309,96 @@ void BuildTabStops(GViewI *v, ::GArray<GViewI*> &a)
 
 static gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 {
-    #if 0
-    // This is useful for debugging...
-    if (e->keyval == GDK_Shift_L ||
-        e->keyval == GDK_Shift_R ||
-        e->keyval == GDK_Control_L ||
-        e->keyval == GDK_Control_R ||
-        e->keyval == GDK_Alt_L ||
-        e->keyval == GDK_Alt_R)
-    {
-        return TRUE;
-    }
-    #endif
+	#if 0
+	// This is useful for debugging...
+	if (e->keyval == GDK_Shift_L ||
+		e->keyval == GDK_Shift_R ||
+		e->keyval == GDK_Control_L ||
+		e->keyval == GDK_Control_R ||
+		e->keyval == GDK_Alt_L ||
+		e->keyval == GDK_Alt_R)
+	{
+		return TRUE;
+	}
+	#endif
 
 	LgiWidget *p = LGI_WIDGET(wid);
-    GView *v = dynamic_cast<GView*>(p->target);
-    if (!v)
-    	printf("%s:%i - No target??\n", _FL);
-    else
-    {
-        GKey k;
-        k.Down(e->type == GDK_KEY_PRESS);
-        k.c16 = k.vkey = e->keyval;
-        k.Shift((e->state & 1) != 0);
-        k.Ctrl((e->state & 4) != 0);
-        k.Alt((e->state & 8) != 0);
-        
-        // k.IsChar = !k.Ctrl() && (k.c16 >= ' ' && k.c16 <= 0x7f);
+	GView *v = dynamic_cast<GView*>(p->target);
+	if (!v)
+		printf("%s:%i - No target??\n", _FL);
+	else
+	{
+		GKey k;
+		k.Down(e->type == GDK_KEY_PRESS);
+		k.c16 = k.vkey = e->keyval;
+		k.Shift((e->state & 1) != 0);
+		k.Ctrl((e->state & 4) != 0);
+		k.Alt((e->state & 8) != 0);
+		
+		// k.IsChar = !k.Ctrl() && (k.c16 >= ' ' && k.c16 <= 0x7f);
 		k.IsChar = !k.Ctrl() &&
 					!k.Alt() && 
 					(k.c16 >= ' ') &&
 					(k.c16 >> 8 != 0xff);
-        if (e->keyval > 0xff && e->string != NULL)
-        {
-        	// Convert string to unicode char
-        	auto *i = e->string;
-        	ptrdiff_t len = strlen(i);
+		if (e->keyval > 0xff && e->string != NULL)
+		{
+			// Convert string to unicode char
+			auto *i = e->string;
+			ptrdiff_t len = strlen(i);
 			k.c16 = LgiUtf8To32((uint8_t *&) i, len);
-        }
-        
-        switch (k.vkey)
-        {
+		}
+		
+		switch (k.vkey)
+		{
 			case KEY(ISO_Left_Tab):
 			case KEY(Tab):
-            	k.IsChar = true;
-            	k.c16 = k.vkey = VK_TAB;
-            	break;
+				k.IsChar = true;
+				k.c16 = k.vkey = VK_TAB;
+				break;
 			case KEY(Return):
 			case KEY(KP_Enter):
-            	k.IsChar = true;
-            	k.c16 = k.vkey = VK_RETURN;
-            	break;
-            case KEY(BackSpace):
-            	k.c16 = k.vkey = VK_BACKSPACE;
-            	k.IsChar = !k.Ctrl() && !k.Alt();
-            	break;
-            case KEY(Left):
-            	k.vkey = k.c16 = VK_LEFT;
-            	break;
-            case KEY(Right):
-            	k.vkey = k.c16 = VK_RIGHT;
-            	break;
-            case KEY(Up):
-            	k.vkey = k.c16 = VK_UP;
-            	break;
-            case KEY(Down):
-            	k.vkey = k.c16 = VK_DOWN;
-            	break;
-            case KEY(Home):
-            	k.vkey = k.c16 = VK_HOME;
-            	break;
-            case KEY(End):
-            	k.vkey = k.c16 = VK_END;
-            	break;
-            
-            #define KeyPadMap(gdksym, ch, is) \
-            	case gdksym: k.c16 = ch; k.IsChar = is; break;
-            
-            KeyPadMap(KEY(KP_0), '0', true)
-            KeyPadMap(KEY(KP_1), '1', true)
-            KeyPadMap(KEY(KP_2), '2', true)
-            KeyPadMap(KEY(KP_3), '3', true)
-            KeyPadMap(KEY(KP_4), '4', true)
-            KeyPadMap(KEY(KP_5), '5', true)
-            KeyPadMap(KEY(KP_6), '6', true)
-            KeyPadMap(KEY(KP_7), '7', true)
-            KeyPadMap(KEY(KP_8), '8', true)
-            KeyPadMap(KEY(KP_9), '9', true)
+				k.IsChar = true;
+				k.c16 = k.vkey = VK_RETURN;
+				break;
+			case KEY(BackSpace):
+				k.c16 = k.vkey = VK_BACKSPACE;
+				k.IsChar = !k.Ctrl() && !k.Alt();
+				break;
+			case KEY(Left):
+				k.vkey = k.c16 = VK_LEFT;
+				break;
+			case KEY(Right):
+				k.vkey = k.c16 = VK_RIGHT;
+				break;
+			case KEY(Up):
+				k.vkey = k.c16 = VK_UP;
+				break;
+			case KEY(Down):
+				k.vkey = k.c16 = VK_DOWN;
+				break;
+			case KEY(Home):
+				k.vkey = k.c16 = VK_HOME;
+				break;
+			case KEY(End):
+				k.vkey = k.c16 = VK_END;
+				break;
+			
+			#define KeyPadMap(gdksym, ch, is) \
+				case gdksym: k.c16 = ch; k.IsChar = is; break;
+			
+			KeyPadMap(KEY(KP_0), '0', true)
+			KeyPadMap(KEY(KP_1), '1', true)
+			KeyPadMap(KEY(KP_2), '2', true)
+			KeyPadMap(KEY(KP_3), '3', true)
+			KeyPadMap(KEY(KP_4), '4', true)
+			KeyPadMap(KEY(KP_5), '5', true)
+			KeyPadMap(KEY(KP_6), '6', true)
+			KeyPadMap(KEY(KP_7), '7', true)
+			KeyPadMap(KEY(KP_8), '8', true)
+			KeyPadMap(KEY(KP_9), '9', true)
 
-            KeyPadMap(KEY(KP_Space), ' ', true)
-            KeyPadMap(KEY(KP_Tab), '\t', true)
+			KeyPadMap(KEY(KP_Space), ' ', true)
+			KeyPadMap(KEY(KP_Tab), '\t', true)
 			KeyPadMap(KEY(KP_F1), VK_F1, false)
 			KeyPadMap(KEY(KP_F2), VK_F2, false)
 			KeyPadMap(KEY(KP_F3), VK_F3, false)
@@ -396,40 +421,40 @@ static gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 			KeyPadMap(KEY(KP_Subtract), '-', true)
 			KeyPadMap(KEY(KP_Decimal), '.', true)
 			KeyPadMap(KEY(KP_Divide), '/', true)
-        }
-        
-        #if DEBUG_KEY_EVENT
-        k.Trace("lgi_widget_key_event");
-        #endif
+		}
+		
+		#if DEBUG_KEY_EVENT
+		k.Trace("lgi_widget_key_event");
+		#endif
 
-        GWindow *w = v->GetWindow();
-        if (w)
-        {
-            if (!w->HandleViewKey(v, k) &&
-                (k.vkey == VK_TAB || k.vkey == KEY(ISO_Left_Tab)) &&
-                k.Down())
-            {
-            	// Do tab between controls
-                ::GArray<GViewI*> a;
-                BuildTabStops(w, a);
-                int idx = a.IndexOf((GViewI*)v);
-                if (idx >= 0)
-                {
-                    idx += k.Shift() ? -1 : 1;
-                    int next_idx = idx == 0 ? a.Length() -1 : idx % a.Length();                    
-                    GViewI *next = a[next_idx];
-                    if (next)
-                    {
-                        // LgiTrace("Setting focus to %i of %i: %s, %s, %i\n", next_idx, a.Length(), next->GetClass(), next->GetPos().GetStr(), next->GetId());
-                        next->Focus(true);
-                    }
-                }
-            }
-        }
-        else v->OnKey(k);
-    }
-    
-    return true;
+		GWindow *w = v->GetWindow();
+		if (w)
+		{
+			if (!w->HandleViewKey(v, k) &&
+				(k.vkey == VK_TAB || k.vkey == KEY(ISO_Left_Tab)) &&
+				k.Down())
+			{
+				// Do tab between controls
+				::GArray<GViewI*> a;
+				BuildTabStops(w, a);
+				int idx = a.IndexOf((GViewI*)v);
+				if (idx >= 0)
+				{
+					idx += k.Shift() ? -1 : 1;
+					int next_idx = idx == 0 ? a.Length() -1 : idx % a.Length();                    
+					GViewI *next = a[next_idx];
+					if (next)
+					{
+						// LgiTrace("Setting focus to %i of %i: %s, %s, %i\n", next_idx, a.Length(), next->GetClass(), next->GetPos().GetStr(), next->GetId());
+						next->Focus(true);
+					}
+				}
+			}
+		}
+		else v->OnKey(k);
+	}
+	
+	return true;
 }
 
 static void
@@ -463,8 +488,8 @@ lgi_widget_drag_data_delete(GtkWidget	       *widget,
 
 static void
 lgi_widget_drag_leave(GtkWidget	       *widget,
-				    GdkDragContext     *context,
-				    guint               time)
+					GdkDragContext     *context,
+					guint               time)
 {
 	LgiWidget *v = LGI_WIDGET(widget);
 	if (!v || !v->target)
@@ -486,10 +511,10 @@ lgi_widget_drag_leave(GtkWidget	       *widget,
 
 static gboolean
 lgi_widget_drag_motion(GtkWidget	   *widget,
-				    GdkDragContext     *context,
-				    gint                x,
-				    gint                y,
-				    guint               time_)
+					GdkDragContext     *context,
+					gint                x,
+					gint                y,
+					guint               time_)
 {
 	LgiWidget *v = LGI_WIDGET(widget);
 	if (!v || !v->target)
@@ -1013,7 +1038,7 @@ lgi_widget_realize(GtkWidget *widget)
 			a.y = pp.y1 + cp.y1;
 			a.width = MAX(cp.X(), 1);
 			a.height = MAX(cp.Y(), 1);
-    		gtk_widget_size_allocate(widget, &a);
+			gtk_widget_size_allocate(widget, &a);
 		}
 
 		if (is_debug(p))
@@ -1116,6 +1141,7 @@ lgi_widget_setpos(GtkWidget *widget, GRect rc)
 	if (parentWidget)
 	{
 		GRect pp = GtkGetPos(parentWidget);
+
 		GtkAllocation a;
 		a.x = pp.x1 + rc.x1;
 		a.y = pp.y1 + rc.y1;
@@ -1148,10 +1174,10 @@ lgi_widget_configure(GtkWidget *widget, GdkEventConfigure *ev)
 	if (p)
 	{
 		LgiTrace("Configure %s = %i x %i\n", p->target->GetClass(), ev->width, ev->height);
-	    p->target->OnPosChange();
+		p->target->OnPosChange();
 	}
 
-    return TRUE;
+	return TRUE;
 }
 
 static void
@@ -1183,14 +1209,14 @@ lgi_widget_class_init(LgiWidgetClass *cls)
 	widget_class->realize					= lgi_widget_realize;
 	widget_class->size_allocate				= lgi_widget_size_allocate;
 	
-	/*
-	Seems if we don't set these, the GWindow::OnGtkEvent handler takes care of it.
+	#if 1
+	// Seems if we don't set these, the GWindow::OnGtkEvent handler takes care of it.
 
 	widget_class->button_press_event		= lgi_widget_click;
 	widget_class->button_release_event		= lgi_widget_click;
 	widget_class->motion_notify_event		= lgi_widget_motion;
 	widget_class->scroll_event				= lgi_widget_scroll;
-	*/
+	#endif
 
 	widget_class->enter_notify_event		= lgi_widget_mouse_enter_leave;
 	widget_class->leave_notify_event		= lgi_widget_mouse_enter_leave;

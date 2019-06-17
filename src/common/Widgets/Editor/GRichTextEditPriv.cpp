@@ -1875,7 +1875,12 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 	
 	GRect r = Areas[GRichTextEdit::ContentArea];
 	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
-	GMemDC Mem(r.X(), r.Y(), pDC->GetColourSpace());
+	GMemDC Mem;
+	if (!Mem.Create(r.X(), r.Y(), pDC->GetColourSpace()))
+	{
+		LgiAssert(!"MemDC creation failed.");
+		return;
+	}
 	GSurface *pScreen = pDC;
 	pDC = &Mem;
 	r.Offset(-r.x1, -r.y1);

@@ -301,6 +301,7 @@ elseif (MSVC)
 							gobject-2.0.lib
 							pangocairo-1.0.lib
 							gdk_pixbuf-2.0.lib
+							gio-2.0.lib
 							Ws2_32.lib)
 	# target_link_directories(Lgi PUBLIC ${VCPKG}/installed/x64-windows/lib)
 	target_link_directories(Lgi PUBLIC ${VCPKG}/installed/x64-windows/debug/lib)

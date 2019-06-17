@@ -602,7 +602,12 @@ bool GView::SetPos(GRect &p, bool Repaint)
 		{
 			if (LGI_IS_WIDGET(GtkPar))
 			{
-				lgi_widget_setpos(_View, Pos);
+				auto Par = GetParent();
+				auto Offset = Par && Par->GetGView() ? Par->GetGView()->_BorderSize : 0;
+				auto p = Pos;
+				p.x1 += Offset;
+				p.y1 += Offset;
+				lgi_widget_setpos(_View, p);
 			}
 			else
 			{

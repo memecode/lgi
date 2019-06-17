@@ -81,6 +81,7 @@ GScreenDC::GScreenDC(Gtk::cairo_t *cr, int x, int y)
 	d->x = x;
 	d->y = y;
 	d->Bits = 32;
+	ColourSpace = GdcD->GetColourSpace();
 }
 
 GScreenDC::GScreenDC(OsDrawable *Drawable)
@@ -240,8 +241,8 @@ void GScreenDC::SetClient(GRect *c)
 
 		#if GTK_MAJOR_VERSION == 3
 		cairo_save(d->cr);
-		// cairo_rectangle(d->cr, c->x1, c->y1, c->X(), c->Y());
-		// cairo_clip(d->cr);		
+		cairo_rectangle(d->cr, c->x1, c->y1, c->X(), c->Y());
+		cairo_clip(d->cr);		
 		cairo_translate(d->cr, c->x1, c->y1);
 		#else
         GdkRectangle r = {c->x1, c->y1, c->X(), c->Y()};

@@ -134,7 +134,7 @@ GDisplayString::GDisplayString(GFont *f, const char *s, ssize_t l, GSurface *pdc
 	
 	#if defined __GTK_H__
 	
-		Hnd = 0;
+		Hnd = NULL;
 		LastTabOffset = -1;
 		if (Font && Str)
 		{
@@ -203,7 +203,7 @@ GDisplayString::GDisplayString(GFont *f, const char16 *s, ssize_t l, GSurface *p
 
 	#if defined __GTK_H__
 	
-		Hnd = 0;
+		Hnd = NULL;
 		if (Font && Str && len > 0)
 		{
 			Gtk::GtkPrintContext *PrintCtx = pDC ? pDC->GetPrintContext() : NULL;
@@ -245,7 +245,12 @@ GDisplayString::GDisplayString(GFont *f, const uint32_t *s, ssize_t l, GSurface 
 
 	#endif
 
-	#if defined(MAC) || defined(LGI_SDL) || defined(_MSC_VER)
+	#if defined __GTK_H__
+
+		Hnd = NULL;
+		StringConvert(Str, &len, s, l);
+
+	#elif defined(MAC) || defined(LGI_SDL) || defined(_MSC_VER)
 
 		StringConvert(Str, &len, s, l);
 

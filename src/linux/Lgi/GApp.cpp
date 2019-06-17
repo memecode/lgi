@@ -234,6 +234,7 @@ class GAppPrivate : public GSymLookup
 {
 public:
 	// Common
+	GtkApplication *App;
 	GXmlTag *Config;
 	GFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
@@ -358,6 +359,11 @@ GSkinEngine *GApp::SkinEngine = 0;
 GApp *TheApp = 0;
 GMouseHook *GApp::MouseHook = 0;
 
+static void close_program(GSimpleAction *action, Gtk::GVariant *parameter, gpointer user_data)
+{
+	g_application_quit(G_APPLICATION(user_data));
+}
+
 GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
 {
@@ -398,6 +404,11 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	srand(LgiCurrentTime());
 	LgiInitColours();
 	AppWnd = 0;
+
+	Gtk::gchar id[256];
+	sprintf_s(id, sizeof(id), "com.memecode.%s", name);
+	d->App = gtk_application_new(id, G_APPLICATION_FLAGS_NONE); 
+	LgiAssert(d->App != NULL);
 
 	MouseHook = new GMouseHook;
 
@@ -444,6 +455,16 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 		extern GSkinEngine *CreateSkinEngine(GApp *App);
 		SkinEngine = CreateSkinEngine(this);
 	}
+
+	#if 0 // Doesn't work
+	if (d->App)
+	{
+		GSimpleAction *close = Gtk::g_simple_action_new("close", NULL);
+		Gtk::g_signal_connect(close, "activate", G_CALLBACK(close_program), d->App);
+		Gtk::g_action_map_add_action(G_ACTION_MAP(d->App), G_ACTION(close));
+		Gtk::g_object_unref(close);
+	}
+	#endif
 }
 
 GApp::~GApp()
