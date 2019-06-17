@@ -159,21 +159,20 @@ GMouse _map_mouse_event(GView *v, int x, int y, bool Motion)
 	m.y = y - Offset.y;
 	m.Target = View;
 
+	#if 0
 	LgiTrace("Widget%s %i,%i on %s -> offset: %i,%i -> %i,%i on %s, FoundParent=%i\n",
 		Motion ? "Motion" : "Click",
 		x, y, v?v->GetClass():"NULL",
 		Offset.x, Offset.y,
 		m.x, m.y, m.Target?m.Target->GetClass():"NULL",
 		FoundParent);
+	#endif
 
 	return m;
 }
 
 gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 {
-	bool BtnDown =  ev->type == GDK_BUTTON_PRESS ||
-					ev->type == GDK_2BUTTON_PRESS ||
-					ev->type == GDK_3BUTTON_PRESS;
 	LgiWidget *p = LGI_WIDGET(widget);
 	if (!p)
 		return false;
@@ -185,7 +184,7 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 	GMouse m = _map_mouse_event(v, ev->x, ev->y, false);
 	if (!m.Target)
 	{
-		v->GetWindow()->_Dump();
+		// v->GetWindow()->_Dump();
 		return false;
 	}
 
@@ -840,47 +839,34 @@ lgi_widget_realize(GtkWidget *widget)
 
 		attributes.window_type = GDK_WINDOW_CHILD;
 		auto pos = GtkGetPos(widget);
-		/*
-		if (c)
-		{
-			attributes.x = c->x;
-			attributes.y = c->y;
-			attributes.width = w->w;
-			attributes.height = w->h;
-		}
-		else
-		*/
-		{
-			attributes.x = pos.x1;
-			attributes.y = pos.x1;
-			attributes.width = pos.X();
-			attributes.height = pos.Y();
-		}
-
+		attributes.x = pos.x1;
+		attributes.y = pos.x1;
+		attributes.width = pos.X();
+		attributes.height = pos.Y();
+		#if 0
 		if (is_debug(w))
 		{
 			LgiTrace("lgi_widget_realize(%s) gtk=%i,%i-%i,%i\n", w->target->GetClass(),
 				pos.x1, pos.y1, pos.X(), pos.Y());
 		}
-
+		#endif
 		attributes.wclass = GDK_INPUT_ONLY;
 		attributes.event_mask = gtk_widget_get_events(widget) |
 								GDK_POINTER_MOTION_MASK |
 								GDK_BUTTON_PRESS_MASK |
 								GDK_BUTTON_RELEASE_MASK |
 								GDK_ENTER_NOTIFY_MASK |
-								GDK_LEAVE_NOTIFY_MASK;
+								GDK_LEAVE_NOTIFY_MASK |
+								GDK_EXPOSURE_MASK |
+								GDK_STRUCTURE_MASK
+								;
 
-		auto window = gtk_widget_get_parent_window (widget);
-		if (window)
-		{
-			gtk_widget_set_window (widget, window);
-			g_object_ref (window);
-
-			w->window = gdk_window_new (window, &attributes, GDK_WA_X | GDK_WA_Y);
-			gtk_widget_register_window (widget, w->window);
-		}
-		else assert(0);
+		gtk_widget_set_window
+		(
+			widget,
+			w->window = gdk_window_new(gtk_widget_get_parent_window(widget), &attributes, GDK_WA_X | GDK_WA_Y)
+		);
+		gtk_widget_register_window(widget, w->window);
 
 		auto gv = w->target->GetGView();
 		if (gv)
@@ -927,6 +913,7 @@ lgi_widget_realize(GtkWidget *widget)
 	lgi_widget_unrealize (GtkWidget *widget)
 	{
 		LgiWidget *w = LGI_WIDGET(widget);
+		gtk_widget_set_realized(widget, false);
 		w->window = NULL;
 		GTK_WIDGET_CLASS(lgi_widget_parent_class)->unrealize(widget);
 	}
@@ -1143,8 +1130,8 @@ lgi_widget_setpos(GtkWidget *widget, GRect rc)
 		GRect pp = GtkGetPos(parentWidget);
 
 		GtkAllocation a;
-		a.x = pp.x1 + rc.x1;
-		a.y = pp.y1 + rc.y1;
+		a.x = rc.x1;
+		a.y = rc.y1;
 		a.width = MAX(rc.X(), 1);
 		a.height = MAX(rc.Y(), 1);
 		gtk_widget_size_allocate(widget, &a);
@@ -1210,8 +1197,6 @@ lgi_widget_class_init(LgiWidgetClass *cls)
 	widget_class->size_allocate				= lgi_widget_size_allocate;
 	
 	#if 1
-	// Seems if we don't set these, the GWindow::OnGtkEvent handler takes care of it.
-
 	widget_class->button_press_event		= lgi_widget_click;
 	widget_class->button_release_event		= lgi_widget_click;
 	widget_class->motion_notify_event		= lgi_widget_motion;
@@ -1245,7 +1230,7 @@ lgi_widget_init(LgiWidget *w)
 {
 	#if GTK_MAJOR_VERSION == 3
 	w->window = NULL;
-	gtk_widget_set_has_window(GTK_WIDGET(w), FALSE);
+	gtk_widget_set_has_window(GTK_WIDGET(w), true);
 	#else
 	GTK_WIDGET_UNSET_FLAGS(w, GTK_NO_WINDOW);
 	#endif
