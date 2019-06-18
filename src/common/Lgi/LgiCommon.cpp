@@ -1250,24 +1250,29 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			#if defined MAC
 
 				#if COCOA
-				NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
-				if (paths)
-				{
-					Path = [[paths objectAtIndex:0] UTF8String];
-				}
+					NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
+					if (paths)
+						Path = [[paths objectAtIndex:0] UTF8String];
 				#elif defined LGI_CARBON
-				FSRef Ref;
-				OSErr e = FSFindFolder(kUserDomain, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
-				if (e)
-				{
-					printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
-					LgiAssert(0);
-				}
-				else
-				{
-					GAutoString Base = FSRefPath(Ref);
-					Path = Base.Get();
-				}
+					FSRef Ref;
+					OSErr e = FSFindFolder(kUserDomain, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
+					if (e)
+					{
+						printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
+						LgiAssert(0);
+					}
+					else
+					{
+						GAutoString Base = FSRefPath(Ref);
+						Path = Base.Get();
+					}
+				#else
+
+				struct passwd *pw = getpwuid(getuid());
+				if (!pw)
+					return false;
+				Path.Printf("%s/Library", pw->pw_dir);
+			
 				#endif
 
 			#elif defined WIN32
