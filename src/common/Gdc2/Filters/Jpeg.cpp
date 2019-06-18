@@ -31,7 +31,7 @@ const char sLibrary[] =
 	"libjpeg"
 	#if defined(WINDOWS)
 		_MSC_VER_STR
-		#ifdef WIN64
+		#ifdef LGI_64BIT
 		"x64"
 		#else
 		"x32"
@@ -52,11 +52,8 @@ class LibJpeg : public GLibrary
 public:
 	LibJpeg() : GLibrary(sLibrary)
 	{
-		#if 0 // def _DEBUG
-		char File[256];
-		GetModuleFileNameA(Handle(), File, sizeof(File));
-		LgiTrace("%s:%i - JPEG: %s\n", _FL, File);
-		#endif
+		if (!IsLoaded())
+			LgiTrace("%s:%i - JPEG: failed to find '%s'\n", _FL, sLibrary);
 	}
 
 	DynFunc1(boolean, jpeg_finish_decompress, j_decompress_ptr, cinfo);
