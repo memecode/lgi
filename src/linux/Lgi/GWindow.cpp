@@ -528,15 +528,12 @@ bool GWindow::Attach(GViewI *p)
 		d->DestroySig = g_signal_connect(Obj, "destroy", G_CALLBACK(GtkWindowDestroy), this);
 		g_signal_connect(Obj, "realize",				G_CALLBACK(GtkWindowRealize), i);							
 		g_signal_connect(Obj, "delete_event",			G_CALLBACK(GtkViewCallback), i);
-
 		#if 0
 		g_signal_connect(Obj, "button-press-event",		G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "button-release-event",	G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "motion-notify-event",	G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "scroll-event",			G_CALLBACK(GtkViewCallback), i);
 		#endif
-
-		/*
 		g_signal_connect(Obj, "focus-in-event",			G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "focus-out-event",		G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "window-state-event",		G_CALLBACK(GtkViewCallback), i);
@@ -544,11 +541,12 @@ bool GWindow::Attach(GViewI *p)
 		g_signal_connect(Obj, "configure-event",		G_CALLBACK(GtkViewCallback), i);
 
 		gtk_widget_add_events(	_View,
-								GDK_POINTER_MOTION_MASK|
+								/* GDK_POINTER_MOTION_MASK|
 								GDK_BUTTON_PRESS_MASK|
 								GDK_BUTTON_RELEASE_MASK|
-								GDK_SCROLL_MASK|
-								GDK_STRUCTURE_MASK);*/
+								GDK_SCROLL_MASK|*/
+								GDK_FOCUS_CHANGE_MASK|
+								GDK_STRUCTURE_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
 
 		if ((_Root = lgi_widget_new(this, true)))

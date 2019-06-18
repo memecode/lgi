@@ -1042,6 +1042,7 @@ public:
 		App = a;
 		HBox = VBox = NULL;
 		Tree = 0;
+		Mdi = NULL;
 		DbgContext = NULL;
 		Output = 0;
 		Debugging = false;
@@ -1564,6 +1565,7 @@ Chk;
 			}
 		}
 
+		#if 1
 Chk;
 		GToolBar *Tools;
 		if (GdcD->Y() > 1200)
@@ -1605,7 +1607,9 @@ Chk;
 			Tools->Attach(this);
 		}
 		else LgiTrace("%s:%i - No tools obj?", _FL);
-		
+		#endif
+
+		#if 1
 Chk;
 		GVariant v = 270, OutPx = 250;
 		d->Options.GetValue(OPT_SPLIT_PX, v);
@@ -1640,6 +1644,7 @@ Chk;
 			GCss::Len y(GCss::LenPx, (float)MAX(Px, 120));
 			d->Output->GetCss(true)->Height(y);
 		}
+		#endif
 
 		AttachChildren();
 		OnPosChange();
@@ -3176,7 +3181,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		{
 			IdeDoc *Doc;
 			d->Docs.Insert(Doc = new IdeDoc(this, 0, 0));
-			if (Doc)
+			if (Doc && d->Mdi)
 			{
 				GRect p = d->Mdi->NewPos();
 				Doc->GView::SetPos(p);
@@ -3886,7 +3891,7 @@ GTree *AppWnd::GetTree()
 
 IdeDoc *AppWnd::TopDoc()
 {
-	return dynamic_cast<IdeDoc*>(d->Mdi->GetTop());
+	return d->Mdi ? dynamic_cast<IdeDoc*>(d->Mdi->GetTop()) : NULL;
 }
 
 GTextView3 *AppWnd::FocusEdit()

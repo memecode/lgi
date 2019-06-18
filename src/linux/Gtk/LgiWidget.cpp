@@ -200,13 +200,15 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 	m.Shift((ev->state & GDK_SHIFT_MASK) != 0);
 	m.Ctrl((ev->state & GDK_CONTROL_MASK) != 0);
 
-	#if 1
+	#if 0
 	char s[256];
 	sprintf_s(s, sizeof(s), "%s::MouseClick", v->GetClass());
 	m.Trace(s);
 	#endif
 
 	v->_Mouse(m, false);
+
+	// v->GetWindow()->_Dump();
 	return true;
 }
 
@@ -753,6 +755,14 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 	#if GTK_MAJOR_VERSION == 3
 
 		gtk_widget_set_allocation (widget, allocation);
+		if (gtk_widget_get_has_window(widget) && gtk_widget_get_realized(widget))
+		{
+			gdk_window_move_resize(gtk_widget_get_window(widget),
+					allocation->x,
+					allocation->y,
+					allocation->width,
+					allocation->height);
+		}
 
 		#if 0
 		if (w->pour_largest)
@@ -850,7 +860,7 @@ lgi_widget_realize(GtkWidget *widget)
 				pos.x1, pos.y1, pos.X(), pos.Y());
 		}
 		#endif
-		attributes.wclass = GDK_INPUT_ONLY;
+		attributes.wclass = GDK_INPUT_OUTPUT;
 		attributes.event_mask = gtk_widget_get_events(widget) |
 								GDK_POINTER_MOTION_MASK |
 								GDK_BUTTON_PRESS_MASK |
@@ -925,41 +935,53 @@ lgi_widget_realize(GtkWidget *widget)
 		g_return_val_if_fail(LGI_IS_WIDGET(widget), FALSE);
 
 		LgiWidget *p = LGI_WIDGET(widget);
-		if (gtk_widget_is_drawable(widget))
+		if (!gtk_widget_is_drawable(widget))
 		{
-			if (p && p->target)
-			{
-				auto Pos = p->target->GetPos();
-				GScreenDC Dc(cr, Pos.X(), Pos.Y());
-
-				#if 0
-				{
-					Gtk::cairo_matrix_t matrix;
-					cairo_get_matrix(cr, &matrix);
-
-					double ex[4];
-					cairo_clip_extents(cr, ex+0, ex+1, ex+2, ex+3);
-					#if 0
-					ex[0] += matrix.x0;
-					ex[1] += matrix.y0;
-					ex[2] += matrix.x0;
-					ex[3] += matrix.y0;
-					#endif
-					LgiTrace("%s::_Paint (%p) = %g,%g,%g,%g - %g,%g\n", p->target->GetClass(), widget, ex[0], ex[1], ex[2], ex[3], matrix.x0, matrix.y0);
-				}
-				#endif
-
-				GView *v = dynamic_cast<GView*>(p->target);
-				if (v)
-					v->_Paint(&Dc);
-				else
-					p->target->OnPaint(&Dc);
-			}
-			else printf("%s:%i - No view to paint widget.\n", _FL);
+			LgiTrace("%s:%i - Not drawable.\n", _FL);
+			return false;
 		}
 
+		if (!p || !p->target)
+		{
+			LgiTrace("%s:%i - No view to paint widget.\n", _FL);
+			return false;
+		}
+
+		auto Pos = GtkGetPos(widget);
+		GScreenDC Dc(cr, Pos.X(), Pos.Y());
+
+		#if 0
+		{
+			Gtk::cairo_matrix_t matrix;
+			cairo_get_matrix(cr, &matrix);
+
+			double ex[4];
+			cairo_clip_extents(cr, ex+0, ex+1, ex+2, ex+3);
+			#if 0
+			ex[0] += matrix.x0;
+			ex[1] += matrix.y0;
+			ex[2] += matrix.x0;
+			ex[3] += matrix.y0;
+			#endif
+			LgiTrace("%s::_Paint (%p) = %g,%g,%g,%g - %g,%g\n", p->target->GetClass(), widget, ex[0], ex[1], ex[2], ex[3], matrix.x0, matrix.y0);
+		}
+		#endif
+
+		GView *v = dynamic_cast<GView*>(p->target);
+		if (v)
+			v->_Paint(&Dc);
+		else
+			p->target->OnPaint(&Dc);
+
+		#if 0
+		Dc.Colour(GColour::Red);
+		Dc.Line(0, 0, Dc.X()-1, Dc.Y()-1);
+		Dc.Line(Dc.X()-1, 0, 0, Dc.Y()-1);
+		#endif
+
 		GTK_WIDGET_CLASS(lgi_widget_parent_class)->draw(widget, cr);
-		return FALSE;
+		
+		return true;
 	}
 
 	static void
@@ -1017,12 +1039,12 @@ lgi_widget_realize(GtkWidget *widget)
 		auto parentWidget = gtk_widget_get_parent(widget);
 		if (pos.x1 == -1 && parentWidget)
 		{
-			auto pp = GtkGetPos(parentWidget);
+			// auto pp = GtkGetPos(parentWidget);
 			auto cp = p->target->GetPos();
 
 			GtkAllocation a;
-			a.x = pp.x1 + cp.x1;
-			a.y = pp.y1 + cp.y1;
+			a.x = cp.x1;
+			a.y = cp.y1;
 			a.width = MAX(cp.X(), 1);
 			a.height = MAX(cp.Y(), 1);
 			gtk_widget_size_allocate(widget, &a);
@@ -1127,14 +1149,16 @@ lgi_widget_setpos(GtkWidget *widget, GRect rc)
 	auto parentWidget = gtk_widget_get_parent(widget);
 	if (parentWidget)
 	{
-		GRect pp = GtkGetPos(parentWidget);
-
 		GtkAllocation a;
 		a.x = rc.x1;
 		a.y = rc.y1;
 		a.width = MAX(rc.X(), 1);
 		a.height = MAX(rc.Y(), 1);
 		gtk_widget_size_allocate(widget, &a);
+		gtk_widget_queue_draw(widget);
+
+		// LgiWidget *p = LGI_WIDGET(widget);
+		// LgiTrace("lgi_widget_setpos %s %i,%i-%i,%i\n", p->target->GetClass(), a.x, a.y, a.width, a.height);
 	}
 }
 
@@ -1160,7 +1184,7 @@ lgi_widget_configure(GtkWidget *widget, GdkEventConfigure *ev)
 	LgiWidget *p = LGI_WIDGET(widget);
 	if (p)
 	{
-		LgiTrace("Configure %s = %i x %i\n", p->target->GetClass(), ev->width, ev->height);
+		// LgiTrace("Configure %s = %i x %i\n", p->target->GetClass(), ev->width, ev->height);
 		p->target->OnPosChange();
 	}
 

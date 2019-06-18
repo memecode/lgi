@@ -116,7 +116,6 @@ GViewPrivate::GViewPrivate()
 	ParentI = 0;
 	Notify = 0;
 	CtrlId = -1;
-	DropTarget = 0;
 	Font = 0;
 	FontOwnType = GV_FontPtr;
 	Popup = 0;
@@ -126,6 +125,9 @@ GViewPrivate::GViewPrivate()
 	GotOnCreate = false;
 	WantsFocus = false;
 	SinkHnd = -1;
+
+	DropTarget = NULL;
+	DropSource = NULL;
 }
 
 GViewPrivate::~GViewPrivate()
@@ -629,20 +631,9 @@ GRect GtkGetPos(GtkWidget *w)
 
 GdcPt2 GtkAbsPos(GtkWidget *w)
 {
-	GdcPt2 Off;
-	
-	do
-	{
-		if (GTK_IS_WINDOW(w))
-			break;
-
-		auto p = GtkGetPos(w);
-		Off.x += p.x1;
-		Off.y += p.y1;
-	}
-	while (w = gtk_widget_get_parent(w));
-	
-	return Off;
+	gint wx = 0, wy = 0;
+	gdk_window_get_origin(gtk_widget_get_window(w), &wx, &wy);
+	return GdcPt2(wx, wy);
 }
 
 bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
@@ -662,38 +653,25 @@ bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
 			if (!Repainting)
 			{
 				Repainting = true;
-				GdkWindow *hnd = gtk_widget_get_window(_View);
-				if (hnd)
-				{
-					GtkAllocation a;
-					gtk_widget_get_allocation (_View, &a);
 
-					#if 1
+				if (gtk_widget_get_has_window(_View))
+				{
+					auto h = gtk_widget_get_window(_View);
+					GdkRectangle rc;
+					
 					if (r)
-					{
-						GRect cr = *r;
-						cr.Offset(Client.x1, Client.y1);
-						Gtk::GdkRectangle gr = cr;
-						
-						// This loop seems so wrong, but it works:
-						auto Off = GtkAbsPos(_View);
-						gr.x += a.x;
-						gr.y += a.y;
-						
-	            		/*
-						LgiTrace("Inval.r %s, _View=%p, gtk.rect=%i,%i-%i,%i alloc=%i,%i-%i,%i\n", GetClass(), _View,
-							gr.x, gr.y, gr.width, gr.height,
-							a.x, a.y, a.width, a.height);
-						*/
-						gdk_window_invalidate_rect(hnd, &gr, FALSE);
-					}
+						rc = *r;
 					else
-					#endif
-					{
-	            		// LgiTrace("Inval.a %s %i,%i-%i,%i\n", GetClass(), a.x, a.y, a.width, a.height);
-	            		gdk_window_invalidate_rect(hnd, NULL, FALSE);
-					}
+						rc = GtkGetPos(_View);
+					
+					gdk_window_invalidate_rect(h, &rc, true);
+					// LgiTrace("Inval %s %i,%i-%i,%i\n", GetClass(), rc.x, rc.y, rc.width, rc.height);
 				}
+				else
+				{
+					gtk_widget_queue_draw(_View);
+				}
+
 				Repainting = false;
 			}
 		}
