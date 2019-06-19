@@ -94,7 +94,7 @@ int ShowLanguagesDlg::OnNotify(GViewI *n, int f)
 			{
 				List<Lang> All;
 				d->Lst->GetAll(All);
-				for (Lang *L = All.First(); L; L = All.Next())
+				for (auto L: All)
 				{
 					d->App->ShowLang(L->GetLang()->Id, L->GetVal());
 				}

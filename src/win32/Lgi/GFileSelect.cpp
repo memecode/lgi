@@ -35,7 +35,7 @@ class GFileSelectPrivate
 	{
 		GStringPipe p;
 
-		for (GFileType *Type = TypeList.First(); Type; Type = TypeList.Next())
+		for (auto Type: TypeList)
 		{
 			p.Push(Type->Description());
 			p.Push("", 1);
@@ -50,7 +50,7 @@ class GFileSelectPrivate
 	{
 		GMemQueue p;
 
-		for (GFileType *Type = TypeList.First(); Type; Type = TypeList.Next())
+		for (auto Type: TypeList)
 		{
 			char16 *d = Utf8ToWide(Type->Description());
 			char16 *e = Utf8ToWide(Type->Extension());
@@ -209,7 +209,7 @@ GFileSelect::~GFileSelect()
 
 char *GFileSelect::Name()
 {
-	return d->Files.First();
+	return d->Files[0];
 }
 
 bool GFileSelect::Name(const char *n)

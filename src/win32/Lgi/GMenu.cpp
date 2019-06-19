@@ -111,7 +111,7 @@ GSubMenu::~GSubMenu()
 	}
 	
 	GMenuItem *i;
-	while (i = Items.First())
+	while (i = Items[0])
 	{
 		LgiAssert(i->Parent == this);
 		DeleteObj(i);
@@ -419,7 +419,7 @@ void GMenuItem::_Measure(GdcPt2 &Size)
 		int Ht = Font->GetHeight();
 		Size.x = BaseMenu ? 0 : 20;
 
-		for (GDisplayString *s = d->Strs.First(); s; s = d->Strs.Next())
+		for (auto s: d->Strs)
 		{
 			Size.x += s->X();
 		}
@@ -464,7 +464,7 @@ void GMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 
 	if (d->HasAccel)
 	{
-		GDisplayString *s = d->Strs.Last();
+		GDisplayString *s = *d->Strs.rbegin();
 		if (s)
 		{
 			s->Draw(pDC, Width - s->X() - 8, y);
@@ -760,7 +760,7 @@ bool GMenuItem::Remove()
 		Status = RemoveMenu(Parent->Handle(), Index, MF_BYPOSITION) != 0;
 
 		int n=0;
-		for (GMenuItem *i=Parent->Items.First(); i; i=Parent->Items.Next())
+		for (auto i: Parent->Items)
 		{
 			i->Position = n++;
 		}
@@ -1064,7 +1064,7 @@ bool GMenu::OnKey(GView *v, GKey &k)
 {
 	if (k.Down() && k.vkey != 17)
 	{
-		for (GAccelerator *a = Accel.First(); a; a = Accel.Next())
+		for (auto a: Accel)
 		{
 			if (a->Match(k))
 			{
@@ -1104,7 +1104,7 @@ int GMenu::_OnEvent(GMessage *Msg)
 					if (Menu)
 					{
 						int Index=0;
-						for (GMenuItem *i=Menu->Items.First(); i; i=Menu->Items.Next(), Index++)
+						for (auto i: Menu->Items)
 						{
 							char *n = i->Name();
 							if (n)
@@ -1116,6 +1116,7 @@ int GMenu::_OnEvent(GMessage *Msg)
 									return (MNC_EXECUTE << 16) | Index;
 								}
 							}
+							Index++;
 						}
 					}
 				}

@@ -378,15 +378,15 @@
 	</Node>
 	<Node Name="LgiNet" Type="1" Platforms="15" Open="0" Id="69">
 		<Node Name="Source" Type="1" Platforms="15" Open="0" Id="70">
-			<Node File="./src/common/INet/GUri.cpp" Type="2" Platforms="15" />
-			<Node File="./src/common/INet/INet.cpp" Type="2" Platforms="15" />
-			<Node File="./src/common/INet/INetTools.cpp" Type="2" Platforms="15" />
-			<Node File="./src/common/INet/MDStringToDigest.cpp" Type="2" Platforms="15" />
-			<Node File="./src/win32/INet/MibAccess.cpp" Type="2" Platforms="1" />
+			<Node File=".\src\common\INet\GUri.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\common\INet\INet.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\common\INet\INetTools.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\common\INet\MDStringToDigest.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\win32\INet\MibAccess.cpp" Type="2" Platforms="1" />
 		</Node>
 		<Node Name="Header" Type="1" Platforms="15" Open="0" Id="71">
-			<Node File="./include/common/INet.h" Type="3" Platforms="15" />
-			<Node File="./include/common/INetTools.h" Type="3" Platforms="15" />
+			<Node File=".\include\common\INet.h" Type="3" Platforms="15" />
+			<Node File=".\include\common\INetTools.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Mime Message" Type="1" Platforms="15" Open="0" Id="72">
 			<Node File="./include/common/GMime.h" Type="3" Platforms="15" />

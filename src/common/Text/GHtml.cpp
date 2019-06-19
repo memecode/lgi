@@ -236,7 +236,7 @@ public:
 	
 	GFont *FindMatch(GFont *m)
 	{
-		for (GFont *f = Fonts.First(); f; f = Fonts.Next())
+		for (auto f: Fonts)
 		{
 			if (*f == *m)
 			{
@@ -277,13 +277,12 @@ public:
 			Size.Value = (float)Default->PointSize();
 		}
 
-		GFont *f = 0;
 		if (Size.Type == GCss::LenPx)
 		{
 		    int RequestPx = (int)Size.Value;
 
 			// Look for cached fonts of the right size...
-			for (f=Fonts.First(); f; f=Fonts.Next())
+			for (auto f: Fonts)
 			{
 				if (f->Face() &&
 					_stricmp(f->Face(), Face[0]) == 0 &&
@@ -300,7 +299,7 @@ public:
 		else if (Size.Type == GCss::LenPt)
 		{
 			double Pt = MAX(MinimumPointSize, Size.Value);
-			for (f=Fonts.First(); f; f=Fonts.Next())
+			for (auto f: Fonts)
 			{
 				if (!f->Face() || Face.Length() == 0)
 				{
@@ -371,6 +370,7 @@ public:
 		}
 		else LgiAssert(!"Not impl.");
 
+		GFont *f;
 		if ((f = new GFont))
 		{
 			char *ff = ValidStr(Face[0]) ? Face[0] : Default->Face();
@@ -397,7 +397,7 @@ public:
 					if (!f->Create((char*)0, 0))
 					{
 						DeleteObj(f);
-						return Fonts.First();
+						return Fonts[0];
 					}
 				}
 			}
@@ -1225,7 +1225,8 @@ void GFlowRegion::FinishLine(GCss::LengthType Align, bool Margin)
 
 GRect *GFlowRegion::LineBounds()
 {
-	GFlowRect *Prev = Line.First();
+	auto It = Line.begin();
+	GFlowRect *Prev = *It;
 	GFlowRect *r=Prev;
 	if (r)
 	{
@@ -1237,7 +1238,7 @@ GRect *GFlowRegion::LineBounds()
 		b.Offset(Ox, Oy);
 
 		// int Ox = 0, Oy = 0;
-		while ((r = Line.Next()))
+		while ((r = *(++It) ))
 		{
 			GRect c = *r;
 			Ox = r->Tag->AbsX();

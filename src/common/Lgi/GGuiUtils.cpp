@@ -512,7 +512,7 @@ GViewI *GetNextTabStop(GViewI *v, bool Back)
 			}
 			else
 			{
-				return All.First();
+				return All[0];
 			}
 		}
 	}

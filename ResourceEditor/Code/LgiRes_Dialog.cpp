@@ -191,7 +191,7 @@ public:
 
 					List<CtrlItem> All;
 					Lst->GetAll(All);
-					for (CtrlItem *n=All.First(); n; n=All.Next())
+					for (auto n: All)
 					{
 						Top->View()->DelView(n->Ctrl->View());
 						Top->View()->AddView(n->Ctrl->View(), i++);
@@ -725,7 +725,7 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 					}
 					case IDM_COPY_TEXT:
 					{
-						ResDialogCtrl *Ctrl = Dlg->Selection.First();
+						ResDialogCtrl *Ctrl = Dlg->Selection[0];
 						if (Ctrl)
 						{
 							Ctrl->CopyText();
@@ -1303,7 +1303,7 @@ void CtrlTab::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 	LgiAssert(MyIndex >= 0);
 
 	List<GViewI> *CList = (Par->Current == MyIndex) ? &Par->Children : &Children;
-	for (GViewI *w = CList->First(); w; w = CList->Next())
+	for (auto w: *CList)
 	{
 		ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(w);
 		if (c)
@@ -1404,7 +1404,7 @@ GRect CtrlTabs::GetMinSize()
 	// don't resize smaller than any of the children
 	// on any of the tabs
 	GRect cli = GetClient(false);
-	for (ResDialogCtrl *c=l.First(); c; c=l.Next())
+	for (auto c: l)
 	{
 		GRect cpos = c->View()->GetPos();
 		cpos.Offset(cli.x1, cli.y1);
@@ -1417,7 +1417,7 @@ GRect CtrlTabs::GetMinSize()
 void CtrlTabs::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 {
 	int n=0;
-	for (CtrlTab *t = Tabs.First(); t; t = Tabs.Next(), n++)
+	for (auto t: Tabs)
 	{
 	    l.Add(t);
 	    
@@ -1431,6 +1431,7 @@ void CtrlTabs::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 				c->ListChildren(l, Deep);
 			}
 		}
+		n++;
 	}
 }
 
@@ -1452,7 +1453,7 @@ void CtrlTabs::OnPaint(GSurface *pDC)
 	// Draw the tabs
 	int i = 0;
 	int x = 2;
-	for (CtrlTab *Tab = Tabs.First(); Tab; Tab = Tabs.Next(), i++)
+	for (auto Tab: Tabs)
 	{
 		char *Str = Tab->Str ? Tab->Str->Get() : 0;
 		GDisplayString ds(SysFont, Str);
@@ -1497,6 +1498,7 @@ void CtrlTabs::OnPaint(GSurface *pDC)
 		ds.Draw(pDC, t.x1 + ((t.X()-ds.X())/2), t.y1 + ((t.Y()-ds.Y())/2), &t);
 
 		x += Width + ((Current == i) ? 2 : 1);
+		i++;
 	}
 
 	// Draw children
@@ -1556,7 +1558,7 @@ void CtrlTabs::OnMouseClick(GMouse &m)
 		{
 			// select current tab
 			int i = 0;
-			for (CtrlTab *Tab = Tabs.First(); Tab; Tab = Tabs.Next(), i++)
+			for (auto Tab: Tabs)
 			{
 				if (Tab->View()->GetPos().Overlap(m.x, m.y) /* && i != Current*/)
 				{
@@ -1569,6 +1571,7 @@ void CtrlTabs::OnMouseClick(GMouse &m)
 
 					break;
 				}
+				i++;
 			}
 		}
 
@@ -1727,7 +1730,7 @@ void CtrlList::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 {
 	if (Deep)
 	{
-		for (GView *w = Cols.First(); w; w = Cols.Next())
+		for (auto w: Cols)
 		{
 			ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(w);
 			if (c)
@@ -1741,7 +1744,7 @@ void CtrlList::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 
 void CtrlList::Empty()
 {
-	for (ListCol *c = Cols.First(); c; c = Cols.Next())
+	for (auto c: Cols)
 	{
 		DeleteObj(c);
 	}
@@ -1757,7 +1760,7 @@ void CtrlList::OnMouseClick(GMouse &m)
 			int x=0;
 			ListCol *c = 0;
 			int DragOver = -1;
-			for (ListCol *Col = Cols.First(); Col; Col = Cols.Next())
+			for (auto Col: Cols)
 			{
 				if (m.x >= Col->r().x1 && m.x <= Col->r().x2)
 				{
@@ -1900,7 +1903,7 @@ void CtrlList::OnMouseMove(GMouse &m)
 	if (DragCol >= 0)
 	{
 		int i=0, x=0;;
-		for (ListCol *Col = Cols.First(); Col; Col = Cols.Next(), i++)
+		for (auto Col: Cols)
 		{
 			if (i == DragCol)
 			{
@@ -1913,6 +1916,7 @@ void CtrlList::OnMouseMove(GMouse &m)
 			}
 
 			x += Col->r().X();
+			i++;
 		}
 
 		Invalidate();
@@ -1936,7 +1940,7 @@ void CtrlList::OnPaint(GSurface *pDC)
 	pDC->Rectangle(&Client);
 
 	int x = Title.x1;
-	for (ListCol *c = Cols.First(); c; c = Cols.Next())
+	for (auto c: Cols)
 	{
 		int Width = c->r().X();
 		c->r().Set(x, Title.y1, x + Width - 1, Title.y2);
@@ -2255,10 +2259,11 @@ void ResDialogCtrl::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 
 void ResDialog::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 {
-	for (ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(Children.First());
-					 c; c = dynamic_cast<ResDialogCtrl*>(Children.Next()))
+	for (auto ci: Children)
 	{
-		c->EnumCtrls(Ctrls);
+		ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(ci);
+		if (c)
+			c->EnumCtrls(Ctrls);
 	}
 }
 
@@ -2327,14 +2332,14 @@ ResDialog::~ResDialog()
 void ResDialog::OnShowLanguages()
 {
 	// Current language changed.
-	OnSelect(Selection.First());
+	OnSelect(Selection[0]);
 	Invalidate();
 	OnLanguageChange();
 }
 
 char *ResDialog::Name()
 {
-	GViewI *v = Children.First();
+	GViewI *v = Children[0];
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(v);
 	if (Ctrl && Ctrl->Str && Ctrl->Str->GetDefine())
 	{
@@ -2345,7 +2350,7 @@ char *ResDialog::Name()
 
 bool ResDialog::Name(const char *n)
 {
-	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children.First());
+	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	if (Ctrl && Ctrl->Str)
 	{
 		Ctrl->Str->SetDefine((n)?n:"");
@@ -2504,7 +2509,7 @@ bool ResDialog::Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep)
 
 			List<ResDialogCtrl> Child;
 			Ctrl->ListChildren(Child, Deep);
-			for (ResDialogCtrl *o = Child.First(); o; o = Child.Next())
+			for (auto o: Child)
 			{
 				l->Insert(o);
 			}
@@ -2549,9 +2554,7 @@ bool ResDialog::Res_GetItems(ResObject *Obj, List<ResObject> *l)
 		CtrlTabs *Tabs = dynamic_cast<CtrlTabs*>(Obj);
 		if (Tabs)
 		{
-			for (	CtrlTab *Tab = Tabs->Tabs.First();
-					Tab;
-					Tab = Tabs->Tabs.Next())
+			for (auto Tab: Tabs->Tabs)
 			{
 				l->Insert(Tab);
 			}
@@ -2562,9 +2565,7 @@ bool ResDialog::Res_GetItems(ResObject *Obj, List<ResObject> *l)
 		CtrlList *Lst = dynamic_cast<CtrlList*>(Obj);
 		if (Lst)
 		{
-			for (	ListCol *Col = Lst->Cols.First();
-					Col;
-					Col = Lst->Cols.Next())
+			for (auto Col: Lst->Cols)
 			{
 				l->Insert(Col);
 			}
@@ -2605,10 +2606,11 @@ void ResDialog::Create(GXmlTag *load, SerialiseContext *Ctx)
 void ResDialog::Delete()
 {
 	// Deselect the dialog ctrl
-	OnDeselect(dynamic_cast<ResDialogCtrl*>(Children.First()));
+	OnDeselect(dynamic_cast<ResDialogCtrl*>(Children[0]));
 
 	// Delete selected controls
-	for (ResDialogCtrl *c = Selection.First(); c; c = Selection.First())
+	ResDialogCtrl *c;
+	while ((c = Selection[0]))
 	{
 		c->View()->Detach();
 		DeleteObj(c);
@@ -2640,11 +2642,11 @@ void GetTopCtrls(List<ResDialogCtrl> &Top, List<ResDialogCtrl> &Selection)
 {
 	// all children will automatically be cut as well
 
-	for (ResDialogCtrl *c = Selection.First(); c; c = Selection.Next())
+	for (auto c: Selection)
 	{
 		// is c a child of an item already in Top?
 		bool Ignore = false;
-		for (ResDialogCtrl *p = Top.First(); p; p = Top.Next())
+		for (auto p: Top)
 		{
 			if (IsChild(p, c))
 			{
@@ -2666,7 +2668,7 @@ void ResDialog::Copy(bool Delete)
 	bool Status = false;
 
 	// Deselect the dialog... can't cut that
-	OnDeselect(dynamic_cast<ResDialogCtrl*>(Children.First()));
+	OnDeselect(dynamic_cast<ResDialogCtrl*>(Children[0]));
 	
 	// Get top level list
 	List<ResDialogCtrl> Top;
@@ -2675,7 +2677,6 @@ void ResDialog::Copy(bool Delete)
 	// ok we have a top level list of ctrls
 	// write them to the file
 	List<ResDialogCtrl> All;
-	ResDialogCtrl *c;
 	GXmlTag *Root = new GXmlTag("Resources");
 	if (Root)
 	{
@@ -2686,7 +2687,7 @@ void ResDialog::Copy(bool Delete)
 		}
 
 		// write the string resources first
-		for (c = Top.First(); c; c = Top.Next())
+		for (auto c: Top)
 		{
 			All.Insert(c);
 			c->ListChildren(All, true);
@@ -2696,7 +2697,7 @@ void ResDialog::Copy(bool Delete)
 		// so that we can reference them from the objects
 		// below.
 		SerialiseContext Ctx;
-		for (c = All.First(); c; c = All.Next())
+		for (auto c: All)
 		{
 			// Write the string out
 			GXmlTag *t = new GXmlTag;
@@ -2711,7 +2712,7 @@ void ResDialog::Copy(bool Delete)
 		}
 
 		// write the objects themselves
-		for (c = Top.First(); c; c = Top.Next())
+		for (auto c: Top)
 		{
 			GXmlTag *t = new GXmlTag;
 			if (t && Res_Write(c, t))
@@ -2749,7 +2750,8 @@ void ResDialog::Copy(bool Delete)
 		if (Delete && Status)
 		{
 			// delete them
-			for (c = Selection.First(); c; c = Selection.First())
+			ResDialogCtrl *c;
+			while ((c = Selection[0]))
 			{
 				c->View()->Detach();
 				Selection.Delete(c);
@@ -2777,7 +2779,7 @@ void RemapAllRefs(GXmlTag *t, List<StringId> &Strs)
 	{
 		int r = atoi(RefStr);
 
-		for (StringId *i=Strs.First(); i; i=Strs.Next())
+		for (auto i: Strs)
 		{
 			if (i->OldRef == r)
 			{
@@ -2806,7 +2808,7 @@ void RemapAllRefs(GXmlTag *t, List<StringId> &Strs)
 		}
 	}
 
-	for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+	for (auto c: t->Children)
 	{
 		RemapAllRefs(c, Strs);
 	}
@@ -2830,7 +2832,7 @@ void ResDialog::Paste()
 		ResDialogCtrl *Container = 0;
 
 		// Find a container to plonk the controls in
-		ResDialogCtrl *c = Selection.First();
+		ResDialogCtrl *c = Selection[0];
 		if (c && c->IsContainer())
 		{
 			Container = c;
@@ -2839,7 +2841,7 @@ void ResDialog::Paste()
 		if (!Container)
 		{
 			// Otherwise just use the dialog as the container
-			Container = dynamic_cast<ResDialogCtrl*>(Children.First());
+			Container = dynamic_cast<ResDialogCtrl*>(Children[0]);
 		}
 
 		if (Container)
@@ -2863,8 +2865,7 @@ void ResDialog::Paste()
 			GXmlTag Root;
 			if (Tree.Read(&Root, &p, 0))
 			{
-				GXmlTag *t;
-				for (t = Root.Children.First(); t; t = Root.Children.Next())
+				for (auto t: Root.Children)
 				{
 					if (t->IsTag("string"))
 					{
@@ -2905,7 +2906,7 @@ void ResDialog::Paste()
 
 				// load all the objects now
 				List<ResDialogCtrl> NewCtrls;
-				for (t = Root.Children.First(); t; t = Root.Children.Next())
+				for (auto t: Root.Children)
 				{
 					if (!t->IsTag("string"))
 					{
@@ -2927,17 +2928,18 @@ void ResDialog::Paste()
 
 				// calculate the new control set's dimensions so we
 				// can paste them in at the top of the container
-				ResDialogCtrl *c = NewCtrls.First();
+				auto It = NewCtrls.begin();
+				ResDialogCtrl *c = *It;
 				if (c)
 				{
 					GRect All = c->View()->GetPos();
-					while ((c = NewCtrls.Next()))
+					while ((c = *(++It)))
 					{
 						All.Union(&c->View()->GetPos());
 					}
 
 					// now paste in the controls
-					for (c = NewCtrls.First(); c; c = NewCtrls.Next())
+					for (auto c: NewCtrls)
 					{
 						GRect *Preference = Container->GetPasteArea();
 						GRect p = c->View()->GetPos();
@@ -2956,7 +2958,7 @@ void ResDialog::Paste()
 				}
 
 				// Deduplicate all these new strings
-				for (ResString *s = NewStrs.First(); s; s = NewStrs.Next())
+				for (auto s: NewStrs)
 				{
 					s->UnDuplicate();
 				}
@@ -2971,7 +2973,7 @@ void ResDialog::Paste()
 
 void ResDialog::SnapPoint(GdcPt2 *p, ResDialogCtrl *From)
 {
-	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children.First());
+	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	if (p && Ctrl)
 	{
 		int Ox = 0; // -Ctrl->Client.x1;
@@ -2999,7 +3001,7 @@ void ResDialog::SnapPoint(GdcPt2 *p, ResDialogCtrl *From)
 
 void ResDialog::SnapRect(GRect *r, ResDialogCtrl *From)
 {
-	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children.First());
+	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	if (r && Ctrl)
 	{
 		int Ox = 0; // -Ctrl->Client.x1;
@@ -3035,7 +3037,8 @@ int ResDialog::CurrentTool()
 
 void ResDialog::MoveSelection(int Dx, int Dy)
 {
-	ResDialogCtrl *w = Selection.First();
+	auto It = Selection.begin();
+	ResDialogCtrl *w = *It;
 	if (w)
 	{
 		ResDialogCtrl *Parent = w->ParentCtrl();
@@ -3043,7 +3046,7 @@ void ResDialog::MoveSelection(int Dx, int Dy)
 		{
 			// find dimensions of group
 			GRect All = w->View()->GetPos();
-			for (; w; w = Selection.Next())
+			for (; w; w = *(++It))
 			{
 				All.Union(&w->View()->GetPos());
 			}
@@ -3064,7 +3067,7 @@ void ResDialog::MoveSelection(int Dx, int Dy)
 
 			// move the ctrls
 			GRegion Update;
-			for (w = Selection.First(); w; w = Selection.Next())
+			for (auto w: Selection)
 			{
 				GRect Old = w->View()->GetPos();
 				GRect New = Old;
@@ -3204,7 +3207,7 @@ void ResDialog::SelectRect(ResDialogCtrl *Parent, GRect *r, bool ClearPrev)
 
 	if (AppWindow)
 	{
-		AppWindow->OnObjSelect((Selection.Length() == 1) ? Selection.First() : 0);
+		AppWindow->OnObjSelect((Selection.Length() == 1) ? Selection[0] : 0);
 	}
 }
 
@@ -3240,7 +3243,7 @@ void ResDialog::OnSelect(ResDialogCtrl *Wnd, bool ClearPrev)
 
 		if (AppWindow)
 		{
-			AppWindow->OnObjSelect((Selection.Length() == 1) ? Selection.First() : 0);
+			AppWindow->OnObjSelect((Selection.Length() == 1) ? Selection[0] : 0);
 		}
 	}
 }
@@ -3421,7 +3424,7 @@ void ResDialog::DrawSelection(GSurface *pDC)
         return;
 
 	// Draw selection
-	for (ResDialogCtrl *Ctrl = Selection.First(); Ctrl; Ctrl = Selection.Next())
+	for (auto Ctrl: Selection)
 	{
 		GRect r = Ctrl->AbsPos();
 		COLOUR s = Rgb24(255, 0, 0);
@@ -3438,7 +3441,7 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 	if (!pDC)
 		ScreenDC.Reset(pDC = new GScreenDC(Handle()));
 
-	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children.First());
+	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	if (Ctrl)
 	{
 		GRect c = Ctrl->View()->GetPos();
@@ -3576,7 +3579,7 @@ void ResDialog::OnMouseClick(GMouse &m)
 		if (m.Left())
 		{
 			DragGoober = -1;
-			for (ResDialogCtrl *c = Selection.First(); c; c = Selection.Next())
+			for (auto c: Selection)
 			{
 				for (int i=0; i<8; i++)
 				{
@@ -3678,7 +3681,7 @@ void ResDialog::OnMouseMove(GMouse &m)
 			GRegion Update;
 
 			// change everyone else by the same amount
-			for (ResDialogCtrl *c = Selection.First(); c; c = Selection.Next())
+			for (auto c: Selection)
 			{
 				GRect OldPos = c->View()->GetPos();
 				GRect NewPos = OldPos;
@@ -3717,7 +3720,7 @@ bool ResDialog::Read(GXmlTag *t, SerialiseContext &Ctx)
 	// symbol via Id matching instead of creating their own
 	CreateSymbols = false;
 
-	ResDialogCtrl *Dlg = dynamic_cast<ResDialogCtrl*>(Children.First());
+	ResDialogCtrl *Dlg = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	if (Dlg)
 	{
 		// Load the resource
@@ -3739,7 +3742,7 @@ void ResDialog::CleanSymbols()
 	}
 
 	// re-ID duplicate entries
-	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children.First());
+	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	if (Ctrl)
 	{
 		// list all the entries
@@ -3748,7 +3751,7 @@ void ResDialog::CleanSymbols()
 		l.Insert(Ctrl); // insert the dialog too
 
 		// remove duplicate string entries
-		for (ResDialogCtrl *c = l.First(); c; c = l.Next())
+		for (auto c: l)
 		{
 			LgiAssert(c->Str);
 			c->Str->UnDuplicate();
@@ -3765,7 +3768,7 @@ void ResDialog::CleanSymbols()
 bool ResDialog::Write(GXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = false;
-	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children.First());
+	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	if (Ctrl)
 	{
 		// duplicates symbols should have been removed before the 
@@ -3912,7 +3915,7 @@ void OutputCtrl(GStringPipe &Def,
 		if (List)
 		{
 			// output columns
-			for (ListCol *c=List->Cols.First(); c; c=List->Cols.Next())
+			for (auto c: List->Cols)
 			{
 				sprintf(Str, "\tCtrl%i->AddColumn(\"%s\", %i);\n", Index, c->Str->Get(), c->X());
 				Inst.Push(Str);
@@ -3940,7 +3943,7 @@ void ResDialog::OnCommand(int Cmd)
 			GStringPipe Buf;
 			char Str[256];
 
-			ResDialogCtrl *Dlg = dynamic_cast<ResDialogCtrl*>(Children.First());
+			ResDialogCtrl *Dlg = dynamic_cast<ResDialogCtrl*>(Children[0]);
 			if (Dlg)
 			{
 				// List controls
@@ -4087,13 +4090,13 @@ int ResDialog::OnCommand(int Cmd, int Event, OsView hWnd)
 		{
 			ResDialogCtrl *Top = 0;
 			if (Selection.Length() == 1 &&
-				Selection.First()->IsContainer())
+				Selection[0]->IsContainer())
 			{
-				Top = Selection.First();
+				Top = Selection[0];
 			}
 			if (!Top)
 			{
-				Top = dynamic_cast<ResDialogCtrl*>(Children.First());
+				Top = dynamic_cast<ResDialogCtrl*>(Children[0]);
 			}
 			if (Top)
 			{
@@ -4122,7 +4125,7 @@ ResDialogUi::ResDialogUi(ResDialog *Res)
 
 	if (Res)
 	{
-		Res->OnSelect(Res->Selection.First());
+		Res->OnSelect(Res->Selection[0]);
 		ShortCutView *scv = Res->App()->GetShortCutView();
 		if (scv)
 			scv->OnDialogChange(Res);
@@ -4143,7 +4146,7 @@ ResDialogUi::~ResDialogUi()
 void ResDialogUi::OnPaint(GSurface *pDC)
 {
 	GRegion Client(0, 0, X()-1, Y()-1);
-	for (GViewI *w = Children.First(); w; w = Children.Next())
+	for (auto w: Children)
 	{
 		GRect r = w->GetPos();
 		Client.Subtract(&r);
@@ -4161,7 +4164,7 @@ void ResDialogUi::PourAll()
 	GRegion Client(GetClient());
 	GRegion Update;
 
-	for (GViewI *v = Children.First(); v; v = Children.Next())
+	for (auto v: Children)
 	{
 		GRect OldPos = v->GetPos();
 		Update.Union(&OldPos);

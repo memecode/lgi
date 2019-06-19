@@ -1152,7 +1152,8 @@ void GTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 
 	if (!PartialPour)
 	{
-		GTextLine *Last = Line.Length() ? Line.Last() : 0;
+		auto It = Line.rbegin();
+		GTextLine *Last = It != Line.end() ? *It : NULL;
 		if (!Last ||
 			Last->Start + Last->Len < Size)
 		{
@@ -1548,7 +1549,7 @@ bool GTextView3::Insert(size_t At, const char16 *Data, ssize_t Len)
 				// non-wrap mode			
 				if (WrapType == TEXTED_WRAP_NONE)
 				{
-					GTextLine *l = Line.Last();
+					GTextLine *l = *Line.rbegin();
 					printf("%s:%i - Insert error: no cur, At=%i, Size=%i, Lines=%i, WrapType=%i\n",
 						_FL, (int)At, (int)Size, (int)Line.Length(), (int)WrapType);
 					if (l)
@@ -1722,24 +1723,26 @@ void GTextView3::DeleteSelection(char16 **Cut)
 	}
 }
 
-GTextView3::GTextLine *GTextView3::GetTextLine(ssize_t Offset, ssize_t *Index)
+List<GTextView3::GTextLine>::I GTextView3::GetTextLineIt(ssize_t Offset, ssize_t *Index)
 {
 	int i = 0;
 
-	for (GTextLine *l = Line.First(); l; l = Line.Next(), i++)
+	for (auto It = Line.begin(); It != Line.end(); It++)
 	{
+		auto l = *It;
+
 		if (Offset >= l->Start && Offset <= l->Start+l->Len)
 		{
 			if (Index)
-			{
 				*Index = i;
-			}
 
-			return l;
+			return It;
 		}
+
+		i++;
 	}
 
-	return NULL;
+	return Line.end();
 }
 
 int64 GTextView3::Value()
@@ -3216,20 +3219,20 @@ void GTextView3::OnPosChange()
 
 int GTextView3::WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState)
 {
-	for (char *s = Formats.First(); s; )
+	for (auto It = Formats.begin(); It != Formats.end(); )
 	{
+		auto s = *It;
+
 		if (!_stricmp(s, "text/uri-list") ||
 			!_stricmp(s, "text/html") ||
 			!_stricmp(s, "UniformResourceLocatorW"))
 		{
-			s = Formats.Next();
+			It++;
 		}
 		else
 		{
-			// LgiTrace("Ignoring format '%s'\n", s);
-			Formats.Delete(s);
+			Formats.Delete(It);
 			DeleteArray(s);
-			s = Formats.Current();
 		}
 	}
 
@@ -3337,11 +3340,14 @@ ssize_t GTextView3::HitText(int x, int y, bool Nearest)
 
 	bool Down = y >= 0;
 	int Y = (VScroll) ? (int)VScroll->Value() : 0;
-	GTextLine *l = Line.ItemAt(Y);
-	y += (l) ? l->r.y1 : 0;
+	auto It = Line.begin(Y);
+	if (It != Line.end())
+		y += (*It)->r.y1;
 
-	while (l)
+	while (It != Line.end())
 	{
+		auto l = *It;
+
 		if (l->r.Overlap(x, y))
 		{
 			// Over a line
@@ -3366,17 +3372,20 @@ ssize_t GTextView3::HitText(int x, int y, bool Nearest)
 			}
 		}
 			
-		l = (Down) ? Line.Next() : Line.Prev();
+		if (Down)
+			It++;
+		else
+			It--;
 		Y++;
 	}
 
 	// outside text area
 	if (Down)
 	{
-		l = Line.Last();
-		if (l)
+		It = Line.rbegin();
+		if (It != Line.end())
 		{
-			if (y > l->r.y2)
+			if (y > (*It)->r.y2)
 			{
 				// end of document
 				return Size;
@@ -4244,12 +4253,14 @@ bool GTextView3::OnKey(GKey &k)
 						goto GTextView3_PageUp;
 					#endif
 					
-					GTextLine *l = GetTextLine(Cursor);
-					if (l)
+					auto It = GetTextLineIt(Cursor);
+					if (It != Line.end())
 					{
-						GTextLine *Prev = Line.Prev();
-						if (Prev)
+						auto l = *It;
+						It--;
+						if (It != Line.end())
 						{
+							GTextLine *Prev = *It;
 							GDisplayString CurLine(Font, Text + l->Start, Cursor-l->Start);
 							int ScreenX = CurLine.X();
 
@@ -4275,12 +4286,14 @@ bool GTextView3::OnKey(GKey &k)
 						goto GTextView3_PageDown;
 					#endif
 
-					GTextLine *l = GetTextLine(Cursor);
-					if (l)
+					auto It = GetTextLineIt(Cursor);
+					if (It != Line.end())
 					{
-						GTextLine *Next = Line.Next();
-						if (Next)
+						auto l = *It;
+						It++;
+						if (It != Line.end())
 						{
+							GTextLine *Next = *It;
 							GDisplayString CurLine(Font, Text + l->Start, Cursor-l->Start);
 							int ScreenX = CurLine.X();
 							
@@ -4809,10 +4822,14 @@ void GTextView3::OnPaint(GSurface *pDC)
 		
 			// draw lines of text
 			int k = ScrollYLine();
-			GTextLine *l=Line.ItemAt(k);
-			int Dy = (l) ? -l->r.y1 : 0;
+			auto It = Line.begin(k);
+			GTextLine *l = NULL;
+			int Dy = 0;
+			if (It != Line.end())
+				Dy = -(*It)->r.y1;
 			ssize_t NextSelection = (SelStart != SelEnd) ? SelMin : -1; // offset where selection next changes
-			if (l &&
+			if (It != Line.end() &&
+				(l = *It) &&
 				SelStart >= 0 &&
 				SelStart < l->Start &&
 				SelEnd > l->Start)
@@ -4834,7 +4851,8 @@ void GTextView3::OnPaint(GSurface *pDC)
 	#endif
 			// loop through all visible lines
 			int y = d->rPadding.y1;
-			for (; l && l->r.y1+Dy < r.Y(); l=Line.Next())
+			while ((l = *It) &&
+					l->r.y1+Dy < r.Y())
 			{
 				GRect Tr = l->r;
 				#ifdef DOUBLE_BUFFER_PAINT
@@ -5108,6 +5126,8 @@ void GTextView3::OnPaint(GSurface *pDC)
 				pDC->Blt(d->rPadding.x1, y, pOut);
 				#endif
 				y += LineY;
+
+				It++;
 
 			} // end of line loop
 

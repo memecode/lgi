@@ -9,19 +9,32 @@
 class GTextLog : public GTextView3, public GStream
 {
 protected:
-    bool RemoveReturns;
-    LMutex Sem;
-    GArray<char16*> Txt;
+	bool RemoveReturns;
+	LMutex Sem;
+	GArray<char16*> Txt;
 
 	void ProcessTxt()
 	{
-	    if (Sem.Lock(_FL))
-	    {
-	        for (uint32_t i=0; i<Txt.Length(); i++)
-	        {
-			    Add(Txt[i]);
+		if (Txt.Length() == 0)
+			return;
+		if (Sem.Lock(_FL))
+		{
+			auto Ts = LgiCurrentTime();
+
+			GRange Del(0, 0);
+			for (uint32_t i=0; i<Txt.Length(); i++)
+			{
+				Add(Txt[i]);
+				Del.Len = i + 1;
+				if (i % 10 == 0 && (LgiCurrentTime() - Ts) > 50)
+				{
+					// Yeah stop doing this and let the message loop run
+					PostEvent(M_LOG_TEXT);
+					break;
+				}
 			}
-			Txt.Length(0);
+
+			Txt.DeleteRange(Del);
 			Sem.Unlock();
 		}
 	}
@@ -29,18 +42,19 @@ protected:
 public:
 	GTextLog(int id) : GTextView3(id, 0, 0, 2000, 1000)
 	{
-	    RemoveReturns = true;
+		RemoveReturns = true;
 		Sunken(true);
 		SetPourLargest(true);
+		SetWrapType(TEXTED_WRAP_NONE);
 	}
 	
 	~GTextLog()
 	{
-	    if (Sem.Lock(_FL))
-	    {
-	        Txt.DeleteArrays();
-	        Sem.Unlock();
-	    }
+		if (Sem.Lock(_FL))
+		{
+			Txt.DeleteArrays();
+			Sem.Unlock();
+		}
 	}
 	
 	void OnCreate()
@@ -92,7 +106,7 @@ public:
 			if (Sem.LockWithTimeout(200, _FL))
 			{
 				Txt.Add(w.Release());
-			    Sem.Unlock();
+				Sem.Unlock();
 			}
 			if (Handle())
 				PostEvent(M_LOG_TEXT);

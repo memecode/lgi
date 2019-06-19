@@ -9,7 +9,7 @@ static char Ws[] = " \r\t\n";
 bool HasTag(List<char> &Tags, char *Tag)
 {
 	int Len = strlen(Tag);
-	for (char *t=Tags.First(); t; t=Tags.Next())
+	for (auto t: Tags)
 	{
 		if (_strnicmp(Tag, t, Len) == 0) return true;
 	}

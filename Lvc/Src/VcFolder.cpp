@@ -2294,13 +2294,17 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 	VcFile *f = NULL;
 	GArray<VcFile*> Add;
 	bool Partial = false;
-	while (d->Files->Iterate(f))
+	for (auto fp: *d->Files)
 	{
-		int c = f->Checked();
-		if (c > 0)
-			Add.Add(f);
-		else
-			Partial = true;
+		VcFile *f = dynamic_cast<VcFile*>(fp);
+		if (f)
+		{
+			int c = f->Checked();
+			if (c > 0)
+				Add.Add(f);
+			else
+				Partial = true;
+		}
 	}
 
 	if (CurrentBranch && Branch &&

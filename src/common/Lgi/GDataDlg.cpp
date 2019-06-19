@@ -148,7 +148,7 @@ bool DataDlgTools::ProcessFields(DataDlgFieldList &Field, bool Write)
 {
 	int Processed = 0;
 	
-	for (DataDlgField *f = Field.First(); f; f = Field.Next())
+	for (auto f: Field)
 	{
 		if (ProcessField(f, Write))
 		{

@@ -788,7 +788,7 @@ bool BuildCppDefnList(char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns, int 
 												 StrcmpW(t, StrColon) == 0)
 										{
 											DeleteArray(CurClassDecl);
-											CurClassDecl = Tok.Last();
+											CurClassDecl = *Tok.rbegin();
 											Tok.Delete(CurClassDecl);
 											
 											if (LimitTo == DefnNone || (LimitTo & DefnClass) != 0)

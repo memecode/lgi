@@ -680,12 +680,11 @@ void GWindow::PourAll()
 	GRegion Client(GetClient());
 	GRegion Update;
 	bool HasTools = false;
-	GViewI *v;
-
+	
 	{
 		GRegion Tools;
 
-		for (v = Children.First(); v; v = Children.Next())
+		for (auto v: Children)
 		{
 			GView *k = dynamic_cast<GView*>(v);
 			if (k && k->_IsToolBar)
@@ -742,7 +741,7 @@ void GWindow::PourAll()
 		}
 	}
 
-	for (v = Children.First(); v; v = Children.Next())
+	for (auto v: Children)
 	{
 		GView *k = dynamic_cast<GView*>(v);
 		if (!(k && k->_IsToolBar))

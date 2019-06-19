@@ -1116,19 +1116,18 @@ int GRichTextEdit::WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState)
 {
 	const char *Fd = LGI_FileDropFormat;
 
-	for (char *s = Formats.First(); s; )
+	for (auto It = Formats.begin(); It != Formats.end(); )
 	{
+		auto s = *It;
 		if (!_stricmp(s, Fd) ||
 			!_stricmp(s, "UniformResourceLocatorW"))
 		{
-			s = Formats.Next();
+			It++;
 		}
 		else
 		{
-			// LgiTrace("Ignoring format '%s'\n", s);
-			Formats.Delete(s);
+			Formats.Delete(It);
 			DeleteArray(s);
-			s = Formats.Current();
 		}
 	}
 

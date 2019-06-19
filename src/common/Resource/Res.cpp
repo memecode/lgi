@@ -840,17 +840,15 @@ LgiFunc char *_LgiGenLangLookup()
 			}
 		}
 
-		if (d.First())
+		if (d.Length())
 		{
-			GLanguage *t;
-
 			sprintf_s(s, sizeof(s),
 					"\tcase '%c':\n"
 					"\t{\n", i);
 			p.Push(s);
 
 			n = 0;
-			for (t=d.First(); t; t=d.Next(), n++)
+			for (auto t: d)
 			{
 				if (strlen(t->Id) > 2)
 				{
@@ -869,12 +867,13 @@ LgiFunc char *_LgiGenLangLookup()
 							*Index[n]);
 					p.Push(s);
 				}
+				n++;
 			}
 
 			p.Push("\t\tswitch (tolower(Id[1]))\n\t\t{\n");
 
 			n = 0;
-			for (t=d.First(); t; t=d.Next(), n++)
+			for (auto t: d)
 			{
 				if (strlen(t->Id) == 2)
 				{
@@ -885,6 +884,7 @@ LgiFunc char *_LgiGenLangLookup()
 							*Index[n]);
 					p.Push(s);
 				}
+				n++;
 			}
 
 			p.Push("\t\t}\n");
@@ -1328,7 +1328,7 @@ bool ResObjectImpl::Res_GetChildren(List<ResObjectImpl> *Children, bool Deep)
 	bool Status = Factory->Res_GetChildren(Object, &l, Deep);
 	if (Status && Children)
 	{
-		for (ResObject *o = l.First(); o; o = l.Next())
+		for (auto o: l)
 		{
 			Children->Insert(GetImpl(o));
 		}
@@ -1348,7 +1348,7 @@ bool ResObjectImpl::Res_GetItems(List<ResObjectImpl> *Items)
 	bool Status = Factory->Res_GetItems(Object, &l);
 	if (Status && Items)
 	{
-		for (ResObject *o = l.First(); o; o = l.Next())
+		for (auto o: l)
 		{
 			Items->Insert(GetImpl(o));
 		}
@@ -1430,7 +1430,7 @@ ResObjectImpl::SStatus ResDialogObj::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 	Res_SetPos(Tag);
 	Res_SetStrRef(Tag, &Ctx);
 
-	for (GXmlTag *t = Tag->Children.First(); t; t = Tag->Children.Next())
+	for (auto t: Tag->Children)
 	{
 		ResObjectImpl *Ctrl = CreateCtrl(t, Object);
 		if (Ctrl && Ctrl->Res_Read(t, Ctx))
@@ -1466,7 +1466,7 @@ ResObjectImpl::SStatus ResDialogObj::Res_Write(GXmlTag *t)
 	List<ResObjectImpl> Children;
 	if (Res_GetChildren(&Children, false))
 	{
-		for (ResObjectImpl *c = Children.First(); c; c = Children.Next())
+		for (auto c: Children)
 		{
 			GXmlTag *a = new GXmlTag;
 			if (a)
@@ -1547,12 +1547,12 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 			memset(Used, 0, sizeof(*Used) * Cx * Cy);
 
 			int x = 0, y = 0;
-			for (GXmlTag *Tr = Tag->Children.First(); Tr; Tr = Tag->Children.Next())
+			for (auto Tr: Tag->Children)
 			{
 				if (!Tr->IsTag("Tr"))
 					continue;
 
-				for (GXmlTag *Td = Tr->Children.First(); Td; Td = Tr->Children.Next())
+				for (auto Td: Tr->Children)
 				{
 					if (!Td->IsTag("Td"))
 						continue;
@@ -1604,7 +1604,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 
 							if (v.SetList())
 							{
-								for (GXmlTag *Ctrl = Td->Children.First(); Ctrl; Ctrl = Td->Children.Next())
+								for (auto Ctrl: Td->Children)
 								{
 									ResObjectImpl *c = CreateCtrl(Ctrl, Object);
 									if (c)
@@ -1732,7 +1732,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Write(GXmlTag *t)
 										if (c->GetValue("children", v) &&
 											v.Type == GV_LIST)
 										{
-											for (GVariant *n = v.Value.Lst->First(); n; n = v.Value.Lst->Next())
+											for (auto n: *v.Value.Lst)
 											{
 												if (n->Type == GV_VOID_PTR)
 												{
@@ -1802,7 +1802,7 @@ ResObjectImpl::SStatus ResGroup::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 {
 	ResObjectImpl::SStatus s = ResObjectImpl::Res_Read(Tag, Ctx);
 
-	for (GXmlTag *t = Tag->Children.First(); t; t = t = Tag->Children.Next())
+	for (auto t: Tag->Children)
 	{
 		ResObjectImpl *Ctrl = CreateCtrl(t, Object);
 		if (Ctrl && Ctrl->Res_Read(t, Ctx))
@@ -1826,7 +1826,7 @@ ResObjectImpl::SStatus ResGroup::Res_Write(GXmlTag *t)
 	List<ResObjectImpl> Children;
 	if (Res_GetChildren(&Children, false))
 	{
-		for (ResObjectImpl *c = Children.First(); c; c = Children.Next())
+		for (auto c: Children)
 		{
 			GXmlTag *a = new GXmlTag;
 			if (a && c->Res_Write(a))
@@ -1852,7 +1852,7 @@ ResObjectImpl::SStatus ResTab::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 	if (!Res_SetStrRef(Tag, &Ctx))
 		return SExclude;
 
-	for (GXmlTag *t = Tag->Children.First(); t; t = Tag->Children.Next())
+	for (auto t: Tag->Children)
 	{
 		ResObjectImpl *Ctrl = CreateCtrl(t, Object);
 		if (!Ctrl)
@@ -1887,7 +1887,7 @@ ResObjectImpl::SStatus ResTab::Res_Write(GXmlTag *t)
 	List<ResObjectImpl> Children;
 	if (Res_GetChildren(&Children, false))
 	{
-		for (ResObjectImpl *c = Children.First(); c; c = Children.Next())
+		for (auto c: Children)
 		{
 			GXmlTag *a = new GXmlTag;
 			if (a && c->Res_Write(a))
@@ -1913,7 +1913,7 @@ ResObjectImpl::SStatus ResTabView::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 	Res_SetPos(Tag);
 	Res_SetStrRef(Tag, &Ctx);
 
-	for (GXmlTag *t = Tag->Children.First(); t; t = Tag->Children.Next())
+	for (auto t: Tag->Children)
 	{
 		if (!t->IsTag(Res_Tab))
 		{
@@ -1944,7 +1944,7 @@ ResObjectImpl::SStatus ResTabView::Res_Write(GXmlTag *t)
 	List<ResObjectImpl> Items;
 	if (Res_GetItems(&Items))
 	{
-		for (ResObjectImpl *Tab = Items.First(); Tab; Tab = Items.Next())
+		for (auto Tab: Items)
 		{
 			GXmlTag *a = new GXmlTag;
 			if (a && Tab->Res_Write(a))
@@ -2009,7 +2009,7 @@ ResObjectImpl::SStatus ResListView::Res_Read(GXmlTag *t, ResReadCtx &Ctx)
 	Res_SetStrRef(t, &Ctx);
 	Factory->Res_SetProperties(Object, t);
 
-	for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+	for (auto c: t->Children)
 	{
 		if (stricmp(c->GetTag(), Res_Column) == 0)
 		{
@@ -2041,7 +2041,7 @@ ResObjectImpl::SStatus ResListView::Res_Write(GXmlTag *t)
 	List<ResObjectImpl> Items;
 	if (Res_GetItems(&Items))
 	{
-		for (ResObjectImpl *c = Items.First(); c; c = Items.Next())
+		for (auto c: Items)
 		{
 			GXmlTag *a = new GXmlTag;
 			if (a && c->Res_Write(a))
@@ -2128,7 +2128,8 @@ ResObjectImpl::SStatus ResControlTree::Res_Write(GXmlTag *t)
 		if (n)
 		{
 			GXmlTag *c;
-			while ((c = n->Children.First()))
+			while (n->Children.Length() &&
+				(c = n->Children[0]))
 			{
 				t->InsertTag(c);
 			}

@@ -1459,7 +1459,7 @@ const char *LgiDetectCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
 	{
 		if (Prefs)
 		{
-			for (char *p = Prefs->First(); p; p = Prefs->Next())
+			for (auto p: *Prefs)
 			{
 				GCharset *Cp = CharsetSystem.GetCsInfo(p);
 				if (Cp &&

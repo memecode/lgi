@@ -225,6 +225,7 @@ public:
 		return Items.end();
 	}
 
+	/*
 	template<typename T>
 	bool Iterate(T *&Ptr)
 	{
@@ -237,6 +238,7 @@ public:
 
 		return Ptr != NULL;
 	}
+	*/
 };
 
 /// List widget
@@ -406,10 +408,8 @@ public:
 
 	/// Returns true if the list is empty
 	bool IsEmpty() { return Items.Length() == 0; }
-	/// Deletes the current item
-	bool Delete();
 	/// Deletes the item at index 'Index'
-	bool Delete(int Index);
+	bool Delete(ssize_t Index);
 	/// Deletes the item 'p'
 	virtual bool Delete(LListItem *p);
 	/// Remove the item 'Obj' but don't delete it

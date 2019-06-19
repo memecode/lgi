@@ -112,7 +112,7 @@ public:
 		List<IdeProject> All;
 		p->GetChildProjects(All);
 		All.Insert(p);							
-		for (p=All.First(); p; p=All.Next())
+		for (auto p: All)
 		{
 			p->GetAllNodes(Nodes);
 		}
@@ -410,7 +410,7 @@ public:
 		}
 		else
 		{
-			for (GTextLine *l=Line.First(); l; l=Line.Next())
+			for (auto l: Line)
 			{
 				char16 *t = Text + l->Start;
 				
@@ -659,7 +659,7 @@ public:
 							}
 							if (w)
 							{
-								for (GXmlTag *c = w->Children.First(); c; c = w->Children.Next())
+								for (auto c: w->Children)
 								{
 									if (c->IsTag("watch"))
 									{
@@ -1105,9 +1105,11 @@ public:
 		if (Context && !Full)
 		{
 			char *Dir = strrchr(Context, DIR_CHAR);
-			for (IdeProject *p=Projects.First(); p && !ContextPath; p=Projects.Next())
+			for (auto p: Projects)
 			{
 				ContextPath = p->FindFullPath(Dir?Dir+1:Context);
+				if (ContextPath)
+					break;
 			}
 			
 			if (ContextPath)
@@ -1149,9 +1151,10 @@ public:
 		if (!Full)
 		{
 			char *Dir = dirchar(File, true);
-			for (IdeProject *p=Projects.First(); p && !Full; p=Projects.Next())
+			for (auto p: Projects)
 			{
-				Full.Reset(p->FindFullPath(Dir?Dir+1:File));
+				if (Full.Reset(p->FindFullPath(Dir?Dir+1:File)))
+					break;
 			}
 			
 			if (!Full)
@@ -1328,10 +1331,12 @@ public:
 		{
 			RecentFilesMenu->Empty();
 			int n=0;
-			char *f=RecentFiles.First();
+
+			auto It = RecentFiles.begin();
+			char *f = *It;
 			if (f)
 			{
-				for (; f; f=RecentFiles.Next())
+				for (; f; f=*(++It))
 				{
 					RecentFilesMenu->AppendItem(f, IDM_RECENT_FILE+n++, true);
 				}
@@ -1346,10 +1351,12 @@ public:
 		{
 			RecentProjectsMenu->Empty();
 			int n=0;
-			char *f=RecentProjects.First();
+
+			auto It = RecentProjects.begin();
+			char *f = *It;
 			if (f)
 			{
-				for (; f; f=RecentProjects.Next())
+				for (; f; f = *(++It))
 				{
 					RecentProjectsMenu->AppendItem(f, IDM_RECENT_PROJECT+n++, true);
 				}
@@ -1365,7 +1372,7 @@ public:
 			WindowsMenu->Empty();
 			Docs.Sort(DocSorter);
 			int n=0;
-			for (IdeDoc *d=Docs.First(); d; d=Docs.Next())
+			for (auto d: Docs)
 			{
 				const char *File = d->GetFileName();
 				if (!File) File = "(untitled)";
@@ -1373,7 +1380,7 @@ public:
 				WindowsMenu->AppendItem(Dir?Dir+1:File, IDM_WINDOWS+n++, true);
 			}
 			
-			if (!Docs.First())
+			if (!Docs.Length())
 			{
 				WindowsMenu->AppendItem(None, 0, false);
 			}
@@ -1385,7 +1392,7 @@ public:
 		if (File)
 		{
 			List<char> *Recent = IsProject ? &RecentProjects : &RecentFiles;
-			for (char *f=Recent->First(); f; f=Recent->Next())
+			for (auto f: *Recent)
 			{
 				if (stricmp(f, File) == 0)
 				{
@@ -1399,7 +1406,7 @@ public:
 			Recent->Insert(NewStr(File), 0);
 			while (Recent->Length() > 10)
 			{
-				char *f = Recent->Last();
+				char *f = *Recent->rbegin();
 				Recent->Delete(f);
 				DeleteArray(f);
 			}
@@ -1415,7 +1422,7 @@ public:
 			List<char> *Recent[3] = { &RecentProjects, &RecentFiles, 0 };
 			for (List<char> **r = Recent; *r; r++)
 			{
-				for (char *f=(*r)->First(); f; f=(*r)->Next())
+				for (auto f: **r)
 				{
 					if (stricmp(f, File) == 0)
 					{
@@ -1440,7 +1447,7 @@ public:
 			return NULL;
 		}
 		
-		for (IdeDoc *Doc = Docs.First(); Doc; Doc = Docs.Next())
+		for (auto Doc: Docs)
 		{
 			if (Doc->IsFile(File))
 			{
@@ -1456,7 +1463,7 @@ public:
 	{
 		if (File)
 		{
-			for (IdeProject *p = Projects.First(); p; p = Projects.Next())
+			for (auto p: Projects)
 			{
 				if (p->GetFileName() && stricmp(p->GetFileName(), File) == 0)
 				{
@@ -1474,7 +1481,7 @@ public:
 		if (Write)
 		{
 			GMemQueue p;
-			for (char *s = Lst->First(); s; s = Lst->Next())
+			for (auto s: *Lst)
 			{
 				p.Write((uchar*)s, strlen(s)+1);
 			}
@@ -2221,15 +2228,15 @@ void AppWnd::SaveAll()
 void AppWnd::CloseAll()
 {
 	SaveAll();
-	while (d->Docs.First())
-		delete d->Docs.First();
+	while (d->Docs[0])
+		delete d->Docs[0];
 	
 	IdeProject *p = RootProject();
 	if (p)
 		DeleteObj(p);
 	
-	while (d->Projects.First())
-		delete d->Projects.First();	
+	while (d->Projects[0])
+		delete d->Projects[0];	
 
 	DeleteObj(d->DbgContext);
 }
@@ -2574,7 +2581,7 @@ IdeProject *AppWnd::RootProject()
 {
 	IdeProject *Root = 0;
 	
-	for (IdeProject *p=d->Projects.First(); p; p=d->Projects.Next())
+	for (auto p: d->Projects)
 	{
 		if (!p->GetParentProject())
 		{
@@ -3134,7 +3141,7 @@ bool AppWnd::ShowInProject(const char *Fn)
 	if (!Fn)
 		return false;
 	
-	for (IdeProject *p=d->Projects.First(); p; p=d->Projects.Next())
+	for (auto p: d->Projects)
 	{
 		ProjectNode *Node = NULL;
 		if (p->FindFullPath(Fn, &Node))
@@ -3398,7 +3405,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						p->GetChildProjects(Projects);
 
 						GArray<ProjectNode*> Nodes;
-						for (IdeProject *p = Projects.First(); p; p = Projects.Next())
+						for (auto p: Projects)
 							p->GetAllNodes(Nodes);
 
 						for (unsigned i=0; i<Nodes.Length(); i++)
@@ -3496,7 +3503,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			p->GetChildProjects(Projects);
 
 			GArray<ProjectNode*> Nodes;
-			for (p = Projects.First(); p; p = Projects.Next())
+			for (auto p: Projects)
 				p->GetAllNodes(Nodes);
 
 			GAutoPtr<FindParams> Params(new FindParams);
@@ -4008,7 +4015,7 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 					{
 						GXmlTag *Projects = NULL;
 						char *Name;
-						for (GXmlTag *c = Opts->Children.First(); c; c = Opts->Children.Next())
+						for (auto c: Opts->Children)
 						{
 							if (c->IsTag("ToolsOptionsCategory") &&
 								(Name = c->GetAttr("Name")) &&
@@ -4020,36 +4027,34 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 						}
 
 						GXmlTag *VCDirectories = NULL;
-						for (GXmlTag *c = Projects ? Projects->Children.First() : NULL;
-							c;
-							c = Projects->Children.Next())
-						{
-							if (c->IsTag("ToolsOptionsSubCategory") &&
-								(Name = c->GetAttr("Name")) &&
-								!stricmp(Name, "VCDirectories"))
+						if (Projects)
+							for (auto c: Projects->Children)
 							{
-								VCDirectories = c;
-								break;
-							}
-						}
-
-						for (GXmlTag *prop = VCDirectories ? VCDirectories->Children.First() : NULL;
-							prop;
-							prop = VCDirectories->Children.Next())
-						{
-							if (prop->IsTag("PropertyValue") &&
-								(Name = prop->GetAttr("Name")) &&
-								!stricmp(Name, "IncludeDirectories"))
-							{
-								char *Bar = strchr(prop->GetContent(), '|');
-								GToken t(Bar ? Bar + 1 : prop->GetContent(), ";");
-								for (int i=0; i<t.Length(); i++)
+								if (c->IsTag("ToolsOptionsSubCategory") &&
+									(Name = c->GetAttr("Name")) &&
+									!stricmp(Name, "VCDirectories"))
 								{
-									char *s = t[i];
-									d->SystemIncludePaths.New().Reset(NewStr(s));
+									VCDirectories = c;
+									break;
 								}
 							}
-						}
+
+						if (VCDirectories)
+							for (auto prop: VCDirectories->Children)
+							{
+								if (prop->IsTag("PropertyValue") &&
+									(Name = prop->GetAttr("Name")) &&
+									!stricmp(Name, "IncludeDirectories"))
+								{
+									char *Bar = strchr(prop->GetContent(), '|');
+									GToken t(Bar ? Bar + 1 : prop->GetContent(), ";");
+									for (int i=0; i<t.Length(); i++)
+									{
+										char *s = t[i];
+										d->SystemIncludePaths.New().Reset(NewStr(s));
+									}
+								}
+							}
 					}
 				}
 			}

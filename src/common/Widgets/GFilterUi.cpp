@@ -113,17 +113,17 @@ public:
 		
 		SelectDropTarget(i);
 
-		for (char *f = Formats.First(); f; )
+		for (auto It = Formats.begin(); It != Formats.end(); )
 		{
+			auto f = *It;
 			if (!_stricmp(f, FILTER_DRAG_FORMAT))
 			{
-				f = Formats.Next();
+				It++;
 			}
 			else
 			{
 				Formats.Delete(f);
 				DeleteArray(f);
-				f = Formats.Current();
 			}
 		}
 		

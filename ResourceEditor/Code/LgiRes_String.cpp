@@ -40,7 +40,7 @@ LangDlg::LangDlg(GView *parent, List<GLanguage> &l, int Init)
 			Sel->Sub(GV_STRING);
 		}
 
-		for (GLanguage *li = l.First(); li; li = l.Next())
+		for (auto li: l)
 		{
 			Langs.Insert(li);
 			Sel->Insert(li->Name);
@@ -166,7 +166,7 @@ ResString::~ResString()
 		Group->LList::Remove(this);
 	}
 
-	for (StrLang *s = Items.First(); s; s = Items.Next())
+	for (auto s: Items)
 	{
 		DeleteObj(s);
 	}
@@ -225,7 +225,7 @@ ResString &ResString::operator =(ResString &s)
 	DeleteObj(Tag);
 	Tag = NewStr(s.Tag);
 	
-	for (StrLang *l = s.Items.First(); l; l = s.Items.Next())
+	for (auto l: s.Items)
 	{
 		Set(l->GetStr(), l->GetLang());
 	}
@@ -354,7 +354,7 @@ bool ResString::Test(ErrorCollection *e)
 	}
 	#endif
 
-	for (StrLang *s = Items.First(); s; s = Items.Next())
+	for (auto s: Items)
 	{
 		if (!LgiIsUtf8(s->GetStr()))
 		{
@@ -466,17 +466,14 @@ bool ResString::Write(GXmlTag *t, SerialiseContext &Ctx)
 	}
 	if (Tag) t->SetAttr("Tag", Tag);
 
-	StrLang *s;
 	char *English = 0;
-	for (s = Items.First(); s; s = Items.Next())
+	for (auto s: Items)
 	{
 		if (s->IsEnglish())
-		{
 			English = s->GetStr();
-		}
 	}
 
-	for (s = Items.First(); s; s = Items.Next())
+	for (auto s: Items)
 	{
 		if (ValidStr(s->GetStr()))
 		{
@@ -538,7 +535,7 @@ bool ResString::Write(GXmlTag *t, SerialiseContext &Ctx)
 
 StrLang *ResString::GetLang(GLanguageId i)
 {
-	for (StrLang *s = Items.First(); s; s = Items.Next())
+	for (auto s: Items)
 	{
 		if (stricmp(s->GetLang(), i) == 0)
 		{
@@ -615,7 +612,7 @@ int ResString::NewId()
 	{
 		Group->AppWindow->FindStrings(sl, Define);
 		int NewId = Group->AppWindow->GetUniqueCtrlId();
-		for (ResString *s = sl.First(); s; s = sl.Next())
+		for (auto s: sl)
 		{
 			s->SetId(NewId);
 			s->Update();
@@ -657,7 +654,7 @@ char *ResString::GetText(int i)
 				GLanguage *Info = Group->Visible[LangIdx];
 				if (Info)
 				{
-					for (StrLang *s = Items.First(); s; s = Items.Next())
+					for (auto s: Items)
 					{
 						if (*s == Info->Id)
 						{
@@ -738,7 +735,7 @@ void ResString::OnMouseClick(GMouse &m)
 						if (GetList()->GetSelection(a))
 						{
 							bool Dirty = false;
-							for (ResString *s = a.First(); s; s = a.Next())
+							for (auto s: a)
 							{
 								if (s->GetId() != s->GetRef())
 								{
@@ -764,7 +761,7 @@ void ResString::OnMouseClick(GMouse &m)
 						if (GetList()->GetSelection(a))
 						{
 							bool Dirty = false;
-							for (ResString *s = a.First(); s; s = a.Next())
+							for (auto s: a)
 							{
 								if (s->GetId() != s->GetRef())
 								{
@@ -803,7 +800,7 @@ void ResString::CopyText()
 		p.Push(TranslationStrMagic);
 		p.Push(EOL_SEQUENCE);
 
-		for (StrLang *s=Items.First(); s; s=Items.Next())
+		for (auto s: Items)
 		{
 			char Str[256];
 			sprintf(Str, "%s,%s", s->GetLang(), s->GetStr());
@@ -899,10 +896,9 @@ ResStringGroup::ResStringGroup(AppWnd *w, int type) :
 
 ResStringGroup::~ResStringGroup()
 {
-	ResString *s;
-	while ((s = Strs.First()))
+	while (Strs.Length())
 	{
-		DeleteObj(s);
+		delete Strs[0];
 	}
 
 	DeleteObj(Ui);
@@ -1102,17 +1098,13 @@ void ResStringGroup::Sort()
 
 void ResStringGroup::RemoveUnReferenced()
 {
-	for (ResString *s = Strs.First(); s; )
+	for (auto It = Strs.begin(); It != Strs.end(); )
 	{
+		auto s = *It;
 		if (!s->UpdateWnd)
-		{
 			DeleteStr(s);
-			s = Strs.Current();
-		}
 		else
-		{
-			s = Strs.Next();
-		}
+			It++;
 	}
 }
 
@@ -1127,12 +1119,10 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 		}
 		case IDM_DELETE:
 		{
-			List<LListItem> l;
+			List<ResString> l;
 			if (GetSelection(l))
 			{
-				for (	ResString *s = dynamic_cast<ResString*>(l.First());
-						s;
-						s = dynamic_cast<ResString*>(l.Next()))
+				for (auto s: l)
 				{
 					DeleteObj(s);
 				}
@@ -1232,9 +1222,7 @@ ResString *ResStringGroup::FindName(char *Name)
 {
 	if (Name)
 	{
-		for (	ResString *s = Strs.First();
-				s;
-				s = Strs.Next())
+		for (auto s: Strs)
 		{
 			if (stricmp(s->Define, Name) == 0)
 			{
@@ -1247,9 +1235,7 @@ ResString *ResStringGroup::FindName(char *Name)
 
 ResString *ResStringGroup::FindRef(int Ref)
 {
-	for (	ResString *s = Strs.First();
-			s;
-			s = Strs.Next())
+	for (auto s: Strs)
 	{
 		if (s->GetRef() == Ref)
 		{
@@ -1263,8 +1249,9 @@ ResString *ResStringGroup::FindRef(int Ref)
 int ResStringGroup::UniqueRef()
 {
 	int n = 1;
-	for (ResString *i = dynamic_cast<ResString*>(Items.First()); i; i = dynamic_cast<ResString*>(Items.Next()))
+	for (auto li: Items)
 	{
+		auto i = dynamic_cast<ResString*>(li);
 		n = MAX(n, i->Ref);
 	}
 
@@ -1275,9 +1262,10 @@ int ResStringGroup::UniqueId(char *Define)
 {
 	int n = 1;
 
-	for (ResString *i = dynamic_cast<ResString*>(Items.First()); i;
-					i = dynamic_cast<ResString*>(Items.Next()))
+	for (auto li: Items)
 	{
+		auto i = dynamic_cast<ResString*>(li);
+
 		if (i->Id &&
 			i->Define &&
 			Define &&
@@ -1302,14 +1290,18 @@ void ResStringGroup::SetLanguages()
 	List<GLanguage> l;
 	bool EnglishFound = false;
 
-	for (	ResString *s = Strs.First();
-			s;
-			s = Strs.Next())
+	for (auto s: Strs)
 	{
-		for (StrLang *sl = s->Items.First(); sl; sl = s->Items.Next())
+		for (auto sl: s->Items)
 		{
 			GLanguage *li = 0;
-			for (li = l.First(); li && *sl != li->Id; li = l.Next());
+			for (auto i: l)
+				if (*sl == i->Id)
+				{
+					li = i;
+					break;
+				}
+			
 			if (!li)
 			{
 				GLanguage *NewLang = GFindLang(sl->GetLang());
@@ -1328,7 +1320,7 @@ void ResStringGroup::SetLanguages()
 
 	int n = 0;
 	Lang[n++] = GFindLang("en");
-	for (GLanguage *li = l.First(); li; li = l.Next())
+	for (auto li: l)
 	{
 		if (stricmp(li->Id, "en") != 0) // !English
 		{
@@ -1362,7 +1354,7 @@ bool ResStringGroup::Test(ErrorCollection *e)
 {
 	bool Status = true;
 
-	for (ResString *s = Strs.First(); s; s = Strs.Next())
+	for (auto s: Strs)
 	{
 		if (!s->Test(e))
 		{
@@ -1399,12 +1391,12 @@ bool ResStringGroup::Read(GXmlTag *t, SerialiseContext &Ctx)
 		LHashTbl<ConstStrKey<char,false>, bool> L;
 		L.Add("en", true);
 		Status = true;
-		for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+		for (auto c: t->Children)
 		{
 			ResString *s = new ResString(this);
 			if (s && s->Read(c, Ctx))
 			{
-				for (StrLang *i=s->Items.First(); i; i=s->Items.Next())
+				for (auto i: s->Items)
 				{
 					if (!L.Find(i->GetLang()))
 					{
@@ -1441,7 +1433,7 @@ bool ResStringGroup::Write(GXmlTag *t, SerialiseContext &Ctx)
 	t->SetAttr("Name", n);
 	DeleteArray(n);
 
-	for (LListItem *i = Strs.First(); i; i = Strs.Next())
+	for (auto i: Strs)
 	{
 		ResString *s = dynamic_cast<ResString*>(i);
 		if (s && (s->Define || s->Items.Length() > 0))
@@ -1565,7 +1557,7 @@ ResStringUi::~ResStringUi()
 void ResStringUi::OnPaint(GSurface *pDC)
 {
 	GRegion Client(0, 0, X()-1, Y()-1);
-	for (GViewI *w = Children.First(); w; w = Children.Next())
+	for (auto w: Children)
 	{
 		GRect r = w->GetPos();
 		Client.Subtract(&r);
@@ -1583,7 +1575,7 @@ void ResStringUi::PourAll()
 	GRegion Client(GetClient());
 	GRegion Update;
 
-	for (GViewI *v = Children.First(); v; v = Children.Next())
+	for (auto v: Children)
 	{
 		GRect OldPos = v->GetPos();
 		Update.Union(&OldPos);

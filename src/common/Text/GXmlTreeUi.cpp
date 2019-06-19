@@ -34,7 +34,7 @@ struct Mapping
 
 	void LoadTree(GTreeNode *n, GXmlTag *t)
 	{
-		for (GXmlTag *c=t->Children.First(); c; c=t->Children.Next())
+		for (auto c: t->Children)
 		{
 			GTreeItem *i = TreeItemFactory(User);
 			if (i)
@@ -272,7 +272,7 @@ bool GXmlTreeUi::Convert(GDom *Tag, GViewI *Ui, bool ToUI)
 						LList *Lst;
 						if (!Ui->GetViewById(Map.value->Id, Lst)) continue;
 						Lst->Empty();
-						for (GXmlTag *c=t->Children.First(); c; c=t->Children.Next())
+						for (auto c: t->Children)
 						{
 							LListItem *i = Map.value->ListItemFactory(Map.value->User);
 							if (i)
@@ -355,7 +355,7 @@ bool GXmlTreeUi::Convert(GDom *Tag, GViewI *Ui, bool ToUI)
 
 							List<LListItem> All;
 							Lst->GetAll(All);
-							for (LListItem *i = All.First(); i; i = All.Next())
+							for (auto i: All)
 							{
 								GXmlTag *n = new GXmlTag(Map.value->ChildElements.Str());
 								if (n)

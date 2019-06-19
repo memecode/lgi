@@ -319,7 +319,7 @@ void GDataGridPriv::Create(int NewCol)
 						GVariant &e = ColumnArgs[Col];
 						if (e.Type == GV_LIST)
 						{
-							for (GVariant *v = e.Value.Lst->First(); v; v = e.Value.Lst->Next())
+							for (auto v: *e.Value.Lst)
 							{
 								char *s = v->Str();
 								Combo->Insert(s);
@@ -434,7 +434,7 @@ void GDataGrid::OnItemClick(LListItem *Item, GMouse &m)
 				GetSelection(Sel);
 				GStringPipe p(256);
 				int Cols = GetColumns();
-				for (LListItem *i=Sel.First(); i; i=Sel.Next())
+				for (auto i: Sel)
 				{
 					for (int c=0; c<Cols; c++)
 					{
@@ -452,7 +452,7 @@ void GDataGrid::OnItemClick(LListItem *Item, GMouse &m)
 				List<LListItem> Sel;
 				GetSelection(Sel);
 				d->Deleted.Length(0);
-				for (LListItem *i=Sel.First(); i; i=Sel.Next())
+				for (auto i: Sel)
 				{
 					d->Deleted.Add(IndexOf(i));
 				}
@@ -594,7 +594,7 @@ void GDataGrid::SetDndFormats(char *SrcFmt, char *AcceptFmt)
 
 int GDataGrid::WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState)
 {
-	for (char *f=Formats.First(); f; f=Formats.Next())
+	for (auto f: Formats)
 	{
 		if (d->AcceptFmt && !stricmp(f, d->AcceptFmt))
 		{
@@ -668,7 +668,7 @@ bool GDataGrid::GetData(GArray<GDragData> &Data)
 			if (GetSelection(s))
 			{
 				GArray<LListItem*> a;
-				for (LListItem *it=s.First(); it; it=s.Next())
+				for (auto it: s)
 				{
 					a.Add(it);
 				}

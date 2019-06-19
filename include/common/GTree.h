@@ -240,7 +240,7 @@ public:
 	/// Remove but don't delete an item
 	bool Remove(GTreeItem *Obj);
 	/// Gets the item at an index
-	GTreeItem *ItemAt(size_t Pos) { return Items.ItemAt(Pos); }
+	GTreeItem *ItemAt(size_t Pos) { return Items[Pos]; }
 
 	/// Select the item 'Obj'
 	bool Select(GTreeItem *Obj);

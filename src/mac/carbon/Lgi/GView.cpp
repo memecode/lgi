@@ -355,7 +355,7 @@ void GView::_Delete()
 	Pos.ZOff(-1, -1);
 
 	GViewI *c;
-	while ((c = Children.First()))
+	while ((c = Children[0]))
 	{
 		if (c->GetParent() != (GViewI*)this)
 		{

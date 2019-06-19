@@ -49,7 +49,7 @@ GSubMenu::~GSubMenu()
 {
 	while (Items.Length())
 	{
-		GMenuItem *i = Items.First();
+		GMenuItem *i = Items[0];
 		if (i->Parent != this)
 		{
 			i->Parent = NULL;
@@ -66,7 +66,7 @@ GSubMenu::~GSubMenu()
 
 void GSubMenu::OnAttach(bool Attach)
 {
-	for (GMenuItem *i = Items.First(); i; i = Items.Next())
+	for (auto i: Items)
 	{
 		i->OnAttach(Attach);
 	}
@@ -296,9 +296,9 @@ GSubMenu *GSubMenu::AppendSub(const char *Str, int Where)
 
 void GSubMenu::Empty()
 {
-	while (Items.First())
+	while (Items[0])
 	{
-		RemoveItem(Items.First());
+		RemoveItem(Items[0]);
 	}
 }
 
@@ -410,7 +410,7 @@ int GSubMenu::Float(GView *From, int x, int y, int Btns)
 
 GSubMenu *GSubMenu::FindSubMenu(int Id)
 {
-	for (GMenuItem *i = Items.First(); i; i = Items.Next())
+	for (auto i: Items)
 	{
 		GSubMenu *Sub = i->Sub();
 
@@ -433,7 +433,7 @@ GSubMenu *GSubMenu::FindSubMenu(int Id)
 
 GMenuItem *GSubMenu::FindItem(int Id)
 {
-	for (GMenuItem *i = Items.First(); i; i = Items.Next())
+	for (auto i: Items)
 	{
 		GSubMenu *Sub = i->Sub();
 
@@ -1342,7 +1342,7 @@ bool GMenu::OnKey(GView *v, GKey &k)
 {
 	if (k.Down())
 	{
-		for (GAccelerator *a = Accel.First(); a; a = Accel.Next())
+		for (auto a: Accel)
 		{
 			if (a->Match(k))
 			{
@@ -1357,7 +1357,7 @@ bool GMenu::OnKey(GView *v, GKey &k)
 		{
 			bool Hide = false;
 			
-			for (GMenuItem *s=Items.First(); s; s=Items.Next())
+			for (auto s: Items)
 			{
 				if (!s->Separator())
 				{

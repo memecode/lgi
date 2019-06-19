@@ -507,7 +507,7 @@ GFont *GFontSystem::GetBestFont(char *Str)
 				if (Font)
 				{
 					bool Has = false;
-					for (GFont *h=Possibles.First(); h; h=Possibles.Next())
+					for (auto h: Possibles)
 					{
 						if (h == Font)
 						{
@@ -524,7 +524,7 @@ GFont *GFontSystem::GetBestFont(char *Str)
 
 			// Choose best match amongst possibles
 			int MatchingChars = 0;
-			for (GFont *h=Possibles.First(); h; h=Possibles.Next())
+			for (auto h: Possibles)
 			{
 				int Chars = 0;
 				for (i = s; *i; i++)

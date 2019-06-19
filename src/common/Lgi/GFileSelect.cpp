@@ -839,7 +839,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 		ShowHidden->Value(d->InitShowHiddenFiles);
 
 	// Load types
-	if (!d->Types.First())
+	if (!d->Types.Length())
 	{
 		GFileType *t = new GFileType;
 		if (t)
@@ -849,7 +849,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 			d->Types.Insert(t);
 		}
 	}
-	for (GFileType *t=d->Types.First(); t; t=d->Types.Next())
+	for (auto t: d->Types)
 	{
 		char s[256];
 		sprintf(s, "%s (%s)", t->Description(), t->Extension());
@@ -859,7 +859,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	d->CurrentType = 0;
 
 	// File + Path
-	char *File = d->Files.First();
+	char *File = d->Files[0];
 	if (File)
 	{
 		char *Dir = strrchr(File, DIR_CHAR);
@@ -1068,7 +1068,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 					int TypeIndex = -1;
 					
 					int n = 0;
-					for (GFileType *t = d->Types.First(); t; t = d->Types.Next(), n++)
+					for (auto t: d->Types)
 					{
 						if (t->Extension() &&
 							stricmp(t->Extension(), f) == 0)
@@ -1076,6 +1076,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 							TypeIndex = n;
 							break;
 						}
+						n++;
 					}
 					
 					// insert the new type if not already there
@@ -1137,7 +1138,8 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 		}
 		case IDC_BACK:
 		{
-			char *Dir = d->History.Last();
+			auto It = d->History.rbegin();
+			char *Dir = *It;
 			if (Dir)
 			{
 				d->History.Delete(Dir);
@@ -1145,7 +1147,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 				OnFolder();
 				DeleteArray(Dir);
 
-				if (!d->History.First())
+				if (!d->History[0])
 				{
 					SetCtrlEnabled(IDC_BACK, false);
 				}
@@ -1254,7 +1256,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 						FileLst->GetSelection(Sel) &&
 						Sel.Length() > 1)
 					{
-						for (LListItem *i=Sel.First(); i; i=Sel.Next())
+						for (auto i: Sel)
 						{
 							LgiMakePath(f, sizeof(f), Path, i->GetText(0));
 							d->Files.Insert(NewStr(f));
@@ -1434,7 +1436,7 @@ void GFileSystemItem::OnPath(char *p)
 		}
 		default:
 		{
-			GTreeItem *Old = Items.First();
+			GTreeItem *Old = Items[0];
 			if (Old)
 			{
 				Old->Remove();
@@ -1489,10 +1491,11 @@ void GFileSystemItem::OnPath(char *p)
 		}
 	}
 
-	for (GFileSystemItem *i=dynamic_cast<GFileSystemItem*>(Items.First()); i;
-						  i=dynamic_cast<GFileSystemItem*>(Items.Next()))
+	for (auto item: Items)
 	{
-		i->OnPath(p);
+		GFileSystemItem *i = dynamic_cast<GFileSystemItem*>(item);
+		if (i)
+			i->OnPath(p);
 	}
 }
 
@@ -1794,7 +1797,7 @@ bool GFolderList::OnKey(GKey &k)
 					Msg.Push("Do you want to delete:\n\n");
 					
 					List<GFolderItem> Delete;
-					for (LListItem *i=Sel.First(); i; i=Sel.Next())
+					for (auto i: Sel)
 					{
 						GFolderItem *s = dynamic_cast<GFolderItem*>(i);
 						if (s)
@@ -1811,7 +1814,7 @@ bool GFolderList::OnKey(GKey &k)
 					{
 						if (LgiMsg(this, Mem, ModuleName, MB_YESNO) == IDYES)
 						{
-							for (GFolderItem *d=Delete.First(); d; d=Delete.Next())
+							for (auto d: Delete)
 							{
 								d->OnDelete(false);
 							}
@@ -1868,11 +1871,14 @@ void GFolderList::OnFolder()
 				Ext.Length() > 0)
 		{
 			Match = false;
-			for (char *e=Ext.First(); e && !Match; e=Ext.Next())
+			for (auto e: Ext)
 			{
 				bool m = MatchStr(e, Name);
 				if (m)
+				{
 					Match = true;
+					break;
+				}
 			}
 		}
 		
@@ -1913,7 +1919,7 @@ bool GFileSelect::ReadOnly()
 
 char *GFileSelect::Name()
 {
-	return d->Files.First();
+	return d->Files[0];
 }
 
 bool GFileSelect::Name(const char *n)

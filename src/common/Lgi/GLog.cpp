@@ -162,17 +162,14 @@ void RLogView::OnPaint(GSurface *pDC)
 		int Screen = GetScreenItems();
 		int Index = MAX((VScroll) ? (int)VScroll->Value() : 0, 0);
 		int n = GetTotalItems() - 1;
-		RLogEntry *e = 0;
 		
+		List<RLogEntry>::I It = Log->Entries.end();
 		if (TopDown())
-		{
-			e = Log->Entries.ItemAt(MAX(Index, 0));
-		}
+			It = Log->Entries.begin(MAX(Index, 0));
 		else
-		{
-			e = Log->Entries.ItemAt(MIN(Screen+Index-1, n));
-		}
+			It = Log->Entries.begin(MIN(Screen+Index-1, n));
 
+        auto e = *It;
 		while (e)
 		{
 			GRect t;
@@ -216,12 +213,12 @@ void RLogView::OnPaint(GSurface *pDC)
 			if (TopDown())
 			{
 				r.y1 += y;
-				e = Log->Entries.Next();
+				e = *(++It);
 			}
 			else
 			{
 				r.y2 -= y;
-				e = Log->Entries.Prev();
+				e = *(--It);
 			}
 		}
 	}
