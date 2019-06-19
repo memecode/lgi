@@ -211,4 +211,4 @@
 # define _Restrict
 #endif
 
-#define _CRTRESTRICT
+// #define _CRTRESTRICT
