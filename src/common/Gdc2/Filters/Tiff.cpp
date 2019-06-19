@@ -70,7 +70,7 @@ public:
 	char *Str();
 	int ElementSize();
 	int Value();
-	int ArrayValue(int i);
+	int ArrayValue(ulong i);
 	bool Read(TiffIo &f);
 	bool Write(TiffIo &f);
 };
@@ -284,7 +284,7 @@ int IFD::Value()
 	return 0;
 }
 
-int IFD::ArrayValue(int i)
+int IFD::ArrayValue(ulong i)
 {
 	void *p = GetData();
 	
@@ -341,7 +341,7 @@ bool IFD::Read(TiffIo &f)
 		Data = new uchar[Size];
 		if (Data)
 		{
-			int Pos = f.s->GetPos();
+			auto Pos = f.s->GetPos();
 			f.s->SetPos(Offset);
 
 			switch (Type)
@@ -349,7 +349,7 @@ bool IFD::Read(TiffIo &f)
 				case TYPE_USHORT:
 				{
 					uint16 *p = (uint16*)Data;
-					for (int i=0; i<Count; i++)
+					for (ulong i=0; i<Count; i++)
 					{
 						f.Read(p+i, sizeof(p[i]));
 					}
@@ -358,7 +358,7 @@ bool IFD::Read(TiffIo &f)
 				case TYPE_ULONG:
 				{
 					uint32_t *p = (uint32_t*)Data;
-					for (int i=0; i<Count; i++)
+					for (ulong i=0; i<Count; i++)
 					{
 						f.Read(p+i, sizeof(p[i]));
 					}
@@ -367,7 +367,7 @@ bool IFD::Read(TiffIo &f)
 				case TYPE_SSHORT:
 				{
 					int16 *p = (int16*)Data;
-					for (int i=0; i<Count; i++)
+					for (ulong i=0; i<Count; i++)
 					{
 						f.Read(p+i, sizeof(p[i]));
 					}
@@ -376,7 +376,7 @@ bool IFD::Read(TiffIo &f)
 				case TYPE_SLONG:
 				{
 					int32 *p = (int32*)Data;
-					for (int i=0; i<Count; i++)
+					for (ulong i=0; i<Count; i++)
 					{
 						f.Read(p+i, sizeof(p[i]));
 					}
@@ -454,7 +454,7 @@ class TiffPipe : public GMemQueue
 {
 	Progress *p;
 	int Scansize;
-	int Last;
+	int64 Last;
 	int64 Size;
 
 public:
@@ -473,7 +473,7 @@ public:
 
 		if (p)
 		{
-			int y = Size / Scansize;
+			int64 y = Size / Scansize;
 			if (y > Last + 64)
 			{
 				p->Value(y);
@@ -495,7 +495,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
 	IFD *y = FindTag(TAG_ImageY);
 	IFD *BitTag = FindTag(TAG_Bits);
 	int Bits = 1;
-	int Pos = s->GetPos();
+	auto Pos = s->GetPos();
 
 	if (BitTag)
 	{
@@ -617,7 +617,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
 				case 32:
 				case 64:
 				{
-					int Strip = 0;
+					ulong Strip = 0;
 					ScanLength = ((pDC->X() * Bits) + 7) / 8;
 					
 					for (	;
@@ -755,7 +755,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
 								if (Props)
 								{
 									char Msg[256];
-									sprintf(Msg, "This image uses an unsupported TIFF compression method: %i", Comp);
+									sprintf_s(Msg, sizeof(Msg), "This image uses an unsupported TIFF compression method: %i", Comp);
 									GVariant v = Msg;
 									Props->SetValue(LGI_FILTER_ERROR, v);
 								}
@@ -950,7 +950,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
 					if (Props)
 					{
 						char Msg[256];
-						sprintf(Msg, "Image currently doesn't support %i bit TIFF files", Bits);
+						sprintf_s(Msg, sizeof(Msg), "Image currently doesn't support %i bit TIFF files", Bits);
 						GVariant v = Msg;
 						Props->SetValue(LGI_FILTER_ERROR, v);
 					}
@@ -976,7 +976,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
 		if (Props)
 		{
 			char Msg[256];
-			sprintf(Msg, "Couldn't create bitmap of size %ix%i @ %i bpp.", X, Y, B);
+			sprintf_s(Msg, sizeof(Msg), "Couldn't create bitmap of size %ix%i @ %i bpp.", X, Y, B);
 			GVariant v = Msg;
 			Props->SetValue(LGI_FILTER_ERROR, v);
 		}

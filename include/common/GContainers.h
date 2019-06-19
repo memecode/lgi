@@ -247,14 +247,6 @@ protected:
 		return false;
 	}
 
-	bool ValidBlock(LstBlk *b)
-	{
-		for (LstBlk *i = FirstObj; i; i = i->Next)
-			if (i == b)
-				return true;
-		return false;
-	}
-
 	LstBlk *NewBlock(LstBlk *Where)
 	{
 		LstBlk *i = new LstBlk;

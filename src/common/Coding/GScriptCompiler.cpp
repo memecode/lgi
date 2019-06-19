@@ -2942,7 +2942,7 @@ public:
 					if (StructMethod)
 						StructMethod->FrameSize = (uint16)LocalScope.Length();
 					else if (ScriptMethod)
-						ScriptMethod->FrameSize.Reset(new uint16(LocalScope.Length()));
+						ScriptMethod->FrameSize.Reset(new uint16((uint16)LocalScope.Length()));
 					else
 						LgiAssert(!"What are you defining exactly?");
 					

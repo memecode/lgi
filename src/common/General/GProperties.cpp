@@ -22,11 +22,17 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Prop::Serialize(GFile &f, bool Write)
 {
-	ushort Us;
+	uint16_t Us;
 
 	if (Write)
 	{
-		Us = strlen(Name) + 1;
+		auto Len = strlen(Name) + 1;
+		if (Len > 0xffff)
+		{
+			LgiAssert(!"Name len overflow");
+			return false;
+		}
+		Us = (uint16_t)Len;
 		f << Us;
 		f.Write(Name, Us);
 		f << Type;
@@ -45,7 +51,13 @@ bool Prop::Serialize(GFile &f, bool Write)
 			}
 			case OBJ_STRING:
 			{
-				Us = Value.Cp ? strlen(Value.Cp) + 1 : 0;
+				Len = Value.Cp ? strlen(Value.Cp) + 1 : 0;
+				if (Len > 0xffff)
+				{
+					LgiAssert(!"String len overflow");
+					return false;
+				}
+				Us = (uint16_t)Len;
 				f << Us;
 				f.Write(Value.Cp, Us);
 				break;
@@ -834,7 +846,7 @@ class ObjProperties {
 bool ObjProperties::Serialize(GFile &f, bool Write)
 {
 	bool Status = false;
-	ushort Us;
+	uint16_t Us;
 
 	if (Write)
 	{
@@ -842,11 +854,25 @@ bool ObjProperties::Serialize(GFile &f, bool Write)
 		if (Leaf) Us |= PROPLST_LEAF;
 		if (Next) Us |= PROPLST_NEXT;
 		f << Us;
-		Us = Properties.Length();
+
+		if (Properties.Length() > 0xffff)
+		{
+			LgiAssert(!"Prop len overflow");
+			return false;
+		}
+
+		Us = (uint16_t)Properties.Length();
 		f << Us;
 		if (Name())
 		{
-			Us = strlen(Name()) + 1;
+			auto Len = strlen(Name()) + 1;
+			if (Len > 0xffff)
+			{
+				LgiAssert(!"String len overflow");
+				return false;
+			}
+
+			Us = (uint16_t)Len;
 			f << Us;
 			f.Write(Name(), Us);
 		}
