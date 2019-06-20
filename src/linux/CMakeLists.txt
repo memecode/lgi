@@ -40,6 +40,7 @@ if (APPLE)
 				"gdk_pixbuf-2.0"
 				"gtk-3"
 				"pango-1.0"
+				"gio-2.0"
 				"pangocairo-1.0")
 
 elseif (LINUX)

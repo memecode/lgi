@@ -359,10 +359,17 @@ GSkinEngine *GApp::SkinEngine = 0;
 GApp *TheApp = 0;
 GMouseHook *GApp::MouseHook = 0;
 
-static void close_program(GSimpleAction *action, Gtk::GVariant *parameter, gpointer user_data)
+static void
+activate_quit (GSimpleAction *action,
+               Gtk::GVariant      *parameter,
+               gpointer       user_data)
 {
-	g_application_quit(G_APPLICATION(user_data));
+	int asd=0;
 }
+
+static GActionEntry app_entries[] = {
+	{ "quit", activate_quit, NULL, NULL, NULL },
+};
 
 GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
@@ -456,13 +463,10 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 		SkinEngine = CreateSkinEngine(this);
 	}
 
-	#if 0 // Doesn't work
+	#if 1 // Doesn't work
 	if (d->App)
 	{
-		GSimpleAction *close = Gtk::g_simple_action_new("close", NULL);
-		Gtk::g_signal_connect(close, "activate", G_CALLBACK(close_program), d->App);
-		Gtk::g_action_map_add_action(G_ACTION_MAP(d->App), G_ACTION(close));
-		Gtk::g_object_unref(close);
+		g_action_map_add_action_entries (G_ACTION_MAP(d->App), app_entries, G_N_ELEMENTS (app_entries), d->App);
 	}
 	#endif
 }

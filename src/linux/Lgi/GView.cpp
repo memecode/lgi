@@ -654,9 +654,10 @@ bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
 			{
 				Repainting = true;
 
-				if (gtk_widget_get_has_window(_View))
+				GdkWindow *h;
+				if (gtk_widget_get_has_window(_View) &&
+					(h = gtk_widget_get_window(_View)))
 				{
-					auto h = gtk_widget_get_window(_View);
 					GdkRectangle rc;
 					
 					if (r)

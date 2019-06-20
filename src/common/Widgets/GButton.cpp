@@ -123,10 +123,7 @@ int GButton::OnNotify(GViewI *Ctrl, int Flags)
 bool GButton::Default()
 {
 	if (GetWindow())
-	{
 		return GetWindow()->_Default == this;
-	}
-	else LgiTrace("%s:%i - No window.\n", _FL);
 	
 	return false;
 }
