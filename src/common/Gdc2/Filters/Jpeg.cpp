@@ -28,7 +28,7 @@
 #if LIBJPEG_SHARED
 #define JPEGLIB d->
 const char sLibrary[] =
-	"libjpeg"
+	"libjpeg9a_"
 	#if defined(WINDOWS)
 		_MSC_VER_STR
 		#ifdef LGI_64BIT
