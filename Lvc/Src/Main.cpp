@@ -833,6 +833,17 @@ public:
 						Lst->Sort(LstCmp, Col);
 						break;
 					}
+					case GNotifyItem_DoubleClick:
+					{
+						VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
+						if (!f)
+							break;
+
+						GArray<VcCommit*> s;
+						if (Lst->GetSelection(s) && s.Length() == 1)
+							f->OnUpdate(s[0]->GetRev());
+						break;
+					}
 				}
 				break;
 			}
