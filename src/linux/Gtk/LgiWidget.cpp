@@ -184,7 +184,7 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 	GMouse m = _map_mouse_event(v, ev->x, ev->y, false);
 	if (!m.Target)
 	{
-		// v->GetWindow()->_Dump();
+		v->GetWindow()->_Dump();
 		return false;
 	}
 
@@ -868,8 +868,8 @@ lgi_widget_realize(GtkWidget *widget)
 								GDK_ENTER_NOTIFY_MASK |
 								GDK_LEAVE_NOTIFY_MASK |
 								GDK_EXPOSURE_MASK |
-								GDK_STRUCTURE_MASK
-								;
+								GDK_STRUCTURE_MASK |
+								GDK_SCROLL_MASK;
 
 		gtk_widget_set_window
 		(

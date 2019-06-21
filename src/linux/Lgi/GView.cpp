@@ -661,7 +661,14 @@ bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
 					GdkRectangle rc;
 					
 					if (r)
+					{
 						rc = *r;
+						if (!Frame)
+						{
+							rc.x += _BorderSize;
+							rc.y += _BorderSize;
+						}
+					}
 					else
 						rc = GtkGetPos(_View);
 					
