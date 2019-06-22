@@ -1118,6 +1118,7 @@ GRect &GWindow::GetPos()
 
 bool GWindow::SetPos(GRect &p, bool Repaint)
 {
+	Pos = p;
 	if (Wnd)
 	{
 		ThreadCheck();
@@ -1125,13 +1126,9 @@ bool GWindow::SetPos(GRect &p, bool Repaint)
 		GtkWindow *w = GTK_WINDOW(Wnd);
 		gtk_window_set_default_size(w, Pos.X(), Pos.Y());
 		gtk_window_move(w, Pos.x1, Pos.y1);
-		// We'll get an OnPosChange event when it's done
 	}
-	else if (Pos != p)
-	{
-		Pos = p;
-		OnPosChange();
-	}
+
+	OnPosChange();
 	return true;
 }
 
