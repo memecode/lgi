@@ -265,7 +265,9 @@ void GWindow::OnGtkDelete()
 	
 	// These will be destroyed by GTK after returning from GWindowCallback
 	Wnd = NULL;
+	#ifndef __GTK_H__
 	_View = NULL;
+	#endif
 }
 
 GRect *GWindow::GetDecorSize()
@@ -518,7 +520,7 @@ bool GWindow::Attach(GViewI *p)
 
 	if (Wnd)
 	{
-		_View = GTK_WIDGET(Wnd);
+		auto Widget = GTK_WIDGET(Wnd);
 		GView *i = this;
 		gtk_window_set_default_size(Wnd, Pos.X(), Pos.Y());
 		
@@ -540,7 +542,7 @@ bool GWindow::Attach(GViewI *p)
 		g_signal_connect(Obj, "property-notify-event",	G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "configure-event",		G_CALLBACK(GtkViewCallback), i);
 
-		gtk_widget_add_events(	_View,
+		gtk_widget_add_events(	Widget,
 								/* GDK_POINTER_MOTION_MASK|
 								GDK_BUTTON_PRESS_MASK|
 								GDK_BUTTON_RELEASE_MASK|
@@ -1079,7 +1081,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 
 GRect &GWindow::GetPos()
 {
-	if (Wnd && _View)
+	if (Wnd)
 	{
 		/*
 		OsRect r = _View->geometry();
@@ -1108,7 +1110,6 @@ GRect &GWindow::GetPos()
 
 bool GWindow::SetPos(GRect &p, bool Repaint)
 {
-	Pos = p;
 	if (Wnd)
 	{
 		ThreadCheck();
@@ -1116,6 +1117,12 @@ bool GWindow::SetPos(GRect &p, bool Repaint)
 		GtkWindow *w = GTK_WINDOW(Wnd);
 		gtk_window_set_default_size(w, Pos.X(), Pos.Y());
 		gtk_window_move(w, Pos.x1, Pos.y1);
+		// We'll get an OnPosChange event when it's done
+	}
+	else if (Pos != p)
+	{
+		Pos = p;
+		OnPosChange();
 	}
 	return true;
 }
@@ -1131,16 +1138,21 @@ void GWindow::OnCreate()
 	AttachChildren();
 }
 
-void GWindow::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
-{
-	// GRect r = GetClient();
-	GView::_Paint(pDC, Offset, Update);
-}
-
 void GWindow::OnPaint(GSurface *pDC)
 {
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle();
+}
+
+void GWindow::OnGtkSetPos(int width, int height)
+{
+	if (Pos.X() != width ||
+		Pos.Y() != height)
+	{
+		Pos.x2 = Pos.x1 + width - 1;
+		Pos.y2 = Pos.y1 + height - 1;
+		OnPosChange();
+	}
 }
 
 void GWindow::OnPosChange()
@@ -1586,9 +1598,10 @@ void GWindow::Quit(bool DontDelete)
 {
 	ThreadCheck();
 	
-	if (_View)
+	if (Wnd)
 	{
-		gtk_widget_destroy(_View);
+		gtk_widget_destroy(GTK_WIDGET(Wnd));
+		Wnd = NULL;
 	}
 }
 

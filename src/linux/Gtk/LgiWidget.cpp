@@ -774,7 +774,11 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 		}
 		#endif
 
-		w->target->OnPosChange();
+		GWindow *wnd = dynamic_cast<GWindow*>(w->target);
+		if (wnd)
+			wnd->OnGtkSetPos(allocation->width, allocation->height);
+		else
+			w->target->OnPosChange();
 
 	#else
 

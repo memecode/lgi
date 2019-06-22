@@ -47,7 +47,6 @@ GDialog::GDialog()
 {
 	d = new GDialogPriv();
 	Name("Dialog");
-	_View = GTK_WIDGET(Wnd);
 	_SetDynamic(false);
 }
 

@@ -82,6 +82,12 @@ GScreenDC::GScreenDC(Gtk::cairo_t *cr, int x, int y)
 	d->y = y;
 	d->Bits = 32;
 	ColourSpace = GdcD->GetColourSpace();
+
+	Gtk::cairo_matrix_t matrix;
+	cairo_get_matrix(cr, &matrix);
+	double ex[4];
+	cairo_clip_extents(cr, ex+0, ex+1, ex+2, ex+3);
+	LgiTrace("GScreenDC, clip=%g,%g,%g,%g - %g,%g\n", ex[0], ex[1], ex[2], ex[3], matrix.x0, matrix.y0);
 }
 
 GScreenDC::GScreenDC(OsDrawable *Drawable)
@@ -311,11 +317,12 @@ GRect GScreenDC::ClipRgn(GRect *c)
 	{
 		Clip = *c;
 
-        GdkRectangle r = {c->x1+d->Client.x1, c->y1+d->Client.y1, c->X(), c->Y()};
+		// Don't add d->Client on here, as the translate makes it redundant.
+        GdkRectangle r = {c->x1, c->y1, c->X(), c->Y()};
 		#if GTK_MAJOR_VERSION == 3
 			cairo_save(d->cr);
 			cairo_new_path(d->cr);
-			cairo_rectangle(d->cr, c->x1 + d->Client.x1, c->y1 + d->Client.y1, c->X(), c->Y());
+			cairo_rectangle(d->cr, c->x1, c->y1, c->X(), c->Y());
 			cairo_clip(d->cr);
 		#else
 			gdk_gc_set_clip_rectangle(d->gc, &r);
