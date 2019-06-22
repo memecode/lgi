@@ -597,6 +597,9 @@ GRect GtkGetPos(GtkWidget *w)
 bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 {
 	GWindow *ParWnd = GetWindow();
+	if (!ParWnd)
+		return false; // Nothing we can do till we attach
+
 	GView *ParView = ParWnd;
 
 	GRect r;
@@ -627,13 +630,16 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 		Repainting = true;
 
 		GdkWindow *h;
-		GtkWidget *w = ParWnd ? GTK_WIDGET(ParWnd->WindowHandle()) : NULL;
+		GtkWidget *w = GTK_WIDGET(ParWnd->WindowHandle());
 		if (w)
 		{
 			if (gtk_widget_get_has_window(w) &&
 				(h = gtk_widget_get_window(w)))
 			{
 				GdkRectangle grc = r;
+				auto WndCli = ParWnd->GetClient();
+				grc.x += WndCli.x1;
+				grc.y += WndCli.y1;
 				gdk_window_invalidate_rect(h, &grc, true);
 			}
 			else

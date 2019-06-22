@@ -138,28 +138,20 @@ GMouse _map_mouse_event(GView *v, int x, int y, bool Motion)
 			break;
 		}
 
-		auto h = i->Handle();
-		GRect Pos;
-		if (h)
-			Pos = GtkGetPos(i->Handle());
-		else
-			Pos = i->GetPos();
+		GRect Pos = i->GetPos();
 		Offset.x += Pos.x1;
 		Offset.y += Pos.y1;
-		if (i)
-		{
-			Pos = i->GetClient(false);
-			Offset.x += Pos.x1;
-			Offset.y += Pos.y1;
-			break;
-		}
+
+		Pos = i->GetClient(false);
+		Offset.x += Pos.x1;
+		Offset.y += Pos.y1;
 	}
 
 	m.x = x - Offset.x;
 	m.y = y - Offset.y;
 	m.Target = View;
 
-	#if 0
+	#if 1
 	LgiTrace("Widget%s %i,%i on %s -> offset: %i,%i -> %i,%i on %s, FoundParent=%i\n",
 		Motion ? "Motion" : "Click",
 		x, y, v?v->GetClass():"NULL",

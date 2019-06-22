@@ -280,7 +280,7 @@ GViewI *GWindow::WindowFromPoint(int x, int y, bool Debug)
 	if (!_Root)
 		return NULL;
 
-	auto rpos = GtkGetPos(_Root);
+	auto rpos = GtkGetPos(_Root).ZeroTranslate();
 	if (!rpos.Overlap(x, y))
 		return NULL;
 
