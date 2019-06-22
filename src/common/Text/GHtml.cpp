@@ -6215,14 +6215,6 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, GRect *BorderP
 		{
 			pDC->Colour(Back);
 			pDC->Rectangle(&rc);
-			
-			/*
-			if (Debug)
-			{
-				pDC->Colour(GColour(255, 0, 0));
-				pDC->Box(&rc);
-			}
-			*/
 		}
 
 		GCss::BorderDef *b;
@@ -6361,10 +6353,10 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 		}
 		case TAG_BODY:
 		{
-			COLOUR b = GetBack();
-			if (b != GT_TRANSPARENT)
+			auto b = GetBack();
+			if (!b.IsTransparent())
 			{
-				pDC->Colour(b, 32);
+				pDC->Colour(b);
 				pDC->Rectangle(Pos.x, Pos.y, Pos.x+Size.x, Pos.y+Size.y);
 			}
 			if (Image)
@@ -8047,6 +8039,7 @@ void GHtml::OnMouseClick(GMouse &m)
 			if (Load) Load->Checked(GetLoadImages());
 			RClick.AppendItem					(LgiLoadString(L_VIEW_IN_DEFAULT_BROWSER, "View in Default Browser"), IDM_EXTERNAL, Source != 0);
 			GSubMenu *Cs = RClick.AppendSub		(LgiLoadString(L_CHANGE_CHARSET, "Change Charset"));
+
 			if (Cs)
 			{
 				int n=0;

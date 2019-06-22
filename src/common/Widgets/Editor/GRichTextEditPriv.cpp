@@ -1800,27 +1800,6 @@ bool GRichTextPriv::InsertHorzRule()
 	
 void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 {
-	/*
-	if (Areas[GRichTextEdit::CapabilityArea].Valid())
-	{
-		GRect &t = Areas[GRichTextEdit::CapabilityArea];
-		pDC->Colour(GColour::Red);
-		pDC->Rectangle(&t);
-		int y = t.y1 + 4;
-		for (unsigned i=0; i<NeedsCap.Length(); i++)
-		{
-			CtrlCap &cc = NeedsCap[i];
-			GDisplayString Ds(SysFont, cc.Name);
-			SysFont->Transparent(true);
-			SysFont->Colour(GColour::White, GColour::Red);
-			Ds.Draw(pDC, t.x1 + 4, y);
-			y += Ds.Y() + 4;
-		}
-
-		PaintBtn(pDC, GRichTextEdit::CapabilityBtn);
-	}
-	*/
-
 	if (Areas[GRichTextEdit::ToolsArea].Valid())
 	{
 		// Draw tools area...
@@ -1874,7 +1853,7 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 	pDC->GetOrigin(Origin.x, Origin.y);
 	
 	GRect r = Areas[GRichTextEdit::ContentArea];
-	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
+	#if defined(WINDOWS) && !defined(__GTK_H__) && !DEBUG_NO_DOUBLE_BUF
 	GMemDC Mem;
 	if (!Mem.Create(r.X(), r.Y(), pDC->GetColourSpace()))
 	{
@@ -1961,7 +1940,7 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 	}
 	#endif
 
-	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
+	#if defined(WINDOWS) && !defined(__GTK_H__) && !DEBUG_NO_DOUBLE_BUF
 	Mem.SetOrigin(0, 0);
 	pScreen->Blt(Areas[GRichTextEdit::ContentArea].x1, Areas[GRichTextEdit::ContentArea].y1, &Mem);
 	#endif
