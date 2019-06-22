@@ -83,11 +83,13 @@ GScreenDC::GScreenDC(Gtk::cairo_t *cr, int x, int y)
 	d->Bits = 32;
 	ColourSpace = GdcD->GetColourSpace();
 
+	#if 0
 	Gtk::cairo_matrix_t matrix;
 	cairo_get_matrix(cr, &matrix);
 	double ex[4];
 	cairo_clip_extents(cr, ex+0, ex+1, ex+2, ex+3);
 	LgiTrace("GScreenDC, clip=%g,%g,%g,%g - %g,%g\n", ex[0], ex[1], ex[2], ex[3], matrix.x0, matrix.y0);
+	#endif
 }
 
 GScreenDC::GScreenDC(OsDrawable *Drawable)

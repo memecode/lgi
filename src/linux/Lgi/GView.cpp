@@ -629,10 +629,10 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 	{
 		Repainting = true;
 
-		GdkWindow *h;
 		GtkWidget *w = GTK_WIDGET(ParWnd->WindowHandle());
 		if (w)
 		{
+			GdkWindow *h;
 			if (gtk_widget_get_has_window(w) &&
 				(h = gtk_widget_get_window(w)))
 			{

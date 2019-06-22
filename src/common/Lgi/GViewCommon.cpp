@@ -2058,20 +2058,9 @@ bool GView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 	}
 	else
 	#endif
-	if (InThread())
-	{
-		GMessage e(Cmd, a, b);
-		OnEvent(&e);
-		return true;
-	}
-	else
-	{
-		// LgiTrace("%s:%i - No view to post event to.\n", _FL);
-	}
+		return LgiApp->PostEvent(this, Cmd, a, b);
 	
 	#endif
-	
-	return false;
 }
 
 bool GView::Invalidate(GRegion *r, bool Repaint, bool NonClient)

@@ -241,6 +241,12 @@ int GSubMenu::Float(GView *From, int x, int y, int Button)
 {
 	static int Depth = 0;
 
+	#ifdef __GTK_H__
+	GWindow *Wnd = From->GetWindow();
+	if (!Wnd)
+		return -1;
+	Wnd->Capture(false);
+	#else
 	while (From && !From->Handle())
 	{
 		From = dynamic_cast<GView*>(From->GetParent());
@@ -254,6 +260,7 @@ int GSubMenu::Float(GView *From, int x, int y, int Button)
 	
 	if (From->IsCapturing())
 		From->Capture(false);
+	#endif
 
 	// This signal handles the case where the user cancels the menu by clicking away from it.
 	Gtk::g_signal_connect_data(GtkCast(Info, g_object, GObject), 
