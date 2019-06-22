@@ -729,7 +729,7 @@ lgi_widget_destroy(
 	g_return_if_fail(object != NULL);
 	g_return_if_fail(LGI_IS_WIDGET(object));
 
-	LgiWidget *p = LGI_WIDGET(object);
+	// LgiWidget *p = LGI_WIDGET(object);
 	// printf("%s:%i - lgi_widget_destroy(%p) %s\n", _FL, p, p->target->GetClass());
 	#if GTK_MAJOR_VERSION == 3
 	void *cls = g_type_class_peek(gtk_widget_get_type());
@@ -744,7 +744,7 @@ lgi_widget_destroy(
 }
 
 
-static void
+void
 lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 {
 	g_return_if_fail(widget != NULL);

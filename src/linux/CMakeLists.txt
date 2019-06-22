@@ -3,6 +3,7 @@
 
 cmake_minimum_required (VERSION 3.12)
 
+cmake_policy(SET CMP0054 NEW)
 set (CMAKE_CXX_STANDARD 11)
 
 project (Lgi)
@@ -21,8 +22,17 @@ endif()
 
 if (APPLE)
 
+	set( CMAKE_SKIP_BUILD_RPATH true )
 	add_definitions("-DMAC -DLGI_LIBRARY -D_DEBUG -DLGI_RES")
 	set(GTK3_PATH "/Users/Shared/inst")
+	if (NOT EXISTS ${GTK3_PATH})
+		get_filename_component(GTK3_PATH "${ROOT}/../../inst" REALPATH)
+		if (NOT EXISTS ${GTK3_PATH})
+			message(ERROR "Where is GTK3?")
+		endif()
+	endif()
+	message(STATUS "Lgi.GTK3_PATH=${GTK3_PATH}")
+
 	set(GTK3_INCLUDE_DIRS
 				"${GTK3_PATH}/include/gtk-3.0"
 				"${GTK3_PATH}/include/glib-2.0"
@@ -32,7 +42,6 @@ if (APPLE)
 				"${GTK3_PATH}/include/gdk-pixbuf-2.0"
 				"${GTK3_PATH}/include/atk-1.0")
 	set(GTK3_LIBRARIES
-				"-L${GTK3_PATH}/lib"
 				"cairo"
 				"glib-2.0"
 				"gobject-2.0.0"
@@ -42,6 +51,10 @@ if (APPLE)
 				"pango-1.0"
 				"gio-2.0"
 				"pangocairo-1.0")
+	set(GTK3_LIB_PATH "${GTK3_PATH}/lib")
+	list(TRANSFORM GTK3_LIBRARIES PREPEND "${GTK3_LIB_PATH}/lib")
+	list(TRANSFORM GTK3_LIBRARIES APPEND ".dylib")
+	set(GTK3_LIBRARIES ${GTK3_LIBRARIES} CACHE INTERNAL "")
 
 elseif (LINUX)
 
@@ -275,8 +288,10 @@ if (APPLE)
 							${GTK3_INCLUDE_DIRS}
 							)
 	target_link_libraries(Lgi ${GTK3_LIBRARIES})
-	set_source_files_properties(${OBJCPP_SOURCE} PROPERTIES 
+	set_source_files_properties(${OBJCPP_SOURCE} PROPERTIES
                             COMPILE_FLAGS "-x objective-c++")
+	set_target_properties(Lgi PROPERTIES
+							BUILD_RPATH "{GTK3_PATH}/lib")
 elseif (LINUX)
 	target_include_directories(Lgi PUBLIC
 							"${ROOT}/include/linux/Gtk"
