@@ -1546,7 +1546,12 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 	
 	q->New().Set(View, Msg, a, b);
 
-	// printf("Insert %p,%i,%i,%i\n", View, Msg, a, b);
+	if (Msg == 907)
+	{
+		int asd=0;
+	}
+
+	LgiTrace("Insert %s/%p,%i,%i,%i\n", View->GetClass(), View, Msg, a, b);
 	MsgQue.Unlock();
 	
 	return true;

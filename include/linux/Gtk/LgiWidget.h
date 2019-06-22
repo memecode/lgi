@@ -28,6 +28,7 @@ GtkType lgi_widget_get_type();
 void lgi_widget_init(LgiWidget *w);
 #endif
 GtkWidget *lgi_widget_new(GViewI *target, bool pour_largest);
+void lgi_widget_detach(GtkWidget *widget);
 
 // Children management
 void lgi_widget_add(GtkContainer *wid, GtkWidget *child);

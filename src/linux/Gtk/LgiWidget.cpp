@@ -105,6 +105,14 @@ GtkWidget *lgi_widget_new(GViewI *target, bool pour_largest)
 }
 
 void
+lgi_widget_detach(GtkWidget *w)
+{
+	LgiWidget *p = LGI_WIDGET(w);
+	if (p)
+		p->target = NULL;
+}
+
+void
 lgi_widget_remove(GtkContainer *wid, GtkWidget *child)
 {
 	LgiWidget *p = LGI_WIDGET(wid);
@@ -151,7 +159,7 @@ GMouse _map_mouse_event(GView *v, int x, int y, bool Motion)
 	m.y = y - Offset.y;
 	m.Target = View;
 
-	#if 1
+	#if 0
 	LgiTrace("Widget%s %i,%i on %s -> offset: %i,%i -> %i,%i on %s, FoundParent=%i\n",
 		Motion ? "Motion" : "Click",
 		x, y, v?v->GetClass():"NULL",
