@@ -1537,21 +1537,14 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 		return false;
 	}
 	
-	auto Widget = View->Handle();
-
 	#if VIEW_REF_MODE
+	auto Widget = View->Handle();
 	// printf("Ref %p %s.%p (len=%i)\n", Widget, View->GetClass(), View, (int)q->Length());
 	g_object_ref(Widget); // ref widget till we try and propagate the message to it...
 	#endif
 	
 	q->New().Set(View, Msg, a, b);
 
-	if (Msg == 907)
-	{
-		int asd=0;
-	}
-
-	LgiTrace("Insert %s/%p,%i,%i,%i\n", View->GetClass(), View, Msg, a, b);
 	MsgQue.Unlock();
 	
 	return true;
