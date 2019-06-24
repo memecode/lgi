@@ -268,7 +268,7 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect)
 	SignalInfo &Si = ExistingSignals.New();
 	Si.Wnd = d->SignalWnd;
 	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
+	Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-data-get", G_CALLBACK(LgiDragDataGet), this);
 	#else
 	Si.Sig = gtk_signal_connect(GTK_OBJECT(d->SignalWnd), "drag-data-get", G_CALLBACK(LgiDragDataGet), this);
 	#endif

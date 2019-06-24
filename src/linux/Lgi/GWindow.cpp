@@ -507,6 +507,18 @@ GtkRootResize(GtkWidget *widget, GdkRectangle *alloc, GView *This)
 		w->PourAll();
 }
 
+static void
+activate_quit (GSimpleAction *action,
+               Gtk::GVariant      *parameter,
+               gpointer       user_data)
+{
+	int asd=0;
+}
+
+static GActionEntry app_entries[] = {
+	{ "quit", activate_quit, NULL, NULL, NULL },
+};
+
 bool GWindow::Attach(GViewI *p)
 {
 	bool Status = false;
@@ -540,14 +552,10 @@ bool GWindow::Attach(GViewI *p)
 		g_signal_connect(Obj, "property-notify-event",	G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "configure-event",		G_CALLBACK(GtkViewCallback), i);
 
-		gtk_widget_add_events(	_View,
-								/* GDK_POINTER_MOTION_MASK|
-								GDK_BUTTON_PRESS_MASK|
-								GDK_BUTTON_RELEASE_MASK|
-								GDK_SCROLL_MASK|*/
-								GDK_FOCUS_CHANGE_MASK|
-								GDK_STRUCTURE_MASK);
+		gtk_widget_add_events(_View, GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
+
+		g_action_map_add_action_entries (G_ACTION_MAP(Wnd), app_entries, G_N_ELEMENTS (app_entries), Wnd);
 
 		if ((_Root = lgi_widget_new(this, true)))
         {
