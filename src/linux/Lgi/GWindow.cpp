@@ -214,21 +214,11 @@ void GWindow::Visible(bool i)
 {
 	ThreadCheck();
 
+	auto w = GTK_WIDGET(Wnd);
 	if (i)
-	{
-		gtk_widget_show(GTK_WIDGET(Wnd));
-
-		/*
-		static bool First = true;
-		if (First)
-		{
-			First = false;
-			RequestFrameExtents(GTK_WIDGET(Wnd));
-		}
-		*/
-	}
+		gtk_widget_show(w);
 	else
-		gtk_widget_hide(GTK_WIDGET(Wnd));
+		gtk_widget_hide(w);
 }
 
 bool GWindow::Obscured()
@@ -542,7 +532,8 @@ bool GWindow::Attach(GViewI *p)
 	{
 		auto Widget = GTK_WIDGET(Wnd);
 		GView *i = this;
-		gtk_window_set_default_size(Wnd, Pos.X(), Pos.Y());
+		gtk_window_resize(Wnd, Pos.X(), Pos.Y());
+		gtk_window_move(Wnd, Pos.x1, Pos.y1);
 		
 		auto Obj = G_OBJECT(Wnd);
 		g_object_set_data(Obj, "GViewI", (GViewI*)this);
@@ -597,7 +588,7 @@ bool GWindow::Attach(GViewI *p)
         }
 
 		// This call sets up the GdkWindow handle
-		gtk_widget_realize(GTK_WIDGET(Wnd));
+		gtk_widget_realize(Widget);
 		
 		// Do a rough layout of child windows
 		PourAll();

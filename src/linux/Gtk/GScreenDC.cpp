@@ -298,7 +298,7 @@ int GScreenDC::GetFlags()
 
 void GScreenDC::GetOrigin(int &x, int &y)
 {
-	return GSurface::GetOrigin(x, y);
+	GSurface::GetOrigin(x, y);
 }
 
 void GScreenDC::SetOrigin(int x, int y)
@@ -768,6 +768,17 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 				cairo_pattern_t *Pat = cairo_pattern_create_for_surface(Sub);
 				if (Pat)
 				{
+					#if 0
+					Gtk::cairo_matrix_t matrix;
+					cairo_get_matrix(d->cr, &matrix);
+					double ex[4];
+					cairo_clip_extents(d->cr, ex+0, ex+1, ex+2, ex+3);
+					LgiTrace("GScreenDC::Blt, clip=%g,%g,%g,%g, client=%s\n",
+						ex[0]+matrix.x0, ex[1]+matrix.y0,
+						ex[2]+matrix.x0, ex[3]+matrix.y0,
+						d->Client.GetStr());
+					#endif
+
 					cairo_save(d->cr);
 					cairo_translate(d->cr, br.DstClip.x1, br.DstClip.y1);
 					cairo_set_source(d->cr, Pat);

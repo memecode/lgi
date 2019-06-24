@@ -1850,7 +1850,6 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 	}
 
 	GdcPt2 Origin;
-	pDC->GetOrigin(Origin.x, Origin.y);
 	
 	GRect r = Areas[GRichTextEdit::ContentArea];
 	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
@@ -1864,6 +1863,7 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 	pDC = &Mem;
 	r.Offset(-r.x1, -r.y1);
 	#else
+	pDC->GetOrigin(Origin.x, Origin.y);
 	pDC->ClipRgn(&r);
 	#endif
 

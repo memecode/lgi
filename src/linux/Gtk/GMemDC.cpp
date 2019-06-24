@@ -15,9 +15,6 @@
 #include "GString.h"
 using namespace Gtk;
 
-#define UnTranslate()		// if (d->p) d->p->translate(OriginX, OriginY);
-#define Translate()			// if (d->p) d->p->translate(-OriginX, -OriginY);
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ROUND_UP(bits) (((bits) + 7) / 8)
 
@@ -280,12 +277,15 @@ bool GMemDC::Unlock()
 	return false;
 }
 
+void GMemDC::GetOrigin(int &x, int &y)
+{
+	GSurface::GetOrigin(x, y);
+}
+
 void GMemDC::SetOrigin(int x, int y)
 {
 	Handle();
-	UnTranslate();
 	GSurface::SetOrigin(x, y);
-	Translate();
 }
 
 GColourSpace GMemDC::GetCreateCs()

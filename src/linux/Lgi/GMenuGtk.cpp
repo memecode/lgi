@@ -482,9 +482,6 @@ void LgiMenuItem::Handle(GtkMenuItem *mi)
 	if (Info != mi)
 	{
 		Info = mi;
-		
-		LgiTrace("CreateItem %p %p\n", this, Info);
-
 		Gtk::g_signal_connect(Info, "activate", (Gtk::GCallback) MenuItemActivate, this);
 		Gtk::g_signal_connect(Info, "destroy", (Gtk::GCallback) MenuItemDestroy, this);
 	}
