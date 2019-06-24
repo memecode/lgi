@@ -105,6 +105,14 @@ GtkWidget *lgi_widget_new(GViewI *target, bool pour_largest)
 }
 
 void
+lgi_widget_detach(GtkWidget *w)
+{
+	LgiWidget *p = LGI_WIDGET(w);
+	if (p)
+		p->target = NULL;
+}
+
+void
 lgi_widget_remove(GtkContainer *wid, GtkWidget *child)
 {
 	LgiWidget *p = LGI_WIDGET(wid);
@@ -138,21 +146,13 @@ GMouse _map_mouse_event(GView *v, int x, int y, bool Motion)
 			break;
 		}
 
-		auto h = i->Handle();
-		GRect Pos;
-		if (h)
-			Pos = GtkGetPos(i->Handle());
-		else
-			Pos = i->GetPos();
+		GRect Pos = i->GetPos();
 		Offset.x += Pos.x1;
 		Offset.y += Pos.y1;
-		if (i)
-		{
-			Pos = i->GetClient(false);
-			Offset.x += Pos.x1;
-			Offset.y += Pos.y1;
-			break;
-		}
+
+		Pos = i->GetClient(false);
+		Offset.x += Pos.x1;
+		Offset.y += Pos.y1;
 	}
 
 	m.x = x - Offset.x;
@@ -729,7 +729,7 @@ lgi_widget_destroy(
 	g_return_if_fail(object != NULL);
 	g_return_if_fail(LGI_IS_WIDGET(object));
 
-	LgiWidget *p = LGI_WIDGET(object);
+	// LgiWidget *p = LGI_WIDGET(object);
 	// printf("%s:%i - lgi_widget_destroy(%p) %s\n", _FL, p, p->target->GetClass());
 	#if GTK_MAJOR_VERSION == 3
 	void *cls = g_type_class_peek(gtk_widget_get_type());
@@ -744,7 +744,7 @@ lgi_widget_destroy(
 }
 
 
-static void
+void
 lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 {
 	g_return_if_fail(widget != NULL);
@@ -774,7 +774,11 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 		}
 		#endif
 
-		w->target->OnPosChange();
+		GWindow *wnd = dynamic_cast<GWindow*>(w->target);
+		if (wnd)
+			wnd->OnGtkSetPos(allocation->width, allocation->height);
+		else
+			w->target->OnPosChange();
 
 	#else
 

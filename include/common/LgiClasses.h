@@ -464,7 +464,10 @@ private:
 protected:
 	class GViewPrivate	*d;
 
+	#ifndef __GTK_H__
 	OsView				_View; // OS specific handle to view object
+	#endif
+
 	GView				*_Window;
 	LMutex				*_Lock;
 	uint16				_BorderSize;
@@ -605,7 +608,14 @@ public:
 	virtual ~GView();
 
 	/// Returns the OS handle of the view
-	OsView Handle() { return _View; }
+	OsView Handle()
+	{
+		#ifdef __GTK_H__
+		return NULL;
+		#else
+		return _View;
+		#endif
+	}
 
 	/// Returns the ptr to a GView
 	GView *GetGView() { return this; }
@@ -1246,7 +1256,6 @@ class LgiClass GWindow :
 	friend class BViewRedir;
 	friend class GView;
 	friend class GButton;
-	friend class XWindow;
 	friend class GDialog;
 	friend class GApp;
 	friend class GWindowPrivate;
@@ -1281,9 +1290,10 @@ protected:
 	#elif defined __GTK_H__
 
 	friend class GMenu;	
+	friend void lgi_widget_size_allocate(Gtk::GtkWidget *widget, Gtk::GtkAllocation *allocation);
 	
 	Gtk::GtkWidget *_Root, *_VBox, *_MenuBar;
-	void _Paint(GSurface *pDC = NULL, GdcPt2 *Offset = NULL, GRegion *Update = NULL);
+	void OnGtkSetPos(int width, int height);
 	void OnGtkDelete();
 	Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
 

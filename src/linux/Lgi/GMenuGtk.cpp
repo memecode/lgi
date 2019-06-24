@@ -241,6 +241,12 @@ int GSubMenu::Float(GView *From, int x, int y, int Button)
 {
 	static int Depth = 0;
 
+	#ifdef __GTK_H__
+	GWindow *Wnd = From->GetWindow();
+	if (!Wnd)
+		return -1;
+	Wnd->Capture(false);
+	#else
 	while (From && !From->Handle())
 	{
 		From = dynamic_cast<GView*>(From->GetParent());
@@ -254,6 +260,7 @@ int GSubMenu::Float(GView *From, int x, int y, int Button)
 	
 	if (From->IsCapturing())
 		From->Capture(false);
+	#endif
 
 	// This signal handles the case where the user cancels the menu by clicking away from it.
 	Gtk::g_signal_connect_data(GtkCast(Info, g_object, GObject), 
@@ -383,12 +390,12 @@ static GAutoString MenuItemParse(const char *s)
 	return GAutoString(NewStr(buf));
 }
 
-static void MenuItemActivate(LgiMenuItem *Item)
+static void MenuItemActivate(GtkMenuItem *MenuItem, LgiMenuItem *Item)
 {
 	Item->OnGtkEvent("activate");
 }
 
-static void MenuItemDestroy(LgiMenuItem *Item)
+static void MenuItemDestroy(GtkWidget *widget, LgiMenuItem *Item)
 {
 	Item->OnGtkEvent("destroy");
 }
@@ -406,7 +413,7 @@ void LgiMenuItem::OnGtkEvent(::GString Event)
 				::GMenu *m = GetMenu();
 				if (m)
 				{
-					// Attached to a mean, so send an event to the window
+					// Attached to a menu, so send an event to the window
 					GViewI *w = m->WindowHandle();
 					if (w)
 						w->PostEvent(M_COMMAND, Id());
@@ -471,24 +478,16 @@ LgiMenuItem::GMenuItem(::GMenu *m, GSubMenu *p, const char *txt, int Pos, const 
 
 void LgiMenuItem::Handle(GtkMenuItem *mi)
 {
-	LgiAssert(Info == NULL);
-	
-	Info = mi;
-	// LgiTrace("CreateItem %p %p\n", this, Info);
+	LgiAssert(Info == NULL);	
+	if (Info != mi)
+	{
+		Info = mi;
+		
+		LgiTrace("CreateItem %p %p\n", this, Info);
 
-	Gtk::gulong ret = Gtk::g_signal_connect_data(Info,
-									"activate",
-									(Gtk::GCallback) MenuItemActivate,
-									this,
-									NULL,
-									Gtk::G_CONNECT_SWAPPED);
-
-	ret = Gtk::g_signal_connect_data(Info,
-									"destroy",
-									(Gtk::GCallback) MenuItemDestroy,
-									this,
-									NULL,
-									Gtk::G_CONNECT_SWAPPED);
+		Gtk::g_signal_connect(Info, "activate", (Gtk::GCallback) MenuItemActivate, this);
+		Gtk::g_signal_connect(Info, "destroy", (Gtk::GCallback) MenuItemDestroy, this);
+	}
 }
 
 LgiMenuItem::~GMenuItem()

@@ -127,7 +127,15 @@ GWindow::~GWindow()
 		LgiApp->AppWnd = NULL;
 
     if (_Root)
+	{
+		lgi_widget_detach(_Root);
         _Root = NULL;
+	}
+	if (Wnd)
+ 	{
+		gtk_widget_destroy(GTK_WIDGET(Wnd));
+		Wnd = NULL;
+ 	}
 
 	DeleteObj(Menu);
 	DeleteObj(d);
@@ -265,7 +273,9 @@ void GWindow::OnGtkDelete()
 	
 	// These will be destroyed by GTK after returning from GWindowCallback
 	Wnd = NULL;
+	#ifndef __GTK_H__
 	_View = NULL;
+	#endif
 }
 
 GRect *GWindow::GetDecorSize()
@@ -278,7 +288,7 @@ GViewI *GWindow::WindowFromPoint(int x, int y, bool Debug)
 	if (!_Root)
 		return NULL;
 
-	auto rpos = GtkGetPos(_Root);
+	auto rpos = GtkGetPos(_Root).ZeroTranslate();
 	if (!rpos.Overlap(x, y))
 		return NULL;
 
@@ -530,7 +540,7 @@ bool GWindow::Attach(GViewI *p)
 
 	if (Wnd)
 	{
-		_View = GTK_WIDGET(Wnd);
+		auto Widget = GTK_WIDGET(Wnd);
 		GView *i = this;
 		gtk_window_set_default_size(Wnd, Pos.X(), Pos.Y());
 		
@@ -1087,7 +1097,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 
 GRect &GWindow::GetPos()
 {
-	if (Wnd && _View)
+	if (Wnd)
 	{
 		/*
 		OsRect r = _View->geometry();
@@ -1125,6 +1135,8 @@ bool GWindow::SetPos(GRect &p, bool Repaint)
 		gtk_window_set_default_size(w, Pos.X(), Pos.Y());
 		gtk_window_move(w, Pos.x1, Pos.y1);
 	}
+
+	OnPosChange();
 	return true;
 }
 
@@ -1139,16 +1151,21 @@ void GWindow::OnCreate()
 	AttachChildren();
 }
 
-void GWindow::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
-{
-	// GRect r = GetClient();
-	GView::_Paint(pDC, Offset, Update);
-}
-
 void GWindow::OnPaint(GSurface *pDC)
 {
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle();
+}
+
+void GWindow::OnGtkSetPos(int width, int height)
+{
+	if (Pos.X() != width ||
+		Pos.Y() != height)
+	{
+		Pos.x2 = Pos.x1 + width - 1;
+		Pos.y2 = Pos.y1 + height - 1;
+		OnPosChange();
+	}
 }
 
 void GWindow::OnPosChange()
@@ -1594,9 +1611,10 @@ void GWindow::Quit(bool DontDelete)
 {
 	ThreadCheck();
 	
-	if (_View)
+	if (Wnd)
 	{
-		gtk_widget_destroy(_View);
+		gtk_widget_destroy(GTK_WIDGET(Wnd));
+		Wnd = NULL;
 	}
 }
 

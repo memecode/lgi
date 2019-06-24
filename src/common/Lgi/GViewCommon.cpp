@@ -229,7 +229,7 @@ GView::GView(OsView view)
 	d = new GViewPrivate;
 	#ifdef LGI_SDL
 	_View = this;
-	#else
+	#elif !defined __GTK_H__
 	_View = view;
 	#endif
 	_Window = 0;
@@ -413,7 +413,7 @@ void GView::OnAttach()
 			v->SetParent(this);
 	}
 
-	#if defined __GTK_H__
+	#if 0 // defined __GTK_H__
 	if (_View && !DropTarget())
 	{
 		// If one of our parents is drop capable we need to set a dest here
@@ -509,11 +509,7 @@ int GView::OnCommand(int Cmd, int Event, OsView Wnd)
 void GView::OnNcPaint(GSurface *pDC, GRect &r)
 {
 	int Border = Sunken() || Raised() ? _BorderSize : 0;
-	if (
-		#if 0 // WINNATIVE
-		!_View &&
-		#endif	
-		Border == 2)
+	if (Border == 2)
 	{
 		LgiEdge e;
 		if (Sunken())
@@ -534,14 +530,86 @@ void GView::OnNcPaint(GSurface *pDC, GRect &r)
 	}
 }
 
-// extern bool SetClientDebug;
-
+#if defined __GTK_H__
 void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 {
-	#if defined __GTK_H__
 	d->InPaint = true;
+
+	// Create temp DC if needed...
+	GAutoPtr<GSurface> Local;
+	if (!pDC)
+	{
+		if (!Local.Reset(new GScreenDC(this)))
+			return;
+		pDC = Local;
+	}
+
+	#if 0
+	// This is useful for coverage checking
+	pDC->Colour(Rgb24(255, 0, 255), 24);
+	pDC->Rectangle();
 	#endif
 
+	// Non-Client drawing
+	GRect r = Pos;
+	if (Offset)
+	{
+		r = Pos;
+		r.Offset(Offset->x, Offset->y);
+	}
+	else
+	{
+		r = GetClient().ZeroTranslate();
+	}
+
+	pDC->SetClient(&r);
+	GRect zr1 = r.ZeroTranslate(), zr2 = zr1;
+	OnNcPaint(pDC, zr1);
+	pDC->SetClient(NULL);
+	if (zr2 != zr1)
+	{
+		r.x1 -= zr2.x1 - zr1.x1;
+		r.y1 -= zr2.y1 - zr1.y1;
+		r.x2 -= zr2.x2 - zr1.x2;
+		r.y2 -= zr2.y2 - zr1.y2;
+	}
+	GdcPt2 o(r.x1, r.y1); // Origin of client
+
+	// Paint this view's contents...
+	pDC->SetClient(&r);
+
+	#if 0
+	{
+		Gtk::cairo_matrix_t matrix;
+		cairo_get_matrix(pDC->Handle(), &matrix);
+
+		double ex[4];
+		cairo_clip_extents(pDC->Handle(), ex+0, ex+1, ex+2, ex+3);
+		ex[0] += matrix.x0;
+		ex[1] += matrix.y0;
+		ex[2] += matrix.x0;
+		ex[3] += matrix.y0;
+		LgiTrace("%s::_Paint, r=%s, clip=%g,%g,%g,%g - %g,%g\n", GetClass(), r.GetStr(), ex[0], ex[1], ex[2], ex[3], matrix.x0, matrix.y0);
+	}
+	#endif
+
+	OnPaint(pDC);
+
+	pDC->SetClient(NULL);
+
+	// Paint all the children...
+	for (auto i : Children)
+	{
+		GView *w = i->GetGView();
+		if (w && w->Visible())
+			w->_Paint(pDC, &o);
+	}
+
+	d->InPaint = false;
+}
+#else
+void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
+{
 	// Create temp DC if needed...
 	GAutoPtr<GSurface> Local;
 	if (!pDC)
@@ -593,15 +661,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 		if (HasClient)
 		{
 			Client.Offset(o.x, o.y);
-			// printf("Client=%s\n", Client.GetStr());
 			pDC->SetClient(&Client);
-			
-			/*
-			#ifdef _DEBUG
-			if (_Debug)
-				printf("%s:%i SetClient %s  %i,%i\n", _FL, Client.GetStr(), o.x, o.y);
-			#endif
-			*/
 		}
 	}
 
@@ -641,8 +701,6 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 			HIViewGetFrame(_View, &rc);
 			HIViewFeatures f;
 			HIViewGetFeatures(_View, &f);
-			// bool op = (f & kHIViewIsOpaque) != 0;
-			// bool vis = IsControlVisible(_View);
 			
 			if (r2.x1 >= 0)
 			{
@@ -695,21 +753,6 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 					w->_Paint(pDC, &co);
 					pDC->SetClient(NULL);
 				}
-				/*
-				else
-				{
-					LgiTrace("%s:%i - Not updating '%s' because %i, %i (%s)\n",
-						_FL, w->GetClass(),
-						Update != NULL,
-						Update ? Update->Overlap(&p) : -1,
-						p.GetStr());
-					if (Update)
-					{
-						for (unsigned i=0; i<Update->Length(); i++)
-							LgiTrace("    [%i]=%s\n", i, (*Update)[i]->GetStr());
-					}
-				}
-				*/
 			}
 		}
 	}
@@ -717,11 +760,8 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 
 	if (HasClient)
 		pDC->SetClient(0);
-
-	#if defined __GTK_H__
-	d->InPaint = false;
-	#endif
 }
+#endif
 
 GViewI *GView::GetParent()
 {
@@ -741,7 +781,11 @@ void GView::SendNotify(int Data)
 	GViewI *n = d->Notify ? d->Notify : d->Parent;
 	if (n)
 	{
-		if (!_View || InThread())
+		if (
+			#ifndef __GTK_H__
+			!_View ||
+			#endif
+			InThread())
 		{
 			n->OnNotify(this, Data);
 		}
@@ -1144,6 +1188,7 @@ void GView::Enabled(bool i)
 	if (!i) SetFlag(GViewFlags, GWF_DISABLED);
 	else ClearFlag(GViewFlags, GWF_DISABLED);
 
+	#ifndef __GTK_H__
 	if (_View)
 	{
 		#if WINNATIVE
@@ -1161,6 +1206,7 @@ void GView::Enabled(bool i)
 		}
 		#endif
 	}
+	#endif
 
 	Invalidate();
 }
@@ -1194,6 +1240,7 @@ void GView::Visible(bool v)
 	if (v) SetFlag(GViewFlags, GWF_VISIBLE);
 	else ClearFlag(GViewFlags, GWF_VISIBLE);
 
+	#ifndef __GTK_H__
 	if (_View)
 	{
 		#if WINNATIVE
@@ -1233,6 +1280,7 @@ void GView::Visible(bool v)
 		#endif
 	}
 	else
+	#endif
 	{
 		Invalidate();
 	}
@@ -1297,7 +1345,9 @@ void GView::Focus(bool i)
 	if (Wnd)
 		Wnd->SetFocus(this, i ? GWindow::GainFocus : GWindow::LoseFocus);
 
+	#ifndef __GTK_H__
 	if (_View)
+	#endif
 	{
 		#if defined(LGI_SDL) || defined(__GTK_H__)
 		
@@ -1639,7 +1689,7 @@ void GView::SetTabStop(bool b)
 	#else
 	d->TabStop = b;
 	#endif
-	#ifdef __GTK_H__
+	#if 0 // def __GTK_H__
 	if (_View)
 	{
 		#if GtkVer(2, 18)
@@ -1991,6 +2041,7 @@ bool GView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 	
 	#else
 	
+	#ifndef __GTK_H__
 	if (_View)
 	{
 		#if WINNATIVE
@@ -2005,20 +2056,11 @@ bool GView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 		return LgiPostEvent(_View, Cmd, a, b);
 		#endif
 	}
-	else if (InThread())
-	{
-		GMessage e(Cmd, a, b);
-		OnEvent(&e);
-		return true;
-	}
 	else
-	{
-		// LgiTrace("%s:%i - No view to post event to.\n", _FL);
-	}
+	#endif
+		return LgiApp->PostEvent(this, Cmd, a, b);
 	
 	#endif
-	
-	return false;
 }
 
 bool GView::Invalidate(GRegion *r, bool Repaint, bool NonClient)
@@ -2069,6 +2111,7 @@ bool GView::Name(const char *n)
 {
 	GBase::Name(n);
 
+	#ifndef __GTK_H__
 	if (_View)
 	{
 		#if WINNATIVE
@@ -2078,6 +2121,7 @@ bool GView::Name(const char *n)
 		
 		#endif
 	}
+	#endif
 
 	Invalidate();
 
@@ -2354,7 +2398,7 @@ void GView::_Dump(int Depth)
 
 	#elif defined(__GTK_H__)
 
-	DumpGtk(_View);
+	// DumpGtk(_View);
 	
 	#endif
 }
@@ -2440,7 +2484,8 @@ void GView::Debug()
     _Debug = true;
 
 	#if defined(__GTK_H__)
-    if (_View)
+    /*
+	if (_View)
     {
 		#if GTK_MAJOR_VERSION == 3
 			LgiAssert(!"Gtk3 FIXME");
@@ -2457,6 +2502,7 @@ void GView::Debug()
     	else LgiTrace("%s:%i - Not a widget.\n", _FL);
 		#endif
     }
+	*/
     #elif defined COCOA
     d->ClassName = GetClass();
 	#endif
