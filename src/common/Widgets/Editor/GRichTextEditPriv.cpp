@@ -1853,7 +1853,7 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 	pDC->GetOrigin(Origin.x, Origin.y);
 	
 	GRect r = Areas[GRichTextEdit::ContentArea];
-	#if defined(WINDOWS) && !defined(__GTK_H__) && !DEBUG_NO_DOUBLE_BUF
+	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
 	GMemDC Mem;
 	if (!Mem.Create(r.X(), r.Y(), pDC->GetColourSpace()))
 	{
@@ -1940,7 +1940,7 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 	}
 	#endif
 
-	#if defined(WINDOWS) && !defined(__GTK_H__) && !DEBUG_NO_DOUBLE_BUF
+	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
 	Mem.SetOrigin(0, 0);
 	pScreen->Blt(Areas[GRichTextEdit::ContentArea].x1, Areas[GRichTextEdit::ContentArea].y1, &Mem);
 	#endif

@@ -243,8 +243,12 @@ static gboolean lgi_widget_scroll(GtkWidget *widget, GdkEventScroll *ev)
 	if (v)
 	{
 		double Lines = ev->direction == GDK_SCROLL_DOWN ? 3 : -3;
-		// LgiTrace("%s::OnMouseWheel %g\n", v->GetClass(), Lines);
-		v->OnMouseWheel(Lines);
+
+		GMouse m = _map_mouse_event(v, ev->x, ev->y, true);
+		if (!m.Target)
+			return false;
+
+		m.Target->OnMouseWheel(Lines);
 	}    
 	return TRUE;
 }

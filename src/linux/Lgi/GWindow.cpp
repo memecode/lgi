@@ -562,7 +562,7 @@ bool GWindow::Attach(GViewI *p)
 		g_signal_connect(Obj, "property-notify-event",	G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "configure-event",		G_CALLBACK(GtkViewCallback), i);
 
-		gtk_widget_add_events(_View, GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK);
+		gtk_widget_add_events(Widget, GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
 
 		g_action_map_add_action_entries (G_ACTION_MAP(Wnd), app_entries, G_N_ELEMENTS (app_entries), Wnd);
@@ -1131,9 +1131,8 @@ bool GWindow::SetPos(GRect &p, bool Repaint)
 	{
 		ThreadCheck();
 		
-		GtkWindow *w = GTK_WINDOW(Wnd);
-		gtk_window_set_default_size(w, Pos.X(), Pos.Y());
-		gtk_window_move(w, Pos.x1, Pos.y1);
+		gtk_window_resize(Wnd, Pos.X(), Pos.Y());
+		gtk_window_move(Wnd, Pos.x1, Pos.y1);
 	}
 
 	OnPosChange();
