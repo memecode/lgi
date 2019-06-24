@@ -167,8 +167,14 @@ void GView::_Focus(bool f)
 
 	if (f)
 	{
-		if (GetWindow())
-			GetWindow()->SetFocus(this, GWindow::GainFocus);
+		auto w = GetWindow();
+		if (w)
+		{
+			if (w->_Root)
+				gtk_widget_grab_focus(w->_Root);
+			else
+				LgiAssert(0);
+		}
 		else
 			d->WantsFocus = f;
 	}

@@ -2,7 +2,7 @@
 #include "GDragAndDrop.h"
 #include "GViewPriv.h"
 
-#define DEBUG_KEY_EVENT		0
+#define DEBUG_KEY_EVENT		1
 
 using namespace Gtk;
 #include "LgiWidget.h"
@@ -278,6 +278,7 @@ static gboolean lgi_widget_mouse_enter_leave(GtkWidget *widget, GdkEventCrossing
 	return TRUE;
 }
 
+/*
 static gboolean lgi_widget_focus_event(GtkWidget *wid, GdkEventFocus *e)
 {
 	LgiWidget *p = LGI_WIDGET(wid);
@@ -289,6 +290,7 @@ static gboolean lgi_widget_focus_event(GtkWidget *wid, GdkEventFocus *e)
 	
 	return TRUE;
 }
+*/
 
 void BuildTabStops(GViewI *v, ::GArray<GViewI*> &a)
 {
@@ -312,7 +314,7 @@ void BuildTabStops(GViewI *v, ::GArray<GViewI*> &a)
 #define KEY(name) GDK_##name
 #endif
 
-static gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
+gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 {
 	#if 0
 	// This is useful for debugging...
@@ -875,6 +877,8 @@ lgi_widget_realize(GtkWidget *widget)
 								GDK_BUTTON_RELEASE_MASK |
 								GDK_ENTER_NOTIFY_MASK |
 								GDK_LEAVE_NOTIFY_MASK |
+								GDK_KEY_PRESS_MASK |
+								GDK_KEY_RELEASE_MASK |
 								GDK_EXPOSURE_MASK |
 								GDK_STRUCTURE_MASK |
 								GDK_SCROLL_MASK;
@@ -1227,18 +1231,16 @@ lgi_widget_class_init(LgiWidgetClass *cls)
 	#endif
 	widget_class->realize					= lgi_widget_realize;
 	widget_class->size_allocate				= lgi_widget_size_allocate;
-	
-	#if 1
 	widget_class->button_press_event		= lgi_widget_click;
 	widget_class->button_release_event		= lgi_widget_click;
 	widget_class->motion_notify_event		= lgi_widget_motion;
 	widget_class->scroll_event				= lgi_widget_scroll;
-	#endif
-
 	widget_class->enter_notify_event		= lgi_widget_mouse_enter_leave;
 	widget_class->leave_notify_event		= lgi_widget_mouse_enter_leave;
+	/*
 	widget_class->focus_in_event			= lgi_widget_focus_event;
 	widget_class->focus_out_event			= lgi_widget_focus_event;
+	*/
 	widget_class->key_press_event			= lgi_widget_key_event;
 	widget_class->key_release_event			= lgi_widget_key_event;
 	widget_class->drag_begin				= lgi_widget_drag_begin;
