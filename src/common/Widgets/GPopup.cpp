@@ -533,21 +533,15 @@ public:
 ::GArray<GPopup*> GPopup::CurrentPopups;
 
 GPopup::GPopup(GView *owner)
-	#ifdef CARBON
+	#ifdef LGI_CARBON
 	: GWindow(CreateBorderlessWindow())
+	#elif defined(__GTK_H__)
+	: GWindow(gtk_window_new(GTK_WINDOW_POPUP))
 	#endif
 {
 	d = new GPopupPrivate;
 	Start = 0;
 	Cancelled = false;
-	#ifdef _DEBUG
-	// _Debug = true;
-	#endif
-
-    #ifdef __GTK_H__
-    Wnd = NULL;
-    #endif
-
     CurrentPopups.Add(this);
 
 	if ((Owner = owner))
@@ -584,12 +578,6 @@ GPopup::~GPopup()
 		}
 		#endif
 	}
-
-    #ifdef __GTK_H__
-    Detach();
-    if (Wnd)
-        gtk_widget_destroy(Wnd);
-    #endif
 
 	GMouseHook *Hook = LgiApp->GetMouseHook();
 	if (Hook) Hook->UnregisterPopup(this);
@@ -707,17 +695,29 @@ bool GPopup::Attach(GViewI *p)
 	AttachChildren();
 
 	#elif defined __GTK_H__
+
+	gtk_window_set_decorated(WindowHandle(), FALSE);
+	// gtk_widget_add_events(Wnd, GDK_ALL_EVENTS_MASK & ~GDK_POINTER_MOTION_HINT_MASK);
 	
+	return GWindow::Attach(p);
+	
+	/*
 	if (!Wnd)
 	{
 	    Wnd = gtk_window_new(GTK_WINDOW_POPUP);
+		auto WndObj = G_OBJECT(Wnd);
+		LgiAssert(WndObj);
 	    
 	    gtk_window_set_decorated(GTK_WINDOW(Wnd), FALSE);
 		gtk_widget_add_events(Wnd, GDK_ALL_EVENTS_MASK & ~GDK_POINTER_MOTION_HINT_MASK);
 
 		if (!p)
 			p = Owner;
-		GtkWidget *toplevel = p ? gtk_widget_get_toplevel(p->Handle()) : NULL;
+
+		auto Wnd = p ? p->GetWindow() : 0;
+		GtkWidget *Hnd = Wnd ? GTK_WIDGET(Wnd->WindowHandle()) : NULL;
+
+		GtkWidget *toplevel = p ? gtk_widget_get_toplevel(Hnd) : NULL;
 		if (GTK_IS_WINDOW(toplevel))
 			gtk_window_set_transient_for(GTK_WINDOW(Wnd), GTK_WINDOW(toplevel));
 		else
@@ -726,34 +726,13 @@ bool GPopup::Attach(GViewI *p)
 			return false;
 		}
 
-        g_signal_connect(	G_OBJECT(Wnd),
-							"button-press-event",
-							G_CALLBACK(PopupEvent),
-							this);
-        g_signal_connect(	G_OBJECT(Wnd),
-							"focus-in-event",
-							G_CALLBACK(PopupEvent),
-							this);
-        g_signal_connect(	G_OBJECT(Wnd),
-							"focus-out-event",
-							G_CALLBACK(PopupEvent),
-							this);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"delete_event",
-							G_CALLBACK(PopupEvent),
-							this);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"configure-event",
-							G_CALLBACK(PopupEvent),
-							this);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"button-press-event",
-							G_CALLBACK(PopupEvent),
-							this);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"client-event",
-							G_CALLBACK(PopupEvent),
-							this);
+        g_signal_connect(WndObj, "button-press-event", G_CALLBACK(PopupEvent), this);
+        g_signal_connect(WndObj, "focus-in-event", G_CALLBACK(PopupEvent), this);
+        g_signal_connect(WndObj, "focus-out-event", G_CALLBACK(PopupEvent), this);
+		g_signal_connect(WndObj, "delete_event", G_CALLBACK(PopupEvent), this);
+		g_signal_connect(WndObj, "configure-event", G_CALLBACK(PopupEvent), this);
+		g_signal_connect(WndObj, "button-press-event", G_CALLBACK(PopupEvent), this);
+		// g_signal_connect(WndObj, "client-event", G_CALLBACK(PopupEvent), this);
 	}
 
 	if (Wnd && Pos.Valid())
@@ -761,6 +740,7 @@ bool GPopup::Attach(GViewI *p)
 		gtk_window_set_default_size(GTK_WINDOW(Wnd), Pos.X(), Pos.Y());
 		gtk_window_move(GTK_WINDOW(Wnd), Pos.x1, Pos.y1);
 	}
+	*/
 
 	#endif
 
@@ -790,6 +770,7 @@ void GPopup::Visible(bool i)
 
 	#if defined __GTK_H__
 	
+		auto Wnd = WindowHandle();
 		if (i && !Wnd)
 		{
 			if (!Attach(0))
@@ -804,14 +785,14 @@ void GPopup::Visible(bool i)
 	    {
 		    if (i)
 		    {
-		        gtk_widget_show_all(Wnd);
-				gtk_window_move(GTK_WINDOW(Wnd), Pos.x1, Pos.y1);
-				gtk_window_resize(GTK_WINDOW(Wnd), Pos.X(), Pos.Y());
+		        gtk_widget_show_all(GTK_WIDGET(Wnd));
+				gtk_window_move(Wnd, Pos.x1, Pos.y1);
+				gtk_window_resize(Wnd, Pos.X(), Pos.Y());
 				// printf("%s:%i - Showing Wnd %s.\n", _FL, Pos.GetStr());
 		    }
 		    else
 		    {
-		        gtk_widget_hide(Wnd);
+		        gtk_widget_hide(GTK_WIDGET(Wnd));
 				// printf("%s:%i - Hiding Wnd.\n", _FL);
 		    }
 		}
@@ -941,7 +922,7 @@ bool GPopup::Visible()
 	    {
 			GView::Visible(
 							#if GtkVer(2, 18)
-							gtk_widget_get_visible(Wnd)
+							gtk_widget_get_visible(GTK_WIDGET(WindowHandle()))
 							#else
 							(GTK_OBJECT_FLAGS (Wnd) & GTK_VISIBLE) != 0
 							#endif

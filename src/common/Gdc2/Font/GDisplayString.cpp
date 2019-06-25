@@ -237,6 +237,13 @@ GDisplayString::GDisplayString(GFont *f, const uint32_t *s, ssize_t l, GSurface 
 {
 	pDC = pdc;
 	Font = f;
+	x = y = 0;
+	xf = 0;
+	yf = 0;
+	DrawOffsetF = 0;
+	LaidOut = 0;
+	AppendDots = 0;
+	VisibleTab = 0;
 
 	#if LGI_DSP_STR_CACHE
 
@@ -250,6 +257,19 @@ GDisplayString::GDisplayString(GFont *f, const uint32_t *s, ssize_t l, GSurface 
 		Hnd = NULL;
 		StringConvert(Str, &len, s, l);
 
+		if (Font && Str)
+		{
+			len = l >= 0 ? l : strlen(Str);
+			if (len > 0)
+			{
+				Gtk::GtkPrintContext *PrintCtx = pDC ? pDC->GetPrintContext() : NULL;
+				if (PrintCtx)
+					Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+				else
+					Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
+			}
+		}
+
 	#elif defined(MAC) || defined(LGI_SDL) || defined(_MSC_VER)
 
 		StringConvert(Str, &len, s, l);
@@ -260,14 +280,6 @@ GDisplayString::GDisplayString(GFont *f, const uint32_t *s, ssize_t l, GSurface 
 		len = Str ? strlen(Str) : 0;
 
 	#endif
-	
-	x = y = 0;
-	xf = 0;
-	yf = 0;
-	DrawOffsetF = 0;
-	LaidOut = 0;
-	AppendDots = 0;
-	VisibleTab = 0;
 }
 #endif
 
@@ -519,7 +531,6 @@ void GDisplayString::Layout(bool Debug)
 		*/
 		UpdateTabs(OffsetF / FScale, Font->TabSize());
 
-
 		if (Font->Underline())
 		{
 			Gtk::PangoAttrList *attrs = Gtk::pango_attr_list_new();
@@ -531,6 +542,7 @@ void GDisplayString::Layout(bool Debug)
 		
 		Gtk::pango_layout_set_text(Hnd, Str, len);
 		Gtk::pango_layout_get_size(Hnd, &xf, &yf);
+
 		x = (xf + PANGO_SCALE - 1) / PANGO_SCALE;
 		#if 1
 		y = Font->GetHeight();

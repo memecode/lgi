@@ -397,6 +397,9 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 				case KEY(End):
 					k.vkey = k.c16 = VK_END;
 					break;
+				case KEY(Delete):
+					k.vkey = k.c16 = VK_DELETE;
+					break;
 			
 				#define KeyPadMap(gdksym, ch, is) \
 					case gdksym: k.c16 = ch; k.IsChar = is; break;
