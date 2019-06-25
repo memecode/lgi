@@ -714,14 +714,24 @@ GMessage::Param GView::OnEvent(GMessage *Msg)
 
 GdcPt2 GtkGetOrigin(GWindow *w)
 {
-	auto Hnd = w->Handle();
+	auto Hnd = w->WindowHandle();
 	if (Hnd)
 	{
-		auto Wnd = gtk_widget_get_window(Hnd);
+		auto Wnd = gtk_widget_get_window(GTK_WIDGET(Hnd));
 		if (Wnd)
 		{
+			/*
+			GdkRectangle rect;
+			gdk_window_get_frame_extents(Wnd, &rect);
+			return GdcPt2(rect.x, rect.y);
+			*/
+			
 			gint x = 0, y = 0;
+			/*
 			gdk_window_get_origin(Wnd, &x, &y);
+			*/
+
+			gdk_window_get_root_origin  (Wnd, &x, &y);
 			return GdcPt2(x, y);
 		}
 		else

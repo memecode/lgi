@@ -286,8 +286,8 @@ GMessage::Param GLayout::OnEvent(GMessage *Msg)
 	}
 	#endif
 
-	if (VScroll) VScroll->OnEvent(Msg);
-	if (HScroll) HScroll->OnEvent(Msg);
+	// if (VScroll) VScroll->OnEvent(Msg);
+	// if (HScroll) HScroll->OnEvent(Msg);
 	int Status = GView::OnEvent(Msg);
 	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&
