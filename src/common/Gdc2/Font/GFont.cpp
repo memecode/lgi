@@ -1255,6 +1255,7 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 		Gtk::PangoContext *SysCtx = GFontSystem::Inst()->GetContext();
 		if (PrintCtx)
 			d->PangoCtx = gtk_print_context_create_pango_context(PrintCtx);
+		auto EffectiveCtx = d->PangoCtx ? d->PangoCtx : SysCtx;
 		Gtk::PangoFontMetrics *m = Gtk::pango_context_get_metrics(d->PangoCtx ? d->PangoCtx : SysCtx, d->hFont, 0);
 		if (!m)
 			printf("pango_font_get_metrics failed.\n");
@@ -1266,7 +1267,7 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 			
 			// printf("Created '%s:%i' %f + %f = %i\n", Face(), PointSize(), GTypeFace::d->_Ascent, GTypeFace::d->_Descent, d->Height);
 
-			#if 1
+			#if 0
 			if (PrintCtx)
 			{
 				LgiTrace("GFont::Create %s,%f (%i,%i,%i) (%.1f,%.1f,%i)\n",
@@ -1282,6 +1283,37 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 			#endif
 
 			Gtk::pango_font_metrics_unref(m);
+
+			#if 1
+			Gtk::PangoFont *fnt = pango_font_map_load_font(Gtk::pango_cairo_font_map_get_default(), EffectiveCtx, d->hFont);
+			if (fnt)
+			{
+				Gtk::PangoCoverage *c = Gtk::pango_font_get_coverage(fnt, Gtk::pango_language_get_default());
+				if (c)
+				{
+					Gtk::guchar *bytes = NULL;
+					int len = 0;
+					Gtk::pango_coverage_to_bytes(c, &bytes, &len);
+					if (bytes)
+					{
+						int bitsz = (len + 7) / 8;
+						if ((d->GlyphMap = new uchar[bitsz]))
+						{
+							memset(d->GlyphMap, 0, bitsz);
+							for (int i=0; i<len; i++)
+							{
+								if (bytes[i] >= Gtk::PANGO_COVERAGE_APPROXIMATE)
+									d->GlyphMap[i>>3] |= 1 << (i & 0x7);
+							}
+						}
+					}
+					Gtk::g_free(bytes);
+					Gtk::pango_coverage_unref(c);
+				}
+				
+				g_object_unref(fnt);
+			}
+			#endif
 			
 			return true;
 		}

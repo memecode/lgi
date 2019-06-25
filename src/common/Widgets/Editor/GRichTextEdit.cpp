@@ -1766,7 +1766,10 @@ bool GRichTextEdit::OnKey(GKey &k)
 					break;
 
 				if (k.Down() && k.IsChar)
+				{
 					OnEnter(k);
+					SendNotify(GNotifyDocChanged);
+				}
 
 				return true;
 			}

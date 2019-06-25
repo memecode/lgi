@@ -927,6 +927,7 @@ bool GView::Detach()
 		// Events
 		Par->DelView(this);
 		Par->OnChildrenChanged(this, false);
+		Par->Invalidate(&GetPos());
 	}
 	
 	d->Parent = 0;
