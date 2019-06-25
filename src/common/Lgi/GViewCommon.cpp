@@ -1586,10 +1586,12 @@ void GView::Sunken(bool i)
 	else ClearFlag(GViewFlags, GWF_SUNKEN);
 	#endif
 
-	if (!_BorderSize && i)
+	if (i)
 	{
-		_BorderSize = 2;
+		if (!_BorderSize)
+			_BorderSize = 2;
 	}
+	else _BorderSize = 0;
 }
 
 bool GView::Flat()
@@ -1639,10 +1641,12 @@ void GView::Raised(bool i)
 	else ClearFlag(GViewFlags, GWF_RAISED);
 	#endif
 
-	if (!_BorderSize && i)
+	if (i)
 	{
-		_BorderSize = 2;
+		if (!!_BorderSize)
+			_BorderSize = 2;
 	}
+	else _BorderSize = 0;
 }
 
 int GView::GetId()

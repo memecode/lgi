@@ -31,7 +31,6 @@
 
 // Options
 #define DOUBLE_BUFFER_PAINT				0
-#define DOUBLE_BUFFER_COLUMN_DRAWING	0
 
 #define ForAllItems(Var)				for (auto Var : Items)
 #define ForAllItemsReverse(Var)			Iterator<LListItem> ItemIter(&Items); for (LListItem *Var = ItemIter.Last(); Var; Var = ItemIter.Prev())
