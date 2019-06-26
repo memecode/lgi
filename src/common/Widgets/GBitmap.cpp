@@ -42,10 +42,10 @@ public:
 			{
 				Bmp->SetDC(pDC);
 
+				#ifndef __GTK_H__
 				while (!Bmp->Handle())
-				{
 					LgiSleep(10);
-				}
+				#endif
 
 				GRect r = Bmp->GetPos();
 				r.Dimension(pDC->X()+4, pDC->Y()+4);

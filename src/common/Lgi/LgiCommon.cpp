@@ -137,6 +137,7 @@ bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 
 	#elif defined(__GTK_H__)
 
+	LgiAssert(Wnd);
 	GViewI *View = (GViewI*) g_object_get_data(GtkCast(Wnd, g_object, GObject), "GViewI");
 	if (View)
 	{

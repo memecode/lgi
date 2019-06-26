@@ -369,7 +369,7 @@ void GSplitter::OnPaint(GSurface *pDC)
 
 		if (d->ViewA)
 		{
-			#ifdef WIN32
+			#if defined(WIN32) && !defined(__GTK_H__)
 			if (!d->ViewA->Handle())
 			{
 				pDC->SetClient(&d->PosA);
@@ -403,7 +403,7 @@ void GSplitter::OnPaint(GSurface *pDC)
 
 		if (d->ViewB)
 		{
-			#ifdef WIN32
+			#if defined(WIN32) && !defined(__GTK_H__)
 			if (!d->ViewB->Handle())
 			{
 				pDC->SetClient(&d->PosB);

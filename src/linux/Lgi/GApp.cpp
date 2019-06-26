@@ -1458,53 +1458,6 @@ bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth)
 	return false;
 }
 
-#if GTK_MAJOR_VERSION == 3
-#else
-static gboolean 
-GlibPostMessage(GlibEventParams *p)
-{
-	#if 1
-	GtkWindow *w = NULL;
-
-	if (p->e->client.window)
-		gdk_window_get_user_data(p->e->client.window, (gpointer*)&w);
-
-	if (!w)
-	{
-		// Window must of been destroyed...
-	}
-	else if (GlibWidgetSearch(GTK_WIDGET(w), p->w, false))
-	{
-	    gtk_propagate_event(p->w, p->e);
-	}
-	else
-	{
-		printf("%s:%i - Failed to find widget(%p) for PostMessage.\n", _FL, w);
-		
-		#if 0
-		static int Count = 0;
-		if (Count++ < 5)
-		{
-			GlibWidgetSearch(GTK_WIDGET(w), p->w, true);
-		}
-		if (Count > 20)
-		{
-			printf("%s:%i - Too many widget not found errors.\n", _FL);
-			LgiExitApp();
-		}
-		#endif
-	}
-	#else
-    gtk_propagate_event(p->w, p->e);
-	#endif
-	
-    gdk_event_free(p->e);
-    DeleteObj(p);
-	
-    return FALSE;
-}
-#endif
-
 void GApp::OnDetach(GViewI *View)
 {
 	LMessageQue::MsgArray *q = MsgQue.Lock(_FL);
@@ -1513,17 +1466,6 @@ void GApp::OnDetach(GViewI *View)
 		printf("%s:%i - Couldn't lock app.\n", _FL);
 		return;
 	}
-
-	#if VIEW_REF_MODE
-	for (unsigned i=0; i<q->Length(); i++)
-	{
-		if ((*q)[i].v == View)
-		{
-			printf("Clearing detaching view.\n");
-			q->DeleteAt(i--, true);
-		}
-	}
-	#endif
 
 	MsgQue.Unlock();
 }
@@ -1537,14 +1479,7 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 		return false;
 	}
 	
-	#if VIEW_REF_MODE
-	auto Widget = View->Handle();
-	// printf("Ref %p %s.%p (len=%i)\n", Widget, View->GetClass(), View, (int)q->Length());
-	g_object_ref(Widget); // ref widget till we try and propagate the message to it...
-	#endif
-	
 	q->New().Set(View, Msg, a, b);
-
 	MsgQue.Unlock();
 	
 	return true;
