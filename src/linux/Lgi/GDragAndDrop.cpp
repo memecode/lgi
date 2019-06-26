@@ -234,7 +234,11 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect)
 	if (!SourceWnd)
 		return -1;
 
-	if (!SourceWnd || !SourceWnd->Handle())
+	if (!SourceWnd
+		#ifndef __GTK_H__
+		|| !SourceWnd->Handle()
+		#endif
+		)
 	{
 		LgiTrace("%s:%i - Error: No source window or handle.\n", _FL);
 		return -1;
@@ -263,7 +267,8 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect)
 	Gtk::GdkDragAction Action = EffectToDragAction(Effect);
 	
 	int Button = 1;
-	d->SignalWnd = SourceWnd->Handle();
+	GWindow *w = SourceWnd->GetWindow();
+	d->SignalWnd = w ? GTK_WIDGET(w->WindowHandle()) : NULL;
 	RemoveExistingSignals(d->SignalWnd);
 	SignalInfo &Si = ExistingSignals.New();
 	Si.Wnd = d->SignalWnd;
@@ -302,9 +307,9 @@ void GDragDropTarget::SetWindow(GView *to)
 	{
 		To->DropTarget(this);
 		Status = To->DropTarget(true);
-		if (To->Handle())
+		
+		if (To->IsAttached())
 		{
-			GtkWidget *w = to->Handle();
    			OnDragInit(Status);
 		}
 		else

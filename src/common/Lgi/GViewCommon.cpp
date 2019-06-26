@@ -1077,8 +1077,17 @@ GViewI *GView::FindReal(GdcPt2 *Offset)
 		Offset->y = 0;
 	}
 
+	#ifdef __GTK_H__
+	GViewI *w = GetWindow();
+	#endif
 	GViewI *p = d->Parent;
-	while (p && !p->Handle())
+	while (p &&
+		#ifdef __GTK_H__
+		p != w
+		#else
+		!p->Handle()
+		#endif
+		)
 	{
 		if (Offset)
 		{
@@ -1089,7 +1098,13 @@ GViewI *GView::FindReal(GdcPt2 *Offset)
 		p = p->GetParent();
 	}
 	
-	if (p && p->Handle())
+	if (p &&
+		#ifdef __GTK_H__
+		p == w
+		#else
+		p->Handle()
+		#endif
+		)
 	{
 		return p;
 	}
@@ -1449,12 +1464,14 @@ extern pascal OSStatus LgiViewDndHandler(EventHandlerCallRef inHandlerCallRef, E
 // Recursively add drag dest to all view and all children
 bool GtkAddDragDest(GViewI *v, bool IsTarget)
 {
-	if (!v->Handle())
-		return false;
+	if (!v) return false;
+	GWindow *w = v->GetWindow();
+	if (!w) return false;
+	auto wid = GtkCast(w->WindowHandle(), gtk_widget, GtkWidget);
 
 	if (IsTarget)
 	{
-		Gtk::gtk_drag_dest_set(	v->Handle(),
+		Gtk::gtk_drag_dest_set(	wid,
 								(Gtk::GtkDestDefaults)0,
 								NULL,
 								0,
@@ -1462,7 +1479,7 @@ bool GtkAddDragDest(GViewI *v, bool IsTarget)
 	}
 	else
 	{
-		Gtk::gtk_drag_dest_unset(v->Handle());
+		Gtk::gtk_drag_dest_unset(wid);
 	}
 	
 	GAutoPtr<GViewIterator> it(v->IterateViews());
@@ -1880,9 +1897,16 @@ bool GView::WindowVirtualOffset(GdcPt2 *Offset)
 		Offset->x = 0;
 		Offset->y = 0;
 		
+		#ifdef __GTK_H__
+		GViewI *wnd = GetWindow();
+		#endif
 		for (GViewI *Wnd = this; Wnd; Wnd = Wnd->GetParent())
 		{
+			#ifdef __GTK_H__
+			if (Wnd != wnd)
+			#else
 			if (!Wnd->Handle())
+			#endif
 			{
 				GRect r = Wnd->GetPos();
 				GViewI *Par = Wnd->GetParent();

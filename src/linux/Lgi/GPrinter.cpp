@@ -130,7 +130,7 @@ bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages /
 	{
 		GWindow *w = Parent->GetWindow();
 		if (w)
-			Wnd = GTK_WINDOW(w->Handle());
+			Wnd = w->WindowHandle();
 	}
 	
 	d->Events = Events;

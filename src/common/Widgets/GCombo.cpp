@@ -279,7 +279,13 @@ void GCombo::DoMenu()
 		int Result = d->Menu->Float(this, p.x, p.y, GSubMenu::BtnLeft);
 		if (Result)
 		{
-			GetWindow()->OnCommand(Result, 0, Handle());
+			GetWindow()->OnCommand(Result, 0,
+				#ifdef __GTK_H__
+				NULL
+				#else
+				Handle()
+				#endif
+				);
 		}
 	}
 	else

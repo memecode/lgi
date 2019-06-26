@@ -205,6 +205,7 @@ void GSplitter::Value(int64 s)
 	}
 }
 
+#ifndef __GTK_H__
 GViewI *GSplitter::FindControl(OsView hCtrl)
 {
 	GViewI *c = 0;
@@ -214,6 +215,7 @@ GViewI *GSplitter::FindControl(OsView hCtrl)
 	if (d->ViewB) c = d->ViewB->FindControl(hCtrl);
 	return c;
 }
+#endif
 
 void GSplitter::CalcRegions(bool Follow)
 {

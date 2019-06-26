@@ -407,7 +407,9 @@ class LgiClass GViewI :
 
 public:
 	// Handles
+	#if !defined(__GTK_H__)
 	virtual OsView Handle() = 0;
+	#endif
 	virtual OsWindow WindowHandle() = 0;
 	virtual GView *GetGView() { return NULL; }
 
@@ -492,7 +494,9 @@ public:
 	virtual bool GetMouse(GMouse &m, bool ScreenCoords = false) = 0;
 
 	// Helper
+	#if !defined(__GTK_H__)
 	virtual GViewI *FindControl(OsView hnd) = 0;
+	#endif
 	virtual GViewI *FindControl(int Id) = 0;
 	virtual int64 GetCtrlValue(int Id) = 0;
 	virtual void SetCtrlValue(int Id, int64 i) = 0;

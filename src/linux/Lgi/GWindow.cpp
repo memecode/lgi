@@ -291,11 +291,12 @@ bool GWindow::TranslateMouse(GMouse &m)
 	if (!m.Target)
 		return false;
 
+	GViewI *w = this;
 	for (auto p = m.Target; p; p = p->GetParent())
 	{
-		if (p->Handle())
+		if (p == w)
 		{
-			auto ppos = GtkGetPos(p->Handle());
+			auto ppos = GtkGetPos(GTK_WIDGET(WindowHandle()));
 			m.x -= ppos.x1;
 			m.y -= ppos.y1;
 			break;

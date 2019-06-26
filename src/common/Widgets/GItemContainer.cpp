@@ -488,11 +488,11 @@ GDragColumn::GDragColumn(GItemContainer *list, int col)
 		
 		#elif defined(__GTK_H__)
 
-		Gtk::GtkWindow *w = Handle() ? GtkCast(Handle(), gtk_window, GtkWindow) : NULL;
+		Gtk::GtkWindow *w = WindowHandle();
 		if (w)
 		{
 			gtk_window_set_decorated(w, FALSE);
-			gtk_widget_set_opacity(Handle(), DRAG_COL_ALPHA / 255.0);
+			gtk_widget_set_opacity(GtkCast(w, gtk_widget, GtkWidget), DRAG_COL_ALPHA / 255.0);
 		}
 		
 		#endif

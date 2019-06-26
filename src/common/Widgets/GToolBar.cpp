@@ -1361,7 +1361,13 @@ void GToolBar::OnButtonClick(GToolButton *Btn)
 	if (w && Btn)
 	{
 		int Id = Btn->GetId();
-        w->PostEvent(M_COMMAND, (GMessage::Param) Id, (GMessage::Param) Handle());
+        w->PostEvent(M_COMMAND, (GMessage::Param) Id,
+			#ifdef __GTK_H__
+			0
+			#else
+        	(GMessage::Param) Handle()
+        	#endif
+        	);
 	}
 }
 

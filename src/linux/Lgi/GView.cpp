@@ -317,13 +317,10 @@ void LgiToGtkCursor(GViewI *v, LgiCursor c)
 		*/
 	}
 	
-	OsView h = v->Handle();
-	if (!h)
-	{
-		GWindow *w = v->GetWindow();
-		if (w)
-			h = GTK_WIDGET(w->WindowHandle());
-	}
+	OsView h = NULL;
+	GWindow *w = v->GetWindow();
+	if (w)
+		h = GTK_WIDGET(w->WindowHandle());
 	
 	LgiAssert(v->InThread());
 	auto wnd = gtk_widget_get_window(h);
@@ -785,7 +782,6 @@ void GView::PointToView(GdcPt2 &p)
 		for (GViewI *i = this; i && i != w; i = i->GetParent())
 		{
 			GRect pos = i->GetPos();
-			const char *cls = i->GetClass();
 			p.x -= pos.x1;
 			p.y -= pos.y1;
 		}
@@ -800,12 +796,12 @@ void GView::PointToView(GdcPt2 &p)
 		int Sx = 0, Sy = 0;
 		GViewI *v;
 		// Work out the virtual offset
-		for (v = this; v && !v->Handle(); v = v->GetParent())
+		for (v = this; v && v->GetParent(); v = v->GetParent())
 		{
 			Sx += v->GetPos().x1;
 			Sy += v->GetPos().y1;
 		}
-		if (v && v->Handle())
+		if (v)
 		{
 			// Get the point relative to the first real parent
 			v->PointToView(p);
@@ -965,27 +961,6 @@ bool GView::Detach()
 	}
 
 	return true;
-}
-
-GViewI *GView::FindControl(OsView hCtrl)
-{
-	ThreadCheck();
-	
-	if (Handle() == hCtrl)
-	{
-		return this;
-	}
-
-	List<GViewI>::I it = Children.begin();
-	for (GViewI *c = *it; c; c = *++it)
-	{
-		GViewI *Ctrl = c->FindControl(hCtrl);
-		if (Ctrl)
-		{
-			return Ctrl;
-		}
-	}
-	return 0;
 }
 
 LgiCursor GView::GetCursor(int x, int y)

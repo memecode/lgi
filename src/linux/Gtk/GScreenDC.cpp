@@ -122,7 +122,8 @@ GScreenDC::GScreenDC(GView *view, void *param)
 	d->View = view;
 	if (view)
 	{
-		OsView v = view->Handle();
+		GWindow *w = view->GetWindow();
+		OsView v = w? GTK_WIDGET(w->WindowHandle()) : NULL;
 		if (v)
 		{
 			d->v = v;

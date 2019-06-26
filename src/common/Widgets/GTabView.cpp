@@ -290,7 +290,9 @@ void GTabView::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 		if (d->Current >= c.Length())
 			d->Current = (int)c.Length() - 1;
 
+		#ifndef __GTK_H__
 		if (Handle())
+		#endif
 			Invalidate();
 	}
 }
@@ -1129,12 +1131,19 @@ char *_lgi_gview_cmp(GView *a, GView *b)
 	static char Str[256];
 	if (a && b)
 	{
+		#ifdef __GTK_H__
+		sprintf_s(Str, sizeof(Str),
+				"GView: %p,%p",
+				dynamic_cast<GView*>(a),
+				dynamic_cast<GView*>(b));
+		#else
 		sprintf_s(Str, sizeof(Str),
 				"GView: %p,%p Hnd: %p,%p",
 				dynamic_cast<GView*>(a),
 				dynamic_cast<GView*>(b),
 				(void*)a->Handle(),
 				(void*)b->Handle());
+		#endif
 	}
 	else
 	{

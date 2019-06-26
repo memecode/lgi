@@ -432,8 +432,12 @@ void GMouseHook::TrackClick(GView *v)
 	#ifdef MAC
 	if (v)
 	{
+		#ifdef __GTK_H__
+		if (v->IsAttached())
+		#else
 		d->ViewHandle = v->Handle();
 		if (d->ViewHandle)
+		#endif
 		{
 			d->Event.Signal();
 		}
@@ -752,7 +756,11 @@ bool GPopup::Attach(GViewI *p)
 			_Window = p->GetWindow();
 	}
 
+	#ifdef __GTK_H__
+	return true;
+	#else
 	return Handle() != 0;
+	#endif
 
 	#endif
 }
