@@ -1193,7 +1193,8 @@ void DocEdit::PourStyle(size_t Start, ssize_t EditSize)
 				!stricmp(Ext, "cpp") ||
 				!stricmp(Ext, "cc") ||
 				!stricmp(Ext, "h") ||
-				!stricmp(Ext, "hpp") )
+				!stricmp(Ext, "hpp") ||
+				!stricmp(Ext, "java") )
 			FileType = SrcCpp;
 		else if (!stricmp(Ext, "py"))
 			FileType = SrcPython;
