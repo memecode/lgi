@@ -717,19 +717,16 @@ GdcPt2 GtkGetOrigin(GWindow *w)
 		auto Wnd = gtk_widget_get_window(GTK_WIDGET(Hnd));
 		if (Wnd)
 		{
-			/*
 			GdkRectangle rect;
 			gdk_window_get_frame_extents(Wnd, &rect);
 			return GdcPt2(rect.x, rect.y);
-			*/
 			
-			gint x = 0, y = 0;
 			/*
+			gint x = 0, y = 0;
 			gdk_window_get_origin(Wnd, &x, &y);
-			*/
-
-			gdk_window_get_root_origin  (Wnd, &x, &y);
+			gdk_window_get_root_origin(Wnd, &x, &y);
 			return GdcPt2(x, y);
+			*/
 		}
 		else
 		{
@@ -822,19 +819,21 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 	if (w)
 	{
 		gint x = 0, y = 0;
-		GdkModifierType mask;
-		GdkScreen *wnd_scr = gtk_window_get_screen(GTK_WINDOW(w->WindowHandle()));
-		GdkDisplay *wnd_dsp = wnd_scr ? gdk_screen_get_display(wnd_scr) : NULL;
-		gdk_display_get_pointer(wnd_dsp,
-								&wnd_scr,
-								&x, &y,
-								&mask);
+		GdkModifierType mask = (GdkModifierType)0;
+		GdkWindow *wnd = gtk_widget_get_window(GTK_WIDGET(w->WindowHandle()));
+		
+		auto display = gdk_display_get_default();
+		auto deviceManager = gdk_display_get_device_manager(display);
+		auto device = gdk_device_manager_get_client_pointer(deviceManager);
+		gdouble axes[2] = {0};
+		gdk_device_get_state(device, wnd, axes, &mask);
+
 		if (!ScreenCoords)
 		{
-			GdcPt2 p(x, y);
-			PointToView(p);
-			m.x = p.x;
-			m.y = p.y;
+			GdcPt2 p;
+			WindowVirtualOffset(&p);
+			m.x = (int)axes[0] - p.x - _BorderSize;
+			m.y = (int)axes[1] - p.y - _BorderSize;
 		}
 		else
 		{
