@@ -322,7 +322,7 @@ void LgiToGtkCursor(GViewI *v, LgiCursor c)
 	{
 		GWindow *w = v->GetWindow();
 		if (w)
-			h = w->Handle();
+			h = GTK_WIDGET(w->WindowHandle());
 	}
 	
 	LgiAssert(v->InThread());
