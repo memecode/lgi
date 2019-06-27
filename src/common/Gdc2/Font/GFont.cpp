@@ -1248,8 +1248,6 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 		if (Bold())
 			Gtk::pango_font_description_set_weight(d->hFont, Gtk::PANGO_WEIGHT_BOLD);
 		
-		// printf("Creating pango font %s, %i\n", Face(), PointSize());
-		
 		// Get metrics for this font...
 		Gtk::GtkPrintContext *PrintCtx = pSurface ? pSurface->GetPrintContext() : NULL;
 		Gtk::PangoContext *SysCtx = GFontSystem::Inst()->GetContext();
@@ -1265,8 +1263,6 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 			GTypeFace::d->_Descent = (double)Gtk::pango_font_metrics_get_descent(m) / PANGO_SCALE;
 			d->Height = ceil(GTypeFace::d->_Ascent + GTypeFace::d->_Descent + 1/*hack the underscores to work*/);
 			
-			// printf("Created '%s:%i' %f + %f = %i\n", Face(), PointSize(), GTypeFace::d->_Ascent, GTypeFace::d->_Descent, d->Height);
-
 			#if 0
 			if (PrintCtx)
 			{
@@ -1291,23 +1287,18 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 				Gtk::PangoCoverage *c = Gtk::pango_font_get_coverage(fnt, Gtk::pango_language_get_default());
 				if (c)
 				{
-					Gtk::guchar *bytes = NULL;
-					int len = 0;
-					Gtk::pango_coverage_to_bytes(c, &bytes, &len);
-					if (bytes)
+					uint Bytes = (MAX_UNICODE + 1) >> 3;
+					if ((d->GlyphMap = new uchar[Bytes]))
 					{
-						int bitsz = (len + 7) / 8;
-						if ((d->GlyphMap = new uchar[bitsz]))
+						memset(d->GlyphMap, 0, Bytes);
+
+						int Bits = Bytes << 3;
+						for (int i=0; i<Bits; i++)
 						{
-							memset(d->GlyphMap, 0, bitsz);
-							for (int i=0; i<len; i++)
-							{
-								if (bytes[i] >= Gtk::PANGO_COVERAGE_APPROXIMATE)
-									d->GlyphMap[i>>3] |= 1 << (i & 0x7);
-							}
+							if (pango_coverage_get(c, i))
+								d->GlyphMap[i>>3] |= 1 << (i & 0x7);
 						}
 					}
-					Gtk::g_free(bytes);
 					Gtk::pango_coverage_unref(c);
 				}
 				

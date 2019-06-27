@@ -500,15 +500,25 @@ void GDisplayString::Layout(bool Debug)
 		y = Font->GetHeight();
 		yf = y * PANGO_SCALE;
 		if (!Hnd || !Font->Handle())
-		{
-			// LgiTrace("%s:%i - Missing handle: %p,%p\n", _FL, Hnd, Font->Handle());
 			return;
-		}
 
-		if (!LgiIsUtf8(Str))
+		auto Map = Font->GetGlyphMap();
+		GUtf8Ptr Utf(Str);
+		int32 Wide;
+		bool MissingGlyphs = false;
+		while (*Utf.GetPtr())
 		{
-			LgiTrace("%s:%i - Not utf8\n", _FL);
-			return;
+			Wide = Utf;
+			if (!Wide)
+			{
+				LgiTrace("%s:%i - Not utf8\n", _FL);
+				return;
+			}
+
+			if (Map && !_HasUnicodeGlyph(Map, Wide))
+				MissingGlyphs = true;
+
+			Utf++;
 		}
 
 		GFontSystem *FSys = GFontSystem::Inst();
@@ -518,17 +528,6 @@ void GDisplayString::Layout(bool Debug)
 		int TabSizeF = TabSizePx * FScale;
 		int TabOffsetF = DrawOffsetF % TabSizeF;
 		int OffsetF = TabOffsetF ? TabSizeF - TabOffsetF : 0;
-		/*
-		if (Debug)
-		{
-			printf("'%s', TabSizeF=%i, TabOffsetF=%i, DrawOffsetF=%i, OffsetF=%i\n",
-				Str,
-				TabSizeF,
-				TabOffsetF,
-				DrawOffsetF,
-				OffsetF);
-		}
-		*/
 		UpdateTabs(OffsetF / FScale, Font->TabSize());
 
 		if (Font->Underline())
