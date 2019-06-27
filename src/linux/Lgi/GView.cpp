@@ -151,6 +151,13 @@ void GView::OnGtkRealize()
 		
 		OnCreate();
 	}
+
+	for (auto c : Children)
+	{
+		auto gv = c->GetGView();
+		if (gv)
+			gv->OnGtkRealize();
+	}
 }
 
 void GView::_Focus(bool f)
@@ -880,34 +887,28 @@ bool GView::Attach(GViewI *parent)
 	
 	bool Status = false;
 
-	SetParent(parent);
 	GView *Parent = d->GetParent();
+	LgiAssert(Parent == NULL);
+
+	SetParent(parent);
+	Parent = d->GetParent();
 	_Window = Parent ? Parent->_Window : this;
 	
-	int o = 0;
-	{
-		GView *Par = d->GetParent();
-		if (Par && (Par->Sunken() || Par->Raised()))
-		{
-			o = Par->_BorderSize;
-		}
-	}
-		
 	if (parent)
 	{
 		auto w = GetWindow();
 		if (w && TestFlag(WndFlags, GWF_FOCUS))
 			w->SetFocus(this, GWindow::GainFocus);
 
-		OnAttach();
 		Status = true;
-	}
-
-	if (d->Parent && !d->Parent->HasView(this))
-	{
-		if (!d->Parent->HasView(this))
-			d->Parent->AddView(this);
-		d->Parent->OnChildrenChanged(this, true);
+		
+		if (!Parent->HasView(this))
+		{
+			OnAttach();
+			if (!d->Parent->HasView(this))
+				d->Parent->AddView(this);
+			d->Parent->OnChildrenChanged(this, true);
+		}
 	}
 	
 	return Status;

@@ -1266,7 +1266,7 @@ LgiCursor LList::GetCursor(int x, int y)
 
 void LList::OnMouseClick(GMouse &m)
 {
-	m.Trace("LList::OnMouseClick");
+	// m.Trace("LList::OnMouseClick");
 
 	if (Lock(_FL))
 	{
@@ -1628,7 +1628,7 @@ void LList::OnPulse()
 		{
 			GMouse m;
 			GetMouse(m);
-			m.Trace("LList::OnPulse");
+			// m.Trace("LList::OnPulse");
 
 			if (m.y < 0 || m.y >= Y())
 			{
