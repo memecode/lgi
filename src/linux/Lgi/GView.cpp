@@ -628,11 +628,9 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 	if (!Frame)
 		r.Offset(_BorderSize, _BorderSize);
 
-	for (GView *i = this; i && i != ParView; i = dynamic_cast<GView*>(i->GetParent()))
-	{
-		auto p = i->GetPos();
-		r.Offset(p.x1, p.y1);
-	}
+	GdcPt2 Offset;
+	WindowVirtualOffset(&Offset);
+	r.Offset(Offset.x, Offset.y);
 
 	static bool Repainting = false;
 	if (!Repainting)
@@ -647,9 +645,6 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 				(h = gtk_widget_get_window(w)))
 			{
 				GdkRectangle grc = r;
-				auto WndCli = ParWnd->GetClient();
-				grc.x += WndCli.x1;
-				grc.y += WndCli.y1;
 				gdk_window_invalidate_rect(h, &grc, true);
 			}
 			else
