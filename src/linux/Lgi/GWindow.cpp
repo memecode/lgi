@@ -537,7 +537,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		#endif
 		case GDK_CONFIGURE:
 		{
-			GdkEventConfigure *c = (GdkEventConfigure*)event;
+			GdkEventConfigure *c = &event->configure;
 			Pos.Set(c->x, c->y, c->x+c->width-1, c->y+c->height-1);
 			OnPosChange();
 			return FALSE;
@@ -1296,11 +1296,11 @@ void GWindow::OnPosChange()
 {
 	GView::OnPosChange();
 
-	//if (d->Sx != X() ||	d->Sy != Y())
+	if (d->Sx != X() ||	d->Sy != Y())
 	{
 		PourAll();
-		//d->Sx = X();
-		//d->Sy = Y();
+		d->Sx = X();
+		d->Sy = Y();
 	}
 }
 
