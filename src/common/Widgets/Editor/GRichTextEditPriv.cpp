@@ -2306,6 +2306,12 @@ bool GRichTextPriv::FromHtml(GHtmlElement *e, CreateContext &ctx, GCss *ParentSt
 					Blocks.Add(ctx.Tb = new TextBlock(this));
 					ctx.Tb->SetStyle(CachedStyle);
 				}
+
+				#ifdef __GTK_H__
+				for (auto *i = Txt; *i; i++)
+					if (*i == 0xa0)
+						*i = ' ';
+				#endif
 			
 				ctx.AddText(CachedStyle, Txt);
 				ctx.StartOfLine = false;

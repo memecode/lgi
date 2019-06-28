@@ -6353,7 +6353,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 		}
 		case TAG_BODY:
 		{
-			auto b = GetBack();
+			auto b = _Colour(false);
 			if (!b.IsTransparent())
 			{
 				pDC->Colour(b);

@@ -1295,7 +1295,6 @@ protected:
 	friend void lgi_widget_size_allocate(Gtk::GtkWidget *widget, Gtk::GtkAllocation *allocation);
 	
 	Gtk::GtkWidget *_Root, *_VBox, *_MenuBar;
-	void OnGtkSetPos(int width, int height);
 	void OnGtkDelete();
 	Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
 

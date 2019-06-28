@@ -351,7 +351,6 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			k.Ctrl((e->state & 4) != 0);
 			k.Alt((e->state & 8) != 0);
 		
-			// k.IsChar = !k.Ctrl() && (k.c16 >= ' ' && k.c16 <= 0x7f);
 			k.IsChar = !k.Ctrl() &&
 						!k.Alt() && 
 						(k.c16 >= ' ') &&
@@ -469,72 +468,6 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			}
 			break;
 		}
-		#if 0
-		case GDK_BUTTON_PRESS:
-		case GDK_2BUTTON_PRESS:
-		case GDK_3BUTTON_PRESS:
-		case GDK_BUTTON_RELEASE:
-		{
-			GMouse m;
-			m.x = event->button.x;
-			m.y = event->button.y;
-			m.SetButton(event->button.button);
-			m.SetModifer(event->button.state);
-			m.Down(event->type == GDK_BUTTON_PRESS);
-			if (event->type == GDK_2BUTTON_PRESS || event->type == GDK_3BUTTON_PRESS)
-			{
-				m.Double(true);
-				m.Down(true);
-			}
-			else m.Down(event->type == GDK_BUTTON_PRESS);
-
-			if (!TranslateMouse(m))
-			{
-				LgiTrace("Can't translate click.\n");
-				return false;
-			}
-			// m.Trace(m.Target ? m.Target->GetClass() : "-none-");
-
-			_Mouse(m, false);
-			break;
-		}
-		case GDK_MOTION_NOTIFY:
-		{
-			GMouse m;
-			m.x = event->motion.x;
-			m.y = event->motion.y;
-			m.SetModifer(event->motion.state);
-
-			if (event->motion.state & GDK_BUTTON1_MASK) m.Left(true);
-			if (event->motion.state & GDK_BUTTON2_MASK) m.Middle(true);
-			if (event->motion.state & GDK_BUTTON3_MASK) m.Right(true);
-			m.Down(m.Left() || m.Middle() || m.Right());
-
-			m.IsMove(true);
-
-			if (!TranslateMouse(m))
-			{
-				LgiTrace("Can't translate move.\n");
-				return false;
-			}
-			// m.Trace(m.Target ? m.Target->GetClass() : "-none-");
-
-			_Mouse(m, true);
-			break;
-		}
-		case GDK_SCROLL:
-		{
-			GMouse m;
-			m.x = event->scroll.x;
-			m.y = event->scroll.y;
-			if (!TranslateMouse(m))
-				break;
-
-			double Lines = event->scroll.direction == GDK_SCROLL_DOWN ? 3 : -3;
-			m.Target->OnMouseWheel(Lines);
-			break;
-		}
-		#endif
 		case GDK_CONFIGURE:
 		{
 			GdkEventConfigure *c = &event->configure;
@@ -588,18 +521,6 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 	  		g_free(Name);		
 			break;
 		}
-		#if GTK_MAJOR_VERSION == 3
-		#else
-		case GDK_CLIENT_EVENT:
-		{
-			GMessage m;
-			m.m = event->client.data.l[0];
-			m.a = event->client.data.l[1];
-			m.b = event->client.data.l[2];
-			OnEvent(&m);
-			break;
-		}
-		#endif
 		default:
 		{
 			printf("%s:%i - Unknown event %i\n", _FL, event->type);
@@ -1279,17 +1200,6 @@ void GWindow::OnPaint(GSurface *pDC)
 {
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle();
-}
-
-void GWindow::OnGtkSetPos(int width, int height)
-{
-	if (Pos.X() != width ||
-		Pos.Y() != height)
-	{
-		Pos.x2 = Pos.x1 + width - 1;
-		Pos.y2 = Pos.y1 + height - 1;
-		OnPosChange();
-	}
 }
 
 void GWindow::OnPosChange()

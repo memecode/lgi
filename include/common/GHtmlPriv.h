@@ -302,10 +302,7 @@ protected:
 	bool OnUnhandledColor(GCss::ColorDef *def, const char *&s);
 	void CenterText();
 	bool Serialize(GXmlTag *t, bool Write);
-	
 	GColour _Colour(bool Fore);
-	GColour GetFore() { return _Colour(true); }
-	GColour GetBack() { return _Colour(false); }
 
 public:
 	// Object
