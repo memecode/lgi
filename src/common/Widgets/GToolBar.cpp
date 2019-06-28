@@ -1493,7 +1493,6 @@ GToolButton *GToolBar::AppendButton(const char *Tip, int Id, int Type, int Enabl
 		But->Name(Tip);
 		But->SetId(Id);
 		But->Type = Type;
-		But->SetParent(this);
 		But->Enabled(Enabled != 0);
 
 		if (IconId >= 0)
@@ -1521,7 +1520,6 @@ bool GToolBar::AppendSeparator()
 	if (But)
 	{
 		But->SetId(IDM_SEPARATOR);
-		But->SetParent(this);
 		AttachButton(But);
 		return true;
 	}

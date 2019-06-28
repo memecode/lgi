@@ -644,7 +644,7 @@ void GDisplayString::Layout(bool Debug)
 			b.ZOff(bx-1, by-1);
 			b.Offset(Fx, 0);
 			xf += bx;
-			yf = max(yf, by);
+			yf = MAX(yf, by);
 		}
 
 		x = (xf + PANGO_SCALE - 1) / PANGO_SCALE;
@@ -2081,10 +2081,10 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 
 	Gtk::cairo_save(cr);
 
+	GColour b = Font->Back();
 	if (!Font->Transparent() && frc)
 	{
 		#if 1 // Background fill
-		GColour b = Font->Back();
 		Gtk::cairo_set_source_rgb(cr,
 									(double)b.r()/255.0,
 									(double)b.g()/255.0,
@@ -2110,6 +2110,10 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	if (!Font->Transparent() && !frc)
 	{
 		Gtk::cairo_new_path(cr);
+		Gtk::cairo_set_source_rgb(cr,
+									(double)b.r()/255.0,
+									(double)b.g()/255.0,
+									(double)b.b()/255.0);
 		Gtk::cairo_rectangle(cr, 0, 0, x, y);
 		Gtk::cairo_fill(cr);
 	}
