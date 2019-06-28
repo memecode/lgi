@@ -39,15 +39,17 @@ static OsChar GDisplayStringDots[] = {'.', '.', '.', 0};
 #if defined(__GTK_H__)
 struct Block : public GRect
 {
-	char16 *Str;
-	int Len;
+	OsChar *Str;
+	int Bytes;
+	GFont *Fnt;
 	Gtk::PangoLayout *Hnd;
 
 	Block()
 	{
 		Str = NULL;
 		Hnd = NULL;
-		Len = 0;
+		Fnt = NULL;
+		Bytes = 0;
 	}
 
 	~Block()
@@ -75,13 +77,71 @@ struct GDisplayStringPriv
 
 	void Create(Gtk::GtkPrintContext *PrintCtx)
 	{
-		auto &b = Blocks.New();
-		b.Str = Ds->StrCache;
-		b.Len = Ds->len;
-		if (PrintCtx)
-			b.Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+		auto *Fs = GFontSystem::Inst();
+		auto *Fnt = Ds->Font;
+		auto Tbl = Fnt->GetGlyphMap();
+		auto *Str = Ds->StrCache.Get();
+
+		GUtf8Ptr p(Ds->Str);
+		auto *Start = p.GetPtr();
+		if (Tbl)
+		{
+			int32 w;
+			while (w = (int32)p)
+			{
+				GFont *f;
+				if (w >= 0x80 && !_HasUnicodeGlyph(Tbl, w))
+					f = Fs->GetGlyph(w, Ds->Font);
+				else
+					f = Ds->Font;
+				p++;
+				if (f == Fnt)
+					continue;
+
+				// Emit block to cover the section from 'Start' to 'i'
+				auto &b = Blocks.New();
+				b.Str = (char*)Start;
+				b.Bytes = p.GetPtr() - Start;
+				if (f == Ds->Font)
+				{
+					if (PrintCtx)
+						b.Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+					else
+						b.Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
+				}
+				else
+				{
+					b.Fnt = f;
+				}
+
+				Fnt = f;
+				Start = p.GetPtr();
+			}
+		}
 		else
-			b.Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
+		{
+			while (p.GetPtr() - Start < Ds->len)
+				p++;
+		}
+				
+		if (p.GetPtr() > Start)
+		{
+			// Emit a block for the last section
+			auto &b = Blocks.New();
+			b.Str = (char*)Start;
+			b.Bytes = p.GetPtr() - Start;
+			if (Fnt == Ds->Font)
+			{
+				if (PrintCtx)
+					b.Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+				else
+					b.Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
+			}
+			else
+			{
+				b.Fnt = Fnt;
+			}
+		}
 	}
 	
 	void UpdateTabs(int Offset, int Size, bool Debug = false)
@@ -532,10 +592,8 @@ void GDisplayString::Layout(bool Debug)
 		if (!d->Blocks.Length() || !Font->Handle())
 			return;
 
-		auto Map = Font->GetGlyphMap();
 		GUtf8Ptr Utf(Str);
 		int32 Wide;
-		bool MissingGlyphs = false;
 		while (*Utf.GetPtr())
 		{
 			Wide = Utf;
@@ -544,10 +602,6 @@ void GDisplayString::Layout(bool Debug)
 				LgiTrace("%s:%i - Not utf8\n", _FL);
 				return;
 			}
-
-			if (Map && !_HasUnicodeGlyph(Map, Wide))
-				MissingGlyphs = true;
-
 			Utf++;
 		}
 
@@ -570,10 +624,27 @@ void GDisplayString::Layout(bool Debug)
 			Gtk::pango_attr_list_unref(attrs);
 		}
 		
+		int Fx = 0;
 		for (auto &b: d->Blocks)
 		{
-			Gtk::pango_layout_set_text(b.Hnd, Str, len);
-			Gtk::pango_layout_get_size(b.Hnd, &xf, &yf);
+			int bx = 0, by = 0;
+
+			if (b.Hnd)
+			{
+				Gtk::pango_layout_set_text(b.Hnd, b.Str, b.Bytes);
+				Gtk::pango_layout_get_size(b.Hnd, &bx, &by);
+			}
+			else if (b.Fnt)
+			{
+				b.Fnt->_Measure(bx, by, b.Str, b.Bytes);
+				bx <<= FShift;
+				by <<= FShift;
+			}
+
+			b.ZOff(bx-1, by-1);
+			b.Offset(Fx, 0);
+			xf += bx;
+			yf = max(yf, by);
 		}
 
 		x = (xf + PANGO_SCALE - 1) / PANGO_SCALE;
@@ -2043,14 +2114,19 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 		Gtk::cairo_fill(cr);
 	}
 
+	GColour f = Font->Fore();
 	for (auto &b: d->Blocks)
 	{
-		GColour f = Font->Fore();
-		Gtk::cairo_set_source_rgb(	cr,
-									(double)f.r()/255.0,
-									(double)f.g()/255.0,
-									(double)f.b()/255.0);
-		Gtk::pango_cairo_show_layout(cr, b.Hnd);
+		if (b.Hnd)
+		{
+			Gtk::cairo_set_source_rgb(	cr,
+										(double)f.r()/255.0,
+										(double)f.g()/255.0,
+										(double)f.b()/255.0);
+			Gtk::pango_cairo_show_layout(cr, b.Hnd);
+		}
+		else if (b.Fnt)
+			b.Fnt->_Draw(pDC, 0, 0, b.Str, b.Bytes, NULL, f);
 		
 		if (VisibleTab && Str)
 		{

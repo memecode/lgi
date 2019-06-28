@@ -725,7 +725,8 @@ GFont *GFontSystem::GetGlyph(uint32_t u, GFont *UserFont)
 					if (AddFont(Fnt))
 					{
 						GFont *Prev = Font[d->Used - 1];
-						if (_HasUnicodeGlyph(Prev->GetGlyphMap(), u))
+						auto PrevMap = Prev->GetGlyphMap();
+						if (PrevMap && _HasUnicodeGlyph(Prev->GetGlyphMap(), u))
 						{
 							Has = Prev;
 							LgiAssert(Has != NULL);

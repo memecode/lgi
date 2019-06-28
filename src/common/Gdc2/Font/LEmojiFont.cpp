@@ -30,15 +30,26 @@ LEmojiFont::~LEmojiFont()
 	delete priv;
 }
 
+#define ConvertUtf32(s) \
+	uint32_t u32 = 0; \
+	if (sizeof(*Str) == 1) \
+		u32 = LgiUtf8To32( (uint8_t*&)s, Bytes); \
+	else if (sizeof(*Str) == 2) \
+		u32 = LgiUtf16To32( (const uint16_t*&)s, Bytes); \
+	else if (sizeof(*Str) == 4) \
+		u32 = *((uint32_t*&)s)++; \
+	else \
+		LgiAssert(!"Invalid OsChar type.");
+
 void LEmojiFont::_Measure(int &x, int &y, OsChar *Str, int len)
 {
-	ssize_t Len = len * sizeof(*Str);
+	ssize_t Bytes = len * sizeof(*Str);
 
 	x = 0;
 	y = priv->Cell;
-	for (auto s = (const uint16*)Str; *s && Len > 0; )
+	for (void *s = Str; Bytes > 0; )
 	{
-		uint32_t u32 = LgiUtf16To32(s, Len);
+		ConvertUtf32(s);
 		if (u32)
 			x += priv->Cell;
 	}
@@ -46,13 +57,13 @@ void LEmojiFont::_Measure(int &x, int &y, OsChar *Str, int len)
 
 int LEmojiFont::_CharAt(int xPos, OsChar *Str, int len, LgiPxToIndexType Type)
 {
-	ssize_t Len = len * sizeof(*Str);
+	ssize_t Bytes = len * sizeof(*Str);
 
 	int x = 0;
 	int Char = 0;
-	for (auto s = (const uint16*)Str; *s && Len > 0; )
+	for (void *s = Str; Bytes > 0; )
 	{
-		uint32_t u32 = LgiUtf16To32(s, Len);
+		ConvertUtf32(s);
 		if (u32)
 		{
 			if (xPos >= x && xPos < x + priv->Cell)
@@ -76,9 +87,16 @@ void LEmojiFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int len, GRect 
 	pDC->Op(GDC_ALPHA);
 	pDC->Colour(Back());
 
-	for (auto s = (const uint16*)Str; *s && Bytes > 0; )
+	for (void *s = Str; Bytes > 0; )
 	{
-		uint32_t u32 = LgiUtf16To32(s, Bytes);
+		uint32_t u32 = 0;
+		if (sizeof(*Str) == 1)
+			u32 = LgiUtf8To32( (uint8_t*&)s, Bytes);
+		else if (sizeof(*Str) == 2)
+			u32 = LgiUtf16To32( (const uint16_t*&)s, Bytes);
+		else if (sizeof(*Str) == 4)
+			u32 = *((uint32_t*&)s)++;
+
 		if (!u32)
 			break;
 
@@ -114,7 +132,11 @@ void LEmojiFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int len, GRect 
 
 			x += priv->Cell;
 		}
-		else LgiAssert(!"Invalid char");
+		else
+		{
+			LgiTrace("%s:%i - Invalid char: %i 0x%x\n", _FL, u32, u32);
+			break;
+		}
 	}
 }
 
