@@ -54,10 +54,9 @@ protected:
 	GAutoPtr<GMemDC> Img;
 	
 	#elif defined(__GTK_H__)
-	
-	Gtk::PangoLayout *Hnd;
-	int LastTabOffset;
-	void UpdateTabs(int Offset, int Size, bool Debug = false);
+
+	struct GDisplayStringPriv *d;
+	friend struct GDisplayStringPriv;
 	
 	#elif defined(MAC)
 	
