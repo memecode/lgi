@@ -116,7 +116,11 @@ GFontSystem::GFontSystem()
 
 	d->SubSupport =	(Os == LGI_OS_LINUX) ||
 					(Os == LGI_OS_WIN64) ||
-					(Os == LGI_OS_WIN32); //  && Rev == 0);  // WinXP does it's own glyph substitution
+					(Os == LGI_OS_WIN32)
+					#ifdef __GTK_H__
+					|| (Os == LGI_OS_MAC_OS_X)
+					#endif
+					; //  && Rev == 0);  // WinXP does it's own glyph substitution
 	d->DefaultGlyphSub = d->SubSupport;
 	d->CheckedConfig = false;
 	d->FontTableLoaded = false;
@@ -593,6 +597,8 @@ bool GFontSystem::AddFont(GAutoPtr<GFont> Fnt)
 			TestLut(7);
 		}
 	}
+
+	printf("Lut[]=%i, %i\n", Lut[128337], d->Used);
 
 	Font[d->Used++] = Fnt.Release();
 	return true;

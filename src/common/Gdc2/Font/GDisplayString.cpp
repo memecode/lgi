@@ -81,7 +81,6 @@ struct GDisplayStringPriv
 		auto *Fs = GFontSystem::Inst();
 		auto *Fnt = Ds->Font;
 		auto Tbl = Fnt->GetGlyphMap();
-		auto *Str = Ds->StrCache.Get();
 
 		GUtf8Ptr p(Ds->Str);
 		auto *Start = p.GetPtr();
@@ -90,7 +89,7 @@ struct GDisplayStringPriv
 			int32 w;
 			Block *b = NULL;
 
-			while (w = (int32)p)
+			while ((w = (int32)p))
 			{
 				GFont *f;
 
@@ -109,7 +108,6 @@ struct GDisplayStringPriv
 						b->Bytes = p.GetPtr() - Start;
 
 					Start = p.GetPtr();
-					Fnt = f;
 
 					// Start new block...
 					b = &Blocks.New();
@@ -129,6 +127,7 @@ struct GDisplayStringPriv
 						b->Fnt = f;
 					}
 
+					Fnt = f;
 				}
 				// else no change in font
 				
@@ -613,6 +612,11 @@ void GDisplayString::Layout(bool Debug)
 				return;
 			}
 			Utf++;
+		}
+	
+		if (d->Debug)
+		{
+			int asd=0;
 		}
 
 		GFontSystem *FSys = GFontSystem::Inst();
