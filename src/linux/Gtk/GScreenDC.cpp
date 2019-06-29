@@ -259,7 +259,7 @@ void GScreenDC::SetClient(GRect *c)
 		#endif
 
 		OriginX = -c->x1;
-		OriginY = -c->y1;	
+		OriginY = -c->y1;
 	}
 	else
 	{
@@ -268,10 +268,10 @@ void GScreenDC::SetClient(GRect *c)
 
 		d->Client.ZOff(-1, -1);
 
-        GdkRectangle r = {0, 0, X(), Y()};
 		#if GTK_MAJOR_VERSION == 3
 		cairo_restore(d->cr);
 		#else
+        GdkRectangle r = {0, 0, X(), Y()};
 		gdk_gc_set_clip_rectangle(d->gc, &r);
 		#endif
 	}
@@ -304,7 +304,10 @@ void GScreenDC::GetOrigin(int &x, int &y)
 
 void GScreenDC::SetOrigin(int x, int y)
 {
+	int dx = -x + OriginX;
+	int dy = -y + OriginY;
 	GSurface::SetOrigin(x, y);
+	cairo_translate(d->cr, dx, dy);
 }
 
 GRect GScreenDC::ClipRgn()
@@ -321,13 +324,13 @@ GRect GScreenDC::ClipRgn(GRect *c)
 		Clip = *c;
 
 		// Don't add d->Client on here, as the translate makes it redundant.
-        GdkRectangle r = {c->x1, c->y1, c->X(), c->Y()};
 		#if GTK_MAJOR_VERSION == 3
 			cairo_save(d->cr);
 			cairo_new_path(d->cr);
 			cairo_rectangle(d->cr, c->x1, c->y1, c->X(), c->Y());
 			cairo_clip(d->cr);
 		#else
+        	GdkRectangle r = {c->x1, c->y1, c->X(), c->Y()};
 			gdk_gc_set_clip_rectangle(d->gc, &r);
 		#endif
 	}
@@ -335,10 +338,10 @@ GRect GScreenDC::ClipRgn(GRect *c)
 	{
 	    Clip.ZOff(-1, -1);
 
-        GdkRectangle r = {d->Client.x1, d->Client.y1, X(), Y()};
 		#if GTK_MAJOR_VERSION == 3
 			cairo_restore(d->cr);
 		#else
+        	GdkRectangle r = {d->Client.x1, d->Client.y1, X(), Y()};
 			gdk_gc_set_clip_rectangle(d->gc, &r);
 		#endif
 	}

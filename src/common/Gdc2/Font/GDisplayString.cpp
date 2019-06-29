@@ -2072,12 +2072,15 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 
 	int Ox = 0, Oy = 0;
 	pDC->GetOrigin(Ox, Oy);
+	
+	#if 1
 	GRect Client;
 	if (pDC->GetClient(&Client) && Client.Valid())
 	{
 		Ox += Client.x1;
 		Oy += Client.y1;
 	}
+	#endif
 
 	Gtk::cairo_save(cr);
 
@@ -2085,12 +2088,12 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	if (!Font->Transparent() && frc)
 	{
 		#if 1 // Background fill
-		Gtk::cairo_set_source_rgb(cr,
-									(double)b.r()/255.0,
-									(double)b.g()/255.0,
-									(double)b.b()/255.0);
-		Gtk::cairo_new_path(cr);
-		Gtk::cairo_rectangle
+		cairo_set_source_rgb(cr,
+							(double)b.r()/255.0,
+							(double)b.g()/255.0,
+							(double)b.b()/255.0);
+		cairo_new_path(cr);
+		cairo_rectangle
 		(
 			cr,
 			((double)frc->x1 / FScale) - Ox,
@@ -2098,24 +2101,24 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 			(double)frc->X() / FScale,
 			(double)frc->Y() / FScale
 		);
-		Gtk::cairo_fill(cr);
+		cairo_fill(cr);
 		#endif
 	}
 
-	double Dx = ((double)fx / FScale) - Ox;
-	double Dy = ((double)fy / FScale) - Oy;
+	double Dx = ((double)fx / FScale);
+	double Dy = ((double)fy / FScale);
 
 	cairo_translate(cr, Dx, Dy);
 	
 	if (!Font->Transparent() && !frc)
 	{
-		Gtk::cairo_new_path(cr);
-		Gtk::cairo_set_source_rgb(cr,
-									(double)b.r()/255.0,
-									(double)b.g()/255.0,
-									(double)b.b()/255.0);
-		Gtk::cairo_rectangle(cr, 0, 0, x, y);
-		Gtk::cairo_fill(cr);
+		cairo_new_path(cr);
+		cairo_set_source_rgb(cr,
+							(double)b.r()/255.0,
+							(double)b.g()/255.0,
+							(double)b.b()/255.0);
+		cairo_rectangle(cr, 0, 0, x, y);
+		cairo_fill(cr);
 	}
 
 	GColour f = Font->Fore();
@@ -2123,11 +2126,11 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	{
 		if (b.Hnd)
 		{
-			Gtk::cairo_set_source_rgb(	cr,
-										(double)f.r()/255.0,
-										(double)f.g()/255.0,
-										(double)f.b()/255.0);
-			Gtk::pango_cairo_show_layout(cr, b.Hnd);
+			cairo_set_source_rgb(	cr,
+									(double)f.r()/255.0,
+									(double)f.g()/255.0,
+									(double)f.b()/255.0);
+			pango_cairo_show_layout(cr, b.Hnd);
 		}
 		else if (b.Fnt)
 			b.Fnt->_Draw(pDC, 0, 0, b.Str, b.Bytes, NULL, f);
@@ -2154,7 +2157,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 		cairo_translate(cr, (double)b.X() / FScale, 0);
 	}
 	
-	Gtk::cairo_restore(cr);
+	cairo_restore(cr);
 	
 	#elif defined MAC && !defined(LGI_SDL)
 
