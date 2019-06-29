@@ -2108,7 +2108,12 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	double Dx = ((double)fx / FScale);
 	double Dy = ((double)fy / FScale);
 
+	#ifdef WIN32
+	// What the hell is this? It works ok but why?
+	cairo_translate(cr, Dx-Ox, Dy-Oy);
+	#else
 	cairo_translate(cr, Dx, Dy);
+	#endif
 	
 	if (!Font->Transparent() && !frc)
 	{
