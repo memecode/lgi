@@ -63,11 +63,12 @@ struct GDisplayStringPriv
 {
 	GDisplayString *Ds;
 	GArray<Block> Blocks;
-	
+	bool Debug;	
 	int LastTabOffset;
 
 	GDisplayStringPriv(GDisplayString *str) : Ds(str)
 	{
+		Debug = false;
 		LastTabOffset = -1;
 	}
 
@@ -87,60 +88,69 @@ struct GDisplayStringPriv
 		if (Tbl)
 		{
 			int32 w;
+			Block *b = NULL;
+
 			while (w = (int32)p)
 			{
 				GFont *f;
+
+				if (w == 0x1f551)
+					Debug = true;
+
 				if (w >= 0x80 && !_HasUnicodeGlyph(Tbl, w))
 					f = Fs->GetGlyph(w, Ds->Font);
 				else
 					f = Ds->Font;
-				p++;
-				if (f == Fnt)
-					continue;
 
-				// Emit block to cover the section from 'Start' to 'i'
-				auto &b = Blocks.New();
-				b.Str = (char*)Start;
-				b.Bytes = p.GetPtr() - Start;
-				if (f == Ds->Font)
+				if (!b || f != Fnt)
 				{
-					if (PrintCtx)
-						b.Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+					// Finish old block
+					if (b)
+						b->Bytes = p.GetPtr() - Start;
+
+					Start = p.GetPtr();
+					Fnt = f;
+
+					// Start new block...
+					b = &Blocks.New();
+					b->Str = (char*)Start;
+					b->Bytes = -1; // unknown at this point
+					if (f == Ds->Font)
+					{
+						// Create a pango layout
+						if (PrintCtx)
+							b->Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+						else
+							b->Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
+					}
 					else
-						b.Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
-				}
-				else
-				{
-					b.Fnt = f;
-				}
+					{
+						// External font
+						b->Fnt = f;
+					}
 
-				Fnt = f;
-				Start = p.GetPtr();
+				}
+				// else no change in font
+				
+				p++;
 			}
+
+			if (b)
+				// Fix the size of the last block
+				b->Bytes = p.GetPtr() - Start;
 		}
 		else
 		{
 			while (p.GetPtr() - Start < Ds->len)
 				p++;
-		}
-				
-		if (p.GetPtr() > Start)
-		{
-			// Emit a block for the last section
-			auto &b = Blocks.New();
+
+			auto b = Blocks.New();
 			b.Str = (char*)Start;
 			b.Bytes = p.GetPtr() - Start;
-			if (Fnt == Ds->Font)
-			{
-				if (PrintCtx)
-					b.Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
-				else
-					b.Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
-			}
+			if (PrintCtx)
+				b.Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
 			else
-			{
-				b.Fnt = Fnt;
-			}
+				b.Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
 		}
 	}
 	

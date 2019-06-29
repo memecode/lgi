@@ -278,24 +278,28 @@ void LgiClipboardReceivedFunc(GtkClipboard *clipboard,
                              gpointer user_data)
 {
 	ReceiveData *r = (ReceiveData*)	user_data;
-	if (data && r)
+	if (!data || !r)
 	{
-		auto Bytes = gtk_selection_data_get_length(data);
-		uint8_t *d = new uint8_t[Bytes];
-		if (d)
-		{
-			memcpy(d, gtk_selection_data_get_data(data), Bytes);
-			if (r->Len)
-				*r->Len = Bytes;
-			r->Ptr->Reset(d);
-
-			#if DEBUG_CLIPBOARD
-			printf("%s:%i - LgiClipboardReceivedFunc\n", _FL);
-			#endif
-		}
-		else LgiTrace("%s:%i - Alloc failed %i\n", _FL, Bytes);
+		LgiTrace("%s:%i - Missing ptr: %p %p\n", _FL, data, r);
+		return;
 	}
-	else LgiTrace("%s:%i - Missing ptr: %p %p\n", _FL, data, r);
+
+	auto Bytes = gtk_selection_data_get_length(data);
+	uint8_t *d = new uint8_t[Bytes];
+	if (!d)
+	{
+		LgiTrace("%s:%i - Alloc failed %i\n", _FL, Bytes);
+		return;
+	}
+
+	memcpy(d, gtk_selection_data_get_data(data), Bytes);
+	if (r->Len)
+		*r->Len = Bytes;
+	r->Ptr->Reset(d);
+
+	#if DEBUG_CLIPBOARD
+	printf("%s:%i - LgiClipboardReceivedFunc\n", _FL);
+	#endif
 }
 
 bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8_t,true> &Ptr, ssize_t *Len)
