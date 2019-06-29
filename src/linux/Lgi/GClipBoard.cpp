@@ -280,23 +280,20 @@ void LgiClipboardReceivedFunc(GtkClipboard *clipboard,
 	ReceiveData *r = (ReceiveData*)	user_data;
 	if (data && r)
 	{
-		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
-		#else
-		uint8_t *d = new uint8_t[data->length];
+		auto Bytes = gtk_selection_data_get_length(data);
+		uint8_t *d = new uint8_t[Bytes];
 		if (d)
 		{
-			memcpy(d, data->data, data->length);
+			memcpy(d, gtk_selection_data_get_data(data), Bytes);
 			if (r->Len)
-				*r->Len = data->length;
+				*r->Len = Bytes;
 			r->Ptr->Reset(d);
 
 			#if DEBUG_CLIPBOARD
 			printf("%s:%i - LgiClipboardReceivedFunc\n", _FL);
 			#endif
 		}
-		else LgiTrace("%s:%i - Alloc failed %i\n", _FL, data->length);
-		#endif
+		else LgiTrace("%s:%i - Alloc failed %i\n", _FL, Bytes);
 	}
 	else LgiTrace("%s:%i - Missing ptr: %p %p\n", _FL, data, r);
 }
