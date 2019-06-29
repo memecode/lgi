@@ -614,11 +614,6 @@ void GDisplayString::Layout(bool Debug)
 			Utf++;
 		}
 	
-		if (d->Debug)
-		{
-			int asd=0;
-		}
-
 		GFontSystem *FSys = GFontSystem::Inst();
 		Gtk::pango_context_set_font_description(FSys->GetContext(), Font->Handle());
 
@@ -1132,7 +1127,9 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 	{
 		int Index = 0, Trailing = 0;
 		int Foffset = Fpos - Fx;
-		if (Gtk::pango_layout_xy_to_index(b.Hnd, Foffset, 0, &Index, &Trailing))
+		
+		if (b.Hnd &&
+			Gtk::pango_layout_xy_to_index(b.Hnd, Foffset, 0, &Index, &Trailing))
 		{
 			// printf("Index = %i, Trailing = %i\n", Index, Trailing);
 			GUtf8Str u(Str);

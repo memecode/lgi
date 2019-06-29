@@ -598,8 +598,6 @@ bool GFontSystem::AddFont(GAutoPtr<GFont> Fnt)
 		}
 	}
 
-	printf("Lut[]=%i, %i\n", Lut[128337], d->Used);
-
 	Font[d->Used++] = Fnt.Release();
 	return true;
 }

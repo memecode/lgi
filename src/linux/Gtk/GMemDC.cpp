@@ -385,7 +385,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 				pMem->Cs = CsBgrx32;
 				break;
 			case CAIRO_FORMAT_A8:
-				pMem->Cs = CsAlpha8;
+				pMem->Cs = CsIndex8;
 				break;
 			case CAIRO_FORMAT_RGB16_565:
 				pMem->Cs = CsRgb16;
