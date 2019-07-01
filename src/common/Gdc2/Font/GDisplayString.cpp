@@ -143,7 +143,7 @@ struct GDisplayStringPriv
 			while (p.GetPtr() - Start < Ds->len)
 				p++;
 
-			auto b = Blocks.New();
+			auto &b = Blocks.New();
 			b.Str = (char*)Start;
 			b.Bytes = p.GetPtr() - Start;
 			if (PrintCtx)
@@ -2125,6 +2125,16 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	#else
 	cairo_translate(cr, Dx, Dy);
 	#endif
+
+	/*
+	Gtk::cairo_matrix_t matrix;
+	cairo_get_matrix (cr, &matrix);
+	LgiTrace("Str '%s' actual=%g,%g draw=%g,%g off=%i,%i\n",
+		Str,
+		matrix.x0, matrix.y0,
+		Dx, Dy,
+		Ox, Oy);
+	*/
 	
 	if (!Font->Transparent() && !frc)
 	{
