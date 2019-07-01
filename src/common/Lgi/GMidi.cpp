@@ -19,7 +19,7 @@ public:
 	
 	GMessage::Result OnEvent(GMessage *Msg)
 	{
-		if (MsgCode(Msg) == M_MIDI_IN)
+		if (Msg->Msg() == M_MIDI_IN)
 		{
 			m->ParseMidi();
 		}
@@ -40,7 +40,7 @@ struct GMidiPriv
 		GArray<MIDIDeviceRef> Devs;
 		GArray<MIDIEndpointRef> Srcs, Dsts;
 		MIDIEndpointRef Dst;
-		GArray<uint8> Data;
+		GArray<uint8_t> Data;
 	#elif defined(WINDOWS)
 		HMIDIIN hIn;
 		HMIDIOUT hOut;
@@ -107,7 +107,7 @@ struct GMidiPriv
 		GMidi *a = (GMidi*)readProcRefCon;
 		if (a)
 		{
-			GArray<uint8> *d = &a->d->Data;
+			GArray<uint8_t> *d = &a->d->Data;
 			
 			// Collect all data from the input stream
 			MIDIPacket *packet = (MIDIPacket*)pktlist->packet;
@@ -185,9 +185,9 @@ struct GMidiPriv
 	void CALLBACK MidiInProc(HMIDIIN hmi, UINT wMsg, MIDI_TYPE dwInstance, MIDI_TYPE dwParam1, MIDI_TYPE dwParam2)
 	{
 		GMidi *a = (GMidi*)dwInstance;
-		uint8 *b = 0;
+		uint8_t *b = 0;
 		int len = 0;
-		uint8 buf[3];
+		uint8_t buf[3];
 
 		// LgiTrace("MidiInProc wMsg=%i\n", wMsg);
 		switch (wMsg)
@@ -199,9 +199,9 @@ struct GMidiPriv
 				break;
 			case MM_MIM_DATA:
 			{
-				buf[0] = (uint8) (dwParam2 & 0xff);
-				buf[1] = (uint8) ((dwParam2 >> 8) & 0xff);
-				buf[2] = (uint8) ((dwParam2 >> 16) & 0xff);
+				buf[0] = (uint8_t) (dwParam2 & 0xff);
+				buf[1] = (uint8_t) ((dwParam2 >> 8) & 0xff);
+				buf[2] = (uint8_t) ((dwParam2 >> 16) & 0xff);
 				b = buf;
 				
 				switch (b[0] >> 4)
@@ -226,7 +226,7 @@ struct GMidiPriv
 			case MM_MIM_LONGDATA:
 			{
 				MIDIHDR *Hdr = (MIDIHDR*)dwParam1;
-				b = (uint8*) Hdr->lpData;
+				b = (uint8_t*) Hdr->lpData;
 				len = Hdr->dwBytesRecorded;
 				
 				if (len)
@@ -402,7 +402,7 @@ bool GMidi::IsMidiOpen()
 	#endif
 }
 
-int GMidi::GetMidiPacketSize(uint8 *ptr, int len)
+int GMidi::GetMidiPacketSize(uint8_t *ptr, int len)
 {
 	if (!ptr || len < 1)
 		return 0;
@@ -476,7 +476,7 @@ void GMidi::ParseMidi()
 	}
 }
 
-void GMidi::StoreMidi(uint8 *ptr, int len)
+void GMidi::StoreMidi(uint8_t *ptr, int len)
 {
 	if (Lock(_FL))
 	{
@@ -666,14 +666,14 @@ void GMidi::CloseMidi()
 	#endif
 }
 
-void GMidi::OnMidiIn(uint8 *midi, int midi_len)
+void GMidi::OnMidiIn(uint8_t *midi, int midi_len)
 {
 	#if MIDI_MIRROR_IN_TO_OUT
 	SendMidi(p, len);
 	#endif
 }
 
-void GMidi::SendMidi(uint8 *ptr, int len, bool quiet)
+void GMidi::SendMidi(uint8_t *ptr, int len, bool quiet)
 {
 	LgiAssert(ptr != NULL);
 	if (!ptr)
@@ -686,7 +686,7 @@ void GMidi::SendMidi(uint8 *ptr, int len, bool quiet)
 			if (len <= 3)
 			{
 				DWORD dwMsg = 0;
-				uint8 *b = (uint8*) &dwMsg;
+				uint8_t *b = (uint8_t*) &dwMsg;
 				memcpy(b, ptr, len);
 				MMRESULT r = midiOutShortMsg(d->hOut, dwMsg);
 				if (r != 0)
@@ -754,7 +754,7 @@ void GMidi::SendMidi(uint8 *ptr, int len, bool quiet)
 	#endif
 }
 
-void GMidi::OnMidiOut(uint8 *p, int len)
+void GMidi::OnMidiOut(uint8_t *p, int len)
 {
 	if (GetLog())
 	{
@@ -769,7 +769,7 @@ void GMidi::OnMidiOut(uint8 *p, int len)
 	#endif
 }
 
-void GMidi::OnError(char *Func, GAutoString *ErrorMsg, uint32 Code, char *File, int Line)
+void GMidi::OnError(char *Func, GAutoString *ErrorMsg, uint32_t Code, char *File, int Line)
 {
 	char m[256];
 	sprintf_s(m, sizeof(m), "%s failed with %i", Func, Code);

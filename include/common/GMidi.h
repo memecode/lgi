@@ -19,18 +19,18 @@ class GMidi : public LMutex
 {
 	struct GMidiPriv *d;
 
-	void OnError(char *Func, GAutoString *Error, uint32 Code, char *File, int Line);
+	void OnError(char *Func, GAutoString *Error, uint32_t Code, char *File, int Line);
 
 	#if defined WIN32
 	friend class GMidiNotifyWnd;
 	friend void CALLBACK MidiInProc(HMIDIIN hmi, UINT wMsg, MIDI_TYPE dwInstance, MIDI_TYPE dwParam1, MIDI_TYPE dwParam2);
-	void StoreMidi(uint8 *ptr, int len);
+	void StoreMidi(uint8_t *ptr, int len);
 	void ParseMidi();
 	#endif
 
 protected:
 	// Lock the object before accessing this
-	GArray<uint8> MidiIn;
+	GArray<uint8_t> MidiIn;
 
 	// Arrays of device names
 	GArray<GAutoString> In, Out;
@@ -45,17 +45,17 @@ public:
 	GMidi();
 	~GMidi();
 
-	static int GetMidiPacketSize(uint8 *ptr, int len);
+	static int GetMidiPacketSize(uint8_t *ptr, int len);
 	
 	virtual GStream *GetLog() { return NULL; }
 
 	bool IsMidiOpen();
 	bool Connect(int InIdx, int OutIdx, GAutoString *ErrorMsg = NULL);
-	void SendMidi(uint8 *ptr, int len, bool quiet);
+	void SendMidi(uint8_t *ptr, int len, bool quiet);
 	void CloseMidi();
 
-	virtual void OnMidiIn(uint8 *midi, int len);
-	virtual void OnMidiOut(uint8 *midi, int len);
+	virtual void OnMidiIn(uint8_t *midi, int len);
+	virtual void OnMidiOut(uint8_t *midi, int len);
 };
 
 #endif
