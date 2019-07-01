@@ -412,7 +412,7 @@ public:
 					if (stristr(Base, "Release") || stristr(Base, "Debug"))
 						LgiTrimDir(Base);
 					#endif
-					#if defined(MAC)
+					#if defined(MAC) || defined(__GTK_H__)
 					LgiMakePath(Base, sizeof(Base), Base, "../../..");
 					#endif
 
