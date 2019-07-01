@@ -1893,7 +1893,6 @@ void GTableLayoutPrivate::Layout(GRect &Client)
 
 	if (Prof) Prof->Add("Notify");
 
-	Ctrl->SendNotify(GNotifyTableLayout_LayoutChanged);
 	#if DEBUG_PROFILE
 	LgiTrace("GTableLayout::Layout(%i) = %i ms\n", Ctrl->GetId(), (int)(LgiCurrentTime()-Start));
 	#endif
@@ -1908,6 +1907,8 @@ void GTableLayoutPrivate::Layout(GRect &Client)
 	#endif
 	
 	InLayout = false;
+
+	Ctrl->SendNotify(GNotifyTableLayout_LayoutChanged);
 }
 
 GTableLayout::GTableLayout(int id) : ResObject(Res_Table)

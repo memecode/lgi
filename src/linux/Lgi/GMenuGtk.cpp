@@ -76,10 +76,9 @@ LgiMenuItem *GSubMenu::ItemAt(int Id)
 
 LgiMenuItem *GSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where, const char *Shortcut)
 {
-	LgiMenuItem *i = new LgiMenuItem(Menu, this, Str, Where < 0 ? Items.Length() : Where, Shortcut);
+	LgiMenuItem *i = new LgiMenuItem(Menu, this, Str, Id, Where < 0 ? Items.Length() : Where, Shortcut);
 	if (i)
 	{
-		i->Id(Id);
 		i->Enabled(Enabled);
 
 		Items.Insert(i, Where);
@@ -458,7 +457,7 @@ LgiMenuItem::GMenuItem()
 	_Id = 0;
 }
 
-LgiMenuItem::GMenuItem(::GMenu *m, GSubMenu *p, const char *txt, int Pos, const char *shortcut)
+LgiMenuItem::GMenuItem(::GMenu *m, GSubMenu *p, const char *txt, int id, int Pos, const char *shortcut)
 {
 	d = NULL;
 	GAutoString Txt = MenuItemParse(txt);
@@ -476,7 +475,7 @@ LgiMenuItem::GMenuItem(::GMenu *m, GSubMenu *p, const char *txt, int Pos, const 
 
 	_Flags = 0;	
 	_Icon = -1;
-	_Id = 0;
+	_Id = id;
 
 	ShortCut = shortcut;
 	ScanForAccel();
@@ -755,7 +754,9 @@ bool LgiMenuItem::ScanForAccel()
 				printf("%s:%i - No gtk key for '%s'\n", _FL, Sc);
 			}
 			
-			Menu->Accel.Insert( new GAccelerator(Flags, Key, Id()) );
+			auto Ident = Id();
+			LgiAssert(Ident > 0);
+			Menu->Accel.Insert( new GAccelerator(Flags, Key, Ident) );
 		}
 		else
 		{
@@ -1253,7 +1254,7 @@ bool ::GMenu::OnKey(GView *v, GKey &k)
 		{
 			if (a->Match(k))
 			{
-				// printf("Matched accel\n");
+				LgiAssert(a->GetId() > 0);
 				Window->OnCommand(a->GetId(), 0, 0);
 				return true;
 			}

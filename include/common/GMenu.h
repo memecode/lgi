@@ -342,7 +342,7 @@ public:
 	GMenuItem(BMenuItem *item);
 	GMenuItem(GSubMenu *p);
 	#endif
-	GMenuItem(GMenu *m, GSubMenu *p, const char *txt, int Pos, const char *Shortcut = 0);
+	GMenuItem(GMenu *m, GSubMenu *p, const char *txt, int Id, int Pos, const char *Shortcut = 0);
 	virtual ~GMenuItem();
 
 	GMenuItem &operator =(const GMenuItem &m) { LgiAssert(!"This shouldn't be used anywhere"); return *this; }

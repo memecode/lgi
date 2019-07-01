@@ -285,6 +285,12 @@ void LgiClipboardReceivedFunc(GtkClipboard *clipboard,
 	}
 
 	auto Bytes = gtk_selection_data_get_length(data);
+	if (Bytes < 0)
+	{
+		LgiTrace("%s:%i - No data? (%i)\n", _FL, Bytes);
+		return;
+	}
+
 	uint8_t *d = new uint8_t[Bytes];
 	if (!d)
 	{

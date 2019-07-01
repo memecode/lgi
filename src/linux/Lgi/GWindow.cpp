@@ -341,6 +341,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		case GDK_KEY_PRESS:
 		case GDK_KEY_RELEASE:
 		{
+			auto Class = G_OBJECT_TYPE_NAME(widget);
 			auto e = &event->key;
 			#define KEY(name) GDK_KEY_##name
 
@@ -446,25 +447,28 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			#endif
 
 			auto v = d->Focus ? d->Focus : this;
-			if (!HandleViewKey(v->GetGView(), k) &&
-				(k.vkey == VK_TAB || k.vkey == KEY(ISO_Left_Tab)) &&
-				k.Down())
+			if (!HandleViewKey(v->GetGView(), k))
 			{
-				// Do tab between controls
-				::GArray<GViewI*> a;
-				BuildTabStops(this, a);
-				int idx = a.IndexOf((GViewI*)v);
-				if (idx >= 0)
+				if ((k.vkey == VK_TAB || k.vkey == KEY(ISO_Left_Tab)) &&
+					k.Down())
 				{
-					idx += k.Shift() ? -1 : 1;
-					int next_idx = idx == 0 ? a.Length() -1 : idx % a.Length();                    
-					GViewI *next = a[next_idx];
-					if (next)
+					// Do tab between controls
+					::GArray<GViewI*> a;
+					BuildTabStops(this, a);
+					int idx = a.IndexOf((GViewI*)v);
+					if (idx >= 0)
 					{
-						// LgiTrace("Setting focus to %i of %i: %s, %s, %i\n", next_idx, a.Length(), next->GetClass(), next->GetPos().GetStr(), next->GetId());
-						next->Focus(true);
+						idx += k.Shift() ? -1 : 1;
+						int next_idx = idx == 0 ? a.Length() -1 : idx % a.Length();                    
+						GViewI *next = a[next_idx];
+						if (next)
+						{
+							// LgiTrace("Setting focus to %i of %i: %s, %s, %i\n", next_idx, a.Length(), next->GetClass(), next->GetPos().GetStr(), next->GetId());
+							next->Focus(true);
+						}
 					}
 				}
+				else return false;
 			}
 			break;
 		}
@@ -826,6 +830,11 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 				goto AllDone;
 			}
 		}
+	}
+
+	if (k.Ctrl() && k.c16 == 'c')
+	{
+		int asd=0;
 	}
 
 	// Give the key to the window...
