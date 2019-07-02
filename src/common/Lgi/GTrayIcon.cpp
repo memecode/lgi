@@ -172,26 +172,33 @@ bool GTrayIcon::Load(const TCHAR *Str)
 	
 	#elif defined(__GTK_H__)
 
-	if (Str)	
+	if (!Str)
+		return false;
+
+	::GString sStr = Str;
+	GAutoString File(LgiFindFile(sStr));		
+	if (!File)
 	{
-		::GString sStr = Str;
-		GAutoString File(LgiFindFile(sStr));		
-		if (File)
-		{
-			GAutoPtr<GSurface> Ico(GdcD->Load(File));
-			if (Ico)
-			{
-				Gtk::GdkPixbuf *Pb = Ico->CreatePixBuf();
-            	if (Pb)
-            	{
-            		d->Icon.Add(Pb);
-	            	d->Images.Add(Ico.Release());
-	            }
-			}
-			else printf("%s:%i - Failed to load '%s'\n", _FL, sStr.Get());
-		}
-		else printf("%s:%i - Can't find '%s'\n", _FL, sStr.Get());
+		LgiTrace("%s:%i - Can't find '%s'\n", _FL, sStr.Get());
+		return false;
 	}
+
+	GAutoPtr<GSurface> Ico(GdcD->Load(File));
+	if (!Ico)
+	{
+		LgiTrace("%s:%i - Failed to load '%s'\n", _FL, sStr.Get());
+		return false;
+	}
+
+	Gtk::GdkPixbuf *Pb = Ico->CreatePixBuf();
+    if (!Pb)
+	{
+		LgiTrace("%s:%i - Failed to CreatePixBuf '%s'\n", _FL, sStr.Get());
+		return false;
+	}
+
+    d->Icon.Add(Pb);
+	d->Images.Add(Ico.Release());
 	
 	#else
 	

@@ -182,20 +182,32 @@ OsPainter GMemDC::Handle()
 	#endif
 }
 
-Gtk::GdkPixbuf *GMemDC::CreatePixBuf()
+void FreeMemDC(guchar *pixels, GMemDC *data)
 {
-	auto Alpha = HasAlpha() || GColourSpaceHasAlpha(GetColourSpace());
+	delete data;	
+}
 
-	Gtk::GdkPixbuf *Pb =
-		gdk_pixbuf_new_from_data ((*this)[0],
-              GDK_COLORSPACE_RGB,
-              Alpha,
-              8,
-              X(),
-              Y(),
-              GetRowStep(),
-              NULL,
-              NULL);
+GdkPixbuf *GMemDC::CreatePixBuf()
+{
+	GMemDC *Tmp = new GMemDC(X(), Y(), CsRgba32, SurfaceRequireExactCs);
+	if (!Tmp)
+		return NULL;
+
+	Tmp->Colour(0, 32);
+	Tmp->Rectangle();
+	Tmp->Op(GDC_ALPHA);
+	Tmp->Blt(0, 0, this);
+
+	GdkPixbuf *Pb =
+		gdk_pixbuf_new_from_data ((*Tmp)[0],
+								  GDK_COLORSPACE_RGB,
+								  true,
+								  8,
+								  Tmp->X(),
+								  Tmp->Y(),
+								  Tmp->GetRowStep(),
+								  (GdkPixbufDestroyNotify) FreeMemDC,
+								  Tmp);
 	if (!Pb)
 		printf("%s:%i - gdk_pixbuf_new_from_data failed.\n", _FL);
 
@@ -304,64 +316,33 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 		Bits = 8;
 
 	Empty();
+
+	bool Exact = (Flags & SurfaceRequireExactCs) != 0;
 	d->CreateCs = Cs;
 	
-	#if GTK_MAJOR_VERSION == 3
-	#else
-	GdkVisual Fallback;
-	#endif
-	GdkVisual *Vis = gdk_visual_get_system();
-	GColourSpace VisCs = Vis ? GdkVisualToColourSpace(Vis, Bits) : CsNone;
-	if (Bits == 8)
-	{
-		GdkVisual *Vis8 = gdk_visual_get_best_with_depth(8);
-		if (Vis8)
-		{
-			// Yay an 8 bit visual!
-		    Vis = Vis8;
-		}
-		else
-		{
-			Vis = NULL;
-	    }
-	}
-	
-	if (Vis &&
-		VisCs != Cs &&
-		(Flags & SurfaceRequireExactCs) != 0)
-	{
-		Vis = NULL;
-	}
-	
-	#if GTK_MAJOR_VERSION == 3
 	cairo_format_t fmt = CAIRO_FORMAT_RGB24;
 	switch (Bits)
 	{
 		case 8:
 			fmt = CAIRO_FORMAT_A8;
+			ColourSpace = CsIndex8;
 			break;
 		case 16:
 			fmt = CAIRO_FORMAT_RGB16_565;
+			ColourSpace = CsRgb16;
 			break;
 		case 24:
 			fmt = CAIRO_FORMAT_RGB24;
+			ColourSpace = CsBgrx32;
 			break;
 		case 32:
 			fmt = CAIRO_FORMAT_ARGB32;
+			ColourSpace = CsBgra32;
 			break;
 		default:
+			ColourSpace = CsNone;
 			return false;
 	}
-	d->Img = cairo_image_surface_create (fmt, x, y);
-	#else
-	if (Vis)
-		d->Img = gdk_image_new(	GDK_IMAGE_FASTEST,
-								Vis,
-								x,
-								y);
-	else
-		d->Img = NULL;
-	#endif
 
 	if (!pMem)
 		pMem = new GBmpMem;
@@ -373,9 +354,23 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	pMem->Flags = 0;
 	pMem->Cs = CsNone;
 
-	#if GTK_MAJOR_VERSION == 3
-	if (d->Img)
+	if (d->CreateCs != ColourSpace  &&
+		Exact)
 	{
+		// Don't bother creating a cairo imaage surface, as the colour space we want is not
+		// supported. Just create an in memory bitmap.
+		pMem->OwnMem(true);
+		pMem->Line = ((pMem->x * Bits + 31) / 32) * 4;
+		LgiAssert(pMem->Line > 0);
+		pMem->Base = new uchar[pMem->Line * pMem->y];
+		pMem->Cs = ColourSpace = Cs;
+	}
+	else
+	{
+		d->Img = cairo_image_surface_create (fmt, x, y);
+		if (!d->Img)
+			return false;
+
 		switch (cairo_image_surface_get_format(d->Img))
 		{
 			case CAIRO_FORMAT_ARGB32:
@@ -397,47 +392,6 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 		pMem->Base = cairo_image_surface_get_data(d->Img);
 		pMem->Line = cairo_image_surface_get_stride(d->Img);
 	}
-	#else
-	if (d->Img)
-	{
-		// Use the GdkImage memory
-		pMem->Line = d->Img->bpl;
-		pMem->Base = (uchar*)d->Img->mem;
-		pMem->Cs = GdkVisualToColourSpace(d->Img->visual, d->Img->bits_per_pixel);
-	}
-	else
-	{
-		// Generate our own memory
-		pMem->Line = (((pMem->x * Bits) + 31) / 32) << 2;
-		pMem->Base = new uchar[pMem->y * pMem->Line];
-		pMem->Cs = Cs;
-		pMem->Flags |= GBmpMem::BmpOwnMemory;
-	}
-	#endif
-	
-	ColourSpace = pMem->Cs;
-
-	#if 0
-	if (Vis && d->Img)
-		printf("GMemDC::Create(%i,%i,%i) gdk_image_new(vis=%i,%i,%i,%i) img(%i,%i,%p) cs=%s\n",
-			x, y, Bits,
-			Vis->depth, Vis->byte_order, Vis->colormap_size, Vis->bits_per_rgb,
-			d->Img->bits_per_pixel,
-			d->Img->bpl,
-			d->Img->mem,
-			GColourSpaceToString(ColourSpace));
-	#endif
-
-	#if 0
-	printf("Created gdk image %ix%i @ %i bpp line=%i (%i) ptr=%p Vis=%p\n",
-		pMem->x,
-		pMem->y,
-		pMem->Bits,
-		pMem->Line,
-		pMem->Bits*pMem->x/8,
-		pMem->Base,
-		Vis);
-	#endif
 
 	int NewOp = (pApp) ? Op() : GDC_SET;
 
