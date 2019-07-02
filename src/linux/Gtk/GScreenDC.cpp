@@ -225,7 +225,7 @@ OsPainter GScreenDC::Handle()
 bool GScreenDC::SupportsAlphaCompositing()
 {
 	// GTK/X11 doesn't seem to support alpha compositing.
-	return false;
+	return true;
 }
 
 GdcPt2 GScreenDC::GetSize()

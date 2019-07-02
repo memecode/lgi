@@ -89,14 +89,7 @@ void LEmojiFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int len, GRect 
 
 	for (void *s = Str; Bytes > 0; )
 	{
-		uint32_t u32 = 0;
-		if (sizeof(*Str) == 1)
-			u32 = LgiUtf8To32( (uint8_t*&)s, Bytes);
-		else if (sizeof(*Str) == 2)
-			u32 = LgiUtf16To32( (const uint16_t*&)s, Bytes);
-		else if (sizeof(*Str) == 4)
-			u32 = *((uint32_t*&)s)++;
-
+		ConvertUtf32(s);
 		if (!u32)
 			break;
 
@@ -209,6 +202,8 @@ bool LEmojiFont::Create(const char *Face, GCss::Len Sz, GSurface *pSurface)
 			priv->Scaled.Reset(new GMemDC(Nx, Ny, priv->Img->GetColourSpace()))
 		)
 		{
+			priv->Scaled->Colour(0, 32);
+			priv->Scaled->Rectangle();
 			priv->Cell = NewCell;
 		}
 	}

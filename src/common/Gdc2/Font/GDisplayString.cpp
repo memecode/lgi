@@ -78,6 +78,7 @@ struct GDisplayStringPriv
 
 	void Create(Gtk::GtkPrintContext *PrintCtx)
 	{
+		Start:
 		auto *Fs = GFontSystem::Inst();
 		auto *Fnt = Ds->Font;
 		auto Tbl = Fnt->GetGlyphMap();
@@ -109,23 +110,27 @@ struct GDisplayStringPriv
 
 					Start = p.GetPtr();
 
-					// Start new block...
-					b = &Blocks.New();
-					b->Str = (char*)Start;
-					b->Bytes = -1; // unknown at this point
-					if (f == Ds->Font)
+					if (f)
 					{
-						// Create a pango layout
-						if (PrintCtx)
-							b->Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+						// Start new block...
+						b = &Blocks.New();
+						b->Str = (char*)Start;
+						b->Bytes = -1; // unknown at this point
+						if (f == Ds->Font)
+						{
+							// Create a pango layout
+							if (PrintCtx)
+								b->Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+							else
+								b->Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
+						}
 						else
-							b->Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
+						{
+							// External font
+							b->Fnt = f;
+						}
 					}
-					else
-					{
-						// External font
-						b->Fnt = f;
-					}
+					// else no font supports glyph
 
 					Fnt = f;
 				}
@@ -150,6 +155,15 @@ struct GDisplayStringPriv
 				b.Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
 			else
 				b.Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
+		}
+
+		for (auto &b: Blocks)
+		{
+			if (b.Hnd == NULL && b.Fnt == NULL)
+			{
+				Blocks.Length(0);
+				goto Start;
+			}
 		}
 	}
 	
@@ -2159,7 +2173,12 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 			pango_cairo_show_layout(cr, b.Hnd);
 		}
 		else if (b.Fnt)
+		{
+			b.Fnt->Transparent(Font->Transparent());
+			b.Fnt->Back(Font->Back());
 			b.Fnt->_Draw(pDC, 0, 0, b.Str, b.Bytes, NULL, f);
+		}
+		else LgiAssert(0);
 		
 		if (VisibleTab && Str)
 		{
