@@ -19,10 +19,10 @@ enum PopupNotifications
 #ifndef WH_MOUSE_LL
 #define WH_MOUSE_LL        14
 #endif
-
 #if !defined(MAKELONG)
 #define MAKELONG(low, high) ( ((low) & 0xffff) | ((high) << 16) )
 #endif
+#define MOUSE_POLL_MS		50
 
 #if defined(__GTK_H__)
 
@@ -186,8 +186,14 @@ public:
 			GMouse m;
 			v.GetMouse(m, true);
 
-			if (LockWithTimeout(500, _FL))
+			if (LockWithTimeout(100, _FL))
 			{
+				if (m.Down() ^ Old.Down())
+				{
+					// m.Trace("Hook");
+					GSubMenu::SysMouseClick(m);
+				}
+
 				if (m.Down() && !Old.Down()) 
 				{
 					// Down click....
@@ -408,7 +414,7 @@ public:
 
 			Old = m;
 
-			LgiSleep(40);
+			LgiSleep(MOUSE_POLL_MS);
 			#endif
 		}
 

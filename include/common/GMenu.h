@@ -93,19 +93,25 @@ class LgiClass GSubMenu :
 	friend class SubMenuImpl;
 	friend class MenuItemImpl;
 	friend class MenuImpl;
+	friend class GMouseHookPrivate;
+
+	// This is not called in the GUI thread
+	static void SysMouseClick(GMouse &m);
 
 	#if !WINNATIVE
 	OsSubMenu Info;
 	#endif
 
 	#if defined(__GTK_H__)
-	friend void GSubMenuDeactivate(Gtk::GtkMenuShell *widget, GSubMenu *Sub);
+	friend void GtkDeactivate(Gtk::GtkMenuShell *widget, GSubMenu *Sub);
+	friend Gtk::gboolean GSubMenuClick(GMouse *m);
 	friend void SubMenuDestroy(GSubMenu *Item);
 
 	int *_ContextMenuId;
 	bool InLoop;
+	uint64 ActiveTs;
 	bool IsContext(GMenuItem *Item);
-	void OnDeactivate();
+	void OnActivate(bool a);
 	#elif defined(WINNATIVE)
 	HWND TrackHandle;
 	#elif defined(BEOS)

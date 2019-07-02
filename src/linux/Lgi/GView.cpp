@@ -816,54 +816,38 @@ void GView::PointToView(GdcPt2 &p)
 bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 {
 	ThreadCheck();
+
+	GdkModifierType mask = (GdkModifierType)0;
+	auto display = gdk_display_get_default();
+	auto deviceManager = gdk_display_get_device_manager(display);
+	auto device = gdk_device_manager_get_client_pointer(deviceManager);
+	gdouble axes[2] = {0};
 	
 	GWindow *w = GetWindow();
-	if (w)
+	if (w && !ScreenCoords)
 	{
-		gint x = 0, y = 0;
-		GdkModifierType mask = (GdkModifierType)0;
 		GdkWindow *wnd = gtk_widget_get_window(GTK_WIDGET(w->WindowHandle()));
-		
-		auto display = gdk_display_get_default();
-		auto deviceManager = gdk_display_get_device_manager(display);
-		auto device = gdk_device_manager_get_client_pointer(deviceManager);
-		gdouble axes[2] = {0};
 		gdk_device_get_state(device, wnd, axes, &mask);
 
-		if (!ScreenCoords)
-		{
-			GdcPt2 p;
-			WindowVirtualOffset(&p);
-			m.x = (int)axes[0] - p.x - _BorderSize;
-			m.y = (int)axes[1] - p.y - _BorderSize;
-		}
-		else
-		{
-			m.x = x;
-			m.y = y;
-		}
-		m.SetModifer(mask);
-		m.Left((mask & GDK_BUTTON1_MASK) != 0);
-		m.Middle((mask & GDK_BUTTON2_MASK) != 0);
-		m.Right((mask & GDK_BUTTON3_MASK) != 0);
-		
-		return true;
+		GdcPt2 p;
+		WindowVirtualOffset(&p);
+		m.x = (int)axes[0] - p.x - _BorderSize;
+		m.y = (int)axes[1] - p.y - _BorderSize;
 	}
-	else if (GetParent())
+	else
 	{
-		bool s = GetParent()->GetMouse(m, ScreenCoords);
-		if (s)
-		{
-			if (!ScreenCoords)
-			{
-				m.x -= Pos.x1;
-				m.y -= Pos.y1;
-			}
-			return true;
-		}
+		gdk_device_get_state(device, gdk_get_default_root_window(), axes, &mask);
+		m.x = (int)axes[0];
+		m.y = (int)axes[1];
 	}
+
+	m.SetModifer(mask);
+	m.Left((mask & GDK_BUTTON1_MASK) != 0);
+	m.Middle((mask & GDK_BUTTON2_MASK) != 0);
+	m.Right((mask & GDK_BUTTON3_MASK) != 0);
+	m.Down(m.Left() || m.Middle() || m.Right());
 	
-	return false;
+	return true;
 }
 
 bool GView::IsAttached()

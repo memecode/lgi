@@ -17,6 +17,8 @@ using namespace Gtk;
 typedef ::GMenuItem LgiMenuItem;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+static ::GArray<GSubMenu*> Active;
+
 void SubMenuDestroy(GSubMenu *Item)
 {
 	// LgiTrace("DestroySub %p %p\n", Item, Item->Info);
@@ -29,6 +31,7 @@ GSubMenu::GSubMenu(const char *name, bool Popup)
 	Parent = NULL;
 	Info = NULL;
 	_ContextMenuId = NULL;
+	ActiveTs = 0;
 	InLoop = false;
 	
 	if (name)
@@ -42,10 +45,14 @@ GSubMenu::GSubMenu(const char *name, bool Popup)
 										NULL,
 										Gtk::G_CONNECT_SWAPPED);
 	}
+
+	Active.Add(this);
 }
 
 GSubMenu::~GSubMenu()
 {
+	Active.Delete(this);
+
 	while (Items.Length())
 	{
 		LgiMenuItem *i = Items[0];
@@ -62,6 +69,78 @@ GSubMenu::~GSubMenu()
 		Gtk::gtk_widget_destroy(w);
 		Info = NULL;
 	}
+}
+
+// This will be run in the GUI thread..
+gboolean GSubMenuClick(GMouse *m)
+{
+	if (!m)
+		return false;
+
+	bool OverMenu = false, HasVisible = false;
+	uint64 ActiveTs = 0;
+
+	for (auto s: Active)
+	{
+		auto w = GTK_WIDGET(s->Handle());
+		auto vis = gtk_widget_is_visible(w);
+		if (vis)
+		{
+			auto src = gtk_widget_get_screen(w);
+			// auto hnd = gdk_screen_get_root_window(src);
+			auto hnd = gtk_widget_get_window(w);
+
+			ActiveTs = MAX(s->ActiveTs, ActiveTs);
+			HasVisible = true;
+
+			GdkRectangle a;
+			gdk_window_get_frame_extents(hnd, &a);
+			/*
+			LgiTrace("SubClk down=%i, pos=%i,%i sub=%i,%i-%i,%i\n",
+				m->Down(),
+				m->x, m->y,
+				a.x, a.y, a.width, a.height);
+				*/
+
+			GRect rc = a;
+			if (rc.Overlap(m->x, m->y))
+				OverMenu = true;
+		}
+	}
+
+	if (m->Down() && !OverMenu && HasVisible && ActiveTs > 0)
+	{
+		uint64 Now = LgiCurrentTime();
+		uint64 Since = Now - ActiveTs;
+		LgiTrace("%s:%i - GSubMenuClick, Since=" LPrintfInt64 "\n", _FL, Since);
+
+		if (Since > 500)
+		{
+			for (auto s: Active)
+			{
+				auto w = GTK_WIDGET(s->Handle());
+				auto vis = gtk_widget_is_visible(w);
+				if (vis && s->ActiveTs)
+				{
+					gtk_widget_hide(w);
+					s->ActiveTs = 0;
+				}
+			}
+		}
+	}
+	// else LgiTrace("GSubMenuClick Down=%i OverMenu=%i HasVIsible=%i ActiveTs=%i\n", m->Down(), OverMenu, HasVisible, ActiveTs > 0);
+
+	DeleteObj(m);
+
+	return false;
+}
+
+// This is not called in the GUI thread..
+void GSubMenu::SysMouseClick(GMouse &m)
+{
+	GMouse *ms = new GMouse;
+	*ms = m;
+	g_idle_add((GSourceFunc) GSubMenuClick, ms);
 }
 
 size_t GSubMenu::Length()
@@ -219,23 +298,26 @@ bool GSubMenu::IsContext(LgiMenuItem *Item)
 	return true;
 }
 
-void GSubMenuDeactivate(Gtk::GtkMenuShell *widget, GSubMenu *Sub)
+void GtkDeactivate(Gtk::GtkMenuShell *widget, GSubMenu *Sub)
 {
-	Sub->OnDeactivate();
+	Sub->OnActivate(false);
 }
 
-void GSubMenu::OnDeactivate()
+void GSubMenu::OnActivate(bool a)
 {
-	if (_ContextMenuId)
-		*_ContextMenuId = 0;
-		
-	if (InLoop)
+	if (!a)
 	{
-		Gtk::gtk_main_quit();
-		InLoop = false;
+		if (_ContextMenuId)
+			*_ContextMenuId = 0;
+		
+		if (InLoop)
+		{
+			Gtk::gtk_main_quit();
+			InLoop = false;
+		}
 	}
 }
-                                                         
+
 int GSubMenu::Float(GView *From, int x, int y, int Button)
 {
 	static int Depth = 0;
@@ -261,55 +343,26 @@ int GSubMenu::Float(GView *From, int x, int y, int Button)
 		From->Capture(false);
 	#endif
 
+	ActiveTs = LgiCurrentTime();
+
 	// This signal handles the case where the user cancels the menu by clicking away from it.
-	Gtk::g_signal_connect_data(GtkCast(Info, g_object, GObject), 
-						"deactivate", 
-						(Gtk::GCallback)GSubMenuDeactivate,
-						this, NULL, (Gtk::GConnectFlags) 0);
+	auto Obj = G_OBJECT(Info);
+	g_signal_connect(Obj, "deactivate",  (GCallback)GtkDeactivate, this);
 	
-	Gtk::gtk_widget_show_all(GtkCast(Info, gtk_widget, GtkWidget));
+	auto Widget = GTK_WIDGET(Info);
+	gtk_widget_show_all(Widget);
 
 	int MenuId = 0;
 	_ContextMenuId = &MenuId;
 
 	GdcPt2 Pos(x, y);
-	Gtk::gtk_menu_popup(GtkCast(Info, gtk_menu, GtkMenu),
-						NULL, NULL, NULL, NULL,
-						Button,
-						Gtk::gtk_get_current_event_time());
+	gtk_menu_popup(GTK_MENU(Info),
+					NULL, NULL, NULL, NULL,
+					Button,
+					gtk_get_current_event_time());
 
-	/*
-	// In the case where there is no mouse button down, the popup menu can fail to 
-	// show. If that happens and we enter the gtk_main loop then the application will
-	// be a bad state. No GSubMenuDeactivate event will get called to exit the float
-	// loop. There may be a better way to do this.
-	Gtk::gdouble ms[5];
-	auto widget = GtkCast(Wnd->WindowHandle(), gtk_widget, GtkWidget);
-	auto window = Gtk::gtk_widget_get_window(widget);
-	Gtk::GdkModifierType mask = (Gtk::GdkModifierType)0;
-	auto deviceManager = Gtk::gdk_display_get_device_manager(Gtk::gdk_display_get_default());
-	auto device = Gtk::gdk_device_manager_get_client_pointer(deviceManager);
-	Gtk::gdk_device_get_state(device, window, ms, &mask);
-	if
-	(
-		Button == 0
-		||
-		(
-			mask & (GDK_BUTTON1_MASK|GDK_BUTTON2_MASK|GDK_BUTTON3_MASK|GDK_BUTTON4_MASK|GDK_BUTTON5_MASK)
-		)
-	)
-	*/
-	{
-		InLoop = true;
-		Gtk::gtk_main();
-	}
-	/*
-	else
-	{
-		LgiTrace("%s:%i - Popup loop avoided, no button down?\n", _FL);
-	}
-	*/
-
+	InLoop = true;
+	gtk_main();
 	_ContextMenuId = NULL;
 	return MenuId;
 }
