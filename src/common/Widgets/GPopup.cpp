@@ -22,7 +22,7 @@ enum PopupNotifications
 #if !defined(MAKELONG)
 #define MAKELONG(low, high) ( ((low) & 0xffff) | ((high) << 16) )
 #endif
-#define MOUSE_POLL_MS		50
+#define MOUSE_POLL_MS		100
 
 #if defined(__GTK_H__)
 
