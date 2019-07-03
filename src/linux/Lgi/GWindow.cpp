@@ -392,6 +392,12 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 				case KEY(Down):
 					k.vkey = k.c16 = VK_DOWN;
 					break;
+				case KEY(Page_Up):
+					k.vkey = k.c16 = VK_PAGEUP;
+					break;
+				case KEY(Page_Down):
+					k.vkey = k.c16 = VK_PAGEDOWN;
+					break;
 				case KEY(Home):
 					k.vkey = k.c16 = VK_HOME;
 					break;

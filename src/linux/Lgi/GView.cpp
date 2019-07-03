@@ -852,7 +852,16 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 
 bool GView::IsAttached()
 {
-	return GetWindow() != NULL;
+	auto w = GetWindow();
+	if (!w)
+		return false;
+	auto p = GetParent();
+	if (!p)
+		return false;
+	auto gv = p->GetGView();
+	if (gv && !gv->Children.HasItem(this))
+		return false;
+	return true;
 }
 
 const char *GView::GetClass()
@@ -867,7 +876,7 @@ bool GView::Attach(GViewI *parent)
 	bool Status = false;
 
 	GView *Parent = d->GetParent();
-	LgiAssert(Parent == NULL);
+	LgiAssert(Parent == NULL || Parent == parent);
 
 	SetParent(parent);
 	Parent = d->GetParent();
