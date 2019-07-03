@@ -28,15 +28,7 @@
 
 #define DEBUG_MSG_TYPES				0
 #define DEBUG_HND_WARNINGS			0
-
-/*
-#ifndef WIN32
-namespace Gtk {
-#include <gdk/gdkx.h>
-#undef Status
-}
-#endif
-*/
+#define IDLE_ALWAYS					0
 
 typedef GArray<GAppInfo*> AppArray;
 using namespace Gtk;
@@ -359,18 +351,6 @@ GSkinEngine *GApp::SkinEngine = 0;
 GApp *TheApp = 0;
 GMouseHook *GApp::MouseHook = 0;
 
-static void
-activate_quit (GSimpleAction *action,
-               Gtk::GVariant      *parameter,
-               gpointer       user_data)
-{
-	int asd=0;
-}
-
-static GActionEntry app_entries[] = {
-	{ "quit", activate_quit, NULL, NULL, NULL },
-};
-
 GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
 {
@@ -392,11 +372,6 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	SetEnvironmentVariable(_T("GTK_CSD"), _T("0"));
 	#else
 	setenv("GTK_CSD", "0", true);
-	#endif
-	#if GTK_MAJOR_VERSION == 3
-	#else
-	GtkLock _Lock;
-  	Gtk::gdk_threads_init();	
 	#endif
   	
 	// We want our printf's NOW!
@@ -432,6 +407,16 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	SystemNormal = 0;
 	GFontType SysFontType;
 
+	#if 0
+	Gtk::PangoFontMap *fm = Gtk::pango_cairo_font_map_get_default();
+	if (fm)
+	{
+		using namespace Gtk;
+		auto cfm = PANGO_CAIRO_FONT_MAP(fm);
+		pango_cairo_font_map_set_resolution(cfm, 98.0);
+	}
+	#endif
+	
 	if (SysFontType.GetSystemFont("System"))
 	{
 		SystemNormal = SysFontType.Create();
@@ -462,13 +447,6 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 		extern GSkinEngine *CreateSkinEngine(GApp *App);
 		SkinEngine = CreateSkinEngine(this);
 	}
-
-	#if 1 // Doesn't work
-	if (d->App)
-	{
-		g_action_map_add_action_entries (G_ACTION_MAP(d->App), app_entries, G_N_ELEMENTS (app_entries), d->App);
-	}
-	#endif
 }
 
 GApp::~GApp()
@@ -576,14 +554,6 @@ bool GApp::InThread()
 	return Gui == Me;
 }
 
-/*
-#ifndef WIN32
-void GApp::OnEvents()
-{
-}
-#endif
-*/
-
 struct GtkIdle
 {
 	GAppPrivate *d;
@@ -638,11 +608,15 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 		}
 	}
 	
+	#if IDLE_ALWAYS
 	LgiSleep(1);
-	
-	return TRUE;
+	return true;
+	#else
+	return false;
+	#endif	
 }
 
+static GtkIdle idle = {0};
 bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 {
 	if (!InThread())
@@ -653,7 +627,6 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 
 	if (Loop)
 	{
-		static GtkIdle idle = {0};
 		if (!idle.d)
 		{
 			idle.d = d;
@@ -667,7 +640,7 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 			GtkLock _Lock;
 			#endif
 			
-			#if 1
+			#if IDLE_ALWAYS
 			auto Id = Gtk::gdk_threads_add_idle_full(G_PRIORITY_DEFAULT_IDLE,
 													IdleWrapper,
 													&idle,
@@ -1479,8 +1452,14 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 		return false;
 	}
 	
+	auto Existing = q->Length();
 	q->New().Set(View, Msg, a, b);
 	MsgQue.Unlock();
+	
+	#if !IDLE_ALWAYS
+	if (!Existing)
+		g_idle_add((GSourceFunc)IdleWrapper, &idle);
+	#endif
 	
 	return true;
 }

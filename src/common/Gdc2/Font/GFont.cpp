@@ -1212,16 +1212,6 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 	
 	Destroy();
 	
-	#if 1 //def MAC
-	Gtk::PangoFontMap *fm = Gtk::pango_cairo_font_map_get_default();
-	if (fm)
-	{
-		using namespace Gtk;
-		auto cfm = PANGO_CAIRO_FONT_MAP(fm);
-		pango_cairo_font_map_set_resolution(cfm, 82.0);
-	}
-	#endif
-	
 	d->hFont = Gtk::pango_font_description_new();
 	if (!d->hFont)
 		printf("%s:%i - pango_font_description_new failed: Face='%s' Size=%i Bold=%i Italic=%i\n",
