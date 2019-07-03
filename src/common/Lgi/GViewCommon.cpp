@@ -327,6 +327,11 @@ OsWindow GView::WindowHandle()
 
 GWindow *GView::GetWindow()
 {
+	if (_Debug)
+	{
+		int asd=0;
+	}
+
 	if (!_Window)
 	{
 		// Walk up parent list and find someone who has a window
@@ -1897,13 +1902,11 @@ bool GView::WindowVirtualOffset(GdcPt2 *Offset)
 		Offset->x = 0;
 		Offset->y = 0;
 		
-		#ifdef __GTK_H__
-		GViewI *wnd = GetWindow();
-		#endif
 		for (GViewI *Wnd = this; Wnd; Wnd = Wnd->GetParent())
 		{
 			#ifdef __GTK_H__
-			if (Wnd != wnd)
+			auto IsWnd = dynamic_cast<GWindow*>(Wnd);
+			if (!IsWnd)
 			#else
 			if (!Wnd->Handle())
 			#endif

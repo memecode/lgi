@@ -159,7 +159,7 @@ GMouse _map_mouse_event(GView *v, int x, int y, bool Motion)
 	m.y = y - Offset.y;
 	m.Target = View;
 
-	#if 0
+	#if 1
 	LgiTrace("Widget%s %i,%i on %s -> offset: %i,%i -> %i,%i on %s, FoundParent=%i\n",
 		Motion ? "Motion" : "Click",
 		x, y, v?v->GetClass():"NULL",
@@ -999,9 +999,9 @@ lgi_widget_realize(GtkWidget *widget)
 		if (p)
 		{
 			if (minimum_height)
-				*minimum_height = p->pour_largest ? 80 : p->target->Y();
+				*minimum_height = p->pour_largest ? 10 : p->target->Y();
 			if (natural_height)
-				*natural_height = p->pour_largest ? MAX(80, p->target->Y()) : p->target->Y();
+				*natural_height = p->pour_largest ? MAX(10, p->target->Y()) : p->target->Y();
 		}
 		else LgiAssert(0);
 	}
@@ -1013,9 +1013,9 @@ lgi_widget_realize(GtkWidget *widget)
 		if (p)
 		{
 			if (minimum_width)
-				*minimum_width = p->pour_largest ? 80 : p->target->X();
+				*minimum_width = p->pour_largest ? 10 : p->target->X();
 			if (natural_width)
-				*natural_width = p->pour_largest ? MAX(80, p->target->X()) : p->target->X();
+				*natural_width = p->pour_largest ? MAX(10, p->target->X()) : p->target->X();
 		}
 		else LgiAssert(0);
 	}

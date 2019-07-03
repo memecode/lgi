@@ -2,7 +2,7 @@
 #define _WIN32_WINNT 0x500
 #include "Lgi.h"
 
-#if defined(WIN32)
+#if defined(WIN32) && !defined(__GTK_H__)
 	#include <commctrl.h>
 #elif defined(LGI_CARBON)
 	#include <Carbon/Carbon.h>

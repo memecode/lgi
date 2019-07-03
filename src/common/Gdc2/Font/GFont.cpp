@@ -1212,7 +1212,7 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 	
 	Destroy();
 	
-	#ifdef MAC
+	#if 1 //def MAC
 	Gtk::PangoFontMap *fm = Gtk::pango_cairo_font_map_get_default();
 	if (fm)
 	{

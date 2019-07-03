@@ -2884,7 +2884,7 @@ int EmojiMenu::Cur = 0;
 EmojiMenu::EmojiMenu(GRichTextPriv *priv, GdcPt2 p) : GPopup(priv->View)
 {
 	d = priv;
-
+	Debug();
 	d->GetEmojiImage();
 
 	int MaxIdx = 0;

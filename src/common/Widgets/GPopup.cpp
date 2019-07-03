@@ -201,9 +201,8 @@ public:
 					GPopup *Over = 0;
 					GPopup *w;
 
-					for (auto it = Popups.begin(); it != Popups.end(); it++)
+					for (auto w: Popups)
 					{
-						w = *it;
 						if (w->GetPos().Overlap(m.x, m.y))
 						{
 							Over = w;
@@ -211,9 +210,8 @@ public:
 						}
 					}
 					
-					for (auto it = Popups.begin(); it != Popups.end(); it++)
+					for (auto w: Popups)
 					{
-						w = *it;
 						#if 0
 						LgiTrace("PopupLoop: Over=%p w=%p, w->Vis=%i, Time=%i\n",
 							Over,
@@ -228,7 +226,7 @@ public:
 						{
 							bool Close = true;
 
-							#if defined WIN32
+							#if WINNATIVE
 							// This is a bit of a hack to prevent GPopup's with open context menus from
 							// closing when the user clicks on the context menu.
 							//
@@ -560,7 +558,7 @@ GPopup::GPopup(GView *owner)
 		Owner->PopupChild() = this;
 		#endif
 		
-		#ifndef MAC
+		#if !defined(MAC) && !defined(__GTK_H__)
 		_Window = Owner->GetWindow();
 		#endif
 		SetNotify(Owner);
@@ -707,60 +705,11 @@ bool GPopup::Attach(GViewI *p)
 	#elif defined __GTK_H__
 
 	gtk_window_set_decorated(WindowHandle(), FALSE);
-	// gtk_widget_add_events(Wnd, GDK_ALL_EVENTS_MASK & ~GDK_POINTER_MOTION_HINT_MASK);
-	
 	return GWindow::Attach(p);
-	
-	/*
-	if (!Wnd)
-	{
-	    Wnd = gtk_window_new(GTK_WINDOW_POPUP);
-		auto WndObj = G_OBJECT(Wnd);
-		LgiAssert(WndObj);
-	    
-	    gtk_window_set_decorated(GTK_WINDOW(Wnd), FALSE);
-		gtk_widget_add_events(Wnd, GDK_ALL_EVENTS_MASK & ~GDK_POINTER_MOTION_HINT_MASK);
-
-		if (!p)
-			p = Owner;
-
-		auto Wnd = p ? p->GetWindow() : 0;
-		GtkWidget *Hnd = Wnd ? GTK_WIDGET(Wnd->WindowHandle()) : NULL;
-
-		GtkWidget *toplevel = p ? gtk_widget_get_toplevel(Hnd) : NULL;
-		if (GTK_IS_WINDOW(toplevel))
-			gtk_window_set_transient_for(GTK_WINDOW(Wnd), GTK_WINDOW(toplevel));
-		else
-		{
-			LgiTrace("%s:%i - toplevel isn't window?\n", _FL);
-			return false;
-		}
-
-        g_signal_connect(WndObj, "button-press-event", G_CALLBACK(PopupEvent), this);
-        g_signal_connect(WndObj, "focus-in-event", G_CALLBACK(PopupEvent), this);
-        g_signal_connect(WndObj, "focus-out-event", G_CALLBACK(PopupEvent), this);
-		g_signal_connect(WndObj, "delete_event", G_CALLBACK(PopupEvent), this);
-		g_signal_connect(WndObj, "configure-event", G_CALLBACK(PopupEvent), this);
-		g_signal_connect(WndObj, "button-press-event", G_CALLBACK(PopupEvent), this);
-		// g_signal_connect(WndObj, "client-event", G_CALLBACK(PopupEvent), this);
-	}
-
-	if (Wnd && Pos.Valid())
-	{
-		gtk_window_set_default_size(GTK_WINDOW(Wnd), Pos.X(), Pos.Y());
-		gtk_window_move(GTK_WINDOW(Wnd), Pos.x1, Pos.y1);
-	}
-	*/
 
 	#endif
 
-	if (!_Window)
-	{
-		if (Owner)
-			_Window = Owner->GetWindow();
-		else
-			_Window = p->GetWindow();
-	}
+	GetWindow();
 
 	#ifdef __GTK_H__
 	return true;
@@ -785,7 +734,7 @@ void GPopup::Visible(bool i)
 	#if defined __GTK_H__
 	
 		auto Wnd = WindowHandle();
-		if (i && !Wnd)
+		if (i && !IsAttached())
 		{
 			if (!Attach(0))
 			{

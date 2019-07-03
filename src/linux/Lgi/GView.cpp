@@ -858,8 +858,13 @@ bool GView::IsAttached()
 	auto p = GetParent();
 	if (!p)
 	{
-		if (!dynamic_cast<GWindow*>(this) && !dynamic_cast<GPopup*>(this))
+		w = dynamic_cast<GWindow*>(this);
+		if (!w)
 			return false;
+		auto hnd = w->WindowHandle();
+		if (!hnd)
+			return false;
+		return gtk_widget_get_realized(GTK_WIDGET(hnd));
 	}
 	else
 	{
