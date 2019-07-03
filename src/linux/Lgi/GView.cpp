@@ -857,10 +857,16 @@ bool GView::IsAttached()
 		return false;
 	auto p = GetParent();
 	if (!p)
-		return false;
-	auto gv = p->GetGView();
-	if (gv && !gv->Children.HasItem(this))
-		return false;
+	{
+		if (!dynamic_cast<GWindow*>(this) && !dynamic_cast<GPopup*>(this))
+			return false;
+	}
+	else
+	{
+		auto gv = p->GetGView();
+		if (gv && !gv->Children.HasItem(this))
+			return false;
+	}
 	return true;
 }
 
