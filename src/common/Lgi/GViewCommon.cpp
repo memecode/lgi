@@ -536,9 +536,18 @@ void GView::OnNcPaint(GSurface *pDC, GRect &r)
 }
 
 #if defined __GTK_H__
-void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
+
+/*
+uint64 nPaint = 0;
+uint64 PaintTime = 0;
+*/
+
+void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 {
+	/*
+	uint64 StartTs = Update ? LgiCurrentTime() : 0;
 	d->InPaint = true;
+	*/
 
 	// Create temp DC if needed...
 	GAutoPtr<GSurface> Local;
@@ -610,10 +619,17 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
 			w->_Paint(pDC, &o);
 	}
 
+	/*
 	d->InPaint = false;
+	PaintTime += Update ? LgiCurrentTime()-StartTs : 0;
+	if (++nPaint % 100 == 0)
+	{
+		LgiTrace("PaintAvg = %.2g\n", (double)PaintTime / nPaint);
+	}
+	*/
 }
 #else
-void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
+void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 {
 	// Create temp DC if needed...
 	GAutoPtr<GSurface> Local;

@@ -588,7 +588,7 @@ protected:
 #ifdef LGI_SDL
 public:
 #endif
-	virtual void	_Paint(GSurface *pDC = NULL, GdcPt2 *Offset = NULL, GRegion *Update = NULL);
+	virtual void	_Paint(GSurface *pDC = NULL, GdcPt2 *Offset = NULL, GRect *Update = NULL);
 
 public:
 	/// \brief Creates a view/window.

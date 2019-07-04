@@ -159,7 +159,7 @@ GMouse _map_mouse_event(GView *v, int x, int y, bool Motion)
 	m.y = y - Offset.y;
 	m.Target = View;
 
-	#if 1
+	#if 0
 	LgiTrace("Widget%s %i,%i on %s -> offset: %i,%i -> %i,%i on %s, FoundParent=%i\n",
 		Motion ? "Motion" : "Click",
 		x, y, v?v->GetClass():"NULL",
@@ -977,7 +977,13 @@ lgi_widget_realize(GtkWidget *widget)
 
 		GView *v = dynamic_cast<GView*>(p->target);
 		if (v)
-			v->_Paint(&Dc);
+		{
+			GdkRectangle GtkUp;
+			GRect Up;
+			if (gdk_cairo_get_clip_rectangle(cr, &GtkUp))
+				Up = GtkUp;			
+			v->_Paint(&Dc, NULL, Up.Valid() ? &Up : NULL);
+		}
 		else
 			p->target->OnPaint(&Dc);
 
