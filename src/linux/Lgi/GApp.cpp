@@ -612,7 +612,7 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 	LgiSleep(1);
 	return true;
 	#else
-	return false;
+	return i->cb != NULL;
 	#endif	
 }
 
