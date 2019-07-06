@@ -58,7 +58,7 @@ typedef GRgba64 Png64;
 #define LIBPNG Lib->
 const char sLibrary[] =
 	#if defined(MAC)
-		"libpng15.15.4.0"
+		"libpng16.16"
 	#else
 		#if defined(__CYGWIN__)
 			"cygpng12"

@@ -9,7 +9,7 @@
 #endif
 */
 
-#define MissingDynImport	LgiAssert(0);
+#define MissingDynImport(fn)	printf("%s:%i - Missing import '%s'\n", _FL, fn);
 
 #ifndef CALL_TYPE
 #define CALL_TYPE			// __stdcall
@@ -24,7 +24,7 @@
 		{												\
 			return p();									\
 		}												\
-		MissingDynImport								\
+		MissingDynImport(#func)							\
 		return 0;										\
 	}
 
@@ -37,7 +37,7 @@
 		{												\
 			return p(argname);							\
 		}												\
-		MissingDynImport								\
+		MissingDynImport(#func)							\
 		return 0;										\
 	}
 
@@ -50,7 +50,7 @@
 		{												\
 			return p(argname1, argname2);				\
 		}												\
-		MissingDynImport								\
+		MissingDynImport(#func)							\
 		return 0;										\
 	}
 
@@ -69,7 +69,7 @@
 		{												\
 			return p(argname1, argname2, argname3);		\
 		}												\
-		MissingDynImport								\
+		MissingDynImport(#func)							\
 		return 0;										\
 	}
 
@@ -92,7 +92,7 @@
 			return p(argname1, argname2,				\
 					 argname3, argname4);				\
 		}												\
-		MissingDynImport								\
+		MissingDynImport(#func)							\
 		return 0;										\
 	}
 
@@ -119,7 +119,7 @@
 					 argname3, argname4,				\
 					 argname5);							\
 		}												\
-		MissingDynImport								\
+		MissingDynImport(#func)							\
 		return 0;										\
 	}
 
@@ -149,7 +149,7 @@
 					 argname3, argname4,				\
 					 argname5, argname6);				\
 		}												\
-		MissingDynImport								\
+		MissingDynImport(#func)							\
 		return 0;										\
 	}
 
@@ -191,7 +191,7 @@
 					 argname7, argname8,				\
 					 argname9);				            \
 		}												\
-		MissingDynImport								\
+		MissingDynImport(#func)							\
 		return 0;										\
 	}
 
@@ -235,7 +235,7 @@
 					 argname7, argname8,				\
 					 argname9, argname10);				\
 		}												\
-		MissingDynImport								\
+		MissingDynImport(#func)							\
 		return 0;										\
 	}
 

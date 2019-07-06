@@ -1865,7 +1865,7 @@ bool LgiGetExeFile(char *Dst, int DstSize)
 			bool Status = false;
 		
 			#if COCOA || defined __GTK_H__
-		
+
 			if (FileExists(LgiArgsAppPath))
 			{
 				LgiMakePath(Dst, DstSize, LgiArgsAppPath, "../../..");

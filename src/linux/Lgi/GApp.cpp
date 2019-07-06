@@ -360,6 +360,18 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	d = new GAppPrivate;
 	Name(name);
 	LgiArgsAppPath = AppArgs.Arg[0];
+	if (LgiIsRelativePath(LgiArgsAppPath))
+	{
+		char Cwd[MAX_PATH];
+		getcwd(Cwd, sizeof(Cwd));
+		LgiMakePath(Cwd, sizeof(Cwd), Cwd, LgiArgsAppPath);
+		LgiArgsAppPath = Cwd;
+		printf("Rel.LgiArgsAppPath=%s\n", LgiArgsAppPath.Get());
+	}
+	else
+	{
+		printf("Abs.LgiArgsAppPath=%s\n", LgiArgsAppPath.Get());
+	}
 
 	int WCharSz = sizeof(wchar_t);
 	#if defined(_MSC_VER)

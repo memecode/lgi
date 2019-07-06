@@ -26,27 +26,27 @@
 #include "GVariant.h"
 #include "INet.h"
 
-#define PATH_OFFSET				"../"
+#define PATH_OFFSET					"../"
 #ifdef WIN32
 	#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		#ifdef _WIN64
-			#define SSL_LIBRARY				"libssl-1_1-x64"
-			#define EAY_LIBRARY				"libcrypto-1_1-x64"
+			#define SSL_LIBRARY		"libssl-1_1-x64"
+			#define EAY_LIBRARY		"libcrypto-1_1-x64"
 		#else // 32bit
-			#define SSL_LIBRARY				"libssl-1_1"
-			#define EAY_LIBRARY				"libcrypto-1_1"
+			#define SSL_LIBRARY		"libssl-1_1"
+			#define EAY_LIBRARY		"libcrypto-1_1"
 		#endif
 	#else
-		#define SSL_LIBRARY				"ssleay32"
-		#define EAY_LIBRARY             "libeay32"
+		#define SSL_LIBRARY			"ssleay32"
+		#define EAY_LIBRARY            "libeay32"
 	#endif
 #else
-#define SSL_LIBRARY				"libssl"
+#define SSL_LIBRARY					"libssl"
 #endif
-#define HasntTimedOut()			((To < 0) || (LgiCurrentTime() - Start < To))
+#define HasntTimedOut()				((To < 0) || (LgiCurrentTime() - Start < To))
 
 static const char*
-	MinimumVersion				= "1.0.1g";
+	MinimumVersion					= "1.0.1g";
 
 void
 SSL_locking_function(int mode, int n, const char *file, int line);
@@ -72,7 +72,9 @@ public:
 
         if (!IsLoaded())
         {
-			Load("/opt/local/lib/" SSL_LIBRARY);
+			auto Opt = "/opt/local/lib/" SSL_LIBRARY;
+			if (!Load(Opt))
+				LgiTrace("%s:%i - Failed to load '%s'\n", _FL, Opt);
 		}
 		#elif defined LINUX
 		if (LgiGetExePath(p, sizeof(p)))
