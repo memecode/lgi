@@ -131,10 +131,9 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 
 		GString p;
 		p.Printf("Assert failed, file: %s, line: %i\n%s", file, line, test);
-
-		int Result = 2;
 		
 		#if defined LGI_CARBON
+		int Result = 2;
 		if (LgiApp && LgiApp->InThread())
 		{
 			SInt16 r;
