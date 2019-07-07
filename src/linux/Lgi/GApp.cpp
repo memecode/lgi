@@ -20,6 +20,7 @@
 #endif
 #include "GToken.h"
 #include "GFontCache.h"
+#include "LJson.h"
 
 #if HAS_LIB_MAGIC
 // sudo apt-get install libmagic-dev
@@ -366,11 +367,11 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 		getcwd(Cwd, sizeof(Cwd));
 		LgiMakePath(Cwd, sizeof(Cwd), Cwd, LgiArgsAppPath);
 		LgiArgsAppPath = Cwd;
-		printf("Rel.LgiArgsAppPath=%s\n", LgiArgsAppPath.Get());
+		// printf("Rel.LgiArgsAppPath=%s\n", LgiArgsAppPath.Get());
 	}
 	else
 	{
-		printf("Abs.LgiArgsAppPath=%s\n", LgiArgsAppPath.Get());
+		// printf("Abs.LgiArgsAppPath=%s\n", LgiArgsAppPath.Get());
 	}
 
 	int WCharSz = sizeof(wchar_t);
@@ -419,13 +420,13 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	SystemNormal = 0;
 	GFontType SysFontType;
 
-	#if 0
+	#if 1
 	Gtk::PangoFontMap *fm = Gtk::pango_cairo_font_map_get_default();
 	if (fm)
 	{
 		using namespace Gtk;
 		auto cfm = PANGO_CAIRO_FONT_MAP(fm);
-		pango_cairo_font_map_set_resolution(cfm, 98.0);
+		pango_cairo_font_map_set_resolution(cfm, 80.0);
 	}
 	#endif
 	

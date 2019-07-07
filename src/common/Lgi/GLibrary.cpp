@@ -111,6 +111,14 @@ bool GLibrary::Load(const char *File, bool Quiet)
 				}
 				else
 				{
+					#ifdef MAC
+					char p[MAX_PATH];
+					LgiMakePath(p, sizeof(p), LgiArgsAppPath, FileName);
+					hLib = dlopen(p, RTLD_NOW);
+					auto epath = getenv("DYLD_LIBRARY_PATH");
+					int asd=0;
+					#endif
+				
 					char *e = dlerror();
 					if (!stristr(e, "No such file or directory") && !Quiet)
 						LgiTrace("%s:%i - dlopen(%s) failed: %s\n", _FL, File, e);
