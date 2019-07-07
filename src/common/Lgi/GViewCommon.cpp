@@ -329,11 +329,6 @@ OsWindow GView::WindowHandle()
 
 GWindow *GView::GetWindow()
 {
-	if (_Debug)
-	{
-		int asd=0;
-	}
-
 	if (!_Window)
 	{
 		// Walk up parent list and find someone who has a window

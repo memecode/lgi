@@ -22,10 +22,6 @@ if (APPLE)
 	add_definitions("-DMAC -DLGI_LIBRARY -D_DEBUG -DLGI_RES")
 	SET(GUI_TYPE MACOSX_BUNDLE)
 
-	get_filename_component(LIBPNG_SEARCH "${CODELIB}/libpng" ABSOLUTE)
-	get_filename_component(ZLIB_SEARCH "${CODELIB}/zlib" ABSOLUTE)
-	add_subdirectory(${LIBPNG_SEARCH} libpng_dir)
-
 elseif (LINUX)
 
 	add_definitions("-DLINUX -DLGI_LIBRARY -D_DEBUG -DLGI_RES -DPOSIX -fPIC -w -fno-inline -fpermissive")
@@ -88,12 +84,11 @@ set(CommonResourceFiles
 
 if (APPLE)
 	set(MacResourceFiles
-		Resources/mac-icon.icns
-		MacCarbon/English.lproj/InfoPlist.strings
-		MacCarbon/English.lproj/main.nib)
+		# MacCarbon/English.lproj/InfoPlist.strings
+		# MacCarbon/English.lproj/main.nib
+		)
 	list(TRANSFORM MacResourceFiles PREPEND ../)
 
-	set(MACOSX_BUNDLE_ICON_FILE mac-icon.icns)
 	set_source_files_properties(${CommonResourceFiles} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 	set_source_files_properties(${MacResourceFiles} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
@@ -125,19 +120,6 @@ if (APPLE)
 		)
 	set(RESOURCE_DEST "../Resources")
 
-	if (0)
-		get_cmake_property(_variableNames VARIABLES)
-		list (SORT _variableNames)
-		foreach (_variableName ${_variableNames})
-			message(STATUS "${_variableName}=${${_variableName}}")
-		endforeach()
-	endif()
-
-	add_custom_command(TARGET HtmlTest POST_BUILD
-				COMMAND "${CMAKE_COMMAND}" -E copy
-					"$<TARGET_FILE:png15>"
-					"$<TARGET_FILE_DIR:HtmlTest>"
-				COMMENT "Copying Lgi to output directory")
 elseif (LINUX)
 	target_include_directories(HtmlTest PUBLIC
 								"${LGI}/include/linux/Gtk"

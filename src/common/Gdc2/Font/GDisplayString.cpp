@@ -2101,71 +2101,34 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 		return;
 	}
 
-	int Ox = 0, Oy = 0;
-	pDC->GetOrigin(Ox, Oy);
-	
-	#if 1
-	GRect Client;
-	if (pDC->GetClient(&Client) && Client.Valid())
-	{
-		Ox += Client.x1;
-		Oy += Client.y1;
-	}
-	#endif
-
 	Gtk::cairo_save(cr);
 
 	GColour b = Font->Back();
-	if (!Font->Transparent() && frc)
-	{
-		#if 1 // Background fill
-		cairo_set_source_rgb(cr,
-							(double)b.r()/255.0,
-							(double)b.g()/255.0,
-							(double)b.b()/255.0);
-		cairo_new_path(cr);
-		cairo_rectangle
-		(
-			cr,
-			((double)frc->x1 / FScale) - Ox,
-			((double)frc->y1 / FScale) - Oy,
-			(double)frc->X() / FScale,
-			(double)frc->Y() / FScale
-		);
-		cairo_fill(cr);
-		#endif
-	}
-
 	double Dx = ((double)fx / FScale);
 	double Dy = ((double)fy / FScale);
-
-	#ifdef WIN32
-	// What the hell is this? It works ok but why?
-	cairo_translate(cr, Dx-Ox, Dy-Oy);
-	#else
-	cairo_translate(cr, Dx, Dy);
-	#endif
-
-	/*
-	Gtk::cairo_matrix_t matrix;
-	cairo_get_matrix (cr, &matrix);
-	LgiTrace("Str '%s' actual=%g,%g draw=%g,%g off=%i,%i\n",
-		Str,
-		matrix.x0, matrix.y0,
-		Dx, Dy,
-		Ox, Oy);
-	*/
-	
-	if (!Font->Transparent() && !frc)
+	if (!Font->Transparent())
 	{
-		cairo_new_path(cr);
+		// Background fill
 		cairo_set_source_rgb(cr,
 							(double)b.r()/255.0,
 							(double)b.g()/255.0,
 							(double)b.b()/255.0);
-		cairo_rectangle(cr, 0, 0, x, y);
+		cairo_new_path(cr);
+		if (frc)
+			cairo_rectangle
+			(
+				cr,
+				((double)frc->x1 / FScale),
+				((double)frc->y1 / FScale),
+				(double)frc->X() / FScale,
+				(double)frc->Y() / FScale
+			);
+		else
+			cairo_rectangle(cr, Dx, Dy, x, y);
 		cairo_fill(cr);
 	}
+
+	cairo_translate(cr, Dx, Dy);
 
 	GColour f = Font->Fore();
 	for (auto &b: d->Blocks)
