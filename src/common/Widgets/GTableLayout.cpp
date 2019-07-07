@@ -2163,8 +2163,6 @@ void GTableLayout::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 				}
 			}
 		}
-
-		LgiAssert(0);
 	}
 }
 

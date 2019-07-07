@@ -1008,8 +1008,14 @@ void GDisplayString::TruncateWithDots(int Width)
 	{
 		if (Fwid < Fx + b.X())
 		{
-			Gtk::pango_layout_set_ellipsize(b.Hnd, Gtk::PANGO_ELLIPSIZE_END);
-			Gtk::pango_layout_set_width(b.Hnd, Fwid - Fx);
+			if (b.Hnd)
+			{
+				Gtk::pango_layout_set_ellipsize(b.Hnd, Gtk::PANGO_ELLIPSIZE_END);
+				Gtk::pango_layout_set_width(b.Hnd, Fwid - Fx);
+			}
+			else if (b.Fnt)
+			{
+			}
 			break;
 		}
 
