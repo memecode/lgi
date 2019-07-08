@@ -592,16 +592,16 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 		}
 		case M_CHANGE:
 		{
-			GViewI *Ctrl = dynamic_cast<GViewI*>((GViewI*) MsgA(Msg));
+			GViewI *Ctrl = dynamic_cast<GViewI*>((GViewI*) Msg->A());
 			if (Ctrl)
 			{
-				return OnNotify(Ctrl, (int)MsgB(Msg));
+				return OnNotify(Ctrl, (int)Msg->B());
 			}
 			break;
 		}
 		case M_COMMAND:
 		{
-			return OnCommand((int)MsgA(Msg), 0, (OsView)MsgB(Msg));
+			return OnCommand((int)Msg->A(), 0, (OsView)Msg->B());
 		}
 		default:
 		{

@@ -107,7 +107,7 @@ GMenuItem *GSubMenu::ItemAt(int Id)
 
 GMenuItem *GSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where, const char *Shortcut)
 {
-	GMenuItem *i = new GMenuItem(Menu, this, Str, Where, Shortcut);
+	GMenuItem *i = new GMenuItem(Menu, this, Str, Id, Where, Shortcut);
 	if (i)
 	{
 		if (Info)
@@ -487,7 +487,7 @@ GMenuItem::GMenuItem()
 	_Flags = 0;
 }
 
-GMenuItem::GMenuItem(GMenu *m, GSubMenu *p, const char *Str, int Pos, const char *Shortcut)
+GMenuItem::GMenuItem(GMenu *m, GSubMenu *p, const char *Str, int Id, int Pos, const char *Shortcut)
 {
 	d = new GMenuItemPrivate();
 	GBase::Name(Str);
@@ -496,7 +496,7 @@ GMenuItem::GMenuItem(GMenu *m, GSubMenu *p, const char *Str, int Pos, const char
 	Info = NULL;
 	Child = NULL;
 	_Icon = -1;
-	_Id = 0;
+	_Id = Id;
 	_Flags = 0;
 	d->Shortcut.Reset(NewStr(Shortcut));
 	Name(Str);

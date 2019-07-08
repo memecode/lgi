@@ -176,6 +176,7 @@
 		34D2CCAC08F1183F0009968C /* GWindow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D2CCAB08F1183F0009968C /* GWindow.cpp */; };
 		34D2CCED08F11BEF0009968C /* GWidgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D2CCEC08F11BEF0009968C /* GWidgets.cpp */; };
 		34D4D55B1250AF98000DA1FD /* GHashTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D4D55A1250AF98000DA1FD /* GHashTable.h */; };
+		34D6AA1322D37237005D739E /* GSubProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D6AA1222D37237005D739E /* GSubProcess.cpp */; };
 		34D979D11150F0E100CE462B /* GLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D979D01150F0E100CE462B /* GLayout.cpp */; };
 		34DA5CB70DE0DE930050C7E4 /* GScrollBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34DA5CB60DE0DE930050C7E4 /* GScrollBar.cpp */; };
 		34DE4D381B945D980061E722 /* LStringLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 34DE4D371B945D980061E722 /* LStringLayout.h */; };
@@ -363,6 +364,7 @@
 		34D2CCAB08F1183F0009968C /* GWindow.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GWindow.cpp; path = Lgi/GWindow.cpp; sourceTree = "<group>"; };
 		34D2CCEC08F11BEF0009968C /* GWidgets.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GWidgets.cpp; path = Lgi/GWidgets.cpp; sourceTree = "<group>"; };
 		34D4D55A1250AF98000DA1FD /* GHashTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GHashTable.h; path = ../../../include/common/GHashTable.h; sourceTree = "<group>"; };
+		34D6AA1222D37237005D739E /* GSubProcess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GSubProcess.cpp; path = ../../common/Lgi/GSubProcess.cpp; sourceTree = "<group>"; };
 		34D979D01150F0E100CE462B /* GLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLayout.cpp; path = ../../common/Lgi/GLayout.cpp; sourceTree = "<group>"; };
 		34DA5CB60DE0DE930050C7E4 /* GScrollBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GScrollBar.cpp; path = ../../common/Widgets/GScrollBar.cpp; sourceTree = "<group>"; };
 		34DE4D371B945D980061E722 /* LStringLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LStringLayout.h; path = ../../../include/common/LStringLayout.h; sourceTree = "<group>"; };
@@ -580,6 +582,7 @@
 		344AF39F08E0489D004ED88C /* Process */ = {
 			isa = PBXGroup;
 			children = (
+				34D6AA1222D37237005D739E /* GSubProcess.cpp */,
 			);
 			name = Process;
 			sourceTree = "<group>";
@@ -1096,6 +1099,7 @@
 				34983C2608F548DF0054868C /* GFindReplace.cpp in Sources */,
 				34983C2708F548DF0054868C /* GInput.cpp in Sources */,
 				34983C2808F548DF0054868C /* GMru.cpp in Sources */,
+				34D6AA1322D37237005D739E /* GSubProcess.cpp in Sources */,
 				34983C2908F548DF0054868C /* GTrayIcon.cpp in Sources */,
 				34983C2A08F548DF0054868C /* LgiRand.cpp in Sources */,
 				34983C2E08F5492E0054868C /* GPassword.cpp in Sources */,

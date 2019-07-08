@@ -115,9 +115,9 @@
 		345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeProjectSettings.cpp; path = ../Code/IdeProjectSettings.cpp; sourceTree = "<group>"; };
 		345B20FF217969700079E3C9 /* MissingFiles.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MissingFiles.cpp; path = ../Code/MissingFiles.cpp; sourceTree = "<group>"; };
 		345B2100217969700079E3C9 /* ParserCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ParserCommon.h; path = ../Code/ParserCommon.h; sourceTree = "<group>"; };
-		345B211B217969D30079E3C9 /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../../Resources/mac-icon.icns"; sourceTree = "<group>"; };
-		345B211C217969D30079E3C9 /* LgiIde.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = LgiIde.lr8; path = ../../Resources/LgiIde.lr8; sourceTree = "<group>"; };
-		345B211D217969D30079E3C9 /* icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icons.png; path = ../../Resources/icons.png; sourceTree = "<group>"; };
+		345B211B217969D30079E3C9 /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../Resources/mac-icon.icns"; sourceTree = "<group>"; };
+		345B211C217969D30079E3C9 /* LgiIde.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file; name = LgiIde.lr8; path = ../Resources/LgiIde.lr8; sourceTree = "<group>"; };
+		345B211D217969D30079E3C9 /* icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icons.png; path = ../Resources/icons.png; sourceTree = "<group>"; };
 		34D21CD721797815003D1EA6 /* GExeCheck.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GExeCheck.cpp; path = ../../src/common/General/GExeCheck.cpp; sourceTree = "<group>"; };
 		34D21CD921797833003D1EA6 /* GLexCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLexCpp.cpp; path = ../../src/common/Coding/GLexCpp.cpp; sourceTree = "<group>"; };
 		34D21CDB21797856003D1EA6 /* GOptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GOptionsFile.cpp; path = ../../src/common/Lgi/GOptionsFile.cpp; sourceTree = "<group>"; };

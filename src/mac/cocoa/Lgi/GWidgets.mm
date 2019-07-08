@@ -154,7 +154,7 @@ extern GButton *FindDefault(GView *w);
 
 GMessage::Result GDialog::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 		case M_CLOSE:
 		{
@@ -191,7 +191,7 @@ GControl::~GControl()
 
 GMessage::Result GControl::OnEvent(GMessage *Msg)
 {
-	switch (MsgCode(Msg))
+	switch (Msg->Msg())
 	{
 	}
 	return 0;

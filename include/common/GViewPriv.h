@@ -174,7 +174,8 @@ public:
 	#endif
 
 	#if defined(MAC)
-		#ifdef COCOA
+		#ifdef LGI_COCOA
+		GString ClassName;
 		#elif defined LGI_CARBON
 		EventHandlerRef DndHandler;
 		GAutoString AcceptedDropFormat;

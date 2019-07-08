@@ -2084,8 +2084,8 @@ bool GView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 	#else
 		if (_View)
 			return LgiPostEvent(_View, Cmd, a, b);
-		else
-			LgiAssert(0);
+		LgiAssert(0);
+		return false;
 	#endif
 }
 
@@ -2529,7 +2529,7 @@ void GView::Debug()
 		#endif
     }
 	*/
-    #elif defined COCOA
+    #elif defined LGI_COCOA
     d->ClassName = GetClass();
 	#endif
 }

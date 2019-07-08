@@ -384,7 +384,7 @@ OSErr FinderLaunch(long nTargets, FSRef *targetList)
 	return err;
 }
 
-GAutoString LgiErrorCodeToString(uint32 ErrorCode)
+GString LErrorCodeToString(uint32 ErrorCode)
 {
 	const char *e = strerror(ErrorCode);
 	static char tmp[32];
@@ -394,10 +394,10 @@ GAutoString LgiErrorCodeToString(uint32 ErrorCode)
 		e = tmp;
 	}
 	
-	return GAutoString(NewStr(e));
+	return e;
 }
 
-bool LgiExecute(const char *File, const char *Args, const char *Dir, GAutoString *ErrorMsg)
+bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *ErrorMsg)
 {
 	bool Status = false;
 	

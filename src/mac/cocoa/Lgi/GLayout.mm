@@ -634,7 +634,7 @@ GMessage::Result GLayout::OnEvent(GMessage *Msg)
 
 	GMessage::Result Status = GView::OnEvent(Msg);
 
-	if (MsgCode(Msg) == M_CHANGE &&
+	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&
 		GetParent())
 	{

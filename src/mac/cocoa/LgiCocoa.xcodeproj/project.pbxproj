@@ -129,6 +129,7 @@
 		34A3ACEA20568D9700B1D62A /* GMenuCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE920568D9700B1D62A /* GMenuCommon.cpp */; };
 		34D1B3C121748A2800BC6B58 /* GPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D1B3C021748A2800BC6B58 /* GPath.cpp */; };
 		34D21CEC217981AE003D1EA6 /* GEventTargetThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D21CEB217981AE003D1EA6 /* GEventTargetThread.h */; };
+		34D6AA1722D3749A005D739E /* Gdc2.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D6AA1622D3749A005D739E /* Gdc2.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -257,6 +258,7 @@
 		34A3ACE920568D9700B1D62A /* GMenuCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GMenuCommon.cpp; path = ../../../common/Lgi/GMenuCommon.cpp; sourceTree = "<group>"; };
 		34D1B3C021748A2800BC6B58 /* GPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GPath.cpp; path = ../../../common/Gdc2/Path/GPath.cpp; sourceTree = "<group>"; };
 		34D21CEB217981AE003D1EA6 /* GEventTargetThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GEventTargetThread.h; path = ../../../../include/common/GEventTargetThread.h; sourceTree = "<group>"; };
+		34D6AA1622D3749A005D739E /* Gdc2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Gdc2.h; path = ../../../../include/common/Gdc2.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -343,6 +345,7 @@
 		3477C28A1CBF08760028B84B /* Graphics */ = {
 			isa = PBXGroup;
 			children = (
+				34D6AA1622D3749A005D739E /* Gdc2.h */,
 				34D1B3C021748A2800BC6B58 /* GPath.cpp */,
 				3477C3211CC04DA00028B84B /* GColour.cpp */,
 				3477C2BA1CBF97C80028B84B /* GdcCommon.cpp */,
@@ -598,6 +601,7 @@
 				3477C5171CC303B70028B84B /* LgiClass.h in Headers */,
 				3477C2AA1CBF22A00028B84B /* GFile.h in Headers */,
 				3477C2A21CBF0A920028B84B /* GSymLookup.h in Headers */,
+				34D6AA1722D3749A005D739E /* Gdc2.h in Headers */,
 				3477C2A41CBF0A920028B84B /* LgiOs.h in Headers */,
 				3477C26C1CBF020F0028B84B /* LgiProject.h in Headers */,
 				345921011F25649000098DFD /* GFontSelect.h in Headers */,
