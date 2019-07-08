@@ -194,9 +194,6 @@
     <ClCompile Include="src\win32\General\ShowFileProp_Win.cpp">
       <Filter>Source Files\Core\File</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\GProcess.cpp">
-      <Filter>Source Files\Core\Process</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Skins\Gel\Gel.cpp">
       <Filter>Source Files\Core\Skin</Filter>
     </ClCompile>
@@ -488,6 +485,9 @@
     <ClCompile Include="src\common\Text\LUnicodeString.cpp">
       <Filter>Source Files\Text</Filter>
     </ClCompile>
+    <ClCompile Include="src\common\Lgi\GSubProcess.cpp">
+      <Filter>Source Files\Core\Process</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\common\GLibrary.h">
@@ -540,9 +540,6 @@
     </ClInclude>
     <ClInclude Include="include\common\GFile.h">
       <Filter>Source Files\Core\File</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GProcess.h">
-      <Filter>Source Files\Core\Process</Filter>
     </ClInclude>
     <ClInclude Include="include\common\GImageList.h">
       <Filter>Source Files\Widgets</Filter>
@@ -747,6 +744,9 @@
     </ClInclude>
     <ClInclude Include="include\common\LUnrolledList.h">
       <Filter>Source Files\Core\Memory Subsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="include\common\GSubProcess.h">
+      <Filter>Source Files\Core\Process</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

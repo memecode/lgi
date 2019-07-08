@@ -6320,9 +6320,9 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 	int Px, Py;
 	pDC->GetOrigin(Px, Py);
 	
+	#if 0
 	if (Debug)
 	{
-		#if 0
 		Gtk::cairo_matrix_t mx;
 		Gtk::cairo_get_matrix(pDC->Handle(), &mx);
 		GdcPt2 Offset;
@@ -6335,8 +6335,8 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 			Px, Py,
 			Pos.x, Pos.y,
 			cli.GetStr());
-		#endif
 	}
+	#endif
 
 	switch (TagId)
 	{

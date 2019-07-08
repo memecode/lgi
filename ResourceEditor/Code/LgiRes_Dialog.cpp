@@ -911,7 +911,7 @@ GRect &CtrlDlg::GetClient(bool InClientSpace)
 	return r;
 }
 
-void CtrlDlg::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
+void CtrlDlg::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 {
 	Client = GetClient(false);
 
@@ -3435,7 +3435,7 @@ void ResDialog::DrawSelection(GSurface *pDC)
 
 #define USE_MEM_DC		1
 
-void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
+void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 {
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	GAutoPtr<GSurface> ScreenDC;

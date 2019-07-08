@@ -463,8 +463,8 @@
     <ClCompile Include="src\common\Lgi\GMru.cpp" />
     <ClCompile Include="src\common\Lgi\GObject.cpp" />
     <ClCompile Include="src\common\Lgi\GOptionsFile.cpp" />
-    <ClCompile Include="src\common\Lgi\GProcess.cpp" />
     <ClCompile Include="src\common\Lgi\GStream.cpp" />
+    <ClCompile Include="src\common\Lgi\GSubProcess.cpp" />
     <ClCompile Include="src\common\Lgi\GToolTip.cpp" />
     <ClCompile Include="src\common\Lgi\GTrayIcon.cpp" />
     <ClCompile Include="src\common\Lgi\GVariant.cpp" />
@@ -613,7 +613,6 @@
     <ClInclude Include="include\common\GPixelRops.h" />
     <ClInclude Include="include\common\GPoint.h" />
     <ClInclude Include="include\common\GPopup.h" />
-    <ClInclude Include="include\common\GProcess.h" />
     <ClInclude Include="include\common\GProgress.h" />
     <ClInclude Include="include\common\GRadioGroup.h" />
     <ClInclude Include="include\common\GRect.h" />
@@ -621,6 +620,7 @@
     <ClInclude Include="include\common\GScrollBar.h" />
     <ClInclude Include="include\common\GStream.h" />
     <ClInclude Include="include\common\GString.h" />
+    <ClInclude Include="include\common\GSubProcess.h" />
     <ClInclude Include="include\common\GTableLayout.h" />
     <ClInclude Include="include\common\GTabView.h" />
     <ClInclude Include="include\common\GTextLabel.h" />

@@ -164,9 +164,6 @@
     <ClCompile Include="Code\GDebugger.cpp">
       <Filter>Source Files\Debugger</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Lgi\GSubProcess.cpp">
-      <Filter>Source Files\Debugger</Filter>
-    </ClCompile>
     <ClCompile Include="Code\AddFtpFile.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>

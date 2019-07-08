@@ -16,9 +16,6 @@
     <ClCompile Include="..\src\common\Lgi\LgiMain.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Lgi\GSubProcess.cpp">
-      <Filter>Source Files\Lgi</Filter>
-    </ClCompile>
     <ClCompile Include="Src\VcCommit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

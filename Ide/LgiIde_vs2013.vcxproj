@@ -221,7 +221,6 @@
     <ClCompile Include="..\src\common\INet\OpenSSLSocket.cpp" />
     <ClCompile Include="..\src\common\Lgi\GAbout.cpp" />
     <ClCompile Include="..\src\common\Lgi\GMdi.cpp" />
-    <ClCompile Include="..\src\common\Lgi\GSubProcess.cpp" />
     <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
     <ClCompile Include="Code\AddFtpFile.cpp" />
     <ClCompile Include="Code\DocEdit.cpp" />
