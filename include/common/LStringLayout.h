@@ -64,7 +64,7 @@ class LStringLayout
 protected:
 	GFontCache *FontCache;
 
-	// Min and max bounds
+	// Min and max bounds (in pixels)
 	GdcPt2 Min, Max;
 	int MinLines;
 	

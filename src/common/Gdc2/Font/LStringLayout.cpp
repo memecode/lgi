@@ -495,9 +495,12 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 	Prof.Add("Post");
 	#endif
 
+	Min.x = (Min.x + GDisplayString::FScale - 1) >> GDisplayString::FShift;
 	Min.y = LineHeight * MinLines;
 	if (Min.y < MinYSize)
 		Min.y = MinYSize;
+
+	Max.x = (Max.x + GDisplayString::FScale - 1) >> GDisplayString::FShift;
 	Max.y = y + LineHeight;
 	if (Max.y < MinYSize)
 		Max.y = MinYSize;

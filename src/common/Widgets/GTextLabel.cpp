@@ -59,7 +59,7 @@ GTextLabel::GTextLabel(int id, int x, int y, int cx, int cy, const char *name) :
 	if (name)
 		Name(name);
 
-	if (cx < 0) cx = d->GetMax().x >> GDisplayString::FShift;
+	if (cx < 0) cx = d->GetMax().x;
 	if (cy < 0) cy = d->GetMax().y;
 
 	GRect r(x, y, x+cx, y+cy);
@@ -118,8 +118,8 @@ bool GTextLabel::Name(const char *n)
 
 		d->Empty();
 		d->Add(n, GetCss());
-		int Wid = X();
-		d->Layout(GetFont(), Wid ? Wid : GdcD->X());
+		int x = X();
+		d->Layout(GetFont(), x ? x : GdcD->X());
 
 		Invalidate();
 		SendNotify(GNotifyTableLayout_Refresh);
@@ -149,7 +149,8 @@ bool GTextLabel::NameW(const char16 *n)
 
 		d->Empty();
 		d->Add(GView::Name(), GetCss());
-		d->Layout(GetFont(), X());
+		int x = X();
+		d->Layout(GetFont(), x ? x : GdcD->X());
 
 		Invalidate();
 		SendNotify(GNotifyTableLayout_Refresh);
