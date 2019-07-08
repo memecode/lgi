@@ -23,6 +23,10 @@
 	#define CornerOffset 0
 	typedef os::Rect OsRect;
 
+#elif defined __GTK_H__
+
+	typedef Gtk::GdkRectangle OsRect;
+
 #elif defined MAC
 
 	#define CornerOffset 1
@@ -169,6 +173,11 @@ public:
 	/// Returns how near a point is to a rectangle
 	int Near(GRect &r);
 
+	GRect ZeroTranslate()
+	{
+		return GRect(0, 0, X()-1, Y()-1);
+	}
+
 	#ifdef COCOA
 
 		operator OsRect()
@@ -200,7 +209,7 @@ public:
 			y2 = y1 + r.size.height - 1;
 		}
 	
-	#else
+	#elif !defined(__GTK_H__)
 	
 	/// Returns an operating system specific rectangle
 		operator OsRect()
@@ -274,6 +283,23 @@ public:
 	    r.width = X();
 	    r.height = Y();
 	    return r;
+	}
+
+	GRect &operator =(const Gtk::GdkRectangle r)
+	{
+		x1 = r.x;
+		y1 = r.y;
+		x2 = x1 + r.width - 1;
+		y2 = y1 + r.height - 1;
+		return *this;
+	}
+
+	GRect(const Gtk::GtkAllocation &a)
+	{
+		x1 = a.x;
+		y1 = a.y;
+		x2 = a.x + a.width - 1;
+		y2 = a.y + a.height - 1;
 	}
 	#endif
 	

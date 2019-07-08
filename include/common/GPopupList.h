@@ -108,12 +108,12 @@ public:
 				p.x += x;
 				p.y += y;
 				
-				Gtk::gtk_widget_translate_coordinates(	Edit->Handle(),
-														Gtk::gtk_widget_get_toplevel(Edit->Handle()),
-														0, 0,
-														&x, &y);
-				p.x += x;
-				p.y += y;
+				for (GViewI *i = Edit; i && i != (GViewI*)w; i = i->GetParent())
+				{
+					auto pos = i->GetPos();
+					p.x += pos.x1;
+					p.y += pos.y1;
+				}
 
 				GRect *Decor = w->GetDecorSize();
 				if (Decor)

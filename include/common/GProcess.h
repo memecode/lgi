@@ -4,10 +4,10 @@
 
 #include "GStream.h"
 
-LgiFunc bool LgiIsProcess(OsProcessId Pid);
+extern bool LgiIsProcess(OsProcessId Pid);
 
 /// A process wrapper class
-class LgiClass GProcess
+class GProcess
 {
 	class GProcessPrivate *d;
 

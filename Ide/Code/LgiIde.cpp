@@ -8,7 +8,6 @@
 #include "GToken.h"
 #include "GXmlTree.h"
 #include "GPanel.h"
-#include "GProcess.h"
 #include "GButton.h"
 #include "GTabView.h"
 #include "FtpThread.h"
@@ -285,9 +284,11 @@ public:
 			char Args[256];
 			sprintf(Args, "-d %s", File);
 			
-			GProcess p;
-			if (p.Run("readelf", Args, 0, true, 0, &Out))
+			GSubProcess p("readelf", Args);
+			if (p.Start())
 			{
+				p.Communicate(&Out);
+
 				char *o = Out.NewStr();
 				// LgiTrace("o=%s\n", o);
 				if (o)
@@ -1061,6 +1062,7 @@ public:
 		App = a;
 		HBox = VBox = NULL;
 		Tree = 0;
+		Mdi = NULL;
 		DbgContext = NULL;
 		Output = 0;
 		Debugging = false;
@@ -1081,7 +1083,8 @@ public:
 	{
 		FindSym.Reset();
 		Finder.Reset();
-		Output->Save();
+		if (Output)
+			Output->Save();
 		App->SerializeState(&Options, "WndPos", false);
 		SerializeStringList("RecentFiles", &RecentFiles, true);
 		SerializeStringList("RecentProjects", &RecentProjects, true);
@@ -1582,6 +1585,7 @@ Chk;
 			}
 		}
 
+		#if 1
 Chk;
 		GToolBar *Tools;
 		if (GdcD->Y() > 1200)
@@ -1623,7 +1627,9 @@ Chk;
 			Tools->Attach(this);
 		}
 		else LgiTrace("%s:%i - No tools obj?", _FL);
-		
+		#endif
+
+		#if 1
 Chk;
 		GVariant v = 270, OutPx = 250;
 		d->Options.GetValue(OPT_SPLIT_PX, v);
@@ -1654,9 +1660,11 @@ Chk;
 		GRect c = GetClient();
 		if (c.Y() > OutPx.CastInt32())
 		{
-			GCss::Len y(GCss::LenPx, (float)OutPx.CastDouble());
+			auto Px = OutPx.CastInt32();
+			GCss::Len y(GCss::LenPx, (float)MAX(Px, 120));
 			d->Output->GetCss(true)->Height(y);
 		}
+		#endif
 
 		AttachChildren();
 		OnPosChange();
@@ -1685,7 +1693,8 @@ Chk;
 	#endif
 	
 	#if USE_HAIKU_PULSE_HACK
-	d->Output->SetPulse(1000);
+	if (d->Output)
+		d->Output->SetPulse(1000);
 	#endif
 Chk;
 }
@@ -2413,7 +2422,7 @@ IdeDoc *AppWnd::NewDocWnd(const char *FileName, NodeSource *Src)
 		d->Docs.Insert(Doc);
 
 		GRect p = d->Mdi->NewPos();
-		Doc->SetPos(p);
+		Doc->GView::SetPos(p);
 		Doc->Attach(d->Mdi);
 		Doc->Focus(true);
 		Doc->Raise();
@@ -2550,7 +2559,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 		if (Doc)
 		{
 			GRect p = d->Mdi->NewPos();
-			Doc->SetPos(p);
+			Doc->GView::SetPos(p);
 			d->Docs.Insert(Doc);
 			d->OnFile(File);
 		}
@@ -3192,10 +3201,10 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		{
 			IdeDoc *Doc;
 			d->Docs.Insert(Doc = new IdeDoc(this, 0, 0));
-			if (Doc)
+			if (Doc && d->Mdi)
 			{
 				GRect p = d->Mdi->NewPos();
-				Doc->SetPos(p);
+				Doc->GView::SetPos(p);
 				Doc->Attach(d->Mdi);
 				Doc->Focus(true);
 			}
@@ -3789,6 +3798,32 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				Doc->EscapeSelection(false);
 			break;
 		}
+		case IDM_SPLIT:
+		{
+			IdeDoc *Doc = FocusDoc();
+			if (!Doc)
+				break;
+
+			GInput i(this, "", "Separator:", AppName);
+			if (!i.DoModal())
+				break;
+				
+			Doc->SplitSelection(i.GetStr());
+			break;
+		}
+		case IDM_JOIN:
+		{
+			IdeDoc *Doc = FocusDoc();
+			if (!Doc)
+				break;
+
+			GInput i(this, "", "Separator:", AppName);
+			if (!i.DoModal())
+				break;
+				
+			Doc->JoinSelection(i.GetStr());
+			break;
+		}
 		case IDM_EOL_LF:
 		{
 			IdeDoc *Doc = FocusDoc();
@@ -3876,7 +3911,7 @@ GTree *AppWnd::GetTree()
 
 IdeDoc *AppWnd::TopDoc()
 {
-	return dynamic_cast<IdeDoc*>(d->Mdi->GetTop());
+	return d->Mdi ? dynamic_cast<IdeDoc*>(d->Mdi->GetTop()) : NULL;
 }
 
 GTextView3 *AppWnd::FocusEdit()
@@ -4070,69 +4105,12 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 	return true;
 }
 
-/*
-#include "GSubProcess.h"
-void Test()
-{
-	GDirectory d;
-	for (int b = d.First("C:\\Users\\matthew\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Cache"); b; b = d.Next())
-	{
-		if (!d.IsDir())
-		{
-			char p[MAX_PATH];
-			d.Path(p, sizeof(p));
-			
-			GFile f;
-			if (f.Open(p, O_READ))
-			{
-				char Buf[256];
-				ssize_t Rd = f.Read(Buf, sizeof(Buf));
-				if (Rd > 3 && !strnicmp(Buf, "Ogg", 3))
-				{
-					char out[MAX_PATH];
-					f.Close();
-					LgiMakePath(out, sizeof(out), "C:\\Users\\matthew\\Desktop\\new day", d.GetName());
-					strcat(out, ".ogg");
-					if (!FileDev->Copy(p, out))
-					{
-						LgiTrace("%s:%i - Failed to copy '%s'\n", _FL, d.GetName());
-					}
-				}
-				else
-				{
-					LgiTrace("%s:%i - Not an ogg '%s'\n", _FL, d.GetName());
-				}
-			}
-			else
-			{
-				LgiTrace("%s:%i - Can't open '%s'\n", _FL, d.GetName());
-			}
-		}
-	}
-}
-*/
-
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);
 	GApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
-		/*
-		GString mt = LGetAppForProtocol("mailto");
-		GString https = LGetAppForProtocol("https");
-		printf("%s\n%s\n", mt.Get(), https.Get());
-
-		GArray<GSocket::Interface> Out;
-		if (GSocket::EnumInterfaces(Out))
-		{
-			for (auto &i : Out)
-			{
-				printf("%s %s %s\n", i.Name.Get(), i.ToString().Get(), i.ToString(i.Netmask4).Get());
-			}
-		}
-		*/
-
 		a.AppWnd = new AppWnd;
 		a.Run();
 	}

@@ -52,17 +52,12 @@ bool GPrinter::Browse(GView *Parent)
 	return false;
 }
 
-bool GPrinter::Serialize(char *&Str, bool Write)
+bool GPrinter::Serialize(::GString &Str, bool Write)
 {
 	if (Write)
-	{
-		Str = NewStr(d->Printer);
-	}
+		Str = d->Printer;
 	else
-	{
 		d->Printer = Str;
-		DeleteArray(Str);
-	}
 
 	return true;
 }
@@ -135,7 +130,7 @@ bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages /
 	{
 		GWindow *w = Parent->GetWindow();
 		if (w)
-			Wnd = GTK_WINDOW(w->Handle());
+			Wnd = w->WindowHandle();
 	}
 	
 	d->Events = Events;

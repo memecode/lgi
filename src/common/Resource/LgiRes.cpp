@@ -393,7 +393,7 @@ LgiTrace("%s:%i - FullPath='%s'\n", _FL, FullPath);
 				Exe);
 
 		// Dialog
-		printf("%s", Msg);
+		printf("%s\n", Msg);
 		if (Warn)
 		{
 			LgiMsg(0, Msg, "LgiResources::LgiResources");
@@ -1473,6 +1473,7 @@ bool GMenuLoader::Load(LgiMenuRes *MenuRes, GXmlTag *Tag, ResFileFormat Format, 
 	#endif
 	{
 		Status = true;
+		
 		for (auto t: Tag->Children)
 		{
 			if (!Status)

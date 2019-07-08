@@ -9,7 +9,7 @@
 #include <ctype.h>
 
 #include "Lgi.h"
-#include "GProcess.h"
+#include "GSubProcess.h"
 #include "GSkinEngine.h"
 #include "GArray.h"
 #include "GVariant.h"

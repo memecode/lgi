@@ -116,7 +116,6 @@ GViewPrivate::GViewPrivate()
 	ParentI = 0;
 	Notify = 0;
 	CtrlId = -1;
-	DropTarget = 0;
 	Font = 0;
 	FontOwnType = GV_FontPtr;
 	Popup = 0;
@@ -126,6 +125,9 @@ GViewPrivate::GViewPrivate()
 	GotOnCreate = false;
 	WantsFocus = false;
 	SinkHnd = -1;
+
+	DropTarget = NULL;
+	DropSource = NULL;
 }
 
 GViewPrivate::~GViewPrivate()
@@ -140,13 +142,21 @@ void GView::OnGtkRealize()
 	{
 		d->GotOnCreate = true;
 		
-		if (d->WantsFocus && _View)
+		if (d->WantsFocus)
 		{
 			d->WantsFocus = false;
-			gtk_widget_grab_focus(_View);
+			if (GetWindow())
+				GetWindow()->SetFocus(this, GWindow::GainFocus);
 		}
 		
 		OnCreate();
+	}
+
+	for (auto c : Children)
+	{
+		auto gv = c->GetGView();
+		if (gv)
+			gv->OnGtkRealize();
 	}
 }
 
@@ -164,11 +174,9 @@ void GView::_Focus(bool f)
 
 	if (f)
 	{
-		if (_View)
-		{
-			// printf("%s:%i - grabbing focus on %s.%p\n", _FL, GetClass(), _View);
-			gtk_widget_grab_focus(_View);
-		}
+		auto w = GetWindow();
+		if (w && w->_Root)
+			gtk_widget_grab_focus(w->_Root);
 		else
 			d->WantsFocus = f;
 	}
@@ -199,7 +207,7 @@ void GView::_Delete()
 
 	// Heirarchy
 	GViewI *c;
-	while (c = Children[0])
+	while ((c = Children[0]))
 	{
 		if (c->GetParent() != (GViewI*)this)
 		{
@@ -212,7 +220,6 @@ void GView::_Delete()
 	}
 
 	Detach();
-	LgiAssert(_View == NULL);
 }
 
 GView *&GView::PopupChild()
@@ -312,28 +319,25 @@ void LgiToGtkCursor(GViewI *v, LgiCursor c)
 		*/
 	}
 	
-	GWindow *Wnd = v->GetWindow();
-	OsView h = Wnd ? Wnd->Handle() : v->Handle();
+	OsView h = NULL;
+	GWindow *w = v->GetWindow();
+	if (w)
+		h = GTK_WIDGET(w->WindowHandle());
 	
 	LgiAssert(v->InThread());
-	LgiAssert(h->window);
-	if (type == GDK_ARROW)
+	auto wnd = gtk_widget_get_window(h);
+	// LgiAssert(wnd);
+	if (wnd)
 	{
-		gdk_window_set_cursor(h->window, NULL);
-		// printf("gdk_window_set_cursor(%s, NULL)\n", v->GetClass());
-	}
-	else
-	{
-		GdkCursor *cursor = gdk_cursor_new_for_display(gdk_display_get_default(), type);
-		if (cursor)
-		{
-			gdk_window_set_cursor(h->window, cursor);
-			// printf("gdk_window_set_cursor(%s, cursor)\n", v->GetClass());
-		}
+		if (type == GDK_ARROW)
+			gdk_window_set_cursor(wnd, NULL);
 		else
 		{
-			gdk_window_set_cursor(h->window, NULL);
-			// printf("gdk_window_set_cursor(%s, gdk_cursor_new_for_display fail)\n", v->GetClass());
+			GdkCursor *cursor = gdk_cursor_new_for_display(gdk_display_get_default(), type);
+			if (cursor)
+				gdk_window_set_cursor(wnd, cursor);
+			else
+				gdk_window_set_cursor(wnd, NULL);
 		}
 	}
 }
@@ -363,13 +367,15 @@ bool GView::_Mouse(GMouse &m, bool Move)
 	#endif
 
 	#if DEBUG_MOUSE_EVENTS
-	LgiTrace("%s:%i - _Mouse([%i,%i], %i)\n", _FL, m.x, m.y, Move);
+	// LgiTrace("%s:%i - _Mouse([%i,%i], %i)\n", _FL, m.x, m.y, Move);
 	#endif
 
 	if
 	(
+		/*
 		!_View
 		||
+		*/
 		(
 			GetWindow()
 			&&
@@ -385,7 +391,7 @@ bool GView::_Mouse(GMouse &m, bool Move)
 
 	GViewI *cap = _Capturing;
 	#if DEBUG_MOUSE_EVENTS
-	LgiTrace("%s:%i - _Capturing=%p/%s\n", _FL, _Capturing, _Capturing ? _Capturing->GetClass() : NULL);
+	// LgiTrace("%s:%i - _Capturing=%p/%s\n", _FL, _Capturing, _Capturing ? _Capturing->GetClass() : NULL);
 	#endif
 	if (_Capturing)
 	{
@@ -408,10 +414,15 @@ bool GView::_Mouse(GMouse &m, bool Move)
 		if (Move)
 		{
 			bool Change = false;
+			#if 1
+			auto *o = m.Target;
+			#else
 			GViewI *o = WindowFromPoint(m.x, m.y);
+			#endif
 			if (_Over != o)
 			{
 				#if DEBUG_MOUSE_EVENTS
+				// if (!o) WindowFromPoint(m.x, m.y, true);
 				LgiTrace("%s:%i - _Over changing from %p/%s to %p/%s\n", _FL,
 						_Over, _Over ? _Over->GetClass() : NULL,
 						o, o ? o->GetClass() : NULL);
@@ -461,12 +472,67 @@ bool GView::_Mouse(GMouse &m, bool Move)
 	return true;
 }
 
+const char *EventTypeToString(int i)
+{
+	switch (i)
+	{
+		case GDK_DELETE: return "GDK_DELETE";
+		case GDK_DESTROY: return "GDK_DESTROY";
+		case GDK_EXPOSE: return "GDK_EXPOSE";
+		case GDK_MOTION_NOTIFY: return "GDK_MOTION_NOTIFY";
+		case GDK_BUTTON_PRESS: return "GDK_BUTTON_PRESS";
+		case GDK_2BUTTON_PRESS: return "GDK_2BUTTON_PRESS";
+		case GDK_3BUTTON_PRESS: return "GDK_3BUTTON_PRESS";
+		case GDK_BUTTON_RELEASE: return "GDK_BUTTON_RELEASE";
+		case GDK_KEY_PRESS: return "GDK_KEY_PRESS";
+		case GDK_KEY_RELEASE: return "GDK_KEY_RELEASE";
+		case GDK_ENTER_NOTIFY: return "GDK_ENTER_NOTIFY";
+		case GDK_LEAVE_NOTIFY: return "GDK_LEAVE_NOTIFY";
+		case GDK_FOCUS_CHANGE: return "GDK_FOCUS_CHANGE";
+		case GDK_CONFIGURE: return "GDK_CONFIGURE";
+		case GDK_MAP: return "GDK_MAP";
+		case GDK_UNMAP: return "GDK_UNMAP";
+		case GDK_PROPERTY_NOTIFY: return "GDK_PROPERTY_NOTIFY";
+		case GDK_SELECTION_CLEAR: return "GDK_SELECTION_CLEAR";
+		case GDK_SELECTION_REQUEST: return "GDK_SELECTION_REQUEST";
+		case GDK_SELECTION_NOTIFY: return "GDK_SELECTION_NOTIFY";
+		case GDK_PROXIMITY_IN: return "GDK_PROXIMITY_IN";
+		case GDK_PROXIMITY_OUT: return "GDK_PROXIMITY_OUT";
+		case GDK_DRAG_ENTER: return "GDK_DRAG_ENTER";
+		case GDK_DRAG_LEAVE: return "GDK_DRAG_LEAVE";
+		case GDK_DRAG_MOTION: return "GDK_DRAG_MOTION";
+		case GDK_DRAG_STATUS: return "GDK_DRAG_STATUS";
+		case GDK_DROP_START: return "GDK_DROP_START";
+		case GDK_DROP_FINISHED: return "GDK_DROP_FINISHED";
+		case GDK_CLIENT_EVENT: return "GDK_CLIENT_EVENT";
+		case GDK_VISIBILITY_NOTIFY: return "GDK_VISIBILITY_NOTIFY";
+		case GDK_SCROLL: return "GDK_SCROLL";
+		case GDK_WINDOW_STATE: return "GDK_WINDOW_STATE";
+		case GDK_SETTING: return "GDK_SETTING";
+		case GDK_OWNER_CHANGE: return "GDK_OWNER_CHANGE";
+		case GDK_GRAB_BROKEN: return "GDK_GRAB_BROKEN";
+		case GDK_DAMAGE: return "GDK_DAMAGE";
+		case GDK_TOUCH_BEGIN: return "GDK_TOUCH_BEGIN";
+		case GDK_TOUCH_UPDATE: return "GDK_TOUCH_UPDATE";
+		case GDK_TOUCH_END: return "GDK_TOUCH_END";
+		case GDK_TOUCH_CANCEL: return "GDK_TOUCH_CANCEL";
+		case GDK_TOUCHPAD_SWIPE: return "GDK_TOUCHPAD_SWIPE";
+		case GDK_TOUCHPAD_PINCH: return "GDK_TOUCHPAD_PINCH";
+		case GDK_PAD_BUTTON_PRESS: return "GDK_PAD_BUTTON_PRESS";
+		case GDK_PAD_BUTTON_RELEASE: return "GDK_PAD_BUTTON_RELEASE";
+		case GDK_PAD_RING: return "GDK_PAD_RING";
+		case GDK_PAD_STRIP: return "GDK_PAD_STRIP";
+		case GDK_PAD_GROUP_MODE: return "GDK_PAD_GROUP_MODE";
+	}
+	return "#error";
+}
+
 gboolean GtkViewCallback(GtkWidget *widget, GdkEvent *event, GView *This)
 {
 	#if 0
-	printf("GtkViewCallback, widget=%p, event=%p, event=%x, This=%p(%s\"%s\")\n",
-		widget, event,
-		event->type, This, (NativeInt)This > 0x1000 ? This->GetClass() : 0, (NativeInt)This > 0x1000 ? This->Name() : 0);
+	LgiTrace("GtkViewCallback, Event=%s, This=%p(%s\"%s\")\n",
+		EventTypeToString(event->type),
+		This, (NativeInt)This > 0x1000 ? This->GetClass() : 0, (NativeInt)This > 0x1000 ? This->Name() : 0);
 	#endif
 	
 	if (event->type < 0 || event->type > 1000)
@@ -517,121 +583,75 @@ void GView::Quit(bool DontDelete)
 
 bool GView::SetPos(GRect &p, bool Repaint)
 {
-	ThreadCheck();
-	
-	Pos = p;
-	if (_View)
+	if (Pos != p)
 	{
-		int o = 0;
-		
-		GView *Par = d->GetParent();
-		if (Par && (Par->Sunken() || Par->Raised()))
-		{
-			o = Par->_BorderSize;
-		}
-		
-		GtkWidget *GtkPar;
-		if (GTK_IS_WINDOW(_View))
-		{
-			gtk_window_move(GTK_WINDOW(_View), Pos.x1, Pos.y1);
-			gtk_window_resize(GTK_WINDOW(_View), Pos.X(), Pos.Y());
-		}
-		else if (GtkPar = gtk_widget_get_parent(_View))
-		{
-			if (LGI_IS_WIDGET(GtkPar))
-			{
-				lgi_widget_setsize(_View, Pos.X(), Pos.Y());
-				lgi_widget_setchildpos(	GtkPar,
-										_View,
-										Pos.x1 + o,
-										Pos.y1 + o);
-			}
-			else
-			{
-				// LgiTrace("%s:%i - Error: Can't set object position, parent is: %s\n", _FL, G_OBJECT_TYPE_NAME(GtkPar));
-			}
-		}
+		Pos = p;
+		OnPosChange();
 	}
 
-	OnPosChange();
 	return true;
 }
 
-bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
+GRect GtkGetPos(GtkWidget *w)
 {
-	if (IsAttached())
+	GtkAllocation a = {0};
+	gtk_widget_get_allocation(w, &a);
+	return a;
+}
+
+bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
+{
+	GWindow *ParWnd = GetWindow();
+	if (!ParWnd)
+		return false; // Nothing we can do till we attach
+
+	GView *ParView = ParWnd;
+
+	GRect r;
+	if (rc)
 	{
-		if (InThread() && !d->InPaint)
-		{
-			GRect Client;
-			if (Frame)
-				Client.ZOff(Pos.X()-1, Pos.Y()-1);
-			else
-				Client = GView::GetClient(false);
-
-			static bool Repainting = false;
-			
-			if (!Repainting)
-			{
-				Repainting = true;
-				GdkWindow *hnd = gtk_widget_get_window(_View);
-				if (hnd)
-				{
-					if (r)
-					{
-						GRect cr = *r;
-						cr.Offset(Client.x1, Client.y1);
-						Gtk::GdkRectangle gr = cr;
-						
-	            		gdk_window_invalidate_rect(hnd, &gr, FALSE);
-					}
-					else
-					{
-						Gtk::GdkRectangle r = {0, 0, Pos.X(), Pos.Y()};
-
-	            		gdk_window_invalidate_rect(hnd, &r, FALSE);
-					}
-				}
-				Repainting = false;
-			}
-		}
-		else
-		{
-			PostEvent(	M_INVALIDATE,
-						(GMessage::Param)(r ? new GRect(r) : NULL),
-						(GMessage::Param)(GView*)this);
-		}
-		
-		return true;
+		r = *rc;
 	}
 	else
 	{
-		GRect Up;
-		GViewI *p = this;
-
-		if (r)
-		{
-			Up = *r;
-		}
+		if (Frame)
+			r = Pos.ZeroTranslate();
 		else
-		{
-			Up.Set(0, 0, Pos.X()-1, Pos.Y()-1);
-		}
-
-		while (p && !p->IsAttached())
-		{
-			GRect pos = p->GetPos();
-			Up.Offset(pos.x1, pos.y1);
-			p = p->GetParent();
-		}
-
-		if (p && p->IsAttached())
-		{
-			return p->Invalidate(&Up, Repaint);
-		}
+			r = GetClient().ZeroTranslate();
 	}
 
-	return false;
+	if (!Frame)
+		r.Offset(_BorderSize, _BorderSize);
+
+	GdcPt2 Offset;
+	WindowVirtualOffset(&Offset);
+	r.Offset(Offset.x, Offset.y);
+
+	static bool Repainting = false;
+	if (!Repainting)
+	{
+		Repainting = true;
+
+		GtkWidget *w = GTK_WIDGET(ParWnd->WindowHandle());
+		if (w)
+		{
+			GdkWindow *h;
+			if (gtk_widget_get_has_window(w) &&
+				(h = gtk_widget_get_window(w)))
+			{
+				GdkRectangle grc = r;
+				gdk_window_invalidate_rect(h, &grc, true);
+			}
+			else
+			{
+				gtk_widget_queue_draw(w);
+			}
+		}
+
+		Repainting = false;
+	}
+
+	return true;
 }
 
 void GView::SetPulse(int Length)
@@ -686,6 +706,34 @@ GMessage::Param GView::OnEvent(GMessage *Msg)
 	return 0;
 }
 
+GdcPt2 GtkGetOrigin(GWindow *w)
+{
+	auto Hnd = w->WindowHandle();
+	if (Hnd)
+	{
+		auto Wnd = gtk_widget_get_window(GTK_WIDGET(Hnd));
+		if (Wnd)
+		{
+			GdkRectangle rect;
+			gdk_window_get_frame_extents(Wnd, &rect);
+			return GdcPt2(rect.x, rect.y);
+			
+			/*
+			gint x = 0, y = 0;
+			gdk_window_get_origin(Wnd, &x, &y);
+			gdk_window_get_root_origin(Wnd, &x, &y);
+			return GdcPt2(x, y);
+			*/
+		}
+		else
+		{
+			LgiTrace("%s:%i - can't get Wnd for %s\n", _FL, G_OBJECT_TYPE_NAME(Hnd));
+		}
+	}
+	
+	return GdcPt2();
+}
+
 void GView::PointToScreen(GdcPt2 &p)
 {
 	ThreadCheck();
@@ -703,21 +751,9 @@ void GView::PointToScreen(GdcPt2 &p)
 	
 	if (c && c->WindowHandle())
 	{
-	    gint x = 0, y = 0;
-	    // GdkRectangle rect;
-		Gtk::GtkWindow *wnd = c->WindowHandle();
-		Gtk::GtkWidget *w = GTK_WIDGET(wnd);
-		// Gtk::GdkWindow *gdk_wnd = gtk_widget_get_window(w);
-
-		// gdk_window_get_frame_extents(gdk_wnd, &rect);
-		gdk_window_get_origin(w->window, &x, &y);
-		
-		// int DecorX = x - rect.x;
-		// int DecorY = y - rect.y;		
-		// printf("%s:%i - rect=%i,%i-%i,%i  origin=%i,%i\n", _FL, rect.x, rect.y, rect.width, rect.height, x, y);
-		
-		p.x += x;
-		p.y += y;
+	    auto Origin = GtkGetOrigin(GetWindow());
+		p.x += Origin.x;
+		p.y += Origin.y;
 	}
 	else
 	{
@@ -729,18 +765,17 @@ void GView::PointToView(GdcPt2 &p)
 {
 	ThreadCheck();
 	
-	if (_View)
+	GWindow *w = GetWindow();
+	if (w)
 	{
-		gint x = 0, y = 0;
-		gdk_window_get_origin(GetWindow()->Handle()->window, &x, &y);
-		p.x -= x;
-		p.y -= y;
+	    auto Origin = GtkGetOrigin(w);
+		p.x -= Origin.x;
+		p.y -= Origin.y;
 		
 		GViewI *w = GetWindow();
 		for (GViewI *i = this; i && i != w; i = i->GetParent())
 		{
 			GRect pos = i->GetPos();
-			const char *cls = i->GetClass();
 			p.x -= pos.x1;
 			p.y -= pos.y1;
 		}
@@ -755,12 +790,12 @@ void GView::PointToView(GdcPt2 &p)
 		int Sx = 0, Sy = 0;
 		GViewI *v;
 		// Work out the virtual offset
-		for (v = this; v && !v->Handle(); v = v->GetParent())
+		for (v = this; v && v->GetParent(); v = v->GetParent())
 		{
 			Sx += v->GetPos().x1;
 			Sy += v->GetPos().y1;
 		}
-		if (v && v->Handle())
+		if (v)
 		{
 			// Get the point relative to the first real parent
 			v->PointToView(p);
@@ -776,56 +811,63 @@ void GView::PointToView(GdcPt2 &p)
 bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 {
 	ThreadCheck();
+
+	GdkModifierType mask = (GdkModifierType)0;
+	auto display = gdk_display_get_default();
+	auto deviceManager = gdk_display_get_device_manager(display);
+	auto device = gdk_device_manager_get_client_pointer(deviceManager);
+	gdouble axes[2] = {0};
 	
-	if (_View)
+	GWindow *w = GetWindow();
+	if (w && !ScreenCoords)
 	{
-		gint x = 0, y = 0;
-		GdkModifierType mask;
-		GdkScreen *wnd_scr = gtk_window_get_screen(GTK_WINDOW(WindowHandle()));
-		GdkDisplay *wnd_dsp = wnd_scr ? gdk_screen_get_display(wnd_scr) : NULL;
-		gdk_display_get_pointer(wnd_dsp,
-								&wnd_scr,
-								&x, &y,
-								&mask);
-		if (!ScreenCoords)
-		{
-			GdcPt2 p(x, y);
-			PointToView(p);
-			m.x = p.x;
-			m.y = p.y;
-		}
-		else
-		{
-			m.x = x;
-			m.y = y;
-		}
-		m.SetModifer(mask);
-		m.Left((mask & GDK_BUTTON1_MASK) != 0);
-		m.Middle((mask & GDK_BUTTON2_MASK) != 0);
-		m.Right((mask & GDK_BUTTON3_MASK) != 0);
-		
-		return true;
+		GdkWindow *wnd = gtk_widget_get_window(GTK_WIDGET(w->WindowHandle()));
+		gdk_device_get_state(device, wnd, axes, &mask);
+
+		GdcPt2 p;
+		WindowVirtualOffset(&p);
+		m.x = (int)axes[0] - p.x - _BorderSize;
+		m.y = (int)axes[1] - p.y - _BorderSize;
 	}
-	else if (GetParent())
+	else
 	{
-		bool s = GetParent()->GetMouse(m, ScreenCoords);
-		if (s)
-		{
-			if (!ScreenCoords)
-			{
-				m.x -= Pos.x1;
-				m.y -= Pos.y1;
-			}
-			return true;
-		}
+		gdk_device_get_state(device, gdk_get_default_root_window(), axes, &mask);
+		m.x = (int)axes[0];
+		m.y = (int)axes[1];
 	}
+
+	m.SetModifer(mask);
+	m.Left((mask & GDK_BUTTON1_MASK) != 0);
+	m.Middle((mask & GDK_BUTTON2_MASK) != 0);
+	m.Right((mask & GDK_BUTTON3_MASK) != 0);
+	m.Down(m.Left() || m.Middle() || m.Right());
 	
-	return false;
+	return true;
 }
 
 bool GView::IsAttached()
 {
-	return	_View && _View->parent;
+	auto w = GetWindow();
+	if (!w)
+		return false;
+	auto p = GetParent();
+	if (!p)
+	{
+		w = dynamic_cast<GWindow*>(this);
+		if (!w)
+			return false;
+		auto hnd = w->WindowHandle();
+		if (!hnd)
+			return false;
+		return gtk_widget_get_realized(GTK_WIDGET(hnd));
+	}
+	else
+	{
+		auto gv = p->GetGView();
+		if (gv && !gv->Children.HasItem(this))
+			return false;
+	}
+	return true;
 }
 
 const char *GView::GetClass()
@@ -839,68 +881,28 @@ bool GView::Attach(GViewI *parent)
 	
 	bool Status = false;
 
-	SetParent(parent);
 	GView *Parent = d->GetParent();
+	LgiAssert(Parent == NULL || Parent == parent);
+
+	SetParent(parent);
+	Parent = d->GetParent();
 	_Window = Parent ? Parent->_Window : this;
 	
-	if (!_View)
+	if (parent)
 	{
-		_View = lgi_widget_new(this, Pos.X(), Pos.Y(), false);
-	}
-	
-	if (_View)
-	{
-		int o = 0;
-		{
-			GView *Par = d->GetParent();
-			if (Par && (Par->Sunken() || Par->Raised()))
-			{
-				o = Par->_BorderSize;
-			}
-		}
-		
-		if (parent)
-		{
-			GtkWidget *p = parent->Handle();
+		auto w = GetWindow();
+		if (w && TestFlag(WndFlags, GWF_FOCUS))
+			w->SetFocus(this, GWindow::GainFocus);
 
-			GWindow *w;
-			if (w = dynamic_cast<GWindow*>(parent))
-				p = w->_Root;
-			
-			if (p && gtk_widget_get_parent(_View) != p)
-			{
-				lgi_widget_add(GTK_CONTAINER(p), _View);
-				lgi_widget_setchildpos(p, _View, Pos.x1 + o, Pos.y1 + o);
-				
-				// printf("%s:%i - Attach %s @ %i,%i - %i,%i\n", _FL, GetClass(), Pos.x1 + o, Pos.y1 + o, Pos.X(), Pos.Y());
-			}
-		}
-
-		if (Visible())
-		{
-			gtk_widget_show(_View);
-		}
-		
-		if (DropTarget())
-		{
-			DropTarget(true);
-		}
-		
-		if (TestFlag(WndFlags, GWF_FOCUS))
-		{
-			// LgiTrace("OnCreate Focus %s\n", GetClass());
-			gtk_widget_grab_focus(_View);
-		}
-
-		OnAttach();
 		Status = true;
-	}
-
-	if (d->Parent && !d->Parent->HasView(this))
-	{
-		if (!d->Parent->HasView(this))
-			d->Parent->AddView(this);
-		d->Parent->OnChildrenChanged(this, true);
+		
+		if (!Parent->HasView(this))
+		{
+			OnAttach();
+			if (!d->Parent->HasView(this))
+				d->Parent->AddView(this);
+			d->Parent->OnChildrenChanged(this, true);
+		}
 	}
 	
 	return Status;
@@ -925,6 +927,7 @@ bool GView::Detach()
 		// Events
 		Par->DelView(this);
 		Par->OnChildrenChanged(this, false);
+		Par->Invalidate(&GetPos());
 	}
 	
 	d->Parent = 0;
@@ -937,7 +940,7 @@ bool GView::Detach()
 			int Detached = 0;
 			GViewI *c, *prev = NULL;
 
-			while (c = Children[0])
+			while ((c = Children[0]))
 			{
 				LgiAssert(!prev || c != prev);
 				if (c->GetParent())
@@ -951,36 +954,7 @@ bool GView::Detach()
 		}
 	}
 
-	if (_View)
-	{
-		LgiAssert(_View->object.parent_instance.g_type_instance.g_class);
-		LgiApp->OnDetach(this);
-		gtk_widget_destroy(_View);
-		_View = 0;
-	}
-
 	return true;
-}
-
-GViewI *GView::FindControl(OsView hCtrl)
-{
-	ThreadCheck();
-	
-	if (Handle() == hCtrl)
-	{
-		return this;
-	}
-
-	List<GViewI>::I it = Children.begin();
-	for (GViewI *c = *it; c; c = *++it)
-	{
-		GViewI *Ctrl = c->FindControl(hCtrl);
-		if (Ctrl)
-		{
-			return Ctrl;
-		}
-	}
-	return 0;
 }
 
 LgiCursor GView::GetCursor(int x, int y)
@@ -990,8 +964,6 @@ LgiCursor GView::GetCursor(int x, int y)
 
 void GView::OnGtkDelete()
 {
-	_View = NULL;
-	
 	List<GViewI>::I it = Children.begin();
 	for (GViewI *c = *it; c; c = *++it)
 	{

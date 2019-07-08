@@ -1270,7 +1270,7 @@ int DocEdit::CountRefreshEdges(size_t At, ssize_t Len)
 	for (const char **Edge = RefreshEdges; *Edge; Edge++)
 	{
 		const char *e = *Edge;
-		t[e[0]] = true;
+		t[(int)e[0]] = true;
 	}
 
 	int Edges = 0;

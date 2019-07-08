@@ -31,7 +31,7 @@ LgiFunc bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a = 0, GMessage
 LgiFunc GViewI *GetNextTabStop(GViewI *v, bool Back);
 /// Converts an OS error code into a text string
 LgiClass GString LErrorCodeToString(uint32_t ErrorCode);
-#if defined(MAC) && !defined(COCOA)
+#if defined(LGI_CARBON)
 LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
 #endif
 
@@ -184,9 +184,6 @@ public:
 
 	/// Destroys the object
 	virtual ~GApp();
-
-	/// Returns the version of Lgi used. String returned is in the form '#.#.#'
-	const char *GetLgiVersion() { return LGI_VER; }
 
 	/// Resets the arguments
 	void SetAppArgs(OsAppArguments &AppArgs);
@@ -368,9 +365,12 @@ public:
 
 		DesktopInfo *GetDesktopInfo();
 		bool SetApplicationIcon(const char *FileName);
-		bool PostEvent(GViewI *View, int Msg, GMessage::Param a = 0, GMessage::Param b = 0);
-		void OnDetach(GViewI *View);
 		
+	#endif
+
+	#ifdef __GTK_H__
+		void OnDetach(GViewI *View);
+		bool PostEvent(GViewI *View, int Msg, GMessage::Param a = 0, GMessage::Param b = 0);
 	#endif
 };
 
@@ -404,6 +404,7 @@ class LgiClass GView : virtual public GViewI, virtual public GBase
 	#if defined(__GTK_H__)
 
 		friend Gtk::gboolean lgi_widget_expose(Gtk::GtkWidget *widget, Gtk::GdkEventExpose *e);
+		friend Gtk::gboolean lgi_widget_draw(Gtk::GtkWidget *widget, Gtk::cairo_t *cr);
 		friend Gtk::gboolean lgi_widget_click(Gtk::GtkWidget *widget, Gtk::GdkEventButton *ev);
 		friend Gtk::gboolean lgi_widget_motion(Gtk::GtkWidget *widget, Gtk::GdkEventMotion *ev);
 		friend Gtk::gboolean GViewCallback(Gtk::GtkWidget *widget, Gtk::GdkEvent  *event, GView *view);
@@ -429,7 +430,7 @@ private:
 	
 		#if defined(COCOA)
 
-		#else
+		#elif defined(LGI_CARBON)
 
 			friend OSStatus LgiWindowProc(EventHandlerCallRef, EventRef, void *);
 			friend OSStatus LgiRootCtrlProc(EventHandlerCallRef, EventRef, void *);
@@ -463,7 +464,10 @@ private:
 protected:
 	class GViewPrivate	*d;
 
+	#ifndef __GTK_H__
 	OsView				_View; // OS specific handle to view object
+	#endif
+
 	GView				*_Window;
 	LMutex				*_Lock;
 	uint16				_BorderSize;
@@ -508,7 +512,7 @@ protected:
 	GWin32Class *CreateClassW32(const char *Class = 0, HICON Icon = 0, int AddStyles = 0);
 
 	virtual int		SysOnNotify(int Msg, int Code) { return 0; }
-
+	
 	#elif defined BEOS
 
 	struct OsMouseInfo;
@@ -533,7 +537,7 @@ public:
 	void OnCocoaLayout();
 	void OnCocoaDealloc();
 protected:
-	#else
+	#elif defined(LGI_CARBON)
 	OsView _CreateCustomView();
 	virtual bool _OnGetInfo(HISize &size, HISize &line, HIRect &bounds, HIPoint &origin) { return false; }
 	virtual void _OnScroll(HIPoint &origin) {}
@@ -584,7 +588,7 @@ protected:
 #ifdef LGI_SDL
 public:
 #endif
-	virtual void	_Paint(GSurface *pDC = NULL, GdcPt2 *Offset = NULL, GRegion *Update = NULL);
+	virtual void	_Paint(GSurface *pDC = NULL, GdcPt2 *Offset = NULL, GRect *Update = NULL);
 
 public:
 	/// \brief Creates a view/window.
@@ -604,7 +608,12 @@ public:
 	virtual ~GView();
 
 	/// Returns the OS handle of the view
-	OsView Handle() { return _View; }
+	#if !defined(__GTK_H__)
+	OsView Handle()
+	{
+		return _View;
+	}
+	#endif
 
 	/// Returns the ptr to a GView
 	GView *GetGView() { return this; }
@@ -901,8 +910,10 @@ public:
 	virtual int64 Value() { return 0; }
 	/// Sets the integer representation of the view's contents
 	virtual void Value(int64 i) {}
+	#ifndef __GTK_H__
 	/// Find a view by it's os handle
 	virtual GViewI *FindControl(OsView hnd);
+	#endif
 	/// Returns the view by it's ID
 	virtual GViewI *FindControl
 	(
@@ -1153,7 +1164,7 @@ public:
 	GLayout();
 	~GLayout();
 
-	const char *GetClass() { return "GLayout"; }
+	const char *GetClass() override { return "GLayout"; }
 
 	/// Gets the current scroll bar values.
 	virtual void GetScrollPos(int &x, int &y);
@@ -1171,19 +1182,19 @@ public:
 	void SetPourLargest(bool i);
 
 	/// Handles the incoming events.
-	GMessage::Result OnEvent(GMessage *Msg);
+	GMessage::Result OnEvent(GMessage *Msg) override;
 
 	/// Lay out all the children views into the client area according to their
 	/// own internal rules. Space is given in a first come first served basis.
-	bool Pour(GRegion &r);
+	bool Pour(GRegion &r) override;
 
 	// Impl
 	#if defined(__GTK_H__) || !defined(WINNATIVE)
 
-	bool Attach(GViewI *p);
-	bool Detach();
-	GRect &GetClient(bool InClientSpace = true);
-	void OnCreate();
+	bool Attach(GViewI *p) override;
+	bool Detach() override;
+	GRect &GetClient(bool InClientSpace = true) override;
+	void OnCreate() override;
 	
 	#if defined(MAC) && !XPLATFORM_GLAYOUT
 
@@ -1194,14 +1205,17 @@ public:
 
 	#else
 	
-	void OnPosChange();
-	int OnNotify(GViewI *c, int f);
-	void OnNcPaint(GSurface *pDC, GRect &r);
+	void OnPosChange() override;
+	int OnNotify(GViewI *c, int f) override;
+	void OnNcPaint(GSurface *pDC, GRect &r) override;
 
 	#endif
 	#endif
 	
-	GViewI *FindControl(int Id);
+	GViewI *FindControl(int Id) override;
+	#ifndef __GTK_H__
+	GViewI *FindControl(OsView hnd) override { return GView::FindControl(hnd); }
+	#endif
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1244,7 +1258,6 @@ class LgiClass GWindow :
 	friend class BViewRedir;
 	friend class GView;
 	friend class GButton;
-	friend class XWindow;
 	friend class GDialog;
 	friend class GApp;
 	friend class GWindowPrivate;
@@ -1279,15 +1292,15 @@ protected:
 	#elif defined __GTK_H__
 
 	friend class GMenu;	
+	friend void lgi_widget_size_allocate(Gtk::GtkWidget *widget, Gtk::GtkAllocation *allocation);
 	
 	Gtk::GtkWidget *_Root, *_VBox, *_MenuBar;
-	void _Paint(GSurface *pDC = NULL, GdcPt2 *Offset = NULL, GRegion *Update = NULL);
 	void OnGtkDelete();
 	Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
 
 	#endif
 	
-	#if defined(MAC) && !defined(LGI_SDL)
+	#if defined(LGI_CARBON)
 	void _Delete();
 	#endif
 
@@ -1302,7 +1315,7 @@ protected:
 
 public:
 	#ifdef __GTK_H__
-	GWindow(Gtk::GtkWidget *w = 0);
+	GWindow(Gtk::GtkWidget *w = NULL);
 	#else
 	GWindow();
 	#endif
@@ -1468,23 +1481,25 @@ public:
 		virtual bool PushWindow(GWindow *v);
 		virtual GWindow *PopWindow();
 	
-	#elif defined(MAC)
-	
-		bool &CloseRequestDone();
-		bool PostEvent(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0);
-		void Quit(bool DontDelete = false);
-		#ifndef COCOA
-		OSErr HandlerCallback(DragTrackingMessage *tracking, DragRef theDrag);
-		#endif
-		int OnCommand(int Cmd, int Event, OsView Wnd);
-		GViewI *WindowFromPoint(int x, int y, bool Debug = false);
-		
 	#elif defined __GTK_H__
 	
 		void OnMap(bool m);
 		void Quit(bool DontDelete = false);
 		GRect *GetDecorSize();
+		bool TranslateMouse(GMouse &m);
+		GViewI *WindowFromPoint(int x, int y, bool Debug);
 	
+	#elif defined(MAC)
+	
+		bool &CloseRequestDone();
+		bool PostEvent(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0);
+		void Quit(bool DontDelete = false);
+		#if defined(LGI_CARBON)
+		OSErr HandlerCallback(DragTrackingMessage *tracking, DragRef theDrag);
+		#endif
+		int OnCommand(int Cmd, int Event, OsView Wnd);
+		GViewI *WindowFromPoint(int x, int y, bool Debug = false);
+		
 	#endif
 };
 
@@ -1543,13 +1558,13 @@ public:
 	GSplitter();
 	~GSplitter();
 
-	const char *GetClass() { return "GSplitter"; }
+	const char *GetClass() override { return "GSplitter"; }
 
 	/// Get the position of the split in px
-	int64 Value(); // Use to set/get the split position
+	int64 Value() override; // Use to set/get the split position
 	
 	/// Sets the position of the split
-	void Value(int64 i);
+	void Value(int64 i) override;
 
 	/// True if the split is vertical
 	bool IsVertical();
@@ -1587,18 +1602,20 @@ public:
 	/// Set the bar size
 	void BarSize(int i);
 
-	GViewI *FindControl(OsView hCtrl);
+	#ifndef __GTK_H__
+	GViewI *FindControl(OsView hCtrl) override;
+	#endif
 
-	bool Attach(GViewI *p);
-	bool Pour(GRegion &r);
-	void OnPaint(GSurface *pDC);
-	void OnPosChange();
-	void OnMouseClick(GMouse &m);
-	void OnMouseMove(GMouse &m);
-	void OnMouseExit(GMouse &m);
-	int OnHitTest(int x, int y);
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
-	LgiCursor GetCursor(int x, int y);
+	bool Attach(GViewI *p) override;
+	bool Pour(GRegion &r) override;
+	void OnPaint(GSurface *pDC) override;
+	void OnPosChange() override;
+	void OnMouseClick(GMouse &m) override;
+	void OnMouseMove(GMouse &m) override;
+	void OnMouseExit(GMouse &m) override;
+	int OnHitTest(int x, int y) override;
+	void OnChildrenChanged(GViewI *Wnd, bool Attaching) override;
+	LgiCursor GetCursor(int x, int y) override;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

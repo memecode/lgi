@@ -40,7 +40,7 @@ public:
 	GSurface *Image;
 	bool OwnImage;
 	
-	GButtonPrivate() : Cache(SysFont), LStringLayout(&Cache)
+	GButtonPrivate() : LStringLayout(&Cache), Cache(SysFont)
 	{
 		AmpersandToUnderline = true;
 		Pressed = 0;
@@ -123,10 +123,7 @@ int GButton::OnNotify(GViewI *Ctrl, int Flags)
 bool GButton::Default()
 {
 	if (GetWindow())
-	{
 		return GetWindow()->_Default == this;
-	}
-	else LgiTrace("%s:%i - No window.\n", _FL);
 	
 	return false;
 }
@@ -348,7 +345,11 @@ void GButton::OnClick()
 		GViewI *target = n ? n : p;
 		if (target)
 		{
+			#ifdef __GTK_H__
+			if (1)
+			#else
 			if (Handle())
+			#endif
 			{
 				target->PostEvent(M_CHANGE, (GMessage::Param)Id);
 			}
@@ -373,7 +374,7 @@ void GButton::OnFocus(bool f)
 
 void GButton::OnPaint(GSurface *pDC)
 {
-	#if defined(MAC) && !defined(COCOA) && !defined(LGI_SDL)
+	#if defined LGI_CARBON
 
 	GColour NoPaintColour = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
 	if (!NoPaintColour.IsTransparent())

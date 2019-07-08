@@ -9,7 +9,7 @@
 #include <time.h>
 
 #include "Lgi.h"
-#include "GProcess.h"
+#include "GSubProcess.h"
 #include "GTextLabel.h"
 #include "GButton.h"
 #ifndef LGI_SDL
@@ -224,7 +224,6 @@ bool LgiGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 
 	char Args[MAX_PATH];
 	sprintf(Args, "query default %s", Mime);
-	GProcess p;
 	GStringPipe Output;
 
 	GLanguage *CurLang = LgiGetLanguageId();	
@@ -236,8 +235,10 @@ bool LgiGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 		Mime, Limit, Args);
 	#endif
 
-	if (p.Run("xdg-mime", Args, 0, true, 0, &Output))
+	GSubProcess p("xdg-mime", Args);
+	if (p.Start())
 	{
+		p.Communicate(&Output);
 		GAutoString o(Output.NewStr());
 
 		#if DEBUG_GET_APPS_FOR_MIMETYPE

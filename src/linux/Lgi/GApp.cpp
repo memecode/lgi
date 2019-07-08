@@ -9,7 +9,6 @@
 #include <ctype.h>
 
 #include "Lgi.h"
-#include "GProcess.h"
 #include "GSkinEngine.h"
 #include "GArray.h"
 #include "LgiWinManGlue.h"
@@ -21,6 +20,7 @@
 #endif
 #include "GToken.h"
 #include "GFontCache.h"
+#include "LJson.h"
 
 #if HAS_LIB_MAGIC
 // sudo apt-get install libmagic-dev
@@ -29,18 +29,15 @@
 
 #define DEBUG_MSG_TYPES				0
 #define DEBUG_HND_WARNINGS			0
-
-#ifndef WIN32
-namespace Gtk {
-#include <gdk/gdkx.h>
-#undef Status
-}
-#endif
+#define IDLE_ALWAYS					0
 
 typedef GArray<GAppInfo*> AppArray;
 using namespace Gtk;
 
-__thread int GtkLockCount = 0;
+#if GTK_MAJOR_VERSION == 3
+#else
+LTHREAD_DATA int GtkLockCount = 0;
+#endif
 bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth = 0);
 
 ////////////////////////////////////////////////////////////////
@@ -230,6 +227,7 @@ class GAppPrivate : public GSymLookup
 {
 public:
 	// Common
+	GtkApplication *App;
 	GXmlTag *Config;
 	GFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
@@ -251,9 +249,12 @@ public:
 	::GArray<GViewI*> DeleteLater;
 	GMouse LastMove;
 	GAutoString Name;
+	::GArray<Gtk::guint> IdleId;
 	
+	#if defined(LINUX)
 	/// Desktop info
 	GAutoPtr<GApp::DesktopInfo> DesktopInfo;
+	#endif
 
 	#if HAS_LIB_MAGIC
 	LMutex MagicLock;
@@ -274,8 +275,12 @@ public:
 	int LastClickX;
 	int LastClickY;
 
-	GAppPrivate() : Args(0, 0), MagicLock("MagicLock")
+	GAppPrivate() : Args(0, 0)
+		#if HAS_LIB_MAGIC
+		, MagicLock("MagicLock")
+		#endif
 	{
+		IdleId = 0;
 		CurEvent = 0;
 		GuiThread = LgiGetCurrentThread();
 		GuiThreadId = GetCurrentThreadId();
@@ -355,7 +360,20 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	SystemBold = 0;
 	d = new GAppPrivate;
 	Name(name);
-	
+	LgiArgsAppPath = AppArgs.Arg[0];
+	if (LgiIsRelativePath(LgiArgsAppPath))
+	{
+		char Cwd[MAX_PATH];
+		getcwd(Cwd, sizeof(Cwd));
+		LgiMakePath(Cwd, sizeof(Cwd), Cwd, LgiArgsAppPath);
+		LgiArgsAppPath = Cwd;
+		// printf("Rel.LgiArgsAppPath=%s\n", LgiArgsAppPath.Get());
+	}
+	else
+	{
+		// printf("Abs.LgiArgsAppPath=%s\n", LgiArgsAppPath.Get());
+	}
+
 	int WCharSz = sizeof(wchar_t);
 	#if defined(_MSC_VER)
 	LgiAssert(WCharSz == 2);
@@ -363,8 +381,11 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	LgiAssert(WCharSz == 4);
 	#endif
 
-  	Gtk::gdk_threads_init();	
-	GtkLock _Lock;
+	#ifdef _MSC_VER
+	SetEnvironmentVariable(_T("GTK_CSD"), _T("0"));
+	#else
+	setenv("GTK_CSD", "0", true);
+	#endif
   	
 	// We want our printf's NOW!
 	setvbuf(stdout,(char *)NULL,_IONBF,0); // print mesgs immediately.
@@ -378,6 +399,11 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	srand(LgiCurrentTime());
 	LgiInitColours();
 	AppWnd = 0;
+
+	Gtk::gchar id[256];
+	sprintf_s(id, sizeof(id), "com.memecode.%s", name);
+	d->App = gtk_application_new(id, G_APPLICATION_FLAGS_NONE); 
+	LgiAssert(d->App != NULL);
 
 	MouseHook = new GMouseHook;
 
@@ -394,6 +420,16 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	SystemNormal = 0;
 	GFontType SysFontType;
 
+	#ifdef MAC
+	Gtk::PangoFontMap *fm = Gtk::pango_cairo_font_map_get_default();
+	if (fm)
+	{
+		using namespace Gtk;
+		auto cfm = PANGO_CAIRO_FONT_MAP(fm);
+		pango_cairo_font_map_set_resolution(cfm, 80.0);
+	}
+	#endif
+	
 	if (SysFontType.GetSystemFont("System"))
 	{
 		SystemNormal = SysFontType.Create();
@@ -428,7 +464,10 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 
 GApp::~GApp()
 {
+	#if GTK_MAJOR_VERSION == 3
+	#else
 	GtkLock _Lock;
+	#endif
 
 	DeleteObj(AppWnd);
 	DeleteObj(SystemNormal);
@@ -450,8 +489,11 @@ GApp *GApp::ObjInstance()
 
 bool GApp::IsOk()
 {
-	bool Status = 	(this != 0) &&
-					(d != 0);
+	bool Status =
+		#ifndef __clang__
+		(this != 0) &&
+		#endif
+		(d != 0);
 					
 	LgiAssert(Status);
 	return Status;
@@ -467,17 +509,13 @@ int GApp::GetMetric(LgiSystemMetric Metric)
 	switch (Metric)
 	{
 		case LGI_MET_DECOR_X:
-		{
 			return 8;
-		}
 		case LGI_MET_DECOR_Y:
-		{
 			return 8 + 19;
-		}
 		case LGI_MET_DECOR_CAPTION:
-		{
 			return 19;
-		}
+		default:
+			break;
 	}
 
 	return 0;
@@ -529,12 +567,6 @@ bool GApp::InThread()
 	return Gui == Me;
 }
 
-#ifndef WIN32
-void GApp::OnEvents()
-{
-}
-#endif
-
 struct GtkIdle
 {
 	GAppPrivate *d;
@@ -568,7 +600,7 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 		(Msgs = MsgQue.Lock(_FL)))
 	{
 		// Copy the messages out of the locked structure..
-		// This allows new messages to arrive independant
+		// This allows new messages to arrive independent
 		// of us processing them here...
 		LMessageQue::MsgArray q = *Msgs;
 		Msgs->Empty();
@@ -576,49 +608,28 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 		
 		for (auto m : q)
 		{
-			// printf("Process %p,%i,%i,%i\n", m.v, m.m, m.a, m.b);
+			// LgiTrace("Process %p,%i,%i,%i\n", m.v, m.m, m.a, m.b);
 			if (!GView::LockHandler(m.v, GView::OpExists))
 			{
-				// printf("%s:%i - Invalid view to post event to.\n", _FL);
+				// LgiTrace("%s:%i - Invalid view to post event to.\n", _FL);
 			}
 			else
 			{
-				#if VIEW_REF_MODE
-				
-				GdkEvent *e = gdk_event_new(GDK_CLIENT_EVENT);
-				if (e)
-				{
-					e->client.data.l[0] = m.m;
-					e->client.data.l[1] = m.a;
-					e->client.data.l[2] = m.b;			
-					
-					auto Widget = m.v->Handle();
-					if (Widget)
-					{
-						gtk_propagate_event(Widget, e);
-						gdk_event_free(e);
-						
-						// printf("Unref %p %s.%p\n", Widget, m.v->GetClass(), m.v);
-						g_object_unref(Widget);
-					}
-				}
-				else printf("%s:%i - gdk_event_new failed.\n", _FL);
-				
-				#else
-
 				GMessage Msg(m.m, m.a, m.b);
 				m.v->OnEvent(&Msg);
-				
-				#endif
 			}
 		}
 	}
 	
+	#if IDLE_ALWAYS
 	LgiSleep(1);
-	
-	return TRUE;
+	return true;
+	#else
+	return i->cb != NULL;
+	#endif	
 }
 
+static GtkIdle idle = {0};
 bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 {
 	if (!InThread())
@@ -629,7 +640,6 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 
 	if (Loop)
 	{
-		static GtkIdle idle = {0};
 		if (!idle.d)
 		{
 			idle.d = d;
@@ -638,11 +648,19 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 		}
 
 		{			
+			#if GTK_MAJOR_VERSION == 3
+			#else
 			GtkLock _Lock;
-			Gtk::guint Id = Gtk::gdk_threads_add_idle_full(	G_PRIORITY_DEFAULT_IDLE,
-															IdleWrapper,
-															&idle,
-															NULL);
+			#endif
+			
+			#if IDLE_ALWAYS
+			auto Id = Gtk::gdk_threads_add_idle_full(G_PRIORITY_DEFAULT_IDLE,
+													IdleWrapper,
+													&idle,
+													NULL);
+			if (Id)
+				d->IdleId.Add(Id);
+			#endif
 		}
 
 		static bool CmdLineDone = false;
@@ -652,12 +670,18 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 			OnCommandLine();
 		}
 		
+		#if GTK_MAJOR_VERSION == 3
+		#else
 		GtkLock _Lock;
+		#endif
 	    Gtk::gtk_main();
 	}
 	else
 	{
+		#if GTK_MAJOR_VERSION == 3
+		#else
 		GtkLock _Lock;
+		#endif
 	    Gtk::gtk_main_iteration_do(false);
 	}
 
@@ -674,8 +698,17 @@ void GApp::Exit(int Code)
 	else
 	{
 		// soft exit
+		#if GTK_MAJOR_VERSION == 3
+		#else
 		GtkLock _Lock;
+		#endif
 		Gtk::gtk_main_quit();
+		if (d->IdleId.Length() > 0)
+		{
+			size_t Last = d->IdleId.Length() - 1;
+			g_source_remove(d->IdleId[Last]);
+			d->IdleId.Length(Last);
+		}
 	}
 }
 
@@ -814,7 +847,7 @@ bool GApp::GetOption(const char *Option, ::GString &Buf)
 							char *End = strchr(Arg, Delim);
 							if (End)
 							{
-								int Len = (int)End-(int)Arg;
+								auto Len = End-Arg;
 								if (Len > 0)
 								    Buf.Set(Arg, Len);
 								else
@@ -965,9 +998,10 @@ GAutoString GApp::GetFileMimeType(const char *File)
 	GStringPipe Output;
 	char Args[256];
 	sprintf(Args, "-i \"%s\"", File);
-	GProcess p;
-	if (p.Run("file", Args, 0, true, 0, &Output))
+	GSubProcess p("file", Args);
+	if (p.Start())
 	{
+		p.Communicate(&Output);
 		char *Out = Output.NewStr();
 		if (Out)
 		{
@@ -1028,7 +1062,7 @@ bool GApp::GetAppsForMimeType(char *Mime, ::GArray<::GAppInfo*> &Apps)
 	return Apps.Length() > 0;
 }
 
-#ifndef WIN32
+#if defined(LINUX)
 GLibrary *GApp::GetWindowManagerLib()
 {
 	if (this != NULL && !d->WmLib)
@@ -1328,7 +1362,7 @@ OsApplication::OsApplication(int Args, char **Arg)
     Inst = this;
     d = new OsApplicationPriv;	
 	
-	#ifdef __GNUC__
+	#if defined(__GNUC__) && defined(LINUX)
 	XInitThreads();
 	#endif
     gtk_init(&Args, &Arg);
@@ -1343,31 +1377,14 @@ OsApplication::~OsApplication()
 ////////////////////////////////////////////////////////////////
 void GMessage::Set(int Msg, Param ParamA, Param ParamB)
 {
-	if (!Event)
-	{
-		OwnEvent = true;
-		if (LgiApp->InThread())
-		{
-			Event = gdk_event_new(GDK_CLIENT_EVENT);
-		}
-	}
-	
 	m = Msg;
 	a = ParamA;
 	b = ParamB;
-	
-	if (Event)
-	{
-		Event->client.data.l[0] = m;
-		Event->client.data.l[1] = a;
-		Event->client.data.l[2] = b;
-	}
 }
 
-struct GlibEventParams
+struct GlibEventParams : public GMessage
 {
     GtkWidget *w;
-    GdkEvent *e;
 };
 
 bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth)
@@ -1427,49 +1444,6 @@ bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth)
 	return false;
 }
 
-static gboolean 
-GlibPostMessage(GlibEventParams *p)
-{
-	#if 1
-	GtkWindow *w = NULL;
-	if (p->e->client.window)
-		gdk_window_get_user_data(p->e->client.window, (gpointer*)&w);
-	
-	if (!w)
-	{
-		// Window must of been destroyed...
-	}
-	else if (GlibWidgetSearch(GTK_WIDGET(w), p->w, false))
-	{
-	    gtk_propagate_event(p->w, p->e);
-	}
-	else
-	{
-		printf("%s:%i - Failed to find widget(%p) for PostMessage.\n", _FL, w);
-		
-		#if 0
-		static int Count = 0;
-		if (Count++ < 5)
-		{
-			GlibWidgetSearch(GTK_WIDGET(w), p->w, true);
-		}
-		if (Count > 20)
-		{
-			printf("%s:%i - Too many widget not found errors.\n", _FL);
-			LgiExitApp();
-		}
-		#endif
-	}
-	#else
-    gtk_propagate_event(p->w, p->e);
-	#endif
-	
-    gdk_event_free(p->e);
-    DeleteObj(p);
-
-    return FALSE;
-}
-
 void GApp::OnDetach(GViewI *View)
 {
 	LMessageQue::MsgArray *q = MsgQue.Lock(_FL);
@@ -1478,17 +1452,6 @@ void GApp::OnDetach(GViewI *View)
 		printf("%s:%i - Couldn't lock app.\n", _FL);
 		return;
 	}
-
-	#if VIEW_REF_MODE
-	for (unsigned i=0; i<q->Length(); i++)
-	{
-		if ((*q)[i].v == View)
-		{
-			printf("Clearing detaching view.\n");
-			q->DeleteAt(i--, true);
-		}
-	}
-	#endif
 
 	MsgQue.Unlock();
 }
@@ -1502,17 +1465,14 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 		return false;
 	}
 	
-	auto Widget = View->Handle();
-
-	#if VIEW_REF_MODE
-	// printf("Ref %p %s.%p (len=%i)\n", Widget, View->GetClass(), View, (int)q->Length());
-	g_object_ref(Widget); // ref widget till we try and propagate the message to it...
-	#endif
-	
+	auto Existing = q->Length();
 	q->New().Set(View, Msg, a, b);
-
-	// printf("Insert %p,%i,%i,%i\n", View, Msg, a, b);
 	MsgQue.Unlock();
+	
+	#if !IDLE_ALWAYS
+	if (!Existing)
+		g_idle_add((GSourceFunc)IdleWrapper, &idle);
+	#endif
 	
 	return true;
 }

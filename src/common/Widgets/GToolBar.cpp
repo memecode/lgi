@@ -28,7 +28,7 @@ bool BltBmpToBmp(HBITMAP hDest, int xDst, int yDst, int cx, int cy, HBITMAP hSrc
 bool BltBmpToDc(HDC DestDC, int xDst, int yDst, int cx, int cy, HBITMAP hSrc, int xSrc, int ySrc,  DWORD dwRop);
 bool BltDcToBmp(HBITMAP hDest, int xDst, int yDst, int cx, int cy, HDC SrcDC, int xSrc, int ySrc, DWORD dwRop);
 
-#define AttachButton(b)	Children.Insert(b);
+#define AttachButton(b)	AddView(b);
 
 #else
 
@@ -529,70 +529,54 @@ GToolButton::~GToolButton()
 bool GToolButton::Name(const char *n)
 {
 	bool s = GView::Name(n);
-
-	/*
-	char *i = GView::Name();
-	char *o = i;
-	while (*i)
-	{
-		if (*i != '&')
-			*o++ = *i;
-		*i++;
-	}
-	*o++ = 0;
-	*/
-
 	d->Text.DeleteObjects();
-
 	return s;
 }
 
 void GToolButton::Layout()
 {
-	GToolBar *Par = dynamic_cast<GToolBar*>(GetParent());
+	auto Parent = GetParent();
+	GToolBar *ToolBar = dynamic_cast<GToolBar*>(Parent);
+	if (!ToolBar)
+		return;
 
 	// Text
 	char *s = Name();
-	if (Par->d->ShowTextLabels() &&
-		s)
-	{
-		// Write each word centered on a different line
-		char Buf[256];
-		strcpy_s(Buf, sizeof(Buf), s);
+	if (!ToolBar->d->ShowTextLabels() || !s)
+		return;
 
-		GToken t(Buf, " ");
-		if (t.Length() < 3)
+	// Write each word centered on a different line
+	char Buf[256];
+	strcpy_s(Buf, sizeof(Buf), s);
+
+	GToken t(Buf, " ");
+	if (t.Length() < 3)
+	{
+		if (t.Length() > 0)
+			d->Text.Add(new GDisplayString(ToolBar->d->Font, t[0]));
+		if (t.Length() > 1)
+			d->Text.Add(new GDisplayString(ToolBar->d->Font, t[1]));
+	}
+	else if (t.Length() == 3)
+	{
+		sprintf_s(Buf, sizeof(Buf), "%s %s", t[0], t[1]);
+		GDisplayString *d1 = new GDisplayString(ToolBar->d->Font, Buf);
+		sprintf_s(Buf, sizeof(Buf), "%s %s", t[1], t[2]);
+		GDisplayString *d2 = new GDisplayString(ToolBar->d->Font, Buf);
+		if (d1 && d2)
 		{
-			if (t.Length() > 0)
-				d->Text.Add(new GDisplayString(Par->d->Font, t[0]));
-			if (t.Length() > 1)
-				d->Text.Add(new GDisplayString(Par->d->Font, t[1]));
-		}
-		else if (t.Length() == 3)
-		{
-			sprintf_s(Buf, sizeof(Buf), "%s %s", t[0], t[1]);
-			GDisplayString *d1 = new GDisplayString(Par->d->Font, Buf);
-			sprintf_s(Buf, sizeof(Buf), "%s %s", t[1], t[2]);
-			GDisplayString *d2 = new GDisplayString(Par->d->Font, Buf);
-			if (d1 && d2)
+			if (d1->X() < d2->X())
 			{
-				if (d1->X() < d2->X())
-				{
-					DeleteObj(d2);
-					d->Text.Add(d1);
-					d->Text.Add(new GDisplayString(Par->d->Font, t[2]));
-				}
-				else
-				{
-					DeleteObj(d1);
-					d->Text.Add(new GDisplayString(Par->d->Font, t[0]));
-					d->Text.Add(d2);
-				}
+				DeleteObj(d2);
+				d->Text.Add(d1);
+				d->Text.Add(new GDisplayString(ToolBar->d->Font, t[2]));
 			}
-		}
-		else
-		{
-			//GDisplayString *Cur = new GDisplayString(Par->d->Font, Buf);
+			else
+			{
+				DeleteObj(d1);
+				d->Text.Add(new GDisplayString(ToolBar->d->Font, t[0]));
+				d->Text.Add(d2);
+			}
 		}
 	}
 }
@@ -1361,7 +1345,13 @@ void GToolBar::OnButtonClick(GToolButton *Btn)
 	if (w && Btn)
 	{
 		int Id = Btn->GetId();
-        w->PostEvent(M_COMMAND, (GMessage::Param) Id, (GMessage::Param) Handle());
+        w->PostEvent(M_COMMAND, (GMessage::Param) Id,
+			#ifdef __GTK_H__
+			0
+			#else
+        	(GMessage::Param) Handle()
+        	#endif
+        	);
 	}
 }
 
@@ -1487,7 +1477,6 @@ GToolButton *GToolBar::AppendButton(const char *Tip, int Id, int Type, int Enabl
 		But->Name(Tip);
 		But->SetId(Id);
 		But->Type = Type;
-		But->SetParent(this);
 		But->Enabled(Enabled != 0);
 
 		if (IconId >= 0)
@@ -1515,7 +1504,6 @@ bool GToolBar::AppendSeparator()
 	if (But)
 	{
 		But->SetId(IDM_SEPARATOR);
-		But->SetParent(this);
 		AttachButton(But);
 		return true;
 	}

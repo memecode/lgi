@@ -41,12 +41,12 @@ struct GDialogPriv
 GDialog::GDialog()
 	: ResObject(Res_Dialog)
 	#ifdef __GTK_H__
-	, GWindow(gtk_dialog_new())
+	// , GWindow(gtk_dialog_new())
+	, GWindow(gtk_window_new(GTK_WINDOW_TOPLEVEL))
 	#endif
 {
 	d = new GDialogPriv();
 	Name("Dialog");
-	_View = GTK_WIDGET(Wnd);
 	_SetDynamic(false);
 }
 
@@ -70,6 +70,7 @@ void GDialog::Quit(bool DontDelete)
 
 void GDialog::OnPosChange()
 {
+	GWindow::OnPosChange();
     if (Children.Length() == 1)
     {
         List<GViewI>::I it = Children.begin();
@@ -79,6 +80,8 @@ void GDialog::OnPosChange()
             GRect r = GetClient();
             r.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
             t->SetPos(r);
+
+			// _Dump();
         }
     }
 }
@@ -108,26 +111,6 @@ bool GDialog::OnRequestClose(bool OsClose)
 	return true;
 }
 
-#define MWM_DECOR_ALL						(1L << 0)
-#define MWM_HINTS_INPUT_MODE				(1L << 2)
-#define MWM_INPUT_FULL_APPLICATION_MODAL	3L
-#define XA_ATOM								((xcb_atom_t) 4)
-
-class MotifWmHints
-{
-public:
-	ulong Flags, Functions, Decorations;
-	long InputMode;
-	ulong Status;
-	
-	MotifWmHints()
-	{
-		Flags = Functions = Status = 0;
-		Decorations = MWM_DECOR_ALL;
-		InputMode = 0;
-	}
-};
-
 bool GDialog::IsResizeable()
 {
     return d->Resizable;
@@ -138,72 +121,12 @@ void GDialog::IsResizeable(bool r)
 	d->Resizable = r;
 }
 
-gboolean GDialog::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
-{
-	if (!event)
-	{
-		printf("%s:%i - No event %i\n", _FL);
-		return FALSE;
-	}
-
-	switch (event->type)
-	{
-		case GDK_DELETE:
-		{
-			Quit();
-			OnGtkDelete();
-			return false;
-		}
-		case GDK_CONFIGURE:
-		{
-			GdkEventConfigure *c = (GdkEventConfigure*)event;
-			Pos.Set(c->x, c->y, c->x+c->width-1, c->y+c->height-1);
-			OnPosChange();
-			return false;
-			break;
-		}
-		case GDK_FOCUS_CHANGE:
-		{
-			GWindow::OnGtkEvent(widget, event);
-			break;
-		}
-		case GDK_CLIENT_EVENT:
-		{
-			GMessage m(event);
-			OnEvent(&m);
-			break;
-		}
-		default:
-		{
-			printf("%s:%i - Unknown event %i\n", _FL, event->type);
-			break;
-		}
-	}
-	
-	return true;
-}
-
-static
-gboolean
-GtkDialogDestroy(GtkWidget *widget, GDialog *This)
-{
-	This->_View = NULL;
-	return 0;
-}
-
-static
-void
-GtkDialogRealize(GtkWidget *widget, GDialog *This)
-{
-	This->OnGtkRealize();
-}
-               
 bool GDialog::SetupDialog(bool Modal)
 {
-	if (GBase::Name())
-		gtk_window_set_title(GTK_WINDOW(Wnd), GBase::Name());
-
+	#if GTK_MAJOR_VERSION == 3
+	#else
 	gtk_dialog_set_has_separator(GTK_DIALOG(Wnd), false);
+	#endif
 	if (IsResizeable())
 	{
 	    gtk_window_set_default_size(Wnd, Pos.X(), Pos.Y());
@@ -213,84 +136,12 @@ bool GDialog::SetupDialog(bool Modal)
 	    gtk_widget_set_size_request(GTK_WIDGET(Wnd), Pos.X(), Pos.Y());
 	    gtk_window_set_resizable(Wnd, FALSE);
 	}
-	
-	GtkWidget *content_area = 	
-	#if GtkVer(2, 14)
-		gtk_dialog_get_content_area(GTK_DIALOG(Wnd));
-	#else
-		GTK_DIALOG(Wnd)->vbox;
-	#endif
-	if (content_area)
-	{
-		GtkContainer *container = GTK_CONTAINER(content_area);
-		GtkHButtonBox *btns = NULL;
-		
-		Gtk::GList *list = gtk_container_get_children(container);
-		for (Gtk::GList *i = list; i != NULL; i = i->next)
-		{
-			const gchar *type = G_OBJECT_TYPE_NAME(i->data);
-			GtkWidget *w = GTK_WIDGET(i->data);
-			if (!btns && GTK_IS_HBUTTON_BOX(i->data))
-			{
-				btns = GTK_HBUTTON_BOX(i->data);
-			}
-		}		
-		g_list_free(list);
-    
-		// Add our own root control to contain LGI widgets
-		if (_Root = lgi_widget_new(this, Pos.X(), Pos.Y(), true))
-		{
-			gtk_container_add(container, _Root);
-			gtk_widget_show(_Root);
-			if (btns)
-			{
-				// Hide the btns container, as Lgi won't use it.
-				gtk_widget_hide(GTK_WIDGET(btns));
-			}
-		}
-	}
-	
-	GView *gv = this;
-	g_signal_connect(	G_OBJECT(Wnd),
-						"delete_event",
-						G_CALLBACK(GtkViewCallback),
-						gv);
-	g_signal_connect(	G_OBJECT(Wnd),
-						"configure-event",
-						G_CALLBACK(GtkViewCallback),
-						gv);
-	g_signal_connect(	G_OBJECT(Wnd),
-						"destroy",
-						G_CALLBACK(GtkDialogDestroy),
-						this);
-	g_signal_connect(	G_OBJECT(Wnd),
-						"client-event",
-						G_CALLBACK(GtkViewCallback),
-						gv);
-	g_signal_connect(	G_OBJECT(Wnd),
-						"focus-in-event",
-						G_CALLBACK(GtkViewCallback),
-						gv);
-	g_signal_connect(	G_OBJECT(Wnd),
-						"focus-out-event",
-						G_CALLBACK(GtkViewCallback),
-						gv);
-	g_signal_connect(	G_OBJECT(Wnd),
-						"realize",
-						G_CALLBACK(GtkDialogRealize),
-						gv);
 
-	gtk_widget_realize(GTK_WIDGET(Wnd));
-	OnCreate();
-	AttachChildren();
+	auto p = GetParent();
+	if (!Attach(p))
+		return false;
 
-	if (!_Default)
-	{
-		_Default = FindControl(IDOK);
-	}
-
-	gtk_widget_show(GTK_WIDGET(Wnd));
-	GView::Visible(true);
+	GWindow::Visible(true);
 
 	return true;
 }
@@ -298,34 +149,19 @@ bool GDialog::SetupDialog(bool Modal)
 int GDialog::DoModal(OsView OverrideParent)
 {
 	d->ModalStatus = -1;
-
-	if (GetParent())
-		gtk_window_set_transient_for(GTK_WINDOW(Wnd), GetParent()->WindowHandle());
+	
+	auto Parent = GetParent();
+	if (Parent)
+	{
+		gtk_window_set_transient_for(GTK_WINDOW(Wnd), Parent->WindowHandle());
+		MoveSameScreen(Parent);
+	}
 
 	d->IsModal = true;
 	SetupDialog(true);
-	
-	#if 0
-	gtk_main();
-	#else
 	LgiApp->Run();
-	#endif
 	
 	return d->ModalStatus;
-}
-
-void _Dump(GViewI *v, int Depth = 0)
-{
-	for (int i=0; i<Depth*4; i++)
-		printf(" ");
-
-	GViewIterator *it = v->IterateViews();
-	if (it)
-	{
-		for (GViewI *c=it->First(); c; c=it->Next())
-			_Dump(c, Depth+1);
-		DeleteObj(it);
-	}					
 }
 
 void GDialog::EndModal(int Code)
@@ -334,12 +170,7 @@ void GDialog::EndModal(int Code)
 	{
 		d->IsModal = false;
 		d->ModalStatus = Code;
-
-		#if 0
-		gtk_main_quit();
-		#else
 		LgiApp->Exit();
-		#endif
 	}
 	else
 	{
@@ -393,7 +224,7 @@ GdcPt2 GControl::SizeOfStr(const char *Str)
 		for (const char *s = Str; s && *s; s = e?e+1:0)
 		{
 			e = strchr(s, '\n');
-			int Len = e ? (int)e-(int)s : strlen(s);
+			auto Len = e ? e - s : strlen(s);
 
 			GDisplayString ds(SysFont, s, Len);
 			Pt.x = MAX(Pt.x, ds.X());

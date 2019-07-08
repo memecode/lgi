@@ -707,7 +707,7 @@ void GRadioButton::OnPaint(GSurface *pDC)
 		GdcPt2 TxtPt(c.x2 + 11, (r.Y() - d->GetBounds().Y()) >> 1);
 		d->Paint(pDC, TxtPt, Back, fill, Enabled(), false);
 		
-		#if defined MAC && !defined COCOA && !defined(LGI_SDL)
+		#if defined LGI_CARBON
 
 		GRect cli = GetClient();
 		for (GViewI *v = this; v && !v->Handle(); v = v->GetParent())

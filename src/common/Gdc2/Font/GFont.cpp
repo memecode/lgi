@@ -39,95 +39,99 @@
 
 #if defined(LGI_SDL)
 
-class FreetypeLib
-{
-	FT_Library  lib;
-	FT_Error	err;
-	
-public:
-	FreetypeLib()
+	class FreetypeLib
 	{
-		err = FT_Init_FreeType(&lib);
-		if (err)
+		FT_Library  lib;
+		FT_Error	err;
+		
+	public:
+		FreetypeLib()
 		{
-			LgiAssert(0);
+			err = FT_Init_FreeType(&lib);
+			if (err)
+			{
+				LgiAssert(0);
+			}
 		}
-	}
-	
-	~FreetypeLib()
-	{
-		if (!err)
+		
+		~FreetypeLib()
 		{
-			FT_Done_FreeType(lib);
+			if (!err)
+			{
+				FT_Done_FreeType(lib);
+			}
 		}
-	}
-	
-	FT_Library Handle()
-	{
-		return lib;
-	}
-	
-	GString GetVersion()
-	{
-		FT_Int amajor = 0, aminor = 0, apatch = 0;
-		FT_Library_Version(lib, &amajor, &aminor, &apatch);
-		GString s;
-		s.Printf("%i.%i.%i", amajor, aminor, apatch);
-		return s;
-	}
-	
-} Freetype2;
+		
+		FT_Library Handle()
+		{
+			return lib;
+		}
+		
+		GString GetVersion()
+		{
+			FT_Int amajor = 0, aminor = 0, apatch = 0;
+			FT_Library_Version(lib, &amajor, &aminor, &apatch);
+			GString s;
+			s.Printf("%i.%i.%i", amajor, aminor, apatch);
+			return s;
+		}
+		
+	} Freetype2;
 
-GString GetFreetypeLibraryVersion()
-{
-	return Freetype2.GetVersion();
-}
+	GString GetFreetypeLibraryVersion()
+	{
+		return Freetype2.GetVersion();
+	}
 
 #elif defined(WIN32)
 
-#ifndef __GNUC__
-#include <mbctype.h>
-#endif
+	#ifndef __GNUC__
+	#include <mbctype.h>
+	#endif
 
-int WinPointToHeight(int Pt, HDC hDC)
-{
-	int Ht = 0;
+	int WinPointToHeight(int Pt, HDC hDC)
+	{
+		int Ht = 0;
 
-	HWND hDestktop = NULL;
-	if (!hDC)
-		hDC = GetDC(hDestktop = GetDesktopWindow());
-	
-	if (hDC)
-		Ht = -MulDiv(Pt, GetDeviceCaps(hDC, LOGPIXELSY), 72);
+		HWND hDestktop = NULL;
+		if (!hDC)
+			hDC = GetDC(hDestktop = GetDesktopWindow());
+		
+		if (hDC)
+			Ht = -MulDiv(Pt, GetDeviceCaps(hDC, LOGPIXELSY), 72);
 
-	if (hDestktop)
-		ReleaseDC(hDestktop, hDC);
+		if (hDestktop)
+			ReleaseDC(hDestktop, hDC);
 
-	return Ht;
-}
+		return Ht;
+	}
 
-int WinHeightToPoint(int Ht, HDC hDC)
-{
-	int Pt = 0;
+	int WinHeightToPoint(int Ht, HDC hDC)
+	{
+		int Pt = 0;
 
-	HWND hDestktop = NULL;
-	if (!hDC)
-		hDC = GetDC(hDestktop = GetDesktopWindow());
-	
-	if (hDC)
-		Pt = -MulDiv(Ht, 72, GetDeviceCaps(hDC, LOGPIXELSY));
+		HWND hDestktop = NULL;
+		if (!hDC)
+			hDC = GetDC(hDestktop = GetDesktopWindow());
+		
+		if (hDC)
+			Pt = -MulDiv(Ht, 72, GetDeviceCaps(hDC, LOGPIXELSY));
 
-	if (hDestktop)
-		ReleaseDC(hDestktop, hDC);
+		if (hDestktop)
+			ReleaseDC(hDestktop, hDC);
 
-	return Pt;
-}
+		return Pt;
+	}
 
-#elif defined(MAC)
+#elif defined(__GTK_H__)
 
-// CTFontCreateUIFontForLanguage
-// #include <HIToolbox/HITheme.h>
-#include <CoreText/CTFont.h>
+	#include <pango/pangocairo.h>
+
+#elif USE_CORETEXT
+
+	// CTFontCreateUIFontForLanguage
+	// #include <HIToolbox/HITheme.h>
+	#include <CoreText/CTFont.h>
 
 #endif
 
@@ -537,19 +541,19 @@ bool GFont::Destroy()
 			FT_Done_Face(d->hFont);
 		#elif defined(WIN32)
 			DeleteObject(d->hFont);
-		#elif defined MAC
-			#if USE_CORETEXT
-			CFRelease(d->hFont);
-			#else
-			ATSUDisposeStyle(d->hFont);
-			#endif
-		#elif defined LINUX
+		#elif defined __GTK_H__
 			if (d->PangoCtx)
 			{
 				g_object_unref(d->PangoCtx);
 				d->PangoCtx = NULL;
 			}
 			Gtk::pango_font_description_free(d->hFont);
+		#elif defined MAC
+			#if USE_CORETEXT
+			CFRelease(d->hFont);
+			#else
+			ATSUDisposeStyle(d->hFont);
+			#endif
 		#elif defined BEOS
 			DeleteObj(d->hFont);
 		#else
@@ -563,7 +567,7 @@ bool GFont::Destroy()
 	return Status;
 }
 
-#if defined(MAC)
+#if USE_CORETEXT
 CFDictionaryRef GFont::GetAttributes()
 {
 	return d->Attributes;
@@ -1219,7 +1223,8 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 	else
 	{
 		auto Sz = Size();
-		Gtk::pango_font_description_set_family(d->hFont, Face());
+		GString sFace = Face();
+		Gtk::pango_font_description_set_family(d->hFont, sFace);
 		if (Sz.Type == GCss::LenPt)
 			Gtk::pango_font_description_set_size(d->hFont, Sz.Value * PANGO_SCALE);
 		else if (Sz.Type == GCss::LenPx)
@@ -1233,13 +1238,12 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 		if (Bold())
 			Gtk::pango_font_description_set_weight(d->hFont, Gtk::PANGO_WEIGHT_BOLD);
 		
-		// printf("Creating pango font %s, %i\n", Face(), PointSize());
-		
 		// Get metrics for this font...
 		Gtk::GtkPrintContext *PrintCtx = pSurface ? pSurface->GetPrintContext() : NULL;
 		Gtk::PangoContext *SysCtx = GFontSystem::Inst()->GetContext();
 		if (PrintCtx)
 			d->PangoCtx = gtk_print_context_create_pango_context(PrintCtx);
+		auto EffectiveCtx = d->PangoCtx ? d->PangoCtx : SysCtx;
 		Gtk::PangoFontMetrics *m = Gtk::pango_context_get_metrics(d->PangoCtx ? d->PangoCtx : SysCtx, d->hFont, 0);
 		if (!m)
 			printf("pango_font_get_metrics failed.\n");
@@ -1249,9 +1253,7 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 			GTypeFace::d->_Descent = (double)Gtk::pango_font_metrics_get_descent(m) / PANGO_SCALE;
 			d->Height = ceil(GTypeFace::d->_Ascent + GTypeFace::d->_Descent + 1/*hack the underscores to work*/);
 			
-			// printf("Created '%s:%i' %f + %f = %i\n", Face(), PointSize(), GTypeFace::d->_Ascent, GTypeFace::d->_Descent, d->Height);
-
-			#if 1
+			#if 0
 			if (PrintCtx)
 			{
 				LgiTrace("GFont::Create %s,%f (%i,%i,%i) (%.1f,%.1f,%i)\n",
@@ -1267,6 +1269,32 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 			#endif
 
 			Gtk::pango_font_metrics_unref(m);
+
+			#if 1
+			Gtk::PangoFont *fnt = pango_font_map_load_font(Gtk::pango_cairo_font_map_get_default(), EffectiveCtx, d->hFont);
+			if (fnt)
+			{
+				Gtk::PangoCoverage *c = Gtk::pango_font_get_coverage(fnt, Gtk::pango_language_get_default());
+				if (c)
+				{
+					uint Bytes = (MAX_UNICODE + 1) >> 3;
+					if ((d->GlyphMap = new uchar[Bytes]))
+					{
+						memset(d->GlyphMap, 0, Bytes);
+
+						int Bits = Bytes << 3;
+						for (int i=0; i<Bits; i++)
+						{
+							if (pango_coverage_get(c, i))
+								d->GlyphMap[i>>3] |= 1 << (i & 0x7);
+						}
+					}
+					Gtk::pango_coverage_unref(c);
+				}
+				
+				g_object_unref(fnt);
+			}
+			#endif
 			
 			return true;
 		}
@@ -1826,7 +1854,7 @@ public:
 	}
 };
 
-#ifdef MAC
+#if defined USE_CORETEXT
 
 bool MacGetSystemFont(GTypeFace &Info, CTFontUIFontType Which)
 {
@@ -2031,7 +2059,7 @@ bool GFontType::GetSystemFont(const char *Which)
 			#elif defined MAC
 			
 
-				#if USE_CORETEXT
+				#ifdef USE_CORETEXT
 
 				Status = MacGetSystemFont(Info, kCTFontUIFontControlContent);
 
@@ -2317,7 +2345,7 @@ bool GFontType::GetSystemFont(const char *Which)
 		{
 			#if LGI_SDL
 			
-				LgiAssert(!"Impl me.");
+			LgiAssert(!"Impl me.");
 			
 			#elif defined WINNATIVE
 
@@ -2332,7 +2360,7 @@ bool GFontType::GetSystemFont(const char *Which)
 			Info.PointSize(12);
 			Status = true;
 
-			#elif defined LINUX
+			#elif defined __GTK_H__
 
 			Info.Face("Courier New");
 			Info.PointSize(DefSize);
@@ -2341,6 +2369,10 @@ bool GFontType::GetSystemFont(const char *Which)
 			#elif defined MAC
 			
 			Status = MacGetSystemFont(Info, kCTFontUIFontUserFixedPitch);
+
+			#else
+
+			#error "Impl me"
 
 			#endif
 		}

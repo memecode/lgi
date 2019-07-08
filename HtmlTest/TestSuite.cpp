@@ -399,10 +399,6 @@ public:
 
 				Script.Reset(new GScriptEngine(this, Html, NULL));
 
-                #ifdef _GHTML_H
-				if (Html)
-					Html->SetEnv(this);
-				#endif
 				if (Html)
 					Html->SetEnv(this);
 				
@@ -412,7 +408,9 @@ public:
 					if (stristr(Base, "Release") || stristr(Base, "Debug"))
 						LgiTrimDir(Base);
 					#endif
-					#if defined(MAC)
+					#if defined(MAC) && defined(__GTK_H__)
+					LgiMakePath(Base, sizeof(Base), Base, "../../../..");
+					#elif defined(MAC) || defined(__GTK_H__)
 					LgiMakePath(Base, sizeof(Base), Base, "../../..");
 					#endif
 

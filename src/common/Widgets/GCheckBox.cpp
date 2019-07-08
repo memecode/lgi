@@ -159,7 +159,9 @@ bool GCheckBox::Name(const char *n)
 		d->Empty();
 		d->Add(n, GetCss());
 		d->SetBaseFont(GetFont());
-		d->DoLayout(X());
+		
+		auto x = X();
+		d->DoLayout(x ? x : GdcD->X());
 		
 		d->Unlock();
 	}
@@ -173,9 +175,17 @@ bool GCheckBox::NameW(const char16 *n)
 	if (d->Lock(_FL))
 	{
 		Status = GView::NameW(n);
+
+		d->Empty();
+		d->Add(GBase::Name(), GetCss());
+		d->SetBaseFont(GetFont());
+
+		auto x = X();
+		d->DoLayout(x ? x : GdcD->X());
+
 		d->Unlock();
 	}
-	d->Layout(X());
+
 	return Status;
 }
 
@@ -343,7 +353,7 @@ void GCheckBox::OnPaint(GSurface *pDC)
 			d->Unlock();
 		}
 
-		#if defined MAC && !defined COCOA && !defined(LGI_SDL)
+		#if defined LGI_CARBON
 
 			if (!cBack.IsTransparent())
 			{

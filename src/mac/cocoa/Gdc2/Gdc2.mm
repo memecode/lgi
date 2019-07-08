@@ -576,7 +576,7 @@ bool GGlobalColour::MakeGlobalPalette()
 		d->Global = new GPalette(0, 256);
 		if (d->Global)
 		{
-			for (GSurface *pDC = d->Cache.First(); pDC; pDC = d->Cache.Next())
+			for (auto pDC: d->Cache)
 			{
 				for (int y=0; y<pDC->Y(); y++)
 				{

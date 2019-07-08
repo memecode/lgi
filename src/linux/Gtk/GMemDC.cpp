@@ -15,9 +15,6 @@
 #include "GString.h"
 using namespace Gtk;
 
-#define UnTranslate()		// if (d->p) d->p->translate(OriginX, OriginY);
-#define Translate()			// if (d->p) d->p->translate(-OriginX, -OriginY);
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ROUND_UP(bits) (((bits) + 7) / 8)
 
@@ -25,15 +22,24 @@ class GMemDCPrivate
 {
 public:
 	GRect Client;
+	cairo_t *cr;
+	#if GTK_MAJOR_VERSION == 3
+	cairo_surface_t *Img;
+	#else
 	GdkImage *Img;
 	cairo_surface_t *Surface;
+	#endif
 	GColourSpace CreateCs;
 
     GMemDCPrivate()
     {
 		Client.ZOff(-1, -1);
-		Img = 0;
-		Surface = 0;
+		cr = NULL;
+		Img = NULL;
+		#if GTK_MAJOR_VERSION == 3
+		#else
+		Surface = NULL;
+		#endif
 		CreateCs = CsNone;
     }
 
@@ -41,12 +47,17 @@ public:
     {
 		if (Img)
 		{
-			g_object_unref(Img);
+			cairo_surface_destroy(Img);
+			Img = NULL;
 		}
+		#if GTK_MAJOR_VERSION == 3
+		#else
 		if (Surface)
 		{
 			cairo_surface_destroy(Surface);
+			Surface = NULL;
 		}
+		#endif
 	}
 };
 
@@ -78,7 +89,10 @@ cairo_surface_t *GMemDC::GetSurface(GRect &r)
 {
 	if (!d->Img)
 		return NULL;
-
+	
+	#if GTK_MAJOR_VERSION == 3
+	cairo_format_t fmt = cairo_image_surface_get_format(d->Img);
+	#else
 	cairo_format_t fmt = CAIRO_FORMAT_ARGB32;
 	switch (d->Img->depth)
 	{
@@ -90,17 +104,31 @@ cairo_surface_t *GMemDC::GetSurface(GRect &r)
 			printf("%s:%i - '%i' bit depth that cairo supports\n", _FL, d->Img->depth);
 			return NULL;
 	}
+	#endif
 
 	int pixel_bytes = GColourSpaceToBits(ColourSpace) >> 3;
+	#if GTK_MAJOR_VERSION == 3
+	return cairo_image_surface_create_for_data(	pMem->Base + (r.y1 * pMem->Line) + (r.x1 * pixel_bytes),
+												fmt,
+												r.X(),
+												r.Y(),
+												pMem->Line);
+	#else
 	return cairo_image_surface_create_for_data(	((uchar*)d->Img->mem) + (r.y1 * d->Img->bpl) + (r.x1 * pixel_bytes),
 												fmt,
 												r.X(),
 												r.Y(),
 												d->Img->bpl);
+	#endif
 }
 
 OsPainter GMemDC::Handle()
 {
+	#if GTK_MAJOR_VERSION == 3
+	if (!d->cr)
+		d->cr = cairo_create(d->Img);
+	return d->cr;
+	#else
 	if (!Cairo)
 	{
 		cairo_format_t fmt = CAIRO_FORMAT_ARGB32;
@@ -151,22 +179,38 @@ OsPainter GMemDC::Handle()
 	}
 
 	return Cairo;
+	#endif
 }
 
-Gtk::GdkPixbuf *GMemDC::CreatePixBuf()
+void FreeMemDC(guchar *pixels, GMemDC *data)
 {
-	Gtk::GdkPixbuf *Pb =
-		gdk_pixbuf_new_from_data ((*this)[0],
-              GDK_COLORSPACE_RGB,
-              HasAlpha(),
-              8,
-              X(),
-              Y(),
-              GetRowStep(),
-              NULL,
-              NULL);
+	delete data;	
+}
+
+GdkPixbuf *GMemDC::CreatePixBuf()
+{
+	GMemDC *Tmp = new GMemDC(X(), Y(), CsRgba32, SurfaceRequireExactCs);
+	if (!Tmp)
+		return NULL;
+
+	Tmp->Colour(0, 32);
+	Tmp->Rectangle();
+	Tmp->Op(GDC_ALPHA);
+	Tmp->Blt(0, 0, this);
+
+	GdkPixbuf *Pb =
+		gdk_pixbuf_new_from_data ((*Tmp)[0],
+								  GDK_COLORSPACE_RGB,
+								  true,
+								  8,
+								  Tmp->X(),
+								  Tmp->Y(),
+								  Tmp->GetRowStep(),
+								  (GdkPixbufDestroyNotify) FreeMemDC,
+								  Tmp);
 	if (!Pb)
 		printf("%s:%i - gdk_pixbuf_new_from_data failed.\n", _FL);
+
 	return Pb;
 }
 
@@ -176,7 +220,11 @@ bool GMemDC::SupportsAlphaCompositing()
 	return true;
 }
 
+#if GTK_MAJOR_VERSION == 3
+Gtk::cairo_surface_t *GMemDC::GetImage()
+#else
 GdkImage *GMemDC::GetImage()
+#endif
 {
     return d->Img;
 }
@@ -226,8 +274,8 @@ void GMemDC::Empty()
 {
 	if (d->Img)
 	{
-		g_object_unref(d->Img);
-		d->Img = 0;
+		cairo_surface_destroy(d->Img);
+		d->Img = NULL;
 	}
 }
 
@@ -241,12 +289,24 @@ bool GMemDC::Unlock()
 	return false;
 }
 
+void GMemDC::GetOrigin(int &x, int &y)
+{
+	GSurface::GetOrigin(x, y);
+}
+
 void GMemDC::SetOrigin(int x, int y)
 {
 	Handle();
-	UnTranslate();
 	GSurface::SetOrigin(x, y);
-	Translate();
+
+	if (d->cr)
+	{		
+		cairo_matrix_t m;
+		cairo_get_matrix(d->cr, &m);
+		m.x0 = -x;
+		m.y0 = -y;
+		cairo_set_matrix(d->cr, &m);
+	}
 }
 
 GColourSpace GMemDC::GetCreateCs()
@@ -265,42 +325,32 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 		Bits = 8;
 
 	Empty();
+
+	bool Exact = (Flags & SurfaceRequireExactCs) != 0;
 	d->CreateCs = Cs;
 	
-	GdkVisual Fallback;
-	GdkVisual *Vis = gdk_visual_get_system();
-	GColourSpace VisCs = Vis ? GdkVisualToColourSpace(Vis, Bits) : CsNone;
-	if (Bits == 8)
+	cairo_format_t fmt = CAIRO_FORMAT_RGB24;
+	switch (Bits)
 	{
-		GdkVisual *Vis8 = gdk_visual_get_best_with_depth(8);
-		if (Vis8)
-		{
-			// Yay an 8 bit visual!
-		    Vis = Vis8;
-		}
-		else
-		{
-			Vis = NULL;
-	    }
-	}
-	
-	if (Vis &&
-		VisCs != Cs &&
-		(Flags & SurfaceRequireExactCs) != 0)
-	{
-		Vis = NULL;
-	}
-	
-	if (Vis)
-	{
-		d->Img = gdk_image_new(	GDK_IMAGE_FASTEST,
-								Vis,
-								x,
-								y);
-	}
-	else
-	{
-		d->Img = NULL;
+		case 8:
+			fmt = CAIRO_FORMAT_A8;
+			ColourSpace = CsIndex8;
+			break;
+		case 16:
+			fmt = CAIRO_FORMAT_RGB16_565;
+			ColourSpace = CsRgb16;
+			break;
+		case 24:
+			fmt = CAIRO_FORMAT_RGB24;
+			ColourSpace = CsBgrx32;
+			break;
+		case 32:
+			fmt = CAIRO_FORMAT_ARGB32;
+			ColourSpace = CsBgra32;
+			break;
+		default:
+			ColourSpace = CsNone;
+			return false;
 	}
 
 	if (!pMem)
@@ -311,45 +361,46 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	pMem->x = x;
 	pMem->y = y;
 	pMem->Flags = 0;
-	if (d->Img)
+	pMem->Cs = CsNone;
+
+	if (d->CreateCs != ColourSpace  &&
+		Exact)
 	{
-		// Use the GdkImage memory
-		pMem->Line = d->Img->bpl;
-		pMem->Base = (uchar*)d->Img->mem;
-		pMem->Cs = GdkVisualToColourSpace(d->Img->visual, d->Img->bits_per_pixel);
+		// Don't bother creating a cairo imaage surface, as the colour space we want is not
+		// supported. Just create an in memory bitmap.
+		pMem->OwnMem(true);
+		pMem->Line = ((pMem->x * Bits + 31) / 32) * 4;
+		LgiAssert(pMem->Line > 0);
+		pMem->Base = new uchar[pMem->Line * pMem->y];
+		pMem->Cs = ColourSpace = Cs;
 	}
 	else
 	{
-		// Generate our own memory
-		pMem->Line = (((pMem->x * Bits) + 31) / 32) << 2;
-		pMem->Base = new uchar[pMem->y * pMem->Line];
-		pMem->Cs = Cs;
-		pMem->Flags |= GBmpMem::BmpOwnMemory;
+		d->Img = cairo_image_surface_create (fmt, x, y);
+		if (!d->Img)
+			return false;
+
+		switch (cairo_image_surface_get_format(d->Img))
+		{
+			case CAIRO_FORMAT_ARGB32:
+				pMem->Cs = CsBgra32;
+				break;
+			case CAIRO_FORMAT_RGB24:
+				pMem->Cs = CsBgrx32;
+				break;
+			case CAIRO_FORMAT_A8:
+				pMem->Cs = CsIndex8;
+				break;
+			case CAIRO_FORMAT_RGB16_565:
+				pMem->Cs = CsRgb16;
+				break;
+			default:
+				LgiAssert(0);
+				return false;
+		}			
+		pMem->Base = cairo_image_surface_get_data(d->Img);
+		pMem->Line = cairo_image_surface_get_stride(d->Img);
 	}
-	
-	ColourSpace = pMem->Cs;
-
-	#if 0
-	if (Vis && d->Img)
-		printf("GMemDC::Create(%i,%i,%i) gdk_image_new(vis=%i,%i,%i,%i) img(%i,%i,%p) cs=%s\n",
-			x, y, Bits,
-			Vis->depth, Vis->byte_order, Vis->colormap_size, Vis->bits_per_rgb,
-			d->Img->bits_per_pixel,
-			d->Img->bpl,
-			d->Img->mem,
-			GColourSpaceToString(ColourSpace));
-	#endif
-
-	#if 0
-	printf("Created gdk image %ix%i @ %i bpp line=%i (%i) ptr=%p Vis=%p\n",
-		pMem->x,
-		pMem->y,
-		pMem->Bits,
-		pMem->Line,
-		pMem->Bits*pMem->x/8,
-		pMem->Base,
-		Vis);
-	#endif
 
 	int NewOp = (pApp) ? Op() : GDC_SET;
 
@@ -399,7 +450,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 		return;
 
 	GScreenDC *Screen;
-	if (Screen = Src->IsScreen())
+	if ((Screen = Src->IsScreen()))
 	{
 		if (pMem->Base)
 		{
@@ -410,6 +461,9 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 				gint x_orig, y_orig;
 				gint width, height;
 
+				#if GTK_MAJOR_VERSION == 3
+				LgiAssert(!"Gtk3 FIXME");
+				#else
 				gdk_drawable_get_size(root_window, &width, &height);      
 				gdk_window_get_origin(root_window, &x_orig, &y_orig);
 				gdk_drawable_copy_to_image(	root_window,
@@ -420,6 +474,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 											y,
 											br.SrcClip.X(),
 											br.SrcClip.Y());
+				#endif
 				
 				// Call the capture screen handler to draw anything between the screen and
 				// cursor layers

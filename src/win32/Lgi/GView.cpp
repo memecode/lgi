@@ -485,7 +485,7 @@ void GView::_Delete()
 	}
 
 	// Delete all children
-	GViewI *c;	
+	GViewI *c;
 	while (c = Children[0])
 	{
 		// If it has no parent, remove the pointer from the child list,

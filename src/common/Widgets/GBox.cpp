@@ -648,7 +648,10 @@ int GBox::OnNotify(GViewI *Ctrl, int Flags)
 	if (Flags == GNotifyTableLayout_Refresh)
 	{
 		d->Dirty = true;
+		
+		#ifndef __GTK_H__
 		if (Handle())
+		#endif
 			PostEvent(M_CHILDREN_CHANGED);
 	}
 		
@@ -664,7 +667,9 @@ void GBox::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 	#endif
 	
 	d->Dirty = true;
+	#ifndef __GTK_H__
 	if (Handle())
+	#endif
 		PostEvent(M_CHILDREN_CHANGED);
 }
 

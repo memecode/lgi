@@ -87,7 +87,7 @@ bool GFileSelect::ReadOnly()
 
 char *GFileSelect::Name()
 {
-	return d->Files.First();
+	return d->Files[0];
 }
 
 bool GFileSelect::Name(const char *n)

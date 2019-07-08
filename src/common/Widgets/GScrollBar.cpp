@@ -5,7 +5,7 @@
 // #define DrawBorder(dc, r, edge) LgiWideBorder(dc, r, edge)
 #define DrawBorder(dc, r, edge) LgiThinBorder(dc, r, edge)
 
-#if defined(MAC) && !defined(LGI_SDL) && !COCOA
+#if defined(LGI_CARBON)
 #define MAC_SKIN		1
 #else
 #define MAC_SKIN		0

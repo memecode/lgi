@@ -17,22 +17,42 @@ using namespace Gtk;
 typedef ::GMenuItem LgiMenuItem;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+static ::GArray<GSubMenu*> Active;
+
+void SubMenuDestroy(GSubMenu *Item)
+{
+	// LgiTrace("DestroySub %p %p\n", Item, Item->Info);
+	Item->Info = NULL;
+}
+
 GSubMenu::GSubMenu(const char *name, bool Popup)
 {
 	Menu = NULL;
 	Parent = NULL;
 	Info = NULL;
 	_ContextMenuId = NULL;
+	ActiveTs = 0;
 	InLoop = false;
 	
 	if (name)
 	{
 		Info = GtkCast(Gtk::gtk_menu_new(), gtk_menu_shell, GtkMenuShell);
+		// LgiTrace("CreateSub %p %p\n", this, Info);
+		auto ret = Gtk::g_signal_connect_data(Info,
+										"destroy",
+										(Gtk::GCallback) SubMenuDestroy,
+										this,
+										NULL,
+										Gtk::G_CONNECT_SWAPPED);
 	}
+
+	Active.Add(this);
 }
 
 GSubMenu::~GSubMenu()
 {
+	Active.Delete(this);
+
 	while (Items.Length())
 	{
 		LgiMenuItem *i = Items[0];
@@ -42,13 +62,85 @@ GSubMenu::~GSubMenu()
 	
 	if (Info)
 	{
-		// bool IsMenu = Menu == this;
+		#if GTK_MAJOR_VERSION == 2
 		LgiAssert(Info->container.widget.object.parent_instance.g_type_instance.g_class);
+		#endif
 		Gtk::GtkWidget *w = GtkCast(Info, gtk_widget, GtkWidget);
-		// LgiTrace("%p::~GSubMenu w=%p name=%s IsMenu=%i\n", this, w, Name(), IsMenu);
 		Gtk::gtk_widget_destroy(w);
 		Info = NULL;
 	}
+}
+
+// This will be run in the GUI thread..
+gboolean GSubMenuClick(GMouse *m)
+{
+	if (!m)
+		return false;
+
+	bool OverMenu = false, HasVisible = false;
+	uint64 ActiveTs = 0;
+
+	for (auto s: Active)
+	{
+		auto w = GTK_WIDGET(s->Handle());
+		auto vis = gtk_widget_is_visible(w);
+		if (vis)
+		{
+			auto src = gtk_widget_get_screen(w);
+			// auto hnd = gdk_screen_get_root_window(src);
+			auto hnd = gtk_widget_get_window(w);
+
+			ActiveTs = MAX(s->ActiveTs, ActiveTs);
+			HasVisible = true;
+
+			GdkRectangle a;
+			gdk_window_get_frame_extents(hnd, &a);
+			/*
+			LgiTrace("SubClk down=%i, pos=%i,%i sub=%i,%i-%i,%i\n",
+				m->Down(),
+				m->x, m->y,
+				a.x, a.y, a.width, a.height);
+				*/
+
+			GRect rc = a;
+			if (rc.Overlap(m->x, m->y))
+				OverMenu = true;
+		}
+	}
+
+	if (m->Down() && !OverMenu && HasVisible && ActiveTs > 0)
+	{
+		uint64 Now = LgiCurrentTime();
+		uint64 Since = Now - ActiveTs;
+		LgiTrace("%s:%i - GSubMenuClick, Since=" LPrintfInt64 "\n", _FL, Since);
+
+		if (Since > 500)
+		{
+			for (auto s: Active)
+			{
+				auto w = GTK_WIDGET(s->Handle());
+				auto vis = gtk_widget_is_visible(w);
+				if (vis && s->ActiveTs)
+				{
+					gtk_widget_hide(w);
+					s->ActiveTs = 0;
+				}
+			}
+		}
+	}
+	// else LgiTrace("GSubMenuClick Down=%i OverMenu=%i HasVIsible=%i ActiveTs=%i\n", m->Down(), OverMenu, HasVisible, ActiveTs > 0);
+
+	DeleteObj(m);
+
+	return false;
+}
+
+// This is not called in the GUI thread..
+void GSubMenu::SysMouseClick(GMouse &m)
+{
+	GMouse *ms = new GMouse;
+	*ms = m;
+	g_idle_add((GSourceFunc) GSubMenuClick, ms);
 }
 
 size_t GSubMenu::Length()
@@ -63,15 +155,14 @@ LgiMenuItem *GSubMenu::ItemAt(int Id)
 
 LgiMenuItem *GSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where, const char *Shortcut)
 {
-	LgiMenuItem *i = new LgiMenuItem(Menu, this, Str, Where < 0 ? Items.Length() : Where, Shortcut);
+	LgiMenuItem *i = new LgiMenuItem(Menu, this, Str, Id, Where < 0 ? Items.Length() : Where, Shortcut);
 	if (i)
 	{
-		i->Id(Id);
 		i->Enabled(Enabled);
 
 		Items.Insert(i, Where);
 
-		GtkWidget *item = GtkCast(i->Handle(), gtk_widget, GtkWidget);
+		GtkWidget *item = GTK_WIDGET(i->Handle());
 		LgiAssert(item);
 		if (item)
 		{
@@ -96,12 +187,12 @@ LgiMenuItem *GSubMenu::AppendSeparator(int Where)
 
 		Items.Insert(i, Where);
 
-		Gtk::GtkWidget *item = GtkCast(i->Handle(), gtk_widget, GtkWidget);
+		GtkWidget *item = GTK_WIDGET(i->Handle());
 		LgiAssert(item);
 		if (item)
 		{
-			Gtk::gtk_menu_shell_append(Info, item);
-			Gtk::gtk_widget_show(item);
+			gtk_menu_shell_append(Info, item);
+			gtk_widget_show(item);
 		}
 		
 		return i;
@@ -119,15 +210,15 @@ GSubMenu *GSubMenu::AppendSub(const char *Str, int Where)
 		i->Id(-1);
 		Items.Insert(i, Where);
 
-		Gtk::GtkWidget *item = GtkCast(i->Handle(), gtk_widget, GtkWidget);
+		GtkWidget *item = GTK_WIDGET(i->Handle());
 		LgiAssert(item);
 		if (item)
 		{
 			if (Where < 0)
-				Gtk::gtk_menu_shell_append(Info, item);
+				gtk_menu_shell_append(Info, item);
 			else
-				Gtk::gtk_menu_shell_insert(Info, item, Where);
-			Gtk::gtk_widget_show(item);
+				gtk_menu_shell_insert(Info, item, Where);
+			gtk_widget_show(item);
 		}
 
 		i->Child = new GSubMenu(Str);
@@ -137,12 +228,12 @@ GSubMenu *GSubMenu::AppendSub(const char *Str, int Where)
 			i->Child->Menu = Menu;
 			i->Child->Window = Window;
 			
-			Gtk::GtkWidget *sub = GtkCast(i->Child->Handle(), gtk_widget, GtkWidget);
+			GtkWidget *sub = GTK_WIDGET(i->Child->Handle());
 			LgiAssert(sub);
 			if (i->Handle() && sub)
 			{
-				Gtk::gtk_menu_item_set_submenu(i->Handle(), sub);
-				Gtk::gtk_widget_show(sub);
+				gtk_menu_item_set_submenu(i->Handle(), sub);
+				gtk_widget_show(sub);
 			}
 			else
 				LgiTrace("%s:%i Error: gtk_menu_item_set_submenu(%p,%p) failed\n", _FL, i->Handle(), sub);
@@ -166,7 +257,7 @@ void GSubMenu::ClearHandle()
 void GSubMenu::Empty()
 {
 	LgiMenuItem *i;
-	while (i = Items[0])
+	while ((i = Items[0]))
 	{
 		RemoveItem(i);
 		DeleteObj(i);
@@ -207,27 +298,36 @@ bool GSubMenu::IsContext(LgiMenuItem *Item)
 	return true;
 }
 
-void GSubMenuDeactivate(Gtk::GtkMenuShell *widget, GSubMenu *Sub)
+void GtkDeactivate(Gtk::GtkMenuShell *widget, GSubMenu *Sub)
 {
-	Sub->OnDeactivate();
+	Sub->OnActivate(false);
 }
 
-void GSubMenu::OnDeactivate()
+void GSubMenu::OnActivate(bool a)
 {
-	if (_ContextMenuId)
-		*_ContextMenuId = 0;
-		
-	if (InLoop)
+	if (!a)
 	{
-		Gtk::gtk_main_quit();
-		InLoop = false;
+		if (_ContextMenuId)
+			*_ContextMenuId = 0;
+		
+		if (InLoop)
+		{
+			Gtk::gtk_main_quit();
+			InLoop = false;
+		}
 	}
 }
-                                                         
+
 int GSubMenu::Float(GView *From, int x, int y, int Button)
 {
 	static int Depth = 0;
 
+	#ifdef __GTK_H__
+	GWindow *Wnd = From->GetWindow();
+	if (!Wnd)
+		return -1;
+	Wnd->Capture(false);
+	#else
 	while (From && !From->Handle())
 	{
 		From = dynamic_cast<GView*>(From->GetParent());
@@ -241,50 +341,28 @@ int GSubMenu::Float(GView *From, int x, int y, int Button)
 	
 	if (From->IsCapturing())
 		From->Capture(false);
+	#endif
+
+	ActiveTs = LgiCurrentTime();
 
 	// This signal handles the case where the user cancels the menu by clicking away from it.
-	Gtk::g_signal_connect_data(GtkCast(Info, g_object, GObject), 
-						"deactivate", 
-						(Gtk::GCallback)GSubMenuDeactivate,
-						this, NULL, (Gtk::GConnectFlags) 0);
+	auto Obj = G_OBJECT(Info);
+	g_signal_connect(Obj, "deactivate",  (GCallback)GtkDeactivate, this);
 	
-	Gtk::gtk_widget_show_all(GtkCast(Info, gtk_widget, GtkWidget));
+	auto Widget = GTK_WIDGET(Info);
+	gtk_widget_show_all(Widget);
 
 	int MenuId = 0;
 	_ContextMenuId = &MenuId;
 
 	GdcPt2 Pos(x, y);
-	Gtk::gtk_menu_popup(GtkCast(Info, gtk_menu, GtkMenu),
-						NULL, NULL, NULL, NULL,
-						Button,
-						Gtk::gtk_get_current_event_time());
+	gtk_menu_popup(GTK_MENU(Info),
+					NULL, NULL, NULL, NULL,
+					Button,
+					gtk_get_current_event_time());
 
-	// In the case where there is no mouse button down, the popup menu can fail to 
-	// show. If that happens and we enter the gtk_main loop then the application will
-	// be a bad state. No GSubMenuDeactivate event will get called to exit the float
-	// loop. There may be a better way to do this.
-	Gtk::GdkScreen *screen = NULL;
-	Gtk::gint mx, my;
-	Gtk::GdkModifierType mask;
-	Gtk::gdk_display_get_pointer(Gtk::gdk_display_get_default(),
-								&screen,
-								&mx,
-								&my,
-								&mask);
-	if
-	(
-		Button == 0
-		||
-		(
-			mask & (GDK_BUTTON1_MASK|GDK_BUTTON2_MASK|GDK_BUTTON3_MASK|GDK_BUTTON4_MASK|GDK_BUTTON5_MASK)
-		)
-	)
-	{
-		InLoop = true;
-		Gtk::gtk_main();
-	}
-	else LgiTrace("%s:%i - Popup loop avoided, no button down?\n", _FL);
-
+	InLoop = true;
+	gtk_main();
 	_ContextMenuId = NULL;
 	return MenuId;
 }
@@ -370,39 +448,60 @@ static GAutoString MenuItemParse(const char *s)
 	return GAutoString(NewStr(buf));
 }
 
-static void MenuItemCallback(LgiMenuItem *Item)
+static void MenuItemActivate(GtkMenuItem *MenuItem, LgiMenuItem *Item)
 {
-	if (!Item->Sub() && !Item->InSetCheck)
+	Item->OnGtkEvent("activate");
+}
+
+static void MenuItemDestroy(GtkWidget *widget, LgiMenuItem *Item)
+{
+	Item->OnGtkEvent("destroy");
+}
+
+void LgiMenuItem::OnGtkEvent(::GString Event)
+{
+	if (Event.Equals("activate"))
 	{
-		GSubMenu *Parent = Item->GetParent();
-		
-		if (!Parent || !Parent->IsContext(Item))
+		if (!Sub() && !InSetCheck)
 		{
-			::GMenu *m = Item->GetMenu();
-			if (m)
+			GSubMenu *Parent = GetParent();
+		
+			if (!Parent || !Parent->IsContext(this))
 			{
-				// Attached to a mean, so send an event to the window
-				GViewI *w = m->WindowHandle();
-				if (w)
-					w->PostEvent(M_COMMAND, Item->Id());
+				::GMenu *m = GetMenu();
+				if (m)
+				{
+					// Attached to a menu, so send an event to the window
+					GViewI *w = m->WindowHandle();
+					if (w)
+						w->PostEvent(M_COMMAND, Id());
+					else
+						LgiAssert(!"No window for menu to send to");
+				}
 				else
-					LgiAssert(!"No window for menu to send to");
-			}
-			else
-			{
-				// Could be just a popup menu... in which case do nothing.				
+				{
+					// Could be just a popup menu... in which case do nothing.				
+				}
 			}
 		}
+	}
+	else if (Event.Equals("destroy"))
+	{
+		// LgiTrace("DestroyItem %p %p\n", this, Info);
+		Info = NULL;
 	}
 }
 
 LgiMenuItem::GMenuItem()
 {
-	Info = GtkCast(Gtk::gtk_separator_menu_item_new(), gtk_menu_item, GtkMenuItem);
+	d = NULL;
+	Info = NULL;
 	Child = NULL;
 	Menu = NULL;
 	Parent = NULL;
 	InSetCheck = false;
+
+	Handle(GTK_MENU_ITEM(gtk_separator_menu_item_new()));
 	
 	Position = -1;
 	
@@ -411,19 +510,15 @@ LgiMenuItem::GMenuItem()
 	_Id = 0;
 }
 
-LgiMenuItem::GMenuItem(::GMenu *m, GSubMenu *p, const char *txt, int Pos, const char *shortcut)
+LgiMenuItem::GMenuItem(::GMenu *m, GSubMenu *p, const char *txt, int id, int Pos, const char *shortcut)
 {
+	d = NULL;
 	GAutoString Txt = MenuItemParse(txt);
 	GBase::Name(txt);
-	Info = GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(Txt));
-	
-	Gtk::gulong ret = Gtk::g_signal_connect_data(Info,
-												"activate",
-												(Gtk::GCallback) MenuItemCallback,
-												this,
-												NULL,
-												Gtk::G_CONNECT_SWAPPED);
+	Info = NULL;
 
+	Handle(GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(Txt)));
+	
 	Child = NULL;
 	Menu = m;
 	Parent = p;
@@ -433,16 +528,26 @@ LgiMenuItem::GMenuItem(::GMenu *m, GSubMenu *p, const char *txt, int Pos, const 
 
 	_Flags = 0;	
 	_Icon = -1;
-	_Id = 0;
+	_Id = id;
 
 	ShortCut = shortcut;
 	ScanForAccel();
 }
 
+void LgiMenuItem::Handle(GtkMenuItem *mi)
+{
+	LgiAssert(Info == NULL);	
+	if (Info != mi)
+	{
+		Info = mi;
+		Gtk::g_signal_connect(Info, "activate", (Gtk::GCallback) MenuItemActivate, this);
+		Gtk::g_signal_connect(Info, "destroy", (Gtk::GCallback) MenuItemDestroy, this);
+	}
+}
+
 LgiMenuItem::~GMenuItem()
 {
-	if (Info)
-		Remove();
+	Remove();
 	DeleteObj(Child);
 }
 
@@ -702,7 +807,9 @@ bool LgiMenuItem::ScanForAccel()
 				printf("%s:%i - No gtk key for '%s'\n", _FL, Sc);
 			}
 			
-			Menu->Accel.Insert( new GAccelerator(Flags, Key, Id()) );
+			auto Ident = Id();
+			LgiAssert(Ident > 0);
+			Menu->Accel.Insert( new GAccelerator(Flags, Key, Ident) );
 		}
 		else
 		{
@@ -735,15 +842,20 @@ bool LgiMenuItem::Remove()
 
 	if (Info)
 	{
+		#if GTK_MAJOR_VERSION == 2
 		LgiAssert(Info->item.bin.container.widget.object.parent_instance.g_type_instance.g_class);
+		#endif
+		// LgiTrace("Remove %p %p\n", this, Info);
 		Gtk::GtkWidget *w = GtkCast(Info, gtk_widget, GtkWidget);
 		if (Gtk::gtk_widget_get_parent(w))
 		{		
 			Gtk::GtkContainer *c = GtkCast(Parent->Info, gtk_container, GtkContainer);
 			Gtk::gtk_container_remove(c, w);
 		}
+		Info = NULL;
 	}
 
+	LgiAssert(Parent->Items.HasItem(this));
 	Parent->Items.Delete(this);
 	Parent = NULL;
 	return true;
@@ -836,7 +948,7 @@ bool LgiMenuItem::Replace(Gtk::GtkWidget *newWid)
 		g_object_unref(Info);
 	}
 	
-	Info = GTK_MENU_ITEM(newWid);
+	Handle(GTK_MENU_ITEM(newWid));
 	return Info != NULL;
 }
 
@@ -856,7 +968,7 @@ void LgiMenuItem::Icon(int i)
 			// Attach our signal
 			gulong ret = g_signal_connect_data(	w,
 												"activate",
-												(GCallback) MenuItemCallback,
+												(GCallback) MenuItemActivate,
 												this,
 												NULL,
 												G_CONNECT_SWAPPED);
@@ -908,15 +1020,18 @@ void LgiMenuItem::Icon(int i)
 				IconImg->Blt(0, 0, lst, &r);
 				
 				// Get the sub-image of the icon
-				GdkImage *img = IconImg->GetImage();
+				auto img = IconImg->GetImage();
 				if (!img)
 				{
 					LgiTrace("%s:%i - GetImage failed.\n", _FL);
 					return;
 				}
-				
 				// Create a new widget to wrap it...
-				GtkWidget *img_wid = gtk_image_new_from_image(img, NULL);
+				#if GTK_MAJOR_VERSION == 3
+				auto img_wid = gtk_image_new_from_surface(img);
+				#else
+				auto img_wid = gtk_image_new_from_image(img, NULL);
+				#endif
 				if (!img_wid)
 				{
 					LgiTrace("%s:%i - gtk_image_new_from_image failed.\n", _FL);
@@ -957,7 +1072,7 @@ void LgiMenuItem::Checked(bool c)
 			// Attach our signal
 			gulong ret = g_signal_connect_data(	w,
 												"activate",
-												(GCallback) MenuItemCallback,
+												(GCallback) MenuItemActivate,
 												this,
 												NULL,
 												G_CONNECT_SWAPPED);
@@ -1143,7 +1258,6 @@ bool ::GMenu::Attach(GViewI *p)
 	}
 		
 	Window = Wnd;
-	Gtk::GtkWidget *Root = NULL;
 	if (Wnd->_VBox)
 	{
 		LgiAssert(!"Already has a menu");
@@ -1153,18 +1267,18 @@ bool ::GMenu::Attach(GViewI *p)
 	
 	Gtk::GtkWidget *menubar = GtkCast(Info, gtk_widget, GtkWidget);
 
-	Wnd->_VBox = Gtk::gtk_vbox_new(false, 0);
+	Wnd->_VBox = Gtk::gtk_box_new(Gtk::GTK_ORIENTATION_VERTICAL, 0);
 
 	Gtk::GtkBox *vbox = GtkCast(Wnd->_VBox, gtk_box, GtkBox);
 	Gtk::GtkContainer *wndcontainer = GtkCast(Wnd->Wnd, gtk_container, GtkContainer);
 
 	g_object_ref(Wnd->_Root);
+	
 	gtk_container_remove(wndcontainer, Wnd->_Root);
-
-	gtk_container_add(wndcontainer, Wnd->_VBox);
-
 	gtk_box_pack_start(vbox, menubar, false, false, 0);
 	gtk_box_pack_end(vbox, Wnd->_Root, true, true, 0);
+	gtk_container_add(wndcontainer, Wnd->_VBox);
+
 	g_object_unref(Wnd->_Root);
 
 	gtk_widget_show_all(GtkCast(Wnd->Wnd, gtk_widget, GtkWidget));
@@ -1193,7 +1307,7 @@ bool ::GMenu::OnKey(GView *v, GKey &k)
 		{
 			if (a->Match(k))
 			{
-				// printf("Matched accel\n");
+				LgiAssert(a->GetId() > 0);
 				Window->OnCommand(a->GetId(), 0, 0);
 				return true;
 			}
@@ -1295,9 +1409,9 @@ bool GAccelerator::Match(GKey &k)
 	{
 		if
 		(
-			(TestFlag(Flags, LGI_EF_CTRL) ^ k.Ctrl() == 0) &&
-			(TestFlag(Flags, LGI_EF_ALT) ^ k.Alt() == 0) &&
-			(TestFlag(Flags, LGI_EF_SHIFT) ^ k.Shift() == 0)
+			((TestFlag(Flags, LGI_EF_CTRL) ^ k.Ctrl()) == 0) &&
+			((TestFlag(Flags, LGI_EF_ALT) ^ k.Alt()) == 0) &&
+			((TestFlag(Flags, LGI_EF_SHIFT) ^ k.Shift()) == 0)
 		)				
 		{
 			return true;

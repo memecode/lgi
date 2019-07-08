@@ -19,10 +19,10 @@ enum PopupNotifications
 #ifndef WH_MOUSE_LL
 #define WH_MOUSE_LL        14
 #endif
-
 #if !defined(MAKELONG)
 #define MAKELONG(low, high) ( ((low) & 0xffff) | ((high) << 16) )
 #endif
+#define MOUSE_POLL_MS		100
 
 #if defined(__GTK_H__)
 
@@ -153,7 +153,7 @@ public:
 				Cur.x = (int)p.x;
 				Cur.y = (int)p.y;
 				
-				#else
+				#elif defined LGI_CARBON
 				
 				HIPoint p;
 				HIGetMousePosition(kHICoordSpaceScreenPixel, NULL, &p);
@@ -186,8 +186,14 @@ public:
 			GMouse m;
 			v.GetMouse(m, true);
 
-			if (LockWithTimeout(500, _FL))
+			if (LockWithTimeout(100, _FL))
 			{
+				if (m.Down() ^ Old.Down())
+				{
+					// m.Trace("Hook");
+					GSubMenu::SysMouseClick(m);
+				}
+
 				if (m.Down() && !Old.Down()) 
 				{
 					// Down click....
@@ -195,9 +201,8 @@ public:
 					GPopup *Over = 0;
 					GPopup *w;
 
-					for (auto it = Popups.begin(); it != Popups.end(); it++)
+					for (auto w: Popups)
 					{
-						w = *it;
 						if (w->GetPos().Overlap(m.x, m.y))
 						{
 							Over = w;
@@ -205,9 +210,8 @@ public:
 						}
 					}
 					
-					for (auto it = Popups.begin(); it != Popups.end(); it++)
+					for (auto w: Popups)
 					{
-						w = *it;
 						#if 0
 						LgiTrace("PopupLoop: Over=%p w=%p, w->Vis=%i, Time=%i\n",
 							Over,
@@ -222,7 +226,7 @@ public:
 						{
 							bool Close = true;
 
-							#if defined WIN32
+							#if WINNATIVE
 							// This is a bit of a hack to prevent GPopup's with open context menus from
 							// closing when the user clicks on the context menu.
 							//
@@ -408,7 +412,7 @@ public:
 
 			Old = m;
 
-			LgiSleep(40);
+			LgiSleep(MOUSE_POLL_MS);
 			#endif
 		}
 
@@ -432,8 +436,12 @@ void GMouseHook::TrackClick(GView *v)
 	#ifdef MAC
 	if (v)
 	{
+		#ifdef __GTK_H__
+		if (v->IsAttached())
+		#else
 		d->ViewHandle = v->Handle();
 		if (d->ViewHandle)
+		#endif
 		{
 			d->Event.Signal();
 		}
@@ -533,21 +541,15 @@ public:
 ::GArray<GPopup*> GPopup::CurrentPopups;
 
 GPopup::GPopup(GView *owner)
-	#ifdef CARBON
+	#ifdef LGI_CARBON
 	: GWindow(CreateBorderlessWindow())
+	#elif defined(__GTK_H__)
+	: GWindow(gtk_window_new(GTK_WINDOW_POPUP))
 	#endif
 {
 	d = new GPopupPrivate;
 	Start = 0;
 	Cancelled = false;
-	#ifdef _DEBUG
-	// _Debug = true;
-	#endif
-
-    #ifdef __GTK_H__
-    Wnd = NULL;
-    #endif
-
     CurrentPopups.Add(this);
 
 	if ((Owner = owner))
@@ -556,7 +558,7 @@ GPopup::GPopup(GView *owner)
 		Owner->PopupChild() = this;
 		#endif
 		
-		#ifndef MAC
+		#if !defined(MAC) && !defined(__GTK_H__)
 		_Window = Owner->GetWindow();
 		#endif
 		SetNotify(Owner);
@@ -584,12 +586,6 @@ GPopup::~GPopup()
 		}
 		#endif
 	}
-
-    #ifdef __GTK_H__
-    Detach();
-    if (Wnd)
-        gtk_widget_destroy(Wnd);
-    #endif
 
 	GMouseHook *Hook = LgiApp->GetMouseHook();
 	if (Hook) Hook->UnregisterPopup(this);
@@ -656,12 +652,18 @@ gboolean PopupEvent(GtkWidget *widget, GdkEvent *event, GPopup *This)
 			This->OnFocus(event->focus_change.in);
 			break;
 		}
+		#if GTK_MAJOR_VERSION == 3
+		#else
 		case GDK_CLIENT_EVENT:
 		{
-			GMessage m(event);
+			GMessage m;
+			m.m = event->client.data.l[0];
+			m.a = event->client.data.l[1];
+			m.b = event->client.data.l[2];
 			This->OnEvent(&m);
 			break;
 		}
+		#endif
 		case GDK_BUTTON_PRESS:
 		{
 			break;
@@ -701,78 +703,19 @@ bool GPopup::Attach(GViewI *p)
 	AttachChildren();
 
 	#elif defined __GTK_H__
-	
-	if (!Wnd)
-	{
-	    Wnd = gtk_window_new(GTK_WINDOW_POPUP);
-	    
-	    gtk_window_set_decorated(GTK_WINDOW(Wnd), FALSE);
-		gtk_widget_add_events(Wnd, GDK_ALL_EVENTS_MASK);
 
-		if (!p)
-			p = Owner;
-		GtkWidget *toplevel = p ? gtk_widget_get_toplevel(p->Handle()) : NULL;
-		if (GTK_IS_WINDOW(toplevel))
-			gtk_window_set_transient_for(GTK_WINDOW(Wnd), GTK_WINDOW(toplevel));
-		else
-		{
-			LgiTrace("%s:%i - toplevel isn't window?\n", _FL);
-			return false;
-		}
-
-        g_signal_connect(	G_OBJECT(Wnd),
-							"button-press-event",
-							G_CALLBACK(PopupEvent),
-							this);
-        g_signal_connect(	G_OBJECT(Wnd),
-							"focus-in-event",
-							G_CALLBACK(PopupEvent),
-							this);
-        g_signal_connect(	G_OBJECT(Wnd),
-							"focus-out-event",
-							G_CALLBACK(PopupEvent),
-							this);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"delete_event",
-							G_CALLBACK(PopupEvent),
-							this);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"configure-event",
-							G_CALLBACK(PopupEvent),
-							this);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"button-press-event",
-							G_CALLBACK(PopupEvent),
-							this);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"client-event",
-							G_CALLBACK(PopupEvent),
-							this);
-	}
-
-	if (Wnd && Pos.Valid())
-	{
-		gtk_window_set_default_size(GTK_WINDOW(Wnd), Pos.X(), Pos.Y());
-		gtk_window_move(GTK_WINDOW(Wnd), Pos.x1, Pos.y1);
-	}
-
-    if (!_View)
-    {
-	    _View = lgi_widget_new(this, Pos.X(), Pos.Y(), true);
-	    gtk_container_add(GTK_CONTAINER(Wnd), _View);
-	}
+	gtk_window_set_decorated(WindowHandle(), FALSE);
+	return GWindow::Attach(p);
 
 	#endif
 
-	if (!_Window)
-	{
-		if (Owner)
-			_Window = Owner->GetWindow();
-		else
-			_Window = p->GetWindow();
-	}
+	GetWindow();
 
+	#ifdef __GTK_H__
+	return true;
+	#else
 	return Handle() != 0;
+	#endif
 
 	#endif
 }
@@ -790,7 +733,8 @@ void GPopup::Visible(bool i)
 
 	#if defined __GTK_H__
 	
-		if (i && !Wnd)
+		auto Wnd = WindowHandle();
+		if (i && !IsAttached())
 		{
 			if (!Attach(0))
 			{
@@ -804,14 +748,14 @@ void GPopup::Visible(bool i)
 	    {
 		    if (i)
 		    {
-		        gtk_widget_show_all(Wnd);
-				gtk_window_move(GTK_WINDOW(Wnd), Pos.x1, Pos.y1);
-				gtk_window_resize(GTK_WINDOW(Wnd), Pos.X(), Pos.Y());
+		        gtk_widget_show_all(GTK_WIDGET(Wnd));
+				gtk_window_move(Wnd, Pos.x1, Pos.y1);
+				gtk_window_resize(Wnd, Pos.X(), Pos.Y());
 				// printf("%s:%i - Showing Wnd %s.\n", _FL, Pos.GetStr());
 		    }
 		    else
 		    {
-		        gtk_widget_hide(Wnd);
+		        gtk_widget_hide(GTK_WIDGET(Wnd));
 				// printf("%s:%i - Hiding Wnd.\n", _FL);
 		    }
 		}
@@ -941,7 +885,7 @@ bool GPopup::Visible()
 	    {
 			GView::Visible(
 							#if GtkVer(2, 18)
-							gtk_widget_get_visible(Wnd)
+							gtk_widget_get_visible(GTK_WIDGET(WindowHandle()))
 							#else
 							(GTK_OBJECT_FLAGS (Wnd) & GTK_VISIBLE) != 0
 							#endif
@@ -1003,7 +947,7 @@ void GDropDown::OnPaint(GSurface *pDC)
 	if (!r.Valid())
 		return;
 
-	#if defined(MAC) && !defined(COCOA) && !defined(LGI_SDL)
+	#if defined(LGI_CARBON)
 	GColour NoPaintColour(LC_MED, 24);
 	if (GetCss())
 	{

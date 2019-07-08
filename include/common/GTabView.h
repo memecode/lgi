@@ -71,7 +71,7 @@ public:
 	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
 	GRect &GetTabClient();
 
-	#if defined(WIN32) && !defined(LGI_SDL)
+	#if defined(WINNATIVE) && !defined(LGI_SDL)
 	GViewI *FindControl(HWND hCtrl);
 	#endif
 

@@ -116,7 +116,11 @@ GFontSystem::GFontSystem()
 
 	d->SubSupport =	(Os == LGI_OS_LINUX) ||
 					(Os == LGI_OS_WIN64) ||
-					(Os == LGI_OS_WIN32); //  && Rev == 0);  // WinXP does it's own glyph substitution
+					(Os == LGI_OS_WIN32)
+					#ifdef __GTK_H__
+					|| (Os == LGI_OS_MAC_OS_X)
+					#endif
+					; //  && Rev == 0);  // WinXP does it's own glyph substitution
 	d->DefaultGlyphSub = d->SubSupport;
 	d->CheckedConfig = false;
 	d->FontTableLoaded = false;
@@ -332,7 +336,7 @@ bool GFontSystem::HasIconv(bool Quiet)
 	return Status;
 }
 
-#if defined MAC && !defined COCOA
+#if defined LGI_CARBON
 // This converts a normal charset to an Apple encoding ID
 static CFStringEncoding CharsetToEncoding(const char *cs)
 {
@@ -355,7 +359,7 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, GStreamI *Out, const char *
 	    
 #if defined(MAC)
 
-	#if !defined COCOA
+	#if defined LGI_CARBON
 	char Buf[2 << 10];
 	CFStringEncoding InEnc = CharsetToEncoding(InCs);
 	CFStringEncoding OutEnc = CharsetToEncoding(OutCs);
@@ -431,7 +435,7 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, char *Out, ssize_t OutLen, 
 
 #if defined(MAC)
 
-	#if !defined COCOA
+	#if defined LGI_CARBON
 	CFStringEncoding InEnc = CharsetToEncoding(InCs);
 	CFStringEncoding OutEnc = CharsetToEncoding(OutCs);
 	if (InEnc != kCFStringEncodingInvalidId &&
@@ -725,7 +729,8 @@ GFont *GFontSystem::GetGlyph(uint32_t u, GFont *UserFont)
 					if (AddFont(Fnt))
 					{
 						GFont *Prev = Font[d->Used - 1];
-						if (_HasUnicodeGlyph(Prev->GetGlyphMap(), u))
+						auto PrevMap = Prev->GetGlyphMap();
+						if (PrevMap && _HasUnicodeGlyph(Prev->GetGlyphMap(), u))
 						{
 							Has = Prev;
 							LgiAssert(Has != NULL);

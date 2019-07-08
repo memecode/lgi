@@ -1345,7 +1345,7 @@ bool GXmlTree::Read(GXmlTag *Root, GStreamI *File, GXmlFactory *Factory)
 	bool First = true;
 	while (d->Current && Ptr && *Ptr)
 	{
-		bool NoChildren;
+		bool NoChildren = true;
 		
 		GAutoPtr<GXmlTag> t
 		(
@@ -1508,7 +1508,7 @@ void GXmlTree::Output(GXmlTag *t, int Depth)
 				d->File->Write((char*)"\n", 1);
 			}
 
-			for (; c; c = ++It)
+			for (; c; c = *(++It))
 			{
 				Output(c, Depth + (d->NoDom() ? 0 : 1));
 			}

@@ -78,7 +78,8 @@ public:
 
 GApplicator *GApp8::Create(GColourSpace Cs, int Op)
 {
-	if (Cs == CsIndex8)
+	if (Cs == CsIndex8 ||
+		Cs == CsAlpha8)
 	{
 		switch (Op)
 		{

@@ -742,8 +742,7 @@ public:
 				REG Pixel *e = s + x;
 				while (s < e)
 				{
-					*this->p = px;
-					s++;
+					*s++ = px;
 				}
 				this->u8 += this->Dest->Line;
 			}
@@ -1071,6 +1070,7 @@ public:
 			switch (Src->Cs)
 			{
 				case CsIndex8:
+				case CsAlpha8:
 				{
 					System24BitPixel c[256];
 					CreatePaletteLut(c, SPal);

@@ -7,8 +7,12 @@
 #include "GPanel.h"
 #include "GNotifications.h"
 
+#include "GViewPriv.h"
 using namespace Gtk;
+#if GTK_MAJOR_VERSION == 3
+#else
 #include <gdk/gdkx.h>
+#endif
 #undef Status
 #include "LgiWidget.h"
 
@@ -58,7 +62,11 @@ public:
 		Sx = Sy = 0;
 		Dynamic = true;
 		SnapToEdge = false;
-		ZeroObj(LastKey);		
+
+		LastKey.vkey = 0;
+		LastKey.c16 = 0;
+		LastKey.Data = 0;
+		LastKey.IsChar = 0;
 	}
 	
 	int GetHookIndex(GView *Target, bool Create = false)
@@ -119,17 +127,27 @@ GWindow::~GWindow()
 		LgiApp->AppWnd = NULL;
 
     if (_Root)
+	{
+		lgi_widget_detach(_Root);
         _Root = NULL;
+	}
+	if (Wnd)
+ 	{
+		gtk_widget_destroy(GTK_WIDGET(Wnd));
+		Wnd = NULL;
+ 	}
 
 	DeleteObj(Menu);
 	DeleteObj(d);
 	DeleteObj(_Lock);
 }
 
+/*
 static void PixbufDestroyNotify(guchar *pixels, GSurface *data)
 {
 	delete data;
 }
+*/
 
 bool GWindow::SetIcon(const char *FileName)
 {
@@ -155,14 +173,14 @@ bool GWindow::SetIcon(const char *FileName)
 			LgiApp->SetApplicationIcon(FileName);
 			#endif
 			
-			/*
+			#if _MSC_VER
 			if (gtk_window_set_icon_from_file(Wnd, FileName, &error))
 				return true;
-			*/
+			#else
+			// On windows this is giving a red for blue channel swap error...
 			if (d->IconImg.Reset(GdcD->Load(a)))
-			{
 				gtk_window_set_icon(Wnd, d->IconImg->CreatePixBuf());
-			}
+			#endif
 		}
 	}
 	
@@ -196,21 +214,11 @@ void GWindow::Visible(bool i)
 {
 	ThreadCheck();
 
+	auto w = GTK_WIDGET(Wnd);
 	if (i)
-	{
-		gtk_widget_show(GTK_WIDGET(Wnd));
-
-		/*
-		static bool First = true;
-		if (First)
-		{
-			First = false;
-			RequestFrameExtents(GTK_WIDGET(Wnd));
-		}
-		*/
-	}
+		gtk_widget_show(w);
 	else
-		gtk_widget_hide(GTK_WIDGET(Wnd));
+		gtk_widget_hide(w);
 }
 
 bool GWindow::Obscured()
@@ -255,7 +263,9 @@ void GWindow::OnGtkDelete()
 	
 	// These will be destroyed by GTK after returning from GWindowCallback
 	Wnd = NULL;
+	#ifndef __GTK_H__
 	_View = NULL;
+	#endif
 }
 
 GRect *GWindow::GetDecorSize()
@@ -263,17 +273,56 @@ GRect *GWindow::GetDecorSize()
 	return d->Decor.x2 >= 0 ? &d->Decor : NULL;
 }
 
+GViewI *GWindow::WindowFromPoint(int x, int y, bool Debug)
+{
+	if (!_Root)
+		return NULL;
+
+	auto rpos = GtkGetPos(_Root).ZeroTranslate();
+	if (!rpos.Overlap(x, y))
+		return NULL;
+
+	return GView::WindowFromPoint(x - rpos.x1, y - rpos.y1, Debug);
+}
+
+bool GWindow::TranslateMouse(GMouse &m)
+{
+	m.Target = WindowFromPoint(m.x, m.y, false);
+	if (!m.Target)
+		return false;
+
+	GViewI *w = this;
+	for (auto p = m.Target; p; p = p->GetParent())
+	{
+		if (p == w)
+		{
+			auto ppos = GtkGetPos(GTK_WIDGET(WindowHandle()));
+			m.x -= ppos.x1;
+			m.y -= ppos.y1;
+			break;
+		}
+		else
+		{
+			auto pos = p->GetPos();
+			m.x -= pos.x1;
+			m.y -= pos.y1;
+		}
+	}
+
+	return true;
+}
+
 gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 {
 	if (!event)
 	{
-		printf("%s:%i - No event %i\n", _FL);
+		printf("%s:%i - No event.\n", _FL);
 		return FALSE;
 	}
 
 	#if 0
 	if (event->type != 28)
-		printf("%s::OnGtkEvent(%i) name=%s\n", GetClass(), event->type, Name());
+		LgiTrace("%s::OnGtkEvent(%i) name=%s\n", GetClass(), event->type, Name());
 	#endif
 	switch (event->type)
 	{
@@ -289,9 +338,149 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			delete this;
 			return true;
 		}
+		case GDK_KEY_PRESS:
+		case GDK_KEY_RELEASE:
+		{
+			auto Class = G_OBJECT_TYPE_NAME(widget);
+			auto e = &event->key;
+			#define KEY(name) GDK_KEY_##name
+
+			GKey k;
+			k.Down(e->type == GDK_KEY_PRESS);
+			k.c16 = k.vkey = e->keyval;
+			k.Shift((e->state & 1) != 0);
+			k.Ctrl((e->state & 4) != 0);
+			k.Alt((e->state & 8) != 0);
+		
+			k.IsChar = !k.Ctrl() &&
+						!k.Alt() && 
+						(k.c16 >= ' ') &&
+						(k.c16 >> 8 != 0xff);
+			if (e->keyval > 0xff && e->string != NULL)
+			{
+				// Convert string to unicode char
+				auto *i = e->string;
+				ptrdiff_t len = strlen(i);
+				k.c16 = LgiUtf8To32((uint8_t *&) i, len);
+			}
+		
+			switch (k.vkey)
+			{
+				case KEY(ISO_Left_Tab):
+				case KEY(Tab):
+					k.IsChar = true;
+					k.c16 = k.vkey = VK_TAB;
+					break;
+				case KEY(Return):
+				case KEY(KP_Enter):
+					k.IsChar = true;
+					k.c16 = k.vkey = VK_RETURN;
+					break;
+				case KEY(BackSpace):
+					k.c16 = k.vkey = VK_BACKSPACE;
+					k.IsChar = !k.Ctrl() && !k.Alt();
+					break;
+				case KEY(Left):
+					k.vkey = k.c16 = VK_LEFT;
+					break;
+				case KEY(Right):
+					k.vkey = k.c16 = VK_RIGHT;
+					break;
+				case KEY(Up):
+					k.vkey = k.c16 = VK_UP;
+					break;
+				case KEY(Down):
+					k.vkey = k.c16 = VK_DOWN;
+					break;
+				case KEY(Page_Up):
+					k.vkey = k.c16 = VK_PAGEUP;
+					break;
+				case KEY(Page_Down):
+					k.vkey = k.c16 = VK_PAGEDOWN;
+					break;
+				case KEY(Home):
+					k.vkey = k.c16 = VK_HOME;
+					break;
+				case KEY(End):
+					k.vkey = k.c16 = VK_END;
+					break;
+				case KEY(Delete):
+					k.vkey = k.c16 = VK_DELETE;
+					break;
+			
+				#define KeyPadMap(gdksym, ch, is) \
+					case gdksym: k.c16 = ch; k.IsChar = is; break;
+			
+				KeyPadMap(KEY(KP_0), '0', true)
+				KeyPadMap(KEY(KP_1), '1', true)
+				KeyPadMap(KEY(KP_2), '2', true)
+				KeyPadMap(KEY(KP_3), '3', true)
+				KeyPadMap(KEY(KP_4), '4', true)
+				KeyPadMap(KEY(KP_5), '5', true)
+				KeyPadMap(KEY(KP_6), '6', true)
+				KeyPadMap(KEY(KP_7), '7', true)
+				KeyPadMap(KEY(KP_8), '8', true)
+				KeyPadMap(KEY(KP_9), '9', true)
+
+				KeyPadMap(KEY(KP_Space), ' ', true)
+				KeyPadMap(KEY(KP_Tab), '\t', true)
+				KeyPadMap(KEY(KP_F1), VK_F1, false)
+				KeyPadMap(KEY(KP_F2), VK_F2, false)
+				KeyPadMap(KEY(KP_F3), VK_F3, false)
+				KeyPadMap(KEY(KP_F4), VK_F4, false)
+				KeyPadMap(KEY(KP_Home), VK_HOME, false)
+				KeyPadMap(KEY(KP_Left), VK_LEFT, false)
+				KeyPadMap(KEY(KP_Up), VK_UP, false)
+				KeyPadMap(KEY(KP_Right), VK_RIGHT, false)
+				KeyPadMap(KEY(KP_Down), VK_DOWN, false)
+				KeyPadMap(KEY(KP_Page_Up), VK_PAGEUP, false)
+				KeyPadMap(KEY(KP_Page_Down), VK_PAGEDOWN, false)
+				KeyPadMap(KEY(KP_End), VK_END, false)
+				KeyPadMap(KEY(KP_Begin), VK_HOME, false)
+				KeyPadMap(KEY(KP_Insert), VK_INSERT, false)
+				KeyPadMap(KEY(KP_Delete), VK_DELETE, false)
+				KeyPadMap(KEY(KP_Equal), '=', true)
+				KeyPadMap(KEY(KP_Multiply), '*', true)
+				KeyPadMap(KEY(KP_Add), '+', true)
+				KeyPadMap(KEY(KP_Separator), '|', true) // is this right?
+				KeyPadMap(KEY(KP_Subtract), '-', true)
+				KeyPadMap(KEY(KP_Decimal), '.', true)
+				KeyPadMap(KEY(KP_Divide), '/', true)
+			}
+		
+			#if DEBUG_KEY_EVENT
+			k.Trace("gtk_key_event");
+			#endif
+
+			auto v = d->Focus ? d->Focus : this;
+			if (!HandleViewKey(v->GetGView(), k))
+			{
+				if ((k.vkey == VK_TAB || k.vkey == KEY(ISO_Left_Tab)) &&
+					k.Down())
+				{
+					// Do tab between controls
+					::GArray<GViewI*> a;
+					BuildTabStops(this, a);
+					int idx = a.IndexOf((GViewI*)v);
+					if (idx >= 0)
+					{
+						idx += k.Shift() ? -1 : 1;
+						int next_idx = idx == 0 ? a.Length() -1 : idx % a.Length();                    
+						GViewI *next = a[next_idx];
+						if (next)
+						{
+							// LgiTrace("Setting focus to %i of %i: %s, %s, %i\n", next_idx, a.Length(), next->GetClass(), next->GetPos().GetStr(), next->GetId());
+							next->Focus(true);
+						}
+					}
+				}
+				else return false;
+			}
+			break;
+		}
 		case GDK_CONFIGURE:
 		{
-			GdkEventConfigure *c = (GdkEventConfigure*)event;
+			GdkEventConfigure *c = &event->configure;
 			Pos.Set(c->x, c->y, c->x+c->width-1, c->y+c->height-1);
 			OnPosChange();
 			return FALSE;
@@ -342,16 +531,10 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 	  		g_free(Name);		
 			break;
 		}
-		case GDK_CLIENT_EVENT:
-		{
-			GMessage m(event);
-			OnEvent(&m);
-			break;
-		}
 		default:
 		{
 			printf("%s:%i - Unknown event %i\n", _FL, event->type);
-			break;
+			return false;
 		}
 	}
 	
@@ -370,8 +553,34 @@ static
 void
 GtkWindowRealize(GtkWidget *widget, GWindow *This)
 {
+	#if 0
+	LgiTrace("GtkWindowRealize, This=%p(%s\"%s\")\n",
+		This, (NativeInt)This > 0x1000 ? This->GetClass() : 0, (NativeInt)This > 0x1000 ? This->Name() : 0);
+	#endif
+
 	This->OnGtkRealize();
 }
+
+static
+void
+GtkRootResize(GtkWidget *widget, GdkRectangle *alloc, GView *This)
+{
+	GWindow *w = This->GetWindow();
+	if (w)
+		w->PourAll();
+}
+
+static void
+activate_quit (GSimpleAction *action,
+               Gtk::GVariant      *parameter,
+               gpointer       user_data)
+{
+	int asd=0;
+}
+
+static GActionEntry app_entries[] = {
+	{ "quit", activate_quit, NULL, NULL, NULL },
+};
 
 bool GWindow::Attach(GViewI *p)
 {
@@ -380,71 +589,71 @@ bool GWindow::Attach(GViewI *p)
 	ThreadCheck();
 	
 	if (!Wnd)
-	{
-		if (Wnd = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL)))
-		{
-			g_object_set_data(G_OBJECT(Wnd), "GViewI", (GViewI*)this);
-		}
-	}
+		Wnd = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
+
 	if (Wnd)
 	{
-		_View = GTK_WIDGET(Wnd);
+		auto Widget = GTK_WIDGET(Wnd);
 		GView *i = this;
+		gtk_window_resize(Wnd, Pos.X(), Pos.Y());
+		gtk_window_move(Wnd, Pos.x1, Pos.y1);
 		
-		d->DestroySig = g_signal_connect(
-							G_OBJECT(Wnd),
-							"destroy",
-							G_CALLBACK(GtkWindowDestroy),
-							this);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"delete_event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"configure-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"button-press-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"focus-in-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"focus-out-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"client-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"window-state-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"property-notify-event",
-							G_CALLBACK(GtkViewCallback),
-							i);
-		g_signal_connect(	G_OBJECT(Wnd),
-							"realize",
-							G_CALLBACK(GtkWindowRealize),
-							i);							
+		auto Obj = G_OBJECT(Wnd);
+		g_object_set_data(Obj, "GViewI", (GViewI*)this);
 
-		gtk_window_set_default_size(GTK_WINDOW(Wnd), Pos.X(), Pos.Y());
-		gtk_widget_add_events(GTK_WIDGET(Wnd), GDK_ALL_EVENTS_MASK);
+		d->DestroySig = g_signal_connect(Obj, "destroy", G_CALLBACK(GtkWindowDestroy), this);
+		g_signal_connect(Obj, "realize",				G_CALLBACK(GtkWindowRealize), i);							
+		g_signal_connect(Obj, "delete_event",			G_CALLBACK(GtkViewCallback), i);
+		#if 0
+		g_signal_connect(Obj, "button-press-event",		G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "button-release-event",	G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "motion-notify-event",	G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "scroll-event",			G_CALLBACK(GtkViewCallback), i);
+		#endif
+		g_signal_connect(Obj, "key-press-event",		G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "key-release-event",		G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "focus-in-event",			G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "focus-out-event",		G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "window-state-event",		G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "property-notify-event",	G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "configure-event",		G_CALLBACK(GtkViewCallback), i);
+
+		gtk_widget_add_events(Widget, GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
-		
-        if (_Root = lgi_widget_new(this, Pos.X(), Pos.Y(), true))
+
+		// g_action_map_add_action_entries (G_ACTION_MAP(Wnd), app_entries, G_N_ELEMENTS (app_entries), Wnd);
+
+		if ((_Root = lgi_widget_new(this, true)))
         {
-            gtk_container_add(GTK_CONTAINER(Wnd), _Root);
+			g_signal_connect(_Root, "size-allocate", G_CALLBACK(GtkRootResize), i);
+
+			if (GTK_IS_DIALOG(Wnd))
+			{
+				auto content = gtk_dialog_get_content_area(GTK_DIALOG(Wnd));
+				if (!content)
+				{
+					LgiAssert(!"No content area");
+					return false;
+				}
+				gtk_container_add(GTK_CONTAINER(content), _Root);
+			}
+			else
+			{
+				gtk_container_add(GTK_CONTAINER(Wnd), _Root);
+			}
+
+			auto p = gtk_widget_get_parent(_Root);
+			if (!p)
+			{
+				LgiAssert(!"Add failed");
+				return false;
+			}
+
             gtk_widget_show(_Root);
         }
 
 		// This call sets up the GdkWindow handle
-		gtk_widget_realize(GTK_WIDGET(Wnd));
+		gtk_widget_realize(Widget);
 		
 		// Do a rough layout of child windows
 		PourAll();
@@ -629,6 +838,11 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 		}
 	}
 
+	if (k.Ctrl() && k.c16 == 'c')
+	{
+		int asd=0;
+	}
+
 	// Give the key to the window...
 	if (v->OnKey(k))
 	{
@@ -761,6 +975,8 @@ GWindowZoom GWindow::GetZoom()
 			return GZoomMin;
 		case GDK_WINDOW_STATE_MAXIMIZED:
 			return GZoomMax;
+		default:
+			break;
 	}
 
 	return GZoomNormal;
@@ -849,17 +1065,13 @@ struct CallbackParams
 
 void ClientCallback(GtkWidget *w, CallbackParams *p)
 {
-	/*
-	printf("%.*sCallback %s\n",
-		p->Depth,
-		"                                         ", gtk_widget_get_name(w));
-	*/
 	const char *Name = gtk_widget_get_name(w);
 	if (Name && !_stricmp(Name, "GtkMenuBar"))
 	{
-		GtkRequisition alloc;
-		gtk_widget_size_request(w, &alloc);
+		GtkAllocation alloc = {0};
+		gtk_widget_get_allocation(w, &alloc);
 		p->Menu.ZOff(alloc.width-1, alloc.height-1);
+		// LgiTrace("GtkMenuBar = %s\n", p->Menu.GetStr());
 	}
 	
 	if (!p->Menu.Valid())
@@ -875,16 +1087,15 @@ GRect &GWindow::GetClient(bool ClientSpace)
 {
 	static GRect r;
 	r = GView::GetClient(ClientSpace);
+
 	if (Wnd)
 	{
 		CallbackParams p;
 		gtk_container_forall(GTK_CONTAINER(Wnd), (GtkCallback)ClientCallback, &p);
 		if (p.Menu.Valid())
-		{
-			// printf("MenuSize=%s\n", p.Menu.GetStr());
-			r.y2 -= p.Menu.Y();
-		}
+			r.y1 += p.Menu.Y();
 	}
+
 	return r;
 }
 
@@ -947,7 +1158,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 
 GRect &GWindow::GetPos()
 {
-	if (Wnd && _View)
+	if (Wnd)
 	{
 		/*
 		OsRect r = _View->geometry();
@@ -981,10 +1192,11 @@ bool GWindow::SetPos(GRect &p, bool Repaint)
 	{
 		ThreadCheck();
 		
-		GtkWindow *w = GTK_WINDOW(Wnd);
-		gtk_window_set_default_size(w, Pos.X(), Pos.Y());
-		gtk_window_move(w, Pos.x1, Pos.y1);
+		gtk_window_resize(Wnd, Pos.X(), Pos.Y());
+		gtk_window_move(Wnd, Pos.x1, Pos.y1);
 	}
+
+	OnPosChange();
 	return true;
 }
 
@@ -996,12 +1208,7 @@ void GWindow::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 
 void GWindow::OnCreate()
 {
-}
-
-void GWindow::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)
-{
-	GRect r = GetClient();
-	GView::_Paint(pDC, Offset, Update);
+	AttachChildren();
 }
 
 void GWindow::OnPaint(GSurface *pDC)
@@ -1014,11 +1221,11 @@ void GWindow::OnPosChange()
 {
 	GView::OnPosChange();
 
-	//if (d->Sx != X() ||	d->Sy != Y())
+	if (d->Sx != X() ||	d->Sy != Y())
 	{
 		PourAll();
-		//d->Sx = X();
-		//d->Sy = Y();
+		d->Sx = X();
+		d->Sy = Y();
 	}
 }
 
@@ -1031,7 +1238,12 @@ void GWindow::OnPosChange()
 
 void GWindow::PourAll()
 {
-	GRegion Client(GetClient());
+	GRect c;
+	if (_Root)
+		c = GtkGetPos(_Root).ZeroTranslate();
+	else
+		c = GetClient();
+	GRegion Client(c);
 	GViewI *MenuView = 0;
 
 	GRegion Update(Client);
@@ -1048,7 +1260,8 @@ void GWindow::PourAll()
 			if (!IsMenu && IsTool(v))
 			{
 				GRect OldPos = v->GetPos();
-				Update.Union(&OldPos);
+				if (OldPos.Valid())
+					Update.Union(&OldPos);
 				
 				if (HasTools)
 				{
@@ -1088,6 +1301,7 @@ void GWindow::PourAll()
 						}
 
 						GRect Bar(v->GetPos());
+						// LgiTrace("%s = %s\n", v->GetClass(), Bar.GetStr());
 						Bar.x2 = GetClient().x2;
 
 						Tools = Bar;
@@ -1107,16 +1321,15 @@ void GWindow::PourAll()
 		if (!IsMenu && !IsTool(v))
 		{
 			GRect OldPos = v->GetPos();
-			Update.Union(&OldPos);
+			if (OldPos.Valid())
+				Update.Union(&OldPos);
 
 			if (v->Pour(Client))
 			{
-				GRect p = v->GetPos();
-
+				// GRect p = v->GetPos();
+				// LgiTrace("%s = %s\n", v->GetClass(), p.GetStr());
 				if (!v->Visible())
-				{
 					v->Visible(true);
-				}
 
 				v->Invalidate();
 
@@ -1134,6 +1347,8 @@ void GWindow::PourAll()
 	{
 		Invalidate(Update[i]);
 	}
+
+	// _Dump();
 }
 
 /*
@@ -1445,9 +1660,10 @@ void GWindow::Quit(bool DontDelete)
 {
 	ThreadCheck();
 	
-	if (_View)
+	if (Wnd)
 	{
-		gtk_widget_destroy(_View);
+		gtk_widget_destroy(GTK_WIDGET(Wnd));
+		Wnd = NULL;
 	}
 }
 

@@ -27,6 +27,7 @@ public:
 	EditTray(GTextView3 *ctrl, IdeDoc *doc);
 	~EditTray();
 	
+	const char *GetClass() override { return "EditTray"; }
 	void GotoSearch(int CtrlId, char *InitialText = NULL);	
 	void OnCreate();
 	void OnPosChange();

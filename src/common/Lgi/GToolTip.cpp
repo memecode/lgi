@@ -2,9 +2,9 @@
 #define _WIN32_WINNT 0x500
 #include "Lgi.h"
 
-#if defined(WIN32)
+#if defined(WIN32) && !defined(__GTK_H__)
 	#include <commctrl.h>
-#elif defined(MAC)
+#elif defined(LGI_CARBON)
 	#include <Carbon/Carbon.h>
 #elif !defined(BEOS)
 	#define LGI_NATIVE_TIPS 1
@@ -104,7 +104,7 @@ public:
 		}
 	}
 	
-	bool Name(char *n)
+	bool Name(const char *n)
 	{
 		bool Status = GView::Name(n);
 		if (s.Reset(new GDisplayString(SysFont, GView::Name())))
@@ -160,7 +160,7 @@ class GToolTipPrivate
 public:
 	int NextUid;
 
-	#if defined(MAC)
+	#if defined(LGI_CARBON)
 	HMHelpContentRec Tag;
 	#elif LGI_NATIVE_TIPS
 	GView *Parent;
@@ -208,7 +208,7 @@ int GToolTip::NewTip(char *Name, GRect &Pos)
 		#if COCOA
 
 
-		#else
+		#elif defined LGI_CARBON
 	
 			#ifdef __MACHELP__
 			HMSetHelpTagsDisplayed(true);

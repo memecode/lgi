@@ -265,6 +265,7 @@ public:
 		// Load the file...
 		Img.Reset(GdcD->Load(File));
 		
+		#ifndef __GTK_H__
 		if (!Owner->Handle())
 		{
 			// Wait for the view to be created...
@@ -279,6 +280,7 @@ public:
 				}
 			}
 		}
+		#endif
 		
 		Owner->PostEvent(M_LOAD, 0, (GMessage::Param) this);
 		return 0;

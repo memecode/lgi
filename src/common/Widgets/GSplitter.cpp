@@ -205,6 +205,7 @@ void GSplitter::Value(int64 s)
 	}
 }
 
+#ifndef __GTK_H__
 GViewI *GSplitter::FindControl(OsView hCtrl)
 {
 	GViewI *c = 0;
@@ -214,6 +215,7 @@ GViewI *GSplitter::FindControl(OsView hCtrl)
 	if (d->ViewB) c = d->ViewB->FindControl(hCtrl);
 	return c;
 }
+#endif
 
 void GSplitter::CalcRegions(bool Follow)
 {
@@ -367,7 +369,7 @@ void GSplitter::OnPaint(GSurface *pDC)
 
 		if (d->ViewA)
 		{
-			#ifdef WIN32
+			#if defined(WIN32) && !defined(__GTK_H__)
 			if (!d->ViewA->Handle())
 			{
 				pDC->SetClient(&d->PosA);
@@ -401,7 +403,7 @@ void GSplitter::OnPaint(GSurface *pDC)
 
 		if (d->ViewB)
 		{
-			#ifdef WIN32
+			#if defined(WIN32) && !defined(__GTK_H__)
 			if (!d->ViewB->Handle())
 			{
 				pDC->SetClient(&d->PosB);

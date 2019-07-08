@@ -1893,7 +1893,6 @@ void GTableLayoutPrivate::Layout(GRect &Client)
 
 	if (Prof) Prof->Add("Notify");
 
-	Ctrl->SendNotify(GNotifyTableLayout_LayoutChanged);
 	#if DEBUG_PROFILE
 	LgiTrace("GTableLayout::Layout(%i) = %i ms\n", Ctrl->GetId(), (int)(LgiCurrentTime()-Start));
 	#endif
@@ -1908,6 +1907,8 @@ void GTableLayoutPrivate::Layout(GRect &Client)
 	#endif
 	
 	InLayout = false;
+
+	Ctrl->SendNotify(GNotifyTableLayout_LayoutChanged);
 }
 
 GTableLayout::GTableLayout(int id) : ResObject(Res_Table)
@@ -2115,31 +2116,28 @@ bool GTableLayout::SetVariant(const char *Name, GVariant &Value, char *Array)
 	}
 	else if (stricmp(Name, "cell") == 0)
 	{
-		if (Array)
+		if (!Array)
+			return false;
+
+		GToken t(Array, ",");
+		if (t.Length() != 2)
+			return false;
+
+		int cx = atoi(t[0]);
+		int cy = atoi(t[1]);
+		TableCell *c = new TableCell(this, cx, cy);
+		if (!c)
+			return false;
+
+		d->Cells.Add(c);
+		if (Value.Type == GV_VOID_PTR)
 		{
-			GToken t(Array, ",");
-			if (t.Length() == 2)
+			GDom **d = (GDom**)Value.Value.Ptr;
+			if (d)
 			{
-				int cx = atoi(t[0]);
-				int cy = atoi(t[1]);
-				TableCell *c = new TableCell(this, cx, cy);
-				if (c)
-				{
-					d->Cells.Add(c);
-					if (Value.Type == GV_VOID_PTR)
-					{
-						GDom **d = (GDom**)Value.Value.Ptr;
-						if (d)
-						{
-							*d = c;
-						}
-					}
-				}
-				else return false;
+				*d = c;
 			}
-			else return false;
 		}
-		else return false;
 	}
 	else return false;
 
@@ -2148,22 +2146,20 @@ bool GTableLayout::SetVariant(const char *Name, GVariant &Value, char *Array)
 
 void GTableLayout::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 {
-	if (!Attaching)
+	if (Attaching)
+		return;
+
+	for (int i=0; i<d->Cells.Length(); i++)
 	{
-		for (int i=0; i<d->Cells.Length(); i++)
+		TableCell *c = d->Cells[i];
+		for (int n=0; n<c->Children.Length(); n++)
 		{
-			TableCell *c = d->Cells[i];
-			for (int n=0; n<c->Children.Length(); n++)
+			if (c->Children[n].View == Wnd)
 			{
-				if (c->Children[n].View == Wnd)
-				{
-					c->Children.DeleteAt(n);
-					return;
-				}
+				c->Children.DeleteAt(n);
+				return;
 			}
 		}
-
-		LgiAssert(0);
 	}
 }
 

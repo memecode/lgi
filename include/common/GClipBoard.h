@@ -8,7 +8,7 @@ class LgiClass GClipBoard
 	class GClipBoardPriv *d;
 	GView *Owner;
 	bool Open;
-	GSurface *pDC;
+	GAutoPtr<GSurface> pDC;
 
 	GAutoString Txt;
 	GAutoWString wTxt;

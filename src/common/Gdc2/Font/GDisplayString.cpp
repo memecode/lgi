@@ -36,6 +36,172 @@ static OsChar GDisplayStringDots[] = {'.', '.', '.', 0};
 #define DISPLAY_STRING_FRACTIONAL_NATIVE	0
 #endif
 
+#if defined(__GTK_H__)
+struct Block : public GRect
+{
+	OsChar *Str;
+	int Bytes;
+	GFont *Fnt;
+	Gtk::PangoLayout *Hnd;
+
+	Block()
+	{
+		Str = NULL;
+		Hnd = NULL;
+		Fnt = NULL;
+		Bytes = 0;
+	}
+
+	~Block()
+	{
+		if (Hnd)
+			g_object_unref(Hnd);
+	}
+};
+
+struct GDisplayStringPriv
+{
+	GDisplayString *Ds;
+	GArray<Block> Blocks;
+	bool Debug;	
+	int LastTabOffset;
+
+	GDisplayStringPriv(GDisplayString *str) : Ds(str)
+	{
+		Debug = false;
+		LastTabOffset = -1;
+	}
+
+	~GDisplayStringPriv()
+	{
+	}
+
+	void Create(Gtk::GtkPrintContext *PrintCtx)
+	{
+		Start:
+		auto *Fs = GFontSystem::Inst();
+		auto *Fnt = Ds->Font;
+		auto Tbl = Fnt->GetGlyphMap();
+
+		GUtf8Ptr p(Ds->Str);
+		auto *Start = p.GetPtr();
+		if (Tbl)
+		{
+			int32 w;
+			Block *b = NULL;
+
+			while ((w = (int32)p))
+			{
+				GFont *f;
+
+				if (w == 0x1f551)
+					Debug = true;
+
+				if (w >= 0x80 && !_HasUnicodeGlyph(Tbl, w))
+					f = Fs->GetGlyph(w, Ds->Font);
+				else
+					f = Ds->Font;
+
+				if (!b || f != Fnt)
+				{
+					// Finish old block
+					if (b)
+						b->Bytes = p.GetPtr() - Start;
+
+					Start = p.GetPtr();
+
+					if (f)
+					{
+						// Start new block...
+						b = &Blocks.New();
+						b->Str = (char*)Start;
+						b->Bytes = -1; // unknown at this point
+						if (f == Ds->Font)
+						{
+							// Create a pango layout
+							if (PrintCtx)
+								b->Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+							else
+								b->Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
+						}
+						else
+						{
+							// External font
+							b->Fnt = f;
+						}
+					}
+					// else no font supports glyph
+
+					Fnt = f;
+				}
+				// else no change in font
+				
+				p++;
+			}
+
+			if (b)
+				// Fix the size of the last block
+				b->Bytes = p.GetPtr() - Start;
+		}
+		else
+		{
+			while (p.GetPtr() - Start < Ds->len)
+				p++;
+
+			auto &b = Blocks.New();
+			b.Str = (char*)Start;
+			b.Bytes = p.GetPtr() - Start;
+			if (PrintCtx)
+				b.Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+			else
+				b.Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
+		}
+
+		for (auto &b: Blocks)
+		{
+			if (b.Hnd == NULL && b.Fnt == NULL)
+			{
+				Blocks.Length(0);
+				goto Start;
+			}
+		}
+	}
+	
+	void UpdateTabs(int Offset, int Size, bool Debug = false)
+	{
+		/*
+		if (Hnd &&
+			Ds->Font &&
+			Ds->Font->TabSize())
+		{
+			int Len = 16;
+			LastTabOffset = Offset;
+		
+			Gtk::PangoTabArray *t = Gtk::pango_tab_array_new(Len, true);
+			if (t)
+			{
+				for (int i=0; i<Len; i++)
+				{
+					int Pos = (i * Size) + Offset;
+					Gtk::pango_tab_array_set_tab(t,
+												i,
+												Gtk::PANGO_TAB_LEFT,
+												Pos);
+					if (Debug)
+						printf("%i, ", Pos);
+				}
+				if (Debug)
+					printf("\n");
+			
+				Gtk::pango_layout_set_tabs(Hnd, t);
+				Gtk::pango_tab_array_free(t);
+			}
+		}
+		*/
+	}
+};
+#endif
+
 template<typename Out, typename In>
 bool StringConvert(Out *&out, ssize_t *OutLen, const In *in, ssize_t InLen)
 {
@@ -132,7 +298,17 @@ GDisplayString::GDisplayString(GFont *f, const char *s, ssize_t l, GSurface *pdc
 	AppendDots = 0;
 	VisibleTab = 0;
 	
-	#if defined MAC && !defined(LGI_SDL)
+	#if defined __GTK_H__
+	
+		d = new GDisplayStringPriv(this);
+		if (Font && Str)
+		{
+			len = l >= 0 ? l : strlen(Str);
+			if (len > 0)
+				d->Create(pDC ? pDC->GetPrintContext() : NULL);
+		}
+	
+	#elif defined MAC && !defined(LGI_SDL)
 	
 		Hnd = 0;
 		#if USE_CORETEXT
@@ -148,23 +324,6 @@ GDisplayString::GDisplayString(GFont *f, const char *s, ssize_t l, GSurface *pdc
 				#else
 					ATSUCreateTextLayout(&Hnd);
 				#endif
-			}
-		}
-	
-	#elif defined __GTK_H__
-	
-		Hnd = 0;
-		LastTabOffset = -1;
-		if (Font && Str)
-		{
-			len = l >= 0 ? l : strlen(Str);
-			if (len > 0)
-			{
-				Gtk::GtkPrintContext *PrintCtx = pDC ? pDC->GetPrintContext() : NULL;
-				if (PrintCtx)
-					Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
-				else
-					Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
 			}
 		}
 	
@@ -201,7 +360,13 @@ GDisplayString::GDisplayString(GFont *f, const char16 *s, ssize_t l, GSurface *p
 	AppendDots = 0;
 	VisibleTab = 0;
 
-	#if defined MAC && !defined(LGI_SDL)
+	#if defined __GTK_H__
+	
+		d = new GDisplayStringPriv(this);
+		if (Font && Str && len > 0)
+			d->Create(pDC ? pDC->GetPrintContext() : NULL);
+	
+	#elif defined MAC && !defined(LGI_SDL)
 	
 		Hnd = NULL;
 		#if USE_CORETEXT
@@ -217,18 +382,6 @@ GDisplayString::GDisplayString(GFont *f, const char16 *s, ssize_t l, GSurface *p
 			#endif
 		}
 	
-	#elif defined __GTK_H__
-	
-		Hnd = 0;
-		if (Font && Str && len > 0)
-		{
-			Gtk::GtkPrintContext *PrintCtx = pDC ? pDC->GetPrintContext() : NULL;
-			if (PrintCtx)
-				Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
-			else
-				Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
-		}
-	
 	#endif
 }
 
@@ -237,6 +390,13 @@ GDisplayString::GDisplayString(GFont *f, const uint32_t *s, ssize_t l, GSurface 
 {
 	pDC = pdc;
 	Font = f;
+	x = y = 0;
+	xf = 0;
+	yf = 0;
+	DrawOffsetF = 0;
+	LaidOut = 0;
+	AppendDots = 0;
+	VisibleTab = 0;
 
 	#if LGI_DSP_STR_CACHE
 
@@ -245,7 +405,19 @@ GDisplayString::GDisplayString(GFont *f, const uint32_t *s, ssize_t l, GSurface 
 
 	#endif
 
-	#if defined(MAC) || defined(LGI_SDL) || defined(_MSC_VER)
+	#if defined __GTK_H__
+
+		d = new GDisplayStringPriv(this);
+		StringConvert(Str, &len, s, l);
+
+		if (Font && Str)
+		{
+			len = l >= 0 ? l : strlen(Str);
+			if (len > 0)
+				d->Create(pDC ? pDC->GetPrintContext() : NULL);
+		}
+
+	#elif defined(MAC) || defined(LGI_SDL) || defined(_MSC_VER)
 
 		StringConvert(Str, &len, s, l);
 
@@ -255,14 +427,6 @@ GDisplayString::GDisplayString(GFont *f, const uint32_t *s, ssize_t l, GSurface 
 		len = Str ? strlen(Str) : 0;
 
 	#endif
-	
-	x = y = 0;
-	xf = 0;
-	yf = 0;
-	DrawOffsetF = 0;
-	LaidOut = 0;
-	AppendDots = 0;
-	VisibleTab = 0;
 }
 #endif
 
@@ -272,6 +436,10 @@ GDisplayString::~GDisplayString()
 	
 		Img.Reset();
 	
+	#elif defined __GTK_H__
+
+		DeleteObj(d);
+
 	#elif defined MAC
 
 		#if USE_CORETEXT
@@ -294,48 +462,10 @@ GDisplayString::~GDisplayString()
 
 		#endif
 
-	#elif defined __GTK_H__
-
-		if (Hnd)
-			g_object_unref(Hnd);
-
 	#endif
 	
 	DeleteArray(Str);
 }
-
-#if defined __GTK_H__
-void GDisplayString::UpdateTabs(int Offset, int Size, bool Debug)
-{
-	if (Hnd &&
-		Font &&
-		Font->TabSize())
-	{
-		int Len = 16;
-		LastTabOffset = Offset;
-		
-		Gtk::PangoTabArray *t = Gtk::pango_tab_array_new(Len, true);
-		if (t)
-		{
-			for (int i=0; i<Len; i++)
-			{
-				int Pos = (i * Size) + Offset;
-				Gtk::pango_tab_array_set_tab(t,
-											i,
-											Gtk::PANGO_TAB_LEFT,
-											Pos);
-				if (Debug)
-					printf("%i, ", Pos);
-			}
-			if (Debug)
-				printf("\n");
-			
-			Gtk::pango_layout_set_tabs(Hnd, t);
-			Gtk::pango_tab_array_free(t);
-		}
-	}
-}
-#endif
 
 void GDisplayString::DrawWhiteSpace(GSurface *pDC, char Ch, GRect &r)
 {
@@ -482,18 +612,22 @@ void GDisplayString::Layout(bool Debug)
 	
 		y = Font->GetHeight();
 		yf = y * PANGO_SCALE;
-		if (!Hnd || !Font->Handle())
-		{
-			// LgiTrace("%s:%i - Missing handle: %p,%p\n", _FL, Hnd, Font->Handle());
+		if (!d->Blocks.Length() || !Font->Handle())
 			return;
-		}
 
-		if (!LgiIsUtf8(Str))
+		GUtf8Ptr Utf(Str);
+		int32 Wide;
+		while (*Utf.GetPtr())
 		{
-			LgiTrace("%s:%i - Not utf8\n", _FL);
-			return;
+			Wide = Utf;
+			if (!Wide)
+			{
+				LgiTrace("%s:%i - Not utf8\n", _FL);
+				return;
+			}
+			Utf++;
 		}
-
+	
 		GFontSystem *FSys = GFontSystem::Inst();
 		Gtk::pango_context_set_font_description(FSys->GetContext(), Font->Handle());
 
@@ -501,31 +635,41 @@ void GDisplayString::Layout(bool Debug)
 		int TabSizeF = TabSizePx * FScale;
 		int TabOffsetF = DrawOffsetF % TabSizeF;
 		int OffsetF = TabOffsetF ? TabSizeF - TabOffsetF : 0;
-		/*
-		if (Debug)
-		{
-			printf("'%s', TabSizeF=%i, TabOffsetF=%i, DrawOffsetF=%i, OffsetF=%i\n",
-				Str,
-				TabSizeF,
-				TabOffsetF,
-				DrawOffsetF,
-				OffsetF);
-		}
-		*/
-		UpdateTabs(OffsetF / FScale, Font->TabSize());
-
+		d->UpdateTabs(OffsetF / FScale, Font->TabSize());
 
 		if (Font->Underline())
 		{
 			Gtk::PangoAttrList *attrs = Gtk::pango_attr_list_new();
 			Gtk::PangoAttribute *attr = Gtk::pango_attr_underline_new(Gtk::PANGO_UNDERLINE_SINGLE);
 			Gtk::pango_attr_list_insert(attrs, attr);
-			Gtk::pango_layout_set_attributes(Hnd, attrs);
+			for (auto &b: d->Blocks)
+				Gtk::pango_layout_set_attributes(b.Hnd, attrs);
 			Gtk::pango_attr_list_unref(attrs);
 		}
 		
-		Gtk::pango_layout_set_text(Hnd, Str, len);
-		Gtk::pango_layout_get_size(Hnd, &xf, &yf);
+		int Fx = 0;
+		for (auto &b: d->Blocks)
+		{
+			int bx = 0, by = 0;
+
+			if (b.Hnd)
+			{
+				Gtk::pango_layout_set_text(b.Hnd, b.Str, b.Bytes);
+				Gtk::pango_layout_get_size(b.Hnd, &bx, &by);
+			}
+			else if (b.Fnt)
+			{
+				b.Fnt->_Measure(bx, by, b.Str, b.Bytes);
+				bx <<= FShift;
+				by <<= FShift;
+			}
+
+			b.ZOff(bx-1, by-1);
+			b.Offset(Fx, 0);
+			xf += bx;
+			yf = MAX(yf, by);
+		}
+
 		x = (xf + PANGO_SCALE - 1) / PANGO_SCALE;
 		#if 1
 		y = Font->GetHeight();
@@ -858,10 +1002,24 @@ void GDisplayString::TruncateWithDots(int Width)
 	
 	#if defined __GTK_H__
 		
-	if (Hnd)
+	int Fx = 0;
+	int Fwid = Width << FShift;
+	for (auto &b: d->Blocks)
 	{
-		Gtk::pango_layout_set_ellipsize(Hnd, Gtk::PANGO_ELLIPSIZE_END);
-		Gtk::pango_layout_set_width(Hnd, Width * PANGO_SCALE);
+		if (Fwid < Fx + b.X())
+		{
+			if (b.Hnd)
+			{
+				Gtk::pango_layout_set_ellipsize(b.Hnd, Gtk::PANGO_ELLIPSIZE_END);
+				Gtk::pango_layout_set_width(b.Hnd, Fwid - Fx);
+			}
+			else if (b.Fnt)
+			{
+			}
+			break;
+		}
+
+		Fx += b.X();
 	}
 	
 	#elif WINNATIVE
@@ -981,7 +1139,40 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 		#endif
 	}
 
-	#if defined MAC && !defined(LGI_SDL)
+	#if defined __GTK_H__
+	
+	int Fx = 0;
+	int Fpos = Px << FShift;
+	for (auto &b: d->Blocks)
+	{
+		int Index = 0, Trailing = 0;
+		int Foffset = Fpos - Fx;
+		
+		if (b.Hnd &&
+			Gtk::pango_layout_xy_to_index(b.Hnd, Foffset, 0, &Index, &Trailing))
+		{
+			// printf("Index = %i, Trailing = %i\n", Index, Trailing);
+			GUtf8Str u(Str);
+			Status = 0;
+			while ((OsChar*)u.GetPtr() < Str + Index)
+			{
+				u++;
+				Status++;
+			}
+		}
+		else if (Trailing)
+		{
+			GUtf8Str u(Str + Index);
+			if (u)
+				u++;			
+			Status = (OsChar*)u.GetPtr() - Str;
+		}
+		else Status = 0;
+
+		Fx += b.X();
+	}
+	
+	#elif defined MAC && !defined(LGI_SDL)
 
 		if (Hnd && Str)
 		{
@@ -1019,32 +1210,6 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 
 			#endif
 		}
-	
-	#elif defined __GTK_H__
-	
-	if (Hnd)
-	{
-		int Index = 0, Trailing = 0;
-		if (Gtk::pango_layout_xy_to_index(Hnd, Px * PANGO_SCALE, 0, &Index, &Trailing))
-		{
-			// printf("Index = %i, Trailing = %i\n", Index, Trailing);
-			GUtf8Str u(Str);
-			Status = 0;
-			while ((OsChar*)u.GetPtr() < Str + Index)
-			{
-				u++;
-				Status++;
-			}
-		}
-		else if (Trailing)
-		{
-			GUtf8Str u(Str + Index);
-			if (u)
-				u++;			
-			Status = (OsChar*)u.GetPtr() - Str;
-		}
-		else Status = 0;
-	}
 	
 	#elif defined(LGI_SDL)
 	
@@ -1592,7 +1757,7 @@ void GDisplayString::Draw(GSurface *pDC, int px, int py, GRect *r, bool Debug)
 		rc = *r;
 		rc.x1 <<= FShift;
 		rc.y1 <<= FShift;
-		#ifdef MAC
+		#if defined(MAC) && !defined(__GTK_H__)
 		rc.x2 <<= FShift;
 		rc.y2 <<= FShift;
 		#else
@@ -1928,7 +2093,6 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 
 	#elif defined __GTK_H__
 	
-	Gtk::pango_context_set_font_description(GFontSystem::Inst()->GetContext(), Font->Handle());
 	Gtk::cairo_t *cr = pDC->Handle();
 	if (!cr)
 	{
@@ -1936,75 +2100,53 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 		return;
 	}
 
-	int Ox = 0, Oy = 0;
-	pDC->GetOrigin(Ox, Oy);
-	
+	Gtk::pango_context_set_font_description(GFontSystem::Inst()->GetContext(), Font->Handle());
 	Gtk::cairo_save(cr);
-	
-	GRect Client;
-	if (pDC->GetClient(&Client) && Client.Valid())
-	{
-		Gtk::cairo_rectangle(cr, Client.x1, Client.y1, Client.X(), Client.Y());
-		Gtk::cairo_clip(cr);
-		Gtk::cairo_new_path(cr);
-	}
-	else
-	{
-		Client.ZOff(-1, -1);
-	}
-	
+
 	GColour b = Font->Back();
-
-	Gtk::cairo_set_source_rgb(cr,
-								(double)b.r()/255.0,
-								(double)b.g()/255.0,
-								(double)b.b()/255.0);
-
-	if (!Font->Transparent() && frc)
+	double Dx = ((double)fx / FScale);
+	double Dy = ((double)fy / FScale);
+	if (!Font->Transparent())
 	{
-		Gtk::cairo_new_path(cr);
-		Gtk::cairo_rectangle
-		(
-			cr,
-			((double)frc->x1 / FScale) - Ox,
-			((double)frc->y1 / FScale) - Oy,
-			(double)frc->X() / FScale,
-			(double)frc->Y() / FScale
-		);
-		Gtk::cairo_fill(cr);
+		// Background fill
+		cairo_set_source_rgb(cr, (double)b.r()/255.0, (double)b.g()/255.0, (double)b.b()/255.0); cairo_new_path(cr);
+		if (frc)	cairo_rectangle(cr, ((double)frc->x1 / FScale), ((double)frc->y1 / FScale), (double)frc->X() / FScale, (double)frc->Y() / FScale);
+		else		cairo_rectangle(cr, Dx, Dy, x, y);
+		cairo_fill(cr);
 	}
 
-	double Dx = ((double)fx / FScale) - Ox;
-	double Dy = ((double)fy / FScale) - Oy;
+	cairo_translate(cr, Dx, Dy);
 
-	cairo_translate(cr, Dx, Dy);	
-	
-	if (!Font->Transparent() && !frc)
+	GColour f = Font->Fore();
+	for (auto &b: d->Blocks)
 	{
-		Gtk::cairo_new_path(cr);
-		Gtk::cairo_rectangle(cr, 0, 0, x, y);
-		Gtk::cairo_fill(cr);
-	}
-	if (Hnd)
-	{
-		GColour f = Font->Fore();
-		Gtk::cairo_set_source_rgb(	cr,
+		if (b.Hnd)
+		{
+			cairo_set_source_rgb(	cr,
 									(double)f.r()/255.0,
 									(double)f.g()/255.0,
 									(double)f.b()/255.0);
-		Gtk::pango_cairo_show_layout(cr, Hnd);
+			pango_cairo_show_layout(cr, b.Hnd);
+		}
+		else if (b.Fnt)
+		{
+			b.Fnt->Transparent(Font->Transparent());
+			b.Fnt->Back(Font->Back());
+			b.Fnt->_Draw(pDC, 0, 0, b.Str, b.Bytes, NULL, f);
+		}
+		else LgiAssert(0);
 		
 		if (VisibleTab && Str)
 		{
 			GUtf8Str Ptr(Str);
 			pDC->Colour(Font->WhitespaceColour());
 			
-			for (int32 u, Idx = 0; u = Ptr; Idx++)
+			for (int32 u, Idx = 0 ; (u = Ptr); Idx++)
 			{
 				if (IsTabChar(u) || u == ' ')
 				{
 					Gtk::PangoRectangle pos;
-					Gtk::pango_layout_index_to_pos(Hnd, Idx, &pos);
+					Gtk::pango_layout_index_to_pos(b.Hnd, Idx, &pos);
 					GRect r(0, 0, pos.width / FScale, pos.height / FScale);
 					r.Offset(Dx + (pos.x / FScale), Dy + (pos.y / FScale));					
 					DrawWhiteSpace(pDC, u, r);
@@ -2012,9 +2154,11 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 				Ptr++;
 			}
 		}
+
+		cairo_translate(cr, (double)b.X() / FScale, 0);
 	}
 	
-	Gtk::cairo_restore(cr);
+	cairo_restore(cr);
 	
 	#elif defined MAC && !defined(LGI_SDL)
 

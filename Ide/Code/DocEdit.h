@@ -170,7 +170,7 @@ public:
 	DocEdit(IdeDoc *d, GFontType *f);
 	~DocEdit();
 
-	const char *GetClass() { return "DocEdit"; }
+	const char *GetClass() override { return "DocEdit"; }
 	char *Name() override { return GTextView3::Name(); }
 	bool Name(const char *s) override { return GTextView3::Name(s); }
 	bool SetPourEnabled(bool b);

@@ -3871,7 +3871,7 @@ bool GTag::GetWidthMetrics(GTag *Table, uint16 &Min, uint16 &Max)
 			LineWidth = MaxContent = ds.X();
 		}
 
-		#ifdef _DEBUG
+		#if 0//def _DEBUG
 		if (Debug)
 		{
 			LgiTrace("GetWidthMetrics Font=%p Sz=%i,%i\n", f, MinContent, MaxContent);
@@ -6215,14 +6215,6 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, GRect *BorderP
 		{
 			pDC->Colour(Back);
 			pDC->Rectangle(&rc);
-			
-			/*
-			if (Debug)
-			{
-				pDC->Colour(GColour(255, 0, 0));
-				pDC->Box(&rc);
-			}
-			*/
 		}
 
 		GCss::BorderDef *b;
@@ -6327,6 +6319,24 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 
 	int Px, Py;
 	pDC->GetOrigin(Px, Py);
+	
+	if (Debug)
+	{
+		#if 0
+		Gtk::cairo_matrix_t mx;
+		Gtk::cairo_get_matrix(pDC->Handle(), &mx);
+		GdcPt2 Offset;
+		Html->WindowVirtualOffset(&Offset);
+		GRect cli;
+		pDC->GetClient(&cli);
+		printf("\tTag paint mx=%g,%g off=%i,%i p=%i,%i Pos=%i,%i cli=%s\n",
+			mx.x0, mx.y0,
+			Offset.x, Offset.y,
+			Px, Py,
+			Pos.x, Pos.y,
+			cli.GetStr());
+		#endif
+	}
 
 	switch (TagId)
 	{
@@ -6361,10 +6371,10 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 		}
 		case TAG_BODY:
 		{
-			COLOUR b = GetBack();
-			if (b != GT_TRANSPARENT)
+			auto b = _Colour(false);
+			if (!b.IsTransparent())
 			{
-				pDC->Colour(b, 32);
+				pDC->Colour(b);
 				pDC->Rectangle(Pos.x, Pos.y, Pos.x+Size.x, Pos.y+Size.y);
 			}
 			if (Image)
@@ -7319,82 +7329,75 @@ GdcPt2 GHtml::Layout(bool ForceLayout)
 
 void GHtml::OnPaint(GSurface *ScreenDC)
 {
-	#if LGI_EXCEPTIONS
-	try
+	#if GHTML_USE_DOUBLE_BUFFER
+	GRect Client = GetClient();
+	if (!MemDC ||
+		(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
 	{
+		if (MemDC.Reset(new GMemDC))
+		{
+			int Sx = Client.X() + 10;
+			int Sy = Client.Y() + 10;
+			if (!MemDC->Create(Sx, Sy, System32BitColourSpace))
+			{
+				MemDC.Reset();
+			}
+		}
+	}
+	if (MemDC)
+	{
+		MemDC->ClipRgn(NULL);
+		#if 0//def _DEBUG
+		MemDC->Colour(GColour(255, 0, 255));
+		MemDC->Rectangle();
+		#endif
+	}
 	#endif
 
-		#if GHTML_USE_DOUBLE_BUFFER
-		GRect Client = GetClient();
-		if (!MemDC ||
-			(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
-		{
-			if (MemDC.Reset(new GMemDC))
-			{
-				int Sx = Client.X() + 10;
-				int Sy = Client.Y() + 10;
-				if (!MemDC->Create(Sx, Sy, System32BitColourSpace))
-				{
-					MemDC.Reset();
-				}
-			}
-		}
-		if (MemDC)
-		{
-			MemDC->ClipRgn(NULL);
-			#if 0//def _DEBUG
-			MemDC->Colour(GColour(255, 0, 255));
-			MemDC->Rectangle();
-			#endif
-		}
-		#endif
+	GSurface *pDC = MemDC ? MemDC : ScreenDC;
 
-		GSurface *pDC = MemDC ? MemDC : ScreenDC;
+	#if 0
+	Gtk::cairo_matrix_t mx;
+	Gtk::cairo_get_matrix(pDC->Handle(), &mx);
+	GdcPt2 Offset;
+	WindowVirtualOffset(&Offset);
+	printf("\tHtml paint mx=%g,%g off=%i,%i\n",
+		mx.x0, mx.y0,
+		Offset.x, Offset.y);
+	#endif
 
-		GColour cBack;
-		if (GetCss())
-		{
-			GCss::ColorDef Bk = GetCss()->BackgroundColor();
-			if (Bk.Type == GCss::ColorRgb)
-				cBack = Bk;
-		}
-		if (!cBack.IsValid())
-			cBack.Set(Enabled() ? LC_WORKSPACE : LC_MED, 24);		
-		pDC->Colour(cBack);
-		pDC->Rectangle();
-
-		if (Tag)
-		{
-			Layout();
-
-			if (VScroll)
-			{
-				int LineY = GetFont()->GetHeight();
-				int Vs = (int)VScroll->Value();
-				pDC->SetOrigin(0, Vs * LineY);
-			}
-
-			bool InSelection = false;
-			Tag->OnPaint(pDC, InSelection, 0);
-		}
-
-		#if GHTML_USE_DOUBLE_BUFFER
-		if (MemDC)
-		{
-			pDC->SetOrigin(0, 0);
-			#if 0
-			pDC->Colour(Rgb24(255, 0, 0), 24);
-			pDC->Line(0, 0, X()-1, Y()-1);
-			pDC->Line(X()-1, 0, 0, Y()-1);
-			#endif
-			ScreenDC->Blt(0, 0, MemDC);
-		}
-		#endif
-	#if LGI_EXCEPTIONS
-	}
-	catch (...)
+	GColour cBack;
+	if (GetCss())
 	{
-		LgiTrace("GHtml paint crash\n");
+		GCss::ColorDef Bk = GetCss()->BackgroundColor();
+		if (Bk.Type == GCss::ColorRgb)
+			cBack = Bk;
+	}
+	if (!cBack.IsValid())
+		cBack.Set(Enabled() ? LC_WORKSPACE : LC_MED, 24);
+	pDC->Colour(cBack);
+	pDC->Rectangle();
+
+	if (Tag)
+	{
+		Layout();
+
+		if (VScroll)
+		{
+			int LineY = GetFont()->GetHeight();
+			int Vs = (int)VScroll->Value();
+			pDC->SetOrigin(0, Vs * LineY);
+		}
+
+		bool InSelection = false;
+		Tag->OnPaint(pDC, InSelection, 0);
+	}
+
+	#if GHTML_USE_DOUBLE_BUFFER
+	if (MemDC)
+	{
+		pDC->SetOrigin(0, 0);
+		ScreenDC->Blt(0, 0, MemDC);
 	}
 	#endif
 
@@ -8047,6 +8050,7 @@ void GHtml::OnMouseClick(GMouse &m)
 			if (Load) Load->Checked(GetLoadImages());
 			RClick.AppendItem					(LgiLoadString(L_VIEW_IN_DEFAULT_BROWSER, "View in Default Browser"), IDM_EXTERNAL, Source != 0);
 			GSubMenu *Cs = RClick.AppendSub		(LgiLoadString(L_CHANGE_CHARSET, "Change Charset"));
+
 			if (Cs)
 			{
 				int n=0;

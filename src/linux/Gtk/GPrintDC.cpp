@@ -15,9 +15,11 @@ public:
 	int Pages;
 	GColour c;
 	GRect Clip;
+	Gtk::cairo_t *cr;
 	
 	GPrintDCPrivate(Gtk::GtkPrintContext *handle)
 	{
+		cr = NULL;
 		p = 0;
 		Pages = 0;
 		Handle = handle;
@@ -29,7 +31,11 @@ public:
 	
 	bool IsOk()
 	{
+		#ifndef __clang__
 		return	this != 0;
+		#else
+		return true;
+		#endif
 	}
 };
 
@@ -39,14 +45,13 @@ GPrintDC::GPrintDC(void *Handle, const char *PrintJobName, const char *PrinterNa
 	d = new GPrintDCPrivate((Gtk::GtkPrintContext*)Handle);
 	d->PrintJobName = PrintJobName;
 	d->PrinterName = PrinterName;
-	Cairo = gtk_print_context_get_cairo_context(d->Handle);
+	d->cr = gtk_print_context_get_cairo_context(d->Handle);
 	ColourSpace = CsRgb24;
 	d->Clip = Bounds();
 }
 
 GPrintDC::~GPrintDC()
 {
-	Cairo = NULL;
 	DeleteObj(d);
 }
 
@@ -110,8 +115,8 @@ GColour GPrintDC::Colour(GColour c)
 {
 	GColour Prev = d->c;
 	d->c = c;
-	if (Cairo)
-		cairo_set_source_rgb(Cairo,
+	if (d->cr)
+		cairo_set_source_rgb(d->cr,
 							(double)d->c.r() / 255.0,
 							(double)d->c.g() / 255.0,
 							(double)d->c.b() / 255.0);
@@ -120,11 +125,11 @@ GColour GPrintDC::Colour(GColour c)
 
 void GPrintDC::Set(int x, int y)
 {
-	if (Cairo)
+	if (d->cr)
 	{
-		cairo_new_path(Cairo);
-		cairo_rectangle(Cairo, x, y, x+1, y+1);
-		cairo_fill(Cairo);
+		cairo_new_path(d->cr);
+		cairo_rectangle(d->cr, x, y, x+1, y+1);
+		cairo_fill(d->cr);
 	}
 }
 
@@ -140,13 +145,13 @@ void GPrintDC::VLine(int x, int y1, int y2)
 
 void GPrintDC::Line(int x1, int y1, int x2, int y2)
 {
-	if (Cairo)
+	if (d->cr)
 	{
-		cairo_set_line_width(Cairo, 0.5);
-		cairo_new_path(Cairo);
-		cairo_move_to(Cairo, x1, y1);
-		cairo_line_to(Cairo, x2, y2);
-		cairo_stroke(Cairo);
+		cairo_set_line_width(d->cr, 0.5);
+		cairo_new_path(d->cr);
+		cairo_move_to(d->cr, x1, y1);
+		cairo_line_to(d->cr, x2, y2);
+		cairo_stroke(d->cr);
 	}
 }
 
@@ -193,17 +198,17 @@ void GPrintDC::Box(GRect *a)
 		r = *a;
 	else
 		r = Bounds();
-	if (Cairo)
+	if (d->cr)
 	{
 		double Half = 0.5;
-		cairo_set_line_width(Cairo, Half);
-		cairo_new_path(Cairo);
-		cairo_rectangle(Cairo,
+		cairo_set_line_width(d->cr, Half);
+		cairo_new_path(d->cr);
+		cairo_rectangle(d->cr,
 						Half + r.x1,
 						Half + r.y1,
 						-Half + r.X(),
 						-Half + r.Y());
-		cairo_stroke(Cairo);
+		cairo_stroke(d->cr);
 	}
 }
 
@@ -220,11 +225,11 @@ void GPrintDC::Rectangle(GRect *a)
 		r = *a;
 	else
 		r = Bounds();
-	if (Cairo)
+	if (d->cr)
 	{
-		cairo_new_path(Cairo);
-		cairo_rectangle(Cairo, r.x1, r.y1, r.X(), r.Y());
-		cairo_fill(Cairo);
+		cairo_new_path(d->cr);
+		cairo_rectangle(d->cr, r.x1, r.y1, r.X(), r.Y());
+		cairo_fill(d->cr);
 	}
 }
 
@@ -236,9 +241,9 @@ void GPrintDC::Blt(int x, int y, GSurface *Src, GRect *SrcClip)
 	StretchBlt(&d, Src, &s);
 }
 
-void GPrintDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
+void GPrintDC::StretchBlt(GRect *rc, GSurface *Src, GRect *s)
 {
-	if (!Cairo)
+	if (!d->cr)
 	{
 		LgiAssert(0);
 		return;
@@ -285,20 +290,20 @@ void GPrintDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
 	if (Pat)
 	{
 		Gtk::cairo_matrix_t m;
-		double Sx = (double) s->X() / d->X();
-		double Sy = (double) s->Y() / d->Y();
+		double Sx = (double) s->X() / rc->X();
+		double Sy = (double) s->Y() / rc->Y();
 		cairo_matrix_init_scale(&m, Sx, Sy);
-		cairo_matrix_translate(&m, -d->x1,-d->y1);
+		cairo_matrix_translate(&m, -rc->x1,-rc->y1);
 		cairo_pattern_set_matrix(Pat, &m);
 
-		cairo_save(Cairo);
-		cairo_set_source(Cairo, Pat);
+		cairo_save(d->cr);
+		cairo_set_source(d->cr, Pat);
 		
-		cairo_new_path(Cairo);
-		cairo_rectangle(Cairo, d->x1, d->y1, d->X(), d->Y());
-		cairo_fill(Cairo);
+		cairo_new_path(d->cr);
+		cairo_rectangle(d->cr, rc->x1, rc->y1, rc->X(), rc->Y());
+		cairo_fill(d->cr);
 		
-		cairo_restore(Cairo);
+		cairo_restore(d->cr);
 		cairo_pattern_destroy(Pat);
 	}
 	

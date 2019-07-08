@@ -6,14 +6,20 @@
 #include "GEdit.h"
 
 // Colours
+#if defined(__GTK_H__)
+	#define DOUBLE_BUFFER_COLUMN_DRAWING	1
+#else
+	#define DOUBLE_BUFFER_COLUMN_DRAWING	0
+#endif
+
 #if defined(WIN32)
-#if !defined(WS_EX_LAYERED)
-#define WS_EX_LAYERED					0x80000
-#endif
-#if !defined(LWA_ALPHA)
-#define LWA_ALPHA						2
-#endif
-typedef BOOL (__stdcall *_SetLayeredWindowAttributes)(HWND hwnd, COLORREF crKey, BYTE bAlpha, DWORD dwFlags);
+	#if !defined(WS_EX_LAYERED)
+		#define WS_EX_LAYERED				0x80000
+	#endif
+	#if !defined(LWA_ALPHA)
+		#define LWA_ALPHA					2
+	#endif
+	typedef BOOL (__stdcall *_SetLayeredWindowAttributes)(HWND hwnd, COLORREF crKey, BYTE bAlpha, DWORD dwFlags);
 #endif
 
 class GItemColumnPrivate
@@ -87,35 +93,26 @@ void GItemContainer::PaintColumnHeadings(GSurface *pDC)
 	if (ColumnHeaders && ColumnHeader.Valid())
 	{
 		GSurface *ColDC = pDC;
-		GRect cr = ColumnHeader;
-		int cx = cr.x1;
+		GRect cr;
 
 		#if DOUBLE_BUFFER_COLUMN_DRAWING
 		GMemDC Bmp;
-		if (!pDC->SupportsAlphaCompositing())
+		if (!pDC->SupportsAlphaCompositing() &&
+			Bmp.Create(ColumnHeader.X(), ColumnHeader.Y(), System32BitColourSpace))
 		{
-			if (Bmp.Create(ColumnHeader.X(), ColumnHeader.Y(), 32))
-			{
-				ColDC = &Bmp;
-				Bmp.Op(GDC_ALPHA);
-			}
-			else
-			{
-				ColDC = pDC;
-			}
-
-			printf("LList::OnPaint ***START*** %s %i\n",
-				GColourSpaceToString(ColDC->GetColourSpace()), ColDC->SupportsAlphaCompositing());
+			ColDC = &Bmp;
+			Bmp.Op(GDC_ALPHA);
+			cr = ColumnHeader.ZeroTranslate();
 		}
 		else
-		#else
+		#endif
 		{
-			ColDC = pDC;
+			cr = ColumnHeader;
 			pDC->ClipRgn(&cr);
 		}
-		#endif
-		
+
 		// Draw columns
+		int cx = cr.x1;
 		if (IconCol)
 		{
 			cr.x1 = cx;
@@ -184,9 +181,6 @@ void GItemContainer::PaintColumnHeadings(GSurface *pDC)
 		}
 
 		#if DOUBLE_BUFFER_COLUMN_DRAWING
-		printf("LList::OnPaint ***END*** %s %i\n",
-			GColourSpaceToString(ColDC->GetColourSpace()), ColDC->SupportsAlphaCompositing());
-
 		if (!pDC->SupportsAlphaCompositing())
 		{
 			pDC->Blt(ColumnHeader.x1, ColumnHeader.y1, &Bmp);
@@ -494,11 +488,11 @@ GDragColumn::GDragColumn(GItemContainer *list, int col)
 		
 		#elif defined(__GTK_H__)
 
-		Gtk::GtkWindow *w = Handle() ? GtkCast(Handle(), gtk_window, GtkWindow) : NULL;
+		Gtk::GtkWindow *w = WindowHandle();
 		if (w)
 		{
 			gtk_window_set_decorated(w, FALSE);
-			gtk_window_set_opacity(w, DRAG_COL_ALPHA / 255.0);
+			gtk_widget_set_opacity(GtkCast(w, gtk_widget, GtkWidget), DRAG_COL_ALPHA / 255.0);
 		}
 		
 		#endif

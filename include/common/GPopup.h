@@ -7,7 +7,7 @@
 
 /// A popup window: closes when the user clicks off-window.
 class LgiClass GPopup :
-	#ifdef CARBON
+	#if defined(LGI_CARBON) || defined(__GTK_H__)
 	public GWindow
 	#else
 	public GView
@@ -19,10 +19,6 @@ class LgiClass GPopup :
 	friend class GMouseHook;
 	friend class GMouseHookPrivate;
     friend class GView;
-
-    #ifdef __GTK_H__
-    Gtk::GtkWidget *Wnd;
-    #endif
 
     static GArray<GPopup*> CurrentPopups;
 

@@ -255,7 +255,7 @@ void MemorySizeToStr(char *Str, uint64 Size)
 
 	if (Size >= G)
 	{
-		sprintf(Str, "%.2 G", Size / G);
+		sprintf(Str, "%.2f G", Size / G);
 	}
 	else if (Size >= M)
 	{
@@ -267,7 +267,7 @@ void MemorySizeToStr(char *Str, uint64 Size)
 	}
 	else
 	{
-		sprintf(Str, "%ld bytes", Size);
+		sprintf(Str, LPrintfInt64 " bytes", Size);
 	}
 
 	#undef K

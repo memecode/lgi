@@ -720,7 +720,7 @@ public:
 	template <class T>
 	class Iter
 	{
-		friend class GArray;
+		friend class ::GArray<T>;
 		ssize_t i;
 		char each_dir;
 		GArray<T> *a;

@@ -58,18 +58,21 @@ typedef GRgba64 Png64;
 #define LIBPNG Lib->
 const char sLibrary[] =
 	#if defined(MAC)
-		"libpng15.15.4.0"
+		"libpng16.16"
 	#else
 		#if defined(__CYGWIN__)
 			"cygpng12"
 		#else
-			"libpng"
-			#ifdef _MSC_VER
+			"libpng15_"
+			#ifdef _MSC_VER_STR
 				_MSC_VER_STR
-				#if defined(WIN64)
+				#if defined(LGI_64BIT)
 				"x64"
 				#else
 				"x32"
+				#endif
+				#ifdef _DEBUG
+				"d"
 				#endif
 			#endif
 		#endif
@@ -82,7 +85,8 @@ class LibPng : public GLibrary
 public:
 	LibPng() : GLibrary(sLibrary)
 	{
-		if (!IsLoaded())
+		auto Loaded = IsLoaded();
+		if (!Loaded)
 		{
 			#if defined(MAC)
 			if (!Load("/opt/local/lib/libpng.dylib"))
@@ -1264,7 +1268,7 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 					LIBPNG png_set_iCCP(png_ptr,
 								info_ptr,
 								(png_charp)"ColourProfile",
-								NULL,
+								0,
 								(png_const_bytep) ColProfile.Value.Binary.Data,
 								(png_uint_32) ColProfile.Value.Binary.Length);
 				}

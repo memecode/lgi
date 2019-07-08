@@ -243,7 +243,7 @@ public:
 
 	#ifdef MAC
 		#if defined COCOA
-		#else
+		#elif defined(LGI_CARBON)
 		OSStatus OnDragWithin(GView *v, DragRef Drag);
 		OSStatus OnDragReceive(GView *v, DragRef Drag);
 		#endif

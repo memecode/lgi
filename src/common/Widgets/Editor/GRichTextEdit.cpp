@@ -1766,7 +1766,10 @@ bool GRichTextEdit::OnKey(GKey &k)
 					break;
 
 				if (k.Down() && k.IsChar)
+				{
 					OnEnter(k);
+					SendNotify(GNotifyDocChanged);
+				}
 
 				return true;
 			}
@@ -2488,24 +2491,6 @@ void GRichTextEdit::OnPaint(GSurface *pDC)
 	r = ct.PaintBorder(pDC, r);
 
 	bool HasSpace = r.Y() > (FontY * 3);
-	/*
-	if (d->NeedsCap.Length() > 0 && HasSpace)
-	{
-		d->Areas[CapabilityArea] = r;
-		d->Areas[CapabilityArea].y2 = d->Areas[CapabilityArea].y1 + 4 + ((FontY + 4) * (int)d->NeedsCap.Length());
-		r.y1 = d->Areas[CapabilityArea].y2 + 1;
-
-		d->Areas[CapabilityBtn] = d->Areas[CapabilityArea];
-		d->Areas[CapabilityBtn].Size(2, 2);
-		d->Areas[CapabilityBtn].x1 = d->Areas[CapabilityBtn].x2 - 30;
-	}
-	else
-	{
-		d->Areas[CapabilityArea].ZOff(-1, -1);
-		d->Areas[CapabilityBtn].ZOff(-1, -1);
-	}
-	*/
-
 	if (d->ShowTools && HasSpace)
 	{
 		d->Areas[ToolsArea] = r;
@@ -2518,19 +2503,6 @@ void GRichTextEdit::OnPaint(GSurface *pDC)
 	}
 
 	d->Areas[ContentArea] = r;
-
-	#if 0
-	CGAffineTransform t1 = CGContextGetCTM(pDC->Handle());
-	CGRect rc = CGContextGetClipBoundingBox(pDC->Handle());
-	LgiTrace("d->Areas[ContentArea]=%s  %f,%f,%f,%f\n",
-		d->Areas[ContentArea].GetStr(),
-		rc.origin.x, rc.origin.y,
-		rc.size.width, rc.size.height);
-	if (rc.size.width < 20)
-	{
-		int asd=0;
-	}
-	#endif
 
 	if (d->Layout(VScroll))
 		d->Paint(pDC, VScroll);
@@ -2912,7 +2884,7 @@ int EmojiMenu::Cur = 0;
 EmojiMenu::EmojiMenu(GRichTextPriv *priv, GdcPt2 p) : GPopup(priv->View)
 {
 	d = priv;
-
+	Debug();
 	d->GetEmojiImage();
 
 	int MaxIdx = 0;

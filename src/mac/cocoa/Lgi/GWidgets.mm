@@ -171,11 +171,13 @@ void GDialog::EndModeless(int Code)
 	GWindow::Quit(Code);
 }
 
+/*
 void GDialog::OnPaint(GSurface *pDC)
 {
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle();
 }
+*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 GControl::GControl(OsView view) : GView(view)

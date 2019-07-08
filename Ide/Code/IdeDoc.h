@@ -39,6 +39,8 @@ public:
 	bool HasFocus(int Set = -1);
 	void ConvertWhiteSpace(bool ToTabs);
 	void EscapeSelection(bool ToEscaped);
+	void SplitSelection(GString s);
+	void JoinSelection(GString s);
 	void SetCrLf(bool CrLf);
 	ssize_t GetLine();
 	void SetLine(int Line, bool CurIp);
@@ -65,7 +67,6 @@ public:
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	int OnNotify(GViewI *v, int f) override;
 	void OnPulse() override;
-	bool SetPos(GRect &p, bool Repaint = false) override { return GView::SetPos(p, Repaint); }
 	GString Read();
 	ssize_t Read(void *Ptr, ssize_t Size, int Flags = 0) override { return 0; }
 	ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override;

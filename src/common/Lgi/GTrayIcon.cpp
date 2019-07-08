@@ -12,7 +12,7 @@ namespace Gtk {
 using namespace Gtk;
 
 class GTrayIconPrivate;
-void tray_icon_on_click(GtkStatusIcon *status_icon, GTrayIconPrivate *d);
+static void tray_icon_on_click(GtkStatusIcon *status_icon, GTrayIconPrivate *d);
 static void tray_icon_on_menu(GtkStatusIcon *status_icon, guint button, guint activate_time, GTrayIconPrivate *d);
 #endif
 
@@ -135,12 +135,12 @@ public:
 };
 
 #if defined(__GTK_H__)
-static void tray_icon_on_click(GtkStatusIcon *status_icon, GTrayIconPrivate *d)
+void tray_icon_on_click(GtkStatusIcon *status_icon, GTrayIconPrivate *d)
 {
 	d->OnClick();
 }
 
-static void tray_icon_on_menu(GtkStatusIcon *status_icon, guint button, guint activate_time, GTrayIconPrivate *d)
+void tray_icon_on_menu(GtkStatusIcon *status_icon, guint button, guint activate_time, GTrayIconPrivate *d)
 {
 	d->OnMenu(button, activate_time);
 }
@@ -172,26 +172,33 @@ bool GTrayIcon::Load(const TCHAR *Str)
 	
 	#elif defined(__GTK_H__)
 
-	if (Str)	
+	if (!Str)
+		return false;
+
+	::GString sStr = Str;
+	GAutoString File(LgiFindFile(sStr));		
+	if (!File)
 	{
-		::GString sStr = Str;
-		GAutoString File(LgiFindFile(sStr));		
-		if (File)
-		{
-			GAutoPtr<GSurface> Ico(GdcD->Load(File));
-			if (Ico)
-			{
-				Gtk::GdkPixbuf *Pb = Ico->CreatePixBuf();
-            	if (Pb)
-            	{
-            		d->Icon.Add(Pb);
-	            	d->Images.Add(Ico.Release());
-	            }
-			}
-			else printf("%s:%i - Failed to load '%s'\n", _FL, sStr.Get());
-		}
-		else printf("%s:%i - Can't find '%s'\n", _FL, sStr.Get());
+		LgiTrace("%s:%i - Can't find '%s'\n", _FL, sStr.Get());
+		return false;
 	}
+
+	GAutoPtr<GSurface> Ico(GdcD->Load(File));
+	if (!Ico)
+	{
+		LgiTrace("%s:%i - Failed to load '%s'\n", _FL, sStr.Get());
+		return false;
+	}
+
+	Gtk::GdkPixbuf *Pb = Ico->CreatePixBuf();
+    if (!Pb)
+	{
+		LgiTrace("%s:%i - Failed to CreatePixBuf '%s'\n", _FL, sStr.Get());
+		return false;
+	}
+
+    d->Icon.Add(Pb);
+	d->Images.Add(Ico.Release());
 	
 	#else
 	
@@ -274,7 +281,11 @@ void GTrayIcon::Visible(bool v)
 					if (Ref)
 					{
 						Gtk::gtk_status_icon_set_from_pixbuf(d->tray_icon, Ref);
+						#if GTK_MAJOR_VERSION == 3
+						Gtk::gtk_status_icon_set_tooltip_text(d->tray_icon, GBase::Name());
+						#else
 						Gtk::gtk_status_icon_set_tooltip(d->tray_icon, GBase::Name());
+						#endif
 						Gtk::gtk_status_icon_set_visible(d->tray_icon, true);
 					}
 				}

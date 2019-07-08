@@ -434,7 +434,11 @@ GdcTiff::~GdcTiff()
 
 OsView GdcTiff::Handle()
 {
-	return (Parent) ? Parent->Handle() : 0;
+	return
+		#ifndef __GTK_H__
+		(Parent) ? Parent->Handle() :
+		#endif
+		0;
 }
 
 IFD *GdcTiff::FindTag(ushort n)

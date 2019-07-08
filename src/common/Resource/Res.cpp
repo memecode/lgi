@@ -957,6 +957,7 @@ public:
 	}
 
 	ResObjectImpl(ResFactory *factory, ResObject *object);
+	virtual ~ResObjectImpl() {}
 	ResObjectImpl *CreateCtrl(GXmlTag *Tag, ResObject *Parent);
 
 	// Store

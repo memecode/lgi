@@ -270,7 +270,7 @@ void GPalette::CreateCube()
 
 void TrimWhite(char *s)
 {
-	char *White = " \r\n\t";
+	auto *White = " \r\n\t";
 	char *c = s;
 	while (*c && strchr(White, *c)) c++;
 	if (c != s)
@@ -447,11 +447,16 @@ public:
 			{
 				ScrX = Gtk::gdk_screen_get_width(Scr);
 				ScrY = Gtk::gdk_screen_get_height(Scr);
+
 				Gtk::GdkVisual *Vis = Gtk::gdk_screen_get_system_visual(Scr);
 				if (Vis)
 				{
+					#if GTK_MAJOR_VERSION == 3
+					ScrBits = gdk_visual_get_depth(Vis);
+					#else
 					ScrBits = Vis->depth;
-					ScrColourSpace = GdkVisualToColourSpace(Vis, Vis->depth);
+					#endif
+					ScrColourSpace = GdkVisualToColourSpace(Vis, ScrBits);
 				}
 			}
 		}
@@ -891,7 +896,6 @@ union EndianTest
 GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 {
 	uint32_t c = CsNone;
-	
 	if (v)
 	{
 		EndianTest Test;
@@ -902,27 +906,56 @@ GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 		#if VisualToColourSpaceDebug
 		printf("GdkVisualToColourSpace, Type: %i, LittleEndian=%i\n", v->type, LittleEndian);
 		#endif
+
+		#if GTK_MAJOR_VERSION == 3
+		auto Depth = gdk_visual_get_depth(v);
+		
+		#define comp(c) \
+			Gtk::guint32 mask_##c; \
+			Gtk::gint shift_##c, precision_##c; \
+			gdk_visual_get_red_pixel_details (v, &mask_##c, &shift_##c, &precision_##c)
+		comp(r);
+		comp(g);
+		comp(b);
+
+		switch (gdk_visual_get_visual_type(v))
+		#else
+		auto Depth = v->depth;
+
+		auto mask_r = v->red_mask;
+		auto shift_r = v->red_shift;
+		auto precision_r = v->red_precision;
+		
+		auto mask_g = v->green_mask;
+		auto shift_g = v->green_shift;
+		auto precision_g = v->green_precision;
+		
+		auto mask_b = v->blue_mask;
+		auto shift_b = v->blue_shift;
+		auto precision_b = v->blue_precision;
+
 		switch (v->type)
+		#endif
 		{
 			default:
 			{
 				LgiAssert(!"impl me");
-				c = GBitsToColourSpace(v->depth);
+				c = GBitsToColourSpace(Depth);
 				break;
 			}
 			case Gtk::GDK_VISUAL_PSEUDO_COLOR:
 			case Gtk::GDK_VISUAL_STATIC_COLOR:
 			{
-				LgiAssert(v->depth <= 16);
-				c = (CtIndex << 4) | (v->depth != 16 ? v->depth : 0);
+				LgiAssert(Depth <= 16);
+				c = (CtIndex << 4) | (Depth != 16 ? Depth : 0);
 				break;
 			}
 			case Gtk::GDK_VISUAL_TRUE_COLOR:
 			case Gtk::GDK_VISUAL_DIRECT_COLOR:
 			{
-				int red =   (CtRed   << 4) | v->red_prec;
-				int green = (CtGreen << 4) | v->green_prec;
-				int blue =  (CtBlue  << 4) | v->blue_prec;
+				int red =   (CtRed   << 4) | precision_r;
+				int green = (CtGreen << 4) | precision_g;
+				int blue =  (CtBlue  << 4) | precision_b;
 				#ifdef __arm__
 				if
 				(
@@ -931,7 +964,7 @@ GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 					(v->depth != 16 && v->red_shift > v->blue_shift)
 				)
 				#else
-				if (v->red_shift > v->blue_shift)
+				if (shift_r > shift_b)
 				#endif
 				{
 					c = (red << 16) | (green << 8) | blue;
@@ -973,27 +1006,30 @@ GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 				break;
 			}
 		}
-	}
-	
-	GColourSpace Cs;
-	
-	if (v->depth != 16)
-	{
-		if (v->byte_order == Gtk::GDK_LSB_FIRST)
+
+		if (Depth != 16)
 		{
-			#if VisualToColourSpaceDebug
-			printf("GdkVisualToColourSpace swapping\n");
+			#if GTK_MAJOR_VERSION == 3
+			if (gdk_visual_get_byte_order(v) == Gtk::GDK_LSB_FIRST)
+			#else
+			if (v->byte_order == Gtk::GDK_LSB_FIRST)
 			#endif
-			c = LgiSwap32(c);
-			while (!(c & 0xff))
-				c >>= 8;
+			{
+				#if VisualToColourSpaceDebug
+				printf("GdkVisualToColourSpace swapping\n");
+				#endif
+				c = LgiSwap32(c);
+				while (!(c & 0xff))
+					c >>= 8;
+			}
 		}
 	}
 	
-	Cs = (GColourSpace)c;
+	GColourSpace Cs = (GColourSpace)c;
 	#if VisualToColourSpaceDebug
 	printf("GdkVisualToColourSpace %x %s\n", Cs, GColourSpaceToString(Cs));
 	#endif
+	
 	return Cs;
 }
 

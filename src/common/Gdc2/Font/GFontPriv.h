@@ -1,7 +1,8 @@
 #ifndef _GFONT_PRIV_H_
 #define _GFONT_PRIV_H_
 
-#if defined MAC && !defined COCOA
+#if defined USE_CORETEXT
+#include <ApplicationServices/ApplicationServices.h>
 typedef ATSUTextMeasurement OsTextSize;
 #else
 typedef double OsTextSize;
@@ -32,7 +33,7 @@ public:
 	LHashTbl<IntKey<int>,int> UnicodeX; // Widths of any other characters
 	#endif
 
-	#ifdef MAC
+	#ifdef USE_CORETEXT
 	CFDictionaryRef Attributes;
 	#endif
 
@@ -47,11 +48,10 @@ public:
 		#if defined WIN32
 		OwnerUnderline = false;
 		#endif
-		#if defined(MAC)
-		Attributes = NULL;
-		#endif
 		#ifdef __GTK_H__
 		PangoCtx = NULL;
+		#elif defined(MAC)
+		Attributes = NULL;
 		#endif
 
 		GlyphMap = 0;
@@ -62,13 +62,12 @@ public:
 	
 	~GFontPrivate()
 	{
-		#if defined(MAC)
-		if (Attributes)
-			CFRelease(Attributes);
-		#endif
 		#ifdef __GTK_H__
 		if (PangoCtx)
 			g_object_unref(PangoCtx);
+		#elif defined(MAC)
+		if (Attributes)
+			CFRelease(Attributes);
 		#endif
 	}
 };

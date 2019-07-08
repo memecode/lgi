@@ -812,7 +812,7 @@ public:
 		for (LstBlk *i = FirstObj; i; i = n)
 		{
 			n = i->Next;
-			for (char n=0; n<i->Count; n++)
+			for (int n=0; n<i->Count; n++)
 			{
 				delete [] i->Ptr[n];
 				i->Ptr[n] = NULL;

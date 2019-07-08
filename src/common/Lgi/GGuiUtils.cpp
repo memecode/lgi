@@ -201,10 +201,10 @@ void LgiInitColours()
 	
 	char PropName[] = "gtk-color-scheme";
 	Gtk::gchararray Value = 0;
-	Gtk::g_object_get(set, PropName, &Value, 0);	
+	Gtk::g_object_get(set, PropName, &Value, NULL);
 	GToken Lines(Value, "\n");
 	Gtk::g_free(Value);
-	LHashTbl<StrKey<char,false>, int> Colours(0, -1);
+	LHashTbl<ConstStrKey<char,false>, int> Colours(0, -1);
 	for (int i=0; i<Lines.Length(); i++)
 	{
 		char *var = Lines[i];
@@ -447,6 +447,32 @@ bool LgiGetDisplays(::GArray<GDisplayInfo*> &Displays, GRect *AllDisplays)
 
 		disp.cb = sizeof(disp);
 	}
+
+	#elif defined __GTK_H__
+
+	Gtk::GdkDisplay *Dsp = Gtk::gdk_display_get_default();
+	#if GtkVer(3, 22) 
+		int monitors = Gtk::gdk_display_get_n_monitors(Dsp);
+		for (int i=0; i<monitors; i++)
+		{
+			Gtk::GdkMonitor *m = Gtk::gdk_display_get_monitor(Dsp, i);
+			if (!m)
+				continue;
+
+			GDisplayInfo *di = new GDisplayInfo;
+			if (!di)
+				continue;
+
+			Gtk::GdkRectangle geometry;
+			gdk_monitor_get_geometry (m, &geometry);
+			di->r = geometry;
+			di->Device = NewStr(Gtk::gdk_monitor_get_manufacturer(m));
+			di->Name = NewStr(Gtk::gdk_monitor_get_model(m));
+			di->Refresh = Gtk::gdk_monitor_get_refresh_rate(m);
+
+			Displays.Add(di);
+		}
+	#endif
 
 	#endif
 

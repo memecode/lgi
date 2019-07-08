@@ -203,32 +203,33 @@
 #ifndef __LGI_H
 #define __LGI_H
 
-/// Library version
-#define LGI_VER								"3.8.0"
-
 /// \brief Define as '1' if Iconv is available else as '0'
 #define HAS_ICONV							1
 
 /// \brief Define as '1' if libjpeg is available else as '0'
 #define HAS_LIBJPEG							1
 #ifndef LIBJPEG_SHARED
-#define LIBJPEG_SHARED						1
+	#define LIBJPEG_SHARED					1
 #endif
 
 /// \brief Define as '1' if libpng and zlib are available else as '0'
 #define HAS_LIBPNG_ZLIB						1
 #ifndef LIBPNG_SHARED
-#define LIBPNG_SHARED						1
+	#define LIBPNG_SHARED					1
 #endif
 
 /// \brief Define as '1' if libsharedmime is available else as '0'
 #define HAS_SHARED_MIME						0
 #ifndef HAS_FILE_CMD
-#define HAS_FILE_CMD						0
+	#define HAS_FILE_CMD					0
 #endif
 #define HAS_SHARED_OBJECT_SKIN				0
 #define HAS_LIBGSASL						0
-#define HAS_LIB_MAGIC						1
+#if defined(_MSC_VER) || defined(MAC)
+	#define HAS_LIB_MAGIC					0
+#else
+	#define HAS_LIB_MAGIC					1
+#endif
 
 // My includes
 #include "LgiInc.h"							// Xp

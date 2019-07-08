@@ -1180,7 +1180,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 							Ext++;
 							char s[256];
 							ZeroObj(s);
-							memcpy(s, File, (int)Ext-(int)File);
+							memcpy(s, File, Ext-File);
 							strcat(s, DefExt);
 
 							OnFile(s);

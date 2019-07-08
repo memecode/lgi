@@ -93,19 +93,25 @@ class LgiClass GSubMenu :
 	friend class SubMenuImpl;
 	friend class MenuItemImpl;
 	friend class MenuImpl;
+	friend class GMouseHookPrivate;
+
+	// This is not called in the GUI thread
+	static void SysMouseClick(GMouse &m);
 
 	#if !WINNATIVE
 	OsSubMenu Info;
 	#endif
 
 	#if defined(__GTK_H__)
-	friend void MenuItemCallback(class GMenuItem *Item);
-	friend void GSubMenuDeactivate(Gtk::GtkMenuShell *widget, GSubMenu *Sub);
+	friend void GtkDeactivate(Gtk::GtkMenuShell *widget, GSubMenu *Sub);
+	friend Gtk::gboolean GSubMenuClick(GMouse *m);
+	friend void SubMenuDestroy(GSubMenu *Item);
 
 	int *_ContextMenuId;
 	bool InLoop;
+	uint64 ActiveTs;
 	bool IsContext(GMenuItem *Item);
-	void OnDeactivate();
+	void OnActivate(bool a);
 	#elif defined(WINNATIVE)
 	HWND TrackHandle;
 	#elif defined(BEOS)
@@ -320,14 +326,17 @@ protected:
 	#endif
 
 	#if defined(__GTK_H__)
-	friend void MenuItemCallback(GMenuItem *Item);
-	bool InSetCheck;
-	GAutoPtr<GMemDC> IconImg;
-	bool Replace(Gtk::GtkWidget *newWid);
+		bool InSetCheck;
+		GAutoPtr<GMemDC> IconImg;
+		bool Replace(Gtk::GtkWidget *newWid);
+	public:
+		void Handle(Gtk::GtkMenuItem *mi);
+		void OnGtkEvent(GString Event);
+	protected:
 	#else
-	virtual void _Measure(GdcPt2 &Size);
-	virtual void _Paint(GSurface *pDC, int Flags);
-	virtual void _PaintText(GSurface *pDC, int x, int y, int Width);
+		virtual void _Measure(GdcPt2 &Size);
+		virtual void _Paint(GSurface *pDC, int Flags);
+		virtual void _PaintText(GSurface *pDC, int x, int y, int Width);
 	#endif
 
 	void OnAttach(bool Attach);
@@ -339,7 +348,7 @@ public:
 	GMenuItem(BMenuItem *item);
 	GMenuItem(GSubMenu *p);
 	#endif
-	GMenuItem(GMenu *m, GSubMenu *p, const char *txt, int Pos, const char *Shortcut = 0);
+	GMenuItem(GMenu *m, GSubMenu *p, const char *txt, int Id, int Pos, const char *Shortcut = 0);
 	virtual ~GMenuItem();
 
 	GMenuItem &operator =(const GMenuItem &m) { LgiAssert(!"This shouldn't be used anywhere"); return *this; }

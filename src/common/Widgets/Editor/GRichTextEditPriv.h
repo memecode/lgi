@@ -880,6 +880,8 @@ public:
 			#else
 			Chars = len;
 			#endif
+
+			LgiAssert(l == 0 || FX() > 0);
 		}
 		
 		template<typename T>

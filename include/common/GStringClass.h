@@ -11,7 +11,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__GTK_H__)
 	// This fixes compile errors in VS2008/Gtk
 	#undef _SIGN_DEFINED
 	#undef abs
@@ -1144,7 +1144,9 @@ public:
 
 	static GString UnEscape(GString s) { return UnEscape(s.Get(), s.Length()); }
 
-	#if defined(MAC) // && __COREFOUNDATION_CFBASE__
+	#if defined(__GTK_H__)
+
+	#elif defined(MAC) // && __COREFOUNDATION_CFBASE__
 
 	GString(const CFStringRef r)
 	{

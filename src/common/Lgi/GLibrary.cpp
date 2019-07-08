@@ -111,43 +111,52 @@ bool GLibrary::Load(const char *File, bool Quiet)
 				}
 				else
 				{
-					char *e = dlerror();
-					if (!stristr(e, "No such file or directory") && !Quiet)
-						LgiTrace("%s:%i - dlopen(%s) failed: %s\n", _FL, File, e);
-
-					#if DEBUG_LIB_MSGS
-					LgiTrace("%s:%i - dlerror='%s'\n", _FL, e);
+					#ifdef MAC
+					char p[MAX_PATH];
+					LgiMakePath(p, sizeof(p), LgiArgsAppPath, "..");
+					LgiMakePath(p, sizeof(p), p, FileName);
+					hLib = dlopen(p, RTLD_NOW);
+					if (!hLib)
 					#endif
-
-					#ifdef BEOS
-					GToken t("/boot/system/develop/lib/x86", ":");
-					#else
-					GToken t("/opt/local/lib", ":");
-					#endif
-					for (int i=0; i<t.Length(); i++)
-					{
-						char full[MAX_PATH];
-						LgiMakePath(full, sizeof(full), t[i], f);
-						if (FileExists(full))
-						{
-							hLib = dlopen(full, RTLD_NOW);
-							if (!Quiet)
-								LgiTrace("%s:%i - dlopen(%s)=%p\n", _FL, full, hLib);
-							if (hLib)
-								break;
-						}
-						else if (!Quiet)
-						{
-							LgiTrace("%s doesn't exist\n", full);
-						}
-
-					}
-
-					if (!hLib && !Quiet)
 					{
 						char *e = dlerror();
-						if (!stristr(e, "No such file or directory"))
+						if (!stristr(e, "No such file or directory") && !Quiet)
 							LgiTrace("%s:%i - dlopen(%s) failed: %s\n", _FL, File, e);
+
+						#if DEBUG_LIB_MSGS
+						LgiTrace("%s:%i - dlerror='%s'\n", _FL, e);
+						#endif
+
+						#ifdef BEOS
+						GToken t("/boot/system/develop/lib/x86", ":");
+						#else
+						GToken t("/opt/local/lib", ":");
+						#endif
+						for (int i=0; i<t.Length(); i++)
+						{
+							char full[MAX_PATH];
+							LgiMakePath(full, sizeof(full), t[i], f);
+							if (FileExists(full))
+							{
+								hLib = dlopen(full, RTLD_NOW);
+								if (!Quiet)
+									LgiTrace("%s:%i - dlopen(%s)=%p\n", _FL, full, hLib);
+								if (hLib)
+									break;
+							}
+							else if (!Quiet)
+							{
+								LgiTrace("%s doesn't exist\n", full);
+							}
+
+						}
+
+						if (!hLib && !Quiet)
+						{
+							char *e = dlerror();
+							if (!stristr(e, "No such file or directory"))
+								LgiTrace("%s:%i - dlopen(%s) failed: %s\n", _FL, File, e);
+						}
 					}
 				}
 			}

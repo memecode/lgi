@@ -24,8 +24,9 @@ public:
 
 	GView *View;
 	OsView v;
-	GdkDrawable *d;
-	GdkGC *gc;
+	OsDrawable *d;
+	cairo_t *cr;
+	cairo_matrix_t matrix;
 
 	GScreenPrivate()
 	{
@@ -34,21 +35,16 @@ public:
 		Own = false;
 		v = 0;
 		d = NULL;
-		gc = NULL;
+		cr = NULL;
 		Client.ZOff(-1, -1);
 	}
 	
 	~GScreenPrivate()
 	{
-		if (gc)
-			g_object_unref((Gtk::GObject*)g_type_check_instance_cast((Gtk::GTypeInstance*)gc, G_TYPE_OBJECT));
 	}
 };
 
 // Translates are cumulative... so we undo the last one before resetting it.
-#define UnTranslate()		// d->p.translate(OriginX, OriginY);
-#define Translate()			// d->p.translate(-OriginX, -OriginY);
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 GScreenDC::GScreenDC()
 {
@@ -56,32 +52,6 @@ GScreenDC::GScreenDC()
 	d->x = GdcD->X();
 	d->y = GdcD->Y();
 }
-
-/*
-GScreenDC::GScreenDC(OsView View)
-{
-	d = new GScreenPrivate;
-	d->v = View;
-	d->d = View->window;	
-	d->x = View->allocation.width;
-	d->y = View->allocation.height;	
-	if (d->gc = gdk_gc_new(View->window))
-	{
-	    GdkScreen *s = gdk_gc_get_screen(d->gc);
-	    if (s)
-	    {
-	        GdkVisual *v = gdk_screen_get_system_visual(s);
-	        if (v)
-	        {
-	            d->Bits = v->depth;
-		        ColourSpace = GdkVisualToColourSpace(v, v->depth);
-	        }
-	    }
-	}
-	
-	// printf("%s:%i %p, %ix%i, %i\n", _FL, View, d->x, d->y, d->Bits);
-}
-*/
 
 GScreenDC::GScreenDC(int x, int y, int bits)
 {
@@ -91,11 +61,26 @@ GScreenDC::GScreenDC(int x, int y, int bits)
 	d->Bits = bits;
 }
 
-GScreenDC::GScreenDC(Gtk::GdkDrawable *Drawable)
+GScreenDC::GScreenDC(Gtk::cairo_t *cr, int x, int y)
+{
+	d = new GScreenPrivate;
+	d->Own = false;
+	d->cr = cr;
+	d->x = x;
+	d->y = y;
+	d->Bits = 32;
+	ColourSpace = GdcD->GetColourSpace();
+	cairo_get_matrix(d->cr, &d->matrix);
+}
+
+GScreenDC::GScreenDC(OsDrawable *Drawable)
 {
 	d = new GScreenPrivate;
 	d->Own = false;
 	d->d = Drawable;
+
+	#if GTK_MAJOR_VERSION == 3
+	#else
 	if (d->gc = gdk_gc_new(Drawable))
 	{
 	    GdkScreen *s = gdk_gc_get_screen(d->gc);
@@ -109,6 +94,7 @@ GScreenDC::GScreenDC(Gtk::GdkDrawable *Drawable)
 	        }
 	    }
 	}
+	#endif
 }
 
 GScreenDC::GScreenDC(GView *view, void *param)
@@ -117,10 +103,15 @@ GScreenDC::GScreenDC(GView *view, void *param)
 	d->View = view;
 	if (view)
 	{
-		OsView v = view->Handle();
+		GWindow *w = view->GetWindow();
+		OsView v = w? GTK_WIDGET(w->WindowHandle()) : NULL;
 		if (v)
 		{
 			d->v = v;
+
+			#if GTK_MAJOR_VERSION == 3
+			LgiAssert(!"Gtk3 FIXME");
+			#else
 			d->d = v->window;	
 			d->x = v->allocation.width;
 			d->y = v->allocation.height;	
@@ -137,23 +128,7 @@ GScreenDC::GScreenDC(GView *view, void *param)
 			        }
 			    }
 			}
-	
-			/*
-			d->d = v->window;
-			if (d->gc = gdk_gc_new(v->window))
-			{
-			    GdkScreen *s = gdk_gc_get_screen(d->gc);
-			    if (s)
-			    {
-			        GdkVisual *v = gdk_screen_get_system_visual(s);
-			        if (v)
-			        {
-			            d->Bits = v->depth;
-				        ColourSpace = GdkVisualToColourSpace(v, v->depth);
-			        }
-			    }
-			}
-			*/
+			#endif
 		}
 		else
 		{
@@ -168,8 +143,9 @@ GScreenDC::GScreenDC(GView *view, void *param)
 		        GdkVisual *v = gdk_screen_get_system_visual(s);
 		        if (v)
 		        {
-		            d->Bits = v->depth;
-			        ColourSpace = GdkVisualToColourSpace(v, v->depth);
+					d->Bits = gdk_visual_get_depth(v);
+		            // d->Bits = v->depth;
+			        ColourSpace = GdkVisualToColourSpace(v, d->Bits);
 		        }
 		    }
 		}
@@ -182,13 +158,14 @@ GScreenDC::GScreenDC(GView *view, void *param)
 
 GScreenDC::~GScreenDC()
 {
-	UnTranslate();
-	
 	DeleteObj(d);
 }
 
 OsPainter GScreenDC::Handle()
 {
+	#if GTK_MAJOR_VERSION == 3
+	return d->cr;
+	#else
 	if (!Cairo)
 	{
 		Cairo = gdk_cairo_create(d->d);
@@ -207,6 +184,7 @@ OsPainter GScreenDC::Handle()
 				d->View->_Debug)
 			{
 				int width, height;
+
 				gdk_drawable_get_size (d->d, &width, &height);
 				
 				printf("%s:%i %s %g,%g,%g,%g %i,%i  %i,%i  %i,%i\n",
@@ -222,6 +200,7 @@ OsPainter GScreenDC::Handle()
 	}
 	
 	return Cairo;
+	#endif
 }
 
 bool GScreenDC::SupportsAlphaCompositing()
@@ -244,27 +223,62 @@ bool GScreenDC::GetClient(GRect *c)
 	return true;
 }
 
+void GScreenDC::GetOrigin(int &x, int &y)
+{
+	if (d->Client.Valid())
+	{
+		x = OriginX + d->Client.x1;
+		y = OriginY + d->Client.y1;
+	}
+	else
+	{
+		x = OriginX;
+		y = OriginY;
+	}
+}
+
+void GScreenDC::SetOrigin(int x, int y)
+{
+	if (d->Client.Valid())
+	{
+		OriginX = x - d->Client.x1;
+		OriginY = y - d->Client.y1;
+	}
+	else
+	{
+		OriginX = x;
+		OriginY = y;
+	}
+
+	cairo_matrix_t m;
+	cairo_get_matrix(d->cr, &m);
+	m.x0 = d->matrix.x0 - OriginX;
+	m.y0 = d->matrix.y0 - OriginY;
+	cairo_set_matrix(d->cr, &m);
+}
+
 void GScreenDC::SetClient(GRect *c)
 {
 	if (c)
 	{
 		d->Client = *c;
 
-        GdkRectangle r = {c->x1, c->y1, c->X(), c->Y()};
-        gdk_gc_set_clip_rectangle(d->gc, &r);
+		cairo_save(d->cr);
+		cairo_rectangle(d->cr, c->x1, c->y1, c->X(), c->Y());
+		cairo_clip(d->cr);		
+		cairo_translate(d->cr, c->x1, c->y1);
 
 		OriginX = -c->x1;
-		OriginY = -c->y1;	
+		OriginY = -c->y1;
 	}
 	else
 	{
 		OriginX = 0;
 		OriginY = 0;	
 
-		d->Client.ZOff(-1, -1);
+		cairo_restore(d->cr);
 
-        GdkRectangle r = {0, 0, X(), Y()};
-        gdk_gc_set_clip_rectangle(d->gc, &r);
+		d->Client.ZOff(-1, -1);
 	}
 }
 
@@ -288,18 +302,6 @@ int GScreenDC::GetFlags()
 	return 0;
 }
 
-void GScreenDC::GetOrigin(int &x, int &y)
-{
-	return GSurface::GetOrigin(x, y);
-}
-
-void GScreenDC::SetOrigin(int x, int y)
-{
-	UnTranslate();
-	GSurface::SetOrigin(x, y);
-	Translate();
-}
-
 GRect GScreenDC::ClipRgn()
 {
 	return Clip;
@@ -308,26 +310,23 @@ GRect GScreenDC::ClipRgn()
 GRect GScreenDC::ClipRgn(GRect *c)
 {
 	GRect Prev = Clip;
-	UnTranslate();
 
 	if (c)
 	{
 		Clip = *c;
-		// LgiTrace("Setting clip %s client=%s\n", Clip.GetStr(), d->Client.GetStr());
 
-        GdkRectangle r = {c->x1+d->Client.x1, c->y1+d->Client.y1, c->X(), c->Y()};
-        gdk_gc_set_clip_rectangle(d->gc, &r);
+		// Don't add d->Client on here, as the translate makes it redundant.
+		cairo_save(d->cr);
+		cairo_new_path(d->cr);
+		cairo_rectangle(d->cr, c->x1, c->y1, c->X(), c->Y());
+		cairo_clip(d->cr);
 	}
 	else
 	{
 	    Clip.ZOff(-1, -1);
-		// LgiTrace("Removing clip\n");
-
-        GdkRectangle r = {d->Client.x1, d->Client.y1, X(), Y()};
-        gdk_gc_set_clip_rectangle(d->gc, &r);
+		cairo_restore(d->cr);
 	}
 
-	Translate();
 	return Prev;
 }
 
@@ -338,14 +337,25 @@ COLOUR GScreenDC::Colour()
 
 COLOUR GScreenDC::Colour(COLOUR c, int Bits)
 {
-	GColour col(c, Bits ? Bits : GetBits());
-	return Colour(col).Get(GetBits());
+	auto b = Bits?Bits:GetBits();
+	d->Col.Set(c, b);
+	return Colour(d->Col).Get(b);
 }
 
 GColour GScreenDC::Colour(GColour c)
 {
 	GColour Prev = d->Col;
 	d->Col = c;
+
+	#if GTK_MAJOR_VERSION == 3
+	if (d->cr)
+	{
+		cairo_set_source_rgb(d->cr,
+							(double)d->Col.r()/255.0,
+							(double)d->Col.g()/255.0,
+							(double)d->Col.b()/255.0);
+	}
+	#else
 	if (d->gc)
 	{
 		GdkColor col;
@@ -366,6 +376,7 @@ GColour GScreenDC::Colour(GColour c)
 		gdk_gc_set_rgb_fg_color(d->gc, &col);
 		gdk_gc_set_rgb_bg_color(d->gc, &col);
 	}
+	#endif
 
 	return Prev;
 }
@@ -458,7 +469,12 @@ void GScreenDC::Palette(GPalette *pPal, bool bOwnIt)
 
 void GScreenDC::Set(int x, int y)
 {
+	#if GTK_MAJOR_VERSION == 3
+	cairo_rectangle(d->cr, x, y, 1, 1);
+	cairo_fill(d->cr);
+	#else
 	gdk_draw_point(d->d, d->gc, x-OriginX, y-OriginY);
+	#endif
 }
 
 COLOUR GScreenDC::Get(int x, int y)
@@ -468,82 +484,134 @@ COLOUR GScreenDC::Get(int x, int y)
 
 void GScreenDC::HLine(int x1, int x2, int y)
 {
+	#if GTK_MAJOR_VERSION == 3
+	cairo_rectangle(d->cr, x1, y, x2-x1+1, 1);
+	cairo_fill(d->cr);
+	#else
 	gdk_draw_line(d->d, d->gc, x1-OriginX, y-OriginY, x2-OriginX, y-OriginY);
+	#endif
 }
 
 void GScreenDC::VLine(int x, int y1, int y2)
 {
+	#if GTK_MAJOR_VERSION == 3
+	cairo_rectangle(d->cr, x, y1, 1, y2-y1+1);
+	cairo_fill(d->cr);
+	#else
 	gdk_draw_line(d->d, d->gc, x-OriginX, y1-OriginY, x-OriginX, y2-OriginY);
+	#endif
 }
 
 void GScreenDC::Line(int x1, int y1, int x2, int y2)
 {
+	#if GTK_MAJOR_VERSION == 3
+	cairo_move_to(d->cr, 0.5+x1, 0.5+y1);
+	cairo_line_to (d->cr, 0.5+x2, 0.5+y2);
+	cairo_set_line_width(d->cr, 1.0);
+	cairo_set_line_cap(d->cr, CAIRO_LINE_CAP_SQUARE);
+	cairo_stroke(d->cr);
+	cairo_fill(d->cr);
+	#else
 	gdk_draw_line(d->d, d->gc, x1-OriginX, y1-OriginY, x2-OriginX, y2-OriginY);
+	#endif
 }
 
 void GScreenDC::Circle(double cx, double cy, double radius)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_arc(d->d, d->gc, false,
 			 	cx - radius, cy - radius,
 			 	radius * 2.0,
 			 	radius * 2.0,
 			 	0,
 			 	360 * 64);
+	#endif
 }
 
 void GScreenDC::FilledCircle(double cx, double cy, double radius)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_arc(d->d, d->gc, true,
 			 	cx - radius, cy - radius,
 			 	radius * 2.0,
 			 	radius * 2.0,
 			 	0,
 			 	360 * 64);
+	#endif
 }
 
 void GScreenDC::Arc(double cx, double cy, double radius, double start, double end)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_arc(d->d, d->gc, false,
 			 	cx - radius, cy - radius,
 			 	radius * 2.0,
 			 	radius * 2.0,
 			 	start * 64.0,
 			 	end * 64.0);
+	#endif
 }
 
 void GScreenDC::FilledArc(double cx, double cy, double radius, double start, double end)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_arc(d->d, d->gc, true,
 			 	cx - radius, cy - radius,
 			 	radius * 2.0,
 			 	radius * 2.0,
 			 	start * 64.0,
 			 	end * 64.0);
+	#endif
 }
 
 void GScreenDC::Ellipse(double cx, double cy, double x, double y)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_arc(d->d, d->gc, false,
 			 	cx - (x / 2), cy - (y / 2),
 			 	x,
 			 	y,
 			 	0,
 			 	360 * 64);
+	#endif
 }
 
 void GScreenDC::FilledEllipse(double cx, double cy, double x, double y)
 {
+	#if GTK_MAJOR_VERSION == 3
+	LgiAssert(!"Gtk3 FIXME");
+	#else
 	gdk_draw_arc(d->d, d->gc, true,
 			 	cx - (x / 2), cy - (y / 2),
 			 	x,
 			 	y,
 			 	0,
 			 	360 * 64);
+	#endif
 }
 
 void GScreenDC::Box(int x1, int y1, int x2, int y2)
 {
+	#if GTK_MAJOR_VERSION == 3
+	double w = x2 - x1 + 1;
+	double h = y2 - y1 + 1;
+	cairo_rectangle(d->cr, x1, y1, w, h);
+	cairo_rectangle(d->cr, x1+1, y1+1, w-2, h-2);
+	cairo_set_fill_rule(d->cr, CAIRO_FILL_RULE_EVEN_ODD);
+	cairo_fill(d->cr);
+	#else
 	gdk_draw_rectangle(d->d, d->gc, false, x1-OriginX, y1-OriginY, x2-x1, y2-y1);
+	#endif
 }
 
 void GScreenDC::Box(GRect *a)
@@ -563,7 +631,12 @@ void GScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 	if (x2 >= x1 &&
 		y2 >= y1)
 	{
+		#if GTK_MAJOR_VERSION == 3
+		cairo_rectangle (d->cr, x1, y1, x2-x1+1, y2-y1+1);
+		cairo_fill(d->cr);
+		#else
 		gdk_draw_rectangle(d->d, d->gc, true, x1-OriginX, y1-OriginY, x2-x1+1, y2-y1+1);
+		#endif
 	}
 }
 
@@ -574,12 +647,22 @@ void GScreenDC::Rectangle(GRect *a)
 		if (a->X() > 0 &&
 			a->Y() > 0)
 		{
+			#if GTK_MAJOR_VERSION == 3
+			cairo_rectangle (d->cr, a->x1, a->y1, a->X(), a->Y());
+			cairo_fill(d->cr);
+			#else
 			gdk_draw_rectangle(d->d, d->gc, true, a->x1-OriginX, a->y1-OriginY, a->X(), a->Y());
+			#endif
 		}
 	}
 	else
 	{
+		#if GTK_MAJOR_VERSION == 3
+		cairo_rectangle(d->cr, 0, 0, X(), Y());
+		cairo_fill(d->cr);
+		#else
 		gdk_draw_rectangle(d->d, d->gc, true, -OriginX, -OriginY, X(), Y());
+		#endif
 	}
 }
 
@@ -595,11 +678,15 @@ void GScreenDC::Polygon(int Points, GdcPt2 *Data)
 			out.y = Data[p].y;
 		}
 		
+		#if GTK_MAJOR_VERSION == 3
+		LgiAssert(!"Gtk3 FIXME");
+		#else
 		gdk_draw_polygon(d->d,
 						 d->gc,
 						 true,
 						 &pt.First(),
 						 pt.Length());
+		#endif
 	}
 }
 
@@ -619,12 +706,9 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 		
 	// memory -> screen blt
 	GRect RealClient = d->Client;
-	int Dx, Dy;
-	Dx = x - OriginX;
-	Dy = y - OriginY;
 	d->Client.ZOff(-1, -1); // Clear this so the blit rgn calculation uses the
 							// full context size rather than just the client.
-	GBlitRegions br(this, Dx, Dy, Src, a);
+	GBlitRegions br(this, x, y, Src, a);
 	d->Client = RealClient;
 	if (!br.Valid())
 	{
@@ -632,8 +716,9 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	}
 
 	GMemDC *Mem;
-	if (Mem = dynamic_cast<GMemDC*>(Src))
+	if ((Mem = dynamic_cast<GMemDC*>(Src)))
 	{
+		/*
 		GMemDC Tmp;
 		if (Mem->GetCreateCs() != GetColourSpace() &&
 			Mem->GetBits() > 16 &&
@@ -658,21 +743,58 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 				return;
 			}
 		}
+		*/
 
-		if (d->d && d->gc && Mem->GetImage())
-		{
-			gdk_draw_image( d->d,
-							d->gc,
-							Mem->GetImage(),
-							br.SrcClip.x1, br.SrcClip.y1,
-							Dx, Dy,
-							br.SrcClip.X(), br.SrcClip.Y());
-		}
-		else
-		{
-			LgiTrace("%s:%i - Error missing d=%p, gc=%p, img=%p\n",
-				_FL, d->d, d->gc, Mem->GetImage());
-		}
+		#if GTK_MAJOR_VERSION == 3
+
+			cairo_surface_t *Sub = Mem->GetSurface(br.SrcClip);
+			if (Sub)
+			{
+				cairo_pattern_t *Pat = cairo_pattern_create_for_surface(Sub);
+				if (Pat)
+				{
+					#if 0
+					Gtk::cairo_matrix_t matrix;
+					cairo_get_matrix(d->cr, &matrix);
+					double ex[4];
+					cairo_clip_extents(d->cr, ex+0, ex+1, ex+2, ex+3);
+					LgiTrace("GScreenDC::Blt, clip=%g,%g,%g,%g, client=%s\n",
+						ex[0]+matrix.x0, ex[1]+matrix.y0,
+						ex[2]+matrix.x0, ex[3]+matrix.y0,
+						d->Client.GetStr());
+					#endif
+
+					cairo_save(d->cr);
+					cairo_translate(d->cr, br.DstClip.x1, br.DstClip.y1);
+					cairo_set_source(d->cr, Pat);
+		
+					cairo_new_path(d->cr);
+					cairo_rectangle(d->cr, 0, 0, br.DstClip.X(), br.DstClip.Y());
+					cairo_fill(d->cr);
+		
+					cairo_restore(d->cr);
+					
+					cairo_pattern_destroy(Pat);
+				}
+				cairo_surface_destroy(Sub);				
+			}
+
+		#else
+			if (d->d && d->gc && Mem->GetImage())
+			{
+				gdk_draw_image( d->d,
+								d->gc,
+								Mem->GetImage(),
+								br.SrcClip.x1, br.SrcClip.y1,
+								Dx, Dy,
+								br.SrcClip.X(), br.SrcClip.Y());
+			}
+			else
+			{
+				LgiTrace("%s:%i - Error missing d=%p, gc=%p, img=%p\n",
+					_FL, d->d, d->gc, Mem->GetImage());
+			}
+		#endif
 	}
 }
 

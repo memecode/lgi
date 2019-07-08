@@ -974,7 +974,8 @@ void GView::_Delete()
 	Pos.ZOff(-1, -1);
 
 	GViewI *c;
-	while ((c = Children.First()))
+	auto it = Children.begin();
+	while ((c = *it))
 	{
 		GViewI *p = c->GetParent();
 		if (p != (GViewI*)this)
@@ -982,7 +983,7 @@ void GView::_Delete()
 			printf("Error: GView::_Delete, child not attached correctly: %p(%s) Parent: %p(%s)\n",
 				c, c->Name(),
 				c->GetParent(), c->GetParent() ? c->GetParent()->Name() : "");
-			Children.Delete(c);
+			Children.Delete(it);
 		}
 
 		DeleteObj(c);

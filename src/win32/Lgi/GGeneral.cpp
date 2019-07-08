@@ -885,7 +885,7 @@ GString WinGetSpecialFolderPath(int Id)
 #ifndef LGI_STATIC
 int LgiAssertDlg(GString Msg)
 {
-	GAlert a(0, "Assert Failed", Msg, "Abort", "Debug", "Ignore");
+	GAlert a(LgiApp ? LgiApp->AppWnd : NULL, "Assert Failed", Msg, "Abort", "Debug", "Ignore");
 	a.SetAppModal();
 	return a.DoModal();
 }

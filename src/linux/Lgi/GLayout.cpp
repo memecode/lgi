@@ -234,12 +234,12 @@ void GLayout::OnNcPaint(GSurface *pDC, GRect &r)
 	
 	if (VScroll && VScroll->Visible())
 	{
-		r.x2 = VScroll->GetPos().x1 - 1;
+		r.x2 -= VScroll->X();
 	}
 
 	if (HScroll && HScroll->Visible())
 	{
-		r.y2 = HScroll->GetPos().y1 - 1;
+		r.y2 -= HScroll->Y();
 	}
 	
 	if (VScroll && VScroll->Visible() &&
@@ -286,8 +286,8 @@ GMessage::Param GLayout::OnEvent(GMessage *Msg)
 	}
 	#endif
 
-	if (VScroll) VScroll->OnEvent(Msg);
-	if (HScroll) HScroll->OnEvent(Msg);
+	// if (VScroll) VScroll->OnEvent(Msg);
+	// if (HScroll) HScroll->OnEvent(Msg);
 	int Status = GView::OnEvent(Msg);
 	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&

@@ -5,7 +5,7 @@
 #include "GScripting.h"
 #include "GScriptingPriv.h"
 #include "GToken.h"
-#include "GProcess.h"
+#include "GSubProcess.h"
 #include "LgiRes.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -887,13 +887,14 @@ bool SystemFunctions::Execute(LScriptArguments &Args)
 	if (Args.Length() < 2)
 		return false;
 
-	GProcess e;
 	GStringPipe p;
 	char *Exe = Args[0]->CastString();
 	char *Arguments = Args[1]->CastString();
-	bool Status = e.Run(Exe, Arguments, 0, true, 0, &p);
+	GSubProcess e(Exe, Arguments);
+	bool Status = e.Start();
 	if (Status)
 	{
+		e.Communicate(&p);
 		GAutoString o(p.NewStr());
 		*Args.GetReturn() = o;
 	}

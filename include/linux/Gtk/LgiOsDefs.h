@@ -15,20 +15,19 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <wchar.h>
-#include <unistd.h>
 #ifdef WIN32
 	#include "winsock2.h"
 	#define WIN32GTK                    1
-	#define WINNATIVE					0
 	#ifdef _WIN64
 		#define LGI_64BIT				1
 	#else
 		#define LGI_32BIT				1
 	#endif
 #else
+	#include <unistd.h>
 	#define _MULTI_THREADED
 	#include <pthread.h>
-	#define LINUX						1
+	//#define LINUX						1
 	#define XP_CTRLS					1
 	#define POSIX						1
 
@@ -47,6 +46,10 @@
 #undef stricmp
 
 #include "LgiInc.h"
+#ifdef MAC
+	#include <sys/stat.h>
+	#include <netinet/in.h>
+#endif
 namespace Gtk {
 #include <gtk/gtk.h>
 #ifdef WIN32
@@ -97,7 +100,11 @@ typedef Gtk::cairo_t					*OsPainter;
 typedef Gtk::PangoFontDescription       *OsFont;
 typedef void							*OsBitmap;
 
-#define LgiGetCurrentProcess()			getpid()
+#ifdef WIN32
+#define LgiGetCurrentProcess			GetCurrentProcessId
+#else
+#define LgiGetCurrentProcess			getpid
+#endif
 
 // Because of namespace issues you can't use the built in GTK casting macros.
 // So this is basically the same thing:
@@ -119,7 +126,7 @@ public:
 	OsApplication(int Args, char **Arg);
 	~OsApplication();
 	
-	static OsApplication *GetInst() { LgiAssert(Inst); return Inst; }
+	static OsApplication *GetInst() { LgiAssert(Inst != NULL); return Inst; }
 };
 
 #define XcbConn()					(OsApplication::GetInst()->GetConn())
@@ -137,7 +144,7 @@ public:
 typedef HANDLE  					OsThread;
 typedef DWORD						OsThreadId;
 typedef CRITICAL_SECTION			OsSemaphore;
-#define LgiGetCurrentThread()		GetCurrentThreadId()
+#define LgiGetCurrentThread()		GetCurrentThread()
 
 #else
 
@@ -189,10 +196,48 @@ LgiFunc void LgiSleep(uint32_t i);
 #else
 #define LGI_WideCharset				"utf-32"
 #endif
-#define LPrintfInt64				"%Li"
-#define LPrintfHex64				"%Lx"
-#define LPrintfSizeT				"%zu"
-#define LPrintfSSizeT				"%zi"
+
+#ifdef _MSC_VER
+	#define _MSC_VER_VS2019	2000 // MSVC++ 16.0 (speculative)
+	#define _MSC_VER_VS2017	1910 // MSVC++ 15.0
+	#define _MSC_VER_VS2015	1900 // MSVC++ 14.0
+	#define _MSC_VER_VS2013	1800 // MSVC++ 12.0
+	#define _MSC_VER_VS2012	1700 // MSVC++ 11.0
+	#define _MSC_VER_VS2010	1600 // MSVC++ 10.0
+	#define _MSC_VER_VS2008	1500 // MSVC++ 9.0
+	#define _MSC_VER_VS2005	1400 // MSVC++ 8.0
+	#define _MSC_VER_VS2003	1310 // MSVC++ 7.1
+	#define _MSC_VER_VC7	1300 // MSVC++ 7.0
+	#define _MSC_VER_VC6	1200 // MSVC++ 6.0
+	#define _MSC_VER_VC5	1100 // MSVC++ 5.0
+
+	#if _MSC_VER >= _MSC_VER_VS2015
+	#define _MSC_VER_STR	"14"
+	#elif _MSC_VER >= _MSC_VER_VS2013
+	#define _MSC_VER_STR	"12"
+	#elif _MSC_VER >= _MSC_VER_VS2012
+	#define _MSC_VER_STR	"11"
+	#elif _MSC_VER >= _MSC_VER_VS2010
+	#define _MSC_VER_STR	"10"
+	#else
+	#define _MSC_VER_STR	"9"
+	#endif
+
+	#define LPrintfInt64			"%I64i"
+	#define LPrintfHex64			"%I64x"
+	#if LGI_64BIT
+		#define LPrintfSizeT		"%I64u"
+		#define LPrintfSSizeT		"%I64d"
+	#else
+		#define LPrintfSizeT		"%u"
+		#define LPrintfSSizeT		"%d"
+	#endif
+#else
+	#define LPrintfInt64			"%lld"
+	#define LPrintfHex64			"%llx"
+	#define LPrintfSizeT			"%zu"
+	#define LPrintfSSizeT			"%zi"
+#endif
 
 #ifndef SND_ASYNC
 #define SND_ASYNC					0x0001
@@ -254,7 +299,11 @@ LgiFunc void LgiSleep(uint32_t i);
 	/// The pattern that matches all files in Linux
 	#define LGI_ALL_FILES			"*"
 	/// The stardard extension for dynamically linked code
+	#ifdef MAC
+	#define LGI_LIBRARY_EXT			"dylib"
+	#else
 	#define LGI_LIBRARY_EXT			"so"
+	#endif
 	/// The standard executable extension
 	#define LGI_EXECUTABLE_EXT		""
 #endif
@@ -265,6 +314,7 @@ LgiFunc void LgiSleep(uint32_t i);
 /// Tests a char for being a quote
 #define IsQuote(c)					(((c)=='\"')||((c)=='\''))
 
+#ifndef WIN32
 /// ID's returned by LgiMsg.
 /// \sa LgiMsg
 enum MessageBoxResponse
@@ -294,6 +344,7 @@ enum MessageBoxType
 };
 
 #define MB_SYSTEMMODAL				0x1000
+#endif
 
 /// The CTRL key is pressed
 /// \sa GKey
@@ -512,17 +563,22 @@ enum MessageBoxType
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs
-#define vsprintf_s		vsnprintf
 #define swprintf_s		swprintf
+#ifndef _MSC_VER
+#define vsprintf_s		vsnprintf
+#endif
 
-#ifndef WIN32 // __CYGWIN__
+#ifndef WINNATIVE // __CYGWIN__
 
+	#ifdef _MSC_VER
+	#else
 	// LgiFunc char *strnistr(char *a, char *b, int n);
 	#define _strnicmp strncasecmp // LgiFunc int _strnicmp(char *a, char *b, int i);
 	LgiFunc char *strupr(char *a);
 	LgiFunc char *strlwr(char *a);
 	LgiFunc int stricmp(const char *a, const char *b);
 	#define _stricmp strcasecmp // LgiFunc int _stricmp(const char *a, const char *b);
+	#endif
 	#define sprintf_s snprintf
 
 #else
@@ -531,13 +587,6 @@ enum MessageBoxType
 	LgiFunc int GetMouseWheelLines();
 	LgiFunc int WinPointToHeight(int Pt, HDC hDC = NULL);
 	LgiFunc int WinHeightToPoint(int Ht, HDC hDC = NULL);
-	LgiExtern class GString WinGetSpecialFolderPath(int Id);
-
-	typedef BOOL (__stdcall *pSHGetSpecialFolderPathA)(HWND hwndOwner, LPSTR lpszPath, int nFolder, BOOL fCreate);
-	typedef BOOL (__stdcall *pSHGetSpecialFolderPathW)(HWND hwndOwner, LPWSTR lpszPath, int nFolder, BOOL fCreate);
-	typedef int (__stdcall *pSHFileOperationA)(LPSHFILEOPSTRUCTA lpFileOp);
-	typedef int (__stdcall *pSHFileOperationW)(LPSHFILEOPSTRUCTW lpFileOp);
-	typedef int (__stdcall *p_vscprintf)(const char *format, va_list argptr);
 
 	#if _MSC_VER >= 1400
 		#define snprintf sprintf_s
@@ -548,6 +597,15 @@ enum MessageBoxType
 	/// Convert a Os dependant integer d'n'd format to a string.
 	LgiFunc char *FormatToStr(int f);
 
+#endif
+
+#ifdef WINDOWS
+	typedef BOOL (__stdcall *pSHGetSpecialFolderPathA)(HWND hwndOwner, LPSTR lpszPath, int nFolder, BOOL fCreate);
+	typedef BOOL (__stdcall *pSHGetSpecialFolderPathW)(HWND hwndOwner, LPWSTR lpszPath, int nFolder, BOOL fCreate);
+	typedef int (__stdcall *pSHFileOperationA)(LPSHFILEOPSTRUCTA lpFileOp);
+	typedef int (__stdcall *pSHFileOperationW)(LPSHFILEOPSTRUCTW lpFileOp);
+	typedef int (__stdcall *p_vscprintf)(const char *format, va_list argptr);
+	LgiExtern class GString WinGetSpecialFolderPath(int Id);
 #endif
 
 #endif

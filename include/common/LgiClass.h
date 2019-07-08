@@ -3,7 +3,7 @@
 
 #include "LgiInc.h"
 #include "LgiDefs.h"
-#if defined __OBJC__
+#if defined(__OBJC__) && !defined(__GTK_H__)
 #include <Cocoa/Cocoa.h>
 #endif
 
@@ -126,7 +126,14 @@ public:
 	#else
 	void SetModifer(uint32_t modifierKeys)
 	{
-		#if defined(MAC)
+		#if defined(__GTK_H__)
+		
+		System((modifierKeys & Gtk::GDK_MOD4_MASK) != 0);
+		Shift((modifierKeys & Gtk::GDK_SHIFT_MASK) != 0);
+		Alt((modifierKeys & Gtk::GDK_MOD1_MASK) != 0);
+		Ctrl((modifierKeys & Gtk::GDK_CONTROL_MASK) != 0);
+
+		#elif defined(MAC)
 
 			#if !defined COCOA
 				System(modifierKeys & cmdKey);
@@ -135,13 +142,6 @@ public:
 				Ctrl(modifierKeys & controlKey);
 			#endif
 
-		#elif defined(__GTK_H__)
-		
-		System(modifierKeys & Gtk::GDK_MOD4_MASK);
-		Shift(modifierKeys & Gtk::GDK_SHIFT_MASK);
-		Alt(modifierKeys & Gtk::GDK_MOD1_MASK);
-		Ctrl(modifierKeys & Gtk::GDK_CONTROL_MASK);
-		
 		#endif
 	}
 	#endif
@@ -283,7 +283,7 @@ public:
 	/// \returns true if this event should show a context menu
 	bool IsContextMenu();
 	
-	#if defined __OBJC__
+	#if defined(__OBJC__) && !defined(__GTK_H__)
 	void SetFromEvent(NSEvent *ev, NSView *view);
 	#else
 	void SetButton(uint32_t Btn)
@@ -292,6 +292,10 @@ public:
 		Left(Btn == kEventMouseButtonPrimary);
 		Right(Btn == kEventMouseButtonSecondary);
 		Middle(Btn == kEventMouseButtonTertiary);
+		#elif defined(__GTK_H__)
+		if (Btn == 1) Left(true);
+		else if (Btn == 2) Middle(true);
+		else if (Btn == 3) Right(true);
 		#endif
 	}
 	#endif

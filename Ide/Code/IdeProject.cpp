@@ -10,7 +10,6 @@
 #include "GDragAndDrop.h"
 #include "GToken.h"
 #include "resdefs.h"
-#include "GProcess.h"
 #include "GCombo.h"
 #include "INet.h"
 #include "LListItemCheckBox.h"
@@ -24,6 +23,7 @@
 #include "GTableLayout.h"
 #include "GTextLabel.h"
 #include "GButton.h"
+#include "GRegKey.h"
 
 extern const char *Untitled;
 const char SourcePatterns[] = "*.c;*.h;*.cpp;*.cc;*.java;*.d;*.php;*.html;*.css;*.js";
@@ -1466,6 +1466,7 @@ GString BuildThread::FindExe()
 			GString NmakePath;
 			switch (_MSC_VER)
 			{
+				#ifdef _MSC_VER_VS2013
 				case _MSC_VER_VS2013:
 				{
 					if (Arch == ArchX32)
@@ -1474,6 +1475,8 @@ GString BuildThread::FindExe()
 						NmakePath = "c:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\bin\\amd64\\nmake.exe";
 					break;
 				}
+				#endif
+				#ifdef _MSC_VER_VS2015
 				case _MSC_VER_VS2015:
 				{
 					if (Arch == ArchX32)
@@ -1482,6 +1485,7 @@ GString BuildThread::FindExe()
 						NmakePath = "c:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake.exe";
 					break;
 				}
+				#endif
 				default:
 				{
 					LgiAssert(!"Impl me.");
@@ -2189,16 +2193,13 @@ public:
 		
 		if (Exe)
 		{
-			GProcess p;
 			if (Act == ExeDebug)
 			{
-				char *a = QuoteStr(Exe);
-				char *b = QuoteStr(Path);				
-				
-				p.Run("kdbg", a, b, true, 0, this);
-				
-				DeleteArray(a);
-				DeleteArray(b);
+				GSubProcess sub("kdbg", Exe);
+				if (Path)
+					sub.SetInitFolder(Path);
+				if (sub.Start())
+					sub.Communicate(this);
 			}
 			else if (Act == ExeValgrind)
 			{
@@ -2250,7 +2251,11 @@ public:
 			}
 			else
 			{
-				p.Run(Exe, Args, Path, true, 0, this);
+				GSubProcess sub(Exe, Args);
+				if (Path)
+					sub.SetInitFolder(Path);
+				if (sub.Start())
+					sub.Communicate(this);
 			}
 		}
 		
@@ -3305,10 +3310,12 @@ bool IdeProject::BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool In
 				// Run config app to get the full path list...
 				p = p.Strip("`");
 				GString::Array a = p.Split(" ", 1);
-				GProcess Proc;
+				GSubProcess Proc(a[0], a.Length() > 1 ? a[1].Get() : NULL);
 				GStringPipe Buf;
-				if (Proc.Run(a[0], a.Length() > 1 ? a[1].Get() : NULL, NULL, true, NULL, &Buf))
+				if (Proc.Start())
 				{
+					Proc.Communicate(&Buf);
+
 					GString result = Buf.NewGStr();
 					a = result.Split(" \t\r\n");
 					for (int i=0; i<a.Length(); i++)

@@ -108,7 +108,9 @@ public:
 				Txt.Add(w.Release());
 				Sem.Unlock();
 			}
+			#ifndef __GTK_H__
 			if (Handle())
+			#endif
 				PostEvent(M_LOG_TEXT);
 		}
 		return Size;

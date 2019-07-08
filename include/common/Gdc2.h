@@ -417,10 +417,13 @@ protected:
 	uint32_t			LineReset;
 
 	#if WINNATIVE
-	OsPainter	hDC;
-	OsBitmap	hBmp;
+		OsPainter	hDC;
+		OsBitmap	hBmp;
 	#elif defined __GTK_H__
-	OsPainter	Cairo;
+		#if GTK_MAJOR_VERSION == 3
+		#else
+			OsPainter	Cairo;
+		#endif
 	#endif
 
 public:
@@ -672,7 +675,7 @@ public:
 	bool CallMethod(const char *Name, GVariant *ReturnValue, GArray<GVariant*> &Args);
 };
 
-#ifdef MAC
+#if defined(MAC) && !defined(__GTK_H__)
 
 struct GPrintDcParams
 {
@@ -684,6 +687,14 @@ struct GPrintDcParams
 	#endif
 };
 
+#endif
+
+#if defined(__GTK_H__)
+	#if GTK_MAJOR_VERSION == 3
+	typedef Gtk::GdkWindow OsDrawable;
+	#else
+	typedef Gtk::GdkDrawable OsDrawable;
+	#endif
 #endif
 
 /// \brief An implemenation of GSurface to draw onto the screen.
@@ -715,6 +726,18 @@ public:
 		GScreenDC(GView *view, void *Param = 0);
 	
 		#if defined(LGI_SDL)
+		#elif defined(__GTK_H__)
+		
+			/// Constructs a server size pixmap
+			GScreenDC(int x, int y, int bits);		
+			/// Constructs a wrapper around a drawable
+			GScreenDC(OsDrawable *Drawable);
+			/// Constructs a DC for drawing on a cairo context
+			GScreenDC(Gtk::cairo_t *cr, int x, int y);
+			
+			// Gtk::cairo_surface_t *GetSurface(bool Render);
+			GdcPt2 GetSize();
+		
 		#elif defined(MAC)
 	
 			GScreenDC(GWindow *wnd, void *Param = 0);
@@ -723,18 +746,6 @@ public:
 			void PushState();
 			void PopState();
 	
-		#elif defined(__GTK_H__)
-		
-			/// Constructs a server size pixmap
-			GScreenDC(int x, int y, int bits);		
-			/// Constructs a wrapper around a drawable
-			GScreenDC(Gtk::GdkDrawable *Drawable);
-			/// Constructs a DC for drawing on a window
-			///GScreenDC(OsView View);
-			
-			// Gtk::cairo_surface_t *GetSurface(bool Render);
-			GdcPt2 GetSize();
-		
 		#elif defined(BEOS)
 		
 			GScreenDC(BView *view);
@@ -884,7 +895,7 @@ public:
 	}
 };
 
-#if defined(MAC)
+#if defined(MAC) && !defined(__GTK_H__)
 class CGImg
 {
 	class CGImgPriv *d;
@@ -946,7 +957,19 @@ public:
 
 		GRect ClipRgn() { return Clip; }
 
-		#if defined MAC
+		#if defined(__GTK_H__)
+
+			#if GTK_MAJOR_VERSION == 3
+			Gtk::cairo_surface_t *GetImage();
+			#else
+			Gtk::GdkImage *GetImage();
+			#endif
+			GdcPt2 GetSize();
+			Gtk::cairo_surface_t *GetSurface(GRect &r);
+			GColourSpace GetCreateCs();
+			Gtk::GdkPixbuf *CreatePixBuf();
+
+		#elif defined MAC
 				
 			OsBitmap GetBitmap();
 			#if !defined(LGI_SDL)
@@ -954,14 +977,6 @@ public:
 				CGImg *GetImg(GRect *Sub = 0);
 			#endif
 		
-		#elif defined(__GTK_H__)
-
-			Gtk::GdkImage *GetImage();
-			GdcPt2 GetSize();
-			Gtk::cairo_surface_t *GetSurface(GRect &r);
-			GColourSpace GetCreateCs();
-			Gtk::GdkPixbuf *CreatePixBuf();
-
 		#elif defined(BEOS) || defined(LGI_SDL)
 
 			OsBitmap GetBitmap();
@@ -985,9 +1000,11 @@ public:
 	/// don't need access to a bitmap after creating / loading it then unlock it.
 	bool Unlock();
 	
+	void GetOrigin(int &x, int &y);
 	void SetOrigin(int x, int y);
 	void Empty();
 	bool SupportsAlphaCompositing();
+	bool SwapRedAndBlue();
 	
 	bool Create(int x, int y, GColourSpace Cs, int Flags = SurfaceCreateNone);
 	void Blt(int x, int y, GSurface *Src, GRect *a = NULL);

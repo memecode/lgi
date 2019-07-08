@@ -1,6 +1,6 @@
 #include "Lgi.h"
-#include "LgiSpellcheck.h"
-#if _MSC_VER >= _MSC_VER_VS2013
+#include "LgiSpellCheck.h"
+#if defined(_MSC_VER) && _MSC_VER >= _MSC_VER_VS2013
 #include "Spellcheck.h"
 #endif
 

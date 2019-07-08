@@ -31,7 +31,6 @@
 
 // Options
 #define DOUBLE_BUFFER_PAINT				0
-#define DOUBLE_BUFFER_COLUMN_DRAWING	0
 
 #define ForAllItems(Var)				for (auto Var : Items)
 #define ForAllItemsReverse(Var)			Iterator<LListItem> ItemIter(&Items); for (LListItem *Var = ItemIter.Last(); Var; Var = ItemIter.Prev())
@@ -580,8 +579,7 @@ void LListItem::OnPaint(GItem::ItemPaintCtx &Ctx)
 		if (h && i == h->GetColumn())
 		{
 			h->OnPaintColumn(ColCtx, i, c);
-			It++;
-			h = *It;
+			h = *(++It);
 		}
 		x = ColCtx.x2 + 1;
 		
@@ -1268,6 +1266,8 @@ LgiCursor LList::GetCursor(int x, int y)
 
 void LList::OnMouseClick(GMouse &m)
 {
+	// m.Trace("LList::OnMouseClick");
+
 	if (Lock(_FL))
 	{
 		if (m.Down())
@@ -1628,6 +1628,7 @@ void LList::OnPulse()
 		{
 			GMouse m;
 			GetMouse(m);
+			// m.Trace("LList::OnPulse");
 
 			if (m.y < 0 || m.y >= Y())
 			{

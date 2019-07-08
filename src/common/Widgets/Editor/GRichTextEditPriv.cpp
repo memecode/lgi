@@ -1800,27 +1800,6 @@ bool GRichTextPriv::InsertHorzRule()
 	
 void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 {
-	/*
-	if (Areas[GRichTextEdit::CapabilityArea].Valid())
-	{
-		GRect &t = Areas[GRichTextEdit::CapabilityArea];
-		pDC->Colour(GColour::Red);
-		pDC->Rectangle(&t);
-		int y = t.y1 + 4;
-		for (unsigned i=0; i<NeedsCap.Length(); i++)
-		{
-			CtrlCap &cc = NeedsCap[i];
-			GDisplayString Ds(SysFont, cc.Name);
-			SysFont->Transparent(true);
-			SysFont->Colour(GColour::White, GColour::Red);
-			Ds.Draw(pDC, t.x1 + 4, y);
-			y += Ds.Y() + 4;
-		}
-
-		PaintBtn(pDC, GRichTextEdit::CapabilityBtn);
-	}
-	*/
-
 	if (Areas[GRichTextEdit::ToolsArea].Valid())
 	{
 		// Draw tools area...
@@ -1871,15 +1850,20 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 	}
 
 	GdcPt2 Origin;
-	pDC->GetOrigin(Origin.x, Origin.y);
 	
 	GRect r = Areas[GRichTextEdit::ContentArea];
 	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
-	GMemDC Mem(r.X(), r.Y(), pDC->GetColourSpace());
+	GMemDC Mem;
+	if (!Mem.Create(r.X(), r.Y(), pDC->GetColourSpace()))
+	{
+		LgiAssert(!"MemDC creation failed.");
+		return;
+	}
 	GSurface *pScreen = pDC;
 	pDC = &Mem;
 	r.Offset(-r.x1, -r.y1);
 	#else
+	pDC->GetOrigin(Origin.x, Origin.y);
 	pDC->ClipRgn(&r);
 	#endif
 
@@ -2322,6 +2306,12 @@ bool GRichTextPriv::FromHtml(GHtmlElement *e, CreateContext &ctx, GCss *ParentSt
 					Blocks.Add(ctx.Tb = new TextBlock(this));
 					ctx.Tb->SetStyle(CachedStyle);
 				}
+
+				#ifdef __GTK_H__
+				for (auto *i = Txt; *i; i++)
+					if (*i == 0xa0)
+						*i = ' ';
+				#endif
 			
 				ctx.AddText(CachedStyle, Txt);
 				ctx.StartOfLine = false;

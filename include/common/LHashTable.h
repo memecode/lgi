@@ -608,7 +608,7 @@ public:
 			Pair *e = Table + Size;
 			while (c < e)
 			{
-				if (CmpKey(c->value, val))
+				if (c->value == val)
 				{
 					return c->key;
 				}

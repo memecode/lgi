@@ -90,7 +90,11 @@ void RemoveExistingSignals(OsView w)
 		{
 			if (Si.Sig > 0)
 			{
+				#if GTK_MAJOR_VERSION == 3
+				LgiAssert(!"Gtk3 FIXME");
+				#else
 				gtk_signal_disconnect(GTK_OBJECT(w), Si.Sig);
+				#endif
 				Si.Sig = 0;
 			}
 			
@@ -230,7 +234,11 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect)
 	if (!SourceWnd)
 		return -1;
 
-	if (!SourceWnd || !SourceWnd->Handle())
+	if (!SourceWnd
+		#ifndef __GTK_H__
+		|| !SourceWnd->Handle()
+		#endif
+		)
 	{
 		LgiTrace("%s:%i - Error: No source window or handle.\n", _FL);
 		return -1;
@@ -259,11 +267,16 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect)
 	Gtk::GdkDragAction Action = EffectToDragAction(Effect);
 	
 	int Button = 1;
-	d->SignalWnd = SourceWnd->Handle();
+	GWindow *w = SourceWnd->GetWindow();
+	d->SignalWnd = w ? GTK_WIDGET(w->WindowHandle()) : NULL;
 	RemoveExistingSignals(d->SignalWnd);
 	SignalInfo &Si = ExistingSignals.New();
 	Si.Wnd = d->SignalWnd;
+	#if GTK_MAJOR_VERSION == 3
+	Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-data-get", G_CALLBACK(LgiDragDataGet), this);
+	#else
 	Si.Sig = gtk_signal_connect(GTK_OBJECT(d->SignalWnd), "drag-data-get", G_CALLBACK(LgiDragDataGet), this);
+	#endif
 
 	d->Ctx = Gtk::gtk_drag_begin(d->SignalWnd,
 								Targets,
@@ -294,9 +307,9 @@ void GDragDropTarget::SetWindow(GView *to)
 	{
 		To->DropTarget(this);
 		Status = To->DropTarget(true);
-		if (To->Handle())
+		
+		if (To->IsAttached())
 		{
-			GtkWidget *w = to->Handle();
    			OnDragInit(Status);
 		}
 		else

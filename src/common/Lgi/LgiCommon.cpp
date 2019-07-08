@@ -40,7 +40,7 @@
 	#include <sys/types.h>
 	#include <pwd.h>
 	#include <sys/utsname.h>
-	#include "GProcess.h"
+	#include "GSubProcess.h"
 #elif defined BEOS
 	#include <Path.h>
 #endif
@@ -62,11 +62,12 @@ namespace Gtk {
 
 //////////////////////////////////////////////////////////////////////////
 // Misc stuff
+#if LGI_COCOA || defined(__GTK_H__)
+	GString LgiArgsAppPath;
+#endif
 #if defined MAC
 	#import <foundation/foundation.h>
-	#if COCOA
-		GString LgiArgsAppPath;
-	#else
+	#if defined LGI_CARBON
 		bool _get_path_FSRef(FSRef &fs, GStringPipe &a)
 		{
 			HFSUniStr255 Name;
@@ -136,7 +137,8 @@ bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 
 	#elif defined(__GTK_H__)
 
-	GViewI *View = g_object_get_data(GtkCast(Wnd, g_object, GObject), "GViewI");
+	LgiAssert(Wnd);
+	GViewI *View = (GViewI*) g_object_get_data(GtkCast(Wnd, g_object, GObject), "GViewI");
 	if (View)
 	{
 		GMessage m(0);
@@ -356,6 +358,7 @@ int LgiGetOs
 
 	#elif defined MAC
 
+	#if !defined(__GTK_H__)
 	if (Ver)
 	{
 		NSOperatingSystemVersion v = [[NSProcessInfo processInfo] operatingSystemVersion];
@@ -363,6 +366,7 @@ int LgiGetOs
 		Ver->Add((int)v.minorVersion);
 		Ver->Add((int)v.patchVersion);
 	}
+	#endif
 	
 	return LGI_OS_MAC_OS_X;
 
@@ -1105,7 +1109,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 
 			Path = WinGetSpecialFolderPath(CSIDL_MYMUSIC);
 			
-			#elif defined MAC && !defined COCOA
+			#elif defined LGI_CARBON
 			
 			FSRef Ref;
 			OSErr e = FSFindFolder(kUserDomain, kMusicDocumentsFolderType, kDontCreateFolder, &Ref);
@@ -1135,7 +1139,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 
 			Path = WinGetSpecialFolderPath(CSIDL_MYVIDEO);
 
-			#elif defined MAC && !defined COCOA
+			#elif defined LGI_CARBON
 
 			FSRef Ref;
 			OSErr e = FSFindFolder(kUserDomain, kMovieDocumentsFolderType, kDontCreateFolder, &Ref);
@@ -1247,24 +1251,29 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			#if defined MAC
 
 				#if COCOA
-				NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
-				if (paths)
-				{
-					Path = [[paths objectAtIndex:0] UTF8String];
-				}
+					NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
+					if (paths)
+						Path = [[paths objectAtIndex:0] UTF8String];
+				#elif defined LGI_CARBON
+					FSRef Ref;
+					OSErr e = FSFindFolder(kUserDomain, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
+					if (e)
+					{
+						printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
+						LgiAssert(0);
+					}
+					else
+					{
+						GAutoString Base = FSRefPath(Ref);
+						Path = Base.Get();
+					}
 				#else
-				FSRef Ref;
-				OSErr e = FSFindFolder(kUserDomain, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
-				if (e)
-				{
-					printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
-					LgiAssert(0);
-				}
-				else
-				{
-					GAutoString Base = FSRefPath(Ref);
-					Path = Base.Get();
-				}
+
+				struct passwd *pw = getpwuid(getuid());
+				if (!pw)
+					return false;
+				Path.Printf("%s/Library", pw->pw_dir);
+			
 				#endif
 
 			#elif defined WIN32
@@ -1312,7 +1321,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			if (GetWindowsDirectoryW(p, CountOf(p)) > 0)
 				Path = p;
 
-			#elif defined MAC && !defined COCOA
+			#elif defined LGI_CARBON
 			
 			FSRef Ref;
 			OSErr e = FSFindFolder(kOnAppropriateDisk,  kSystemFolderType, kDontCreateFolder, &Ref);
@@ -1378,7 +1387,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 					Path = utf;
 			}
 
-			#elif defined MAC && !defined COCOA
+			#elif defined LGI_CARBON
 			
 			FSRef Ref;
 			OSErr e = FSFindFolder(kUserDomain, kTemporaryFolderType, kCreateFolder, &Ref);
@@ -1414,7 +1423,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 
 			Path = WinGetSpecialFolderPath(CSIDL_COMMON_APPDATA);
 			
-			#elif defined MAC && !defined COCOA
+			#elif defined LGI_CARBON
 			
 			FSRef Ref;
 			OSErr e = FSFindFolder(kOnSystemDisk, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
@@ -1443,7 +1452,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			
 			Path = WinGetSpecialFolderPath(CSIDL_APPDATA);
 
-			#elif defined MAC && !defined COCOA
+			#elif defined LGI_CARBON
 			
 			FSRef Ref;
 			OSErr e = FSFindFolder(kUserDomain, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
@@ -1484,7 +1493,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			#elif defined(MAC)
 			
 				#if defined COCOA
-				#else
+				#elif defined LGI_CARBON
 				FSRef Ref;
 				OSErr e = FSFindFolder(kOnAppropriateDisk, kDesktopFolderType, kDontCreateFolder, &Ref);
 				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", __FILE__, __LINE__, e);
@@ -1572,10 +1581,11 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 					if (!ValidStr(KdeTrash))
 					{
 						// Ask KDE where the current trash is...
-						GProcess p;
 						GStringPipe o;
-						if (p.Run("kde-config", "--userpath trash", 0, true, 0, &o))
+						GSubProcess p("kde-config", "--userpath trash");
+						if (p.Start())
 						{
+							p.Communicate(&o);
 							char *s = o.NewStr();
 							if (s)
 							{
@@ -1627,7 +1637,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 				}
 			}
 			
-			#elif defined MAC && !defined COCOA
+			#elif defined LGI_CARBON
 			
 			FSRef Ref;
 			OSErr e = FSFindFolder(kUserDomain, kTrashFolderType, kDontCreateFolder, &Ref);
@@ -1647,12 +1657,17 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			else
 				LgiAssert(0);
 
-			#elif defined WIN32
+			#elif defined(WIN32)
 
-			// This should work but doesn't... *shrug*
-			// char *f = GetWin32Folder(CSIDL_BITBUCKET);
+			LgiAssert(0);
 
-			#else
+			#elif defined(MAC)
+
+			// Non carbon mac builds (e.g. GTK3)
+			struct passwd *pw = getpwuid(getuid());
+			if (!pw)
+				return GString();
+			Path.Printf("%s/.Trash", pw->pw_dir);
 
 			#endif
 			break;
@@ -1661,6 +1676,17 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 
 	return Path;
 }
+
+/*
+OsProcessId LgiGetCurrentProcess()
+{
+	#ifdef WIN32
+	return GetCurrentProcessId();
+	#else
+	return getpid();
+	#endif
+}
+*/
 
 bool LgiGetExeFile(char *Dst, int DstSize)
 {
@@ -1788,9 +1814,10 @@ bool LgiGetExeFile(char *Dst, int DstSize)
 					// sprintf_s(Cmd, sizeof(Cmd), "ps | grep \"%i\"", getpid());
 					
 					GStringPipe Ps;
-					GProcess p;
-					if (p.Run("ps", 0, 0, true, 0, &Ps))
+					GSubProcess p("ps");
+					if (p.Start())
 					{
+						p.Communicate(&Ps);
 						char *PsOutput = Ps.NewStr();
 						if (PsOutput)
 						{
@@ -1837,8 +1864,8 @@ bool LgiGetExeFile(char *Dst, int DstSize)
 		
 			bool Status = false;
 		
-			#if COCOA
-		
+			#if COCOA || defined __GTK_H__
+
 			if (FileExists(LgiArgsAppPath))
 			{
 				LgiMakePath(Dst, DstSize, LgiArgsAppPath, "../../..");
@@ -2034,7 +2061,7 @@ uint64 LgiCurrentTime()
 
 	return system_time() / 1000;
 
-	#elif defined MAC && !defined COCOA
+	#elif defined LGI_CARBON
 	
 	UnsignedWide t;
 	Microseconds(&t);
@@ -2076,7 +2103,7 @@ uint64 LgiMicroTime()
 	LgiAssert(!"Not impl.");
 	return 0;
 
-	#elif defined MAC && !defined COCOA
+	#elif defined LGI_CARBON
 	
 	UnsignedWide t;
 	Microseconds(&t);
@@ -2603,6 +2630,8 @@ GString LGetAppForProtocol(const char *Protocol)
 				break;
 			}
 		}
+	#elif defined(__GTK_H__)
+		LgiAssert(!"What to do?");
 	#elif defined(MAC)
 		// Get the handler type
 		CFStringRef Type = GString(Protocol).CreateStringRef();
