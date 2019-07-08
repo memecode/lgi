@@ -298,6 +298,15 @@ void GMemDC::SetOrigin(int x, int y)
 {
 	Handle();
 	GSurface::SetOrigin(x, y);
+
+	if (d->cr)
+	{		
+		cairo_matrix_t m;
+		cairo_get_matrix(d->cr, &m);
+		m.x0 = -x;
+		m.y0 = -y;
+		cairo_set_matrix(d->cr, &m);
+	}
 }
 
 GColourSpace GMemDC::GetCreateCs()

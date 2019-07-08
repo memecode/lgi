@@ -2093,7 +2093,6 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 
 	#elif defined __GTK_H__
 	
-	Gtk::pango_context_set_font_description(GFontSystem::Inst()->GetContext(), Font->Handle());
 	Gtk::cairo_t *cr = pDC->Handle();
 	if (!cr)
 	{
@@ -2101,6 +2100,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 		return;
 	}
 
+	Gtk::pango_context_set_font_description(GFontSystem::Inst()->GetContext(), Font->Handle());
 	Gtk::cairo_save(cr);
 
 	GColour b = Font->Back();
@@ -2109,22 +2109,9 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	if (!Font->Transparent())
 	{
 		// Background fill
-		cairo_set_source_rgb(cr,
-							(double)b.r()/255.0,
-							(double)b.g()/255.0,
-							(double)b.b()/255.0);
-		cairo_new_path(cr);
-		if (frc)
-			cairo_rectangle
-			(
-				cr,
-				((double)frc->x1 / FScale),
-				((double)frc->y1 / FScale),
-				(double)frc->X() / FScale,
-				(double)frc->Y() / FScale
-			);
-		else
-			cairo_rectangle(cr, Dx, Dy, x, y);
+		cairo_set_source_rgb(cr, (double)b.r()/255.0, (double)b.g()/255.0, (double)b.b()/255.0); cairo_new_path(cr);
+		if (frc)	cairo_rectangle(cr, ((double)frc->x1 / FScale), ((double)frc->y1 / FScale), (double)frc->X() / FScale, (double)frc->Y() / FScale);
+		else		cairo_rectangle(cr, Dx, Dy, x, y);
 		cairo_fill(cr);
 	}
 

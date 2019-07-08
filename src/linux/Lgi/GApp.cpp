@@ -420,7 +420,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	SystemNormal = 0;
 	GFontType SysFontType;
 
-	#if 1
+	#ifdef MAC
 	Gtk::PangoFontMap *fm = Gtk::pango_cairo_font_map_get_default();
 	if (fm)
 	{
