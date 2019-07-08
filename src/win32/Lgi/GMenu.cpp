@@ -118,14 +118,17 @@ GSubMenu::~GSubMenu()
 	}
 }
 
+void GSubMenu::SysMouseClick(GMouse &m)
+{
+}
 
 GMenuItem *GSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where, const char *Shortcut)
 {
 	int Pos = (int) (Where < 0 ? Items.Length() : min(Where, Items.Length()));
-	GMenuItem *Item = new GMenuItem(Menu, this, Str, Pos, Shortcut);
+
+	GMenuItem *Item = new GMenuItem(Menu, this, Str, Id, Pos, Shortcut);
 	if (Item)
 	{
-		Item->Id(Id);
 		Item->Enabled(Enabled);
 		Items.Insert(Item, Where);
 		Item->ScanForAccel();
@@ -163,7 +166,7 @@ GMenuItem *GSubMenu::AppendSeparator(int Where)
 GSubMenu *GSubMenu::AppendSub(const char *Str, int Where)
 {
 	int Pos = (int) (Where < 0 ? Items.Length() : min(Where, Items.Length()));
-	GMenuItem *Item = new GMenuItem(Menu, this, Str, Pos);
+	GMenuItem *Item = new GMenuItem(Menu, this, Str, -1, Pos);
 	GSubMenu *Sub = new GSubMenu;
 
 	if (Item && Sub)
@@ -350,7 +353,7 @@ GMenuItem::GMenuItem()
 	Enabled(true);
 }
 
-GMenuItem::GMenuItem(GMenu *m, GSubMenu *p, const char *Txt, int Pos, const char *Shortcut)
+GMenuItem::GMenuItem(GMenu *m, GSubMenu *p, const char *Txt, int id, int Pos, const char *Shortcut)
 {
 	d = new GMenuItemPrivate;
 	d->Shortcut.Reset(NewStr(Shortcut));
@@ -374,7 +377,7 @@ GMenuItem::GMenuItem(GMenu *m, GSubMenu *p, const char *Txt, int Pos, const char
 	#endif
 	#endif
 
-	Id(0);
+	Id(id);
 	Enabled(true);
 	Name(Txt);
 

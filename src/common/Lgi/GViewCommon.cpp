@@ -689,18 +689,8 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	if (Update)
 	{
 		GRect OldClip = pDC->ClipRgn();
-		for (GRect *rc = Update->First(); rc; rc = Update->Next())
-		{
-			pDC->ClipRgn(rc);
-			OnPaint(pDC);
-			
-			/*
-			#ifdef _DEBUG
-			if (_Debug)
-				printf("%s:%i OnPaint %s\n", _FL, rc->GetStr());
-			#endif
-			*/
-		}
+		pDC->ClipRgn(Update);
+		OnPaint(pDC);
 		pDC->ClipRgn(OldClip.Valid() ? &OldClip : NULL);
 	}
 	else
@@ -2080,15 +2070,8 @@ bool GView::InThread()
 bool GView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 {
 	#ifdef LGI_SDL
-	
-	return LgiPostEvent(this, Cmd, a, b);
-	
-	#else
-	
-	#ifndef __GTK_H__
-	if (_View)
-	{
-		#if WINNATIVE
+		return LgiPostEvent(this, Cmd, a, b);
+	#elif WINNATIVE
 		BOOL Res = ::PostMessage(_View, Cmd, a, b);
 		if (!Res)
 		{
@@ -2096,14 +2079,13 @@ bool GView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 			int asd=0;
 		}
 		return Res != 0;
-		#else
-		return LgiPostEvent(_View, Cmd, a, b);
-		#endif
-	}
-	else
-	#endif
+	#elif defined(__GTK_H__)
 		return LgiApp->PostEvent(this, Cmd, a, b);
-	
+	#else
+		if (_View)
+			return LgiPostEvent(_View, Cmd, a, b);
+		else
+			LgiAssert(0);
 	#endif
 }
 

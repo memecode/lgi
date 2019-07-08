@@ -174,7 +174,7 @@ bool GPrinter::GetPageRange(GArray<int> &p)
 #define MAGIC_DEVMODE					0xAAFF0101
 #define MAGIC_DEVNAMES					0xAAFF0102
 
-bool GPrinter::Serialize(char *&Str, bool Write)
+bool GPrinter::Serialize(GString &Str, bool Write)
 {
 	int Size = sizeof(d->Info);
 	if (Write)
@@ -227,8 +227,6 @@ bool GPrinter::Serialize(char *&Str, bool Write)
 			{
 				memset(Base64, 0, Base64Len+1);
 				ConvertBinaryToBase64(Base64, Base64Len, Bin, BinLen);
-				
-				DeleteArray(Str);
 				Str = Base64;
 			}
 			return true;
@@ -245,7 +243,7 @@ bool GPrinter::Serialize(char *&Str, bool Write)
 			// Convert to binary
 			GMemQueue Temp;
 
-			auto Base64Len = strlen(Str);
+			auto Base64Len = Str.Length();
 			auto BinaryLen = BufferLen_64ToBin(Base64Len);
 			uchar *Binary = new uchar[BinaryLen];
 			if (Binary)

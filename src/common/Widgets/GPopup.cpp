@@ -199,7 +199,6 @@ public:
 					// Down click....
 					uint64 Now = LgiCurrentTime();
 					GPopup *Over = 0;
-					GPopup *w;
 
 					for (auto w: Popups)
 					{

@@ -1000,7 +1000,9 @@ public:
 	/// don't need access to a bitmap after creating / loading it then unlock it.
 	bool Unlock();
 	
+	#if !WINNATIVE
 	void GetOrigin(int &x, int &y);
+	#endif
 	void SetOrigin(int x, int y);
 	void Empty();
 	bool SupportsAlphaCompositing();
