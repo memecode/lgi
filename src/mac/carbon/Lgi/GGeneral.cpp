@@ -448,8 +448,11 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Er
 				}
 				CFRelease(s);
 			}
-			#else
-			LgiAssert(0);
+			#elif defined(__GTK_H__)
+			Gtk::GError *e = NULL;
+			OsWindow w = LgiApp->AppWnd ? LgiApp->AppWnd->WindowHandle() : NULL;
+			auto r = Gtk::gtk_show_uri_on_window(w, File, 0, &e);
+			return r;
 			#endif
 		}
 		else

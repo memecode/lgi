@@ -322,7 +322,7 @@ int IFD::ArrayValue(ulong i)
 	else
 	{
 		printf("%s:%i - IFD::ArrayValue(%i) error, Count=%i p=%p\n",
-			_FL, i, (int)Count, p);
+			_FL, (int)i, (int)Count, p);
 	}
 	
 	return 0;

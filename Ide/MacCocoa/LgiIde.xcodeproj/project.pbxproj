@@ -33,9 +33,9 @@
 		345B2117217969700079E3C9 /* GDebugContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FD2179696F0079E3C9 /* GDebugContext.cpp */; };
 		345B2118217969700079E3C9 /* IdeProjectSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */; };
 		345B2119217969700079E3C9 /* MissingFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FF217969700079E3C9 /* MissingFiles.cpp */; };
-		345B211E217969D30079E3C9 /* mac-icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 345B211B217969D30079E3C9 /* mac-icon.icns */; };
-		345B211F217969D30079E3C9 /* LgiIde.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 345B211C217969D30079E3C9 /* LgiIde.lr8 */; };
-		345B2120217969D30079E3C9 /* icons.png in Resources */ = {isa = PBXBuildFile; fileRef = 345B211D217969D30079E3C9 /* icons.png */; };
+		34CAF47F22D3771800BE529A /* icons.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211D217969D30079E3C9 /* icons.png */; };
+		34CAF48022D3771C00BE529A /* LgiIde.lr8 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211C217969D30079E3C9 /* LgiIde.lr8 */; };
+		34CAF48122D3771E00BE529A /* mac-icon.icns in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211B217969D30079E3C9 /* mac-icon.icns */; };
 		34D21CD821797815003D1EA6 /* GExeCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CD721797815003D1EA6 /* GExeCheck.cpp */; };
 		34D21CDA21797833003D1EA6 /* GLexCpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CD921797833003D1EA6 /* GLexCpp.cpp */; };
 		34D21CDE21797856003D1EA6 /* GOptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CDB21797856003D1EA6 /* GOptionsFile.cpp */; };
@@ -65,6 +65,21 @@
 			remoteInfo = LgiCocoa;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		34CAF47E22D3771500BE529A /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				34CAF47F22D3771800BE529A /* icons.png in CopyFiles */,
+				34CAF48022D3771C00BE529A /* LgiIde.lr8 in CopyFiles */,
+				34CAF48122D3771E00BE529A /* mac-icon.icns in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		341C7AC721A752DC0083C9CE /* GAbout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GAbout.cpp; path = ../../src/common/Lgi/GAbout.cpp; sourceTree = "<group>"; };
@@ -308,7 +323,7 @@
 			buildPhases = (
 				345B2068217965E80079E3C9 /* Sources */,
 				345B2069217965E80079E3C9 /* Frameworks */,
-				345B206A217965E80079E3C9 /* Resources */,
+				34CAF47E22D3771500BE529A /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -373,19 +388,6 @@
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
-
-/* Begin PBXResourcesBuildPhase section */
-		345B206A217965E80079E3C9 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				345B211F217969D30079E3C9 /* LgiIde.lr8 in Resources */,
-				345B211E217969D30079E3C9 /* mac-icon.icns in Resources */,
-				345B2120217969D30079E3C9 /* icons.png in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		345B2068217965E80079E3C9 /* Sources */ = {
