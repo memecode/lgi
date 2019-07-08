@@ -895,6 +895,20 @@ GFilter::IoStatus GdcJpeg::WriteImage(GStream *Out, GSurface *pDC)
 	return _Write(Out, pDC, Quality.CastInt32(), (SubSampleMode)SubSample.CastInt32(), Dpi);
 }
 
+template<typename I>
+void Rop24(GRgb24 *dst, I *p, int x)
+{
+    I *end = p + x;
+	while (p < end)
+	{
+		dst->r = p->r;
+		dst->g = p->g;
+		dst->b = p->b;
+        dst++;
+		p++;
+	}
+}
+
 GFilter::IoStatus GdcJpeg::_Write(GStream *Out, GSurface *pDC, int Quality, SubSampleMode SubSample, GdcPt2 Dpi)
 {
 	struct jpeg_compress_struct cinfo;
@@ -1075,20 +1089,19 @@ GFilter::IoStatus GdcJpeg::_Write(GStream *Out, GSurface *pDC, int Quality, SubS
 					}
 					break;
 				}
-				case System24BitColourSpace:
-				{
-				    System24BitPixel *p, *end;
-				    p = (System24BitPixel*) (*pDC)[cinfo.next_scanline];
-                    end = p + pDC->X();
-					while (p < end)
-					{
-						*dst++ = p->r;
-						*dst++ = p->g;
-						*dst++ = p->b;
-                        p++;
-					}
-					break;
-				}
+
+				#define Write24(cs) \
+					case Cs##cs: \
+						Rop24<G##cs>((GRgb24*)dst, (G##cs*)(*pDC)[cinfo.next_scanline], pDC->X()); \
+						break
+				
+				Write24(Rgb24);
+				Write24(Bgr24);
+				Write24(Rgbx32);
+				Write24(Bgrx32);
+				Write24(Xrgb32);
+				Write24(Xbgr32);
+
 				case System32BitColourSpace:
 				{
 				    System32BitPixel *p = (System32BitPixel*) (*pDC)[cinfo.next_scanline];
