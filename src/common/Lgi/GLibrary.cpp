@@ -111,7 +111,7 @@ bool GLibrary::Load(const char *File, bool Quiet)
 				}
 				else
 				{
-					#ifdef MAC
+					#if defined(MAC) && defined(__GTK_H__)
 					char p[MAX_PATH];
 					LgiMakePath(p, sizeof(p), LgiArgsAppPath, "..");
 					LgiMakePath(p, sizeof(p), p, FileName);

@@ -36,7 +36,7 @@ bool GPrinter::Browse(GView *Parent)
 	return false;
 }
 
-bool GPrinter::Serialize(char *&Str, bool Write)
+bool GPrinter::Serialize(GString &Str, bool Write)
 {
 	if (Write)
 	{

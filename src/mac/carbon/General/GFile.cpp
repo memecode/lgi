@@ -43,7 +43,6 @@
 #define O_LARGEFILE				0
 
 /****************************** Globals ***********************************/
-
 struct ErrorCodeType
 {
 	const char *Name;
@@ -570,6 +569,7 @@ public:
 				}
 			}
 			#endif
+		}
 
 		_It = _Sub.begin();
 		return *_It;

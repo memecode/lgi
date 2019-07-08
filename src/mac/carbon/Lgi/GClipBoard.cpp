@@ -30,7 +30,6 @@ GClipBoard::GClipBoard(GView *o)
 	d = new GClipBoardPriv;
 	Owner = o;
 	Open = false;
-	pDC = 0;
 }
 
 GClipBoard::~GClipBoard()
@@ -56,7 +55,6 @@ bool GClipBoard::Empty()
 
 	Txt.Reset();
 	wTxt.Reset();
-	DeleteObj(pDC);
 
 	return Status;
 }
