@@ -155,6 +155,8 @@ set (CommonSource
 	src/common/Lgi/LThreadCommon.cpp
 	include/common/LThreadEvent.h
 	src/common/Lgi/LThreadEvent.cpp
+	include/common/GSubProcess.h
+	src/common/Lgi/GSubProcess.cpp
 	src/common/Lgi/GToolTip.cpp
 	src/common/Lgi/GTrayIcon.cpp
 	include/common/GVariant.h

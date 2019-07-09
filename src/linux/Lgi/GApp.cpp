@@ -420,15 +420,26 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	SystemNormal = 0;
 	GFontType SysFontType;
 
-	#ifdef MAC
 	Gtk::PangoFontMap *fm = Gtk::pango_cairo_font_map_get_default();
 	if (fm)
 	{
 		using namespace Gtk;
 		auto cfm = PANGO_CAIRO_FONT_MAP(fm);
-		pango_cairo_font_map_set_resolution(cfm, 80.0);
+		double Dpi = 80.0;
+
+		::GFile::Path p(LSP_APP_ROOT);
+		p += "lgi-conf.json";
+		if (p.IsFile())
+		{
+			::GFile f(p, O_READ);
+			LJson j(f.Read());
+			auto sDpi = j.Get("DPI");
+			if (sDpi)
+				Dpi = sDpi.Float();
+		}
+
+		pango_cairo_font_map_set_resolution(cfm, Dpi);
 	}
-	#endif
 	
 	if (SysFontType.GetSystemFont("System"))
 	{
