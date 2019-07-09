@@ -26,7 +26,6 @@
 #define SubtractPtr(a, b)			((a) - (b))
 
 #define GDCF_UTF8					-1
-#define LUIS_DEBUG					0
 #define POUR_DEBUG					0
 #define PROFILE_POUR				0
 #define PROFILE_PAINT				0
@@ -3421,11 +3420,6 @@ void GTextView3::DoContextMenu(GMouse &m)
 		ClipText.Reset(NewStr(Clip.Text()));
 	}
 
-	#if LUIS_DEBUG
-	RClick.AppendItem("Dump Layout", IDM_DUMP, true);
-	RClick.AppendSeparator();
-	#endif
-
 	GStyle *s = HitStyle(HitText(m.x, m.y, true));
 	if (s)
 	{
@@ -3466,24 +3460,6 @@ void GTextView3::DoContextMenu(GMouse &m)
 	m.ToScreen();
 	switch (Id = RClick.Float(this, m))
 	{
-		#if LUIS_DEBUG
-		case IDM_DUMP:
-		{
-			int n=0;
-			for (GTextLine *l=Line.First(); l; l=Line.Next(), n++)
-			{
-				LgiTrace("[%i] %i,%i (%s)\n", n, l->Start, l->Len, l->r.Describe());
-
-				char *s = WideToUtf8(Text + l->Start, l->Len);
-				if (s)
-				{
-					LgiTrace("%s\n", s);
-					DeleteArray(s);
-				}
-			}
-			break;
-		}
-		#endif
 		case IDM_FIXED:
 		{
 			SetFixedWidthFont(!GetFixedWidthFont());							

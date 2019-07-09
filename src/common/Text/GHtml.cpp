@@ -37,7 +37,6 @@
 #define MAX_RECURSION_DEPTH			300
 #define ALLOW_TABLE_GROWTH			1
 
-#define LUIS_DEBUG					0
 #define CRASH_TRACE					0
 #ifdef MAC
 #define GHTML_USE_DOUBLE_BUFFER		0
@@ -7110,10 +7109,6 @@ bool GHtml::Name(const char *s)
 
 char *GHtml::Name()
 {
-	#if LUIS_DEBUG
-	LgiTrace("%s:%i html(%p).src(%p)='%30.30s'\n", _FL, this, Source, Source);
-	#endif
-
 	if (!Source && Tag)
 	{
 		GStringPipe s(1024);

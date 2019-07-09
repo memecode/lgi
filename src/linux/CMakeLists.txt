@@ -70,6 +70,7 @@ elseif (MSVC)
 endif ()
 
 set (CommonSource
+	include/common/LgiInc.h
 	include/common/GString.h
 	include/common/GClipBoard.h
 	include/common/GArray.h
@@ -294,6 +295,7 @@ if (APPLE)
                             COMPILE_FLAGS "-x objective-c++")
 	set_target_properties(Lgi PROPERTIES
 							BUILD_RPATH "{GTK3_PATH}/lib")
+	set_target_properties(Lgi PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 elseif (LINUX)
 	target_include_directories(Lgi PUBLIC
 							"${ROOT}/include/linux/Gtk"
