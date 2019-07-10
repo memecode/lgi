@@ -4,7 +4,7 @@
 cmake_minimum_required (VERSION 3.12)
 
 cmake_policy(SET CMP0054 NEW)
-set (CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
 
 project (Lgi)
 set (LGI_VERSION_MAJOR 4)
@@ -295,7 +295,6 @@ if (APPLE)
                             COMPILE_FLAGS "-x objective-c++")
 	set_target_properties(Lgi PROPERTIES
 							BUILD_RPATH "{GTK3_PATH}/lib")
-	set_target_properties(Lgi PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 elseif (LINUX)
 	target_include_directories(Lgi PUBLIC
 							"${ROOT}/include/linux/Gtk"
