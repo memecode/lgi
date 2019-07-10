@@ -90,11 +90,7 @@ void RemoveExistingSignals(OsView w)
 		{
 			if (Si.Sig > 0)
 			{
-				#if GTK_MAJOR_VERSION == 3
-				LgiAssert(!"Gtk3 FIXME");
-				#else
-				gtk_signal_disconnect(GTK_OBJECT(w), Si.Sig);
-				#endif
+				g_signal_handler_disconnect(G_OBJECT(w), Si.Sig);
 				Si.Sig = 0;
 			}
 			
@@ -228,6 +224,16 @@ LgiDragDataGet(GtkWidget        *widget,
 	}	
 }
 
+gboolean
+DragFailed(	GtkWidget      *widget,
+			GdkDragContext *context,
+			GtkDragResult   result,
+			gpointer        user_data)
+{
+	int asd=0;
+	return false;
+}
+
 int GDragDropSource::Drag(GView *SourceWnd, int Effect)
 {
 	LgiAssert(SourceWnd);
@@ -268,23 +274,34 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect)
 	
 	int Button = 1;
 	GWindow *w = SourceWnd->GetWindow();
-	d->SignalWnd = w ? GTK_WIDGET(w->WindowHandle()) : NULL;
+	if (!w)
+	{
+		LgiTrace("%s:%i - No GWindow.\n", _FL);
+		return -1;
+	}
+
+	d->SignalWnd = GTK_WIDGET(w->WindowHandle());
+	if (!d->SignalWnd)
+	{
+		LgiTrace("%s:%i - No GtkWidget.\n", _FL);
+		return -1;
+	}
+	
 	RemoveExistingSignals(d->SignalWnd);
 	SignalInfo &Si = ExistingSignals.New();
 	Si.Wnd = d->SignalWnd;
-	#if GTK_MAJOR_VERSION == 3
 	Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-data-get", G_CALLBACK(LgiDragDataGet), this);
-	#else
-	Si.Sig = gtk_signal_connect(GTK_OBJECT(d->SignalWnd), "drag-data-get", G_CALLBACK(LgiDragDataGet), this);
-	#endif
+	g_signal_connect(G_OBJECT(d->SignalWnd), "drag-failed", G_CALLBACK(DragFailed), this);
 
-	d->Ctx = Gtk::gtk_drag_begin(d->SignalWnd,
-								Targets,
-								Action,
-								Button,
-								NULL); // Gdk event if available...
+	GMouse m;
+	SourceWnd->GetMouse(m);
+	int btn = 0;
+	if (m.Left()) btn = 1;
+	else if (m.Middle()) btn = 2;
+	else if (m.Right()) btn = 3;
+	d->Ctx = gtk_drag_begin_with_coordinates (d->SignalWnd, Targets, Action, btn, NULL, m.x, m.y);
 
-
+	LgiTrace("%s:%i - Drag finished.\n", _FL);
     return -1;
 }
 
