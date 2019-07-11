@@ -377,6 +377,9 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	int WCharSz = sizeof(wchar_t);
 	#if defined(_MSC_VER)
 	LgiAssert(WCharSz == 2);
+	::GFile::Path Dlls(LgiArgsAppPath);
+	Dlls--;
+	SetDllDirectoryA(Dlls);
 	#else
 	LgiAssert(WCharSz == 4);
 	#endif

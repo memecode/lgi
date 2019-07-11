@@ -137,7 +137,6 @@ GViewPrivate::~GViewPrivate()
 
 void GView::OnGtkRealize()
 {
-	// printf("%s::OnGtkRealize %i\n", GetClass(), d->GotOnCreate);
 	if (!d->GotOnCreate)
 	{
 		d->GotOnCreate = true;
@@ -850,24 +849,12 @@ bool GView::IsAttached()
 	auto w = GetWindow();
 	if (!w)
 		return false;
-	auto p = GetParent();
-	if (!p)
-	{
-		w = dynamic_cast<GWindow*>(this);
-		if (!w)
-			return false;
-		auto hnd = w->WindowHandle();
-		if (!hnd)
-			return false;
-		return gtk_widget_get_realized(GTK_WIDGET(hnd));
-	}
-	else
-	{
-		auto gv = p->GetGView();
-		if (gv && !gv->Children.HasItem(this))
-			return false;
-	}
-	return true;
+
+	w = dynamic_cast<GWindow*>(this);
+	if (!w)
+		return GetParent() != NULL;
+
+	return w->IsAttached();
 }
 
 const char *GView::GetClass()

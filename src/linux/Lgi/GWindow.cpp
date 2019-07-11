@@ -27,6 +27,14 @@ public:
 	GView *Target;
 };
 
+enum LAttachState
+{
+	LUnattached,
+	LAttaching,
+	LAttached,
+	LDetaching,
+};
+
 class GWindowPrivate
 {
 public:
@@ -39,6 +47,7 @@ public:
 	GRect Decor;
 	gulong DestroySig;
 	GAutoPtr<GSurface> IconImg;
+	LAttachState AttachState;
 	
 	// State
 	GdkWindowState State;
@@ -51,6 +60,7 @@ public:
 
 	GWindowPrivate()
 	{
+		AttachState = LUnattached;
 		DestroySig = 0;
 		Decor.ZOff(-1, -1);
 		FirstFocus = NULL;
@@ -116,6 +126,7 @@ GWindow::GWindow(GtkWidget *w) : GView(0)
 
 GWindow::~GWindow()
 {
+	d->AttachState = LDetaching;
 	if (Wnd && d->DestroySig > 0)
 	{
 		// As we are already in the destructor, we don't want
@@ -136,6 +147,7 @@ GWindow::~GWindow()
 		gtk_widget_destroy(GTK_WIDGET(Wnd));
 		Wnd = NULL;
  	}
+	d->AttachState = LUnattached;
 
 	DeleteObj(Menu);
 	DeleteObj(d);
@@ -238,6 +250,12 @@ void GWindow::_OnViewDelete()
 	{
 		delete this;
 	}
+}
+
+void GWindow::OnGtkRealize()
+{
+	d->AttachState = LAttached;
+	GView::OnGtkRealize();
 }
 
 void GWindow::OnGtkDelete()
@@ -588,6 +606,11 @@ bool GWindow::Attach(GViewI *p)
 
 	ThreadCheck();
 	
+	// Setup default button...
+	if (!_Default)
+		_Default = FindControl(IDOK);
+
+	// Create a window if needed..
 	if (!Wnd)
 		Wnd = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
 
@@ -620,6 +643,7 @@ bool GWindow::Attach(GViewI *p)
 
 		gtk_widget_add_events(Widget, GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
+		d->AttachState = LAttaching;
 
 		// g_action_map_add_action_entries (G_ACTION_MAP(Wnd), app_entries, G_N_ELEMENTS (app_entries), Wnd);
 
@@ -627,6 +651,7 @@ bool GWindow::Attach(GViewI *p)
         {
 			g_signal_connect(_Root, "size-allocate", G_CALLBACK(GtkRootResize), i);
 
+			GtkContainer *AttachPoint = NULL;
 			if (GTK_IS_DIALOG(Wnd))
 			{
 				auto content = gtk_dialog_get_content_area(GTK_DIALOG(Wnd));
@@ -635,13 +660,17 @@ bool GWindow::Attach(GViewI *p)
 					LgiAssert(!"No content area");
 					return false;
 				}
-				gtk_container_add(GTK_CONTAINER(content), _Root);
+				AttachPoint = GTK_CONTAINER(content);
 			}
 			else
 			{
-				gtk_container_add(GTK_CONTAINER(Wnd), _Root);
+				AttachPoint = GTK_CONTAINER(Wnd);
 			}
 
+			LgiAssert(AttachPoint != NULL);
+			gtk_container_add(AttachPoint, _Root);
+
+			// Check it actually worked... (would a return value kill you GTK? no it would not)
 			auto p = gtk_widget_get_parent(_Root);
 			if (!p)
 			{
@@ -658,16 +687,6 @@ bool GWindow::Attach(GViewI *p)
 		// Do a rough layout of child windows
 		PourAll();
 
-		// Setup default button...
-		if (!_Default)
-		{
-			_Default = FindControl(IDOK);
-		}
-		if (_Default)
-		{
-			_Default->Invalidate();
-		}
-		
 		// Add icon
 		if (d->Icon)
 		{
@@ -1632,8 +1651,10 @@ void GWindow::SetDragHandlers(bool On)
 {
 }
 
-void GWindow::OnMap(bool m)
+bool GWindow::IsAttached()
 {
+	return	d->AttachState == LAttaching ||
+			d->AttachState == LAttached;
 }
 
 void GWindow::OnTrayClick(GMouse &m)
@@ -1662,6 +1683,7 @@ void GWindow::Quit(bool DontDelete)
 	
 	if (Wnd)
 	{
+		d->AttachState = LDetaching;
 		gtk_widget_destroy(GTK_WIDGET(Wnd));
 		Wnd = NULL;
 	}

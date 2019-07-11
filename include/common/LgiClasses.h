@@ -413,7 +413,7 @@ class LgiClass GView : virtual public GViewI, virtual public GBase
 	
 		virtual Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
 public:
-		void OnGtkRealize();
+		virtual void OnGtkRealize();
 		virtual void OnGtkDelete();
 
 private:
@@ -1483,7 +1483,8 @@ public:
 	
 	#elif defined __GTK_H__
 	
-		void OnMap(bool m);
+		void OnGtkRealize();
+		bool IsAttached();
 		void Quit(bool DontDelete = false);
 		GRect *GetDecorSize();
 		bool TranslateMouse(GMouse &m);
