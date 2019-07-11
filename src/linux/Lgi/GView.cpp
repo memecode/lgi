@@ -201,10 +201,7 @@ void GView::_Delete()
 		LgiApp->AppWnd = 0;
 	}
 
-	// Misc
-	Pos.ZOff(-1, -1);
-
-	// Heirarchy
+	// Hierarchy
 	GViewI *c;
 	while ((c = Children[0]))
 	{
@@ -219,6 +216,9 @@ void GView::_Delete()
 	}
 
 	Detach();
+
+	// Misc
+	Pos.ZOff(-1, -1);
 }
 
 GView *&GView::PopupChild()
@@ -914,7 +914,7 @@ bool GView::Detach()
 		// Events
 		Par->DelView(this);
 		Par->OnChildrenChanged(this, false);
-		Par->Invalidate(&GetPos());
+		Par->Invalidate(&Pos);
 	}
 	
 	d->Parent = 0;
