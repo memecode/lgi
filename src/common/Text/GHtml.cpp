@@ -1437,7 +1437,7 @@ bool GTag::SetVariant(const char *Name, GVariant &Value, char *Array)
 
 ssize_t GTag::GetTextStart()
 {
-	if (PreText())
+	if (PreText() && TextPos.Length() > 1)
 	{
 		GFlowRect *t = TextPos[1];
 		if (t)
@@ -4848,6 +4848,7 @@ void GArea::FlowText(GTag *Tag, GFlowRegion *Flow, GFont *Font, int LineHeight, 
 	if (!Flow || !Text || !Font)
 		return;
 
+	SetFixedLength(false);
 	char16 *Start = Text;
 	size_t FullLen = StrlenW(Text);
 
@@ -4984,6 +4985,8 @@ void GArea::FlowText(GTag *Tag, GFlowRegion *Flow, GFont *Font, int LineHeight, 
 		if (Tr->Len == 0)
 			break;
 	}
+	
+	SetFixedLength(true);
 }
 
 char16 htoi(char16 c)
