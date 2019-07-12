@@ -798,7 +798,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	
 	// if (Debug)
 	{
-		printf("%s/%p::HandleViewKey=%i ischar=%i %s%s%s%s (d->Focus=%s/%p)\n",
+		LgiTrace("%s/%p::HandleViewKey=%i ischar=%i %s%s%s%s (d->Focus=%s/%p)\n",
 			v->GetClass(), v,
 			k.c16,
 			k.IsChar,
@@ -818,7 +818,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 		{
 			#if DEBUG_HANDLEVIEWKEY
 			if (Debug)
-				printf("\tSending key to popup\n");
+				LgiTrace("\tSending key to popup\n");
 			#endif
 			
 			return v->OnKey(k);
@@ -832,7 +832,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	{
 		#if DEBUG_HANDLEVIEWKEY
 		if (Debug)
-			printf("\tMouseHook got key\n");
+			LgiTrace("\tMouseHook got key\n");
 		#endif
 		goto AllDone;
 	}
@@ -840,16 +840,24 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	// Allow any hooks to see the key...
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{
+		#if DEBUG_HANDLEVIEWKEY
+		if (Debug)
+			LgiTrace("\tHook[%i]\n", i);
+		#endif
 		if (d->Hooks[i].Flags & GKeyEvents)
 		{
 			GView *Target = d->Hooks[i].Target;
+			#if DEBUG_HANDLEVIEWKEY
+			if (Debug)
+				LgiTrace("\tHook.Target=%p %s\n", Target, Target->GetClass());
+			#endif
 			if (Target->OnViewKey(v, k))
 			{
 				Status = true;
 				
 				#if DEBUG_HANDLEVIEWKEY
 				if (Debug)
-					printf("\tHook ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n", SafePrint, k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
+					LgiTrace("\tHook ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n", SafePrint, k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
 				#endif
 				
 				goto AllDone;
@@ -867,7 +875,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	{
 		#if DEBUG_HANDLEVIEWKEY
 		if (Debug)
-			printf("\tView ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n",
+			LgiTrace("\tView ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n",
 				SafePrint, k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
 		#endif
 		
@@ -876,7 +884,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	}
 	#if DEBUG_HANDLEVIEWKEY
 	else if (Debug)
-		printf("\t%s didn't eat '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n",
+		LgiTrace("\t%s didn't eat '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n",
 			v->GetClass(), SafePrint, k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
 	#endif
 	
@@ -909,7 +917,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 
 				#if DEBUG_HANDLEVIEWKEY
 				if (Debug)
-					printf("\tDefault Button ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n",
+					LgiTrace("\tDefault Button ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n",
 						SafePrint, k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
 				#endif
 				
@@ -921,7 +929,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	}
 	#if DEBUG_HANDLEVIEWKEY
 	else if (Debug)
-		printf("\tNo default ctrl to handle key.\n");
+		LgiTrace("\tNo default ctrl to handle key.\n");
 	#endif
 	
 	if (Menu)
@@ -931,7 +939,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 		{
 			#if DEBUG_HANDLEVIEWKEY
 			if (Debug)
-				printf("\tMenu ate '%c' down=%i alt=%i ctrl=%i sh=%i\n", k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
+				LgiTrace("\tMenu ate '%c' down=%i alt=%i ctrl=%i sh=%i\n", k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
 			#endif
 		}
 	}
@@ -942,7 +950,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 		GViewI *Wnd = GetNextTabStop(v, k.Shift());
 		#if DEBUG_HANDLEVIEWKEY
 		if (Debug)
-			printf("\tTab moving focus shift=%i Wnd=%p\n", k.Shift(), Wnd);
+			LgiTrace("\tTab moving focus shift=%i Wnd=%p\n", k.Shift(), Wnd);
 		#endif
 		if (Wnd)
 			Wnd->Focus(true);

@@ -71,9 +71,12 @@ public:
 	
 	~GPopupList()
 	{
-		if (GetWindow() && Registered)
-			GetWindow()->UnregisterHook(this);
+		auto Wnd = Edit->GetWindow();
+		if (Wnd && Registered)
+			Wnd->UnregisterHook(this);
 	}
+
+	const char *GetClass() { return "GPopupList"; }
 
 	// Events:
 	// ------------------------------------------------------------------------
@@ -164,11 +167,12 @@ public:
 		{
 			AttachChildren();
 			OnPosChange();
-			
-			if (GetWindow() && !Registered)
+
+			auto Wnd = Edit->GetWindow();
+			if (Wnd && !Registered)
 			{
 				Registered = true;
-				GetWindow()->RegisterHook(this, GKeyEvents);
+				Wnd->RegisterHook(this, GKeyEvents);
 			}
 
 			#ifdef WINNATIVE
@@ -214,6 +218,8 @@ public:
 
 	bool OnViewKey(GView *v, GKey &k)
 	{
+		k.Trace("PopupList.OnViewKey");
+
 		if (Visible())
 		{
 			switch (k.vkey)

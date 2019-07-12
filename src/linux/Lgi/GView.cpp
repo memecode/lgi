@@ -742,18 +742,20 @@ void GView::PointToScreen(GdcPt2 &p)
 	p += Offset;
 
 	auto w = GetWindow();
-	if (w && w->WindowHandle())
-	{
-		gint x = 0, y = 0;
-		auto wnd = w->WindowHandle();
-		auto wid = GTK_WIDGET(wnd);
-		auto hnd = gtk_widget_get_window(wid);
+	if (!w)
+		return;
+	auto wnd = w->WindowHandle();
+	if (!wnd)
+		return;
 
-		gdk_window_get_origin(hnd, &x, &y);
+	auto wid = GTK_WIDGET(wnd);
+	auto hnd = gtk_widget_get_window(wid);
 
-		p.x += x;
-		p.y += y;
-	}
+	gint x = 0, y = 0;
+	gdk_window_get_origin(hnd, &x, &y);
+
+	p.x += x;
+	p.y += y;
 }
 
 void GView::PointToView(GdcPt2 &p)
@@ -765,18 +767,20 @@ void GView::PointToView(GdcPt2 &p)
 	p -= Offset;
 
 	auto w = GetWindow();
-	if (w && w->WindowHandle())
-	{
-		gint x = 0, y = 0;
-		auto wnd = w->WindowHandle();
-		auto wid = GTK_WIDGET(wnd);
-		auto hnd = gtk_widget_get_window(wid);
+	if (!w)
+		return;
+	auto wnd = w->WindowHandle();
+	if (!wnd)
+		return;
 
-		gdk_window_get_origin(hnd, &x, &y);
+	auto wid = GTK_WIDGET(wnd);
+	auto hnd = gtk_widget_get_window(wid);
 
-		p.x -= x;
-		p.y -= y;
-	}
+	gint x = 0, y = 0;
+	gdk_window_get_origin(hnd, &x, &y);
+
+	p.x -= x;
+	p.y -= y;
 }
 
 bool GView::GetMouse(GMouse &m, bool ScreenCoords)
