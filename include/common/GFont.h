@@ -276,7 +276,7 @@ class LgiClass GFontType
 	friend class GTypeFace;
 
 protected:
-	#if defined WINNATIVE
+	#if WINNATIVE
 	LOGFONTW Info;
 	#else
 	GTypeFace Info;

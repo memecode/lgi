@@ -224,7 +224,6 @@ void GFontSelect::UpdatePreview()
 					AlphaHack(Abgr32);
 					AlphaHack(Bgra32);
 					default:
-						LgiAssert(0);
 						break;
 				}
 			}

@@ -1635,7 +1635,7 @@ bool GFontType::DoUI(GView *Parent)
 {
 	bool Status = false;
 
-	#if defined WIN32
+	#if WINNATIVE
 	void *i = &Info;
 	int bytes = sizeof(Info);
 	#else
@@ -1646,7 +1646,7 @@ bool GFontType::DoUI(GView *Parent)
 	GFontSelect Dlg(Parent, i, bytes);
 	if (Dlg.DoModal() == IDOK)
 	{
-		#ifdef WIN32
+		#if WINNATIVE
 		Dlg.Serialize(i, sizeof(Info), true);
 		#else
 		if (Dlg.Face) Info.Face(Dlg.Face);
@@ -1669,65 +1669,6 @@ bool GFontType::GetDescription(char *Str, int SLen)
 
 	return false;
 }
-
-/*
-bool GFontType::Serialize(ObjProperties *Options, char *OptName, bool Write)
-{
-	bool Status = false;
-
-	if (Options && OptName)
-	{
-		#if defined WIN32
-		if (Write)
-		{
-			Status = Options->Set(OptName, &Info, sizeof(Info));
-		}
-		else
-		{
-			void *Data = 0;
-			int Len = 0;
-			if (Options->Get(OptName, Data, Len) &&
-				Len == sizeof(Info) &&
-				Data)
-			{
-				memcpy(&Info, Data, Len);
-				Status = true;
-			}
-		}
-		#else
-		if (Write)
-		{
-			char Temp[128];
-			sprintf_s(Temp, sizeof(Temp), "%s,%i pt", Info.Face(), Info.PointSize());
-			Status = Options->Set(OptName, Temp);
-		}
-		else
-		{
-			char *Temp = 0;
-			if (Options->Get(OptName, Temp) && ValidStr(Temp))
-			{
-				char *OurCopy = NewStr(Temp);
-				if (OurCopy)
-				{
-					char *Comma = strchr(OurCopy, ',');
-					if (Comma)
-					{
-						*Comma++ = 0;
-						Info.Face(OurCopy);
-						Info.PointSize(atoi(Comma));
-						Status = true;
-					}
-
-					DeleteArray(OurCopy);
-				}
-			}
-		}
-		#endif
-	}
-
-	return Status;
-}
-*/
 
 bool GFontType::Serialize(GDom *Options, const char *OptName, bool Write)
 {
