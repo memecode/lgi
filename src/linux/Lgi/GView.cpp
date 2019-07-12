@@ -736,74 +736,46 @@ GdcPt2 GtkGetOrigin(GWindow *w)
 void GView::PointToScreen(GdcPt2 &p)
 {
 	ThreadCheck();
-	
-	GViewI *c = this;
 
-	// Find real parent
-	while (c->GetParent() && !dynamic_cast<GWindow*>(c))
+	GdcPt2 Offset;
+	WindowVirtualOffset(&Offset);
+	p += Offset;
+
+	auto w = GetWindow();
+	if (w && w->WindowHandle())
 	{
-		GRect n = c->GetPos();
-		p.x += n.x1;
-		p.y += n.y1;
-		c = c->GetParent();
-	}
-	
-	if (c && c->WindowHandle())
-	{
-	    auto Origin = GtkGetOrigin(GetWindow());
-		p.x += Origin.x;
-		p.y += Origin.y;
-	}
-	else
-	{
-		printf("%s:%i - No real view to map to screen.\n", _FL);
+		gint x = 0, y = 0;
+		auto wnd = w->WindowHandle();
+		auto wid = GTK_WIDGET(wnd);
+		auto hnd = gtk_widget_get_window(wid);
+
+		gdk_window_get_origin(hnd, &x, &y);
+
+		p.x += x;
+		p.y += y;
 	}
 }
 
 void GView::PointToView(GdcPt2 &p)
 {
 	ThreadCheck();
-	
-	GWindow *w = GetWindow();
-	if (w)
+
+	GdcPt2 Offset;
+	WindowVirtualOffset(&Offset);
+	p -= Offset;
+
+	auto w = GetWindow();
+	if (w && w->WindowHandle())
 	{
-	    auto Origin = GtkGetOrigin(w);
-		p.x -= Origin.x;
-		p.y -= Origin.y;
-		
-		GViewI *w = GetWindow();
-		for (GViewI *i = this; i && i != w; i = i->GetParent())
-		{
-			GRect pos = i->GetPos();
-			p.x -= pos.x1;
-			p.y -= pos.y1;
-		}
-		
-		GRect cli = GetClient(false);
-		p.x -= cli.x1;
-		p.y -= cli.y1;
-	}
-	else if (GetParent())
-	{
-		// Virtual window
-		int Sx = 0, Sy = 0;
-		GViewI *v;
-		// Work out the virtual offset
-		for (v = this; v && v->GetParent(); v = v->GetParent())
-		{
-			Sx += v->GetPos().x1;
-			Sy += v->GetPos().y1;
-		}
-		if (v)
-		{
-			// Get the point relative to the first real parent
-			v->PointToView(p);
-			
-			// Move point back into virtual space
-			p.x -= Sx;
-			p.y -= Sy;
-		}
-		else LgiTrace("%s:%i - No Real view for %s\n", _FL, GetClass());
+		gint x = 0, y = 0;
+		auto wnd = w->WindowHandle();
+		auto wid = GTK_WIDGET(wnd);
+		auto hnd = gtk_widget_get_window(wid);
+
+		gdk_window_get_origin(hnd, &x, &y);
+
+		p.x -= x;
+		p.y -= y;
 	}
 }
 

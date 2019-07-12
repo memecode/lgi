@@ -96,41 +96,7 @@ public:
 		// Set position relative to editbox
 		GRect r = GetPos();
 		GdcPt2 p(0, PosType == PopupAbove ? 0 : Edit->Y());
-
-		#ifdef __GTK_H__
-
-			GWindow *w = Edit->GetWindow();
-			if (w)
-			{
-				OsWindow h = w->WindowHandle();
-				Gtk::gint x, y;
-				Gtk::gtk_window_get_position(h, &x, &y);				
-				p.x += x;
-				p.y += y;
-				
-				for (GViewI *i = Edit; i && i != (GViewI*)w; i = i->GetParent())
-				{
-					auto pos = i->GetPos();
-					p.x += pos.x1;
-					p.y += pos.y1;
-				}
-
-				GRect *Decor = w->GetDecorSize();
-				if (Decor)
-				{
-					p.x += Decor->x1;
-					p.y += Decor->y1;
-				}
-				else printf("%s:%i - No decor size for %s\n", _FL, w->GetClass());
-			}
-			else LgiAssert(0);
-
-		#else
-		
-			Edit->PointToScreen(p);
-		
-		#endif
-
+		Edit->PointToScreen(p);
 		if (PosType == PopupAbove)
 			r.Offset(p.x - r.x1, (p.y - r.Y()) - r.y1);
 		else
