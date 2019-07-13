@@ -1871,6 +1871,7 @@ bool LgiGetExeFile(char *Dst, int DstSize)
 				LgiMakePath(Dst, DstSize, LgiArgsAppPath, "../../..");
 				Status = true;
 			}
+			else LgiTrace("%s:%i - No executable path.");
 		
 			#else
 		
