@@ -1322,15 +1322,23 @@ bool VcFolder::ParseUpdate(int Result, GString s, ParseParams *Params)
 
 bool VcFolder::ParseWorking(int Result, GString s, ParseParams *Params)
 {
-	if (GetType() == VcSvn)
+	switch (GetType())
 	{
-		ParseParams Local;
-		if (!Params) Params = &Local;
-		Params->IsWorking = true;
-		ParseStatus(Result, s, Params);
+		case VcSvn:
+		case VcHg:
+		{
+			ParseParams Local;
+			if (!Params) Params = &Local;
+			Params->IsWorking = true;
+			ParseStatus(Result, s, Params);
+			break;
+		}
+		default:
+		{
+			ParseDiffs(s, NULL, true);
+			break;
+		}
 	}
-	else
-		ParseDiffs(s, NULL, true);
 	
 	IsWorkingFld = false;
 	d->Files->ResizeColumnsToContent();
@@ -1456,7 +1464,7 @@ bool VcFolder::ParseDiffs(GString s, GString Rev, bool IsWorking)
 					Diff.Empty();
 
 					GString Fn = a[i].Split(" ", 3).Last();
-					GString Status = "M";
+					// GString Status = "M";
 
 					f = FindFile(Fn);
 					if (!f)
@@ -1465,7 +1473,7 @@ bool VcFolder::ParseDiffs(GString s, GString Rev, bool IsWorking)
 					// printf("a='%s'\n", a[i].Get());
 
 					f->SetText(Fn.Replace("\\","/"), COL_FILENAME);
-					f->SetText(Status, COL_STATE);
+					// f->SetText(Status, COL_STATE);
 					Files.Insert(f);
 				}
 				else if (!_strnicmp(Ln, "index", 5) ||
@@ -2146,6 +2154,9 @@ void VcFolder::ListWorkingFolder()
 				StartCmd("diff --staged", &VcFolder::ParseWorking);
 				Arg = "diff --diff-filter=ACDMRTU";
 				// return FolderStatus();
+				break;
+			case VcHg:
+				Arg = "status -mard";
 				break;
 			default:
 				Arg ="diff";

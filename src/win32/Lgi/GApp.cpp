@@ -1026,13 +1026,9 @@ void GApp::Exit(int Code)
 	}
 }
 
-GAutoString GApp::GetFileMimeType(const char *File)
+GString GApp::GetFileMimeType(const char *File)
 {
-	GAutoString r;
-	char m[128];
-	if (LGetFileMimeType(File, m, sizeof(m)))
-		r.Reset(NewStr(m));
-	return r;
+	return LGetFileMimeType(File);
 }
 
 bool GApp::GetAppsForMimeType(char *Mime, GArray<GAppInfo*> &Apps)
