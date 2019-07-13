@@ -179,13 +179,12 @@ bool GWindow::SetIcon(const char *FileName)
 		}
 		else
 		{
-			GError *error = NULL;
-			
 			#if defined(LINUX)
 			LgiApp->SetApplicationIcon(FileName);
 			#endif
 			
 			#if _MSC_VER
+			GError *error = NULL;
 			if (gtk_window_set_icon_from_file(Wnd, FileName, &error))
 				return true;
 			#else
@@ -359,16 +358,17 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		case GDK_KEY_PRESS:
 		case GDK_KEY_RELEASE:
 		{
-			auto Class = G_OBJECT_TYPE_NAME(widget);
+			// auto Class = G_OBJECT_TYPE_NAME(widget);
 			auto e = &event->key;
 			#define KEY(name) GDK_KEY_##name
 
 			GKey k;
 			k.Down(e->type == GDK_KEY_PRESS);
 			k.c16 = k.vkey = e->keyval;
-			k.Shift((e->state & 1) != 0);
-			k.Ctrl((e->state & 4) != 0);
-			k.Alt((e->state & 8) != 0);
+			k.Shift((e->state & GDK_SHIFT_MASK) != 0);
+			k.Ctrl((e->state & GDK_CONTROL_MASK) != 0);
+			k.Alt((e->state & GDK_MOD1_MASK) != 0);
+			k.System((e->state & GDK_MOD2_MASK) != 0);
 		
 			k.IsChar = !k.Ctrl() &&
 						!k.Alt() && 
@@ -588,17 +588,18 @@ GtkRootResize(GtkWidget *widget, GdkRectangle *alloc, GView *This)
 		w->PourAll();
 }
 
+/*
 static void
 activate_quit (GSimpleAction *action,
                Gtk::GVariant      *parameter,
                gpointer       user_data)
 {
-	int asd=0;
 }
 
 static GActionEntry app_entries[] = {
 	{ "quit", activate_quit, NULL, NULL, NULL },
 };
+*/
 
 bool GWindow::Attach(GViewI *p)
 {
@@ -865,11 +866,6 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 		}
 	}
 
-	if (k.Ctrl() && k.c16 == 'c')
-	{
-		int asd=0;
-	}
-
 	// Give the key to the window...
 	if (v->OnKey(k))
 	{
@@ -970,7 +966,8 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	}
 
 AllDone:
-	d->LastKey = k;
+	if (d)
+		d->LastKey = k;
 
 	return Status;
 }

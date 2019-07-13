@@ -218,8 +218,6 @@ public:
 
 	bool OnViewKey(GView *v, GKey &k)
 	{
-		k.Trace("PopupList.OnViewKey");
-
 		if (Visible())
 		{
 			switch (k.vkey)
