@@ -629,8 +629,7 @@ bool GRichTextPriv::ImageBlock::ToHtml(GStream &s, GArray<GDocView::ContentMedia
 		else if (ValidSourceFile)
 		{
 			// Attach the original file...
-			GAutoString mt = LgiApp->GetFileMimeType(Source);
-			Cm.MimeType = mt.Get();
+			Cm.MimeType = LgiApp->GetFileMimeType(Source);
 			Cm.FileName = LgiGetLeaf(Source);
 
 			GFile *f = new GFile;
@@ -1245,7 +1244,7 @@ GMessage::Result GRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 						else if (FileMimeType)
 						{
 							si.MimeType = FileMimeType.Get();
-							FileMimeType.Reset();
+							FileMimeType.Empty();
 						}
 					}
 				}

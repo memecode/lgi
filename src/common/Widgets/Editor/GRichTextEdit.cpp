@@ -1151,9 +1151,8 @@ int GRichTextEdit::OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
 			for (unsigned n=0; n<Df.Length(); n++)
 			{
 				const char *f = Df[n];
-				char Mt[128];
-				if (LGetFileMimeType(f, Mt, sizeof(Mt)) &&
-					!_strnicmp(Mt, "image/", 6))
+				GString Mt = LGetFileMimeType(f);
+				if (Mt && Mt.Find("image/") == 0)
 				{
 					if (AddIndex < 0)
 					{

@@ -332,13 +332,6 @@ LgiExtern bool LgiGetMimeTypeExtensions
 	GArray<GString> &Ext
 );
 
-inline bool LGetFileMimeType(const char *File, char *MimeType, int BufSize)
-{
-	GString p = LGetFileMimeType(File);
-	if (MimeType && p) strcpy_s(MimeType, BufSize, p);
-	return p.Length() > 0;
-}
-
 inline bool LGetAppForMimeType(const char *Mime, char *AppPath, int BufSize)
 {
 	GString p = LGetAppForMimeType(Mime);

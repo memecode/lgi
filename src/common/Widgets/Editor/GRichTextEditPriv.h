@@ -1149,7 +1149,7 @@ public:
 		GString FileName;
 		GString ContentId;
 		GString StreamMimeType;
-		GAutoString FileMimeType;
+		GString FileMimeType;
 
 		GArray<ScaleInf> Scales;
 		int ResizeIdx;

@@ -909,10 +909,10 @@ void GApp::OnCommandLine()
 	Files.DeleteArrays();
 }
 
-GAutoString GApp::GetFileMimeType(const char *File)
+::GString GApp::GetFileMimeType(const char *File)
 {
-	GAutoString Status;
-	char Full[300] = "";
+	::GString Status;
+	char Full[MAX_PATH] = "";
 
 	if (!FileExists(File))
 	{
@@ -939,7 +939,7 @@ GAutoString GApp::GetFileMimeType(const char *File)
 		g_free(gt);
 		if (mt)
 		{
-			Status.Reset(NewStr(mt));
+			Status = mt;
 			g_free(mt);
 			return Status;
 		}

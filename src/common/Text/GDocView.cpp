@@ -145,10 +145,8 @@ GDocumentEnv::LoadType GDefaultDocumentEnv::GetContent(LoadJob *&j)
 
 	if (FileExists(FullPath))
 	{
-		char Mt[256] = "";
-		LGetFileMimeType(FullPath, Mt, sizeof(Mt));
-		
-		if (stristr(Mt, "image/"))
+		GString Mt = LGetFileMimeType(FullPath);
+		if (Mt.Find("image/") == 0)
 		{
 			j->pDC.Reset(GdcD->Load(p));
 			return LoadImmediate;

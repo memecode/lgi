@@ -255,7 +255,7 @@ public:
 	
 	/// Gets the MIME type of a file
 	/// \returns the mime type or NULL if unknown.
-	GAutoString GetFileMimeType
+	GString GetFileMimeType
 	(
 		/// The file to identify
 		const char *File

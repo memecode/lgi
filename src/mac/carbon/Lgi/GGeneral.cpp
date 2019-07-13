@@ -213,11 +213,7 @@ OsView DefaultOsView(GView *v)
 
 GString LGetFileMimeType(const char *File)
 {
-	GAutoString m = LgiApp->GetFileMimeType(File);
-	if (!m)
-		return GString();
-
-	return m.Get();
+	return LgiApp->GetFileMimeType(File);
 }
 
 #include "GToken.h"

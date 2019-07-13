@@ -304,7 +304,7 @@ public:
 	virtual GViewI *GetFocus() = 0;
 	
 	/// Gets the MIME type of a file
-	virtual GAutoString GetFileMimeType
+	virtual GString GetFileMimeType
 	(
 		/// The file to identify
 		const char *File
