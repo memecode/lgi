@@ -981,67 +981,72 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			break;
 		case LSP_USER_DOWNLOADS:
 		{
-			#if defined(WIN32) && defined(_MSC_VER)
-
-			// OMG!!!! Really?
+			#if defined(__GTK_H__)
 			
-			#ifndef REFKNOWNFOLDERID
-			typedef GUID KNOWNFOLDERID;
-			#define REFKNOWNFOLDERID const KNOWNFOLDERID &
-			GUID FOLDERID_Downloads = {0x374DE290,0x123F,0x4565,{0x91,0x64,0x39,0xC4,0x92,0x5E,0x46,0x7B}};
-			#endif
+				auto p = Gtk::g_get_user_special_dir(Gtk::G_USER_DIRECTORY_DOWNLOAD);
+				Path = p;
 			
-			GLibrary Shell("Shell32.dll");
-			typedef HRESULT (STDAPICALLTYPE *pSHGetKnownFolderPath)(REFKNOWNFOLDERID rfid, DWORD dwFlags, HANDLE hToken, PWSTR *ppszPath);
-			pSHGetKnownFolderPath SHGetKnownFolderPath = (pSHGetKnownFolderPath)Shell.GetAddress("SHGetKnownFolderPath");
-			if (SHGetKnownFolderPath)
-			{
-				PWSTR ptr = NULL;
-				HRESULT r = SHGetKnownFolderPath(FOLDERID_Downloads, 0, NULL, &ptr);
-				if (SUCCEEDED(r))
-				{
-					GAutoString u8(WideToUtf8(ptr));
-					if (u8)
-						Path = u8;
-					CoTaskMemFree(ptr);
-				}
-			}
+			#elif defined(WIN32) && defined(_MSC_VER)
 
-			if (!Path.Get())
-			{
-				GRegKey k(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders");
-				char *p = k.GetStr("{374DE290-123F-4565-9164-39C4925E467B}");
-				if (DirExists(p))
-					Path = p;
-			}
+				// OMG!!!! Really?
 			
-			if (!Path.Get())
-			{
-				GString MyDoc = WinGetSpecialFolderPath(CSIDL_MYDOCUMENTS);
-				if (MyDoc)
+				#ifndef REFKNOWNFOLDERID
+				typedef GUID KNOWNFOLDERID;
+				#define REFKNOWNFOLDERID const KNOWNFOLDERID &
+				GUID FOLDERID_Downloads = {0x374DE290,0x123F,0x4565,{0x91,0x64,0x39,0xC4,0x92,0x5E,0x46,0x7B}};
+				#endif
+			
+				GLibrary Shell("Shell32.dll");
+				typedef HRESULT (STDAPICALLTYPE *pSHGetKnownFolderPath)(REFKNOWNFOLDERID rfid, DWORD dwFlags, HANDLE hToken, PWSTR *ppszPath);
+				pSHGetKnownFolderPath SHGetKnownFolderPath = (pSHGetKnownFolderPath)Shell.GetAddress("SHGetKnownFolderPath");
+				if (SHGetKnownFolderPath)
 				{
-					char Buf[MAX_PATH];
-					LgiMakePath(Buf, sizeof(Buf), MyDoc, "Downloads");
-					if (DirExists(Buf))
-						Path = Buf;
+					PWSTR ptr = NULL;
+					HRESULT r = SHGetKnownFolderPath(FOLDERID_Downloads, 0, NULL, &ptr);
+					if (SUCCEEDED(r))
+					{
+						GAutoString u8(WideToUtf8(ptr));
+						if (u8)
+							Path = u8;
+						CoTaskMemFree(ptr);
+					}
 				}
-			}
 
-			if (!Path.Get())
-			{
-				GString Profile = WinGetSpecialFolderPath(CSIDL_PROFILE);
-				if (Profile)
+				if (!Path.Get())
 				{
-					char Buf[MAX_PATH];
-					LgiMakePath(Buf, sizeof(Buf), Profile, "Downloads");
-					if (DirExists(Buf))
-						Path = Buf;
+					GRegKey k(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders");
+					char *p = k.GetStr("{374DE290-123F-4565-9164-39C4925E467B}");
+					if (DirExists(p))
+						Path = p;
 				}
-			}
+			
+				if (!Path.Get())
+				{
+					GString MyDoc = WinGetSpecialFolderPath(CSIDL_MYDOCUMENTS);
+					if (MyDoc)
+					{
+						char Buf[MAX_PATH];
+						LgiMakePath(Buf, sizeof(Buf), MyDoc, "Downloads");
+						if (DirExists(Buf))
+							Path = Buf;
+					}
+				}
+
+				if (!Path.Get())
+				{
+					GString Profile = WinGetSpecialFolderPath(CSIDL_PROFILE);
+					if (Profile)
+					{
+						char Buf[MAX_PATH];
+						LgiMakePath(Buf, sizeof(Buf), Profile, "Downloads");
+						if (DirExists(Buf))
+							Path = Buf;
+					}
+				}
 
 			#else
 
-			LgiAssert(!"Not implemented");
+				LgiAssert(!"Not implemented");
 
 			#endif
 			break;
@@ -1052,74 +1057,85 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			
 			#if defined(WIN32)
 
-			char p[MAX_PATH];
-			if (LgiMakePath(p, sizeof(p), Home, "Links"))
-				Path = p;
+				char p[MAX_PATH];
+				if (LgiMakePath(p, sizeof(p), Home, "Links"))
+					Path = p;
 
 			#elif defined(LINUX)
 
-			char p[MAX_PATH];
-			if (LgiMakePath(p, sizeof(p), Home, ".config/gtk-3.0"))
-				Path = p;
+				char p[MAX_PATH];
+				if (LgiMakePath(p, sizeof(p), Home, ".config/gtk-3.0"))
+					Path = p;
 			
-			#elif defined(BEOS)
-			
-			// No known user links path for Haiku			
-
-			#else
-
-			LgiAssert(!"Not implemented");
-
 			#endif
 			break;
 		}
 		case LSP_USER_PICTURES:
 		{
-			#if defined(WIN32)
-			Path = WinGetSpecialFolderPath(CSIDL_MYPICTURES);
-			if (Path)
-				return Path;
+			#if defined(__GTK_H__)
+			
+				auto p = Gtk::g_get_user_special_dir(Gtk::G_USER_DIRECTORY_DOCUMENTS);
+				Path = p;
+			
+			#elif defined(WIN32)
+	
+				Path = WinGetSpecialFolderPath(CSIDL_MYPICTURES);
+				if (Path)
+					return Path;
+	
 			#endif
 
 			// Default to ~/Pictures
-			char p[MAX_PATH];
+			char hm[MAX_PATH];
 			GString Home = LGetSystemPath(LSP_HOME);
-			if (LgiMakePath(p, sizeof(p), Home, "Pictures"))
-				Path = p;
+			if (LgiMakePath(hm, sizeof(hm), Home, "Pictures"))
+				Path = hm;
 			break;
 		}
 		case LSP_USER_DOCUMENTS:
 		{
-			#if defined(WIN32) && defined(_MSC_VER)
-			Path = WinGetSpecialFolderPath(CSIDL_MYDOCUMENTS);
-			if (Path)
-				return Path;
+			#if defined(__GTK_H__)
+			
+				auto p = Gtk::g_get_user_special_dir(Gtk::G_USER_DIRECTORY_DOCUMENTS);
+				Path = p;
+			
+			#elif defined(WIN32) && defined(_MSC_VER)
+			
+				Path = WinGetSpecialFolderPath(CSIDL_MYDOCUMENTS);
+				if (Path)
+					return Path;
+			
 			#endif
 
 			// Default to ~/Documents
-			char p[MAX_PATH];
+			char hm[MAX_PATH];
 			GString Home = LGetSystemPath(LSP_HOME);
-			if (LgiMakePath(p, sizeof(p), Home, "Documents"))
-				Path = p;
+			if (LgiMakePath(hm, sizeof(hm), Home, "Documents"))
+				Path = hm;
 			break;
 		}
 		case LSP_USER_MUSIC:
 		{
 			#if defined WIN32
 
-			Path = WinGetSpecialFolderPath(CSIDL_MYMUSIC);
+				Path = WinGetSpecialFolderPath(CSIDL_MYMUSIC);
+			
+			#elif defined(__GTK_H__)
+			
+				auto p = Gtk::g_get_user_special_dir(Gtk::G_USER_DIRECTORY_MUSIC);
+				Path = p;
 			
 			#elif defined LGI_CARBON
 			
-			FSRef Ref;
-			OSErr e = FSFindFolder(kUserDomain, kMusicDocumentsFolderType, kDontCreateFolder, &Ref);
-			if (e) printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
-			else
-			{
-				GAutoString a = FSRefPath(Ref);
-				if (a)
-					Path = a.Get();
-			}				
+				FSRef Ref;
+				OSErr e = FSFindFolder(kUserDomain, kMusicDocumentsFolderType, kDontCreateFolder, &Ref);
+				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
+				else
+				{
+					GAutoString a = FSRefPath(Ref);
+					if (a)
+						Path = a.Get();
+				}
 
 			#endif
 			
@@ -1139,6 +1155,11 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 
 			Path = WinGetSpecialFolderPath(CSIDL_MYVIDEO);
 
+			#elif defined(__GTK_H__)
+			
+				auto p = Gtk::g_get_user_special_dir(Gtk::G_USER_DIRECTORY_VIDEOS);
+				Path = p;
+			
 			#elif defined LGI_CARBON
 
 			FSRef Ref;
@@ -1251,10 +1272,13 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			#if defined MAC
 
 				#if COCOA
+			
 					NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
 					if (paths)
 						Path = [[paths objectAtIndex:0] UTF8String];
+			
 				#elif defined LGI_CARBON
+			
 					FSRef Ref;
 					OSErr e = FSFindFolder(kUserDomain, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
 					if (e)
@@ -1267,12 +1291,13 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 						GAutoString Base = FSRefPath(Ref);
 						Path = Base.Get();
 					}
+			
 				#else
 
-				struct passwd *pw = getpwuid(getuid());
-				if (!pw)
-					return false;
-				Path.Printf("%s/Library", pw->pw_dir);
+					struct passwd *pw = getpwuid(getuid());
+					if (!pw)
+						return false;
+					Path.Printf("%s/Library", pw->pw_dir);
 			
 				#endif
 
@@ -1291,14 +1316,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 				else
 					LgiAssert(0);
 
-			#elif defined BEOS
-				
-				char p[MAX_PATH] = "";
-				if (find_directory(B_USER_SETTINGS_DIRECTORY, 0, false, p, sizeof(p)))
-					Path = p;
-				else
-					Path = "/boot/home/config/settings";
-				
 			#else
 
 				LgiAssert(0);
@@ -1317,33 +1334,25 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		{
 			#if defined WIN32
 
-			char16 p[MAX_PATH];
-			if (GetWindowsDirectoryW(p, CountOf(p)) > 0)
-				Path = p;
+				char16 p[MAX_PATH];
+				if (GetWindowsDirectoryW(p, CountOf(p)) > 0)
+					Path = p;
 
 			#elif defined LGI_CARBON
 			
-			FSRef Ref;
-			OSErr e = FSFindFolder(kOnAppropriateDisk,  kSystemFolderType, kDontCreateFolder, &Ref);
-			if (e) printf("%s:%i - FSFindFolder failed e=%i\n", __FILE__, __LINE__, e);
-			else
-			{
-				GAutoString u = FSRefPath(Ref);
-				if (u)
-					Path = u.Get();
-			}
-			
-			#elif defined BEOS
-			
-			char p[MAX_PATH] = "";
-			if (find_directory(B_SYSTEM_DIRECTORY, 0, false, p, sizeof(p)))
-				Path = p;
-			else
-				LgiAssert(0);
+				FSRef Ref;
+				OSErr e = FSFindFolder(kOnAppropriateDisk,  kSystemFolderType, kDontCreateFolder, &Ref);
+				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", __FILE__, __LINE__, e);
+				else
+				{
+					GAutoString u = FSRefPath(Ref);
+					if (u)
+						Path = u.Get();
+				}
 
 			#else
 
-			Path = "/boot"; // it'll do for now...
+				Path = "/boot"; // it'll do for now...
 
 			#endif
 			break;
@@ -1352,25 +1361,17 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		{
 			#if defined WIN32
 
-			char16 p[MAX_PATH];
-			if (GetSystemDirectoryW(p, CountOf(p)) > 0)
-				Path = p;
+				char16 p[MAX_PATH];
+				if (GetSystemDirectoryW(p, CountOf(p)) > 0)
+					Path = p;
 			
 			#elif defined MAC
 			
-			Path = "/Library";
-			
-			#elif defined BEOS
-
-			char p[MAX_PATH] = "";
-			if (find_directory(B_SYSTEM_LIB_DIRECTORY, 0, false, p, sizeof(p)))
-				Path = p;
-			else
-				LgiAssert(0);
+				Path = "/Library";
 
 			#else
 
-			Path = "/lib"; // it'll do for now...
+				Path = "/lib"; // it'll do for now...
 
 			#endif
 			break;
@@ -1379,40 +1380,32 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		{
 			#if defined WIN32
 
-			char16 t[MAX_PATH];
-			if (GetTempPathW(CountOf(t), t) > 0)
-			{
-				GAutoString utf(WideToUtf8(t));
-				if (utf)
-					Path = utf;
-			}
+				char16 t[MAX_PATH];
+				if (GetTempPathW(CountOf(t), t) > 0)
+				{
+					GAutoString utf(WideToUtf8(t));
+					if (utf)
+						Path = utf;
+				}
 
 			#elif defined LGI_CARBON
 			
-			FSRef Ref;
-			OSErr e = FSFindFolder(kUserDomain, kTemporaryFolderType, kCreateFolder, &Ref);
-			if (e) LgiTrace("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
-			else
-			{
-				GAutoString u = FSRefPath(Ref);
-				if (u)
+				FSRef Ref;
+				OSErr e = FSFindFolder(kUserDomain, kTemporaryFolderType, kCreateFolder, &Ref);
+				if (e) LgiTrace("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
+				else
 				{
-					Path = u.Get();
+					GAutoString u = FSRefPath(Ref);
+					if (u)
+					{
+						Path = u.Get();
+					}
+					else LgiTrace("%s:%i - FSRefPath failed.\n", _FL);
 				}
-				else LgiTrace("%s:%i - FSRefPath failed.\n", _FL);
-			}
 			
-			#elif defined BEOS
-			
-			char p[MAX_PATH] = "";
-			if (find_directory(B_SYSTEM_TEMP_DIRECTORY, 0, false, p, sizeof(p)))
-				Path = p;
-			else
-				Path = "/tmp";
-
 			#else
 
-			Path = "/tmp"; // it'll do for now...
+				Path = "/tmp"; // it'll do for now...
 
 			#endif
 			break;
@@ -1421,27 +1414,27 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		{
 			#if defined WIN32
 
-			Path = WinGetSpecialFolderPath(CSIDL_COMMON_APPDATA);
+				Path = WinGetSpecialFolderPath(CSIDL_COMMON_APPDATA);
 			
 			#elif defined LGI_CARBON
 			
-			FSRef Ref;
-			OSErr e = FSFindFolder(kOnSystemDisk, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
-			if (e) printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
-			else
-			{
-				GAutoString u = FSRefPath(Ref);
-				if (u)
-					Path = u.Get();
-			}
+				FSRef Ref;
+				OSErr e = FSFindFolder(kOnSystemDisk, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
+				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
+				else
+				{
+					GAutoString u = FSRefPath(Ref);
+					if (u)
+						Path = u.Get();
+				}
 
 			#elif defined LINUX
 
-			Path = "/usr";
+				Path = "/usr";
 
 			#elif defined BEOS
 
-			Path = "/boot/apps";
+				Path = "/boot/apps";
 
 			#endif
 			break;
@@ -1450,23 +1443,23 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		{
 			#if defined WIN32
 			
-			Path = WinGetSpecialFolderPath(CSIDL_APPDATA);
+				Path = WinGetSpecialFolderPath(CSIDL_APPDATA);
 
 			#elif defined LGI_CARBON
 			
-			FSRef Ref;
-			OSErr e = FSFindFolder(kUserDomain, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
-			if (e) printf("%s:%i - FSFindFolder failed e=%i\n", __FILE__, __LINE__, e);
-			else
-			{
-				GAutoString u = FSRefPath(Ref);
-				if (u)
-					Path = u.Get();
-			}
+				FSRef Ref;
+				OSErr e = FSFindFolder(kUserDomain, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
+				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", __FILE__, __LINE__, e);
+				else
+				{
+					GAutoString u = FSRefPath(Ref);
+					if (u)
+						Path = u.Get();
+				}
 
 			#elif defined LINUX
 
-			Path = "/usr";
+				Path = "/usr";
 
 			#endif
 			break;
@@ -1475,11 +1468,11 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		{
 			#if defined WIN32
 			
-			Path = WinGetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
+				Path = WinGetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
 			
 			#else
 			
-			LgiAssert(!"Impl me.");
+				LgiAssert(!"Impl me.");
 			
 			#endif
 			break;
@@ -1488,50 +1481,52 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		{
 			#if defined(WINDOWS) && defined(_MSC_VER)
 
-			Path = WinGetSpecialFolderPath(CSIDL_DESKTOPDIRECTORY);
+				Path = WinGetSpecialFolderPath(CSIDL_DESKTOPDIRECTORY);
+			
+			#elif defined(__GTK_H__)
+			
+				auto p = Gtk::g_get_user_special_dir(Gtk::G_USER_DIRECTORY_DESKTOP);
+				Path = p;
 			
 			#elif defined(MAC)
 			
-				#if defined COCOA
+				#if defined LGI_COCOA
+					LgiAssert(!"Impl me.");
 				#elif defined LGI_CARBON
-				FSRef Ref;
-				OSErr e = FSFindFolder(kOnAppropriateDisk, kDesktopFolderType, kDontCreateFolder, &Ref);
-				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", __FILE__, __LINE__, e);
-				else
-				{
-					GAutoString u = FSRefPath(Ref);
-					if (u)
-						Path = u.Get();
-				}
+					FSRef Ref;
+					OSErr e = FSFindFolder(kOnAppropriateDisk, kDesktopFolderType, kDontCreateFolder, &Ref);
+					if (e) printf("%s:%i - FSFindFolder failed e=%i\n", __FILE__, __LINE__, e);
+					else
+					{
+						GAutoString u = FSRefPath(Ref);
+						if (u)
+							Path = u.Get();
+					}
+				#else
+					#error "Impl."
 				#endif
 
 			#elif defined POSIX
 
-			struct passwd *pw = getpwuid(getuid());
-			if (pw)
-			{
-				#ifdef LINUX
-				WindowManager wm = LgiGetWindowManager();
-				if (wm == WM_Gnome)
+				struct passwd *pw = getpwuid(getuid());
+				if (pw)
 				{
-					Path.Printf("%s/.gnome-desktop", pw->pw_dir);
+					#ifdef LINUX
+					WindowManager wm = LgiGetWindowManager();
+					if (wm == WM_Gnome)
+					{
+						Path.Printf("%s/.gnome-desktop", pw->pw_dir);
+					}
+					#endif
+
+					if (!DirExists(Path))
+					{
+						Path.Printf("%s/Desktop", pw->pw_dir);
+					}
 				}
-				#endif
-
-				if (!DirExists(Path))
-				{
-					Path.Printf("%s/Desktop", pw->pw_dir);
-				}
-			}
-
-			#elif defined BEOS
-
-			char p[MAX_PATH] = "";
-			if (find_directory(B_DESKTOP_DIRECTORY, 0, false, p, sizeof(p))
-				Path = p;
-			else
-				LgiAssert(0);
 			
+			#else
+				#error "Impl me."
 			#endif
 			break;
 		}
@@ -1539,22 +1534,16 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		{
 			#if defined WIN32
 
-			Path = WinGetSpecialFolderPath(CSIDL_PROFILE);
+				Path = WinGetSpecialFolderPath(CSIDL_PROFILE);
 
 			#elif defined POSIX
 
-			struct passwd *pw = getpwuid(getuid());
-			if (pw)
-				Path = pw->pw_dir;
+				struct passwd *pw = getpwuid(getuid());
+				if (pw)
+					Path = pw->pw_dir;
 
-			#elif defined BEOS
-
-			char p[MAX_PATH] = "";
-			if (find_directory(B_USER_DIRECTORY, 0, false, p, sizeof(p))
-				Path = p;
-			else
-				LgiAssert(0);
-
+			#else
+				#error "Impl me."
 			#endif
 			break;
 		}
@@ -1572,102 +1561,94 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		{
 			#if defined LINUX
 			
-			switch (LgiGetWindowManager())
-			{
-				case WM_Kde:
+				switch (LgiGetWindowManager())
 				{
-					static char KdeTrash[256] = "";
-					
-					if (!ValidStr(KdeTrash))
+					case WM_Kde:
 					{
-						// Ask KDE where the current trash is...
-						GStringPipe o;
-						GSubProcess p("kde-config", "--userpath trash");
-						if (p.Start())
+						static char KdeTrash[256] = "";
+						
+						if (!ValidStr(KdeTrash))
 						{
-							p.Communicate(&o);
-							char *s = o.NewStr();
-							if (s)
+							// Ask KDE where the current trash is...
+							GStringPipe o;
+							GSubProcess p("kde-config", "--userpath trash");
+							if (p.Start())
 							{
-								// Store it..
-								strcpy_s(KdeTrash, sizeof(KdeTrash), s);
-								DeleteArray(s);
-
-								// Clear out any crap at the end...
-								char *e = KdeTrash + strlen(KdeTrash) - 1;
-								while (e > KdeTrash && strchr(" \r\n\t/", *e))
+								p.Communicate(&o);
+								char *s = o.NewStr();
+								if (s)
 								{
-									*e-- = 0;
+									// Store it..
+									strcpy_s(KdeTrash, sizeof(KdeTrash), s);
+									DeleteArray(s);
+
+									// Clear out any crap at the end...
+									char *e = KdeTrash + strlen(KdeTrash) - 1;
+									while (e > KdeTrash && strchr(" \r\n\t/", *e))
+									{
+										*e-- = 0;
+									}
+								}
+								else
+								{
+									printf("%s:%i - No output from 'kde-config'.\n", _FL);
 								}
 							}
 							else
 							{
-								printf("%s:%i - No output from 'kde-config'.\n", _FL);
+								printf("%s:%i - Run 'kde-config' failed.\n", _FL);
 							}
 						}
-						else
-						{
-							printf("%s:%i - Run 'kde-config' failed.\n", _FL);
-						}
-					}
 
-					if (ValidStr(KdeTrash))
-						Path = KdeTrash;
-					break;
-				}
-				default:
-				{
-					GString Home = LGetSystemPath(LSP_HOME);
-					if (!Home)
-					{
-						LgiTrace("%s:%i - Can't get LSP_HOME.\n", _FL);
+						if (ValidStr(KdeTrash))
+							Path = KdeTrash;
 						break;
 					}
-					
-					char p[MAX_PATH];
-					if (!LgiMakePath(p, sizeof(p), Home, ".local/share/Trash") ||
-						!DirExists(p))
+					default:
 					{
-						LgiTrace("%s:%i - '%s' doesn't exist.\n", _FL, p);
+						GString Home = LGetSystemPath(LSP_HOME);
+						if (!Home)
+						{
+							LgiTrace("%s:%i - Can't get LSP_HOME.\n", _FL);
+							break;
+						}
+						
+						char p[MAX_PATH];
+						if (!LgiMakePath(p, sizeof(p), Home, ".local/share/Trash") ||
+							!DirExists(p))
+						{
+							LgiTrace("%s:%i - '%s' doesn't exist.\n", _FL, p);
+							break;
+						}
+						
+						Path = p;
 						break;
 					}
-					
-					Path = p;
-					break;
 				}
-			}
 			
 			#elif defined LGI_CARBON
 			
-			FSRef Ref;
-			OSErr e = FSFindFolder(kUserDomain, kTrashFolderType, kDontCreateFolder, &Ref);
-			if (e) printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
-			else
-			{
-				GAutoString u = FSRefPath(Ref);
-				if (u)
-					Path = u.Get();
-			}
+				FSRef Ref;
+				OSErr e = FSFindFolder(kUserDomain, kTrashFolderType, kDontCreateFolder, &Ref);
+				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
+				else
+				{
+					GAutoString u = FSRefPath(Ref);
+					if (u)
+						Path = u.Get();
+				}
 			
-			#elif defined BEOS
-
-			char p[MAX_PATH] = "";
-			if (find_directory(B_TRASH_DIRECTORY, 0, false, p, sizeof(p)))
-				Path = p;
-			else
-				LgiAssert(0);
-
 			#elif defined(WIN32)
 
-			LgiAssert(0);
+				LgiAssert(0);
 
 			#elif defined(MAC)
 
-			// Non carbon mac builds (e.g. GTK3)
-			struct passwd *pw = getpwuid(getuid());
-			if (!pw)
-				return GString();
-			Path.Printf("%s/.Trash", pw->pw_dir);
+				// Non carbon mac builds (e.g. GTK3)
+				struct passwd *pw = getpwuid(getuid());
+				if (!pw)
+					return GString();
+				Path.Printf("%s/.Trash", pw->pw_dir);
 
 			#endif
 			break;

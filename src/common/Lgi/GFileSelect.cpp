@@ -723,7 +723,7 @@ public:
 			}
 		}
 		
-		for (GVolume *cv = v->First(); cv; cv = cv->Next())
+		for (GVolume *cv = v->First(); cv; cv = v->Next())
 		{
 			GTreeItem *ci = new GTreeItem;
 			if (ci)
@@ -1289,7 +1289,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 class GFileSystemItem : public GTreeItem
 {
 	class GFileSystemPopup *Popup;
-	char *Path;
+	GString Path;
 
 public:
 	GFileSystemItem(GFileSystemPopup *popup, GVolume *vol, char *path = 0);
@@ -1375,8 +1375,9 @@ GFileSystemItem::GFileSystemItem(GFileSystemPopup *popup, GVolume *Vol, char *pa
 
 	if (Vol)
 	{
-		Path = NewStr(Vol->Path());
+		Path = Vol->Path();
 		SetText(Vol->Name());
+		
 		switch (Vol->Type())
 		{
 			case VT_3_5FLOPPY:

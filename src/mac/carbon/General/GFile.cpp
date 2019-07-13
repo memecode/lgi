@@ -537,37 +537,50 @@ public:
 			}
 
 			#if defined LGI_CARBON
-			FSVolumeRefNum volume;
-			FSVolumeInfo info;
-			HFSUniStr255 volName;
-			FSRef ref;
-			int i = 0;
 
-			while (FSGetVolumeInfo(kFSInvalidVolumeRefNum, ++i, &volume, kFSVolInfoFSInfo, &info, &volName, &ref) == 0)
-			{
-				uint8_t path[PATH_MAX + 1];
-				if (FSRefMakePath(&ref, path, PATH_MAX) == 0 &&
-					Stricmp((char*)path, "/") &&
-					Stricmp((char*)path, "/net") && 
-					Stricmp((char*)path, "/home"))
+				FSVolumeRefNum volume;
+				FSVolumeInfo info;
+				HFSUniStr255 volName;
+				FSRef ref;
+				int i = 0;
+
+				while (FSGetVolumeInfo(kFSInvalidVolumeRefNum, ++i, &volume, kFSVolInfoFSInfo, &info, &volName, &ref) == 0)
 				{
-					v = new GMacVolume(0);
-					v->_Path = (char*)path;
-					GAutoString vol((char*)LgiNewConvertCp("utf-8", volName.unicode, "utf-16", volName.length * 2));
-					v->_Name = vol.Get();
-					
-					// printf("Vol '%s' '%s'\n", v->_Name.Get(), v->_Path.Get());
-
-					// FSGetVolumeInfo(volume, 0, 0, kFSVolInfoSizes, &info, 0, 0);
-					// v.setSize(quint64(info.totalBytes));
-					// v.setAvailableSpace(quint64(info.freeBytes));
-					// struct statfs data;
-					// if (statfs(qPrintable(v.path()), &data) == 0)
-					//	v.setFileSystemType(QLatin1String(data.f_fstypename));
-
-					_Sub.Insert(v);
+					uint8_t path[PATH_MAX + 1];
+					if (FSRefMakePath(&ref, path, PATH_MAX) == 0 &&
+						Stricmp((char*)path, "/") &&
+						Stricmp((char*)path, "/net") &&
+						Stricmp((char*)path, "/home"))
+					{
+						v = new GMacVolume(0);
+						v->_Path = (char*)path;
+						GAutoString vol((char*)LgiNewConvertCp("utf-8", volName.unicode, "utf-16", volName.length * 2));
+						v->_Name = vol.Get();
+						_Sub.Insert(v);
+					}
 				}
-			}
+			
+			#else
+	
+				LgiSystemPath p[] = {LSP_USER_DOCUMENTS,
+									LSP_USER_MUSIC,
+									LSP_USER_VIDEO,
+									LSP_USER_DOWNLOADS,
+									LSP_USER_PICTURES};
+				for (int i=0; i<CountOf(p); i++)
+				{
+					GString Path = LGetSystemPath(p[i]);
+					if (Path &&
+						(v = new GMacVolume(0)))
+					{
+						auto Parts = Path.Split("/");
+						v->_Path = Path;
+						v->_Name = *Parts.rbegin();
+						v->_Type = VT_FOLDER;
+						_Sub.Insert(v);
+					}
+				}
+	
 			#endif
 		}
 
