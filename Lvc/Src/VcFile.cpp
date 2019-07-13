@@ -25,16 +25,19 @@ VcFile::FileStatus VcFile::GetStatus()
 		if (!s)
 			return Status;
 
-		#define STATE(str, sym) \
-			if (stristr(s, str)) Status = sym
-		STATE("?", SUntracked);
-		else STATE("Up-To-Date", SClean);
-		else STATE("Modified", SModified);
-		else STATE("A", SAdded);
-		else STATE("M", SModified);
-		else STATE("C", SConflicted);
-		else STATE("!", SMissing);
-		else STATE("D", SDeleted);
+		#define STATE(str, len, sym) \
+			if (!strnicmp(s, str, len)) \
+				Status = sym
+
+		STATE("?", 1, SUntracked);
+		else STATE("Up-To-Date", 10, SClean);
+		else STATE("Modified", 8, SModified);
+		else STATE("A", 1, SAdded);
+		else STATE("M", 1, SModified);
+		else STATE("C", 1, SConflicted);
+		else STATE("!", 1, SMissing);
+		else STATE("D", 1, SDeleted);
+		else STATE("R", 1, SDeleted); // "Removed"
 		else
 		{
 			LgiAssert(!"Impl state");

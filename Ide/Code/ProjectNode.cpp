@@ -395,8 +395,8 @@ void ProjectNode::AutoDetectType()
 	GString FullPath = GetFullPath();
 	if (FullPath)
 	{
-		char MimeType[256];
-		if (LGetFileMimeType(FullPath, MimeType, sizeof(MimeType)) &&
+		auto MimeType = LGetFileMimeType(FullPath);
+		if (MimeType &&
 			strnicmp(MimeType, "image/", 6) == 0)
 		{
 			Type = NodeGraphic;
