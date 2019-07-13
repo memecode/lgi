@@ -929,6 +929,24 @@ GAutoString GApp::GetFileMimeType(const char *File)
 		}		
 	}
 
+	#ifdef __GTK_H__
+	
+	gboolean result_uncertain;
+	gchar *gt = g_content_type_guess(File, NULL, 0, &result_uncertain);
+	if (gt)
+	{
+		gchar *mt = g_content_type_get_mime_type(gt);
+		g_free(gt);
+		if (mt)
+		{
+			Status.Reset(NewStr(mt));
+			g_free(mt);
+			return Status;
+		}
+	}
+	
+	#endif
+
 	#if HAS_LIB_MAGIC
 	
 	static bool MagicError = false;
