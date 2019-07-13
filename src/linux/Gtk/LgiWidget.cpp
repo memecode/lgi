@@ -30,7 +30,11 @@ static void lgi_widget_class_init(LgiWidgetClass *klass);
 
 static bool is_debug(LgiWidget *w)
 {
+	#if defined _DEBUG
 	return w->target->GetGView()->_Debug;
+	#else
+	return false;
+	#endif
 }
 
 static void
@@ -183,10 +187,7 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 
 	GMouse m = _map_mouse_event(v, ev->x, ev->y, false);
 	if (!m.Target)
-	{
-		v->GetWindow()->_Dump();
 		return false;
-	}
 
 	m.Double(ev->type == GDK_2BUTTON_PRESS ||
 			ev->type == GDK_3BUTTON_PRESS);
