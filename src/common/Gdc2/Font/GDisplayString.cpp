@@ -2106,13 +2106,33 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	GColour b = Font->Back();
 	double Dx = ((double)fx / FScale);
 	double Dy = ((double)fy / FScale);
+	double rx, ry, rw, rh;
 	if (!Font->Transparent())
 	{
 		// Background fill
 		cairo_set_source_rgb(cr, (double)b.r()/255.0, (double)b.g()/255.0, (double)b.b()/255.0); cairo_new_path(cr);
-		if (frc)	cairo_rectangle(cr, ((double)frc->x1 / FScale), ((double)frc->y1 / FScale), (double)frc->X() / FScale, (double)frc->Y() / FScale);
-		else		cairo_rectangle(cr, Dx, Dy, x, y);
+		if (frc)
+		{
+			rx = ((double)frc->x1 / FScale);
+			ry = ((double)frc->y1 / FScale);
+			rw = (double)frc->X() / FScale;
+			rh = (double)frc->Y() / FScale;
+		}
+		else
+		{
+			rx = Dx;
+			ry = Dy;
+			rw = x;
+			rh = y;
+		}
+
+		cairo_rectangle(cr, rx, ry, rw, rh);
 		cairo_fill(cr);
+		if (frc)
+		{
+			cairo_rectangle(cr, rx, ry, rw, rh);
+			cairo_clip(cr);
+		}
 	}
 
 	cairo_translate(cr, Dx, Dy);
