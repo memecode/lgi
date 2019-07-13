@@ -1393,11 +1393,6 @@ OsApplication::OsApplication(int Args, char **Arg)
 {
     Inst = this;
     d = new OsApplicationPriv;	
-	
-	#if defined(__GNUC__) && defined(LINUX)
-	XInitThreads();
-	#endif
-    gtk_init(&Args, &Arg);
 }
 
 OsApplication::~OsApplication()

@@ -20,10 +20,14 @@ if (UNIX AND NOT APPLE)
 	set(LINUX TRUE)
 endif()
 
+if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+	add_definitions("-D_DEBUG")
+endif()
+
 if (APPLE)
 
 	set( CMAKE_SKIP_BUILD_RPATH true )
-	add_definitions("-DMAC -DLGI_LIBRARY -D_DEBUG -DLGI_RES")
+	add_definitions("-DMAC -DLGI_LIBRARY -DLGI_RES")
 	set(GTK3_PATH "/Users/Shared/inst")
 	if (NOT EXISTS ${GTK3_PATH})
 		get_filename_component(GTK3_PATH "${ROOT}/../../inst" REALPATH)
@@ -58,14 +62,14 @@ if (APPLE)
 
 elseif (LINUX)
 
-	add_definitions("-DLINUX -DLGI_LIBRARY -D_DEBUG -DLGI_RES -fPIC -w -fno-inline -fpermissive")
+	add_definitions("-DLINUX -DLGI_LIBRARY -DLGI_RES -fPIC -w -fno-inline -fpermissive")
 	find_package(PkgConfig REQUIRED)
 	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4)
 	                               
 elseif (MSVC)
 
-	add_definitions("/W1 -DWINDOWS -DWIN32 -DLGI_LIBRARY -D_DEBUG -DLGI_RES -D_WINDLL -D_UNICODE -DUNICODE")
+	add_definitions("/W1 -DWINDOWS -DWIN32 -DLGI_LIBRARY -DLGI_RES -D_WINDLL -D_UNICODE -DUNICODE")
 
 endif ()
 
