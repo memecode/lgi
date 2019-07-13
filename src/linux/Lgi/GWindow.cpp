@@ -473,8 +473,10 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			auto v = d->Focus ? d->Focus : this;
 			if (!HandleViewKey(v->GetGView(), k))
 			{
-				if ((k.vkey == VK_TAB || k.vkey == KEY(ISO_Left_Tab)) &&
-					k.Down())
+				if (!k.Down())
+					return false;
+
+				if (k.vkey == VK_TAB || k.vkey == KEY(ISO_Left_Tab))
 				{
 					// Do tab between controls
 					::GArray<GViewI*> a;
@@ -489,6 +491,19 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 						{
 							// LgiTrace("Setting focus to %i of %i: %s, %s, %i\n", next_idx, a.Length(), next->GetClass(), next->GetPos().GetStr(), next->GetId());
 							next->Focus(true);
+						}
+					}
+				}
+				else if (k.System() && k.IsChar)
+				{
+					if (ToLower(k.c16) == 'q')
+					{
+						auto AppWnd = LgiApp->AppWnd;
+						auto Wnd = AppWnd ? AppWnd : this;
+						if (Wnd->OnRequestClose(false))
+						{
+							Wnd->Quit();
+							return true;
 						}
 					}
 				}
