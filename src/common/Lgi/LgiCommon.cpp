@@ -476,7 +476,7 @@ bool LgiRecursiveFileSearch(const char *Root,
 
 				if (Count)
 				{
-					Count++;
+					(*Count)++;
 				}
 
 				Status = true;
