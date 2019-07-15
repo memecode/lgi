@@ -218,6 +218,12 @@ public:
 
 	bool OnViewKey(GView *v, GKey &k)
 	{
+		/*
+		GString s;
+		s.Printf("%s:%i - OnViewKey vis=%i", _FL, Visible());
+		k.Trace(s);
+		*/
+		
 		if (Visible())
 		{
 			switch (k.vkey)
@@ -260,7 +266,7 @@ public:
 			}
 		}
 
-		#ifdef MAC
+		#if defined(MAC) && !defined(__GTK_H__)
 		return Edit->OnKey(k);
 		#else
 		return false;

@@ -202,6 +202,7 @@ set (CommonSource
 	include/common/GPanel.h
 	src/common/Widgets/GPanel.cpp
 	include/common/GPopup.h
+	include/common/GPopupList.h
 	src/common/Widgets/GPopup.cpp
 	include/common/GProgressDlg.h
 	src/common/Widgets/GProgressDlg.cpp

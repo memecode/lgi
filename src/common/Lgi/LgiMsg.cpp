@@ -245,7 +245,7 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 	if (dlg)
 	{
 		if (Type == MB_YESNOCANCEL)
-			gtk_dialog_add_button(GTK_DIALOG(dlg), "Cancel", -30);
+			gtk_dialog_add_button(GTK_DIALOG(dlg), "Cancel", GTK_RESPONSE_CANCEL);
 		int Response = 0;
 		g_signal_connect(GTK_DIALOG(dlg), "response", G_CALLBACK(MsgCb), &Response);
 		auto r = gtk_dialog_run(GTK_DIALOG(dlg));
