@@ -70,7 +70,10 @@ bool Base64Str(GString &s)
 	if (!b64.Set(NULL, Base64Len))
 		return false;
 	
-	ssize_t Ch = ConvertBinaryToBase64(b64.Get(), b64.Length(), (uchar*)s.Get(), s.Length());
+	#ifdef _DEBUG
+	ssize_t Ch =
+	#endif
+	ConvertBinaryToBase64(b64.Get(), b64.Length(), (uchar*)s.Get(), s.Length());
 	LgiAssert(Ch == b64.Length());
 	s = b64;
 	return true;
@@ -2817,7 +2820,10 @@ bool MailPop3::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 										ssize_t Actual = EndPos - DataPos - 3;
 										if (Actual > 0)
 										{
-											ssize_t w = Msg->Write(Buffer, Actual);
+											#ifdef _DEBUG
+											ssize_t w =
+											#endif
+											Msg->Write(Buffer, Actual);
 											LgiAssert(w == Actual);
 										}
 										// else the end point was in the last buffer
@@ -2827,7 +2833,10 @@ bool MailPop3::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 									}
 									else
 									{
-										ssize_t w = Msg->Write(Buffer, r);
+										#ifdef _DEBUG
+										ssize_t w =
+										#endif
+										Msg->Write(Buffer, r);
 										LgiAssert(w == r);
 										DataPos += r;
 									}

@@ -95,7 +95,9 @@ ssize_t MailIMap::ParseImapResponse(char *Buffer, ssize_t BufferLen, GArray<StrR
 	if (!*Buffer || *Buffer != '*')
 		return 0;
 
+	#ifdef _DEBUG
 	char *End = Buffer + BufferLen;
+	#endif
 	char *s = Buffer + 1;
 	char *Start;
 	for (int n=0; n<Names; n++)

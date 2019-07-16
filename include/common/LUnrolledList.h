@@ -440,8 +440,7 @@ public:
 			Iter i = GetIndex(Len, &Base);
 			if (i.i)
 			{
-				size_t Offset = Len - Base;
-				LgiAssert(Offset <= i.i->Count);
+				LgiAssert((Len - Base) <= i.i->Count);
 				i.i->Count = Len - Base;
 				LgiAssert(i.i->Count >= 0 && i.i->Count < BlockSize);
 				while (i.i->Next)

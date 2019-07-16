@@ -29,7 +29,9 @@ bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int Len)
 	Ptr = (uint16*)In;
 	Bytes = sizeof(*In) * Len;
 	uint32_t *o = &Out[0];
+	#ifdef _DEBUG
 	uint32_t *e = o + Out.Length();
+	#endif
 	while (	Bytes >= sizeof(*In))
 	{
 		*o++ = LgiUtf16To32(Ptr, Bytes);

@@ -121,7 +121,10 @@ public:
 	{
 		if (!LastEol)
 		{
-			ssize_t w = Out->Write(MimeEol, 2);
+			#ifdef _DEBUG
+			ssize_t w =
+			#endif
+			Out->Write(MimeEol, 2);
 			LgiAssert(w == 2);
 		}
 	}

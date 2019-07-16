@@ -66,11 +66,11 @@ char16 *WcharToChar16(const wchar_t *i)
 GHtmlStatic *GHtmlStatic::Inst = NULL;
 
 GHtmlStatic::GHtmlStatic() :
+	TagMap(CountOf(TagInfo) * 3),
+	TagIdMap(CountOf(TagInfo) * 3),
 	VarMap(8),
 	StyleMap(8),
-	ColourMap(8, -1),
-	TagMap(CountOf(TagInfo) * 3),
-	TagIdMap(CountOf(TagInfo) * 3)
+	ColourMap(8, -1)
 {
 	Refs = 0;
 	UnknownElement = NULL;

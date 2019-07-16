@@ -248,7 +248,7 @@ struct LOAuth2Priv
 	{
 		GString b;
 		b.Length(BufferLen_BinTo64(s.Length()));
-		auto ch = ConvertBinaryToBase64(b.Get(), b.Length(), (uchar*)s.Get(), s.Length());
+		ConvertBinaryToBase64(b.Get(), b.Length(), (uchar*)s.Get(), s.Length());
 		b.Get()[b.Length()] = 0;
 		return b;
 	}

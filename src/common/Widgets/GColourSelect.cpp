@@ -75,7 +75,7 @@ public:
 };
 
 GColourSelect::GColourSelect(GArray<COLOUR> *col32) :
-	ResObject(Res_Custom), GDropDown(-1, 0, 0, 10, 10, 0)
+	GDropDown(-1, 0, 0, 10, 10, 0), ResObject(Res_Custom)
 {
 	c32 = Rgb32(0, 0, 255);
 

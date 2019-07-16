@@ -6,7 +6,7 @@
 
 static char Ws[] = " \r\t\n";
 
-bool HasTag(List<char> &Tags, char *Tag)
+bool HasTag(List<char> &Tags, const char *Tag)
 {
 	int Len = strlen(Tag);
 	for (auto t: Tags)

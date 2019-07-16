@@ -4288,7 +4288,6 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 		return;
 	}
 
-	GFont *Font = Table->GetFont();
 	Table->ZeroTableElements();
 	MinCol.Length(0);
 	MaxCol.Length(0);
@@ -7893,7 +7892,6 @@ bool GHtml::OnKey(GKey &k)
 					case 'c':
 					case 'C':
 					{
-						DoCopy:
 						if (k.Modifier())
 						{
 							Copy();

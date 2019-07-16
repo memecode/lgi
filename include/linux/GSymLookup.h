@@ -50,9 +50,8 @@ public:
 
 		for (int i=0; Sym[i] && i<IpLen; i++)
 		{
-			char *s = strrchr(Sym[i], '('), *e;
-			
 			/*
+			char *s = strrchr(Sym[i], '('), *e;
 			if (s != 0 && (e = strchr(++s, '+')))
 			{
 				GStringPipe un;

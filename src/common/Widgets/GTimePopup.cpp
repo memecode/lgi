@@ -11,7 +11,9 @@
 #include "GDateTimeCtrls.h"
 
 /// This class is the list of times in a popup, it is used by GTimeDropDown
-GTimeDropDown::GTimeDropDown() : ResObject(Res_Custom), GDropDown(-1, 0, 0, 10, 10, 0)
+GTimeDropDown::GTimeDropDown() :
+	GDropDown(-1, 0, 0, 10, 10, 0),
+	ResObject(Res_Custom)
 {
 	SetPopup(Drop = new GTimePopup(this));
 }

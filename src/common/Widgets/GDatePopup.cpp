@@ -250,7 +250,9 @@ bool GDatePopup::OnKey(GKey &k)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-GDateDropDown::GDateDropDown() : ResObject(Res_Custom), GDropDown(-1, 0, 0, 10, 10, 0)
+GDateDropDown::GDateDropDown() :
+	GDropDown(-1, 0, 0, 10, 10, 0),
+	ResObject(Res_Custom)
 {
 	SetPopup(Drop = new GDatePopup(this));
 }

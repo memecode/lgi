@@ -1872,7 +1872,7 @@ bool GFontType::GetSystemFont(const char *Which)
 		"Sans";
 	#endif
 	int DefSize = 10;
-	int Offset = 0;
+	// int Offset = 0;
 
 	static bool First = true;
 	if (First)

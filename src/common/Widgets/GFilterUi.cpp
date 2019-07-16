@@ -361,14 +361,14 @@ public:
 			{
 				int Pt[][2] =
 				{
-					(int)(n/2), (int)(k[0]),
-					(int)(k[0]), (int)(k[1]),
-					(int)(k[1]), (int)(k[1]),
-					(int)(k[1]), (int)(k[3]),
-					(int)(k[2]), (int)(k[3]),
-					(int)(k[2]), (int)(k[1]),
-					(int)(k[3]), (int)(k[1]),
-					(int)(n/2), (int)(k[0]),
+					{(int)(n/2), (int)(k[0])},
+					{(int)(k[0]), (int)(k[1])},
+					{(int)(k[1]), (int)(k[1])},
+					{(int)(k[1]), (int)(k[3])},
+					{(int)(k[2]), (int)(k[3])},
+					{(int)(k[2]), (int)(k[1])},
+					{(int)(k[3]), (int)(k[1])},
+					{(int)(n/2), (int)(k[0])},
 				};
 
 				GPath p;
