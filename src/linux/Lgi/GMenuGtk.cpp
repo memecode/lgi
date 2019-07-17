@@ -38,12 +38,12 @@ GSubMenu::GSubMenu(const char *name, bool Popup)
 	{
 		Info = GtkCast(Gtk::gtk_menu_new(), gtk_menu_shell, GtkMenuShell);
 		// LgiTrace("CreateSub %p %p\n", this, Info);
-		auto ret = Gtk::g_signal_connect_data(Info,
-										"destroy",
-										(Gtk::GCallback) SubMenuDestroy,
-										this,
-										NULL,
-										Gtk::G_CONNECT_SWAPPED);
+		Gtk::g_signal_connect_data(	Info,
+									"destroy",
+									(Gtk::GCallback) SubMenuDestroy,
+									this,
+									NULL,
+									Gtk::G_CONNECT_SWAPPED);
 	}
 
 	Active.Add(this);
@@ -86,7 +86,7 @@ gboolean GSubMenuClick(GMouse *m)
 		auto vis = gtk_widget_is_visible(w);
 		if (vis)
 		{
-			auto src = gtk_widget_get_screen(w);
+			// auto src = gtk_widget_get_screen(w);
 			// auto hnd = gdk_screen_get_root_window(src);
 			auto hnd = gtk_widget_get_window(w);
 
@@ -320,8 +320,6 @@ void GSubMenu::OnActivate(bool a)
 
 int GSubMenu::Float(GView *From, int x, int y, int Button)
 {
-	static int Depth = 0;
-
 	#ifdef __GTK_H__
 	GWindow *Wnd = From->GetWindow();
 	if (!Wnd)
@@ -695,7 +693,11 @@ bool LgiMenuItem::ScanForAccel()
 			char *k = Keys[i];
 			if (stricmp(k, "Ctrl") == 0)
 			{
+				#ifdef MAC
+				Flags |= LGI_EF_SYSTEM;
+				#else
 				Flags |= LGI_EF_CTRL;
+				#endif
 			}
 			else if (stricmp(k, "Alt") == 0)
 			{
@@ -786,9 +788,10 @@ bool LgiMenuItem::ScanForAccel()
 				GtkWidget *w = GtkCast(Info, gtk_widget, GtkWidget);
 				Gtk::GdkModifierType mod = (Gtk::GdkModifierType)
 					(
-						(TestFlag(Flags, LGI_EF_CTRL)  ? Gtk::GDK_CONTROL_MASK : 0) |
-						(TestFlag(Flags, LGI_EF_SHIFT) ? Gtk::GDK_SHIFT_MASK : 0) |
-						(TestFlag(Flags, LGI_EF_ALT)   ? Gtk::GDK_MOD1_MASK : 0)
+						(TestFlag(Flags, LGI_EF_CTRL)   ? Gtk::GDK_CONTROL_MASK : 0) |
+						(TestFlag(Flags, LGI_EF_SHIFT)  ? Gtk::GDK_SHIFT_MASK : 0)   |
+						(TestFlag(Flags, LGI_EF_ALT)    ? Gtk::GDK_MOD1_MASK : 0)    |
+						(TestFlag(Flags, LGI_EF_SYSTEM) ? Gtk::GDK_META_MASK : 0)
 					);
 
 				const char *Signal = "activate";
@@ -1411,8 +1414,9 @@ bool GAccelerator::Match(GKey &k)
 		(
 			((TestFlag(Flags, LGI_EF_CTRL) ^ k.Ctrl()) == 0) &&
 			((TestFlag(Flags, LGI_EF_ALT) ^ k.Alt()) == 0) &&
-			((TestFlag(Flags, LGI_EF_SHIFT) ^ k.Shift()) == 0)
-		)				
+			((TestFlag(Flags, LGI_EF_SHIFT) ^ k.Shift()) == 0) &&
+			((TestFlag(Flags, LGI_EF_SYSTEM) ^ k.System()) == 0)
+		)
 		{
 			return true;
 		}

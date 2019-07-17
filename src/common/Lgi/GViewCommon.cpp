@@ -1277,14 +1277,6 @@ void GView::Visible(bool v)
 			else
 				_View->Hide();
 
-		#elif defined __GTK_H__
-
-			ThreadCheck();
-			if (v)
-				Gtk::gtk_widget_show(_View);
-			else
-				Gtk::gtk_widget_hide(_View);
-		
 		#elif defined(COCOA)
 
 			LAutoPool Pool;

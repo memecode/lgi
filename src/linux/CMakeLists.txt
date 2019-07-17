@@ -20,7 +20,10 @@ if (UNIX AND NOT APPLE)
 	set(LINUX TRUE)
 endif()
 
-if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+if (NOT DEFINED ${CMAKE_BUILD_TYPE})
+	set(CMAKE_BUILD_TYPE "DEBUG")
+endif()
+if (CMAKE_BUILD_TYPE STREQUAL "DEBUG")
 	add_definitions("-D_DEBUG")
 endif()
 

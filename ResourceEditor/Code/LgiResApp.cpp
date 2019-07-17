@@ -712,6 +712,7 @@ void FieldView::OnSelect(FieldSource *s)
 						case DATA_FILENAME:
 						{
 							Cell = t->GetCell(0, Row);
+							Cell->VerticalAlign(GCss::VerticalMiddle);
 							Cell->Add(new GTextLabel(-1, 0, 0, -1, -1, c->Label));
 
 							TextViewEdit *Tv;

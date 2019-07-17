@@ -370,8 +370,15 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			k.Alt((e->state & GDK_MOD1_MASK) != 0);
 			k.System((e->state & GDK_MOD2_MASK) != 0);
 		
+			#ifdef _DEBUG
+			if (k.vkey == GDK_KEY_Meta_L ||
+				k.vkey == GDK_KEY_Meta_R)
+				break;
+			#endif
+		
 			k.IsChar = !k.Ctrl() &&
-						!k.Alt() && 
+						!k.Alt() &&
+						!k.System() &&
 						(k.c16 >= ' ') &&
 						(k.c16 >> 8 != 0xff);
 			if (e->keyval > 0xff && e->string != NULL)
@@ -384,7 +391,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		
 			switch (k.vkey)
 			{
-				case KEY(ISO_Left_Tab):
+				case GDK_KEY_ISO_Left_Tab:
 				case KEY(Tab):
 					k.IsChar = true;
 					k.c16 = k.vkey = VK_TAB;
@@ -394,9 +401,9 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 					k.IsChar = true;
 					k.c16 = k.vkey = VK_RETURN;
 					break;
-				case KEY(BackSpace):
+				case GDK_KEY_BackSpace:
 					k.c16 = k.vkey = VK_BACKSPACE;
-					k.IsChar = !k.Ctrl() && !k.Alt();
+					k.IsChar = !k.Ctrl() && !k.Alt() && !k.System();
 					break;
 				case KEY(Left):
 					k.vkey = k.c16 = VK_LEFT;
@@ -494,7 +501,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 						}
 					}
 				}
-				else if (k.System() && k.IsChar)
+				else if (k.System())
 				{
 					if (ToLower(k.c16) == 'q')
 					{

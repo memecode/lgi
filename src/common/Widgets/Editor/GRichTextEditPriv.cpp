@@ -1817,7 +1817,7 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 		#define AllocPx(sz, border) \
 			GRect(r.x1, r.y1, r.x1 + (int)(sz) - 1, r.y2); r.x1 += (int)(sz) + border
 
-		Areas[GRichTextEdit::FontFamilyBtn] = AllocPx(100, 6);
+		Areas[GRichTextEdit::FontFamilyBtn] = AllocPx(130, 6);
 		Areas[GRichTextEdit::FontSizeBtn] = AllocPx(40, 6);
 
 		Areas[GRichTextEdit::BoldBtn] = AllocPx(r.Y(), 0);

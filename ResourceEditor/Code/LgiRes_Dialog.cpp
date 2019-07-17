@@ -3440,7 +3440,7 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	GAutoPtr<GSurface> ScreenDC;
 	if (!pDC)
-		ScreenDC.Reset(pDC = new GScreenDC(Handle()));
+		ScreenDC.Reset(pDC = new GScreenDC(this));
 
 	if (Ctrl)
 	{
