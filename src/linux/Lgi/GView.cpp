@@ -828,7 +828,10 @@ bool GView::IsAttached()
 
 	w = dynamic_cast<GWindow*>(this);
 	if (!w)
-		return GetParent() != NULL;
+	{
+		auto p = GetParent();
+		return p && p->HasView(this);
+	}
 
 	return w->IsAttached();
 }
