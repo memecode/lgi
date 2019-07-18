@@ -623,7 +623,7 @@ GtkRootResize(GtkWidget *widget, GdkRectangle *alloc, GView *This)
 void
 GWindowUnrealize(GtkWidget *widget, GWindow *wnd)
 {
-	printf("%s:%i - GWindowUnrealize %s\n", _FL, wnd->GetClass());
+	// printf("%s:%i - GWindowUnrealize %s\n", _FL, wnd->GetClass());
 }
 
 bool GWindow::Attach(GViewI *p)
@@ -747,7 +747,6 @@ bool GWindow::OnRequestClose(bool OsShuttingDown)
 
 bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 {
-	#ifdef __GTK_H__
 	if (m.Down() && !m.IsMove())
 	{
 		bool InPopup = false;
@@ -769,7 +768,6 @@ bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 			}
 		}
 	}
-	#endif
 
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{
@@ -784,43 +782,6 @@ bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 	
 	return true;
 }
-
-#define DEBUG_KEYS			0
-
-/*
-	// Any window in a popup always gets the key...
-	for (GView *p = v; p; p = p->GetParent())
-	{
-		GPopup *Popup;
-		if (Popup = dynamic_cast<GPopup*>(p))
-		{
-			Status = v->OnKey(k);
-			if (!Status)
-			{
-				if (k.c16 == VK_ESCAPE)
-				{
-					// Popup window (or child) didn't handle the key, and the user
-					// pressed ESC, so do the default thing and close the popup.
-					Popup->Cancelled = true;
-					Popup->Visible(false);
-				}
-				else
-				{
-					#if DEBUG_KEYS
-					printf("Popup ignores '%c' down=%i alt=%i ctrl=%i sh=%i\n", k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
-					#endif
-					break;
-				}
-			}
-			
-			#if DEBUG_KEYS
-			printf("Popup ate '%c' down=%i alt=%i ctrl=%i sh=%i\n", k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
-			#endif
-			
-			goto AllDone;
-		}
-	}
-*/
 
 bool GWindow::HandleViewKey(GView *v, GKey &k)
 {
