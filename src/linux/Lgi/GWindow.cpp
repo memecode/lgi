@@ -571,6 +571,16 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 	  		g_free(Name);		
 			break;
 		}
+		case GDK_UNMAP:
+		{
+			// LgiTrace("%s:%i - Unmap %s\n", _FL, GetClass());
+			break;
+		}
+		case GDK_VISIBILITY_NOTIFY:
+		{
+			// LgiTrace("%s:%i - Visible %s\n", _FL, GetClass());
+			break;
+		}
 		default:
 		{
 			printf("%s:%i - Unknown event %i\n", _FL, event->type);
@@ -610,18 +620,11 @@ GtkRootResize(GtkWidget *widget, GdkRectangle *alloc, GView *This)
 		w->PourAll();
 }
 
-/*
-static void
-activate_quit (GSimpleAction *action,
-               Gtk::GVariant      *parameter,
-               gpointer       user_data)
+void
+GWindowUnrealize(GtkWidget *widget, GWindow *wnd)
 {
+	printf("%s:%i - GWindowUnrealize %s\n", _FL, wnd->GetClass());
 }
-
-static GActionEntry app_entries[] = {
-	{ "quit", activate_quit, NULL, NULL, NULL },
-};
-*/
 
 bool GWindow::Attach(GViewI *p)
 {
@@ -650,12 +653,6 @@ bool GWindow::Attach(GViewI *p)
 		d->DestroySig = g_signal_connect(Obj, "destroy", G_CALLBACK(GtkWindowDestroy), this);
 		g_signal_connect(Obj, "realize",				G_CALLBACK(GtkWindowRealize), i);							
 		g_signal_connect(Obj, "delete_event",			G_CALLBACK(GtkViewCallback), i);
-		#if 0
-		g_signal_connect(Obj, "button-press-event",		G_CALLBACK(GtkViewCallback), i);
-		g_signal_connect(Obj, "button-release-event",	G_CALLBACK(GtkViewCallback), i);
-		g_signal_connect(Obj, "motion-notify-event",	G_CALLBACK(GtkViewCallback), i);
-		g_signal_connect(Obj, "scroll-event",			G_CALLBACK(GtkViewCallback), i);
-		#endif
 		g_signal_connect(Obj, "key-press-event",		G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "key-release-event",		G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "focus-in-event",			G_CALLBACK(GtkViewCallback), i);
@@ -663,8 +660,23 @@ bool GWindow::Attach(GViewI *p)
 		g_signal_connect(Obj, "window-state-event",		G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "property-notify-event",	G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "configure-event",		G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "unmap-event",			G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "visibility-notify-event",G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "unrealize",				G_CALLBACK(GWindowUnrealize), i);
 
-		gtk_widget_add_events(Widget, GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK);
+		#if 0
+		g_signal_connect(Obj, "button-press-event",		G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "button-release-event",	G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "motion-notify-event",	G_CALLBACK(GtkViewCallback), i);
+		g_signal_connect(Obj, "scroll-event",			G_CALLBACK(GtkViewCallback), i);
+		#endif
+
+		gtk_widget_add_events(	Widget,
+								GDK_KEY_PRESS_MASK |
+								GDK_KEY_RELEASE_MASK |
+								GDK_FOCUS_CHANGE_MASK |
+								GDK_STRUCTURE_MASK |
+								GDK_VISIBILITY_NOTIFY_MASK);
 		gtk_window_set_title(Wnd, GBase::Name());
 		d->AttachState = LAttaching;
 
@@ -736,7 +748,7 @@ bool GWindow::OnRequestClose(bool OsShuttingDown)
 bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 {
 	#ifdef __GTK_H__
-	if (m.Down())
+	if (m.Down() && !m.IsMove())
 	{
 		bool InPopup = false;
 		for (GViewI *p = v; p; p = p->GetParent())

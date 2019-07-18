@@ -627,63 +627,6 @@ void GPopup::TakeFocus(bool Take)
 	d->TakeFocus = Take;
 }
 
-#ifdef __GTK_H__
-gboolean PopupDestroy(GtkWidget *widget, GPopup *This)
-{
-	delete This;
-	return true;
-}
-
-gboolean PopupEvent(GtkWidget *widget, GdkEvent *event, GPopup *This)
-{
-	switch (event->type)
-	{
-		case GDK_CONFIGURE:
-		{
-			GdkEventConfigure *c = (GdkEventConfigure*)event;
-			This->Pos.Set(c->x, c->y, c->x+c->width-1, c->y+c->height-1);
-			This->OnPosChange();
-			return FALSE;
-			break;
-		}
-		case GDK_FOCUS_CHANGE:
-		{
-			This->OnFocus(event->focus_change.in);
-			break;
-		}
-		#if GTK_MAJOR_VERSION == 3
-		#else
-		case GDK_CLIENT_EVENT:
-		{
-			GMessage m;
-			m.m = event->client.data.l[0];
-			m.a = event->client.data.l[1];
-			m.b = event->client.data.l[2];
-			This->OnEvent(&m);
-			break;
-		}
-		#endif
-		case GDK_BUTTON_PRESS:
-		{
-			break;
-		}
-		case GDK_EXPOSE:
-		{
-			GScreenDC s(This);
-			This->OnPaint(&s);
-			break;
-		}
-		default:
-		{
-			// LgiTrace("Unhandled PopupEvent type %i\n", event->type);
-			break;
-		}
-	}
-    return TRUE;
-}
-
-#endif
-
 bool GPopup::Attach(GViewI *p)
 {
 	#if defined(CARBON)
@@ -703,6 +646,13 @@ bool GPopup::Attach(GViewI *p)
 
 	#elif defined __GTK_H__
 
+	auto w = p->GetWindow();
+	if (w)
+	{
+		auto h = w->WindowHandle();
+		if (h)
+			gtk_window_set_transient_for(WindowHandle(), h);
+	}
 	gtk_window_set_decorated(WindowHandle(), FALSE);
 	return GWindow::Attach(p);
 
@@ -723,11 +673,13 @@ void GPopup::Visible(bool i)
 {
 	if (i)
 	{
+		#if 1
 		for (auto p: CurrentPopups)
 		{
 			if (p != this && p->Visible())
 				p->Visible(false);
 		}
+		#endif
 	}
 
 	#if defined __GTK_H__

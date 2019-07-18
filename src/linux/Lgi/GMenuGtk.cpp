@@ -1394,7 +1394,7 @@ bool GAccelerator::Match(GKey &k)
 	}
 	
 	#if 0
-	printf("GAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s\n",
+	printf("GAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s%s\n",
 		Press,
 		Press>=' '?Press:'.',
 		k.Ctrl()?" ctrl":"",
@@ -1404,7 +1404,8 @@ bool GAccelerator::Match(GKey &k)
 		Key>=' '?Key:'.',
 		TestFlag(Flags, LGI_EF_CTRL)?" ctrl":"",
 		TestFlag(Flags, LGI_EF_ALT)?" alt":"",
-		TestFlag(Flags, LGI_EF_SHIFT)?" shift":""		
+		TestFlag(Flags, LGI_EF_SHIFT)?" shift":"",
+		TestFlag(Flags, LGI_EF_SYSTEM)?" system":""
 		);
 	#endif
 

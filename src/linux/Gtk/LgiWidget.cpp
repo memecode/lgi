@@ -206,7 +206,7 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 	sprintf_s(s, sizeof(s), "%s::MouseClick", v->GetClass());
 	m.Trace(s);
 	#endif
-
+	
 	v->_Mouse(m, false);
 
 	// v->GetWindow()->_Dump();
