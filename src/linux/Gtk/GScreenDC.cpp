@@ -273,6 +273,9 @@ void GScreenDC::SetClient(GRect *c)
 	}
 	else
 	{
+		if (Clip.Valid())
+			ClipRgn(NULL);
+		
 		OriginX = 0;
 		OriginY = 0;	
 

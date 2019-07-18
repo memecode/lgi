@@ -38,7 +38,7 @@
 #define DEBUG_NO_DOUBLE_BUF				0
 #define DEBUG_COVERAGE_CHECK			0
 #define DEBUG_NUMBERED_LAYOUTS			0
-#if 0 // _DEBUG
+#if 1 // _DEBUG
 #define LOG_FN							LgiTrace
 #else
 #define LOG_FN							d->Log->Print

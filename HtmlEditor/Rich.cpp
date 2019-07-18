@@ -368,12 +368,12 @@ public:
 		SetIcon((const char*)IDI_APP);
 		#endif
 		
-		#if defined(WINDOWS)
+		#if defined(WINNATIVE)
 		Speller = CreateWindowsSpellCheck();
-		#elif defined(MAC)
-		Speller = CreateAppleSpellCheck();
-		#elif !defined(LINUX)
+		#elif defined(LINUX)
 		Speller = CreateAspellObject();
+		#elif defined(MAC) && !defined(__GTK_H__)
+		Speller = CreateAppleSpellCheck();
 		#endif
 		
 		if (Attach(0))
@@ -396,6 +396,8 @@ public:
 			AddView(Split = new GBox);
 			if (Split)
 			{
+				Split->Debug();
+				
 				Split->AddView(Edit = new EditCtrl(IDC_EDITOR));
 				if (Edit)
 				{
@@ -411,7 +413,6 @@ public:
 					Edit->Register(this);
 					GVariant v;
 					Edit->SetValue("HtmlImagesLinkCid", v = true);
-					// Edit->Name("<span style='color:#800;'>The rich editor control is not functional in this build.</span><b>This is some bold</b>");
 
 					#if LOAD_DOC
 					#ifndef SrcFileName

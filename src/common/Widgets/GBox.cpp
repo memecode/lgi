@@ -289,7 +289,12 @@ void GBox::OnPosChange()
 	int Cur = content.x1, Idx = 0;
 	int AvailablePx = d->GetBox(content);
 	if (AvailablePx <= 0)
+	{
+		#ifdef _DEBUG
+		if (_Debug) LgiTrace("%s:%i - No available px.\n", _FL);
+		#endif
 		return;
+	}
 
 	GArray<BoxRange> Sizes;
 
@@ -303,6 +308,10 @@ void GBox::OnPosChange()
 	float PercentCount = 0.0f;
 	
 	int AutoChildren = 0;
+
+	#ifdef _DEBUG
+	if (_Debug) LgiTrace("%s:%i - %i views.\n", _FL, (int)views->Length());
+	#endif
 
 	// Do first pass over children and find their sizes
 	for (GViewI *c = views->First(); c; c = views->Next(), Idx++)
@@ -432,6 +441,9 @@ void GBox::OnPosChange()
 			viewPos.x2 = Cur + Px - 1;
 		}
 		box.View->SetPos(viewPos);
+		#ifdef _DEBUG
+		if (_Debug) LgiTrace("%s:%i - view[%i] = %s.\n", _FL, i, viewPos.GetStr());
+		#endif
 		#ifdef WIN32
 		// This forces the update, otherwise the child's display lags till the
 		// mouse is released *rolls eyes*

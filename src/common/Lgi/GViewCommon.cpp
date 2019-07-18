@@ -589,7 +589,8 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	// Paint this view's contents...
 	pDC->SetClient(&r);
 
-	#if 0
+	#if 1
+	if (GetParent() && GetParent()->GetGView()->_Debug)
 	{
 		Gtk::cairo_matrix_t matrix;
 		cairo_get_matrix(pDC->Handle(), &matrix);
@@ -600,7 +601,10 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 		ex[1] += matrix.y0;
 		ex[2] += matrix.x0;
 		ex[3] += matrix.y0;
-		LgiTrace("%s::_Paint, r=%s, clip=%g,%g,%g,%g - %g,%g\n", GetClass(), r.GetStr(), ex[0], ex[1], ex[2], ex[3], matrix.x0, matrix.y0);
+		LgiTrace("%s::_Paint, r=%s, clip=%g,%g,%g,%g - %g,%g\n",
+				GetClass(), r.GetStr(),
+				ex[0], ex[1], ex[2], ex[3],
+				matrix.x0, matrix.y0);
 	}
 	#endif
 
@@ -613,7 +617,16 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	{
 		GView *w = i->GetGView();
 		if (w && w->Visible())
+		{
+			#ifdef _DEBUG
+			if (_Debug) LgiTrace("%s:%i - _Paint.Vis %s %s\n", _FL, w->GetClass(), w->GetPos().GetStr());
+			#endif
 			w->_Paint(pDC, &o);
+		}
+		#ifdef _DEBUG
+		else if (_Debug)
+			LgiTrace("%s:%i - _Paint.!Vis %s\n", _FL, w->GetClass());
+		#endif
 	}
 
 	/*

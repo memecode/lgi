@@ -63,7 +63,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Users/matthew/Code/Lgi/trunk/HtmlEditor/Test/Reply3.html"
+            argument = "/Users/matthew/Code/Lgi/trunk/HtmlEditor/TestCases/customer.html"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

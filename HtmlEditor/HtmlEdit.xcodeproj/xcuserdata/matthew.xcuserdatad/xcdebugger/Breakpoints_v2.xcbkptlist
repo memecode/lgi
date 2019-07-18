@@ -10,13 +10,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../src/common/Lgi/GViewCommon.cpp"
-            timestampString = "520210381.90449"
+            timestampString = "585140144.661768"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "558"
             endingLineNumber = "558"
-            landmarkName = "GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRegion *Update)"
-            landmarkType = "5">
+            landmarkName = "GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
