@@ -194,12 +194,13 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 	m.Down( ev->type == GDK_BUTTON_PRESS ||
 			ev->type == GDK_2BUTTON_PRESS ||
 			ev->type == GDK_3BUTTON_PRESS);
-	m.Left(ev->button == 1);
+	m.Left  (ev->button == 1);
 	m.Middle(ev->button == 2);
-	m.Right(ev->button == 3);
-	m.Alt((ev->state & GDK_MOD1_MASK) != 0);
-	m.Shift((ev->state & GDK_SHIFT_MASK) != 0);
-	m.Ctrl((ev->state & GDK_CONTROL_MASK) != 0);
+	m.Right (ev->button == 3);
+	m.Ctrl  ((ev->state & GDK_CONTROL_MASK) != 0);
+	m.Shift ((ev->state & GDK_SHIFT_MASK)   != 0);
+	m.Alt   ((ev->state & GDK_MOD1_MASK)    != 0);
+	m.System((ev->state & GDK_MOD2_MASK)    != 0);
 
 	#if 0
 	char s[256];

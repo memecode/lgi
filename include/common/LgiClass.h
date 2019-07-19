@@ -112,9 +112,7 @@ public:
 
 	bool Modifier()
 	{
-		#if defined(BEOS)
-		return Alt();
-		#elif defined(MAC)
+		#if defined(MAC)
 		return System(); // "Apple" key
 		#else // win32 and linux
 		return Ctrl();
