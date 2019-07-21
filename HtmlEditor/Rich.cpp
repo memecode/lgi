@@ -396,7 +396,7 @@ public:
 			AddView(Split = new GBox);
 			if (Split)
 			{
-				Split->Debug();
+				// Split->Debug();
 				
 				Split->AddView(Edit = new EditCtrl(IDC_EDITOR));
 				if (Edit)

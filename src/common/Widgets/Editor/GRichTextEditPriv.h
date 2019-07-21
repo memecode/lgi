@@ -38,7 +38,7 @@
 #define DEBUG_NO_DOUBLE_BUF				0
 #define DEBUG_COVERAGE_CHECK			0
 #define DEBUG_NUMBERED_LAYOUTS			0
-#if 1 // _DEBUG
+#if 0 // _DEBUG
 #define LOG_FN							LgiTrace
 #else
 #define LOG_FN							d->Log->Print
@@ -878,7 +878,7 @@ public:
 			#if defined(_MSC_VER)
 			Chars = l < 0 ? Strlen(s) : l;
 			#else
-			Chars = len;
+			Chars = WideWords;
 			#endif
 
 			LgiAssert(l == 0 || FX() > 0);
@@ -916,14 +916,14 @@ public:
 		virtual GAutoPtr<DisplayStr> Clone(ssize_t Start, ssize_t Len = -1)
 		{
 			GAutoPtr<DisplayStr> c;
-			if (len > 0 && Len != 0)
+			if (WideWords > 0 && Len != 0)
 			{
 				const char16 *Str = *this;
 				if (Len < 0)
-					Len = len - Start;
+					Len = WideWords - Start;
 				if (Start >= 0 &&
-					Start < (int)len &&
-					Start + Len <= (int)len)
+					Start < (int)WideWords &&
+					Start + Len <= (int)WideWords)
 				{
 					#if defined(_MSC_VER)
 					LgiAssert(Str != NULL);

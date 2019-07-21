@@ -145,7 +145,7 @@ struct GDisplayStringPriv
 		}
 		else
 		{
-			while (p.GetPtr() - Start < Ds->len)
+			while (p.GetPtr() - Start < Ds->StrWords)
 				p++;
 
 			auto &b = Blocks.New();
@@ -203,35 +203,50 @@ struct GDisplayStringPriv
 #endif
 
 template<typename Out, typename In>
-bool StringConvert(Out *&out, ssize_t *OutLen, const In *in, ssize_t InLen)
+bool StringConvert(Out *&out, ssize_t &OutWords, const In *in, ssize_t InLen)
 {
-	char OutCs[8], InCs[8];
-	sprintf_s(OutCs, sizeof(OutCs), "utf-%i", (int)sizeof(Out)<<3);
-	sprintf_s(InCs, sizeof(InCs), "utf-%i", (int)sizeof(In)<<3);
+	if (!in)
+	{
+		out = 0;
+		OutWords = 0;
+		return false;
+	}
 
-	if (InLen < 0)
-		InLen = StringLen(in);
+	auto InSz = sizeof(In);
+	auto OutSz = sizeof(Out);
+	
+	// Work out input size
+	ssize_t InWords;
+	if (InLen >= 0)
+		InWords = InLen;
+	else
+		for (InWords = 0; in[InWords]; InWords++)
+			;
 
-	out = (Out*)LgiNewConvertCp
-		(
-			OutCs,
-			in,
-			InCs,
-			InLen*sizeof(In)
-		);
+	if (InSz == OutSz)
+	{
+		// No conversion optimization
+		out = (Out*)Strdup(in, InWords);
+		OutWords = out ? InWords : 0;
+		return out != 0;
+	}
+	else
+	{
+		// Convert the string to new word size
+		static const char *Cp[] = { NULL, "utf-8", "utf-16", NULL, "utf-32"};
+		LgiAssert(OutSz <= 4 && InSz <= 4 && Cp[OutSz] && Cp[InSz]);
+		out = (Out*) LgiNewConvertCp(Cp[OutSz], in, Cp[InSz], InWords*sizeof(In));
+		OutWords = Strlen(out);
+		return out != NULL;
+	}
 	
-	if (OutLen)
-		*OutLen = out ? StringLen(out) : 0;
-	
-	return out != NULL;
+	return false;
 }
 
 //////////////////////////////////////////////////////////////////////
-#define SubtractPtr(a, b)			(	(((NativeInt)(a))-((NativeInt)(b))) / sizeof(*a)	)
+#define SubtractPtr(a, b)			(	((a)-(b)) / sizeof(*a)	)
 #define VisibleTabChar				0x2192
 #define IsTabChar(c)				(c == '\t') // || (c == VisibleTabChar && VisibleTab))
-
-// static OsChar GDisplayStringDots[] = {'.', '.', '.', 0};
 
 #if USE_CORETEXT
 	#include <CoreFoundation/CFString.h>
@@ -268,27 +283,9 @@ GDisplayString::GDisplayString(GFont *f, const char *s, ssize_t l, GSurface *pdc
 	Font = f;
 	
 	#if LGI_DSP_STR_CACHE
-
-		StrCache.Reset(Utf8ToWide(s, l));
-
+	StringConvert(Wide, WideWords, s, l);
 	#endif
-
-	#if defined(MAC)
-	
-		StringConvert(Str, &len, s, l);
-	
-	#elif defined(WINNATIVE) || defined(LGI_SDL)
-
-		StringConvert(Str, &len, s, l);
-
-	#else
-
-		Str = NewStr(s, l);
-		len = Str ? strlen(Str) : 0;
-		if (!LgiIsUtf8(Str))
-			printf("%s:%i - Not valid utf\n", _FL);
-
-	#endif
+	StringConvert(Str, StrWords, s, l);
 	
 	x = y = 0;
 	xf = 0;
@@ -303,8 +300,8 @@ GDisplayString::GDisplayString(GFont *f, const char *s, ssize_t l, GSurface *pdc
 		d = new GDisplayStringPriv(this);
 		if (Font && Str)
 		{
-			len = l >= 0 ? l : strlen(Str);
-			if (len > 0)
+			LgiAssert(StrWords >= 0);
+			if (StrWords > 0)
 				d->Create(pDC ? pDC->GetPrintContext() : NULL);
 		}
 	
@@ -336,21 +333,9 @@ GDisplayString::GDisplayString(GFont *f, const char16 *s, ssize_t l, GSurface *p
 	Font = f;
 
 	#if LGI_DSP_STR_CACHE
-
-		StrCache.Reset(NewStrW(s, l));
-
+	StringConvert(Wide, WideWords, s, l);
 	#endif
-
-	#if defined(MAC) || WINNATIVE || defined(LGI_SDL)
-
-		StringConvert(Str, &len, s, l);
-
-	#else
-
-		Str = WideToUtf8(s, l < 0 ? -1 : l);
-		len = Str ? strlen(Str) : 0;
-
-	#endif
+	StringConvert(Str, StrWords, s, l);
 	
 	x = y = 0;
 	xf = 0;
@@ -363,7 +348,7 @@ GDisplayString::GDisplayString(GFont *f, const char16 *s, ssize_t l, GSurface *p
 	#if defined __GTK_H__
 	
 		d = new GDisplayStringPriv(this);
-		if (Font && Str && len > 0)
+		if (Font && Str && StrWords > 0)
 			d->Create(pDC ? pDC->GetPrintContext() : NULL);
 	
 	#elif defined MAC && !defined(LGI_SDL)
@@ -465,6 +450,9 @@ GDisplayString::~GDisplayString()
 	#endif
 	
 	DeleteArray(Str);
+	#if LGI_DSP_STR_CACHE
+	DeleteArray(Wide);
+	#endif
 }
 
 void GDisplayString::DrawWhiteSpace(GSurface *pDC, char Ch, GRect &r)
@@ -1323,9 +1311,10 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 
 ssize_t GDisplayString::Length()
 {
-	return len;
+	return StrWords;
 }
 
+/* If this is only impl for windows either, impl for everything or don't use.
 void GDisplayString::Length(int New)
 {
 	Layout();
@@ -1387,6 +1376,7 @@ void GDisplayString::Length(int New)
 
 	#endif
 }
+*/
 
 int GDisplayString::X()
 {

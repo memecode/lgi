@@ -12,7 +12,9 @@
 	}
 #endif
 
+#ifndef WINNATIVE
 #define LGI_DSP_STR_CACHE		1
+#endif
 
 /// \brief Cache for text measuring, glyph substitution and painting
 ///
@@ -32,10 +34,8 @@ class LgiClass GDisplayString
 {
 protected:
 	GSurface *pDC;
-	OsChar *Str;
 	GFont *Font;
 	uint32_t x, y;
-	ssize_t len;
 	int xf, yf;
 	int DrawOffsetF;
 	
@@ -44,9 +44,18 @@ protected:
 	uint8_t AppendDots : 1;
 	uint8_t VisibleTab : 1;
 
+	/* String data:
+					Str			Wide
+		Windows:	utf-16		utf-16
+	 	MacCarbon:	utf-16		utf-32
+	 	MacCocoa:	utf-16		utf-32
+	 	Gtk3:		utf-8		utf-32
+	*/
+	OsChar *Str;
+	ssize_t StrWords;
 	#if LGI_DSP_STR_CACHE
-	// Wide char cache
-	GAutoWString StrCache;
+	wchar_t *Wide;
+	ssize_t WideWords;
 	#endif
 	
 	#if defined(LGI_SDL)
@@ -172,18 +181,31 @@ public:
 	/// Returns true if the string is trucated
 	bool IsTruncated();
 
-	/// Returns the chars in the OsChar string
+	/// Returns the words (not chars) in the OsChar string
 	ssize_t Length();
-	/// Sets the number of chars in the OsChar string
+	
+	/*
+	/// Sets the number of words in the OsChar string
 	void Length(int NewLen);
+	*/
 
 	/// Returns the pointer to the native string
 	operator const char16*()
 	{
-		#ifdef LGI_DSP_STR_CACHE
-		return StrCache;
+		#if LGI_DSP_STR_CACHE
+		return Wide;
 		#else
 		return Str;
+		#endif
+	}
+	
+	/// \returns the number of words in the wide string
+	ssize_t WideLength()
+	{
+		#if LGI_DSP_STR_CACHE
+		return WideWords;
+		#else
+		return StrWords;
 		#endif
 	}
 

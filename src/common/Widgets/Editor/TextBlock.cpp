@@ -75,7 +75,7 @@ GRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, GSurface *img, G
 	uint32_t *u = &Utf32[0];
 	#else
 	LgiAssert(sizeof(char16) == 4);
-	uint32_t *u = (uint32_t*)StrCache.Get();
+	uint32_t *u = (uint32_t*)Wide;
 	Chars = Strlen(u);
 	#endif
 
@@ -1008,6 +1008,9 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 		return true;
 	}
 
+	static int Count = 0;
+	Count++;
+
 	LayoutDirty = false;
 	Layout.DeleteObjects();
 			
@@ -1101,7 +1104,7 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 				e++;
 					
 			// Add 't' to current line
-			ssize_t Chars = MIN(1024, (int) (e - s));
+			ssize_t Chars = MIN(1024, e - s);
 			GAutoPtr<DisplayStr> Ds
 			(
 				t->Emoji
@@ -1230,6 +1233,10 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 		Layout.Add(CurLine.Release());
 	}
 	
+	if (LayoutSize != Len)
+	{
+		int asd=0;
+	}
 	LgiAssert(LayoutSize == Len);
 			
 	flow.CurY = Pos.y2 + 1 + Margin.y2 + Border.y2 + Padding.y2;

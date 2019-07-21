@@ -589,7 +589,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	// Paint this view's contents...
 	pDC->SetClient(&r);
 
-	#if 1
+	#if 0
 	if (GetParent() && GetParent()->GetGView()->_Debug)
 	{
 		Gtk::cairo_matrix_t matrix;
