@@ -384,32 +384,19 @@ GDisplayString::GDisplayString(GFont *f, const uint32_t *s, ssize_t l, GSurface 
 	VisibleTab = 0;
 
 	#if LGI_DSP_STR_CACHE
-
-		size_t Chars = l < 0 ? Strlen(s) : l;
-		StrCache.Reset((char16*)LgiNewConvertCp(LGI_WideCharset, s, "utf-32", Chars*4));
-
+	StringConvert(Wide, WideWords, s, l);
 	#endif
+	StringConvert(Str, StrWords, s, l);
 
 	#if defined __GTK_H__
 
 		d = new GDisplayStringPriv(this);
-		StringConvert(Str, &len, s, l);
-
 		if (Font && Str)
 		{
 			len = l >= 0 ? l : strlen(Str);
 			if (len > 0)
 				d->Create(pDC ? pDC->GetPrintContext() : NULL);
 		}
-
-	#elif defined(MAC) || defined(LGI_SDL) || defined(_MSC_VER)
-
-		StringConvert(Str, &len, s, l);
-
-	#else
-
-		Str = WideToUtf8(s, l < 0 ? -1 : l);
-		len = Str ? strlen(Str) : 0;
 
 	#endif
 }
@@ -796,7 +783,7 @@ void GDisplayString::Layout(bool Debug)
 
 			bool Debug = WasTab;			
 			uint32_t u32;
-			for (LUnicodeString<wchar_t> u(Str, len); true; u++)
+			for (LUnicodeString<wchar_t> u(Str, StrWords); true; u++)
 			{
 				u32 = *u;
 				GFont *n = GlyphSub ? Sys->GetGlyph(u32, Font) : Font;
@@ -1016,7 +1003,7 @@ void GDisplayString::TruncateWithDots(int Width)
 	if (Width < X() + 8)
 	{
 		ssize_t c = CharAt(Width);
-		if (c >= 0 && c < len)
+		if (c >= 0 && c < StrWords)
 		{
 			if (c > 0) c--; // fudge room for dots
 			if (c > 0) c--;
@@ -1124,7 +1111,7 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 		}
 		return 0;
 		#else
-		return len;
+		return StrWords;
 		#endif
 	}
 

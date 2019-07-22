@@ -7892,6 +7892,9 @@ bool GHtml::OnKey(GKey &k)
 					case 'c':
 					case 'C':
 					{
+						#ifdef WIN32
+						DoCopy:
+						#endif
 						if (k.Modifier())
 						{
 							Copy();

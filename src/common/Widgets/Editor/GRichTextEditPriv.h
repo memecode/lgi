@@ -911,19 +911,29 @@ public:
 			
 			return s;
 		}
+
+		ssize_t WideLen()
+		{
+			#if defined(LGI_DSP_STR_CACHE)
+			return WideWords;
+			#else
+			return StrWords;
+			#endif
+		}
 		
 		// Make a sub-string of this display string
 		virtual GAutoPtr<DisplayStr> Clone(ssize_t Start, ssize_t Len = -1)
 		{
 			GAutoPtr<DisplayStr> c;
-			if (WideWords > 0 && Len != 0)
+			auto WideW = WideLen();
+			if (WideW > 0 && Len != 0)
 			{
 				const char16 *Str = *this;
 				if (Len < 0)
-					Len = WideWords - Start;
+					Len = WideW - Start;
 				if (Start >= 0 &&
-					Start < (int)WideWords &&
-					Start + Len <= (int)WideWords)
+					Start < (int)WideW &&
+					Start + Len <= (int)WideW)
 				{
 					#if defined(_MSC_VER)
 					LgiAssert(Str != NULL);
