@@ -118,6 +118,11 @@ Boolean AssertProc(DialogRef theDialog, EventRecord *theEvent, DialogItemIndex *
 }
 */
 
+static void MsgCb(Gtk::GtkDialog *dialog, Gtk::gint response_id, Gtk::gpointer user_data)
+{
+	*((int*)user_data) = response_id;
+}
+
 void _lgi_assert(bool b, const char *test, const char *file, int line)
 {
 	static bool Asserting = false;
@@ -133,65 +138,103 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		p.Printf("Assert failed, file: %s, line: %i\n%s", file, line, test);
 		
 		#if defined LGI_CARBON
-		int Result = 2;
-		if (LgiApp && LgiApp->InThread())
-		{
-			SInt16 r;
-			Str255 t;
-			Str255 s;
-			Str63 sAbort = {5, 'A', 'b', 'o', 'r', 't'},
-				  sBreak = {5, 'B', 'r', 'e', 'a', 'k'},
-				  sIgnore = {6, 'I', 'g', 'n', 'o', 'r', 'e'};
-			AlertStdAlertParamRec Params;
+			int Result = 2;
+			if (LgiApp && LgiApp->InThread())
+			{
+				SInt16 r;
+				Str255 t;
+				Str255 s;
+				Str63 sAbort = {5, 'A', 'b', 'o', 'r', 't'},
+					  sBreak = {5, 'B', 'r', 'e', 'a', 'k'},
+					  sIgnore = {6, 'I', 'g', 'n', 'o', 'r', 'e'};
+				AlertStdAlertParamRec Params;
 
-			c2p255(t, "Assert");
-			c2p255(s, p.Get());
-			Params.movable = true;
-			Params.helpButton = false;
-			Params.filterProc = 0;
+				c2p255(t, "Assert");
+				c2p255(s, p.Get());
+				Params.movable = true;
+				Params.helpButton = false;
+				Params.filterProc = 0;
 
-			Params.defaultButton = kAlertStdAlertOKButton;
-			Params.defaultText = sAbort;
+				Params.defaultButton = kAlertStdAlertOKButton;
+				Params.defaultText = sAbort;
 
-			Params.cancelButton = kAlertStdAlertCancelButton;
-			Params.cancelText = sIgnore;
+				Params.cancelButton = kAlertStdAlertCancelButton;
+				Params.cancelText = sIgnore;
 
-			Params.otherText = sBreak;
+				Params.otherText = sBreak;
 
-			Params.position = kWindowDefaultPosition;
-			
-			// Params.filterProc = AssertProc;
-			
-			StandardAlert(kAlertStopAlert, t, s, &Params, &r);
+				Params.position = kWindowDefaultPosition;
+				
+				// Params.filterProc = AssertProc;
+				
+				StandardAlert(kAlertStopAlert, t, s, &Params, &r);
 
-			if (r == kAlertStdAlertOKButton)
-				Result = 1;
-			else if (r == kAlertStdAlertOtherButton)
-				Result = 2;
-			else
-				Result = 3;
-		}
+				if (r == kAlertStdAlertOKButton)
+					Result = 1;
+				else if (r == kAlertStdAlertOtherButton)
+					Result = 2;
+				else
+					Result = 3;
+			}
 		
-		switch (Result)
-		{
-			default:
+			switch (Result)
 			{
-				exit(-1);
-				break;
+				default:
+				{
+					exit(-1);
+					break;
+				}
+				case 2:
+				{
+					__builtin_trap();
+					break;
+				}
+				case 3:
+				{
+					break;
+				}
 			}
-			case 2:
+
+		#elif defined __GTK_H__
+		
+			if (LgiApp->InThread())
 			{
-				__builtin_trap();
-				break;
+				Gtk::GtkWidget *msg = Gtk::gtk_message_dialog_new(
+					NULL,
+					Gtk::GTK_DIALOG_MODAL,
+					Gtk::GTK_MESSAGE_ERROR,
+					Gtk::GTK_BUTTONS_YES_NO,
+					"Assert: %s\n"
+					"Source: %s:%i\n"
+					"\n"
+					"Do you want to break?",
+					test,
+					file, line);
+				if (msg)
+				{
+					using namespace Gtk;
+					auto w = GTK_WINDOW(msg);
+					auto d = GTK_DIALOG(msg);
+					gtk_window_set_gravity(w, GDK_GRAVITY_CENTER);
+					gtk_window_set_position(w, GTK_WIN_POS_CENTER_ALWAYS);
+					int Response = 0;
+					g_signal_connect(d, "response", (GCallback)MsgCb, &Response);
+					gtk_dialog_run(d);
+					gtk_widget_destroy(msg);
+					switch (Response)
+					{
+						case GTK_RESPONSE_YES:
+							raise(SIGINT);
+							break;
+						case GTK_RESPONSE_NO:
+							break;
+					}
+				}
 			}
-			case 3:
-			{
-				break;
-			}
-		}
 
 		#endif
-		#endif
+	
+		#endif // defined _DEBUG
 
 		Asserting = false;
 	}
@@ -551,7 +594,7 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Er
 				}
 			}
 			#else
-			LgiAssert(0);
+			LgiAssert(!"Opening file not impl.");
 			#endif
 		}
 	}

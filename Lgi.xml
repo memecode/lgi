@@ -397,12 +397,11 @@
 		</Node>
 	</Node>
 	<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="73">
-		<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="74">
-			<Node File="./include/beos/LgiOsClasses.h" Type="3" Platforms="8" />
-			<Node File="./include/beos/LgiOsDefs.h" Type="3" Platforms="8" />
-		</Node>
 		<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="75">
 			<Node File="./include/linux/Gtk/LgiOsDefs.h" Type="3" Platforms="2" />
+		</Node>
+		<Node Name="Mac" Type="1" Platforms="15" Id="1">
+			<Node File="./include/mac/carbon/LgiOsDefs.h" Type="3" Platforms="4" />
 		</Node>
 		<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
 			<Node File="./include/win32/LgiOsDefs.h" Type="3" Platforms="1" />
@@ -446,6 +445,7 @@ WINDOWS</Release>
 					<Release>POSIX</Release>
 				</Haiku>
 				<Linux />
+				<Mac />
 			</Defines>
 			<Compiler>
 				<Windows>MingW</Windows>
@@ -453,6 +453,7 @@ WINDOWS</Release>
 			<Executable>
 				<Linux />
 				<Windows />
+				<Mac />
 			</Executable>
 			<Arguments>
 				<All />
@@ -487,6 +488,7 @@ include/linux/Gtk</Release>
 					<Release>include/beos
 /boot/develop/headers/os/app</Release>
 				</Haiku>
+				<Mac />
 			</IncludePaths>
 			<Libraries>
 				<Windows>
@@ -524,6 +526,7 @@ game
 textencoding</Release>
 				</Haiku>
 				<All />
+				<Mac />
 			</Libraries>
 			<TargetType>
 				<All>DynamicLibrary</All>
@@ -541,6 +544,7 @@ textencoding</Release>
 					<Debug>lgi</Debug>
 					<Release>lgi</Release>
 				</Linux>
+				<Mac />
 			</TargetName>
 			<SystemIncludes>
 				<Linux>
@@ -552,11 +556,13 @@ textencoding</Release>
 `pkg-config --cflags gtk+-2.0`</Release>
 				</Linux>
 				<Windows />
+				<Mac />
 			</SystemIncludes>
 			<LibraryPaths>
 				<All />
 				<Linux />
 				<Windows />
+				<Mac />
 			</LibraryPaths>
 			<ApplicationIcon />
 		</Build>
@@ -581,6 +587,7 @@ textencoding</Release>
 			<PostBuildCommands>
 				<Linux />
 				<Windows />
+				<Mac />
 			</PostBuildCommands>
 		</Advanced>
 	</Settings>
