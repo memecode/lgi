@@ -22,6 +22,8 @@
 
 #if defined LGI_CARBON
 #import <Cocoa/Cocoa.h>
+#elif defined __GTK_H__
+#include "gio/gappinfo.h"
 #endif
 
 ////////////////////////////////////////////////////////////////
@@ -593,8 +595,21 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Er
 					}
 				}
 			}
+			#elif defined(__GTK_H__)
+			
+			using namespace Gtk;
+			uri.Protocol = NewStr("file");
+			auto u = uri.GetUri();
+			Gtk::GError *err = NULL;
+			GAppLaunchContext *context = g_app_launch_context_new();
+			Status = g_app_info_launch_default_for_uri(u, context, &err);
+			g_error_free(err);
+			g_object_unref(context);
+			
 			#else
+			
 			LgiAssert(!"Opening file not impl.");
+			
 			#endif
 		}
 	}
