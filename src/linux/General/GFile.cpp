@@ -31,6 +31,9 @@
 #include "LgiCommon.h"
 #include "GString.h"
 #include "LDateTime.h"
+#if defined(WIN32)
+#include "errno.h"
+#endif
 
 /****************************** Defines ***********************************/
 
@@ -47,9 +50,9 @@
 
 struct ErrorCodeType
 {
-	char *Name;
+	const char *Name;
 	int Code;
-	char *Desc;
+	const char *Desc;
 }
 ErrorCodes[] =
 {
@@ -143,7 +146,7 @@ ErrorCodes[] =
 	{"EDOTDOT", 88, "Cross mount point"},
 	{"EREMCHG", 89, "Remote address change"},
 
-	#elif defined(LINUX)
+	#elif defined(LINUX) || defined(__GTK_H__)
 
 	{"EPERM",			EPERM, "Operation not permitted"},
 	{"ENOENT",			ENOENT, "No such file or directory"},
@@ -188,48 +191,17 @@ ErrorCodes[] =
 	{"EWOULDBLOCK",		EWOULDBLOCK, "Operation would block"},
 	{"ENOMSG",			ENOMSG, "No message of desired type"},
 	{"EIDRM",			EIDRM, "Identifier removed"},
-	{"ECHRNG",			ECHRNG, "Channel number out of range"},
-	{"EL2NSYNC",		EL2NSYNC, "Level 2 not synchronized"},
-	{"EL3HLT",			EL3HLT, "Level 3 halted"},
-	{"EL3RST",			EL3RST, "Level 3 reset"},
-	{"ELNRNG",			ELNRNG, "Link number out of range"},
-	{"EUNATCH",			EUNATCH, "Protocol driver not attached"},
-	{"ENOCSI",			ENOCSI, "No CSI structure available"},
-	{"EL2HLT",			EL2HLT, "Level 2 halted"},
-	{"EBADE",			EBADE, "Invalid exchange"},
-	{"EBADR",			EBADR, "Invalid request descriptor"},
-	{"EXFULL",			EXFULL, "Exchange full"},
-	{"ENOANO",			ENOANO, "No anode"},
-	{"EBADRQC",			EBADRQC, "Invalid request code"},
-	{"EBADSLT",			EBADSLT, "Invalid slot"},
-	{"EBFONT",			EBFONT, "Bad font file format"},
+	{"EREMOTE",			EREMOTE, "Object is remote"},
+	{"ENOLINK",			ENOLINK, "Link has been severed"},
 	{"ENOSTR",			ENOSTR, "Device not a stream"},
 	{"ENODATA",			ENODATA, "No data available"},
 	{"ETIME",			ETIME, "Timer expired"},
 	{"ENOSR",			ENOSR, "Out of streams resources"},
-	{"ENONET",			ENONET, "Machine is not on the network"},
-	{"ENOPKG",			ENOPKG, "Package not installed"},
-	{"EREMOTE",			EREMOTE, "Object is remote"},
-	{"ENOLINK",			ENOLINK, "Link has been severed"},
-	{"EADV",			EADV, "Advertise error"},
-	{"ESRMNT",			ESRMNT, "Srmount error"},
-	{"ECOMM",			ECOMM, "Communication error on send"},
 	{"EPROTO",			EPROTO, "Protocol error"},
 	{"EMULTIHOP",		EMULTIHOP, "Multihop attempted"},
-	{"EDOTDOT",			EDOTDOT, "RFS specific error"},
 	{"EBADMSG",			EBADMSG, "Not a data message"},
 	{"EOVERFLOW",		EOVERFLOW, "Value too large for defined data type"},
-	{"ENOTUNIQ",		ENOTUNIQ, "Name not unique on network"},
-	{"EBADFD",			EBADFD, "File descriptor in bad state"},
-	{"EREMCHG",			EREMCHG, "Remote address changed"},
-	{"ELIBACC",			ELIBACC, "Can not access a needed shared library"},
-	{"ELIBBAD",			ELIBBAD, "Accessing a corrupted shared library"},
-	{"ELIBSCN",			ELIBSCN, ".lib section in a.out corrupted"},
-	{"ELIBMAX",			ELIBMAX, "Attempting to link in too many shared libraries"},
-	{"ELIBEXEC",		ELIBEXEC, "Cannot exec a shared library directly"},
 	{"EILSEQ",			EILSEQ, "Illegal byte sequence"},
-	{"ERESTART",		ERESTART, "Interrupted system call should be restarted"},
-	{"ESTRPIPE",		ESTRPIPE, "Streams pipe error"},
 	{"EUSERS",			EUSERS, "Too many users"},
 	{"ENOTSOCK",		ENOTSOCK, "Socket operation on non-socket"},
 	{"EDESTADDRREQ",	EDESTADDRREQ, "Destination address required"},
@@ -260,17 +232,49 @@ ErrorCodes[] =
 	{"EALREADY",		EALREADY, "Operation already in progress"},
 	{"EINPROGRESS",		EINPROGRESS, "Operation now in progress"},
 	{"ESTALE",			ESTALE, "Stale NFS file handle"},
+
+	#ifndef __GTK_H__
+	{"EDQUOT",			EDQUOT, "Quota exceeded"},
+	{"ENOMEDIUM",		ENOMEDIUM, "No medium found"},
+	{"EMEDIUMTYPE",		EMEDIUMTYPE, "Wrong medium type"},
 	{"EUCLEAN",			EUCLEAN, "Structure needs cleaning"},
 	{"ENOTNAM",			ENOTNAM, "Not a XENIX named type file"},
 	{"ENAVAIL",			ENAVAIL, "No XENIX semaphores available"},
 	{"EISNAM",			EISNAM, "Is a named type file"},
 	{"EREMOTEIO",		EREMOTEIO, "Remote I/O error"},
-	{"EDQUOT",			EDQUOT, "Quota exceeded"},
-	{"ENOMEDIUM",		ENOMEDIUM, "No medium found"},
-	{"EMEDIUMTYPE",		EMEDIUMTYPE, "Wrong medium type"},
+	{"ERESTART",		ERESTART, "Interrupted system call should be restarted"},
+	{"ESTRPIPE",		ESTRPIPE, "Streams pipe error"},
+	{"ECOMM",			ECOMM, "Communication error on send"},
+	{"EDOTDOT",			EDOTDOT, "RFS specific error"},
+	{"ENOTUNIQ",		ENOTUNIQ, "Name not unique on network"},
+	{"EBADFD",			EBADFD, "File descriptor in bad state"},
+	{"EREMCHG",			EREMCHG, "Remote address changed"},
+	{"ELIBACC",			ELIBACC, "Can not access a needed shared library"},
+	{"ELIBBAD",			ELIBBAD, "Accessing a corrupted shared library"},
+	{"ELIBSCN",			ELIBSCN, ".lib section in a.out corrupted"},
+	{"ELIBMAX",			ELIBMAX, "Attempting to link in too many shared libraries"},
+	{"ELIBEXEC",		ELIBEXEC, "Cannot exec a shared library directly"},
+	{"ECHRNG",			ECHRNG, "Channel number out of range"},
+	{"EL2NSYNC",		EL2NSYNC, "Level 2 not synchronized"},
+	{"EL3HLT",			EL3HLT, "Level 3 halted"},
+	{"EL3RST",			EL3RST, "Level 3 reset"},
+	{"ELNRNG",			ELNRNG, "Link number out of range"},
+	{"EUNATCH",			EUNATCH, "Protocol driver not attached"},
+	{"ENOCSI",			ENOCSI, "No CSI structure available"},
+	{"EL2HLT",			EL2HLT, "Level 2 halted"},
+	{"EBADE",			EBADE, "Invalid exchange"},
+	{"EBADR",			EBADR, "Invalid request descriptor"},
+	{"EXFULL",			EXFULL, "Exchange full"},
+	{"ENOANO",			ENOANO, "No anode"},
+	{"EBADRQC",			EBADRQC, "Invalid request code"},
+	{"EBADSLT",			EBADSLT, "Invalid slot"},
+	{"EBFONT",			EBFONT, "Bad font file format"},
+	{"EADV",			EADV, "Advertise error"},
+	{"ESRMNT",			ESRMNT, "Srmount error"},
+	{"ENONET",			ENONET, "Machine is not on the network"},
+	{"ENOPKG",			ENOPKG, "Package not installed"},
+	#endif
 
-	#else
-	#error impl me
 	#endif
 
 	{"NONE", 0, "No error"},
@@ -291,14 +295,12 @@ const char *GetErrorName(int e)
 	return s;
 }
 
-char *GetErrorDesc(int e)
+const char *GetErrorDesc(int e)
 {
 	for (ErrorCodeType *c=ErrorCodes; c->Code; c++)
 	{
 		if (e == c->Code)
-		{
 			return c->Desc;
-		}
 	}
 
 	return 0;
@@ -396,7 +398,7 @@ bool FileExists(const char *FileName, char *CorrectCase)
 				if (Dir)
 				{
 					dirent *De;
-					while (De = readdir(Dir))
+					while ((De = readdir(Dir)))
 					{
 						if (De->d_type != DT_DIR &&
 							stricmp(De->d_name, e) == 0)
@@ -404,7 +406,7 @@ bool FileExists(const char *FileName, char *CorrectCase)
 							try
 							{
 								// Tell the calling program the actual case of the file...
-								e = strrchr(FileName, DIR_CHAR);
+								e = (char*) strrchr(FileName, DIR_CHAR);
 								
 								// If this crashes because the argument is read only then we get caught by the try catch
 								strcpy(e+1, De->d_name);
@@ -639,7 +641,7 @@ public:
 									v->_Type = VT_HARDDISK;
 
 									char *Device = M[0];
-									char *FileSys = M[2];
+									// char *FileSys = M[2];
 									if (stristr(Device, "fd"))
 									{
 										v->_Type = VT_3_5FLOPPY;
@@ -654,6 +656,25 @@ public:
 							}
 						}
 					}
+				}
+			}
+			
+			LgiSystemPath p[] = {LSP_USER_DOCUMENTS,
+								LSP_USER_MUSIC,
+								LSP_USER_VIDEO,
+								LSP_USER_DOWNLOADS,
+								LSP_USER_PICTURES};
+			for (int i=0; i<CountOf(p); i++)
+			{
+				GString Path = LGetSystemPath(p[i]);
+				if (Path &&
+					(v = new GLinuxVolume(0)))
+				{
+					auto Parts = Path.Split("/");
+					v->_Path = Path;
+					v->_Name = *Parts.rbegin();
+					v->_Type = VT_FOLDER;
+					_Sub.Insert(v);
 				}
 			}
 		}
@@ -716,10 +737,10 @@ GVolume *GFileSystem::GetRootVolume()
 
 int FloppyType(int Letter)
 {
+	/*
 	uchar MaxTrack;
 	uchar SecPerTrack;
 
-	/*
 	_asm {
 		mov eax, 0800h
 		mov edx, Letter
@@ -820,7 +841,7 @@ bool GFileSystem::Delete(GArray<const char*> &Files, GArray<LError> *Status, boo
 		{
 			for (int i=0; i<Files.Length(); i++)
 			{
-				char *f = strrchr(Files[i], DIR_CHAR);
+				const char *f = strrchr(Files[i], DIR_CHAR);
 				LgiMakePath(p, sizeof(p), p, f?f+1:Files[i]);
 				if (!Move(Files[i], p))
 				{
@@ -1003,9 +1024,8 @@ bool GDirectory::ConvertToDate(char *Str, int SLen, uint64 Time) const
 /////////////////////////////////////////////////////////////////////////////////
 //////////////////////////// Directory //////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
-class GDirectoryPriv
+struct GDirectoryPriv
 {
-public:
 	char			BasePath[MAX_PATH];
 	DIR				*Dir;
 	struct dirent	*De;
@@ -1117,7 +1137,7 @@ int GDirectory::Next()
 
 	while (d->Dir && d->De)
 	{
-		if (d->De = readdir(d->Dir))
+		if ((d->De = readdir(d->Dir)))
 		{
 			char s[256];
 			LgiMakePath(s, sizeof(s), d->BasePath, GetName());			
@@ -1334,7 +1354,11 @@ int GFile::Open(const char *File, int Mode)
 		}
 
 		Close();
-		d->hFile = open(File, Mode | O_LARGEFILE, S_IRUSR | S_IWUSR);
+		d->hFile = open(File, Mode
+						#ifdef O_LARGEFILE
+		 				| O_LARGEFILE
+		 				#endif
+		 				, S_IRUSR | S_IWUSR);
 		if (ValidHandle(d->hFile))
 		{
 			d->Attributes = Mode;
@@ -1432,7 +1456,9 @@ ssize_t GFile::Write(const void *Buffer, ssize_t Size, int Flags)
 	return MAX(Written, 0);
 }
 
+#ifdef LINUX
 #define LINUX64 	1
+#endif
 
 int64 GFile::Seek(int64 To, int Whence)
 {

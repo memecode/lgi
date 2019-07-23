@@ -560,27 +560,6 @@ public:
 					}
 				}
 			
-			#else
-	
-				LgiSystemPath p[] = {LSP_USER_DOCUMENTS,
-									LSP_USER_MUSIC,
-									LSP_USER_VIDEO,
-									LSP_USER_DOWNLOADS,
-									LSP_USER_PICTURES};
-				for (int i=0; i<CountOf(p); i++)
-				{
-					GString Path = LGetSystemPath(p[i]);
-					if (Path &&
-						(v = new GMacVolume(0)))
-					{
-						auto Parts = Path.Split("/");
-						v->_Path = Path;
-						v->_Name = *Parts.rbegin();
-						v->_Type = VT_FOLDER;
-						_Sub.Insert(v);
-					}
-				}
-	
 			#endif
 		}
 

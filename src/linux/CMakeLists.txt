@@ -232,6 +232,7 @@ set (GtkSource
 	src/linux/Gtk/GPrintDC.cpp
 	src/linux/Gtk/GScreenDC.cpp
 	src/linux/Gtk/LgiWidget.cpp
+	src/linux/General/GFile.cpp
 	src/linux/General/GMem.cpp
 	src/linux/Lgi/GApp.cpp
 	src/linux/Lgi/GClipBoard.cpp
@@ -261,7 +262,6 @@ set (WindowsSource
 	)
 
 set (LinuxSource
-	src/linux/General/GFile.cpp
 	src/linux/General/ShowFileProp_Linux.cpp
 	src/linux/Lgi/GGeneral.cpp
 	src/linux/Lgi/LThread.cpp
@@ -270,7 +270,7 @@ set (LinuxSource
 
 set (MacSource
 	src/mac/cocoa/General/ShowFileProp_Mac.mm
-	src/mac/carbon/General/GFile.cpp
+	# src/mac/carbon/General/GFile.cpp
 	src/mac/carbon/Lgi/GGeneral.cpp
 	src/mac/carbon/Lgi/LThread.cpp
 	)

@@ -534,7 +534,7 @@ gboolean GtkViewCallback(GtkWidget *widget, GdkEvent *event, GView *This)
 		This, (NativeInt)This > 0x1000 ? This->GetClass() : 0, (NativeInt)This > 0x1000 ? This->Name() : 0);
 	#endif
 	
-	if (event->type < 0 || event->type > 1000)
+	if (event->type < 0 || (int)event->type > 1000)
 	{
 		printf("%s:%i - CORRUPT EVENT %i\n", _FL, event->type);
 		return false;
