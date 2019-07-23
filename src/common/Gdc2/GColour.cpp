@@ -29,6 +29,13 @@ GColour::GColour(uint32_t c, int bits, GPalette *palette)
 	Set(c, bits, palette);
 }
 
+#ifdef __GTK_H__
+GColour::GColour(Gtk::GdkRGBA gtk)
+{
+	Rgb(gtk.red * 255.0, gtk.green * 255.0, gtk.blue * 255.0, gtk.alpha * 255.0);
+}
+#endif
+
 int GColour::HlsValue(double fN1, double fN2, double fHue) const
 {
 	if (fHue > 360.0) fHue -= 360.0;

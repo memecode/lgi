@@ -332,6 +332,7 @@ protected:
 	public:
 		void Handle(Gtk::GtkMenuItem *mi);
 		void OnGtkEvent(GString Event);
+		void PaintIcon(Gtk::cairo_t *cr);
 	protected:
 	#else
 		virtual void _Measure(GdcPt2 &Size);
@@ -400,6 +401,8 @@ public:
 	GSubMenu *Sub();
 	/// Return the icon of this this
 	int Icon();
+
+	GImageList *GetImageList();
 };
 
 /// Encapsulates a keyboard shortcut

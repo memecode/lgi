@@ -5,9 +5,9 @@
 #include "GCssTools.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int Len)
+bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int WordLen)
 {
-	if (Len == 0)
+	if (WordLen == 0)
 	{
 		Out.Length(0);
 		return true;
@@ -15,7 +15,7 @@ bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int Len)
 
 	// Count the length of utf32 chars...
 	const uint16 *Ptr = In;
-	ssize_t Bytes = sizeof(*In) * Len;
+	ssize_t Bytes = sizeof(*In) * WordLen;
 	int Chars = 0;
 	while (	Bytes >= sizeof(*In) &&
 			LgiUtf16To32(Ptr, Bytes) > 0)
@@ -27,7 +27,7 @@ bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int Len)
 
 	// Convert the string...
 	Ptr = (uint16*)In;
-	Bytes = sizeof(*In) * Len;
+	Bytes = sizeof(*In) * WordLen;
 	uint32_t *o = &Out[0];
 	#ifdef _DEBUG
 	uint32_t *e = o + Out.Length();

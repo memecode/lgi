@@ -503,7 +503,7 @@ public:
 	bool Add
 	(
 		/// Items to insert
-		Type *s,
+		const Type *s,
 		/// Length of array
 		ssize_t count
 		

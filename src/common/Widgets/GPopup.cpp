@@ -646,12 +646,15 @@ bool GPopup::Attach(GViewI *p)
 
 	#elif defined __GTK_H__
 
-	auto w = p->GetWindow();
-	if (w)
+	if (p)
 	{
-		auto h = w->WindowHandle();
-		if (h)
-			gtk_window_set_transient_for(WindowHandle(), h);
+		auto w = p->GetWindow();
+		if (w)
+		{
+			auto h = w->WindowHandle();
+			if (h)
+				gtk_window_set_transient_for(WindowHandle(), h);
+		}
 	}
 	gtk_window_set_decorated(WindowHandle(), FALSE);
 	return GWindow::Attach(p);

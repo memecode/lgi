@@ -82,6 +82,16 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
 	#if defined(_MSC_VER) && defined(_DEBUG)
 	// _CrtSetDbgFlag(_CRTDBG_CHECK_ALWAYS_DF);
 	#endif
+	#ifdef __GTK_H__
+	{
+		using namespace Gtk;
+		#if _CONSOLE
+		gtk_init(&args, &arg);
+		#else
+		gtk_init(&__argc, &__argv);
+		#endif
+	}
+    #endif
 
 	int Status = 0;
 	#if !_CONSOLE && WINNATIVE

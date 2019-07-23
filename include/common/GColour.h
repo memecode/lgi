@@ -36,6 +36,9 @@ public:
 	GColour(int r, int g, int b, int a = 255);
 	/// Conversion from COLOUR
 	GColour(uint32_t c, int bits, GPalette *palette = NULL);
+	#ifdef __GTK_H__
+	GColour(Gtk::GdkRGBA gtk);
+	#endif
 	GColourSpace GetColourSpace();
 	bool SetColourSpace(GColourSpace cs);
 	
