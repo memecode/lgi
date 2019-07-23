@@ -120,10 +120,12 @@ Boolean AssertProc(DialogRef theDialog, EventRecord *theEvent, DialogItemIndex *
 }
 */
 
+#if defined __GTK_H__
 static void MsgCb(Gtk::GtkDialog *dialog, Gtk::gint response_id, Gtk::gpointer user_data)
 {
 	*((int*)user_data) = response_id;
 }
+#endif
 
 void _lgi_assert(bool b, const char *test, const char *file, int line)
 {

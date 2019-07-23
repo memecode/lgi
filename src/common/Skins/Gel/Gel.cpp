@@ -12,31 +12,33 @@
 #include "GCssTools.h"
 #include "LStringLayout.h"
 
-#ifdef WIN32
-#define BTN_TEXT_OFFSET_Y	-1
+#ifdef __GTK_H__
+	#define BTN_TEXT_OFFSET_Y	1
+#elif defined WIN32
+	#define BTN_TEXT_OFFSET_Y	-1
 #else
-#define BTN_TEXT_OFFSET_Y	0
+	#define BTN_TEXT_OFFSET_Y	0
 #endif
 
-#define GREY24				Rgb24(44, 44, 44)
-#define GREY32(a)			Rgba32(44, 44, 44, a)
+#define GREY24					Rgb24(44, 44, 44)
+#define GREY32(a)				Rgba32(44, 44, 44, a)
 
-#define CHECK_BORDER		2
-#define CHECK_RADIUS		3
+#define CHECK_BORDER			2
+#define CHECK_RADIUS			3
 
-#define Btn_Value			0x1
-#define Btn_Enabled			0x2
-#define Btn_Max				((Btn_Value|Btn_Enabled)+1)
+#define Btn_Value				0x1
+#define Btn_Enabled				0x2
+#define Btn_Max					((Btn_Value|Btn_Enabled)+1)
 
 #if defined(WIN32) && !defined(LGI_SDL)
 // Wine can't handle 32 bit DIB sections... :(
-#define OsDefaultCs			System24BitColourSpace
+#define OsDefaultCs				System24BitColourSpace
 #else
 // 32bit is marginally faster to render to.
-#define OsDefaultCs			System32BitColourSpace
+#define OsDefaultCs				System32BitColourSpace
 #endif
 
-#define CUSTOM_COLOURS		0
+#define CUSTOM_COLOURS			0
 
 class GelSkin : public GSkinEngine
 {
@@ -278,7 +280,6 @@ class GelSkin : public GSkinEngine
 
 			int Grey = R24(LC_MED);
 			bool Enabled = (Flags & Btn_Enabled) != 0;
-			int BorderCol = Enabled ? 80 : 160;
 
 			if (Enabled)
 			{
@@ -291,9 +292,6 @@ class GelSkin : public GSkinEngine
 					p.RoundRect(r, CHECK_RADIUS + CHECK_BORDER);
 				
 				// gradient from 169,169,169 at the top through to 225,225,225
-				int Dark = MAX(0, Grey - 40);
-				int Light = MIN(255, Grey + 40);				
-				
 				GPointF a(0, 0), b(0, 15);
 				GBlendStop s[] =
 				{
@@ -770,7 +768,7 @@ public:
 				{
 					int sx = Text->X(), sy = Text->Y();
 					int tx = GCombo::Pad.x1;
-					int ty = (Ctrl->Y()-sy) >> 1;
+					int ty = (Ctrl->Y()-sy+1) >> 1;
 						
 					int Off = 0;
 					GRect c = Ctrl->GetClient();
@@ -920,7 +918,7 @@ public:
 			// Draw icon
 			GRect ico;
 			GCssTools Tools(Ctrl);
-			GColour &Fore = Tools.GetFore(), &Back = Tools.GetBack();
+			GColour &Back = Tools.GetBack();
 
 			ico.ZOff(Mem->X()-1, Mem->Y()-1);
 		    if (ico.Y() < Ctrl->Y())

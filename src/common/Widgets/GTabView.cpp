@@ -26,7 +26,11 @@ enum TabViewStyle
 
 #define MAC_STYLE_RADIUS		7
 #define MAC_DBL_BUF				1
+#ifdef __GTK_H__
+#define TAB_TXT_PAD				5
+#else
 #define TAB_TXT_PAD				3
+#endif
 
 #if defined(MAC) && !defined(COCOA) && !defined(LGI_SDL)
 #define MAC_PAINT	1

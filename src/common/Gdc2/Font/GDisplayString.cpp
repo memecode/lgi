@@ -29,6 +29,7 @@ static OsChar GDisplayStringDots[] = {'.', '.', '.', 0};
 	//	2nd
 
 #define DEBUG_CHAR_AT				0
+#define DEBUG_BOUNDS				0
 
 #if defined(__GTK_H__) || (defined(MAC) && !defined(LGI_SDL))
 #define DISPLAY_STRING_FRACTIONAL_NATIVE	1
@@ -253,7 +254,7 @@ bool StringConvert(Out *&out, ssize_t &OutWords, const In *in, ssize_t InLen)
 
 	void GDisplayString::CreateAttrStr()
 	{
-		if (!StrCache.Get())
+		if (!Wide)
 			return;
 
 		if (AttrStr)
@@ -262,7 +263,7 @@ bool StringConvert(Out *&out, ssize_t &OutWords, const In *in, ssize_t InLen)
 			AttrStr = NULL;
 		}
 
-		wchar_t *w = StrCache.Get();
+		wchar_t *w = Wide;
 		CFStringRef string = CFStringCreateWithBytes(kCFAllocatorDefault, (const uint8_t*)w, StrlenW(w) * sizeof(*w), kCFStringEncodingUTF32LE, false);
 		if (string)
 		{
@@ -311,17 +312,13 @@ GDisplayString::GDisplayString(GFont *f, const char *s, ssize_t l, GSurface *pdc
 		#if USE_CORETEXT
 		AttrStr = NULL;
 		#endif
-		if (Font && Str)
+		if (Font && Str && StrWords > 0)
 		{
-			len = l >= 0 ? l : StringLen(Str);
-			if (len > 0)
-			{
-				#if USE_CORETEXT
-					CreateAttrStr();
-				#else
-					ATSUCreateTextLayout(&Hnd);
-				#endif
-			}
+			#if USE_CORETEXT
+				CreateAttrStr();
+			#else
+				ATSUCreateTextLayout(&Hnd);
+			#endif
 		}
 	
 	#endif
@@ -357,7 +354,7 @@ GDisplayString::GDisplayString(GFont *f, const char16 *s, ssize_t l, GSurface *p
 		#if USE_CORETEXT
 		AttrStr = NULL;
 		#endif
-		if (Font && Str && len > 0)
+		if (Font && Str && StrWords > 0)
 		{
 			#if USE_CORETEXT
 				CreateAttrStr();
@@ -2102,8 +2099,10 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 		cairo_fill(cr);
 		if (frc)
 		{
+			#if 1
 			cairo_rectangle(cr, rx, ry, rw, rh);
 			cairo_clip(cr);
+			#endif
 		}
 	}
 
@@ -2112,6 +2111,17 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	GColour f = Font->Fore();
 	for (auto &b: d->Blocks)
 	{
+		double Bx = ((double)b.X()) / FScale;
+		double By = Font->GetHeight();
+		
+		#if DEBUG_BOUNDS
+		cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+		cairo_rectangle(cr, 0, 0, Bx, By);
+		cairo_rectangle(cr, 1, 1, Bx - 2.0, By - 2.0);
+		cairo_set_fill_rule(cr, Gtk::CAIRO_FILL_RULE_EVEN_ODD);
+		cairo_fill(cr);
+		#endif
+		
 		if (b.Hnd)
 		{
 			cairo_set_source_rgb(	cr,
@@ -2147,7 +2157,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 			}
 		}
 
-		cairo_translate(cr, (double)b.X() / FScale, 0);
+		cairo_translate(cr, Bx, 0);
 	}
 	
 	cairo_restore(cr);
@@ -2182,7 +2192,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 		pDC->Colour(Old);
 	}
 	
-	if (Hnd && pDC && len > 0)
+	if (Hnd && pDC && StrWords > 0)
 	{
 		OsPainter				dc = pDC->Handle();
 

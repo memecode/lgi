@@ -45,11 +45,6 @@ bool HasEmoji(uint32_t *Txt)
 }
 
 /*
-#ifdef WIN32
-#define snwprintf _snwprintf
-#else
-#include <wchar.h>
-*/
 template<typename T>
 ssize_t my_snwprintf(T *ptr, int ptr_size, const char16 *fmt, ...)
 {
@@ -252,3 +247,4 @@ GAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 	GAutoWString Final( (char16*)LgiNewConvertCp(LGI_WideCharset, WideVer, "utf-32") );
 	return Final;
 }
+*/

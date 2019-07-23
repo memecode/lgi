@@ -773,6 +773,9 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 	if (!d->Drag)
 	{
 		int Off = d->Down ? 1 : 0;
+		#ifdef __GTK_H__
+		Off++;
+		#endif
 		int Mx = r.x1 + 8, My = r.y1 + ((r.Y() - 8) / 2);
 		if (d->cIcon)
 		{
@@ -837,7 +840,10 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 
 			f->Transparent(!FillBackground);
 			f->Colour(LC_TEXT, LC_MED);
-			d->Txt->Draw(pDC, r.x1 + Off + 3, r.y1 + Off, &r);
+			int ty = d->Txt->Y();
+			int ry = r.Y();
+			int y = r.y1 + ((ry - ty) >> 1);
+			d->Txt->Draw(pDC, r.x1 + Off + 3, y + Off, &r);
 
 			if (d->cMark)
 			{
