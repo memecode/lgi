@@ -389,15 +389,9 @@ GDisplayString::GDisplayString(GFont *f, const uint32_t *s, ssize_t l, GSurface 
 	StringConvert(Str, StrWords, s, l);
 
 	#if defined __GTK_H__
-
-		d = new GDisplayStringPriv(this);
-		if (Font && Str)
-		{
-			len = l >= 0 ? l : strlen(Str);
-			if (len > 0)
-				d->Create(pDC ? pDC->GetPrintContext() : NULL);
-		}
-
+	d = new GDisplayStringPriv(this);
+	if (Font && Str && StrWords > 0)
+		d->Create(pDC ? pDC->GetPrintContext() : NULL);
 	#endif
 }
 #endif

@@ -955,103 +955,59 @@ bool LgiMenuItem::Replace(Gtk::GtkWidget *newWid)
 	return Info != NULL;
 }
 
+GImageList *LgiMenuItem::GetImageList()
+{
+	if (GetMenu())
+		return GetMenu()->GetImageList();
+
+	// Search tree of parents for an image list...
+	for (auto p = GetParent(); p; )
+	{
+		auto lst = p->GetImageList();
+		if (lst)
+			return lst;
+			
+		auto pmi = p->GetParent();
+		if (pmi)
+			p = pmi->GetParent();
+		else
+			break;
+	}
+
+	return NULL;
+}
+
+gboolean
+LgiMenuItemDraw(GtkWidget *widget, cairo_t *cr, LgiMenuItem *mi)
+{
+	auto cls = GTK_WIDGET_GET_CLASS(widget);
+	cls->draw(widget, cr);
+	mi->PaintIcon(cr);
+	return true;
+}
+
+void LgiMenuItem::PaintIcon(Gtk::cairo_t *cr)
+{
+	if (_Icon < 0)
+		return;
+	auto il = GetImageList();
+	if (!il)
+		return;
+
+	auto wid = GTK_WIDGET(Info);
+	GtkAllocation a;
+	gtk_widget_get_allocation(wid, &a);
+
+	GScreenDC Dc(cr, a.width, a.height);
+	il->Draw(&Dc, 7, 5, _Icon, GColour::White);
+}
+
 void LgiMenuItem::Icon(int i)
 {
 	_Icon = i;
-	
-	if (Info && GetMenu())
-	{
-		// Is the item a image menu item?
-		if (!GTK_IS_IMAGE_MENU_ITEM(Info) && _Icon >= 0)
-		{
-			// Create a image menu item
-			GAutoString Txt = MenuItemParse(Name());
-			GtkWidget *w = gtk_image_menu_item_new_with_mnemonic(Txt);
 
-			// Attach our signal
-			gulong ret = g_signal_connect_data(	w,
-												"activate",
-												(GCallback) MenuItemActivate,
-												this,
-												NULL,
-												G_CONNECT_SWAPPED);
-
-			// Replace the existing menu item with this new one
-			if (w)
-				Replace(w);
-			else
-				LgiAssert(!"No new widget.");
-		}
-		
-		if (_Icon >= 0 && GTK_IS_IMAGE_MENU_ITEM(Info))
-		{
-			GImageList *lst = GetMenu()->GetImageList();
-			GtkImageMenuItem *imi = GTK_IMAGE_MENU_ITEM(Info);
-			if (!lst)
-			{
-				LgiTrace("%s:%i - No image list to create icon with.\n", _FL);
-			}
-			else if (!imi)
-			{
-				LgiTrace("%s:%i - No image menu item to set icon.\n", _FL);
-			}
-			else
-			{
-				// Attempt to read the background colour from the theme settings...
-				// Default back to LC_MED if we can't get it.
-				GColour Back;				
-				GdkColor colour;
-				GtkStyle *style = gtk_rc_get_style(GTK_WIDGET(Info));
-				if (gtk_style_lookup_color(style, "bg_color", &colour))
-					Back.Rgb(colour.red>>8, colour.green>>8, colour.blue>>8);
-				else
-					Back.Set(LC_MED, 24);
-    
-   				// Create sub-image of the icon
-				if (!IconImg.Reset(new GMemDC(lst->TileX(), lst->TileY(), System32BitColourSpace)))
-				{
-					LgiTrace("%s:%i - Couldn't create icon image.\n", _FL);
-					return;
-				}
-				
-				// Init to blank, then blt the pixels across...
-				IconImg->Colour(Back);
-				IconImg->Rectangle();
-				GRect r(0, 0, lst->TileX()-1, lst->TileY()-1);
-				r.Offset(lst->TileX() * _Icon, 0);
-				IconImg->Op(GDC_ALPHA);
-				IconImg->Blt(0, 0, lst, &r);
-				
-				// Get the sub-image of the icon
-				auto img = IconImg->GetImage();
-				if (!img)
-				{
-					LgiTrace("%s:%i - GetImage failed.\n", _FL);
-					return;
-				}
-				// Create a new widget to wrap it...
-				#if GTK_MAJOR_VERSION == 3
-				auto img_wid = gtk_image_new_from_surface(img);
-				#else
-				auto img_wid = gtk_image_new_from_image(img, NULL);
-				#endif
-				if (!img_wid)
-				{
-					LgiTrace("%s:%i - gtk_image_new_from_image failed.\n", _FL);
-					return;
-				}
-				gtk_widget_show(img_wid);
-
-				// Set the menu item's image as that icon widget
-				gtk_image_menu_item_set_always_show_image(imi, true);
-				gtk_image_menu_item_set_image(imi, img_wid);
-				
-				// printf("Setting '%s' to img %p (%i)\n", Name(), img_wid, _Icon);
-				
-				ScanForAccel();
-			}
-		}
-	}
+	if (Info)
+		g_signal_connect(Info, "draw", (GCallback)LgiMenuItemDraw, this);
 }
 
 void LgiMenuItem::Checked(bool c)
