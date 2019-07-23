@@ -302,20 +302,14 @@ bool GButton::OnKey(GKey &k)
 		case VK_ESCAPE:
 		{
 			if (GetId() != IDCANCEL)
-			{
 				break;
-			}
 			// else fall thru
 		}
 		case VK_RETURN:
 		{
-			if (!k.IsChar)
-			{
-				if (k.Down())
-					OnClick();
-				return true;
-			}
-			break;
+			if (!k.IsChar && !k.Down())
+				OnClick();
+			return true;
 		}
 	}
 	
