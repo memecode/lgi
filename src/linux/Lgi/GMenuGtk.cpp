@@ -998,8 +998,13 @@ void LgiMenuItem::PaintIcon(Gtk::cairo_t *cr)
 	GtkAllocation a;
 	gtk_widget_get_allocation(wid, &a);
 
+	GdkRGBA bk = {0};
+	gtk_style_context_get_background_color(	gtk_widget_get_style_context(wid),
+											gtk_widget_get_state_flags(wid),
+											&bk);
+
 	GScreenDC Dc(cr, a.width, a.height);
-	il->Draw(&Dc, 7, 5, _Icon, GColour::White);
+	il->Draw(&Dc, 7, 5, _Icon, bk.alpha ? GColour(bk) : GColour::White);
 }
 
 void LgiMenuItem::Icon(int i)
