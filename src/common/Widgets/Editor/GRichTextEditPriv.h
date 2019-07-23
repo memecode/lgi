@@ -881,7 +881,7 @@ public:
 			Chars = WideWords;
 			#endif
 
-			LgiAssert(l == 0 || FX() > 0);
+			// LgiAssert(l == 0 || FX() > 0);
 		}
 		
 		template<typename T>
