@@ -142,15 +142,16 @@ void GWindow::MoveToMouse()
 	}
 }
 
-bool GWindow::MoveSameScreen(GViewI *wnd)
+bool GWindow::MoveSameScreen(GViewI *View)
 {
-	if (!wnd)
+	if (!View)
 	{
 		LgiAssert(0);
 		return false;
 	}
-	
-	GRect p = wnd->GetPos();
+
+	auto Wnd = View->GetWindow();
+	GRect p = Wnd ? Wnd->GetPos() : View->GetPos();
 	int cx = p.x1 + (p.X() >> 4);
 	int cy = p.y1 + (p.Y() >> 4);
 	

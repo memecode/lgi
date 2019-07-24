@@ -232,8 +232,6 @@ set (GtkSource
 	src/linux/Gtk/GPrintDC.cpp
 	src/linux/Gtk/GScreenDC.cpp
 	src/linux/Gtk/LgiWidget.cpp
-	src/linux/General/GFile.cpp
-	src/linux/General/GMem.cpp
 	src/linux/Lgi/GApp.cpp
 	src/linux/Lgi/GClipBoard.cpp
 	src/linux/Lgi/GDragAndDrop.cpp
@@ -255,6 +253,7 @@ set (GtkSource
 
 set (WindowsSource
 	src/win32/General/GFile.cpp
+	src/linux/General/GMem.cpp
 	src/win32/General/ShowFileProp_Win.cpp
 	src/win32/Lgi/GGeneral.cpp
 	src/win32/Lgi/LThread.cpp
@@ -262,6 +261,8 @@ set (WindowsSource
 	)
 
 set (LinuxSource
+	src/linux/General/GFile.cpp
+	src/linux/General/GMem.cpp
 	src/linux/General/ShowFileProp_Linux.cpp
 	src/linux/Lgi/GGeneral.cpp
 	src/linux/Lgi/LThread.cpp

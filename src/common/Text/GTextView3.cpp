@@ -4710,6 +4710,8 @@ void GTextView3::OnPaint(GSurface *pDC)
 	Prof.Add("PourStyle");
 	#endif
 			PourStyle(d->DirtyStart, d->DirtyLen);
+			
+			d->LayoutDirty = false;
 		}
 
 	#if PROFILE_PAINT

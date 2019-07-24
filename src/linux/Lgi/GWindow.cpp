@@ -581,6 +581,36 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			// LgiTrace("%s:%i - Visible %s\n", _FL, GetClass());
 			break;
 		}
+		case GDK_DRAG_ENTER:
+		{
+			LgiTrace("%s:%i - GDK_DRAG_ENTER\n", _FL);
+			break;
+		}
+		case GDK_DRAG_LEAVE:
+		{
+			LgiTrace("%s:%i - GDK_DRAG_LEAVE\n", _FL);
+			break;
+		}
+		case GDK_DRAG_MOTION:
+		{
+			LgiTrace("%s:%i - GDK_DRAG_MOTION\n", _FL);
+			break;
+		}
+		case GDK_DRAG_STATUS:
+		{
+			LgiTrace("%s:%i - GDK_DRAG_STATUS\n", _FL);
+			break;
+		}
+		case GDK_DROP_START:
+		{
+			LgiTrace("%s:%i - GDK_DROP_START\n", _FL);
+			break;
+		}
+		case GDK_DROP_FINISHED:
+		{
+			LgiTrace("%s:%i - GDK_DROP_FINISHED\n", _FL);
+			break;
+		}
 		default:
 		{
 			printf("%s:%i - Unknown event %i\n", _FL, event->type);
@@ -626,6 +656,63 @@ GWindowUnrealize(GtkWidget *widget, GWindow *wnd)
 	// printf("%s:%i - GWindowUnrealize %s\n", _FL, wnd->GetClass());
 }
 
+void
+GWindowDragBegin(GtkWidget *widget, GdkDragContext *context, GWindow *Wnd)
+{
+	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+}
+
+void
+GWindowDragDataDelete(GtkWidget *widget, GdkDragContext *context, GWindow *Wnd)
+{
+	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+}
+
+void
+GWindowDragDataGet(GtkWidget *widget, GdkDragContext *context, GtkSelectionData *data, guint info, guint time, GWindow *Wnd)
+{
+	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+}
+
+void
+GWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint y, GtkSelectionData *data, guint info, guint time, GWindow *Wnd)
+{
+	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+}
+
+gboolean
+GWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, GWindow *Wnd)
+{
+	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	return false;
+}
+
+void
+GWindowDragEnd(GtkWidget *widget, GdkDragContext *context, GWindow *Wnd)
+{
+	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+}
+
+gboolean
+GWindowDragFailed(GtkWidget *widget, GdkDragContext *context, GtkDragResult result, GWindow *Wnd)
+{
+	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	return false;
+}
+
+void
+GWindowDragLeave(GtkWidget *widget, GdkDragContext *context, guint time, GWindow *Wnd)
+{
+	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+}
+
+gboolean
+GWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, GWindow *Wnd)
+{
+	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	return true;
+}
+
 bool GWindow::Attach(GViewI *p)
 {
 	bool Status = false;
@@ -651,7 +738,6 @@ bool GWindow::Attach(GViewI *p)
 		g_object_set_data(Obj, "GViewI", (GViewI*)this);
 
 		d->DestroySig = g_signal_connect(Obj, "destroy", G_CALLBACK(GtkWindowDestroy), this);
-		g_signal_connect(Obj, "realize",				G_CALLBACK(GtkWindowRealize), i);							
 		g_signal_connect(Obj, "delete_event",			G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "key-press-event",		G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "key-release-event",		G_CALLBACK(GtkViewCallback), i);
@@ -662,7 +748,19 @@ bool GWindow::Attach(GViewI *p)
 		g_signal_connect(Obj, "configure-event",		G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "unmap-event",			G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "visibility-notify-event",G_CALLBACK(GtkViewCallback), i);
+
+		g_signal_connect(Obj, "realize",				G_CALLBACK(GtkWindowRealize), i);							
 		g_signal_connect(Obj, "unrealize",				G_CALLBACK(GWindowUnrealize), i);
+
+		g_signal_connect(Obj, "drag-begin",				G_CALLBACK(GWindowDragBegin), i);
+		g_signal_connect(Obj, "drag-data-delete",		G_CALLBACK(GWindowDragDataDelete), i);
+		g_signal_connect(Obj, "drag-data-get",			G_CALLBACK(GWindowDragDataGet), i);
+		g_signal_connect(Obj, "drag-data-received",		G_CALLBACK(GWindowDragDataReceived), i);
+		g_signal_connect(Obj, "drag-drop",				G_CALLBACK(GWindowDragDataDrop), i);
+		g_signal_connect(Obj, "drag-end",				G_CALLBACK(GWindowDragEnd), i);
+		g_signal_connect(Obj, "drag-failed",			G_CALLBACK(GWindowDragFailed), i);
+		g_signal_connect(Obj, "drag-leave",				G_CALLBACK(GWindowDragLeave), i);
+		g_signal_connect(Obj, "drag-motion",			G_CALLBACK(GWindowDragMotion), i);
 
 		#if 0
 		g_signal_connect(Obj, "button-press-event",		G_CALLBACK(GtkViewCallback), i);
@@ -684,7 +782,7 @@ bool GWindow::Attach(GViewI *p)
 
 		if ((_Root = lgi_widget_new(this, true)))
         {
-			g_signal_connect(_Root, "size-allocate", G_CALLBACK(GtkRootResize), i);
+			g_signal_connect(_Root, "size-allocate",	G_CALLBACK(GtkRootResize), i);
 
 			GtkContainer *AttachPoint = NULL;
 			if (GTK_IS_DIALOG(Wnd))

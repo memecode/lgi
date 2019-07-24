@@ -283,7 +283,7 @@ void GButton::OnMouseExit(GMouse &m)
 bool GButton::OnKey(GKey &k)
 {
 	if (
-		#ifdef WIN32
+		#ifdef WINNATIVE
 		k.IsChar ||
 		#endif
 		!Enabled())

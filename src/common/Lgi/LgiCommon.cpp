@@ -14,7 +14,6 @@
 
 #ifdef WINDOWS
 	#include <winsock2.h>
-	#include <shlobj.h>
 	#include "GRegKey.h"
 	#include <sys/types.h>
 	#include <sys/stat.h>

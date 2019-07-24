@@ -23,6 +23,16 @@
 	#else
 		#define LGI_32BIT				1
 	#endif
+
+	#include <shlobj.h>
+	#include <shellapi.h>
+	typedef BOOL (__stdcall *pSHGetSpecialFolderPathA)(HWND hwndOwner, LPSTR lpszPath, int nFolder, BOOL fCreate);
+	typedef BOOL (__stdcall *pSHGetSpecialFolderPathW)(HWND hwndOwner, LPWSTR lpszPath, int nFolder, BOOL fCreate);
+	typedef int (__stdcall *pSHFileOperationA)(LPSHFILEOPSTRUCTA lpFileOp);
+	typedef int (__stdcall *pSHFileOperationW)(LPSHFILEOPSTRUCTW lpFileOp);
+	typedef int (__stdcall *p_vscprintf)(const char *format, va_list argptr);
+	LgiExtern class GString WinGetSpecialFolderPath(int Id);
+
 #else
 	#include <unistd.h>
 	#define _MULTI_THREADED
@@ -597,15 +607,6 @@ enum MessageBoxType
 	/// Convert a Os dependant integer d'n'd format to a string.
 	LgiFunc char *FormatToStr(int f);
 
-#endif
-
-#ifdef WINDOWS
-	typedef BOOL (__stdcall *pSHGetSpecialFolderPathA)(HWND hwndOwner, LPSTR lpszPath, int nFolder, BOOL fCreate);
-	typedef BOOL (__stdcall *pSHGetSpecialFolderPathW)(HWND hwndOwner, LPWSTR lpszPath, int nFolder, BOOL fCreate);
-	typedef int (__stdcall *pSHFileOperationA)(LPSHFILEOPSTRUCTA lpFileOp);
-	typedef int (__stdcall *pSHFileOperationW)(LPSHFILEOPSTRUCTW lpFileOp);
-	typedef int (__stdcall *p_vscprintf)(const char *format, va_list argptr);
-	LgiExtern class GString WinGetSpecialFolderPath(int Id);
 #endif
 
 #endif
