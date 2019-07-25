@@ -253,7 +253,7 @@ set (GtkSource
 
 set (WindowsSource
 	src/win32/General/GFile.cpp
-	src/linux/General/GMem.cpp
+	src/win32/General/GMem.cpp
 	src/win32/General/ShowFileProp_Win.cpp
 	src/win32/Lgi/GGeneral.cpp
 	src/win32/Lgi/LThread.cpp
@@ -271,7 +271,8 @@ set (LinuxSource
 
 set (MacSource
 	src/mac/cocoa/General/ShowFileProp_Mac.mm
-	# src/mac/carbon/General/GFile.cpp
+	src/mac/carbon/General/GFile.cpp
+	src/mac/carbon/General/GMem.cpp
 	src/mac/carbon/Lgi/GGeneral.cpp
 	src/mac/carbon/Lgi/LThread.cpp
 	)

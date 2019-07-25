@@ -367,11 +367,6 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 		getcwd(Cwd, sizeof(Cwd));
 		LgiMakePath(Cwd, sizeof(Cwd), Cwd, LgiArgsAppPath);
 		LgiArgsAppPath = Cwd;
-		// printf("Rel.LgiArgsAppPath=%s\n", LgiArgsAppPath.Get());
-	}
-	else
-	{
-		// printf("Abs.LgiArgsAppPath=%s\n", LgiArgsAppPath.Get());
 	}
 
 	int WCharSz = sizeof(wchar_t);
@@ -428,7 +423,11 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	{
 		using namespace Gtk;
 		auto cfm = PANGO_CAIRO_FONT_MAP(fm);
+		#ifdef MAC
+		double Dpi = 80.0;
+		#else
 		double Dpi = 96.0;
+		#endif
 
 		::GFile::Path p(LSP_APP_ROOT);
 		p += "lgi-conf.json";
@@ -886,8 +885,6 @@ bool GApp::GetOption(const char *Option, ::GString &Buf)
 
 void GApp::OnCommandLine()
 {
-	char WhiteSpace[] = " \r\n\t";
-
 	::GArray<char*> Files;
 
 	for (int i=1; i<GetAppArgs()->Args; i++)
