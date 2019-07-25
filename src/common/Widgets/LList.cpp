@@ -944,28 +944,24 @@ bool LList::OnKey(GKey &k)
 					if (k.Down())
 						SendNotify(GNotify_ReturnKey);
 				}
-				Status = true;
 				break;
 			}
 			case VK_BACKSPACE:
 			{
 				if (k.Down())
 					SendNotify(GNotify_BackspaceKey);
-				Status = true;
 				break;
 			}
 			case VK_ESCAPE:
 			{
 				if (k.Down())
 					SendNotify(GNotify_EscapeKey);
-				Status = true;
 				break;
 			}
 			case VK_DELETE:
 			{
 				if (k.Down())
 					SendNotify(GNotify_DeleteKey);
-				Status = true;
 				break;
 			}
 			case VK_UP:
