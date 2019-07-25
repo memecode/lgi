@@ -2607,6 +2607,7 @@ bool VcFolder::ParseMerge(int Result, GString s, ParseParams *Params)
 void VcFolder::Refresh()
 {
 	CommitListDirty = true;
+	CurrentCommit.Empty();
 	if (Uncommit && Uncommit->LListItem::Select())
 		Uncommit->Select(true);
 	Select(true);
