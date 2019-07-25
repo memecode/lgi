@@ -165,6 +165,12 @@ private:
 	GView *To;
 	List<char> Formats;
 
+	#ifdef __GTK_H__
+	friend Gtk::gboolean GWindowDragDataDrop(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::guint time, class GWindow *Wnd);
+	friend void GWindowDragDataReceived(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::GtkSelectionData *data, Gtk::guint info, Gtk::guint time, GWindow *Wnd);
+	GArray<GDragData> Data;
+	#endif
+
 	#ifdef WIN32
 	LONG Refs;
 	#endif
@@ -180,7 +186,6 @@ private:
 	HRESULT STDMETHODCALLTYPE DragOver(DWORD grfKeyState, POINTL pt, DWORD *pdwEffect);
 	HRESULT STDMETHODCALLTYPE DragLeave(void);
 	HRESULT STDMETHODCALLTYPE Drop(IDataObject *pDataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect);
-
 	#endif
 
 protected:

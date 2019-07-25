@@ -102,6 +102,12 @@ public:
 					GFile::Path p(File);
 					if (p.Exists())
 					{
+						#ifdef WINDOWS
+						char *c;
+						while (c = strchr(File, '/'))
+							*c = '\\';
+						#endif
+
 						Add(NewStr(File));
 					}
 				}

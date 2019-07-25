@@ -428,7 +428,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	{
 		using namespace Gtk;
 		auto cfm = PANGO_CAIRO_FONT_MAP(fm);
-		double Dpi = 80.0;
+		double Dpi = 96.0;
 
 		::GFile::Path p(LSP_APP_ROOT);
 		p += "lgi-conf.json";

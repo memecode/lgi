@@ -658,6 +658,30 @@ GWindowUnrealize(GtkWidget *widget, GWindow *wnd)
 	// printf("%s:%i - GWindowUnrealize %s\n", _FL, wnd->GetClass());
 }
 
+bool DndPointMap(GViewI *&v, GdcPt2 &p, GDragDropTarget *&t, GWindow *Wnd, int x, int y)
+{
+	GRect cli = Wnd->GetClient();
+	t = NULL;
+	v = Wnd->WindowFromPoint(x - cli.x1, y - cli.y1, false);
+	if (!v)
+	{
+		LgiTrace("%s:%i - <no view> @ %i,%i\n", _FL, x, y);
+		return false;
+	}
+
+	v->WindowVirtualOffset(&p);
+	p.x = x - p.x;
+	p.y = y - p.y;
+
+	for (GViewI *view = v; !t && view; view = view->GetParent())
+		t = view->DropTarget();
+	if (t)
+		return true;
+
+	LgiTrace("%s:%i - No target for %s\n", _FL, v->GetClass());
+	return false;
+}
+
 void
 GWindowDragBegin(GtkWidget *widget, GdkDragContext *context, GWindow *Wnd)
 {
@@ -679,14 +703,91 @@ GWindowDragDataGet(GtkWidget *widget, GdkDragContext *context, GtkSelectionData 
 void
 GWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint y, GtkSelectionData *data, guint info, guint time, GWindow *Wnd)
 {
-	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
+	GdcPt2 p;
+	GViewI *v;
+	GDragDropTarget *t;
+	if (!DndPointMap(v, p, t, Wnd, x, y))
+		return;
+
+	for (auto &d: t->Data)
+	{
+		auto type = gdk_atom_name(gtk_selection_data_get_data_type(data));
+		if (d.Format.Equals(type))
+		{
+			gint length = 0;
+			auto ptr = gtk_selection_data_get_data_with_length(data, &length);
+			if (ptr)
+			{
+				d.Data[0].SetBinary(length, (void*)ptr, false);
+			}
+			break;
+		}
+	}
+}
+
+int GetAcceptFmts(::GString::Array &Formats, GdkDragContext *context, GDragDropTarget *t, GdcPt2 &p)
+{
+	int KeyState = 0;
+	List<char> Fmts;
+	int Flags = DROPEFFECT_NONE;
+
+	GList *targets = gdk_drag_context_list_targets(context);
+	Gtk::GList *i = targets;
+	while (i)
+	{
+		auto a = gdk_atom_name((GdkAtom)i->data);
+		if (a)
+			Fmts.Add(NewStr(a));
+		i = i->next;
+	}
+
+	Flags = t->WillAccept(Fmts, p, KeyState);
+	for (auto f: Fmts)
+		Formats.New() = f;
+
+	Fmts.DeleteArrays();
+	return Flags;
 }
 
 gboolean
 GWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, GWindow *Wnd)
 {
-	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
-	return false;
+	// Map the point to a view...
+	GdcPt2 p;
+	GViewI *v;
+	GDragDropTarget *t;
+	if (!DndPointMap(v, p, t, Wnd, x, y))
+		return false;
+	t->Data.Length(0);
+
+	// Request the data...
+	::GArray<GDragData> Data;
+	::GString::Array Formats;
+	int KeyState = 0;
+	int Flags = GetAcceptFmts(Formats, context, t, p);
+	for (auto f: Formats)
+	{
+		t->Data.New().Format = f;
+		gtk_drag_get_data(widget, context, gdk_atom_intern(f, true), time);
+	}
+
+	// Wait for the data to arrive...
+	uint64_t Start = LgiCurrentTime();
+	while (LgiCurrentTime()-Start < 2000)
+	{
+		int HasData = 0;
+		for (auto d: t->Data)
+			if (d.Data.Length() > 0)
+				HasData++;
+		if (HasData >= Formats.Length())
+			break;
+		LgiYield();
+	}
+
+	auto Result = t->OnDrop(t->Data, p, KeyState);
+	if (Flags != DROPEFFECT_NONE)
+		gdk_drag_status(context, EffectToDragAction(Flags), time);
+	return Result != DROPEFFECT_NONE;
 }
 
 void
@@ -711,45 +812,14 @@ GWindowDragLeave(GtkWidget *widget, GdkDragContext *context, guint time, GWindow
 gboolean
 GWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, GWindow *Wnd)
 {
-	GRect cli = Wnd->GetClient();
-	auto v = Wnd->WindowFromPoint(x - cli.x1, y - cli.y1, false);
-	if (!v)
-	{
-		LgiTrace("%s:%i - <no view> @ %i,%i\n", _FL, x, y);
-		return false;
-	}
-
-	GDragDropTarget *t = NULL;
-	for (GViewI *view = v; !t && view; view = view->GetParent())
-		t = view->DropTarget();
-	if (!t)
-	{
-		LgiTrace("%s:%i - No target for %s\n", _FL, v->GetClass());
-		return false;
-	}
-
-	int KeyState = 0;
-	List<char> Fmts;
-	int Flags = DROPEFFECT_NONE;
-
-	GList *targets = gdk_drag_context_list_targets(context);
-	Gtk::GList *i = targets;
-	while (i)
-	{
-		auto a = gdk_atom_name((GdkAtom)i->data);
-		if (a)
-			Fmts.Add(NewStr(a));
-		i = i->next;
-	}
-
 	GdcPt2 p;
-	v->WindowVirtualOffset(&p);
-	p.x = x - p.x;
-	p.y = y - p.y;
-	Flags = t->WillAccept(Fmts, p, KeyState);
+	GViewI *v;
+	GDragDropTarget *t;
+	if (!DndPointMap(v, p, t, Wnd, x, y))
+		return false;
 
-	LgiTrace("%s:%i - Flags=%i on %s\n", _FL, Flags, v->GetClass());
-	Fmts.DeleteArrays();
+	::GString::Array Formats;
+	int Flags = GetAcceptFmts(Formats, context, t, p);
 	
 	if (Flags != DROPEFFECT_NONE)
 		gdk_drag_status(context, EffectToDragAction(Flags), time);
