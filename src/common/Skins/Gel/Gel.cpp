@@ -12,9 +12,7 @@
 #include "GCssTools.h"
 #include "LStringLayout.h"
 
-#ifdef __GTK_H__
-	#define BTN_TEXT_OFFSET_Y	1
-#elif defined WIN32
+#if defined WINNATIVE
 	#define BTN_TEXT_OFFSET_Y	-1
 #else
 	#define BTN_TEXT_OFFSET_Y	0

@@ -139,15 +139,6 @@ public:
 	static OsApplication *GetInst() { LgiAssert(Inst != NULL); return Inst; }
 };
 
-#define XcbConn()					(OsApplication::GetInst()->GetConn())
-#define XcbScreen()					(OsApplication::GetInst()->GetScreen())
-#define XcbCheck(cookie)			(OsApplication::GetInst()->Check(cookie, __FILE__, __LINE__))
-#ifdef _DEBUG
-#define XcbDebug(cookie)			(OsApplication::GetInst()->Check(cookie, __FILE__, __LINE__))
-#else
-#define XcbDebug(cookie)			cookie
-#endif
-
 // Threads
 #ifdef WIN32
 

@@ -19,6 +19,8 @@ using namespace Gtk;
 #define DEBUG_SETFOCUS			0
 #define DEBUG_HANDLEVIEWKEY		0
 
+extern Gtk::GdkDragAction EffectToDragAction(int Effect);
+
 ///////////////////////////////////////////////////////////////////////
 class HookInfo
 {
@@ -709,8 +711,50 @@ GWindowDragLeave(GtkWidget *widget, GdkDragContext *context, guint time, GWindow
 gboolean
 GWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, GWindow *Wnd)
 {
-	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
-	return true;
+	GRect cli = Wnd->GetClient();
+	auto v = Wnd->WindowFromPoint(x - cli.x1, y - cli.y1, false);
+	if (!v)
+	{
+		LgiTrace("%s:%i - <no view> @ %i,%i\n", _FL, x, y);
+		return false;
+	}
+
+	GDragDropTarget *t = NULL;
+	for (GViewI *view = v; !t && view; view = view->GetParent())
+		t = view->DropTarget();
+	if (!t)
+	{
+		LgiTrace("%s:%i - No target for %s\n", _FL, v->GetClass());
+		return false;
+	}
+
+	int KeyState = 0;
+	List<char> Fmts;
+	int Flags = DROPEFFECT_NONE;
+
+	GList *targets = gdk_drag_context_list_targets(context);
+	Gtk::GList *i = targets;
+	while (i)
+	{
+		auto a = gdk_atom_name((GdkAtom)i->data);
+		if (a)
+			Fmts.Add(NewStr(a));
+		i = i->next;
+	}
+
+	GdcPt2 p;
+	v->WindowVirtualOffset(&p);
+	p.x = x - p.x;
+	p.y = y - p.y;
+	Flags = t->WillAccept(Fmts, p, KeyState);
+
+	LgiTrace("%s:%i - Flags=%i on %s\n", _FL, Flags, v->GetClass());
+	Fmts.DeleteArrays();
+	
+	if (Flags != DROPEFFECT_NONE)
+		gdk_drag_status(context, EffectToDragAction(Flags), time);
+
+	return Flags != DROPEFFECT_NONE;
 }
 
 bool GWindow::Attach(GViewI *p)

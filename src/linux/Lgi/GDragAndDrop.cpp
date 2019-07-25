@@ -140,7 +140,7 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, ::GString
 	return false;
 }
 
-static Gtk::GdkDragAction EffectToDragAction(int Effect)
+Gtk::GdkDragAction EffectToDragAction(int Effect)
 {
 	switch (Effect)
 	{
