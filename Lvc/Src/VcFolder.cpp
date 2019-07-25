@@ -2604,6 +2604,14 @@ bool VcFolder::ParseMerge(int Result, GString s, ParseParams *Params)
 	return true;
 }
 
+void VcFolder::Refresh()
+{
+	CommitListDirty = true;
+	if (Uncommit && Uncommit->LListItem::Select())
+		Uncommit->Select(true);
+	Select(true);
+}
+
 void VcFolder::Clean()
 {
 	switch (GetType())

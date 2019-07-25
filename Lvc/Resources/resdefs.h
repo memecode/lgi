@@ -35,3 +35,4 @@
 #define IDC_PUSH_ALL							514
 #define IDM_EDIT_MENU							515
 #define IDM_FIND								516
+#define IDM_REFRESH								517

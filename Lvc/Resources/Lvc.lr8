@@ -171,8 +171,10 @@
 			<String Ref="21" Cid="513" Define="IDM_ABOUT" en="&About" />
 			<String Ref="42" Cid="515" Define="IDM_EDIT_MENU" en="&Edit" />
 			<String Ref="43" Cid="516" Define="IDM_FIND" en="&Find" />
+			<String Ref="46" Cid="517" Define="IDM_REFRESH" en="&Refresh" />
 		</string-group>
 		<submenu Ref="4">
+			<menuitem Ref="46" Shortcut="F5" />
 			<menuitem Ref="19" />
 		</submenu>
 		<submenu Ref="42">

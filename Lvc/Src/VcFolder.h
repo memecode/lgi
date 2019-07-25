@@ -249,6 +249,7 @@ public:
 	void Diff(VcFile *file);
 	void MergeToLocal(GString Rev);
 	bool RenameBranch(GString NewName, GArray<VcCommit*> &Revs);
+	void Refresh();
 
 	void OnPulse();
 	void OnUpdate(const char *Rev);

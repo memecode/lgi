@@ -617,6 +617,16 @@ public:
 	{
 		switch (Cmd)
 		{
+			case IDM_REFRESH:
+			{
+				GArray<VcFolder*> Flds;
+				Tree->GetSelection(Flds);
+				for (auto f : Flds)
+				{
+					f->Refresh();
+				}
+				break;
+			}
 			case IDM_OPTIONS:
 			{
 				OptionsDlg Dlg(this, Opts);
