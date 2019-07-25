@@ -773,9 +773,6 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 	if (!d->Drag)
 	{
 		int Off = d->Down ? 1 : 0;
-		#ifdef __GTK_H__
-		Off++;
-		#endif
 		int Mx = r.x1 + 8, My = r.y1 + ((r.Y() - 8) / 2);
 		if (d->cIcon)
 		{
