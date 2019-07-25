@@ -1463,7 +1463,9 @@ bool VcFolder::ParseDiffs(GString s, GString Rev, bool IsWorking)
 						f->SetDiff(Diff);
 					Diff.Empty();
 
-					GString Fn = a[i].Split(" ", 3).Last();
+					auto MainParts = a[i].Split(" -r ");
+					auto FileParts = MainParts.Last().Split(" ",1);
+					GString Fn = FileParts.Last();
 					// GString Status = "M";
 
 					f = FindFile(Fn);
@@ -1827,7 +1829,7 @@ void VcFolder::ListCommit(VcCommit *c)
 			case VcHg:
 			{
 				Args.Printf("diff --change %s", c->GetRev());
-				IsFilesCmd = StartCmd(Args, &VcFolder::ParseFiles, new ParseParams(c->GetRev()));				
+				IsFilesCmd = StartCmd(Args, &VcFolder::ParseFiles, new ParseParams(c->GetRev()));
 				break;
 			}
 			default:
