@@ -471,10 +471,10 @@ bool FindSymbolDlg::OnViewKey(GView *v, GKey &k)
 {
 	switch (k.vkey)
 	{
-		case VK_UP:
-		case VK_DOWN:
-		case VK_PAGEDOWN:
-		case VK_PAGEUP:
+		case LK_UP:
+		case LK_DOWN:
+		case LK_PAGEDOWN:
+		case LK_PAGEUP:
 		{
 			return Lst->OnKey(k);
 			break;
@@ -565,7 +565,7 @@ int FindSymbolDlg::OnNotify(GViewI *v, int f)
 	{
 		case IDC_STR:
 		{
-			if (f != VK_RETURN)
+			if (f != LK_RETURN)
 			{
 				char *Str = v->Name();
 				if (Str && strlen(Str) > 2)

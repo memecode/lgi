@@ -71,15 +71,15 @@ public:
 	{
 		switch (k.vkey)
 		{
-			case VK_UP:
-			case VK_DOWN:
-			case VK_PAGEDOWN:
-			case VK_PAGEUP:
+			case LK_UP:
+			case LK_DOWN:
+			case LK_PAGEDOWN:
+			case LK_PAGEUP:
 			{
 				return Lst->OnKey(k);
 				break;
 			}
-			case VK_RETURN:
+			case LK_RETURN:
 			{
 				LListItem *i = Lst->GetSelected();
 				if (i)
@@ -90,7 +90,7 @@ public:
 				EndModal(1);
 				break;
 			}
-			case VK_ESCAPE:
+			case LK_ESCAPE:
 			{
 				EndModal(0);
 				break;
@@ -2871,7 +2871,7 @@ int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
 		}
 		case IDC_DEBUG_EDIT:
 		{
-			if (Flags == VK_RETURN && d->DbgContext)
+			if (Flags == LK_RETURN && d->DbgContext)
 			{
 				char *Cmd = Ctrl->Name();
 				if (Cmd)
@@ -2884,7 +2884,7 @@ int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
 		}
 		case IDC_MEM_ADDR:
 		{
-			if (Flags == VK_RETURN)
+			if (Flags == LK_RETURN)
 			{
 				if (d->DbgContext)
 				{
@@ -2910,7 +2910,7 @@ int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
 		}
 		case IDC_MEM_ROW_LEN:
 		{
-			if (Flags == VK_RETURN)
+			if (Flags == LK_RETURN)
 				UpdateMemoryDump();
 			break;
 		}
