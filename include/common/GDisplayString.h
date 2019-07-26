@@ -12,7 +12,7 @@
 	}
 #endif
 
-#ifndef WINNATIVE
+#if !defined(_MSC_VER) || defined(__GTK_H__)
 #define LGI_DSP_STR_CACHE		1
 #endif
 
