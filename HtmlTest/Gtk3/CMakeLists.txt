@@ -74,6 +74,8 @@ set (CommonSource
 	${LGI}/src/common/Coding/GScriptLibrary.cpp
 	${LGI}/src/common/Coding/GScriptVM.cpp
 	${LGI}/src/common/Gdc2/Tools/GdcTools.cpp
+	${LGI}/src/common/Gdc2/Font/LEmojiFont.cpp
+	${LGI}/src/common/Text/Emoji/EmojiMap.cpp
 	${LGI}/src/common/Images/Compare/ImageComparison.cpp
 	${LGI}/src/common/Widgets/GZoomView.cpp
 	)

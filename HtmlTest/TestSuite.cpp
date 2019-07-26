@@ -16,6 +16,7 @@
 #include "ImageComparison.h"
 #include "OpenSSLSocket.h"
 #include "INet.h"
+#include "LEmojiFont.h"
 
 #define HAS_LOG_VIEW			0
 #define HAS_IMAGE_LOADER		0
@@ -298,6 +299,7 @@ class AppWnd : public GWindow, public GDefaultDocumentEnv
 	char Base[256];
 	GAutoPtr<GScriptEngine> Script;
 	GAutoPtr<HtmlImageLoader> Worker;
+	GAutoPtr<LEmojiFont> Emoji;
 
 	LoadType GetContent(LoadJob *&j)
 	{
@@ -348,6 +350,7 @@ public:
 		Lst = 0;
 		Text = NULL;
 		Base[0] = 0;
+		Emoji.Reset(new LEmojiFont());
 		
 		GRect r(0, 0, 1200, 800);
 		SetPos(r);
