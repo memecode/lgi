@@ -1304,7 +1304,7 @@ char16 *GHtmlParser::CleanText(const char *s, ssize_t Len, bool ConversionAllowe
 							
 							i++;
 							
-							char16 Ch = 0;
+							uint32_t Ch = 0;
 							if (*i == 'x' || *i == 'X')
 							{
 								// Hex number
@@ -1334,7 +1334,17 @@ char16 *GHtmlParser::CleanText(const char *s, ssize_t Len, bool ConversionAllowe
 							}
 							
 							if (Ch)
-								*o++ = Ch;
+							{
+								if (sizeof(*o) < 4)
+								{
+									ssize_t Len = 4;
+									LgiUtf32To16(Ch, (uint16_t*&)o, Len);
+								}
+								else
+								{
+									*o++ = Ch;
+								}
+							}
 							
 							if (*i && *i != ';')
 								i--;
