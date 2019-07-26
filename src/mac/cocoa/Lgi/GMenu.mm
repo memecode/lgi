@@ -799,7 +799,7 @@ bool GMenuItem::ScanForAccel()
 		return false;
 	
 	int Flags = 0;
-	uchar Key = 0;
+	int Key = 0;
 	
 	for (int i=0; i<Keys.Length(); i++)
 	{
@@ -819,32 +819,32 @@ bool GMenuItem::ScanForAccel()
 		else if (stricmp(k, "Del") == 0 ||
 				 stricmp(k, "Delete") == 0)
 		{
-			Key = VK_DELETE;
+			Key = LK_DELETE;
 		}
 		else if (stricmp(k, "Ins") == 0 ||
 				 stricmp(k, "Insert") == 0)
 		{
-			Key = VK_INSERT;
+			Key = LK_INSERT;
 		}
 		else if (stricmp(k, "Home") == 0)
 		{
-			Key = VK_HOME;
+			Key = LK_HOME;
 		}
 		else if (stricmp(k, "End") == 0)
 		{
-			Key = VK_END;
+			Key = LK_END;
 		}
 		else if (stricmp(k, "PageUp") == 0)
 		{
-			Key = VK_PAGEUP;
+			Key = LK_PAGEUP;
 		}
 		else if (stricmp(k, "PageDown") == 0)
 		{
-			Key = VK_PAGEDOWN;
+			Key = LK_PAGEDOWN;
 		}
 		else if (stricmp(k, "Backspace") == 0)
 		{
-			Key = VK_BACKSPACE;
+			Key = LK_BACKSPACE;
 		}
 		else if (stricmp(k, "Space") == 0)
 		{
@@ -854,8 +854,8 @@ bool GMenuItem::ScanForAccel()
 		{
 			int F[] =
 			{
-				VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6,
-				VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12
+				LK_F1, LK_F2, LK_F3, LK_F4, LK_F5, LK_F6,
+				LK_F7, LK_F8, LK_F9, LK_F10, LK_F11, LK_F12
 			};
 			int idx = atoi(k + 1);
 			if (idx >= 1 && idx <= 12)

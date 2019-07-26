@@ -768,37 +768,37 @@ int VirtualKeyToLgi(int Virt)
 	switch (Virt)
 	{
 		// various
-		case 122: return VK_F1;
-		case 120: return VK_F2;
-		case 99: return VK_F3;
-		case 118: return VK_F4;
-		case 96: return VK_F5;
-		case 97: return VK_F6;
-		case 98: return VK_F7;
-		case 100: return VK_F8;
-		case 101: return VK_F9;
-		case 109: return VK_F10;
-		case 103: return VK_F11;
-		case 110: return VK_APPS;
-		case 111: return VK_F12;
+		case 122: return LK_F1;
+		case 120: return LK_F2;
+		case 99: return LK_F3;
+		case 118: return LK_F4;
+		case 96: return LK_F5;
+		case 97: return LK_F6;
+		case 98: return LK_F7;
+		case 100: return LK_F8;
+		case 101: return LK_F9;
+		case 109: return LK_F10;
+		case 103: return LK_F11;
+		case 110: return LK_APPS;
+		case 111: return LK_F12;
 		
-		case 123: return VK_LEFT;
-		case 124: return VK_RIGHT;
-		case 125: return VK_DOWN;
-		case 126: return VK_UP;
-		case 114: return VK_INSERT;
-		case 116: return VK_PAGEUP;
-		case 121: return VK_PAGEDOWN;
+		case 123: return LK_LEFT;
+		case 124: return LK_RIGHT;
+		case 125: return LK_DOWN;
+		case 126: return LK_UP;
+		case 114: return LK_INSERT;
+		case 116: return LK_PAGEUP;
+		case 121: return LK_PAGEDOWN;
 
-		case 53: return VK_ESCAPE;
-		case 51: return VK_BACKSPACE;
-		case 117: return VK_DELETE;
+		case 53: return LK_ESCAPE;
+		case 51: return LK_BACKSPACE;
+		case 117: return LK_DELETE;
 		
-		case 115: return VK_HOME;
-		case 119: return VK_END;
+		case 115: return LK_HOME;
+		case 119: return LK_END;
 		
 		// whitespace
-		case 76: return VK_RETURN;
+		case 76: return LK_RETURN;
 		case 36: return '\r';
 		case 48: return '\t';
 		case 49: return ' ';

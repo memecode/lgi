@@ -306,39 +306,51 @@ LgiFunc void LgiSleep(uint32_t i);
 /// \sa GMouse
 #define LGI_VMOUSE_DOUBLE			0x400
 
+#ifdef __OBJC__
+#define _KEY(sym,val) sym
+#else
+#define _KEY(sym,val) val
+#endif
+
 // Keys
-#define VK_F1						1
-#define VK_F2						2
-#define VK_ENTER					3
-#define VK_F3						4
-#define VK_F4						5
-#define VK_F5						6
-#define VK_F6						7
-#define VK_BACKSPACE				8
-#define VK_TAB						'\t' // 9
-#define VK_F7						11
-#define VK_F8						12
-#define VK_RETURN					'\r' // 13
-#define VK_F9						14
-#define VK_F10						15
-#define VK_F11						16
-#define VK_F12						17
-#define VK_SHIFT					18
-#define VK_PAGEUP					19
-#define VK_PAGEDOWN					20
-#define VK_HOME						21
-#define VK_END						22
-#define VK_INSERT					23
-#define VK_DELETE					24
-#define VK_APPS						25
-#define VK_SPACE					' '
+enum LVirtualKeys
+{
+	LK_BACKSPACE = '\b',
+	LK_TAB = '\t',
+	LK_RETURN = '\r',
+	LK_ESCAPE = 27,
+	LK_SPACE = ' ',
 
-#define VK_ESCAPE					27
-#define VK_LEFT						28
-#define VK_RIGHT					29
-#define VK_UP						30
-#define VK_DOWN						31
+	LK_PAGEUP = _KEY(NSPageUpFunctionKey, 0xF72C),
+	LK_PAGEDOWN = _KEY(NSPageDownFunctionKey, 0xF72D),
+	LK_HOME = _KEY(NSHomeFunctionKey, 0xF729),
+	LK_END = _KEY(NSEndFunctionKey, 0xF72B),
+	LK_DELETE = _KEY(NSDeleteFunctionKey, 0xF728),
+	LK_UP = _KEY(NSUpArrowFunctionKey, 0xF700),
+	LK_DOWN = _KEY(NSDownArrowFunctionKey, 0xF701),
+	LK_LEFT = _KEY(NSLeftArrowFunctionKey, 0xF702),
+	LK_RIGHT = _KEY(NSRightArrowFunctionKey, 0xF703),
 
+	LK_F1 = _KEY(NSF1FunctionKey, 0xF704),
+	LK_F2 = _KEY(NSF2FunctionKey, 0xF705),
+	LK_F3 = _KEY(NSF3FunctionKey, 0xF706),
+	LK_F4 = _KEY(NSF4FunctionKey, 0xF707),
+	LK_F5 = _KEY(NSF5FunctionKey, 0xF708),
+	LK_F6 = _KEY(NSF6FunctionKey, 0xF709),
+	LK_F7 = _KEY(NSF7FunctionKey, 0xF70A),
+	LK_F8 = _KEY(NSF8FunctionKey, 0xF70B),
+	LK_F9 = _KEY(NSF9FunctionKey, 0xF70C),
+	LK_F10 = _KEY(NSF10FunctionKey, 0xF70D),
+	LK_F11 = _KEY(NSF11FunctionKey, 0xF70E),
+	LK_F12 = _KEY(NSF12FunctionKey, 0xF70F),
+
+	LK_INSERT = 0xF748,
+	LK_APPS,
+	LK_ENTER,
+	LK_SHIFT,
+};
+
+#undef _KEY
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs

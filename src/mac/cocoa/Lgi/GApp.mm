@@ -944,9 +944,9 @@ void GApp::OnCommandLine()
 	Files.DeleteArrays();
 }
 
-GAutoString GApp::GetFileMimeType(const char *File)
+GString GApp::GetFileMimeType(const char *File)
 {
-	GAutoString Ret;
+	GString Ret;
 	
 	if (!FileExists(File))
 	{
@@ -983,7 +983,7 @@ GAutoString GApp::GetFileMimeType(const char *File)
 	}
 	
 	if (!Ret)
-		Ret.Reset(NewStr("application/octet-stream"));
+		Ret = "application/octet-stream";
 	
 	return Ret;
 }
