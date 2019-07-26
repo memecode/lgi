@@ -1049,12 +1049,12 @@ static int GetIsChar(GKey &k, int mods)
 				&&
 				(
 					k.c16 >= ' ' ||
-					k.vkey == VK_RETURN ||
-					k.vkey == VK_TAB ||
-					k.vkey == VK_BACKSPACE
+					k.vkey == LK_RETURN ||
+					k.vkey == LK_TAB ||
+					k.vkey == LK_BACKSPACE
 				)
 				&&
-				k.vkey != VK_DELETE;
+				k.vkey != LK_DELETE;
 
 	// printf("IsChar %i,%i -> %i\n", k.vkey,k.c16,k.IsChar);
 	return k.IsChar;
@@ -1294,7 +1294,7 @@ OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent, bool Handle)
 					
 					DeleteArray(text);
 					
-					if (Status == eventNotHandledErr && k.vkey == VK_TAB)
+					if (Status == eventNotHandledErr && k.vkey == LK_TAB)
 					{
 						NextTabStop(v, k.Shift() ? -1 : 1);
 						Status = noErr;

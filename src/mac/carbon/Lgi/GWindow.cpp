@@ -1335,12 +1335,12 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	// Window didn't want the key...
 	switch (k.vkey)
 	{
-		case VK_RETURN:
+		case LK_RETURN:
 		{
 			Ctrl = _Default;
 			break;
 		}
-		case VK_ESCAPE:
+		case LK_ESCAPE:
 		{
 			Ctrl = FindControl(IDCANCEL);
 			break;

@@ -940,12 +940,12 @@ bool ProjectNode::OnKey(GKey &k)
 {
 	if (k.Down())
 	{
-		if (k.vkey == VK_RETURN && k.IsChar)
+		if (k.vkey == LK_RETURN && k.IsChar)
 		{
 			Open();
 			return true;
 		}
-		else if (k.vkey == VK_DELETE)
+		else if (k.vkey == LK_DELETE)
 		{
 			Delete();
 			return true;

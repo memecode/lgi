@@ -3526,7 +3526,7 @@ bool ResDialog::OnKey(GKey &k)
 	{
 		switch (k.c16)
 		{
-			case VK_UP:
+			case LK_UP:
 			{
 				if (k.Down())
 				{
@@ -3545,7 +3545,7 @@ bool ResDialog::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_DOWN:
+			case LK_DOWN:
 			{
 				if (k.Down())
 				{

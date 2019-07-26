@@ -335,8 +335,8 @@ bool DocEdit::OnKey(GKey &k)
 {
 	if (k.Alt())
 	{
-		if (k.vkey == VK_LEFT ||
-			k.vkey == VK_RIGHT)
+		if (k.vkey == LK_LEFT ||
+			k.vkey == LK_RIGHT)
 			return false;
 
 		if (ToLower(k.vkey) == 'm')

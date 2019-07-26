@@ -596,7 +596,7 @@ public:
 			}
 			case IDC_SEARCH:
 			{
-				if (Flags == VK_RETURN)
+				if (Flags == LK_RETURN)
 				{
 					DefLockOut = LgiCurrentTime();
 					OnSearch(GetCtrlName(IDC_SEARCH));

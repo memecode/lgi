@@ -601,7 +601,7 @@ public:
 
 	bool OnKey(GKey &k)
 	{
-		if (!Multiline && (k.c16 == '\t' || k.c16 == VK_RETURN))
+		if (!Multiline && (k.c16 == '\t' || k.c16 == LK_RETURN))
 		{
 			return false;
 		}
@@ -4366,7 +4366,7 @@ bool ResFrame::OnKey(GKey &k)
 	{
 		switch (k.c16)
 		{
-			case VK_DELETE:
+			case LK_DELETE:
 			{
 				if (k.Shift())
 				{
@@ -4399,7 +4399,7 @@ bool ResFrame::OnKey(GKey &k)
 				}
 				break;
 			}
-			case VK_INSERT:
+			case LK_INSERT:
 			{
 				if (k.Ctrl())
 				{

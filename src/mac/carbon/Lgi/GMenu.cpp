@@ -805,32 +805,32 @@ bool GMenuItem::ScanForAccel()
 		else if (stricmp(k, "Del") == 0 ||
 				 stricmp(k, "Delete") == 0)
 		{
-			Key = VK_DELETE;
+			Key = LK_DELETE;
 		}
 		else if (stricmp(k, "Ins") == 0 ||
 				 stricmp(k, "Insert") == 0)
 		{
-			Key = VK_INSERT;
+			Key = LK_INSERT;
 		}
 		else if (stricmp(k, "Home") == 0)
 		{
-			Key = VK_HOME;
+			Key = LK_HOME;
 		}
 		else if (stricmp(k, "End") == 0)
 		{
-			Key = VK_END;
+			Key = LK_END;
 		}
 		else if (stricmp(k, "PageUp") == 0)
 		{
-			Key = VK_PAGEUP;
+			Key = LK_PAGEUP;
 		}
 		else if (stricmp(k, "PageDown") == 0)
 		{
-			Key = VK_PAGEDOWN;
+			Key = LK_PAGEDOWN;
 		}
 		else if (stricmp(k, "Backspace") == 0)
 		{
-			Key = VK_BACKSPACE;
+			Key = LK_BACKSPACE;
 		}
 		else if (stricmp(k, "Space") == 0)
 		{
@@ -840,8 +840,8 @@ bool GMenuItem::ScanForAccel()
 		{
 			int F[] =
 			{
-				VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6,
-				VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12
+				LK_F1, LK_F2, LK_F3, LK_F4, LK_F5, LK_F6,
+				LK_F7, LK_F8, LK_F9, LK_F10, LK_F11, LK_F12
 			};
 			int idx = atoi(k + 1);
 			if (idx >= 1 && idx <= 12)
@@ -890,25 +890,25 @@ bool GMenuItem::ScanForAccel()
 					SetMenuItemKeyGlyph(Parent->Info, Info, g); \
 					break
 					
-			Map(VK_F1, kMenuF1Glyph);
-			Map(VK_F2, kMenuF2Glyph);
-			Map(VK_F3, kMenuF3Glyph);
-			Map(VK_F4, kMenuF4Glyph);
-			Map(VK_F5, kMenuF5Glyph);
-			Map(VK_F6, kMenuF6Glyph);
-			Map(VK_F7, kMenuF7Glyph);
-			Map(VK_F8, kMenuF8Glyph);
-			Map(VK_F9, kMenuF9Glyph);
-			Map(VK_F10, kMenuF10Glyph);
-			Map(VK_F11, kMenuF11Glyph);
-			Map(VK_F12, kMenuF12Glyph);
+			Map(LK_F1, kMenuF1Glyph);
+			Map(LK_F2, kMenuF2Glyph);
+			Map(LK_F3, kMenuF3Glyph);
+			Map(LK_F4, kMenuF4Glyph);
+			Map(LK_F5, kMenuF5Glyph);
+			Map(LK_F6, kMenuF6Glyph);
+			Map(LK_F7, kMenuF7Glyph);
+			Map(LK_F8, kMenuF8Glyph);
+			Map(LK_F9, kMenuF9Glyph);
+			Map(LK_F10, kMenuF10Glyph);
+			Map(LK_F11, kMenuF11Glyph);
+			Map(LK_F12, kMenuF12Glyph);
 			Map(' ', kMenuSpaceGlyph);
-			Map(VK_DELETE, kMenuDeleteRightGlyph);
-			Map(VK_BACKSPACE, kMenuDeleteLeftGlyph);
-			Map(VK_UP, kMenuUpArrowGlyph);
-			Map(VK_DOWN, kMenuDownArrowGlyph);
-			Map(VK_LEFT, kMenuLeftArrowGlyph);
-			Map(VK_RIGHT, kMenuRightArrowGlyph);
+			Map(LK_DELETE, kMenuDeleteRightGlyph);
+			Map(LK_BACKSPACE, kMenuDeleteLeftGlyph);
+			Map(LK_UP, kMenuUpArrowGlyph);
+			Map(LK_DOWN, kMenuDownArrowGlyph);
+			Map(LK_LEFT, kMenuLeftArrowGlyph);
+			Map(LK_RIGHT, kMenuRightArrowGlyph);
 			default:
 			{					
 				e = SetMenuItemCommandKey(	Parent->Info,
