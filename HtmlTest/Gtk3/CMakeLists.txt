@@ -76,7 +76,6 @@ set (CommonSource
 	${LGI}/src/common/Gdc2/Tools/GdcTools.cpp
 	${LGI}/src/common/Images/Compare/ImageComparison.cpp
 	${LGI}/src/common/Widgets/GZoomView.cpp
-	${LGI}/src/common/Lgi/GSubProcess.cpp
 	)
 
 set(CommonResourceFiles

@@ -153,6 +153,21 @@ enum LgiKeys {
 	LK_HOME = VK_HOME,
 	LK_END = VK_END,
 	LK_INSERT = VK_INSERT,
+	LK_SHIFT = VK_SHIFT,
+	LK_ALT = VK_MENU,
+	LK_CTRL = VK_CONTROL,
+	LK_DECIMAL = VK_DECIMAL,
+
+	LK_COMMA			= VK_OEM_COMMA, // , .
+	LK_MINUS			= VK_OEM_MINUS, // - _
+	LK_EQUALS			= VK_OEM_PLUS, // = +
+	LK_SEMI_COLON		= VK_OEM_1, // ; :
+	LK_SLASH			= VK_OEM_2, // / ?
+	LK_TILDE			= VK_OEM_3, // ~
+	LK_OPEN_BRACKET		= VK_OEM_4, // [ {
+	LK_BACK_SLASH		= VK_OEM_5, // \ |
+	LK_CLOSE_BRACKET	= VK_OEM_6, // ] }
+	LK_SINGLE_QUOTE		= VK_OEM_7, // ' "
 };
 
 // Sleep the current thread
