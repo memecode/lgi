@@ -15,7 +15,6 @@
 #include <stdlib.h>
 
 #include "GMem.h"
-#include "process.h"
 
 #ifdef LGI_MEM_DEBUG
 

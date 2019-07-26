@@ -125,9 +125,35 @@ public:
 #define GWL_EXTRA_BYTES					12
 
 // Key redefs
-#define VK_PAGEUP						VK_PRIOR
-#define VK_PAGEDOWN						VK_NEXT
-#define VK_BACKSPACE					VK_BACK
+enum LgiKeys {
+	LK_TAB = VK_TAB,
+	LK_RETURN = VK_RETURN,
+	LK_SPACE = VK_SPACE,
+	LK_DELETE = VK_DELETE,
+	LK_ESCAPE = VK_ESCAPE,
+	LK_PAGEUP = VK_PRIOR,
+	LK_PAGEDOWN = VK_NEXT,
+	LK_BACKSPACE = VK_BACK,
+	LK_F1 = VK_F1,
+	LK_F2 = VK_F2,
+	LK_F3 = VK_F3,
+	LK_F4 = VK_F4,
+	LK_F5 = VK_F5,
+	LK_F6 = VK_F6,
+	LK_F7 = VK_F7,
+	LK_F8 = VK_F8,
+	LK_F9 = VK_F9,
+	LK_F10 = VK_F10,
+	LK_F11 = VK_F11,
+	LK_F12 = VK_F12,
+	LK_LEFT = VK_LEFT,
+	LK_RIGHT = VK_RIGHT,
+	LK_UP = VK_UP,
+	LK_DOWN = VK_DOWN,
+	LK_HOME = VK_HOME,
+	LK_END = VK_END,
+	LK_INSERT = VK_INSERT,
+};
 
 // Sleep the current thread
 LgiFunc void LgiSleep(DWORD i);

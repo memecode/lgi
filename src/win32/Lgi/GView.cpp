@@ -1952,7 +1952,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 					Key.c16 = ToUpper(Key.c16);
 				}
 
-				if (Key.c16 == VK_TAB && ConsumeTabKey)
+				if (Key.c16 == LK_TAB && ConsumeTabKey)
 				{
 					ConsumeTabKey--;
 				}

@@ -22,7 +22,6 @@ static int MinYSize = 16;
 class GCheckBoxPrivate : public LMutex, public LStringLayout
 {
 	GCheckBox *Ctrl;
-	GFontCache Cache;
 	
 public:
 	int64 Val;
@@ -32,7 +31,7 @@ public:
 
 	GCheckBoxPrivate(GCheckBox *ctrl) :
 		LMutex("GCheckBoxPrivate"),
-		LStringLayout(&Cache)
+		LStringLayout(LgiApp->GetFontCache())
 	{
 		Ctrl = ctrl;
 		Val = 0;
@@ -265,7 +264,7 @@ bool GCheckBox::OnKey(GKey &k)
 {
 	switch (k.vkey)
 	{
-		case VK_SPACE:
+		case LK_SPACE:
 		{
 			if (!k.Down())
 				Value(!Value());

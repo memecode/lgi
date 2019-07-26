@@ -11,7 +11,6 @@
 class GTextPrivate : public LStringLayout, public LMutex
 {
 	GTextLabel *Ctrl;
-	GFontCache Cache;
 
 public:
 	/// When GTextLabel::Name(W) is called out of thread, the string is put
@@ -20,7 +19,7 @@ public:
 	GString ThreadName;
 	int PrevX;
 
-	GTextPrivate(GTextLabel *ctrl) : Cache(SysFont), LStringLayout(&Cache), LMutex("GTextPrivate")
+	GTextPrivate(GTextLabel *ctrl) : LStringLayout(LgiApp->GetFontCache()), LMutex("GTextPrivate")
 	{
 		Ctrl = ctrl;
 		PrevX = -1;

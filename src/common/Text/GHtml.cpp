@@ -7824,46 +7824,46 @@ bool GHtml::OnKey(GKey &k)
 
 		switch (k.vkey)
 		{
-			case VK_F3:
+			case LK_F3:
 			{
 				OnFind(NULL);
 				break;
 			}
 			#ifdef WIN32
-			case VK_INSERT:
+			case LK_INSERT:
 				goto DoCopy;
 			#endif
-			case VK_UP:
+			case LK_UP:
 			{
 				Dy = -1;
 				Status = true;
 				break;
 			}
-			case VK_DOWN:
+			case LK_DOWN:
 			{
 				Dy = 1;
 				Status = true;
 				break;
 			}
-			case VK_PAGEUP:
+			case LK_PAGEUP:
 			{
 				Dy = -Page;
 				Status = true;
 				break;
 			}
-			case VK_PAGEDOWN:
+			case LK_PAGEDOWN:
 			{
 				Dy = Page;
 				Status = true;
 				break;
 			}
-			case VK_HOME:
+			case LK_HOME:
 			{
 				Dy = (int) (VScroll ? -VScroll->Value() : 0);
 				Status = true;
 				break;
 			}
-			case VK_END:
+			case LK_END:
 			{
 				if (VScroll)
 				{

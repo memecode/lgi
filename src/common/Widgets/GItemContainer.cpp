@@ -1067,8 +1067,8 @@ public:
 
 	bool OnKey(GKey &k)
 	{
-		if (k.c16 == VK_RETURN ||
-			k.c16 == VK_ESCAPE)
+		if (k.c16 == LK_RETURN ||
+			k.c16 == LK_ESCAPE)
 		{
 			if (k.Down())
 			{			
@@ -1210,7 +1210,7 @@ int GItemEdit::OnNotify(GViewI *v, int f)
 	{
 		case 100:
 		{
-			if (f == VK_ESCAPE)
+			if (f == LK_ESCAPE)
 			{
 				d->Esc = true;
 				#if DEBUG_EDIT_LABEL
@@ -1218,7 +1218,7 @@ int GItemEdit::OnNotify(GViewI *v, int f)
 				#endif
 			}
 
-			if (f == VK_ESCAPE || f == VK_RETURN)
+			if (f == LK_ESCAPE || f == LK_RETURN)
 			{
 				#if DEBUG_EDIT_LABEL
 				LgiTrace("%s:%i - GItemEdit hiding on esc/enter\n", _FL);

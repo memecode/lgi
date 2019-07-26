@@ -82,16 +82,16 @@ enum GNotifyType
 
 	/// Return/Enter pressed
 	/// \sa LList, GView::OnNotify
-	GNotify_ReturnKey = VK_RETURN,
+	GNotify_ReturnKey = LK_RETURN,
 	/// Backspace pressed
 	/// \sa LList, GView::OnNotify
-	GNotify_BackspaceKey = VK_BACKSPACE,
+	GNotify_BackspaceKey = LK_BACKSPACE,
 	/// Delete pressed
 	/// \sa LList, GView::OnNotify
-	GNotify_DeleteKey = VK_DELETE,
+	GNotify_DeleteKey = LK_DELETE,
 	/// Escape pressed
 	/// \sa LList, GView::OnNotify
-	GNotify_EscapeKey = VK_ESCAPE,
+	GNotify_EscapeKey = LK_ESCAPE,
 	
 	
 	/// User app notification IDs should start with this value:

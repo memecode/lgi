@@ -362,34 +362,34 @@ gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 			case KEY(ISO_Left_Tab):
 			case KEY(Tab):
 				k.IsChar = true;
-				k.c16 = k.vkey = VK_TAB;
+				k.c16 = k.vkey = LK_TAB;
 				break;
 			case KEY(Return):
 			case KEY(KP_Enter):
 				k.IsChar = true;
-				k.c16 = k.vkey = VK_RETURN;
+				k.c16 = k.vkey = LK_RETURN;
 				break;
 			case KEY(BackSpace):
-				k.c16 = k.vkey = VK_BACKSPACE;
+				k.c16 = k.vkey = LK_BACKSPACE;
 				k.IsChar = !k.Ctrl() && !k.Alt();
 				break;
 			case KEY(Left):
-				k.vkey = k.c16 = VK_LEFT;
+				k.vkey = k.c16 = LK_LEFT;
 				break;
 			case KEY(Right):
-				k.vkey = k.c16 = VK_RIGHT;
+				k.vkey = k.c16 = LK_RIGHT;
 				break;
 			case KEY(Up):
-				k.vkey = k.c16 = VK_UP;
+				k.vkey = k.c16 = LK_UP;
 				break;
 			case KEY(Down):
-				k.vkey = k.c16 = VK_DOWN;
+				k.vkey = k.c16 = LK_DOWN;
 				break;
 			case KEY(Home):
-				k.vkey = k.c16 = VK_HOME;
+				k.vkey = k.c16 = LK_HOME;
 				break;
 			case KEY(End):
-				k.vkey = k.c16 = VK_END;
+				k.vkey = k.c16 = LK_END;
 				break;
 			
 			#define KeyPadMap(gdksym, ch, is) \
@@ -408,21 +408,21 @@ gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 
 			KeyPadMap(KEY(KP_Space), ' ', true)
 			KeyPadMap(KEY(KP_Tab), '\t', true)
-			KeyPadMap(KEY(KP_F1), VK_F1, false)
-			KeyPadMap(KEY(KP_F2), VK_F2, false)
-			KeyPadMap(KEY(KP_F3), VK_F3, false)
-			KeyPadMap(KEY(KP_F4), VK_F4, false)
-			KeyPadMap(KEY(KP_Home), VK_HOME, false)
-			KeyPadMap(KEY(KP_Left), VK_LEFT, false)
-			KeyPadMap(KEY(KP_Up), VK_UP, false)
-			KeyPadMap(KEY(KP_Right), VK_RIGHT, false)
-			KeyPadMap(KEY(KP_Down), VK_DOWN, false)
-			KeyPadMap(KEY(KP_Page_Up), VK_PAGEUP, false)
-			KeyPadMap(KEY(KP_Page_Down), VK_PAGEDOWN, false)
-			KeyPadMap(KEY(KP_End), VK_END, false)
-			KeyPadMap(KEY(KP_Begin), VK_HOME, false)
-			KeyPadMap(KEY(KP_Insert), VK_INSERT, false)
-			KeyPadMap(KEY(KP_Delete), VK_DELETE, false)
+			KeyPadMap(KEY(KP_F1), LK_F1, false)
+			KeyPadMap(KEY(KP_F2), LK_F2, false)
+			KeyPadMap(KEY(KP_F3), LK_F3, false)
+			KeyPadMap(KEY(KP_F4), LK_F4, false)
+			KeyPadMap(KEY(KP_Home), LK_HOME, false)
+			KeyPadMap(KEY(KP_Left), LK_LEFT, false)
+			KeyPadMap(KEY(KP_Up), LK_UP, false)
+			KeyPadMap(KEY(KP_Right), LK_RIGHT, false)
+			KeyPadMap(KEY(KP_Down), LK_DOWN, false)
+			KeyPadMap(KEY(KP_Page_Up), LK_PAGEUP, false)
+			KeyPadMap(KEY(KP_Page_Down), LK_PAGEDOWN, false)
+			KeyPadMap(KEY(KP_End), LK_END, false)
+			KeyPadMap(KEY(KP_Begin), LK_HOME, false)
+			KeyPadMap(KEY(KP_Insert), LK_INSERT, false)
+			KeyPadMap(KEY(KP_Delete), LK_DELETE, false)
 			KeyPadMap(KEY(KP_Equal), '=', true)
 			KeyPadMap(KEY(KP_Multiply), '*', true)
 			KeyPadMap(KEY(KP_Add), '+', true)
@@ -440,7 +440,7 @@ gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 		if (w)
 		{
 			if (!w->HandleViewKey(v, k) &&
-				(k.vkey == VK_TAB || k.vkey == KEY(ISO_Left_Tab)) &&
+				(k.vkey == LK_TAB || k.vkey == KEY(ISO_Left_Tab)) &&
 				k.Down())
 			{
 				// Do tab between controls

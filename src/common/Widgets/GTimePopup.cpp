@@ -136,10 +136,10 @@ public:
 	{
 		bool b = false;
 		
-		if (k.vkey == VK_UP ||
-			k.vkey == VK_DOWN ||
-			k.vkey == VK_ESCAPE ||
-			k.vkey == VK_RETURN)
+		if (k.vkey == LK_UP ||
+			k.vkey == LK_DOWN ||
+			k.vkey == LK_ESCAPE ||
+			k.vkey == LK_RETURN)
 		{
 			Key = true;
 			LList::OnKey(k);

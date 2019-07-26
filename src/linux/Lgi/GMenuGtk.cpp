@@ -589,64 +589,64 @@ Gtk::gint LgiKeyToGtkKey(int Key, const char *ShortCut)
 	switch (Key)
 	{
 		#ifdef GDK_Delete
-		case VK_DELETE: return GDK_Delete;
+		case LK_DELETE: return GDK_Delete;
 		#endif
 		#ifdef GDK_Insert
-		case VK_INSERT: return GDK_Insert;
+		case LK_INSERT: return GDK_Insert;
 		#endif
 		#ifdef GDK_Home
-		case VK_HOME: return GDK_Home;
+		case LK_HOME: return GDK_Home;
 		#endif
 		#ifdef GDK_End
-		case VK_END: return GDK_End;
+		case LK_END: return GDK_End;
 		#endif
 		#ifdef GDK_Page_Up
-		case VK_PAGEUP: return GDK_Page_Up;
+		case LK_PAGEUP: return GDK_Page_Up;
 		#endif
 		#ifdef GDK_Page_Down
-		case VK_PAGEDOWN: return GDK_Page_Down;
+		case LK_PAGEDOWN: return GDK_Page_Down;
 		#endif
 		#ifdef GDK_BackSpace
-		case VK_BACKSPACE: return GDK_BackSpace;
+		case LK_BACKSPACE: return GDK_BackSpace;
 		#endif
 		#ifdef GDK_Escape
-		case VK_ESCAPE: return GDK_Escape;
+		case LK_ESCAPE: return GDK_Escape;
 		#else
 		#warning "GDK_Escape not defined."
 		#endif
 
-		case VK_UP:
+		case LK_UP:
 			return GDK_Up;
-		case VK_DOWN:
+		case LK_DOWN:
 			return GDK_Down;
-		case VK_LEFT:
+		case LK_LEFT:
 			return GDK_Left;
-		case VK_RIGHT:
+		case LK_RIGHT:
 			return GDK_Right;
 
-		case VK_F1:
+		case LK_F1:
 			return GDK_F1;
-		case VK_F2:
+		case LK_F2:
 			return GDK_F2;
-		case VK_F3:
+		case LK_F3:
 			return GDK_F3;
-		case VK_F4:
+		case LK_F4:
 			return GDK_F4;
-		case VK_F5:
+		case LK_F5:
 			return GDK_F5;
-		case VK_F6:
+		case LK_F6:
 			return GDK_F6;
-		case VK_F7:
+		case LK_F7:
 			return GDK_F7;
-		case VK_F8:
+		case LK_F8:
 			return GDK_F8;
-		case VK_F9:
+		case LK_F9:
 			return GDK_F9;
-		case VK_F10:
+		case LK_F10:
 			return GDK_F10;
-		case VK_F11:
+		case LK_F11:
 			return GDK_F11;
-		case VK_F12:
+		case LK_F12:
 			return GDK_F12;
 		case ' ':
 			#ifdef GDK_space
@@ -710,52 +710,52 @@ bool LgiMenuItem::ScanForAccel()
 			else if (stricmp(k, "Del") == 0 ||
 					 stricmp(k, "Delete") == 0)
 			{
-				Key = VK_DELETE;
+				Key = LK_DELETE;
 			}
 			else if (stricmp(k, "Ins") == 0 ||
 					 stricmp(k, "Insert") == 0)
 			{
-				Key = VK_INSERT;
+				Key = LK_INSERT;
 			}
 			else if (stricmp(k, "Home") == 0)
 			{
-				Key = VK_HOME;
+				Key = LK_HOME;
 			}
 			else if (stricmp(k, "End") == 0)
 			{
-				Key = VK_END;
+				Key = LK_END;
 			}
 			else if (stricmp(k, "PageUp") == 0)
 			{
-				Key = VK_PAGEUP;
+				Key = LK_PAGEUP;
 			}
 			else if (stricmp(k, "PageDown") == 0)
 			{
-				Key = VK_PAGEDOWN;
+				Key = LK_PAGEDOWN;
 			}
 			else if (stricmp(k, "Backspace") == 0)
 			{
-				Key = VK_BACKSPACE;
+				Key = LK_BACKSPACE;
 			}
 			else if (stricmp(k, "Left") == 0)
 			{
-				Key = VK_LEFT;
+				Key = LK_LEFT;
 			}
 			else if (stricmp(k, "Up") == 0)
 			{
-				Key = VK_UP;
+				Key = LK_UP;
 			}
 			else if (stricmp(k, "Right") == 0)
 			{
-				Key = VK_RIGHT;
+				Key = LK_RIGHT;
 			}
 			else if (stricmp(k, "Down") == 0)
 			{
-				Key = VK_DOWN;
+				Key = LK_DOWN;
 			}
 			else if (!stricmp(k, "Esc") || !stricmp(k, "Escape"))
 			{
-				Key = VK_ESCAPE;
+				Key = LK_ESCAPE;
 			}
 			else if (stricmp(k, "Space") == 0)
 			{
@@ -764,7 +764,7 @@ bool LgiMenuItem::ScanForAccel()
 			else if (k[0] == 'F' && isdigit(k[1]))
 			{
 				int Idx = atoi(k+1);
-				Key = VK_F1 + Idx - 1;
+				Key = LK_F1 + Idx - 1;
 			}
 			else if (isalpha(k[0]))
 			{
@@ -1344,12 +1344,12 @@ bool GAccelerator::Match(GKey &k)
 {
 	int Press = (uint) k.vkey;
 	
-	if (k.vkey == VK_RSHIFT ||
-		k.vkey == VK_LSHIFT ||
-		k.vkey == VK_RCTRL ||
-		k.vkey == VK_LCTRL ||
-		k.vkey == VK_RALT ||
-		k.vkey == VK_RALT)
+	if (k.vkey == LK_RSHIFT ||
+		k.vkey == LK_LSHIFT ||
+		k.vkey == LK_RCTRL ||
+		k.vkey == LK_LCTRL ||
+		k.vkey == LK_RALT ||
+		k.vkey == LK_RALT)
 	{
 		return false;
 	}

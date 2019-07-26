@@ -917,7 +917,7 @@ bool LList::OnKey(GKey &k)
 		Status = Item->OnKey(k);
 	}
 
-	if (k.vkey != VK_UP && k.vkey != VK_DOWN && k.Modifier())
+	if (k.vkey != LK_UP && k.vkey != LK_DOWN && k.Modifier())
 	{
 		switch (k.c16)
 		{
@@ -935,7 +935,7 @@ bool LList::OnKey(GKey &k)
 	{
 		switch (k.vkey)
 		{
-			case VK_RETURN:
+			case LK_RETURN:
 			{
 				#if WINNATIVE
 				if (!k.IsChar)
@@ -946,25 +946,25 @@ bool LList::OnKey(GKey &k)
 				}
 				break;
 			}
-			case VK_BACKSPACE:
+			case LK_BACKSPACE:
 			{
 				if (k.Down())
 					SendNotify(GNotify_BackspaceKey);
 				break;
 			}
-			case VK_ESCAPE:
+			case LK_ESCAPE:
 			{
 				if (k.Down())
 					SendNotify(GNotify_EscapeKey);
 				break;
 			}
-			case VK_DELETE:
+			case LK_DELETE:
 			{
 				if (k.Down())
 					SendNotify(GNotify_DeleteKey);
 				break;
 			}
-			case VK_UP:
+			case LK_UP:
 			{
 				// int i = Value();
 				#ifdef MAC
@@ -979,7 +979,7 @@ bool LList::OnKey(GKey &k)
 				Status = true;
 				break;
 			}
-			case VK_DOWN:
+			case LK_DOWN:
 			{
 				#ifdef MAC
 				if (k.Ctrl())
@@ -993,7 +993,7 @@ bool LList::OnKey(GKey &k)
 				Status = true;
 				break;
 			}
-			case VK_LEFT:
+			case LK_LEFT:
 			{
 				if (GetMode() == LListColumns)
 				{
@@ -1053,7 +1053,7 @@ bool LList::OnKey(GKey &k)
 				}
 				break;
 			}
-			case VK_RIGHT:
+			case LK_RIGHT:
 			{
 				if (GetMode() == LListColumns)
 				{
@@ -1093,7 +1093,7 @@ bool LList::OnKey(GKey &k)
 				}
 				break;
 			}
-			case VK_PAGEUP:
+			case LK_PAGEUP:
 			{
 				#ifdef MAC
 				LList_PageUp:
@@ -1107,7 +1107,7 @@ bool LList::OnKey(GKey &k)
 				Status = true;
 				break;
 			}
-			case VK_PAGEDOWN:
+			case LK_PAGEDOWN:
 			{
 				#ifdef MAC
 				LList_PageDown:
@@ -1121,7 +1121,7 @@ bool LList::OnKey(GKey &k)
 				Status = true;
 				break;
 			}
-			case VK_END:
+			case LK_END:
 			{
 				#ifdef MAC
 				LList_End:
@@ -1131,7 +1131,7 @@ bool LList::OnKey(GKey &k)
 				Status = true;
 				break;
 			}
-			case VK_HOME:
+			case LK_HOME:
 			{
 				#ifdef MAC
 				LList_Home:

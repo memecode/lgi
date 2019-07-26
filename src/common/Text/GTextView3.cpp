@@ -3798,7 +3798,7 @@ bool GTextView3::OnKey(GKey &k)
 					!GetReadOnly()
 					&&
 					(
-						(k.c16 >= ' ' || k.vkey == VK_TAB)
+						(k.c16 >= ' ' || k.vkey == LK_TAB)
 						&&
 						k.c16 != 127
 					)
@@ -3810,7 +3810,7 @@ bool GTextView3::OnKey(GKey &k)
 						if (SelStart >= 0)
 						{
 							bool MultiLine = false;
-							if (k.vkey == VK_TAB)
+							if (k.vkey == LK_TAB)
 							{
 								size_t Min = MIN(SelStart, SelEnd), Max = MAX(SelStart, SelEnd);
 								for (size_t i=Min; i<Max; i++)
@@ -3837,7 +3837,7 @@ bool GTextView3::OnKey(GKey &k)
 						GTextLine *l = GetTextLine(Cursor);
 						size_t Len = (l) ? l->Len : 0;
 						
-						if (l && k.vkey == VK_TAB && (!HardTabs || IndentSize != TabSize))
+						if (l && k.vkey == LK_TAB && (!HardTabs || IndentSize != TabSize))
 						{
 							int x = GetColumn();							
 							int Add = IndentSize - (x % IndentSize);
@@ -3916,7 +3916,7 @@ bool GTextView3::OnKey(GKey &k)
 				}
 				break;
 			}
-			case VK_RETURN:
+			case LK_RETURN:
 			{
 				if (GetReadOnly())
 					break;
@@ -3928,7 +3928,7 @@ bool GTextView3::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_BACKSPACE:
+			case LK_BACKSPACE:
 			{
 				if (GetReadOnly())
 					break;
@@ -4017,13 +4017,13 @@ bool GTextView3::OnKey(GKey &k)
 	{
 		switch (k.vkey)
 		{
-			case VK_TAB:
+			case LK_TAB:
 				return true;
-			case VK_RETURN:
+			case LK_RETURN:
 			{
 				return !GetReadOnly();
 			}
-			case VK_BACKSPACE:
+			case LK_BACKSPACE:
 			{
 				if (!GetReadOnly())
 				{
@@ -4061,7 +4061,7 @@ bool GTextView3::OnKey(GKey &k)
 				}
 				break;
 			}
-			case VK_F3:
+			case LK_F3:
 			{
 				if (k.Down())
 				{
@@ -4070,7 +4070,7 @@ bool GTextView3::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_LEFT:
+			case LK_LEFT:
 			{
 				if (k.Down())
 				{
@@ -4143,7 +4143,7 @@ bool GTextView3::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_RIGHT:
+			case LK_RIGHT:
 			{
 				if (k.Down())
 				{
@@ -4213,7 +4213,7 @@ bool GTextView3::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_UP:
+			case LK_UP:
 			{
 				if (k.Alt())
 					return false;
@@ -4246,7 +4246,7 @@ bool GTextView3::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_DOWN:
+			case LK_DOWN:
 			{
 				if (k.Alt())
 					return false;
@@ -4279,7 +4279,7 @@ bool GTextView3::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_END:
+			case LK_END:
 			{
 				if (k.Down())
 				{
@@ -4302,7 +4302,7 @@ bool GTextView3::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_HOME:
+			case LK_HOME:
 			{
 				if (k.Down())
 				{
@@ -4338,7 +4338,7 @@ bool GTextView3::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_PAGEUP:
+			case LK_PAGEUP:
 			{
 				#ifdef MAC
 				GTextView3_PageUp:
@@ -4361,7 +4361,7 @@ bool GTextView3::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_PAGEDOWN:
+			case LK_PAGEDOWN:
 			{
 				#ifdef MAC
 				GTextView3_PageDown:
@@ -4384,7 +4384,7 @@ bool GTextView3::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_INSERT:
+			case LK_INSERT:
 			{
 				if (k.Down())
 				{
@@ -4403,7 +4403,7 @@ bool GTextView3::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_DELETE:
+			case LK_DELETE:
 			{
 				if (!GetReadOnly())
 				{
@@ -4587,7 +4587,7 @@ bool GTextView3::OnKey(GKey &k)
 							}
 							break;
 						}
-						case VK_RETURN:
+						case LK_RETURN:
 						{
 							if (!GetReadOnly() && !k.Shift())
 							{

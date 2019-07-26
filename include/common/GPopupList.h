@@ -228,12 +228,12 @@ public:
 		{
 			switch (k.vkey)
 			{
-				case VK_TAB:
+				case LK_TAB:
 				{
 					Visible(false);
 					return false;
 				}
-				case VK_ESCAPE:
+				case LK_ESCAPE:
 				{
 					if (!k.Down())
 					{
@@ -242,17 +242,17 @@ public:
 					return true;
 					break;
 				}
-				case VK_RETURN:
+				case LK_RETURN:
 				{
 					if (Lst)
 						Lst->OnKey(k);
 					return true;
 					break;
 				}
-				case VK_UP:
-				case VK_DOWN:
-				case VK_PAGEDOWN:
-				case VK_PAGEUP:
+				case LK_UP:
+				case LK_DOWN:
+				case LK_PAGEDOWN:
+				case LK_PAGEUP:
 				{
 					if (!k.IsChar)
 					{

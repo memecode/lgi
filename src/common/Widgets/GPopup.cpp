@@ -1031,7 +1031,7 @@ void GDropDown::Activate()
 
 bool GDropDown::OnKey(GKey &k)
 {
-	if (k.IsChar && (k.c16 == ' ' || k.vkey == VK_RETURN))
+	if (k.IsChar && (k.c16 == ' ' || k.vkey == LK_RETURN))
 	{
 		if (k.Down())
 		{
@@ -1040,7 +1040,7 @@ bool GDropDown::OnKey(GKey &k)
 		
 		return true;
 	}
-	else if (k.vkey == VK_ESCAPE)
+	else if (k.vkey == LK_ESCAPE)
 	{
 		if (k.Down() && IsOpen())
 		{

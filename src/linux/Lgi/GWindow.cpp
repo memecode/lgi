@@ -396,43 +396,43 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 				case GDK_KEY_ISO_Left_Tab:
 				case KEY(Tab):
 					k.IsChar = true;
-					k.c16 = k.vkey = VK_TAB;
+					k.c16 = k.vkey = LK_TAB;
 					break;
 				case KEY(Return):
 				case KEY(KP_Enter):
 					k.IsChar = true;
-					k.c16 = k.vkey = VK_RETURN;
+					k.c16 = k.vkey = LK_RETURN;
 					break;
 				case GDK_KEY_BackSpace:
-					k.c16 = k.vkey = VK_BACKSPACE;
+					k.c16 = k.vkey = LK_BACKSPACE;
 					k.IsChar = !k.Ctrl() && !k.Alt() && !k.System();
 					break;
 				case KEY(Left):
-					k.vkey = k.c16 = VK_LEFT;
+					k.vkey = k.c16 = LK_LEFT;
 					break;
 				case KEY(Right):
-					k.vkey = k.c16 = VK_RIGHT;
+					k.vkey = k.c16 = LK_RIGHT;
 					break;
 				case KEY(Up):
-					k.vkey = k.c16 = VK_UP;
+					k.vkey = k.c16 = LK_UP;
 					break;
 				case KEY(Down):
-					k.vkey = k.c16 = VK_DOWN;
+					k.vkey = k.c16 = LK_DOWN;
 					break;
 				case KEY(Page_Up):
-					k.vkey = k.c16 = VK_PAGEUP;
+					k.vkey = k.c16 = LK_PAGEUP;
 					break;
 				case KEY(Page_Down):
-					k.vkey = k.c16 = VK_PAGEDOWN;
+					k.vkey = k.c16 = LK_PAGEDOWN;
 					break;
 				case KEY(Home):
-					k.vkey = k.c16 = VK_HOME;
+					k.vkey = k.c16 = LK_HOME;
 					break;
 				case KEY(End):
-					k.vkey = k.c16 = VK_END;
+					k.vkey = k.c16 = LK_END;
 					break;
 				case KEY(Delete):
-					k.vkey = k.c16 = VK_DELETE;
+					k.vkey = k.c16 = LK_DELETE;
 					break;
 			
 				#define KeyPadMap(gdksym, ch, is) \
@@ -451,21 +451,21 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 
 				KeyPadMap(KEY(KP_Space), ' ', true)
 				KeyPadMap(KEY(KP_Tab), '\t', true)
-				KeyPadMap(KEY(KP_F1), VK_F1, false)
-				KeyPadMap(KEY(KP_F2), VK_F2, false)
-				KeyPadMap(KEY(KP_F3), VK_F3, false)
-				KeyPadMap(KEY(KP_F4), VK_F4, false)
-				KeyPadMap(KEY(KP_Home), VK_HOME, false)
-				KeyPadMap(KEY(KP_Left), VK_LEFT, false)
-				KeyPadMap(KEY(KP_Up), VK_UP, false)
-				KeyPadMap(KEY(KP_Right), VK_RIGHT, false)
-				KeyPadMap(KEY(KP_Down), VK_DOWN, false)
-				KeyPadMap(KEY(KP_Page_Up), VK_PAGEUP, false)
-				KeyPadMap(KEY(KP_Page_Down), VK_PAGEDOWN, false)
-				KeyPadMap(KEY(KP_End), VK_END, false)
-				KeyPadMap(KEY(KP_Begin), VK_HOME, false)
-				KeyPadMap(KEY(KP_Insert), VK_INSERT, false)
-				KeyPadMap(KEY(KP_Delete), VK_DELETE, false)
+				KeyPadMap(KEY(KP_F1), LK_F1, false)
+				KeyPadMap(KEY(KP_F2), LK_F2, false)
+				KeyPadMap(KEY(KP_F3), LK_F3, false)
+				KeyPadMap(KEY(KP_F4), LK_F4, false)
+				KeyPadMap(KEY(KP_Home), LK_HOME, false)
+				KeyPadMap(KEY(KP_Left), LK_LEFT, false)
+				KeyPadMap(KEY(KP_Up), LK_UP, false)
+				KeyPadMap(KEY(KP_Right), LK_RIGHT, false)
+				KeyPadMap(KEY(KP_Down), LK_DOWN, false)
+				KeyPadMap(KEY(KP_Page_Up), LK_PAGEUP, false)
+				KeyPadMap(KEY(KP_Page_Down), LK_PAGEDOWN, false)
+				KeyPadMap(KEY(KP_End), LK_END, false)
+				KeyPadMap(KEY(KP_Begin), LK_HOME, false)
+				KeyPadMap(KEY(KP_Insert), LK_INSERT, false)
+				KeyPadMap(KEY(KP_Delete), LK_DELETE, false)
 				KeyPadMap(KEY(KP_Equal), '=', true)
 				KeyPadMap(KEY(KP_Multiply), '*', true)
 				KeyPadMap(KEY(KP_Add), '+', true)
@@ -485,7 +485,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 				if (!k.Down())
 					return false;
 
-				if (k.vkey == VK_TAB || k.vkey == KEY(ISO_Left_Tab))
+				if (k.vkey == LK_TAB || k.vkey == KEY(ISO_Left_Tab))
 				{
 					// Do tab between controls
 					::GArray<GViewI*> a;
@@ -1001,7 +1001,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	GViewI *Ctrl = 0;
 	
 	#if DEBUG_HANDLEVIEWKEY
-	bool Debug = 1; // k.vkey == VK_RETURN;
+	bool Debug = 1; // k.vkey == LK_RETURN;
 	char SafePrint = k.c16 < ' ' ? ' ' : k.c16;
 	
 	// if (Debug)
@@ -1094,15 +1094,15 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	// Window didn't want the key...
 	switch (k.vkey)
 	{
-		case VK_RETURN:
-		#ifdef VK_KP_ENTER
-		case VK_KP_ENTER:
+		case LK_RETURN:
+		#ifdef LK_KP_ENTER
+		case LK_KP_ENTER:
 		#endif
 		{
 			Ctrl = _Default;
 			break;
 		}
-		case VK_ESCAPE:
+		case LK_ESCAPE:
 		{
 			Ctrl = FindControl(IDCANCEL);
 			break;
@@ -1148,7 +1148,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	}
 	
 	// Tab through controls
-	if (k.vkey == VK_TAB && k.Down() && !k.IsChar)
+	if (k.vkey == LK_TAB && k.Down() && !k.IsChar)
 	{
 		GViewI *Wnd = GetNextTabStop(v, k.Shift());
 		#if DEBUG_HANDLEVIEWKEY

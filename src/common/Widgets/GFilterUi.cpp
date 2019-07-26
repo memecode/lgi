@@ -959,7 +959,7 @@ bool GFilterItem::OnKey(GKey &k)
 {
 	if (k.IsChar)
 	{
-		if (k.vkey == VK_SPACE)
+		if (k.vkey == LK_SPACE)
 		{
 			if (k.Down())
 			{
@@ -976,7 +976,7 @@ bool GFilterItem::OnKey(GKey &k)
 		}
 		return true;
 	}
-	else if (k.vkey == VK_DELETE)
+	else if (k.vkey == LK_DELETE)
 	{
 		if (k.Down() && GetParent() && d->Node != LNODE_NEW)
 		{

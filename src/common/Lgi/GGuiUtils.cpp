@@ -7,13 +7,13 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////////////
-#if !defined(VK_CONTEXTKEY)
+#if !defined(LK_CONTEXTKEY)
 	#if defined(WINDOWS)
-		#define VK_CONTEXTKEY 0x5d
+		#define LK_CONTEXTKEY 0x5d
 	#elif defined(MAC)
-		#define VK_CONTEXTKEY VK_APPS
+		#define LK_CONTEXTKEY VK_APPS
 	#else
-		#define VK_CONTEXTKEY 0x5d
+		#define LK_CONTEXTKEY 0x5d
 		#warning "Check local platform def for app menu key."
 	#endif
 #endif
@@ -21,7 +21,7 @@
 bool GKey::IsContextMenu()
 {
 	#if WINNATIVE || defined(LINUX)
-	return !IsChar && vkey == VK_CONTEXTKEY;
+	return !IsChar && vkey == LK_CONTEXTKEY;
 	#else
 	return false;
 	#endif

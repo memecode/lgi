@@ -439,14 +439,14 @@ bool GCombo::OnKey(GKey &k)
 	{
 		switch (k.vkey)
 		{
-			case VK_SPACE:
+			case LK_SPACE:
 			{
 				// Open the submenu
 				Status = true;
 				DoMenu();
 				break;
 			}
-			case VK_UP:
+			case LK_UP:
 			{
 				// Previous value in the list
 				int64 i = Value();
@@ -457,7 +457,7 @@ bool GCombo::OnKey(GKey &k)
 				Status = true;
 				break;
 			}
-			case VK_DOWN:
+			case LK_DOWN:
 			{
 				// Next value in the list...
 				int i = (int)Value();

@@ -136,7 +136,7 @@ typedef GArray<LLayoutString*> LayoutArray;
 
 // Pre-layout min/max calculation
 void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
-{		
+{
 	MinX = 0;
 	MaxX = 0;
 		
@@ -164,7 +164,9 @@ void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
 			s++;
 		}
 		if (s > Start)
+		{
 			Lines[Line].Add(new LLayoutString(f, Start, s - Start));
+		}
 
 		s = (*Run)->Text;
 		while (*s)
@@ -240,7 +242,9 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 {
 	#if DEBUG_PROFILE_LAYOUT
 	GProfile Prof("LStringLayout::DoLayout");
-	Prof.HideResultsIfBelow(100);
+	char Buf[1024];
+	int Ch = 0;
+	// Prof.HideResultsIfBelow(100);
 	#endif
 
 	// Empty
@@ -285,9 +289,8 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 		if (Debug) LgiTrace("    Run='%s' %p\n", s.GetPtr(), *Run);
 		#endif
 		#if DEBUG_PROFILE_LAYOUT
-		GString Pm;
-		Pm.Printf("[%i] Run = '%.*s'\n", (int) (Run - Text.AddressOf()), max(20, (*Run)->Text.Length()), s.GetPtr());
-		Prof.Add(Pm);
+		Prof.Add(Buf+Ch);
+		Ch += sprintf(Buf+Ch, "[%i] Run = '%.*s'\n", (int) (Run - Text.AddressOf()), (int) max(20, (*Run)->Text.Length()), s.GetPtr());
 		#endif
 
 		while (s)

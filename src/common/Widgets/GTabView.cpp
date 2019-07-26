@@ -614,7 +614,7 @@ bool GTabView::OnKey(GKey &k)
 	{
 		switch (k.vkey)
 		{
-			case VK_LEFT:
+			case LK_LEFT:
 			{
 				if (k.Alt())
 					break;
@@ -632,7 +632,7 @@ bool GTabView::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_RIGHT:
+			case LK_RIGHT:
 			{
 				if (k.Alt())
 					break;

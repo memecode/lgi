@@ -27,8 +27,6 @@ GdcPt2 GButton::Overhead =
 
 class GButtonPrivate : public LStringLayout
 {
-	GFontCache Cache;
-	
 public:
 	int Pressed;
 	bool KeyDown;
@@ -40,7 +38,7 @@ public:
 	GSurface *Image;
 	bool OwnImage;
 	
-	GButtonPrivate() : LStringLayout(&Cache), Cache(SysFont)
+	GButtonPrivate() : LStringLayout(LgiApp->GetFontCache())
 	{
 		AmpersandToUnderline = true;
 		Pressed = 0;
@@ -293,7 +291,7 @@ bool GButton::OnKey(GKey &k)
 	
 	switch (k.vkey)
 	{
-		case VK_ESCAPE:
+		case LK_ESCAPE:
 		{
 			if (GetId() != IDCANCEL)
 			{
@@ -301,10 +299,10 @@ bool GButton::OnKey(GKey &k)
 			}
 			// else fall thru
 		}
-		case VK_SPACE:
-		case VK_RETURN:
+		case LK_SPACE:
+		case LK_RETURN:
 		#ifdef LINUX
-		case VK_KP_ENTER:
+		case LK_KP_ENTER:
 		#endif
 		{
 			if (d->KeyDown ^ k.Down())

@@ -986,7 +986,9 @@ bool LgiResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 	{
 		w->SetId(s->Id);
 		if (ValidStr(s->Str))
+		{
 			w->Name(s->Str);
+		}
 	}
 	else if (Obj)
 	{

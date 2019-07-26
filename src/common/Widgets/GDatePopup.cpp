@@ -200,42 +200,42 @@ bool GDatePopup::OnKey(GKey &k)
 {
 	switch (k.vkey)
 	{
-		case VK_ESCAPE:
+		case LK_ESCAPE:
 		{
 			if (!k.Down())
 				Visible(false);
 			return true;
 			break;
 		}
-		case VK_UP:
+		case LK_UP:
 		{
 			if (k.Down())
 				Move(0, -1);
 			return true;
 			break;
 		}
-		case VK_DOWN:
+		case LK_DOWN:
 		{
 			if (k.Down())
 				Move(0, 1);
 			return true;
 			break;
 		}
-		case VK_LEFT:
+		case LK_LEFT:
 		{
 			if (k.Down())
 				Move(-1, 0);
 			return true;
 			break;
 		}
-		case VK_RIGHT:
+		case LK_RIGHT:
 		{
 			if (k.Down())
 				Move(1, 0);
 			return true;
 			break;
 		}
-		case VK_RETURN:
+		case LK_RETURN:
 		{
 			if (k.Down() && k.IsChar)
 				OnChange();

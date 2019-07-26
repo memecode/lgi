@@ -80,7 +80,7 @@ void GEdit::SendNotify(int Data)
 {
 	if (Data == GNotifyDocChanged)
 		return GTextView3::SendNotify(0);
-	else if (Data == VK_RETURN ||
+	else if (Data == LK_RETURN ||
 			Data == GNotify_EscapeKey)
 		return GTextView3::SendNotify(Data);
 }
@@ -172,18 +172,18 @@ bool GEdit::OnKey(GKey &k)
 	(
 		!d->Multiline &&
 		(
-			k.vkey == VK_TAB ||
-			k.vkey == VK_RETURN
+			k.vkey == LK_TAB ||
+			k.vkey == LK_RETURN
 		)
 	)
 	{	
-		if (k.vkey == VK_RETURN)
+		if (k.vkey == LK_RETURN)
 			GTextView3::OnKey(k);
 		
 		return false;
 	}
 	
-	if (k.vkey == VK_ESCAPE && k.Down())
+	if (k.vkey == LK_ESCAPE && k.Down())
 		SendNotify(GNotify_EscapeKey);
 
 	bool Status = GTextView3::OnKey(k);
@@ -198,7 +198,7 @@ void GEdit::OnEnter(GKey &k)
 	}
 	else
 	{
-		SendNotify(VK_RETURN);
+		SendNotify(LK_RETURN);
 	}
 }
 

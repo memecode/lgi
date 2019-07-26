@@ -69,7 +69,7 @@ public:
 			{
 				switch (k.vkey)
 				{
-					case VK_RETURN:
+					case LK_RETURN:
 					{
 						LListItem *s = d->This->GetSelected();
 						int Idx = s ? d->This->IndexOf(s) : -1;
@@ -83,7 +83,7 @@ public:
 						}
 						break;
 					}
-					case VK_LEFT:
+					case LK_LEFT:
 					{
 						GRange r = GetSelectionRange();
 						if (r.Len && GetCaret() ==  0)
@@ -93,7 +93,7 @@ public:
 						}
 						break;
 					}
-					case VK_RIGHT:
+					case LK_RIGHT:
 					{
 						GRange r = GetSelectionRange();
 						if (r.Len == 0)
@@ -109,10 +109,10 @@ public:
 						}
 						break;
 					}
-					case VK_PAGEUP:
-					case VK_PAGEDOWN:
-					case VK_UP:
-					case VK_DOWN:
+					case LK_PAGEUP:
+					case LK_PAGEDOWN:
+					case LK_UP:
+					case LK_DOWN:
 					{
 						bool b = d->This->OnKey(k);
 						d->Invalidate();
@@ -141,11 +141,11 @@ public:
 	{
 		if (!k.IsChar && k.Down())
 		{
-			if (k.c16 == VK_LEFT)
+			if (k.c16 == LK_LEFT)
 			{
 				d->MoveCell(-1);
 			}
-			else if (k.c16 == VK_RIGHT)
+			else if (k.c16 == LK_RIGHT)
 			{
 				d->MoveCell(1);
 			}

@@ -1508,6 +1508,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 	if (!Res_SetStrRef(Tag, &Ctx))
 		return SExclude;
 	Res_SetFlags(Tag);
+
 	const char *Style = Tag->GetAttr("style");
 	if (Style)
 	{

@@ -1637,13 +1637,13 @@ bool GRichTextEdit::OnKey(GKey &k)
 
 	#ifdef WINDOWS
 	// Wtf is this?
-	// Weeeelll, windows likes to send a VK_TAB after a Ctrl+I doesn't it?
+	// Weeeelll, windows likes to send a LK_TAB after a Ctrl+I doesn't it?
 	// And this just takes care of that TAB before it can overwrite your
 	// selection.
 	if (ToLower(k.c16) == 'i' &&
 		k.Ctrl())
 	{
-		d->EatVkeys.Add(VK_TAB);
+		d->EatVkeys.Add(LK_TAB);
 	}
 	else if (d->EatVkeys.Length())
 	{
@@ -1675,7 +1675,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 					!GetReadOnly()
 					&&
 					(
-						(k.c16 >= ' ' || k.vkey == VK_TAB)
+						(k.c16 >= ' ' || k.vkey == LK_TAB)
 						&&
 						k.c16 != 127
 					)
@@ -1759,7 +1759,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 				}
 				break;
 			}
-			case VK_RETURN:
+			case LK_RETURN:
 			{
 				if (GetReadOnly())
 					break;
@@ -1772,7 +1772,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 
 				return true;
 			}
-			case VK_BACKSPACE:
+			case LK_BACKSPACE:
 			{
 				if (GetReadOnly())
 					break;
@@ -1859,11 +1859,11 @@ bool GRichTextEdit::OnKey(GKey &k)
 	{
 		switch (k.vkey)
 		{
-			case VK_TAB:
+			case LK_TAB:
 				return true;
-			case VK_RETURN:
+			case LK_RETURN:
 				return !GetReadOnly();
-			case VK_BACKSPACE:
+			case LK_BACKSPACE:
 			{
 				if (!GetReadOnly())
 				{
@@ -1890,13 +1890,13 @@ bool GRichTextEdit::OnKey(GKey &k)
 				}
 				break;
 			}
-			case VK_F3:
+			case LK_F3:
 			{
 				if (k.Down())
 					DoFindNext();
 				return true;
 			}
-			case VK_LEFT:
+			case LK_LEFT:
 			{
 				#ifdef MAC
 				if (k.Ctrl())
@@ -1935,7 +1935,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 				}
 				return true;
 			}
-			case VK_RIGHT:
+			case LK_RIGHT:
 			{
 				#ifdef MAC
 				if (k.Ctrl())
@@ -1973,7 +1973,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 				}
 				return true;
 			}
-			case VK_UP:
+			case LK_UP:
 			{
 				if (k.Alt())
 					return false;
@@ -1991,7 +1991,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 				}
 				return true;
 			}
-			case VK_DOWN:
+			case LK_DOWN:
 			{
 				if (k.Alt())
 					return false;
@@ -2009,7 +2009,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 				}
 				return true;
 			}
-			case VK_END:
+			case LK_END:
 			{
 				if (k.Down())
 				{
@@ -2024,7 +2024,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 				}
 				return true;
 			}
-			case VK_HOME:
+			case LK_HOME:
 			{
 				if (k.Down())
 				{
@@ -2039,7 +2039,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 				}
 				return true;
 			}
-			case VK_PAGEUP:
+			case LK_PAGEUP:
 			{
 				#ifdef MAC
 				GTextView4_PageUp:
@@ -2053,7 +2053,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_PAGEDOWN:
+			case LK_PAGEDOWN:
 			{
 				#ifdef MAC
 				GTextView4_PageDown:
@@ -2067,7 +2067,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_INSERT:
+			case LK_INSERT:
 			{
 				if (k.Down())
 				{
@@ -2086,7 +2086,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 				return true;
 				break;
 			}
-			case VK_DELETE:
+			case LK_DELETE:
 			{
 				if (GetReadOnly())
 					break;
@@ -2376,7 +2376,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 							}
 							break;
 						}
-						case VK_RETURN:
+						case LK_RETURN:
 						{
 							if (!GetReadOnly() && !k.Shift())
 							{

@@ -1443,15 +1443,15 @@ bool GTree::OnKey(GKey &k)
 	{
 		switch (k.vkey)
 		{
-			case VK_PAGEUP:
-			case VK_PAGEDOWN:
+			case LK_PAGEUP:
+			case LK_PAGEDOWN:
 			{
 				if (i && i->d->Pos.Y() > 0)
 				{
 					int Page = GetClient().Y() / i->d->Pos.Y();
 					for (int j=0; j<Page; j++)
 					{
-						GTreeItem *n = GetAdjacent(i, k.c16 == VK_PAGEDOWN);
+						GTreeItem *n = GetAdjacent(i, k.c16 == LK_PAGEDOWN);
 						if (n)
 						{
 							i = n;
@@ -1467,7 +1467,7 @@ bool GTree::OnKey(GKey &k)
 				Status = true;
 				break;
 			}
-			case VK_HOME:
+			case LK_HOME:
 			{
 				GTreeItem *i;
 				if ((i = Items[0]))
@@ -1478,7 +1478,7 @@ bool GTree::OnKey(GKey &k)
 				Status = true;
 				break;
 			}
-			case VK_END:
+			case LK_END:
 			{
 				GTreeItem *n = i, *p = 0;
 				while ((n = GetAdjacent(n, true)))
@@ -1493,7 +1493,7 @@ bool GTree::OnKey(GKey &k)
 				Status = true;
 				break;
 			}
-			case VK_LEFT:
+			case LK_LEFT:
 			{
 				if (i)
 				{
@@ -1516,7 +1516,7 @@ bool GTree::OnKey(GKey &k)
 				}
 				// fall thru
 			}
-			case VK_UP:
+			case LK_UP:
 			{
 				GTreeItem *n = GetAdjacent(i, false);
 				if (n)
@@ -1527,7 +1527,7 @@ bool GTree::OnKey(GKey &k)
 				Status = true;
 				break;
 			}
-			case VK_RIGHT:
+			case LK_RIGHT:
 			{
 				if (i)
 				{
@@ -1540,7 +1540,7 @@ bool GTree::OnKey(GKey &k)
 				}
 				// fall thru
 			}
-			case VK_DOWN:
+			case LK_DOWN:
 			{
 				GTreeItem *n = GetAdjacent(i, true);
 				if (n)
@@ -1551,7 +1551,7 @@ bool GTree::OnKey(GKey &k)
 				Status = true;
 				break;
 			}
-			case VK_DELETE:
+			case LK_DELETE:
 			{
 				if (k.Down())
 				{

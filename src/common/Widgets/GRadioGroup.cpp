@@ -18,7 +18,6 @@ static int MinYSize = 16;
 class GRadioGroupPrivate : public LMutex, public LStringLayout
 {
 	GRadioGroup *Ctrl;
-	GFontCache Cache;
 	
 public:
 	static int NextId;
@@ -28,7 +27,7 @@ public:
 
 	GRadioGroupPrivate(GRadioGroup *g) :
 		LMutex("GRadioGroupPrivate"),
-		LStringLayout(&Cache)
+		LStringLayout(LgiApp->GetFontCache())
 	{
 		Ctrl = g;
 		Val = 0;
@@ -352,11 +351,10 @@ public:
 	GRadioButton *Ctrl;
 	bool Val;
 	bool Over;
-	GFontCache Cache;
 
 	GRadioButtonPrivate(GRadioButton *c) :
 		LMutex("GRadioButtonPrivate"),
-		LStringLayout(&Cache)
+		LStringLayout(LgiApp->GetFontCache())
 	{
 		Ctrl = c;
 		Val = 0;
@@ -619,8 +617,8 @@ bool GRadioButton::OnKey(GKey &k)
 
 	switch (k.vkey)
 	{
-		case VK_UP:
-		case VK_LEFT:
+		case LK_UP:
+		case LK_LEFT:
 		{
 			if (k.Down())
 			{
@@ -629,8 +627,8 @@ bool GRadioButton::OnKey(GKey &k)
 			Status = true;
 			break;
 		}
-		case VK_RIGHT:
-		case VK_DOWN:
+		case LK_RIGHT:
+		case LK_DOWN:
 		{
 			if (k.Down())
 			{
@@ -639,7 +637,7 @@ bool GRadioButton::OnKey(GKey &k)
 			Status = true;
 			break;
 		}
-		case VK_SPACE:
+		case LK_SPACE:
 		{
 			if (k.Down())
 			{

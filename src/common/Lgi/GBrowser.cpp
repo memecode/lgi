@@ -543,7 +543,7 @@ int GBrowser::OnNotify(GViewI *c, int f)
 	{
 		case IDC_SEARCH_TXT:
 		{
-			if (f != VK_RETURN)
+			if (f != LK_RETURN)
 				break;
 			// else fall through
 		}
@@ -559,7 +559,7 @@ int GBrowser::OnNotify(GViewI *c, int f)
 		}
 		case IDC_URI:
 		{
-			if (f == VK_RETURN)
+			if (f == LK_RETURN)
 			{
 				char *u = c->Name();
 				SetUri(u);
