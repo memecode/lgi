@@ -178,8 +178,7 @@ bool LgiGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
 
 GString LGetFileMimeType(const char *File)
 {
-	GAutoString s = LgiApp->GetFileMimeType(File);
-	return GString(s.Get());
+	return LgiApp->GetFileMimeType(File);
 }
 
 bool _GetSystemFont(char *FontType, char *Font, int FontBufSize, int &PointSize)
@@ -398,8 +397,8 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Er
 				else
 				{
 					// look up the type...
-					char Mime[256] = "";
-					if (LGetFileMimeType(File, Mime, sizeof(Mime)))
+					auto Mime = LGetFileMimeType(File);
+					if (Mime)
 					{
 						// printf("LGetFileMimeType(%s)=%s\n", File, Mime);
 						

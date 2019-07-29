@@ -1,7 +1,7 @@
 # Linux:
 # sudo apt install libgtk-3-dev
 
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.7)
 
 cmake_policy(SET CMP0054 NEW)
 set(CMAKE_CXX_STANDARD 11)
@@ -65,7 +65,7 @@ if (APPLE)
 
 elseif (LINUX)
 
-	add_definitions("-DLINUX -DLGI_LIBRARY -DLGI_RES -fPIC -w -fno-inline -fpermissive")
+	add_definitions("-DLINUX -DPOSIX -DLGI_LIBRARY -DLGI_RES -fPIC -w -fno-inline -fpermissive")
 	find_package(PkgConfig REQUIRED)
 	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4)

@@ -224,10 +224,7 @@ int main(int Args, char **Arg)
 	int Status = 0;
 
 	#ifdef __GTK_H__
-		#if defined(__GNUC__) && defined(LINUX)
-		Gtk::XInitThreads();
-		#endif
-		Gtk::gtk_init(&Args, &Arg);
+	Gtk::gtk_init(&Args, &Arg);
     #endif
 
 	OsAppArguments AppArgs(Args, (const char**)Arg);

@@ -24,7 +24,7 @@ ifeq ($(Build),Debug)
 		-L../Debug \
 		-lmagic \
 		-lpthread \
-		`pkg-config --libs gtk+-2.0` \
+		`pkg-config --libs gtk+-3.0` \
 		-static-libgcc \
 		-llgi$(Tag) \
 		-L../$(BuildDir)
@@ -34,7 +34,7 @@ ifeq ($(Build),Debug)
 		-I../include/linux/Gtk \
 		-I./Code \
 		-I./Resources \
-		`pkg-config --cflags gtk+-2.0`
+		`pkg-config --cflags gtk+-3.0`
 else
 	Flags += -s -Os -std=c++11
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
@@ -42,7 +42,7 @@ else
 		-L../Release \
 		-lmagic \
 		-lpthread \
-		`pkg-config --libs gtk+-2.0` \
+		`pkg-config --libs gtk+-3.0` \
 		-static-libgcc \
 		-llgi$(Tag) \
 		-L../$(BuildDir)
@@ -52,7 +52,7 @@ else
 		-I../include/linux/Gtk \
 		-I./Code \
 		-I./Resources \
-		`pkg-config --cflags gtk+-2.0`
+		`pkg-config --cflags gtk+-3.0`
 endif
 
 # Dependencies

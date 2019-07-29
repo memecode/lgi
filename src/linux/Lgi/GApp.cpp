@@ -974,7 +974,7 @@ void GApp::OnCommandLine()
 			const char *mt = magic_file(d->hMagic, File);
 			if (mt)
 			{
-				Status.Reset(NewStr(mt));
+				Status = mt;
 			}
 		}
 		

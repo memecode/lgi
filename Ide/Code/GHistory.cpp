@@ -33,7 +33,9 @@ public:
 	{
 		if (Lst)
 		{
+			#if !defined(__GTK_H__)
 			if (!Lst->Handle())
+			#endif
 				AttachChildren();
 			Lst->Focus(true);
 		}

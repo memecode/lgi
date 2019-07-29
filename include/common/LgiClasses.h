@@ -117,19 +117,11 @@ protected:
 	friend class GWin32Class;
 	ClassContainer *GetClasses();
 
-	#elif defined ATHEOS
-
-	char *_AppFile;
-
-	#elif defined BEOS
-
-	void RefsReceived(BMessage *Msg);
-	
 	#elif defined LINUX
 	
 	friend class GClipBoard;
 	
-	virtual void OnEvents();
+	// virtual void OnEvents();
 	void DeleteMeLater(GViewI *v);
 	void SetClipBoardContent(OsView Hnd, GVariant &v);
 	bool GetClipBoardContent(OsView Hnd, GVariant &v, GArray<char*> &Types);

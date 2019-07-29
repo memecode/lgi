@@ -959,9 +959,9 @@ GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 				#ifdef __arm__
 				if
 				(
-					(v->depth == 16 && v->red_shift < v->blue_shift)
+					(Depth == 16 && shift_r < shift_b)
 					||
-					(v->depth != 16 && v->red_shift > v->blue_shift)
+					(Depth != 16 && shift_r > shift_b)
 				)
 				#else
 				if (shift_r > shift_b)
