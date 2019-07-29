@@ -132,7 +132,10 @@ public:
 		if (First)
 		{
 			if (Rd < 4)
-				LgiAssert(!"Initial read is too small");
+			{
+				// LgiAssert(!"Initial read is too small");
+				return 0;
+			}
 			else
 			{
 				First = false;

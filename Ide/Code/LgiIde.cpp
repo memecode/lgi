@@ -81,18 +81,26 @@ public:
 			}
 			case LK_RETURN:
 			{
-				LListItem *i = Lst->GetSelected();
-				if (i)
+				if (k.Down())
 				{
-					char *Ref = i->GetText(0);
-					App->GotoReference(Ref, 1, false);
+					LListItem *i = Lst->GetSelected();
+					if (i)
+					{
+						char *Ref = i->GetText(0);
+						App->GotoReference(Ref, 1, false);
+					}
+					EndModal(1);
+					return true;
 				}
-				EndModal(1);
 				break;
 			}
 			case LK_ESCAPE:
 			{
-				EndModal(0);
+				if (k.Down())
+				{
+					EndModal(0);
+					return true;
+				}
 				break;
 			}
 		}
