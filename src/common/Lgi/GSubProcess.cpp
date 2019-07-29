@@ -20,14 +20,11 @@
 */ 
 
 #if defined(MAC) || defined(POSIX)
-#define _GNU_SOURCE
-#include <errno.h>
-#include <signal.h>
-#include <sys/wait.h>
-#include <sys/ioctl.h>
-#endif
-#ifdef BEOS
-#include <sys/select.h>
+	#define _GNU_SOURCE
+	#include <errno.h>
+	#include <signal.h>
+	#include <sys/wait.h>
+	#include <sys/ioctl.h>
 #endif
 
 #include "Lgi.h"

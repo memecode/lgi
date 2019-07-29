@@ -147,6 +147,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../include/common/GStream.h \
 	../include/common/GString.h \
 	../include/common/GStringClass.h \
+	../include/common/GSubProcess.h \
 	../include/common/GTableLayout.h \
 	../include/common/GTabView.h \
 	../include/common/GTextFile.h \
@@ -178,6 +179,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../include/common/LgiRes.h \
 	../include/common/LgiWidgets.h \
 	../include/common/LHashTable.h \
+	../include/common/LJson.h \
 	../include/common/LList.h \
 	../include/common/LListItemCheckBox.h \
 	../include/common/LListItemRadioBtn.h \
@@ -310,7 +312,8 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../src/linux/Lgi/GView.cpp \
 	../src/linux/Lgi/GWidgets.cpp \
 	../src/linux/Lgi/GWindow.cpp \
-	../src/linux/Lgi/LThread.cpp
+	../src/linux/Lgi/LThread.cpp \
+	../src/mac/carbon/General/GFile.cpp
 	export Build=$(Build); \
 	$(MAKE) -C .. -f Makefile.linux
 
@@ -424,6 +427,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LThread.h \
 	../include/common/GInput.h
 
+../include/common/GToolBar.h : ../include/common/GImageList.h
+
 ../include/common/GString.h : ../include/common/LgiDefs.h \
 	../include/linux/Gtk/LgiOsDefs.h
 
@@ -466,6 +471,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/LListItemCheckBox.h : ../include/common/LList.h
 
+../include/common/GTextLabel.h : 
+
 ../include/linux/Gtk/LgiOsClasses.h : 
 
 ../include/common/GDisplayString.h : ../include/common/GFont.h
@@ -480,6 +487,10 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LgiRes.h \
 	../include/common/LStringLayout.h
 
+../include/common/GDisplayString.h : ../include/common/GFont.h
+
+../include/common/Res.h : ../include/common/GXmlTree.h
+
 ../include/common/LgiWidgets.h : 
 
 ../src/common/Gdc2/Font/GFontSystem.cpp : ../include/common/Lgi.h \
@@ -487,14 +498,18 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GLibrary.h \
 	../include/common/GLibraryUtils.h
 
-../include/common/LMutex.h : 
+../include/common/GLibraryUtils.h : 
 
 ../include/common/GToken.h : ../include/common/GArray.h \
 	../include/common/GString.h
 
-../src/common/Lgi/GTrayIcon.cpp : ../include/common/Lgi.h
+../include/common/GFont.h : ../include/common/GRect.h \
+	../include/linux/Gtk/LgiOsClasses.h \
+	../include/common/GColour.h \
+	../include/common/GCapabilities.h \
+	../include/common/GCss.h
 
-../include/common/LgiWidgets.h : 
+../src/common/Lgi/GTrayIcon.cpp : ../include/common/Lgi.h
 
 ../include/common/GXmlTreeUi.h : ../include/common/GVariant.h \
 	../include/common/LList.h
@@ -532,7 +547,10 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GToken.h \
 	../include/linux/Gtk/LgiWinManGlue.h
 
-../include/common/LThread.h : ../include/common/LMutex.h
+../include/linux/Gtk/LgiWinManGlue.h : ../include/common/LgiDefs.h \
+	../include/common/GMem.h \
+	../include/common/GArray.h \
+	../include/common/LgiClass.h
 
 ../include/common/GNotifications.h : 
 
@@ -549,10 +567,14 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GNotifications.h \
 	../include/common/LgiRes.h
 
+../include/common/GNotifications.h : 
+
 ../include/common/GHashTable.h : ../include/common/GMem.h \
 	../include/common/GArray.h \
 	../include/common/GString.h \
 	../include/common/LgiClass.h
+
+../include/common/LMutex.h : 
 
 ../include/common/LUnicodeString.h : ../include/common/GUnicode.h
 
@@ -560,15 +582,31 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GPalette.h \
 	../include/common/GPixelRops.h
 
-../include/common/GPixelRops.h : 
-
-../include/common/GButton.h : 
-
-../include/common/GXmlTree.h : ../include/common/GHashTable.h \
+../include/common/Gdc2.h : ../include/linux/Gtk/LgiOsDefs.h \
+	../include/common/LgiInc.h \
+	../include/common/LgiClass.h \
+	../include/common/Progress.h \
+	../include/common/GFile.h \
+	../include/common/GMem.h \
+	../include/common/Core.h \
+	../include/common/GContainers.h \
+	../include/common/GCapabilities.h \
 	../include/common/GRefCount.h \
-	../include/common/GDom.h
+	../include/common/GPalette.h \
+	../include/common/GLibrary.h \
+	../include/common/GColourSpace.h \
+	../include/common/GRect.h \
+	../include/common/GPoint.h \
+	../include/common/GColour.h \
+	../include/common/GFilter.h
 
-../include/common/Res.h : ../include/common/GXmlTree.h
+../include/common/GPoint.h : 
+
+../include/common/GFilter.h : ../include/common/GContainers.h
+
+../include/common/GScrollBar.h : 
+
+../include/common/GRect.h : ../include/common/GPoint.h
 
 ../src/common/Text/GString.cpp : ../include/common/GMem.h \
 	../include/linux/Gtk/LgiOsDefs.h \
@@ -597,12 +635,9 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GTableLayout.h \
 	../include/common/LgiRes.h
 
-../include/common/GCombo.h : 
+../include/common/GBitmap.h : 
 
-../include/common/GHashTable.h : ../include/common/GMem.h \
-	../include/common/GArray.h \
-	../include/common/GString.h \
-	../include/common/LgiClass.h
+../include/common/GCombo.h : 
 
 ../src/common/Lgi/GVariant.cpp : ../include/common/Lgi.h \
 	../include/common/GVariant.h \
@@ -615,6 +650,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LgiRes.h \
 	../include/common/GPopup.h \
 	../include/common/GNotifications.h
+
+../include/common/GPopup.h : 
 
 ../src/linux/Gtk/Gdc2.cpp : ../include/common/Lgi.h \
 	../include/common/GPalette.h
@@ -636,7 +673,13 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/GSlider.h : 
 
-../include/common/GAutoPtr.h : 
+../include/common/GItemContainer.h : ../include/common/GPopup.h \
+	../include/common/GNotifications.h \
+	../include/common/GCss.h
+
+../include/common/GBox.h : ../include/common/GCss.h
+
+../include/common/GFontSelect.h : 
 
 ../include/common/GLibrary.h : 
 
@@ -653,6 +696,12 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 ../src/common/Lgi/LThreadEvent.cpp : ../include/common/Lgi.h \
 	../include/common/LThreadEvent.h
 
+../include/common/GTextView3.h : ../include/common/GDocView.h \
+	../include/common/GUndo.h \
+	../include/common/GDragAndDrop.h \
+	../include/common/GCss.h \
+	../include/common/LUnrolledList.h
+
 ../src/common/Lgi/GCssTools.cpp : ../include/common/Lgi.h \
 	../include/common/GCssTools.h
 
@@ -662,14 +711,12 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GString.h
 
 ../src/linux/Lgi/GGeneral.cpp : ../include/common/Lgi.h \
-	../include/common/GProcess.h \
+	../include/common/GSubProcess.h \
 	../include/common/GTextLabel.h \
 	../include/common/GButton.h \
 	../include/linux/Gtk/LgiWinManGlue.h \
 	../include/common/GToken.h \
 	/usr/include/gstreamer-1.0/gst/gst.h
-
-../include/common/GProcess.h : ../include/common/GStream.h
 
 ../include/common/GFile.h : ../include/common/GMem.h \
 	../include/common/LgiClass.h \
@@ -706,8 +753,6 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LgiRes.h \
 	../include/common/LStringLayout.h
 
-../include/linux/Gtk/LgiOsClasses.h : 
-
 ../src/common/Resource/LgiRes.cpp : ../include/common/Lgi.h \
 	../include/common/GToken.h \
 	../include/common/LList.h \
@@ -728,6 +773,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GScrollBar.h \
 	../include/common/GTree.h
 
+../include/common/GTabView.h : 
+
 ../src/common/Lgi/GViewCommon.cpp : ../include/common/Lgi.h \
 	../include/common/GViewPriv.h \
 	../include/common/GDragAndDrop.h \
@@ -739,9 +786,9 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GPopup.h \
 	../include/linux/Gtk/LgiWidget.h
 
-../include/linux/Gtk/LgiWidget.h : 
-
 ../include/common/GViewPriv.h : ../include/common/LThreadEvent.h
+
+../include/linux/Gtk/LgiWidget.h : 
 
 ../include/common/GEventTargetThread.h : ../include/common/LThread.h \
 	../include/common/LMutex.h \
@@ -749,21 +796,13 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LCancel.h \
 	../include/common/LHashTable.h
 
-../include/common/LCancel.h : 
-
-../include/common/GVariant.h : ../include/common/GDom.h \
-	../include/common/LDateTime.h \
-	../include/common/GContainers.h \
-	../include/common/LHashTable.h \
-	../include/common/GString.h
-
-../include/common/LDateTime.h : ../include/common/GStringClass.h
-
-../include/common/GEdit.h : ../include/common/GTextView3.h
+../include/common/GColourSpace.h : 
 
 ../include/common/LError.h : 
 
-../include/common/GFontCache.h : 
+../include/common/GFileSelect.h : 
+
+../include/linux/Gtk/LgiOsClasses.h : 
 
 ../src/common/Widgets/GCheckBox.cpp : ../include/common/Lgi.h \
 	../include/common/GSkinEngine.h \
@@ -779,10 +818,13 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GFontSelect.h \
 	../include/common/GdiLeak.h
 
+../include/common/GContainers.h : ../include/common/LgiInc.h \
+	../include/linux/Gtk/LgiOsDefs.h \
+	../include/common/GStream.h
+
 ../src/linux/Gtk/GPrintDC.cpp : ../include/common/Lgi.h
 
 ../src/linux/Lgi/GApp.cpp : ../include/common/Lgi.h \
-	../include/common/GProcess.h \
 	../include/common/GSkinEngine.h \
 	../include/common/GArray.h \
 	../include/linux/Gtk/LgiWinManGlue.h \
@@ -790,7 +832,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/win32/GSymLookup.h \
 	../include/linux/GSymLookup.h \
 	../include/common/GToken.h \
-	../include/common/GFontCache.h
+	../include/common/GFontCache.h \
+	../include/common/LJson.h
 
 ../include/common/GMessage.h : 
 
@@ -801,8 +844,12 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GPassword.h \
 	../include/common/GDataDlg.h
 
-../include/common/Progress.h : ../include/common/LMutex.h \
-	../include/common/LCancel.h
+../include/common/LList.h : ../include/common/GMem.h \
+	../include/common/GArray.h \
+	../include/common/GPopup.h \
+	../include/common/GDisplayString.h \
+	../include/common/GCss.h \
+	../include/common/GItemContainer.h
 
 ../src/common/Lgi/LgiMsg.cpp : ../include/common/Lgi.h \
 	../include/common/GTextLabel.h \
@@ -826,13 +873,15 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GColour.h \
 	../include/common/GFilter.h
 
-../include/common/GColour.h : ../include/common/GColourSpace.h
-
-../include/common/GColourSpace.h : 
-
 ../include/common/GClipBoard.h : 
 
-../include/common/GSkinEngine.h : ../include/common/LList.h
+../include/common/LgiClass.h : ../include/common/LgiInc.h \
+	../include/common/LgiDefs.h \
+	../include/common/GAutoPtr.h
+
+../include/common/GMru.h : ../include/common/GProperties.h
+
+../include/common/GProgress.h : 
 
 ../src/common/Lgi/GCss.cpp : ../include/common/Lgi.h \
 	../include/common/LgiCommon.h
@@ -843,18 +892,19 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../src/linux/Gtk/LgiWidget.cpp : ../include/common/Lgi.h \
 	../include/common/GDragAndDrop.h \
+	../include/common/GViewPriv.h \
 	../include/linux/Gtk/LgiWidget.h
+
+../include/common/GLibrary.h : 
 
 ../src/common/Gdc2/15Bit.cpp : ../include/common/Gdc2.h \
 	../include/common/GPalette.h
 
 ../include/common/GTextLabel.h : 
 
+../include/common/GCheckBox.h : 
+
 ../include/common/GPath.h : ../include/common/GMatrix.h
-
-../include/common/GUnicode.h : ../include/common/LgiInc.h
-
-../include/common/GRadioGroup.h : 
 
 ./Resources/resdefs.h : 
 
@@ -862,29 +912,23 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GScrollBar.h \
 	../include/common/LgiRes.h
 
-../include/common/GdiLeak.h : 
-
-../include/common/GTextLabel.h : 
-
-../include/common/GProgress.h : 
+../include/common/INet.h : ../include/common/LgiNetInc.h \
+	../include/common/LgiInterfaces.h \
+	../include/common/GMem.h \
+	../include/common/GContainers.h \
+	../include/common/GStream.h \
+	../include/common/GString.h \
+	../include/common/LCancel.h \
+	../include/common/LHashTable.h
 
 ../include/common/LListItemRadioBtn.h : 
 
 ../include/common/GBox.h : ../include/common/GCss.h
 
-../include/common/GDataDlg.h : ../include/common/GProperties.h \
-	../include/common/GScrollBar.h \
-	../include/common/GTextLabel.h
-
-../include/common/GPalette.h : ../include/common/GColourSpace.h \
-	../include/common/GFile.h
-
-../include/common/GStream.h : ../include/common/GDom.h \
-	../include/common/GStringClass.h
-
-../include/common/GMatrix.h : 
-
-../include/common/GCheckBox.h : 
+../include/common/GMenu.h : ../include/common/GMenuImpl.h \
+	../include/common/GXmlTree.h \
+	../include/common/Res.h \
+	../include/common/GImageList.h
 
 ../src/common/Gdc2/Tools/GColourReduce.cpp : ../include/common/Gdc2.h \
 	../include/common/GPalette.h
@@ -892,39 +936,22 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 ../src/common/Lgi/GWindowCommon.cpp : ../include/common/Lgi.h \
 	../include/common/INet.h
 
-../include/common/Gdc2.h : ../include/linux/Gtk/LgiOsDefs.h \
-	../include/common/LgiInc.h \
-	../include/common/LgiClass.h \
-	../include/common/Progress.h \
-	../include/common/GFile.h \
-	../include/common/GMem.h \
-	../include/common/Core.h \
-	../include/common/GContainers.h \
-	../include/common/GCapabilities.h \
-	../include/common/GRefCount.h \
-	../include/common/GPalette.h \
-	../include/common/GLibrary.h \
-	../include/common/GColourSpace.h \
-	../include/common/GRect.h \
-	../include/common/GPoint.h \
-	../include/common/GColour.h \
-	../include/common/GFilter.h
-
 ../include/common/GProcess.h : ../include/common/GStream.h
 
-../include/common/GTree.h : ../include/common/GItemContainer.h
+../include/common/LThread.h : ../include/common/LMutex.h
+
+../include/common/LJson.h : ../include/common/GArray.h \
+	../include/common/GStringClass.h
 
 ../include/common/GBitmap.h : 
 
 ../include/common/GPanel.h : ../include/common/GDisplayString.h
 
-../include/linux/GSymLookup.h : ../include/common/GProcess.h
+../include/linux/GSymLookup.h : ../include/common/GSubProcess.h
 
 ../include/common/GMime.h : ../include/common/LgiNetInc.h \
 	../include/common/GStream.h \
 	../include/common/INetTools.h
-
-../include/common/LgiNetInc.h : 
 
 ../include/common/GStringClass.h : ../include/common/GUnicode.h \
 	../include/common/GArray.h \
@@ -952,7 +979,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/GFilter.h : ../include/common/GContainers.h
 
-../include/common/GCapabilities.h : ../include/common/LHashTable.h
+../include/common/Core.h : 
 
 ../src/linux/Lgi/GLayout.cpp : ../include/common/Lgi.h \
 	../include/common/GScrollBar.h \
@@ -969,9 +996,9 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LgiRes.h \
 	../include/common/GPath.h
 
-../include/common/GPath.h : ../include/common/GMatrix.h
-
 ../include/common/LgiInc.h : 
+
+../include/common/GButton.h : 
 
 ../include/common/LgiCommon.h : ../include/common/GMem.h \
 	../include/common/GArray.h \
@@ -981,21 +1008,16 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/GScrollBar.h : 
 
-../include/common/GBox.h : ../include/common/GCss.h
-
-../include/common/GString.h : ../include/common/LgiDefs.h \
-	../include/linux/Gtk/LgiOsDefs.h
-
 ../include/common/GPassword.h : 
 
-../include/common/GDragAndDrop.h : ../include/common/GVariant.h
+../include/common/LgiInterfaces.h : ../include/common/GMem.h \
+	../include/common/GArray.h \
+	../include/linux/Gtk/LgiOsDefs.h \
+	../include/common/GColour.h \
+	../include/common/LCancel.h \
+	../include/common/GStringClass.h
 
 ../include/common/GMru.h : ../include/common/GProperties.h
-
-../include/linux/Gtk/LgiWinManGlue.h : ../include/common/LgiDefs.h \
-	../include/common/GMem.h \
-	../include/common/GArray.h \
-	../include/common/LgiClass.h
 
 ../include/common/GXmlTree.h : ../include/common/GHashTable.h \
 	../include/common/GRefCount.h \
@@ -1004,7 +1026,9 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 ../include/common/GTableLayout.h : ../include/common/GCss.h \
 	../include/common/GNotifications.h
 
-../include/common/GScrollBar.h : 
+../include/common/GDragAndDrop.h : ../include/common/GVariant.h
+
+../include/common/GColour.h : ../include/common/GColourSpace.h
 
 ../include/common/GInput.h : 
 
@@ -1017,8 +1041,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GRops.h \
 	../src/common/Gdc2/GRopsCases.cpp
 
-../include/common/LgiDefs.h : ../include/common/LgiInc.h \
-	../include/common/GAutoPtr.h
+../include/common/GRops.h : ../include/common/GPixelRops.h
 
 ../src/common/Lgi/GObject.cpp : ../include/common/Gdc2.h \
 	../include/common/LgiCommon.h \
@@ -1063,8 +1086,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GDisplayString.h \
 	../include/common/LgiRes.h
 
-../include/common/GToken.h : ../include/common/GArray.h \
-	../include/common/GString.h
+../include/common/GProcess.h : ../include/common/GStream.h
 
 ../include/linux/Gtk/LgiOsDefs.h : ../include/common/LgiDefs.h \
 	../include/common/LgiInc.h \
@@ -1096,14 +1118,15 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LCancel.h \
 	../include/common/LHashTable.h
 
-../include/common/LgiInterfaces.h : ../include/common/GMem.h \
-	../include/common/GArray.h \
-	../include/linux/Gtk/LgiOsDefs.h \
-	../include/common/GColour.h \
-	../include/common/LCancel.h \
-	../include/common/GStringClass.h
-
 ../include/common/GEdit.h : ../include/common/GTextView3.h
+
+../include/common/GSubProcess.h : 
+
+../include/linux/GSymLookup.h : ../include/common/GSubProcess.h
+
+../include/common/GProperties.h : ../include/common/GContainers.h \
+	../include/common/LgiClass.h \
+	../include/common/GString.h
 
 ../include/common/GTextView3.h : ../include/common/GDocView.h \
 	../include/common/GUndo.h \
@@ -1111,18 +1134,12 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GCss.h \
 	../include/common/LUnrolledList.h
 
-../include/common/GUndo.h : 
-
-../include/common/LUnrolledList.h : 
-
-../include/common/GFont.h : ../include/common/GRect.h \
-	../include/linux/Gtk/LgiOsClasses.h \
-	../include/common/GColour.h \
-	../include/common/GCapabilities.h \
-	../include/common/GCss.h
+../include/common/GCssTools.h : ../include/common/GCss.h
 
 ../src/linux/Gtk/GMemDC.cpp : ../include/common/Gdc2.h \
 	../include/common/GString.h
+
+../include/common/LCancel.h : 
 
 ../src/common/Gdc2/Path/GPath.cpp : ../include/common/Lgi.h \
 	../include/common/GPath.h \
@@ -1149,11 +1166,11 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LgiRes.h \
 	../include/common/GCssTools.h
 
-../include/common/GTextView3.h : ../include/common/GDocView.h \
-	../include/common/GUndo.h \
-	../include/common/GDragAndDrop.h \
-	../include/common/GCss.h \
-	../include/common/LUnrolledList.h
+../include/common/LgiCommon.h : ../include/common/GMem.h \
+	../include/common/GArray.h \
+	../include/common/LgiClass.h \
+	../include/common/GString.h \
+	../include/common/GStringClass.h
 
 ../src/common/Gdc2/16Bit.cpp : ../include/common/Gdc2.h \
 	../include/common/GPalette.h
@@ -1164,19 +1181,22 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LHashTable.h \
 	../include/common/GString.h
 
-../include/linux/GSymLookup.h : ../include/common/GProcess.h
+../include/common/LDateTime.h : ../include/common/GStringClass.h
 
-../include/common/GMru.h : ../include/common/GProperties.h
-
-../src/common/Gdc2/GRopsCases.cpp : 
-
-../include/common/GCssTools.h : ../include/common/GCss.h
+../include/common/GPassword.h : 
 
 ../include/common/GPoint.h : 
 
 ../include/common/GMenuImpl.h : ../include/common/GPopup.h
 
-../include/common/GFontSelect.h : 
+../include/common/GXmlTree.h : ../include/common/GHashTable.h \
+	../include/common/GRefCount.h \
+	../include/common/GDom.h
+
+../include/common/GImageList.h : 
+
+../include/common/GToken.h : ../include/common/GArray.h \
+	../include/common/GString.h
 
 ../src/common/Widgets/GCombo.cpp : ../include/common/Lgi.h \
 	../include/common/GVariant.h \
@@ -1187,11 +1207,13 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/Core.h : 
 
-../include/common/LgiCommon.h : ../include/common/GMem.h \
-	../include/common/GArray.h \
+../include/common/GFile.h : ../include/common/GMem.h \
 	../include/common/LgiClass.h \
-	../include/common/GString.h \
-	../include/common/GStringClass.h
+	../include/common/GStream.h \
+	../include/common/GArray.h \
+	../include/common/GRefCount.h \
+	../include/common/GStringClass.h \
+	../include/common/LError.h
 
 ../include/common/LThreadEvent.h : 
 
@@ -1199,8 +1221,6 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/INetTools.h : ../include/common/GContainers.h \
 	../include/common/LgiNetInc.h
-
-../include/common/GPassword.h : 
 
 ../include/common/Progress.h : ../include/common/LMutex.h \
 	../include/common/LCancel.h
@@ -1211,20 +1231,6 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/GUndo.h : 
 
-../include/common/GArray.h : ../include/common/GRange.h
-
-../include/common/INet.h : ../include/common/LgiNetInc.h \
-	../include/common/LgiInterfaces.h \
-	../include/common/GMem.h \
-	../include/common/GContainers.h \
-	../include/common/GStream.h \
-	../include/common/GString.h \
-	../include/common/LCancel.h \
-	../include/common/LHashTable.h
-
-../include/common/GDocView.h : ../include/common/GVariant.h \
-	../include/common/GNotifications.h
-
 ../src/common/Widgets/GEdit.cpp : ../include/common/Lgi.h \
 	../include/common/GEdit.h \
 	../include/common/GClipBoard.h \
@@ -1234,7 +1240,9 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/GClipBoard.h : 
 
-../include/common/GRect.h : ../include/common/GPoint.h
+../include/common/GMem.h : ../include/common/LgiInc.h \
+	../include/linux/Gtk/LgiOsDefs.h \
+	../include/common/LgiClass.h
 
 ../include/common/Mail.h : ../include/common/INet.h \
 	../include/common/Base64.h \
@@ -1243,6 +1251,11 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LOAuth2.h
 
 ../include/common/Base64.h : ../include/common/LgiDefs.h
+
+../include/common/LHashTable.h : ../include/common/GMem.h \
+	../include/common/GArray.h \
+	../include/common/GString.h \
+	../include/common/LgiClass.h
 
 ../src/common/Widgets/GPopup.cpp : ../include/common/Lgi.h \
 	../include/common/GPopup.h \
@@ -1255,7 +1268,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GPassword.h \
 	../include/common/GVariant.h
 
-../include/common/GFileSelect.h : 
+../include/common/GAutoPtr.h : 
 
 ../include/common/GProgressDlg.h : ../include/common/GTextLabel.h \
 	../include/common/GTableLayout.h
@@ -1267,13 +1280,23 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LCancel.h \
 	../include/common/GStringClass.h
 
-../include/common/GToolBar.h : ../include/common/GImageList.h
+../include/common/Lgi.h : ../include/common/LgiInc.h \
+	../include/linux/Gtk/LgiOsDefs.h \
+	../include/common/LgiMsgs.h \
+	../include/common/LgiDefs.h \
+	../include/common/GMem.h \
+	../include/common/GString.h \
+	../include/common/LgiClass.h \
+	../include/common/Progress.h \
+	../include/common/GFile.h \
+	../include/common/Gdc2.h \
+	../include/common/GFont.h \
+	../include/common/LgiClasses.h \
+	../include/common/LgiCommon.h
 
-../include/common/LStringLayout.h : ../include/common/GDisplayString.h \
-	../include/common/GCss.h \
-	../include/common/GFontCache.h
+../include/common/LgiMsgs.h : 
 
-../include/common/GRops.h : ../include/common/GPixelRops.h
+../include/common/GdiLeak.h : 
 
 ../include/common/GUnicode.h : ../include/common/LgiInc.h
 
@@ -1299,7 +1322,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GToken.h \
 	../include/common/GCapabilities.h \
 	../include/linux/Gtk/LgiWinManGlue.h \
-	../include/common/GProcess.h \
+	../include/common/GSubProcess.h \
 	../include/win32/GSymLookup.h \
 	../include/linux/GSymLookup.h \
 	../include/common/GLibrary.h \
@@ -1321,21 +1344,46 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LgiRes.h \
 	../include/common/Mail.h
 
-../include/common/GContainers.h : ../include/common/LgiInc.h \
-	../include/linux/Gtk/LgiOsDefs.h \
-	../include/common/GStream.h
+../include/common/Mail.h : ../include/common/INet.h \
+	../include/common/Base64.h \
+	../include/common/Progress.h \
+	../include/common/GVariant.h \
+	../include/common/LOAuth2.h
+
+../src/mac/carbon/General/GFile.cpp : ../include/common/GFile.h \
+	../include/common/GContainers.h \
+	../include/common/GToken.h \
+	../include/common/Gdc2.h \
+	../include/common/LgiCommon.h \
+	../include/common/GString.h
+
+../include/common/GDom.h : ../include/common/LgiInterfaces.h \
+	../include/common/GMem.h \
+	../include/common/GArray.h \
+	../include/common/LDomFields.h
 
 ../src/common/INet/GUri.cpp : ../include/common/Lgi.h \
 	../include/common/INet.h \
 	../include/common/GRegKey.h
+
+../include/common/GVariant.h : ../include/common/GDom.h \
+	../include/common/LDateTime.h \
+	../include/common/GContainers.h \
+	../include/common/LHashTable.h \
+	../include/common/GString.h
+
+../include/common/GMenuImpl.h : ../include/common/GPopup.h
+
+../include/common/GStream.h : ../include/common/GDom.h \
+	../include/common/GStringClass.h
+
+../include/common/GMatrix.h : 
 
 ../include/common/GTree.h : ../include/common/GItemContainer.h
 
 ../include/common/GDataDlg.h : ../include/common/GProperties.h \
 	../include/common/GScrollBar.h \
 	../include/common/GTextLabel.h
-
-../include/common/GSlider.h : 
 
 ../include/common/Lgi.h : ../include/common/LgiInc.h \
 	../include/linux/Gtk/LgiOsDefs.h \
@@ -1350,6 +1398,57 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GFont.h \
 	../include/common/LgiClasses.h \
 	../include/common/LgiCommon.h
+
+../include/common/GPalette.h : ../include/common/GColourSpace.h \
+	../include/common/GFile.h
+
+../include/common/LDomFields.h : 
+
+../include/common/GRange.h : 
+
+../include/common/GArray.h : ../include/common/GRange.h
+
+../src/common/Gdc2/GRect.cpp : ../include/common/Gdc2.h \
+	../include/common/GToken.h
+
+../include/common/INetTools.h : ../include/common/GContainers.h \
+	../include/common/LgiNetInc.h
+
+../include/common/GCombo.h : 
+
+../src/common/General/GFileCommon.cpp : ../include/common/Lgi.h \
+	../include/common/GVariant.h
+
+../include/common/GPath.h : ../include/common/GMatrix.h
+
+../include/common/LMutex.h : 
+
+../include/common/Progress.h : ../include/common/LMutex.h \
+	../include/common/LCancel.h
+
+../include/common/GRegKey.h : ../include/common/GContainers.h
+
+../include/win32/GSymLookup.h : 
+
+../include/common/LThread.h : ../include/common/LMutex.h
+
+../include/linux/Gtk/LgiWidget.h : 
+
+../src/linux/Lgi/GClipBoard.cpp : ../include/common/Lgi.h \
+	../include/common/GVariant.h \
+	../include/common/GClipBoard.h
+
+../src/common/General/GContainers.cpp : ../include/common/GMem.h \
+	../include/common/GContainers.h \
+	../include/common/GString.h \
+	../include/common/LgiCommon.h
+
+../include/common/GString.h : ../include/common/LgiDefs.h \
+	../include/linux/Gtk/LgiOsDefs.h
+
+../include/common/GUnicode.h : ../include/common/LgiInc.h
+
+../include/common/GButton.h : 
 
 ../include/common/LgiClasses.h : ../include/common/LMutex.h \
 	../include/linux/Gtk/LgiOsClasses.h \
@@ -1368,83 +1467,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LThread.h \
 	../include/common/GInput.h
 
-../include/common/LgiMsgs.h : 
-
-../include/common/GPalette.h : ../include/common/GColourSpace.h \
-	../include/common/GFile.h
-
-../include/common/GRange.h : 
-
 ../include/common/LError.h : 
-
-../include/common/Core.h : 
-
-../src/common/Gdc2/GRect.cpp : ../include/common/Gdc2.h \
-	../include/common/GToken.h
-
-../include/common/GCombo.h : 
-
-../src/common/General/GFileCommon.cpp : ../include/common/Lgi.h \
-	../include/common/GVariant.h
-
-../include/common/GMenuImpl.h : ../include/common/GPopup.h
-
-../include/common/LOAuth2.h : 
-
-../include/common/Mail.h : ../include/common/INet.h \
-	../include/common/Base64.h \
-	../include/common/Progress.h \
-	../include/common/GVariant.h \
-	../include/common/LOAuth2.h
-
-../include/common/LMutex.h : 
-
-../include/common/GRegKey.h : ../include/common/GContainers.h
-
-../include/win32/GSymLookup.h : 
-
-../include/common/LThread.h : ../include/common/LMutex.h
-
-../include/linux/Gtk/LgiWidget.h : 
-
-../include/common/GLibraryUtils.h : 
-
-../include/common/GDisplayString.h : ../include/common/GFont.h
-
-../include/common/INetTools.h : ../include/common/GContainers.h \
-	../include/common/LgiNetInc.h
-
-../src/linux/Lgi/GClipBoard.cpp : ../include/common/Lgi.h \
-	../include/common/GVariant.h \
-	../include/common/GClipBoard.h
-
-../include/common/LList.h : ../include/common/GMem.h \
-	../include/common/GArray.h \
-	../include/common/GPopup.h \
-	../include/common/GDisplayString.h \
-	../include/common/GCss.h \
-	../include/common/GItemContainer.h
-
-../src/common/General/GContainers.cpp : ../include/common/GMem.h \
-	../include/common/GContainers.h \
-	../include/common/GString.h \
-	../include/common/LgiCommon.h
-
-../include/common/Lgi.h : ../include/common/LgiInc.h \
-	../include/linux/Gtk/LgiOsDefs.h \
-	../include/common/LgiMsgs.h \
-	../include/common/LgiDefs.h \
-	../include/common/GMem.h \
-	../include/common/GString.h \
-	../include/common/LgiClass.h \
-	../include/common/Progress.h \
-	../include/common/GFile.h \
-	../include/common/Gdc2.h \
-	../include/common/GFont.h \
-	../include/common/LgiClasses.h \
-	../include/common/LgiCommon.h
-
-../include/common/GButton.h : 
 
 ../src/common/INet/Base64.cpp : ../include/common/GMem.h \
 	../include/common/LgiInc.h \
@@ -1455,7 +1478,12 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/linux/Gtk/LgiOsDefs.h \
 	../include/common/LgiClass.h
 
-../include/common/GTabView.h : 
+../include/common/LJson.h : ../include/common/GArray.h \
+	../include/common/GStringClass.h
+
+../include/common/GDataDlg.h : ../include/common/GProperties.h \
+	../include/common/GScrollBar.h \
+	../include/common/GTextLabel.h
 
 ../include/common/GFontSelect.h : 
 
@@ -1477,6 +1505,24 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GCapabilities.h \
 	../include/common/GCss.h
 
+../include/common/LgiDefs.h : ../include/common/LgiInc.h \
+	../include/common/GAutoPtr.h
+
+../include/common/GCapabilities.h : ../include/common/LHashTable.h
+
+../include/common/GPalette.h : ../include/common/GColourSpace.h \
+	../include/common/GFile.h
+
+../include/common/GCss.h : ../include/common/LgiInc.h \
+	../include/linux/Gtk/LgiOsDefs.h \
+	../include/common/GMem.h \
+	../include/common/Gdc2.h \
+	../include/common/GAutoPtr.h \
+	../include/common/GString.h \
+	../include/common/LHashTable.h
+
+../include/common/GPixelRops.h : 
+
 ../include/common/GStringClass.h : ../include/common/GUnicode.h \
 	../include/common/GArray.h \
 	../include/common/LgiClass.h
@@ -1493,27 +1539,24 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GDisplayString.h \
 	../include/common/GTableLayout.h
 
-../include/common/GMenu.h : ../include/common/GMenuImpl.h \
-	../include/common/GXmlTree.h \
-	../include/common/Res.h \
-	../include/common/GImageList.h
+../include/win32/GSymLookup.h : 
 
 ../include/common/GControlTree.h : ../include/common/GTree.h \
 	../include/common/GVariant.h
-
-../include/common/GFindReplaceDlg.h : 
 
 ../src/linux/Lgi/GPrinter.cpp : ../include/common/Lgi.h \
 	../include/common/LList.h \
 	../include/common/GButton.h \
 	../include/common/GPrinter.h
 
+../include/common/GPrinter.h : 
+
 ../include/common/GDom.h : ../include/common/LgiInterfaces.h \
 	../include/common/GMem.h \
 	../include/common/GArray.h \
 	../include/common/LDomFields.h
 
-../include/common/GNotifications.h : 
+../include/common/LUnrolledList.h : 
 
 ../src/common/Gdc2/Font/GDisplayString.cpp : ../include/common/Lgi.h \
 	../include/common/GVariant.h \
@@ -1523,11 +1566,17 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GPixelRops.h \
 	../include/common/LUnicodeString.h
 
+../include/common/LUnicodeString.h : ../include/common/GUnicode.h
+
 ../include/common/GFileSelect.h : 
 
 ../include/common/LgiMsgs.h : 
 
 ../src/common/Hash/sha1/sha1.c : 
+
+../include/common/LgiWidgets.h : 
+
+../include/common/GFindReplaceDlg.h : 
 
 ../include/common/LCancel.h : 
 
@@ -1540,18 +1589,14 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GDisplayString.h \
 	../include/linux/Gtk/LgiWidget.h
 
-../include/common/GTableLayout.h : ../include/common/GCss.h \
-	../include/common/GNotifications.h
-
 ../src/common/Lgi/GMenuCommon.cpp : ../include/common/Lgi.h
 
-../include/win32/GSymLookup.h : 
+../include/common/GTableLayout.h : ../include/common/GCss.h \
+	../include/common/GNotifications.h
 
 ../include/common/GContainers.h : ../include/common/LgiInc.h \
 	../include/linux/Gtk/LgiOsDefs.h \
 	../include/common/GStream.h
-
-../include/common/LUnicodeString.h : ../include/common/GUnicode.h
 
 ./Src/Lvc.h : ../include/common/Lgi.h \
 	../include/common/LList.h \
@@ -1566,28 +1611,18 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	./Src/VcCommit.h \
 	./Src/VcFolder.h
 
-./Src/VcFolder.h : ../include/common/GSubProcess.h
-
-./Src/VcFile.h : ../include/common/LListItemCheckBox.h
-
 ../include/common/GTextLog.h : ../include/common/GTextView3.h \
 	../include/common/INet.h
 
-./Src/VcCommit.h : 
+./Src/VcFile.h : ../include/common/LListItemCheckBox.h
+
+./Src/VcFolder.h : ../include/common/GSubProcess.h
+
+../include/common/LListItemCheckBox.h : ../include/common/LList.h
 
 ../include/common/GRefCount.h : 
 
-../include/common/GMem.h : ../include/common/LgiInc.h \
-	../include/linux/Gtk/LgiOsDefs.h \
-	../include/common/LgiClass.h
-
 ../src/common/Lgi/LMutex.cpp : ../include/common/Lgi.h
-
-../include/linux/Gtk/LgiOsDefs.h : ../include/common/LgiDefs.h \
-	../include/common/LgiInc.h \
-	../include/common/GMessage.h
-
-../include/common/LgiInc.h : 
 
 ../include/common/GEventTargetThread.h : ../include/common/LThread.h \
 	../include/common/LMutex.h \
@@ -1597,30 +1632,22 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/GRect.h : ../include/common/GPoint.h
 
+../include/common/GEdit.h : ../include/common/GTextView3.h
+
+../include/common/GImageList.h : 
+
+../include/linux/Gtk/LgiOsDefs.h : ../include/common/LgiDefs.h \
+	../include/common/LgiInc.h \
+	../include/common/GMessage.h
+
 ../include/common/GOptionsFile.h : ../include/common/GVariant.h \
 	../include/common/GXmlTree.h \
 	../include/common/LMutex.h
 
-../include/common/GPrinter.h : 
-
-../include/common/GImageList.h : 
-
 ../src/common/Gdc2/24Bit.cpp : ../include/common/Gdc2.h \
 	../include/common/GPalette.h
 
-../include/common/GBitmap.h : 
-
-../include/common/GSubProcess.h : 
-
-../include/common/GProperties.h : ../include/common/GContainers.h \
-	../include/common/LgiClass.h \
-	../include/common/GString.h
-
-../include/common/GFilter.h : ../include/common/GContainers.h
-
 ../include/common/GRops.h : ../include/common/GPixelRops.h
-
-../include/common/GImageList.h : 
 
 ../src/linux/Lgi/GWindow.cpp : ../include/common/Lgi.h \
 	../include/common/GDragAndDrop.h \
@@ -1628,9 +1655,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GPopup.h \
 	../include/common/GPanel.h \
 	../include/common/GNotifications.h \
+	../include/common/GViewPriv.h \
 	../include/linux/Gtk/LgiWidget.h
-
-../include/common/GPanel.h : ../include/common/GDisplayString.h
 
 ../include/common/LgiNetInc.h : 
 
@@ -1648,31 +1674,23 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GString.h \
 	../include/common/GVariant.h
 
-../include/common/GDom.h : ../include/common/LgiInterfaces.h \
-	../include/common/GMem.h \
-	../include/common/GArray.h \
-	../include/common/LDomFields.h
-
 ../src/common/Text/GDocView.cpp : ../include/common/Lgi.h \
 	../include/common/GDocView.h \
 	../include/common/INet.h
 
-../include/common/GInput.h : 
+../src/common/Gdc2/GRopsCases.cpp : 
 
-../include/common/GItemContainer.h : ../include/common/GPopup.h \
-	../include/common/GNotifications.h \
-	../include/common/GCss.h
+../include/common/GHashTable.h : ../include/common/GMem.h \
+	../include/common/GArray.h \
+	../include/common/GString.h \
+	../include/common/LgiClass.h
 
 ../src/common/Hash/md5/md5.c : 
 
+../include/common/GPanel.h : ../include/common/GDisplayString.h
+
 ../src/common/Hash/md5/md5.h : ../include/common/LgiInc.h \
 	../include/common/LgiDefs.h
-
-../include/common/LgiRes.h : ../include/common/Res.h \
-	../include/common/GContainers.h \
-	../include/common/GCss.h \
-	../include/common/GAutoPtr.h \
-	../include/common/GFontCache.h
 
 ../src/common/Gdc2/Tools/GdcTools.cpp : ../include/common/Gdc2.h \
 	../include/common/GdcTools.h \
@@ -1680,16 +1698,13 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/GdcTools.h : 
 
-../include/common/LHashTable.h : ../include/common/GMem.h \
-	../include/common/GArray.h \
-	../include/common/GString.h \
-	../include/common/LgiClass.h
-
 ../include/common/GColourSpace.h : 
 
 ../include/common/GdiLeak.h : 
 
 ../include/common/GToolBar.h : ../include/common/GImageList.h
+
+../include/common/LgiInc.h : 
 
 ../include/common/GCom.h : ../include/common/GContainers.h \
 	../include/common/GVariant.h
@@ -1709,15 +1724,15 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GToken.h \
 	../include/common/GPalette.h
 
-../include/common/LThreadEvent.h : 
-
 ../include/common/GCapabilities.h : ../include/common/LHashTable.h
 
-../include/common/LgiClass.h : ../include/common/LgiInc.h \
-	../include/common/LgiDefs.h \
-	../include/common/GAutoPtr.h
+../include/common/GRefCount.h : 
 
-../include/common/LListItemCheckBox.h : ../include/common/LList.h
+../include/common/GSlider.h : 
+
+../include/common/GUndo.h : 
+
+../include/common/LThreadEvent.h : 
 
 ../include/common/GStream.h : ../include/common/GDom.h \
 	../include/common/GStringClass.h
@@ -1725,8 +1740,6 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 ../include/common/GMatrix.h : 
 
 ../include/common/LDomFields.h : 
-
-../include/common/GLibrary.h : 
 
 ../src/common/Gdc2/Alpha.cpp : ../include/common/Gdc2.h \
 	../include/common/GPath.h \
@@ -1753,14 +1766,15 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GToken.h \
 	../include/common/GDocView.h
 
-../include/common/GPoint.h : 
+../include/common/GSkinEngine.h : ../include/common/LList.h
 
-../include/common/GProgressDlg.h : ../include/common/GTextLabel.h \
-	../include/common/GTableLayout.h
+../include/common/LStringLayout.h : ../include/common/GDisplayString.h \
+	../include/common/GCss.h \
+	../include/common/GFontCache.h
 
-../include/common/LDomFields.h : 
+../include/common/LOAuth2.h : 
 
-../include/common/GRefCount.h : 
+../include/common/GInput.h : 
 
 ../src/common/Text/GUtf8.cpp : ../include/common/Lgi.h
 
@@ -1770,6 +1784,13 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GDisplayString.h \
 	../include/common/GCss.h \
 	../include/common/GItemContainer.h
+
+../include/common/LgiNetInc.h : 
+
+../include/common/GProgressDlg.h : ../include/common/GTextLabel.h \
+	../include/common/GTableLayout.h
+
+../include/common/GFontCache.h : 
 
 ../src/common/Text/GXmlTree.cpp : ../include/common/Lgi.h \
 	../include/common/GXmlTree.h \
@@ -1807,11 +1828,20 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GToken.h \
 	../include/common/GString.h
 
+../include/common/LgiRes.h : ../include/common/Res.h \
+	../include/common/GContainers.h \
+	../include/common/GCss.h \
+	../include/common/GAutoPtr.h \
+	../include/common/GFontCache.h
+
 ../src/linux/Lgi/GMenuGtk.cpp : ../include/common/Lgi.h \
 	../include/common/GToken.h \
 	../include/common/GDisplayString.h
 
-../include/common/GPopup.h : 
+../include/common/GDocView.h : ../include/common/GVariant.h \
+	../include/common/GNotifications.h
+
+./Src/VcCommit.h : 
 
 ../src/linux/Lgi/GView.cpp : ../include/common/Lgi.h \
 	../include/common/GDragAndDrop.h \
@@ -1821,15 +1851,11 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GCss.h \
 	../include/linux/Gtk/LgiWidget.h
 
-./Resources/resource.h : 
+../include/common/GTree.h : ../include/common/GItemContainer.h
 
-../include/common/GFile.h : ../include/common/GMem.h \
-	../include/common/LgiClass.h \
-	../include/common/GStream.h \
-	../include/common/GArray.h \
-	../include/common/GRefCount.h \
-	../include/common/GStringClass.h \
-	../include/common/LError.h
+../include/common/GRadioGroup.h : 
+
+./Resources/resource.h : 
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gst.h : /usr/include/gstreamer-1.0/gst/glib-compat.h \
 	/usr/include/gstreamer-1.0/gst/gstenumtypes.h \
@@ -1861,6 +1887,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	/usr/include/gstreamer-1.0/gst/gstmeta.h \
 	/usr/include/gstreamer-1.0/gst/gstminiobject.h \
 	/usr/include/gstreamer-1.0/gst/gstobject.h \
+	/usr/include/gstreamer-1.0/gst/gststreamcollection.h \
 	/usr/include/gstreamer-1.0/gst/gstpad.h \
 	/usr/include/gstreamer-1.0/gst/gstparamspecs.h \
 	/usr/include/gstreamer-1.0/gst/gstpipeline.h \
@@ -1872,6 +1899,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	/usr/include/gstreamer-1.0/gst/gstregistry.h \
 	/usr/include/gstreamer-1.0/gst/gstsample.h \
 	/usr/include/gstreamer-1.0/gst/gstsegment.h \
+	/usr/include/gstreamer-1.0/gst/gststreams.h \
 	/usr/include/gstreamer-1.0/gst/gststructure.h \
 	/usr/include/gstreamer-1.0/gst/gstsystemclock.h \
 	/usr/include/gstreamer-1.0/gst/gsttaglist.h \
@@ -1895,11 +1923,11 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	/usr/include/gstreamer-1.0/gst/gstplugin.h \
 	/usr/include/gstreamer-1.0/gst/gstpluginfeature.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gsttracer.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h
+../../../../../../usr/include/gstreamer-1.0/gst/gsttracer.h : /usr/include/gstreamer-1.0/gst/gstconfig.h
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gsttocsetter.h : /usr/include/gstreamer-1.0/gst/gst.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstmemory.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstmemory.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstminiobject.h
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gstenumtypes.h : 
@@ -1910,11 +1938,12 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	/usr/include/gstreamer-1.0/gst/gstcaps.h
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gsturi.h : /usr/include/gstreamer-1.0/gst/gstelement.h \
-	/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h
+	/usr/include/gstreamer-1.0/gst/gstconfig.h
+
+../../../../../../usr/include/gstreamer-1.0/gst/gststreamcollection.h : /usr/include/gstreamer-1.0/gst/gstobject.h \
+	/usr/include/gstreamer-1.0/gst/gststreams.h
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gstsystemclock.h : /usr/include/gstreamer-1.0/gst/gstclock.h
-
-../../../../../../usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h : 
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gsttagsetter.h : /usr/include/gstreamer-1.0/gst/gst.h
 
@@ -1925,7 +1954,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gsterror.h : 
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstdebugutils.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstdebugutils.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstbin.h
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gstevent.h : /usr/include/gstreamer-1.0/gst/gstminiobject.h \
@@ -1938,7 +1967,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	/usr/include/gstreamer-1.0/gst/gstmessage.h \
 	/usr/include/gstreamer-1.0/gst/gstcontext.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstcaps.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstcaps.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstminiobject.h \
 	/usr/include/gstreamer-1.0/gst/gststructure.h \
 	/usr/include/gstreamer-1.0/gst/gstcapsfeatures.h \
@@ -1958,7 +1987,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	/usr/include/gstreamer-1.0/gst/gstplugin.h \
 	/usr/include/gstreamer-1.0/gst/gstpluginfeature.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstutils.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstutils.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstbin.h \
 	/usr/include/gstreamer-1.0/gst/gstparse.h
 
@@ -1971,24 +2000,24 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 ../../../../../../usr/include/gstreamer-1.0/gst/gstbus.h : /usr/include/gstreamer-1.0/gst/gstmessage.h \
 	/usr/include/gstreamer-1.0/gst/gstclock.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gsttoc.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gsttoc.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstminiobject.h \
 	/usr/include/gstreamer-1.0/gst/gststructure.h \
 	/usr/include/gstreamer-1.0/gst/gsttaglist.h \
 	/usr/include/gstreamer-1.0/gst/gstformat.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstclock.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstclock.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstobject.h
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gstcontext.h : /usr/include/gstreamer-1.0/gst/gstminiobject.h \
 	/usr/include/gstreamer-1.0/gst/gststructure.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstcontrolsource.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstcontrolsource.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstclock.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstdatetime.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h
+../../../../../../usr/include/gstreamer-1.0/gst/gstdatetime.h : /usr/include/gstreamer-1.0/gst/gstconfig.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstiterator.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h
+../../../../../../usr/include/gstreamer-1.0/gst/gstiterator.h : /usr/include/gstreamer-1.0/gst/gstconfig.h
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gstmessage.h : /usr/include/gstreamer-1.0/gst/gstminiobject.h \
 	/usr/include/gstreamer-1.0/gst/gstobject.h \
@@ -1997,11 +2026,12 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	/usr/include/gstreamer-1.0/gst/gststructure.h \
 	/usr/include/gstreamer-1.0/gst/gstquery.h \
 	/usr/include/gstreamer-1.0/gst/gsttoc.h \
-	/usr/include/gstreamer-1.0/gst/gstdevice.h
+	/usr/include/gstreamer-1.0/gst/gstdevice.h \
+	/usr/include/gstreamer-1.0/gst/gststreamcollection.h
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gstformat.h : /usr/include/gstreamer-1.0/gst/gstiterator.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstpad.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstpad.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstobject.h \
 	/usr/include/gstreamer-1.0/gst/gstbuffer.h \
 	/usr/include/gstreamer-1.0/gst/gstbufferlist.h \
@@ -2011,23 +2041,23 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	/usr/include/gstreamer-1.0/gst/gstquery.h \
 	/usr/include/gstreamer-1.0/gst/gsttask.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstregistry.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstregistry.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstplugin.h \
 	/usr/include/gstreamer-1.0/gst/gstpluginfeature.h
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gstelementmetadata.h : 
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstvalue.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstvalue.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstcaps.h \
 	/usr/include/gstreamer-1.0/gst/gststructure.h \
 	/usr/include/gstreamer-1.0/gst/gstcapsfeatures.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstcapsfeatures.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
-	/usr/include/gstreamer-1.0/gst/glib-compat.h
-
 ../../../../../../usr/include/gstreamer-1.0/gst/gstsegment.h : /usr/include/gstreamer-1.0/gst/gstformat.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstplugin.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstcapsfeatures.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
+	/usr/include/gstreamer-1.0/gst/glib-compat.h
+
+../../../../../../usr/include/gstreamer-1.0/gst/gstplugin.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstobject.h \
 	/usr/include/gstreamer-1.0/gst/gstmacros.h \
 	/usr/include/gstreamer-1.0/gst/gststructure.h
@@ -2036,9 +2066,11 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gsttracerrecord.h : /usr/include/gstreamer-1.0/gst/gstobject.h
 
+../../../../../../usr/include/gstreamer-1.0/gst/gstversion.h : 
+
 ../../../../../../usr/include/gstreamer-1.0/gst/gstpoll.h : /usr/include/gstreamer-1.0/gst/gstclock.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstversion.h : 
+../../../../../../usr/include/gstreamer-1.0/gst/gstconfig.h : 
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gsttypefindfactory.h : /usr/include/gstreamer-1.0/gst/gstcaps.h \
 	/usr/include/gstreamer-1.0/gst/gstplugin.h \
@@ -2054,21 +2086,21 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gstparse.h : /usr/include/gstreamer-1.0/gst/gstelement.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstpreset.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h
+../../../../../../usr/include/gstreamer-1.0/gst/gstpreset.h : /usr/include/gstreamer-1.0/gst/gstconfig.h
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gstsample.h : /usr/include/gstreamer-1.0/gst/gstbuffer.h \
 	/usr/include/gstreamer-1.0/gst/gstbufferlist.h \
 	/usr/include/gstreamer-1.0/gst/gstcaps.h \
 	/usr/include/gstreamer-1.0/gst/gstsegment.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstdeviceproviderfactory.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstdeviceproviderfactory.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstplugin.h \
 	/usr/include/gstreamer-1.0/gst/gstpluginfeature.h \
 	/usr/include/gstreamer-1.0/gst/gstdeviceprovider.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstminiobject.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h
+../../../../../../usr/include/gstreamer-1.0/gst/gstminiobject.h : /usr/include/gstreamer-1.0/gst/gstconfig.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gststructure.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gststructure.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstclock.h \
 	/usr/include/gstreamer-1.0/gst/gstdatetime.h \
 	/usr/include/gstreamer-1.0/gst/glib-compat.h
@@ -2077,11 +2109,11 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gstparamspecs.h : /usr/include/gstreamer-1.0/gst/gstvalue.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstobject.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstobject.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstcontrolbinding.h \
 	/usr/include/gstreamer-1.0/gst/gstcontrolsource.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstcontrolbinding.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstcontrolbinding.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstcontrolsource.h
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gstmeta.h : /usr/include/gstreamer-1.0/gst/gstbuffer.h
@@ -2097,7 +2129,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gstghostpad.h : /usr/include/gstreamer-1.0/gst/gstpad.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstelement.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstelement.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstobject.h \
 	/usr/include/gstreamer-1.0/gst/gstpad.h \
 	/usr/include/gstreamer-1.0/gst/gstbus.h \
@@ -2110,7 +2142,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	/usr/include/gstreamer-1.0/gst/gstquery.h \
 	/usr/include/gstreamer-1.0/gst/gsttaglist.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstinfo.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h
+../../../../../../usr/include/gstreamer-1.0/gst/gstinfo.h : /usr/include/gstreamer-1.0/gst/gstconfig.h
 
 ../../../../../../usr/include/gstreamer-1.0/gst/gstquery.h : /usr/include/gstreamer-1.0/gst/gstiterator.h \
 	/usr/include/gstreamer-1.0/gst/gstminiobject.h \
@@ -2124,16 +2156,19 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 ../../../../../../usr/include/gstreamer-1.0/gst/gstallocator.h : /usr/include/gstreamer-1.0/gst/gstmemory.h \
 	/usr/include/gstreamer-1.0/gst/gstobject.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstelementfactory.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstelementfactory.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstelement.h \
 	/usr/include/gstreamer-1.0/gst/gstpad.h \
 	/usr/include/gstreamer-1.0/gst/gstplugin.h \
 	/usr/include/gstreamer-1.0/gst/gstpluginfeature.h \
 	/usr/include/gstreamer-1.0/gst/gsturi.h
 
+../../../../../../usr/include/gstreamer-1.0/gst/gststreams.h : /usr/include/gstreamer-1.0/gst/gstobject.h \
+	/usr/include/gstreamer-1.0/gst/gstevent.h
+
 ../../../../../../usr/include/gstreamer-1.0/gst/gsttaskpool.h : /usr/include/gstreamer-1.0/gst/gstobject.h
 
-../../../../../../usr/include/gstreamer-1.0/gst/gstpadtemplate.h : /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include/gst/gstconfig.h \
+../../../../../../usr/include/gstreamer-1.0/gst/gstpadtemplate.h : /usr/include/gstreamer-1.0/gst/gstconfig.h \
 	/usr/include/gstreamer-1.0/gst/gstobject.h \
 	/usr/include/gstreamer-1.0/gst/gstbuffer.h \
 	/usr/include/gstreamer-1.0/gst/gstcaps.h \
@@ -2155,21 +2190,13 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GRegKey.h \
 	../include/common/LgiNetInc.h
 
-../include/common/GCss.h : ../include/common/LgiInc.h \
-	../include/linux/Gtk/LgiOsDefs.h \
-	../include/common/GMem.h \
-	../include/common/Gdc2.h \
-	../include/common/GAutoPtr.h \
-	../include/common/GString.h \
-	../include/common/LHashTable.h
-
 VPATH=%.cpp \
-	../include/linux/Gtk \
 	../include/linux \
-	../../../../../../usr/include/gstreamer-1.0 \
-	../include/common \
-	../../../../../../usr/lib/x86_64-linux-gnu/gstreamer-1.0/include \
-	./Resources \
 	./Src \
+	../../../../../../usr/include/gstreamer-1.0 \
+	../../../../../../usr/lib/x86_64-linux-gnu/gstreamer-1.0/include \
+	../include/linux/Gtk \
+	../include/common \
+	./Resources \
 	$(BuildDir)
 
