@@ -86,7 +86,7 @@
 		<General>
 			<Makefile>
 				<Windows>.\LgiIde_vs2013.sln</Windows>
-				<Linux>./Gtk3/build/Makefile</Linux>
+				<Linux>./Makefile</Linux>
 				<Mac>./Gtk3/build/Makefile</Mac>
 				<Haiku>Makefile.haiku</Haiku>
 			</Makefile>

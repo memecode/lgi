@@ -517,11 +517,21 @@ const char *EventTypeToString(int i)
 		case GDK_TOUCH_CANCEL: return "GDK_TOUCH_CANCEL";
 		case GDK_TOUCHPAD_SWIPE: return "GDK_TOUCHPAD_SWIPE";
 		case GDK_TOUCHPAD_PINCH: return "GDK_TOUCHPAD_PINCH";
+		#ifdef GDK_PAD_BUTTON_PRESS
 		case GDK_PAD_BUTTON_PRESS: return "GDK_PAD_BUTTON_PRESS";
+		#endif
+		#ifdef GDK_PAD_BUTTON_RELEASE
 		case GDK_PAD_BUTTON_RELEASE: return "GDK_PAD_BUTTON_RELEASE";
+		#endif
+		#ifdef GDK_PAD_RING
 		case GDK_PAD_RING: return "GDK_PAD_RING";
+		#endif
+		#ifdef GDK_PAD_STRIP
 		case GDK_PAD_STRIP: return "GDK_PAD_STRIP";
+		#endif
+		#ifdef GDK_PAD_GROUP_MODE
 		case GDK_PAD_GROUP_MODE: return "GDK_PAD_GROUP_MODE";
+		#endif
 	}
 	return "#error";
 }

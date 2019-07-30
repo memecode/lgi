@@ -30,7 +30,9 @@ elseif (LINUX)
 	add_definitions("-DLINUX -DLGI_LIBRARY -D_DEBUG -DLGI_RES -DPOSIX -fPIC -w -fno-inline -fpermissive")
 	find_package(PkgConfig REQUIRED)
 	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
-	find_package(PNG REQUIRED)
+
+	get_filename_component(LIBPNG_SEARCH "${CODELIB}/libpng" ABSOLUTE)
+	add_subdirectory(${LIBPNG_SEARCH} libpng_dir)
 	
 elseif (MSVC)
 
@@ -181,7 +183,9 @@ if (APPLE)
 					"$<TARGET_FILE:png15>"
 					"$<TARGET_FILE_DIR:LgiIde>"
 				COMMENT "Copying Lgi to output directory")
+
 elseif (LINUX)
+
 	target_include_directories(LgiIde PUBLIC
 								"${ROOT}/include/linux/Gtk"
 								"${ROOT}/include/linux"
@@ -189,7 +193,14 @@ elseif (LINUX)
 								${PNG_INCLUDE_DIR})
 	target_link_libraries(LgiIde Lgi pthread ${GTK2_LIBRARIES} ${PNG_LIBRARY})
 	set(RESOURCE_DEST "Resources")
+	add_custom_command(TARGET LgiIde POST_BUILD
+				COMMAND "${CMAKE_COMMAND}" -E copy
+					"$<TARGET_FILE:png15>"
+					"$<TARGET_FILE_DIR:LgiIde>"
+				COMMENT "Copying Lgi to output directory")
+
 elseif (MSVC)
+
 	target_include_directories(LgiIde PUBLIC ${PNG_INCLUDE_DIRS} ${VCPKG}/installed/x64-windows/include)
 	target_link_libraries(	LgiIde
 							Lgi)
@@ -201,6 +212,7 @@ elseif (MSVC)
 					COMMENT "Copying Lgi to output directory")
 	endif()
 	set(RESOURCE_DEST "Resources")
+
 endif ()
 
 # Create a resources sub-folder and copy over the resource files (images and lr8)
