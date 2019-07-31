@@ -193,7 +193,7 @@ void EditTray::OnHeaderList(GMouse &m)
 			// Sort them..
 			Headers.Sort(FileNameSorter);
 			
-			GSubMenu *s = new GSubMenu;
+			LSubMenu *s = new LSubMenu;
 			if (s)
 			{
 				// Construct the menu
@@ -231,7 +231,7 @@ void EditTray::OnHeaderList(GMouse &m)
 
 							char Title[256];
 							sprintf_s(Title, sizeof(Title), "%s - %s", First, Last);
-							GSubMenu *sub = s->AppendSub(Title);
+							LSubMenu *sub = s->AppendSub(Title);
 							if (sub)
 							{
 								for (int n=0; n<Letters[i].Length(); n++)
@@ -322,7 +322,7 @@ void EditTray::OnFunctionList(GMouse &m)
 
 	if (BuildDefnList(Doc->GetFileName(), Ctrl->NameW(), Funcs, DefnNone /*DefnFunc | DefnClass*/))
 	{
-		GSubMenu s;
+		LSubMenu s;
 		GArray<DefnInfo*> a;					
 		
 		int ScreenHt = GdcD->Y();
@@ -331,7 +331,7 @@ void EditTray::OnFunctionList(GMouse &m)
 		bool UseSubMenus = Ratio > 0.9f;
 		int Buckets = UseSubMenus ? (int)(ScreenLines * 0.9) : 1;
 		int BucketSize = MAX(2, (int)Funcs.Length() / Buckets);
-		GSubMenu *Cur = NULL;
+		LSubMenu *Cur = NULL;
 		
 		for (unsigned n=0; n<Funcs.Length(); n++)
 		{
@@ -412,7 +412,7 @@ void EditTray::OnSymbolList(GMouse &m)
 			Doc->GetApp()->FindSymbol(s, Matches);
 			#endif
 
-			GSubMenu *s = new GSubMenu;
+			LSubMenu *s = new LSubMenu;
 			if (s)
 			{
 				// Construct the menu
@@ -484,7 +484,7 @@ void EditTray::OnSymbolList(GMouse &m)
 	}
 	else
 	{
-		GSubMenu *s = new GSubMenu;
+		LSubMenu *s = new LSubMenu;
 		if (s)
 		{
 			s->AppendItem("(No symbol currently selected)", 0, false);
@@ -1193,7 +1193,7 @@ void IdeDoc::OnTitleClick(GMouse &m)
 			sprintf_s(sBrowse, sizeof(sBrowse), "Browse to '%s'", Dir ? Dir + 1 : Full);			
 		}
 		
-		GSubMenu s;
+		LSubMenu s;
 		s.AppendItem("Save", IDM_SAVE, d->IsDirty);
 		s.AppendItem("Close", IDM_CLOSE, true);
 		if (Fn)

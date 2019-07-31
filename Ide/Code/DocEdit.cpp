@@ -67,9 +67,9 @@ void DocEdit::OnCreate()
 	Run();
 }
 
-bool DocEdit::AppendItems(GSubMenu *Menu, int Base)
+bool DocEdit::AppendItems(LSubMenu *Menu, int Base)
 {
-	GSubMenu *Insert = Menu->AppendSub("Insert...");
+	LSubMenu *Insert = Menu->AppendSub("Insert...");
 	if (Insert)
 	{
 		Insert->AppendItem("File Comment", IDM_FILE_COMMENT, Doc->GetProject() != 0);

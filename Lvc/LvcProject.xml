@@ -20,7 +20,7 @@
 		<Node File="./Src/VcFile.cpp" Type="2" Platforms="15" />
 		<Node File="./Src/VcFolder.cpp" Type="2" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
 	<Node Name="Resources" Type="1" Platforms="15" Id="1">
 		<Node File="./Resources/icon32.png" Type="6" Platforms="15" />
 		<Node File="./installer-zip.py" Type="8" Platforms="15" />
@@ -30,7 +30,7 @@
 		<General>
 			<Makefile>
 				<Linux>Makefile.linux</Linux>
-				<Windows>Makefile.win32</Windows>
+				<Windows>.\Lvc.sln</Windows>
 			</Makefile>
 			<Executable>
 				<Linux>
@@ -117,7 +117,9 @@
 		</Editor>
 		<Advanced>
 			<OtherMakefileRules />
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Windows />
+			</PostBuildCommands>
 		</Advanced>
 	</Settings>
 </Project>

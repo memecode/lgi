@@ -2946,7 +2946,7 @@ void IdeProject::OnMouseClick(GMouse &m)
 {
 	if (m.IsContextMenu())
 	{
-		GSubMenu Sub;
+		LSubMenu Sub;
 		Sub.AppendItem("New Folder", IDM_NEW_FOLDER);
 		Sub.AppendItem("New Web Folder", IDM_WEB_FOLDER);
 		Sub.AppendSeparator();

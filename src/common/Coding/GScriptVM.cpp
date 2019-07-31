@@ -1516,7 +1516,7 @@ GVmDebuggerWnd::GVmDebuggerWnd(GView *Parent, GVmDebuggerCallback *Callback, GVi
 	
 	if (Attach(NULL))
 	{
-		if ((Menu = new GMenu))
+		if ((Menu = new LMenu))
 		{
 			Menu->Attach(this);
 			LSubMenu *s = Menu->AppendSub("Debug");

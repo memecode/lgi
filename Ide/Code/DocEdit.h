@@ -181,7 +181,7 @@ public:
 	void OnCreate() override;
 
 	// Overrides
-	bool AppendItems(GSubMenu *Menu, int Base) override;
+	bool AppendItems(LSubMenu *Menu, int Base) override;
 	bool DoGoto() override;
 	void OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour) override;
 	void OnMouseClick(GMouse &m) override;

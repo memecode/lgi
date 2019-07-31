@@ -1541,7 +1541,7 @@ bool GMenuLoader::Load(LgiMenuRes *MenuRes, GXmlTag *Tag, ResFileFormat Format, 
 	return Status;
 }
 
-bool GMenu::Load(GView *w, const char *Res, const char *TagList)
+bool LMenu::Load(GView *w, const char *Res, const char *TagList)
 {
 	bool Status = false;
 

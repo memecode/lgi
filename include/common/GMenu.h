@@ -52,7 +52,7 @@
 class LgiClass GMenuLoader
 {
 	friend class LMenuItem;
-	friend class GMenu;
+	friend class LMenu;
 	friend class LSubMenu;
 	friend class MenuImpl;
 	friend class SubMenuImplPrivate;
@@ -89,7 +89,7 @@ class LgiClass LSubMenu :
 	public GDom
 {
 	friend class LMenuItem;
-	friend class GMenu;
+	friend class LMenu;
 	friend class SubMenuImpl;
 	friend class MenuItemImpl;
 	friend class MenuImpl;
@@ -127,7 +127,7 @@ protected:
 	/// The parent menu item or NULL if the root menu
 	LMenuItem		*Parent;
 	/// The top level window this sub menu belongs to or NULL
-	GMenu			*Menu;
+	LMenu			*Menu;
 	/// The window that the menu belongs to or NULL.
 	GViewI			*Window;
 	
@@ -273,7 +273,7 @@ public:
 	LMenuItem *GetParent() { return Parent; }
 	
 	/// Returns the menu that this belongs to
-	GMenu *GetMenu() { return Menu; }
+	LMenu *GetMenu() { return Menu; }
 
 	// Dom impl
 	bool GetVariant(const char *Name, GVariant &Value, char *Arr = NULL);
@@ -287,7 +287,7 @@ class LgiClass LMenuItem :
 	public GDom
 {
 	friend class LSubMenu;
-	friend class GMenu;
+	friend class LMenu;
 	friend class GView;
 	friend class SubMenuImpl;
 	friend class MenuItemImpl;
@@ -307,7 +307,7 @@ private:
 	#endif
 
 protected:
-	GMenu			*Menu;
+	LMenu			*Menu;
 	LSubMenu		*Parent;
 	LSubMenu		*Child;
 	int				Position;
@@ -355,7 +355,7 @@ public:
 	LMenuItem(BMenuItem *item);
 	LMenuItem(LSubMenu *p);
 	#endif
-	LMenuItem(GMenu *m, LSubMenu *p, const char *txt, int Id, int Pos, const char *Shortcut = 0);
+	LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int Id, int Pos, const char *Shortcut = 0);
 	virtual ~LMenuItem();
 
 	LMenuItem &operator =(const LMenuItem &m) { LgiAssert(!"This shouldn't be used anywhere"); return *this; }
@@ -367,7 +367,7 @@ public:
 	/// Returns the parent sub menu
 	LSubMenu *GetParent();
 	/// Returns the parent sub menu
-	GMenu *GetMenu() { return Menu; }
+	LMenu *GetMenu() { return Menu; }
 	/// Scans the text of the item for a keyboard shortcut
 	bool ScanForAccel();
 	/// Returns the OS handle for the menuitem
@@ -388,7 +388,7 @@ public:
 	void Focus(bool f);
 	/// Attach a sub menu to the item
 	void Sub(LSubMenu *s);
-	/// Set the icon for the item. The icon is stored in the GMenu's image list.
+	/// Set the icon for the item. The icon is stored in the LMenu's image list.
 	void Icon(int i);
 
 	/// Get the id
@@ -432,7 +432,7 @@ This class contains LMenuItem's and LSubMenu's.
 
 A basic menu can be constructed inside a GWindow like this:
 \code
-Menu = new GMenu;
+Menu = new LMenu;
 if (Menu)
 {
 	Menu->Attach(this);
@@ -460,7 +460,7 @@ if (Menu)
 
 Or you can load a menu from a resource like this:
 \code
-Menu = new GMenu;
+Menu = new LMenu;
 if (Menu)
 {
 	Menu->Attach(this);
@@ -469,7 +469,7 @@ if (Menu)
 \endcode
 */
 
-class LgiClass GMenu :
+class LgiClass LMenu :
 	public LSubMenu
 {
 	friend class LSubMenu;
@@ -493,10 +493,10 @@ protected:
 
 public:
 	/// Constructor
-	GMenu(const char *AppName = NULL);
+	LMenu(const char *AppName = NULL);
 	
 	/// Destructor
-	virtual ~GMenu();
+	virtual ~LMenu();
 
 	/// Returns the font used by the menu items
 	static GFont *GetFont();

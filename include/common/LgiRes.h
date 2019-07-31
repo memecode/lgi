@@ -104,7 +104,7 @@ public:
 class LgiClass LgiResources : public ResFactory
 {
 	friend class GLgiRes;
-	friend class GMenu;
+	friend class LMenu;
 	friend class LgiStringRes;
 
 	class LgiResourcesPrivate *d;

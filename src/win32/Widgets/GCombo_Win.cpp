@@ -203,13 +203,13 @@ char *GCombo::Name()
 	return NULL;
 }
 
-GSubMenu *GCombo::GetMenu()
+LSubMenu *GCombo::GetMenu()
 {
 	LgiAssert(!"Impl me.");
 	return 0;
 }
 
-void GCombo::SetMenu(GSubMenu *m)
+void GCombo::SetMenu(LSubMenu *m)
 {
 	LgiAssert(!"Impl me.");
 }

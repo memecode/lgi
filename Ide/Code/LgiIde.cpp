@@ -1017,8 +1017,8 @@ public:
 	bool Debugging;
 	bool Running;
 	bool Building;
-	GSubMenu *WindowsMenu;
-	GSubMenu *CreateMakefileMenu;
+	LSubMenu *WindowsMenu;
+	LSubMenu *CreateMakefileMenu;
 	GAutoPtr<FindSymbolSystem> FindSym;
 	GArray<GAutoString> SystemIncludePaths;
 	GArray<GDebugger::BreakPoint> BreakPoints;
@@ -1054,9 +1054,9 @@ public:
 	
 	// Mru
 	List<char> RecentFiles;
-	GSubMenu *RecentFilesMenu;
+	LSubMenu *RecentFilesMenu;
 	List<char> RecentProjects;
-	GSubMenu *RecentProjectsMenu;
+	LSubMenu *RecentProjectsMenu;
 
 	// Object
 	AppWndPrivate(AppWnd *a) :
@@ -1560,7 +1560,7 @@ Chk;
 	if (Attach(0))
 	{
 Chk;
-		Menu = new GMenu;
+		Menu = new LMenu;
 		if (Menu)
 		{
 			Menu->Attach(this);
@@ -1582,7 +1582,7 @@ Chk;
 				}
 				else LgiTrace("%s:%i - FindSubMenu failed.\n", _FL);
 
-				GMenuItem *Debug = GetMenu()->FindItem(IDM_DEBUG_MODE);
+				LMenuItem *Debug = GetMenu()->FindItem(IDM_DEBUG_MODE);
 				if (Debug)
 				{
 					Debug->Checked(true);
@@ -3084,7 +3084,7 @@ int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
 
 bool AppWnd::IsReleaseMode()
 {
-	GMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
+	LMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
 	bool IsRelease = Release ? Release->Checked() : false;
 	return IsRelease;
 }
@@ -3099,7 +3099,7 @@ bool AppWnd::Build()
 	{		
 		UpdateState(-1, true);
 
-		GMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
+		LMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
 		bool IsRelease = Release ? Release->Checked() : false;
 		p->Build(false, IsRelease);
 
@@ -3728,8 +3728,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_DEBUG_MODE:
 		{
-			GMenuItem *Debug = GetMenu()->FindItem(IDM_DEBUG_MODE);
-			GMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
+			LMenuItem *Debug = GetMenu()->FindItem(IDM_DEBUG_MODE);
+			LMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
 			if (Debug && Release)
 			{
 				Debug->Checked(true);
@@ -3739,8 +3739,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_RELEASE_MODE:
 		{
-			GMenuItem *Debug = GetMenu()->FindItem(IDM_DEBUG_MODE);
-			GMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
+			LMenuItem *Debug = GetMenu()->FindItem(IDM_DEBUG_MODE);
+			LMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
 			if (Debug && Release)
 			{
 				Debug->Checked(false);
@@ -3978,7 +3978,7 @@ void AppWnd::OnDocDestroy(IdeDoc *Doc)
 
 int AppWnd::GetBuildMode()
 {
-	GMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
+	LMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
 	if (Release && Release->Checked())
 	{
 		return BUILD_TYPE_RELEASE;

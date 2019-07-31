@@ -1309,7 +1309,7 @@ void GWindow::OnTrayClick(GMouse &m)
 {
 	if (m.Down() || m.IsContextMenu())
 	{
-		GSubMenu RClick;
+		LSubMenu RClick;
 		OnTrayMenu(RClick);
 		if (GetMouse(m, true))
 		{

@@ -1296,7 +1296,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			case WM_MENUCHAR:
 			case WM_MEASUREITEM:
 			{
-				return GMenu::_OnEvent(Msg);
+				return LMenu::_OnEvent(Msg);
 				break;
 			}
 			case WM_DRAWITEM:
@@ -1306,7 +1306,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				{
 					if (di->CtlType == ODT_MENU)
 					{
-						return GMenu::_OnEvent(Msg);
+						return LMenu::_OnEvent(Msg);
 					}
 					/*
 					else if (di->CtlType == ODT_BUTTON)

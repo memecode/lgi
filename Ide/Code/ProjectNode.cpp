@@ -961,7 +961,7 @@ void ProjectNode::OnMouseClick(GMouse &m)
 	
 	if (m.IsContextMenu())
 	{
-		GSubMenu Sub;
+		LSubMenu Sub;
 
 		Select(true);
 

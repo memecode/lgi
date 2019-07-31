@@ -67,7 +67,7 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GSubMenu::GSubMenu(const char *name, bool Popup)
+LSubMenu::LSubMenu(const char *name, bool Popup)
 {
 	if (Popup)
 	{
@@ -84,7 +84,7 @@ GSubMenu::GSubMenu(const char *name, bool Popup)
 	Window = 0;
 }
 
-GSubMenu::~GSubMenu()
+LSubMenu::~LSubMenu()
 {
 	if (TrackHandle)
 	{
@@ -110,7 +110,7 @@ GSubMenu::~GSubMenu()
 		Parent->Child = 0;
 	}
 	
-	GMenuItem *i;
+	LMenuItem *i;
 	while (i = Items[0])
 	{
 		LgiAssert(i->Parent == this);
@@ -118,15 +118,15 @@ GSubMenu::~GSubMenu()
 	}
 }
 
-void GSubMenu::SysMouseClick(GMouse &m)
+void LSubMenu::SysMouseClick(GMouse &m)
 {
 }
 
-GMenuItem *GSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where, const char *Shortcut)
+LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where, const char *Shortcut)
 {
 	int Pos = (int) (Where < 0 ? Items.Length() : min(Where, Items.Length()));
 
-	GMenuItem *Item = new GMenuItem(Menu, this, Str, Id, Pos, Shortcut);
+	LMenuItem *Item = new LMenuItem(Menu, this, Str, Id, Pos, Shortcut);
 	if (Item)
 	{
 		Item->Enabled(Enabled);
@@ -142,9 +142,9 @@ GMenuItem *GSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 	return Item;
 }
 
-GMenuItem *GSubMenu::AppendSeparator(int Where)
+LMenuItem *LSubMenu::AppendSeparator(int Where)
 {
-	GMenuItem *Item = new GMenuItem;
+	LMenuItem *Item = new LMenuItem;
 	if (Item)
 	{
 		Item->Menu = Menu;
@@ -163,11 +163,11 @@ GMenuItem *GSubMenu::AppendSeparator(int Where)
 	return Item;
 }
 
-GSubMenu *GSubMenu::AppendSub(const char *Str, int Where)
+LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 {
 	int Pos = (int) (Where < 0 ? Items.Length() : min(Where, Items.Length()));
-	GMenuItem *Item = new GMenuItem(Menu, this, Str, -1, Pos);
-	GSubMenu *Sub = new GSubMenu;
+	LMenuItem *Item = new LMenuItem(Menu, this, Str, -1, Pos);
+	LSubMenu *Sub = new LSubMenu;
 
 	if (Item && Sub)
 	{
@@ -188,14 +188,14 @@ GSubMenu *GSubMenu::AppendSub(const char *Str, int Where)
 	return Sub;
 }
 
-void GSubMenu::Empty()
+void LSubMenu::Empty()
 {
 	while (RemoveItem(0));
 }
 
-bool GSubMenu::RemoveItem(int i)
+bool LSubMenu::RemoveItem(int i)
 {
-    GMenuItem *Item = Items[i];
+    LMenuItem *Item = Items[i];
     if (Item && Item->Remove())
     {
 	DeleteObj(Item);
@@ -204,7 +204,7 @@ bool GSubMenu::RemoveItem(int i)
     return false;
 }
 
-bool GSubMenu::RemoveItem(GMenuItem *Item)
+bool LSubMenu::RemoveItem(LMenuItem *Item)
 {
 	if (Item &&
         Items.HasItem(Item) &&
@@ -215,7 +215,7 @@ bool GSubMenu::RemoveItem(GMenuItem *Item)
 	return false;
 }
 
-int GSubMenu::Float(GView *From, int x, int y, int Button)
+int LSubMenu::Float(GView *From, int x, int y, int Button)
 {
 	int Cmd = 0;
 
@@ -249,21 +249,21 @@ int GSubMenu::Float(GView *From, int x, int y, int Button)
 	return Cmd;
 }
 
-size_t GSubMenu::Length()
+size_t LSubMenu::Length()
 {
 	return Items.Length();
 }
 
-GMenuItem *GSubMenu::ItemAt(int Id)
+LMenuItem *LSubMenu::ItemAt(int Id)
 {
 	return Items.ItemAt(Id);
 }
 
-GSubMenu *GSubMenu::FindSubMenu(int Id)
+LSubMenu *LSubMenu::FindSubMenu(int Id)
 {
 	for (auto i: Items)
 	{
-		GSubMenu *Sub = i->Sub();
+		LSubMenu *Sub = i->Sub();
 
 		if (i->Id() == Id)
 		{
@@ -271,7 +271,7 @@ GSubMenu *GSubMenu::FindSubMenu(int Id)
 		}
 		else if (Sub)
 		{
-			GSubMenu *m = Sub->FindSubMenu(Id);
+			LSubMenu *m = Sub->FindSubMenu(Id);
 			if (m)
 			{
 				return m;
@@ -282,11 +282,11 @@ GSubMenu *GSubMenu::FindSubMenu(int Id)
 	return 0;
 }
 
-GMenuItem *GSubMenu::FindItem(int Id)
+LMenuItem *LSubMenu::FindItem(int Id)
 {
 	for (auto i: Items)
 	{
-		GSubMenu *Sub = i->Sub();
+		LSubMenu *Sub = i->Sub();
 
 		if (i->Id() == Id)
 		{
@@ -326,7 +326,7 @@ public:
 	}
 };
 
-GMenuItem::GMenuItem()
+LMenuItem::LMenuItem()
 {
 	d = new GMenuItemPrivate;
 	Menu = NULL;
@@ -353,7 +353,7 @@ GMenuItem::GMenuItem()
 	Enabled(true);
 }
 
-GMenuItem::GMenuItem(GMenu *m, GSubMenu *p, const char *Txt, int id, int Pos, const char *Shortcut)
+LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *Txt, int id, int Pos, const char *Shortcut)
 {
 	d = new GMenuItemPrivate;
 	d->Shortcut.Reset(NewStr(Shortcut));
@@ -385,7 +385,7 @@ GMenuItem::GMenuItem(GMenu *m, GSubMenu *p, const char *Txt, int id, int Pos, co
 	Insert(Position);
 }
 
-GMenuItem::~GMenuItem()
+LMenuItem::~LMenuItem()
 {
 	if (Parent)
 	{
@@ -407,7 +407,7 @@ GMenuItem::~GMenuItem()
 // control over the colours displayed. these functions remove that
 // limitation and also provide the application the ability to override
 // the default painting behaviour if desired.
-void GMenuItem::_Measure(GdcPt2 &Size)
+void LMenuItem::_Measure(GdcPt2 &Size)
 {
 	if (Separator())
 	{
@@ -444,7 +444,7 @@ void GMenuItem::_Measure(GdcPt2 &Size)
 	}
 }
 
-void GMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
+void LMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 {
 	bool Underline = d->StartUnderline;
 	GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
@@ -475,7 +475,7 @@ void GMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 	}
 }
 
-void GMenuItem::_Paint(GSurface *pDC, int Flags)
+void LMenuItem::_Paint(GSurface *pDC, int Flags)
 {
 	bool BaseMenu = Parent == Menu;
 	int IconX = BaseMenu ? 5 : 20;
@@ -584,7 +584,7 @@ void GMenuItem::_Paint(GSurface *pDC, int Flags)
 	}
 }
 
-bool GMenuItem::ScanForAccel()
+bool LMenuItem::ScanForAccel()
 {
 	char *Accel = 0;
 
@@ -748,12 +748,12 @@ bool GMenuItem::ScanForAccel()
 	return false;
 }
 
-GSubMenu *GMenuItem::GetParent()
+LSubMenu *LMenuItem::GetParent()
 {
 	return Parent;
 }
 
-bool GMenuItem::Remove()
+bool LMenuItem::Remove()
 {
 	bool Status = false;
 	if (Parent)
@@ -772,7 +772,7 @@ bool GMenuItem::Remove()
 	return Status;
 }
 
-bool GMenuItem::Update()
+bool LMenuItem::Update()
 {
 	bool Status = FALSE;
 
@@ -785,24 +785,24 @@ bool GMenuItem::Update()
 	return Status;
 }
 
-void GMenuItem::Icon(int i)
+void LMenuItem::Icon(int i)
 {
 	_Icon = i;
 }
 
-int GMenuItem::Icon()
+int LMenuItem::Icon()
 {
 	return _Icon;
 }
 
-void GMenuItem::Id(int i)
+void LMenuItem::Id(int i)
 {
 	Info.wID = i;
 	Info.fMask |= MIIM_ID;
 	Update();
 }
 
-void GMenuItem::Separator(bool s)
+void LMenuItem::Separator(bool s)
 {
 	if (s)
 	{
@@ -817,7 +817,7 @@ void GMenuItem::Separator(bool s)
 	Update();
 }
 
-void GMenuItem::Checked(bool c)
+void LMenuItem::Checked(bool c)
 {
 	if (c)
 	{
@@ -832,7 +832,7 @@ void GMenuItem::Checked(bool c)
 	Update();
 }
 
-bool GMenuItem::Name(const char *Txt)
+bool LMenuItem::Name(const char *Txt)
 {
 	bool Status = GBase::Name(Txt);
 	if (Status)
@@ -908,7 +908,7 @@ bool GMenuItem::Name(const char *Txt)
 	return Status;
 }
 
-void GMenuItem::Enabled(bool e)
+void LMenuItem::Enabled(bool e)
 {
 	Info.fState &= ~(MFS_ENABLED|MFS_DISABLED|MFS_GRAYED);
 
@@ -923,7 +923,7 @@ void GMenuItem::Enabled(bool e)
 	// LgiTrace("%s:%i - GMenuItem::Enabled(%i) %s\n", _FL, e, Name());
 }
 
-void GMenuItem::Focus(bool f)
+void LMenuItem::Focus(bool f)
 {
 	if (f)
 	{
@@ -938,7 +938,7 @@ void GMenuItem::Focus(bool f)
 	Update();
 }
 
-void GMenuItem::Sub(GSubMenu *s)
+void LMenuItem::Sub(LSubMenu *s)
 {
 	Child = s;
 	if (Child)
@@ -955,7 +955,7 @@ void GMenuItem::Sub(GSubMenu *s)
 	Update();
 }
 
-bool GMenuItem::Insert(int Pos)
+bool LMenuItem::Insert(int Pos)
 {
 	bool Status = false;
 
@@ -973,27 +973,26 @@ bool GMenuItem::Insert(int Pos)
 	return Status;
 }
 
-void GMenuItem::Visible(bool i)
+void LMenuItem::Visible(bool i)
 {
 }
 
-int GMenuItem::Id() { return Info.wID; }
-char *GMenuItem::Name() { return GBase::Name(); }
-bool GMenuItem::Separator() { return (Info.fType & MFT_SEPARATOR) != 0; }
-bool GMenuItem::Checked() { return (Info.fState & MF_CHECKED) != 0; }
-bool GMenuItem::Enabled()
+int LMenuItem::Id() { return Info.wID; }
+char *LMenuItem::Name() { return GBase::Name(); }
+bool LMenuItem::Separator() { return (Info.fType & MFT_SEPARATOR) != 0; }
+bool LMenuItem::Checked() { return (Info.fState & MF_CHECKED) != 0; }
+bool LMenuItem::Enabled()
 {
 	return (Info.fState & MFS_DISABLED) == 0;
 }
-bool GMenuItem::Visible() { return true; }
-bool GMenuItem::Focus() { return (Info.fState & MFS_HILITE) != 0; }
-GSubMenu *GMenuItem::Sub() { return Child; }
+bool LMenuItem::Visible() { return true; }
+bool LMenuItem::Focus() { return (Info.fState & MFS_HILITE) != 0; }
+LSubMenu *LMenuItem::Sub() { return Child; }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 int _GMenuFontRef = 0;
-GFont *GMenu::_Font = 0;
 
-GMenu::GMenu(const char *AppName) : GSubMenu("", false)
+LMenu::LMenu(const char *AppName) : LSubMenu("", false)
 {
 	d = new GMenuPrivate;
 	Menu = this;
@@ -1001,17 +1000,13 @@ GMenu::GMenu(const char *AppName) : GSubMenu("", false)
 	_GMenuFontRef++;
 }
 
-GMenu::~GMenu()
+LMenu::~LMenu()
 {
 	Accel.DeleteObjects();
-	if (--_GMenuFontRef == 0)
-	{
-		DeleteObj(_Font);
-	}
 	DeleteObj(d);
 }
 
-void GMenu::OnChange()
+void LMenu::OnChange()
 {
 	if (Info && Window)
 	{
@@ -1022,28 +1017,44 @@ void GMenu::OnChange()
 	}
 }
 
-GFont *GMenu::GetFont()
+struct LMenuFont
 {
-	if (!_Font)
+	GFont *f;
+
+	LMenuFont()
+	{
+		f = NULL;
+	}
+
+	~LMenuFont()
+	{
+		DeleteObj(f);
+	}
+}	MenuFont;
+
+
+GFont *LMenu::GetFont()
+{
+	if (!MenuFont.f)
 	{
 		GFontType Type;
 		if (Type.GetSystemFont("Menu"))
 		{
-			_Font = Type.Create();
+			MenuFont.f = Type.Create();
 		}
 	}
 
-	return _Font ? _Font : SysFont;
+	return MenuFont.f ? MenuFont.f : SysFont;
 }
 
-bool GMenu::Attach(GViewI *p)
+bool LMenu::Attach(GViewI *p)
 {
 	Window = p;
 
 	return true;
 }
 
-bool GMenu::Detach()
+bool LMenu::Detach()
 {
 	bool Status = FALSE;
 
@@ -1063,7 +1074,7 @@ bool GMenu::Detach()
 	return Status;
 }
 
-bool GMenu::OnKey(GView *v, GKey &k)
+bool LMenu::OnKey(GView *v, GKey &k)
 {
 	if (k.Down() && k.vkey != 17)
 	{
@@ -1071,7 +1082,7 @@ bool GMenu::OnKey(GView *v, GKey &k)
 		{
 			if (a->Match(k))
 			{
-				GMenuItem *i = FindItem(a->GetId());
+				LMenuItem *i = FindItem(a->GetId());
 				if (!i || i->Enabled())
 				{
 					int Cmd = a->GetId();
@@ -1085,7 +1096,7 @@ bool GMenu::OnKey(GView *v, GKey &k)
 	return false;
 }
 
-int GMenu::_OnEvent(GMessage *Msg)
+int LMenu::_OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -1100,10 +1111,10 @@ int GMenu::_OnEvent(GMessage *Msg)
 			Info.fMask = MIIM_DATA;
 			if (GetMenuItemInfo(View, 0, true, &Info))
 			{
-				GMenuItem *Item = (GMenuItem*)Info.dwItemData;
+				LMenuItem *Item = (LMenuItem*)Info.dwItemData;
 				if (Item)
 				{
-					GSubMenu *Menu = Item->Parent;
+					LSubMenu *Menu = Item->Parent;
 					if (Menu)
 					{
 						int Index=0;
@@ -1133,7 +1144,7 @@ int GMenu::_OnEvent(GMessage *Msg)
 			{
 				GdcPt2 Size;
 
-				((GMenuItem*)Item->itemData)->_Measure(Size);
+				((LMenuItem*)Item->itemData)->_Measure(Size);
 				Item->itemWidth = Size.x;
 				Item->itemHeight = Size.y;
 				return true;
@@ -1162,7 +1173,7 @@ int GMenu::_OnEvent(GMessage *Msg)
 				Dc.SetSize(r.X(), r.Y());
 
 				// Paint the item...
-				((GMenuItem*)Item->itemData)->_Paint(&Dc, Item->itemState);
+				((LMenuItem*)Item->itemData)->_Paint(&Dc, Item->itemState);
 
 				// Set the origin back the original value.
 				Dc.SetOrigin(x, y);
@@ -1175,7 +1186,7 @@ int GMenu::_OnEvent(GMessage *Msg)
 	return 0;
 }
 
-bool GMenu::SetPrefAndAboutItems(int PrefId, int AboutId)
+bool LMenu::SetPrefAndAboutItems(int PrefId, int AboutId)
 {
 	return false;
 }

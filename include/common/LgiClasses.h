@@ -381,7 +381,7 @@ class LgiClass GView : virtual public GViewI, virtual public GBase
 	friend		class GWindow;
 	friend		class GLayout;
 	friend		class GControl;
-	friend		class GMenu;
+	friend		class LMenu;
 	friend		class LSubMenu;
 	friend		class GWnd;
 	friend		class GScrollBar;
@@ -1278,12 +1278,12 @@ protected:
 
 	#if defined BEOS
 
-	friend class GMenu;
+	friend class LMenu;
 	friend class GView;
 
 	#elif defined __GTK_H__
 
-	friend class GMenu;	
+	friend class LMenu;	
 	friend void lgi_widget_size_allocate(Gtk::GtkWidget *widget, Gtk::GtkAllocation *allocation);
 	
 	Gtk::GtkWidget *_Root, *_VBox, *_MenuBar;
@@ -1300,7 +1300,7 @@ protected:
 	GViewI *_Default;
 
 	/// The menu on the window
-	GMenu *Menu;
+	LMenu *Menu;
 
 	void SetChildDialog(GDialog *Dlg);
 	void SetDragHandlers(bool On);
@@ -1322,10 +1322,10 @@ public:
 	virtual void PourAll();
 
 	/// Returns the current menu object
-	GMenu *GetMenu() { return Menu; }
+	LMenu *GetMenu() { return Menu; }
 	
 	/// Set the menu object.
-	void SetMenu(GMenu *m) { Menu = m; }
+	void SetMenu(LMenu *m) { Menu = m; }
 	
 	/// Set the window's icon
 	bool SetIcon(const char *FileName);
