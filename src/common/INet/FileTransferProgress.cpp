@@ -177,7 +177,7 @@ void GPaneThrottle::OnMouseClick(GMouse &m)
 {
 	if (m.Down())
 	{
-		GSubMenu *RClick = new GSubMenu;
+		auto RClick = new LSubMenu;
 		if (RClick)
 		{
 			for (int i=0; PipeSize[i]; i++)
@@ -191,7 +191,7 @@ void GPaneThrottle::OnMouseClick(GMouse &m)
 				{
 					sprintf_s(Str, sizeof(Str), "%.1f Mbps", (double)PipeSize[i] / 1024.0 / 1024.0);
 				}
-				GMenuItem *Item = RClick->AppendItem(Str, 100+i, true);
+				auto Item = RClick->AppendItem(Str, 100+i, true);
 				if (Item && i == Pipe)
 				{
 					Item->Checked(true);

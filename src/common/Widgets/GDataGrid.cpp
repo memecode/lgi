@@ -422,7 +422,7 @@ void GDataGrid::OnItemClick(LListItem *Item, GMouse &m)
 {
 	if (m.IsContextMenu())
 	{
-		GSubMenu s;
+		LSubMenu s;
 		s.AppendItem("Copy", IDC_COPY);
 		s.AppendItem("Delete", IDC_DELETE);
 		m.ToScreen();

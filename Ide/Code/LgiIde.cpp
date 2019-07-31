@@ -2084,14 +2084,20 @@ void AppWnd::OnFixBuildErrors()
 			#else
 			GString::Array p = Ln(0, ErrPos).Strip().SplitDelimit(":");
 			#endif
-			Log->Print("p.Len = %i\n", (int)p.Length());
-			if (p.Length() > 2)
+			if (p.Length() <= 2)
+			{
+				Log->Print("Error: Only %i parts? '%s'\n", (int)p.Length(), Ln.Get());
+			}
+			else
 			{
 				#ifdef WINDOWS
 				int Base = p[0].IsNumeric() ? 1 : 0;
 				GString Fn = p[Base];
 				if (Fn.Find("Program Files") >= 0)
+				{
+					Log->Print("Is prog file\n");
 					continue;
+				}
 				auto LineNo = p[Base+1].Int();
 				#else
 				GString Fn = p[0];
@@ -2099,49 +2105,59 @@ void AppWnd::OnFixBuildErrors()
 				#endif
 
 				GAutoString Full;
-				if (d->FindSource(Full, Fn, NULL))
+				if (!d->FindSource(Full, Fn, NULL))
 				{
-					LFileInfo *Fi = NULL;
-					for (auto &i: Files)
-					{
-						if (i.Path.Equals(Full))
-						{
-							Fi = &i;
-							break;
-						}
-					}
-					if (!Fi)
-					{
-						GFile f(Full, O_READ);
-						if (f.IsOpen())
-						{
-							Fi = &Files.New();
-							Fi->Path = Full.Get();
-							auto OldFile = f.Read();
-							Fi->Lines = OldFile.SplitDelimit("\n", -1, false);
-						}
-					}
+					Log->Print("Error: Can't find Fn='%s' Line=%i\n", Fn.Get(), (int)LineNo);
+					continue;
+				}
 
-
-					if (Fi)
+				LFileInfo *Fi = NULL;
+				for (auto &i: Files)
+				{
+					if (i.Path.Equals(Full))
 					{
-						if (LineNo <= Fi->Lines.Length())
+						Fi = &i;
+						break;
+					}
+				}
+				if (!Fi)
+				{
+					GFile f(Full, O_READ);
+					if (f.IsOpen())
+					{
+						Fi = &Files.New();
+						Fi->Path = Full.Get();
+						auto OldFile = f.Read();
+						Fi->Lines = OldFile.SplitDelimit("\n", -1, false);
+					}
+					else
+					{
+						Log->Print("Error: Can't open '%s'\n", Full.Get());
+					}
+				}
+
+				if (Fi)
+				{
+					if (LineNo <= Fi->Lines.Length())
+					{
+						GString &s = Fi->Lines[LineNo-1];
+						for (auto i: Map)
 						{
-							GString &s = Fi->Lines[LineNo-1];
-							for (auto i: Map)
+							if (ReplaceWholeWord(s, i.key, i.value))
 							{
-								if (ReplaceWholeWord(s, i.key, i.value))
-								{
-									Fi->Dirty = true;
-									Replacements++;
-								}
+								Fi->Dirty = true;
+								Replacements++;
 							}
 						}
 					}
 					else
 					{
-						int asd=0;
+						Log->Print("Error: Invalid line %i\n", (int)LineNo);
 					}
+				}
+				else
+				{
+					Log->Print("Error: Fi is NULL\n");
 				}
 			}
 		}

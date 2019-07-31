@@ -499,15 +499,15 @@ void GGraph::OnMouseClick(GMouse &m)
 {
     if (m.IsContextMenu())
     {
-        GSubMenu s;
+        LSubMenu s;
         m.ToScreen();
 
-        GSubMenu *style = s.AppendSub("Style");
+        auto style = s.AppendSub("Style");
         style->AppendItem("Line", IDM_LINE);
         style->AppendItem("Point", IDM_POINT);
         
-        GSubMenu *a = s.AppendSub("Average");
-        GMenuItem *i = a->AppendItem("Show", IDM_AVERAGE);
+        auto a = s.AppendSub("Average");
+        auto i = a->AppendItem("Show", IDM_AVERAGE);
         i->Checked(d->Average);
         a->AppendItem("Save", IDC_AVERAGE_SAVE);
 

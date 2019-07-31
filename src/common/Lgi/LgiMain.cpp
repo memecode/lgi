@@ -79,10 +79,12 @@ WINAPI CALLBACK
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 #endif
 {
+	/*
 	#if defined(_MSC_VER) && defined(_DEBUG)
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 	// _CrtSetBreakAlloc(34058);
 	#endif
+	*/
 	#ifdef __GTK_H__
 	{
 		using namespace Gtk;
@@ -169,19 +171,6 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
 
 	return Status;
 }
-
-/*
-#pragma warning(disable:4075) // warning C4074: initializers put in compiler reserved initialization area
-// #pragma init_seg(compiler)
-#pragma init_seg(".CRT$XCT")
-struct LLeakCheck
-{
-	~LLeakCheck()
-	{
-		_CrtDumpMemoryLeaks();
-	}
-}	_LeakCheck;
-*/
 
 #else
 
