@@ -1,5 +1,5 @@
 /*hdr
-**      FILE:           GMenuGtk.cpp
+**      FILE:           LMenuGtk.cpp
 **      AUTHOR:         Matthew Allen
 **      DATE:           19/4/2013
 **      DESCRIPTION:    Gtk menus
@@ -464,7 +464,7 @@ void LMenuItem::OnGtkEvent(::GString Event)
 		
 			if (!Parent || !Parent->IsContext(this))
 			{
-				::GMenu *m = GetMenu();
+				auto m = GetMenu();
 				if (m)
 				{
 					// Attached to a menu, so send an event to the window
@@ -506,7 +506,7 @@ LMenuItem::LMenuItem()
 	_Id = 0;
 }
 
-LMenuItem::LMenuItem(::GMenu *m, LSubMenu *p, const char *txt, int id, int Pos, const char *shortcut)
+LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int id, int Pos, const char *shortcut)
 {
 	d = NULL;
 	GAutoString Txt = MenuItemParse(txt);
@@ -1164,12 +1164,12 @@ struct LMenuFont
 	}
 }	MenuFont;
 
-class GMenuPrivate
+class LMenuPrivate
 {
 public:
 };
 
-::GMenu::GMenu(const char *AppName) : LSubMenu("", false)
+LMenu::LMenu(const char *AppName) : LSubMenu("", false)
 {
 	Menu = this;
 	d = NULL;
@@ -1177,12 +1177,12 @@ public:
 	Info = GtkCast(Gtk::gtk_menu_bar_new(), gtk_menu_shell, GtkMenuShell);
 }
 
-::GMenu::~GMenu()
+LMenu::~LMenu()
 {
 	Accel.DeleteObjects();
 }
 
-GFont *::GMenu::GetFont()
+GFont *LMenu::GetFont()
 {
 	if (!MenuFont.f)
 	{
@@ -1196,12 +1196,12 @@ GFont *::GMenu::GetFont()
 			}
 			else
 			{
-				printf("GMenu::GetFont Couldn't create menu font.\n");
+				printf("LMenu::GetFont Couldn't create menu font.\n");
 			}
 		}
 		else
 		{
-			printf("GMenu::GetFont Couldn't get menu typeface.\n");
+			printf("LMenu::GetFont Couldn't get menu typeface.\n");
 		}
 
 		if (!MenuFont.f)
@@ -1217,7 +1217,7 @@ GFont *::GMenu::GetFont()
 	return MenuFont.f ? MenuFont.f : SysFont;
 }
 
-bool ::GMenu::Attach(GViewI *p)
+bool LMenu::Attach(GViewI *p)
 {
 	if (!p)
 	{
@@ -1263,18 +1263,18 @@ bool ::GMenu::Attach(GViewI *p)
 	return true;
 }
 
-bool ::GMenu::Detach()
+bool LMenu::Detach()
 {
 	bool Status = false;
 	return Status;
 }
 
-bool ::GMenu::SetPrefAndAboutItems(int a, int b)
+bool LMenu::SetPrefAndAboutItems(int a, int b)
 {
 	return false;
 }
 
-bool ::GMenu::OnKey(GView *v, GKey &k)
+bool LMenu::OnKey(GView *v, GKey &k)
 {
 	if (k.Down())
 	{

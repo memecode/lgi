@@ -81,6 +81,7 @@ set (CommonSource
 	include/common/GString.h
 	include/common/GClipBoard.h
 	include/common/GArray.h
+	include/common/LMenu.h
 	src/common/Gdc2/15Bit.cpp
 	src/common/Gdc2/16Bit.cpp
 	src/common/Gdc2/24Bit.cpp
@@ -175,7 +176,7 @@ set (CommonSource
 	src/common/Lgi/LgiCommon.cpp
 	src/common/Lgi/LgiMsg.cpp
 	src/common/Lgi/LgiRand.cpp
-	src/common/Lgi/GMenuCommon.cpp
+	src/common/Lgi/LMenuCommon.cpp
 	include/common/LgiRes.h
 	src/common/Resource/LgiRes.cpp
 	include/common/Res.h
@@ -238,7 +239,7 @@ set (GtkSource
 	src/linux/Lgi/GClipBoard.cpp
 	src/linux/Lgi/GDragAndDrop.cpp
 	src/linux/Lgi/GLayout.cpp
-	src/linux/Lgi/GMenuGtk.cpp
+	src/linux/Lgi/LMenu.cpp
 	src/linux/Lgi/GPrinter.cpp
 	src/linux/Lgi/GView.cpp
 	src/linux/Lgi/GWidgets.cpp
