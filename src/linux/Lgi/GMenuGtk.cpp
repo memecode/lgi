@@ -1151,7 +1151,20 @@ int LgiMenuItem::Icon()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GFont *::GMenu::_Font = 0;
+struct LMenuFont
+{
+	GFont *f;
+
+	LMenuFont()
+	{
+		f = NULL;
+	}
+
+	~LMenuFont()
+	{
+		DeleteObj(f);
+	}
+}	MenuFont;
 
 class GMenuPrivate
 {
@@ -1173,15 +1186,15 @@ public:
 
 GFont *::GMenu::GetFont()
 {
-	if (!_Font)
+	if (!MenuFont.f)
 	{
 		GFontType Type;
 		if (Type.GetSystemFont("Menu"))
 		{
-			_Font = Type.Create();
-			if (_Font)
+			MenuFont.f = Type.Create();
+			if (MenuFont.f)
 			{
-				// _Font->CodePage(SysFont->CodePage());
+				// MenuFont.f->CodePage(SysFont->CodePage());
 			}
 			else
 			{
@@ -1193,17 +1206,17 @@ GFont *::GMenu::GetFont()
 			printf("GMenu::GetFont Couldn't get menu typeface.\n");
 		}
 
-		if (!_Font)
+		if (!MenuFont.f)
 		{
-			_Font = new GFont;
-			if (_Font)
+			MenuFont.f = new GFont;
+			if (MenuFont.f)
 			{
-				*_Font = *SysFont;
+				*MenuFont.f = *SysFont;
 			}
 		}
 	}
 
-	return _Font ? _Font : SysFont;
+	return MenuFont.f ? MenuFont.f : SysFont;
 }
 
 bool ::GMenu::Attach(GViewI *p)

@@ -80,7 +80,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
 #endif
 {
 	#if defined(_MSC_VER) && defined(_DEBUG)
-	// _CrtSetDbgFlag(_CRTDBG_CHECK_ALWAYS_DF);
+	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 	#endif
 	#ifdef __GTK_H__
 	{
@@ -125,6 +125,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
 		if (AppArgs.lpCmdLine) AppArgs.lpCmdLine++;
 
 		#else
+		GString::Array Mem;
 		GArray<char*> Args;
 		char16 *Ws = L" \t\r\n";
 		for (char16 *c = CL; *c; )
@@ -136,12 +137,16 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
 		        char16 *end = StrchrW(c, delim);
 		        if (end)
 		        {
-		            Args.Add(WideToUtf8(c, end-c));
+					GString s(c, end-c);
+					Mem.New() = s;
+		            Args.Add(s.Get());
 		            c = end + 1;
 		        }
 		        else
 		        {
-		            Args.Add(WideToUtf8(c));
+					GString s(c);
+					Mem.New() = s;
+		            Args.Add(s.Get());
 		            break;
 		        }
 		    }
@@ -160,8 +165,22 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
 		
 		Status = LgiMain(AppArgs);
 	}
+
 	return Status;
 }
+
+/*
+#pragma warning(disable:4075) // warning C4074: initializers put in compiler reserved initialization area
+// #pragma init_seg(compiler)
+#pragma init_seg(".CRT$XCT")
+struct LLeakCheck
+{
+	~LLeakCheck()
+	{
+		_CrtDumpMemoryLeaks();
+	}
+}	_LeakCheck;
+*/
 
 #else
 

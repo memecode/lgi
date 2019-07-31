@@ -24,6 +24,19 @@
 		#define LGI_32BIT				1
 	#endif
 
+	#if 1
+		#define _CRTDBG_MAP_ALLOC
+		#include <crtdbg.h>
+		#ifdef _DEBUG
+		#define DEBUG_CLIENTBLOCK new( _CLIENT_BLOCK, __FILE__, __LINE__)
+		#else
+		#define DEBUG_CLIENTBLOCK
+		#endif // _DEBUG
+		#ifdef _DEBUG
+		#define new DEBUG_CLIENTBLOCK
+		#endif
+	#endif
+
 	#include <shlobj.h>
 	#include <shellapi.h>
 	typedef BOOL (__stdcall *pSHGetSpecialFolderPathA)(HWND hwndOwner, LPSTR lpszPath, int nFolder, BOOL fCreate);

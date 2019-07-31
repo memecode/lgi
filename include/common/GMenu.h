@@ -470,7 +470,6 @@ class LgiClass GMenu :
 	friend class GMenuItem;
 	friend class GWindow;
 
-	static GFont *_Font;
 	class GMenuPrivate *d;
 
 	#if defined WIN32

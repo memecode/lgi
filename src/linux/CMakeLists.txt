@@ -227,6 +227,7 @@ set (CommonSource
 
 set (GtkSource
 	include/linux/Gtk/LgiWidget.h
+	include/linux/Gtk/LgiOsDefs.h
 	src/linux/Gtk/Gdc2.cpp
 	src/linux/Gtk/GMemDC.cpp
 	src/linux/Gtk/GPrintDC.cpp
@@ -266,7 +267,6 @@ set (LinuxSource
 	src/linux/General/ShowFileProp_Linux.cpp
 	src/linux/Lgi/GGeneral.cpp
 	src/linux/Lgi/LThread.cpp
-	include/linux/Gtk/LgiOsDefs.h
 	)
 
 set (MacSource
