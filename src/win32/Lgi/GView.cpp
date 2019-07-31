@@ -1378,17 +1378,21 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			}
 			case WM_MOUSEWHEEL:
 			{
-				short fwKeys = LOWORD(Msg->a);			// key flags
+				// short fwKeys = LOWORD(Msg->a);			// key flags
 				short zDelta = (short) HIWORD(Msg->a);	// wheel rotation
-				short xPos = (short) LOWORD(Msg->b);	// horizontal position of pointer
-				short yPos = (short) HIWORD(Msg->b);	// vertical position of pointer
 				int nScrollLines = - _lgi_mouse_wheel_lines();
 				double Lines = ((double)zDelta * (double)nScrollLines) / WHEEL_DELTA;
+				if (abs(Lines) < 1.0)
+					Lines *= 1.0 / abs(Lines);
 				
+				LgiTrace("Lines = %g, zDelta = %i, nScrollLines = %i\n", Lines, zDelta, nScrollLines);
+
 				// Try giving the event to the current window...
 				if (!OnMouseWheel(Lines))
 				{
 					// Find the window under the cursor... and try giving it the mouse wheel event
+					short xPos = (short) LOWORD(Msg->b);	// horizontal position of pointer
+					short yPos = (short) HIWORD(Msg->b);	// vertical position of pointer
 					POINT Point = {xPos, yPos};
 					HWND hUnder = ::WindowFromPoint(Point);
 					HWND hParent = ::GetParent(hUnder);
