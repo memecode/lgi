@@ -195,9 +195,9 @@ elseif (LINUX)
 	set(RESOURCE_DEST "Resources")
 	add_custom_command(TARGET LgiIde POST_BUILD
 				COMMAND "${CMAKE_COMMAND}" -E copy
-					"$<TARGET_FILE:png15>"
+					"$<TARGET_FILE:libpng15>"
 					"$<TARGET_FILE_DIR:LgiIde>"
-				COMMENT "Copying Lgi to output directory")
+				COMMENT "Copying libpng to output directory")
 
 elseif (MSVC)
 

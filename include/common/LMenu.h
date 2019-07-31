@@ -2,8 +2,8 @@
 	\author Matthew Allen
  */
  
-#ifndef __GMENU_H
-#define __GMENU_H
+#ifndef _LMENU_H_
+#define _LMENU_H_
 
 // Os specific declarations
 #if defined __GTK_H__
@@ -19,13 +19,6 @@
 	#ifndef COLOR_MENUBAR
 	#define COLOR_MENUBAR		30
 	#endif
-#elif defined BEOS
-	typedef BMenu *OsSubMenu;
-	typedef	BMenuItem *OsMenuItem;
-#elif defined ATHEOS
-	#include <gui/menu.h>
-	typedef os::Menu *OsSubMenu;
-	typedef os::MenuItem *OsMenuItem;
 #elif defined(MAC) && !defined(LGI_SDL)
 	#if defined(COCOA)
 		#ifdef __OBJC__
@@ -82,6 +75,7 @@ public:
 };
 
 /// Sub menu.
+class LMenu;
 class LgiClass LSubMenu :
 	public GBase,
 	public GMenuLoader,

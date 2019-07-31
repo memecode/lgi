@@ -406,18 +406,21 @@
 		<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
 			<Node File="./include/win32/LgiOsDefs.h" Type="3" Platforms="1" />
 		</Node>
-		<Node File="./include/common/GNotifications.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LCancel.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LError.h" Type="3" Platforms="15" />
-		<Node File="./include/common/Lgi.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LgiClass.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LgiClasses.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LgiCommon.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LgiDefs.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LgiInc.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LgiInterfaces.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LgiMsgs.h" Type="3" Platforms="15" />
-		<Node File="./Makefile.linux" Type="9" Platforms="15" />
+		<Node File=".\include\common\GNotifications.h" Type="3" Platforms="15" />
+		<Node File=".\include\common\LCancel.h" Type="3" Platforms="15" />
+		<Node File=".\include\common\LError.h" Type="3" Platforms="15" />
+		<Node File=".\include\common\Lgi.h" Type="3" Platforms="15" />
+		<Node File=".\include\common\LgiClass.h" Type="3" Platforms="15" />
+		<Node File=".\include\common\LgiClasses.h" Type="3" Platforms="15" />
+		<Node File=".\include\common\LgiCommon.h" Type="3" Platforms="15" />
+		<Node File=".\include\common\LgiDefs.h" Type="3" Platforms="15" />
+		<Node File=".\include\common\LgiInc.h" Type="3" Platforms="15" />
+		<Node File=".\include\common\LgiInterfaces.h" Type="3" Platforms="15" />
+		<Node File=".\include\common\LgiMsgs.h" Type="3" Platforms="15" />
+		<Node File=".\Makefile.linux" Type="9" Platforms="15" />
+	</Node>
+	<Node Name="Build" Type="1" Platforms="15" Id="1">
+		<Node File=".\Ide\Gtk3\CMakeLists.txt" Type="8" Platforms="15" />
 	</Node>
 	<Settings>
 		<General>

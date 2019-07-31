@@ -53,7 +53,7 @@ public:
 	{
 		if (!obj)
 			return false;
-		auto r = Gtk::g_signal_connect_data(G_OBJECT(obj), detailed_signal, c_handler, data, NULL, (GConnectFlags) 0);
+		auto r = Gtk::g_signal_connect_data(obj, detailed_signal, c_handler, data, NULL, (Gtk::GConnectFlags) 0);
 		if (r <= 0)
 			return false;
 
