@@ -486,7 +486,7 @@ bool LgiRecursiveFileSearch(const char *Root,
 	return Status;
 }
 
-#define LGI_TRACE_TO_FILE
+// #define LGI_TRACE_TO_FILE
 // #include <malloc.h>
 
 #ifndef WIN32

@@ -133,6 +133,9 @@ GViewPrivate::GViewPrivate()
 GViewPrivate::~GViewPrivate()
 {
 	LgiAssert(Pulse == 0);
+
+	if (Font && FontOwnType == GV_FontOwned)
+		DeleteObj(Font);
 }
 
 void GView::OnGtkRealize()

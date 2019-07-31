@@ -767,8 +767,6 @@ bool GCss::InheritCollect(GCss &c, PropMap &Contrib)
 {
 	int StillInherit = 0;
 
-    // int p;
-	// for (PropArray *a = Contrib.First(&p); a; a = Contrib.Next(&p))
 	for (auto a : Contrib)
 	{
 		switch (a.key >> 8)
@@ -895,7 +893,7 @@ bool GCss::InheritResolve(PropMap &Contrib)
 	    {
             case TypeLen:
             {
-				Len *Mine = 0;
+				Len *Mine = (Len*)Props.Find(a.key);
 			    for (ssize_t i=a.value->Length()-1; i>=0; i--)
 			    {
 			        Len *Cur = (Len*)(*a.value)[i];
@@ -2859,13 +2857,13 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 		}
 
 		// read selector
-		GArray<GCss::Selector*> Selectors;
+		GArray<GAutoPtr<GCss::Selector>> Selectors;
 		GCss::Selector *Cur = new GCss::Selector;
 		
 		if (Cur->Parse(c))
 		{
 			Cur->SourceIndex = SelectorIndex++;
-			Selectors.Add(Cur);
+			Selectors.New().Reset(Cur);
 		}
 		else
 		{
@@ -2884,7 +2882,7 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 				if (Cur && Cur->Parse(c))
 				{
 					Cur->SourceIndex = SelectorIndex++;
-					Selectors.Add(Cur);
+					Selectors.New().Reset(Cur);
 				}
 				else
 				{
@@ -2930,7 +2928,7 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 				
 				for (int i=0; i<Selectors.Length(); i++)
 				{
-					GCss::Selector *s = Selectors[i];
+					auto &s = Selectors[i];
 					s->Style = Style;
 					
 					ssize_t n = s->GetSimpleIndex();
@@ -2949,7 +2947,7 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 							if (p.Value)
 							{
 								SelArray *a = TypeMap.Get(p.Value);
-								a->Add(s);
+								a->Add(s.Release());
 							}
 							break;
 						}
@@ -2958,7 +2956,7 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 							if (p.Value)
 							{
 								SelArray *a = ClassMap.Get(p.Value);
-								a->Add(s);
+								a->Add(s.Release());
 							}
 							break;
 						}
@@ -2967,13 +2965,13 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 							if (p.Value)
 							{
 								SelArray *a = IdMap.Get(p.Value);
-								a->Add(s);
+								a->Add(s.Release());
 							}
 							break;
 						}
 						default:
 						{
-							Other.Add(s);
+							Other.Add(s.Release());
 							break;
 						}
 					}
@@ -2982,7 +2980,7 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 		}
 		else
 		{
-			Selectors.DeleteObjects();
+			Selectors.Empty();
 			break;
 		}
 	}
