@@ -943,13 +943,13 @@ void GRichTextPriv::ImageBlock::IncAllStyleRefs()
 		Style->RefCount++;
 }
 
-bool GRichTextPriv::ImageBlock::DoContext(GSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling)
+bool GRichTextPriv::ImageBlock::DoContext(LSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling)
 {
 	if (SourceImg && !Spelling)
 	{
 		s.AppendSeparator();
 		
-		GSubMenu *c = s.AppendSub("Transform Image");
+		LSubMenu *c = s.AppendSub("Transform Image");
 		if (c)
 		{
 			c->AppendItem("Rotate Clockwise", IDM_CLOCKWISE); 
@@ -980,7 +980,7 @@ bool GRichTextPriv::ImageBlock::DoContext(GSubMenu &s, GdcPt2 Doc, ssize_t Offse
 					m += s;
 				}
 				
-				GMenuItem *mi = c->AppendItem(m, IDM_SCALE_IMAGE+i, !IsBusy());
+				LMenuItem *mi = c->AppendItem(m, IDM_SCALE_IMAGE+i, !IsBusy());
 				if (mi && ResizeIdx == i)
 				{
 					mi->Checked(true);

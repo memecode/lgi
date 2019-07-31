@@ -24,7 +24,7 @@
 		#define LGI_32BIT				1
 	#endif
 
-	#if 1
+	#if 0
 		#define _CRTDBG_MAP_ALLOC
 		#include <crtdbg.h>
 		#ifdef _DEBUG

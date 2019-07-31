@@ -2012,7 +2012,7 @@ bool GTag::OnMouseClick(GMouse &m)
 		GTag *a = IsAnchor(&Uri);
 		if (a && ValidStr(Uri))
 		{
-			GSubMenu RClick;
+			LSubMenu RClick;
 
 			#define IDM_COPY_LINK	100
 			if (Html->GetMouse(m, true))
@@ -8029,7 +8029,7 @@ void GHtml::OnMouseClick(GMouse &m)
 		if (!TagProcessedClick &&
 			m.IsContextMenu())
 		{
-			GSubMenu RClick;
+			LSubMenu RClick;
 
 			enum ContextMenuCmds
 			{
@@ -8043,12 +8043,12 @@ void GHtml::OnMouseClick(GMouse &m)
 			#define IDM_CHARSET_BASE	10000
 
 			RClick.AppendItem					(LgiLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
-			GMenuItem *Vs = RClick.AppendItem	(LgiLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
+			LMenuItem *Vs = RClick.AppendItem	(LgiLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
 			RClick.AppendItem					(LgiLoadString(L_COPY_SOURCE, "Copy Source"), IDM_COPY_SRC, Source != 0);
-			GMenuItem *Load = RClick.AppendItem	(LgiLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
+			LMenuItem *Load = RClick.AppendItem	(LgiLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
 			if (Load) Load->Checked(GetLoadImages());
 			RClick.AppendItem					(LgiLoadString(L_VIEW_IN_DEFAULT_BROWSER, "View in Default Browser"), IDM_EXTERNAL, Source != 0);
-			GSubMenu *Cs = RClick.AppendSub		(LgiLoadString(L_CHANGE_CHARSET, "Change Charset"));
+			LSubMenu *Cs = RClick.AppendSub		(LgiLoadString(L_CHANGE_CHARSET, "Change Charset"));
 
 			if (Cs)
 			{

@@ -610,7 +610,7 @@ public:
 			return false;
 
 		GString dir = NameAt(Level-1);
-		GSubMenu s;
+		LSubMenu s;
 		GDirectory d;
 
 		GString::Array Opts;
@@ -1658,7 +1658,7 @@ void GFolderItem::OnMouseClick(GMouse &m)
 		}
 		else if (m.Right())
 		{
-			GSubMenu *RClick = new GSubMenu;
+			LSubMenu *RClick = new LSubMenu;
 			if (RClick)
 			{
 				RClick->AppendItem("Select", IDM_OPEN, true);

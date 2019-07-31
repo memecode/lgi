@@ -155,7 +155,7 @@ public:
 	virtual bool OnSubmitForm(GTag *Form);
 	virtual void OnCursorChanged() {}
 	virtual void OnLoad();
-	virtual bool OnContextMenuCreate(struct GTagHit &Hit, GSubMenu &RClick) { return true; }
+	virtual bool OnContextMenuCreate(struct GTagHit &Hit, LSubMenu &RClick) { return true; }
 	virtual void OnContextMenuCommand(struct GTagHit &Hit, int Cmd) {}
 };
 

@@ -1028,7 +1028,7 @@ void GToolBar::ContextMenu(GMouse &m)
 {
 	if (IsCustomizable())
 	{
-		GSubMenu *Sub = new GSubMenu;
+		LSubMenu *Sub = new LSubMenu;
 		if (Sub)
 		{
 			int n = 1;
@@ -1043,7 +1043,7 @@ void GToolBar::ContextMenu(GMouse &m)
 				}
 				else
 				{
-					GMenuItem *Item = Sub->AppendItem(v->Name(), n, true);
+					auto Item = Sub->AppendItem(v->Name(), n, true);
 					if (Item)
 					{
 						Item->Checked(v->Visible());
@@ -1051,7 +1051,7 @@ void GToolBar::ContextMenu(GMouse &m)
 				}
 			}
 			Sub->AppendSeparator();
-			GMenuItem *Txt = Sub->AppendItem(LgiLoadString(L_TOOLBAR_SHOW_TEXT, "Show Text Labels"), 1000, true);
+			auto Txt = Sub->AppendItem(LgiLoadString(L_TOOLBAR_SHOW_TEXT, "Show Text Labels"), 1000, true);
 			Txt->Checked(d->Text);
 
 			bool Save = false;

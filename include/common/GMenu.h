@@ -51,9 +51,9 @@
 // Menu wrappers
 class LgiClass GMenuLoader
 {
-	friend class GMenuItem;
+	friend class LMenuItem;
 	friend class GMenu;
-	friend class GSubMenu;
+	friend class LSubMenu;
 	friend class MenuImpl;
 	friend class SubMenuImplPrivate;
 
@@ -61,7 +61,7 @@ protected:
 #ifdef WIN32
 	OsSubMenu Info;
 #endif
-	List<GMenuItem> Items;
+	List<LMenuItem> Items;
 
 public:
 	GMenuLoader()
@@ -76,19 +76,19 @@ public:
 				ResFileFormat Format,
 				class TagHash *TagList);
 
-	virtual GMenuItem *AppendItem(const char *Str, int Id, bool Enabled = true, int Where = -1, const char *Shortcut = 0) = 0;
-	virtual GSubMenu *AppendSub(const char *Str, int Where = -1) = 0;
-	virtual GMenuItem *AppendSeparator(int Where = -1) = 0;
+	virtual LMenuItem *AppendItem(const char *Str, int Id, bool Enabled = true, int Where = -1, const char *Shortcut = 0) = 0;
+	virtual LSubMenu *AppendSub(const char *Str, int Where = -1) = 0;
+	virtual LMenuItem *AppendSeparator(int Where = -1) = 0;
 };
 
 /// Sub menu.
-class LgiClass GSubMenu :
+class LgiClass LSubMenu :
 	public GBase,
 	public GMenuLoader,
 	public GImageListOwner,
 	public GDom
 {
-	friend class GMenuItem;
+	friend class LMenuItem;
 	friend class GMenu;
 	friend class SubMenuImpl;
 	friend class MenuItemImpl;
@@ -98,32 +98,34 @@ class LgiClass GSubMenu :
 	// This is not called in the GUI thread
 	static void SysMouseClick(GMouse &m);
 
-	#if !WINNATIVE
+	#if defined(__GTK_H__)
+	GlibWrapper<Gtk::GtkMenuShell> Info;
+	#elif !WINNATIVE
 	OsSubMenu Info;
 	#endif
 
 	#if defined(__GTK_H__)
-	friend void GtkDeactivate(Gtk::GtkMenuShell *widget, GSubMenu *Sub);
-	friend Gtk::gboolean GSubMenuClick(GMouse *m);
-	friend void SubMenuDestroy(GSubMenu *Item);
+	friend void GtkDeactivate(Gtk::GtkMenuShell *widget, LSubMenu *Sub);
+	friend Gtk::gboolean LSubMenuClick(GMouse *m);
+	friend void SubMenuDestroy(LSubMenu *Item);
 
 	int *_ContextMenuId;
 	bool InLoop;
 	uint64 ActiveTs;
-	bool IsContext(GMenuItem *Item);
+	bool IsContext(LMenuItem *Item);
 	void OnActivate(bool a);
 	#elif defined(WINNATIVE)
 	HWND TrackHandle;
 	#elif defined(BEOS)
-	void		_CopyMenu(BMenu *To, GSubMenu *From);
-	GMenuItem	*MatchShortcut(GKey &k);
+	void		_CopyMenu(BMenu *To, LSubMenu *From);
+	LMenuItem	*MatchShortcut(GKey &k);
 	#else
 	bool OnKey(GKey &k);
 	#endif
 
 protected:
 	/// The parent menu item or NULL if the root menu
-	GMenuItem		*Parent;
+	LMenuItem		*Parent;
 	/// The top level window this sub menu belongs to or NULL
 	GMenu			*Menu;
 	/// The window that the menu belongs to or NULL.
@@ -133,16 +135,16 @@ protected:
 	void ClearHandle();
 
 public:
-	GSubMenu(OsSubMenu Hnd);
+	LSubMenu(OsSubMenu Hnd);
 	/// Constructor
-	GSubMenu
+	LSubMenu
 	(
 		/// Name of the menu
 		const char *name = "",
 		/// True if it's popup
 		bool Popup = true
 	);
-	virtual ~GSubMenu();
+	virtual ~LSubMenu();
 
 	/// Returns the OS handle
 	OsSubMenu Handle() { return Info; }
@@ -156,7 +158,7 @@ public:
 	}
 	
 	/// Add a new item
-	GMenuItem *AppendItem
+	LMenuItem *AppendItem
 	(
 		/// The text of the item.
 		///
@@ -182,7 +184,7 @@ public:
 	);
 	
 	/// Add a submenu
-	GSubMenu *AppendSub
+	LSubMenu *AppendSub
 	(
 		/// The text of the item
 		const char *Str,
@@ -191,7 +193,7 @@ public:
 	);
 	
 	/// Add a separator
-	GMenuItem *AppendSeparator(int Where = -1);
+	LMenuItem *AppendSeparator(int Where = -1);
 	
 	/// Delete all items
 	void Empty();
@@ -207,28 +209,28 @@ public:
 	bool RemoveItem
 	(
 		/// Pointer of the item to remove
-		GMenuItem *Item
+		LMenuItem *Item
 	);
 	
 	/// Returns numbers of items in menu
 	size_t Length();
 
 	/// Return a pointer to an item
-	GMenuItem *ItemAt
+	LMenuItem *ItemAt
 	(
 		/// The index of the item to return
 		int i
 	);
 	
 	/// Returns a pointer to an item
-	GMenuItem *FindItem
+	LMenuItem *FindItem
 	(
 		/// The ID of the item to return
 		int Id
 	);
 
 	/// Returns a pointer to an sub menu
-	GSubMenu *FindSubMenu
+	LSubMenu *FindSubMenu
 	(
 		/// The ID of the sub menu to return
 		int Id
@@ -268,7 +270,7 @@ public:
 	}
 
 	/// Returns the parent menu item
-	GMenuItem *GetParent() { return Parent; }
+	LMenuItem *GetParent() { return Parent; }
 	
 	/// Returns the menu that this belongs to
 	GMenu *GetMenu() { return Menu; }
@@ -280,11 +282,11 @@ public:
 };
 
 /// An item an a menu
-class LgiClass GMenuItem :
+class LgiClass LMenuItem :
 	public GBase,
 	public GDom
 {
-	friend class GSubMenu;
+	friend class LSubMenu;
 	friend class GMenu;
 	friend class GView;
 	friend class SubMenuImpl;
@@ -306,12 +308,16 @@ private:
 
 protected:
 	GMenu			*Menu;
-	GSubMenu		*Parent;
-	GSubMenu		*Child;
+	LSubMenu		*Parent;
+	LSubMenu		*Child;
 	int				Position;
 	int				_Icon;
 
+	#ifdef __GTK_H__
+	GlibWrapper<Gtk::GtkMenuItem> Info;
+	#else
 	OsMenuItem		Info;
+	#endif
 	class GMenuItemPrivate *d;
 
 	#if defined BEOS
@@ -319,7 +325,7 @@ protected:
 	bool			UnsupportedShortcut;
 	int				ShortcutKey;
 	int				ShortcutMod;
-	GMenuItem		*MatchShortcut(GKey &k);
+	LMenuItem		*MatchShortcut(GKey &k);
 	#else
 	int				_Id;
 	int				_Flags;
@@ -344,22 +350,22 @@ protected:
 	void ClearHandle();
 
 public:
-	GMenuItem();
+	LMenuItem();
 	#if defined BEOS
-	GMenuItem(BMenuItem *item);
-	GMenuItem(GSubMenu *p);
+	LMenuItem(BMenuItem *item);
+	LMenuItem(LSubMenu *p);
 	#endif
-	GMenuItem(GMenu *m, GSubMenu *p, const char *txt, int Id, int Pos, const char *Shortcut = 0);
-	virtual ~GMenuItem();
+	LMenuItem(GMenu *m, LSubMenu *p, const char *txt, int Id, int Pos, const char *Shortcut = 0);
+	virtual ~LMenuItem();
 
-	GMenuItem &operator =(const GMenuItem &m) { LgiAssert(!"This shouldn't be used anywhere"); return *this; }
+	LMenuItem &operator =(const LMenuItem &m) { LgiAssert(!"This shouldn't be used anywhere"); return *this; }
 
 	/// Creates a sub menu off the item
-	GSubMenu *Create();
+	LSubMenu *Create();
 	/// Removes the item from it's place in the menu but doesn't delete it
 	bool Remove();
 	/// Returns the parent sub menu
-	GSubMenu *GetParent();
+	LSubMenu *GetParent();
 	/// Returns the parent sub menu
 	GMenu *GetMenu() { return Menu; }
 	/// Scans the text of the item for a keyboard shortcut
@@ -374,14 +380,14 @@ public:
 	/// Put a check mark on the item
 	void Checked(bool c);
 	/// \brief Set the text of the item
-	/// \sa GSubMenu::AppendItem()
+	/// \sa LSubMenu::AppendItem()
 	bool Name(const char *n);
 	/// Enable or disable the item
 	void Enabled(bool e);
 	void Visible(bool v);
 	void Focus(bool f);
 	/// Attach a sub menu to the item
-	void Sub(GSubMenu *s);
+	void Sub(LSubMenu *s);
 	/// Set the icon for the item. The icon is stored in the GMenu's image list.
 	void Icon(int i);
 
@@ -398,7 +404,7 @@ public:
 	bool Visible();
 	bool Focus();
 	/// Return whether this item's submenu
-	GSubMenu *Sub();
+	LSubMenu *Sub();
 	/// Return the icon of this this
 	int Icon();
 
@@ -422,7 +428,7 @@ public:
 
 /** \brief Top level window menu
 
-This class contains GMenuItem's and GSubMenu's.
+This class contains LMenuItem's and LSubMenu's.
 
 A basic menu can be constructed inside a GWindow like this:
 \code
@@ -431,7 +437,7 @@ if (Menu)
 {
 	Menu->Attach(this);
 
-	GSubMenu *File = Menu->AppendSub("&File");
+	LSubMenu *File = Menu->AppendSub("&File");
 	if (File)
 	{
 		File->AppendItem("&Open\tCtrl+O", IDM_OPEN, true);
@@ -443,7 +449,7 @@ if (Menu)
 		File->AppendItem("E&xit", IDM_EXIT, true);
 	}
 
-	GSubMenu *Help = Menu->AppendSub("&Help");
+	LSubMenu *Help = Menu->AppendSub("&Help");
 	if (Help)
 	{
 		Help->AppendItem("&Help", IDM_HELP, true);
@@ -464,10 +470,10 @@ if (Menu)
 */
 
 class LgiClass GMenu :
-	public GSubMenu
+	public LSubMenu
 {
-	friend class GSubMenu;
-	friend class GMenuItem;
+	friend class LSubMenu;
+	friend class LMenuItem;
 	friend class GWindow;
 
 	class GMenuPrivate *d;

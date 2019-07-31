@@ -34,13 +34,16 @@ public:
 	#elif defined(__GTK_H__)
 	
 	::GArray<GSurface*> Images;
-	GtkStatusIcon *tray_icon;
+	GlibWrapper<GtkStatusIcon> tray_icon;
 	typedef GdkPixbuf *IconRef;
 	uint64 LastClickTime;
 	gint DoubleClickTime;
 	
 	void OnClick()
 	{
+		if (!tray_icon)
+			return;
+
 		uint64 Now = LgiCurrentTime();
 		GdkScreen *s = gtk_status_icon_get_screen(tray_icon);
 		GdkDisplay *dsp = gdk_screen_get_display(s);
@@ -101,14 +104,8 @@ public:
 		tray_icon = Gtk::gtk_status_icon_new();
 		if (tray_icon)
 		{
-			g_signal_connect(G_OBJECT(tray_icon),
-							"activate", 
-							G_CALLBACK(tray_icon_on_click),
-							this);
-			g_signal_connect(G_OBJECT(tray_icon), 
-							 "popup-menu",
-							 G_CALLBACK(tray_icon_on_menu),
-							 this);
+			tray_icon.Connect("activate", G_CALLBACK(tray_icon_on_click), this);
+			tray_icon.Connect("popup-menu", G_CALLBACK(tray_icon_on_menu), this);
 		}
 		
 		#endif
@@ -127,8 +124,6 @@ public:
 			g_object_unref(Icon[n]);
 		}
 		Images.DeleteObjects();
-		if (tray_icon)
-			g_object_unref(tray_icon);
 		#else
 		Icon.DeleteObjects();
 		#endif
@@ -283,11 +278,7 @@ void GTrayIcon::Visible(bool v)
 					if (Ref)
 					{
 						Gtk::gtk_status_icon_set_from_pixbuf(d->tray_icon, Ref);
-						#if GTK_MAJOR_VERSION == 3
 						Gtk::gtk_status_icon_set_tooltip_text(d->tray_icon, GBase::Name());
-						#else
-						Gtk::gtk_status_icon_set_tooltip(d->tray_icon, GBase::Name());
-						#endif
 						Gtk::gtk_status_icon_set_visible(d->tray_icon, true);
 					}
 				}

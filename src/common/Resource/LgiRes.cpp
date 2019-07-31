@@ -1486,10 +1486,10 @@ bool GMenuLoader::Load(LgiMenuRes *MenuRes, GXmlTag *Tag, ResFileFormat Format, 
 				if (Str && Str->Str)
 				{
 					bool Add = !TagList || TagList->Check(Str->Tag);
-					GSubMenu *Sub = AppendSub(Str->Str);
+					LSubMenu *Sub = AppendSub(Str->Str);
 					if (Sub)
 					{
-						GMenuItem *p = Sub->GetParent();
+						auto p = Sub->GetParent();
 						if (p)
 							p->Id(Str->Id);
 						else
@@ -1554,7 +1554,7 @@ bool GMenu::Load(GView *w, const char *Res, const char *TagList)
 			if (stricmp(m->Name(), Res) == 0)
 			{
 				#if WINNATIVE
-				Status = GSubMenu::Load(m, m->Tag, r->GetFormat(), &Tags);
+				Status = LSubMenu::Load(m, m->Tag, r->GetFormat(), &Tags);
 				#else
 				Status = GMenuLoader::Load(m, m->Tag, r->GetFormat(), &Tags);
 				#endif

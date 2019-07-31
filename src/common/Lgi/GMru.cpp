@@ -25,7 +25,7 @@ class GMruPrivate
 public:
 	int Size;
 	GArray<GMruEntry*> Items;
-	GSubMenu *Parent;
+	LSubMenu *Parent;
 	GFileType *SelectedType;
 
 	GMruPrivate()	
@@ -197,7 +197,7 @@ void GMru::_Update()
 	}
 }
 
-bool GMru::Set(GSubMenu *parent, int size)
+bool GMru::Set(LSubMenu *parent, int size)
 {
 	d->Parent = parent;
 	if (size > 0)

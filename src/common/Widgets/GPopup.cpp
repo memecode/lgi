@@ -191,7 +191,7 @@ public:
 				if (m.Down() ^ Old.Down())
 				{
 					// m.Trace("Hook");
-					GSubMenu::SysMouseClick(m);
+					LSubMenu::SysMouseClick(m);
 				}
 
 				if (m.Down() && !Old.Down()) 
@@ -275,8 +275,8 @@ public:
 										break;
 									}
 									
-									::GMenuItem *it = Sub->GetSub()->GetParent();
-									GSubMenu *mn = it ? it->GetParent() : 0;
+									LMenuItem *it = Sub->GetSub()->GetParent();
+									LSubMenu *mn = it ? it->GetParent() : 0;
 									MenuClickImpl *impl = mn ? mn->Handle() : 0;
 									v = impl ? impl->View() : 0;
 								}

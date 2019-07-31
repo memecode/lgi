@@ -1283,8 +1283,8 @@ public:
 
 void GRichTextEdit::DoContextMenu(GMouse &m)
 {
-	GMenuItem *i;
-	GSubMenu RClick;
+	LMenuItem *i;
+	LSubMenu RClick;
 	GAutoString ClipText;
 	{
 		GClipBoard Clip(this);
@@ -1330,7 +1330,7 @@ void GRichTextEdit::DoContextMenu(GMouse &m)
 	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_INDENT_SIZE, "Indent Size"), IDM_INDENT_SIZE, true);
 	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_TAB_SIZE, "Tab Size"), IDM_TAB_SIZE, true);
 	
-	GSubMenu *Src = RClick.AppendSub("Source");
+	LSubMenu *Src = RClick.AppendSub("Source");
 	if (Src)
 	{
 		Src->AppendItem("Copy Original", IDM_COPY_ORIGINAL, d->OriginalText.Get() != NULL);

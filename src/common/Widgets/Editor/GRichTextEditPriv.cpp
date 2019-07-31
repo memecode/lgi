@@ -1566,8 +1566,8 @@ bool GRichTextPriv::ClickBtn(GMouse &m, GRichTextEdit::RectType t)
 
 			bool UseSub = (SysFont->GetHeight() * Fonts.Length()) > (GdcD->Y() * 0.8);
 
-			GSubMenu s;
-			GSubMenu *Cur = NULL;
+			LSubMenu s;
+			LSubMenu *Cur = NULL;
 			int Idx = 1;
 			char Last = 0;
 			for (unsigned i=0; i<Fonts.Length(); i++)
@@ -1611,7 +1611,7 @@ bool GRichTextPriv::ClickBtn(GMouse &m, GRichTextEdit::RectType t)
 		{
 			static const char *Sizes[] = { "6", "7", "8", "9", "10", "11", "12", "14", "16", "18", "20", "24",
 											"28", "32", "40", "50", "60", "80", "100", "120", 0 };
-			GSubMenu s;
+			LSubMenu s;
 			for (int Idx = 0; Sizes[Idx]; Idx++)
 				s.AppendItem(Sizes[Idx], Idx+1);
 

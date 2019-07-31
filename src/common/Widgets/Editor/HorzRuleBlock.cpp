@@ -195,7 +195,7 @@ void GRichTextPriv::HorzRuleBlock::IncAllStyleRefs()
 {
 }
 
-bool GRichTextPriv::HorzRuleBlock::DoContext(GSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling)
+bool GRichTextPriv::HorzRuleBlock::DoContext(LSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling)
 {
 	return false;
 }

@@ -61,9 +61,9 @@ public:
 	/// Returns the selected item's name
 	char *Name();
 	/// Gets the menu used
-	GSubMenu *GetMenu();
+	LSubMenu *GetMenu();
 	/// Sets the menu used
-	void SetMenu(GSubMenu *m);
+	void SetMenu(LSubMenu *m);
 
 	/// This state describes what happens to the currently selected
 	/// entry in the list when the menu is openned.

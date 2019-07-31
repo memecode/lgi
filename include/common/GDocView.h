@@ -180,7 +180,7 @@ public:
 
 	/// Creating a context menu, usually when the user right clicks on the 
 	/// document.
-	virtual bool AppendItems(GSubMenu *Menu, int Base = 1000) { return false; }
+	virtual bool AppendItems(LSubMenu *Menu, int Base = 1000) { return false; }
 	
 	/// Do something when the menu items created by GDocumentEnv::AppendItems 
 	/// are clicked.

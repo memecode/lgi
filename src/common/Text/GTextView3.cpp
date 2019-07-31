@@ -3409,7 +3409,7 @@ void GTextView3::Redo()
 
 void GTextView3::DoContextMenu(GMouse &m)
 {
-	GSubMenu RClick;
+	LSubMenu RClick;
 	GAutoString ClipText;
 	{
 		GClipBoard Clip(this);
@@ -3434,7 +3434,7 @@ void GTextView3::DoContextMenu(GMouse &m)
 	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_REDO, "Redo"), IDM_REDO, UndoQue.CanRedo());
 	RClick.AppendSeparator();
 
-	GMenuItem *i = RClick.AppendItem(LgiLoadString(L_TEXTCTRL_FIXED, "Fixed Width Font"), IDM_FIXED, true);
+	auto i = RClick.AppendItem(LgiLoadString(L_TEXTCTRL_FIXED, "Fixed Width Font"), IDM_FIXED, true);
 	if (i) i->Checked(GetFixedWidthFont());
 
 	i = RClick.AppendItem(LgiLoadString(L_TEXTCTRL_AUTO_INDENT, "Auto Indent"), IDM_AUTO_INDENT, true);
@@ -3568,7 +3568,7 @@ bool GTextView3::OnStyleClick(GStyle *style, GMouse *m)
 	return false;
 }
 
-bool GTextView3::OnStyleMenu(GStyle *style, GSubMenu *m)
+bool GTextView3::OnStyleMenu(GStyle *style, LSubMenu *m)
 {
 	switch (style->Owner)
 	{

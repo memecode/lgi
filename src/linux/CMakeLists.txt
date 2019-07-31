@@ -228,6 +228,7 @@ set (CommonSource
 set (GtkSource
 	include/linux/Gtk/LgiWidget.h
 	include/linux/Gtk/LgiOsDefs.h
+	include/linux/Gtk/LgiOsClasses.h
 	src/linux/Gtk/Gdc2.cpp
 	src/linux/Gtk/GMemDC.cpp
 	src/linux/Gtk/GPrintDC.cpp

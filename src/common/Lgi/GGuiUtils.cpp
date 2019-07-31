@@ -204,6 +204,8 @@ void LgiInitColours()
 	Gtk::g_object_get(set, PropName, &Value, NULL);
 	GToken Lines(Value, "\n");
 	Gtk::g_free(Value);
+	g_object_unref(set);
+
 	LHashTbl<ConstStrKey<char,false>, int> Colours(0, -1);
 	for (int i=0; i<Lines.Length(); i++)
 	{

@@ -14,18 +14,17 @@
 #include "GDisplayString.h"
 
 using namespace Gtk;
-typedef ::GMenuItem LgiMenuItem;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-static ::GArray<GSubMenu*> Active;
+static ::GArray<LSubMenu*> Active;
 
-void SubMenuDestroy(GSubMenu *Item)
+void SubMenuDestroy(LSubMenu *Item)
 {
 	// LgiTrace("DestroySub %p %p\n", Item, Item->Info);
 	Item->Info = NULL;
 }
 
-GSubMenu::GSubMenu(const char *name, bool Popup)
+LSubMenu::LSubMenu(const char *name, bool Popup)
 {
 	Menu = NULL;
 	Parent = NULL;
@@ -49,13 +48,13 @@ GSubMenu::GSubMenu(const char *name, bool Popup)
 	Active.Add(this);
 }
 
-GSubMenu::~GSubMenu()
+LSubMenu::~LSubMenu()
 {
 	Active.Delete(this);
 
 	while (Items.Length())
 	{
-		LgiMenuItem *i = Items[0];
+		LMenuItem *i = Items[0];
 		LgiAssert(i->Parent == this);
 		DeleteObj(i);
 	}
@@ -65,14 +64,14 @@ GSubMenu::~GSubMenu()
 		#if GTK_MAJOR_VERSION == 2
 		LgiAssert(Info->container.widget.object.parent_instance.g_type_instance.g_class);
 		#endif
-		Gtk::GtkWidget *w = GtkCast(Info, gtk_widget, GtkWidget);
+		Gtk::GtkWidget *w = GtkCast(Info.obj, gtk_widget, GtkWidget);
 		Gtk::gtk_widget_destroy(w);
 		Info = NULL;
 	}
 }
 
 // This will be run in the GUI thread..
-gboolean GSubMenuClick(GMouse *m)
+gboolean LSubMenuClick(GMouse *m)
 {
 	if (!m)
 		return false;
@@ -112,7 +111,7 @@ gboolean GSubMenuClick(GMouse *m)
 	{
 		uint64 Now = LgiCurrentTime();
 		uint64 Since = Now - ActiveTs;
-		LgiTrace("%s:%i - GSubMenuClick, Since=" LPrintfInt64 "\n", _FL, Since);
+		LgiTrace("%s:%i - LSubMenuClick, Since=" LPrintfInt64 "\n", _FL, Since);
 
 		if (Since > 500)
 		{
@@ -128,7 +127,7 @@ gboolean GSubMenuClick(GMouse *m)
 			}
 		}
 	}
-	// else LgiTrace("GSubMenuClick Down=%i OverMenu=%i HasVIsible=%i ActiveTs=%i\n", m->Down(), OverMenu, HasVisible, ActiveTs > 0);
+	// else LgiTrace("LSubMenuClick Down=%i OverMenu=%i HasVIsible=%i ActiveTs=%i\n", m->Down(), OverMenu, HasVisible, ActiveTs > 0);
 
 	DeleteObj(m);
 
@@ -136,26 +135,26 @@ gboolean GSubMenuClick(GMouse *m)
 }
 
 // This is not called in the GUI thread..
-void GSubMenu::SysMouseClick(GMouse &m)
+void LSubMenu::SysMouseClick(GMouse &m)
 {
 	GMouse *ms = new GMouse;
 	*ms = m;
-	g_idle_add((GSourceFunc) GSubMenuClick, ms);
+	g_idle_add((GSourceFunc) LSubMenuClick, ms);
 }
 
-size_t GSubMenu::Length()
+size_t LSubMenu::Length()
 {
 	return Items.Length();
 }
 
-LgiMenuItem *GSubMenu::ItemAt(int Id)
+LMenuItem *LSubMenu::ItemAt(int Id)
 {
 	return Items.ItemAt(Id);
 }
 
-LgiMenuItem *GSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where, const char *Shortcut)
+LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where, const char *Shortcut)
 {
-	LgiMenuItem *i = new LgiMenuItem(Menu, this, Str, Id, Where < 0 ? Items.Length() : Where, Shortcut);
+	LMenuItem *i = new LMenuItem(Menu, this, Str, Id, Where < 0 ? Items.Length() : Where, Shortcut);
 	if (i)
 	{
 		i->Enabled(Enabled);
@@ -176,9 +175,9 @@ LgiMenuItem *GSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Whe
 	return 0;
 }
 
-LgiMenuItem *GSubMenu::AppendSeparator(int Where)
+LMenuItem *LSubMenu::AppendSeparator(int Where)
 {
-	LgiMenuItem *i = new LgiMenuItem;
+	LMenuItem *i = new LMenuItem;
 	if (i)
 	{
 		i->Parent = this;
@@ -201,10 +200,10 @@ LgiMenuItem *GSubMenu::AppendSeparator(int Where)
 	return 0;
 }
 
-GSubMenu *GSubMenu::AppendSub(const char *Str, int Where)
+LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 {
 	GBase::Name(Str);
-	LgiMenuItem *i = new LgiMenuItem(Menu, this, Str, Where < 0 ? Items.Length() : Where, NULL);
+	LMenuItem *i = new LMenuItem(Menu, this, Str, Where < 0 ? Items.Length() : Where, NULL);
 	if (i)
 	{
 		i->Id(-1);
@@ -221,7 +220,7 @@ GSubMenu *GSubMenu::AppendSub(const char *Str, int Where)
 			gtk_widget_show(item);
 		}
 
-		i->Child = new GSubMenu(Str);
+		i->Child = new LSubMenu(Str);
 		if (i->Child)
 		{
 			i->Child->Parent = i;
@@ -245,7 +244,7 @@ GSubMenu *GSubMenu::AppendSub(const char *Str, int Where)
 	return 0;
 }
 
-void GSubMenu::ClearHandle()
+void LSubMenu::ClearHandle()
 {
 	Info = NULL;
 	for (auto i: Items)
@@ -254,9 +253,9 @@ void GSubMenu::ClearHandle()
 	}
 }
 
-void GSubMenu::Empty()
+void LSubMenu::Empty()
 {
-	LgiMenuItem *i;
+	LMenuItem *i;
 	while ((i = Items[0]))
 	{
 		RemoveItem(i);
@@ -264,12 +263,12 @@ void GSubMenu::Empty()
 	}
 }
 
-bool GSubMenu::RemoveItem(int i)
+bool LSubMenu::RemoveItem(int i)
 {
 	return RemoveItem(Items.ItemAt(i));
 }
 
-bool GSubMenu::RemoveItem(LgiMenuItem *Item)
+bool LSubMenu::RemoveItem(LMenuItem *Item)
 {
 	if (Item && Items.HasItem(Item))
 	{
@@ -279,12 +278,12 @@ bool GSubMenu::RemoveItem(LgiMenuItem *Item)
 	return false;
 }
 
-bool GSubMenu::IsContext(LgiMenuItem *Item)
+bool LSubMenu::IsContext(LMenuItem *Item)
 {
 	if (!_ContextMenuId)
 	{
-		LgiMenuItem *i = GetParent();
-		GSubMenu *s = i ? i->GetParent() : NULL;
+		LMenuItem *i = GetParent();
+		LSubMenu *s = i ? i->GetParent() : NULL;
 		if (s)
 			// Walk up the chain of menus to find the top...
 			return s->IsContext(Item);
@@ -298,12 +297,12 @@ bool GSubMenu::IsContext(LgiMenuItem *Item)
 	return true;
 }
 
-void GtkDeactivate(Gtk::GtkMenuShell *widget, GSubMenu *Sub)
+void GtkDeactivate(Gtk::GtkMenuShell *widget, LSubMenu *Sub)
 {
 	Sub->OnActivate(false);
 }
 
-void GSubMenu::OnActivate(bool a)
+void LSubMenu::OnActivate(bool a)
 {
 	if (!a)
 	{
@@ -318,7 +317,7 @@ void GSubMenu::OnActivate(bool a)
 	}
 }
 
-int GSubMenu::Float(GView *From, int x, int y, int Button)
+int LSubMenu::Float(GView *From, int x, int y, int Button)
 {
 	#ifdef __GTK_H__
 	GWindow *Wnd = From->GetWindow();
@@ -344,17 +343,16 @@ int GSubMenu::Float(GView *From, int x, int y, int Button)
 	ActiveTs = LgiCurrentTime();
 
 	// This signal handles the case where the user cancels the menu by clicking away from it.
-	auto Obj = G_OBJECT(Info);
-	g_signal_connect(Obj, "deactivate",  (GCallback)GtkDeactivate, this);
+	Info.Connect("deactivate",  (GCallback)GtkDeactivate, this);
 	
-	auto Widget = GTK_WIDGET(Info);
+	auto Widget = GTK_WIDGET(Info.obj);
 	gtk_widget_show_all(Widget);
 
 	int MenuId = 0;
 	_ContextMenuId = &MenuId;
 
 	GdcPt2 Pos(x, y);
-	gtk_menu_popup(GTK_MENU(Info),
+	gtk_menu_popup(GTK_MENU(Info.obj),
 					NULL, NULL, NULL, NULL,
 					Button,
 					gtk_get_current_event_time());
@@ -365,11 +363,11 @@ int GSubMenu::Float(GView *From, int x, int y, int Button)
 	return MenuId;
 }
 
-GSubMenu *GSubMenu::FindSubMenu(int Id)
+LSubMenu *LSubMenu::FindSubMenu(int Id)
 {
 	for (auto i: Items)
 	{
-		GSubMenu *Sub = i->Sub();
+		LSubMenu *Sub = i->Sub();
 
 		// printf("Find(%i) '%s' %i sub=%p\n", Id, i->Name(), i->Id(), Sub);
 		if (i->Id() == Id)
@@ -378,7 +376,7 @@ GSubMenu *GSubMenu::FindSubMenu(int Id)
 		}
 		else if (Sub)
 		{
-			GSubMenu *m = Sub->FindSubMenu(Id);
+			LSubMenu *m = Sub->FindSubMenu(Id);
 			if (m)
 			{
 				return m;
@@ -389,11 +387,11 @@ GSubMenu *GSubMenu::FindSubMenu(int Id)
 	return 0;
 }
 
-LgiMenuItem *GSubMenu::FindItem(int Id)
+LMenuItem *LSubMenu::FindItem(int Id)
 {
 	for (auto i: Items)
 	{
-		GSubMenu *Sub = i->Sub();
+		LSubMenu *Sub = i->Sub();
 
 		if (i->Id() == Id)
 		{
@@ -446,23 +444,23 @@ static GAutoString MenuItemParse(const char *s)
 	return GAutoString(NewStr(buf));
 }
 
-static void MenuItemActivate(GtkMenuItem *MenuItem, LgiMenuItem *Item)
+static void MenuItemActivate(GtkMenuItem *MenuItem, LMenuItem *Item)
 {
 	Item->OnGtkEvent("activate");
 }
 
-static void MenuItemDestroy(GtkWidget *widget, LgiMenuItem *Item)
+static void MenuItemDestroy(GtkWidget *widget, LMenuItem *Item)
 {
 	Item->OnGtkEvent("destroy");
 }
 
-void LgiMenuItem::OnGtkEvent(::GString Event)
+void LMenuItem::OnGtkEvent(::GString Event)
 {
 	if (Event.Equals("activate"))
 	{
 		if (!Sub() && !InSetCheck)
 		{
-			GSubMenu *Parent = GetParent();
+			LSubMenu *Parent = GetParent();
 		
 			if (!Parent || !Parent->IsContext(this))
 			{
@@ -490,7 +488,7 @@ void LgiMenuItem::OnGtkEvent(::GString Event)
 	}
 }
 
-LgiMenuItem::GMenuItem()
+LMenuItem::LMenuItem()
 {
 	d = NULL;
 	Info = NULL;
@@ -508,7 +506,7 @@ LgiMenuItem::GMenuItem()
 	_Id = 0;
 }
 
-LgiMenuItem::GMenuItem(::GMenu *m, GSubMenu *p, const char *txt, int id, int Pos, const char *shortcut)
+LMenuItem::LMenuItem(::GMenu *m, LSubMenu *p, const char *txt, int id, int Pos, const char *shortcut)
 {
 	d = NULL;
 	GAutoString Txt = MenuItemParse(txt);
@@ -532,7 +530,7 @@ LgiMenuItem::GMenuItem(::GMenu *m, GSubMenu *p, const char *txt, int id, int Pos
 	ScanForAccel();
 }
 
-void LgiMenuItem::Handle(GtkMenuItem *mi)
+void LMenuItem::Handle(GtkMenuItem *mi)
 {
 	LgiAssert(Info == NULL);	
 	if (Info != mi)
@@ -543,7 +541,7 @@ void LgiMenuItem::Handle(GtkMenuItem *mi)
 	}
 }
 
-LgiMenuItem::~GMenuItem()
+LMenuItem::~LMenuItem()
 {
 	Remove();
 	DeleteObj(Child);
@@ -662,7 +660,7 @@ Gtk::gint LgiKeyToGtkKey(int Key, const char *ShortCut)
 	return 0;
 }
 
-bool LgiMenuItem::ScanForAccel()
+bool LMenuItem::ScanForAccel()
 {
 	if (!Menu)
 		return false;
@@ -785,7 +783,7 @@ bool LgiMenuItem::ScanForAccel()
 			Gtk::gint GtkKey = LgiKeyToGtkKey(Key, Sc);
 			if (GtkKey)
 			{
-				GtkWidget *w = GtkCast(Info, gtk_widget, GtkWidget);
+				GtkWidget *w = GtkCast(Info.obj, gtk_widget, GtkWidget);
 				Gtk::GdkModifierType mod = (Gtk::GdkModifierType)
 					(
 						(TestFlag(Flags, LGI_EF_CTRL)   ? Gtk::GDK_CONTROL_MASK : 0) |
@@ -824,19 +822,19 @@ bool LgiMenuItem::ScanForAccel()
 	return true;
 }
 
-GSubMenu *LgiMenuItem::GetParent()
+LSubMenu *LMenuItem::GetParent()
 {
 	return Parent;
 }
 
-void LgiMenuItem::ClearHandle()
+void LMenuItem::ClearHandle()
 {
 	Info = NULL;
 	if (Child)
 		Child->ClearHandle();
 }
 
-bool LgiMenuItem::Remove()
+bool LMenuItem::Remove()
 {
 	if (!Parent)
 	{
@@ -849,10 +847,10 @@ bool LgiMenuItem::Remove()
 		LgiAssert(Info->item.bin.container.widget.object.parent_instance.g_type_instance.g_class);
 		#endif
 		// LgiTrace("Remove %p %p\n", this, Info);
-		Gtk::GtkWidget *w = GtkCast(Info, gtk_widget, GtkWidget);
+		Gtk::GtkWidget *w = GtkCast(Info.obj, gtk_widget, GtkWidget);
 		if (Gtk::gtk_widget_get_parent(w))
 		{		
-			Gtk::GtkContainer *c = GtkCast(Parent->Info, gtk_container, GtkContainer);
+			Gtk::GtkContainer *c = GtkCast(Parent->Info.obj, gtk_container, GtkContainer);
 			Gtk::gtk_container_remove(c, w);
 		}
 		Info = NULL;
@@ -864,12 +862,12 @@ bool LgiMenuItem::Remove()
 	return true;
 }
 
-void LgiMenuItem::Id(int i)
+void LMenuItem::Id(int i)
 {
 	_Id = i;
 }
 
-void LgiMenuItem::Separator(bool s)
+void LMenuItem::Separator(bool s)
 {
 	if (s)
 	{
@@ -914,7 +912,7 @@ gtk_container_get_child_index(GtkContainer *c, GtkWidget *child)
 	return Idx.Index;
 }
 
-bool LgiMenuItem::Replace(Gtk::GtkWidget *newWid)
+bool LMenuItem::Replace(Gtk::GtkWidget *newWid)
 {
 	if (!newWid || !Info)
 	{
@@ -923,13 +921,13 @@ bool LgiMenuItem::Replace(Gtk::GtkWidget *newWid)
 	}
 
 	// Get widget
-	GtkWidget *w = GTK_WIDGET(Info);
+	GtkWidget *w = GTK_WIDGET(Info.obj);
 	
 	// Is is attach already?
 	if (gtk_widget_get_parent(w))
 	{
 		// Yes!
-		GtkContainer *c = GTK_CONTAINER(Parent->Info);
+		GtkContainer *c = GTK_CONTAINER(Parent->Info.obj);
 		if (c)
 		{			
 			// Find index
@@ -955,7 +953,7 @@ bool LgiMenuItem::Replace(Gtk::GtkWidget *newWid)
 	return Info != NULL;
 }
 
-GImageList *LgiMenuItem::GetImageList()
+GImageList *LMenuItem::GetImageList()
 {
 	if (GetMenu())
 		return GetMenu()->GetImageList();
@@ -978,7 +976,7 @@ GImageList *LgiMenuItem::GetImageList()
 }
 
 gboolean
-LgiMenuItemDraw(GtkWidget *widget, cairo_t *cr, LgiMenuItem *mi)
+LgiMenuItemDraw(GtkWidget *widget, cairo_t *cr, LMenuItem *mi)
 {
 	auto cls = GTK_WIDGET_GET_CLASS(widget);
 	cls->draw(widget, cr);
@@ -986,7 +984,7 @@ LgiMenuItemDraw(GtkWidget *widget, cairo_t *cr, LgiMenuItem *mi)
 	return true;
 }
 
-void LgiMenuItem::PaintIcon(Gtk::cairo_t *cr)
+void LMenuItem::PaintIcon(Gtk::cairo_t *cr)
 {
 	if (_Icon < 0)
 		return;
@@ -994,7 +992,7 @@ void LgiMenuItem::PaintIcon(Gtk::cairo_t *cr)
 	if (!il)
 		return;
 
-	auto wid = GTK_WIDGET(Info);
+	auto wid = GTK_WIDGET(Info.obj);
 	GtkAllocation a;
 	gtk_widget_get_allocation(wid, &a);
 
@@ -1007,15 +1005,15 @@ void LgiMenuItem::PaintIcon(Gtk::cairo_t *cr)
 	il->Draw(&Dc, 7, 5, _Icon, bk.alpha ? GColour(bk) : GColour::White);
 }
 
-void LgiMenuItem::Icon(int i)
+void LMenuItem::Icon(int i)
 {
 	_Icon = i;
 
 	if (Info)
-		g_signal_connect(Info, "draw", (GCallback)LgiMenuItemDraw, this);
+		Info.Connect("draw", (GCallback)LgiMenuItemDraw, this);
 }
 
-void LgiMenuItem::Checked(bool c)
+void LMenuItem::Checked(bool c)
 {
 	if (c)
 		SetFlag(_Flags, ODS_CHECKED);
@@ -1027,7 +1025,7 @@ void LgiMenuItem::Checked(bool c)
 		InSetCheck = true;
 		
 		// Is the item a checked menu item?
-		if (!GTK_IS_CHECK_MENU_ITEM(Info) && c)
+		if (!GTK_IS_CHECK_MENU_ITEM(Info.obj) && c)
 		{
 			// Create a checkable menu item...
 			GAutoString Txt = MenuItemParse(Name());
@@ -1048,10 +1046,10 @@ void LgiMenuItem::Checked(bool c)
 				LgiAssert(!"No new widget.");
 		}
 		
-		if (GTK_IS_CHECK_MENU_ITEM(Info))
+		if (GTK_IS_CHECK_MENU_ITEM(Info.obj))
 		{
 			// Now mark is checked
-			GtkCheckMenuItem *chk = GTK_CHECK_MENU_ITEM(Info);
+			GtkCheckMenuItem *chk = GTK_CHECK_MENU_ITEM(Info.obj);
 			if (chk)
 			{
 				Gtk::gtk_check_menu_item_set_active(chk, c);
@@ -1062,7 +1060,7 @@ void LgiMenuItem::Checked(bool c)
 	}
 }
 
-bool LgiMenuItem::Name(const char *n)
+bool LMenuItem::Name(const char *n)
 {
 	bool Status = GBase::Name(n);	
 	
@@ -1079,7 +1077,7 @@ bool LgiMenuItem::Name(const char *n)
 	return Status;
 }
 
-void LgiMenuItem::Enabled(bool e)
+void LMenuItem::Enabled(bool e)
 {
 	if (e)
 		ClearFlag(_Flags, ODS_DISABLED);
@@ -1088,64 +1086,64 @@ void LgiMenuItem::Enabled(bool e)
 	
 	if (Info)
 	{
-		gtk_widget_set_sensitive(GtkCast(Info, gtk_widget, GtkWidget), e);
+		gtk_widget_set_sensitive(GtkCast(Info.obj, gtk_widget, GtkWidget), e);
  	}
 }
 
-void LgiMenuItem::Focus(bool f)
+void LMenuItem::Focus(bool f)
 {
 }
 
-void LgiMenuItem::Sub(GSubMenu *s)
+void LMenuItem::Sub(LSubMenu *s)
 {
 	Child = s;
 }
 
-void LgiMenuItem::Visible(bool i)
+void LMenuItem::Visible(bool i)
 {
 }
 
-int LgiMenuItem::Id()
+int LMenuItem::Id()
 {
 	return _Id;
 }
 
-char *LgiMenuItem::Name()
+char *LMenuItem::Name()
 {
 	return GBase::Name();
 }
 
-bool LgiMenuItem::Separator()
+bool LMenuItem::Separator()
 {
 	return _Id == -2;
 }
 
-bool LgiMenuItem::Checked()
+bool LMenuItem::Checked()
 {
 	return TestFlag(_Flags, ODS_CHECKED);
 }
 
-bool LgiMenuItem::Enabled()
+bool LMenuItem::Enabled()
 {
 	return !TestFlag(_Flags, ODS_DISABLED);
 }
 
-bool LgiMenuItem::Visible()
+bool LMenuItem::Visible()
 {
 	return true;
 }
 
-bool LgiMenuItem::Focus()
+bool LMenuItem::Focus()
 {
 	return 0;
 }
 
-GSubMenu *LgiMenuItem::Sub()
+LSubMenu *LMenuItem::Sub()
 {
 	return Child;
 }
 
-int LgiMenuItem::Icon()
+int LMenuItem::Icon()
 {
 	return _Icon;
 }
@@ -1171,7 +1169,7 @@ class GMenuPrivate
 public:
 };
 
-::GMenu::GMenu(const char *AppName) : GSubMenu("", false)
+::GMenu::GMenu(const char *AppName) : LSubMenu("", false)
 {
 	Menu = this;
 	d = NULL;
@@ -1242,7 +1240,7 @@ bool ::GMenu::Attach(GViewI *p)
 	}
 
 	
-	Gtk::GtkWidget *menubar = GtkCast(Info, gtk_widget, GtkWidget);
+	Gtk::GtkWidget *menubar = GtkCast(Info.obj, gtk_widget, GtkWidget);
 
 	Wnd->_VBox = Gtk::gtk_box_new(Gtk::GTK_ORIENTATION_VERTICAL, 0);
 
@@ -1291,8 +1289,8 @@ bool ::GMenu::OnKey(GView *v, GKey &k)
 		}
 		
 		if (k.Alt() &&
-			!dynamic_cast<LgiMenuItem*>(v) &&
-			!dynamic_cast<GSubMenu*>(v))
+			!dynamic_cast<LMenuItem*>(v) &&
+			!dynamic_cast<LSubMenu*>(v))
 		{
 			bool Hide = false;
 			

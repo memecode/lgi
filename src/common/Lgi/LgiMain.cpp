@@ -81,6 +81,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
 {
 	#if defined(_MSC_VER) && defined(_DEBUG)
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+	// _CrtSetBreakAlloc(34058);
 	#endif
 	#ifdef __GTK_H__
 	{

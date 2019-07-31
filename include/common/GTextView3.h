@@ -133,7 +133,7 @@ public:
 		virtual ~GStyle() {}
 
 		virtual bool OnMouseClick(GMouse *m) { return false; }
-		virtual bool OnMenu(GSubMenu *m) { return false; }
+		virtual bool OnMenu(LSubMenu *m) { return false; }
 		virtual void OnMenuClick(int i) {}
 		virtual CURSOR_CHAR GetCursor()  { return 0; }
 		*/
@@ -438,7 +438,7 @@ public:
 	virtual void OnUrl(char *Url);
 	virtual void DoContextMenu(GMouse &m);
 	virtual bool OnStyleClick(GStyle *style, GMouse *m);
-	virtual bool OnStyleMenu(GStyle *style, GSubMenu *m);
+	virtual bool OnStyleMenu(GStyle *style, LSubMenu *m);
 	virtual void OnStyleMenuClick(GStyle *style, int i);
 };
 

@@ -382,7 +382,7 @@ class LgiClass GView : virtual public GViewI, virtual public GBase
 	friend		class GLayout;
 	friend		class GControl;
 	friend		class GMenu;
-	friend		class GSubMenu;
+	friend		class LSubMenu;
 	friend		class GWnd;
 	friend		class GScrollBar;
 	friend		class GFileTarget;
@@ -1423,7 +1423,7 @@ public:
 	virtual void OnTrayClick(GMouse &m);
 
 	/// Called when the tray icon menu is about to be displayed.
-	virtual void OnTrayMenu(GSubMenu &m) {}
+	virtual void OnTrayMenu(LSubMenu &m) {}
 	/// Called when the tray icon menu item has been selected.
 	virtual void OnTrayMenuResult(int MenuId) {}
 	
@@ -1668,7 +1668,7 @@ class LgiClass GCommand : public GBase //, public GFlags
 public:
 	int			Id;
 	GToolButton	*ToolButton;
-	GMenuItem	*MenuItem;
+	LMenuItem	*MenuItem;
 	GKey		*Accelerator;
 	char		*TipHelp;
 	

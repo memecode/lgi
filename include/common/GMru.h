@@ -47,7 +47,7 @@ public:
 	virtual ~GMru();
 
 	// Impl
-	bool Set(GSubMenu *parent, int size = -1);
+	bool Set(LSubMenu *parent, int size = -1);
 	char *AddFile(char *FileName, bool Update = true);
 	void RemoveFile(char *FileName, bool Update = true);
 	GMessage::Result OnEvent(GMessage *Msg);

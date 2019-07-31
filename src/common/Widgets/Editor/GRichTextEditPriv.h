@@ -729,7 +729,7 @@ public:
 			virtual void Dump() {}
 			virtual GNamedStyle *GetStyle(ssize_t At = -1) = 0;
 			virtual int GetUid() const { return BlockUid; }
-			virtual bool DoContext(GSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling) { return false; }
+			virtual bool DoContext(LSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling) { return false; }
 			#ifdef _DEBUG
 			virtual void DumpNodes(GTreeItem *Ti) = 0;
 			#endif
@@ -1062,7 +1062,7 @@ public:
 		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
 		void IncAllStyleRefs();
 		void SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, GRange r);
-		bool DoContext(GSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling);
+		bool DoContext(LSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
 		void DumpNodes(GTreeItem *Ti);
 		#endif
@@ -1115,7 +1115,7 @@ public:
 		bool Seek(SeekType To, BlockCursor &Cursor);
 		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
 		void IncAllStyleRefs();
-		bool DoContext(GSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling);
+		bool DoContext(LSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
 		void DumpNodes(GTreeItem *Ti);
 		#endif
@@ -1210,7 +1210,7 @@ public:
 		bool Seek(SeekType To, BlockCursor &Cursor);
 		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
 		void IncAllStyleRefs();
-		bool DoContext(GSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling);
+		bool DoContext(LSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
 		void DumpNodes(GTreeItem *Ti);
 		#endif

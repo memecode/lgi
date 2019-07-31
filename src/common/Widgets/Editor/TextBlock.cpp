@@ -1921,7 +1921,7 @@ bool GRichTextPriv::TextBlock::StripLast(Transaction *Trans, const char *Set)
 	return true;
 }
 
-bool GRichTextPriv::TextBlock::DoContext(GSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling)
+bool GRichTextPriv::TextBlock::DoContext(LSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling)
 {
 	if (Spelling)
 	{
@@ -1934,7 +1934,7 @@ bool GRichTextPriv::TextBlock::DoContext(GSubMenu &s, GdcPt2 Doc, ssize_t Offset
 				ClickErrIdx = i;
 				if (e.Suggestions.Length())
 				{
-					GSubMenu *Sp = s.AppendSub("Spelling");
+					auto Sp = s.AppendSub("Spelling");
 					if (Sp)
 					{
 						s.AppendSeparator();

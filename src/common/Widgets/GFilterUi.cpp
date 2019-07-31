@@ -1110,7 +1110,7 @@ void GFilterItem::OptionsMenu()
 	if (!Pos) return;
 	GRect Client = GetTree()->GetClient();
 
-	GSubMenu s;
+	LSubMenu s;
 	if (d->Node == LNODE_NEW)
 		s.AppendItem(LgiLoadString(L_FUI_CONDITION, "Condition"), 3, true);
 	s.AppendItem(LgiLoadString(L_FUI_AND, "And"), 1, true);

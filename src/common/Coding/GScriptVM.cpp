@@ -1519,7 +1519,7 @@ GVmDebuggerWnd::GVmDebuggerWnd(GView *Parent, GVmDebuggerCallback *Callback, GVi
 		if ((Menu = new GMenu))
 		{
 			Menu->Attach(this);
-			GSubMenu *s = Menu->AppendSub("Debug");
+			LSubMenu *s = Menu->AppendSub("Debug");
 			s->AppendItem("Run", IDC_RUN, true, -1, "F5");
 			s->AppendItem("Pause", IDC_PAUSE, true, -1, NULL);
 			s->AppendItem("Stop", IDC_STOP, true, -1, "Ctrl+Break");
@@ -1993,7 +1993,7 @@ int GVmDebuggerWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				break;
 			}
 
-			GMenuItem *i = Menu->FindItem(IDC_BREAK_CPP);
+			LMenuItem *i = Menu->FindItem(IDC_BREAK_CPP);
 			if (!i)
 			{
 				LgiAssert(0);

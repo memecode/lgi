@@ -41,7 +41,7 @@ public:
 	List<char> Items;
 	uint64 LastKey;
 	GAutoString Find;
-	GSubMenu *Menu;
+	LSubMenu *Menu;
 	GCombo::SelectedState SelState;
 	bool LayoutDirty;
 
@@ -136,12 +136,12 @@ void GCombo::Sub(int s) // GV_???
 	d->Sub = s;
 }
 
-GSubMenu *GCombo::GetMenu()
+LSubMenu *GCombo::GetMenu()
 {
 	return d->Menu;
 }
 
-void GCombo::SetMenu(GSubMenu *m)
+void GCombo::SetMenu(LSubMenu *m)
 {
 	d->Menu = m;
 }
@@ -276,7 +276,7 @@ void GCombo::DoMenu()
 
 	if (d->Menu)
 	{
-		int Result = d->Menu->Float(this, p.x, p.y, GSubMenu::BtnLeft);
+		int Result = d->Menu->Float(this, p.x, p.y, LSubMenu::BtnLeft);
 		if (Result)
 		{
 			GetWindow()->OnCommand(Result, 0,
@@ -290,7 +290,7 @@ void GCombo::DoMenu()
 	}
 	else
 	{
-		GSubMenu RClick;
+		LSubMenu RClick;
 		int Base = 1000;
 		int i=0;
 
@@ -323,7 +323,7 @@ void GCombo::DoMenu()
 				int n = 0;
 				double dbl = 0;
 				char16 f = 0;
-				GSubMenu *m = 0;
+				LSubMenu *m = 0;
 				for (; c; c = *(++It), i++)
 				{
 					GUtf8Ptr u(c);
@@ -405,7 +405,7 @@ void GCombo::DoMenu()
 			RClick.AppendItem("", Base+i, false);
 		}
 
-		int Result = RClick.Float(this, p.x, p.y, GSubMenu::BtnLeft);
+		int Result = RClick.Float(this, p.x, p.y, LSubMenu::BtnLeft);
 		if (Result >= Base)
 		{
 			d->Current = Result - Base;
