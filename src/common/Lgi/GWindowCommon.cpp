@@ -125,6 +125,7 @@ void GWindow::MoveToCenter()
 	}
 
 	SetPos(p, true);
+	Displays.DeleteObjects();
 }
 
 void GWindow::MoveToMouse()

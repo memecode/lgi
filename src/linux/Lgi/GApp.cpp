@@ -485,6 +485,7 @@ GApp::~GApp()
 	DeleteObj(AppWnd);
 	DeleteObj(SystemNormal);
 	DeleteObj(SystemBold);
+	DeleteObj(SkinEngine);
 	
 	DeleteObj(MouseHook);
 	DeleteObj(d->FileSystem);

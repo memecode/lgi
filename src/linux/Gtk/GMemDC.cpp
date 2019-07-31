@@ -277,6 +277,7 @@ void GMemDC::Empty()
 		cairo_surface_destroy(d->Img);
 		d->Img = NULL;
 	}
+	DeleteObj(pMem);
 }
 
 bool GMemDC::Lock()

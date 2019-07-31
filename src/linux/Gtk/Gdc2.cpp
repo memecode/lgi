@@ -399,6 +399,7 @@ GBmpMem::~GBmpMem()
 	if (Base && (Flags & BmpOwnMemory))
 	{
 		delete [] Base;
+		Base = NULL;
 	}
 }
 

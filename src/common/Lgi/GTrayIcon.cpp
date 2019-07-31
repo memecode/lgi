@@ -127,6 +127,8 @@ public:
 			g_object_unref(Icon[n]);
 		}
 		Images.DeleteObjects();
+		if (tray_icon)
+			g_object_unref(tray_icon);
 		#else
 		Icon.DeleteObjects();
 		#endif
