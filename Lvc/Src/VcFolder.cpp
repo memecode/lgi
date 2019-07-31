@@ -1659,7 +1659,7 @@ void VcFolder::OnMouseClick(GMouse &m)
 {
 	if (m.IsContextMenu())
 	{
-		GSubMenu s;
+		LSubMenu s;
 		s.AppendItem("Browse To", IDM_BROWSE_FOLDER);
 		s.AppendItem(
 			#ifdef WINDOWS
@@ -3275,7 +3275,7 @@ void VcLeaf::OnMouseClick(GMouse &m)
 {
 	if (m.IsContextMenu())
 	{
-		GSubMenu s;
+		LSubMenu s;
 		s.AppendItem("Log", IDM_LOG);
 		s.AppendItem("Blame", IDM_BLAME, !Folder);
 		s.AppendSeparator();

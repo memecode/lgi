@@ -218,7 +218,7 @@ public:
 	bool OnKey(GKey &k);
 	void OnSelect(ResDialogCtrl *Wnd, bool ClearPrev = true);
 	void OnDeselect(ResDialogCtrl *Wnd);
-	void OnRightClick(GSubMenu *RClick);
+	void OnRightClick(LSubMenu *RClick);
 	void OnCommand(int Cmd);
 	int OnCommand(int Cmd, int Event, OsView hWnd);
 	void OnLanguageChange();

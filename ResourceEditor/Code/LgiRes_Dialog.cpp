@@ -670,7 +670,7 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 		}
 		else if (m.IsContextMenu())
 		{
-			GSubMenu RClick;
+			LSubMenu RClick;
 			bool PasteData = false;
 			bool PasteTranslations = false;
 
@@ -1577,7 +1577,7 @@ void CtrlTabs::OnMouseClick(GMouse &m)
 
 		if (m.IsContextMenu() && Title.Overlap(m.x, m.y))
 		{
-			GSubMenu *RClick = new GSubMenu;
+			auto RClick = new LSubMenu;
 			if (RClick)
 			{
 				bool HasTab = Tabs.ItemAt(Current);
@@ -1788,7 +1788,7 @@ void CtrlList::OnMouseClick(GMouse &m)
 			}
 			else if (m.IsContextMenu())
 			{
-				GSubMenu *RClick = new GSubMenu;
+				auto RClick = new LSubMenu;
 				if (RClick)
 				{
 					bool HasCol = c != 0;
@@ -3786,7 +3786,7 @@ bool ResDialog::Write(GXmlTag *t, SerialiseContext &Ctx)
 	return Status;
 }
 
-void ResDialog::OnRightClick(GSubMenu *RClick)
+void ResDialog::OnRightClick(LSubMenu *RClick)
 {
 	if (RClick)
 	{
@@ -3797,7 +3797,7 @@ void ResDialog::OnRightClick(GSubMenu *RClick)
 			{
 				RClick->AppendItem("Dump to C++", IDM_DUMP, true);
 
-				GSubMenu *Export = RClick->AppendSub("Export to...");
+				auto Export = RClick->AppendSub("Export to...");
 				if (Export)
 				{
 					Export->AppendItem("Lgi File", IDM_EXPORT, true);

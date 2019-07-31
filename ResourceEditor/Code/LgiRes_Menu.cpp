@@ -68,7 +68,7 @@ void ResMenuItem::OnMouseClick(GMouse &m)
 		ResString *Str = GetStr();
 		if (Str)
 		{
-			GSubMenu RClick;
+			LSubMenu RClick;
 			bool PasteData = false;
 			bool PasteTranslations = false;
 
@@ -374,7 +374,7 @@ void ResMenu::OnItemSelect(GTreeItem *Item)
 	}
 }
 
-void ResMenu::OnRightClick(GSubMenu *RClick)
+void ResMenu::OnRightClick(LSubMenu *RClick)
 {
 }
 

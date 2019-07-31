@@ -674,7 +674,7 @@ void ResString::OnMouseClick(GMouse &m)
 {
 	if (m.IsContextMenu())
 	{
-		GSubMenu *RClick = new GSubMenu;
+		LSubMenu *RClick = new LSubMenu;
 		if (RClick)
 		{
 			bool PasteTranslations = false;
@@ -1454,7 +1454,7 @@ bool ResStringGroup::Write(GXmlTag *t, SerialiseContext &Ctx)
 	return Status;
 }
 
-void ResStringGroup::OnRightClick(GSubMenu *RClick)
+void ResStringGroup::OnRightClick(LSubMenu *RClick)
 {
 	if (RClick)
 	{
@@ -1463,7 +1463,7 @@ void ResStringGroup::OnRightClick(GSubMenu *RClick)
 			RClick->AppendSeparator();
 			if (Type() > 0)
 			{
-				GSubMenu *Export = RClick->AppendSub("Export to...");
+				auto Export = RClick->AppendSub("Export to...");
 				if (Export)
 				{
 					Export->AppendItem("Lgi File", IDM_EXPORT, true);

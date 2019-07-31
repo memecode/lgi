@@ -85,6 +85,12 @@
     <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp">
       <Filter>Source Files\Filters</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Font\LEmojiFont.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Text\Emoji\EmojiMap.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\common\GHtml.h">

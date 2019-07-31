@@ -110,16 +110,16 @@
 			</Node>
 			<Node Name="Menus" Type="1" Platforms="15" Open="0" Id="23">
 				<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="24">
-					<Node File="./src/beos/Lgi/GMenu.cpp" Type="2" Platforms="8" />
+					<Node File="./src/beos/Lgi/LMenu.cpp" Type="2" Platforms="8" />
 				</Node>
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="25">
-					<Node File="./src/linux/Lgi/GMenuGtk.cpp" Type="2" Platforms="2" />
+					<Node File="./src/linux/Lgi/LMenu.cpp" Type="2" Platforms="2" />
 				</Node>
 				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="26">
-					<Node File="./src/win32/Lgi/GMenu.cpp" Type="2" Platforms="1" />
+					<Node File="./src/win32/Lgi/LMenu.cpp" Type="2" Platforms="1" />
 				</Node>
-				<Node File="./include/common/GMenu.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Lgi/GMenuCommon.cpp" Type="2" Platforms="15" />
+				<Node File="./include/common/LMenu.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Lgi/LMenuCommon.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Process" Type="1" Platforms="15" Open="0" Id="27">
 				<Node File="./src/common/Lgi/GProcess.cpp" Type="2" Platforms="15" />

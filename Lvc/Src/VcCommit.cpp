@@ -432,7 +432,7 @@ void VcCommit::OnMouseClick(GMouse &m)
 
 	if (m.IsContextMenu())
 	{
-		GSubMenu s;
+		LSubMenu s;
 		s.AppendItem("Update", IDM_UPDATE, !Current);
 		s.AppendSeparator();
 		s.AppendItem("Merge With Local", IDM_MERGE, !Current);

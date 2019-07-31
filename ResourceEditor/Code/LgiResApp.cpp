@@ -356,7 +356,7 @@ void ObjTreeItem::OnMouseClick(GMouse &m)
 	if (m.IsContextMenu())
 	{
 		Tree->Select(this);
-		GSubMenu RClick;
+		LSubMenu RClick;
 
 		if (Obj->Wnd()->Enabled())
 		{
@@ -371,7 +371,7 @@ void ObjTreeItem::OnMouseClick(GMouse &m)
 				// Folder
 				RClick.AppendItem("New", IDM_NEW, true);
 				RClick.AppendSeparator();
-				GSubMenu *Insert = RClick.AppendSub("Import from...");
+				auto Insert = RClick.AppendSub("Import from...");
 				if (Insert)
 				{
 					Insert->AppendItem("Lgi File", IDM_IMPORT, true);
@@ -1062,7 +1062,7 @@ void AppWnd::OnLanguagesChange(GLanguageId Lang, bool Add, bool Update)
 			GLanguage *Lang = Languages[i];
 			if (Lang)
 			{
-				GMenuItem *Item = ViewMenu->AppendItem(Lang->Name, IDM_LANG_BASE + n, true);
+				auto Item = ViewMenu->AppendItem(Lang->Name, IDM_LANG_BASE + n, true);
 				if (Item)
 				{
 					if (CurLang == i)
@@ -1429,7 +1429,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 			if (Idx >= 0 && Idx < Languages.Length())
 			{
 				// Deselect the old lang
-				GMenuItem *Item = ViewMenu ? ViewMenu->ItemAt(CurLang + 2) : 0;
+				auto Item = ViewMenu ? ViewMenu->ItemAt(CurLang + 2) : 0;
 				if (Item)
 				{
 					Item->Checked(false);
@@ -2683,7 +2683,7 @@ bool AppWnd::LoadLgi(char *FileName)
 						for (auto i : Langs)
 						{
 							Languages.Add(i.value);
-							GMenuItem *Item = ViewMenu->AppendItem(i.value->Name, IDM_LANG_BASE + n, true);
+							auto Item = ViewMenu->AppendItem(i.value->Name, IDM_LANG_BASE + n, true);
 							if (Item && i.value->IsEnglish())
 							{
 								Item->Checked(true);

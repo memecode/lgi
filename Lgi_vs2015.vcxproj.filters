@@ -155,7 +155,7 @@
     <ClCompile Include="src\win32\Lgi\GDragAndDrop.cpp">
       <Filter>Source Files\Core\Drag and Drop</Filter>
     </ClCompile>
-    <ClCompile Include="src\win32\Lgi\GMenu.cpp">
+    <ClCompile Include="src\win32\Lgi\LMenu.cpp">
       <Filter>Source Files\Core\Menus</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Resource\LgiRes.cpp">
@@ -473,7 +473,7 @@
     <ClCompile Include="src\common\Gdc2\Font\LStringLayout.cpp">
       <Filter>Source Files\Graphics\Font</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\GMenuCommon.cpp">
+    <ClCompile Include="src\common\Lgi\LMenuCommon.cpp">
       <Filter>Source Files\Core\Menus</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Lgi\LgiCommon.cpp">
@@ -496,7 +496,7 @@
     <ClInclude Include="include\common\GDropFiles.h">
       <Filter>Source Files\Core\Drag and Drop</Filter>
     </ClInclude>
-    <ClInclude Include="include\common\GMenu.h">
+    <ClInclude Include="include\common\LMenu.h">
       <Filter>Source Files\Core\Menus</Filter>
     </ClInclude>
     <ClInclude Include="include\common\LgiRes.h">
@@ -740,4 +740,4 @@
       <Filter>Source Files\Core\Process</Filter>
     </ClInclude>
   </ItemGroup>
-</Project>
+</Project>ter

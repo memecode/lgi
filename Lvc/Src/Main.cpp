@@ -225,7 +225,7 @@ public:
 		GdcPt2 Pt(Pos.x1, Pos.y2 + 1);
 		PointToScreen(Pt);
 		
-		GSubMenu s;
+		LSubMenu s;
 
 		GString::Array Bins = GetProgramsInPath(Bin);
 		for (unsigned i=0; i<Bins.Length(); i++)
@@ -241,7 +241,7 @@ public:
 		{
 			s.AppendSeparator();
 			s.AppendItem("Browse...", 1);
-			int Cmd = s.Float(this, Pt.x, Pt.y, GSubMenu::BtnLeft);
+			int Cmd = s.Float(this, Pt.x, Pt.y, LSubMenu::BtnLeft);
 			switch (Cmd)
 			{
 				case 1:
@@ -486,7 +486,7 @@ public:
 
 		if (Attach(0))
 		{
-			if ((Menu = new GMenu))
+			if ((Menu = new LMenu))
 			{
 				Menu->SetPrefAndAboutItems(IDM_OPTIONS, IDM_ABOUT);
 				Menu->Attach(this);
@@ -723,7 +723,7 @@ public:
 						c->GetMouse(m);
 						if (m.Right())
 						{
-							GSubMenu s;
+							LSubMenu s;
 							s.AppendItem("Add", IDM_ADD);
 							int Cmd = s.Float(c->GetGView(), m);
 							switch (Cmd)

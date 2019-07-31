@@ -55,7 +55,7 @@ protected:
 	bool			_SerializeFile(bool Write);
 
 	// Data
-	GSubMenu		*_FileMenu;
+	LSubMenu		*_FileMenu;
 
 	/// Set this to the name of the language setting in the option file.
 	char			*_LangOptsName;

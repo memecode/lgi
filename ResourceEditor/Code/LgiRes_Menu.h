@@ -85,7 +85,7 @@ public:
 
 	// Resource
 	GView *CreateUI();
-	void OnRightClick(GSubMenu *RClick);
+	void OnRightClick(LSubMenu *RClick);
 	void OnCommand(int Cmd);
 	int OnCommand(int Cmd, int Event, OsView hWnd);
 

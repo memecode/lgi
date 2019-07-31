@@ -80,7 +80,7 @@ public:
 	{
 		if (m.IsContextMenu())
 		{
-			GSubMenu s;
+			LSubMenu s;
 			s.AppendItem("New Child", IDM_NEW_CHILD, true);
 			s.AppendItem("New Next", IDM_NEW_NEXT, true);
 			s.AppendItem("Delete", IDM_DELETE, true);

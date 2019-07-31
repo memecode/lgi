@@ -91,7 +91,7 @@ void VcFile::OnMouseClick(GMouse &m)
 
 	if (m.IsContextMenu())
 	{
-		GSubMenu s;
+		LSubMenu s;
 		char *File = GetText(COL_FILENAME);
 		GFile::Path p = Path ? Path.Get() : Owner->GetPath();
 		p += File;
@@ -132,8 +132,8 @@ void VcFile::OnMouseClick(GMouse &m)
 			s.AppendItem("Browse To", IDM_BROWSE);
 
 			int Cur = GetEol(p);
-			GSubMenu *Ln = s.AppendSub("Line Endings");
-			GMenuItem *Item = Ln->AppendItem("LF", IDM_EOL_LF);
+			auto Ln = s.AppendSub("Line Endings");
+			auto Item = Ln->AppendItem("LF", IDM_EOL_LF);
 			if (Item && Cur == IDM_EOL_LF) Item->Checked(true);
 			Ln->AppendItem("CRLF", IDM_EOL_CRLF);
 			if (Item && Cur == IDM_EOL_CRLF) Item->Checked(true);

@@ -268,10 +268,10 @@ public:
 	{
 		if (m.Down() && m.Right())
 		{
-			GSubMenu *RClick = new GSubMenu;
+			LSubMenu *RClick = new LSubMenu;
 			if (RClick)
 			{
-				GSubMenu *s = RClick->AppendSub("Horizontal Align");
+				LSubMenu *s = RClick->AppendSub("Horizontal Align");
 				if (s)
 				{
 					s->AppendItem("Left", IDM_ALIGN_X_MIN, AlignX != AlignMin);

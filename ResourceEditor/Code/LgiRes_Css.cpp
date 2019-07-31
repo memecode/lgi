@@ -87,7 +87,7 @@ GView *ResCss::CreateUI()
     return Ui = new ResCssUi(this);
 }
 
-void ResCss::OnRightClick(GSubMenu *RClick)
+void ResCss::OnRightClick(LSubMenu *RClick)
 {
 }
 

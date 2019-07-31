@@ -210,7 +210,7 @@ public:
 
 	// UI
 	virtual GView *CreateUI() { return 0; }
-	virtual void OnRightClick(GSubMenu *RClick) {}
+	virtual void OnRightClick(LSubMenu *RClick) {}
 	virtual void OnCommand(int Cmd) {}
 	virtual void OnShowLanguages() {}
 };
@@ -692,9 +692,9 @@ protected:
 	GBox			*VBox;
 	GView			*ContentView;
 
-	GSubMenu		*Edit;
-	GSubMenu		*Help;
-	GSubMenu		*ViewMenu;
+	LSubMenu		*Edit;
+	LSubMenu		*Help;
+	LSubMenu		*ViewMenu;
 
 	GStatusBar		*Status;
 	GStatusPane		*StatusInfo[STATUS_MAX];
@@ -839,7 +839,7 @@ public:
 
 	// Resource
 	GView *CreateUI();
-	void OnRightClick(GSubMenu *RClick);
+	void OnRightClick(LSubMenu *RClick);
 	void OnCommand(int Cmd);
 	int OnCommand(int Cmd, int Event, OsView hWnd);
 

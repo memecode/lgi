@@ -183,12 +183,14 @@
     <ClCompile Include="..\src\common\Gdc2\Filters\Jpeg.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Filters\Lzw.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
+    <ClCompile Include="..\src\common\Gdc2\Font\LEmojiFont.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Tools\GdcTools.cpp" />
     <ClCompile Include="..\src\common\General\GProperties.cpp" />
     <ClCompile Include="..\src\common\Images\Compare\ImageComparison.cpp" />
     <ClCompile Include="..\src\common\INet\IHttp.cpp" />
     <ClCompile Include="..\src\common\INet\OpenSSLSocket.cpp" />
     <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
+    <ClCompile Include="..\src\common\Text\Emoji\EmojiMap.cpp" />
     <ClCompile Include="..\src\common\Text\GHtml.cpp" />
     <ClCompile Include="..\src\common\Text\GHtmlCommon.cpp" />
     <ClCompile Include="..\src\common\Text\GHtmlParser.cpp" />

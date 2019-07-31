@@ -406,7 +406,7 @@ bool GDocApp<OptionsFmt>::_Destroy()
 template <typename OptionsFmt>
 bool GDocApp<OptionsFmt>::_LoadMenu(const char *Resource, const char *Tags, int FileMenuId, int RecentMenuId)
 {
-	if ((Menu = new GMenu))
+	if ((Menu = new LMenu))
 	{
 		Menu->Attach(this);
 
@@ -440,7 +440,7 @@ bool GDocApp<OptionsFmt>::_LoadMenu(const char *Resource, const char *Tags, int 
 				_FileMenu->AppendSeparator();
 			}
 
-			GSubMenu *Recent = NULL;
+			LSubMenu *Recent = NULL;
 			if (RecentMenuId >= 0)
 				Recent = _FileMenu->FindSubMenu(RecentMenuId);
 			else

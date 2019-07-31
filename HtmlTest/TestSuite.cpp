@@ -65,7 +65,7 @@ public:
     {
         if (m.IsContextMenu())
         {
-            GSubMenu s;
+            LSubMenu s;
             s.AppendItem("Copy Path", 100);
             m.ToScreen();
             if (s.Float(GetList(), m.x, m.y, m.Left()) == 100)
@@ -359,7 +359,7 @@ public:
 		SetQuitOnClose(true);
 		if (Attach(0))
 		{
-			Menu = new GMenu();
+			Menu = new LMenu();
 			if (Menu)
 			{
 				Menu->Attach(this);

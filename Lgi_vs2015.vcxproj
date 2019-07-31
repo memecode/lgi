@@ -457,7 +457,7 @@
     <ClCompile Include="src\common\Lgi\GInput.cpp" />
     <ClCompile Include="src\common\Lgi\GLibrary.cpp" />
     <ClCompile Include="src\common\Lgi\GMemStream.cpp" />
-    <ClCompile Include="src\common\Lgi\GMenuCommon.cpp" />
+    <ClCompile Include="src\common\Lgi\LMenuCommon.cpp" />
     <ClCompile Include="src\common\Lgi\GMru.cpp" />
     <ClCompile Include="src\common\Lgi\GObject.cpp" />
     <ClCompile Include="src\common\Lgi\GOptionsFile.cpp" />
@@ -553,7 +553,7 @@
     <ClCompile Include="src\win32\Lgi\GFileSelect.cpp" />
     <ClCompile Include="src\win32\Lgi\GGeneral.cpp" />
     <ClCompile Include="src\win32\Lgi\GLayout.cpp" />
-    <ClCompile Include="src\win32\Lgi\GMenu.cpp" />
+    <ClCompile Include="src\win32\Lgi\LMenu.cpp" />
     <ClCompile Include="src\win32\Lgi\GPrinter.cpp" />
     <ClCompile Include="src\win32\Lgi\GScrollBar.cpp" />
     <ClCompile Include="src\win32\Lgi\GView.cpp" />
@@ -602,7 +602,7 @@
     <ClInclude Include="include\common\GLibrary.h" />
     <ClInclude Include="include\common\GMatrix.h" />
     <ClInclude Include="include\common\GMem.h" />
-    <ClInclude Include="include\common\GMenu.h" />
+    <ClInclude Include="include\common\LMenu.h" />
     <ClInclude Include="include\common\GMessage.h" />
     <ClInclude Include="include\common\GMru.h" />
     <ClInclude Include="include\common\GNotifications.h" />
@@ -659,4 +659,4 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-</Project>
+</Project>rin

@@ -154,7 +154,7 @@ public:
 
 	// Resource
 	GView *CreateUI();
-	void OnRightClick(GSubMenu *RClick);
+	void OnRightClick(LSubMenu *RClick);
 	void OnCommand(int Cmd);
 	bool Test(ErrorCollection *e);
 	bool Read(GXmlTag *t, SerialiseContext &Ctx);

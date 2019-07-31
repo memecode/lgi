@@ -378,12 +378,12 @@ public:
 		
 		if (Attach(0))
 		{
-			Menu = new GMenu;
+			Menu = new LMenu;
 			if (Menu)
 			{
 				Menu->Attach(this);
 
-				GSubMenu *s = Menu->AppendSub("&File");
+				auto s = Menu->AppendSub("&File");
 				s->AppendItem("To &HTML", IDC_TO_HTML, true, -1, "F5");
 				s->AppendItem("To &Nodes", IDC_TO_NODES, true, -1, "F6");
 				s->AppendItem("View In &Browser", IDC_VIEW_IN_BROWSER, true, -1, "F7");
