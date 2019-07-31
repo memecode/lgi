@@ -38,6 +38,7 @@ typedef BOOL (__stdcall *SYMGETSYMFROMADDRPROC)
 
 #ifdef _WIN64
 typedef BOOL (WINAPI *pSymGetLineFromAddr64)(HANDLE hProcess, DWORD64 dwAddr, PDWORD pdwDisplacement, PIMAGEHLP_LINE64 Line);
+typedef BOOL (WINAPI *pSymGetSymFromAddr64)(HANDLE hProcess, DWORD64 qwAddr, PDWORD64 pdwDisplacement, PIMAGEHLP_SYMBOL64 Symbol);
 #else
 typedef BOOL (__stdcall *proc_SymGetLineFromAddr)(	HANDLE hProcess,
 													DWORD dwAddr,
@@ -61,10 +62,11 @@ class GSymLookup
 	STACKWALKPROC               StackWalk;
 	SYMFUNCTIONTABLEACCESSPROC  SymFunctionTableAccess;
 	SYMGETMODULEBASEPROC        SymGetModuleBase;
-	SYMGETSYMFROMADDRPROC       SymGetSymFromAddr;
 	#ifdef _WIN64
+	pSymGetSymFromAddr64		SymGetSymFromAddr64;
 	pSymGetLineFromAddr64		SymGetLineFromAddr64;
 	#else
+	SYMGETSYMFROMADDRPROC       SymGetSymFromAddr;
 	proc_SymGetLineFromAddr     SymGetLineFromAddr;
 	#endif	
 	proc_SymGetOptions          SymGetOptions;
@@ -87,10 +89,11 @@ public:
 			StackWalk = (STACKWALKPROC) GetProcAddress(DbgHelp, "StackWalk");
 			SymFunctionTableAccess = (SYMFUNCTIONTABLEACCESSPROC) GetProcAddress(DbgHelp, "SymFunctionTableAccess");
 			SymGetModuleBase = (SYMGETMODULEBASEPROC) GetProcAddress(DbgHelp, "SymGetModuleBase");
-			SymGetSymFromAddr = (SYMGETSYMFROMADDRPROC) GetProcAddress(DbgHelp, "SymGetSymFromAddr");
 			#ifdef _WIN64
+			SymGetSymFromAddr64 = (pSymGetSymFromAddr64) GetProcAddress(DbgHelp, "SymGetSymFromAddr64");
 			SymGetLineFromAddr64 = (pSymGetLineFromAddr64) GetProcAddress(DbgHelp, "SymGetLineFromAddr64");
 			#else
+			SymGetSymFromAddr = (SYMGETSYMFROMADDRPROC) GetProcAddress(DbgHelp, "SymGetSymFromAddr");
 			SymGetLineFromAddr = (proc_SymGetLineFromAddr) GetProcAddress(DbgHelp, "SymGetLineFromAddr");
 			#endif
 			SymGetOptions = (proc_SymGetOptions) GetProcAddress(DbgHelp, "SymGetOptions");
@@ -196,9 +199,15 @@ public:
 			TCHAR module[256] = _T("");
 			if (GetModuleFileName(Pid, module, sizeof(module)))
 			{
+				#ifdef _WIN64
+				BYTE symbolBuffer[ sizeof(IMAGEHLP_SYMBOL64) + 512 ];
+				PIMAGEHLP_SYMBOL64 pSymbol = (PIMAGEHLP_SYMBOL64)symbolBuffer;
+				DWORD64 symDisplacement = 0;
+				#else
 				BYTE symbolBuffer[ sizeof(IMAGEHLP_SYMBOL) + 512 ];
 				PIMAGEHLP_SYMBOL pSymbol = (PIMAGEHLP_SYMBOL)symbolBuffer;
 				DWORD symDisplacement = 0;
+				#endif
 				IMAGEHLP_LINE Line;
 				
 				// Is this right???
@@ -214,9 +223,16 @@ public:
 				else mod = module;
 
 				bool found_addr = false;
+				#ifdef _WIN64
+				if (SymGetSymFromAddr64(hProcess, (DWORD64)Ip[i], &symDisplacement, pSymbol))
+				{
+					DWORD symDisp = (DWORD)symDisplacement;
+					if (SymGetLineFromAddr64(hProcess, (DWORD64)Ip[i], &symDisp, &Line))
+				#else
 				if (SymGetSymFromAddr(hProcess, (DWORD)Ip[i], &symDisplacement, pSymbol))
 				{
 					if (SymGetLineFromAddr(hProcess, (DWORD_PTR)Ip[i], &symDisplacement, &Line))
+				#endif
 					{
 						int Ch = Sprintf(buf, buf_end-buf, "    %p: " TCHAR_FORMAT ", %s:%i", (void*)Ip[i], mod, Line.FileName, Line.LineNumber);
 						if (Ch > 0)
@@ -227,7 +243,7 @@ public:
 					}
 					else if (pSymbol->Name[0] != '$')
 					{
-						int Ch = Sprintf(buf, buf_end-buf, "    %p: " TCHAR_FORMAT ", %s+0x%x", (void*)Ip[i], mod, pSymbol->Name, symDisplacement);
+						int Ch = Sprintf(buf, buf_end-buf, "    %p: " TCHAR_FORMAT ", %s+0x%x", (void*)Ip[i], mod, pSymbol->Name, (int)symDisplacement);
 						if (Ch > 0)
 							buf += Ch;
 						else
@@ -267,6 +283,20 @@ public:
 		if (!addr || len < 1)
 			return 0;
 
+		#if defined(_WIN64)
+
+		static USHORT (WINAPI *s_pfnCaptureStackBackTrace)(ULONG, ULONG, PVOID*, PULONG) = 0;
+		if (s_pfnCaptureStackBackTrace == 0)  
+		{  
+			const HMODULE hNtDll = ::GetModuleHandle(L"ntdll.dll");
+			reinterpret_cast<void*&>(s_pfnCaptureStackBackTrace) = ::GetProcAddress(hNtDll, "RtlCaptureStackBackTrace");
+		}  
+
+		DWORD BackTraceHash;
+		USHORT r = s_pfnCaptureStackBackTrace(1, len, (PVOID*)addr, &BackTraceHash);
+		return r;
+
+		#else
 		int i = 0;
 
 		// Save the stack trace
@@ -274,9 +304,8 @@ public:
 		if (!Ebp)
 		{
 			memset(addr, 0, sizeof(Addr) * len);
-			#if defined(_WIN64)
 			LgiAssert(!"Not impl");
-			#elif defined(_MSC_VER)
+			#if defined(_MSC_VER)
 			// Microsoft C++
 			_asm {
 				mov eax, ebp
@@ -308,6 +337,7 @@ public:
 		}
 
 		return i;
+		#endif
 	}
 };
 #endif

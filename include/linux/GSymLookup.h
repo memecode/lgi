@@ -10,7 +10,7 @@
 class GSymLookup
 {
 public:
-	#if __LP64__
+	#if __LP64__ || defined(_WIN64)
 	typedef long int Addr;
 	#else
 	typedef int Addr;
