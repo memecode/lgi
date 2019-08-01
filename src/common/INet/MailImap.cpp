@@ -1746,7 +1746,6 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 						}
 
 						TraceLog TLog;
-						int RefreshCount = 0;
 						LOAuth2 Auth(OAuth2, User, SettingStore, Socket->GetCancel(), &TLog);
 
 						auto AccessToken = Auth.GetAccessToken();

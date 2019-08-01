@@ -39,11 +39,12 @@ struct GDialogPriv
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 GDialog::GDialog()
-	: ResObject(Res_Dialog)
+	:
 	#ifdef __GTK_H__
 	// , GWindow(gtk_dialog_new())
-	, GWindow(gtk_window_new(GTK_WINDOW_TOPLEVEL))
+	GWindow(gtk_window_new(GTK_WINDOW_TOPLEVEL)),
 	#endif
+	ResObject(Res_Dialog)
 {
 	d = new GDialogPriv();
 	Name("Dialog");

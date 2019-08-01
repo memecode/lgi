@@ -321,7 +321,7 @@ bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	}
 	
 	GtkTargetEntry te;
-	te.target = LGI_CLIP_BINARY;
+	te.target = (char*)LGI_CLIP_BINARY;
 	te.flags = 0; // GTK_TARGET_SAME_APP?
 	te.info = GV_BINARY; // App defined data type ID
 	Gtk::gboolean r = gtk_clipboard_set_with_data(d->c,

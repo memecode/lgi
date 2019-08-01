@@ -413,9 +413,9 @@ public:
 		memset(Lut+(int)'a', 1, 'z'-'a'+1);
 		memset(Lut+(int)'A', 1, 'Z'-'A'+1);
 		memset(Lut+(int)'0', 1, '9'-'0'+1);
-		Lut['+'] = 1;
-		Lut['/'] = 1;
-		Lut['='] = 1;
+		Lut[(int)'+'] = 1;
+		Lut[(int)'/'] = 1;
+		Lut[(int)'='] = 1;
 	}
 
 	ssize_t Write(const void *p, ssize_t size, int f = 0)
@@ -427,9 +427,9 @@ public:
 		char *e = s + size;
 		while (s < e)
 		{
-			while (*s && s < e && !Lut[*s]) s++;
+			while (*s && s < e && !Lut[(int)*s]) s++;
 			char *Start = s;
-			while (*s && s < e && Lut[*s]) s++;
+			while (*s && s < e && Lut[(int)*s]) s++;
 			if (s-Start > 0)
 				Buf.Push(Start, CastInt(s-Start));
 			else

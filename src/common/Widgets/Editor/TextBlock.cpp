@@ -1233,10 +1233,6 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 		Layout.Add(CurLine.Release());
 	}
 	
-	if (LayoutSize != Len)
-	{
-		int asd=0;
-	}
 	LgiAssert(LayoutSize == Len);
 			
 	flow.CurY = Pos.y2 + 1 + Margin.y2 + Border.y2 + Padding.y2;
