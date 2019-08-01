@@ -94,7 +94,7 @@ public:
 	GArray<GXmlAttr> Attr;
 	/// A list of child tags. Don't edit this list yourself, use the
 	/// InsertTag and RemoveTag methods.
-	List<GXmlTag> Children;
+	GArray<GXmlTag*> Children;
 	
 	/// Construct the object
 	GXmlTag

@@ -277,7 +277,7 @@ char *WebPage::GetCharSet()
 		GXmlTag *t = GetRoot();
 		if (t)
 		{
-			List<GXmlTag>::I it = t->Children.begin();
+			auto it = t->Children.begin();
 			for (GXmlTag *c = *it; !Charset && c; c = *++it)
 			{
 				if (c->IsTag("meta"))

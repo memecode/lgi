@@ -376,6 +376,7 @@ class GCompilerPriv :
 {
 	LHashTbl<ConstStrKey<char>, GVariantType> Types;
 	size_t JumpLoc;
+	GArray<GAutoPtr<GExternFunc>> FuncMem;
 
 public:
 	GScriptContext *SysCtx;
@@ -463,6 +464,8 @@ public:
 		Lines.Empty();
 		DeleteArray(Script);
 		Defines.DeleteArrays();
+		Methods.Empty();
+		FuncMem.Empty();
 	}
 
 	/// Prints the error message
@@ -3091,6 +3094,7 @@ public:
 			Cur++;
 		}
 		
+		FuncMem.New().Reset(e);
 		Methods.Add(e->Method, e);
 		return true;
 	}

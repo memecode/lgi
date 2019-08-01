@@ -418,8 +418,7 @@ bool GXmlTag::Copy(GXmlTag &t, bool Deep)
 	
 	if (Deep)
 	{
-		List<GXmlTag>::I it = t.Children.begin();
-		for (GXmlTag *c = *it; it.In(); c = *++it)
+		for (GXmlTag *c: Children)
 		{
 			GXmlTag *n = new GXmlTag;
 			if (n)
@@ -474,8 +473,7 @@ GXmlTag *GXmlTag::GetChildTag(const char *Name, bool Create, const char *TagSepa
 		GXmlTag *Child = 0;
 		char *Part = p[i];
 		
-		List<GXmlTag>::I n = t->Children.begin();
-		for (GXmlTag *c = *n; n; c = *++n)
+		for (auto c: t->Children)
 		{
 			if (c->Tag && stricmp(c->Tag, Part) == 0)
 			{
@@ -508,8 +506,7 @@ bool GXmlTag::GetVariant(const char *Name, GVariant &Value, char *Array)
 
 	if (Name)
 	{
-		List<GXmlTag>::I n = Children.begin();
-		for (GXmlTag *c = *n; c; c = *++n)
+		for (auto c: Children)
 		{
 			if (c->Tag && stricmp(c->Tag, Name) == 0)
 			{
@@ -650,7 +647,7 @@ void GXmlTag::InsertTag(GXmlTag *t)
 	{
 		t->RemoveTag();
 		t->Parent = this;		
-		Children.Insert(t);
+		Children.Add(t);
 	}
 }
 
@@ -666,11 +663,9 @@ void GXmlTag::RemoveTag()
 int64 GXmlTag::CountTags()
 {
 	uint64 c = 1;
-	List<GXmlTag>::I it = Children.begin();
-	for (GXmlTag *t = *it; t; t = *++it)
-	{
+
+	for (auto t: Children)
 		c += t->CountTags();
-	}
 
 	return c;
 }
@@ -1508,8 +1503,9 @@ void GXmlTree::Output(GXmlTag *t, int Depth)
 				d->File->Write((char*)"\n", 1);
 			}
 
-			for (; c; c = *(++It))
+			for (; It != t->Children.end(); It++)
 			{
+				c = *It;
 				Output(c, Depth + (d->NoDom() ? 0 : 1));
 			}
 

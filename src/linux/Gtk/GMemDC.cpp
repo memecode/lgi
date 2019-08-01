@@ -23,12 +23,7 @@ class GMemDCPrivate
 public:
 	GRect Client;
 	cairo_t *cr;
-	#if GTK_MAJOR_VERSION == 3
 	cairo_surface_t *Img;
-	#else
-	GdkImage *Img;
-	cairo_surface_t *Surface;
-	#endif
 	GColourSpace CreateCs;
 
     GMemDCPrivate()
@@ -36,28 +31,26 @@ public:
 		Client.ZOff(-1, -1);
 		cr = NULL;
 		Img = NULL;
-		#if GTK_MAJOR_VERSION == 3
-		#else
-		Surface = NULL;
-		#endif
 		CreateCs = CsNone;
     }
 
     ~GMemDCPrivate()
     {
+    	Empty();
+	}
+
+	void Empty()
+	{
+		if (cr)
+		{
+			cairo_destroy(cr);
+			cr = NULL;
+		}
 		if (Img)
 		{
 			cairo_surface_destroy(Img);
 			Img = NULL;
 		}
-		#if GTK_MAJOR_VERSION == 3
-		#else
-		if (Surface)
-		{
-			cairo_surface_destroy(Surface);
-			Surface = NULL;
-		}
-		#endif
 	}
 };
 
@@ -124,62 +117,9 @@ cairo_surface_t *GMemDC::GetSurface(GRect &r)
 
 OsPainter GMemDC::Handle()
 {
-	#if GTK_MAJOR_VERSION == 3
 	if (!d->cr)
 		d->cr = cairo_create(d->Img);
 	return d->cr;
-	#else
-	if (!Cairo)
-	{
-		cairo_format_t fmt = CAIRO_FORMAT_ARGB32;
-		int bits;
-		if (d->Img)
-			bits = d->Img->depth;
-		else if (pMem)
-			bits = GColourSpaceToBits(pMem->Cs);
-		else
-			return NULL;
-
-		switch (bits)
-		{
-			case 8: fmt = CAIRO_FORMAT_A8; break;
-			case 16: fmt = CAIRO_FORMAT_RGB16_565; break;
-			case 24: fmt = CAIRO_FORMAT_RGB24; break;
-			case 32: fmt = CAIRO_FORMAT_ARGB32; break;
-			default:
-				printf("%s:%i - '%i' bit depth that cairo supports\n", _FL, bits);
-				return NULL;
-		}
-
-		if (!d->Surface)
-		{
-			if (d->Img)
-			{
-				d->Surface = cairo_image_surface_create_for_data((uchar*)d->Img->mem,
-																fmt,
-																d->Img->width, d->Img->height,
-																d->Img->bpl);
-			}
-			else if (pMem)
-			{
-				d->Surface = cairo_image_surface_create_for_data((uchar*)pMem->Base,
-																fmt,
-																pMem->x, pMem->y,
-																pMem->Line);
-			}
-			else return NULL;
-			LgiAssert(d->Surface);
-		}
-
-		if (d->Surface)
-		{
-			Cairo = cairo_create(d->Surface);
-			LgiAssert(Cairo);
-		}
-	}
-
-	return Cairo;
-	#endif
 }
 
 void FreeMemDC(guchar *pixels, GMemDC *data)
@@ -272,11 +212,7 @@ void GMemDC::SetClient(GRect *c)
 
 void GMemDC::Empty()
 {
-	if (d->Img)
-	{
-		cairo_surface_destroy(d->Img);
-		d->Img = NULL;
-	}
+	d->Empty();
 	DeleteObj(pMem);
 }
 
@@ -377,6 +313,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	}
 	else
 	{
+		LgiAssert(d->Img == NULL);
 		d->Img = cairo_image_surface_create (fmt, x, y);
 		if (!d->Img)
 			return false;

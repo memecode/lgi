@@ -916,7 +916,7 @@ bool LMenuItem::Replace(Gtk::GtkWidget *newWid)
 {
 	if (!newWid || !Info)
 	{
-		LgiTrace("%s:%i - Error: New=%p Old=%p\n", newWid, Info);
+		LgiTrace("%s:%i - Error: New=%p Old=%p\n", newWid, Info.obj);
 		return false;
 	}
 
