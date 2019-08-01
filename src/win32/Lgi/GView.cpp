@@ -1382,8 +1382,8 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				short zDelta = (short) HIWORD(Msg->a);	// wheel rotation
 				int nScrollLines = - _lgi_mouse_wheel_lines();
 				double Lines = ((double)zDelta * (double)nScrollLines) / WHEEL_DELTA;
-				if (abs(Lines) < 1.0)
-					Lines *= 1.0 / abs(Lines);
+				if (ABS(Lines) < 1.0)
+					Lines *= 1.0 / ABS(Lines);
 				
 				LgiTrace("Lines = %g, zDelta = %i, nScrollLines = %i\n", Lines, zDelta, nScrollLines);
 
