@@ -622,7 +622,6 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 		
 		for (auto m : q)
 		{
-			// LgiTrace("Process %p,%i,%i,%i\n", m.v, m.m, m.a, m.b);
 			if (!GView::LockHandler(m.v, GView::OpExists))
 			{
 				// LgiTrace("%s:%i - Invalid view to post event to.\n", _FL);
@@ -630,6 +629,7 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 			else
 			{
 				GMessage Msg(m.m, m.a, m.b);
+				// LgiTrace("%s::OnEvent %i,%i,%i\n", m.v->GetClass(), m.m, m.a, m.b);
 				m.v->OnEvent(&Msg);
 			}
 		}
@@ -662,11 +662,6 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 		}
 
 		{			
-			#if GTK_MAJOR_VERSION == 3
-			#else
-			GtkLock _Lock;
-			#endif
-			
 			#if IDLE_ALWAYS
 			auto Id = Gtk::gdk_threads_add_idle_full(G_PRIORITY_DEFAULT_IDLE,
 													IdleWrapper,
@@ -684,18 +679,10 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 			OnCommandLine();
 		}
 		
-		#if GTK_MAJOR_VERSION == 3
-		#else
-		GtkLock _Lock;
-		#endif
 	    Gtk::gtk_main();
 	}
 	else
 	{
-		#if GTK_MAJOR_VERSION == 3
-		#else
-		GtkLock _Lock;
-		#endif
 	    Gtk::gtk_main_iteration_do(false);
 	}
 
@@ -712,10 +699,6 @@ void GApp::Exit(int Code)
 	else
 	{
 		// soft exit
-		#if GTK_MAJOR_VERSION == 3
-		#else
-		GtkLock _Lock;
-		#endif
 		Gtk::gtk_main_quit();
 		if (d->IdleId.Length() > 0)
 		{
@@ -1495,8 +1478,16 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 	MsgQue.Unlock();
 	
 	#if !IDLE_ALWAYS
-	if (!Existing)
-		g_idle_add((GSourceFunc)IdleWrapper, &idle);
+	
+		#if 0
+		// if (!Existing)
+			// g_idle_add((GSourceFunc)IdleWrapper, &idle);
+		#elif 0
+		// gdk_threads_add_idle((GSourceFunc)IdleWrapper, &idle);
+		#elif 1
+		g_main_context_invoke_full(NULL, G_PRIORITY_DEFAULT, (GSourceFunc)IdleWrapper, &idle, NULL);
+		#endif
+
 	#endif
 	
 	return true;

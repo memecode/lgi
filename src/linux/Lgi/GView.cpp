@@ -865,8 +865,10 @@ bool GView::Attach(GViewI *parent)
 
 	SetParent(parent);
 	Parent = d->GetParent();
-	_Window = Parent ? Parent->_Window : this;
 	
+	auto WndNull = _Window == NULL;
+	_Window = Parent ? Parent->_Window : this;
+
 	if (parent)
 	{
 		auto w = GetWindow();
@@ -874,6 +876,11 @@ bool GView::Attach(GViewI *parent)
 			w->SetFocus(this, GWindow::GainFocus);
 
 		Status = true;
+
+		if (WndNull && _Window != NULL)
+		{
+			OnGtkRealize();
+		}
 		
 		if (!Parent->HasView(this))
 		{
