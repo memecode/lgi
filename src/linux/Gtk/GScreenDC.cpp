@@ -715,89 +715,48 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	d->Client = RealClient;
 	if (!br.Valid())
 	{
+		// LgiTrace("Blt inval pos=%i,%i a=%s bounds=%s\n", x, y, a?a->GetStr():"null", Bounds().GetStr());
 		return;
 	}
 
 	GMemDC *Mem;
 	if ((Mem = dynamic_cast<GMemDC*>(Src)))
 	{
-		/*
-		GMemDC Tmp;
-		if (Mem->GetCreateCs() != GetColourSpace() &&
-			Mem->GetBits() > 16 &&
-			GetBits() <= 16)
+		cairo_surface_t *Sub = Mem->GetSurface(br.SrcClip);
+		if (Sub)
 		{
-			// Do an on the fly colour space conversion... this is slow though
-			if (Tmp.Create(br.SrcClip.X(), br.SrcClip.Y(), GetColourSpace()))
+			cairo_pattern_t *Pat = cairo_pattern_create_for_surface(Sub);
+			if (Pat)
 			{
-				Tmp.Blt(0, 0, Mem, &br.SrcClip);
-				printf("On the fly Mem->Scr conversion: %s->%s\n",
-					GColourSpaceToString(Mem->GetColourSpace()),
-					GColourSpaceToString(GetColourSpace()));
-
-				Mem = &Tmp;
-				br.SrcClip = Tmp.Bounds();
-			}
-			else
-			{
-				printf("Failed to Mem->Scr Blt: %s->%s\n",
-					GColourSpaceToString(Mem->GetColourSpace()),
-					GColourSpaceToString(GetColourSpace()));
-				return;
-			}
-		}
-		*/
-
-		#if GTK_MAJOR_VERSION == 3
-
-			cairo_surface_t *Sub = Mem->GetSurface(br.SrcClip);
-			if (Sub)
-			{
-				cairo_pattern_t *Pat = cairo_pattern_create_for_surface(Sub);
-				if (Pat)
+				/*
 				{
-					#if 0
 					Gtk::cairo_matrix_t matrix;
 					cairo_get_matrix(d->cr, &matrix);
 					double ex[4];
 					cairo_clip_extents(d->cr, ex+0, ex+1, ex+2, ex+3);
-					LgiTrace("GScreenDC::Blt, clip=%g,%g,%g,%g, client=%s\n",
-						ex[0]+matrix.x0, ex[1]+matrix.y0,
-						ex[2]+matrix.x0, ex[3]+matrix.y0,
-						d->Client.GetStr());
-					#endif
-
-					cairo_save(d->cr);
-					cairo_translate(d->cr, br.DstClip.x1, br.DstClip.y1);
-					cairo_set_source(d->cr, Pat);
-		
-					cairo_new_path(d->cr);
-					cairo_rectangle(d->cr, 0, 0, br.DstClip.X(), br.DstClip.Y());
-					cairo_fill(d->cr);
-		
-					cairo_restore(d->cr);
-					
-					cairo_pattern_destroy(Pat);
+					LgiTrace("GScreenDC::Blt xy=%i,%i clip=%g,%g+%g,%g cli=%s off=%i,%i\n",
+						x, y,
+						ex[0]+matrix.x0, ex[1]+ex[0],
+						ex[2]+matrix.x0, ex[3]+ex[2],
+						d->Client.GetStr(),
+						OriginX, OriginY);
 				}
-				cairo_surface_destroy(Sub);				
-			}
+				*/
 
-		#else
-			if (d->d && d->gc && Mem->GetImage())
-			{
-				gdk_draw_image( d->d,
-								d->gc,
-								Mem->GetImage(),
-								br.SrcClip.x1, br.SrcClip.y1,
-								Dx, Dy,
-								br.SrcClip.X(), br.SrcClip.Y());
+				cairo_save(d->cr);
+				cairo_translate(d->cr, br.DstClip.x1, br.DstClip.y1);
+				cairo_set_source(d->cr, Pat);
+		
+				cairo_new_path(d->cr);
+				cairo_rectangle(d->cr, 0, 0, br.DstClip.X(), br.DstClip.Y());
+				cairo_fill(d->cr);
+		
+				cairo_restore(d->cr);
+					
+				cairo_pattern_destroy(Pat);
 			}
-			else
-			{
-				LgiTrace("%s:%i - Error missing d=%p, gc=%p, img=%p\n",
-					_FL, d->d, d->gc, Mem->GetImage());
-			}
-		#endif
+			cairo_surface_destroy(Sub);				
+		}
 	}
 }
 

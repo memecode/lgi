@@ -850,7 +850,13 @@ public:
 		// Calc full image bounds
 		if (Src) SrcBounds.Set(0, 0, Src->X()-1, Src->Y()-1);
 		else SrcBounds.ZOff(-1, -1);
-		if (Dst) DstBounds.Set(0, 0, Dst->X()-1, Dst->Y()-1);
+		if (Dst)
+		{
+			DstBounds = Dst->Bounds();
+			int x = 0, y = 0;
+			Dst->GetOrigin(x, y);
+			DstBounds.Offset(x, y);
+		}
 		else DstBounds.ZOff(-1, -1);
 		
 		// Calc full sized blt regions

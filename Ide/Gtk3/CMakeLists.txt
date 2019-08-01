@@ -113,7 +113,6 @@ set (CommonSource
 	../src/common/INet/IFtp.cpp
 	../src/common/Gdc2/Filters/Png.cpp
 	../src/common/Lgi/GAbout.cpp
-	../src/common/Lgi/GSubProcess.cpp
 	../src/common/Lgi/GMdi.cpp
 	../src/common/Lgi/LgiMain.cpp
 	../src/common/Widgets/GControlTree.cpp

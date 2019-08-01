@@ -45,13 +45,6 @@ void GSurface::Init()
 
 	LineBits = LINE_SOLID;
 	LineMask = LineReset = 0x80000000;
-	
-	#if defined(__GTK_H__)
-		#if GTK_MAJOR_VERSION == 3
-		#else
-		Cairo = 0;
-		#endif
-	#endif
 }
 
 GSurface::GSurface()
