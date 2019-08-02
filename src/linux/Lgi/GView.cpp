@@ -617,8 +617,6 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 	if (!ParWnd)
 		return false; // Nothing we can do till we attach
 
-	GView *ParView = ParWnd;
-
 	GRect r;
 	if (rc)
 	{
@@ -638,6 +636,8 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 	GdcPt2 Offset;
 	WindowVirtualOffset(&Offset);
 	r.Offset(Offset.x, Offset.y);
+	if (!r.Valid())
+		return false;
 
 	static bool Repainting = false;
 	if (!Repainting)
