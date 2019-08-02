@@ -11,7 +11,7 @@ set (LGI_VERSION_MAJOR 4)
 set (LGI_VERSION_MINOR 0)
 get_filename_component(ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." REALPATH)
 get_filename_component(CODELIB "${ROOT}/../../../CodeLib" REALPATH)
-get_filename_component(VCPKG "${CODELIB}/vcpkg" REALPATH)
+get_filename_component(VCPKG "${CODELIB}/vcpkg_dbg" REALPATH)
 
 message(STATUS "ROOT=${ROOT}")
 message(STATUS "VCPKG=${VCPKG}")

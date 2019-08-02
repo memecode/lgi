@@ -1159,11 +1159,11 @@ int NodeSort(GTreeItem *a, GTreeItem *b, NativeInt d)
 	return 0;
 }
 
-int XmlSort(GXmlTag *a, GXmlTag *b, NativeInt d)
+DeclGArrayCompare(XmlSort, GXmlTag*, NativeInt)
 {
-	GTreeItem *A = dynamic_cast<GTreeItem*>(a);
-	GTreeItem *B = dynamic_cast<GTreeItem*>(b);
-	return NodeSort(A, B, d);
+	GTreeItem *A = dynamic_cast<GTreeItem*>(*a);
+	GTreeItem *B = dynamic_cast<GTreeItem*>(*b);
+	return NodeSort(A, B, param ? *param : 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2923,7 +2923,8 @@ int IdeProject::GetImage(int Flags)
 void IdeProject::Empty()
 {
 	GXmlTag *t;
-	while ((t = Children[0]))
+	while (Children.Length() > 0 &&
+		(t = Children[0]))
 	{
 		ProjectNode *n = dynamic_cast<ProjectNode*>(t);
 		if (n)
@@ -3803,7 +3804,7 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
 						
 						// Attach
 						Src->GXmlTag::Parent = Dst;
-						Dst->Children.Insert(Src);
+						Dst->Children.Add(Src);
 						Dst->Insert(Src);
 						
 						// Dirty
@@ -3883,21 +3884,25 @@ int64 AddFilesProgress::Value()
 void AddFilesProgress::Value(int64 val)
 {
 	v = val;
-	if (Visible() && Msg)
-	{
-		Msg->Value(v);
-		Msg->SendNotify(GNotifyTableLayout_Refresh);
-	}
 
 	uint64 Now = LgiCurrentTime();
 	if (Visible())
 	{
-		if (Now - Ts > 150)
+		if (Now - Ts > 200)
+		{
+			if (Msg)
+			{
+				Msg->Value(v);
+				Msg->SendNotify(GNotifyTableLayout_Refresh);
+			}
 			LgiYield();
+			Ts = Now;
+		}
 	}
 	else if (Now - Ts > 1000)
 	{
 		DoModeless();
+		SetAlwaysOnTop(true);
 	}
 }
 

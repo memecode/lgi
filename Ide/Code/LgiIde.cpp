@@ -1940,6 +1940,8 @@ void AppWnd::OnReceiveFiles(GArray<char*> &Files)
 			if (!OpenProject(f, NULL))
 				OpenFile(f);
 		}
+		else if (DirExists(f))
+			;
 		else if
 		(
 			LgiIsFileNameExecutable(f)

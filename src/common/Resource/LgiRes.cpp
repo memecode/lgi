@@ -1390,8 +1390,7 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 				}
 
 				// instantiate control list
-				auto it = Dlg->Dialog->Children.begin();
-				for (GXmlTag *t = *it; t; t = *++it)
+				for (GXmlTag *t: Dlg->Dialog->Children)
 				{
 					ResObject *Obj = CreateObject(t, 0);
 					if (Obj)

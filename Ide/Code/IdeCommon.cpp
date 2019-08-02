@@ -23,9 +23,11 @@ bool IdeCommon::OnOpen(GProgressDlg *Prog, GXmlTag *Src)
 	if (!Serialize(Write = false))
 		return false;
 
-	List<GXmlTag>::I it = Src->Children.begin();
-	for (GXmlTag *c = *it; c && (!Prog || !Prog->IsCancelled()); c = *++it)
+	for (auto c: Src->Children)
 	{
+		if (Prog && Prog->IsCancelled())
+			break;
+
 		bool Processed = false;
 		if (c->IsTag("Node"))
 		{
@@ -113,7 +115,7 @@ void IdeCommon::CollectAllSource(GArray<GString> &c, IdePlatform Platform)
 void IdeCommon::SortChildren()
 {
 	Items.Sort(NodeSort);
-	Children.Sort(XmlSort);
+	Children.Sort<NativeInt>(XmlSort, 0);
 	
 	if (Tree)
 	{

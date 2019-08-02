@@ -21,7 +21,7 @@ enum NodeType
 };
 
 extern int NodeSort(GTreeItem *a, GTreeItem *b, NativeInt d);
-extern int XmlSort(GXmlTag *a, GXmlTag *b, NativeInt d);
+extern DeclGArrayCompare(XmlSort, GXmlTag*, NativeInt);
 
 class ProjectNode : public IdeCommon, public GDragDropSource, public FtpCallback, public NodeSource
 {

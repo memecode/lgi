@@ -24,7 +24,7 @@
 		#define LGI_32BIT				1
 	#endif
 
-	#if 0
+	#if 1
 		#define _CRTDBG_MAP_ALLOC
 		#include <crtdbg.h>
 		#ifdef _DEBUG
@@ -76,7 +76,7 @@
 namespace Gtk {
 #include <gtk/gtk.h>
 #ifdef WIN32
-#include <gdk/gdkwin32.h>
+#include <gdk/win32/gdkwin32.h>
 #endif
 }
 

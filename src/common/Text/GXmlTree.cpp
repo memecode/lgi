@@ -341,6 +341,7 @@ GAutoRefPtr<XmlNormalAlloc> TagHeapAllocator(new XmlNormalAlloc);
 
 GXmlTag::GXmlTag(const char *tag, GXmlAlloc *alloc)
 {
+	Children.SetFixedLength(true);
 	Allocator = alloc ? alloc : TagHeapAllocator;
 
 	Write = false;
@@ -647,7 +648,10 @@ void GXmlTag::InsertTag(GXmlTag *t)
 	{
 		t->RemoveTag();
 		t->Parent = this;		
+
+		Children.SetFixedLength(false);
 		Children.Add(t);
+		Children.SetFixedLength(true);
 	}
 }
 
@@ -655,7 +659,9 @@ void GXmlTag::RemoveTag()
 {
 	if (Parent)
 	{
+		Children.SetFixedLength(false);
 		Parent->Children.Delete(this);
+		Children.SetFixedLength(true);
 	}
 	Parent = 0;	
 }
@@ -1479,10 +1485,10 @@ void GXmlTree::Output(GXmlTag *t, int Depth)
 	
 	// Write the child tags
 	bool HasContent = ValidStr(t->Content);
-	auto It = t->Children.begin();
-	GXmlTag *c = *It;
-	if (c || HasContent)
+	if (t->Children.Length() || HasContent)
 	{
+		auto It = t->Children.begin();
+		GXmlTag *c = t->Children.Length() ? *It : NULL;
 		if (ValidTag)
 			d->File->Write(">", 1);
 		

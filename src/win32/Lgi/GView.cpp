@@ -1385,7 +1385,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				if (ABS(Lines) < 1.0)
 					Lines *= 1.0 / ABS(Lines);
 				
-				LgiTrace("Lines = %g, zDelta = %i, nScrollLines = %i\n", Lines, zDelta, nScrollLines);
+				// LgiTrace("Lines = %g, zDelta = %i, nScrollLines = %i\n", Lines, zDelta, nScrollLines);
 
 				// Try giving the event to the current window...
 				if (!OnMouseWheel(Lines))

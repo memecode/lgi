@@ -8,13 +8,13 @@
 **              fret@memecode.com
 */
 
-#include <malloc.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
 
 #include "GMem.h"
+#include <malloc.h>
 
 #ifdef LGI_MEM_DEBUG
 
@@ -570,9 +570,66 @@ void operator delete[](void *p)
 
 #else
 
-bool LgiDumpMemoryStats(char *f)
+#include <crtdbg.h>
+
+#define nNoMansLandSize 4
+
+typedef struct _CrtMemBlockHeader
 {
-	return false;
+        struct _CrtMemBlockHeader * pBlockHeaderNext;
+        struct _CrtMemBlockHeader * pBlockHeaderPrev;
+        char *                      szFileName;
+        int                         nLine;
+#ifdef _WIN64
+        /* These items are reversed on Win64 to eliminate gaps in the struct
+         * and ensure that sizeof(struct)%16 == 0, so 16-byte alignment is
+         * maintained in the debug heap.
+         */
+        int                         nBlockUse;
+        size_t                      nDataSize;
+#else  /* _WIN64 */
+        size_t                      nDataSize;
+        int                         nBlockUse;
+#endif  /* _WIN64 */
+        long                        lRequest;
+        unsigned char               gap[nNoMansLandSize];
+        /* followed by:
+         *  unsigned char           data[nDataSize];
+         *  unsigned char           anotherGap[nNoMansLandSize];
+         */
+} _CrtMemBlockHeader;
+
+bool LgiDumpMemoryStats(char *filename)
+{
+	_CrtMemState state;
+	_CrtMemCheckpoint(&state);
+	_CrtMemDumpStatistics(&state);
+
+	auto f = fopen(filename ? filename : "memdump.txt", "w");
+	if (!f)
+		return false;
+
+	char buf[512];
+
+	int i = 0;
+	for (auto blk = state.pBlockHeader; blk; blk = blk->pBlockHeaderNext)
+	{
+		int ch = sprintf_s(	buf, sizeof(buf),
+							"%i,%s:%i,%i," LPrintfSizeT ",%li\n",
+							i++,
+							blk->szFileName,
+							blk->nLine,
+							blk->nBlockUse,
+							blk->nDataSize,
+							blk->lRequest);
+		fwrite(buf, 1, ch, f);
+		if (i % 10000 == 0)
+			LgiTrace("Dumping %i..\n", i);
+	}
+
+	fclose(f);
+
+	return true;
 }
 
 void LgiSetLeakDetect(bool On)
@@ -921,7 +978,7 @@ bool LgiCheckHeap()
 
 	#endif
 
-	#ifdef _MSC_VER
+	#if 0 // defined _MSC_VER && defined _CRT_USE_WINAPI_FAMILY_DESKTOP_APP
 	if (_heapchk() != _HEAPOK)
 	{
 		assert(!"Heap not ok.");
