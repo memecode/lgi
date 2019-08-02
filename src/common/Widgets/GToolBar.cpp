@@ -804,11 +804,8 @@ void GToolButton::Value(int64 b)
 
 void GToolButton::SendCommand()
 {
-	if (GetParent())
-	{
-		GToolBar *t = dynamic_cast<GToolBar*>(GetParent());
-		if (t) t->OnButtonClick(this);
-	}
+	GToolBar *t = dynamic_cast<GToolBar*>(GetParent());
+	if (t) t->OnButtonClick(this);
 }
 
 void GToolButton::OnMouseClick(GMouse &m)

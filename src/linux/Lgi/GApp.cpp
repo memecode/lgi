@@ -1473,20 +1473,15 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 		return false;
 	}
 	
-	auto Existing = q->Length();
 	q->New().Set(View, Msg, a, b);
 	MsgQue.Unlock();
 	
 	#if !IDLE_ALWAYS
-	
-		#if 0
-		// if (!Existing)
-			// g_idle_add((GSourceFunc)IdleWrapper, &idle);
-		#elif 0
-		// gdk_threads_add_idle((GSourceFunc)IdleWrapper, &idle);
-		#elif 1
-		g_main_context_invoke_full(NULL, G_PRIORITY_DEFAULT, (GSourceFunc)IdleWrapper, &idle, NULL);
-		#endif
+
+		if (LgiApp->InThread())
+			g_idle_add((GSourceFunc)IdleWrapper, &idle);
+		else
+			g_main_context_invoke_full(NULL, G_PRIORITY_DEFAULT, (GSourceFunc)IdleWrapper, &idle, NULL);
 
 	#endif
 	

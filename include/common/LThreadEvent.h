@@ -20,6 +20,7 @@ class LgiClass LThreadEvent : public GBase
         sem_t Local;
         sem_t *Sem;
 	#elif defined(POSIX)
+		bool signalled;
         pthread_cond_t Cond;
         pthread_mutex_t Mutex;
 	#elif defined(WIN32)

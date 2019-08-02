@@ -109,8 +109,8 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 	bool DoingProgress;
 	
 	FindSymbolSystemPriv(int appSinkHnd) :
-		hApp(appSinkHnd),
-		GEventTargetThread("FindSymbolSystemPriv")
+		GEventTargetThread("FindSymbolSystemPriv"),
+		hApp(appSinkHnd)	
 	{
 		Tasks = 0;
 		MsgTs = 0;
@@ -270,7 +270,8 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 	{
 		if (IsCancelled())
 			return -1;
-			
+		
+		//printf("Msg->Msg()=%i\n", Msg->Msg());
 		switch (Msg->Msg())
 		{
 			case M_FIND_SYM_REQUEST:

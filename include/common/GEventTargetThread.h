@@ -310,6 +310,7 @@ public:
 		Msgs.Add(new GMessage(Cmd, a, b));
 		Unlock();
 		
+		// printf("%x: PostEvent and sig %i\n", GetCurrentThreadId(), (int)Msgs.Length());
 		return Event.Signal();
 	}
 	
@@ -355,8 +356,14 @@ public:
 				for (unsigned i=0; Loop && i < m.Length(); i++)
 				{
 					Processing--;
+					/*
+					printf("%x: Processing=%i of %i\n",
+						GetCurrentThreadId(),
+						(int)Processing, (int)m.Length());
+					*/
 					OnEvent(m[i]);
 				}
+				// printf("%x: Done Processing, %i to go\n", GetCurrentThreadId(), (int)Msgs.Length());
 				m.DeleteObjects();
 			}
 			else if (s == LThreadEvent::WaitError)

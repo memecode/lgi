@@ -83,20 +83,19 @@ LThreadEvent::LThreadEvent(const char *name)
 	
 	#elif defined(POSIX)
 	
-		// Value = 0;
-		pthread_mutexattr_t  mattr;
+		signalled = false;
 		int e = pthread_cond_init(&Cond, NULL);
-		if (e)
-			printf("%s:%i - pthread_cond_init failed %i\n", _FL, e);
+		if (e) printf("%s:%i - pthread_cond_init failed %i\n", _FL, e);
+
+		pthread_mutexattr_t  mattr;
 		e = pthread_mutexattr_init(&mattr);
-		if (e)
-			printf("%s:%i - pthread_mutexattr_init failed %i\n", _FL, e);
+		if (e) printf("%s:%i - pthread_mutexattr_init failed %i\n", _FL, e);
+	
 		e = pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
-		if (e)
-			printf("%s:%i - pthread_mutexattr_settype failed %i\n", _FL, e);
+		if (e) printf("%s:%i - pthread_mutexattr_settype failed %i\n", _FL, e);
+
 		e = pthread_mutex_init(&Mutex, &mattr);
-		if (e)
-			printf("%s:%i - pthread_mutex_init failed %i\n", _FL, e);
+		if (e) printf("%s:%i - pthread_mutex_init failed %i\n", _FL, e);
 	
 	#elif defined(WIN32)
 	
@@ -231,17 +230,17 @@ bool LThreadEvent::Signal()
 		}
 
 	#elif defined(POSIX)
-
+	
 		int e = pthread_mutex_lock(&Mutex);
-		if (e)
-			printf("%s:%i - pthread_mutex_lock failed %i\n", _FL, e);
+		if (e) printf("%s:%i - pthread_mutex_lock failed %i\n", _FL, e);
+
+        signalled = true;
+
 		e = pthread_mutex_unlock(&Mutex);
-		if (e)
-			printf("%s:%i - pthread_mutex_unlock failed %i\n", _FL, e);
+		if (e) printf("%s:%i - pthread_mutex_unlock failed %i\n", _FL, e);
 
 		e = pthread_cond_signal(&Cond);    /* signal SendThread */
-		if (e)
-			printf("%s:%i - pthread_cond_signal failed %i\n", _FL, e);
+		if (e) printf("%s:%i - pthread_cond_signal failed %i\n", _FL, e);
 
 	#elif defined(WIN32)
 
@@ -368,24 +367,47 @@ LThreadEvent::WaitStatus LThreadEvent::Wait(int32 Timeout)
 	#elif defined(POSIX)
 
 		int e = pthread_mutex_lock(&Mutex);
-		if (e)
-			printf("%s:%i - pthread_mutex_lock failed %i\n", _FL, e);
+		if (e) printf("%s:%i - pthread_mutex_lock failed %i\n", _FL, e);
 
-		int result;
-		if (Timeout < 0)
+		int result = 0;
+		uint64_t start = Timeout >= 0 ? LgiCurrentTime() : 0;
+		while (!signalled)
 		{
-			result = pthread_cond_wait(&Cond, &Mutex);
+			if (Timeout < 0)
+			{
+				#if DEBUG_THREADING
+				printf("%x: calling pthread_cond_wait\n", GetCurrentThreadId());
+				#endif
+				result = pthread_cond_wait(&Cond, &Mutex);
+				#if DEBUG_THREADING
+				printf("%x: pthread_cond_wait = %i\n", GetCurrentThreadId(), result);
+				#endif
+			}
+			else
+			{
+				timespec to;
+				uint64_t now = LgiCurrentTime();
+				if (now >= start + Timeout)
+				{
+					result = ETIMEDOUT;
+					break;
+				}
+				int remaining_ms = Timeout - (now - start);
+				TimeoutToTimespec(to, remaining_ms);
+				#if DEBUG_THREADING
+				printf("%x: calling pthread_cond_timedwait %i\n", GetCurrentThreadId(), remaining_ms);
+				#endif
+				result = pthread_cond_timedwait(&Cond, &Mutex, &to);
+				#if DEBUG_THREADING
+				printf("%x: pthread_cond_timedwait result = %i\n", GetCurrentThreadId(), result);
+				#endif
+			}
 		}
-		else
-		{
-			timespec to;
-			TimeoutToTimespec(to, Timeout);
-			result = pthread_cond_timedwait(&Cond, &Mutex, &to);
-		}
-		
+
+        signalled = false;
+
 		e = pthread_mutex_unlock(&Mutex);
-		if (e)
-			printf("%s:%i - pthread_mutex_unlock failed %i\n", _FL, e);
+		if (e) printf("%s:%i - pthread_mutex_unlock failed %i\n", _FL, e);
 
 		if (result == ETIMEDOUT)
 			return WaitTimeout;
