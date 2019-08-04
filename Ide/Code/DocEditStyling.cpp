@@ -91,11 +91,12 @@ LanguageParams LangParam[] =
 };
 
 DocEditStyling::DocEditStyling(DocEdit *view) : 
-	View(view),
-	ParentState(KWaiting), WorkerState(KWaiting),
 	LThread("DocEditStyling.Thread"),
 	LMutex("DocEditStyling.Lock"),
+	View(view),
 	Event("DocEditStyling.Event"),
+	ParentState(KWaiting),
+	WorkerState(KWaiting),
 	Params(view)
 {
 }

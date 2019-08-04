@@ -332,7 +332,7 @@ pascal OSStatus AppProc(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, 
 				{
 					if (a->AppWnd)
 					{
-						GSubMenu s;
+						LSubMenu s;
 						a->AppWnd->OnTrayMenu(s);
 						MenuRef gDockMenu = s.Release();
 						CFRetain(gDockMenu);

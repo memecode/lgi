@@ -29,11 +29,11 @@ public:
 	
 	const char *GetClass() override { return "EditTray"; }
 	void GotoSearch(int CtrlId, char *InitialText = NULL);	
-	void OnCreate();
-	void OnPosChange();
-	void OnPaint(GSurface *pDC);
-	bool Pour(GRegion &r);
-	void OnMouseClick(GMouse &m);
+	void OnCreate() override;
+	void OnPosChange() override;
+	void OnPaint(GSurface *pDC) override;
+	bool Pour(GRegion &r) override;
+	void OnMouseClick(GMouse &m) override;
 	void OnHeaderList(GMouse &m);
 	void OnFunctionList(GMouse &m);
 	void OnSymbolList(GMouse &m);

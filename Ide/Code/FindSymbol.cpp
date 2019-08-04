@@ -27,7 +27,7 @@ int SYM_FILE_SENT = 0;
 
 class FindSymbolDlg : public GDialog
 {
-	AppWnd *App;
+	// AppWnd *App;
 	LList *Lst;
 	FindSymbolSystem *Sys;
 

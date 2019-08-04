@@ -2112,9 +2112,9 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	for (auto &b: d->Blocks)
 	{
 		double Bx = ((double)b.X()) / FScale;
-		double By = Font->GetHeight();
 		
 		#if DEBUG_BOUNDS
+		double By = Font->GetHeight();
 		cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
 		cairo_rectangle(cr, 0, 0, Bx, By);
 		cairo_rectangle(cr, 1, 1, Bx - 2.0, By - 2.0);

@@ -31,7 +31,7 @@
 		typedef MenuItemIndex OsMenuItem;
 	#endif
 #else
-	#include "GMenuImpl.h"
+	#include "LMenuImpl.h"
 	typedef class MenuClickImpl *OsSubMenu;
 	typedef class MenuItemImpl *OsMenuItem;
 #endif
@@ -42,7 +42,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Menu wrappers
-class LgiClass GMenuLoader
+class LgiClass LMenuLoader
 {
 	friend class LMenuItem;
 	friend class LMenu;
@@ -57,7 +57,7 @@ protected:
 	List<LMenuItem> Items;
 
 public:
-	GMenuLoader()
+	LMenuLoader()
 	{
 		#ifdef WIN32
 		Info = 0;
@@ -78,7 +78,7 @@ public:
 class LMenu;
 class LgiClass LSubMenu :
 	public GBase,
-	public GMenuLoader,
+	public LMenuLoader,
 	public GImageListOwner,
 	public GDom
 {
@@ -312,7 +312,7 @@ protected:
 	#else
 	OsMenuItem		Info;
 	#endif
-	class GMenuItemPrivate *d;
+	class LMenuItemPrivate *d;
 
 	#if defined BEOS
 	BMessage		*Msg;
@@ -470,7 +470,7 @@ class LgiClass LMenu :
 	friend class LMenuItem;
 	friend class GWindow;
 
-	class GMenuPrivate *d;
+	class LMenuPrivate *d;
 
 	#if defined WIN32
 	void OnChange();

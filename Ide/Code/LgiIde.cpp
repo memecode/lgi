@@ -1060,8 +1060,8 @@ public:
 
 	// Object
 	AppWndPrivate(AppWnd *a) :
-		AppHnd(GEventSinkMap::Dispatch.AddSink(a)),
-		Options(GOptionsFile::DesktopMode, AppName)
+		Options(GOptionsFile::DesktopMode, AppName),
+		AppHnd(GEventSinkMap::Dispatch.AddSink(a))
 	{
 		FindSym.Reset(new FindSymbolSystem(AppHnd));
 		HistoryLoc = 0;
@@ -2071,7 +2071,6 @@ void AppWnd::OnFixBuildErrors()
 
 	Log->Name(NULL);
 	Log->Print("Parsing errors...\n");
-	int i = 0;
 	int Replacements = 0;
 	GArray<LFileInfo> Files;
 

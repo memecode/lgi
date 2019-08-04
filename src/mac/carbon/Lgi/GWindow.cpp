@@ -44,7 +44,7 @@ public:
 	bool SetOnTop;
 	uint64 LastDragDrop;
 
-	GMenu *EmptyMenu;
+	LMenu *EmptyMenu;
 	
 	GViewI *Focus;
 
@@ -643,7 +643,7 @@ pascal OSStatus LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inE
 						{
 							// This maps the About and Preference commands to the
 							// applications internal CMD identifiers.
-							GMenu *m = w->GetMenu();
+							LMenu *m = w->GetMenu();
 							if (m)
 							{
 								int Cmd = m->GetIdForCommand(command.commandID);
@@ -706,7 +706,7 @@ pascal OSStatus LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inE
 					if (!w)
 						break;
 
-					GMenu *m = w->GetMenu();
+					LMenu *m = w->GetMenu();
 					if (m)
 					{
 						OSStatus e = SetRootMenu(m->Handle());
@@ -719,7 +719,7 @@ pascal OSStatus LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inE
 					{
 						if (!w->d->EmptyMenu)
 						{
-							w->d->EmptyMenu = new GMenu;
+							w->d->EmptyMenu = new LMenu;
 						}
 
 						if (w->d->EmptyMenu)
@@ -1922,7 +1922,7 @@ void GWindow::OnTrayClick(GMouse &m)
 {
 	if (m.Down() || m.IsContextMenu())
 	{
-		GSubMenu RClick;
+		LSubMenu RClick;
 		OnTrayMenu(RClick);
 		if (GetMouse(m, true))
 		{

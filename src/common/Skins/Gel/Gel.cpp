@@ -276,7 +276,7 @@ class GelSkin : public GSkinEngine
 			double Radius = Box.X()/2;
 			GPointF Center(Box.X()/2, Box.Y()/2);
 
-			int Grey = R24(LC_MED);
+			// int Grey = R24(LC_MED);
 			bool Enabled = (Flags & Btn_Enabled) != 0;
 
 			if (Enabled)

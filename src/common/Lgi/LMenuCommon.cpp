@@ -1,5 +1,5 @@
 //
-//  GMenuCommon.cpp
+//  LMenuCommon.cpp
 //  LgiCarbon
 //
 //  Created by Matthew Allen on 30/01/2018.

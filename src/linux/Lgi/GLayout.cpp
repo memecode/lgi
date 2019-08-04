@@ -120,14 +120,14 @@ void GLayout::AttachScrollBars()
 {
 	if (HScroll && !HScroll->IsAttached())
 	{
-		GRect r = HScroll->GetPos();
+		// GRect r = HScroll->GetPos();
 		HScroll->Attach(this);
 		HScroll->SetNotify(this);
 	}
 
 	if (VScroll && !VScroll->IsAttached())
 	{
-		GRect r = VScroll->GetPos();
+		// GRect r = VScroll->GetPos();
 		VScroll->Attach(this);
 		VScroll->SetNotify(this);
 	}

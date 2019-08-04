@@ -1449,7 +1449,7 @@ LgiStringRes *LgiMenuRes::GetString(GXmlTag *Tag)
 	return 0;
 }
 
-bool GMenuLoader::Load(LgiMenuRes *MenuRes, GXmlTag *Tag, ResFileFormat Format, TagHash *TagList)
+bool LMenuLoader::Load(LgiMenuRes *MenuRes, GXmlTag *Tag, ResFileFormat Format, TagHash *TagList)
 {
 	bool Status = false;
 
@@ -1555,7 +1555,7 @@ bool LMenu::Load(GView *w, const char *Res, const char *TagList)
 				#if WINNATIVE
 				Status = LSubMenu::Load(m, m->Tag, r->GetFormat(), &Tags);
 				#else
-				Status = GMenuLoader::Load(m, m->Tag, r->GetFormat(), &Tags);
+				Status = LMenuLoader::Load(m, m->Tag, r->GetFormat(), &Tags);
 				#endif
 				break;
 			}

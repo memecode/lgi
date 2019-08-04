@@ -146,7 +146,7 @@ void GPalette::SwapRAndB()
 uchar *GPalette::MakeLut(int Bits)
 {
 	uchar *Lut = 0;
-	GdcRGB *p = (*this)[0];
+	// GdcRGB *p = (*this)[0];
 
 	int Size = 1 << Bits;
 	switch (Bits)
@@ -619,9 +619,9 @@ GPalette *GdcDevice::GetSystemPalette()
 
 void GdcDevice::SetColourPaletteType(int Type)
 {
+	/*
 	bool SetOpt = true;
 
-	/*
 	switch (Type)
 	{
 		case PALTYPE_ALLOC:
@@ -902,13 +902,12 @@ GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 		EndianTest Test;
 		Test.b[0] = 1;
 		Test.b[1] = 0;
-		bool LittleEndian = Test.s == 1;
 		
 		#if VisualToColourSpaceDebug
+		bool LittleEndian = Test.s == 1;
 		printf("GdkVisualToColourSpace, Type: %i, LittleEndian=%i\n", v->type, LittleEndian);
 		#endif
 
-		#if GTK_MAJOR_VERSION == 3
 		auto Depth = gdk_visual_get_depth(v);
 		
 		#define comp(c) \
@@ -920,23 +919,6 @@ GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 		comp(b);
 
 		switch (gdk_visual_get_visual_type(v))
-		#else
-		auto Depth = v->depth;
-
-		auto mask_r = v->red_mask;
-		auto shift_r = v->red_shift;
-		auto precision_r = v->red_precision;
-		
-		auto mask_g = v->green_mask;
-		auto shift_g = v->green_shift;
-		auto precision_g = v->green_precision;
-		
-		auto mask_b = v->blue_mask;
-		auto shift_b = v->blue_shift;
-		auto precision_b = v->blue_precision;
-
-		switch (v->type)
-		#endif
 		{
 			default:
 			{

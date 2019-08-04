@@ -230,7 +230,6 @@ DragFailed(	GtkWidget      *widget,
 			GtkDragResult   result,
 			gpointer        user_data)
 {
-	int asd=0;
 	return false;
 }
 
@@ -272,7 +271,7 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect)
 	
 	Gtk::GdkDragAction Action = EffectToDragAction(Effect);
 	
-	int Button = 1;
+	// int Button = 1;
 	GWindow *w = SourceWnd->GetWindow();
 	if (!w)
 	{

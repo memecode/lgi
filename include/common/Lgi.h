@@ -123,7 +123,7 @@
 	This will put a simple empty window on the screen. The sorts of classes you'll be using to
 	fill in the contents of the window will be:
 	<ul>
-		<li> GMenu
+		<li> LMenu
 		<li> GSplitter
 		<li> GToolBar
 		<li> GStatusBar

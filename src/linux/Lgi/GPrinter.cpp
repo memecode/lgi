@@ -104,7 +104,7 @@ GtkPrintDrawPage(	GtkPrintOperation	*operation,
 	if (ct && d->PrintDC)
 		LgiAssert(d->PrintDC->Handle() == ct); // Just checking it's the same handle
 	
-	bool r = d->Events->OnPrintPage(d->PrintDC, page_number);
+	d->Events->OnPrintPage(d->PrintDC, page_number);
 }
 
 bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages /* = -1 */, GView *Parent /* = 0 */)

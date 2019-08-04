@@ -91,7 +91,7 @@ class GWindowPrivate
 public:
 	GWindow *Wnd;
 	GDialog *ChildDlg;
-	GMenu *EmptyMenu;
+	LMenu *EmptyMenu;
 	GViewI *Focus;
 
 	int Sx, Sy;
@@ -802,7 +802,7 @@ int LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *
 					GWindow *w = v->GetWindow();
 					if (w)
 					{
-						GMenu *m = w->GetMenu();
+						LMenu *m = w->GetMenu();
 						if (m)
 						{
 							OSStatus e = SetRootMenu(m->Handle());
@@ -815,7 +815,7 @@ int LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *
 						{
 							if (!w->d->EmptyMenu)
 							{
-								w->d->EmptyMenu = new GMenu;
+								w->d->EmptyMenu = new LMenu;
 							}
 							
 							if (w->d->EmptyMenu)
@@ -1873,7 +1873,7 @@ void GWindow::OnTrayClick(GMouse &m)
 {
 	if (m.Down() || m.IsContextMenu())
 	{
-		GSubMenu RClick;
+		LSubMenu RClick;
 		OnTrayMenu(RClick);
 		if (GetMouse(m, true))
 		{

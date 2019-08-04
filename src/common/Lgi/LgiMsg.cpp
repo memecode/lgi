@@ -248,7 +248,7 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 			gtk_dialog_add_button(GTK_DIALOG(dlg), "Cancel", GTK_RESPONSE_CANCEL);
 		int Response = 0;
 		g_signal_connect(GTK_DIALOG(dlg), "response", G_CALLBACK(MsgCb), &Response);
-		auto r = gtk_dialog_run(GTK_DIALOG(dlg));
+		gtk_dialog_run(GTK_DIALOG(dlg));
 		gtk_widget_destroy(dlg);
 	
 		switch (Response)

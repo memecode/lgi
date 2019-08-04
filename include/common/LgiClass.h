@@ -25,7 +25,7 @@ class GFileSelect;
 class GFindReplace;
 class LSubMenu;
 class LMenuItem;
-class GMenu;
+class LMenu;
 class GToolBar;
 class GToolButton;
 class GSplitter;

@@ -17,7 +17,7 @@
 	
 	#include <sys/time.h>
 
-	void TimeoutToTimespec(struct timespec &to, int TimeoutMs)
+	void TimeoutToTimespec(struct timespec &to, uint64_t TimeoutMs)
 	{
 		timeval tv;
 		gettimeofday(&tv, NULL);
@@ -392,7 +392,7 @@ LThreadEvent::WaitStatus LThreadEvent::Wait(int32 Timeout)
 					result = ETIMEDOUT;
 					break;
 				}
-				int remaining_ms = Timeout - (now - start);
+				auto remaining_ms = Timeout - (now - start);
 				TimeoutToTimespec(to, remaining_ms);
 				#if DEBUG_THREADING
 				printf("%x: calling pthread_cond_timedwait %i\n", GetCurrentThreadId(), remaining_ms);
