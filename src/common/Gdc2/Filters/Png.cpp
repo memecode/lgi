@@ -54,11 +54,24 @@ typedef GRgba64 Png64;
 #define png_const_bytep png_bytep
 #endif
 
+#ifdef LINUX
+const char *LinuxLibName()
+{
+	static char lib[64];
+	auto v = GString(LIBPNG_VERSION).Split(".");
+	sprintf_s(lib, sizeof(lib), "libpng%s%s", v[0].Get(), v[1].Get());
+	printf("lib='%s'\n", lib);
+	return lib;
+}
+#endif
+
 #if LIBPNG_SHARED
 #define LIBPNG Lib->
-const char sLibrary[] =
+const char *sLibrary =
 	#if defined(MAC)
 		"libpng16.16"
+	#elif defined(LINUX)
+		LinuxLibName()
 	#else
 		#if defined(__CYGWIN__)
 			"cygpng12"
@@ -91,8 +104,6 @@ public:
 		{
 			#if defined(MAC)
 			if (!Load("/opt/local/lib/libpng.dylib"))
-			#elif defined(LINUX)
-			if (!Load("libpng16"))
 			#endif
 			{
 				static bool First = true;

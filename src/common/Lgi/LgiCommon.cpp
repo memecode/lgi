@@ -959,6 +959,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		#endif
 	#endif
 
+	/*
 	#if defined(LINUX) && !defined(LGI_SDL)
 	// Ask our window manager add-on if it knows the path
 	GLibrary *WmLib = LgiApp ? LgiApp->GetWindowManagerLib() : NULL;
@@ -973,6 +974,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		}
 	}
 	#endif
+	*/
 
 	switch (Which)
 	{

@@ -68,7 +68,7 @@ bool GLibrary::Load(const char *File, bool Quiet)
 			SetErrorMode(0);
 
 
-			#elif defined(LINUX) || defined(MAC) || defined(BEOS)
+			#else
 			
 			char *f = strrchr(FileName, DIR_CHAR);
 			if (f) f++;
@@ -111,13 +111,22 @@ bool GLibrary::Load(const char *File, bool Quiet)
 				}
 				else
 				{
-					#if defined(MAC) && defined(__GTK_H__)
-					char p[MAX_PATH];
-					LgiMakePath(p, sizeof(p), LgiArgsAppPath, "..");
-					LgiMakePath(p, sizeof(p), p, FileName);
-					hLib = dlopen(p, RTLD_NOW);
+					if (LgiIsRelativePath(FileName))
+					{
+						// Explicitly try the full path to the executable folder
+						char p[MAX_PATH];
+						#if defined(MAC) && defined(__GTK_H__)
+						LgiMakePath(p, sizeof(p), LgiArgsAppPath, "..");
+						#else
+						LgiGetExePath(p, sizeof(p));
+						#endif
+						LgiMakePath(p, sizeof(p), p, FileName);
+						hLib = dlopen(p, RTLD_NOW);
+						#if DEBUG_LIB_MSGS
+						printf("%s:%i - Trying '%s' = %p\n", _FL, p, hLib);
+						#endif
+					}
 					if (!hLib)
-					#endif
 					{
 						char *e = dlerror();
 						if (!stristr(e, "No such file or directory") && !Quiet)
@@ -160,10 +169,6 @@ bool GLibrary::Load(const char *File, bool Quiet)
 					}
 				}
 			}
-
-			#else
-
-			LgiAssert(0);
 
 			#endif
 		}

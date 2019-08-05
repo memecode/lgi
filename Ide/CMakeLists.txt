@@ -149,7 +149,7 @@ if (APPLE)
 		)
 elseif (LINUX)
 	target_include_directories(LgiIde PUBLIC "../include/linux/Gtk" "../include/linux" ${GTK2_INCLUDE_DIRS} ${PNG_INCLUDE_DIR})
-	target_link_libraries(LgiIde Lgi pthread ${GTK2_LIBRARIES} ${PNG_LIBRARY})
+	target_link_libraries(LgiIde Lgi pthread ${GTK2_LIBRARIES} libpng15)
 elseif (MSVC)
 	target_include_directories(LgiIde PUBLIC "../include/win32" ${PNG_INCLUDE_DIRS})
 	target_link_libraries(	LgiIde

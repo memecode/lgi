@@ -30,7 +30,7 @@
 					<Node File="./src/linux/General/ShowFileProp_Linux.cpp" Type="2" Platforms="2" />
 				</Node>
 				<Node Name="Mac" Type="1" Platforms="15" Id="1">
-					<Node File="./src/mac/carbon/General/GFile.cpp" Type="2" Platforms="15" />
+					<Node File="./src/mac/carbon/General/GFile.cpp" Type="2" Platforms="4" />
 					<Node File="./src/mac/cocoa/General/ShowFileProp_Mac.mm" Type="8" Platforms="15" />
 				</Node>
 				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="11">
@@ -406,192 +406,21 @@
 		<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
 			<Node File="./include/win32/LgiOsDefs.h" Type="3" Platforms="1" />
 		</Node>
-		<Node File=".\include\common\GNotifications.h" Type="3" Platforms="15" />
-		<Node File=".\include\common\LCancel.h" Type="3" Platforms="15" />
-		<Node File=".\include\common\LError.h" Type="3" Platforms="15" />
-		<Node File=".\include\common\Lgi.h" Type="3" Platforms="15" />
-		<Node File=".\include\common\LgiClass.h" Type="3" Platforms="15" />
-		<Node File=".\include\common\LgiClasses.h" Type="3" Platforms="15" />
-		<Node File=".\include\common\LgiCommon.h" Type="3" Platforms="15" />
-		<Node File=".\include\common\LgiDefs.h" Type="3" Platforms="15" />
-		<Node File=".\include\common\LgiInc.h" Type="3" Platforms="15" />
-		<Node File=".\include\common\LgiInterfaces.h" Type="3" Platforms="15" />
-		<Node File=".\include\common\LgiMsgs.h" Type="3" Platforms="15" />
+		<Node File="./include/common/GNotifications.h" Type="3" Platforms="15" />
+		<Node File="./include/common/LCancel.h" Type="3" Platforms="15" />
+		<Node File="./include/common/LError.h" Type="3" Platforms="15" />
+		<Node File="./include/common/Lgi.h" Type="3" Platforms="15" />
+		<Node File="./include/common/LgiClass.h" Type="3" Platforms="15" />
+		<Node File="./include/common/LgiClasses.h" Type="3" Platforms="15" />
+		<Node File="./include/common/LgiCommon.h" Type="3" Platforms="15" />
+		<Node File="./include/common/LgiDefs.h" Type="3" Platforms="15" />
+		<Node File="./include/common/LgiInc.h" Type="3" Platforms="15" />
+		<Node File="./include/common/LgiInterfaces.h" Type="3" Platforms="15" />
+		<Node File="./include/common/LgiMsgs.h" Type="3" Platforms="15" />
 		<Node File=".\Makefile.linux" Type="9" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
-		<Node File=".\Ide\Gtk3\CMakeLists.txt" Type="8" Platforms="15" />
+		<Node File="./Ide/Gtk3/CMakeLists.txt" Type="8" Platforms="15" />
 	</Node>
-	<Settings>
-		<General>
-			<Makefile>
-				<Windows>.\Makefile.windows</Windows>
-				<Linux>./Makefile.linux</Linux>
-				<Haiku>Makefile.haiku</Haiku>
-				<Mac>Makefile.macosx</Mac>
-			</Makefile>
-			<Defines>
-				<All>
-					<Debug>LGI_LIBRARY
-HAS_FILE_CMD=1</Debug>
-					<Release>LGI_LIBRARY
-HAS_FILE_CMD=1</Release>
-				</All>
-				<Windows>
-					<Debug>WINNATIVE
-WINDOWS</Debug>
-					<Release>WINNATIVE
-WINDOWS</Release>
-				</Windows>
-				<Haiku>
-					<Debug>POSIX</Debug>
-					<Release>POSIX</Release>
-				</Haiku>
-				<Linux />
-				<Mac />
-			</Defines>
-			<Compiler>
-				<Windows>MingW</Windows>
-			</Compiler>
-			<Executable>
-				<Linux />
-				<Windows />
-				<Mac />
-			</Executable>
-			<Arguments>
-				<All />
-			</Arguments>
-			<CrossCompiler />
-			<DebugAdmin />
-			<CCrossCompiler />
-			<CppCrossCompiler />
-		</General>
-		<Build>
-			<IncludePaths>
-				<All>
-					<Debug>include/common</Debug>
-					<Release>include/common</Release>
-				</All>
-				<Windows>
-					<Debug>include/win32
-/local/include</Debug>
-					<Release>include/win32
-/local/include</Release>
-				</Windows>
-				<Linux>
-					<Debug>include/linux
-include/linux/Gtk
-</Debug>
-					<Release>include/linux
-include/linux/Gtk</Release>
-				</Linux>
-				<Haiku>
-					<Debug>include/beos
-/boot/develop/headers/os/app</Debug>
-					<Release>include/beos
-/boot/develop/headers/os/app</Release>
-				</Haiku>
-				<Mac />
-			</IncludePaths>
-			<Libraries>
-				<Windows>
-					<Debug>ws2_32
-ComCtl32
-uxtheme
-gdi32
-comdlg32
-ole32
-uuid</Debug>
-					<Release>ws2_32
-ComCtl32
-uxtheme
-gdi32
-comdlg32
-ole32
-uuid</Release>
-				</Windows>
-				<Linux>
-					<Debug>magic
--static-libgcc 
-`pkg-config --libs gtk+-2.0`</Debug>
-					<Release>magic
--static-libgcc 
-`pkg-config --libs gtk+-2.0`</Release>
-				</Linux>
-				<Haiku>
-					<Debug>network
-be
-game
-textencoding</Debug>
-					<Release>network
-be
-game
-textencoding</Release>
-				</Haiku>
-				<All />
-				<Mac />
-			</Libraries>
-			<TargetType>
-				<All>DynamicLibrary</All>
-			</TargetType>
-			<TargetName>
-				<Haiku>
-					<Debug>lgi</Debug>
-					<Release>lgi</Release>
-				</Haiku>
-				<Windows>
-					<Debug>lgi</Debug>
-					<Release>lgi</Release>
-				</Windows>
-				<Linux>
-					<Debug>lgi</Debug>
-					<Release>lgi</Release>
-				</Linux>
-				<Mac />
-			</TargetName>
-			<SystemIncludes>
-				<Linux>
-					<Debug>/usr/include/gstreamer-1.0
-/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
-`pkg-config --cflags gtk+-2.0`</Debug>
-					<Release>/usr/include/gstreamer-1.0
-/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
-`pkg-config --cflags gtk+-2.0`</Release>
-				</Linux>
-				<Windows />
-				<Mac />
-			</SystemIncludes>
-			<LibraryPaths>
-				<All />
-				<Linux />
-				<Windows />
-				<Mac />
-			</LibraryPaths>
-			<ApplicationIcon />
-		</Build>
-		<Editor>
-			<TabSize>
-				<All>4</All>
-			</TabSize>
-			<IndentSize>
-				<All>4</All>
-			</IndentSize>
-			<ShowWhiteSpace>
-				<All>0</All>
-			</ShowWhiteSpace>
-			<UseHardTabs>
-				<All>1</All>
-			</UseHardTabs>
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
-		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-				<Windows />
-				<Mac />
-			</PostBuildCommands>
-		</Advanced>
-	</Settings>
+	<Settings />
 </Project>

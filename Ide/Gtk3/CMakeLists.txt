@@ -30,9 +30,11 @@ elseif (LINUX)
 	add_definitions("-DLINUX -DLGI_LIBRARY -D_DEBUG -DLGI_RES -DPOSIX -fPIC -w -fno-inline -fpermissive")
 	find_package(PkgConfig REQUIRED)
 	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
-
-	get_filename_component(LIBPNG_SEARCH "${CODELIB}/libpng" ABSOLUTE)
-	add_subdirectory(${LIBPNG_SEARCH} libpng_dir)
+	pkg_check_modules(LIBPNG REQUIRED libpng) # use the system libpng
+	add_definitions(-DLIBPNG_VERSION=\"${LIBPNG_VERSION}\")
+	
+	# get_filename_component(LIBPNG_SEARCH "${CODELIB}/libpng" ABSOLUTE)
+	# add_subdirectory(${LIBPNG_SEARCH} libpng_dir)
 	
 elseif (MSVC)
 
@@ -190,13 +192,13 @@ elseif (LINUX)
 								"${ROOT}/include/linux"
 								${GTK3_INCLUDE_DIRS}
 								${PNG_INCLUDE_DIR})
-	target_link_libraries(LgiIde Lgi pthread ${GTK2_LIBRARIES} ${PNG_LIBRARY})
+	target_link_libraries(LgiIde Lgi pthread ${GTK3_LIBRARIES})
 	set(RESOURCE_DEST "Resources")
-	add_custom_command(TARGET LgiIde POST_BUILD
-				COMMAND "${CMAKE_COMMAND}" -E copy
-					"$<TARGET_FILE:libpng15>"
-					"$<TARGET_FILE_DIR:LgiIde>"
-				COMMENT "Copying libpng to output directory")
+#	add_custom_command(TARGET LgiIde POST_BUILD
+#				COMMAND "${CMAKE_COMMAND}" -E copy
+#					"$<TARGET_FILE:libpng15>"
+#					"$<TARGET_FILE_DIR:LgiIde>"
+#				COMMENT "Copying libpng to output directory")
 
 elseif (MSVC)
 
