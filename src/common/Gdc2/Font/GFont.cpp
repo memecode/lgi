@@ -175,7 +175,7 @@ public:
 		_CodePage = NewStr("utf-8");
 		_Fore.Rgb(0, 0, 0);
 		_Back.Rgb(255, 255, 255);
-		_TabSize = 32;
+		_TabSize = 32; // px
 		_Transparent = false;
 		_Quality = DEFAULT_QUALITY;
 		_SubGlyphs = GFontSystem::Inst()->GetDefaultGlyphSub();

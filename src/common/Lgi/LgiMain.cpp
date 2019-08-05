@@ -234,7 +234,7 @@ int main(int Args, char **Arg)
 
 	#ifdef __GTK_H__
 	Gtk::gtk_init(&Args, &Arg);
-    #endif
+	#endif
 
 	OsAppArguments AppArgs(Args, (const char**)Arg);
 	

@@ -565,6 +565,7 @@ void GTextView3::SetCrLf(bool crlf)
 	CrLf = crlf;
 }
 
+
 void GTextView3::SetTabSize(uint8_t i)
 {
 	TabSize = limit(i, 2, 32);

@@ -474,7 +474,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 				KeyPadMap(KEY(KP_Divide), '/', true)
 			}
 		
-			#if 1 // DEBUG_KEY_EVENT
+			#if DEBUG_KEY_EVENT
 			k.Trace("gtk_key_event");
 			#endif
 

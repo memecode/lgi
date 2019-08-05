@@ -1927,7 +1927,6 @@ void AppWnd::OnReceiveFiles(GArray<char*> &Files)
 	for (int i=0; i<Files.Length(); i++)
 	{
 		char *f = Files[i];
-		// char *d = strrchr(f, DIR_CHAR);
 		
 		char *ext = LgiGetExtension(f);
 		if (ext && !stricmp(ext, "mem"))
@@ -2592,13 +2591,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 
 	if (Doc)
 	{
-		#ifdef BEOS
-		BView *h = Doc->Handle();
-		BWindow *w = h ? h->Window() : 0;
-		bool att = Doc->IsAttached();
-		printf("%s:%i - att=%i h=%p w=%p\n", _FL, att, h, w);
-		#endif
-		
+		Doc->SetEditorParams(4, 4, true, false);
 		if (!Doc->IsAttached())
 		{
 			Doc->Attach(d->Mdi);

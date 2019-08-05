@@ -170,9 +170,7 @@ struct GDisplayStringPriv
 	
 	void UpdateTabs(int Offset, int Size, bool Debug = false)
 	{
-		/*
-		if (Hnd &&
-			Ds->Font &&
+		if (Ds->Font &&
 			Ds->Font->TabSize())
 		{
 			int Len = 16;
@@ -194,11 +192,15 @@ struct GDisplayStringPriv
 				if (Debug)
 					printf("\n");
 			
-				Gtk::pango_layout_set_tabs(Hnd, t);
+                		for (auto &b: Blocks)
+                		{
+                			if (b.Hnd)
+						Gtk::pango_layout_set_tabs(b.Hnd, t);
+				}
+
 				Gtk::pango_tab_array_free(t);
 			}
 		}
-		*/
 	}
 };
 #endif
@@ -2047,7 +2049,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 
 	#if !DISPLAY_STRING_FRACTIONAL_NATIVE
 
-	// BeOS / Windows don't use fractional pixels, so call the integer version:
+	// BeOS / Windows doesn't use fractional pixels, so call the integer version:
 	GRect rc;
 	if (frc)
 	{
@@ -2099,10 +2101,8 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 		cairo_fill(cr);
 		if (frc)
 		{
-			#if 1
 			cairo_rectangle(cr, rx, ry, rw, rh);
 			cairo_clip(cr);
-			#endif
 		}
 	}
 
@@ -2129,6 +2129,26 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 									(double)f.g()/255.0,
 									(double)f.b()/255.0);
 			pango_cairo_show_layout(cr, b.Hnd);
+
+    		if (VisibleTab && Str)
+    		{
+    			GUtf8Str Ptr(Str);
+    			auto Ws = Font->WhitespaceColour();
+    			pDC->Colour(Ws);
+    			
+    			for (int32 u, Idx = 0 ; (u = Ptr); Idx++)
+    			{
+    				if (IsTabChar(u) || u == ' ')
+    				{
+    					Gtk::PangoRectangle pos;
+    					Gtk::pango_layout_index_to_pos(b.Hnd, Idx, &pos);
+    					GRect r(0, 0, pos.width / FScale, pos.height / FScale);
+    					r.Offset(pos.x / FScale, pos.y / FScale);
+    					DrawWhiteSpace(pDC, u, r);
+    				}
+    				Ptr++;
+    			}
+    		}
 		}
 		else if (b.Fnt)
 		{
@@ -2138,25 +2158,6 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 		}
 		else LgiAssert(0);
 		
-		if (VisibleTab && Str)
-		{
-			GUtf8Str Ptr(Str);
-			pDC->Colour(Font->WhitespaceColour());
-			
-			for (int32 u, Idx = 0 ; (u = Ptr); Idx++)
-			{
-				if (IsTabChar(u) || u == ' ')
-				{
-					Gtk::PangoRectangle pos;
-					Gtk::pango_layout_index_to_pos(b.Hnd, Idx, &pos);
-					GRect r(0, 0, pos.width / FScale, pos.height / FScale);
-					r.Offset(Dx + (pos.x / FScale), Dy + (pos.y / FScale));					
-					DrawWhiteSpace(pDC, u, r);
-				}
-				Ptr++;
-			}
-		}
-
 		cairo_translate(cr, Bx, 0);
 	}
 	

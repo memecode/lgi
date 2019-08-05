@@ -144,21 +144,19 @@ ProjectNode::~ProjectNode()
 
 void ProjectNode::OpenLocalCache(IdeDoc *&Doc)
 {
+	printf("OpenLocalCache %p\n", LocalCache);
 	if (LocalCache)
 	{
 		Doc = Project->GetApp()->OpenFile(LocalCache, this);
 		if (Doc)
 		{
-			if (Doc)
-			{
-				Doc->SetProject(Project);
-				
-				IdeProjectSettings *Settings = Project->GetSettings();
-				Doc->SetEditorParams(Settings->GetInt(ProjEditorIndentSize),
-									Settings->GetInt(ProjEditorTabSize),
-									Settings->GetInt(ProjEditorUseHardTabs),
-									Settings->GetInt(ProjEditorShowWhiteSpace));
-			}
+			Doc->SetProject(Project);
+			
+			IdeProjectSettings *Settings = Project->GetSettings();
+			Doc->SetEditorParams(Settings->GetInt(ProjEditorIndentSize),
+								Settings->GetInt(ProjEditorTabSize),
+								Settings->GetInt(ProjEditorUseHardTabs),
+								Settings->GetInt(ProjEditorShowWhiteSpace));
 		}
 		else
 		{
@@ -871,12 +869,15 @@ IdeDoc *ProjectNode::Open()
 				default:
 				{
 					GString FullPath = GetFullPath();
+					printf("%s:%i - FullPath = %s\n", _FL, FullPath.Get());
 					if (FullPath)
 					{
 						Doc = Project->GetApp()->FindOpenFile(FullPath);
+						printf("%s:%i - Doc=%p\n", _FL, Doc);
 						if (!Doc)
 						{
 							Doc = Project->GetApp()->NewDocWnd(0, this);
+							printf("%s:%i - Doc=%p\n", _FL, Doc);
 							if (Doc)
 							{
 								if (Doc->OpenFile(FullPath))

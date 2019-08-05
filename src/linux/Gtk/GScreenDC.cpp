@@ -521,58 +521,26 @@ void GScreenDC::Line(int x1, int y1, int x2, int y2)
 
 void GScreenDC::Circle(double cx, double cy, double radius)
 {
-	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
-	#else
-	gdk_draw_arc(d->d, d->gc, false,
-			 	cx - radius, cy - radius,
-			 	radius * 2.0,
-			 	radius * 2.0,
-			 	0,
-			 	360 * 64);
-	#endif
+	cairo_arc(d->cr, cx, cy, radius, 0, 2 * M_PI);
+	cairo_stroke(d->cr);
 }
 
 void GScreenDC::FilledCircle(double cx, double cy, double radius)
 {
-	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
-	#else
-	gdk_draw_arc(d->d, d->gc, true,
-			 	cx - radius, cy - radius,
-			 	radius * 2.0,
-			 	radius * 2.0,
-			 	0,
-			 	360 * 64);
-	#endif
+	cairo_arc(d->cr, cx, cy, radius, 0, 2 * M_PI);
+	cairo_fill(d->cr);
 }
 
 void GScreenDC::Arc(double cx, double cy, double radius, double start, double end)
 {
-	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
-	#else
-	gdk_draw_arc(d->d, d->gc, false,
-			 	cx - radius, cy - radius,
-			 	radius * 2.0,
-			 	radius * 2.0,
-			 	start * 64.0,
-			 	end * 64.0);
-	#endif
+	cairo_arc(d->cr, cx, cy, radius, start, end);
+	cairo_stroke(d->cr);
 }
 
 void GScreenDC::FilledArc(double cx, double cy, double radius, double start, double end)
 {
-	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
-	#else
-	gdk_draw_arc(d->d, d->gc, true,
-			 	cx - radius, cy - radius,
-			 	radius * 2.0,
-			 	radius * 2.0,
-			 	start * 64.0,
-			 	end * 64.0);
-	#endif
+	cairo_arc(d->cr, cx, cy, radius, start, end);
+	cairo_fill(d->cr);
 }
 
 void GScreenDC::Ellipse(double cx, double cy, double x, double y)

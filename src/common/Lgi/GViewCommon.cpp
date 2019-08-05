@@ -2067,6 +2067,10 @@ bool GView::InThread()
 
 		OsThreadId Me = GetCurrentThreadId();
 		OsThreadId Gui = LgiApp ? LgiApp->GetGuiThreadId() : 0;
+		
+		if (Gui != Me)
+		    printf("%s:%i - Out of thread: %p, %p\n", _FL, Gui, Me);
+		
 		return Gui == Me;
 
 	#endif
