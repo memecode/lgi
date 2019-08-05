@@ -19,12 +19,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 #define LGI_OWNER_DRAW_MENUS
 
-class GMenuPrivate
+class LMenuPrivate
 {
 public:
 	COLOUR RootMenuBack;
 	
-	GMenuPrivate()
+	LMenuPrivate()
 	{
 		GArray<int> Ver;
 		int Os = LgiGetOs(&Ver);
@@ -306,7 +306,7 @@ LMenuItem *LSubMenu::FindItem(int Id)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-class GMenuItemPrivate
+class LMenuItemPrivate
 {
 public:
 	bool StartUnderline;		// Underline the first display string
@@ -315,12 +315,12 @@ public:
 								// except the last in the case of HasAccel==true.
 	GAutoString Shortcut;
 
-	GMenuItemPrivate()
+	LMenuItemPrivate()
 	{
 		HasAccel = false;
 	}
 
-	~GMenuItemPrivate()
+	~LMenuItemPrivate()
 	{
 		Strs.DeleteObjects();
 	}
@@ -328,7 +328,7 @@ public:
 
 LMenuItem::LMenuItem()
 {
-	d = new GMenuItemPrivate;
+	d = new LMenuItemPrivate;
 	Menu = NULL;
 	Parent = NULL;
 	Child = 0;
@@ -355,7 +355,7 @@ LMenuItem::LMenuItem()
 
 LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *Txt, int id, int Pos, const char *Shortcut)
 {
-	d = new GMenuItemPrivate;
+	d = new LMenuItemPrivate;
 	d->Shortcut.Reset(NewStr(Shortcut));
 	Position = Pos;
 	Parent = NULL;
@@ -920,7 +920,7 @@ void LMenuItem::Enabled(bool e)
 	Info.fMask |= MIIM_STATE;
 	Update();
 
-	// LgiTrace("%s:%i - GMenuItem::Enabled(%i) %s\n", _FL, e, Name());
+	// LgiTrace("%s:%i - LMenuItem::Enabled(%i) %s\n", _FL, e, Name());
 }
 
 void LMenuItem::Focus(bool f)
@@ -990,14 +990,11 @@ bool LMenuItem::Focus() { return (Info.fState & MFS_HILITE) != 0; }
 LSubMenu *LMenuItem::Sub() { return Child; }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-int _GMenuFontRef = 0;
-
 LMenu::LMenu(const char *AppName) : LSubMenu("", false)
 {
-	d = new GMenuPrivate;
+	d = new LMenuPrivate;
 	Menu = this;
 	Window = NULL;
-	_GMenuFontRef++;
 }
 
 LMenu::~LMenu()
