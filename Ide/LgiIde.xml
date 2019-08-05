@@ -81,12 +81,12 @@
 		<Node File="./Makefile.linux" Type="3" Platforms="15" />
 		<Node File="./Resources/resource.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" />
 	<Settings>
 		<General>
 			<Makefile>
 				<Windows>.\LgiIde_vs2013.sln</Windows>
-				<Linux>./Makefile</Linux>
+				<Linux>./Makefile.linux</Linux>
 				<Mac>./Gtk3/build/Makefile</Mac>
 				<Haiku>Makefile.haiku</Haiku>
 			</Makefile>
@@ -113,7 +113,10 @@ WINNATIVE</Release>
 					<Release>POSIX</Release>
 				</Haiku>
 				<All />
-				<Linux />
+				<Linux>
+					<Debug>LIBPNG_VERSION=\&quot;1.2\&quot;</Debug>
+					<Release>LIBPNG_VERSION=\&quot;1.2\&quot;</Release>
+				</Linux>
 				<Mac />
 			</Defines>
 			<Compiler>
@@ -132,12 +135,12 @@ WINNATIVE</Release>
 		<Build>
 			<IncludePaths>
 				<All>
-					<Debug>.\Code
-.\Resources
-..\include\common</Debug>
-					<Release>.\Code
-.\Resources
-..\include\common</Release>
+					<Debug>./Code
+./Resources
+../include/common</Debug>
+					<Release>./Code
+./Resources
+../include/common</Release>
 				</All>
 				<Windows>
 					<Debug>..\include\win32
@@ -166,11 +169,11 @@ WINNATIVE</Release>
 				<Linux>
 					<Debug>magic
 pthread
-`pkg-config --libs gtk+-2.0`
+`pkg-config --libs gtk+-3.0`
 -static-libgcc</Debug>
 					<Release>magic
 pthread
-`pkg-config --libs gtk+-2.0`
+`pkg-config --libs gtk+-3.0`
 -static-libgcc</Release>
 				</Linux>
 				<Haiku>
@@ -215,8 +218,8 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Debug>
 C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 				</Windows>
 				<Linux>
-					<Debug>`pkg-config --cflags gtk+-2.0`</Debug>
-					<Release>`pkg-config --cflags gtk+-2.0`</Release>
+					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
+					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 				<Mac />
 			</SystemIncludes>

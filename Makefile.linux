@@ -8,7 +8,7 @@
 
 CC = gcc
 CPP = g++
-Target = liblgid.so
+Target = lgi-gtk3
 ifndef Build
 	Build = Debug
 endif
@@ -20,21 +20,39 @@ ifeq ($(Build),Debug)
 	Flags += -g -std=c++11
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
-	Libs = 
+	Libs =  \
+		-lmagic \
+		-static-libgcc  \
+		`pkg-config --libs gtk+-3.0`
 	Inc =  \
 		-I./include/common \
 		-I./include/linux/Gtk \
 		-I./src/common/Hash/md5 \
-		-I./src/common/Hash/sha1
+		-I./src/common/Hash/sha1 \
+		-I/usr/include/gstreamer-1.0 \
+		-I/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include \
+		`pkg-config --cflags gtk+-3.0` \
+		-Iinclude/common \
+		-Iinclude/linux \
+		-Iinclude/linux/Gtk
 else
 	Flags += -s -Os -std=c++11
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
-	Libs = 
+	Libs =  \
+		-lmagic \
+		-static-libgcc  \
+		`pkg-config --libs gtk+-3.0`
 	Inc =  \
 		-I./include/common \
 		-I./include/linux/Gtk \
 		-I./src/common/Hash/md5 \
-		-I./src/common/Hash/sha1
+		-I./src/common/Hash/sha1 \
+		-I/usr/include/gstreamer-1.0 \
+		-I/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include \
+		`pkg-config --cflags gtk+-3.0` \
+		-Iinclude/common \
+		-Iinclude/linux \
+		-Iinclude/linux/Gtk
 endif
 
 # Dependencies
@@ -151,25 +169,23 @@ Depends =	LDateTime.o \
 			MDStringToDigest.o
 
 # Target
-# Executable target
-$(Target) : outputfolder $(Depends)
-	@echo Linking $(Target) [$(Build)]...
-	$(CPP) -Wl,-export-dynamic,-R. -o \
-		$(Target) $(addprefix $(BuildDir)/,$(Depends)) $(Libs)
+TargetFile = lib$(Target)$(Tag).so
+$(TargetFile) : outputfolder $(Depends)
+	@echo Linking $(TargetFile) [$(Build)]...
+	$(CPP)$s -shared \
+		 \
+		-o $(BuildDir)/$(TargetFile) \
+		$(addprefix $(BuildDir)/,$(Depends)) \
+		$(Libs)
 	@echo Done.
 
 # Create the output folder
 outputfolder :
 	-mkdir -p $(BuildDir) 2> /dev/null
 
-# Clean just this target
+# Clean out targets
 clean :
-	rm -f $(BuildDir)/*.o $(Target)
-	@echo Cleaned $(BuildDir)
-
-# Clean all targets
-cleanall :
-	rm -f $(BuildDir)/*.o $(Target)
+	rm -f $(BuildDir)/*.o $(BuildDir)/$(TargetFile)
 	@echo Cleaned $(BuildDir)
 
 LDateTime.o : ./src/common/General/LDateTime.cpp ./include/common/Lgi.h \
@@ -214,6 +230,7 @@ GApp.o : ./src/linux/Lgi/GApp.cpp ./include/common/Lgi.h \
 	./include/linux/Gtk/LgiWinManGlue.h \
 	./include/common/GVariant.h \
 	./include/win32/GSymLookup.h \
+	./include/linux/GSymLookup.h \
 	./include/common/GToken.h \
 	./include/common/GFontCache.h \
 	./include/common/LJson.h
@@ -1571,6 +1588,7 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 
 VPATH=%.cpp \
 	./include/linux/Gtk \
+	./include/linux \
 	./src/common/Hash/sha1 \
 	./include/common \
 	./src/common/Hash/md5 \

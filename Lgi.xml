@@ -109,9 +109,7 @@
 				<Node File="./include/common/LUnrolledList.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Menus" Type="1" Platforms="15" Open="0" Id="23">
-				<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="24">
-					<Node File="./src/beos/Lgi/LMenu.cpp" Type="2" Platforms="8" />
-				</Node>
+				<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="24" />
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="25">
 					<Node File="./src/linux/Lgi/LMenu.cpp" Type="2" Platforms="2" />
 				</Node>
@@ -417,10 +415,97 @@
 		<Node File="./include/common/LgiInc.h" Type="3" Platforms="15" />
 		<Node File="./include/common/LgiInterfaces.h" Type="3" Platforms="15" />
 		<Node File="./include/common/LgiMsgs.h" Type="3" Platforms="15" />
-		<Node File=".\Makefile.linux" Type="9" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
 		<Node File="./Ide/Gtk3/CMakeLists.txt" Type="8" Platforms="15" />
+		<Node File="./Makefile.linux" Type="9" Platforms="15" />
 	</Node>
-	<Settings />
+	<Settings>
+		<General>
+			<Makefile>
+				<Linux>Makefile.linux</Linux>
+			</Makefile>
+			<Executable>
+				<Linux />
+			</Executable>
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin>
+				<All>0</All>
+			</DebugAdmin>
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
+			<Compiler>
+				<Linux>gcc</Linux>
+			</Compiler>
+			<CCrossCompiler />
+			<CppCrossCompiler />
+		</General>
+		<Build>
+			<IncludePaths>
+				<All>
+					<Debug>include/common</Debug>
+					<Release>include/common</Release>
+				</All>
+				<Linux>
+					<Debug>include/linux
+include/linux/Gtk</Debug>
+					<Release>include/linux
+include/linux/Gtk</Release>
+				</Linux>
+			</IncludePaths>
+			<SystemIncludes>
+				<Linux>
+					<Debug>/usr/include/gstreamer-1.0
+/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
+`pkg-config --cflags gtk+-3.0`</Debug>
+					<Release>/usr/include/gstreamer-1.0
+/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
+`pkg-config --cflags gtk+-3.0`</Release>
+				</Linux>
+			</SystemIncludes>
+			<Libraries>
+				<All />
+				<Linux>
+					<Debug>magic
+-static-libgcc 
+`pkg-config --libs gtk+-3.0`</Debug>
+					<Release>magic
+-static-libgcc 
+`pkg-config --libs gtk+-3.0`</Release>
+				</Linux>
+			</Libraries>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<TargetType>
+				<All>DynamicLibrary</All>
+			</TargetType>
+			<TargetName>
+				<Linux>
+					<Debug>lgi-gtk3</Debug>
+					<Release>lgi-gtk3</Release>
+				</Linux>
+			</TargetName>
+			<ApplicationIcon />
+		</Build>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
+	</Settings>
 </Project>

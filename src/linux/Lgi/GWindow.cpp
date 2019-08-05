@@ -17,7 +17,7 @@ using namespace Gtk;
 #include "LgiWidget.h"
 
 #define DEBUG_SETFOCUS			0
-#define DEBUG_HANDLEVIEWKEY		0
+#define DEBUG_HANDLEVIEWKEY		1
 
 extern Gtk::GdkDragAction EffectToDragAction(int Effect);
 
@@ -370,7 +370,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			k.Shift((e->state & GDK_SHIFT_MASK) != 0);
 			k.Ctrl((e->state & GDK_CONTROL_MASK) != 0);
 			k.Alt((e->state & GDK_MOD1_MASK) != 0);
-			k.System((e->state & GDK_MOD2_MASK) != 0);
+			// k.System((e->state & GDK_MOD2_MASK) != 0);
 		
 			#ifdef _DEBUG
 			if (k.vkey == GDK_KEY_Meta_L ||
@@ -475,7 +475,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 				KeyPadMap(KEY(KP_Divide), '/', true)
 			}
 		
-			#if DEBUG_KEY_EVENT
+			#if 1 // DEBUG_KEY_EVENT
 			k.Trace("gtk_key_event");
 			#endif
 
