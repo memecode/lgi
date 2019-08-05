@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Project>
 	<Node Name="Headers" Type="1" Platforms="15" Id="2">
-		<Node File=".\Src\VcFolder.h" Type="3" Platforms="15" />
-		<Node File=".\Src\VcCommit.h" Type="3" Platforms="15" />
-		<Node File=".\Src\Lvc.h" Type="3" Platforms="15" />
-		<Node File=".\Resources\resdefs.h" Type="3" Platforms="15" />
+		<Node File="./Src/VcFolder.h" Type="3" Platforms="15" />
+		<Node File="./Src/VcCommit.h" Type="3" Platforms="15" />
+		<Node File="./Src/Lvc.h" Type="3" Platforms="15" />
+		<Node File="./Resources/resdefs.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Source" Type="1" Platforms="15" Id="1">
 		<Node Name="Lgi" Type="1" Platforms="15" Id="2">
@@ -20,7 +20,7 @@
 		<Node File="./Src/VcFile.cpp" Type="2" Platforms="15" />
 		<Node File="./Src/VcFolder.cpp" Type="2" Platforms="15" />
 	</Node>
-	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" />
 	<Node Name="Resources" Type="1" Platforms="15" Id="1">
 		<Node File="./Resources/icon32.png" Type="6" Platforms="15" />
 		<Node File="./installer-zip.py" Type="8" Platforms="15" />
@@ -67,24 +67,34 @@
 				<Linux>
 					<Debug>../include/linux
 ../include/linux/Gtk
-/usr/include/gstreamer-1.0
-/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
-`pkg-config --cflags gtk+-2.0`</Debug>
+</Debug>
 					<Release>../include/linux
 ../include/linux/Gtk
-/usr/include/gstreamer-1.0
-/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
-`pkg-config --cflags gtk+-2.0`</Release>
+</Release>
 				</Linux>
 				<Windows />
 			</IncludePaths>
 			<SystemIncludes>
-				<Linux />
+				<Linux>
+					<Debug>/usr/include/gstreamer-1.0
+/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
+`pkg-config --cflags gtk+-3.0`</Debug>
+					<Release>/usr/include/gstreamer-1.0
+/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
+`pkg-config --cflags gtk+-3.0`</Release>
+				</Linux>
 				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<All />
-				<Linux />
+				<Linux>
+					<Debug>magic
+-static-libgcc 
+`pkg-config --libs gtk+-3.0`</Debug>
+					<Release>magic
+-static-libgcc 
+`pkg-config --libs gtk+-3.0`</Release>
+				</Linux>
 				<Windows />
 			</Libraries>
 			<LibraryPaths>
@@ -119,6 +129,7 @@
 			<OtherMakefileRules />
 			<PostBuildCommands>
 				<Windows />
+				<Linux />
 			</PostBuildCommands>
 		</Advanced>
 	</Settings>

@@ -21,27 +21,33 @@ ifeq ($(Build),Debug)
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
-		-llgi$(Tag) \
+		-lmagic \
+		-static-libgcc  \
+		`pkg-config --libs gtk+-3.0` \
+		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
 		-I../include/common \
 		-I../include/linux \
 		-I../include/linux/Gtk \
 		-I./Code \
-		`pkg-config --cflags gtk+-2.0` \
+		`pkg-config --cflags gtk+-3.0` \
 		-IResources
 else
 	Flags += -s -Os -std=c++11
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
-		-llgi$(Tag) \
+		-lmagic \
+		-static-libgcc  \
+		`pkg-config --libs gtk+-3.0` \
+		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
 		-I../include/common \
 		-I../include/linux \
 		-I../include/linux/Gtk \
 		-I./Code \
-		`pkg-config --cflags gtk+-2.0` \
+		`pkg-config --cflags gtk+-3.0` \
 		-IResources
 endif
 
@@ -64,13 +70,13 @@ Depends =	LgiRes_ControlTree.o \
 
 # Target
 # Executable target
-$(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
+$(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	@echo Linking $(Target) [$(Build)]...
 	$(CPP) -Wl,-export-dynamic,-R. -o \
 		$(Target) $(addprefix $(BuildDir)/,$(Depends)) $(Libs)
 	@echo Done.
 
-../$(BuildDir)/liblgi$(Tag).so : ../include/common/Base64.h \
+../$(BuildDir)/liblgi-gtk3$(Tag).so : ../include/common/Base64.h \
 	../include/common/Core.h \
 	../include/common/GArray.h \
 	../include/common/GAutoPtr.h \
@@ -113,8 +119,6 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../include/common/GLibraryUtils.h \
 	../include/common/GMatrix.h \
 	../include/common/GMem.h \
-	../include/common/GMenu.h \
-	../include/common/GMenuImpl.h \
 	../include/common/GMessage.h \
 	../include/common/GMime.h \
 	../include/common/GMru.h \
@@ -129,7 +133,6 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../include/common/GPopup.h \
 	../include/common/GPopupList.h \
 	../include/common/GPrinter.h \
-	../include/common/GProcess.h \
 	../include/common/GProgress.h \
 	../include/common/GProgressDlg.h \
 	../include/common/GProperties.h \
@@ -145,6 +148,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../include/common/GStream.h \
 	../include/common/GString.h \
 	../include/common/GStringClass.h \
+	../include/common/GSubProcess.h \
 	../include/common/GTableLayout.h \
 	../include/common/GTabView.h \
 	../include/common/GTextFile.h \
@@ -176,9 +180,12 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../include/common/LgiRes.h \
 	../include/common/LgiWidgets.h \
 	../include/common/LHashTable.h \
+	../include/common/LJson.h \
 	../include/common/LList.h \
 	../include/common/LListItemCheckBox.h \
 	../include/common/LListItemRadioBtn.h \
+	../include/common/LMenu.h \
+	../include/common/LMenuImpl.h \
 	../include/common/LMutex.h \
 	../include/common/LOAuth2.h \
 	../include/common/LStringLayout.h \
@@ -242,12 +249,11 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../src/common/Lgi/GInput.cpp \
 	../src/common/Lgi/GLibrary.cpp \
 	../src/common/Lgi/GMemStream.cpp \
-	../src/common/Lgi/GMenuCommon.cpp \
 	../src/common/Lgi/GMru.cpp \
 	../src/common/Lgi/GObject.cpp \
 	../src/common/Lgi/GOptionsFile.cpp \
-	../src/common/Lgi/GProcess.cpp \
 	../src/common/Lgi/GStream.cpp \
+	../src/common/Lgi/GSubProcess.cpp \
 	../src/common/Lgi/GToolTip.cpp \
 	../src/common/Lgi/GTrayIcon.cpp \
 	../src/common/Lgi/GVariant.cpp \
@@ -256,6 +262,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../src/common/Lgi/LgiCommon.cpp \
 	../src/common/Lgi/LgiMsg.cpp \
 	../src/common/Lgi/LgiRand.cpp \
+	../src/common/Lgi/LMenuCommon.cpp \
 	../src/common/Lgi/LMutex.cpp \
 	../src/common/Lgi/LThreadCommon.cpp \
 	../src/common/Lgi/LThreadEvent.cpp \
@@ -303,11 +310,11 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../src/linux/Lgi/GDragAndDrop.cpp \
 	../src/linux/Lgi/GGeneral.cpp \
 	../src/linux/Lgi/GLayout.cpp \
-	../src/linux/Lgi/GMenuGtk.cpp \
 	../src/linux/Lgi/GPrinter.cpp \
 	../src/linux/Lgi/GView.cpp \
 	../src/linux/Lgi/GWidgets.cpp \
 	../src/linux/Lgi/GWindow.cpp \
+	../src/linux/Lgi/LMenu.cpp \
 	../src/linux/Lgi/LThread.cpp
 	export Build=$(Build); \
 	$(MAKE) -C .. -f Makefile.linux
@@ -469,7 +476,7 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 	../include/common/LgiCommon.h \
 	../include/common/GXmlTree.h \
 	../include/common/GDragAndDrop.h \
-	../include/common/GMenu.h \
+	../include/common/LMenu.h \
 	../include/common/LgiWidgets.h \
 	../include/common/Progress.h \
 	../include/common/GProgress.h \
@@ -492,12 +499,9 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 	../include/common/GButton.h \
 	../include/common/GTableLayout.h
 
-../include/common/GMenu.h : ../include/common/GMenuImpl.h \
-	../include/common/GXmlTree.h \
-	../include/common/Res.h \
-	../include/common/GImageList.h
-
 ../include/common/GTabView.h : 
+
+../include/common/GSubProcess.h : 
 
 ../include/common/GProperties.h : ../include/common/GContainers.h \
 	../include/common/LgiClass.h \
@@ -539,6 +543,11 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 
 ../include/common/LMutex.h : 
 
+../include/common/LMenu.h : ../include/common/LMenuImpl.h \
+	../include/common/GXmlTree.h \
+	../include/common/Res.h \
+	../include/common/GImageList.h
+
 ../include/common/GToken.h : ../include/common/GArray.h \
 	../include/common/GString.h
 
@@ -559,6 +568,8 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 ../include/common/Base64.h : ../include/common/LgiDefs.h
 
 ../include/common/GPrinter.h : 
+
+../include/common/LMenuImpl.h : ../include/common/GPopup.h
 
 ../src/common/Lgi/LgiRand.cpp : ../include/common/GMem.h \
 	../include/common/GFile.h \
@@ -608,6 +619,10 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 	../include/common/GPixelRops.h
 
 ../include/common/GPixelRops.h : 
+
+../src/linux/Lgi/LMenu.cpp : ../include/common/Lgi.h \
+	../include/common/GToken.h \
+	../include/common/GDisplayString.h
 
 ../include/common/GButton.h : 
 
@@ -702,6 +717,10 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 
 ../include/common/GProgress.h : 
 
+../src/common/Lgi/GSubProcess.cpp : ../include/common/Lgi.h \
+	../include/common/GSubProcess.h \
+	../include/common/GToken.h
+
 ../src/common/Gdc2/Font/GFont.cpp : ../include/common/Lgi.h \
 	../include/common/GVariant.h \
 	../include/common/GFontSelect.h \
@@ -722,13 +741,11 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 	../include/common/GString.h
 
 ../src/linux/Lgi/GGeneral.cpp : ../include/common/Lgi.h \
-	../include/common/GProcess.h \
+	../include/common/GSubProcess.h \
 	../include/common/GTextLabel.h \
 	../include/common/GButton.h \
 	../include/linux/Gtk/LgiWinManGlue.h \
 	../include/common/GToken.h
-
-../include/common/GProcess.h : ../include/common/GStream.h
 
 ../include/common/GAbout.h : ../include/common/GDocView.h
 
@@ -843,7 +860,6 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 ../src/linux/Gtk/GPrintDC.cpp : ../include/common/Lgi.h
 
 ../src/linux/Lgi/GApp.cpp : ../include/common/Lgi.h \
-	../include/common/GProcess.h \
 	../include/common/GSkinEngine.h \
 	../include/common/GArray.h \
 	../include/linux/Gtk/LgiWinManGlue.h \
@@ -851,7 +867,11 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 	../include/win32/GSymLookup.h \
 	../include/linux/GSymLookup.h \
 	../include/common/GToken.h \
-	../include/common/GFontCache.h
+	../include/common/GFontCache.h \
+	../include/common/LJson.h
+
+../include/common/LJson.h : ../include/common/GArray.h \
+	../include/common/GStringClass.h
 
 ../include/common/GMessage.h : 
 
@@ -904,6 +924,7 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 
 ../src/linux/Gtk/LgiWidget.cpp : ../include/common/Lgi.h \
 	../include/common/GDragAndDrop.h \
+	../include/common/GViewPriv.h \
 	../include/linux/Gtk/LgiWidget.h
 
 ../src/common/Gdc2/15Bit.cpp : ../include/common/Gdc2.h \
@@ -971,9 +992,10 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 	../include/common/GColour.h \
 	../include/common/GFilter.h
 
-../include/common/GProcess.h : ../include/common/GStream.h
-
 ../include/common/GTree.h : ../include/common/GItemContainer.h
+
+../include/common/LJson.h : ../include/common/GArray.h \
+	../include/common/GStringClass.h
 
 ../include/common/GDocApp.h : ../include/common/Lgi.h \
 	../include/common/GMru.h
@@ -982,7 +1004,7 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 
 ../include/common/GPanel.h : ../include/common/GDisplayString.h
 
-../include/linux/GSymLookup.h : ../include/common/GProcess.h
+../include/linux/GSymLookup.h : ../include/common/GSubProcess.h
 
 ../include/common/GMime.h : ../include/common/LgiNetInc.h \
 	../include/common/GStream.h \
@@ -1007,10 +1029,6 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 	../include/common/GTableLayout.h \
 	../include/common/GBox.h \
 	../include/common/INet.h
-
-../src/common/Lgi/GProcess.cpp : ../include/common/Lgi.h \
-	../include/common/GProcess.h \
-	../include/common/GToken.h
 
 ../include/common/GCssTools.h : ../include/common/GCss.h
 
@@ -1231,7 +1249,7 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 	../include/common/LHashTable.h \
 	../include/common/GString.h
 
-../include/linux/GSymLookup.h : ../include/common/GProcess.h
+../include/linux/GSymLookup.h : ../include/common/GSubProcess.h
 
 ../include/common/GMru.h : ../include/common/GProperties.h
 
@@ -1240,8 +1258,6 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 ../include/common/GCssTools.h : ../include/common/GCss.h
 
 ../include/common/GPoint.h : 
-
-../include/common/GMenuImpl.h : ../include/common/GPopup.h
 
 ../include/common/Lzw.h : 
 
@@ -1353,6 +1369,8 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 	../include/common/GProgress.h \
 	../include/common/GCss.h
 
+../src/common/Lgi/LMenuCommon.cpp : ../include/common/Lgi.h
+
 ../src/linux/Gtk/GScreenDC.cpp : ../include/common/Lgi.h
 
 ../src/common/Gdc2/8Bit.cpp : ../include/common/Gdc2.h \
@@ -1371,7 +1389,7 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 	../include/common/GToken.h \
 	../include/common/GCapabilities.h \
 	../include/linux/Gtk/LgiWinManGlue.h \
-	../include/common/GProcess.h \
+	../include/common/GSubProcess.h \
 	../include/win32/GSymLookup.h \
 	../include/linux/GSymLookup.h \
 	../include/common/GLibrary.h \
@@ -1433,7 +1451,7 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 	../include/common/LgiCommon.h \
 	../include/common/GXmlTree.h \
 	../include/common/GDragAndDrop.h \
-	../include/common/GMenu.h \
+	../include/common/LMenu.h \
 	../include/common/LgiWidgets.h \
 	../include/common/Progress.h \
 	../include/common/GProgress.h \
@@ -1461,8 +1479,6 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 
 ../src/common/General/GFileCommon.cpp : ../include/common/Lgi.h \
 	../include/common/GVariant.h
-
-../include/common/GMenuImpl.h : ../include/common/GPopup.h
 
 ../include/common/LOAuth2.h : 
 
@@ -1571,11 +1587,6 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 	../include/common/GDisplayString.h \
 	../include/common/GTableLayout.h
 
-../include/common/GMenu.h : ../include/common/GMenuImpl.h \
-	../include/common/GXmlTree.h \
-	../include/common/Res.h \
-	../include/common/GImageList.h
-
 ../include/common/GFindReplaceDlg.h : 
 
 ../src/linux/Lgi/GPrinter.cpp : ../include/common/Lgi.h \
@@ -1618,8 +1629,6 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 ../include/common/GTableLayout.h : ../include/common/GCss.h \
 	../include/common/GNotifications.h
 
-../src/common/Lgi/GMenuCommon.cpp : ../include/common/Lgi.h
-
 ../include/win32/GSymLookup.h : 
 
 ../include/common/GContainers.h : ../include/common/LgiInc.h \
@@ -1658,10 +1667,17 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 
 ../include/common/GImageList.h : 
 
+../include/common/LMenu.h : ../include/common/LMenuImpl.h \
+	../include/common/GXmlTree.h \
+	../include/common/Res.h \
+	../include/common/GImageList.h
+
 ../src/common/Gdc2/24Bit.cpp : ../include/common/Gdc2.h \
 	../include/common/GPalette.h
 
 ../include/common/GBitmap.h : 
+
+../include/common/GSubProcess.h : 
 
 ../include/common/GProperties.h : ../include/common/GContainers.h \
 	../include/common/LgiClass.h \
@@ -1679,6 +1695,7 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 	../include/common/GPopup.h \
 	../include/common/GPanel.h \
 	../include/common/GNotifications.h \
+	../include/common/GViewPriv.h \
 	../include/linux/Gtk/LgiWidget.h
 
 ../include/common/GPanel.h : ../include/common/GDisplayString.h
@@ -1787,7 +1804,8 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 ../src/common/Widgets/GPanel.cpp : ../include/common/Lgi.h \
 	../include/common/GPanel.h \
 	../include/common/GDisplayString.h \
-	../include/common/LgiRes.h
+	../include/common/LgiRes.h \
+	../include/common/GCssTools.h
 
 ../src/common/Widgets/GBitmap.cpp : ../include/common/Lgi.h \
 	../include/common/GBitmap.h \
@@ -1863,10 +1881,6 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 ../include/common/GDocApp.h : ../include/common/Lgi.h \
 	../include/common/GMru.h
 
-../src/linux/Lgi/GMenuGtk.cpp : ../include/common/Lgi.h \
-	../include/common/GToken.h \
-	../include/common/GDisplayString.h
-
 ../include/common/GPopup.h : 
 
 ../src/linux/Lgi/GView.cpp : ../include/common/Lgi.h \
@@ -1884,6 +1898,8 @@ Lzw.o : ../src/common/Gdc2/Filters/Lzw.cpp ../include/common/Lgi.h \
 	../include/common/GRefCount.h \
 	../include/common/GStringClass.h \
 	../include/common/LError.h
+
+../include/common/LMenuImpl.h : ../include/common/GPopup.h
 
 ../src/common/INet/INet.cpp : ../include/common/GFile.h \
 	../include/common/INet.h \

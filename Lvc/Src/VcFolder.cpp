@@ -327,7 +327,7 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 
 	Update();
 
-	LgiTrace("Cmd: %s %s\n", Exe, Args);
+	// LgiTrace("Cmd: %s %s\n", Exe, Args);
 
 	return true;
 }
@@ -1409,7 +1409,7 @@ bool VcFolder::ParseDiffs(GString s, GString Rev, bool IsWorking)
 					else
 						Fn = Bits.Last()(2,-1);
 
-					LgiTrace("%s\n", a[i].Get());
+					// LgiTrace("%s\n", a[i].Get());
 
 					f = FindFile(Fn);
 					if (!f)

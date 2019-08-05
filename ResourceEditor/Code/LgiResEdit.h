@@ -624,12 +624,12 @@ public:
 class FieldSource
 {
 	friend class FieldView;
-	OsView _FieldView;
+	GViewI *_FieldView;
 
 public:
 	FieldSource()
 	{
-		_FieldView = 0;
+		_FieldView = NULL;
 	}
 	
 	virtual ~FieldSource() {}
@@ -640,7 +640,7 @@ public:
 	void OnFieldChange()
 	{
 		if (_FieldView)
-			LgiPostEvent(_FieldView, M_OBJECT_CHANGED, (GMessage::Param)this);
+			LgiApp->PostEvent(_FieldView, M_OBJECT_CHANGED, (GMessage::Param)this);
 	}
 };
 

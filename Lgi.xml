@@ -102,8 +102,8 @@
 				<Node File="./src/common/Lgi/LMenuCommon.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Process" Type="1" Platforms="15" Open="0" Id="27">
-				<Node File="./src/common/Lgi/GProcess.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GProcess.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Lgi/GSubProcess.cpp" Type="2" Platforms="15" />
+				<Node File="./include/common/GSubProcess.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Resources" Type="1" Platforms="15" Open="0" Id="28">
 				<Node File="./src/common/Resource/LgiRes.cpp" Type="2" Platforms="15" />

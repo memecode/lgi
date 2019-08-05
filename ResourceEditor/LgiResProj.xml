@@ -54,6 +54,9 @@
 				<All />
 				<Linux />
 			</Defines>
+			<DebugAdmin />
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -66,10 +69,10 @@ Resources</Release>
 				<Linux>
 					<Debug>../include/linux
 ../include/linux/Gtk
-`pkg-config --cflags gtk+-2.0`</Debug>
+</Debug>
 					<Release>../include/linux
 ../include/linux/Gtk
-`pkg-config --cflags gtk+-2.0`</Release>
+</Release>
 				</Linux>
 			</IncludePaths>
 			<TargetType>
@@ -77,7 +80,14 @@ Resources</Release>
 			</TargetType>
 			<Libraries>
 				<All />
-				<Linux />
+				<Linux>
+					<Debug>magic
+-static-libgcc 
+`pkg-config --libs gtk+-3.0`</Debug>
+					<Release>magic
+-static-libgcc 
+`pkg-config --libs gtk+-3.0`</Release>
+				</Linux>
 			</Libraries>
 			<LibraryPaths>
 				<All />
@@ -90,8 +100,12 @@ Resources</Release>
 				</Linux>
 			</TargetName>
 			<SystemIncludes>
-				<Linux />
+				<Linux>
+					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
+					<Release>`pkg-config --cflags gtk+-3.0`</Release>
+				</Linux>
 			</SystemIncludes>
+			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -111,10 +125,9 @@ Resources</Release>
 		</Editor>
 		<Advanced>
 			<OtherMakefileRules />
-		</Advanced>
-	</Settings>
-</Project>
-	<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
 		</Advanced>
 	</Settings>
 </Project>

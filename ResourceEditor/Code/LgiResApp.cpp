@@ -682,8 +682,7 @@ void FieldView::OnSelect(FieldSource *s)
 	{
 		// Add new fields
 		Source = s;
-		Source->_FieldView = Handle();
-
+		Source->_FieldView = this;
 
 		if (Source->GetFields(Fields))
 		{
