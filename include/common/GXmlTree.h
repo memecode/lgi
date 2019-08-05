@@ -153,7 +153,7 @@ public:
 	/// Gets the current tag
 	const char *GetTag();
 	/// Sets or removes the tag using the allocator
-	void SetTag(const char *Str = NULL);
+	void SetTag(const char *Str = NULL, ssize_t Len = -1);
 
 	/// Read/write all your native types in here
 	virtual bool Serialize(bool Write) { return false; }

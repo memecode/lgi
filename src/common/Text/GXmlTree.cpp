@@ -419,7 +419,7 @@ bool GXmlTag::Copy(GXmlTag &t, bool Deep)
 	
 	if (Deep)
 	{
-		for (GXmlTag *c: Children)
+		for (auto c: t.Children)
 		{
 			GXmlTag *n = new GXmlTag;
 			if (n)
@@ -456,12 +456,14 @@ const char *GXmlTag::GetTag()
 	return Tag;
 }
 
-void GXmlTag::SetTag(const char *Str)
+void GXmlTag::SetTag(const char *Str, ssize_t Len)
 {
 	Allocator->Free(Tag);
 	Tag = NULL;
 	if (Str)
-		Tag = Allocator->Alloc(Str);
+	{
+		Tag = Allocator->Alloc(Str, Len);
+	}
 }
 
 GXmlTag *GXmlTag::GetChildTag(const char *Name, bool Create, const char *TagSeparator)
@@ -1247,7 +1249,7 @@ ParsingStart:
 				{	
 					Tag->Empty(false);
 					LgiAssert(Tag->Tag == NULL);
-					Tag->Tag = Tag->Allocator->Alloc(TagName, t - TagName);
+					Tag->SetTag(TagName, t - TagName);
 					NoChildren = Tag->Tag ? Tag->Tag[0] == '?' : false;
 					
 					Tag->ParseAttribute(this, Alloc, t, NoChildren, InTypeDef);
@@ -1260,6 +1262,7 @@ ParsingStart:
 				}
 				
 				char *ContentStart = t;
+				bool ContentIsWhite = true;
 				while
 				(
 					*t &&
@@ -1267,23 +1270,25 @@ ParsingStart:
 					(!InTypeDef || *t != ']')
 				)
 				{
+					if (!strchr(WhiteSpace, *t))
+						ContentIsWhite = false;
 					t++;
 				}
-				if (t > ContentStart)
+				if
+				(
+					t > ContentStart
+					&&
+					(
+						!ContentIsWhite
+						||
+						TestFlag(d->Flags, GXT_KEEP_WHITESPACE)
+					)
+				)
 				{
 					if (d->Flags & GXT_NO_ENTITIES)
-					{
 						Tag->Content = NewStr(ContentStart, t - ContentStart);
-					}
 					else
-					{
 						Tag->Content = DecodeEntities(Tag->Allocator, ContentStart, t - ContentStart);
-					}
-
-					if (!TestFlag(d->Flags, GXT_KEEP_WHITESPACE) && !ValidStr(Tag->Content))
-					{
-						Tag->Allocator->Free(Tag->Content);
-					}
 				}
 			}
 		}
