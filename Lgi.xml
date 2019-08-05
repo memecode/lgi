@@ -3,13 +3,10 @@
 	<Node Name="Source Files" Type="1" Platforms="15" Open="1" Id="1">
 		<Node Name="Core" Type="1" Platforms="15" Open="1" Id="2">
 			<Node Name="DateTime" Type="1" Platforms="15" Open="0" Id="3">
-				<Node File=".\src\common\General\LDateTime.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/General/LDateTime.cpp" Type="2" Platforms="15" />
 				<Node File="./include/common/LDateTime.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Drag and Drop" Type="1" Platforms="15" Open="0" Id="4">
-				<Node Name="Haiku" Type="1" Platforms="15" Open="1" Id="5">
-					<Node File="./src/beos/Lgi/GDragAndDrop.cpp" Type="2" Platforms="8" />
-				</Node>
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="6">
 					<Node File="./src/linux/Lgi/GDragAndDrop.cpp" Type="2" Platforms="2" />
 				</Node>
@@ -21,10 +18,6 @@
 				<Node File="./include/common/GDropFiles.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="File" Type="1" Platforms="15" Open="0" Id="8">
-				<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="9">
-					<Node File="./src/beos/General/GFile.cpp" Type="2" Platforms="8" />
-					<Node File="./src/beos/General/ShowFileProp_Beos.cpp" Type="2" Platforms="8" />
-				</Node>
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="10">
 					<Node File="./src/linux/General/GFile.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/General/ShowFileProp_Linux.cpp" Type="2" Platforms="2" />
@@ -42,13 +35,6 @@
 				<Node File="./src/common/General/GFileCommon.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Interface" Type="1" Platforms="15" Open="1" Id="12">
-				<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="13">
-					<Node File="./src/beos/Lgi/GApp.cpp" Type="2" Platforms="8" />
-					<Node File="./src/beos/Lgi/GGeneral.cpp" Type="2" Platforms="8" />
-					<Node File="./src/beos/Lgi/GPrinter.cpp" Type="2" Platforms="8" />
-					<Node File="./src/beos/Lgi/GView.cpp" Type="2" Platforms="8" />
-					<Node File="./src/beos/Lgi/GWindow.cpp" Type="2" Platforms="8" />
-				</Node>
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="14">
 					<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="15">
 						<Node File="./include/linux/Gtk/LgiOsClasses.h" Type="3" Platforms="2" />
@@ -86,9 +72,6 @@
 				<Node File="./include/common/GLibrary.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Memory Subsystem" Type="1" Platforms="15" Open="0" Id="18">
-				<Node Name="Haiku" Type="1" Platforms="15" Open="1" Id="19">
-					<Node File="./src/beos/General/GMem.cpp" Type="2" Platforms="8" />
-				</Node>
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="20">
 					<Node File="./src/linux/General/GMem.cpp" Type="2" Platforms="2" />
 				</Node>
@@ -109,7 +92,6 @@
 				<Node File="./include/common/LUnrolledList.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Menus" Type="1" Platforms="15" Open="0" Id="23">
-				<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="24" />
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="25">
 					<Node File="./src/linux/Lgi/LMenu.cpp" Type="2" Platforms="2" />
 				</Node>
@@ -135,12 +117,11 @@
 			</Node>
 			<Node Name="Stream" Type="1" Platforms="15" Open="0" Id="30">
 				<Node File="./include/common/GDom.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Lgi\GMemStream.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Lgi\GStream.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Lgi/GMemStream.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Lgi/GStream.cpp" Type="2" Platforms="15" />
 				<Node File="./include/common/GStream.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Threads" Type="1" Platforms="15" Open="0" Id="31">
-				<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="32" />
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="33">
 					<Node File="./src/linux/Lgi/LThread.cpp" Type="2" Platforms="2" />
 				</Node>
@@ -183,22 +164,19 @@
 		</Node>
 		<Node Name="Graphics" Type="1" Platforms="15" Open="0" Id="39">
 			<Node Name="_Core" Type="1" Platforms="15" Open="0" Id="40">
-				<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="41">
-					<Node File=".\src\beos\Gdc2\Gdc2.cpp" Type="2" Platforms="8" />
-				</Node>
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="42">
 					<Node File="./src/linux/Gtk/Gdc2.cpp" Type="2" Platforms="2" />
 				</Node>
 				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="43">
 					<Node File="./src/win32/Gdc2/Gdc2.cpp" Type="2" Platforms="1" />
 				</Node>
-				<Node File=".\src\common\Gdc2\GColour.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/GColour.cpp" Type="2" Platforms="15" />
 				<Node File="./include/common/GColour.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Gdc2\Tools\GColourReduce.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Tools/GColourReduce.cpp" Type="2" Platforms="15" />
 				<Node File="./include/common/GColourSpace.h" Type="3" Platforms="15" />
 				<Node File="./include/common/Gdc2.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Gdc2\GdcCommon.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\Tools\GdcTools.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/GdcCommon.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Tools/GdcTools.cpp" Type="2" Platforms="15" />
 				<Node File="./include/common/GdcTools.h" Type="3" Platforms="15" />
 				<Node File="./include/common/GFilter.h" Type="3" Platforms="15" />
 				<Node File="./include/common/GPixelRops.h" Type="3" Platforms="15" />
@@ -231,11 +209,6 @@
 				<Node File="./include/common/GRect.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Surfaces" Type="1" Platforms="15" Open="0" Id="48">
-				<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="49">
-					<Node File="./src/beos/Gdc2/GMemDC.cpp" Type="2" Platforms="8" />
-					<Node File="./src/beos/Gdc2/GPrintDC.cpp" Type="2" Platforms="8" />
-					<Node File="./src/beos/Gdc2/GScreenDC.cpp" Type="2" Platforms="8" />
-				</Node>
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="50">
 					<Node File="./src/linux/Gtk/GMemDC.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/Gtk/GPrintDC.cpp" Type="2" Platforms="2" />
@@ -351,10 +324,6 @@
 				<Node File="./include/common/GCss.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/GCssTools.cpp" Type="2" Platforms="15" />
 				<Node File="./include/common/GCssTools.h" Type="3" Platforms="15" />
-			</Node>
-			<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="65">
-				<Node File="./src/beos/Lgi/GLayout.cpp" Type="2" Platforms="8" />
-				<Node File="./src/beos/Lgi/GWidgets.cpp" Type="2" Platforms="8" />
 			</Node>
 			<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="66">
 				<Node File="./src/linux/Lgi/GLayout.cpp" Type="2" Platforms="2" />

@@ -48,7 +48,12 @@ GAbout::GAbout(	GView *parent,
 	#endif	
 	
 	p.Print("%s v%s (%s %s)\n", AppName, Ver, OsName, Build);
-	p.Print("Build: %s, %s\n\n", __DATE__, __TIME__);
+	p.Print("Build: %s, %s\n", __DATE__, __TIME__);
+	#ifdef __GTK_H__
+	p.Print("GTK v%i.%i.%i\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION);
+	#endif
+	p.Print("\n");
+
 	if (Url) p.Print("Homepage:\n\t%s\n", Url);
 	if (Email) p.Print("Email:\n\t%s\n", Email);
 	if (Text) p.Write((char*)Text, strlen(Text));

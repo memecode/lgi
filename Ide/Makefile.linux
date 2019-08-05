@@ -8,7 +8,7 @@
 
 CC = gcc
 CPP = g++
-Target = ./lgiide
+Target = ./Gtk3/build/bin/LgiIde
 ifndef Build
 	Build = Debug
 endif
