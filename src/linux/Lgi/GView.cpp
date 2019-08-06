@@ -877,11 +877,6 @@ bool GView::Attach(GViewI *parent)
 
 		Status = true;
 
-		if (WndNull && _Window != NULL)
-		{
-			OnGtkRealize();
-		}
-		
 		if (!Parent->HasView(this))
 		{
 			OnAttach();
@@ -889,6 +884,9 @@ bool GView::Attach(GViewI *parent)
 				d->Parent->AddView(this);
 			d->Parent->OnChildrenChanged(this, true);
 		}
+
+		if (WndNull && _Window != NULL)
+			OnGtkRealize();
 	}
 	
 	return Status;
