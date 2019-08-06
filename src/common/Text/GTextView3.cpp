@@ -129,6 +129,10 @@ public:
 	ssize_t WordSelectMode;
 	GString Eol;
 	GString LastError;
+	
+	// If the scroll position is set before we get a scroll bar, store the index
+	// here and set it when the GNotifyScrollBar_Create arrives.
+	ssize_t VScrollCache;
 
 	// Find/Replace Params
 	bool OwnFindReplaceParams;
@@ -152,6 +156,7 @@ public:
 		View = view;
 		WordSelectMode = -1;
 		PourX = -1;
+		VScrollCache = -1;
 		DirtyStart = DirtyLen = 0;
 		UrlColour.Rgb(0, 0, 255);
 		
@@ -1987,37 +1992,44 @@ bool GTextView3::ScrollToOffset(size_t Off)
 	bool ForceFullUpdate = false;
 	ssize_t ToIndex = 0;
 	GTextLine *To = GetTextLine(Off, &ToIndex);
-	if (VScroll && To)
+	if (To)
 	{
 		GRect Client = GetClient();
 		int DisplayLines = Client.Y() / LineY;
 
-		if (ToIndex < VScroll->Value())
+		if (VScroll)
 		{
-			// Above the visible region...
-			if (d->CenterCursor)
+			if (ToIndex < VScroll->Value())
 			{
-				ssize_t i = ToIndex - (DisplayLines >> 1);
-				VScroll->Value(MAX(0, i));
-			}
-			else
-			{
-				VScroll->Value(ToIndex);
-			}
-			ForceFullUpdate = true;
-		}
-
-		if (ToIndex >= VScroll->Value() + DisplayLines)
-		{
-			int YOff = d->CenterCursor ? DisplayLines >> 1 : DisplayLines;
-			
-			ssize_t v = MIN(ToIndex - YOff + 1, (ssize_t)Line.Length() - DisplayLines);
-			if (v != VScroll->Value())
-			{
-				// Below the visible region
-				VScroll->Value(v);
+				// Above the visible region...
+				if (d->CenterCursor)
+				{
+					ssize_t i = ToIndex - (DisplayLines >> 1);
+					VScroll->Value(MAX(0, i));
+				}
+				else
+				{
+					VScroll->Value(ToIndex);
+				}
 				ForceFullUpdate = true;
 			}
+
+			if (ToIndex >= VScroll->Value() + DisplayLines)
+			{
+				int YOff = d->CenterCursor ? DisplayLines >> 1 : DisplayLines;
+			
+				ssize_t v = MIN(ToIndex - YOff + 1, (ssize_t)Line.Length() - DisplayLines);
+				if (v != VScroll->Value())
+				{
+					// Below the visible region
+					VScroll->Value(v);
+					ForceFullUpdate = true;
+				}
+			}
+		}
+		else
+		{
+			d->VScrollCache = ToIndex;
 		}
 	}
 
@@ -2538,6 +2550,12 @@ void GTextView3::UpdateScrollBars(bool Reset)
 			if (Reset)
 			{
 				VScroll->Value(0);
+				SelStart = SelEnd = -1;
+			}
+			else if (d->VScrollCache >= 0)
+			{
+				VScroll->Value(d->VScrollCache);
+				d->VScrollCache = -1;
 				SelStart = SelEnd = -1;
 			}
 

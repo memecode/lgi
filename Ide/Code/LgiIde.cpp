@@ -2473,10 +2473,6 @@ IdeDoc *AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithH
 	IdeDoc *Doc = File ? OpenFile(File) : GetCurrentDoc();
 	if (Doc)
 		Doc->SetLine(Line, CurIp);
-	/*
-	else
-		LgiTrace("%s:%i - No file '%s' found.\n", _FL, File);
-	*/
 
 	if (!WithHistory)
 		d->InHistorySeek = false;
