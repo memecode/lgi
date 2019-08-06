@@ -151,6 +151,7 @@ class VcFolder : public GTreeItem, public GCss
 	AppPriv *d;
 	VersionCtrl Type;
 	GString Path, CurrentCommit, RepoUrl, VcCmd;
+	int64 CurrentCommitIdx;
 	GArray<VcCommit*> Log;
 	GString CurrentBranch;
 	LHashTbl<ConstStrKey<char>,VcBranch*> Branches;
@@ -218,6 +219,7 @@ class VcFolder : public GTreeItem, public GCss
 	bool ParseClean(int Result, GString s, ParseParams *Params);
 	bool ParseDiff(int Result, GString s, ParseParams *Params);
 	bool ParseMerge(int Result, GString s, ParseParams *Params);
+	bool ParseCountToTip(int Result, GString s, ParseParams *Params);
 	
 public:
 	VcFolder(AppPriv *priv, const char *p);
@@ -250,6 +252,9 @@ public:
 	void MergeToLocal(GString Rev);
 	bool RenameBranch(GString NewName, GArray<VcCommit*> &Revs);
 	void Refresh();
+	void GetBranches(ParseParams *Params = NULL);
+	void GetCurrentRevision(ParseParams *Params = NULL);
+	void CountToTip();
 
 	void OnPulse();
 	void OnUpdate(const char *Rev);

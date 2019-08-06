@@ -144,6 +144,7 @@ void VcFolder::Init(AppPriv *priv)
 	Unpushed = Unpulled = -1;
 	Type = VcNone;
 	CmdErrors = 0;
+	CurrentCommitIdx = -1;
 
 	Expanded(false);
 	Insert(Tmp = new GTreeItem);
@@ -376,7 +377,14 @@ bool VcFolder::ParseBranches(int Result, GString s, ParseParams *Params)
 		{
 			auto a = s.SplitDelimit("\r\n");
 			for (auto b: a)
+			{
+				if (!CurrentBranch)
+					 CurrentBranch = b;
 				Branches.Add(b, new VcBranch(b));
+			}
+
+			if (Params && Params->Str.Equals("CountToTip"))
+				CountToTip();
 			break;
 		}
 		default:
@@ -550,46 +558,7 @@ void VcFolder::Select(bool b)
 		}
 
 		PROF("GetBranches");
-		if (Branches.Length() == 0 && IsBranches == StatusNone)
-		{
-			switch (GetType())
-			{
-				case VcGit:
-					if (StartCmd("branch -a", &VcFolder::ParseBranches))
-						IsBranches = StatusActive;
-					break;
-				case VcSvn:
-					Branches.Add("trunk", new VcBranch("trunk"));
-					break;
-				case VcHg:
-					if (StartCmd("branch", &VcFolder::ParseBranches))
-						IsBranches = StatusActive;
-					break;
-				case VcCvs:
-					break;
-				default:
-					break;
-			}
-		}
-		OnBranchesChange();
-
-		/*
-		if (!IsUpdatingCounts && Unpushed < 0)
-		{			
-			switch (GetType())
-			{
-				case VcGit:
-					IsUpdatingCounts = StartCmd("cherry -v", &VcFolder::ParseCounts);
-					break;
-				case VcSvn:
-					IsUpdatingCounts = StartCmd("status -u", &VcFolder::ParseCounts);
-					break;
-				default:
-					LgiAssert(!"Impl me.");
-					break;
-			}
-		}
-		*/
+		GetBranches();
 
 		char *Ctrl = d->Lst->GetWindow()->GetCtrlName(IDC_FILTER);
 		GString Filter = ValidStr(Ctrl) ? Ctrl : NULL;
@@ -700,34 +669,15 @@ void VcFolder::Select(bool b)
 				d->Lst->ColumnAt(4)->Width(400); // LMessage
 			}
 		}
+
 		PROF("UpdateAll");
 		d->Lst->UpdateAllItems();
 
-		if (!CurrentCommit && IsIdent == StatusNone)
-		{
-			PROF("GetCur");
-			switch (GetType())
-			{
-				case VcGit:
-					if (StartCmd("rev-parse HEAD", &VcFolder::ParseInfo))
-						IsIdent = StatusActive;
-					break;
-				case VcSvn:
-					if (StartCmd("info", &VcFolder::ParseInfo))
-						IsIdent = StatusActive;
-					break;
-				case VcHg:
-					if (StartCmd("id -i", &VcFolder::ParseInfo))
-						IsIdent = StatusActive;
-					break;
-				case VcCvs:
-					break;
-				default:
-					break;
-			}				
-		}
+		PROF("GetCur");
+		GetCurrentRevision(false);
 	}
 }
+
 
 int CommitRevCmp(VcCommit **a, VcCommit **b)
 {
@@ -755,6 +705,58 @@ int CommitDateCmp(VcCommit **a, VcCommit **b)
 	int64 diff = (int64)bts - ats;
 	if (diff < 0) return -1;
 	return (diff > 0) ? 1 : 0;
+}
+
+void VcFolder::GetCurrentRevision(ParseParams *Params)
+{
+	if (CurrentCommit || IsIdent != StatusNone)
+		return;
+	
+	switch (GetType())
+	{
+		case VcGit:
+			if (StartCmd("rev-parse HEAD", &VcFolder::ParseInfo, Params))
+				IsIdent = StatusActive;
+			break;
+		case VcSvn:
+			if (StartCmd("info", &VcFolder::ParseInfo, Params))
+				IsIdent = StatusActive;
+			break;
+		case VcHg:
+			if (StartCmd("id -i -n", &VcFolder::ParseInfo, Params))
+				IsIdent = StatusActive;
+			break;
+		case VcCvs:
+			break;
+		default:
+			break;
+	}
+}
+
+void VcFolder::GetBranches(ParseParams *Params)
+{
+	if (Branches.Length() > 0 || IsBranches != StatusNone)
+		return;
+
+	switch (GetType())
+	{
+		case VcGit:
+			if (StartCmd("branch -a", &VcFolder::ParseBranches, Params))
+				IsBranches = StatusActive;
+			break;
+		case VcSvn:
+			Branches.Add("trunk", new VcBranch("trunk"));
+			OnBranchesChange();
+			break;
+		case VcHg:
+			if (StartCmd("branch", &VcFolder::ParseBranches, Params))
+				IsBranches = StatusActive;
+			break;
+		case VcCvs:
+			break;
+		default:
+			break;
+	}
 }
 
 bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
@@ -1277,7 +1279,12 @@ bool VcFolder::ParseInfo(int Result, GString s, ParseParams *Params)
 		case VcGit:
 		case VcHg:
 		{
-			CurrentCommit = s.Strip(" \t\r\n+");
+			auto p = s.Strip().SplitDelimit();
+			CurrentCommit = p[0].Strip(" \t\r\n+");
+			CurrentCommitIdx = p[1].Int();
+
+			if (Params && Params->Str.Equals("CountToTip"))
+				CountToTip();
 			break;
 		}
 		case VcSvn:
@@ -2113,7 +2120,7 @@ void VcFolder::FolderStatus(const char *Path, VcLeaf *Notify)
 			if (!ToolVersion[VcGit])
 				LgiAssert(!"Where is the version?");
 			
-			// What version did =2 become available? It's definately not in v2.5.4
+			// What version did =2 become available? It's definitely not in v2.5.4
 			// Not in v2.7.4 either...
 			if (ToolVersion[VcGit] >= Ver2Int("2.8.0"))
 				Arg = "status --porcelain=2";
@@ -2135,6 +2142,57 @@ void VcFolder::FolderStatus(const char *Path, VcLeaf *Notify)
 		p->IsWorking = true;
 	}
 	StartCmd(Arg, &VcFolder::ParseStatus, p);
+
+	switch (GetType())
+	{
+		case VcHg:
+			CountToTip();
+			break;
+	}
+}
+
+void VcFolder::CountToTip()
+{
+	// if (Path.Equals("C:\\Users\\matthew\\Code\\Lgi\\trunk"))
+	{
+		LgiTrace("%s: CountToTip, br=%s, idx=%i\n", Path.Get(), CurrentBranch.Get(), (int)CurrentCommitIdx);
+
+		if (!CurrentBranch)
+			GetBranches(new ParseParams("CountToTip"));
+		else if (CurrentCommitIdx < 0)
+			GetCurrentRevision(new ParseParams("CountToTip"));
+		else
+		{
+			GString Arg;
+			Arg.Printf("id -n -r %s", CurrentBranch.Get());
+			StartCmd(Arg, &VcFolder::ParseCountToTip);
+		}
+	}
+}
+
+bool VcFolder::ParseCountToTip(int Result, GString s, ParseParams *Params)
+{
+	switch (GetType())
+	{
+		case VcHg:
+			if (CurrentCommitIdx >= 0)
+			{
+				auto p = s.Strip();
+				auto idx = p.Int();
+				if (idx >= CurrentCommitIdx)
+				{
+					Unpulled = (int) (idx - CurrentCommitIdx);
+					Update();
+				}
+			}
+			else
+			{
+				int asd=0;
+			}
+			break;
+	}
+
+	return false;
 }
 
 void VcFolder::ListWorkingFolder()
