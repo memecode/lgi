@@ -128,12 +128,17 @@ bool GLibrary::Load(const char *File, bool Quiet)
 					}
 					if (!hLib)
 					{
-						char *e = dlerror();
-						if (!stristr(e, "No such file or directory") && !Quiet)
-							LgiTrace("%s:%i - dlopen(%s) failed: %s\n", _FL, File, e);
-
 						#if DEBUG_LIB_MSGS
-						LgiTrace("%s:%i - dlerror='%s'\n", _FL, e);
+						char *e = dlerror();
+						if
+						(
+							!stristr(e, "No such file or directory")
+							&&
+							!stristr(e, "image not found")
+							&&
+							!Quiet
+						)
+							LgiTrace("%s:%i - dlopen(%s) failed: %s\n", _FL, File, e);
 						#endif
 
 						#ifdef BEOS
@@ -148,16 +153,17 @@ bool GLibrary::Load(const char *File, bool Quiet)
 							if (FileExists(full))
 							{
 								hLib = dlopen(full, RTLD_NOW);
+								#if DEBUG_LIB_MSGS
 								if (!Quiet)
 									LgiTrace("%s:%i - dlopen(%s)=%p\n", _FL, full, hLib);
+								#endif
 								if (hLib)
 									break;
 							}
+							#if DEBUG_LIB_MSGS
 							else if (!Quiet)
-							{
 								LgiTrace("%s doesn't exist\n", full);
-							}
-
+							#endif
 						}
 
 						if (!hLib && !Quiet)

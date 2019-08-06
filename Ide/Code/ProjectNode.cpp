@@ -869,15 +869,12 @@ IdeDoc *ProjectNode::Open()
 				default:
 				{
 					GString FullPath = GetFullPath();
-					printf("%s:%i - FullPath = %s\n", _FL, FullPath.Get());
 					if (FullPath)
 					{
 						Doc = Project->GetApp()->FindOpenFile(FullPath);
-						printf("%s:%i - Doc=%p\n", _FL, Doc);
 						if (!Doc)
 						{
 							Doc = Project->GetApp()->NewDocWnd(0, this);
-							printf("%s:%i - Doc=%p\n", _FL, Doc);
 							if (Doc)
 							{
 								if (Doc->OpenFile(FullPath))

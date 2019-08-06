@@ -699,7 +699,11 @@ bool LMenuItem::ScanForAccel()
 			}
 			else if (stricmp(k, "Alt") == 0)
 			{
+				#ifdef MAC
+				Flags |= LGI_EF_SYSTEM;
+				#else
 				Flags |= LGI_EF_ALT;
+				#endif
 			}
 			else if (stricmp(k, "Shift") == 0)
 			{
