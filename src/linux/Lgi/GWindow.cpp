@@ -369,7 +369,11 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			k.Shift((e->state & GDK_SHIFT_MASK) != 0);
 			k.Ctrl((e->state & GDK_CONTROL_MASK) != 0);
 			k.Alt((e->state & GDK_MOD1_MASK) != 0);
+			#ifdef MAC
+			k.System((e->state & GDK_MOD2_MASK) != 0);
+			#else
 			k.System((e->state & GDK_SUPER_MASK) != 0);
+			#endif
 		
 			#ifdef _DEBUG
 			if (k.vkey == GDK_KEY_Meta_L ||
