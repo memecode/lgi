@@ -63,9 +63,6 @@ GInput::GInput(GViewI *parent, const char *InitStr, const char *Msg, const char 
 
 	c = Tbl->GetCell(0, 1, true);
 	c->Add(Edit = new GEdit(IDC_EDIT, 5, Txt->GetPos().y2 + 5, EditX - 1, MsgDs.Y()+7, InitStr));
-
-	c = Tbl->GetCell(0, 2, true);
-	c->TextAlign(GCss::AlignRight);
 	if (Edit)
 	{
 		Edit->Password(Password);
@@ -73,6 +70,9 @@ GInput::GInput(GViewI *parent, const char *InitStr, const char *Msg, const char 
 		if (Callback)
 			c->Add(new GButton(IDC_CALLBACK, 0, 0, -1, -1, "..."));
 	}
+
+	c = Tbl->GetCell(0, 2, true);
+	c->TextAlign(GCss::AlignRight);
 
 	GButton *Ok;
 	c->Add(Ok = new GButton(IDOK, 0, 0, -1, -1, LgiLoadString(L_BTN_OK, "Ok")));

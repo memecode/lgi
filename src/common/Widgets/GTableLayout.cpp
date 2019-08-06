@@ -32,7 +32,7 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		7
+// #define DEBUG_LAYOUT		102
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
 
@@ -1270,7 +1270,7 @@ void TableCell::OnPaint(GSurface *pDC)
 GTableLayoutPrivate::GTableLayoutPrivate(GTableLayout *ctrl)
 {
 	PrevSize.Set(-1, -1);
-	LayoutDirty = false;
+	LayoutDirty = true;
 	InLayout = false;
 	DebugLayout = false;
 	Ctrl = ctrl;
@@ -1777,6 +1777,10 @@ void GTableLayoutPrivate::LayoutPost(GRect &Client)
 	GFont *Fnt = Ctrl->GetFont();
 
 	// Move cells into their final positions
+	#if DEBUG_LAYOUT
+	if (DebugLayout)
+		LgiTrace("\tLayoutPost %ix%i\n", Cols.Length(), Rows.Length());
+	#endif
 	for (Cy=0; Cy<Rows.Length(); Cy++)
 	{
 		int MaxY = 0;
@@ -1965,6 +1969,7 @@ bool GTableLayout::SizeChanged()
 void GTableLayout::OnPosChange()
 {
 	GRect r = GetClient();
+
 	if (SizeChanged() || d->LayoutDirty)
 	{
 		d->PrevSize.x = r.X();
@@ -2034,12 +2039,13 @@ GMessage::Result GTableLayout::OnEvent(GMessage *m)
 
 void GTableLayout::OnPaint(GSurface *pDC)
 {
-	if (SizeChanged())
+	if (SizeChanged() || d->LayoutDirty)
 	{
 		#ifdef LGI_SDL
 		OnPosChange();
 		#else
-		// LgiTrace("%s:%i - Post layout\n", _FL);
+		
+		// LgiTrace("%s:%i - Post M_TABLE_LAYOUT\n", _FL);
 		PostEvent(M_TABLE_LAYOUT);
 		#endif
 		return;
@@ -2219,6 +2225,7 @@ GLayoutCell *GTableLayout::GetCell(int cx, int cy, bool create, int colspan, int
         c = new TableCell(this, cx, cy);
         if (c)
         {
+			d->LayoutDirty = true;
             if (colspan > 1)
                 c->Cell.x2 += colspan - 1;
             if (rowspan > 1)
