@@ -376,6 +376,7 @@ bool VcFolder::ParseBranches(int Result, GString s, ParseParams *Params)
 		case VcHg:
 		{
 			auto a = s.SplitDelimit("\r\n");
+			Branches.DeleteObjects();
 			for (auto b: a)
 			{
 				if (!CurrentBranch)
@@ -401,7 +402,7 @@ bool VcFolder::ParseBranches(int Result, GString s, ParseParams *Params)
 void VcFolder::OnBranchesChange()
 {
 	GWindow *w = d->Tree->GetWindow();
-	if (!w)
+	if (!w || !GTreeItem::Select())
 		return;
 
 	if (Branches.Length())
@@ -558,7 +559,8 @@ void VcFolder::Select(bool b)
 		}
 
 		PROF("GetBranches");
-		GetBranches();
+		if (GetBranches())
+			OnBranchesChange();
 
 		char *Ctrl = d->Lst->GetWindow()->GetCtrlName(IDC_FILTER);
 		GString Filter = ValidStr(Ctrl) ? Ctrl : NULL;
@@ -733,10 +735,10 @@ void VcFolder::GetCurrentRevision(ParseParams *Params)
 	}
 }
 
-void VcFolder::GetBranches(ParseParams *Params)
+bool VcFolder::GetBranches(ParseParams *Params)
 {
 	if (Branches.Length() > 0 || IsBranches != StatusNone)
-		return;
+		return true;
 
 	switch (GetType())
 	{
@@ -757,6 +759,8 @@ void VcFolder::GetBranches(ParseParams *Params)
 		default:
 			break;
 	}
+
+	return false;
 }
 
 bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)

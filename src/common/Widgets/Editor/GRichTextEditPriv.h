@@ -1268,7 +1268,7 @@ public:
 		ImageBlock *Ib;
 		HorzRuleBlock *Hrb;
 		GArray<uint32_t> Buf;
-		char16 LastChar;
+		uint32_t LastChar;
 		GFontCache *FontCache;
 		GCss::Store StyleStore;
 		bool StartOfLine;

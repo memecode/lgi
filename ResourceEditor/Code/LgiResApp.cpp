@@ -682,7 +682,7 @@ void FieldView::OnSelect(FieldSource *s)
 	{
 		// Add new fields
 		Source = s;
-		Source->_FieldView = this;
+		Source->_FieldView = AddDispatch();
 
 		if (Source->GetFields(Fields))
 		{

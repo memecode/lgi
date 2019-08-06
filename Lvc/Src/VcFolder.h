@@ -252,7 +252,7 @@ public:
 	void MergeToLocal(GString Rev);
 	bool RenameBranch(GString NewName, GArray<VcCommit*> &Revs);
 	void Refresh();
-	void GetBranches(ParseParams *Params = NULL);
+	bool GetBranches(ParseParams *Params = NULL);
 	void GetCurrentRevision(ParseParams *Params = NULL);
 	void CountToTip();
 

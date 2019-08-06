@@ -17,6 +17,7 @@
 #include "resource.h"
 #include "GTree.h"
 #include "GBox.h"
+#include "GEventTargetThread.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Defines
@@ -624,12 +625,12 @@ public:
 class FieldSource
 {
 	friend class FieldView;
-	GViewI *_FieldView;
+	int _FieldView;
 
 public:
 	FieldSource()
 	{
-		_FieldView = NULL;
+		_FieldView = -1;
 	}
 	
 	virtual ~FieldSource() {}
@@ -639,8 +640,8 @@ public:
 	
 	void OnFieldChange()
 	{
-		if (_FieldView)
-			LgiApp->PostEvent(_FieldView, M_OBJECT_CHANGED, (GMessage::Param)this);
+		if (_FieldView >= 0)
+			PostThreadEvent(_FieldView, M_OBJECT_CHANGED, (GMessage::Param)this);
 	}
 };
 
