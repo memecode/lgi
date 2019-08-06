@@ -1129,6 +1129,7 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 				Status++;
 			}
 		}
+		/*
 		else if (Trailing)
 		{
 			GUtf8Str u(Str + Index);
@@ -1136,6 +1137,7 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 				u++;			
 			Status = (OsChar*)u.GetPtr() - Str;
 		}
+		*/
 		else Status = 0;
 
 		Fx += b.X();

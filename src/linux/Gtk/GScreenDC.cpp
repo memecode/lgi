@@ -507,27 +507,23 @@ void GScreenDC::VLine(int x, int y1, int y2)
 
 void GScreenDC::Line(int x1, int y1, int x2, int y2)
 {
-	#if GTK_MAJOR_VERSION == 3
 	cairo_move_to(d->cr, 0.5+x1, 0.5+y1);
 	cairo_line_to (d->cr, 0.5+x2, 0.5+y2);
 	cairo_set_line_width(d->cr, 1.0);
 	cairo_set_line_cap(d->cr, CAIRO_LINE_CAP_SQUARE);
 	cairo_stroke(d->cr);
 	cairo_fill(d->cr);
-	#else
-	gdk_draw_line(d->d, d->gc, x1-OriginX, y1-OriginY, x2-OriginX, y2-OriginY);
-	#endif
 }
 
 void GScreenDC::Circle(double cx, double cy, double radius)
 {
-	cairo_arc(d->cr, cx, cy, radius, 0, 2 * M_PI);
+	cairo_arc(d->cr, cx, cy, radius, 0, 2 * LGI_PI);
 	cairo_stroke(d->cr);
 }
 
 void GScreenDC::FilledCircle(double cx, double cy, double radius)
 {
-	cairo_arc(d->cr, cx, cy, radius, 0, 2 * M_PI);
+	cairo_arc(d->cr, cx, cy, radius, 0, 2 * LGI_PI);
 	cairo_fill(d->cr);
 }
 
@@ -545,56 +541,40 @@ void GScreenDC::FilledArc(double cx, double cy, double radius, double start, dou
 
 void GScreenDC::Ellipse(double cx, double cy, double x, double y)
 {
-	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
-	#else
-	gdk_draw_arc(d->d, d->gc, false,
-			 	cx - (x / 2), cy - (y / 2),
-			 	x,
-			 	y,
-			 	0,
-			 	360 * 64);
-	#endif
+	cairo_save(d->cr);
+	cairo_translate(d->cr, cx, cy);
+	cairo_scale(d->cr, x / 2.0, y / 2.0);
+	cairo_arc(d->cr, 0.0, 0.0, 1.0, 0.0, 2 * LGI_PI);
+	cairo_stroke(d->cr);
+	cairo_restore(d->cr);
 }
 
 void GScreenDC::FilledEllipse(double cx, double cy, double x, double y)
 {
-	#if GTK_MAJOR_VERSION == 3
-	LgiAssert(!"Gtk3 FIXME");
-	#else
-	gdk_draw_arc(d->d, d->gc, true,
-			 	cx - (x / 2), cy - (y / 2),
-			 	x,
-			 	y,
-			 	0,
-			 	360 * 64);
-	#endif
+	cairo_save(d->cr);
+	cairo_translate(d->cr, cx, cy);
+	cairo_scale(d->cr, x / 2.0, y / 2.0);
+	cairo_arc(d->cr, 0.0, 0.0, 1.0, 0.0, 2 * LGI_PI);
+	cairo_fill(d->cr);
+	cairo_restore(d->cr);
 }
 
 void GScreenDC::Box(int x1, int y1, int x2, int y2)
 {
-	#if GTK_MAJOR_VERSION == 3
 	double w = x2 - x1 + 1;
 	double h = y2 - y1 + 1;
 	cairo_rectangle(d->cr, x1, y1, w, h);
 	cairo_rectangle(d->cr, x1+1, y1+1, w-2, h-2);
 	cairo_set_fill_rule(d->cr, CAIRO_FILL_RULE_EVEN_ODD);
 	cairo_fill(d->cr);
-	#else
-	gdk_draw_rectangle(d->d, d->gc, false, x1-OriginX, y1-OriginY, x2-x1, y2-y1);
-	#endif
 }
 
 void GScreenDC::Box(GRect *a)
 {
 	if (a)
-	{
 		Box(a->x1, a->y1, a->x2, a->y2);
-	}
 	else
-	{
 		Box(0, 0, X()-1, Y()-1);
-	}
 }
 
 void GScreenDC::Rectangle(int x1, int y1, int x2, int y2)
@@ -602,12 +582,8 @@ void GScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 	if (x2 >= x1 &&
 		y2 >= y1)
 	{
-		#if GTK_MAJOR_VERSION == 3
 		cairo_rectangle (d->cr, x1, y1, x2-x1+1, y2-y1+1);
 		cairo_fill(d->cr);
-		#else
-		gdk_draw_rectangle(d->d, d->gc, true, x1-OriginX, y1-OriginY, x2-x1+1, y2-y1+1);
-		#endif
 	}
 }
 
@@ -618,47 +594,27 @@ void GScreenDC::Rectangle(GRect *a)
 		if (a->X() > 0 &&
 			a->Y() > 0)
 		{
-			#if GTK_MAJOR_VERSION == 3
 			cairo_rectangle (d->cr, a->x1, a->y1, a->X(), a->Y());
 			cairo_fill(d->cr);
-			#else
-			gdk_draw_rectangle(d->d, d->gc, true, a->x1-OriginX, a->y1-OriginY, a->X(), a->Y());
-			#endif
 		}
 	}
 	else
 	{
-		#if GTK_MAJOR_VERSION == 3
 		cairo_rectangle(d->cr, 0, 0, X(), Y());
 		cairo_fill(d->cr);
-		#else
-		gdk_draw_rectangle(d->d, d->gc, true, -OriginX, -OriginY, X(), Y());
-		#endif
 	}
 }
 
 void GScreenDC::Polygon(int Points, GdcPt2 *Data)
 {
-	if (Data)
-	{
-		::GArray<GdkPoint> pt;
-		for (int p=0; p<Points; p++)
-		{
-			GdkPoint &out = pt.New();
-			out.x = Data[p].x;
-			out.y = Data[p].y;
-		}
-		
-		#if GTK_MAJOR_VERSION == 3
-		LgiAssert(!"Gtk3 FIXME");
-		#else
-		gdk_draw_polygon(d->d,
-						 d->gc,
-						 true,
-						 &pt.First(),
-						 pt.Length());
-		#endif
-	}
+	if (!Data || Points <= 0)
+		return;
+
+	cairo_move_to(d->cr, Data[0].x, Data[0].y);
+	for (int i=1; i<Points; i++)
+		cairo_line_to(d->cr, Data[i].x, Data[i].y);
+	cairo_close_path(d->cr);
+	cairo_fill(d->cr);
 }
 
 void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
