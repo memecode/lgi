@@ -646,7 +646,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	GMemDC *Mem;
 	if ((Mem = dynamic_cast<GMemDC*>(Src)))
 	{
-		cairo_surface_t *Sub = Mem->GetSurface(br.SrcClip);
+		cairo_surface_t *Sub = Mem->GetSurface(&br.SrcClip);
 		if (Sub)
 		{
 			cairo_pattern_t *Pat = cairo_pattern_create_for_surface(Sub);

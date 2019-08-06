@@ -78,41 +78,21 @@ GMemDC::~GMemDC()
 	DeleteObj(d);
 }
 
-cairo_surface_t *GMemDC::GetSurface(GRect &r)
+cairo_surface_t *GMemDC::GetSurface(GRect *r)
 {
 	if (!d->Img)
 		return NULL;
 	
-	#if GTK_MAJOR_VERSION == 3
+	if (!r)
+		return d->Img;
+	
 	cairo_format_t fmt = cairo_image_surface_get_format(d->Img);
-	#else
-	cairo_format_t fmt = CAIRO_FORMAT_ARGB32;
-	switch (d->Img->depth)
-	{
-		case 8: fmt = CAIRO_FORMAT_A8; break;
-		case 16: fmt = CAIRO_FORMAT_RGB16_565; break;
-		case 24: fmt = CAIRO_FORMAT_RGB24; break;
-		case 32: fmt = CAIRO_FORMAT_ARGB32; break;
-		default:
-			printf("%s:%i - '%i' bit depth that cairo supports\n", _FL, d->Img->depth);
-			return NULL;
-	}
-	#endif
-
 	int pixel_bytes = GColourSpaceToBits(ColourSpace) >> 3;
-	#if GTK_MAJOR_VERSION == 3
-	return cairo_image_surface_create_for_data(	pMem->Base + (r.y1 * pMem->Line) + (r.x1 * pixel_bytes),
+	return cairo_image_surface_create_for_data(	pMem->Base + (r->y1 * pMem->Line) + (r->x1 * pixel_bytes),
 												fmt,
-												r.X(),
-												r.Y(),
+												r->X(),
+												r->Y(),
 												pMem->Line);
-	#else
-	return cairo_image_surface_create_for_data(	((uchar*)d->Img->mem) + (r.y1 * d->Img->bpl) + (r.x1 * pixel_bytes),
-												fmt,
-												r.X(),
-												r.Y(),
-												d->Img->bpl);
-	#endif
 }
 
 OsPainter GMemDC::Handle()
@@ -158,15 +138,6 @@ bool GMemDC::SupportsAlphaCompositing()
 {
 	// We can blend RGBA into memory buffers, mostly because the code is in Lgi not GTK.
 	return true;
-}
-
-#if GTK_MAJOR_VERSION == 3
-Gtk::cairo_surface_t *GMemDC::GetImage()
-#else
-GdkImage *GMemDC::GetImage()
-#endif
-{
-    return d->Img;
 }
 
 GdcPt2 GMemDC::GetSize()

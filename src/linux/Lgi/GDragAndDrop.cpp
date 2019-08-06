@@ -57,6 +57,7 @@ class GDndSourcePriv
 public:
 	GAutoString CurrentFormat;
 	Gtk::GdkDragContext *Ctx;
+	cairo_surface_t *Ico;
 
 	OsView SignalWnd;
 	
@@ -64,6 +65,7 @@ public:
 	{
 		Ctx = NULL;
 		SignalWnd = NULL;
+		Ico = NULL;
 	}
 	
 	~GDndSourcePriv()
@@ -233,7 +235,7 @@ DragFailed(	GtkWidget      *widget,
 	return false;
 }
 
-int GDragDropSource::Drag(GView *SourceWnd, int Effect)
+int GDragDropSource::Drag(GView *SourceWnd, int Effect, GSurface *Icon)
 {
 	LgiAssert(SourceWnd);
 	if (!SourceWnd)
@@ -299,6 +301,10 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect)
 	else if (m.Middle()) btn = 2;
 	else if (m.Right()) btn = 3;
 	d->Ctx = gtk_drag_begin_with_coordinates (d->SignalWnd, Targets, Action, btn, NULL, m.x, m.y);
+	
+	auto MemIco = dynamic_cast<GMemDC*>(Icon);
+	if (MemIco)
+		gtk_drag_set_icon_surface(d->Ctx, MemIco->GetSurface(NULL));
 
 	LgiTrace("%s:%i - Drag finished.\n", _FL);
     return -1;

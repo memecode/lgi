@@ -965,13 +965,8 @@ public:
 
 		#if defined(__GTK_H__)
 
-			#if GTK_MAJOR_VERSION == 3
-			Gtk::cairo_surface_t *GetImage();
-			#else
-			Gtk::GdkImage *GetImage();
-			#endif
 			GdcPt2 GetSize();
-			Gtk::cairo_surface_t *GetSurface(GRect &r);
+			Gtk::cairo_surface_t *GetSurface(GRect *r);
 			GColourSpace GetCreateCs();
 			Gtk::GdkPixbuf *CreatePixBuf();
 
