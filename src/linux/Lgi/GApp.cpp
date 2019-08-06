@@ -1478,10 +1478,10 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 	
 	#if !IDLE_ALWAYS
 
-		if (LgiApp->InThread())
+		// if (LgiApp->InThread())
 			g_idle_add((GSourceFunc)IdleWrapper, &idle);
-		else
-			g_main_context_invoke_full(NULL, G_PRIORITY_DEFAULT, (GSourceFunc)IdleWrapper, &idle, NULL);
+		// else
+		// 	g_main_context_invoke_full(NULL, G_PRIORITY_DEFAULT, (GSourceFunc)IdleWrapper, &idle, NULL);
 
 	#endif
 	
