@@ -435,7 +435,14 @@ int LstCmp(LListItem *a, LListItem *b, int Col)
 	}
 
 	auto f = A->GetFolder();
-	auto fld = f->GetFields()[Col];
+	auto flds = f->GetFields();
+	if (!flds.Length())
+	{
+		LgiTrace("%s:%i - No fields?\n", _FL);
+		return 0;
+	}
+		
+	auto fld = flds[Col];
 	switch (fld)
 	{
 		case LGraph:
