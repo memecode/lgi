@@ -320,6 +320,7 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect, GSurface *Icon)
 	else if (m.Right()) btn = 3;
 	d->Ctx = gtk_drag_begin_with_coordinates (d->SignalWnd, Targets, Action, btn, NULL, m.x, m.y);
 
+	#if 0 // Not working, who the fuck knows why. GTK is suck.
 	if (!d->Ico && !Icon)
 		d->Ico.Reset(DefIcon.Create());
 	auto MemIco = dynamic_cast<GMemDC*>(Icon ? Icon : d->Ico.Get());
@@ -330,6 +331,7 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect, GSurface *Icon)
 		auto Surface = MemIco->GetSurface();
 		gtk_drag_set_icon_surface(d->Ctx, Surface);
 	}
+	#endif
 
 	LgiTrace("%s:%i - Drag finished.\n", _FL);
     return -1;

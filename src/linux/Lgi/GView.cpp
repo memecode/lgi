@@ -801,12 +801,6 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 	ThreadCheck();
 
 	GWindow *w = GetWindow();
-	if (!w)
-	{
-		LgiTrace("%s:%i - No window.\n", _FL);
-		return false;
-	}
-
 	GdkModifierType mask = (GdkModifierType)0;
 	auto display = gdk_display_get_default();
 	auto deviceManager = gdk_display_get_device_manager(display);
@@ -818,7 +812,7 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 	if (gdk_device_get_axis_use(device, 1) != GDK_AXIS_Y)
 		gdk_device_set_axis_use(device, 1, GDK_AXIS_Y);
 
-	if (ScreenCoords)
+	if (ScreenCoords || !w)
 	{
 		gdk_device_get_state(device, gdk_get_default_root_window(), axes, &mask);
 		m.x = (int)axes[0];

@@ -635,12 +635,7 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 		}
 	}
 	
-	#if IDLE_ALWAYS
-	LgiSleep(1);
-	return true;
-	#else
 	return i->cb != NULL;
-	#endif	
 }
 
 static GtkIdle idle = {0};
@@ -659,17 +654,6 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 			idle.d = d;
 			idle.cb = IdleCallback;
 			idle.param = IdleParam;
-		}
-
-		{			
-			#if IDLE_ALWAYS
-			auto Id = Gtk::gdk_threads_add_idle_full(G_PRIORITY_DEFAULT_IDLE,
-													IdleWrapper,
-													&idle,
-													NULL);
-			if (Id)
-				d->IdleId.Add(Id);
-			#endif
 		}
 
 		static bool CmdLineDone = false;
@@ -1474,17 +1458,26 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 	}
 	
 	q->New().Set(View, Msg, a, b);
+	
+	#if defined(_DEBUG)
+	if (q->Length() > 5)
+	{
+		#if defined(WIN32)
+			char s[256];
+			sprintf_s(s, sizeof(s), 
+		#else
+			printf(
+		#endif
+			"MsgQue=" LPrintfSizeT "\n", q->Length());
+		#if defined(WIN32)
+			OutputDebugStringA(s);
+		#endif
+	}
+	#endif
+
 	MsgQue.Unlock();
 	
-	#if !IDLE_ALWAYS
-
-		// if (LgiApp->InThread())
-			g_idle_add((GSourceFunc)IdleWrapper, &idle);
-		// else
-		// 	g_main_context_invoke_full(NULL, G_PRIORITY_DEFAULT, (GSourceFunc)IdleWrapper, &idle, NULL);
-
-	#endif
-	
+	g_idle_add((GSourceFunc)IdleWrapper, &idle);
 	return true;
 }
 
