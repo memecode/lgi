@@ -800,28 +800,46 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 {
 	ThreadCheck();
 
+	GWindow *w = GetWindow();
+	if (!w)
+	{
+		LgiTrace("%s:%i - No window.\n", _FL);
+		return false;
+	}
+
 	GdkModifierType mask = (GdkModifierType)0;
 	auto display = gdk_display_get_default();
 	auto deviceManager = gdk_display_get_device_manager(display);
 	auto device = gdk_device_manager_get_client_pointer(deviceManager);
 	gdouble axes[2] = {0};
 	
-	GWindow *w = GetWindow();
-	if (w && !ScreenCoords)
+	if (gdk_device_get_axis_use(device, 0) != GDK_AXIS_X)
+		gdk_device_set_axis_use(device, 0, GDK_AXIS_X);
+	if (gdk_device_get_axis_use(device, 1) != GDK_AXIS_Y)
+		gdk_device_set_axis_use(device, 1, GDK_AXIS_Y);
+
+	if (ScreenCoords)
+	{
+		gdk_device_get_state(device, gdk_get_default_root_window(), axes, &mask);
+		m.x = (int)axes[0];
+		m.y = (int)axes[1];
+	}
+	else
 	{
 		GdkWindow *wnd = gtk_widget_get_window(GTK_WIDGET(w->WindowHandle()));
 		gdk_device_get_state(device, wnd, axes, &mask);
+		
+		if (axes[0] == 0.0 || axes[0] > 10000)
+		{
+			LgiTrace("%s:%i - gdk_device_get_state failed.\n", _FL);
+			return false;
+		}
 
 		GdcPt2 p;
 		WindowVirtualOffset(&p);
 		m.x = (int)axes[0] - p.x - _BorderSize;
 		m.y = (int)axes[1] - p.y - _BorderSize;
-	}
-	else
-	{
-		gdk_device_get_state(device, gdk_get_default_root_window(), axes, &mask);
-		m.x = (int)axes[0];
-		m.y = (int)axes[1];
+		// printf("GetMs %g,%g %i,%i %i,%i device=%p wnd=%p\n", axes[0], axes[1], p.x, p.y, m.x, m.y, device, wnd);
 	}
 
 	m.SetModifer(mask);

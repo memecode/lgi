@@ -1626,271 +1626,271 @@ void LList::OnMouseClick(GMouse &m)
 
 void LList::OnPulse()
 {
-	if (Lock(_FL))
+	if (!Lock(_FL))
+		return;
+
+	if (IsCapturing())
 	{
-		if (IsCapturing())
+		GMouse m;
+		bool HasMs = GetMouse(m);
+		// m.Trace("LList::OnPulse");
+
+		if (HasMs && (m.y < 0 || m.y >= Y()))
 		{
-			GMouse m;
-			GetMouse(m);
-			// m.Trace("LList::OnPulse");
-
-			if (m.y < 0 || m.y >= Y())
+			switch (DragMode)
 			{
-				switch (DragMode)
+				case SELECT_ITEMS:
 				{
-					case SELECT_ITEMS:
+					int OverIndex = 0;
+					LListItem *Over = 0;
+
+					if (m.y < 0)
 					{
-						int OverIndex = 0;
-						LListItem *Over = 0;
+						int Space = -m.y;
 
-						if (m.y < 0)
+						int n = FirstVisible - 1;
+						auto It = Items.begin(n);
+						for (LListItem *i = *It; i; i=*(--It), n--)
 						{
-							int Space = -m.y;
-
-							int n = FirstVisible - 1;
-							auto It = Items.begin(n);
-							for (LListItem *i = *It; i; i=*(--It), n--)
+							GdcPt2 Info;
+							i->OnMeasure(&Info);
+							if (Space > Info.y)
 							{
-								GdcPt2 Info;
-								i->OnMeasure(&Info);
-								if (Space > Info.y)
-								{
-									Space -= Info.y;
-								}
-								else
-								{
-									OverIndex = n;
-									Over = i;
-									break;
-								}
+								Space -= Info.y;
 							}
-
-							if (!Over)
+							else
 							{
-								Over = Items[0];
-								OverIndex = 0;
-							}
-						}
-						else if (m.y >= Y())
-						{
-							int Space = m.y - Y();
-							int n = LastVisible + 1;
-
-							auto It = Items.begin(n);
-							for (LListItem *i = *It; i; i=*(++It), n++)
-							{
-								GdcPt2 Info;
-								i->OnMeasure(&Info);
-								if (Space > Info.y)
-								{
-									Space -= Info.y;
-								}
-								else
-								{
-									OverIndex = n;
-									Over = i;
-									break;
-								}
-							}
-
-							if (!Over)
-							{
-								Over = *Items.rbegin();
-								OverIndex = (int)Items.Length()-1;
+								OverIndex = n;
+								Over = i;
+								break;
 							}
 						}
 
-						int Min = MIN(d->DragData, OverIndex);
-						int Max = MAX(d->DragData, OverIndex);
-						int n = Min;
-
-						auto It = Items.begin(Min);
-						for (LListItem *i = *It; i && n <= Max; i=*(++It), n++)
+						if (!Over)
 						{
-							if (!i->Select())
-								i->Select(true);
+							Over = Items[0];
+							OverIndex = 0;
 						}
-
-						if (Over)
-						{
-							Over->ScrollTo();
-						}
-						break;
 					}
+					else if (m.y >= Y())
+					{
+						int Space = m.y - Y();
+						int n = LastVisible + 1;
+
+						auto It = Items.begin(n);
+						for (LListItem *i = *It; i; i=*(++It), n++)
+						{
+							GdcPt2 Info;
+							i->OnMeasure(&Info);
+							if (Space > Info.y)
+							{
+								Space -= Info.y;
+							}
+							else
+							{
+								OverIndex = n;
+								Over = i;
+								break;
+							}
+						}
+
+						if (!Over)
+						{
+							Over = *Items.rbegin();
+							OverIndex = (int)Items.Length()-1;
+						}
+					}
+
+					int Min = MIN(d->DragData, OverIndex);
+					int Max = MAX(d->DragData, OverIndex);
+					int n = Min;
+
+					auto It = Items.begin(Min);
+					for (LListItem *i = *It; i && n <= Max; i=*(++It), n++)
+					{
+						if (!i->Select())
+							i->Select(true);
+					}
+
+					if (Over)
+					{
+						Over->ScrollTo();
+					}
+					break;
 				}
 			}
 		}
-		else
-		{
-			DragMode = DRAG_NONE;
-			SetPulse();
-		}
-
-		Unlock();
 	}
+	else
+	{
+		DragMode = DRAG_NONE;
+		SetPulse();
+	}
+	
+	Unlock();
 }
 
 void LList::OnMouseMove(GMouse &m)
 {
-	if (Lock(_FL))
+	if (!Lock(_FL))
+		return;
+
+	// printf("%s:%i - DragMode=%i\n", _FL, DragMode);
+	switch (DragMode)
 	{
-		switch (DragMode)
+		case DRAG_COLUMN:
 		{
-			case DRAG_COLUMN:
+			if (DragCol)
 			{
-				if (DragCol)
-				{
-					GdcPt2 p;
-					PointToScreen(p);
+				GdcPt2 p;
+				PointToScreen(p);
 
-					GRect r = DragCol->GetPos();
-					r.Offset(-p.x, -p.y); // to view co-ord
+				GRect r = DragCol->GetPos();
+				r.Offset(-p.x, -p.y); // to view co-ord
 
-					r.Offset(m.x - DragCol->GetOffset() - r.x1, 0);
-					if (r.x1 < 0) r.Offset(-r.x1, 0);
-					if (r.x2 > X()-1) r.Offset((X()-1)-r.x2, 0);
+				r.Offset(m.x - DragCol->GetOffset() - r.x1, 0);
+				if (r.x1 < 0) r.Offset(-r.x1, 0);
+				if (r.x2 > X()-1) r.Offset((X()-1)-r.x2, 0);
 
-					r.Offset(p.x, p.y); // back to screen co-ord
-					DragCol->SetPos(r, true);
-					r = DragCol->GetPos();
-				}
-				break;
+				r.Offset(p.x, p.y); // back to screen co-ord
+				DragCol->SetPos(r, true);
+				r = DragCol->GetPos();
 			}
-			case RESIZE_COLUMN:
+			break;
+		}
+		case RESIZE_COLUMN:
+		{
+			GItemColumn *c = Columns[d->DragData];
+			if (c)
 			{
-				GItemColumn *c = Columns[d->DragData];
-				if (c)
-				{
-					// int OldWidth = c->Width();
-					int NewWidth = m.x - c->GetPos().x1;
+				// int OldWidth = c->Width();
+				int NewWidth = m.x - c->GetPos().x1;
 
-					c->Width(MAX(NewWidth, 4));
-					ClearDs(d->DragData);
-					Invalidate();
-				}
-				break;
+				c->Width(MAX(NewWidth, 4));
+				ClearDs(d->DragData);
+				Invalidate();
 			}
-			case CLICK_COLUMN:
+			break;
+		}
+		case CLICK_COLUMN:
+		{
+			if (d->DragData < 0 || d->DragData >= Columns.Length())
+				break;
+				
+			GItemColumn *c = Columns[d->DragData];
+			if (c)
 			{
-				if (d->DragData < 0 || d->DragData >= Columns.Length())
-					break;
+				if (abs(m.x - d->DragStart.x) > DRAG_THRESHOLD ||
+					abs(m.y - d->DragStart.y) > DRAG_THRESHOLD)
+				{
+					OnColumnDrag(d->DragData, m);
+				}
+				else
+				{
+					bool Over = c->GetPos().Overlap(m.x, m.y);
+					if (m.Down() && Over != c->Value())
+					{
+						c->Value(Over);
+						GRect r = c->GetPos();
+						Invalidate(&r);
+					}
+				}
+			}
+			break;
+		}
+		case SELECT_ITEMS:
+		{
+			int n=0;
+			// bool Selected = m.y < ItemsPos.y1;
+
+			if (IsCapturing())
+			{
+				if (MultiSelect())
+				{
+					int Over = -1;
 					
-				GItemColumn *c = Columns[d->DragData];
-				if (c)
-				{
-					if (abs(m.x - d->DragStart.x) > DRAG_THRESHOLD ||
-						abs(m.y - d->DragStart.y) > DRAG_THRESHOLD)
+					LListItem *h = HitItem(m.x, m.y, &Over);
+					if (m.y < ItemsPos.y1 && FirstVisible == 0)
 					{
-						OnColumnDrag(d->DragData, m);
+						Over = 0;
 					}
 					else
 					{
-						bool Over = c->GetPos().Overlap(m.x, m.y);
-						if (m.Down() && Over != c->Value())
+						int n = FirstVisible;
+						for (auto it = Items.begin(n); it != Items.end(); it++)
 						{
-							c->Value(Over);
-							GRect r = c->GetPos();
-							Invalidate(&r);
+							auto k = *it;
+							if (!k->OnScreen())
+								break;
+							if ((m.y >= k->Pos.y1) && (m.y <= k->Pos.y2))
+							{
+								Over = n;
+								break;
+							}
+							n++;
 						}
 					}
-				}
-				break;
-			}
-			case SELECT_ITEMS:
-			{
-				int n=0;
-				// bool Selected = m.y < ItemsPos.y1;
 
-				if (IsCapturing())
-				{
-					if (MultiSelect())
+					if (Over >= 0)
 					{
-						int Over = -1;
-						
-						/*
-						LListItem *h = HitItem(m.x, m.y, &Over);
-						if (m.y < ItemsPos.y1 && FirstVisible == 0)
-						{
-							Over = 0;
-						}
-						else
-						{
-							Iterator<LListItem> Iter(&Items);
-							int n = FirstVisible;
-							for (LListItem *k=Iter[n]; k && k->OnScreen(); k=Iter.Next())
-							{
-								if ((m.y >= k->Pos.y1) && (m.y <= k->Pos.y2))
-								{
-									Over = n;
-									break;
-								}
-								n++;
-							}
-						}
-						*/
+						n = 0;
 
-						if (Over >= 0)
-						{
-							n = 0;
+						int Start = MIN(Over, d->DragData);
+						int End = MAX(Over, d->DragData);
 
-							int Start = MIN(Over, d->DragData);
-							int End = MAX(Over, d->DragData);
-
-							ForAllItems(i)
-							{
-								i->Select(n >= Start && n <= End);
-								n++;
-							}
-						}
-					}
-					else
-					{
 						ForAllItems(i)
 						{
-							// i->Select(m.y >= i->Pos.y1 && m.y <= i->Pos.y2);
-							i->Select(i->Pos.Overlap(m.x, m.y));
+							i->Select(n >= Start && n <= End);
+							n++;
 						}
 					}
 				}
-				break;
-			}
-			case CLICK_ITEM:
-			{
-				LListItem *Cur = Items.ItemAt(d->DragData);
-				if (Cur)
+				else
 				{
-					Cur->OnMouseMove(m);
-					
-					if (IsCapturing() &&
-						(abs(d->DragStart.x-m.x) > DRAG_THRESHOLD ||
-						abs(d->DragStart.y-m.y) > DRAG_THRESHOLD))
+					ForAllItems(i)
 					{
-						Capture(false);
-						OnItemBeginDrag(Cur, m);
-						DragMode = DRAG_NONE;
+						i->Select(i->Pos.Overlap(m.x, m.y));
 					}
 				}
-				break;
 			}
-			default:
-			{
-				List<LListItem> s;
-				if (GetSelection(s))
-				{
-					for (auto c: s)
-					{
-						GMouse ms = m;
-						ms.x -= c->Pos.x1;
-						ms.y -= c->Pos.y1;
-						c->OnMouseMove(ms);
-					}
-				}
-				break;
-			}
+			break;
 		}
-
-		Unlock();
+		case CLICK_ITEM:
+		{
+			LListItem *Cur = Items.ItemAt(d->DragData);
+			if (Cur)
+			{
+				Cur->OnMouseMove(m);
+				
+				if (IsCapturing() &&
+					(abs(d->DragStart.x-m.x) > DRAG_THRESHOLD ||
+					abs(d->DragStart.y-m.y) > DRAG_THRESHOLD))
+				{
+					Capture(false);
+					OnItemBeginDrag(Cur, m);
+					DragMode = DRAG_NONE;
+				}
+			}
+			break;
+		}
+		default:
+		{
+			List<LListItem> s;
+			if (GetSelection(s))
+			{
+				for (auto c: s)
+				{
+					GMouse ms = m;
+					ms.x -= c->Pos.x1;
+					ms.y -= c->Pos.y1;
+					c->OnMouseMove(ms);
+				}
+			}
+			break;
+		}
 	}
+
+	Unlock();
 }
 
 int64 LList::Value()
