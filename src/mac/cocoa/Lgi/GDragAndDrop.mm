@@ -88,7 +88,7 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::
 	return false;
 }
 
-int GDragDropSource::Drag(GView *SourceWnd, int Effect)
+int GDragDropSource::Drag(GView *SourceWnd, int Effect, GSurface *Icon)
 {
 	LgiAssert(SourceWnd);
 	if (!SourceWnd)

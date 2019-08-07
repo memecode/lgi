@@ -182,92 +182,34 @@ LgiFunc void LgiSleep(uint32_t i);
 /// The stardard extension for dynamically linked code
 #define LGI_LIBRARY_EXT				"dylib"
 
-// Carbon user events
-#define GViewThisPtr				'gvtp'
-#define kEventClassUser				'user'
-#define kEventUser					1
-#define kEventParamLgiEvent			'Lgie'
-#define kEventParamLgiA				'Lgia'
-#define kEventParamLgiB				'Lgib'
-/// Base point for system messages.
-#define M_SYSTEM					0
-/// Message that indicates the user is trying to close a top level window.
-#define M_CLOSE						(M_SYSTEM+92)
+enum LDialogIds
+{
+	/// Standard ID for an "Ok" button.
+	/// \sa LgiMsg
+	IDOK = 1,
+	/// Standard ID for a "Cancel" button.
+	/// \sa LgiMsg
+	IDCANCEL,
+	/// Standard ID for a "Yes" button.
+	/// \sa LgiMsg
+	IDYES,
+	/// Standard ID for a "No" button.
+	/// \sa LgiMsg
+	IDNO,
 
-/// Minimum value for application defined message ID's
-#define M_USER						(M_SYSTEM+1000)
-
-/// \brief Mouse enter event
-///
-/// a = bool Inside; // is the mouse inside the client area?\n
-/// b = MAKELONG(x, y); // mouse location
-#define M_MOUSEENTER				(M_USER+100)
-
-/// \brief Mouse exit event
-///
-/// a = bool Inside; // is the mouse inside the client area?\n
-/// b = MAKELONG(x, y); // mouse location
-#define M_MOUSEEXIT					(M_USER+101)
-
-/// \brief GView change notification
-///
-/// a = (GView*) Wnd;\n
-/// b = (int) Flags; // Specific to each GView
-#define M_CHANGE					(M_USER+102)
-
-/// \brief Pass a text message up to the UI to descibe whats happening
-///
-/// a = (GView*) Wnd;\n
-/// b = (char*) Text; // description from window
-#define M_DESCRIBE					(M_USER+103)
-
-// return (bool)
-#define M_WANT_DIALOG_PROC			(M_USER+104)
-
-#define M_MENU						(M_USER+105)
-#define M_COMMAND					(M_USER+106)
-#define M_DRAG_DROP					(M_USER+107)
-
-#define M_TRAY_NOTIFY				(M_USER+108)
-#define M_CUT						(M_USER+109)
-#define M_COPY						(M_USER+110)
-#define M_PASTE						(M_USER+111)
-#define M_PULSE						(M_USER+112)
-#define M_DELETE					(M_USER+113)
-#define M_SET_VISIBLE				(M_USER+114)
-#define M_TEXT_UPDATE_NAME			(M_USER+115)
-
-/// GThreadWork object completed
-///
-/// MsgA = (GThreadOwner*) Owner;
-/// MsgB = (GThreadWork*) WorkUnit;
-#define M_GTHREADWORK_COMPELTE		(M_USER+114)
-
-/// Standard ID for an "Ok" button.
-/// \sa LgiMsg
-#define IDOK						1
-/// Standard ID for a "Cancel" button.
-/// \sa LgiMsg
-#define IDCANCEL					2
-/// Standard ID for a "Yes" button.
-/// \sa LgiMsg
-#define IDYES						3
-/// Standard ID for a "No" button.
-/// \sa LgiMsg
-#define IDNO						4
-
-/// Standard message box with an Ok button.
-/// \sa LgiMsg
-#define MB_OK						5
-/// Standard message box with Ok and Cancel buttons.
-/// \sa LgiMsg
-#define MB_OKCANCEL					6
-/// Standard message box with Yes and No buttons.
-/// \sa LgiMsg
-#define MB_YESNO					7
-/// Standard message box with Yes, No and Cancel buttons.
-/// \sa LgiMsg
-#define MB_YESNOCANCEL				8
+	/// Standard message box with an Ok button.
+	/// \sa LgiMsg
+	MB_OK,
+	/// Standard message box with Ok and Cancel buttons.
+	/// \sa LgiMsg
+	MB_OKCANCEL,
+	/// Standard message box with Yes and No buttons.
+	/// \sa LgiMsg
+	MB_YESNO,
+	/// Standard message box with Yes, No and Cancel buttons.
+	/// \sa LgiMsg
+	MB_YESNOCANCEL,
+};
 
 #define MB_SYSTEMMODAL				0x1000
 
