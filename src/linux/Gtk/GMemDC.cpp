@@ -23,14 +23,13 @@ class GMemDCPrivate
 public:
 	GRect Client;
 	cairo_t *cr;
-	cairo_surface_t *Img;
+	LCairoSurface Img;
 	GColourSpace CreateCs;
 
     GMemDCPrivate()
     {
 		Client.ZOff(-1, -1);
 		cr = NULL;
-		Img = NULL;
 		CreateCs = CsNone;
     }
 
@@ -46,11 +45,7 @@ public:
 			cairo_destroy(cr);
 			cr = NULL;
 		}
-		if (Img)
-		{
-			cairo_surface_destroy(Img);
-			Img = NULL;
-		}
+		Img.Empty();
 	}
 };
 
@@ -78,21 +73,27 @@ GMemDC::~GMemDC()
 	DeleteObj(d);
 }
 
-cairo_surface_t *GMemDC::GetSurface(GRect *r)
+cairo_surface_t *GMemDC::GetSurface()
 {
-	if (!d->Img)
-		return NULL;
-	
-	if (!r)
-		return d->Img;
-	
-	cairo_format_t fmt = cairo_image_surface_get_format(d->Img);
-	int pixel_bytes = GColourSpaceToBits(ColourSpace) >> 3;
-	return cairo_image_surface_create_for_data(	pMem->Base + (r->y1 * pMem->Line) + (r->x1 * pixel_bytes),
-												fmt,
-												r->X(),
-												r->Y(),
-												pMem->Line);
+	return d->Img;
+}
+
+LCairoSurface GMemDC::GetSubImage(GRect &r)
+{
+	LCairoSurface s;
+
+	if (d->Img)
+	{
+		cairo_format_t fmt = cairo_image_surface_get_format(d->Img);
+		int pixel_bytes = GColourSpaceToBits(ColourSpace) >> 3;
+		return cairo_image_surface_create_for_data(	pMem->Base + (r.y1 * pMem->Line) + (r.x1 * pixel_bytes),
+													fmt,
+													r.X(),
+													r.Y(),
+													pMem->Line);
+	}
+
+	return s;
 }
 
 OsPainter GMemDC::Handle()

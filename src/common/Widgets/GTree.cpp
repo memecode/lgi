@@ -13,16 +13,7 @@
 #define DRAG_SCROLL_X		8
 #define DRAG_SCROLL_Y		1
 
-/*
-#ifdef LINUX
-*/
 #define TreeUpdateNow		false
-/*
-#else
-#define TreeUpdateNow		true
-#endif
-*/
-
 #define TREELOCK			LMutex::Auto Lck(d, _FL);
 #define ForAll(Items)		for (auto c : Items)
 

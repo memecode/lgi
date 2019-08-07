@@ -917,6 +917,48 @@ public:
 };
 #endif
 
+#if defined(__GTK_H__)
+class LCairoSurface
+{
+	Gtk::cairo_surface_t *surface;
+
+public:
+	LCairoSurface(Gtk::cairo_surface_t *s = NULL)
+	{
+		surface = s;
+	}
+	
+	~LCairoSurface()
+	{
+		Empty();
+	}
+	
+	void Empty()
+	{
+		if (surface)
+		{
+			cairo_surface_destroy(surface);
+			surface = NULL;
+		}
+	}
+	
+	operator Gtk::cairo_surface_t*()
+	{
+		return surface;
+	}
+	
+	LCairoSurface &operator =(Gtk::cairo_surface_t *s)
+	{
+		if (s != surface)
+		{
+			Empty();
+			surface = s;
+		}
+		return *this;
+	}
+};
+#endif
+
 /// \brief An implemenation of GSurface to draw into a memory bitmap.
 ///
 /// This class uses a block of memory to represent an image. You have direct
@@ -966,7 +1008,14 @@ public:
 		#if defined(__GTK_H__)
 
 			GdcPt2 GetSize();
-			Gtk::cairo_surface_t *GetSurface(GRect *r);
+
+			/// This returns the surface owned by the GMemDC
+			Gtk::cairo_surface_t *GetSurface();
+
+			/// This returns a sub-image, caller is responsible to free via
+			/// calling cairo_surface_destroy
+			LCairoSurface GetSubImage(GRect &r);
+			
 			GColourSpace GetCreateCs();
 			Gtk::GdkPixbuf *CreatePixBuf();
 

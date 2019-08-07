@@ -146,48 +146,6 @@ public:
     virtual const char *GetComponentName() { return NULL; }
 };
 
-#define GDC_RLE_COLOUR				0x0001
-#define GDC_RLE_MONO				0x0002
-#define GDC_RLE_READONLY			0x0004
-#define GDC_RLE_KEY					0x0008		// set if valid
-
-class LgiClass GdcRleDC : public GMemDC
-{
-protected:
-	COLOUR	Key;
-
-	int	Flags;
-	ssize_t	Length;
-	ssize_t	Alloc;
-	uchar	*Data;
-	uchar	**ScanLine;
-
-	bool SetLength(ssize_t Len);
-	bool FindScanLines();
-	void Empty();
-
-public:
-	GdcRleDC();
-	virtual ~GdcRleDC();
-
-	void Move(GdcRleDC *pDC);
-
-	bool Create(int x, int y, GColourSpace cs, int flags = SurfaceCreateNone);
-	bool CreateInfo(int x, int y, GColourSpace cs);
-	void ReadOnly(bool Read);
-	bool ReadOnly();
-	void Mono(bool Mono);
-	bool Mono();
-
-	void Update(int Flags);
-	void Draw(GSurface *Dest, int x, int y);
-
-	ssize_t SizeOf();
-	bool Read(GFile &F);
-	bool Write(GFile &F);
-};
-
-
 ////////////////////////////////////////////////////////////////
 
 /// Factory class for creating filter objects. You should create a static
