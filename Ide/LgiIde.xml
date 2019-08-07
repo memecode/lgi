@@ -92,8 +92,8 @@
 			</Makefile>
 			<Executable>
 				<Linux>
-					<Debug>./Gtk3/build/bin/LgiIde</Debug>
-					<Release>./Gtk3/build/bin/LgiIde</Release>
+					<Debug>./lgiide</Debug>
+					<Release>./lgiide</Release>
 				</Linux>
 				<Windows>
 					<Debug>LgiIde.exe</Debug>

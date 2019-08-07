@@ -8,7 +8,7 @@
 
 CC = gcc
 CPP = g++
-Target = ./Gtk3/build/bin/LgiIde
+Target = ./lgiide
 ifndef Build
 	Build = Debug
 endif
@@ -157,7 +157,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../include/common/GPopup.h \
 	../include/common/GPopupList.h \
 	../include/common/GPrinter.h \
-	../include/common/GProcess.h \
 	../include/common/GProgress.h \
 	../include/common/GProgressDlg.h \
 	../include/common/GProperties.h \
@@ -277,8 +276,8 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../src/common/Lgi/GMru.cpp \
 	../src/common/Lgi/GObject.cpp \
 	../src/common/Lgi/GOptionsFile.cpp \
-	../src/common/Lgi/GProcess.cpp \
 	../src/common/Lgi/GStream.cpp \
+	../src/common/Lgi/GSubProcess.cpp \
 	../src/common/Lgi/GToolTip.cpp \
 	../src/common/Lgi/GTrayIcon.cpp \
 	../src/common/Lgi/GVariant.cpp \
@@ -938,6 +937,10 @@ Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/common/Lgi.h \
 
 ../include/common/GProgress.h : 
 
+../src/common/Lgi/GSubProcess.cpp : ../include/common/Lgi.h \
+	../include/common/GSubProcess.h \
+	../include/common/GToken.h
+
 ../src/common/Gdc2/Font/GFont.cpp : ../include/common/Lgi.h \
 	../include/common/GVariant.h \
 	../include/common/GFontSelect.h \
@@ -1212,8 +1215,6 @@ Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/common/Lgi.h \
 	../include/common/GColour.h \
 	../include/common/GFilter.h
 
-../include/common/GProcess.h : ../include/common/GStream.h
-
 ../include/common/GTree.h : ../include/common/GItemContainer.h
 
 ../include/common/LJson.h : ../include/common/GArray.h \
@@ -1248,12 +1249,6 @@ Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/common/Lgi.h \
 	../include/common/GTableLayout.h \
 	../include/common/GBox.h \
 	../include/common/INet.h
-
-../src/common/Lgi/GProcess.cpp : ../include/common/Lgi.h \
-	../include/common/GProcess.h \
-	../include/common/GToken.h
-
-../include/common/GProcess.h : ../include/common/GStream.h
 
 ../include/common/GCssTools.h : ../include/common/GCss.h
 

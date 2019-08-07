@@ -60,7 +60,6 @@ const char *LinuxLibName()
 	static char lib[64];
 	auto v = GString(LIBPNG_VERSION).Split(".");
 	sprintf_s(lib, sizeof(lib), "libpng%s%s", v[0].Get(), v[1].Get());
-	printf("lib='%s'\n", lib);
 	return lib;
 }
 #endif
