@@ -1185,19 +1185,8 @@ AllDone:
 
 void GWindow::Raise()
 {
-	/*
-	if (_View->handle())
-	{
-		#if defined XWIN
-		XWindowChanges c;
-		c.stack_mode = XAbove;
-		XConfigureWindow(	_View->XDisplay(),
-							_View->handle(),
-							CWStackMode,
-							&c);
-		#endif							
-	}
-	*/
+	if (Wnd)
+		gtk_window_present(Wnd);
 }
 
 
