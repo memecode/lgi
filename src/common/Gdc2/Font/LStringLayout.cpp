@@ -527,7 +527,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 	if (!pDC)
 		return;
 
-	#ifdef WINDOWS
+	#ifdef WINNATIVE
 	GRegion Rgn(rc);
 	#else
 	// Fill the background...
@@ -548,7 +548,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 		GFont *f = s->GetFont();
 		GColour Bk = s->Back.IsTransparent() ? Back : s->Back;
 
-		#ifdef WINDOWS
+		#ifdef WINNATIVE
 		int y = pt.y + s->y;
 		GRect r(pt.x + s->Fx, y,
 				pt.x + s->Fx + s->FX() - 1, y + s->Y() - 1);
@@ -563,7 +563,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 		if (Enabled)
 		{
 			f->Colour(Focused ? FocusFore : s->Fore, Bk);
-			#ifdef WINDOWS
+			#ifdef WINNATIVE
 			s->Draw(pDC, r.x1, r.y1, &r);
 			#else
 			GdcPt2 k((pt.x << Shift) + s->Fx, (pt.y + s->y) << Shift);
@@ -574,7 +574,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 		{
 			f->Transparent(Bk.IsTransparent());
 			f->Colour(GColour(LC_LIGHT, 24), Bk);
-			#ifdef WINDOWS
+			#ifdef WINNATIVE
 			s->Draw(pDC, r.x1+1, r.y1+1, &r);
 			#else
 			GdcPt2 k(((pt.x+1) << Shift) + s->Fx, (pt.y + 1 + s->y) << Shift);
@@ -583,7 +583,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 				
 			f->Transparent(true);
 			f->Colour(LC_LOW, LC_MED);
-			#ifdef WINDOWS
+			#ifdef WINNATIVE
 			s->Draw(pDC, r.x1, r.y1, &r);
 			#else
 			s->FDraw(pDC, (pt.x << Shift) + s->Fx, (pt.y + s->y) << Shift);
@@ -591,7 +591,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 		}
 	}
 
-	#ifdef WINDOWS
+	#ifdef WINNATIVE
 	// Fill any remaining area with background...
 	if (!Back.IsTransparent())
 	{
