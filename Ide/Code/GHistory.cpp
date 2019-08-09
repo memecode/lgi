@@ -33,7 +33,7 @@ public:
 	{
 		if (Lst)
 		{
-			#if !defined(__GTK_H__)
+			#if LGI_VIEW_HANDLE
 			if (!Lst->Handle())
 			#endif
 				AttachChildren();

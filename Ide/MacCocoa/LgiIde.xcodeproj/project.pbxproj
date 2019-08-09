@@ -33,9 +33,12 @@
 		345B2117217969700079E3C9 /* GDebugContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FD2179696F0079E3C9 /* GDebugContext.cpp */; };
 		345B2118217969700079E3C9 /* IdeProjectSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */; };
 		345B2119217969700079E3C9 /* MissingFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FF217969700079E3C9 /* MissingFiles.cpp */; };
-		34CAF47F22D3771800BE529A /* icons.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211D217969D30079E3C9 /* icons.png */; };
-		34CAF48022D3771C00BE529A /* LgiIde.lr8 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211C217969D30079E3C9 /* LgiIde.lr8 */; };
-		34CAF48122D3771E00BE529A /* mac-icon.icns in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211B217969D30079E3C9 /* mac-icon.icns */; };
+		34C4FD2A22FD7EB800C4BECB /* icons.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211D217969D30079E3C9 /* icons.png */; };
+		34C4FD2B22FD7EC100C4BECB /* LgiIde.lr8 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211C217969D30079E3C9 /* LgiIde.lr8 */; };
+		34C4FD2C22FD7EC700C4BECB /* mac-icon.icns in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211B217969D30079E3C9 /* mac-icon.icns */; };
+		34C4FD3122FDB28400C4BECB /* libpng15.15.4.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C4FD2D22FDB24800C4BECB /* libpng15.15.4.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		34C4FD3422FDB58B00C4BECB /* cmds-16px.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C4FD3222FDB50D00C4BECB /* cmds-16px.png */; };
+		34C4FD3522FDB58B00C4BECB /* cmds-32px.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C4FD3322FDB50D00C4BECB /* cmds-32px.png */; };
 		34D21CD821797815003D1EA6 /* GExeCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CD721797815003D1EA6 /* GExeCheck.cpp */; };
 		34D21CDA21797833003D1EA6 /* GLexCpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CD921797833003D1EA6 /* GLexCpp.cpp */; };
 		34D21CDE21797856003D1EA6 /* GOptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CDB21797856003D1EA6 /* GOptionsFile.cpp */; };
@@ -67,15 +70,27 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		34C4FD3022FDB27B00C4BECB /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+				34C4FD3122FDB28400C4BECB /* libpng15.15.4.0.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		34CAF47E22D3771500BE529A /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 7;
 			files = (
-				34CAF47F22D3771800BE529A /* icons.png in CopyFiles */,
-				34CAF48022D3771C00BE529A /* LgiIde.lr8 in CopyFiles */,
-				34CAF48122D3771E00BE529A /* mac-icon.icns in CopyFiles */,
+				34C4FD3422FDB58B00C4BECB /* cmds-16px.png in CopyFiles */,
+				34C4FD3522FDB58B00C4BECB /* cmds-32px.png in CopyFiles */,
+				34C4FD2C22FD7EC700C4BECB /* mac-icon.icns in CopyFiles */,
+				34C4FD2B22FD7EC100C4BECB /* LgiIde.lr8 in CopyFiles */,
+				34C4FD2A22FD7EB800C4BECB /* icons.png in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -133,6 +148,9 @@
 		345B211B217969D30079E3C9 /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../Resources/mac-icon.icns"; sourceTree = "<group>"; };
 		345B211C217969D30079E3C9 /* LgiIde.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file; name = LgiIde.lr8; path = ../Resources/LgiIde.lr8; sourceTree = "<group>"; };
 		345B211D217969D30079E3C9 /* icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icons.png; path = ../Resources/icons.png; sourceTree = "<group>"; };
+		34C4FD2D22FDB24800C4BECB /* libpng15.15.4.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng15.15.4.0.dylib; path = ../../../../../CodeLib/libpng/build/libpng15.15.4.0.dylib; sourceTree = "<group>"; };
+		34C4FD3222FDB50D00C4BECB /* cmds-16px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cmds-16px.png"; sourceTree = "<group>"; };
+		34C4FD3322FDB50D00C4BECB /* cmds-32px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cmds-32px.png"; sourceTree = "<group>"; };
 		34D21CD721797815003D1EA6 /* GExeCheck.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GExeCheck.cpp; path = ../../src/common/General/GExeCheck.cpp; sourceTree = "<group>"; };
 		34D21CD921797833003D1EA6 /* GLexCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLexCpp.cpp; path = ../../src/common/Coding/GLexCpp.cpp; sourceTree = "<group>"; };
 		34D21CDB21797856003D1EA6 /* GOptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GOptionsFile.cpp; path = ../../src/common/Lgi/GOptionsFile.cpp; sourceTree = "<group>"; };
@@ -197,6 +215,7 @@
 		345B20CB217967B70079E3C9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				34C4FD2D22FDB24800C4BECB /* libpng15.15.4.0.dylib */,
 				345B20C3217967760079E3C9 /* LgiCocoa.xcodeproj */,
 			);
 			name = Frameworks;
@@ -213,11 +232,14 @@
 		345B211A217969C50079E3C9 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				34C4FD3222FDB50D00C4BECB /* cmds-16px.png */,
+				34C4FD3322FDB50D00C4BECB /* cmds-32px.png */,
 				345B211D217969D30079E3C9 /* icons.png */,
 				345B211C217969D30079E3C9 /* LgiIde.lr8 */,
 				345B211B217969D30079E3C9 /* mac-icon.icns */,
 			);
-			path = Resources;
+			name = Resources;
+			path = ../Resources;
 			sourceTree = "<group>";
 		};
 		345B2121217969F10079E3C9 /* Projects */ = {
@@ -324,6 +346,7 @@
 				345B2068217965E80079E3C9 /* Sources */,
 				345B2069217965E80079E3C9 /* Frameworks */,
 				34CAF47E22D3771500BE529A /* CopyFiles */,
+				34C4FD3022FDB27B00C4BECB /* CopyFiles */,
 			);
 			buildRules = (
 			);

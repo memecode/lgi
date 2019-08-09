@@ -115,7 +115,7 @@ bool GLibrary::Load(const char *File, bool Quiet)
 					{
 						// Explicitly try the full path to the executable folder
 						char p[MAX_PATH];
-						#if defined(MAC) && defined(__GTK_H__)
+						#if LGI_COCOA || defined(__GTK_H__)
 						LgiMakePath(p, sizeof(p), LgiArgsAppPath, "..");
 						#else
 						LgiGetExePath(p, sizeof(p));

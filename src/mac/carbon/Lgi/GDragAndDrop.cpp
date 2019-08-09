@@ -108,7 +108,7 @@ LgiDragSendDataFunction
 }
 */
 
-int GDragDropSource::Drag(GView *SourceWnd, int Effect)
+int GDragDropSource::Drag(GView *SourceWnd, int Effect, GSurface *Icon)
 {
 	LgiAssert(SourceWnd);
 	if (!SourceWnd)

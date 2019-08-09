@@ -205,7 +205,7 @@ void GSplitter::Value(int64 s)
 	}
 }
 
-#ifndef __GTK_H__
+#if LGI_VIEW_HANDLE
 GViewI *GSplitter::FindControl(OsView hCtrl)
 {
 	GViewI *c = 0;

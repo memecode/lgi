@@ -676,7 +676,7 @@ void VcFolder::Select(bool b)
 		d->Lst->UpdateAllItems();
 
 		PROF("GetCur");
-		GetCurrentRevision(false);
+		GetCurrentRevision();
 	}
 }
 

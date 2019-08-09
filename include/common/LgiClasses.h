@@ -362,6 +362,8 @@ public:
 
 	#ifdef __GTK_H__
 		void OnDetach(GViewI *View);
+	#endif
+	#if !LGI_VIEW_HANDLE
 		bool PostEvent(GViewI *View, int Msg, GMessage::Param a = 0, GMessage::Param b = 0);
 	#endif
 };
@@ -456,7 +458,7 @@ private:
 protected:
 	class GViewPrivate	*d;
 
-	#ifndef __GTK_H__
+	#if LGI_VIEW_HANDLE
 	OsView				_View; // OS specific handle to view object
 	#endif
 
@@ -600,11 +602,8 @@ public:
 	virtual ~GView();
 
 	/// Returns the OS handle of the view
-	#if !defined(__GTK_H__)
-	OsView Handle()
-	{
-		return _View;
-	}
+	#if LGI_VIEW_HANDLE
+	OsView Handle() { return _View; }
 	#endif
 
 	/// Returns the ptr to a GView
@@ -902,7 +901,7 @@ public:
 	virtual int64 Value() { return 0; }
 	/// Sets the integer representation of the view's contents
 	virtual void Value(int64 i) {}
-	#ifndef __GTK_H__
+	#if LGI_VIEW_HANDLE
 	/// Find a view by it's os handle
 	virtual GViewI *FindControl(OsView hnd);
 	#endif
@@ -1205,7 +1204,7 @@ public:
 	#endif
 	
 	GViewI *FindControl(int Id) override;
-	#ifndef __GTK_H__
+	#if LGI_VIEW_HANDLE
 	GViewI *FindControl(OsView hnd) override { return GView::FindControl(hnd); }
 	#endif
 };
@@ -1595,7 +1594,7 @@ public:
 	/// Set the bar size
 	void BarSize(int i);
 
-	#ifndef __GTK_H__
+	#if LGI_VIEW_HANDLE
 	GViewI *FindControl(OsView hCtrl) override;
 	#endif
 

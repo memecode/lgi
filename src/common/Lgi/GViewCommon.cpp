@@ -229,7 +229,7 @@ GView::GView(OsView view)
 	d = new GViewPrivate;
 	#ifdef LGI_SDL
 	_View = this;
-	#elif !defined __GTK_H__
+	#elif LGI_VIEW_HANDLE
 	_View = view;
 	#endif
 	_Window = 0;
@@ -749,7 +749,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 		GView *w = i->GetGView();
 		if (w && w->Visible())
 		{
-			#ifndef LGI_SDL
+			#if LGI_VIEW_HANDLE
 			if (!w->Handle())
 			#endif
 			{
@@ -803,7 +803,7 @@ void GView::SendNotify(int Data)
 	if (n)
 	{
 		if (
-			#ifndef __GTK_H__
+			#if LGI_VIEW_HANDLE
 			!_View ||
 			#endif
 			InThread())
@@ -1098,12 +1098,12 @@ GViewI *GView::FindReal(GdcPt2 *Offset)
 		Offset->y = 0;
 	}
 
-	#ifdef __GTK_H__
+	#if !LGI_VIEW_HANDLE
 	GViewI *w = GetWindow();
 	#endif
 	GViewI *p = d->Parent;
 	while (p &&
-		#ifdef __GTK_H__
+		#if !LGI_VIEW_HANDLE
 		p != w
 		#else
 		!p->Handle()
@@ -1120,7 +1120,7 @@ GViewI *GView::FindReal(GdcPt2 *Offset)
 	}
 	
 	if (p &&
-		#ifdef __GTK_H__
+		#if !LGI_VIEW_HANDLE
 		p == w
 		#else
 		p->Handle()
@@ -1224,7 +1224,7 @@ void GView::Enabled(bool i)
 	if (!i) SetFlag(GViewFlags, GWF_DISABLED);
 	else ClearFlag(GViewFlags, GWF_DISABLED);
 
-	#ifndef __GTK_H__
+	#if LGI_VIEW_HANDLE
 	if (_View)
 	{
 		#if WINNATIVE
@@ -1276,7 +1276,7 @@ void GView::Visible(bool v)
 	if (v) SetFlag(GViewFlags, GWF_VISIBLE);
 	else ClearFlag(GViewFlags, GWF_VISIBLE);
 
-	#ifndef __GTK_H__
+	#if LGI_VIEW_HANDLE
 	if (_View)
 	{
 		#if WINNATIVE
@@ -1337,10 +1337,7 @@ bool GView::Focus()
 	#elif defined(MAC) && !defined(LGI_SDL)
 	if (w)
 	{
-		#if COCOA
-		LAutoPool Pool;
-		if (_View)
-			Has = [NSView focusView] == _View.p;
+		#if LGI_COCOA
 		#else
 		ControlRef Cur;
 		OSErr e = GetKeyboardFocus(w->WindowHandle(), &Cur);
@@ -1373,7 +1370,7 @@ void GView::Focus(bool i)
 	if (Wnd)
 		Wnd->SetFocus(this, i ? GWindow::GainFocus : GWindow::LoseFocus);
 
-	#ifndef __GTK_H__
+	#if LGI_VIEW_HANDLE
 	if (_View)
 	#endif
 	{
@@ -1418,10 +1415,6 @@ void GView::Focus(bool i)
 				OsWindow osw = w->WindowHandle();
 				if (osw)
 				{
-					if (i)
-						[osw.p makeFirstResponder:_View.p];
-					else
-						[osw.p makeFirstResponder:nil];
 				}
 			}
 
@@ -1912,7 +1905,7 @@ bool GView::WindowVirtualOffset(GdcPt2 *Offset)
 		
 		for (GViewI *Wnd = this; Wnd; Wnd = Wnd->GetParent())
 		{
-			#ifdef __GTK_H__
+			#if !LGI_VIEW_HANDLE
 			auto IsWnd = dynamic_cast<GWindow*>(Wnd);
 			if (!IsWnd)
 			#else
@@ -2069,7 +2062,13 @@ bool GView::InThread()
 		OsThreadId Gui = LgiApp ? LgiApp->GetGuiThreadId() : 0;
 		
 		if (Gui != Me)
-		    printf("%s:%i - Out of thread: %x, %x\n", _FL, Gui, Me);
+		    printf( "%s:%i - Out of thread: "
+				    #ifdef LGI_COCOA
+					"%llx, %llx"
+				    #else
+					"%x, %x"
+					#endif
+		    		"\n", _FL, Gui, Me);
 		
 		return Gui == Me;
 
@@ -2088,7 +2087,7 @@ bool GView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 			int asd=0;
 		}
 		return Res != 0;
-	#elif defined(__GTK_H__)
+	#elif !LGI_VIEW_HANDLE
 		return LgiApp->PostEvent(this, Cmd, a, b);
 	#else
 		if (_View)
@@ -2146,7 +2145,7 @@ bool GView::Name(const char *n)
 {
 	GBase::Name(n);
 
-	#ifndef __GTK_H__
+	#if LGI_VIEW_HANDLE
 	if (_View)
 	{
 		#if WINNATIVE

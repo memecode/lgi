@@ -345,67 +345,7 @@ void GLayout::SetScrollPos(int x, int y)
 
 bool GLayout::Attach(GViewI *p)
 {
-	bool v = IsValid();
-	bool Status = false;
-
-	// printf("%s:%i v=%p p=%p, _View=%p\n", _FL, v, p, _View);
-	if (v && p)
-	{
-		// Attach scroll wnd first...
-		if (_View)
-		{
-			LgiAssert(!IsScrollView(_View));
-			#if 0
-			RealWnd = _View;
-			#endif
-		}
-		
-		_View = CreateScrollView(HScroll && HScroll->Valid(), VScroll && VScroll->Valid());
-		// printf("	%s:%i - Attaching, create new ScrollView=%p\n", _FL, _View);
-			
-		if (_View && AttachHnd(p, _View))
-		{
-			// Then attach this view as a child
-			#if COCOA
-			
-			_View.p = [[NSView alloc] initWithFrame:NSZeroRect];
-			
-			#else
-			
-			OsView ScrollWnd = _View;
-			if (_CreateCustomView())
-			{
-				RealWnd = _View;
-				_View = ScrollWnd;
-				if (AttachHnd(this, RealWnd))
-				{
-					SetControlVisibility(_View, Visible(), true);
-					SetControlVisibility(RealWnd, Visible(), true);
-					
-					SetParent(p);
-					if (!p->HasView(this))
-						p->AddView(this);
-					
-					OnCreate();
-					OnAttach();
-					Status = true;
-				}
-				else printf("%s:%i - AttachHnd failed.\n", _FL);
-			}
-			else printf("%s:%i - CreateCustomView failed\n", _FL);
-			
-			#endif
-			
-			SetPos(Pos);
-		}
-		else printf("%s:%i - AttachHnd failed.\n", _FL);
-	}
-	else
-	{
-		// Do normal attach because we not showing the scroll bars yet...
-		Status = GView::Attach(p);
-	}
-	return Status;
+	return GView::Attach(p);
 }
 
 bool GLayout::Detach()
@@ -596,34 +536,6 @@ GRect &GLayout::GetClient(bool ClientSpace)
 {
 	static GRect r;
 	r = GView::GetClient(ClientSpace);
-
-	if (_View)
-	{
-		#if 0
-		for (HIViewRef c = HIViewGetFirstSubview(_View); c; c = HIViewGetNextView(c))
-		{
-			char Buf[256] = "";
-			if (!GetControlProperty(c, 'meme', 'type', sizeof(Buf), 0, Buf) &&
-				!stricmp(Buf, ScrollBarName))
-			{
-				HIRect rc;
-				HIViewGetFrame(c, &rc);
-				if (rc.size.height > rc.size.width)
-				{
-					// Vertical
-					r.x2 = rc.origin.x - 1;
-				}
-				else
-				{
-					// Horizontal
-					r.y2 = rc.origin.y - 1;
-				}
-			}
-		}
-		#endif
-	}
-
-	// printf("%s::GetClient %s\n", GetClass(), r.GetStr());
 	return r;
 }
 

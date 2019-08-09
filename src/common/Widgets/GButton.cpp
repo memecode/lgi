@@ -343,7 +343,7 @@ void GButton::OnClick()
 		GViewI *target = n ? n : p;
 		if (target)
 		{
-			#ifdef __GTK_H__
+			#if !LGI_VIEW_HANDLE
 			if (1)
 			#else
 			if (Handle())

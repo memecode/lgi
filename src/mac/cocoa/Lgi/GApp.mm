@@ -514,6 +514,11 @@ GApp::~GApp()
 	TheApp = 0;
 }
 
+bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b)
+{
+	return false;
+}
+
 GApp *GApp::ObjInstance()
 {
 	return TheApp;

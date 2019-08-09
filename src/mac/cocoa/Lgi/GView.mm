@@ -174,25 +174,6 @@ GView *&GView::PopupChild()
 	return d->Popup;
 }
 
-GViewI *_Find(GViewI *v, OsView h)
-{
-	if (v->Handle() == h)
-		return v;
-	
-	GViewI *r = 0;
-	GViewIterator *i = v->IterateViews();
-	if (i)
-	{
-		for (GViewI *c = i->First(); c && !r; c = i->Next())
-		{
-			r = _Find(c, h);
-		}
-		DeleteObj(i);
-	}
-	
-	return r;
-}
-
 bool GView::_Mouse(GMouse &m, bool Move)
 {
 	#if 0
@@ -352,13 +333,14 @@ GRect GView::Flip(GRect p)
 
 void GView::OnCocoaDealloc()
 {
-	_View.p = nil;
 }
 
 void GView::OnCocoaLayout()
 {
 	LAutoPool Pool;
 	GRect f = Flip(Pos);
+	
+	/*
 	GRect r = _View.p.frame;
 	if (f != r)
 	{
@@ -374,6 +356,7 @@ void GView::OnCocoaLayout()
 		
 		OnPosChange();
 	}
+	*/
 
 	/*
 	GAutoPtr<GViewIterator> views(self.v->IterateViews());
@@ -397,175 +380,31 @@ void GView::OnCocoaLayout()
 
 bool GView::SetPos(GRect &p, bool Repaint)
 {
-	LAutoPool Pool;
 	Pos = p;
-
-	if (_View)
-	{
-		int o = 0;
-		
-		if (d->Parent && (d->Parent->Sunken() || d->Parent->Raised()))
-		{
-			GView *p = dynamic_cast<GView*>(d->Parent);
-			if (p)
-				o = p->_BorderSize;
-		}
-
-		GRect f = Flip(Pos);
-		GRect Cur = _View.p.frame;
-		if (Cur != f)
-		{
-			[_View.p setFrame:f];
-			OnPosChange();
-		}
-	}
-	else if (GetParent())
-		OnPosChange();
+	OnPosChange();
 
 	return true;
 }
 
-bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
+bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 {
-	LAutoPool Pool;
+	GRect r;
+	if (rc)
+		r = *rc;
+	else
+		r = GetClient();
+	
 	for (GViewI *v = this; v; v = v->GetParent())
 	{
 		if (!v->Visible())
 			return true;
-	}
-	
-	if (r && !r->Valid())
-		return false;
 
-	#if 1
-	
-	if (_View)
-	{
-		[_View.p setNeedsDisplay:YES];
-		return true;
-	}
-	
-	#else
-	
-// printf("Inval %p,%s,%p r=%s repaint=%i\n", this, GetClassName(), _View, r?r->GetStr():0, Repaint);
-	if (_View || WindowHandle())
-	{
-		GRect Client = Frame ? GView::GetPos() : GView::GetClient();
-		HIViewRef ViewRef = 0;
-		if (WindowHandle())
-		{
-			OSStatus e = HIViewFindByID(HIViewGetRoot(WindowHandle()), kHIViewWindowContentID, &ViewRef);
-			if (e)
-			{
-				LgiTrace("%s:%i - Getting content view failed (e=%i)\n", __FILE__, __LINE__, e);
-			}
-		}
-		else
-		{
-			ViewRef = _View;
-		}
-		
-		if (Repaint)
-		{
-			static bool Repainting = false;
-			if (!Repainting)
-			{
-				Repainting = true;
-				if (r)
-				{
-					GRect cr = *r;
-					cr.Offset(Client.x1, Client.y1);
-					
-					RgnHandle a = NewRgn();
-					SetRectRgn(a, cr.x1, cr.y1, cr.x2, cr.y2);
-					OSStatus e = HIViewSetNeedsDisplayInRegion(ViewRef, a, true);
-					DisposeRgn(a);
-					if (e)
-					{
-						LgiTrace("%s:%i - HIViewSetNeedsDisplay failed (%i)\n", __FILE__, __LINE__, e);
-					}
-					else
-					{
-						printf("HIViewSetNeedsDisplayInRegion(%s) on %s\n", r->GetStr(), GetClassName());
-					}
-				}
-				else
-				{
-					Rect a = GetClient();
-					OSStatus e = HIViewSetNeedsDisplay(ViewRef, true);
-					if (e)
-					{
-						LgiTrace("%s:%i - HIViewSetNeedsDisplay failed (%i)\n", __FILE__, __LINE__, e);
-					}
-					else
-					{
-						printf("HIViewSetNeedsDisplay() on %s\n", GetClassName());
-					}
-				}
-				
-				// HiViewRender(ViewRef);
-				
-				Repainting = false;
-			}
-		}
-		else
-		{
-			if (r)
-			{
-				GRect cr = *r;
-				cr.Offset(Client.x1, Client.y1);
-				Rect a = cr;
-				OSStatus e = HIViewSetNeedsDisplay(ViewRef, true);
-
-				if (!e)
-				{
-					printf("HIViewSetNeedsDisplay() on %s\n", GetClassName());
-				}
-			}
-			else
-			{
-				OSStatus e = HIViewSetNeedsDisplay(ViewRef, true);
-
-				if (!e)
-				{
-					printf("HIViewSetNeedsDisplay() on %s\n", GetClassName());
-				}
-			}
-		}
-		
-		return true;
-	}
-	#endif
-
-	else
-	{
-		GRect Up;
-		GViewI *p = this;
-
-		if (r)
-		{
-			Up = *r;
-		}
-		else
-		{
-			Up.Set(0, 0, Pos.X()-1, Pos.Y()-1);
-		}
-
-		while (p && !dynamic_cast<GWindow*>(p) && !p->Handle())
-		{
-			GRect r = p->GetPos();
-			Up.Offset(r.x1, r.y1);
-			p = p->GetParent();
-		}
-
-		if (p && p->Handle())
-		{
-			LgiAssert(p != this);
-				
-			return p->Invalidate(&Up, Repaint);
-		}
+		auto p = v->GetPos();
+		r.Offset(p.x1, p.y1);
 	}
 
+	// FIXME: real invalidate here...
+	
 	return false;
 }
 
@@ -671,10 +510,8 @@ void GView::PointToView(GdcPt2 &p)
 
 bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 {
-	if (_View || !GetParent())
-	{
-		return true;
-	}
+	if (!GetParent())
+		return false;
 	else if (GetParent())
 	{
 		bool s = GetParent()->GetMouse(m, ScreenCoords);
@@ -698,9 +535,6 @@ bool GView::IsAttached()
 	if (GetWindow() == this)
 		return WindowHandle() != 0;
 
-	if (_View)
-		return [_View.p window] != nil;
-	
 	return false;
 }
 
@@ -901,32 +735,8 @@ bool GView::_Attach(GViewI *parent)
 		NSView *ph = nil;
 		if (w)
 			ph = w->WindowHandle().p.contentView;
-		else
-			ph = p->Handle().p;
 
-		LgiAssert(ph);
-
-		if (!_View)
-		{
-			_View.p = [[LCocoaView alloc] init:this];
-		}
-		
-		if (!_View)
-			return false;
-		
-		if (_View.p.superview)
-		{
-			// Already atteched?
-			LgiAssert(0);
-		}
-		else
-		{
-			GRect f = Flip(Pos);
-			[_View.p setFrame:f];
-			[ph addSubview:_View.p];
-
-			OnCreate();
-		}
+		OnCreate();
 	}
 	else
 	{
@@ -995,12 +805,6 @@ void GView::_Delete()
 	{
 		int asd=0;
 	}
-	
-	if (_View)
-	{
-		[_View.p release];
-		_View.p = nil;
-	}
 }
 
 bool GView::Detach()
@@ -1017,11 +821,6 @@ bool GView::Detach()
 		_Window = NULL;
 	}
 
-	if (_View)
-	{
-		[_View.p removeFromSuperview];
-	}
-	
 	if (d->Parent)
 	{
 		// Remove the view from the parent
@@ -1045,24 +844,6 @@ bool GView::Detach()
 	Status = true;
 
 	return Status;
-}
-
-GViewI *GView::FindControl(OsView hCtrl)
-{
-	if (Handle() == hCtrl)
-	{
-		return this;
-	}
-
-	for (auto c : Children)
-	{
-		GViewI *Ctrl = c->FindControl(hCtrl);
-		if (Ctrl)
-		{
-			return Ctrl;
-		}
-	}
-	return 0;
 }
 
 ////////////////////////////////

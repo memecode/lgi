@@ -101,6 +101,7 @@ public:
 #define POSIX						1
 #define LGI_COCOA					1
 #define LGI_64BIT					1
+#define LGI_VIEW_HANDLE				0
 
 // Process
 typedef int							OsProcess;

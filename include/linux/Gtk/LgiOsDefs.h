@@ -65,6 +65,7 @@
 	#endif
 	#endif
 #endif
+#define LGI_VIEW_HANDLE					0
 
 #undef stricmp
 

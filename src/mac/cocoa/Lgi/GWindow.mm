@@ -29,6 +29,7 @@ public:
 class GWindowContent : public GView
 {
 	GWindow *w;
+	OsView _View;
 
 public:
 	const char *GetClass() { return "GWindowContent"; }
@@ -240,8 +241,10 @@ public:
 	if (w && w.d)
 	{
 		w.d->OnResize();
+		/* FIXME
 		if (w.content)
 			[w.content->Handle().p layout];
+		*/
 	}
 }
 
@@ -502,7 +505,8 @@ void GWindow::Quit(bool DontDelete)
 		LgiCloseApp();
 	}
 	
-	d->DeleteWhenDone = !DontDelete;
+	if (d)
+		d->DeleteWhenDone = !DontDelete;
 	if (Wnd)
 	{
 		SetDragHandlers(false);

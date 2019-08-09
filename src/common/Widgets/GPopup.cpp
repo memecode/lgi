@@ -435,7 +435,7 @@ void GMouseHook::TrackClick(GView *v)
 	#ifdef MAC
 	if (v)
 	{
-		#ifdef __GTK_H__
+		#if !LGI_VIEW_HANDLE
 		if (v->IsAttached())
 		#else
 		d->ViewHandle = v->Handle();

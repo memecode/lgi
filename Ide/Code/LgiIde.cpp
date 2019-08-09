@@ -1519,7 +1519,7 @@ public:
 	}
 };
 
-#ifdef COCOA
+#if 0// def COCOA
 #define Chk printf("%s:%i - Cnt=%i\n", LgiGetLeaf(__FILE__), __LINE__, (int)WindowHandle().p.retainCount)
 #else
 #define Chk

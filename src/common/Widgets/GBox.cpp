@@ -679,7 +679,7 @@ void GBox::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 	#endif
 	
 	d->Dirty = true;
-	#ifndef __GTK_H__
+	#if !LGI_VIEW_HANDLE
 	if (Handle())
 	#endif
 		PostEvent(M_CHILDREN_CHANGED);
