@@ -322,12 +322,12 @@ public:
 		SendNotify(GNotifyDocChanged);
 	}
 
-	bool OnContextMenuCreate(struct GTagHit &Hit, GSubMenu &RClick)
+	bool OnContextMenuCreate(struct GTagHit &Hit, LSubMenu &RClick)
 	{
 		RClick.AppendSeparator();
 		RClick.AppendItem("Copy Original Source", IDM_COPY_ORIGINAL_SOURCE);
 		
-		GSubMenu *s = RClick.AppendSub("Save State");
+		LSubMenu *s = RClick.AppendSub("Save State");
 		s->AppendItem("To Clipboard", IDM_SAVE_CLIP);
 		s->AppendItem("To File", IDM_SAVE_FILE);
 

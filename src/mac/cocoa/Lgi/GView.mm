@@ -331,53 +331,6 @@ GRect GView::Flip(GRect p)
 	return p;
 }
 
-void GView::OnCocoaDealloc()
-{
-}
-
-void GView::OnCocoaLayout()
-{
-	LAutoPool Pool;
-	GRect f = Flip(Pos);
-	
-	/*
-	GRect r = _View.p.frame;
-	if (f != r)
-	{
-		auto Parent = GetParent();
-		if (Parent)
-		{
-			// Unflip
-			GRect pr = Parent->GetClient(false);
-			int y1 = pr.y2 - r.y2;
-			r.Offset(0, pr.y1 + y1 - r.y1);
-		}
-		Pos = r;
-		
-		OnPosChange();
-	}
-	*/
-
-	/*
-	GAutoPtr<GViewIterator> views(self.v->IterateViews());
-	printf("%s.layout %i %s\n", self.v->GetClass(), (int)views->Length(), self.v->GetPos().GetStr());
-	for (auto c = views->First(); c; c = views->Next())
-	{
-		OsView h = c->Handle();
-		if (h)
-		{
-			GRect Flip = c->GetPos();
-			if (h.p.superview)
-				Flip = LFlip(h.p.superview, Flip);
-			[h.p setFrame:Flip];
-			[h.p layout];
-		}
-	}
-	
-	// [nsv layoutSubtreeIfNeeded];
-	*/
-}
-
 bool GView::SetPos(GRect &p, bool Repaint)
 {
 	Pos = p;
@@ -800,11 +753,6 @@ void GView::_Delete()
 	}
 	
 	Detach();
-
-	if (d->ClassName.Equals("GTabView"))
-	{
-		int asd=0;
-	}
 }
 
 bool GView::Detach()

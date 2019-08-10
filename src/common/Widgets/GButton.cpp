@@ -344,7 +344,7 @@ void GButton::OnClick()
 		if (target)
 		{
 			#if !LGI_VIEW_HANDLE
-			if (1)
+			if (IsAttached())
 			#else
 			if (Handle())
 			#endif

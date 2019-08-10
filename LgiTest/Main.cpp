@@ -230,8 +230,15 @@ public:
 
 	void OnPaint(GSurface *pDC)
 	{
+		auto c = GetClient();
+		
 		pDC->Colour(LC_MED, 24);
 		pDC->Rectangle();
+		
+		#if 0
+		pDC->Colour(GColour::Red);
+		pDC->Line(0, 0, c.X()-1, c.Y()-1);
+		#endif
 	}
 	
 	int OnNotify(GViewI *Ctrl, int Flags)

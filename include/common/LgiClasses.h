@@ -528,8 +528,6 @@ protected:
 public:
 	GdcPt2 Flip(GdcPt2 p);
 	GRect Flip(GRect p);
-	void OnCocoaLayout();
-	void OnCocoaDealloc();
 protected:
 	#elif defined(LGI_CARBON)
 	OsView _CreateCustomView();
@@ -579,7 +577,7 @@ protected:
 	friend class GViewIter;
 	List<GViewI>	Children;
 
-#ifdef LGI_SDL
+#if defined(LGI_SDL) || defined(LGI_COCOA)
 public:
 #endif
 	virtual void	_Paint(GSurface *pDC = NULL, GdcPt2 *Offset = NULL, GRect *Update = NULL);

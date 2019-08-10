@@ -1809,7 +1809,7 @@ void LList::OnMouseMove(GMouse &m)
 				{
 					int Over = -1;
 					
-					LListItem *h = HitItem(m.x, m.y, &Over);
+					HitItem(m.x, m.y, &Over);
 					if (m.y < ItemsPos.y1 && FirstVisible == 0)
 					{
 						Over = 0;

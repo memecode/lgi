@@ -727,11 +727,11 @@ public:
 			LgiAssert(0);
 		}
 		
+		/*
 		char PixEnc[256];
 		if (CFStringGetCString(pixEnc, PixEnc, sizeof(PixEnc), kCFStringEncodingUTF8))
-		{
 			printf("Cs = '%s'\n", PixEnc);
-		}
+		*/
 		
 		// Palette information
 		GammaCorrection = 1.0;

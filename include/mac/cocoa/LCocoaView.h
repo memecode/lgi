@@ -9,13 +9,14 @@
 #ifndef LCocoaView_h
 #define LCocoaView_h
 
-// This class wraps a Cocoa NSView and redirects all the calls to LGI's GView object.
+// This class wraps a Cocoa NSView and redirects all the calls to LGI's GWindow object.
+//
 @interface LCocoaView : NSView
 {
 }
-@property GView *v;
-@property GString Cls;
-- (id)init:(GView*)view;
+@property GWindow *w;
+@property GString WndClass;
+- (id)init:(GWindow*)wnd;
 - (void)dealloc;
 - (void)drawRect:(NSRect)dirtyRect;
 - (void)layout;

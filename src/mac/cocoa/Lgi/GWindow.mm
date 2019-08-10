@@ -26,39 +26,6 @@ public:
 	GView *Target;
 };
 
-class GWindowContent : public GView
-{
-	GWindow *w;
-	OsView _View;
-
-public:
-	const char *GetClass() { return "GWindowContent"; }
-
-	GWindowContent(GWindow *wnd)
-	{
-		w = wnd;
-		// printf("%s:%i - w=%p %s\n", _FL, w, w->GetClass());
-	}
-	
-	void OnPaint(GSurface *pDC)
-	{
-		// printf("%s:%i, paint c=%i\n", _FL, (int) w->WindowHandle().p.retainCount);
-		w->OnPaint(pDC);
-	}
-	
-	GWindowContent &operator=(NSView *v)
-	{
-		_View.p = v;
-		return *this;
-	}
-	
-	GViewIterator *IterateViews()
-	{
-		return w->IterateViews();
-	}
-};
-
-
 @interface LWindowDelegate : NSObject <NSWindowDelegate>
 {
 }
@@ -78,7 +45,6 @@ public:
 }
 
 @property GWindowPrivate *d;
-@property GWindowContent *content;
 
 - (id)init:(GWindowPrivate*)priv Frame:(NSRect)rc;
 - (void)dealloc;
@@ -155,28 +121,12 @@ public:
 	
 	void OnResize()
 	{
-		NSWindow *nsw = Wnd->WindowHandle().p;
+		NSWindow *wnd = Wnd->WindowHandle().p;
 		
-		Wnd->Pos = nsw.frame;
-		Wnd->PourAll();
+		Wnd->Pos = wnd.frame;
 		Wnd->OnPosChange();
 
-		nsw.contentView.needsLayout = YES;
-		
-		/*
-		GAutoPtr<GViewIterator> views(Wnd->IterateViews());
-		for (auto c = views->First(); c; c = views->Next())
-		{
-			OsView h = c->Handle();
-			if (h)
-			{
-				GRect Flip = c->GetPos();
-				if (h.p.superview)
-					Flip = LFlip(h.p.superview, Flip);
-				[h.p setFrame:Flip];
-			}
-		}
-		*/
+		wnd.contentView.needsLayout = YES;
 	}
 };
 
@@ -193,29 +143,24 @@ public:
 	{
 		self.d = priv;
 		
-		#if 1
-		auto old = self.contentView.frame;
-		
-		self.content = new GWindowContent(priv->Wnd);
-		GRect r = old;
-		self.content->SetPos(r);
-		
 		auto ctrl = [[NSViewController alloc] init];
-		ctrl.view = [[LCocoaView alloc] init:self.content];
+		ctrl.view = [[LCocoaView alloc] init:priv->Wnd];
 		ctrl.view.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
-		*self.content = ctrl.view;
 		self.contentViewController = ctrl;
 		[ctrl release];
-		#endif
+		
+		printf("LNsWindow.init\n");
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	delete self.content;
+	LCocoaView *cv = objc_dynamic_cast(LCocoaView, self.contentViewController.view);
+	cv.w = NULL;
+	[cv release];
 	[super dealloc];
-	printf("LNsWindow dealloc...\n");
+	printf("LNsWindow.dealloc.\n");
 }
 
 @end

@@ -10,21 +10,21 @@
 #import <Foundation/Foundation.h>
 #import "LCocoaView.h"
 
-#define Check() if (!self.v) return
+#define Check() if (!self.w) return
 static int LCocoaView_Count = 0;
 @implementation LCocoaView
 
-- (id)init:(GView*)view
+- (id)init:(GWindow*)wnd
 {
 	LAutoPool Pool;
 	LCocoaView_Count++;
 
-	if ((self = [super initWithFrame:view->GetPos()]) != nil)
+	if ((self = [super initWithFrame:wnd->GetPos()]) != nil)
 	{
-		self.Cls = view->GetClass();
-		printf("LCocoaView.alloc... (%i, %s)\n", LCocoaView_Count, self.Cls.Get());
+		printf("LCocoaView.alloc... (%i, %s)\n", LCocoaView_Count, wnd->GetClass());
 	
-		self.v = view;
+		self.w = wnd;
+		self.WndClass = wnd->GetClass();
 	
 		[self setAutoresizingMask:NSViewNotSizable];
 		[self setTranslatesAutoresizingMaskIntoConstraints:YES];
@@ -36,10 +36,9 @@ static int LCocoaView_Count = 0;
 {
 	LAutoPool Pool;
 
-	printf("LCocoaView.dealloc... (%i, %s)\n", LCocoaView_Count-1, self.Cls.Get());
+	printf("LCocoaView.dealloc... (%i, %s)\n", LCocoaView_Count-1, self.WndClass.Get());
 
-	self.v->OnCocoaDealloc();
-	self.v = nil;
+	self.w = nil;
 	[super dealloc];
 	LCocoaView_Count--;
 }
@@ -48,15 +47,12 @@ static int LCocoaView_Count = 0;
 {
 	LAutoPool Pool;
 	Check();
-	GScreenDC Dc(self.v);
-	self.v->OnPaint(&Dc);
+	GScreenDC Dc(self.w);
+	self.w->_Paint(&Dc);
 }
 
 - (void)layout
 {
-	LAutoPool Pool;
-	Check();
-	self.v->OnCocoaLayout();
 }
 
 - (void)mouseDown:(NSEvent*)ev
@@ -65,7 +61,7 @@ static int LCocoaView_Count = 0;
 	Check();
 	GMouse m;
 	m.SetFromEvent(ev, self);
-	self.v->OnMouseClick(m);
+	self.w->OnMouseClick(m);
 }
 
 - (void)mouseUp:(NSEvent*)ev
@@ -74,7 +70,7 @@ static int LCocoaView_Count = 0;
 	Check();
 	GMouse m;
 	m.SetFromEvent(ev, self);
-	self.v->OnMouseClick(m);
+	self.w->OnMouseClick(m);
 }
 
 - (void)rightMouseDown:(NSEvent*)ev
@@ -83,7 +79,7 @@ static int LCocoaView_Count = 0;
 	Check();
 	GMouse m;
 	m.SetFromEvent(ev, self);
-	self.v->OnMouseClick(m);
+	self.w->OnMouseClick(m);
 }
 
 - (void)rightMouseUp:(NSEvent*)ev
@@ -92,7 +88,7 @@ static int LCocoaView_Count = 0;
 	Check();
 	GMouse m;
 	m.SetFromEvent(ev, self);
-	self.v->OnMouseClick(m);
+	self.w->OnMouseClick(m);
 }
 
 - (void)mouseMoved:(NSEvent*)ev
@@ -101,7 +97,7 @@ static int LCocoaView_Count = 0;
 	Check();
 	GMouse m;
 	m.SetFromEvent(ev, self);
-	self.v->OnMouseMove(m);
+	self.w->OnMouseMove(m);
 }
 
 @end

@@ -294,7 +294,7 @@ void GTabView::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 		if (d->Current >= c.Length())
 			d->Current = (int)c.Length() - 1;
 
-		#ifndef __GTK_H__
+		#if LGI_VIEW_HANDLE
 		if (Handle())
 		#endif
 			Invalidate();
