@@ -74,10 +74,15 @@
 	#include <sys/stat.h>
 	#include <netinet/in.h>
 #endif
+#define GtkVer(major, minor)			( (GTK_MAJOR_VERSION > major) || (GTK_MAJOR_VERSION == major && GTK_MINOR_VERSION >= minor) )
 namespace Gtk {
 #include <gtk/gtk.h>
 #ifdef WIN32
-#include <gdk/win32/gdkwin32.h>
+	#if GtkVer(3, 22)
+		#include <gdk/gdkwin32.h>
+	#else
+		#include <gdk/win32/gdkwin32.h>
+	#endif
 #endif
 }
 
@@ -136,8 +141,6 @@ typedef void							*OsBitmap;
 //		Gtk::GtkContainer *c = GtkCast(widget, gtk_container, GtkContainer);
 //
 #define GtkCast(obj, gtype, ctype)		((Gtk::ctype*)g_type_check_instance_cast( (Gtk::GTypeInstance*)obj, Gtk::gtype##_get_type() ))
-
-#define GtkVer(major, minor)			( (GTK_MAJOR_VERSION > major) || (GTK_MAJOR_VERSION == major && GTK_MINOR_VERSION >= minor) )
 
 class OsApplication
 {

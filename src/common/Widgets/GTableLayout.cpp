@@ -32,7 +32,7 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		102
+#define DEBUG_LAYOUT		539
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
 
@@ -391,6 +391,8 @@ TableCell::TableCell(GTableLayout *t, int Cx, int Cy)
 	Cell.Offset(Cx, Cy);
 	Padding.ZOff(0, 0);
 	Disp = GCss::DispBlock;
+
+	Children.SetFixedLength(true);
 }
 
 void TableCell::OnChange(PropType Prop)
@@ -424,11 +426,15 @@ TableCell::Child *TableCell::HasView(GView *v)
 
 bool TableCell::Add(GView *v)
 {
-	if (HasView(v))
+	if (!v || HasView(v))
 		return false;
 
 	Table->AddView(v);
+
+	Children.SetFixedLength(false);
 	Children.New().View = v;
+	Children.SetFixedLength(true);
+
 	return true;
 }
 
@@ -551,7 +557,10 @@ bool TableCell::SetVariant(const char *Name, GVariant &Value, char *Array)
 						GView *gv = dynamic_cast<GView*>(o);
 						if (gv)
 						{
+							Children.SetFixedLength(false);
 							Children.New().View = gv;
+							Children.SetFixedLength(true);
+
 							Table->AddView(gv);
 							gv->SetParent(Table);
 
@@ -718,7 +727,7 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 
 	if (!Wid.IsValid() || Flag != SizeFixed)
 	{
-		Child *c = &Children[0];
+		Child *c = Children.AddressOf();
 		for (int i=0; i<Children.Length(); i++, c++)
 		{
 			GView *v = c->View;
@@ -922,7 +931,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 	Width -= Padding.x1 + Padding.x2;
 	LgiAssert(Width >= 0);
 	
-	Child *c = &Children[0];
+	Child *c = Children.AddressOf();
 	for (int i=0; i<Children.Length(); i++, c++)
 	{
 		GView *v = c->View;
@@ -1101,7 +1110,7 @@ void TableCell::PostLayout()
 	int WidthPx = Pos.X() - Padding.x1 - Padding.x2;
 	int HeightPx = Pos.Y() - Padding.y1 - Padding.y2;
 
-	Child *c = &Children[0];
+	Child *c = Children.AddressOf();
 	for (int i=0; i<Children.Length(); i++, c++)
 	{
 		GView *v = c->View;
@@ -2152,6 +2161,7 @@ bool GTableLayout::SetVariant(const char *Name, GVariant &Value, char *Array)
 
 void GTableLayout::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 {
+	d->LayoutDirty = true;
 	if (Attaching)
 		return;
 
