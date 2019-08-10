@@ -605,7 +605,13 @@ bool LgiDumpMemoryStats(char *filename)
 	_CrtMemCheckpoint(&state);
 	_CrtMemDumpStatistics(&state);
 
-	auto f = fopen(filename ? filename : "memdump.txt", "w");
+	FILE *f;
+		#ifdef _MSC_VER
+		auto ret = fopen_s(&f,
+		#else
+		f = fopen(
+		#endif
+		filename ? filename : "memdump.txt", "w");
 	if (!f)
 		return false;
 
