@@ -10,7 +10,7 @@
 extern void NextTabStop(GViewI *v, int dir);
 extern void SetDefaultFocus(GViewI *v);
 
-#define DEBUG_KEYS			0
+#define DEBUG_KEYS			1
 #define DEBUG_SETFOCUS		0
 
 WindowGroupRef OnTopGroup = NULL;
@@ -1283,6 +1283,9 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 {
 	bool Status = false;
 	GViewI *Ctrl = 0;
+	#if DEBUG_KEYS
+	GString VCls = v->GetClass();
+	#endif
 
 	// Give key to popups
 	if (LgiApp)
@@ -1402,7 +1405,8 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 
 AllDone:
 	#if DEBUG_KEYS
-	printf("No view wants '%c' down=%i alt=%i ctrl=%i sh=%i\n", k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
+	printf(	"No view wants '%c' down=%i alt=%i ctrl=%i sh=%i (v=%s)\n",
+			k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift(), VCls.Get());
 	#endif
 	if (d)
 		d->LastKey = k;

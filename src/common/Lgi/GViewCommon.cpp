@@ -532,7 +532,7 @@ void GView::OnNcPaint(GSurface *pDC, GRect &r)
 	}
 }
 
-#if defined __GTK_H__
+#if LGI_COCOA || defined(__GTK_H__)
 
 /*
 uint64 nPaint = 0;
@@ -1438,10 +1438,6 @@ void GView::Focus(bool i)
 			}
 			else printf("%s:%i - no window?\n", _FL);
 		
-		#elif defined(BEOS)
-
-		_Focus(i);
-
 		#endif
 	}
 }

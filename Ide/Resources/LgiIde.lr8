@@ -682,7 +682,7 @@
 			<menuitem Sep="1" />
 			<menuitem Ref="137" Shortcut="F4" />
 			<menuitem Ref="237" Shortcut="Shift+F4" />
-			<menuitem Ref="238" Shortcut="Shift+Alt+O" />
+			<menuitem Ref="238" Shortcut="Shift+Modifier+O" />
 			<menuitem Sep="1" />
 			<menuitem Ref="135" Shortcut="Ctrl+F5" />
 			<menuitem Ref="134" Shortcut="Ctrl+Shift+V" />

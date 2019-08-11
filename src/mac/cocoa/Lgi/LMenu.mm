@@ -804,7 +804,8 @@ bool LMenuItem::ScanForAccel()
 	for (int i=0; i<Keys.Length(); i++)
 	{
 		char *k = Keys[i];
-		if (stricmp(k, "Ctrl") == 0)
+		if (stricmp(k, "Ctrl") == 0 ||
+			stricmp(k, "Modifier") == 0)
 		{
 			Flags |= LGI_EF_CTRL;
 		}

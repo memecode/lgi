@@ -333,19 +333,19 @@ bool DocEdit::Delete(size_t At, ssize_t Len)
 
 bool DocEdit::OnKey(GKey &k)
 {
-	if (k.Alt())
+	if (k.Modifier())
 	{
 		if (k.vkey == LK_LEFT ||
 			k.vkey == LK_RIGHT)
 			return false;
 
-		if (ToLower(k.vkey) == 'm')
+		if (ToLower(k.c16) == 'm')
 		{
 			if (k.Down())
 				Doc->GotoSearch(IDC_METHOD_SEARCH);
 			return true;
 		}
-		else if (ToLower(k.vkey) == 'o' &&
+		else if (ToLower(k.c16) == 'o' &&
 				k.Shift())
 		{
 			if (k.Down())

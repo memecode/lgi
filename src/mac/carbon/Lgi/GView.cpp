@@ -1791,6 +1791,10 @@ bool GView::_Attach(GViewI *parent)
 							OSErr e = HIViewSetVisible(_View, true);
 							if (e) printf("%s:%i - SetControlVisibility failed %i\n", _FL, e);
 						}
+						if (TestFlag(WndFlags, GWF_FOCUS))
+						{
+							Focus(true);
+						}
 
 						OnCreate();
 						OnAttach();
