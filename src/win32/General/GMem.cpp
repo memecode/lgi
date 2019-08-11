@@ -601,7 +601,8 @@ typedef struct _CrtMemBlockHeader
 
 bool LgiDumpMemoryStats(char *filename)
 {
-	_CrtMemState state;
+	#ifdef _DEBUG
+	_CrtMemState state = {0};
 	_CrtMemCheckpoint(&state);
 	_CrtMemDumpStatistics(&state);
 
@@ -634,8 +635,10 @@ bool LgiDumpMemoryStats(char *filename)
 	}
 
 	fclose(f);
-
 	return true;
+	#else
+	return false;
+	#endif
 }
 
 void LgiSetLeakDetect(bool On)
