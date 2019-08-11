@@ -382,4 +382,58 @@ public:
 	HRESULT STDMETHODCALLTYPE Clone(__RPC__deref_out_opt IStream **ppstm) NotImplemented
 };
 
+
+// This class just wraps a COM pointer so that it's easy to obey all the rules.
+template<typename T>
+class LComPtr
+{
+	T *ptr;
+
+public:
+	LComPtr()
+	{
+		ptr = NULL;
+	}
+
+	~LComPtr()
+	{
+		Release();
+	}
+
+	void Release()
+	{
+		if (ptr)
+		{
+			ptr->Release();
+			ptr = NULL;
+		}
+	}
+
+	T **Set()
+	{
+		return &ptr;
+	}
+
+	T* operator->() const
+	{
+		LgiAssert(ptr != 0); 
+		return ptr;
+	}
+
+	operator T*()
+	{
+		return ptr;
+	}
+
+	LComPtr<T> &operator =(const LComPtr<T> &p)
+	{
+		Release();
+
+		if (ptr = p.ptr)
+			ptr->AddRef();
+		
+		return *this;
+	}
+};
+
 #endif
