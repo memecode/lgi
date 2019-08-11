@@ -460,7 +460,8 @@ bool GMouseHook::OnViewKey(GView *v, GKey &k)
 		if (It != d->Popups.end())
 		{
 			GView *l = *It;
-			if (l->OnKey(k))
+			if (l->Visible() &&
+				l->OnKey(k))
 			{
 				Status = true;
 			}

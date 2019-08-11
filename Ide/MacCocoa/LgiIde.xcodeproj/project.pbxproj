@@ -146,7 +146,7 @@
 		345B20FF217969700079E3C9 /* MissingFiles.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MissingFiles.cpp; path = ../Code/MissingFiles.cpp; sourceTree = "<group>"; };
 		345B2100217969700079E3C9 /* ParserCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ParserCommon.h; path = ../Code/ParserCommon.h; sourceTree = "<group>"; };
 		345B211B217969D30079E3C9 /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../Resources/mac-icon.icns"; sourceTree = "<group>"; };
-		345B211C217969D30079E3C9 /* LgiIde.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file; name = LgiIde.lr8; path = ../Resources/LgiIde.lr8; sourceTree = "<group>"; };
+		345B211C217969D30079E3C9 /* LgiIde.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = LgiIde.lr8; path = ../Resources/LgiIde.lr8; sourceTree = "<group>"; };
 		345B211D217969D30079E3C9 /* icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icons.png; path = ../Resources/icons.png; sourceTree = "<group>"; };
 		34C4FD2D22FDB24800C4BECB /* libpng15.15.4.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng15.15.4.0.dylib; path = ../../../../../CodeLib/libpng/build/libpng15.15.4.0.dylib; sourceTree = "<group>"; };
 		34C4FD3222FDB50D00C4BECB /* cmds-16px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cmds-16px.png"; sourceTree = "<group>"; };

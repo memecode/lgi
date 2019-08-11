@@ -43,6 +43,15 @@ protected:
 	bool Registered;
 	PositionType PosType;
 
+	GWindow *HookWnd()
+	{
+		#if defined(LGI_CARBON) || defined(__GTK_H__)
+		return GetWindow();
+		#else
+		return Edit->GetWindow();
+		#endif
+	}
+
 public:
 	GPopupList(GViewI *edit, PositionType pos, int width = 200, int height = 300) : GPopup(edit->GetGView())
 	{
@@ -71,7 +80,7 @@ public:
 	
 	~GPopupList()
 	{
-		auto Wnd = Edit->GetWindow();
+		auto Wnd = HookWnd();
 		if (Wnd && Registered)
 			Wnd->UnregisterHook(this);
 	}
@@ -168,7 +177,7 @@ public:
 			AttachChildren();
 			OnPosChange();
 
-			auto Wnd = Edit->GetWindow();
+			auto Wnd = HookWnd();
 			if (Wnd && !Registered)
 			{
 				Registered = true;
@@ -218,51 +227,51 @@ public:
 
 	bool OnViewKey(GView *v, GKey &k)
 	{
-		/*
+		#if 1
 		GString s;
 		s.Printf("%s:%i - OnViewKey vis=%i", _FL, Visible());
 		k.Trace(s);
-		*/
+		#endif
 		
-		if (Visible())
+		if (!Visible())
+			return false;
+
+		switch (k.vkey)
 		{
-			switch (k.vkey)
+			case LK_TAB:
 			{
-				case LK_TAB:
+				Visible(false);
+				return false;
+			}
+			case LK_ESCAPE:
+			{
+				if (!k.Down())
 				{
 					Visible(false);
-					return false;
 				}
-				case LK_ESCAPE:
-				{
-					if (!k.Down())
-					{
-						Visible(false);
-					}
-					return true;
-					break;
-				}
-				case LK_RETURN:
+				return true;
+				break;
+			}
+			case LK_RETURN:
+			{
+				if (Lst)
+					Lst->OnKey(k);
+				return true;
+				break;
+			}
+			case LK_UP:
+			case LK_DOWN:
+			case LK_PAGEDOWN:
+			case LK_PAGEUP:
+			{
+				if (!k.IsChar)
 				{
 					if (Lst)
 						Lst->OnKey(k);
+					
 					return true;
-					break;
 				}
-				case LK_UP:
-				case LK_DOWN:
-				case LK_PAGEDOWN:
-				case LK_PAGEUP:
-				{
-					if (!k.IsChar)
-					{
-						if (Lst)
-							Lst->OnKey(k);
-						
-						return true;
-					}
-					break;
-				}
+				break;
 			}
 		}
 

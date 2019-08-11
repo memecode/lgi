@@ -349,6 +349,42 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////
+@interface LNsApplication : NSApplication
+{
+}
+
+@property GAppPrivate *d;
+
+- (id)init:(GAppPrivate*)priv;
+- (void)terminate:(nullable id)sender;
+- (void)dealloc;
+
+@end
+
+@implementation LNsApplication
+
+- (id)init:(GAppPrivate*)priv
+{
+	if ((self = [super init]) != nil)
+	{
+		self.d = priv;
+		printf("LNsApplication.init\n");
+	}
+	return self;
+}
+
+- (void)terminate:(nullable id)sender
+{
+}
+
+- (void)dealloc
+{
+	[super dealloc];
+	printf("LNsApplication.dealloc\n");
+}
+
+@end
+/////////////////////////////////////////////////////////////////////////////
 GSkinEngine *GApp::SkinEngine = 0;
 GApp *TheApp = 0;
 GMouseHook *GApp::MouseHook = 0;
@@ -377,6 +413,34 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	
 	// Connect to the server
 	d->NsApp = [NSApplication sharedApplication];
+
+	#if 0
+	auto mainMenu = [d->NsApp mainMenu];
+	if (!mainMenu)
+	{
+		mainMenu = [[NSMenu alloc] initWithTitle:@"App"];
+	}
+	NSMenuItem *appItem = [mainMenu itemAtIndex:0];
+	if (!appItem)
+	{
+		appItem = [[NSMenuItem alloc] initWithTitle:@"appItem" action:NULL keyEquivalent:@""];
+		[mainMenu addItem:appItem];
+	}
+	NSMenu *appMenu = [appItem submenu];
+	if (!appMenu)
+	{
+		appMenu = [[NSMenu alloc] initWithTitle:@"AppMenu"];
+		[appItem setSubmenu:appMenu];
+	}
+	if (appMenu)
+	{
+		auto myItem = [[NSMenuItem alloc] initWithTitle:@"Quit" action:NULL keyEquivalent:@"Q"];
+		[myItem setKeyEquivalentModifierMask: NSCommandKeyMask];
+		[appMenu addItem:myItem];
+	}
+	
+	[d->NsApp setMainMenu:mainMenu];
+	#endif
 	
 	// Setup the file and graphics sub-systems
 	d->FileSystem = new GFileSystem;
