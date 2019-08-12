@@ -662,7 +662,7 @@ public:
 				GNotifyType ft = (GNotifyType)f;
 				GTreeItem *i = Tree->Selection();
 				
-				LHashTbl<StrKey<char>,GString> vars;
+				LHashTbl<ConstStrKey<char>,GString> vars;
 				if (i)
 				{
 					auto p = GString(i->GetText()).Split(",");
@@ -685,6 +685,8 @@ public:
 						#endif
 						break;
 					}
+					default:
+						break;
 				}
 				break;
 			}

@@ -10,6 +10,8 @@
 		342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */; };
 		3468AB9021EA9B0700865645 /* Lgi.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 347D1D221FB079BF00E7B04D /* Lgi.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		347D1D241FB07CB200E7B04D /* Lgi.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 347D1D221FB079BF00E7B04D /* Lgi.framework */; };
+		34D267BE2301A14000E5C645 /* LEmojiFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D267BD2301A14000E5C645 /* LEmojiFont.cpp */; };
+		34D267C12301A16400E5C645 /* EmojiMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D267C02301A16400E5C645 /* EmojiMap.cpp */; };
 		34F93C711AB6FDCB00B557EC /* TestSuite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34F93C701AB6FDCB00B557EC /* TestSuite.cpp */; };
 		34F93CA31AB705FE00B557EC /* GLexCpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34F93C9F1AB705FE00B557EC /* GLexCpp.cpp */; };
 		34F93CA41AB705FE00B557EC /* GScriptCompiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34F93CA01AB705FE00B557EC /* GScriptCompiler.cpp */; };
@@ -61,6 +63,8 @@
 		342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = SOURCE_ROOT; };
 		347D1D231FB07AD500E7B04D /* HtmlTest_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HtmlTest_Prefix.pch; sourceTree = "<group>"; };
 		348335CE1AA190D1006BD4F9 /* LgiCarbon.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCarbon.xcodeproj; path = ../../src/mac/carbon/LgiCarbon.xcodeproj; sourceTree = "<group>"; };
+		34D267BD2301A14000E5C645 /* LEmojiFont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LEmojiFont.cpp; path = ../../src/common/Gdc2/Font/LEmojiFont.cpp; sourceTree = "<group>"; };
+		34D267C02301A16400E5C645 /* EmojiMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EmojiMap.cpp; path = ../../src/common/Text/Emoji/EmojiMap.cpp; sourceTree = "<group>"; };
 		34F93C701AB6FDCB00B557EC /* TestSuite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestSuite.cpp; path = ../TestSuite.cpp; sourceTree = "<group>"; };
 		34F93C9F1AB705FE00B557EC /* GLexCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLexCpp.cpp; path = ../../src/common/Coding/GLexCpp.cpp; sourceTree = "<group>"; };
 		34F93CA01AB705FE00B557EC /* GScriptCompiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GScriptCompiler.cpp; path = ../../src/common/Coding/GScriptCompiler.cpp; sourceTree = "<group>"; };
@@ -153,6 +157,8 @@
 		342D52A30F0CBA07002A1C7C /* Lgi */ = {
 			isa = PBXGroup;
 			children = (
+				34D267C02301A16400E5C645 /* EmojiMap.cpp */,
+				34D267BD2301A14000E5C645 /* LEmojiFont.cpp */,
 				34F93CB81AB7070F00B557EC /* Png.cpp */,
 				34F93CDF1AB7081300B557EC /* GZoomView.cpp */,
 				34F93CB41AB706A300B557EC /* OpenSSLSocket.cpp */,
@@ -274,12 +280,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */,
+				34D267C12301A16400E5C645 /* EmojiMap.cpp in Sources */,
 				34F93C711AB6FDCB00B557EC /* TestSuite.cpp in Sources */,
 				34F93CA31AB705FE00B557EC /* GLexCpp.cpp in Sources */,
 				34F93CA41AB705FE00B557EC /* GScriptCompiler.cpp in Sources */,
 				34F93CA51AB705FE00B557EC /* GScriptLibrary.cpp in Sources */,
 				34F93CA61AB705FE00B557EC /* GScriptVM.cpp in Sources */,
 				34F93CAB1AB7062700B557EC /* GHtml.cpp in Sources */,
+				34D267BE2301A14000E5C645 /* LEmojiFont.cpp in Sources */,
 				34F93CAC1AB7062700B557EC /* GHtmlCommon.cpp in Sources */,
 				34F93CAD1AB7062700B557EC /* GHtmlParser.cpp in Sources */,
 				34F93CAF1AB7065500B557EC /* IHttp.cpp in Sources */,

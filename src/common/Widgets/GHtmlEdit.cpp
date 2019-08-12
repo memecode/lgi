@@ -2043,14 +2043,14 @@ public:
 		{
 			if (k.Down())
 			{
-				if (k.c16 == VK_BACKSPACE)
+				if (k.c16 == LK_BACKSPACE)
 				{
 					if (k.Down())
 					{
 						Delete(true);
 					}
 				}
-				else if (k.c16 == VK_RETURN)
+				else if (k.c16 == LK_RETURN)
 				{
 					if (k.Down())
 					{
@@ -2069,7 +2069,7 @@ public:
 		{
 			switch (k.c16)
 			{
-				case VK_HOME:
+				case LK_HOME:
 				{
 					if (k.Down())
 					{
@@ -2086,7 +2086,7 @@ public:
 					return true;
 					break;
 				}
-				case VK_END:
+				case LK_END:
 				{
 					if (Cursor && k.Down())
 					{
@@ -2103,7 +2103,7 @@ public:
 					return true;
 					break;
 				}
-				case VK_DELETE:
+				case LK_DELETE:
 				{
 					if (k.Down())
 					{
@@ -2111,7 +2111,7 @@ public:
 					}
 					return true;
 				}
-				case VK_LEFT:
+				case LK_LEFT:
 				{
 					if (k.Down())
 					{
@@ -2120,7 +2120,7 @@ public:
 					return true;
 					break;
 				}
-				case VK_RIGHT:
+				case LK_RIGHT:
 				{
 					if (k.Down())
 					{
@@ -2129,7 +2129,7 @@ public:
 					return true;
 					break;
 				}
-				case VK_UP:
+				case LK_UP:
 				{
 					if (k.Down())
 					{
@@ -2138,7 +2138,7 @@ public:
 					return true;
 					break;
 				}
-				case VK_DOWN:
+				case LK_DOWN:
 				{
 					if (k.Down())
 					{
