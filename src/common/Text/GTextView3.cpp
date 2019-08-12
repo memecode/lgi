@@ -4453,7 +4453,7 @@ bool GTextView3::OnKey(GKey &k)
 			{
 				if (k.c16 == 17) break;
 
-				if (k.Modifier() &&
+				if (k.CtrlCmd() &&
 					!k.Alt())
 				{
 					switch (k.GetChar())

@@ -157,15 +157,7 @@ public:
 		/// The text of the item.
 		///
 		/// If you put a tab control in the text, anything after the tab is considered
-		/// to be the keyboard shortcut for the menu item. The shortcut can be a combination
-		/// of keys added together with '+'.
-		///
-		/// e.g.
-		/// <ul>
-		///		<li> Ctrl+S
-		///		<li> Alt+Del
-		///		<li> F2
-		/// </ul>
+		/// to be the keyboard shortcut for the menu item.
 		const char *Str,
 		/// Command ID to post to the OnCommand() handler
 		int Id,
@@ -173,8 +165,35 @@ public:
 		bool Enabled = true,
 		/// The index into the list to insert at, or -1 to insert at the end
 		int Where = -1,
-		// Shortcut if not embeded in "Str"
-		const char *Shortcut = 0
+		/// Shortcut if not embedded in the "Str" parameter.
+		///
+		/// The shortcut can be a combination of modifiers and keys added together with '+'.
+		///
+		/// Available modifier names are:
+		/// - Ctrl/Control
+		/// - Alt/Option
+		/// - Shift
+		/// - System/Cmd
+		/// - CtrlCmd (Ctrl on Windows/Linux, Cmd on OSX)
+		/// - AltCmd (Alt on Windows/Linux, Cmd on OSX)
+		///
+		/// Available key names are:
+		/// - Del/Delete
+		/// - Home/End
+		/// - PageUp/Page Up/Page-Up
+		/// - PageDown/Page Down/Page-Down
+		/// - Backspace
+		/// - Up/Right/Down/Left
+		/// - Esc
+		/// - Space
+		/// - Numbers or letters
+		/// - Some punctuation: ,./\\[]`;\'
+		///
+		/// Examples:
+		///	- Ctrl+S
+		/// - Shift+Modifier+F
+		/// - Alt+Left
+		const char *Shortcut = NULL
 	);
 	
 	/// Add a submenu

@@ -313,16 +313,72 @@ public:
 	bool HasAccel;				// The last display string should be right aligned
 	List<GDisplayString> Strs;	// Draw each alternate display string with underline
 								// except the last in the case of HasAccel==true.
-	GAutoString Shortcut;
+	GString Shortcut;
 
 	LMenuItemPrivate()
 	{
 		HasAccel = false;
+		StartUnderline = false;
 	}
 
 	~LMenuItemPrivate()
 	{
 		Strs.DeleteObjects();
+	}
+
+	void UpdateStrings(GFont *Font, char *n)
+	{
+		// Build up our display strings, 
+		Strs.DeleteObjects();
+		StartUnderline = false;
+
+		char *Tab = strrchr(n, '\t');
+		if (Tab)
+		{
+			*Tab = 0;
+		}
+
+		char *Amp = 0, *a = n;
+		while (a = strchr(a, '&'))
+		{
+			if (a[1] != '&')
+			{
+				Amp = a;
+				break;
+			}
+
+			a++;
+		}
+
+		if (Amp)
+		{
+			// Before amp
+			Strs.Insert(new GDisplayString(Font, n, Amp - n ));
+
+			// Amp'd letter
+			char *e = LgiSeekUtf8(++Amp, 1);
+			Strs.Insert(new GDisplayString(Font, Amp, e - Amp ));
+
+			// After Amp
+			if (*e)
+			{
+				Strs.Insert(new GDisplayString(Font, e));
+			}
+		}
+		else
+		{
+			Strs.Insert(new GDisplayString(Font, n));
+		}
+
+		if (HasAccel = (Tab != 0))
+		{
+			Strs.Insert(new GDisplayString(Font, Tab + 1));
+			*Tab = '\t';
+		}
+		else if (HasAccel = (Shortcut.Get() != 0))
+		{
+			Strs.Insert(new GDisplayString(Font, Shortcut));
+		}
 	}
 };
 
@@ -356,7 +412,7 @@ LMenuItem::LMenuItem()
 LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *Txt, int id, int Pos, const char *Shortcut)
 {
 	d = new LMenuItemPrivate;
-	d->Shortcut.Reset(NewStr(Shortcut));
+	d->Shortcut = Shortcut;
 	Position = Pos;
 	Parent = NULL;
 	Menu = m;
@@ -527,7 +583,7 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 		}
 		else
 		{
-			// for a submenu
+			// for a sub menu
 			pDC->Colour(Back, 24);
 			pDC->Rectangle();
 		}
@@ -542,9 +598,9 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 				Font->Colour(LC_LIGHT, 0);
 				_PaintText(pDC, x+1, y, r.X());
 			}
-			// else selected... don't draw the hilight
+			// else selected... don't draw the highlight
 
-			// "greyed" text...
+			// "grayed" text...
 			Font->Colour(LC_LOW, 0);
 			_PaintText(pDC, x, y-1, r.X()-1);
 		}
@@ -586,7 +642,7 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 
 bool LMenuItem::ScanForAccel()
 {
-	char *Accel = 0;
+	GString Accel;
 
 	if (d->Shortcut)
 	{
@@ -599,32 +655,43 @@ bool LMenuItem::ScanForAccel()
 		{
 			char *Tab = strchr(n, '\t');
 			if (Tab)
-			{
 				Accel = Tab + 1;
-			}
 		}
 	}
 
 	if (Accel)
 	{
-		GToken Keys(Accel, "-+");
+		auto Keys = Accel.SplitDelimit("-+");
 		if (Keys.Length() > 0)
 		{
 			int Flags = 0;
 			uchar Key = 0;
+			bool AccelDirty = false;
 			
 			for (int i=0; i<Keys.Length(); i++)
 			{
-				char *k = Keys[i];
-				if (stricmp(k, "Ctrl") == 0)
+				auto &k = Keys[i];
+
+				if (k.Equals("CtrlCmd"))
+				{
+					k = GUiEvent::CtrlCmdName();
+					AccelDirty = true;
+				}
+				else if (k.Equals("AltCmd"))
+				{
+					k = GUiEvent::AltCmdName();
+					AccelDirty = true;
+				}
+
+				if (k.Equals("Ctrl") || k.Equals("Control"))
 				{
 					Flags |= LGI_EF_CTRL;
 				}
-				else if (stricmp(k, "Alt") == 0)
+				else if (k.Equals("Alt") || k.Equals("Option"))
 				{
 					Flags |= LGI_EF_ALT;
 				}
-				else if (stricmp(k, "Shift") == 0)
+				else if (k.Equals("Shift"))
 				{
 					Flags |= LGI_EF_SHIFT;
 				}
@@ -700,7 +767,7 @@ bool LMenuItem::ScanForAccel()
 				}
 				else if (k[0] == 'F' && IsDigit(k[1]))
 				{
-					Key = VK_F1 + atoi(k+1) - 1;
+					Key = VK_F1 + (int)k.LStrip("F").Int() - 1;
 					Flags |= LGI_EF_IS_NOT_CHAR;
 				}
 				else if (IsAlpha(k[0]))
@@ -736,6 +803,18 @@ bool LMenuItem::ScanForAccel()
 						Key = k[0];
 					}
 				}
+				else
+				{
+					LgiAssert(!"Unknown Accel Part");
+				}
+			}
+
+			if (AccelDirty)
+			{
+				d->Shortcut = GString("+").Join(Keys);
+				GString n = Name();
+				GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+				d->UpdateStrings(Font, n);
 			}
 			
 			if (Key && Menu)
@@ -846,58 +925,8 @@ bool LMenuItem::Name(const char *Txt)
 			Info.fType |= MFT_STRING;
 			Info.fMask |= MIIM_TYPE | MIIM_DATA;
 
-			// Build up our display strings, 
-			d->Strs.DeleteObjects();
 			GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
-			d->StartUnderline = false;
-
-			char *Tab = strrchr(n, '\t');
-			if (Tab)
-			{
-				*Tab = 0;
-			}
-
-			char *Amp = 0, *a = n;
-			while (a = strchr(a, '&'))
-			{
-				if (a[1] != '&')
-				{
-					Amp = a;
-					break;
-				}
-
-				a++;
-			}
-
-			if (Amp)
-			{
-				// Before amp
-				d->Strs.Insert(new GDisplayString(Font, n, Amp - n ));
-
-				// Amp'd letter
-				char *e = LgiSeekUtf8(++Amp, 1);
-				d->Strs.Insert(new GDisplayString(Font, Amp, e - Amp ));
-
-				// After Amp
-				if (*e)
-				{
-					d->Strs.Insert(new GDisplayString(Font, e));
-				}
-			}
-			else
-			{
-				d->Strs.Insert(new GDisplayString(Font, n));
-			}
-
-			if (d->HasAccel = (Tab != 0))
-			{
-				d->Strs.Insert(new GDisplayString(Font, Tab + 1));
-				*Tab = '\t';
-			}
-			else if (d->HasAccel = (d->Shortcut.Get() != 0))
-			{
-				d->Strs.Insert(new GDisplayString(Font, d->Shortcut));
-			}
+			d->UpdateStrings(Font, n);
 
 			// Tell the OS
 			Update();

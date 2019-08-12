@@ -110,14 +110,17 @@ public:
 	void Shift(bool i)	{ AssignFlag(Flags, LGI_EF_SHIFT, i); }
 	void System(bool i)	{ AssignFlag(Flags, LGI_EF_SYSTEM, i); }
 
-	bool Modifier()
-	{
-		#if defined(MAC)
-		return System(); // "Apple" key
-		#else // win32 and linux
-		return Ctrl();
-		#endif
-	}
+	#if defined(MAC)
+		bool CtrlCmd() { return System(); }
+		static const char *CtrlCmdName() { return "\xE2\x8C\x98"; }	
+		bool AltCmd() { return System(); }
+		static const char *AltCmdName()	{ return "\xE2\x8C\x98"; }
+	#else // win32 and linux
+		bool CtrlCmd() { return Ctrl(); }
+		static const char *CtrlCmdName() { return "Ctrl"; }	
+		bool AltCmd() { return Alt(); }
+		static const char *AltCmdName() { return "Alt"; }
+	#endif
 	
 	#if defined COCOA
 	void SetModifer(uint32_t modifierKeys);
@@ -131,7 +134,7 @@ public:
 		Alt((modifierKeys & Gtk::GDK_MOD1_MASK) != 0);
 		Ctrl((modifierKeys & Gtk::GDK_CONTROL_MASK) != 0);
 
-		#elif defined(MAC)
+		#elif defined
 
 			#if !defined COCOA
 				System(modifierKeys & cmdKey);

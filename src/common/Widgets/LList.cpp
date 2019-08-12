@@ -917,7 +917,7 @@ bool LList::OnKey(GKey &k)
 		Status = Item->OnKey(k);
 	}
 
-	if (k.vkey != LK_UP && k.vkey != LK_DOWN && k.Modifier())
+	if (k.vkey != LK_UP && k.vkey != LK_DOWN && k.CtrlCmd())
 	{
 		switch (k.c16)
 		{
@@ -1293,7 +1293,7 @@ void LList::OnMouseClick(GMouse &m)
 				{
 					if (m.Double())
 					{
-						if (m.Modifier())
+						if (m.CtrlCmd())
 						{
 							ResizeColumnsToContent();
 						}
@@ -1352,7 +1352,7 @@ void LList::OnMouseClick(GMouse &m)
 				if (Item && Item->Select())
 				{
 					// Click on selected item
-					if (m.Modifier())
+					if (m.CtrlCmd())
 					{
 						Item->Select(false);
 						OnItemClick(Item, m);
@@ -1432,7 +1432,7 @@ void LList::OnMouseClick(GMouse &m)
 						{
 							if (Item == i) // clicked item
 							{
-								if (m.Modifier())
+								if (m.CtrlCmd())
 								{
 									// Toggle selected state
 									if (!i->Select())
@@ -1448,7 +1448,7 @@ void LList::OnMouseClick(GMouse &m)
 									PostSelect = true;
 								}
 							}
-							else if (!m.Modifier() || !MultiSelect())
+							else if (!m.CtrlCmd() || !MultiSelect())
 							{
 								if (i->Select())
 								{
@@ -1464,7 +1464,7 @@ void LList::OnMouseClick(GMouse &m)
 							Keyboard = (int)Items.IndexOf(Item);
 						}
 
-						if (!m.Modifier() && Items.Length() && !m.IsContextMenu())
+						if (!m.CtrlCmd() && Items.Length() && !m.IsContextMenu())
 						{
 							DragMode = SELECT_ITEMS;
 							SetPulse(100);

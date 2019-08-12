@@ -653,9 +653,9 @@
 			<menuitem Ref="215" Shortcut="Alt+Left" />
 			<menuitem Ref="216" Shortcut="Alt+Right" />
 			<menuitem Sep="1" />
-			<menuitem Ref="198" Shortcut="Alt+G" />
-			<menuitem Ref="34" Shortcut="Shift+Alt+S" />
-			<menuitem Ref="81" Shortcut="Shift+Alt+F" />
+			<menuitem Ref="198" Shortcut="CtrlCmd+G" />
+			<menuitem Ref="34" Shortcut="Shift+AltCmd+S" />
+			<menuitem Ref="81" Shortcut="Shift+AltCmd+F" />
 		</submenu>
 		<submenu Ref="151">
 			<menuitem Ref="150" />
@@ -682,7 +682,7 @@
 			<menuitem Sep="1" />
 			<menuitem Ref="137" Shortcut="F4" />
 			<menuitem Ref="237" Shortcut="Shift+F4" />
-			<menuitem Ref="238" Shortcut="Shift+Modifier+O" />
+			<menuitem Ref="238" Shortcut="Shift+AltCmd+O" />
 			<menuitem Sep="1" />
 			<menuitem Ref="135" Shortcut="Ctrl+F5" />
 			<menuitem Ref="134" Shortcut="Ctrl+Shift+V" />
