@@ -292,6 +292,10 @@ bool GCheckBox::OnLayout(GViewLayoutInfo &Inf)
 	{
 		d->PreLayout(Inf.Width.Min,
 					 Inf.Width.Max);
+		
+		// FIXME: no wrapping support so....
+		Inf.Width.Min = Inf.Width.Max;
+		
 		Inf.Width.Min += PadX1Px + PadX2Px;
 		Inf.Width.Max += PadX1Px + PadX2Px;
 	}
