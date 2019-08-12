@@ -7881,7 +7881,7 @@ bool GHtml::OnKey(GKey &k)
 					case 'f':
 					case 'F':
 					{
-						if (k.Modifier())
+						if (k.CtrlCmd())
 						{
 							GFindDlg Dlg(this, 0, FindCallback, this);
 							Dlg.DoModal();
@@ -7895,7 +7895,7 @@ bool GHtml::OnKey(GKey &k)
 						#ifdef WIN32
 						DoCopy:
 						#endif
-						if (k.Modifier())
+						if (k.CtrlCmd())
 						{
 							Copy();
 							Status = true;

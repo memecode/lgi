@@ -335,9 +335,12 @@ bool DocEdit::OnKey(GKey &k)
 {
 	if (k.CtrlCmd())
 	{
+		/*	This is the normal Ctrl+Left/Right word select on windows.
+			What was it's original purpose?
 		if (k.vkey == LK_LEFT ||
 			k.vkey == LK_RIGHT)
 			return false;
+		*/
 
 		if (ToLower(k.c16) == 'm')
 		{

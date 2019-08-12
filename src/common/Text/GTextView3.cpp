@@ -4109,7 +4109,7 @@ bool GTextView3::OnKey(GKey &k)
 						}
 						else
 						#endif
-						if (k.Ctrl() || k.Alt())
+						if (k.CtrlCmd())
 						{
 							// word move/select
 							bool StartWhiteSpace = IsWhiteSpace(Text[n]);
