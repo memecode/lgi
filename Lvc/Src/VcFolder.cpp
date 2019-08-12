@@ -1619,9 +1619,11 @@ void VcFolder::OnPulse()
 						d->Log->Print("Error: Can't run '%s'\n", GetVcName());
 					CmdErrors++;
 				}
-
-				if (c->PostOp)
+				else if (c->PostOp)
+				{
 					Reselect |= CALL_MEMBER_FN(*this, c->PostOp)(Result, s, c->Params);
+				}
+				
 				Cmds.DeleteAt(i--, true);
 				delete c;
 				CmdsChanged = true;
@@ -1637,6 +1639,8 @@ void VcFolder::OnPulse()
 	}
 	if (CmdsChanged)
 		Update();
+	if (CmdErrors)
+		d->Tabs->Value(1);
 }
 
 void VcFolder::OnRemove()
