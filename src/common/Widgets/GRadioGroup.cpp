@@ -9,7 +9,7 @@
 #include "LgiRes.h"
 #include "LStringLayout.h"
 
-#define RADIO_GRID	2
+#define RADIO_GRID	4
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Radio group
@@ -119,6 +119,7 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
 		
 		if (Inf.Width.Max < Inf.Width.Min)
 			Inf.Width.Max = Inf.Width.Min;
+		
 		d->MaxLayoutWidth = Inf.Width.Max;
 	}
 	else
@@ -395,7 +396,7 @@ public:
 	}
 };
 
-static int PadXPx = 30;
+static int PadXPx = 24; // 13px for circle, 11px padding to text.
 #ifdef MAC
 static int PadYPx = 6;
 #else
@@ -500,6 +501,10 @@ bool GRadioButton::OnLayout(GViewLayoutInfo &Inf)
 	if (!Inf.Width.Max)
 	{
 		d->PreLayout(Inf.Width.Min, Inf.Width.Max);
+		
+		// FIXME: Wrapping labels not supported yet. So use the max width.
+		Inf.Width.Min = Inf.Width.Max;
+		
 		Inf.Width.Min += PadXPx;
 		Inf.Width.Max += PadXPx;
 	}
