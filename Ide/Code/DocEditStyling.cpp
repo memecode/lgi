@@ -904,7 +904,7 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 
 	auto &Style = p.Styles;
 
-	char *Ext = LgiGetExtension(p.FileName);
+	GString Ext = LgiGetExtension(p.FileName);
 	DocType Type = CodeHtml;
 	GTextView3::GStyle *Cur = NULL;
 
@@ -921,32 +921,46 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 		{ \
 			Cur->Len = (s - Text) - Cur->Start; \
 			if (Cur->Len <= 0) \
-			{ \
 				Style.Delete(Style.rbegin()); \
-			} \
 			Cur = NULL; \
 		}
 
 	char16 *s = Text;
-	if (Ext)
+	bool IsJavascript = Ext.Equals("js");
+	bool IsPHP = Ext.Equals("php");
+	bool IsCSS = Ext.Equals("css");
+	if (IsJavascript)
 	{
-		if (!stricmp(Ext, "js") ||
-			!stricmp(Ext, "php"))
-		{
-			Type = CodePhp;
-			START_CODE();
-		}
-		else if (!stricmp(Ext, "css"))
-		{
-			Type = CodeCss;
-			START_CODE();
-		}
+		Type = CodeJavascript;
+		START_CODE();
+	}
+	else if (IsPHP)
+	{
+		Type = CodePhp;
+		START_CODE();
+	}
+	else if (IsCSS)
+	{
+		Type = CodeCss;
+		START_CODE();
 	}
 
 	for (s = Text; s < e; s++)
 	{
 		switch (*s)
 		{
+			case '`':
+			{
+				if (Type == CodeJavascript)
+				{
+					END_CODE();
+					p.StyleString(s, e, ColourLiteral);
+					s++;
+					START_CODE();
+					s--;
+				}
+				break;
+			}
 			case '\'':
 			{
 				if (s > Text &&

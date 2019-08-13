@@ -333,7 +333,7 @@ bool DocEdit::Delete(size_t At, ssize_t Len)
 
 bool DocEdit::OnKey(GKey &k)
 {
-	if (k.CtrlCmd())
+	if (k.AltCmd())
 	{
 		/*	This is the normal Ctrl+Left/Right word select on windows.
 			What was it's original purpose?

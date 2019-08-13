@@ -653,7 +653,7 @@
 			<menuitem Ref="215" Shortcut="Alt+Left" />
 			<menuitem Ref="216" Shortcut="Alt+Right" />
 			<menuitem Sep="1" />
-			<menuitem Ref="198" Shortcut="CtrlCmd+G" />
+			<menuitem Ref="198" Shortcut="AltCmd+G" />
 			<menuitem Ref="34" Shortcut="Shift+AltCmd+S" />
 			<menuitem Ref="81" Shortcut="Shift+AltCmd+F" />
 		</submenu>
