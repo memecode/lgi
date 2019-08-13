@@ -254,7 +254,7 @@ public:
 	~ObjTreeItem();
 
 	Resource *GetObj() { return Obj; }
-	char *GetText(int i=0);
+	const char *GetText(int i=0);
 	void OnSelect();
 	void OnMouseClick(GMouse &m);
 };

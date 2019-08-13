@@ -52,7 +52,7 @@ class GDataGridEdit : public GEdit
 	GDataGridPriv *d;
 
 public:
-	GDataGridEdit(GDataGridPriv *data, int id, int x, int y, int cx, int cy, char *txt) :
+	GDataGridEdit(GDataGridPriv *data, int id, int x, int y, int cx, int cy, const char *txt) :
 		GEdit(id, x, y, cx, cy, txt)
 	{
 		d = data;
@@ -292,7 +292,7 @@ void GDataGridPriv::Create(int NewCol)
 
 		int NewCtrl = Flags[Col] & GDataGrid::GDG_INTEGER;
 
-		char *CurText = i->GetText(Col);
+		const char *CurText = i->GetText(Col);
 		GRect *r = i->GetPos(Col);
 		if (r)
 		{

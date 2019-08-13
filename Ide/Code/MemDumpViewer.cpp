@@ -28,7 +28,7 @@ public:
 		DeleteArray(Stack);
 	}
 
-	char *GetText(int c)
+	const char *GetText(int c)
 	{
 		static char s[64];
 		switch (c)

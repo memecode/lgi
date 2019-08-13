@@ -194,7 +194,7 @@ public:
 	IdeProjectSettings *GetSettings();
 
 	// Impl
-	char *GetText(int Col);
+	const char *GetText(int Col);
 	int GetImage(int Flags);
 	void OnMouseClick(GMouse &m);
 };

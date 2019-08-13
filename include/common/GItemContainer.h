@@ -91,7 +91,7 @@ public:
 	/// Select/Deselect the item
 	virtual void Select(bool b) {}
 	/// Gets the text associated with the column 'Col'
-	virtual char *GetText(int Col=0) { return 0; }
+	virtual const char *GetText(int Col = 0) { return 0; }
 	/// Sets the text associated with the column 'Col'
 	virtual bool SetText(const char *s, int Col=0) { return false; }
 	/// Gets the icon index

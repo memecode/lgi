@@ -82,7 +82,7 @@ public:
 
 	// Item
 	int GetCols();
-	char *GetText(int i);
+	const char *GetText(int i);
 	void OnMouseClick(GMouse &m);
 
 	// Fields

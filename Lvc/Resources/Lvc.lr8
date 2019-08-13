@@ -40,6 +40,7 @@
 		<String Ref="41" Cid="514" Define="IDC_PUSH_ALL" en="*" />
 		<String Ref="44" Cid="-1" Define="IDC_STATIC" en="Head revisions:" />
 		<String Ref="45" Cid="45" Define="IDC_HEADS" />
+		<String Ref="47" Cid="47" Define="IDC_BUILD_FIX" en="BuildFix" />
 	</string-group>
 	<Dialog pos="7,7,464,203" ref="9">
 		<TableLayout pos="7,7,447,167" ref="10" cols="0.200,0.200,0.200,0.200,0.200" rows="0.181,0.819">
@@ -63,6 +64,7 @@
 			<tr>
 				<td align="Max">
 					<StaticText pos="7,35,73,48" ref="15" />
+					<CheckBox pos="7,63,69,76" ref="47" />
 				</td>
 				<td colspan="4">
 					<EditBox Pos="91,35,419,139" MultiLine="1" ref="16" />

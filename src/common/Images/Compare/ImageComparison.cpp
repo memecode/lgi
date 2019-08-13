@@ -803,8 +803,8 @@ struct CompareThread : public LThread
 
 			if (i)
 			{
-				char *left = i->GetText(0);
-				char *right = i->GetText(1);
+				const char *left = i->GetText(0);
+				const char *right = i->GetText(1);
 				GAutoPtr<GSurface> left_img(GdcD->Load(left));
 				GAutoPtr<GSurface> right_img(GdcD->Load(right));
 				if (left_img && right_img)
@@ -963,8 +963,8 @@ int ImageCompareDlg::OnNotify(GViewI *Ctrl, int Flags)
 				LListItem *s = d->lst->GetSelected();
 				if (s)
 				{
-					char *left = s->GetText(0);
-					char *right = s->GetText(1);
+					const char *left = s->GetText(0);
+					const char *right = s->GetText(1);
 					
 					#if 0
 					char p[MAX_PATH];
@@ -977,7 +977,7 @@ int ImageCompareDlg::OnNotify(GViewI *Ctrl, int Flags)
 						LgiExecute(p, args);
 					}
 					#else
-					char *Leaf = strrchr(left, DIR_CHAR);
+					const char *Leaf = strrchr(left, DIR_CHAR);
 					int Len = d->tabs->GetTabs();
 					GTabPage *t = d->tabs->Append(Leaf ? Leaf + 1 : left);
 					if (t)

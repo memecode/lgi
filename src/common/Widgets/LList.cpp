@@ -236,7 +236,7 @@ bool LListItem::SetText(const char *s, int i)
 }
 
 // User can override this if they want to use their own data
-char *LListItem::GetText(int i)
+const char *LListItem::GetText(int i)
 {
 	return d->Str[i];
 }
@@ -419,7 +419,7 @@ GDisplayString *LListItem::GetDs(int Col, int FitTo)
 		if (!f) f = Parent->GetFont();
 		if (!f) f = SysFont;
 
-		char *Text = d->Str[Col] ? d->Str[Col] : GetText(Col);
+		const char *Text = d->Str[Col] ? d->Str[Col] : GetText(Col);
 		LgiAssert((NativeInt)Text != 0xcdcdcdcd &&
 				  (NativeInt)Text != 0xfdfdfdfd);
 		d->Display[Col] = new GDisplayString(f, Text?Text:(char*)"");
@@ -1226,7 +1226,7 @@ bool LList::OnKey(GKey &k)
 								{
 									if (!Selected)
 									{
-										char *t = i->GetText(Col);
+										const char *t = i->GetText(Col);
 										if (t && stricmp(t, c8) >= 0)
 										{
 											i->Select(true);
@@ -2652,7 +2652,7 @@ int LList::GetContentSize(int Index)
 			if (!f) f = GetFont();
 			if (!f) f = SysFont;
 
-			char *Text = i->d->Str[Index] ? i->d->Str[Index] : i->GetText(Index);
+			const char *Text = i->d->Str[Index] ? i->d->Str[Index] : i->GetText(Index);
 			if (s && s->IsTruncated())
 			{
 				s = Mem = new GDisplayString(f, Text?Text:(char*)"");

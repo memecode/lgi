@@ -75,32 +75,24 @@ public:
 		Ctrl = ctrl;
 	}
 
-	char *GetText(int Col)
+	const char *GetText(int Col)
 	{
 		switch (Col)
 		{
 			case 0:
 			{
-				if (Ctrl &&
-					Ctrl->Str &&
-					Ctrl->Str->GetDefine())
-				{
+				if (Ctrl && Ctrl->Str)
 					return Ctrl->Str->GetDefine();
-				}
 				break;
 			}
 			case 1:
 			{
-				if (Ctrl &&
-					Ctrl->Str &&
-					Ctrl->Str->Get())
-				{
+				if (Ctrl && Ctrl->Str)
 					return Ctrl->Str->Get();
-				}
 				break;
 			}
 		}
-		return (char*)"";
+		return NULL;
 	}
 };
 

@@ -228,7 +228,7 @@ public:
 	VersionCtrl GetType();
 	AppPriv *GetPriv() { return d; }
 	const char *GetPath() { return Path; }
-	char *GetText(int Col);
+	const char *GetText(int Col);
 	GArray<CommitField> &GetFields() { return Fields; }
 	bool Serialize(GXmlTag *t, bool Write);
 	GXmlTag *Save();
@@ -279,7 +279,7 @@ public:
 	void OnBrowse();
 	void AfterBrowse();
 	void OnExpand(bool b);
-	char *GetText(int Col);
+	const char *GetText(int Col);
 	int GetImage(int Flags);
 	int Compare(VcLeaf *b);
 	bool Select();

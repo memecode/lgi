@@ -131,7 +131,7 @@ public:
 	/// object by implementing this function in your item class 
 	/// or use the SetText function to store the string in this 
 	/// class.
-	char *GetText(int i=0);
+	const char *GetText(int i = 0) override;
 	/// \brief Sets the text for the node.
 	///
 	/// This will allocate and store the string in this class.

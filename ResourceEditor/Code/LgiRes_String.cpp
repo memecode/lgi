@@ -628,7 +628,7 @@ int ResString::GetCols()
 	return 3 + Group->GetLanguages();
 }
 
-char *ResString::GetText(int i)
+const char *ResString::GetText(int i)
 {
 	switch (i)
 	{
@@ -667,7 +667,7 @@ char *ResString::GetText(int i)
 		}
 	}
 
-	return (char*)"";
+	return NULL;
 }
 
 void ResString::OnMouseClick(GMouse &m)

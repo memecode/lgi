@@ -1147,12 +1147,7 @@ int NodeSort(GTreeItem *a, GTreeItem *b, NativeInt d)
 		}
 		else
 		{
-			char *Sa = a->GetText(0);
-			char *Sb = b->GetText(0);
-			if (Sa && Sb)
-			{
-				return stricmp(Sa, Sb);
-			}
+			return Stricmp(a->GetText(0), b->GetText(0));
 		}
 	}
 
@@ -2904,7 +2899,7 @@ bool IdeProject::SetClean()
 	return true;
 }
 
-char *IdeProject::GetText(int Col)
+const char *IdeProject::GetText(int Col)
 {
 	if (d->FileName)
 	{
@@ -2912,7 +2907,7 @@ char *IdeProject::GetText(int Col)
 		return s ? s + 1 : d->FileName.Get();
 	}
 
-	return (char*)Untitled;
+	return Untitled;
 }
 
 int IdeProject::GetImage(int Flags)

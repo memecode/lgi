@@ -121,16 +121,16 @@ void ResMenuItem::OnMouseClick(GMouse &m)
 	}
 }
 
-char *ResMenuItem::GetText(int i)
+const char *ResMenuItem::GetText(int i)
 {
 	if (Sep)
 	{
-		return (char*)"--------------";
+		return "--------------";
 	}
 
 	ResString *Str = GetStr();
 	char *s = Str ? Str->Get() : 0;
-	return (s) ? s : (char*)"<null>";
+	return (s) ? s : "<null>";
 }
 
 bool ResMenuItem::GetFields(FieldTree &Fields)

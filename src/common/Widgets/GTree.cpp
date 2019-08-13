@@ -618,7 +618,7 @@ void GTreeItem::_PourText(GdcPt2 &Size)
 
 void GTreeItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 {
-	char *Text = GetText();
+	const char *Text = GetText();
 	if (Text)
 	{
 		GDisplayString *Ds = d->GetDs(0, d->Text.X());
@@ -706,7 +706,7 @@ void GTreeItem::_ClearDs(int Col)
 	GTreeNode::_ClearDs(Col);
 }
 
-char *GTreeItem::GetText(int i)
+const char *GTreeItem::GetText(int i)
 {
 	return Str[i];
 }

@@ -553,7 +553,7 @@ public:
 	
 	GTreeItem *FindItem(GTreeItem *i, const char *search)
 	{
-		char *s = i->GetText(0);
+		const char *s = i->GetText(0);
 		if (s && search && stristr(s, search))
 			return i;
 		

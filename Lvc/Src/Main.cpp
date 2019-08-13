@@ -10,7 +10,8 @@
 #include "GXmlTreeUi.h"
 
 //////////////////////////////////////////////////////////////////
-const char *AppName = "Lvc";
+const char *AppName =			"Lvc";
+#define DEFAULT_BUILD_FIX_MSG	"Build fix."
 
 VersionCtrl DetectVcs(const char *Path)
 {
@@ -778,15 +779,16 @@ public:
 			case IDC_COMMIT_AND_PUSH:
 			case IDC_COMMIT:
 			{
+				auto BuildFix = GetCtrlName(IDC_BUILD_FIX);
 				const char *Msg = GetCtrlName(IDC_MSG);
-				if (ValidStr(Msg))
+				if (BuildFix || ValidStr(Msg))
 				{
 					VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
 					if (f)
 					{
 						char *Branch = GetCtrlName(IDC_BRANCH);
 						bool AndPush = c->GetId() == IDC_COMMIT_AND_PUSH;
-						f->Commit(Msg, ValidStr(Branch) ? Branch : NULL, AndPush);
+						f->Commit(BuildFix ? DEFAULT_BUILD_FIX_MSG : Msg, ValidStr(Branch) ? Branch : NULL, AndPush);
 					}
 				}
 				else LgiMsg(this, "No message for commit.", AppName);

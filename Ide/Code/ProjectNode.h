@@ -63,7 +63,7 @@ public:
 	NodeType GetType();
 	void SetType(NodeType t);
 	int GetImage(int f) override;
-	char *GetText(int c) override;
+	const char *GetText(int c) override;
 	GString GetFullPath() override;
 	ProjectNode *FindFile(const char *In, char **Full);
 	/// \sa Some combination of PLATFORM_WIN32, PLATFORM_LINUX, PLATFORM_MAC, PLATFORM_HAIKU or PLATFORM_ALL

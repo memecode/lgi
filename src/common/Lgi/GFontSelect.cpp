@@ -125,14 +125,12 @@ GFontSelect::~GFontSelect()
 	DeleteObj(d);
 }
 
-char *GFontSelect::GetSelectedFace()
+const char *GFontSelect::GetSelectedFace()
 {
 	LListItem *i = d->Lst->GetSelected();
 	if (i)
-	{
 		return i->GetText(0);
-	}
-	return 0;
+	return NULL;
 }
 
 void GFontSelect::InsertFont(const char *f)
@@ -155,10 +153,7 @@ void GFontSelect::InsertFont(const char *f)
 
 int SortFunc(LListItem *a, LListItem *b, NativeInt Data)
 {
-	char *A = a->GetText(0);
-	char *B = b->GetText(0);
-	if (A && B) return stricmp(A, B);
-	return 0;
+	return Stricmp(a->GetText(0), b->GetText(0));
 }
 
 void GFontSelect::EnumerateFonts()

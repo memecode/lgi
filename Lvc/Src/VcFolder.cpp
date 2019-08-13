@@ -172,7 +172,7 @@ VersionCtrl VcFolder::GetType()
 	return Type;
 }
 
-char *VcFolder::GetText(int Col)
+const char *VcFolder::GetText(int Col)
 {
 	switch (Col)
 	{
@@ -1901,7 +1901,7 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 	{
 		case VcCvs:
 		{
-			LHashTbl<StrKey<char>,VcFile*> Map;
+			LHashTbl<ConstStrKey<char>,VcFile*> Map;
 			for (auto i: *d->Files)
 			{
 				VcFile *f = dynamic_cast<VcFile*>(i);
@@ -3303,7 +3303,7 @@ void VcLeaf::OnExpand(bool b)
 	}
 }
 
-char *VcLeaf::GetText(int Col)
+const char *VcLeaf::GetText(int Col)
 {
 	if (Col == 0)
 		return Leaf;

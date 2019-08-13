@@ -18,6 +18,7 @@
 #define IDC_PULL_ALL							39
 #define IDC_STATUS								40
 #define IDC_HEADS								45
+#define IDC_BUILD_FIX							47
 #define IDC_TABLE								500
 #define IDC_COMMIT								501
 #define IDC_PULL								502

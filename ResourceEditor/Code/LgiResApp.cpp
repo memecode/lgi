@@ -324,22 +324,18 @@ ObjTreeItem::~ObjTreeItem()
 	}
 }
 
-char *ObjTreeItem::GetText(int i)
+const char *ObjTreeItem::GetText(int i)
 {
 	if (Obj)
 	{
 		int Type = Obj->Type();
 		if (Type > 0)
-		{
 			return Obj->Wnd()->Name();
-		}
 		else
-		{
-			return (char*)TypeNames[-Type];
-		}
+			return TypeNames[-Type];
 	}
 
-	return (char*)"#NO_OBJ";
+	return "#NO_OBJ";
 }
 
 void ObjTreeItem::OnSelect()
@@ -1785,7 +1781,7 @@ bool AppWnd::InsertObject(int Type, Resource *r, bool Select)
 			ObjTreeItem *Item = new ObjTreeItem(r);
 			if (Item)
 			{
-				char *Name = Item->GetText();
+				const char *Name = Item->GetText();
 
 				r->Item = Item;
 				Dir->Insert(Item, (Name && Name[0] == '_') ? 0 : -1);

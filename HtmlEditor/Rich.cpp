@@ -289,7 +289,7 @@ public:
 		}
 	}
 
-	char *GetText(int i)
+	const char *GetText(int i)
 	{
 		switch (i)
 		{

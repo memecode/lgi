@@ -39,7 +39,7 @@ public:
 	char *Shortcut() { return Short; }
 	void Shortcut(char *s) { Short.Reset(NewStr(s)); }
 
-	char *GetText(int i=0);
+	const char *GetText(int i=0);
 	ResMenu *GetMenu() { return Menu; }
 	ResMenuItem *FindByRef(int Ref);
 	bool GetFields(FieldTree &Fields);

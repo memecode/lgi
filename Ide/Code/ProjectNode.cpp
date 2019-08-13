@@ -523,7 +523,7 @@ int ProjectNode::GetImage(int f)
 	return ICON_HEADER;
 }
 
-char *ProjectNode::GetText(int c)
+const char *ProjectNode::GetText(int c)
 {
 	if (File)
 	{

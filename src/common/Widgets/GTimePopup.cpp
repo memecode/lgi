@@ -279,7 +279,7 @@ int GTimePopup::OnNotify(GViewI *c, int f)
 			LListItem *Sel = Times->GetSelected();
 			if (Sel)
 			{
-				char *t = Sel->GetText(0);
+				const char *t = Sel->GetText(0);
 				if (t)
 				{
 					GViewI *n = GetNotify();
@@ -327,7 +327,7 @@ void GTimePopup::SetTime(LDateTime *t)
 
 	for (auto i : *Times)
 	{
-		char *s = i->GetText(0);
+		const char *s = i->GetText(0);
 		if (!s)
 			continue;
 

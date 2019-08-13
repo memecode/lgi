@@ -433,7 +433,7 @@ GControlTree::Item *GControlTree::Resolve(bool Create, const char *Path, int Ctr
 			GTreeItem *Match = 0;
 			for (GTreeItem *c = Cur->GetChild(); c; c = c->GetNext())
 			{
-				char *s = c->GetText();
+				const char *s = c->GetText();
 				if (s && _stricmp(t[i], s) == 0)
 				{
 					Match = c;

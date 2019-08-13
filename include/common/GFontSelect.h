@@ -24,7 +24,7 @@ class GFontSelect : public GDialog
 {
 	struct GFontSelectPriv *d;
 	
-	char *GetSelectedFace();
+	const char *GetSelectedFace();
 	void InsertFont(const char *Face);
 	void EnumerateFonts();
 	void OnCreate();

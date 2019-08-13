@@ -216,15 +216,15 @@ public:
 		Lang = l;
 	}
 	
-	char *GetText(int i)
+	const char *GetText(int i)
 	{
 		switch (i)
 		{
 			case 0:
 			{
-				if (Menu) return (char*)"MenuItem";
-				else if (Dialog) return (char*)"Control";
-				return (char*)"String";
+				if (Menu) return "MenuItem";
+				else if (Dialog) return "Control";
+				return "String";
 				break;
 			}
 			case 1:
@@ -242,7 +242,7 @@ public:
 			}
 			case 3:
 			{
-				return (char*)Lang;
+				return Lang;
 				break;
 			}
 		}

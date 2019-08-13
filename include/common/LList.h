@@ -110,11 +110,11 @@ public:
 	/// control.
 	/// 
 	/// \returns A string
-	char *GetText
+	const char *GetText
 	(
 		/// The index of the column.
 		int i
-	);
+	)	override;
 
 	/// Get the icon index to display in the '0th' column. The image list is stored in
 	/// the parent LList.
@@ -484,8 +484,8 @@ public:
 		(
 			[](LListItem *a, LListItem *b, int Column) -> int
 			{
-				char *ATxt = a->GetText(Column);
-				char *BTxt = b->GetText(Column);
+				const char *ATxt = a->GetText(Column);
+				const char *BTxt = b->GetText(Column);
 				return (ATxt && BTxt) ? stricmp(ATxt, BTxt) : 0;
 			},
 			Column

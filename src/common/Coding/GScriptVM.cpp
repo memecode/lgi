@@ -2081,7 +2081,7 @@ int GVmDebuggerWnd::OnNotify(GViewI *Ctrl, int Flags)
 				if (!it)
 					break;
 
-				char *full = it->GetText(1);
+				const char *full = it->GetText(1);
 				if (!FileExists(full))
 					break;
 

@@ -56,7 +56,7 @@ public:
 		}
 	}
 
-	char *GetText(int i)
+	const char *GetText(int i)
 	{
 		if (GetCss(true))
 		{
@@ -68,10 +68,10 @@ public:
 		}
 
 		if (!Str)
-			return (char*)"(no string)";
+			return "(no string)";
 
 		if (!Str->Get())
-			return (char*)"(empty string)";
+			return "(empty string)";
 
 		return Str->Get();
 	}

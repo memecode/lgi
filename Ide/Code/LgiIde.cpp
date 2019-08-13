@@ -86,7 +86,7 @@ public:
 					LListItem *i = Lst->GetSelected();
 					if (i)
 					{
-						char *Ref = i->GetText(0);
+						const char *Ref = i->GetText(0);
 						App->GotoReference(Ref, 1, false);
 					}
 					EndModal(1);
@@ -2980,8 +2980,8 @@ int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
 				LListItem *it = d->Output->Locals->GetSelected();
 				if (it)
 				{
-					char *Var = it->GetText(2);
-					char *Val = it->GetText(3);
+					const char *Var = it->GetText(2);
+					const char *Val = it->GetText(3);
 					if (Var)
 					{
 						if (d->Output->DebugTab)
@@ -3017,7 +3017,7 @@ int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
 							{
 								GotoReference(Full, Line, false);
 								
-								char *sFrame = item->GetText(0);
+								const char *sFrame = item->GetText(0);
 								if (sFrame && IsDigit(*sFrame))
 									d->DbgContext->SetFrame(atoi(sFrame));
 							}

@@ -75,7 +75,7 @@ public:
 
 	void SetCurrent(bool b);
 	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c);
-	char *GetText(int Col);
+	const char *GetText(int Col);
 	const char *GetFieldText(CommitField Fld);
 	bool GitParse(GString s, bool RevList);
 	bool SvnParse(GString s);

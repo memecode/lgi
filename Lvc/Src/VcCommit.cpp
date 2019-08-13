@@ -222,7 +222,7 @@ const char *VcCommit::GetFieldText(CommitField Fld)
 	return NULL;
 }
 
-char *VcCommit::GetText(int Col)
+const char *VcCommit::GetText(int Col)
 {
 	if (!Folder)
 	{

@@ -17,7 +17,7 @@ public:
 		v = new LListItemCheckBox(this, 0);
 	}
 
-	char *GetText(int c)
+	const char *GetText(int c)
 	{
 		static char buf[256];
 		switch (c)

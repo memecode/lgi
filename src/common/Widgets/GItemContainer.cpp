@@ -1033,7 +1033,7 @@ class GItemEditBox : public GEdit
 	GItemEdit *ItemEdit;
 
 public:
-	GItemEditBox(GItemEdit *i, int x, int y, char *s) : GEdit(100, 1, 1, x-3, y-3, s)
+	GItemEditBox(GItemEdit *i, int x, int y, const char *s) : GEdit(100, 1, 1, x-3, y-3, s)
 	{
 		ItemEdit = i;
 		Sunken(false);

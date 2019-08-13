@@ -1459,7 +1459,7 @@ public:
 		Dlg = dlg;
 	}
 	
-	char *GetText(int i)
+	const char *GetText(int i)
 	{
 		return Dlg->Str->Str;
 	}
@@ -1510,9 +1510,9 @@ public:
 		}
 	}
 	
-	char *GetText(int i)
+	const char *GetText(int i)
 	{
-		return File ? File : (char*)"#error";
+		return File ? File : "#error";
 	}
 };
 
