@@ -106,12 +106,12 @@ protected:
 	GTreeItem *_HitTest(int x, int y, bool Debug = false);
 	GRect *_GetRect(GTreeItemRect Which);
 	GdcPt2 _ScrollPos();
-	GTreeItem *Item() { return this; }
-	GRect *Pos();
+	GTreeItem *Item() override { return this; }
+	GRect *Pos() override;
 
 	virtual void _PourText(GdcPt2 &Size);
 	virtual void _PaintText(GItem::ItemPaintCtx &Ctx);
-	void _ClearDs(int Col);
+	void _ClearDs(int Col) override;
 	virtual void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c);
 	int GetColumnSize(int Col);
 
@@ -123,7 +123,7 @@ public:
 	GTreeItem();
 	virtual ~GTreeItem();
 
-	GItemContainer *GetContainer();
+	GItemContainer *GetContainer() override;
 	
 	/// \brief Get the text for the node
 	///
@@ -135,26 +135,26 @@ public:
 	/// \brief Sets the text for the node.
 	///
 	/// This will allocate and store the string in this class.
-	bool SetText(const char *s, int i=0);
+	bool SetText(const char *s, int i=0) override;
 	/// Returns the icon index into the parent tree's GImageList.
-	int GetImage(int Flags = 0);
+	int GetImage(int Flags = 0) override;
 	/// Sets the icon index into the parent tree's GImageList.
-	void SetImage(int i);
+	void SetImage(int i) override;
 	/// Tells the item to update itself on the screen when the
 	/// GTreeItem::GetText data has changed.
-	void Update();
+	void Update() override;
 	/// Returns true if the tree item is currently selected.
-	bool Select();
+	bool Select() override;
 	/// Selects or deselects the tree item.
-	void Select(bool b);
+	void Select(bool b) override;
 	/// Returns true if the node has children and is open.
-	bool Expanded();
+	bool Expanded() override;
 	/// Opens or closes the node to show or hide the children.
-	void Expanded(bool b);
+	void Expanded(bool b) override;
 	/// Scrolls the tree view so this node is visible.
-	void ScrollTo();
+	void ScrollTo() override;
 	/// Gets the bounding box of the item.
-	GRect *GetPos(int Col = -1);
+	GRect *GetPos(int Col = -1) override;
 	/// Sort the child folder
 	bool SortChildren(int (*compare)(GTreeItem *a, GTreeItem *b, NativeInt UserData), NativeInt UserData = 0);
 	/// True if the node is the drop target
@@ -164,8 +164,8 @@ public:
 	virtual void OnExpand(bool b);
 
 	/// Paints the item
-	void OnPaint(ItemPaintCtx &Ctx);
-	void OnPaint(GSurface *pDC) { LgiAssert(0); }
+	void OnPaint(ItemPaintCtx &Ctx) override;
+	void OnPaint(GSurface *pDC) override { LgiAssert(0); }
 };
 
 /// A tree control.

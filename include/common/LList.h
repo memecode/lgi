@@ -92,7 +92,7 @@ public:
 	LListItem();
 	virtual ~LListItem();
 
-	GItemContainer *GetContainer();
+	GItemContainer *GetContainer() override;
 	/// Get the owning list
 	LList *GetList() { return Parent; }
 	/// Gets the LListItemColumn's.
@@ -101,7 +101,7 @@ public:
 	// Properties
 	
 	/// Set the text for a given column
-	bool SetText(const char *s, int i=0);
+	bool SetText(const char *s, int i=0) override;
 
 	/// \brief Get the text for a given column.
 	///
@@ -118,31 +118,31 @@ public:
 
 	/// Get the icon index to display in the '0th' column. The image list is stored in
 	/// the parent LList.
-	int GetImage(int Flags = 0);
+	int GetImage(int Flags = 0) override;
 	/// Sets the icon index
-	void SetImage(int i);
+	void SetImage(int i) override;
 	/// Returns true if selected
-	bool Select();
+	bool Select() override;
 	/// Changes the selection start of the control.
-	void Select(bool b);
+	void Select(bool b) override;
 	/// Gets the on screen position of the field at column 'col'
-	GRect *GetPos(int Col = -1);
+	GRect *GetPos(int Col = -1) override;
 	/// True if the item is visible
 	bool OnScreen() { return Pos.y1 < Pos.y2; }
 
 	// Methods
 	
 	/// Update the text cache and display the updated data
-	void Update();
+	void Update() override;
 	/// Moves the item on screen if not visible
-	void ScrollTo();
+	void ScrollTo() override;
 	
 	// Events;
-	void OnMouseClick(GMouse &m);
-	void OnMeasure(GdcPt2 *Info);
-	void OnPaint(GSurface *pDC) { LgiAssert(0); }
-	void OnPaint(GItem::ItemPaintCtx &Ctx);
-	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c);
+	void OnMouseClick(GMouse &m) override;
+	void OnMeasure(GdcPt2 *Info) override;
+	void OnPaint(GSurface *pDC) override { LgiAssert(0); }
+	void OnPaint(GItem::ItemPaintCtx &Ctx) override;
+	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c) override;
 
 	// Overridable
 	virtual int Compare(LListItem *To, int Field = 0) { return 0; }

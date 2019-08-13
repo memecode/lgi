@@ -1001,7 +1001,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 				GTreeItem *s = Bookmarks->Selection();
 				if (s)
 				{
-					char *p = s->GetText(1);
+					const char *p = s->GetText(1);
 					if (DirExists(p))
 					{
 						SetCtrlName(IDC_PATH, p);
