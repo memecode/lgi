@@ -335,12 +335,10 @@ bool DocEdit::OnKey(GKey &k)
 {
 	if (k.AltCmd())
 	{
-		/*	This is the normal Ctrl+Left/Right word select on windows.
-			What was it's original purpose?
+		// This allows the Alt+Left/Right to be processed by the prev/next navigator menu.
 		if (k.vkey == LK_LEFT ||
 			k.vkey == LK_RIGHT)
 			return false;
-		*/
 
 		if (ToLower(k.c16) == 'm')
 		{
