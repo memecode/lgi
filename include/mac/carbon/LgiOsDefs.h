@@ -16,6 +16,15 @@
 #include <stdio.h>
 #include <Carbon/Carbon.h>
 #include <wchar.h>
+
+/// This turns on the Core Text implementation.
+/// If '0' the old ATSUI implementation is used.
+#define USE_CORETEXT		1
+#define POSIX				1
+#define LGI_CARBON			1
+#define LGI_32BIT			1
+#define LGI_VIEW_HANDLE		1
+
 #include "LgiInc.h"
 #include "LgiDefs.h"
 #include "GAutoPtr.h"
@@ -25,17 +34,6 @@
 //////////////////////////////////////////////////////////////////
 // Includes
 #include "LgiInc.h"
-
-/// This turns on the Core Text implementation.
-/// If '0' the old ATSUI implementation is used.
-#define USE_CORETEXT		1
-
-#ifndef CARBON
-#define CARBON				1
-#endif
-
-#define LGI_32BIT			1
-#define LGI_VIEW_HANDLE		1
 
 //////////////////////////////////////////////////////////////////
 // Typedefs
@@ -74,10 +72,6 @@ public:
 // Defines
 #define _stricmp					strcasecmp
 #define _strnicmp					strncasecmp
-
-// System defines
-#define POSIX						1
-#define LGI_CARBON					1
 
 // Process
 typedef int							OsProcess;

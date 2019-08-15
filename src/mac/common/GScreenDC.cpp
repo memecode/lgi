@@ -616,7 +616,11 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 						CGContextSaveGState(d->Ctx);
 						CGContextTranslateCTM(d->Ctx, 0.0f, b.Y());
 						CGContextScaleCTM(d->Ctx, 1.0f, -1.0f);
-						
+
+						bool HasConstAlpha = d->ConstAlpha >= 0 && d->ConstAlpha < 255;
+						if (HasConstAlpha)
+							CGContextSetAlpha(d->Ctx, d->ConstAlpha / 255.0);
+
 						CGContextDrawImage(d->Ctx, r, Img);
 						
 						CGContextRestoreGState(d->Ctx);

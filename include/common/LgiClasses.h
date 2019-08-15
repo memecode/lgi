@@ -1295,7 +1295,7 @@ public:
 	#else
 		GWindow();
 	#endif
-	#if CARBON
+	#if LGI_CARBON
 		GWindow(WindowRef wr);
 	#endif
 	~GWindow();

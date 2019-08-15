@@ -1096,7 +1096,10 @@ bool GKeyFromEvent(GKey &k, EventRef inEvent)
 							NULL,
 							&mods);
 	if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-	
+
+	#ifndef LGI_CARBON
+		#error "LGI_CARBON not defined?"
+	#endif
 	k.SetModifer(mods);
 
 	ByteCount len = 0;
@@ -1268,7 +1271,7 @@ OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent, bool Handle)
 					if (mods & 0x800) k.Alt(true);
 					if (mods & 0x100) k.System(true);
 
-					#if 0
+					#if 1
 					printf("key=%u(0x%x)%u, c16=%u(0x%x), utf=%.1S\n",
 						(unsigned)key, (unsigned)key, (unsigned)actualSize,
 						(unsigned)k.c16, (unsigned)k.c16,

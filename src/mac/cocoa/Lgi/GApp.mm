@@ -23,6 +23,8 @@
 #include <sys/resource.h>
 #include <sys/wait.h>
 
+#import "LCocoaView.h"
+
 extern int hndstate(int hnd);
 
 struct OsAppArgumentsPriv
@@ -594,9 +596,22 @@ GApp::~GApp()
 	TheApp = 0;
 }
 
-bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b)
+bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param A, GMessage::Param B)
 {
-	return false;
+	if (!View)
+		return false;
+	
+	GWindow *w = View->GetWindow();
+	if (!w)
+		return false;
+	
+	auto v = w->Handle();
+	if (!v)
+		return false;
+	
+	auto m = [[LCocoaMsg alloc] init:View msg:Msg a:A b:B];
+	[v performSelectorOnMainThread:@selector(userEvent:) withObject:m waitUntilDone:false];
+	return true;
 }
 
 GApp *GApp::ObjInstance()

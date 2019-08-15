@@ -136,7 +136,7 @@ GWindow::GWindow() :
 	}
 }
 
-#if defined(CARBON)
+#if defined(LGI_CARBON)
 GWindow::GWindow(WindowRef wr)
 {
 	d = new GWindowPrivate(this);

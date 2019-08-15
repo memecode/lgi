@@ -232,8 +232,6 @@
 #endif
 
 // My includes
-#include "LgiInc.h"							// Xp
-
 #include "LgiOsDefs.h"						// Platform specific 
 
 #include "LgiMsgs.h"						// Xp

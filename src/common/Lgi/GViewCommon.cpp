@@ -709,7 +709,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	else
 	{
 		OnPaint(pDC);
-		#if defined(_DEBUG) && defined(CARBON)
+		#if defined(_DEBUG) && defined(LGI_CARBON)
 		if (_Debug)
 		{
 			OsPainter h = pDC->Handle();
@@ -2341,7 +2341,7 @@ GdcPt2 &GView::GetWindowBorderSize()
 
 #ifdef _DEBUG
 
-#ifdef CARBON
+#ifdef LGI_CARBON
 void DumpHiview(HIViewRef v, int Depth = 0)
 {
 	char Sp[256];
@@ -2422,7 +2422,7 @@ void GView::_Dump(int Depth)
 				v->_Dump(Depth+1);
 		}
 	
-	#elif defined(CARBON)
+	#elif defined(LGI_CARBON)
 	
 	DumpHiview(_View);
 

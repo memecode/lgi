@@ -24,13 +24,6 @@
 #define ADJ_UP						3
 #define ADJ_DOWN					4
 
-struct X11_INVALIDATE_PARAMS
-{
-	GView *View;
-	GRect Rgn;
-	bool Repaint;
-};
-
 // CursorData is a bitmap in an array of uint32's. This is generated from a graphics file:
 // ./Code/cursors.png
 //
@@ -177,7 +170,7 @@ GView *&GView::PopupChild()
 bool GView::_Mouse(GMouse &m, bool Move)
 {
 	#if 0
-	if (!Move)
+	if (Move)
 	{
 		static bool First = true;
 		if (First)
@@ -223,16 +216,10 @@ bool GView::_Mouse(GMouse &m, bool Move)
 		if (_Over != this)
 		{
 			if (_Over)
-			{
 				_Over->OnMouseExit(m);
-			}
-
 			_Over = this;
-
 			if (_Over)
-			{
 				_Over->OnMouseEnter(m);
-			}
 		}
 			
 		GView *Target = dynamic_cast<GView*>(_Over ? _Over : this);
@@ -350,7 +337,8 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 		return false;
 	
 	auto w = GetWindow();
-	for (GViewI *v = this; v; v = v->GetParent())
+	GViewI *v;
+	for (v = this; v; v = v->GetParent())
 	{
 		if (!v->Visible())
 			return true;
@@ -361,14 +349,17 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 		r.Offset(p.x1, p.y1);
 	}
 
-	auto v = w ? w->Handle() : NULL;
-	if (v)
+	auto nsview = w ? w->Handle() : NULL;
+	if (nsview)
 	{
-		[v setNeedsDisplayInRect:r];
+		#if 0
+		[nsview setNeedsDisplayInRect:v->GetGView()->Flip(r)];
 		printf("%s::Inval r=%s\n", GetClass(), r.GetStr());
+		#else
+		nsview.needsDisplay = true;
+		#endif
 	}
-	else
-		LgiTrace("%s:%i - No contentView? %s\n", _FL, GetClass());
+	// else LgiTrace("%s:%i - No contentView? %s\n", _FL, GetClass());
 	
 	return false;
 }

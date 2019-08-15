@@ -435,16 +435,16 @@ void GMouseHook::TrackClick(GView *v)
 	#ifdef MAC
 	if (v)
 	{
-		#if !LGI_VIEW_HANDLE
-		if (v->IsAttached())
-		#else
+		#if LGI_VIEW_HANDLE
 		d->ViewHandle = v->Handle();
 		if (d->ViewHandle)
 		#endif
 		{
 			d->Event.Signal();
 		}
+		#if LGI_VIEW_HANDLE
 		else printf("%s:%i - No view handle.\n", _FL);
+		#endif
 	}
 	else printf("%s:%i - No view ptr.\n", _FL);
 	#endif
@@ -499,7 +499,7 @@ LRESULT CALLBACK GMouseHook::MouseProc(int Code, WPARAM a, LPARAM b)
 {
 	return 0;
 }
-#elif defined(CARBON)
+#elif defined(LGI_CARBON)
 WindowRef CreateBorderlessWindow()
 {
 	Rect r = {0,0,100,100};
@@ -630,7 +630,7 @@ void GPopup::TakeFocus(bool Take)
 
 bool GPopup::Attach(GViewI *p)
 {
-	#if defined(CARBON)
+	#if defined(LGI_CARBON)
 	
 	return GWindow::Attach(NULL);
 	
@@ -764,7 +764,7 @@ void GPopup::Visible(bool i)
 			else
 				ShowWindow(Handle(), SW_SHOWNA);
 	
-		#elif defined(CARBON)
+		#elif defined(LGI_CARBON)
 	
 			SetAlwaysOnTop(true);
 			GWindow::Visible(i);
@@ -849,7 +849,7 @@ bool GPopup::Visible()
 	    
     #endif
 
-	#if defined(CARBON)
+	#if defined(LGI_CARBON)
 	bool v = GWindow::Visible();
 	#else
 	bool v = GView::Visible();

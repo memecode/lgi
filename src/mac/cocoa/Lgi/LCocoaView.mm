@@ -12,6 +12,24 @@
 
 #define Check() if (!self.w) return
 static int LCocoaView_Count = 0;
+
+@implementation LCocoaMsg
+
+- (id)init:(GViewI*)view msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B
+{
+	if ((self = [super init]) != nil)
+	{
+		self.v = view;
+		self.m = Msg;
+		self.a = A;
+		self.b = B;
+	}
+	
+	return self;
+}
+
+@end
+
 @implementation LCocoaView {
 	NSTrackingArea *tracking;
 }
@@ -27,13 +45,16 @@ static int LCocoaView_Count = 0;
 	
 		self.w = wnd;
 		self.WndClass = wnd->GetClass();
-		self->tracking = [[NSTrackingArea alloc] initWithRect:[self bounds]
+		
+		NSRect r = {{0, 0},{1000,1000}};
+		self->tracking = [[NSTrackingArea alloc] initWithRect:r
                                      options:NSTrackingMouseEnteredAndExited |
                                              NSTrackingActiveAlways |
                                              NSTrackingMouseMoved
                                        owner:self
                                     userInfo:nil];
 	
+		[self addTrackingArea:self->tracking];
 		[self setAutoresizingMask:NSViewNotSizable];
 		[self setTranslatesAutoresizingMaskIntoConstraints:YES];
 	}
@@ -117,6 +138,12 @@ static int LCocoaView_Count = 0;
 	GMouse m(self.w);
 	m.SetFromEvent(ev, self);
 	m.Target->GetGView()->_Mouse(m, true);
+}
+
+- (void)userEvent:(LCocoaMsg*)msg
+{
+	GMessage m(msg.m, msg.a, msg.b);
+	msg.v->OnEvent(&m);
 }
 
 @end

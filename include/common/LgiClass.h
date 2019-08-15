@@ -132,7 +132,7 @@ public:
 		Shift((modifierKeys & Gtk::GDK_SHIFT_MASK) != 0);
 		Alt((modifierKeys & Gtk::GDK_MOD1_MASK) != 0);
 		Ctrl((modifierKeys & Gtk::GDK_CONTROL_MASK) != 0);
-		#elif defined(LGI_CARBON)
+		#elif LGI_CARBON
 		System(modifierKeys & cmdKey);
 		Shift(modifierKeys & shiftKey);
 		Alt(modifierKeys & optionKey);
@@ -195,11 +195,16 @@ public:
 			c16, c16 >= ' ' && c16 < 127 ? c16 : '.',
 			IsChar, Down(), Ctrl(), Alt(), Shift(), System());
 	}
+	
+	bool CapsLock()
+	{
+		return TestFlag(Flags, LGI_EF_CAPS_LOCK);
+	}
 
 	/// Returns the character in the right case...
 	char16 GetChar()
 	{
-		if (Shift() ^ TestFlag(Flags, LGI_EF_CAPS_LOCK))
+		if (Shift() ^ CapsLock())
 		{
 			return (c16 >= 'a' && c16 <= 'z') ? c16 - 'a' + 'A' : c16;
 		}
