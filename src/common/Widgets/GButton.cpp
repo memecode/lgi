@@ -223,6 +223,8 @@ void GButton::OnMouseClick(GMouse &m)
 		bool Click = IsCapturing();
 		Capture(m.Down());
 		
+		printf("Click=%i Down=%i Over=%i\n", Click, m.Down(), d->Over);
+		
 		if (Click ^ m.Down())
 		{
 			if (d->Over)
@@ -239,6 +241,7 @@ void GButton::OnMouseClick(GMouse &m)
 				
 				Invalidate();
 
+				printf("Down=%i Pressed=%i\n", m.Down(), d->Pressed);
 				if (!m.Down() &&
 					d->Pressed == 0)
 				{
@@ -343,10 +346,10 @@ void GButton::OnClick()
 		GViewI *target = n ? n : p;
 		if (target)
 		{
-			#if !LGI_VIEW_HANDLE
-			if (IsAttached())
-			#else
+			#if LGI_VIEW_HANDLE
 			if (Handle())
+			#else
+			if (IsAttached())
 			#endif
 			{
 				target->PostEvent(M_CHANGE, (GMessage::Param)Id);

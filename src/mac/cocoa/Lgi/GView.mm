@@ -487,9 +487,15 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 
 bool GView::IsAttached()
 {
-	LAutoPool Pool;
-	if (GetWindow() == this)
+	GWindow *w = GetWindow();
+	if (!w)
+		return false;
+	
+	if (w == this)
 		return WindowHandle() != 0;
+	
+	if (GetParent() != NULL)
+		return w->WindowHandle() != 0;
 
 	return false;
 }
