@@ -779,7 +779,7 @@ public:
 			case IDC_COMMIT_AND_PUSH:
 			case IDC_COMMIT:
 			{
-				auto BuildFix = GetCtrlName(IDC_BUILD_FIX);
+				auto BuildFix = GetCtrlValue(IDC_BUILD_FIX);
 				const char *Msg = GetCtrlName(IDC_MSG);
 				if (BuildFix || ValidStr(Msg))
 				{
