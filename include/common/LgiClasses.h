@@ -357,6 +357,10 @@ public:
 
 		DesktopInfo *GetDesktopInfo();
 		bool SetApplicationIcon(const char *FileName);
+	
+	#elif LGI_COCOA && defined(__OBJC__)
+	
+		NSApplication *Handle();
 		
 	#endif
 

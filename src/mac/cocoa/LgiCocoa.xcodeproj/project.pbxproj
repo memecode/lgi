@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		34109857217A9805007020CE /* LCocoaView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 34109856217A9805007020CE /* LCocoaView.mm */; };
+		3413170E23068FFE008CE982 /* GFileSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3413170D23068FFE008CE982 /* GFileSelect.cpp */; };
+		34131710230694D1008CE982 /* Gel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3413170F230694D1008CE982 /* Gel.cpp */; };
 		345920FF1F25649000098DFD /* GFont.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FC1F25649000098DFD /* GFont.h */; };
 		345921001F25649000098DFD /* GFontCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FD1F25649000098DFD /* GFontCache.h */; };
 		345921011F25649000098DFD /* GFontSelect.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FE1F25649000098DFD /* GFontSelect.h */; };
@@ -17,7 +19,6 @@
 		3477C26C1CBF020F0028B84B /* LgiProject.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C26B1CBF020F0028B84B /* LgiProject.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3477C2751CBF07DD0028B84B /* GApp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2741CBF07DD0028B84B /* GApp.mm */; };
 		3477C2781CBF08050028B84B /* GClipBoard.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2761CBF08050028B84B /* GClipBoard.mm */; };
-		3477C2791CBF08050028B84B /* GFileSelect.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2771CBF08050028B84B /* GFileSelect.mm */; };
 		3477C2821CBF086A0028B84B /* GGeneral.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27A1CBF086A0028B84B /* GGeneral.mm */; };
 		3477C2831CBF086A0028B84B /* GLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27B1CBF086A0028B84B /* GLayout.mm */; };
 		3477C2841CBF086A0028B84B /* LMenu.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27C1CBF086A0028B84B /* LMenu.mm */; };
@@ -136,6 +137,8 @@
 /* Begin PBXFileReference section */
 		34109853217A975E007020CE /* LCocoaView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LCocoaView.h; path = ../../../../include/mac/cocoa/LCocoaView.h; sourceTree = "<group>"; };
 		34109856217A9805007020CE /* LCocoaView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = LCocoaView.mm; path = Lgi/LCocoaView.mm; sourceTree = SOURCE_ROOT; };
+		3413170D23068FFE008CE982 /* GFileSelect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GFileSelect.cpp; path = ../../../common/Lgi/GFileSelect.cpp; sourceTree = "<group>"; };
+		3413170F230694D1008CE982 /* Gel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Gel.cpp; path = ../../../common/Skins/Gel/Gel.cpp; sourceTree = "<group>"; };
 		345920FC1F25649000098DFD /* GFont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFont.h; path = ../../../../include/common/GFont.h; sourceTree = "<group>"; };
 		345920FD1F25649000098DFD /* GFontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFontCache.h; path = ../../../../include/common/GFontCache.h; sourceTree = "<group>"; };
 		345920FE1F25649000098DFD /* GFontSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFontSelect.h; path = ../../../../include/common/GFontSelect.h; sourceTree = "<group>"; };
@@ -147,7 +150,6 @@
 		3477C26D1CBF020F0028B84B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Lgi/Info.plist; sourceTree = "<group>"; };
 		3477C2741CBF07DD0028B84B /* GApp.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GApp.mm; sourceTree = "<group>"; };
 		3477C2761CBF08050028B84B /* GClipBoard.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GClipBoard.mm; sourceTree = "<group>"; };
-		3477C2771CBF08050028B84B /* GFileSelect.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GFileSelect.mm; sourceTree = "<group>"; };
 		3477C27A1CBF086A0028B84B /* GGeneral.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GGeneral.mm; sourceTree = "<group>"; };
 		3477C27B1CBF086A0028B84B /* GLayout.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GLayout.mm; sourceTree = "<group>"; };
 		3477C27C1CBF086A0028B84B /* LMenu.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = LMenu.mm; sourceTree = "<group>"; };
@@ -347,6 +349,7 @@
 		3477C28A1CBF08760028B84B /* Graphics */ = {
 			isa = PBXGroup;
 			children = (
+				3413170F230694D1008CE982 /* Gel.cpp */,
 				34D6AA1622D3749A005D739E /* Gdc2.h */,
 				34D1B3C021748A2800BC6B58 /* GPath.cpp */,
 				3477C3211CC04DA00028B84B /* GColour.cpp */,
@@ -407,10 +410,10 @@
 		3477C2B21CBF96E60028B84B /* Dialogs */ = {
 			isa = PBXGroup;
 			children = (
+				3413170D23068FFE008CE982 /* GFileSelect.cpp */,
 				3477C46C1CC26DEB0028B84B /* GAlert.cpp */,
 				3477C3481CC0AA7E0028B84B /* GProgressDlg.cpp */,
 				3477C3441CC0A9DE0028B84B /* GInput.cpp */,
-				3477C2771CBF08050028B84B /* GFileSelect.mm */,
 				3477C30C1CC04C560028B84B /* GFindReplace.cpp */,
 				3477C2E01CC04A3C0028B84B /* GFontSelect.cpp */,
 				3477C2B31CBF96F20028B84B /* LgiMsg.cpp */,
@@ -711,11 +714,13 @@
 				3477C3021CC04BF00028B84B /* GCheckBox.cpp in Sources */,
 				3477C2BB1CBF97C80028B84B /* GdcCommon.cpp in Sources */,
 				3477C2E51CC04A7F0028B84B /* GViewCommon.cpp in Sources */,
+				34131710230694D1008CE982 /* Gel.cpp in Sources */,
 				3477C2D71CC048390028B84B /* GPopup.cpp in Sources */,
 				3477C3091CC04BF00028B84B /* GTableLayout.cpp in Sources */,
 				3477C2E11CC04A3C0028B84B /* GFontSelect.cpp in Sources */,
 				3477C2DF1CC04A030028B84B /* GScrollBar.cpp in Sources */,
 				3477C2F11CC04BBB0028B84B /* GTree.cpp in Sources */,
+				3413170E23068FFE008CE982 /* GFileSelect.cpp in Sources */,
 				3477C3281CC04E020028B84B /* GVariant.cpp in Sources */,
 				3477C2AF1CBF96B90028B84B /* LgiRes.cpp in Sources */,
 				3477C3161CC04CCB0028B84B /* GLibrary.cpp in Sources */,
@@ -766,7 +771,6 @@
 				3477C2E31CC04A5C0028B84B /* GStream.cpp in Sources */,
 				34A3ACEA20568D9700B1D62A /* LMenuCommon.cpp in Sources */,
 				3477C3341CC04E120028B84B /* 24Bit.cpp in Sources */,
-				3477C2791CBF08050028B84B /* GFileSelect.mm in Sources */,
 				3477C3351CC04E120028B84B /* 32Bit.cpp in Sources */,
 				3477C31E1CC04D3F0028B84B /* INetTools.cpp in Sources */,
 				3477C2881CBF086A0028B84B /* GWidgets.mm in Sources */,

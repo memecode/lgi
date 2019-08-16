@@ -572,56 +572,7 @@ void GWindow::SetAlwaysOnTop(bool b)
 
 bool GWindow::PostEvent(int Event, GMessage::Param a, GMessage::Param b)
 {
-	bool Status = false;
-	
-	#if 0
-	if (Wnd)
-	{
-		EventRef Ev;
-		OSStatus e = CreateEvent(NULL,
-								 kEventClassUser,
-								 kEventUser,
-								 0, // EventTime
-								 kEventAttributeUserEvent,
-								 &Ev);
-		if (e)
-		{
-			printf("%s:%i - CreateEvent failed with %i\n", _FL, (int)e);
-		}
-		else
-		{
-			EventTargetRef t = GetWindowEventTarget(Wnd);
-			
-			e = SetEventParameter(Ev, kEventParamLgiEvent, typeUInt32, sizeof(Event), &Event);
-			if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-			e = SetEventParameter(Ev, kEventParamLgiA, typeUInt32, sizeof(a), &a);
-			if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-			e = SetEventParameter(Ev, kEventParamLgiB, typeUInt32, sizeof(b), &b);
-			if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-			
-			// printf("Sending event to window %i,%i,%i\n", Event, a, b);
-			
-#if 1
-			
-			e = SetEventParameter(Ev, kEventParamPostTarget, typeEventTargetRef, sizeof(t), &t);
-			if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-			e = PostEventToQueue(GetMainEventQueue(), Ev, kEventPriorityStandard);
-			if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-			Status = e == 0;
-			
-#else
-			
-			e = SendEventToEventTarget(Ev, GetControlEventTarget(Wnd));
-			if (e) printf("%s:%i - error %i\n", _FL, e);
-			
-#endif
-			
-			ReleaseEvent(Ev);
-		}
-	}
-	#endif
-	
-	return Status;
+	return LgiApp->PostEvent(this, Event, a, b);
 }
 
 #if 0

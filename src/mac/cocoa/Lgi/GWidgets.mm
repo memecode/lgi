@@ -116,7 +116,8 @@ int GDialog::DoModal(OsView OverideParent)
 		AttachChildren();
 		Visible(true);
 		
-		// RunAppModalLoopForWindow(Wnd);
+		NSApplication *app = LgiApp->Handle();
+		[app runModalForWindow:WindowHandle()];
 		
 		if (Owner) Owner->SetChildDialog(0);
 	}
@@ -131,7 +132,8 @@ void GDialog::EndModal(int Code)
 		d->IsModal = false;
 		d->ModalStatus = Code;
 		
-		// QuitAppModalLoopForWindow(Wnd);
+		NSApplication *app = LgiApp->Handle();
+		[app stopModal];
 	}
 	else
 	{

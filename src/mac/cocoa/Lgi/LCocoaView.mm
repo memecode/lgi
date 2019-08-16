@@ -144,6 +144,7 @@ static int LCocoaView_Count = 0;
 {
 	GMessage m(msg.m, msg.a, msg.b);
 	msg.v->OnEvent(&m);
+	[msg release];
 }
 
 @end

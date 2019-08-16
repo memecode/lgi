@@ -1492,7 +1492,11 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			#elif defined(MAC)
 			
 				#if defined LGI_COCOA
-					LgiAssert(!"Impl me.");
+			
+					auto f = [NSURL fileURLWithPath:[NSHomeDirectory()stringByAppendingPathComponent:@"Desktop"]];
+					Path = [f.absoluteString UTF8String];
+					[f release];
+			
 				#elif defined LGI_CARBON
 					FSRef Ref;
 					OSErr e = FSFindFolder(kOnAppropriateDisk, kDesktopFolderType, kDontCreateFolder, &Ref);

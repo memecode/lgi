@@ -511,36 +511,8 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	
 	if (!GetOption("noskin"))
 	{
-#if 0
-		// Load dynamic library skin engine
-		char Name[64];
-#ifdef _DEBUG
-		char *Build = "d";
-#else
-		char *Build = "";
-#endif
-		
-		sprintf(Name, "lgiskin%s.%s", Build, LGI_LIBRARY_EXT);
-		d->SkinLib = new GLibrary(Name);
-#else
-		// Static version of the skinning engine
-#endif
-		if (d->SkinLib)
-		{
-			if (d->SkinLib->IsLoaded())
-			{
-				Proc_CreateSkinEngine CreateSkinEngine =
-				(Proc_CreateSkinEngine)d->SkinLib->GetAddress(LgiSkinEntryPoint);
-				if (CreateSkinEngine)
-				{
-					SkinEngine = CreateSkinEngine(this);
-				}
-			}
-			else
-			{
-				DeleteObj(d->SkinLib);
-			}
-		}
+		extern GSkinEngine *CreateSkinEngine(GApp *App);
+		SkinEngine = CreateSkinEngine(this);
 	}
 	
 #if 0
@@ -594,6 +566,11 @@ GApp::~GApp()
 	DeleteObj(GFontSystem::Me);
 	DeleteObj(d);
 	TheApp = 0;
+}
+
+NSApplication *GApp::Handle()
+{
+	return d->NsApp;
 }
 
 bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param A, GMessage::Param B)
