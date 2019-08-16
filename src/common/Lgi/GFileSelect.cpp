@@ -375,7 +375,7 @@ class FolderCtrl : public GView
 	GEdit *e;
 	GArray<Part> p;
 	Part *Over;
-	int Cursor;
+	ssize_t Cursor;
 
 	Part *HitPart(int x, int y, int *Sub = NULL)
 	{
@@ -425,7 +425,7 @@ public:
 		return true;
 	}
 
-	GString NameAt(int Level)
+	GString NameAt(ssize_t Level)
 	{
 		GString n;
 		#ifndef WINDOWS
@@ -604,7 +604,7 @@ public:
 		return GView::OnEvent(m);
 	}
 
-	virtual bool ShowMenu(int Level)
+	virtual bool ShowMenu(ssize_t Level)
 	{
 		if (Level <= 0)
 			return false;
@@ -619,7 +619,7 @@ public:
 			if (d.IsDir())
 			{
 				Opts.New() = d.GetName();
-				s.AppendItem(d.GetName(), Opts.Length());
+				s.AppendItem(d.GetName(), (int)Opts.Length());
 			}
 		}
 
@@ -1087,7 +1087,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 						{
 							n->Description(f);
 							n->Extension(f);							
-							TypeIndex = d->Types.Length();
+							TypeIndex = (int)d->Types.Length();
 							d->Types.Insert(n);
 							FileTypeCbo->Insert(f);
 						}
@@ -1161,7 +1161,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 		}
 		case IDC_TYPE:
 		{
-			d->CurrentType = FileTypeCbo->Value();
+			d->CurrentType = (int)FileTypeCbo->Value();
 			FileLst->OnFolder();
 
 			if (d->Type == TypeSaveFile)
@@ -1449,7 +1449,7 @@ void GFileSystemItem::OnPath(char *p)
 
 	if (p)
 	{
-		int PathLen = strlen(Path);
+		auto PathLen = strlen(Path);
 		if (Path &&
 			strnicmp(Path, p, PathLen) == 0 &&
 			(p[PathLen] == DIR_CHAR || p[PathLen] == 0)

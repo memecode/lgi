@@ -223,8 +223,6 @@ void GButton::OnMouseClick(GMouse &m)
 		bool Click = IsCapturing();
 		Capture(m.Down());
 		
-		printf("Click=%i Down=%i Over=%i\n", Click, m.Down(), d->Over);
-		
 		if (Click ^ m.Down())
 		{
 			if (d->Over)
@@ -241,7 +239,6 @@ void GButton::OnMouseClick(GMouse &m)
 				
 				Invalidate();
 
-				printf("Down=%i Pressed=%i\n", m.Down(), d->Pressed);
 				if (!m.Down() &&
 					d->Pressed == 0)
 				{

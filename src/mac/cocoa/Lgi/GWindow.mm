@@ -275,11 +275,16 @@ GWindow::~GWindow()
 	
 	if (Wnd)
 	{
+		LCocoaView *cv = objc_dynamic_cast(LCocoaView, Wnd.p.contentViewController.view);
+		if (cv)
+			cv.w = NULL;
+
 		LNsWindow *w = objc_dynamic_cast(LNsWindow, Wnd.p);
 		if (w)
 			w.d = NULL;
-		// auto c = Wnd.p.retainCount;
-		// printf("~GWindow %i\n", (int)c);
+
+		if (!d->Closing)
+			[Wnd.p close];
 		[Wnd.p release];
 		Wnd.p = nil;
 	}

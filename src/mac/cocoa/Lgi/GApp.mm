@@ -771,60 +771,7 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 	else
 	{
 	}
-	
-	#if 0
-	EventRef theEvent;
-	EventTargetRef theTarget;
-	theTarget = GetEventDispatcherTarget();
-	
-	if (Loop)
-	{
-		OnCommandLine();
 		
-		EventLoopTimerRef timer;
-		IdleGluePtrs Ptrs;
-		if (IdleCallback)
-		{
-			Ptrs.Callback = IdleCallback;
-			Ptrs.Param = IdleParam;
-			InstallEventLoopTimer(	GetCurrentEventLoop(),
-								  0,
-								  kEventDurationSecond / 10,
-								  NewEventLoopTimerUPP(IdleGlue),
-								  &Ptrs,
-								  &timer);
-		}
-		
-		do
-		{
-			RunApplicationEventLoop();
-		}
-		while (AppWnd &&
-			   !AppWnd->CloseRequestDone() &&
-			   !AppWnd->OnRequestClose(false));
-	}
-	else
-	{
-		while
-			(
-			 ReceiveNextEvent
-			 (
-			  0,
-			  NULL,
-			  0.001, // kEventDurationForever,
-			  true,
-			  &theEvent
-			  )
-			 ==
-			 noErr
-			 )
-		{
-			SendEventToEventTarget (theEvent, theTarget);
-			ReleaseEvent(theEvent);
-		}
-	}
-	#endif
-	
 	return 0;
 }
 

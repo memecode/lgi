@@ -387,11 +387,9 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 		}
 		case M_CHANGE:
 		{
-			GViewI *Ctrl = dynamic_cast<GViewI*>((GViewI*) Msg->A());
-			if (Ctrl)
-			{
+			GViewI *Ctrl;
+			if (GetViewById(Msg->A(), Ctrl))
 				return OnNotify(Ctrl, (int)Msg->B());
-			}
 			break;
 		}
 		case M_COMMAND:

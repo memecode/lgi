@@ -296,7 +296,7 @@ void GLayout::OnPosChange()
 
 int GLayout::OnNotify(GViewI *c, int f)
 {
-	return 0;
+	return GView::OnNotify(c, f);
 }
 
 void GLayout::OnNcPaint(GSurface *pDC, GRect &r)

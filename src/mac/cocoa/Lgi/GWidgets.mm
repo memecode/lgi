@@ -101,6 +101,7 @@ int GDialog::DoModal(OsView OverideParent)
 	
 	if (Wnd && Attach(0))
 	{
+		LAutoPool Pool;
 		GWindow *Owner = GetParent() ? GetParent()->GetWindow() : 0;
 		if (Owner)
 		{
@@ -117,9 +118,11 @@ int GDialog::DoModal(OsView OverideParent)
 		Visible(true);
 		
 		NSApplication *app = LgiApp->Handle();
-		[app runModalForWindow:WindowHandle()];
+		auto wnd = WindowHandle();
+		[app runModalForWindow:wnd];
 		
-		if (Owner) Owner->SetChildDialog(0);
+		if (Owner)
+			Owner->SetChildDialog(NULL);
 	}
 	
 	return d->ModalStatus;
@@ -129,6 +132,7 @@ void GDialog::EndModal(int Code)
 {
 	if (d->IsModal)
 	{
+		LAutoPool Pool;
 		d->IsModal = false;
 		d->ModalStatus = Code;
 		
@@ -172,14 +176,6 @@ void GDialog::EndModeless(int Code)
 {
 	GWindow::Quit(Code);
 }
-
-/*
-void GDialog::OnPaint(GSurface *pDC)
-{
-	pDC->Colour(LC_MED, 24);
-	pDC->Rectangle();
-}
-*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 GControl::GControl(OsView view) : GView(view)

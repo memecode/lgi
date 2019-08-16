@@ -46,7 +46,7 @@ static int LCocoaView_Count = 0;
 		self.w = wnd;
 		self.WndClass = wnd->GetClass();
 		
-		NSRect r = {{0, 0},{1000,1000}};
+		NSRect r = {{0, 0},{4000,2000}};
 		self->tracking = [[NSTrackingArea alloc] initWithRect:r
                                      options:NSTrackingMouseEnteredAndExited |
                                              NSTrackingActiveAlways |
@@ -80,8 +80,9 @@ static int LCocoaView_Count = 0;
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-	LAutoPool Pool;
 	Check();
+
+	LAutoPool Pool;
 	GScreenDC Dc(self.w);
 	self.w->_Paint(&Dc);
 }
