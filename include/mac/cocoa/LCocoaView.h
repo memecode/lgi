@@ -28,19 +28,30 @@ class GViewI;
 }
 @property GWindow *w;
 @property GString WndClass;
+
+// Object life time
 - (id)init:(GWindow*)wnd;
 - (void)dealloc;
+
+// Painting
 - (void)drawRect:(NSRect)dirtyRect;
-- (void)layout;
+
+// Mouse
 - (void)mouseDown:(NSEvent*)ev;
 - (void)mouseUp:(NSEvent*)ev;
 - (void)rightMouseDown:(NSEvent*)ev;
 - (void)rightMouseUp:(NSEvent*)ev;
 - (void)mouseMoved:(NSEvent*)ev;
+- (void)scrollWheel:(NSEvent*)ev;
+
+// Keybaord
 - (void)keyDown:(NSEvent*)event;
 - (void)keyUp:(NSEvent*)event;
-- (void)userEvent:(LCocoaMsg*)ev;
 - (BOOL)acceptsFirstResponder;
+
+// Message handling
+- (void)userEvent:(LCocoaMsg*)ev;
+
 @end
 
 

@@ -11,147 +11,9 @@
 #include <stdio.h>
 #include "Lgi.h"
 #include "GScrollBar.h"
+#include "GNotifications.h"
 
-#define IsValid() ((VScroll ? VScroll->Valid() : false) || (HScroll ? HScroll->Valid() : false))
-static char ScrollViewName[] = "[ScrollView]";
-static char ScrollBarName[] = "[ScrollBar]";
-
-OsView CreateScrollView(bool x, bool y)
-{
-	OsView v = NULL;
-	
-	// Create and attach scroll bar
-	#if 0
-	int Flags = y ? kHIScrollViewOptionsVertScroll : 0;
-	Flags |= x ? kHIScrollViewOptionsHorizScroll : 0;
-	OSStatus e = HIScrollViewCreate(Flags, &v);
-	if (e) printf("%s:%i - HIScrollViewCreate error %i\n", _FL, e);
-	else
-	{
-		SetControlProperty(v, 'meme', 'type', sizeof(ScrollViewName), ScrollViewName);
-
-		for (HIViewRef c = HIViewGetFirstSubview(v); c; c = HIViewGetNextView(c))
-		{
-			SetControlProperty(c, 'meme', 'type', strlen(ScrollBarName)+1, ScrollBarName);
-		}
-	}
-	#endif
-	
-	return v;
-}
-
-bool IsScrollView(OsView v)
-{
-	char Buf[256] = "";
-	#if 0
-	if (GetControlProperty(v, 'meme', 'type', sizeof(Buf), 0, Buf))
-		return false;
-	#endif
-	return !stricmp(Buf, ScrollViewName);
-}
-
-bool IsScrollBar(OsView v)
-{
-	char Buf[256] = "";
-	
-	#if 0
-	if (GetControlProperty(v, 'meme', 'type', sizeof(Buf), 0, Buf))
-		return false;
-	#endif
-
-	return !stricmp(Buf, ScrollBarName);
-}
-
-bool CarbonRelease(OsView v)
-{
-	// Null check
-	if (!v)
-	{
-		LgiAssert(!"Null handle.");
-		return false;
-	}
-
-	// Check that no other control is a child (other than scroll bars)
-	#if 0
-	HIViewRef c;
-	while (c = HIViewGetFirstSubview(v))
-	{
-		CarbonRelease(c);
-	}
-	
-	// Check retain count...
-	int Retain = Retain = CFGetRetainCount(v);
-	if (Retain != 1)
-	{
-		LgiAssert(!"Retain count is weird.");
-		return false;
-	}
-	
-	if (HIViewGetSuperview(v))
-	{
-		OSStatus e = HIViewRemoveFromSuperview(v);
-		if (e) printf("%s:%i - HIViewRemoveFromSuperview failed %i\n", _FL, e);
-	}
-	#endif
-	
-	// Release the object...
-	//printf("			DisposeControl %p\n", v);
-	//DisposeControl(v);
-	
-	return true;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-class GLayoutScrollBar : public GScrollBar
-{
-	GLayout *Lo;
-
-public:
-	GLayoutScrollBar(GLayout *lo, int id, int x, int y, int cx, int cy, const char *name) :
-		GScrollBar(id, x, y, cx, cy, name)
-	{
-		Lo = lo;
-	}
-
-	void OnConfigure()
-	{
-		#if 0
-		Lo->OnScrollConfigure();
-		#endif
-	}
-};
-
-bool AttachHnd(GViewI *p, OsView Child)
-{
-	#if 0
-	OSStatus e;
-	#if defined(kHIViewFeatureIsOpaque)
-	HIViewChangeFeatures(Child, kHIViewFeatureIsOpaque, 0);
-	#else
-	HIViewChangeFeatures(Child, kHIViewIsOpaque, 0);
-	#endif
-	OsView Par = 0;
-	if (dynamic_cast<GWindow*>(p))
-	{
-		HIViewRef ViewRef = HIViewGetRoot(p->WindowHandle());
-		if (ViewRef)
-		{
-			e = HIViewFindByID(ViewRef, kHIViewWindowContentID, &Par);
-			if (e) printf("%s:%i - HIViewFindByID error %i\n", _FL, e);
-		}
-	}
-	else Par = p->Handle();
-	if (Par)
-	{
-		
-		e = HIViewAddSubview(Par, Child);
-		if (e) printf("%s:%i - HIViewAddSubview error %i\n", _FL, e);
-		return e == 0;
-	}
-	#endif
-	return false;
-}
+#define M_SET_SCROLL		(M_USER + 0x2000)
 
 //////////////////////////////////////////////////////////////////////////////
 GLayout::GLayout()
@@ -159,107 +21,23 @@ GLayout::GLayout()
 	_PourLargest = false;
 	VScroll = 0;
 	HScroll = 0;
-	
-	#if 0
-	RealWnd = 0;
-	Line.height = Line.width = 20;
-	#endif
 }
 
 GLayout::~GLayout()
 {
-	#if 0
-	if (RealWnd)
-		Detach();
-	#endif
 	DeleteObj(HScroll);
 	DeleteObj(VScroll);
 }
 
-#if 0
-void GLayout::OnScrollConfigure()
+GViewI *GLayout::FindControl(int Id)
 {
-	EventRef theEvent;
-	CreateEvent(NULL, kEventClassScrollable,
-				kEventScrollableInfoChanged, 
-				GetCurrentEventTime(),
-				kEventAttributeUserEvent, 
-				&theEvent);
-	SendEventToEventTarget(theEvent, GetControlEventTarget(_View));
-	ReleaseEvent(theEvent);
+	if (VScroll && VScroll->GetId() == Id)
+		return VScroll;
+	if (HScroll && HScroll->GetId() == Id)
+		return HScroll;
+
+	return GView::FindControl(Id);
 }
-
-bool GLayout::_OnGetInfo(HISize &size, HISize &line, HIRect &bounds, HIPoint &origin)
-{
-	if (VScroll)
-	{
-		int64 Min, Max;
-		VScroll->Limits(Min, Max);
-		int Page = VScroll->Page();
-		
-		if (Max > Min)
-		{
-			float Shown = (float) Page / (Max - Min);
-			size.height = Y() / Shown;
-			// printf("%s Shown=%g Size=%g MinMax=%i Page=%i\n", GetClass(), Shown, size.height, (int)(Max-Min), Page);
-		}
-		else size.height = Y();
-	}
-	else
-	{
-		size.height = Y();
-	}
-	if (HScroll)
-	{
-		int64 Min, Max;
-		HScroll->Limits(Min, Max);
-		int Page = HScroll->Page();
-
-		if (Max > Min)
-		{
-			float Shown = (float) Page / (Max - Min);
-			size.width = X() / Shown;
-		}
-		else size.width = X();
-	}
-	else
-	{
-		size.width = X();
-	}
-
-	line = Line;
-	origin.x = 0;
-	origin.y = 0;
-	
-	return true;
-}
-
-void GLayout::_OnScroll(HIPoint &origin)
-{
-	bool Change = false;
-	if (VScroll)
-	{
-		int64 n = origin.y;
-		if (VScroll->Value() != n)
-		{
-			VScroll->Value(n);
-			Change = true;
-		}
-	}
-	if (HScroll) 
-	{
-		int64 n = origin.x;
-		if (HScroll->Value() != n)
-		{
-			HScroll->Value(n);
-			Change = true;
-		}
-	}
-	
-	if (RealWnd && Change)
-		HIViewSetNeedsDisplay(RealWnd, true);
-}
-#endif
 
 bool GLayout::GetPourLargest()
 {
@@ -286,34 +64,11 @@ bool GLayout::Pour(GRegion &r)
 	return false;
 }
 
-void GLayout::OnCreate()
-{
-}
-
-void GLayout::OnPosChange()
-{
-}
-
-int GLayout::OnNotify(GViewI *c, int f)
-{
-	return GView::OnNotify(c, f);
-}
-
-void GLayout::OnNcPaint(GSurface *pDC, GRect &r)
-{
-	GView::OnNcPaint(pDC, r);
-}
-
-GViewI *GLayout::FindControl(int Id)
-{
-	return GView::FindControl(Id);
-}
-
 void GLayout::GetScrollPos(int &x, int &y)
 {
 	if (HScroll)
 	{
-		x = (int)HScroll->Value();
+		x = HScroll->Value();
 	}
 	else
 	{
@@ -322,7 +77,7 @@ void GLayout::GetScrollPos(int &x, int &y)
 
 	if (VScroll)
 	{
-		y = (int)VScroll->Value();
+		y = VScroll->Value();
 	}
 	else
 	{
@@ -345,46 +100,56 @@ void GLayout::SetScrollPos(int x, int y)
 
 bool GLayout::Attach(GViewI *p)
 {
-	return GView::Attach(p);
+	bool Status = GView::Attach(p);
+	AttachScrollBars();
+	return Status;
 }
 
 bool GLayout::Detach()
 {
-	#if 0
-	if (RealWnd)
-	{
-		/*
-		printf("%s:%i - Releasing _View=%p {\n", _FL, _View);
-		DumpHnd(HIViewGetSuperview(_View), 1);
-		
-		OSStatus e = HIViewRemoveFromSuperview(_View);
-		if (e) printf("%s:%i - HIViewRemoveFromSuperview failed with %i\n", _FL, e);
-		e = HIViewRemoveFromSuperview(RealWnd);
-		if (e) printf("%s:%i - HIViewRemoveFromSuperview failed with %i\n", _FL, e);
-		
-		LgiAssert(IsScrollView(_View));
-		CarbonRelease(_View);
-		printf("}\n");
-		*/
-		
-		OSStatus e = HIViewRemoveFromSuperview(RealWnd);
-		if (e) printf("%s:%i - HIViewRemoveFromSuperview failed with %i\n", _FL, e);
-		e = HIViewRemoveFromSuperview(_View);
-		if (e) printf("%s:%i - error %i\n", _FL, e);
-		// CFRelease(_View);
-		_View = RealWnd;
-		RealWnd = 0;
-	}
-	#endif
-	
 	return GView::Detach();
+}
+
+void GLayout::OnCreate()
+{
+	AttachScrollBars();
+	OnPosChange();
 }
 
 void GLayout::AttachScrollBars()
 {
+	if (HScroll && !HScroll->IsAttached())
+	{
+		// GRect r = HScroll->GetPos();
+		HScroll->Attach(this);
+		HScroll->SetNotify(this);
+	}
+
+	if (VScroll && !VScroll->IsAttached())
+	{
+		// GRect r = VScroll->GetPos();
+		VScroll->Attach(this);
+		VScroll->SetNotify(this);
+	}
 }
 
 bool GLayout::SetScrollBars(bool x, bool y)
+{
+	#ifdef M_SET_SCROLL
+	if (x ^ (HScroll != NULL)
+		||
+		y ^ (VScroll != NULL))
+	{
+		return PostEvent(M_SET_SCROLL, x, y);
+	}
+	#else
+	_SetScrollBars(x, y);
+	#endif
+
+	return true;
+}
+
+bool GLayout::_SetScrollBars(bool x, bool y)
 {
 	static bool Processing = false;
 
@@ -392,112 +157,12 @@ bool GLayout::SetScrollBars(bool x, bool y)
 		(((HScroll!=0) ^ x ) || ((VScroll!=0) ^ y )) )
 	{
 		Processing = true;
-		
-		// int NeedsScroll = (x?1:0) + (y?1:0);
-		// int HasScroll = (VScroll?1:0) + (HScroll?1:0);
-		
-		if (IsAttached())
-		{
-			LgiAssert(GetParent());
-			
-			#if 0
-			OSStatus e;
 
-			// Need to change the arrangement of windows
-			if (NeedsScroll)
-			{
-				// Setup Parent->Scroll->Real by inserting the Scroll between real and parent wnds
-				if (RealWnd)
-				{
-					// ie. changing which bars are on the scroll...
-					LgiAssert(!IsScrollView(RealWnd));
-					LgiAssert(IsScrollView(_View));
-					
-					e = HIViewRemoveFromSuperview(RealWnd);
-					if (e) printf("%s:%i - error %i\n", _FL, e);
-					e = HIViewRemoveFromSuperview(_View);
-					if (e) printf("%s:%i - error %i\n", _FL, e);
-					
-					CFRelease(_View);
-					_View = 0;
-				}
-				else
-				{
-					e = HIViewRemoveFromSuperview(_View);
-					if (e) printf("%s:%i - error %i\n", _FL, e);
-
-					// Setting up initial scroll bar..
-					LgiAssert(!IsScrollView(_View));
-					RealWnd = _View;
-				}
-
-				// Create and attach scroll bar
-				if (_View = CreateScrollView(x, y))
-				{
-					if (!AttachHnd(GetParent(), _View))
-						printf("%s:%i - AttachHnd failed.\n", _FL);
-					else
-					{
-						if (!AttachHnd(this, RealWnd))
-							printf("%s:%i - AttachHnd failed.\n", _FL);
-						else
-						{
-							SetControlVisibility(_View, Visible(), true);
-							SetControlVisibility(RealWnd, Visible(), true);
-
-							SetPos(Pos);
-							MoveControl(RealWnd, 0, 0);
-							SizeControl(RealWnd, Pos.X(), Pos.Y());
-							
-							printf("ScrollView setup Real=%p, Scroll=%p\n", RealWnd, _View);
-						}
-					}
-				}
-			}
-			else
-			{
-				#if 1
-				// Remove the ScrollBar (_View) from between the real and parent
-				OSStatus e = HIViewRemoveFromSuperview(RealWnd);
-				if (e) printf("%s:%i - error %i\n", _FL, e);
-				
-				e = HIViewRemoveFromSuperview(_View);
-				if (e) printf("%s:%i - error %i\n", _FL, e);
-				// CFRelease(_View);
-				
-				// Now connect up the real and parent wnds
-				_View = RealWnd;
-				RealWnd = 0;
-				if (AttachHnd(GetParent(), _View))
-				{
-					SetPos(Pos);
-				}
-				else printf("%s:%i - AttachHnd failed.\n", _FL);
-				#else
-				printf("Removing scroll %s - Real=%p, Scroll=%p, attaching...\n", GetClass(), RealWnd, _View);
-				if (AttachHnd(GetParent(), RealWnd))
-				{
-					// printf("Attached... removing scroll %p\n", _View);
-					OSStatus e = HIViewRemoveFromSuperview(_View);
-					if (e) printf("%s:%i - error %i\n", _FL, e);
-
-					_View = RealWnd;
-					RealWnd = 0;
-
-					// printf("SetPos %s\n", Pos.GetStr());
-					SetPos(Pos);
-				}
-				else printf("%s:%i - AttachHnd failed.\n", _FL);
-				#endif
-			}
-			#endif
-		}
-		
 		if (x)
 		{
 			if (!HScroll)
 			{
-				HScroll = new GLayoutScrollBar(this, IDC_HSCROLL, 0, 0, 100, 10, "GLayout.HScroll");
+				HScroll = new GScrollBar(IDC_HSCROLL, 0, 0, 100, 10, "GLayout->HScroll");
 				if (HScroll)
 				{
 					HScroll->SetVertical(false);
@@ -513,7 +178,7 @@ bool GLayout::SetScrollBars(bool x, bool y)
 		{
 			if (!VScroll)
 			{
-				VScroll = new GLayoutScrollBar(this, IDC_VSCROLL, 0, 0, 10, 100, "GLayout.VScroll");
+				VScroll = new GScrollBar(IDC_VSCROLL, 0, 0, 10, 100, "GLayout->VScroll");
 				if (VScroll)
 				{
 					VScroll->Visible(false);
@@ -525,27 +190,105 @@ bool GLayout::SetScrollBars(bool x, bool y)
 			DeleteObj(VScroll);
 		}
 
+		AttachScrollBars();
+		OnPosChange();
 		Invalidate();
+
 		Processing = false;
 	}
-
+	
 	return true;
+}
+
+int GLayout::OnNotify(GViewI *c, int f)
+{
+	return GView::OnNotify(c, f);
+}
+
+void GLayout::OnPosChange()
+{
+	GRect r = GView::GetClient();
+	GRect v(r.x2-SCROLL_BAR_SIZE+1, r.y1, r.x2, r.y2);
+	GRect h(r.x1, r.y2-SCROLL_BAR_SIZE+1, r.x2, r.y2);
+	if (VScroll && HScroll)
+	{
+		h.x2 = v.x1 - 1;
+		v.y2 = h.y1 - 1;
+	}
+	
+	if (VScroll)
+	{
+		VScroll->Visible(true);
+		VScroll->SetPos(v, true);
+	}
+	if (HScroll)
+	{
+		HScroll->Visible(true);
+		HScroll->SetPos(h, true);
+	}
+}
+
+void GLayout::OnNcPaint(GSurface *pDC, GRect &r)
+{
+	GView::OnNcPaint(pDC, r);
+	
+	if (VScroll && VScroll->Visible())
+	{
+		r.x2 -= VScroll->X();
+	}
+
+	if (HScroll && HScroll->Visible())
+	{
+		r.y2 -= HScroll->Y();
+	}
+	
+	if (VScroll && VScroll->Visible() &&
+		HScroll && HScroll->Visible())
+	{
+		// Draw square at the end of each scroll bar
+		GRect s(	VScroll->GetPos().x1, HScroll->GetPos().y1,
+					VScroll->GetPos().x2, HScroll->GetPos().y2);
+		pDC->Colour(LC_MED, 24);
+		pDC->Rectangle(&s);
+	}
 }
 
 GRect &GLayout::GetClient(bool ClientSpace)
 {
 	static GRect r;
 	r = GView::GetClient(ClientSpace);
+
+	if (VScroll && VScroll->Visible())
+	{
+		r.x2 = VScroll->GetPos().x1 - 1;
+	}
+
+	if (HScroll && HScroll->Visible())
+	{
+		r.y2 = HScroll->GetPos().y1 - 1;
+	}
+	
 	return r;
 }
 
-GMessage::Result GLayout::OnEvent(GMessage *Msg)
+GMessage::Param GLayout::OnEvent(GMessage *Msg)
 {
-	if (VScroll) VScroll->OnEvent(Msg);
-	if (HScroll) HScroll->OnEvent(Msg);
+	#ifdef M_SET_SCROLL
+	if (Msg->Msg() == M_SET_SCROLL)
+	{
+		_SetScrollBars(Msg->A(), Msg->B());
+		
+		if (HScroll)
+			HScroll->SendNotify(GNotifyScrollBar_Create);
+		if (VScroll)
+			VScroll->SendNotify(GNotifyScrollBar_Create);
+		return 0;
+	}
+	#endif
 
-	GMessage::Result Status = GView::OnEvent(Msg);
-
+	// if (VScroll) VScroll->OnEvent(Msg);
+	// if (HScroll) HScroll->OnEvent(Msg);
+	int Status = GView::OnEvent(Msg);
 	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&
 		GetParent())

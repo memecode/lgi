@@ -1329,7 +1329,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 		// Close
 		if (d->CloseRequestDone || OnRequestClose(false))
 		{
-			d->CloseRequestDone = true;
+			if (d) d->CloseRequestDone = true;
 			delete this;
 			return true;
 		}

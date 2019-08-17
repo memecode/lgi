@@ -141,6 +141,27 @@ static int LCocoaView_Count = 0;
 	m.Target->GetGView()->_Mouse(m, true);
 }
 
+- (void)scrollWheel:(NSEvent*)ev
+{
+	LAutoPool Pool;
+	Check();
+
+	auto r = self.frame;
+	auto pt = ev.locationInWindow;
+	int x = (int)pt.x;
+	int y = (int)(r.size.height - pt.y);
+
+	auto t = self.w->WindowFromPoint(x, y);
+	if (!t)
+		return;
+
+	auto scrollingDeltaY = ev.scrollingDeltaY;
+	int px = SysFont->GetHeight();
+	float lines = ((-scrollingDeltaY) + px) / px;
+	// printf("Scroll %g\n", scrollingDeltaY);
+	t->OnMouseWheel(lines);
+}
+
 GKey KeyEvent(NSEvent *ev)
 {
 	GKey k;
