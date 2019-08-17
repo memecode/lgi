@@ -143,8 +143,7 @@ static int LCocoaView_Count = 0;
 
 - (void)userEvent:(LCocoaMsg*)msg
 {
-	GMessage m(msg.m, msg.a, msg.b);
-	msg.v->OnEvent(&m);
+	LgiApp->DeliverMessage(msg.v, msg.m, msg.a, msg.b);
 	[msg release];
 }
 

@@ -361,6 +361,8 @@ public:
 	#elif LGI_COCOA && defined(__OBJC__)
 	
 		NSApplication *Handle();
+		void OnDeleteView(GViewI *v);
+		void DeliverMessage(GViewI *v, int Msg, GMessage::Param a, GMessage::Param b);
 		
 	#endif
 

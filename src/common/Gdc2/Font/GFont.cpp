@@ -2237,20 +2237,13 @@ bool GFontType::GetSystemFont(const char *Which)
 				Status = true;
 			}
 
-			#elif defined BEOS
-
-			// BeOS has no system wide setting so give a valid default
-			Info.Face("Swis721 BT");
-			Info.PointSize(9);
-			Status = true;
-
 			#elif defined __GTK_H__
 
 			Info.Face(DefFont);
 			Info.PointSize(DefSize-1);
 			Status = true;
 			
-			#elif defined MAC && !defined COCOA
+			#elif defined MAC
 			
 				#if USE_CORETEXT
 

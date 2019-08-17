@@ -339,6 +339,9 @@ public:
 	GAutoString Name;
 	GAutoString UrlArg;
 	
+	// View table
+	LHashTbl<PtrKey<GViewI*>, bool> Views;
+	
 	/// Any fonts needed for styling the elements
 	GAutoPtr<GFontCache> FontCache;
 	
@@ -586,9 +589,24 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param A, GMessage::Param B
 	if (!v)
 		return false;
 	
+	d->Views.Add(View, true);
+	
 	auto m = [[LCocoaMsg alloc] init:View msg:Msg a:A b:B];
 	[v performSelectorOnMainThread:@selector(userEvent:) withObject:m waitUntilDone:false];
 	return true;
+}
+
+void GApp::OnDeleteView(GViewI *v)
+{
+	d->Views.Delete(v);
+}
+
+void GApp::DeliverMessage(GViewI *v, int Msg, GMessage::Param a, GMessage::Param b)
+{
+	if (!d->Views.Find(v))
+		return;
+	GMessage m(Msg, a, b);
+	v->OnEvent(&m);
 }
 
 GApp *GApp::ObjInstance()

@@ -247,6 +247,10 @@ GView::GView(OsView view)
 
 GView::~GView()
 {
+	#if LGI_COCOA
+	LgiApp->OnDeleteView(this);
+	#endif
+	
 	if (d->SinkHnd >= 0)
 		GEventSinkMap::Dispatch.RemoveSink(this);
 	

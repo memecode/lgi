@@ -388,7 +388,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 		case M_CHANGE:
 		{
 			GViewI *Ctrl;
-			if (GetViewById(Msg->A(), Ctrl))
+			if (GetViewById((int)Msg->A(), Ctrl))
 				return OnNotify(Ctrl, (int)Msg->B());
 			break;
 		}
