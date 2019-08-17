@@ -258,17 +258,17 @@ enum LDialogIds
 // Keys
 enum LVirtualKeys
 {
-	LK_BACKSPACE = '\b',
 	LK_TAB = '\t',
 	LK_RETURN = '\r',
 	LK_ESCAPE = 27,
 	LK_SPACE = ' ',
+	LK_BACKSPACE = 0x7F,
 
 	LK_PAGEUP = _KEY(NSPageUpFunctionKey, 0xF72C),
 	LK_PAGEDOWN = _KEY(NSPageDownFunctionKey, 0xF72D),
+	LK_DELETE = _KEY(NSDeleteFunctionKey, 0xF728),
 	LK_HOME = _KEY(NSHomeFunctionKey, 0xF729),
 	LK_END = _KEY(NSEndFunctionKey, 0xF72B),
-	LK_DELETE = _KEY(NSDeleteFunctionKey, 0xF728),
 	LK_UP = _KEY(NSUpArrowFunctionKey, 0xF700),
 	LK_DOWN = _KEY(NSDownArrowFunctionKey, 0xF701),
 	LK_LEFT = _KEY(NSLeftArrowFunctionKey, 0xF702),

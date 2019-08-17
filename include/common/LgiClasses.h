@@ -33,6 +33,8 @@ LgiFunc GViewI *GetNextTabStop(GViewI *v, bool Back);
 LgiClass GString LErrorCodeToString(uint32_t ErrorCode);
 #if defined(LGI_CARBON)
 LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
+#elif LGI_COCOA && defined(__OBJC__)
+#include "LCocoaView.h"
 #endif
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -362,7 +364,7 @@ public:
 	
 		NSApplication *Handle();
 		void OnDeleteView(GViewI *v);
-		void DeliverMessage(GViewI *v, int Msg, GMessage::Param a, GMessage::Param b);
+		void DeliverMessage(LCocoaMsg *msg);
 		
 	#endif
 

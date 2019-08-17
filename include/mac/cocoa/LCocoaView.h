@@ -37,7 +37,10 @@ class GViewI;
 - (void)rightMouseDown:(NSEvent*)ev;
 - (void)rightMouseUp:(NSEvent*)ev;
 - (void)mouseMoved:(NSEvent*)ev;
+- (void)keyDown:(NSEvent*)event;
+- (void)keyUp:(NSEvent*)event;
 - (void)userEvent:(LCocoaMsg*)ev;
+- (BOOL)acceptsFirstResponder;
 @end
 
 

@@ -588,7 +588,9 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param A, GMessage::Param B
 	auto v = w->Handle();
 	if (!v)
 		return false;
-	
+
+	// This hash table keeps track of valid view objects that have been sent messages.
+	// When we go to deliver the message we can see if it's been deleted or not.
 	d->Views.Add(View, true);
 	
 	auto m = [[LCocoaMsg alloc] init:View msg:Msg a:A b:B];
@@ -601,12 +603,12 @@ void GApp::OnDeleteView(GViewI *v)
 	d->Views.Delete(v);
 }
 
-void GApp::DeliverMessage(GViewI *v, int Msg, GMessage::Param a, GMessage::Param b)
+void GApp::DeliverMessage(LCocoaMsg *msg)
 {
-	if (!d->Views.Find(v))
+	if (!d->Views.Find(msg.v))
 		return;
-	GMessage m(Msg, a, b);
-	v->OnEvent(&m);
+	GMessage m(msg.m, msg.a, msg.b);
+	msg.v->OnEvent(&m);
 }
 
 GApp *GApp::ObjInstance()

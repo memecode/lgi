@@ -143,6 +143,7 @@ GViewPrivate::GViewPrivate()
 	Popup = 0;
 	Pulse = 0;
 	SinkHnd = -1;
+	AttachEvent = false;
 		
 	static bool First = true;
 	if (First)
@@ -492,6 +493,9 @@ bool GView::IsAttached()
 	if (w == this)
 		return WindowHandle() != 0;
 	
+	if (!d->AttachEvent)
+		return false;
+	
 	if (GetParent() != NULL)
 		return w->WindowHandle() != 0;
 
@@ -675,9 +679,7 @@ bool GView::_Attach(GViewI *parent)
 		return false;
 	}
 
-	#if COCOA
 	d->ClassName = GetClass();
-	#endif
 	
 	d->ParentI = parent;
 	d->Parent = d->ParentI ? parent->GetGView() : NULL;
@@ -688,19 +690,22 @@ bool GView::_Attach(GViewI *parent)
 		_Lock = _Window->_Lock;
 
 	auto p = d->GetParent();
-	if (p &&
-		p->IsAttached())
+	if (p)
 	{
 		GWindow *w = dynamic_cast<GWindow*>(p);
 		NSView *ph = nil;
 		if (w)
 			ph = w->WindowHandle().p.contentView;
 
-		OnCreate();
+		if (!d->AttachEvent)
+		{
+			d->AttachEvent = true;
+			OnCreate();
+		}
 	}
 	else
 	{
-		// Virtual attach
+		LgiAssert(0);
 	}
 
 	if (!p->Children.HasItem(this))
@@ -717,9 +722,7 @@ bool GView::Attach(GViewI *parent)
 	if (_Attach(parent))
 	{
 		if (d->Parent && !d->Parent->HasView(this))
-		{
 			d->Parent->AddView(this);
-		}
 		
 		d->Parent->OnChildrenChanged(this, true);
 		return true;

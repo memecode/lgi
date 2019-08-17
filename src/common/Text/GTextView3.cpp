@@ -4754,6 +4754,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 		bool DrawSel = false;
 		
 		bool HasFocus = Focus();
+		// printf("%s:%i - HasFocus = %i\n", _FL, HasFocus);
 		GColour SelectedText(HasFocus ? LC_FOCUS_SEL_FORE : LC_NON_FOCUS_SEL_FORE, 24);
 		GColour SelectedBack(HasFocus ? LC_FOCUS_SEL_BACK : LC_NON_FOCUS_SEL_BACK, 24);
 

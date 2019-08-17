@@ -1338,25 +1338,26 @@ bool GView::Focus()
 		HWND hFocus = GetFocus();
 		Has = hFocus == _View;
 	}
-	#elif defined(MAC) && !defined(LGI_SDL)
+	#elif LGI_COCOA
+	Has = TestFlag(WndFlags, GWF_FOCUS);
+	#elif LGI_CARBON
 	if (w)
 	{
-		#if LGI_COCOA
-		#else
 		ControlRef Cur;
 		OSErr e = GetKeyboardFocus(w->WindowHandle(), &Cur);
 		if (e)
 			LgiTrace("%s:%i - GetKeyboardFocus failed with %i\n", _FL, e);
 		else
 			Has = (Cur == _View);
-		#endif
 	}
   	#endif
 
+	#if !LGI_CARBON
 	if (Has)
 		SetFlag(WndFlags, GWF_FOCUS);
 	else
 		ClearFlag(WndFlags, GWF_FOCUS);
+	#endif
 	
 	return Has;
 }
@@ -1408,18 +1409,6 @@ void GView::Focus(bool i)
 				}
 
 				SetFocus(GetDesktopWindow());
-			}
-
-		#elif defined COCOA
-		
-			LAutoPool Pool;
-			GWindow *w = GetWindow();
-			if (w)
-			{
-				OsWindow osw = w->WindowHandle();
-				if (osw)
-				{
-				}
 			}
 
 		#elif defined LGI_CARBON

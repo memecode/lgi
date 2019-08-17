@@ -167,7 +167,7 @@ public:
 		#if defined __GTK_H__
 		bool			InPaint;
 		bool			GotOnCreate;
-		#elif defined(MAC) && !defined(COCOA)
+		#elif defined(MAC) && !defined(LGI_COCOA)
 		static HIObjectClassRef BaseClass;
 		#endif
 
@@ -176,6 +176,7 @@ public:
 	#if defined(MAC)
 		#ifdef LGI_COCOA
 		GString ClassName;
+		bool AttachEvent;
 		#elif defined LGI_CARBON
 		EventHandlerRef DndHandler;
 		GAutoString AcceptedDropFormat;

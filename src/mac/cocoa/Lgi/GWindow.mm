@@ -48,6 +48,7 @@ public:
 
 - (id)init:(GWindowPrivate*)priv Frame:(NSRect)rc;
 - (void)dealloc;
+- (BOOL)canBecomeKeyWindow;
 
 @end
 
@@ -147,6 +148,7 @@ public:
 		ctrl.view = [[LCocoaView alloc] init:priv->Wnd];
 		ctrl.view.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
 		self.contentViewController = ctrl;
+		[self makeFirstResponder:ctrl];
 		[ctrl release];
 		
 		self.acceptsMouseMovedEvents = true;
@@ -164,6 +166,11 @@ public:
 	[cv release];
 	[super dealloc];
 	printf("LNsWindow.dealloc.\n");
+}
+
+- (BOOL)canBecomeKeyWindow
+{
+	return YES;
 }
 
 @end
@@ -1229,7 +1236,11 @@ bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 bool GWindow::HandleViewKey(GView *v, GKey &k)
 {
 	bool Status = false;
-	GViewI *Ctrl = 0;
+	GViewI *Ctrl = NULL;
+	if (!v && d->Focus)
+		v = d->Focus->GetGView();
+	if (!v)
+		return false;
 	
 	// Give key to popups
 	if (LgiApp &&

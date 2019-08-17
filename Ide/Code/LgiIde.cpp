@@ -32,7 +32,7 @@
 #define IDM_WINDOWS				1200
 #define IDM_MAKEFILE_BASE		1300
 
-#define USE_HAIKU_PULSE_HACK	1
+#define USE_HAIKU_PULSE_HACK	0
 
 #define OPT_ENTIRE_SOLUTION		"SearchSolution"
 #define OPT_SPLIT_PX			"SplitPos"

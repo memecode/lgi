@@ -141,10 +141,74 @@ static int LCocoaView_Count = 0;
 	m.Target->GetGView()->_Mouse(m, true);
 }
 
+GKey KeyEvent(NSEvent *ev)
+{
+	GKey k;
+	GString s = [ev.characters UTF8String];
+	auto mod = ev.modifierFlags;
+	#if 0
+	bool capsLock = (mod & NSEventModifierFlagCapsLock) != 0;
+	bool shift = (mod & NSEventModifierFlagShift) != 0;
+	bool ctrl = (mod & NSEventModifierFlagControl) != 0;
+	bool numPad = (mod & NSEventModifierFlagNumericPad) != 0;
+	bool help = (mod & NSEventModifierFlagHelp) != 0;
+	#endif
+	bool option = (mod & NSEventModifierFlagOption) != 0;
+	bool cmd = (mod & NSEventModifierFlagCommand) != 0;
+	bool func = (mod & NSEventModifierFlagFunction) != 0;
+
+	uint8_t *p = (uint8_t*) s.Get();
+	ssize_t len = s.Length();
+	uint32_t u32 = LgiUtf8To32(p, len);
+	k.c16 = u32;
+	k.vkey = u32;
+	
+	k.SetModifer((uint32_t)mod);
+	
+	k.IsChar =	!func
+				&&
+				!cmd
+				&&
+				!option
+				&&
+				(
+					k.c16 >= ' ' ||
+					k.vkey == LK_RETURN ||
+					k.vkey == LK_TAB ||
+					k.vkey == LK_BACKSPACE
+				)
+				&&
+				k.vkey != LK_DELETE;
+	
+	return k;
+}
+
+- (void)keyDown:(NSEvent*)event
+{
+	Check();
+
+	GKey k = KeyEvent(event);
+	k.Down(true);
+	self.w->HandleViewKey(NULL, k);
+}
+
+- (void)keyUp:(NSEvent*)event
+{
+	Check();
+
+	GKey k = KeyEvent(event);
+	self.w->HandleViewKey(NULL, k);
+}
+
 - (void)userEvent:(LCocoaMsg*)msg
 {
-	LgiApp->DeliverMessage(msg.v, msg.m, msg.a, msg.b);
+	LgiApp->DeliverMessage(msg);
 	[msg release];
+}
+
+- (BOOL) acceptsFirstResponder
+{
+    return YES;
 }
 
 @end
