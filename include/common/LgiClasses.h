@@ -363,8 +363,6 @@ public:
 	#elif LGI_COCOA && defined(__OBJC__)
 	
 		NSApplication *Handle();
-		void OnDeleteView(GViewI *v);
-		void DeliverMessage(LCocoaMsg *msg);
 		
 	#endif
 
@@ -522,6 +520,7 @@ protected:
 		public:
 			GdcPt2 Flip(GdcPt2 p);
 			GRect Flip(GRect p);
+	
 		#elif defined(LGI_CARBON)
 			OsView _CreateCustomView();
 			virtual bool _OnGetInfo(HISize &size, HISize &line, HIRect &bounds, HIPoint &origin) { return false; }
@@ -605,7 +604,7 @@ public:
 	GView *GetGView() { return this; }
 	
 	/// Returns the OS handle of the top level window
-	virtual OsWindow WindowHandle();
+	OsWindow WindowHandle();
 
 	// Attaching windows / heirarchy
 	bool AddView(GViewI *v, int Where = -1);
@@ -766,7 +765,7 @@ public:
 	/// true it's safe to do just about anything.
 	bool InThread();
 	
-	/// \brief Asyncronously posts an event to be received by this window
+	/// \brief Asyncronously posts an event to be received by this view
 	virtual bool PostEvent
 	(
 		/// The command ID.

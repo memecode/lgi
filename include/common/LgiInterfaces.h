@@ -410,6 +410,7 @@ public:
 	#if LGI_VIEW_HANDLE
 	virtual OsView Handle() = 0;
 	#endif
+	virtual int AddDispatch() = 0;
 	virtual OsWindow WindowHandle() = 0;
 	virtual GView *GetGView() { return NULL; }
 

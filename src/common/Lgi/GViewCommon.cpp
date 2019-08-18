@@ -247,12 +247,11 @@ GView::GView(OsView view)
 
 GView::~GView()
 {
-	#if LGI_COCOA
-	LgiApp->OnDeleteView(this);
-	#endif
-	
 	if (d->SinkHnd >= 0)
+	{
 		GEventSinkMap::Dispatch.RemoveSink(this);
+		d->SinkHnd = -1;
+	}
 	
 	#if defined(__GTK_H__) || defined(LGI_SDL)
 	LockHandler(this, OpDelete);
@@ -269,7 +268,6 @@ GView::~GView()
 	}
 
 	_Delete();
-	// printf("~%s\n", d->ClassName.Get());
 	DeleteObj(d);
 }
 

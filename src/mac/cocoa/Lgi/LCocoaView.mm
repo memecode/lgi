@@ -9,17 +9,18 @@
 #import "Lgi.h"
 #import <Foundation/Foundation.h>
 #import "LCocoaView.h"
+#include "GEventTargetThread.h"
 
 #define Check() if (!self.w) return
 static int LCocoaView_Count = 0;
 
 @implementation LCocoaMsg
 
-- (id)init:(GViewI*)view msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B
+- (id)init:(int)hnd msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B
 {
 	if ((self = [super init]) != nil)
 	{
-		self.v = view;
+		self.hnd = hnd;
 		self.m = Msg;
 		self.a = A;
 		self.b = B;
@@ -223,7 +224,7 @@ GKey KeyEvent(NSEvent *ev)
 
 - (void)userEvent:(LCocoaMsg*)msg
 {
-	LgiApp->DeliverMessage(msg);
+	PostThreadEvent(msg.hnd, msg.m, msg.a, msg.b);
 	[msg release];
 }
 

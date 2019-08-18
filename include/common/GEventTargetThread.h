@@ -96,7 +96,7 @@ public:
 		bool Status = false;
 		if (s)
 			Status = s->PostEvent(Cmd, a, b);
-		#if _DEBUG
+		#if 0 // _DEBUG
 		else
 			// This is not fatal, but we might want to know about it in DEBUG builds:
 			LgiTrace("%s:%i - Sink associated with handle '%i' doesn't exist.\n", _FL, Hnd);

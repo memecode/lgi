@@ -155,7 +155,7 @@ GViewPrivate::GViewPrivate()
 GViewPrivate::~GViewPrivate()
 {
 	DeleteObj(Popup);
-	LgiAssert(Pulse == 0);
+	LgiAssert(Pulse == NULL);
 }
 
 const char *GView::GetClass()
@@ -207,9 +207,7 @@ bool GView::_Mouse(GMouse &m, bool Move)
 		else
 		{
 			if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(m.Target), m))
-			{
 				m.Target->OnMouseClick(m);
-			}
 		}
 	}
 	else
@@ -230,16 +228,9 @@ bool GView::_Mouse(GMouse &m, bool Move)
 		if (!Client.Valid() || Client.Overlap(m.x, m.y))
 		{
 			if (Move)
-			{
 				Target->OnMouseMove(m);
-			}
-			else
-			{
-				if (!Wnd || Wnd->HandleViewMouse(Target, m))
-				{
-					Target->OnMouseClick(m);
-				}
-			}
+			else if (!Wnd || Wnd->HandleViewMouse(Target, m))
+				Target->OnMouseClick(m);
 		}
 		else return false;
 	}
@@ -252,21 +243,6 @@ GRect &GView::GetClient(bool ClientSpace)
 	int Edge = (Sunken() || Raised()) ? _BorderSize : 0;
 
 	static GRect c;
-	/*
-	if (_View)
-	{
-		GRect r = _View.p.frame;
-		auto Parent = GetParent();
-		if (Parent)
-		{
-			GRect pr = Parent->GetClient(false);
-			int y1 = pr.y2 - f.y2;
-			r.Offset(0, pr.y1 + y1 - r.y1);
-		}
-		Pos = r;
-	}
-	*/
-
 	c = Pos;
 	c.Offset(-c.x1, -c.y1);
 	if (ClientSpace)

@@ -24,6 +24,7 @@
 #include <sys/wait.h>
 
 #import "LCocoaView.h"
+#include "GEventTargetThread.h"
 
 extern int hndstate(int hnd);
 
@@ -339,9 +340,6 @@ public:
 	GAutoString Name;
 	GAutoString UrlArg;
 	
-	// View table
-	LHashTbl<PtrKey<GViewI*>, bool> Views;
-	
 	/// Any fonts needed for styling the elements
 	GAutoPtr<GFontCache> FontCache;
 	
@@ -579,36 +577,28 @@ NSApplication *GApp::Handle()
 bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param A, GMessage::Param B)
 {
 	if (!View)
+	{
+		printf("%s:%i - No view.\n", _FL);
 		return false;
+	}
 	
 	GWindow *w = View->GetWindow();
 	if (!w)
+	{
+		printf("%s:%i - No window.\n", _FL);
 		return false;
+	}
 	
 	auto v = w->Handle();
 	if (!v)
+	{
+		printf("%s:%i - No handle.\n", _FL);
 		return false;
+	}
 
-	// This hash table keeps track of valid view objects that have been sent messages.
-	// When we go to deliver the message we can see if it's been deleted or not.
-	d->Views.Add(View, true);
-	
-	auto m = [[LCocoaMsg alloc] init:View msg:Msg a:A b:B];
+	auto m = [[LCocoaMsg alloc] init:View->AddDispatch() msg:Msg a:A b:B];
 	[v performSelectorOnMainThread:@selector(userEvent:) withObject:m waitUntilDone:false];
 	return true;
-}
-
-void GApp::OnDeleteView(GViewI *v)
-{
-	d->Views.Delete(v);
-}
-
-void GApp::DeliverMessage(LCocoaMsg *msg)
-{
-	if (!d->Views.Find(msg.v))
-		return;
-	GMessage m(msg.m, msg.a, msg.b);
-	msg.v->OnEvent(&m);
 }
 
 GApp *GApp::ObjInstance()
