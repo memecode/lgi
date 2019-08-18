@@ -364,7 +364,7 @@ public:
 		}
 
 		SetQuitOnClose(true);
-		#ifdef WIN32
+		#ifdef WINNATIVE
 		SetIcon((const char*)IDI_APP);
 		#endif
 		
