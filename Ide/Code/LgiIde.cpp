@@ -861,9 +861,7 @@ public:
 	
 	void OnCreate()
 	{
-		#if !USE_HAIKU_PULSE_HACK
 		SetPulse(1000);
-		#endif
 		AttachChildren();
 	}
 

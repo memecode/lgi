@@ -855,7 +855,7 @@ bool GView::IsAttached()
 	if (!w)
 	{
 		auto p = GetParent();
-		return p && p->HasView(this);
+		return d->GotOnCreate && p && p->HasView(this);
 	}
 
 	return w->IsAttached();
@@ -897,7 +897,7 @@ bool GView::Attach(GViewI *parent)
 			d->Parent->OnChildrenChanged(this, true);
 		}
 
-		if (WndNull && _Window != NULL)
+		if (_Window)
 			OnGtkRealize();
 	}
 	

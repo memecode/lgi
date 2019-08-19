@@ -1785,7 +1785,7 @@ bool GView::GetCtrlVisible(int Id)
 
 	GViewI *w = FindControl(Id);
 	if (!w)
-		printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
+		LgiTrace("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	return (w) ? w->Visible() : 0;
 }
 
@@ -1795,7 +1795,7 @@ void GView::SetCtrlVisible(int Id, bool v)
 
 	GViewI *w = FindControl(Id);
 	if (!w)
-		printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
+		LgiTrace("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	else
 		w->Visible(v);
 }
@@ -1804,7 +1804,9 @@ bool GView::AttachChildren()
 {
 	for (auto c : Children)
 	{
-		if (!c->IsAttached())
+		bool a = c->IsAttached();
+		// LgiTrace("%s::IsAttached = %i\n", c->GetClass(), a);
+		if (!a)
 		{
 			if (!c->Attach(this))
 			{
