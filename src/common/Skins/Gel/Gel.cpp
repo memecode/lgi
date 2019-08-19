@@ -269,7 +269,7 @@ class GelSkin : public GSkinEngine
 			if (Back.Type == GCss::ColorRgb)
 				Mem->Colour(Back.Rgb32, 32);
 			else
-				Mem->Colour(LC_MED, 24);
+				Mem->Colour(LColour(L_MED));
 			Mem->Rectangle();
 			
 			GRectF Box(0, 0, Mem->X(), Mem->Y());
@@ -325,7 +325,7 @@ class GelSkin : public GSkinEngine
 				}
 				else
 				{
-					GSolidBrush c(Rgb24To32(LC_MED));
+					GSolidBrush c(LColour(L_MED));
 					p.Fill(Mem, c);
 				}
 			}
@@ -349,7 +349,7 @@ class GelSkin : public GSkinEngine
 				else
 					p.RoundRect(r, CHECK_RADIUS-1);
 				
-				GSolidBrush c(Rgb24To32(LC_LIGHT));
+				GSolidBrush c(LColour(L_LIGHT));
 				p.Fill(Mem, c);
 			}
 
@@ -425,8 +425,8 @@ class GelSkin : public GSkinEngine
 
 		if (!Enabled)
 		{
-			Light.Set(LC_LIGHT, 24);
-			Low.Set(LC_LOW, 24);
+			Light = LColour(L_LIGHT);
+			Low = LColour(L_LOW);
 		}
 
 		GRegion Rgn;
@@ -451,7 +451,7 @@ class GelSkin : public GSkinEngine
 					f->Colour(Fore, Back);
 					if (Ctrl->Focus())
 					{
-						pDC->Colour(LC_MIDGREY, 24);
+						pDC->Colour(LColour(L_MIDGREY));
 						pDC->Box(&c);
 						c.Size(1, 1);
 						pDC->Colour(Back);
@@ -496,13 +496,13 @@ public:
 		ZeroObj(CheckBox);
 		ZeroObj(RadioBtn);
 
-		COLOUR Med = Rgb24To32(LC_MED);
-		c80 = LgiDarken(Med, 80 * 256 / 192);
-		c160 = LgiDarken(Med, 160 * 256 / 192);
-		c172 = LgiDarken(Med, 172 * 256 / 192);
-		c222 = Med;
-		c232 = LgiLighten(Med, 33 * 256 / 63);
-		c253 = LgiLighten(Med, 60 * 256 / 63);
+		GColour Med = LColour(L_MED);
+		c80 = LgiDarken(Med.c32(), 80 * 256 / 192);
+		c160 = LgiDarken(Med.c32(), 160 * 256 / 192);
+		c172 = LgiDarken(Med.c32(), 172 * 256 / 192);
+		c222 = Med.c32();
+		c232 = LgiLighten(Med.c32(), 33 * 256 / 63);
+		c253 = LgiLighten(Med.c32(), 60 * 256 / 63);
 		c255 = Rgba32(255, 255, 255, 255);
 	}
 	
@@ -605,7 +605,7 @@ public:
 			GCssTools Tools(Ctrl->GetCss(), Ctrl->GetFont());
 			GColour DefaultBack;
 			GColour &Fore = Tools.GetFore(), &Back = Tools.GetBack(&DefaultBack);
-			GColour NoPaint(LC_MED, 24);			
+			GColour NoPaint(LColour(L_MED));			
 			if (Ctrl->GetCss())
 			{
 				GCss::ColorDef np = Ctrl->GetCss()->NoPaintColor();
@@ -676,10 +676,10 @@ public:
 					}
 					else
 					{
-						f->Colour(GColour(LC_LIGHT, 24), Back);
+						f->Colour(LColour(L_LIGHT), Back);
 						Text->Draw(Out, CurX+Off+1, ty+Off+1+BTN_TEXT_OFFSET_Y);
 
-						f->Colour(GColour(LC_LOW, 24), Back);
+						f->Colour(LColour(L_LOW), Back);
 						Text->Draw(Out, CurX+Off, ty+Off+BTN_TEXT_OFFSET_Y);
 					}
 					ty += Text->Y();
@@ -757,7 +757,7 @@ public:
 			DrawBtn(&Mem, Ctrl->GetClient(), NULL, false, State->Enabled);
 			
 			int n = 22;
-			GColour DkGrey(LC_DKGREY, 24);
+			GColour DkGrey(LColour(L_DKGREY));
 			
 			if (Ctrl->X() > 32)
 			{
@@ -790,10 +790,10 @@ public:
 					}
 					else
 					{
-						f->Colour(LC_LIGHT, LC_MED);
+						f->Colour(LColour(L_LIGHT), LColour(L_MED));
 						Text->Draw(&Mem, tx+Off+1, ty+Off+1+BTN_TEXT_OFFSET_Y, &c);
 
-						f->Colour(LC_LOW, LC_MED);
+						f->Colour(LColour(L_LOW), LColour(L_MED));
 						Text->Draw(&Mem, tx+Off, ty+Off+BTN_TEXT_OFFSET_Y, &c);
 					}
 					
@@ -870,7 +870,7 @@ public:
 			}
 			else
 			{
-				State->pScreen->Colour(LC_MED, 24);
+				State->pScreen->Colour(LColour(L_MED));
 				if (Box.y1 > 0)
 					State->pScreen->Rectangle(&Box1);
 				if (Box.y2 < Ctrl->Y() - 1)

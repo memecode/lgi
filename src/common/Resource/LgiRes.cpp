@@ -674,7 +674,7 @@ public:
         pDC->Line(c.x2, c.y1, c.x1, c.y2);
         GDisplayString ds(SysFont, n);
         SysFont->Transparent(true);
-        SysFont->Fore(LC_TEXT);
+        SysFont->Fore(LColour(L_TEXT));
         ds.Draw(pDC, 3, 0);
     }
 };

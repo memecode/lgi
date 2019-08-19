@@ -149,15 +149,15 @@ void LgiDrawBox(GSurface *pDC, GRect &r, bool Sunken, bool Fill)
 {
 	if (Fill)
 	{
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(LColour(L_MED));
 		pDC->Rectangle(r.x1+1, r.y1+1, r.x2-1, r.y2-1);
 	}
 
-	pDC->Colour((Sunken) ? LC_LIGHT : LC_LOW, 24);
+	pDC->Colour((Sunken) ? LColour(L_LIGHT) : LColour(L_LOW));
 	pDC->Line(r.x2, r.y2, r.x2, r.y1);
 	pDC->Line(r.x2, r.y2, r.x1, r.y2);
 
-	pDC->Colour((Sunken) ? LC_LOW : LC_LIGHT, 24);
+	pDC->Colour((Sunken) ? LColour(L_LOW) : LColour(L_LIGHT));
 	pDC->Line(r.x1, r.y1, r.x1, r.y2);
 	pDC->Line(r.x1, r.y1, r.x2, r.y1);
 }
@@ -166,67 +166,67 @@ void LgiWideBorder(GSurface *pDC, GRect &r, LgiEdge Type)
 {
 	if (!pDC) return;
 	COLOUR Old = pDC->Colour();
-	COLOUR VLow = LC_SHADOW;
-	COLOUR Low = LC_LOW;
-	COLOUR High = LC_HIGH;
-	COLOUR VHigh = LC_LIGHT;
+	GColour VLow = LColour(L_SHADOW);
+	GColour Low = LColour(L_LOW);
+	GColour High = LColour(L_HIGH);
+	GColour VHigh = LColour(L_LIGHT);
 	
 	switch (Type)
 	{
 		case EdgeXpSunken:
 		{
 			// XP theme
-			pDC->Colour(Low, 24);
+			pDC->Colour(Low);
 			pDC->Line(r.x1, r.y1, r.x2-1, r.y1);
 			pDC->Line(r.x1, r.y1, r.x1, r.y2-1);
 
-			pDC->Colour(VLow, 24);
+			pDC->Colour(VLow);
 			pDC->Line(r.x1+1, r.y1+1, r.x2-2, r.y1+1);
 			pDC->Line(r.x1+1, r.y1+1, r.x1+1, r.y2-2);
 
-			pDC->Colour(High, 24);
+			pDC->Colour(High);
 			pDC->Line(r.x2-1, r.y2-1, r.x2-1, r.y1+1);
 			pDC->Line(r.x2-1, r.y2-1, r.x1+1, r.y2-1);
 
-			pDC->Colour(VHigh, 24);
+			pDC->Colour(VHigh);
 			pDC->Line(r.x2, r.y2, r.x2, r.y1);
 			pDC->Line(r.x2, r.y2, r.x1, r.y2);
 			break;
 		}
 		case EdgeXpRaised:
 		{
-			pDC->Colour(VHigh, 24);
+			pDC->Colour(VHigh);
 			pDC->Line(r.x1, r.y1, r.x2-1, r.y1);
 			pDC->Line(r.x1, r.y1, r.x1, r.y2-1);
 
-			pDC->Colour(High, 24);
+			pDC->Colour(High);
 			pDC->Line(r.x1+1, r.y1+1, r.x2-1, r.y1+1);
 			pDC->Line(r.x1+1, r.y1+1, r.x1+1, r.y2-1);
 
-			pDC->Colour(Low, 24);
+			pDC->Colour(Low);
 			pDC->Line(r.x2-1, r.y2-1, r.x2-1, r.y1+1);
 			pDC->Line(r.x2-1, r.y2-1, r.x1+1, r.y2-1);
 
-			pDC->Colour(VLow, 24);
+			pDC->Colour(VLow);
 			pDC->Line(r.x2, r.y2, r.x2, r.y1);
 			pDC->Line(r.x2, r.y2, r.x1, r.y2);
 			break;
 		}
 		case EdgeXpChisel:
 		{
-			pDC->Colour(Low, 24);
+			pDC->Colour(Low);
 			pDC->Line(r.x1, r.y1, r.x2-1, r.y1);
 			pDC->Line(r.x1, r.y1, r.x1, r.y2-1);
 
-			pDC->Colour(VHigh, 24);
+			pDC->Colour(VHigh);
 			pDC->Line(r.x1+1, r.y1+1, r.x2-2, r.y1+1);
 			pDC->Line(r.x1+1, r.y1+1, r.x1+1, r.y2-2);
 
-			pDC->Colour(Low, 24);
+			pDC->Colour(Low);
 			pDC->Line(r.x2-1, r.y2-1, r.x2-1, r.y1+1);
 			pDC->Line(r.x2-1, r.y2-1, r.x1+1, r.y2-1);
 
-			pDC->Colour(VHigh, 24);
+			pDC->Colour(VHigh);
 			pDC->Line(r.x2, r.y2, r.x2, r.y1);
 			pDC->Line(r.x2, r.y2, r.x1, r.y2);
 			break;
@@ -237,7 +237,7 @@ void LgiWideBorder(GSurface *pDC, GRect &r, LgiEdge Type)
 			bool Focus = Type == EdgeWin7FocusSunken;
 			
 			// Win7 theme
-			GColour Ws(LC_WORKSPACE, 24);
+			GColour Ws(LColour(L_WORKSPACE));
 			GColour Corner1, Corner2, Corner3, Corner4, Corner5;
 			GColour Top, Left, Right, Bottom;
 			if (Focus)
@@ -332,11 +332,11 @@ void LgiThinBorder(GSurface *pDC, GRect &r, LgiEdge Type)
 		case EdgeWin7FocusSunken:
 		case EdgeWin7Sunken:
 		{
-			pDC->Colour(LC_LIGHT, 24);
+			pDC->Colour(LColour(L_LIGHT));
 			pDC->Line(r.x2, r.y2, r.x2, r.y1);
 			pDC->Line(r.x2, r.y2, r.x1, r.y2);
 
-			pDC->Colour(LC_LOW, 24);
+			pDC->Colour(LColour(L_LOW));
 			pDC->Line(r.x1, r.y1, r.x1, r.y2);
 			pDC->Line(r.x1, r.y1, r.x2, r.y1);
 
@@ -345,11 +345,11 @@ void LgiThinBorder(GSurface *pDC, GRect &r, LgiEdge Type)
 		}
 		case EdgeXpRaised:
 		{
-			pDC->Colour(LC_LOW, 24);
+			pDC->Colour(LColour(L_LOW));
 			pDC->Line(r.x2, r.y2, r.x2, r.y1);
 			pDC->Line(r.x2, r.y2, r.x1, r.y2);
 
-			pDC->Colour(LC_LIGHT, 24);
+			pDC->Colour(LColour(L_LIGHT));
 			pDC->Line(r.x1, r.y1, r.x1, r.y2);
 			pDC->Line(r.x1, r.y1, r.x2, r.y1);
 
@@ -368,7 +368,7 @@ void LgiThinBorder(GSurface *pDC, GRect &r, LgiEdge Type)
 
 void LgiFlatBorder(GSurface *pDC, GRect &r, int Width)
 {
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(LColour(L_MED));
 	if (Width < 1 || r.X() < (2 * Width) || r.Y() < (2 * Width))
 	{
 		pDC->Rectangle(&r);

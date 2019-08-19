@@ -9,7 +9,7 @@ GColour &GCssTools::GetFore(GColour *Default)
 		if (Default)
 			Fore = *Default;
 		else
-			Fore.Set(LC_TEXT, 24);
+			Fore = LColour(L_TEXT);
 
 		if (View)
 		{
@@ -37,7 +37,7 @@ GColour &GCssTools::GetBack(GColour *Default)
 		if (Default)
 			Back = *Default;
 		else
-			Back.Set(LC_MED, 24);
+			Back = LColour(L_MED);
 
 		if (View)
 		{
@@ -286,7 +286,7 @@ GRect GCssTools::PaintPadding(GSurface *pDC, GRect &in)
 				LgiAssert(!"Unsupported");
 		}
 		else
-			Background.c24(LC_MED);
+			Background = LColour(L_MED);
 		
 		pDC->Colour(Background);
 		if (r.x1 > Content.x1)

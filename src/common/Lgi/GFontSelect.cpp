@@ -184,9 +184,9 @@ void GFontSelect::UpdatePreview()
 		GMemDC *Dc = new GMemDC;
 		if (Dc->Create(263, 65, GdcD->GetColourSpace()))
 		{
-			Dc->Colour(LC_WORKSPACE, 24);
+			Dc->Colour(LColour(L_WORKSPACE));
 			Dc->Rectangle();
-			f.Colour(LC_BLACK, LC_WORKSPACE);
+			f.Colour(LColour(L_BLACK), LColour(L_WORKSPACE));
 			f.Transparent(true);
 
 			GDisplayString ds(&f, "AaBbCcDdEeFf");

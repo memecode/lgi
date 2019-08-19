@@ -19,7 +19,7 @@ void LLayoutString::Set(int LineIdx, int FixX, int YPx, LLayoutRun *Lr, ssize_t 
 	if (Fill.Type == GCss::ColorRgb)
 		Fore.Set(Fill.Rgb32, 32);
 	else if (Fill.Type != GCss::ColorTransparent)
-		Fore.Set(LC_TEXT, 24);
+		Fore = LColour(L_TEXT);
 	
 	Fill = Src->BackgroundColor();
 	if (Fill.Type == GCss::ColorRgb)
@@ -539,7 +539,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 	int Shift = GDisplayString::FShift;
 	#endif		
 	
-	GColour FocusFore(LC_FOCUS_SEL_FORE, 24);
+	GColour FocusFore = LColour(L_FOCUS_SEL_FORE);
 	
 	// Draw all the text
 	for (GDisplayString **ds = NULL; Strs.Iterate(ds); )
@@ -573,7 +573,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 		else
 		{
 			f->Transparent(Bk.IsTransparent());
-			f->Colour(GColour(LC_LIGHT, 24), Bk);
+			f->Colour(LColour(L_LIGHT), Bk);
 			#ifdef WINNATIVE
 			s->Draw(pDC, r.x1+1, r.y1+1, &r);
 			#else
@@ -582,7 +582,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 			#endif
 				
 			f->Transparent(true);
-			f->Colour(LC_LOW, LC_MED);
+			f->Colour(LColour(L_LOW), LColour(L_MED));
 			#ifdef WINNATIVE
 			s->Draw(pDC, r.x1, r.y1, &r);
 			#else
