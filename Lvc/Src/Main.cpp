@@ -71,7 +71,7 @@ public:
 					ln->Back.Rgb(235, 235, 235);
 				}
 				else
-					ln->c.Set(LC_TEXT, 24);
+					ln->c = LColour(L_TEXT);
 			}
 		}
 	}
@@ -124,7 +124,7 @@ public:
 
 	void OnPaint(GSurface *pDC)
 	{
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(LColour(L_MED));
 		pDC->Rectangle();
 	}
 };

@@ -32,16 +32,16 @@ public:
 		c.Offset(Ctx.x1 + ((Ctx.X()-c.X())/2), Ctx.y1 + ((Ctx.Y()-c.Y())/2));
 
 		// Box
-		pDC->Colour(LC_TEXT, 24);
+		pDC->Colour(LColour(L_TEXT));
 		pDC->Box(&c);
 		c.Size(1, 1);
-		pDC->Colour(LC_WORKSPACE, 24);
+		pDC->Colour(LColour(L_WORKSPACE));
 		pDC->Rectangle(&c);
 
 		// Value
 		if (Value())
 		{
-			pDC->Colour(LC_TEXT, 24);
+			pDC->Colour(LColour(L_TEXT));
 
 			pDC->Line(c.x1+1, c.y1+1, c.x2-1, c.y2-1);
 			pDC->Line(c.x1+1, c.y1+2, c.x2-2, c.y2-1);

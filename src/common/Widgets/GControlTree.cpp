@@ -256,7 +256,7 @@ void GControlTree::Item::Select(bool b)
 
 			if (Ctrl)
 			{
-				GColour Ws(LC_WORKSPACE, 24);
+				GColour Ws = LColour(L_WORKSPACE);
 				Ctrl->SetColour(Ws, false);
 				Ctrl->Visible(false);
 				Ctrl->Attach(GetTree());
@@ -305,7 +305,7 @@ void GControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 
 	if (!Ctrl)
 	{
-		SysBold->Colour(LC_TEXT, LC_WORKSPACE);
+		SysBold->Colour(LColour(L_TEXT), LColour(L_WORKSPACE));
 		SysBold->Transparent(true);
 
 		GRect p = GetRect();
@@ -343,7 +343,7 @@ void GControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 					else
 					{
 						GDisplayString ds(SysFont, LgiLoadString(L_CONTROLTREE_NO_VALUE, "(no value)"));
-						SysFont->Colour(GColour(LC_LOW, 24), GColour(LC_WORKSPACE, 24));
+						SysFont->Colour(LColour(L_LOW), LColour(L_WORKSPACE));
 						ds.Draw(Ctx.pDC, p.x1 + 8, p.y1 + 1);
 					}
 				}
