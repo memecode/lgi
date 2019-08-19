@@ -103,7 +103,7 @@ public:
 
 
 	void OnActivate();
-	char *GetText(int i);
+	const char *GetText(int i);
 	int GetImage(int Flags);
 	void OnSelect();
 	void OnDelete(bool Ask = true);
@@ -1557,7 +1557,7 @@ GFolderItem::~GFolderItem()
 	DeleteArray(Path);
 }
 
-char *GFolderItem::GetText(int i)
+const char *GFolderItem::GetText(int i)
 {
 	return File;
 }
