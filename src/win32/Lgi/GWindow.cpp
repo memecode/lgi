@@ -565,7 +565,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 
 void GWindow::OnPaint(GSurface *pDC)
 {
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(LColour(L_MED));
 	pDC->Rectangle();
 }
 
@@ -841,7 +841,7 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 		}
 		case WM_SYSCOLORCHANGE:
 		{
-			LgiInitColours();
+			GColour::OnChange();
 			break;
 		}
 		case WM_WINDOWPOSCHANGING:

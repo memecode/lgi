@@ -1,5 +1,6 @@
 #include "Lgi.h"
 #include "GPalette.h"
+#include "GSkinEngine.h"
 
 const GColour GColour::Black(0, 0, 0);
 const GColour GColour::White(255, 255, 255);
@@ -585,3 +586,270 @@ bool GColour::SetStr(const char *str)
 
 	return true;
 }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+static GColour _LgiColours[L_MAXIMUM];
+
+#define ReadColourConfig(def)	GColour::GetConfigColour("Colour."#def, _LgiColours[def])
+
+bool GColour::GetConfigColour(const char *Tag, GColour &c)
+{
+	#ifdef LGI_STATIC
+	return false;
+	#else
+	if (!Tag)
+		return false;
+
+	GXmlTag *Col = LgiApp->GetConfig(Tag);
+	if (!Col)
+		return false;
+
+	char *h;
+	if (!(h = Col->GetAttr("Hex")))
+		return false;
+
+	if (*h == '#') h++;
+	int n = htoi(h);
+
+	c.Rgb( n>>16, n>>8, n );
+	return true;
+	#endif
+}
+
+////////////////////////////////////////////////////////////////////////////
+#ifdef __GTK_H__
+COLOUR ColTo24(Gtk::GdkColor &c)
+{
+	return Rgb24(c.red >> 8, c.green >> 8, c.blue >> 8);
+}
+#endif
+
+#if defined(WINDOWS)
+static GColour ConvertWinColour(uint32_t c)
+{
+	return GColour(GetRValue(c), GetGValue(c), GetBValue(c));
+}
+#endif
+
+void GColour::OnChange()
+{
+	// Basic colours
+	_LgiColours[L_BLACK].Rgb(0, 0, 0); // LC_BLACK
+	_LgiColours[L_DKGREY].Rgb(0x40, 0x40, 0x40); // LC_DKGREY
+	_LgiColours[L_MIDGREY].Rgb(0x80, 0x80, 0x80); // LC_MIDGREY
+	_LgiColours[L_LTGREY].Rgb(0xc0, 0xc0, 0xc0); // LC_LTGREY
+	_LgiColours[L_WHITE].Rgb(0xff, 0xff, 0xff); // LC_WHITE
+
+	// Variable colours
+	#if defined _XP_CTRLS
+
+	_LgiColours[L_SHADOW] = Rgb24(0x42, 0x27, 0x63); // LC_SHADOW
+	_LgiColours[L_LOW] = Rgb24(0x7a, 0x54, 0xa9); // LC_LOW
+	_LgiColours[L_MED] = Rgb24(0xbc, 0xa9, 0xd4); // LC_MED
+	_LgiColours[L_HIGH] = Rgb24(0xdd, 0xd4, 0xe9); // LC_HIGH
+	_LgiColours[L_LIGHT] = Rgb24(0xff, 0xff, 0xff); // LC_LIGHT
+	_LgiColours[L_DIALOG] = Rgb24(0xbc, 0xa9, 0xd4); // LC_DIALOG
+	_LgiColours[L_WORKSPACE] = Rgb24(0xeb, 0xe6, 0xf2); // LC_WORKSPACE
+	_LgiColours[L_TEXT] = Rgb24(0x35, 0x1f, 0x4f); // LC_TEXT
+	_LgiColours[L_FOCUS_SEL_BACK] = Rgb24(0xbf, 0x67, 0x93); // LC_FOCUS_SEL_BACK
+	_LgiColours[L_FOCUS_SEL_FORE] = Rgb24(0xff, 0xff, 0xff); // LC_FOCUS_SEL_FORE
+	_LgiColours[L_ACTIVE_TITLE] = Rgb24(0x70, 0x3a, 0xec); // LC_ACTIVE_TITLE
+	_LgiColours[L_ACTIVE_TITLE_TEXT] = Rgb24(0xff, 0xff, 0xff); // LC_ACTIVE_TITLE_TEXT
+	_LgiColours[L_INACTIVE_TITLE] = Rgb24(0x80, 0x80, 0x80); // LC_INACTIVE_TITLE
+	_LgiColours[L_INACTIVE_TITLE_TEXT] = Rgb24(0x40, 0x40, 0x40); // LC_INACTIVE_TITLE_TEXT
+	_LgiColours[L_MENU_BACKGROUND] = Rgb24(0xbc, 0xa9, 0xd4); // LC_MENU_BACKGROUND
+	_LgiColours[L_MENU_TEXT] = Rgb24(0x35, 0x1f, 0x4f); // LC_MENU_TEXT
+	_LgiColours[L_NON_FOCUS_SEL_BACK] = Rgb24(0xbc, 0xa9, 0xd4); // LC_NON_FOCUS_SEL_BACK
+	_LgiColours[L_NON_FOCUS_SEL_FORE] = Rgb24(0x35, 0x1f, 0x4f); // LC_NON_FOCUS_SEL_FORE
+	LgiAssert(i == LC_MAXIMUM);
+	
+	#elif defined __GTK_H__
+
+	Gtk::GtkSettings *set = Gtk::gtk_settings_get_default();
+	if (!set)
+	{
+		printf("%s:%i - gtk_settings_get_for_screen failed.\n", _FL);
+		return;
+	}
+	
+	char PropName[] = "gtk-color-scheme";
+	Gtk::gchararray Value = 0;
+	Gtk::g_object_get(set, PropName, &Value, NULL);
+	GToken Lines(Value, "\n");
+	Gtk::g_free(Value);
+	g_object_unref(set);
+
+	LHashTbl<ConstStrKey<char,false>, int> Colours(0, -1);
+	for (int i=0; i<Lines.Length(); i++)
+	{
+		char *var = Lines[i];
+		char *col = strchr(var, ':');
+		if (col)
+		{
+			*col++ = 0;
+			
+			char *val = col;
+			if (*val == ' ') val++;
+			if (*val == '#') val++;
+			uint64 c = htoi64(val);
+			// printf("%s -> %llX\n", val, c);
+			COLOUR c24 = ((c >> 8) & 0xff) |
+						((c >> 16) & 0xff00) |
+						((c >> 24) & 0xff0000);
+
+			// printf("ParseSysColour %s = %x\n", var, c24);
+			Colours.Add(var, c24);
+		}
+	}
+	#define LookupColour(name, default) ((Colours.Find(name) >= 0) ? Colours.Find(name) : default)
+
+	COLOUR Med = LookupColour("bg_color", Rgb24(0xe8, 0xe8, 0xe8));
+	COLOUR White = Rgb24(255, 255, 255);
+	COLOUR Black = Rgb24(0, 0, 0);
+	COLOUR Sel = Rgb24(0x33, 0x99, 0xff);
+	_LgiColours[L_SHADOW] = GdcMixColour(Med, Black, 0.25); // LC_SHADOW
+	_LgiColours[L_LOW] = GdcMixColour(Med, Black, 0.5); // LC_LOW
+	_LgiColours[L_MED] = Med; // LC_MED
+	_LgiColours[L_HIGH] = GdcMixColour(Med, White, 0.5); // LC_HIGH
+	_LgiColours[L_LIGHT] = GdcMixColour(Med, White, 0.25); // LC_LIGHT
+	_LgiColours[L_DIALOG] = Med; // LC_DIALOG
+	_LgiColours[L_WORKSPACE] = LookupColour("base_color", White); // LC_WORKSPACE
+	_LgiColours[L_TEXT] = LookupColour("text_color", Black); // LC_TEXT
+	_LgiColours[L_FOCUS_SEL_BACK] = LookupColour("selected_bg_color", Sel); // LC_FOCUS_SEL_BACK
+	_LgiColours[L_FOCUS_SEL_FORE] = LookupColour("selected_fg_color", White); // LC_FOCUS_SEL_FORE
+	_LgiColours[L_ACTIVE_TITLE] = LookupColour("selected_bg_color", Sel); // LC_ACTIVE_TITLE
+	_LgiColours[L_ACTIVE_TITLE_TEXT] = LookupColour("selected_fg_color", White); // LC_ACTIVE_TITLE_TEXT
+	_LgiColours[L_INACTIVE_TITLE] = Rgb24(0xc0, 0xc0, 0xc0); // LC_INACTIVE_TITLE
+	_LgiColours[L_INACTIVE_TITLE_TEXT] = Rgb24(0x80, 0x80, 0x80); // LC_INACTIVE_TITLE_TEXT
+	_LgiColours[L_MENU_BACKGROUND] = LookupColour("bg_color", White); // LC_MENU_BACKGROUND
+	_LgiColours[L_MENU_TEXT] = LookupColour("text_color", Black); // LC_MENU_TEXT
+	_LgiColours[L_NON_FOCUS_SEL_BACK] = GdcMixColour(LookupColour("selected_bg_color", Sel), _LgiColours[11]); // LC_NON_FOCUS_SEL_BACK
+	_LgiColours[L_NON_FOCUS_SEL_FORE] = LookupColour("selected_fg_color", White); // LC_NON_FOCUS_SEL_FORE
+
+	#elif defined(WINDOWS)
+
+	_LgiColours[L_SHADOW] = ConvertWinColour(GetSysColor(COLOR_3DDKSHADOW)); // LC_SHADOW
+	_LgiColours[L_LOW] = ConvertWinColour(GetSysColor(COLOR_3DSHADOW)); // LC_LOW
+	_LgiColours[L_MED] = ConvertWinColour(GetSysColor(COLOR_3DFACE)); // LC_MED
+	_LgiColours[L_HIGH] = ConvertWinColour(GetSysColor(COLOR_3DLIGHT)); // LC_HIGH
+	_LgiColours[L_LIGHT] = ConvertWinColour(GetSysColor(COLOR_3DHIGHLIGHT)); // LC_LIGHT
+	_LgiColours[L_DIALOG] = ConvertWinColour(GetSysColor(COLOR_3DFACE)); // LC_DIALOG
+	_LgiColours[L_WORKSPACE] = ConvertWinColour(GetSysColor(COLOR_WINDOW)); // LC_WORKSPACE
+	_LgiColours[L_TEXT] = ConvertWinColour(GetSysColor(COLOR_WINDOWTEXT)); // LC_TEXT
+	_LgiColours[L_FOCUS_SEL_BACK] = ConvertWinColour(GetSysColor(COLOR_HIGHLIGHT)); // LC_FOCUS_SEL_BACK
+	_LgiColours[L_FOCUS_SEL_FORE] = ConvertWinColour(GetSysColor(COLOR_HIGHLIGHTTEXT)); // LC_FOCUS_SEL_FORE
+	_LgiColours[L_ACTIVE_TITLE] = ConvertWinColour(GetSysColor(COLOR_ACTIVECAPTION)); // LC_ACTIVE_TITLE
+	_LgiColours[L_ACTIVE_TITLE_TEXT] = ConvertWinColour(GetSysColor(COLOR_CAPTIONTEXT)); // LC_ACTIVE_TITLE_TEXT
+	_LgiColours[L_INACTIVE_TITLE] = ConvertWinColour(GetSysColor(COLOR_INACTIVECAPTION)); // LC_INACTIVE_TITLE
+	_LgiColours[L_INACTIVE_TITLE_TEXT] = ConvertWinColour(GetSysColor(COLOR_INACTIVECAPTIONTEXT)); // LC_INACTIVE_TITLE_TEXT
+	_LgiColours[L_MENU_BACKGROUND] = ConvertWinColour(GetSysColor(COLOR_MENU)); // LC_MENU_BACKGROUND
+	_LgiColours[L_MENU_TEXT] = ConvertWinColour(GetSysColor(COLOR_MENUTEXT)); // LC_MENU_TEXT
+	_LgiColours[L_NON_FOCUS_SEL_BACK] = ConvertWinColour(GetSysColor(COLOR_BTNFACE)); // LC_NON_FOCUS_SEL_BACK
+	_LgiColours[L_NON_FOCUS_SEL_FORE] = ConvertWinColour(GetSysColor(COLOR_BTNTEXT)); // LC_NON_FOCUS_SEL_FORE
+
+	#else // defaults for non-windows, plain grays
+
+	#if defined(LINUX) && !defined(LGI_SDL)
+	WmColour c;
+	Proc_LgiWmGetColour WmGetColour = 0;
+	GLibrary *WmLib = LgiApp->GetWindowManagerLib();
+	if (WmLib)
+	{
+		WmGetColour = (Proc_LgiWmGetColour) WmLib->GetAddress("LgiWmGetColour");
+	}
+
+	#define SetCol(def) \
+		if (WmGetColour && WmGetColour(i, &c)) \
+			_LgiColours[i++] = Rgb24(c.r, c.g, c.b); \
+		else \
+			_LgiColours[i++] = def;
+
+	#else // MAC
+
+	#define SetCol(def) \
+		_LgiColours[i++] = def;
+
+	#endif
+
+	SetCol(Rgb24(64, 64, 64)); // LC_SHADOW
+	SetCol(Rgb24(128, 128, 128)); // LC_LOW
+
+	//#ifdef BEOS
+	SetCol(Rgb24(216, 216, 216)); // LC_MED
+	//#else
+	//SetCol(Rgb24(230, 230, 230)); // LC_MED
+	//#endif
+
+	SetCol(Rgb24(230, 230, 230)); // LC_HIGH
+	SetCol(Rgb24(255, 255, 255)); // LC_LIGHT
+	SetCol(Rgb24(216, 216, 216)); // LC_DIALOG
+	SetCol(Rgb24(0xff, 0xff, 0xff)); // LC_WORKSPACE
+	SetCol(Rgb24(0, 0, 0)); // LC_TEXT
+	SetCol(Rgb24(0x4a, 0x59, 0xa5)); // LC_FOCUS_SEL_BACK
+	SetCol(Rgb24(0xff, 0xff, 0xff)); // LC_FOCUS_SEL_FORE
+	SetCol(Rgb24(0, 0, 0x80)); // LC_ACTIVE_TITLE
+	SetCol(Rgb24(0xff, 0xff, 0xff)); // LC_ACTIVE_TITLE_TEXT
+	SetCol(Rgb24(0x80, 0x80, 0x80)); // LC_INACTIVE_TITLE
+	SetCol(Rgb24(0x40, 0x40, 0x40)); // LC_INACTIVE_TITLE_TEXT
+	SetCol(Rgb24(222, 222, 222)); // LC_MENU_BACKGROUND
+	SetCol(Rgb24(0, 0, 0)); // LC_MENU_TEXT
+	SetCol(Rgb24(222, 222, 222)); // LC_NON_FOCUS_SEL_BACK
+	SetCol(Rgb24(0, 0, 0)); // LC_NON_FOCUS_SEL_FORE
+	#endif
+
+	// Tweak
+	if (LgiGetOs() == LGI_OS_WIN32
+		||
+		LgiGetOs() == LGI_OS_WIN64)
+	{
+		// Win32 doesn't seem to get this right, so we just tweak it here
+		_LgiColours[8] = _LgiColours[L_MED].Mix(_LgiColours[L_LIGHT]);
+	}
+	
+	_LgiColours[L_DEBUG_CURRENT_LINE].Rgb(0xff, 0xe0, 0x00);
+	_LgiColours[L_TOOL_TIP].Rgb(255, 255, 231);
+
+	// Read any settings out of config
+	ReadColourConfig(L_SHADOW);
+	ReadColourConfig(L_LOW);
+	ReadColourConfig(L_MED);
+	ReadColourConfig(L_HIGH);
+	ReadColourConfig(L_LIGHT);
+	ReadColourConfig(L_DIALOG);
+	ReadColourConfig(L_WORKSPACE);
+	ReadColourConfig(L_TEXT);
+	ReadColourConfig(L_FOCUS_SEL_BACK);
+	ReadColourConfig(L_FOCUS_SEL_FORE);
+	ReadColourConfig(L_ACTIVE_TITLE);
+	ReadColourConfig(L_ACTIVE_TITLE_TEXT);
+	ReadColourConfig(L_INACTIVE_TITLE);
+	ReadColourConfig(L_INACTIVE_TITLE_TEXT);
+}
+
+GColour LColour(LSystemColour Colour)
+{
+	#ifndef LGI_STATIC
+	if (GApp::SkinEngine &&
+		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_COLOUR))
+	{
+		return GApp::SkinEngine->GetColour(Colour);
+	}
+	#endif
+	
+	return Colour < L_MAXIMUM ? _LgiColours[Colour] : GColour();
+}
+
+COLOUR LgiColour(LSystemColour Colour)
+{
+	#ifndef LGI_STATIC
+	if (GApp::SkinEngine &&
+		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_COLOUR))
+	{
+		return GApp::SkinEngine->GetColour(Colour).c24();
+	}
+	#endif
+	
+	return Colour < L_MAXIMUM ? _LgiColours[Colour].c24() : 0;
+}
+

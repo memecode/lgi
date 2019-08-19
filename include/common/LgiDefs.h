@@ -306,60 +306,6 @@ enum LgiOs
 	LGI_OS_MAX,
 };
 
-// System Colours
-
-/// Black
-#define LC_BLACK						LgiColour(0)
-/// Dark grey
-#define LC_DKGREY						LgiColour(1)
-/// Medium grey
-#define LC_MIDGREY						LgiColour(2)
-/// Light grey
-#define LC_LTGREY						LgiColour(3)
-/// White
-#define LC_WHITE						LgiColour(4)
-
-/// 3d dark shadow
-#define LC_SHADOW						LgiColour(5)
-/// 3d light shadow
-#define LC_LOW							LgiColour(6)
-/// Flat colour for dialogs, windows and buttons
-#define LC_MED							LgiColour(7)
-/// 3d dark hilight
-#define LC_HIGH							LgiColour(8)
-/// 3d light hilight
-#define LC_LIGHT						LgiColour(9)
-
-/// Dialog colour
-#define LC_DIALOG						LgiColour(10)
-/// Workspace area
-#define LC_WORKSPACE					LgiColour(11)
-/// Default text colour
-#define LC_TEXT							LgiColour(12)
-/// Selection background colour when in focus
-#define LC_FOCUS_SEL_BACK				LgiColour(13)
-/// Selection foreground colour when in focus
-#define LC_FOCUS_SEL_FORE				LgiColour(14)
-
-#define LC_ACTIVE_TITLE					LgiColour(15)
-#define LC_ACTIVE_TITLE_TEXT			LgiColour(16)
-#define LC_INACTIVE_TITLE				LgiColour(17)
-#define LC_INACTIVE_TITLE_TEXT			LgiColour(18)
-
-#define LC_MENU_BACKGROUND				LgiColour(19)
-#define LC_MENU_TEXT					LgiColour(20)
-
-/// Selection background colour when not in focus
-#define LC_NON_FOCUS_SEL_BACK			LgiColour(21)
-/// Selection forground colour when not in focus
-#define LC_NON_FOCUS_SEL_FORE			LgiColour(22)
-
-#define LC_DEBUG_CURRENT_LINE			LgiColour(23)
-
-#define LC_MAXIMUM						24
-
-#define LC_TOOL_TIP						Rgb24(255, 255, 231)
-
 // Edge types
 enum LgiEdge
 {

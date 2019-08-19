@@ -435,7 +435,7 @@ DumpTime("fonts");
 
 DumpTime("cursor/rand/msg");
 
-	LgiInitColours();
+	GColour::OnChange();
 
 DumpTime("colours");
 

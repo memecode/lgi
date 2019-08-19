@@ -9,40 +9,6 @@
 #include "GRegKey.h"
 
 ////////////////////////////////////////////////////////////////
-// Local helper functions
-bool LgiCheckFile(char *Path, int PathSize)
-{
-	if (Path)
-	{
-		if (FileExists(Path))
-		{
-			// file is there
-			return true;
-		}
-		else
-		{
-			// shortcut?
-			char Link[MAX_PATH];
-			sprintf_s(Link, sizeof(Link), "%s.lnk", Path);
-			
-			// resolve shortcut
-			if (FileExists(Link) &&
-				ResolveShortcut(Link, Link, sizeof(Link)))
-			{
-				// check destination of link
-				if (FileExists(Link))
-				{
-					strcpy_s(Path, PathSize, Link);
-					return true;
-				}
-			}
-		}
-	}
-
-	return false;
-}
-
-////////////////////////////////////////////////////////////////
 // Implementations
 void LgiSleep(DWORD i)
 {

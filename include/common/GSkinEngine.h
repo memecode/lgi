@@ -102,9 +102,9 @@ public:
 	// existing functions change order or be removed.
 	virtual uint32_t GetFeatures() { return 0; }	
 
-	// Return the RGB24 for the LC_??? colour index
+	// Return the GColour for the L_??? colour index
 	// Will only be called if you return GSKIN_COLOUR from GetFeatures()
-	virtual uint32_t GetColour(int i) { return 0; }
+	virtual GColour GetColour(LSystemColour i) { return GColour(); }
 
 	// Do painting for the various controls, the relevant GSKIN_??? flag needs to
 	// be returned from GetFeatures before you can call any of these.

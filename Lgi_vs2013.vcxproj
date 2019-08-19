@@ -573,6 +573,7 @@
     <ClCompile Include="src\win32\Widgets\GSlider.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\common\GApp.h" />
     <ClInclude Include="include\common\GArray.h" />
     <ClInclude Include="include\common\GAutoPtr.h" />
     <ClInclude Include="include\common\GBox.h" />
@@ -602,9 +603,16 @@
     <ClInclude Include="include\common\GHashTable.h" />
     <ClInclude Include="include\common\GImageList.h" />
     <ClInclude Include="include\common\GItemContainer.h" />
+    <ClInclude Include="include\common\GLayout.h" />
     <ClInclude Include="include\common\GLibrary.h" />
     <ClInclude Include="include\common\GMatrix.h" />
     <ClInclude Include="include\common\GMem.h" />
+    <ClInclude Include="include\common\GSplitter.h" />
+    <ClInclude Include="include\common\GStatusBar.h" />
+    <ClInclude Include="include\common\GToolTip.h" />
+    <ClInclude Include="include\common\GTrayIcon.h" />
+    <ClInclude Include="include\common\GView.h" />
+    <ClInclude Include="include\common\GWindow.h" />
     <ClInclude Include="include\common\LMenu.h" />
     <ClInclude Include="include\common\GMessage.h" />
     <ClInclude Include="include\common\GMru.h" />
@@ -667,4 +675,3 @@
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
- 

@@ -158,11 +158,8 @@ public:
 		PourX = -1;
 		VScrollCache = -1;
 		DirtyStart = DirtyLen = 0;
-		UrlColour.Rgb(0, 0, 255);
-		
-		uint32_t c24 = 0;
-		if (_lgi_read_colour_config("colour.LC_URL", &c24))
-			UrlColour.c24(c24);
+		UrlColour.Rgb(0, 0, 255);		
+		GColour::GetConfigColour("colour.L_URL", UrlColour);
 
 		CenterCursor = false;
 		
@@ -2966,8 +2963,8 @@ bool GTextView3::OnFind(const char16 *Find, bool MatchWord, bool MatchCase, bool
 		GAutoPtr<GStyle> s(new GStyle(STYLE_FIND_MATCHES));
 		s->Start = Loc;
 		s->Len = FindLen;
-		s->Fore.Set(LC_FOCUS_SEL_FORE, 24);
-		s->Back = GColour(LC_FOCUS_SEL_BACK, 24).Mix(GColour(LC_WORKSPACE, 24));
+		s->Fore = LColour(L_FOCUS_SEL_FORE);
+		s->Back = LColour(L_FOCUS_SEL_BACK).Mix(LColour(L_WORKSPACE));
 		InsertStyle(s);
 
 		Cursor = Loc + FindLen;
@@ -4755,8 +4752,8 @@ void GTextView3::OnPaint(GSurface *pDC)
 		
 		bool HasFocus = Focus();
 		// printf("%s:%i - HasFocus = %i\n", _FL, HasFocus);
-		GColour SelectedText(HasFocus ? LC_FOCUS_SEL_FORE : LC_NON_FOCUS_SEL_FORE, 24);
-		GColour SelectedBack(HasFocus ? LC_FOCUS_SEL_BACK : LC_NON_FOCUS_SEL_BACK, 24);
+		GColour SelectedText(HasFocus ? LColour(L_FOCUS_SEL_FORE) : LColour(L_NON_FOCUS_SEL_FORE));
+		GColour SelectedBack(HasFocus ? LColour(L_FOCUS_SEL_BACK) : LColour(L_NON_FOCUS_SEL_BACK));
 
 		GCss::ColorDef ForeDef, BkDef;
 		if (GetCss())
@@ -4765,22 +4762,21 @@ void GTextView3::OnPaint(GSurface *pDC)
 			BkDef = GetCss()->BackgroundColor();
 		}
 		
-		GColour Fore(ForeDef.Type ==  GCss::ColorRgb ? Rgb32To24(ForeDef.Rgb32) : LC_TEXT, 24);
+		GColour Fore(ForeDef.Type ==  GCss::ColorRgb ? GColour(ForeDef.Rgb32, 32) : LColour(L_TEXT));
 		GColour Back
 		(
 			/*!ReadOnly &&*/ BkDef.Type == GCss::ColorRgb
 			?
-			Rgb32To24(BkDef.Rgb32)
+			GColour(BkDef.Rgb32, 32)
 			:
-			Enabled() ? LC_WORKSPACE : LC_MED,
-			24
+			Enabled() ? LColour(L_WORKSPACE) : LColour(L_MED)
 		);
 
 		// GColour Whitespace = Fore.Mix(Back, 0.85f);
 		if (!Enabled())
 		{
-			Fore.Set(LC_LOW, 24);
-			Back.Set(LC_MED, 24);
+			Fore = LColour(L_LOW);
+			Back = LColour(L_MED);
 		}
 
 		#ifdef DOUBLE_BUFFER_PAINT

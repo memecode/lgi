@@ -1156,7 +1156,7 @@ void GView::DrawThemeBorder(GSurface *pDC, GRect &r)
 			#endif
 		}
 		
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(LColour(L_MED));
 		pDC->Set(r.x1, r.y1);
 		pDC->Set(r.x2, r.y1);
 		pDC->Set(r.x1, r.y2);
