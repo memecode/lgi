@@ -59,15 +59,7 @@ LSubMenu::~LSubMenu()
 		DeleteObj(i);
 	}
 	
-	if (Info)
-	{
-		#if GTK_MAJOR_VERSION == 2
-		LgiAssert(Info->container.widget.object.parent_instance.g_type_instance.g_class);
-		#endif
-		Gtk::GtkWidget *w = GtkCast(Info.obj, gtk_widget, GtkWidget);
-		Gtk::gtk_widget_destroy(w);
-		Info = NULL;
-	}
+	Info.Destroy([](GtkMenuShell *s){ gtk_widget_destroy(GTK_WIDGET(s)); });
 }
 
 // This will be run in the GUI thread..
@@ -544,6 +536,7 @@ void LMenuItem::Handle(GtkMenuItem *mi)
 LMenuItem::~LMenuItem()
 {
 	Remove();
+	Info.Destroy([](GtkMenuItem *i){ gtk_widget_destroy(GTK_WIDGET(i)); });
 	DeleteObj(Child);
 }
 
@@ -847,17 +840,12 @@ bool LMenuItem::Remove()
 
 	if (Info)
 	{
-		#if GTK_MAJOR_VERSION == 2
-		LgiAssert(Info->item.bin.container.widget.object.parent_instance.g_type_instance.g_class);
-		#endif
-		// LgiTrace("Remove %p %p\n", this, Info);
-		Gtk::GtkWidget *w = GtkCast(Info.obj, gtk_widget, GtkWidget);
+		Gtk::GtkWidget *w = GTK_WIDGET(Info.obj);
 		if (Gtk::gtk_widget_get_parent(w))
 		{		
 			Gtk::GtkContainer *c = GtkCast(Parent->Info.obj, gtk_container, GtkContainer);
 			Gtk::gtk_container_remove(c, w);
 		}
-		Info = NULL;
 	}
 
 	LgiAssert(Parent->Items.HasItem(this));

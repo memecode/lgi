@@ -1,6 +1,8 @@
 #ifndef __OS_CLASS_H
 #define __OS_CLASS_H
 
+#include <functional>
+
 #ifdef _MSC_VER
 #define LTHREAD_DATA __declspec( thread )
 #else
@@ -27,15 +29,28 @@ public:
 
 	void Empty()
 	{
-		if (obj)
-		{
-			for (auto s: Sigs)
-				Gtk::g_signal_handler_disconnect(obj, s);
-			Sigs.Empty();
+		if (!obj)
+			return;
 
-			Gtk::g_object_unref(obj);
-			obj = NULL;
-		}
+		for (auto s: Sigs)
+			Gtk::g_signal_handler_disconnect(obj, s);
+		Sigs.Empty();
+
+		Gtk::g_object_unref(obj);
+		obj = NULL;
+	}
+
+	void Destroy(std::function<void(T*)> Fn)
+	{
+		if (!obj)
+			return;
+
+		for (auto s: Sigs)
+			Gtk::g_signal_handler_disconnect(obj, s);
+		Sigs.Empty();
+
+		Fn(obj);
+		obj = NULL;
 	}
 
 	operator T*()
