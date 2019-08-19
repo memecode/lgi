@@ -395,7 +395,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	SetAppArgs(AppArgs);
 
 	srand(LgiCurrentTime());
-	LgiInitColours();
+	GColour::OnChange();
 	AppWnd = 0;
 
 	Gtk::gchar id[256];

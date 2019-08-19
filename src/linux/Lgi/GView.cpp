@@ -825,7 +825,7 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 		
 		if (axes[0] == 0.0 || axes[0] > 10000)
 		{
-			LgiTrace("%s:%i - gdk_device_get_state failed.\n", _FL);
+			// LgiTrace("%s:%i - gdk_device_get_state failed.\n", _FL);
 			return false;
 		}
 

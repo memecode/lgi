@@ -676,7 +676,7 @@ void GColour::OnChange()
 	char PropName[] = "gtk-color-scheme";
 	Gtk::gchararray Value = 0;
 	Gtk::g_object_get(set, PropName, &Value, NULL);
-	GToken Lines(Value, "\n");
+	GString::Array Lines = GString(Value).SplitDelimit("\n");
 	Gtk::g_free(Value);
 	g_object_unref(set);
 
@@ -702,12 +702,12 @@ void GColour::OnChange()
 			Colours.Add(var, c24);
 		}
 	}
-	#define LookupColour(name, default) ((Colours.Find(name) >= 0) ? Colours.Find(name) : default)
+	#define LookupColour(name, default) ((Colours.Find(name) >= 0) ? GColour(Colours.Find(name),24) : default)
 
-	COLOUR Med = LookupColour("bg_color", Rgb24(0xe8, 0xe8, 0xe8));
-	COLOUR White = Rgb24(255, 255, 255);
-	COLOUR Black = Rgb24(0, 0, 0);
-	COLOUR Sel = Rgb24(0x33, 0x99, 0xff);
+	GColour Med = LookupColour("bg_color", GColour(0xe8, 0xe8, 0xe8));
+	GColour White(255, 255, 255);
+	GColour Black(0, 0, 0);
+	GColour Sel(0x33, 0x99, 0xff);
 	_LgiColours[L_SHADOW] = GdcMixColour(Med, Black, 0.25); // LC_SHADOW
 	_LgiColours[L_LOW] = GdcMixColour(Med, Black, 0.5); // LC_LOW
 	_LgiColours[L_MED] = Med; // LC_MED
@@ -720,8 +720,8 @@ void GColour::OnChange()
 	_LgiColours[L_FOCUS_SEL_FORE] = LookupColour("selected_fg_color", White); // LC_FOCUS_SEL_FORE
 	_LgiColours[L_ACTIVE_TITLE] = LookupColour("selected_bg_color", Sel); // LC_ACTIVE_TITLE
 	_LgiColours[L_ACTIVE_TITLE_TEXT] = LookupColour("selected_fg_color", White); // LC_ACTIVE_TITLE_TEXT
-	_LgiColours[L_INACTIVE_TITLE] = Rgb24(0xc0, 0xc0, 0xc0); // LC_INACTIVE_TITLE
-	_LgiColours[L_INACTIVE_TITLE_TEXT] = Rgb24(0x80, 0x80, 0x80); // LC_INACTIVE_TITLE_TEXT
+	_LgiColours[L_INACTIVE_TITLE].Rgb(0xc0, 0xc0, 0xc0); // LC_INACTIVE_TITLE
+	_LgiColours[L_INACTIVE_TITLE_TEXT].Rgb(0x80, 0x80, 0x80); // LC_INACTIVE_TITLE_TEXT
 	_LgiColours[L_MENU_BACKGROUND] = LookupColour("bg_color", White); // LC_MENU_BACKGROUND
 	_LgiColours[L_MENU_TEXT] = LookupColour("text_color", Black); // LC_MENU_TEXT
 	_LgiColours[L_NON_FOCUS_SEL_BACK] = GdcMixColour(LookupColour("selected_bg_color", Sel), _LgiColours[11]); // LC_NON_FOCUS_SEL_BACK

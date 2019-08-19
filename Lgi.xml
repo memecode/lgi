@@ -62,9 +62,12 @@
 					<Node File=".\src\win32\Lgi\GWindow.cpp" Type="2" Platforms="1" />
 					<Node File=".\src\win32\Lgi\LgiException.cpp" Type="2" Platforms="1" />
 				</Node>
+				<Node File="./include/common/GApp.h" Type="3" Platforms="15" />
 				<Node File="./include/common/GMessage.h" Type="3" Platforms="15" />
+				<Node File="./include/common/GView.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/GViewCommon.cpp" Type="2" Platforms="15" />
 				<Node File="./include/common/GViewPriv.h" Type="3" Platforms="15" />
+				<Node File="./include/common/GWindow.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/GWindowCommon.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Libraries" Type="1" Platforms="15" Open="1" Id="17">

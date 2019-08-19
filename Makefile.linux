@@ -530,7 +530,8 @@ Gdc2.o : ./src/linux/Gtk/Gdc2.cpp ./include/common/Lgi.h \
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 GColour.o : ./src/common/Gdc2/GColour.cpp ./include/common/Lgi.h \
-	./include/common/GPalette.h
+	./include/common/GPalette.h \
+	./include/common/GSkinEngine.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -1281,8 +1282,7 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/GArray.h \
 	./include/common/LgiClass.h
 
-./include/common/Lgi.h : ./include/common/LgiInc.h \
-	./include/linux/Gtk/LgiOsDefs.h \
+./include/common/Lgi.h : ./include/linux/Gtk/LgiOsDefs.h \
 	./include/common/LgiMsgs.h \
 	./include/common/LgiDefs.h \
 	./include/common/GMem.h \
@@ -1302,7 +1302,12 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/LgiCommon.h \
 	./include/common/GXmlTree.h \
 	./include/common/GDragAndDrop.h \
+	./include/common/GApp.h \
+	./include/common/GView.h \
+	./include/common/GLayout.h \
 	./include/common/LMenu.h \
+	./include/common/GWindow.h \
+	./include/common/GToolTip.h \
 	./include/common/LgiWidgets.h \
 	./include/common/Progress.h \
 	./include/common/GProgress.h \
@@ -1310,6 +1315,9 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/GFindReplaceDlg.h \
 	./include/common/GToolBar.h \
 	./include/common/LThread.h \
+	./include/common/GSplitter.h \
+	./include/common/GStatusBar.h \
+	./include/common/GTrayIcon.h \
 	./include/common/GInput.h
 
 ./include/common/LgiCommon.h : ./include/common/GMem.h \
@@ -1323,6 +1331,12 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 ./include/common/GFileSelect.h : 
 
 ./include/common/GToolBar.h : ./include/common/GImageList.h
+
+./include/common/GApp.h : 
+
+./include/common/GLayout.h : 
+
+./include/common/GView.h : 
 
 ./include/common/GdiLeak.h : 
 
@@ -1339,6 +1353,8 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 ./include/common/LDateTime.h : ./include/common/GStringClass.h
 
 ./include/common/LCancel.h : 
+
+./include/common/GToolTip.h : 
 
 ./include/common/GFindReplaceDlg.h : 
 
@@ -1385,6 +1401,8 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 
 ./include/common/GSubProcess.h : 
 
+./include/common/GTrayIcon.h : 
+
 ./include/common/GPrinter.h : 
 
 ./include/common/GUnicode.h : ./include/common/LgiInc.h
@@ -1424,6 +1442,8 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/GMem.h \
 	./include/common/GArray.h \
 	./include/common/LDomFields.h
+
+./include/common/GSplitter.h : 
 
 ./include/linux/Gtk/LgiOsClasses.h : 
 
@@ -1542,6 +1562,8 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 
 ./include/common/GRefCount.h : 
 
+./include/common/GStatusBar.h : 
+
 ./include/common/GScrollBar.h : 
 
 ./include/linux/Gtk/LgiOsDefs.h : ./include/common/LgiDefs.h \
@@ -1562,6 +1584,8 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/GString.h \
 	./include/common/LCancel.h \
 	./include/common/LHashTable.h
+
+./include/common/GWindow.h : 
 
 ./include/common/LgiDefs.h : ./include/common/LgiInc.h \
 	./include/common/GAutoPtr.h
