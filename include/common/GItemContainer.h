@@ -6,7 +6,7 @@
 #include "GCss.h"
 
 class GItemContainer;
-#define DragColumnColour				LC_LOW
+#define DragColumnColour				LColour(L_LOW)
 
 /// Base class for items in widget containers
 class LgiClass GItem : virtual public GEventsI

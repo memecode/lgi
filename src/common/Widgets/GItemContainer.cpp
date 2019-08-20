@@ -858,7 +858,7 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 		}
 
 		#define ARROW_SIZE	9
-		pDC->Colour(LC_TEXT, 24);
+		pDC->Colour(L_TEXT);
 		Mx += Off;
 		My += Off - 1;
 
@@ -899,7 +899,7 @@ void GItemColumn::OnPaint(GSurface *pDC, GRect &Rgn)
 
 	if (d->Drag)
 	{
-		pDC->Colour(DragColumnColour, 24);
+		pDC->Colour(DragColumnColour);
 		pDC->Rectangle(&r);
 	}
 	else
@@ -1201,7 +1201,7 @@ GItem *GItemEdit::GetItem()
 
 void GItemEdit::OnPaint(GSurface *pDC)
 {
-	pDC->Colour(LC_BLACK, 24);
+	pDC->Colour(L_BLACK);
 	pDC->Rectangle();
 }
 

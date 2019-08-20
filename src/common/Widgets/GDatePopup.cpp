@@ -51,7 +51,7 @@ void GDatePopup::OnPaint(GSurface *pDC)
 	// Border
 	GRect r = GetClient();
 	LgiWideBorder(pDC, r, DefaultRaisedEdge);
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Line(r.x2, r.y1, r.x2, r.y2);
 	pDC->Line(r.x1, r.y2, r.x2-1, r.y2);
 	r.x2--;
@@ -70,13 +70,13 @@ void GDatePopup::OnPaint(GSurface *pDC)
 	// Caption bar
 	r = Caption;
 	LgiThinBorder(pDC, r, DefaultRaisedEdge);
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Rectangle(&r);
 	char *Title = Mv.Title();
 	if (Title)
 	{
 		SysFont->Transparent(true);
-		SysFont->Colour(LC_TEXT, LC_MED);
+		SysFont->Colour(L_TEXT, L_MED);
 		GDisplayString ds(SysFont, Title);
 		ds.Draw(pDC, r.x1 + (r.X()-ds.X())/2, r.y1);
 	}
@@ -85,7 +85,7 @@ void GDatePopup::OnPaint(GSurface *pDC)
 	int CntY = Prev.y1 + ((Prev.Y()-8)/2);
 	int Px = Prev.x2 - 6;
 	int Nx = Next.x1 + 4;
-	pDC->Colour(LC_TEXT, 24);
+	pDC->Colour(L_TEXT);
 	for (int i=0; i<5; i++)
 	{
 		pDC->Line(	Px-i, CntY+i,
@@ -95,7 +95,7 @@ void GDatePopup::OnPaint(GSurface *pDC)
 	}
 
 	// Date space
-	pDC->Colour(LC_WORKSPACE, 24);
+	pDC->Colour(L_WORKSPACE, 24);
 	pDC->Rectangle(&Date);
 
 	Date.Size(3, 3);
@@ -112,19 +112,19 @@ void GDatePopup::OnPaint(GSurface *pDC)
 
 			if (Mv.IsSelected())
 			{
-				pDC->Colour(LC_FOCUS_SEL_BACK, 24);
+				pDC->Colour(L_FOCUS_SEL_BACK);
 				pDC->Rectangle(r.x1 + Px, r.y1 + Py, r.x1 + Px + Cx - 2, r.y1 + Py + Cy - 2);
-				SysFont->Colour(LC_FOCUS_SEL_FORE, LC_FOCUS_SEL_BACK);
+				SysFont->Colour(L_FOCUS_SEL_FORE, L_FOCUS_SEL_BACK);
 			}
 			else
 			{
 				if (Mv.IsToday())
 				{
-					SysFont->Colour(Rgb24(192, 0, 0), LC_WORKSPACE);
+					SysFont->Colour(GColour(192, 0, 0), LColour(L_WORKSPACE));
 				}
 				else
 				{
-					SysFont->Colour(Mv.IsMonth() ? LC_TEXT : LC_MED, LC_WORKSPACE);
+					SysFont->Colour(Mv.IsMonth() ? L_TEXT : L_MED, L_WORKSPACE);
 				}
 			}
 

@@ -595,7 +595,7 @@ void GToolButton::OnPaint(GSurface *pDC)
 		pDC->Rectangle();
 		#endif
 
-		GColour cBack = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
+		GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 		if (e && Over)
 			cBack = cBack.Mix(GColour::White);
 
@@ -683,8 +683,8 @@ void GToolButton::OnPaint(GSurface *pDC)
 				{
 					// Write each word centered on a different line
 					int Ty = Down + Par->d->By + 2;
-					COLOUR a = e ? LC_TEXT : LC_LOW;
-					COLOUR b = LC_MED;
+					GColour a(e ? L_TEXT : L_LOW);
+					GColour b(L_MED);
 
 					Par->d->Font->Colour(a, b);
 					for (int i=0; i<d->Text.Length(); i++)
@@ -976,7 +976,7 @@ GToolBar::GToolBar()
 		if (d->Font)
 		{
 			d->Font->PointSize(MIN(d->Font->PointSize(), SysFont->PointSize()));
-			d->Font->Colour(0);
+			d->Font->Colour(L_TEXT);
 			d->Font->Bold(false);
 			d->Font->Transparent(true);
 		}
@@ -989,7 +989,7 @@ GToolBar::GToolBar()
 	#if defined BEOS
 	Handle()->SetViewColor(B_TRANSPARENT_COLOR);
 	#endif
-	GetCss(true)->BackgroundColor(GColour(LC_MED,24).Mix(GColour::Black, 0.05f));
+	GetCss(true)->BackgroundColor(LColour(L_MED).Mix(GColour::Black, 0.05f));
 	LgiResources::StyleElement(this);
 }
 

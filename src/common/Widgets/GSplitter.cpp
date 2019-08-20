@@ -384,7 +384,7 @@ void GSplitter::OnPaint(GSurface *pDC)
 		}
 		else
 		{
-			pDC->Colour(LC_WORKSPACE, 24);
+			pDC->Colour(L_WORKSPACE);
 			pDC->Rectangle(&r);
 		}
 	}
@@ -418,7 +418,7 @@ void GSplitter::OnPaint(GSurface *pDC)
 		}
 		else
 		{
-			pDC->Colour(LC_WORKSPACE, 24);
+			pDC->Colour(L_WORKSPACE);
 			pDC->Rectangle(&r);
 		}
 	}

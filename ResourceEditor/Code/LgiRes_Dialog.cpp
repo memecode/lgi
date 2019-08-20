@@ -922,7 +922,7 @@ void CtrlDlg::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	if (Str)
 	{
 		GDisplayString ds(SysFont, Str->Get());
-		SysFont->Fore(LC_ACTIVE_TITLE_TEXT);
+		SysFont->Fore(L_ACTIVE_TITLE_TEXT);
 		SysFont->Transparent(true);
 		ds.Draw(pDC, Title.x1 + 10, Title.y1 + ((Title.Y()-ds.Y())/2));
 	}
@@ -970,7 +970,7 @@ void CtrlText::OnPaint(GSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
 	char *Text = Str->Get();
-	SysFont->Fore(0);
+	SysFont->Fore(L_TEXT);
 	SysFont->Transparent(true);
 
 	if (Text)
@@ -1017,7 +1017,7 @@ void CtrlEditbox::OnPaint(GSurface *pDC)
 	pDC->Rectangle(&r);
 
 	char *Text = Str->Get();
-	SysFont->Fore(Enabled() ? 0 : LC_LOW);
+	SysFont->Fore(Enabled() ? L_TEXT : L_LOW);
 	SysFont->Transparent(true);
 	if (Text)
 	{
@@ -1100,7 +1100,7 @@ void CtrlCheckbox::OnPaint(GSurface *pDC)
 	char *Text = Str->Get();
 	if (Text)
 	{
-		SysFont->Fore(LC_TEXT);
+		SysFont->Fore(L_TEXT);
 		SysFont->Transparent(true);
 		GDisplayString ds(SysFont, Text);
 		ds.Draw(pDC, r.x2 + 10, r.y1-2);
@@ -1145,11 +1145,11 @@ void CtrlButton::OnPaint(GSurface *pDC)
 	
 	// Draw the ctrl
 	LgiWideBorder(pDC, r, DefaultRaisedEdge);
-	SysFont->Fore(LC_TEXT);
+	SysFont->Fore(L_TEXT);
 
 	if (ValidStr(Text))
 	{
-		SysFont->Back(LC_MED);
+		SysFont->Back(L_MED);
 		SysFont->Transparent(false);
 
 		GDisplayString ds(SysFont, Text);
@@ -1189,8 +1189,8 @@ void CtrlGroup::OnPaint(GSurface *pDC)
 	r.y1 += 5;
 	LgiWideBorder(pDC, r, EdgeXpChisel);
 	r.y1 -= 5;
-	SysFont->Fore(LC_TEXT);
-	SysFont->Back(LC_MED);
+	SysFont->Fore(L_TEXT);
+	SysFont->Back(L_MED);
 	SysFont->Transparent(false);
 	char *Text = Str->Get();
 	GDisplayString ds(SysFont, Text);
@@ -1261,7 +1261,7 @@ void CtrlRadio::OnPaint(GSurface *pDC)
 	char *Text = Str->Get();
 	if (Text)
 	{
-		SysFont->Fore(LC_TEXT);
+		SysFont->Fore(L_TEXT);
 		SysFont->Transparent(true);
 		GDisplayString ds(SysFont, Text);
 		ds.Draw(pDC, r.x2 + 10, r.y1-2);
@@ -1484,8 +1484,8 @@ void CtrlTabs::OnPaint(GSurface *pDC)
 		t.Size(2, 2);
 		t.y2 += 2;
 
-		SysFont->Fore(LC_TEXT);
-		SysFont->Back(LC_MED);
+		SysFont->Fore(L_TEXT);
+		SysFont->Back(L_MED);
 		SysFont->Transparent(false);
 		ds.Draw(pDC, t.x1 + ((t.X()-ds.X())/2), t.y1 + ((t.Y()-ds.Y())/2), &t);
 
@@ -1943,8 +1943,8 @@ void CtrlList::OnPaint(GSurface *pDC)
 		{
 			LgiWideBorder(pDC, r, DefaultRaisedEdge);
 
-			SysFont->Fore(LC_TEXT);
-			SysFont->Back(LC_MED);
+			SysFont->Fore(L_TEXT);
+			SysFont->Back(L_MED);
 			SysFont->Transparent(false);
 
 			const char *Str = c->Str->Get();
@@ -2008,7 +2008,7 @@ void CtrlComboBox::OnPaint(GSurface *pDC)
 
 	// Text
 	char *Text = Str->Get();
-	SysFont->Fore(0);
+	SysFont->Fore(L_TEXT);
 	SysFont->Transparent(true);
 	if (Text)
 	{
@@ -2097,7 +2097,7 @@ void CtrlTree::OnPaint(GSurface *pDC)
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
 	pDC->Colour(Rgb24(255, 255, 255), 24);
 	pDC->Rectangle(&r);
-	SysFont->Colour(0, 0xffffff);
+	SysFont->Colour(L_TEXT, L_WORKSPACE);
 	SysFont->Transparent(true);
 	GDisplayString ds(SysFont, "Tree");
 	ds.Draw(pDC, r.x1 + 3, r.y1 + 3, &r);
@@ -2192,7 +2192,7 @@ void CtrlCustom::OnPaint(GSurface *pDC)
 		strcat(s, Control);
 	}
 
-	SysFont->Colour(LC_TEXT, LC_WORKSPACE);
+	SysFont->Colour(L_TEXT, L_WORKSPACE);
 	GDisplayString ds(SysFont, s);
 	ds.Draw(pDC, r.x1+2, r.y1+1, &r);
 
@@ -3485,7 +3485,7 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 		else
 		{
 			// error
-			SysFont->Colour(LC_TEXT, LC_WORKSPACE);
+			SysFont->Colour(L_TEXT, L_WORKSPACE);
 			SysFont->Transparent(false);
 			GDisplayString Ds(SysFont, "Can't create memory bitmap.");
 			Ds.Draw(pDC, 2, 0, &GetClient());

@@ -1262,9 +1262,9 @@ void GFilterView::OnPaint(GSurface *pDC)
 		Buf.Line(0, Buf.Y()-1, Buf.X()-1, Buf.Y()-1);
 
 		SysFont->Transparent(true);
-		SysFont->Colour(LC_TEXT, LC_MED);
+		SysFont->Colour(L_TEXT, L_MED);
 		SysBold->Transparent(true);
-		SysBold->Colour(LC_TEXT, LC_MED);
+		SysBold->Colour(L_TEXT, L_MED);
 		int x = 4, y = 4;
 
 		d->dsLegend->Draw(&Buf, x, y);

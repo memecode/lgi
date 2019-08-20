@@ -66,8 +66,8 @@ enum TabViewStyle
 #define TAB_MARGIN_X		12 // Px each side of the text label on the tab
 #define CLOSE_BTN_SIZE		8
 #define CLOSE_BTN_GAP		8
-#define cFocusFore			GColour(LC_FOCUS_SEL_FORE, 24)
-#define cFocusBack			GColour(LC_FOCUS_SEL_BACK, 24)
+#define cFocusFore			LColour(L_FOCUS_SEL_FORE)
+#define cFocusBack			LColour(L_FOCUS_SEL_BACK)
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 class GTabViewPrivate
@@ -683,7 +683,7 @@ void GTabView::OnAttach()
 			d->Depth++;
 	}
 
-	GColour cDialog(LC_MED, 24);
+	GColour cDialog(L_MED);
 			
 	auto mul = pow(0.91f, 1+d->Depth);
 	auto c = (int) ((double)cDialog.r() * mul);
@@ -764,7 +764,7 @@ void GTabView::OnPaint(GSurface *pDC)
 		CalcInset();
 
 		GView *Pv = GetParent() ? GetParent()->GetGView() : NULL;
-		GColour NoPaint = (Pv ? Pv : this)->StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
+		GColour NoPaint = (Pv ? Pv : this)->StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 		if (!NoPaint.IsTransparent())
 		{
 			pDC->Colour(NoPaint);
@@ -951,7 +951,7 @@ void GTabView::OnPaint(GSurface *pDC)
 			if (Tab->GetCss())
 				Fore = Tab->GetCss()->Color();
 			tf->Fore(Fore.IsValid() ? (GColour)Fore : 
-					IsCurrent && Foc ? cFocusFore : GColour(LC_TEXT, 24));
+					IsCurrent && Foc ? cFocusFore : LColour(L_TEXT));
 			
 			int DsX = r.x1 + TAB_MARGIN_X;
 			int DsY = r.y1 + TAB_TXT_PAD + BaselineOff;
@@ -994,7 +994,7 @@ void GTabView::OnPaint(GSurface *pDC)
 			r.Size(-2, -2);
 			LgiWideBorder(pDC, r, DefaultRaisedEdge);
 
-			pDC->Colour(LC_MED, 24);
+			pDC->Colour(L_MED);
 			pDC->Rectangle(0, 0, X()-1, d->TabClient.y1-3);
 
 			GTabPage *Sel = 0;
@@ -1049,7 +1049,7 @@ void GTabView::OnPaint(GSurface *pDC)
 			
 			if (!it.Length())
 			{
-				pDC->Colour(LC_MED, 24);
+				pDC->Colour(L_MED);
 				pDC->Rectangle(&r);
 			}
 			
@@ -1065,7 +1065,7 @@ void GTabView::OnPaint(GSurface *pDC)
 
 				int x = r.x1 + (r.X() >> 1) + 1;
 				int y = r.y1 + (r.Y() >> 1) - 1;
-				pDC->Colour(LC_TEXT, 24);
+				pDC->Colour(L_TEXT);
 				for (int i=0; i<4; i++)
 				{
 					pDC->Line(x-i, y-i, x-i, y+i);
@@ -1078,7 +1078,7 @@ void GTabView::OnPaint(GSurface *pDC)
 
 				int x = r.x1 + (r.X() >> 1) - 2;
 				int y = r.y1 + (r.Y() >> 1) - 1;
-				pDC->Colour(LC_TEXT, 24);
+				pDC->Colour(L_TEXT);
 				for (int i=0; i<4; i++)
 				{
 					pDC->Line(x+i, y-i, x+i, y+i);
@@ -1235,8 +1235,8 @@ void GTabPage::OnButtonPaint(GSurface *pDC)
 	#else
 	
 	// The default is a close button
-	GColour Low(LC_LOW, 24);
-	GColour Mid(LC_MED, 24);
+	GColour Low(L_LOW);
+	GColour Mid(L_MED);
 	Mid = Mid.Mix(Low);
 	
 	pDC->Colour(Mid);
@@ -1278,7 +1278,7 @@ void GTabPage::PaintTab(GSurface *pDC, bool Selected)
 		r.Size(-2, -2);
 	}
 	
-	pDC->Colour(LC_LIGHT, 24);
+	pDC->Colour(L_LIGHT);
 	
 	bool First = false;
 	if (TabCtrl)
@@ -1293,21 +1293,21 @@ void GTabPage::PaintTab(GSurface *pDC, bool Selected)
 		pDC->Line(r.x1, r.y1+1, r.x1, r.y2-1);
 	pDC->Line(r.x1+1, r.y1, r.x2-1, r.y1);
 
-	pDC->Colour(LC_HIGH, 24);
+	pDC->Colour(L_HIGH);
 	pDC->Line(r.x1+1, r.y1+1, r.x1+1, r.y2);
 	pDC->Line(r.x1+1, r.y1+1, r.x2-1, r.y1+1);
 
-	pDC->Colour(LC_LOW, 24);
+	pDC->Colour(L_LOW);
 	pDC->Line(r.x2-1, r.y1+1, r.x2-1, r.y2);
 
-	pDC->Colour(LC_SHADOW, 24);
+	pDC->Colour(L_SHADOW);
 	pDC->Line(r.x2, r.y1+1, r.x2, r.y2-1);
 
 	r.x2 -= 2;
 	r.x1 += 2;
 	r.y1 += 2;
 	
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Rectangle(&r);
 	pDC->Set(r.x1, r.y1);
 	pDC->Set(r.x2, r.y1);
@@ -1318,7 +1318,7 @@ void GTabPage::PaintTab(GSurface *pDC, bool Selected)
 	{
 		GFont *f = GetFont();
 		GDisplayString ds(f, t);
-		f->Colour(LC_TEXT, LC_MED);
+		f->Colour(L_TEXT, L_MED);
 		f->Transparent(true);
 		
 		int y = r.y1 + ((r.Y()-ds.Y())/2);
@@ -1329,7 +1329,7 @@ void GTabPage::PaintTab(GSurface *pDC, bool Selected)
 			r.Set(Cx, y, Cx+ds.X(), y+ds.Y());
 			r.Size(-2, -1);
 			r.y1++;
-			pDC->Colour(LC_LOW, 24);
+			pDC->Colour(L_LOW);
 			pDC->Box(&r);
 		}
 
@@ -1420,7 +1420,7 @@ GColour GTabPage::GetBackground()
 	if (TabCtrl && TabCtrl->d->Style == TvMac)
 		return GColour(226, 226, 226); // 207?
 	else
-		return GColour(LC_MED, 24);
+		return LColour(L_MED);
 }
 
 void GTabPage::OnStyleChange()
@@ -1439,7 +1439,7 @@ void GTabPage::SetFont(GFont *Font, bool OwnIt)
 void GTabPage::OnPaint(GSurface *pDC)
 {
 	GRect r(0, 0, X()-1, Y()-1);
-	GColour Bk = StyleColour(GCss::PropBackgroundColor, TabCtrl ? TabCtrl->d->cFill : GColour(LC_MED, 24), 1);
+	GColour Bk = StyleColour(GCss::PropBackgroundColor, TabCtrl ? TabCtrl->d->cFill : LColour(L_MED), 1);
 	pDC->Colour(Bk);
 	pDC->Rectangle(&r);
 	

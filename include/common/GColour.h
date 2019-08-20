@@ -93,6 +93,8 @@ public:
 
 	/// Transparent
 	GColour();
+	/// System colour
+	GColour(LSystemColour sc);
 	/// Indexed colour
 	GColour(uint8_t idx8, GPalette *palette);
 	/// True colour

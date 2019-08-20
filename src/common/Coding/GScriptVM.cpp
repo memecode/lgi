@@ -1401,7 +1401,7 @@ void GDebugView::OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour)
 
 	pDC->Colour(GColour(192, 0, 0));
 	GFont *f = GetFont();
-	f->Colour(LC_LOW, LC_WORKSPACE);
+	f->Colour(L_LOW, L_WORKSPACE);
 	f->Transparent(true);
 	
 	int Fy = f->GetHeight();
@@ -1431,7 +1431,7 @@ void GDebugView::OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour)
 	}
 
 	f->Transparent(false);
-	f->Colour(LC_TEXT, LC_WORKSPACE);
+	f->Colour(L_TEXT, L_WORKSPACE);
 }
 
 void GDebugView::OnPaint(GSurface *pDC)

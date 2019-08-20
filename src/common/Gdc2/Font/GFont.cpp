@@ -272,9 +272,9 @@ void GTypeFace::WhitespaceColour(GColour c)
 	_OnPropChange(false);
 }
 
-void GTypeFace::Fore(COLOUR c)
+void GTypeFace::Fore(LSystemColour c)
 {
-	d->_Fore.c24(c);
+	d->_Fore = LColour(c);
 	_OnPropChange(false);
 }
 
@@ -284,9 +284,9 @@ void GTypeFace::Fore(GColour c)
 	_OnPropChange(false);
 }
 
-void GTypeFace::Back(COLOUR c)
+void GTypeFace::Back(LSystemColour c)
 {
-	d->_Back.c24(c);
+	d->_Back = LColour(c);
 	_OnPropChange(false);
 }
 
@@ -329,10 +329,10 @@ void GTypeFace::Transparent(bool i)
 	_OnPropChange(false);
 }
 
-void GTypeFace::Colour(COLOUR Fore, COLOUR Back)
+void GTypeFace::Colour(LSystemColour Fore, LSystemColour Back)
 {
-	d->_Fore.c24(Fore);
-	d->_Back.c24(Back);
+	d->_Fore = LColour(Fore);
+	d->_Back = LColour(Back);
 	_OnPropChange(false);
 }
 

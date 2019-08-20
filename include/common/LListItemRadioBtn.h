@@ -40,16 +40,16 @@ public:
 		c.Offset(r.x1 + ((r.X()-c.X())/2), r.y1 + ((r.Y()-c.Y())/2));
 
 		// Box
-		pDC->Colour(LC_WORKSPACE, 24);
+		pDC->Colour(L_WORKSPACE);
 		pDC->FilledCircle(c.x1 + 5, c.y1 + 5, 5);
 
-		pDC->Colour(LC_TEXT, 24);
+		pDC->Colour(L_TEXT);
 		pDC->Circle(c.x1 + 5, c.y1 + 5, 5);
 
 		// Value
 		if (Value())
 		{
-			pDC->Colour(LC_TEXT, 24);
+			pDC->Colour(L_TEXT);
 			pDC->FilledCircle(c.x1 + 5, c.y1 + 5, 2);
 		}
 	}

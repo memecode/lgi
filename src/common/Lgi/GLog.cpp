@@ -17,9 +17,13 @@
 #include "GDisplayString.h"
 
 ////////////////////////////////////////////////////////////////////
-RLogEntry::RLogEntry(const char *t, const char *desc, int Len, COLOUR Col)
+RLogEntry::RLogEntry(const char *t, const char *desc, int Len, GColour *Col)
 {
-	c = Col;
+	if (Col)
+		c = *Col;
+	else
+		c = LColour(L_TEXT);
+
 	if (desc)
 	{
 		Desc = NewStr(desc);
@@ -151,11 +155,11 @@ void RLogView::OnPaint(GSurface *pDC)
 	GRect r(GetClient());
 	r.Offset(-r.x1, -r.y1);
 
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 
 	if (Log && r.Valid())
 	{
-		SysFont->Back(LC_WORKSPACE);
+		SysFont->Back(L_WORKSPACE);
 		SysFont->Transparent(false);
 
 		int y = SysFont->GetHeight();
@@ -206,7 +210,7 @@ void RLogView::OnPaint(GSurface *pDC)
 			}
 			else
 			{
-				pDC->Colour(LC_WORKSPACE, 24);
+				pDC->Colour(L_WORKSPACE);
 				pDC->Rectangle(&t);
 			}
 
@@ -225,7 +229,7 @@ void RLogView::OnPaint(GSurface *pDC)
 
 	if (r.Valid())
 	{
-		pDC->Colour(LC_WORKSPACE, 24);
+		pDC->Colour(L_WORKSPACE);
 		pDC->Rectangle(&r);
 	}
 }
@@ -290,12 +294,12 @@ void GLog::SetView(RLogView *View)
 	LogView = View;
 }
 
-void GLog::Write(COLOUR c, const char *Buffer, int Len, char *Desc)
+void GLog::Write(GColour c, const char *Buffer, int Len, char *Desc)
 {
 	if (Buffer)
 	{
 		RLogEntry *Entry = 0;
-		Entries.Insert(Entry = new RLogEntry(Buffer, Desc, Len, c));
+		Entries.Insert(Entry = new RLogEntry(Buffer, Desc, Len, &c));
 		if (Entry && FileName)
 		{
 			GFile F;
@@ -321,7 +325,7 @@ void GLog::Write(COLOUR c, const char *Buffer, int Len, char *Desc)
 	}
 }
 
-void GLog::Print(COLOUR c, const char *Str, ...)
+void GLog::Print(GColour c, const char *Str, ...)
 {
 	if (Str)
 	{

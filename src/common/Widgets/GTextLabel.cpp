@@ -269,7 +269,7 @@ int GTextLabel::OnNotify(GViewI *Ctrl, int Flags)
 
 void GTextLabel::OnPaint(GSurface *pDC)
 {
-	GColour Back = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
+	GColour Back = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 	if (d->Lock(_FL))
 	{
 		GRect c = GetClient();

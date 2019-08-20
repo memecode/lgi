@@ -33,7 +33,7 @@ bool GStatusBar::Pour(GRegion &r)
 
 void GStatusBar::OnPaint(GSurface *pDC)
 {
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Rectangle();
 }
 
@@ -158,7 +158,7 @@ void GStatusPane::OnPaint(GSurface *pDC)
 		int TabSize = SysFont->TabSize();
 
 		SysFont->TabSize(0);
-		SysFont->Colour(LC_TEXT, LC_MED);
+		SysFont->Colour(L_TEXT, L_MED);
 		SysFont->Transparent(false);
 
 		GDisplayString ds(SysFont, t);
@@ -168,7 +168,7 @@ void GStatusPane::OnPaint(GSurface *pDC)
 	}
 	else
 	{
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle(&r);
 	}
 }

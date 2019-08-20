@@ -827,6 +827,12 @@ void GColour::OnChange()
 	ReadColourConfig(L_INACTIVE_TITLE_TEXT);
 }
 
+GColour::GColour(LSystemColour sc)
+{
+	if (sc < L_MAXIMUM)
+		*this = _LgiColours[sc];
+}
+
 GColour LColour(LSystemColour Colour)
 {
 	#ifndef LGI_STATIC

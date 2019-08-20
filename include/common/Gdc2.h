@@ -520,6 +520,8 @@ public:
 		/// The new colour
 		GColour c
 	);
+	/// Sets the colour to a system colour
+	virtual GColour Colour(LSystemColour SysCol);
 	/// Gets the current blending mode in operation
 	virtual int Op() { return (pApp) ? pApp->GetOp() : GDC_SET; }
 	/// Sets the current blending mode in operation

@@ -112,14 +112,14 @@ public:
 	void Quality(int i);
 
 	/// Sets the foreground colour as a 24 bit RGB value
-	void Fore(COLOUR c);
+	void Fore(LSystemColour c);
 	void Fore(GColour c);
 
 	/// Sets the background colour as a 24 bit RGB value. In most systems this is not important,
 	/// but on BeOS the anti-aliasing is done from the foreground colour to the background colour
 	/// with no regards for what is underneath the rendered text, thus you need to set the back
 	/// colour correctly
-	void Back(COLOUR c);
+	void Back(LSystemColour c);
 	void Back(GColour c);
 
     /// Get the whitespace rendering colour
@@ -178,7 +178,7 @@ public:
 
 	/// Set the foreground and background in 24-bit colour.
 	/// \sa GTypeFace::Fore() and GTypeFace::Back()
-	virtual void Colour(COLOUR Fore, COLOUR Back = 0xFFFFFFFF);
+	virtual void Colour(LSystemColour Fore, LSystemColour Back = L_TRANSPARENT);
 
 	/// Set the foreground and background colour.
 	virtual void Colour(GColour Fore, GColour Back);

@@ -2060,7 +2060,7 @@ void GTableLayout::OnPaint(GSurface *pDC)
 		return;
 	}
 
-	GColour Back = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
+	GColour Back = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 	if (!Back.IsTransparent())
 	{
 		pDC->Colour(Back);

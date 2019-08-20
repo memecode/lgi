@@ -1651,6 +1651,11 @@ GRect GSurface::ClipRgn()
 	return Clip;
 }
 
+GColour GSurface::Colour(LSystemColour SysCol)
+{
+	return Colour(LColour(SysCol));
+}
+
 GColour GSurface::Colour(GColour c)
 {
 	LgiAssert(pApp != NULL);

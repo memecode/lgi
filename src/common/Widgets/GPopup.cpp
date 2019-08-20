@@ -951,7 +951,7 @@ void GDropDown::OnPaint(GSurface *pDC)
 		if (f.Type == GCss::ColorRgb)
 			Mem.Colour(f.Rgb32, 32);
 		else
-			Mem.Colour(LC_MED, 24);
+			Mem.Colour(L_MED);
 		Mem.Rectangle();
 
 		GApp::SkinEngine->DrawBtn(&Mem, r, NULL, IsOpen(), Enabled());
@@ -962,7 +962,7 @@ void GDropDown::OnPaint(GSurface *pDC)
 	else
 	{
 		LgiWideBorder(pDC, r, IsOpen() ? DefaultSunkenEdge : DefaultRaisedEdge);
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle(&r);
 		if (Focus())
 		{
@@ -980,7 +980,7 @@ void GDropDown::OnPaint(GSurface *pDC)
     double Aspect = (double)r.X() / r.Y();
 	int Cx = Aspect < 1.2 ? r.x1 + ((r.X() - ArrowWidth) >> 1) : r.x2 - (ArrowWidth << 1);
 	int Cy = r.y1 + ((r.Y() - 3) >> 1);
-	pDC->Colour(Enabled() && Popup ? LC_TEXT : LC_LOW, 24);
+	pDC->Colour(Enabled() && Popup ? L_TEXT : L_LOW);
 	if (IsOpen())
 	{
 		Cx++;
@@ -995,7 +995,7 @@ void GDropDown::OnPaint(GSurface *pDC)
 	if (Nm && X() >= 32)
 	{
 		GDisplayString Ds(SysFont, Nm);
-		SysFont->Colour(LC_TEXT, LC_MED);
+		SysFont->Colour(L_TEXT, L_MED);
 		SysFont->Transparent(true);
 		int Offset = IsOpen() ? 1 : 0;
 		Ds.Draw(pDC, (Cx-Ds.X())/2+Offset+r.x1, (Y()-Ds.Y())/2+Offset);

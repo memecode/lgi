@@ -311,7 +311,7 @@ void GProgressPane::OnPaint(GSurface *pDC)
 {
 	GRect r = GetClient();
 	LgiThinBorder(pDC, r, DefaultRaisedEdge);
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Rectangle(&r);
 }
 
@@ -625,7 +625,7 @@ bool GProgressDlg::IsCancelled()
 
 void GProgressDlg::OnPaint(GSurface *pDC)
 {
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Rectangle();
 }
 

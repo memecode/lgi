@@ -105,7 +105,7 @@ void GPaneThrottle::OnPaint(GSurface *pDC)
 	pDC->GetOrigin(x, y);
 
 	LgiThinBorder(pDC, r, DefaultSunkenEdge);
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Rectangle(r.x1, r.y1, r.x1+THROTTLE_TEXT_WIDTH, r.y2);
 
 	if (Slider)
@@ -162,7 +162,7 @@ void GPaneThrottle::OnPaint(GSurface *pDC)
 			strcpy_s(Str, sizeof(Str), "No limit");
 		}
 		
-		SysFont->Colour(0, LC_MED);
+		SysFont->Colour(LColour(L_TEXT), LColour(L_MED));
 		GDisplayString ds(SysFont, Str);
 		ds.Draw(pDC, r.x1+2, r.y1);
 	}
@@ -272,12 +272,12 @@ void GPaneHistory::OnPaint(GSurface *pDC)
 	GRect r(0, 0, X()-1, Y()-1);
 
 	LgiThinBorder(pDC, r, DefaultSunkenEdge);
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Rectangle(r.x1, r.y1, r.x1+HISTORY_TEXT_WIDTH, r.y2);
 
 	char Str[256];
 	sprintf_s(Str, sizeof(Str), "%.1f K/s", Max / 1024.0);
-	SysFont->Colour(0, LC_MED);
+	SysFont->Colour(LColour(L_TEXT), LColour(L_MED));
 	GDisplayString ds(SysFont, Str);
 	ds.Draw(pDC, r.x1+2, r.y1);
 
@@ -304,7 +304,7 @@ void GPaneHistory::OnPaint(GSurface *pDC)
 	}
 	else
 	{
-		pDC->Colour(LC_LOW, 24);
+		pDC->Colour(L_LOW);
 		pDC->Rectangle(&r);
 	}
 }

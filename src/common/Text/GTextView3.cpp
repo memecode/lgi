@@ -413,7 +413,7 @@ GTextView3::GTextView3(	int Id,
 			*Underline = *Font;
 			Underline->Underline(true);
 			if (d->UrlColour.IsValid())
-				Underline->Fore(d->UrlColour.c24());
+				Underline->Fore(d->UrlColour);
 			Underline->Create();
 		}
 		Bold = new GFont;
@@ -625,7 +625,7 @@ void GTextView3::SetFont(GFont *f, bool OwnIt)
 			Underline->Underline(true);
 			Underline->Create();
 			if (d->UrlColour.IsValid())
-				Underline->Fore(d->UrlColour.c24());
+				Underline->Fore(d->UrlColour);
 		}
 
 		if (!Bold)

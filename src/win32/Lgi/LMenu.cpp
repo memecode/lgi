@@ -19,10 +19,18 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 #define LGI_OWNER_DRAW_MENUS
 
+GColour LGetSysColor(int nIndex)
+{
+	GColour c;
+	auto i = GetSysColor(nIndex);
+	c.Rgb(GetRValue(i), GetGValue(i), GetBValue(i));
+	return c;
+}
+
 class LMenuPrivate
 {
 public:
-	COLOUR RootMenuBack;
+	GColour RootMenuBack;
 	
 	LMenuPrivate()
 	{
@@ -50,19 +58,16 @@ public:
 			BOOL Flat = true;
 			SystemParametersInfo(SPI_GETFLATMENU, 0, &Flat, 0);
 			if (Flat)
-				RootMenuBack = GetSysColor(COLOR_MENUBAR);
+				RootMenuBack = LGetSysColor(COLOR_MENUBAR);
 			else
-				RootMenuBack = GetSysColor(COLOR_MENU);
+				RootMenuBack = LGetSysColor(COLOR_MENU);
 			// LgiTrace("NT: flat=%i, menu=%x\n", Flat, RootMenuBack);
 		}
 		else
 		{
-			RootMenuBack = GetSysColor(COLOR_MENU);
+			RootMenuBack = LGetSysColor(COLOR_MENU);
 			// LgiTrace("9x: menu=%x\n", RootMenuBack);
 		}
-		
-		// Convert RootMenuBack to an Lgi colour
-		RootMenuBack = Rgb24(GetRValue(RootMenuBack), GetGValue(RootMenuBack), GetBValue(RootMenuBack));
 	}
 };
 
@@ -546,20 +551,20 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 		// paint a separator
 		int Cy = pDC->Y() / 2;
 
-		pDC->Colour(LC_MENU_BACKGROUND, 24);
+		pDC->Colour(L_MENU_BACKGROUND);
 		pDC->Rectangle();
 
-		pDC->Colour(LC_LOW, 24);
+		pDC->Colour(L_LOW);
 		pDC->Line(0, Cy-1, pDC->X()-1, Cy-1);
 		
-		pDC->Colour(LC_LIGHT, 24);
+		pDC->Colour(L_LIGHT);
 		pDC->Line(0, Cy, pDC->X()-1, Cy);
 	}
 	else
 	{
 		// paint a text menu item
-		COLOUR Fore = Selected ? LC_FOCUS_SEL_FORE : LC_MENU_TEXT;
-		COLOUR Back = BaseMenu ? Menu->d->RootMenuBack : Selected ? LC_FOCUS_SEL_BACK : LC_MENU_BACKGROUND;
+		GColour Fore(Selected ? L_FOCUS_SEL_FORE : L_MENU_TEXT);
+		GColour Back(BaseMenu ? Menu->d->RootMenuBack : (Selected ? LColour(L_FOCUS_SEL_BACK) : LColour(L_MENU_BACKGROUND)));
 		int x = IconX;
 		GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 		int y = (pDC->Y() - Font->GetHeight()) >> 1;
@@ -572,19 +577,19 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 			if (Selected)
 			{
 				LgiThinBorder(pDC, rgn, DefaultSunkenEdge);
-				Fore = LC_MENU_TEXT;
+				Fore = LColour(L_MENU_TEXT);
 				x++;
 				y++;
 			}
 			
 			// always dialog colour
-			pDC->Colour(Back, 24);
+			pDC->Colour(Back);
 			pDC->Rectangle(&rgn);
 		}
 		else
 		{
 			// for a sub menu
-			pDC->Colour(Back, 24);
+			pDC->Colour(Back);
 			pDC->Rectangle();
 		}
 
@@ -595,19 +600,19 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 			// disabled text
 			if (!Selected)
 			{
-				Font->Colour(LC_LIGHT, 0);
+				Font->Colour(L_LIGHT);
 				_PaintText(pDC, x+1, y, r.X());
 			}
 			// else selected... don't draw the highlight
 
 			// "grayed" text...
-			Font->Colour(LC_LOW, 0);
+			Font->Colour(L_LOW);
 			_PaintText(pDC, x, y-1, r.X()-1);
 		}
 		else
 		{
 			// normal coloured text
-			Font->Colour(Fore, 0);
+			Font->Colour(Fore, Back);
 			_PaintText(pDC, x, y-1, r.X());
 		}
 
@@ -620,7 +625,7 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 			int x = 4;
 			int y = 6;
 			
-			pDC->Colour(Fore, 24);
+			pDC->Colour(Fore);
 			pDC->Line(x, y, x+2, y+2);
 			pDC->Line(x+2, y+2, x+6, y-2);
 			y++;
@@ -634,8 +639,7 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 				_Icon >= 0)
 		{
 			// it's an icon!
-			GColour Bk(Back, 24);
-			ImgLst->Draw(pDC, 0, 0, _Icon, Bk);
+			ImgLst->Draw(pDC, 0, 0, _Icon, Back);
 		}
 	}
 }

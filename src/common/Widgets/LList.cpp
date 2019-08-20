@@ -452,7 +452,7 @@ void LListItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 
 		if (c->InDrag())
 		{
-			pDC->Colour(DragColumnColour, 24);
+			pDC->Colour(DragColumnColour);
 			pDC->Rectangle(&ng);
 		}
 		else
@@ -521,7 +521,7 @@ void LListItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 
 			if (GridLines())
 			{
-				pDC->Colour(LC_LOW, 24);
+				pDC->Colour(L_LOW);
 				pDC->Line(Ctx.x1, Ctx.y2, Ctx.x2, Ctx.y2);
 				pDC->Line(Ctx.x2, Ctx.y1, Ctx.x2, Ctx.y2);
 			}
@@ -2486,7 +2486,7 @@ void LList::OnPaint(GSurface *pDC)
 	
 	if (Lock(_FL))
 	{
-		COLOUR Back = Enabled() ? LC_WORKSPACE : LC_MED;
+		GColour Back(Enabled() ? L_WORKSPACE : L_MED);
 		PourAll();
 		
 		#if LList_ONPAINT_PROFILE
@@ -2522,8 +2522,8 @@ void LList::OnPaint(GSurface *pDC)
 		int n = FirstVisible;
 		int LastY = r.y1;
 		GCss::ColorDef Fill;
-		COLOUR SelFore = Focus() ? LC_FOCUS_SEL_FORE : LC_NON_FOCUS_SEL_FORE;
-		COLOUR SelBack = Focus() ? LC_FOCUS_SEL_BACK : (Enabled() ? LC_NON_FOCUS_SEL_BACK : LC_MED);
+		GColour SelFore(Focus() ? L_FOCUS_SEL_FORE : L_NON_FOCUS_SEL_FORE);
+		GColour SelBack(Focus() ? L_FOCUS_SEL_BACK : (Enabled() ? L_NON_FOCUS_SEL_BACK : L_MED));
 		int LastSelected = -1;
 
 		GItem::ItemPaintCtx Ctx;
@@ -2540,13 +2540,13 @@ void LList::OnPaint(GSurface *pDC)
 				{
 					if ((LastSelected = i->Select()))
 					{
-						Ctx.Fore.Set(SelFore, 24);
-						Ctx.Back.Set(SelBack, 24);
+						Ctx.Fore = SelFore;
+						Ctx.Back = SelBack;
 					}
 					else
 					{
-						Ctx.Fore.Set(LC_TEXT, 24);
-						Ctx.Back.Set(Back, 24);
+						Ctx.Fore = LColour(L_TEXT);
+						Ctx.Back = Back;
 					}
 				}
 
@@ -2576,7 +2576,7 @@ void LList::OnPaint(GSurface *pDC)
 			}
 		}
 		
-		pDC->Colour(Back, 24);
+		pDC->Colour(Back);
 		for (GRect *w=Rgn.First(); w; w=Rgn.Next())
 		{
 			pDC->Rectangle(w);

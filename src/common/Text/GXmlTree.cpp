@@ -418,7 +418,11 @@ void GXmlTag::Swap(GXmlTag &t)
 	LSwap(Parent, t.Parent);
 
 	Attr.Swap(t.Attr);
-	Children.Swap(t.Children);	
+	Children.Swap(t.Children);
+	for (auto c: Children)
+		c->Parent = this;
+	for (auto c: t.Children)
+		c->Parent = &t;
 }
 
 bool GXmlTag::Copy(GXmlTag &t, bool Deep)

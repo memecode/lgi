@@ -2985,7 +2985,7 @@ void EmojiMenu::OnPaint(GSurface *pDC)
 				pDC->Colour(LC_LIGHT, 24);
 				pDC->Rectangle(&p.Btn);
 			}
-			SysFont->Fore(LC_TEXT);
+			SysFont->Fore(L_TEXT);
 			SysFont->Transparent(true);
 			Ds.Draw(pDC, p.Btn.x1 + ((p.Btn.X()-Ds.X())>>1), p.Btn.y1 + ((p.Btn.Y()-Ds.Y())>>1));
 		}
@@ -3001,7 +3001,7 @@ void EmojiMenu::OnPaint(GSurface *pDC)
 	{
 		GRect c = GetClient();
 		GDisplayString Ds(SysFont, "Loading...");
-		SysFont->Colour(LC_TEXT, LC_MED);
+		SysFont->Colour(L_TEXT, L_MED);
 		SysFont->Transparent(true);
 		Ds.Draw(pDC, (c.X()-Ds.X())>>1, (c.Y()-Ds.Y())>>1);
 	}

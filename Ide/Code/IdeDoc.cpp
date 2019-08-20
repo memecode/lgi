@@ -137,7 +137,7 @@ void EditTray::OnPaint(GSurface *pDC)
 	GRect c = GetClient();
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle();
-	SysFont->Colour(LC_TEXT, LC_MED);
+	SysFont->Colour(L_TEXT, L_MED);
 	SysFont->Transparent(true);
 		
 	GString s;

@@ -6530,7 +6530,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 				#define FontColour(InSelection) \
 					f->Transparent(!InSelection && !IsEditor); \
 					if (InSelection) \
-						f->Colour(LC_FOCUS_SEL_FORE, LC_FOCUS_SEL_BACK); \
+						f->Colour(L_FOCUS_SEL_FORE, L_FOCUS_SEL_BACK); \
 					else \
 					{ \
 						GColour bk(back.IsTransparent() ? GColour(LC_WORKSPACE, 24) : back);			\

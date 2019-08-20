@@ -207,8 +207,8 @@ int GPanel::OnNotify(GViewI *Ctrl, int Flags)
 void GPanel::OnPaint(GSurface *pDC)
 {
 	GRect r = GetClient();
-	GColour cFore = StyleColour(GCss::PropColor, GColour(LC_TEXT, 24));
-	GColour cBack = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
+	GColour cFore = StyleColour(GCss::PropColor, LColour(L_TEXT));
+	GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 
 	pDC->Colour(cBack);
 	pDC->Rectangle(&r);
@@ -230,11 +230,11 @@ void GPanel::OnPaint(GSurface *pDC)
 		ThumbPos.ZOff(8, 8);
 		ThumbPos.Offset(r.x1 + 3, r.y1 + 3);
 		
-		pDC->Colour(LC_LOW, 24);
+		pDC->Colour(L_LOW);
 		pDC->Box(&ThumbPos);
-		pDC->Colour(LC_WHITE, 24);
+		pDC->Colour(L_WHITE);
 		pDC->Rectangle(ThumbPos.x1+1, ThumbPos.y1+1, ThumbPos.x2-1, ThumbPos.y2-1);
-		pDC->Colour(LC_SHADOW, 24);
+		pDC->Colour(L_SHADOW);
 		pDC->Line(	ThumbPos.x1+2,
 					ThumbPos.y1+4,
 					ThumbPos.x1+6,

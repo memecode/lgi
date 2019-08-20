@@ -1449,7 +1449,7 @@ void GRichTextPriv::PaintBtn(GSurface *pDC, GRichTextEdit::RectType t)
 	bool Down = (v.Type == GV_BOOL && v.Value.Bool) ||
 				(BtnState[t].IsPress && BtnState[t].Pressed && BtnState[t].MouseOver);
 
-	SysFont->Colour(LC_TEXT, BtnState[t].MouseOver ? LC_LIGHT : LC_MED);
+	SysFont->Colour(L_TEXT, BtnState[t].MouseOver ? L_LIGHT : L_MED);
 	SysFont->Transparent(false);
 
 	GColour Low(96, 96, 96);
