@@ -229,7 +229,7 @@ struct GGraphPriv
 		int64 int64_inc = 0;
 		int date_inc = 1;
 
-		SysFont->Colour(LC_TEXT, LC_WORKSPACE);
+		SysFont->Colour(L_TEXT, L_WORKSPACE);
 
 		GArray<GVariant> Values;
 		while (Loop)
