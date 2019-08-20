@@ -174,7 +174,7 @@ void GItemContainer::PaintColumnHeadings(GSurface *pDC)
 			else
 			{
 				LgiWideBorder(ColDC, cr, DefaultRaisedEdge);
-				ColDC->Colour(LC_MED, 24);
+				ColDC->Colour(LColour(L_MED));
 				ColDC->Rectangle(&cr);
 			}
 			#endif
@@ -772,13 +772,14 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 {
 	if (!d->Drag)
 	{
+		auto cMed = LColour(L_MED);
 		int Off = d->Down ? 1 : 0;
 		int Mx = r.x1 + 8, My = r.y1 + ((r.Y() - 8) / 2);
 		if (d->cIcon)
 		{
 			if (FillBackground)
 			{
-				pDC->Colour(LC_MED, 24);
+				pDC->Colour(cMed);
 				pDC->Rectangle(&r);
 			}
 
@@ -795,7 +796,7 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 		}
 		else if (d->cImage >= 0 && d->Parent)
 		{
-			GColour Background(LC_MED, 24);
+			GColour Background = cMed;
 			if (FillBackground)
 			{
 				pDC->Colour(Background);
@@ -836,7 +837,7 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 			}
 
 			f->Transparent(!FillBackground);
-			f->Colour(LC_TEXT, LC_MED);
+			f->Colour(LColour(L_TEXT), cMed);
 			int ty = d->Txt->Y();
 			int ry = r.Y();
 			int y = r.y1 + ((ry - ty) >> 1);
@@ -851,7 +852,7 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 		{
 			if (FillBackground)
 			{
-				pDC->Colour(LC_MED, 24);
+				pDC->Colour(cMed);
 				pDC->Rectangle(&r);
 			}
 		}

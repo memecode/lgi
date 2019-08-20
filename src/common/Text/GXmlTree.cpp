@@ -401,6 +401,26 @@ void GXmlTag::Empty(bool Deep)
 		EmptyChildren();
 }
 
+void GXmlTag::Swap(GXmlTag &t)
+{
+	Allocator.Swap(t.Allocator);
+	LSwap(Write, t.Write);
+	LSwap(Tag, t.Tag);
+	LSwap(Content, t.Content);
+
+	// I think this is right... but IDK
+	ssize_t AIdx = Parent ? Parent->Children.IndexOf(this) : -1;
+	if (AIdx >= 0)
+		Parent->Children[AIdx] = &t;
+	ssize_t BIdx = t.Parent ? t.Parent->Children.IndexOf(&t) : -1;
+	if (BIdx >= 0)
+		t.Parent->Children[BIdx] = this;
+	LSwap(Parent, t.Parent);
+
+	Attr.Swap(t.Attr);
+	Children.Swap(t.Children);	
+}
+
 bool GXmlTag::Copy(GXmlTag &t, bool Deep)
 {
 	Empty(Deep);

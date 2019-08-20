@@ -116,6 +116,8 @@ public:
 	void EmptyAttributes();
 	/// Frees all child tags
 	void EmptyChildren();
+	/// Swaps object contents
+	void Swap(GXmlTag &t);
 
 	/// \return true if the tag is 's'
 	bool IsTag(const char *s) { return Tag && s ? _stricmp(Tag, s) == 0 : false; }

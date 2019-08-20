@@ -66,6 +66,11 @@ public:
 		Ptr = 0;
 	}
 
+	void Swap(GAutoPtr<X,Arr> &p)
+	{
+		LSwap(Ptr, p.Ptr);
+	}
+
 	operator X*() const
 	{
 		return Ptr;

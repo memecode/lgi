@@ -582,6 +582,13 @@ public:
 
 	Store3State GetState() { return State; }
 
+	void Swap(DIterator<TPub, TPriv, TStore> &di)
+	{
+		LSwap(Cur, di.Cur);
+		LSwap(State, di.State);
+		a.Swap(di.a);
+	}
+
 	TPub *Create(GDataStoreI *Store)
 	{
 		LgiAssert(State == Store3Loaded);

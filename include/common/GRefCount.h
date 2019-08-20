@@ -56,6 +56,11 @@ public:
 		Empty();
 	}
 
+	void Swap(GAutoRefPtr<T> &p)
+	{
+		LSwap(Ptr, p.Ptr);
+	}
+
 	operator T*()
 	{
 		return Ptr;

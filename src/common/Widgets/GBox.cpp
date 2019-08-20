@@ -223,7 +223,7 @@ void GBox::OnPaint(GSurface *pDC)
 	GCssTools tools(GetCss(), GetFont());
 	cli = tools.PaintBorderAndPadding(pDC, cli);
 
-	GColour cBack = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
+	GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 
 	size_t ChildViews = Children.Length();
 	if (ChildViews == 0)

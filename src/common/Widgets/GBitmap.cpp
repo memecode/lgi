@@ -120,7 +120,7 @@ void GBitmap::SetDC(GSurface *pNewDC)
 		pDC = new GMemDC;
 		if (pDC && pDC->Create(pNewDC->X(), pNewDC->Y(), GdcD->GetColourSpace()))
 		{
-			GColour Bk(LC_WORKSPACE, 24);
+			GColour Bk = LColour(L_WORKSPACE);
 			if (GetCss())
 			{
 				GCss::ColorDef b = GetCss()->BackgroundColor();
@@ -166,7 +166,7 @@ GMessage::Result GBitmap::OnEvent(GMessage *Msg)
 
 void GBitmap::OnPaint(GSurface *pScreen)
 {
-	GColour cBack = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
+	GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 
 	GRect a = GetClient();
 	pScreen->Colour(cBack);
