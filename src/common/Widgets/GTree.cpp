@@ -639,7 +639,7 @@ void GTreeItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 				if (Ctx.Columns > 1)
 					Ctx.pDC->Colour(Ctx.Back);
 				else
-					Ctx.pDC->Colour(LC_WORKSPACE, 24);
+					Ctx.pDC->Colour(L_WORKSPACE);
 				Ctx.pDC->Rectangle(&r);
 			}
 		}
@@ -856,7 +856,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 
 	// background up to text
 	GSurface *&pDC = Ctx.pDC;
-	pDC->Colour(LC_WORKSPACE, 24);
+	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle(0, d->Pos.y1, (d->Depth*TREE_BLOCK)+TREE_BLOCK, d->Pos.y2);
 
 	// draw trunk
@@ -864,8 +864,8 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	Pos.x2 = Pos.x1 + Ctx.ColPx[0] - 1;
 
 	int x = 0;
-	COLOUR Lines = LC_MED;
-	pDC->Colour(Lines, 24);
+	GColour Lines(L_MED);
+	pDC->Colour(Lines);
 	if (Tree->d->JoiningLines)
 	{
 		for (int i=0; i<d->Depth; i++)
@@ -894,11 +894,11 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 			case GTree::TreePlus:
 			{
 				// plus/minus symbol
-				pDC->Colour(LC_LOW, 24);
+				pDC->Colour(L_LOW);
 				pDC->Box(&d->Thumb);
-				pDC->Colour(LC_WHITE, 24);
+				pDC->Colour(L_WHITE);
 				pDC->Rectangle(d->Thumb.x1+1, d->Thumb.y1+1, d->Thumb.x2-1, d->Thumb.y2-1);
-				pDC->Colour(LC_SHADOW, 24);
+				pDC->Colour(L_SHADOW);
 				pDC->Line(	d->Thumb.x1+2,
 							d->Thumb.y1+4,
 							d->Thumb.x1+6,
@@ -907,7 +907,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 				if (!d->Open)
 				{
 					// not open, so draw the cross bar making the '-' into a '+'
-					pDC->Colour(LC_SHADOW, 24);
+					pDC->Colour(L_SHADOW);
 					pDC->Line(	d->Thumb.x1+4,
 								d->Thumb.y1+2,
 								d->Thumb.x1+4,
@@ -918,7 +918,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 			case GTree::TreeTriangle:
 			{
 				// Triangle style expander
-				pDC->Colour(LC_LOW, 24);
+				pDC->Colour(L_LOW);
 
 				int Off = 2;
 				if (d->Open)
@@ -947,7 +947,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 			}
 		}
 
-		pDC->Colour(Lines, 24);
+		pDC->Colour(Lines);
 
 		if (Tree->d->JoiningLines)
 		{
@@ -970,7 +970,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	else if (Tree->d->JoiningLines)
 	{
 		// leaf node
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		if (d->Last)
 		{
 			pDC->Rectangle(x + 8, Pos.y1, x + 8, cy);
@@ -992,7 +992,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 		d->Icon.ZOff(Lst->TileX() + Tree->d->IconTextGap - 1, Pos.Y() - 1);
 		d->Icon.Offset(x, Pos.y1);
 
-		GColour Background(LC_WORKSPACE, 24);
+		GColour Background(L_WORKSPACE);
 		pDC->Colour(Background);
 
 		if (Tree->d->IconCache)
@@ -1037,7 +1037,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	}
 	
 	// background after text
-	pDC->Colour(LC_WORKSPACE, 24);
+	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle(x, Pos.y1, MAX(Tree->X(), Tree->d->Limit.x), Pos.y2);
 
 	// children
@@ -1048,8 +1048,8 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 			Tree->d->LineFlags[0] |= 1 << d->Depth;
 		}
 
-		COLOUR SelFore = Tree->Focus() ? LC_FOCUS_SEL_FORE : LC_NON_FOCUS_SEL_FORE;
-		COLOUR SelBack = Tree->Focus() ? LC_FOCUS_SEL_BACK : LC_NON_FOCUS_SEL_BACK;
+		GColour SelFore(Tree->Focus() ? L_FOCUS_SEL_FORE : L_NON_FOCUS_SEL_FORE);
+		GColour SelBack(Tree->Focus() ? L_FOCUS_SEL_BACK : L_NON_FOCUS_SEL_BACK);
 		List<GTreeItem>::I it = Items.begin();
 		for (GTreeItem *i=*it; i; i=*++it)
 		{
@@ -1057,14 +1057,11 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 
 			// Foreground
 			GCss::ColorDef Fill = i->GetCss(true)->Color();
-			Ctx.Fore.Set(Fill.Type == GCss::ColorRgb ? Rgb32To24(Fill.Rgb32) : (IsSelected ? SelFore : LC_TEXT), 24);
+			Ctx.Fore = Fill.Type == GCss::ColorRgb ? Fill : (IsSelected ? SelFore : LColour(L_TEXT));
 
 			// Background	
 			Fill = i->GetCss()->BackgroundColor();
-			Ctx.Back.Set(Fill.Type == GCss::ColorRgb ?
-						Rgb32To24(Fill.Rgb32) :
-						(IsSelected ? SelBack : LC_WORKSPACE),
-						24);
+			Ctx.Back = Fill.Type == GCss::ColorRgb ? Fill : (IsSelected ? SelBack : LColour(L_WORKSPACE));
 
 			i->OnPaint(Ctx);
 		}
@@ -1835,7 +1832,7 @@ void GTree::OnPaint(GSurface *pDC)
 				d->IconCache->Palette(new GPalette(GdcD->GetGlobalColour()->GetPalette()));
 			}
 
-			GColour Background(LC_WORKSPACE, 24);
+			GColour Background(L_WORKSPACE);
 			d->IconCache->Colour(Background);
 			d->IconCache->Rectangle();
 			d->IconCache->Op(GDC_ALPHA);
@@ -1874,8 +1871,8 @@ void GTree::OnPaint(GSurface *pDC)
 		ColPx[0] = rItems.X();
 	}
 	Ctx.ColPx = &ColPx[0];	
-	COLOUR SelFore = Focus() ? LC_FOCUS_SEL_FORE : LC_NON_FOCUS_SEL_FORE;
-	COLOUR SelBack = Focus() ? LC_FOCUS_SEL_BACK : LC_NON_FOCUS_SEL_BACK;
+	GColour SelFore(Focus() ? L_FOCUS_SEL_FORE : L_NON_FOCUS_SEL_FORE);
+	GColour SelBack(Focus() ? L_FOCUS_SEL_BACK : L_NON_FOCUS_SEL_BACK);
 
 	// layout items
 	if (d->LayoutDirty)
@@ -1892,11 +1889,11 @@ void GTree::OnPaint(GSurface *pDC)
 
 		// Foreground
 		GCss::ColorDef Fill = i->GetCss(true)->Color();
-		Ctx.Fore.Set(Fill.Type == GCss::ColorRgb ? Rgb32To24(Fill.Rgb32) : (IsSelected ? SelFore : LC_TEXT), 24);
+		Ctx.Fore = Fill.Type == GCss::ColorRgb ? Fill : (IsSelected ? SelFore : LColour(L_TEXT));
 
 		// Background	
 		Fill = i->GetCss()->BackgroundColor();
-		Ctx.Back.Set(Fill.Type == GCss::ColorRgb ? Rgb32To24(Fill.Rgb32) : (IsSelected ? SelBack : LC_WORKSPACE), 24);
+		Ctx.Back = Fill.Type == GCss::ColorRgb ? Fill : (IsSelected ? SelBack : LColour(L_WORKSPACE));
 
 		i->OnPaint(Ctx);
 	}
@@ -1905,7 +1902,7 @@ void GTree::OnPaint(GSurface *pDC)
 	if (d->Limit.y-s.y < rItems.Y())
 	{
 		// paint after items
-		pDC->Colour(LC_WORKSPACE, 24);
+		pDC->Colour(L_WORKSPACE);
 		pDC->Rectangle(rItems.x1, d->Limit.y - s.y, rItems.x2, rItems.y2);
 	}
 }

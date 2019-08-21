@@ -133,7 +133,7 @@ GMessage::Result GCheckBox::OnEvent(GMessage *Msg)
 		case WM_ERASEBKGND:
 		{
 			GScreenDC Dc((HDC)Msg->A(), _View);
-			GColour cBack = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24), 10);
+			GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED), 10);
 			Dc.Colour(cBack);
 			Dc.Rectangle();
 			return true;

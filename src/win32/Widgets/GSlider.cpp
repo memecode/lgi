@@ -118,7 +118,7 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 					SendMessage(Handle(), TBM_GETTHUMBRECT, 0, (LPARAM)&rc);
 					GRect t = rc;
 					LgiWideBorder(&dc, t, DefaultRaisedEdge);
-					dc.Colour(LC_MED, 24);
+					dc.Colour(L_MED);
 					dc.Rectangle(&t);
 
 					if (GetFocus() == Handle())

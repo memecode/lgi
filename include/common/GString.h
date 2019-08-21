@@ -14,12 +14,17 @@
 LgiExtern char WhiteSpace[];
 
 // Defines
-#ifndef ToUpper
-#define ToUpper(c)		((c) >= 'a' && (c) <= 'z' ? (c)-'a'+'A' : (c))
-#endif
-#ifndef ToLower
-#define ToLower(c)		((c) >= 'A' && (c) <= 'Z' ? (c)-'A'+'a' : (c))
-#endif
+template<typename C>
+C ToUpper(C c)
+{	
+	return (c) >= 'a' && (c) <= 'z' ? (c)-'a'+'A' : (c);
+}
+
+template<typename C>
+C ToLower(C c)
+{
+	return (c) >= 'A' && (c) <= 'Z' ? (c)-'A'+'a' : (c);
+}
 
 // Functions
 template<typename Char>

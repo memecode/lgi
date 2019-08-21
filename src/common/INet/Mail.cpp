@@ -312,10 +312,6 @@ char *DecodeQuotedPrintableStr(char *Str, ssize_t Len)
 	return Str;
 }
 
-#ifndef ToUpper
-#define ToUpper(c)						( ((c)>='a'&&(c)<='z')?(c)-'a'+'A':(c) )
-#endif
-
 char *DecodeRfc2047(char *Str)
 {
 	if (!Str)

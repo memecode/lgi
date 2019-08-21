@@ -509,7 +509,7 @@ bool GEdit::SysEmptyText()
 	if (Empty)
 	{
 		// Show empty text
-		GColour c(LC_LOW, 24);
+		GColour c(L_LOW);
 		if (!d->InEmptyMode)
 		{
 			d->NonEmptyColor = GetCss(true)->Color();

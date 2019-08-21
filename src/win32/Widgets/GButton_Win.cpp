@@ -325,7 +325,7 @@ void GButton::OnPaint(GSurface *pDC)
 	if (!_View)
 	{
 		// Fall back drawing code
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle();
 		pDC->Colour(GColour::Red);
 		GRect c = GetClient();
