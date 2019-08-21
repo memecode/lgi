@@ -160,7 +160,7 @@ void GEdit::OnPaint(GSurface *pDC)
     {
         GFont *f = GetFont();
         GDisplayString ds(f, d->EmptyTxt);
-        f->Colour(LC_MED, LC_WORKSPACE);
+        f->Colour(L_MED, L_WORKSPACE);
         f->Transparent(true);
         ds.Draw(pDC, 2, 2);
     }

@@ -501,7 +501,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *AppName, GAppArguments *ObjArgs)
 	d->GdcSystem = new GdcDevice;
 
 	srand(LgiCurrentTime());
-	LgiInitColours();
+	GColour::OnChange();
 
 	SetAppArgs(AppArgs);
 	MouseHook = new GMouseHook;

@@ -317,14 +317,6 @@ public:
 	GAutoString Params;
 };
 
-template<typename T>
-void LSwap(T &a, T &b)
-{
-	T tmp = a;
-	a = b;
-	b = tmp;
-}
-
 template<typename RESULT, typename CHAR>
 RESULT LHash(const CHAR *v, ssize_t l, bool Case)
 {

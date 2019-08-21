@@ -258,6 +258,16 @@ LgiFunc void							_lgi_assert(bool b, const char *test, const char *file, int l
 #define CountOf(array)					(sizeof(array)/sizeof(array[0]))
 #endif
 
+#ifdef __cplusplus
+template<typename T>
+void LSwap(T &a, T &b)
+{
+	T tmp = a;
+	a = b;
+	b = tmp;
+}
+#endif
+
 #ifndef MEMORY_DEBUG
 
 	#define DeleteObj(obj)				if (obj) { delete obj; obj = 0; }

@@ -2302,16 +2302,26 @@ public:
 	struct DbgDs : public GDisplayString
 	{
 	public:
-		COLOUR c;
+		GColour c;
 
-		DbgDs(GFont *f, const char *s, COLOUR col) : GDisplayString(f, s)
+		DbgDs(GFont *f, const char *s, GColour col) : GDisplayString(f, s)
 		{
 			c = col;
 		}
 
-		DbgDs(GFont *f, const char16 *s, COLOUR col) : GDisplayString(f, s)
+		DbgDs(GFont *f, const char *s, LSystemColour col) : GDisplayString(f, s)
+		{
+			c = LColour(col);
+		}
+
+		DbgDs(GFont *f, const char16 *s, GColour col) : GDisplayString(f, s)
 		{
 			c = col;
+		}
+
+		DbgDs(GFont *f, const char16 *s, LSystemColour col) : GDisplayString(f, s)
+		{
+			c = LColour(col);
 		}
 	};
 
@@ -2356,45 +2366,45 @@ public:
 			{
 				DbgInf *Line = new DbgInf(t);
 				sprintf_s(m, sizeof(m), "<%s>", t->Tag?t->Tag.Get():"CONTENT");
-				Line->Ds.Add(ds = new DbgDs(SysFont, m, LC_TEXT));
+				Line->Ds.Add(ds = new DbgDs(SysFont, m, L_TEXT));
 
 				char16 *Txt = t->Text();
 				if (ValidStrW(Txt))
-					Line->Ds.Add(ds = new DbgDs(SysFont, Txt, t == Selection ? Rgb24(0, 222, 0) : LC_TEXT));
+					Line->Ds.Add(ds = new DbgDs(SysFont, Txt, t == Selection ? GColour(0, 222, 0) : LColour(L_TEXT)));
 				else if (Txt)
-					Line->Ds.Add(ds = new DbgDs(SysFont, "[empty-str]", t == Selection ? Rgb24(0, 222, 0) : Rgb24(0xdd, 0xdd, 0xdd)));
+					Line->Ds.Add(ds = new DbgDs(SysFont, "[empty-str]", t == Selection ? GColour(0, 222, 0) : GColour(0xdd, 0xdd, 0xdd)));
 				else if (t->TagId == CONTENT)
-					Line->Ds.Add(ds = new DbgDs(SysFont, "[null-ptr]", t == Selection ? Rgb24(0, 222, 0) : Rgb24(255, 0, 0)));
+					Line->Ds.Add(ds = new DbgDs(SysFont, "[null-ptr]", t == Selection ? GColour(0, 222, 0) : GColour(255, 0, 0)));
 				Inf.AddAt(0, Line);
 			}
 
 			DbgInf *Cur = new DbgInf(Cursor);
 			GAutoString CursorText(WideToUtf8(Cursor->Text(), Cursor->Cursor));
 			sprintf_s(m, sizeof(m), "<%s>%s", Cursor->Tag?Cursor->Tag.Get():"CONTENT", CursorText.Get());
-			Cur->Ds.Add(ds = new DbgDs(SysFont, m, Rgb24(0, 0, 255)));
-			Cur->Ds.Add(ds = new DbgDs(SysFont, "[cursor]", Rgb24(255, 0, 0)));
-			Cur->Ds.Add(ds = new DbgDs(SysFont, Cursor->Text()+Cursor->Cursor, Rgb24(0, 0, 255)));
+			Cur->Ds.Add(ds = new DbgDs(SysFont, m, GColour(0, 0, 255)));
+			Cur->Ds.Add(ds = new DbgDs(SysFont, "[cursor]", GColour(255, 0, 0)));
+			Cur->Ds.Add(ds = new DbgDs(SysFont, Cursor->Text()+Cursor->Cursor, GColour(0, 0, 255)));
 			int CursorLine = Inf.Length();
 			Inf.AddAt(Inf.Length(), Cur);
 
-			SysFont->Fore(LC_TEXT);
+			SysFont->Fore(L_TEXT);
 			for (cy = y, t = NextTag(Cursor); t && cy < pDC->Y(); t = NextTag(t))
 			{
 				DbgInf *Line = new DbgInf(t);
 				sprintf_s(m, sizeof(m), "<%s>", t->Tag?t->Tag.Get():"CONTENT");
-				Line->Ds.Add(ds = new DbgDs(SysFont, m, LC_TEXT));
+				Line->Ds.Add(ds = new DbgDs(SysFont, m, L_TEXT));
 
 				char16 *Txt = t->Text();
 				if (ValidStrW(Txt))
-					Line->Ds.Add(ds = new DbgDs(SysFont, Txt, t == Selection ? Rgb24(0, 222, 0) : LC_TEXT));
+					Line->Ds.Add(ds = new DbgDs(SysFont, Txt, t == Selection ? GColour(0, 222, 0) : LColour(L_TEXT)));
 				else if (Txt)
-					Line->Ds.Add(ds = new DbgDs(SysFont, "[empty-str]", t == Selection ? Rgb24(0, 222, 0) : Rgb24(0xdd, 0xdd, 0xdd)));
+					Line->Ds.Add(ds = new DbgDs(SysFont, "[empty-str]", t == Selection ? GColour(0, 222, 0) : GColour(0xdd, 0xdd, 0xdd)));
 				else if (t->TagId == CONTENT)
-					Line->Ds.Add(ds = new DbgDs(SysFont, "[null-ptr]", t == Selection ? Rgb24(0, 222, 0) : Rgb24(255, 0, 0)));
+					Line->Ds.Add(ds = new DbgDs(SysFont, "[null-ptr]", t == Selection ? GColour(0, 222, 0) : GColour(255, 0, 0)));
 				Inf.AddAt(Inf.Length(), Line);
 			}
 
-			pDC->Colour(LC_WORKSPACE, 24);
+			pDC->Colour(L_WORKSPACE);
 			pDC->Rectangle(0, 0, pDC->X(), cy-1);
 
 			cy = (pDC->Y() / 2 - 10) - (SysFont->GetHeight() * CursorLine);
@@ -2403,7 +2413,7 @@ public:
 				DbgInf *Line = Inf[i];
 				int x = Line->Depth * 12;
 				int cy2 = cy + SysFont->GetHeight() - 1;
-				pDC->Colour(LC_WORKSPACE, 24);
+				pDC->Colour(L_WORKSPACE);
 				pDC->Rectangle(0, cy, x-1, cy2);
 				pDC->Colour(Rgb24(0xdd, 0xdd, 0xdd), 24);
 				for (int a=0; a<Line->Depth; a++)
@@ -2415,20 +2425,20 @@ public:
 				for (unsigned n=0; n<Line->Ds.Length(); n++)
 				{
 					DbgDs *ds = Line->Ds[n];
-					SysFont->Colour(ds->c, LC_WORKSPACE);
+					SysFont->Colour(ds->c, LColour(L_WORKSPACE));
 					ds->Draw(pDC, x, cy);
 					x += ds->X();
 					LgiTrace("Deleting %p\n", ds);
 					DeleteObj(ds);
 
-					pDC->Colour(LC_WORKSPACE, 24);
+					pDC->Colour(L_WORKSPACE);
 					pDC->Rectangle(x, cy, pDC->X(), cy2);
 				}
 				cy = cy2 + 1;
 				DeleteObj(Line);
 			}
 
-			pDC->Colour(LC_WORKSPACE, 24);
+			pDC->Colour(L_WORKSPACE);
 			pDC->Rectangle(0, cy, pDC->X(), pDC->Y());
 		}
 		else

@@ -585,7 +585,7 @@ void GCombo::OnPaint(GSurface *pDC)
 
 			auto f = Ds->GetFont();
 			f->Transparent(true);
-			f->Fore(LC_TEXT);
+			f->Fore(L_TEXT);
 			Ds->Draw(pDC, Txt.x1, y);
 			
 			#if 0
@@ -647,7 +647,7 @@ void GCombo::OnPaint(GSurface *pDC)
 			Cy--;
 		}
 		r.x2 = d->Arrow.x1 - 1;
-		pDC->Colour(LC_LOW, 24);
+		pDC->Colour(L_LOW);
 		pDC->Line(r.x2, r.y1+1, r.x2, r.y2-1);
 		r.x2--;
 
@@ -661,18 +661,18 @@ void GCombo::OnPaint(GSurface *pDC)
 				if (Enabled())
 				{
 					bool f = Focus();
-					SysFont->Colour(f ? LC_FOCUS_SEL_FORE : LC_TEXT, f ? LC_FOCUS_SEL_BACK : LC_MED);
+					SysFont->Colour(f ? L_FOCUS_SEL_FORE : L_TEXT, f ? L_FOCUS_SEL_BACK : L_MED);
 					SysFont->Transparent(false);
 					ds->Draw(pDC, r.x1, r.y1, &r);
 				}
 				else
 				{
 					SysFont->Transparent(false);
-					SysFont->Colour(GColour(LC_LIGHT,24), cBack);
+					SysFont->Colour(LColour(L_LIGHT), cBack);
 					ds->Draw(pDC, r.x1+1, r.y1+1, &r);
 
 					SysFont->Transparent(true);
-					SysFont->Colour(LC_LOW, 0);
+					SysFont->Colour(L_LOW);
 					ds->Draw(pDC, r.x1, r.y1, &r);
 				}
 			}

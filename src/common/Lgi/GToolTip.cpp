@@ -119,15 +119,15 @@ public:
 	void OnPaint(GSurface *pDC)
 	{
 		GRect c = GetClient();
-		COLOUR b = LC_TOOL_TIP;
+		auto b = L_TOOL_TIP;
 		
 		// Draw border
-		pDC->Colour(LC_BLACK, 24);
+		pDC->Colour(L_BLACK);
 		pDC->Box(&c);
 		c.Size(1, 1);
 		
 		// Draw text interior
-		SysFont->Colour(LC_TEXT, b);
+		SysFont->Colour(L_TEXT, b);
 		SysFont->Transparent(false);
 
 		if (s)

@@ -713,13 +713,13 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 	else
 	{
 		// Paint a text menu item
-		COLOUR Fore = LC_TEXT; // Selected ? LC_SEL_TEXT : LC_TEXT;
-		COLOUR Back = Selected ? LC_HIGH : LC_MED; // Selected ? LC_SELECTION : LC_MED;
+		GColour Fore(L_TEXT);
+		GColour Back(Selected ? L_HIGH : L_MED);
 		int x = IconX;
 		int y = 1;
 		
 		// For a submenu
-		pDC->Colour(Back, 24);
+		pDC->Colour(Back);
 		pDC->Rectangle();
 		
 		// Draw the text on top
@@ -730,19 +730,19 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 			// Disabled text
 			if (!Selected)
 			{
-				Font->Colour(LC_LIGHT, 0);
+				Font->Colour(L_LIGHT);
 				_PaintText(pDC, x+1, y+1, r.X());
 			}
 			// Else selected... don't draw the hilight
 			
 			// "greyed" text...
-			Font->Colour(LC_LOW, 0);
+			Font->Colour(L_LOW);
 			_PaintText(pDC, x, y, r.X());
 		}
 		else
 		{
 			// Normal coloured text
-			Font->Colour(Fore, 0);
+			Font->Fore(Fore);
 			_PaintText(pDC, x, y, r.X());
 		}
 		
@@ -755,7 +755,7 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 			int x = 4;
 			int y = 6;
 			
-			pDC->Colour(Fore, 24);
+			pDC->Colour(Fore);
 			pDC->Line(x, y, x+2, y+2);
 			pDC->Line(x+2, y+2, x+6, y-2);
 			y++;

@@ -248,7 +248,7 @@ void GLayout::OnNcPaint(GSurface *pDC, GRect &r)
 		// Draw square at the end of each scroll bar
 		GRect s(	VScroll->GetPos().x1, HScroll->GetPos().y1,
 					VScroll->GetPos().x2, HScroll->GetPos().y2);
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle(&s);
 	}
 }

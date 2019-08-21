@@ -481,13 +481,24 @@ public:
 		for (unsigned i=0; i<p.Length(); i++)
 		{
 			Part *n = p.AddressOf(i);
-			COLOUR Fore = Cursor == i ? LC_FOCUS_SEL_FORE : LC_TEXT;
-			COLOUR Bk = Cursor == i ? LC_FOCUS_SEL_BACK : (n == Over ? GdcMixColour(LC_FOCUS_SEL_BACK, LC_WORKSPACE, 0.15f) : LC_WORKSPACE);
+			GColour Fore(Cursor == i ? L_FOCUS_SEL_FORE : L_TEXT);
+			GColour Bk(	Cursor == i
+						?
+						LColour(L_FOCUS_SEL_BACK)
+						:
+						(
+							n == Over
+							?
+							GdcMixColour(LColour(L_FOCUS_SEL_BACK), LColour(L_WORKSPACE), 0.15f)
+							:
+							LColour(L_WORKSPACE)
+						)
+					);
 			
 			// Layout and draw arrow
 			n->Arrow.ZOff(Arrow.X()+1, c.Y()-1);
 			n->Arrow.Offset(c.x1, c.y1);
-			f->Colour(Rgb24(192,192,192), Bk);
+			f->Colour(GColour(192,192,192), Bk);
 			Arrow.DrawCenter(pDC, &n->Arrow);
 			c.x1 = n->Arrow.x2 + 1;
 

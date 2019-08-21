@@ -466,7 +466,7 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	d->GdcSystem = new GdcDevice;
 	
 	srand((unsigned)LgiCurrentTime());
-	LgiInitColours();
+	GColour::OnChange();
 	
 	SetAppArgs(AppArgs);
 	MouseHook = new GMouseHook;
