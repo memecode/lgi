@@ -106,27 +106,30 @@ int ReaderThread::OnLine(char *s, ssize_t len)
 bool ReaderThread::OnData(char *Buf, ssize_t &r)
 {
 	char *Start = Buf;
-	for (char *c = Buf; c < Buf + r; c++)
+	for (char *c = Buf; c < Buf + r;)
 	{
-		if (*c != '\n')
-			continue;
-		int Result = OnLine(Start, c - Start);
-		if (Result < 0)
+		bool nl = *c == '\n';
+		c++;
+		if (nl)
 		{
-			// Kill process and exit thread.
-			Process->Kill();
-			return false;
-		}
-		if (Result == 0)
-		{
-			// Delete line.
-			ssize_t LineLen = c - Start + 1;
-			ssize_t NextLine = c - Buf + 1;
-			ssize_t Remain = r - NextLine;
-			if (Remain > 0)
-				memmove(Start, Buf + NextLine, Remain);
-			r -= LineLen;
-			c = Start - 1;
+			int Result = OnLine(Start, c - Start);
+			if (Result < 0)
+			{
+				// Kill process and exit thread.
+				Process->Kill();
+				return false;
+			}
+			if (Result == 0)
+			{
+				// Delete line.
+				ssize_t LineLen = c - Start;
+				ssize_t NextLine = c - Buf;
+				ssize_t Remain = r - NextLine;
+				if (Remain > 0)
+					memmove(Start, Buf + NextLine, Remain);
+				r -= LineLen;
+				c = Start;
+			}
 		}
 	}
 
