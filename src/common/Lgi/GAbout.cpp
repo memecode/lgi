@@ -58,7 +58,7 @@ GAbout::GAbout(	GView *parent,
 	if (Email) p.Print("Email:\n\t%s\n", Email);
 	if (Text) p.Write((char*)Text, strlen(Text));
 
-	GColour cBack(LC_MED, 24);
+	GColour cBack(L_MED);
 	GTableLayout *Tbl = new GTableLayout(IDC_TABLE);
 	AddView(Tbl);
 	Tbl->GetCss(true)->Padding("0.5em");

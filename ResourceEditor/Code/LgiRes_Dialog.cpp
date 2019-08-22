@@ -601,7 +601,7 @@ void ResDialogCtrl::OnPaint(GSurface *pDC)
 	{
 		GRect r = DragRgn;
 		r.Normal();
-		pDC->Colour(LC_FOCUS_SEL_BACK, 24);
+		pDC->Colour(L_FOCUS_SEL_BACK);
 		pDC->Box(&r);
 	}
 }
@@ -910,13 +910,13 @@ void CtrlDlg::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	// Draw the border
 	GRect r(0, 0, View()->X()-1, View()->Y()-1);
 	LgiWideBorder(pDC, r, DefaultRaisedEdge);
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	LgiFlatBorder(pDC, r, 1);
 
 	// Draw the title bar
 	Title = r;
 	Title.y2 = Client.y1 - 1;
-	pDC->Colour(LC_ACTIVE_TITLE, 24);
+	pDC->Colour(L_ACTIVE_TITLE);
 	pDC->Rectangle(&Title);
 	
 	if (Str)
@@ -935,7 +935,7 @@ void CtrlDlg::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	pDC->SetClient(&c);
 
 	// Draw the grid
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Rectangle(0, 0, Client.X()-1, Client.Y()-1);
 	pDC->Colour(Rgb24(0x80, 0x80, 0x80), 24);
 	for (int y=0; y<Client.Y(); y+=GRID_Y)
@@ -1013,7 +1013,7 @@ void CtrlEditbox::OnPaint(GSurface *pDC)
 	
 	// Draw the ctrl
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
-	pDC->Colour(Enabled() ? LC_WORKSPACE : LC_MED, 24);
+	pDC->Colour(Enabled() ? L_WORKSPACE : L_MED);
 	pDC->Rectangle(&r);
 
 	char *Text = Str->Get();

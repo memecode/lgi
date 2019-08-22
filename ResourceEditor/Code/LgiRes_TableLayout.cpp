@@ -533,7 +533,7 @@ public:
 		int cy = r.Y() >> 1;
 
 		COLOUR Old = pDC->Colour();
-		pDC->Colour(LC_WHITE, 24);
+		pDC->Colour(L_WHITE);
 		switch (Btn)
 		{
 			case '|':
@@ -1594,7 +1594,7 @@ public:
     
     void OnPaint(GSurface *pDC)
     {
-        pDC->Colour(LC_WORKSPACE, 24);
+        pDC->Colour(L_WORKSPACE);
         pDC->Rectangle();
     }
     
