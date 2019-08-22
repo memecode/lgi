@@ -1156,7 +1156,7 @@ void GView::DrawThemeBorder(GSurface *pDC, GRect &r)
 			#endif
 		}
 		
-		pDC->Colour(LColour(L_MED));
+		pDC->Colour(L_MED);
 		pDC->Set(r.x1, r.y1);
 		pDC->Set(r.x2, r.y1);
 		pDC->Set(r.x1, r.y2);
@@ -1240,6 +1240,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 	{
 		switch (Msg->m)
 		{
+			#if 1
 			case WM_CTLCOLOREDIT:
 			case WM_CTLCOLORSTATIC:
 			{
@@ -1278,6 +1279,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				goto ReturnDefaultProc;
 				return 0;
 			}
+			#endif
 			case 5700:
 			{
 				// I forget what this is for...

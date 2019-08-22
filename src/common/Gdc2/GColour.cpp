@@ -729,6 +729,17 @@ void GColour::OnChange()
 
 	#elif defined(WINDOWS)
 
+	/*
+	for (int i=0; i<30; i++)
+	{
+		auto c = GetSysColor(i);
+		auto r = GetRValue(c);
+		auto g = GetGValue(c);
+		auto b = GetBValue(c);
+		LgiTrace("[%i]=%i,%i,%i %x,%x,%x\n", i, r, g, b, r, g, b);
+	}
+	*/
+
 	_LgiColours[L_SHADOW] = ConvertWinColour(GetSysColor(COLOR_3DDKSHADOW)); // LC_SHADOW
 	_LgiColours[L_LOW] = ConvertWinColour(GetSysColor(COLOR_3DSHADOW)); // LC_LOW
 	_LgiColours[L_MED] = ConvertWinColour(GetSysColor(COLOR_3DFACE)); // LC_MED
@@ -804,7 +815,7 @@ void GColour::OnChange()
 		LgiGetOs() == LGI_OS_WIN64)
 	{
 		// Win32 doesn't seem to get this right, so we just tweak it here
-		_LgiColours[8] = _LgiColours[L_MED].Mix(_LgiColours[L_LIGHT]);
+		_LgiColours[L_LIGHT] = _LgiColours[L_MED].Mix(_LgiColours[L_LIGHT]);
 	}
 	
 	_LgiColours[L_DEBUG_CURRENT_LINE].Rgb(0xff, 0xe0, 0x00);

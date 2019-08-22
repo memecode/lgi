@@ -466,17 +466,6 @@ GMessage::Result GDialog::OnEvent(GMessage *Msg)
 			// WM_CREATE will call OnCreate again.
 			return true;
 		}
-		/*
-		case WM_CLOSE:
-		{
-			if (d->IsModal)
-				EndModal(0);
-			else
-				EndModeless(0);
-			return 0;
-			break;
-		}
-		*/
 	}
 
     return GWindow::OnEvent(Msg);
