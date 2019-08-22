@@ -2069,6 +2069,8 @@ bool GView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 	#ifdef LGI_SDL
 		return LgiPostEvent(this, Cmd, a, b);
 	#elif WINNATIVE
+		if (!_View)
+			return false;
 		BOOL Res = ::PostMessage(_View, Cmd, a, b);
 		if (!Res)
 		{

@@ -1267,16 +1267,18 @@ GMessage::Result GRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 			#if LOADER_THREAD_LOGGING
 			LgiTrace("%s:%i - Received M_IMAGE_FINISHED\n", _FL);
 			#endif
-
-			UpdateDisplay(SourceImg->Y()-1);
 			UpdateThreadBusy(_FL, -1);
 
-			if (DisplayImg != NULL &&
-				PostThreadEvent(GetThreadHandle(),
-								M_IMAGE_RESAMPLE,
-								(GMessage::Param)DisplayImg.Get(),
-								(GMessage::Param)SourceImg.Get()))
-				UpdateThreadBusy(_FL, 1);
+			if (SourceImg)
+			{
+				UpdateDisplay(SourceImg->Y()-1);
+				if (DisplayImg != NULL &&
+					PostThreadEvent(GetThreadHandle(),
+									M_IMAGE_RESAMPLE,
+									(GMessage::Param)DisplayImg.Get(),
+									(GMessage::Param)SourceImg.Get()))
+					UpdateThreadBusy(_FL, 1);
+			}
 			break;
 		}
 		case M_IMAGE_RESAMPLE:
