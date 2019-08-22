@@ -62,6 +62,7 @@ ReaderThread::ReaderThread(VersionCtrl vcs, GSubProcess *p, GStream *out) : LThr
 	Process = p;
 	Out = out;
 	Result = -1;
+	FilterCount = 0;
 	
 	Run();
 }
@@ -71,6 +72,35 @@ ReaderThread::~ReaderThread()
 	Out = NULL;
 	while (!IsExited())
 		LgiSleep(1);
+}
+
+const char *HgFilter = "We\'re removing Mercurial support";
+const char *CvsKill = "No such file or directory";
+
+int ReaderThread::OnLine(char *s, ssize_t len)
+{
+	switch (Vcs)
+	{
+		case VcHg:
+		{
+			if (strnistr(s, HgFilter, len))
+				FilterCount = 4;
+			if (FilterCount > 0)
+			{
+				FilterCount--;
+				return 0;
+			}
+			break;
+		}
+		case VcCvs:
+		{
+			if (strnistr(s, CvsKill, len))
+				return -1;
+			break;
+		}
+	}
+
+	return 1;
 }
 
 int ReaderThread::Main()
@@ -83,22 +113,40 @@ int ReaderThread::Main()
 		return ErrSubProcessFailed;
 	}
 
+	char Buf[1024];
+	int u = 0;
 	while (Process->IsRunning())
 	{
 		if (Out)
 		{
-			char Buf[1024];
-			ssize_t r = Process->Read(Buf, sizeof(Buf));
+			ssize_t r = Process->Read(Buf + u, sizeof(Buf) - u);
 			if (r > 0)
 			{
-				Out->Write(Buf, r);
-
-				if (Vcs == VcCvs &&
-					stristr(Buf, "No such file or directory"))
+				char *Start = Buf;
+				for (char *c = Buf; c < Buf + r; c++)
 				{
-					Process->Kill();
-					return -1;
+					if (*c != '\n')
+						continue;
+					int Result = OnLine(Start, c - Start);
+					if (Result < 0)
+					{
+						// Kill process and exit thread.
+						Process->Kill();
+						return -1;
+					}
+					if (Result == 0)
+					{
+						// Delete line.
+						ssize_t LineLen = c - Start + 1;
+						ssize_t NextLine = c - Buf + 1;
+						ssize_t Remain = r - NextLine;
+						if (Remain > 0)
+							memmove(Start, Buf + NextLine, Remain);
+						r -= LineLen;
+					}
 				}
+
+				Out->Write(Buf, r);
 			}
 		}
 		else

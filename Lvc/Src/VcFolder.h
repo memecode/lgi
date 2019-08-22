@@ -30,6 +30,9 @@ class ReaderThread : public LThread
 	VersionCtrl Vcs;
 	GStream *Out;
 	GSubProcess *Process;
+	int FilterCount;
+
+	int OnLine(char *s, ssize_t len);
 
 public:
 	int Result;
