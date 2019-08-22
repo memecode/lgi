@@ -90,6 +90,10 @@ int ReaderThread::OnLine(char *s, ssize_t len)
 				FilterCount--;
 				return 0;
 			}
+			else if (GString(s, len).Strip().Equals("remote:"))
+			{
+				return 0;
+			}
 			break;
 		}
 		case VcCvs:
