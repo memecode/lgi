@@ -33,6 +33,7 @@ class ReaderThread : public LThread
 	int FilterCount;
 
 	int OnLine(char *s, ssize_t len);
+	bool OnData(char *Buf, ssize_t &r);
 
 public:
 	int Result;

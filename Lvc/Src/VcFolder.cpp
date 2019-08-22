@@ -103,6 +103,36 @@ int ReaderThread::OnLine(char *s, ssize_t len)
 	return 1;
 }
 
+bool ReaderThread::OnData(char *Buf, ssize_t &r)
+{
+	char *Start = Buf;
+	for (char *c = Buf; c < Buf + r; c++)
+	{
+		if (*c != '\n')
+			continue;
+		int Result = OnLine(Start, c - Start);
+		if (Result < 0)
+		{
+			// Kill process and exit thread.
+			Process->Kill();
+			return false;
+		}
+		if (Result == 0)
+		{
+			// Delete line.
+			ssize_t LineLen = c - Start + 1;
+			ssize_t NextLine = c - Buf + 1;
+			ssize_t Remain = r - NextLine;
+			if (Remain > 0)
+				memmove(Start, Buf + NextLine, Remain);
+			r -= LineLen;
+		}
+	}
+
+	Out->Write(Buf, r);
+	return true;
+}
+
 int ReaderThread::Main()
 {
 	bool b = Process->Start(true, false);
@@ -114,39 +144,16 @@ int ReaderThread::Main()
 	}
 
 	char Buf[1024];
-	int u = 0;
+	ssize_t r;
 	while (Process->IsRunning())
 	{
 		if (Out)
 		{
-			ssize_t r = Process->Read(Buf + u, sizeof(Buf) - u);
+			r = Process->Read(Buf, sizeof(Buf));
 			if (r > 0)
 			{
-				char *Start = Buf;
-				for (char *c = Buf; c < Buf + r; c++)
-				{
-					if (*c != '\n')
-						continue;
-					int Result = OnLine(Start, c - Start);
-					if (Result < 0)
-					{
-						// Kill process and exit thread.
-						Process->Kill();
-						return -1;
-					}
-					if (Result == 0)
-					{
-						// Delete line.
-						ssize_t LineLen = c - Start + 1;
-						ssize_t NextLine = c - Buf + 1;
-						ssize_t Remain = r - NextLine;
-						if (Remain > 0)
-							memmove(Start, Buf + NextLine, Remain);
-						r -= LineLen;
-					}
-				}
-
-				Out->Write(Buf, r);
+				if (!OnData(Buf, r))
+					return -1;
 			}
 		}
 		else
@@ -159,10 +166,8 @@ int ReaderThread::Main()
 
 	if (Out)
 	{
-		char Buf[1024];
-		ssize_t r;
 		while ((r = Process->Read(Buf, sizeof(Buf))) > 0)
-			Out->Write(Buf, r);
+			OnData(Buf, r);
 	}
 
 	Result = (int) Process->GetExitValue();
