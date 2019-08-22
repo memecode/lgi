@@ -1964,6 +1964,11 @@ bool LDateTime::GetVariant(const char *Name, GVariant &Dst, char *Array)
 			Dst = (int64)i;
 			break;
 		}
+		case DateSecond64Bit:
+		{
+			Dst = Second64Bit;
+			break;
+		}
 		default:
 		{
 			return false;

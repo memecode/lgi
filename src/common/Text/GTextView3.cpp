@@ -50,6 +50,7 @@ enum Cmds
 	IDM_TAB_SIZE,
 	IDM_DUMP,
 	IDM_RTL,
+	IDM_COPY_ALL,
 	IDM_SELECT_ALL,
 	#ifndef IDM_OPEN
 		IDM_OPEN,
@@ -3448,6 +3449,9 @@ void GTextView3::DoContextMenu(GMouse &m)
 	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_CUT, "Cut"), IDM_CUT, HasSelection());
 	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
 	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_PASTE, "Paste"), IDM_PASTE, ClipText != 0);
+	RClick.AppendSeparator();
+
+	RClick.AppendItem("Copy All", IDM_COPY_ALL, true);
 	RClick.AppendItem("Select All", IDM_SELECT_ALL, true);
 	RClick.AppendSeparator();
 
@@ -3496,6 +3500,12 @@ void GTextView3::DoContextMenu(GMouse &m)
 		case IDM_PASTE:
 		{
 			Paste();
+			break;
+		}
+		case IDM_COPY_ALL:
+		{
+			SelectAll();
+			Copy();
 			break;
 		}
 		case IDM_SELECT_ALL:

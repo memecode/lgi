@@ -1692,6 +1692,7 @@ struct GDomPropMap
 		Check("SetNow", DateSetNow);
 		Check("SetStr", DateSetStr);
 		Check("GetStr", DateGetStr);
+		Check("Second64Bit", DateSecond64Bit);
 
 		Check("Join", StrJoin);
 		Check("Split", StrSplit);
