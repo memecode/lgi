@@ -165,7 +165,8 @@ GViewI *GViewIter::operator [](ssize_t Idx)
 GViewI *GView::_Capturing = 0;
 GViewI *GView::_Over = 0;
 
-#if defined(__GTK_H__) || defined(LGI_SDL)
+#if LGI_VIEW_HASH
+
 struct ViewTbl : public LMutex
 {
 	typedef LHashTbl<PtrKey<GViewI*>, int> T;
@@ -218,6 +219,7 @@ bool GView::LockHandler(GViewI *v, GView::LockOp Op)
 	ViewTblInst.Unlock();
 	return Status;
 }
+
 #endif
 
 GView::GView(OsView view)
@@ -240,7 +242,7 @@ GView::GView(OsView view)
 	Pos.ZOff(-1, -1);
 	WndFlags = GWF_VISIBLE;
 
-	#if defined(__GTK_H__) || defined(LGI_SDL)
+	#if LGI_GVIEW_HASH
 	LockHandler(this, OpCreate);
 	#endif
 }
@@ -253,7 +255,7 @@ GView::~GView()
 		d->SinkHnd = -1;
 	}
 	
-	#if defined(__GTK_H__) || defined(LGI_SDL)
+	#if LGI_GVIEW_HASH
 	LockHandler(this, OpDelete);
 	#endif
 

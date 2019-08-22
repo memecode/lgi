@@ -111,17 +111,20 @@ protected:
 	static GViewI		*_Capturing;
 	static GViewI		*_Over;
 	
-	#if defined(__GTK_H__) || defined(LGI_SDL)
+	#ifndef LGI_VIEW_HASH
+	#error "Define LGI_VIEW_HASH to 0 or 1"
+	#endif
+	#if LGI_VIEW_HASH
 	
 public:
-		enum LockOp
-		{
-			OpCreate,
-			OpDelete,
-			OpExists,
-		};
-	
-		static bool LockHandler(GViewI *v, LockOp Op);
+	enum LockOp
+	{
+		OpCreate,
+		OpDelete,
+		OpExists,
+	};
+
+	static bool LockHandler(GViewI *v, LockOp Op);
 
 	#endif
 

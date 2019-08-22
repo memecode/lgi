@@ -596,7 +596,7 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param A, GMessage::Param B
 		return false;
 	}
 
-	auto m = [[LCocoaMsg alloc] init:View->AddDispatch() msg:Msg a:A b:B];
+	auto m = [[LCocoaMsg alloc] init:View msg:Msg a:A b:B];
 	[v performSelectorOnMainThread:@selector(userEvent:) withObject:m waitUntilDone:false];
 	return true;
 }

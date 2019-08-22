@@ -16,11 +16,11 @@ static int LCocoaView_Count = 0;
 
 @implementation LCocoaMsg
 
-- (id)init:(int)hnd msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B
+- (id)init:(GView*)View msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B
 {
 	if ((self = [super init]) != nil)
 	{
-		self.hnd = hnd;
+		self.v = View;
 		self.m = Msg;
 		self.a = A;
 		self.b = B;
@@ -224,7 +224,12 @@ GKey KeyEvent(NSEvent *ev)
 
 - (void)userEvent:(LCocoaMsg*)msg
 {
-	PostThreadEvent(msg.hnd, msg.m, msg.a, msg.b);
+	if (GView::LockHandler(msg.v, GView::OpExists))
+	{
+		GMessage Msg(msg.m, msg.a, msg.b);
+		// LgiTrace("%s::OnEvent %i,%i,%i\n", m.v->GetClass(), m.m, m.a, m.b);
+		msg.v->OnEvent(&Msg);
+	}
 	[msg release];
 }
 

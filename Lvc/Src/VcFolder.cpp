@@ -2224,7 +2224,7 @@ void VcFolder::CountToTip()
 {
 	// if (Path.Equals("C:\\Users\\matthew\\Code\\Lgi\\trunk"))
 	{
-		LgiTrace("%s: CountToTip, br=%s, idx=%i\n", Path.Get(), CurrentBranch.Get(), (int)CurrentCommitIdx);
+		// LgiTrace("%s: CountToTip, br=%s, idx=%i\n", Path.Get(), CurrentBranch.Get(), (int)CurrentCommitIdx);
 
 		if (!CurrentBranch)
 			GetBranches(new ParseParams("CountToTip"));
@@ -2254,10 +2254,8 @@ bool VcFolder::ParseCountToTip(int Result, GString s, ParseParams *Params)
 					Update();
 				}
 			}
-			else
-			{
-				int asd=0;
-			}
+			break;
+		default:
 			break;
 	}
 

@@ -14,11 +14,11 @@ class GViewI;
 @interface LCocoaMsg : NSObject
 {
 }
-@property int hnd;
+@property GViewI *v;
 @property int m;
 @property GMessage::Param a;
 @property GMessage::Param b;
-- (id)init:(int)hnd msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B;
+- (id)init:(GViewI*)view msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B;
 @end
 
 // This class wraps a Cocoa NSView and redirects all the calls to LGI's GWindow object.
