@@ -126,6 +126,7 @@ bool ReaderThread::OnData(char *Buf, ssize_t &r)
 			if (Remain > 0)
 				memmove(Start, Buf + NextLine, Remain);
 			r -= LineLen;
+			c = Start - 1;
 		}
 	}
 
