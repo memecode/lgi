@@ -129,6 +129,7 @@ bool ReaderThread::OnData(char *Buf, ssize_t &r)
 				r -= LineLen;
 				c = Start;
 			}
+			else Start = c;
 		}
 	}
 
