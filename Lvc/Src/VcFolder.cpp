@@ -2608,17 +2608,18 @@ bool VcFolder::ParsePush(int Result, GString s, ParseParams *Params)
 	return Status; // no reselect
 }
 
-void VcFolder::Pull(LoggingType Logging)
+void VcFolder::Pull(bool AndUpdate, LoggingType Logging)
 {
-	GString Args;
 	bool Status = false;
 	switch (GetType())
 	{
 		case VcNone:
 			return;
 		case VcHg:
+			Status = StartCmd(AndUpdate ? "pull -u" : "pull", &VcFolder::ParsePull, NULL, Logging);
+			break;
 		case VcGit:
-			Status = StartCmd("pull", &VcFolder::ParsePull, NULL, Logging);
+			Status = StartCmd(AndUpdate ? "pull" : "fetch", &VcFolder::ParsePull, NULL, Logging);
 			break;
 		case VcSvn:
 			Status = StartCmd("up", &VcFolder::ParsePull, NULL, Logging);

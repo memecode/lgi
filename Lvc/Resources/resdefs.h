@@ -17,6 +17,7 @@
 #define IDC_UNTRACKED							38
 #define IDC_PULL_ALL							39
 #define IDC_STATUS								40
+#define IDC_UPDATE								41
 #define IDC_HEADS								45
 #define IDC_BUILD_FIX							47
 #define IDC_TABLE								500
@@ -33,7 +34,6 @@
 #define IDM_OPTIONS								511
 #define IDM_HELP								512
 #define IDM_ABOUT								513
-#define IDC_PUSH_ALL							514
 #define IDM_EDIT_MENU							515
 #define IDM_FIND								516
 #define IDM_REFRESH								517

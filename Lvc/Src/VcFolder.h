@@ -242,7 +242,7 @@ public:
 	void FolderStatus(const char *Path = NULL, VcLeaf *Notify = NULL);
 	void Commit(const char *Msg, const char *Branch, bool AndPush);
 	void Push();
-	void Pull(LoggingType Logging = LogNormal);
+	void Pull(bool AndUpdate, LoggingType Logging = LogNormal);
 	void Clean();
 	bool Revert(const char *Path, const char *Revision = NULL);
 	bool Resolve(const char *Path);

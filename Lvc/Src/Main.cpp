@@ -565,6 +565,8 @@ public:
 			p->Append(Log = new GTextLog(IDC_LOG));
 			// Log->Sunken(true);
 			Log->SetWrapType(TEXTED_WRAP_NONE);
+			
+			SetCtrlValue(IDC_UPDATE, true);
 
 			AttachChildren();
 			Visible(true);
@@ -748,7 +750,6 @@ public:
 					case LvcCommandStart:
 					{
 						SetCtrlEnabled(IDC_PUSH, false);
-						SetCtrlEnabled(IDC_PUSH_ALL, false);
 						SetCtrlEnabled(IDC_PULL, false);
 						SetCtrlEnabled(IDC_PULL_ALL, false);
 						break;
@@ -756,7 +757,6 @@ public:
 					case LvcCommandEnd:
 					{
 						SetCtrlEnabled(IDC_PUSH, true);
-						SetCtrlEnabled(IDC_PUSH_ALL, true);
 						SetCtrlEnabled(IDC_PULL, true);
 						SetCtrlEnabled(IDC_PULL_ALL, true);
 						break;
@@ -805,16 +805,18 @@ public:
 			{
 				VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
 				if (f)
-					f->Pull();
+					f->Pull(GetCtrlValue(IDC_UPDATE) != 0);
 				break;
 			}
 			case IDC_PULL_ALL:
 			{
 				GArray<VcFolder*> Folders;
 				Tree->GetAll(Folders);
+				bool AndUpdate = GetCtrlValue(IDC_UPDATE) != 0;
+				
 				for (auto f : Folders)
 				{
-					f->Pull(LogSilo);
+					f->Pull(AndUpdate, LogSilo);
 				}
 				break;
 			}
