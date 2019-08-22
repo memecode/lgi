@@ -121,7 +121,6 @@ bool ReaderThread::OnData(char *Buf, ssize_t &r)
 			}
 			if (Result == 0)
 			{
-				// Delete line.
 				ssize_t LineLen = c - Start;
 				ssize_t NextLine = c - Buf;
 				ssize_t Remain = r - NextLine;
