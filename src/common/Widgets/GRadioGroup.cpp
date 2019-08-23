@@ -315,7 +315,7 @@ void GRadioGroup::OnPaint(GSurface *pDC)
 	else
 	{
 		// GColour Fore = StyleColour(GCss::PropColor, LC_TEXT);
-		GColour Back = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
+		GColour Back = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 		if (!Back.IsTransparent())
 		{
 			pDC->Colour(Back);
@@ -703,7 +703,7 @@ void GRadioButton::OnPaint(GSurface *pDC)
 		GRect r(0, 0, X()-1, Y()-1);
 		GRect c(0, 0, 12, 12);
 		// GColour Fore = StyleColour(GCss::PropColor, LC_TEXT, 4);
-		GColour Back = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
+		GColour Back = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 		
 		// bool e = Enabled();
 		GRect fill(c.x2 + 1, r.y1, r.x2, r.x2);
@@ -743,7 +743,7 @@ void GRadioButton::OnPaint(GSurface *pDC)
 		#else
 
 		// Draw border
-		pDC->Colour(LC_LOW, 24);
+		pDC->Colour(L_LOW);
 		pDC->Line(c.x1+1, c.y1+9, c.x1+1, c.y1+10);
 		pDC->Line(c.x1, c.y1+4, c.x1, c.y1+8);
 		pDC->Line(c.x1+1, c.y1+2, c.x1+1, c.y1+3);
@@ -751,7 +751,7 @@ void GRadioButton::OnPaint(GSurface *pDC)
 		pDC->Line(c.x1+4, c.y1, c.x1+8, c.y1);
 		pDC->Line(c.x1+9, c.y1+1, c.x1+10, c.y1+1);
 
-		pDC->Colour(LC_SHADOW, 24);
+		pDC->Colour(L_SHADOW);
 		pDC->Set(c.x1+2, c.y1+9);
 		pDC->Line(c.x1+1, c.y1+4, c.x1+1, c.y1+8);
 		pDC->Line(c.x1+2, c.y1+2, c.x1+2, c.y1+3);
@@ -759,7 +759,7 @@ void GRadioButton::OnPaint(GSurface *pDC)
 		pDC->Line(c.x1+4, c.y1+1, c.x1+8, c.y1+1);
 		pDC->Set(c.x1+9, c.y1+2);
 
-		pDC->Colour(LC_LIGHT, 24);
+		pDC->Colour(L_LIGHT);
 		pDC->Line(c.x1+11, c.y1+2, c.x1+11, c.y1+3);
 		pDC->Line(c.x1+12, c.y1+4, c.x1+12, c.y1+8);
 		pDC->Line(c.x1+11, c.y1+9, c.x1+11, c.y1+10);
@@ -769,7 +769,7 @@ void GRadioButton::OnPaint(GSurface *pDC)
 
 		/// Draw center
 		bool e = Enabled();
-		pDC->Colour(d->Over || !e ? LC_MED : LC_WORKSPACE, 24);
+		pDC->Colour(d->Over || !e ? L_MED : L_WORKSPACE);
 		pDC->Rectangle(c.x1+2, c.y1+4, c.x1+10, c.y1+8);
 		pDC->Box(c.x1+3, c.y1+3, c.x1+9, c.y1+9);
 		pDC->Box(c.x1+4, c.y1+2, c.x1+8, c.y1+10);
@@ -777,7 +777,7 @@ void GRadioButton::OnPaint(GSurface *pDC)
 		// Draw value
 		if (d->Val)
 		{
-			pDC->Colour(e ? LC_TEXT : LC_LOW, 24);
+			pDC->Colour(e ? L_TEXT : L_LOW);
 			pDC->Rectangle(c.x1+4, c.y1+5, c.x1+8, c.y1+7);
 			pDC->Rectangle(c.x1+5, c.y1+4, c.x1+7, c.y1+8);
 		}

@@ -166,7 +166,7 @@ void DocEdit::OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour)
 		{
 			if (DocMatch && Idx == IdeDoc::CurIpLine)
 			{
-				ln->Back.Set(LC_DEBUG_CURRENT_LINE, 24);
+				ln->Back = LColour(L_DEBUG_CURRENT_LINE);
 			}
 			else
 			{

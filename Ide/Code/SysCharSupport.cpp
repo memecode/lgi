@@ -86,8 +86,8 @@ public:
 									GDisplayString d(Fnt, Str);
 									if (pDC->Create(d.X(), d.Y(), System32BitColourSpace))
 									{
-										pDC->Colour(LC_WORKSPACE, 24);
-										pDC->Colour(LC_TEXT, 24);
+										pDC->Colour(L_WORKSPACE);
+										pDC->Colour(L_TEXT);
 										d.Draw(pDC, 0, 0);
 									}
 								}

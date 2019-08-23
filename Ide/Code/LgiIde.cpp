@@ -517,7 +517,7 @@ public:
 				else if (Warn && strchr(":[", Warn[7]))
 					ln->c.Rgb(255, 128, 0);
 				else
-					ln->c.Set(LC_TEXT, 24);
+					ln->c = LColour(L_TEXT);
 			}
 		}
 	}

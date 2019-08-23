@@ -230,7 +230,7 @@ public:
 	void OnPaint(GSurface *pDC)
 	{
 		GRect c = GetClient();
-		GColour Background(LC_MED, 24);
+		GColour Background(L_MED);
 		c.Offset(-c.x1, -c.y1);
 		LgiWideBorder(pDC, c, Down ? DefaultSunkenEdge : DefaultRaisedEdge);
 		pDC->Colour(Background);
@@ -513,7 +513,7 @@ public:
 			}
 		}
 		
-		pDC->Colour(LC_WORKSPACE, 24);
+		pDC->Colour(L_WORKSPACE);
 		pDC->Rectangle(&c);
 	}
 
@@ -1363,7 +1363,7 @@ public:
 		// Draw border
 		GRect c = GetClient();
 		c.Offset(-c.x1, -c.y1);
-		pDC->Colour(LC_BLACK, 24);
+		pDC->Colour(L_BLACK);
 		pDC->Box(&c);
 		c.Size(1, 1);
 	}

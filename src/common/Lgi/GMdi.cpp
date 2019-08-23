@@ -739,7 +739,7 @@ void GMdiParent::OnPaint(GSurface *pDC)
 	if (d->Children.Length() == 0)
 	#endif
 	{
-		pDC->Colour(LC_LOW, 24);
+		pDC->Colour(L_LOW);
 		pDC->Rectangle();
 		return;
 	}
@@ -748,7 +748,7 @@ void GMdiParent::OnPaint(GSurface *pDC)
 	// Draw tabs...
 	GFont *Fnt = GetFont();
 	
-	GColour Back(LC_LOW, 24), Black(0, 0, 0);
+	GColour Back(L_LOW), Black(L_BLACK);
 	int Cx = 5;
 	pDC->Colour(Back);
 	pDC->Rectangle(d->Tabs.x1, d->Tabs.y1, d->Tabs.x1 + Cx - 1, d->Tabs.y2 - 1);
@@ -760,8 +760,8 @@ void GMdiParent::OnPaint(GSurface *pDC)
 	::GArray<GMdiChild*> Views;
 	GMdiChild *Last = dynamic_cast<GMdiChild*>(d->Children.Last());
 	GetChildren(Views);
-	GColour cActive(LC_WORKSPACE, 24);
-	GColour cInactive(GColour(LC_MED,24).Mix(cActive));
+	GColour cActive(L_WORKSPACE);
+	GColour cInactive(LColour(L_MED).Mix(cActive));
 	
 	for (int Idx=0; Idx<Views.Length(); Idx++)
 	{
@@ -784,8 +784,8 @@ void GMdiParent::OnPaint(GSurface *pDC)
 		
 		c->Visible(Active);
 		GColour Bk(Active ? cActive : cInactive);
-		GColour Edge(LC_BLACK, 24);
-		GColour Txt(LC_TEXT, 24);
+		GColour Edge(L_BLACK);
+		GColour Txt(L_TEXT);
 		
 		GRect r = c->d->Tab;
 		if (Active)

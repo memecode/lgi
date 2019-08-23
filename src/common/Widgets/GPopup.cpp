@@ -969,7 +969,7 @@ void GDropDown::OnPaint(GSurface *pDC)
 			#if WINNATIVE
 			DrawFocusRect(pDC->Handle(), &((RECT)r));
 			#else
-			pDC->Colour(LC_LOW, 24);
+			pDC->Colour(L_LOW);
 			pDC->Box(&r);
 			#endif
 		}

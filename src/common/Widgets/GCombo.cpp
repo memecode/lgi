@@ -547,7 +547,7 @@ void GCombo::OnPaint(GSurface *pDC)
 			d->SetText(new GDisplayString(GetFont(), n), _FL);
 	}
 
-	GColour cBack = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
+	GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 
 	#if defined LGI_CARBON
 
@@ -610,11 +610,11 @@ void GCombo::OnPaint(GSurface *pDC)
 		GRect r(0, 0, X()-1, Y()-1);
 
 		// draw shadowed border
-		pDC->Colour(LC_SHADOW, 24);
+		pDC->Colour(L_SHADOW);
 		pDC->Line(r.x1+2, r.y2, r.x2, r.y2);
 		pDC->Line(r.x2, r.y1+2, r.x2, r.y2);
 
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Set(r.x1, r.y2);
 		pDC->Set(r.x1+1, r.y2);
 		pDC->Set(r.x2, r.y1);
@@ -622,10 +622,10 @@ void GCombo::OnPaint(GSurface *pDC)
 
 		r.x2--;
 		r.y2--;
-		pDC->Colour(LC_LOW, 24);
+		pDC->Colour(L_LOW);
 		pDC->Box(&r);
 		r.Size(1, 1);
-		pDC->Colour(LC_HIGH, 24);
+		pDC->Colour(L_HIGH);
 		pDC->Line(r.x1, r.y1, r.x2, r.y1);
 		pDC->Line(r.x1, r.y1+1, r.x1, r.y2);
 		r.x1++;
@@ -638,7 +638,7 @@ void GCombo::OnPaint(GSurface *pDC)
 		// draw the drop down arrow
 		d->Arrow = r;
 		d->Arrow.x1 = d->Arrow.x2 - 10;
-		pDC->Colour(Enabled() ? LC_SHADOW : LC_LOW, 24);
+		pDC->Colour(Enabled() ? L_SHADOW : L_LOW);
 		int Cx = r.x2 - 5;
 		int Cy = r.y1 + (r.Y()/2) + 2;
 		for (int i=0; i<4; i++)
@@ -678,7 +678,7 @@ void GCombo::OnPaint(GSurface *pDC)
 			}
 			else
 			{
-				pDC->Colour(Focus() ? LC_FOCUS_SEL_BACK : LC_MED, 24);
+				pDC->Colour(Focus() ? L_FOCUS_SEL_BACK : L_MED);
 				pDC->Rectangle(&r);
 			}
 		}

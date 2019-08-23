@@ -400,9 +400,9 @@ void GCheckBox::OnPaint(GSurface *pDC)
 		#else
 	
 			LgiWideBorder(pDC, d->ValuePos, DefaultSunkenEdge);
-			pDC->Colour(d->Over || !en ? LC_MED : LC_WORKSPACE, 24);
+			pDC->Colour(d->Over || !en ? L_MED : L_WORKSPACE);
 			pDC->Rectangle(&d->ValuePos);
-			pDC->Colour(en ? LC_TEXT : LC_LOW, 24);
+			pDC->Colour(en ? L_TEXT : L_LOW);
 
 			if (d->Three && d->Val == 2)
 			{

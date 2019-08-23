@@ -284,7 +284,7 @@ public:
 	
 	void OnPaint(GSurface *pDC)
 	{
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle();
 	}
 	

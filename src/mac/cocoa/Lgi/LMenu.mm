@@ -701,13 +701,13 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 		// Paint a separator
 		int Cy = r.Y() / 2;
 		
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle();
 		
-		pDC->Colour(LC_LOW, 24);
+		pDC->Colour(L_LOW);
 		pDC->Line(0, Cy-1, pDC->X()-1, Cy-1);
 		
-		pDC->Colour(LC_LIGHT, 24);
+		pDC->Colour(L_LIGHT);
 		pDC->Line(0, Cy, pDC->X()-1, Cy);
 	}
 	else
@@ -769,14 +769,14 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 				 _Icon >= 0)
 		{
 			// it's an icon!
-			GColour Bk(LC_MED, 24);
+			GColour Bk(L_MED);
 			ImgLst->Draw(pDC, 0, 0, _Icon, Bk);
 		}
 		
 		// Sub menu arrow
 		if (Child && !dynamic_cast<LMenu*>(Parent))
 		{
-			pDC->Colour(LC_TEXT, 24);
+			pDC->Colour(L_TEXT);
 			
 			int x = r.x2 - 4;
 			int y = r.y1 + (r.Y()/2);
