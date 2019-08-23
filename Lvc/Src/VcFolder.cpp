@@ -109,7 +109,7 @@ int ReaderThread::OnLine(char *s, ssize_t len)
 
 bool ReaderThread::OnData(char *Buf, ssize_t &r)
 {
-	#if 0
+	#if 1
 	char *Start = Buf;
 	for (char *c = Buf; c < Buf + r;)
 	{
