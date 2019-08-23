@@ -2651,6 +2651,7 @@ void VcFolder::Pull(bool AndUpdate, LoggingType Logging)
 
 bool VcFolder::ParsePull(int Result, GString s, ParseParams *Params)
 {
+	GetTree()->SendNotify(LvcCommandEnd);
 	if (Result)
 	{
 		OnCmdError(s, "Pull failed.");
@@ -2699,7 +2700,6 @@ bool VcFolder::ParsePull(int Result, GString s, ParseParams *Params)
 			break;
 	}
 
-	GetTree()->SendNotify(LvcCommandEnd);
 	CommitListDirty = true;
 	return true; // Yes - reselect and update
 }
