@@ -142,6 +142,16 @@ static int LCocoaView_Count = 0;
 	m.Target->GetGView()->_Mouse(m, true);
 }
 
+- (void)mouseDragged:(NSEvent*)ev
+{
+	LAutoPool Pool;
+	Check();
+
+	GMouse m(self.w);
+	m.SetFromEvent(ev, self);
+	m.Target->GetGView()->_Mouse(m, true);
+}
+
 - (void)scrollWheel:(NSEvent*)ev
 {
 	LAutoPool Pool;

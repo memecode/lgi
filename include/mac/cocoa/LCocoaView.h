@@ -42,6 +42,7 @@ class GViewI;
 - (void)rightMouseDown:(NSEvent*)ev;
 - (void)rightMouseUp:(NSEvent*)ev;
 - (void)mouseMoved:(NSEvent*)ev;
+- (void)mouseDragged:(NSEvent*)ev;
 - (void)scrollWheel:(NSEvent*)ev;
 
 // Keybaord

@@ -473,6 +473,13 @@ void GBox::OnPosChange()
 
 void GBox::OnMouseClick(GMouse &m)
 {
+	{
+		GString::Array a;
+		for (GViewI *p = this; p; p = p->GetParent())
+			a.New() = p->GetClass();
+		m.Trace(GString("GBox::OnMouseClick-") + GString(".").Join(a));
+	}
+
 	if (m.Down())
 	{
 		d->Dragging = d->HitTest(m.x, m.y);
@@ -502,6 +509,13 @@ void GBox::OnMouseMove(GMouse &m)
 {
 	if (!d->Dragging || !IsCapturing())
 		return;
+
+	{
+		GString::Array a;
+		for (GViewI *p = this; p; p = p->GetParent())
+			a.New().Printf("%s/%p", p->GetClass(), p);
+		m.Trace(GString("GBox::OnMouseMove-") + GString(".").Join(a));
+	}
 
 	if (!m.Down())
 	{

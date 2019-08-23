@@ -173,6 +173,12 @@ void GMouse::SetFromEvent(NSEvent *ev, NSView *view)
 		case SDK_10_12(NSEventTypeMouseMoved,     NX_MOUSEMOVED):
 			IsMove(true);
 			break;
+		case SDK_10_12(NSEventTypeLeftMouseDragged, NX_LMOUSEDRAGGED):
+			Down(true); IsMove(true); Left(true);
+			break;
+		case SDK_10_12(NSEventTypeRightMouseDragged, NX_RMOUSEDRAGGED):
+			Down(true); IsMove(true); Right(true);
+			break;
 		default:
 			LgiAssert(!"Unknown event.");
 			break;
