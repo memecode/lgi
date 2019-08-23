@@ -585,7 +585,7 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param A, GMessage::Param B
 	GWindow *w = View->GetWindow();
 	if (!w)
 	{
-		printf("%s:%i - No window.\n", _FL);
+		// printf("%s:%i - No window.\n", _FL);
 		return false;
 	}
 	

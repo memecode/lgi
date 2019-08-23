@@ -246,6 +246,7 @@ GView::GView(OsView view)
         #error "LGI_VIEW_HASH needs to be defined"
     #elif LGI_VIEW_HASH
 	    LockHandler(this, OpCreate);
+	    // printf("Adding %p to hash\n", (GViewI*)this);
 	#endif
 }
 
@@ -258,6 +259,7 @@ GView::~GView()
 	}
 	
 	#if LGI_VIEW_HASH
+    // printf("Removing %p from hash\n", (GViewI*)this);
 	LockHandler(this, OpDelete);
 	#endif
 
