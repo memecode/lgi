@@ -242,8 +242,10 @@ GView::GView(OsView view)
 	Pos.ZOff(-1, -1);
 	WndFlags = GWF_VISIBLE;
 
-	#if LGI_GVIEW_HASH
-	LockHandler(this, OpCreate);
+    #ifndef LGI_VIEW_HASH
+        #error "LGI_VIEW_HASH needs to be defined"
+    #elif LGI_VIEW_HASH
+	    LockHandler(this, OpCreate);
 	#endif
 }
 
@@ -255,7 +257,7 @@ GView::~GView()
 		d->SinkHnd = -1;
 	}
 	
-	#if LGI_GVIEW_HASH
+	#if LGI_VIEW_HASH
 	LockHandler(this, OpDelete);
 	#endif
 

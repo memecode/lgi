@@ -109,6 +109,7 @@ int ReaderThread::OnLine(char *s, ssize_t len)
 
 bool ReaderThread::OnData(char *Buf, ssize_t &r)
 {
+	#if 0
 	char *Start = Buf;
 	for (char *c = Buf; c < Buf + r;)
 	{
@@ -136,6 +137,7 @@ bool ReaderThread::OnData(char *Buf, ssize_t &r)
 			else Start = c;
 		}
 	}
+	#endif
 
 	Out->Write(Buf, r);
 	return true;
@@ -153,11 +155,14 @@ int ReaderThread::Main()
 
 	char Buf[1024];
 	ssize_t r;
+	// printf("%s:%i - starting reader loop.\n", _FL);
 	while (Process->IsRunning())
 	{
 		if (Out)
 		{
+			// printf("%s:%i - starting read.\n", _FL);
 			r = Process->Read(Buf, sizeof(Buf));
+			// printf("%s:%i - read=%i.\n", _FL, (int)r);
 			if (r > 0)
 			{
 				if (!OnData(Buf, r))
@@ -172,12 +177,14 @@ int ReaderThread::Main()
 		}
 	}
 
+	// printf("%s:%i - process loop done.\n", _FL);
 	if (Out)
 	{
 		while ((r = Process->Read(Buf, sizeof(Buf))) > 0)
 			OnData(Buf, r);
 	}
 
+	// printf("%s:%i - loop done.\n", _FL);
 	Result = (int) Process->GetExitValue();
 	#if _DEBUG
 	if (Result)
@@ -475,8 +482,10 @@ void VcFolder::OnBranchesChange()
 			if (!stricmp(b.key, "default") ||
 				!stricmp(b.key, "trunk"))
 				Default = b.key;
+			/*
 			else
 				printf("Other=%s\n", b.key);
+			*/
 		}
 		int Idx = 1;
 		for (auto b: Branches)
@@ -1663,6 +1672,7 @@ void VcFolder::OnPulse()
 	bool Reselect = false, CmdsChanged = false;
 	static bool Processing = false;
 	
+	// printf("%s:%i - OnPulse\n", _FL);
 	if (!Processing)
 	{	
 		Processing = true; // Lock out processing, if it puts up a dialog or something...
@@ -1670,24 +1680,29 @@ void VcFolder::OnPulse()
 		for (unsigned i=0; i<Cmds.Length(); i++)
 		{
 			Cmd *c = Cmds[i];
-			if (c && c->Rd->IsExited())
+			if (c)
 			{
-				GString s = c->GetBuf();
-				int Result = c->Rd->ExitCode();
-				if (Result == ErrSubProcessFailed)
+				bool Ex = c->Rd->IsExited();
+				// printf("%s:%i - Ex=%i, Cmds=%i\n", _FL, (int)Cmds.Length());
+				if (Ex)
 				{
-					if (!CmdErrors)
-						d->Log->Print("Error: Can't run '%s'\n", GetVcName());
-					CmdErrors++;
+					GString s = c->GetBuf();
+					int Result = c->Rd->ExitCode();
+					if (Result == ErrSubProcessFailed)
+					{
+						if (!CmdErrors)
+							d->Log->Print("Error: Can't run '%s'\n", GetVcName());
+						CmdErrors++;
+					}
+					else if (c->PostOp)
+					{
+						Reselect |= CALL_MEMBER_FN(*this, c->PostOp)(Result, s, c->Params);
+					}
+					
+					Cmds.DeleteAt(i--, true);
+					delete c;
+					CmdsChanged = true;
 				}
-				else if (c->PostOp)
-				{
-					Reselect |= CALL_MEMBER_FN(*this, c->PostOp)(Result, s, c->Params);
-				}
-				
-				Cmds.DeleteAt(i--, true);
-				delete c;
-				CmdsChanged = true;
 			}
 		}
 		Processing = false;
