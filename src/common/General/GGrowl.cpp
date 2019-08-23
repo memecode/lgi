@@ -6,7 +6,7 @@ class GGrowlPriv : public LThread, public LMutex
 {
 	bool Loop;
 	bool Async;
-	GAutoString AppName;
+	GString AppName;
 	GAutoPtr<GGrowl::GRegister> Reg;
 	GArray<GGrowl::GNotify*> Notes;
 	
@@ -84,7 +84,7 @@ public:
 		p.Print("GNTP/1.0 %s NONE\r\n", reg ? "REGISTER" : "NOTIFY");
 		if (reg)
 		{
-			AppName.Reset(NewStr(reg->App));
+			AppName = reg->App;
 			p.Print("Application-Name: %s\r\n", reg->App.Get());
 			if (reg->IconUrl)
 				p.Print("Application-Icon: %s\r\n", reg->IconUrl.Get());

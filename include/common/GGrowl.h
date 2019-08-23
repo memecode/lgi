@@ -8,10 +8,10 @@ class LgiClass GGrowl
 public:
 	struct GNotifyType
 	{
-		GAutoString Name;
-		GAutoString DisplayName; // Optional
+		GString Name;
+		GString DisplayName; // Optional
 		bool Enabled;
-		GAutoString IconUrl;
+		GString IconUrl;
 		
 		GNotifyType()
 		{
@@ -21,24 +21,24 @@ public:
 
 	struct GRegister
 	{
-		GAutoString App;
-		GAutoString IconUrl; // Optional
+		GString App;
+		GString IconUrl; // Optional
 		GArray<GNotifyType> Types;
 	};
 
 	struct GNotify
 	{
-		GAutoString Name;
-		GAutoString Title;
-		GAutoString Id; // Optional
-		GAutoString Text; // Optional
+		GString Name;
+		GString Title;
+		GString Id; // Optional
+		GString Text; // Optional
 		bool Sticky; // Optional
 		int Priority; // Optional
-		GAutoString IconUrl; // Optional
-		GAutoString CoalescingID; // Optional
-		GAutoString CallbackData; // Optional
-		GAutoString CallbackDataType; // Optional
-		GAutoString CallbackTarget; // Optional
+		GString IconUrl; // Optional
+		GString CoalescingID; // Optional
+		GString CallbackData; // Optional
+		GString CallbackDataType; // Optional
+		GString CallbackTarget; // Optional
 		
 		GNotify()
 		{

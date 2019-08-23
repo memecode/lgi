@@ -16,6 +16,7 @@
 #define WIN32GTK					0
 #define WINNATIVE					1
 #define LGI_VIEW_HANDLE				1
+#define LGI_VIEW_HASH				0
 #ifndef WINDOWS
 	#error "Define WINDOWS in your project"
 #endif
