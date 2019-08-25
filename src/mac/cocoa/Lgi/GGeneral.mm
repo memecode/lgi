@@ -114,13 +114,13 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		[hnd.p performSelectorOnMainThread:@selector(assert:) withObject:ca waitUntilDone:true];
 		switch (ca.result)
 		{
-			case 1000: // Debug/Break
+			case NSAlertFirstButtonReturn: // Debug/Break
 				Result = 2;
 				break;
-			case 1001: // Ingore/Continue
+			case NSAlertSecondButtonReturn: // Ingore/Continue
 				Result = 3;
 				break;
-			case 1002: // Exit/Abort
+			case NSAlertThirdButtonReturn: // Exit/Abort
 				Result = 1;
 				break;
 		}

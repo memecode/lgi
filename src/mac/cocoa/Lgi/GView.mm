@@ -192,12 +192,16 @@ bool GView::_Mouse(GMouse &m, bool Move)
 
 	if (_Capturing)
 	{
-		if (_Capturing != m.Target)
+		// Convert root NSView coords to capture view coords
+		for (auto i = _Capturing; i && i != this; i = i->GetParent())
 		{
-			m.ToScreen();
-			m.Target = _Capturing;
-			m.ToView();
+			auto p = i->GetPos();
+			m.x -= p.x1;
+			m.y -= p.y1;
 		}
+		
+		if (!m.IsMove())
+			m.Trace("Capture");
 		
 		if (Move)
 		{
@@ -206,22 +210,38 @@ bool GView::_Mouse(GMouse &m, bool Move)
 		}
 		else
 		{
-			if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(m.Target), m))
-				m.Target->OnMouseClick(m);
+			if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(_Capturing), m))
+				_Capturing->OnMouseClick(m);
 		}
 	}
 	else
 	{
-		if (_Over != this)
+		// Convert root NSView coords to _Over coords
+		auto t = WindowFromPoint(m.x, m.y);
+		if (t)
+		{
+			for (auto i = t; i && i != this; i = i->GetParent())
+			{
+				auto p = i->GetPos();
+				m.x -= p.x1;
+				m.y -= p.y1;
+			}
+			m.Target = t;
+		}
+		
+		if (!m.IsMove())
+			m.Trace("NonCapture");
+
+		if (_Over != m.Target)
 		{
 			if (_Over)
 				_Over->OnMouseExit(m);
-			_Over = this;
+			_Over = m.Target;
 			if (_Over)
 				_Over->OnMouseEnter(m);
 		}
 			
-		GView *Target = dynamic_cast<GView*>(_Over ? _Over : this);
+		GView *Target = dynamic_cast<GView*>(_Over ? _Over : m.Target);
 		GLayout *Lo = dynamic_cast<GLayout*>(Target);
 		GRect Client = Lo ? Lo->GetClient(false) : Target->GView::GetClient(false);
 

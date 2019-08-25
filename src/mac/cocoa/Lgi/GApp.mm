@@ -183,21 +183,6 @@ void GMouse::SetFromEvent(NSEvent *ev, NSView *view)
 			LgiAssert(!"Unknown event.");
 			break;
 	}
-	
-	if (Target)
-	{
-		auto t = Target->WindowFromPoint(x, y);
-		if (t)
-		{
-			for (auto i = t; i && i != Target; i = i->GetParent())
-			{
-				auto p = i->GetPos();
-				x -= p.x1;
-				y -= p.y1;
-			}
-			Target = t;
-		}
-	}
 }
 
 void GUiEvent::SetModifer(uint32 modifierKeys)
@@ -782,7 +767,13 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 		
 		// [pool release];
 		#else
-		NSApplicationMain(GetArgs(), GetArg());
+		
+			#if 1
+			NSApplicationMain(GetArgs(), GetArg());
+			#else
+			[d->NsApp run];
+			#endif
+			
 		#endif
 		return true;
 	}
@@ -805,7 +796,8 @@ void GApp::Exit(int Code)
 	if (!Code)
 	{
 		DeleteObj(AppWnd);
-		[NSApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.0];
+		// [d->NsApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.0];
+		[d->NsApp stop:nil];
 	}
 	else
 	#endif

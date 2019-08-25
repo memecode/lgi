@@ -144,13 +144,8 @@ public:
 	{
 		self.d = priv;
 		
-		auto ctrl = [[NSViewController alloc] init];
-		ctrl.view = [[LCocoaView alloc] init:priv->Wnd];
-		ctrl.view.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
-		self.contentViewController = ctrl;
-		[self makeFirstResponder:ctrl];
-		[ctrl release];
-		
+		self.contentView = [[LCocoaView alloc] init:priv->Wnd];
+		[self makeFirstResponder:self.contentView];
 		self.acceptsMouseMovedEvents = true;
 		self.ignoresMouseEvents = false;
 		
@@ -161,9 +156,12 @@ public:
 
 - (void)dealloc
 {
-	LCocoaView *cv = objc_dynamic_cast(LCocoaView, self.contentViewController.view);
+	LAutoPool Ap;
+	LCocoaView *cv = objc_dynamic_cast(LCocoaView, self.contentView);
 	cv.w = NULL;
 	[cv release];
+	self.contentView = NULL;
+	
 	[super dealloc];
 	printf("LNsWindow.dealloc.\n");
 }
@@ -194,13 +192,7 @@ public:
 {
 	LNsWindow *w = event.object;
 	if (w && w.d)
-	{
 		w.d->OnResize();
-		/* FIXME
-		if (w.content)
-			[w.content->Handle().p layout];
-		*/
-	}
 }
 
 - (BOOL)windowShouldClose:(NSWindow*)sender
@@ -304,7 +296,7 @@ GWindow::~GWindow()
 NSView *GWindow::Handle()
 {
 	if (Wnd.p != nil)
-		return Wnd.p.contentViewController.view;
+		return Wnd.p.contentView; //Wnd.p.contentViewController.view;
 	
 	return NULL;
 }

@@ -190,6 +190,7 @@ static int LCocoaView_Count = 0;
 
 GKey KeyEvent(NSEvent *ev)
 {
+	LAutoPool Pool;
 	GKey k;
 	GString s = [ev.characters UTF8String];
 	auto mod = ev.modifierFlags;
@@ -232,6 +233,7 @@ GKey KeyEvent(NSEvent *ev)
 
 - (void)keyDown:(NSEvent*)event
 {
+	LAutoPool Pool;
 	Check();
 
 	GKey k = KeyEvent(event);
@@ -241,6 +243,7 @@ GKey KeyEvent(NSEvent *ev)
 
 - (void)keyUp:(NSEvent*)event
 {
+	LAutoPool Pool;
 	Check();
 
 	GKey k = KeyEvent(event);
@@ -249,15 +252,13 @@ GKey KeyEvent(NSEvent *ev)
 
 - (void)userEvent:(LCocoaMsg*)msg
 {
+	LAutoPool Pool;
+
 	if (GView::LockHandler(msg.v, GView::OpExists))
 	{
 		GMessage Msg(msg.m, msg.a, msg.b);
 		// LgiTrace("%s::OnEvent %i,%i,%i\n", msg.v->GetClass(), msg.m, msg.a, msg.b);
 		msg.v->OnEvent(&Msg);
-	}
-	else
-	{
-		// printf("%p::OnEvent %i,%i,%i no view\n", msg.v, msg.m, msg.a, msg.b);
 	}
 	
 	[msg release];
