@@ -113,50 +113,20 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 		if (Info)
 		{
 			Items.Insert(i, Where);
-			
-			#if COCOA
-			#else
-			Str = i->Name();
-			CFStringRef s = CFStringCreateWithBytes(kCFAllocatorDefault,
-													(UInt8*)Str, strlen(Str),
-													kCFStringEncodingUTF8,
-													false);
-			if (!s)
-				s = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)"#error", 6, kCFStringEncodingUTF8, false);
-			if (s)
+			auto Index = Items.IndexOf(i);
+			auto Max = Info.p.numberOfItems;
+
+			GString s(Str);
+			auto name = s.NsStr();
+			auto key = s.Replace("&","").NsStr();
+			printf("Adding '%s' @ %i, %i\n", Str, (int)Index, (int)Max);
+			i->Info = [Info.p insertItemWithTitle:name action:nil keyEquivalent:key atIndex:Index];
+			if (!i->Info)
 			{
-				OSStatus e;
-				
-				if (Where >= 0)
-				{
-					e = InsertMenuItemTextWithCFString(Info, s, Where, 0, 0);
-				}
-				else
-				{
-					e = AppendMenuItemTextWithCFString(Info, s, 0, 0, &i->Info);
-				}
-				
-				if (e)
-					printf("%s:%i - AppendMenuItemTextWithCFString failed (e=%i)\n", _FL, (int)e);
-#if DEBUG_INFO
-				else
-					printf("Append|Insert.MenuItemTextWithCFString(%p, %s)=%p\n", Info, Str, i->Info);
-#endif
-				
-				CFRelease(s);
+				Items.Delete(i);
+				delete i;
+				return NULL;
 			}
-			
-			if (Where >= 0)
-			{
-				// We have to reindex everything (do the indexes change anyway?)
-				List<LMenuItem>::I it = Items.Start();
-				int n = 1;
-				for (LMenuItem *mi = *it; mi; mi = *++it)
-				{
-					mi->Info = n++;
-				}
-			}
-			#endif
 			
 			i->Id(Id);
 			i->Enabled(Enabled);
@@ -187,32 +157,13 @@ LMenuItem *LSubMenu::AppendSeparator(int Where)
 		
 		if (Info)
 		{
-			#if COCOA
-			#else
-			OSStatus e;
-			if (Where >= 0)
-			{
-				e = InsertMenuItemTextWithCFString(	Info,
-												   NULL,
-												   Where,
-												   kMenuItemAttrSeparator,
-												   0);
-				if (!e)
-					i->Info = Where;
-			}
-			else
-			{
-				e = AppendMenuItemTextWithCFString(	Info,
-												   NULL,
-												   kMenuItemAttrSeparator,
-												   0,
-												   &i->Info);
-			}
-			if (e) printf("%s:%i - InsertMenuItemTextWithCFString failed (e=%i)\n", _FL, (int)e);
-			#if DEBUG_INFO
-			else printf("InsertMenuItemTextWithCFString(%p, ---)=%p\n", Info, i->Info);
-			#endif
-			#endif
+			auto Index = Items.IndexOf(i);
+			auto Max = Info.p.numberOfItems;
+
+			printf("Adding ----- @ %i, %i\n", (int)Index, (int)Max);
+
+			i->Info = [NSMenuItem separatorItem];
+			[Info.p insertItem:i->Info atIndex:Index];
 		}
 		else
 		{
@@ -245,48 +196,22 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 				i->Child->Parent = i;
 				i->Child->Menu = Menu;
 				i->Child->Window = Window;
+
+				i->Info = [[NSMenuItem alloc] init];
+				i->Info.p.title = GString(Str).NsStr();
+				i->Info.p.submenu = i->Child->Info.p;
 				
-				#if COCOA
-				#else
-				CFStringRef s;
-				OSStatus e;
-				
-				Str = i->Name();
-				s = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)Str, strlen(Str), kCFStringEncodingUTF8, false);
-				if (s)
+				auto Index = Items.IndexOf(i);
+				[Info.p insertItem:i->Info atIndex:Index];
+
+				/*
+				if (1)
 				{
-					e = SetMenuTitleWithCFString(i->Child->Info, s);
-					if (e) printf("%s:%i - SetMenuTitleWithCFString failed (e=%i)\n", __FILE__, __LINE__, (int)e);
-					#if DEBUG_INFO
-					else printf("SetMenuTitleWithCFString(%p, %s)\n", i->Child->Info, Str);
-					#endif
-					CFRelease(s);
+					Items.Delete(i);
+					delete i;
+					return NULL;
 				}
-				
-				i->Info = Items.IndexOf(i) + 1;
-				s = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)Str, strlen(Str), kCFStringEncodingUTF8, false);
-				if (s)
-				{
-					e = InsertMenuItemTextWithCFString(Info, s, i->Info - 1, 0, 0);
-					CFRelease(s);
-				}
-				if (e)
-					printf("%s:%i - Error: AppendMenuItemTextWithCFString(%p)=%i\n",
-						   _FL,
-						   Parent && Parent->Parent ? Parent->Parent->Info : NULL,
-						   Parent ? Parent->Info : NULL);
-				else
-				{
-					e = SetMenuItemHierarchicalMenu(Info, i->Info, i->Child->Info);
-					if (e)
-						printf("%s:%i - Error: SetMenuItemHierarchicalMenu(%p, %i, %p) = %i\n",
-							   _FL,
-							   Parent && Parent->Parent ? Parent->Parent->Info : NULL,
-							   Parent ? Parent->Info : NULL,
-							   Info,
-							   (int)e);
-				}
-				#endif
+				*/
 			}
 		}
 		else
@@ -304,7 +229,8 @@ void LSubMenu::Empty()
 {
 	while (Items[0])
 	{
-		RemoveItem(Items[0]);
+		if (!RemoveItem(Items[0]))
+			break; // Otherwise we'll get an infinite loop.
 	}
 }
 
@@ -368,58 +294,17 @@ bool IsOverMenu(XEvent *e)
 }
 #endif
 
-#if COCOA
-#else
-MenuCommand *ReturnFloatCommand = 0;
-#endif
-
 int LSubMenu::Float(GView *From, int x, int y, int Btns)
 {
-	// static int Depth = 0;
+	auto w = From ? From->GetWindow() : NULL;
+	auto h = w ? w->Handle() : NULL;
 	
-	#if COCOA
-	return 0;
-	#else
-	MenuCommand Cmd = 0;
-	if (From && Depth == 0)
-	{
-		Depth++;
-		
-		UInt32 UserSelectionType;
-		SInt16 MenuID;
-		MenuItemIndex MenuItem;
-		Point Pt = { y, x };
-		
-		From->Capture(false);
-		OnAttach(true);
-		
-		ReturnFloatCommand = &Cmd;
-		OSStatus e = ContextualMenuSelect(	Info,
-										  Pt,
-										  false,
-										  kCMHelpItemRemoveHelp,
-										  0,
-										  0, // AEDesc *inSelection,
-										  &UserSelectionType,
-										  &MenuID,
-										  &MenuItem);
-		ReturnFloatCommand = 0;
-		if (e == userCanceledErr)
-		{
-			// Success
-		}
-		else
-		{
-			printf("%s:%i - ContextualMenuSelect failed (e=%i)\n", _FL, (int)e);
-			Cmd = 0;
-		}
-		
-		Depth--;
-	}
-	else printf("%s:%i - Recursive limit.\n", _FL);
+	GdcPt2 p(x, y);
+	if (w) p = w->Flip(p);
+	NSPoint loc = {(double)p.x, (double)p.y};
+	[Info.p popUpMenuPositioningItem:nil atLocation:loc inView:h];
 
-	return Cmd;
-	#endif
+	return 0;
 }
 
 LSubMenu *LSubMenu::FindSubMenu(int Id)
@@ -949,37 +834,21 @@ LSubMenu *LMenuItem::GetParent()
 
 bool LMenuItem::Remove()
 {
-	if (Parent)
-	{
-		if (Parent->Info && Info)
-		{
-			// int Index = Parent->Items.IndexOf(this);
-			
-			#ifdef COCOA
-			#else
-			LgiAssert(Index + 1 == Info);
+	if (!Parent)
+		return false;
 
-			DeleteMenuItem(Parent->Info, Info);
-			Parent->Items.Delete(this);
-			
-			// Re-index all the following items
-			LMenuItem *mi;
-			for (int i = Index; (mi = Parent->Items.ItemAt(i)); i++)
-			{
-				mi->Info = i + 1;
-			}
-			
-			Info = NULL;
-			#endif
-		}
-		else
-		{
-			Parent->Items.Delete(this);
-		}
-		return true;
+	if (Parent->Info && Info)
+	{
+		[Parent->Info.p removeItem:Info];
+		Parent->Items.Delete(this);
+		Info = NULL;
+	}
+	else
+	{
+		Parent->Items.Delete(this);
 	}
 	
-	return false;
+	return true;
 }
 
 void LMenuItem::Id(int i)

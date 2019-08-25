@@ -291,7 +291,7 @@ void GView::Quit(bool DontDelete)
 
 GdcPt2 GView::Flip(GdcPt2 p)
 {
-	auto Parent = GetParent();
+	auto Parent = GetParent() ? GetParent() : GetWindow();
 	if (Parent)
 	{
 		GRect r = Parent->GetClient(false);
@@ -302,7 +302,7 @@ GdcPt2 GView::Flip(GdcPt2 p)
 
 GRect GView::Flip(GRect p)
 {
-	auto Parent = GetParent();
+	auto Parent = GetParent() ? GetParent() : GetWindow();
 	if (Parent)
 	{
 		GRect r = Parent->GetClient(false);
@@ -424,6 +424,11 @@ void GView::PointToScreen(GdcPt2 &p)
 	
 	if (c && c->WindowHandle())
 	{
+		NSWindow *w = c->WindowHandle();
+		NSRect i = {(double)Ox, (double)Oy, 0.0, 0.0};
+		NSRect o = [w convertRectToScreen:i];
+		p.x = (int)o.origin.x;
+		p.y = (int)o.origin.y;
 	}
 	else
 	{
@@ -450,6 +455,11 @@ void GView::PointToView(GdcPt2 &p)
 	// Apply window position
 	if (c && c->WindowHandle())
 	{
+		NSWindow *w = c->WindowHandle();
+		NSRect i = {(double)Ox, (double)Oy, 0.0, 0.0};
+		NSRect o = [w convertRectFromScreen:i];
+		p.x = (int)o.origin.x;
+		p.y = (int)o.origin.y;
 	}
 	else
 	{

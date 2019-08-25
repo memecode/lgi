@@ -197,8 +197,6 @@ void GScreenDC::SetClient(GRect *c)
 		{
 			CGContextSaveGState(d->Ctx);
 
-			// int Ox = 0, Oy = 0;
-
 			d->Stack.Add(d->Rc);
 			d->Rc = *c;
 

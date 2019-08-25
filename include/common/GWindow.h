@@ -74,8 +74,10 @@ protected:
 	
 	#elif defined(__OBJC__)
 	
+	public:
 		// This returns the root level content NSView
 		NSView *Handle();
+	protected:
 
 	#endif
 
