@@ -6346,8 +6346,8 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 		{
 			if (Ctrl)
 			{
-				int Sx = 0, Sy = 0;
-				int LineY = GetFont()->GetHeight();
+				int64 Sx = 0, Sy = 0;
+				int64 LineY = GetFont()->GetHeight();
 				Html->GetScrollPos(Sx, Sy);
 				Sx *= LineY;
 				Sy *= LineY;

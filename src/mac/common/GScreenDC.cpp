@@ -211,7 +211,7 @@ void GScreenDC::SetClient(GRect *c)
 			CGRect rect = {0};
 			rect.size.width = c->X();
 			rect.size.height = c->Y();
-			//CGContextClipToRect(d->Ctx, rect);
+			CGContextClipToRect(d->Ctx, rect);
 
 			#if 0
 			{

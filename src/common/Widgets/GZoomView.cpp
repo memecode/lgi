@@ -1415,8 +1415,8 @@ void GZoomView::SetCallback(GZoomViewCallback *cb)
 
 bool GZoomView::Convert(GPointF &p, int x, int y)
 {
-	int Sx = 0, Sy = 0;
-	int Factor = d->Factor();
+	int64 Sx = 0, Sy = 0;
+	int64 Factor = d->Factor();
 	GetScrollPos(Sx, Sy);
 	
 	if (d->GetZoom() > 0)
@@ -1712,7 +1712,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 		if (!d->Tile)
 			d->ResetTiles();
 
-		int Sx = 0, Sy = 0;
+		int64 Sx = 0, Sy = 0;
 		GetScrollPos(Sx, Sy);
 
 		// Get the image bounds and scroll it into position (view coords)

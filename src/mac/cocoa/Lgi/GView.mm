@@ -200,8 +200,7 @@ bool GView::_Mouse(GMouse &m, bool Move)
 			m.y -= p.y1;
 		}
 		
-		if (!m.IsMove())
-			m.Trace("Capture");
+		// if (!m.IsMove()) m.Trace("Capture");
 		
 		if (Move)
 		{
@@ -229,8 +228,7 @@ bool GView::_Mouse(GMouse &m, bool Move)
 			m.Target = t;
 		}
 		
-		if (!m.IsMove())
-			m.Trace("NonCapture");
+		// if (!m.IsMove()) m.Trace("NonCapture");
 
 		if (_Over != m.Target)
 		{
