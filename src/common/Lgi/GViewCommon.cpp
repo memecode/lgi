@@ -1327,9 +1327,9 @@ bool GView::Focus()
 	ThreadCheck();
 
 	bool Has = false;
-	GWindow *w = GetWindow();
-   
+	
 	#if defined(__GTK_H__) || defined(BEOS)
+	GWindow *w = GetWindow();
 	if (w)
 	{
 		bool Active = w->IsActive();
@@ -1537,9 +1537,8 @@ bool GView::DropTarget(bool t)
 			d->DropTarget = t ? Wnd : 0;
 	}
 
-	#if COCOA
-	#warning FIXME
-	#elif defined LGI_CARBON
+	#if LGI_COCOA
+	#elif LGI_CARBON
 	if (t)
 	{
 		static EventTypeSpec DragEvents[] =

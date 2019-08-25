@@ -31,6 +31,21 @@ static int LCocoaView_Count = 0;
 
 @end
 
+@implementation LCocoaAssert
+
+- (id)init:(GString)m
+{
+	if ((self = [super init]) != nil)
+	{
+		self.msg = m;
+	}
+	
+	return self;
+}
+
+@end
+
+
 @implementation LCocoaView {
 	NSTrackingArea *tracking;
 }

@@ -9,6 +9,8 @@
 #ifndef LCocoaView_h
 #define LCocoaView_h
 
+#if defined __OBJC__
+
 class GViewI;
 
 @interface LCocoaMsg : NSObject
@@ -19,6 +21,14 @@ class GViewI;
 @property GMessage::Param a;
 @property GMessage::Param b;
 - (id)init:(GViewI*)view msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B;
+@end
+
+@interface LCocoaAssert : NSObject
+{
+}
+@property GString msg;
+@property NSModalResponse result;
+- (id)init:(GString)m;
 @end
 
 // This class wraps a Cocoa NSView and redirects all the calls to LGI's GWindow object.
@@ -55,5 +65,5 @@ class GViewI;
 
 @end
 
-
+#endif
 #endif /* LCocoaView_h */

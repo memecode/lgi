@@ -52,6 +52,28 @@ struct GAppArguments
 	bool NoSkin;
 };
 
+class GAppPrivate;
+
+#if LGI_COCOA && defined __OBJC__
+#include "LCocoaView.h"
+
+@interface LNsApplication : NSApplication
+{
+}
+
+@property (nonnull) GAppPrivate *d;
+
+- (_Nonnull id)init:(nonnull GAppPrivate*)priv;
+- (void)terminate:(nullable id)sender;
+- (void)dealloc;
+- (void)assert:(nonnull LCocoaAssert*)ca;
+
+@end
+
+#endif
+
+ObjCWrapper(LNsApplication, OsApp)
+
 /// \brief Singleton class for handling application wide settings and methods
 ///
 /// This should be the first class you create, passing in the arguments from the
@@ -326,7 +348,7 @@ public:
 	
 	#elif LGI_COCOA && defined(__OBJC__)
 	
-		NSApplication *Handle();
+		OsApp &Handle();
 		
 	#endif
 

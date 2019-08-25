@@ -329,7 +329,7 @@ void OnCrash(int i)
 class GAppPrivate
 {
 public:
-	NSApplication *NsApp;
+	OsApp NsApp;
 	int RunDepth;
 
 	// Common
@@ -374,18 +374,6 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-@interface LNsApplication : NSApplication
-{
-}
-
-@property GAppPrivate *d;
-
-- (id)init:(GAppPrivate*)priv;
-- (void)terminate:(nullable id)sender;
-- (void)dealloc;
-
-@end
-
 @implementation LNsApplication
 
 - (id)init:(GAppPrivate*)priv
@@ -406,6 +394,20 @@ public:
 {
 	[super dealloc];
 	printf("LNsApplication.dealloc\n");
+}
+
+- (void)assert:(LCocoaAssert*)ca
+{
+	NSAlert *a = [[NSAlert alloc] init];
+	a.messageText = ca.msg.NsStr();
+	a.alertStyle = NSAlertStyleCritical;
+	[a addButtonWithTitle:@"Debug"];
+	[a addButtonWithTitle:@"Ignore"];
+	[a addButtonWithTitle:@"Abort"];
+	
+	ca.result = [a runModal];
+	
+	[a release];
 }
 
 @end
@@ -437,7 +439,7 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	setvbuf(stdout,(char *)NULL,_IONBF,0); // print mesgs immediately.
 	
 	// Connect to the server
-	d->NsApp = [NSApplication sharedApplication];
+	d->NsApp = [LNsApplication sharedApplication];
 
 	#if 0
 	auto mainMenu = [d->NsApp mainMenu];
@@ -575,7 +577,7 @@ GApp::~GApp()
 	TheApp = 0;
 }
 
-NSApplication *GApp::Handle()
+OsApp &GApp::Handle()
 {
 	return d->NsApp;
 }
