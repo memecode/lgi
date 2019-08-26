@@ -3511,7 +3511,7 @@ char *GTag::ParseText(char *Doc)
 {
 	ColorDef c;
 	c.Type = ColorRgb;
-	c.Rgb32 = LC_WORKSPACE;
+	c.Rgb32 = LColour(L_WORKSPACE).c32();
 	BackgroundColor(c);
 	
 	TagId = TAG_BODY;
@@ -3563,7 +3563,7 @@ char *GTag::ParseText(char *Doc)
 				GTag *t = new GTag(Html, this);
 				if (t)
 				{
-					t->Color(ColorDef(ColorRgb, Rgb24To32(LC_TEXT)));
+					t->Color(LColour(L_TEXT));
 					t->Text(Line);
 				}
 			}
@@ -6393,7 +6393,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 		}
 		case TAG_HR:
 		{
-			pDC->Colour(LC_MED, 24);
+			pDC->Colour(L_MED);
 			pDC->Rectangle(0, 0, Size.x - 1, Size.y - 1);
 			break;
 		}
@@ -6446,8 +6446,8 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 			else if (Size.x > 1 && Size.y > 1)
 			{
 				GRect b(0, 0, Size.x-1, Size.y-1);
-				GColour Fill(GdcMixColour(LC_MED, LC_LIGHT, 0.2f), 24);
-				GColour Border(LC_MED, 24);
+				GColour Fill(LColour(L_MED).Mix(LColour(L_LIGHT), 0.2f));
+				GColour Border(L_MED);
 
 				// Border
 				pDC->Colour(Border);
@@ -6459,7 +6459,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 				pDC->Rectangle(&b);
 
 				const char *Alt;
-				GColour Red(GdcMixColour(Rgb24(255, 0, 0), Fill.c24(), 0.3f), 24);
+				GColour Red(GColour(255, 0, 0).Mix(Fill, 0.3f));
 				if (Get("alt", Alt) && ValidStr(Alt))
 				{
 					GDisplayString Ds(Html->GetFont(), Alt);
@@ -6533,10 +6533,10 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 						f->Colour(L_FOCUS_SEL_FORE, L_FOCUS_SEL_BACK); \
 					else \
 					{ \
-						GColour bk(back.IsTransparent() ? GColour(LC_WORKSPACE, 24) : back);			\
-						GColour fr(fore.IsTransparent() ? GColour(DefaultTextColour, 32) : fore);		\
+						GColour bk(back.IsTransparent() ? GColour(L_WORKSPACE) : back);			\
+						GColour fr(fore.IsTransparent() ? GColour(DefaultTextColour) : fore);		\
 						if (IsEditor)																\
-							bk = bk.Mix(GColour(0, 0, 0), 0.05f);									\
+							bk = bk.Mix(GColour::Black, 0.05f);									\
 						f->Colour(fr, bk);															\
 					}
 

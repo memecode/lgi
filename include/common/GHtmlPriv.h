@@ -9,7 +9,7 @@ class HtmlEdit;
 
 namespace Html1
 {
-#define DefaultTextColour			Rgb32(0, 0, 0)
+#define DefaultTextColour			LColour(L_TEXT)
 
 //////////////////////////////////////////////////////////////////////////////////
 // Structs & Classes                                                            //

@@ -1116,7 +1116,7 @@ public:
             }
 			else
 			{
-				Dst->Colour(LC_WORKSPACE, 24);
+				Dst->Colour(L_WORKSPACE);
 				Dst->Rectangle();
 			}
 			
@@ -1839,7 +1839,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 	pDC->SetOrigin(0, 0);
 	for (GRect *r = Rgn.First(); r; r = Rgn.Next())
 	{
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle(r);
 		#if 0
 		pDC->Colour(GColour(255, 0, 255));

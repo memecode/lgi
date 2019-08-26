@@ -1366,12 +1366,6 @@ LgiFunc COLOUR CBit(int DstBits, COLOUR c, int SrcBits = 24, GPalette *Pal = 0);
 LgiClass GColour GdcMixColour(GColour a, GColour b, float HowMuchA = 0.5);
 #endif
 
-/// blends 2 24bit colours by the amount specified
-LgiFunc COLOUR GdcMixColour(COLOUR a, COLOUR b, float HowMuchA = 0.5);
-
-/// Turns a colour into an 8 bit grey scale representation
-LgiFunc COLOUR GdcGreyScale(COLOUR c, int Bits = 24);
-
 /// Colour reduction option to define what palette to go to
 enum GColourReducePalette
 {

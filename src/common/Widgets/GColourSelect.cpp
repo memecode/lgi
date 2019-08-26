@@ -23,7 +23,7 @@ public:
 	{
 		GRect r = GetClient();
 		LgiWideBorder(pDC, r, DefaultRaisedEdge);
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle(&r);
 
 		SysFont->Transparent(true);
@@ -38,12 +38,12 @@ public:
 			for (unsigned i=0; i<Colour->Presets.Length(); i++)
 			{
 				int y = r.y1 + ((i+1) * Ly);
-				COLOUR p32 = Colour->Presets[i];
+				GColour p = Colour->Presets[i];
 
-				pDC->Colour(p32, 32);
+				pDC->Colour(p);
 				pDC->Rectangle(r.x1+1, y+1, r.x1+Ly-1, y+Ly-1);
 				
-				sprintf_s(s, sizeof(s), "%2.2X,%2.2X,%2.2X", R32(p32), G32(p32), B32(p32));
+				sprintf_s(s, sizeof(s), "%2.2X,%2.2X,%2.2X", p.r(), p.g(), p.b());
 				GDisplayString ds(SysFont, s);
 				ds.Draw(pDC, r.x1 + Ly + 10, y + 2);
 			}
@@ -74,21 +74,21 @@ public:
 	void Value(int64 i) { Colour->Value(i); }
 };
 
-GColourSelect::GColourSelect(GArray<COLOUR> *col32) :
+GColourSelect::GColourSelect(GArray<GColour> *cols) :
 	GDropDown(-1, 0, 0, 10, 10, 0), ResObject(Res_Custom)
 {
-	c32 = Rgb32(0, 0, 255);
+	c.Rgb(0, 0, 255);
 
 	SetPopup(new GColourSelectPopup(this));
-	if (col32)
-		SetColourList(col32);
+	if (cols)
+		SetColourList(cols);
 }
 
-void GColourSelect::SetColourList(GArray<COLOUR> *col32)
+void GColourSelect::SetColourList(GArray<GColour> *cols)
 {
-	if (col32)
+	if (cols)
 	{
-		Presets = *col32;
+		Presets = *cols;
 	}
 
 	if (GetPopup())
@@ -100,21 +100,34 @@ void GColourSelect::SetColourList(GArray<COLOUR> *col32)
 
 int64 GColourSelect::Value()
 {
-	return c32;
+	return c.c32();
 }
 
-void GColourSelect::Value(int64 i)
+void GColourSelect::Value(GColour set)
 {
-	if (c32 != (COLOUR)i)
+	if (c != set)
 	{
-		c32 = (COLOUR)i;
 		Invalidate();
 
 		GViewI *n = GetNotify() ? GetNotify() : GetParent();
 		if (n)
-		{
 			n->OnNotify(this, 0);
-		}
+	}
+}
+
+void GColourSelect::Value(int64 i)
+{
+	if (c.c32() != i)
+	{
+		if (i >= 0)
+			c.Set((uint32_t)i, 32);
+		else
+			c.Empty();
+		Invalidate();
+
+		GViewI *n = GetNotify() ? GetNotify() : GetParent();
+		if (n)
+			n->OnNotify(this, 0);
 	}
 }
 
@@ -128,12 +141,12 @@ void GColourSelect::OnPaint(GSurface *pDC)
 	r.Size(5, 5);
 	if (IsOpen()) r.Offset(1, 1);
 
-	bool HasColour = Enabled() && c32 != 0;
-	pDC->Colour(HasColour ? LC_BLACK : LC_LOW, 24);
+	bool HasColour = Enabled() && c.IsValid();
+	pDC->Colour(HasColour ? L_BLACK : L_LOW);
 	pDC->Box(&r);
 
 	r.Size(1, 1);
-	pDC->Colour(HasColour ? c32 : Rgb24To32(LC_LOW), 32);
+	pDC->Colour(HasColour ? c : LColour(L_LOW));
 	if (HasColour)
 	{
 		pDC->Rectangle(&r);

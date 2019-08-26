@@ -761,10 +761,10 @@ void GRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 			GRect Bounds(0, 0, Size.x-1, Size.y-1);
 			Bounds.Offset(r.x1, r.y1);
 
-			Ctx.pDC->Colour(LC_MED, 24);
+			Ctx.pDC->Colour(L_MED);
 			Ctx.pDC->Box(&Bounds);
 			Bounds.Size(1, 1);
-			Ctx.pDC->Colour(LC_WORKSPACE, 24);
+			Ctx.pDC->Colour(L_WORKSPACE);
 			Ctx.pDC->Rectangle(&Bounds);
 
 			GRect rr(0, 0, Src->X()-1, SourceValid.y2 / Scale);
@@ -803,7 +803,7 @@ void GRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 		Ctx.pDC->Colour(ImgSelected ? cBack.Mix(Ctx.Colours[Selected].Back) : cBack);
 		Ctx.pDC->Rectangle(&r);
 
-		Ctx.pDC->Colour(LC_LOW, 24);
+		Ctx.pDC->Colour(L_LOW);
 		uint Ls = Ctx.pDC->LineStyle(GSurface::LineAlternate);
 		Ctx.pDC->Box(&r);
 		Ctx.pDC->LineStyle(Ls);
@@ -1082,7 +1082,7 @@ void GRichTextPriv::ImageBlock::UpdateDisplayImg()
 			Size.y = (int)ceil((double)SourceImg->Y() / Scale);
 			if (DisplayImg.Reset(new GMemDC(Size.x, Size.y, SourceImg->GetColourSpace())))
 			{
-				DisplayImg->Colour(LC_MED, 24);
+				DisplayImg->Colour(L_MED);
 				DisplayImg->Rectangle();
 			}
 		}
