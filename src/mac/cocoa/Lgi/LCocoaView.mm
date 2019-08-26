@@ -181,11 +181,18 @@ static int LCocoaView_Count = 0;
 	if (!t)
 		return;
 
-	auto scrollingDeltaY = ev.scrollingDeltaY;
+	static CGFloat total = 0.0;
+	auto deltaY = ev.scrollingDeltaY;
+	total += deltaY;
+	
 	int px = SysFont->GetHeight();
-	float lines = ((-scrollingDeltaY) + px) / px;
-	// printf("Scroll %g\n", scrollingDeltaY);
-	t->OnMouseWheel(lines);
+	int lines = (int) (total / px);
+	// printf("Scroll %g, lines=%i\n", deltaY, lines);
+	if (lines)
+	{
+		total -= lines * px;
+		t->OnMouseWheel(-lines);
+	}
 }
 
 GKey KeyEvent(NSEvent *ev)
@@ -270,3 +277,4 @@ GKey KeyEvent(NSEvent *ev)
 }
 
 @end
+

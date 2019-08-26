@@ -203,12 +203,12 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////
-void DrawGoobers(GSurface *pDC, GRect &r, GRect *Goobers, COLOUR c)
+void DrawGoobers(GSurface *pDC, GRect &r, GRect *Goobers, GColour c)
 {
 	int Mx = (r.x2 + r.x1) / 2 - (GOOBER_SIZE / 2);
 	int My = (r.y2 + r.y1) / 2 - (GOOBER_SIZE / 2);
 
-	pDC->Colour(c, 24);
+	pDC->Colour(c);
 
 	Goobers[0].x1 = r.x1 - GOOBER_BORDER;
 	Goobers[0].y1 = r.y1 - GOOBER_BORDER;
@@ -3419,8 +3419,8 @@ void ResDialog::DrawSelection(GSurface *pDC)
 	for (auto Ctrl: Selection)
 	{
 		GRect r = Ctrl->AbsPos();
-		COLOUR s = Rgb24(255, 0, 0);
-		COLOUR c = GetParent()->Focus() ? s : GdcMixColour(s, LC_MED, 0.4);
+		GColour s(255, 0, 0);
+		GColour c = GetParent()->Focus() ? s : s.Mix(LColour(L_MED), 0.4);
 		DrawGoobers(pDC, r, Ctrl->Goobers, c);
 	}
 }

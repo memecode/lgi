@@ -1880,7 +1880,7 @@ public:
 		
 		GColour c = t->_Colour(true);
 		if (c.IsValid())
-			t->Color(GCss::ColorDef(GCss::ColorRgb, DefaultTextColour));
+			t->Color(GCss::ColorDef(DefaultTextColour));
 
 		if (t->BackgroundColor().Type > GCss::ColorInherit)
 			t->BackgroundColor(GCss::ColorDef());
