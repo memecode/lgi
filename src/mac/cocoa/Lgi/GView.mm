@@ -439,7 +439,7 @@ void GView::PointToScreen(GdcPt2 &p)
 void GView::PointToView(GdcPt2 &p)
 {
 	GViewI *c = this;
-	int Ox = 0, Oy = 0;
+	int Ox = p.x, Oy = p.y;
 
 	// Find offset to window
 	while (c && c != c->GetWindow())

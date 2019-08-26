@@ -39,7 +39,7 @@
 }
 - (void)activate
 {
-	self.item->OnActivate();
+	self.item->OnActivate(self.item);
 }
 @end
 
@@ -387,17 +387,41 @@ bool IsOverMenu(XEvent *e)
 }
 #endif
 
+void LSubMenu::OnActivate(LMenuItem *item)
+{
+	if (!item)
+		return;
+	
+	if (FloatResult)
+		*FloatResult = item->Id();
+	else if (Parent)
+		Parent->OnActivate(item);
+	else
+		LgiAssert(!"Should have a float result OR a parent..");
+}
+
 int LSubMenu::Float(GView *From, int x, int y, int Btns)
 {
-	auto w = From ? From->GetWindow() : NULL;
-	auto h = w ? w->Handle() : NULL;
-	
 	GdcPt2 p(x, y);
-	if (w) p = w->Flip(p);
-	NSPoint loc = {(double)p.x, (double)p.y};
-	[Info.p popUpMenuPositioningItem:nil atLocation:loc inView:h];
+	OsView v = nil;
+	
+	auto w = From ? From->GetWindow() : NULL;
+	if (w)
+	{
+		v = w->Handle();
 
-	return 0;
+		w->PointToView(p);
+		// printf("Menu local = %i,%i\n", p.x, p.y);
+		p = w->Flip(p);
+		// printf("Menu flip = %i,%i\n", p.x, p.y);
+	}
+	
+	FloatResult.Reset(new int(0));
+	
+	NSPoint loc = {(double)p.x, (double)p.y};
+	[Info.p popUpMenuPositioningItem:nil atLocation:loc inView:v];
+
+	return FloatResult ? *FloatResult : 0;
 }
 
 LSubMenu *LSubMenu::FindSubMenu(int Id)
@@ -491,26 +515,12 @@ LMenuItem::~LMenuItem()
 	DeleteObj(d);
 }
 
-void LMenuItem::OnActivate()
+void LMenuItem::OnActivate(LMenuItem *item)
 {
-	switch (Id())
-	{
-		/*
-		case M_ABOUT:
-			break;
-		case M_PERFERENCES:
-			break;
-		case M_HIDE:
-			break;
-		*/
-		case M_QUIT:
-			LgiCloseApp();
-			break;
-		default:
-			if (Menu && Menu->Window)
-				Menu->Window->PostEvent(M_COMMAND, Id());
-			break;
-	}
+	if (Parent)
+		Parent->OnActivate(item);
+	else
+		LgiAssert(!"Should have a parent.");
 }
 
 void LMenuItem::OnAttach(bool Attach)
@@ -1078,6 +1088,33 @@ LMenu::LMenu(const char *AppName) : LSubMenu("", false)
 LMenu::~LMenu()
 {
 	Accel.DeleteObjects();
+}
+
+void LMenu::OnActivate(LMenuItem *item)
+{
+	if (!item)
+	{
+		LgiAssert(0);
+		return;
+	}
+	switch (item->Id())
+	{
+		/*
+		case M_ABOUT:
+			break;
+		case M_PERFERENCES:
+			break;
+		case M_HIDE:
+			break;
+		*/
+		case M_QUIT:
+			LgiCloseApp();
+			break;
+		default:
+			if (Window)
+				Window->PostEvent(M_COMMAND, item->Id());
+			break;
+	}
 }
 
 bool LMenu::SetPrefAndAboutItems(int PrefId, int AboutId)
