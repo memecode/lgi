@@ -422,6 +422,10 @@ public:
 	int Icon();
 
 	GImageList *GetImageList();
+
+	#if LGI_COCOA
+	void OnActivate();
+	#endif
 };
 
 /// Encapsulates a keyboard shortcut

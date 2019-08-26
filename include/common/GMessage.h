@@ -147,6 +147,10 @@ enum LgiMessages
 		M_SET_VISIBLE,
 		M_SETPOS, // A=(GRect*)Rectangle, B=(GView*)this
 		M_ASSERT_DLG,
+		M_QUIT,
+		M_ABOUT,
+		M_PERFERENCES,
+		M_HIDE,
 
 	#else
 	

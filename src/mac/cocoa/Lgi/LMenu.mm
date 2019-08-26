@@ -15,8 +15,137 @@
 #include "GToken.h"
 #include "GDisplayString.h"
 
-// static int NextId = 0;
 #define DEBUG_INFO		0
+
+@interface LNSMenuItem : NSMenuItem
+{
+}
+@property LMenuItem* item;
+- (id)init:(LMenuItem*)it;
+- (void)activate;
+@end
+
+@implementation LNSMenuItem
+- (id)init:(LMenuItem*)it
+{
+	if ((self = [super init]) != nil)
+	{
+		self.item = it;
+		self.target = self;
+		self.action = @selector(activate);
+	}
+	
+	return self;
+}
+- (void)activate
+{
+	self.item->OnActivate();
+}
+@end
+
+struct LShortcut
+{
+	NSString *Str;
+
+public:
+	NSString *Key;
+	NSEventModifierFlags Mod;
+	
+	LShortcut(const char *s)
+	{
+		Key = @"";
+		Str = nil;
+		Mod = 0;
+
+		auto Keys = GString(s).SplitDelimit("+-");
+		if (Keys.Length() <= 0)
+			return;
+		
+		for (auto k: Keys)
+		{
+			if (stricmp(k, "CtrlCmd") == 0 ||
+				stricmp(k, "AltCmd") == 0 ||
+				stricmp(k, "Cmd") == 0 ||
+				stricmp(k, "Command") == 0)
+			{
+				Mod |= NSEventModifierFlagCommand;
+			}
+			else if (stricmp(k, "Ctrl") == 0 ||
+					stricmp(k, "Control") == 0)
+			{
+				Mod |= NSEventModifierFlagControl;
+			}
+			else if (stricmp(k, "Alt") == 0 ||
+					stricmp(k, "Option") == 0)
+			{
+				Mod |= NSEventModifierFlagOption;
+			}
+			else if (stricmp(k, "Shift") == 0)
+			{
+				Mod |= NSEventModifierFlagShift;
+			}
+			else if (stricmp(k, "Del") == 0 ||
+					 stricmp(k, "Delete") == 0)
+			{
+				Key = @"Delete";
+			}
+			else if (stricmp(k, "Ins") == 0 ||
+					 stricmp(k, "Insert") == 0)
+			{
+				Key = @"Insert";
+			}
+			else if (stricmp(k, "Home") == 0)
+			{
+				Key = @"Home";
+			}
+			else if (stricmp(k, "End") == 0)
+			{
+				Key = @"End";
+			}
+			else if (stricmp(k, "PageUp") == 0)
+			{
+				Key = @"PageUp";
+			}
+			else if (stricmp(k, "PageDown") == 0)
+			{
+				Key = @"PageDown";
+			}
+			else if (stricmp(k, "Backspace") == 0)
+			{
+				Key = @"Backspace";
+			}
+			else if (stricmp(k, "Space") == 0)
+			{
+				Key = @" ";
+			}
+			else if (k[0] == 'F' && isdigit(k[1]))
+			{
+				Key = Str = GString(k).NsStr();
+			}
+			else if (isalpha(k[0]))
+			{
+				Key = Str = GString(k).Lower().NsStr();
+			}
+			else if (isdigit(k[0]))
+			{
+				Key = Str = GString(k).NsStr();
+			}
+			else if (strchr(",", k[0]))
+			{
+				Key = @",";
+			}
+			else
+			{
+				printf("%s:%i - Unhandled shortcut token '%s'\n", _FL, k.Get());
+			}
+		}
+	}
+	
+	~LShortcut()
+	{
+		if (Str) [Str release];
+	}
+};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 LSubMenu::LSubMenu(const char *name, bool Popup)
@@ -25,18 +154,7 @@ LSubMenu::LSubMenu(const char *name, bool Popup)
 	Parent = 0;
 	Info = NULL;
 	GBase::Name(name);
-
-	#if COCOA
-		Info.p = [[NSMenu alloc] init];
-	#else
-		OSStatus e = CreateNewMenu(	NextId++, // MenuId
-								   0, // MenuAttributes
-								   &Info);
-		if (e) printf("%s:%i - can't create menu (e=%i)\n", __FILE__, __LINE__, (int)e);
-		#if DEBUG_INFO
-		else printf("CreateNewMenu()=%p\n", Info);
-		#endif
-	#endif
+	Info.p = [[NSMenu alloc] init];
 }
 
 LSubMenu::~LSubMenu()
@@ -54,10 +172,8 @@ LSubMenu::~LSubMenu()
 	
 	if (Info)
 	{
-		#if COCOA
-		#else
-		DisposeMenu(Info);
-		#endif
+		[Info.p release];
+		Info = NULL;
 	}
 }
 
@@ -73,25 +189,6 @@ void LSubMenu::OnAttach(bool Attach)
 		Parent &&
 		Parent->Parent)
 	{
-#if 0
-		LSubMenu *k = Parent->Parent;
-		
-		if (Parent->Info == 0)
-		{
-			Parent->Info = k->Items.IndexOf(Parent) + 1;
-			char *Str = Parent->Name();
-			CFStringRef s = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)Str, strlen(Str), kCFStringEncodingUTF8, false);
-			OSStatus e = InsertMenuItemTextWithCFString(Parent->Parent->Info, s, Parent->Info - 1, 0, 0);
-			CFRelease(s);
-			
-			if (e) printf("%s:%i - Error: AppendMenuItemTextWithCFString(%p)=%i\n", __FILE__, __LINE__, Parent->Parent->Info, Parent->Info);
-			else
-			{
-				e = SetMenuItemHierarchicalMenu(Parent->Parent->Info, Parent->Info, Info);
-				if (e) printf("%s:%i - Error: SetMenuItemHierarchicalMenu(%p, %i, %p) = %i\n", __FILE__, __LINE__, Parent->Parent->Info, Parent->Info, Info, e);
-			}
-		}
-#endif
 	}
 }
 
@@ -114,23 +211,27 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 		{
 			Items.Insert(i, Where);
 			auto Index = Items.IndexOf(i);
-			auto Max = Info.p.numberOfItems;
+			// auto Max = Info.p.numberOfItems;
 
-			GString s(Str);
+			GString s(i->GBase::Name());
 			auto name = s.NsStr();
-			auto key = s.Replace("&","").NsStr();
-			printf("Adding '%s' @ %i, %i\n", Str, (int)Index, (int)Max);
-			i->Info = [Info.p insertItemWithTitle:name action:nil keyEquivalent:key atIndex:Index];
+			LShortcut sc(Shortcut);
+
+			i->Info.p = [[LNSMenuItem alloc] init:i];
+			[i->Info.p setTitle:name];
+			i->Info.p.keyEquivalent = sc.Key;
+			[Info.p insertItem:i->Info atIndex:Index];
+			// i->Info = [Info.p insertItemWithTitle:name action:nil keyEquivalent:sc.Key atIndex:Index];
 			if (!i->Info)
 			{
 				Items.Delete(i);
 				delete i;
 				return NULL;
 			}
-			
+
+			i->Info.p.keyEquivalentModifierMask = sc.Mod;
 			i->Id(Id);
 			i->Enabled(Enabled);
-			i->ScanForAccel();
 			
 			return i;
 		}
@@ -158,9 +259,8 @@ LMenuItem *LSubMenu::AppendSeparator(int Where)
 		if (Info)
 		{
 			auto Index = Items.IndexOf(i);
-			auto Max = Info.p.numberOfItems;
-
-			printf("Adding ----- @ %i, %i\n", (int)Index, (int)Max);
+			// auto Max = Info.p.numberOfItems;
+			// printf("Adding ----- @ %i, %i\n", (int)Index, (int)Max);
 
 			i->Info = [NSMenuItem separatorItem];
 			[Info.p insertItem:i->Info atIndex:Index];
@@ -181,13 +281,11 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 	LMenuItem *i = new LMenuItem;
 	if (i && Str)
 	{
-		i->Name(Str);
 		i->Parent = this;
 		i->Menu = Menu;
 		i->Id(-1);
 		
 		Items.Insert(i, Where);
-		
 		if (Info)
 		{
 			i->Child = new LSubMenu(Str);
@@ -196,22 +294,17 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 				i->Child->Parent = i;
 				i->Child->Menu = Menu;
 				i->Child->Window = Window;
+				
+				i->Info.p = [[NSMenuItem alloc] init];
+				LgiAssert(i->Info);
 
-				i->Info = [[NSMenuItem alloc] init];
-				i->Info.p.title = GString(Str).NsStr();
-				i->Info.p.submenu = i->Child->Info.p;
+				i->Name(Str);
+				GString s(i->GBase::Name());
+				[i->Child->Info.p setTitle:s.NsStr()];
+				[i->Info.p setSubmenu:i->Child->Info.p];
 				
 				auto Index = Items.IndexOf(i);
 				[Info.p insertItem:i->Info atIndex:Index];
-
-				/*
-				if (1)
-				{
-					Items.Delete(i);
-					delete i;
-					return NULL;
-				}
-				*/
 			}
 		}
 		else
@@ -396,6 +489,28 @@ LMenuItem::~LMenuItem()
 	}
 	DeleteObj(Child);
 	DeleteObj(d);
+}
+
+void LMenuItem::OnActivate()
+{
+	switch (Id())
+	{
+		/*
+		case M_ABOUT:
+			break;
+		case M_PERFERENCES:
+			break;
+		case M_HIDE:
+			break;
+		*/
+		case M_QUIT:
+			LgiCloseApp();
+			break;
+		default:
+			if (Menu && Menu->Window)
+				Menu->Window->PostEvent(M_COMMAND, Id());
+			break;
+	}
 }
 
 void LMenuItem::OnAttach(bool Attach)
@@ -679,150 +794,6 @@ bool LMenuItem::ScanForAccel()
 	if (!d->Shortcut)
 		return false;
 	
-	GToken Keys(d->Shortcut, "+-");
-	if (Keys.Length() <= 0)
-		return false;
-	
-	int Flags = 0;
-	int Key = 0;
-	
-	for (int i=0; i<Keys.Length(); i++)
-	{
-		char *k = Keys[i];
-		if (stricmp(k, "Ctrl") == 0 ||
-			stricmp(k, "Modifier") == 0)
-		{
-			Flags |= LGI_EF_CTRL;
-		}
-		else if (stricmp(k, "Alt") == 0)
-		{
-			Flags |= LGI_EF_ALT;
-		}
-		else if (stricmp(k, "Shift") == 0)
-		{
-			Flags |= LGI_EF_SHIFT;
-		}
-		else if (stricmp(k, "Del") == 0 ||
-				 stricmp(k, "Delete") == 0)
-		{
-			Key = LK_DELETE;
-		}
-		else if (stricmp(k, "Ins") == 0 ||
-				 stricmp(k, "Insert") == 0)
-		{
-			Key = LK_INSERT;
-		}
-		else if (stricmp(k, "Home") == 0)
-		{
-			Key = LK_HOME;
-		}
-		else if (stricmp(k, "End") == 0)
-		{
-			Key = LK_END;
-		}
-		else if (stricmp(k, "PageUp") == 0)
-		{
-			Key = LK_PAGEUP;
-		}
-		else if (stricmp(k, "PageDown") == 0)
-		{
-			Key = LK_PAGEDOWN;
-		}
-		else if (stricmp(k, "Backspace") == 0)
-		{
-			Key = LK_BACKSPACE;
-		}
-		else if (stricmp(k, "Space") == 0)
-		{
-			Key = ' ';
-		}
-		else if (k[0] == 'F' && isdigit(k[1]))
-		{
-			int F[] =
-			{
-				LK_F1, LK_F2, LK_F3, LK_F4, LK_F5, LK_F6,
-				LK_F7, LK_F8, LK_F9, LK_F10, LK_F11, LK_F12
-			};
-			int idx = atoi(k + 1);
-			if (idx >= 1 && idx <= 12)
-			{
-				Key = F[idx-1];
-			}
-		}
-		else if (isalpha(k[0]))
-		{
-			Key = toupper(k[0]);
-		}
-		else if (isdigit(k[0]))
-		{
-			Key = k[0];
-		}
-		else if (strchr(",", k[0]))
-		{
-			Key = k[0];
-		}
-		else
-		{
-			printf("%s:%i - Unhandled shortcut token '%s'\n", _FL, k);
-		}
-	}
-	
-	if (Key == ' ')
-	{
-		Menu->Accel.Insert( new GAccelerator(Flags, Key, Id()) );
-	}
-	else if (Key)
-	{
-		#ifdef COCOA
-		#else
-		int ModMask =	(TestFlag(Flags, LGI_EF_CTRL) ? 0 : kMenuNoCommandModifier) |
-		(TestFlag(Flags, LGI_EF_ALT) ? kMenuOptionModifier : 0) |
-		(TestFlag(Flags, LGI_EF_SHIFT) ? kMenuShiftModifier : 0);
-		
-		e = SetMenuItemModifiers(Parent->Info, Info, ModMask);
-		
-		if (e) printf("%s:%i - SetMenuItemModifiers() failed with %i\n",
-					  __FILE__, __LINE__, (int)e);
-		
-		switch (Key)
-		{
-#define Map(k, g) \
-case k: \
-SetMenuItemKeyGlyph(Parent->Info, Info, g); \
-break
-				
-				Map(VK_F1, kMenuF1Glyph);
-				Map(VK_F2, kMenuF2Glyph);
-				Map(VK_F3, kMenuF3Glyph);
-				Map(VK_F4, kMenuF4Glyph);
-				Map(VK_F5, kMenuF5Glyph);
-				Map(VK_F6, kMenuF6Glyph);
-				Map(VK_F7, kMenuF7Glyph);
-				Map(VK_F8, kMenuF8Glyph);
-				Map(VK_F9, kMenuF9Glyph);
-				Map(VK_F10, kMenuF10Glyph);
-				Map(VK_F11, kMenuF11Glyph);
-				Map(VK_F12, kMenuF12Glyph);
-				Map(' ', kMenuSpaceGlyph);
-				Map(VK_DELETE, kMenuDeleteRightGlyph);
-				Map(VK_BACKSPACE, kMenuDeleteLeftGlyph);
-				Map(VK_UP, kMenuUpArrowGlyph);
-				Map(VK_DOWN, kMenuDownArrowGlyph);
-				Map(VK_LEFT, kMenuLeftArrowGlyph);
-				Map(VK_RIGHT, kMenuRightArrowGlyph);
-			default:
-			{
-				e = SetMenuItemCommandKey(	Parent->Info,
-										  Info,
-										  false,
-										  Key);
-				if (e) printf("%s:%i - SetMenuItemCommandKey(%i/%c) failed with %i\n",
-							  _FL, Key, Key, (int)e);
-				break;
-			}
-		}
-		#endif
-	}
 	
 	return true;
 }
@@ -913,23 +884,10 @@ bool LMenuItem::Name(const char *n)
 	}
 	
 	bool Status = GBase::Name(Tmp);
-	if (Status && Parent)
+	if (Status && Info)
 	{
-		#ifdef COCOA
-		#else
-		CFStringRef s = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)Tmp, strlen(Tmp), kCFStringEncodingUTF8, false);
-		
-		if (!s)
-			s = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)"#error", 6, kCFStringEncodingUTF8, false);
-		
-		if (s)
-		{
-			SetMenuItemTextWithCFString(Parent->Info, Info, s);
-			// if (e) printf("%s:%i - SetMenuItemTextWithCFString(%p, %s) failed with %i.\n", _FL, Parent->Info, Tmp, e);
-			
-			CFRelease(s);
-		}
-		#endif
+		GString s(Tmp);
+		[Info.p setTitle:s.NsStr()];
 	}
 	
 	DeleteArray(Tmp);
@@ -1104,6 +1062,17 @@ int LMenuItem::Icon()
 LMenu::LMenu(const char *AppName) : LSubMenu("", false)
 {
 	Menu = this;
+	
+	auto s = AppendSub("Root");
+	if (s)
+	{
+		s->AppendItem("About", M_ABOUT);
+		s->AppendSeparator();
+		s->AppendItem("Perferences", M_PERFERENCES);
+		s->AppendItem("Hide", M_HIDE);
+		s->AppendSeparator();
+		s->AppendItem("Quit", M_QUIT, true, -1, "Cmd+Q");
+	}
 }
 
 LMenu::~LMenu()
@@ -1174,6 +1143,7 @@ bool LMenu::Attach(GViewI *p)
 	if (w)
 	{
 		Window = p;
+		[NSApplication sharedApplication].mainMenu = Info;
 		
 		if (Info)
 		{
