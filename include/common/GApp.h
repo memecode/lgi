@@ -70,9 +70,9 @@ class GAppPrivate;
 
 @end
 
-#endif
-
 ObjCWrapper(LNsApplication, OsApp)
+
+#endif
 
 /// \brief Singleton class for handling application wide settings and methods
 ///

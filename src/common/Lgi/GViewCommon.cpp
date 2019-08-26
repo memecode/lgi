@@ -1345,6 +1345,7 @@ bool GView::Focus()
 	#elif LGI_COCOA
 	Has = TestFlag(WndFlags, GWF_FOCUS);
 	#elif LGI_CARBON
+	GWindow *w = GetWindow();
 	if (w)
 	{
 		ControlRef Cur;

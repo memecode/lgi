@@ -102,6 +102,8 @@ int ReaderThread::OnLine(char *s, ssize_t len)
 				return -1;
 			break;
 		}
+		default:
+			break;
 	}
 
 	return 1;
@@ -2018,7 +2020,7 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 					VcFile *f = Map.Find(File);
 					if (!f)
 					{
-						if (f = new VcFile(d, this, WorkingRev, IsWorking))
+						if ((f = new VcFile(d, this, WorkingRev, IsWorking)))
 							Ins.Insert(f);
 					}
 					if (f)
@@ -2036,7 +2038,7 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 					VcFile *f = Map.Find(File);
 					if (!f)
 					{
-						if (f = new VcFile(d, this, NULL, IsWorking))
+						if ((f = new VcFile(d, this, NULL, IsWorking)))
 							Ins.Insert(f);
 					}
 					if (f)
@@ -2231,6 +2233,8 @@ void VcFolder::FolderStatus(const char *Path, VcLeaf *Notify)
 	{
 		case VcHg:
 			CountToTip();
+			break;
+		default:
 			break;
 	}
 }
@@ -3043,7 +3047,7 @@ bool VcFolder::AddFile(const char *Path, bool AsBinary)
 			if (dir)
 			{
 				*dir++ = 0;
-				if (params = new ParseParams)
+				if ((params = new ParseParams))
 					params->AltInitPath = p;
 			}
 
