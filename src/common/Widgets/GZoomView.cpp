@@ -1722,7 +1722,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 		GRect s = ScaledDocSize;
 		
 		// Scroll positions are in doc px, so scale them here to screen
-		GdcPt2 ScaledScroll(Sx, Sy);
+		GdcPt2 ScaledScroll((int)Sx, (int)Sy);
 		ScaledScroll = d->DocToScreen(ScaledScroll);
 		s.Offset(-ScaledScroll.x, -ScaledScroll.y);
 

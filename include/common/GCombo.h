@@ -103,7 +103,7 @@ public:
 	/// Gets the items in the list
 	size_t Length();
 	/// Returns the item at index 'i'
-	char *operator [](int i);
+	char *operator [](ssize_t i);
 	/// Returns the index of a given string
 	int IndexOf(const char *str);
 

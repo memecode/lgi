@@ -479,7 +479,7 @@ public:
     class GCss *GetCss(bool Create = false);
 
 	/// Resolve a CSS colour, e.g.:
-	/// auto Back = StyleColour(GCss::PropBackgroundColor, LC_MED);
+	/// auto Back = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 	GColour StyleColour(int CssPropType, GColour Default, int Depth = 5);
 
     /// Sets the style of the control (will take ownership of 'css')

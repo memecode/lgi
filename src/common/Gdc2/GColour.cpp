@@ -94,6 +94,11 @@ void GColour::Rgb(int r, int g, int b, int a)
 	c32(Rgba32(r, g, b, a));
 }
 
+void GColour::Set(LSystemColour c)
+{
+	*this = LColour(c);
+}
+
 void GColour::Set(uint32_t c, int bits, GPalette *palette)
 {
 	pal = 0;

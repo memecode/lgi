@@ -6362,7 +6362,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 					r.x2 -= Px.x2;
 					r.y2 -= Px.y2;
 				}
-				r.Offset(AbsX() - Sx, AbsY() - Sy);
+				r.Offset(AbsX() - (int)Sx, AbsY() - (int)Sy);
 				Ctrl->SetPos(r);
 			}
 			
@@ -6673,7 +6673,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 
 					if (Html->d->CursorVis && CursorPos.Valid())
 					{
-						pDC->Colour(LC_TEXT, 24);
+						pDC->Colour(L_TEXT);
 						pDC->Rectangle(&CursorPos);
 					}
 				}
@@ -6709,7 +6709,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 						)
 						{
 							ssize_t Off = Tr->Text == PreText() ? StrlenW(PreText()) : Cursor - Pos;
-							pDC->Colour(LC_TEXT, 24);
+							pDC->Colour(L_TEXT);
 							GRect c;
 							if (Off)
 							{
@@ -7371,7 +7371,7 @@ void GHtml::OnPaint(GSurface *ScreenDC)
 			cBack = Bk;
 	}
 	if (!cBack.IsValid())
-		cBack.Set(Enabled() ? LC_WORKSPACE : LC_MED, 24);
+		cBack = LColour(Enabled() ? L_WORKSPACE : L_MED);
 	pDC->Colour(cBack);
 	pDC->Rectangle();
 

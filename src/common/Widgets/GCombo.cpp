@@ -151,7 +151,7 @@ size_t GCombo::Length()
 	return d->Items.Length();
 }
 
-char *GCombo::operator [](int i)
+char *GCombo::operator [](ssize_t i)
 {
 	return d->Items.ItemAt(i);
 }

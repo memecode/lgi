@@ -625,25 +625,11 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 		GView *w = i->GetGView();
 		if (w && w->Visible())
 		{
-			#ifdef _DEBUG
-			if (_Debug) LgiTrace("%s:%i - _Paint.Vis %s %s\n", _FL, w->GetClass(), w->GetPos().GetStr());
-			#endif
+			if (!w->Pos.Valid())
+				continue;
 			w->_Paint(pDC, &o);
 		}
-		#ifdef _DEBUG
-		else if (_Debug)
-			LgiTrace("%s:%i - _Paint.!Vis %s\n", _FL, w->GetClass());
-		#endif
 	}
-
-	/*
-	d->InPaint = false;
-	PaintTime += Update ? LgiCurrentTime()-StartTs : 0;
-	if (++nPaint % 100 == 0)
-	{
-		LgiTrace("PaintAvg = %.2g\n", (double)PaintTime / nPaint);
-	}
-	*/
 }
 #else
 void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)

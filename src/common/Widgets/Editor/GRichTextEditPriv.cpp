@@ -337,9 +337,9 @@ GRichTextPriv::GRichTextPriv(GRichTextEdit *view, GRichTextPriv **Ptr) :
 	Values[GRichTextEdit::UnderlineBtn] = false;
 	BtnState[GRichTextEdit::UnderlineBtn].IsPress = true;
 		
-	Values[GRichTextEdit::ForegroundColourBtn] = (int64)Rgb24To32(LC_TEXT);
+	Values[GRichTextEdit::ForegroundColourBtn] = (int64)LColour(L_TEXT).c32();
 	BtnState[GRichTextEdit::ForegroundColourBtn].IsMenu = true;
-	Values[GRichTextEdit::BackgroundColourBtn] = (int64)Rgb24To32(LC_WORKSPACE);
+	Values[GRichTextEdit::BackgroundColourBtn] = (int64)LColour(L_WORKSPACE).c32();
 	BtnState[GRichTextEdit::BackgroundColourBtn].IsMenu = true;
 
 	Values[GRichTextEdit::MakeLinkBtn] = TEXT_LINK;
@@ -1896,18 +1896,18 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 	Ctx.pDC = pDC;
 	Ctx.Cursor = Cursor;
 	Ctx.Select = Selection;
-	Ctx.Colours[Unselected].Fore.Set(LC_TEXT, 24);
-	Ctx.Colours[Unselected].Back.Set(LC_WORKSPACE, 24);		
+	Ctx.Colours[Unselected].Fore.Set(L_TEXT);
+	Ctx.Colours[Unselected].Back.Set(L_WORKSPACE);
 		
 	if (View->Focus())
 	{
-		Ctx.Colours[Selected].Fore.Set(LC_FOCUS_SEL_FORE, 24);
-		Ctx.Colours[Selected].Back.Set(LC_FOCUS_SEL_BACK, 24);
+		Ctx.Colours[Selected].Fore.Set(L_FOCUS_SEL_FORE);
+		Ctx.Colours[Selected].Back.Set(L_FOCUS_SEL_BACK);
 	}
 	else
 	{
-		Ctx.Colours[Selected].Fore.Set(LC_NON_FOCUS_SEL_FORE, 24);
-		Ctx.Colours[Selected].Back.Set(LC_NON_FOCUS_SEL_BACK, 24);
+		Ctx.Colours[Selected].Fore.Set(L_NON_FOCUS_SEL_FORE);
+		Ctx.Colours[Selected].Back.Set(L_NON_FOCUS_SEL_BACK);
 	}
 		
 	for (unsigned i=0; i<Blocks.Length(); i++)

@@ -956,24 +956,14 @@ GString GApp::GetFileMimeType(const char *File)
 		}
 	}
 	
-	char *Ext = LgiGetExtension((char*)File);
-	if (Ext)
-	{
-		#if 0
-		CFStringRef e = CFStringCreateWithCString(NULL, Ext, kCFStringEncodingUTF8);
-		CFStringRef uti = e != NULL ? UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, e, NULL) : 0;
-		CFStringRef mime = uti != NULL ? UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType) : 0;
-		
-		Ret.Reset(CFStringToUtf8(mime));
-		
-		if (uti != NULL)
-			CFRelease(uti);
-		if (mime != NULL)
-			CFRelease(mime);
-		if (e != NULL)
-			CFRelease(e);
-		#endif
-	}
+	auto filePath = GString(File).NsStr();
+	CFStringRef fileExtension = (__bridge CFStringRef)[filePath pathExtension];
+	CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, fileExtension, NULL);
+	CFStringRef MIMEType = UTTypeCopyPreferredTagWithClass(UTI, kUTTagClassMIMEType);
+	Ret = MIMEType;
+	CFRelease(MIMEType);
+	CFRelease(UTI);
+	[filePath release];
 	
 	if (!Ret)
 		Ret = "application/octet-stream";

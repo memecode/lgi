@@ -6,7 +6,7 @@
 #include "GNotifications.h"
 
 #define DEFAULT_SPACER_PX			5
-// #define DEFAULT_SPACER_COLOUR24		LC_MED
+// #define DEFAULT_SPACER_COLOUR24		LColour(L_MED)
 #define DEFAULT_MINIMUM_SIZE_PX		5
 #define ACTIVE_SPACER_SIZE_PX		9
 

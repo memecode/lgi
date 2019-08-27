@@ -123,6 +123,8 @@ public:
 	void Rgb(int r, int g, int b, int a = 255);
 	/// Sets the colour
 	void Set(uint32_t c, int bits, GPalette *palette = NULL);
+	/// Set to a system colour
+	void Set(LSystemColour c);
 	uint32_t Get(int bits);
 	
 	/// Gets/sets the red component (0-255)
