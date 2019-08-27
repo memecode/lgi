@@ -373,6 +373,7 @@ public:
 
 - (void)terminate:(nullable id)sender
 {
+	[super terminate:sender];
 }
 
 - (void)dealloc
@@ -508,43 +509,6 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 		extern GSkinEngine *CreateSkinEngine(GApp *App);
 		SkinEngine = CreateSkinEngine(this);
 	}
-	
-#if 0
-	OSStatus e;
-	
-	// Setup apple event handlers
-	/*
-	 e = AEInstallEventHandler(	kInternetEventClass,
-	 kAEGetURL,
-	 NewAEEventHandlerUPP(AppleEventProc),
-	 (SRefCon)this,
-	 false);
-	 printf("AEInstallEventHandler(kInternetEventClass, kAEGetURL, ...)=%i\n", (int)e);
-	 if (e) LgiTrace("%s:%i - AEInstallEventHandler = %i\n", _FL, e);
-	 e = AEInstallEventHandler(	kCoreEventClass,
-	 kAEOpenApplication,
-	 NewAEEventHandlerUPP(AppleEventProc),
-	 (SRefCon)this,
-	 false);
-	 LgiTrace("%s:%i - AEInstallEventHandler = %i\n", _FL, e);
-	 */
-	
-	// Setup application handler
-	EventTypeSpec	AppEvents[] =
-	{
-		{ kEventClassApplication, kEventAppActivated       },
-		{ kEventClassApplication, kEventAppFrontSwitched   },
-		{ kEventClassApplication, kEventAppGetDockTileMenu },
-		{ kEventClassCommand,     kEventCommandProcess     },
-	};
-	
-	EventHandlerRef Handler = 0;
-	e =	InstallApplicationEventHandler(	NewEventHandlerUPP(AppProc),
-									   GetEventTypeCount(AppEvents),
-									   AppEvents,
-									   (void*)this, &Handler);
-	if (e) LgiTrace("%s:%i - InstallEventHandler for app failed (%i)\n", _FL, e);
-#endif
 }
 
 GApp::~GApp()
@@ -795,9 +759,10 @@ void GApp::Exit(int Code)
 	#else
 	if (!Code)
 	{
-		DeleteObj(AppWnd);
-		// [d->NsApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.0];
-		[d->NsApp stop:nil];
+		if (AppWnd)
+			AppWnd->Quit();
+		
+		[d->NsApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.0];
 	}
 	else
 	#endif

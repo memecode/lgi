@@ -1132,6 +1132,7 @@ void LMenu::OnActivate(LMenuItem *item)
 				Window->PostEvent(M_COMMAND, d->PrefId);
 			break;
 		case M_HIDE:
+			[[NSApplication sharedApplication] hide:Info];
 			break;
 		case M_QUIT:
 			LgiCloseApp();

@@ -157,6 +157,7 @@ protected:
 		public:
 			GdcPt2 Flip(GdcPt2 p);
 			GRect Flip(GRect p);
+			virtual void OnDealloc();
 	
 		#elif defined(LGI_CARBON)
 			OsView _CreateCustomView();

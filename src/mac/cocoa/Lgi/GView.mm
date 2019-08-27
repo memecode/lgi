@@ -300,6 +300,16 @@ GdcPt2 GView::Flip(GdcPt2 p)
 	return p;
 }
 
+void GView::OnDealloc()
+{
+	SetPulse();
+	for (auto c: Children)
+	{
+		auto gv = c->GetGView();
+		if (gv) gv->OnDealloc();
+	}
+}
+
 GRect GView::Flip(GRect p)
 {
 	auto Parent = GetParent() ? GetParent() : GetWindow();

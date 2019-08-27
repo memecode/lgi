@@ -156,6 +156,8 @@ public:
 
 - (void)dealloc
 {
+	self.d->Wnd->OnDealloc();
+
 	LAutoPool Ap;
 	LCocoaView *cv = objc_dynamic_cast(LCocoaView, self.contentView);
 	cv.w = NULL;
