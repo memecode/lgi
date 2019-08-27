@@ -10,7 +10,7 @@
 extern void NextTabStop(GViewI *v, int dir);
 extern void SetDefaultFocus(GViewI *v);
 
-#define DEBUG_KEYS			0
+#define DEBUG_KEYS			1
 
 #define objc_dynamic_cast(TYPE, object) \
   ({ \
@@ -156,7 +156,8 @@ public:
 
 - (void)dealloc
 {
-	self.d->Wnd->OnDealloc();
+	if (self.d)
+		self.d->Wnd->OnDealloc();
 
 	LAutoPool Ap;
 	LCocoaView *cv = objc_dynamic_cast(LCocoaView, self.contentView);
@@ -209,8 +210,26 @@ public:
 - (void)windowWillClose:(NSNotification*)event
 {
 	LNsWindow *w = event.object;
-	if (w && w.d && !w.d->Closing)
-		w.d->Wnd->Quit();
+	if (w)
+	{
+	 	if (w.d)
+	 	{
+			printf("%s:%i - windowWillClose(%s) w.d->Closing=%i\n",
+				_FL, w.d->Wnd->GetClass(), w.d->Closing);
+			
+	 		if (w.d->Closing)
+	 		{
+	 			auto gwnd = w.d->Wnd;
+	 			w.d = NULL;
+	 			delete gwnd;
+			}
+	 		else
+	 		{
+				w.d->Wnd->Quit();
+			}
+		}
+		else printf("%s:%i - w.d is NULL\n", _FL);
+	}
 }
 
 - (void)windowDidBecomeMain:(NSNotification*)event
@@ -276,7 +295,7 @@ GWindow::~GWindow()
 	
 	if (Wnd)
 	{
-		LCocoaView *cv = objc_dynamic_cast(LCocoaView, Wnd.p.contentViewController.view);
+		LCocoaView *cv = objc_dynamic_cast(LCocoaView, Wnd.p.contentView);
 		if (cv)
 			cv.w = NULL;
 
@@ -469,11 +488,19 @@ void GWindow::Quit(bool DontDelete)
 	
 	if (d)
 		d->DeleteWhenDone = !DontDelete;
+	
 	if (Wnd)
 	{
 		SetDragHandlers(false);
-		d->Closing = true;
-		[Wnd.p close];
+		if (d->Closing)
+		{
+			PostEvent(M_DESTROY);
+		}
+		else
+		{
+			d->Closing = true;
+			PostEvent(M_CLOSE);
+		}
 	}
 }
 
@@ -1697,6 +1724,11 @@ GMessage::Result GWindow::OnEvent(GMessage *m)
 				return 0;
 			}
 			break;
+		}
+		case M_DESTROY:
+		{
+			delete this;
+			return true;
 		}
 	}
 	

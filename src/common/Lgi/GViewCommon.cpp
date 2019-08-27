@@ -259,7 +259,6 @@ GView::~GView()
 	}
 	
 	#if LGI_VIEW_HASH
-    // printf("Removing %p from hash\n", (GViewI*)this);
 	LockHandler(this, OpDelete);
 	#endif
 

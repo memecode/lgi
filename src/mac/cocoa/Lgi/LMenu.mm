@@ -1101,7 +1101,7 @@ LMenu::LMenu(const char *AppName) : LSubMenu("", false)
 	{
 		s->AppendItem("About", M_ABOUT);
 		s->AppendSeparator();
-		s->AppendItem("Perferences", M_PERFERENCES, true, -1, "Cmd+.");
+		s->AppendItem("Preferences", M_PERFERENCES, true, -1, "Cmd+,");
 		s->AppendItem("Hide", M_HIDE, true, -1, "Cmd+H");
 		s->AppendSeparator();
 		s->AppendItem("Quit", M_QUIT, true, -1, "Cmd+Q");

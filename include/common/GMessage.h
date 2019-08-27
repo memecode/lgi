@@ -151,6 +151,7 @@ enum LgiMessages
 		M_ABOUT,
 		M_PERFERENCES,
 		M_HIDE,
+		M_DESTROY,
 
 	#else
 	

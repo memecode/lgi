@@ -539,6 +539,13 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param A, GMessage::Param B
 		return false;
 	}
 	
+	bool Exists = GView::LockHandler(View, GView::LockOp::OpExists);
+	if (!Exists)
+	{
+		printf("%s:%i - View deleted.\n", _FL);
+		return false;
+	}
+
 	GWindow *w = View->GetWindow();
 	if (!w)
 	{

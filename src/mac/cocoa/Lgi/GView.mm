@@ -302,7 +302,11 @@ GdcPt2 GView::Flip(GdcPt2 p)
 
 void GView::OnDealloc()
 {
+	#if LGI_VIEW_HASH
+	LockHandler(this, OpDelete);
+	#endif
 	SetPulse();
+	
 	for (auto c: Children)
 	{
 		auto gv = c->GetGView();
