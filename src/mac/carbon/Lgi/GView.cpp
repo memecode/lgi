@@ -1152,17 +1152,7 @@ OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent, bool Handle)
 					if (GKeyFromEvent(k, inEvent))
 					{
 						k.Down(true);
-						
-						/*
-						switch (k.vkey)
-						{
-						 	case VK_APPS:
-						 	case VK_LEFT:
-						 	case VK_RIGHT:
-						 	case VK_UP:
-						 	case VK_DOWN:
-							{
-						*/
+						k.Trace("kEventRawKeyDown");
 						
 						if (Handle)
 						{
@@ -1181,6 +1171,10 @@ OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent, bool Handle)
 						printf("%s:%i - kEventRawKeyDown '%i' for '%s' = %i\n",
 							LgiGetLeaf(__FILE__), __LINE__, k.vkey, v->GetClass(), (int)Status);
 						#endif
+					}
+					else
+					{
+						printf("%s:%i - GKeyFromEvent failed.\n", _FL);
 					}
 					break;
 				}

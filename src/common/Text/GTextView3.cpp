@@ -4562,6 +4562,8 @@ bool GTextView3::OnKey(GKey &k)
 							if (k.Shift())
 								return false;
 							
+							k.Trace("Precopy");
+							
 							if (k.Down())
 								Copy();
 							return true;

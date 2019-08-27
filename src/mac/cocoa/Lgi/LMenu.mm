@@ -87,32 +87,39 @@ public:
 			else if (stricmp(k, "Del") == 0 ||
 					 stricmp(k, "Delete") == 0)
 			{
-				Key = @"Delete";
+				unichar s[] = {NSDeleteCharacter};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
 			}
 			else if (stricmp(k, "Ins") == 0 ||
 					 stricmp(k, "Insert") == 0)
 			{
-				Key = @"Insert";
+				unichar s[] = {NSInsertFunctionKey};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
 			}
 			else if (stricmp(k, "Home") == 0)
 			{
-				Key = @"Home";
+				unichar s[] = {NSHomeFunctionKey};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
 			}
 			else if (stricmp(k, "End") == 0)
 			{
-				Key = @"End";
+				unichar s[] = {NSEndFunctionKey};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
 			}
 			else if (stricmp(k, "PageUp") == 0)
 			{
-				Key = @"PageUp";
+				unichar s[] = {NSPageUpFunctionKey};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
 			}
 			else if (stricmp(k, "PageDown") == 0)
 			{
-				Key = @"PageDown";
+				unichar s[] = {NSPageDownFunctionKey};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
 			}
 			else if (stricmp(k, "Backspace") == 0)
 			{
-				Key = @"Backspace";
+				unichar s[] = {NSBackspaceCharacter};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
 			}
 			else if (stricmp(k, "Space") == 0)
 			{
@@ -120,7 +127,9 @@ public:
 			}
 			else if (k[0] == 'F' && isdigit(k[1]))
 			{
-				Key = Str = GString(k).NsStr();
+				int64 index = k.Strip("F").Int();
+				unichar s[] = {(unichar)(NSF1FunctionKey + index - 1)};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
 			}
 			else if (isalpha(k[0]))
 			{
@@ -130,9 +139,10 @@ public:
 			{
 				Key = Str = GString(k).NsStr();
 			}
-			else if (strchr(",", k[0]))
+			else if (strchr(",.", k(0)))
 			{
-				Key = @",";
+				unichar s[] = {(unichar)k(0)};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
 			}
 			else
 			{
@@ -474,7 +484,7 @@ LMenuItem *LSubMenu::FindItem(int Id)
 class LMenuItemPrivate
 {
 public:
-	GAutoString Shortcut;
+	GString Shortcut;
 };
 
 LMenuItem::LMenuItem()
@@ -500,7 +510,7 @@ LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *Str, int Id, int Pos, co
 	_Icon = -1;
 	_Id = Id;
 	_Flags = 0;
-	d->Shortcut.Reset(NewStr(Shortcut));
+	d->Shortcut = Shortcut;
 	Name(Str);
 }
 
@@ -1069,17 +1079,30 @@ int LMenuItem::Icon()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+class LMenuPrivate
+{
+public:
+	int PrefId, AboutId;
+	
+	LMenuPrivate()
+	{
+		PrefId = AboutId = 0;
+	}
+};
+
+
 LMenu::LMenu(const char *AppName) : LSubMenu("", false)
 {
 	Menu = this;
+	d = new LMenuPrivate;
 	
 	auto s = AppendSub("Root");
 	if (s)
 	{
 		s->AppendItem("About", M_ABOUT);
 		s->AppendSeparator();
-		s->AppendItem("Perferences", M_PERFERENCES);
-		s->AppendItem("Hide", M_HIDE);
+		s->AppendItem("Perferences", M_PERFERENCES, true, -1, "Cmd+.");
+		s->AppendItem("Hide", M_HIDE, true, -1, "Cmd+H");
 		s->AppendSeparator();
 		s->AppendItem("Quit", M_QUIT, true, -1, "Cmd+Q");
 	}
@@ -1088,6 +1111,7 @@ LMenu::LMenu(const char *AppName) : LSubMenu("", false)
 LMenu::~LMenu()
 {
 	Accel.DeleteObjects();
+	DeleteObj(d);
 }
 
 void LMenu::OnActivate(LMenuItem *item)
@@ -1099,14 +1123,16 @@ void LMenu::OnActivate(LMenuItem *item)
 	}
 	switch (item->Id())
 	{
-		/*
 		case M_ABOUT:
+			if (Window && d->AboutId)
+				Window->PostEvent(M_COMMAND, d->AboutId);
 			break;
 		case M_PERFERENCES:
+			if (Window && d->PrefId)
+				Window->PostEvent(M_COMMAND, d->PrefId);
 			break;
 		case M_HIDE:
 			break;
-		*/
 		case M_QUIT:
 			LgiCloseApp();
 			break;
@@ -1119,7 +1145,9 @@ void LMenu::OnActivate(LMenuItem *item)
 
 bool LMenu::SetPrefAndAboutItems(int PrefId, int AboutId)
 {
-	return false;
+	d->PrefId = PrefId;
+	d->AboutId = AboutId;
+	return true;
 }
 
 struct LMenuFont

@@ -1373,6 +1373,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 			#if DEBUG_KEYS
 			printf("Menu ate '%c' down=%i alt=%i ctrl=%i sh=%i\n", k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
 			#endif
+			goto AllDone;
 		}
 	}
 	
@@ -1405,8 +1406,9 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 
 AllDone:
 	#if DEBUG_KEYS
-	printf(	"No view wants '%c' down=%i alt=%i ctrl=%i sh=%i (v=%s)\n",
-			k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift(), VCls.Get());
+	if (!Status)
+		printf(	"No view wants '%c' down=%i alt=%i ctrl=%i sh=%i (v=%s)\n",
+				k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift(), VCls.Get());
 	#endif
 	if (d)
 		d->LastKey = k;

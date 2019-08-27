@@ -1353,23 +1353,47 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 		case IDM_CUT:
 		{
-			Resource *r = Objs->CurrentResource();
-			if (r)
-				r->Copy(true);
+			auto Focus = LgiApp->GetFocus();
+			if (Focus)
+			{
+				Focus->PostEvent(M_CUT);
+			}
+			else
+			{
+				Resource *r = Objs->CurrentResource();
+				if (r)
+					r->Copy(true);
+			}
 			break;
 		}
 		case IDM_COPY:
 		{
-			Resource *r = Objs->CurrentResource();
-			if (r)
-				r->Copy(false);
+			auto Focus = LgiApp->GetFocus();
+			if (Focus)
+			{
+				Focus->PostEvent(M_COPY);
+			}
+			else
+			{
+				Resource *r = Objs->CurrentResource();
+				if (r)
+					r->Copy(false);
+			}
 			break;
 		}
 		case IDM_PASTE:
 		{
-			Resource *r = Objs->CurrentResource();
-			if (r)
-				r->Paste();
+			auto Focus = LgiApp->GetFocus();
+			if (Focus)
+			{
+				Focus->PostEvent(M_PASTE);
+			}
+			else
+			{
+				Resource *r = Objs->CurrentResource();
+				if (r)
+					r->Paste();
+			}
 			break;
 		}
 		case IDM_TABLELAYOUT_TEST:
