@@ -629,29 +629,16 @@ int GApp::GetMetric(LgiSystemMetric Metric)
 
 GViewI *GApp::GetFocus()
 {
-	#if 0
-	WindowRef w = FrontNonFloatingWindow();
-	if (w)
-	{
-		ControlRef v;
-		OSErr e = GetKeyboardFocus(w, &v);
-		if (e) printf("%s:%i - GetKeyboardFocus failed with %i\n", __FILE__, __LINE__, e);
-		else
-		{
-			GViewI *Ptr = 0;
-			UInt32 Size = 0;
-			e = GetControlProperty(v, 'meme', 'view', sizeof(Ptr), &Size, &Ptr);
-			if (e) printf("%s:%i - GetControlProperty failed with %i\n", __FILE__, __LINE__, e);
-			else
-			{
-				return Ptr;
-			}
-		}
-	}
-	else printf("FrontNonFloatingWindow failed.\n");
-	#endif
-	
-	return 0;
+	auto kw = d->NsApp.p.keyWindow;
+	if (!kw)
+		return NULL;
+
+	LNsWindow *w = objc_dynamic_cast(LNsWindow, kw);
+	GWindow *gw = w ? [w getWindow] : nil;
+	if (!gw)
+		return NULL;
+
+	return gw->GetFocus();
 }
 
 OsThread GApp::_GetGuiThread()

@@ -12,6 +12,15 @@
 #if defined __OBJC__
 
 class GViewI;
+class GWindow;
+class GWindowPrivate;
+
+#define objc_dynamic_cast(TYPE, object) \
+  ({ \
+      TYPE *dyn_cast_object = (TYPE*)(object); \
+      [dyn_cast_object isKindOfClass:[TYPE class]] ? dyn_cast_object : nil; \
+  })
+
 
 @interface LCocoaMsg : NSObject
 {
@@ -64,6 +73,20 @@ class GViewI;
 - (void)userEvent:(LCocoaMsg*)ev;
 
 @end
+
+@interface LNsWindow : NSWindow
+{
+}
+
+@property GWindowPrivate *d;
+
+- (id)init:(GWindowPrivate*)priv Frame:(NSRect)rc;
+- (void)dealloc;
+- (BOOL)canBecomeKeyWindow;
+- (GWindow*)getWindow;
+
+@end
+
 
 #endif
 #endif /* LCocoaView_h */

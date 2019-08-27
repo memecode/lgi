@@ -10,13 +10,7 @@
 extern void NextTabStop(GViewI *v, int dir);
 extern void SetDefaultFocus(GViewI *v);
 
-#define DEBUG_KEYS			1
-
-#define objc_dynamic_cast(TYPE, object) \
-  ({ \
-      TYPE *dyn_cast_object = (TYPE*)(object); \
-      [dyn_cast_object isKindOfClass:[TYPE class]] ? dyn_cast_object : nil; \
-  })
+#define DEBUG_KEYS			0
 
 ///////////////////////////////////////////////////////////////////////
 class HookInfo
@@ -37,18 +31,6 @@ public:
 - (BOOL)windowShouldClose:(id)sender;
 - (void)windowDidBecomeMain:(NSNotification*)notification;
 - (void)windowDidResignMain:(NSNotification*)notification;
-
-@end
-
-@interface LNsWindow : NSWindow
-{
-}
-
-@property GWindowPrivate *d;
-
-- (id)init:(GWindowPrivate*)priv Frame:(NSRect)rc;
-- (void)dealloc;
-- (BOOL)canBecomeKeyWindow;
 
 @end
 
@@ -167,6 +149,11 @@ public:
 	
 	[super dealloc];
 	printf("LNsWindow.dealloc.\n");
+}
+
+- (GWindow*)getWindow
+{
+	return self.d ? self.d->Wnd : nil;
 }
 
 - (BOOL)canBecomeKeyWindow
