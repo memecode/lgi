@@ -878,13 +878,9 @@ void LMenuItem::Checked(bool c)
 		SetFlag(_Flags, ODS_CHECKED);
 	else
 		ClearFlag(_Flags, ODS_CHECKED);
-	if (Parent)
-	{
-		#ifdef COCOA
-		#else
-		CheckMenuItem(Parent->Info, Info, c);
-		#endif
-	}
+	
+	if (Info)
+		[Info.p setState: c ? NSOnState : NSOffState];
 }
 
 bool LMenuItem::Name(const char *n)
@@ -916,20 +912,8 @@ bool LMenuItem::Name(const char *n)
 
 void LMenuItem::Enabled(bool e)
 {
-	if (Parent)
-	{
-		#ifdef COCOA
-		#else
-		if (e)
-		{
-			EnableMenuItem(Parent->Info, Info);
-		}
-		else
-		{
-			DisableMenuItem(Parent->Info, Info);
-		}
-		#endif
-	}
+	if (Info)
+		Info.p.enabled = e;
 }
 
 void LMenuItem::Focus(bool f)
@@ -951,72 +935,18 @@ void LMenuItem::Icon(int i)
 {
 	_Icon = i;
 	
-	if (Parent && Parent->Info && Info)
+	GImageList *Lst = Menu ? Menu->GetImageList() : Parent->GetImageList();
+	if (!Lst)
+		return;
+
+	if (_Icon < 0 || _Icon >= Lst->GetItems())
+		return;
+
+	if (Info)
 	{
-		GImageList *Lst = Menu ? Menu->GetImageList() : Parent->GetImageList();
-		if (!Lst)
-			return;
-		
-#if 0
-		int Bpp = Lst->GetBits() / 8;
-		int Off = _Icon * Lst->TileX() * Bpp;
-		int Line = (*Lst)[1] - (*Lst)[0];
-		uchar *Base = (*Lst)[0];
-		if (!Base)
-			return;
-		
-		int TempSize = Lst->TileX() * Lst->TileY() * Bpp;
-		uchar *Temp = new uchar[TempSize];
-		if (!Temp)
-			return;
-		
-		uchar *d = Temp;
-		for (int y=0; y<Lst->TileY(); y++)
-		{
-			uchar *s = Base + Off + (Line * (Lst->TileY() - y - 1));
-			uchar *e = s + (Lst->TileX() * Bpp);
-			while (s < e)
-			{
-				if (memcmp(Base, s, Bpp) == 0)
-					memset(d, 0, Bpp);
-				else
-					memcpy(d, s, Bpp);
-				d += Bpp;
-				s += Bpp;
-			}
-		}
-		
-		CGDataProviderRef Provider = CGDataProviderCreateWithData(0, Temp, TempSize, releaseData);
-		if (Provider)
-		{
-			// CGColorSpaceRef Cs = CGColorSpaceCreateWithName(kCGColorSpaceUserRGB);
-			CGColorSpaceRef Cs = CGColorSpaceCreateDeviceRGB();
-			CGImageRef Ico = CGImageCreate(	Lst->TileX(),
-										   Lst->TileX(),
-										   8,
-										   Lst->GetBits(),
-										   Lst->TileX() * Bpp,
-										   Cs,
-										   kCGImageAlphaPremultipliedLast,
-										   Provider,
-										   NULL,
-										   false,
-										   kCGRenderingIntentDefault);
-			if (Ico)
-			{
-				OSErr e = SetMenuItemIconHandle(Parent->Info, Info, kMenuCGImageRefType, (char**)Ico);
-				if (e) printf("%s:%i - SetMenuItemIconHandle failed with %i\n", __FILE__, __LINE__, e);
-			}
-			else printf("%s:%i - CGImageCreate failed.\n", __FILE__, __LINE__);
-			
-			// CGColorSpaceRelease(Cs);
-			// CGDataProviderRelease(Provider);
-		}
-#endif
-	}
-	else
-	{
-		printf("Can't set icon.\n");
+		GRect r(0, 0, Lst->TileX()-1, Lst->TileY()-1);
+		r.Offset(_Icon * Lst->TileX(), 0);
+		[Info.p setImage: Lst->GetSubImage(&r)];
 	}
 }
 

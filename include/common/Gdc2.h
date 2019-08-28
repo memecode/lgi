@@ -395,6 +395,7 @@ class LgiClass GSurface : public GRefCount, public GDom
 	friend class GWindow;
 	friend class GVariant;
 	friend class GRegionClipDC;
+	friend class GMemDC;
 
 	void Init();
 	
@@ -1024,6 +1025,11 @@ public:
 		#elif defined MAC
 				
 			OsBitmap GetBitmap();
+	
+			#if LGI_COCOA && defined(__OBJC__)
+			NSImage *GetSubImage(GRect *rc = NULL);
+			#endif
+	
 			#if !defined(LGI_SDL)
 				CGColorSpaceRef GetColourSpaceRef();
 				CGImg *GetImg(GRect *Sub = 0);

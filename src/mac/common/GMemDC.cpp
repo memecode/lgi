@@ -242,6 +242,89 @@ GMemDC::~GMemDC()
 	DeleteObj(d);
 }
 
+NSImage *GMemDC::GetSubImage(GRect *rc)
+{
+	if (!pMem || !pMem->Base)
+		return nil;
+
+	GRect r;
+	if (rc)
+		r = *rc;
+	else
+		r = Bounds();
+	
+	size_t bitsPerComponent = 8;
+	size_t bitsPerPixel = GetBits();
+	size_t bytesPerRow = (bitsPerPixel * r.X() + 7) / bitsPerComponent;
+	CGDataProviderRef provider = nil;
+	
+	GArray<uint8_t> Mem;
+	if (rc)
+	{
+		GAutoPtr<GSurface> Sub(SubImage(r));
+		if (!Sub)
+			return nil;
+		auto p = Sub->pMem;
+		
+		// Need to collect all the image data into one place.
+		if (!Mem.Length(p->y * bytesPerRow))
+			return nil;
+		
+		auto dst = Mem.AddressOf();
+		for (int y=0; y<p->y; y++)
+		{
+			auto src = p->Base + (y * p->Line);
+			LgiAssert(dst + bytesPerRow <= Mem.AddressOf() + Mem.Length());
+			LgiAssert(src + bytesPerRow <= pMem->Base + (pMem->y * pMem->Line));
+			memcpy(dst, src, bytesPerRow);
+			
+			dst += bytesPerRow;
+		}
+
+		/*
+		static bool first = true;
+		if (first)
+		{
+			first = false;
+			for (int x=0; x<Mem.Length(); x += 4)
+			{
+				auto src = Mem.AddressOf(x);
+				if (x % 64 == 0)
+					printf("\n");
+				printf("{%02.2x,%02.2x,%02.2x,%02.2x},", src[x], src[x+1], src[x+2], src[x+3]);
+			}
+		}
+		*/
+		
+		provider = CGDataProviderCreateWithData(NULL, Mem.AddressOf(), Mem.Length(), NULL);
+	}
+	else
+	{
+		// Just use the existing data...
+		provider = CGDataProviderCreateWithData(NULL, pMem->Base, pMem->y * pMem->Line, NULL);
+	}
+	
+	CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
+	// CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast;
+	CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaNoneSkipLast;
+	CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
+
+	CGImageRef iref = CGImageCreate(r.X(), r.Y(),
+									bitsPerComponent,
+									bitsPerPixel,
+									bytesPerRow,
+									colorSpaceRef,
+									bitmapInfo,
+									provider,   // data provider
+									NULL,       // decode
+									YES,        // should interpolate
+									renderingIntent);
+
+	auto img = [[NSImage alloc] initWithCGImage:iref size:NSMakeSize(r.X(), r.Y())];
+	CGImageRelease(iref);
+	return img;
+}
+
 void GMemDC::Empty()
 {
 	DeleteObj(pMem);
