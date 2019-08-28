@@ -201,8 +201,8 @@ public:
 	{
 	 	if (w.d)
 	 	{
-			printf("%s:%i - windowWillClose(%s) w.d->Closing=%i\n",
-				_FL, w.d->Wnd->GetClass(), w.d->Closing);
+			//printf("%s:%i - windowWillClose(%s) w.d->Closing=%i\n",
+			//	_FL, w.d->Wnd->GetClass(), w.d->Closing);
 			
 	 		if (w.d->Closing)
 	 		{
@@ -215,7 +215,7 @@ public:
 				w.d->Wnd->Quit();
 			}
 		}
-		else printf("%s:%i - w.d is NULL\n", _FL);
+		// else printf("%s:%i - w.d is NULL\n", _FL);
 	}
 }
 

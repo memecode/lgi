@@ -92,7 +92,7 @@ class LgiClass LSubMenu :
 	// This is not called in the GUI thread
 	static void SysMouseClick(GMouse &m);
 
-	#if !WINNATIVE
+	#if !WINNATIVE && !defined(__GTK_H__)
 		OsSubMenu Info;
 	#endif
 	#if LGI_COCOA
