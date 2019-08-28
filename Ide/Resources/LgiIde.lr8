@@ -617,15 +617,15 @@
 			<String Ref="52" Cid="588" Define="IDM_JOIN" en="Join Selection" />
 		</string-group>
 		<submenu Ref="175">
-			<menuitem Ref="174" Shortcut="Ctrl+N" />
-			<menuitem Ref="173" Shortcut="Ctrl+O" />
-			<menuitem Ref="235" Shortcut="Ctrl+S" />
-			<menuitem Ref="172" />
-			<menuitem Ref="171" />
-			<menuitem Ref="170" Shortcut="Ctrl+W" />
+			<menuitem Ref="174" Shortcut="CtrlCmd+N" />
+			<menuitem Ref="173" Shortcut="CtrlCmd+O" />
+			<menuitem Ref="235" Shortcut="CtrlCmd+S" />
+			<menuitem Ref="172" Shortcut="CtrlCmd+Shift+S" />
+			<menuitem Ref="171" Shortcut="CtrlCmd+Shift+A" />
+			<menuitem Ref="170" Shortcut="CtrlCmd+W" />
 			<menuitem Ref="169" />
 			<menuitem Sep="1" />
-			<menuitem Ref="168" />
+			<menuitem Ref="168" Shortcut="CtrlCmd+," />
 			<menuitem Sep="1" />
 			<submenu Ref="167">
 				<menuitem Enabled="0" Ref="166" />
@@ -634,26 +634,26 @@
 				<menuitem Ref="164" />
 			</submenu>
 			<menuitem Sep="1" />
-			<menuitem Ref="163" />
+			<menuitem Ref="163" Shortcut="CtrlCmd+Q" />
 		</submenu>
 		<submenu Ref="162">
-			<menuitem Ref="161" Shortcut="Ctrl+Z" />
-			<menuitem Ref="160" Shortcut="Shift+Ctrl+Z" />
+			<menuitem Ref="161" Shortcut="CtrlCmd+Z" />
+			<menuitem Ref="160" Shortcut="CtrlCmd+Shift+Z" />
 			<menuitem Sep="1" />
-			<menuitem Ref="159" Shortcut="Ctrl+X" />
-			<menuitem Ref="158" Shortcut="Ctrl+C" />
-			<menuitem Ref="157" Shortcut="Ctrl+V" />
+			<menuitem Ref="159" Shortcut="CtrlCmd+X" />
+			<menuitem Ref="158" Shortcut="CtrlCmd+C" />
+			<menuitem Ref="157" Shortcut="CtrlCmd+V" />
 			<menuitem Sep="1" />
-			<menuitem Ref="156" Shortcut="Ctrl+G" />
-			<menuitem Ref="155" Shortcut="Ctrl+F" />
+			<menuitem Ref="156" Shortcut="CtrlCmd+G" />
+			<menuitem Ref="155" Shortcut="CtrlCmd+F" />
 			<menuitem Ref="154" Shortcut="F3" />
-			<menuitem Ref="153" Shortcut="Ctrl+H" />
-			<menuitem Ref="152" Shortcut="Ctrl+Shift+F" />
+			<menuitem Ref="153" Shortcut="CtrlCmd+H" />
+			<menuitem Ref="152" Shortcut="CtrlCmd+Shift+F" />
 			<menuitem Sep="1" />
-			<menuitem Ref="215" Shortcut="Alt+Left" />
-			<menuitem Ref="216" Shortcut="Alt+Right" />
+			<menuitem Ref="215" Shortcut="AltCmd+Left" />
+			<menuitem Ref="216" Shortcut="AltCmd+Right" />
 			<menuitem Sep="1" />
-			<menuitem Ref="198" Shortcut="AltCmd+G" />
+			<menuitem Ref="198" Shortcut="Alt+G" />
 			<menuitem Ref="34" Shortcut="Shift+AltCmd+S" />
 			<menuitem Ref="81" Shortcut="Shift+AltCmd+F" />
 		</submenu>

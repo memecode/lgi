@@ -4125,8 +4125,10 @@ bool GTextView3::OnKey(GKey &k)
 							goto Jump_StartOfLine;
 						}
 						else
+						if (k.Alt())
+						#else
+						if (k.Ctrl())
 						#endif
-						if (k.CtrlCmd())
 						{
 							// word move/select
 							bool StartWhiteSpace = IsWhiteSpace(Text[n]);
@@ -4197,9 +4199,10 @@ bool GTextView3::OnKey(GKey &k)
 						{
 							goto Jump_EndOfLine;
 						}
-						else
+						else if (k.Alt())
+						#else
+						if (k.Ctrl())
 						#endif
-						if (k.Ctrl() || k.Alt())
 						{
 							// word move/select
 							if (IsWhiteSpace(Text[n]))
