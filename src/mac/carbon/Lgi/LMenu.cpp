@@ -791,7 +791,8 @@ bool LMenuItem::ScanForAccel()
 	{
 		char *k = Keys[i];
 		if (stricmp(k, "Ctrl") == 0 ||
-			stricmp(k, "Modifier") == 0)
+			stricmp(k, "CtrlCmd") == 0 ||
+			stricmp(k, "AltCmd") == 0)
 		{
 			Flags |= LGI_EF_CTRL;
 		}

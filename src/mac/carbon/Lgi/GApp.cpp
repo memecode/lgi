@@ -545,14 +545,6 @@ GApp::GApp(OsAppArguments &AppArgs, const char *AppName, GAppArguments *ObjArgs)
 		LgiExitApp();
 	}
 	
-	if (!GetOption("noskin"))
-	{
-		//extern GSkinEngine *CreateSkinEngine(GApp *App);
-		//SkinEngine = CreateSkinEngine(this);
-	}
-	
-	OSStatus e;
-
 	#if 1
 	// Setup application handler
 	EventTypeSpec	AppEvents[] =
@@ -563,6 +555,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *AppName, GAppArguments *ObjArgs)
 		{ kEventClassCommand,     kEventCommandProcess     },
 	};
 
+	OSStatus e;
 	EventHandlerRef Handler = 0;
 	e =	InstallApplicationEventHandler(	NewEventHandlerUPP(AppProc),
 										GetEventTypeCount(AppEvents),

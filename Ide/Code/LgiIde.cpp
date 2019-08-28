@@ -1566,6 +1566,7 @@ Chk;
 			LgiAssert(Loaded);
 			if (Loaded)
 			{
+				Menu->SetPrefAndAboutItems(IDM_OPTIONS, IDM_ABOUT);
 				d->RecentFilesMenu = Menu->FindSubMenu(IDM_RECENT_FILES);
 				d->RecentProjectsMenu = Menu->FindSubMenu(IDM_RECENT_PROJECTS);
 				d->WindowsMenu = Menu->FindSubMenu(IDM_WINDOW_LST);
