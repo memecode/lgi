@@ -263,7 +263,7 @@
 		3477C35C1CC2253E0028B84B /* LgiInterfaces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiInterfaces.h; path = ../../../include/common/LgiInterfaces.h; sourceTree = "<group>"; };
 		3477C4391CC234750028B84B /* GMemStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GMemStream.cpp; path = ../../../common/Lgi/GMemStream.cpp; sourceTree = "<group>"; };
 		3477C46C1CC26DEB0028B84B /* GAlert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GAlert.cpp; path = ../../../common/Lgi/GAlert.cpp; sourceTree = "<group>"; };
-		3477C4EC1CC27F1C0028B84B /* GTrayIcon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GTrayIcon.cpp; path = ../../../common/Lgi/GTrayIcon.cpp; sourceTree = "<group>"; };
+		3477C4EC1CC27F1C0028B84B /* GTrayIcon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GTrayIcon.cpp; path = ../../../common/Lgi/GTrayIcon.cpp; sourceTree = "<group>"; };
 		3477C5161CC303B70028B84B /* LgiClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiClass.h; path = ../../../include/common/LgiClass.h; sourceTree = "<group>"; };
 		347D192021B1F5700008C4CB /* GFont_W.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GFont_W.cpp; path = ../../../common/Gdc2/Font/GFont_W.cpp; sourceTree = "<group>"; };
 		348362411F233A77003B2A6D /* GStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GStream.h; path = ../../../../include/common/GStream.h; sourceTree = "<group>"; };

@@ -231,7 +231,6 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 			[i->Info.p setTitle:name];
 			i->Info.p.keyEquivalent = sc.Key;
 			[Info.p insertItem:i->Info atIndex:Index];
-			// i->Info = [Info.p insertItemWithTitle:name action:nil keyEquivalent:sc.Key atIndex:Index];
 			if (!i->Info)
 			{
 				Items.Delete(i);

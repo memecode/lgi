@@ -594,9 +594,9 @@ public:
 		int Ms = -1
 	);
 	/// Convert a point form view coordinates to screen coordinates
-	void PointToScreen(GdcPt2 &p);
+	bool PointToScreen(GdcPt2 &p);
 	/// Convert a point form screen coordinates to view coordinates
-	void PointToView(GdcPt2 &p);
+	bool PointToView(GdcPt2 &p);
 	/// Get the x,y offset from the virtual window to the first real view in the parent chain
 	bool WindowVirtualOffset(GdcPt2 *Offset);	
 	/// Get the size of the window borders
