@@ -361,6 +361,19 @@ void GImageList::Update(int Flags)
 {
 }
 
+GRect GImageList::GetIconRect(int Idx)
+{
+	GRect r(0, 0, -1, -1);
+	
+	if (Idx >= 0 && Idx < GetItems())
+	{
+		r.ZOff(d->Sx-1, d->Sy-1);
+		r.Offset(Idx * d->Sx, 0);
+	}
+	
+	return r;
+}
+
 GRect *GImageList::GetBounds()
 {
 	if (!d->Bounds.Length() && (*this)[0])

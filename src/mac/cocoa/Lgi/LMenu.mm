@@ -23,24 +23,33 @@
 @property LMenuItem* item;
 - (id)init:(LMenuItem*)it;
 - (void)activate;
+- (BOOL)worksWhenModal;
 @end
 
 @implementation LNSMenuItem
+
 - (id)init:(LMenuItem*)it
 {
 	if ((self = [super init]) != nil)
 	{
 		self.item = it;
-		self.target = self;
+		[self setTarget:self];
 		self.action = @selector(activate);
 	}
 	
 	return self;
 }
+
+- (BOOL)worksWhenModal
+{
+	return YES;
+}
+
 - (void)activate
 {
 	self.item->OnActivate(self.item);
 }
+
 @end
 
 struct LShortcut
@@ -165,6 +174,7 @@ LSubMenu::LSubMenu(const char *name, bool Popup)
 	Info = NULL;
 	GBase::Name(name);
 	Info.p = [[NSMenu alloc] init];
+	[Info.p setAutoenablesItems:NO];
 }
 
 LSubMenu::~LSubMenu()
@@ -215,43 +225,34 @@ LMenuItem *LSubMenu::ItemAt(int Id)
 LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where, const char *Shortcut)
 {
 	LMenuItem *i = new LMenuItem(Menu, this, Str, Id, Where, Shortcut);
-	if (i)
+	if (!i || !Info)
+		return NULL;
+
+	Items.Insert(i, Where);
+	auto Index = Items.IndexOf(i);
+	// auto Max = Info.p.numberOfItems;
+
+	GString s(i->GBase::Name());
+	auto name = s.NsStr();
+	LShortcut sc(Shortcut);
+
+	i->Info.p = [[LNSMenuItem alloc] init:i];
+	if (!i->Info)
 	{
-		if (Info)
-		{
-			Items.Insert(i, Where);
-			auto Index = Items.IndexOf(i);
-			// auto Max = Info.p.numberOfItems;
-
-			GString s(i->GBase::Name());
-			auto name = s.NsStr();
-			LShortcut sc(Shortcut);
-
-			i->Info.p = [[LNSMenuItem alloc] init:i];
-			[i->Info.p setTitle:name];
-			i->Info.p.keyEquivalent = sc.Key;
-			[Info.p insertItem:i->Info atIndex:Index];
-			if (!i->Info)
-			{
-				Items.Delete(i);
-				delete i;
-				return NULL;
-			}
-
-			i->Info.p.keyEquivalentModifierMask = sc.Mod;
-			i->Id(Id);
-			i->Enabled(Enabled);
-			
-			return i;
-		}
-		else
-		{
-			printf("%s:%i - No menu to attach item to.\n", __FILE__, __LINE__);
-			DeleteObj(i);
-		}
+		Items.Delete(i);
+		delete i;
+		return NULL;
 	}
-	
-	return 0;
+
+	[i->Info.p setTitle:name];
+	i->Info.p.keyEquivalent = sc.Key;
+	i->Info.p.keyEquivalentModifierMask = sc.Mod;
+	i->Id(Id);
+	i->Enabled(Enabled);
+
+	[Info.p insertItem:i->Info atIndex:Index];
+
+	return i;
 }
 
 LMenuItem *LSubMenu::AppendSeparator(int Where)
@@ -418,14 +419,15 @@ int LSubMenu::Float(GView *From, int x, int y, int Btns)
 	if (w)
 	{
 		v = w->Handle();
-
 		w->PointToView(p);
-		// printf("Menu local = %i,%i\n", p.x, p.y);
 		p = w->Flip(p);
-		// printf("Menu flip = %i,%i\n", p.x, p.y);
 	}
 	
 	FloatResult.Reset(new int(0));
+	
+	auto item = Items[0];
+	auto menuitem = item->Info.p;
+	auto en = menuitem.enabled;
 	
 	NSPoint loc = {(double)p.x, (double)p.y};
 	[Info.p popUpMenuPositioningItem:nil atLocation:loc inView:v];
@@ -912,8 +914,10 @@ bool LMenuItem::Name(const char *n)
 
 void LMenuItem::Enabled(bool e)
 {
-	if (Info)
+	#if 1
+	if (Info && Info.p.enabled ^ e)
 		Info.p.enabled = e;
+	#endif
 }
 
 void LMenuItem::Focus(bool f)
@@ -936,18 +940,14 @@ void LMenuItem::Icon(int i)
 	_Icon = i;
 	
 	GImageList *Lst = Menu ? Menu->GetImageList() : Parent->GetImageList();
-	if (!Lst)
+	if (!Lst || !Info)
 		return;
 
 	if (_Icon < 0 || _Icon >= Lst->GetItems())
 		return;
 
-	if (Info)
-	{
-		GRect r(0, 0, Lst->TileX()-1, Lst->TileY()-1);
-		r.Offset(_Icon * Lst->TileX(), 0);
-		[Info.p setImage: Lst->GetSubImage(&r)];
-	}
+	GRect r = Lst->GetIconRect(_Icon);
+	[Info.p setImage: Lst->NsImage(&r)];
 }
 
 void LMenuItem::Visible(bool i)
