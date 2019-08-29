@@ -242,7 +242,13 @@ GMemDC::~GMemDC()
 	DeleteObj(d);
 }
 
-NSImage *GMemDC::GetSubImage(GRect *rc)
+void MemRelease(void * __nullable info, const void *  data, size_t size)
+{
+	uint8_t *p = (uint8_t*)data;
+	DeleteArray(p);
+}
+
+NSImage *GMemDC::NsImage(GRect *rc)
 {
 	if (!pMem || !pMem->Base)
 		return nil;
@@ -276,27 +282,13 @@ NSImage *GMemDC::GetSubImage(GRect *rc)
 			auto src = p->Base + (y * p->Line);
 			LgiAssert(dst + bytesPerRow <= Mem.AddressOf() + Mem.Length());
 			LgiAssert(src + bytesPerRow <= pMem->Base + (pMem->y * pMem->Line));
-			memcpy(dst, src, bytesPerRow);
 			
+			memcpy(dst, src, bytesPerRow);
 			dst += bytesPerRow;
 		}
 
-		/*
-		static bool first = true;
-		if (first)
-		{
-			first = false;
-			for (int x=0; x<Mem.Length(); x += 4)
-			{
-				auto src = Mem.AddressOf(x);
-				if (x % 64 == 0)
-					printf("\n");
-				printf("{%02.2x,%02.2x,%02.2x,%02.2x},", src[x], src[x+1], src[x+2], src[x+3]);
-			}
-		}
-		*/
-		
-		provider = CGDataProviderCreateWithData(NULL, Mem.AddressOf(), Mem.Length(), NULL);
+		auto len = Mem.Length();
+		provider = CGDataProviderCreateWithData(NULL, Mem.Release(), len, MemRelease);
 	}
 	else
 	{
@@ -306,7 +298,7 @@ NSImage *GMemDC::GetSubImage(GRect *rc)
 	
 	CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
 	// CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast;
-	CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaNoneSkipLast;
+	CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaLast;
 	CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
 
 	CGImageRef iref = CGImageCreate(r.X(), r.Y(),

@@ -1027,7 +1027,7 @@ public:
 			OsBitmap GetBitmap();
 	
 			#if LGI_COCOA && defined(__OBJC__)
-			NSImage *GetSubImage(GRect *rc = NULL);
+			NSImage *NsImage(GRect *rc = NULL);
 			#endif
 	
 			#if !defined(LGI_SDL)
