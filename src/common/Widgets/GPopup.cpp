@@ -541,7 +541,7 @@ public:
 ::GArray<GPopup*> GPopup::CurrentPopups;
 
 GPopup::GPopup(GView *owner)
-	#ifdef LGI_CARBON
+	#if  LGI_CARBON
 	: GWindow(CreateBorderlessWindow())
 	#elif defined(__GTK_H__)
 	: GWindow(gtk_window_new(GTK_WINDOW_POPUP))
@@ -551,6 +551,18 @@ GPopup::GPopup(GView *owner)
 	Start = 0;
 	Cancelled = false;
     CurrentPopups.Add(this);
+
+	#if LGI_COCOA
+	Panel = [[NSPanel alloc] init];
+	if (Panel)
+	{
+		Panel.p.floatingPanel = TRUE;
+		Panel.p.worksWhenModal = TRUE;
+		Panel.p.styleMask = NSBorderlessWindowMask;
+		
+		Panel.p.contentView = [[LCocoaView alloc] init:this];
+	}
+	#endif
 
 	if ((Owner = owner))
 	{
@@ -581,9 +593,7 @@ GPopup::~GPopup()
 		#ifdef MAC
 		GDropDown *dd = dynamic_cast<GDropDown*>(Owner);
 		if (dd)
-		{
-			dd->Popup = 0;
-		}
+			dd->Popup = NULL;
 		#endif
 	}
 
@@ -601,6 +611,25 @@ GPopup::~GPopup()
 
 	DeleteObj(d);
 }
+
+#if LGI_COCOA
+
+GRect &GPopup::GetPos()
+{
+	return Pos;
+}
+
+bool GPopup::SetPos(GRect &r, bool repaint)
+{
+	Pos = r;
+	
+	if (Panel)
+		[Panel.p setFrame:r display:Visible()];
+	
+	return true;
+}
+
+#endif
 
 GMessage::Result GPopup::OnEvent(GMessage *Msg)
 {
@@ -764,14 +793,23 @@ void GPopup::Visible(bool i)
 			else
 				ShowWindow(Handle(), SW_SHOWNA);
 	
-		#elif defined(LGI_CARBON)
+		#elif LGI_CARBON
 	
 			SetAlwaysOnTop(true);
 			GWindow::Visible(i);
 	
+		#elif LGI_COCOA
+	
+			if (Panel)
+			{
+				if (i)
+					[Panel.p makeKeyAndOrderFront:NULL];
+				else
+					[Panel.p orderOut:Panel.p];
+			}
+	
 		#else
 		
-			//bool HadFocus = Focus();
 			GView::Visible(i);
 	
 		#endif

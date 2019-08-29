@@ -57,6 +57,7 @@ public:
 		::GArray<GSurface*> Images;
 		GlibWrapper<GtkStatusIcon> tray_icon;
 		typedef GdkPixbuf *IconRef;
+		::GArray<IconRef> Icon;
 		uint64 LastClickTime;
 		gint DoubleClickTime;
 	

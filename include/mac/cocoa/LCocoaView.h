@@ -45,11 +45,11 @@ class GWindowPrivate;
 @interface LCocoaView : NSView
 {
 }
-@property GWindow *w;
+@property GView *w;
 @property GString WndClass;
 
 // Object life time
-- (id)init:(GWindow*)wnd;
+- (id)init:(GView*)wnd;
 - (void)dealloc;
 
 // Painting

@@ -93,11 +93,12 @@ protected:
 public:
 	#ifdef __GTK_H__
 		GWindow(Gtk::GtkWidget *w = NULL);
+	#elif LGI_CARBON
+		GWindow(WindowRef wr);
+	#elif LGI_COCOA
+		GWindow(OsWindow wnd = NULL);
 	#else
 		GWindow();
-	#endif
-	#if LGI_CARBON
-		GWindow(WindowRef wr);
 	#endif
 	~GWindow();
 

@@ -242,7 +242,7 @@ public:
 #error "NO ARC!"
 #endif
 
-GWindow::GWindow() : GView(NULL)
+GWindow::GWindow(OsWindow wnd) : GView(NULL)
 {
 	d = new GWindowPrivate(this);
 	_QuitOnClose = false;
@@ -259,7 +259,10 @@ GWindow::GWindow() : GView(NULL)
 	
 	GRect pos(200, 200, 200, 200);
 	NSRect frame = pos;
-	Wnd.p = [[LNsWindow alloc] init:d Frame:frame];
+	if (wnd)
+		Wnd = wnd;
+	else
+		Wnd.p = [[LNsWindow alloc] init:d Frame:frame];
 	if (Wnd)
 	{
 		[Wnd.p retain];

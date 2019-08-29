@@ -50,7 +50,7 @@ static int LCocoaView_Count = 0;
 	NSTrackingArea *tracking;
 }
 
-- (id)init:(GWindow*)wnd
+- (id)init:(GView*)wnd
 {
 	LAutoPool Pool;
 	LCocoaView_Count++;
@@ -246,7 +246,12 @@ GKey KeyEvent(NSEvent *ev)
 
 	GKey k = KeyEvent(event);
 	k.Down(true);
-	self.w->HandleViewKey(NULL, k);
+	
+	GWindow *wnd = dynamic_cast<GWindow*>(self.w);
+	if (wnd)
+		wnd->HandleViewKey(NULL, k);
+	else
+		self.w->OnKey(k);
 }
 
 - (void)keyUp:(NSEvent*)event
@@ -255,7 +260,11 @@ GKey KeyEvent(NSEvent *ev)
 	Check();
 
 	GKey k = KeyEvent(event);
-	self.w->HandleViewKey(NULL, k);
+	GWindow *wnd = dynamic_cast<GWindow*>(self.w);
+	if (wnd)
+		wnd->HandleViewKey(NULL, k);
+	else
+		self.w->OnKey(k);
 }
 
 - (void)userEvent:(LCocoaMsg*)msg
