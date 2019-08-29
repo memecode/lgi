@@ -1523,8 +1523,13 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 GRect &GWindow::GetPos()
 {
 	LAutoPool Pool;
+
 	if (Wnd)
-		Pos = [Wnd.p frame];
+	{
+		Pos = Wnd.p.frame;
+		
+		// printf("%s::GetPos %s\n", GetClass(), Pos.GetStr());
+	}
 	
 	return Pos;
 }
@@ -1532,25 +1537,15 @@ GRect &GWindow::GetPos()
 bool GWindow::SetPos(GRect &p, bool Repaint)
 {
 	LAutoPool Pool;
-	int x = GdcD->X();
-	int y = GdcD->Y();
 	
-	GRect r = p;
-	#if 0
-	int MenuY = GetMBarHeight();
-	
-	if (r.y1 < MenuY)
-		r.Offset(0, MenuY - r.y1);
-	#endif
-	if (r.y2 > y)
-		r.y2 = y - 1;
-	if (r.X() > x)
-		r.x2 = r.x1 + x - 1;
-	
-	Pos = r;
+	Pos = p;
 	if (Wnd)
+	{
 		[Wnd.p setFrame:Pos display:YES];
-	
+		
+		// printf("%s::SetPos %s\n", GetClass(), Pos.GetStr());
+	}
+
 	return true;
 }
 

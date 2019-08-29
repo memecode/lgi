@@ -195,7 +195,7 @@ public:
 		GRect &operator =(OsRect &r)
 		{
 			x1 = r.origin.x;
-			y1 = r.origin.x;
+			y1 = r.origin.y;
 			x2 = x1 + r.size.width - 1;
 			y2 = y1 + r.size.height - 1;
 			return *this;
@@ -204,7 +204,7 @@ public:
 		GRect(OsRect r)
 		{
 			x1 = r.origin.x;
-			y1 = r.origin.x;
+			y1 = r.origin.y;
 			x2 = x1 + r.size.width - 1;
 			y2 = y1 + r.size.height - 1;
 		}
