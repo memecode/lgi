@@ -1711,11 +1711,13 @@ bool GFontType::Serialize(GDom *Options, const char *OptName, bool Write)
 				{
 					*Comma++ = 0;
 					int PtSize = atoi(Comma);
-					
-					Info.Face(v.Str());
-					Info.PointSize(PtSize);
-					// printf("FontTypeSer getting '%s' = '%s' pt %i\n", OptName, v.Str(), PtSize);
-					Status = true;
+					if (stricmp(v.Str(), "(null)"))
+					{
+						Info.Face(v.Str());
+						Info.PointSize(PtSize);
+						// printf("FontTypeSer getting '%s' = '%s' pt %i\n", OptName, v.Str(), PtSize);
+						Status = true;
+					}
 				}
 			}
 		}
