@@ -333,7 +333,7 @@ bool DocEdit::Delete(size_t At, ssize_t Len)
 
 bool DocEdit::OnKey(GKey &k)
 {
-	if (k.AltCmd())
+	if (k.Alt())
 	{
 		// This allows the Alt+Left/Right to be processed by the prev/next navigator menu.
 		if (k.vkey == LK_LEFT ||

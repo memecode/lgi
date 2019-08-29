@@ -10,7 +10,7 @@
 extern void NextTabStop(GViewI *v, int dir);
 extern void SetDefaultFocus(GViewI *v);
 
-#define DEBUG_KEYS			1
+#define DEBUG_KEYS			0
 #define DEBUG_SETFOCUS		0
 
 WindowGroupRef OnTopGroup = NULL;
