@@ -1156,7 +1156,7 @@ OSStatus CarbonKeyboardProc(GView *v, EventRef inEvent, bool Handle)
 					if (GKeyFromEvent(k, inEvent))
 					{
 						k.Down(true);
-						k.Trace("kEventRawKeyDown");
+						// k.Trace("kEventRawKeyDown");
 						
 						if (Handle)
 						{
