@@ -248,6 +248,7 @@ void MemRelease(void * __nullable info, const void *  data, size_t size)
 	DeleteArray(p);
 }
 
+#if LGI_COCOA
 NSImage *GMemDC::NsImage(GRect *rc)
 {
 	if (!pMem || !pMem->Base)
@@ -316,6 +317,7 @@ NSImage *GMemDC::NsImage(GRect *rc)
 	CGImageRelease(iref);
 	return img;
 }
+#endif
 
 void GMemDC::Empty()
 {

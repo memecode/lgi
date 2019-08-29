@@ -817,7 +817,7 @@ int GView::OnEvent(GMessage *Msg)
 	return 0;
 }
 
-void GView::PointToScreen(GdcPt2 &p)
+bool GView::PointToScreen(GdcPt2 &p)
 {
 	GViewI *c = this;
 	int Ox = 0, Oy = 0;
@@ -849,12 +849,14 @@ void GView::PointToScreen(GdcPt2 &p)
 	else
 	{
 		printf("%s:%i - No window handle to map to screen. c=%p\n", __FILE__, __LINE__, c);
+		return false;
 	}
+	
+	return true;
 }
 
-void GView::PointToView(GdcPt2 &p)
+bool GView::PointToView(GdcPt2 &p)
 {
-Start:
 	GViewI *c = this;
 	int Ox = 0, Oy = 0;
 	GViewI *w = c->GetWindow();
@@ -886,8 +888,10 @@ Start:
 	else
 	{
 		printf("%s:%i - No window handle to map to view. c=%p\n", __FILE__, __LINE__, c);
-		goto Start;
+		return false;
 	}
+	
+	return true;
 }
 
 bool GView::GetMouse(GMouse &m, bool ScreenCoords)
