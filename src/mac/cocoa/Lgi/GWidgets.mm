@@ -16,6 +16,7 @@
 #include "GBitmap.h"
 #include "GTableLayout.h"
 #include "GDisplayString.h"
+#include "GButton.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 #define GreyBackground()
@@ -24,6 +25,14 @@ struct GDialogPriv
 {
 	bool IsModal;
 	int ModalStatus;
+	int BtnId;
+	
+	GDialogPriv()
+	{
+		IsModal = false;
+		ModalStatus = -1;
+		BtnId = -1;
+	}
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -32,14 +41,33 @@ GDialog::GDialog()
 {
 	d = new GDialogPriv;
 	Name("Dialog");
-	d->IsModal = false;
-	d->ModalStatus = -1;
 	_SetDynamic(false);
 }
 
 GDialog::~GDialog()
 {
 	DeleteObj(d);
+}
+
+int GDialog::GetButtonId()
+{
+	return d->BtnId;
+}
+
+int GDialog::OnNotify(GViewI *Ctrl, int Flags)
+{
+	GButton *b = dynamic_cast<GButton*>(Ctrl);
+	if (b)
+	{
+		d->BtnId = b->GetId();
+		
+		if (d->IsModal)
+			EndModal();
+		else
+			EndModeless();
+	}
+
+	return 0;
 }
 
 bool GDialog::IsModal()

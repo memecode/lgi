@@ -94,7 +94,7 @@ public:
 	#ifdef __GTK_H__
 		GWindow(Gtk::GtkWidget *w = NULL);
 	#elif LGI_CARBON
-		GWindow(WindowRef wr);
+		GWindow(WindowRef wr = NULL);
 	#elif LGI_COCOA
 		GWindow(OsWindow wnd = NULL);
 	#else

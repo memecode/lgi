@@ -103,14 +103,14 @@ public:
 ///////////////////////////////////////////////////////////////////////
 #define GWND_CREATE		0x0010000
 
-GWindow::GWindow() :
+GWindow::GWindow(WindowRef wr) :
 	GView(0)
 {
 	d = new GWindowPrivate(this);
 	_QuitOnClose = false;
-	Wnd = 0;
-	Menu = 0;
-	_Default = 0;
+	Wnd = NULL;
+	Menu = NULL;
+	_Default = NULL;
 	_Window = this;
 	WndFlags |= GWND_CREATE;
 	GView::Visible(false);
@@ -119,38 +119,27 @@ GWindow::GWindow() :
 
 	GRect pos(0, 50, 200, 100);
 	Rect r = pos;
-	
-	OSStatus e = CreateNewWindow
-		(
-			kDocumentWindowClass,
-			kWindowStandardDocumentAttributes |
-				kWindowStandardHandlerAttribute |
-				kWindowCompositingAttribute |
-				kWindowLiveResizeAttribute,
-			&r,
-			&Wnd
-		);
-	if (e)
+
+	if (wr)
 	{
-		printf("%s:%i - CreateNewWindow failed (e=%i).\n", _FL, (int)e); 
+		Wnd = wr;
+	}
+	else
+	{
+		OSStatus e = CreateNewWindow
+			(
+				kDocumentWindowClass,
+				kWindowStandardDocumentAttributes |
+					kWindowStandardHandlerAttribute |
+					kWindowCompositingAttribute |
+					kWindowLiveResizeAttribute,
+				&r,
+				&Wnd
+			);
+		if (e)
+			printf("%s:%i - CreateNewWindow failed (e=%i).\n", _FL, (int)e);
 	}
 }
-
-#if defined(LGI_CARBON)
-GWindow::GWindow(WindowRef wr)
-{
-	d = new GWindowPrivate(this);
-	_QuitOnClose = false;
-	Wnd = 0;
-	Menu = 0;
-	_Default = 0;
-	_Window = this;
-	WndFlags |= GWND_CREATE;
-	GView::Visible(false);
-    _Lock = new LMutex;
-	Wnd = wr;
-}
-#endif
 
 GWindow::~GWindow()
 {
