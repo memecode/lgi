@@ -12,6 +12,35 @@ extern void SetDefaultFocus(GViewI *v);
 
 #define DEBUG_KEYS			0
 
+GRect LScreenFlip(GRect r)
+{
+	GRect screen(0, 0, -1, -1);
+	for (NSScreen *s in [NSScreen screens])
+	{
+		GRect pos = s.frame;
+		if (r.Overlap(&pos))
+		{
+			screen = pos;
+			break;
+		}
+	}
+	
+	if (screen.Valid())
+	{
+		GRect rc = r;
+		rc.Offset(0, (screen.Y() - r.y1 - r.Y()) - r.y1);
+		// printf("%s:%i - Flip %s -> %s (%s)\n", _FL, r.GetStr(), rc.GetStr(), screen.GetStr());
+		return rc;
+	}
+	else
+	{
+		// printf("%s:%i - No Screen?\n", _FL);
+		r.ZOff(-1, -1);
+	}
+	
+	return r;
+}
+
 ///////////////////////////////////////////////////////////////////////
 class HookInfo
 {
@@ -26,7 +55,8 @@ public:
 
 - (id)init;
 - (void)dealloc;
-- (void)windowDidResize:(NSNotification *)aNotification;
+- (void)windowDidResize:(NSNotification*)aNotification;
+- (void)windowDidMove:(NSNotification*)aNotification;
 - (void)windowWillClose:(NSNotification*)aNotification;
 - (BOOL)windowShouldClose:(id)sender;
 - (void)windowDidBecomeMain:(NSNotification*)notification;
@@ -183,6 +213,13 @@ public:
 	LNsWindow *w = event.object;
 	if (w && w.d)
 		w.d->OnResize();
+}
+
+- (void)windowDidMove:(NSNotification*)event
+{
+	LNsWindow *w = event.object;
+	GRect r = LScreenFlip(w.frame);
+	printf("windowDidMove: %s\n", r.GetStr());
 }
 
 - (BOOL)windowShouldClose:(NSWindow*)sender
@@ -1529,7 +1566,7 @@ GRect &GWindow::GetPos()
 
 	if (Wnd)
 	{
-		Pos = Wnd.p.frame;
+		Pos = LScreenFlip(Wnd.p.frame);
 		
 		// printf("%s::GetPos %s\n", GetClass(), Pos.GetStr());
 	}
@@ -1544,7 +1581,8 @@ bool GWindow::SetPos(GRect &p, bool Repaint)
 	Pos = p;
 	if (Wnd)
 	{
-		[Wnd.p setFrame:Pos display:YES];
+		GRect r = LScreenFlip(p);
+		[Wnd.p setFrame:r display:YES];
 		
 		// printf("%s::SetPos %s\n", GetClass(), Pos.GetStr());
 	}

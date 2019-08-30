@@ -15,6 +15,8 @@ class GViewI;
 class GWindow;
 class GWindowPrivate;
 
+LgiExtern GRect LScreenFlip(GRect r);
+
 #define objc_dynamic_cast(TYPE, object) \
   ({ \
       TYPE *dyn_cast_object = (TYPE*)(object); \
