@@ -44,6 +44,7 @@ public:
 		int MyId;
 		NOTIFYICONDATAW	TrayIcon;
 		typedef HICON IconRef;
+		::GArray<IconRef> Icon;
 	
 	#elif LGI_COCOA
 	

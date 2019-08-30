@@ -535,7 +535,7 @@ void GDataGrid::OnPaint(GSurface *pDC)
 	d->UpdatePos();
 	if (d->e && !(d->Flags[d->Col] & GDG_INTEGER))
 	{
-		pDC->Colour(LC_BLACK, 24);
+		pDC->Colour(L_BLACK);
 		GRect p = d->e->GetPos();
 		p.Size(-CELL_EDGE, -CELL_EDGE);
 		pDC->Box(&p);

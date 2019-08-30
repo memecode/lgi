@@ -609,7 +609,7 @@ bool GRichTextPriv::ImageBlock::ToHtml(GStream &s, GArray<GDocView::ContentMedia
 			Cm.MimeType = Si->MimeType;
 
 			if (FileName)
-				Cm.FileName = FileName;
+				Cm.FileName = LgiGetLeaf(FileName);
 			else if (Cm.MimeType.Equals("image/jpeg"))
 				Cm.FileName.Printf("img%u.jpg", Idx);
 			else if (Cm.MimeType.Equals("image/png"))
@@ -1185,6 +1185,10 @@ GMessage::Result GRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 			Si->Compressed.Reset(Jpg.Release());
 			Si->MimeType = "image/jpeg";
 			UpdateThreadBusy(_FL, -1);
+
+			// Change the doc to dirty
+			d->Dirty = true;
+			d->View->SendNotify(GNotifyDocChanged);
 			break;
 		}
 		case M_IMAGE_ERROR:

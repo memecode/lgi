@@ -869,7 +869,7 @@ bool LgiToWindowsCursor(OsView Hnd, LgiCursor Cursor)
 	return true;
 }
 
-void GView::PointToScreen(GdcPt2 &p)
+bool GView::PointToScreen(GdcPt2 &p)
 {
 	POINT pt = {p.x, p.y};
 	GViewI *t = this;
@@ -884,9 +884,10 @@ void GView::PointToScreen(GdcPt2 &p)
 	ClientToScreen(t->Handle(), &pt);
 	p.x = pt.x;
 	p.y = pt.y;
+	return true;
 }
 
-void GView::PointToView(GdcPt2 &p)
+bool GView::PointToView(GdcPt2 &p)
 {
 	POINT pt = {p.x, p.y};
 	GViewI *t = this;
@@ -901,6 +902,7 @@ void GView::PointToView(GdcPt2 &p)
 	ScreenToClient(t->Handle(), &pt);
 	p.x = pt.x;
 	p.y = pt.y;
+	return true;
 }
 
 bool GView::GetMouse(GMouse &m, bool ScreenCoords)
