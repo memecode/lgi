@@ -163,6 +163,9 @@ LgiFunc int LgiMsg
 	...
 );
 
+/// This is like LgiMsg but displays the text in a scrollable view.
+LgiFunc void LDialogTextMsg(GViewI *Parent, const char *Title, GString Txt);
+
 /// Contains all the information about a display/monitor attached to the system.
 /// \sa LgiGetDisplays
 struct GDisplayInfo

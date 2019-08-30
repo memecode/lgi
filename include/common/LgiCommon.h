@@ -36,6 +36,14 @@ LgiExtern GString LGetSystemPath(
 	int WordSize = 0
 );
 
+/// Gets the path of the currently running executable
+/// \ingroup Base
+LgiExtern GString LGetExePath();
+
+/// Gets the file of the currently running executable
+/// \ingroup Base
+LgiExtern GString LGetExeFile();
+
 /// Returns the mime type of the file
 /// \ingroup Mime
 LgiExtern GString LGetFileMimeType
@@ -43,6 +51,10 @@ LgiExtern GString LGetFileMimeType
 	/// File to find mime type for
 	const char *File
 );
+
+/// Finds a file in the applications directory or nearby
+/// \ingroup Base
+LgiExtern GString LFindFile(const char *Name);
 
 /// Returns the application associated with the mime type
 /// \ingroup Mime
@@ -202,15 +214,18 @@ LgiFunc char *LgiEncodeUri
 	
 /// Gets the path and file name of the currently running executable
 /// \ingroup Base
-LgiFunc bool LgiGetExeFile(char *Dst, int DstSize);
+/// \deprecated Use 'LGetExeFile'
+LgiFunc bool DEPRECATED(LgiGetExeFile(char *Dst, int DstSize));
 
 /// Gets the path of the currently running executable
 /// \ingroup Base
-LgiFunc bool LgiGetExePath(char *Dst, int DstSize);
+/// \deprecated Use 'LGetExePath'
+LgiFunc bool DEPRECATED(LgiGetExePath(char *Dst, int DstSize));
 
 /// Gets the path of the temporary file directory
 /// \ingroup Base
-LgiFunc bool LgiGetTempPath(char *Dst, int DstSize);
+/// \deprecated Use 'LGetSystemPath(LSP_TEMP)'
+LgiFunc bool DEPRECATED(LgiGetTempPath(char *Dst, int DstSize));
 
 /// Returns the system path specified
 /// \ingroup Base
@@ -226,7 +241,8 @@ LgiFunc bool LGetSystemPath
 
 /// Finds a file in the applications directory or nearby
 /// \ingroup Base
-LgiFunc char *LgiFindFile(const char *Name);
+/// \deprecated Use 'LFindFile()'
+LgiFunc DEPRECATED(char *LgiFindFile(const char *Name));
 
 /// Returns 0 to end search
 /// \ingroup Base

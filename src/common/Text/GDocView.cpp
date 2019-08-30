@@ -137,7 +137,7 @@ GDocumentEnv::LoadType GDefaultDocumentEnv::GetContent(LoadJob *&j)
 		}
 		else
 		{
-			GAutoString f(LgiFindFile(FileName));
+			auto f = LFindFile(FileName);
 			if (f)
 				strcpy_s(FullPath = p, sizeof(p), f);
 		}

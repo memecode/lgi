@@ -25,22 +25,7 @@ GOptionsFile::GOptionsFile(const char *FileName) : LMutex("GOptionsFile")
 	if (FileExists(FileName))
 		File = FileName;
 	else
-	{
-		char e[MAX_PATH] = "";
-		LgiGetExeFile(e, sizeof(e));
-		auto a = GString(e).SplitDelimit(DIR_STR);
-
-		#if defined(MAC)
-		bool Desktop = a.Length() > 0 && a[0].Equals("Applications");
-		#elif defined(WINDOWS)
-		bool Desktop = a.Length() > 1 &&
-						(a[1].Equals("Program Files") || a[1].Equals("Program Files (x86)"));
-		#else
-		bool Desktop = false;
-		#endif
-		
-		SetMode(Desktop ? DesktopMode : PortableMode, FileName);
-	}
+		SetMode(GuessMode(), FileName);
 }
 
 GOptionsFile::GOptionsFile(PortableType Mode, const char *BaseName) : LMutex("GOptionsFile")
@@ -54,9 +39,33 @@ GOptionsFile::~GOptionsFile()
 {
 }
 
-bool GOptionsFile::SetMode(PortableType Mode, const char *BaseName)
+GOptionsFile::PortableType GOptionsFile::GuessMode()
+{
+	auto a = LGetExeFile().SplitDelimit(DIR_STR);
+	if (a.Length() == 0)
+		return UnknownMode;
+
+	#if defined(MAC)
+	if (a[0].Equals("Applications"))
+		return DesktopMode;
+	#elif defined(WINDOWS)
+	if (a.Length() > 1 && (a[1].Equals("Program Files") || a[1].Equals("Program Files (x86)")))
+		return DesktopMode;
+	#else
+	#warning "Impl me.""
+	#endif
+
+	return PortableMode;
+}		
+
+bool GOptionsFile::SetMode(PortableType mode, const char *BaseName)
 {
 	char FullPath[MAX_PATH];
+
+	if (!mode)
+		mode = GuessMode();
+	Mode = mode;
+
 	if (!LGetSystemPath(Mode == DesktopMode ? LSP_APP_ROOT : LSP_APP_INSTALL, FullPath, sizeof(FullPath)))
 		return false;
 

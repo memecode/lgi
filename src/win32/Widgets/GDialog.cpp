@@ -14,6 +14,7 @@
 #include <commctrl.h>
 #include "GTableLayout.h"
 #include "GDisplayString.h"
+#include "GButton.h"
 
 #define USE_DIALOGBOXINDIRECTPARAM         0
 
@@ -21,6 +22,7 @@ struct GDialogPriv
 {
 	bool IsModal, _Resizable;
 	int ModalStatus;
+	int BtnId;
 
 	#if WINNATIVE
     #if USE_DIALOGBOXINDIRECTPARAM
@@ -43,6 +45,7 @@ struct GDialogPriv
     	ModalResult = -1;
     	#endif
     	IsModal = true;
+		BtnId = -1;
     }
     
     ~GDialogPriv()
@@ -469,6 +472,27 @@ GMessage::Result GDialog::OnEvent(GMessage *Msg)
 	}
 
     return GWindow::OnEvent(Msg);
+}
+
+int GDialog::GetButtonId()
+{
+	return d->BtnId;
+}
+
+int GDialog::OnNotify(GViewI *Ctrl, int Flags)
+{
+	GButton *b = dynamic_cast<GButton*>(Ctrl);
+	if (b)
+	{
+		d->BtnId = b->GetId();
+		
+		if (d->IsModal)
+			EndModal();
+		else
+			EndModeless();
+	}
+
+	return 0;
 }
 
 void GDialog::Quit(bool DontDelete)
