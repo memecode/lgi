@@ -7336,7 +7336,7 @@ GdcPt2 GHtml::Layout(bool ForceLayout)
 
 void GHtml::OnPaint(GSurface *ScreenDC)
 {
-	GProfile Prof("GHtml::OnPaint");
+	// GProfile Prof("GHtml::OnPaint");
 
 	#if GHTML_USE_DOUBLE_BUFFER
 	GRect Client = GetClient();
