@@ -848,7 +848,7 @@ void LMenuItem::Id(int i)
 	_Id = i;
 	if (Parent && Parent->Info && Info)
 	{
-		#ifdef COCOA
+		#if LGI_COCOA
 		#else
 		SetMenuItemCommandID(Parent->Info, Info, _Id);
 		#endif
@@ -864,7 +864,7 @@ void LMenuItem::Separator(bool s)
 	
 	if (Parent)
 	{
-		#ifdef COCOA
+		#if LGI_COCOA
 		#else
 		if (s)
 			ChangeMenuItemAttributes(Parent->Info, Info, kMenuItemAttrSeparator, 0);
@@ -978,7 +978,7 @@ bool LMenuItem::Enabled()
 {
 	if (Parent)
 	{
-		#ifdef COCOA
+		#if LGI_COCOA
 		#else
 		return IsMenuItemEnabled(Parent->Info, Info);
 		#endif

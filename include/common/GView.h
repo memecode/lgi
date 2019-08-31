@@ -62,9 +62,9 @@ private:
 
 	#elif defined MAC
 	
-		#if defined(COCOA)
+		#if LGI_COCOA
 
-		#elif defined(LGI_CARBON)
+		#elif LGI_CARBON
 
 			friend OSStatus LgiWindowProc(EventHandlerCallRef, EventRef, void *);
 			friend OSStatus LgiRootCtrlProc(EventHandlerCallRef, EventRef, void *);
@@ -153,13 +153,13 @@ protected:
 	#elif defined MAC
 	
 		bool _Attach(GViewI *parent);
-		#if defined(COCOA)
+		#if LGI_COCOA
 		public:
 			GdcPt2 Flip(GdcPt2 p);
 			GRect Flip(GRect p);
 			virtual void OnDealloc();
 	
-		#elif defined(LGI_CARBON)
+		#elif LGI_CARBON
 			OsView _CreateCustomView();
 			virtual bool _OnGetInfo(HISize &size, HISize &line, HIRect &bounds, HIPoint &origin) { return false; }
 			virtual void _OnScroll(HIPoint &origin) {}
@@ -175,7 +175,7 @@ protected:
 
 	#endif
 	
-	#if defined(COCOA)
+	#if LGI_COCOA
 		protected:
 	#endif
 

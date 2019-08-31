@@ -559,7 +559,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 				NSImage *cursor = [[[NSCursor currentSystemCursor] image] copy];
 				if (cursor)
 				{
-					#ifdef COCOA
+					#if LGI_COCOA
 					#warning "Impl cursor blt"
 					#else
 					// NSPoint hotSpot = [[NSCursor currentSystemCursor] hotSpot];

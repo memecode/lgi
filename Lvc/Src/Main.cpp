@@ -9,6 +9,7 @@
 #include "GButton.h"
 #include "GXmlTreeUi.h"
 
+
 //////////////////////////////////////////////////////////////////
 const char *AppName =			"Lvc";
 #define DEFAULT_BUILD_FIX_MSG	"Build fix."

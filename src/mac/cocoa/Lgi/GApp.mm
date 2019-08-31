@@ -185,7 +185,7 @@ void GMouse::SetFromEvent(NSEvent *ev, NSView *view)
 	}
 }
 
-void GUiEvent::SetModifer(uint32 modifierKeys)
+void GUiEvent::SetModifer(uint32_t modifierKeys)
 {
 	System(modifierKeys & SDK_10_12(NSEventModifierFlagCommand, NSCommandKeyMask));
 	Shift (modifierKeys & SDK_10_12(NSEventModifierFlagShift,   NSShiftKeyMask));

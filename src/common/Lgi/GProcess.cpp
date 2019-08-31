@@ -11,7 +11,7 @@
 #if defined(LINUX) || defined(MAC)
 #include <signal.h>
 #include <unistd.h>
-#ifdef COCOA
+#if LGI_COCOA
 #include <Cocoa/Cocoa.h>
 #endif
 #endif
@@ -85,7 +85,7 @@ bool LgiIsProcess(OsProcessId Pid)
 	
 	#elif defined(MAC)
 	
-		#if COCOA
+		#if LGI_COCOA
 	
 		NSRunningApplication* app = [NSRunningApplication runningApplicationWithProcessIdentifier: Pid];
 		return app != nil;

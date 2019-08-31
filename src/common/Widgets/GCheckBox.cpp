@@ -330,7 +330,7 @@ void GCheckBox::OnPaint(GSurface *pDC)
 		bool en = Enabled();
 		GRect r = GetClient();
 		
-		#if defined MAC && !defined COCOA
+		#if defined MAC && !LGI_COCOA
 		d->ValuePos.Set(0, 0, PadX1Px, MinYSize);
 		#else
 		d->ValuePos.Set(0, 0, 12, 12);

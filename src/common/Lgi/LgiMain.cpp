@@ -248,7 +248,7 @@ int main(int Args, char **Arg)
 		
 		
 		// Setup apple event handlers
-		#if COCOA
+		#if LGI_COCOA
 		#elif defined LGI_CARBON
 		OSStatus e = AEInstallEventHandler(	kInternetEventClass,
 											kAEGetURL,

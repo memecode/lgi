@@ -208,7 +208,7 @@ LgiFunc char *LgiEncodeUri
 );
 
 // Path
-#if defined(COCOA) || defined(__GTK_H__)
+#if LGI_COCOA || defined(__GTK_H__)
 	LgiExtern GString LgiArgsAppPath;
 #endif
 	

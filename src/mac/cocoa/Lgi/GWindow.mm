@@ -217,9 +217,9 @@ public:
 
 - (void)windowDidMove:(NSNotification*)event
 {
-	LNsWindow *w = event.object;
-	GRect r = LScreenFlip(w.frame);
-	printf("windowDidMove: %s\n", r.GetStr());
+	// LNsWindow *w = event.object;
+	// GRect r = LScreenFlip(w.frame);
+	// printf("windowDidMove: %s\n", r.GetStr());
 }
 
 - (BOOL)windowShouldClose:(NSWindow*)sender
@@ -510,6 +510,7 @@ void GWindow::Quit(bool DontDelete)
 	LAutoPool Pool;
 	if (_QuitOnClose)
 	{
+		_QuitOnClose = false;
 		LgiCloseApp();
 	}
 	

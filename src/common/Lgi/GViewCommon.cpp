@@ -1283,12 +1283,12 @@ void GView::Visible(bool v)
 			else
 				_View->Hide();
 
-		#elif defined(COCOA)
+		#elif LGI_COCOA
 
 			LAutoPool Pool;
 			[_View.p setHidden:!v];
 
-		#elif defined(LGI_CARBON)
+		#elif LGI_CARBON
 		
 			Boolean is = HIViewIsVisible(_View);
 			if (v != is)

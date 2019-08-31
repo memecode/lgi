@@ -311,7 +311,7 @@ GExecutionStatus GExternFunc::Call(GScriptContext *Ctx, LScriptArguments &Args)
 		return ScriptError;
 	}
 	
-	#if defined(_MSC_VER) || (defined(MAC) && defined(LGI_32BIT) && !defined(COCOA))
+	#if defined(_MSC_VER) || (defined(MAC) && defined(LGI_32BIT) && !LGI_COCOA)
 	ssize_t a = Ptr.ni - &Val[0];
 	#endif
 	NativeInt r = 0;
@@ -342,7 +342,7 @@ GExecutionStatus GExternFunc::Call(GScriptContext *Ctx, LScriptArguments &Args)
 			}
 		#endif
 	#elif defined(MAC)
-		#ifdef COCOA
+		#if LGI_COCOA
 		#warning FIXME
 		#elif LGI_32BIT
 		// 32bit only

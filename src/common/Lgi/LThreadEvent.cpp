@@ -4,7 +4,7 @@
 #if USE_POSIX_SEM
 	#define SEM_NULL -1
 #endif
-#if defined(LINUX) || COCOA
+#if defined(LINUX) || LGI_COCOA
 	#include <errno.h>
 #endif
 #if USE_MACH_SEM

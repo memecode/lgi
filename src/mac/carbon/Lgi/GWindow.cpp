@@ -662,7 +662,7 @@ pascal OSStatus LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inE
 					
 					if (w && w->d && w->d->DeleteWhenDone)
 					{
-						w->Wnd = 0;
+						w->Wnd = NULL;
 						DeleteObj(v);
 					}
 					

@@ -32,7 +32,7 @@ enum TabViewStyle
 #define TAB_TXT_PAD				3
 #endif
 
-#if defined(MAC) && !defined(COCOA) && !defined(LGI_SDL)
+#if defined(MAC) && !LGI_COCOA && !defined(LGI_SDL)
 #define MAC_PAINT	1
 #else
 #define MAC_PAINT	0

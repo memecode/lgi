@@ -1,0 +1,443 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */; };
+		3448F8C62081D2500038AE76 /* mac-icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 3448F8C52081D2500038AE76 /* mac-icon.icns */; };
+		3457FE492081CB3D00014BE4 /* BlameUi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE3E2081CB3D00014BE4 /* BlameUi.cpp */; };
+		3457FE4A2081CB3D00014BE4 /* DropDownBtn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE3F2081CB3D00014BE4 /* DropDownBtn.cpp */; };
+		3457FE4B2081CB3D00014BE4 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE412081CB3D00014BE4 /* Main.cpp */; };
+		3457FE4C2081CB3D00014BE4 /* VcCommit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE432081CB3D00014BE4 /* VcCommit.cpp */; };
+		3457FE4D2081CB3D00014BE4 /* VcFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE452081CB3D00014BE4 /* VcFile.cpp */; };
+		3457FE4E2081CB3D00014BE4 /* VcFolder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE472081CB3D00014BE4 /* VcFolder.cpp */; };
+		3457FE502081CBE500014BE4 /* GSubProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE4F2081CBE500014BE4 /* GSubProcess.cpp */; };
+		3457FE522081CC4800014BE4 /* Lvc.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 3457FE512081CC4800014BE4 /* Lvc.lr8 */; };
+		34BD35B120C5484A0001838A /* GControlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B020C5484A0001838A /* GControlTree.cpp */; };
+		34BD35B320C548710001838A /* GXmlTreeUi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B220C548710001838A /* GXmlTreeUi.cpp */; };
+		34C032B32319CDE900470DF2 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C032B22319CDE900470DF2 /* Cocoa.framework */; };
+		34C032BB2319CE8C00470DF2 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C032B92319CDFE00470DF2 /* LgiCocoa.framework */; };
+		34C032BD2319CEC100470DF2 /* GOptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C032BC2319CEC100470DF2 /* GOptionsFile.cpp */; };
+		34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C032B92319CDFE00470DF2 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		34E1910C20B1898E00005243 /* image-list.png in Resources */ = {isa = PBXBuildFile; fileRef = 34E1910B20B1898E00005243 /* image-list.png */; };
+		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
+		8D0C4E8E0486CD37000505A6 /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = 02345980000FD03B11CA0E72 /* main.nib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		34C032B82319CDFE00470DF2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3477C2681CBF020F0028B84B;
+			remoteInfo = LgiCocoa;
+		};
+		34C032BF2319CF1A00470DF2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 3477C2671CBF020F0028B84B;
+			remoteInfo = LgiCocoa;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		34640D3212D5D8AB00B207F4 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0867D6ABFE840B52C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1870340FFE93FCAF11CA0CD7 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
+		32DBCF6D0370B57F00C91783 /* Lvc_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Lvc_Prefix.pch; sourceTree = "<group>"; };
+		342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = SOURCE_ROOT; };
+		3448F8C52081D2500038AE76 /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../Resources/mac-icon.icns"; sourceTree = "<group>"; };
+		3457FE3E2081CB3D00014BE4 /* BlameUi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BlameUi.cpp; path = ../Src/BlameUi.cpp; sourceTree = "<group>"; };
+		3457FE3F2081CB3D00014BE4 /* DropDownBtn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DropDownBtn.cpp; path = ../Src/DropDownBtn.cpp; sourceTree = "<group>"; };
+		3457FE402081CB3D00014BE4 /* Lvc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Lvc.h; path = ../Src/Lvc.h; sourceTree = "<group>"; };
+		3457FE412081CB3D00014BE4 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../Src/Main.cpp; sourceTree = "<group>"; };
+		3457FE422081CB3D00014BE4 /* resdefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = resdefs.h; path = ../Resources/resdefs.h; sourceTree = "<group>"; };
+		3457FE432081CB3D00014BE4 /* VcCommit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VcCommit.cpp; path = ../Src/VcCommit.cpp; sourceTree = "<group>"; };
+		3457FE442081CB3D00014BE4 /* VcCommit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VcCommit.h; path = ../Src/VcCommit.h; sourceTree = "<group>"; };
+		3457FE452081CB3D00014BE4 /* VcFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VcFile.cpp; path = ../Src/VcFile.cpp; sourceTree = "<group>"; };
+		3457FE462081CB3D00014BE4 /* VcFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VcFile.h; path = ../Src/VcFile.h; sourceTree = "<group>"; };
+		3457FE472081CB3D00014BE4 /* VcFolder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VcFolder.cpp; path = ../Src/VcFolder.cpp; sourceTree = "<group>"; };
+		3457FE482081CB3D00014BE4 /* VcFolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VcFolder.h; path = ../Src/VcFolder.h; sourceTree = "<group>"; };
+		3457FE4F2081CBE500014BE4 /* GSubProcess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GSubProcess.cpp; path = ../../src/common/Lgi/GSubProcess.cpp; sourceTree = "<group>"; };
+		3457FE512081CC4800014BE4 /* Lvc.lr8 */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Lvc.lr8; path = ../Resources/Lvc.lr8; sourceTree = "<group>"; };
+		34BD35B020C5484A0001838A /* GControlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GControlTree.cpp; path = ../../src/common/Widgets/GControlTree.cpp; sourceTree = "<group>"; };
+		34BD35B220C548710001838A /* GXmlTreeUi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GXmlTreeUi.cpp; path = ../../src/common/Text/GXmlTreeUi.cpp; sourceTree = "<group>"; };
+		34C032B22319CDE900470DF2 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = ../../../../../../../System/Library/Frameworks/Cocoa.framework; sourceTree = "<group>"; };
+		34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
+		34C032BC2319CEC100470DF2 /* GOptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GOptionsFile.cpp; path = ../../src/common/Lgi/GOptionsFile.cpp; sourceTree = "<group>"; };
+		34E1910B20B1898E00005243 /* image-list.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "image-list.png"; path = "../Resources/image-list.png"; sourceTree = "<group>"; };
+		8D0C4E960486CD37000505A6 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		8D0C4E970486CD37000505A6 /* Lvc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lvc.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8D0C4E910486CD37000505A6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				34C032BB2319CE8C00470DF2 /* LgiCocoa.framework in Frameworks */,
+				34C032B32319CDE900470DF2 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		195DF8CFFE9D517E11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D0C4E970486CD37000505A6 /* Lvc.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		20286C29FDCF999611CA2CEA /* i.Hex */ = {
+			isa = PBXGroup;
+			children = (
+				20286C2AFDCF999611CA2CEA /* Sources */,
+				20286C2CFDCF999611CA2CEA /* Resources */,
+				20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */,
+				195DF8CFFE9D517E11CA2CBB /* Products */,
+			);
+			name = i.Hex;
+			sourceTree = "<group>";
+		};
+		20286C2AFDCF999611CA2CEA /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				3457FE3E2081CB3D00014BE4 /* BlameUi.cpp */,
+				3457FE3F2081CB3D00014BE4 /* DropDownBtn.cpp */,
+				3457FE402081CB3D00014BE4 /* Lvc.h */,
+				3457FE412081CB3D00014BE4 /* Main.cpp */,
+				3457FE422081CB3D00014BE4 /* resdefs.h */,
+				3457FE432081CB3D00014BE4 /* VcCommit.cpp */,
+				3457FE442081CB3D00014BE4 /* VcCommit.h */,
+				3457FE452081CB3D00014BE4 /* VcFile.cpp */,
+				3457FE462081CB3D00014BE4 /* VcFile.h */,
+				3457FE472081CB3D00014BE4 /* VcFolder.cpp */,
+				3457FE482081CB3D00014BE4 /* VcFolder.h */,
+				342D52A30F0CBA07002A1C7C /* Lgi */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		20286C2CFDCF999611CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				34E1910B20B1898E00005243 /* image-list.png */,
+				3448F8C52081D2500038AE76 /* mac-icon.icns */,
+				3457FE512081CC4800014BE4 /* Lvc.lr8 */,
+				8D0C4E960486CD37000505A6 /* Info.plist */,
+				0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */,
+				02345980000FD03B11CA0E72 /* main.nib */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */,
+				34C032B22319CDE900470DF2 /* Cocoa.framework */,
+			);
+			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		342D52A30F0CBA07002A1C7C /* Lgi */ = {
+			isa = PBXGroup;
+			children = (
+				34C032BC2319CEC100470DF2 /* GOptionsFile.cpp */,
+				34BD35B220C548710001838A /* GXmlTreeUi.cpp */,
+				34BD35B020C5484A0001838A /* GControlTree.cpp */,
+				3457FE4F2081CBE500014BE4 /* GSubProcess.cpp */,
+				32DBCF6D0370B57F00C91783 /* Lvc_Prefix.pch */,
+				342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */,
+			);
+			name = Lgi;
+			sourceTree = "<group>";
+		};
+		34C032B52319CDFE00470DF2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				34C032B92319CDFE00470DF2 /* LgiCocoa.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8D0C4E890486CD37000505A6 /* Lvc */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0E91AC508A95435008D54AB /* Build configuration list for PBXNativeTarget "Lvc" */;
+			buildPhases = (
+				8D0C4E8C0486CD37000505A6 /* Resources */,
+				8D0C4E8F0486CD37000505A6 /* Sources */,
+				8D0C4E910486CD37000505A6 /* Frameworks */,
+				34640D3212D5D8AB00B207F4 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				34C032C02319CF1A00470DF2 /* PBXTargetDependency */,
+			);
+			name = Lvc;
+			productInstallPath = "$(HOME)/Applications";
+			productName = i.Hex;
+			productReference = 8D0C4E970486CD37000505A6 /* Lvc.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		20286C28FDCF999611CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0830;
+			};
+			buildConfigurationList = C0E91AC908A95435008D54AB /* Build configuration list for PBXProject "LvcCocoa" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 20286C29FDCF999611CA2CEA /* i.Hex */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 34C032B52319CDFE00470DF2 /* Products */;
+					ProjectRef = 34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				8D0C4E890486CD37000505A6 /* Lvc */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		34C032B92319CDFE00470DF2 /* LgiCocoa.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = LgiCocoa.framework;
+			remoteRef = 34C032B82319CDFE00470DF2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8D0C4E8C0486CD37000505A6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3457FE522081CC4800014BE4 /* Lvc.lr8 in Resources */,
+				34E1910C20B1898E00005243 /* image-list.png in Resources */,
+				8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */,
+				8D0C4E8E0486CD37000505A6 /* main.nib in Resources */,
+				3448F8C62081D2500038AE76 /* mac-icon.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8D0C4E8F0486CD37000505A6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3457FE502081CBE500014BE4 /* GSubProcess.cpp in Sources */,
+				34BD35B320C548710001838A /* GXmlTreeUi.cpp in Sources */,
+				3457FE4C2081CB3D00014BE4 /* VcCommit.cpp in Sources */,
+				3457FE4E2081CB3D00014BE4 /* VcFolder.cpp in Sources */,
+				3457FE4A2081CB3D00014BE4 /* DropDownBtn.cpp in Sources */,
+				3457FE4D2081CB3D00014BE4 /* VcFile.cpp in Sources */,
+				34C032BD2319CEC100470DF2 /* GOptionsFile.cpp in Sources */,
+				3457FE492081CB3D00014BE4 /* BlameUi.cpp in Sources */,
+				342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */,
+				34BD35B120C5484A0001838A /* GControlTree.cpp in Sources */,
+				3457FE4B2081CB3D00014BE4 /* Main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		34C032C02319CF1A00470DF2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = LgiCocoa;
+			targetProxy = 34C032BF2319CF1A00470DF2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		02345980000FD03B11CA0E72 /* main.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1870340FFE93FCAF11CA0CD7 /* English */,
+			);
+			name = main.nib;
+			sourceTree = "<group>";
+		};
+		0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0867D6ABFE840B52C02AAC07 /* English */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		C0E91AC608A95435008D54AB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.Lvc;
+				PRODUCT_NAME = Lvc;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		C0E91AC708A95435008D54AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.Lvc;
+				PRODUCT_NAME = Lvc;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		C0E91ACA08A95435008D54AB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					MAC,
+					_DEBUG,
+					"LGI_COCOA=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../../include/common,
+					../../include/mac/cocoa,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				VALID_ARCHS = x86_64;
+			};
+			name = Debug;
+		};
+		C0E91ACB08A95435008D54AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					MAC,
+					"LGI_COCOA=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../../include/common,
+					../../include/mac/cocoa,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				SDKROOT = macosx;
+				VALID_ARCHS = x86_64;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C0E91AC508A95435008D54AB /* Build configuration list for PBXNativeTarget "Lvc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0E91AC608A95435008D54AB /* Debug */,
+				C0E91AC708A95435008D54AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0E91AC908A95435008D54AB /* Build configuration list for PBXProject "LvcCocoa" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0E91ACA08A95435008D54AB /* Debug */,
+				C0E91ACB08A95435008D54AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 20286C28FDCF999611CA2CEA /* Project object */;
+}

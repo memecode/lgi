@@ -447,7 +447,7 @@ public:
 	
 	#elif defined MAC
 	
-	#ifdef COCOA
+	#if LGI_COCOA
 	#else
 	virtual CGColorSpaceRef GetColourSpaceRef() { return 0; }
 	#endif
@@ -682,7 +682,7 @@ public:
 
 struct GPrintDcParams
 {
-	#ifdef COCOA
+	#if LGI_COCOA
 	#else
 	PMRect Page;
 	CGContextRef Ctx;

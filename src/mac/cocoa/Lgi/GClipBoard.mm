@@ -49,9 +49,7 @@ bool GClipBoard::Text(char *Str, bool AutoEmpty)
 	LAutoPool Ap;
 	
 	if (AutoEmpty)
-	{
 		Empty();
-	}
 	
 	Txt = Str;
 	wTxt.Reset();
@@ -66,10 +64,10 @@ char *GClipBoard::Text()
 {
 	LAutoPool Ap;
 	
-	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
 	NSArray *classes = [[NSArray alloc] initWithObjects:[NSString class], nil];
-	NSDictionary *options = [NSDictionary dictionary];
-	NSArray *copiedItems = [pasteboard readObjectsForClasses:classes options:options];
+	NSArray *copiedItems = [[NSPasteboard generalPasteboard]
+								readObjectsForClasses:classes
+								options:[NSDictionary dictionary]];
 	if (copiedItems != nil)
 	{
 		for (NSString *s in copiedItems)
@@ -77,11 +75,9 @@ char *GClipBoard::Text()
 			Txt = [s UTF8String];
 			break;
 		}
-		
-		[copiedItems release];
 	}
+	[classes release];
 
-    // Do something with the contents...
 	return Txt;
 }
 

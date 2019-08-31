@@ -20,7 +20,7 @@
 	#define COLOR_MENUBAR		30
 	#endif
 #elif defined(MAC) && !defined(LGI_SDL)
-	#if defined(COCOA)
+	#if LGI_COCOA
 		#ifdef __OBJC__
 			#include <Cocoa/Cocoa.h>
 		#endif

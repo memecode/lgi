@@ -2061,7 +2061,7 @@ bool GFontType::GetSystemFont(const char *Which)
 			Info.PointSize(DefSize);
 			Status = true;
 
-			#elif defined MAC && !defined COCOA
+			#elif defined MAC && !LGI_COCOA
 			
 				#if USE_CORETEXT
 
@@ -2123,7 +2123,7 @@ bool GFontType::GetSystemFont(const char *Which)
 				Info.PointSize(DefSize-1);
 				Status = true;
 
-			#elif defined MAC && !defined COCOA
+			#elif defined MAC && !LGI_COCOA
 			
 				#if USE_CORETEXT
 
@@ -2183,7 +2183,7 @@ bool GFontType::GetSystemFont(const char *Which)
 			Info.PointSize(DefSize);
 			Status = true;
 
-			#elif defined MAC && !defined COCOA
+			#elif defined MAC && !LGI_COCOA
 			
 				#if USE_CORETEXT
 

@@ -18,7 +18,7 @@ void MsgCb(Gtk::GtkDialog *dialog, Gtk::gint response_id, Gtk::gpointer user_dat
 #include "GTextLabel.h"
 #include "GButton.h"
 
-#if COCOA
+#if LGI_COCOA
 #import <Cocoa/Cocoa.h>
 #endif
 
@@ -180,7 +180,7 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 		}
 	}
 	
-	#elif COCOA
+	#elif LGI_COCOA
 	
 	NSAlert *alert = [[NSAlert alloc] init];
 	auto msg = Msg.NsStr();

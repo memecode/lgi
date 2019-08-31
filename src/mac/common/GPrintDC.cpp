@@ -31,7 +31,7 @@ GPrintDC::GPrintDC(void *Handle, const char *PrintJobName, const char *PrinterNa
 	GPrintDcParams *Params = (GPrintDcParams*)Handle;
 	if (Params)
 	{
-		#if defined COCOA
+		#if LGI_COCOA
 		#else
 		int x = Params->Page.right - Params->Page.left;
 		int y = Params->Page.bottom - Params->Page.top;

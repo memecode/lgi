@@ -1517,7 +1517,7 @@ public:
 	}
 };
 
-#if 0// def COCOA
+#if 0// def LGI_COCOA
 #define Chk printf("%s:%i - Cnt=%i\n", LgiGetLeaf(__FILE__), __LINE__, (int)WindowHandle().p.retainCount)
 #else
 #define Chk

@@ -4,7 +4,7 @@
 #include "GSkinEngine.h"
 #include "GDisplayString.h"
 #include "LThreadEvent.h"
-#ifdef COCOA
+#if LGI_COCOA
 	#include <Cocoa/Cocoa.h>
 #endif
 
@@ -147,13 +147,13 @@ public:
 			Prev.Down(true);
 			do
 			{
-				#if COCOA
+				#if LGI_COCOA
 				
 				NSPoint p = [NSEvent mouseLocation];
 				Cur.x = (int)p.x;
 				Cur.y = (int)p.y;
 				
-				#elif defined LGI_CARBON
+				#elif LGI_CARBON
 				
 				HIPoint p;
 				HIGetMousePosition(kHICoordSpaceScreenPixel, NULL, &p);

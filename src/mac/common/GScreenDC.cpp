@@ -32,7 +32,7 @@ public:
 		ConstAlpha = 255;
 	}
 
-	#if COCOA
+	#if LGI_COCOA
 	void SetContext(GView *v)
 	{
 		Rc = v->GetClient();
@@ -54,7 +54,7 @@ public:
 	{
 		Init();
 		Wnd = w;
-		#if COCOA
+		#if LGI_COCOA
 		SetContext(w);
 		#else
 		Ctx = (CGContextRef)param;
@@ -83,7 +83,7 @@ public:
 	{
 		Init();
 		View = v;
-		#if COCOA
+		#if LGI_COCOA
 		SetContext(v);
 		#else
 		Ctx = (CGContextRef)param;
@@ -124,7 +124,7 @@ GScreenDC::GScreenDC(GPrintDcParams *Params)
 {
 	d = new GScreenPrivate;
 	
-	#if defined COCOA
+	#if LGI_COCOA
 	#else
 	d->Ctx = Params->Ctx;
 	if (d->Ctx)
@@ -594,7 +594,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 			else
 			{
 				// Blt mem->screen
-				#if !COCOA
+				#if !LGI_COCOA
 				OSStatus err = noErr;
 				#endif
 				GMemDC *Mem = dynamic_cast<GMemDC*>(Src);
@@ -603,7 +603,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 					CGImg *i = Mem->GetImg(a ? &b : 0);
 					if (i)
 					{
-						#if COCOA
+						#if LGI_COCOA
 						CGRect r;
 						r.origin.x = x;
 						r.origin.y = -y;
@@ -643,7 +643,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 						DeleteObj(i);
 					}
 					
-					#if !COCOA
+					#if !LGI_COCOA
 					if (err < 0)
 					{
 						GMemDC Tmp(b.X(), b.Y(), GdcD->GetColourSpace());

@@ -24,12 +24,14 @@
 struct GDialogPriv
 {
 	bool IsModal;
+	bool IsModeless;
 	int ModalStatus;
 	int BtnId;
 
 	GDialogPriv()
 	{
 		IsModal = false;
+		IsModeless = false;
 		ModalStatus = -1;
 		BtnId = -1;
 	}
@@ -63,7 +65,7 @@ int GDialog::OnNotify(GViewI *Ctrl, int Flags)
 		
 		if (d->IsModal)
 			EndModal();
-		else
+		else if (d->IsModeless)
 			EndModeless();
 	}
 
@@ -141,6 +143,7 @@ int GDialog::DoModal(OsView OverideParent)
 		}
 		
 		d->IsModal = true;
+		d->IsModeless = false;
 		AttachChildren();
 		Visible(true);
 		
@@ -172,10 +175,21 @@ int GDialog::DoModeless()
 	d->IsModal = false;
 	if (Attach(0))
 	{
+		d->IsModeless = true;
 		AttachChildren();
 		Visible(true);
 	}
+	
 	return 0;
+}
+
+void GDialog::EndModeless(int Code)
+{
+	if (d->IsModeless)
+	{
+		d->IsModeless = false;
+		GWindow::Quit(Code);
+	}
 }
 
 extern GButton *FindDefault(GView *w);
@@ -192,11 +206,6 @@ int GDialog::OnEvent(GMessage *Msg)
 	}
 
 	return GView::OnEvent(Msg);
-}
-
-void GDialog::EndModeless(int Code)
-{
-	GWindow::Quit(Code);
 }
 
 void GDialog::OnPaint(GSurface *pDC)

@@ -164,7 +164,7 @@ int LDateTime::SystemTimeZone(bool ForceUpdate)
 
 		#ifdef MAC
 
-			#if 0 //def COCOA
+			#if 0 //def LGI_COCOA
 
 				LgiAssert(!"Fixme");
 

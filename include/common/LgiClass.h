@@ -122,7 +122,7 @@ public:
 		static const char *AltCmdName() { return "Alt"; }
 	#endif
 	
-	#if defined COCOA
+	#if LGI_COCOA
 	void SetModifer(uint32_t modifierKeys);
 	#else
 	void SetModifer(uint32_t modifierKeys)

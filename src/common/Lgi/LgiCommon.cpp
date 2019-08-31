@@ -1,7 +1,7 @@
 //
 //	Cross platform LGI functions
 //
-#if COCOA
+#if LGI_COCOA
 #import <Foundation/Foundation.h>
 #endif
 
@@ -158,7 +158,7 @@ bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 		return m.SendMessage(&Msg) == B_OK;
 	}
 
-	#elif defined(MAC) && !defined COCOA
+	#elif defined(MAC) && !LGI_COCOA
 	
 	#if 0
 	int64 Now = LgiCurrentTime();
@@ -1270,13 +1270,13 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 
 			#if defined MAC
 
-				#if COCOA
+				#if LGI_COCOA
 			
 					NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
 					if (paths)
 						Path = [[paths objectAtIndex:0] UTF8String];
 			
-				#elif defined LGI_CARBON
+				#elif LGI_CARBON
 			
 					FSRef Ref;
 					OSErr e = FSFindFolder(kUserDomain, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
@@ -1845,7 +1845,7 @@ bool LgiGetExeFile(char *Dst, int DstSize)
 		
 			bool Status = false;
 		
-			#if COCOA || defined __GTK_H__
+			#if LGI_COCOA || defined __GTK_H__
 
 			if (FileExists(LgiArgsAppPath))
 			{

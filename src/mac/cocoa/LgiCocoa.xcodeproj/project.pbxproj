@@ -945,13 +945,13 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = (
 					"-DMAC",
-					"-DCOCOA",
+					"-DLGI_COCOA=1",
 					"-DLGI_LIBRARY",
 					"-D_DEBUG",
 				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DMAC",
-					"-DCOCOA",
+					"-DLGI_COCOA=1",
 					"-DLGI_LIBRARY",
 					"-D_DEBUG",
 				);
@@ -985,12 +985,12 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = (
 					"-DMAC",
-					"-DCOCOA",
+					"-DLGI_COCOA=1",
 					"-DLGI_LIBRARY",
 				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DMAC",
-					"-DCOCOA",
+					"-DLGI_COCOA=1",
 					"-DLGI_LIBRARY",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.Lgi;
