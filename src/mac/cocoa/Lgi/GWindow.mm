@@ -302,10 +302,9 @@ GWindow::GWindow(OsWindow wnd) : GView(NULL)
 		Wnd.p = [[LNsWindow alloc] init:d Frame:frame];
 	if (Wnd)
 	{
-		[Wnd.p retain];
 		if (!Delegate)
 			Delegate = [[LWindowDelegate alloc] init];
-		[Wnd.p makeKeyAndOrderFront:NSApp];
+		//[Wnd.p makeKeyAndOrderFront:NSApp];
 		Wnd.p.delegate = Delegate;
 	}
 }
@@ -330,10 +329,11 @@ GWindow::~GWindow()
 		if (w)
 			w.d = NULL;
 
+		Wnd.p.delegate = nil;
 		if (!d->Closing)
 			[Wnd.p close];
 		[Wnd.p release];
-		Wnd.p = nil;
+		Wnd = nil;
 	}
 	
 	DeleteObj(Menu);
@@ -489,22 +489,6 @@ void GWindow::SetDragHandlers(bool On)
 	#endif
 }
 
-/*
-static void _ClearChildHandles(GViewI *v)
-{
-	GViewIterator *it = v->IterateViews();
-	if (it)
-	{
-		for (GViewI *v = it->First(); v; v = it->Next())
-		{
-			_ClearChildHandles(v);
-			v->Detach();
-		}
-	}
-	DeleteObj(it);
-}
-*/
-
 void GWindow::Quit(bool DontDelete)
 {
 	LAutoPool Pool;
@@ -549,34 +533,11 @@ void GWindow::SetSnapToEdge(bool s)
 
 void GWindow::OnFrontSwitch(bool b)
 {
-	if (b && d->InitVisible)
-	{
-		#if 0
-		if (!IsWindowVisible(WindowHandle()))
-		{
-			ShowWindow(WindowHandle());
-			SelectWindow(WindowHandle());
-		}
-		else if (IsWindowCollapsed(WindowHandle()))
-		{
-			uint64 Now = LgiCurrentTime();
-			if (Now - d->LastMinimize < 1000)
-			{
-				// printf("%s:%i - CollapseWindow ignored via timeout\n", _FL);
-			}
-			else
-			{
-				// printf("%s:%i - CollapseWindow "LGI_PrintfInt64","LGI_PrintfInt64"\n", _FL, Now, d->LastMinimize);
-				CollapseWindow(WindowHandle(), false);
-			}
-		}
-		#endif
-	}
 }
 
 bool GWindow::Visible()
 {
-	LAutoPool Pool;
+	// LAutoPool Pool;
 	if (!Wnd)
 		return false;
 	
@@ -585,7 +546,7 @@ bool GWindow::Visible()
 
 void GWindow::Visible(bool i)
 {
-	LAutoPool Pool;
+	// LAutoPool Pool;
 	if (!Wnd)
 		return;
 
@@ -619,14 +580,6 @@ void GWindow::_OnViewDelete()
 	}
 }
 
-/*
-void GWindow::_Delete()
-{
-	SetDragHandlers(false);
-	GView::_Delete();
-}
-*/
-
 void GWindow::SetAlwaysOnTop(bool b)
 {
 }
@@ -635,478 +588,6 @@ bool GWindow::PostEvent(int Event, GMessage::Param a, GMessage::Param b)
 {
 	return LgiApp->PostEvent(this, Event, a, b);
 }
-
-#if 0
-#define InRect(r, x, y) \
-( (x >= r.left) && (y >= r.top) && (x <= r.right) && (y <= r.bottom) )
-
-int LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *inUserData)
-{
-	OSStatus result = eventNotHandledErr;
-	
-	GView *v = (GView*)inUserData;
-	if (!v) return result;
-	
-	UInt32 eventClass = GetEventClass( inEvent );
-	UInt32 eventKind = GetEventKind( inEvent );
-	
-#if 0
-	UInt32 ev = LgiSwap32(eventClass);
-	printf("WndProc %4.4s-%i\n", (char*)&ev, eventKind);
-#endif
-	
-	switch (eventClass)
-	{
-		case kEventClassCommand:
-		{
-			if (eventKind == kEventProcessCommand)
-			{
-				GWindow *w = v->GetWindow();
-				if (w)
-				{
-					HICommand command;
-					GetEventParameter(inEvent, kEventParamDirectObject, typeHICommand, NULL, sizeof(command), NULL, &command);
-					if (command.commandID != kHICommandSelectWindow)
-					{
-#if 0
-						uint32 c = command.commandID;
-#ifndef __BIG_ENDIAN__
-						c = LgiSwap32(c);
-#endif
-						if (c != '0000')
-							printf("%s:%i - Cmd='%4.4s'\n", _FL, (char*)&c);
-#endif
-						
-						extern int *ReturnFloatCommand;
-						if (ReturnFloatCommand)
-						{
-							*ReturnFloatCommand = command.commandID;
-						}
-						else if (command.commandID == kHICommandQuit)
-						{
-							LgiCloseApp();
-						}
-						else if (command.commandID == kHICommandMinimizeWindow ||
-								 command.commandID == kHICommandMinimizeAll)
-						{
-							w->d->LastMinimize = LgiCurrentTime();
-							CollapseWindow(w->WindowHandle(), true);
-						}
-						else if (command.commandID == kHICommandClose)
-						{
-							GWindow *w = dynamic_cast<GWindow*>(v);
-							if (w && (w->CloseRequestDone() || w->OnRequestClose(false)))
-							{
-								w->CloseRequestDone() = true;
-								DeleteObj(v);
-							}
-						}
-						else if (command.commandID == kHICommandHide)
-						{
-							ProcessSerialNumber PSN;
-							OSErr e;
-							
-							e = MacGetCurrentProcess(&PSN);
-							if (e)
-								printf("MacGetCurrentProcess failed with %i\n", e);
-							else
-							{
-								e = ShowHideProcess(&PSN, false);
-								if (e)
-									printf("ShowHideProcess failed with %i\n", e);
-							}
-						}
-						else if (command.commandID == kHICommandRotateWindowsForward ||
-								 command.commandID == kHICommandRotateFloatingWindowsBackward)
-						{
-							return eventNotHandledErr;
-						}
-						else
-						{
-							w->OnCommand(command.commandID, 0, 0);
-						}
-						
-						result = noErr;
-					}
-				}
-			}
-			break;
-		}
-		case kEventClassWindow:
-		{
-			switch (eventKind)
-			{
-				case kEventWindowDispose:
-				{
-					GWindow *w = v->GetWindow();
-					v->OnDestroy();
-					
-					if (w && w->d && w->d->DeleteWhenDone)
-					{
-						w->Wnd = 0;
-						DeleteObj(v);
-					}
-					
-					result = noErr;
-					break;
-				}
-				case kEventWindowClose:
-				{
-					GWindow *w = dynamic_cast<GWindow*>(v);
-					if (w && (w->CloseRequestDone() || w->OnRequestClose(false)))
-					{
-						w->CloseRequestDone() = true;
-						DeleteObj(v);
-					}
-					
-					result = noErr;
-					break;
-				}
-				case kEventWindowCollapsing:
-				{
-					GWindow *w = v->GetWindow();
-					if (w)
-						w->d->LastMinimize = LgiCurrentTime();
-					break;
-				}
-				case kEventWindowActivated:
-				{
-					GWindow *w = v->GetWindow();
-					if (w)
-					{
-						LMenu *m = w->GetMenu();
-						if (m)
-						{
-							OSStatus e = SetRootMenu(m->Handle());
-							if (e)
-							{
-								printf("%s:%i - SetRootMenu failed (e=%i)\n", _FL, (int)e);
-							}
-						}
-						else
-						{
-							if (!w->d->EmptyMenu)
-							{
-								w->d->EmptyMenu = new LMenu;
-							}
-							
-							if (w->d->EmptyMenu)
-							{
-								OSStatus e = SetRootMenu(w->d->EmptyMenu->Handle());
-								if (e)
-								{
-									printf("%s:%i - SetRootMenu failed (e=%i)\n", _FL, (int)e);
-								}
-							}
-						}
-					}
-					break;
-				}
-				case kEventWindowBoundsChanged:
-				{
-					// kEventParamCurrentBounds
-					HIRect r;
-					GetEventParameter(inEvent, kEventParamCurrentBounds, typeHIRect, NULL, sizeof(HIRect), NULL, &r);
-					v->Pos.x1 = r.origin.x;
-					v->Pos.y1 = r.origin.y;
-					v->Pos.x2 = v->Pos.x1 + r.size.width - 1;
-					v->Pos.y2 = v->Pos.y1 + r.size.height - 1;
-					
-					v->Invalidate();
-					v->OnPosChange();
-					result = noErr;
-					break;
-					
-				}
-			}
-			break;
-		}
-		case kEventClassMouse:
-		{
-			switch (eventKind)
-			{
-				case kEventMouseDown:
-				{
-					GWindow *Wnd = dynamic_cast<GWindow*>(v->GetWindow());
-					if (Wnd && !Wnd->d->ChildDlg)
-					{
-						OsWindow Hnd = Wnd->WindowHandle();
-						if (!IsWindowActive(Hnd))
-						{
-							ProcessSerialNumber Psn;
-							GetCurrentProcess(&Psn);
-							SetFrontProcess(&Psn);
-							
-							SelectWindow(Hnd);
-						}
-					}
-					// Fall thru
-				}
-				case kEventMouseUp:
-				{
-					UInt32		modifierKeys = 0;
-					UInt32		Clicks = 0;
-					Point		Pt;
-					UInt16		Btn = 0;
-					Rect		Client, Grow;
-					
-					GetWindowBounds(v->WindowHandle(), kWindowContentRgn, &Client);
-					GetWindowBounds(v->WindowHandle(), kWindowGrowRgn, &Grow);
-					
-					// the point parameter is in view-local coords.
-					OSStatus status = GetEventParameter (inEvent, kEventParamMouseLocation, typeQDPoint, NULL, sizeof(Point), NULL, &Pt);
-					//if (status) printf("error(%i) getting kEventParamMouseLocation\n", status);
-					status = GetEventParameter(inEvent, kEventParamKeyModifiers, typeUInt32, NULL, sizeof(modifierKeys), NULL, &modifierKeys);
-					//if (status) printf("error(%i) getting kEventParamKeyModifiers\n", status);
-					status = GetEventParameter(inEvent, kEventParamClickCount, typeUInt32, NULL, sizeof(Clicks), NULL, &Clicks);
-					//if (status) printf("error(%i) getting kEventParamClickCount\n", status);
-					status = GetEventParameter(inEvent, kEventParamMouseButton, typeMouseButton, NULL, sizeof(Btn), NULL, &Btn);
-					//if (status) printf("error(%i) getting kEventParamMouseButton\n", status);
-					
-					if (InRect(Grow, Pt.h, Pt.v))
-					{
-						break;
-					}
-					if (!InRect(Client, Pt.h, Pt.v))
-					{
-						break;
-					}
-					
-					GMouse m;
-					m.ViewCoords = false;
-					m.x = Pt.h; // - Client.left;
-					m.y = Pt.v; // - Client.top;
-					m.SetModifer(modifierKeys);
-					m.Down(eventKind == kEventMouseDown);
-					m.Double(m.Down() && Clicks > 1);
-					m.SetButton(Btn);
-					
-#if 0
-					printf("Client=%i,%i,%i,%i Pt=%i,%i\n",
-						   Client.left, Client.top, Client.right, Client.bottom,
-						   (int)Pt.h, (int)Pt.v);
-#endif
-					
-#if 0
-					printf("click %i,%i down=%i, left=%i right=%i middle=%i, ctrl=%i alt=%i shift=%i Double=%i\n",
-						   m.x, m.y,
-						   m.Down(), m.Left(), m.Right(), m.Middle(),
-						   m.Ctrl(), m.Alt(), m.Shift(), m.Double());
-#endif
-					
-					int Cx = m.x - Client.left;
-					int Cy = m.y - Client.top;
-					
-					m.Target = v->WindowFromPoint(Cx, Cy);
-					if (m.Target)
-					{
-						if (v->GetWindow()->HandleViewMouse(v, m))
-						{
-							m.ToView();
-							GView *v = m.Target->GetGView();
-							if (v)
-							{
-								if (v->_Mouse(m, false))
-									result = noErr;
-							}
-							else printf("%s:%i - Not a GView\n", _FL);
-						}
-					}
-					else printf("%s:%i - No target window for mouse event.\n", _FL);
-					
-					break;
-				}
-				case kEventMouseMoved:
-				case kEventMouseDragged:
-				{
-					UInt32		modifierKeys;
-					Point		Pt;
-					Rect		Client;
-					
-					GetWindowBounds(v->WindowHandle(), kWindowContentRgn, &Client);
-					
-					// the point parameter is in view-local coords.
-					OSStatus status = GetEventParameter(inEvent, kEventParamMouseLocation, typeQDPoint, NULL, sizeof(Point), NULL, &Pt);
-					if (status) printf("error(%i) getting kEventParamMouseLocation\n", (int)status);
-					status = GetEventParameter(inEvent, kEventParamKeyModifiers, typeUInt32, NULL, sizeof(modifierKeys), NULL, &modifierKeys);
-					if (status) printf("error(%i) getting kEventParamKeyModifiers\n", (int)status);
-					
-					GMouse m;
-					m.ViewCoords = false;
-					m.x = Pt.h;
-					m.y = Pt.v;
-					m.SetModifer(modifierKeys);
-					m.Down(eventKind == kEventMouseDragged);
-					if (m.Down())
-						m.SetButton(GetCurrentEventButtonState());
-					
-#if 0
-					printf("move %i,%i down=%i, left=%i right=%i middle=%i, ctrl=%i alt=%i shift=%i Double=%i\n",
-						   m.x, m.y,
-						   m.Down(), m.Left(), m.Right(), m.Middle(),
-						   m.Ctrl(), m.Alt(), m.Shift(), m.Double());
-#endif
-					
-#if 1
-					if ((m.Target = v->WindowFromPoint(m.x - Client.left, m.y - Client.top)))
-					{
-						m.ToView();
-						
-						GView *v = m.Target->GetGView();
-						if (v)
-						{
-							v->_Mouse(m, true);
-						}
-					}
-#endif
-					break;
-				}
-				case kEventMouseWheelMoved:
-				{
-					UInt32		modifierKeys;
-					Point		Pt;
-					Rect		Client;
-					SInt32		Delta;
-					GViewI		*Target;
-					
-					GetWindowBounds(v->WindowHandle(), kWindowContentRgn, &Client);
-					
-					OSStatus status = GetEventParameter(inEvent, kEventParamMouseLocation, typeQDPoint, NULL, sizeof(Point), NULL, &Pt);
-					if (status) printf("error(%i) getting kEventParamMouseLocation\n", (int)status);
-					status = GetEventParameter(inEvent, kEventParamKeyModifiers, typeUInt32, NULL, sizeof(modifierKeys), NULL, &modifierKeys);
-					if (status) printf("error(%i) getting kEventParamKeyModifiers\n", (int)status);
-					status = GetEventParameter(inEvent, kEventParamMouseWheelDelta, typeSInt32, NULL, sizeof(Delta), NULL, &Delta);
-					if (status) printf("error(%i) getting kEventParamMouseWheelDelta\n", (int)status);
-					
-					if ((Target = v->WindowFromPoint(Pt.h - Client.left, Pt.v - Client.top)))
-					{
-						GView *v = Target->GetGView();
-						if (v)
-						{
-							v->OnMouseWheel(Delta < 0 ? 3 : -3);
-						}
-						else printf("%s:%i - no GView\n", __FILE__, __LINE__);
-					}
-					else printf("%s:%i - no target\n", __FILE__, __LINE__);
-					break;
-				}
-			}
-			break;
-		}
-		case kEventClassControl:
-		{
-			switch (eventKind)
-			{
-				case kEventControlDragEnter:
-				{
-					printf("kEventControlDragEnter\n");
-					bool acceptDrop = true;
-					SetEventParameter(	inEvent,
-									  kEventParamControlWouldAcceptDrop,
-									  typeBoolean,
-									  sizeof(acceptDrop),
-									  &acceptDrop);
-					result = noErr;
-					break;
-				}
-				case kEventControlDragWithin:
-				{
-					printf("kEventControlDragWithin\n");
-					result = noErr;
-					break;
-				}
-				case kEventControlDragLeave:
-				{
-					printf("kEventControlDragLeave\n");
-					result = noErr;
-					break;
-				}
-				case kEventControlDragReceive:
-				{
-					printf("kEventControlDragReceive\n");
-					result = noErr;
-					break;
-				}
-			}
-			break;
-		}
-		case kEventClassUser:
-		{
-			if (eventKind == kEventUser)
-			{
-				GMessage m;
-				
-				OSStatus status = GetEventParameter(inEvent, kEventParamLgiEvent, typeUInt32, NULL, sizeof(UInt32), NULL, &m.m);
-				status = GetEventParameter(inEvent, kEventParamLgiA, typeUInt32, NULL, sizeof(UInt32), NULL, &m.a);
-				status = GetEventParameter(inEvent, kEventParamLgiB, typeUInt32, NULL, sizeof(UInt32), NULL, &m.b);
-				
-				v->OnEvent(&m);
-				
-				if (m.m == M_MOUSE_TRACK_UP && GView::_Capturing)
-				{
-					GMouse m;
-					GView::_Capturing->GetMouse(m, false);
-					GView::_Capturing->OnMouseClick(m);
-				}
-				
-				result = noErr;
-			}
-			break;
-		}
-	}
-	
-	return result;
-}
-
-pascal OSStatus LgiRootCtrlProc(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *inUserData)
-{
-	OSStatus result = eventNotHandledErr;
-	
-	GView *v = (GView*)inUserData;
-	if (!v)
-	{
-		LgiTrace("%s:%i - no gview\n", __FILE__, __LINE__);
-		return result;
-	}
-	
-	UInt32 eventClass = GetEventClass( inEvent );
-	UInt32 eventKind = GetEventKind( inEvent );
-	
-	switch (eventClass)
-	{
-		case kEventClassControl:
-		{
-			switch (eventKind)
-			{
-				case kEventControlDraw:
-				{
-					CGContextRef Ctx = 0;
-					result = GetEventParameter (inEvent,
-												kEventParamCGContextRef,
-												typeCGContextRef,
-												NULL,
-												sizeof(CGContextRef),
-												NULL,
-												&Ctx);
-					if (Ctx)
-					{
-						GScreenDC s(v->GetWindow(), Ctx);
-						v->_Paint(&s);
-					}
-					else
-					{
-						LgiTrace("%s:%i - No context.\n", __FILE__, __LINE__);
-					}
-					break;
-				}
-			}
-			break;
-		}
-	}
-	
-	return result;
-}
-#endif
 
 bool GWindow::Attach(GViewI *p)
 {
@@ -1117,66 +598,6 @@ bool GWindow::Attach(GViewI *p)
 		if (GBase::Name())
 			Name(GBase::Name());
 		
-		#if 0
-		EventTypeSpec	WndEvents[] =
-		{
-			{ kEventClassCommand, kEventProcessCommand },
-			
-			{ kEventClassWindow, kEventWindowClose },
-			{ kEventClassWindow, kEventWindowInit },
-			{ kEventClassWindow, kEventWindowDispose },
-			{ kEventClassWindow, kEventWindowBoundsChanged },
-			{ kEventClassWindow, kEventWindowActivated },
-			{ kEventClassWindow, kEventWindowShown },
-			{ kEventClassWindow, kEventWindowCollapsing },
-			
-			{ kEventClassMouse, kEventMouseDown },
-			{ kEventClassMouse, kEventMouseUp },
-			{ kEventClassMouse, kEventMouseMoved },
-			{ kEventClassMouse, kEventMouseDragged },
-			{ kEventClassMouse, kEventMouseWheelMoved },
-			
-			{ kEventClassControl, kEventControlDragEnter },
-			{ kEventClassControl, kEventControlDragWithin },
-			{ kEventClassControl, kEventControlDragLeave },
-			{ kEventClassControl, kEventControlDragReceive },
-			
-			{ kEventClassUser, kEventUser }
-			
-		};
-		
-		EventHandlerRef Handler = 0;
-		OSStatus e = InstallWindowEventHandler(	Wnd,
-											   d->EventUPP = NewEventHandlerUPP(LgiWindowProc),
-											   GetEventTypeCount(WndEvents),
-											   WndEvents,
-											   (void*)this,
-											   &Handler);
-		if (e) LgiTrace("%s:%i - InstallEventHandler failed (%i)\n", _FL, e);
-		
-		e = HIViewFindByID(HIViewGetRoot(Wnd), kHIViewWindowContentID, &_View);
-		if (_View)
-		{
-			EventTypeSpec	CtrlEvents[] =
-			{
-				{ kEventClassControl, kEventControlDraw },
-			};
-			EventHandlerRef CtrlHandler = 0;
-			e = InstallEventHandler(GetControlEventTarget(_View),
-									NewEventHandlerUPP(LgiRootCtrlProc),
-									GetEventTypeCount(CtrlEvents),
-									CtrlEvents,
-									(void*)this,
-									&CtrlHandler);
-			if (e)
-			{
-				LgiTrace("%s:%i - InstallEventHandler failed (%i)\n", _FL, e);
-			}
-			
-			HIViewChangeFeatures(_View, kHIViewIsOpaque, 0);
-		}
-		#endif
-		
 		Status = true;
 		
 		// Setup default button...
@@ -1184,9 +605,7 @@ bool GWindow::Attach(GViewI *p)
 		{
 			_Default = FindControl(IDOK);
 			if (_Default)
-			{
 				_Default->Invalidate();
-			}
 		}
 		
 		OnCreate();
@@ -1491,7 +910,7 @@ char *GWindow::Name()
 
 GRect &GWindow::GetClient(bool ClientSpace)
 {
-	LAutoPool Pool;
+	// LAutoPool Pool;
 	static GRect r;
 	if (Wnd)
 	{

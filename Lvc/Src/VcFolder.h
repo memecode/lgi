@@ -106,6 +106,11 @@ class VcFolder : public GTreeItem, public GCss
 			Log = log;
 			Err = ErrNone;
 		}
+		
+		~Cmd()
+		{
+			int asd=0;
+		}
 
 		GString GetBuf()
 		{

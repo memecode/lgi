@@ -379,9 +379,7 @@ public:
 	GRegion();
 	GRegion(int X1, int Y1, int X2, int Y2);
 	GRegion(const GRect &r);
-	#if LGI_COCOA
 	GRegion(OsRect &r);
-	#endif
 	GRegion(GRegion &c);
 	~GRegion();
 

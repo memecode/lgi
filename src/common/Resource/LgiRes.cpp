@@ -381,16 +381,14 @@ LgiTrace("%s:%i - FullPath='%s'\n", _FL, FullPath);
 	else
 	{
 		char Msg[256];
-
-		char Exe[256] = "(couldn't get exe path)";
-		LgiGetExeFile(Exe, sizeof(Exe));
+		auto Exe = LGetExeFile();
 
 		// Prepare data
 		sprintf_s(Msg, sizeof(Msg),
 				LgiLoadString(L_ERROR_RES_NO_LR8_FILE,
 								"Couldn't find the file '%s' required to run this application\n(Exe='%s')"),
 				File.Get(),
-				Exe);
+				Exe.Get());
 
 		// Dialog
 		printf("%s\n", Msg);

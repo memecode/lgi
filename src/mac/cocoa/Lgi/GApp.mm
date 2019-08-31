@@ -54,13 +54,12 @@ void OsAppArguments::Set(char *CmdLine)
 	GArray<char> Raw;
 	GArray<size_t> Offsets;
 	
-	char Exe[256];
+	auto Exe = LGetExeFile();
 	Offsets.Add(0);
-	if (LgiGetExeFile(Exe, sizeof(Exe)))
+	if (Exe)
 	{
-		size_t Len = strlen(Exe);
-		Raw.Length(Len + 1);
-		strcpy(&Raw[0], Exe);
+		Raw.Length(Exe.Length() + 1);
+		strcpy(Raw.AddressOf(), Exe);
 	}
 	else
 	{
@@ -234,8 +233,7 @@ void OnCrash(int i)
 	pipe((int*)&Read);
 	pipe((int*)&Error);
 	
-	char Exe[256] = "";
-	LgiGetExeFile(Exe, sizeof(Exe));
+	auto Exe = LGetExeFile();
 	
 	// Has stdin pipe
 	pipe((int*)&Write);

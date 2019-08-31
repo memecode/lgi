@@ -151,6 +151,7 @@ int GDialog::DoModal(OsView OverideParent)
 		
 		if (Owner)
 			Owner->SetChildDialog(NULL);
+		GWindow::Visible(false);
 	}
 	
 	return d->ModalStatus;
@@ -184,6 +185,11 @@ int GDialog::DoModeless()
 	return 0;
 }
 
+void GDialog::EndModeless(int Code)
+{
+	GWindow::Quit(Code);
+}
+
 extern GButton *FindDefault(GView *w);
 
 GMessage::Result GDialog::OnEvent(GMessage *Msg)
@@ -198,11 +204,6 @@ GMessage::Result GDialog::OnEvent(GMessage *Msg)
 	}
 	
 	return GView::OnEvent(Msg);
-}
-
-void GDialog::EndModeless(int Code)
-{
-	GWindow::Quit(Code);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

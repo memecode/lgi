@@ -260,12 +260,9 @@ GTempStream::GTempStream(char *tmp, int maxMemSize) : GProxyStream(0)
 	s = &Null;
 	MaxMemSize = maxMemSize;
 	if (tmp)
-		TmpFolder.Reset(NewStr(tmp));
+		TmpFolder = tmp;
 	else
-	{
-		GFile::Path p(LSP_TEMP);
-		TmpFolder.Reset(NewStr(p));
-	}
+		TmpFolder = LGetSystemPath(LSP_TEMP);
 	Tmp = 0;
 	Mem = 0;
 }
@@ -314,11 +311,11 @@ ssize_t GTempStream::Write(const void *Buffer, ssize_t Size, int Flags)
 		{
 			sprintf_s(f, sizeof(f), "GTempStream-%x.tmp", (int)(((NativeInt)this)+i++));
 			
-			char *t = TmpFolder;
 			if (!TmpFolder)
-				LgiGetTempPath(t = c, sizeof(c));
-
-			LgiMakePath(c, sizeof(c), t, f);
+				TmpFolder = LGetSystemPath(LSP_TEMP);
+			if (!TmpFolder)
+				break;
+			LgiMakePath(c, sizeof(c), TmpFolder, f);
 		}
 		while (FileExists(c));
 

@@ -241,12 +241,10 @@ bool GTrayIcon::Load(const TCHAR *Str)
 	
 	#elif LGI_COCOA
 	
-		GAutoString File(LgiFindFile(Str));
+		GString File = LFindFile(Str);
 		if (!File)
 			return false;
-
-		GString gf = File.Get();
-		NSString *nf = gf.NsStr();
+		NSString *nf = File.NsStr();
 		NSImage *img = [[NSImage alloc] initWithContentsOfFile:nf];
 		if (img)
 			d->Icon.Add(img);

@@ -890,9 +890,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	}
 	else
 	{
-		char Str[256];
-		LgiGetExePath(Str, sizeof(Str));
-		SetFolder(Str);
+		SetFolder(LGetExePath());
 	}
 	OnFolder();
 
