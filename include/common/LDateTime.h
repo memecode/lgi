@@ -108,46 +108,46 @@ public:
     };
 
 	/// Returns true if all the components are in a valid range
-	bool IsValid();
+	bool IsValid() const;
 	/// Sets the date to an NULL state
 	void Empty();
 
 	/// Returns the day
-	int Day() { return _Day; }
+	int Day() const { return _Day; }
 	/// Sets the day
 	void Day(int d) { _Day = d; }
 	/// Returns the month
-	int Month() { return _Month; }
+	int Month() const { return _Month; }
 	/// Sets the month
 	void Month(int m) { _Month = m; }
 	/// Sets the month by it's name
 	void Month(char *m);
 	/// Returns the year
-	int Year() { return _Year; }
+	int Year() const { return _Year; }
 	/// Sets the year
 	void Year(int y) { _Year = y; }
 
 	/// Returns the millisecond part of the time
-	int Thousands() { return _Thousands; }
+	int Thousands() const { return _Thousands; }
 	/// Sets the millisecond part of the time
 	void Thousands(int t) { _Thousands = t; }
 	/// Returns the seconds part of the time
-	int Seconds() { return _Seconds; }
+	int Seconds() const { return _Seconds; }
 	/// Sets the seconds part of the time
 	void Seconds(int s) { _Seconds = s; }
 	/// Returns the minutes part of the time
-	int Minutes() { return _Minutes; }
+	int Minutes() const { return _Minutes; }
 	/// Sets the minutes part of the time
 	void Minutes(int m) { _Minutes = m; }
 	/// Returns the hours part of the time
-	int Hours() { return _Hours; }
+	int Hours() const { return _Hours; }
 	/// Sets the hours part of the time
 	void Hours(int h) { _Hours = h; }
 
 	/// Returns the timezone of this current date time object in minutes (+10 = 600)
-	int GetTimeZone() { return _Tz; }
+	int GetTimeZone() const { return _Tz; }
 	/// Returns the timezone in hours
-	double GetTimeZoneHours() { return (double)_Tz / 60.0; }
+	double GetTimeZoneHours() const { return (double)_Tz / 60.0; }
 
 	/// Sets the timezone of this current object.in minutes (+10 = 600)
 	void SetTimeZone
@@ -184,7 +184,7 @@ public:
 	}
 
 	/// \returns the local time version of this object.
-	LDateTime Local()
+	LDateTime Local() const
 	{
 		LDateTime dt = *this;
 		return dt.ToLocal();
@@ -194,7 +194,7 @@ public:
 	/// Gets the current formatting of the date, the format only effects
 	/// the representation of the date when converted to/from a string.
 	/// \returns a bit mask of (#GDTF_DAY_MONTH_YEAR or #GDTF_MONTH_DAY_YEAR or #GDTF_YEAR_MONTH_DAY) and (#GDTF_12HOUR or #GDTF_24HOUR)
-	uint16 GetFormat() { return _Format; }
+	uint16 GetFormat() const { return _Format; }
 	/// Sets the current formatting of the date, the format only effects
 	/// the representation of the date when converted to/from a string
 	void SetFormat
@@ -213,29 +213,29 @@ public:
 	static void SetDefaultFormat(uint16 f) { DefaultFormat = f; }
 
 	/// Gets the data and time as a GString
-	GString Get();
+	GString Get() const;
 	/// Gets the date and time as a string
 	/// \sa LDateTime::GetFormat()
-	void Get(char *Str, size_t SLen);
+	void Get(char *Str, size_t SLen) const;
 	/// Gets the data and time as a 64 bit int (os specific)
-	bool Get(uint64 &s);
+	bool Get(uint64 &s) const;
 	/// Gets just the date as a string
 	/// \sa LDateTime::GetFormat()
 	/// \returns The number of characters written to 'Str'
-	int GetDate(char *Str, size_t SLen);
+	int GetDate(char *Str, size_t SLen) const;
 	/// Gets just the date as a GString
 	/// \sa LDateTime::GetFormat()
-	GString GetDate();
+	GString GetDate() const;
 	/// Gets just the time as a string
 	/// \sa LDateTime::GetFormat()
 	/// \returns The number of characters written to 'Str'
-	int GetTime(char *Str, size_t SLen);
+	int GetTime(char *Str, size_t SLen) const;
 	/// Gets just the time as a GString
 	/// \sa LDateTime::GetFormat()
-	GString GetTime();
+	GString GetTime() const;
 	
 	/// Returns the 64bit timestamp.
-	uint64 Ts();
+	uint64 Ts() const;
 
 	/// Sets the date and time to the system clock
 	void SetNow();
@@ -257,23 +257,23 @@ public:
 	bool Parse(GString s);
 
 	/// \returns true if 'd' is on the same day as this object
-	bool IsSameDay(LDateTime &d);
+	bool IsSameDay(LDateTime &d) const;
 	/// \returns true if 'd' is on the same month as this object
-	bool IsSameMonth(LDateTime &d);
+	bool IsSameMonth(LDateTime &d) const;
 	/// \returns true if 'd' is on the same year as this object
-	bool IsSameYear(LDateTime &d);
+	bool IsSameYear(LDateTime &d) const;
 
 	/// \returns whether a year is a leap year or not
 	bool IsLeapYear
 	(
 		/// Pass a specific year here, or ignore to return if the current Date/Time is in a leap year.
 		int Year = -1
-	);
+	) const;
 
 	/// Returns the day of the week as an index, 0=sun, 1=mon, 2=teus etc
-	int DayOfWeek();
+	int DayOfWeek() const;
 	/// \returns the number of days in the current month
-	int DaysInMonth();
+	int DaysInMonth() const;
 	
 	/// Adds a number of seconds to the current date/time
 	void AddSeconds(int64 Seconds);

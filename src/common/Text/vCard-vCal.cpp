@@ -831,7 +831,7 @@ bool VCard::Export(GDataPropI *c, GStreamI *o)
 		WriteField(*o, "note", 0, Note);
 	}
 	
-	GVariant *Photo = c->GetVar(FIELD_CONTACT_IMAGE);
+	const GVariant *Photo = c->GetVar(FIELD_CONTACT_IMAGE);
 	if (Photo && Photo->Type == GV_BINARY)
 	{
 		ssize_t B64Len = BufferLen_BinTo64(Photo->Value.Binary.Length);
@@ -1342,20 +1342,22 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 			GStreamPrint(o, "UID:%s\r\n", Uid);
 		}
 
-		LDateTime *Dt;
+		const LDateTime *Dt;
 		if ((Dt = c->GetDate(FIELD_CAL_START_UTC)))
 		{
-			Dt->ToUtc();
+			LDateTime dt = *Dt;
+			dt.ToUtc();
 			GStreamPrint(o, "DTSTART:%04.4i%02.2i%02.2iT%02.2i%02.2i%02.2i\r\n",
-					Dt->Year(), Dt->Month(), Dt->Day(),
-					Dt->Hours(), Dt->Minutes(), Dt->Seconds());
+					dt.Year(), dt.Month(), dt.Day(),
+					dt.Hours(), dt.Minutes(), dt.Seconds());
 		}
 		if ((Dt = c->GetDate(FIELD_CAL_END_UTC)))
 		{
-			Dt->ToUtc();
+			LDateTime dt = *Dt;
+			dt.ToUtc();
 			GStreamPrint(o, "DTEND:%04.4i%02.2i%02.2iT%02.2i%02.2i%02.2i\r\n",
-					Dt->Year(), Dt->Month(), Dt->Day(),
-					Dt->Hours(), Dt->Minutes(), Dt->Seconds());
+					dt.Year(), dt.Month(), dt.Day(),
+					dt.Hours(), dt.Minutes(), dt.Seconds());
 		}
 
 		#ifdef _MSC_VER

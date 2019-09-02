@@ -86,8 +86,8 @@ public:
 	Store3Status SetStr(int id, const char *str);
 	int64 GetInt(int id);
 	Store3Status SetInt(int id, int64 i);
-	LDateTime *GetDate(int id);
-	Store3Status SetDate(int id, LDateTime *i);
+	const LDateTime *GetDate(int id);
+	Store3Status SetDate(int id, const LDateTime *i);
 	GVariant *GetVar(int id);
 	Store3Status SetVar(int id, GVariant *i);
 	GDataPropI *GetObj(int id);

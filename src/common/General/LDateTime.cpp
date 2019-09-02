@@ -132,7 +132,7 @@ void LDateTime::Empty()
 }
 
 #define InRange(v, low, high) ((v) >= low && (v) <= high)
-bool LDateTime::IsValid()
+bool LDateTime::IsValid() const
 {
 	return	InRange(_Day, 1, 31) &&
 			InRange(_Year, 1600, 2100) &&
@@ -541,7 +541,7 @@ bool LDateTime::GetDaylightSavingsInfo(GArray<GDstInfo> &Info, LDateTime &Start,
 	return Status;
 }
 
-int LDateTime::DayOfWeek()
+int LDateTime::DayOfWeek() const
 {
 	int Index = 0;
 	int Day = IsLeapYear() ? 29 : 28;
@@ -648,14 +648,14 @@ void LDateTime::SetNow()
 #define Convert24HrTo12Hr(h)			( (h) == 0 ? 12 : (h) > 12 ? (h) % 12 : (h) )
 #define Convert24HrToAmPm(h)		( (h) >= 12 ? "p" : "a" )
 
-GString LDateTime::GetDate()
+GString LDateTime::GetDate() const
 {
 	char s[32];
 	int Ch = GetDate(s, sizeof(s));
 	return GString(s, Ch);
 }
 
-int LDateTime::GetDate(char *Str, size_t SLen)
+int LDateTime::GetDate(char *Str, size_t SLen) const
 {
 	int Ch = 0;
 
@@ -685,14 +685,14 @@ int LDateTime::GetDate(char *Str, size_t SLen)
 	return Ch;
 }
 
-GString LDateTime::GetTime()
+GString LDateTime::GetTime() const
 {
 	char s[32];
 	int Ch = GetTime(s, sizeof(s));
 	return GString(s, Ch);
 }
 
-int LDateTime::GetTime(char *Str, size_t SLen)
+int LDateTime::GetTime(char *Str, size_t SLen) const
 {
 	int Ch = 0;
 
@@ -717,7 +717,7 @@ int LDateTime::GetTime(char *Str, size_t SLen)
 	return Ch;
 }
 
-uint64 LDateTime::Ts()
+uint64 LDateTime::Ts() const
 {
 	uint64 ts;
 	Get(ts);
@@ -803,7 +803,7 @@ bool LDateTime::Set(time_t tt)
 	return false;
 }
 
-bool LDateTime::Get(uint64 &s)
+bool LDateTime::Get(uint64 &s) const
 {
 	#ifdef WIN32
 	FILETIME Utc;
@@ -866,7 +866,7 @@ bool LDateTime::Get(uint64 &s)
 	#endif
 }
 
-GString LDateTime::Get()
+GString LDateTime::Get() const
 {
 	char buf[32];
 	int Ch = GetDate(buf, sizeof(buf));
@@ -875,7 +875,7 @@ GString LDateTime::Get()
 	return GString(buf, Ch);
 }
 
-void LDateTime::Get(char *Str, size_t SLen)
+void LDateTime::Get(char *Str, size_t SLen) const
 {
 	if (Str)
 	{
@@ -1508,25 +1508,25 @@ LDateTime &LDateTime::operator =(struct tm *time)
 	return *this;
 }
 
-bool LDateTime::IsSameDay(LDateTime &d)
+bool LDateTime::IsSameDay(LDateTime &d) const
 {
 	return	Day() == d.Day() &&
 			Month() == d.Month() &&
 			Year() == d.Year();
 }
 
-bool LDateTime::IsSameMonth(LDateTime &d)
+bool LDateTime::IsSameMonth(LDateTime &d) const
 {
 	return	Day() == d.Day() &&
 			Month() == d.Month();
 }
 
-bool LDateTime::IsSameYear(LDateTime &d)
+bool LDateTime::IsSameYear(LDateTime &d) const
 {
 	return Year() == d.Year();
 }
 
-bool LDateTime::IsLeapYear(int Year)
+bool LDateTime::IsLeapYear(int Year) const
 {
 	if (Year < 0) Year = _Year;
 
@@ -1548,7 +1548,7 @@ bool LDateTime::IsLeapYear(int Year)
 	return true;
 }
 
-int LDateTime::DaysInMonth()
+int LDateTime::DaysInMonth() const
 {
 	if (_Month == 2 &&
 		IsLeapYear())
