@@ -390,6 +390,11 @@ GRegion::GRegion(OsRect &r) : GRect(0, 0, 0, 0)
 			y1 = a[0].y1 = (int) r.origin.y;
 			x2 = a[0].x2 = x1 + (int) r.size.width;
 			y2 = a[0].y2 = y1 + (int) r.size.height;
+		#elif WINNATIVE
+			x1 = r.left;
+			y1 = r.top;
+			x2 = r.right - CornerOffset;
+			y2 = r.bottom - CornerOffset;
 		#else
 			#error "Impl me."
 		#endif
