@@ -613,6 +613,8 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 	if (MsgQue &&
 		(Msgs = MsgQue.Lock(_FL)))
 	{
+        // printf("IdleWrapper start %i\n", (int)Msgs->Length());
+
 		// Copy the messages out of the locked structure..
 		// This allows new messages to arrive independent
 		// of us processing them here...
@@ -624,7 +626,7 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 		{
 			if (!GView::LockHandler(m.v, GView::OpExists))
 			{
-				// LgiTrace("%s:%i - Invalid view to post event to.\n", _FL);
+				// LgiTrace("%s:%i - Invalid view: %p.\n", _FL, m.v);
 			}
 			else
 			{
@@ -634,7 +636,12 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 			}
 		}
 	}
+	else
+	{
+        // printf("IdleWrapper start no lock\n");
+	}
 	
+    // printf("IdleWrapper end\n");
 	return i->cb != NULL;
 }
 
@@ -1459,8 +1466,8 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 	
 	q->New().Set(View, Msg, a, b);
 	
-	#if defined(_DEBUG)
-	if (q->Length() > 5)
+	#if 0 // defined(_DEBUG)
+	if (q->Length() > 3)
 	{
 		#if defined(WIN32)
 			char s[256];

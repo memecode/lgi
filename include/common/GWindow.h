@@ -74,8 +74,10 @@ protected:
 	
 	#elif defined(__OBJC__)
 	
+	public:
 		// This returns the root level content NSView
 		NSView *Handle();
+	protected:
 
 	#endif
 
@@ -91,11 +93,12 @@ protected:
 public:
 	#ifdef __GTK_H__
 		GWindow(Gtk::GtkWidget *w = NULL);
+	#elif LGI_CARBON
+		GWindow(WindowRef wr = NULL);
+	#elif LGI_COCOA
+		GWindow(OsWindow wnd = NULL);
 	#else
 		GWindow();
-	#endif
-	#if LGI_CARBON
-		GWindow(WindowRef wr);
 	#endif
 	~GWindow();
 

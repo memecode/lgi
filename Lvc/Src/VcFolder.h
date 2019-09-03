@@ -30,6 +30,10 @@ class ReaderThread : public LThread
 	VersionCtrl Vcs;
 	GStream *Out;
 	GSubProcess *Process;
+	int FilterCount;
+
+	int OnLine(char *s, ssize_t len);
+	bool OnData(char *Buf, ssize_t &r);
 
 public:
 	int Result;
@@ -101,6 +105,11 @@ class VcFolder : public GTreeItem, public GCss
 			Logging = logging;
 			Log = log;
 			Err = ErrNone;
+		}
+		
+		~Cmd()
+		{
+			int asd=0;
 		}
 
 		GString GetBuf()
@@ -238,7 +247,7 @@ public:
 	void FolderStatus(const char *Path = NULL, VcLeaf *Notify = NULL);
 	void Commit(const char *Msg, const char *Branch, bool AndPush);
 	void Push();
-	void Pull(LoggingType Logging = LogNormal);
+	void Pull(bool AndUpdate, LoggingType Logging = LogNormal);
 	void Clean();
 	bool Revert(const char *Path, const char *Revision = NULL);
 	bool Resolve(const char *Path);

@@ -37,6 +37,7 @@ _(DateTimestamp) // 64bit UTC
 _(DateSetNow)
 _(DateSetStr)
 _(DateGetStr)
+_(DateSecond64Bit)
 
 // GVariant string
 _(StrJoin)

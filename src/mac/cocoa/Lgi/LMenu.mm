@@ -15,8 +15,156 @@
 #include "GToken.h"
 #include "GDisplayString.h"
 
-// static int NextId = 0;
 #define DEBUG_INFO		0
+
+@interface LNSMenuItem : NSMenuItem
+{
+}
+@property LMenuItem* item;
+- (id)init:(LMenuItem*)it;
+- (void)activate;
+- (BOOL)worksWhenModal;
+@end
+
+@implementation LNSMenuItem
+
+- (id)init:(LMenuItem*)it
+{
+	if ((self = [super init]) != nil)
+	{
+		self.item = it;
+		[self setTarget:self];
+		self.action = @selector(activate);
+	}
+	
+	return self;
+}
+
+- (BOOL)worksWhenModal
+{
+	return YES;
+}
+
+- (void)activate
+{
+	self.item->OnActivate(self.item);
+}
+
+@end
+
+struct LShortcut
+{
+	NSString *Str;
+
+public:
+	NSString *Key;
+	NSEventModifierFlags Mod;
+	
+	LShortcut(const char *s)
+	{
+		Key = @"";
+		Str = nil;
+		Mod = 0;
+
+		auto Keys = GString(s).SplitDelimit("+-");
+		if (Keys.Length() <= 0)
+			return;
+		
+		for (auto k: Keys)
+		{
+			if (stricmp(k, "CtrlCmd") == 0 ||
+				stricmp(k, "AltCmd") == 0 ||
+				stricmp(k, "Cmd") == 0 ||
+				stricmp(k, "Command") == 0)
+			{
+				Mod |= NSEventModifierFlagCommand;
+			}
+			else if (stricmp(k, "Ctrl") == 0 ||
+					stricmp(k, "Control") == 0)
+			{
+				Mod |= NSEventModifierFlagControl;
+			}
+			else if (stricmp(k, "Alt") == 0 ||
+					stricmp(k, "Option") == 0)
+			{
+				Mod |= NSEventModifierFlagOption;
+			}
+			else if (stricmp(k, "Shift") == 0)
+			{
+				Mod |= NSEventModifierFlagShift;
+			}
+			else if (stricmp(k, "Del") == 0 ||
+					 stricmp(k, "Delete") == 0)
+			{
+				unichar s[] = {NSDeleteCharacter};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
+			}
+			else if (stricmp(k, "Ins") == 0 ||
+					 stricmp(k, "Insert") == 0)
+			{
+				unichar s[] = {NSInsertFunctionKey};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
+			}
+			else if (stricmp(k, "Home") == 0)
+			{
+				unichar s[] = {NSHomeFunctionKey};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
+			}
+			else if (stricmp(k, "End") == 0)
+			{
+				unichar s[] = {NSEndFunctionKey};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
+			}
+			else if (stricmp(k, "PageUp") == 0)
+			{
+				unichar s[] = {NSPageUpFunctionKey};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
+			}
+			else if (stricmp(k, "PageDown") == 0)
+			{
+				unichar s[] = {NSPageDownFunctionKey};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
+			}
+			else if (stricmp(k, "Backspace") == 0)
+			{
+				unichar s[] = {NSBackspaceCharacter};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
+			}
+			else if (stricmp(k, "Space") == 0)
+			{
+				Key = @" ";
+			}
+			else if (k[0] == 'F' && isdigit(k[1]))
+			{
+				int64 index = k.Strip("F").Int();
+				unichar s[] = {(unichar)(NSF1FunctionKey + index - 1)};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
+			}
+			else if (isalpha(k[0]))
+			{
+				Key = Str = GString(k).Lower().NsStr();
+			}
+			else if (isdigit(k[0]))
+			{
+				Key = Str = GString(k).NsStr();
+			}
+			else if (strchr(",.", k(0)))
+			{
+				unichar s[] = {(unichar)k(0)};
+				Key = Str = [[NSString alloc] initWithCharacters:s length:1];
+			}
+			else
+			{
+				printf("%s:%i - Unhandled shortcut token '%s'\n", _FL, k.Get());
+			}
+		}
+	}
+	
+	~LShortcut()
+	{
+		if (Str) [Str release];
+	}
+};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 LSubMenu::LSubMenu(const char *name, bool Popup)
@@ -25,18 +173,8 @@ LSubMenu::LSubMenu(const char *name, bool Popup)
 	Parent = 0;
 	Info = NULL;
 	GBase::Name(name);
-
-	#if COCOA
-		Info.p = [[NSMenu alloc] init];
-	#else
-		OSStatus e = CreateNewMenu(	NextId++, // MenuId
-								   0, // MenuAttributes
-								   &Info);
-		if (e) printf("%s:%i - can't create menu (e=%i)\n", __FILE__, __LINE__, (int)e);
-		#if DEBUG_INFO
-		else printf("CreateNewMenu()=%p\n", Info);
-		#endif
-	#endif
+	Info.p = [[NSMenu alloc] init];
+	[Info.p setAutoenablesItems:NO];
 }
 
 LSubMenu::~LSubMenu()
@@ -54,10 +192,8 @@ LSubMenu::~LSubMenu()
 	
 	if (Info)
 	{
-		#if COCOA
-		#else
-		DisposeMenu(Info);
-		#endif
+		[Info.p release];
+		Info = NULL;
 	}
 }
 
@@ -73,25 +209,6 @@ void LSubMenu::OnAttach(bool Attach)
 		Parent &&
 		Parent->Parent)
 	{
-#if 0
-		LSubMenu *k = Parent->Parent;
-		
-		if (Parent->Info == 0)
-		{
-			Parent->Info = k->Items.IndexOf(Parent) + 1;
-			char *Str = Parent->Name();
-			CFStringRef s = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)Str, strlen(Str), kCFStringEncodingUTF8, false);
-			OSStatus e = InsertMenuItemTextWithCFString(Parent->Parent->Info, s, Parent->Info - 1, 0, 0);
-			CFRelease(s);
-			
-			if (e) printf("%s:%i - Error: AppendMenuItemTextWithCFString(%p)=%i\n", __FILE__, __LINE__, Parent->Parent->Info, Parent->Info);
-			else
-			{
-				e = SetMenuItemHierarchicalMenu(Parent->Parent->Info, Parent->Info, Info);
-				if (e) printf("%s:%i - Error: SetMenuItemHierarchicalMenu(%p, %i, %p) = %i\n", __FILE__, __LINE__, Parent->Parent->Info, Parent->Info, Info, e);
-			}
-		}
-#endif
 	}
 }
 
@@ -108,70 +225,34 @@ LMenuItem *LSubMenu::ItemAt(int Id)
 LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where, const char *Shortcut)
 {
 	LMenuItem *i = new LMenuItem(Menu, this, Str, Id, Where, Shortcut);
-	if (i)
+	if (!i || !Info)
+		return NULL;
+
+	Items.Insert(i, Where);
+	auto Index = Items.IndexOf(i);
+	// auto Max = Info.p.numberOfItems;
+
+	GString s(i->GBase::Name());
+	auto name = s.NsStr();
+	LShortcut sc(Shortcut);
+
+	i->Info.p = [[LNSMenuItem alloc] init:i];
+	if (!i->Info)
 	{
-		if (Info)
-		{
-			Items.Insert(i, Where);
-			
-			#if COCOA
-			#else
-			Str = i->Name();
-			CFStringRef s = CFStringCreateWithBytes(kCFAllocatorDefault,
-													(UInt8*)Str, strlen(Str),
-													kCFStringEncodingUTF8,
-													false);
-			if (!s)
-				s = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)"#error", 6, kCFStringEncodingUTF8, false);
-			if (s)
-			{
-				OSStatus e;
-				
-				if (Where >= 0)
-				{
-					e = InsertMenuItemTextWithCFString(Info, s, Where, 0, 0);
-				}
-				else
-				{
-					e = AppendMenuItemTextWithCFString(Info, s, 0, 0, &i->Info);
-				}
-				
-				if (e)
-					printf("%s:%i - AppendMenuItemTextWithCFString failed (e=%i)\n", _FL, (int)e);
-#if DEBUG_INFO
-				else
-					printf("Append|Insert.MenuItemTextWithCFString(%p, %s)=%p\n", Info, Str, i->Info);
-#endif
-				
-				CFRelease(s);
-			}
-			
-			if (Where >= 0)
-			{
-				// We have to reindex everything (do the indexes change anyway?)
-				List<LMenuItem>::I it = Items.Start();
-				int n = 1;
-				for (LMenuItem *mi = *it; mi; mi = *++it)
-				{
-					mi->Info = n++;
-				}
-			}
-			#endif
-			
-			i->Id(Id);
-			i->Enabled(Enabled);
-			i->ScanForAccel();
-			
-			return i;
-		}
-		else
-		{
-			printf("%s:%i - No menu to attach item to.\n", __FILE__, __LINE__);
-			DeleteObj(i);
-		}
+		Items.Delete(i);
+		delete i;
+		return NULL;
 	}
-	
-	return 0;
+
+	[i->Info.p setTitle:name];
+	i->Info.p.keyEquivalent = sc.Key;
+	i->Info.p.keyEquivalentModifierMask = sc.Mod;
+	i->Id(Id);
+	i->Enabled(Enabled);
+
+	[Info.p insertItem:i->Info atIndex:Index];
+
+	return i;
 }
 
 LMenuItem *LSubMenu::AppendSeparator(int Where)
@@ -187,32 +268,12 @@ LMenuItem *LSubMenu::AppendSeparator(int Where)
 		
 		if (Info)
 		{
-			#if COCOA
-			#else
-			OSStatus e;
-			if (Where >= 0)
-			{
-				e = InsertMenuItemTextWithCFString(	Info,
-												   NULL,
-												   Where,
-												   kMenuItemAttrSeparator,
-												   0);
-				if (!e)
-					i->Info = Where;
-			}
-			else
-			{
-				e = AppendMenuItemTextWithCFString(	Info,
-												   NULL,
-												   kMenuItemAttrSeparator,
-												   0,
-												   &i->Info);
-			}
-			if (e) printf("%s:%i - InsertMenuItemTextWithCFString failed (e=%i)\n", _FL, (int)e);
-			#if DEBUG_INFO
-			else printf("InsertMenuItemTextWithCFString(%p, ---)=%p\n", Info, i->Info);
-			#endif
-			#endif
+			auto Index = Items.IndexOf(i);
+			// auto Max = Info.p.numberOfItems;
+			// printf("Adding ----- @ %i, %i\n", (int)Index, (int)Max);
+
+			i->Info = [NSMenuItem separatorItem];
+			[Info.p insertItem:i->Info atIndex:Index];
 		}
 		else
 		{
@@ -230,13 +291,11 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 	LMenuItem *i = new LMenuItem;
 	if (i && Str)
 	{
-		i->Name(Str);
 		i->Parent = this;
 		i->Menu = Menu;
 		i->Id(-1);
 		
 		Items.Insert(i, Where);
-		
 		if (Info)
 		{
 			i->Child = new LSubMenu(Str);
@@ -246,47 +305,16 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 				i->Child->Menu = Menu;
 				i->Child->Window = Window;
 				
-				#if COCOA
-				#else
-				CFStringRef s;
-				OSStatus e;
+				i->Info.p = [[NSMenuItem alloc] init];
+				LgiAssert(i->Info);
+
+				i->Name(Str);
+				GString s(i->GBase::Name());
+				[i->Child->Info.p setTitle:s.NsStr()];
+				[i->Info.p setSubmenu:i->Child->Info.p];
 				
-				Str = i->Name();
-				s = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)Str, strlen(Str), kCFStringEncodingUTF8, false);
-				if (s)
-				{
-					e = SetMenuTitleWithCFString(i->Child->Info, s);
-					if (e) printf("%s:%i - SetMenuTitleWithCFString failed (e=%i)\n", __FILE__, __LINE__, (int)e);
-					#if DEBUG_INFO
-					else printf("SetMenuTitleWithCFString(%p, %s)\n", i->Child->Info, Str);
-					#endif
-					CFRelease(s);
-				}
-				
-				i->Info = Items.IndexOf(i) + 1;
-				s = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)Str, strlen(Str), kCFStringEncodingUTF8, false);
-				if (s)
-				{
-					e = InsertMenuItemTextWithCFString(Info, s, i->Info - 1, 0, 0);
-					CFRelease(s);
-				}
-				if (e)
-					printf("%s:%i - Error: AppendMenuItemTextWithCFString(%p)=%i\n",
-						   _FL,
-						   Parent && Parent->Parent ? Parent->Parent->Info : NULL,
-						   Parent ? Parent->Info : NULL);
-				else
-				{
-					e = SetMenuItemHierarchicalMenu(Info, i->Info, i->Child->Info);
-					if (e)
-						printf("%s:%i - Error: SetMenuItemHierarchicalMenu(%p, %i, %p) = %i\n",
-							   _FL,
-							   Parent && Parent->Parent ? Parent->Parent->Info : NULL,
-							   Parent ? Parent->Info : NULL,
-							   Info,
-							   (int)e);
-				}
-				#endif
+				auto Index = Items.IndexOf(i);
+				[Info.p insertItem:i->Info atIndex:Index];
 			}
 		}
 		else
@@ -304,7 +332,8 @@ void LSubMenu::Empty()
 {
 	while (Items[0])
 	{
-		RemoveItem(Items[0]);
+		if (!RemoveItem(Items[0]))
+			break; // Otherwise we'll get an infinite loop.
 	}
 }
 
@@ -368,58 +397,42 @@ bool IsOverMenu(XEvent *e)
 }
 #endif
 
-#if COCOA
-#else
-MenuCommand *ReturnFloatCommand = 0;
-#endif
+void LSubMenu::OnActivate(LMenuItem *item)
+{
+	if (!item)
+		return;
+	
+	if (FloatResult)
+		*FloatResult = item->Id();
+	else if (Parent)
+		Parent->OnActivate(item);
+	else
+		LgiAssert(!"Should have a float result OR a parent..");
+}
 
 int LSubMenu::Float(GView *From, int x, int y, int Btns)
 {
-	// static int Depth = 0;
+	GdcPt2 p(x, y);
+	OsView v = nil;
 	
-	#if COCOA
-	return 0;
-	#else
-	MenuCommand Cmd = 0;
-	if (From && Depth == 0)
+	auto w = From ? From->GetWindow() : NULL;
+	if (w)
 	{
-		Depth++;
-		
-		UInt32 UserSelectionType;
-		SInt16 MenuID;
-		MenuItemIndex MenuItem;
-		Point Pt = { y, x };
-		
-		From->Capture(false);
-		OnAttach(true);
-		
-		ReturnFloatCommand = &Cmd;
-		OSStatus e = ContextualMenuSelect(	Info,
-										  Pt,
-										  false,
-										  kCMHelpItemRemoveHelp,
-										  0,
-										  0, // AEDesc *inSelection,
-										  &UserSelectionType,
-										  &MenuID,
-										  &MenuItem);
-		ReturnFloatCommand = 0;
-		if (e == userCanceledErr)
-		{
-			// Success
-		}
-		else
-		{
-			printf("%s:%i - ContextualMenuSelect failed (e=%i)\n", _FL, (int)e);
-			Cmd = 0;
-		}
-		
-		Depth--;
+		v = w->Handle();
+		w->PointToView(p);
+		p = w->Flip(p);
 	}
-	else printf("%s:%i - Recursive limit.\n", _FL);
+	
+	FloatResult.Reset(new int(0));
+	
+	auto item = Items[0];
+	auto menuitem = item->Info.p;
+	auto en = menuitem.enabled;
+	
+	NSPoint loc = {(double)p.x, (double)p.y};
+	[Info.p popUpMenuPositioningItem:nil atLocation:loc inView:v];
 
-	return Cmd;
-	#endif
+	return FloatResult ? *FloatResult : 0;
 }
 
 LSubMenu *LSubMenu::FindSubMenu(int Id)
@@ -472,7 +485,7 @@ LMenuItem *LSubMenu::FindItem(int Id)
 class LMenuItemPrivate
 {
 public:
-	GAutoString Shortcut;
+	GString Shortcut;
 };
 
 LMenuItem::LMenuItem()
@@ -498,7 +511,7 @@ LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *Str, int Id, int Pos, co
 	_Icon = -1;
 	_Id = Id;
 	_Flags = 0;
-	d->Shortcut.Reset(NewStr(Shortcut));
+	d->Shortcut = Shortcut;
 	Name(Str);
 }
 
@@ -511,6 +524,14 @@ LMenuItem::~LMenuItem()
 	}
 	DeleteObj(Child);
 	DeleteObj(d);
+}
+
+void LMenuItem::OnActivate(LMenuItem *item)
+{
+	if (Parent)
+		Parent->OnActivate(item);
+	else
+		LgiAssert(!"Should have a parent.");
 }
 
 void LMenuItem::OnAttach(bool Attach)
@@ -701,25 +722,25 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 		// Paint a separator
 		int Cy = r.Y() / 2;
 		
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle();
 		
-		pDC->Colour(LC_LOW, 24);
+		pDC->Colour(L_LOW);
 		pDC->Line(0, Cy-1, pDC->X()-1, Cy-1);
 		
-		pDC->Colour(LC_LIGHT, 24);
+		pDC->Colour(L_LIGHT);
 		pDC->Line(0, Cy, pDC->X()-1, Cy);
 	}
 	else
 	{
 		// Paint a text menu item
-		COLOUR Fore = LC_TEXT; // Selected ? LC_SEL_TEXT : LC_TEXT;
-		COLOUR Back = Selected ? LC_HIGH : LC_MED; // Selected ? LC_SELECTION : LC_MED;
+		GColour Fore(L_TEXT);
+		GColour Back(Selected ? L_HIGH : L_MED);
 		int x = IconX;
 		int y = 1;
 		
 		// For a submenu
-		pDC->Colour(Back, 24);
+		pDC->Colour(Back);
 		pDC->Rectangle();
 		
 		// Draw the text on top
@@ -730,19 +751,19 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 			// Disabled text
 			if (!Selected)
 			{
-				Font->Colour(LC_LIGHT, 0);
+				Font->Colour(L_LIGHT);
 				_PaintText(pDC, x+1, y+1, r.X());
 			}
 			// Else selected... don't draw the hilight
 			
 			// "greyed" text...
-			Font->Colour(LC_LOW, 0);
+			Font->Colour(L_LOW);
 			_PaintText(pDC, x, y, r.X());
 		}
 		else
 		{
 			// Normal coloured text
-			Font->Colour(Fore, 0);
+			Font->Fore(Fore);
 			_PaintText(pDC, x, y, r.X());
 		}
 		
@@ -755,7 +776,7 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 			int x = 4;
 			int y = 6;
 			
-			pDC->Colour(Fore, 24);
+			pDC->Colour(Fore);
 			pDC->Line(x, y, x+2, y+2);
 			pDC->Line(x+2, y+2, x+6, y-2);
 			y++;
@@ -769,14 +790,14 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 				 _Icon >= 0)
 		{
 			// it's an icon!
-			GColour Bk(LC_MED, 24);
+			GColour Bk(L_MED);
 			ImgLst->Draw(pDC, 0, 0, _Icon, Bk);
 		}
 		
 		// Sub menu arrow
 		if (Child && !dynamic_cast<LMenu*>(Parent))
 		{
-			pDC->Colour(LC_TEXT, 24);
+			pDC->Colour(L_TEXT);
 			
 			int x = r.x2 - 4;
 			int y = r.y1 + (r.Y()/2);
@@ -794,150 +815,6 @@ bool LMenuItem::ScanForAccel()
 	if (!d->Shortcut)
 		return false;
 	
-	GToken Keys(d->Shortcut, "+-");
-	if (Keys.Length() <= 0)
-		return false;
-	
-	int Flags = 0;
-	int Key = 0;
-	
-	for (int i=0; i<Keys.Length(); i++)
-	{
-		char *k = Keys[i];
-		if (stricmp(k, "Ctrl") == 0 ||
-			stricmp(k, "Modifier") == 0)
-		{
-			Flags |= LGI_EF_CTRL;
-		}
-		else if (stricmp(k, "Alt") == 0)
-		{
-			Flags |= LGI_EF_ALT;
-		}
-		else if (stricmp(k, "Shift") == 0)
-		{
-			Flags |= LGI_EF_SHIFT;
-		}
-		else if (stricmp(k, "Del") == 0 ||
-				 stricmp(k, "Delete") == 0)
-		{
-			Key = LK_DELETE;
-		}
-		else if (stricmp(k, "Ins") == 0 ||
-				 stricmp(k, "Insert") == 0)
-		{
-			Key = LK_INSERT;
-		}
-		else if (stricmp(k, "Home") == 0)
-		{
-			Key = LK_HOME;
-		}
-		else if (stricmp(k, "End") == 0)
-		{
-			Key = LK_END;
-		}
-		else if (stricmp(k, "PageUp") == 0)
-		{
-			Key = LK_PAGEUP;
-		}
-		else if (stricmp(k, "PageDown") == 0)
-		{
-			Key = LK_PAGEDOWN;
-		}
-		else if (stricmp(k, "Backspace") == 0)
-		{
-			Key = LK_BACKSPACE;
-		}
-		else if (stricmp(k, "Space") == 0)
-		{
-			Key = ' ';
-		}
-		else if (k[0] == 'F' && isdigit(k[1]))
-		{
-			int F[] =
-			{
-				LK_F1, LK_F2, LK_F3, LK_F4, LK_F5, LK_F6,
-				LK_F7, LK_F8, LK_F9, LK_F10, LK_F11, LK_F12
-			};
-			int idx = atoi(k + 1);
-			if (idx >= 1 && idx <= 12)
-			{
-				Key = F[idx-1];
-			}
-		}
-		else if (isalpha(k[0]))
-		{
-			Key = toupper(k[0]);
-		}
-		else if (isdigit(k[0]))
-		{
-			Key = k[0];
-		}
-		else if (strchr(",", k[0]))
-		{
-			Key = k[0];
-		}
-		else
-		{
-			printf("%s:%i - Unhandled shortcut token '%s'\n", _FL, k);
-		}
-	}
-	
-	if (Key == ' ')
-	{
-		Menu->Accel.Insert( new GAccelerator(Flags, Key, Id()) );
-	}
-	else if (Key)
-	{
-		#ifdef COCOA
-		#else
-		int ModMask =	(TestFlag(Flags, LGI_EF_CTRL) ? 0 : kMenuNoCommandModifier) |
-		(TestFlag(Flags, LGI_EF_ALT) ? kMenuOptionModifier : 0) |
-		(TestFlag(Flags, LGI_EF_SHIFT) ? kMenuShiftModifier : 0);
-		
-		e = SetMenuItemModifiers(Parent->Info, Info, ModMask);
-		
-		if (e) printf("%s:%i - SetMenuItemModifiers() failed with %i\n",
-					  __FILE__, __LINE__, (int)e);
-		
-		switch (Key)
-		{
-#define Map(k, g) \
-case k: \
-SetMenuItemKeyGlyph(Parent->Info, Info, g); \
-break
-				
-				Map(VK_F1, kMenuF1Glyph);
-				Map(VK_F2, kMenuF2Glyph);
-				Map(VK_F3, kMenuF3Glyph);
-				Map(VK_F4, kMenuF4Glyph);
-				Map(VK_F5, kMenuF5Glyph);
-				Map(VK_F6, kMenuF6Glyph);
-				Map(VK_F7, kMenuF7Glyph);
-				Map(VK_F8, kMenuF8Glyph);
-				Map(VK_F9, kMenuF9Glyph);
-				Map(VK_F10, kMenuF10Glyph);
-				Map(VK_F11, kMenuF11Glyph);
-				Map(VK_F12, kMenuF12Glyph);
-				Map(' ', kMenuSpaceGlyph);
-				Map(VK_DELETE, kMenuDeleteRightGlyph);
-				Map(VK_BACKSPACE, kMenuDeleteLeftGlyph);
-				Map(VK_UP, kMenuUpArrowGlyph);
-				Map(VK_DOWN, kMenuDownArrowGlyph);
-				Map(VK_LEFT, kMenuLeftArrowGlyph);
-				Map(VK_RIGHT, kMenuRightArrowGlyph);
-			default:
-			{
-				e = SetMenuItemCommandKey(	Parent->Info,
-										  Info,
-										  false,
-										  Key);
-				if (e) printf("%s:%i - SetMenuItemCommandKey(%i/%c) failed with %i\n",
-							  _FL, Key, Key, (int)e);
-				break;
-			}
-		}
-		#endif
-	}
 	
 	return true;
 }
@@ -949,37 +826,21 @@ LSubMenu *LMenuItem::GetParent()
 
 bool LMenuItem::Remove()
 {
-	if (Parent)
-	{
-		if (Parent->Info && Info)
-		{
-			// int Index = Parent->Items.IndexOf(this);
-			
-			#ifdef COCOA
-			#else
-			LgiAssert(Index + 1 == Info);
+	if (!Parent)
+		return false;
 
-			DeleteMenuItem(Parent->Info, Info);
-			Parent->Items.Delete(this);
-			
-			// Re-index all the following items
-			LMenuItem *mi;
-			for (int i = Index; (mi = Parent->Items.ItemAt(i)); i++)
-			{
-				mi->Info = i + 1;
-			}
-			
-			Info = NULL;
-			#endif
-		}
-		else
-		{
-			Parent->Items.Delete(this);
-		}
-		return true;
+	if (Parent->Info && Info)
+	{
+		[Parent->Info.p removeItem:Info];
+		Parent->Items.Delete(this);
+		Info = NULL;
+	}
+	else
+	{
+		Parent->Items.Delete(this);
 	}
 	
-	return false;
+	return true;
 }
 
 void LMenuItem::Id(int i)
@@ -987,7 +848,7 @@ void LMenuItem::Id(int i)
 	_Id = i;
 	if (Parent && Parent->Info && Info)
 	{
-		#ifdef COCOA
+		#if LGI_COCOA
 		#else
 		SetMenuItemCommandID(Parent->Info, Info, _Id);
 		#endif
@@ -1003,7 +864,7 @@ void LMenuItem::Separator(bool s)
 	
 	if (Parent)
 	{
-		#ifdef COCOA
+		#if LGI_COCOA
 		#else
 		if (s)
 			ChangeMenuItemAttributes(Parent->Info, Info, kMenuItemAttrSeparator, 0);
@@ -1019,13 +880,9 @@ void LMenuItem::Checked(bool c)
 		SetFlag(_Flags, ODS_CHECKED);
 	else
 		ClearFlag(_Flags, ODS_CHECKED);
-	if (Parent)
-	{
-		#ifdef COCOA
-		#else
-		CheckMenuItem(Parent->Info, Info, c);
-		#endif
-	}
+	
+	if (Info)
+		[Info.p setState: c ? NSOnState : NSOffState];
 }
 
 bool LMenuItem::Name(const char *n)
@@ -1044,23 +901,10 @@ bool LMenuItem::Name(const char *n)
 	}
 	
 	bool Status = GBase::Name(Tmp);
-	if (Status && Parent)
+	if (Status && Info)
 	{
-		#ifdef COCOA
-		#else
-		CFStringRef s = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)Tmp, strlen(Tmp), kCFStringEncodingUTF8, false);
-		
-		if (!s)
-			s = CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)"#error", 6, kCFStringEncodingUTF8, false);
-		
-		if (s)
-		{
-			SetMenuItemTextWithCFString(Parent->Info, Info, s);
-			// if (e) printf("%s:%i - SetMenuItemTextWithCFString(%p, %s) failed with %i.\n", _FL, Parent->Info, Tmp, e);
-			
-			CFRelease(s);
-		}
-		#endif
+		GString s(Tmp);
+		[Info.p setTitle:s.NsStr()];
 	}
 	
 	DeleteArray(Tmp);
@@ -1070,20 +914,10 @@ bool LMenuItem::Name(const char *n)
 
 void LMenuItem::Enabled(bool e)
 {
-	if (Parent)
-	{
-		#ifdef COCOA
-		#else
-		if (e)
-		{
-			EnableMenuItem(Parent->Info, Info);
-		}
-		else
-		{
-			DisableMenuItem(Parent->Info, Info);
-		}
-		#endif
-	}
+	#if 1
+	if (Info && Info.p.enabled ^ e)
+		Info.p.enabled = e;
+	#endif
 }
 
 void LMenuItem::Focus(bool f)
@@ -1105,73 +939,15 @@ void LMenuItem::Icon(int i)
 {
 	_Icon = i;
 	
-	if (Parent && Parent->Info && Info)
-	{
-		GImageList *Lst = Menu ? Menu->GetImageList() : Parent->GetImageList();
-		if (!Lst)
-			return;
-		
-#if 0
-		int Bpp = Lst->GetBits() / 8;
-		int Off = _Icon * Lst->TileX() * Bpp;
-		int Line = (*Lst)[1] - (*Lst)[0];
-		uchar *Base = (*Lst)[0];
-		if (!Base)
-			return;
-		
-		int TempSize = Lst->TileX() * Lst->TileY() * Bpp;
-		uchar *Temp = new uchar[TempSize];
-		if (!Temp)
-			return;
-		
-		uchar *d = Temp;
-		for (int y=0; y<Lst->TileY(); y++)
-		{
-			uchar *s = Base + Off + (Line * (Lst->TileY() - y - 1));
-			uchar *e = s + (Lst->TileX() * Bpp);
-			while (s < e)
-			{
-				if (memcmp(Base, s, Bpp) == 0)
-					memset(d, 0, Bpp);
-				else
-					memcpy(d, s, Bpp);
-				d += Bpp;
-				s += Bpp;
-			}
-		}
-		
-		CGDataProviderRef Provider = CGDataProviderCreateWithData(0, Temp, TempSize, releaseData);
-		if (Provider)
-		{
-			// CGColorSpaceRef Cs = CGColorSpaceCreateWithName(kCGColorSpaceUserRGB);
-			CGColorSpaceRef Cs = CGColorSpaceCreateDeviceRGB();
-			CGImageRef Ico = CGImageCreate(	Lst->TileX(),
-										   Lst->TileX(),
-										   8,
-										   Lst->GetBits(),
-										   Lst->TileX() * Bpp,
-										   Cs,
-										   kCGImageAlphaPremultipliedLast,
-										   Provider,
-										   NULL,
-										   false,
-										   kCGRenderingIntentDefault);
-			if (Ico)
-			{
-				OSErr e = SetMenuItemIconHandle(Parent->Info, Info, kMenuCGImageRefType, (char**)Ico);
-				if (e) printf("%s:%i - SetMenuItemIconHandle failed with %i\n", __FILE__, __LINE__, e);
-			}
-			else printf("%s:%i - CGImageCreate failed.\n", __FILE__, __LINE__);
-			
-			// CGColorSpaceRelease(Cs);
-			// CGDataProviderRelease(Provider);
-		}
-#endif
-	}
-	else
-	{
-		printf("Can't set icon.\n");
-	}
+	GImageList *Lst = Menu ? Menu->GetImageList() : Parent->GetImageList();
+	if (!Lst || !Info)
+		return;
+
+	if (_Icon < 0 || _Icon >= Lst->GetItems())
+		return;
+
+	GRect r = Lst->GetIconRect(_Icon);
+	[Info.p setImage: Lst->NsImage(&r)];
 }
 
 void LMenuItem::Visible(bool i)
@@ -1202,7 +978,7 @@ bool LMenuItem::Enabled()
 {
 	if (Parent)
 	{
-		#ifdef COCOA
+		#if LGI_COCOA
 		#else
 		return IsMenuItemEnabled(Parent->Info, Info);
 		#endif
@@ -1232,19 +1008,76 @@ int LMenuItem::Icon()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+class LMenuPrivate
+{
+public:
+	int PrefId, AboutId;
+	
+	LMenuPrivate()
+	{
+		PrefId = AboutId = 0;
+	}
+};
+
+
 LMenu::LMenu(const char *AppName) : LSubMenu("", false)
 {
 	Menu = this;
+	d = new LMenuPrivate;
+	
+	auto s = AppendSub("Root");
+	if (s)
+	{
+		s->AppendItem("About", M_ABOUT);
+		s->AppendSeparator();
+		s->AppendItem("Preferences", M_PERFERENCES, true, -1, "Cmd+,");
+		s->AppendItem("Hide", M_HIDE, true, -1, "Cmd+H");
+		s->AppendSeparator();
+		s->AppendItem("Quit", M_QUIT, true, -1, "Cmd+Q");
+	}
 }
 
 LMenu::~LMenu()
 {
 	Accel.DeleteObjects();
+	DeleteObj(d);
+}
+
+void LMenu::OnActivate(LMenuItem *item)
+{
+	if (!item)
+	{
+		LgiAssert(0);
+		return;
+	}
+	switch (item->Id())
+	{
+		case M_ABOUT:
+			if (Window && d->AboutId)
+				Window->PostEvent(M_COMMAND, d->AboutId);
+			break;
+		case M_PERFERENCES:
+			if (Window && d->PrefId)
+				Window->PostEvent(M_COMMAND, d->PrefId);
+			break;
+		case M_HIDE:
+			[[NSApplication sharedApplication] hide:Info];
+			break;
+		case M_QUIT:
+			LgiCloseApp();
+			break;
+		default:
+			if (Window)
+				Window->PostEvent(M_COMMAND, item->Id());
+			break;
+	}
 }
 
 bool LMenu::SetPrefAndAboutItems(int PrefId, int AboutId)
 {
-	return false;
+	d->PrefId = PrefId;
+	d->AboutId = AboutId;
+	return true;
 }
 
 struct LMenuFont
@@ -1305,6 +1138,7 @@ bool LMenu::Attach(GViewI *p)
 	if (w)
 	{
 		Window = p;
+		[NSApplication sharedApplication].mainMenu = Info;
 		
 		if (Info)
 		{

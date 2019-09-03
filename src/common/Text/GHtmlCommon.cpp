@@ -373,46 +373,50 @@ GHtmlStatic::GHtmlStatic() :
 	DefStyle(border-bottom, GCss::PropBorderBottom);
 	
 	// Html colours
-	#define DefColour(s, v) ColourMap.Add((char*)#s, v)
+	#define SysColour(s) ColourMap.Add(#s, LColour(s).c24())
+	#define DefColour(s, v) ColourMap.Add(#s, LColour(v).c24())
 
-	DefColour(LC_BLACK, LC_BLACK);
-	DefColour(LC_DKGREY, LC_DKGREY);
-	DefColour(LC_MIDGREY, LC_MIDGREY);
-	DefColour(LC_LTGREY, LC_LTGREY);
-	DefColour(LC_WHITE, LC_WHITE);
-	DefColour(LC_SHADOW, LC_SHADOW);
-	DefColour(LC_LOW, LC_LOW);
-	DefColour(LC_MED, LC_MED);
-	DefColour(LC_HIGH, LC_HIGH);
-	DefColour(LC_LIGHT, LC_LIGHT);
-	DefColour(LC_DIALOG, LC_DIALOG);
-	DefColour(LC_WORKSPACE, LC_WORKSPACE);
-	DefColour(LC_TEXT, LC_TEXT);
-	DefColour(LC_FOCUS_SEL_BACK, LC_FOCUS_SEL_BACK);
-	DefColour(LC_FOCUS_SEL_FORE, LC_FOCUS_SEL_FORE);
-	DefColour(LC_ACTIVE_TITLE, LC_ACTIVE_TITLE);
-	DefColour(LC_ACTIVE_TITLE_TEXT, LC_ACTIVE_TITLE_TEXT);
-	DefColour(LC_INACTIVE_TITLE, LC_INACTIVE_TITLE);
-	DefColour(LC_INACTIVE_TITLE_TEXT, LC_INACTIVE_TITLE_TEXT);
-	DefColour(LC_NON_FOCUS_SEL_BACK, LC_NON_FOCUS_SEL_BACK);
-	DefColour(LC_NON_FOCUS_SEL_FORE, LC_NON_FOCUS_SEL_FORE);
+	SysColour(L_BLACK);
+	SysColour(L_DKGREY);
+	SysColour(L_MIDGREY);
+	SysColour(L_LTGREY);
+	SysColour(L_WHITE);
+	SysColour(L_SHADOW);
+	SysColour(L_LOW);
+	SysColour(L_MED);
+	SysColour(L_HIGH);
+	SysColour(L_LIGHT);
+	SysColour(L_DIALOG);
+	SysColour(L_WORKSPACE);
+	SysColour(L_TEXT);
+	SysColour(L_FOCUS_SEL_BACK);
+	SysColour(L_FOCUS_SEL_FORE);
+	SysColour(L_ACTIVE_TITLE);
+	SysColour(L_ACTIVE_TITLE_TEXT);
+	SysColour(L_INACTIVE_TITLE);
+	SysColour(L_INACTIVE_TITLE_TEXT);
+	SysColour(L_NON_FOCUS_SEL_BACK);
+	SysColour(L_NON_FOCUS_SEL_FORE);
 
-	DefColour(ThreeDDarkShadow, LC_SHADOW);
-	DefColour(ThreeDShadow, LC_LOW);
-	DefColour(ThreeDFace, LC_MED);
-	DefColour(ThreeDLightShadow, LC_HIGH);
-	DefColour(ThreeDHighlight, LC_LIGHT);
-	DefColour(ButtonFace, LC_DIALOG);
-	DefColour(AppWorkspace, LC_WORKSPACE);
-	DefColour(WindowText, LC_TEXT);
-	DefColour(Highlight, LC_FOCUS_SEL_BACK);
-	DefColour(HighlightText, LC_FOCUS_SEL_FORE);
-	DefColour(ActiveBorder, LC_ACTIVE_TITLE);
-	DefColour(ActiveCaption, LC_ACTIVE_TITLE_TEXT);
-	DefColour(InactiveBorder, LC_INACTIVE_TITLE);
-	DefColour(InactiveCaptionText, LC_INACTIVE_TITLE_TEXT);
-	DefColour(NonFocusHighlight, LC_NON_FOCUS_SEL_BACK);
-	DefColour(NonFocusHighlightText, LC_NON_FOCUS_SEL_FORE);
+	DefColour(ThreeDDarkShadow, L_SHADOW);
+	DefColour(ThreeDShadow, L_LOW);
+	DefColour(ThreeDFace, L_MED);
+	DefColour(ThreeDLightShadow, L_HIGH);
+	DefColour(ThreeDHighlight, L_LIGHT);
+	DefColour(ButtonFace, L_DIALOG);
+	DefColour(AppWorkspace, L_WORKSPACE);
+	DefColour(WindowText, L_TEXT);
+	DefColour(Highlight, L_FOCUS_SEL_BACK);
+	DefColour(HighlightText, L_FOCUS_SEL_FORE);
+	DefColour(ActiveBorder, L_ACTIVE_TITLE);
+	DefColour(ActiveCaption, L_ACTIVE_TITLE_TEXT);
+	DefColour(InactiveBorder, L_INACTIVE_TITLE);
+	DefColour(InactiveCaptionText, L_INACTIVE_TITLE_TEXT);
+	DefColour(NonFocusHighlight, L_NON_FOCUS_SEL_BACK);
+	DefColour(NonFocusHighlightText, L_NON_FOCUS_SEL_FORE);
+
+	#undef DefColour
+	#define DefColour(s, v) ColourMap.Add(#s, v)
 
 	DefColour(AliceBlue, Rgb24(0xF0, 0xF8, 0xFF));
 	DefColour(AntiqueWhite, Rgb24(0xFA, 0xEB, 0xD7));

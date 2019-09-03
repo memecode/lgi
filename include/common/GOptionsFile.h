@@ -19,6 +19,7 @@ private:
 	GString File;
 	GString Error;
 	bool Dirty;
+	PortableType Mode;
 	
 	char *LockFile;
 	int LockLine;
@@ -43,11 +44,13 @@ protected:
 
 public:
 	GOptionsFile(const char *FileName = 0);
-	GOptionsFile(PortableType Mode, const char *BaseName = 0);
+	GOptionsFile(PortableType mode, const char *BaseName = 0);
 	~GOptionsFile();
 
 	void SetFile(const char *f);
-	bool SetMode(PortableType Mode, const char *BaseName = 0);
+	PortableType GuessMode();
+	PortableType GetMode() { return Mode; }
+	bool SetMode(PortableType mode, const char *BaseName = 0);
 
 	bool IsValid();
 	char *GetFile() { return File; }

@@ -54,13 +54,12 @@ void OsAppArguments::Set(char *CmdLine)
 	GArray<char> Raw;
 	GArray<size_t> Offsets;
 	
-	char Exe[256];
+	auto Exe = LGetExeFile();
 	Offsets.Add(0);
-	if (LgiGetExeFile(Exe, sizeof(Exe)))
+	if (Exe)
 	{
-		size_t Len = strlen(Exe);
-		Raw.Length(Len + 1);
-		strcpy(&Raw[0], Exe);
+		Raw.Length(Exe.Length() + 1);
+		strcpy(Raw.AddressOf(), Exe);
 	}
 	else
 	{
@@ -173,28 +172,19 @@ void GMouse::SetFromEvent(NSEvent *ev, NSView *view)
 		case SDK_10_12(NSEventTypeMouseMoved,     NX_MOUSEMOVED):
 			IsMove(true);
 			break;
+		case SDK_10_12(NSEventTypeLeftMouseDragged, NX_LMOUSEDRAGGED):
+			Down(true); IsMove(true); Left(true);
+			break;
+		case SDK_10_12(NSEventTypeRightMouseDragged, NX_RMOUSEDRAGGED):
+			Down(true); IsMove(true); Right(true);
+			break;
 		default:
 			LgiAssert(!"Unknown event.");
 			break;
 	}
-	
-	if (Target)
-	{
-		auto t = Target->WindowFromPoint(x, y);
-		if (t)
-		{
-			for (auto i = t; i && i != Target; i = i->GetParent())
-			{
-				auto p = i->GetPos();
-				x -= p.x1;
-				y -= p.y1;
-			}
-			Target = t;
-		}
-	}
 }
 
-void GUiEvent::SetModifer(uint32 modifierKeys)
+void GUiEvent::SetModifer(uint32_t modifierKeys)
 {
 	System(modifierKeys & SDK_10_12(NSEventModifierFlagCommand, NSCommandKeyMask));
 	Shift (modifierKeys & SDK_10_12(NSEventModifierFlagShift,   NSShiftKeyMask));
@@ -243,8 +233,7 @@ void OnCrash(int i)
 	pipe((int*)&Read);
 	pipe((int*)&Error);
 	
-	char Exe[256] = "";
-	LgiGetExeFile(Exe, sizeof(Exe));
+	auto Exe = LGetExeFile();
 	
 	// Has stdin pipe
 	pipe((int*)&Write);
@@ -323,7 +312,7 @@ void OnCrash(int i)
 class GAppPrivate
 {
 public:
-	NSApplication *NsApp;
+	OsApp NsApp;
 	int RunDepth;
 
 	// Common
@@ -368,18 +357,6 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-@interface LNsApplication : NSApplication
-{
-}
-
-@property GAppPrivate *d;
-
-- (id)init:(GAppPrivate*)priv;
-- (void)terminate:(nullable id)sender;
-- (void)dealloc;
-
-@end
-
 @implementation LNsApplication
 
 - (id)init:(GAppPrivate*)priv
@@ -394,12 +371,27 @@ public:
 
 - (void)terminate:(nullable id)sender
 {
+	[super terminate:sender];
 }
 
 - (void)dealloc
 {
 	[super dealloc];
 	printf("LNsApplication.dealloc\n");
+}
+
+- (void)assert:(LCocoaAssert*)ca
+{
+	NSAlert *a = [[NSAlert alloc] init];
+	a.messageText = ca.msg.NsStr();
+	a.alertStyle = NSAlertStyleCritical;
+	[a addButtonWithTitle:@"Debug"];
+	[a addButtonWithTitle:@"Ignore"];
+	[a addButtonWithTitle:@"Abort"];
+	
+	ca.result = [a runModal];
+	
+	[a release];
 }
 
 @end
@@ -431,7 +423,7 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	setvbuf(stdout,(char *)NULL,_IONBF,0); // print mesgs immediately.
 	
 	// Connect to the server
-	d->NsApp = [NSApplication sharedApplication];
+	d->NsApp = [LNsApplication sharedApplication];
 
 	#if 0
 	auto mainMenu = [d->NsApp mainMenu];
@@ -466,7 +458,7 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	d->GdcSystem = new GdcDevice;
 	
 	srand((unsigned)LgiCurrentTime());
-	LgiInitColours();
+	GColour::OnChange();
 	
 	SetAppArgs(AppArgs);
 	MouseHook = new GMouseHook;
@@ -515,43 +507,6 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 		extern GSkinEngine *CreateSkinEngine(GApp *App);
 		SkinEngine = CreateSkinEngine(this);
 	}
-	
-#if 0
-	OSStatus e;
-	
-	// Setup apple event handlers
-	/*
-	 e = AEInstallEventHandler(	kInternetEventClass,
-	 kAEGetURL,
-	 NewAEEventHandlerUPP(AppleEventProc),
-	 (SRefCon)this,
-	 false);
-	 printf("AEInstallEventHandler(kInternetEventClass, kAEGetURL, ...)=%i\n", (int)e);
-	 if (e) LgiTrace("%s:%i - AEInstallEventHandler = %i\n", _FL, e);
-	 e = AEInstallEventHandler(	kCoreEventClass,
-	 kAEOpenApplication,
-	 NewAEEventHandlerUPP(AppleEventProc),
-	 (SRefCon)this,
-	 false);
-	 LgiTrace("%s:%i - AEInstallEventHandler = %i\n", _FL, e);
-	 */
-	
-	// Setup application handler
-	EventTypeSpec	AppEvents[] =
-	{
-		{ kEventClassApplication, kEventAppActivated       },
-		{ kEventClassApplication, kEventAppFrontSwitched   },
-		{ kEventClassApplication, kEventAppGetDockTileMenu },
-		{ kEventClassCommand,     kEventCommandProcess     },
-	};
-	
-	EventHandlerRef Handler = 0;
-	e =	InstallApplicationEventHandler(	NewEventHandlerUPP(AppProc),
-									   GetEventTypeCount(AppEvents),
-									   AppEvents,
-									   (void*)this, &Handler);
-	if (e) LgiTrace("%s:%i - InstallEventHandler for app failed (%i)\n", _FL, e);
-#endif
 }
 
 GApp::~GApp()
@@ -569,7 +524,7 @@ GApp::~GApp()
 	TheApp = 0;
 }
 
-NSApplication *GApp::Handle()
+OsApp &GApp::Handle()
 {
 	return d->NsApp;
 }
@@ -582,10 +537,17 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param A, GMessage::Param B
 		return false;
 	}
 	
+	bool Exists = GView::LockHandler(View, GView::LockOp::OpExists);
+	if (!Exists)
+	{
+		printf("%s:%i - View deleted.\n", _FL);
+		return false;
+	}
+
 	GWindow *w = View->GetWindow();
 	if (!w)
 	{
-		printf("%s:%i - No window.\n", _FL);
+		// printf("%s:%i - No window.\n", _FL);
 		return false;
 	}
 	
@@ -596,7 +558,7 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param A, GMessage::Param B
 		return false;
 	}
 
-	auto m = [[LCocoaMsg alloc] init:View->AddDispatch() msg:Msg a:A b:B];
+	auto m = [[LCocoaMsg alloc] init:View msg:Msg a:A b:B];
 	[v performSelectorOnMainThread:@selector(userEvent:) withObject:m waitUntilDone:false];
 	return true;
 }
@@ -665,29 +627,16 @@ int GApp::GetMetric(LgiSystemMetric Metric)
 
 GViewI *GApp::GetFocus()
 {
-	#if 0
-	WindowRef w = FrontNonFloatingWindow();
-	if (w)
-	{
-		ControlRef v;
-		OSErr e = GetKeyboardFocus(w, &v);
-		if (e) printf("%s:%i - GetKeyboardFocus failed with %i\n", __FILE__, __LINE__, e);
-		else
-		{
-			GViewI *Ptr = 0;
-			UInt32 Size = 0;
-			e = GetControlProperty(v, 'meme', 'view', sizeof(Ptr), &Size, &Ptr);
-			if (e) printf("%s:%i - GetControlProperty failed with %i\n", __FILE__, __LINE__, e);
-			else
-			{
-				return Ptr;
-			}
-		}
-	}
-	else printf("FrontNonFloatingWindow failed.\n");
-	#endif
-	
-	return 0;
+	auto kw = d->NsApp.p.keyWindow;
+	if (!kw)
+		return NULL;
+
+	LNsWindow *w = objc_dynamic_cast(LNsWindow, kw);
+	GWindow *gw = w ? [w getWindow] : nil;
+	if (!gw)
+		return NULL;
+
+	return gw->GetFocus();
 }
 
 OsThread GApp::_GetGuiThread()
@@ -774,7 +723,13 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 		
 		// [pool release];
 		#else
-		NSApplicationMain(GetArgs(), GetArg());
+		
+			#if 1
+			NSApplicationMain(GetArgs(), GetArg());
+			#else
+			[d->NsApp run];
+			#endif
+			
 		#endif
 		return true;
 	}
@@ -796,8 +751,10 @@ void GApp::Exit(int Code)
 	#else
 	if (!Code)
 	{
-		DeleteObj(AppWnd);
-		[NSApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.0];
+		if (AppWnd)
+			AppWnd->Quit();
+		
+		[d->NsApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.0];
 	}
 	else
 	#endif
@@ -997,24 +954,14 @@ GString GApp::GetFileMimeType(const char *File)
 		}
 	}
 	
-	char *Ext = LgiGetExtension((char*)File);
-	if (Ext)
-	{
-		#if 0
-		CFStringRef e = CFStringCreateWithCString(NULL, Ext, kCFStringEncodingUTF8);
-		CFStringRef uti = e != NULL ? UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, e, NULL) : 0;
-		CFStringRef mime = uti != NULL ? UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType) : 0;
-		
-		Ret.Reset(CFStringToUtf8(mime));
-		
-		if (uti != NULL)
-			CFRelease(uti);
-		if (mime != NULL)
-			CFRelease(mime);
-		if (e != NULL)
-			CFRelease(e);
-		#endif
-	}
+	auto filePath = GString(File).NsStr();
+	CFStringRef fileExtension = (__bridge CFStringRef)[filePath pathExtension];
+	CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, fileExtension, NULL);
+	CFStringRef MIMEType = UTTypeCopyPreferredTagWithClass(UTI, kUTTagClassMIMEType);
+	Ret = MIMEType;
+	CFRelease(MIMEType);
+	CFRelease(UTI);
+	[filePath release];
 	
 	if (!Ret)
 		Ret = "application/octet-stream";

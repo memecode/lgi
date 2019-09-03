@@ -565,7 +565,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 
 void GWindow::OnPaint(GSurface *pDC)
 {
-	pDC->Colour(LColour(L_MED));
+	pDC->Colour(L_MED);
 	pDC->Rectangle();
 }
 

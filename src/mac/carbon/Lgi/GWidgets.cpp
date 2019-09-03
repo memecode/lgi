@@ -16,6 +16,7 @@
 #include "GBitmap.h"
 #include "GTableLayout.h"
 #include "GDisplayString.h"
+#include "GButton.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 #define GreyBackground()
@@ -23,7 +24,17 @@
 struct GDialogPriv
 {
 	bool IsModal;
+	bool IsModeless;
 	int ModalStatus;
+	int BtnId;
+
+	GDialogPriv()
+	{
+		IsModal = false;
+		IsModeless = false;
+		ModalStatus = -1;
+		BtnId = -1;
+	}
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -32,14 +43,33 @@ GDialog::GDialog()
 {
 	d = new GDialogPriv;
 	Name("Dialog");
-	d->IsModal = false;
-	d->ModalStatus = -1;
 	_SetDynamic(false);
 }
 
 GDialog::~GDialog()
 {
 	DeleteObj(d);
+}
+
+int GDialog::GetButtonId()
+{
+	return d->BtnId;
+}
+
+int GDialog::OnNotify(GViewI *Ctrl, int Flags)
+{
+	GButton *b = dynamic_cast<GButton*>(Ctrl);
+	if (b)
+	{
+		d->BtnId = b->GetId();
+		
+		if (d->IsModal)
+			EndModal();
+		else if (d->IsModeless)
+			EndModeless();
+	}
+
+	return 0;
 }
 
 bool GDialog::IsModal()
@@ -113,6 +143,7 @@ int GDialog::DoModal(OsView OverideParent)
 		}
 		
 		d->IsModal = true;
+		d->IsModeless = false;
 		AttachChildren();
 		Visible(true);
 		
@@ -144,10 +175,21 @@ int GDialog::DoModeless()
 	d->IsModal = false;
 	if (Attach(0))
 	{
+		d->IsModeless = true;
 		AttachChildren();
 		Visible(true);
 	}
+	
 	return 0;
+}
+
+void GDialog::EndModeless(int Code)
+{
+	if (d->IsModeless)
+	{
+		d->IsModeless = false;
+		GWindow::Quit(Code);
+	}
 }
 
 extern GButton *FindDefault(GView *w);
@@ -164,11 +206,6 @@ int GDialog::OnEvent(GMessage *Msg)
 	}
 
 	return GView::OnEvent(Msg);
-}
-
-void GDialog::EndModeless(int Code)
-{
-	GWindow::Quit(Code);
 }
 
 void GDialog::OnPaint(GSurface *pDC)

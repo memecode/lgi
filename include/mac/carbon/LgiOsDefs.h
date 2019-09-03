@@ -24,6 +24,7 @@
 #define LGI_CARBON			1
 #define LGI_32BIT			1
 #define LGI_VIEW_HANDLE		1
+#define LGI_VIEW_HASH		0
 
 #include "LgiInc.h"
 #include "LgiDefs.h"
@@ -264,7 +265,7 @@ enum LVirtualKeys
 	LK_F11 = kVK_F11,
 	LK_F12 = kVK_F12,
 
-	LK_INSERT,
+	LK_INSERT = 0x100, // so it's above the range of kVK_??? symbols.
 	LK_APPS,
 };
 

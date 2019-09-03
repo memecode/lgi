@@ -460,26 +460,6 @@ GColour GdcMixColour(GColour c1, GColour c2, float HowMuchC1)
 	return GColour(r, g, b, a);
 }
 
-COLOUR GdcMixColour(COLOUR c1, COLOUR c2, float HowMuchC1)
-{
-	double HowMuchC2 = 1.0 - HowMuchC1;
-	uint8_t r = (uint8_t) ((R24(c1)*HowMuchC1) + (R24(c2)*HowMuchC2));
-	uint8_t g = (uint8_t) ((G24(c1)*HowMuchC1) + (G24(c2)*HowMuchC2));
-	uint8_t b = (uint8_t) ((B24(c1)*HowMuchC1) + (B24(c2)*HowMuchC2));
-	return Rgb24(r, g, b);
-}
-
-COLOUR GdcGreyScale(COLOUR c, int Bits)
-{
-	COLOUR c24 = CBit(24, c, Bits);
-
-	int r = R24(c24) * 76;
-	int g = G24(c24) * 150;
-	int b = B24(c24) * 29;
-	
-	return (r + g + b) >> 8;
-}
-
 COLOUR CBit(int DstBits, COLOUR c, int SrcBits, GPalette *Pal)
 {
 	if (SrcBits == DstBits)

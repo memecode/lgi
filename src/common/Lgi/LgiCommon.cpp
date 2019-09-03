@@ -1,7 +1,7 @@
 //
 //	Cross platform LGI functions
 //
-#if COCOA
+#if LGI_COCOA
 #import <Foundation/Foundation.h>
 #endif
 
@@ -158,7 +158,7 @@ bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 		return m.SendMessage(&Msg) == B_OK;
 	}
 
-	#elif defined(MAC) && !defined COCOA
+	#elif defined(MAC) && !LGI_COCOA
 	
 	#if 0
 	int64 Now = LgiCurrentTime();
@@ -1240,7 +1240,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		case LSP_APP_ROOT:
 		{
 			#ifndef LGI_STATIC
-			char *Name = NULL, Exe[MAX_PATH];
+			char *Name = NULL;
 			
 			// Try and get the configured app name:
 			if (LgiApp)
@@ -1249,18 +1249,16 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			if (!Name)
 			{
 				// Use the exe name?
-				if (LgiGetExeFile(Exe, sizeof(Exe)))
+				GString Exe = LGetExeFile();
+				char *l = LgiGetLeaf(Exe);
+				if (l)
 				{
-					char *l = LgiGetLeaf(Exe);
-					if (l)
-					{
-						#ifdef WIN32
-						char *d = strrchr(l, '.');
-						*d = NULL;
-						#endif
-						Name = l;
-						// printf("%s:%i - name '%s'\n", _FL, Name);
-					}
+					#ifdef WIN32
+					char *d = strrchr(l, '.');
+					*d = NULL;
+					#endif
+					Name = l;
+					// printf("%s:%i - name '%s'\n", _FL, Name);
 				}
 			}
 			
@@ -1272,13 +1270,13 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 
 			#if defined MAC
 
-				#if COCOA
+				#if LGI_COCOA
 			
 					NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
 					if (paths)
 						Path = [[paths objectAtIndex:0] UTF8String];
 			
-				#elif defined LGI_CARBON
+				#elif LGI_CARBON
 			
 					FSRef Ref;
 					OSErr e = FSFindFolder(kUserDomain, kDomainLibraryFolderType, kDontCreateFolder, &Ref);
@@ -1554,12 +1552,12 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		}
 		case LSP_EXE:
 		{
-			char Buf[MAX_PATH];
-			if (LgiGetExeFile(Buf, sizeof(Buf)))
-			{
-				LgiTrimDir(Buf);
-				Path = Buf;
-			}
+			Path = LGetExeFile();
+			if (!Path)
+				break;
+			auto p = Path.RFind(DIR_STR);
+			if (p > 0)
+				Path.Length(p);
 			break;
 		}
 		case LSP_TRASH:
@@ -1663,16 +1661,13 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 	return Path;
 }
 
-/*
-OsProcessId LgiGetCurrentProcess()
+GString LGetExeFile()
 {
-	#ifdef WIN32
-	return GetCurrentProcessId();
-	#else
-	return getpid();
-	#endif
+	char s[MAX_PATH];
+	if (LgiGetExeFile(s, sizeof(s)))
+		return s;
+	return GString();
 }
-*/
 
 bool LgiGetExeFile(char *Dst, int DstSize)
 {
@@ -1850,7 +1845,7 @@ bool LgiGetExeFile(char *Dst, int DstSize)
 		
 			bool Status = false;
 		
-			#if COCOA || defined __GTK_H__
+			#if LGI_COCOA || defined __GTK_H__
 
 			if (FileExists(LgiArgsAppPath))
 			{
@@ -1891,6 +1886,11 @@ bool LgiGetExeFile(char *Dst, int DstSize)
 	return false;
 }
 
+GString LGetExePath()
+{
+	return LGetSystemPath(LSP_EXE);
+}
+
 bool LgiGetExePath(char *Dst, int DstSize)
 {
 	return LGetSystemPath(LSP_EXE, Dst, DstSize);
@@ -1912,104 +1912,124 @@ char *LgiGetExtension(const char *File)
 
 #define DEBUG_FIND_FILE		0
 
-char *LgiFindFile(const char *Name)
+static void _LFindFile(const char *Name, GString *GStr, GAutoString *AStr)
 {
-	char *Result = 0;
-	
 	#if DEBUG_FIND_FILE
 	printf("%s:%i - Name='%s'\n", __FILE__, __LINE__, Name);
 	#endif
 	
-	if (Name)
+	if (!Name)
+		return;
+
+	#ifndef MAC
+	GString Exe = LGetExePath();
+	#else
+	GString Exe = LGetExeFile();
+	#endif
+
+	#if DEBUG_FIND_FILE
+	printf("%s:%i - Exe='%s'\n", _FL, Exe.Get());
+	#endif
+
+	char CurWorking[MAX_PATH];
+	_getcwd(CurWorking, sizeof(CurWorking));
+	const char *PrefPath[] =
 	{
-		char Exe[MAX_PATH];
-		
-		#ifndef MAC
-		LgiGetExePath(Exe, sizeof(Exe));
+		".",
+		"..",
+		"Code",
+		#ifdef MAC
+		"./Contents/Resources",
 		#else
-		LgiGetExeFile(Exe, sizeof(Exe));
-		// LgiTrimDir(Exe);
+		"./Resources",
 		#endif
-
-		#if DEBUG_FIND_FILE
-		printf("%s:%i - Exe='%s'\n", _FL, Exe);
+		#ifndef WIN32
+		"./resources",
 		#endif
+		"../Code",
+		"../Resources",
+		#ifdef WIN32
+		"../Debug",
+		"../Release",
+		"../../Debug",
+		"../../Release",
+		#endif
+		CurWorking,
+		0
+	};
 
-		char CurWorking[MAX_PATH];
-		_getcwd(CurWorking, sizeof(CurWorking));
-		const char *PrefPath[] =
+	// Look in prefered paths first...
+	for (const char **Pref = PrefPath; *Pref; Pref++)
+	{
+		char Path[MAX_PATH];
+		if (LgiIsRelativePath(*Pref))
 		{
-			".",
-			"..",
-			"Code",
-			#ifdef MAC
-			"./Contents/Resources",
-			#else
-			"./Resources",
-			#endif
-			#ifndef WIN32
-			"./resources",
-			#endif
-			"../Code",
-			"../Resources",
-			#ifdef WIN32
-			"../Debug",
-			"../Release",
-			"../../Debug",
-			"../../Release",
-			#endif
-			CurWorking,
-			0
-		};
-
-		// Look in prefered paths first...
-		for (const char **Pref = PrefPath; *Pref; Pref++)
+			LgiMakePath(Path, sizeof(Path), Exe, *Pref);
+			LgiMakePath(Path, sizeof(Path), Path, Name);
+		}
+		else
 		{
-			char Path[MAX_PATH];
-			if (LgiIsRelativePath(*Pref))
-			{
-				LgiMakePath(Path, sizeof(Path), Exe, *Pref);
-				LgiMakePath(Path, sizeof(Path), Path, Name);
-			}
-			else
-			{
-				LgiMakePath(Path, sizeof(Path), *Pref, Name);
-			}
-			size_t PathLen = strlen(Path);
-			LgiAssert(PathLen < sizeof(Path));
+			LgiMakePath(Path, sizeof(Path), *Pref, Name);
+		}
+		size_t PathLen = strlen(Path);
+		LgiAssert(PathLen < sizeof(Path));
 
-			if (FileExists(Path))
-				return NewStr(Path);
-
-			#ifdef WIN32
-			if (PathLen < sizeof(Path) - 4)
-			{
-				strcat(Path, ".lnk");
-				if (ResolveShortcut(Path, Path, sizeof(Path)))
-					return NewStr(Path);
-			}
-			#endif
+		if (FileExists(Path))
+		{
+			if (GStr)
+				*GStr = Path;
+			else if (AStr)
+				AStr->Reset(NewStr(Path));
+			return;
 		}
 
-		// General search fall back...
-		GArray<const char*> Ext;
-		GArray<char*> Files;
-		Ext.Add((char*)Name);
-
-		#if DEBUG_FIND_FILE
-		printf("%s:%i - Exe='%s'\n", _FL, Exe);
-		#endif
-
-		if (LgiRecursiveFileSearch(Exe, &Ext, &Files) &&
-			Files.Length())
+		#ifdef WIN32
+		if (PathLen < sizeof(Path) - 4)
 		{
-			Result = Files[0];
-			Files.DeleteAt(0);
+			strcat(Path, ".lnk");
+			if (ResolveShortcut(Path, Path, sizeof(Path)))
+			{
+				if (GStr)
+					*GStr = Path;
+				else if (AStr)
+					AStr->Reset(NewStr(Path));
+				return;
+			}
 		}
-		Files.DeleteArrays();
+		#endif
 	}
 
-	return Result;
+	// General search fall back...
+	GArray<const char*> Ext;
+	GArray<char*> Files;
+	Ext.Add((char*)Name);
+	if (LgiRecursiveFileSearch(Exe, &Ext, &Files) &&
+		Files.Length())
+	{
+		if (GStr)
+			*GStr = Files[0];
+		else
+		{
+			AStr->Reset(Files[0]);
+			Files.DeleteAt(0);
+		}
+	}
+	Files.DeleteArrays();
+}
+
+GString LFindFile(const char *Name)
+{
+	GString s;
+	_LFindFile(Name, &s, NULL);
+	return s;
+}
+
+/// This is deprecated in favour of the GString version...
+char *LgiFindFile(const char *Name)
+{
+	GAutoString s;
+	_LFindFile(Name, NULL, &s);
+	return s.Release();
 }
 
 #if defined WIN32
@@ -2383,9 +2403,6 @@ GProfile::~GProfile()
 		}
 	}
 	
-	// char c[1024];
-	// int ch = 0;
-
 	for (int i=0; i<s.Length()-1; i++)
 	{
 		Sample &a = s[i];

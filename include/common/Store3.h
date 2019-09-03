@@ -87,8 +87,8 @@ void ParseIdList(char *In, List<char> &Out);
 	bool Set##name(const char *val) { return GetObject() ? GetObject()->SetStr(id, val) >= Store3Delayed : OnError(_FL); }
 
 #define GDATA_DATE_PROP(name, id) \
-	LDateTime *Get##name() { return (GetObject() ? GetObject()->GetDate(id) : (LDateTime*)OnError(_FL)); } \
-	bool Set##name(LDateTime *val) { return GetObject() ? GetObject()->SetDate(id, val) >= Store3Delayed : OnError(_FL); }
+	const LDateTime *Get##name() { return (GetObject() ? GetObject()->GetDate(id) : (LDateTime*)OnError(_FL)); } \
+	bool Set##name(const LDateTime *val) { return GetObject() ? GetObject()->SetDate(id, val) >= Store3Delayed : OnError(_FL); }
 
 #define GDATA_PERM_PROP(name, id) \
 	ScribePerm Get##name() { return (ScribePerm) (GetObject() ? GetObject()->GetInt(id) : OnError(_FL)); } \
@@ -160,12 +160,12 @@ public:
 	virtual Store3Status SetInt(int id, int64 i) { EmptyVirtual(Store3Error); }
 
 	/// Gets a date property
-	virtual LDateTime *GetDate(int id) { EmptyVirtual(NULL); }
+	virtual const LDateTime *GetDate(int id) { EmptyVirtual(NULL); }
 	/// Sets a date property
-	virtual Store3Status SetDate(int id, LDateTime *i) { EmptyVirtual(Store3Error); }
+	virtual Store3Status SetDate(int id, const LDateTime *i) { EmptyVirtual(Store3Error); }
 
 	/// Gets a variant
-	virtual GVariant *GetVar(int id) { EmptyVirtual(NULL); }
+	virtual const GVariant *GetVar(int id) { EmptyVirtual(NULL); }
 	/// Sets a variant property
 	virtual Store3Status SetVar(int id, GVariant *i) { EmptyVirtual(Store3Error); }
 

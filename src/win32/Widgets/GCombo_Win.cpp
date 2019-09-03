@@ -309,9 +309,9 @@ size_t GCombo::Length()
 	return d->Strs.Length();
 }
 
-char *GCombo::operator [](int i)
+char *GCombo::operator [](ssize_t i)
 {
-	if (i >= 0 && i < d->Strs.Length())
+	if (i >= 0 && i < (ssize_t)d->Strs.Length())
 		return d->Strs[i];
 	
 	LgiAssert(!"Out of range combo string access.");

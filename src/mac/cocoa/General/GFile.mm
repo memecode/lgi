@@ -26,7 +26,7 @@
 #include "LgiCommon.h"
 #include "GString.h"
 
-#ifdef COCOA
+#if LGI_COCOA
 #include <Cocoa/Cocoa.h>
 #endif
 
@@ -695,7 +695,7 @@ bool GFileSystem::Copy(const char *From, const char *To, LError *ErrorCode, Copy
 {
 	if (!From || !To)
 	{
-		#ifdef COCOA
+		#if LGI_COCOA
 		if (ErrorCode) *ErrorCode = NSFileReadInvalidFileNameError;
 		#else
 		if (ErrorCode) *ErrorCode = paramErr;
@@ -720,7 +720,7 @@ bool GFileSystem::Copy(const char *From, const char *To, LError *ErrorCode, Copy
 	if (Out.SetSize(0))
 	{
 		if (ErrorCode) *ErrorCode =
-			#ifdef COCOA
+			#if LGI_COCOA
 			NSFileWriteUnknownError;
 			#else
 			writErr;
@@ -739,7 +739,7 @@ bool GFileSystem::Copy(const char *From, const char *To, LError *ErrorCode, Copy
 	if (!Buf)
 	{
 		if (ErrorCode) *ErrorCode =
-			#ifdef COCOA
+			#if LGI_COCOA
 			NSFileWriteOutOfSpaceError;
 			#else
 			notEnoughBufferSpace;
@@ -764,7 +764,7 @@ bool GFileSystem::Copy(const char *From, const char *To, LError *ErrorCode, Copy
 				else
 				{
 					if (ErrorCode) *ErrorCode =
-						#ifdef COCOA
+						#if LGI_COCOA
 						NSFileWriteUnknownError;
 						#else
 						writErr;
@@ -865,7 +865,7 @@ bool GFileSystem::Delete(GArray<const char*> &Files, GArray<LError> *Status, boo
 	{
 #if defined MAC
 		
-		#ifdef COCOA
+		#if LGI_COCOA
 		
 		NSMutableArray *urls = [[NSMutableArray alloc] initWithCapacity:Files.Length()];
 		for (auto f : Files)
@@ -1360,7 +1360,7 @@ public:
 		Swap = false;
 		Status = true;
 		Attributes = 0;
-		#ifdef COCOA
+		#if LGI_COCOA
 		LastError = 0;
 		#else
 		LastError = noErr;
@@ -1432,7 +1432,7 @@ int GFile::Open(const char *File, int Mode)
 {
 	if (!File)
 	{
-		#ifdef COCOA
+		#if LGI_COCOA
 		d->LastError = NSFileReadInvalidFileNameError;
 		#else
 		d->LastError = paramErr;

@@ -46,6 +46,7 @@ protected:
 	GTag				*Selection;			// Edge of selection or NULL
 	char				IsHtml;
 	int					ViewWidth;
+	uint64_t			PaintStart;
 	GToolTip			Tip;
 	GCss::Store			CssStore;
 	LHashTbl<ConstStrKey<char,false>, bool> CssHref;

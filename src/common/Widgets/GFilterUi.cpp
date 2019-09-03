@@ -647,14 +647,14 @@ void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 
 	// Create a memory context
 	GMemDC Buf(Pos->X(), Pos->Y(), System32BitColourSpace);
-	Buf.Colour(LC_WORKSPACE, 24);
+	Buf.Colour(L_WORKSPACE);
 	Buf.Rectangle(0);
 
 	// Draw the background
 	double ox = 1, oy = 1;
 	double r = (double)(Pos->Y() - (oy * 2)) / 2;
 	GColour BackCol = TransparentBlk;
-	GColour Workspace(LC_WORKSPACE, 24);
+	GColour Workspace(L_WORKSPACE);
 	switch (d->Node)
 	{
 		case LNODE_NEW:
@@ -662,7 +662,7 @@ void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 			break;
 		case LNODE_COND:
 		default:
-			BackCol.Set(LC_MED, 24);
+			BackCol = LColour(L_MED);
 			break;
 		case LNODE_AND:
 		case LNODE_OR:
@@ -675,7 +675,7 @@ void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	if (Select() || IsTarget)
 	{
 		GPath p;
-		GSolidBrush b(Rgb24To32(LC_FOCUS_SEL_BACK));
+		GSolidBrush b(LColour(L_FOCUS_SEL_BACK));
 		GRectF PosF(0, 0, Pos->X()-1, Pos->Y());
 		p.RoundRect(PosF, PosF.Y()/2);
 		p.Fill(&Buf, b);
@@ -801,14 +801,14 @@ void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 			Buf.Op(GDC_SET);
 
 			SysFont->Transparent(true);
-			SysFont->Colour(GColour(LC_TEXT, 24), Ctx.Back);
+			SysFont->Colour(GColour(L_TEXT), Ctx.Back);
 			d->Data->dsNot->Draw(&Buf, d->NotBtn.x2 + 3, d->NotBtn.y1);
 
 			ShowControls(Select());
 			
 			if (!Select())
 			{
-				Buf.Colour(LC_WORKSPACE, 24);
+				Buf.Colour(L_WORKSPACE);
 				Buf.Rectangle(&d->FieldBtn);
 				Buf.Rectangle(&d->OpBtn);
 				Buf.Rectangle(&d->ValueBtn);
@@ -863,7 +863,7 @@ void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	// Paint to the right of the item, filling the column.
 	if (Pos->x2 < Ctx.x2)
 	{
-		Ctx.pDC->Colour(LC_WORKSPACE, 24);
+		Ctx.pDC->Colour(L_WORKSPACE);
 		Ctx.pDC->Rectangle(Pos->x2 + 1, Ctx.y1, Ctx.x2, Ctx.y2);
 	}
 }
@@ -1256,9 +1256,9 @@ void GFilterView::OnPaint(GSurface *pDC)
 	{
 		GMemDC Buf(d->Info.X(), d->Info.Y(), System32BitColourSpace);
 
-		Buf.Colour(LC_MED, 24);
+		Buf.Colour(L_MED);
 		Buf.Rectangle(0, 0, Buf.X()-1, Buf.Y()-2);
-		Buf.Colour(LC_LOW, 24);
+		Buf.Colour(L_LOW);
 		Buf.Line(0, Buf.Y()-1, Buf.X()-1, Buf.Y()-1);
 
 		SysFont->Transparent(true);

@@ -242,6 +242,83 @@ GMemDC::~GMemDC()
 	DeleteObj(d);
 }
 
+void MemRelease(void * __nullable info, const void *  data, size_t size)
+{
+	uint8_t *p = (uint8_t*)data;
+	DeleteArray(p);
+}
+
+#if LGI_COCOA
+NSImage *GMemDC::NsImage(GRect *rc)
+{
+	if (!pMem || !pMem->Base)
+		return nil;
+
+	GRect r;
+	if (rc)
+		r = *rc;
+	else
+		r = Bounds();
+	
+	size_t bitsPerComponent = 8;
+	size_t bitsPerPixel = GetBits();
+	size_t bytesPerRow = (bitsPerPixel * r.X() + 7) / bitsPerComponent;
+	CGDataProviderRef provider = nil;
+	
+	GArray<uint8_t> Mem;
+	if (rc)
+	{
+		GAutoPtr<GSurface> Sub(SubImage(r));
+		if (!Sub)
+			return nil;
+		auto p = Sub->pMem;
+		
+		// Need to collect all the image data into one place.
+		if (!Mem.Length(p->y * bytesPerRow))
+			return nil;
+		
+		auto dst = Mem.AddressOf();
+		for (int y=0; y<p->y; y++)
+		{
+			auto src = p->Base + (y * p->Line);
+			LgiAssert(dst + bytesPerRow <= Mem.AddressOf() + Mem.Length());
+			LgiAssert(src + bytesPerRow <= pMem->Base + (pMem->y * pMem->Line));
+			
+			memcpy(dst, src, bytesPerRow);
+			dst += bytesPerRow;
+		}
+
+		auto len = Mem.Length();
+		provider = CGDataProviderCreateWithData(NULL, Mem.Release(), len, MemRelease);
+	}
+	else
+	{
+		// Just use the existing data...
+		provider = CGDataProviderCreateWithData(NULL, pMem->Base, pMem->y * pMem->Line, NULL);
+	}
+	
+	CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
+	// CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast;
+	CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaLast;
+	CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
+
+	CGImageRef iref = CGImageCreate(r.X(), r.Y(),
+									bitsPerComponent,
+									bitsPerPixel,
+									bytesPerRow,
+									colorSpaceRef,
+									bitmapInfo,
+									provider,   // data provider
+									NULL,       // decode
+									YES,        // should interpolate
+									renderingIntent);
+
+	auto img = [[NSImage alloc] initWithCGImage:iref size:NSMakeSize(r.X(), r.Y())];
+	CGImageRelease(iref);
+	return img;
+}
+#endif
+
 void GMemDC::Empty()
 {
 	DeleteObj(pMem);
@@ -482,7 +559,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 				NSImage *cursor = [[[NSCursor currentSystemCursor] image] copy];
 				if (cursor)
 				{
-					#ifdef COCOA
+					#if LGI_COCOA
 					#warning "Impl cursor blt"
 					#else
 					// NSPoint hotSpot = [[NSCursor currentSystemCursor] hotSpot];

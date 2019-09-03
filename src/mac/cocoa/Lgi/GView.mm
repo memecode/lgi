@@ -192,12 +192,15 @@ bool GView::_Mouse(GMouse &m, bool Move)
 
 	if (_Capturing)
 	{
-		if (_Capturing != m.Target)
+		// Convert root NSView coords to capture view coords
+		for (auto i = _Capturing; i && i != this; i = i->GetParent())
 		{
-			m.ToScreen();
-			m.Target = _Capturing;
-			m.ToView();
+			auto p = i->GetPos();
+			m.x -= p.x1;
+			m.y -= p.y1;
 		}
+		
+		// if (!m.IsMove()) m.Trace("Capture");
 		
 		if (Move)
 		{
@@ -206,22 +209,37 @@ bool GView::_Mouse(GMouse &m, bool Move)
 		}
 		else
 		{
-			if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(m.Target), m))
-				m.Target->OnMouseClick(m);
+			if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(_Capturing), m))
+				_Capturing->OnMouseClick(m);
 		}
 	}
 	else
 	{
-		if (_Over != this)
+		// Convert root NSView coords to _Over coords
+		auto t = WindowFromPoint(m.x, m.y);
+		if (t)
+		{
+			for (auto i = t; i && i != this; i = i->GetParent())
+			{
+				auto p = i->GetPos();
+				m.x -= p.x1;
+				m.y -= p.y1;
+			}
+			m.Target = t;
+		}
+		
+		// if (!m.IsMove()) m.Trace("NonCapture");
+
+		if (_Over != m.Target)
 		{
 			if (_Over)
 				_Over->OnMouseExit(m);
-			_Over = this;
+			_Over = m.Target;
 			if (_Over)
 				_Over->OnMouseEnter(m);
 		}
 			
-		GView *Target = dynamic_cast<GView*>(_Over ? _Over : this);
+		GView *Target = dynamic_cast<GView*>(_Over ? _Over : m.Target);
 		GLayout *Lo = dynamic_cast<GLayout*>(Target);
 		GRect Client = Lo ? Lo->GetClient(false) : Target->GView::GetClient(false);
 
@@ -273,7 +291,7 @@ void GView::Quit(bool DontDelete)
 
 GdcPt2 GView::Flip(GdcPt2 p)
 {
-	auto Parent = GetParent();
+	auto Parent = GetParent() ? GetParent() : GetWindow();
 	if (Parent)
 	{
 		GRect r = Parent->GetClient(false);
@@ -282,9 +300,23 @@ GdcPt2 GView::Flip(GdcPt2 p)
 	return p;
 }
 
+void GView::OnDealloc()
+{
+	#if LGI_VIEW_HASH
+	LockHandler(this, OpDelete);
+	#endif
+	SetPulse();
+	
+	for (auto c: Children)
+	{
+		auto gv = c->GetGView();
+		if (gv) gv->OnDealloc();
+	}
+}
+
 GRect GView::Flip(GRect p)
 {
-	auto Parent = GetParent();
+	auto Parent = GetParent() ? GetParent() : GetWindow();
 	if (Parent)
 	{
 		GRect r = Parent->GetClient(false);
@@ -382,38 +414,50 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 	return 0;
 }
 
-void GView::PointToScreen(GdcPt2 &p)
+bool GView::PointToScreen(GdcPt2 &p)
 {
 	GViewI *c = this;
-	int Ox = 0, Oy = 0;
 
 	// Find offset to window
 	while (c && c != c->GetWindow())
 	{
-		#if 0
-		GRect cli = c->GetClient(false);
-		GRect pos = c->GetPos(); 
-		Ox += pos.x1 + cli.x1;
-		Oy += pos.y1 + cli.y1;
-		#else
-		GRect pos = c->GetPos(); 
-		Ox += pos.x1;
-		Oy += pos.y1;
-		#endif
-		
+		GRect pos = c->GetPos();
+		p.x += pos.x1;
+		p.y += pos.y1;
 		c = c->GetParent();
 	}
 	
 	if (c && c->WindowHandle())
 	{
+		NSWindow *w = c->WindowHandle();
+
+		GRect wFrame = w.frame;
+		GRect Screen(0, 0, -1, -1);
+		for (NSScreen *s in [NSScreen screens])
+		{
+			GRect pos = s.frame;
+			if (wFrame.Overlap(&pos))
+			{
+				Screen = pos;
+				break;
+			}
+		}
+		
+		if (!Screen.Valid())
+			return false;
+
+		p = c->GetGView()->Flip(p);
+		NSRect i = {{(double)p.x, (double)p.y}, {0.0, 0.0}};
+		NSRect o = [w convertRectToScreen:i];
+		p.x = (int)o.origin.x;
+		p.y = Screen.Y() - (int)o.origin.y;
 	}
-	else
-	{
-		printf("%s:%i - No window handle to map to screen. c=%p\n", __FILE__, __LINE__, c);
-	}
+	else return false;
+	
+	return true;
 }
 
-void GView::PointToView(GdcPt2 &p)
+bool GView::PointToView(GdcPt2 &p)
 {
 	GViewI *c = this;
 	int Ox = 0, Oy = 0;
@@ -432,32 +476,63 @@ void GView::PointToView(GdcPt2 &p)
 	// Apply window position
 	if (c && c->WindowHandle())
 	{
+		NSWindow *w = c->WindowHandle();
+
+		GRect wFrame = w.frame;
+		GRect Screen(0, 0, -1, -1);
+		for (NSScreen *s in [NSScreen screens])
+		{
+			GRect pos = s.frame;
+			if (wFrame.Overlap(&pos))
+			{
+				Screen = pos;
+				break;
+			}
+		}
+		
+		if (!Screen.Valid())
+			return false;
+
+		// Flip into top-down to bottom up:
+		NSRect i = {(double)p.x, (double)(Screen.Y()-p.y), 0.0, 0.0};
+		NSRect o = [w convertRectFromScreen:i];
+		p.x = (int)o.origin.x;
+		p.y = (int)o.origin.y;
+		
+		// Flip back into top down.. in window space
+		p = c->GetGView()->Flip(p);
+		
+		// Now offset into view space.
+		p.x += Ox;
+		p.y += Oy;
 	}
-	else
-	{
-		printf("%s:%i - No window handle to map to view. c=%p\n", __FILE__, __LINE__, c);
-	}
+	else return false;
+	
+	return true;
 }
 
 bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 {
-	if (!GetParent())
+	GViewI *w = GetWindow();
+	if (!w)
 		return false;
-	else if (GetParent())
-	{
-		bool s = GetParent()->GetMouse(m, ScreenCoords);
-		if (s)
-		{
-			if (!ScreenCoords)
-			{
-				m.x -= Pos.x1;
-				m.y -= Pos.y1;
-			}
-			return true;
-		}
-	}
+
+	NSWindow *wh = w->WindowHandle();
+	if (!wh)
+		return false;
 	
-	return false;
+	NSPoint pt = wh.mouseLocationOutsideOfEventStream;
+	m.x = pt.x;
+	m.y = pt.y;
+
+	GdcPt2 p(pt.x, pt.y);
+	p = w->GetGView()->Flip(p);
+	if (ScreenCoords)
+		PointToScreen(p);
+
+	m.x = p.x;
+	m.y = p.y;
+	return true;
 }
 
 bool GView::IsAttached()

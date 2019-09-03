@@ -214,85 +214,56 @@ bool GFontSystem::EnumerateFonts(GString::Array &Fonts)
 	{
 		#if defined WINNATIVE
 
-		HDC hDC = CreateCompatibleDC(NULL);
-		if (hDC)
-		{
-			EnumFontFamilies(	hDC,
-								NULL,
-								(FONTENUMPROC) _EnumFonts,
-								(LPARAM) &AllFonts);
-
-			DeleteDC(hDC);
-		}
-
-		#elif defined BEOS
-
-		int32 numFamilies = count_font_families();
-		for (int32 i = 0; i < numFamilies; i++)
-		{
-			font_family Temp;
-			uint32 flags;
-
-			if (get_font_family(i, &Temp, &flags) == B_OK)
+			HDC hDC = CreateCompatibleDC(NULL);
+			if (hDC)
 			{
-				AllFonts.Insert(NewStr(Temp));
+				EnumFontFamilies(	hDC,
+									NULL,
+									(FONTENUMPROC) _EnumFonts,
+									(LPARAM) &AllFonts);
+
+				DeleteDC(hDC);
 			}
-		}
 
 		#elif defined __GTK_H__
 
-	    Gtk::PangoFontFamily ** families;
-	    int n_families;
-	    Gtk::PangoFontMap * fontmap;
+			Gtk::PangoFontFamily ** families;
+			int n_families;
+			Gtk::PangoFontMap * fontmap;
 
-	    fontmap = Gtk::pango_cairo_font_map_get_default();
-	    Gtk::pango_font_map_list_families (fontmap, & families, & n_families);
-	    for (int i = 0; i < n_families; i++)
-	    {
-	        Gtk::PangoFontFamily * family = families[i];
-	        const char * family_name;
-
-	        family_name = Gtk::pango_font_family_get_name (family);
-	        AllFonts.New() = family_name;
-	    }
-	    Gtk::g_free (families);
-
-		#elif defined XWIN
-
-		XObject o;
-		XftFontSet *Set = XftListFonts(	o.XDisplay(), 0,
-										0,
-										XFT_FAMILY,
-										0);
-		if (Set)
-		{
-			for (int i=0; i<Set->nfont; i++)
+			fontmap = Gtk::pango_cairo_font_map_get_default();
+			Gtk::pango_font_map_list_families (fontmap, & families, & n_families);
+			for (int i = 0; i < n_families; i++)
 			{
-				char s[256];
-				if (XftNameUnparse(Set->fonts[i], s, sizeof(s)))
-				{
-					AllFonts.Insert(NewStr(s));
-				}
-			}
-			
-			XftFontSetDestroy(Set);
-		}
-		
-		#elif defined MAC && !defined COCOA
+				Gtk::PangoFontFamily * family = families[i];
+				const char * family_name;
 
-		CFArrayRef fontFamilies = CTFontManagerCopyAvailableFontFamilyNames();
-		if (fontFamilies)
-		{
-			for(CFIndex i = 0; i < CFArrayGetCount(fontFamilies); i++)
-			{
-				CFStringRef fontName = (CFStringRef) CFArrayGetValueAtIndex(fontFamilies, i);
-				if (fontName)
-				{
-					AllFonts.New() = fontName;
-				}
+				family_name = Gtk::pango_font_family_get_name (family);
+				AllFonts.New() = family_name;
 			}
-			CFRelease(fontFamilies);
-		}
+			Gtk::g_free (families);
+
+		#elif LGI_COCOA
+
+			auto avail = [[NSFontManager sharedFontManager] availableFontFamilies];
+			for (NSString *s in avail)
+			{
+				AllFonts.New() = [s UTF8String];
+			}
+
+		#elif LGI_CARBON
+
+			CFArrayRef fontFamilies = CTFontManagerCopyAvailableFontFamilyNames();
+			if (fontFamilies)
+			{
+				for(CFIndex i = 0; i < CFArrayGetCount(fontFamilies); i++)
+				{
+					CFStringRef fontName = (CFStringRef) CFArrayGetValueAtIndex(fontFamilies, i);
+					if (fontName)
+						AllFonts.New() = fontName;
+				}
+				CFRelease(fontFamilies);
+			}
 		
 		#endif
 

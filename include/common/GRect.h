@@ -30,7 +30,7 @@
 #elif defined MAC
 
 	#define CornerOffset 1
-	#ifdef COCOA
+	#if LGI_COCOA
 		#ifdef __OBJC__
 			#include <Foundation/NSGeometry.h>
 			typedef NSRect				OsRect;
@@ -178,7 +178,7 @@ public:
 		return GRect(0, 0, X()-1, Y()-1);
 	}
 
-	#ifdef COCOA
+	#if LGI_COCOA
 
 		operator OsRect()
 		{
@@ -195,7 +195,7 @@ public:
 		GRect &operator =(OsRect &r)
 		{
 			x1 = r.origin.x;
-			y1 = r.origin.x;
+			y1 = r.origin.y;
 			x2 = x1 + r.size.width - 1;
 			y2 = y1 + r.size.height - 1;
 			return *this;
@@ -204,7 +204,7 @@ public:
 		GRect(OsRect r)
 		{
 			x1 = r.origin.x;
-			y1 = r.origin.x;
+			y1 = r.origin.y;
 			x2 = x1 + r.size.width - 1;
 			y2 = y1 + r.size.height - 1;
 		}
@@ -379,9 +379,7 @@ public:
 	GRegion();
 	GRegion(int X1, int Y1, int X2, int Y2);
 	GRegion(const GRect &r);
-	#ifndef COCOA
 	GRegion(OsRect &r);
-	#endif
 	GRegion(GRegion &c);
 	~GRegion();
 

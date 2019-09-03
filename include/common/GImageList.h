@@ -32,6 +32,8 @@ public:
 	/// Finds the bounds of valid data for each image and returns it in an array
 	/// valid from 0 to GetItems()-1.
 	GRect *GetBounds();
+	/// Gets the full source rect for the icon
+	GRect GetIconRect(int Idx);
 
 	/// Notifies the image list that it's image data has changed and it should flush any
 	/// cached info about the images

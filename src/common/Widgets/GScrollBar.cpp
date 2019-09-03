@@ -55,7 +55,7 @@ public:
 		return Over ? Clicked : BTN_NONE;
 	}
 
-	void DrawIcon(GSurface *pDC, GRect &r, bool Add, COLOUR c)
+	void DrawIcon(GSurface *pDC, GRect &r, bool Add, LSystemColour c)
 	{
 		pDC->Colour(c, 24);
 		int IconSize = MAX(r.X(), r.Y()) * 2 / 6;
@@ -120,39 +120,39 @@ public:
 		// left/up button
 		GRect r = Sub;
 		DrawBorder(pDC, r, IsOver() == BTN_SUB ? DefaultSunkenEdge : DefaultRaisedEdge);
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle(&r);
-		DrawIcon(pDC, r, false, IsValid() ? LC_BLACK : LC_LOW);
+		DrawIcon(pDC, r, false, IsValid() ? L_BLACK : L_LOW);
 
 		// right/down
 		r = Add;
 		DrawBorder(pDC, r, IsOver() == BTN_ADD ? DefaultSunkenEdge : DefaultRaisedEdge);
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle(&r);
-		DrawIcon(pDC, r, true, IsValid() ? LC_BLACK : LC_LOW);
+		DrawIcon(pDC, r, true, IsValid() ? L_BLACK : L_LOW);
 
-		COLOUR SlideCol = LC_MED;
-		SlideCol = Rgb24(	(255 + R24(SlideCol)) >> 1,
-							(255 + G24(SlideCol)) >> 1,
-							(255 + B24(SlideCol)) >> 1);
+		GColour SlideCol(L_MED);
+		SlideCol.Rgb(	(255 + SlideCol.r()) >> 1,
+						(255 + SlideCol.g()) >> 1,
+						(255 + SlideCol.b()) >> 1);
 
 		// printf("Paint %ix%i, %s\n", pDC->X(), pDC->Y(), Widget->GetPos().GetStr());
 		if (IsValid())
 		{
 			// slide space
-			pDC->Colour(SlideCol, 24);
+			pDC->Colour(SlideCol);
 			pDC->Rectangle(&PageSub);
 			pDC->Rectangle(&PageAdd);
 
 			// slide button
 			r = Slide;
 			DrawBorder(pDC, r, DefaultRaisedEdge); // IsOver() == BTN_SLIDE ? SUNKEN : RAISED);
-			pDC->Colour(LC_MED, 24);
+			pDC->Colour(L_MED);
 			if (r.Valid()) pDC->Rectangle(&r);
 		}
 		else
 		{
-			pDC->Colour(SlideCol, 24);
+			pDC->Colour(SlideCol);
 			pDC->Rectangle(&Slide);
 		}
 	}

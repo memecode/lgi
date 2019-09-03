@@ -111,7 +111,7 @@ void GProgress::OnPaint(GSurface *pDC)
 
 	if (r.Valid())
 	{
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle(&r);
 	}
 }

@@ -869,7 +869,7 @@ bool LgiToWindowsCursor(OsView Hnd, LgiCursor Cursor)
 	return true;
 }
 
-void GView::PointToScreen(GdcPt2 &p)
+bool GView::PointToScreen(GdcPt2 &p)
 {
 	POINT pt = {p.x, p.y};
 	GViewI *t = this;
@@ -884,9 +884,10 @@ void GView::PointToScreen(GdcPt2 &p)
 	ClientToScreen(t->Handle(), &pt);
 	p.x = pt.x;
 	p.y = pt.y;
+	return true;
 }
 
-void GView::PointToView(GdcPt2 &p)
+bool GView::PointToView(GdcPt2 &p)
 {
 	POINT pt = {p.x, p.y};
 	GViewI *t = this;
@@ -901,6 +902,7 @@ void GView::PointToView(GdcPt2 &p)
 	ScreenToClient(t->Handle(), &pt);
 	p.x = pt.x;
 	p.y = pt.y;
+	return true;
 }
 
 bool GView::GetMouse(GMouse &m, bool ScreenCoords)
@@ -1156,7 +1158,7 @@ void GView::DrawThemeBorder(GSurface *pDC, GRect &r)
 			#endif
 		}
 		
-		pDC->Colour(LColour(L_MED));
+		pDC->Colour(L_MED);
 		pDC->Set(r.x1, r.y1);
 		pDC->Set(r.x2, r.y1);
 		pDC->Set(r.x1, r.y2);
@@ -1240,6 +1242,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 	{
 		switch (Msg->m)
 		{
+			#if 1
 			case WM_CTLCOLOREDIT:
 			case WM_CTLCOLORSTATIC:
 			{
@@ -1278,6 +1281,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				goto ReturnDefaultProc;
 				return 0;
 			}
+			#endif
 			case 5700:
 			{
 				// I forget what this is for...

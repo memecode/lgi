@@ -159,7 +159,7 @@ GVariant::GVariant(GDom *p, char *name)
 	SetDomRef(p, name);
 }
 
-GVariant::GVariant(LDateTime *d)
+GVariant::GVariant(const LDateTime *d)
 {
 	Type = GV_NULL;
 	*this = d;
@@ -283,7 +283,7 @@ bool GVariant::operator ==(GVariant &v)
 	return false;
 }
 
-GVariant &GVariant::operator =(LDateTime *d)
+GVariant &GVariant::operator =(const LDateTime *d)
 {
 	Empty();
 
@@ -1692,6 +1692,7 @@ struct GDomPropMap
 		Check("SetNow", DateSetNow);
 		Check("SetStr", DateSetStr);
 		Check("GetStr", DateGetStr);
+		Check("Second64Bit", DateSecond64Bit);
 
 		Check("Join", StrJoin);
 		Check("Split", StrSplit);

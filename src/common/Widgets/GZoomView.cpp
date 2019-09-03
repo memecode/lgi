@@ -1116,7 +1116,7 @@ public:
             }
 			else
 			{
-				Dst->Colour(LC_WORKSPACE, 24);
+				Dst->Colour(L_WORKSPACE);
 				Dst->Rectangle();
 			}
 			
@@ -1415,8 +1415,8 @@ void GZoomView::SetCallback(GZoomViewCallback *cb)
 
 bool GZoomView::Convert(GPointF &p, int x, int y)
 {
-	int Sx = 0, Sy = 0;
-	int Factor = d->Factor();
+	int64 Sx = 0, Sy = 0;
+	int64 Factor = d->Factor();
 	GetScrollPos(Sx, Sy);
 	
 	if (d->GetZoom() > 0)
@@ -1712,7 +1712,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 		if (!d->Tile)
 			d->ResetTiles();
 
-		int Sx = 0, Sy = 0;
+		int64 Sx = 0, Sy = 0;
 		GetScrollPos(Sx, Sy);
 
 		// Get the image bounds and scroll it into position (view coords)
@@ -1722,7 +1722,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 		GRect s = ScaledDocSize;
 		
 		// Scroll positions are in doc px, so scale them here to screen
-		GdcPt2 ScaledScroll(Sx, Sy);
+		GdcPt2 ScaledScroll((int)Sx, (int)Sy);
 		ScaledScroll = d->DocToScreen(ScaledScroll);
 		s.Offset(-ScaledScroll.x, -ScaledScroll.y);
 
@@ -1839,7 +1839,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 	pDC->SetOrigin(0, 0);
 	for (GRect *r = Rgn.First(); r; r = Rgn.Next())
 	{
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle(r);
 		#if 0
 		pDC->Colour(GColour(255, 0, 255));

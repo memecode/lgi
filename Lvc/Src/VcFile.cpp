@@ -222,10 +222,13 @@ int GetEol(const char *Path)
 		return false;
 	GString s = f.Read();
 	int Cr = 0, Lf = 0;
-	for (char *c = s; *c; c++)
+	if (s)
 	{
-		if (*c == '\r') Cr++;
-		if (*c == '\n') Lf++;
+		for (char *c = s; *c; c++)
+		{
+			if (*c == '\r') Cr++;
+			if (*c == '\n') Lf++;
+		}
 	}
 	if (Cr > 0)
 		return IDM_EOL_CRLF;

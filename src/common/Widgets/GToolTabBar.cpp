@@ -30,7 +30,7 @@ GToolTab::~GToolTab()
 void GToolTab::OnPaint(GSurface *pDC)
 {
 	#if 1
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	#else
 	pDC->Colour(GColour(255, 0, 255));
 	#endif
@@ -167,7 +167,7 @@ void GToolTabBar::OnChange(GToolButton *Btn)
 void GToolTabBar::_PaintTab(GSurface *pDC, GToolTab *Tab)
 {
 	GRect t = Tab->TabPos;
-	GColour Background(LC_MED, 24);
+	GColour Background(L_MED);
 
 	if (Tab->Value())
 	{
@@ -202,7 +202,7 @@ void GToolTabBar::_PaintTab(GSurface *pDC, GToolTab *Tab)
 	}
 	else
 	{
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		if (IsVertical())
 		{
 			pDC->Rectangle(t.x1+1, t.y1+1, t.x2, t.y2-1);
@@ -214,19 +214,19 @@ void GToolTabBar::_PaintTab(GSurface *pDC, GToolTab *Tab)
 	}
 
 	// draw lines around tab
-	pDC->Colour(LC_LIGHT, 24);
+	pDC->Colour(L_LIGHT);
 	if (IsVertical())
 	{
 		pDC->Line(t.x1, t.y1+1, t.x1, t.y2-1);
 		pDC->Line(t.x1+1, t.y1, t.x2, t.y1);
-		pDC->Colour(LC_LOW, 24);
+		pDC->Colour(L_LOW);
 		pDC->Line(t.x1+1, t.y2, t.x2, t.y2);
 	}
 	else
 	{
 		pDC->Line(t.x1+1, t.y1, t.x2-1, t.y1);
 		pDC->Line(t.x1, t.y1+1, t.x1, t.y2);
-		pDC->Colour(LC_LOW, 24);
+		pDC->Colour(L_LOW);
 		pDC->Line(t.x2, t.y1+1, t.x2, t.y2);
 	}
 

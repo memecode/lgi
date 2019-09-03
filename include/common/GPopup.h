@@ -5,9 +5,19 @@
 #ifndef __GPOPUP_H
 #define __GPOPUP_H
 
+#if defined(LGI_CARBON) || defined(__GTK_H__)
+#define LGI_POPUP_GWINDOW	1
+#else
+#define LGI_POPUP_GWINDOW	0
+#endif
+
+#if LGI_COCOA
+ObjCWrapper(NSPanel, OsPanel)
+#endif
+
 /// A popup window: closes when the user clicks off-window.
 class LgiClass GPopup :
-	#if defined(LGI_CARBON) || defined(__GTK_H__)
+	#if LGI_POPUP_GWINDOW
 	public GWindow
 	#else
 	public GView
@@ -28,20 +38,30 @@ protected:
 	GView *Owner;
 	uint64 Start;
 	GRect ScreenPos;
+	
+	#if LGI_COCOA
+	OsPanel Panel;
+	#endif
 
 public:
 	GPopup(GView *owner);
 	~GPopup();
 
+	#if LGI_COCOA
+	OsPanel Handle() { return Panel; }
+	GRect &GetPos() override;
+	bool SetPos(GRect &r, bool repaint = false) override;
+	#endif
+
 	/// Sets whether the popup should take the focus when it's shown.
 	/// The default is 'true'
 	void TakeFocus(bool Take);
-	const char *GetClass() { return "GPopup"; }
+	const char *GetClass() override { return "GPopup"; }
 	bool GetCancelled() { return Cancelled; }
-	bool Attach(GViewI *p);
-	void Visible(bool i);
-	bool Visible();
-	GMessage::Result OnEvent(GMessage *Msg);
+	bool Attach(GViewI *p) override;
+	void Visible(bool i) override;
+	bool Visible() override;
+	GMessage::Result OnEvent(GMessage *Msg) override;
 };
 
 /// Drop down menu, UI widget for opening a popup.

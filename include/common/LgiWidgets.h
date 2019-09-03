@@ -263,6 +263,13 @@ public:
 	void OnPosChange();
     void PourAll() {}
 	void Quit(bool DontDelete = false);
+
+	/// By default the dialog will finish when a button is pressed. To override this
+	/// behavior you'll have to subclass GDialog and handle the OnNotify yourself.
+	int OnNotify(GViewI *Ctrl, int Flags);
+
+	/// This returns the ID of the button pressed to close the dialog.
+	int GetButtonId();
 	
 	#if defined(__GTK_H__)
 	friend Gtk::gboolean GtkDialogDestroy(Gtk::GtkWidget *widget, GDialog *This);

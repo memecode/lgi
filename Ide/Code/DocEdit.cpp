@@ -166,7 +166,7 @@ void DocEdit::OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour)
 		{
 			if (DocMatch && Idx == IdeDoc::CurIpLine)
 			{
-				ln->Back.Set(LC_DEBUG_CURRENT_LINE, 24);
+				ln->Back = LColour(L_DEBUG_CURRENT_LINE);
 			}
 			else
 			{
@@ -333,13 +333,16 @@ bool DocEdit::Delete(size_t At, ssize_t Len)
 
 bool DocEdit::OnKey(GKey &k)
 {
-	if (k.AltCmd())
+	if (k.Alt())
 	{
 		// This allows the Alt+Left/Right to be processed by the prev/next navigator menu.
 		if (k.vkey == LK_LEFT ||
 			k.vkey == LK_RIGHT)
 			return false;
+	}
 
+	if (k.AltCmd())
+	{
 		if (ToLower(k.c16) == 'm')
 		{
 			if (k.Down())

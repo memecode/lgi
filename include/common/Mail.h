@@ -931,7 +931,8 @@ public:
 	/// Idle processing...
 	/// \returns true if something happened
 	bool StartIdle();
-	bool OnIdle(int Timeout, GArray<Untagged> &Resp);
+	// bool OnIdle(int Timeout, GArray<Untagged> &Resp);
+	bool OnIdle(int Timeout, GString::Array &Resp);
 	bool FinishIdle();
 	bool Poll(int *Recent = 0, GArray<GAutoString> *New = 0);
 	bool Status(char *Path, int *Recent);

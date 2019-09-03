@@ -330,7 +330,7 @@ void GCheckBox::OnPaint(GSurface *pDC)
 		bool en = Enabled();
 		GRect r = GetClient();
 		
-		#if defined MAC && !defined COCOA
+		#if defined MAC && !LGI_COCOA
 		d->ValuePos.Set(0, 0, PadX1Px, MinYSize);
 		#else
 		d->ValuePos.Set(0, 0, 12, 12);
@@ -338,14 +338,14 @@ void GCheckBox::OnPaint(GSurface *pDC)
 		
 		if (d->ValuePos.y2 < r.y2)
 		{
-			pDC->Colour(LC_MED, 24);
+			pDC->Colour(L_MED);
 			pDC->Rectangle(0, d->ValuePos.y2+1, d->ValuePos.x2, r.y2);
 		}
 
 		GRect t = r;
 		t.x1 = d->ValuePos.x2 + 1;
 		// GColour cFore = StyleColour(GCss::PropColor, LC_TEXT);
-		GColour cBack = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
+		GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 
 		if (d->Lock(_FL))
 		{
@@ -400,9 +400,9 @@ void GCheckBox::OnPaint(GSurface *pDC)
 		#else
 	
 			LgiWideBorder(pDC, d->ValuePos, DefaultSunkenEdge);
-			pDC->Colour(d->Over || !en ? LC_MED : LC_WORKSPACE, 24);
+			pDC->Colour(d->Over || !en ? L_MED : L_WORKSPACE);
 			pDC->Rectangle(&d->ValuePos);
-			pDC->Colour(en ? LC_TEXT : LC_LOW, 24);
+			pDC->Colour(en ? L_TEXT : L_LOW);
 
 			if (d->Three && d->Val == 2)
 			{

@@ -15,7 +15,9 @@
 #include "GStream.h"
 
 ///	Template for using DLinkList with a type safe API.
-#define ITEM_PTRS	64
+#define ITEM_PTRS				64
+#define LGI_LIST_VALIDATION		0
+
 LgiFunc bool UnitTest_ListClass();
 #ifdef _DEBUG
 	#define VALIDATE() Validate()
@@ -922,6 +924,7 @@ public:
 			Items == 0)
 			return true;
 
+		#if LGI_LIST_VALIDATION
 		size_t n = 0;
 		LstBlk *Prev = NULL;
 		for (LstBlk *i = FirstObj; i; i = i->Next)
@@ -972,6 +975,7 @@ public:
 			LgiAssert(!"Item count cache incorrect.");
 			return false;
 		}
+		#endif
 		
 		return true;
 	}

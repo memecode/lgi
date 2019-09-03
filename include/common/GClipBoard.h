@@ -10,7 +10,11 @@ class LgiClass GClipBoard
 	bool Open;
 	GAutoPtr<GSurface> pDC;
 
+	#if LGI_COCOA
+	GString Txt;
+	#else
 	GAutoString Txt;
+	#endif
 	GAutoWString wTxt;
 
 public:

@@ -6,7 +6,7 @@
 #include "GNotifications.h"
 
 #define DEFAULT_SPACER_PX			5
-// #define DEFAULT_SPACER_COLOUR24		LC_MED
+// #define DEFAULT_SPACER_COLOUR24		LColour(L_MED)
 #define DEFAULT_MINIMUM_SIZE_PX		5
 #define ACTIVE_SPACER_SIZE_PX		9
 
@@ -473,6 +473,15 @@ void GBox::OnPosChange()
 
 void GBox::OnMouseClick(GMouse &m)
 {
+	#if 0
+	{
+		GString::Array a;
+		for (GViewI *p = this; p; p = p->GetParent())
+			a.New() = p->GetClass();
+		m.Trace(GString("GBox::OnMouseClick-") + GString(".").Join(a));
+	}
+	#endif
+
 	if (m.Down())
 	{
 		d->Dragging = d->HitTest(m.x, m.y);
@@ -502,6 +511,15 @@ void GBox::OnMouseMove(GMouse &m)
 {
 	if (!d->Dragging || !IsCapturing())
 		return;
+
+	#if 0
+	{
+		GString::Array a;
+		for (GViewI *p = this; p; p = p->GetParent())
+			a.New().Printf("%s/%p", p->GetClass(), p);
+		m.Trace(GString("GBox::OnMouseMove-") + GString(".").Join(a));
+	}
+	#endif
 
 	if (!m.Down())
 	{

@@ -850,7 +850,7 @@ int FieldView::OnNotify(GViewI *Ctrl, int Flags)
 
 void FieldView::OnPaint(GSurface *pDC)
 {
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Rectangle();
 }
 
@@ -1353,23 +1353,47 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 		case IDM_CUT:
 		{
-			Resource *r = Objs->CurrentResource();
-			if (r)
-				r->Copy(true);
+			auto Focus = LgiApp->GetFocus();
+			if (Focus)
+			{
+				Focus->PostEvent(M_CUT);
+			}
+			else
+			{
+				Resource *r = Objs->CurrentResource();
+				if (r)
+					r->Copy(true);
+			}
 			break;
 		}
 		case IDM_COPY:
 		{
-			Resource *r = Objs->CurrentResource();
-			if (r)
-				r->Copy(false);
+			auto Focus = LgiApp->GetFocus();
+			if (Focus)
+			{
+				Focus->PostEvent(M_COPY);
+			}
+			else
+			{
+				Resource *r = Objs->CurrentResource();
+				if (r)
+					r->Copy(false);
+			}
 			break;
 		}
 		case IDM_PASTE:
 		{
-			Resource *r = Objs->CurrentResource();
-			if (r)
-				r->Paste();
+			auto Focus = LgiApp->GetFocus();
+			if (Focus)
+			{
+				Focus->PostEvent(M_PASTE);
+			}
+			else
+			{
+				Resource *r = Objs->CurrentResource();
+				if (r)
+					r->Paste();
+			}
 			break;
 		}
 		case IDM_TABLELAYOUT_TEST:
@@ -4428,7 +4452,7 @@ void ResFrame::OnPaint(GSurface *pDC)
 	// Draw nice frame
 	GRect r(0, 0, X()-1, Y()-1);
 	LgiThinBorder(pDC, r, DefaultRaisedEdge);
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	LgiFlatBorder(pDC, r, 4);
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
 

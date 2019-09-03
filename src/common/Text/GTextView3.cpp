@@ -37,38 +37,43 @@
 #define ALLOC_BLOCK					64
 #define IDC_VS						1000
 
-#ifndef IDM_OPEN
-#define IDM_OPEN					1
-#endif
-#ifndef IDM_NEW
-#define	IDM_NEW						2
-#endif
-#ifndef IDM_COPY
-#define IDM_COPY					3
-#endif
-#ifndef IDM_CUT
-#define IDM_CUT						4
-#endif
-#ifndef IDM_PASTE
-#define IDM_PASTE					5
-#endif
-#define IDM_COPY_URL				6
-#define IDM_AUTO_INDENT				7
-#define IDM_UTF8					8
-#define IDM_PASTE_NO_CONVERT		9
-#ifndef IDM_UNDO
-#define IDM_UNDO					10
-#endif
-#ifndef IDM_REDO
-#define IDM_REDO					11
-#endif
-#define IDM_FIXED					12
-#define IDM_SHOW_WHITE				13
-#define IDM_HARD_TABS				14
-#define IDM_INDENT_SIZE				15
-#define IDM_TAB_SIZE				16
-#define IDM_DUMP					17
-#define IDM_RTL						18
+enum Cmds
+{
+	IDM_COPY_URL = 100,
+	IDM_AUTO_INDENT,
+	IDM_UTF8,
+	IDM_PASTE_NO_CONVERT,
+	IDM_FIXED,
+	IDM_SHOW_WHITE,
+	IDM_HARD_TABS,
+	IDM_INDENT_SIZE,
+	IDM_TAB_SIZE,
+	IDM_DUMP,
+	IDM_RTL,
+	IDM_COPY_ALL,
+	IDM_SELECT_ALL,
+	#ifndef IDM_OPEN
+		IDM_OPEN,
+	#endif
+	#ifndef IDM_NEW
+		IDM_NEW,
+	#endif
+	#ifndef IDM_COPY
+		IDM_COPY,
+	#endif
+	#ifndef IDM_CUT
+		IDM_CUT,
+	#endif
+	#ifndef IDM_PASTE
+		IDM_PASTE,
+	#endif
+	#ifndef IDM_UNDO
+		IDM_UNDO,
+	#endif
+	#ifndef IDM_REDO
+		IDM_REDO,
+	#endif
+};
 
 #define PAINT_BORDER				Back
 #if DRAW_LINE_BOXES
@@ -3446,6 +3451,10 @@ void GTextView3::DoContextMenu(GMouse &m)
 	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_PASTE, "Paste"), IDM_PASTE, ClipText != 0);
 	RClick.AppendSeparator();
 
+	RClick.AppendItem("Copy All", IDM_COPY_ALL, true);
+	RClick.AppendItem("Select All", IDM_SELECT_ALL, true);
+	RClick.AppendSeparator();
+
 	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_UNDO, "Undo"), IDM_UNDO, UndoQue.CanUndo());
 	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_REDO, "Redo"), IDM_REDO, UndoQue.CanRedo());
 	RClick.AppendSeparator();
@@ -3491,6 +3500,17 @@ void GTextView3::DoContextMenu(GMouse &m)
 		case IDM_PASTE:
 		{
 			Paste();
+			break;
+		}
+		case IDM_COPY_ALL:
+		{
+			SelectAll();
+			Copy();
+			break;
+		}
+		case IDM_SELECT_ALL:
+		{
+			SelectAll();
 			break;
 		}
 		case IDM_UNDO:
@@ -4105,8 +4125,10 @@ bool GTextView3::OnKey(GKey &k)
 							goto Jump_StartOfLine;
 						}
 						else
+						if (k.Alt())
+						#else
+						if (k.Ctrl())
 						#endif
-						if (k.CtrlCmd())
 						{
 							// word move/select
 							bool StartWhiteSpace = IsWhiteSpace(Text[n]);
@@ -4177,9 +4199,10 @@ bool GTextView3::OnKey(GKey &k)
 						{
 							goto Jump_EndOfLine;
 						}
-						else
+						else if (k.Alt())
+						#else
+						if (k.Ctrl())
 						#endif
-						if (k.Ctrl() || k.Alt())
 						{
 							// word move/select
 							if (IsWhiteSpace(Text[n]))

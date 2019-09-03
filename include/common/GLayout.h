@@ -82,9 +82,9 @@ public:
 	const char *GetClass() override { return "GLayout"; }
 
 	/// Gets the current scroll bar values.
-	virtual void GetScrollPos(int &x, int &y);
+	virtual void GetScrollPos(int64 &x, int64 &y);
 	/// Sets the current scroll bar values
-	virtual void SetScrollPos(int x, int y);
+	virtual void SetScrollPos(int64 x, int64 y);
 
 	/// Gets the "pour largest" setting
 	bool GetPourLargest();

@@ -36,6 +36,7 @@
 #define DOCUMENT_LOAD_IMAGES		1
 #define MAX_RECURSION_DEPTH			300
 #define ALLOW_TABLE_GROWTH			1
+#define LGI_HTML_MAXPAINT_TIME		250 // ms
 
 #define CRASH_TRACE					0
 #ifdef MAC
@@ -3511,7 +3512,7 @@ char *GTag::ParseText(char *Doc)
 {
 	ColorDef c;
 	c.Type = ColorRgb;
-	c.Rgb32 = LC_WORKSPACE;
+	c.Rgb32 = LColour(L_WORKSPACE).c32();
 	BackgroundColor(c);
 	
 	TagId = TAG_BODY;
@@ -3563,7 +3564,7 @@ char *GTag::ParseText(char *Doc)
 				GTag *t = new GTag(Html, this);
 				if (t)
 				{
-					t->Color(ColorDef(ColorRgb, Rgb24To32(LC_TEXT)));
+					t->Color(LColour(L_TEXT));
 					t->Text(Line);
 				}
 			}
@@ -6123,145 +6124,153 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, GRect *BorderP
 	BorderPx->y2 = Bottom.ToPx(Size.x, f);
 	GCss::BorderDef *defs[4] = {&Left, &Top, &Right, &Bottom};
 
-	// Work out the rectangles
-	switch (Display())
+	if (Left.IsValid() ||
+		Right.IsValid() ||
+		Top.IsValid() ||
+		Bottom.IsValid() ||
+		DrawBackground)
 	{
-		case DispInlineBlock:
-		case DispBlock:
+		// Work out the rectangles
+		switch (Display())
 		{
-			r[0].ZOff(Size.x-1, Size.y-1);
-			break;
-		}
-		case DispInline:
-		{
-			GRegion rgn;
-			GetInlineRegion(rgn);
-			// rgn.Simplify(false);
-			for (int i=0; i<rgn.Length(); i++)
+			case DispInlineBlock:
+			case DispBlock:
 			{
-				GRect rc = *rgn[i];
-				if (BorderPx)
+				r[0].ZOff(Size.x-1, Size.y-1);
+				break;
+			}
+			case DispInline:
+			{
+				GRegion rgn;
+				GetInlineRegion(rgn);
+				r.Length(rgn.Length());
+				for (int i=0; i<rgn.Length(); i++)
 				{
-					rc.x1 -= BorderPx->x1 + PadPx.x1;
-					rc.y1 -= BorderPx->y1 + PadPx.y1;
-					rc.x2 += BorderPx->x2 + PadPx.x2;
-					rc.y2 += BorderPx->y2 + PadPx.y2;
+					GRect rc = *rgn[i];
+					GRect &out = r[i];
+					if (BorderPx)
+					{
+						rc.x1 -= BorderPx->x1 + PadPx.x1;
+						rc.y1 -= BorderPx->y1 + PadPx.y1;
+						rc.x2 += BorderPx->x2 + PadPx.x2;
+						rc.y2 += BorderPx->y2 + PadPx.y2;
+					}
+					out = rc;
 				}
-				r.New() = rc;
+				break;
 			}
-			break;
+			default:
+				return;
 		}
-		default:
-			return;
-	}
 
-	// If we are drawing rounded corners, draw them into a memory context
-	GAutoPtr<CornersImg> Corners;
-	int Px = 0, Px2 = 0;
-	GCss::Len Radius = BorderRadius();
-	float RadPx = Radius.Type == GCss::LenPx ? Radius.Value : Radius.ToPx(Size.x, GetFont());
-	bool HasRadius = Radius.Type != GCss::LenInherit && RadPx > 0.0f;
+		// If we are drawing rounded corners, draw them into a memory context
+		GAutoPtr<CornersImg> Corners;
+		int Px = 0, Px2 = 0;
+		GCss::Len Radius = BorderRadius();
+		float RadPx = Radius.Type == GCss::LenPx ? Radius.Value : Radius.ToPx(Size.x, GetFont());
+		bool HasRadius = Radius.Type != GCss::LenInherit && RadPx > 0.0f;
 
-	// Loop over the rectangles and draw everything
-	int Op = pDC->Op(GDC_ALPHA);
+		// Loop over the rectangles and draw everything
+		int Op = pDC->Op(GDC_ALPHA);
 
-	for (unsigned i=0; i<r.Length(); i++)
-	{
-		GRect rc = r[i];
-		if (HasRadius)
+		for (unsigned i=0; i<r.Length(); i++)
 		{
-			Px = (int)ceil(RadPx);
-			Px2 = Px << 1;
-			if (Px2 > rc.Y())
+			GRect rc = r[i];
+			if (HasRadius)
 			{
-				Px = rc.Y() / 2;
+				Px = (int)ceil(RadPx);
 				Px2 = Px << 1;
-			}			
-			if (!Corners || Corners->Px2 != Px2)
-			{
-				Corners.Reset(new CornersImg((float)Px, BorderPx, defs, Back, DrawBackground));
+				if (Px2 > rc.Y())
+				{
+					Px = rc.Y() / 2;
+					Px2 = Px << 1;
+				}			
+				if (!Corners || Corners->Px2 != Px2)
+				{
+					Corners.Reset(new CornersImg((float)Px, BorderPx, defs, Back, DrawBackground));
+				}
+			
+				// top left
+				GRect r(0, 0, Px-1, Px-1);
+				pDC->Blt(rc.x1, rc.y1, Corners, &r);
+			
+				// top right
+				r.Set(Px, 0, Corners->X()-1, Px-1);
+				pDC->Blt(rc.x2-Px+1, rc.y1, Corners, &r);
+			
+				// bottom left
+				r.Set(0, Px, Px-1, Corners->Y()-1);
+				pDC->Blt(rc.x1, rc.y2-Px+1, Corners, &r);
+			
+				// bottom right
+				r.Set(Px, Px, Corners->X()-1, Corners->Y()-1);
+				pDC->Blt(rc.x2-Px+1, rc.y2-Px+1, Corners, &r);
+			
+				#if 1
+				pDC->Colour(Back);
+				pDC->Rectangle(rc.x1+Px, rc.y1, rc.x2-Px, rc.y2);
+				pDC->Rectangle(rc.x1, rc.y1+Px, rc.x1+Px-1, rc.y2-Px);
+				pDC->Rectangle(rc.x2-Px+1, rc.y1+Px, rc.x2, rc.y2-Px);
+				#else
+				pDC->Colour(GColour(255, 0, 0, 0x80));
+				pDC->Rectangle(rc.x1+Px, rc.y1, rc.x2-Px, rc.y2);
+				pDC->Colour(GColour(0, 255, 0, 0x80));
+				pDC->Rectangle(rc.x1, rc.y1+Px, rc.x1+Px-1, rc.y2-Px);
+				pDC->Colour(GColour(0, 0, 255, 0x80));
+				pDC->Rectangle(rc.x2-Px+1, rc.y1+Px, rc.x2, rc.y2-Px);
+				#endif
 			}
-			
-			// top left
-			GRect r(0, 0, Px-1, Px-1);
-			pDC->Blt(rc.x1, rc.y1, Corners, &r);
-			
-			// top right
-			r.Set(Px, 0, Corners->X()-1, Px-1);
-			pDC->Blt(rc.x2-Px+1, rc.y1, Corners, &r);
-			
-			// bottom left
-			r.Set(0, Px, Px-1, Corners->Y()-1);
-			pDC->Blt(rc.x1, rc.y2-Px+1, Corners, &r);
-			
-			// bottom right
-			r.Set(Px, Px, Corners->X()-1, Corners->Y()-1);
-			pDC->Blt(rc.x2-Px+1, rc.y2-Px+1, Corners, &r);
-			
-			#if 1
-			pDC->Colour(Back);
-			pDC->Rectangle(rc.x1+Px, rc.y1, rc.x2-Px, rc.y2);
-			pDC->Rectangle(rc.x1, rc.y1+Px, rc.x1+Px-1, rc.y2-Px);
-			pDC->Rectangle(rc.x2-Px+1, rc.y1+Px, rc.x2, rc.y2-Px);
-			#else
-			pDC->Colour(GColour(255, 0, 0, 0x80));
-			pDC->Rectangle(rc.x1+Px, rc.y1, rc.x2-Px, rc.y2);
-			pDC->Colour(GColour(0, 255, 0, 0x80));
-			pDC->Rectangle(rc.x1, rc.y1+Px, rc.x1+Px-1, rc.y2-Px);
-			pDC->Colour(GColour(0, 0, 255, 0x80));
-			pDC->Rectangle(rc.x2-Px+1, rc.y1+Px, rc.x2, rc.y2-Px);
-			#endif
-		}
-		else if (DrawBackground)
-		{
-			pDC->Colour(Back);
-			pDC->Rectangle(&rc);
+			else if (DrawBackground)
+			{
+				pDC->Colour(Back);
+				pDC->Rectangle(&rc);
+			}
+
+			GCss::BorderDef *b;
+			if ((b = &Left)->IsValid())
+			{
+				pDC->Colour(b->Color.Rgb32, 32);
+				DrawBorder db(pDC, *b);
+				for (int i=0; i<b->Value; i++)
+				{
+					pDC->LineStyle(db.LineStyle, db.LineReset);
+					pDC->Line(rc.x1 + i, rc.y1+Px, rc.x1+i, rc.y2-Px);
+				}
+			}
+			if ((b = &Top)->IsValid())
+			{
+				pDC->Colour(b->Color.Rgb32, 32);
+				DrawBorder db(pDC, *b);
+				for (int i=0; i<b->Value; i++)
+				{
+					pDC->LineStyle(db.LineStyle, db.LineReset);
+					pDC->Line(rc.x1+Px, rc.y1+i, rc.x2-Px, rc.y1+i);
+				}
+			}
+			if ((b = &Right)->IsValid())
+			{
+				pDC->Colour(b->Color.Rgb32, 32);
+				DrawBorder db(pDC, *b);
+				for (int i=0; i<b->Value; i++)
+				{
+					pDC->LineStyle(db.LineStyle, db.LineReset);
+					pDC->Line(rc.x2-i, rc.y1+Px, rc.x2-i, rc.y2-Px);
+				}			
+			}
+			if ((b = &Bottom)->IsValid())
+			{
+				pDC->Colour(b->Color.Rgb32, 32);
+				DrawBorder db(pDC, *b);
+				for (int i=0; i<b->Value; i++)
+				{
+					pDC->LineStyle(db.LineStyle, db.LineReset);
+					pDC->Line(rc.x1+Px, rc.y2-i, rc.x2-Px, rc.y2-i);
+				}
+			}
 		}
 
-		GCss::BorderDef *b;
-		if ((b = &Left)->IsValid())
-		{
-			pDC->Colour(b->Color.Rgb32, 32);
-			DrawBorder db(pDC, *b);
-			for (int i=0; i<b->Value; i++)
-			{
-				pDC->LineStyle(db.LineStyle, db.LineReset);
-				pDC->Line(rc.x1 + i, rc.y1+Px, rc.x1+i, rc.y2-Px);
-			}
-		}
-		if ((b = &Top)->IsValid())
-		{
-			pDC->Colour(b->Color.Rgb32, 32);
-			DrawBorder db(pDC, *b);
-			for (int i=0; i<b->Value; i++)
-			{
-				pDC->LineStyle(db.LineStyle, db.LineReset);
-				pDC->Line(rc.x1+Px, rc.y1+i, rc.x2-Px, rc.y1+i);
-			}
-		}
-		if ((b = &Right)->IsValid())
-		{
-			pDC->Colour(b->Color.Rgb32, 32);
-			DrawBorder db(pDC, *b);
-			for (int i=0; i<b->Value; i++)
-			{
-				pDC->LineStyle(db.LineStyle, db.LineReset);
-				pDC->Line(rc.x2-i, rc.y1+Px, rc.x2-i, rc.y2-Px);
-			}			
-		}
-		if ((b = &Bottom)->IsValid())
-		{
-			pDC->Colour(b->Color.Rgb32, 32);
-			DrawBorder db(pDC, *b);
-			for (int i=0; i<b->Value; i++)
-			{
-				pDC->LineStyle(db.LineStyle, db.LineReset);
-				pDC->Line(rc.x1+Px, rc.y2-i, rc.x2-Px, rc.y2-i);
-			}
-		}
+		pDC->Op(Op);
 	}
-
-	pDC->Op(Op);
 }
 
 static void FillRectWithImage(GSurface *pDC, GRect *r, GSurface *Image, GCss::RepeatType Repeat)
@@ -6315,7 +6324,8 @@ static void FillRectWithImage(GSurface *pDC, GRect *r, GSurface *Image, GCss::Re
 void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 {
 	if (Depth >= MAX_RECURSION_DEPTH ||
-		Display() == DispNone)
+		Display() == DispNone ||
+		LgiCurrentTime() - Html->PaintStart > LGI_HTML_MAXPAINT_TIME)
 		return;
 
 	int Px, Py;
@@ -6346,8 +6356,8 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 		{
 			if (Ctrl)
 			{
-				int Sx = 0, Sy = 0;
-				int LineY = GetFont()->GetHeight();
+				int64 Sx = 0, Sy = 0;
+				int64 LineY = GetFont()->GetHeight();
 				Html->GetScrollPos(Sx, Sy);
 				Sx *= LineY;
 				Sy *= LineY;
@@ -6362,7 +6372,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 					r.x2 -= Px.x2;
 					r.y2 -= Px.y2;
 				}
-				r.Offset(AbsX() - Sx, AbsY() - Sy);
+				r.Offset(AbsX() - (int)Sx, AbsY() - (int)Sy);
 				Ctrl->SetPos(r);
 			}
 			
@@ -6393,7 +6403,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 		}
 		case TAG_HR:
 		{
-			pDC->Colour(LC_MED, 24);
+			pDC->Colour(L_MED);
 			pDC->Rectangle(0, 0, Size.x - 1, Size.y - 1);
 			break;
 		}
@@ -6446,8 +6456,8 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 			else if (Size.x > 1 && Size.y > 1)
 			{
 				GRect b(0, 0, Size.x-1, Size.y-1);
-				GColour Fill(GdcMixColour(LC_MED, LC_LIGHT, 0.2f), 24);
-				GColour Border(LC_MED, 24);
+				GColour Fill(LColour(L_MED).Mix(LColour(L_LIGHT), 0.2f));
+				GColour Border(L_MED);
 
 				// Border
 				pDC->Colour(Border);
@@ -6459,7 +6469,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 				pDC->Rectangle(&b);
 
 				const char *Alt;
-				GColour Red(GdcMixColour(Rgb24(255, 0, 0), Fill.c24(), 0.3f), 24);
+				GColour Red(GColour(255, 0, 0).Mix(Fill, 0.3f));
 				if (Get("alt", Alt) && ValidStr(Alt))
 				{
 					GDisplayString Ds(Html->GetFont(), Alt);
@@ -6533,10 +6543,10 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 						f->Colour(L_FOCUS_SEL_FORE, L_FOCUS_SEL_BACK); \
 					else \
 					{ \
-						GColour bk(back.IsTransparent() ? GColour(LC_WORKSPACE, 24) : back);			\
-						GColour fr(fore.IsTransparent() ? GColour(DefaultTextColour, 32) : fore);		\
+						GColour bk(back.IsTransparent() ? GColour(L_WORKSPACE) : back);			\
+						GColour fr(fore.IsTransparent() ? GColour(DefaultTextColour) : fore);		\
 						if (IsEditor)																\
-							bk = bk.Mix(GColour(0, 0, 0), 0.05f);									\
+							bk = bk.Mix(GColour::Black, 0.05f);									\
 						f->Colour(fr, bk);															\
 					}
 
@@ -6673,7 +6683,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 
 					if (Html->d->CursorVis && CursorPos.Valid())
 					{
-						pDC->Colour(LC_TEXT, 24);
+						pDC->Colour(L_TEXT);
 						pDC->Rectangle(&CursorPos);
 					}
 				}
@@ -6709,7 +6719,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 						)
 						{
 							ssize_t Off = Tr->Text == PreText() ? StrlenW(PreText()) : Cursor - Pos;
-							pDC->Colour(LC_TEXT, 24);
+							pDC->Colour(L_TEXT);
 							GRect c;
 							if (Off)
 							{
@@ -7326,6 +7336,8 @@ GdcPt2 GHtml::Layout(bool ForceLayout)
 
 void GHtml::OnPaint(GSurface *ScreenDC)
 {
+	// GProfile Prof("GHtml::OnPaint");
+
 	#if GHTML_USE_DOUBLE_BUFFER
 	GRect Client = GetClient();
 	if (!MemDC ||
@@ -7371,7 +7383,7 @@ void GHtml::OnPaint(GSurface *ScreenDC)
 			cBack = Bk;
 	}
 	if (!cBack.IsValid())
-		cBack.Set(Enabled() ? LC_WORKSPACE : LC_MED, 24);
+		cBack = LColour(Enabled() ? L_WORKSPACE : L_MED);
 	pDC->Colour(cBack);
 	pDC->Rectangle();
 
@@ -7387,6 +7399,7 @@ void GHtml::OnPaint(GSurface *ScreenDC)
 		}
 
 		bool InSelection = false;
+		PaintStart = LgiCurrentTime();		
 		Tag->OnPaint(pDC, InSelection, 0);
 	}
 

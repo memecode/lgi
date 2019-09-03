@@ -461,7 +461,7 @@ public:
 		for (ssize_t i=r.Start; i<r.End(); i++)
 			p[i].~Type();
 
-		// Move the elements donw
+		// Move the elements down
 		auto Remain = len - r.End();
 		if (Remain > 0)
 			memmove(&p[r.Start], &p[r.End()], sizeof(Type)*Remain);

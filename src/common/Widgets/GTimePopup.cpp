@@ -255,7 +255,7 @@ void GTimePopup::OnPaint(GSurface *pDC)
 	// 1px black border
 	GRect r = GetClient();
 	r.Offset(-r.x1, -r.y1);
-	pDC->Colour(LC_TEXT, 24);
+	pDC->Colour(L_TEXT);
 	pDC->Box(&r);
 	r.Size(1, 1);
 

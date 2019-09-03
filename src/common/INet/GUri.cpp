@@ -323,7 +323,7 @@ GProxyUri::GProxyUri()
 //		int enable = CFNumberRefToInt((CFNumberRef) CFDictionaryGetValue(Proxies, kSCPropNetProxiesHTTPEnable));
 //		if (enable)
 //		{
-//			#ifdef COCOA
+//			#ifdef LGI_COCOA
 //			LgiAssert(!"Fixme");
 //			#else
 //			Host = CFStringToUtf8((CFStringRef) CFDictionaryGetValue(Proxies, kSCPropNetProxiesHTTPProxy));

@@ -151,7 +151,7 @@ size_t GCombo::Length()
 	return d->Items.Length();
 }
 
-char *GCombo::operator [](int i)
+char *GCombo::operator [](ssize_t i)
 {
 	return d->Items.ItemAt(i);
 }
@@ -547,7 +547,7 @@ void GCombo::OnPaint(GSurface *pDC)
 			d->SetText(new GDisplayString(GetFont(), n), _FL);
 	}
 
-	GColour cBack = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
+	GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 
 	#if defined LGI_CARBON
 
@@ -585,7 +585,7 @@ void GCombo::OnPaint(GSurface *pDC)
 
 			auto f = Ds->GetFont();
 			f->Transparent(true);
-			f->Fore(LC_TEXT);
+			f->Fore(L_TEXT);
 			Ds->Draw(pDC, Txt.x1, y);
 			
 			#if 0
@@ -610,11 +610,11 @@ void GCombo::OnPaint(GSurface *pDC)
 		GRect r(0, 0, X()-1, Y()-1);
 
 		// draw shadowed border
-		pDC->Colour(LC_SHADOW, 24);
+		pDC->Colour(L_SHADOW);
 		pDC->Line(r.x1+2, r.y2, r.x2, r.y2);
 		pDC->Line(r.x2, r.y1+2, r.x2, r.y2);
 
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Set(r.x1, r.y2);
 		pDC->Set(r.x1+1, r.y2);
 		pDC->Set(r.x2, r.y1);
@@ -622,10 +622,10 @@ void GCombo::OnPaint(GSurface *pDC)
 
 		r.x2--;
 		r.y2--;
-		pDC->Colour(LC_LOW, 24);
+		pDC->Colour(L_LOW);
 		pDC->Box(&r);
 		r.Size(1, 1);
-		pDC->Colour(LC_HIGH, 24);
+		pDC->Colour(L_HIGH);
 		pDC->Line(r.x1, r.y1, r.x2, r.y1);
 		pDC->Line(r.x1, r.y1+1, r.x1, r.y2);
 		r.x1++;
@@ -638,7 +638,7 @@ void GCombo::OnPaint(GSurface *pDC)
 		// draw the drop down arrow
 		d->Arrow = r;
 		d->Arrow.x1 = d->Arrow.x2 - 10;
-		pDC->Colour(Enabled() ? LC_SHADOW : LC_LOW, 24);
+		pDC->Colour(Enabled() ? L_SHADOW : L_LOW);
 		int Cx = r.x2 - 5;
 		int Cy = r.y1 + (r.Y()/2) + 2;
 		for (int i=0; i<4; i++)
@@ -647,7 +647,7 @@ void GCombo::OnPaint(GSurface *pDC)
 			Cy--;
 		}
 		r.x2 = d->Arrow.x1 - 1;
-		pDC->Colour(LC_LOW, 24);
+		pDC->Colour(L_LOW);
 		pDC->Line(r.x2, r.y1+1, r.x2, r.y2-1);
 		r.x2--;
 
@@ -661,24 +661,24 @@ void GCombo::OnPaint(GSurface *pDC)
 				if (Enabled())
 				{
 					bool f = Focus();
-					SysFont->Colour(f ? LC_FOCUS_SEL_FORE : LC_TEXT, f ? LC_FOCUS_SEL_BACK : LC_MED);
+					SysFont->Colour(f ? L_FOCUS_SEL_FORE : L_TEXT, f ? L_FOCUS_SEL_BACK : L_MED);
 					SysFont->Transparent(false);
 					ds->Draw(pDC, r.x1, r.y1, &r);
 				}
 				else
 				{
 					SysFont->Transparent(false);
-					SysFont->Colour(GColour(LC_LIGHT,24), cBack);
+					SysFont->Colour(LColour(L_LIGHT), cBack);
 					ds->Draw(pDC, r.x1+1, r.y1+1, &r);
 
 					SysFont->Transparent(true);
-					SysFont->Colour(LC_LOW, 0);
+					SysFont->Colour(L_LOW);
 					ds->Draw(pDC, r.x1, r.y1, &r);
 				}
 			}
 			else
 			{
-				pDC->Colour(Focus() ? LC_FOCUS_SEL_BACK : LC_MED, 24);
+				pDC->Colour(Focus() ? L_FOCUS_SEL_BACK : L_MED);
 				pDC->Rectangle(&r);
 			}
 		}

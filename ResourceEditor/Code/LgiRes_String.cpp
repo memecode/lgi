@@ -1563,7 +1563,7 @@ void ResStringUi::OnPaint(GSurface *pDC)
 		Client.Subtract(&r);
 	}
 
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	for (GRect *r = Client.First(); r; r = Client.Next())
 	{
 		pDC->Rectangle(r);

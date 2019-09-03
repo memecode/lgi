@@ -94,6 +94,11 @@ void GColour::Rgb(int r, int g, int b, int a)
 	c32(Rgba32(r, g, b, a));
 }
 
+void GColour::Set(LSystemColour c)
+{
+	*this = LColour(c);
+}
+
 void GColour::Set(uint32_t c, int bits, GPalette *palette)
 {
 	pal = 0;
@@ -729,6 +734,17 @@ void GColour::OnChange()
 
 	#elif defined(WINDOWS)
 
+	/*
+	for (int i=0; i<30; i++)
+	{
+		auto c = GetSysColor(i);
+		auto r = GetRValue(c);
+		auto g = GetGValue(c);
+		auto b = GetBValue(c);
+		LgiTrace("[%i]=%i,%i,%i %x,%x,%x\n", i, r, g, b, r, g, b);
+	}
+	*/
+
 	_LgiColours[L_SHADOW] = ConvertWinColour(GetSysColor(COLOR_3DDKSHADOW)); // LC_SHADOW
 	_LgiColours[L_LOW] = ConvertWinColour(GetSysColor(COLOR_3DSHADOW)); // LC_LOW
 	_LgiColours[L_MED] = ConvertWinColour(GetSysColor(COLOR_3DFACE)); // LC_MED
@@ -772,30 +788,30 @@ void GColour::OnChange()
 
 	#endif
 
-	SetCol(Rgb24(64, 64, 64)); // LC_SHADOW
-	SetCol(Rgb24(128, 128, 128)); // LC_LOW
+	_LgiColours[L_SHADOW].Rgb(64, 64, 64); // LC_SHADOW
+	_LgiColours[L_LOW].Rgb(128, 128, 128); // LC_LOW
 
 	//#ifdef BEOS
-	SetCol(Rgb24(216, 216, 216)); // LC_MED
+	_LgiColours[L_MED].Rgb(216, 216, 216); // LC_MED
 	//#else
 	//SetCol(Rgb24(230, 230, 230)); // LC_MED
 	//#endif
 
-	SetCol(Rgb24(230, 230, 230)); // LC_HIGH
-	SetCol(Rgb24(255, 255, 255)); // LC_LIGHT
-	SetCol(Rgb24(216, 216, 216)); // LC_DIALOG
-	SetCol(Rgb24(0xff, 0xff, 0xff)); // LC_WORKSPACE
-	SetCol(Rgb24(0, 0, 0)); // LC_TEXT
-	SetCol(Rgb24(0x4a, 0x59, 0xa5)); // LC_FOCUS_SEL_BACK
-	SetCol(Rgb24(0xff, 0xff, 0xff)); // LC_FOCUS_SEL_FORE
-	SetCol(Rgb24(0, 0, 0x80)); // LC_ACTIVE_TITLE
-	SetCol(Rgb24(0xff, 0xff, 0xff)); // LC_ACTIVE_TITLE_TEXT
-	SetCol(Rgb24(0x80, 0x80, 0x80)); // LC_INACTIVE_TITLE
-	SetCol(Rgb24(0x40, 0x40, 0x40)); // LC_INACTIVE_TITLE_TEXT
-	SetCol(Rgb24(222, 222, 222)); // LC_MENU_BACKGROUND
-	SetCol(Rgb24(0, 0, 0)); // LC_MENU_TEXT
-	SetCol(Rgb24(222, 222, 222)); // LC_NON_FOCUS_SEL_BACK
-	SetCol(Rgb24(0, 0, 0)); // LC_NON_FOCUS_SEL_FORE
+	_LgiColours[L_HIGH].Rgb(230, 230, 230); // LC_HIGH
+	_LgiColours[L_LIGHT].Rgb(255, 255, 255); // LC_LIGHT
+	_LgiColours[L_DIALOG].Rgb(216, 216, 216); // LC_DIALOG
+	_LgiColours[L_WORKSPACE].Rgb(0xff, 0xff, 0xff); // LC_WORKSPACE
+	_LgiColours[L_TEXT].Rgb(0, 0, 0); // LC_TEXT
+	_LgiColours[L_FOCUS_SEL_BACK].Rgb(0x4a, 0x59, 0xa5); // LC_FOCUS_SEL_BACK
+	_LgiColours[L_FOCUS_SEL_FORE].Rgb(0xff, 0xff, 0xff); // LC_FOCUS_SEL_FORE
+	_LgiColours[L_ACTIVE_TITLE].Rgb(0, 0, 0x80); // LC_ACTIVE_TITLE
+	_LgiColours[L_ACTIVE_TITLE_TEXT].Rgb(0xff, 0xff, 0xff); // LC_ACTIVE_TITLE_TEXT
+	_LgiColours[L_INACTIVE_TITLE].Rgb(0x80, 0x80, 0x80); // LC_INACTIVE_TITLE
+	_LgiColours[L_INACTIVE_TITLE_TEXT].Rgb(0x40, 0x40, 0x40); // LC_INACTIVE_TITLE_TEXT
+	_LgiColours[L_MENU_BACKGROUND].Rgb(222, 222, 222); // LC_MENU_BACKGROUND
+	_LgiColours[L_MENU_TEXT].Rgb(0, 0, 0); // LC_MENU_TEXT
+	_LgiColours[L_NON_FOCUS_SEL_BACK].Rgb(222, 222, 222); // LC_NON_FOCUS_SEL_BACK
+	_LgiColours[L_NON_FOCUS_SEL_FORE].Rgb(0, 0, 0); // LC_NON_FOCUS_SEL_FORE
 	#endif
 
 	// Tweak
@@ -804,7 +820,7 @@ void GColour::OnChange()
 		LgiGetOs() == LGI_OS_WIN64)
 	{
 		// Win32 doesn't seem to get this right, so we just tweak it here
-		_LgiColours[8] = _LgiColours[L_MED].Mix(_LgiColours[L_LIGHT]);
+		_LgiColours[L_LIGHT] = _LgiColours[L_MED].Mix(_LgiColours[L_LIGHT]);
 	}
 	
 	_LgiColours[L_DEBUG_CURRENT_LINE].Rgb(0xff, 0xe0, 0x00);

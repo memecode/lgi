@@ -395,6 +395,7 @@ class LgiClass GSurface : public GRefCount, public GDom
 	friend class GWindow;
 	friend class GVariant;
 	friend class GRegionClipDC;
+	friend class GMemDC;
 
 	void Init();
 	
@@ -446,7 +447,7 @@ public:
 	
 	#elif defined MAC
 	
-	#ifdef COCOA
+	#if LGI_COCOA
 	#else
 	virtual CGColorSpaceRef GetColourSpaceRef() { return 0; }
 	#endif
@@ -681,7 +682,7 @@ public:
 
 struct GPrintDcParams
 {
-	#ifdef COCOA
+	#if LGI_COCOA
 	#else
 	PMRect Page;
 	CGContextRef Ctx;
@@ -1024,6 +1025,11 @@ public:
 		#elif defined MAC
 				
 			OsBitmap GetBitmap();
+	
+			#if LGI_COCOA && defined(__OBJC__)
+			NSImage *NsImage(GRect *rc = NULL);
+			#endif
+	
 			#if !defined(LGI_SDL)
 				CGColorSpaceRef GetColourSpaceRef();
 				CGImg *GetImg(GRect *Sub = 0);
@@ -1365,12 +1371,6 @@ LgiFunc COLOUR CBit(int DstBits, COLOUR c, int SrcBits = 24, GPalette *Pal = 0);
 /// blends 2 colours by the amount specified
 LgiClass GColour GdcMixColour(GColour a, GColour b, float HowMuchA = 0.5);
 #endif
-
-/// blends 2 24bit colours by the amount specified
-LgiFunc COLOUR GdcMixColour(COLOUR a, COLOUR b, float HowMuchA = 0.5);
-
-/// Turns a colour into an 8 bit grey scale representation
-LgiFunc COLOUR GdcGreyScale(COLOUR c, int Bits = 24);
 
 /// Colour reduction option to define what palette to go to
 enum GColourReducePalette

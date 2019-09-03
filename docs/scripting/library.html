@@ -119,11 +119,11 @@
 					<a href="#minute">obj.Minute</a><br>
 					<a href="#second">obj.Second</a><br>
 					<a href="#milli">obj.Milli</a><br>
-					<a href="#u64">obj.Int</a><br>
 					<br>
 					<a href="#date">obj.Date</a><br>
 					<a href="#time">obj.Time</a><br>
 					<a href="#datetime">obj.DateTime</a><br>
+					<a href="#timestamp">obj.Timestamp</a><br>
 				<td>
 					<a href="#x">obj.x</a><br>
 					<a href="#y">obj.y</a><br>
@@ -713,7 +713,7 @@ System.script is 837 bytes</pre>
 			<div>
 				Returns:
 				<ul>
-					<li> The path separator character for the current platform. ("\" on windows, "/" otherwise)
+					<li> The path separator character for the current platform. ("&bsol;" on windows, "/" otherwise)
 				</ul>
 			</div>
 
@@ -894,25 +894,25 @@ System.script is 837 bytes</pre>
 				Sets or gets the millisecond part of a date/time object.
 			</div>
 
-		<h4>int <a name="u64">obj.DateInt64</a>;</h4>
+		<h4>int64 <a name="timestamp">obj.Timestamp</a>;</h4>
 			<div>
 				Sets or gets the int64 version of a date/time object. This is compatible
 				with a range of operating system APIs.
 			</div>
 
-		<h4>int <a name="date">obj.Date</a>;</h4>
+		<h4>string <a name="date">obj.Date</a>;</h4>
 			<div>
 				Sets or gets the date part of the object. Typically this is in the form 'day/month/year'
 				in the current locale of the operating system.
 			</div>
 
-		<h4>int <a name="time">obj.Time</a>;</h4>
+		<h4>string <a name="time">obj.Time</a>;</h4>
 			<div>
 				Sets or gets the time part of the object. Typically this is in the form 'hour:minute:second'
 				in the current locale of the operating system.
 			</div>
 
-		<h4>int <a name="datetime">obj.DateTime</a>;</h4>
+		<h4>string <a name="datetime">obj.DateTime</a>;</h4>
 			<div>
 				Sets or gets both the date and time parts of the object as a string.
 			</div>

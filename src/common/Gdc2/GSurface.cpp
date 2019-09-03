@@ -1659,13 +1659,15 @@ GColour GSurface::Colour(LSystemColour SysCol)
 GColour GSurface::Colour(GColour c)
 {
 	LgiAssert(pApp != NULL);
-	GColour cPrev(pApp->c, GetBits());
-	
+	GColour cPrev;
+
 	uint32_t c32 = c.c32();
 	GColourSpace Cs = pApp->GetColourSpace();
 	switch (Cs)
 	{
 		case CsIndex8:
+		{
+			cPrev.Set(pApp->c, 8);
 			if (c.GetColourSpace() == CsIndex8)
 			{
 				pApp->c = c.c8();
@@ -1681,14 +1683,21 @@ GColour GSurface::Colour(GColour c)
 					pApp->c = c.GetGray();
 			}
 			break;
+		}
 		case CsRgb15:
 		case CsBgr15:
+		{
+			cPrev.Set(pApp->c, 15);
 			pApp->c = Rgb32To15(c32);
 			break;
+		}
 		case CsRgb16:
 		case CsBgr16:
+		{
+			cPrev.Set(pApp->c, 16);
 			pApp->c = Rgb32To16(c32);
 			break;
+		}
 		case CsRgba32:
 		case CsBgra32:
 		case CsArgb32:
@@ -1701,19 +1710,25 @@ GColour GSurface::Colour(GColour c)
 		case CsBgra64:
 		case CsArgb64:
 		case CsAbgr64:
+		{
+			cPrev.Rgb(pApp->p32.r, pApp->p32.g, pApp->p32.b, pApp->p32.a);
 			pApp->p32.r = R32(c32);
 			pApp->p32.g = G32(c32);
 			pApp->p32.b = B32(c32);
 			pApp->p32.a = A32(c32);
 			break;
+		}
 		case CsRgb24:
 		case CsBgr24:
 		case CsRgb48:
 		case CsBgr48:
+		{
+			cPrev.Rgb(pApp->p24.r, pApp->p24.g, pApp->p24.b);
 			pApp->p24.r = R32(c32);
 			pApp->p24.g = G32(c32);
 			pApp->p24.b = B32(c32);
 			break;
+		}
 		default:
 			LgiAssert(0);
 			break;

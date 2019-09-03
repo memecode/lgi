@@ -32,22 +32,19 @@
 
 //////////////////////////////////////////////////////////////////
 // Typedefs
-#define ObjCWrap(Type, Name) \
-	Name(Type *i) { p = i; } \
-	Name(long i = 0) { p = 0; } \
-	Name &operator=(Type *i) { p = i; return *this; } \
-	Name &operator=(long i) { p = 0; return *this; } \
-	operator bool() { return p != NULL; } \
-	operator Type*() { return p; } \
-	bool operator ==(const Name &obj) { return p == obj.p; } \
-
 #ifdef __OBJC__
 	#define ObjCWrapper(Type, Name) \
 		class Name \
 		{ \
 		public: \
-			Type *p; \
-			ObjCWrap(Type, Name) \
+			Type * _Nullable p; \
+			Name(Type * _Nullable i) { p = i; } \
+			Name(long i = 0) { p = NULL; } \
+			Name &operator=(Type * _Nullable i) { p = i; return *this; } \
+			Name &operator=(long i) { p = NULL; return *this; } \
+			operator bool() { return p != NULL; } \
+			operator Type* _Nullable() { return p; } \
+			bool operator ==(const Name &obj) { return p == obj.p; } \
 		};
 #else
 	#define ObjCWrapper(Type, Name) \
@@ -55,7 +52,13 @@
 		{ \
 			void *p; \
 		public: \
-			ObjCWrap(void, Name) \
+			Name(void *i) { p = i; } \
+			Name(long i = 0) { p = NULL; } \
+			Name &operator=(void *i) { p = i; return *this; } \
+			Name &operator=(long i) { p = NULL; return *this; } \
+			operator bool() { return p != NULL; } \
+			operator void*() { return p; } \
+			bool operator ==(const void *obj) { return p == obj; } \
 		};
 #endif
 
@@ -101,7 +104,8 @@ public:
 #define POSIX						1
 #define LGI_COCOA					1
 #define LGI_64BIT					1
-#define LGI_VIEW_HANDLE				0
+#define LGI_VIEW_HANDLE				0 // GViews DON'T have individual OsView handles
+#define LGI_VIEW_HASH				1 // GView DO have a hash table for validity
 
 // Process
 typedef int							OsProcess;

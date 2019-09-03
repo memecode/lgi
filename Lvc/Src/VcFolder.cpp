@@ -62,6 +62,7 @@ ReaderThread::ReaderThread(VersionCtrl vcs, GSubProcess *p, GStream *out) : LThr
 	Process = p;
 	Out = out;
 	Result = -1;
+	FilterCount = 0;
 	
 	Run();
 }
@@ -71,6 +72,77 @@ ReaderThread::~ReaderThread()
 	Out = NULL;
 	while (!IsExited())
 		LgiSleep(1);
+}
+
+const char *HgFilter = "We\'re removing Mercurial support";
+const char *CvsKill = "No such file or directory";
+
+int ReaderThread::OnLine(char *s, ssize_t len)
+{
+	switch (Vcs)
+	{
+		case VcHg:
+		{
+			if (strnistr(s, HgFilter, len))
+				FilterCount = 4;
+			if (FilterCount > 0)
+			{
+				FilterCount--;
+				return 0;
+			}
+			else if (GString(s, len).Strip().Equals("remote:"))
+			{
+				return 0;
+			}
+			break;
+		}
+		case VcCvs:
+		{
+			if (strnistr(s, CvsKill, len))
+				return -1;
+			break;
+		}
+		default:
+			break;
+	}
+
+	return 1;
+}
+
+bool ReaderThread::OnData(char *Buf, ssize_t &r)
+{
+	#if 1
+	char *Start = Buf;
+	for (char *c = Buf; c < Buf + r;)
+	{
+		bool nl = *c == '\n';
+		c++;
+		if (nl)
+		{
+			int Result = OnLine(Start, c - Start);
+			if (Result < 0)
+			{
+				// Kill process and exit thread.
+				Process->Kill();
+				return false;
+			}
+			if (Result == 0)
+			{
+				ssize_t LineLen = c - Start;
+				ssize_t NextLine = c - Buf;
+				ssize_t Remain = r - NextLine;
+				if (Remain > 0)
+					memmove(Start, Buf + NextLine, Remain);
+				r -= LineLen;
+				c = Start;
+			}
+			else Start = c;
+		}
+	}
+	#endif
+
+	Out->Write(Buf, r);
+	return true;
 }
 
 int ReaderThread::Main()
@@ -83,22 +155,20 @@ int ReaderThread::Main()
 		return ErrSubProcessFailed;
 	}
 
+	char Buf[1024];
+	ssize_t r;
+	// printf("%s:%i - starting reader loop.\n", _FL);
 	while (Process->IsRunning())
 	{
 		if (Out)
 		{
-			char Buf[1024];
-			ssize_t r = Process->Read(Buf, sizeof(Buf));
+			// printf("%s:%i - starting read.\n", _FL);
+			r = Process->Read(Buf, sizeof(Buf));
+			// printf("%s:%i - read=%i.\n", _FL, (int)r);
 			if (r > 0)
 			{
-				Out->Write(Buf, r);
-
-				if (Vcs == VcCvs &&
-					stristr(Buf, "No such file or directory"))
-				{
-					Process->Kill();
+				if (!OnData(Buf, r))
 					return -1;
-				}
 			}
 		}
 		else
@@ -109,14 +179,14 @@ int ReaderThread::Main()
 		}
 	}
 
+	// printf("%s:%i - process loop done.\n", _FL);
 	if (Out)
 	{
-		char Buf[1024];
-		ssize_t r;
 		while ((r = Process->Read(Buf, sizeof(Buf))) > 0)
-			Out->Write(Buf, r);
+			OnData(Buf, r);
 	}
 
+	// printf("%s:%i - loop done.\n", _FL);
 	Result = (int) Process->GetExitValue();
 	#if _DEBUG
 	if (Result)
@@ -414,8 +484,10 @@ void VcFolder::OnBranchesChange()
 			if (!stricmp(b.key, "default") ||
 				!stricmp(b.key, "trunk"))
 				Default = b.key;
+			/*
 			else
 				printf("Other=%s\n", b.key);
+			*/
 		}
 		int Idx = 1;
 		for (auto b: Branches)
@@ -1602,6 +1674,7 @@ void VcFolder::OnPulse()
 	bool Reselect = false, CmdsChanged = false;
 	static bool Processing = false;
 	
+	// printf("%s:%i - OnPulse\n", _FL);
 	if (!Processing)
 	{	
 		Processing = true; // Lock out processing, if it puts up a dialog or something...
@@ -1609,24 +1682,29 @@ void VcFolder::OnPulse()
 		for (unsigned i=0; i<Cmds.Length(); i++)
 		{
 			Cmd *c = Cmds[i];
-			if (c && c->Rd->IsExited())
+			if (c)
 			{
-				GString s = c->GetBuf();
-				int Result = c->Rd->ExitCode();
-				if (Result == ErrSubProcessFailed)
+				bool Ex = c->Rd->IsExited();
+				// printf("%s:%i - Ex=%i, Cmds=%i\n", _FL, (int)Cmds.Length());
+				if (Ex)
 				{
-					if (!CmdErrors)
-						d->Log->Print("Error: Can't run '%s'\n", GetVcName());
-					CmdErrors++;
+					GString s = c->GetBuf();
+					int Result = c->Rd->ExitCode();
+					if (Result == ErrSubProcessFailed)
+					{
+						if (!CmdErrors)
+							d->Log->Print("Error: Can't run '%s'\n", GetVcName());
+						CmdErrors++;
+					}
+					else if (c->PostOp)
+					{
+						Reselect |= CALL_MEMBER_FN(*this, c->PostOp)(Result, s, c->Params);
+					}
+					
+					Cmds.DeleteAt(i--, true);
+					delete c;
+					CmdsChanged = true;
 				}
-				else if (c->PostOp)
-				{
-					Reselect |= CALL_MEMBER_FN(*this, c->PostOp)(Result, s, c->Params);
-				}
-				
-				Cmds.DeleteAt(i--, true);
-				delete c;
-				CmdsChanged = true;
 			}
 		}
 		Processing = false;
@@ -1942,7 +2020,7 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 					VcFile *f = Map.Find(File);
 					if (!f)
 					{
-						if (f = new VcFile(d, this, WorkingRev, IsWorking))
+						if ((f = new VcFile(d, this, WorkingRev, IsWorking)))
 							Ins.Insert(f);
 					}
 					if (f)
@@ -1960,7 +2038,7 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 					VcFile *f = Map.Find(File);
 					if (!f)
 					{
-						if (f = new VcFile(d, this, NULL, IsWorking))
+						if ((f = new VcFile(d, this, NULL, IsWorking)))
 							Ins.Insert(f);
 					}
 					if (f)
@@ -2156,6 +2234,8 @@ void VcFolder::FolderStatus(const char *Path, VcLeaf *Notify)
 		case VcHg:
 			CountToTip();
 			break;
+		default:
+			break;
 	}
 }
 
@@ -2163,7 +2243,7 @@ void VcFolder::CountToTip()
 {
 	// if (Path.Equals("C:\\Users\\matthew\\Code\\Lgi\\trunk"))
 	{
-		LgiTrace("%s: CountToTip, br=%s, idx=%i\n", Path.Get(), CurrentBranch.Get(), (int)CurrentCommitIdx);
+		// LgiTrace("%s: CountToTip, br=%s, idx=%i\n", Path.Get(), CurrentBranch.Get(), (int)CurrentCommitIdx);
 
 		if (!CurrentBranch)
 			GetBranches(new ParseParams("CountToTip"));
@@ -2193,10 +2273,8 @@ bool VcFolder::ParseCountToTip(int Result, GString s, ParseParams *Params)
 					Update();
 				}
 			}
-			else
-			{
-				int asd=0;
-			}
+			break;
+		default:
 			break;
 	}
 
@@ -2547,17 +2625,18 @@ bool VcFolder::ParsePush(int Result, GString s, ParseParams *Params)
 	return Status; // no reselect
 }
 
-void VcFolder::Pull(LoggingType Logging)
+void VcFolder::Pull(bool AndUpdate, LoggingType Logging)
 {
-	GString Args;
 	bool Status = false;
 	switch (GetType())
 	{
 		case VcNone:
 			return;
 		case VcHg:
+			Status = StartCmd(AndUpdate ? "pull -u" : "pull", &VcFolder::ParsePull, NULL, Logging);
+			break;
 		case VcGit:
-			Status = StartCmd("pull", &VcFolder::ParsePull, NULL, Logging);
+			Status = StartCmd(AndUpdate ? "pull" : "fetch", &VcFolder::ParsePull, NULL, Logging);
 			break;
 		case VcSvn:
 			Status = StartCmd("up", &VcFolder::ParsePull, NULL, Logging);
@@ -2576,6 +2655,7 @@ void VcFolder::Pull(LoggingType Logging)
 
 bool VcFolder::ParsePull(int Result, GString s, ParseParams *Params)
 {
+	GetTree()->SendNotify(LvcCommandEnd);
 	if (Result)
 	{
 		OnCmdError(s, "Pull failed.");
@@ -2624,7 +2704,6 @@ bool VcFolder::ParsePull(int Result, GString s, ParseParams *Params)
 			break;
 	}
 
-	GetTree()->SendNotify(LvcCommandEnd);
 	CommitListDirty = true;
 	return true; // Yes - reselect and update
 }
@@ -2968,7 +3047,7 @@ bool VcFolder::AddFile(const char *Path, bool AsBinary)
 			if (dir)
 			{
 				*dir++ = 0;
-				if (params = new ParseParams)
+				if ((params = new ParseParams))
 					params->AltInitPath = p;
 			}
 

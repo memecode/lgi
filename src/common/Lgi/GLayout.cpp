@@ -65,7 +65,7 @@ bool GLayout::Pour(GRegion &r)
 	return false;
 }
 
-void GLayout::GetScrollPos(int &x, int &y)
+void GLayout::GetScrollPos(int64 &x, int64 &y)
 {
 	if (HScroll)
 	{
@@ -86,7 +86,7 @@ void GLayout::GetScrollPos(int &x, int &y)
 	}
 }
 
-void GLayout::SetScrollPos(int x, int y)
+void GLayout::SetScrollPos(int64 x, int64 y)
 {
 	if (HScroll)
 	{

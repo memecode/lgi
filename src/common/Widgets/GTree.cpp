@@ -1057,11 +1057,11 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 
 			// Foreground
 			GCss::ColorDef Fill = i->GetCss(true)->Color();
-			Ctx.Fore = Fill.Type == GCss::ColorRgb ? Fill : (IsSelected ? SelFore : LColour(L_TEXT));
+			Ctx.Fore = Fill.Type == GCss::ColorRgb ? (GColour)Fill : (IsSelected ? SelFore : LColour(L_TEXT));
 
 			// Background	
 			Fill = i->GetCss()->BackgroundColor();
-			Ctx.Back = Fill.Type == GCss::ColorRgb ? Fill : (IsSelected ? SelBack : LColour(L_WORKSPACE));
+			Ctx.Back = Fill.Type == GCss::ColorRgb ? (GColour)Fill : (IsSelected ? SelBack : LColour(L_WORKSPACE));
 
 			i->OnPaint(Ctx);
 		}
@@ -1889,11 +1889,11 @@ void GTree::OnPaint(GSurface *pDC)
 
 		// Foreground
 		GCss::ColorDef Fill = i->GetCss(true)->Color();
-		Ctx.Fore = Fill.Type == GCss::ColorRgb ? Fill : (IsSelected ? SelFore : LColour(L_TEXT));
+		Ctx.Fore = Fill.Type == GCss::ColorRgb ? (GColour)Fill : (IsSelected ? SelFore : LColour(L_TEXT));
 
 		// Background	
 		Fill = i->GetCss()->BackgroundColor();
-		Ctx.Back = Fill.Type == GCss::ColorRgb ? Fill : (IsSelected ? SelBack : LColour(L_WORKSPACE));
+		Ctx.Back = Fill.Type == GCss::ColorRgb ? (GColour)Fill : (IsSelected ? SelBack : LColour(L_WORKSPACE));
 
 		i->OnPaint(Ctx);
 	}

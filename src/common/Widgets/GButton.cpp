@@ -374,7 +374,7 @@ void GButton::OnPaint(GSurface *pDC)
 {
 	#if defined LGI_CARBON
 
-	GColour NoPaintColour = StyleColour(GCss::PropBackgroundColor, GColour(LC_MED, 24));
+	GColour NoPaintColour = StyleColour(GCss::PropBackgroundColor, GColour(L_MED));
 	if (!NoPaintColour.IsTransparent())
 	{
 		pDC->Colour(NoPaintColour);
@@ -452,11 +452,11 @@ void GButton::OnPaint(GSurface *pDC)
 	}
 	else
 	{
-		COLOUR Back = d->Over ? LC_HIGH : LC_MED;
+		GColour Back(d->Over ? L_HIGH : L_MED);
 		GRect r(0, 0, X()-1, Y()-1);
 		if (Default())
 		{
-			pDC->Colour(LC_BLACK, 24);
+			pDC->Colour(L_BLACK);
 			pDC->Box(&r);
 			r.Size(1, 1);
 		}
@@ -465,7 +465,7 @@ void GButton::OnPaint(GSurface *pDC)
 		GdcPt2 pt;
 		pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
 		pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
-		d->Paint(pDC, pt, GColour(Back,24), r, Enabled(), false);
+		d->Paint(pDC, pt, Back, r, Enabled(), false);
 
 		/*
 		if (d->Txt)

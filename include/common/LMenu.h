@@ -20,7 +20,7 @@
 	#define COLOR_MENUBAR		30
 	#endif
 #elif defined(MAC) && !defined(LGI_SDL)
-	#if defined(COCOA)
+	#if LGI_COCOA
 		#ifdef __OBJC__
 			#include <Cocoa/Cocoa.h>
 		#endif
@@ -92,29 +92,29 @@ class LgiClass LSubMenu :
 	// This is not called in the GUI thread
 	static void SysMouseClick(GMouse &m);
 
-	#if defined(__GTK_H__)
-	GlibWrapper<Gtk::GtkMenuShell> Info;
-	#elif !WINNATIVE
-	OsSubMenu Info;
+	#if !WINNATIVE && !defined(__GTK_H__)
+		OsSubMenu Info;
+	#endif
+	#if LGI_COCOA
+		GAutoPtr<int> FloatResult;
+		virtual void OnActivate(LMenuItem *item);
 	#endif
 
 	#if defined(__GTK_H__)
-	friend void GtkDeactivate(Gtk::GtkMenuShell *widget, LSubMenu *Sub);
-	friend Gtk::gboolean LSubMenuClick(GMouse *m);
-	friend void SubMenuDestroy(LSubMenu *Item);
+		GlibWrapper<Gtk::GtkMenuShell> Info;
+		friend void GtkDeactivate(Gtk::GtkMenuShell *widget, LSubMenu *Sub);
+		friend Gtk::gboolean LSubMenuClick(GMouse *m);
+		friend void SubMenuDestroy(LSubMenu *Item);
 
-	int *_ContextMenuId;
-	bool InLoop;
-	uint64 ActiveTs;
-	bool IsContext(LMenuItem *Item);
-	void OnActivate(bool a);
+		int *_ContextMenuId;
+		bool InLoop;
+		uint64 ActiveTs;
+		bool IsContext(LMenuItem *Item);
+		void OnActivate(bool a);
 	#elif defined(WINNATIVE)
-	HWND TrackHandle;
-	#elif defined(BEOS)
-	void		_CopyMenu(BMenu *To, LSubMenu *From);
-	LMenuItem	*MatchShortcut(GKey &k);
+		HWND TrackHandle;
 	#else
-	bool OnKey(GKey &k);
+		bool OnKey(GKey &k);
 	#endif
 
 protected:
@@ -333,16 +333,8 @@ protected:
 	#endif
 	class LMenuItemPrivate *d;
 
-	#if defined BEOS
-	BMessage		*Msg;
-	bool			UnsupportedShortcut;
-	int				ShortcutKey;
-	int				ShortcutMod;
-	LMenuItem		*MatchShortcut(GKey &k);
-	#else
 	int				_Id;
 	int				_Flags;
-	#endif
 
 	#if defined(__GTK_H__)
 		bool InSetCheck;
@@ -422,6 +414,10 @@ public:
 	int Icon();
 
 	GImageList *GetImageList();
+
+	#if LGI_COCOA
+	void OnActivate(LMenuItem *item);
+	#endif
 };
 
 /// Encapsulates a keyboard shortcut
@@ -502,6 +498,9 @@ protected:
 	List<GAccelerator> Accel;
 	#ifdef __GTK_H__
 	Gtk::GtkAccelGroup *AccelGrp;
+	#endif
+	#if LGI_COCOA
+	void OnActivate(LMenuItem *item);
 	#endif
 
 public:

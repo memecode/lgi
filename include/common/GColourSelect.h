@@ -14,8 +14,8 @@ class GColourSelect :
 {
 	friend class GColourSelectPopup;
 
-	COLOUR c32;
-	GArray<COLOUR> Presets;
+	GColour c;
+	GArray<GColour> Presets;
 
 public:
 	enum
@@ -23,14 +23,15 @@ public:
 		Transparent = 0
 	};
 
-	GColourSelect(GArray<COLOUR> *c32 = 0);
+	GColourSelect(GArray<GColour> *c32 = 0);
 
 	// Methods
-	void SetColourList(GArray<COLOUR> *c32 = 0);
+	void SetColourList(GArray<GColour> *c32 = 0);
 
 	// GView
 	int64 Value();
 	void Value(int64 i);
+	void Value(GColour c);
 	void OnPaint(GSurface *pDC);
 	bool OnLayout(GViewLayoutInfo &Inf);
 };

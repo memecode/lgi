@@ -40,7 +40,7 @@ public:
 			Lst->Focus(true);
 		}
 		
-		pDC->Colour(LC_BLACK, 24);
+		pDC->Colour(L_BLACK);
 		pDC->Box();
 	}
 	

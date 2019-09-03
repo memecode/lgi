@@ -64,7 +64,7 @@ bool GLayout::Pour(GRegion &r)
 	return false;
 }
 
-void GLayout::GetScrollPos(int &x, int &y)
+void GLayout::GetScrollPos(int64 &x, int64 &y)
 {
 	if (HScroll)
 	{
@@ -85,7 +85,7 @@ void GLayout::GetScrollPos(int &x, int &y)
 	}
 }
 
-void GLayout::SetScrollPos(int x, int y)
+void GLayout::SetScrollPos(int64 x, int64 y)
 {
 	if (HScroll)
 	{
@@ -248,7 +248,7 @@ void GLayout::OnNcPaint(GSurface *pDC, GRect &r)
 		// Draw square at the end of each scroll bar
 		GRect s(	VScroll->GetPos().x1, HScroll->GetPos().y1,
 					VScroll->GetPos().x2, HScroll->GetPos().y2);
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle(&s);
 	}
 }
@@ -288,7 +288,7 @@ GMessage::Param GLayout::OnEvent(GMessage *Msg)
 
 	// if (VScroll) VScroll->OnEvent(Msg);
 	// if (HScroll) HScroll->OnEvent(Msg);
-	int Status = GView::OnEvent(Msg);
+	auto Status = GView::OnEvent(Msg);
 	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&
 		GetParent())

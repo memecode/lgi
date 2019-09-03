@@ -311,7 +311,7 @@ GExecutionStatus GExternFunc::Call(GScriptContext *Ctx, LScriptArguments &Args)
 		return ScriptError;
 	}
 	
-	#if defined(_MSC_VER) || (defined(MAC) && defined(LGI_32BIT) && !defined(COCOA))
+	#if defined(_MSC_VER) || (defined(MAC) && defined(LGI_32BIT) && !LGI_COCOA)
 	ssize_t a = Ptr.ni - &Val[0];
 	#endif
 	NativeInt r = 0;
@@ -342,7 +342,7 @@ GExecutionStatus GExternFunc::Call(GScriptContext *Ctx, LScriptArguments &Args)
 			}
 		#endif
 	#elif defined(MAC)
-		#ifdef COCOA
+		#if LGI_COCOA
 		#warning FIXME
 		#elif LGI_32BIT
 		// 32bit only
@@ -796,15 +796,15 @@ public:
 			if (Args)
 			{
 				// Check the local frame size is at least big enough for the args...
-				if (Sf.CurrentFrameSize < Args->Length())
+				if (Sf.CurrentFrameSize > Args->Length())
 				{
-					Log->Print("%s:%i - Too many args for local frame size (%i->%i).\n",
+					Log->Print("%s:%i - Expecting more args then those supplied (%i->%i).\n",
 						_FL, (int)Args->Length(), (int)Sf.CurrentFrameSize);
 					return ScriptError;
 				}
 
 				// Put the arguments of the function call into the local array
-				for (unsigned i=0; i<Args->Length(); i++)
+				for (unsigned i=0; i<Sf.CurrentFrameSize; i++)
 				{
 					Locals[LocalsBase+i] = *(*Args)[i];
 				}
@@ -1479,7 +1479,7 @@ void GDebugView::PourText(size_t Start, ssize_t Len)
 		if (CurLine == Idx)
 		{
 			l->c.Rgb(0, 0, 0);
-			l->Back.Set(LC_DEBUG_CURRENT_LINE, 24);
+			l->Back = LColour(L_DEBUG_CURRENT_LINE);
 		}
 		else
 		{

@@ -62,9 +62,9 @@ private:
 
 	#elif defined MAC
 	
-		#if defined(COCOA)
+		#if LGI_COCOA
 
-		#elif defined(LGI_CARBON)
+		#elif LGI_CARBON
 
 			friend OSStatus LgiWindowProc(EventHandlerCallRef, EventRef, void *);
 			friend OSStatus LgiRootCtrlProc(EventHandlerCallRef, EventRef, void *);
@@ -111,17 +111,20 @@ protected:
 	static GViewI		*_Capturing;
 	static GViewI		*_Over;
 	
-	#if defined(__GTK_H__) || defined(LGI_SDL)
+	#ifndef LGI_VIEW_HASH
+	#error "Define LGI_VIEW_HASH to 0 or 1"
+	#endif
+	#if LGI_VIEW_HASH
 	
 public:
-		enum LockOp
-		{
-			OpCreate,
-			OpDelete,
-			OpExists,
-		};
-	
-		static bool LockHandler(GViewI *v, LockOp Op);
+	enum LockOp
+	{
+		OpCreate,
+		OpDelete,
+		OpExists,
+	};
+
+	static bool LockHandler(GViewI *v, LockOp Op);
 
 	#endif
 
@@ -150,12 +153,13 @@ protected:
 	#elif defined MAC
 	
 		bool _Attach(GViewI *parent);
-		#if defined(COCOA)
+		#if LGI_COCOA
 		public:
 			GdcPt2 Flip(GdcPt2 p);
 			GRect Flip(GRect p);
+			virtual void OnDealloc();
 	
-		#elif defined(LGI_CARBON)
+		#elif LGI_CARBON
 			OsView _CreateCustomView();
 			virtual bool _OnGetInfo(HISize &size, HISize &line, HIRect &bounds, HIPoint &origin) { return false; }
 			virtual void _OnScroll(HIPoint &origin) {}
@@ -171,7 +175,7 @@ protected:
 
 	#endif
 	
-	#if defined(COCOA)
+	#if LGI_COCOA
 		protected:
 	#endif
 
@@ -475,7 +479,7 @@ public:
     class GCss *GetCss(bool Create = false);
 
 	/// Resolve a CSS colour, e.g.:
-	/// auto Back = StyleColour(GCss::PropBackgroundColor, LC_MED);
+	/// auto Back = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 	GColour StyleColour(int CssPropType, GColour Default, int Depth = 5);
 
     /// Sets the style of the control (will take ownership of 'css')
@@ -590,9 +594,9 @@ public:
 		int Ms = -1
 	);
 	/// Convert a point form view coordinates to screen coordinates
-	void PointToScreen(GdcPt2 &p);
+	bool PointToScreen(GdcPt2 &p);
 	/// Convert a point form screen coordinates to view coordinates
-	void PointToView(GdcPt2 &p);
+	bool PointToView(GdcPt2 &p);
 	/// Get the x,y offset from the virtual window to the first real view in the parent chain
 	bool WindowVirtualOffset(GdcPt2 *Offset);	
 	/// Get the size of the window borders

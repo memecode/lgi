@@ -517,7 +517,7 @@ public:
 				else if (Warn && strchr(":[", Warn[7]))
 					ln->c.Rgb(255, 128, 0);
 				else
-					ln->c.Set(LC_TEXT, 24);
+					ln->c = LColour(L_TEXT);
 			}
 		}
 	}
@@ -1517,7 +1517,7 @@ public:
 	}
 };
 
-#if 0// def COCOA
+#if 0// def LGI_COCOA
 #define Chk printf("%s:%i - Cnt=%i\n", LgiGetLeaf(__FILE__), __LINE__, (int)WindowHandle().p.retainCount)
 #else
 #define Chk
@@ -1566,6 +1566,7 @@ Chk;
 			LgiAssert(Loaded);
 			if (Loaded)
 			{
+				Menu->SetPrefAndAboutItems(IDM_OPTIONS, IDM_ABOUT);
 				d->RecentFilesMenu = Menu->FindSubMenu(IDM_RECENT_FILES);
 				d->RecentProjectsMenu = Menu->FindSubMenu(IDM_RECENT_PROJECTS);
 				d->WindowsMenu = Menu->FindSubMenu(IDM_WINDOW_LST);

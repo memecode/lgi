@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include "Lgi.h"
+#include "GTextLog.h"
+#include "GTableLayout.h"
+#include "GButton.h"
 
 #if defined(__GTK_H__)
 #include "gtk/gtkdialog.h"
@@ -15,7 +18,7 @@ void MsgCb(Gtk::GtkDialog *dialog, Gtk::gint response_id, Gtk::gpointer user_dat
 #include "GTextLabel.h"
 #include "GButton.h"
 
-#if COCOA
+#if LGI_COCOA
 #import <Cocoa/Cocoa.h>
 #endif
 
@@ -177,7 +180,7 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 		}
 	}
 	
-	#elif COCOA
+	#elif LGI_COCOA
 	
 	NSAlert *alert = [[NSAlert alloc] init];
 	auto msg = Msg.NsStr();
@@ -428,3 +431,30 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 	return Res;
 }
 
+#if !LGI_STATIC
+void LDialogTextMsg(GViewI *Parent, const char *Title, GString Txt)
+{
+	GAutoPtr<GDialog> d(new GDialog);
+	if (d)
+	{
+		GTextLog *Log = NULL;
+		d->SetParent(Parent);
+		d->Name(Title);
+		GRect r(0, 0, 600, 500);
+		d->SetPos(r);
+		d->MoveSameScreen(Parent);
+
+		GTableLayout *t = new GTableLayout(100);
+		auto c = t->GetCell(0, 0);
+		c->Add(Log = new GTextLog(101));
+		Log->Name(Txt);
+		c = t->GetCell(0, 1);
+		c->Add(new GButton(IDOK, 0, 0, -1, -1, "Ok"));
+		c->TextAlign(GCss::AlignCenter);
+		
+		d->AddView(t);
+		d->DoModal();
+	}
+}
+
+#endif

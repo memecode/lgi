@@ -67,7 +67,7 @@ GRichTextEdit::GRichTextEdit(	int Id,
 	#if 0
 	d->BackgroundColor(GCss::ColorDef(GColour::Green));
 	#else
-	d->BackgroundColor(GCss::ColorDef(GCss::ColorRgb, Rgb24To32(LC_WORKSPACE)));
+	d->BackgroundColor(LColour(L_WORKSPACE));
 	#endif
 	
 	SetFont(SysFont);
@@ -2838,7 +2838,7 @@ SelectColour::SelectColour(GRichTextPriv *priv, GdcPt2 p, GRichTextEdit::RectTyp
 
 void SelectColour::OnPaint(GSurface *pDC)
 {
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Rectangle();
 	for (unsigned i=0; i<e.Length(); i++)
 	{
@@ -2905,7 +2905,7 @@ EmojiMenu::EmojiMenu(GRichTextPriv *priv, GdcPt2 p) : GPopup(priv->View)
 
 	int Sz = EMOJI_CELL_SIZE - 1;
 	int PaneCount = 5;
-	int PaneSz = Map.Length() / PaneCount;
+	int PaneSz = (int)(Map.Length() / PaneCount);
 	int ImgIdx = 0;
 
 	int PaneSelectSz = SysFont->GetHeight() * 2;
@@ -2965,7 +2965,7 @@ void EmojiMenu::OnPaint(GSurface *pDC)
 	if (!pDC->SupportsAlphaCompositing())
 		DblBuf.Reset(new GDoubleBuffer(pDC));
 
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Rectangle();
 
 	GSurface *EmojiImg = d->GetEmojiImage();
@@ -2982,7 +2982,7 @@ void EmojiMenu::OnPaint(GSurface *pDC)
 			GDisplayString Ds(SysFont, s);
 			if (Cur == i)
 			{
-				pDC->Colour(LC_LIGHT, 24);
+				pDC->Colour(L_LIGHT);
 				pDC->Rectangle(&p.Btn);
 			}
 			SysFont->Fore(L_TEXT);

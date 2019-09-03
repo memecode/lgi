@@ -68,7 +68,7 @@ GImageList *LgiLoadImageList(const char *File, int x, int y)
 	}		
 
 	GImageList *ImgList = 0;
-	char *Path = FileExists(File) ? NewStr(File) : LgiFindFile(File);
+	auto Path = FileExists(File) ? GString(File) : LFindFile(File);
 	if (Path)
 	{
 		GSurface *pDC = GdcD->Load(Path);
@@ -77,9 +77,7 @@ GImageList *LgiLoadImageList(const char *File, int x, int y)
 			ImgList = new GImageList(x, y, pDC);
 			DeleteObj(pDC);
 		}
-		else LgiTrace("%s:%i - Couldn't load '%s'\n", _FL, Path);
-
-		DeleteArray(Path);
+		else LgiTrace("%s:%i - Couldn't load '%s'\n", _FL, Path.Get());
 	}
 	else LgiTrace("%s:%i - Couldn't find '%s'\n", _FL, File);
 
@@ -91,7 +89,7 @@ GToolBar *LgiLoadToolbar(GViewI *Parent, const char *File, int x, int y)
 	GToolBar *Toolbar = new GToolBar;
 	if (Toolbar)
 	{
-		GAutoString FileName(LgiFindFile(File));
+		GString FileName = LFindFile(File);
 		if (FileName)
 		{
 			bool Success = FileName && Toolbar->SetBitmap(FileName, x, y);
@@ -359,6 +357,19 @@ int GImageList::GetItems()
 
 void GImageList::Update(int Flags)
 {
+}
+
+GRect GImageList::GetIconRect(int Idx)
+{
+	GRect r(0, 0, -1, -1);
+	
+	if (Idx >= 0 && Idx < GetItems())
+	{
+		r.ZOff(d->Sx-1, d->Sy-1);
+		r.Offset(Idx * d->Sx, 0);
+	}
+	
+	return r;
 }
 
 GRect *GImageList::GetBounds()

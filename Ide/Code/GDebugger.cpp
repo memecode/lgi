@@ -881,6 +881,10 @@ public:
 						}
 					}
 					
+					if (Cmd("handle SIGTTOU ignore nostop", &p))
+					{
+					}
+					
 					bool Status = Cmd("c");
 					if (Status)
 						SetState(true, true);

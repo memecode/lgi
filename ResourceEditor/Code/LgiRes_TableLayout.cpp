@@ -532,8 +532,7 @@ public:
 		int cx = r.X() >> 1;
 		int cy = r.Y() >> 1;
 
-		COLOUR Old = pDC->Colour();
-		pDC->Colour(LC_WHITE, 24);
+		GColour Old = pDC->Colour(L_WHITE);
 		switch (Btn)
 		{
 			case '|':
@@ -981,7 +980,10 @@ void CtrlTable::OnPaint(GSurface *pDC)
 			{
 				int Op = pDC->Op(GDC_ALPHA);
 				if (pDC->Applicator())
+				{
+					pDC->Colour(Blue);
 					pDC->Applicator()->SetVar(GAPP_ALPHA_A, 0x20);
+				}
 				else
 					pDC->Colour(GColour(Blue.r(), Blue.g(), Blue.b(), 0x20));
 				pDC->Rectangle(c->Pos.x1 + 1, c->Pos.y1 + 1, c->Pos.x2 - 1, c->Pos.y2 - 1);
@@ -998,6 +1000,8 @@ void CtrlTable::OnPaint(GSurface *pDC)
 			#endif
 		}
 	}
+
+	pDC->Colour(Blue);
 	d->DrawBtn(pDC, d->AddX, '+');
 	d->DrawBtn(pDC, d->AddY, '+');
 	for (i=0; i<d->DelCol.Length(); i++)
@@ -1594,7 +1598,7 @@ public:
     
     void OnPaint(GSurface *pDC)
     {
-        pDC->Colour(LC_WORKSPACE, 24);
+        pDC->Colour(L_WORKSPACE);
         pDC->Rectangle();
     }
     

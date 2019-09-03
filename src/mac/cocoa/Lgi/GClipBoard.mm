@@ -22,7 +22,7 @@ GClipBoard::GClipBoard(GView *o)
 {
 	d = new GClipBoardPriv;
 	Owner = o;
-	Open = false;
+	Open = true;
 }
 
 GClipBoard::~GClipBoard()
@@ -32,31 +32,52 @@ GClipBoard::~GClipBoard()
 
 bool GClipBoard::Empty()
 {
+	LAutoPool Ap;
 	bool Status = false;
 
-	Txt.Reset();
+	Txt.Empty();
 	wTxt.Reset();
+
+	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+	[pasteboard clearContents];
 
 	return Status;
 }
 
 bool GClipBoard::Text(char *Str, bool AutoEmpty)
 {
-	if (AutoEmpty)
-	{
-		Empty();
-	}
+	LAutoPool Ap;
 	
-	if (!wTxt.Reset(Utf8ToWide(Str)))
-		return false;
+	if (AutoEmpty)
+		Empty();
+	
+	Txt = Str;
+	wTxt.Reset();
+	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+	NSArray *array = [NSArray arrayWithObject:Txt.NsStr()];
+	[pasteboard writeObjects:array];
 
-	return TextW(wTxt);
+	return Txt;
 }
 
 char *GClipBoard::Text()
 {
-	char16 *w = TextW();
-	Txt.Reset(WideToUtf8(w));
+	LAutoPool Ap;
+	
+	NSArray *classes = [[NSArray alloc] initWithObjects:[NSString class], nil];
+	NSArray *copiedItems = [[NSPasteboard generalPasteboard]
+								readObjectsForClasses:classes
+								options:[NSDictionary dictionary]];
+	if (copiedItems != nil)
+	{
+		for (NSString *s in copiedItems)
+		{
+			Txt = [s UTF8String];
+			break;
+		}
+	}
+	[classes release];
+
 	return Txt;
 }
 
@@ -67,13 +88,19 @@ bool GClipBoard::TextW(char16 *Str, bool AutoEmpty)
 	if (AutoEmpty)
 		Empty();
 	
+	Txt = Str;
+	wTxt.Reset();
+	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+	NSArray *array = [NSArray arrayWithObject:Txt.NsStr()];
+	[pasteboard writeObjects:array];
+
 	return Status;
 }
 
 char16 *GClipBoard::TextW()
 {
-	Txt.Reset();
-	wTxt.Reset();
+	Text();
+	wTxt.Reset(Utf8ToWide(Txt));
 	return wTxt;
 }
 
@@ -122,9 +149,23 @@ bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8,true> &Ptr, ssize_t *L
 {
 	bool Status = false;
 
-	if (Ptr && Len)
+	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+	NSArray *classes = [[NSArray alloc] initWithObjects:[NSPasteboardItem class], nil];
+	NSDictionary *options = [NSDictionary dictionary];
+	NSArray *copiedItems = [pasteboard readObjectsForClasses:classes options:options];
+	if (copiedItems != nil)
 	{
-		LgiAssert(!"Not impl");
+		for (NSPasteboardItem *i in copiedItems)
+		{
+			GString::Array Types;
+			Types.SetFixedLength(false);
+			for (id type in i.types)
+				Types.New() = [type UTF8String];
+			
+			// Pick a type and decode it...
+			printf("%s:%i - FIXME decode a binary type here.\n", _FL);
+		}
+		[copiedItems release];
 	}
 
 	return Status;

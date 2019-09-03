@@ -16,11 +16,11 @@ static int LCocoaView_Count = 0;
 
 @implementation LCocoaMsg
 
-- (id)init:(int)hnd msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B
+- (id)init:(GViewI*)View msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B
 {
 	if ((self = [super init]) != nil)
 	{
-		self.hnd = hnd;
+		self.v = View;
 		self.m = Msg;
 		self.a = A;
 		self.b = B;
@@ -31,11 +31,26 @@ static int LCocoaView_Count = 0;
 
 @end
 
+@implementation LCocoaAssert
+
+- (id)init:(GString)m
+{
+	if ((self = [super init]) != nil)
+	{
+		self.msg = m;
+	}
+	
+	return self;
+}
+
+@end
+
+
 @implementation LCocoaView {
 	NSTrackingArea *tracking;
 }
 
-- (id)init:(GWindow*)wnd
+- (id)init:(GView*)wnd
 {
 	LAutoPool Pool;
 	LCocoaView_Count++;
@@ -142,6 +157,16 @@ static int LCocoaView_Count = 0;
 	m.Target->GetGView()->_Mouse(m, true);
 }
 
+- (void)mouseDragged:(NSEvent*)ev
+{
+	LAutoPool Pool;
+	Check();
+
+	GMouse m(self.w);
+	m.SetFromEvent(ev, self);
+	m.Target->GetGView()->_Mouse(m, true);
+}
+
 - (void)scrollWheel:(NSEvent*)ev
 {
 	LAutoPool Pool;
@@ -156,15 +181,24 @@ static int LCocoaView_Count = 0;
 	if (!t)
 		return;
 
-	auto scrollingDeltaY = ev.scrollingDeltaY;
-	int px = SysFont->GetHeight();
-	float lines = ((-scrollingDeltaY) + px) / px;
-	// printf("Scroll %g\n", scrollingDeltaY);
-	t->OnMouseWheel(lines);
+	static CGFloat total = 0.0;
+	auto deltaY = ev.scrollingDeltaY;
+	total += deltaY;
+	
+	// int px = SysFont->GetHeight();
+	int px = 1;
+	int lines = (int) (total / px);
+	// printf("Scroll %g, lines=%i\n", deltaY, lines);
+	if (lines)
+	{
+		total -= lines * px;
+		t->OnMouseWheel(-lines);
+	}
 }
 
 GKey KeyEvent(NSEvent *ev)
 {
+	LAutoPool Pool;
 	GKey k;
 	GString s = [ev.characters UTF8String];
 	auto mod = ev.modifierFlags;
@@ -207,24 +241,43 @@ GKey KeyEvent(NSEvent *ev)
 
 - (void)keyDown:(NSEvent*)event
 {
+	LAutoPool Pool;
 	Check();
 
 	GKey k = KeyEvent(event);
 	k.Down(true);
-	self.w->HandleViewKey(NULL, k);
+	
+	GWindow *wnd = dynamic_cast<GWindow*>(self.w);
+	if (wnd)
+		wnd->HandleViewKey(NULL, k);
+	else
+		self.w->OnKey(k);
 }
 
 - (void)keyUp:(NSEvent*)event
 {
+	LAutoPool Pool;
 	Check();
 
 	GKey k = KeyEvent(event);
-	self.w->HandleViewKey(NULL, k);
+	GWindow *wnd = dynamic_cast<GWindow*>(self.w);
+	if (wnd)
+		wnd->HandleViewKey(NULL, k);
+	else
+		self.w->OnKey(k);
 }
 
 - (void)userEvent:(LCocoaMsg*)msg
 {
-	PostThreadEvent(msg.hnd, msg.m, msg.a, msg.b);
+	LAutoPool Pool;
+
+	if (GView::LockHandler(msg.v, GView::OpExists))
+	{
+		GMessage Msg(msg.m, msg.a, msg.b);
+		// LgiTrace("%s::OnEvent %i,%i,%i\n", msg.v->GetClass(), msg.m, msg.a, msg.b);
+		msg.v->OnEvent(&Msg);
+	}
+	
 	[msg release];
 }
 
@@ -234,3 +287,4 @@ GKey KeyEvent(NSEvent *ev)
 }
 
 @end
+

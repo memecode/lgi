@@ -122,7 +122,7 @@ public:
 		static const char *AltCmdName() { return "Alt"; }
 	#endif
 	
-	#if defined COCOA
+	#if LGI_COCOA
 	void SetModifer(uint32_t modifierKeys);
 	#else
 	void SetModifer(uint32_t modifierKeys)
@@ -316,14 +316,6 @@ public:
 	/// The params to call the app with
 	GAutoString Params;
 };
-
-template<typename T>
-void LSwap(T &a, T &b)
-{
-	T tmp = a;
-	a = b;
-	b = tmp;
-}
 
 template<typename RESULT, typename CHAR>
 RESULT LHash(const CHAR *v, ssize_t l, bool Case)

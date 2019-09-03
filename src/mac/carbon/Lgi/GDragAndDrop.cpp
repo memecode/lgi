@@ -25,7 +25,7 @@ public:
 	GSurface *ExternImg;
 	GRect ExternSubRgn;
 	
-	#if !defined(COCOA)
+	#if !LGI_COCOA
 	GAutoPtr<CGImg> Img;
 	#endif
 	
@@ -114,7 +114,7 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect, GSurface *Icon)
 	if (!SourceWnd)
 		return -1;
 
-	#if !defined(COCOA)
+	#if !LGI_COCOA
 	
 	DragRef Drag = 0;
 	OSErr err = NewDrag(&Drag);

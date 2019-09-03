@@ -312,8 +312,8 @@ DeclGArrayCompare(RowStrCompare, LDbRow*, CompareParams)
 
 DeclGArrayCompare(RowDateCompare, LDbRow*, CompareParams)
 {
-	LDateTime *A = (*a)->GetDate(param->Id);
-	LDateTime *B = (*b)->GetDate(param->Id);
+	const LDateTime *A = (*a)->GetDate(param->Id);
+	const LDateTime *B = (*b)->GetDate(param->Id);
 	if (!A || !B)
 	{
 		LgiAssert(0);
@@ -543,7 +543,7 @@ GString LDbRow::ToString()
 			}
 			case GV_DATETIME:
 			{
-				LDateTime *dt = GetDate(f.Id);
+				const LDateTime *dt = GetDate(f.Id);
 				if (dt)
 					a.New() = dt->Get();
 				else
@@ -711,7 +711,7 @@ Store3Status LDbRow::SetInt(int id, int64 val)
 	return Store3Error;
 }
 
-LDateTime *LDbRow::GetDate(int id)
+const LDateTime *LDbRow::GetDate(int id)
 {
 	Info i = d->Map.Find(id);
 	if (i.Index < 0 || !Base.c)
@@ -725,7 +725,7 @@ LDateTime *LDbRow::GetDate(int id)
 	return &Cache;
 }
 
-Store3Status LDbRow::SetDate(int id, LDateTime *dt)
+Store3Status LDbRow::SetDate(int id, const LDateTime *dt)
 {
 	Info i = d->Map.Find(id);
 	if (i.Index < 0 || !dt)
@@ -737,7 +737,8 @@ Store3Status LDbRow::SetDate(int id, LDateTime *dt)
 		return Store3Error;
 
 	LDbDate dd;
-	dd.Serialize(p, *dt, true);
+	LDateTime n = *dt;
+	dd.Serialize(p, n, true);
 	d->SetDirty();
 	
 	return Store3Success;

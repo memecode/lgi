@@ -165,7 +165,8 @@ GViewI *GViewIter::operator [](ssize_t Idx)
 GViewI *GView::_Capturing = 0;
 GViewI *GView::_Over = 0;
 
-#if defined(__GTK_H__) || defined(LGI_SDL)
+#if LGI_VIEW_HASH
+
 struct ViewTbl : public LMutex
 {
 	typedef LHashTbl<PtrKey<GViewI*>, int> T;
@@ -218,6 +219,7 @@ bool GView::LockHandler(GViewI *v, GView::LockOp Op)
 	ViewTblInst.Unlock();
 	return Status;
 }
+
 #endif
 
 GView::GView(OsView view)
@@ -240,8 +242,11 @@ GView::GView(OsView view)
 	Pos.ZOff(-1, -1);
 	WndFlags = GWF_VISIBLE;
 
-	#if defined(__GTK_H__) || defined(LGI_SDL)
-	LockHandler(this, OpCreate);
+    #ifndef LGI_VIEW_HASH
+        #error "LGI_VIEW_HASH needs to be defined"
+    #elif LGI_VIEW_HASH
+	    LockHandler(this, OpCreate);
+	    // printf("Adding %p to hash\n", (GViewI*)this);
 	#endif
 }
 
@@ -253,7 +258,7 @@ GView::~GView()
 		d->SinkHnd = -1;
 	}
 	
-	#if defined(__GTK_H__) || defined(LGI_SDL)
+	#if LGI_VIEW_HASH
 	LockHandler(this, OpDelete);
 	#endif
 
@@ -620,25 +625,11 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 		GView *w = i->GetGView();
 		if (w && w->Visible())
 		{
-			#ifdef _DEBUG
-			if (_Debug) LgiTrace("%s:%i - _Paint.Vis %s %s\n", _FL, w->GetClass(), w->GetPos().GetStr());
-			#endif
+			if (!w->Pos.Valid())
+				continue;
 			w->_Paint(pDC, &o);
 		}
-		#ifdef _DEBUG
-		else if (_Debug)
-			LgiTrace("%s:%i - _Paint.!Vis %s\n", _FL, w->GetClass());
-		#endif
 	}
-
-	/*
-	d->InPaint = false;
-	PaintTime += Update ? LgiCurrentTime()-StartTs : 0;
-	if (++nPaint % 100 == 0)
-	{
-		LgiTrace("PaintAvg = %.2g\n", (double)PaintTime / nPaint);
-	}
-	*/
 }
 #else
 void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
@@ -1292,12 +1283,12 @@ void GView::Visible(bool v)
 			else
 				_View->Hide();
 
-		#elif defined(COCOA)
+		#elif LGI_COCOA
 
 			LAutoPool Pool;
 			[_View.p setHidden:!v];
 
-		#elif defined(LGI_CARBON)
+		#elif LGI_CARBON
 		
 			Boolean is = HIViewIsVisible(_View);
 			if (v != is)
@@ -1321,9 +1312,9 @@ bool GView::Focus()
 	ThreadCheck();
 
 	bool Has = false;
-	GWindow *w = GetWindow();
-   
+	
 	#if defined(__GTK_H__) || defined(BEOS)
+	GWindow *w = GetWindow();
 	if (w)
 	{
 		bool Active = w->IsActive();
@@ -1339,6 +1330,7 @@ bool GView::Focus()
 	#elif LGI_COCOA
 	Has = TestFlag(WndFlags, GWF_FOCUS);
 	#elif LGI_CARBON
+	GWindow *w = GetWindow();
 	if (w)
 	{
 		ControlRef Cur;
@@ -1531,9 +1523,8 @@ bool GView::DropTarget(bool t)
 			d->DropTarget = t ? Wnd : 0;
 	}
 
-	#if COCOA
-	#warning FIXME
-	#elif defined LGI_CARBON
+	#if LGI_COCOA
+	#elif LGI_CARBON
 	if (t)
 	{
 		static EventTypeSpec DragEvents[] =
@@ -2069,6 +2060,8 @@ bool GView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 	#ifdef LGI_SDL
 		return LgiPostEvent(this, Cmd, a, b);
 	#elif WINNATIVE
+		if (!_View)
+			return false;
 		BOOL Res = ::PostMessage(_View, Cmd, a, b);
 		if (!Res)
 		{

@@ -93,24 +93,6 @@ void c2p255(Str255 &d, char *s)
 	}
 }
 
-struct GLgiAssert
-{
-	GAutoString Msg;
-	int Result;
-	
-	GLgiAssert() { Result = 0; }
-};
-
-#ifdef _DEBUG
-static void *_LgiAssert(void *Param)
-{
-	GLgiAssert *Assert = (GLgiAssert*) Param;
-	GAlert a(0, "Assert Failed", Assert->Msg, "Abort", "Debug", "Ignore");
-	Assert->Result = a.DoModal();
-	return Assert;
-}
-#endif
-
 void _lgi_assert(bool b, const char *test, const char *file, int line)
 {
 	static bool Asserting = false;
@@ -124,17 +106,31 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		
 		GStringPipe p;
 		p.Print("Assert failed, file: %s, line: %i\n%s", file, line, test);
-		GLgiAssert Assert;
-		Assert.Msg.Reset(p.NewStr());
+		int Result = -1;
 		
-#ifdef MAC
-		MPRemoteCall(_LgiAssert, &Assert, kMPOwningProcessRemoteContext);
+#if LGI_COCOA
+		LCocoaAssert *ca = [[LCocoaAssert alloc] init:p.NewGStr()];
+		auto hnd = LgiApp->Handle();
+		[hnd.p performSelectorOnMainThread:@selector(assert:) withObject:ca waitUntilDone:true];
+		switch (ca.result)
+		{
+			case NSAlertFirstButtonReturn: // Debug/Break
+				Result = 2;
+				break;
+			case NSAlertSecondButtonReturn: // Ingore/Continue
+				Result = 3;
+				break;
+			case NSAlertThirdButtonReturn: // Exit/Abort
+				Result = 1;
+				break;
+		}
+		[ca release];
 #else
 		GAlert a(0, "Assert Failed", Assert.Msg, "Abort", "Debug", "Ignore");
-		Assert.Result = a.DoModal();
+		Result = a.DoModal();
 #endif
 		
-		switch (Assert.Result)
+		switch (Result)
 		{
 			default:
 			{
@@ -274,13 +270,11 @@ bool LgiPlaySound(const char *FileName, int ASync)
 	return LgiExecute(FileName);
 }
 
+#if LGI_CARBON
 OSErr FinderLaunch(long nTargets, FSRef *targetList)
 {
 	OSErr err = unimpErr;
 	
-	#if COCOA
-	#warning FIXME
-	#else
 	AppleEvent theAEvent, theReply;
 	AEAddressDesc fndrAddress;
 	AEDescList targetListDesc;
@@ -375,10 +369,9 @@ OSErr FinderLaunch(long nTargets, FSRef *targetList)
 	AEDisposeDesc(&fndrAddress);
 	AEDisposeDesc(&theReply);
 	
-	#endif
-
 	return err;
 }
+#endif
 
 GString LErrorCodeToString(uint32 ErrorCode)
 {
@@ -411,6 +404,7 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Er
 		}
 		else
 		{
+			#if LGI_CARBON
 			FSRef r;
 			OSStatus e = FSPathMakeRef((UInt8*)File, &r, NULL);
 			char Path[MAX_PATH];
@@ -426,6 +420,7 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Er
 			
 			if (e) printf("%s:%i - FSPathMakeRef failed with %i\n", _FL, (int)e);
 			else
+			#endif
 			{
 				// Is this an app bundle?
 				bool IsAppBundle = false;
@@ -495,9 +490,11 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Er
 				else
 				{
 					// Document
+					#if LGI_CARBON
 					e = FinderLaunch(1, &r);
 					if (e) printf("%s:%i - FinderLaunch faied with %i\n", _FL, (int)e);
 					else Status = true;
+					#endif
 				}
 			}
 		}

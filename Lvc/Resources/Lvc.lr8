@@ -37,10 +37,10 @@
 		<String Ref="38" Cid="38" Define="IDC_UNTRACKED" en="Show untracked files" />
 		<String Ref="39" Cid="39" Define="IDC_PULL_ALL" en="*" />
 		<String Ref="40" Cid="40" Define="IDC_STATUS" en="Status" />
-		<String Ref="41" Cid="514" Define="IDC_PUSH_ALL" en="*" />
 		<String Ref="44" Cid="-1" Define="IDC_STATIC" en="Head revisions:" />
 		<String Ref="45" Cid="45" Define="IDC_HEADS" />
 		<String Ref="47" Cid="47" Define="IDC_BUILD_FIX" en="BuildFix" />
+		<String Ref="48" Cid="41" Define="IDC_UPDATE" en="Update" />
 	</string-group>
 	<Dialog pos="7,7,464,203" ref="9">
 		<TableLayout pos="7,7,447,167" ref="10" cols="0.200,0.200,0.200,0.200,0.200" rows="0.181,0.819">
@@ -127,40 +127,42 @@
 			</tr>
 		</TableLayout>
 	</Dialog>
-	<Dialog pos="7,7,998,130" ref="1">
-		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" cols="0.100,0.100,0.100,0.066,0.050,0.090,0.066,0.164,0.164,0.100" rows="1.000">
+	<Dialog pos="7,7,998,136" ref="1">
+		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" CellStyle="padding-right: 1em;" cols="0.091,0.094,0.088,0.060,0.045,0.082,0.060,0.149,0.149,0.091,0.091" rows="1.000">
 			<tr>
 				<td valign="Center" style="padding-left: 4px;&#10;padding-right: 1em;">
 					<Button pos="7,21,71,48" ref="18" />
 				</td>
-				<td valign="Center" style="padding-right: 1em;">
-					<Button pos="105,14,139,41" ref="5" />
-					<Button pos="140,14,167,41" ref="39" />
-				</td>
-				<td valign="Center" style="padding-right: 1em;">
-					<Button pos="199,14,240,41" ref="6" />
-					<Button pos="245,14,272,41" ref="41" />
-				</td>
-				<td valign="Center" style="padding-right: 1em;">
-					<Button pos="294,14,335,41" ref="40" />
-				</td>
 				<td valign="Center">
-					<StaticText pos="348,21,388,41" ref="7" />
-				</td>
-				<td>
-					<EditBox Pos="406,14,470,41" Style="width: 200px;" ref="8" />
+					<Button pos="96,14,130,41" ref="5" />
+					<Button pos="131,14,158,41" ref="39" />
 				</td>
 				<td style="padding-right: 1em;">
-					<Button pos="499,14,526,41" ref="17" />
+					<CheckBox pos="189,21,223,41" ref="48" />
+				</td>
+				<td valign="Center" style="padding-right: 1em;">
+					<Button pos="260,14,301,41" ref="6" />
+				</td>
+				<td valign="Center" style="padding-right: 1em;">
+					<Button pos="315,14,355,41" ref="40" />
 				</td>
 				<td valign="Center">
-					<CheckBox pos="545,21,607,41" ref="38" />
-				</td>
-				<td valign="Center">
-					<StaticText pos="728,21,804,48" ref="44" />
+					<StaticText pos="359,21,399,41" ref="7" />
 				</td>
 				<td>
-					<ComboBox pos="861,21,944,41" ref="45" />
+					<EditBox Pos="435,14,490,41" Style="width: 200px;" ref="8" />
+				</td>
+				<td style="padding-right: 1em;">
+					<Button pos="513,14,540,41" ref="17" />
+				</td>
+				<td valign="Center">
+					<CheckBox pos="639,21,701,41" ref="38" />
+				</td>
+				<td valign="Center">
+					<StaticText pos="784,21,860,48" ref="44" />
+				</td>
+				<td>
+					<ComboBox pos="868,21,951,41" ref="45" />
 				</td>
 			</tr>
 		</TableLayout>

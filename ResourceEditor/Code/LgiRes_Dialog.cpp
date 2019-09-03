@@ -203,12 +203,12 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////
-void DrawGoobers(GSurface *pDC, GRect &r, GRect *Goobers, COLOUR c)
+void DrawGoobers(GSurface *pDC, GRect &r, GRect *Goobers, GColour c)
 {
 	int Mx = (r.x2 + r.x1) / 2 - (GOOBER_SIZE / 2);
 	int My = (r.y2 + r.y1) / 2 - (GOOBER_SIZE / 2);
 
-	pDC->Colour(c, 24);
+	pDC->Colour(c);
 
 	Goobers[0].x1 = r.x1 - GOOBER_BORDER;
 	Goobers[0].y1 = r.y1 - GOOBER_BORDER;
@@ -601,7 +601,7 @@ void ResDialogCtrl::OnPaint(GSurface *pDC)
 	{
 		GRect r = DragRgn;
 		r.Normal();
-		pDC->Colour(LC_FOCUS_SEL_BACK, 24);
+		pDC->Colour(L_FOCUS_SEL_BACK);
 		pDC->Box(&r);
 	}
 }
@@ -910,13 +910,13 @@ void CtrlDlg::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	// Draw the border
 	GRect r(0, 0, View()->X()-1, View()->Y()-1);
 	LgiWideBorder(pDC, r, DefaultRaisedEdge);
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	LgiFlatBorder(pDC, r, 1);
 
 	// Draw the title bar
 	Title = r;
 	Title.y2 = Client.y1 - 1;
-	pDC->Colour(LC_ACTIVE_TITLE, 24);
+	pDC->Colour(L_ACTIVE_TITLE);
 	pDC->Rectangle(&Title);
 	
 	if (Str)
@@ -935,7 +935,7 @@ void CtrlDlg::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	pDC->SetClient(&c);
 
 	// Draw the grid
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Rectangle(0, 0, Client.X()-1, Client.Y()-1);
 	pDC->Colour(Rgb24(0x80, 0x80, 0x80), 24);
 	for (int y=0; y<Client.Y(); y+=GRID_Y)
@@ -1013,7 +1013,7 @@ void CtrlEditbox::OnPaint(GSurface *pDC)
 	
 	// Draw the ctrl
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
-	pDC->Colour(Enabled() ? LC_WORKSPACE : LC_MED, 24);
+	pDC->Colour(Enabled() ? L_WORKSPACE : L_MED);
 	pDC->Rectangle(&r);
 
 	char *Text = Str->Get();
@@ -1083,7 +1083,7 @@ void CtrlCheckbox::OnPaint(GSurface *pDC)
 	
 	// Draw the ctrl
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
-	pDC->Colour(LC_WORKSPACE, 24);
+	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle(&r);
 
 	GdcPt2 Pt[6] = {
@@ -1157,7 +1157,7 @@ void CtrlButton::OnPaint(GSurface *pDC)
 	}
 	else
 	{
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle(&r);
 	}
 
@@ -1467,16 +1467,16 @@ void CtrlTabs::OnPaint(GSurface *pDC)
 		if (Tab->View()->GetPos() != t)
 			Tab->View()->SetPos(t);
 
-		pDC->Colour(LC_LIGHT, 24);
+		pDC->Colour(L_LIGHT);
 		pDC->Line(t.x1, t.y1+2, t.x1, t.y2);
 		pDC->Set(t.x1+1, t.y1+1);
 		pDC->Line(t.x1+2, t.y1, t.x2-2, t.y1);
 
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Line(t.x1+1, t.y1+2, t.x1+1, t.y2);
 		pDC->Line(t.x1+2, t.y1+1, t.x2-2, t.y1+1);
 
-		pDC->Colour(LC_LOW, 24);
+		pDC->Colour(L_LOW);
 		pDC->Line(t.x2-1, t.y1, t.x2-1, t.y2);
 		pDC->Colour(0, 24);
 		pDC->Line(t.x2, t.y1+2, t.x2, t.y2);
@@ -1928,7 +1928,7 @@ void CtrlList::OnPaint(GSurface *pDC)
 	Client = r;
 	Client.y1 = Title.y2 + 1;
 
-	pDC->Colour(LC_WORKSPACE, 24);
+	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle(&Client);
 
 	int x = Title.x1;
@@ -1958,7 +1958,7 @@ void CtrlList::OnPaint(GSurface *pDC)
 	if (Client.Valid())
 	{
 		LgiWideBorder(pDC, Client, DefaultRaisedEdge);
-		pDC->Colour(LC_MED, 24);;
+		pDC->Colour(L_MED);;
 		pDC->Rectangle(&Client);
 	}
 
@@ -1989,12 +1989,12 @@ void CtrlComboBox::OnPaint(GSurface *pDC)
 	d.x1 = e.x2 + 1;
 
 	// Draw edit
-	pDC->Colour(LC_WORKSPACE, 24);
+	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle(&e);
 
 	// Draw drap down
 	LgiWideBorder(pDC, d, DefaultRaisedEdge);
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Rectangle(&d);
 
 	pDC->Colour(0, 24);
@@ -2053,7 +2053,7 @@ void CtrlScrollBar::OnPaint(GSurface *pDC)
 	// Buttons
 	LgiWideBorder(pDC, a, DefaultRaisedEdge);
 	LgiWideBorder(pDC, c, DefaultRaisedEdge);
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	pDC->Rectangle(&a);
 	pDC->Rectangle(&c);
 
@@ -3419,8 +3419,8 @@ void ResDialog::DrawSelection(GSurface *pDC)
 	for (auto Ctrl: Selection)
 	{
 		GRect r = Ctrl->AbsPos();
-		COLOUR s = Rgb24(255, 0, 0);
-		COLOUR c = GetParent()->Focus() ? s : GdcMixColour(s, LC_MED, 0.4);
+		GColour s(255, 0, 0);
+		GColour c = GetParent()->Focus() ? s : s.Mix(LColour(L_MED), 0.4);
 		DrawGoobers(pDC, r, Ctrl->Goobers, c);
 	}
 }
@@ -3448,7 +3448,7 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
             if (Scr) Scr->PushState();
             #endif
 			// Draw client
-			pMemDC->Colour(LC_WORKSPACE, 24);
+			pMemDC->Colour(L_WORKSPACE);
 			// pMemDC->Colour(Rgb24(0, 128, 0), 24);
 			pMemDC->Rectangle();
 
@@ -3472,7 +3472,7 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 			pDC->Blt(0, 0, pMemDC);
 
 			// Draw other non Mem-DC regions
-			pDC->Colour(LC_WORKSPACE, 24);
+			pDC->Colour(L_WORKSPACE);
 			if (X() > c.X())
 			{
 				pDC->Rectangle(c.x2 + 1, 0, X()-1, c.y2);
@@ -3493,7 +3493,7 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	}
 	else
 	{
-		pDC->Colour(LC_WORKSPACE, 24);
+		pDC->Colour(L_WORKSPACE);
 		pDC->Rectangle();
 	}
 }
@@ -4144,7 +4144,7 @@ void ResDialogUi::OnPaint(GSurface *pDC)
 		Client.Subtract(&r);
 	}
 
-	pDC->Colour(LC_MED, 24);
+	pDC->Colour(L_MED);
 	for (GRect *r = Client.First(); r; r = Client.Next())
 	{
 		pDC->Rectangle(r);

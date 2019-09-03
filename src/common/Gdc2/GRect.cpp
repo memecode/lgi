@@ -371,7 +371,6 @@ GRegion::GRegion(const GRect &r) : GRect(r)
 	}
 }
 
-#if defined LGI_CARBON
 GRegion::GRegion(OsRect &r) : GRect(0, 0, 0, 0)
 {
 	Size = Alloc = 0;	
@@ -381,13 +380,26 @@ GRegion::GRegion(OsRect &r) : GRect(0, 0, 0, 0)
 	SetSize(1);
 	if (a)
 	{
-		x1 = a[0].x1 = (int) r.left;
-		y1 = a[0].y1 = (int) r.top;
-		x2 = a[0].x2 = (int) r.right - CornerOffset;
-		y2 = a[0].y2 = (int) r.bottom - CornerOffset;
+		#if LGI_CARBON
+			x1 = a[0].x1 = (int) r.left;
+			y1 = a[0].y1 = (int) r.top;
+			x2 = a[0].x2 = (int) r.right - CornerOffset;
+			y2 = a[0].y2 = (int) r.bottom - CornerOffset;
+		#elif LGI_COCOA
+			x1 = a[0].x1 = (int) r.origin.x;
+			y1 = a[0].y1 = (int) r.origin.y;
+			x2 = a[0].x2 = x1 + (int) r.size.width;
+			y2 = a[0].y2 = y1 + (int) r.size.height;
+		#elif WINNATIVE
+			x1 = r.left;
+			y1 = r.top;
+			x2 = r.right - CornerOffset;
+			y2 = r.bottom - CornerOffset;
+		#else
+			#error "Impl me."
+		#endif
 	}
 }
-#endif
 
 GRegion::~GRegion()
 {
