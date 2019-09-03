@@ -3223,7 +3223,7 @@ bool MailIMap::StartIdle()
 	return Status;
 }
 
-bool MailIMap::OnIdle(int Timeout, GArray<Untagged> &Resp)
+bool MailIMap::OnIdle(int Timeout, GString::Array &Resp)
 {
 	bool Status = false;
 
@@ -3245,6 +3245,7 @@ bool MailIMap::OnIdle(int Timeout, GArray<Untagged> &Resp)
 		#endif
 		
 		Socket->IsBlocking(Blk);
+		Resp.SetFixedLength(false);
 
 		char *Dlg;
 		while ((Dlg = Dialog[0]))
@@ -3255,26 +3256,8 @@ bool MailIMap::OnIdle(int Timeout, GArray<Untagged> &Resp)
 			if (Dlg[0] == '*' &&
 				Dlg[1] == ' ')
 			{
-				char *s = Dlg + 2;
-				GAutoString a = ImapBasicTokenize(s);
-				GAutoString b = ImapBasicTokenize(s);
-				if (a && b)
-				{
-					Untagged &u = Resp.New();
-					if (IsDigit(a[0]))
-					{
-						u.Cmd = b.Get();
-						u.Id = atoi(a);
-						if (ValidStr(s))
-							u.Param = s;
-					}
-					else
-					{
-						u.Param = Dlg + 2;
-					}
-
-					Status = true;
-				}
+				Resp.New() = Dlg;
+				Status = true;
 			}
 
 			DeleteArray(Dlg);
