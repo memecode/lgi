@@ -288,10 +288,10 @@ public:
 	/// Constructor for DOM variable reference
 	GVariant(GDom *p, char *name);
 	/// Constructor for date
-	GVariant(LDateTime *d);
+	GVariant(const LDateTime *d);
 	/// Constructor for variant
 	GVariant(GVariant const &v);
-	/// Construtor for operator
+	/// Constructor for operator
 	GVariant(GOperator Op);
 	/// Destructor
 	~GVariant();
@@ -322,7 +322,7 @@ public:
 	/// Assign value to DOM ptr
 	GVariant &operator =(GDom *p);
 	/// Assign value to be a date/time
-	GVariant &operator =(LDateTime *d);
+	GVariant &operator =(const LDateTime *d);
 
 	GVariant &operator =(class GView *p);
 	GVariant &operator =(class GMouse *p);
