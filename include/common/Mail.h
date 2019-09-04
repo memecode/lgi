@@ -831,7 +831,7 @@ public:
 		/// The IMAP object
 		class MailIMap *Imap,
 		/// The message sequence number
-		char *Msg,
+		uint32_t Msg,
 		/// The fetch parts (which the callee needs to own if returning true)
 		StrMap &Parts,
 		/// The user data passed to the Fetch function
@@ -925,8 +925,8 @@ public:
 	bool ExpungeFolder();
 	
 	// Uid methods
-	bool CopyByUid(GArray<char*> &InUids, const char *DestFolder);
-	bool SetFlagsByUid(GArray<char*> &Uids, const char *Flags);
+	bool CopyByUid(GArray<uint32_t> &InUids, const char *DestFolder);
+	bool SetFlagsByUid(GArray<uint32_t> &Uids, const char *Flags);
 
 	/// Idle processing...
 	/// \returns true if something happened
@@ -934,9 +934,9 @@ public:
 	// bool OnIdle(int Timeout, GArray<Untagged> &Resp);
 	bool OnIdle(int Timeout, GString::Array &Resp);
 	bool FinishIdle();
-	bool Poll(int *Recent = 0, GArray<GAutoString> *New = 0);
+	bool Poll(int *Recent = 0, GArray<GString> *New = 0);
 	bool Status(char *Path, int *Recent);
-	bool Search(bool Uids, GArray<GAutoString> &SeqNumbers, const char *Filter);
+	bool Search(bool Uids, GArray<GString> &SeqNumbers, const char *Filter);
 
 	// Utility
 	static bool Http(GSocketI *S,
