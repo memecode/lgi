@@ -164,7 +164,7 @@ public:
 const char *EncodeEntitiesAttr	= "\'<>\"\n";
 const char *EncodeEntitiesContent	= "\'<>\"";
 
-char *GXmlTree::EncodeEntities(char *s, ssize_t len, const char *extra_characters)
+char *GXmlTree::EncodeEntities(const char *s, ssize_t len, const char *extra_characters)
 {
 	GStringPipe p;
 	if (EncodeEntities(&p, s, len, extra_characters))
@@ -175,17 +175,17 @@ char *GXmlTree::EncodeEntities(char *s, ssize_t len, const char *extra_character
 	return 0;
 }
 
-bool GXmlTree::EncodeEntities(GStreamI *to, char *start, ssize_t len, const char *extra_characters)
+bool GXmlTree::EncodeEntities(GStreamI *to, const char *start, ssize_t len, const char *extra_characters)
 {
 	if (!start || !to)
 		return 0;
 
 	int Amp = (d->Flags & GXT_NO_ENTITIES) ? 10000000 : '&';
 
-	char *end = start + len;
-	for (char *s = start; s && *s;)
+	const char *end = start + len;
+	for (const char *s = start; s && *s;)
 	{
-		char *e = s;
+		const char *e = s;
 		while (	*e &&
 				*e != Amp &&
 				*e != '\r' &&

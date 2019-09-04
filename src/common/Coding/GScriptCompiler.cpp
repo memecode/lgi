@@ -3616,7 +3616,7 @@ GCompiledCode *GScriptEngine::GetCurrentCode()
 	return d->Code;
 }
 
-bool GScriptEngine::Compile(GAutoPtr<GCompiledCode> &Obj, GScriptContext *UserContext, char *Script, const char *FileName, GDom *Args)
+bool GScriptEngine::Compile(GAutoPtr<GCompiledCode> &Obj, GScriptContext *UserContext, const char *Script, const char *FileName, GDom *Args)
 {
 	if (!Script)
 	{

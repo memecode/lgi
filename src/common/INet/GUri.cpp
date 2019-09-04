@@ -250,7 +250,7 @@ GUri::StrMap GUri::Params()
 	return m;
 }
 
-GAutoString GUri::Decode(char *s)
+GAutoString GUri::Decode(const char *s)
 {
 	GStringPipe p(256);
 	if (s)

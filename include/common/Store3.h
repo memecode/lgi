@@ -83,7 +83,7 @@ void ParseIdList(char *In, List<char> &Out);
 	bool Set##name(type val) { return GetObject() ? GetObject()->SetInt(id, (int)val) >= Store3Delayed : OnError(_FL); }
 
 #define GDATA_STR_PROP(name, id) \
-	char *Get##name() { auto o = GetObject(); return o ? o->GetStr(id) : (char*)OnError(_FL); } \
+	const char *Get##name() { auto o = GetObject(); return o ? o->GetStr(id) : (const char*)OnError(_FL); } \
 	bool Set##name(const char *val) { return GetObject() ? GetObject()->SetStr(id, val) >= Store3Delayed : OnError(_FL); }
 
 #define GDATA_DATE_PROP(name, id) \
@@ -149,7 +149,7 @@ public:
 	virtual bool CopyProps(GDataPropI &p) { return false; }
 
 	/// Gets a string property
-	virtual char *GetStr(int id) { EmptyVirtual(NULL); }
+	virtual const char *GetStr(int id) { EmptyVirtual(NULL); }
 	/// Sets a string property, it will make a copy of the string, so you
 	/// still retain ownership of the string you're passing in.
 	virtual Store3Status SetStr(int id, const char *str) { EmptyVirtual(Store3Error); }

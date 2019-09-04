@@ -255,7 +255,7 @@ ssize_t GMemStream::Write(GStream *Out, ssize_t Size)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-GTempStream::GTempStream(char *tmp, int maxMemSize) : GProxyStream(0)
+GTempStream::GTempStream(const char *tmp, int maxMemSize) : GProxyStream(0)
 {
 	s = &Null;
 	MaxMemSize = maxMemSize;

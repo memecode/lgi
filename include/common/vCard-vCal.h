@@ -74,12 +74,12 @@ protected:
 	bool ParseDate(LDateTime &out, char *in);
 	bool ParseDuration(LDateTime &Out, int &Sign, char *In);
 
-	void Fold(GStreamI &o, char *i, int pre_chars = 0);
+	void Fold(GStreamI &o, const char *i, int pre_chars = 0);
 	char *Unfold(char *In);
 	char *UnMultiLine(char *In);
 
 	bool ReadField(GStreamI &s, GString &Name, ParamArray *Type, GString &Data);
-	void WriteField(GStreamI &s, const char *Name, ParamArray *Type, char *Data);
+	void WriteField(GStreamI &s, const char *Name, ParamArray *Type, const char *Data);
 
 public:
 	VIo();

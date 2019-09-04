@@ -246,9 +246,9 @@ public:
 	/// Decode a string with entities
 	char *DecodeEntities(GXmlAlloc *Alloc, char *s, ssize_t len = -1);
 	/// Encode a string to use entities
-	char *EncodeEntities(char *s, ssize_t len = -1, const char *extra_characters = 0);
+	char *EncodeEntities(const char *s, ssize_t len = -1, const char *extra_characters = 0);
 	/// Encode a string to use entities
-	bool EncodeEntities(GStreamI *out, char *s, ssize_t len, const char *extra_characters = 0);
+	bool EncodeEntities(GStreamI *out, const char *s, ssize_t len, const char *extra_characters = 0);
 };
 
 #endif

@@ -235,7 +235,7 @@ protected:
 	GString TmpFolder;
 
 public:
-	GTempStream(char *TmpFolder = 0, int maxMemSize = 1 << 20);
+	GTempStream(const char *TmpFolder = 0, int maxMemSize = 1 << 20);
 	~GTempStream();
 
 	int GetMaxMemSize() { return MaxMemSize; }

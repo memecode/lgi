@@ -68,7 +68,7 @@ class GMime
 public:
 	static const char *DefaultCharset;
 
-	GMime(char *TmpFileRoot = 0);
+	GMime(const char *TmpFileRoot = 0);
 	virtual ~GMime();
 
 	// Methods

@@ -353,7 +353,7 @@ public:
 	GCompiledCode *GetCurrentCode();
 	bool Compile(	GAutoPtr<GCompiledCode> &Obj,
 					GScriptContext *UserContext,
-					char *Script,
+					const char *Script,
 					const char *FileName = NULL,
 					GDom *Args = NULL);
 	GExecutionStatus Run(GCompiledCode *Obj, GVariant *Ret = NULL, const char *TempPath = NULL);

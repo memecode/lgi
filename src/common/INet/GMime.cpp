@@ -584,7 +584,7 @@ ssize_t GMimeBuf::Pop(char *Str, ssize_t BufSize)
 
 ///////////////////////////////////////////////////////////////////////
 // Mime Object
-GMime::GMime(char *tmp)
+GMime::GMime(const char *tmp)
 {
 	Parent = 0;
 	TmpPath = NewStr(tmp);

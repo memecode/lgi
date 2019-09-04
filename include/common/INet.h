@@ -386,7 +386,7 @@ public:
 	);
 
 	/// URL decode
-	GAutoString Decode(char *s);
+	GAutoString Decode(const char *s);
 
 	/// Separate args into map
 	typedef LHashTbl<StrKey<char,false>,GString> StrMap;

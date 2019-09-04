@@ -197,10 +197,10 @@ bool VIo::ParseDuration(LDateTime &Out, int &Sign, char *In)
 	return Status;
 }
 
-void VIo::Fold(GStreamI &o, char *i, int pre_chars)
+void VIo::Fold(GStreamI &o, const char *i, int pre_chars)
 {
 	int x = pre_chars;
-	for (char *s=i; s && *s;)
+	for (const char *s=i; s && *s;)
 	{
 		if (x >= 74)
 		{
@@ -661,7 +661,7 @@ bool VIo::ReadField(GStreamI &s, GString &Name, ParamArray *Params, GString &Dat
 	return Status;
 }
 
-void VIo::WriteField(GStreamI &s, const char *Name, ParamArray *Params, char *Data)
+void VIo::WriteField(GStreamI &s, const char *Name, ParamArray *Params, const char *Data)
 {
 	if (Name && Data)
 	{
@@ -714,7 +714,7 @@ bool VCard::Export(GDataPropI *c, GStreamI *o)
 	o->Push("begin:vcard\r\n");
 	o->Push("version:3.0\r\n");
 
-	char *First = 0, *Last = 0, *Title = 0;
+	const char *First = 0, *Last = 0, *Title = 0;
 	First = c->GetStr(FIELD_FIRST_NAME);
 	Last = c->GetStr(FIELD_LAST_NAME);
 	Title = c->GetStr(FIELD_TITLE);
@@ -729,14 +729,14 @@ bool VCard::Export(GDataPropI *c, GStreamI *o)
 	}
 
 	#define OutputTypedField(Field, Name, Type)		\
-		{ char *str = 0;								\
+		{ const char *str = 0;								\
 		if ((str = c->GetStr(Name)))					\
 		{											\
 			WriteField(*o, Field, Type, str);			\
 		} }
 
 	#define OutputField(Field, Name)				\
-		{ char *str = 0;								\
+		{ const char *str = 0;								\
 		if ((str = c->GetStr(Name)))					\
 		{											\
 			WriteField(*o, Field, 0, str);				\
@@ -753,7 +753,7 @@ bool VCard::Export(GDataPropI *c, GStreamI *o)
 	OutputTypedField("tel", FIELD_HOME_FAX, &HomeFax);
 	OutputField("org", FIELD_COMPANY);
 	OutputTypedField("email", FIELD_EMAIL, &InetPref);
-	char *Alt;
+	const char *Alt;
 	if ((Alt = c->GetStr(FIELD_ALT_EMAIL)))
 	{
 		GToken t(Alt, ",");
@@ -763,13 +763,13 @@ bool VCard::Export(GDataPropI *c, GStreamI *o)
 		}
 	}
 
-	char * Uid;
+	const char * Uid;
 	if ((Uid = c->GetStr(FIELD_UID)))
 	{
 		GStreamPrint(o, "UID:%s\r\n", Uid);
 	}
 
-	char *Street, *Suburb, *PostCode, *State, *Country;
+	const char *Street, *Suburb, *PostCode, *State, *Country;
 	Street = Suburb = PostCode = State = Country = 0;
 	Street = c->GetStr(FIELD_HOME_STREET);
 	Suburb = c->GetStr(FIELD_HOME_SUBURB);
@@ -811,7 +811,7 @@ bool VCard::Export(GDataPropI *c, GStreamI *o)
 
 	// OutputField("X-Perm", FIELD_PERMISSIONS);
 
-	char *Url;
+	const char *Url;
 	if ((Url = c->GetStr(FIELD_HOME_WEBPAGE)))
 	{
 		WriteField(*o, "url", &Home, Url);
@@ -820,12 +820,12 @@ bool VCard::Export(GDataPropI *c, GStreamI *o)
 	{
 		WriteField(*o, "url", &Work, Url);
 	}
-	char *Nick;
+	const char *Nick;
 	if ((Nick = c->GetStr(FIELD_NICK)))
 	{
 		WriteField(*o, "nickname", 0, Nick);
 	}
-	char *Note;
+	const char *Note;
 	if ((Note = c->GetStr(FIELD_NOTE)))
 	{
 		WriteField(*o, "note", 0, Note);
@@ -1296,7 +1296,7 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 
 		#define OutputStr(Field, Name)						\
 		{													\
-			char *_s = 0;									\
+			const char *_s = 0;									\
 			if ((_s = c->GetStr(Field)))					\
 			{												\
 				WriteField(*o, Name, 0, _s);				\
@@ -1336,7 +1336,7 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 			}
 		}
 
-		char *Uid;
+		const char *Uid;
 		if ((Uid = c->GetStr(FIELD_UID)))
 		{
 			GStreamPrint(o, "UID:%s\r\n", Uid);
