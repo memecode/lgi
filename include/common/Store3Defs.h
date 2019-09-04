@@ -383,6 +383,7 @@ enum Store3Fields
 	FIELD_OUTBOX,						// (GDataFolderI*) Outbox for mail store
 	FIELD_SENT,							// (GDataFolderI*) Sent folder for mail store
 	FIELD_TRASH,						// (GDataFolderI*) Trash folder for mail store
+	FIELD_IMAP_SEQ,						// (uint32_t) IMAP sequence number
 
 	FIELD_MAX,
 };

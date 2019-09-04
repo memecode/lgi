@@ -1310,6 +1310,15 @@ bool LDateTime::Serialize(ObjProperties *Props, char *Name, bool Write)
 
 int LDateTime::Compare(const LDateTime *d) const
 {
+	#if 1
+
+	auto t1 = IsValid() ? Ts() : 0;
+	auto t2 = d->IsValid() ? d->Ts() : 0;
+	auto diff = t2 - t1;
+	if (diff < 0) return -1;
+	return diff > 0 ? 1 : 0;
+
+	#else
 	int c = 0;
 	if (d)
 	{
@@ -1339,7 +1348,9 @@ int LDateTime::Compare(const LDateTime *d) const
 			}
 		}
 	}
+
 	return c;
+	#endif
 }
 
 bool LDateTime::operator <(LDateTime &dt) const

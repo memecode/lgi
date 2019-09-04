@@ -2992,7 +2992,7 @@ bool MailIMap::SetFlagsByUid(GArray<uint32_t> &Uids, const char *Flags)
 		{
 			for (unsigned i=0; i<Uids.Length(); i++)
 			{
-				p.Print("%s%s", i?",":"", Uids[i]);
+				p.Print("%s%i", i?",":"", Uids[i]);
 			}
 		}
 		else
