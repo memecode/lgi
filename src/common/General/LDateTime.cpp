@@ -1308,15 +1308,22 @@ bool LDateTime::Serialize(ObjProperties *Props, char *Name, bool Write)
 }
 */
 
-int LDateTime::Compare(const LDateTime *d) const
+int LDateTime::Compare(const LDateTime *Date) const
 {
 	#if 1
 
-	auto t1 = IsValid() ? Ts() : 0;
-	auto t2 = d->IsValid() ? d->Ts() : 0;
-	auto diff = t2 - t1;
-	if (diff < 0) return -1;
-	return diff > 0 ? 1 : 0;
+	// this - *Date
+	auto ThisTs = IsValid() ? Ts() : 0;
+	auto DateTs = Date->IsValid() ? Date->Ts() : 0;
+
+	// If these ever fire, the cast to int64_t will overflow
+	LgiAssert((ThisTs & 0x800000000000000) == 0);
+	LgiAssert((DateTs & 0x800000000000000) == 0);
+
+	int64_t Diff = (int64_t)ThisTs - DateTs;
+	if (Diff < 0)
+		return -1;
+	return Diff > 0 ? 1 : 0;
 
 	#else
 	int c = 0;
