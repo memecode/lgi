@@ -2280,7 +2280,7 @@ int MailIMap::Fetch(bool ByUid,
 					}
 					
 					// Call the callback function
-					if (Callback(this, Param, Parts, UserData))
+					if (Callback(this, atoi(Param), Parts, UserData))
 					{
 						#if DEBUG_FETCH
 						LgiTrace("%s:%i - Fetch: Callback OK\n", _FL);
@@ -2351,7 +2351,7 @@ int MailIMap::Fetch(bool ByUid,
 	return Status;
 }
 
-bool IMapHeadersCallback(MailIMap *Imap, char *Msg, MailIMap::StrMap &Parts, void *UserData)
+bool IMapHeadersCallback(MailIMap *Imap, uint32_t Msg, MailIMap::StrMap &Parts, void *UserData)
 {
 	char *s = Parts.Find(sRfc822Header);
 	if (s)
@@ -2393,7 +2393,7 @@ struct ReceiveCallbackState
 	MailCallbacks *Callbacks;
 };
 
-static bool IMapReceiveCallback(MailIMap *Imap, char *Msg, MailIMap::StrMap &Parts, void *UserData)
+static bool IMapReceiveCallback(MailIMap *Imap, uint32_t Msg, MailIMap::StrMap &Parts, void *UserData)
 {
 	ReceiveCallbackState *State = (ReceiveCallbackState*) UserData;
 	char *Flags = Parts.Find("FLAGS");
@@ -2663,18 +2663,15 @@ int MailIMap::Sizeof(int Message)
 	return Status;
 }
 
-bool ImapSizeCallback(MailIMap *Imap, char *Msg, MailIMap::StrMap &Parts, void *UserData)
+bool ImapSizeCallback(MailIMap *Imap, uint32_t Msg, MailIMap::StrMap &Parts, void *UserData)
 {
 	GArray<int> *Sizes = (GArray<int>*) UserData;
-	int Index = atoi(Msg);
-	if (Index < 1)
-		return false;
 
 	char *Sz = Parts.Find(sRfc822Size);
 	if (!Sz)
 		return false;
 
-	(*Sizes)[Index - 1] = atoi(Sz);
+	(*Sizes)[Msg - 1] = atoi(Sz);
 	return true;
 }
 
@@ -2981,7 +2978,7 @@ bool MailIMap::SetFolderFlags(MailImapFolder *f)
 	return Status;
 }
 
-bool MailIMap::SetFlagsByUid(GArray<char*> &Uids, const char *Flags)
+bool MailIMap::SetFlagsByUid(GArray<uint32_t> &Uids, const char *Flags)
 {
 	bool Status = false;
 
@@ -3020,7 +3017,7 @@ bool MailIMap::SetFlagsByUid(GArray<char*> &Uids, const char *Flags)
 	return Status;
 }
 
-bool MailIMap::CopyByUid(GArray<char*> &InUids, const char *DestFolder)
+bool MailIMap::CopyByUid(GArray<uint32_t> &InUids, const char *DestFolder)
 {
 	bool Status = false;
 
@@ -3034,7 +3031,7 @@ bool MailIMap::CopyByUid(GArray<char*> &InUids, const char *DestFolder)
 		for (unsigned i=0; i<InUids.Length(); i++)
 		{
 			if (i) p.Write((char*)",", 1);
-			p.Write(InUids[i], strlen(InUids[i]));
+			p.Print("%i", InUids[i]);
 		}
 		p.Print(" \"%s\"\r\n", Dest.Get());
 
@@ -3074,7 +3071,7 @@ bool MailIMap::ExpungeFolder()
 	return Status;
 }
 
-bool MailIMap::Search(bool Uids, GArray<GAutoString> &SeqNumbers, const char *Filter)
+bool MailIMap::Search(bool Uids, GArray<GString> &SeqNumbers, const char *Filter)
 {
 	bool Status = false;
 
@@ -3099,7 +3096,7 @@ bool MailIMap::Search(bool Uids, GArray<GAutoString> &SeqNumbers, const char *Fi
 
 					while (s.Reset(Tok(d)))
 					{
-						SeqNumbers.New() = s;
+						SeqNumbers.New() = s.Get();
 						Status = true;
 					}
 				}
@@ -3167,7 +3164,7 @@ bool MailIMap::Status(char *Path, int *Recent)
 	return Status;
 }
 
-bool MailIMap::Poll(int *Recent, GArray<GAutoString> *New)
+bool MailIMap::Poll(int *Recent, GArray<GString> *New)
 {
 	bool Status = true;
 
