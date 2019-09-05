@@ -82,7 +82,7 @@ public:
 
 	// Data access
 	bool CopyProps(GDataPropI &p);
-	char *GetStr(int id);
+	const char *GetStr(int id);
 	Store3Status SetStr(int id, const char *str);
 	int64 GetInt(int id);
 	Store3Status SetInt(int id, int64 i);

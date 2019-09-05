@@ -598,7 +598,7 @@ bool LDbRow::CopyProps(GDataPropI &p)
 	return true;
 }
 
-char *LDbRow::GetStr(int id)
+const char *LDbRow::GetStr(int id)
 {
 	Info i = d->Map.Find(id);
 	if (i.Index < 0 || i.Type != GV_STRING || !Base.c)
@@ -1091,8 +1091,8 @@ bool LDbTable::UnitTests()
 	{
 		int64 Id = r->GetInt(TestUid);
 		int64 Int = r->GetInt(TestInt32);
-		char *s = r->GetStr(TestString);
-		char *s2 = r->GetStr(TestString2);
+		auto s = r->GetStr(TestString);
+		auto s2 = r->GetStr(TestString2);
 		LgiTrace("\t%i: %i, %s, %s\n", (int)Id, (int)Int, s, s2);
 	}
 
@@ -1110,8 +1110,8 @@ bool LDbTable::UnitTests()
 		int64 Start = LgiMicroTime();
 		int64 Id = r->GetInt(TestUid);
 		int64 Int = r->GetInt(TestInt32);
-		char *s = r->GetStr(TestString);
-		char *s2 = r->GetStr(TestString2);
+		auto s = r->GetStr(TestString);
+		auto s2 = r->GetStr(TestString2);
 		int64 Time = LgiMicroTime()-Start;
 		LgiTrace("\t%i: %i, %s, %s (%.4fms)\n", (int)Id, (int)Int, s, s2, (double)Time/1000.0);
 
@@ -1133,8 +1133,8 @@ bool LDbTable::UnitTests()
 	{
 		int64 Id = r->GetInt(TestUid);
 		int64 Int = r->GetInt(TestInt32);
-		char *s = r->GetStr(TestString);
-		char *s2 = r->GetStr(TestString2);
+		auto s = r->GetStr(TestString);
+		auto s2 = r->GetStr(TestString2);
 		LgiTrace("\t%i: %i, %s, %s\n", (int)Id, (int)Int, s, s2);
 	}
 
@@ -1148,8 +1148,8 @@ bool LDbTable::UnitTests()
 	{
 		int64 Id = r->GetInt(TestUid);
 		int64 Int = r->GetInt(TestInt32);
-		char *s = r->GetStr(TestString);
-		char *s2 = r->GetStr(TestString2);
+		auto s = r->GetStr(TestString);
+		auto s2 = r->GetStr(TestString2);
 		LgiTrace("\t%i: %i, %s, %s\n", (int)Id, (int)Int, s, s2);
 	}
 
