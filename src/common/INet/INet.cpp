@@ -696,7 +696,7 @@ int GSocket::Open(const char *HostAddr, int Port)
 				else
 				#endif
 				{
-					#define CONNECT_LOGGING			1
+					#define CONNECT_LOGGING			0
 					
 					// Setup the connect
 					bool Block = IsBlocking();
@@ -733,13 +733,10 @@ int GSocket::Open(const char *HostAddr, int Port)
 						LgiTrace(LPrintSock " - IsWouldBlock()=%i d->LastError=%i\n", d->Socket, IsWouldBlock(), d->LastError);
 						#endif
 
-						auto iEWOULDBLOCK = EWOULDBLOCK;
-						auto iWSAEINVAL = WSAEINVAL;
 						int64 End = LgiCurrentTime() + (d->Timeout > 0 ? d->Timeout : 30000);
-						bool WBlock, ValidS, Cance;
-						while (	!(Cance = d->Cancel->IsCancelled()) &&
-								(ValidS = ValidSocket(d->Socket)) &&
-								(WBlock = IsWouldBlock()))
+						while (	!d->Cancel->IsCancelled() &&
+								ValidSocket(d->Socket) &&
+								IsWouldBlock())
 						{
 							int64 Remaining = End - LgiCurrentTime();
 
