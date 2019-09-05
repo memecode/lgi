@@ -514,7 +514,12 @@ GFilter::IoStatus GdcJpeg::ReadImage(GSurface *pDC, GStream *In)
 	GVariant v;
 	
 	#if LIBJPEG_SHARED
-	if (!d->IsLoaded() && !d->Load(sLibrary))
+	if (!d->IsLoaded() &&
+		!d->Load(sLibrary)
+		#ifdef WIN32
+		&& !d->Load(GString(sLibrary).Strip("d"))
+		#endif
+		)
 	{
 		if (Props)
 		{
