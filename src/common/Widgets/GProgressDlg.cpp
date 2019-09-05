@@ -15,6 +15,7 @@
 #include "GTextLabel.h"
 #include "GButton.h"
 #include "GTableLayout.h"
+#include "LgiRes.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////
 ProgressList::ProgressList()
@@ -102,13 +103,8 @@ Progress &Progress::operator =(Progress &p)
 #define IDC_TABLE				105
 #define IDC_PANE				106
 
-#if 1
 #define PANE_X					300
 #define PANE_Y					100
-#else
-#define PANE_X					260
-#define PANE_Y					85
-#endif
 
 GProgressPane::GProgressPane()
 {
@@ -116,7 +112,7 @@ GProgressPane::GProgressPane()
 	UiDirty = false;
 	GRect r(0, 0, PANE_X-1, PANE_Y-1);
 	SetPos(r);
-	Name("Progress");
+	Name(LgiLoadString(L_PROGRESSDLG_PROGRESS, "Progress"));
 	SetId(IDC_PANE);
 	Ref = 0;
 
@@ -156,7 +152,7 @@ GProgressPane::GProgressPane()
 		c->Padding(GCss::Len(GCss::LenPx, PAD));
 		#endif
 		c->TextAlign(GCss::Len(GCss::AlignCenter));
-		c->Add(But = new GButton(IDC_BUTTON, 0, 0, -1, -1, "Request Abort"));
+		c->Add(But = new GButton(IDC_BUTTON, 0, 0, -1, -1, LgiLoadString(L_PROGRESSDLG_REQ_ABORT, "Request Abort")));
 	}
 }
 
@@ -212,26 +208,17 @@ void GProgressPane::UpdateUI()
 		else
 			PerSec = 0;
 		
-		sprintf_s(Str, sizeof(Str), "@ %.2f %s / sec", PerSec * Scale, (Type) ? Type : "");
+		sprintf_s(Str, sizeof(Str), LgiLoadString(L_PROGRESSDLG_RATE_FMT, "@ %.2f %s / sec"), PerSec * Scale, (Type) ? Type : "");
 		Update |= Rate->Name(Str);
 	}
 
 	if (ValText)
 	{
-		if (Scale == 1.0)
-		{
-			sprintf_s(Str, sizeof(Str), "%.0f of %.0f %s",
-				Val * Scale,
-				(High - Low) * Scale,
-				(Type) ? Type : "");
-		}
-		else
-		{
-			sprintf_s(Str, sizeof(Str), "%.1f of %.1f %s",
-				(double)Val * Scale,
-				(double)(High - Low) * Scale,
-				(Type) ? Type : "");
-		}
+		auto ValFmt = LgiLoadString(L_PROGRESSDLG_VALUE_FMT, "%.1f of %.1f %s");
+		sprintf_s(Str, sizeof(Str), ValFmt,
+			(double)Val * Scale,
+			(double)(High - Low) * Scale,
+			(Type) ? Type : "");
 		
 		Update |= ValText->Name(Str);
 	}
@@ -365,7 +352,7 @@ GProgressDlg::GProgressDlg(GView *parent, uint64 timeout)
 	SetParent(parent);
 	Resize();
 	MoveToCenter();
-	Name("Progress");
+	Name(LgiLoadString(L_PROGRESSDLG_PROGRESS, "Progress"));
 	#ifdef BEOS
 	WindowHandle()->SetFeel(B_NORMAL_WINDOW_FEEL);
 	#endif
@@ -629,75 +616,3 @@ void GProgressDlg::OnPaint(GSurface *pDC)
 	pDC->Rectangle();
 }
 
-/*
-// Sync this window with the contents of a list.
-void GProgressDlg::OnSync(ProgressList *Prg)
-{
-	if (Prg && Prg->Lock())
-	{
-		GProgressPane *Pane = Progri[1];
-
-		// Loop through all the up to date panes
-		for (Progress *p = Prg->First(); p; p = Prg->Next())
-		{
-			bool NewPane = false;
-			if (Pane)
-			{
-				if (Pane->Ref != p)
-				{
-					Pop(Pane);
-					NewPane = true;
-				}
-				else
-				{
-					// pane already exist for this progress
-					// so just update the value
-					if (Pane->Value() != p->Value())
-					{
-						Pane->Value(p->Value());
-					}
-
-					if (Pane->IsCancelled() != p->IsCancelled())
-					{
-						p->Cancel(Pane->IsCancelled());
-					}
-				}
-			}
-			else
-			{
-				NewPane = true;
-			}
-
-			if (NewPane)
-			{
-				// new pane
-				Pane = Push();
-				if (Pane)
-				{
-					Pane->Ref = p;
-					Pane->SetDescription(p->GetDescription());
-
-					int64 h, l;
-					p->GetLimits(&h, &l);
-					Pane->SetLimits(h, l);
-
-					Pane->Progress::SetScale(p->GetScale());
-					Pane->SetType(p->GetType());
-					Pane->Value(p->Value());
-
-				}
-			}
-
-			Pane = Progri.Next();
-		}
-
-		// too many panes, delete some
-		while (Progri.Length() > Prg->Length() + 1)
-		{
-			Pop();
-		}
-
-		Prg->Unlock();
-	}
-}
-*/
