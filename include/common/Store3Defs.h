@@ -21,6 +21,21 @@ enum Store3State
     Store3Loaded,
 };
 
+inline const char *toString(Store3State s)
+{
+	#define _(s) case s: return #s;
+	switch (s)
+	{
+		_(Store3Unloaded)
+		_(Store3Loading)
+		_(Store3Headers)
+		_(Store3Loaded)
+	}
+	#undef _
+	LgiAssert(0);
+	return "#invalidStore3State";
+}
+
 /// Folder system type
 enum Store3SystemFolder
 {
@@ -33,6 +48,25 @@ enum Store3SystemFolder
 	Store3SystemContacts,
 	Store3SystemSpam,
 };
+
+inline const char *toString(Store3SystemFolder s)
+{
+	#define _(s) case s: return #s;
+	switch (s)
+	{
+		_(Store3SystemNone)
+		_(Store3SystemInbox)
+		_(Store3SystemTrash)
+		_(Store3SystemOutbox)
+		_(Store3SystemSent)
+		_(Store3SystemCalendar)
+		_(Store3SystemContacts)
+		_(Store3SystemSpam)
+	}
+	#undef _
+	LgiAssert(0);
+	return "#invalidStore3SystemFolder";
+}
 
 /// This defines the possible outcomes of calling a function.
 enum Store3Status

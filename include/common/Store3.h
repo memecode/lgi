@@ -282,6 +282,11 @@ class GDataEventsI
 public:
 	virtual ~GDataEventsI() {}
 
+	/// This allows the caller to pass source:line info for debugging
+	/// It should be called prior to one of the following functions and
+	/// expires immediately after the function call.
+	virtual void SetContext(const char *file, int line) {}
+
 	/// Posts something to the GUI thread
 	/// \sa M_STORAGE_EVENT
 	virtual void Post(GDataStoreI *store, void *Param) {}
