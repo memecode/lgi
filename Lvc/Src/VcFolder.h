@@ -109,7 +109,6 @@ class VcFolder : public GTreeItem, public GCss
 		
 		~Cmd()
 		{
-			int asd=0;
 		}
 
 		GString GetBuf()

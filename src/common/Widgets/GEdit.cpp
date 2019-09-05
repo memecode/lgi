@@ -178,13 +178,17 @@ bool GEdit::OnKey(GKey &k)
 	)
 	{	
 		if (k.vkey == LK_RETURN)
-			GTextView3::OnKey(k);
+			return GTextView3::OnKey(k);
 		
 		return false;
 	}
 	
-	if (k.vkey == LK_ESCAPE && k.Down())
-		SendNotify(GNotify_EscapeKey);
+	if (k.vkey == LK_ESCAPE)
+	{
+		if (k.Down())
+			SendNotify(GNotify_EscapeKey);
+		return true;
+	}
 
 	bool Status = GTextView3::OnKey(k);
 	return Status;
@@ -193,13 +197,9 @@ bool GEdit::OnKey(GKey &k)
 void GEdit::OnEnter(GKey &k)
 {
 	if (d->Multiline)
-	{
 		GTextView3::OnEnter(k);
-	}
 	else
-	{
-		SendNotify(LK_RETURN);
-	}
+		SendNotify(GNotify_ReturnKey);
 }
 
 bool GEdit::Paste()

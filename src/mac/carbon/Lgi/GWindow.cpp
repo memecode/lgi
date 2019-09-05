@@ -1281,7 +1281,10 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	{
 		auto mh = LgiApp->GetMouseHook();
 		if (mh && mh->OnViewKey(v, k))
+		{
+			Status = true;
 			goto AllDone;
+		}
 	}
 
 	// Allow any hooks to see the key...
