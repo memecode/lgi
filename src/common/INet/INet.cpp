@@ -49,6 +49,7 @@
 	typedef unsigned long in_addr_t;
 	typedef BOOL option_t;
 
+	#define LPrintSock "%I64x"
 	#define MSG_NOSIGNAL		0
 	#ifndef EWOULDBLOCK
 		#define EWOULDBLOCK		WSAEWOULDBLOCK
@@ -58,23 +59,6 @@
 	#endif
 
 	#define OsAddr				S_un.S_addr
-
-#elif defined BEOS
-
-	#include <sys/time.h>
-	#include <stdio.h>
-	#include <errno.h>
-	#include <UrlContext.h>
-	#include <NetEndpoint.h>
-	#include <NetworkKit.h>
-
-	#define SOCKET_ERROR -1
-	#define MSG_NOSIGNAL 0
-
-	typedef struct hostent HostEnt;
-	typedef int option_t;
-	// typedef int socklen_t;
-	#define OsAddr				s_addr
 
 #elif defined POSIX
 
@@ -91,6 +75,7 @@
 	#include <ifaddrs.h>
 	
 	#define SOCKET_ERROR -1
+	#define LPrintSock "%x"
 	typedef hostent HostEnt;
 	typedef int option_t;
 	#define OsAddr				s_addr
@@ -711,25 +696,25 @@ int GSocket::Open(const char *HostAddr, int Port)
 				else
 				#endif
 				{
-					#define CONNECT_LOGGING			0
+					#define CONNECT_LOGGING			1
 					
 					// Setup the connect
 					bool Block = IsBlocking();
 					if (Block)
 					{
 						#if CONNECT_LOGGING
-						printf("%p - Setting non blocking\n", d->Socket);
+						LgiTrace(LPrintSock " - Setting non blocking\n", d->Socket);
 						#endif
 						IsBlocking(false);
 					}
 				
 					// Do initial connect to kick things off..
 					#if CONNECT_LOGGING
-					printf("%p - Doing initial connect to %s:%i\n", d->Socket, HostAddr, Port);
+					LgiTrace(LPrintSock " - Doing initial connect to %s:%i\n", d->Socket, HostAddr, Port);
 					#endif
 					Status = connect(d->Socket, (sockaddr*) &RemoteAddr, sizeof(sockaddr_in));
 					#if CONNECT_LOGGING
-					printf("%p - Initial connect=%i Block=%i\n", d->Socket, Status, Block);
+					LgiTrace(LPrintSock " - Initial connect=%i Block=%i\n", d->Socket, Status, Block);
 					#endif
 
 					// Wait for the connect to finish?
@@ -739,30 +724,33 @@ int GSocket::Open(const char *HostAddr, int Port)
 
 						#ifdef WIN32
 						// yeah I know... wtf? (http://itamarst.org/writings/win32sockets.html)
-						#define IsWouldBlock() (d->LastError == EWOULDBLOCK || d->LastError == WSAEINVAL)
+						#define IsWouldBlock() (d->LastError == EWOULDBLOCK || d->LastError == WSAEINVAL || d->LastError == WSAEWOULDBLOCK)
 						#else
 						#define IsWouldBlock() (d->LastError == EWOULDBLOCK || d->LastError == EINPROGRESS)
 						#endif
 
 						#if CONNECT_LOGGING
-						printf("%p - IsWouldBlock()=%i d->LastError=%i\n", d->Socket, IsWouldBlock(), d->LastError);
+						LgiTrace(LPrintSock " - IsWouldBlock()=%i d->LastError=%i\n", d->Socket, IsWouldBlock(), d->LastError);
 						#endif
 
+						auto iEWOULDBLOCK = EWOULDBLOCK;
+						auto iWSAEINVAL = WSAEINVAL;
 						int64 End = LgiCurrentTime() + (d->Timeout > 0 ? d->Timeout : 30000);
-						while (	!d->Cancel->IsCancelled() &&
-								ValidSocket(d->Socket) &&
-								IsWouldBlock())
+						bool WBlock, ValidS, Cance;
+						while (	!(Cance = d->Cancel->IsCancelled()) &&
+								(ValidS = ValidSocket(d->Socket)) &&
+								(WBlock = IsWouldBlock()))
 						{
 							int64 Remaining = End - LgiCurrentTime();
 
 							#if CONNECT_LOGGING
-							printf("%p - Remaining "LPrintfInt64"\n", d->Socket, Remaining);
+							LgiTrace(LPrintSock " - Remaining " LPrintfInt64 "\n", d->Socket, Remaining);
 							#endif
 
 							if (Remaining < 0)
 							{
 								#if CONNECT_LOGGING
-								printf("%p - Leaving loop\n", d->Socket);
+								LgiTrace(LPrintSock " - Leaving loop\n", d->Socket);
 								#endif
 								break;
 							}
@@ -771,28 +759,38 @@ int GSocket::Open(const char *HostAddr, int Port)
 							{
 								// Should be ready to connect now...
 								#if CONNECT_LOGGING
-								printf("%p - Secondary connect...\n", d->Socket);
+								LgiTrace(LPrintSock " - Secondary connect...\n", d->Socket);
 								#endif
 								Status = connect(d->Socket, (sockaddr*) &RemoteAddr, sizeof(sockaddr_in));
 								#if CONNECT_LOGGING
-								printf("%p - Secondary connect=%i\n", d->Socket, Status);
+								LgiTrace(LPrintSock " - Secondary connect=%i\n", d->Socket, Status);
 								#endif
 								if (Status != 0)
 								{
 									Error(Host);
-									#if CONNECT_LOGGING
-									printf("%p - Connect=%i Err=%i\n", d->Socket, Status, d->LastError);
-									#endif
-									if (IsWouldBlock())
-										continue;
-									if (d->LastError == EISCONN)
+									
+									if (d->LastError == EISCONN
+										#ifdef WIN32
+										|| d->LastError == WSAEISCONN // OMG windows, really?
+										#endif
+										)
+									{
 										Status = 0;
+									}
+									else
+									{
+										#if CONNECT_LOGGING
+										LgiTrace(LPrintSock " - Connect=%i Err=%i\n", d->Socket, Status, d->LastError);
+										#endif
+										if (IsWouldBlock())
+											continue;
+									}
 									break;
 								}
 								else
 								{
 									#if CONNECT_LOGGING
-									printf("%p - Connected...\n", d->Socket);
+									LgiTrace(LPrintSock " - Connected...\n", d->Socket);
 									#endif
 									break;
 								}
@@ -800,7 +798,7 @@ int GSocket::Open(const char *HostAddr, int Port)
 							else
 							{
 								#if CONNECT_LOGGING
-								printf("%p - Timout...\n", d->Socket);
+								LgiTrace(LPrintSock " - Timout...\n", d->Socket);
 								#endif
 							}
 						}
