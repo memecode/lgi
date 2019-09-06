@@ -15,8 +15,6 @@ enum Store3State
     /// The object is currently loading (in some worker thread or something)
     /// Best to not try and access anything like data fields.
     Store3Loading,
-    /// The mail object has only it's headers loaded, and not the body.
-	Store3Headers,
 	/// The object is fully loaded and can be accessed normally.
     Store3Loaded,
 };
