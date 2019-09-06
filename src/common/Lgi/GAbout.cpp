@@ -66,7 +66,7 @@ GAbout::GAbout(	GView *parent,
 
 	if (AboutGraphic)
 	{
-		GAutoString FileName(LgiFindFile(AboutGraphic));
+		GString FileName = LFindFile(AboutGraphic);
 		if (FileName)
 		{
 			auto c = Tbl->GetCell(x++, 0, true);
