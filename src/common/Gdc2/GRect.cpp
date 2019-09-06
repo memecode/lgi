@@ -380,7 +380,12 @@ GRegion::GRegion(OsRect &r) : GRect(0, 0, 0, 0)
 	SetSize(1);
 	if (a)
 	{
-		#if LGI_CARBON
+		#if defined(__GTK_H__)
+			x1 = r.x;
+			y1 = r.y;
+			x2 = r.x + r.width - CornerOffset;
+			y2 = r.y + r.height - CornerOffset;
+		#elif LGI_CARBON
 			x1 = a[0].x1 = (int) r.left;
 			y1 = a[0].y1 = (int) r.top;
 			x2 = a[0].x2 = (int) r.right - CornerOffset;

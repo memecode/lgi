@@ -7,25 +7,21 @@
 #ifndef __GDCREGION_H
 #define __GDCREGION_H
 
-#if defined WIN32
+#if defined __GTK_H__
+
+	#define CornerOffset 1
+	typedef Gtk::GdkRectangle OsRect;
+
+#elif defined WIN32
 
 	#define CornerOffset 1
 	typedef RECT OsRect;
-
-#elif defined BEOS
-
-	#define CornerOffset 0
-	typedef BRect OsRect;
 
 #elif defined ATHEOS
 
 	#include <gui/rect.h>
 	#define CornerOffset 0
 	typedef os::Rect OsRect;
-
-#elif defined __GTK_H__
-
-	typedef Gtk::GdkRectangle OsRect;
 
 #elif defined MAC
 

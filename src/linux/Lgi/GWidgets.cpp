@@ -16,6 +16,7 @@
 #include "GBitmap.h"
 #include "GTableLayout.h"
 #include "GDisplayString.h"
+#include "GButton.h"
 
 using namespace Gtk;
 #include "LgiWidget.h"
@@ -26,14 +27,17 @@ using namespace Gtk;
 struct GDialogPriv
 {
 	int ModalStatus;
-	bool IsModal;
+	int BtnId;
+	bool IsModal, IsModeless;
 	bool Resizable;
 	
 	GDialogPriv()
 	{
-		IsModal = true;
+		IsModal = false;
+		IsModeless = false;
 		Resizable = true;
 		ModalStatus = 0;
+		BtnId = -1;
 	}
 };
 
@@ -60,6 +64,28 @@ bool GDialog::IsModal()
 {
 	return d->IsModal;
 }
+
+int GDialog::GetButtonId()
+{
+	return d->BtnId;
+}
+
+int GDialog::OnNotify(GViewI *Ctrl, int Flags)
+{
+	GButton *b = dynamic_cast<GButton*>(Ctrl);
+	if (b)
+	{
+		d->BtnId = b->GetId();
+		
+		if (d->IsModal)
+			EndModal();
+		else if (d->IsModeless)
+			EndModeless();
+	}
+
+	return 0;
+}
+
 
 void GDialog::Quit(bool DontDelete)
 {
@@ -159,6 +185,7 @@ int GDialog::DoModal(OsView OverrideParent)
 	}
 
 	d->IsModal = true;
+	d->IsModeless = false;
 	SetupDialog(true);
 	LgiApp->Run();
 	
@@ -182,6 +209,7 @@ void GDialog::EndModal(int Code)
 int GDialog::DoModeless()
 {
 	d->IsModal = false;
+	d->IsModeless = true;
 	SetupDialog(false);
 	return 0;
 }
