@@ -2286,17 +2286,13 @@ bool AppWnd::OnBreakPoint(GDebugger::BreakPoint &b, bool Add)
 	for (IdeDoc *doc = *it; doc; doc = *++it)
 	{
 		char *fn = doc->GetFileName();
-		bool Match = !_stricmp(fn, b.File);
+		bool Match = !Stricmp(fn, b.File.Get());
 		if (Match)
-		{
 			doc->AddBreakPoint(b.Line, Add);
-		}
 	}
 
 	if (d->DbgContext)
-	{
 		d->DbgContext->OnBreakPoint(b, Add);
-	}
 	
 	return true;
 }
