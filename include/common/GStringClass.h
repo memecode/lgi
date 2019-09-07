@@ -1156,28 +1156,31 @@ public:
 	
 	GString &operator =(CFStringRef r)
 	{
-		CFIndex length = CFStringGetLength(r);
-		CFRange range = CFRangeMake(0, length);
-		CFIndex usedBufLen = 0;
-		CFIndex slen = CFStringGetBytes(r,
-										range,
-										kCFStringEncodingUTF8,
-										'?',
-										false,
-										NULL,
-										0,
-										&usedBufLen);
-		if (Set(NULL, usedBufLen))
+		if (r)
 		{
-			slen = CFStringGetBytes(	r,
-										range,
-										kCFStringEncodingUTF8,
-										'?',
-										false,
-										(UInt8*)Str->Str,
-										Str->Len,
-										&usedBufLen);
-			Str->Str[usedBufLen] = 0; // NULL terminate
+			CFIndex length = CFStringGetLength(r);
+			CFRange range = CFRangeMake(0, length);
+			CFIndex usedBufLen = 0;
+			CFIndex slen = CFStringGetBytes(r,
+											range,
+											kCFStringEncodingUTF8,
+											'?',
+											false,
+											NULL,
+											0,
+											&usedBufLen);
+			if (Set(NULL, usedBufLen))
+			{
+				slen = CFStringGetBytes(	r,
+											range,
+											kCFStringEncodingUTF8,
+											'?',
+											false,
+											(UInt8*)Str->Str,
+											Str->Len,
+											&usedBufLen);
+				Str->Str[usedBufLen] = 0; // NULL terminate
+			}
 		}
 		
 		return *this;

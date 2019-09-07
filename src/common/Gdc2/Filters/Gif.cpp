@@ -683,6 +683,8 @@ GFilter::IoStatus GdcGif::ReadImage(GSurface *pdc, GStream *in)
 					if (!Read(s, &Var, sizeof(Var))) \
 					{ \
 						Done = true; \
+						LgiTrace("%s:%i - Failed to read %i (" LPrintfInt64 " of " LPrintfInt64 ")\n", \
+								(int)sizeof(Var), in->GetPos(), in->GetSize()); \
 						break; \
 					}
 					
@@ -746,7 +748,7 @@ GFilter::IoStatus GdcGif::ReadImage(GSurface *pdc, GStream *in)
 						}
 						else
 						{
-							printf("%s:%i - Failed to create output surface.\n", _FL);
+							LgiTrace("%s:%i - Failed to create output surface.\n", _FL);
 						}
 
 						Done = true;

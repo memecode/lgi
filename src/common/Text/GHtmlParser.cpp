@@ -303,9 +303,10 @@ char *GHtmlParser::ParsePropList(char *s, GHtmlElement *Obj, bool &Closed)
 			if (Name && Value && *Value)
 			{
 				#if defined(_DEBUG)
-				if (!_stricmp(Name, "debug"))
+				if (!_stricmp(Name, "src"))
 				{
-					// int asd=0;
+					// printf("%s = %S\n", Name, Value);
+					int asd=0;
 				}
 				#endif
 				Obj->Set(Name, Value);

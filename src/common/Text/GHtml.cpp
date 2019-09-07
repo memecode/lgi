@@ -3138,6 +3138,7 @@ void GTag::SetStyle()
 			if (Html->Environment &&
 				Get("src", Uri))
 			{
+				// printf("Uri: %s\n", Uri);
 				LoadImage(Uri);
 			}
 			break;
@@ -7185,7 +7186,8 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 									}
 									else LgiTrace("%s:%i - Image decode failed for '%s'\n", _FL, j->Uri.Get());
 								}
-								else LgiTrace("%s:%i - Unexpected job type for '%s'\n", _FL, j->Uri.Get());
+								else if (j->Status == GDocumentEnv::LoadJob::JobOk)
+									LgiTrace("%s:%i - Unexpected job type for '%s'\n", _FL, j->Uri.Get());
 							}
 							else if (r->TagId == TAG_LINK)
 							{

@@ -935,6 +935,27 @@ void GApp::OnCommandLine()
 	Files.DeleteArrays();
 }
 
+GString MimeFromData(const char *File)
+{
+	GString Ret;
+	GFile f;
+	if (!f.Open(File, O_READ))
+		return Ret;
+	GArray<uint8_t> b;
+	b.Length(1024);
+	auto r = f.Read(b.AddressOf(), b.Length());
+	if (r <= 0)
+		return Ret;
+	
+	if (b.Length() >= 8)
+	{
+		if (memcmp(b.AddressOf(), "GIF89a\x01", 7) == 0)
+			Ret = "image/gif";
+	}
+	
+	return Ret;
+}
+
 GString GApp::GetFileMimeType(const char *File)
 {
 	GString Ret;
@@ -959,12 +980,16 @@ GString GApp::GetFileMimeType(const char *File)
 	CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, fileExtension, NULL);
 	CFStringRef MIMEType = UTTypeCopyPreferredTagWithClass(UTI, kUTTagClassMIMEType);
 	Ret = MIMEType;
-	CFRelease(MIMEType);
+	if (MIMEType) CFRelease(MIMEType);
 	CFRelease(UTI);
 	[filePath release];
 	
 	if (!Ret)
-		Ret = "application/octet-stream";
+	{
+		Ret = MimeFromData(File);
+		if (!Ret)
+			Ret = "application/octet-stream";
+	}
 	
 	return Ret;
 }
