@@ -129,7 +129,7 @@ int GDialog::DoModal(OsView OverideParent)
 	
 	if (Wnd && Attach(0))
 	{
-		LAutoPool Pool;
+		// LAutoPool Pool;
 		GWindow *Owner = GetParent() ? GetParent()->GetWindow() : 0;
 		if (Owner)
 		{
@@ -147,6 +147,7 @@ int GDialog::DoModal(OsView OverideParent)
 		
 		NSApplication *app = LgiApp->Handle();
 		auto wnd = WindowHandle();
+		[wnd.p retain];
 		[app runModalForWindow:wnd];
 		
 		if (Owner)
@@ -161,7 +162,7 @@ void GDialog::EndModal(int Code)
 {
 	if (d->IsModal)
 	{
-		LAutoPool Pool;
+		// LAutoPool Pool;
 		d->IsModal = false;
 		d->ModalStatus = Code;
 		

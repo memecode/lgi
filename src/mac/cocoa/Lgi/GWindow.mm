@@ -171,7 +171,7 @@ public:
 	if (self.d)
 		self.d->Wnd->OnDealloc();
 
-	LAutoPool Ap;
+	// LAutoPool Ap;
 	LCocoaView *cv = objc_dynamic_cast(LCocoaView, self.contentView);
 	cv.w = NULL;
 	[cv release];
@@ -292,7 +292,7 @@ GWindow::GWindow(OsWindow wnd) : GView(NULL)
 	
 	_Lock = new LMutex;
 	
-	LAutoPool Pool;
+	// LAutoPool Pool;
 	
 	GRect pos(200, 200, 200, 200);
 	NSRect frame = pos;
@@ -311,7 +311,7 @@ GWindow::GWindow(OsWindow wnd) : GView(NULL)
 
 GWindow::~GWindow()
 {
-	LAutoPool Pool;
+	// LAutoPool Pool;
 	if (LgiApp->AppWnd == this)
 	{
 		LgiApp->AppWnd = 0;
@@ -491,7 +491,7 @@ void GWindow::SetDragHandlers(bool On)
 
 void GWindow::Quit(bool DontDelete)
 {
-	LAutoPool Pool;
+	// LAutoPool Pool;
 	if (_QuitOnClose)
 	{
 		_QuitOnClose = false;
@@ -890,7 +890,7 @@ void GWindow::SetDefault(GViewI *v)
 
 bool GWindow::Name(const char *n)
 {
-	LAutoPool Pool;
+	// LAutoPool Pool;
 	bool Status = GBase::Name(n);
 	
 	if (Wnd)
@@ -982,7 +982,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 
 GRect &GWindow::GetPos()
 {
-	LAutoPool Pool;
+	// LAutoPool Pool;
 
 	if (Wnd)
 	{
@@ -996,7 +996,7 @@ GRect &GWindow::GetPos()
 
 bool GWindow::SetPos(GRect &p, bool Repaint)
 {
-	LAutoPool Pool;
+	// LAutoPool Pool;
 	
 	Pos = p;
 	if (Wnd)
@@ -1287,7 +1287,7 @@ void GWindow::OnTrayClick(GMouse &m)
 
 bool GWindow::Obscured()
 {
-	LAutoPool Pool;
+	// LAutoPool Pool;
 	if (!Wnd)
 		return false;
 
