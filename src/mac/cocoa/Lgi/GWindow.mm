@@ -957,8 +957,10 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 			
 			if (Position.Valid())
 			{
-				// int Sy = GdcD->Y();
-				// Position.y2 = min(Position.y2, Sy - 50);
+				if (Position.X() < 64)
+					Position.x2 = Position.x1 + 63;
+				if (Position.Y() < 64)
+					Position.y2 = Position.y1 + 63;
 				SetPos(Position);
 			}
 			
