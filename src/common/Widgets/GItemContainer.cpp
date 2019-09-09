@@ -1068,16 +1068,21 @@ public:
 
 	bool OnKey(GKey &k)
 	{
-		if (k.c16 == LK_RETURN ||
-			k.c16 == LK_ESCAPE)
+		/*	This should be handled by GEdit::OnKey now.
+			Which will send a GNotify_EscapeKey or GNotify_ReturnKey
+			up to the ItemEdit OnNotify handler.
+
+		switch (k.vkey)
 		{
-			if (k.Down())
-			{			
-				ItemEdit->OnNotify(this, k.c16);
+			case LK_RETURN:
+			case LK_ESCAPE:
+			{
+				if (k.Down())
+					ItemEdit->OnNotify(this, k.c16);			
+				return true;
 			}
-			
-			return true;
 		}
+		*/
 		
 		return GEdit::OnKey(k);
 	}

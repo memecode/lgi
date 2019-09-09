@@ -53,7 +53,7 @@ class GEditPrivate
 {
 public:
 	bool IgnoreNotify;
-
+	bool NotificationProcessed;
 	bool InEmptyMode;
 	GCss::ColorDef NonEmptyColor;
 	GAutoWString EmptyText;
@@ -61,6 +61,7 @@ public:
 	GEditPrivate()
 	{
 		IgnoreNotify = true;
+		NotificationProcessed = false;
 		InEmptyMode = false;
 	}
 
@@ -234,11 +235,20 @@ GMessage::Result GEdit::OnEvent(GMessage *Msg)
 		case WM_KEYDOWN:
 		{
 			if (!MultiLine() &&
-				(Msg->a == VK_UP || Msg->a == VK_DOWN))
+				(
+					Msg->a == VK_UP ||
+					Msg->a == VK_DOWN ||
+					Msg->a == VK_ESCAPE ||
+					Msg->a == VK_BACK ||
+					Msg->a == VK_RETURN
+				))
 			{
 				GView::OnEvent(Msg);
 				return 1;				
 			}
+
+			// if (Msg->a == VK_ESCAPE) SendNotify(GNotify_EscapeKey);
+
 
 			if (Msg->a == VK_TAB && MultiLine())
 			{
@@ -248,11 +258,9 @@ GMessage::Result GEdit::OnEvent(GMessage *Msg)
 				return 0;
 			}
 			
-			if (Msg->a == VK_ESCAPE)
-				SendNotify(GNotify_EscapeKey);
-
 			if (tolower((int)Msg->a) == 'u')
 			{
+				// Ctrl+U case change
 				if (GetKeyState(VK_CONTROL) & 0xFF00)
 				{
 					DWORD Start = 0, End = 0;
@@ -350,22 +358,43 @@ void GEdit::OnFocus(bool f)
 		SysEmptyText();
 }
 
+void GEdit::KeyProcessed()
+{
+	d->NotificationProcessed = true;
+}
+
 bool GEdit::OnKey(GKey &k)
 {
-	if (!k.IsChar &&
-		k.vkey == VK_RETURN)
+	d->NotificationProcessed = false;
+	
+	switch (k.vkey)
 	{
-		if (k.Down())
+	 	case LK_RETURN:
 		{
-			SendNotify(k.c16);
+			if (k.Down())
+				SendNotify(GNotify_ReturnKey);
+			break;
 		}
-
-		if (MultiLine())
+		case LK_ESCAPE:
 		{
-			return true;
+			if (k.Down())
+				SendNotify(GNotify_EscapeKey);
+			break;
+		}
+		case LK_BACKSPACE:
+		{
+			if (k.Down())
+				SendNotify(GNotify_BackspaceKey);
+			break;
+		}
+		case LK_DELETE:
+		{
+			if (k.Down())
+				SendNotify(GNotify_DeleteKey);
+			break;
 		}
 	}
-	
+
 	if
 	(
 		!k.IsChar &&
@@ -381,6 +410,19 @@ bool GEdit::OnKey(GKey &k)
 		// Ctrl+v don't fire as WELL as the built in windows clipboard
 		// handlers.
 		return true;
+	}
+
+	if
+	(
+		!MultiLine() &&
+		(
+			k.vkey == LK_TAB ||
+			k.vkey == LK_RETURN  ||
+			k.vkey == LK_ESCAPE
+		)
+	)
+	{	
+		return d->NotificationProcessed;
 	}
 
 	return false;
