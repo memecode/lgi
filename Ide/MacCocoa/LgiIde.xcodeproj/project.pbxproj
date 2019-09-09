@@ -33,10 +33,10 @@
 		345B2117217969700079E3C9 /* GDebugContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FD2179696F0079E3C9 /* GDebugContext.cpp */; };
 		345B2118217969700079E3C9 /* IdeProjectSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */; };
 		345B2119217969700079E3C9 /* MissingFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FF217969700079E3C9 /* MissingFiles.cpp */; };
+		346A86902325CBC000FBC545 /* libpng15.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 346A86832325CBA000FBC545 /* libpng15.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34C4FD2A22FD7EB800C4BECB /* icons.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211D217969D30079E3C9 /* icons.png */; };
 		34C4FD2B22FD7EC100C4BECB /* LgiIde.lr8 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211C217969D30079E3C9 /* LgiIde.lr8 */; };
 		34C4FD2C22FD7EC700C4BECB /* mac-icon.icns in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211B217969D30079E3C9 /* mac-icon.icns */; };
-		34C4FD3122FDB28400C4BECB /* libpng15.15.4.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C4FD2D22FDB24800C4BECB /* libpng15.15.4.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34C4FD3422FDB58B00C4BECB /* cmds-16px.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C4FD3222FDB50D00C4BECB /* cmds-16px.png */; };
 		34C4FD3522FDB58B00C4BECB /* cmds-32px.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C4FD3322FDB50D00C4BECB /* cmds-32px.png */; };
 		34D21CD821797815003D1EA6 /* GExeCheck.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CD721797815003D1EA6 /* GExeCheck.cpp */; };
@@ -67,6 +67,62 @@
 			remoteGlobalIDString = 3477C2671CBF020F0028B84B;
 			remoteInfo = LgiCocoa;
 		};
+		346A86802325CBA000FBC545 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 39AA012DEDB543A3BCEF81FD;
+			remoteInfo = example;
+		};
+		346A86822325CBA000FBC545 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4C392CBA007A49E283A870CA;
+			remoteInfo = libpng15;
+		};
+		346A86842325CBA000FBC545 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 47866703CB4F4AC1B13C6E4B;
+			remoteInfo = libpng15_static;
+		};
+		346A86862325CBA000FBC545 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0C6D3B3FB6004304954D150A;
+			remoteInfo = minigzip;
+		};
+		346A86882325CBA000FBC545 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2C53552CD30B429F83D7E6FE;
+			remoteInfo = pngtest;
+		};
+		346A868A2325CBA000FBC545 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 06944BF9A41A468B9CE1C982;
+			remoteInfo = zlib;
+		};
+		346A868C2325CBA000FBC545 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1F1C912190B54B7EBB1305D4;
+			remoteInfo = zlib_static;
+		};
+		346A868E2325CBB300FBC545 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 530F64CDFF9743C2A14BF4C9;
+			remoteInfo = libpng15;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -76,7 +132,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				34C4FD3122FDB28400C4BECB /* libpng15.15.4.0.dylib in CopyFiles */,
+				346A86902325CBC000FBC545 /* libpng15.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -148,7 +204,7 @@
 		345B211B217969D30079E3C9 /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../Resources/mac-icon.icns"; sourceTree = "<group>"; };
 		345B211C217969D30079E3C9 /* LgiIde.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = LgiIde.lr8; path = ../Resources/LgiIde.lr8; sourceTree = "<group>"; };
 		345B211D217969D30079E3C9 /* icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icons.png; path = ../Resources/icons.png; sourceTree = "<group>"; };
-		34C4FD2D22FDB24800C4BECB /* libpng15.15.4.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng15.15.4.0.dylib; path = ../../../../../CodeLib/libpng/build/libpng15.15.4.0.dylib; sourceTree = "<group>"; };
+		346A86722325CBA000FBC545 /* libpng.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libpng.xcodeproj; path = ../../../../../CodeLib/libpng/build/libpng.xcodeproj; sourceTree = "<group>"; };
 		34C4FD3222FDB50D00C4BECB /* cmds-16px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cmds-16px.png"; sourceTree = "<group>"; };
 		34C4FD3322FDB50D00C4BECB /* cmds-32px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cmds-32px.png"; sourceTree = "<group>"; };
 		34D21CD721797815003D1EA6 /* GExeCheck.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GExeCheck.cpp; path = ../../src/common/General/GExeCheck.cpp; sourceTree = "<group>"; };
@@ -215,7 +271,7 @@
 		345B20CB217967B70079E3C9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				34C4FD2D22FDB24800C4BECB /* libpng15.15.4.0.dylib */,
+				346A86722325CBA000FBC545 /* libpng.xcodeproj */,
 				345B20C3217967760079E3C9 /* LgiCocoa.xcodeproj */,
 			);
 			name = Frameworks;
@@ -318,6 +374,20 @@
 			name = Search;
 			sourceTree = "<group>";
 		};
+		346A86732325CBA000FBC545 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				346A86812325CBA000FBC545 /* example */,
+				346A86832325CBA000FBC545 /* libpng15.dylib */,
+				346A86852325CBA000FBC545 /* libpng15_static.a */,
+				346A86872325CBA000FBC545 /* minigzip */,
+				346A86892325CBA000FBC545 /* pngtest */,
+				346A868B2325CBA000FBC545 /* libzd.dylib */,
+				346A868D2325CBA000FBC545 /* libzlib_static.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		34D21CD621797809003D1EA6 /* Lgi */ = {
 			isa = PBXGroup;
 			children = (
@@ -351,6 +421,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				346A868F2325CBB300FBC545 /* PBXTargetDependency */,
 				345B20D3217968890079E3C9 /* PBXTargetDependency */,
 			);
 			name = LgiIde;
@@ -394,6 +465,10 @@
 					ProductGroup = 345B20CD217968820079E3C9 /* Products */;
 					ProjectRef = 345B20C3217967760079E3C9 /* LgiCocoa.xcodeproj */;
 				},
+				{
+					ProductGroup = 346A86732325CBA000FBC545 /* Products */;
+					ProjectRef = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -408,6 +483,57 @@
 			fileType = wrapper.framework;
 			path = LgiCocoa.framework;
 			remoteRef = 345B20D0217968820079E3C9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		346A86812325CBA000FBC545 /* example */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = example;
+			remoteRef = 346A86802325CBA000FBC545 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		346A86832325CBA000FBC545 /* libpng15.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			name = libpng15.dylib;
+			path = libpng15.15.4.0.dylib;
+			remoteRef = 346A86822325CBA000FBC545 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		346A86852325CBA000FBC545 /* libpng15_static.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libpng15_static.a;
+			remoteRef = 346A86842325CBA000FBC545 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		346A86872325CBA000FBC545 /* minigzip */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = minigzip;
+			remoteRef = 346A86862325CBA000FBC545 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		346A86892325CBA000FBC545 /* pngtest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = pngtest;
+			remoteRef = 346A86882325CBA000FBC545 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		346A868B2325CBA000FBC545 /* libzd.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			name = libzd.dylib;
+			path = libzd.1.2.5.dylib;
+			remoteRef = 346A868A2325CBA000FBC545 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		346A868D2325CBA000FBC545 /* libzlib_static.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libzlib_static.a;
+			remoteRef = 346A868C2325CBA000FBC545 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -463,6 +589,11 @@
 			isa = PBXTargetDependency;
 			name = LgiCocoa;
 			targetProxy = 345B20D2217968890079E3C9 /* PBXContainerItemProxy */;
+		};
+		346A868F2325CBB300FBC545 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = libpng15;
+			targetProxy = 346A868E2325CBB300FBC545 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

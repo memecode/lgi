@@ -803,8 +803,6 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////
 IdeDocPrivate::IdeDocPrivate(IdeDoc *d, AppWnd *a, NodeSource *src, const char *file) : NodeView(src), LMutex("IdeDocPrivate.Lock")
 {
-	IsDirty = false;
-
 	FilePopup = NULL;
 	MethodPopup = NULL;
 	SymPopup = NULL;
@@ -990,17 +988,21 @@ bool IdeDocPrivate::Save()
 		
 		OnSaveComplete(Status);
 	}
+	else
+	{
+		Edit->IsDirty(false);
+	}
 
 	if (Status)
 		ModTs = GetModTime();
-	
+
 	return Status;
 }
 
 void IdeDocPrivate::OnSaveComplete(bool Status)
 {
 	if (Status)
-		IsDirty = false;
+		Edit->IsDirty(false);
 	UpdateName();
 
 	ProjectNode *Node = dynamic_cast<ProjectNode*>(nSrc);
@@ -1023,12 +1025,12 @@ void IdeDocPrivate::CheckModTime()
 		if (!InCheckModTime)
 		{
 			InCheckModTime = true;
-			if (!IsDirty ||
+			if (!Edit->IsDirty() ||
 				LgiMsg(Doc, "Do you want to reload modified file from\ndisk and lose your changes?", AppName, MB_YESNO) == IDYES)
 			{
 				auto Ln = Edit->GetLine();
 				Load();
-				IsDirty = false;
+				Edit->IsDirty(false);
 				UpdateName();
 				Edit->SetLine((int)Ln);
 			}
@@ -1194,7 +1196,7 @@ void IdeDoc::OnTitleClick(GMouse &m)
 		}
 		
 		LSubMenu s;
-		s.AppendItem("Save", IDM_SAVE, d->IsDirty);
+		s.AppendItem("Save", IDM_SAVE, d->Edit->IsDirty());
 		s.AppendItem("Close", IDM_CLOSE, true);
 		if (Fn)
 		{
@@ -1680,11 +1682,7 @@ int IdeDoc::OnNotify(GViewI *v, int f)
 			{
 				case GNotifyDocChanged:
 				{
-					if (d->IsDirty ^ d->Edit->IsDirty())
-					{
-						d->IsDirty = d->Edit->IsDirty();
-						d->UpdateName();
-					}
+					d->UpdateName();
 					break;
 				}
 				case GNotifyCursorChanged:
@@ -1811,7 +1809,6 @@ int IdeDoc::OnNotify(GViewI *v, int f)
 
 void IdeDoc::SetDirty()
 {
-	d->IsDirty = true;
 	d->Edit->IsDirty(true);
 	d->UpdateName();
 }
@@ -1843,7 +1840,8 @@ bool IdeDoc::SetClean()
 			LocalPath = d->GetLocalFile();
 		}
 
-		if (!FileExists(LocalPath))
+		if (d->Edit->IsDirty() &&
+			!FileExists(LocalPath))
 		{
 			// We need a valid filename to save to...			
 			GFileSelect s;
@@ -1852,15 +1850,11 @@ bool IdeDoc::SetClean()
 				s.InitialDir(Base);
 			
 			if (s.Save())
-			{
 				d->SetFileName(s.Name());
-			}
 		}
 		
 		if (d->Edit->IsDirty())
-		{
 			d->Save();
-		}
 		
 		Processing = false;
 	}

@@ -27,13 +27,20 @@ public:
 	bool FocusOnCreate;
 	bool Multiline;
 	bool Password;
+	bool NotificationProcessed;
 	GAutoString EmptyTxt;
 	
 	GEditPrivate()
 	{
 		FocusOnCreate = false;
+		NotificationProcessed = false;
 	}
 };
+
+void GEdit::KeyProcessed()
+{
+	d->NotificationProcessed = true;
+}
 
 GEdit::GEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	#if WINNATIVE
@@ -168,30 +175,50 @@ void GEdit::OnPaint(GSurface *pDC)
 
 bool GEdit::OnKey(GKey &k)
 {
+	d->NotificationProcessed = false;
+	
+	switch (k.vkey)
+	{
+	 	case LK_RETURN:
+		{
+			if (k.Down())
+				SendNotify(GNotify_ReturnKey);
+			break;
+		}
+		case LK_ESCAPE:
+		{
+			if (k.Down())
+				SendNotify(GNotify_EscapeKey);
+			break;
+		}
+		case LK_BACKSPACE:
+		{
+			if (k.Down())
+				SendNotify(GNotify_BackspaceKey);
+			break;
+		}
+		case LK_DELETE:
+		{
+			if (k.Down())
+				SendNotify(GNotify_DeleteKey);
+			break;
+		}
+	}
+
 	if
 	(
 		!d->Multiline &&
 		(
 			k.vkey == LK_TAB ||
-			k.vkey == LK_RETURN
+			k.vkey == LK_RETURN  ||
+			k.vkey == LK_ESCAPE
 		)
 	)
 	{	
-		if (k.vkey == LK_RETURN)
-			return GTextView3::OnKey(k);
-		
-		return false;
+		return d->NotificationProcessed;
 	}
 	
-	if (k.vkey == LK_ESCAPE)
-	{
-		if (k.Down())
-			SendNotify(GNotify_EscapeKey);
-		return true;
-	}
-
-	bool Status = GTextView3::OnKey(k);
-	return Status;
+	return GTextView3::OnKey(k);
 }
 
 void GEdit::OnEnter(GKey &k)

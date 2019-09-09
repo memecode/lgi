@@ -1211,7 +1211,7 @@ int GItemEdit::OnNotify(GViewI *v, int f)
 	{
 		case 100:
 		{
-			if (f == LK_ESCAPE)
+			if (f == GNotify_EscapeKey)
 			{
 				d->Esc = true;
 				#if DEBUG_EDIT_LABEL
@@ -1219,11 +1219,12 @@ int GItemEdit::OnNotify(GViewI *v, int f)
 				#endif
 			}
 
-			if (f == LK_ESCAPE || f == LK_RETURN)
+			if (f == GNotify_EscapeKey || f == GNotify_ReturnKey)
 			{
 				#if DEBUG_EDIT_LABEL
 				LgiTrace("%s:%i - GItemEdit hiding on esc/enter\n", _FL);
 				#endif
+				d->Edit->KeyProcessed();
 				Visible(false);
 			}
 

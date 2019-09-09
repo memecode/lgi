@@ -78,6 +78,7 @@ public:
 	void SelectAll() { Select(); }
 
 	bool OnKey(GKey &k);
+	void KeyProcessed();
 	LgiCursor GetCursor(int x, int y) { return LCUR_Ibeam; }
 
 	#if WINNATIVE

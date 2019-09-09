@@ -48,7 +48,6 @@ public:
 	IdeDoc *Doc;
 	AppWnd *App;
 	IdeProject *Project;
-	bool IsDirty;
 	LDateTime ModTs;
 	class DocEdit *Edit;
 	EditTray *Tray;
