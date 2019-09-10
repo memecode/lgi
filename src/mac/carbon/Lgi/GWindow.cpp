@@ -429,17 +429,9 @@ void GWindow::Visible(bool i)
 	}
 }
 
-void GWindow::_SetDynamic(bool i)
+void GWindow::SetDeleteOnClose(bool i)
 {
 	d->Dynamic = i;
-}
-
-void GWindow::_OnViewDelete()
-{
-	if (d->Dynamic)
-	{
-		delete this;
-	}
 }
 
 void GWindow::_Delete()

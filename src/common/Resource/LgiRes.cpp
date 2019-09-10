@@ -312,7 +312,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 		if (Exe)
 		{
 			#if DEBUG_RES_FILE
-			LgiTrace("%s:%i - Str='%s'\n", _FL, Str);
+			LgiTrace("%s:%i - Str='%s'\n", _FL, Exe.Get());
 			#endif
 			auto p = Exe.SplitDelimit(DIR_STR);
 			File = p.Last();
@@ -359,7 +359,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 		FullPath = LFindFile(AltFile);
 
 #if DEBUG_RES_FILE
-LgiTrace("%s:%i - FullPath='%s'\n", _FL, FullPath);
+LgiTrace("%s:%i - FullPath='%s'\n", _FL, FullPath.Get());
 #endif
 
 	if (FullPath)

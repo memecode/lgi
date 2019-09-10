@@ -107,7 +107,7 @@ struct AppPriv
 	VersionCtrl PrevType;
 	int Resort;
 
-	AppPriv()  : Opts(GOptionsFile::PortableMode, AppName)
+	AppPriv()  : Opts(GOptionsFile::DesktopMode, AppName)
 	{
 		Lst = NULL;
 		PrevType = VcNone;

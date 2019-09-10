@@ -409,7 +409,19 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	d->Name.Reset(NewStr(AppName));
 	AppWnd = 0;
 	Name(AppName);
-	LgiArgsAppPath = AppArgs.Arg[0];
+	if (LgiIsRelativePath(AppArgs.Arg[0]))
+	{
+		char wd[MAX_PATH];
+		char exe[MAX_PATH];
+		if (LgiMakePath(exe, sizeof(exe), getcwd(wd, sizeof(wd)), AppArgs.Arg[0]))
+			LgiArgsAppPath = exe;
+		else
+			printf("%s:%i - LgiMakePath for Exe failed.\n", _FL);
+	}
+	else
+		LgiArgsAppPath = AppArgs.Arg[0];
+	
+	printf("%s:%i - LgiArgsAppPath='%s'\n", _FL, LgiArgsAppPath.Get());
 	
 	// Catch and ignore SIGPIPE
 	signal(SIGPIPE, OnSigPipe);

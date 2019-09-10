@@ -43,7 +43,7 @@ GDialog::GDialog()
 {
 	d = new GDialogPriv;
 	Name("Dialog");
-	_SetDynamic(false);
+	SetDeleteOnClose(false);
 }
 
 GDialog::~GDialog()

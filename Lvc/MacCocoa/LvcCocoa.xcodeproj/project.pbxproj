@@ -23,6 +23,8 @@
 		34C032BB2319CE8C00470DF2 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C032B92319CDFE00470DF2 /* LgiCocoa.framework */; };
 		34C032BD2319CEC100470DF2 /* GOptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C032BC2319CEC100470DF2 /* GOptionsFile.cpp */; };
 		34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C032B92319CDFE00470DF2 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		34CE07102327B3B100807DCB /* Png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CE070F2327B3B100807DCB /* Png.cpp */; };
+		34CE07302327B41600807DCB /* libpng15.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CE07222327B3F900807DCB /* libpng15.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34E1910C20B1898E00005243 /* image-list.png in Resources */ = {isa = PBXBuildFile; fileRef = 34E1910B20B1898E00005243 /* image-list.png */; };
 		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
 		8D0C4E8E0486CD37000505A6 /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = 02345980000FD03B11CA0E72 /* main.nib */; };
@@ -43,6 +45,62 @@
 			remoteGlobalIDString = 3477C2671CBF020F0028B84B;
 			remoteInfo = LgiCocoa;
 		};
+		34CE071F2327B3F900807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 360DE5A9CD3B4DD097CB7E11;
+			remoteInfo = example;
+		};
+		34CE07212327B3F900807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D56EC0ED9E0D44C2B26CDB8F;
+			remoteInfo = libpng15;
+		};
+		34CE07232327B3F900807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DA0F4BAA036048DCA3D1D1D8;
+			remoteInfo = libpng15_static;
+		};
+		34CE07252327B3F900807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = FC709C82281345128D446EC7;
+			remoteInfo = minigzip;
+		};
+		34CE07272327B3F900807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5D124817888941F5B00F7116;
+			remoteInfo = pngtest;
+		};
+		34CE07292327B3F900807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2B1B121702CE458485DC22A0;
+			remoteInfo = zlib;
+		};
+		34CE072B2327B3F900807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 7B8852341F9942C785506AF2;
+			remoteInfo = zlib_static;
+		};
+		34CE072D2327B40200807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = A3078A5A031E4850B43CE4CC;
+			remoteInfo = libpng15;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -56,12 +114,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		34CE072F2327B40D00807DCB /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+				34CE07302327B41600807DCB /* libpng15.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		0867D6ABFE840B52C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1870340FFE93FCAF11CA0CD7 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
-		32DBCF6D0370B57F00C91783 /* Lvc_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Lvc_Prefix.pch; sourceTree = "<group>"; };
 		342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = SOURCE_ROOT; };
 		3448F8C52081D2500038AE76 /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../Resources/mac-icon.icns"; sourceTree = "<group>"; };
 		3457FE3E2081CB3D00014BE4 /* BlameUi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BlameUi.cpp; path = ../Src/BlameUi.cpp; sourceTree = "<group>"; };
@@ -82,6 +149,8 @@
 		34C032B22319CDE900470DF2 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = ../../../../../../../System/Library/Frameworks/Cocoa.framework; sourceTree = "<group>"; };
 		34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
 		34C032BC2319CEC100470DF2 /* GOptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GOptionsFile.cpp; path = ../../src/common/Lgi/GOptionsFile.cpp; sourceTree = "<group>"; };
+		34CE070F2327B3B100807DCB /* Png.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Png.cpp; path = ../../src/common/Gdc2/Filters/Png.cpp; sourceTree = "<group>"; };
+		34CE07112327B3F900807DCB /* libpng.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libpng.xcodeproj; path = ../../../../../CodeLib/libpng/build/libpng.xcodeproj; sourceTree = "<group>"; };
 		34E1910B20B1898E00005243 /* image-list.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "image-list.png"; path = "../Resources/image-list.png"; sourceTree = "<group>"; };
 		8D0C4E960486CD37000505A6 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D0C4E970486CD37000505A6 /* Lvc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lvc.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -154,6 +223,7 @@
 		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				34CE07112327B3F900807DCB /* libpng.xcodeproj */,
 				34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */,
 				34C032B22319CDE900470DF2 /* Cocoa.framework */,
 			);
@@ -163,11 +233,11 @@
 		342D52A30F0CBA07002A1C7C /* Lgi */ = {
 			isa = PBXGroup;
 			children = (
+				34CE070F2327B3B100807DCB /* Png.cpp */,
 				34C032BC2319CEC100470DF2 /* GOptionsFile.cpp */,
 				34BD35B220C548710001838A /* GXmlTreeUi.cpp */,
 				34BD35B020C5484A0001838A /* GControlTree.cpp */,
 				3457FE4F2081CBE500014BE4 /* GSubProcess.cpp */,
-				32DBCF6D0370B57F00C91783 /* Lvc_Prefix.pch */,
 				342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */,
 			);
 			name = Lgi;
@@ -177,6 +247,20 @@
 			isa = PBXGroup;
 			children = (
 				34C032B92319CDFE00470DF2 /* LgiCocoa.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		34CE07122327B3F900807DCB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				34CE07202327B3F900807DCB /* example */,
+				34CE07222327B3F900807DCB /* libpng15.dylib */,
+				34CE07242327B3F900807DCB /* libpng15_static.a */,
+				34CE07262327B3F900807DCB /* minigzip */,
+				34CE07282327B3F900807DCB /* pngtest */,
+				34CE072A2327B3F900807DCB /* libzd.dylib */,
+				34CE072C2327B3F900807DCB /* libzlib_static.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -192,10 +276,12 @@
 				8D0C4E8F0486CD37000505A6 /* Sources */,
 				8D0C4E910486CD37000505A6 /* Frameworks */,
 				34640D3212D5D8AB00B207F4 /* CopyFiles */,
+				34CE072F2327B40D00807DCB /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				34CE072E2327B40200807DCB /* PBXTargetDependency */,
 				34C032C02319CF1A00470DF2 /* PBXTargetDependency */,
 			);
 			name = Lvc;
@@ -226,6 +312,10 @@
 					ProductGroup = 34C032B52319CDFE00470DF2 /* Products */;
 					ProjectRef = 34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */;
 				},
+				{
+					ProductGroup = 34CE07122327B3F900807DCB /* Products */;
+					ProjectRef = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -240,6 +330,57 @@
 			fileType = wrapper.framework;
 			path = LgiCocoa.framework;
 			remoteRef = 34C032B82319CDFE00470DF2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		34CE07202327B3F900807DCB /* example */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = example;
+			remoteRef = 34CE071F2327B3F900807DCB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		34CE07222327B3F900807DCB /* libpng15.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			name = libpng15.dylib;
+			path = libpng15.15.4.0.dylib;
+			remoteRef = 34CE07212327B3F900807DCB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		34CE07242327B3F900807DCB /* libpng15_static.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libpng15_static.a;
+			remoteRef = 34CE07232327B3F900807DCB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		34CE07262327B3F900807DCB /* minigzip */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = minigzip;
+			remoteRef = 34CE07252327B3F900807DCB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		34CE07282327B3F900807DCB /* pngtest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = pngtest;
+			remoteRef = 34CE07272327B3F900807DCB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		34CE072A2327B3F900807DCB /* libzd.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			name = libzd.dylib;
+			path = libzd.1.2.5.dylib;
+			remoteRef = 34CE07292327B3F900807DCB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		34CE072C2327B3F900807DCB /* libzlib_static.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libzlib_static.a;
+			remoteRef = 34CE072B2327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -273,6 +414,7 @@
 				34C032BD2319CEC100470DF2 /* GOptionsFile.cpp in Sources */,
 				3457FE492081CB3D00014BE4 /* BlameUi.cpp in Sources */,
 				342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */,
+				34CE07102327B3B100807DCB /* Png.cpp in Sources */,
 				34BD35B120C5484A0001838A /* GControlTree.cpp in Sources */,
 				3457FE4B2081CB3D00014BE4 /* Main.cpp in Sources */,
 			);
@@ -285,6 +427,11 @@
 			isa = PBXTargetDependency;
 			name = LgiCocoa;
 			targetProxy = 34C032BF2319CF1A00470DF2 /* PBXContainerItemProxy */;
+		};
+		34CE072E2327B40200807DCB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = libpng15;
+			targetProxy = 34CE072D2327B40200807DCB /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -320,6 +467,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.Lvc;
 				PRODUCT_NAME = Lvc;
@@ -338,6 +486,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.Lvc;
 				PRODUCT_NAME = Lvc;
@@ -382,6 +531,8 @@
 				HEADER_SEARCH_PATHS = (
 					../../include/common,
 					../../include/mac/cocoa,
+					../../../../../CodeLib/libpng,
+					../../../../../CodeLib/libpng/build,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;
@@ -425,6 +576,8 @@
 				HEADER_SEARCH_PATHS = (
 					../../include/common,
 					../../include/mac/cocoa,
+					../../../../../CodeLib/libpng,
+					../../../../../CodeLib/libpng/build,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				SDKROOT = macosx;

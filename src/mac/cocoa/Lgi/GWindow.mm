@@ -516,7 +516,7 @@ void GWindow::OnFrontSwitch(bool b)
 		auto m = LgiApp->Default.Get();
 		[NSApplication sharedApplication].mainMenu = m ? m->Handle() : nil;
 	}
-	printf("%s:%i - menu for %s is %p\n", _FL, Name(), [NSApplication sharedApplication].mainMenu);
+	// printf("%s:%i - menu for %s is %p\n", _FL, Name(), [NSApplication sharedApplication].mainMenu);
 }
 
 bool GWindow::Visible()
