@@ -147,7 +147,6 @@ void GMouse::SetFromEvent(NSEvent *ev, NSView *view)
 	x = (int)pt.x;
 	y = (int)(r.size.height - pt.y);
 	SetModifer((uint32)ev.modifierFlags);
-	Double(ev.clickCount == 2);
 
 	switch (ev.type)
 	{
@@ -182,6 +181,8 @@ void GMouse::SetFromEvent(NSEvent *ev, NSView *view)
 			LgiAssert(!"Unknown event.");
 			break;
 	}
+
+	Double(ev.clickCount == 2 && Down());
 }
 
 void GUiEvent::SetModifer(uint32_t modifierKeys)

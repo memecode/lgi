@@ -780,7 +780,10 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	}
 	
 AllDone:
-	d->LastKey = k;
+	if (d)
+		d->LastKey = k;
+	else
+		LgiAssert(!"Window was deleted and we are accessing unallocated mem.");
 	
 	return Status;
 }
