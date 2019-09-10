@@ -53,8 +53,7 @@ protected:
 	#else
 
 		OsWindow Wnd;
-		void _OnViewDelete();
-		void _SetDynamic(bool i);
+		void SetDeleteOnClose(bool i);
 
 	#endif
 

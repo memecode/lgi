@@ -41,7 +41,7 @@ GDialog::GDialog()
 {
 	d = new GDialogPriv;
 	Name("Dialog");
-	_SetDynamic(false);
+	SetDeleteOnClose(false);
 }
 
 GDialog::~GDialog()
@@ -147,7 +147,6 @@ int GDialog::DoModal(OsView OverideParent)
 		
 		NSApplication *app = LgiApp->Handle();
 		auto wnd = WindowHandle();
-		[wnd.p retain];
 		[app runModalForWindow:wnd];
 		
 		if (Owner)

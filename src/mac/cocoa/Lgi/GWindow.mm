@@ -82,12 +82,11 @@ public:
 	uint64 LastMinimize;
 	uint64 LastDragDrop;
 
-	bool Dynamic;
+	bool Quiting;
+	bool DeleteOnClose;
 	bool SnapToEdge;
-	bool DeleteWhenDone;
 	bool InitVisible;
 	bool CloseRequestDone;
-	bool Closing;
 	
 	GWindowPrivate(GWindow *wnd)
 	{
@@ -96,19 +95,41 @@ public:
 		LastMinimize = 0;
 		Wnd = wnd;
 		LastDragDrop = 0;
-		DeleteWhenDone = false;
+		DeleteOnClose = true;
 		ChildDlg = 0;
 		Sx = Sy = -1;
-		Dynamic = true;
 		SnapToEdge = false;
 		EmptyMenu = 0;
 		CloseRequestDone = false;
-		Closing = false;
+		Quiting = false;
 	}
 	
 	~GWindowPrivate()
 	{
 		DeleteObj(EmptyMenu);
+	}
+	
+	void OnClose()
+	{
+		auto &osw = Wnd->Wnd;
+
+		if (!osw)
+			return;
+
+		LCocoaView *cv = objc_dynamic_cast(LCocoaView, osw.p.contentView);
+		if (cv)
+			cv.w = NULL;
+
+		LNsWindow *w = objc_dynamic_cast(LNsWindow, osw.p);
+		if (w)
+			w.d = NULL;
+
+		osw.p.delegate = nil;
+		[osw.p autorelease];
+		osw = nil;
+		
+		if (DeleteOnClose)
+			delete Wnd;
 	}
 	
 	ssize_t GetHookIndex(GView *Target, bool Create = false)
@@ -171,7 +192,6 @@ public:
 	if (self.d)
 		self.d->Wnd->OnDealloc();
 
-	// LAutoPool Ap;
 	LCocoaView *cv = objc_dynamic_cast(LCocoaView, self.contentView);
 	cv.w = NULL;
 	[cv release];
@@ -234,26 +254,8 @@ public:
 - (void)windowWillClose:(NSNotification*)event
 {
 	LNsWindow *w = event.object;
-	if (w)
-	{
-	 	if (w.d)
-	 	{
-			//printf("%s:%i - windowWillClose(%s) w.d->Closing=%i\n",
-			//	_FL, w.d->Wnd->GetClass(), w.d->Closing);
-			
-	 		if (w.d->Closing)
-	 		{
-	 			auto gwnd = w.d->Wnd;
-	 			w.d = NULL;
-	 			delete gwnd;
-			}
-	 		else
-	 		{
-				w.d->Wnd->Quit();
-			}
-		}
-		// else printf("%s:%i - w.d is NULL\n", _FL);
-	}
+	if (w && w.d)
+		w.d->OnClose();
 }
 
 - (void)windowDidBecomeMain:(NSNotification*)event
@@ -292,8 +294,6 @@ GWindow::GWindow(OsWindow wnd) : GView(NULL)
 	
 	_Lock = new LMutex;
 	
-	// LAutoPool Pool;
-	
 	GRect pos(200, 200, 200, 200);
 	NSRect frame = pos;
 	if (wnd)
@@ -302,6 +302,7 @@ GWindow::GWindow(OsWindow wnd) : GView(NULL)
 		Wnd.p = [[LNsWindow alloc] init:d Frame:frame];
 	if (Wnd)
 	{
+		[Wnd.p retain];
 		if (!Delegate)
 			Delegate = [[LWindowDelegate alloc] init];
 		//[Wnd.p makeKeyAndOrderFront:NSApp];
@@ -311,31 +312,11 @@ GWindow::GWindow(OsWindow wnd) : GView(NULL)
 
 GWindow::~GWindow()
 {
-	// LAutoPool Pool;
 	if (LgiApp->AppWnd == this)
-	{
 		LgiApp->AppWnd = 0;
-	}
 	
 	_Delete();
-	
-	if (Wnd)
-	{
-		LCocoaView *cv = objc_dynamic_cast(LCocoaView, Wnd.p.contentView);
-		if (cv)
-			cv.w = NULL;
-
-		LNsWindow *w = objc_dynamic_cast(LNsWindow, Wnd.p);
-		if (w)
-			w.d = NULL;
-
-		Wnd.p.delegate = nil;
-		if (!d->Closing)
-			[Wnd.p close];
-		[Wnd.p release];
-		Wnd = nil;
-	}
-	
+	d->OnClose();
 	DeleteObj(Menu);
 	DeleteObj(d);
 	DeleteObj(_Lock);
@@ -498,21 +479,14 @@ void GWindow::Quit(bool DontDelete)
 		LgiCloseApp();
 	}
 	
-	if (d)
-		d->DeleteWhenDone = !DontDelete;
+	if (d && DontDelete)
+		d->DeleteOnClose = false;
 	
-	if (Wnd)
+	if (Wnd && !d->Quiting)
 	{
+		d->Quiting = true;
 		SetDragHandlers(false);
-		if (d->Closing)
-		{
-			PostEvent(M_DESTROY);
-		}
-		else
-		{
-			d->Closing = true;
-			PostEvent(M_CLOSE);
-		}
+		[Wnd.p close];
 	}
 }
 
@@ -567,17 +541,9 @@ void GWindow::Visible(bool i)
 	}
 }
 
-void GWindow::_SetDynamic(bool i)
+void GWindow::SetDeleteOnClose(bool i)
 {
-	d->Dynamic = i;
-}
-
-void GWindow::_OnViewDelete()
-{
-	if (d->Dynamic)
-	{
-		delete this;
-	}
+	d->DeleteOnClose = i;
 }
 
 void GWindow::SetAlwaysOnTop(bool b)
