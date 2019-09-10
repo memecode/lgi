@@ -491,9 +491,13 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Er
 				{
 					// Document
 					#if LGI_CARBON
-					e = FinderLaunch(1, &r);
-					if (e) printf("%s:%i - FinderLaunch faied with %i\n", _FL, (int)e);
-					else Status = true;
+						e = FinderLaunch(1, &r);
+						if (e) printf("%s:%i - FinderLaunch faied with %i\n", _FL, (int)e);
+						else Status = true;
+					#elif LGI_COCOA
+						GString file = File;
+						auto url = [[NSURL alloc] initFileURLWithPath:file.NsStr()];
+						Status = [[NSWorkspace sharedWorkspace] openURL:url];
 					#endif
 				}
 			}

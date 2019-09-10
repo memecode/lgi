@@ -507,6 +507,16 @@ void GWindow::SetSnapToEdge(bool s)
 
 void GWindow::OnFrontSwitch(bool b)
 {
+	if (b && Menu)
+	{
+		[NSApplication sharedApplication].mainMenu = Menu->Handle().p;
+	}
+	else
+	{
+		auto m = LgiApp->Default.Get();
+		[NSApplication sharedApplication].mainMenu = m ? m->Handle() : nil;
+	}
+	printf("%s:%i - menu for %s is %p\n", _FL, Name(), [NSApplication sharedApplication].mainMenu);
 }
 
 bool GWindow::Visible()
@@ -1128,12 +1138,14 @@ GMessage::Result GWindow::OnEvent(GMessage *m)
 	{
 		case M_CLOSE:
 		{
+			#if 0  // Crashing...
 			if (d->CloseRequestDone || OnRequestClose(false))
 			{
 				d->CloseRequestDone = true;
 				Quit();
 				return 0;
 			}
+			#endif
 			break;
 		}
 		case M_DESTROY:

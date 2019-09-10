@@ -342,10 +342,7 @@ bool GSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, GViewI *W
 	if (d->TempPath)
 		LgiMakePath(Tmp, sizeof(Tmp), d->TempPath, File);
 	else
-	{
-		LgiGetTempPath(Tmp, sizeof(Tmp));
-		LgiMakePath(Tmp, sizeof(Tmp), Tmp, File);
-	}
+		LgiMakePath(Tmp, sizeof(Tmp), LGetSystemPath(LSP_TEMP), File);
 
 	GFile Local;
 	if (!Local.Open(Tmp, O_WRITE))
@@ -406,8 +403,7 @@ bool GSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, GViewI *W
 			{
 				// Calculate the local path...
 				char Path[MAX_PATH];
-				LgiGetExePath(Path, sizeof(Path));
-				LgiMakePath(Path, sizeof(Path), Path, File);
+				LgiMakePath(Path, sizeof(Path), LGetExePath(), File);
 
 				if (!_stricmp(Ext, "dll"))
 				{

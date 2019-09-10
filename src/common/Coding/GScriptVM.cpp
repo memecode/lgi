@@ -1604,8 +1604,7 @@ GVmDebuggerWnd::GVmDebuggerWnd(GView *Parent, GVmDebuggerCallback *Callback, GVi
 		
 		{
 			char p[MAX_PATH];
-			LgiGetExePath(p, sizeof(p));
-			LgiMakePath(p, sizeof(p), p, "../Scripts");
+			LgiMakePath(p, sizeof(p), LGetExePath(), "../Scripts");
 			GDirectory dir;
 			LListItem *Match = NULL;
 

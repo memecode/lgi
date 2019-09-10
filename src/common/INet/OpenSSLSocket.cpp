@@ -61,14 +61,9 @@ public:
 	{
 		char p[MAX_PATH];
 		#if defined MAC
-		if (LgiGetExeFile(p, sizeof(p)))
-		{
-			LgiMakePath(p, sizeof(p), p, "Contents/MacOS/libssl.1.0.0.dylib");
-			if (FileExists(p))
-			{
-				Load(p);
-			}
-		}
+		LgiMakePath(p, sizeof(p), LGetExeFile(), "Contents/MacOS/libssl.1.0.0.dylib");
+		if (FileExists(p))
+			Load(p);
 
         if (!IsLoaded())
         {
@@ -93,8 +88,7 @@ public:
 
 		if (!IsLoaded())
 		{
-			LgiGetExePath(p, sizeof(p));
-			LgiMakePath(p, sizeof(p), p, PATH_OFFSET "../OpenSSL");
+			LgiMakePath(p, sizeof(p), LGetExePath(), PATH_OFFSET "../OpenSSL");
 			#ifdef WIN32
 			GString old = FileDev->GetCurrentFolder();
 			FileDev->SetCurrentFolder(p);

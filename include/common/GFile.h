@@ -342,7 +342,7 @@ protected:
 	ssize_t SwapWrite(uchar *Buf, ssize_t Size);
 
 public:
-	GFile(const char *Path = NULL, int Mode = 0);
+	GFile(const char *Path = NULL, int Mode = O_READ);
 	virtual ~GFile();
 
 	OsFile Handle();

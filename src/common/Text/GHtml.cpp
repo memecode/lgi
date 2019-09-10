@@ -172,8 +172,7 @@ public:
 
 		char EmojiPng[MAX_PATH];
 		#ifdef MAC
-		LgiGetExeFile(EmojiPng, sizeof(EmojiPng));
-		LgiMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "Contents/Resources/Emoji.png");
+		LgiMakePath(EmojiPng, sizeof(EmojiPng), LGetExeFile(), "Contents/Resources/Emoji.png");
 		#else
 		LGetSystemPath(LSP_APP_INSTALL, EmojiPng, sizeof(EmojiPng));
 		LgiMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "resources/emoji.png");

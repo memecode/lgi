@@ -507,6 +507,8 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 		extern GSkinEngine *CreateSkinEngine(GApp *App);
 		SkinEngine = CreateSkinEngine(this);
 	}
+	
+	Default.Reset(new LMenu);
 }
 
 GApp::~GApp()
@@ -783,23 +785,18 @@ GXmlTag *GApp::GetConfig(const char *Tag)
 	if (IsOk() && !d->Config)
 	{
 		char File[] = "lgi.conf";
-		char Path[256];
-		if (LgiGetExePath(Path, sizeof(Path)))
+		char Path[MAX_PATH];
+		LgiMakePath(Path, sizeof(Path), LGetExePath(), File);
+		if (FileExists(Path))
 		{
-			if (Path[strlen(Path)-1] != DIR_CHAR) strcat(Path, DIR_STR);
-			strcat(Path, File);
-			
-			if (FileExists(Path))
+			d->Config = new GXmlTag("Config");
+			if (d->Config)
 			{
-				d->Config = new GXmlTag("Config");
-				if (d->Config)
+				GFile f;
+				if (f.Open(Path, O_READ))
 				{
-					GFile f;
-					if (f.Open(Path, O_READ))
-					{
-						GXmlTree t;
-						t.Read(d->Config, &f, 0);
-					}
+					GXmlTree t;
+					t.Read(d->Config, &f, 0);
 				}
 			}
 		}

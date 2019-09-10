@@ -278,7 +278,7 @@ LgiResources::LgiResources(const char *FileName, bool Warn)
 	_ResourceOwner.Add(this);
 
 	GString File;
-	char *FullPath = NULL;
+	GString FullPath;
 
 #if DEBUG_RES_FILE
 LgiTrace("%s:%i - Filename='%s'\n", _FL, FileName);
@@ -308,32 +308,28 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 	else
 	{
 		// Need to look up the file associated by name with the current exe
-		char Str[MAX_PATH];
-		if (LgiGetExeFile(Str, sizeof(Str)))
+		auto Exe = LGetExeFile();
+		if (Exe)
 		{
-#if DEBUG_RES_FILE
-LgiTrace("%s:%i - Str='%s'\n", _FL, Str);
-#endif
+			#if DEBUG_RES_FILE
+			LgiTrace("%s:%i - Str='%s'\n", _FL, Str);
+			#endif
+			auto p = Exe.SplitDelimit(DIR_STR);
+			File = p.Last();
 
-			char *f = strrchr(Str, DIR_CHAR);
-			if (f)
-			{
-				f++;
-				
-				#ifdef WINDOWS
-				char *Period = strrchr(f, '.');
-				if (Period)
-				{
-					*Period = 0;
-				}
-				#endif
+			#if defined WINDOWS
+				auto DotExe = File.RFind(".exe");
+				if (DotExe >= 0)
+					File.Length(DotExe);
+			#elif defined MAC
+				auto DotApp = File.RFind(".app");
+				if (DotApp >= 0)
+					File.Length(DotApp);
+			#endif
 
-				File = f;
-			}
-
-#if DEBUG_RES_FILE
-LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
-#endif
+			#if DEBUG_RES_FILE
+			LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
+			#endif
 		}
 		else
 		{
@@ -345,29 +341,22 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 		}
 	}
 
-	// Find the file..
-	#ifdef MAC
-	ssize_t DotApp = File.RFind(".app");
-	if (DotApp >= 0)
-		File.Length((int)DotApp);
+	#if DEBUG_RES_FILE
+	LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 	#endif
-
-#if DEBUG_RES_FILE
-LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
-#endif
 
 	GString BaseFile = File;
 	GString AltFile = File.Replace(".");
 	BaseFile += ".lr8";
 	AltFile += ".lr8";
 
-#if DEBUG_RES_FILE
-LgiTrace("%s:%i - File='%s'\n", _FL, BaseFile.Get());
-#endif
+	#if DEBUG_RES_FILE
+	LgiTrace("%s:%i - File='%s'\n", _FL, BaseFile.Get());
+	#endif
 
-	FullPath = LgiFindFile(BaseFile);
+	FullPath = LFindFile(BaseFile);
 	if (!FullPath)
-		FullPath = LgiFindFile(AltFile);
+		FullPath = LFindFile(AltFile);
 
 #if DEBUG_RES_FILE
 LgiTrace("%s:%i - FullPath='%s'\n", _FL, FullPath);
@@ -376,7 +365,6 @@ LgiTrace("%s:%i - FullPath='%s'\n", _FL, FullPath);
 	if (FullPath)
 	{
 		Load(FullPath);
-		DeleteArray(FullPath);
 	}
 	else
 	{

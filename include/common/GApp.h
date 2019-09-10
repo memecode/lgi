@@ -85,6 +85,7 @@ class LgiClass GApp : virtual public GAppI,
 	public OsApplication
 {
 	friend class GView;
+	friend class GWindow;
 
 public:
 	typedef LHashTbl<ConstStrKey<char>, GWin32Class*> ClassContainer;
@@ -96,6 +97,10 @@ protected:
 	#if defined LGI_SDL
 	
 	void OnSDLEvent(GMessage *m);
+	
+	#elif defined LGI_COCOA
+	
+	GAutoPtr<LMenu> Default;
 	
 	#elif defined WIN32
 

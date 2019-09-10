@@ -505,27 +505,26 @@ bool LgiTraceGetFilePath(char *LogPath, int BufLen)
 	if (!LogPath)
 		return false;
 
-	if (LgiGetExeFile(LogPath, BufLen))
+	auto Exe = LGetExeFile();
+	if (Exe)
 	{
 		#ifdef MAC
-		char *Dir = strrchr(LogPath, DIR_CHAR);
+		char *Dir = strrchr(Exe, DIR_CHAR);
 		if (Dir)
 		{
 			char Part[256];
 			strcpy_s(Part, sizeof(Part), Dir+1);
-            LogPath[0] = 0;
-			LgiMakePath(LogPath, BufLen, LogPath, "~/Library/Logs");
-			LgiMakePath(LogPath, BufLen, LogPath, Dir+1);
+			LgiMakePath(LogPath, BufLen, "~/Library/Logs", Dir+1);
 			strcat_s(LogPath, BufLen, ".txt");
 		}
 		else
 		#endif
 		{
-			char *Dot = strrchr(LogPath, '.');
+			char *Dot = strrchr(Exe, '.');
 			if (Dot && !strchr(Dot, DIR_CHAR))
-				strcpy_s(Dot+1, BufLen - (Dot - LogPath) - 1, "txt");
+				sprintf_s(LogPath, BufLen, "%.*s.txt", (int)(Dot - Exe.Get()), Exe.Get());
 			else
-				strcat(LogPath, ".txt");
+				sprintf_s(LogPath, BufLen, "%s.txt", Exe.Get());
 		}
 
 		GFile f;		
