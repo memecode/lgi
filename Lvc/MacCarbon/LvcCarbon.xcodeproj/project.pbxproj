@@ -21,6 +21,7 @@
 		3457FE522081CC4800014BE4 /* Lvc.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 3457FE512081CC4800014BE4 /* Lvc.lr8 */; };
 		34BD35B120C5484A0001838A /* GControlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B020C5484A0001838A /* GControlTree.cpp */; };
 		34BD35B320C548710001838A /* GXmlTreeUi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B220C548710001838A /* GXmlTreeUi.cpp */; };
+		34CE07512327B53D00807DCB /* libpng15.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CE07432327B52700807DCB /* libpng15.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34E1910C20B1898E00005243 /* image-list.png in Resources */ = {isa = PBXBuildFile; fileRef = 34E1910B20B1898E00005243 /* image-list.png */; };
 		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
 		8D0C4E8E0486CD37000505A6 /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = 02345980000FD03B11CA0E72 /* main.nib */; };
@@ -42,6 +43,62 @@
 			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = Lgi;
 		};
+		34CE07402327B52700807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07322327B52700807DCB /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 360DE5A9CD3B4DD097CB7E11;
+			remoteInfo = example;
+		};
+		34CE07422327B52700807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07322327B52700807DCB /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D56EC0ED9E0D44C2B26CDB8F;
+			remoteInfo = libpng15;
+		};
+		34CE07442327B52700807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07322327B52700807DCB /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DA0F4BAA036048DCA3D1D1D8;
+			remoteInfo = libpng15_static;
+		};
+		34CE07462327B52700807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07322327B52700807DCB /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = FC709C82281345128D446EC7;
+			remoteInfo = minigzip;
+		};
+		34CE07482327B52700807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07322327B52700807DCB /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5D124817888941F5B00F7116;
+			remoteInfo = pngtest;
+		};
+		34CE074A2327B52700807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07322327B52700807DCB /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2B1B121702CE458485DC22A0;
+			remoteInfo = zlib;
+		};
+		34CE074C2327B52700807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07322327B52700807DCB /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 7B8852341F9942C785506AF2;
+			remoteInfo = zlib_static;
+		};
+		34CE074E2327B53100807DCB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07322327B52700807DCB /* libpng.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = A3078A5A031E4850B43CE4CC;
+			remoteInfo = libpng15;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -52,6 +109,16 @@
 			dstSubfolderSpec = 10;
 			files = (
 				3457FE3B2081C95E00014BE4 /* Lgi.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		34CE07502327B53500807DCB /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+				34CE07512327B53D00807DCB /* libpng15.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,6 +147,7 @@
 		348335CE1AA190D1006BD4F9 /* LgiCarbon.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCarbon.xcodeproj; path = ../../src/mac/carbon/LgiCarbon.xcodeproj; sourceTree = "<group>"; };
 		34BD35B020C5484A0001838A /* GControlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GControlTree.cpp; path = ../../src/common/Widgets/GControlTree.cpp; sourceTree = "<group>"; };
 		34BD35B220C548710001838A /* GXmlTreeUi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GXmlTreeUi.cpp; path = ../../src/common/Text/GXmlTreeUi.cpp; sourceTree = "<group>"; };
+		34CE07322327B52700807DCB /* libpng.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libpng.xcodeproj; path = ../../../../../CodeLib/libpng/build/libpng.xcodeproj; sourceTree = "<group>"; };
 		34E1910B20B1898E00005243 /* image-list.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "image-list.png"; path = "../Resources/image-list.png"; sourceTree = "<group>"; };
 		4A9504C8FFE6A3BC11CA0CBA /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		4A9504CAFFE6A41611CA0CBA /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
@@ -154,6 +222,7 @@
 		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				34CE07322327B52700807DCB /* libpng.xcodeproj */,
 				348335CE1AA190D1006BD4F9 /* LgiCarbon.xcodeproj */,
 				20286C33FDCF999611CA2CEA /* Carbon.framework */,
 				4A9504CAFFE6A41611CA0CBA /* CoreServices.framework */,
@@ -182,6 +251,20 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		34CE07332327B52700807DCB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				34CE07412327B52700807DCB /* example */,
+				34CE07432327B52700807DCB /* libpng15.dylib */,
+				34CE07452327B52700807DCB /* libpng15_static.a */,
+				34CE07472327B52700807DCB /* minigzip */,
+				34CE07492327B52700807DCB /* pngtest */,
+				34CE074B2327B52700807DCB /* libzd.dylib */,
+				34CE074D2327B52700807DCB /* libzlib_static.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -193,10 +276,12 @@
 				8D0C4E8F0486CD37000505A6 /* Sources */,
 				8D0C4E910486CD37000505A6 /* Frameworks */,
 				34640D3212D5D8AB00B207F4 /* CopyFiles */,
+				34CE07502327B53500807DCB /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				34CE074F2327B53100807DCB /* PBXTargetDependency */,
 				3457FE392081C8C300014BE4 /* PBXTargetDependency */,
 			);
 			name = Lvc;
@@ -213,7 +298,7 @@
 			attributes = {
 				LastUpgradeCheck = 0830;
 			};
-			buildConfigurationList = C0E91AC908A95435008D54AB /* Build configuration list for PBXProject "Lvc" */;
+			buildConfigurationList = C0E91AC908A95435008D54AB /* Build configuration list for PBXProject "LvcCarbon" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -226,6 +311,10 @@
 				{
 					ProductGroup = 3457FE332081C86C00014BE4 /* Products */;
 					ProjectRef = 348335CE1AA190D1006BD4F9 /* LgiCarbon.xcodeproj */;
+				},
+				{
+					ProductGroup = 34CE07332327B52700807DCB /* Products */;
+					ProjectRef = 34CE07322327B52700807DCB /* libpng.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -241,6 +330,57 @@
 			fileType = wrapper.framework;
 			path = Lgi.framework;
 			remoteRef = 3457FE362081C86C00014BE4 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		34CE07412327B52700807DCB /* example */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = example;
+			remoteRef = 34CE07402327B52700807DCB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		34CE07432327B52700807DCB /* libpng15.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			name = libpng15.dylib;
+			path = libpng15.15.4.0.dylib;
+			remoteRef = 34CE07422327B52700807DCB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		34CE07452327B52700807DCB /* libpng15_static.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libpng15_static.a;
+			remoteRef = 34CE07442327B52700807DCB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		34CE07472327B52700807DCB /* minigzip */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = minigzip;
+			remoteRef = 34CE07462327B52700807DCB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		34CE07492327B52700807DCB /* pngtest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = pngtest;
+			remoteRef = 34CE07482327B52700807DCB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		34CE074B2327B52700807DCB /* libzd.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			name = libzd.dylib;
+			path = libzd.1.2.5.dylib;
+			remoteRef = 34CE074A2327B52700807DCB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		34CE074D2327B52700807DCB /* libzlib_static.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libzlib_static.a;
+			remoteRef = 34CE074C2327B52700807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -285,6 +425,11 @@
 			isa = PBXTargetDependency;
 			name = Lgi;
 			targetProxy = 3457FE382081C8C300014BE4 /* PBXContainerItemProxy */;
+		};
+		34CE074F2327B53100807DCB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = libpng15;
+			targetProxy = 34CE074E2327B53100807DCB /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -441,7 +586,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C0E91AC908A95435008D54AB /* Build configuration list for PBXProject "Lvc" */ = {
+		C0E91AC908A95435008D54AB /* Build configuration list for PBXProject "LvcCarbon" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C0E91ACA08A95435008D54AB /* Debug */,
