@@ -1357,7 +1357,10 @@ bool VcFolder::ParseInfo(int Result, GString s, ParseParams *Params)
 		{
 			auto p = s.Strip().SplitDelimit();
 			CurrentCommit = p[0].Strip(" \t\r\n+");
-			CurrentCommitIdx = p[1].Int();
+			if (p.Length() > 1)
+				CurrentCommitIdx = p[1].Int();
+			else
+				CurrentCommitIdx = -1;
 
 			if (Params && Params->Str.Equals("CountToTip"))
 				CountToTip();
