@@ -13,6 +13,7 @@
 #include "LgiInc.h"
 #include "LgiOsDefs.h"
 #include "GStream.h"
+#include <cstdlib>
 
 ///	Template for using DLinkList with a type safe API.
 #define ITEM_PTRS				64
@@ -406,6 +407,7 @@ protected:
 		return Iter(this);
 	}
 
+	#if 1
 	class BTreeNode
 	{
 	public:
@@ -524,6 +526,7 @@ protected:
 			}
 		}
 	};
+	#endif
 
 
 public:
@@ -753,6 +756,36 @@ public:
 			return;
 
 		VALIDATE();
+
+		#if 0
+
+		// Save the List to an Array
+		GArray<T*> a;
+		a.Length(Length());
+		T **p = a.AddressOf();
+		for (LstBlk *i = FirstObj; i; i = i->Next)
+			for (int n=0; n<i->Count; n++)
+				*p++ = i->Ptr[n];
+		
+		// Sort
+		LSort<T*>
+		(
+			a.AddressOf(),
+			0, a.Length()-1,
+			[Compare, Data](T *a, T *b) -> ssize_t
+			{
+				return Compare(a, b, Data);
+			}
+		);
+
+		// Copy back to the List
+		p = a.AddressOf();
+		for (LstBlk *i = FirstObj; i; i = i->Next)
+			for (int n=0; n<i->Count; n++)
+				i->Ptr[n] = *p++;
+
+		#else
+
 		BTree Tree(Items);
 		T ***iLst = new T**[Items];
 		if (iLst)
@@ -772,6 +805,9 @@ public:
 			Tree.Index(iLst);
 			delete [] iLst;
 		}
+		
+		#endif
+
 		VALIDATE();
 	}
 

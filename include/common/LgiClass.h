@@ -362,4 +362,27 @@ RESULT LHash(const CHAR *v, ssize_t l, bool Case)
 	return h;
 }
 
+#include <functional>
+
+template<typename T>
+void LSort(T *v, int left, int right, std::function<ssize_t(T, T)> comp)
+{
+    int i, last;
+
+    if (left >= right)
+        return;
+    
+	LSwap(v[left], v[(left + right)>>1]);
+
+    last = left;
+    for (i = left+1; i <= right; i++)
+        if (comp(v[i], v[left]) < 0) /* Here's the function call */
+            LSwap(v[++last], v[i]);
+    
+	LSwap(v[left], v[last]);
+    LSort(v, left, last-1, comp);
+    LSort(v, last+1, right, comp);
+}
+
+
 #endif

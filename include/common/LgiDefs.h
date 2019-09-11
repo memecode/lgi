@@ -266,6 +266,7 @@ void LSwap(T &a, T &b)
 	a = b;
 	b = tmp;
 }
+
 #endif
 
 #ifndef MEMORY_DEBUG
