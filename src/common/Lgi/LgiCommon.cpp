@@ -825,12 +825,28 @@ bool LgiMakePath(char *Str, int StrSize, const char *Path, const char *File)
 
 	if (Str && Path && File)
 	{
-		if (Str != Path)
+		char Dir[] = { '/', '\\', 0 };
+
+		if (Path[0] == '~')
+		{
+			auto Parts = GString(Path).SplitDelimit(Dir, 2);
+			char *s = Str, *e = Str + StrSize;
+			for (auto p: Parts)
+			{
+				if (p.Equals("~"))
+				{
+					LGetSystemPath(LSP_HOME, s, e - s);
+					s += strlen(s);
+				}
+				else
+					s += sprintf_s(s, e - s, "%s%s", DIR_STR, p.Get());
+			}
+		}
+		else if (Str != Path)
 		{
 			strcpy_s(Str, StrSize, Path);
 		}
 
-		char Dir[] = { '/', '\\', 0 };
 		#define EndStr() Str[strlen(Str)-1]
 		#define EndDir() if (!strchr(Dir, EndStr())) strcat(Str, DIR_STR);
 
@@ -878,7 +894,7 @@ bool LgiGetTempPath(char *Dst, int DstSize)
 	return LGetSystemPath(LSP_TEMP, Dst, DstSize);
 }
 
-bool LGetSystemPath(LgiSystemPath Which, char *Dst, int DstSize)
+bool LGetSystemPath(LgiSystemPath Which, char *Dst, ssize_t DstSize)
 {
 	if (!Dst || DstSize <= 0)
 		return false;

@@ -236,7 +236,7 @@ LgiFunc bool LGetSystemPath
 	/// The buffer to receive the path into 
 	char *Dst,
 	/// The size of the receive buffer in bytes
-	int DstSize
+	ssize_t DstSize
 );
 
 /// Finds a file in the applications directory or nearby
