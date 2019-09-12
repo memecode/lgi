@@ -753,7 +753,7 @@ void ResMenuUi::OnCreate()
 	Tools = new GToolBar;
 	if (Tools)
 	{
-		char *FileName = LgiFindFile("_MenuIcons.gif");
+		auto FileName = LFindFile("_MenuIcons.gif");
 		if (FileName && Tools->SetBitmap(FileName, 16, 16))
 		{
 			Tools->Attach(this);
@@ -772,7 +772,6 @@ void ResMenuUi::OnCreate()
 		{
 			DeleteObj(Tools);
 		}
-		DeleteArray(FileName);
 	}
 
 	Status = new GStatusBar;

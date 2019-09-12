@@ -275,13 +275,7 @@ bool GDocApp<OptionsFmt>::SetLanguage(char *LangId)
 	GetOptions()->SetValue(_LangOptsName, v = LangId);
 	GetOptions()->SerializeFile(true);
 	LgiCloseApp();
-
-	char Exe[MAX_PATH];
-	if (LgiGetExeFile(Exe, sizeof(Exe)))
-	{
-		LgiExecute(Exe);
-	}
-
+	LgiExecute(LGetExeFile());
 	return true;
 }
 

@@ -867,7 +867,7 @@ ObjContainer::ObjContainer(AppWnd *w) :
 	Insert(Menus   = new ObjTreeItem( new ResFolder(Window, -TYPE_MENU)));
 
 	const char *IconFile = "_icons.gif";
-	GAutoString f(LgiFindFile(IconFile));
+	auto f = LFindFile(IconFile);
 	if (f)
 	{
 		Images = LgiLoadImageList(f, 16, 16);

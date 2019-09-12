@@ -2,6 +2,7 @@
 #define _LOAUTH2_H_
 
 //////////////////////////////////////////////////////////////////
+#include "INet.h"
 
 /* Do this somewhere?
 GAutoString ErrorMsg;

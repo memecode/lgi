@@ -4200,7 +4200,7 @@ void ResDialogUi::OnCreate()
 	Tools = new GToolBar;
 	if (Tools)
 	{
-		char *FileName = LgiFindFile("_DialogIcons.gif");
+		auto FileName = LFindFile("_DialogIcons.gif");
 		if (FileName && Tools->SetBitmap(FileName, 16, 16))
 		{
 			Tools->Attach(this);
@@ -4223,7 +4223,6 @@ void ResDialogUi::OnCreate()
 		{
 			DeleteObj(Tools);
 		}
-		DeleteArray(FileName);
 	}
 
 	Status = new GStatusBar;

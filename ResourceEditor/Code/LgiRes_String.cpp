@@ -1619,7 +1619,7 @@ void ResStringUi::OnCreate()
 	Tools = new GToolBar;
 	if (Tools)
 	{
-		char *FileName = LgiFindFile("_StringIcons.gif");
+		auto FileName = LFindFile("_StringIcons.gif");
 		if (FileName && Tools->SetBitmap(FileName, 16, 16))
 		{
 			Tools->Attach(this);
@@ -1635,7 +1635,6 @@ void ResStringUi::OnCreate()
 		{
 			DeleteObj(Tools);
 		}
-		DeleteArray(FileName);
 	}
 
 	Status = new GStatusBar;

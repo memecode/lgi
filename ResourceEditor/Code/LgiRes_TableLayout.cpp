@@ -1489,7 +1489,7 @@ static bool HasTableLayout(GXmlTag *t)
 class Lr8Item : public GTreeItem
 {
     TableLayoutTest *Wnd;
-	GAutoString File;
+	GString File;
 	GAutoPtr<LgiResources> Res;
 
 public:
@@ -1497,7 +1497,7 @@ public:
 	{
 	    Wnd = w;
 		Res = res;
-		File.Reset(NewStr(file));
+		File = file;
 
 		List<LgiDialogRes>::I d = Res->GetDialogs();
 		for (LgiDialogRes *dlg = *d; dlg; dlg = *++d)
@@ -1516,7 +1516,7 @@ public:
 	
 	const char *GetText(int i)
 	{
-		return File ? File : "#error";
+		return File ? File.Get() : "#error";
 	}
 };
 
