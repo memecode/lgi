@@ -9,7 +9,7 @@
 
 struct LEmojiFontPriv
 {
-	GAutoString Fn;
+	GString Fn;
 	GAutoPtr<GSurface> Img, Scaled;
 	GArray<bool> Resampled;
 	int Cell;
@@ -145,13 +145,13 @@ bool LEmojiFont::Create(const char *Face, GCss::Len Sz, GSurface *pSurface)
 
 	if (!priv->Fn)
 	{
-		priv->Fn.Reset(LgiFindFile(FILE_NAME));
+		priv->Fn = LFindFile(FILE_NAME);
 		if (!priv->Fn)
 		{
 			GFile::Path p(LSP_APP_INSTALL);
 			p += "..\\Lgi\\trunk\\src\\common\\Text\\Emoji\\EmojiMap.png";
 			if (p.Exists())
-				priv->Fn.Reset(NewStr(p));
+				priv->Fn = p.GetFull();
 		}
 	}
 
