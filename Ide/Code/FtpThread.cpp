@@ -330,8 +330,7 @@ int FtpThread::Main()
 							}
 
 							char r[256], *d = strrchr(c->Uri, '/');
-							LgiGetTempPath(r, sizeof(r));
-							LgiMakePath(r, sizeof(r), r, d + 1);
+							LgiMakePath(r, sizeof(r), LGetSystemPath(LSP_TEMP), d + 1);
 							if (FileExists(r))
 							{
 								FileDev->Delete(r, false);

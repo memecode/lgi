@@ -210,6 +210,14 @@ public:
 		Param a;
 		Param b;
 	#endif
+	
+	#if LGI_COCOA
+		#if __OBJC__
+		NSEvent *event;
+		#else
+		void *event;
+		#endif
+	#endif
 
 	GMessage()
 	{
@@ -225,6 +233,9 @@ public:
 				b = 0;
 			#endif
 		#endif
+		#if LGI_COCOA
+			event = NULL;
+		#endif
 	}
 
 	GMessage
@@ -239,6 +250,9 @@ public:
 	{
 		#if defined(WINNATIVE)
 			hWnd = 0;
+		#endif
+		#if LGI_COCOA
+			event = NULL;
 		#endif
 		Set(M, A, B);
 	}

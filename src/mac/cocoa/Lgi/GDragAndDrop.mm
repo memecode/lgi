@@ -17,6 +17,15 @@
 #include "GViewPriv.h"
 
 // #define DND_DEBUG_TRACE
+class GDndSourcePriv;
+
+@interface LDragSource : NSObject<NSDraggingSource>
+{
+}
+@property GDndSourcePriv *d;
+- (id)init:(GDndSourcePriv*)view;
+- (NSDragOperation)draggingSession:(nonnull NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context;
+@end
 
 class GDndSourcePriv
 {
@@ -24,17 +33,42 @@ public:
 	GAutoString CurrentFormat;
 	GSurface *ExternImg;
 	GRect ExternSubRgn;
-	
-	#if !LGI_COCOA
-	GAutoPtr<CGImg> Img;
-	#endif
+	LDragSource *Wrapper;
 	
 	GDndSourcePriv()
 	{
 		ExternImg = NULL;
+		Wrapper = NULL;
 		ExternSubRgn.ZOff(-1, -1);
 	}
+
+	~GDndSourcePriv()
+	{
+		if (Wrapper)
+			[Wrapper release];
+	}
 };
+
+@implementation LDragSource
+
+- (id)init:(GDndSourcePriv*)d
+{
+	if ((self = [super init]) != nil)
+	{
+		self.d = d;
+	}
+	
+	return self;
+}
+
+- (NSDragOperation)draggingSession:(nonnull NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context
+{
+	LgiAssert(0);
+	return NSDragOperationNone;
+}
+
+@end
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 GDragDropSource::GDragDropSource()
@@ -88,209 +122,38 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::
 	return false;
 }
 
-int GDragDropSource::Drag(GView *SourceWnd, int Effect, GSurface *Icon)
+int GDragDropSource::Drag(GView *SourceWnd, GMessage *Event, int Effect, GSurface *Icon)
 {
 	LgiAssert(SourceWnd);
-	if (!SourceWnd)
-		return -1;
-
-	#if !LGI_COCOA
-	
-	DragRef Drag = 0;
-	OSErr err = NewDrag(&Drag);
-	if (err)
+	if (!SourceWnd || !Event || !Event->event)
 	{
-		printf("%s:%i - NewDrag failed with %i\n", _FL, err);
+		LgiAssert(!"Missing param");
 		return DROPEFFECT_NONE;
 	}
 
-	PasteboardRef Pb;
-	OSStatus status = GetDragPasteboard(Drag, &Pb);
-	if (status)
-	{
-		printf("%s:%i - GetDragPasteboard failed with %li\n", _FL, status);
-		return DROPEFFECT_NONE;
-	}
-	
-	EventRecord Event;
-	Event.what = mouseDown;
-	Event.message = 0;
-	Event.when = LgiCurrentTime();
-	Event.where.h = 0;
-	Event.where.v = 0;
-	Event.modifiers = 0;
+	auto Wnd = SourceWnd->GetWindow();
+	if (!Wnd) return DROPEFFECT_NONE;
+	auto h = Wnd->WindowHandle();
+	if (!h) return DROPEFFECT_NONE;
 
-	List<char> Formats;
-	if (!GetFormats(Formats))
+	NSImage *img = nil;
+	GMemDC *Mem = dynamic_cast<GMemDC*>(Icon);
+	if (Mem)
 	{
-		printf("%s:%i - GetFormats failed\n", _FL);
-		return DROPEFFECT_NONE;
-	}
-
-	// Setup the formats in the GDragData array
-	GArray<GDragData> Data;
-	for (int n=0; n<Formats.Length(); n++)
-	{
-		Data[n].Format = Formats[n];
-	}
-	
-	// Get the data for each format...
-	GetData(Data);
-	
-	// Now push the data into the pasteboard
-	int ItemId = 1;
-	for (unsigned i=0; i<Data.Length(); i++)
-	{
-		GDragData &dd = Data[i];
-		PasteboardFlavorFlags Flags = kPasteboardFlavorNoFlags;
-
-		for (int i=0; i<dd.Data.Length(); i++)
-		{
-			void *Ptr = NULL;
-			int Size = 0;
-			GVariant *v = &dd.Data[i];
-			
-			if (dd.IsFileDrop())
-			{
-				// Special handling for file drops...
-				GString sPath = dd.Data[i].Str();
-				if (sPath)
-				{
-					CFStringRef Path = sPath.CreateStringRef();
-					if (Path)
-					{
-						CFURLRef Url = CFURLCreateWithFileSystemPath(NULL, Path, kCFURLPOSIXPathStyle, false);
-						if (Url)
-						{
-							#if 1
-							CFErrorRef Err;
-							CFDataRef Data = CFURLCreateBookmarkData(NULL,
-																	Url,
-																	kCFURLBookmarkCreationWithSecurityScope, // CFURLBookmarkCreationOptions,
-																	NULL, // CFArrayRef resourcePropertiesToInclude,
-																	NULL, // CFURLRef relativeToURL,
-																	&Err);
-							#else
-							CFDataRef Data = CFURLCreateData(NULL, Url, kCFStringEncodingUTF8, true);
-							#endif
-							if (Data)
-							{
-								printf("PasteboardPutItemFlavor(%i, %s)\n", ItemId, dd.Format.Get());
-								status = PasteboardPutItemFlavor(Pb, (PasteboardItemID)(ItemId++), kUTTypeFileURL, Data, Flags);
-								if (status) printf("%s:%i - PasteboardPutItemFlavor=%li\n", _FL, status);
-							}
-							else
-							{
-								CFIndex Code = CFErrorGetCode(Err);
-								CFStringRef ErrStr = CFErrorCopyDescription(Err);
-								GString ErrStr2 = ErrStr;
-								CFRelease(ErrStr);
-								LgiTrace("%s:%i - CFURLCreateBookmarkData error: %i, %s\n", _FL, Code, ErrStr2.Get());
-							}
-
-							CFRelease(Url);
-						}
-						else LgiTrace("%s:%i - Failed to create URL for file drag.\n", _FL);
-
-						CFRelease(Path);
-					}
-					else LgiTrace("%s:%i - Failed to create strref for file drag.\n", _FL);
-				}
-				else LgiTrace("%s:%i - No path for file drag.\n", _FL);
-			}
-			else if (v->Type == GV_STRING)
-			{
-				Ptr = v->Str();
-				if (Ptr)
-					Size = strlen((char*)Ptr);
-			}
-			else if (v->Type == GV_BINARY)
-			{
-				Ptr = v->Value.Binary.Data;
-				Size = v->Value.Binary.Length;
-			}
-			else
-			{
-				printf("%s:%i - Unsupported drag flavour %i\n", _FL, v->Type);
-				LgiAssert(0);
-			}
-			
-			if (Ptr)
-			{
-				CFStringRef FlavorType = dd.Format.CreateStringRef();
-				if (FlavorType)
-				{
-					CFDataRef Data = CFDataCreate(NULL, (const UInt8 *)Ptr, Size);
-					if (Data)
-					{
-						printf("PasteboardPutItemFlavor(%i, %s)\n", ItemId, dd.Format.Get());
-						status = PasteboardPutItemFlavor(Pb, (PasteboardItemID)(ItemId++), FlavorType, Data, Flags);
-						if (status) printf("%s:%i - PasteboardPutItemFlavor=%li\n", _FL, status);
-						CFRelease(Data);
-					}
-					else LgiTrace("%s:%i - Failed to create drop data.\n", _FL);
-					CFRelease(FlavorType);
-				}
-				else LgiTrace("%s:%i - Failed to create flavour type.\n", _FL);
-			}
-		}
-	}
-	
-	GMemDC m;
-	if (d->ExternImg)
-	{
-		GRect r = d->ExternSubRgn;
-		if (!r.Valid())
-		{
-			r = d->ExternImg->Bounds();
-		}
-		
-		if (m.Create(r.X(), r.Y(), System32BitColourSpace))
-		{
-			m.Blt(0, 0, d->ExternImg, &r);
-			d->Img.Reset(new CGImg(&m));
-		}
+		img = Mem->NsImage();
 	}
 	else
 	{
-		SysFont->Fore(Rgb24(0xff, 0xff, 0xff));
-		SysFont->Transparent(true);
-		GDisplayString s(SysFont, "+");
+		// Synthesis an image..
+		img = [[NSImage alloc] initWithSize:NSMakeSize(32, 32)];
+	}
+	
+	if (!d->Wrapper)
+		d->Wrapper = [[LDragSource alloc] init:d];
+	
+	NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
+	[h.p dragImage:img at:NSZeroPoint offset:NSZeroSize event:Event->event pasteboard:pboard source:d->Wrapper slideBack:YES ];
 
-		if (m.Create(s.X() + 12, s.Y() + 2, System32BitColourSpace))
-		{
-			m.Colour(Rgb32(0x30, 0, 0xff));
-			m.Rectangle();
-			s.Draw(&m, 6, 0);
-			d->Img.Reset(new CGImg(&m));
-		}
-	}
-	
-	if (d->Img)
-	{
-		HIPoint Offset = { 16, 16 };
-		status = SetDragImageWithCGImage(Drag, *d->Img, &Offset, kDragDarkerTranslucency);
-		if (status) printf("%s:%i - SetDragImageWithCGImage failed with %li\n", _FL, status);
-	}
-	
-	status = TrackDrag(Drag, &Event, 0);
-	if (status == dragNotAcceptedErr)
-	{
-		printf("%s:%i - error 'dragNotAcceptedErr', formats were:\n", _FL);
-		for (char *f = Formats.First(); f; f = Formats.Next())
-		{
-			printf("\t'%s'\n", f);
-		}
-	}
-	else if (status)
-	{
-		printf("%s:%i - TrackDrag failed with %li\n", _FL, status);
-	}
-			
-	DisposeDrag(Drag);
-	
-	#endif
-	
 	return DROPEFFECT_NONE;
 }
 

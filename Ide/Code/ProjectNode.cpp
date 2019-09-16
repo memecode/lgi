@@ -380,7 +380,7 @@ bool ProjectNode::GetData(GArray<GDragData> &Data)
 
 bool ProjectNode::OnBeginDrag(GMouse &m)
 {
-	return Drag(Tree, DROPEFFECT_MOVE);
+	return Drag(Tree, m.Event, DROPEFFECT_MOVE);
 }
 
 char *ProjectNode::GetFileName()
@@ -833,9 +833,8 @@ IdeDoc *ProjectNode::Open()
 					GString FullPath = GetFullPath();
 					if (FullPath)
 					{
-						char Exe[256];
-						LgiGetExePath(Exe, sizeof(Exe));
-						LgiTrimDir(Exe);
+						char Exe[MAX_PATH];
+						LgiMakePath(Exe, sizeof(Exe), LGetExePath(), "..");
 						#if defined WIN32
 						LgiMakePath(Exe, sizeof(Exe), Exe, "Debug\\LgiRes.exe");
 						#elif defined LINUX
