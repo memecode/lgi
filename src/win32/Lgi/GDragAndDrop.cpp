@@ -338,7 +338,7 @@ bool GDragDropSource::SetIcon(GSurface *Img, GRect *SubRgn)
 	return false;
 }
 
-int GDragDropSource::Drag(GView *SourceWnd, int Effect, GSurface *Icon)
+int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface *Icon)
 {
 	LgiAssert(SourceWnd != 0);
 	if (!SourceWnd)

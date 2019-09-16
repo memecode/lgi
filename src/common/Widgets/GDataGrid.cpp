@@ -646,7 +646,7 @@ int GDataGrid::OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
 
 void GDataGrid::OnItemBeginDrag(LListItem *Item, GMouse &m)
 {
-	Drag(this, DROPEFFECT_COPY);
+	Drag(this, m.Event, DROPEFFECT_COPY);
 }
 
 bool GDataGrid::GetFormats(List<char> &Formats)
