@@ -1436,7 +1436,24 @@ GDragDropSource *GView::DropSource(GDragDropSource *Set)
 GDragDropTarget *GView::DropTarget(GDragDropTarget *Set)
 {
 	if (Set)
+	{
 		d->DropTarget = Set;
+
+		#if LGI_COCOA
+		GWindow *w = GetWindow();
+		if (w)
+		{
+			OsWindow h = w->WindowHandle();
+			if (h)
+			{
+				NSArray *types = [NSArray arrayWithObjects:
+								NSCreateFileContentsPboardType(@"tga"),
+								NSCreateFileContentsPboardType(@"png"),nil];
+				[h.p registerForDraggedTypes:types];
+			}
+		}
+		#endif
+	}
 
 	return d->DropTarget;
 }

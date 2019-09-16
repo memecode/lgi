@@ -49,7 +49,7 @@ public:
 	GView *Target;
 };
 
-@interface LWindowDelegate : NSObject <NSWindowDelegate>
+@interface LWindowDelegate : NSObject<NSWindowDelegate>
 {
 }
 

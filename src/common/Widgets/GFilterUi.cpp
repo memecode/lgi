@@ -933,7 +933,7 @@ void GFilterItem::OnExpand(bool b)
 
 bool GFilterItem::OnBeginDrag(GMouse &m)
 {
-	Drag(GetTree(), DROPEFFECT_MOVE);
+	Drag(GetTree(), m.Event, DROPEFFECT_MOVE);
 	return true;
 }
 

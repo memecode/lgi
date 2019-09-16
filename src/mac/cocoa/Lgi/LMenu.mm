@@ -425,9 +425,9 @@ int LSubMenu::Float(GView *From, int x, int y, int Btns)
 	
 	FloatResult.Reset(new int(0));
 	
-	auto item = Items[0];
-	auto menuitem = item->Info.p;
-	auto en = menuitem.enabled;
+	// auto item = Items[0];
+	// auto menuitem = item->Info.p;
+	// auto en = menuitem.enabled;
 	
 	NSPoint loc = {(double)p.x, (double)p.y};
 	[Info.p popUpMenuPositioningItem:nil atLocation:loc inView:v];

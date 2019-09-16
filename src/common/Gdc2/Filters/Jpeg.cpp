@@ -851,7 +851,7 @@ boolean j_empty_output_buffer(j_compress_ptr cinfo)
 void j_term_destination(j_compress_ptr cinfo)
 {
 	JpegStream *Stream = (JpegStream*)cinfo->client_data;
-	int Bytes = Stream->Buf.Length() - cinfo->dest->free_in_buffer;
+	auto Bytes = Stream->Buf.Length() - cinfo->dest->free_in_buffer;
 	if (Stream->f->Write(&Stream->Buf[0], Bytes) != Bytes)
 		LgiAssert(!"Write failed.");
 }

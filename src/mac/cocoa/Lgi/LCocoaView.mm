@@ -281,6 +281,42 @@ GKey KeyEvent(NSEvent *ev)
 	[msg release];
 }
 
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
+{
+	// auto loc = sender.draggingLocation;
+	
+	return NSDragOperationNone;
+}
+
+- (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender
+{
+	// auto loc = sender.draggingLocation;
+
+	return NSDragOperationNone;
+}
+
+- (void)draggingExited:(nullable id <NSDraggingInfo>)sender
+{
+}
+
+- (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender
+{
+	return true;
+}
+
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
+{
+	return true;
+}
+
+- (void)concludeDragOperation:(nullable id <NSDraggingInfo>)sender
+{
+}
+
+- (void)draggingEnded:(nullable id <NSDraggingInfo>)sender
+{
+}
+
 - (BOOL) acceptsFirstResponder
 {
     return YES;

@@ -66,13 +66,22 @@ LgiExtern GRect LScreenFlip(GRect r);
 - (void)mouseDragged:(NSEvent*)ev;
 - (void)scrollWheel:(NSEvent*)ev;
 
-// Keybaord
+// Keyboard
 - (void)keyDown:(NSEvent*)event;
 - (void)keyUp:(NSEvent*)event;
 - (BOOL)acceptsFirstResponder;
 
 // Message handling
 - (void)userEvent:(LCocoaMsg*)ev;
+
+// DnD
+- (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender;
+- (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender;
+- (void)draggingExited:(nullable id <NSDraggingInfo>)sender;
+- (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender;
+- (BOOL)performDragOperation:(id <NSDraggingInfo>)sender;
+- (void)concludeDragOperation:(nullable id <NSDraggingInfo>)sender;
+- (void)draggingEnded:(nullable id <NSDraggingInfo>)sender;
 
 @end
 

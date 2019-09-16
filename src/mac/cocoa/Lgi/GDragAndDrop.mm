@@ -34,9 +34,12 @@ public:
 	GSurface *ExternImg;
 	GRect ExternSubRgn;
 	LDragSource *Wrapper;
+	int Effect;
+	GMemDC Icon;
 	
 	GDndSourcePriv()
 	{
+		Effect = 0;
 		ExternImg = NULL;
 		Wrapper = NULL;
 		ExternSubRgn.ZOff(-1, -1);
@@ -61,9 +64,19 @@ public:
 	return self;
 }
 
-- (NSDragOperation)draggingSession:(nonnull NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context
+- (NSDragOperation)draggingSession:(nonnull NSDraggingSession *)session
+		sourceOperationMaskForDraggingContext:(NSDraggingContext)context
 {
-	LgiAssert(0);
+	NSDragOperation op = 0;
+	auto Effect = self.d->Effect;
+
+	if (Effect & DROPEFFECT_COPY)
+		op |= NSDragOperationCopy;
+	if (Effect & DROPEFFECT_MOVE)
+		op |= NSDragOperationMove;
+	if (Effect & DROPEFFECT_LINK)
+		op |= NSDragOperationLink;
+
 	return NSDragOperationNone;
 }
 
@@ -145,14 +158,35 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	else
 	{
 		// Synthesis an image..
-		img = [[NSImage alloc] initWithSize:NSMakeSize(32, 32)];
+		if (!d->Icon.X())
+			d->Icon.Create(32, 32, System32BitColourSpace);
+		Mem = &d->Icon;
+		Mem->Colour(0, 32);
+		Mem->Rectangle();
+		
+		for (int i=0; i<3; i++)
+		{
+			GRect r(0, 0, 11, 15);
+			r.Offset(10 + (i*3), 8 + (i*3));
+			Mem->Colour(L_BLACK);
+			Mem->Box(&r);
+			r.Size(1, 1);
+			Mem->Colour(L_WHITE);
+			Mem->Rectangle(&r);
+		}
+		
+		img = Mem->NsImage();
 	}
 	
+	d->Effect = Effect;
 	if (!d->Wrapper)
 		d->Wrapper = [[LDragSource alloc] init:d];
 	
+	auto pt = Event.p.locationInWindow;
+	pt.y -= Mem->Y();
+	
 	NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
-	[h.p dragImage:img at:NSZeroPoint offset:NSZeroSize event:Event.p pasteboard:pboard source:d->Wrapper slideBack:YES ];
+	[h.p dragImage:img at:pt offset:NSZeroSize event:Event.p pasteboard:pboard source:d->Wrapper slideBack:YES ];
 
 	return DROPEFFECT_NONE;
 }

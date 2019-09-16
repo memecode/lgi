@@ -143,11 +143,10 @@ void GMouse::SetFromEvent(NSEvent *ev, NSView *view)
 	auto r = view.frame;
 	auto pt = ev.locationInWindow;
 
-	GMouse m;
 	x = (int)pt.x;
 	y = (int)(r.size.height - pt.y);
 	SetModifer((uint32)ev.modifierFlags);
-	m.Event = ev;
+	Event = ev;
 
 	switch (ev.type)
 	{
