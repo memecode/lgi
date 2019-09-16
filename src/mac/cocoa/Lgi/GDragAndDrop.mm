@@ -122,10 +122,10 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::
 	return false;
 }
 
-int GDragDropSource::Drag(GView *SourceWnd, GMessage *Event, int Effect, GSurface *Icon)
+int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface *Icon)
 {
 	LgiAssert(SourceWnd);
-	if (!SourceWnd || !Event || !Event->event)
+	if (!SourceWnd || !Event)
 	{
 		LgiAssert(!"Missing param");
 		return DROPEFFECT_NONE;
@@ -152,7 +152,7 @@ int GDragDropSource::Drag(GView *SourceWnd, GMessage *Event, int Effect, GSurfac
 		d->Wrapper = [[LDragSource alloc] init:d];
 	
 	NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
-	[h.p dragImage:img at:NSZeroPoint offset:NSZeroSize event:Event->event pasteboard:pboard source:d->Wrapper slideBack:YES ];
+	[h.p dragImage:img at:NSZeroPoint offset:NSZeroSize event:Event.p pasteboard:pboard source:d->Wrapper slideBack:YES ];
 
 	return DROPEFFECT_NONE;
 }

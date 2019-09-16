@@ -80,12 +80,11 @@ class LgiClass GUiEvent
 {
 public:
 	int Flags;
-	class GMessage *Event;
+	OsEvent Event;
 
 	GUiEvent()
 	{
 		Flags = 0;
-		Event = NULL;
 	}
 
 	virtual ~GUiEvent() {}

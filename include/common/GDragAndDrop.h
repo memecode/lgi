@@ -109,7 +109,7 @@ public:
 
 	/// Start a drag operation
 	/// \returns The operation that took effect: #DROPEFFECT_NONE, #DROPEFFECT_COPY etc. 
-	int Drag(GView *SourceWnd, GMessage *Event, int Effect, GSurface *Icon = NULL);
+	int Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface *Icon = NULL);
 
 	/// Called when window is registered
 	virtual void OnRegister(bool Suc) {}

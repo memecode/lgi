@@ -147,6 +147,7 @@ void GMouse::SetFromEvent(NSEvent *ev, NSView *view)
 	x = (int)pt.x;
 	y = (int)(r.size.height - pt.y);
 	SetModifer((uint32)ev.modifierFlags);
+	m.Event = ev;
 
 	switch (ev.type)
 	{

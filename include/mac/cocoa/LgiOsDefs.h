@@ -17,7 +17,6 @@
 #include "LgiInc.h"
 #include "LgiDefs.h"
 #include "GAutoPtr.h"
-#include "LgiClass.h"
 #include "pthread.h"
 
 //////////////////////////////////////////////////////////////////
@@ -63,7 +62,8 @@
 #endif
 
 ObjCWrapper(NSWindow, OsWindow)
-ObjCWrapper(NSView, OsView)
+ObjCWrapper(NSView,   OsView)
+ObjCWrapper(NSEvent,  OsEvent);
 
 typedef pthread_t           OsThread;
 typedef uint64_t			OsThreadId;
@@ -75,6 +75,7 @@ typedef CGContextRef		OsPainter;
 typedef CGContextRef		OsBitmap;
 typedef CTFontRef			OsFont;
 
+#include "LgiClass.h"
 #include "GMessage.h"
 
 class OsAppArguments
