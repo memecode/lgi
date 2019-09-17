@@ -75,6 +75,25 @@ LgiFunc void LgiTrace(const char *Format, ...);
 LgiFunc void LgiStackTrace(const char *Format, ...);
 #endif
 
+// OsEvent is defined here because the GUiEvent is the primary user.
+// And this header can be included independently of LgiOsDefs.h where
+// this would otherwise live.
+#if defined __GTKH__
+	typedef Gtk::GtkEvent *OsEvent;
+#elif defined _SDL_H
+	typedef SDL_Event *OsEvent;
+#elif defined _WIN32
+	// No native type here, but GMessage can encapsulate the message code, WPARAM and LPARAM.
+	typedef class GMessage *OsEvent;
+#elif LGI_COCOA
+	#include "ObjCWrapper.h"
+	ObjCWrapper(NSEvent,  OsEvent);
+#elif LGI_CARBON
+	typedef EventRef OsEvent;
+#else
+	#error "Impl me."
+#endif
+
 /// General user interface event
 class LgiClass GUiEvent
 {

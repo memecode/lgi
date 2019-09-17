@@ -83,7 +83,6 @@ typedef char16				OsChar;
 typedef HBITMAP				OsBitmap;
 typedef HDC					OsPainter;
 typedef HFONT				OsFont;
-typedef void				*OsEvent; // Don't really have an OsEvent
 #if _MSC_VER <= _MSC_VER_VC6
 typedef unsigned long		ULONG_PTR, *PULONG_PTR;
 #define sprintf_s			_snprintf
