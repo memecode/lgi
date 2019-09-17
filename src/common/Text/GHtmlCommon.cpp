@@ -46,6 +46,8 @@ static GHtmlElemInfo TagInfo[] =
 	{TAG_INPUT,			"input",		0,			GHtmlElemInfo::TI_NEVER_CLOSES},
 	{TAG_LABEL,			"label",		0,			GHtmlElemInfo::TI_NONE},
 	{TAG_FORM,			"form",			0,			GHtmlElemInfo::TI_NONE},
+	{TAG_SUP,			"sup",			0,			GHtmlElemInfo::TI_NONE},
+	{TAG_SUB,			"sub",			0,			GHtmlElemInfo::TI_NONE},
 	{TAG_LAST,			NULL,			0,			GHtmlElemInfo::TI_BLOCK}
 };
 

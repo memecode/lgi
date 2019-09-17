@@ -2978,6 +2978,18 @@ void GTag::SetStyle()
 			TextDecoration(TextDecorUnderline);
 			break;
 		}
+		case TAG_SUP:
+		{
+			VerticalAlign(VerticalSuper);
+			FontSize(SizeSmaller);
+			break;
+		}
+		case TAG_SUB:
+		{
+			VerticalAlign(VerticalSub);
+			FontSize(SizeSmaller);
+			break;
+		}
 	}
 
 	if (Get("width", s))
