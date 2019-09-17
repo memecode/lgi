@@ -608,9 +608,7 @@ void GRegion::Union(GRect *b)
 		Subtract(b);
 		GRect *n = NewOne();
 		if (n)
-		{
 			*n = *b;
-		}
 	}
 }
 

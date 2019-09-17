@@ -5956,12 +5956,12 @@ struct DrawBorder
 	}
 };
 
-void GTag::GetInlineRegion(GRegion &rgn)
+void GTag::GetInlineRegion(GRegion &rgn, int ox, int oy)
 {
 	if (TagId == TAG_IMG)
 	{
 		GRect rc(0, 0, Size.x-1, Size.y-1);
-		rc.Offset(Pos.x, Pos.y);
+		rc.Offset(ox + Pos.x, oy + Pos.y);
 		rgn.Union(&rc);
 	}
 	else
@@ -5969,6 +5969,7 @@ void GTag::GetInlineRegion(GRegion &rgn)
 		for (unsigned i=0; i<TextPos.Length(); i++)
 		{
 			GRect rc = *(TextPos[i]);
+			rc.Offset(ox + Pos.x, oy + Pos.y);
 			rgn.Union(&rc);
 		}
 	}
@@ -5976,7 +5977,7 @@ void GTag::GetInlineRegion(GRegion &rgn)
 	for (unsigned c=0; c<Children.Length(); c++)
 	{
 		GTag *ch = ToTag(Children[c]);
-		ch->GetInlineRegion(rgn);
+		ch->GetInlineRegion(rgn, ox + Pos.x, oy + Pos.y);
 	}
 }
 
@@ -6143,20 +6144,22 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, GRect *BorderP
 			{
 				GRegion rgn;
 				GetInlineRegion(rgn);
-				r.Length(rgn.Length());
-				for (int i=0; i<rgn.Length(); i++)
+				if (BorderPx)
 				{
-					GRect rc = *rgn[i];
-					GRect &out = r[i];
-					if (BorderPx)
+					for (int i=0; i<rgn.Length(); i++)
 					{
-						rc.x1 -= BorderPx->x1 + PadPx.x1;
-						rc.y1 -= BorderPx->y1 + PadPx.y1;
-						rc.x2 += BorderPx->x2 + PadPx.x2;
-						rc.y2 += BorderPx->y2 + PadPx.y2;
+						GRect *r = rgn[i];
+						r->x1 -= BorderPx->x1 + PadPx.x1;
+						r->y1 -= BorderPx->y1 + PadPx.y1;
+						r->x2 += BorderPx->x2 + PadPx.x2;
+						r->y2 += BorderPx->y2 + PadPx.y2;
 					}
-					out = rc;
 				}
+
+				r.Length(rgn.Length());
+				auto p = r.AddressOf();
+				for (auto i = rgn.First(); i; i = rgn.Next())
+					*p++ = *i;
 				break;
 			}
 			default:

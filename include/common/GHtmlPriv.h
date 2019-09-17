@@ -415,7 +415,7 @@ public:
 		/// [Optional] The size of the border painted
 		GRect *Px = NULL);
 	/// This fills 'rgn' with all the rectangles making up the inline tags region
-	void GetInlineRegion(GRegion &rgn);
+	void GetInlineRegion(GRegion &rgn, int ox = 0, int oy = 0);
 	void OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth);
 	void SetSize(GdcPt2 &s);
 	void SetTag(const char *Tag);

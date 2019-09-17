@@ -46,7 +46,7 @@ static GHtmlElemInfo TagInfo[] =
 	{TAG_INPUT,			"input",		0,			GHtmlElemInfo::TI_NEVER_CLOSES},
 	{TAG_LABEL,			"label",		0,			GHtmlElemInfo::TI_NONE},
 	{TAG_FORM,			"form",			0,			GHtmlElemInfo::TI_NONE},
-	{TAG_LAST,			NULL,			0,			GHtmlElemInfo::TI_NONE}
+	{TAG_LAST,			NULL,			0,			GHtmlElemInfo::TI_BLOCK}
 };
 
 char16 GHtmlListItem[] = { 0x2022, ' ', 0 };

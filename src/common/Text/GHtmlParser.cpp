@@ -598,7 +598,6 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 					LgiTrace("%s%s (this=%p, parent=%p)\n", Sp, Elem->Tag, Elem, Elem->Parent);
 					#endif
 					
-								
 					bool AlreadyOpen = false;
 					Elem->Info = GetTagInfo(Elem->Tag);
 					if (Elem->Info)
@@ -636,9 +635,8 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 						}
 					
 						Elem->TagId = Elem->Info->Id;
-						Elem->Display
-						(
-							TestFlag
+						
+						auto Dsp = TestFlag
 							(
 								Elem->Info->Flags,
 								GHtmlElemInfo::TI_BLOCK
@@ -652,8 +650,9 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 							?
 							GCss::DispBlock
 							:
-							GCss::DispInline
-						);
+							GCss::DispInline;
+						
+						Elem->Display(Dsp);
 						if (Elem->TagId == TAG_PRE)
 						{
 							InPreTag = true;
@@ -700,6 +699,10 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								}
 							}
 						}
+					}
+					else
+					{
+						int asd=0;
 					}
 
 					if (IsBlock(Elem->Display()) || Elem->TagId == TAG_BR)
