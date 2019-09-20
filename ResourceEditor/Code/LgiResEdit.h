@@ -778,23 +778,45 @@ public:
 	void OnCreate();
 };
 
-class Search : public GDialog
+#define INVALID_INT			-10000
+#define NEW_UI				1
+
+struct SearchParams
 {
-	AppWnd *App;
-
-	void OnCheck();
-
-public:
-	char *Text;
-	char *Define;
+	GString Text;
+	#if NEW_UI
+	bool LimitToText;
+	bool LimitToDefine;
+	#else
+	GString Define;
+	#endif
 	GLanguageId InLang;
 	GLanguageId NotInLang;
 	int Ref;
 	int CtrlId;
 
-	Search(AppWnd *app);
-	~Search();
+	SearchParams()
+	{
+		InLang = NULL;
+		NotInLang = NULL;
+		Ref = INVALID_INT;
+		CtrlId = INVALID_INT;
+		#if NEW_UI
+		LimitToText = false;
+		LimitToDefine = false;
+		#else
+		#endif
+	}
+};
 
+class Search : public GDialog, public SearchParams
+{
+	AppWnd *App;
+	GAutoPtr<class SearchThread> Thread;
+	void OnCheck();
+
+public:
+	Search(AppWnd *app);
 	int OnNotify(GViewI *c, int f);
 };
 
