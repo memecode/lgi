@@ -215,9 +215,49 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 			break;
 		}
 	}
-	[alert runModal];
+	auto r = [alert runModal];
 	[msg release];
 	[title release];
+	
+	Res = IDOK;
+	switch (Type & ~MB_SYSTEMMODAL)
+	{
+		default:
+		case MB_OK:
+			break;
+		case MB_OKCANCEL:
+		{
+			if (r == NSAlertFirstButtonReturn)
+				return IDCANCEL;
+			else if (r == NSAlertSecondButtonReturn)
+				return IDOK;
+			else
+				LgiAssert(0);
+			break;
+		}
+		case MB_YESNO:
+		{
+			if (r == NSAlertFirstButtonReturn)
+				return IDNO;
+			else if (r == NSAlertSecondButtonReturn)
+				return IDYES;
+			else
+				LgiAssert(0);
+			break;
+		}
+		case MB_YESNOCANCEL:
+		{
+			if (r == NSAlertFirstButtonReturn)
+				return IDCANCEL;
+			else if (r == NSAlertSecondButtonReturn)
+				return IDNO;
+			else if (r == NSAlertThirdButtonReturn)
+				return IDYES;
+			else
+				LgiAssert(0);
+			break;
+		}
+	}
 
 	#elif defined(__GTK_H__)
 

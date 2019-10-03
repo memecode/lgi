@@ -678,10 +678,11 @@
 			};
 			buildConfigurationList = 3477C2621CBF020F0028B84B /* Build configuration list for PBXProject "LgiCocoa" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 3477C25E1CBF020F0028B84B;
 			productRefGroup = 3477C2691CBF020F0028B84B /* Products */;

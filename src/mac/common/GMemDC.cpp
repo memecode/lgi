@@ -22,15 +22,18 @@
 class CGImgPriv
 {
 public:
+	GAutoPtr<uint8> Data;
 	CGImageRef Img;
 	CGColorSpaceRef Cs;
 	CGDataProviderRef Prov;
+	int Debug;
 	
 	CGImgPriv()
 	{
 		Img = 0;
 		Cs = 0;
 		Prov = 0;
+		Debug = -1;
 	}
 	
 	~CGImgPriv()
@@ -71,11 +74,14 @@ CGImg::CGImg(GSurface *pDC)
 	}
 }
 
-CGImg::CGImg(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, GRect *r)
+CGImg::CGImg(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, GRect *r, int Debug)
 {
 	d = new CGImgPriv;
+	d->Debug = Debug;
 	Create(x, y, Bits, Line, data, palette, r);
 }
+
+#define COPY_MODE		1
 
 void CGImg::Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, GRect *r)
 {
@@ -92,8 +98,25 @@ void CGImg::Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *pal
 	}
 	
 	int Bytes = Bits / 8;
+	int RowSize = Bytes * B.X();
 	uchar *Base = data + (Line * B.y1) + (Bytes * B.x1);
-
+	#if COPY_MODE
+	if (d->Data.Reset(new uint8[B.Y() * RowSize]))
+	{
+		for (int y=0; y<B.Y(); y++)
+		{
+			auto i = Base + (Line * y);
+			if (!i) continue;
+			auto o = d->Data.Get() + (RowSize * y);
+			memcpy(o, i, RowSize);
+		}
+	}
+	#endif
+	
+	if (d->Debug)
+		printf("%s:%i - Bytes=%i, Base=%i, Line=%i, pos=%i,%i\n", _FL, Bytes, (int)(Base-data), Line,
+			B.x1, B.y1);
+	
 	if (Bits <= 8)
 	{
 		int Entries = 1 << Bits;
@@ -111,7 +134,11 @@ void CGImg::Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *pal
 	
 	if (d->Cs)
 	{
-		d->Prov = CGDataProviderCreateWithData(d, Base, Line * y, ReleaseCGImg);
+		#if COPY_MODE
+		d->Prov = CGDataProviderCreateWithData(d, d->Data.Get(), RowSize * B.Y(), ReleaseCGImg);
+		#else
+		d->Prov = CGDataProviderCreateWithData(d, Base, Line * B.Y(), ReleaseCGImg);
+		#endif
 		if (d->Prov)
 		{
 			d->Img = CGImageCreate
@@ -120,7 +147,11 @@ void CGImg::Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *pal
 				B.Y(),
 				Bits == 16 ? 5 : 8,
 				Bits,
+				#if COPY_MODE
+			 	RowSize,
+			 	#else
 				ABS(Line),
+			 	#endif
 				d->Cs,
 				Bits == 32 ? AlphaType : kCGImageAlphaNone,
 				d->Prov,
@@ -349,7 +380,7 @@ GRect GMemDC::ClipRgn(GRect *Rgn)
 	return Old;
 }
 
-CGImg *GMemDC::GetImg(GRect *Sub)
+CGImg *GMemDC::GetImg(GRect *Sub, int Debug)
 {
 	if (!pMem)
 		return 0;
@@ -364,7 +395,8 @@ CGImg *GMemDC::GetImg(GRect *Sub)
 					pMem->Line,
 					d->Data,
 					rgb,
-					Sub
+					Sub,
+				 	Debug
 				);
 }
 

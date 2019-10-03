@@ -127,8 +127,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0867D6ABFE840B52C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		1870340FFE93FCAF11CA0CD7 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
 		342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = SOURCE_ROOT; };
 		3448F8C52081D2500038AE76 /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../Resources/mac-icon.icns"; sourceTree = "<group>"; };
 		3457FE3E2081CB3D00014BE4 /* BlameUi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BlameUi.cpp; path = ../Src/BlameUi.cpp; sourceTree = "<group>"; };
@@ -144,6 +142,8 @@
 		3457FE482081CB3D00014BE4 /* VcFolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VcFolder.h; path = ../Src/VcFolder.h; sourceTree = "<group>"; };
 		3457FE4F2081CBE500014BE4 /* GSubProcess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GSubProcess.cpp; path = ../../src/common/Lgi/GSubProcess.cpp; sourceTree = "<group>"; };
 		3457FE512081CC4800014BE4 /* Lvc.lr8 */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Lvc.lr8; path = ../Resources/Lvc.lr8; sourceTree = "<group>"; };
+		3488EE99233C16AF00756838 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		3488EE9A233C16AF00756838 /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/main.nib; sourceTree = "<group>"; };
 		34BD35B020C5484A0001838A /* GControlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GControlTree.cpp; path = ../../src/common/Widgets/GControlTree.cpp; sourceTree = "<group>"; };
 		34BD35B220C548710001838A /* GXmlTreeUi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GXmlTreeUi.cpp; path = ../../src/common/Text/GXmlTreeUi.cpp; sourceTree = "<group>"; };
 		34C032B22319CDE900470DF2 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = ../../../../../../../System/Library/Frameworks/Cocoa.framework; sourceTree = "<group>"; };
@@ -259,7 +259,7 @@
 				34CE07242327B3F900807DCB /* libpng15_static.a */,
 				34CE07262327B3F900807DCB /* minigzip */,
 				34CE07282327B3F900807DCB /* pngtest */,
-				34CE072A2327B3F900807DCB /* libzd.dylib */,
+				34CE072A2327B3F900807DCB /* libzd.1.2.5.dylib */,
 				34CE072C2327B3F900807DCB /* libzlib_static.a */,
 			);
 			name = Products;
@@ -300,10 +300,11 @@
 			};
 			buildConfigurationList = C0E91AC908A95435008D54AB /* Build configuration list for PBXProject "LvcCocoa" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 20286C29FDCF999611CA2CEA /* i.Hex */;
 			projectDirPath = "";
@@ -367,7 +368,7 @@
 			remoteRef = 34CE07272327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		34CE072A2327B3F900807DCB /* libzd.dylib */ = {
+		34CE072A2327B3F900807DCB /* libzd.1.2.5.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
 			path = libzd.1.2.5.dylib;
@@ -437,7 +438,7 @@
 		02345980000FD03B11CA0E72 /* main.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				1870340FFE93FCAF11CA0CD7 /* English */,
+				3488EE9A233C16AF00756838 /* en */,
 			);
 			name = main.nib;
 			sourceTree = "<group>";
@@ -445,7 +446,7 @@
 		0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
-				0867D6ABFE840B52C02AAC07 /* English */,
+				3488EE99233C16AF00756838 /* en */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";

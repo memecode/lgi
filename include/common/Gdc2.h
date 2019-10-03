@@ -912,7 +912,7 @@ class CGImg
 	void Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, GRect *r);
 
 public:
-	CGImg(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, GRect *r);
+	CGImg(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, GRect *r, int Debug = 0);
 	CGImg(GSurface *pDC);
 	~CGImg();
 	
@@ -1032,7 +1032,7 @@ public:
 	
 			#if !defined(LGI_SDL)
 				CGColorSpaceRef GetColourSpaceRef();
-				CGImg *GetImg(GRect *Sub = 0);
+				CGImg *GetImg(GRect *Sub = 0, int Debug = 0);
 			#endif
 		
 		#elif defined(BEOS) || defined(LGI_SDL)

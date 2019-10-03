@@ -600,7 +600,9 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 				GMemDC *Mem = dynamic_cast<GMemDC*>(Src);
 				if (Mem)
 				{
-					CGImg *i = Mem->GetImg(a ? &b : 0);
+					static int count = 0;
+
+					CGImg *i = Mem->GetImg(a ? &b : 0, count==26);
 					if (i)
 					{
 						#if LGI_COCOA
@@ -620,6 +622,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 							CGContextSetAlpha(d->Ctx, d->ConstAlpha / 255.0);
 
 						CGContextDrawImage(d->Ctx, r, Img);
+						count++;
 						
 						CGContextRestoreGState(d->Ctx);
 						#else

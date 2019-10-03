@@ -33,6 +33,8 @@ Lvc/Lvc.xml
 Lvc/Lvc*.sdf
 Lvc/Lvc*.suo
 Lvc/x64*
+Lvc/MacCarbon/build/*
+Lvc/MacCocoa/build/*
 
 ResourceEditor/x64*
 

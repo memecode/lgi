@@ -1062,6 +1062,7 @@ void GDisplayString::TruncateWithDots(int Width)
 
 			if (Hnd)
 			{
+				/*
 				CFAttributedStringRef truncationString = CFAttributedStringCreate(NULL, CFSTR("\u2026"), Font->GetAttributes());
 				if (truncationString)
 				{
@@ -1078,6 +1079,7 @@ void GDisplayString::TruncateWithDots(int Width)
 						}
 					}
 				}
+				 */
 			}
 	
 		#endif
