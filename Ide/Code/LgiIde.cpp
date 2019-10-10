@@ -1763,9 +1763,13 @@ public:
 		char Buf[256];
 		ssize_t Rd;
 
-		GSubProcess s("c:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\bin\\amd64\\dumpbin.exe", Args);
+		const char *Prog = "c:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\dumpbin.exe";
+		GSubProcess s(Prog, Args);
 		if (!s.Start(true, false))
+		{
+			Out->Print("%s:%i - '%s' doesn't exist.\n", _FL, Prog);
 			return false;
+		}
 
 		while ((Rd = s.Read(Buf, sizeof(Buf))) > 0)
 			Str->Write(Buf, Rd);
@@ -1780,28 +1784,32 @@ public:
 		Args.Printf("/dependents \"%s\"", InFile.Get());
 		DumpBin(Args, &p);
 
+		GString::Array Files;
 		auto Parts = p.NewGStr().Replace("\r", "").Split("\n\n");
-		auto Files = Parts[4].Strip().Split("\n");
-		auto Path = LGetPath();
-		for (auto &f : Files)
+		if (Parts.Length() > 0)
 		{
-			f = f.Strip();
-
-			bool Found = false;
-			for (auto s : Path)
+			Files = Parts[4].Strip().Split("\n");
+			auto Path = LGetPath();
+			for (auto &f : Files)
 			{
-				GFile::Path c(s);
-				c += f.Get();
-				if (c.IsFile())
-				{
-					f = c.GetFull();
-					Found = true;
-					break;
-				}
-			}
+				f = f.Strip();
 
-			if (!Found)
-				f += " (not found in path)";
+				bool Found = false;
+				for (auto s : Path)
+				{
+					GFile::Path c(s);
+					c += f.Get();
+					if (c.IsFile())
+					{
+						f = c.GetFull();
+						Found = true;
+						break;
+					}
+				}
+
+				if (!Found)
+					f += " (not found in path)";
+			}
 		}
 
 		return Files;
@@ -1907,7 +1915,8 @@ public:
 		if (!IsLib)
 		{
 			auto Deps = Dependencies();
-			Out->Print("Dependencies:\n\t%s\n\n", GString("\n\t").Join(Deps).Get());
+			if (Deps.Length())
+				Out->Print("Dependencies:\n\t%s\n\n", GString("\n\t").Join(Deps).Get());
 		}
 
 		auto Arch = GetArch();
