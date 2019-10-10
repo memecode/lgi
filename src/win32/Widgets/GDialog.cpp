@@ -268,15 +268,18 @@ int GDialog::DoModal(OsView ParentHnd)
 	    if (p)
 	    {
 	        GRect pp = p->GetPos();
-	        int cx = pp.x1 + (pp.X() >> 1);
-	        int cy = pp.y1 + (pp.Y() >> 1);
+			if (pp.Valid())
+			{
+				int cx = pp.x1 + (pp.X() >> 1);
+				int cy = pp.y1 + (pp.Y() >> 1);
 	        
-	        GRect np = GetPos();
-	        np.Offset(  cx - (np.X() >> 1) - np.x1,
-	                    cy - (np.Y() >> 1) - np.y1);
+				GRect np = GetPos();
+				np.Offset(  cx - (np.X() >> 1) - np.x1,
+							cy - (np.Y() >> 1) - np.y1);
 	        
-	        SetPos(np);
-	        MoveOnScreen();
+				SetPos(np);
+				MoveOnScreen();
+			}
 	    }
 	    
 	    Visible(true);

@@ -88,14 +88,13 @@ public:
 
 		if (!IsLoaded())
 		{
-			LgiMakePath(p, sizeof(p), LGetExePath(), PATH_OFFSET "../OpenSSL");
 			#ifdef WIN32
-			GString old = FileDev->GetCurrentFolder();
-			FileDev->SetCurrentFolder(p);
-			#endif
-			Load(SSL_LIBRARY);
-			#ifdef WIN32
-			FileDev->SetCurrentFolder(old);
+			char p[MAX_PATH], leaf[32];
+			int bits = sizeof(size_t)*8;
+			sprintf_s(leaf, sizeof(leaf), "OpenSSL-Win%i", bits);
+			LgiMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
+			LgiMakePath(p, sizeof(p), p, SSL_LIBRARY);
+			Load(p);
 			#endif
 		}
     }

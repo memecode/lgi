@@ -57,7 +57,7 @@ GAlert::GAlert(	GViewI *parent,
 	r.y2 += y;
 
 	SetPos(r);
-	if (parent)
+	if (parent && parent->GetPos().Valid())
 		MoveSameScreen(parent);
 	else
 		MoveToCenter();
