@@ -23,6 +23,7 @@
     <ProjectGuid>{C73D636D-514E-4D14-9495-6DF6F19A3B49}</ProjectGuid>
     <RootNamespace>LgiRes_vc8</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -72,8 +73,8 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(Platform)$(Configuration)12\</OutDir>
-    <IntDir>$(Platform)$(Configuration)12\</IntDir>
+    <OutDir>$(Platform)$(Configuration)14\</OutDir>
+    <IntDir>$(Platform)$(Configuration)14\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

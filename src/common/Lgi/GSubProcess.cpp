@@ -829,9 +829,14 @@ int32 GSubProcess::Communicate(GStreamI *Out, GStreamI *In, LCancel *Cancel)
 			Out->Write(Buf, r);
 	}
 
-	r = Read(Buf, sizeof(Buf));
-	if (r > 0 && Out)
-		Out->Write(Buf, r);
+	while (1)
+	{
+		r = Read(Buf, sizeof(Buf));
+		if (r > 0 && Out)
+			Out->Write(Buf, r);
+		else
+			break;
+	}
 
 	return GetExitValue();
 }
