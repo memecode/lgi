@@ -93,8 +93,11 @@ public:
 			int bits = sizeof(size_t)*8;
 			sprintf_s(leaf, sizeof(leaf), "OpenSSL-Win%i", bits);
 			LgiMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
+			auto prev = FileDev->GetCurrentFolder();
+			FileDev->SetCurrentFolder(p);
 			LgiMakePath(p, sizeof(p), p, SSL_LIBRARY);
-			Load(p);
+			auto loaded = Load(p);
+			FileDev->SetCurrentFolder(prev);
 			#endif
 		}
     }
@@ -152,16 +155,16 @@ public:
 	{
 		if (!IsLoaded())
 		{
-			char p[300];
-			LgiGetExePath(p, sizeof(p));
-			LgiMakePath(p, sizeof(p), p, PATH_OFFSET "../OpenSSL");
 			#ifdef WIN32
-			auto old = FileDev->GetCurrentFolder();
+			char p[MAX_PATH], leaf[32];
+			int bits = sizeof(size_t)*8;
+			sprintf_s(leaf, sizeof(leaf), "OpenSSL-Win%i", bits);
+			LgiMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
+			auto prev = FileDev->GetCurrentFolder();
 			FileDev->SetCurrentFolder(p);
-			#endif
-			Load("libeay32");
-			#ifdef WIN32
-			FileDev->SetCurrentFolder(old);
+			LgiMakePath(p, sizeof(p), p, EAY_LIBRARY);
+			auto loaded = Load(p);
+			FileDev->SetCurrentFolder(prev);
 			#endif
 		}
 	}
