@@ -330,6 +330,8 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::
 	Native.DeleteArrays();
 	NativeW.DeleteArrays();
 
+	OutputData->Format = LGI_FileDropFormat;
+
 	return Status;
 }
 

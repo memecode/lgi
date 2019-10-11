@@ -166,6 +166,11 @@ public:
 	{
 		return Name;
 	}
+
+	int32 GetStartAddr()
+	{
+		return StartAddr;
+	}
 	
 	size_t GetParams()
 	{

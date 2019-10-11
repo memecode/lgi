@@ -185,7 +185,8 @@ GFunctionInfo *GCompiledCode::GetMethod(const char *Name, bool Create)
 
 int GCompiledCode::ObjectToSourceAddress(size_t ObjAddr)
 {
-	return Debug.Find(ObjAddr);
+	auto Idx = Debug.Find(ObjAddr);
+	return Idx < 0 ? 1 : Idx;
 }
 
 const char *GCompiledCode::AddrToSourceRef(size_t ObjAddr)
@@ -200,14 +201,15 @@ const char *GCompiledCode::AddrToSourceRef(size_t ObjAddr)
 
 	char *Dir = FileName ? strrchr(FileName, DIR_CHAR) : NULL;
 	size_t PathLen = Dir ? Dir - FileName : 0;
+	GString FileRef = FileName ? (PathLen > 24 ? Dir + 1 : FileName.Get()) : "(untitled)";
 
 	if (LineNum >= 0)
 		sprintf_s(	Status, sizeof(Status),
 					"%s:%i",
-					FileName ? (PathLen > 24 ? Dir + 1 : FileName.Get()) : "(untitled)",
+					FileRef.Get(),
 					LineNum);
 	else
-		sprintf_s(Status, sizeof(Status), "0x%x", (int)ObjAddr);
+		sprintf_s(Status, sizeof(Status), "%s:0x%x", FileRef.Get(), (int)ObjAddr);
 	
 	return Status;
 }

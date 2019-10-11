@@ -796,15 +796,16 @@ public:
 			if (Args)
 			{
 				// Check the local frame size is at least big enough for the args...
-				if (Sf.CurrentFrameSize > Args->Length())
+				if (Args->Length() > Sf.CurrentFrameSize)
 				{
-					Log->Print("%s:%i - Expecting more args then those supplied (%i->%i).\n",
-						_FL, (int)Args->Length(), (int)Sf.CurrentFrameSize);
+					Log->Print("%s:%i - Arg count mismatch, Supplied: %i, FrameSize: %i (Script: %s).\n",
+						_FL, (int)Args->Length(), (int)Sf.CurrentFrameSize,
+						Code->AddrToSourceRef(Func->StartAddr));
 					return ScriptError;
 				}
 
 				// Put the arguments of the function call into the local array
-				for (unsigned i=0; i<Sf.CurrentFrameSize; i++)
+				for (unsigned i=0; i<Args->Length(); i++)
 				{
 					Locals[LocalsBase+i] = *(*Args)[i];
 				}
@@ -1016,7 +1017,7 @@ GExecutionStatus GVirtualMachine::Execute(GCompiledCode *Code, uint32_t StartOff
 GExecutionStatus GVirtualMachine::ExecuteFunction(GCompiledCode *Code, GFunctionInfo *Func, LScriptArguments &Args, GStream *Log, LScriptArguments *ArgsOut)
 {
 	GCompiledCode *Cc = dynamic_cast<GCompiledCode*>(Code);
-	if (!Cc)
+	if (!Cc || !Func)
 		return ScriptError;
 
 	GExecutionStatus s = d->Setup(Cc, 0, Log, Func, &Args);
