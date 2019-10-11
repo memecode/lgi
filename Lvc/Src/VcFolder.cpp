@@ -6,7 +6,8 @@
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 #endif
 
-#if 0 // def _DEBUG
+#define PROFILE_FN 0
+#if PROFILE_FN
 #define PROF(s) Prof.Add(s)
 #else
 #define PROF(s)
@@ -534,7 +535,7 @@ void VcFolder::OnBranchesChange()
 
 void VcFolder::Select(bool b)
 {
-	#ifdef _DEBUG
+	#if PROFILE_FN
 	GProfile Prof("Select");
 	#endif
 	if (!b)
@@ -1722,7 +1723,10 @@ void VcFolder::OnPulse()
 	if (CmdsChanged)
 		Update();
 	if (CmdErrors)
+	{
 		d->Tabs->Value(1);
+		CmdErrors = false;
+	}
 }
 
 void VcFolder::OnRemove()
