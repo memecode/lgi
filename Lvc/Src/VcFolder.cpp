@@ -1110,7 +1110,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 
 void VcFolder::LinkParents()
 {
-	#ifdef _DEBUG
+	#if PROFILE_FN
 	GProfile Prof("LinkParents");
 	#endif	
 	LHashTbl<StrKey<char>,VcCommit*> Map;
