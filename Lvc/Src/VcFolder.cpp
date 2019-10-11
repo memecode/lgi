@@ -1134,7 +1134,8 @@ void VcFolder::LinkParents()
 			if (p)
 				new VcEdge(p, c);
 			else
-				LgiAssert(0);
+				return;
+				// LgiAssert(0);
 		}
 	}
 

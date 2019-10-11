@@ -602,6 +602,7 @@ public:
 		}
 		
 		SetPulse(200);
+		DropTarget(true);
 	}
 
 	~App()
@@ -622,6 +623,15 @@ public:
 			Opts.Unlock();
 		}
 		Opts.SerializeFile(true);
+	}
+
+	void OnReceiveFiles(GArray<char*> &Files)
+	{
+		for (auto f : Files)
+		{
+			if (DirExists(f))
+				OpenFolder(f);
+		}
 	}
 
 	int OnCommand(int Cmd, int Event, OsView Wnd)
@@ -673,14 +683,37 @@ public:
 		}
 	}
 
-	void OpenFolder()
+	void OpenFolder(const char *Fld = NULL)
 	{
 		GFileSelect s;
-		s.Parent(this);
-		if (s.OpenFolder())
+
+		if (!Fld)
 		{
-			if (DetectVcs(s.Name()))
-				Tree->Insert(new VcFolder(this, s.Name()));
+			s.Parent(this);
+			if (s.OpenFolder())
+				Fld = s.Name();
+		}
+
+		if (Fld)
+		{
+			if (DetectVcs(Fld))
+			{
+				// Check the folder isn't already loaded...
+				bool Has = false;
+				GArray<VcFolder*> Folders;
+				Tree->GetAll(Folders);
+				for (auto f: Folders)
+				{
+					if (!Stricmp(f->GetPath(), Fld))
+					{
+						Has = true;
+						break;
+					}
+				}
+
+				if (!Has)
+					Tree->Insert(new VcFolder(this, Fld));
+			}
 			else
 				LgiMsg(this, "Folder not under version control.", AppName);
 		}
