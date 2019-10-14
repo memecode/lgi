@@ -68,8 +68,8 @@
     <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(Platform)$(Configuration)12\</OutDir>
-    <IntDir>$(Platform)$(Configuration)12\</IntDir>
+    <OutDir>$(Platform)$(Configuration)14\</OutDir>
+    <IntDir>$(Platform)$(Configuration)14\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -78,13 +78,13 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(Platform)$(Configuration)12\</OutDir>
-    <IntDir>$(Platform)$(Configuration)12\</IntDir>
+    <OutDir>$(Platform)$(Configuration)14\</OutDir>
+    <IntDir>$(Platform)$(Configuration)14\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(Platform)$(Configuration)12\</OutDir>
-    <IntDir>$(Platform)$(Configuration)12\</IntDir>
+    <OutDir>$(Platform)$(Configuration)14\</OutDir>
+    <IntDir>$(Platform)$(Configuration)14\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

@@ -1,12 +1,12 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
+# Visual Studio 2015
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HtmlEdit", "HtmlEdit_vs2013.vcxproj", "{EE2A92B6-8D28-4216-AE64-E226BCACB0B7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HtmlEdit", "HtmlEdit.vcxproj", "{EE2A92B6-8D28-4216-AE64-E226BCACB0B7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lgi", "..\Lgi_vs2013.vcxproj", "{95DF9CA4-6D37-4A85-A648-80C2712E0DA1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lgi", "..\Lgi_vs2015.vcxproj", "{95DF9CA4-6D37-4A85-A648-80C2712E0DA1}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libjpeg-9a", "..\..\..\..\CodeLib\libjpeg-9a\windows\libjpeg-9a-vs2013.vcxproj", "{6EA81C44-B69C-4103-A845-C314E2ED9ECA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libjpeg-9a", "..\..\..\..\CodeLib\libjpeg-9a\windows\libjpeg-9a-vs2015.vcxproj", "{6EA81C44-B69C-4103-A845-C314E2ED9ECA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

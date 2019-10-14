@@ -51,7 +51,7 @@ public:
 
 	void OnPaint(GSurface *pDC)
 	{
-		pDC->Colour(GColour(LC_MED, 24));
+		pDC->Colour(L_MED);
 		pDC->Rectangle();
 
 		pDC->Op(GDC_ALPHA);

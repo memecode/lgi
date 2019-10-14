@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -23,28 +23,29 @@
     <ProjectGuid>{D21A823F-9A21-43BB-8F2C-FA665D16126B}</ProjectGuid>
     <RootNamespace>LgiScript</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -67,23 +68,23 @@
     <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)$(Platform)$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)$(Platform)$(Configuration)\</IntDir>
+    <OutDir>$(Platform)$(Configuration)14\</OutDir>
+    <IntDir>$(Platform)$(Configuration)14\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)$(Platform)$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)$(Platform)$(Configuration)\</IntDir>
+    <OutDir>$(Platform)$(Configuration)14\</OutDir>
+    <IntDir>$(Platform)$(Configuration)14\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)$(Platform)$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)$(Platform)$(Configuration)\</IntDir>
+    <OutDir>$(Platform)$(Configuration)14\</OutDir>
+    <IntDir>$(Platform)$(Configuration)14\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)$(Platform)$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)$(Platform)$(Configuration)\</IntDir>
+    <OutDir>$(Platform)$(Configuration)14\</OutDir>
+    <IntDir>$(Platform)$(Configuration)14\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -187,11 +188,11 @@
     <None Include="..\docs\scripting\syntax.html" />
     <CustomBuild Include="..\src\common\Coding\ExternCall.asm">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cd $(IntDir)
-"c:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\ml64.exe" %(FullPath) /c
+"c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\ml64.exe" %(FullPath) /c
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">cd $(IntDir)
-"c:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\ml64.exe" %(FullPath) /c
+"c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\ml64.exe" %(FullPath) /c
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
     </CustomBuild>
@@ -214,7 +215,7 @@
     <ClInclude Include="..\src\common\Coding\Instructions.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lgi_vs2013.vcxproj">
+    <ProjectReference Include="..\Lgi_vs2015.vcxproj">
       <Project>{95df9ca4-6d37-4a85-a648-80c2712e0da1}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
