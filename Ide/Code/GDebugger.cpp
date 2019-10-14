@@ -291,7 +291,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 		}
 		else printf("Error: %i parts (%s:%i).\n", (int)a.Length(), _FL);
 
-		if (File && Line > 0)
+		if (File && Line.Int() > 0)
 		{
 			OnFileLine(NativePath(File), (int)Line.Int(), true);
 		}

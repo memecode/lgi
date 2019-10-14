@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		34148AFC2349ECA200D5E495 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B20D1217968820079E3C9 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		341C7AC821A752DC0083C9CE /* GAbout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 341C7AC721A752DC0083C9CE /* GAbout.cpp */; };
 		345B20D42179688E0079E3C9 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 345B20D1217968820079E3C9 /* LgiCocoa.framework */; };
 		345B2101217969700079E3C9 /* PythonParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20D52179696B0079E3C9 /* PythonParser.cpp */; };
@@ -120,12 +121,22 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 530F64CDFF9743C2A14BF4C9;
+			remoteGlobalIDString = 047E789AA0CD42FC86E368AD;
 			remoteInfo = libpng15;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		34148AF12349EC9500D5E495 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				34148AFC2349ECA200D5E495 /* LgiCocoa.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		34C4FD3022FDB27B00C4BECB /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -417,6 +428,7 @@
 				345B2069217965E80079E3C9 /* Frameworks */,
 				34CAF47E22D3771500BE529A /* CopyFiles */,
 				34C4FD3022FDB27B00C4BECB /* CopyFiles */,
+				34148AF12349EC9500D5E495 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -723,6 +735,8 @@
 					../Code,
 					../Resources,
 					/opt/local/include,
+					../../../../../CodeLib/libpng,
+					../../../../../CodeLib/libpng/build,
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -732,7 +746,7 @@
 					"$(OTHER_CFLAGS)",
 					"-DMAC",
 					"-DPOSIX",
-					"-DCOCOA",
+					"-DLGI_COCOA",
 					"-D_DEBUG",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.LgiIde;
@@ -759,6 +773,8 @@
 					../Code,
 					../Resources,
 					/opt/local/include,
+					../../../../../CodeLib/libpng,
+					../../../../../CodeLib/libpng/build,
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -768,7 +784,7 @@
 					"$(OTHER_CFLAGS)",
 					"-DMAC",
 					"-DPOSIX",
-					"-DCOCOA",
+					"-DLGI_COCOA",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.LgiIde;
 				PRODUCT_NAME = "$(TARGET_NAME)";
