@@ -119,7 +119,6 @@ bool GClipBoard::Bitmap(GSurface *pDC, bool AutoEmpty)
 	bool Status = false;
 	if (pDC && Owner)
 	{
-		LgiAssert(!"Not impl");
 	}
 	return Status;
 }
@@ -128,21 +127,71 @@ GSurface *GClipBoard::Bitmap()
 {
 	GSurface *pDC = NULL;
 
-	LgiAssert(!"Not impl");
-	
+
 	return pDC;
 }
 
+// This is a custom type to wrap binary data.
+@interface LBinaryData : NSObject<NSPasteboardWriting,NSPasteboardReading>
+{
+}
+@property NSData *data;
+- (id)init:(uchar*)ptr len:(ssize_t)Len;
+
+// Writer
+- (nullable id)pasteboardPropertyListForType:(NSString *)type;
+- (NSArray<NSString *> *)writableTypesForPasteboard:(NSPasteboard *)pasteboard;
+
+// Reader
++ (NSArray<NSString *> *)readableTypesForPasteboard:(NSPasteboard *)pasteboard;
+
+@end
+
+@implementation LBinaryData
+
+- (id)init:(uchar*)ptr len:(ssize_t)Len
+{
+	if ((self = [super init]) != nil)
+	{
+		self.data = [[NSData alloc] initWithBytes:ptr length:Len];
+	}
+	
+	return self;
+}
+
+- (nullable id)pasteboardPropertyListForType:(NSString *)type
+{
+	if ([type isEqualToString:@"com.memecode.lgi.binary"])
+	{
+		return self.data;
+	}
+	
+	return nil;
+}
+
+- (NSArray<NSString *> *)writableTypesForPasteboard:(NSPasteboard *)pasteboard
+{
+	return [NSArray arrayWithObjects:@"com.memecode.lgi.binary", kUTTypeData, nil];
+}
+
++ (NSArray<NSString *> *)readableTypesForPasteboard:(NSPasteboard *)pasteboard
+{
+	return [NSArray arrayWithObjects:@"com.memecode.lgi.binary", kUTTypeData, nil];
+}
+@end
+
+
 bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmpty)
 {
-	bool Status = false;
+	if (!Ptr || Len <= 0)
+		return false;
 
-	if (Ptr && Len > 0)
-	{
-		LgiAssert(!"Not impl");
-	}
-
-	return Status;
+	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+	auto data = [[LBinaryData alloc] init:Ptr len:Len];
+	NSArray *array = [NSArray arrayWithObject:data];
+	auto r = [pasteboard writeObjects:array];
+	
+	return r;
 }
 
 bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8,true> &Ptr, ssize_t *Len)
