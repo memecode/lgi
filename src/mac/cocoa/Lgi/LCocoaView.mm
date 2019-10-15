@@ -154,6 +154,9 @@ static int LCocoaView_Count = 0;
 
 	GMouse m(self.w);
 	m.SetFromEvent(ev, self);
+	
+	// m.Trace("moved");
+	
 	m.Target->GetGView()->_Mouse(m, true);
 }
 

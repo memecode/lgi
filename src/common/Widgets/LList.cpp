@@ -1735,7 +1735,7 @@ void LList::OnMouseMove(GMouse &m)
 	if (!Lock(_FL))
 		return;
 
-	// printf("%s:%i - DragMode=%i\n", _FL, DragMode);
+	// m.Trace("LList::OnMouseMove");
 	switch (DragMode)
 	{
 		case DRAG_COLUMN:
