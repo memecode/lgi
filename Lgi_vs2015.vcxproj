@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -484,6 +484,7 @@
     <ClCompile Include="src\common\Text\GUnicode.cpp" />
     <ClCompile Include="src\common\Text\GUtf8.cpp" />
     <ClCompile Include="src\common\Text\GXmlTree.cpp" />
+    <ClCompile Include="src\common\Text\LUnicodeString.cpp" />
     <ClCompile Include="src\common\Widgets\GBitmap.cpp" />
     <ClCompile Include="src\common\Widgets\GBox.cpp" />
     <ClCompile Include="src\common\Widgets\GButton.cpp">

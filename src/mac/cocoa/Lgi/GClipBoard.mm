@@ -119,7 +119,6 @@ bool GClipBoard::Bitmap(GSurface *pDC, bool AutoEmpty)
 	bool Status = false;
 	if (pDC && Owner)
 	{
-		LgiAssert(!"Not impl");
 	}
 	return Status;
 }
@@ -128,46 +127,97 @@ GSurface *GClipBoard::Bitmap()
 {
 	GSurface *pDC = NULL;
 
-	LgiAssert(!"Not impl");
-	
+
 	return pDC;
 }
 
+// This is a custom type to wrap binary data.
+NSString *const LBinaryDataPBoardType = @"com.memecode.lgi.binary";
+
+@interface LBinaryData : NSObject<NSPasteboardWriting,NSPasteboardReading>
+{
+}
+@property(assign) NSData *data;
+- (id)init:(uchar*)ptr len:(ssize_t)Len;
+
+// Writer
+- (nullable id)pasteboardPropertyListForType:(NSString *)type;
+- (NSArray<NSString *> *)writableTypesForPasteboard:(NSPasteboard *)pasteboard;
+
+// Reader
++ (NSPasteboardReadingOptions)readingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard;
++ (NSArray<NSString *> *)readableTypesForPasteboard:(NSPasteboard *)pasteboard;
+
+@end
+
+@implementation LBinaryData
+
+- (id)init:(uchar*)ptr len:(ssize_t)Len
+{
+	if ((self = [super init]) != nil)
+	{
+		self.data = [[NSData alloc] initWithBytes:ptr length:Len];
+	}
+	
+	return self;
+}
+
+- (nullable id)pasteboardPropertyListForType:(NSString *)type
+{
+	if ([type isEqualToString:LBinaryDataPBoardType])
+	{
+		return self.data;
+	}
+	
+	return nil;
+}
+
+- (NSArray<NSString *> *)writableTypesForPasteboard:(NSPasteboard *)pasteboard
+{
+	return [NSArray arrayWithObjects:LBinaryDataPBoardType, kUTTypeData, nil];
+}
+
++ (NSPasteboardReadingOptions)readingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard
+{
+	return NSPasteboardReadingAsData;
+}
+
++ (NSArray<NSString *> *)readableTypesForPasteboard:(NSPasteboard *)pasteboard
+{
+	return [NSArray arrayWithObjects:LBinaryDataPBoardType, kUTTypeData, nil];
+}
+@end
+
+
 bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmpty)
 {
-	bool Status = false;
+	if (!Ptr || Len <= 0)
+		return false;
 
-	if (Ptr && Len > 0)
-	{
-		LgiAssert(!"Not impl");
-	}
-
-	return Status;
+	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+	auto data = [[LBinaryData alloc] init:Ptr len:Len];
+	NSArray *array = [NSArray arrayWithObject:data];
+	[pasteboard clearContents];
+	auto r = [pasteboard writeObjects:array];
+	
+	return r;
 }
 
 bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8,true> &Ptr, ssize_t *Len)
 {
-	bool Status = false;
-
 	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
-	NSArray *classes = [[NSArray alloc] initWithObjects:[NSPasteboardItem class], nil];
-	NSDictionary *options = [NSDictionary dictionary];
-	NSArray *copiedItems = [pasteboard readObjectsForClasses:classes options:options];
-	if (copiedItems != nil)
+	auto d = [pasteboard dataForType:LBinaryDataPBoardType];
+	if (d)
 	{
-		for (NSPasteboardItem *i in copiedItems)
+		if (Len)
+			*Len = d.length;
+		if (Ptr.Reset(new uint8_t[d.length]))
 		{
-			GString::Array Types;
-			Types.SetFixedLength(false);
-			for (id type in i.types)
-				Types.New() = [type UTF8String];
-			
-			// Pick a type and decode it...
-			printf("%s:%i - FIXME decode a binary type here.\n", _FL);
+			[d getBytes:Ptr.Get() length:d.length];
+			return true;
 		}
-		[copiedItems release];
 	}
-
-	return Status;
+	
+	return false;
 }
 

@@ -8,7 +8,7 @@ struct ConsoleLog : public GStream
 {
 	ssize_t Write(const void *Ptr, ssize_t Size, int Flags)
 	{
-		return printf("%.*s", Size, Ptr);
+		return printf("%.*s", (int)Size, (char*)Ptr);
 	}
 };
 

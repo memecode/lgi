@@ -1164,6 +1164,7 @@ bool LMenu::OnKey(GView *v, GKey &k)
 {
 	if (k.Down())
 	{
+		// k.Trace("MenuKey");
 		for (auto a: Accel)
 		{
 			if (a->Match(k))

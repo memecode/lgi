@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.5)
 
-SET (CMAKE_OSX_ARCHITECTURES "i386")
+SET (CMAKE_OSX_ARCHITECTURES "x86_64")
 set (CMAKE_CXX_STANDARD 11)
 
 project (Lgi)
@@ -13,13 +13,11 @@ endif()
 
 if (APPLE)
 
-	add_definitions("-DMAC -DLGI_LIBRARY -D_DEBUG -DLGI_RES")
+	add_definitions("-DMAC -DLGI_LIBRARY -D_DEBUG -DLGI_RES -DLGI_COCOA")
 	# SET(GUI_TYPE MACOSX_BUNDLE)
-	include_directories ( /Developer/Headers/FlatCarbon )
-	find_library(CARBON_LIBRARY Carbon)
 	find_library(COCOA_LIBRARY Cocoa)
-	mark_as_advanced (CARBON_LIBRARY COCOA_LIBRARY)
-	set(EXTRA_LIBS ${CARBON_LIBRARY} ${COCOA_LIBRARY})
+	mark_as_advanced (COCOA_LIBRARY)
+	set(EXTRA_LIBS ${COCOA_LIBRARY})
 
 elseif (LINUX)
 
@@ -94,7 +92,7 @@ set (CommonSource
 	src/common/Lgi/LgiCommon.cpp
 	src/common/Lgi/LgiMsg.cpp
 	src/common/Lgi/LgiRand.cpp
-	src/common/Lgi/GMenuCommon.cpp
+	src/common/Lgi/LMenuCommon.cpp
 	src/common/Resource/LgiRes.cpp
 	src/common/Resource/Res.cpp
 	src/common/Skins/Gel/Gel.cpp
@@ -137,7 +135,7 @@ set (WindowsSource
 	src/win32/Lgi/GFileSelect.cpp
 	src/win32/Lgi/GGeneral.cpp
 	src/win32/Lgi/GLayout.cpp
-	src/win32/Lgi/GMenu.cpp
+	src/win32/Lgi/LMenu.cpp
 	src/win32/Lgi/GPrinter.cpp
 	src/win32/Lgi/GScrollBar.cpp
 	src/win32/Lgi/LThread.cpp
@@ -169,7 +167,7 @@ set (LinuxSource
 	src/linux/Lgi/GDragAndDrop.cpp
 	src/linux/Lgi/GGeneral.cpp
 	src/linux/Lgi/GLayout.cpp
-	src/linux/Lgi/GMenuGtk.cpp
+	src/linux/Lgi/LMenu.cpp
 	src/linux/Lgi/GPrinter.cpp
 	src/linux/Lgi/LThread.cpp
 	src/linux/Lgi/GView.cpp
@@ -199,19 +197,20 @@ set (MacSource
 	src/mac/common/GMemDC.cpp
 	src/mac/common/GPrintDC.cpp
 	src/mac/common/GScreenDC.cpp
-	src/mac/carbon/General/GFile.cpp
-	src/mac/carbon/General/GMem.cpp
-	src/mac/carbon/Lgi/GApp.cpp
-	src/mac/carbon/Lgi/GClipBoard.cpp
-	src/mac/carbon/Lgi/GDragAndDrop.cpp
-	src/mac/carbon/Lgi/GGeneral.cpp
-	src/mac/carbon/Lgi/GFileSelect.cpp
-	src/mac/carbon/Lgi/GMenu.cpp
-	src/mac/carbon/Lgi/GPrinter.cpp
-	src/mac/carbon/Lgi/LThread.cpp
-	src/mac/carbon/Lgi/GView.cpp
-	src/mac/carbon/Lgi/GWidgets.cpp
-	src/mac/carbon/Lgi/GWindow.cpp
+	src/mac/cocoa/General/GFile.mm
+	src/mac/cocoa/General/GMem.mm
+	src/mac/cocoa/Lgi/GApp.mm
+	src/mac/cocoa/Lgi/GClipBoard.mm
+	src/mac/cocoa/Lgi/GDragAndDrop.mm
+	src/mac/cocoa/Lgi/GGeneral.mm
+	src/mac/cocoa/Lgi/GFileSelect.mm
+	src/mac/cocoa/Lgi/LMenu.mm
+	src/mac/cocoa/Lgi/GPrinter.mm
+	src/mac/cocoa/Lgi/LThread.mm
+	src/mac/cocoa/Lgi/GView.mm
+	src/mac/cocoa/Lgi/GWidgets.mm
+	src/mac/cocoa/Lgi/GWindow.mm
+	src/mac/cocoa/Lgi/LCocoaView.mm
 	)
 
 if (APPLE)
@@ -226,7 +225,7 @@ add_library(Lgi SHARED ${Source})
 
 if (APPLE)
 	target_include_directories(Lgi PUBLIC
-		"include/mac/carbon"
+		"include/mac/cocoa"
 		"include/posix"
 		"/opt/local/include"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../../../CodeLib/libpng"
@@ -235,8 +234,16 @@ if (APPLE)
 	target_link_libraries(Lgi ${EXTRA_LIBS})
 	set(	OBJCPP_SOURCE
 		src/common/Lgi/LgiCommon.cpp
+		src/common/Lgi/GGuiUtils.cpp
+		src/common/Gdc2/Font/GFontSystem.cpp
+		src/common/Lgi/GProcess.cpp
+		src/common/Lgi/GViewCommon.cpp
+		src/common/Lgi/GTrayIcon.cpp
+		src/common/Lgi/LgiMsg.cpp
+		src/common/Widgets/GPopup.cpp
 		src/mac/common/GMemDC.cpp
-		src/mac/carbon/Lgi/GGeneral.cpp
+		src/mac/common/GScreenDC.cpp
+		src/mac/cocoa/Lgi/GGeneral.cpp
 		)
 	set_source_files_properties(${OBJCPP_SOURCE} PROPERTIES 
                             COMPILE_FLAGS "-x objective-c++")

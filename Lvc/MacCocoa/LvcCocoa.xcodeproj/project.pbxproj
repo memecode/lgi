@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 48;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -24,7 +24,7 @@
 		34C032BD2319CEC100470DF2 /* GOptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C032BC2319CEC100470DF2 /* GOptionsFile.cpp */; };
 		34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C032B92319CDFE00470DF2 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		34CE07102327B3B100807DCB /* Png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CE070F2327B3B100807DCB /* Png.cpp */; };
-		34CE07302327B41600807DCB /* libpng15.15.4.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CE07222327B3F900807DCB /* libpng15.15.4.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		34CE07302327B41600807DCB /* libpng15.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CE07222327B3F900807DCB /* libpng15.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34E1910C20B1898E00005243 /* image-list.png in Resources */ = {isa = PBXBuildFile; fileRef = 34E1910B20B1898E00005243 /* image-list.png */; };
 		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
 		8D0C4E8E0486CD37000505A6 /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = 02345980000FD03B11CA0E72 /* main.nib */; };
@@ -98,7 +98,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 530F64CDFF9743C2A14BF4C9;
+			remoteGlobalIDString = 047E789AA0CD42FC86E368AD;
 			remoteInfo = libpng15;
 		};
 /* End PBXContainerItemProxy section */
@@ -120,7 +120,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				34CE07302327B41600807DCB /* libpng15.15.4.0.dylib in CopyFiles */,
+				34CE07302327B41600807DCB /* libpng15.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -255,11 +255,11 @@
 			isa = PBXGroup;
 			children = (
 				34CE07202327B3F900807DCB /* example */,
-				34CE07222327B3F900807DCB /* libpng15.15.4.0.dylib */,
+				34CE07222327B3F900807DCB /* libpng15.dylib */,
 				34CE07242327B3F900807DCB /* libpng15_static.a */,
 				34CE07262327B3F900807DCB /* minigzip */,
 				34CE07282327B3F900807DCB /* pngtest */,
-				34CE072A2327B3F900807DCB /* libzd.1.2.5.dylib */,
+				34CE072A2327B3F900807DCB /* libzd.dylib */,
 				34CE072C2327B3F900807DCB /* libzlib_static.a */,
 			);
 			name = Products;
@@ -299,7 +299,7 @@
 				LastUpgradeCheck = 0940;
 			};
 			buildConfigurationList = C0E91AC908A95435008D54AB /* Build configuration list for PBXProject "LvcCocoa" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 1;
 			knownRegions = (
@@ -340,9 +340,10 @@
 			remoteRef = 34CE071F2327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		34CE07222327B3F900807DCB /* libpng15.15.4.0.dylib */ = {
+		34CE07222327B3F900807DCB /* libpng15.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
+			name = libpng15.dylib;
 			path = libpng15.15.4.0.dylib;
 			remoteRef = 34CE07212327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -368,9 +369,10 @@
 			remoteRef = 34CE07272327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		34CE072A2327B3F900807DCB /* libzd.1.2.5.dylib */ = {
+		34CE072A2327B3F900807DCB /* libzd.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
+			name = libzd.dylib;
 			path = libzd.1.2.5.dylib;
 			remoteRef = 34CE07292327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;

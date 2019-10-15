@@ -384,6 +384,8 @@ void ResMenu::OnCommand(int Cmd)
 
 int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 {
+	OsView Null(NULL);
+
 	switch (Cmd)
 	{
 		case IDM_NEW_SUB:
@@ -511,7 +513,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 		{
 			if (Group)
 			{
-				Group->OnCommand(IDM_NEW_LANG, 0, 0);
+				Group->OnCommand(IDM_NEW_LANG, 0, Null);
 				Invalidate();
 				AppWindow->SetDirty(true);
 			}
@@ -521,7 +523,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 		{
 			if (Group)
 			{
-				Group->OnCommand(IDM_DELETE_LANG, 0, 0);
+				Group->OnCommand(IDM_DELETE_LANG, 0, Null);
 				Invalidate();
 				AppWindow->SetDirty(true);
 			}

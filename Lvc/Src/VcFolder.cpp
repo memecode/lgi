@@ -6,7 +6,8 @@
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 #endif
 
-#if 0 // def _DEBUG
+#define PROFILE_FN 0
+#if PROFILE_FN
 #define PROF(s) Prof.Add(s)
 #else
 #define PROF(s)
@@ -534,7 +535,7 @@ void VcFolder::OnBranchesChange()
 
 void VcFolder::Select(bool b)
 {
-	#ifdef _DEBUG
+	#if PROFILE_FN
 	GProfile Prof("Select");
 	#endif
 	if (!b)
@@ -854,7 +855,7 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 	*/
 	Log.DeleteObjects();
 
-	int Skipped = 0, Errors = 0;
+	int Errors = 0;
 	switch (GetType())
 	{
 		case VcGit:
@@ -1109,7 +1110,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 
 void VcFolder::LinkParents()
 {
-	#ifdef _DEBUG
+	#if PROFILE_FN
 	GProfile Prof("LinkParents");
 	#endif	
 	LHashTbl<StrKey<char>,VcCommit*> Map;
@@ -1722,7 +1723,10 @@ void VcFolder::OnPulse()
 	if (CmdsChanged)
 		Update();
 	if (CmdErrors)
+	{
 		d->Tabs->Value(1);
+		CmdErrors = false;
+	}
 }
 
 void VcFolder::OnRemove()
@@ -2452,7 +2456,6 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 
 void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 {
-	VcFile *f = NULL;
 	GArray<VcFile*> Add;
 	bool Partial = false;
 	for (auto fp: *d->Files)
@@ -3370,7 +3373,6 @@ void VcLeaf::OnBrowse()
 
 void VcLeaf::AfterBrowse()
 {
-	int asd=0;
 }
 
 void VcLeaf::OnExpand(bool b)

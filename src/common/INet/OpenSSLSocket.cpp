@@ -59,8 +59,8 @@ class LibSSL : public GLibrary
 public:
 	LibSSL()
 	{
-		char p[MAX_PATH];
 		#if defined MAC
+		char p[MAX_PATH];
 		LgiMakePath(p, sizeof(p), LGetExeFile(), "Contents/MacOS/libssl.1.0.0.dylib");
 		if (FileExists(p))
 			Load(p);
@@ -72,6 +72,7 @@ public:
 				LgiTrace("%s:%i - Failed to load '%s'\n", _FL, Opt);
 		}
 		#elif defined LINUX
+		char p[MAX_PATH];
 		if (LgiGetExePath(p, sizeof(p)))
 		{
 			LgiMakePath(p, sizeof(p), p, "libssl.so");

@@ -108,7 +108,7 @@ LgiDragSendDataFunction
 }
 */
 
-int GDragDropSource::Drag(GView *SourceWnd, int Effect, GSurface *Icon)
+int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface *Icon)
 {
 	LgiAssert(SourceWnd);
 	if (!SourceWnd)
@@ -132,13 +132,13 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect, GSurface *Icon)
 		return DROPEFFECT_NONE;
 	}
 	
-	EventRecord Event;
-	Event.what = mouseDown;
-	Event.message = 0;
-	Event.when = LgiCurrentTime();
-	Event.where.h = 0;
-	Event.where.v = 0;
-	Event.modifiers = 0;
+	EventRecord Er;
+	Er.what = mouseDown;
+	Er.message = 0;
+	Er.when = LgiCurrentTime();
+	Er.where.h = 0;
+	Er.where.v = 0;
+	Er.modifiers = 0;
 
 	List<char> Formats;
 	if (!GetFormats(Formats))
@@ -344,7 +344,7 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect, GSurface *Icon)
 		if (status) printf("%s:%i - SetDragImageWithCGImage failed with %li\n", _FL, status);
 	}
 	
-	status = TrackDrag(Drag, &Event, 0);
+	status = TrackDrag(Drag, &Er, 0);
 	if (status == dragNotAcceptedErr)
 	{
 		printf("%s:%i - error 'dragNotAcceptedErr', formats were:\n", _FL);

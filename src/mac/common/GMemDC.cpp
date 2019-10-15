@@ -97,6 +97,9 @@ void CGImg::Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *pal
 		B = All;
 	}
 	
+	if (!data)
+		return;
+	
 	int Bytes = Bits / 8;
 	int RowSize = Bytes * B.X();
 	uchar *Base = data + (Line * B.y1) + (Bytes * B.x1);
@@ -112,10 +115,6 @@ void CGImg::Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *pal
 		}
 	}
 	#endif
-	
-	if (d->Debug)
-		printf("%s:%i - Bytes=%i, Base=%i, Line=%i, pos=%i,%i\n", _FL, Bytes, (int)(Base-data), Line,
-			B.x1, B.y1);
 	
 	if (Bits <= 8)
 	{

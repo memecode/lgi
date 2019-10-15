@@ -13,13 +13,11 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Lgi\trunk\src\common\Lgi\LgiMain.cpp">
-      <Filter>Source Files\Lgi</Filter>
+    <ClCompile Include="..\..\..\..\..\src\common\Lgi\LgiMain.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\Lgi\trunk\src\win32\General\Lgi.manifest">
-      <Filter>Source Files\Lgi</Filter>
-    </Manifest>
+    <Manifest Include="..\..\..\..\..\src\win32\General\Lgi.manifest" />
   </ItemGroup>
 </Project>

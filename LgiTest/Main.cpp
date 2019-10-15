@@ -130,7 +130,7 @@ public:
 	
 	void OnPaint(GSurface *pDC)
 	{
-		pDC->Colour(LC_WORKSPACE, 24);
+		pDC->Colour(L_WORKSPACE);
 		pDC->Rectangle();
 		
 		int x = 10;
@@ -232,7 +232,7 @@ public:
 	{
 		auto c = GetClient();
 		
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle();
 		
 		#if 0

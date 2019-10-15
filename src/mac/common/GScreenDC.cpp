@@ -400,7 +400,7 @@ COLOUR GScreenDC::Get(int x, int y)
 	return 0;
 }
 
-uint GScreenDC::LineStyle(uint32 Bits, uint32 Reset)
+uint GScreenDC::LineStyle(uint32_t Bits, uint32_t Reset)
 {
 	return LineBits;
 }
