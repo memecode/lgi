@@ -113,10 +113,6 @@ void CGImg::Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *pal
 	}
 	#endif
 	
-	if (d->Debug)
-		printf("%s:%i - Bytes=%i, Base=%i, Line=%i, pos=%i,%i\n", _FL, Bytes, (int)(Base-data), (int)Line,
-			B.x1, B.y1);
-	
 	if (Bits <= 8)
 	{
 		int Entries = 1 << Bits;

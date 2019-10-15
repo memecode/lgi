@@ -235,7 +235,6 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 	GString s(i->GBase::Name());
 	auto name = s.NsStr();
 	LShortcut sc(Shortcut);
-	printf("%s = %s\n", Str, Shortcut);
 
 	i->Info.p = [[LNSMenuItem alloc] init:i];
 	if (!i->Info)
@@ -1245,7 +1244,7 @@ bool GAccelerator::Match(GKey &k)
 {
 	int Press = (uint) k.c16;
 	
-#if 1
+#if 0
 	printf("GAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s\n",
 		   Press,
 		   Press>=' '?Press:'.',
