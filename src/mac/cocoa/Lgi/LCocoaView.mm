@@ -188,10 +188,14 @@ static int LCocoaView_Count = 0;
 	auto deltaY = ev.scrollingDeltaY;
 	total += deltaY;
 	
-	// int px = SysFont->GetHeight();
 	int px = 1;
-	int lines = (int) (total / px);
-	// printf("Scroll %g, lines=%i\n", deltaY, lines);
+
+	int lines;
+    if ([ev hasPreciseScrollingDeltas])
+		lines = (int) (deltaY * 0.1 / px);
+    else
+		lines = (int) (total / px);
+
 	if (lines)
 	{
 		total -= lines * px;
