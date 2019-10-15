@@ -607,29 +607,8 @@ bool GWindow::OnRequestClose(bool OsShuttingDown)
 
 bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 {
-#ifdef MAC
 	if (m.Down())
 	{
-#if 0
-		
-		GAutoPtr<GViewIterator> it(IterateViews());
-		for (GViewI *n = it->Last(); n; n = it->Prev())
-		{
-			GPopup *p = dynamic_cast<GPopup*>(n);
-			if (p)
-			{
-				GRect pos = p->GetPos();
-				if (!pos.Overlap(m.x, m.y))
-				{
-					printf("Closing Popup, m=%i,%i not over pos=%s\n", m.x, m.y, pos.GetStr());
-					p->Visible(false);
-				}
-			}
-			else break;
-		}
-		
-#else
-		
 		bool ParentPopup = false;
 		GViewI *p = m.Target;
 		while (p && p->GetParent())
@@ -641,17 +620,17 @@ bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 			}
 			p = p->GetParent();
 		}
+		printf("ParentPopup=%i\n", ParentPopup);
 		if (!ParentPopup)
 		{
 			for (int i=0; i<GPopup::CurrentPopups.Length(); i++)
 			{
 				GPopup *pu = GPopup::CurrentPopups[i];
+				printf("Hiding popup %s\n", pu->GetClass());
 				if (pu->Visible())
 					pu->Visible(false);
 			}
 		}
-		
-#endif
 		
 		if (!m.IsMove() && LgiApp)
 		{
@@ -660,7 +639,6 @@ bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 				mh->TrackClick(v);
 		}
 	}
-#endif
 	
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{

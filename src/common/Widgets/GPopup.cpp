@@ -624,7 +624,10 @@ bool GPopup::SetPos(GRect &r, bool repaint)
 	Pos = r;
 	
 	if (Panel)
-		[Panel.p setFrame:r display:Visible()];
+	{
+		GRect flipped = LScreenFlip(r);
+		[Panel.p setFrame:flipped display:Visible()];
+	}
 	
 	return true;
 }
@@ -807,6 +810,7 @@ void GPopup::Visible(bool i)
 				else
 					[Panel.p orderOut:Panel.p];
 			}
+			GView::Visible(i);
 	
 		#else
 		
@@ -887,7 +891,7 @@ bool GPopup::Visible()
 	    
     #endif
 
-	#if defined(LGI_CARBON)
+	#if LGI_POPUP_GWINDOW
 	bool v = GWindow::Visible();
 	#else
 	bool v = GView::Visible();

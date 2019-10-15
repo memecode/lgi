@@ -188,17 +188,15 @@ static int LCocoaView_Count = 0;
 	auto deltaY = ev.scrollingDeltaY;
 	total += deltaY;
 	
-	int px = 1;
-
 	int lines;
     if ([ev hasPreciseScrollingDeltas])
-		lines = (int) (deltaY * 0.1 / px);
+		lines = (int) (deltaY * 0.1);
     else
-		lines = (int) (total / px);
+		lines = (int) total;
 
 	if (lines)
 	{
-		total -= lines * px;
+		total -= lines;
 		t->OnMouseWheel(-lines);
 	}
 }

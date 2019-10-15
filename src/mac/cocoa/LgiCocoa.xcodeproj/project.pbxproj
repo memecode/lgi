@@ -15,6 +15,7 @@
 		343874B6230F46B200CF96B4 /* GView.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B2230F46B200CF96B4 /* GView.h */; };
 		343874B7230F46B200CF96B4 /* GApp.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B3230F46B200CF96B4 /* GApp.h */; };
 		343874B8230F46B200CF96B4 /* GLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B4230F46B200CF96B4 /* GLayout.h */; };
+		343BE8C72355D0CE00742E21 /* GPopupList.h in Headers */ = {isa = PBXBuildFile; fileRef = 343BE8C62355D0CE00742E21 /* GPopupList.h */; };
 		345920FF1F25649000098DFD /* GFont.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FC1F25649000098DFD /* GFont.h */; };
 		345921001F25649000098DFD /* GFontCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FD1F25649000098DFD /* GFontCache.h */; };
 		345921011F25649000098DFD /* GFontSelect.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FE1F25649000098DFD /* GFontSelect.h */; };
@@ -149,6 +150,7 @@
 		343874B2230F46B200CF96B4 /* GView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GView.h; path = ../../../../include/common/GView.h; sourceTree = "<group>"; };
 		343874B3230F46B200CF96B4 /* GApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GApp.h; path = ../../../../include/common/GApp.h; sourceTree = "<group>"; };
 		343874B4230F46B200CF96B4 /* GLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLayout.h; path = ../../../../include/common/GLayout.h; sourceTree = "<group>"; };
+		343BE8C62355D0CE00742E21 /* GPopupList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GPopupList.h; path = ../../../../include/common/GPopupList.h; sourceTree = "<group>"; };
 		345920FC1F25649000098DFD /* GFont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFont.h; path = ../../../../include/common/GFont.h; sourceTree = "<group>"; };
 		345920FD1F25649000098DFD /* GFontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFontCache.h; path = ../../../../include/common/GFontCache.h; sourceTree = "<group>"; };
 		345920FE1F25649000098DFD /* GFontSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFontSelect.h; path = ../../../../include/common/GFontSelect.h; sourceTree = "<group>"; };
@@ -511,6 +513,7 @@
 		3477C2CC1CC046370028B84B /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
+				343BE8C62355D0CE00742E21 /* GPopupList.h */,
 				3477C2F21CC04BF00028B84B /* GBitmap.cpp */,
 				3477C2F31CC04BF00028B84B /* GBox.cpp */,
 				3477C2F41CC04BF00028B84B /* GButton.cpp */,
@@ -620,6 +623,7 @@
 				348362421F233A77003B2A6D /* GStream.h in Headers */,
 				3477C2A61CBF0A920028B84B /* LgiOsDefs.h in Headers */,
 				34D21CEC217981AE003D1EA6 /* GEventTargetThread.h in Headers */,
+				343BE8C72355D0CE00742E21 /* GPopupList.h in Headers */,
 				3477C2A11CBF0A920028B84B /* GMem.h in Headers */,
 				3477C2D51CC0481B0028B84B /* GArray.h in Headers */,
 				3477C5171CC303B70028B84B /* LgiClass.h in Headers */,
