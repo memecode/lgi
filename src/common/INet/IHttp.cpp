@@ -1060,7 +1060,7 @@ bool LgiGetUri(LCancel *Cancel, GStreamI *Out, GString *OutError, const char *In
 			{
 				GdcD->NeedsCapability("zlib");
 				if (OutError)
-					*OutError = "Gzip decompression not available";
+					OutError->Printf("Gzip decompression not available (needs %s)", z ? z->Name() : "zlib library");
 				return false;
 			}
 		}

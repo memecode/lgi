@@ -15,7 +15,7 @@ public:
 	{
 		return
 				#ifdef WINDOWS
-                    "zlib"
+                    "zlib_"
 					#if _MSC_VER >= _MSC_VER_VS2015
 					"14"
 					#elif _MSC_VER >= _MSC_VER_VS2013
