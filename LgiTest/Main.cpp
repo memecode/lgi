@@ -8,6 +8,8 @@
 #include "LDbTable.h"
 #include "GXmlTree.h"
 #include "GTabView.h"
+#include "GTextLog.h"
+#include "GDropFiles.h"
 
 const char *AppName = "Lgi Test App";
 
@@ -158,15 +160,66 @@ public:
 	}
 };
 
+class DnDtarget : public GTextLog
+{
+public:
+	DnDtarget() : GTextLog(10)
+	{
+	}
+
+	int WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState)
+	{
+		return DROPEFFECT_COPY;
+	}
+
+	int OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
+	{
+		GString Keys;
+		if (KeyState & LGI_EF_CTRL)
+			Keys += "LGI_EF_CTRL ";
+		if (KeyState & LGI_EF_ALT)
+			Keys += "LGI_EF_ALT ";
+		if (KeyState & LGI_EF_SHIFT)
+			Keys += "LGI_EF_SHIFT ";
+
+		Print("OnDrop(Data, ms={%i,%i}, keys={%s})\n", Pt.x, Pt.y, Keys?Keys.Get():"");
+		for (unsigned i=0; i<Data.Length(); i++)
+		{
+			auto &d = Data[i];
+			Print("\t[%i] fmt='%s'\n", i, d.Format.Get());
+			for (unsigned n=0; n<d.Data.Length(); n++)
+			{
+				auto &v = d.Data[n];
+				if (d.IsFileDrop())
+				{
+					GDropFiles df(d);
+					Print("\t\t%i files:\n", (int)df.Length());
+					for (unsigned f=0; f<df.Length(); f++)
+					{
+						Print("\t\t[%i]='%s'\n", f, df[f]);
+					}
+				}
+				else
+				{
+					Print("\t\t[%i]=%s\n", n, v.ToString().Get());
+				}
+			}
+		}
+
+		return DROPEFFECT_COPY;
+	}
+};
+
 class App : public GWindow
 {
+	GOptionsFile Opts;
 	GEdit *e;
 	GEdit *e2;
 	GTextLabel *Txt;
 	GTableLayout *Tbl;
 
 public:
-	App()
+	App() : Opts(GOptionsFile::PortableMode, AppName)
 	{
 		e = 0;
 		e2 = 0;
@@ -178,6 +231,9 @@ public:
 		Name(AppName);
 		MoveToCenter();
 		SetQuitOnClose(true);
+
+		Opts.SerializeFile(false);
+		SerializeState(&Opts, "WndState", true);
 		
 		if (Attach(0))
 		{
@@ -186,10 +242,14 @@ public:
 			GTabView *t = new GTabView(100);
 			t->Attach(this);
 			t->GetCss(true)->Padding("6px");
+
 			auto *tab = t->Append("First");
 			tab->GetCss(true)->FontStyle(GCss::FontStyleItalic);
+			tab->Append(new DnDtarget());
+			
 			tab = t->Append("Second");
 			tab->GetCss(true)->FontSize("14pt");
+			
 			tab = t->Append("Third");
 			tab->GetCss(true)->Color("red");
 			t->OnStyleChange();
@@ -226,6 +286,12 @@ public:
 			// Debug();
 			Visible(true);
 		}
+	}
+
+	~App()
+	{
+		SerializeState(&Opts, "WndState", false);
+		Opts.SerializeFile(true);
 	}
 
 	void OnPaint(GSurface *pDC)
