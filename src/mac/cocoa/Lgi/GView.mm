@@ -18,6 +18,7 @@
 #include "GViewPriv.h"
 #include "GCss.h"
 #include "LCocoaView.h"
+#include "GPopup.h"
 
 #define ADJ_LEFT					1
 #define ADJ_RIGHT					2
@@ -346,6 +347,7 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 		return false;
 	
 	auto w = GetWindow();
+	GPopup *popup = NULL;
 	GViewI *v;
 	for (v = this; v; v = v->GetParent())
 	{
@@ -353,12 +355,19 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 			return true;
 		if (v == (GViewI*)w)
 			break;
+		if ((popup = dynamic_cast<GPopup*>(v)))
+			break;
 
 		auto p = v->GetPos();
 		r.Offset(p.x1, p.y1);
 	}
 
-	auto nsview = w ? w->Handle() : NULL;
+	NSView *nsview = NULL;
+	if (popup)
+	 	nsview = popup->Handle().p.contentView;
+	else if (w)
+		nsview = w->Handle();
+	
 	if (nsview)
 	{
 		#if 0

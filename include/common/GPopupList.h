@@ -227,15 +227,15 @@ public:
 
 	bool OnViewKey(GView *v, GKey &k)
 	{
-		#if 1
+		if (!Visible())
+			return false;
+
+		#if 0
 		GString s;
 		s.Printf("%s:%i - OnViewKey vis=%i", _FL, Visible());
 		k.Trace(s);
 		#endif
 		
-		if (!Visible())
-			return false;
-
 		switch (k.vkey)
 		{
 			case LK_TAB:

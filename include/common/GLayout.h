@@ -44,6 +44,7 @@ class LgiClass GLayout : public GView
 	// Private variables
 	bool			_SettingScrollBars;
 	bool			_PourLargest;
+	bool			WantX, WantY;
 
 protected:
 	/// The vertical scroll bar

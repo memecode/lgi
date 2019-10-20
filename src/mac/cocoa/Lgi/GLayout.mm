@@ -21,6 +21,8 @@ GLayout::GLayout()
 	_PourLargest = false;
 	VScroll = 0;
 	HScroll = 0;
+	WantX = false;
+	WantY = false;
 }
 
 GLayout::~GLayout()
@@ -156,7 +158,8 @@ bool GLayout::SetScrollBars(bool x, bool y)
 		
 		if (!PostEvent(M_SET_SCROLL, x, y))
 		{
-			printf("%s:%i - PostEvent failed.\n", _FL);
+			WantX = x;
+			WantY = y;
 			return false;
 		}
 	}

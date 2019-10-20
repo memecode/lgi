@@ -620,7 +620,7 @@ bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 			}
 			p = p->GetParent();
 		}
-		printf("ParentPopup=%i\n", ParentPopup);
+
 		if (!ParentPopup)
 		{
 			for (int i=0; i<GPopup::CurrentPopups.Length(); i++)
