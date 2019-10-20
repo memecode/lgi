@@ -289,7 +289,6 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::
 
 	size_t Size = sizeof(DROPFILES) + sizeof(char16);
 
-	List<char> Native;
 	List<char16> NativeW;
 	for (auto File : Files)
 	{
@@ -327,7 +326,6 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::
 		DeleteArray((char*&)Dp);
 	}
 
-	Native.DeleteArrays();
 	NativeW.DeleteArrays();
 
 	OutputData->Format = LGI_FileDropFormat;

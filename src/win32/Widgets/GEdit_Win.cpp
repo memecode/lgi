@@ -365,7 +365,8 @@ void GEdit::KeyProcessed()
 
 bool GEdit::OnKey(GKey &k)
 {
-	d->NotificationProcessed = false;
+	if (k.Down())
+		d->NotificationProcessed = false;
 	
 	switch (k.vkey)
 	{
@@ -373,24 +374,44 @@ bool GEdit::OnKey(GKey &k)
 		{
 			if (k.Down())
 				SendNotify(GNotify_ReturnKey);
+			else if (d->NotificationProcessed)
+			{
+				d->NotificationProcessed = false;
+				return true;
+			}
 			break;
 		}
 		case LK_ESCAPE:
 		{
 			if (k.Down())
 				SendNotify(GNotify_EscapeKey);
+			else if (d->NotificationProcessed)
+			{
+				d->NotificationProcessed = false;
+				return true;
+			}
 			break;
 		}
 		case LK_BACKSPACE:
 		{
 			if (k.Down())
 				SendNotify(GNotify_BackspaceKey);
+			else if (d->NotificationProcessed)
+			{
+				d->NotificationProcessed = false;
+				return true;
+			}
 			break;
 		}
 		case LK_DELETE:
 		{
 			if (k.Down())
 				SendNotify(GNotify_DeleteKey);
+			else if (d->NotificationProcessed)
+			{
+				d->NotificationProcessed = false;
+				return true;
+			}
 			break;
 		}
 	}
