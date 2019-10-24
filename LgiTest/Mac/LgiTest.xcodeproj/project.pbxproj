@@ -12,6 +12,8 @@
 		3410986A217ACEF0007020CE /* LDbTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34109869217ACEF0007020CE /* LDbTable.cpp */; };
 		3417A98F21ADDB1700EF8085 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3417A98E21ADDB1700EF8085 /* Cocoa.framework */; };
 		347417BF2178B6B80097AD99 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 347417B82178B5630097AD99 /* LgiCocoa.framework */; };
+		34AD0C1023616760008A2F24 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 347417B82178B5630097AD99 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		34AD0C12236168E3008A2F24 /* GOptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34AD0C11236168E3008A2F24 /* GOptionsFile.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +33,19 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		34AD0C0F23616756008A2F24 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				34AD0C1023616760008A2F24 /* LgiCocoa.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		34109865217ACEC8007020CE /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = SOURCE_ROOT; };
 		34109867217ACEE0007020CE /* Main.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = Main.cpp; path = ../Main.cpp; sourceTree = SOURCE_ROOT; };
@@ -39,6 +54,7 @@
 		3474179C2178B50B0097AD99 /* LgiTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LgiTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		347417AD2178B50B0097AD99 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		347417B32178B5630097AD99 /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
+		34AD0C11236168E3008A2F24 /* GOptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GOptionsFile.cpp; path = ../../src/common/Lgi/GOptionsFile.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +126,7 @@
 		347417C52178B76D0097AD99 /* Lgi */ = {
 			isa = PBXGroup;
 			children = (
+				34AD0C11236168E3008A2F24 /* GOptionsFile.cpp */,
 				34109865217ACEC8007020CE /* LgiMain.cpp */,
 			);
 			name = Lgi;
@@ -125,6 +142,7 @@
 				347417982178B50A0097AD99 /* Sources */,
 				347417992178B50A0097AD99 /* Frameworks */,
 				3474179A2178B50A0097AD99 /* Resources */,
+				34AD0C0F23616756008A2F24 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -200,6 +218,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34AD0C12236168E3008A2F24 /* GOptionsFile.cpp in Sources */,
 				3410986A217ACEF0007020CE /* LDbTable.cpp in Sources */,
 				34109868217ACEE0007020CE /* Main.cpp in Sources */,
 				34109866217ACEC8007020CE /* LgiMain.cpp in Sources */,
@@ -337,7 +356,7 @@
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DMAC",
-					"-DCOCOA",
+					"-DLGI_COCOA",
 					"-D_DEBUG",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.LgiTest;
@@ -362,7 +381,7 @@
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DMAC",
-					"-DCOCOA",
+					"-DLGI_COCOA",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.LgiTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
