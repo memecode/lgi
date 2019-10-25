@@ -5,6 +5,8 @@ Lgi*.suo
 Lib
 Win32*
 x64*
+Debug*
+Release*
 
 HtmlEditor/HtmlEdit*.sdf
 HtmlEditor/HtmlEdit*.suo
@@ -20,10 +22,13 @@ HtmlTest/x64Release
 Ide/HtmlTest*.sdf
 Ide/HtmlTest*.suo
 Ide/x64Debug*
+Ide/Debug*
 Ide/x64Release*
+Ide/Release*
 Ide/LgiIde.xml.*
 Ide/LgiIde*.sdf
 Ide/LgiIde*.suo
+Ide/Gtk3/build*
 
 LgiTest/Test*.sdf
 LgiTest/Test*.suo

@@ -78,8 +78,8 @@ LgiFunc void LgiStackTrace(const char *Format, ...);
 // OsEvent is defined here because the GUiEvent is the primary user.
 // And this header can be included independently of LgiOsDefs.h where
 // this would otherwise live.
-#if defined __GTKH__
-	typedef Gtk::GtkEvent *OsEvent;
+#if defined __GTK_H__
+	typedef Gtk::GdkEvent *OsEvent;
 #elif defined _SDL_H
 	typedef SDL_Event *OsEvent;
 #elif defined _WIN32

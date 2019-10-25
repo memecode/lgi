@@ -254,7 +254,7 @@ uint32_t DefaultIcon[] = {
 };
 GInlineBmp DefIcon = { 32, 32, 32, DefaultIcon };
 
-int GDragDropSource::Drag(GView *SourceWnd, int Effect, GSurface *Icon)
+int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface *Icon)
 {
 	LgiAssert(SourceWnd);
 	if (!SourceWnd)

@@ -266,6 +266,8 @@ public:
 		GRect *GetDecorSize();
 		bool TranslateMouse(GMouse &m);
 		GViewI *WindowFromPoint(int x, int y, bool Debug);
+		void _SetDynamic(bool b);
+		void _OnViewDelete();
 	
 	#elif defined(MAC)
 	
