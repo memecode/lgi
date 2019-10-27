@@ -1436,24 +1436,7 @@ GDragDropSource *GView::DropSource(GDragDropSource *Set)
 GDragDropTarget *GView::DropTarget(GDragDropTarget *Set)
 {
 	if (Set)
-	{
 		d->DropTarget = Set;
-
-		#if LGI_COCOA
-		GWindow *w = GetWindow();
-		if (w)
-		{
-			OsWindow h = w->WindowHandle();
-			if (h)
-			{
-				NSArray *types = [NSArray arrayWithObjects:
-								NSCreateFileContentsPboardType(@"tga"),
-								NSCreateFileContentsPboardType(@"png"),nil];
-				[h.p registerForDraggedTypes:types];
-			}
-		}
-		#endif
-	}
 
 	return d->DropTarget;
 }
@@ -1507,73 +1490,85 @@ bool GView::DropTarget(bool t)
 	else ClearFlag(GViewFlags, GWF_DROP_TARGET);
 
 	#if WINNATIVE
-	if (_View)
-	{
-		if (t)
+	
+		if (_View)
 		{
-			if (!d->DropTarget)
+			if (t)
 			{
-				DragAcceptFiles(_View, t);
+				if (!d->DropTarget)
+				{
+					DragAcceptFiles(_View, t);
+				}
+				else
+				{
+					Status = RegisterDragDrop(_View, (IDropTarget*) d->DropTarget) == S_OK;
+				}
 			}
 			else
 			{
-				Status = RegisterDragDrop(_View, (IDropTarget*) d->DropTarget) == S_OK;
+				if (_View && d->DropTarget)
+				{
+					Status = RevokeDragDrop(_View) == S_OK;
+				}
 			}
 		}
-		else
-		{
-			if (_View && d->DropTarget)
-			{
-				Status = RevokeDragDrop(_View) == S_OK;
-			}
-		}
-	}
-	else LgiAssert(!"No window handle");
+		else LgiAssert(!"No window handle");
 
 	#elif defined MAC && !defined(LGI_SDL)
 
-	GWindow *Wnd = dynamic_cast<GWindow*>(GetWindow());
-	if (Wnd)
-	{
-		Wnd->SetDragHandlers(t);
-		if (!d->DropTarget)
-			d->DropTarget = t ? Wnd : 0;
-	}
-
-	#if LGI_COCOA
-	#elif LGI_CARBON
-	if (t)
-	{
-		static EventTypeSpec DragEvents[] =
+		GWindow *Wnd = dynamic_cast<GWindow*>(GetWindow());
+		if (Wnd)
 		{
-			{ kEventClassControl, kEventControlDragEnter },
-			{ kEventClassControl, kEventControlDragWithin },
-			{ kEventClassControl, kEventControlDragLeave },
-			{ kEventClassControl, kEventControlDragReceive },
-		};
-		
-		if (!d->DndHandler)
-		{
-			OSStatus e = ::InstallControlEventHandler(	_View,
-														NewEventHandlerUPP(LgiViewDndHandler),
-														GetEventTypeCount(DragEvents),
-														DragEvents,
-														(void*)this,
-														&d->DndHandler);
-			if (e) LgiTrace("%s:%i - InstallEventHandler failed (%i)\n", _FL, e);
+			Wnd->SetDragHandlers(t);
+			if (!d->DropTarget)
+				d->DropTarget = t ? Wnd : 0;
 		}
-		SetControlDragTrackingEnabled(_View, true);
-	}
-	else
-	{
-		SetControlDragTrackingEnabled(_View, false);
-	}
-	#endif
+
+		#if LGI_COCOA
+
+		GWindow *w = GetWindow();
+		if (w)
+		{
+			OsWindow h = w->WindowHandle();
+			if (h)
+				[h.p.contentView registerForDraggedTypes:@[(NSString*)kUTTypeItem]];
+		}
+
+		#elif LGI_CARBON
+		if (t)
+		{
+			static EventTypeSpec DragEvents[] =
+			{
+				{ kEventClassControl, kEventControlDragEnter },
+				{ kEventClassControl, kEventControlDragWithin },
+				{ kEventClassControl, kEventControlDragLeave },
+				{ kEventClassControl, kEventControlDragReceive },
+			};
+			
+			if (!d->DndHandler)
+			{
+				OSStatus e = ::InstallControlEventHandler(	_View,
+															NewEventHandlerUPP(LgiViewDndHandler),
+															GetEventTypeCount(DragEvents),
+															DragEvents,
+															(void*)this,
+															&d->DndHandler);
+				if (e) LgiTrace("%s:%i - InstallEventHandler failed (%i)\n", _FL, e);
+			}
+			SetControlDragTrackingEnabled(_View, true);
+		}
+		else
+		{
+			SetControlDragTrackingEnabled(_View, false);
+		}
+		#endif
 
 	#elif defined __GTK_H__
-	Status = GtkAddDragDest(this, t);
-	if (Status && !d->DropTarget)
-		d->DropTarget = t ? GetWindow() : 0;
+
+		Status = GtkAddDragDest(this, t);
+		if (Status && !d->DropTarget)
+			d->DropTarget = t ? GetWindow() : 0;
+
 	#endif
 
 	return Status;

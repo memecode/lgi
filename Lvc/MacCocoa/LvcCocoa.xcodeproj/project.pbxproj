@@ -24,7 +24,7 @@
 		34C032BD2319CEC100470DF2 /* GOptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C032BC2319CEC100470DF2 /* GOptionsFile.cpp */; };
 		34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C032B92319CDFE00470DF2 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		34CE07102327B3B100807DCB /* Png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CE070F2327B3B100807DCB /* Png.cpp */; };
-		34CE07302327B41600807DCB /* libpng15.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CE07222327B3F900807DCB /* libpng15.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		34CE07302327B41600807DCB /* libpng15.15.4.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CE07222327B3F900807DCB /* libpng15.15.4.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34E1910C20B1898E00005243 /* image-list.png in Resources */ = {isa = PBXBuildFile; fileRef = 34E1910B20B1898E00005243 /* image-list.png */; };
 		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
 		8D0C4E8E0486CD37000505A6 /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = 02345980000FD03B11CA0E72 /* main.nib */; };
@@ -98,7 +98,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 047E789AA0CD42FC86E368AD;
+			remoteGlobalIDString = 504BA09A47E449699B8583CD;
 			remoteInfo = libpng15;
 		};
 /* End PBXContainerItemProxy section */
@@ -120,7 +120,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				34CE07302327B41600807DCB /* libpng15.dylib in CopyFiles */,
+				34CE07302327B41600807DCB /* libpng15.15.4.0.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -142,7 +142,7 @@
 		3457FE482081CB3D00014BE4 /* VcFolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VcFolder.h; path = ../Src/VcFolder.h; sourceTree = "<group>"; };
 		3457FE4F2081CBE500014BE4 /* GSubProcess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GSubProcess.cpp; path = ../../src/common/Lgi/GSubProcess.cpp; sourceTree = "<group>"; };
 		3457FE512081CC4800014BE4 /* Lvc.lr8 */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Lvc.lr8; path = ../Resources/Lvc.lr8; sourceTree = "<group>"; };
-		3488EE99233C16AF00756838 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		3488EE99233C16AF00756838 /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		3488EE9A233C16AF00756838 /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/main.nib; sourceTree = "<group>"; };
 		34BD35B020C5484A0001838A /* GControlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GControlTree.cpp; path = ../../src/common/Widgets/GControlTree.cpp; sourceTree = "<group>"; };
 		34BD35B220C548710001838A /* GXmlTreeUi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GXmlTreeUi.cpp; path = ../../src/common/Text/GXmlTreeUi.cpp; sourceTree = "<group>"; };
@@ -255,7 +255,7 @@
 			isa = PBXGroup;
 			children = (
 				34CE07202327B3F900807DCB /* example */,
-				34CE07222327B3F900807DCB /* libpng15.dylib */,
+				34CE07222327B3F900807DCB /* libpng15.15.4.0.dylib */,
 				34CE07242327B3F900807DCB /* libpng15_static.a */,
 				34CE07262327B3F900807DCB /* minigzip */,
 				34CE07282327B3F900807DCB /* pngtest */,
@@ -340,10 +340,9 @@
 			remoteRef = 34CE071F2327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		34CE07222327B3F900807DCB /* libpng15.dylib */ = {
+		34CE07222327B3F900807DCB /* libpng15.15.4.0.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			name = libpng15.dylib;
 			path = libpng15.15.4.0.dylib;
 			remoteRef = 34CE07212327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -372,7 +371,6 @@
 		34CE072A2327B3F900807DCB /* libzd.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			name = libzd.dylib;
 			path = libzd.1.2.5.dylib;
 			remoteRef = 34CE07292327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;

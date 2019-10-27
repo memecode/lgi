@@ -45,6 +45,73 @@ static int LCocoaView_Count = 0;
 
 @end
 
+static NSDragOperation LgiToCocoaDragOp(int op)
+{
+	switch (op)
+	{
+		case DROPEFFECT_COPY: return NSDragOperationCopy;
+		case DROPEFFECT_MOVE: return NSDragOperationMove;
+		case DROPEFFECT_LINK: return NSDragOperationLink;
+	}
+	
+	return NSDragOperationNone; //DROPEFFECT_NONE
+}
+
+struct DndEvent
+{
+	LCocoaView *cv;
+	GViewI *v;
+	GDragDropTarget *target;
+	List<char> InputFmts, AcceptedFmts;
+	GdcPt2 Pt;
+	int Keys;
+
+	NSPasteboard *pb;
+	int result;
+	
+	DndEvent(LCocoaView *Cv, id <NSDraggingInfo> sender) : cv(Cv)
+	{
+		v = cv.w;
+		target = NULL;
+		Keys = 0;
+		pb = NULL;
+		result = 0;
+
+		setPoint(sender.draggingLocation);
+		if (!target)
+			return;
+		
+		NSPasteboard *pb = sender.draggingPasteboard;
+		if (!pb)
+			return;
+
+		List<char> Fmts;
+		if (pb.types)
+		{
+			for (id type in pb.types)
+				InputFmts.Add(NewStr([type UTF8String]));
+		}
+	}
+	
+	~DndEvent()
+	{
+		InputFmts.DeleteArrays();
+		AcceptedFmts.DeleteArrays();
+	}
+	
+	void setPoint(NSPoint loc)
+	{
+		auto frame = cv.frame;
+		Pt.Set(loc.x, frame.size.height - loc.y);
+		
+		auto view = cv.w->WindowFromPoint(Pt.x, Pt.y);
+		if (!view)
+			return;
+
+		for (v = view; !target && v; v = v->GetParent())
+			target = v->DropTarget();
+	}
+};
 
 @implementation LCocoaView {
 	NSTrackingArea *tracking;
@@ -61,7 +128,8 @@ static int LCocoaView_Count = 0;
 	
 		self.w = wnd;
 		self.WndClass = wnd->GetClass();
-		
+		self->dnd = nil;
+
 		NSRect r = {{0, 0},{4000,2000}};
 		self->tracking = [[NSTrackingArea alloc] initWithRect:r
                                      options:NSTrackingMouseEnteredAndExited |
@@ -83,6 +151,7 @@ static int LCocoaView_Count = 0;
 
 	printf("LCocoaView.dealloc... (%i, %s)\n", LCocoaView_Count-1, self.WndClass.Get());
 
+	DeleteObj(self->dnd);
 	if (self->tracking)
 	{
 		[self->tracking release];
@@ -288,20 +357,49 @@ GKey KeyEvent(NSEvent *ev)
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
 {
-	// auto loc = sender.draggingLocation;
+	DeleteObj(self->dnd);
+	self->dnd = new DndEvent(self, sender);
+	if (!self->dnd)
+		return NSDragOperationNone;
+	DndEvent &e = *self->dnd;
+	e.target->OnDragEnter();
 	
-	return NSDragOperationNone;
+	e.AcceptedFmts.DeleteArrays();
+	for (auto f: e.InputFmts)
+		e.AcceptedFmts.Add(NewStr(f));
+	
+	e.result = e.target->WillAccept(e.AcceptedFmts, e.Pt, e.Keys);
+	auto ret = LgiToCocoaDragOp(e.result);
+	printf("draggingEntered ret=%i\n", (int)ret);
+	return ret;
 }
 
 - (NSDragOperation)draggingUpdated:(id <NSDraggingInfo>)sender
 {
-	// auto loc = sender.draggingLocation;
+	if (!self->dnd)
+		return NSDragOperationNone;
 
-	return NSDragOperationNone;
+	DndEvent &e = *self->dnd;
+	e.setPoint(sender.draggingLocation);
+	
+	e.AcceptedFmts.DeleteArrays();
+	for (auto f: e.InputFmts)
+		e.AcceptedFmts.Add(NewStr(f));
+
+	e.result = e.target->WillAccept(e.AcceptedFmts, e.Pt, e.Keys);
+	auto ret = LgiToCocoaDragOp(self->dnd->result);
+	
+	printf("draggingUpdated ret=%i\n", (int)ret);
+	return ret;
 }
 
 - (void)draggingExited:(nullable id <NSDraggingInfo>)sender
 {
+	if (self->dnd)
+	{
+		self->dnd->target->OnDragExit();
+		DeleteObj(self->dnd);
+	}
 }
 
 - (BOOL)prepareForDragOperation:(id <NSDraggingInfo>)sender
@@ -311,7 +409,29 @@ GKey KeyEvent(NSEvent *ev)
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
-	return true;
+	if (!self->dnd)
+		return NSDragOperationNone;
+	DndEvent &e = *self->dnd;
+
+	GArray<GDragData> Data;
+	auto pb = sender.draggingPasteboard;
+	for (auto f: e.AcceptedFmts)
+	{
+		auto &dd = Data.New();
+		dd.Format = f;
+		NSString *NsFmt = dd.Format.NsStr();
+		NSData *d = [pb dataForType:NsFmt];
+		if (d)
+		{
+			dd.Data[0].SetBinary(d.length, (void*)d.bytes);
+			[d release];
+		}
+		
+		[NsFmt release];
+	}
+	
+	auto drop = e.target->OnDrop(Data, e.Pt, e.Keys);
+	return drop != 0;
 }
 
 - (void)concludeDragOperation:(nullable id <NSDraggingInfo>)sender

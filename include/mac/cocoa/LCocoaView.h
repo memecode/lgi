@@ -46,6 +46,7 @@ LgiExtern GRect LScreenFlip(GRect r);
 //
 @interface LCocoaView : NSView
 {
+	struct DndEvent *dnd;
 }
 @property GView *w;
 @property GString WndClass;
@@ -82,6 +83,7 @@ LgiExtern GRect LScreenFlip(GRect r);
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender;
 - (void)concludeDragOperation:(nullable id <NSDraggingInfo>)sender;
 - (void)draggingEnded:(nullable id <NSDraggingInfo>)sender;
+
 
 @end
 
