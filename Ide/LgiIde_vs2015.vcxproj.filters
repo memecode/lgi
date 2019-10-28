@@ -52,6 +52,9 @@
     <Filter Include="Source Files\Search\Python Parser">
       <UniqueIdentifier>{a789d0ae-552d-4e98-902b-7ffb0d018bbc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Search\Javascript">
+      <UniqueIdentifier>{5aca11fa-b1cb-4707-bb7f-22f85d399ab9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\LgiIde.h">
@@ -238,6 +241,9 @@
     </ClCompile>
     <ClCompile Include="..\src\common\Lgi\GAbout.cpp">
       <Filter>Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\JavascriptParser.cpp">
+      <Filter>Source Files\Search\Javascript</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

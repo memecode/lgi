@@ -139,13 +139,21 @@ extern bool BuildCppDefnList
 );
 
 extern bool BuildPyDefnList(char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
+extern bool BuildJsDefnList(char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
 
 inline bool BuildDefnList(char *FileName, char16 *Source, GArray<DefnInfo> &Funcs, int LimitTo, bool Debug = false)
 {
 	auto Ext = LgiGetExtension(FileName);
 	auto Fn = BuildCppDefnList;
-	if (Ext && !stricmp(Ext, "py"))
-		Fn = BuildPyDefnList;
+	
+	if (Ext)
+	{
+		if (!stricmp(Ext, "py"))
+			Fn = BuildPyDefnList;
+		else if (!stricmp(Ext, "js"))
+			Fn = BuildJsDefnList;
+	}
+		
 	return Fn(FileName, Source, Funcs, LimitTo, Debug);
 }
 
