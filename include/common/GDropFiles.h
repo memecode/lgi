@@ -160,7 +160,17 @@ public:
 					)
 					{
 						GAutoString a = u.Decode(u.Path);
-						Add(a.Release());
+						if (a.Get() && !strncasecmp(a, "/.file/", 7))
+						{
+							auto *s = [[NSString alloc] initWithBytes:a.Get() length:strlen(a) encoding:NSUTF8StringEncoding];
+							NSURL *url = [[NSURL alloc] initFileURLWithPath:s];
+							a.Reset(NewStr([url.path UTF8String]));
+							[url release];
+							[s release];
+						}
+						
+						if (a)
+							Add(a.Release());
 					}
 					else if (!u.Protocol &&
 							FileExists(s))

@@ -389,7 +389,7 @@ GKey KeyEvent(NSEvent *ev)
 	e.result = e.target->WillAccept(e.AcceptedFmts, e.Pt, e.Keys);
 	auto ret = LgiToCocoaDragOp(self->dnd->result);
 	
-	printf("draggingUpdated ret=%i\n", (int)ret);
+	// printf("draggingUpdated ret=%i\n", (int)ret);
 	return ret;
 }
 

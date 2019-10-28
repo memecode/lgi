@@ -7,6 +7,7 @@
 //
 #include "Lgi.h"
 #include "INet.h"
+#include "GDropFiles.h"
 
 void GWindow::BuildShortcuts(ShortcutMap &Map, GViewI *v)
 {
@@ -209,6 +210,9 @@ int GWindow::OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
 		
 		if (dd.IsFileDrop())
 		{
+			#if 1
+			GDropFiles Files(dd);
+			#else
 			GArray<char*> Files;
 			GString::Array Uri;
 			
@@ -262,6 +266,7 @@ int GWindow::OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
 					Files.Add(NewStr(u.Path));
 				}
 			}
+			#endif
 			
 			if (Files.Length())
 			{
