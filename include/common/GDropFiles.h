@@ -162,11 +162,15 @@ public:
 						GAutoString a = u.Decode(u.Path);
 						if (a.Get() && !strncasecmp(a, "/.file/", 7))
 						{
+							#if LGI_COCOA
 							auto *s = [[NSString alloc] initWithBytes:a.Get() length:strlen(a) encoding:NSUTF8StringEncoding];
 							NSURL *url = [[NSURL alloc] initFileURLWithPath:s];
 							a.Reset(NewStr([url.path UTF8String]));
 							[url release];
 							[s release];
+							#else
+							LgiAssert(!"Impl me.");
+							#endif
 						}
 						
 						if (a)

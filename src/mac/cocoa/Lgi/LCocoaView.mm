@@ -422,10 +422,7 @@ GKey KeyEvent(NSEvent *ev)
 		NSString *NsFmt = dd.Format.NsStr();
 		NSData *d = [pb dataForType:NsFmt];
 		if (d)
-		{
 			dd.Data[0].SetBinary(d.length, (void*)d.bytes);
-			[d release];
-		}
 		
 		[NsFmt release];
 	}
