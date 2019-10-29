@@ -61,12 +61,14 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 		bool IsSource;
 		bool IsHeader;
 		bool IsPython;
+		bool IsJavascript;
 		
 		bool Parse(GAutoWString Source)
 		{
 			IsSource = false;
 			IsHeader = false;
 			IsPython = false;
+			IsJavascript = false;
 			Defs.Length(0);
 			
 			bool Status = false;
@@ -84,9 +86,12 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 							||
 							!_stricmp(Ext, "hxx");
 				IsPython =	!_stricmp(Ext, "py");
+				IsJavascript = !_stricmp(Ext, "js");
 
 				if (IsSource || IsHeader)
 					Status = BuildCppDefnList(Path, Source, Defs, DefnNone);
+				else if (IsJavascript)
+					Status = BuildJsDefnList(Path, Source, Defs, DefnNone);
 				else if (IsPython)
 					Status = BuildPyDefnList(Path, Source, Defs, DefnNone);
 			}
