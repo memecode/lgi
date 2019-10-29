@@ -835,7 +835,17 @@ DebugTrace("%s:%i - SSL_get_error=%i\n", _FL, err);
 								}
 
 								LgiSleep(50);
-								r = Library->SSL_connect(Ssl);
+
+								try
+								{
+									r = Library->SSL_connect(Ssl);
+								}
+								catch (...)
+								{
+									r = -1;
+									LgiTrace("%s:%i - SSL_connect crashed.\n", _FL);
+								}
+
 DebugTrace("%s:%i - SSL_connect=%i (%i of %i ms)\n", _FL, r, (int)(LgiCurrentTime() - Start), (int)To);
 
 								bool TimeOut = !HasntTimedOut();
