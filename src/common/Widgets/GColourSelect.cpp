@@ -4,6 +4,7 @@
 #include "GColourSelect.h"
 #include "GDisplayString.h"
 #include "LgiRes.h"
+#include "GNotifications.h"
 
 class GColourSelectPopup : public GPopup
 {
@@ -107,11 +108,12 @@ void GColourSelect::Value(GColour set)
 {
 	if (c != set)
 	{
+		c = set;
 		Invalidate();
 
 		GViewI *n = GetNotify() ? GetNotify() : GetParent();
 		if (n)
-			n->OnNotify(this, 0);
+			n->OnNotify(this, GNotifyValueChanged);
 	}
 }
 
