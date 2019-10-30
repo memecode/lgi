@@ -137,7 +137,7 @@
 		34A3ACE820568D5800B1D62A /* LStringLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE720568D5800B1D62A /* LStringLayout.cpp */; };
 		34A3ACEA20568D9700B1D62A /* LMenuCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE920568D9700B1D62A /* LMenuCommon.cpp */; };
 		34B531D822F65734002B50F7 /* LMenu.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B531D722F65734002B50F7 /* LMenu.h */; };
-		34C072BF2368491900E1E222 /* GDropFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C072BE2368491900E1E222 /* GDropFiles.cpp */; };
+		34C072C12369878100E1E222 /* GDropFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C072C02369878100E1E222 /* GDropFiles.cpp */; };
 		34D1B3C121748A2800BC6B58 /* GPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D1B3C021748A2800BC6B58 /* GPath.cpp */; };
 		34D21CEC217981AE003D1EA6 /* GEventTargetThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D21CEB217981AE003D1EA6 /* GEventTargetThread.h */; };
 		34D6AA1722D3749A005D739E /* Gdc2.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D6AA1622D3749A005D739E /* Gdc2.h */; };
@@ -277,7 +277,7 @@
 		34A3ACE720568D5800B1D62A /* LStringLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LStringLayout.cpp; path = ../../../common/Gdc2/Font/LStringLayout.cpp; sourceTree = "<group>"; };
 		34A3ACE920568D9700B1D62A /* LMenuCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LMenuCommon.cpp; path = ../../../common/Lgi/LMenuCommon.cpp; sourceTree = "<group>"; };
 		34B531D722F65734002B50F7 /* LMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LMenu.h; path = ../../../../include/common/LMenu.h; sourceTree = "<group>"; };
-		34C072BE2368491900E1E222 /* GDropFiles.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = GDropFiles.cpp; sourceTree = "<group>"; };
+		34C072C02369878100E1E222 /* GDropFiles.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GDropFiles.cpp; path = ../../../common/Lgi/GDropFiles.cpp; sourceTree = "<group>"; };
 		34D1B3C021748A2800BC6B58 /* GPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GPath.cpp; path = ../../../common/Gdc2/Path/GPath.cpp; sourceTree = "<group>"; };
 		34D21CEB217981AE003D1EA6 /* GEventTargetThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GEventTargetThread.h; path = ../../../../include/common/GEventTargetThread.h; sourceTree = "<group>"; };
 		34D6AA1622D3749A005D739E /* Gdc2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Gdc2.h; path = ../../../../include/common/Gdc2.h; sourceTree = "<group>"; };
@@ -356,7 +356,6 @@
 				3477C2741CBF07DD0028B84B /* GApp.mm */,
 				3477C2761CBF08050028B84B /* GClipBoard.mm */,
 				3477C3391CC04ED90028B84B /* GDragAndDrop.mm */,
-				34C072BE2368491900E1E222 /* GDropFiles.cpp */,
 				3477C27A1CBF086A0028B84B /* GGeneral.mm */,
 				3477C27B1CBF086A0028B84B /* GLayout.mm */,
 				3477C27C1CBF086A0028B84B /* LMenu.mm */,
@@ -449,6 +448,7 @@
 		3477C2B51CBF972B0028B84B /* Interface_XP */ = {
 			isa = PBXGroup;
 			children = (
+				34C072C02369878100E1E222 /* GDropFiles.cpp */,
 				34B531D722F65734002B50F7 /* LMenu.h */,
 				34A3ACE920568D9700B1D62A /* LMenuCommon.cpp */,
 				346FACE61D3C720B00FFEBCE /* GMessage.h */,
@@ -762,7 +762,7 @@
 				3477C3161CC04CCB0028B84B /* GLibrary.cpp in Sources */,
 				3477C3051CC04BF00028B84B /* GPanel.cpp in Sources */,
 				3477C2901CBF08C10028B84B /* GMemDC.cpp in Sources */,
-				34C072BF2368491900E1E222 /* GDropFiles.cpp in Sources */,
+				34C072C12369878100E1E222 /* GDropFiles.cpp in Sources */,
 				3477C30D1CC04C560028B84B /* GFindReplace.cpp in Sources */,
 				3477C34B1CC0AB0B0028B84B /* GToolTip.cpp in Sources */,
 				3477C3201CC04D630028B84B /* LThreadEvent.cpp in Sources */,
