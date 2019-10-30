@@ -66,7 +66,6 @@ struct DndEvent
 	GdcPt2 Pt;
 	int Keys;
 
-	NSPasteboard *pb;
 	int result;
 	
 	DndEvent(LCocoaView *Cv, id <NSDraggingInfo> sender) : cv(Cv)
@@ -74,7 +73,6 @@ struct DndEvent
 		v = cv.w;
 		target = NULL;
 		Keys = 0;
-		pb = NULL;
 		result = 0;
 
 		setPoint(sender.draggingLocation);
@@ -104,12 +102,34 @@ struct DndEvent
 		auto frame = cv.frame;
 		Pt.Set(loc.x, frame.size.height - loc.y);
 		
-		auto view = cv.w->WindowFromPoint(Pt.x, Pt.y);
-		if (!view)
+		GDragDropTarget *t = NULL;
+		v = cv.w->WindowFromPoint(Pt.x, Pt.y);
+		if (!v)
 			return;
 
-		for (v = view; !target && v; v = v->GetParent())
-			target = v->DropTarget();
+		// Convert co-ords to view local
+		for (GViewI *view = v; view != view->GetWindow(); view = view->GetParent())
+		{
+			GView *gv = view->GetGView();
+			GRect cli = gv ? gv->GView::GetClient(false) : view->GetClient(false);
+			GRect pos = view->GetPos();
+			Pt.x -= pos.x1 + cli.x1;
+			Pt.y -= pos.y1 + cli.y1;
+		}
+	
+		// Find the nearest target
+		for (; !t && v; v = v->GetParent())
+			t = v->DropTarget();
+
+		if (target != t)
+		{
+			if (target)
+				target->OnDragExit();
+			target = t;
+			if (target)
+				target->OnDragEnter();
+		}
+
 	}
 };
 
@@ -362,15 +382,16 @@ GKey KeyEvent(NSEvent *ev)
 	if (!self->dnd)
 		return NSDragOperationNone;
 	DndEvent &e = *self->dnd;
-	e.target->OnDragEnter();
-	
+	if (!e.target)
+		return NSDragOperationNone;
+
 	e.AcceptedFmts.DeleteArrays();
 	for (auto f: e.InputFmts)
 		e.AcceptedFmts.Add(NewStr(f));
 	
 	e.result = e.target->WillAccept(e.AcceptedFmts, e.Pt, e.Keys);
 	auto ret = LgiToCocoaDragOp(e.result);
-	printf("draggingEntered ret=%i\n", (int)ret);
+	// printf("draggingEntered ret=%i\n", (int)ret);
 	return ret;
 }
 
@@ -381,7 +402,9 @@ GKey KeyEvent(NSEvent *ev)
 
 	DndEvent &e = *self->dnd;
 	e.setPoint(sender.draggingLocation);
-	
+	if (!e.target)
+		return NSDragOperationNone;
+
 	e.AcceptedFmts.DeleteArrays();
 	for (auto f: e.InputFmts)
 		e.AcceptedFmts.Add(NewStr(f));
@@ -389,7 +412,7 @@ GKey KeyEvent(NSEvent *ev)
 	e.result = e.target->WillAccept(e.AcceptedFmts, e.Pt, e.Keys);
 	auto ret = LgiToCocoaDragOp(self->dnd->result);
 	
-	// printf("draggingUpdated ret=%i\n", (int)ret);
+	printf("draggingUpdated pt=%i,%i len=%i ret=%i\n", e.Pt.x, e.Pt.y, (int)e.AcceptedFmts.Length(), (int)ret);
 	return ret;
 }
 
@@ -397,7 +420,8 @@ GKey KeyEvent(NSEvent *ev)
 {
 	if (self->dnd)
 	{
-		self->dnd->target->OnDragExit();
+		if (self->dnd->target)
+			self->dnd->target->OnDragExit();
 		DeleteObj(self->dnd);
 	}
 }
@@ -410,8 +434,14 @@ GKey KeyEvent(NSEvent *ev)
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
 	if (!self->dnd)
+	{
+		printf("%s:%i - No DND.\n", _FL);
 		return NSDragOperationNone;
+	}
 	DndEvent &e = *self->dnd;
+	e.setPoint(sender.draggingLocation);
+	if (!e.target)
+		return NSDragOperationNone;
 
 	GArray<GDragData> Data;
 	auto pb = sender.draggingPasteboard;
