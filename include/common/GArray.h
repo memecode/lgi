@@ -59,7 +59,7 @@ class GArray
 
 #ifdef _DEBUG
 public:
-	int GetAlloc() { return alloc; }
+	size_t GetAlloc() { return alloc; }
 #endif
 
 protected:

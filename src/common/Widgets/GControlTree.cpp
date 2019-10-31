@@ -2,7 +2,7 @@
 
 #include "Lgi.h"
 #include "GControlTree.h"
-#include "GToken.h"
+// #include "GToken.h"
 #include "GEdit.h"
 #include "GCheckBox.h"
 #include "GCombo.h"
@@ -424,7 +424,7 @@ bool GControlTree::Serialize(GDom *Store, bool Write)
 
 GControlTree::Item *GControlTree::Resolve(bool Create, const char *Path, int CtrlId, GVariantType Type, GArray<EnumValue> *Enum)
 {
-	GToken t(Path, ".");
+	auto t  = GString(Path).SplitDelimit(".");
 	if (t.Length() > 0)
 	{
 		GTreeNode *Cur = this;

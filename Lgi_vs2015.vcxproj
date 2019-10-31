@@ -451,6 +451,7 @@
     <ClCompile Include="src\common\Lgi\GAlert.cpp" />
     <ClCompile Include="src\common\Lgi\GCss.cpp" />
     <ClCompile Include="src\common\Lgi\GCssTools.cpp" />
+    <ClCompile Include="src\common\Lgi\GDropFiles.cpp" />
     <ClCompile Include="src\common\Lgi\GFindReplace.cpp" />
     <ClCompile Include="src\common\Lgi\GFontSelect.cpp" />
     <ClCompile Include="src\common\Lgi\GGuiUtils.cpp" />
