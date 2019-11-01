@@ -20,7 +20,7 @@
 
 struct GDialogPriv
 {
-	bool IsModal, _Resizable;
+	bool IsModal, IsModeless, _Resizable;
 	int ModalStatus;
 	int BtnId;
 
@@ -44,7 +44,8 @@ struct GDialogPriv
     	#else
     	ModalResult = -1;
     	#endif
-    	IsModal = true;
+    	IsModal = false;
+		IsModeless = false;
 		BtnId = -1;
     }
     
@@ -318,6 +319,8 @@ int GDialog::DoModeless()
 	if (_View)
 		return Status;
 
+	d->IsModeless = true;
+
 	#if USE_DIALOGBOXINDIRECTPARAM
 	d->Mem = new GMem(16<<10);
 	d->IsModal = false;
@@ -491,7 +494,7 @@ int GDialog::OnNotify(GViewI *Ctrl, int Flags)
 		
 		if (d->IsModal)
 			EndModal();
-		else
+		else if (d->IsModeless)
 			EndModeless();
 	}
 
@@ -523,16 +526,24 @@ void GDialog::OnPosChange()
 
 void GDialog::EndModal(int Code)
 {
-    #if USE_DIALOGBOXINDIRECTPARAM
-	EndDialog(Handle(), Code);
-	#else
-	d->ModalResult = max(Code, 0);
-	#endif
+	if (d->IsModal)
+	{
+		d->IsModal = false;
+		#if USE_DIALOGBOXINDIRECTPARAM
+		EndDialog(Handle(), Code);
+		#else
+		d->ModalResult = max(Code, 0);
+		#endif
+	}
 }
 
 void GDialog::EndModeless(int Code)
 {
-	Quit(Code != 0);
+	if (d->IsModeless)
+	{
+		d->IsModeless = false;
+		Quit(Code != 0);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

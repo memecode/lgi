@@ -658,6 +658,8 @@ public:
 							}
 							e->Name(Rel ? Rel : s.Name());
 						}
+
+						return 0; // no default btn handling.
 					}
 					//       else LgiTrace("%s:%i - Failed to find editbox: %i\n", _FL, i);
 				}

@@ -13,18 +13,18 @@
 			<Node File="../src/common/Text/GXmlTreeUi.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node File="./Src/BlameUi.cpp" Type="2" Platforms="15" />
-		<Node File="./Src/DropDownBtn.cpp" Type="2" Platforms="15" />
-		<Node File="./Src/Main.cpp" Type="2" Platforms="15" />
-		<Node File="./Src/VcCommit.cpp" Type="2" Platforms="15" />
-		<Node File="./Src/VcFile.cpp" Type="2" Platforms="15" />
-		<Node File="./Src/VcFolder.cpp" Type="2" Platforms="15" />
+		<Node File=".\Src\BlameUi.cpp" Type="2" Platforms="15" />
+		<Node File=".\Src\DropDownBtn.cpp" Type="2" Platforms="15" />
+		<Node File=".\Src\Main.cpp" Type="2" Platforms="15" />
+		<Node File=".\Src\VcCommit.cpp" Type="2" Platforms="15" />
+		<Node File=".\Src\VcFile.cpp" Type="2" Platforms="15" />
+		<Node File=".\Src\VcFolder.cpp" Type="2" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
 	<Node Name="Resources" Type="1" Platforms="15" Id="1">
-		<Node File="./Resources/icon32.png" Type="6" Platforms="15" />
-		<Node File="./installer-zip.py" Type="8" Platforms="15" />
-		<Node File="./Makefile.linux" Type="9" Platforms="15" />
+		<Node File=".\Resources\icon32.png" Type="6" Platforms="15" />
+		<Node File=".\installer-zip.py" Type="8" Platforms="15" />
+		<Node File=".\Makefile.linux" Type="9" Platforms="15" />
 	</Node>
 	<Settings>
 		<General>
@@ -37,14 +37,15 @@
 					<Debug>lvc</Debug>
 					<Release>lvc</Release>
 				</Linux>
-				<Windows />
+				<Windows>
+					<Debug>.\x64Debug14\Lvc.exe</Debug>
+				</Windows>
 			</Executable>
 			<Arguments>
 				<All />
 			</Arguments>
 			<Defines>
 				<All />
-				<Linux />
 				<Windows />
 			</Defines>
 			<DebugAdmin>
@@ -99,14 +100,12 @@
 			</Libraries>
 			<LibraryPaths>
 				<All />
-				<Linux />
 				<Windows />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
 			</TargetType>
 			<TargetName>
-				<Linux />
 				<Windows />
 			</TargetName>
 			<ApplicationIcon />
@@ -129,7 +128,6 @@
 			<OtherMakefileRules />
 			<PostBuildCommands>
 				<Windows />
-				<Linux />
 			</PostBuildCommands>
 		</Advanced>
 	</Settings>

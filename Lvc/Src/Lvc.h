@@ -130,6 +130,13 @@ struct AppPriv
 	}
 
 	GArray<class VcCommit*> GetRevs(GString::Array &Revs);
+	
+	bool IsMenuChecked(int Item)
+	{
+		GMenu *m = Tree->GetWindow()->GetMenu();
+		LMenuItem *i = m ? m->FindItem() : NULL;
+		return i ? i->Checked() : false;
+	}
 };
 
 class BlameUi : public GWindow
