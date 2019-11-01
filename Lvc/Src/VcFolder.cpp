@@ -1421,6 +1421,27 @@ bool VcFolder::ParseWorking(int Result, GString s, ParseParams *Params)
 			ParseStatus(Result, s, Params);
 			break;
 		}
+		case VcCvs:
+		{
+			bool Untracked = d->IsMenuChecked(IDM_UNTRACKED);
+			if (Untracked)
+			{
+				auto Lines = s.SplitDelimit("\n");
+				for (auto Ln: Lines)
+				{
+					auto p = Ln.SplitDelimit(" \t", 1);
+					if (p.Length() > 1)
+					{
+						auto f = new VcFile(d, this, NULL, true);
+						f->SetText(p[0], COL_STATE);
+						f->SetText(p[1], COL_FILENAME);
+						f->GetStatus();
+						d->Files->Insert(f);
+					}
+				}
+			}
+			// else fall thru
+		}
 		default:
 		{
 			ParseDiffs(s, NULL, true);
@@ -2294,12 +2315,17 @@ void VcFolder::ListWorkingFolder()
 	if (!IsWorkingFld)
 	{
 		d->ClearFiles();
+		
+		bool Untracked = d->IsMenuChecked(IDM_UNTRACKED);
 
 		GString Arg;
 		switch (GetType())
 		{
 			case VcCvs:
-				Arg = "-q diff --brief";
+				if (Untracked)
+					Arg = "-qn update";
+				else
+					Arg = "-q diff --brief";
 				break;
 			case VcSvn:
 				Arg = "status";

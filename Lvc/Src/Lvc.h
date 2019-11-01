@@ -10,6 +10,7 @@
 #include "GTextLog.h"
 #include "GTabView.h"
 #include "GEdit.h"
+#include "LMenu.h"
 
 #define OPT_Folders		"Folders"
 #define OPT_Folder		"Folder"
@@ -133,8 +134,8 @@ struct AppPriv
 	
 	bool IsMenuChecked(int Item)
 	{
-		GMenu *m = Tree->GetWindow()->GetMenu();
-		LMenuItem *i = m ? m->FindItem() : NULL;
+		LMenu *m = Tree->GetWindow()->GetMenu();
+		LMenuItem *i = m ? m->FindItem(Item) : NULL;
 		return i ? i->Checked() : false;
 	}
 };
