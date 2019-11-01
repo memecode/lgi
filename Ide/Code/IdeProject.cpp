@@ -28,6 +28,7 @@
 extern const char *Untitled;
 const char SourcePatterns[] = "*.c;*.h;*.cpp;*.cc;*.java;*.d;*.php;*.html;*.css;*.js";
 const char *AddFilesProgress::DefaultExt = "c,cpp,cc,cxx,h,hpp,hxx,html,css,json,js,jsx,txt,png,jpg,jpeg,rc,xml,mk,paths,makefile,py,java,php";
+const char *VsBinaries[] = {"devenv.com", "WDExpress.exe"};
 
 #define USE_OPEN_PROGRESS			1
 
@@ -1375,7 +1376,6 @@ GString BuildThread::FindExe()
 			GFile f;
 			if (f.Open(Makefile, O_READ))
 			{
-				GString VerKey = "Format Version ";
 				GString ProjKey = "Project(";
 				GString StartSection = "GlobalSection(";
 				GString EndSection = "EndGlobalSection";
@@ -1385,13 +1385,8 @@ GString BuildThread::FindExe()
 				GString::Array Ln = f.Read().SplitDelimit("\r\n");
 				for (size_t i = 0; i < Ln.Length(); i++)
 				{
-					GString s = Ln[i];
-					if ((Pos = s.Find(VerKey)) > 0)
-					{
-						GString sVer = s(Pos + VerKey.Length(), -1);
-						fVer = sVer.Float();
-					}
-					else if ((Pos = s.Find(ProjKey)) >= 0)
+					GString s = Ln[i].Strip();
+					if ((Pos = s.Find(ProjKey)) >= 0)
 					{
 						GString::Array p = s.SplitDelimit("(),=");
 						if (p.Length() > 5)
@@ -1511,16 +1506,34 @@ GString BuildThread::FindExe()
 			for (auto i: First->Configs)
 			{
 				BuildConfigs[i.value - 1] = i.key;
+
+				GFile f(First->File, O_READ);
+				GXmlTree t;
+				GXmlTag r;
+				if (t.Read(&r, &f))
+				{
+					if (r.IsTag("Project"))
+					{
+						auto ToolsVersion = r.GetAttr("ToolsVersion");
+						if (ToolsVersion)
+						{
+							fVer = atof(ToolsVersion);
+						}
+					}
+				}
 			}
 		}
 
 		if (fVer > 0.0)
 		{
-			GString p;
-			p.Printf("C:\\Program Files (x86)\\Microsoft Visual Studio %.1f\\Common7\\IDE\\devenv.com", fVer);
-			if (FileExists(p))
+			for (int i=0; i<CountOf(VsBinaries); i++)
 			{
-				return p;
+				GString p;
+				p.Printf("C:\\Program Files (x86)\\Microsoft Visual Studio %.1f\\Common7\\IDE\\%s", fVer, VsBinaries[i]);
+				if (FileExists(p))
+				{
+					return p;
+				}
 			}
 		}
 	}

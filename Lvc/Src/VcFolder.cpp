@@ -2307,7 +2307,6 @@ void VcFolder::ListWorkingFolder()
 			case VcGit:
 				StartCmd("diff --staged", &VcFolder::ParseWorking);
 				Arg = "diff --diff-filter=ACDMRTU";
-				// return FolderStatus();
 				break;
 			case VcHg:
 				Arg = "status -mard";

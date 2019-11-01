@@ -668,6 +668,22 @@ public:
 				}
 				break;
 			}
+			case IDM_UNTRACKED:
+			{
+				auto mi = GetMenu()->FindItem(IDM_UNTRACKED);
+				if (!mi)
+					break;
+
+				mi->Checked(!mi->Checked());
+
+				GArray<VcFolder*> Flds;
+				Tree->GetSelection(Flds);
+				for (auto f : Flds)
+				{
+					f->Refresh();
+				}
+				break;
+			}
 		}
 
 		return 0;

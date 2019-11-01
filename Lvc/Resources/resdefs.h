@@ -34,6 +34,8 @@
 #define IDM_OPTIONS								511
 #define IDM_HELP								512
 #define IDM_ABOUT								513
+#define IDM_VIEW_MENU							514
 #define IDM_EDIT_MENU							515
 #define IDM_FIND								516
 #define IDM_REFRESH								517
+#define IDM_UNTRACKED							518
