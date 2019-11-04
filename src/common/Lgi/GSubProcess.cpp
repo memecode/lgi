@@ -459,7 +459,15 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 				}
 				Env.Add(NULL);
 				
-				execve(Exe, &Args[0], Env.AddressOf());
+				#if 0
+				printf("Exe=%s\n", Exe.Get());
+				printf("Env.Len=%i\n", (int)Env.Length());
+				for (int i=0; i<Env.Length(); i++)
+					printf("Env[%i]=%s\n", i, Env[i]);
+				#endif
+				
+				int r = execve(Exe, &Args[0], Env.AddressOf());
+				printf("execve=%i err=%i\n", r, errno);
 			}
 			else
 			{
