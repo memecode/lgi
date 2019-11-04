@@ -137,11 +137,14 @@ public:
 		*/
 
 		// Overlapping insert test
+		GRange *r = NULL;
 		FromString("10-20,30-40,50-60,70-80,90-100");
 		*this += GRange(55,10);
-		if (Length() != 5) goto Error;
-		auto &r = (*this)[2];
-		if (r.Start != 50 || r.Len != 15) goto Error;
+		if (Length() != 5)
+			goto Error;
+		r = AddressOf(2);
+		if (r->Start != 50 || r->Len != 15)
+			goto Error;
 
 		Length(0);
 		return true;

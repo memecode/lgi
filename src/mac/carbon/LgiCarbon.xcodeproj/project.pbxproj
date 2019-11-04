@@ -109,6 +109,7 @@
 		3479DB1019C1AAA800E0D1E5 /* GWindowCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3479DB0E19C1AAA800E0D1E5 /* GWindowCommon.cpp */; };
 		347CB600172A97D600AC3EA6 /* GTableLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 347CB5FF172A97D600AC3EA6 /* GTableLayout.h */; };
 		347D192721B1F5700008C4CB /* LUnicodeString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D192621B1F5700008C4CB /* LUnicodeString.cpp */; };
+		34841A9523702C9F0010B3ED /* GDropFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34841A9423702C9F0010B3ED /* GDropFiles.cpp */; };
 		3489C3EA0DD1C4DB0095F0E1 /* GMru.h in Headers */ = {isa = PBXBuildFile; fileRef = 3489C3E90DD1C4DB0095F0E1 /* GMru.h */; };
 		348BFBE1202C0F0E00B87DD7 /* LListItemCheckBox.h in Headers */ = {isa = PBXBuildFile; fileRef = 348BFBDF202C0F0E00B87DD7 /* LListItemCheckBox.h */; };
 		348BFBE2202C0F0E00B87DD7 /* LListItemRadioBtn.h in Headers */ = {isa = PBXBuildFile; fileRef = 348BFBE0202C0F0E00B87DD7 /* LListItemRadioBtn.h */; };
@@ -297,6 +298,7 @@
 		3479DB0E19C1AAA800E0D1E5 /* GWindowCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GWindowCommon.cpp; path = ../../common/Lgi/GWindowCommon.cpp; sourceTree = "<group>"; };
 		347CB5FF172A97D600AC3EA6 /* GTableLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GTableLayout.h; path = ../../../include/common/GTableLayout.h; sourceTree = SOURCE_ROOT; };
 		347D192621B1F5700008C4CB /* LUnicodeString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LUnicodeString.cpp; path = ../../common/Text/LUnicodeString.cpp; sourceTree = "<group>"; };
+		34841A9423702C9F0010B3ED /* GDropFiles.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GDropFiles.cpp; path = ../../common/Lgi/GDropFiles.cpp; sourceTree = "<group>"; };
 		3489C3E90DD1C4DB0095F0E1 /* GMru.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMru.h; path = ../../../include/common/GMru.h; sourceTree = "<group>"; };
 		348BFBDF202C0F0E00B87DD7 /* LListItemCheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LListItemCheckBox.h; path = ../../../include/common/LListItemCheckBox.h; sourceTree = "<group>"; };
 		348BFBE0202C0F0E00B87DD7 /* LListItemRadioBtn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LListItemRadioBtn.h; path = ../../../include/common/LListItemRadioBtn.h; sourceTree = "<group>"; };
@@ -599,7 +601,6 @@
 		344B736A08D83F0700D49457 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				34BA44461FE3BF150018D6AE /* LCancel.h */,
 				34983C1808F548620054868C /* GClipBoard.cpp */,
 				344B736B08D83F1800D49457 /* GGeneral.cpp */,
 				344B738C08D8414400D49457 /* GGuiUtils.cpp */,
@@ -609,6 +610,7 @@
 				344B737A08D8401600D49457 /* LgiCommon.cpp */,
 				34983C2308F548DF0054868C /* LgiRand.cpp */,
 				3493304B0F60CE690092EAE8 /* GViewPriv.h */,
+				34BA44461FE3BF150018D6AE /* LCancel.h */,
 				344D1B5208F4A52200228075 /* D'n'd */,
 				344AF36408E0328B004ED88C /* Date/Time */,
 				34E9BF35121AA21800C1F0FA /* Exceptions */,
@@ -706,6 +708,7 @@
 		344D1B5208F4A52200228075 /* D'n'd */ = {
 			isa = PBXGroup;
 			children = (
+				34841A9423702C9F0010B3ED /* GDropFiles.cpp */,
 				34F96DA90DB9B82B009C64B8 /* GDragAndDrop.h */,
 				34983BE208F4A54C0054868C /* GDragAndDrop.cpp */,
 			);
@@ -1091,6 +1094,7 @@
 				34983BE308F4A54C0054868C /* GDragAndDrop.cpp in Sources */,
 				34983BE608F4A5790054868C /* LMenu.cpp in Sources */,
 				34983C1408F5482D0054868C /* GDocView.cpp in Sources */,
+				34841A9523702C9F0010B3ED /* GDropFiles.cpp in Sources */,
 				34983C1508F5482D0054868C /* GTextView3.cpp in Sources */,
 				34983C1708F5484C0054868C /* GToolTip.cpp in Sources */,
 				34983C1908F548620054868C /* GClipBoard.cpp in Sources */,

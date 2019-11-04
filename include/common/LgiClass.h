@@ -6,6 +6,7 @@
 #if defined(__OBJC__) && !defined(__GTK_H__)
 #include <Cocoa/Cocoa.h>
 #endif
+#include <functional>
 
 // Virtual input classes
 class GKey;
@@ -381,8 +382,6 @@ RESULT LHash(const CHAR *v, ssize_t l, bool Case)
 
 	return h;
 }
-
-#include <functional>
 
 template<typename T>
 void LSort(T *v, int left, int right, std::function<ssize_t(T, T)> comp)
