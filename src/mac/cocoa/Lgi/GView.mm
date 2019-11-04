@@ -346,6 +346,8 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 	if (!r.Valid())
 		return false;
 	
+	// printf("%s:%i - %s::inval %s\n", _FL, GetClass(), rc ? rc->GetStr() : "");
+	
 	auto w = GetWindow();
 	GPopup *popup = NULL;
 	GViewI *v;
