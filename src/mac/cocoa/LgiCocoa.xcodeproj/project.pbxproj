@@ -16,6 +16,7 @@
 		343874B7230F46B200CF96B4 /* GApp.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B3230F46B200CF96B4 /* GApp.h */; };
 		343874B8230F46B200CF96B4 /* GLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B4230F46B200CF96B4 /* GLayout.h */; };
 		343BE8C72355D0CE00742E21 /* GPopupList.h in Headers */ = {isa = PBXBuildFile; fileRef = 343BE8C62355D0CE00742E21 /* GPopupList.h */; };
+		344CFBC8237365B800AE6B35 /* GClipBoard.h in Headers */ = {isa = PBXBuildFile; fileRef = 344CFBC7237365B800AE6B35 /* GClipBoard.h */; };
 		345920FF1F25649000098DFD /* GFont.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FC1F25649000098DFD /* GFont.h */; };
 		345921001F25649000098DFD /* GFontCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FD1F25649000098DFD /* GFontCache.h */; };
 		345921011F25649000098DFD /* GFontSelect.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FE1F25649000098DFD /* GFontSelect.h */; };
@@ -153,6 +154,7 @@
 		343874B3230F46B200CF96B4 /* GApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GApp.h; path = ../../../../include/common/GApp.h; sourceTree = "<group>"; };
 		343874B4230F46B200CF96B4 /* GLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLayout.h; path = ../../../../include/common/GLayout.h; sourceTree = "<group>"; };
 		343BE8C62355D0CE00742E21 /* GPopupList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GPopupList.h; path = ../../../../include/common/GPopupList.h; sourceTree = "<group>"; };
+		344CFBC7237365B800AE6B35 /* GClipBoard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GClipBoard.h; path = ../../../../include/common/GClipBoard.h; sourceTree = "<group>"; };
 		345920FC1F25649000098DFD /* GFont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFont.h; path = ../../../../include/common/GFont.h; sourceTree = "<group>"; };
 		345920FD1F25649000098DFD /* GFontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFontCache.h; path = ../../../../include/common/GFontCache.h; sourceTree = "<group>"; };
 		345920FE1F25649000098DFD /* GFontSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFontSelect.h; path = ../../../../include/common/GFontSelect.h; sourceTree = "<group>"; };
@@ -346,22 +348,23 @@
 			isa = PBXGroup;
 			children = (
 				343874B3230F46B200CF96B4 /* GApp.h */,
-				343874B4230F46B200CF96B4 /* GLayout.h */,
-				343874B2230F46B200CF96B4 /* GView.h */,
-				343874B1230F46B200CF96B4 /* GWindow.h */,
-				34109853217A975E007020CE /* LCocoaView.h */,
-				34109856217A9805007020CE /* LCocoaView.mm */,
 				3477C2741CBF07DD0028B84B /* GApp.mm */,
+				344CFBC7237365B800AE6B35 /* GClipBoard.h */,
 				3477C2761CBF08050028B84B /* GClipBoard.mm */,
 				3477C3391CC04ED90028B84B /* GDragAndDrop.mm */,
 				3477C27A1CBF086A0028B84B /* GGeneral.mm */,
+				343874B4230F46B200CF96B4 /* GLayout.h */,
 				3477C27B1CBF086A0028B84B /* GLayout.mm */,
-				3477C27C1CBF086A0028B84B /* LMenu.mm */,
 				3477C27D1CBF086A0028B84B /* GPrinter.mm */,
+				343874B2230F46B200CF96B4 /* GView.h */,
 				3477C27F1CBF086A0028B84B /* GView.mm */,
 				3477C2AB1CBF72170028B84B /* GViewPriv.h */,
 				3477C2801CBF086A0028B84B /* GWidgets.mm */,
+				343874B1230F46B200CF96B4 /* GWindow.h */,
 				3477C2811CBF086A0028B84B /* GWindow.mm */,
+				34109853217A975E007020CE /* LCocoaView.h */,
+				34109856217A9805007020CE /* LCocoaView.mm */,
+				3477C27C1CBF086A0028B84B /* LMenu.mm */,
 			);
 			name = Interface_Cocoa;
 			sourceTree = "<group>";
@@ -619,6 +622,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				344CFBC8237365B800AE6B35 /* GClipBoard.h in Headers */,
 				343874B8230F46B200CF96B4 /* GLayout.h in Headers */,
 				3477C2AC1CBF72170028B84B /* GViewPriv.h in Headers */,
 				3477C35D1CC2253E0028B84B /* LgiInterfaces.h in Headers */,
