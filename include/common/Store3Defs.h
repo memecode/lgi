@@ -138,6 +138,8 @@ enum EmailFlags
 												// is not damaged.
 };
 
+extern GString EmailFlagsToStr(int flags);
+
 enum EmailAddressType
 {
 	MAIL_ADDR_TO = 0,
