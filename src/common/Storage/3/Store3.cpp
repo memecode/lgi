@@ -1,7 +1,6 @@
 #include "Lgi.h"
 #include "Store3.h"
 
-
 GString EmailFlagsToStr(int flags)
 {
 	if (flags == 0)

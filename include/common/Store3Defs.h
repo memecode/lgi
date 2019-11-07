@@ -138,7 +138,7 @@ enum EmailFlags
 												// is not damaged.
 };
 
-LgiExtern GString EmailFlagsToStr(int flags);
+LgiClass GString EmailFlagsToStr(int flags);
 
 enum EmailAddressType
 {

@@ -1554,7 +1554,7 @@ case IDomCall:
 						}
 					}
 					break;
-				}								
+				}
 				case StrSplit:
 				{
 					const char *Sep = Arg[0]->Str();
@@ -1598,6 +1598,47 @@ case IDomCall:
 						v->OwnStr(NewStr(c));
 						Dst->Value.Lst->Insert(v);
 					}
+					break;
+				}
+				case StrSplitDelimit:
+				{
+					const char *Sep = Arg[0]->Str();
+					if (!Sep)
+					{
+						Dst->Empty();
+						break;
+					}
+					
+					GVariant Tmp;
+					if (Dst == Dom)
+					{
+						Tmp = *Dom;
+						Dom = &Tmp;
+					}
+
+					Dst->SetList();
+					
+					int MaxSplit = Arg.Length() > 1 ? Arg[1]->CastInt32() : -1;
+					const char *c = Dom->CastString();
+					while (c && *c)
+					{
+						if (MaxSplit > 0 && (int)Dst->Value.Lst->Length() >= MaxSplit)
+							break;
+
+						const char *next = c;
+						while (*next && !strchr(Sep, *next))
+							next++;
+						
+						GVariant *v = new GVariant;
+						v->OwnStr(NewStr(c, next - c));
+						Dst->Add(v);
+						
+						for (c = next; *c && strchr(Sep, *c); c++)
+							;
+					}
+
+					if (c && *c)
+						Dst->Add(new GVariant(c));
 					break;
 				}								
 				case StrFind:
