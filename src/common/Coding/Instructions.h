@@ -1697,12 +1697,16 @@ case IDomCall:
 					char *s = Dom->Str();
 					if (s)
 					{
+						const char *Delimit = Arg.Length() > 0 ? Arg[0]->Str() : NULL;
+						if (!Delimit)
+							Delimit = WhiteSpace;
+
 						char *start = s;
 						char *end = s + strlen(s);
-						while (start < end && strchr(WhiteSpace, *start))
+						while (start < end && strchr(Delimit, *start))
 							start++;
 
-						while (end > start && strchr(WhiteSpace, end[-1]))
+						while (end > start && strchr(Delimit, end[-1]))
 							end--;
 						
 						Dst->OwnStr(NewStr(start, end - start));
