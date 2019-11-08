@@ -100,19 +100,21 @@ public:
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0)
 	{
 		GAutoWString w(Utf8ToWide((char*)Buffer, Size));
-		// printf("GTextLog::Write(%p)\n", w.Get());
-		if (w)
+		if (!w)
+			return 0;
+
+		if (Sem.LockWithTimeout(200, _FL))
 		{
-			if (Sem.LockWithTimeout(200, _FL))
-			{
-				Txt.Add(w.Release());
-				Sem.Unlock();
-			}
-			#ifndef __GTK_H__
-			if (Handle())
-			#endif
-				PostEvent(M_LOG_TEXT);
+			Txt.Add(w.Release());
+			Sem.Unlock();
 		}
+		#if LGI_VIEW_HANDLE
+		if (Handle())
+		#endif
+		{
+			PostEvent(M_LOG_TEXT);
+		}
+
 		return Size;
 	}
 
@@ -125,18 +127,6 @@ public:
 
 		return GTextView3::OnEvent(m);
 	}
-
-	/* GTextView3 now handles this well enough
-	void OnUrl(char *Url)
-	{
-		GUri u(Url);
-		if (u.Protocol &&
-			(!stricmp(u.Protocol, "http") || !stricmp(u.Protocol, "https")))
-		{
-			LgiExecute(Url);
-		}
-	}
-	*/
 };
 
 #endif

@@ -252,7 +252,7 @@
 		3477C32E1CC04E120028B84B /* 48Bit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 48Bit.cpp; path = ../../../common/Gdc2/48Bit.cpp; sourceTree = "<group>"; };
 		3477C32F1CC04E120028B84B /* 64Bit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 64Bit.cpp; path = ../../../common/Gdc2/64Bit.cpp; sourceTree = "<group>"; };
 		3477C3301CC04E120028B84B /* Alpha.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Alpha.cpp; path = ../../../common/Gdc2/Alpha.cpp; sourceTree = "<group>"; };
-		3477C3391CC04ED90028B84B /* GDragAndDrop.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GDragAndDrop.mm; sourceTree = "<group>"; };
+		3477C3391CC04ED90028B84B /* GDragAndDrop.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = GDragAndDrop.mm; sourceTree = "<group>"; };
 		3477C33C1CC088590028B84B /* GFileCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GFileCommon.cpp; path = ../../../common/General/GFileCommon.cpp; sourceTree = "<group>"; };
 		3477C33E1CC0A6780028B84B /* GToken.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GToken.cpp; path = ../../../common/Text/GToken.cpp; sourceTree = "<group>"; };
 		3477C3401CC0A68E0028B84B /* LDateTime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LDateTime.cpp; path = ../../../common/General/LDateTime.cpp; sourceTree = "<group>"; };

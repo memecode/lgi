@@ -36,7 +36,8 @@ public:
 	LDragSource *Wrapper;
 	int Effect;
 	GMemDC Icon;
-	
+	List<char> Formats;
+
 	GDndSourcePriv()
 	{
 		Effect = 0;
@@ -47,6 +48,7 @@ public:
 
 	~GDndSourcePriv()
 	{
+		Formats.DeleteArrays();
 		if (Wrapper)
 			[Wrapper release];
 	}
@@ -144,6 +146,12 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 		return DROPEFFECT_NONE;
 	}
 
+	if (!GetFormats(d->Formats))
+	{
+		LgiAssert(!"No formats");
+		return DROPEFFECT_NONE;
+	}
+
 	auto Wnd = SourceWnd->GetWindow();
 	if (!Wnd) return DROPEFFECT_NONE;
 	auto h = Wnd->WindowHandle();
@@ -186,6 +194,44 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	pt.y -= Mem->Y();
 	
 	NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
+
+	// Add each format to the paste board
+	GArray<GDragData> Data;
+	for (auto f: d->Formats)
+		Data.New().Format = f;
+
+	if (GetData(Data))
+	{
+		NSMutableArray *objects = [[NSMutableArray alloc] init];
+		
+		for (auto &dd: Data)
+		{
+			NSData *o = nil;
+			if (dd.Data.Length() == 1)
+			{
+				auto &v = dd.Data[0];
+				switch (v.Type)
+				{
+					case GV_STRING:
+						break;
+					case GV_BINARY:
+						o = [[NSData alloc] init
+						break;
+					default:
+						printf("%s:%i - Unhandled type %i\n", _FL, v.Type);
+						break;
+				}
+			}
+			else printf("%s:%i - Unhandler data count.\n", _FL);
+				
+			if (o)
+				[objects addObject:o];
+		}
+
+		[pboard writeObjects:objects];
+	}
+	else printf("%s:%i - GetData returned error.\n", _FL);
+	
 	[h.p dragImage:img at:pt offset:NSZeroSize event:Event.p pasteboard:pboard source:d->Wrapper slideBack:YES ];
 
 	return DROPEFFECT_NONE;
