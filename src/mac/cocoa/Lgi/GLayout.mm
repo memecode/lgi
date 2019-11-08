@@ -151,8 +151,10 @@ bool GLayout::SetScrollBars(bool x, bool y)
 		y ^ (VScroll != NULL))
 	#endif
 	{
+		/*
 		if (_Debug)
 			printf("%s/%p::SetScrollBars Sending M_SET_SCROLL\n", GetClass(), this);
+		*/
 		
 		if (!PostEvent(M_SET_SCROLL, x, y))
 		{
@@ -296,10 +298,11 @@ GMessage::Param GLayout::OnEvent(GMessage *Msg)
 	if (Msg->Msg() == M_SET_SCROLL)
 	{
 		_SetScrollBars(Msg->A(), Msg->B());
-
+		/*
 		printf("%s/%p::M_SET_SCROLL %i-%i %i-%i\n", GetClass(), this,
 			(int)Msg->A(), (HScroll != NULL),
 			(int)Msg->B(), (VScroll != NULL));
+		*/
 		return 0;
 	}
 	#endif

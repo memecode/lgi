@@ -1696,6 +1696,7 @@ struct GDomPropMap
 
 		Check("Join", StrJoin);
 		Check("Split", StrSplit);
+		Check("SplitDelimit", StrSplitDelimit);
 		Check("Find", StrFind);
 		Check("Rfind", StrRfind);
 		Check("Lower", StrLower);

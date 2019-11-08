@@ -42,6 +42,7 @@ _(DateSecond64Bit)
 // GVariant string
 _(StrJoin)
 _(StrSplit)
+_(StrSplitDelimit)
 _(StrFind)
 _(StrRfind)
 _(StrLower)

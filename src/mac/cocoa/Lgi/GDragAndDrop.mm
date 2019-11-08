@@ -15,6 +15,7 @@
 #include "GDisplayString.h"
 #include "INet.h"
 #include "GViewPriv.h"
+#include "GClipBoard.h"
 
 // #define DND_DEBUG_TRACE
 class GDndSourcePriv;
@@ -195,42 +196,41 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	
 	NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
 
-	// Add each format to the paste board
+	List<char> Formats;
+	if (!GetFormats(Formats))
+		return DROPEFFECT_NONE;
+
 	GArray<GDragData> Data;
-	for (auto f: d->Formats)
+	for (auto f: Formats)
 		Data.New().Format = f;
+	Formats.DeleteArrays();
 
-	if (GetData(Data))
+	if (!GetData(Data))
+		return DROPEFFECT_NONE;
+	
+	[pboard clearContents];
+	for (auto &dd: Data)
 	{
-		NSMutableArray *objects = [[NSMutableArray alloc] init];
-		
-		for (auto &dd: Data)
+		if (dd.Data.Length() == 1)
 		{
-			NSData *o = nil;
-			if (dd.Data.Length() == 1)
+			GVariant &v = dd.Data[0];
+			switch (v.Type)
 			{
-				auto &v = dd.Data[0];
-				switch (v.Type)
+				// case GV_STRING:
+				case GV_BINARY:
 				{
-					case GV_STRING:
-						break;
-					case GV_BINARY:
-						o = [[NSData alloc] init
-						break;
-					default:
-						printf("%s:%i - Unhandled type %i\n", _FL, v.Type);
-						break;
+					auto data = [[LBinaryData alloc] init:(uchar*)v.Value.Binary.Data len:v.Value.Binary.Length];
+					NSArray *array = [NSArray arrayWithObject:data];
+					auto r = [pboard writeObjects:array];
+					break;
 				}
+				default:
+					printf("%s:%i - Unsupported type.\n", _FL);
+					break;
 			}
-			else printf("%s:%i - Unhandler data count.\n", _FL);
-				
-			if (o)
-				[objects addObject:o];
 		}
-
-		[pboard writeObjects:objects];
+		else printf("%s:%i - Impl multiple data handling for %s.\n", _FL, dd.Format.Get());
 	}
-	else printf("%s:%i - GetData returned error.\n", _FL);
 	
 	[h.p dragImage:img at:pt offset:NSZeroSize event:Event.p pasteboard:pboard source:d->Wrapper slideBack:YES ];
 

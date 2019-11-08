@@ -76,8 +76,6 @@ struct DndEvent
 		result = 0;
 
 		setPoint(sender.draggingLocation);
-		if (!target)
-			return;
 		
 		NSPasteboard *pb = sender.draggingPasteboard;
 		if (!pb)

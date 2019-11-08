@@ -134,22 +134,6 @@ GSurface *GClipBoard::Bitmap()
 // This is a custom type to wrap binary data.
 NSString *const LBinaryDataPBoardType = @"com.memecode.lgi.binary";
 
-@interface LBinaryData : NSObject<NSPasteboardWriting,NSPasteboardReading>
-{
-}
-@property(assign) NSData *data;
-- (id)init:(uchar*)ptr len:(ssize_t)Len;
-
-// Writer
-- (nullable id)pasteboardPropertyListForType:(NSString *)type;
-- (NSArray<NSString *> *)writableTypesForPasteboard:(NSPasteboard *)pasteboard;
-
-// Reader
-+ (NSPasteboardReadingOptions)readingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard;
-+ (NSArray<NSString *> *)readableTypesForPasteboard:(NSPasteboard *)pasteboard;
-
-@end
-
 @implementation LBinaryData
 
 - (id)init:(uchar*)ptr len:(ssize_t)Len

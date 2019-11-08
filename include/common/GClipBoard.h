@@ -61,4 +61,27 @@ public:
 	bool Binary(FormatType Format, GAutoPtr<uint8_t,true> &Ptr, ssize_t *Len);	// Get
 };
 
+#ifdef __OBJC__
+
+	extern NSString *const LBinaryDataPBoardType;
+
+	@interface LBinaryData : NSObject<NSPasteboardWriting,NSPasteboardReading>
+	{
+	}
+	@property(assign) NSData *data;
+	- (id)init:(uchar*)ptr len:(ssize_t)Len;
+
+	// Writer
+	- (nullable id)pasteboardPropertyListForType:(NSString *)type;
+	- (NSArray<NSString *> *)writableTypesForPasteboard:(NSPasteboard *)pasteboard;
+
+	// Reader
+	+ (NSPasteboardReadingOptions)readingOptionsForType:(NSString *)type pasteboard:(NSPasteboard *)pasteboard;
+	+ (NSArray<NSString *> *)readableTypesForPasteboard:(NSPasteboard *)pasteboard;
+
+	@end
+
+#endif
+
+
 #endif

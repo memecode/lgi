@@ -3812,7 +3812,9 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
 						
 						// Attach
 						Src->GXmlTag::Parent = Dst;
+						Dst->Children.SetFixedLength(false);
 						Dst->Children.Add(Src);
+						Dst->Children.SetFixedLength(true);
 						Dst->Insert(Src);
 						
 						// Dirty
