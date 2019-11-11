@@ -72,8 +72,6 @@ IHttp::~IHttp()
 	DeleteArray(Proxy);
 	DeleteArray(Headers);
 	DeleteArray(Buffer);
-	DeleteArray(AuthUser);
-	DeleteArray(AuthPassword);
 }
 
 void IHttp::SetProxy(char *p, int Port)
@@ -85,11 +83,8 @@ void IHttp::SetProxy(char *p, int Port)
 
 void IHttp::SetAuth(char *User, char *Pass)
 {
-	DeleteArray(AuthUser);
-	DeleteArray(AuthPassword);
-	
-	AuthUser = NewStr(User);
-	AuthPassword = NewStr(Pass);
+	AuthUser = User;
+	AuthPassword = Pass;
 }
 
 bool IHttp::Open(GAutoPtr<GSocketI> S, const char *RemoteHost, int Port)
@@ -371,7 +366,8 @@ enum HttpRequestType
 {
 	HttpNone,
 	HttpGet,
-	HttpPost
+	HttpPost,
+	HttpOther,
 };
 
 bool IHttp::Request
@@ -396,7 +392,7 @@ bool IHttp::Request
 	else if (!_stricmp(Type, "POST"))
 		ReqType = HttpPost;
 	else
-		return false;
+		ReqType = HttpOther;
 
 	// Generate the request string
 	GStringPipe Cmd;
@@ -455,7 +451,8 @@ bool IHttp::Request
 
 	Cmd.Print("%s %s HTTP/1.1\r\n", Type, (Proxy && !IsHTTPS) ? Uri : EncPath.Get());
 	Cmd.Print("Host: %s\r\n", u.Host);
-	if (InHeaders) Cmd.Print("%s", InHeaders);
+	if (InHeaders)
+		Cmd.Write(InHeaders, strlen(InHeaders));
 
 	if (AuthUser && AuthPassword)
 	{
@@ -463,7 +460,7 @@ bool IHttp::Request
 		{
 			// Basic authentication
 			char Raw[128];
-			sprintf_s(Raw, sizeof(Raw), "%s:%s", AuthUser, AuthPassword);
+			sprintf_s(Raw, sizeof(Raw), "%s:%s", AuthUser.Get(), AuthPassword.Get());
 			char Base64[128];
 			ZeroObj(Base64);
 			ConvertBinaryToBase64(Base64, sizeof(Base64)-1, (uchar*)Raw, strlen(Raw));
@@ -479,14 +476,14 @@ bool IHttp::Request
 	}
 	Cmd.Push("\r\n");
 	
-	GAutoString c(Cmd.NewStr());
+	GString c = Cmd.NewGStr();
+	//LgiTrace("HTTP hdrs=%s\n\n", c.Get());
+
 	bool Status = false;
 	if (Socket && c)
 	{
 		// Write the headers...
-		size_t cLen = strlen(c);
-		bool WriteOk = Socket->Write(c, cLen) == cLen;
-		c.Reset();
+		bool WriteOk = Socket->Write(c, c.Length()) == c.Length();
 		if (WriteOk)
 		{
 			// Write any body...

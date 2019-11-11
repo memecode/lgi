@@ -19,13 +19,13 @@ class IHttp
 	GAutoString FileLocation;
 	char *Headers;
 	bool NoCache;
-	char *AuthUser;
-	char *AuthPassword;
+	GString AuthUser, AuthPassword;
 	GString ErrorMsg;
 
 public:
 	enum ContentEncoding
 	{
+		EncodeNone,
 		EncodeRaw,
 		EncodeGZip,
 	};

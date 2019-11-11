@@ -104,6 +104,14 @@ public:
 			SetFixedLength(true);
 			return *this;
 		}
+
+		Array &operator +=(Array &a)
+		{
+			SetFixedLength(false);
+			Add(a);
+			SetFixedLength(true);
+			return *this;
+		}
 	};
 
 	/// Empty constructor

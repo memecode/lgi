@@ -529,8 +529,7 @@ public:
 	bool Add
 	(
 		/// Array to insert
-		GArray<Type> &a
-		
+		GArray<Type> &a		
 	)
 	{
 		ssize_t old = len;
