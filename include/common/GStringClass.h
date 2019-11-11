@@ -105,7 +105,7 @@ public:
 			return *this;
 		}
 
-		Array &operator +=(Array &a)
+		Array &operator +=(const Array &a)
 		{
 			SetFixedLength(false);
 			Add(a);

@@ -113,23 +113,8 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::
 {
 	if (OutputData && Files.First())
 	{
-		#if 1
 		for (auto f : Files)
-		{
-			// GString ef = LgiEscapeString(" ", f, -1);
 			OutputData->Data.New().OwnStr(NewStr(f));
-		}
-		#else
-		if (Files.Length() == 1)
-		{
-			GUri u;
-			u.Protocol = NewStr("file");
-			u.Host = NewStr("localhost");
-			u.Path = NewStr(Files.First());
-			GAutoString Uri = u.GetUri();
-			OutputData->Data.New().OwnStr(LgiDecodeUri(Uri));
-		}
-		#endif
 
 		OutputData->Format = LGI_FileDropFormat;
 		return true;

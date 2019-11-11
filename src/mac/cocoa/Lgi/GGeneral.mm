@@ -560,8 +560,8 @@ else if (!stricmp(Mime, Mime)) \
 if (Ext2) Ext.Add(Ext2); }
 	
 	if (!Mime);
-	HardCodeExtention("text/calendar", "ics", 0)
-	HardCodeExtention("text/x-vcard", "vcf", 0)
+	HardCodeExtention("text/calendar", "ics", (const char*)NULL)
+	HardCodeExtention("text/x-vcard", "vcf", (const char*)NULL)
 	HardCodeExtention("text/mbox", "mbx", "mbox");
 	
 	return Ext.Length() > Start;

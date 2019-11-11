@@ -529,14 +529,14 @@ public:
 	bool Add
 	(
 		/// Array to insert
-		GArray<Type> &a		
+		const GArray<Type> &a
 	)
 	{
 		ssize_t old = len;
 		if (Length(len + a.Length()))
 		{
 			for (unsigned i=0; i<a.Length(); i++, old++)
-				p[old] = a[i];
+				p[old] = a.ItemAt(i);
 		}
 		else return false;
 		return true;
