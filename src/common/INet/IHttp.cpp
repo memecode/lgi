@@ -955,12 +955,24 @@ bool LgiGetUri(LCancel *Cancel, GStreamI *Out, GString *OutError, const char *In
 										"Accept-Language: en-US,en;q=0.5\r\n"
 										"Accept-Encoding: gzip, deflate\r\n"
 										"Connection: keep-alive\r\n";
+		GString InputHeaders;
+		if (InHeaders)
+		{
+			InputHeaders = DefaultHeaders;
+			auto Hdrs = GString(InHeaders).SplitDelimit("\r\n");
+			for (auto h: Hdrs)
+			{
+				GString s;
+				s.Printf("%s\r\n", h.Get());
+				InputHeaders += s;
+			}
+		}
 
 		int Status = 0;
 		IHttp::ContentEncoding Enc;
 		GStringPipe OutHeaders;
 		GStringPipe TmpFile(4 << 10);
-		Http.Get(InUri, /*InHeaders ? InHeaders : */DefaultHeaders, &Status, &TmpFile, &Enc, &OutHeaders);
+		Http.Get(InUri, InHeaders ? InputHeaders : DefaultHeaders, &Status, &TmpFile, &Enc, &OutHeaders);
 		
 		int StatusCatagory = Status / 100;
 		if (StatusCatagory == 3)
