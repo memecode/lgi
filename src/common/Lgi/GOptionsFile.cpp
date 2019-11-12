@@ -202,9 +202,8 @@ bool GOptionsFile::DeleteTag(const char *Name)
 		GXmlTag *t = GetChildTag(Name);
 		if (t)
 		{
-			t->RemoveTag();
+			Status = t->RemoveTag();
 			DeleteObj(t);
-			Status = true;
 		}
 		Unlock();
 	}

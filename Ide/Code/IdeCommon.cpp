@@ -135,10 +135,11 @@ void IdeCommon::InsertTag(GXmlTag *t)
 	}
 }
 
-void IdeCommon::RemoveTag()
+bool IdeCommon::RemoveTag()
 {
-	GXmlTag::RemoveTag();
+	bool Status = GXmlTag::RemoveTag();
 	Detach();
+	return Status;
 }
 
 bool IdeCommon::AddFiles(AddFilesProgress *Prog, const char *Path)

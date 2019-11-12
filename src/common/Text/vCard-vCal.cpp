@@ -18,6 +18,33 @@
 
 #define IsType(str) (Params.Find(str) != 0)
 
+struct TzMap
+{
+	int Offset;
+	const char *Name;
+};
+
+#define TZ(h,m) (((h)*100) + (m))
+static TzMap Timezones[] =
+{
+	{TZ(11,0), "Australia/Sydney"},
+};
+
+int TimezoneToOffset(const char *Tz)
+{
+	if (!Tz)
+		return 0;
+
+	for (int i=0; i<CountOf(Timezones); i++)
+	{
+		auto *t = Timezones + i;
+		if (!Stricmp(t->Name, Tz))
+			return t->Offset;
+	}
+
+	return Atoi(Tz);
+}
+
 #if 1
 bool IsVar(char *field, const char *s)
 {
@@ -1240,9 +1267,7 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 				c->SetStr(FIELD_CAL_TIMEZONE, EndTz);
 			
 			if (StartTz)
-			{
-				EffectiveTz = atoi(StartTz);
-			}
+				EffectiveTz = TimezoneToOffset(StartTz);
 		}
 		
 		if (EffectiveTz)

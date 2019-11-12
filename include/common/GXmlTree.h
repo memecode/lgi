@@ -166,7 +166,7 @@ public:
 	/// Inserts a child tag.
 	virtual void InsertTag(GXmlTag *t);
 	/// Removes this tag from the DOM hierarchy.
-	virtual void RemoveTag();
+	virtual bool RemoveTag();
 	/// Counts all this and all child tags
 	int64 CountTags();
 

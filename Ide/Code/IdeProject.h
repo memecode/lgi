@@ -93,7 +93,7 @@ public:
 	void CollectAllSource(GArray<GString> &c, IdePlatform Platform);
 	void SortChildren();
 	void InsertTag(GXmlTag *t) override;
-	void RemoveTag() override;
+	bool RemoveTag() override;
 	virtual bool IsWeb() = 0;	
 	virtual int GetPlatforms() = 0;
 	bool AddFiles(AddFilesProgress *Prog, const char *Path);

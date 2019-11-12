@@ -681,15 +681,16 @@ void GXmlTag::InsertTag(GXmlTag *t)
 	}
 }
 
-void GXmlTag::RemoveTag()
+bool GXmlTag::RemoveTag()
 {
-	if (Parent)
-	{
-		Children.SetFixedLength(false);
-		Parent->Children.Delete(this);
-		Children.SetFixedLength(true);
-	}
-	Parent = 0;	
+	if (!Parent)
+		return true;
+	
+	Children.SetFixedLength(false);
+	bool Status = Parent->Children.Delete(this);
+	Children.SetFixedLength(true);
+	Parent = 0;
+	return Status;
 }
 
 int64 GXmlTag::CountTags()
