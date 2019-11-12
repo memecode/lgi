@@ -371,6 +371,9 @@ int GTypeFace::PointSize()
 	if (d->_Size.Type == GCss::LenPt)
 		return (int)d->_Size.Value;
 	
+	if (d->_Size.Type == GCss::LenPx)
+		return (int) (d->_Size.Value * 72 / LgiScreenDpi());
+
 	LgiAssert(!"What now?");
 	return 0;
 }
