@@ -42,7 +42,7 @@ int TimezoneToOffset(const char *Tz)
 			return t->Offset;
 	}
 
-	return Atoi(Tz);
+	return (int)Atoi(Tz);
 }
 
 #if 1

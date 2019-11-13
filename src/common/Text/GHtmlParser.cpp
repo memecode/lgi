@@ -700,10 +700,6 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 							}
 						}
 					}
-					else
-					{
-						int asd=0;
-					}
 
 					if (IsBlock(Elem->Display()) || Elem->TagId == TAG_BR)
 					{
