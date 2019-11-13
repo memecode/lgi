@@ -102,6 +102,14 @@ enum Store3UiFields
 	Store3UiNewFormat,		// [Get] returns a integer/enum describing the new format to use
 };
 
+enum Store3Backend
+{
+	Store3Sqlite,
+	Store3Imap,
+	Store3Mapi,
+	Store3Webdav,
+};
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 // MAIL/CALENDAR CLIENT RELATED DEFINITIONS
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -395,7 +403,7 @@ enum Store3Fields
 	FIELD_LOADED = 145,					// (Store3DataState)
 	FIELD_DEBUG = 146,					// (char*)
 	FIELD_MIME_SEG = 147,				// (GDataIt)
-	FIELD_IS_IMAP = 148,				// (bool)
+	FIELD_STORE_TYPE = 148,				// (Store3Backend)
 	FIELD_BOUNCE_MSG_ID = 149,			// (char*)
 	FIELD_FOLDER_INDEX = 150,			// (int64)
 	FIELD_FORMAT = 151,					// (int64)
