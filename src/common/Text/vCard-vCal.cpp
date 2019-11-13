@@ -1304,16 +1304,28 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 	return Status;
 }
 
+GString ToString(LDateTime &dt)
+{
+	GString s;
+	s.Printf("%04.4i%02.2i%02.2iT%02.2i%02.2i%02.2i%s",
+		dt.Year(), dt.Month(), dt.Day(), dt.Hours(), dt.Minutes(), dt.Seconds(),
+		dt.GetTimeZone() ? "" : "Z");
+	return s;
+}
+
 bool VCal::Export(GDataPropI *c, GStreamI *o)
 {
 	if (!c || !o)
 		return false;
 
 	int64 Type = c->GetInt(FIELD_CAL_TYPE);
+	auto *TimeZone = c->GetStr(FIELD_CAL_TIMEZONE);
 	char *TypeStr = Type == 1 ? (char*)"VTODO" : (char*)"VEVENT";
 
-	o->Push((char*)"BEGIN:VCALENDAR\r\n");
-	o->Push((char*)"VERSION:1.0\r\n");
+	o->Push((char*)"BEGIN:VCALENDAR\r\n"
+			"VERSION:2.0\r\n"
+			"CALSCALE:GREGORIAN\r\n"
+			"PRODID:Memecode vcal filter\r\n");
 
 	if (c)
 	{
@@ -1327,6 +1339,11 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 				WriteField(*o, Name, 0, _s);				\
 			}												\
 		}
+
+		LDateTime Now;
+		Now.SetNow();
+		Now.ToUtc();
+		GStreamPrint(o, "DTSTAMP:%s\r\n", ToString(Now).Get());
 
 		OutputStr(FIELD_CAL_SUBJECT, "SUMMARY");
 		OutputStr(FIELD_CAL_LOCATION, "LOCATION");
@@ -1372,17 +1389,13 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 		{
 			LDateTime dt = *Dt;
 			dt.ToUtc();
-			GStreamPrint(o, "DTSTART:%04.4i%02.2i%02.2iT%02.2i%02.2i%02.2i\r\n",
-					dt.Year(), dt.Month(), dt.Day(),
-					dt.Hours(), dt.Minutes(), dt.Seconds());
+			GStreamPrint(o, "DTSTART:%s\r\n", ToString(dt).Get());
 		}
 		if ((Dt = c->GetDate(FIELD_CAL_END_UTC)))
 		{
 			LDateTime dt = *Dt;
 			dt.ToUtc();
-			GStreamPrint(o, "DTEND:%04.4i%02.2i%02.2iT%02.2i%02.2i%02.2i\r\n",
-					dt.Year(), dt.Month(), dt.Day(),
-					dt.Hours(), dt.Minutes(), dt.Seconds());
+			GStreamPrint(o, "DTEND:%s\r\n", ToString(dt).Get());
 		}
 
 		#ifdef _MSC_VER
