@@ -132,15 +132,19 @@ GSurface *GClipBoard::Bitmap()
 }
 
 // This is a custom type to wrap binary data.
-NSString *const LBinaryDataPBoardType = @"com.memecode.lgi.binary";
+NSString *const LBinaryDataPBoardType = @"com.memecode.lgi";
 
 @implementation LBinaryData
 
-- (id)init:(uchar*)ptr len:(ssize_t)Len
+- (id)init:(const char*)format ptr:(uchar*)ptr len:(ssize_t)Len
 {
 	if ((self = [super init]) != nil)
 	{
 		self.data = [[NSData alloc] initWithBytes:ptr length:Len];
+		
+		char f[256];
+		sprintf_s(f, sizeof(f), "%s.%s", [LBinaryDataPBoardType UTF8String], format);
+		self.format = [[NSString alloc] initWithUTF8String:f];
 	}
 	
 	return self;
@@ -148,7 +152,7 @@ NSString *const LBinaryDataPBoardType = @"com.memecode.lgi.binary";
 
 - (nullable id)pasteboardPropertyListForType:(NSString *)type
 {
-	if ([type isEqualToString:LBinaryDataPBoardType])
+	if ([type isEqualToString:self.format])
 	{
 		return self.data;
 	}
@@ -179,7 +183,7 @@ bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 		return false;
 
 	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
-	auto data = [[LBinaryData alloc] init:Ptr len:Len];
+	auto data = [[LBinaryData alloc] init:"binary" ptr:Ptr len:Len];
 	NSArray *array = [NSArray arrayWithObject:data];
 	[pasteboard clearContents];
 	auto r = [pasteboard writeObjects:array];

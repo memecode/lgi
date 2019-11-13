@@ -204,9 +204,9 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 				// case GV_STRING:
 				case GV_BINARY:
 				{
-					auto data = [[LBinaryData alloc] init:(uchar*)v.Value.Binary.Data len:v.Value.Binary.Length];
+					auto data = [[LBinaryData alloc] init:"binary" ptr:(uchar*)v.Value.Binary.Data len:v.Value.Binary.Length];
 					NSArray *array = [NSArray arrayWithObject:data];
-					auto r = [pboard writeObjects:array];
+					[pboard writeObjects:array];
 					break;
 				}
 				default:
