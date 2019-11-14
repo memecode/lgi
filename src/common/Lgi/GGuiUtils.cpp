@@ -43,42 +43,46 @@ bool GMouse::IsContextMenu()
 
 bool GMouse::ToScreen()
 {
-	if (ViewCoords && Target)
+	if (ViewCoords)
 	{
+		if (!Target)
+		{
+			printf("%s:%i - ToScreen Error: Target=%p ViewCoords=%i\n",
+				_FL,
+				Target,
+				ViewCoords);
+			return false;
+		}
+		
 		GdcPt2 p(x, y);
 		Target->PointToScreen(p);
 		x = p.x; y = p.y;
 		ViewCoords = false;
-		return true;
-	}
-	else
-	{
-		printf("%s:%i - Error: Target=%p ViewCoords=%i\n", _FL, Target, ViewCoords);
 	}
 	
-	return false;
+	return true;
 }
 
 bool GMouse::ToView()
 {
-	if (!ViewCoords && Target)
+	if (!ViewCoords)
 	{
+		if (!Target)
+		{
+			printf("%s:%i - ToView Error: Target=%p ViewCoords=%i\n",
+				_FL,
+				Target,
+				ViewCoords);
+			return false;
+		}
+		
 		GdcPt2 p(x, y);
 		Target->PointToView(p);
 		x = p.x; y = p.y;
 		ViewCoords = true;
-		return true;
-	}
-	else
-	{
-		printf("%s:%i - Error: Target=%p ViewCoords=%i\n",
-			__FILE__,
-			__LINE__,
-			Target,
-			ViewCoords);
 	}
 	
-	return false;
+	return true;
 }
 
 #if WINNATIVE
