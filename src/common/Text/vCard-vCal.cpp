@@ -1071,23 +1071,14 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 			else if (IsVar(Field, "x-showas"))
 			{
 				char *n = Data;
-
-				if (_stricmp(n, "TENTATIVE") == 0)
-				{
-					c->SetInt(FIELD_CAL_SHOW_TIME_AS, 1);
-				}
-				else if (_stricmp(n, "BUSY") == 0)
-				{
-					c->SetInt(FIELD_CAL_SHOW_TIME_AS, 2);
-				}
-				else if (_stricmp(n, "OUT") == 0)
-				{
-					c->SetInt(FIELD_CAL_SHOW_TIME_AS, 3);
-				}
+				if (Stricmp(n, "TENTATIVE") == 0)
+					c->SetInt(FIELD_CAL_SHOW_TIME_AS, CalTentative);
+				else if (Stricmp(n, "BUSY") == 0)
+					c->SetInt(FIELD_CAL_SHOW_TIME_AS, CalBusy);
+				else if (Stricmp(n, "OUT") == 0)
+					c->SetInt(FIELD_CAL_SHOW_TIME_AS, CalOut);
 				else
-				{
-					c->SetInt(FIELD_CAL_SHOW_TIME_AS, 0);
-				}
+					c->SetInt(FIELD_CAL_SHOW_TIME_AS, CalFree);
 			}
 			else if (IsVar(Field, "attendee"))
 			{
@@ -1355,26 +1346,18 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 			switch (ShowAs)
 			{
 				default:
-				case 0:
-				{
+				case CalFree:
 					o->Push((char*)"X-SHOWAS:FREE\r\n");
 					break;
-				}
-				case 1:
-				{
+				case CalTentative:
 					o->Push((char*)"X-SHOWAS:TENTATIVE\r\n");
 					break;
-				}
-				case 2:
-				{
+				case CalBusy:
 					o->Push((char*)"X-SHOWAS:BUSY\r\n");
 					break;
-				}
-				case 3:
-				{
+				case CalOut:
 					o->Push((char*)"X-SHOWAS:OUT\r\n");
 					break;
-				}
 			}
 		}
 
@@ -1428,7 +1411,7 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 		LJson j(c->GetStr(FIELD_ATTENDEE_JSON));
 		for (auto g: j.GetArray(NULL))
 		{
-			// ATTENDEE;CN="Matthew Allen";ROLE=REQ-PARTICIPANT;RSVP=TRUE:MAILTO:matthew@cisra.canon.com.au
+			// e.g.: ATTENDEE;CN="Matthew Allen";ROLE=REQ-PARTICIPANT;RSVP=TRUE:MAILTO:matthew@company.com.au
 			auto Email = g.Get("email");
 			if (Email)
 			{

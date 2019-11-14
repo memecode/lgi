@@ -257,7 +257,7 @@
 		3477C3391CC04ED90028B84B /* GDragAndDrop.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = GDragAndDrop.mm; sourceTree = "<group>"; };
 		3477C33C1CC088590028B84B /* GFileCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GFileCommon.cpp; path = ../../../common/General/GFileCommon.cpp; sourceTree = "<group>"; };
 		3477C33E1CC0A6780028B84B /* GToken.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GToken.cpp; path = ../../../common/Text/GToken.cpp; sourceTree = "<group>"; };
-		3477C3401CC0A68E0028B84B /* LDateTime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LDateTime.cpp; path = ../../../common/General/LDateTime.cpp; sourceTree = "<group>"; };
+		3477C3401CC0A68E0028B84B /* LDateTime.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = LDateTime.cpp; path = ../../../common/General/LDateTime.cpp; sourceTree = "<group>"; };
 		3477C3421CC0A6B90028B84B /* GDocView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GDocView.cpp; path = ../../../common/Text/GDocView.cpp; sourceTree = "<group>"; };
 		3477C3441CC0A9DE0028B84B /* GInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GInput.cpp; path = ../../../common/Lgi/GInput.cpp; sourceTree = "<group>"; };
 		3477C3461CC0AA220028B84B /* GWindowCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GWindowCommon.cpp; path = ../../../common/Lgi/GWindowCommon.cpp; sourceTree = "<group>"; };
@@ -952,6 +952,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
+				GCC_C_LANGUAGE_STANDARD = c11;
 				HEADER_SEARCH_PATHS = (
 					../../../include/common,
 					../../../include/mac/cocoa,
@@ -993,6 +994,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
+				GCC_C_LANGUAGE_STANDARD = c11;
 				HEADER_SEARCH_PATHS = (
 					../../../include/common,
 					../../../include/mac/cocoa,

@@ -164,9 +164,16 @@ int LDateTime::SystemTimeZone(bool ForceUpdate)
 
 		#ifdef MAC
 
-			#if 0 //def LGI_COCOA
+			#ifdef LGI_COCOA
 
-				LgiAssert(!"Fixme");
+				NSTimeZone *timeZone = [NSTimeZone localTimeZone];
+				if (timeZone)
+				{
+					NSDate *Now = [NSDate date];
+					CurTz = (int) [timeZone secondsFromGMTForDate:Now] / 60;
+					CurTzOff = [timeZone daylightSavingTimeOffsetForDate:Now] / 60;
+					CurTz -= CurTzOff;
+				}
 
 			#elif defined LGI_CARBON
 			
