@@ -535,6 +535,7 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 	NSPoint pt = wh.mouseLocationOutsideOfEventStream;
 	m.x = pt.x;
 	m.y = pt.y;
+	m.Target = this;
 
 	GdcPt2 p(pt.x, pt.y);
 	p = w->GetGView()->Flip(p);
