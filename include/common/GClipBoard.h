@@ -68,10 +68,11 @@ public:
 	@interface LBinaryData : NSObject<NSPasteboardWriting,NSPasteboardReading>
 	{
 	}
-	@property(assign) NSString *format;
 	@property(assign) NSData *data;
 
-	- (id)init:(const char*)format ptr:(uchar*)ptr len:(ssize_t)Len;
+	- (id)init:(GString)format ptr:(uchar*)ptr len:(ssize_t)Len;
+	- (id)init:(NSData*)data;
+	- (bool)getData:(GString*)format data:(GAutoPtr<uint8,true>*)Ptr len:(ssize_t*)Len;
 
 	// Writer
 	- (nullable id)pasteboardPropertyListForType:(NSString *)type;

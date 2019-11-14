@@ -134,28 +134,116 @@ GSurface *GClipBoard::Bitmap()
 // This is a custom type to wrap binary data.
 NSString *const LBinaryDataPBoardType = @"com.memecode.lgi";
 
+static void _dump(const char *verb, uchar *ptr, uint64_t len)
+{
+	printf("%s " LPrintfInt64 " bytes:\n", verb, len);
+	for (int i=0; i<len; i++)
+	{
+		printf("%02.2x ", ptr[i]);
+		if (i % 16 == 15) printf("\n");
+	}
+	printf("\n");
+}
+
+#define LBinaryData_Magic 'lgid'
+struct LBinaryData_Hdr
+{
+	uint32_t Magic;
+	uint32_t FormatLen;
+	uint64_t DataLen;
+	char Format[1];
+	
+	void *GetData()
+	{
+		return Format + FormatLen + 1;
+	}
+};
+
 @implementation LBinaryData
 
-- (id)init:(const char*)format ptr:(uchar*)ptr len:(ssize_t)Len
+- (id)init:(GString)fmt ptr:(uchar*)ptr len:(ssize_t)Len
 {
 	if ((self = [super init]) != nil)
 	{
-		self.data = [[NSData alloc] initWithBytes:ptr length:Len];
+		GArray<char> mem;
+		mem.Length(sizeof(LBinaryData_Hdr)+fmt.Length());
+		LBinaryData_Hdr *h = (LBinaryData_Hdr*)mem.AddressOf();
+		h->Magic = LBinaryData_Magic;
+		h->FormatLen = (uint32_t)fmt.Length();
+		h->DataLen = Len;
+		strcpy(h->Format, fmt);
 		
-		char f[256];
-		sprintf_s(f, sizeof(f), "%s.%s", [LBinaryDataPBoardType UTF8String], format);
-		self.format = [[NSString alloc] initWithUTF8String:f];
+		NSMutableData *m;
+		self.data = m = [[NSMutableData alloc] initWithBytes:mem.AddressOf() length:mem.Length()];
+		[m appendBytes:ptr length:Len];
+		
+		// _dump("Pasting", ptr, h->DataLen);
 	}
 	
 	return self;
 }
 
+- (id)init:(NSData*)d
+{
+	if ((self = [super init]) != nil)
+	{
+		self.data = d;
+	}
+	
+	return self;
+}
+
+// Any of these parameters can be non-NULL if the caller doesn't care about them
+- (bool)getData:(GString*)Format data:(GAutoPtr<uint8,true>*)Ptr len:(ssize_t*)Len
+{
+	if (!self.data)
+	{
+		LgiTrace("%s:%i - No data object.\n", _FL);
+		return false;
+	}
+
+	GArray<char> mem;
+	if (!mem.Length(MIN(self.data.length, 256)))
+	{
+		LgiTrace("%s:%i - Alloc failed.\n", _FL);
+		return false;
+	}
+	[self.data getBytes:mem.AddressOf() length:mem.Length()];
+	LBinaryData_Hdr *h = (LBinaryData_Hdr*)mem.AddressOf();
+	if (h->Magic != LBinaryData_Magic)
+	{
+		LgiTrace("%s:%i - Data block missing magic.\n", _FL);
+		return false;
+	}
+
+	if (Len)
+		*Len = h->DataLen;
+	if (Format)
+		*Format = h->Format;
+	
+	if (Ptr)
+	{
+		if (!Ptr->Reset(new uint8_t[h->DataLen]))
+		{
+			LgiTrace("%s:%i - Failed to alloc " LPrintfInt64 " bytes.\n", _FL, h->DataLen);
+			return false;
+		}
+		
+		NSRange r;
+		r.location = sizeof(LBinaryData_Hdr) + h->FormatLen;
+		r.length = h->DataLen;
+		[self.data getBytes:Ptr->Get() range:r];
+
+		// _dump("Receiving", Ptr.Get(), h->DataLen);
+	}
+
+	return true;
+}
+
 - (nullable id)pasteboardPropertyListForType:(NSString *)type
 {
-	if ([type isEqualToString:self.format])
-	{
+	if ([type isEqualToString:LBinaryDataPBoardType])
 		return self.data;
-	}
 	
 	return nil;
 }
@@ -177,13 +265,15 @@ NSString *const LBinaryDataPBoardType = @"com.memecode.lgi";
 @end
 
 
+#define LGI_ClipBoardType "clipboard-binary"
+
 bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmpty)
 {
 	if (!Ptr || Len <= 0)
 		return false;
 
 	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
-	auto data = [[LBinaryData alloc] init:"binary" ptr:Ptr len:Len];
+	auto data = [[LBinaryData alloc] init:LGI_ClipBoardType ptr:Ptr len:Len];
 	NSArray *array = [NSArray arrayWithObject:data];
 	[pasteboard clearContents];
 	auto r = [pasteboard writeObjects:array];
@@ -195,17 +285,22 @@ bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8,true> &Ptr, ssize_t *L
 {
 	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
 	auto d = [pasteboard dataForType:LBinaryDataPBoardType];
-	if (d)
+	if (!d)
 	{
-		if (Len)
-			*Len = d.length;
-		if (Ptr.Reset(new uint8_t[d.length]))
-		{
-			[d getBytes:Ptr.Get() length:d.length];
-			return true;
-		}
+		LgiTrace("%s:%i - No LBinaryDataPBoardType data.\n", _FL);
+		return false;
+	}
+
+	auto data = [[LBinaryData alloc] init:d];
+	if (!data)
+	{
+		LgiTrace("%s:%i - LBinaryData alloc failed.\n", _FL);
+		return false;
 	}
 	
-	return false;
+	auto Status = [data getData:NULL data:&Ptr len:Len];
+	[data release];
+
+	return Status;
 }
 
