@@ -544,6 +544,7 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 
 	m.x = p.x;
 	m.y = p.y;
+	m.Target = this;
 	
 	// Find offset to window
 	for (GViewI *c = this; c && c != c->GetWindow(); c = c->GetParent())
