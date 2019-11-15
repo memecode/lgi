@@ -24,12 +24,18 @@
 #define ADJ_UP						3
 #define ADJ_DOWN					4
 
-struct X11_INVALIDATE_PARAMS
+const char *LVirtualKeyToString(LVirtualKeys c)
 {
-	GView *View;
-	GRect Rgn;
-	bool Repaint;
-};
+	switch (c)
+	{
+		#define _(k,v) case LK_ ##k: return "LK_" #k;
+		MacKeyDef()
+		#undef _
+		default:
+			break;
+	}
+	return "#undef";
+}
 
 // CursorData is a bitmap in an array of uint32's. This is generated from a graphics file:
 // ./Code/cursors.png
