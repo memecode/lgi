@@ -10,7 +10,34 @@
 extern void NextTabStop(GViewI *v, int dir);
 extern void SetDefaultFocus(GViewI *v);
 
-#define DEBUG_KEYS			1
+#define DEBUG_KEYS			0
+#define DEBUG_SETFOCUS		0
+
+#if DEBUG_SETFOCUS || DEBUG_KEYS
+static GString DescribeView(GViewI *v)
+{
+	if (!v)
+		return GString();
+
+	char s[512];
+	int ch = 0;
+	GArray<GViewI*> p;
+	for (GViewI *i = v; i; i = i->GetParent())
+	{
+		p.Add(i);
+	}
+	for (int n=MIN(3, (int)p.Length()-1); n>=0; n--)
+	{
+		char Buf[256] = "";
+		if (!stricmp(v->GetClass(), "GMdiChild"))
+			sprintf(Buf, "'%s'", v->Name());
+		v = p[n];
+		
+		ch += sprintf_s(s + ch, sizeof(s) - ch, "%s>%s", Buf, v->GetClass());
+	}
+	return s;
+}
+#endif
 
 GRect LScreenFlip(GRect r)
 {
@@ -371,7 +398,7 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 				d->Focus->Invalidate();
 				
 #if DEBUG_SETFOCUS
-				GAutoString _foc = DescribeView(d->Focus);
+				auto _foc = DescribeView(d->Focus);
 				LgiTrace(".....defocus: %s\n",
 						 _foc.Get());
 #endif
@@ -387,7 +414,7 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 				d->Focus->Invalidate();
 				
 #if DEBUG_SETFOCUS
-				GAutoString _set = DescribeView(d->Focus);
+				auto _set = DescribeView(d->Focus);
 				LgiTrace("GWindow::SetFocus(%s, %s) focusing\n",
 						 _set.Get(),
 						 TypeName);
@@ -411,8 +438,8 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 						// view when we get focus again
 						
 #if DEBUG_SETFOCUS
-						GAutoString _ctrl = DescribeView(ctrl);
-						GAutoString _foc = DescribeView(d->Focus);
+						auto _ctrl = DescribeView(ctrl);
+						auto _foc = DescribeView(d->Focus);
 						LgiTrace("GWindow::SetFocus(%s, %s) keep_focus: %s\n",
 								 _ctrl.Get(),
 								 TypeName,
@@ -701,7 +728,9 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	if (v->OnKey(k))
 	{
 #if DEBUG_KEYS
-		printf("View ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n",
+		GString vv = DescribeView(v);
+		printf("%s ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n",
+				vv.Get(),
 			   k.c16, k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
 #endif
 		

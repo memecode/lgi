@@ -722,13 +722,38 @@ void GPopup::Visible(bool i)
 {
 	if (i)
 	{
-		#if 1
+		// When this popup becomes visible, hide any other visible popups...
 		for (auto p: CurrentPopups)
 		{
 			if (p != this && p->Visible())
 				p->Visible(false);
 		}
-		#endif
+	}
+	else
+	{
+		// When this popup hides and we have the keyboard focus... move the focus
+		// up to the first parent view.
+		auto Wnd = GetWindow();
+		if (Wnd)
+		{
+			bool HaveFocus = false;
+			for (auto Foc = Wnd->GetFocus(); Foc; Foc = Foc->GetParent())
+			{
+				if (Foc == (GViewI*)this)
+				{
+					HaveFocus = true;
+					break;
+				}
+			}
+			
+			// printf("%s:%i - HaveFocus=%i\n", _FL, HaveFocus);
+			if (HaveFocus)
+			{
+				auto Par = GetParent();
+				// printf("%s:%i - Par=%s\n", _FL, Par?Par->GetClass():"NULL");
+				if (Par) Par->Focus(true);
+			}
+		}
 	}
 
 	#if defined __GTK_H__
