@@ -10,7 +10,7 @@
 extern void NextTabStop(GViewI *v, int dir);
 extern void SetDefaultFocus(GViewI *v);
 
-#define DEBUG_KEYS			0
+#define DEBUG_KEYS			1
 
 GRect LScreenFlip(GRect r)
 {
@@ -662,7 +662,12 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	if (!v && d->Focus)
 		v = d->Focus->GetGView();
 	if (!v)
+	{
+		#if DEBUG_KEYS
+		k.Trace("No focus view to handle key.");
+		#endif
 		return false;
+	}
 	
 	// Give key to popups
 	if (LgiApp &&
@@ -681,9 +686,9 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 			{
 				Status = true;
 				
-#if DEBUG_KEYS
+				#if DEBUG_KEYS
 				printf("Hook ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n", k.c16, k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
-#endif
+				#endif
 				
 				goto AllDone;
 			}
@@ -1119,7 +1124,7 @@ GMessage::Result GWindow::OnEvent(GMessage *m)
 	{
 		case M_CLOSE:
 		{
-			#if 0  // Crashing...
+			#if 1  // Crashing...
 			if (d->CloseRequestDone || OnRequestClose(false))
 			{
 				d->CloseRequestDone = true;

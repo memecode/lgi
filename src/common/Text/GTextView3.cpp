@@ -3953,6 +3953,7 @@ bool GTextView3::OnKey(GKey &k)
 				break;
 			}
 			case LK_RETURN:
+			case LK_KEYPADENTER:
 			{
 				if (GetReadOnly())
 					break;

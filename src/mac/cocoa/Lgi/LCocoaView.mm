@@ -288,19 +288,113 @@ struct DndEvent
 	}
 }
 
+/*
+#define MacKeyDef() \
+	_(La, 0) \
+	_(Lb, 11) \
+	_(Lc, 8) \
+	_(Ld, 2) \
+	_(Le, 14) \
+	_(Lf, 3) \
+	_(Lg, 5) \
+	_(Lh, 4) \
+	_(Li, 34) \
+	_(Lj, 38) \
+	_(Lk, 40) \
+	_(Ll, 37) \
+	_(Lm, 46) \
+	_(Ln, 45) \
+	_(Lo, 31) \
+	_(Lp, 35) \
+	_(Lq, 12) \
+	_(Lr, 15) \
+	_(Ls, 1) \
+	_(Lt, 17) \
+	_(Lu, 32) \
+	_(Lv, 9) \
+	_(Lw, 13) \
+	_(Lx, 7) \
+	_(Lz, 6) \
+	_(Ly, 16) \
+	_(LKey1, 18) _(LKey2, 19) _(LKey3, 20) _(LKey4, 21) _(LKey5, 23) \
+	_(LKey6, 22) _(LKey7, 26) _(LKey8, 28) _(LKey9, 25) _(LKey0, 29) \
+	_(LMinus, 27) \
+	_(LEquals, 24) \
+	_(LCloseBracket, 30) \
+	_(LOpenBracket, 33) \
+	_(LEnter, 36) \
+	_(LSingleQuote, 39) \
+	_(LBackSlash, 42) \
+	_(LColon, 41) \
+	_(LLessThan, 43) \
+	_(LForwardSlash, 44) \
+	_(LGreaterThan, 47) \
+	_(LTab, 48) \
+	_(LSpace, 49) \
+	_(LTilde, 50) \
+	_(LBackSpace, 51) \
+	_(LEscape, 53) \
+	_(LCmdRight, 54) \
+	_(LCmdLeft, 55) \
+	_(LShiftLeft, 56) \
+	_(LShiftRight, 60) \
+	_(LCapsLock, 57) \
+	_(LAltLeft, 58) \
+	_(LAltRight, 61) \
+	_(LCtrlLeft, 59) \
+	_(LCtrlRight, 62) \
+	_(LKeypadPeriod, 65) \
+	_(LKeypadAsterisk, 67) \
+	_(LKeypadPlus, 69) \
+	_(LKeypadEnter, 76) \
+	_(LKeypadNumLock, 71) \
+	_(LKeypadForwardSlash, 75) \
+	_(LKeypadMinus, 78) \
+	_(LKeypadEquals, 81) \
+	_(LKeypad0, 82) _(LKeypad1, 83) _(LKeypad2, 84) _(LKeypad3, 85) _(LKeypad4, 86) \
+	_(LKeypad5, 87) _(LKeypad6, 88) _(LKeypad7, 89) _(LKeypad8, 91) _(LKeypad9, 92) \
+	_(LF1, 122) _(LF2, 120) _(LF3, 99) _(LF4, 118) _(LF5, 96) _(LF6, 97) \
+	_(LF7, 98) _(LF8, 100) _(LF9, 101) _(LF10, 109) _(LF11, 103) _(LF12, 111) \
+	_(LPrintScreen, 105) \
+	_(LContextMenu, 110) \
+	_(LInsert, 114) \
+	_(LHome, 115) \
+	_(LPageUp, 116) \
+	_(LDelete, 117) \
+	_(LEnd, 119) \
+	_(LPageDown, 121) \
+	_(LLeft, 123) \
+	_(LRight, 124) \
+	_(LDown, 125) \
+	_(LUp, 126)
+
+enum MacKeyCode
+{
+	#define _(k,v) k = v,
+	MacKeyDef()
+	#undef _
+};
+*/
+
+const char *LVirtualKeyToString(LVirtualKeys c)
+{
+	switch (c)
+	{
+		#define _(k,v) case LK_ ##k: return "LK_" #k;
+		MacKeyDef()
+		#undef _
+		default:
+			break;
+	}
+	return "#undef";
+}
+
 GKey KeyEvent(NSEvent *ev)
 {
 	LAutoPool Pool;
 	GKey k;
 	GString s = [ev.characters UTF8String];
 	auto mod = ev.modifierFlags;
-	#if 0
-	bool capsLock = (mod & NSEventModifierFlagCapsLock) != 0;
-	bool shift = (mod & NSEventModifierFlagShift) != 0;
-	bool ctrl = (mod & NSEventModifierFlagControl) != 0;
-	bool numPad = (mod & NSEventModifierFlagNumericPad) != 0;
-	bool help = (mod & NSEventModifierFlagHelp) != 0;
-	#endif
 	bool option = (mod & NSEventModifierFlagOption) != 0;
 	bool cmd = (mod & NSEventModifierFlagCommand) != 0;
 	bool func = (mod & NSEventModifierFlagFunction) != 0;
@@ -309,7 +403,15 @@ GKey KeyEvent(NSEvent *ev)
 	ssize_t len = s.Length();
 	uint32_t u32 = LgiUtf8To32(p, len);
 	k.c16 = u32;
-	k.vkey = u32;
+	k.vkey = ev.keyCode;
+	
+	printf("MacKeyToStr %i/%s/%i -> %s\n", u32, s.Get(), k.vkey, LVirtualKeyToString((LVirtualKeys)k.vkey));
+	switch (ev.keyCode)
+	{
+		case LK_KEYPADENTER:
+			k.c16 = '\r';
+			break;
+	}
 	
 	k.SetModifer((uint32_t)mod);
 	
@@ -322,6 +424,7 @@ GKey KeyEvent(NSEvent *ev)
 				(
 					k.c16 >= ' ' ||
 					k.vkey == LK_RETURN ||
+					k.vkey == LK_KEYPADENTER ||
 					k.vkey == LK_TAB ||
 					k.vkey == LK_BACKSPACE
 				)

@@ -224,6 +224,54 @@ enum LDialogIds
 /// \sa GMouse
 #define LGI_VMOUSE_DOUBLE			0x400
 
+#define MacKeyDef() \
+	_(A, 0) _(B, 11) _(C, 8) _(D, 2) _(E, 14) _(F, 3) \
+	_(G, 5) _(H, 4) _(I, 34) _(J, 38) _(K, 40) _(L, 37) \
+	_(M, 46) _(N, 45) _(O, 31) _(P, 35) _(Q, 12) _(R, 15) \
+	_(S, 1) _(T, 17) _(U, 32) _(V, 9) _(W, 13) _(X, 7) _(Y, 16) _(Z, 6) \
+	_(KEY1, 18) _(KEY2, 19) _(KEY3, 20) _(KEY4, 21) _(KEY5, 23) \
+	_(KEY6, 22) _(KEY7, 26) _(KEY8, 28) _(KEY9, 25) _(KEY0, 29) \
+	_(MINUS, 27) \
+	_(EQUALS, 24) \
+	_(CLOSEBRACKET, 30) \
+	_(OPENBRACKET, 33) \
+	_(ENTER, 36) \
+	_(SINGLEQUOTE, 39) \
+	_(BACKSLASH, 42) \
+	_(COLON, 41) \
+	_(LESSTHAN, 43) _(GREATERTHAN, 47) \
+	_(FORWARDSLASH, 44) \
+	_(TAB, 48) \
+	_(SPACE, 49) \
+	_(TILDE, 50) \
+	_(BACKSPACE, 51) \
+	_(ESCAPE, 53) \
+	_(CMDRIGHT, 54)_(CMDLEFT, 55) \
+	_(SHIFTLEFT, 56) _(SHIFTRIGHT, 60) \
+	_(CAPSLOCK, 57) \
+	_(ALTLEFT, 58) _(ALTRIGHT, 61) \
+	_(CTRLLEFT, 59) _(CTRLRIGHT, 62) \
+	_(KEYPADPERIOD, 65) \
+	_(KEYPADASTERISK, 67) \
+	_(KEYPADPLUS, 69) \
+	_(KEYPADENTER, 76) \
+	_(KEYPADNUMLOCK, 71) \
+	_(KEYPADFORWARDSLASH, 75) \
+	_(KEYPADMINUS, 78) _(KEYPADEQUALS, 81) \
+	_(KEYPAD0, 82) _(KEYPAD1, 83) _(KEYPAD2, 84) _(KEYPAD3, 85) _(KEYPAD4, 86) \
+	_(KEYPAD5, 87) _(KEYPAD6, 88) _(KEYPAD7, 89) _(KEYPAD8, 91) _(KEYPAD9, 92) \
+	_(F1, 122) _(F2, 120) _(F3, 99) _(F4, 118) _(F5, 96) _(F6, 97) \
+	_(F7, 98) _(F8, 100) _(F9, 101) _(F10, 109) _(F11, 103) _(F12, 111) \
+	_(PRINTSCREEN, 105) \
+	_(CONTEXTMENU, 110) \
+	_(INSERT, 114) \
+	_(HOME, 115) \
+	_(PAGEUP, 116) \
+	_(DELETE, 117) \
+	_(END, 119) \
+	_(PAGEDOWN, 121) \
+	_(LEFT, 123) _(RIGHT, 124) _(DOWN, 125) _(UP, 126)
+
 #ifdef __OBJC__
 #define _KEY(sym,val) sym
 #else
@@ -233,6 +281,14 @@ enum LDialogIds
 // Keys
 enum LVirtualKeys
 {
+	#define _(k, v) LK_ ##k = v,
+	MacKeyDef()
+	#undef _
+	
+	LK_RETURN = LK_ENTER,
+	LK_APPS = 0x1000,
+	
+	/*
 	LK_TAB = '\t',
 	LK_RETURN = '\r',
 	LK_ESCAPE = 27,
@@ -266,9 +322,12 @@ enum LVirtualKeys
 	LK_APPS,
 	LK_ENTER,
 	LK_SHIFT,
+	*/
 };
 
 #undef _KEY
+
+LgiFunc const char *LVirtualKeyToString(LVirtualKeys c);
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs
