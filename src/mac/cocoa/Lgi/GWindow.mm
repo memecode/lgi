@@ -626,9 +626,11 @@ bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 			for (int i=0; i<GPopup::CurrentPopups.Length(); i++)
 			{
 				GPopup *pu = GPopup::CurrentPopups[i];
-				printf("Hiding popup %s\n", pu->GetClass());
 				if (pu->Visible())
+				{
+					printf("Hiding popup %s\n", pu->GetClass());
 					pu->Visible(false);
+				}
 			}
 		}
 		

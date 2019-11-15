@@ -19,6 +19,8 @@ public:
 		GRect r(0, 0, 120, Ly + 4);
 		SetPos(r);
 	}
+	
+	const char *GetClass() { return "GColourSelectPopup"; }
 
 	void OnPaint(GSurface *pDC)
 	{

@@ -584,6 +584,19 @@ GPopup::~GPopup()
 	CurrentPopups.Delete(this);
 	SendNotify(POPUP_DELETE);
 
+	#if LGI_COCOA
+	if (Panel)
+	{
+		LCocoaView *cv = objc_dynamic_cast(LCocoaView, Panel.p.contentView);
+		if (cv)
+		{
+			cv.w = NULL;
+			Panel.p.contentView = NULL;
+			[cv release];
+		}
+	}
+	#endif
+
 	if (Owner)
 	{
 		#ifndef WIN32
