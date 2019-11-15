@@ -1310,7 +1310,7 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 		return false;
 
 	int64 Type = c->GetInt(FIELD_CAL_TYPE);
-	auto *TimeZone = c->GetStr(FIELD_CAL_TIMEZONE);
+	// auto *TimeZone = c->GetStr(FIELD_CAL_TIMEZONE);
 	char *TypeStr = Type == 1 ? (char*)"VTODO" : (char*)"VEVENT";
 
 	o->Push((char*)"BEGIN:VCALENDAR\r\n"

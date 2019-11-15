@@ -134,6 +134,7 @@ GSurface *GClipBoard::Bitmap()
 // This is a custom type to wrap binary data.
 NSString *const LBinaryDataPBoardType = @"com.memecode.lgi";
 
+#if 0
 static void _dump(const char *verb, uchar *ptr, uint64_t len)
 {
 	printf("%s " LPrintfInt64 " bytes:\n", verb, len);
@@ -144,6 +145,7 @@ static void _dump(const char *verb, uchar *ptr, uint64_t len)
 	}
 	printf("\n");
 }
+#endif
 
 #define LBinaryData_Magic 'lgid'
 struct LBinaryData_Hdr
@@ -194,7 +196,7 @@ struct LBinaryData_Hdr
 }
 
 // Any of these parameters can be non-NULL if the caller doesn't care about them
-- (bool)getData:(GString*)Format data:(GAutoPtr<uint8,true>*)Ptr len:(ssize_t*)Len
+- (bool)getData:(GString*)Format data:(GAutoPtr<uint8,true>*)Ptr len:(ssize_t*)Len var:(GVariant*)Var
 {
 	if (!self.data)
 	{
@@ -235,6 +237,20 @@ struct LBinaryData_Hdr
 		[self.data getBytes:Ptr->Get() range:r];
 
 		// _dump("Receiving", Ptr.Get(), h->DataLen);
+	}
+	else if (Var)
+	{
+		Var->Empty();
+		Var->Type = GV_BINARY;
+		Var->Value.Binary.Length = h->DataLen;
+		if ((Var->Value.Binary.Data = new char[h->DataLen]))
+		{
+			NSRange r;
+			r.location = sizeof(LBinaryData_Hdr) + h->FormatLen;
+			r.length = h->DataLen;
+			[self.data getBytes:Var->Value.Binary.Data range:r];
+		}
+		else return false;
 	}
 
 	return true;
@@ -298,7 +314,7 @@ bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8,true> &Ptr, ssize_t *L
 		return false;
 	}
 	
-	auto Status = [data getData:NULL data:&Ptr len:Len];
+	auto Status = [data getData:NULL data:&Ptr len:Len var:NULL];
 	[data release];
 
 	return Status;

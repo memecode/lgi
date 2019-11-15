@@ -201,17 +201,30 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 			GVariant &v = dd.Data[0];
 			switch (v.Type)
 			{
-				// case GV_STRING:
+				case GV_STRING:
+				{
+					NSData *s = [[NSData alloc] initWithBytes:v.Value.String length:strlen(v.Value.String)];
+					auto r = [pboard setData:s forType:dd.Format.NsStr()];
+					if (!r)
+						printf("%s:%i - setData failed.\n", _FL);
+					else
+						printf("Adding string '%s' to drag...\n", dd.Format.Get());
+					break;
+				}
 				case GV_BINARY:
 				{
-					auto data = [[LBinaryData alloc] init:"binary" ptr:(uchar*)v.Value.Binary.Data len:v.Value.Binary.Length];
+					auto data = [[LBinaryData alloc] init:dd.Format ptr:(uchar*)v.Value.Binary.Data len:v.Value.Binary.Length];
 					NSArray *array = [NSArray arrayWithObject:data];
 					[pboard writeObjects:array];
+					
+					printf("Adding binary '%s' to drag...\n", dd.Format.Get());
 					break;
 				}
 				default:
-					printf("%s:%i - Unsupported type.\n", _FL);
+				{
+					printf("%s:%i - Unsupported type '%s' for format '%s'.\n", _FL, GVariant::TypeToString(v.Type), dd.Format.Get());
 					break;
+				}
 			}
 		}
 		else printf("%s:%i - Impl multiple data handling for %s.\n", _FL, dd.Format.Get());
@@ -387,7 +400,7 @@ struct DragParams
 										}
 										else LgiAssert(!"Wrong pointer size");
 									}
-									else if (!_stricmp(DropFormat, "public.file-url"))
+									else if (!_stricmp(DropFormat, LGI_FileDropFormat))
 									{
 										GUri u((char*) Cp);
 										Boolean ret = false;

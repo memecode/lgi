@@ -569,7 +569,7 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param A, GMessage::Param B
 	auto v = w->Handle();
 	if (!v)
 	{
-		printf("%s:%i - No handle.\n", _FL);
+		// printf("%s:%i - No handle.\n", _FL);
 		return false;
 	}
 

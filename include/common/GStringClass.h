@@ -1209,6 +1209,18 @@ public:
 			return [[NSString alloc] initWithBytes:Str->Str length:Str->Len encoding:NSUTF8StringEncoding];
 		return nil;
 	}
+	
+	bool operator=(NSString *const s)
+	{
+		*this = [s UTF8String];
+		return !IsEmpty();
+	}
+
+	GString(NSString *const s)
+	{
+		Str = NULL;
+		*this = [s UTF8String];
+	}
 	#endif
 	
 	#endif

@@ -10,6 +10,7 @@
 #import <Foundation/Foundation.h>
 #import "LCocoaView.h"
 #include "GEventTargetThread.h"
+#include "GClipBoard.h"
 
 #define Check() if (!self.w) return
 static int LCocoaView_Count = 0;
@@ -85,7 +86,11 @@ struct DndEvent
 		if (pb.types)
 		{
 			for (id type in pb.types)
-				InputFmts.Add(NewStr([type UTF8String]));
+			{
+				auto s = NewStr([type UTF8String]);
+				InputFmts.Add(s);
+				printf("Drop has type '%s'\n", s);
+			}
 		}
 	}
 	
@@ -476,6 +481,35 @@ GKey KeyEvent(NSEvent *ev)
 	[msg release];
 }
 
+void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
+{
+	e.AcceptedFmts.DeleteArrays();
+	GString LgiFmt = LBinaryDataPBoardType;
+	for (auto f: e.InputFmts)
+	{
+		if (LgiFmt.Equals(f))
+		{
+			NSString *nsFmt = LgiFmt.NsStr();
+			NSData *d = [sender.draggingPasteboard dataForType:nsFmt];
+			LBinaryData *bin = [[LBinaryData alloc] init:d];
+			if (bin)
+			{
+				GString realFmt;
+				[bin getData:&realFmt data:NULL len:NULL var:NULL];
+				[bin release];
+				
+				if (realFmt)
+					e.AcceptedFmts.Add(NewStr(realFmt));
+			}
+			[nsFmt release];
+		}
+		else
+		{
+			e.AcceptedFmts.Add(NewStr(f));
+		}
+	}
+}
+
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
 {
 	DeleteObj(self->dnd);
@@ -486,9 +520,7 @@ GKey KeyEvent(NSEvent *ev)
 	if (!e.target)
 		return NSDragOperationNone;
 
-	e.AcceptedFmts.DeleteArrays();
-	for (auto f: e.InputFmts)
-		e.AcceptedFmts.Add(NewStr(f));
+	UpdateAccepted(e, sender);
 	
 	e.result = e.target->WillAccept(e.AcceptedFmts, e.Pt, e.Keys);
 	auto ret = LgiToCocoaDragOp(e.result);
@@ -506,14 +538,12 @@ GKey KeyEvent(NSEvent *ev)
 	if (!e.target)
 		return NSDragOperationNone;
 
-	e.AcceptedFmts.DeleteArrays();
-	for (auto f: e.InputFmts)
-		e.AcceptedFmts.Add(NewStr(f));
+	UpdateAccepted(e, sender);
 
 	e.result = e.target->WillAccept(e.AcceptedFmts, e.Pt, e.Keys);
 	auto ret = LgiToCocoaDragOp(self->dnd->result);
 	
-	printf("draggingUpdated pt=%i,%i len=%i ret=%i\n", e.Pt.x, e.Pt.y, (int)e.AcceptedFmts.Length(), (int)ret);
+	// printf("draggingUpdated pt=%i,%i len=%i ret=%i\n", e.Pt.x, e.Pt.y, (int)e.AcceptedFmts.Length(), (int)ret);
 	return ret;
 }
 
@@ -550,10 +580,44 @@ GKey KeyEvent(NSEvent *ev)
 	{
 		auto &dd = Data.New();
 		dd.Format = f;
+		printf("Got drop format '%s'..\n", dd.Format.Get());
+
 		NSString *NsFmt = dd.Format.NsStr();
 		NSData *d = [pb dataForType:NsFmt];
 		if (d)
+		{
+			// System type...
 			dd.Data[0].SetBinary(d.length, (void*)d.bytes);
+		}
+		else
+		{
+			// Lgi type?
+			NSArray<NSPasteboardItem *> *all = [pb pasteboardItems];
+			for (id i in all)
+			{
+				NSData *data = [i dataForType:LBinaryDataPBoardType];
+				if (data)
+				{
+					LBinaryData *bin = [[LBinaryData alloc] init:data];
+					if (bin)
+					{
+						GString realFmt;
+						if ([bin getData:&realFmt data:NULL len:NULL var:NULL])
+						{
+							if (realFmt == dd.Format)
+							{
+								[bin getData:NULL data:NULL len:NULL var:&dd.Data[0]];
+								break;
+							}
+						}
+						
+						[bin release];
+					}
+				}
+				if (dd.Data.Length())
+					break;
+			}
+		}
 		
 		[NsFmt release];
 	}

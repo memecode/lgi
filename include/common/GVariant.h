@@ -22,7 +22,8 @@ class GCompiledCode;
 	#define GVARIANT_SSIZET	1
 #endif
 
-/// The different types the varient can be 
+/// The different types the varient can be.
+/// \sa GVariant::TypeToString to convert to string.
 enum GVariantType
 {
 	// Main types

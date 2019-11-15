@@ -72,7 +72,7 @@ public:
 
 	- (id)init:(GString)format ptr:(uchar*)ptr len:(ssize_t)Len;
 	- (id)init:(NSData*)data;
-	- (bool)getData:(GString*)format data:(GAutoPtr<uint8,true>*)Ptr len:(ssize_t*)Len;
+	- (bool)getData:(GString*)format data:(GAutoPtr<uint8,true>*)Ptr len:(ssize_t*)Len var:(GVariant*)var;
 
 	// Writer
 	- (nullable id)pasteboardPropertyListForType:(NSString *)type;
