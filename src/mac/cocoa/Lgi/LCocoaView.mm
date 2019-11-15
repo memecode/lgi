@@ -410,7 +410,7 @@ GKey KeyEvent(NSEvent *ev)
 	k.c16 = u32;
 	k.vkey = ev.keyCode;
 	
-	printf("MacKeyToStr %i/%s/%i -> %s\n", u32, s.Get(), k.vkey, LVirtualKeyToString((LVirtualKeys)k.vkey));
+	// printf("MacKeyToStr %i/%s/%i -> %s\n", u32, s.Get(), k.vkey, LVirtualKeyToString((LVirtualKeys)k.vkey));
 	switch (ev.keyCode)
 	{
 		case LK_KEYPADENTER:

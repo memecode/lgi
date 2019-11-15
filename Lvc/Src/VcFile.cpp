@@ -212,6 +212,7 @@ bool ConvertEol(const char *Path, bool Cr)
 	if (Cr)
 		s = s.Replace("\n", "\r\n");
 	f.SetSize(0);
+	f.SetPos(0);
 	return f.Write(s) == s.Length();
 }
 
