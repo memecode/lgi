@@ -593,21 +593,19 @@ GXmlTag *GApp::GetConfig(const char *Tag)
 	if (IsOk() && !d->Config)
 	{
 		const char File[] = "lgi.conf";
+		auto ExePath = LGetExePath();
 		char Path[MAX_PATH];
-		if (LgiGetExePath(Path, sizeof(Path)))
+		LgiMakePath(Path, sizeof(Path), ExePath, File);
+		if (FileExists(Path))
 		{
-			LgiMakePath(Path, sizeof(Path), Path, File);
-			if (FileExists(Path))
+			d->Config = new GXmlTag("Config");
+			if (d->Config)
 			{
-				d->Config = new GXmlTag("Config");
-				if (d->Config)
+				GFile f;
+				if (f.Open(Path, O_READ))
 				{
-					GFile f;
-					if (f.Open(Path, O_READ))
-					{
-						GXmlTree t;
-						t.Read(d->Config, &f, 0);
-					}
+					GXmlTree t;
+					t.Read(d->Config, &f, 0);
 				}
 			}
 		}

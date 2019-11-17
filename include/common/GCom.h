@@ -268,10 +268,10 @@ public:
 class GStreamWrap : public GUnknownImpl<IStream>
 {
 	bool Own;
-	GStream *s;
+	GStreamI *s;
 
 public:
-	GStreamWrap(GStream *src, bool own = true)
+	GStreamWrap(GStreamI *src, bool own = true)
 	{
 		s = src;
 		Own = own;

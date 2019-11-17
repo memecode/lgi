@@ -2379,7 +2379,6 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 {
 	if (GTreeItem::Select())
 		Select(true);
-	
 
 	CommitListDirty = Result == 0;
 	CurrentCommit.Empty();
@@ -2476,6 +2475,8 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 		}
 	}
 
+	if (Result == 0)
+		Color(GColour::Green);
 	return true;
 }
 
