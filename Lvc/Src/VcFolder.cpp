@@ -2638,8 +2638,6 @@ bool VcFolder::ParsePush(int Result, GString s, ParseParams *Params)
 	}
 	else
 	{
-		ClearError();
-
 		switch (GetType())
 		{
 			case VcGit:
@@ -2651,8 +2649,8 @@ bool VcFolder::ParsePush(int Result, GString s, ParseParams *Params)
 		}
 
 		Unpushed = 0;
-		Update();
 		Color(GColour::Green);
+		Update();
 		Status = true;
 	}
 
@@ -2701,10 +2699,35 @@ bool VcFolder::ParsePull(int Result, GString s, ParseParams *Params)
 	switch (GetType())
 	{
 		case VcGit:
-		case VcHg:
 		{
 			// Git does a merge by default, so the current commit changes...
 			CurrentCommit.Empty();
+			break;
+		}
+		case VcHg:
+		{
+			CurrentCommit.Empty();
+
+			auto Lines = s.SplitDelimit("\n");
+			bool HasUpdates = false;
+			for (auto Ln: Lines)
+			{
+				if (Ln.Find("files updated") < 0)
+					continue;
+
+				auto Parts = Ln.Split(",");
+				for (auto p: Parts)
+				{
+					auto n = p.Strip().Split(" ", 1);
+					if (n.Length() == 2)
+					{
+						if (n[0].Int() > 0)
+							HasUpdates = true;
+					}
+				}
+			}
+			if (HasUpdates)
+				Color(GColour::Green);
 			break;
 		}
 		case VcSvn:
