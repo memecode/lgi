@@ -211,16 +211,6 @@ LgiFunc char *LgiEncodeUri
 #if LGI_COCOA || defined(__GTK_H__)
 	LgiExtern GString LgiArgsAppPath;
 #endif
-	
-/// Gets the path and file name of the currently running executable
-/// \ingroup Base
-/// \deprecated Use 'LGetExeFile'
-LgiFunc bool DEPRECATED(LgiGetExeFile(char *Dst, int DstSize));
-
-/// Gets the path of the currently running executable
-/// \ingroup Base
-/// \deprecated Use 'LGetExePath'
-LgiFunc bool DEPRECATED(LgiGetExePath(char *Dst, int DstSize));
 
 /// Gets the path of the temporary file directory
 /// \ingroup Base

@@ -1678,85 +1678,31 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 
 GString LGetExeFile()
 {
-	char s[MAX_PATH];
-	if (LgiGetExeFile(s, sizeof(s)))
-		return s;
-	return GString();
-}
+	#if defined WIN32
 
-bool LgiGetExeFile(char *Dst, int DstSize)
-{
-	if (Dst)
-	{
-		#if defined WIN32
-
-		if (LgiGetOs() == LGI_OS_WIN9X)
+		char16 Exe[MAX_PATH];
+		if (GetModuleFileNameW(NULL, Exe, CountOf(Exe)) > 0)
 		{
-			char16 Exe[256];
-			if (GetModuleFileNameW(NULL, Exe, CountOf(Exe)) > 0)
+			GString e = Exe;
+			if (e)
 			{
-				GString e = Exe;
-				if (e)
-				{
-					strcpy_s(Dst, DstSize, e.Lower());
-					return true;
-				}
-				else
-				{
-					LgiMsg(0, "LgiFromNativeCp returned 0, ANSI CodePage=%i (%s)", "LgiGetExeFile Error", MB_OK, GetACP(), LgiAnsiToLgiCp());
-				}
+				return e;
 			}
-
-			GString m;
-			m.Printf("GetModuleFileName failed err: %08.8X", GetLastError());
-			MessageBoxA(0, m, "LgiGetExeFile Error", MB_OK);
-			LgiExitApp();
-		}
-		else
-		{
-			char16 Exe[256];
-			if (GetModuleFileNameW(NULL, Exe, sizeof(Exe)) > 0)
+			else
 			{
-				char *e = WideToUtf8(Exe);
-				if (e)
-				{
-					strcpy_s(Dst, DstSize, e);
-					DeleteArray(e);
-					return true;
-				}
+				LgiMsg(0, "LgiFromNativeCp returned 0, ANSI CodePage=%i (%s)", "LgiGetExeFile Error", MB_OK, GetACP(), LgiAnsiToLgiCp());
+				return GString();
 			}
 		}
 
-		#elif defined BEOS
+		GString m;
+		m.Printf("GetModuleFileName failed err: %08.8X", GetLastError());
+		MessageBoxA(0, m, "LgiGetExeFile Error", MB_OK);
+		LgiExitApp();
 
-		app_info Info;
-		if (LgiApp->GetAppInfo(&Info) == B_OK)
-		{
-			BEntry e(&Info.ref);
-			BPath p;
-			if (e.GetPath(&p) == B_OK)
-			{
-				strcpy_s(Dst, DstSize, p.Path());
-				return true;
-			}
-		}
+	#elif defined LINUX
 
-		#elif defined ATHEOS
-
-		os::Directory AppPath;
-		if (AppPath.SetTo("^/.") == 0)
-		{
-			std::string p;
-			if (AppPath.GetPath(&p) == 0)
-			{
-				sprintf_s(Dst, DstSize, "%s%s%s", p.c_str(), DIR_STR, LgiApp->_AppFile);
-				return true;
-			}
-		}
-
-		#elif defined LINUX
-
-		static char ExePathCache[256] = "";
+		static char ExePathCache[MAX_PATH] = "";
 		bool Status = false;
 
 		// this is _REALLY_ lame way to do it... but hey there aren't any
@@ -1855,60 +1801,50 @@ bool LgiGetExeFile(char *Dst, int DstSize)
 		}
 		
 		return Status;
-		
-		#elif defined MAC
-		
-			bool Status = false;
-		
-			#if LGI_COCOA || defined __GTK_H__
+	
+	#elif defined MAC
+	
+		#if LGI_COCOA || defined __GTK_H__
 
-			if (FileExists(LgiArgsAppPath))
+		char Dest[MAX_PATH];
+		if (FileExists(LgiArgsAppPath))
+		{
+			LgiMakePath(Dest, sizeof(Dest), LgiArgsAppPath, "../../..");
+			return Dest;
+		}
+		else LgiTrace("%s:%i - No executable path.");
+	
+		#else
+	
+		ProcessSerialNumber ps;
+		OSErr e = GetCurrentProcess(&ps);
+		if (!e)
+		{
+			FSRef fs;
+			OSStatus s = GetProcessBundleLocation(&ps, &fs);
+			if (!s)
 			{
-				LgiMakePath(Dst, DstSize, LgiArgsAppPath, "../../..");
-				Status = true;
-			}
-			else LgiTrace("%s:%i - No executable path.");
-		
-			#else
-		
-			ProcessSerialNumber ps;
-			OSErr e = GetCurrentProcess(&ps);
-			if (!e)
-			{
-				FSRef fs;
-				OSStatus s = GetProcessBundleLocation(&ps, &fs);
-				if (!s)
+				GAutoString u = FSRefPath(fs);
+				if (!e)
 				{
-					GAutoString u = FSRefPath(fs);
-					if (!e)
-					{
-						strcpy_s(Dst, DstSize, u);
-						Status = true;
-					}
-					else printf("%s:%i - FSGetCatalogInfo failed (e=%i).\n", _FL, e);
+					return GString(u);
 				}
-				else printf("%s:%i - GetProcessBundleLocation failed (e=%i).\n", _FL, (int)s);
+				else printf("%s:%i - FSGetCatalogInfo failed (e=%i).\n", _FL, e);
 			}
-			else printf("%s:%i - GetCurrentProcess failed (e=%i).\n", _FL, e);
-		
-			#endif
-			
-			return Status;
-		
+			else printf("%s:%i - GetProcessBundleLocation failed (e=%i).\n", _FL, (int)s);
+		}
+		else printf("%s:%i - GetCurrentProcess failed (e=%i).\n", _FL, e);
+	
 		#endif
-	}
+		
+	#endif
 
-	return false;
+	return GString();
 }
 
 GString LGetExePath()
 {
 	return LGetSystemPath(LSP_EXE);
-}
-
-bool LgiGetExePath(char *Dst, int DstSize)
-{
-	return LGetSystemPath(LSP_EXE, Dst, DstSize);
 }
 
 char *LgiGetExtension(const char *File)

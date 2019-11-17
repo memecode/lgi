@@ -252,7 +252,7 @@ public:
 		/// Valid when Type == #GV_STREAM
 		struct
 		{
-			class GStream *Ptr;
+			class GStreamI *Ptr;
 			bool Own;
 		} Stream;
 		/// Valid when Type == #GV_GVIEW
@@ -344,7 +344,7 @@ public:
 	/// Set the value to a surface
 	bool SetSurface(class GSurface *Ptr, bool Own);
 	/// Set the value to a stream
-	bool SetStream(class GStream *Ptr, bool Own);
+	bool SetStream(class GStreamI *Ptr, bool Own);
 
 	/// Returns the string if valid (will convert a GV_WSTRING to utf)
 	char *Str();

@@ -1526,41 +1526,51 @@ bool GView::DropTarget(bool t)
 
 		#if LGI_COCOA
 
-		GWindow *w = GetWindow();
-		if (w)
-		{
-			OsWindow h = w->WindowHandle();
-			if (h)
-				[h.p.contentView registerForDraggedTypes:@[(NSString*)kUTTypeItem]];
-		}
+			GWindow *w = GetWindow();
+			if (w)
+			{
+				OsWindow h = w->WindowHandle();
+				if (h)
+				{
+					NSMutableArray<NSString*> *a = [[NSMutableArray<NSString*> alloc] init];
+					
+					[a addObject:(NSString*)kUTTypeItem];
+					for (id item in NSFilePromiseReceiver.readableDraggedTypes)
+						[a addObject:item];
+					
+					[h.p.contentView registerForDraggedTypes:a];
+				}
+			}
 
 		#elif LGI_CARBON
-		if (t)
-		{
-			static EventTypeSpec DragEvents[] =
+	
+			if (t)
 			{
-				{ kEventClassControl, kEventControlDragEnter },
-				{ kEventClassControl, kEventControlDragWithin },
-				{ kEventClassControl, kEventControlDragLeave },
-				{ kEventClassControl, kEventControlDragReceive },
-			};
-			
-			if (!d->DndHandler)
-			{
-				OSStatus e = ::InstallControlEventHandler(	_View,
-															NewEventHandlerUPP(LgiViewDndHandler),
-															GetEventTypeCount(DragEvents),
-															DragEvents,
-															(void*)this,
-															&d->DndHandler);
-				if (e) LgiTrace("%s:%i - InstallEventHandler failed (%i)\n", _FL, e);
+				static EventTypeSpec DragEvents[] =
+				{
+					{ kEventClassControl, kEventControlDragEnter },
+					{ kEventClassControl, kEventControlDragWithin },
+					{ kEventClassControl, kEventControlDragLeave },
+					{ kEventClassControl, kEventControlDragReceive },
+				};
+				
+				if (!d->DndHandler)
+				{
+					OSStatus e = ::InstallControlEventHandler(	_View,
+																NewEventHandlerUPP(LgiViewDndHandler),
+																GetEventTypeCount(DragEvents),
+																DragEvents,
+																(void*)this,
+																&d->DndHandler);
+					if (e) LgiTrace("%s:%i - InstallEventHandler failed (%i)\n", _FL, e);
+				}
+				SetControlDragTrackingEnabled(_View, true);
 			}
-			SetControlDragTrackingEnabled(_View, true);
-		}
-		else
-		{
-			SetControlDragTrackingEnabled(_View, false);
-		}
+			else
+			{
+				SetControlDragTrackingEnabled(_View, false);
+			}
+	
 		#endif
 
 	#elif defined __GTK_H__

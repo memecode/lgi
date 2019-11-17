@@ -213,11 +213,17 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 				}
 				case GV_BINARY:
 				{
+					// Lgi specific type for moving binary data around...
 					auto data = [[LBinaryData alloc] init:dd.Format ptr:(uchar*)v.Value.Binary.Data len:v.Value.Binary.Length];
 					NSArray *array = [NSArray arrayWithObject:data];
 					[pboard writeObjects:array];
 					
 					printf("Adding binary '%s' to drag...\n", dd.Format.Get());
+					break;
+				}
+				case GV_STREAM:
+				{
+					// File promises...
 					break;
 				}
 				default:
@@ -486,6 +492,7 @@ void GDragDropTarget::SetWindow(GView *to)
 		Status = To->DropTarget(true);
 		if (To->WindowHandle())
 		{
+		
 			OnDragInit(Status);
 		}
 		else
@@ -494,99 +501,3 @@ void GDragDropTarget::SetWindow(GView *to)
 		}
 	}
 }
-
-#if 0
-int GDragDropTarget::OnDrop(GArray<GDragData> &DropData,
-							GdcPt2 Pt,
-							int KeyState)
-{
-	if (DropData.Length() == 0 ||
-		DropData[0].Data.Length() == 0)
-		return DROPEFFECT_NONE;
-	
-	char *Fmt = DropData[0].Format;
-	GVariant *Var = &DropData[0].Data[0];
-	return OnDrop(Fmt, Var, Pt, KeyState);
-}
-
-OSStatus GDragDropTarget::OnDragWithin(GView *v, DragRef Drag)
-{
-	GDragDropTarget *Target = this;
-	GAutoPtr<DragParams> param(new DragParams(v, Drag, NULL));
-
-	// Call the handler
-	int Accept = Target->WillAccept(param->Formats, param->Pt, param->KeyState);
-	for (GViewI *p = v->GetParent(); param && !Accept && p; p = p->GetParent())
-	{
-		GDragDropTarget *pt = p->DropTarget();
-		if (pt)
-		{
-			param.Reset(new DragParams(p, Drag, NULL));
-			Accept = pt->WillAccept(param->Formats, param->Pt, param->KeyState);
-			if (Accept)
-			{
-				v = p->GetGView();
-				Target = pt;
-				break;
-			}
-		}
-	}
-	if (Accept)
-	{
-		v->d->AcceptedDropFormat.Reset(NewStr(param->Formats.First()));
-		LgiAssert(v->d->AcceptedDropFormat.Get());
-	}
-
-	#if 0
-	printf("kEventControlDragWithin %ix%i accept=%i class=%s (",
-		param->Pt.x, param->Pt.y,
-		Accept,
-		v->GetClass());
-	for (char *f = param->Formats.First(); f; f = param->Formats.Next())
-		printf("%s ", f);
-	printf(")\n");
-	#endif
-
-	SetDragDropAction(Drag, param->Map(Accept));
-
-	return noErr;
-}
-
-OSStatus GDragDropTarget::OnDragReceive(GView *v, DragRef Drag)
-{
-	int Accept = 0;
-	GView *DropView = NULL;
-	for (GView *p = v; p; p = p->GetParent() ? p->GetParent()->GetGView() : NULL)
-	{
-		if (p->d->AcceptedDropFormat)
-		{
-			DropView = p;
-			break;
-		}
-	}
-	if (DropView &&
-		DropView->d->AcceptedDropFormat)
-	{
-		GDragDropTarget *pt = DropView->DropTarget();
-		if (pt)
-		{
-			DragParams p(DropView, Drag, DropView->d->AcceptedDropFormat);
-			int Accept = pt->OnDrop(p.Data,
-									p.Pt,
-									p.KeyState);
-			SetDragDropAction(Drag, p.Map(Accept));
-		}
-	}
-	else
-	{
-		printf("%s:%i - No accepted drop format. (view=%s, DropView=%p)\n",
-			_FL,
-			v->GetClass(),
-			DropView);
-		SetDragDropAction(Drag, kDragActionNothing);
-	}
-	
-	return noErr;
-}
-#endif
-

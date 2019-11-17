@@ -738,7 +738,7 @@ bool GVariant::SetSurface(class GSurface *Ptr, bool Own)
     return true;
 }
 
-bool GVariant::SetStream(class GStream *Ptr, bool Own)
+bool GVariant::SetStream(class GStreamI *Ptr, bool Own)
 {
     Empty();
     if (!Ptr)
@@ -1177,7 +1177,7 @@ GDom *GVariant::CastDom()
 		case GV_DOMREF:
 			return Value.DomRef.Dom;
 		case GV_STREAM:
-			return Value.Stream.Ptr;
+			return dynamic_cast<GDom*>(Value.Stream.Ptr);
 		case GV_GSURFACE:
 			return Value.Surface.Ptr;
 		case GV_CUSTOM:
