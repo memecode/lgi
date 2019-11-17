@@ -21,8 +21,8 @@ class GDocAppPrivate
 public:
 	// Data
 	GWindow				*App;
-	GAutoString			OptionsFile;
-	GAutoString			OptionsParam;
+	GString				OptionsFile;
+	GString				OptionsParam;
 	char				*AppName;
 	GString				CurFile;
 	bool				Dirty;
@@ -31,7 +31,7 @@ public:
 	GDocAppPrivate(GWindow *app, char *param)
 	{
 		App = app;
-		OptionsParam.Reset(NewStr(param));
+		OptionsParam = param;
 		AppName = 0;
 		Dirty = 0;
 		Mode = InstallPortable;
@@ -43,43 +43,38 @@ public:
 		DeleteArray(AppName);
 	}
 	
-	GAutoString GetOptionsFile(const char *Ext)
+	GString GetOptionsFile(const char *Ext)
 	{
 		// Get options file
-		GAutoString Status;
-		char Buf[MAX_PATH];
-		if (LgiApp->GetOption("o", Buf, sizeof(Buf)))
+		GString Status;
+		char Opt[MAX_PATH];
+		if (LgiApp->GetOption("o", Opt, sizeof(Opt)))
 		{
-			if (FileExists(Buf))
-			{
-				Status.Reset(NewStr(Buf));
-			}
+			if (FileExists(Opt))
+				Status = Opt;
 		}
 
 		if (!Status)
 		{
-			LgiGetExeFile(Buf, sizeof(Buf));
-				
-			char *File = strrchr(Buf, DIR_CHAR);
+			auto Exe = LGetExeFile();				
+			char *File = strrchr(Exe, DIR_CHAR);
 			if (File)
 			{
 				File++;
+
+				Status = File;
 				#ifdef WIN32
-				char *End = strrchr(File, '.');
-				if (End)
+				auto Dot = Status.RFind(".");
+				if (Dot >= 0)
 				{
-					End++;
-					strcpy_s(End, Buf + sizeof(Buf) - End, Ext);
+					Status = Status(0, Dot+1) + Ext;
 				}
 				else
 				#endif
 				{
 					// unix apps have no '.' in their name
-					size_t Len = strlen(File);
-					sprintf_s(File + Len, Buf + sizeof(Buf) - (File + Len), ".%s", Ext);
+					Status += GString(".") + Ext;
 				}
-				
-				GAutoString BaseName(NewStr(File));
 				
 				char p[MAX_PATH];
 				if (Mode == InstallPortable)
@@ -94,8 +89,9 @@ public:
 						FileDev->CreateFolder(p);
 					}
 				}
-				LgiMakePath(p, sizeof(p), p, BaseName);
-				Status.Reset(NewStr(p));
+
+				LgiMakePath(p, sizeof(p), p, Status);
+				Status = p;
 			}
 		}
 
@@ -236,7 +232,7 @@ GDocApp<OptionsFmt>::GDocApp(const char *appname, const TCHAR *icon, char *optsn
 				c->Class.hIcon = LoadIcon(LgiProcessInst(), wIcon);
 			}
 			#else
-			c->Class.hIcon = LoadIcon(LgiProcessInst(), ((NativeInt)icon&0xffff0000)?icon:MAKEINTRESOURCE(icon));
+			c->Class.hIcon = LoadIcon(LgiProcessInst(), (size_t)icon & (~0xffff) ? icon : MAKEINTRESOURCE((size_t)icon));
 			#endif
 		}
 		#else
