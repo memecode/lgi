@@ -839,16 +839,6 @@ bool VcFolder::GetBranches(ParseParams *Params)
 bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 {
 	/*
-	GFile f("C:\\Users\\matthew\\Code\\Lgi\\trunk\\rev-list.txt", O_WRITE);
-	if (f.IsOpen())
-	{
-		f.SetSize(0);
-		f.Write(s);
-		f.Close();
-	}
-	*/
-
-	/*
 	LHashTbl<StrKey<char>, int> Map(0, -1);
 	for (unsigned i=0; i<Log.Length(); i++)
 		Map.Add(Log[i]->GetRev(), i);
