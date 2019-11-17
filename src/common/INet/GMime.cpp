@@ -1154,7 +1154,9 @@ int GMime::GMimeText::GMimeDecode::Parse(GStringPipe *Source, ParentState *State
 		Mime->Empty();
 
 		if (!Mime->CreateTempData())
+		{
 			LgiAssert(!"CreateTempData failed.");
+		}
 		else
 		{
 			// Read the headers..

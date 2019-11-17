@@ -33,7 +33,9 @@ GMemStream::GMemStream(GStreamI *Src, int64 Start, int64 len)
 				Error = true;
 		}
 		if (Error)
+		{
 			LgiAssert(!"Failed to set stream position");
+		}
 		else
 		{
 			if (len < 0 && Src->GetSize() > 0)
