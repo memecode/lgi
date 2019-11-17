@@ -2450,6 +2450,7 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 			{
 				Unpushed = 0;
 				Update();
+				Color(GColour::Green);
 			}
 			break;
 		}
@@ -2465,6 +2466,8 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 
 				if (Params && Params->Str.Find("Push") >= 0)
 					Push();
+				else
+					Color(GColour::Green);
 			}
 			break;
 		}
@@ -2475,8 +2478,6 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 		}
 	}
 
-	if (Result == 0)
-		Color(GColour::Green);
 	return true;
 }
 
@@ -2651,6 +2652,7 @@ bool VcFolder::ParsePush(int Result, GString s, ParseParams *Params)
 
 		Unpushed = 0;
 		Update();
+		Color(GColour::Green);
 		Status = true;
 	}
 
