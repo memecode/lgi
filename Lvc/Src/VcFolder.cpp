@@ -2722,6 +2722,8 @@ bool VcFolder::ParsePull(int Result, GString s, ParseParams *Params)
 			}
 			if (HasUpdates)
 				Color(GColour::Green);
+			else
+				Color(GCss::ColorInherit);
 			break;
 		}
 		case VcSvn:
