@@ -967,6 +967,50 @@ bool EvalRule(LDateTime &out, VIo::TimeZoneSection &tz, int yr)
 	return true;
 }
 
+struct LAlarm
+{
+	/* e.g.	BEGIN:VALARM
+			ACTION:EMAIL
+			DESCRIPTION:REMINDER
+			TRIGGER:-PT10M
+			X-PARAM:SomeParam
+			END:VALARM */
+
+	GString Action, Desc, Trigger, Param;
+
+	GString GetStr()
+	{
+		// Fields are: Number, CalendarReminderUnits, CalendarReminderType, Param
+		CalendarReminderType Type = CalMaxType;
+		if (Action.Equals("DISPLAY")) Type = CalPopup;
+		else if (Action.Equals("EMAIL")) Type = CalEmail;
+		else if (Action.Equals("X-SCRIPT")) Type = CalScriptCallback;
+		else return NULL;
+
+		CalendarReminderUnits Units = CalMaxUnit;
+		char Last = Trigger.Strip()(-1);
+		if (ToUpper(Last) == 'M') Units = CalMinutes;
+		else if (ToUpper(Last) == 'H') Units = CalHours;
+		else if (ToUpper(Last) == 'D') Units = CalDays;
+
+		char Buf[64];
+		int ch = 0;
+		for (const char *c = Trigger; *c; c++)
+		{
+			if (IsDigit(*c) || *c == '-')
+				Buf[ch++] = *c;
+		}
+		Buf[ch] = 0;
+
+		if (!Trigger)
+			return NULL;
+
+		GString s;
+		s.Printf(LPrintfInt64 ",%i,%i,%s", -Atoi(Buf), (int)Units, (int)Type, Param?Param.Get():"");
+		return s;
+	}
+};
+
 bool VCal::Import(GDataPropI *c, GStreamI *In)
 {
 	bool Status = false;
@@ -979,6 +1023,7 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 
 	bool IsEvent = false;
 	bool IsTimeZone = false;
+	bool IsAlarm = false;
 	GString SectionType;
 	LDateTime EventStart, EventEnd;
 	
@@ -988,6 +1033,8 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 	bool IsNormalTz = false, IsDaylightTz = false;
 	LJson To;
 	int Attendee = 0;
+	GArray<LAlarm> Alarms;
+	int AlarmIdx = -1;
 
 	while (ReadField(*In, Field, &Params, Data))
 	{
@@ -1014,6 +1061,11 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 				IsNormalTz = true;
 			else if (!_stricmp(Data, "daylight"))
 				IsDaylightTz = true;
+			else if (!_stricmp(Data, "valarm"))
+			{
+				IsAlarm = true;
+				AlarmIdx++;
+			}
 		}
 		else if (_stricmp(Field, "end") == 0)
 		{
@@ -1036,10 +1088,24 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 				IsNormalTz = false;
 			else if (!_stricmp(Data, "daylight"))
 				IsDaylightTz = false;
+			else if (!_stricmp(Data, "valarm"))
+				IsAlarm = false;
 		}
 		else if (IsEvent)
 		{
-			if (IsVar(Field, "dtstart"))
+			if (IsAlarm)
+			{
+				auto &a = Alarms[AlarmIdx];
+				if (IsVar(Field, "ACTION"))
+					a.Action = Data;
+				else if (IsVar(Field, "DESCRIPTION"))
+					a.Desc = Data;
+				else if (IsVar(Field, "TRIGGER"))
+					a.Trigger = Data;
+				else if (IsVar(Field, "X-PARAM"))
+					a.Param = Data;
+			}
+			else if (IsVar(Field, "dtstart"))
 			{
 				ParseDate(EventStart, Data);
 				StartTz = Params.Find("TZID");
@@ -1105,41 +1171,6 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 					}
 
 					Attendee++;
-
-					/*
-					GString Guests = o->GetStr(FIELD_TO);
-					if (Guests)
-					{
-						GString::Array a = Guests.SplitDelimit(",");
-						for (unsigned i=0; i<a.Length(); i++)
-						{
-							GAutoPtr<ListAddr> la(new ListAddr(App));
-							if (la->Serialize(a[i], false))
-							{
-								d->Guests->Insert(la.Release());
-							}
-						}
-					}
-
-					GDataPropI *a = c->CreateAttendee();
-					if (a)
-					{
-						a->SetStr(FIELD_ATTENDEE_NAME, Name);
-						a->SetStr(FIELD_ATTENDEE_EMAIL, e);
-						if (_stricmp(Role, "CHAIR") == 0)
-						{
-							a->SetStr(FIELD_ATTENDEE_ATTENDENCE, 1);
-						}
-						else if (_stricmp(Role, "REQ-PARTICIPANT") == 0)
-						{
-							a->SetStr(FIELD_ATTENDEE_ATTENDENCE, 2);
-						}
-						else if (_stricmp(Role, "OPT-PARTICIPANT") == 0)
-						{
-							a->SetStr(FIELD_ATTENDEE_ATTENDENCE, 3);
-						}
-					}
-					*/
 				}
 			}
 		}
@@ -1290,6 +1321,20 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 	if (EventEnd.IsValid())
 		c->SetDate(FIELD_CAL_END_UTC, &EventEnd);
 
+	if (Alarms.Length())
+	{
+		GString::Array s;
+		for (LAlarm &a: Alarms)
+		{
+			GString r = a.GetStr();
+			if (r) s.Add(r);
+		}
+		if (s.Length())
+		{
+			c->SetStr(FIELD_CAL_REMINDERS, GString("\n").Join(s));
+		}
+	}
+
 	ClearFields();
 
 	return Status;
@@ -1381,32 +1426,53 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 			GStreamPrint(o, "DTEND:%s\r\n", ToString(dt).Get());
 		}
 
-		#ifdef _MSC_VER
-		#pragma message("FIXME: add export for reminder.")
-		#else
-		#warning "FIXME: add export for reminder."
-		#endif
-
-		/*
-		int64 AlarmAction;
-		int AlarmTime;
-		if ((AlarmAction = c->GetInt(FIELD_CAL_REMINDER_ACTION)) &&
-			AlarmAction &&
-			(AlarmTime = (int)c->GetInt(FIELD_CAL_REMINDER_TIME)))
+		const char *Reminders;
+		if ((Reminders = c->GetStr(FIELD_CAL_REMINDERS)))
 		{
-			o->Push((char*)"BEGIN:VALARM\r\n");
-			GStreamPrint(o, "TRIGGER:%sPT%iM\r\n", (AlarmTime<0) ? "-" : "", abs(AlarmTime));
-			o->Push((char*)"END:VALARM\r\n");
-		}
-
-		List<GDataPropI> Attendees;
-		if (c->GetAttendees(Attendees))
-		{
-			for (GDataPropI *a=Attendees.First(); a; a=Attendees.Next())
+			auto Lines = GString(Reminders).SplitDelimit("\n");
+			for (auto Ln: Lines)
 			{
+				// Fields are: Number, CalendarReminderUnits, CalendarReminderType, Param
+				auto p = Ln.SplitDelimit(",");
+				if (p.Length() >= 3)
+				{
+					const char *Duration = NULL;
+					int64 Count = p[0].Int();
+					switch (p[1].Int())
+					{
+						case CalMinutes: Duration = "M"; break;
+						case CalHours: Duration = "H"; break;
+						case CalDays: Duration = "D"; break;
+						case CalWeeks: Duration = "D"; Count *= 7; break;
+					}
+
+					const char *Action = NULL;
+					switch (p[2].Int())
+					{
+						case CalEmail: Action = "EMAIL"; break;
+						case CalPopup: Action = "DISPLAY"; break;
+						case CalScriptCallback: Action = "X-SCRIPT"; break;
+					}
+
+					if (Action && Duration)
+					{
+						GString s;
+						s.Printf(	"BEGIN:VALARM\r\n"
+									"ACTION:%s\r\n"
+									"DESCRIPTION:REMINDER\r\n"
+									"TRIGGER:-PT" LPrintfInt64 "%s\r\n",
+									Action,
+									Count, Duration
+								);
+						if (p.Length() > 3)
+							s += GString("X-PARAM: ") + p[3];
+						s += "END:VALARM\r\n";
+						o->Write(s.Get(), s.Length());
+					}
+					else LgiAssert(0);
+				}
 			}
 		}
-		*/
 
 		LJson j(c->GetStr(FIELD_ATTENDEE_JSON));
 		for (auto g: j.GetArray(NULL))

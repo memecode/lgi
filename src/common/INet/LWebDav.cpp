@@ -164,7 +164,7 @@ bool LWebdav::PropFind(GArray<FileProps> &Files, GString Resource, int Depth)
 	return true;
 }
 
-bool LWebdav::Get(GString &Data, const char *Resource)
+bool LWebdav::Get(const char *Resource, GString &Data)
 {
 	Req r;
 
@@ -184,7 +184,7 @@ bool LWebdav::Get(GString &Data, const char *Resource)
 	return true;
 }
 
-bool LWebdav::Put(GString &Data, const char *Resource)
+bool LWebdav::Put(const char *Resource, GString &Data)
 {
 	Req r;
 	r.InBody = Data;

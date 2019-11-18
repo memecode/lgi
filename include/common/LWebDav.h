@@ -8,6 +8,7 @@ extern bool LFindXml(GArray<GXmlTag*> &Results, GXmlTag *t, const char *Name);
 
 class LWebdav
 {
+protected:
 	GString EndPoint, EndPointPath, User, Pass;
 
 	GAutoPtr<GSocketI> GetSocket()
@@ -54,7 +55,7 @@ public:
 			return ContentType.SplitDelimit(";")[0].Strip();
 		}
 
-		FileProps Copy()
+		FileProps Copy() // Make a thread safe copy...
 		{
 			FileProps f;
 			f.Href = Href.Get();
@@ -71,8 +72,8 @@ public:
 
 	GString::Array GetOptions(GString Resource);
 	bool PropFind(GArray<FileProps> &Files, GString Resource, int Depth = 1);
-	bool Get(GString &Data, const char *Resource);
-	bool Put(GString &Data, const char *Resource);
+	bool Get(const char *Resource, GString &Data);
+	bool Put(const char *Resource, GString &Data);
 	bool Delete(const char *Resource);
 };
 

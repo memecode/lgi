@@ -420,7 +420,12 @@ enum Store3Fields
 										// Pass this to an email's SetObj member to add a
 										// related attachment.
 	FIELD_CAL_REMINDERS,				// Individual reminders as CSV, fields are:
-										// Number, CalendarReminderUnits, CalendarReminderType
+										//		Number, CalendarReminderUnits, CalendarReminderType, Param
+										//
+										//		CalEmail: param option email address to send to as well as the guests
+										//		CalPopup: not used
+										//		CalScriptCallback: not impl (but will be the script function and args)
+										//
 	FIELD_CAL_LAST_CHECK,				// (LDateTime) Ts the calendar event was last checked for reminders
 	FIELD_DATE_MODIFIED,				// (LDateTime) Ts of modification
 	FIELD_INBOX,						// (GDataFolderI*) Inbox for mail store
