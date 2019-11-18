@@ -1403,8 +1403,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 		case IDM_HELP:
 		{
-			char ExeName[256];
-			LgiGetExePath(ExeName, sizeof(ExeName));
+			char ExeName[MAX_PATH];
+			sprintf_s(ExeName, sizeof(ExeName), "%s", LGetExePath().Get());
 
 			while (strchr(ExeName, DIR_CHAR) && strlen(ExeName) > 3)
 			{

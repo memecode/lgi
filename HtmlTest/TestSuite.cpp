@@ -405,7 +405,7 @@ public:
 				if (Html)
 					Html->SetEnv(this);
 				
-				if (LgiGetExePath(Base, sizeof(Base)))
+				if (sprintf_s(Base, sizeof(Base), "%s", LGetExePath().Get()) > 0)
 				{
 					#if defined(WIN32)
 					if (stristr(Base, "Release") || stristr(Base, "Debug"))

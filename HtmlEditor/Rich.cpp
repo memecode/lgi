@@ -214,14 +214,12 @@ public:
 				{
 					if (c->IsTag("file"))
 					{
-						// int Bytes = c->GetAsInt("size");
 						const char *Link = c->GetContent();
 						GMemStream File(1024);
 						if (LgiGetUri(this, &File, &err, Link))
 						{
 							char p[MAX_PATH];
-							LgiGetExeFile(p, sizeof(p));
-							LgiTrimDir(p);
+							LgiMakePath(p, sizeof(p), LGetExeFile(), "..");
 							LgiMakePath(p, sizeof(p), p, LgiGetLeaf(Link));
 
 							GFile f;

@@ -2188,7 +2188,11 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 		}
 	}
 
-	Unpushed = Ins.Length() > 0;
+	if (Unpushed = Ins.Length() > 0)
+	{
+		Color(GColour(255, 128, 0));
+	}
+
 	Update();
 	if (GTreeItem::Select())
 	{
