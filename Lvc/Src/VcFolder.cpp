@@ -2192,6 +2192,10 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 	{
 		Color(GColour(255, 128, 0));
 	}
+	else if (Unpulled == 0)
+	{
+		Color(GCss::ColorInherit);
+	}
 
 	Update();
 	if (GTreeItem::Select())
