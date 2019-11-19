@@ -493,7 +493,7 @@ int GDialog::OnNotify(GViewI *Ctrl, int Flags)
 		d->BtnId = b->GetId();
 		
 		if (d->IsModal)
-			EndModal();
+			EndModal(d->BtnId);
 		else if (d->IsModeless)
 			EndModeless();
 	}
