@@ -390,7 +390,7 @@ enum Store3Fields
 	FIELD_UNREAD = 130,					// (int64) Count of unread items
 	FIELD_SORT = 131,					// (int64) Sort setting
 
-	FIELD_STATUS = 132,					// (int64)
+	FIELD_STATUS = 132,					// (Store3Status)
 	FIELD_VERSION = 133,				// (int64)
 	FIELD_ID = 134,						// (int64)
 	FIELD_READONLY = 135,				// (bool)
