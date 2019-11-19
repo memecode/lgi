@@ -215,16 +215,6 @@ class LgiClass GDialog :
 private:
     struct GDialogPriv *d;
 
-protected:
-	/// Load the dialog from a resource
-	bool LoadFromResource
-	(
-		/// The resource ID
-		int Resource,
-		/// [Optional] tag list to exclude/include various controls via tag
-		char *TagList = 0
-	);
-
 public:
 	/// Constructor
 	GDialog();
@@ -233,6 +223,15 @@ public:
 	~GDialog();
 
 	const char *GetClass() { return "GDialog"; }
+
+	/// Load the dialog from a resource
+	bool LoadFromResource
+	(
+		/// The resource ID
+		int Resource,
+		/// [Optional] tag list to exclude/include various controls via tag
+		char *TagList = 0
+	);
 
 	/// \brief Run the dialog in modal mode.
 	///
