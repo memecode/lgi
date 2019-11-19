@@ -77,6 +77,8 @@ enum Store3Status
 	Store3Missing = -1,
 	/// A format upgrade is required to open the store.
 	Store3UpgradeRequired = -2,
+	/// Function not implemented.
+	Store3NotImpl = -3,
 
 	// General:
 	//--------------------------------------------------------------------------------
