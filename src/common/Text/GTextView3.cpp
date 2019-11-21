@@ -2226,19 +2226,23 @@ bool GTextView3::Copy()
 		ssize_t Min = MIN(SelStart, SelEnd);
 		ssize_t Max = MAX(SelStart, SelEnd);
 
-		char16 *Txt16 = NewStrW(Text+Min, Max-Min);
 		#ifdef WIN32
+		char16 *Txt16 = NewStrW(Text+Min, Max-Min);
 		Txt16 = ConvertToCrLf(Txt16);
-		#endif
 		char *Txt8 = (char*)LgiNewConvertCp(LgiAnsiToLgiCp(), Txt16, LGI_WideCharset);
+		#else
+		char *Txt8 = (char*)LgiNewConvertCp("utf-8", Text+Min, LGI_WideCharset, (Max-Min)*sizeof(*Text));
+		#endif
 
 		GClipBoard Clip(this);
 		
 		Clip.Text(Txt8);
+		#ifdef WIN32
 		Clip.TextW(Txt16, false);
+		DeleteArray(Txt16);
+		#endif
 		
 		DeleteArray(Txt8);
-		DeleteArray(Txt16);
 	}
 	else LgiTrace("%s:%i - No selection.\n", _FL);
 
