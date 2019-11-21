@@ -49,12 +49,11 @@ void OsAppArguments::Set(char *CmdLine)
 	GArray<char> Raw;
 	GArray<int> Offsets;
 
-	char Exe[256];
+	auto Exe = LGetExeFile();
 	Offsets.Add(0);
-	if (LgiGetExeFile(Exe, sizeof(Exe)))
+	if (Exe)
 	{
-		int Len = strlen(Exe);
-		Raw.Length(Len + 1);
+		Raw.Length(Exe.Length() + 1);
 		strcpy(&Raw[0], Exe);
 	}
 	else
@@ -169,8 +168,7 @@ void OnCrash(int i)
 	pipe((int*)&Read);
 	pipe((int*)&Error);
 
-	char Exe[256] = "";
-	LgiGetExeFile(Exe, sizeof(Exe));
+	auto Exe = LGetExeFile();
 
 	// Has stdin pipe
 	pipe((int*)&Write);
@@ -195,7 +193,7 @@ void OnCrash(int i)
 		char sPid[32];
 		sprintf(sPid, "--pid=%i", getpid());
 		char *Args[] = {sPid, Exe, 0};
-		// printf("Calling: execv('gdb', '%s', '%s');\n", Exe, sPid);
+		// printf("Calling: execv('gdb', '%s', '%s');\n", Exe.Get(), sPid);
 		execv("/usr/bin/gdb", Args);
 
 		// We should never get here
@@ -795,12 +793,9 @@ GXmlTag *GApp::GetConfig(const char *Tag)
 	if (IsOk() && !d->Config)
 	{
 		char File[] = "lgi.conf";
-		char Path[256];
-		if (LgiGetExePath(Path, sizeof(Path)))
+		char Path[MAX_PATH];
+		if (LgiMakePath(Path, sizeof(Path), LGetExePath(), File))
 		{
-			if (Path[strlen(Path)-1] != DIR_CHAR) strcat(Path, DIR_STR);
-			strcat(Path, File);
-
 			if (FileExists(Path))
 			{
 				d->Config = new GXmlTag("Config");

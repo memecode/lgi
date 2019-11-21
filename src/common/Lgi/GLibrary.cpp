@@ -118,7 +118,7 @@ bool GLibrary::Load(const char *File, bool Quiet)
 						#if LGI_COCOA || defined(__GTK_H__)
 						LgiMakePath(p, sizeof(p), LgiArgsAppPath, "..");
 						#else
-						LgiGetExePath(p, sizeof(p));
+						strcpy_s(p, sizeof(p), LGetExePath());
 						#endif
 						LgiMakePath(p, sizeof(p), p, FileName);
 						hLib = dlopen(p, RTLD_NOW);
