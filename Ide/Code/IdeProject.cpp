@@ -3764,13 +3764,14 @@ int IdeTree::WillAccept(List<char> &Formats, GdcPt2 p, int KeyState)
 
 int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
 {
+	int Ret = DROPEFFECT_NONE;
 	SelectDropTarget(0);
 
 	if (!Hit)
 		Hit = ItemAtPoint(p.x, p.y);
 
 	if (!Hit)
-		return DROPEFFECT_NONE;
+		return Ret;
 	
 	for (unsigned n=0; n<Data.Length(); n++)
 	{
@@ -3821,7 +3822,7 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
 						Src->GetProject()->SetDirty();
 					}
 				
-					return DROPEFFECT_MOVE;
+					Ret = DROPEFFECT_MOVE;
 				}
 			}
 		}
@@ -3840,7 +3841,8 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
 				GDropFiles Df(dd);
 				for (int i=0; i<Df.Length() && !Prog.Cancel; i++)
 				{
-					Dst->AddFiles(&Prog, Df[i]);
+					if (Dst->AddFiles(&Prog, Df[i]))
+						Ret = DROPEFFECT_LINK;
 				}
 			}
 		}
@@ -3850,7 +3852,7 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
 		}
 	}
 
-	return DROPEFFECT_NONE;
+	return Ret;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
