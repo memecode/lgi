@@ -415,6 +415,9 @@ int LSubMenu::Float(GView *From, int x, int y, int Btns)
 	GdcPt2 p(x, y);
 	OsView v = nil;
 	
+	if (From)
+		From->Capture(false);
+
 	auto w = From ? From->GetWindow() : NULL;
 	if (w)
 	{
