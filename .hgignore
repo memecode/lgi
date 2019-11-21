@@ -7,17 +7,22 @@ Win32*
 x64*
 Debug*
 Release*
+*/.DS_Store
+*.xcuserstate
+*.xcbkptlist
 
 HtmlEditor/HtmlEdit*.sdf
 HtmlEditor/HtmlEdit*.suo
 HtmlEditor/x64Debug
 HtmlEditor/x64Release
+HtmlEditor/build
 
 HtmlTest/Files/*
 HtmlTest/HtmlTest*.sdf
 HtmlTest/HtmlTest*.suo
 HtmlTest/x64Debug
 HtmlTest/x64Release
+HtmlTest/Mac/build
 
 Ide/HtmlTest*.sdf
 Ide/HtmlTest*.suo
@@ -29,10 +34,13 @@ Ide/LgiIde.xml.*
 Ide/LgiIde*.sdf
 Ide/LgiIde*.suo
 Ide/Gtk3/build*
+Ide/MacCarbon/build
+Ide/MacCocoa/build
 
 LgiTest/Test*.sdf
 LgiTest/Test*.suo
 LgiTest/x64
+LgiTest/Mac/build
 
 Lvc/Lvc.xml
 Lvc/Lvc*.sdf
@@ -49,7 +57,9 @@ ScriptingUnitTests/x64*
 src/common/Gdc2/Path/test/*.sdf
 src/common/Gdc2/Path/test/*.suo
 src/common/Gdc2/Path/test/x64*
-
+src/mac/carbon/build
+src/mac/cocoa/build
+src/mac/lldb_callback/build
 src/common/INet/libntlm-0.4.2/build-win32/Win32*
 src/common/INet/libntlm-0.4.2/build-win32/x64*
 
