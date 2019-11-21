@@ -166,15 +166,7 @@ public:
 						GAutoString a = u.Decode(u.Path);
 						
 						if (a.Get() && !strncasecmp(a, "/.file/", 7))
-						{
-							printf(".File = %s\n", a.Get());
 							LMacFileToPath(a);
-							printf("now = %s\n", a.Get());
-						}
-						else
-						{
-							printf("a = %s\n", a.Get());
-						}
 					
 						if (a)
 							Add(a.Release());
