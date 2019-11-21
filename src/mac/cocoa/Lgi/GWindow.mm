@@ -739,7 +739,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	}
 	
 	// Window didn't want the key...
-	switch (k.c16)
+	switch (k.vkey)
 	{
 		case LK_RETURN:
 		{
