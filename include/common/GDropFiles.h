@@ -135,11 +135,12 @@ public:
 			for (int i=0; i<a.Length(); i++)
 			{
 				GVariant *v = a[i];
-				char *s = NULL;
+				GString s;
 				if (v->Type == GV_STRING)
 					s = v->Str();
 				else if (v->Type == GV_BINARY)
-					s = (char*)v->Value.Binary.Data;
+					s.Set((char*)v->Value.Binary.Data, v->Value.Binary.Length);
+
 				if (s)
 				{
 					GUri u(s);
@@ -163,8 +164,17 @@ public:
 					)
 					{
 						GAutoString a = u.Decode(u.Path);
+						
 						if (a.Get() && !strncasecmp(a, "/.file/", 7))
+						{
+							printf(".File = %s\n", a.Get());
 							LMacFileToPath(a);
+							printf("now = %s\n", a.Get());
+						}
+						else
+						{
+							printf("a = %s\n", a.Get());
+						}
 					
 						if (a)
 							Add(a.Release());

@@ -991,7 +991,7 @@ GString GApp::GetFileMimeType(const char *File)
 	CFStringRef MIMEType = UTTypeCopyPreferredTagWithClass(UTI, kUTTagClassMIMEType);
 	Ret = MIMEType;
 	if (MIMEType) CFRelease(MIMEType);
-	CFRelease(UTI);
+	if (UTI) CFRelease(UTI);
 	[filePath release];
 	
 	if (!Ret)
