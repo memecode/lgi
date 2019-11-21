@@ -421,7 +421,7 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	else
 		LgiArgsAppPath = AppArgs.Arg[0];
 	
-	printf("%s:%i - LgiArgsAppPath='%s'\n", _FL, LgiArgsAppPath.Get());
+	// printf("%s:%i - LgiArgsAppPath='%s'\n", _FL, LgiArgsAppPath.Get());
 	
 	// Catch and ignore SIGPIPE
 	signal(SIGPIPE, OnSigPipe);
