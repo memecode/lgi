@@ -31,6 +31,7 @@ class ProjectNode : public IdeCommon, public GDragDropSource, public FtpCallback
 	char *File;
 	char *LocalCache;
 	char *Name;
+	GString Charset;
 	IdeProject *Dep;
 	bool IgnoreExpand;
 	int64 ChildCount;
@@ -70,6 +71,7 @@ public:
 	int GetPlatforms() override;
 	char *GetLocalCache() override;
 	void AutoDetectType();
+	char *GetCharset() override { return Charset; }
 	
 	// Dnd
 	bool GetFormats(List<char> &Formats) override;

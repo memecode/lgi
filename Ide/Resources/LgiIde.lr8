@@ -39,6 +39,8 @@
 		<String Ref="47" Cid="2" Define="IDCANCEL" en="Cancel" />
 		<String Ref="48" Cid="48" Define="IDC_FIX_RENAMED" en="Try and fix renamed symbols from compile errors" />
 		<String Ref="49" Cid="-1" Define="IDC_STATIC" en="Enter symbol pairs, one per line. Each line should contain the old symbol and the new symbol separated by whitespace:" />
+		<String Ref="53" Cid="-1" Define="IDC_STATIC" en="Charset:" />
+		<String Ref="54" Cid="54" Define="IDC_CHARSET" />
 		<String Ref="63" Cid="63" Define="IDD_OPTIONS" en="Options" />
 		<String Ref="64" Cid="8" Define="IDC_TABLE" />
 		<String Ref="65" Cid="-1" Define="IDC_STATIC" en="Editor font:" />
@@ -200,36 +202,44 @@
 			<Column ref="92" width="111" />
 		</ListView>
 	</Dialog>
-	<Dialog pos="7,7,405,304" ref="33">
-		<TableLayout pos="7,7,384,265" ref="24" cols="0.500,0.500" rows="0.250,0.103,0.397,0.250">
+	<Dialog pos="7,7,405,305" ref="33">
+		<TableLayout pos="7,7,384,265" ref="24" cols="0.500,0.500" rows="0.189,0.181,0.193,0.305,0.132">
 			<tr>
 				<td colspan="2">
-					<StaticText pos="0,0,265,59" ref="30" />
+					<StaticText pos="0,0,265,40" ref="30" />
 				</td>
 			</tr>
 			<tr>
 				<td>
-					<StaticText pos="0,61,62,74" ref="36" />
+					<StaticText pos="14,55,76,68" ref="36" />
 				</td>
 				<td>
-					<ComboBox pos="183,61,364,81" ref="38" />
+					<ComboBox pos="196,56,349,76" ref="38" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<StaticText pos="14,98,139,125" ref="53" />
+				</td>
+				<td>
+					<ComboBox pos="196,98,349,118" ref="54" />
 				</td>
 			</tr>
 			<tr>
 				<td colspan="2">
-					<Group pos="14,86,286,182" ref="37">
-						<CheckBox pos="84,14,265,27" ref="78" />
-						<CheckBox pos="84,35,223,48" ref="79" />
-						<CheckBox pos="84,56,265,69" ref="80" />
-						<CheckBox pos="84,77,181,90" ref="200" />
+					<Group pos="28,147,314,200" ref="37">
+						<CheckBox pos="21,26,97,39" ref="78" />
+						<CheckBox pos="21,40,76,53" ref="79" />
+						<CheckBox pos="168,26,251,39" ref="80" />
+						<CheckBox pos="168,40,223,53" ref="200" />
 					</Group>
 				</td>
 			</tr>
 			<tr>
 				<td colspan="2" align="Max">
-					<Button pos="105,203,181,223" ref="35" />
-					<Button pos="203,203,258,223" ref="178" />
-					<Button pos="273,203,328,223" ref="203" />
+					<Button pos="105,212,181,230" ref="35" />
+					<Button pos="203,212,258,230" ref="178" />
+					<Button pos="273,212,328,230" ref="203" />
 				</td>
 			</tr>
 		</TableLayout>

@@ -151,6 +151,8 @@ public:
 	bool SerializeAttr(const char *Attr, char *&Str);
 	/// Read/write a native C double into an attribute
 	bool SerializeAttr(const char *Attr, double &Dbl);
+	/// Read/write a GString into an attribute
+	bool SerializeAttr(const char *Attr, GString &s);
 	
 	/// Gets the current tag
 	const char *GetTag();

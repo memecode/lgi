@@ -21,6 +21,7 @@
 #define IDC_44									44
 #define IDC_SYM									45
 #define IDC_FIX_RENAMED							48
+#define IDC_CHARSET								54
 #define IDD_OPTIONS								63
 #define IDC_FONT								65
 #define IDC_SET_FONT							66

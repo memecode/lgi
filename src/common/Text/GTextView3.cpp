@@ -4869,6 +4869,11 @@ void GTextView3::OnPaint(GSurface *pDC)
 	#if PROFILE_PAINT
 	Prof.Add("foreach Line loop");
 	#endif
+			if (_Debug)
+			{
+				int asd=0;
+			}
+
 			// loop through all visible lines
 			int y = d->rPadding.y1;
 			while ((l = *It) &&

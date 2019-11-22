@@ -29,9 +29,10 @@ class FileProps : public GDialog
 {
 public:
 	NodeType Type;
+	GString Charset;
 	int Platforms;
 
-	FileProps(GView *p, char *m, NodeType t, int plat)
+	FileProps(GView *p, char *m, NodeType t, int plat, const char *charset)
 	{
 		Platforms = plat;
 		Type = t;
@@ -51,6 +52,19 @@ public:
 				c->Value(Type);
 			}
 			else LgiTrace("%s:%i - Failed to get Type combo.\n", _FL);
+
+			if (GetViewById(IDC_CHARSET, c))
+			{
+				if (!charset)
+					charset = "utf-8";
+				for (GCharset *cs = LgiGetCsList(); cs->Charset; cs++)
+				{
+					c->Insert(cs->Charset);
+					if (!Stricmp(charset, cs->Charset))
+						c->Value(c->Length()-1);
+				}
+
+			}
 
 			for (int i=0; PlatformNames[i]; i++)
 			{
@@ -97,6 +111,10 @@ public:
 						Platforms |= 1 << i;
 					}
 				}
+
+				Charset = GetCtrlName(IDC_CHARSET);
+				if (!Stricmp(Charset.Get(), "utf-8"))
+					Charset.Empty();
 				
 				// fall thru
 			}
@@ -225,7 +243,8 @@ bool ProjectNode::Load(GDocView *Edit, NodeView *Callback)
 	else
 	{
 		GString Full = GetFullPath();
-		Status = Edit->Open(Full);
+		Edit->Debug();
+		Status = Edit->Open(Full, Charset);
 	}
 	
 	return Status;
@@ -262,7 +281,7 @@ bool ProjectNode::Save(GDocView *Edit, NodeView *Callback)
 	else
 	{
 		GString f = GetFullPath();
-		Status = Edit->Save(f);
+		Status = Edit->Save(f, Charset);
 
 		if (Callback)
 			Callback->OnSaveComplete(Status);
@@ -581,6 +600,7 @@ bool ProjectNode::Serialize(bool Write)
 
 	SerializeAttr("File", File);
 	SerializeAttr("Name", Name);
+	SerializeAttr("Charset", Charset);
 	SerializeAttr("Type", (int&)Type);
 	SerializeAttr("Platforms", (int&)Platforms);
 	
@@ -1398,7 +1418,7 @@ void ProjectNode::OnProperties()
 			char Msg[512];
 			sprintf(Msg, "Source Code:\n\n\t%s\n\nSize: %s (%i bytes)", Path.Get(), Size, (int32)FSize);
 		
-			FileProps Dlg(Tree, Msg, Type, Platforms);
+			FileProps Dlg(Tree, Msg, Type, Platforms, Charset);
 			switch (Dlg.DoModal())
 			{
 				case IDOK:
@@ -1411,6 +1431,11 @@ void ProjectNode::OnProperties()
 					if (Platforms != Dlg.Platforms)
 					{
 						Platforms = Dlg.Platforms;
+						Project->SetDirty();
+					}
+					if (Charset != Dlg.Charset)
+					{
+						Charset = Dlg.Charset;
 						Project->SetDirty();
 					}
 					

@@ -861,6 +861,35 @@ bool GXmlTag::SetAttr(const char *n, int64 Value)
 	return false;
 }
 
+bool GXmlTag::SerializeAttr(const char *Attr, GString &s)
+{
+	if (Write) // arg -> attr
+	{
+		if (s)
+		{
+			GXmlAttr *a = _Attr(Attr, true);
+			if (!a)
+				return false;
+			a->Value = Allocator->Alloc(s);
+			return a->Value != 0;
+		}
+		else
+		{
+			DelAttr(Attr);
+		}
+	}
+	else // attr -> arg
+	{
+		GXmlAttr *a = _Attr(Attr, false);
+		if (a)
+			s = a->Value;
+		else
+			s.Empty();
+	}
+
+	return true;
+}
+
 bool GXmlTag::SerializeAttr(const char *Attr, int &Int)
 {
 	GXmlAttr *a = _Attr(Attr, Write);

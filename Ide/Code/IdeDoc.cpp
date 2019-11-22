@@ -1048,8 +1048,10 @@ IdeDoc::IdeDoc(AppWnd *a, NodeSource *src, const char *file)
 	d = new IdeDocPrivate(this, a, src, file);
 	d->UpdateName();
 
+	/*
 	if (src || file)
 		d->Load();
+	*/
 }
 
 IdeDoc::~IdeDoc()
@@ -1398,12 +1400,12 @@ void IdeDoc::SetCrLf(bool CrLf)
 
 bool IdeDoc::OpenFile(const char *File)
 {
-	if (d->Edit)
-	{
-		return d->Edit->Open(File);
-	}
+	if (!d->Edit)
+		return false;
 
-	return false;
+	auto Cs = d->GetSrc() ? d->GetSrc()->GetCharset() : NULL;
+
+	return d->Edit->Open(File, Cs);
 }
 
 void IdeDoc::SetEditorParams(int IndentSize, int TabSize, bool HardTabs, bool ShowWhiteSpace)
