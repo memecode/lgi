@@ -1172,6 +1172,10 @@ int GDirectory::First(const char *Name, const char *Pattern)
 			d->Pattern = NewStr(Pattern);
 		}
 		
+		auto e = d->BasePath + strlen(d->BasePath);
+		while (e > d->BasePath && e[-1] == DIR_CHAR)
+			*--e = 0;
+		
 		d->Dir = opendir(d->BasePath);
 		if (d->Dir)
 		{
@@ -1190,6 +1194,10 @@ int GDirectory::First(const char *Name, const char *Pattern)
 					}
 				}
 			}
+		}
+		else
+		{
+			printf("%s:%i - opendir(%s) failed with %i\n", _FL, d->BasePath, errno);
 		}
 	}
 	
