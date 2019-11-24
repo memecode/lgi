@@ -28,6 +28,58 @@ class GDndSourcePriv;
 - (NSDragOperation)draggingSession:(nonnull NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context;
 @end
 
+@interface LFilePromiseProviderDelegate : NSObject<NSFilePromiseProviderDelegate>
+{
+	GString filename;
+	GStreamI *stream;
+}
+- (id)init:(GString)fn stream:(GStreamI*)stream;
+- (NSString *)filePromiseProvider:(NSFilePromiseProvider*)filePromiseProvider fileNameForType:(NSString *)fileType;
+- (void)filePromiseProvider:(NSFilePromiseProvider*)filePromiseProvider writePromiseToURL:(NSURL *)url completionHandler:(void (^)(NSError * __nullable errorOrNil))completionHandler;
+@end
+
+@implementation LFilePromiseProviderDelegate
+- (id)init:(GString)fn stream:(GStreamI*)stream
+{
+	if ((self = [super init]) != nil)
+	{
+		self->filename = fn;
+		self->stream = stream;
+	}
+	
+	return self;
+}
+
+- (NSString *)filePromiseProvider:(NSFilePromiseProvider*)filePromiseProvider fileNameForType:(NSString *)fileType
+{
+	return self->filename.NsStr();
+}
+
+- (void)filePromiseProvider:(NSFilePromiseProvider*)filePromiseProvider
+		writePromiseToURL:(NSURL *)url
+		completionHandler:(void (^)(NSError * __nullable errorOrNil))completionHandler
+{
+	GFile out;
+	if (!out.Open([url.path UTF8String], O_WRITE))
+		return;
+	out.SetSize(0);
+	auto len = self->stream->GetSize();
+	int64 written = 0;
+	for (size_t i=0; i<len; )
+	{
+		char buf[1024];
+		auto rd = self->stream->Read(buf, sizeof(buf));
+		if (rd <= 0) break;
+		auto wr = out.Write(buf, rd);
+		if (wr < rd) break;
+		written += wr;
+	}
+	
+	if (written < len)
+		LgiTrace("%s:%i - write failed.\n", _FL);
+}
+@end
+
 class GDndSourcePriv
 {
 public:
@@ -224,6 +276,25 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 				case GV_STREAM:
 				{
 					// File promises...
+					auto s = v.Value.Stream.Ptr;
+					if (!s)
+						break;
+					GVariant filename, uti;
+					if (!s->GetValue("name", filename) ||
+						!s->GetValue("uti", uti) ||
+						!filename.Str() ||
+						!uti.Str())
+					{
+						printf("%s:%i - Stream failed to give filename.\n", _FL);
+						break;
+					}
+					
+					auto delegate = [[LFilePromiseProviderDelegate alloc] init:filename.Str() stream:s];
+					auto prov = [[NSFilePromiseProvider alloc] initWithFileType:GString(uti.Str()).NsStr() delegate:delegate];
+					NSArray *array = [NSArray arrayWithObject:prov];
+					[pboard writeObjects:array];
+					
+					printf("Adding file promise '%s' to drag...\n", filename.Str());
 					break;
 				}
 				default:

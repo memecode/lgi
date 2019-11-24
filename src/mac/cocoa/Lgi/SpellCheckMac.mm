@@ -37,6 +37,7 @@ static OSStatus LoadFrameworkBundle(CFStringRef framework, CFBundleRef *bundlePt
     *bundlePtr = nil;
     baseURL = nil;
     bundleURL = nil;
+    // \sa NSSearchPathDirectory
     err = FSFindFolder(kOnAppropriateDisk, kFrameworksFolderType, true, &frameworksFolderRef);
     if (err == noErr) {
         baseURL = CFURLCreateFromFSRef(kCFAllocatorSystemDefault, &frameworksFolderRef);
