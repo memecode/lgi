@@ -20,6 +20,21 @@
 // #define DND_DEBUG_TRACE
 class GDndSourcePriv;
 
+const char *LMimeToUti(const char *Mime)
+{
+	if (!Mime) return NULL;
+	
+	#define _(m, u) if (!Stricmp(Mime, m)) return u;
+	_("message/rfc822", "public.email-message")
+	_("text/vcard", "public.contact")
+	_("text/vcalendar", "public.calendar")
+	_("text/html", "public.html")
+	_("text/xml", "public.xml")
+	
+	LgiAssert(!"Impl me");
+	return "public.item";
+}
+
 @interface LDragSource : NSObject<NSDraggingSource>
 {
 }
@@ -39,12 +54,12 @@ class GDndSourcePriv;
 @end
 
 @implementation LFilePromiseProviderDelegate
-- (id)init:(GString)fn stream:(GStreamI*)stream
+- (id)init:(GString)fn stream:(GStreamI*)s
 {
 	if ((self = [super init]) != nil)
 	{
 		self->filename = fn;
-		self->stream = stream;
+		self->stream = s;
 	}
 	
 	return self;
@@ -79,6 +94,23 @@ class GDndSourcePriv;
 		LgiTrace("%s:%i - write failed.\n", _FL);
 }
 @end
+
+bool GDragData::AddFileStream(const char *LeafName, const char *MimeType, GAutoPtr<GStreamI> Stream)
+{
+	if (!LeafName || !MimeType || !Stream)
+		return false;
+	
+	if (!Format)
+		Format = LGI_StreamDropFormat;
+	else if (!Format.Equals(LGI_StreamDropFormat))
+		return false;
+	
+	Data.New() = LeafName;
+	Data.New() = MimeType;
+	Data.New().SetStream(Stream.Release(), true);
+	
+	return true;
+}
 
 class GDndSourcePriv
 {
@@ -248,7 +280,31 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	[pboard clearContents];
 	for (auto &dd: Data)
 	{
-		if (dd.Data.Length() == 1)
+		if (dd.IsFileStream())
+		{
+			for (int i=0; i<dd.Data.Length()-2; i+=3)
+			{
+				auto File = dd.Data[i].Str();
+				auto MimeType = dd.Data[i+1].Str();
+				auto &v = dd.Data[i+2];
+				auto Stream = v.Type == GV_STREAM ? v.Value.Stream.Ptr : NULL;
+				
+				if (File && MimeType && Stream)
+				{
+					auto Uti = LMimeToUti(MimeType);
+					if (Uti)
+					{
+						auto delegate = [[LFilePromiseProviderDelegate alloc] init:File stream:Stream];
+						auto prov = [[NSFilePromiseProvider alloc] initWithFileType:GString(Uti).NsStr() delegate:delegate];
+						NSArray *array = [NSArray arrayWithObject:prov];
+						[pboard writeObjects:array];
+						
+						printf("Adding file promise '%s' (%s) to drag...\n", File, Uti);
+					}
+				}
+			}
+		}
+		else if (dd.Data.Length() == 1)
 		{
 			GVariant &v = dd.Data[0];
 			switch (v.Type)
@@ -273,30 +329,6 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 					printf("Adding binary '%s' to drag...\n", dd.Format.Get());
 					break;
 				}
-				case GV_STREAM:
-				{
-					// File promises...
-					auto s = v.Value.Stream.Ptr;
-					if (!s)
-						break;
-					GVariant filename, uti;
-					if (!s->GetValue("name", filename) ||
-						!s->GetValue("uti", uti) ||
-						!filename.Str() ||
-						!uti.Str())
-					{
-						printf("%s:%i - Stream failed to give filename.\n", _FL);
-						break;
-					}
-					
-					auto delegate = [[LFilePromiseProviderDelegate alloc] init:filename.Str() stream:s];
-					auto prov = [[NSFilePromiseProvider alloc] initWithFileType:GString(uti.Str()).NsStr() delegate:delegate];
-					NSArray *array = [NSArray arrayWithObject:prov];
-					[pboard writeObjects:array];
-					
-					printf("Adding file promise '%s' to drag...\n", filename.Str());
-					break;
-				}
 				default:
 				{
 					printf("%s:%i - Unsupported type '%s' for format '%s'.\n", _FL, GVariant::TypeToString(v.Type), dd.Format.Get());
@@ -311,236 +343,6 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 
 	return DROPEFFECT_NONE;
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////
-struct DropItemFlavor
-{
-	int					Index;
-	PasteboardItemID	ItemId;
-	CFStringRef			Flavor;
-	GString				FlavorStr;
-};
-
-struct DragParams
-{
-	GdcPt2 Pt;
-	List<char> Formats;
-	GArray<GDragData> Data;
-	int KeyState;
-	
-	#if 0
-	DragParams(GViewI *v, DragRef Drag, const char *DropFormat)
-	{
-		KeyState = 0;
-		
-		// Get the mouse position
-		Point mouse;
-		Point globalPinnedMouse;
-		OSErr err = GetDragMouse(Drag, &mouse, &globalPinnedMouse);
-		if (err)
-		{
-			printf("%s:%i - GetDragMouse failed with %i\n", _FL, err);
-		}
-		else
-		{
-			Pt.x = mouse.h;
-			Pt.y = mouse.v;
-			v->PointToView(Pt);
-		}
-		
-		// Get the keyboard state
-		SInt16 modifiers = 0;
-		SInt16 mouseDownModifiers = 0;
-		SInt16 mouseUpModifiers = 0;
-		err = GetDragModifiers(Drag, &modifiers, &mouseDownModifiers, &mouseUpModifiers);
-		if (err)
-		{
-			printf("%s:%i - GetDragModifiers failed with %i\n", _FL, err);
-		}
-		else
-		{
-			if (modifiers & cmdKey)
-				KeyState |= LGI_EF_SYSTEM;
-			if (modifiers & shiftKey)
-				KeyState |= LGI_EF_SHIFT;
-			if (modifiers & optionKey)
-				KeyState |= LGI_EF_ALT;
-			if (modifiers & controlKey)
-				KeyState |= LGI_EF_CTRL;
-		}
-
-		// Get the data formats
-		PasteboardRef Pb;
-		OSStatus e = GetDragPasteboard(Drag, &Pb);
-		GArray<DropItemFlavor> ItemFlavors;
-		if (e)
-		{
-			printf("%s:%i - GetDragPasteboard failed with %li\n", _FL, e);
-		}
-		else
-		{
-			GHashTbl<char*, int> Map(32, false, NULL, -1);
-			ItemCount Items = 0;
-			PasteboardGetItemCount(Pb, &Items);
-			
-			if (DropFormat)
-				printf("Items=%li\n", Items);
-			
-			for (CFIndex i=1; i<=Items; i++)
-			{
-				PasteboardItemID Item;
-				e = PasteboardGetItemIdentifier(Pb, i, &Item);
-				if (e)
-				{
-					printf("%s:%i - PasteboardGetItemIdentifier[%li]=%li\n", _FL, i-1, e);
-					continue;
-				}
-				
-				CFArrayRef FlavorTypes;
-				e = PasteboardCopyItemFlavors(Pb, Item, &FlavorTypes);
-				if (e)
-				{
-					printf("%s:%i - PasteboardCopyItemFlavors[%li]=%li\n", _FL, i-1, e);
-					continue;
-				}
-				
-				CFIndex Types = CFArrayGetCount(FlavorTypes);
-				if (DropFormat)
-					printf("[%li] FlavorTypes=%li\n", i, Types);
-				for (CFIndex t=0; t<Types; t++)
-				{
-					CFStringRef flavor = (CFStringRef)CFArrayGetValueAtIndex(FlavorTypes, t);
-					if (flavor)
-					{
-						GString n = flavor;
-
-						if (DropFormat)
-						{
-							int CurIdx = Map.Find(n);
-							if (CurIdx < 0)
-							{
-								CurIdx = Map.Length();
-								Map.Add(n, CurIdx);
-							}
-							
-							printf("[%li][%li]='%s' = %i\n", i, t, n.Get(), CurIdx);
-							DropItemFlavor &Fl = ItemFlavors.New();
-							Fl.Index = CurIdx;
-							Fl.ItemId = Item;
-							Fl.Flavor = flavor;
-							Fl.FlavorStr = n;
-						}
-						else
-						{
-							Formats.Insert(NewStr(n));
-						}
-					}
-				}
-				
-				if (ItemFlavors.Length())
-				{
-					for (unsigned i=0; i<ItemFlavors.Length(); i++)
-					{
-						CFDataRef Ref;
-						DropItemFlavor &Fl = ItemFlavors[i];
-						e = PasteboardCopyItemFlavorData(Pb, Fl.ItemId, Fl.Flavor, &Ref);
-						if (e)
-						{
-							printf("%s:%i - PasteboardCopyItemFlavorData failed with %lu.\n", _FL, e);
-						}
-						else
-						{
-							GDragData &dd = Data[Fl.Index];
-							if (!dd.Format)
-								dd.Format = Fl.FlavorStr;
-							
-							CFIndex Len = CFDataGetLength(Ref);
-							const UInt8 *Ptr = CFDataGetBytePtr(Ref);
-							if (Len > 0 && Ptr != NULL)
-							{
-								uint8 *Cp = new uint8[Len+1];
-								if (Cp)
-								{
-									memcpy(Cp, Ptr, Len);
-									Cp[Len] = 0;
-									
-									GVariant *v = &dd.Data[i];
-									if (!_stricmp(LGI_LgiDropFormat, DropFormat))
-									{
-										GDragDropSource *Src = NULL;
-										if (Len == sizeof(Src))
-										{
-											Src = *((GDragDropSource**)Ptr);
-											v->Empty();
-											v->Type = GV_VOID_PTR;
-											v->Value.Ptr = Src;
-										}
-										else LgiAssert(!"Wrong pointer size");
-									}
-									else if (!_stricmp(DropFormat, LGI_FileDropFormat))
-									{
-										GUri u((char*) Cp);
-										Boolean ret = false;
-										if (u.Protocol &&
-											!_stricmp(u.Protocol, "file") &&
-											u.Path &&
-											!_strnicmp(u.Path, "/.file/", 7))
-										{
-											// Decode File reference URL
-											CFURLRef url = CFURLCreateWithBytes(NULL, Cp, Len, kCFStringEncodingUTF8, NULL);
-											if (url)
-											{
-												UInt8 buffer[MAX_PATH];
-												ret = CFURLGetFileSystemRepresentation(url, true, buffer, sizeof(buffer));
-												if (ret)
-												{
-													*v = (char*)buffer;
-												}
-											}
-										}
-										
-										if (!ret) // Otherwise just pass the string along...
-											*v = (char*) Cp;
-									}
-									else
-									{
-										v->SetBinary(Len, Cp, true);
-									}
-								}
-							}
-							else
-							{
-								printf("%s:%i - Pasteboard data error: %p %li.\n", _FL, Ptr, Len);
-							}
-							
-							CFRelease(Ref);
-						}
-					}
-				}
-				ItemFlavors.Length(0);
-				CFRelease(FlavorTypes);
-			}
-		}
-	}
-	
-	~DragParams()
-	{
-		Formats.DeleteArrays();
-	}
-	
-	DragActions Map(int Accept)
-	{
-		DragActions a = 0;
-		if (Accept & DROPEFFECT_COPY)
-			a |= kDragActionCopy;
-		if (Accept & DROPEFFECT_MOVE)
-			a |= kDragActionMove;
-		if (Accept & DROPEFFECT_LINK)
-			a |= kDragActionAlias;
-		return a;
-	}
-	#endif
-};
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 GDragDropTarget::GDragDropTarget()
@@ -563,12 +365,11 @@ void GDragDropTarget::SetWindow(GView *to)
 		Status = To->DropTarget(true);
 		if (To->WindowHandle())
 		{
-		
 			OnDragInit(Status);
 		}
 		else
 		{
-			printf("%s:%i - Error\n", _FL);
+			LgiTrace("%s:%i - Error\n", _FL);
 		}
 	}
 }

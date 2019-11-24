@@ -58,6 +58,7 @@ class GDataStoreI;
 class GDataPropI;
 typedef GAutoPtr<GStreamI> GAutoStreamI;
 void ParseIdList(char *In, List<char> &Out);
+extern const char *Store3ItemTypeToMime(Store3ItemTypes type);
 
 /// A storage event
 ///		a = StoreId

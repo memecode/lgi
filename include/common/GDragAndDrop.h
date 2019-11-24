@@ -41,6 +41,7 @@ LgiFunc int GtkGetDndType(const char *Format);
 LgiFunc const char *GtkGetDndFormat(int Type);
 LgiFunc Gtk::GdkDragAction DropEffectToAction(int DropEffect);
 #endif
+LgiFunc const char *LMimeToUti(const char *Mime);
 
 //////////////////////////////////////////////////////////////////////////////
 struct LgiClass GDragData
@@ -60,6 +61,13 @@ struct LgiClass GDragData
 	{
 		return IsFormat(LGI_FileDropFormat);
 	}
+	
+	bool IsFileStream()
+	{
+		return IsFormat(LGI_StreamDropFormat);
+	}
+	
+	bool AddFileStream(const char *LeafName, const char *MimeType, GAutoPtr<GStreamI> Stream);
 };
 
 /// A drag source class
