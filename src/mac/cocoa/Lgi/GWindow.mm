@@ -785,12 +785,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 		tolower(k.c16) == 'w')
 	{
 		// Close
-		if (d->CloseRequestDone || OnRequestClose(false))
-		{
-			if (d) d->CloseRequestDone = true;
-			delete this;
-			return true;
-		}
+		Quit();
 	}
 	
 AllDone:
