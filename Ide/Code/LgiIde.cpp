@@ -1347,7 +1347,10 @@ public:
 			{
 				for (; f; f=*(++It))
 				{
-					RecentFilesMenu->AppendItem(f, IDM_RECENT_FILE+n++, true);
+					if (LgiIsUtf8(f))
+						RecentFilesMenu->AppendItem(f, IDM_RECENT_FILE+n++, true);
+					else
+						RecentFiles.Delete(It);
 				}
 			}
 			else

@@ -234,6 +234,12 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 
 	GString s(i->GBase::Name());
 	auto name = s.NsStr();
+	if (!name)
+	{
+		delete i;
+		return NULL;
+	}
+	
 	LShortcut sc(Shortcut);
 
 	i->Info.p = [[LNSMenuItem alloc] init:i];
