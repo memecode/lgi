@@ -2582,6 +2582,8 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 		Doc = new IdeDoc(this, 0, File);
 		if (Doc)
 		{
+			Doc->OpenFile(File);
+
 			GRect p = d->Mdi->NewPos();
 			Doc->GView::SetPos(p);
 			d->Docs.Insert(Doc);
