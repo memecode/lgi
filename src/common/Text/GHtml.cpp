@@ -1921,6 +1921,8 @@ GFont *GTag::GetFont()
 
 			for (GTag *t = this; t; t = ToTag(t->Parent))
 			{
+				if (t->TagId == TAG_IFRAME)
+					break;
 				if (!c.InheritCollect(*t, Map))
 					break;
 			}

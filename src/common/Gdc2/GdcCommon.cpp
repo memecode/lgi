@@ -1149,7 +1149,25 @@ bool LgiRopUniversal(GBmpMem *Dst, GBmpMem *Src, bool Composite)
 
 int LgiScreenDpi()
 {
-	return 96; // A reasonable default.
+	#if LGI_COCOA
+	
+		static int Dpi = 0;
+		if (!Dpi)
+		{
+			NSScreen *screen = [NSScreen mainScreen];
+			NSDictionary *description = [screen deviceDescription];
+			NSSize displayPixelSize = [[description objectForKey:NSDeviceSize] sizeValue];
+			CGSize displayPhysicalSize = CGDisplayScreenSize(
+						[[description objectForKey:@"NSScreenNumber"] unsignedIntValue]);
+			Dpi = (int) ((displayPixelSize.width / displayPhysicalSize.width) * 25.4f);
+		}
+		return Dpi;
+
+	#else
+
+		return 96; // A reasonable default.
+	
+	#endif
 }
 
 bool GMemDC::SwapRedAndBlue()

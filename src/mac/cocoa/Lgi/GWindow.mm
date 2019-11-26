@@ -786,6 +786,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	{
 		// Close
 		Quit();
+		return true;
 	}
 	
 AllDone:

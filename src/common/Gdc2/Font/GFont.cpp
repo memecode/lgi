@@ -1371,6 +1371,16 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 									 GTypeFace::d->_Descent +
 									 GTypeFace::d->_Leading);
 					
+					#if 0
+					GStringPipe p;
+					Sz.ToString(p);
+					LgiTrace("%s:%i - GFont::Create(%s,%s) = %f,%f,%f\n",
+							_FL,
+							Face(), p.NewGStr().Get(),
+							GTypeFace::d->_Ascent,
+							GTypeFace::d->_Descent,
+							GTypeFace::d->_Leading);
+					#endif
 					
 					int keys = 2;
 					CFStringRef key[5] = {	kCTFontAttributeName,
