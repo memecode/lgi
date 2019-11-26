@@ -513,7 +513,11 @@ void GWindow::Quit(bool DontDelete)
 	{
 		d->Quiting = true;
 		SetDragHandlers(false);
+		#if 1
+		PostEvent(M_CLOSE);
+		#else
 		[Wnd.p close];
+		#endif
 	}
 }
 
@@ -1155,7 +1159,8 @@ GMessage::Result GWindow::OnEvent(GMessage *m)
 			if (d->CloseRequestDone || OnRequestClose(false))
 			{
 				d->CloseRequestDone = true;
-				Quit();
+				// Quit();
+				[Wnd.p close];
 				return 0;
 			}
 			#endif
