@@ -147,6 +147,7 @@ public:
 	GHtmlElement *CreateElement(GHtmlElement *Parent);
 	bool EvaluateCondition(const char *Cond);
 	bool GetVariant(const char *Name, GVariant &Value, char *Array = NULL);
+	bool DoFind();
 
 	// Javascript handlers
 	GDom *getElementById(char *Id);

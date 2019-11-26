@@ -2025,6 +2025,10 @@ GColour GView::StyleColour(int CssPropType, GColour Default, int Depth)
 					}
 				}
 			}
+			
+			if (dynamic_cast<GWindow*>(v) ||
+				dynamic_cast<GPopup*>(v))
+				break;
 		}
 	}
 	

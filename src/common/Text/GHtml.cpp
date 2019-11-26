@@ -7843,6 +7843,12 @@ bool GHtml::OnFind(GFindReplaceCommon *Params)
 	return Status;
 }
 
+bool GHtml::DoFind()
+{
+	GFindDlg Dlg(this, 0, FindCallback, this);
+	return Dlg.DoModal();
+}
+
 bool GHtml::OnKey(GKey &k)
 {
 	bool Status = false;
@@ -7914,8 +7920,7 @@ bool GHtml::OnKey(GKey &k)
 					{
 						if (k.CtrlCmd())
 						{
-							GFindDlg Dlg(this, 0, FindCallback, this);
-							Dlg.DoModal();
+							DoFind();
 							Status = true;
 						}
 						break;
