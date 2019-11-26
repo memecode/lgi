@@ -10,12 +10,15 @@
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="6">
 					<Node File="./src/linux/Lgi/GDragAndDrop.cpp" Type="2" Platforms="2" />
 				</Node>
-				<Node Name="Windows" Type="1" Platforms="15" Open="0" Id="7">
-					<Node File="./include/common/GCom.h" Type="3" Platforms="15" />
-					<Node File="./src/win32/Lgi/GDragAndDrop.cpp" Type="2" Platforms="1" />
+				<Node Name="Mac" Type="1" Platforms="15" Id="1">
+					<Node File=".\src\mac\cocoa\Lgi\GDragAndDrop.mm" Type="8" Platforms="4" />
 				</Node>
-				<Node File="./include/common/GDragAndDrop.h" Type="3" Platforms="15" />
-				<Node File="./include/common/GDropFiles.h" Type="3" Platforms="15" />
+				<Node Name="Windows" Type="1" Platforms="15" Open="0" Id="7">
+					<Node File=".\include\common\GCom.h" Type="3" Platforms="15" />
+					<Node File=".\src\win32\Lgi\GDragAndDrop.cpp" Type="2" Platforms="1" />
+				</Node>
+				<Node File=".\include\common\GDragAndDrop.h" Type="3" Platforms="15" />
+				<Node File=".\include\common\GDropFiles.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="File" Type="1" Platforms="15" Open="0" Id="8">
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="10">
@@ -143,12 +146,12 @@
 				<Node File=".\src\common\Lgi\GVariant.cpp" Type="2" Platforms="15" />
 				<Node File="./include/common/GVariant.h" Type="3" Platforms="15" />
 			</Node>
-			<Node File="./src/common/Lgi/GGuiUtils.cpp" Type="2" Platforms="15" />
-			<Node File="./src/common/Lgi/GObject.cpp" Type="2" Platforms="15" />
-			<Node File="./src/common/Lgi/GToolTip.cpp" Type="2" Platforms="15" />
-			<Node File="./src/common/Lgi/GTrayIcon.cpp" Type="2" Platforms="15" />
-			<Node File="./src/common/Lgi/LgiCommon.cpp" Type="2" Platforms="15" />
-			<Node File="./src/common/Lgi/LgiMsg.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\common\Lgi\GGuiUtils.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\common\Lgi\GObject.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\common\Lgi\GToolTip.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\common\Lgi\GTrayIcon.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\common\Lgi\LgiCommon.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\common\Lgi\LgiMsg.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="36">
 			<Node Name="File Select Win" Type="1" Platforms="15" Open="0" Id="38">
@@ -396,9 +399,10 @@
 		<General>
 			<Makefile>
 				<Linux>Makefile.linux</Linux>
+				<Windows>Makefile.win64</Windows>
 			</Makefile>
 			<Executable>
-				<Linux />
+				<Windows />
 			</Executable>
 			<Arguments>
 				<All />
@@ -408,7 +412,7 @@
 			</DebugAdmin>
 			<Defines>
 				<All />
-				<Linux />
+				<Windows />
 			</Defines>
 			<Compiler>
 				<Linux>gcc</Linux>
@@ -428,6 +432,7 @@ include/linux/Gtk</Debug>
 					<Release>include/linux
 include/linux/Gtk</Release>
 				</Linux>
+				<Windows />
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
@@ -438,6 +443,7 @@ include/linux/Gtk</Release>
 /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<All />
@@ -449,10 +455,11 @@ include/linux/Gtk</Release>
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
+				<Windows />
 			</Libraries>
 			<LibraryPaths>
 				<All />
-				<Linux />
+				<Windows />
 			</LibraryPaths>
 			<TargetType>
 				<All>DynamicLibrary</All>
@@ -462,6 +469,7 @@ include/linux/Gtk</Release>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
+				<Windows />
 			</TargetName>
 			<ApplicationIcon />
 		</Build>
@@ -476,7 +484,7 @@ include/linux/Gtk</Release>
 		<Advanced>
 			<OtherMakefileRules />
 			<PostBuildCommands>
-				<Linux />
+				<Windows />
 			</PostBuildCommands>
 		</Advanced>
 	</Settings>

@@ -95,23 +95,6 @@ const char *LMimeToUti(const char *Mime)
 }
 @end
 
-bool GDragData::AddFileStream(const char *LeafName, const char *MimeType, GAutoPtr<GStreamI> Stream)
-{
-	if (!LeafName || !MimeType || !Stream)
-		return false;
-	
-	if (!Format)
-		Format = LGI_StreamDropFormat;
-	else if (!Format.Equals(LGI_StreamDropFormat))
-		return false;
-	
-	Data.New() = LeafName;
-	Data.New() = MimeType;
-	Data.New().SetStream(Stream.Release(), true);
-	
-	return true;
-}
-
 class GDndSourcePriv
 {
 public:

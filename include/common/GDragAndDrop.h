@@ -67,7 +67,22 @@ struct LgiClass GDragData
 		return IsFormat(LGI_StreamDropFormat);
 	}
 	
-	bool AddFileStream(const char *LeafName, const char *MimeType, GAutoPtr<GStreamI> Stream);
+	bool AddFileStream(const char *LeafName, const char *MimeType, GAutoPtr<GStreamI> Stream)
+	{
+		if (!LeafName || !MimeType || !Stream)
+			return false;
+		
+		if (!Format)
+			Format = LGI_StreamDropFormat;
+		else if (!Format.Equals(LGI_StreamDropFormat))
+			return false;
+		
+		Data.New() = LeafName;
+		Data.New() = MimeType;
+		Data.New().SetStream(Stream.Release(), true);
+		
+		return true;
+	}
 };
 
 /// A drag source class
