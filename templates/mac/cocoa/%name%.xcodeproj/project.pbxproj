@@ -362,7 +362,7 @@
 					"-DLGI_COCOA",
 					"-D_DEBUG",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.memecode.i-Hex";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.memecode.%name%";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -388,7 +388,7 @@
 					"-DMAC",
 					"-DLGI_COCOA",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.memecode.i-Hex";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.memecode.%name%";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
