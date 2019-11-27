@@ -265,7 +265,7 @@ public:
 		// Load the file...
 		Img.Reset(GdcD->Load(File));
 		
-		#ifndef __GTK_H__
+		#if LGI_VIEW_HANDLE
 		if (!Owner->Handle())
 		{
 			// Wait for the view to be created...
