@@ -7674,8 +7674,11 @@ bool GHtml::Copy()
 	{
 		GClipBoard c(this);
 		
-		GAutoWString w(Utf8ToWide(s));
+		GAutoWString w;
+		#ifndef MAC
+		w.Reset(Utf8ToWide(s));
 		if (w) c.TextW(w);
+		#endif
 		c.Text(s, w == 0);
 
 		return true;

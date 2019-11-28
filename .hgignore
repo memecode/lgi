@@ -1,5 +1,6 @@
 syntax: glob
 
+.DS_Store
 Lgi*.sdf
 Lgi*.suo
 Lib
@@ -10,6 +11,8 @@ Release*
 */.DS_Store
 *.xcuserstate
 *.xcbkptlist
+xcschememanagement.plist
+contents.xcworkspacedata
 
 HtmlEditor/HtmlEdit*.sdf
 HtmlEditor/HtmlEdit*.suo

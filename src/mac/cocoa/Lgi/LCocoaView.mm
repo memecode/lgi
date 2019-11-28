@@ -153,7 +153,7 @@ struct DndEvent
 		self.WndClass = wnd->GetClass();
 		self->dnd = nil;
 
-		NSRect r = {{0, 0},{4000,2000}};
+		NSRect r = {{0, 0},{8000,8000}};
 		self->tracking = [[NSTrackingArea alloc] initWithRect:r
                                      options:NSTrackingMouseEnteredAndExited |
                                              NSTrackingActiveAlways |

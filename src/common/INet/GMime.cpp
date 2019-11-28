@@ -6,6 +6,13 @@
 #include "GToken.h"
 #include "Base64.h"
 
+#define DEBUG_MIME						1
+#if DEBUG_MIME
+#define LOG(...) printf(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 static const char *MimeEol				= "\r\n";
 static const char *MimeWs				= " \t\r\n";
 static const char *MimeStr				= "\'\"";
@@ -476,7 +483,7 @@ ssize_t GMimeBuf::Pop(GArray<char> &Out)
 	{
 		if (Src)
 		{
-			char Buf[1024];
+			char Buf[2048];
 			ssize_t r = Src ? Src->Read(Buf, sizeof(Buf)) : 0;
 			if (r)
 			{
@@ -736,7 +743,10 @@ GStreamI *GMime::GetData(bool Detach)
 	{		
 		Ds->SetPos(DataPos);
 		if (Detach)
+		{
+			LOG("%s:%i - Detaching %p from %p\n", _FL, DataStore, this);
 			DataStore = 0;
+		}
 	}
 
 	return Ds;
@@ -1149,147 +1159,183 @@ int GMime::GMimeText::GMimeDecode::Parse(GStringPipe *Source, ParentState *State
 {
 	int Status = 0;
 
-	if (Mime && Source)
+	if (!Mime || !Source)
 	{
-		Mime->Empty();
+		LOG("%s:%i - Arg error %p %p.\n", _FL, Mime, Source);
+		return Status;
+	}
+	
+	Mime->Empty();
+	if (!Mime->CreateTempData())
+	{
+		LOG("CreateTempData failed.\n");
+		LgiAssert(!"CreateTempData failed.");
+		return Status;
+	}
+	
+	LgiAssert(Mime->DataStore != NULL);
 
-		if (!Mime->CreateTempData())
+	// Read the headers..
+	GStringPipe HeaderBuf;
+	ssize_t r;
+
+	if (Buffer.Length() == 0)
+		Buffer.Length(1 << 10);
+
+	LOG("%s:%i - Reading headers...\n", _FL);
+	while ((r = Source->Pop(Buffer)) > 0)
+	{
+		if (!strchr(MimeEol, Buffer[0]))
 		{
-			LgiAssert(!"CreateTempData failed.");
+			// Store part of the headers
+			HeaderBuf.Push(Buffer.AddressOf(), r);
+		}
+		else break;
+	}
+
+	if (r < 0)
+		return 0;
+
+	// Not an error
+	Mime->Headers = HeaderBuf.NewStr();
+	LOG("%s:%i - Mime->Headers=%i\n", _FL, Mime->Headers?(int)strlen(Mime->Headers):-1);
+
+	// Get various bits out of the header
+	char *Encoding = Mime->GetEncoding();
+	char *Boundary = Mime->GetBoundary();
+	GAutoString MimeType(Mime->GetMimeType());
+	LOG("%s:%i - Encoding=%s, MimeType=%s, Boundary=%s\n", _FL, Encoding, MimeType.Get(), Boundary);
+
+	GStream *Decoder = 0;
+	if (Encoding)
+	{
+		if (_stricmp(Encoding, MimeQuotedPrintable) == 0)
+		{
+			Decoder = new GMimeQuotedPrintableDecode(Mime->DataStore);
+			LOG("%s:%i - Using GMimeQuotedPrintableDecode\n", _FL);
+		}
+		else if (_stricmp(Encoding, MimeBase64) == 0)
+		{
+			Decoder = new GMimeBase64Decode(Mime->DataStore);
+			LOG("%s:%i - Using GMimeBase64Decode\n", _FL);
 		}
 		else
 		{
-			// Read the headers..
-			GStringPipe HeaderBuf;
-			ssize_t r;
+			LOG("%s:%i - Unknown encoding '%s'\n", _FL, Encoding);
+		}
+	}
+	DeleteArray(Encoding);
 
-			if (Buffer.Length() == 0)
-				Buffer.Length(1 << 10);
+	// Read in the rest of the MIME segment
+	bool Done = false;
+	// int64 StartPos = Mime->DataStore->GetPos();
+	while (!Done)
+	{
+		// Process existing lines
+		ssize_t Len;
+		ssize_t Written = 0;
 
-			while ((r = Source->Pop(Buffer)) > 0)
+		Status = true;
+		while ((Len = Source->Pop(Buffer)) > 0)
+		{
+			// Check for boundary
+			MimeBoundary Type = MimeData;
+			auto b = Buffer.AddressOf();
+
+			if (Boundary)
 			{
-				if (!strchr(MimeEol, Buffer[0]))
+				bool CouldBe = Buffer.Length() > 2 && b[0] == '-' && b[1] == '-';
+				Type = IsMimeBoundary(Boundary, b);
+				
+				if (Type)
 				{
-					// Store part of the headers
-					HeaderBuf.Push(Buffer.AddressOf(), r);
+					LOG("%s:%i - IsMimeBoundary=%i\n", _FL, Type);
 				}
-				else break;
-			}
-
-			if (r < 0)
-				return 0;
-
-			// Not an error
-			Mime->Headers = HeaderBuf.NewStr();
-
-			// Get various bits out of the header
-			char *Encoding = Mime->GetEncoding();
-			char *Boundary = Mime->GetBoundary();
-			// int BoundaryLen = Boundary ? strlen(Boundary) : 0;
-			GStream *Decoder = 0;
-			if (Encoding)
-			{
-				if (_stricmp(Encoding, MimeQuotedPrintable) == 0)
+				else if (CouldBe)
 				{
-					Decoder = new GMimeQuotedPrintableDecode(Mime->DataStore);
-				}
-				else if (_stricmp(Encoding, MimeBase64) == 0)
-				{
-					Decoder = new GMimeBase64Decode(Mime->DataStore);
+					LOG("%s:%i - CouldBe '%s'\n", _FL, b);
 				}
 			}
-			DeleteArray(Encoding);
-
-			// Read in the rest of the MIME segment
-			bool Done = false;
-			// int64 StartPos = Mime->DataStore->GetPos();
-			while (!Done)
+			
+			if (State)
 			{
-				// Process existing lines
-				ssize_t Len;
-				ssize_t Written = 0;
-
-				Status = true;
-				while ((Len = Source->Pop(Buffer)))
+				State->Type = IsMimeBoundary(State->Boundary, b);
+				if (State->Type)
 				{
-					// Check for boundary
-					MimeBoundary Type = MimeData;
-					if (Boundary)
-					{
-						 Type = IsMimeBoundary(Boundary, Buffer.AddressOf());
-					}
-					
-					if (State)
-					{
-						State->Type = IsMimeBoundary(State->Boundary, Buffer.AddressOf());
-						if (State->Type)
-						{
-							Status = Done = true;
-							break;
-						}
-					}
+					LOG("%s:%i - IsMimeBoundary=%i\n", _FL, State->Type);
+					Status = Done = true;
+					break;
+				}
+			}
 
-					DoSegment:
-					if (Type == MimeNextSeg)
+			DoSegment:
+			if (Type == MimeNextSeg)
+			{
+				ParentState MyState;
+				MyState.Boundary = Boundary;
+
+				GMime *Seg = new GMime(Mime->GetTmpPath());
+				if (Seg &&
+					Seg->Text.Decode.Parse(Source, &MyState))
+				{
+					LOG("%s:%i - Inserting child seg.\n", _FL);
+					Mime->Insert(Seg);
+
+					if (MyState.Type)
 					{
-						ParentState MyState;
-						MyState.Boundary = Boundary;
-
-						GMime *Seg = new GMime(Mime->GetTmpPath());
-						if (Seg &&
-							Seg->Text.Decode.Parse(Source, &MyState))
-						{
-							Mime->Insert(Seg);
-
-							if (MyState.Type)
-							{
-								Type = MyState.Type;
-								goto DoSegment;
-							}
-						}
-						else break;
+						Type = MyState.Type;
+						goto DoSegment;
 					}
-					else if (Type == MimeEndSeg)
+				}
+				else
+				{
+					LOG("%s:%i - Text.Decode.Parse failed.\n", _FL);
+					break;
+				}
+			}
+			else if (Type == MimeEndSeg)
+			{
+				Done = true;
+				LOG("%s:%i - MimeEndSeg.\n", _FL);
+				break;
+			}
+			else
+			{
+				// Process data
+				if (Decoder)
+				{
+					Written += Decoder->Write(Buffer.AddressOf(), Len);
+				}
+				else
+				{
+					ssize_t w = Mime->DataStore->Write(Buffer.AddressOf(), Len);
+					if (w > 0)
 					{
-						Done = true;
-						break;
+						Written += w;
 					}
 					else
 					{
-						// Process data
-						if (Decoder)
-						{
-							Written += Decoder->Write(Buffer.AddressOf(), Len);
-						}
-						else
-						{
-							ssize_t w = Mime->DataStore->Write(Buffer.AddressOf(), Len);
-							if (w > 0)
-							{
-								Written += w;
-							}
-							else
-							{
-								Done = true;
-								Status = false;
-								break;
-							}
-						}
+						LOG("%s:%i - w 0\n", _FL);
+						Done = true;
+						Status = false;
+						break;
 					}
 				}
-
-				Mime->DataSize = Written;
-				if (Len == 0)
-				{
-					Done = true;
-				}
 			}
+		}
 
-			DeleteObj(Decoder);
-			DeleteArray(Boundary);
+		Mime->DataSize = Written;
+		if (Len == 0)
+		{
+			LOG("%s:%i - Len 0\n", _FL);
+			Done = true;
 		}
 	}
 
+	DeleteObj(Decoder);
+	DeleteArray(Boundary);
+
+	LOG("%s:%i - Finished\n", _FL);
 	return Status;
 }
 
