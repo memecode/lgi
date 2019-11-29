@@ -526,6 +526,7 @@ public:
 		{
 			if (m.Down())
 			{
+				Over = HitPart(m.x, m.y);
 				if (p.PtrCheck(Over))
 				{
 					// Over a path node...
@@ -540,22 +541,19 @@ public:
 						ShowMenu(Cursor);
 					}
 				}
-				else
+				else if (!e)
 				{
 					// In empty space
-					if (!e)
+					GRect c = GetClient();
+					e = new GEdit(GetId()+1, c.x1, c.y1, c.X()-1, c.Y()-1);
+					if (e)
 					{
-						GRect c = GetClient();
-						e = new GEdit(GetId()+1, c.x1, c.y1, c.X()-1, c.Y()-1);
-						if (e)
-						{
-							e->Attach(this);
+						e->Attach(this);
 
-							GString s = Name();
-							e->Name(s);
-							e->SetCaret(s.Length());
-							e->Focus(true);
-						}
+						GString s = Name();
+						e->Name(s);
+						e->SetCaret(s.Length());
+						e->Focus(true);
 					}
 				}
 			}
