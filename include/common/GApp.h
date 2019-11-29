@@ -61,12 +61,14 @@ class GAppPrivate;
 {
 }
 
-@property (nonnull) GAppPrivate *d;
+@property GAppPrivate *d;
 
-- (_Nonnull id)init:(nonnull GAppPrivate*)priv;
+- (id)init;
+- (void)setPriv:(nonnull GAppPrivate*)priv;
 - (void)terminate:(nullable id)sender;
 - (void)dealloc;
 - (void)assert:(nonnull LCocoaAssert*)ca;
+- (void)onUrl:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)reply;
 
 @end
 

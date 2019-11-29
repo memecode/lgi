@@ -313,6 +313,7 @@ void OnCrash(int i)
 class GAppPrivate
 {
 public:
+	GApp *App;
 	OsApp NsApp;
 	int RunDepth;
 
@@ -333,7 +334,7 @@ public:
 	/// Any fonts needed for styling the elements
 	GAutoPtr<GFontCache> FontCache;
 	
-	GAppPrivate()
+	GAppPrivate(GApp *app) : App(app)
 	{
 		NsApp = NULL;
 		RunDepth = 0;
@@ -360,14 +361,18 @@ public:
 /////////////////////////////////////////////////////////////////////////////
 @implementation LNsApplication
 
-- (id)init:(GAppPrivate*)priv
+- (id)init
 {
 	if ((self = [super init]) != nil)
 	{
-		self.d = priv;
-		printf("LNsApplication.init\n");
+		self.d = NULL;
 	}
 	return self;
+}
+
+- (void)setPriv:(nonnull GAppPrivate*)priv
+{
+	self.d = priv;
 }
 
 - (void)terminate:(nullable id)sender
@@ -378,7 +383,6 @@ public:
 - (void)dealloc
 {
 	[super dealloc];
-	printf("LNsApplication.dealloc\n");
 }
 
 - (void)assert:(LCocoaAssert*)ca
@@ -395,7 +399,15 @@ public:
 	[a release];
 }
 
+- (void)onUrl:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)reply
+{
+	GString s = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
+	if (self.d && self.d->App)
+    	self.d->App->OnUrl(s);
+}
+
 @end
+
 /////////////////////////////////////////////////////////////////////////////
 GSkinEngine *GApp::SkinEngine = 0;
 GApp *TheApp = 0;
@@ -405,7 +417,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *AppName, GAppArguments *ObjArgs)
 OsApplication(AppArgs.Args, AppArgs.Arg)
 {
 	TheApp = this;
-	d = new GAppPrivate;
+	d = new GAppPrivate(this);
 	d->Name.Reset(NewStr(AppName));
 	AppWnd = 0;
 	Name(AppName);
@@ -437,34 +449,11 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	
 	// Connect to the server
 	d->NsApp = [LNsApplication sharedApplication];
-
-	#if 0
-	auto mainMenu = [d->NsApp mainMenu];
-	if (!mainMenu)
-	{
-		mainMenu = [[NSMenu alloc] initWithTitle:@"App"];
-	}
-	NSMenuItem *appItem = [mainMenu itemAtIndex:0];
-	if (!appItem)
-	{
-		appItem = [[NSMenuItem alloc] initWithTitle:@"appItem" action:NULL keyEquivalent:@""];
-		[mainMenu addItem:appItem];
-	}
-	NSMenu *appMenu = [appItem submenu];
-	if (!appMenu)
-	{
-		appMenu = [[NSMenu alloc] initWithTitle:@"AppMenu"];
-		[appItem setSubmenu:appMenu];
-	}
-	if (appMenu)
-	{
-		auto myItem = [[NSMenuItem alloc] initWithTitle:@"Quit" action:NULL keyEquivalent:@"Q"];
-		[myItem setKeyEquivalentModifierMask: NSCommandKeyMask];
-		[appMenu addItem:myItem];
-	}
+	[d->NsApp setPriv:d];
 	
-	[d->NsApp setMainMenu:mainMenu];
-	#endif
+	// Register to get apple events
+	NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
+	[em setEventHandler:d->NsApp andSelector:@selector(onUrl:withReplyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
 	
 	// Setup the file and graphics sub-systems
 	d->FileSystem = new GFileSystem;
