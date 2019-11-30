@@ -474,7 +474,7 @@ void GTrayIcon::Value(int64 v)
 			if (d->StatusItem)
 			{
 				auto img = d->Icon[d->Val];
-				d->StatusItem.button.image = img;
+				[d->StatusItem setImage:img];
 			}
 
 			Visible(true);
