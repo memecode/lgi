@@ -613,7 +613,7 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 	if (MsgQue &&
 		(Msgs = MsgQue.Lock(_FL)))
 	{
-        // printf("IdleWrapper start %i\n", (int)Msgs->Length());
+		printf("IdleWrapper start %i\n", (int)Msgs->Length());
 
 		// Copy the messages out of the locked structure..
 		// This allows new messages to arrive independent
@@ -626,22 +626,22 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 		{
 			if (!GView::LockHandler(m.v, GView::OpExists))
 			{
-				// LgiTrace("%s:%i - Invalid view: %p.\n", _FL, m.v);
+				LgiTrace("%s:%i - Invalid view: %p.\n", _FL, m.v);
 			}
 			else
 			{
 				GMessage Msg(m.m, m.a, m.b);
-				// LgiTrace("%s::OnEvent %i,%i,%i\n", m.v->GetClass(), m.m, m.a, m.b);
+				LgiTrace("%s::OnEvent %i,%i,%i\n", m.v->GetClass(), m.m, m.a, m.b);
 				m.v->OnEvent(&Msg);
 			}
 		}
 	}
 	else
 	{
-        // printf("IdleWrapper start no lock\n");
+		printf("IdleWrapper start no lock\n");
 	}
 	
-    // printf("IdleWrapper end\n");
+	printf("IdleWrapper end\n");
 	return i->cb != NULL;
 }
 
@@ -698,6 +698,39 @@ void GApp::Exit(int Code)
 			d->IdleId.Length(Last);
 		}
 	}
+}
+
+bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b)
+{
+	LMessageQue::MsgArray *q = MsgQue.Lock(_FL);
+	if (!q)
+	{
+		printf("%s:%i - Couldn't lock app.\n", _FL);
+		return false;
+	}
+	
+	q->New().Set(View, Msg, a, b);
+	
+	#if 1 // defined(_DEBUG)
+	if (q->Length() > 3)
+	{
+		#if defined(WIN32)
+			char s[256];
+			sprintf_s(s, sizeof(s), 
+		#else
+			printf(
+		#endif
+			"PostEvent Que=" LPrintfSizeT "\n", q->Length());
+		#if defined(WIN32)
+			OutputDebugStringA(s);
+		#endif
+	}
+	#endif
+
+	MsgQue.Unlock();
+	
+	g_idle_add((GSourceFunc)IdleWrapper, &idle);
+	return true;
 }
 
 void GApp::OnUrl(const char *Url)
@@ -1445,39 +1478,6 @@ void GApp::OnDetach(GViewI *View)
 	}
 
 	MsgQue.Unlock();
-}
-
-bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b)
-{
-	LMessageQue::MsgArray *q = MsgQue.Lock(_FL);
-	if (!q)
-	{
-		printf("%s:%i - Couldn't lock app.\n", _FL);
-		return false;
-	}
-	
-	q->New().Set(View, Msg, a, b);
-	
-	#if 0 // defined(_DEBUG)
-	if (q->Length() > 3)
-	{
-		#if defined(WIN32)
-			char s[256];
-			sprintf_s(s, sizeof(s), 
-		#else
-			printf(
-		#endif
-			"MsgQue=" LPrintfSizeT "\n", q->Length());
-		#if defined(WIN32)
-			OutputDebugStringA(s);
-		#endif
-	}
-	#endif
-
-	MsgQue.Unlock();
-	
-	g_idle_add((GSourceFunc)IdleWrapper, &idle);
-	return true;
 }
 
 bool GMessage::Send(GViewI *View)
