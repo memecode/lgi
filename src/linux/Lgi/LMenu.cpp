@@ -403,6 +403,82 @@ LMenuItem *LSubMenu::FindItem(int Id)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
+class LMenuItemPrivate
+{
+public:
+	bool StartUnderline;		// Underline the first display string
+	bool HasAccel;				// The last display string should be right aligned
+	List<GDisplayString> Strs;	// Draw each alternate display string with underline
+								// except the last in the case of HasAccel==true.
+	::GString Shortcut;
+
+	LMenuItemPrivate()
+	{
+		HasAccel = false;
+		StartUnderline = false;
+	}
+
+	~LMenuItemPrivate()
+	{
+		Strs.DeleteObjects();
+	}
+
+	void UpdateStrings(GFont *Font, char *n)
+	{
+		// Build up our display strings, 
+		Strs.DeleteObjects();
+		StartUnderline = false;
+
+		char *Tab = strrchr(n, '\t');
+		if (Tab)
+		{
+			*Tab = 0;
+		}
+
+		char *Amp = 0, *a = n;
+		while (a = strchr(a, '&'))
+		{
+			if (a[1] != '&')
+			{
+				Amp = a;
+				break;
+			}
+
+			a++;
+		}
+
+		if (Amp)
+		{
+			// Before amp
+			Strs.Insert(new GDisplayString(Font, n, Amp - n ));
+
+			// Amp'd letter
+			char *e = LgiSeekUtf8(++Amp, 1);
+			Strs.Insert(new GDisplayString(Font, Amp, e - Amp ));
+
+			// After Amp
+			if (*e)
+			{
+				Strs.Insert(new GDisplayString(Font, e));
+			}
+		}
+		else
+		{
+			Strs.Insert(new GDisplayString(Font, n));
+		}
+
+		if (HasAccel = (Tab != 0))
+		{
+			Strs.Insert(new GDisplayString(Font, Tab + 1));
+			*Tab = '\t';
+		}
+		else if (HasAccel = (Shortcut.Get() != 0))
+		{
+			Strs.Insert(new GDisplayString(Font, Shortcut));
+		}
+	}
+};
+
 static GAutoString MenuItemParse(const char *s)
 {
 	char buf[256], *out = buf;
@@ -482,7 +558,7 @@ void LMenuItem::OnGtkEvent(::GString Event)
 
 LMenuItem::LMenuItem()
 {
-	d = NULL;
+	d = new LMenuItemPrivate();
 	Info = NULL;
 	Child = NULL;
 	Menu = NULL;
@@ -538,6 +614,7 @@ LMenuItem::~LMenuItem()
 	Remove();
 	Info.Destroy([](GtkMenuItem *i){ gtk_widget_destroy(GTK_WIDGET(i)); });
 	DeleteObj(Child);
+	DeleteObj(d);
 }
 
 #if GtkVer(2, 24)
@@ -653,6 +730,8 @@ Gtk::gint LgiKeyToGtkKey(int Key, const char *ShortCut)
 	return 0;
 }
 
+#if 1
+
 bool LMenuItem::ScanForAccel()
 {
 	if (!Menu)
@@ -682,6 +761,16 @@ bool LMenuItem::ScanForAccel()
 		for (int i=0; i<Keys.Length(); i++)
 		{
 			char *k = Keys[i];
+
+			if (!stricmp(k, "CtrlCmd"))
+			{
+				k = GUiEvent::CtrlCmdName();
+			}
+			else if (!stricmp(k, "AltCmd"))
+			{
+				k = GUiEvent::AltCmdName();
+			}			
+		
 			if (stricmp(k, "Ctrl") == 0)
 			{
 				#ifdef MAC
@@ -771,7 +860,7 @@ bool LMenuItem::ScanForAccel()
 			}
 			else
 			{
-				printf("%s:%i - Unknown shortcut part '%s'\n", _FL, k);
+				LgiTrace("%s:%i - Unknown part '%s' in shortcut '%s'\n", _FL, k, Sc);
 			}
 		}
 		
@@ -818,6 +907,228 @@ bool LMenuItem::ScanForAccel()
 
 	return true;
 }
+
+#else
+
+bool LMenuItem::ScanForAccel()
+{
+	::GString Accel;
+
+	if (d->Shortcut)
+	{
+		Accel = d->Shortcut;
+	}
+	else
+	{
+		char *n = GBase::Name();
+		if (n)
+		{
+			char *Tab = strchr(n, '\t');
+			if (Tab)
+				Accel = Tab + 1;
+		}
+	}
+
+	if (!Accel)
+		return false;
+
+	auto Keys = Accel.SplitDelimit("-+");
+	if (Keys.Length() == 0)
+		return false;
+
+	int Flags = 0;
+	uchar Key = 0;
+	bool AccelDirty = false;
+	
+	for (int i=0; i<Keys.Length(); i++)
+	{
+		auto &k = Keys[i];
+
+		if (k.Equals("CtrlCmd"))
+		{
+			k = GUiEvent::CtrlCmdName();
+			AccelDirty = true;
+		}
+		else if (k.Equals("AltCmd"))
+		{
+			k = GUiEvent::AltCmdName();
+			AccelDirty = true;
+		}
+
+		if (k.Equals("Ctrl") || k.Equals("Control"))
+		{
+			Flags |= LGI_EF_CTRL;
+		}
+		else if (k.Equals("Alt") || k.Equals("Option"))
+		{
+			Flags |= LGI_EF_ALT;
+		}
+		else if (k.Equals("Shift"))
+		{
+			Flags |= LGI_EF_SHIFT;
+		}
+		else if (k.Equals("System"))
+		{
+			Flags |= LGI_EF_SYSTEM;
+		}
+		else if (stricmp(k, "Del") == 0 ||
+				 stricmp(k, "Delete") == 0)
+		{
+			Key = LK_DELETE;
+			Flags |= LGI_EF_IS_NOT_CHAR;
+		}
+		else if (stricmp(k, "Ins") == 0 ||
+				 stricmp(k, "Insert") == 0)
+		{
+			Key = LK_INSERT;
+			Flags |= LGI_EF_IS_NOT_CHAR;
+		}
+		else if (stricmp(k, "Home") == 0)
+		{
+			Key = LK_HOME;
+			Flags |= LGI_EF_IS_NOT_CHAR;
+		}
+		else if (stricmp(k, "End") == 0)
+		{
+			Key = LK_END;
+			Flags |= LGI_EF_IS_NOT_CHAR;
+		}
+		else if (stricmp(k, "PageUp") == 0 ||
+				 stricmp(k, "Page Up") == 0 ||
+				 stricmp(k, "Page-Up") == 0)
+		{
+			Key = LK_PAGEUP;
+			Flags |= LGI_EF_IS_NOT_CHAR;
+		}
+		else if (stricmp(k, "PageDown") == 0 ||
+				 stricmp(k, "Page Down") == 0 ||
+				 stricmp(k, "Page-Down") == 0)
+		{
+			Key = LK_PAGEDOWN;
+			Flags |= LGI_EF_IS_NOT_CHAR;
+		}
+		else if (stricmp(k, "Backspace") == 0)
+		{
+			Key = LK_BACKSPACE;
+			Flags |= LGI_EF_IS_NOT_CHAR;
+		}
+		else if (stricmp(k, "Up") == 0)
+		{
+			Key = LK_UP;
+			Flags |= LGI_EF_IS_NOT_CHAR;
+		}
+		else if (stricmp(k, "Down") == 0)
+		{
+			Key = LK_DOWN;
+			Flags |= LGI_EF_IS_NOT_CHAR;
+		}
+		else if (stricmp(k, "Left") == 0)
+		{
+			Key = LK_LEFT;
+			Flags |= LGI_EF_IS_NOT_CHAR;
+		}
+		else if (stricmp(k, "Right") == 0)
+		{
+			Key = LK_RIGHT;
+			Flags |= LGI_EF_IS_NOT_CHAR;
+		}
+		else if (stricmp(k, "Esc") == 0)
+		{
+			Key = LK_ESCAPE;
+			Flags |= LGI_EF_IS_NOT_CHAR;
+		}
+		else if (stricmp(k, "Space") == 0)
+		{
+			Key = ' ';
+		}
+		else if (k[0] == 'F' && IsDigit(k[1]))
+		{
+			Key = LK_F1 + (int)k.LStrip("F").Int() - 1;
+			Flags |= LGI_EF_IS_NOT_CHAR;
+		}
+		else if (IsAlpha(k[0]))
+		{
+			Key = toupper(k[0]);
+		}
+		else if (IsDigit(k[0]))
+		{
+			Key = k[0];
+		}
+		else if (strchr(",./\\[]`;\'", k[0]))
+		{
+			if (Flags & LGI_EF_CTRL)
+			{
+				switch (k[0])
+				{
+					case ';': Key = 186; break;
+					case '=': Key = 187; break;
+					case ',': Key = 188; break;
+					case '_': Key = 189; break;
+					case '.': Key = 190; break;
+					case '/': Key = 191; break;
+					case '`': Key = 192; break;
+					case '[': Key = 219; break;
+					case '\\': Key = 220; break;
+					case ']': Key = 221; break;
+					case '\'': Key = 222; break;
+					default: LgiAssert(!"Unknown key."); break;
+				}
+			}
+			else
+			{
+				Key = k[0];
+			}
+		}
+		else
+		{
+			LgiAssert(!"Unknown Accel Part");
+		}
+	}
+
+	if (Key)
+	{
+		Gtk::gint GtkKey = LgiKeyToGtkKey(Key, Accel);
+		if (GtkKey)
+		{
+			GtkWidget *w = GtkCast(Info.obj, gtk_widget, GtkWidget);
+			Gtk::GdkModifierType mod = (Gtk::GdkModifierType)
+				(
+					(TestFlag(Flags, LGI_EF_CTRL)   ? Gtk::GDK_CONTROL_MASK : 0) |
+					(TestFlag(Flags, LGI_EF_SHIFT)  ? Gtk::GDK_SHIFT_MASK : 0)   |
+					(TestFlag(Flags, LGI_EF_ALT)    ? Gtk::GDK_MOD1_MASK : 0)    |
+					(TestFlag(Flags, LGI_EF_SYSTEM) ? Gtk::GDK_META_MASK : 0)
+				);
+
+			const char *Signal = "activate";
+
+			gtk_widget_add_accelerator(	w,
+										Signal,
+										Menu->AccelGrp,
+										GtkKey,
+										mod,
+										Gtk::GTK_ACCEL_VISIBLE
+									);
+			gtk_widget_show_all(w);
+		}
+		else
+		{
+			printf("%s:%i - No gtk key for '%s'\n", _FL, Accel.Get());
+		}
+		
+		auto Ident = Id();
+		LgiAssert(Ident > 0);
+		Menu->Accel.Insert( new GAccelerator(Flags, Key, Ident) );
+		
+		return true;
+	}
+	else
+	{
+		printf("%s:%i - Accel scan failed, str='%s'\n", _FL, Accel.Get());
+		return false;
+	}
+}
+
+#endif
 
 LSubMenu *LMenuItem::GetParent()
 {
