@@ -729,7 +729,8 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 
 	MsgQue.Unlock();
 	
-	g_idle_add((GSourceFunc)IdleWrapper, &idle);
+	if (InThread())
+		g_idle_add((GSourceFunc)IdleWrapper, &idle);
 	return true;
 }
 
@@ -1480,43 +1481,6 @@ void GApp::OnDetach(GViewI *View)
 	MsgQue.Unlock();
 }
 
-<<<<<<< working copy
-bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b)
-{
-	LMessageQue::MsgArray *q = MsgQue.Lock(_FL);
-	if (!q)
-	{
-		printf("%s:%i - Couldn't lock app.\n", _FL);
-		return false;
-	}
-	
-	q->New().Set(View, Msg, a, b);
-	
-	#if 0 // defined(_DEBUG)
-	if (q->Length() > 3)
-	{
-		#if defined(WIN32)
-			char s[256];
-			sprintf_s(s, sizeof(s), 
-		#else
-			printf(
-		#endif
-			"MsgQue=" LPrintfSizeT "\n", q->Length());
-		#if defined(WIN32)
-			OutputDebugStringA(s);
-		#endif
-	}
-	#endif
-
-	MsgQue.Unlock();
-	
-	if (InThread())
-		g_idle_add((GSourceFunc)IdleWrapper, &idle);
-	return true;
-}
-
-=======
->>>>>>> merge rev
 bool GMessage::Send(GViewI *View)
 {
 	if (!View)
