@@ -1476,7 +1476,8 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 
 	MsgQue.Unlock();
 	
-	g_idle_add((GSourceFunc)IdleWrapper, &idle);
+	if (InThread())
+		g_idle_add((GSourceFunc)IdleWrapper, &idle);
 	return true;
 }
 
