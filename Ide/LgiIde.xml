@@ -48,6 +48,7 @@
 			<Node File="./Code/FindSymbol.h" Type="3" Platforms="15" />
 			<Node File="./Code/GHistory.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/GHistory.h" Type="3" Platforms="15" />
+			<Node File="./Code/JavascriptParser.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/ParserCommon.h" Type="3" Platforms="15" />
 			<Node File="./Code/PythonParser.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/SimpleCppParser.cpp" Type="2" Platforms="15" />
@@ -127,10 +128,9 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
-			<CrossCompiler />
+			<CppCrossCompiler />
 			<DebugAdmin />
 			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -188,8 +188,6 @@ pthread
 					<Debug>..\Debug</Debug>
 					<Release>..\Release</Release>
 				</All>
-				<Linux />
-				<Windows />
 				<Mac />
 			</LibraryPaths>
 			<TargetType>
@@ -246,8 +244,6 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 		<Advanced>
 			<OtherMakefileRules />
 			<PostBuildCommands>
-				<Linux />
-				<Windows />
 				<Mac />
 			</PostBuildCommands>
 		</Advanced>

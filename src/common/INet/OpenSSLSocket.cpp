@@ -73,9 +73,8 @@ public:
 		}
 		#elif defined LINUX
 		char p[MAX_PATH];
-		if (LgiGetExePath(p, sizeof(p)))
+		if (LgiMakePath(p, sizeof(p), LGetExePath(), "libssl.so"))
 		{
-			LgiMakePath(p, sizeof(p), p, "libssl.so");
 			if (FileExists(p))
 			{
 			    LgiTrace("%s:%i - loading SSL library '%s'\n", _FL, p);

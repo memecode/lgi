@@ -58,8 +58,8 @@ typedef GRgba64 Png64;
 const char *LinuxLibName()
 {
 	static char lib[64];
-	auto v = GString(LIBPNG_VERSION).Split(".");
-	sprintf_s(lib, sizeof(lib), "libpng%s%s", v[0].Get(), v[1].Get());
+	sprintf_s(lib, sizeof(lib), "libpng%i", PNG_LIBPNG_VER_SONUM);
+	// printf("png lib name = '%s' (%s)\n", lib);
 	return lib;
 }
 #endif

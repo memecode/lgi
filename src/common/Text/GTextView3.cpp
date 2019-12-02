@@ -3957,7 +3957,7 @@ bool GTextView3::OnKey(GKey &k)
 				break;
 			}
 			case LK_RETURN:
-			#ifndef WINDOWS
+			#if defined MAC
 			case LK_KEYPADENTER:
 			#endif
 			{

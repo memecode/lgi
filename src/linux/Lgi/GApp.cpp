@@ -740,11 +740,8 @@ GXmlTag *GApp::GetConfig(const char *Tag)
 	{
 		char File[] = "lgi.conf";
 		char Path[256];
-		if (LgiGetExePath(Path, sizeof(Path)))
+		if (LgiMakePath(Path, sizeof(Path), LGetExePath(), File))
 		{
-			if (Path[strlen(Path)-1] != DIR_CHAR) strcat(Path, DIR_STR);
-			strcat(Path, File);
-
 			if (!FileExists(Path))
 			{
 				char *f = LgiFindFile(File);
@@ -1292,8 +1289,7 @@ bool GApp::DesktopInfo::Set(const char *Field, const char *Value, const char *Se
 
 GApp::DesktopInfo *GApp::GetDesktopInfo()
 {
-	char sExe[MAX_PATH] = "";
-	LgiGetExeFile(sExe, sizeof(sExe));
+	auto sExe = LGetExeFile();
 	::GFile::Path Exe(sExe);
 	::GFile::Path Desktop(LSP_HOME);
 	::GString Leaf;
@@ -1312,13 +1308,9 @@ GApp::DesktopInfo *GApp::GetDesktopInfo()
 		if (!s && Name())
 			d->DesktopInfo->Set("Name", Name());
 		
-		char sExe[MAX_PATH] = "";
-		if (LgiGetExeFile(sExe, sizeof(sExe)))
-		{
-			s = d->DesktopInfo->Get("Exec");
-			if (!s || s != (const char*)sExe)
-				d->DesktopInfo->Set("Exec", sExe);
-		}
+		s = d->DesktopInfo->Get("Exec");
+		if (!s || s != (const char*)sExe)
+			d->DesktopInfo->Set("Exec", sExe);
 		
 		s = d->DesktopInfo->Get("Type");
 		if (!s) d->DesktopInfo->Set("Type", "Application");

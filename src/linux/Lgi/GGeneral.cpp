@@ -168,9 +168,10 @@ bool LgiGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
 		{	if (Ext1) Ext.Add(Ext1); \
 			if (Ext2) Ext.Add(Ext2); }
 
+	const char *Null = NULL;
 	if (!Mime);
-	HardCodeExtention("text/calendar", "ics", 0)
-	HardCodeExtention("text/x-vcard", "vcf", 0)
+	HardCodeExtention("text/calendar", "ics", Null)
+	HardCodeExtention("text/x-vcard", "vcf", Null)
 	HardCodeExtention("text/mbox", "mbx", "mbox");
 
 	return Ext.Length() > Start;

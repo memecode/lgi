@@ -1796,11 +1796,9 @@ GString LGetExeFile()
 		else Status = true;
 
 		if (Status)
-		{
-			strcpy_s(Dst, DstSize, ExePathCache);
-		}
+			return ExePathCache;
 		
-		return Status;
+		return GString();
 	
 	#elif defined MAC
 	

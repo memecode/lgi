@@ -180,7 +180,9 @@ bool GEdit::OnKey(GKey &k)
 	switch (k.vkey)
 	{
 	 	case LK_RETURN:
+	 	#ifndef LINUX
 		case LK_KEYPADENTER:
+		#endif
 		{
 			if (k.Down())
 				SendNotify(GNotify_ReturnKey);
@@ -212,7 +214,9 @@ bool GEdit::OnKey(GKey &k)
 		(
 			k.vkey == LK_TAB ||
 			k.vkey == LK_RETURN  ||
+			#ifndef LINUX
 			k.vkey == LK_KEYPADENTER ||
+			#endif
 			k.vkey == LK_ESCAPE
 		)
 	)

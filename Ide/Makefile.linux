@@ -76,6 +76,7 @@ Depends =	GDebugContext.o \
 			FindSymbol.o \
 			GHistory.o \
 			PythonParser.o \
+			JavascriptParser.o \
 			SimpleCppParser.o \
 			GLexCpp.o \
 			GParseCpp.o \
@@ -553,6 +554,11 @@ GHistory.o : ./Code/GHistory.cpp ../include/common/Lgi.h \
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 PythonParser.o : ./Code/PythonParser.cpp ../include/common/Lgi.h \
+	./Code/ParserCommon.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
+JavascriptParser.o : ./Code/JavascriptParser.cpp ../include/common/Lgi.h \
 	./Code/ParserCommon.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
