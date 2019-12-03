@@ -107,12 +107,13 @@ class LgiClass OsAppArguments
 
 public:
 	int Args;
-	char **Arg;
+	const char **Arg;
 
 	OsAppArguments(int args, const char **arg);
 	~OsAppArguments();
 
 	void Set(char *CmdLine);
+	bool Get(const char *Name, const char **Val = NULL);
 	OsAppArguments &operator =(OsAppArguments &a);
 };
 

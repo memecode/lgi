@@ -158,7 +158,7 @@ void *lgi_malloc(size_t size)
 						break;
 
 					if (i >= 0)
-						b->Stack[i].Ip = (uint) *((uint8**)RegEbp + 1);
+						b->Stack[i].Ip = (uint) *((uint8_t**)RegEbp + 1);
 					RegEbp = *(uint*)RegEbp;
 				}
 				#endif
@@ -431,7 +431,7 @@ bool LgiDumpMemoryStats(char *filename)
 							OutputDebugStringA(s);
 						}
 
-						uint8 *Data = (uint8*)(b + 1);
+						uint8_t *Data = (uint8_t*)(b + 1);
 						int ch = sprintf_s(s, sizeof(s), "Block %p, %i bytes = {", b + 1, b->Size);
 						for (int n=0; n<b->Size && n<16; n++)
 						{

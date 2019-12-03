@@ -542,8 +542,8 @@ void GDisplayString::Layout(bool Debug)
 							LgiAssert(Px + bmp.width <= Img->X());
 							for (int y=0; y<bmp.rows; y++)
 							{
-								uint8 *in = bmp.buffer + (y * bmp.pitch);
-								uint8 *out = (*Img)[Py+y];
+								uint8_t *in = bmp.buffer + (y * bmp.pitch);
+								uint8_t *out = (*Img)[Py+y];
 								if (out)
 								{
 									LgiAssert(Px+Skip >= 0);
@@ -1393,7 +1393,7 @@ bool CompositeText8Alpha(GSurface *Out, GSurface *In, GFont *Font, int px, int p
 	// FIXME, do blt clipping here...
 
 	// Create colour map of the foreground/background colours		
-	uint8 *Div255 = Div255Lut;
+	uint8_t *Div255 = Div255Lut;
 	GColour fore = Font->Fore();
 	GRgb24 fore_px;
 	fore_px.r = fore.r();
@@ -1427,21 +1427,21 @@ bool CompositeText8Alpha(GSurface *Out, GSurface *In, GFont *Font, int px, int p
 		}
 	}
 
-	uint8 *StartOfBuffer = (*Out)[0];
-	uint8 *EndOfBuffer = StartOfBuffer + (Out->GetRowStep() * Out->Y());
+	uint8_t *StartOfBuffer = (*Out)[0];
+	uint8_t *EndOfBuffer = StartOfBuffer + (Out->GetRowStep() * Out->Y());
 
 	for (unsigned y=Clip.SrcClip.y1; y<=Clip.SrcClip.y2; y++)
 	{
 		OutPx *d = ((OutPx*) (*Out)[py + y]) + Clip.DstClip.x1;
-		uint8 *i = (*In)[y];
+		uint8_t *i = (*In)[y];
 		if (!i) return false;
-		uint8 *e = i + Clip.DstClip.X();
+		uint8_t *e = i + Clip.DstClip.X();
 
-		LgiAssert((uint8*)d >= StartOfBuffer);
+		LgiAssert((uint8_t*)d >= StartOfBuffer);
 		
 		if (Font->Transparent())
 		{
-			uint8 a, o;
+			uint8_t a, o;
 			OutPx *s;
 			
 			while (i < e)
@@ -1478,7 +1478,7 @@ bool CompositeText8Alpha(GSurface *Out, GSurface *In, GFont *Font, int px, int p
 			}
 		}
 
-		LgiAssert((uint8*)d <= EndOfBuffer);
+		LgiAssert((uint8_t*)d <= EndOfBuffer);
 	}
 	
 	return true;
@@ -1495,7 +1495,7 @@ bool CompositeText8NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 	// FIXME, do blt clipping here...
 
 	// Create colour map of the foreground/background colours		
-	uint8 *DivLut = Div255Lut;
+	uint8_t *DivLut = Div255Lut;
 	GColour fore = Font->Fore();
 	GRgb24 fore_px;
 	fore_px.r = fore.r();
@@ -1529,8 +1529,8 @@ bool CompositeText8NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 		}
 	}
 
-	uint8 *StartOfBuffer = (*Out)[0];
-	uint8 *EndOfBuffer = StartOfBuffer + (Out->GetRowStep() * Out->Y());
+	uint8_t *StartOfBuffer = (*Out)[0];
+	uint8_t *EndOfBuffer = StartOfBuffer + (Out->GetRowStep() * Out->Y());
 
 	for (int y=Clip.SrcClip.y1; y<=Clip.SrcClip.y2; y++)
 	{
@@ -1538,19 +1538,19 @@ bool CompositeText8NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 		if (!dst)
 			continue;
 		dst += Clip.DstClip.x1;
-		if ((uint8*)dst < StartOfBuffer)
+		if ((uint8_t*)dst < StartOfBuffer)
 			continue;
 		
-		uint8 *i = (*In)[y];
+		uint8_t *i = (*In)[y];
 		if (!i) return false;
-		uint8 *e = i + Clip.DstClip.X();
+		uint8_t *e = i + Clip.DstClip.X();
 		GRgba32 *src;
 
-		LgiAssert((uint8*)dst >= StartOfBuffer);
+		LgiAssert((uint8_t*)dst >= StartOfBuffer);
 		
 		if (Font->Transparent())
 		{
-			uint8 a, oma;
+			uint8_t a, oma;
 			
 			while (i < e)
 			{
@@ -1588,7 +1588,7 @@ bool CompositeText8NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 			}
 		}
 
-		LgiAssert((uint8*)dst <= EndOfBuffer);
+		LgiAssert((uint8_t*)dst <= EndOfBuffer);
 	}
 	
 	return true;
@@ -1607,7 +1607,7 @@ bool CompositeText5NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 	#define MASK_6BIT 0x3f
 
 	// Create colour map of the foreground/background colours		
-	uint8 *Div255 = Div255Lut;
+	uint8_t *Div255 = Div255Lut;
 	GColour fore = Font->Fore();
 	GRgb24 fore_px;
 	fore_px.r = fore.r();
@@ -1639,8 +1639,8 @@ bool CompositeText5NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 		}
 	}
 
-	uint8 *StartOfBuffer = (*Out)[0];
-	uint8 *EndOfBuffer = StartOfBuffer + (Out->GetRowStep() * Out->Y());
+	uint8_t *StartOfBuffer = (*Out)[0];
+	uint8_t *EndOfBuffer = StartOfBuffer + (Out->GetRowStep() * Out->Y());
 
 	for (unsigned y=Clip.SrcClip.y1; y<=Clip.SrcClip.y2; y++)
 	{
@@ -1652,11 +1652,11 @@ bool CompositeText5NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 		if (!i) return false;
 		uint8 *e = i + Clip.DstClip.X();
 
-		LgiAssert((uint8*)dst >= StartOfBuffer);
+		LgiAssert((uint8_t*)dst >= StartOfBuffer);
 		
 		if (Font->Transparent())
 		{
-			uint8 a;
+			uint8_t a;
 			OutPx *src;
 			
 			while (i < e)

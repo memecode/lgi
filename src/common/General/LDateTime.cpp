@@ -1264,12 +1264,12 @@ bool LDateTime::Serialize(ObjProperties *Props, char *Name, bool Write)
 	{
 		struct _Date
 		{
-			uint8 Day;
-			uint8 Month;
-			int16 Year;
-			uint8 Hour;
-			uint8 Minute;
-			uint16 ThouSec;
+			uint8_t Day;
+			uint8_t Month;
+			int16_t Year;
+			uint8_t Hour;
+			uint8_t Minute;
+			uint16_t ThouSec;
 		};
 
 		LgiAssert(sizeof(_Date) == 8);

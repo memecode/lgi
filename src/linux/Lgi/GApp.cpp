@@ -69,6 +69,28 @@ OsAppArguments::~OsAppArguments()
 	DeleteObj(d);
 }
 
+bool OsAppArguments::Get(const char *Name, const char **Val)
+{
+	if (!Name)
+		return false;
+		
+	for (int i=0; i<Args; i++)
+	{
+		auto a = Arg[i];
+		if (a[0] == '-' || a[0] == '/')
+		{
+			if (Stricmp(a+1, Name) == 0)
+			{
+				if (i < Args - 1 && Val)
+					*Val = Arg[i + 1];
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
 void OsAppArguments::Set(char *CmdLine)
 {
 	d->Ptr.DeleteArrays();

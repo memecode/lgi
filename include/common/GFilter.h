@@ -58,8 +58,8 @@ protected:
 	{
 		#ifdef __BIG_ENDIAN__
 		// Swap the bytes...
-		uint8 *o = out + len - 1;
-		const uint8 *i = in;
+		uint8_t *o = out + len - 1;
+		const uint8_t *i = in;
 		while (i < in + len)
 		{
 			*o++ = *i++;

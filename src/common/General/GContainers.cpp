@@ -160,10 +160,10 @@ int GMemQueue::Find(char *Str)
 			for (List<Block>::I Blocks = Mem.Start(); Blocks.In(); Blocks++)
 			{
 				Block *m = *Blocks;
-				uint8 *Base = ((uint8*)m->Ptr()) + m->Next;
-				uint8 *End = Base + (m->Used - m->Next);
+				uint8_t *Base = ((uint8_t*)m->Ptr()) + m->Next;
+				uint8_t *End = Base + (m->Used - m->Next);
 
-				for (uint8 *Ptr = Base; Ptr < End; Ptr++)
+				for (uint8_t *Ptr = Base; Ptr < End; Ptr++)
 				{
 					if (*Ptr == *UStr)
 					{
@@ -175,9 +175,9 @@ int GMemQueue::Find(char *Str)
 							Block *Cur = *Match;
 							if (Cur == m)
 							{
-								uint8 *b = Base;
-								uint8 *e = End;
-								uint8 *p = Ptr;
+								uint8_t *b = Base;
+								uint8_t *e = End;
+								uint8_t *p = Ptr;
 								bool m = true;
 
 								for (int i=1; i<SLen; i++)
@@ -188,7 +188,7 @@ int GMemQueue::Find(char *Str)
 										Cur = *Match;
 										if (Cur)
 										{
-											b = ((uint8*)Cur->Ptr()) + Cur->Next;
+											b = ((uint8_t*)Cur->Ptr()) + Cur->Next;
 											e = b + (Cur->Used - Cur->Next);
 											p = b - i;
 										}
