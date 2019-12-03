@@ -12,7 +12,7 @@
 #include "Gdc2.h"
 #include "GPalette.h"
 
-#define BytePtr	((uint8*&)Ptr)
+#define BytePtr	((uint8_t*&)Ptr)
 #undef NonPreMulOver48
 #define NonPreMulOver48(c)	d->c = ((s->c * sa) + ((d->c * 0xffff) / 0xffff * o)) / 0xffff
 

@@ -387,3 +387,16 @@ void GButton::OnClick()
 		SendNotify();
 }
 
+bool GButton::SetImage(const char *FileName)
+{
+	return false;
+}
+
+bool GButton::SetImage(GSurface *Img, bool OwnIt)
+{
+	return false;
+}
+
+void GButton::SetPreferredSize(int x, int y)
+{
+}

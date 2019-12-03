@@ -143,7 +143,7 @@ void *lgi_malloc(size_t size)
 							break;
 
 						if (i)
-							b->Stack[i-1].Ip = (UNativeInt) *((uint8**)frame + 1);
+							b->Stack[i-1].Ip = (UNativeInt) *((uint8_t**)frame + 1);
 						frame = frame->Next;
 					}
 				}

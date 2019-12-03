@@ -152,7 +152,7 @@ int GMemQueue::Find(char *Str)
 	if (Str)
 	{
 		int Pos = 0;
-		uint8 *UStr = (uint8*) Str;
+		uint8_t *UStr = (uint8_t*) Str;
 
 		int SLen = strlen(Str);
 		if (SLen > 0)

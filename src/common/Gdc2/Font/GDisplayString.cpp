@@ -1648,9 +1648,9 @@ bool CompositeText5NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 		if (!dst)
 			continue;
 		dst += Clip.DstClip.x1;
-		uint8 *i = (*In)[y];
+		uint8_t *i = (*In)[y];
 		if (!i) return false;
-		uint8 *e = i + Clip.DstClip.X();
+		uint8_t *e = i + Clip.DstClip.X();
 
 		LgiAssert((uint8_t*)dst >= StartOfBuffer);
 		
@@ -1675,7 +1675,7 @@ bool CompositeText5NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 					{
 						// Blend
 						#if 0
-						uint8 oma = 255 - a;
+						uint8_t oma = 255 - a;
 						src = map + a;
 						GRgb24 d = { G5bitTo8bit(dst->r),
 									 G6bitTo8bit(dst->g),
@@ -1687,14 +1687,14 @@ bool CompositeText5NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 						dst->g = Div255[(oma * d.g) + (a * s.g)] >> 2;
 						dst->b = Div255[(oma * d.b) + (a * s.b)] >> 3;
 						#else
-						uint8 a5 = a >> 3;
-						uint8 a6 = a >> 2;
-						uint8 oma5 = MASK_5BIT - a5;
-						uint8 oma6 = MASK_6BIT - a6;
+						uint8_t a5 = a >> 3;
+						uint8_t a6 = a >> 2;
+						uint8_t oma5 = MASK_5BIT - a5;
+						uint8_t oma6 = MASK_6BIT - a6;
 						src = map + a;
-						dst->r = ((oma5 * (uint8)dst->r) + (a5 * (uint8)src->r)) / MASK_5BIT;
-						dst->g = ((oma6 * (uint8)dst->g) + (a6 * (uint8)src->g)) / MASK_6BIT;
-						dst->b = ((oma5 * (uint8)dst->b) + (a5 * (uint8)src->b)) / MASK_5BIT;
+						dst->r = ((oma5 * (uint8_t)dst->r) + (a5 * (uint8_t)src->r)) / MASK_5BIT;
+						dst->g = ((oma6 * (uint8_t)dst->g) + (a6 * (uint8_t)src->g)) / MASK_6BIT;
+						dst->b = ((oma5 * (uint8_t)dst->b) + (a5 * (uint8_t)src->b)) / MASK_5BIT;
 						#endif
 						break;
 					}
@@ -1711,7 +1711,7 @@ bool CompositeText5NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 			}
 		}
 		
-		LgiAssert((uint8*)dst <= EndOfBuffer);
+		LgiAssert((uint8_t*)dst <= EndOfBuffer);
 	}
 	
 	return true;

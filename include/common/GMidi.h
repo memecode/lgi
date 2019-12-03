@@ -45,17 +45,17 @@ public:
 	GMidi();
 	~GMidi();
 
-	static int GetMidiPacketSize(uint8_t *ptr, int len);
+	static int GetMidiPacketSize(uint8_t *ptr, size_t len);
 	
 	virtual GStream *GetLog() { return NULL; }
 
 	bool IsMidiOpen();
 	bool Connect(int InIdx, int OutIdx, GAutoString *ErrorMsg = NULL);
-	void SendMidi(uint8_t *ptr, int len, bool quiet);
+	void SendMidi(uint8_t *ptr, size_t len, bool quiet);
 	void CloseMidi();
 
-	virtual void OnMidiIn(uint8_t *midi, int len);
-	virtual void OnMidiOut(uint8_t *midi, int len);
+	virtual void OnMidiIn(uint8_t *midi, size_t len);
+	virtual void OnMidiOut(uint8_t *midi, size_t len);
 };
 
 #endif

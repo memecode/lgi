@@ -149,7 +149,7 @@ bool LgiIsUtf8(const char *s, ssize_t len)
 		printf("Utf: %p %i\n", s, (int)Len);
 		for (int i=0; i<Len; i++)
 		{
-			printf("%02x ", (uint8)s[i]);
+			printf("%02x ", (uint8_t)s[i]);
 		}
 		printf("\n");
 	}

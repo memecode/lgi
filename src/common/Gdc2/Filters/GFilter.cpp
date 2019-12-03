@@ -601,11 +601,11 @@ template<typename T>
 ssize_t SwapWrite(GStream *Out, T v)
 {
 	#if 0 // __ORDER_BIG_ENDIAN__
-	uint8 *s = (uint8*)&v;
-	uint8 *e = s + sizeof(v) - 1;
+	uint8_t *s = (uint8_t*)&v;
+	uint8_t *e = s + sizeof(v) - 1;
 	while (s < e)
 	{
-		uint8 tmp = *s;
+		uint8_t tmp = *s;
 		*s++ = *e;
 		*e-- = tmp;
 	}

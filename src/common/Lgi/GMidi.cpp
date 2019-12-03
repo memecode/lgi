@@ -402,7 +402,7 @@ bool GMidi::IsMidiOpen()
 	#endif
 }
 
-int GMidi::GetMidiPacketSize(uint8_t *ptr, int len)
+int GMidi::GetMidiPacketSize(uint8_t *ptr, size_t len)
 {
 	if (!ptr || len < 1)
 		return 0;
@@ -450,11 +450,11 @@ void GMidi::ParseMidi()
 	{
 		while (MidiIn.Length() > 0)
 		{
-			int len = GetMidiPacketSize(&MidiIn[0], MidiIn.Length());
+			auto len = GetMidiPacketSize(&MidiIn[0], MidiIn.Length());
 			if (len > 0)
 			{
 				OnMidiIn(&MidiIn[0], len);
-				int Remaining = MidiIn.Length() - len;
+				auto Remaining = MidiIn.Length() - len;
 				if (Remaining > 0)
 				{
 					memmove(&MidiIn[0], &MidiIn[len], Remaining);
@@ -666,14 +666,14 @@ void GMidi::CloseMidi()
 	#endif
 }
 
-void GMidi::OnMidiIn(uint8_t *midi, int midi_len)
+void GMidi::OnMidiIn(uint8_t *midi, size_t midi_len)
 {
 	#if MIDI_MIRROR_IN_TO_OUT
 	SendMidi(p, len);
 	#endif
 }
 
-void GMidi::SendMidi(uint8_t *ptr, int len, bool quiet)
+void GMidi::SendMidi(uint8_t *ptr, size_t len, bool quiet)
 {
 	LgiAssert(ptr != NULL);
 	if (!ptr)
@@ -704,7 +704,7 @@ void GMidi::SendMidi(uint8_t *ptr, int len, bool quiet)
 				ZeroObj(Hdr);
 				Hdr.dwUser = quiet;
 				Hdr.lpData = (LPSTR) ptr;
-				Hdr.dwBufferLength = len;
+				Hdr.dwBufferLength = (DWORD)len;
 				midiOutPrepareHeader(d->hOut, &Hdr, sizeof(Hdr));
 
 				MMRESULT r = midiOutLongMsg(d->hOut, &Hdr, sizeof(Hdr));
@@ -754,7 +754,7 @@ void GMidi::SendMidi(uint8_t *ptr, int len, bool quiet)
 	#endif
 }
 
-void GMidi::OnMidiOut(uint8_t *p, int len)
+void GMidi::OnMidiOut(uint8_t *p, size_t len)
 {
 	if (GetLog())
 	{
