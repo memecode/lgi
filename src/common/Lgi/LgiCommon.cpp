@@ -1891,12 +1891,10 @@ static void _LFindFile(const char *Name, GString *GStr, GAutoString *AStr)
 		"./Contents/Resources",
 		#else
 		"./Resources",
-		#endif
-		#ifndef WIN32
-		"./resources",
+		"../Resources",
 		#endif
 		"../Code",
-		"../Resources",
+		"../../Resources",
 		#ifdef WIN32
 		"../Debug",
 		"../Release",

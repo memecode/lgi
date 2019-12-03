@@ -742,4 +742,15 @@ public:
 	static GView *Create(const char *Class, GRect *Pos = 0, const char *Text = 0);
 };
 
+#define DeclFactory(CLS) \
+	class CLS ## Factory : public GViewFactory \
+	{ \
+		GView *NewView(const char *Name, GRect *Pos, const char *Text) \
+		{ \
+			if (!_stricmp(Name, #CLS)) return new CLS; \
+			return NULL; \
+		} \
+	}	CLS ## FactoryInst;
+
+
 #endif
