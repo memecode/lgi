@@ -79,7 +79,7 @@ public:
 
 	// Tree
 	void OnItemClick(GTreeItem *Item, GMouse &m);
-	void OnItemBeginDrag(GTreeItem *Item, int Flags);
+	void OnItemBeginDrag(GTreeItem *Item, GMouse &m);
 	void OnItemExpand(GTreeItem *Item, bool Expand);
 	void OnItemSelect(GTreeItem *Item);
 

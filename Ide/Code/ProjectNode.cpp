@@ -243,7 +243,6 @@ bool ProjectNode::Load(GDocView *Edit, NodeView *Callback)
 	else
 	{
 		GString Full = GetFullPath();
-		Edit->Debug();
 		Status = Edit->Open(Full, Charset);
 	}
 	

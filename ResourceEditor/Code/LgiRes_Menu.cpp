@@ -353,9 +353,9 @@ void ResMenu::OnItemClick(GTreeItem *Item, GMouse &m)
 	GTree::OnItemClick(Item, m);
 }
 
-void ResMenu::OnItemBeginDrag(GTreeItem *Item, int Flags)
+void ResMenu::OnItemBeginDrag(GTreeItem *Item, GMouse &m)
 {
-	GTree::OnItemBeginDrag(Item, Flags);
+	GTree::OnItemBeginDrag(Item, m);
 }
 
 void ResMenu::OnItemExpand(GTreeItem *Item, bool Expand)
