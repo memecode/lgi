@@ -1773,7 +1773,7 @@ void GTree::OnMouseMove(GMouse &m)
 				if (abs(d->LastClick.x - m.x) > DRAG_THRESHOLD ||
 					abs(d->LastClick.y - m.y) > DRAG_THRESHOLD)
 				{
-					OnItemBeginDrag(d->LastHit, m.Flags);
+					OnItemBeginDrag(d->LastHit, m);
 					Capture(false);
 				}
 			}
@@ -2169,18 +2169,12 @@ void GTree::OnItemClick(GTreeItem *Item, GMouse &m)
 		SendNotify(GNotifyItem_Click);
 }
 
-void GTree::OnItemBeginDrag(GTreeItem *Item, int Flags)
+void GTree::OnItemBeginDrag(GTreeItem *Item, GMouse &m)
 {
 	if (!Item)
 		return;
 
 	TREELOCK
-
-	GMouse m;
-	m.x = m.y = 0;
-	m.Target = NULL;
-	m.ViewCoords = false;
-	m.Flags = Flags;
 	Item->OnBeginDrag(m);
 }
 

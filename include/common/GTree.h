@@ -211,7 +211,7 @@ public:
 	/// Called when an item is clicked
 	virtual void OnItemClick(GTreeItem *Item, GMouse &m);
 	/// Called when an item is dragged from it's position
-	virtual void OnItemBeginDrag(GTreeItem *Item, int Flags);
+	virtual void OnItemBeginDrag(GTreeItem *Item, GMouse &m);
 	/// Called when an item is expanded/contracted to show or hide it's children
 	virtual void OnItemExpand(GTreeItem *Item, bool Expand);
 	/// Called when an item is selected
