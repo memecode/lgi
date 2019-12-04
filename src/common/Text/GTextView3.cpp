@@ -2426,6 +2426,58 @@ bool GTextView3::Open(const char *Name, const char *CharSet)
 	return Status;
 }
 
+template<typename T>
+bool WriteToStream(GFile &out, T *in, size_t len, bool CrLf)
+{
+	if (!in)
+		return false;
+	
+	if (CrLf)
+	{
+		int BufLen = 1 << 20;
+		GAutoPtr<T,true> Buf(new T[BufLen]);
+		T *b = Buf;
+		T *e = Buf + BufLen;
+		T *c = in;
+		T *end = c + len;
+		
+		while (c < end)
+		{
+			if (b > e - 16)
+			{
+				auto Bytes = (b - Buf) * sizeof(T);
+				if (out.Write(Buf, Bytes) != Bytes)
+					return false;
+				
+				b = Buf;
+			}
+			
+			if (*c == '\n')
+			{
+				*b++ = '\r';
+				*b++ = '\n';
+			}
+			else
+			{
+				*b++ = *c;
+			}
+			c++;
+		}
+
+		auto Bytes = (b - Buf) * sizeof(T);
+		if (out.Write(Buf, Bytes) != Bytes)
+			return false;
+	}
+	else
+	{
+		auto Bytes = len * sizeof(T);
+		if (out.Write(in, Bytes) != Bytes)
+			return false;
+	}
+
+	return true;
+}
+
 bool GTextView3::Save(const char *Name, const char *CharSet)
 {
 	GFile f;
@@ -2457,60 +2509,47 @@ bool GTextView3::Save(const char *Name, const char *CharSet)
 		}
 
 		if (Text)
-		{			
-			char *c8 = (char*)LgiNewConvertCp(CharSet ? CharSet : DefaultCharset, Text, LGI_WideCharset, Size * sizeof(char16));
-			if (c8)
+		{
+			auto InSize = Size * sizeof(char16);
+			if (CharSet && !Stricmp(CharSet, "utf-16"))
 			{
-				int Len = (int)strlen(c8);
-				if (CrLf)
+				if (sizeof(*Text) == 2)
 				{
-					Status = true;
-
-					int BufLen = 1 << 20;
-					GAutoString Buf(new char[BufLen]);
-					char *b = Buf;
-					char *e = Buf + BufLen;
-					char *c = c8;
-					
-					while (*c)
-					{
-					    if (b > e - 10)
-					    {
-					        ptrdiff_t Bytes = b - Buf;
-					        if (f.Write(Buf, (int)Bytes) != Bytes)
-					        {
-					            Status = false;
-					            break;
-					        }
-					        
-					        b = Buf;
-					    }
-					    
-					    if (*c == '\n')
-					    {
-					        *b++ = '\r';
-					        *b++ = '\n';
-					    }
-					    else
-					    {
-					        *b++ = *c;
-					    }
-					    c++;
-					}
-
-			        ptrdiff_t Bytes = b - Buf;
-			        if (f.Write(Buf, (int)Bytes) != Bytes)
-			            Status = false;
+					// No conversion needed...
+					Status = WriteToStream(f, Text, Size, CrLf);
 				}
 				else
 				{
-					Status = f.Write(c8, Len) == Len;
+					// 32->16 convert
+					GAutoPtr<uint16_t,true> c16((uint16_t*)LgiNewConvertCp(CharSet, Text, LGI_WideCharset, InSize));
+					if (c16)
+						Status = WriteToStream(f, c16.Get(), Strlen(c16.Get()), CrLf);
 				}
-
-				DeleteArray(c8);
+			}
+			else if (CharSet && !Stricmp(CharSet, "utf-32"))
+			{
+				if (sizeof(*Text) == 4)
+				{
+					// No conversion needed...
+					Status = WriteToStream(f, Text, Size, CrLf);
+				}
+				else
+				{
+					// 16->32 convert
+					GAutoPtr<uint32_t,true> c32((uint32_t*)LgiNewConvertCp(CharSet, Text, LGI_WideCharset, InSize));
+					if (c32)
+						Status = WriteToStream(f, c32.Get(), Strlen(c32.Get()), CrLf);
+				}
+			}
+			else
+			{
+				GAutoString c8((char*)LgiNewConvertCp(CharSet ? CharSet : DefaultCharset, Text, LGI_WideCharset, InSize));
+				if (c8)
+					Status = WriteToStream(f, c8.Get(), strlen(c8), CrLf);
 			}
 
-			Dirty = false;
+			if (Status)
+				Dirty = false;
 		}
 	}
 	else
