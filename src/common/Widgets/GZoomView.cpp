@@ -1212,32 +1212,38 @@ void GZoomView::UpdateScrollBars(GdcPt2 *MaxScroll, bool ResetPos)
 		SetScrollBars(false, false);
 		return;
 	}
-	
-	GRect c = GetClient();    
-	// int Factor = d->Factor();
-	// int Fmin1 = Factor - 1;
 
-	GdcPt2 DocSize(Src->X(), Src->Y());		
-	GdcPt2 DocClientSize(c.X(), c.Y());
-	DocClientSize = d->ScreenToDoc(DocClientSize);
-	SetScrollBars(DocSize.x > DocClientSize.x, DocSize.y > DocClientSize.y);
+	static bool Updating = false;
+	if (!Updating)
+	{
+		Updating = true;	
+		GRect c = GetClient();    
+		// int Factor = d->Factor();
+		// int Fmin1 = Factor - 1;
 
-	if (HScroll)
-	{
-		HScroll->SetLimits(0, DocSize.x);
-		HScroll->SetPage(DocClientSize.x);
-		if (ResetPos) HScroll->Value(0);
-	}
-	if (VScroll)
-	{
-		VScroll->SetLimits(0, DocSize.y);
-		VScroll->SetPage(DocClientSize.y);
-		if (ResetPos) VScroll->Value(0);
-	}
-	if (MaxScroll)
-	{
-		MaxScroll->x = DocSize.x - DocClientSize.x;
-		MaxScroll->y = DocSize.y - DocClientSize.y;
+		GdcPt2 DocSize(Src->X(), Src->Y());		
+		GdcPt2 DocClientSize(c.X(), c.Y());
+		DocClientSize = d->ScreenToDoc(DocClientSize);
+		SetScrollBars(DocSize.x > DocClientSize.x, DocSize.y > DocClientSize.y);
+
+		if (HScroll)
+		{
+			HScroll->SetLimits(0, DocSize.x);
+			HScroll->SetPage(DocClientSize.x);
+			if (ResetPos) HScroll->Value(0);
+		}
+		if (VScroll)
+		{
+			VScroll->SetLimits(0, DocSize.y);
+			VScroll->SetPage(DocClientSize.y);
+			if (ResetPos) VScroll->Value(0);
+		}
+		if (MaxScroll)
+		{
+			MaxScroll->x = DocSize.x - DocClientSize.x;
+			MaxScroll->y = DocSize.y - DocClientSize.y;
+		}
+		Updating = false;
 	}
 }
 
