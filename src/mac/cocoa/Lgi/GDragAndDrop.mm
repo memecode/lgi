@@ -274,15 +274,20 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 				
 				if (File && MimeType && Stream)
 				{
-					auto Uti = LMimeToUti(MimeType);
-					if (Uti)
+					GString Uti = LMimeToUti(MimeType);
+					auto NsUti = Uti.NsStr();
+					NSString *utType = (__bridge_transfer NSString*)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)NsUti, kUTTypeData);
+					if (utType)
 					{
 						auto delegate = [[LFilePromiseProviderDelegate alloc] init:File stream:Stream];
-						auto prov = [[NSFilePromiseProvider alloc] initWithFileType:GString(Uti).NsStr() delegate:delegate];
+						auto prov = [[NSFilePromiseProvider alloc] initWithFileType:utType delegate:delegate];
 						NSArray *array = [NSArray arrayWithObject:prov];
-						[pboard writeObjects:array];
-						
-						printf("Adding file promise '%s' (%s) to drag...\n", File, Uti);
+						auto wr = [pboard writeObjects:array];
+						if (wr)
+							printf("Adding file promise '%s' (%s) to drag...\n", File, Uti.Get());
+						else
+							printf("Error: Adding file promise '%s' (%s) to drag...\n", File, Uti.Get());
+						[utType release];
 					}
 				}
 			}
