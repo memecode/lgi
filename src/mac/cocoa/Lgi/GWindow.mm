@@ -109,11 +109,9 @@ public:
 	uint64 LastMinimize;
 	uint64 LastDragDrop;
 
-	bool Quiting;
 	bool DeleteOnClose;
 	bool SnapToEdge;
 	bool InitVisible;
-	bool CloseRequestDone;
 	
 	GWindowPrivate(GWindow *wnd)
 	{
@@ -127,8 +125,6 @@ public:
 		Sx = Sy = -1;
 		SnapToEdge = false;
 		EmptyMenu = 0;
-		CloseRequestDone = false;
-		Quiting = false;
 	}
 	
 	~GWindowPrivate()
@@ -203,6 +199,7 @@ public:
 					defer:NO ]) != nil)
 	{
 		self.d = priv;
+		self->ReqClose = false;
 		
 		self.contentView = [[LCocoaView alloc] init:priv->Wnd];
 		[self makeFirstResponder:self.contentView];
@@ -236,6 +233,21 @@ public:
 - (BOOL)canBecomeKeyWindow
 {
 	return YES;
+}
+
+- (void)onQuit
+{
+	if (!self->ReqClose)
+	{
+		if (!self.d ||
+			!self.d->Wnd ||
+			self.d->Wnd->OnRequestClose(false))
+			self->ReqClose = true;
+		else
+			return;
+	}
+	
+	[self close];
 }
 
 @end
@@ -355,11 +367,6 @@ NSView *GWindow::Handle()
 		return Wnd.p.contentView; //Wnd.p.contentViewController.view;
 	
 	return NULL;
-}
-
-bool &GWindow::CloseRequestDone()
-{
-	return d->CloseRequestDone;
 }
 
 bool GWindow::SetIcon(const char *FileName)
@@ -509,15 +516,10 @@ void GWindow::Quit(bool DontDelete)
 	if (d && DontDelete)
 		d->DeleteOnClose = false;
 	
-	if (Wnd && !d->Quiting)
+	if (Wnd)
 	{
-		d->Quiting = true;
 		SetDragHandlers(false);
-		#if 1
-		PostEvent(M_CLOSE);
-		#else
-		[Wnd.p close];
-		#endif
+		[Wnd.p performSelectorOnMainThread:@selector(onQuit) withObject:nil waitUntilDone:false];
 	}
 }
 
@@ -1155,15 +1157,10 @@ GMessage::Result GWindow::OnEvent(GMessage *m)
 	{
 		case M_CLOSE:
 		{
-			#if 1  // Crashing...
-			if (d->CloseRequestDone || OnRequestClose(false))
-			{
-				d->CloseRequestDone = true;
-				// Quit();
-				[Wnd.p close];
-				return 0;
-			}
-			#endif
+			if (Wnd)
+				[Wnd.p performSelectorOnMainThread:@selector(onQuit) withObject:nil waitUntilDone:false];
+			else
+				LgiAssert(!"No window?");
 			break;
 		}
 		case M_DESTROY:

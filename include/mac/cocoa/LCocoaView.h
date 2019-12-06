@@ -89,6 +89,7 @@ LgiExtern GRect LScreenFlip(GRect r);
 
 @interface LNsWindow : NSWindow
 {
+	bool ReqClose;
 }
 
 @property GWindowPrivate *d;
@@ -97,6 +98,7 @@ LgiExtern GRect LScreenFlip(GRect r);
 - (void)dealloc;
 - (BOOL)canBecomeKeyWindow;
 - (GWindow*)getWindow;
+- (void)onQuit;
 
 @end
 
