@@ -486,7 +486,7 @@ bool LgiRecursiveFileSearch(const char *Root,
 	return Status;
 }
 
-// #define LGI_TRACE_TO_FILE
+#define LGI_TRACE_TO_FILE
 // #include <malloc.h>
 
 #ifndef WIN32
@@ -567,101 +567,72 @@ bool LgiTraceGetFilePath(char *LogPath, int BufLen)
 	return true;
 }
 
-#define LGI_TRACE_TS	0
-
-
 void LgiTrace(const char *Msg, ...)
 {
-#if LGI_TRACE_TS
-GProfile Prof("LgiTrace");
-#endif
-
 	#if defined _INC_MALLOC && WINNATIVE
-	if (_heapchk() != _HEAPOK)
-	{
-		return;
-	}
+		if (_heapchk() != _HEAPOK)
+			return;
 	#endif
 
 	if (!Msg)
 		return;
 
 	#ifdef WIN32
-	static LMutex Sem;
-	Sem.Lock(_FL, true);
+		static LMutex Sem;
+		Sem.Lock(_FL, true);
 	#endif
 
 	char Buffer[2049] = "";
 	#ifdef LGI_TRACE_TO_FILE
-	static GFile f;
-	static char LogPath[MAX_PATH] = "";
+		static GFile f;
+		static char LogPath[MAX_PATH] = "";
 	
-	if (!_LgiTraceStream && LogPath[0] == 0)
-	{
-		LgiTraceGetFilePath(LogPath, sizeof(LogPath));
-	}
+		if (!_LgiTraceStream && LogPath[0] == 0)
+			LgiTraceGetFilePath(LogPath, sizeof(LogPath));
 	#endif
-
-#if LGI_TRACE_TS
-Prof.Add("vprint");
-#endif
 
 	va_list Arg;
 	va_start(Arg, Msg);
-	int Ch = vsnprintf(Buffer, sizeof(Buffer)-1, Msg, Arg);
+	#ifdef LGI_TRACE_TO_FILE
+		int Ch =
+	#endif
+	vsnprintf(Buffer, sizeof(Buffer)-1, Msg, Arg);
 	va_end(Arg);
 
-#if LGI_TRACE_TS
-Prof.Add("open");
-#endif
-
 	#ifdef LGI_TRACE_TO_FILE
-	GStreamI *Output = NULL;
-	if (_LgiTraceStream)
-		Output = _LgiTraceStream;
-	else
-	{
-		if (!f.IsOpen() &&
-			f.Open(LogPath, O_WRITE))
-			f.Seek(0, SEEK_END);
-		Output = &f;
-	}
+		GStreamI *Output = NULL;
+		if (_LgiTraceStream)
+			Output = _LgiTraceStream;
+		else
+		{
+			if (!f.IsOpen() &&
+				f.Open(LogPath, O_WRITE))
+				f.Seek(0, SEEK_END);
+			Output = &f;
+		}
 
-#if LGI_TRACE_TS
-Prof.Add("write");
-#endif
-	if (Output && Ch > 0)
-	{
-		Output->Write(Buffer, Ch);
-	}
-#if LGI_TRACE_TS
-Prof.Add("close");
-#endif
-	if (!_LgiTraceStream)
-	{
-		#ifdef WINDOWS
-		// Windows can take AGES to close a file when there is anti-virus on, like 100ms.
-		// We can't afford to wait here so just keep the file open but flush the
-		// buffers if we can.
-		FlushFileBuffers(f.Handle());
-		#else
-		f.Close();
-		#endif
-	}
+		if (Output && Ch > 0)
+			Output->Write(Buffer, Ch);
+
+		if (!_LgiTraceStream)
+		{
+			#ifdef WINDOWS
+				// Windows can take AGES to close a file when there is anti-virus on, like 100ms.
+				// We can't afford to wait here so just keep the file open but flush the
+				// buffers if we can.
+				FlushFileBuffers(f.Handle());
+			#else
+				f.Close();
+			#endif
+		}
 	#endif
 
 
-#if LGI_TRACE_TS
-Prof.Add("OutputDebugStringA");
-#endif
 	#if defined WIN32
-	OutputDebugStringA(Buffer);
-#if LGI_TRACE_TS
-Prof.Add("unlock");
-#endif
-	Sem.Unlock();
+		OutputDebugStringA(Buffer);
+		Sem.Unlock();
 	#else
-	printf("%s", Buffer);
+		printf("%s", Buffer);
 	#endif
 }
 
@@ -682,38 +653,33 @@ void LgiStackTrace(const char *Msg, ...)
 	int Frames = Lu ? Lu->BackTrace(0, 0, Stack, STACK_SIZE) : 0;
 	if (Msg)
 	{
-		char Buffer[2049] = "";
 		#ifdef LGI_TRACE_TO_FILE
-		GFile f;
-		if (LgiGetExeFile(Buffer, sizeof(Buffer)))
-		{
-			char *Dot = strrchr(Buffer, '.');
-			if (Dot && !strchr(Dot, DIR_CHAR))
+			static GFile f;
+			static char LogPath[MAX_PATH] = "";
+		
+			if (!_LgiTraceStream)
 			{
-				strcpy_s(Dot+1, sizeof(Buffer) - (Dot - Buffer) - 1, "txt");
+			 	if (LogPath[0] == 0)
+					LgiTraceGetFilePath(LogPath, sizeof(LogPath));
+				f.Open(LogPath, O_WRITE);
 			}
-			else
-			{
-				strcat(Buffer, ".txt");
-			}
-			f.Open(Buffer, O_WRITE);
-		}
 		#endif
 
 		va_list Arg;
 		va_start(Arg, Msg);
+		char Buffer[2049] = "";
 		int Len = vsnprintf(Buffer, sizeof(Buffer)-1, Msg, Arg);
 		va_end(Arg);
 
 		Lu->Lookup(Buffer+Len, sizeof(Buffer)-Len-1, Stack, Frames);
 
 		#ifdef LGI_TRACE_TO_FILE
-		if (f.IsOpen())
-		{
-			f.Seek(0, SEEK_END);
-			f.Write(Buffer, (int)strlen(Buffer));
-			f.Close();
-		}
+			if (f.IsOpen())
+			{
+				f.Seek(0, SEEK_END);
+				f.Write(Buffer, (int)strlen(Buffer));
+				f.Close();
+			}
 		#endif
 
 		#if defined WIN32
