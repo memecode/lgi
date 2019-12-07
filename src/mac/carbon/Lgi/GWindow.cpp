@@ -161,11 +161,6 @@ GWindow::~GWindow()
 	DeleteObj(_Lock);
 }
 
-bool &GWindow::CloseRequestDone()
-{
-	return d->CloseRequestDone;
-}
-
 bool GWindow::SetIcon(const char *FileName)
 {
 	return false;
@@ -593,11 +588,8 @@ pascal OSStatus LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inE
 						else if (command.commandID == kHICommandClose)
 						{
 							GWindow *w = dynamic_cast<GWindow*>(v);
-							if (w && (w->CloseRequestDone() || w->OnRequestClose(false)))
-							{
-								w->CloseRequestDone() = true;
+							if (w && w->_RequestClose(false))
 								DeleteObj(v);
-							}
 						}
 						else if (command.commandID == kHICommandHide)
 						{
@@ -664,11 +656,8 @@ pascal OSStatus LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inE
 				case kEventWindowClose:
 				{
 					GWindow *w = dynamic_cast<GWindow*>(v);
-					if (w && (w->CloseRequestDone() || w->OnRequestClose(false)))
-					{
-						w->CloseRequestDone() = true;
+					if (w && w->_RequestClose(false))
 						DeleteObj(v);
-					}
 					
 					result = noErr;
 					break;
@@ -1176,6 +1165,15 @@ bool GWindow::Attach(GViewI *p)
 	}
 	
 	return Status;
+}
+
+bool GWindow::_RequestClose(bool os)
+{
+	if (d->CloseRequestDone)
+		return true;
+
+	d->CloseRequestDone = true;
+	return OnRequestClose(os);
 }
 
 bool GWindow::OnRequestClose(bool OsShuttingDown)

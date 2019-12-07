@@ -70,6 +70,7 @@ protected:
 
 		friend pascal OSStatus LgiWindowProc(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *inUserData);
 		void _Delete();
+		bool _RequestClose(bool os);
 	
 	#elif defined(__OBJC__)
 	

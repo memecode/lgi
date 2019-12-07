@@ -729,9 +729,7 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 		{
 			RunApplicationEventLoop();
 		}
-		while (AppWnd &&
-			   !AppWnd->CloseRequestDone() &&
-			   !AppWnd->OnRequestClose(false));
+		while (AppWnd && !AppWnd->_RequestClose(false));
 	}
 	else
 	{
