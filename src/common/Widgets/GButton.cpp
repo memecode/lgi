@@ -374,136 +374,86 @@ void GButton::OnPaint(GSurface *pDC)
 {
 	#if defined LGI_CARBON
 
-	GColour NoPaintColour = StyleColour(GCss::PropBackgroundColor, GColour(L_MED));
-	if (!NoPaintColour.IsTransparent())
-	{
-		pDC->Colour(NoPaintColour);
-		pDC->Rectangle();
-	}
+		GColour NoPaintColour = StyleColour(GCss::PropBackgroundColor, GColour(L_MED));
+		if (!NoPaintColour.IsTransparent())
+		{
+			pDC->Colour(NoPaintColour);
+			pDC->Rectangle();
+		}
 	
-	GRect rc = GetClient();
-	rc.x1 += 2;
-	rc.y2 -= 1;
-	rc.x2 -= 1;
-	HIRect Bounds = rc;
-	HIThemeButtonDrawInfo Info;
-	HIRect LabelRect;
+		GRect rc = GetClient();
+		rc.x1 += 2;
+		rc.y2 -= 1;
+		rc.x2 -= 1;
+		HIRect Bounds = rc;
+		HIThemeButtonDrawInfo Info;
+		HIRect LabelRect;
 
-	Info.version = 0;
-	Info.state = d->Pressed ? kThemeStatePressed : (Enabled() ? kThemeStateActive : kThemeStateInactive);
-	Info.kind = kThemePushButton;
-	Info.value = /*Default() ? kThemeButtonOn :*/ kThemeButtonOff;
-	Info.adornment = Focus() ? kThemeAdornmentFocus : kThemeAdornmentNone;
+		Info.version = 0;
+		Info.state = d->Pressed ? kThemeStatePressed : (Enabled() ? kThemeStateActive : kThemeStateInactive);
+		Info.kind = kThemePushButton;
+		Info.value = /*Default() ? kThemeButtonOn :*/ kThemeButtonOff;
+		Info.adornment = Focus() ? kThemeAdornmentFocus : kThemeAdornmentNone;
 
-	OSStatus e = HIThemeDrawButton(	  &Bounds,
-									  &Info,
-									  pDC->Handle(),
-									  kHIThemeOrientationNormal,
-									  &LabelRect);
+		OSStatus e = HIThemeDrawButton(	  &Bounds,
+										  &Info,
+										  pDC->Handle(),
+										  kHIThemeOrientationNormal,
+										  &LabelRect);
 
-	if (e) printf("%s:%i - HIThemeDrawButton failed %li\n", _FL, e);
-	else
-	{
-		GdcPt2 pt;
-		GRect r = GetClient();
-		pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
-		pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
-		d->Paint(pDC, pt, GColour(), r, Enabled(), Info.state == kThemeStatePressed);
-	}
+		if (e) printf("%s:%i - HIThemeDrawButton failed %li\n", _FL, e);
+		else
+		{
+			GdcPt2 pt;
+			GRect r = GetClient();
+			pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
+			pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
+			d->Paint(pDC, pt, GColour(), r, Enabled(), Info.state == kThemeStatePressed);
+		}
 	
 	#else
 
-	if (GApp::SkinEngine &&
-		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_BUTTON))
-	{
-		GSkinState State;
-		State.pScreen = pDC;
-		State.MouseOver = d->Over;
-
-		/*
-		char *Nl = strchr(Name(), '\n');
-		if (Nl)
+		if (GApp::SkinEngine &&
+			TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_BUTTON))
 		{
-			GString n = Name();
-			GString::Array a = n.Split("\n");
-			State.aText = new GArray<GDisplayString*>;
-			if (State.aText)
-			{
-				for (unsigned i=0; i<a.Length(); i++)
-				{
-					State.aText->Add(new GDisplayString(GetFont(), a[i]));
-				}
-			}
-		}
-		else
-		{
-			State.ptrText = &d->Txt;
-		}
-		*/
-		
-		State.Image = d->Image;
-		GApp::SkinEngine->OnPaint_GButton(this, &State);
-		
-		GdcPt2 pt;
-		GRect r = GetClient();
-		pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
-		pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
-		d->Paint(pDC, pt, GColour(), r, Enabled(), false);
-	}
-	else
-	{
-		GColour Back(d->Over ? L_HIGH : L_MED);
-		GRect r(0, 0, X()-1, Y()-1);
-		if (Default())
-		{
-			pDC->Colour(L_BLACK);
-			pDC->Box(&r);
-			r.Size(1, 1);
-		}
-		LgiWideBorder(pDC, r, d->Pressed ? DefaultSunkenEdge : DefaultRaisedEdge);
+			GSkinState State;
+			State.pScreen = pDC;
+			State.MouseOver = d->Over;
 
-		GdcPt2 pt;
-		pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
-		pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
-		d->Paint(pDC, pt, Back, r, Enabled(), false);
-
-		/*
-		if (d->Txt)
-		{
-			int x = d->Txt->X(), y = d->Txt->Y();
-			int Tx = r.x1 + ((r.X()-x)/2) + (d->Pressed != 0);
-			int Ty = r.y1 + ((r.Y()-y)/2) + (d->Pressed != 0);
-
-			GFont *f = GetFont();
-			f->Transparent(false);
-			if (Enabled())
-			{
-				f->Colour(LC_TEXT, Back);
-				d->Txt->Draw(pDC, Tx, Ty, &r);
-			}
-			else
-			{
-				f->Colour(LC_LIGHT, Back);
-				d->Txt->Draw(pDC, Tx+1, Ty+1, &r);
-
-				f->Transparent(true);
-				f->Colour(LC_LOW, Back);
-				d->Txt->Draw(pDC, Tx, Ty, &r);
-			}
-
+			State.Image = d->Image;
+			GApp::SkinEngine->OnPaint_GButton(this, &State);
+			
+			GdcPt2 pt;
+			GRect r = GetClient();
+			pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
+			pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
+			d->Paint(pDC, pt, GColour(), r, Enabled(), false);
 			if (Focus())
 			{
-				pDC->Colour(LC_LOW, 24);
-				pDC->Box(Tx-2, Ty, Tx+x+2, Ty+y);
+				GRect r = GetClient();
+				r.Size(5, 3);
+				pDC->Colour(GColour(180, 180, 180));
+				pDC->LineStyle(GSurface::LineAlternate);
+				pDC->Box(&r);
 			}
 		}
 		else
 		{
-			pDC->Colour(Back, 24);
-			pDC->Rectangle(&r);
+			GColour Back(d->Over ? L_HIGH : L_MED);
+			GRect r(0, 0, X()-1, Y()-1);
+			if (Default())
+			{
+				pDC->Colour(L_BLACK);
+				pDC->Box(&r);
+				r.Size(1, 1);
+			}
+			LgiWideBorder(pDC, r, d->Pressed ? DefaultSunkenEdge : DefaultRaisedEdge);
+
+			GdcPt2 pt;
+			pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
+			pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
+			d->Paint(pDC, pt, Back, r, Enabled(), false);
 		}
-		*/
-	}
 	
 	#endif
 }

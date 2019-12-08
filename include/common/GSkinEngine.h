@@ -33,6 +33,7 @@ public:
 	bool MouseOver;					// TRUE if the mouse is over the view
 	int64 Value;					// Value of the control if available
 	bool Enabled;					// TRUE if the control is enabled
+	bool Focus;						// TRUE if the control has focus
 	GSurface *Image;				// Any icon that needs displaying
 
 	GSkinState()
@@ -41,6 +42,7 @@ public:
 		ptrText = NULL;
 		Value = 0;
 		Enabled = true;
+		Focus = false;
 		Size = sizeof(*this);
 		pScreen = 0;
 		MouseOver = false;

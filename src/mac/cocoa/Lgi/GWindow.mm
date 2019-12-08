@@ -9,6 +9,7 @@
 
 extern void NextTabStop(GViewI *v, int dir);
 extern void SetDefaultFocus(GViewI *v);
+extern void BuildTabStops(GArray<GViewI*> &Stops, GViewI *v);
 
 #define DEBUG_KEYS			0
 #define DEBUG_SETFOCUS		0
@@ -756,6 +757,32 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 		{
 			Ctrl = FindControl(IDCANCEL);
 			break;
+		}
+		case LK_TAB:
+		{
+			// Go to the next control?
+			if (k.Down())
+			{
+				GArray<GViewI*> Stops;
+				BuildTabStops(Stops, v->GetWindow());
+				ssize_t Idx = Stops.IndexOf(v);
+				if (Idx >= 0)
+				{
+					if (k.Shift())
+					{
+						Idx--;
+						if (Idx < 0) Idx = Stops.Length() - 1;
+					}
+					else
+					{
+						Idx++;
+						if (Idx >= Stops.Length()) Idx = 0;
+					}
+					
+					Stops[Idx]->Focus(true);
+				}
+			}
+			return true;
 		}
 	}
 	

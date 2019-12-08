@@ -593,116 +593,113 @@ public:
 	void OnPaint_GButton(GButton *Ctrl, GSkinState *State)
 	{
 		GMemDC Mem;
-		if (Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
-		{
-			// Font
-			if (Ctrl->GetFont() == SysFont)
-			{
-				Ctrl->SetFont(SysBold);
-			}
-
-			// Background
-			GCssTools Tools(Ctrl->GetCss(), Ctrl->GetFont());
-			GColour DefaultBack;
-			GColour &Fore = Tools.GetFore(), &Back = Tools.GetBack(&DefaultBack);
-			GColour NoPaint(LColour(L_MED));			
-			if (Ctrl->GetCss())
-			{
-				GCss::ColorDef np = Ctrl->GetCss()->NoPaintColor();
-				if (np.Type == GCss::ColorRgb)
-					NoPaint.Set(np.Rgb32, 32);
-				else
-					NoPaint.Empty();
-			}			
-			if (NoPaint.IsValid())
-				Mem.Colour(NoPaint);
-			else
-				Mem.Colour(0, 32);
-			Mem.Rectangle();
-			
-			DrawBtn(&Mem,
-					Ctrl->GetClient(),
-					Back.IsValid() ? &Back : NULL,
-					Ctrl->Value() != 0,
-					Ctrl->Enabled(),
-					Ctrl->Default());
-			
-			GSurface *Out = &Mem;
-			
-			GArray<GDisplayString*> *Txt = State->AllText();
-
-			int ContentX = 0;
-			int SpacingPx = 4;
-			if (State->Image)
-				ContentX += State->Image->X();			
-			int MaxTxt = 0;
-			if (Txt)
-			{
-				for (unsigned i=0; i<Txt->Length(); i++)
-				{
-					MaxTxt = MAX(MaxTxt, (*Txt)[i]->X());
-				}
-				ContentX += MaxTxt;
-			}
-			if (State->Image && Txt && Txt->Length() > 0)
-				ContentX += SpacingPx;			
-
-			int CurX = (Ctrl->X() - ContentX) >> 1;
-			int Off = Ctrl->Value() ? 1 : 0;
-			if (State->Image)
-			{
-				int CurY = (Ctrl->Y() - State->Image->Y()) >> 1;
-				int Op = Out->Op(GDC_ALPHA);
-				Out->Blt(CurX+Off, CurY+Off, State->Image);
-				Out->Op(Op);
-				CurX += State->Image->X() + SpacingPx;
-			}
-			if (Txt && Txt->Length() > 0)
-			{
-				GDisplayString *First = (*Txt)[0];
-				int sx = MaxTxt, sy = (int) Txt->Length() * First->Y();
-				int ty = (Ctrl->Y()-sy) >> 1;
-
-				GFont *f = First->GetFont();
-				f->Transparent(true);
-				
-				for (unsigned i=0; i<Txt->Length(); i++)
-				{
-					GDisplayString *Text = (*Txt)[i];
-					if (Ctrl->Enabled())
-					{
-						f->Colour(Fore, Back);
-						Text->Draw(Out, CurX+Off, ty+Off+BTN_TEXT_OFFSET_Y);
-					}
-					else
-					{
-						f->Colour(LColour(L_LIGHT), Back);
-						Text->Draw(Out, CurX+Off+1, ty+Off+1+BTN_TEXT_OFFSET_Y);
-
-						f->Colour(LColour(L_LOW), Back);
-						Text->Draw(Out, CurX+Off, ty+Off+BTN_TEXT_OFFSET_Y);
-					}
-					ty += Text->Y();
-				}
-				
-				if (Ctrl->Focus())
-				{
-					GRect b(CurX-2, ty, CurX + sx + 1, ty + sy - 2);
-					b.Offset(Off, Off);
-					Out->Colour(Rgb24(180, 180, 180), 24);
-					Out->Box(&b);
-				}
-			}
-			
-			int Op = State->pScreen->Op(GDC_ALPHA);
-			State->pScreen->Blt(0, 0, &Mem);	
-			State->pScreen->Op(Op);
-		}
-		else
+		if (!Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
 		{
 			State->pScreen->Colour(Rgb24(255, 0, 255), 24);
 			State->pScreen->Rectangle();
+			return;
 		}
+
+		// Font
+		if (Ctrl->GetFont() == SysFont)
+			Ctrl->SetFont(SysBold);
+
+		// Background
+		GCssTools Tools(Ctrl->GetCss(), Ctrl->GetFont());
+		GColour DefaultBack;
+		GColour &Fore = Tools.GetFore(), &Back = Tools.GetBack(&DefaultBack);
+		GColour NoPaint(LColour(L_MED));
+		if (Ctrl->GetCss())
+		{
+			GCss::ColorDef np = Ctrl->GetCss()->NoPaintColor();
+			if (np.Type == GCss::ColorRgb)
+				NoPaint.Set(np.Rgb32, 32);
+			else
+				NoPaint.Empty();
+		}
+		if (NoPaint.IsValid())
+			Mem.Colour(NoPaint);
+		else
+			Mem.Colour(0, 32);
+		Mem.Rectangle();
+		
+		DrawBtn(&Mem,
+				Ctrl->GetClient(),
+				Back.IsValid() ? &Back : NULL,
+				Ctrl->Value() != 0,
+				Ctrl->Enabled(),
+				Ctrl->Default());
+		
+		GSurface *Out = &Mem;
+		
+		GArray<GDisplayString*> *Txt = State->AllText();
+
+		int ContentX = 0;
+		int SpacingPx = 4;
+		if (State->Image)
+			ContentX += State->Image->X();
+		int MaxTxt = 0;
+		if (Txt)
+		{
+			for (unsigned i=0; i<Txt->Length(); i++)
+			{
+				MaxTxt = MAX(MaxTxt, (*Txt)[i]->X());
+			}
+			ContentX += MaxTxt;
+		}
+		if (State->Image && Txt && Txt->Length() > 0)
+			ContentX += SpacingPx;
+
+		int CurX = (Ctrl->X() - ContentX) >> 1;
+		int Off = Ctrl->Value() ? 1 : 0;
+		if (State->Image)
+		{
+			int CurY = (Ctrl->Y() - State->Image->Y()) >> 1;
+			int Op = Out->Op(GDC_ALPHA);
+			Out->Blt(CurX+Off, CurY+Off, State->Image);
+			Out->Op(Op);
+			CurX += State->Image->X() + SpacingPx;
+		}
+		if (Txt && Txt->Length() > 0)
+		{
+			GDisplayString *First = (*Txt)[0];
+			int sx = MaxTxt, sy = (int) Txt->Length() * First->Y();
+			int ty = (Ctrl->Y()-sy) >> 1;
+
+			GFont *f = First->GetFont();
+			f->Transparent(true);
+			
+			for (unsigned i=0; i<Txt->Length(); i++)
+			{
+				GDisplayString *Text = (*Txt)[i];
+				if (Ctrl->Enabled())
+				{
+					f->Colour(Fore, Back);
+					Text->Draw(Out, CurX+Off, ty+Off+BTN_TEXT_OFFSET_Y);
+				}
+				else
+				{
+					f->Colour(LColour(L_LIGHT), Back);
+					Text->Draw(Out, CurX+Off+1, ty+Off+1+BTN_TEXT_OFFSET_Y);
+
+					f->Colour(LColour(L_LOW), Back);
+					Text->Draw(Out, CurX+Off, ty+Off+BTN_TEXT_OFFSET_Y);
+				}
+				ty += Text->Y();
+			}
+			
+			if (Ctrl->Focus())
+			{
+				GRect b(CurX-2, ty, CurX + sx + 1, ty + sy - 2);
+				b.Offset(Off, Off);
+				Out->Colour(Rgb24(180, 180, 180), 24);
+				Out->Box(&b);
+			}
+		}
+		
+		int Op = State->pScreen->Op(GDC_ALPHA);
+		State->pScreen->Blt(0, 0, &Mem);
+		State->pScreen->Op(Op);
 	}
 
 	void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, GSkinState *State)
