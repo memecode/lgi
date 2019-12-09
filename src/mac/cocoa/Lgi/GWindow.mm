@@ -749,6 +749,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	switch (k.vkey)
 	{
 		case LK_RETURN:
+		case LK_KEYPADENTER:
 		{
 			Ctrl = _Default;
 			break;
