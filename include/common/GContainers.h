@@ -178,6 +178,9 @@ public:
 			CHECK_THREAD
 			if (i)
 			{
+				if (!In())
+					return false;
+				
 				Cur++;
 				if (Cur >= i->Count)
 				{
@@ -199,6 +202,9 @@ public:
 			CHECK_THREAD
 			if (i)
 			{
+				if (!In())
+					return false;
+				
 				Cur--;
 				if (Cur < 0)
 				{

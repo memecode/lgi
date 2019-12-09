@@ -6,7 +6,7 @@
 #include "GToken.h"
 #include "Base64.h"
 
-#define DEBUG_MIME						1
+#define DEBUG_MIME						0
 #if DEBUG_MIME
 #define LOG(...) printf(__VA_ARGS__)
 #else
