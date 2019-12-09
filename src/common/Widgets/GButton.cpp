@@ -301,8 +301,8 @@ bool GButton::OnKey(GKey &k)
 		}
 		case LK_SPACE:
 		case LK_RETURN:
-		#ifdef LINUX
-		case LK_KP_ENTER:
+		#ifndef WINDOWS
+		case LK_KEYPADENTER:
 		#endif
 		{
 			if (d->KeyDown ^ k.Down())
