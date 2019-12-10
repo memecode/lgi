@@ -207,7 +207,7 @@ protected:
 	uint64 TimerTs; // Time for next tick
 
 public:
-	GEventTargetThread(GString Name) :
+	GEventTargetThread(GString Name, bool RunImmediately = true) :
 		LThread(Name + ".Thread"),
 		LMutex(Name + ".Mutex"),
 		Event(ProcessName(Name, "Event"))
@@ -218,7 +218,8 @@ public:
 		TimerMs = 0;
 		TimerTs = 0;
 
-		Run();
+		if (RunImmediately)
+			Run();
 	}
 	
 	virtual ~GEventTargetThread()

@@ -45,6 +45,7 @@ GViewPrivate::GViewPrivate()
 	Parent = 0;
 	ParentI = 0;
 	Notify = 0;
+	WantsPulse = -1;
 	hTheme = NULL;
 	IsThemed = true;
 }
@@ -685,6 +686,12 @@ bool GView::Attach(GViewI *p)
 			
 			if (TestFlag(WndFlags, GWF_FOCUS))
 				SetFocus(_View);
+
+			if (d->WantsPulse > 0)
+			{
+				SetPulse(d->WantsPulse);
+				d->WantsPulse = -1;
+			}
 		}
 
 		OnAttach();
@@ -1071,6 +1078,10 @@ void GView::SetPulse(int Length)
 			KillTimer(_View, d->TimerId);
 			d->TimerId = 0;
 		}
+	}
+	else
+	{
+		d->WantsPulse = Length;
 	}
 }
 

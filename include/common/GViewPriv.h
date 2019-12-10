@@ -154,6 +154,7 @@ public:
 		GString			WndClass;
 		UINT_PTR		TimerId;
 		HTHEME			hTheme;
+		int				WantsPulse;
 
 	#else
 
