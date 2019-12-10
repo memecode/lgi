@@ -1473,7 +1473,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 				#if defined LGI_COCOA
 			
 					auto f = [NSURL fileURLWithPath:[NSHomeDirectory()stringByAppendingPathComponent:@"Desktop"]];
-					Path = [f.absoluteString UTF8String];
+					Path = [[f path] UTF8String];
 					// [f release];
 			
 				#elif defined LGI_CARBON

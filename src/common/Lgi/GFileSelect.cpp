@@ -512,6 +512,16 @@ public:
 				c.x1 = n->Text.x2 + 1;
 			}
 		}
+		if (p.Length() == 0)
+		{
+			// Layout and draw arrow for the "root folder"
+			f->Colour(GColour(192,192,192), L_WORKSPACE);
+			GRect a;
+			a.ZOff(Arrow.X()+1, c.Y()-1);
+			a.Offset(c.x1, c.y1);
+			Arrow.DrawCenter(pDC, &a);
+			c.x1 = a.x2 + 1;
+		}
 		
 		pDC->Colour(L_WORKSPACE);
 		pDC->Rectangle(&c);
@@ -720,8 +730,10 @@ public:
 	{
 		if (!i || !v)
 			return;
+		
+		auto Path = v->Path();
 		i->SetText(v->Name(), 0);
-		i->SetText(v->Path(), 1);
+		i->SetText(Path, 1);
 		
 		for (unsigned n=0; n<Links.Length(); n++)
 		{

@@ -531,62 +531,6 @@ public:
 					_Sub.Insert(v);
 				}
 			}
-			
-			/*
-			 // Get mount list
-			 // this is just a hack at this stage to establish some base
-			 // functionality. I would appreciate someone telling me how
-			 // to do this properly. Till then...
-			 GFile f;
-			 if (f.Open("/etc/fstab", O_READ))
-			 {
-				int Len = f.GetSize();
-				char *Buf = new char[Len+1];
-				if (Buf)
-				{
-			 f.Read(Buf, Len);
-			 Buf[Len] = 0;
-			 f.Close();
-			 
-			 GToken L(Buf, "\r\n");
-			 for (int l=0; l<L.Length(); l++)
-			 {
-			 GToken M(L[l], " \t");
-			 if (M.Length() > 2)
-			 {
-			 char *Mount = M[1];
-			 if (Mount AND
-			 strnicmp(M[0], "/dev/", 5) == 0 AND
-			 strlen(M[1]) > 1 AND
-			 stricmp(M[2], "swap") != 0)
-			 {
-			 v = new GMacVolume(0);
-			 if (v)
-			 {
-			 char *MountName = strrchr(Mount, '/');
-			 v->_Name = NewStr(MountName ? MountName + 1 : Mount);
-			 v->_Path = NewStr(Mount);
-			 v->_Type = VT_HARDDISK;
-			 
-			 char *Device = M[0];
-			 char *FileSys = M[2];
-			 if (stristr(Device, "fd"))
-			 {
-			 v->_Type = VT_3_5FLOPPY;
-			 }
-			 else if (stristr(Device, "cdrom"))
-			 {
-			 v->_Type = VT_CDROM;
-			 }
-			 
-			 _Sub.Insert(v);
-			 }
-			 }
-			 }
-			 }
-				}
-			 }
-			 */
 		}
 		
 		_It = _Sub.begin();
