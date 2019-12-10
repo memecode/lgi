@@ -32,7 +32,7 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		7
+// #define DEBUG_LAYOUT		14
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
 
@@ -1979,7 +1979,9 @@ void GTableLayout::OnPosChange()
 {
 	GRect r = GetClient();
 
-	if (SizeChanged() || d->LayoutDirty)
+	bool Up = SizeChanged() || d->LayoutDirty;
+	// LgiTrace("%s:%i - Up=%i for Id=%i\n", _FL, Up, GetId());
+	if (Up)
 	{
 		d->PrevSize.x = r.X();
 		d->PrevSize.y = r.Y();
@@ -2050,16 +2052,20 @@ void GTableLayout::OnPaint(GSurface *pDC)
 {
 	if (SizeChanged() || d->LayoutDirty)
 	{
-		#ifdef LGI_SDL
-		OnPosChange();
-		#else
-		
-		// LgiTrace("%s:%i - Post M_TABLE_LAYOUT\n", _FL);
-		PostEvent(M_TABLE_LAYOUT);
+		// LgiTrace("%s:%i - Post M_TABLE_LAYOUT for %i\n", _FL, GetId());
+		#if LGI_VIEW_HANDLE
+		if (!_View)
 		#endif
+			OnPosChange();
+		#if LGI_VIEW_HANDLE
+		else
+			if (!PostEvent(M_TABLE_LAYOUT))
+				LgiAssert(!"Post event failed.");
 		return;
+		#endif
 	}
 
+	// LgiTrace("%s:%i - Painting table %i\n", _FL, GetId());
 	GColour Back = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 	if (!Back.IsTransparent())
 	{

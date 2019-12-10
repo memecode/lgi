@@ -32,6 +32,9 @@ public:
 	bool Toggle;
 	bool WantsDefault;
 	int64 Value;
+	
+	GSurface *Img;
+	bool ImgOwned;
 
 	GButtonPrivate()
 	{
@@ -39,10 +42,14 @@ public:
 		WantsDefault = false;
 		ButtonClassProc = NULL;
 		Value = 0;
+		Img = NULL;
+		ImgOwned = false;
 	}
 
 	~GButtonPrivate()
 	{
+		if (ImgOwned)
+			DeleteObj(Img);
 	}
 };
 
@@ -215,7 +222,7 @@ GMessage::Result GButton::OnEvent(GMessage *Msg)
 		}
 		case WM_PAINT:
 		{
-			if (!GetCss())
+			if (!GetCss() && !d->Img)
 				break; // Just let the system draw the control
 
 			if (IsWin7 < 0)
@@ -267,6 +274,14 @@ GMessage::Result GButton::OnEvent(GMessage *Msg)
 				m.Set(c.X()-2, 1);
 				m.Set(1, c.Y()-2);
 				m.Set(c.X()-2, c.Y()-2);
+			}
+
+			if (d->Img)
+			{
+				m.Op(GDC_ALPHA);
+				int cx = (m.X()-d->Img->X()) >> 1;
+				int cy = (m.Y()-d->Img->Y()) >> 1;
+				m.Blt(cx, cy, d->Img);
 			}
 
 			// Now stick it on the screen
@@ -394,7 +409,13 @@ bool GButton::SetImage(const char *FileName)
 
 bool GButton::SetImage(GSurface *Img, bool OwnIt)
 {
-	return false;
+	if (d->ImgOwned)
+		DeleteObj(d->Img);
+	d->Img = Img;
+	d->ImgOwned = OwnIt;
+
+	Invalidate();
+	return true;
 }
 
 void GButton::SetPreferredSize(int x, int y)
