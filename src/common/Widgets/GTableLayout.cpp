@@ -446,8 +446,11 @@ bool TableCell::Remove(GView *v)
 		
 	Table->DelView(v);
 
-	int Idx = (int) (c - &Children.First());
-	Children.DeleteAt(Idx, true);
+	if (Children.Length())
+	{
+		int Idx = (int) (c - &Children.First());
+		Children.DeleteAt(Idx, true);
+	}
 	return true;
 }
 
@@ -2026,11 +2029,11 @@ void GTableLayout::InvalidateLayout()
 	{
 		d->LayoutDirty = true;
 		if (IsAttached())
-		{
-			// LgiTrace("%s:%i - Post layout\n", _FL);
 			PostEvent(M_TABLE_LAYOUT);
-		}
 	}
+
+	if (!IsAttached())
+		Invalidate();
 }
 
 GMessage::Result GTableLayout::OnEvent(GMessage *m)
