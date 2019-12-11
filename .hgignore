@@ -19,13 +19,15 @@ HtmlEditor/HtmlEdit*.suo
 HtmlEditor/x64Debug
 HtmlEditor/x64Release
 HtmlEditor/build
+HtmlEditor/Gtk3/build
 
 HtmlTest/Files/*
 HtmlTest/HtmlTest*.sdf
 HtmlTest/HtmlTest*.suo
 HtmlTest/x64Debug
 HtmlTest/x64Release
-HtmlTest/Mac/build
+HtmlTest/MacCarbon/build
+HtmlTest/MacCocoa/build
 
 Ide/HtmlTest*.sdf
 Ide/HtmlTest*.suo
@@ -53,6 +55,8 @@ Lvc/MacCarbon/build/*
 Lvc/MacCocoa/build/*
 
 ResourceEditor/x64*
+ResourceEditor/MacCarbon/build
+ResourceEditor/MacCocoa/build
 
 ScriptingUnitTests/Win32*
 ScriptingUnitTests/x64*

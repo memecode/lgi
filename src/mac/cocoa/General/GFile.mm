@@ -1157,6 +1157,7 @@ int GDirectory::Next()
 		if ((d->De = readdir(d->Dir)))
 		{
 			char s[512];
+			*d->BaseEnd = 0;
 			LgiMakePath(s, sizeof(s), d->BasePath, GetName());
 			lstat(s, &d->Stat);
 			if (!d->Ignore())
@@ -1283,7 +1284,13 @@ const char *GDirectory::FullPath()
 	auto n = GetName();
 	if (!n)
 		return NULL;
-	strncpy(d->BaseEnd, n, sizeof(d->BasePath) - (d->BaseEnd - d->BasePath));
+	
+	char *s = d->BaseEnd;
+	char *e = d->BasePath + sizeof(d->BasePath);
+	if (s > d->BasePath &&
+		s[-1] != DIR_CHAR)
+		*s++ = DIR_CHAR;
+	strncpy(s, n, e - s);
 	return d->BasePath;
 }
 

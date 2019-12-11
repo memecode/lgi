@@ -41,6 +41,13 @@
 		<String Ref="49" Cid="-1" Define="IDC_STATIC" en="Enter symbol pairs, one per line. Each line should contain the old symbol and the new symbol separated by whitespace:" />
 		<String Ref="53" Cid="-1" Define="IDC_STATIC" en="Charset:" />
 		<String Ref="54" Cid="54" Define="IDC_CHARSET" />
+		<String Ref="56" Cid="56" Define="IDD_NEW_PROJ_FROM_TEMPLATE" en="New Project From Template" />
+		<String Ref="57" Cid="57" Define="IDC_57" />
+		<String Ref="58" Cid="-1" Define="IDC_STATIC" en="Project name:" />
+		<String Ref="59" Cid="59" Define="IDC_PROJ_NAME" />
+		<String Ref="60" Cid="-1" Define="IDC_STATIC" en="Template to use:" />
+		<String Ref="61" Cid="61" Define="IDC_TEMPLATES" />
+		<String Ref="62" Cid="-1" Define="IDC_STATIC" en="Output folder:" />
 		<String Ref="63" Cid="63" Define="IDD_OPTIONS" en="Options" />
 		<String Ref="64" Cid="8" Define="IDC_TABLE" />
 		<String Ref="65" Cid="-1" Define="IDC_STATIC" en="Editor font:" />
@@ -49,6 +56,10 @@
 		<String Ref="68" Cid="1" Define="IDOK" en="Ok" />
 		<String Ref="69" Cid="70" Define="IDC_TYPE_HISTORY" />
 		<String Ref="70" Cid="542" Define="IDC_SEARCH_DIR" en="&Directory:" />
+		<String Ref="71" Cid="71" Define="IDC_FOLDER" />
+		<String Ref="72" Cid="72" Define="IDC_BROWSE_OUTPUT" en="..." />
+		<String Ref="73" Cid="1" Define="IDOK" en="Create" />
+		<String Ref="74" Cid="2" Define="IDCANCEL" en="Cancel" />
 		<String Ref="75" Cid="558" Define="IDC_75" />
 		<String Ref="78" Cid="79" Define="IDC_WIN32" en="Windows" />
 		<String Ref="79" Cid="80" Define="IDC_LINUX" en="Linux" />
@@ -395,6 +406,43 @@
 			</tr>
 		</TableLayout>
 	</Dialog>
+	<Dialog pos="7,7,478,325" ref="56">
+		<TableLayout pos="7,7,468,293" ref="57" cols="0.333,0.333,0.333" rows="0.250,0.250,0.250,0.250">
+			<tr>
+				<td>
+					<StaticText pos="21,21,104,34" ref="58" />
+				</td>
+				<td colspan="2">
+					<EditBox Pos="161,7,433,27" ref="59" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<StaticText pos="21,93,118,113" ref="60" />
+				</td>
+				<td colspan="2">
+					<TreeView pos="161,77,426,125" ref="61" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<StaticText pos="14,158,139,171" ref="62" />
+				</td>
+				<td>
+					<EditBox Pos="161,147,272,167" ref="71" />
+				</td>
+				<td>
+					<Button pos="308,147,328,167" ref="72" />
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" align="Max">
+					<Button pos="280,217,349,237" ref="73" />
+					<Button pos="357,217,433,237" ref="74" />
+				</td>
+			</tr>
+		</TableLayout>
+	</Dialog>
 	<Dialog pos="7,7,294,134" ref="63">
 		<TableLayout pos="7,7,272,97" ref="75" cols="0.333,0.333,0.333" rows="0.333,0.333,0.333">
 			<tr>
@@ -625,6 +673,7 @@
 			<String Ref="50" Cid="586" Define="IDM_MENU_586" />
 			<String Ref="51" Cid="587" Define="IDM_SPLIT" en="Split Selection" />
 			<String Ref="52" Cid="588" Define="IDM_JOIN" en="Join Selection" />
+			<String Ref="55" Cid="589" Define="IDM_NEW_PROJECT_TEMPLATE" en="New from &Template" />
 		</string-group>
 		<submenu Ref="175">
 			<menuitem Ref="174" Shortcut="CtrlCmd+N" />
@@ -669,6 +718,7 @@
 		</submenu>
 		<submenu Ref="151">
 			<menuitem Ref="150" />
+			<menuitem Ref="55" />
 			<menuitem Ref="149" />
 			<menuitem Ref="148" />
 			<menuitem Sep="1" />

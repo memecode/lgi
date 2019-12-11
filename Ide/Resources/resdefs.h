@@ -22,11 +22,17 @@
 #define IDC_SYM									45
 #define IDC_FIX_RENAMED							48
 #define IDC_CHARSET								54
+#define IDD_NEW_PROJ_FROM_TEMPLATE				56
+#define IDC_57									57
+#define IDC_PROJ_NAME							59
+#define IDC_TEMPLATES							61
 #define IDD_OPTIONS								63
 #define IDC_FONT								65
 #define IDC_SET_FONT							66
 #define IDC_FOLDER_HISTORY						69
 #define IDC_TYPE_HISTORY						70
+#define IDC_FOLDER								71
+#define IDC_BROWSE_OUTPUT						72
 #define IDC_WIN32								79
 #define IDC_LINUX								80
 #define IDC_MAC									81
@@ -157,3 +163,4 @@
 #define IDM_MENU_586							586
 #define IDM_SPLIT								587
 #define IDM_JOIN								588
+#define IDM_NEW_PROJECT_TEMPLATE				589

@@ -300,6 +300,7 @@ public:
 #include "FindInFiles.h"
 
 extern void NewMemDumpViewer(AppWnd *App, char *file = 0);
+extern void NewProjectFromTemplate(GViewI *parent);
 
 class SysCharSupport : public GWindow
 {

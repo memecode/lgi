@@ -48,7 +48,7 @@
 		343FB88E2386621400797ABC /* %name%.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = %name%.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		343FB8942386621600797ABC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		343FB8992386621600797ABC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		343FB89C2386621600797ABC /* %name%.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HtmlTest.entitlements; sourceTree = "<group>"; };
+		343FB89C2386621600797ABC /* %name%.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = %name%.entitlements; sourceTree = "<group>"; };
 		343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = %lgi.folder%/src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
 		343FB8AA238662C500797ABC /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = %lgi.folder%/src/common/Lgi/LgiMain.cpp; sourceTree = "<group>"; };
 		343FB8DB2386642A00797ABC /* GOptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GOptionsFile.cpp; path = %lgi.folder%/src/common/Lgi/GOptionsFile.cpp; sourceTree = "<group>"; };

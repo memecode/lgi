@@ -3576,7 +3576,12 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				p->CreateProject();
 			}
 			break;
-		}		
+		}
+		case IDM_NEW_PROJECT_TEMPLATE:
+		{
+			NewProjectFromTemplate(this);
+			break;
+		}
 		case IDM_OPEN_PROJECT:
 		{
 			GFileSelect s;
