@@ -276,7 +276,7 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 				{
 					GString Uti = LMimeToUti(MimeType);
 					auto NsUti = Uti.NsStr();
-					NSString *utType = (__bridge_transfer NSString*)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)NsUti, kUTTypeData);
+					NSString *utType = (/*__bridge_transfer*/ NSString*)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (/*__bridge*/ CFStringRef)NsUti, kUTTypeData);
 					if (utType)
 					{
 						auto delegate = [[LFilePromiseProviderDelegate alloc] init:File stream:Stream];

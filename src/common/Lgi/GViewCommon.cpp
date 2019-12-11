@@ -2067,6 +2067,7 @@ bool GView::InThread()
 		OsThreadId Me = GetCurrentThreadId();
 		OsThreadId Gui = LgiApp ? LgiApp->GetGuiThreadId() : 0;
 		
+		#if 0
 		if (Gui != Me)
 		    LgiTrace("%s:%i - Out of thread:"
 				    #ifdef LGI_COCOA
@@ -2075,6 +2076,7 @@ bool GView::InThread()
 					"%x, %x"
 					#endif
 		    		"\n", _FL, Gui, Me);
+		#endif
 		
 		return Gui == Me;
 

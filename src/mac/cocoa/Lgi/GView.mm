@@ -338,6 +338,9 @@ bool GView::SetPos(GRect &p, bool Repaint)
 
 bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 {
+	if (!InThread())
+		return PostEvent(M_INVALIDATE, (GMessage::Param) (rc ? new GRect(*rc) : NULL), (GMessage::Param) this);
+
 	GRect r;
 	if (rc)
 		r = *rc;
@@ -345,8 +348,6 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 		r = GetClient();
 	if (!r.Valid())
 		return false;
-	
-	// printf("%s:%i - %s::inval %s\n", _FL, GetClass(), rc ? rc->GetStr() : "");
 	
 	auto w = GetWindow();
 	GPopup *popup = NULL;
@@ -370,18 +371,16 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 	else if (w)
 		nsview = w->Handle();
 	
-	if (nsview)
-	{
-		#if 0
-		[nsview setNeedsDisplayInRect:v->GetGView()->Flip(r)];
-		printf("%s::Inval r=%s\n", GetClass(), r.GetStr());
-		#else
-		nsview.needsDisplay = true;
-		#endif
-	}
-	// else LgiTrace("%s:%i - No contentView? %s\n", _FL, GetClass());
-	
-	return false;
+	if (!nsview)
+		return false;
+
+	#if 0
+	[nsview setNeedsDisplayInRect:v->GetGView()->Flip(r)];
+	printf("%s::Inval r=%s\n", GetClass(), r.GetStr());
+	#else
+	nsview.needsDisplay = true;
+	#endif
+	return true;
 }
 
 void GView::SetPulse(int Length)
@@ -415,6 +414,12 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 		case M_COMMAND:
 		{
 			return OnCommand((int)Msg->A(), 0, (OsView)Msg->B());
+		}
+		case M_INVALIDATE:
+		{
+			GAutoPtr<GRect> rc((GRect*)Msg->A());
+			Invalidate(rc.Get());
+			break;
 		}
 		default:
 		{
