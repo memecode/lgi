@@ -281,8 +281,9 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 					{
 						auto delegate = [[LFilePromiseProviderDelegate alloc] init:File stream:Stream];
 						auto prov = [[NSFilePromiseProvider alloc] initWithFileType:utType delegate:delegate];
-						NSArray *array = [NSArray arrayWithObject:prov];
-						auto wr = [pboard writeObjects:array];
+						// NSArray *array = [NSArray arrayWithObject:prov];
+						// auto wr = [pboard writeObjects:array];
+						auto wr = [pboard writeObjects:@[prov]];
 						if (wr)
 							printf("Adding file promise '%s' (%s) to drag...\n", File, Uti.Get());
 						else
