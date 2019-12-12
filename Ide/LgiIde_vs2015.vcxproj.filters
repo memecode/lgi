@@ -245,6 +245,9 @@
     <ClCompile Include="Code\JavascriptParser.cpp">
       <Filter>Source Files\Search\Javascript</Filter>
     </ClCompile>
+    <ClCompile Include="Code\NewProjectFromTemplate.cpp">
+      <Filter>Source Files\Projects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\src\win32\General\Lgi.manifest">

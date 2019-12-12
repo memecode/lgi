@@ -242,6 +242,7 @@
     <ClCompile Include="Code\LgiUtils.cpp" />
     <ClCompile Include="Code\MemDumpViewer.cpp" />
     <ClCompile Include="Code\MissingFiles.cpp" />
+    <ClCompile Include="Code\NewProjectFromTemplate.cpp" />
     <ClCompile Include="Code\ProjectNode.cpp" />
     <ClCompile Include="Code\PythonParser.cpp" />
     <ClCompile Include="Code\SimpleCppParser.cpp" />
