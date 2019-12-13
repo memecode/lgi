@@ -1098,8 +1098,8 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	switch (k.vkey)
 	{
 		case LK_RETURN:
-		#ifdef LK_KP_ENTER
-		case LK_KP_ENTER:
+		#ifdef LK_KEYPADENTER
+		case LK_KEYPADENTER:
 		#endif
 		{
 			Ctrl = _Default;

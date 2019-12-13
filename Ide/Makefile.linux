@@ -71,6 +71,7 @@ Depends =	GDebugContext.o \
 			IdeProjectSettings.o \
 			levenshtein.o \
 			MissingFiles.o \
+			NewProjectFromTemplate.o \
 			ProjectNode.o \
 			FindInFiles.o \
 			FindSymbol.o \
@@ -509,6 +510,14 @@ MissingFiles.o : ./Code/MissingFiles.cpp ../include/common/Lgi.h \
 	./Code/LgiIde.h \
 	./Code/ProjectNode.h \
 	./Code/levenshtein.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
+NewProjectFromTemplate.o : ./Code/NewProjectFromTemplate.cpp ../include/common/Lgi.h \
+	./Code/LgiIde.h \
+	../include/common/GTree.h \
+	./Resources/resdefs.h \
+	../include/common/GSubProcess.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 

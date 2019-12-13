@@ -488,7 +488,7 @@ enum MessageBoxType
 		/* End of ASCII mapped keysyms */
 
 		/* Numeric keypad */
-		LK_KP_ENTER		= GDK_KP_Enter,
+		LK_KEYPADENTER	= GDK_KP_Enter,
 		LK_KP0			= GDK_KP_0,
 		LK_KP1			= GDK_KP_1,
 		LK_KP2			= GDK_KP_2,
