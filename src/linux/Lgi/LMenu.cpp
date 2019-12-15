@@ -638,6 +638,7 @@ enum {
 };
 #endif
 
+// /usr/include/gtk-3.0/gdk/gdkkeysyms-compat.h
 Gtk::gint LgiKeyToGtkKey(int Key, const char *ShortCut)
 {
 	#ifdef GDK_a
@@ -722,6 +723,8 @@ Gtk::gint LgiKeyToGtkKey(int Key, const char *ShortCut)
 			#else
 			return ' ';
 			#endif
+		case ',':
+			return GDK_comma;
 		default:
 			LgiTrace("Unhandled menu accelerator: 0x%x (%s)\n", Key, ShortCut);
 			break;
@@ -854,7 +857,7 @@ bool LMenuItem::ScanForAccel()
 			{
 				Key = toupper(k[0]);
 			}
-			else if (isdigit(k[0]))
+			else if (isdigit(k[0]) || strchr(",", k[0]))
 			{
 				Key = k[0];
 			}

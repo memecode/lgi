@@ -82,9 +82,11 @@ Resources</Release>
 				<All />
 				<Linux>
 					<Debug>magic
+pthread
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Debug>
 					<Release>magic
+pthread
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>

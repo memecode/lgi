@@ -1858,6 +1858,7 @@ static void _LFindFile(const char *Name, GString *GStr, GAutoString *AStr)
 		#else
 		"./Resources",
 		"../Resources",
+		"../resources",
 		#endif
 		"../Code",
 		"../../Resources",
@@ -1887,6 +1888,7 @@ static void _LFindFile(const char *Name, GString *GStr, GAutoString *AStr)
 		size_t PathLen = strlen(Path);
 		LgiAssert(PathLen < sizeof(Path));
 
+		// printf("\t%s\n", Path);
 		if (FileExists(Path))
 		{
 			if (GStr)

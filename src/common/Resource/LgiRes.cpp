@@ -358,9 +358,9 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 	if (!FullPath)
 		FullPath = LFindFile(AltFile);
 
-#if DEBUG_RES_FILE
-LgiTrace("%s:%i - FullPath='%s'\n", _FL, FullPath.Get());
-#endif
+	#if DEBUG_RES_FILE
+	LgiTrace("%s:%i - FullPath='%s'\n", _FL, FullPath.Get());
+	#endif
 
 	if (FullPath)
 	{
