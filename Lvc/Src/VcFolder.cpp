@@ -1124,9 +1124,10 @@ void VcFolder::LinkParents()
 			auto *p = Map.Find(pRev);
 			if (p)
 				new VcEdge(p, c);
+			#if 0
 			else
 				return;
-				// LgiAssert(0);
+			#endif
 		}
 	}
 
