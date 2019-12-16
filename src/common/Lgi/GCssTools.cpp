@@ -79,33 +79,39 @@ GRect GCssTools::ApplyMargin(GRect &in)
 GRect GCssTools::GetPadding(GRect &box)
 {
 	GRect r;
-	GCss::Len padding = Css->Padding();
-	#define DoPadding(name, edge, dim) \
-		{ \
-			GCss::Len p = Css->Padding##name(); \
-			r.edge = (p.IsValid() ? p : padding).ToPx(box.dim(), Font); \
-		}
-	DoPadding(Left, x1, X)
-	DoPadding(Top, y1, Y)
-	DoPadding(Right, x2, X)
-	DoPadding(Bottom, y2, Y)
-	#undef DoPadding
+	if (Css)
+	{
+		GCss::Len padding = Css->Padding();
+		#define DoPadding(name, edge, dim) \
+			{ \
+				GCss::Len p = Css->Padding##name(); \
+				r.edge = (p.IsValid() ? p : padding).ToPx(box.dim(), Font); \
+			}
+		DoPadding(Left, x1, X)
+		DoPadding(Top, y1, Y)
+		DoPadding(Right, x2, X)
+		DoPadding(Bottom, y2, Y)
+		#undef DoPadding
+	}
 	return r;
 }
 
 GRect GCssTools::GetBorder(GRect &box)
 {
 	GRect r;
-	#define _(name, edge, dim) \
-		{ \
-			GCss::Len p = Css->Border##name(); \
-			r.edge = p.IsValid() ? p.ToPx(box.dim(), Font) : 0; \
-		}
-	_(Left, x1, X)
-	_(Top, y1, Y)
-	_(Right, x2, X)
-	_(Bottom, y2, Y)
-	#undef _
+	if (Css)
+	{
+		#define _(name, edge, dim) \
+			{ \
+				GCss::Len p = Css->Border##name(); \
+				r.edge = p.IsValid() ? p.ToPx(box.dim(), Font) : 0; \
+			}
+		_(Left, x1, X)
+		_(Top, y1, Y)
+		_(Right, x2, X)
+		_(Bottom, y2, Y)
+		#undef _
+	}
 	return r;
 }
 
