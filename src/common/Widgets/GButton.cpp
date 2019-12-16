@@ -508,9 +508,11 @@ void GButton::SetPreferredSize(int x, int y)
 
 bool GButton::OnLayout(GViewLayoutInfo &Inf)
 {
-	GCssTools Css(GetCss(), GetFont());
+	auto Css = GetCss();
+	auto Font = GetFont();
+	GCssTools Tools(Css, Font);
 	auto c = GetClient();
-	GRect Pad = Css.GetPadding(c), Border = Css.GetBorder(c);
+	GRect Pad = Tools.GetPadding(c), Border = Tools.GetBorder(c);
 	auto TxtMin = d->GetMin();
 	auto TxtMax = d->GetMax();
 
@@ -523,19 +525,33 @@ bool GButton::OnLayout(GViewLayoutInfo &Inf)
 	{
 		int BaseX = Pad.x1 + Pad.x2 + Border.x1 + Border.x2;
 		int ImgX = d->Image ? d->Image->X() + 4/*img->text spacer*/ : 0;
-		Inf.Width.Min = BaseX + ImgX + TxtMin.x;
-		Inf.Width.Max = BaseX + ImgX + TxtMax.x;
+		GCss::Len MinX, MaxX;
+		if (Css)
+		{
+			MinX = Css->MinWidth();
+			MaxX = Css->MaxWidth();
+		}
 
-		LgiTrace("%i.Layout.Btn.x = %i, %i\n", GetId(), Inf.Width.Min, Inf.Width.Max);
+		Inf.Width.Min = MinX.IsValid() ? MinX.ToPx(c.X(), Font) : BaseX + ImgX + TxtMin.x;
+		Inf.Width.Max = MaxX.IsValid() ? MaxX.ToPx(c.X(), Font) : BaseX + ImgX + TxtMax.x;
+
+		// LgiTrace("%i.Layout.Btn.x = %i, %i\n", GetId(), Inf.Width.Min, Inf.Width.Max);
 	}
 	else
 	{
 		int BaseY = Pad.y1 + Pad.y2 + Border.y1 + Border.y2;
 		int ImgY = d->Image ? d->Image->Y() : 0;
-		Inf.Height.Min = BaseY + MAX(ImgY, TxtMin.y);
-		Inf.Height.Max = BaseY + MAX(ImgY, TxtMax.y);
+		GCss::Len MinY, MaxY;
+		if (Css)
+		{
+			MinY = Css->MinHeight();
+			MaxY = Css->MaxHeight();
+		}
 
-		LgiTrace("%i.Layout.Btn.y = %i, %i\n", GetId(), Inf.Height.Min, Inf.Height.Max);
+		Inf.Height.Min = MinY.IsValid() ? MinY.ToPx(c.Y(), Font) : BaseY + MAX(ImgY, TxtMin.y);
+		Inf.Height.Max = MaxY.IsValid() ? MaxY.ToPx(c.Y(), Font) : BaseY + MAX(ImgY, TxtMax.y);
+
+		// LgiTrace("%i.Layout.Btn.y = %i, %i\n", GetId(), Inf.Height.Min, Inf.Height.Max);
 	}
 
 	return true;

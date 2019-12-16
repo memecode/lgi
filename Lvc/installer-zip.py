@@ -19,9 +19,9 @@ if ver:
 	print("Output:", filename)
 	z = zipfile.ZipFile(filename, "w")
 	if sys.platform.find("win") >= 0:
-		z.write("x64Release\\Lvc.exe", "Lvc.exe")
-		z.write("..\\lib\\Lgi12x64.dll", "Lgi12x64.dll")
-		z.write("..\\lib\\libpng12x64.dll", "libpng12x64.dll")
+		z.write("x64Release14\\Lvc.exe", "Lvc.exe")
+		z.write("..\\lib\\Lgi14x64.dll", "Lgi14x64.dll")
+		z.write("..\\lib\\libpng15_14x64.dll", "libpng15_14x64.dll")
 	elif sys.platform.find("linux") >= 0:
 		subprocess.call(["strip", "lvc", "../Release/liblgi.so"])
 		z.write("./lvc", "lvc")
