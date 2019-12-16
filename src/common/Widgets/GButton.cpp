@@ -10,6 +10,7 @@
 #include "GTableLayout.h"
 #include "LgiRes.h"
 #include "LStringLayout.h"
+#include "GCssTools.h"
 
 #define DOWN_MOUSE		0x1
 #define DOWN_KEY		0x2
@@ -503,6 +504,41 @@ void GButton::SetPreferredSize(int x, int y)
 				(y > 0 ? y : Cy + Overhead.y) - 1);
 
 	SetPos(r);
+}
+
+bool GButton::OnLayout(GViewLayoutInfo &Inf)
+{
+	GCssTools Css(GetCss(), GetFont());
+	auto c = GetClient();
+	GRect Pad = Css.GetPadding(c), Border = Css.GetBorder(c);
+	auto TxtMin = d->GetMin();
+	auto TxtMax = d->GetMax();
+
+	if (GetId() == 15)
+	{
+		int asd=0;
+	}
+
+	if (!Inf.Width.Min)
+	{
+		int BaseX = Pad.x1 + Pad.x2 + Border.x1 + Border.x2;
+		int ImgX = d->Image ? d->Image->X() + 4/*img->text spacer*/ : 0;
+		Inf.Width.Min = BaseX + ImgX + TxtMin.x;
+		Inf.Width.Max = BaseX + ImgX + TxtMax.x;
+
+		LgiTrace("%i.Layout.Btn.x = %i, %i\n", GetId(), Inf.Width.Min, Inf.Width.Max);
+	}
+	else
+	{
+		int BaseY = Pad.y1 + Pad.y2 + Border.y1 + Border.y2;
+		int ImgY = d->Image ? d->Image->Y() : 0;
+		Inf.Height.Min = BaseY + MAX(ImgY, TxtMin.y);
+		Inf.Height.Max = BaseY + MAX(ImgY, TxtMax.y);
+
+		LgiTrace("%i.Layout.Btn.y = %i, %i\n", GetId(), Inf.Height.Min, Inf.Height.Max);
+	}
+
+	return true;
 }
 
 #endif

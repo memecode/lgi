@@ -100,6 +100,8 @@ public:
 
 	#if WINNATIVE && !XP_BUTTON
 	int SysOnNotify(int Msg, int Code);
+	#else
+	bool OnLayout(GViewLayoutInfo &Inf);
 	#endif
 };
 
