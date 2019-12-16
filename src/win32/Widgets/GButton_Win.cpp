@@ -1,6 +1,7 @@
 // \file
 // \author Matthew Allen
 // \brief Native Win32 Button Class
+#if !XP_BUTTON
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -421,3 +422,5 @@ bool GButton::SetImage(GSurface *Img, bool OwnIt)
 void GButton::SetPreferredSize(int x, int y)
 {
 }
+
+#endif

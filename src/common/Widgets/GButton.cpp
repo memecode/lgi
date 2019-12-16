@@ -1,3 +1,5 @@
+#if !defined(_WIN32) || (XP_BUTTON != 0)
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -89,12 +91,14 @@ GButton::GButton(int id, int x, int y, int cx, int cy, const char *name) :
 	SetPos(r);
 	SetId(id);
 	SetTabStop(true);
+	/*
 	#ifndef MAC
 	SetFont(SysBold, false);
 	#endif
 	
 	if (LgiApp->SkinEngine)
 		SetFont(LgiApp->SkinEngine->GetDefaultFont(_ObjName));
+	*/
 }
 
 GButton::~GButton()
@@ -500,3 +504,5 @@ void GButton::SetPreferredSize(int x, int y)
 
 	SetPos(r);
 }
+
+#endif

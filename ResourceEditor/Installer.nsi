@@ -28,9 +28,10 @@ Section ""
   SetOutPath $INSTDIR
   
   ; Program files
-  File ..\lib\Lgi12x64.dll
-  File .\x64Release12\LgiRes.exe
-  File ..\lib\libpng12x64.dll
+  File ..\lib\Lgi14x64.dll
+  File .\x64Release14\LgiRes.exe
+  File ..\lib\libpng15_14x64.dll
+  File ..\lib\zlib_14x64.dll
 
   ; Resources
   File .\Resources\lgires.lr8

@@ -429,7 +429,10 @@ bool TableCell::Add(GView *v)
 	if (!v || HasView(v))
 		return false;
 
-	Table->AddView(v);
+	if (Table->IsAttached())
+		v->Attach(Table);
+	else
+		Table->AddView(v);
 
 	Children.SetFixedLength(false);
 	Children.New().View = v;

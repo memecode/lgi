@@ -20,7 +20,7 @@
 /// to the top level window unless some other view intercepts it on the way up
 /// the chain of parent views.
 class LgiClass GButton :
-	#if WINNATIVE
+	#if WINNATIVE && !XP_BUTTON
 	public GControl,
 	#else
 	public GView,
@@ -98,7 +98,7 @@ public:
 	void SetFont(GFont *Fnt, bool OwnIt = false);
 	int OnNotify(GViewI *Ctrl, int Flags);
 
-	#if WINNATIVE
+	#if WINNATIVE && !XP_BUTTON
 	int SysOnNotify(int Msg, int Code);
 	#endif
 };

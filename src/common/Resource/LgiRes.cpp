@@ -405,23 +405,19 @@ bool LgiResources::StyleElement(GViewI *v)
 	if (!v) return false;
 	if (!LoadStyles) return true;
 
-	for (int i=0; i<_ResourceOwner.Length(); i++)
+	for (auto r: _ResourceOwner)
 	{
-		LgiResources *r = _ResourceOwner[i];
-		if (r)
-		{
-			GCss::SelArray Selectors;
-			GViewCssCb Ctx;
-			r->CssStore.Match(Selectors, &Ctx, v);
+		GCss::SelArray Selectors;
+		GViewCssCb Ctx;
+		r->CssStore.Match(Selectors, &Ctx, v);
 
-			for (unsigned i=0; i<Selectors.Length(); i++)
+		for (unsigned i=0; i<Selectors.Length(); i++)
+		{
+			const char *Defs = Selectors[i]->Style;
+			GCss *Css = v->GetCss(true);
+			if (Css && Defs)
 			{
-				const char *Defs = Selectors[i]->Style;
-				GCss *Css = v->GetCss(true);
-				if (Css && Defs)
-				{
-					Css->Parse(Defs, GCss::ParseRelaxed);
-				}
+				Css->Parse(Defs, GCss::ParseRelaxed);
 			}
 		}
 	}
