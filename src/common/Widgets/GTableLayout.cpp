@@ -766,10 +766,10 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 					if (Flag < SizeFill)
 						Flag = SizeFill;
 				}
-				else	
-				{
-					Max = MAX(Max, c->Inf.Width.Max);
-				}
+				else if (Max)
+					Max += c->Inf.Width.Max + GTableLayout::CellSpacing;
+				else
+ 					Max = c->Inf.Width.Max;
 
 				if (c->Inf.Width.Min)
 				{
@@ -930,8 +930,8 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		}
 	}
 	
-	int BtnX = 0;
-	int BtnRows = -1;
+	GdcPt2 Cur(Pos.x1, Pos.y1);
+	int NextY = Pos.y1;
 	
 	GCss::Len CssWidth = GCss::Width();
 	Width -= Padding.x1 + Padding.x2;
@@ -954,7 +954,6 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		}
 		
 		GTableLayout *Tbl = NULL;
-		// GRadioGroup *Grp = NULL;
 
 		GCss *Css = v->GetCss();
 		GCss::Len Ht;
@@ -988,17 +987,29 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			// Supports layout info
 			GRect r = v->GetPos();
 
+			// Process height
 			if (c->Inf.Height.Max < 0)
 				Flags = SizeFill;
 			else
-			{
-				Pos.y2 += c->Inf.Height.Max - 1;
 				r.y2 = r.y1 + c->Inf.Height.Max - 1;
+			
+			// Process width
+			if (c->Inf.Width.Max < 0)
+				r.x2 = r.x1 + Width - 1;
+			else
+				r.x2 = r.x1 + c->Inf.Width.Max - 1;
+
+			if (Cur.x > Pos.x1 && Cur.x + r.X() > Pos.x2)
+			{
+				// Wrap
+				Cur.x = Pos.x1;
+				Cur.y = NextY + GTableLayout::CellSpacing;
 			}
 
-			int Px = MIN(Width, c->Inf.Width.Max);
-			r.x2 = r.x1 + Px - 1;
+			r.Offset(Cur.x - r.x1, Cur.y - r.y1);
 			v->SetPos(r);
+			Cur.x = r.x2 + 1;
+			NextY = MAX(NextY, r.y2 + 1);
 
 			c->IsLayout = true;
 		}
@@ -1008,6 +1019,8 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		}
 		else if (Izza(GButton))
 		{
+			LgiAssert(0);
+			/*
 			int y = v->GetFont()->GetHeight() + GButton::Overhead.y;
 			if (BtnRows < 0)
 			{
@@ -1033,6 +1046,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			GRect r = v->GetPos();
 			r.y2 = r.y1 + y - 1;
 			v->SetPos(r);
+			*/
 		}
 		else if (Izza(GEdit) || Izza(GCombo))
 		{
