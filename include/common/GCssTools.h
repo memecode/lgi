@@ -43,13 +43,13 @@ public:
 	GRect ApplyMargin(GRect &in);
 
 	/// \returns the border in Px
-	GRect GetBorder(GRect &box);
+	GRect GetBorder(GRect &box, GRect *def = NULL);
 	
 	/// Applies the border to a rectangle
 	GRect ApplyBorder(GRect &in);
 
 	/// \returns the padding in Px
-	GRect GetPadding(GRect &box);
+	GRect GetPadding(GRect &box, GRect *def = NULL);
 	
 	/// Applies the padding to a rectangle
 	GRect ApplyPadding(GRect &in);

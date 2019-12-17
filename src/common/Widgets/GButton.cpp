@@ -25,7 +25,7 @@ GdcPt2 GButton::Overhead =
         16,
         #endif
         // Extra height needed
-        6
+        8
     );
 
 class GButtonPrivate : public LStringLayout
@@ -426,7 +426,9 @@ void GButton::OnPaint(GSurface *pDC)
 			State.MouseOver = d->Over;
 
 			State.Image = d->Image;
-			GApp::SkinEngine->OnPaint_GButton(this, &State);
+			
+			if (X() < GdcD->X() && Y() < GdcD->Y())
+				GApp::SkinEngine->OnPaint_GButton(this, &State);
 			
 			GdcPt2 pt;
 			GRect r = GetClient();
@@ -512,14 +514,10 @@ bool GButton::OnLayout(GViewLayoutInfo &Inf)
 	auto Font = GetFont();
 	GCssTools Tools(Css, Font);
 	auto c = GetClient();
-	GRect Pad = Tools.GetPadding(c), Border = Tools.GetBorder(c);
 	auto TxtMin = d->GetMin();
 	auto TxtMax = d->GetMax();
-
-	if (GetId() == 15)
-	{
-		int asd=0;
-	}
+	GRect DefaultPad(Overhead.x>>1, Overhead.y>>1, Overhead.x>>1, Overhead.y>>1);
+	GRect Pad = Tools.GetPadding(c, &DefaultPad), Border = Tools.GetBorder(c);
 
 	if (!Inf.Width.Min)
 	{
@@ -534,8 +532,14 @@ bool GButton::OnLayout(GViewLayoutInfo &Inf)
 
 		Inf.Width.Min = MinX.IsValid() ? MinX.ToPx(c.X(), Font) : BaseX + ImgX + TxtMin.x;
 		Inf.Width.Max = MaxX.IsValid() ? MaxX.ToPx(c.X(), Font) : BaseX + ImgX + TxtMax.x;
-
-		// LgiTrace("%i.Layout.Btn.x = %i, %i\n", GetId(), Inf.Width.Min, Inf.Width.Max);
+		
+		/*
+		LgiTrace("%i.Layout.Btn.x = %i, %i  valid=%i,%i c=%s, base=%i, img=%i\n", GetId(), 
+			Inf.Width.Min, Inf.Width.Max,
+			MinX.IsValid(), MaxX.IsValid(),
+			c.GetStr(),
+			BaseX, ImgX);
+		*/
 	}
 	else
 	{

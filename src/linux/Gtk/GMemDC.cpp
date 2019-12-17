@@ -272,8 +272,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	pMem->Flags = 0;
 	pMem->Cs = CsNone;
 
-	if (d->CreateCs != ColourSpace  &&
-		Exact)
+	if (d->CreateCs != ColourSpace && Exact)
 	{
 		// Don't bother creating a cairo imaage surface, as the colour space we want is not
 		// supported. Just create an in memory bitmap.
@@ -286,11 +285,12 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	else
 	{
 		LgiAssert(d->Img == NULL);
-		d->Img = cairo_image_surface_create (fmt, x, y);
+		d->Img = cairo_image_surface_create(fmt, x, y);
 		if (!d->Img)
 			return false;
 
-		switch (cairo_image_surface_get_format(d->Img))
+		auto OutFmt = cairo_image_surface_get_format(d->Img);
+		switch (OutFmt)
 		{
 			case CAIRO_FORMAT_ARGB32:
 				pMem->Cs = CsBgra32;
@@ -305,7 +305,8 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 				pMem->Cs = CsRgb16;
 				break;
 			default:
-				LgiAssert(0);
+				// LgiAssert(0);
+				printf("%s:%i - Invalid surface format: %i (0x%x), in: %i (0x%x), sz: %ix%i\n", _FL, OutFmt, OutFmt, fmt, fmt, x, y);
 				return false;
 		}			
 		pMem->Base = cairo_image_surface_get_data(d->Img);

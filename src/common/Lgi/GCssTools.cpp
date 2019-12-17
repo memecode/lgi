@@ -76,16 +76,17 @@ GRect GCssTools::ApplyMargin(GRect &in)
 	return r;
 }
 
-GRect GCssTools::GetPadding(GRect &box)
+GRect GCssTools::GetPadding(GRect &box, GRect *def)
 {
-	GRect r;
+	GRect r(0, 0, 0, 0);
 	if (Css)
 	{
 		GCss::Len padding = Css->Padding();
 		#define DoPadding(name, edge, dim) \
 			{ \
 				GCss::Len p = Css->Padding##name(); \
-				r.edge = (p.IsValid() ? p : padding).ToPx(box.dim(), Font); \
+				auto v = p.IsValid() ? &p : &padding; \
+				r.edge = v->IsValid() ? v->ToPx(box.dim(), Font) : (def ? def->edge : 0); \
 			}
 		DoPadding(Left, x1, X)
 		DoPadding(Top, y1, Y)
@@ -93,18 +94,25 @@ GRect GCssTools::GetPadding(GRect &box)
 		DoPadding(Bottom, y2, Y)
 		#undef DoPadding
 	}
+	else if (def)
+	{
+		return *def;
+	}
+	
 	return r;
 }
 
-GRect GCssTools::GetBorder(GRect &box)
+GRect GCssTools::GetBorder(GRect &box, GRect *def)
 {
-	GRect r;
+	GRect r(0, 0, 0, 0);
 	if (Css)
 	{
+		GCss::Len border = Css->Border();
 		#define _(name, edge, dim) \
 			{ \
 				GCss::Len p = Css->Border##name(); \
-				r.edge = p.IsValid() ? p.ToPx(box.dim(), Font) : 0; \
+				auto v = p.IsValid() ? &p : &border; \
+				r.edge = v->IsValid() ? v->ToPx(box.dim(), Font) : (def ? def->edge : 0); \
 			}
 		_(Left, x1, X)
 		_(Top, y1, Y)
@@ -112,6 +120,11 @@ GRect GCssTools::GetBorder(GRect &box)
 		_(Bottom, y2, Y)
 		#undef _
 	}
+	else if (def)
+	{
+		return *def;
+	}
+	
 	return r;
 }
 
