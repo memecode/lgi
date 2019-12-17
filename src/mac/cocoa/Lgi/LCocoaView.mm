@@ -15,6 +15,57 @@
 #define Check() if (!self.w) return
 static int LCocoaView_Count = 0;
 
+NSCursor *LCocoaCursor(LgiCursor lc)
+{
+	switch (lc)
+	{
+		/// Blank/invisible cursor
+		case LCUR_Blank: return NSCursor.disappearingItemCursor;
+		/// Normal arrow
+		case LCUR_Normal: return NSCursor.arrowCursor;
+		/// Upwards arrow
+		case LCUR_UpArrow: return NSCursor.resizeUpCursor;
+		/// Downwards arrow
+		case LCUR_DownArrow: return NSCursor.resizeDownCursor;
+		/// Left arrow
+		case LCUR_LeftArrow: return NSCursor.resizeLeftCursor;
+		/// Right arrow
+		case LCUR_RightArrow: return NSCursor.resizeRightCursor;
+		/// Crosshair
+		case LCUR_Cross: return NSCursor.crosshairCursor;
+		/// Ibeam/text entry
+		case LCUR_Ibeam: return NSCursor.IBeamCursor;
+		/// Vertical resize (|)
+		case LCUR_SizeVer: return NSCursor.resizeUpDownCursor;
+		/// Horizontal resize (-)
+		case LCUR_SizeHor: return NSCursor.resizeLeftRightCursor;
+		/// A pointing hand
+		case LCUR_PointingHand: return NSCursor.pointingHandCursor;
+		/// A slashed circle
+		case LCUR_Forbidden: return NSCursor.operationNotAllowedCursor;
+		/// Copy Drop
+		case LCUR_DropCopy: return NSCursor.dragCopyCursor;
+		/// Copy Move
+		case LCUR_DropMove: return NSCursor.dragLinkCursor;
+
+		default:
+		/// Hourglass/watch
+		case LCUR_Wait:
+		/// Diagonal resize (/)
+		case LCUR_SizeBDiag:
+		/// Diagonal resize (\)
+		case LCUR_SizeFDiag:
+		/// All directions resize
+		case LCUR_SizeAll:
+		/// Vertical splitting
+		case LCUR_SplitV:
+		/// Horziontal splitting
+		case LCUR_SplitH:
+			return NULL;
+	}
+}
+
+
 @implementation LCocoaMsg
 
 - (id)init:(GViewI*)View msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B
@@ -248,7 +299,7 @@ struct DndEvent
 	m.SetFromEvent(ev, self);
 	
 	// m.Trace("moved");
-	
+
 	m.Target->GetGView()->_Mouse(m, true);
 }
 

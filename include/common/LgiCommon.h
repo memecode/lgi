@@ -377,52 +377,56 @@ LgiFunc int LgiIsReleaseBuild();
 
 #if defined WIN32
 
-/// Registers an active x control
-LgiFunc bool RegisterActiveXControl(const char *Dll);
+	/// Registers an active x control
+	LgiFunc bool RegisterActiveXControl(const char *Dll);
 
-enum HWBRK_TYPE
-{
-	HWBRK_TYPE_CODE,
-	HWBRK_TYPE_READWRITE,
-	HWBRK_TYPE_WRITE,
-};
+	enum HWBRK_TYPE
+	{
+		HWBRK_TYPE_CODE,
+		HWBRK_TYPE_READWRITE,
+		HWBRK_TYPE_WRITE,
+	};
 
-enum HWBRK_SIZE
-{
-	HWBRK_SIZE_1,
-	HWBRK_SIZE_2,
-	HWBRK_SIZE_4,
-	HWBRK_SIZE_8,
-};
+	enum HWBRK_SIZE
+	{
+		HWBRK_SIZE_1,
+		HWBRK_SIZE_2,
+		HWBRK_SIZE_4,
+		HWBRK_SIZE_8,
+	};
 
-/// Set a hardware breakpoint.
-LgiFunc HANDLE SetHardwareBreakpoint
-(
-	/// Use GetCurrentThread()
-	HANDLE hThread,
-	/// Type of breakpoint
-	HWBRK_TYPE Type,
-	/// Size of breakpoint
-	HWBRK_SIZE Size,
-	/// The pointer to the data to break on
-	void *s
-);
+	/// Set a hardware breakpoint.
+	LgiFunc HANDLE SetHardwareBreakpoint
+	(
+		/// Use GetCurrentThread()
+		HANDLE hThread,
+		/// Type of breakpoint
+		HWBRK_TYPE Type,
+		/// Size of breakpoint
+		HWBRK_SIZE Size,
+		/// The pointer to the data to break on
+		void *s
+	);
 
-/// Deletes a hardware breakpoint
-LgiFunc bool RemoveHardwareBreakpoint(HANDLE hBrk);
+	/// Deletes a hardware breakpoint
+	LgiFunc bool RemoveHardwareBreakpoint(HANDLE hBrk);
 
 #elif defined LINUX
 
-/// Window managers
-enum WindowManager
-{
-	WM_Unknown,
-	WM_Kde,
-	WM_Gnome
-};
+	/// Window managers
+	enum WindowManager
+	{
+		WM_Unknown,
+		WM_Kde,
+		WM_Gnome
+	};
 
-/// Returns the currently running window manager
-WindowManager LgiGetWindowManager();
+	/// Returns the currently running window manager
+	WindowManager LgiGetWindowManager();
+
+#elif defined(__OBJC__)
+
+	LgiFunc NSCursor *LCocoaCursor(LgiCursor lc);
 
 #endif
 

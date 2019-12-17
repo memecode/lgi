@@ -247,9 +247,23 @@ bool GView::_Mouse(GMouse &m, bool Move)
 		if (!Client.Valid() || Client.Overlap(m.x, m.y))
 		{
 			if (Move)
+			{
+				// Do cursor stuff
+				LgiCursor cursor = Target->GetCursor(m.x, m.y);
+				auto cc = NSCursor.arrowCursor;
+				if (cursor != LCUR_Normal)
+					cc = LCocoaCursor(cursor);
+				if (cc != NSCursor.currentSystemCursor)
+					[cc set];
+
+				// Move event
 				Target->OnMouseMove(m);
+			}
 			else if (!Wnd || Wnd->HandleViewMouse(Target, m))
+			{
+				// Click event
 				Target->OnMouseClick(m);
+			}
 		}
 		else return false;
 	}
