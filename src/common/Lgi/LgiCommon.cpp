@@ -1026,6 +1026,17 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 					}
 				}
 
+			#elif LGI_COCOA
+			
+				NSFileManager *fm = [NSFileManager defaultManager];
+				auto urls = [fm URLsForDirectory:NSDownloadsDirectory inDomains:NSUserDomainMask];
+				if (urls)
+				{
+					if (urls.count > 0)
+						Path = [urls[0] path];
+					[urls release];
+				}
+
 			#else
 
 				LgiAssert(!"Not implemented");

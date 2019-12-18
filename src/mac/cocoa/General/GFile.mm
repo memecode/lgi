@@ -509,8 +509,10 @@ public:
 		if (Which < 0 &&
 			!_Sub.Length())
 		{
+			GMacVolume *v = NULL;
+
+			/*
 			// Get various shortcuts to points of interest
-			GMacVolume *v = new GMacVolume(0);
 			if (v)
 			{
 				v->_Path = "/";
@@ -529,6 +531,74 @@ public:
 					v->_Name = "Home";
 					v->_Type = VT_HARDDISK;
 					_Sub.Insert(v);
+				}
+			}
+			*/
+			
+			// List some user folders
+			const char *n[]   = {"Home",   "Downloads",        "Documents",        "Music",        "Video",        "Pictures"};
+			LgiSystemPath a[] = {LSP_HOME, LSP_USER_DOWNLOADS, LSP_USER_DOCUMENTS, LSP_USER_MUSIC, LSP_USER_VIDEO, LSP_USER_PICTURES};
+			for (int i=0; i<CountOf(a); i++)
+			{
+				GFile::Path p(a[i]);
+				if (p.Exists())
+				{
+					auto f = p.GetFull();
+					v = new GMacVolume(0);
+					if (v)
+					{
+						v->_Path = f;
+						v->_Name = n[i];
+						v->_Type = VT_FOLDER;
+						_Sub.Insert(v);
+					}
+				}
+			}
+			
+			// List the local hard disks
+			NSWorkspace   *ws = [NSWorkspace sharedWorkspace];
+			NSArray     *vols = [ws mountedLocalVolumePaths];
+			NSFileManager *fm = [NSFileManager defaultManager];
+
+			for (NSString *path in vols)
+			{
+				NSDictionary* fsAttributes;
+				NSString *description, *type, *name;
+				BOOL removable, writable, unmountable, res;
+				NSNumber *size;
+
+				res = [ws getFileSystemInfoForPath:path
+									   isRemovable:&removable
+										isWritable:&writable
+									 isUnmountable:&unmountable
+									   description:&description
+											  type:&type];
+				if (!res) continue;
+				// fsAttributes = [fm fileSystemAttributesAtPath:path];
+				NSError *err = nil;
+				fsAttributes = [fm attributesOfFileSystemForPath:path error:&err];
+				name         = [fm displayNameAtPath:path];
+				size         = [fsAttributes objectForKey:NSFileSystemSize];
+
+				#if 0
+				NSLog(@"path=%@\nname=%@\nremovable=%d\nwritable=%d\nunmountable=%d\n"
+					   "description=%@\ntype=%@, size=%@\n\n",
+					  path, name, removable, writable, unmountable, description, type, size);
+				#endif
+				
+				GString s = [type UTF8String];
+				GString p = [path UTF8String];
+				if (!s.Equals("autofs") && p.Find("/private") < 0)
+				{
+					v = new GMacVolume(0);
+					if (v)
+					{
+						v->_Path = p;
+						v->_Name = [name UTF8String];
+						v->_Type = VT_HARDDISK;
+						v->_Size = size.longLongValue;
+						_Sub.Insert(v);
+					}
 				}
 			}
 		}
