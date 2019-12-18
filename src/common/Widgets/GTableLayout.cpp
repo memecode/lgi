@@ -32,7 +32,7 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		14
+// #define DEBUG_LAYOUT		1150
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
 
@@ -783,11 +783,13 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 			{
 				GDisplayString ds(v->GetFont(), v->Name());
 				int x = MAX(v->X(), ds.X() + GButton::Overhead.x);
-				if (x > v->X())
+				int y = MAX(v->Y(), ds.Y() + GButton::Overhead.y);
+				if (x > v->X() || y > v->Y())
 				{
 					// Resize the button to show all the text on it...
 					GRect r = v->GetPos();
 					r.x2 = r.x1 + x - 1;
+					r.y2 = r.y1 + y - 1;
 					v->SetPos(r);
 				}
 
@@ -1010,6 +1012,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			v->SetPos(r);
 			Cur.x = r.x2 + 1;
 			NextY = MAX(NextY, r.y2 + 1);
+			Pos.y2 = MAX(Pos.y2, r.y2);
 
 			c->IsLayout = true;
 		}
@@ -1019,34 +1022,21 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		}
 		else if (Izza(GButton))
 		{
-			LgiAssert(0);
-			/*
-			int y = v->GetFont()->GetHeight() + GButton::Overhead.y;
-			if (BtnRows < 0)
-			{
-				// Setup first row
-				BtnRows = 1;
-				Pos.y2 += y;
-			}
+			// Button is already the right size...
+			auto r = v->GetPos();
 			
-			if (BtnX + v->X() > Width)
+			if (Cur.x + r.X() > Width)
 			{
 				// Wrap
-				BtnX = v->X();
-				BtnRows++;
-				Pos.y2 += y + Table->d->BorderSpacing;
-			}
-			else
-			{
-				// Don't wrap
-				BtnX += v->X() + Table->d->BorderSpacing;
+				Cur.x = Pos.x1;
+				Cur.y = NextY + GTableLayout::CellSpacing;
 			}
 			
-			// Set button height..
-			GRect r = v->GetPos();
-			r.y2 = r.y1 + y - 1;
-			v->SetPos(r);
-			*/
+			r.Offset(Cur.x - r.x1, Cur.y - r.y1);
+			v->SetPos(r, true);
+			Cur.x = r.x2 + 1;
+			NextY = MAX(NextY, r.y2 + 1);
+			Pos.y2 = MAX(Pos.y2, r.y2);
 		}
 		else if (Izza(GEdit) || Izza(GCombo))
 		{

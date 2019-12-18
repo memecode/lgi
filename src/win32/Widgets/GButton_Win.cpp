@@ -12,16 +12,8 @@
 
 // Size of extra pixels, beyond the size of the text itself.
 GdcPt2 GButton::Overhead =
-    GdcPt2(
-        // Extra width needed
-        #if defined(MAC) && !defined(LGI_SDL)
-        28,
-        #else
-        16,
-        #endif
-        // Extra height needed
-        6
-    );
+    GdcPt2(	12,	// Extra width needed
+			2);	// Extra height needed
 
 static int IsWin7 = -1;
 static int IsWin10 = -1;
