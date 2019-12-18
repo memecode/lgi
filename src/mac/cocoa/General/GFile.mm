@@ -25,6 +25,7 @@
 #include "Gdc2.h"
 #include "LgiCommon.h"
 #include "GString.h"
+#include "GSubProcess.h"
 
 #if LGI_COCOA
 #include <Cocoa/Cocoa.h>
@@ -1108,6 +1109,9 @@ public:
 	struct stat		Stat;
 	char			*Pattern;
 	
+	ssize_t			CachePos;
+	GString::Array	Cache;
+	
 	GDirectoryPriv()
 	{
 		Dir = NULL;
@@ -1115,6 +1119,7 @@ public:
 		BasePath[0] = 0;
 		Pattern = NULL;
 		BaseEnd = NULL;
+		CachePos = -1;
 	}
 	
 	~GDirectoryPriv()
@@ -1209,6 +1214,38 @@ int GDirectory::First(const char *Name, const char *Pattern)
 				}
 			}
 		}
+		else if (!Stricmp(Name, "/"))
+		{
+			// Really Apple? REALLY???
+			// Can't opendir("/")... sigh. Clearly there is more than one way to get this done.
+			GSubProcess p("ls", "-l /");
+			GStringPipe o;
+			if (p.Start() && p.Communicate(&o) == 0)
+			{
+				strcpy_s(d->BasePath, sizeof(d->BasePath), Name);
+				d->BaseEnd = d->BasePath + strlen(d->BasePath);
+				
+				d->Cache.SetFixedLength(false);
+				auto Lines = o.NewGStr().Split("\n");
+				for (auto Ln: Lines)
+				{
+					auto p = Ln.SplitDelimit(" \t", 8);
+					if (p.Length() > 8)
+					{
+						auto Name = p.Last();
+						auto Lnk = Name.Split(" -> ");
+						if (Lnk.Length() > 1)
+							d->Cache.New().Printf("/%s", Lnk.Last().Get());
+						else
+							d->Cache.New().Printf("/%s", Name.Get());
+					}
+				}
+				
+				d->CachePos = 0;
+				return !lstat(d->Cache[d->CachePos], &d->Stat);
+			}
+			else printf("%s:%i - ls failed.\n", _FL);
+		}
 		else
 		{
 			printf("%s:%i - opendir(%s) failed with %i\n", _FL, d->BasePath, errno);
@@ -1221,19 +1258,35 @@ int GDirectory::First(const char *Name, const char *Pattern)
 int GDirectory::Next()
 {
 	int Status = false;
-	
-	while (d->Dir && d->De)
+	char s[512];
+
+	if (d->CachePos >= 0)
 	{
-		if ((d->De = readdir(d->Dir)))
+		d->CachePos++;
+		if (d->CachePos >= d->Cache.Length())
+			Status = false;
+		else
 		{
-			char s[512];
 			*d->BaseEnd = 0;
-			LgiMakePath(s, sizeof(s), d->BasePath, GetName());
-			lstat(s, &d->Stat);
-			if (!d->Ignore())
-			{
+			auto &c = d->Cache[d->CachePos];
+			if (!lstat(c, &d->Stat))
 				Status = true;
-				break;
+		}
+	}
+	else
+	{
+		while (d->Dir && d->De)
+		{
+			if ((d->De = readdir(d->Dir)))
+			{
+				*d->BaseEnd = 0;
+				LgiMakePath(s, sizeof(s), d->BasePath, GetName());
+				lstat(s, &d->Stat);
+				if (!d->Ignore())
+				{
+					Status = true;
+					break;
+				}
 			}
 		}
 	}
@@ -1321,7 +1374,13 @@ long GDirectory::GetAttributes() const
 
 char *GDirectory::GetName() const
 {
-	return (d->De) ? d->De->d_name : 0;
+	if (d->CachePos >= 0)
+		return d->Cache[d->CachePos];
+	if (d->De)
+		return d->De->d_name;
+
+	LgiAssert(!"Invalid state.");
+	return NULL;
 }
 
 uint64 GDirectory::GetCreationTime() const
