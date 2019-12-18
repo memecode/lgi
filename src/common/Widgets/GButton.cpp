@@ -20,12 +20,12 @@ GdcPt2 GButton::Overhead =
     GdcPt2(
         // Extra width needed
         #if defined(MAC) && !defined(LGI_SDL)
-        28,
+        24,
         #else
         16,
         #endif
         // Extra height needed
-        8
+        6
     );
 
 class GButtonPrivate : public LStringLayout

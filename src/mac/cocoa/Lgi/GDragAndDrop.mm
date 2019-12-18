@@ -92,6 +92,9 @@ const char *LMimeToUti(const char *Mime)
 	
 	if (written < len)
 		LgiTrace("%s:%i - write failed.\n", _FL);
+	
+	if (completionHandler)
+		completionHandler(nil);
 }
 @end
 
