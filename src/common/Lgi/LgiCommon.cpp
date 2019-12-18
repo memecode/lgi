@@ -1030,12 +1030,8 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			
 				NSFileManager *fm = [NSFileManager defaultManager];
 				auto urls = [fm URLsForDirectory:NSDownloadsDirectory inDomains:NSUserDomainMask];
-				if (urls)
-				{
-					if (urls.count > 0)
-						Path = [urls[0] path];
-					[urls release];
-				}
+				if (urls && urls.count > 0)
+					Path = [urls[0] path];
 
 			#else
 
