@@ -3434,6 +3434,13 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	if (!pDC)
 		ScreenDC.Reset(pDC = new GScreenDC(this));
 
+	#ifndef WINDOWS
+	GRect r = GetPos();
+	if (Offset)
+		r.Offset(Offset->x, Offset->y);
+	pDC->SetClient(&r);
+	#endif
+	
 	if (Ctrl)
 	{
 		GRect c = Ctrl->View()->GetPos();
@@ -3443,10 +3450,6 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 		if (pMemDC &&
 			pMemDC->Create(c.X(), c.Y(), GdcD->GetColourSpace()))
 		{
-            #if 0 //def MAC
-            GScreenDC *Scr = dynamic_cast<GScreenDC*>(pDC);
-            if (Scr) Scr->PushState();
-            #endif
 			// Draw client
 			pMemDC->Colour(L_WORKSPACE);
 			// pMemDC->Colour(Rgb24(0, 128, 0), 24);
@@ -3454,6 +3457,7 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 
 			// Paint children
 			GRect Pos = Ctrl->View()->GetPos();
+			printf("Pos=%s\n", Pos.GetStr());
 			pMemDC->SetClient(&Pos);
 			GView::_Paint(pMemDC);
 			pMemDC->SetClient(0);
@@ -3496,6 +3500,10 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 		pDC->Colour(L_WORKSPACE);
 		pDC->Rectangle();
 	}
+
+	#ifndef WINDOWS
+	pDC->SetClient(NULL);
+	#endif
 }
 
 void ResDialog::OnLanguageChange()

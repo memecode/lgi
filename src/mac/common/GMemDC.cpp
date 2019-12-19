@@ -198,7 +198,7 @@ public:
 	uchar *Data;
 	CGContextRef Bmp;
 	CGColorSpaceRef Cs;
-	GRect Client;
+	GArray<GRect> Client;
 	GAutoPtr<uchar, true> BitsMem;
 
 	GMemDCPrivate()
@@ -715,19 +715,39 @@ void GMemDC::SetClient(GRect *c)
 {
 	if (c)
 	{
-		GRect Doc = Bounds();
-		d->Client = *c;
-		d->Client.Bound(&Doc);
-		Clip = d->Client;
+		GRect Doc;
+		if (d->Client.Length())
+			Doc = d->Client.Last();
+		else
+			Doc = Bounds();
 		
-		OriginX = -d->Client.x1;
-		OriginY = -d->Client.y1;
+		GRect r = *c;
+		//r.Offset(Doc.x1, Doc.y1);
+		r.Bound(&Doc);
+		d->Client.Add(r);
+		
+		Clip = r;
+		
+		OriginX = -r.x1;
+		OriginY = -r.y1;
 	}
 	else
 	{
-		d->Client.ZOff(-1, -1);
-		OriginX = 0;
-		OriginY = 0;
-		Clip.ZOff(pMem->x-1, pMem->y-1);
+		if (d->Client.Length())
+			d->Client.PopLast();
+
+		if (d->Client.Length())
+		{
+			auto &r = d->Client.Last();
+			OriginX = -r.x1;
+			OriginY = -r.y1;
+			Clip = r;
+		}
+		else
+		{
+			OriginX = 0;
+			OriginY = 0;
+			Clip.ZOff(pMem->x-1, pMem->y-1);
+		}
 	}
 }

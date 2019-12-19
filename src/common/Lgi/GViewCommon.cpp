@@ -569,7 +569,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	#endif
 
 	// Non-Client drawing
-	GRect r = Pos;
+	GRect r;
 	if (Offset)
 	{
 		r = Pos;
