@@ -627,6 +627,8 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 		{
 			if (!w->Pos.Valid())
 				continue;
+
+			LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), o.x1, o.y1);
 			w->_Paint(pDC, &o);
 		}
 	}
@@ -646,21 +648,6 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 		printf("%s:%i - No context to draw in.\n", _FL);
 		return;
 	}
-
-	#if 0
-	{
-		Gtk::cairo_matrix_t matrix;
-		cairo_get_matrix(pDC->Handle(), &matrix);
-
-		double ex[4];
-		cairo_clip_extents(pDC->Handle(), ex+0, ex+1, ex+2, ex+3);
-		ex[0] += matrix.x0;
-		ex[1] += matrix.y0;
-		ex[2] += matrix.x0;
-		ex[3] += matrix.y0;
-		LgiTrace("%s::_Paint (%p) = %g,%g,%g,%g - %g,%g\n", GetClass(), _View, ex[0], ex[1], ex[2], ex[3], matrix.x0, matrix.y0);
-	}
-	#endif
 
 	#if 0
 	// This is useful for coverage checking
@@ -702,37 +689,6 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	else
 	{
 		OnPaint(pDC);
-		#if defined(_DEBUG) && defined(LGI_CARBON)
-		if (_Debug)
-		{
-			OsPainter h = pDC->Handle();
-			CGAffineTransform t2 = CGContextGetCTM(h);
-			GRect r2;
-			CGRect new_bounds = CGContextGetClipBoundingBox(h);
-			r2 = new_bounds;
-
-			HIRect rc;
-			HIViewGetFrame(_View, &rc);
-			HIViewFeatures f;
-			HIViewGetFeatures(_View, &f);
-			
-			if (r2.x1 >= 0)
-			{
-				printf("%s:%i %s::OnPaint %s, %s (%f,%f)\n", _FL, GetClass(),
-						r.GetStr(),
-						r2.GetStr(),
-						(double)t2.tx, (double)t2.ty);
-			}
-			else
-			{
-				printf("%s:%i %s::OnPaint %s, (%f,%f)\n", _FL, GetClass(),
-						r.GetStr(),
-						(double)t2.tx, (double)t2.ty);
-			}
-			
-			GetWindow()->_Dump();
-		}
-		#endif
 	}
 
 	#if PAINT_VIRTUAL_CHILDREN
@@ -747,26 +703,13 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 			#endif
 			{
 				GRect p = w->GetPos();
-				#ifdef __GTK_H__
-				p.Offset(_BorderSize, _BorderSize);
-				#endif
 				p.Offset(o.x, o.y);
 				
-				if (1) // !Update || Update->Overlap(&p))
-				{			
-					GdcPt2 co(p.x1, p.y1);
-					
-					pDC->SetClient(&p);
-
-					#if 0
-					double ex[4];
-					cairo_clip_extents (pDC->Handle(), ex+0, ex+1, ex+2, ex+3);
-					LgiTrace("	_Paint %s:%s %s (%g,%g,%g,%g)\n", w->GetClass(), w->Name(), p.GetStr(), ex[0], ex[1], ex[2], ex[3]);
-					#endif
-
-					w->_Paint(pDC, &co);
-					pDC->SetClient(NULL);
-				}
+				GdcPt2 co(p.x1, p.y1);
+				LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), p.x1, p.y1);
+				pDC->SetClient(&p);
+				w->_Paint(pDC, &co);
+				pDC->SetClient(NULL);
 			}
 		}
 	}
