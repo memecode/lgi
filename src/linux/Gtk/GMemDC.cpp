@@ -21,14 +21,13 @@ using namespace Gtk;
 class GMemDCPrivate
 {
 public:
-	GRect Client;
+	::GArray<GRect> Client;
 	cairo_t *cr;
 	LCairoSurface Img;
 	GColourSpace CreateCs;
 
     GMemDCPrivate()
     {
-		Client.ZOff(-1, -1);
 		cr = NULL;
 		CreateCs = CsNone;
     }
@@ -170,17 +169,55 @@ void GMemDC::SetClient(GRect *c)
 {
 	if (c)
 	{
-		d->Client = *c;
-		OriginX = -c->x1;
-		OriginY = -c->y1;
+		GRect Doc;
+		if (d->Client.Length())
+			Doc = d->Client.Last();
+		else
+			Doc = Bounds();
+		
+		GRect r = *c;
+		// r.Offset(Doc.x1, Doc.y1);
+		r.Bound(&Doc);
+		d->Client.Add(r);
+		
+		Clip = r;
+		
+		OriginX = -r.x1;
+		OriginY = -r.y1;
+		
+		GStringPipe s;
+		s.Print("Push");
+		for (auto c:d->Client) s.Print(" > %s", c.GetStr());
+		s.Print(", clip=%s, ori=%i,%i", Clip.GetStr(), OriginX, OriginY);
+		printf("%s\n", s.NewGStr().Get());
 	}
 	else
 	{
-		d->Client.ZOff(-1, -1);
-		OriginX = 0;
-		OriginY = 0;
+		if (d->Client.Length())
+			d->Client.PopLast();
+
+		if (d->Client.Length())
+		{
+			auto &r = d->Client.Last();
+			OriginX = -r.x1;
+			OriginY = -r.y1;
+			Clip = r;
+		}
+		else
+		{
+			OriginX = 0;
+			OriginY = 0;
+			Clip.ZOff(pMem->x-1, pMem->y-1);
+		}
+
+		GStringPipe s;
+		s.Print("Pop");
+		for (auto c:d->Client) s.Print(" > %s", c.GetStr());
+		s.Print(", clip=%s, ori=%i,%i", Clip.GetStr(), OriginX, OriginY);
+		printf("%s\n", s.NewGStr().Get());
 	}
 }
+
 
 void GMemDC::Empty()
 {
