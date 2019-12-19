@@ -881,76 +881,60 @@ CtrlDlg::CtrlDlg(ResDialog *dlg, GXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlDlg)
 
-void CtrlDlg::OnPaint(GSurface *pDC)
-{
-	// Draw any rubber band
-	ResDialogCtrl::OnPaint(pDC);
-}
-
 GRect &CtrlDlg::GetClient(bool InClientSpace)
 {
 	static GRect r;
 	
 	Client.Set(0, 0, View()->X()-1, View()->Y()-1);
-	Client.Size(3, 3);
+	Client.Size(2, 2);
 	Client.y1 += LgiApp->GetMetric(LGI_MET_DECOR_CAPTION);
 	if (Client.y1 > Client.y2) Client.y1 = Client.y2;
 
-	r = Client;
 	if (InClientSpace)
-		r.Offset(-r.x1, -r.y1);
+		r = Client.ZeroTranslate();
+	else
+		r = Client;
 
 	return r;
 }
 
-void CtrlDlg::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
+void CtrlDlg::OnNcPaint(GSurface *pDC, GRect &r)
 {
-	Client = GetClient(false);
-
 	// Draw the border
-	GRect r(0, 0, View()->X()-1, View()->Y()-1);
 	LgiWideBorder(pDC, r, DefaultRaisedEdge);
-	pDC->Colour(L_MED);
-	LgiFlatBorder(pDC, r, 1);
 
 	// Draw the title bar
-	Title = r;
-	Title.y2 = Client.y1 - 1;
+	int TitleY = LgiApp->GetMetric(LGI_MET_DECOR_CAPTION);
+	GRect t = r;
+	t.y2 = t.y1 + TitleY - 1;
 	pDC->Colour(L_ACTIVE_TITLE);
-	pDC->Rectangle(&Title);
-	
+	pDC->Rectangle(&t);
 	if (Str)
 	{
 		GDisplayString ds(SysFont, Str->Get());
 		SysFont->Fore(L_ACTIVE_TITLE_TEXT);
 		SysFont->Transparent(true);
-		ds.Draw(pDC, Title.x1 + 10, Title.y1 + ((Title.Y()-ds.Y())/2));
+		ds.Draw(pDC, t.x1 + 10, t.y1 + ((t.Y()-ds.Y())/2));
 	}
 
-	// Draw the client area
-	GRect c = Client;
-	GdcPt2 o;
-	if (Offset) o = *Offset;
-	c.Offset(o.x, o.y);
-	pDC->SetClient(&c);
+	r.y1 = t.y2 + 1;
+}
+
+void CtrlDlg::OnPaint(GSurface *pDC)
+{
+	Client = GetClient();
 
 	// Draw the grid
 	pDC->Colour(L_MED);
-	pDC->Rectangle(0, 0, Client.X()-1, Client.Y()-1);
+	pDC->Rectangle(&Client);
 	pDC->Colour(Rgb24(0x80, 0x80, 0x80), 24);
 	for (int y=0; y<Client.Y(); y+=GRID_Y)
 	{
 		for (int x=0; x<Client.X(); x+=GRID_X)
-		{
 			pDC->Set(x, y);
-		}
 	}
 
-	// Paint children
-	GdcPt2 co(c.x1, c.y1);
-	GView::_Paint(pDC, &co);
-
-	pDC->SetOrigin(o.x, o.y);
+	ResDialogCtrl::OnPaint(pDC);
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -3429,81 +3413,35 @@ void ResDialog::DrawSelection(GSurface *pDC)
 
 void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 {
-	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
-	GAutoPtr<GSurface> ScreenDC;
+	// Create temp DC if needed...
+	GAutoPtr<GSurface> Local;
 	if (!pDC)
-		ScreenDC.Reset(pDC = new GScreenDC(this));
+	{
+		if (!Local.Reset(new GScreenDC(this))) return;
+		pDC = Local;
+	}
+	GDoubleBuffer DblBuf(pDC);
 
-	#ifndef WINDOWS
-	GRect r = GetPos();
-	if (Offset)
-		r.Offset(Offset->x, Offset->y);
-	pDC->SetClient(&r);
+	#if 0
+	auto p = GetPos();
+	GdcPt2 Off(p.x1, p.y1);
+	GView::_Paint(pDC, &Off, Update);
+	#else
+	GView::_Paint(pDC, Offset, Update);
 	#endif
+
+	if (GetParent())
+		DrawSelection(pDC);
+}
+
+void ResDialog::OnPaint(GSurface *pDC)
+{
+	pDC->Colour(L_WORKSPACE);
+	pDC->Rectangle();
 	
-	if (Ctrl)
-	{
-		GRect c = Ctrl->View()->GetPos();
-		c.Size(-GOOBER_BORDER, -GOOBER_BORDER);
-
-		GAutoPtr<GSurface> pMemDC(new GMemDC);
-		if (pMemDC &&
-			pMemDC->Create(c.X(), c.Y(), GdcD->GetColourSpace()))
-		{
-			// Draw client
-			pMemDC->Colour(L_WORKSPACE);
-			// pMemDC->Colour(Rgb24(0, 128, 0), 24);
-			pMemDC->Rectangle();
-
-			// Paint children
-			GRect Pos = Ctrl->View()->GetPos();
-			printf("Pos=%s\n", Pos.GetStr());
-			pMemDC->SetClient(&Pos);
-			GView::_Paint(pMemDC);
-			pMemDC->SetClient(0);
-			
-			if (GetParent())
-			{
-                #if 0 //def MAC
-                if (Scr) Scr->PopState();
-                #endif
-				// Draw selection
-				DrawSelection(pMemDC);
-			}
-
-			// Put on screen
-			pMemDC->SetOrigin(0, 0);
-			pDC->Blt(0, 0, pMemDC);
-
-			// Draw other non Mem-DC regions
-			pDC->Colour(L_WORKSPACE);
-			if (X() > c.X())
-			{
-				pDC->Rectangle(c.x2 + 1, 0, X()-1, c.y2);
-			}
-			if (Y() > c.Y())
-			{
-				pDC->Rectangle(0, c.y2 + 1, X()-1, Y()-1);
-			}
-		}
-		else
-		{
-			// error
-			SysFont->Colour(L_TEXT, L_WORKSPACE);
-			SysFont->Transparent(false);
-			GDisplayString Ds(SysFont, "Can't create memory bitmap.");
-			Ds.Draw(pDC, 2, 0, &GetClient());
-		}
-	}
-	else
-	{
-		pDC->Colour(L_WORKSPACE);
-		pDC->Rectangle();
-	}
-
-	#ifndef WINDOWS
-	pDC->SetClient(NULL);
-	#endif
+	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
+	if (!Ctrl)
+		return;
 }
 
 void ResDialog::OnLanguageChange()

@@ -656,7 +656,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	#endif
 
 	bool HasClient = false;
-	GRect r(0, 0, Pos.X()-1, Pos.Y()-1);
+	GRect r(0, 0, Pos.X()-1, Pos.Y()-1), Client;
 	GdcPt2 o;
 	if (Offset)
 		o = *Offset;
@@ -666,7 +666,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	#endif
 	{
 		// Non-Client drawing
-		GRect Client = r;
+		Client = r;
 		OnNcPaint(pDC, Client);
 		HasClient = GetParent() && (Client != r);
 		if (HasClient)
@@ -704,9 +704,11 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 			{
 				GRect p = w->GetPos();
 				p.Offset(o.x, o.y);
+				if (HasClient)
+					p.Offset(Client.x1 - r.x1, Client.y1 - r.y1);
 				
 				GdcPt2 co(p.x1, p.y1);
-				LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), p.x1, p.y1);
+				// LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), p.x1, p.y1);
 				pDC->SetClient(&p);
 				w->_Paint(pDC, &co);
 				pDC->SetClient(NULL);
