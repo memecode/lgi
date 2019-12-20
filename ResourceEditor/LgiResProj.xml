@@ -48,7 +48,10 @@
 				<Linux>gcc</Linux>
 			</Compiler>
 			<Arguments>
-				<All />
+				<All>
+					<Debug>/home/mallen/Code/MidiHw/mc4/resources/mc4.lr8</Debug>
+					<Release>/home/mallen/Code/MidiHw/mc4/resources/mc4.lr8</Release>
+				</All>
 			</Arguments>
 			<Defines>
 				<All />

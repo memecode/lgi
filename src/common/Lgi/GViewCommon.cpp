@@ -628,7 +628,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 			if (!w->Pos.Valid())
 				continue;
 
-			LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), o.x1, o.y1);
+			// LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), o.x1, o.y1);
 			w->_Paint(pDC, &o);
 		}
 	}

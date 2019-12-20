@@ -1546,12 +1546,12 @@ bool LMenu::Attach(GViewI *p)
 	}
 
 	
-	Gtk::GtkWidget *menubar = GtkCast(Info.obj, gtk_widget, GtkWidget);
+	Gtk::GtkWidget *menubar = GTK_WIDGET(Info.obj);
 
 	Wnd->_VBox = Gtk::gtk_box_new(Gtk::GTK_ORIENTATION_VERTICAL, 0);
 
-	Gtk::GtkBox *vbox = GtkCast(Wnd->_VBox, gtk_box, GtkBox);
-	Gtk::GtkContainer *wndcontainer = GtkCast(Wnd->Wnd, gtk_container, GtkContainer);
+	Gtk::GtkBox *vbox = GTK_BOX(Wnd->_VBox);
+	Gtk::GtkContainer *wndcontainer = GTK_CONTAINER(Wnd->Wnd);
 
 	g_object_ref(Wnd->_Root);
 	
@@ -1562,7 +1562,11 @@ bool LMenu::Attach(GViewI *p)
 
 	g_object_unref(Wnd->_Root);
 
-	gtk_widget_show_all(GtkCast(Wnd->Wnd, gtk_widget, GtkWidget));
+	auto wndWid = GTK_WIDGET(Wnd->Wnd);
+	gtk_widget_hide(GTK_WIDGET(menubar));
+	gtk_widget_hide(GTK_WIDGET(Wnd->_Root));
+	gtk_widget_show_all(wndWid);
+	gtk_widget_queue_draw(wndWid);
 	
 	gtk_window_add_accel_group(Wnd->Wnd, AccelGrp);
 	

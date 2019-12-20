@@ -3420,15 +3420,11 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 		if (!Local.Reset(new GScreenDC(this))) return;
 		pDC = Local;
 	}
-	GDoubleBuffer DblBuf(pDC);
 
-	#if 0
-	auto p = GetPos();
-	GdcPt2 Off(p.x1, p.y1);
-	GView::_Paint(pDC, &Off, Update);
-	#else
-	GView::_Paint(pDC, Offset, Update);
+	#if defined(WINDOWS)
+	GDoubleBuffer DblBuf(pDC);
 	#endif
+	GView::_Paint(pDC, Offset, Update);
 
 	if (GetParent())
 		DrawSelection(pDC);

@@ -169,6 +169,8 @@ void GMemDC::SetClient(GRect *c)
 {
 	if (c)
 	{
+		Handle();
+		
 		GRect Doc;
 		if (d->Client.Length())
 			Doc = d->Client.Last();
@@ -184,17 +186,17 @@ void GMemDC::SetClient(GRect *c)
 		
 		OriginX = -r.x1;
 		OriginY = -r.y1;
-		
-		GStringPipe s;
-		s.Print("Push");
-		for (auto c:d->Client) s.Print(" > %s", c.GetStr());
-		s.Print(", clip=%s, ori=%i,%i", Clip.GetStr(), OriginX, OriginY);
-		printf("%s\n", s.NewGStr().Get());
+
+		cairo_save(d->cr);
+		// cairo_rectangle(d->cr, c->x1, c->y1, c->X(), c->Y());
+		// cairo_clip(d->cr);		
+		cairo_translate(d->cr, c->x1, c->y1);
 	}
 	else
 	{
 		if (d->Client.Length())
 			d->Client.PopLast();
+		cairo_restore(d->cr);
 
 		if (d->Client.Length())
 		{
@@ -209,12 +211,6 @@ void GMemDC::SetClient(GRect *c)
 			OriginY = 0;
 			Clip.ZOff(pMem->x-1, pMem->y-1);
 		}
-
-		GStringPipe s;
-		s.Print("Pop");
-		for (auto c:d->Client) s.Print(" > %s", c.GetStr());
-		s.Print(", clip=%s, ori=%i,%i", Clip.GetStr(), OriginX, OriginY);
-		printf("%s\n", s.NewGStr().Get());
 	}
 }
 
