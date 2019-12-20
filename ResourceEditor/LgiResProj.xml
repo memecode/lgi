@@ -49,17 +49,11 @@
 			</Compiler>
 			<Arguments>
 				<All>
-					<Debug>/home/mallen/Code/MidiHw/mc4/resources/mc4.lr8</Debug>
-					<Release>/home/mallen/Code/MidiHw/mc4/resources/mc4.lr8</Release>
+					<Debug>/home/matthew/Code/MidiHw/mc4/resources/mc4.lr8</Debug>
+					<Release>/home/matthew/Code/MidiHw/mc4/resources/mc4.lr8</Release>
 				</All>
 			</Arguments>
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
-			<DebugAdmin />
-			<CCrossCompiler />
-			<CppCrossCompiler />
+			<Defines />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -82,7 +76,6 @@ Resources</Release>
 				<All>Executable</All>
 			</TargetType>
 			<Libraries>
-				<All />
 				<Linux>
 					<Debug>magic
 pthread
@@ -94,10 +87,7 @@ pthread
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
 			</Libraries>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
+			<LibraryPaths />
 			<TargetName>
 				<Linux>
 					<Debug>lgires</Debug>
@@ -110,7 +100,6 @@ pthread
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
-			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -125,14 +114,9 @@ pthread
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
 		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
+			<PostBuildCommands />
 		</Advanced>
 	</Settings>
 </Project>

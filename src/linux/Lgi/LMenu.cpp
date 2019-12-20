@@ -1554,21 +1554,20 @@ bool LMenu::Attach(GViewI *p)
 	Gtk::GtkContainer *wndcontainer = GTK_CONTAINER(Wnd->Wnd);
 
 	g_object_ref(Wnd->_Root);
-	
+
 	gtk_container_remove(wndcontainer, Wnd->_Root);
 	gtk_box_pack_start(vbox, menubar, false, false, 0);
 	gtk_box_pack_end(vbox, Wnd->_Root, true, true, 0);
 	gtk_container_add(wndcontainer, Wnd->_VBox);
 
+	gtk_widget_show_all(GTK_WIDGET(Wnd->Wnd));
+
 	g_object_unref(Wnd->_Root);
 
-	auto wndWid = GTK_WIDGET(Wnd->Wnd);
-	gtk_widget_hide(GTK_WIDGET(menubar));
-	gtk_widget_hide(GTK_WIDGET(Wnd->_Root));
-	gtk_widget_show_all(wndWid);
-	gtk_widget_queue_draw(wndWid);
-	
 	gtk_window_add_accel_group(Wnd->Wnd, AccelGrp);
+	
+	GdkRectangle allocation = Wnd->GetClient();
+	g_signal_emit_by_name(G_OBJECT(vbox), "size-allocate", GTK_WIDGET(vbox), &allocation, NULL, NULL);
 	
 	return true;
 }

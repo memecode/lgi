@@ -928,13 +928,14 @@ void CtrlDlg::OnPaint(GSurface *pDC)
 	pDC->Colour(L_MED);
 	pDC->Rectangle(&Client);
 	pDC->Colour(Rgb24(0x80, 0x80, 0x80), 24);
-	for (int y=0; y<Client.Y(); y+=GRID_Y)
+	for (int y=Client.y1; y<Client.y2; y+=GRID_Y)
 	{
-		for (int x=0; x<Client.X(); x+=GRID_X)
+		for (int x=Client.x1; x<Client.x2; x+=GRID_X)
 			pDC->Set(x, y);
 	}
 
 	ResDialogCtrl::OnPaint(pDC);
+	pDC->SetClient(NULL);
 }
 
 /////////////////////////////////////////////////////////////////////

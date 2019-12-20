@@ -149,6 +149,15 @@ void GRect::Offset(int x, int y)
 	y2 += y;
 }
 
+void GRect::Offset(GdcPt2 *p)
+{
+	if (!p) return;
+	x1 += p->x;
+	y1 += p->y;
+	x2 += p->x;
+	y2 += p->y;
+}
+
 void GRect::Offset(GRect *a)
 {
 	x1 += a->x1;

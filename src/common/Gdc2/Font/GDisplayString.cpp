@@ -2053,282 +2053,282 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 
 	#if !DISPLAY_STRING_FRACTIONAL_NATIVE
 
-	// BeOS / Windows doesn't use fractional pixels, so call the integer version:
-	GRect rc;
-	if (frc)
-	{
-		rc = *frc;
-		rc.x1 >>= FShift;
-		rc.y1 >>= FShift;
-		rc.x2 >>= FShift;
-		rc.y2 >>= FShift;
-	}
-	
-	Draw(pDC, fx >> FShift, fy >> FShift, frc ? &rc : NULL, Debug);
+		// Windows doesn't use fractional pixels, so call the integer version:
+		GRect rc;
+		if (frc)
+		{
+			rc = *frc;
+			rc.x1 >>= FShift;
+			rc.y1 >>= FShift;
+			rc.x2 >>= FShift;
+			rc.y2 >>= FShift;
+		}
+		
+		Draw(pDC, fx >> FShift, fy >> FShift, frc ? &rc : NULL, Debug);
 
 	#elif defined __GTK_H__
 	
-	Gtk::cairo_t *cr = pDC->Handle();
-	if (!cr)
-	{
-		LgiAssert(!"Can't get cairo.");
-		return;
-	}
-
-	Gtk::pango_context_set_font_description(GFontSystem::Inst()->GetContext(), Font->Handle());
-	Gtk::cairo_save(cr);
-
-	GColour b = Font->Back();
-	double Dx = ((double)fx / FScale);
-	double Dy = ((double)fy / FScale);
-	double rx, ry, rw, rh;
-	if (!Font->Transparent())
-	{
-		// Background fill
-		cairo_set_source_rgb(cr, (double)b.r()/255.0, (double)b.g()/255.0, (double)b.b()/255.0); cairo_new_path(cr);
-		if (frc)
+		Gtk::cairo_t *cr = pDC->Handle();
+		if (!cr)
 		{
-			rx = ((double)frc->x1 / FScale);
-			ry = ((double)frc->y1 / FScale);
-			rw = (double)frc->X() / FScale;
-			rh = (double)frc->Y() / FScale;
-		}
-		else
-		{
-			rx = Dx;
-			ry = Dy;
-			rw = x;
-			rh = y;
+			LgiAssert(!"Can't get cairo.");
+			return;
 		}
 
-		cairo_rectangle(cr, rx, ry, rw, rh);
-		cairo_fill(cr);
-		if (frc)
+		Gtk::pango_context_set_font_description(GFontSystem::Inst()->GetContext(), Font->Handle());
+		Gtk::cairo_save(cr);
+
+		GColour b = Font->Back();
+		double Dx = ((double)fx / FScale);
+		double Dy = ((double)fy / FScale);
+		double rx, ry, rw, rh;
+		if (!Font->Transparent())
 		{
+			// Background fill
+			cairo_set_source_rgb(cr, (double)b.r()/255.0, (double)b.g()/255.0, (double)b.b()/255.0); cairo_new_path(cr);
+			if (frc)
+			{
+				rx = ((double)frc->x1 / FScale);
+				ry = ((double)frc->y1 / FScale);
+				rw = (double)frc->X() / FScale;
+				rh = (double)frc->Y() / FScale;
+			}
+			else
+			{
+				rx = Dx;
+				ry = Dy;
+				rw = x;
+				rh = y;
+			}
+
 			cairo_rectangle(cr, rx, ry, rw, rh);
-			cairo_clip(cr);
+			cairo_fill(cr);
+			if (frc)
+			{
+				cairo_rectangle(cr, rx, ry, rw, rh);
+				cairo_clip(cr);
+			}
 		}
-	}
 
-	cairo_translate(cr, Dx, Dy);
+		cairo_translate(cr, Dx, Dy);
 
-	GColour f = Font->Fore();
-	for (auto &b: d->Blocks)
-	{
-		double Bx = ((double)b.X()) / FScale;
-		
-		#if DEBUG_BOUNDS
-		double By = Font->GetHeight();
-		cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
-		cairo_rectangle(cr, 0, 0, Bx, By);
-		cairo_rectangle(cr, 1, 1, Bx - 2.0, By - 2.0);
-		cairo_set_fill_rule(cr, Gtk::CAIRO_FILL_RULE_EVEN_ODD);
-		cairo_fill(cr);
-		#endif
-		
-		if (b.Hnd)
+		GColour f = Font->Fore();
+		for (auto &b: d->Blocks)
 		{
-			cairo_set_source_rgb(	cr,
-									(double)f.r()/255.0,
-									(double)f.g()/255.0,
-									(double)f.b()/255.0);
-			pango_cairo_show_layout(cr, b.Hnd);
+			double Bx = ((double)b.X()) / FScale;
+			
+			#if DEBUG_BOUNDS
+			double By = Font->GetHeight();
+			cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
+			cairo_rectangle(cr, 0, 0, Bx, By);
+			cairo_rectangle(cr, 1, 1, Bx - 2.0, By - 2.0);
+			cairo_set_fill_rule(cr, Gtk::CAIRO_FILL_RULE_EVEN_ODD);
+			cairo_fill(cr);
+			#endif
+			
+			if (b.Hnd)
+			{
+				cairo_set_source_rgb(	cr,
+										(double)f.r()/255.0,
+										(double)f.g()/255.0,
+										(double)f.b()/255.0);
+				pango_cairo_show_layout(cr, b.Hnd);
 
-    		if (VisibleTab && Str)
-    		{
-    			GUtf8Str Ptr(Str);
-    			auto Ws = Font->WhitespaceColour();
-    			pDC->Colour(Ws);
-    			
-    			for (int32 u, Idx = 0 ; (u = Ptr); Idx++)
-    			{
-    				if (IsTabChar(u) || u == ' ')
-    				{
-    					Gtk::PangoRectangle pos;
-    					Gtk::pango_layout_index_to_pos(b.Hnd, Idx, &pos);
-    					GRect r(0, 0, pos.width / FScale, pos.height / FScale);
-    					r.Offset(pos.x / FScale, pos.y / FScale);
-    					DrawWhiteSpace(pDC, u, r);
-    				}
-    				Ptr++;
-    			}
-    		}
+	    		if (VisibleTab && Str)
+	    		{
+	    			GUtf8Str Ptr(Str);
+	    			auto Ws = Font->WhitespaceColour();
+	    			pDC->Colour(Ws);
+	    			
+	    			for (int32 u, Idx = 0 ; (u = Ptr); Idx++)
+	    			{
+	    				if (IsTabChar(u) || u == ' ')
+	    				{
+	    					Gtk::PangoRectangle pos;
+	    					Gtk::pango_layout_index_to_pos(b.Hnd, Idx, &pos);
+	    					GRect r(0, 0, pos.width / FScale, pos.height / FScale);
+	    					r.Offset(pos.x / FScale, pos.y / FScale);
+	    					DrawWhiteSpace(pDC, u, r);
+	    				}
+	    				Ptr++;
+	    			}
+	    		}
+			}
+			else if (b.Fnt)
+			{
+				b.Fnt->Transparent(Font->Transparent());
+				b.Fnt->Back(Font->Back());
+				b.Fnt->_Draw(pDC, 0, 0, b.Str, b.Bytes, NULL, f);
+			}
+			else LgiAssert(0);
+			
+			cairo_translate(cr, Bx, 0);
 		}
-		else if (b.Fnt)
-		{
-			b.Fnt->Transparent(Font->Transparent());
-			b.Fnt->Back(Font->Back());
-			b.Fnt->_Draw(pDC, 0, 0, b.Str, b.Bytes, NULL, f);
-		}
-		else LgiAssert(0);
 		
-		cairo_translate(cr, Bx, 0);
-	}
-	
-	cairo_restore(cr);
+		cairo_restore(cr);
 	
 	#elif defined MAC && !defined(LGI_SDL)
 
-	int Ox = 0, Oy = 0;
-	int px = fx >> FShift;
-	int py = fy >> FShift;
-	GRect rc;
-	if (frc)
-		rc.Set(	frc->x1 >> FShift,
-				frc->y1 >> FShift,
-				frc->x2 >> FShift,
-				frc->y2 >> FShift);
-
-	if (pDC && !pDC->IsScreen())
-		pDC->GetOrigin(Ox, Oy);
-
-	if (pDC && !Font->Transparent())
-	{
-		GColour Old = pDC->Colour(Font->Back());
+		int Ox = 0, Oy = 0;
+		int px = fx >> FShift;
+		int py = fy >> FShift;
+		GRect rc;
 		if (frc)
+			rc.Set(	frc->x1 >> FShift,
+					frc->y1 >> FShift,
+					frc->x2 >> FShift,
+					frc->y2 >> FShift);
+
+		if (pDC && !pDC->IsScreen())
+			pDC->GetOrigin(Ox, Oy);
+
+		if (pDC && !Font->Transparent())
 		{
-			pDC->Rectangle(&rc);
+			GColour Old = pDC->Colour(Font->Back());
+			if (frc)
+			{
+				pDC->Rectangle(&rc);
+			}
+			else
+			{
+				GRect a(px, py, px + x - 1, py + y - 1);
+				pDC->Rectangle(&a);
+			}
+			pDC->Colour(Old);
 		}
-		else
-		{
-			GRect a(px, py, px + x - 1, py + y - 1);
-			pDC->Rectangle(&a);
-		}
-		pDC->Colour(Old);
-	}
-	
-	if (Hnd && pDC && StrWords > 0)
-	{
-		OsPainter				dc = pDC->Handle();
-
-		#if USE_CORETEXT
-
-			int y = (pDC->Y() - py + Oy);
-
-			CGContextSaveGState(dc);
-			pDC->Colour(Font->Fore());
 		
-			if (pDC->IsScreen())
-			{
-				if (frc)
+		if (Hnd && pDC && StrWords > 0)
+		{
+			OsPainter				dc = pDC->Handle();
+
+			#if USE_CORETEXT
+
+				int y = (pDC->Y() - py + Oy);
+
+				CGContextSaveGState(dc);
+				pDC->Colour(Font->Fore());
+			
+				if (pDC->IsScreen())
 				{
-					CGRect rect = rc;
-					rect.size.width += 1.0;
-					rect.size.height += 1.0;
-					CGContextClipToRect(dc, rect);
-				}
-				CGContextTranslateCTM(dc, 0, pDC->Y()-1);
-				CGContextScaleCTM(dc, 1.0, -1.0);
-			}
-			else
-			{
-				if (frc)
-				{
-					CGContextSaveGState(dc);
-					
-					CGRect rect = rc;
-					rect.origin.x -= Ox;
-					rect.origin.y = pDC->Y() - rect.origin.y + Oy - rect.size.height;
-					rect.size.width += 1.0;
-					rect.size.height += 1.0;
-					CGContextClipToRect(dc, rect);
-				}
-			}
-
-			CGFloat Tx = (CGFloat)fx / FScale - Ox;
-			CGFloat Ty = (CGFloat)y - Font->Ascent();
-			CGContextSetTextPosition(dc, Tx, Ty);
-
-			CTLineDraw(Hnd, dc);
-
-			CGContextRestoreGState(dc);
-
-		#else
-
-			ATSUAttributeTag		Tags[1] = {kATSUCGContextTag};
-			ByteCount				Sizes[1] = {sizeof(CGContextRef)};
-			ATSUAttributeValuePtr	Values[1] = {&dc};
-
-			e = ATSUSetLayoutControls(Hnd, 1, Tags, Sizes, Values);
-			if (e)
-			{
-				printf("%s:%i - ATSUSetLayoutControls failed (e=%i)\n", _FL, (int)e);
-			}
-			else
-			{
-				// Set style attr
-				ATSURGBAlphaColor c;
-				GColour Fore = Font->Fore();
-				c.red	= (double) Fore.r() / 255.0;
-				c.green = (double) Fore.g() / 255.0;
-				c.blue	= (double) Fore.b() / 255.0;
-				c.alpha = 1.0;
-				
-				ATSUAttributeTag Tags[]			= {kATSURGBAlphaColorTag};
-				ATSUAttributeValuePtr Values[]	= {&c};
-				ByteCount Lengths[]				= {sizeof(c)};
-				
-				e = ATSUSetAttributes(	Font->Handle(),
-										CountOf(Tags),
-										Tags,
-										Lengths,
-										Values);
-				if (e)
-				{
-					printf("%s:%i - Error setting font attr (e=%i)\n", _FL, (int)e);
+					if (frc)
+					{
+						CGRect rect = rc;
+						rect.size.width += 1.0;
+						rect.size.height += 1.0;
+						CGContextClipToRect(dc, rect);
+					}
+					CGContextTranslateCTM(dc, 0, pDC->Y()-1);
+					CGContextScaleCTM(dc, 1.0, -1.0);
 				}
 				else
 				{
-					int y = (pDC->Y() - py + Oy);
-
-					if (pDC->IsScreen())
+					if (frc)
 					{
 						CGContextSaveGState(dc);
+						
+						CGRect rect = rc;
+						rect.origin.x -= Ox;
+						rect.origin.y = pDC->Y() - rect.origin.y + Oy - rect.size.height;
+						rect.size.width += 1.0;
+						rect.size.height += 1.0;
+						CGContextClipToRect(dc, rect);
+					}
+				}
 
-						if (frc)
-						{
-							CGRect rect = rc;
-							rect.size.width += 1.0;
-							rect.size.height += 1.0;
-							CGContextClipToRect(dc, rect);
-						}
-						CGContextTranslateCTM(dc, 0, pDC->Y()-1);
-						CGContextScaleCTM(dc, 1.0, -1.0);
+				CGFloat Tx = (CGFloat)fx / FScale - Ox;
+				CGFloat Ty = (CGFloat)y - Font->Ascent();
+				CGContextSetTextPosition(dc, Tx, Ty);
 
-						e = ATSUDrawText(Hnd, kATSUFromTextBeginning, kATSUToTextEnd, fx - Long2Fix(Ox), Long2Fix(y) - fAscent);
+				CTLineDraw(Hnd, dc);
 
-						CGContextRestoreGState(dc);
+				CGContextRestoreGState(dc);
+
+			#else
+
+				ATSUAttributeTag		Tags[1] = {kATSUCGContextTag};
+				ByteCount				Sizes[1] = {sizeof(CGContextRef)};
+				ATSUAttributeValuePtr	Values[1] = {&dc};
+
+				e = ATSUSetLayoutControls(Hnd, 1, Tags, Sizes, Values);
+				if (e)
+				{
+					printf("%s:%i - ATSUSetLayoutControls failed (e=%i)\n", _FL, (int)e);
+				}
+				else
+				{
+					// Set style attr
+					ATSURGBAlphaColor c;
+					GColour Fore = Font->Fore();
+					c.red	= (double) Fore.r() / 255.0;
+					c.green = (double) Fore.g() / 255.0;
+					c.blue	= (double) Fore.b() / 255.0;
+					c.alpha = 1.0;
+					
+					ATSUAttributeTag Tags[]			= {kATSURGBAlphaColorTag};
+					ATSUAttributeValuePtr Values[]	= {&c};
+					ByteCount Lengths[]				= {sizeof(c)};
+					
+					e = ATSUSetAttributes(	Font->Handle(),
+											CountOf(Tags),
+											Tags,
+											Lengths,
+											Values);
+					if (e)
+					{
+						printf("%s:%i - Error setting font attr (e=%i)\n", _FL, (int)e);
 					}
 					else
 					{
-						if (frc)
+						int y = (pDC->Y() - py + Oy);
+
+						if (pDC->IsScreen())
 						{
 							CGContextSaveGState(dc);
-							
-							CGRect rect = rc;
-							rect.origin.x -= Ox;
-							rect.origin.y = pDC->Y() - rect.origin.y + Oy - rect.size.height;
-							rect.size.width += 1.0;
-							rect.size.height += 1.0;
-							CGContextClipToRect(dc, rect);
-						}
-						
-						e = ATSUDrawText(Hnd, kATSUFromTextBeginning, kATSUToTextEnd, Long2Fix(px - Ox), Long2Fix(y) - fAscent);
-						
-						if (frc)
+
+							if (frc)
+							{
+								CGRect rect = rc;
+								rect.size.width += 1.0;
+								rect.size.height += 1.0;
+								CGContextClipToRect(dc, rect);
+							}
+							CGContextTranslateCTM(dc, 0, pDC->Y()-1);
+							CGContextScaleCTM(dc, 1.0, -1.0);
+
+							e = ATSUDrawText(Hnd, kATSUFromTextBeginning, kATSUToTextEnd, fx - Long2Fix(Ox), Long2Fix(y) - fAscent);
+
 							CGContextRestoreGState(dc);
-					}
-					if (e)
-					{
-						char *a = 0;
-						StringConvert(a, NULL, Str, len);
-						printf("%s:%i - ATSUDrawText failed with %i, len=%i, str=%.20s\n", _FL, (int)e, len, a);
-						DeleteArray(a);
+						}
+						else
+						{
+							if (frc)
+							{
+								CGContextSaveGState(dc);
+								
+								CGRect rect = rc;
+								rect.origin.x -= Ox;
+								rect.origin.y = pDC->Y() - rect.origin.y + Oy - rect.size.height;
+								rect.size.width += 1.0;
+								rect.size.height += 1.0;
+								CGContextClipToRect(dc, rect);
+							}
+							
+							e = ATSUDrawText(Hnd, kATSUFromTextBeginning, kATSUToTextEnd, Long2Fix(px - Ox), Long2Fix(y) - fAscent);
+							
+							if (frc)
+								CGContextRestoreGState(dc);
+						}
+						if (e)
+						{
+							char *a = 0;
+							StringConvert(a, NULL, Str, len);
+							printf("%s:%i - ATSUDrawText failed with %i, len=%i, str=%.20s\n", _FL, (int)e, len, a);
+							DeleteArray(a);
+						}
 					}
 				}
-			}
-		#endif
-	}
+			#endif
+		}
 	
 	#endif
 }

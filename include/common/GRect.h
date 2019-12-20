@@ -110,6 +110,7 @@ public:
 	
 	/// Moves the rectangle by an offset
 	void Offset(int x, int y);
+	void Offset(GdcPt2 *p);
 	
 	/// Moves the edges by an offset
 	void Offset(GRect *a);

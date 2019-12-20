@@ -22,6 +22,7 @@ class GMemDCPrivate
 {
 public:
 	::GArray<GRect> Client;
+	// GRect Client;
 	cairo_t *cr;
 	LCairoSurface Img;
 	GColourSpace CreateCs;
@@ -98,7 +99,17 @@ LCairoSurface GMemDC::GetSubImage(GRect &r)
 OsPainter GMemDC::Handle()
 {
 	if (!d->cr)
+	{
 		d->cr = cairo_create(d->Img);
+		/*
+		if (d->cr && d->Client.Length())
+		{
+			auto &c = d->Client.Last();
+			printf("Translating new handle to %i,%i\n", c.x1, c.y1);
+			cairo_translate(d->cr, c.x1, c.y1);
+		}
+		*/
+	}
 	return d->cr;
 }
 
@@ -170,7 +181,7 @@ void GMemDC::SetClient(GRect *c)
 	if (c)
 	{
 		Handle();
-		
+
 		GRect Doc;
 		if (d->Client.Length())
 			Doc = d->Client.Last();
@@ -178,7 +189,6 @@ void GMemDC::SetClient(GRect *c)
 			Doc = Bounds();
 		
 		GRect r = *c;
-		// r.Offset(Doc.x1, Doc.y1);
 		r.Bound(&Doc);
 		d->Client.Add(r);
 		
@@ -188,7 +198,7 @@ void GMemDC::SetClient(GRect *c)
 		OriginY = -r.y1;
 
 		cairo_save(d->cr);
-		// cairo_rectangle(d->cr, c->x1, c->y1, c->X(), c->Y());
+		// cairo_rectangle(d->cr, Clip.x1, Clip.y1, Clip.X(), Clip.Y());
 		// cairo_clip(d->cr);		
 		cairo_translate(d->cr, c->x1, c->y1);
 	}

@@ -573,7 +573,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	if (Offset)
 	{
 		r = Pos;
-		r.Offset(Offset->x, Offset->y);
+		r.Offset(Offset);
 	}
 	else
 	{
