@@ -71,7 +71,7 @@ const char *sLibrary =
 		#ifdef __GTK_H__
 		"libpng16.16"
 		#else
-		"libpng15.15.4.0"
+		"libpng15"
 		#endif
 	#elif defined(LINUX)
 		LinuxLibName()
