@@ -353,10 +353,11 @@ GColour GScreenDC::Colour(GColour c)
 	#if GTK_MAJOR_VERSION == 3
 	if (d->cr)
 	{
-		cairo_set_source_rgb(d->cr,
-							(double)d->Col.r()/255.0,
-							(double)d->Col.g()/255.0,
-							(double)d->Col.b()/255.0);
+		double r = (double)d->Col.r()/255.0;
+		double g = (double)d->Col.g()/255.0;
+		double b = (double)d->Col.b()/255.0;
+		double a = (double)d->Col.a()/255.0;
+		cairo_set_source_rgba(d->cr, r, g, b, a);
 	}
 	#else
 	if (d->gc)

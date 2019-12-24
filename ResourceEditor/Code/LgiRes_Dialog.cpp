@@ -935,7 +935,6 @@ void CtrlDlg::OnPaint(GSurface *pDC)
 	}
 
 	ResDialogCtrl::OnPaint(pDC);
-	pDC->SetClient(NULL);
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -3410,7 +3409,11 @@ void ResDialog::DrawSelection(GSurface *pDC)
 	}
 }
 
+#ifdef WINDOWS
 #define USE_MEM_DC		1
+#else
+#define USE_MEM_DC		0
+#endif
 
 void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 {
@@ -3422,7 +3425,7 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 		pDC = Local;
 	}
 
-	#if defined(WINDOWS)
+	#if USE_MEM_DC
 	GDoubleBuffer DblBuf(pDC);
 	#endif
 	GView::_Paint(pDC, Offset, Update);

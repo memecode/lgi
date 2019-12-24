@@ -2075,8 +2075,8 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 			return;
 		}
 
-		Gtk::pango_context_set_font_description(GFontSystem::Inst()->GetContext(), Font->Handle());
-		Gtk::cairo_save(cr);
+		pango_context_set_font_description(GFontSystem::Inst()->GetContext(), Font->Handle());
+		cairo_save(cr);
 
 		GColour b = Font->Back();
 		double Dx = ((double)fx / FScale);

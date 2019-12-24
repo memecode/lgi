@@ -1566,8 +1566,12 @@ bool LMenu::Attach(GViewI *p)
 
 	gtk_window_add_accel_group(Wnd->Wnd, AccelGrp);
 	
+	#if 0
+	gtk_widget_queue_resize(GTK_WIDGET(vbox));
+	#else
 	GdkRectangle allocation = Wnd->GetClient();
 	g_signal_emit_by_name(G_OBJECT(vbox), "size-allocate", GTK_WIDGET(vbox), &allocation, NULL, NULL);
+	#endif
 	
 	return true;
 }
