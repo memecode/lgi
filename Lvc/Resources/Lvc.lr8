@@ -132,7 +132,7 @@
 		</TableLayout>
 	</Dialog>
 	<Dialog pos="7,7,998,136" ref="1">
-		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" cols="0.091,0.094,0.088,0.060,0.045,0.082,0.060,0.149,0.149,0.091,0.091" rows="1.000">
+		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" CellStyle="padding-right: 1em;" cols="0.091,0.094,0.088,0.060,0.045,0.082,0.060,0.149,0.149,0.091,0.091" rows="1.000">
 			<tr>
 				<td valign="Center" style="padding-left: 4px;&#10;padding-right: 1em;">
 					<Button pos="7,21,71,48" ref="18" />
@@ -141,7 +141,7 @@
 					<Button pos="96,14,130,41" ref="5" />
 					<Button pos="131,14,158,41" ref="39" />
 				</td>
-				<td style="padding-right: 1em;">
+				<td valign="Center" style="padding-right: 1em;">
 					<CheckBox pos="189,21,223,41" ref="48" />
 				</td>
 				<td valign="Center" style="padding-right: 1em;">

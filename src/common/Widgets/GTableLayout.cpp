@@ -782,19 +782,13 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 			else if (Izza(GButton))
 			{
 				GDisplayString ds(v->GetFont(), v->Name());
-				int x = MAX(v->X(), ds.X() + GButton::Overhead.x);
-				int y = MAX(v->Y(), ds.Y() + GButton::Overhead.y);
-				if (x > v->X() || y > v->Y())
-				{
-					// Resize the button to show all the text on it...
-					GRect r = v->GetPos();
-					r.x2 = r.x1 + x - 1;
-					r.y2 = r.y1 + y - 1;
-					v->SetPos(r);
-				}
+				c->Inf.Width.Min = c->Inf.Width.Max = ds.X() + GButton::Overhead.x;
+				c->Inf.Height.Min = c->Inf.Height.Max = ds.Y() + GButton::Overhead.y;
 
-				MaxBtnX = MAX(MaxBtnX, x);
-				TotalBtnX = TotalBtnX ? TotalBtnX + GTableLayout::CellSpacing + x : x;
+				MaxBtnX = MAX(MaxBtnX, c->Inf.Width.Min);
+				TotalBtnX = TotalBtnX ?
+							TotalBtnX + GTableLayout::CellSpacing + c->Inf.Width.Min :
+							c->Inf.Width.Min;
 				
 				if (Flag < SizeFixed)
 					Flag = SizeFixed;
@@ -1022,8 +1016,8 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		}
 		else if (Izza(GButton))
 		{
-			// Button is already the right size...
-			auto r = v->GetPos();
+			GRect r;
+			r.ZOff(c->Inf.Width.Min-1, c->Inf.Height.Min-1);
 			
 			if (Cur.x + r.X() > Width)
 			{
@@ -1032,7 +1026,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 				Cur.y = NextY + GTableLayout::CellSpacing;
 			}
 			
-			r.Offset(Cur.x - r.x1, Cur.y - r.y1);
+			r.Offset(Cur.x, Cur.y);
 			v->SetPos(r, true);
 			Cur.x = r.x2 + 1;
 			NextY = MAX(NextY, r.y2 + 1);
