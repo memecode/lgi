@@ -189,7 +189,7 @@ GItemContainer *GTreeItem::GetContainer()
 	return Tree;
 }
 
-GTreeItem *GTreeNode::Insert(GTreeItem *Obj, int Idx)
+GTreeItem *GTreeNode::Insert(GTreeItem *Obj, ssize_t Idx)
 {
 	LgiAssert(Obj != this);
 
@@ -1931,7 +1931,7 @@ GMessage::Result GTree::OnEvent(GMessage *Msg)
 	return GLayout::OnEvent(Msg);
 }
 
-GTreeItem *GTree::Insert(GTreeItem *Obj, int Pos)
+GTreeItem *GTree::Insert(GTreeItem *Obj, ssize_t Pos)
 {
 	TREELOCK
 		

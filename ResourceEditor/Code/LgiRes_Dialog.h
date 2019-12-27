@@ -382,7 +382,7 @@ class CtrlTabs : public ResDialogCtrl, public GView
 {
 	friend class CtrlTab;
 
-	int Current;
+	ssize_t Current;
 
 public:
 	List<CtrlTab> Tabs;
@@ -416,7 +416,7 @@ public:
 
 class CtrlList : public ResDialogCtrl, public GView
 {
-	int DragCol;
+	ssize_t DragCol;
 
 public:
 	List<ListCol> Cols;

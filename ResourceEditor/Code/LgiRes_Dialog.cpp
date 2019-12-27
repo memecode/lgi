@@ -1237,10 +1237,8 @@ void CtrlRadio::OnPaint(GSurface *pDC)
 	GRect r(0, 0, 12, 12);
 	
 	// Draw the ctrl
-	if (RadioBmp)
-	{
+	if (Bmp)
 		pDC->Blt(r.x1, r.y1, Bmp);
-	}
 
 	char *Text = Str->Get();
 	if (Text)
@@ -1275,7 +1273,7 @@ void CtrlTab::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 	CtrlTabs *Par = dynamic_cast<CtrlTabs*>(Ctrl);
 	LgiAssert(Par);
 
-	int MyIndex = Par->Tabs.IndexOf(this);
+	auto MyIndex = Par->Tabs.IndexOf(this);
 	LgiAssert(MyIndex >= 0);
 
 	List<GViewI> *CList = (Par->Current == MyIndex) ? &Par->Children : &Children;
@@ -1340,7 +1338,7 @@ void CtrlTabs::ShowMe(ResDialogCtrl *Child)
 	CtrlTab *t = dynamic_cast<CtrlTab*>(Child);
 	if (t)
 	{
-		int Idx = Tabs.IndexOf(t);
+		auto Idx = Tabs.IndexOf(t);
 		if (Idx >= 0)
 		{
 			ToTab();
@@ -1662,10 +1660,6 @@ void CtrlTabs::OnMouseClick(GMouse &m)
 			return;
 		}
 	}
-	else
-	{
-		int asd=0;
-	}
 
 	ResDialogCtrl::OnMouseClick(m);
 }
@@ -1735,7 +1729,7 @@ void CtrlList::OnMouseClick(GMouse &m)
 		{
 			int x=0;
 			ListCol *c = 0;
-			int DragOver = -1;
+			ssize_t DragOver = -1;
 			for (auto Col: Cols)
 			{
 				if (m.x >= Col->r().x1 && m.x <= Col->r().x2)
@@ -1831,7 +1825,7 @@ void CtrlList::OnMouseClick(GMouse &m)
 							}
 							case IDM_MOVE_LEFT:
 							{
-								int Current = Cols.IndexOf(c);
+								auto Current = Cols.IndexOf(c);
 								if (c && Current > 0)
 								{
 									Cols.Delete(c);
@@ -1841,7 +1835,7 @@ void CtrlList::OnMouseClick(GMouse &m)
 							}
 							case IDM_MOVE_RIGHT:
 							{
-								int Current = Cols.IndexOf(c);
+								auto Current = Cols.IndexOf(c);
 								if (c && Current < Cols.Length()-1)
 								{
 									Cols.Delete(c);
@@ -3823,7 +3817,7 @@ void OutputCtrl(GStringPipe &Def,
 			stricmp(Ctrl->Str->GetDefine(), "IDC_STATIC"))
 		{
 			char Tab[8];
-			int Tabs = (32 - strlen(Ctrl->Str->GetDefine()) - 1) / 4;
+			auto Tabs = (32 - strlen(Ctrl->Str->GetDefine()) - 1) / 4;
 			memset(Tab, '\t', Tabs);
 			Tab[Tabs] = 0;
 
@@ -4232,7 +4226,7 @@ GMessage::Result ResDialogUi::OnEvent(GMessage *Msg)
 	{
 		case M_COMMAND:
 		{
-			Dialog->OnCommand(Msg->A()&0xffff, Msg->A()>>16, (OsView) Msg->B());
+			Dialog->OnCommand(Msg->A()&0xffff, (int)(Msg->A()>>16), (OsView) Msg->B());
 			break;
 		}
 		case M_DESCRIBE:

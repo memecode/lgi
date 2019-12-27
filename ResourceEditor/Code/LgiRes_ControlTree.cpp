@@ -105,7 +105,7 @@ public:
 					}
 					case IDM_NEW_NEXT:
 					{
-						int Idx = IndexOf();
+						auto Idx = IndexOf();
 						if (GetParent())
 						{
 							if (Idx >= 0)

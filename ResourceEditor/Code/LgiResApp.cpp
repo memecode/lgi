@@ -2600,7 +2600,7 @@ bool AppWnd::LoadLgi(char *FileName)
 	Empty();
 	if (FileName)
 	{
-		ResFileFormat Format = GetFormat(FileName);
+		// ResFileFormat Format = GetFormat(FileName);
 
 		GFile f;
 		if (f.Open(FileName, O_READ))
@@ -3079,7 +3079,7 @@ bool AppWnd::SaveLgi(char *FileName)
 	{
 		GFile f;
 		GFile Defs;
-		ResFileFormat Format = GetFormat(FileName);		
+		// ResFileFormat Format = GetFormat(FileName);		
 		
 		char DefsName[256];
 		strcpy(DefsName, FileName);

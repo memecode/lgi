@@ -36,7 +36,7 @@ public:
 	virtual ~GTreeNode();
 
 	/// Inserts a tree item as a child at 'Pos'
-	GTreeItem *Insert(GTreeItem *Obj = NULL, int Pos = -1);
+	GTreeItem *Insert(GTreeItem *Obj = NULL, ssize_t Pos = -1);
 	/// Removes this node from it's parent, for permanent separation.
 	void Remove();
 	/// Detachs the item from the tree so it can be re-inserted else where.
@@ -234,7 +234,7 @@ public:
 	void Unlock() override;
 
 	/// Add a item to the tree
-	GTreeItem *Insert(GTreeItem *Obj = 0, int Pos = -1);
+	GTreeItem *Insert(GTreeItem *Obj = 0, ssize_t Pos = -1);
 	/// Remove and delete an item
 	bool Delete(GTreeItem *Obj);
 	/// Remove but don't delete an item

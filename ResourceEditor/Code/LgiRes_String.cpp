@@ -924,7 +924,7 @@ int ResStringGroup::GetLangIdx(GLanguageId Id)
 	return -1;
 }
 
-int ResString::Compare(LListItem *li, int Column)
+int ResString::Compare(LListItem *li, ssize_t Column)
 {
 	ResString *r = dynamic_cast<ResString*>(li);
 	static const char *Empty = "";
@@ -952,7 +952,7 @@ int ResString::Compare(LListItem *li, int Column)
 			}
 			default:
 			{
-				int Col = Column - 3;
+				auto Col = Column - 3;
 				if (Group && Col >= 0 && Col < Group->GetLanguages())
 				{
 					GLanguageId Lang = Group->Visible[Column - 3]->Id;
@@ -969,7 +969,7 @@ int ResString::Compare(LListItem *li, int Column)
 	return -1;
 }
 
-int ResStringCompareFunc(LListItem *a, LListItem *b, NativeInt Data)
+int ResStringCompareFunc(LListItem *a, LListItem *b, ssize_t Data)
 {
 	ResString *A = dynamic_cast<ResString*>(a);
 	if (A)
@@ -991,7 +991,7 @@ void ResStringGroup::OnColumnClick(int Col, GMouse &m)
 		SortAscend = true;
 	}
 
-	LList::Sort<NativeInt>(ResStringCompareFunc, (SortCol + 1) * ((SortAscend) ? 1 : -1));
+	LList::Sort<ssize_t>(ResStringCompareFunc, (SortCol + 1) * ((SortAscend) ? 1 : -1));
 
 	LListItem *Sel = GetSelected();
 	if (Sel)
@@ -1411,9 +1411,6 @@ bool ResStringGroup::Read(GXmlTag *t, SerialiseContext &Ctx)
 				DeleteObj(s);
 			}
 		}
-
-		ResString *te = FindRef(441);
-		int asd=0;
 	}
 
 	if (Item)
@@ -1657,7 +1654,7 @@ GMessage::Result ResStringUi::OnEvent(GMessage *Msg)
 	{
 		case M_COMMAND:
 		{
-			StringGrp->OnCommand(Msg->A()&0xffff, Msg->A()>>16, (OsView) Msg->B());
+			StringGrp->OnCommand(Msg->A()&0xffff, (int)(Msg->A()>>16), (OsView) Msg->B());
 			break;
 		}
 		case M_DESCRIBE:

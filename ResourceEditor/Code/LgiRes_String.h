@@ -74,7 +74,7 @@ public:
 	char *Get(GLanguageId Lang = 0);
 	void Set(const char *s, GLanguageId Lang = 0);
 	void UnDuplicate();
-	int Compare(LListItem *To, int Field);
+	int Compare(LListItem *To, ssize_t Field);
 	void CopyText();
 	void PasteText();
 	char *GetDefine() { return Define; }
@@ -136,7 +136,7 @@ public:
 	int UniqueId(char *Define = 0);
 	int OnCommand(int Cmd, int Event, OsView hWnd);
 	void SetLanguages();
-	int GetLanguages() { return Lang.Length(); }
+	int GetLanguages() { return (int)Lang.Length(); }
 	GLanguage *GetLanguage(int i) { return i < Lang.Length() ? Lang[i] : 0; }
 	GLanguage *GetLanguage(GLanguageId Id);
 	int GetLangIdx(GLanguageId Id);

@@ -34,7 +34,7 @@ public:
 
 	int GetVal()
 	{
-		return Val->Value();
+		return (int)Val->Value();
 	}
 };
 

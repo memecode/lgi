@@ -418,7 +418,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 			ResMenuItem *Item = dynamic_cast<ResMenuItem*>(Selection());
 			if (Item)
 			{
-				int n = Item->IndexOf();
+				auto n = Item->IndexOf();
 				if (n >= 0) n++;
 
 				GTreeItem *Parent = Item->GetParent();
@@ -472,7 +472,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 
 				if (Parent)
 				{
-					int n = Item->IndexOf();
+					auto n = Item->IndexOf();
 					if (n > 0)
 					{
 						Item->Remove();
@@ -497,7 +497,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 
 				if (Parent)
 				{
-					int n = Item->IndexOf();
+					auto n = Item->IndexOf();
 					if (n < Parent->GetItems() - 1)
 					{
 						Item->Remove();
@@ -796,7 +796,7 @@ GMessage::Result ResMenuUi::OnEvent(GMessage *Msg)
 	{
 		case M_COMMAND:
 		{
-			Menu->OnCommand(Msg->A()&0xffff, Msg->A()>>16, (OsView) Msg->B());
+			Menu->OnCommand(Msg->A()&0xffff, (int)(Msg->A()>>16), (OsView) Msg->B());
 			break;
 		}
 		case M_DESCRIBE:

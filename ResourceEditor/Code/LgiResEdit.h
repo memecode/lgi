@@ -434,7 +434,7 @@ public:
 				View->SetCtrlValue(f->Id, i);
 				break;
 			case UiToObj:
-				i = View->GetCtrlValue(f->Id);
+				i = (int)View->GetCtrlValue(f->Id);
 				break;
 			case StoreToObj:
 				if (Store->GetValue(FieldName, v))

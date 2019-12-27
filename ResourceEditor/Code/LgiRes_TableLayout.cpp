@@ -42,10 +42,10 @@ void CalcCell(GArray<Pair> &p, GArray<double> &s, int Total)
 /////////////////////////////////////////////////////////////////////
 // Table layout
 template<class T>
-T SumElements(GArray<T> &a, int start, int end)
+T SumElements(GArray<T> &a, ssize_t start, ssize_t end)
 {
 	T Sum = 0;
-	for (int i=start; i<=end; i++)
+	for (auto i=start; i<=end; i++)
 	{
 		Sum += a[i];
 	}
@@ -93,13 +93,13 @@ public:
 	GAutoString Class; // CSS class for styling
 	GAutoString Style; // CSS styles
 
-	ResTableCell(CtrlTable *table, int cx, int cy)
+	ResTableCell(CtrlTable *table, ssize_t cx, ssize_t cy)
 	{
 		AlignX = AlignY = AlignMin;
 		Table = table;
 		Selected = false;
 		Cell.ZOff(0, 0);
-		Cell.Offset(cx, cy);
+		Cell.Offset((int)cx, (int)cy);
 		Pos.ZOff(-1, -1);
 	}
 
@@ -342,7 +342,7 @@ class CtrlTablePrivate
 public:
 	// The cell container
 	CtrlTable *Table;
-	int CellX, CellY;
+	ssize_t CellX, CellY;
 	GArray<ResTableCell*> Cells;
 	ResTableCell *AttachTo;
 
