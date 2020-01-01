@@ -296,36 +296,28 @@ NSImage *GMemDC::NsImage(GRect *rc)
 	CGDataProviderRef provider = nil;
 	
 	GArray<uint8_t> Mem;
-	if (rc)
+	GAutoPtr<GSurface> Sub(SubImage(r));
+	if (!Sub)
+		return nil;
+	auto p = Sub->pMem;
+	
+	// Need to collect all the image data into one place.
+	if (!Mem.Length(p->y * bytesPerRow))
+		return nil;
+	
+	auto dst = Mem.AddressOf();
+	for (int y=0; y<p->y; y++)
 	{
-		GAutoPtr<GSurface> Sub(SubImage(r));
-		if (!Sub)
-			return nil;
-		auto p = Sub->pMem;
+		auto src = p->Base + (y * p->Line);
+		LgiAssert(dst + bytesPerRow <= Mem.AddressOf() + Mem.Length());
+		LgiAssert(src + bytesPerRow <= pMem->Base + (pMem->y * pMem->Line));
 		
-		// Need to collect all the image data into one place.
-		if (!Mem.Length(p->y * bytesPerRow))
-			return nil;
-		
-		auto dst = Mem.AddressOf();
-		for (int y=0; y<p->y; y++)
-		{
-			auto src = p->Base + (y * p->Line);
-			LgiAssert(dst + bytesPerRow <= Mem.AddressOf() + Mem.Length());
-			LgiAssert(src + bytesPerRow <= pMem->Base + (pMem->y * pMem->Line));
-			
-			memcpy(dst, src, bytesPerRow);
-			dst += bytesPerRow;
-		}
+		memcpy(dst, src, bytesPerRow);
+		dst += bytesPerRow;
+	}
 
-		auto len = Mem.Length();
-		provider = CGDataProviderCreateWithData(NULL, Mem.Release(), len, MemRelease);
-	}
-	else
-	{
-		// Just use the existing data...
-		provider = CGDataProviderCreateWithData(NULL, pMem->Base, pMem->y * pMem->Line, NULL);
-	}
+	auto len = Mem.Length();
+	provider = CGDataProviderCreateWithData(NULL, Mem.Release(), len, MemRelease);
 	
 	CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
 	// CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast;

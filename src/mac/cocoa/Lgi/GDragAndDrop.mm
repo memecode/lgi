@@ -276,24 +276,36 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::
 
 static NSArray* BuildImageComponentsForItem(LDragItem* _item)
 {
-	GMemDC Mem(32, 32, System32BitColourSpace);
-	Mem.Colour(0, 32);
-	Mem.Rectangle();
+	NSDraggingImageComponent *ic = [[NSDraggingImageComponent alloc] initWithKey:NSDraggingImageComponentIconKey];
+	NSImage *img = nil;
+
+	#if 0
+		img = [NSImage imageNamed:NSImageNameApplicationIcon]; // test it works..
+	#else
+		GMemDC Mem(32, 32, System32BitColourSpace);
+		Mem.Colour(0, 32);
+		Mem.Rectangle();
 	
-	for (int i=0; i<3; i++)
+		for (int i=0; i<3; i++)
+		{
+			GRect r(0, 0, 11, 15);
+			r.Offset(10 + (i*3), 8 + (i*3));
+			Mem.Colour(L_BLACK);
+			Mem.Box(&r);
+			r.Size(1, 1);
+			Mem.Colour(L_WHITE);
+			Mem.Rectangle(&r);
+		}
+
+		img = Mem.NsImage();
+	#endif
+
+	if (img)
 	{
-		GRect r(0, 0, 11, 15);
-		r.Offset(10 + (i*3), 8 + (i*3));
-		Mem.Colour(L_BLACK);
-		Mem.Box(&r);
-		r.Size(1, 1);
-		Mem.Colour(L_WHITE);
-		Mem.Rectangle(&r);
+		ic.contents = img;
+		ic.frame = NSMakeRect(0, 0, img.size.width, img.size.height);
 	}
 
-	NSDraggingImageComponent *ic = [[NSDraggingImageComponent alloc] initWithKey:NSDraggingImageComponentIconKey];
-	ic.contents = Mem.NsImage();
-	ic.frame = NSMakeRect(0, 0, 32, 32);
 	return @[ic];
 }
 
