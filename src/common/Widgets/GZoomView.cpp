@@ -1434,13 +1434,13 @@ bool GZoomView::Convert(GPointF &p, int x, int y)
 	else if (d->GetZoom() < 0)
 	{
 		// Scaled down
-		p.x = Sx + (x * Factor);
-		p.y = Sy + (y * Factor);
+		p.x = (double)Sx + (x * Factor);
+		p.y = (double)Sy + (y * Factor);
 	}
 	else
 	{
-		p.x = Sx + x;
-		p.y = Sy + y;
+		p.x = (double)Sx + x;
+		p.y = (double)Sy + y;
 	}
 	
 	GSurface *Src = d->pDC;
