@@ -100,7 +100,6 @@ LgiFunc void LgiSleep(uint32_t i);
 
 #define LGI_GViewMagic				0x14412662
 #define LGI_FileDropFormat			"public.file-url"
-// #define LGI_StreamDropFormat		"com.apple.pasteboard.promised-file-content-type"
 #define LGI_StreamDropFormat		"com.apple.pasteboard.promised-file-url"
 #define LGI_LgiDropFormat			"lgi "
 #define LGI_WideCharset				"utf-32"

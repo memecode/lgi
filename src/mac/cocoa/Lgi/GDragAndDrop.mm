@@ -1,11 +1,11 @@
 /*
-**	FILE:			GDragAndDrop.cpp
-**	AUTHOR:			Matthew Allen
-**	DATE:			30/11/98
-**	DESCRIPTION:	Drag and drop support
-**
-**	Copyright (C) 1998-2003, Matthew Allen
-**		fret@memecode.com
+
+Useful info:
+	https://github.com/alexey-lysiuk/ncexp/blob/966bce79e7385754883201a613432b4189e1d918/NimbleCommander/States/FilePanels/DragSender.mm
+	@interface FilesDraggingSource : NSObject<NSDraggingSource, NSPasteboardItemDataProvider>
+	@interface PanelDraggingItem : NSPasteboardItem
+
+
 */
 
 #include <stdio.h>
@@ -35,67 +35,56 @@ const char *LMimeToUti(const char *Mime)
 	return "public.item";
 }
 
-@interface LDragSource : NSObject<NSDraggingSource>
-{
-}
-@property GDndSourcePriv *d;
-- (id)init:(GDndSourcePriv*)view;
-- (NSDragOperation)draggingSession:(nonnull NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context;
+@interface LDragItem : NSPasteboardItem
+@property (nonatomic, readonly) GString path;
+@property (nonatomic, weak) NSImage *icon;
+@property (nonatomic) GAutoPtr<GStreamI> src;
+- (LDragItem*) initWithItem:(GString)item source:(GStreamI*)src;
+- (void)dealloc;
 @end
 
-@interface LFilePromiseProviderDelegate : NSObject<NSFilePromiseProviderDelegate>
+@implementation LDragItem
 {
-	GString filename;
-	GStreamI *stream;
 }
-- (id)init:(GString)fn stream:(GStreamI*)stream;
-- (NSString *)filePromiseProvider:(NSFilePromiseProvider*)filePromiseProvider fileNameForType:(NSString *)fileType;
-- (void)filePromiseProvider:(NSFilePromiseProvider*)filePromiseProvider writePromiseToURL:(NSURL *)url completionHandler:(void (^)(NSError * __nullable errorOrNil))completionHandler;
-@end
 
-@implementation LFilePromiseProviderDelegate
-- (id)init:(GString)fn stream:(GStreamI*)s
+- (LDragItem*) initWithItem:(GString)item source:(GStreamI*)src
 {
 	if ((self = [super init]) != nil)
 	{
-		self->filename = fn;
-		self->stream = s;
+		self->_path = item;
+		self->_src.Reset(src);
+		self->_icon = NULL;
+		
+		// for File URL Promise. need to check if this is necessary
+        [self setString:(NSString*)kUTTypeData
+                forType:(NSString *)kPasteboardTypeFilePromiseContent];
 	}
 	
 	return self;
 }
 
-- (NSString *)filePromiseProvider:(NSFilePromiseProvider*)filePromiseProvider fileNameForType:(NSString *)fileType
+- (void)dealloc
 {
-	return self->filename.NsStr();
+	self->_src.Reset();
+	[super dealloc];
 }
 
-- (void)filePromiseProvider:(NSFilePromiseProvider*)filePromiseProvider
-		writePromiseToURL:(NSURL *)url
-		completionHandler:(void (^)(NSError * __nullable errorOrNil))completionHandler
+@end
+
+@interface LDragSource : NSObject<NSDraggingSource, NSPasteboardItemDataProvider>
 {
-	GFile out;
-	if (!out.Open([url.path UTF8String], O_WRITE))
-		return;
-	out.SetSize(0);
-	auto len = self->stream->GetSize();
-	int64 written = 0;
-	for (size_t i=0; i<len; )
-	{
-		char buf[1024];
-		auto rd = self->stream->Read(buf, sizeof(buf));
-		if (rd <= 0) break;
-		auto wr = out.Write(buf, rd);
-		if (wr < rd) break;
-		written += wr;
-	}
-	
-	if (written < len)
-		LgiTrace("%s:%i - write failed.\n", _FL);
-	
-	if (completionHandler)
-		completionHandler(nil);
+	GArray<LDragItem*> Items;
 }
+
+@property GDndSourcePriv *d;
+
+- (id)init:(GDndSourcePriv*)view;
+- (void)addItem:(LDragItem*)i;
+
+- (NSDragOperation)draggingSession:(nonnull NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context;
+- (void)pasteboard:(nullable NSPasteboard *)pasteboard item:(NSPasteboardItem *)item provideDataForType:(NSPasteboardType)type;
+- (void)pasteboardFinishedWithDataProvider:(NSPasteboard *)pasteboard;
+
 @end
 
 class GDndSourcePriv
@@ -104,7 +93,6 @@ public:
 	GAutoString CurrentFormat;
 	GSurface *ExternImg;
 	GRect ExternSubRgn;
-	LDragSource *Wrapper;
 	int Effect;
 	GMemDC Icon;
 	List<char> Formats;
@@ -113,17 +101,30 @@ public:
 	{
 		Effect = 0;
 		ExternImg = NULL;
-		Wrapper = NULL;
 		ExternSubRgn.ZOff(-1, -1);
 	}
 
 	~GDndSourcePriv()
 	{
 		Formats.DeleteArrays();
-		if (Wrapper)
-			[Wrapper release];
 	}
 };
+
+static NSURL *ExtractPromiseDropLocation(NSPasteboard *_pasteboard)
+{
+    NSURL *result = nil;
+    PasteboardRef pboardRef = nullptr;
+    PasteboardCreate((__bridge CFStringRef)_pasteboard.name, &pboardRef);
+    if( pboardRef ) {
+        PasteboardSynchronize(pboardRef);
+        CFURLRef urlRef = nullptr;
+        PasteboardCopyPasteLocation(pboardRef, &urlRef);
+        if( urlRef )
+            result = (NSURL*) CFBridgingRelease(urlRef);
+        CFRelease(pboardRef);
+    }
+    return result;
+}
 
 @implementation LDragSource
 
@@ -137,9 +138,27 @@ public:
 	return self;
 }
 
+- (void)addItem:(LDragItem*)i
+{
+	self->Items.Add(i);
+}
+
 - (NSDragOperation)draggingSession:(nonnull NSDraggingSession *)session
 		sourceOperationMaskForDraggingContext:(NSDraggingContext)context
 {
+    switch (context)
+    {
+        case NSDraggingContextOutsideApplication:
+			return NSDragOperationCopy;
+			
+        case NSDraggingContextWithinApplication:
+			return NSDragOperationCopy | NSDragOperationGeneric | NSDragOperationMove;
+			
+        default:
+            return NSDragOperationNone;
+    }
+
+	/*
 	NSDragOperation op = 0;
 	auto Effect = self.d->Effect;
 
@@ -151,6 +170,68 @@ public:
 		op |= NSDragOperationLink;
 
 	return NSDragOperationNone;
+	*/
+}
+
+- (void)pasteboard:(nullable NSPasteboard *)sender item:(NSPasteboardItem *)item provideDataForType:(NSPasteboardType)type
+{
+    if (![type isEqualToString:(NSString*)kPasteboardTypeFileURLPromise])
+    	return;
+
+	if (auto drop_url = ExtractPromiseDropLocation(sender))
+	{
+		GFile::Path path(drop_url.path.fileSystemRepresentation);
+		auto di = objc_dynamic_cast(LDragItem, item);
+		if (!di)
+		{
+			LgiTrace("%s:%i - not a LDragItem object.\n", _FL);
+			return;
+		}
+		
+		path += di.path;
+		auto s = di.src;
+
+		GFile out;
+		if (!out.Open(path, O_WRITE))
+		{
+			LgiTrace("%s:%i - can't open '%s' for writing.\n", _FL, path.GetFull().Get());
+			return;
+		}
+		out.SetSize(0);
+		auto len = s->GetSize();
+		int64 written = 0;
+		for (size_t i=0; i<len; )
+		{
+			char buf[1024];
+			auto rd = s->Read(buf, sizeof(buf));
+			if (rd <= 0) break;
+			auto wr = out.Write(buf, rd);
+			if (wr < rd) break;
+			written += wr;
+		}
+		
+		if (written < len)
+		{
+			LgiTrace("%s:%i - write failed.\n", _FL);
+			return;
+		}
+		else
+		{
+			const auto url = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.GetFull()]
+										isDirectory:false
+									  	relativeToURL:nil];
+			if (url)
+			{
+				// NB! keep this in dumb form!
+				// [url writeToPasteboard:sender] doesn't work.
+				[sender writeObjects:@[url]];
+			}
+		}
+	}
+}
+
+- (void)pasteboardFinishedWithDataProvider:(NSPasteboard *)pasteboard
+{
 }
 
 @end
@@ -191,6 +272,29 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::
 	}
 
 	return false;
+}
+
+static NSArray* BuildImageComponentsForItem(LDragItem* _item)
+{
+	GMemDC Mem(32, 32, System32BitColourSpace);
+	Mem.Colour(0, 32);
+	Mem.Rectangle();
+	
+	for (int i=0; i<3; i++)
+	{
+		GRect r(0, 0, 11, 15);
+		r.Offset(10 + (i*3), 8 + (i*3));
+		Mem.Colour(L_BLACK);
+		Mem.Box(&r);
+		r.Size(1, 1);
+		Mem.Colour(L_WHITE);
+		Mem.Rectangle(&r);
+	}
+
+	NSDraggingImageComponent *ic = [[NSDraggingImageComponent alloc] initWithKey:NSDraggingImageComponentIconKey];
+	ic.contents = Mem.NsImage();
+	ic.frame = NSMakeRect(0, 0, 32, 32);
+	return @[ic];
 }
 
 int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface *Icon)
@@ -243,8 +347,7 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	}
 	
 	d->Effect = Effect;
-	if (!d->Wrapper)
-		d->Wrapper = [[LDragSource alloc] init:d];
+	auto DragSrc = [[LDragSource alloc] init:d];
 	
 	auto pt = Event.p.locationInWindow;
 	pt.y -= Mem->Y();
@@ -264,6 +367,13 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 		return DROPEFFECT_NONE;
 	
 	[pboard clearContents];
+	NSMutableArray *drag_items = [[NSMutableArray alloc] init];
+
+	auto pasteboard_types = @[(NSString *)kPasteboardTypeFileURLPromise];
+	auto position = [h.p.contentView convertPoint:Event.p.locationInWindow fromView:nil];
+    /*position.x -= 16;
+    position.y -= 16;*/
+
 	for (auto &dd: Data)
 	{
 		if (dd.IsFileStream())
@@ -277,22 +387,23 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 				
 				if (File && MimeType && Stream)
 				{
-					GString Uti = LMimeToUti(MimeType);
-					auto NsUti = Uti.NsStr();
-					NSString *utType = (/*__bridge_transfer*/ NSString*)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (/*__bridge*/ CFStringRef)NsUti, kUTTypeData);
-					if (utType)
-					{
-						auto delegate = [[LFilePromiseProviderDelegate alloc] init:File stream:Stream];
-						auto prov = [[NSFilePromiseProvider alloc] initWithFileType:utType delegate:delegate];
-						// NSArray *array = [NSArray arrayWithObject:prov];
-						// auto wr = [pboard writeObjects:array];
-						auto wr = [pboard writeObjects:@[prov]];
-						if (wr)
-							printf("Adding file promise '%s' (%s) to drag...\n", File, Uti.Get());
-						else
-							printf("Error: Adding file promise '%s' (%s) to drag...\n", File, Uti.Get());
-						[utType release];
-					}
+					auto item = [[LDragItem alloc] initWithItem:File source:Stream];
+					v.Value.Stream.Ptr = NULL; // So we take ownership of it.
+					[item setDataProvider:DragSrc forTypes:pasteboard_types];
+			
+					[DragSrc addItem:item];
+			
+					auto drag_item = [[NSDraggingItem alloc] initWithPasteboardWriter:item];
+					drag_item.draggingFrame = NSMakeRect(floor(position.x), floor(position.y), 32, 32);
+
+					[drag_items addObject:drag_item];
+			
+					#if 1
+					__weak LDragItem *weak_pb_item = item;
+					drag_item.imageComponentsProvider = ^{
+						return BuildImageComponentsForItem((LDragItem *)weak_pb_item);
+					};
+					#endif
 				}
 			}
 		}
@@ -331,7 +442,21 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 		else printf("%s:%i - Impl multiple data handling for %s.\n", _FL, dd.Format.Get());
 	}
 	
-	[h.p dragImage:img at:pt offset:NSZeroSize event:Event.p pasteboard:pboard source:d->Wrapper slideBack:YES ];
+	if (drag_items.count > 0)
+	{
+		NSDraggingSession *session = [h.p.contentView	beginDraggingSessionWithItems:drag_items
+														event:Event.p
+														source:DragSrc];
+		if (session)
+		{
+			//[d->Wrapper writeURLsPBoard:session.draggingPasteboard];
+			return DROPEFFECT_COPY;
+		}
+	}
+	else
+	{
+		[h.p dragImage:img at:pt offset:NSZeroSize event:Event.p pasteboard:pboard source:DragSrc slideBack:YES ];
+	}
 
 	return DROPEFFECT_NONE;
 }
