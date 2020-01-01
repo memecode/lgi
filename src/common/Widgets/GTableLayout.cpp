@@ -974,7 +974,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			
 			GRect r = v->GetPos();
 			r.y2 = r.y1 + CtrlHeight - 1;
-			v->SetPos(r);
+			v->SetPos(r, true);
 			
 			Pos.y2 = MAX(Pos.y2, r.Y()-1);
 		}
@@ -1003,7 +1003,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			}
 
 			r.Offset(Cur.x - r.x1, Cur.y - r.y1);
-			v->SetPos(r);
+			v->SetPos(r, true);
 			Cur.x = r.x2 + 1;
 			NextY = MAX(NextY, r.y2 + 1);
 			Pos.y2 = MAX(Pos.y2, r.y2);
