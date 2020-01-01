@@ -144,8 +144,8 @@ public:
 	void OnPaint(GItem::ItemPaintCtx &Ctx) override;
 	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c) override;
 
-	// Overridable
-	virtual int Compare(LListItem *To, int Field = 0) { return 0; }
+	// Over-ridable
+	virtual int Compare(LListItem *To, ssize_t Field = 0) { return 0; }
 	virtual void OnColumnNotify(int Col, int64 Data) { Update(); }
 };
 
