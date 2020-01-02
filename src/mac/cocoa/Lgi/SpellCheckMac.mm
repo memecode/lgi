@@ -2,7 +2,6 @@
 #include "Lgi.h"
 #include "LgiSpellCheck.h"
 
-#include <Carbon/Carbon.h>
 #include <Cocoa/Cocoa.h>
 
 enum MacSpellProps

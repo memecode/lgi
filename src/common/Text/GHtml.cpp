@@ -290,7 +290,8 @@ public:
 					f->Underline() == IsUnderline)
 				{
 				    int Px = FontPxHeight(f);
-					if (abs(Px - RequestPx) < 2)
+				    int Diff = Px - RequestPx;
+					if (Diff >= 0 && Diff <= 2)
 						return f;
 				}
 			}

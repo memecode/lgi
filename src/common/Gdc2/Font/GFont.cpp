@@ -871,209 +871,182 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 
 	#if LGI_SDL
 	
-	GString FaceName;
-	#if defined(WIN32)
-	const char *Ext = "ttf";
-	GString FontPath = "c:\\Windows\\Fonts";
-	#elif defined(LINUX)
-	const char *Ext = "ttf";
-	GString FontPath = "/usr/share/fonts/truetype";
-	#elif defined(MAC)
-	const char *Ext = "ttc";
-	GString FontPath = "/System/Library/Fonts";
-	#else
-	#error "Put your font path here"
-	#endif
-	GFile::Path p = FontPath.Get();
-	FaceName.Printf("%s.%s", Face(), Ext);
-	p += FaceName;
-	GString Full = p.GetFull();
+		GString FaceName;
+		#if defined(WIN32)
+		const char *Ext = "ttf";
+		GString FontPath = "c:\\Windows\\Fonts";
+		#elif defined(LINUX)
+		const char *Ext = "ttf";
+		GString FontPath = "/usr/share/fonts/truetype";
+		#elif defined(MAC)
+		const char *Ext = "ttc";
+		GString FontPath = "/System/Library/Fonts";
+		#else
+		#error "Put your font path here"
+		#endif
+		GFile::Path p = FontPath.Get();
+		FaceName.Printf("%s.%s", Face(), Ext);
+		p += FaceName;
+		GString Full = p.GetFull();
 	
-	if (!FileExists(Full))
-	{
-		GArray<char*> Files;
-		GArray<const char*> Extensions;
-		GString Pattern;
-		Pattern.Printf("*.%s", Ext);
-		Extensions.Add(Pattern.Get());
-		LgiRecursiveFileSearch(FontPath, &Extensions, &Files, NULL, NULL, NULL, NULL);
-		char *Match = NULL;
-		for (unsigned i=0; i<Files.Length(); i++)
+		if (!FileExists(Full))
 		{
-			if (stristr(Files[i], FaceName))
-				Match = Files[i];
+			GArray<char*> Files;
+			GArray<const char*> Extensions;
+			GString Pattern;
+			Pattern.Printf("*.%s", Ext);
+			Extensions.Add(Pattern.Get());
+			LgiRecursiveFileSearch(FontPath, &Extensions, &Files, NULL, NULL, NULL, NULL);
+			char *Match = NULL;
+			for (unsigned i=0; i<Files.Length(); i++)
+			{
+				if (stristr(Files[i], FaceName))
+					Match = Files[i];
+			}
+			
+			if (Match)
+				Full = Match;
+			else
+				LgiTrace("%s:%i - The file '%s' doesn't exist.\n", _FL, Full.Get());
+			Files.DeleteArrays();
 		}
-		
-		if (Match)
-			Full = Match;
-		else
-			LgiTrace("%s:%i - The file '%s' doesn't exist.\n", _FL, Full.Get());
-		Files.DeleteArrays();
-	}
 	
-	FT_Error error = FT_New_Face(Freetype2.Handle(),
-								 Full,
-								 0,
-								 &d->hFont);
-	if (error)
-	{
-		LgiTrace("%s:%i - FT_New_Face failed with %i\n", _FL, error);
-	}
-	else
-	{
-		int Dpi = LgiScreenDpi();
-		int PtSize = PointSize();
-		int PxSize = (int) (PtSize * Dpi / 72.0);
-		
-		error = FT_Set_Char_Size(	d->hFont,		/* handle to face object           */
-									0,				/* char_width in 1/64th of points  */
-									PtSize*64,		/* char_height in 1/64th of points */
-									Dpi,			/* horizontal device resolution    */
-									Dpi);
+		FT_Error error = FT_New_Face(Freetype2.Handle(),
+									 Full,
+									 0,
+									 &d->hFont);
 		if (error)
 		{
-			LgiTrace("%s:%i - FT_Set_Char_Size failed with %i\n", _FL, error);
+			LgiTrace("%s:%i - FT_New_Face failed with %i\n", _FL, error);
 		}
-		
-		d->Height = (int) (ceil((double)d->hFont->height * PxSize / d->hFont->units_per_EM) + 0.0001);
-		GTypeFace::d->_Ascent = (double)d->hFont->ascender * PxSize / d->hFont->units_per_EM;
-		LgiAssert(d->Height > GTypeFace::d->_Ascent);
-		GTypeFace::d->_Descent = d->Height - GTypeFace::d->_Ascent;
-		
-		return true;
-	}
+		else
+		{
+			int Dpi = LgiScreenDpi();
+			int PtSize = PointSize();
+			int PxSize = (int) (PtSize * Dpi / 72.0);
+			
+			error = FT_Set_Char_Size(	d->hFont,		/* handle to face object           */
+										0,				/* char_width in 1/64th of points  */
+										PtSize*64,		/* char_height in 1/64th of points */
+										Dpi,			/* horizontal device resolution    */
+										Dpi);
+			if (error)
+			{
+				LgiTrace("%s:%i - FT_Set_Char_Size failed with %i\n", _FL, error);
+			}
+			
+			d->Height = (int) (ceil((double)d->hFont->height * PxSize / d->hFont->units_per_EM) + 0.0001);
+			GTypeFace::d->_Ascent = (double)d->hFont->ascender * PxSize / d->hFont->units_per_EM;
+			LgiAssert(d->Height > GTypeFace::d->_Ascent);
+			GTypeFace::d->_Descent = d->Height - GTypeFace::d->_Ascent;
+			
+			return true;
+		}
 
 	#elif WINNATIVE
 
-	if (d->hFont)
-	{
-		DeleteObject(d->hFont);
-		d->hFont = 0;
-	}
-	
-	d->pSurface = pSurface;
-	HDC hDC = pSurface ? pSurface->Handle() : GetDC(0);
-	auto Sz = Size();
-	int Win32Height = 0;
-	if (Sz.Type == GCss::LenPt)
-		Win32Height = WinPointToHeight((int)Sz.Value, hDC);
-	else if (Sz.Type == GCss::LenPx)
-		Win32Height = (int)(Sz.Value * 1.2);
-	else
-		LgiAssert(!"What now?");
-	
-	GTypeFace::d->IsSymbol = GTypeFace::d->_Face &&
-								(
-									stristr(GTypeFace::d->_Face, "wingdings") ||
-									stristr(GTypeFace::d->_Face, "symbol")
-								);
-	int Cs;
-	if (GTypeFace::d->IsSymbol)
-		Cs = SYMBOL_CHARSET;
-	else
-		Cs = ANSI_CHARSET;
-
-	d->OwnerUnderline = Face() &&
-						stricmp(Face(), "Courier New") == 0 && 
-						Size().Type == GCss::LenPt &&
-						(PointSize() == 8 || PointSize() == 9) &&
-						GTypeFace::d->_Underline;
-
-	GAutoWString wFace(Utf8ToWide(GTypeFace::d->_Face));
-	d->hFont = ::CreateFont(Win32Height,
-							0,
-							0,
-							0,
-							GTypeFace::d->_Weight,
-							GTypeFace::d->_Italic,
-							d->OwnerUnderline ? false : GTypeFace::d->_Underline,
-							false,
-							Cs,
-							OUT_DEFAULT_PRECIS,
-							CLIP_DEFAULT_PRECIS,
-							GTypeFace::d->_Quality,
-							FF_DONTCARE,
-							wFace);
-	
-	if (d->hFont)
-	{
-		HFONT hFnt = (HFONT) SelectObject(hDC, d->hFont);
-
-		TEXTMETRIC tm;
-		ZeroObj(tm);
-		if (GetTextMetrics(hDC, &tm))
+		if (d->hFont)
 		{
-			d->Height = tm.tmHeight;
-			GTypeFace::d->_Ascent = tm.tmAscent;
-			GTypeFace::d->_Descent = tm.tmDescent;
-			GTypeFace::d->_Leading = tm.tmInternalLeading;
+			DeleteObject(d->hFont);
+			d->hFont = 0;
 		}
+	
+		d->pSurface = pSurface;
+		HDC hDC = pSurface ? pSurface->Handle() : GetDC(0);
+		auto Sz = Size();
+		int Win32Height = 0;
+		if (Sz.Type == GCss::LenPt)
+			Win32Height = WinPointToHeight((int)Sz.Value, hDC);
+		else if (Sz.Type == GCss::LenPx)
+			Win32Height = (int)(Sz.Value * 1.2);
 		else
-		{
-			SIZE Size = {0, 0};
-			GetTextExtentPoint32(hDC, L"Ag", 2, &Size);
-			d->Height = Size.cy;
-		}
+			LgiAssert(!"What now?");
+	
+		GTypeFace::d->IsSymbol = GTypeFace::d->_Face &&
+									(
+										stristr(GTypeFace::d->_Face, "wingdings") ||
+										stristr(GTypeFace::d->_Face, "symbol")
+									);
+		int Cs;
+		if (GTypeFace::d->IsSymbol)
+			Cs = SYMBOL_CHARSET;
+		else
+			Cs = ANSI_CHARSET;
 
-		uint Bytes = (MAX_UNICODE + 1) >> 3;
-		if (!d->GlyphMap)
-		{
-			d->GlyphMap = new uchar[Bytes];
-		}
+		d->OwnerUnderline = Face() &&
+							stricmp(Face(), "Courier New") == 0 &&
+							Size().Type == GCss::LenPt &&
+							(PointSize() == 8 || PointSize() == 9) &&
+							GTypeFace::d->_Underline;
 
-		if (d->GlyphMap)
+		GAutoWString wFace(Utf8ToWide(GTypeFace::d->_Face));
+		d->hFont = ::CreateFont(Win32Height,
+								0,
+								0,
+								0,
+								GTypeFace::d->_Weight,
+								GTypeFace::d->_Italic,
+								d->OwnerUnderline ? false : GTypeFace::d->_Underline,
+								false,
+								Cs,
+								OUT_DEFAULT_PRECIS,
+								CLIP_DEFAULT_PRECIS,
+								GTypeFace::d->_Quality,
+								FF_DONTCARE,
+								wFace);
+	
+		if (d->hFont)
 		{
-			memset(d->GlyphMap, 0, Bytes);
+			HFONT hFnt = (HFONT) SelectObject(hDC, d->hFont);
 
-			GArray<int> OsVer;
-			int OsType = LgiGetOs(&OsVer);
-			if (OsType == LGI_OS_WIN9X ||
-				OsVer[0] < 5) // GetFontUnicodeRanges is supported on >= Win2k
+			TEXTMETRIC tm;
+			ZeroObj(tm);
+			if (GetTextMetrics(hDC, &tm))
 			{
-				bool HideUnihan = false;
+				d->Height = tm.tmHeight;
+				GTypeFace::d->_Ascent = tm.tmAscent;
+				GTypeFace::d->_Descent = tm.tmDescent;
+				GTypeFace::d->_Leading = tm.tmInternalLeading;
+			}
+			else
+			{
+				SIZE Size = {0, 0};
+				GetTextExtentPoint32(hDC, L"Ag", 2, &Size);
+				d->Height = Size.cy;
+			}
 
-				LgiAssert(sizeof(type_4_cmap)==16);
-				uint16 Length = 0;
-				type_4_cmap *t = GetUnicodeTable(Handle(), Length);
-				if (t)
+			uint Bytes = (MAX_UNICODE + 1) >> 3;
+			if (!d->GlyphMap)
+			{
+				d->GlyphMap = new uchar[Bytes];
+			}
+
+			if (d->GlyphMap)
+			{
+				memset(d->GlyphMap, 0, Bytes);
+
+				GArray<int> OsVer;
+				int OsType = LgiGetOs(&OsVer);
+				if (OsType == LGI_OS_WIN9X ||
+					OsVer[0] < 5) // GetFontUnicodeRanges is supported on >= Win2k
 				{
-					uint16 SegCount = t->seg_count_x_2 / 2;
-					uint16 *EndCount = t->GetEndCount();
-					uint16 *StartCount = t->GetStartCount();
-					uint16 *IdRangeOffset = t->GetIdRangeOffset();
+					bool HideUnihan = false;
 
-					for (int i = 0; i<SegCount; i++)
+					LgiAssert(sizeof(type_4_cmap)==16);
+					uint16 Length = 0;
+					type_4_cmap *t = GetUnicodeTable(Handle(), Length);
+					if (t)
 					{
-						if (IdRangeOffset[i] == 0)
-						{
-							for (uint u = StartCount[i]; u <= EndCount[i]; u++)
-							{
-								if (HideUnihan &&
-									u >= 0x3400 &&
-									u <= 0x9FAF)
-								{
-									// APPROXIMATE
-								}
-								else
-								{
-									// EXACT
-								}
+						uint16 SegCount = t->seg_count_x_2 / 2;
+						uint16 *EndCount = t->GetEndCount();
+						uint16 *StartCount = t->GetStartCount();
+						uint16 *IdRangeOffset = t->GetIdRangeOffset();
 
-								if ((u >> 3) < Bytes)
-								{
-									d->GlyphMap[u>>3] |= 1 << (u & 7);
-								}
-							}
-						}
-						else
+						for (int i = 0; i<SegCount; i++)
 						{
-							uint16 *End = (uint16*) (((char*)t)+Length);
-							ssize_t IdBytes = End - IdRangeOffset;
-
-							for (uint u = StartCount[i]; u <= EndCount[i] && IdRangeOffset[i] != 0xffff; u++)
+							if (IdRangeOffset[i] == 0)
 							{
-								uint id = *(IdRangeOffset[i]/2 + (u - StartCount[i]) + &IdRangeOffset[i]);
-								if (id)
+								for (uint u = StartCount[i]; u <= EndCount[i]; u++)
 								{
 									if (HideUnihan &&
 										u >= 0x3400 &&
@@ -1092,381 +1065,317 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 									}
 								}
 							}
-						}
-					}
-				}
-				else
-				{
-					// not a TTF? assume that it can handle 00-ff in the current ansi cp
-					/*
-					char *Cp = LgiAnsiToLgiCp();
-					for (int i=0; i<=0x7f; i++)
-					{
-						char16 u;
-						uchar c = i;
-						void *In = &c;
-						int Size = sizeof(c);
-						LgiBufConvertCp(&u, "ucs-2", sizeof(u), In, Cp, Size);
-
-						if ((u >> 3) < Bytes)
-						{
-							GlyphMap[u>>3] |= 1 << (u & 7);
-						}
-					}
-					*/
-				}
-			}
-			else
-			{
-				typedef DWORD (WINAPI *Proc_GetFontUnicodeRanges)(HDC, LPGLYPHSET);
-
-				if (!d->Gdi32)
-					d->Gdi32.Reset(new GLibrary("Gdi32"));
-				if (d->Gdi32)
-				{
-					Proc_GetFontUnicodeRanges GetFontUnicodeRanges = (Proc_GetFontUnicodeRanges)d->Gdi32->GetAddress("GetFontUnicodeRanges");
-					if (GetFontUnicodeRanges)
-					{
-						DWORD BufSize = GetFontUnicodeRanges(hDC, 0);
-						LPGLYPHSET Set = (LPGLYPHSET) new char[BufSize];
-						if (Set && GetFontUnicodeRanges(hDC, Set) > 0)
-						{
-							for (DWORD i=0; i<Set->cRanges; i++)
+							else
 							{
-								WCRANGE *Range = Set->ranges + i;
-								for (int n=0; n<Range->cGlyphs; n++)
+								uint16 *End = (uint16*) (((char*)t)+Length);
+								ssize_t IdBytes = End - IdRangeOffset;
+
+								for (uint u = StartCount[i]; u <= EndCount[i] && IdRangeOffset[i] != 0xffff; u++)
 								{
-									DWORD u = Range->wcLow + n;
-									if (u >> 3 < Bytes)
+									uint id = *(IdRangeOffset[i]/2 + (u - StartCount[i]) + &IdRangeOffset[i]);
+									if (id)
 									{
-										d->GlyphMap[u>>3] |= 1 << (u & 7);
+										if (HideUnihan &&
+											u >= 0x3400 &&
+											u <= 0x9FAF)
+										{
+											// APPROXIMATE
+										}
+										else
+										{
+											// EXACT
+										}
+
+										if ((u >> 3) < Bytes)
+										{
+											d->GlyphMap[u>>3] |= 1 << (u & 7);
+										}
 									}
 								}
 							}
 						}
+					}
+					else
+					{
+						// not a TTF? assume that it can handle 00-ff in the current ansi cp
+						/*
+						char *Cp = LgiAnsiToLgiCp();
+						for (int i=0; i<=0x7f; i++)
+						{
+							char16 u;
+							uchar c = i;
+							void *In = &c;
+							int Size = sizeof(c);
+							LgiBufConvertCp(&u, "ucs-2", sizeof(u), In, Cp, Size);
 
-						DeleteArray((char*&)Set);
+							if ((u >> 3) < Bytes)
+							{
+								GlyphMap[u>>3] |= 1 << (u & 7);
+							}
+						}
+						*/
 					}
 				}
-				
-				if (GTypeFace::d->IsSymbol)
+				else
 				{
-					// Lies! It's all Lies! Symbol doesn't support non-breaking space.
-					int u = 0xa0;
-					d->GlyphMap[u >> 3] &= ~(1 << (u & 7));
-				}
-			}
+					typedef DWORD (WINAPI *Proc_GetFontUnicodeRanges)(HDC, LPGLYPHSET);
 
-			if (d->GlyphMap)
-			{
-				memset(d->GlyphMap, 0xff, 128/8);
-			}
-		}
-
-		SelectObject(hDC, hFnt);
-	}
-
-	if (!pSurface) ReleaseDC(0, hDC);
-
-	return (d->hFont != 0);
-	
-	#elif defined BEOS
-
-	if (Face())
-	{
-		d->hFont = new BFont;
-		d->hFont->SetSize(PointSize());
-	
-		int f = 0;
-		
-		if (Bold())
-			f |= B_BOLD_FACE;
-		
-		if (Italic())
-			f |= B_ITALIC_FACE;
-		
-		if (Underline())
-			f |= B_UNDERSCORE_FACE;
-		
-		if (!f)
-			f |= B_REGULAR_FACE;
-	
-		d->hFont->SetFamilyAndFace(Face(), f);
-	
-		font_height h;
-		d->hFont->GetHeight(&h);
-		GTypeFace::d->_Ascent = h.ascent;
-		GTypeFace::d->_Descent = h.descent;
-		d->Height = ceil(h.ascent + h.descent);
-		
-		// Create glyph size cache of the first 128 characters. StringWidth is too slow
-		// to do for every string at runtime.
-		d->CharX[0] = 0;
-		for (int i=1; i<128; i++)
-		{
-			char str[] = {i, 0};
-			d->CharX[i] = (int)d->hFont->StringWidth(str, 1);
-		}
-	}
-	
-	return true;
-
-	#elif defined __GTK_H__
-	
-	Destroy();
-	
-	d->hFont = Gtk::pango_font_description_new();
-	if (!d->hFont)
-		printf("%s:%i - pango_font_description_new failed: Face='%s' Size=%i Bold=%i Italic=%i\n",
-			_FL, Face(), PointSize(), Bold(), Italic());
-	else if (!ValidStr(Face()))
-		printf("%s:%i - No font face.\n", _FL);
-	else if (!Size().IsValid())
-		printf("%s:%i - Invalid size.\n", _FL);
-	else
-	{
-		auto Sz = Size();
-		GString sFace = Face();
-		Gtk::pango_font_description_set_family(d->hFont, sFace);
-		if (Sz.Type == GCss::LenPt)
-			Gtk::pango_font_description_set_size(d->hFont, Sz.Value * PANGO_SCALE);
-		else if (Sz.Type == GCss::LenPx)
-			Gtk::pango_font_description_set_absolute_size(d->hFont, Sz.Value * PANGO_SCALE);
-		else
-		{
-			LgiAssert(0);
-			return false;
-		}
-			
-		if (Bold())
-			Gtk::pango_font_description_set_weight(d->hFont, Gtk::PANGO_WEIGHT_BOLD);
-		
-		// Get metrics for this font...
-		Gtk::GtkPrintContext *PrintCtx = pSurface ? pSurface->GetPrintContext() : NULL;
-		Gtk::PangoContext *SysCtx = GFontSystem::Inst()->GetContext();
-		if (PrintCtx)
-			d->PangoCtx = gtk_print_context_create_pango_context(PrintCtx);
-		auto EffectiveCtx = d->PangoCtx ? d->PangoCtx : SysCtx;
-		Gtk::PangoFontMetrics *m = Gtk::pango_context_get_metrics(d->PangoCtx ? d->PangoCtx : SysCtx, d->hFont, 0);
-		if (!m)
-			printf("pango_font_get_metrics failed.\n");
-		else
-		{
-			GTypeFace::d->_Ascent = (double)Gtk::pango_font_metrics_get_ascent(m) / PANGO_SCALE;
-			GTypeFace::d->_Descent = (double)Gtk::pango_font_metrics_get_descent(m) / PANGO_SCALE;
-			d->Height = ceil(GTypeFace::d->_Ascent + GTypeFace::d->_Descent + 1/*hack the underscores to work*/);
-			
-			#if 0
-			if (PrintCtx)
-			{
-				LgiTrace("GFont::Create %s,%f (%i,%i,%i) (%.1f,%.1f,%i)\n",
-					Gtk::pango_font_description_get_family(d->hFont),
-					(double)Gtk::pango_font_description_get_size(d->hFont) / PANGO_SCALE,
-					Gtk::pango_font_metrics_get_ascent(m),
-					Gtk::pango_font_metrics_get_descent(m),
-					PANGO_SCALE,
-					GTypeFace::d->_Ascent,
-					GTypeFace::d->_Descent,
-					d->Height);
-			}
-			#endif
-
-			Gtk::pango_font_metrics_unref(m);
-
-			#if 1
-			Gtk::PangoFont *fnt = pango_font_map_load_font(Gtk::pango_cairo_font_map_get_default(), EffectiveCtx, d->hFont);
-			if (fnt)
-			{
-				Gtk::PangoCoverage *c = Gtk::pango_font_get_coverage(fnt, Gtk::pango_language_get_default());
-				if (c)
-				{
-					uint Bytes = (MAX_UNICODE + 1) >> 3;
-					if ((d->GlyphMap = new uchar[Bytes]))
+					if (!d->Gdi32)
+						d->Gdi32.Reset(new GLibrary("Gdi32"));
+					if (d->Gdi32)
 					{
-						memset(d->GlyphMap, 0, Bytes);
-
-						int Bits = Bytes << 3;
-						for (int i=0; i<Bits; i++)
+						Proc_GetFontUnicodeRanges GetFontUnicodeRanges = (Proc_GetFontUnicodeRanges)d->Gdi32->GetAddress("GetFontUnicodeRanges");
+						if (GetFontUnicodeRanges)
 						{
-							if (pango_coverage_get(c, i))
-								d->GlyphMap[i>>3] |= 1 << (i & 0x7);
+							DWORD BufSize = GetFontUnicodeRanges(hDC, 0);
+							LPGLYPHSET Set = (LPGLYPHSET) new char[BufSize];
+							if (Set && GetFontUnicodeRanges(hDC, Set) > 0)
+							{
+								for (DWORD i=0; i<Set->cRanges; i++)
+								{
+									WCRANGE *Range = Set->ranges + i;
+									for (int n=0; n<Range->cGlyphs; n++)
+									{
+										DWORD u = Range->wcLow + n;
+										if (u >> 3 < Bytes)
+										{
+											d->GlyphMap[u>>3] |= 1 << (u & 7);
+										}
+									}
+								}
+							}
+
+							DeleteArray((char*&)Set);
 						}
 					}
-					Gtk::pango_coverage_unref(c);
+					
+					if (GTypeFace::d->IsSymbol)
+					{
+						// Lies! It's all Lies! Symbol doesn't support non-breaking space.
+						int u = 0xa0;
+						d->GlyphMap[u >> 3] &= ~(1 << (u & 7));
+					}
 				}
-				
-				g_object_unref(fnt);
+
+				if (d->GlyphMap)
+				{
+					memset(d->GlyphMap, 0xff, 128/8);
+				}
 			}
-			#endif
-			
-			return true;
+
+			SelectObject(hDC, hFnt);
 		}
-	}
+
+		if (!pSurface) ReleaseDC(0, hDC);
+
+		return (d->hFont != 0);
+	
+	#elif defined __GTK_H__
+	
+		Destroy();
+	
+		d->hFont = Gtk::pango_font_description_new();
+		if (!d->hFont)
+			printf("%s:%i - pango_font_description_new failed: Face='%s' Size=%i Bold=%i Italic=%i\n",
+				_FL, Face(), PointSize(), Bold(), Italic());
+		else if (!ValidStr(Face()))
+			printf("%s:%i - No font face.\n", _FL);
+		else if (!Size().IsValid())
+			printf("%s:%i - Invalid size.\n", _FL);
+		else
+		{
+			auto Sz = Size();
+			GString sFace = Face();
+			Gtk::pango_font_description_set_family(d->hFont, sFace);
+			if (Sz.Type == GCss::LenPt)
+				Gtk::pango_font_description_set_size(d->hFont, Sz.Value * PANGO_SCALE);
+			else if (Sz.Type == GCss::LenPx)
+				Gtk::pango_font_description_set_absolute_size(d->hFont, Sz.Value * PANGO_SCALE);
+			else
+			{
+				LgiAssert(0);
+				return false;
+			}
+			
+			if (Bold())
+				Gtk::pango_font_description_set_weight(d->hFont, Gtk::PANGO_WEIGHT_BOLD);
+			
+			// Get metrics for this font...
+			Gtk::GtkPrintContext *PrintCtx = pSurface ? pSurface->GetPrintContext() : NULL;
+			Gtk::PangoContext *SysCtx = GFontSystem::Inst()->GetContext();
+			if (PrintCtx)
+				d->PangoCtx = gtk_print_context_create_pango_context(PrintCtx);
+			auto EffectiveCtx = d->PangoCtx ? d->PangoCtx : SysCtx;
+			Gtk::PangoFontMetrics *m = Gtk::pango_context_get_metrics(d->PangoCtx ? d->PangoCtx : SysCtx, d->hFont, 0);
+			if (!m)
+				printf("pango_font_get_metrics failed.\n");
+			else
+			{
+				GTypeFace::d->_Ascent = (double)Gtk::pango_font_metrics_get_ascent(m) / PANGO_SCALE;
+				GTypeFace::d->_Descent = (double)Gtk::pango_font_metrics_get_descent(m) / PANGO_SCALE;
+				d->Height = ceil(GTypeFace::d->_Ascent + GTypeFace::d->_Descent + 1/*hack the underscores to work*/);
+				
+				#if 0
+				if (PrintCtx)
+				{
+					LgiTrace("GFont::Create %s,%f (%i,%i,%i) (%.1f,%.1f,%i)\n",
+						Gtk::pango_font_description_get_family(d->hFont),
+						(double)Gtk::pango_font_description_get_size(d->hFont) / PANGO_SCALE,
+						Gtk::pango_font_metrics_get_ascent(m),
+						Gtk::pango_font_metrics_get_descent(m),
+						PANGO_SCALE,
+						GTypeFace::d->_Ascent,
+						GTypeFace::d->_Descent,
+						d->Height);
+				}
+				#endif
+
+				Gtk::pango_font_metrics_unref(m);
+
+				#if 1
+				Gtk::PangoFont *fnt = pango_font_map_load_font(Gtk::pango_cairo_font_map_get_default(), EffectiveCtx, d->hFont);
+				if (fnt)
+				{
+					Gtk::PangoCoverage *c = Gtk::pango_font_get_coverage(fnt, Gtk::pango_language_get_default());
+					if (c)
+					{
+						uint Bytes = (MAX_UNICODE + 1) >> 3;
+						if ((d->GlyphMap = new uchar[Bytes]))
+						{
+							memset(d->GlyphMap, 0, Bytes);
+
+							int Bits = Bytes << 3;
+							for (int i=0; i<Bits; i++)
+							{
+								if (pango_coverage_get(c, i))
+									d->GlyphMap[i>>3] |= 1 << (i & 0x7);
+							}
+						}
+						Gtk::pango_coverage_unref(c);
+					}
+					
+					g_object_unref(fnt);
+				}
+				#endif
+				
+				return true;
+			}
+		}
 	
 	#elif defined MAC
 	
 		Destroy();
 		
-		// OSStatus e;
-
 		if (this == SysFont)
 			LgiTrace("%s:%i - WARNING: you are re-creating the system font... this is bad!!!!\n", _FL);
 
-		#if USE_CORETEXT
+		if (Face())
+		{
+			if (d->Attributes)
+				CFRelease(d->Attributes);
 
-			if (Face())
+			auto Sz = Size();
+			GString sFamily(Face());
+			GString sBold("Bold");
+			int keys = 1;
+			CFStringRef key[5]  = {	kCTFontFamilyNameAttribute };
+			CFTypeRef values[5] = {	sFamily.CreateStringRef() };
+			if (!values[0])
+				return false;
+
+			if (Bold())
 			{
-				if (d->Attributes)
-					CFRelease(d->Attributes);
+				key[keys] = kCTFontStyleNameAttribute;
+				values[keys++] = sBold.CreateStringRef();
+			}
 
-				auto Sz = Size();
-				GString sFamily(Face());
-				GString sBold("Bold");
-				int keys = 1;
-				CFStringRef key[5]  = {	kCTFontFamilyNameAttribute };
-				CFTypeRef values[5] = {	sFamily.CreateStringRef() };
-                if (!values[0])
-                    return false;
-
-				if (Bold())
+			CFDictionaryRef FontAttrD = CFDictionaryCreate(	kCFAllocatorDefault,
+															(const void**)&key,
+															(const void**)&values,
+															keys,
+															&kCFTypeDictionaryKeyCallBacks,
+															&kCFTypeDictionaryValueCallBacks);
+			if (FontAttrD)
+			{
+				CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes(FontAttrD);
+				if (descriptor)
 				{
-					key[keys] = kCTFontStyleNameAttribute;
-					values[keys++] = sBold.CreateStringRef();
-				}
-
-				CFDictionaryRef FontAttrD = CFDictionaryCreate(	kCFAllocatorDefault,
-																(const void**)&key,
-																(const void**)&values,
-																keys,
-																&kCFTypeDictionaryKeyCallBacks,
-																&kCFTypeDictionaryValueCallBacks);
-				if (FontAttrD)
-				{
-					CTFontDescriptorRef descriptor = CTFontDescriptorCreateWithAttributes(FontAttrD);
-					if (descriptor)
-					{
-						float PtSz = 0.0;
-						if (Sz.Type == GCss::LenPt)
-							PtSz = Sz.Value;
-						else if (Sz.Type == GCss::LenPx)
-							PtSz = Sz.Value * 72.0f / LgiScreenDpi();
-						else
-							LgiAssert(!"Impl me.");
-						
-						d->hFont = CTFontCreateWithFontDescriptor(descriptor, PtSz, NULL);
-						CFRelease(descriptor);
-					}
-					else LgiAssert(0);
+					float PtSz = 0.0;
+					if (Sz.Type == GCss::LenPt)
+						PtSz = Sz.Value;
+					else if (Sz.Type == GCss::LenPx)
+// This seems to give fonts that are too small:
+//						PtSz = Sz.Value * 72.0f / 96.0f/*LgiScreenDpi()*/;
+						PtSz = Sz.Value;
+					else
+						LgiAssert(!"Impl me.");
 					
-					CFRelease(FontAttrD);
+					d->hFont = CTFontCreateWithFontDescriptor(descriptor, PtSz, NULL);
+					CFRelease(descriptor);
 				}
 				else LgiAssert(0);
 				
-				if (d->hFont)
+				CFRelease(FontAttrD);
+			}
+			else
+			{
+				LgiAssert(0);
+				return false;
+			}
+			
+			if (d->hFont)
+			{
+				GTypeFace::d->_Ascent = CTFontGetAscent(d->hFont);
+				GTypeFace::d->_Descent = CTFontGetDescent(d->hFont);
+				GTypeFace::d->_Leading = CTFontGetLeading(d->hFont);
+				d->Height = ceil(GTypeFace::d->_Ascent +
+								 GTypeFace::d->_Descent +
+								 GTypeFace::d->_Leading);
+				
+				#if 1
+				if (Sz.Type == GCss::LenPx)
 				{
-					GTypeFace::d->_Ascent = CTFontGetAscent(d->hFont);
-					GTypeFace::d->_Descent = CTFontGetDescent(d->hFont);
-					GTypeFace::d->_Leading = CTFontGetLeading(d->hFont);
-					d->Height = ceil(GTypeFace::d->_Ascent +
-									 GTypeFace::d->_Descent +
-									 GTypeFace::d->_Leading);
-					
-					#if 0
 					GStringPipe p;
 					Sz.ToString(p);
-					LgiTrace("%s:%i - GFont::Create(%s,%s) = %f,%f,%f\n",
+					LgiTrace("%s:%i - GFont::Create(%s,%s) = %f,%f,%f (%i)\n",
 							_FL,
 							Face(), p.NewGStr().Get(),
 							GTypeFace::d->_Ascent,
 							GTypeFace::d->_Descent,
-							GTypeFace::d->_Leading);
-					#endif
-					
-					int keys = 2;
-					CFStringRef key[5] = {	kCTFontAttributeName,
-											kCTForegroundColorFromContextAttributeName };
-					CFTypeRef values[5] = {	d->hFont,
-											kCFBooleanTrue };
+							GTypeFace::d->_Leading,
+							GetHeight());
+				}
+				#endif
+				
+				int keys = 2;
+				CFStringRef key[5] = {	kCTFontAttributeName,
+										kCTForegroundColorFromContextAttributeName };
+				CFTypeRef values[5] = {	d->hFont,
+										kCFBooleanTrue };
 
-					if (Underline())
-					{
-						key[keys] = kCTUnderlineStyleAttributeName;
-						CTUnderlineStyle u = kCTUnderlineStyleSingle;
-						values[keys++] = CFNumberCreate(NULL, kCFNumberSInt32Type, &u);
-					}
-					
-					d->Attributes = CFDictionaryCreate(	kCFAllocatorDefault,
-														(const void**)&key,
-														(const void**)&values,
-														keys,
-														&kCFTypeDictionaryKeyCallBacks,
-														&kCFTypeDictionaryValueCallBacks);
-					
-					return true;
+				if (Underline())
+				{
+					key[keys] = kCTUnderlineStyleAttributeName;
+					CTUnderlineStyle u = kCTUnderlineStyleSingle;
+					values[keys++] = CFNumberCreate(NULL, kCFNumberSInt32Type, &u);
 				}
 				
-				for (int i=0; i<CountOf(values); i++)
-				{
-					CFRelease(values[i]);
-				}
+				d->Attributes = CFDictionaryCreate(	kCFAllocatorDefault,
+													(const void**)&key,
+													(const void**)&values,
+													keys,
+													&kCFTypeDictionaryKeyCallBacks,
+													&kCFTypeDictionaryValueCallBacks);
+				
+				return true;
 			}
-
-		#else
-
-			if (Face() && !(e = ATSUCreateStyle(&d->hFont)))
+			
+			for (int i=0; i<CountOf(values); i++)
 			{
-				// Lookup ID
-				if (!Face())
-				{
-					LgiAssert(!"No font face");
-					return false;
-				}
-				
-				char *sFace = Face();
-				CFStringRef fontName = CFStringCreateWithBytes(	kCFAllocatorDefault,
-																(UInt8*)sFace,
-																strlen(sFace),
-																kCFStringEncodingUTF8,
-																false);
-				if (!fontName)
-					return false;
-				
-				ATSFontRef atsFont = ATSFontFindFromName(fontName, kATSOptionFlagsDefault);
-				CFRelease(fontName);
-				ATSUFontID font = (ATSUFontID)atsFont;
-				if (e)
-					printf("%s:%i - Error getting font id (e=%i)\n", _FL, (int)e);
-				else
-				{
-					Fixed Size;
-					Size = PointSize() << 16;
-					Boolean IsBold = Bold();
-					Boolean IsItalic = Italic();
-					Boolean IsUnder = Underline();
-					
-					// Set style attr
-					ATSUAttributeTag Tags[]			= {kATSUFontTag, kATSUSizeTag, kATSUQDItalicTag, kATSUQDUnderlineTag, kATSUQDBoldfaceTag};
-					ATSUAttributeValuePtr Values[]	= {&font,        &Size,        &IsItalic,        &IsUnder,            &IsBold};
-					ByteCount Lengths[]				= {sizeof(font), sizeof(Size), sizeof(IsItalic), sizeof(IsUnder),     sizeof(IsBold)};
-					if (!(e = ATSUSetAttributes(d->hFont,
-												CountOf(Tags),
-												Tags,
-												Lengths,
-												Values)))
-					{
-						GDisplayString ds(this, "A");
-						d->Height = ds.Y();
-						return true;
-					}
-				}
+				CFRelease(values[i]);
 			}
-			else
-			{
-				printf("%s:%i - Error creating font (e=%i)\n", _FL, (int)e);
-			}
+		}
 
-		#endif
-	
 	#endif
 
 	return false;
