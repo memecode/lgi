@@ -449,9 +449,12 @@ bool GView::PointToScreen(GdcPt2 &p)
 	GViewI *c = this;
 
 	// Find offset to window
-	while (c && c != c->GetWindow())
+	while (	c &&
+			!dynamic_cast<GWindow*>(c) &&
+			!dynamic_cast<GPopup*>(c))
 	{
 		GRect pos = c->GetPos();
+		printf("%s pos %s\n", c->GetClass(), pos.GetStr());
 		p.x += pos.x1;
 		p.y += pos.y1;
 		c = c->GetParent();
@@ -476,7 +479,8 @@ bool GView::PointToScreen(GdcPt2 &p)
 		if (!Screen.Valid())
 			return false;
 
-		p = c->GetGView()->Flip(p);
+		GRect cli = c->GetClient();
+		p.y = cli.Y() - p.y;
 		NSRect i = {{(double)p.x, (double)p.y}, {0.0, 0.0}};
 		NSRect o = [w convertRectToScreen:i];
 		p.x = (int)o.origin.x;
@@ -530,8 +534,13 @@ bool GView::PointToView(GdcPt2 &p)
 		p.y = (int)o.origin.y;
 		
 		// Flip back into top down.. in window space
+		#if 1
 		p = c->GetGView()->Flip(p);
-		
+		#else
+		GRect cli = c->GetClient();
+		p.y = cli.Y() - p.y;
+		#endif
+
 		// Now offset into view space.
 		p.x += Ox;
 		p.y += Oy;
@@ -540,6 +549,8 @@ bool GView::PointToView(GdcPt2 &p)
 	
 	return true;
 }
+
+#define DEBUG_GETMOUSE 0
 
 bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 {
@@ -551,28 +562,54 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 	if (!wh)
 		return false;
 	
+	#if DEBUG_GETMOUSE
+	GStringPipe log;
+	#endif
+
 	NSPoint pt = wh.mouseLocationOutsideOfEventStream;
 	m.x = pt.x;
 	m.y = pt.y;
 	m.Target = this;
+	
+	#if DEBUG_GETMOUSE
+	log.Print("Event=%i,%i", m.x, m.y);
+	#endif
 
 	GdcPt2 p(pt.x, pt.y);
-	p = w->GetGView()->Flip(p);
+	p.y = wh.contentView.frame.size.height - p.y;
+	#if DEBUG_GETMOUSE
+	log.Print(" Flipped=%i,%i", p.x, p.y);
+	#endif
 	if (ScreenCoords)
+	{
 		PointToScreen(p);
+		#if DEBUG_GETMOUSE
+		log.Print(" Screen=%i,%i", p.x, p.y);
+		#endif
+	}
 
 	m.x = p.x;
 	m.y = p.y;
 	m.Target = this;
-	
+	auto Btns = [NSEvent pressedMouseButtons];
+	m.Left(Btns & 0x1);
+	m.Right(Btns & 0x2);
+	m.Middle(Btns & 0x4);
+
 	// Find offset to window
 	for (GViewI *c = this; c && c != c->GetWindow(); c = c->GetParent())
 	{
 		GRect pos = c->GetPos();
 		m.x -= pos.x1;
 		m.y -= pos.y1;
+		#if DEBUG_GETMOUSE
+		log.Print(" Offset(%s,%i,%i)=%i,%i", c->GetClass(), pos.x1, pos.y1, m.x, m.y);
+		#endif
 	}
 
+	#if DEBUG_GETMOUSE
+	printf("    GetMouse: %s\n", log.NewGStr().Get());
+	#endif
 	return true;
 }
 
