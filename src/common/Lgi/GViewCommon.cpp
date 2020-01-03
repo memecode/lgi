@@ -725,7 +725,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 GViewI *GView::GetParent()
 {
 	ThreadCheck();
-	return d->Parent;
+	return d ? d->Parent : NULL;
 }
 
 void GView::SetParent(GViewI *p)

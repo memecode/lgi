@@ -454,7 +454,7 @@ bool GView::PointToScreen(GdcPt2 &p)
 			!dynamic_cast<GPopup*>(c))
 	{
 		GRect pos = c->GetPos();
-		printf("%s pos %s\n", c->GetClass(), pos.GetStr());
+		// printf("%s pos %s\n", c->GetClass(), pos.GetStr());
 		p.x += pos.x1;
 		p.y += pos.y1;
 		c = c->GetParent();
