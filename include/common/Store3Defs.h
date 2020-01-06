@@ -402,7 +402,7 @@ enum Store3Fields
 	FIELD_CACHE_FLAGS = 142,			// (char*) IMAP backend: IMAP flags
 	FIELD_DONT_SHOW_PREVIEW = 143,		// (bool)
 	FIELD_STORE_PASSWORD = 144,			// (char*)
-	FIELD_LOADED = 145,					// (Store3DataState)
+	FIELD_LOADED = 145,					// (Store3State)
 	FIELD_DEBUG = 146,					// (char*)
 	FIELD_MIME_SEG = 147,				// (GDataIt)
 	FIELD_STORE_TYPE = 148,				// (Store3Backend)
