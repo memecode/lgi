@@ -1247,20 +1247,7 @@ void IdeDoc::OnTitleClick(GMouse &m)
 			}
 			case IDM_BROWSE:
 			{
-				#if defined(WIN32)
-				char Args[MAX_PATH];
-				sprintf(Args, "/e,/select,\"%s\"", Full);
-				LgiExecute("explorer", Args);
-				#elif defined(LINUX)
-				GString Args = LGetAppForMimeType("inode/directory");
-				if (Args)
-				{
-					LgiExecute(Args, Full);
-				}
-				else LgiMsg(this, "Failed to find file browser.", AppName);
-				#else
-				LgiAssert(!"Impl me.");
-				#endif
+				LgiBrowseToFile(Full);
 				break;
 			}
 			case IDM_SHOW_IN_PROJECT:
