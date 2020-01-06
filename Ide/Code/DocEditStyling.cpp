@@ -821,7 +821,7 @@ void DocEditStyling::StyleXml(StylingParams &p)
 					auto &st = Style.New().Construct(View, STYLE_IDE);
 					st.Start = s - Text;
 					st.Font = View->GetFont();
-					s += 2;
+					s += 4;
 					while
 					(
 						s < e
