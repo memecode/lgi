@@ -6,9 +6,11 @@
 #define DrawBorder(dc, r, edge) LgiThinBorder(dc, r, edge)
 
 #if defined(LGI_CARBON)
-#define MAC_SKIN		1
+	#define MAC_SKIN		1
+#elif defined(LGI_COCOA)
+	#define MAC_LOOK		1
 #else
-#define MAC_SKIN		0
+	#define WINXP_LOOK		1
 #endif
 
 enum ScrollZone
@@ -117,44 +119,72 @@ public:
 
 	void OnPaint(GSurface *pDC)
 	{
-		// left/up button
-		GRect r = Sub;
-		DrawBorder(pDC, r, IsOver() == BTN_SUB ? DefaultSunkenEdge : DefaultRaisedEdge);
-		pDC->Colour(L_MED);
-		pDC->Rectangle(&r);
-		DrawIcon(pDC, r, false, IsValid() ? L_BLACK : L_LOW);
-
-		// right/down
-		r = Add;
-		DrawBorder(pDC, r, IsOver() == BTN_ADD ? DefaultSunkenEdge : DefaultRaisedEdge);
-		pDC->Colour(L_MED);
-		pDC->Rectangle(&r);
-		DrawIcon(pDC, r, true, IsValid() ? L_BLACK : L_LOW);
-
 		GColour SlideCol(L_MED);
 		SlideCol.Rgb(	(255 + SlideCol.r()) >> 1,
 						(255 + SlideCol.g()) >> 1,
 						(255 + SlideCol.b()) >> 1);
 
-		// printf("Paint %ix%i, %s\n", pDC->X(), pDC->Y(), Widget->GetPos().GetStr());
-		if (IsValid())
-		{
-			// slide space
+		#if MAC_LOOK
+		
 			pDC->Colour(SlideCol);
-			pDC->Rectangle(&PageSub);
-			pDC->Rectangle(&PageAdd);
-
-			// slide button
-			r = Slide;
-			DrawBorder(pDC, r, DefaultRaisedEdge); // IsOver() == BTN_SLIDE ? SUNKEN : RAISED);
+			pDC->Rectangle();
+		
+			if (IsValid())
+			{
+				GRect r = Slide;
+				r.Size(3, 3);
+				pDC->Colour(L_LOW);
+				
+				// pDC->Rectangle(&r);
+				double rad = (IsVertical() ? (double)r.X() : (double)r.Y()) / 2;
+				double cx = (double)r.x1 + rad;
+				pDC->FilledArc(cx, r.y1 + rad, rad, 0, 180);
+				pDC->Rectangle(r.x1, r.y1 + rad, r.x2, r.y2 - rad);
+				pDC->FilledArc(cx, r.y2 - rad, rad, 180, 0);
+			}
+		
+		#elif WINXP_LOOK
+		
+			// left/up button
+			GRect r = Sub;
+			DrawBorder(pDC, r, IsOver() == BTN_SUB ? DefaultSunkenEdge : DefaultRaisedEdge);
 			pDC->Colour(L_MED);
-			if (r.Valid()) pDC->Rectangle(&r);
-		}
-		else
-		{
-			pDC->Colour(SlideCol);
-			pDC->Rectangle(&Slide);
-		}
+			pDC->Rectangle(&r);
+			DrawIcon(pDC, r, false, IsValid() ? L_BLACK : L_LOW);
+
+			// right/down
+			r = Add;
+			DrawBorder(pDC, r, IsOver() == BTN_ADD ? DefaultSunkenEdge : DefaultRaisedEdge);
+			pDC->Colour(L_MED);
+			pDC->Rectangle(&r);
+			DrawIcon(pDC, r, true, IsValid() ? L_BLACK : L_LOW);
+
+
+			// printf("Paint %ix%i, %s\n", pDC->X(), pDC->Y(), Widget->GetPos().GetStr());
+			if (IsValid())
+			{
+				// slide space
+				pDC->Colour(SlideCol);
+				pDC->Rectangle(&PageSub);
+				pDC->Rectangle(&PageAdd);
+
+				// slide button
+				r = Slide;
+				DrawBorder(pDC, r, DefaultRaisedEdge); // IsOver() == BTN_SLIDE ? SUNKEN : RAISED);
+				pDC->Colour(L_MED);
+				if (r.Valid()) pDC->Rectangle(&r);
+			}
+			else
+			{
+				pDC->Colour(SlideCol);
+				pDC->Rectangle(&Slide);
+			}
+		
+		#else
+		
+			#error "No look and feel defined."
+		
+		#endif
 	}
 
 	int GetWidth()
@@ -164,7 +194,11 @@ public:
 
 	int GetLength()
 	{
-		return (IsVertical() ? Widget->Y() : Widget->X()) - (GetWidth() * 2);
+		return (IsVertical() ? Widget->Y() : Widget->X())
+			#if !MAC_LOOK
+			- (GetWidth() * 2)
+			#endif
+			;
 	}
 
 	int64 GetRange()
@@ -186,25 +220,27 @@ public:
 		int len = GetLength();
 		
 		// Button sizes
-		Sub.ZOff(w-1, w-1);
-		Add.ZOff(w-1, w-1);
+ 		#if MAC_LOOK
+ 			Sub.ZOff(-1, -1);
+ 			Add.ZOff(-1, -1);
+		#else
+			Sub.ZOff(w-1, w-1);
+			Add.ZOff(w-1, w-1);
+	
+			// Button positions
+			if (IsVertical())
+				Add.Offset(0, Widget->GetPos().Y()-w);
+			else
+				Add.Offset(Widget->GetPos().X()-w, 0);
+		#endif
 
-		// Button positions
-		if (IsVertical())
-		{
-			Add.Offset(0, Widget->GetPos().Y()-w);
-		}
-		else
-		{
-			Add.Offset(Widget->GetPos().X()-w, 0);
-		}
 
 		// Slider
 		int64 Start, End;
 		#if LGI_SDL
 		int MinSize = w; // Touch UI needs large slide....
 		#else
-		int MinSize = 8;
+		int MinSize = 12;
 		#endif
 
 		// printf("Calc %i, " LPrintfInt64 ", " LPrintfInt64 "\n", IsValid(), Min, Max);
@@ -220,13 +256,21 @@ public:
 			if (IsVertical())
 			{
 				Slide.ZOff(w-1, (int) (End-Start-1));
+				#if MAC_LOOK
+				Slide.Offset(0, (int) (r.y1+Start));
+				#else
 				Slide.Offset(0, (int) (Sub.y2+1+Start));
+				#endif
 
 				if (Start > 1)
 				{
-					PageSub.x1 = Sub.x1;
+					PageSub.x1 = Slide.x1;
+					#if MAC_LOOK
+					PageSub.y1 = 0;
+					#else
 					PageSub.y1 = Sub.y2 + 1;
-					PageSub.x2 = Sub.x2;
+					#endif
+					PageSub.x2 = Slide.x2;
 					PageSub.y2 = Slide.y1 - 1;
 				}
 				else
@@ -236,10 +280,14 @@ public:
 
 				if (End < Add.y1 - 2)
 				{
-					PageAdd.x1 = Add.x1;
-					PageAdd.x2 = Add.x2;
+					PageAdd.x1 = Slide.x1;
+					PageAdd.x2 = Slide.x2;
 					PageAdd.y1 = Slide.y2 + 1;
+					#if MAC_LOOK
+					PageAdd.y2 = r.Y()-1;
+					#else
 					PageAdd.y2 = Add.y1 - 1;
+					#endif
 				}
 				else
 				{
@@ -253,9 +301,13 @@ public:
 				
 				if (Start > 1)
 				{
-					PageSub.y1 = Sub.y1;
+					PageSub.y1 = Slide.y1;
+					#if MAC_LOOK
+					PageSub.x1 = 0;
+					#else
 					PageSub.x1 = Sub.x2 + 1;
-					PageSub.y2 = Sub.y2;
+					#endif
+					PageSub.y2 = Slide.y2;
 					PageSub.x2 = Slide.x1 - 1;
 				}
 				else
@@ -265,10 +317,14 @@ public:
 
 				if (End < Add.x1 - 2)
 				{
-					PageAdd.y1 = Add.y1;
-					PageAdd.y2 = Add.y2;
+					PageAdd.y1 = Slide.y1;
+					PageAdd.y2 = Slide.y2;
 					PageAdd.x1 = Slide.x2 + 1;
+					#if MAC_LOOK
+					PageAdd.x2 = r.X() - 1;
+					#else
 					PageAdd.x2 = Add.x1 - 1;
+					#endif
 				}
 				else
 				{
@@ -465,35 +521,37 @@ void GScrollBar::OnPaint(GSurface *pDC)
 {
 	#if MAC_SKIN
 
-	#if 0
-	pDC->Colour(GColour(255, 0, 255));
-	pDC->Rectangle();
-	#endif
+		#if 0
+		pDC->Colour(GColour(255, 0, 255));
+		pDC->Rectangle();
+		#endif
 	
-	HIThemeTrackDrawInfo Info;
-	GRect Client = GetClient();
-	HIRect Rc = Client;
-	Info.version = 0;
-	Info.kind = kThemeScrollBarMedium;
-	Info.bounds = Rc;
-	Info.min = d->Min;
-	Info.max = d->Max - d->Page + 1;
-	Info.value = d->Value;
-	Info.reserved = 0;
-	Info.attributes =	(Vertical() ? 0 : kThemeTrackHorizontal) |
-						(Focus() ? kThemeTrackHasFocus : 0) |
-						kThemeTrackShowThumb;
-	Info.enableState = Enabled() ? kThemeTrackActive : kThemeTrackDisabled;
-	Info.filler1 = 0;
-	Info.trackInfo.scrollbar.viewsize = d->Page;
-	Info.trackInfo.scrollbar.pressState = false;
-	CGContextRef Cr = pDC->Handle();
-	OSStatus e = HIThemeDrawTrack(&Info, NULL, Cr, kHIThemeOrientationNormal);
-	if (e)
-		printf("%s:%i - HIThemeDrawTrack failed with %li\n", _FL, e);
+		HIThemeTrackDrawInfo Info;
+		GRect Client = GetClient();
+		HIRect Rc = Client;
+		Info.version = 0;
+		Info.kind = kThemeScrollBarMedium;
+		Info.bounds = Rc;
+		Info.min = d->Min;
+		Info.max = d->Max - d->Page + 1;
+		Info.value = d->Value;
+		Info.reserved = 0;
+		Info.attributes =	(Vertical() ? 0 : kThemeTrackHorizontal) |
+							(Focus() ? kThemeTrackHasFocus : 0) |
+							kThemeTrackShowThumb;
+		Info.enableState = Enabled() ? kThemeTrackActive : kThemeTrackDisabled;
+		Info.filler1 = 0;
+		Info.trackInfo.scrollbar.viewsize = d->Page;
+		Info.trackInfo.scrollbar.pressState = false;
+		CGContextRef Cr = pDC->Handle();
+		OSStatus e = HIThemeDrawTrack(&Info, NULL, Cr, kHIThemeOrientationNormal);
+		if (e)
+			printf("%s:%i - HIThemeDrawTrack failed with %li\n", _FL, e);
 	
 	#else
-	d->OnPaint(pDC);
+	
+		d->OnPaint(pDC);
+	
 	#endif
 }
 

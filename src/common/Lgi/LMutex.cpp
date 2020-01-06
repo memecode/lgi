@@ -138,6 +138,8 @@ bool LMutex::Lock(const char *file, int line, bool NoTrace)
 	OsThreadId CurrentThread = GetCurrentThreadId();
 	bool Warn = true;
 
+	LgiAssert(file != NULL && line != 0);
+
 	while (!Status)
 	{
 		if (_Lock())
@@ -209,6 +211,8 @@ bool LMutex::LockWithTimeout(int Timeout, const char *file, int line)
 {
 	auto Start = LgiCurrentTime();
 	bool Status = false;
+
+	LgiAssert(file != NULL && line != 0);
 
 	while (!Status &&
 			LgiCurrentTime() < Start + Timeout)

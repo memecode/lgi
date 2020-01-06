@@ -490,10 +490,22 @@ void GScreenDC::FilledCircle(double cx, double cy, double radius)
 
 void GScreenDC::Arc(double cx, double cy, double radius, double start, double end)
 {
+	if (d->Ctx)
+	{
+		CGContextBeginPath(d->Ctx);
+		CGContextAddArc(d->Ctx, cx, cy, radius, LGI_DegToRad(start), LGI_DegToRad(end), true);
+		CGContextStrokePath(d->Ctx);
+	}
 }
 
 void GScreenDC::FilledArc(double cx, double cy, double radius, double start, double end)
 {
+	if (d->Ctx)
+	{
+		CGContextBeginPath(d->Ctx);
+		CGContextAddArc(d->Ctx, cx, cy, radius, LGI_DegToRad(start), LGI_DegToRad(end), true);
+		CGContextFillPath(d->Ctx);
+	}
 }
 
 void GScreenDC::Ellipse(double cx, double cy, double x, double y)
