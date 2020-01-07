@@ -257,6 +257,19 @@ void GProgressPane::OnCreate()
 	AttachChildren();
 }
 
+GProgressPane &GProgressPane::operator++(int)
+{
+	Value(Progress::Value() + 1);
+	return *this;
+}
+
+GProgressPane &GProgressPane::operator--(int)
+{
+	Value(Progress::Value() - 1);
+	return *this;
+}
+
+
 int GProgressPane::OnNotify(GViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
@@ -549,12 +562,29 @@ void GProgressDlg::SetLimits(int64 l, int64 h)
 		Panes.First()->SetLimits(l, h);
 }
 
-int64 GProgressDlg::Value()
+GProgressDlg &GProgressDlg::operator++(int)
 {
-	return Panes.Length() ? Panes.First()->Value() : -1;
+	if (Panes.Length())
+	{
+		TimeCheck();
+		auto p = Panes.First();
+		(*p)++;
+	}
+	return *this;
 }
 
-void GProgressDlg::Value(int64 v)
+GProgressDlg &GProgressDlg::operator--(int)
+{
+	if (Panes.Length())
+	{
+		TimeCheck();
+		auto p = Panes.First();
+		(*p)--;
+	}
+	return *this;
+}
+
+void GProgressDlg::TimeCheck()
 {
 	uint64 Now = LgiCurrentTime();
 	if (Timeout)
@@ -573,7 +603,16 @@ void GProgressDlg::Value(int64 v)
 			LgiYield();
 		}
 	}
+}
 
+int64 GProgressDlg::Value()
+{
+	return Panes.Length() ? Panes.First()->Value() : -1;
+}
+
+void GProgressDlg::Value(int64 v)
+{
+	TimeCheck();
 	if (Panes.Length())
 		Panes.First()->Value(v);
 }

@@ -48,6 +48,9 @@ public:
 	GFont *GetFont();
 	void UpdateUI();
 
+	GProgressPane &operator++(int);
+	GProgressPane &operator--(int);
+
 	void OnCreate();
 	int OnNotify(GViewI *Ctrl, int Flags);
 	void OnPaint(GSurface *pDC);
@@ -65,6 +68,7 @@ protected:
 	bool CanCancel;
 
 	void Resize();
+	void TimeCheck();
 
 public:
 	/// Constructor
@@ -113,10 +117,8 @@ public:
 	/// Returns whether the user has cancelled the operation
 	bool IsCancelled();
 	
-	/*
-	/// Syncs an external list of progress objects with the dialog
-	void OnSync(ProgressList *Prg);
-	*/
+	GProgressDlg &operator++(int);
+	GProgressDlg &operator--(int);
 
 	int OnNotify(GViewI *Ctrl, int Flags);
 	GMessage::Result OnEvent(GMessage *Msg);
