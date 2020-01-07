@@ -1269,7 +1269,8 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/GPopup.h \
 	./include/common/GDisplayString.h \
 	./include/common/GCss.h \
-	./include/common/GItemContainer.h
+	./include/common/GItemContainer.h \
+	./include/common/LUnrolledList.h
 
 ./include/common/GAutoPtr.h : 
 
@@ -1536,7 +1537,8 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/GPopup.h \
 	./include/common/GDisplayString.h \
 	./include/common/GCss.h \
-	./include/common/GItemContainer.h
+	./include/common/GItemContainer.h \
+	./include/common/LUnrolledList.h
 
 ./include/common/LgiClass.h : ./include/common/LgiInc.h \
 	./include/common/LgiDefs.h \

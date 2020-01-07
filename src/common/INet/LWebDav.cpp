@@ -1,5 +1,5 @@
 #include "Lgi.h"
-#include "LWebdav.h"
+#include "LWebDav.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 bool LFindXml(GArray<GXmlTag*> &Results, GXmlTag *t, const char *Name)
