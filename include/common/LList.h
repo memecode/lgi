@@ -12,6 +12,7 @@
 #include "GDisplayString.h"
 #include "GCss.h"
 #include "GItemContainer.h"
+#include "LUnrolledList.h"
 
 class LList;
 class LListItem;
@@ -29,6 +30,12 @@ enum LListMode
 	LListSpacial,
 };
 
+#if 1
+typedef LUnrolledList<LListItem*> LListT;
+#else
+typedef List<LListItem> LListT;
+#endif
+
 class LgiClass LListItemPainter
 {
 public:
@@ -45,7 +52,7 @@ class LgiClass LListItemColumn : public GBase, public GItem, public LListItemPai
 	void OnPaint(ItemPaintCtx &Ctx) {}
 
 protected:
-	List<LListItem> *GetAllItems();
+	LListT *GetAllItems();
 	LListItemColumn *GetItemCol(LListItem *i, int Col);
 
 public:
@@ -154,7 +161,7 @@ public:
 class LListItems
 {
 protected:
-	List<LListItem> Items;
+	LListT Items;
 
 public:
 	template<class T>
@@ -215,12 +222,12 @@ public:
 		return n.Length() == Items.Length();
 	}
 
-	List<LListItem>::I begin()
+	LListT::I begin()
 	{
 		return Items.begin();
 	}
 
-	List<LListItem>::I end()
+	LListT::I end()
 	{
 		return Items.end();
 	}
@@ -467,7 +474,7 @@ public:
 		if (!Compare || !Lock(_FL))
 			return;
 
-		LListItem *Kb = Items[Keyboard];
+		LListItem *Kb = Items.Length() ? Items[Keyboard] : NULL;
 		Items.Sort(Compare, Data);
 		Keyboard = Kb ? (int)Items.IndexOf(Kb) : -1;
 		Unlock();
@@ -480,7 +487,7 @@ public:
 			return;
 
 		LListItem *Kb = Items[Keyboard];
-		Items.Sort<int>
+		Items.Sort//<int>
 		(
 			[](LListItem *a, LListItem *b, int Column) -> int
 			{

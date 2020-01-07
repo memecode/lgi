@@ -146,7 +146,7 @@ GItemContainer *LListItemColumn::GetContainer()
 	return GetList();
 }
 
-List<LListItem> *LListItemColumn::GetAllItems()
+LListT *LListItemColumn::GetAllItems()
 {
 	return GetList() ? &GetList()->Items : 0;
 }
@@ -1027,7 +1027,7 @@ bool LList::OnKey(GKey &k)
 								{
 									// Seek back to the start of the column before the
 									// first visible column
-									for (List<LListItem>::I it = Items.begin(FirstVisible); it.In(); it--)
+									for (auto it = Items.begin(FirstVisible); it.In(); it--)
 									{
 										LListItem *i = *it;
 										if (i->d->LayoutColumn < HScroll->Value())
@@ -1221,7 +1221,7 @@ bool LList::OnKey(GKey &k)
 								}
 								
 								bool Selected = false;
-								List<LListItem>::I It = Ascend ? Items.begin() : Items.rbegin();
+								auto It = Ascend ? Items.begin() : Items.rbegin();
 								for (LListItem *i = *It; It.In(); i = Ascend ? *++It : *--It)
 								{
 									if (!Selected)
@@ -2530,49 +2530,52 @@ void LList::OnPaint(GSurface *pDC)
 		Ctx.pDC = pDC;
 
 		GRegion Rgn(ItemsPos);
-		auto It = Items.begin(n);
-		for (LListItem *i = *It; i; i = *(++It), n++)
+		if (Items.Length())
 		{
-			if (i->Pos.Valid())
+			for (auto It = Items.begin(n); It != Items.end(); ++It, n++)
 			{
-				// Setup painting colours in the context
-				if (LastSelected ^ (int)i->Select())
+				LListItem *i = *It;
+				if (i->Pos.Valid())
 				{
-					if ((LastSelected = i->Select()))
+					// Setup painting colours in the context
+					if (LastSelected ^ (int)i->Select())
 					{
-						Ctx.Fore = SelFore;
-						Ctx.Back = SelBack;
+						if ((LastSelected = i->Select()))
+						{
+							Ctx.Fore = SelFore;
+							Ctx.Back = SelBack;
+						}
+						else
+						{
+							Ctx.Fore = LColour(L_TEXT);
+							Ctx.Back = Back;
+						}
 					}
-					else
-					{
-						Ctx.Fore = LColour(L_TEXT);
-						Ctx.Back = Back;
-					}
-				}
 
-				// tell the item what colour to use
-				#if DOUBLE_BUFFER_PAINT
-				if (Buf->X() < i->Pos.X() ||
-					Buf->Y() < i->Pos.Y())
+					// tell the item what colour to use
+					#if DOUBLE_BUFFER_PAINT
+					if (Buf->X() < i->Pos.X() ||
+						Buf->Y() < i->Pos.Y())
+					{
+						Buf->Create(i->Pos.X(), i->Pos.Y(), GdcD->GetBits());
+					}
+
+					Ctx = i->Pos;
+					Ctx.r.Offset(-Ctx.r.x1, -Ctx.r.y1);
+					i->OnPaint(Ctx);
+					pDC->Blt(i->Pos.x1, i->Pos.y1, Buf, &Ctx.r);
+					#else
+					(GRect&)Ctx = i->Pos;
+					i->OnPaint(Ctx);
+					#endif
+					Rgn.Subtract(&i->Pos);
+
+					LastY = i->Pos.y2 + 1;
+				}
+				else
 				{
-					Buf->Create(i->Pos.X(), i->Pos.Y(), GdcD->GetBits());
+					break;
 				}
-
-				Ctx = i->Pos;
-				Ctx.r.Offset(-Ctx.r.x1, -Ctx.r.y1);
-				i->OnPaint(Ctx);
-				pDC->Blt(i->Pos.x1, i->Pos.y1, Buf, &Ctx.r);
-				#else
-				(GRect&)Ctx = i->Pos;
-				i->OnPaint(Ctx);
-				#endif
-				Rgn.Subtract(&i->Pos);
-
-				LastY = i->Pos.y2 + 1;
-			}
-			else
-			{
-				break;
 			}
 		}
 		
@@ -2603,9 +2606,9 @@ void LList::OnFocus(bool b)
 		}
 	}
 
-	auto It = Items.begin(FirstVisible);
-	for (LListItem *i = *It; i; i = *(++It))
+	for (auto It = Items.begin(FirstVisible); It != Items.end(); ++It)
 	{
+		auto i = *It;
 		if (i->Pos.Valid() &&
 			i->d->Selected)
 		{
@@ -2639,7 +2642,7 @@ int LList::GetContentSize(int Index)
 {
 	int Max = 0;
 
-	for (List<LListItem>::I It = Items.begin(); It.In(); It++)
+	for (auto It = Items.begin(); It.In(); It++)
 	{
 		LListItem *i = *It;
 		GDisplayString *s = i->d->Display[Index];

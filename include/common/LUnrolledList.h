@@ -616,7 +616,7 @@ public:
 		VALIDATE_UL();
 		auto i = GetIndex(Index);
 		VALIDATE_UL();
-		return i;
+		return *i;
 	}
 	
 	ssize_t IndexOf(T p)
@@ -639,24 +639,27 @@ public:
 		return Status;
 	}
 
-	T *ItemAt(int i)
+	T ItemAt(ssize_t i)
 	{
 		VALIDATE_UL();
 		auto Local = GetIndex(i);
 		VALIDATE_UL();
-		return Local;
+		return *Local;
 	}
 
 	void Compact()
 	{
+		if (!FirstObj || !LastObj)
+			return;
+
 		auto in = begin();
 		auto out = begin();
-		auto e = end();
+		Iter e(this, LastObj, LastObj->Count);
 
 		// Copy any items to fill gaps...
-		while (in != e)
+		while (in.i != e.i && in.Cur != e.Cur)
 		{
-			if (in != out)
+			if (in.i != out.i || in.Cur != out.Cur)
 				out.i->Obj[out.Cur] = in.i->Obj[in.Cur];
 
 			if (out.Cur < BlockSize)
@@ -684,9 +687,7 @@ public:
 
 		// Free any empty blocks...
 		while (LastObj->Count <= 0)
-		{
 			DeleteBlock(LastObj);
-		}
 	}
 
 	void Swap(LUnrolledList<T> &other)
@@ -785,6 +786,19 @@ public:
 				Map->Refs++;
 		}
 
+		RandomAccessIter(const It &rhs, ssize_t idx)
+		{
+			u = rhs.u;
+			Idx = idx;
+			Shift = rhs.Shift;
+			Mask = rhs.Mask;
+			Map = rhs.Map;
+			Version = rhs.Version;
+
+			if (Map)
+				Map->Refs++;
+		}
+
 		~RandomAccessIter()
 		{
 			if (Map)
@@ -831,8 +845,8 @@ public:
 		inline It operator++(int) {It tmp(*this); ++Idx; return tmp;}
 		inline It operator--(int) {It tmp(*this); --Idx; return tmp;}
 		inline difference_type operator-(const It& rhs) const {return Idx-rhs.Idx;}
-		inline It operator+(difference_type amt) {return It(u, Idx+amt);}
-		inline It operator-(difference_type amt) {return It(u, Idx-amt);}
+		inline It operator+(difference_type amt) { return It(*this, Idx + amt); }
+		inline It operator-(difference_type amt) { return It(*this, Idx - amt); }
 		friend inline It operator+(difference_type lhs, const It& rhs) {return It(lhs+rhs.Idx);}
 		friend inline It operator-(difference_type lhs, const It& rhs) {return It(lhs-rhs.Idx);}
 		inline bool operator==(const It& rhs) const {return Idx == rhs.Idx;}
@@ -848,7 +862,7 @@ public:
 	void Sort(Fn Compare)
 	{
 		RandomAccessIter Start(this, 0);
-		RandomAccessIter End(this, Items);
+		RandomAccessIter End(Start, Items);
 		std::sort
 		(
 			Start, End,
@@ -864,7 +878,7 @@ public:
 	void Sort(Fn Compare, User Data)
 	{
 		RandomAccessIter Start(this, 0);
-		RandomAccessIter End(this, Items);
+		RandomAccessIter End(Start, Items);
 		std::sort
 		(
 			Start, End,
