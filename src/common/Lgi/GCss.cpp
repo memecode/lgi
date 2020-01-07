@@ -2528,6 +2528,8 @@ bool GCss::Selector::Parse(const char *&s)
 	while (*s)
 	{
 		SkipWhite(s);
+		if (!*s)
+			break;
 		if (*s == '{' ||
 			*s == ',')
 		{
@@ -2869,7 +2871,7 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 		// read selector
 		GArray<GAutoPtr<GCss::Selector>> Selectors;
 		GCss::Selector *Cur = new GCss::Selector;
-		
+
 		if (Cur->Parse(c))
 		{
 			Cur->SourceIndex = SelectorIndex++;
@@ -2934,7 +2936,7 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 				while (*c && *c != '}') c++;
 				char *Style = NewStr(Start, c - Start);
 				Styles.Add(Style);
-				c++;
+				if (*c) c++;
 				
 				for (int i=0; i<Selectors.Length(); i++)
 				{
