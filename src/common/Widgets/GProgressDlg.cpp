@@ -18,29 +18,6 @@
 #include "LgiRes.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////
-ProgressList::ProgressList()
-{
-	InUse = false;
-}
-
-bool ProgressList::Lock()
-{
-	while (InUse)
-	{
-		LgiSleep(20);
-	}
-
-	InUse = true;
-
-	return true;
-}
-
-void ProgressList::Unlock()
-{
-	InUse = false;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
 Progress::Progress() : LMutex("ProgressObj")
 {
 	Start = 0;
@@ -106,7 +83,7 @@ Progress &Progress::operator =(Progress &p)
 #define PANE_X					300
 #define PANE_Y					100
 
-GProgressPane::GProgressPane()
+GProgressPane::GProgressPane(GProgressDlg *dlg) : Dlg(dlg)
 {
 	t = NULL;
 	UiDirty = false;
@@ -249,7 +226,10 @@ void GProgressPane::UpdateUI()
 void GProgressPane::Value(int64 v)
 {
 	Progress::Value(v);
+	
 	UiDirty = true;
+	if (Dlg)
+		Dlg->TimeCheck();
 }
 
 void GProgressPane::OnCreate()
@@ -501,7 +481,7 @@ GProgressPane *GProgressDlg::ItemAt(int i)
 
 GProgressPane *GProgressDlg::Push()
 {
-	GProgressPane *Pane = new GProgressPane;
+	GProgressPane *Pane = new GProgressPane(this);
 	if (Pane)
 	{
 		// Attach the new pane..
@@ -566,7 +546,6 @@ GProgressDlg &GProgressDlg::operator++(int)
 {
 	if (Panes.Length())
 	{
-		TimeCheck();
 		auto p = Panes.First();
 		(*p)++;
 	}
@@ -577,7 +556,6 @@ GProgressDlg &GProgressDlg::operator--(int)
 {
 	if (Panes.Length())
 	{
-		TimeCheck();
 		auto p = Panes.First();
 		(*p)--;
 	}
@@ -612,7 +590,6 @@ int64 GProgressDlg::Value()
 
 void GProgressDlg::Value(int64 v)
 {
-	TimeCheck();
 	if (Panes.Length())
 		Panes.First()->Value(v);
 }

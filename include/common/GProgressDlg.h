@@ -8,23 +8,14 @@
 #include "GTextLabel.h"
 #include "GTableLayout.h"
 
-class LgiClass ProgressList : public List<Progress>
-{
-	bool InUse;
-
-public:
-	ProgressList();
-
-	bool Lock();
-	void Unlock();
-};
-
 /// Progress window pane, tracks one task.
+class GProgressDlg;
 class LgiClass GProgressPane : public Progress, public GLayout
 {
 	friend class GProgressDlg;
 
 	Progress *Ref;
+	GProgressDlg *Dlg;
 
 protected:
 	GTableLayout *t;
@@ -36,7 +27,7 @@ protected:
 	bool UiDirty;
 
 public:
-	GProgressPane();
+	GProgressPane(GProgressDlg *dlg);
 	~GProgressPane();
 
 	char *GetDescription();
