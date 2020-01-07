@@ -2597,22 +2597,23 @@ void LList::OnPaint(GSurface *pDC)
 void LList::OnFocus(bool b)
 {
 	LListItem *s = GetSelected();
-	if (!s)
+	if (Items.Length())
 	{
-		s = Items[0];
-		if (s)
+		if (!s)
 		{
-			s->Select(true);
+			s = Items[0];
+			if (s)
+				s->Select(true);
 		}
-	}
 
-	for (auto It = Items.begin(FirstVisible); It != Items.end(); ++It)
-	{
-		auto i = *It;
-		if (i->Pos.Valid() &&
-			i->d->Selected)
+		for (auto It = Items.begin(FirstVisible); It != Items.end(); ++It)
 		{
-			Invalidate(&i->Pos);
+			auto i = *It;
+			if (i->Pos.Valid() &&
+				i->d->Selected)
+			{
+				Invalidate(&i->Pos);
+			}
 		}
 	}
 
