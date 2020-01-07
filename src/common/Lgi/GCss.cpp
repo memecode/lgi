@@ -922,6 +922,11 @@ bool GCss::InheritResolve(PropMap &Contrib)
 			                            Mine->Value = Mine->Value - 1;
 			                            break;
 			                        }
+									case LenEm:
+									{
+										Mine->Value = Mine->Value * 0.8f;
+										break;
+									}
 			                        case SizeXXSmall:
 			                        {
 										// No smaller sizes..
@@ -980,6 +985,11 @@ bool GCss::InheritResolve(PropMap &Contrib)
 			                            Mine->Value = Mine->Value + 1;
 			                            break;
 			                        }
+									case LenEm:
+									{
+										Mine->Value = Mine->Value * 1.2f;
+										break;
+									}
 			                        case SizeXXSmall:
 			                        {
 										Mine->Value = SizeXSmall;
