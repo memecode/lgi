@@ -1305,7 +1305,7 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 						PtSz = Sz.Value;
 					else if (Sz.Type == GCss::LenPx)
 // This seems to give fonts that are too small:
-//						PtSz = Sz.Value * 72.0f / 96.0f/*LgiScreenDpi()*/;
+//						PtSz = Sz.Value * 72.0f / LgiScreenDpi();
 						PtSz = Sz.Value;
 					else
 						LgiAssert(!"Impl me.");

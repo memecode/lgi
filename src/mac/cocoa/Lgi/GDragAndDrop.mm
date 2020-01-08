@@ -274,7 +274,7 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::
 	return false;
 }
 
-static NSArray* BuildImageComponentsForItem(LDragItem* _item)
+static NSArray* BuildImageComponentsForItem(NSPasteboardItem *_item)
 {
 	NSDraggingImageComponent *ic = [[NSDraggingImageComponent alloc] initWithKey:NSDraggingImageComponentIconKey];
 	NSImage *img = nil;
@@ -364,8 +364,6 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	auto pt = Event.p.locationInWindow;
 	pt.y -= Mem->Y();
 	
-	NSPasteboard *pboard = [NSPasteboard pasteboardWithName:NSDragPboard];
-
 	List<char> Formats;
 	if (!GetFormats(Formats))
 		return DROPEFFECT_NONE;
@@ -378,13 +376,10 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	if (!GetData(Data))
 		return DROPEFFECT_NONE;
 	
-	[pboard clearContents];
-	NSMutableArray *drag_items = [[NSMutableArray alloc] init];
+	auto drag_items = [[NSMutableArray alloc] init];
 
 	auto pasteboard_types = @[(NSString *)kPasteboardTypeFileURLPromise];
 	auto position = [h.p.contentView convertPoint:Event.p.locationInWindow fromView:nil];
-    /*position.x -= 16;
-    position.y -= 16;*/
 
 	for (auto &dd: Data)
 	{
@@ -413,7 +408,7 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 					#if 1
 					__weak LDragItem *weak_pb_item = item;
 					drag_item.imageComponentsProvider = ^{
-						return BuildImageComponentsForItem((LDragItem *)weak_pb_item);
+						return BuildImageComponentsForItem(weak_pb_item);
 					};
 					#endif
 				}
@@ -426,22 +421,45 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 			{
 				case GV_STRING:
 				{
-					NSData *s = [[NSData alloc] initWithBytes:v.Value.String length:strlen(v.Value.String)];
-					auto r = [pboard setData:s forType:dd.Format.NsStr()];
-					if (!r)
-						printf("%s:%i - setData failed.\n", _FL);
-					else
-						printf("Adding string '%s' to drag...\n", dd.Format.Get());
+					auto item = [[NSPasteboardItem alloc] init];
+
+					GString str = v.Str();
+					[item setString:str.NsStr() forType:dd.Format.NsStr()];
+
+					auto drag_item = [[NSDraggingItem alloc] initWithPasteboardWriter:item];
+					drag_item.draggingFrame = NSMakeRect(floor(position.x), floor(position.y), 32, 32);
+					[drag_items addObject:drag_item];
+
+					printf("Adding string '%s' to drag...\n", dd.Format.Get());
+
+					#if 1
+					__weak NSPasteboardItem *weak_pb_item = item;
+					drag_item.imageComponentsProvider = ^{
+						return BuildImageComponentsForItem(weak_pb_item);
+					};
+					#endif
 					break;
 				}
 				case GV_BINARY:
 				{
 					// Lgi specific type for moving binary data around...
-					auto data = [[LBinaryData alloc] init:dd.Format ptr:(uchar*)v.Value.Binary.Data len:v.Value.Binary.Length];
-					NSArray *array = [NSArray arrayWithObject:data];
-					[pboard writeObjects:array];
+					auto item = [[NSPasteboardItem alloc] init];
 					
+					NSData *data = [NSData dataWithBytes:v.Value.Binary.Data length:v.Value.Binary.Length];
+					[item setData:data forType:dd.Format.NsStr()];
+
+					auto drag_item = [[NSDraggingItem alloc] initWithPasteboardWriter:item];
+					drag_item.draggingFrame = NSMakeRect(floor(position.x), floor(position.y), 32, 32);
+					[drag_items addObject:drag_item];
+
 					printf("Adding binary '%s' to drag...\n", dd.Format.Get());
+					
+					#if 1
+					__weak NSPasteboardItem *weak_pb_item = item;
+					drag_item.imageComponentsProvider = ^{
+						return BuildImageComponentsForItem(weak_pb_item);
+					};
+					#endif
 					break;
 				}
 				default:
@@ -454,21 +472,15 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 		else printf("%s:%i - Impl multiple data handling for %s.\n", _FL, dd.Format.Get());
 	}
 	
-	if (drag_items.count > 0)
+	NSDraggingSession *session = [h.p.contentView	beginDraggingSessionWithItems:drag_items
+													event:Event.p
+													source:DragSrc];
+	if (session)
 	{
-		NSDraggingSession *session = [h.p.contentView	beginDraggingSessionWithItems:drag_items
-														event:Event.p
-														source:DragSrc];
-		if (session)
-		{
-			//[d->Wrapper writeURLsPBoard:session.draggingPasteboard];
-			return DROPEFFECT_COPY;
-		}
+		//[d->Wrapper writeURLsPBoard:session.draggingPasteboard];
+		return DROPEFFECT_COPY;
 	}
-	else
-	{
-		[h.p dragImage:img at:pt offset:NSZeroSize event:Event.p pasteboard:pboard source:DragSrc slideBack:YES ];
-	}
+
 
 	return DROPEFFECT_NONE;
 }
