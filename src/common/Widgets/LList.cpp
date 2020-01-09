@@ -1222,8 +1222,9 @@ bool LList::OnKey(GKey &k)
 								
 								bool Selected = false;
 								auto It = Ascend ? Items.begin() : Items.rbegin();
-								for (LListItem *i = *It; It.In(); i = Ascend ? *++It : *--It)
+								for (; It.In(); Ascend ? ++It : --It)
 								{
+									LListItem *i = *It;
 									if (!Selected)
 									{
 										const char *t = i->GetText(Col);
