@@ -541,7 +541,7 @@ public:
 ::GArray<GPopup*> GPopup::CurrentPopups;
 
 GPopup::GPopup(GView *owner)
-	#if  LGI_CARBON
+	#if LGI_CARBON
 	: GWindow(CreateBorderlessWindow())
 	#elif defined(__GTK_H__)
 	: GWindow(gtk_window_new(GTK_WINDOW_POPUP))
@@ -584,19 +584,6 @@ GPopup::~GPopup()
 	CurrentPopups.Delete(this);
 	SendNotify(POPUP_DELETE);
 
-	#if LGI_COCOA
-	if (Panel)
-	{
-		LCocoaView *cv = objc_dynamic_cast(LCocoaView, Panel.p.contentView);
-		if (cv)
-		{
-			cv.w = NULL;
-			Panel.p.contentView = NULL;
-			[cv release];
-		}
-	}
-	#endif
-
 	if (Owner)
 	{
 		#ifndef WIN32
@@ -621,6 +608,28 @@ GPopup::~GPopup()
 			Children.Delete(It);
 		delete c;
 	}
+
+	#if LGI_COCOA
+	if (Panel)
+	{
+		Visible(false);
+		LCocoaView *cv = objc_dynamic_cast(LCocoaView, Panel.p.contentView);
+		if (cv)
+		{
+			// printf("release LCocoaView %p\n", cv);
+			cv.w = NULL;
+			Panel.p.contentView = NULL;
+			[cv release];
+			cv = NULL;
+		}
+		
+		// printf("release NSPanel %p\n", Panel.p);
+		[Panel.p release];
+		Panel.p = NULL;
+
+		// printf("~GPopup %p\n", this);
+	}
+	#endif
 
 	DeleteObj(d);
 }

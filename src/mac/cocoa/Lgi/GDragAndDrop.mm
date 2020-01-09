@@ -132,22 +132,20 @@ class LFileCopy : public GProgressDlg, public LThread
 {
 	GString Dst;
 	GAutoPtr<GStreamI> Src;
+	uint64_t StartTs;
 	
 public:
-	LFileCopy(GView *parent, GString dst, GAutoPtr<GStreamI> src) : LThread("LFileCopy")
+	LFileCopy(GView *parent, GString dst, GAutoPtr<GStreamI> src) :
+		LThread("LFileCopy"), GProgressDlg(parent, 1000)
 	{
 		SetParent(parent);
 		Dst = dst;
 		Src = src;
+		StartTs = LgiCurrentTime();
 		
 		SetDescription("Saving file...");
-		DoModeless();
+		SetPulse(400);
 		Run();
-	}
-	
-	void OnCreate()
-	{
-		SetPulse(300);
 	}
 	
 	void OnPulse()
@@ -158,6 +156,15 @@ public:
 			SetPulse();
 			EndModeless();
 			delete this;
+		}
+		else if (StartTs)
+		{
+			uint64_t Diff = LgiCurrentTime() - StartTs;
+			if (Diff > 1000)
+			{
+				StartTs = 0;
+				DoModeless();
+			}
 		}
 	}
 	
