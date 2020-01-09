@@ -1332,7 +1332,7 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 								 GTypeFace::d->_Descent +
 								 GTypeFace::d->_Leading);
 				
-				#if 1
+				#if 0
 				if (Sz.Type == GCss::LenPx)
 				{
 					GStringPipe p;
