@@ -9,7 +9,7 @@
 #include "GProgressDlg.h"
 #include "LList.h"
 
-#define NODE_DROP_FORMAT			"Ide.ProjectNode"
+#define NODE_DROP_FORMAT			"com.memecode.ProjectNode"
 
 #define OPT_Ftp						"ftp"
 #define OPT_Www						"www"
