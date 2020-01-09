@@ -324,6 +324,7 @@ public:
 	void SelectRevisions(GString::Array &Revs, const char *BranchHint = NULL)
 	{
 		VcCommit *Scroll = NULL;
+		GArray<VcCommit*> Matches;
 		for (auto i: *this)
 		{
 			VcCommit *item = dynamic_cast<VcCommit*>(i);
@@ -332,25 +333,34 @@ public:
 				for (auto r: Revs)
 				{
 					if (item->IsRev(r))
-					{
-						auto b = item->GetBranch();
-						if (BranchHint)
-						{
-							if (!b || Stricmp(b, BranchHint))
-								continue;
-						}
-						else if (b)
-						{
-							continue;
-						}
-
-						if (!Scroll)
-							Scroll = item;
-						item->Select(true);
-					}
+						Matches.Add(item);
 				}
 			}
 		}
+
+		for (auto item: Matches)
+		{
+			auto b = item->GetBranch();
+			if (BranchHint)
+			{
+				if (!b || Stricmp(b, BranchHint))
+					continue;
+			}
+			else if (b)
+			{
+				continue;
+			}
+
+			if (!Scroll)
+				Scroll = item;
+			item->Select(true);
+		}
+		if (!Scroll && Matches.Length() > 0)
+		{
+			Scroll = Matches[0];
+			Scroll->Select(true);
+		}
+
 		if (Scroll)
 			Scroll->ScrollTo();
 	}

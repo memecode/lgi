@@ -5025,7 +5025,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 
 							if (NextStyle->Decor == GCss::TextDecorSquiggle)
 							{
-								pOut->Colour(NextStyle->DecorColour.c24(), 24);
+								pOut->Colour(NextStyle->DecorColour);
 								int x = FX >> GDisplayString::FShift;
 								int End = x + Ds.X();
 								while (x < End)

@@ -59,7 +59,7 @@ public:
 
 	void DrawIcon(GSurface *pDC, GRect &r, bool Add, LSystemColour c)
 	{
-		pDC->Colour(c, 24);
+		pDC->Colour(c);
 		int IconSize = MAX(r.X(), r.Y()) * 2 / 6;
 		int Cx = r.x1 + (r.X() >> 1);
 		int Cy = r.y1 + (r.Y() >> 1);

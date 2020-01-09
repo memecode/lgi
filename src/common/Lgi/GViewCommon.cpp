@@ -564,7 +564,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 
 	#if 0
 	// This is useful for coverage checking
-	pDC->Colour(Rgb24(255, 0, 255), 24);
+	pDC->Colour(GColour(255, 0, 255));
 	pDC->Rectangle();
 	#endif
 
@@ -651,7 +651,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 
 	#if 0
 	// This is useful for coverage checking
-	pDC->Colour(Rgb24(255, 0, 255), 24);
+	pDC->Colour(GColour(255, 0, 255));
 	pDC->Rectangle();
 	#endif
 

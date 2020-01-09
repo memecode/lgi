@@ -2084,7 +2084,7 @@ void GTableLayout::OnPaint(GSurface *pDC)
 	}
 
 	#if 0 // DEBUG_DRAW_CELLS
-	pDC->Colour(Rgb24(255, 0, 0), 24);
+	pDC->Colour(GColour(255, 0, 0));
 	pDC->Box();
 	#endif
 

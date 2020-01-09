@@ -366,7 +366,7 @@ void GCheckBox::OnPaint(GSurface *pDC)
 		
 			GRect c = GetClient();
 			#if 0
-			pDC->Colour(Rgb24(255, 0, 0), 24);
+			pDC->Colour(GColour(255, 0, 0));
 			pDC->Box(&c);
 			pDC->Line(c.x1, c.y1, c.x2, c.y2);
 			pDC->Line(c.x2, c.y1, c.x1, c.y2);

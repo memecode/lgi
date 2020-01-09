@@ -95,7 +95,7 @@ void GDatePopup::OnPaint(GSurface *pDC)
 	}
 
 	// Date space
-	pDC->Colour(L_WORKSPACE, 24);
+	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle(&Date);
 
 	Date.Size(3, 3);

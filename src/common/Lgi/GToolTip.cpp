@@ -136,7 +136,7 @@ public:
 		}
 		else
 		{
-			pDC->Colour(b, 24);
+			pDC->Colour(b);
 			pDC->Rectangle(&c);
 		}
 	}
