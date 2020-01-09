@@ -16,6 +16,7 @@ Useful info:
 #include "INet.h"
 #include "GViewPriv.h"
 #include "GClipBoard.h"
+#include "GProgressDlg.h"
 
 // #define DND_DEBUG_TRACE
 class GDndSourcePriv;
@@ -74,11 +75,12 @@ const char *LMimeToUti(const char *Mime)
 @interface LDragSource : NSObject<NSDraggingSource, NSPasteboardItemDataProvider>
 {
 	GArray<LDragItem*> Items;
+	GView *SourceWnd;
 }
 
 @property GDndSourcePriv *d;
 
-- (id)init:(GDndSourcePriv*)view;
+- (id)init:(GDndSourcePriv*)view wnd:(GView*)Wnd;
 - (void)addItem:(LDragItem*)i;
 
 - (NSDragOperation)draggingSession:(nonnull NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context;
@@ -126,13 +128,82 @@ static NSURL *ExtractPromiseDropLocation(NSPasteboard *_pasteboard)
     return result;
 }
 
+class LFileCopy : public GProgressDlg, public LThread
+{
+	GString Dst;
+	GAutoPtr<GStreamI> Src;
+	
+public:
+	LFileCopy(GView *parent, GString dst, GAutoPtr<GStreamI> src) : LThread("LFileCopy")
+	{
+		SetParent(parent);
+		Dst = dst;
+		Src = src;
+		
+		SetDescription("Saving file...");
+		DoModeless();
+		Run();
+	}
+	
+	void OnCreate()
+	{
+		SetPulse(300);
+	}
+	
+	void OnPulse()
+	{
+		GProgressDlg::OnPulse();
+		if (IsExited())
+		{
+			SetPulse();
+			EndModeless();
+			delete this;
+		}
+	}
+	
+	int Main()
+	{
+		GFile out;
+		if (!out.Open(Dst, O_WRITE))
+		{
+			LgiTrace("%s:%i - can't open '%s' for writing.\n", _FL, Dst.Get());
+			return -1;
+		}
+		
+		out.SetSize(0);
+		auto len = Src->GetSize();
+		int64 written = 0;
+		if (len > 0)
+			SetLimits(0, len-1);
+		SetScale(1.0/1024.0/1024.0);
+		SetType("MiB");
+
+		for (size_t i=0; len<0 || i<len; )
+		{
+			char buf[1024];
+			auto rd = Src->Read(buf, sizeof(buf));
+			if (rd <= 0) break;
+			auto wr = out.Write(buf, rd);
+			if (wr < rd) break;
+			written += wr;
+			
+			Value(written);
+			if (IsCancelled())
+				break;
+		}
+		
+		return 0;
+	}
+};
+
 @implementation LDragSource
 
-- (id)init:(GDndSourcePriv*)d
+- (id)init:(GDndSourcePriv*)d wnd:(GView*)Wnd
 {
 	if ((self = [super init]) != nil)
 	{
 		self.d = d;
+		self->SourceWnd = Wnd;
 	}
 	
 	return self;
@@ -189,33 +260,16 @@ static NSURL *ExtractPromiseDropLocation(NSPasteboard *_pasteboard)
 		}
 		
 		path += di.path;
-		auto s = di.src;
+		new LFileCopy(self->SourceWnd, path.GetFull(), di.src);
 
-		GFile out;
-		if (!out.Open(path, O_WRITE))
-		{
-			LgiTrace("%s:%i - can't open '%s' for writing.\n", _FL, path.GetFull().Get());
-			return;
-		}
-		out.SetSize(0);
-		auto len = s->GetSize();
-		int64 written = 0;
-		for (size_t i=0; i<len; )
-		{
-			char buf[1024];
-			auto rd = s->Read(buf, sizeof(buf));
-			if (rd <= 0) break;
-			auto wr = out.Write(buf, rd);
-			if (wr < rd) break;
-			written += wr;
-		}
-		
+		/*
 		if (written < len)
 		{
 			LgiTrace("%s:%i - write failed.\n", _FL);
 			return;
 		}
 		else
+		*/
 		{
 			const auto url = [NSURL fileURLWithPath:[NSString stringWithUTF8String:path.GetFull()]
 										isDirectory:false
@@ -359,7 +413,7 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	}
 	
 	d->Effect = Effect;
-	auto DragSrc = [[LDragSource alloc] init:d];
+	auto DragSrc = [[LDragSource alloc] init:d wnd:SourceWnd];
 	
 	auto pt = Event.p.locationInWindow;
 	pt.y -= Mem->Y();
@@ -442,7 +496,6 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 				}
 				case GV_BINARY:
 				{
-					// Lgi specific type for moving binary data around...
 					auto item = [[NSPasteboardItem alloc] init];
 					
 					NSData *data = [NSData dataWithBytes:v.Value.Binary.Data length:v.Value.Binary.Length];

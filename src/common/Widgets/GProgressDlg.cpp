@@ -564,6 +564,8 @@ GProgressDlg &GProgressDlg::operator--(int)
 
 void GProgressDlg::TimeCheck()
 {
+	if (!InThread())
+		return;
 	uint64 Now = LgiCurrentTime();
 	if (Timeout)
 	{

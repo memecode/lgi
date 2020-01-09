@@ -703,42 +703,39 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 	if (Loop)
 	{
 		#if CUSTOM_LOOP
-		// This impl allows for us to exit gracefully.
-		// NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-		int Depth = ++d->RunDepth;
+	
+			// This impl allows for us to exit gracefully.
+			int Depth = ++d->RunDepth;
 		
-		do
-		{
-			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+			do
+			{
+				NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-			NSEvent *event =
-				[	d->NsApp
-					nextEventMatchingMask:NSAnyEventMask
-					untilDate:[NSDate distantFuture]
-					inMode:NSDefaultRunLoopMode
-					dequeue:YES];
+				NSEvent *event =
+					[	d->NsApp
+						nextEventMatchingMask:NSAnyEventMask
+						untilDate:[NSDate distantFuture]
+						inMode:NSDefaultRunLoopMode
+						dequeue:YES];
 
-			[d->NsApp sendEvent:event];
-			[d->NsApp updateWindows];
+				[d->NsApp sendEvent:event];
+				[d->NsApp updateWindows];
 
-			[pool release];
-		}
-		while (d->RunDepth >= Depth);
-		
-		// [pool release];
+				[pool release];
+			}
+			while (d->RunDepth >= Depth);
+	
 		#else
 		
-			#if 1
 			NSApplicationMain(GetArgs(), GetArg());
-			#else
-			[d->NsApp run];
-			#endif
-			
+		
 		#endif
 		return true;
 	}
 	else
 	{
+		// NSWindow nextEventMatchingMask may be useful here.
+		
 	}
 		
 	return 0;
