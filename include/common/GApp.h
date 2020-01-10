@@ -50,6 +50,21 @@ struct GAppArguments
 {
 	/// Don't initialize the skinning engine.
 	bool NoSkin;
+	/// Don't do crash handling
+	bool NoCrashHandler;
+
+	GAppArguments(const char *init = NULL)
+	{
+		NoSkin = false;
+		NoCrashHandler = false;
+
+		auto a = GString(init).SplitDelimit(",");
+		for (auto o: a)
+			if (o.Equals("NoCrashHandler"))
+				NoCrashHandler = true;
+			else if (o.Equals("NoSkin"))
+				NoSkin = true;
+	}
 };
 
 class GAppPrivate;

@@ -266,7 +266,7 @@ void LgiInvalidParam(const wchar_t * expression,
 extern int MouseRollMsg;
 typedef HRESULT (CALLBACK *fDllGetVersion)(DLLVERSIONINFO *);
 
-GApp::GApp(OsAppArguments &AppArgs, const char *AppName, GAppArguments *ObjArgs)
+GApp::GApp(OsAppArguments &AppArgs, const char *AppName, GAppArguments *Opts)
 {
 	// GApp instance
 	SystemNormal = 0;
@@ -309,30 +309,33 @@ DumpTime("start");
 
 DumpTime("priv");
 
-	// Setup exception handler
-	HRSRC hRsrc = ::FindResource(NULL, MAKEINTRESOURCE(VS_VERSION_INFO), RT_VERSION);
-	HGLOBAL hGlobal = ::LoadResource(NULL, hRsrc);
-    LPVOID pVersionResource = ::LockResource(hGlobal);
-	GAutoString ProductName, ProductVer;
-
-    // replace "040904e4" with the language ID of your resources
-	if (pVersionResource)
+	if (!Opts || Opts->NoCrashHandler == false)
 	{
-		ProductName = ParseVer(pVersionResource, "StringFileInfo.0c0904b0.ProductName");
-		ProductVer = ParseVer(pVersionResource, "StringFileInfo.0c0904b0.ProductVersion");
-	}
-	if (ProductName && ProductVer)
-	{
-		char s[256];
-		sprintf_s(s, sizeof(s), "%s-%s", ProductName.Get(), ProductVer.Get());
-		d->ProductId.Reset(NewStr(s));
-	}
+		// Setup exception handler
+		HRSRC hRsrc = ::FindResource(NULL, MAKEINTRESOURCE(VS_VERSION_INFO), RT_VERSION);
+		HGLOBAL hGlobal = ::LoadResource(NULL, hRsrc);
+		LPVOID pVersionResource = ::LockResource(hGlobal);
+		GAutoString ProductName, ProductVer;
 
-    InitializeCriticalSection(&StackTraceSync);
-	#if !defined(_DEBUG)
-	_PrevExceptionHandler = SetUnhandledExceptionFilter(_ExceptionFilter_Redir);
-	#endif
-	_set_invalid_parameter_handler(LgiInvalidParam);
+		// replace "040904e4" with the language ID of your resources
+		if (pVersionResource)
+		{
+			ProductName = ParseVer(pVersionResource, "StringFileInfo.0c0904b0.ProductName");
+			ProductVer = ParseVer(pVersionResource, "StringFileInfo.0c0904b0.ProductVersion");
+		}
+		if (ProductName && ProductVer)
+		{
+			char s[256];
+			sprintf_s(s, sizeof(s), "%s-%s", ProductName.Get(), ProductVer.Get());
+			d->ProductId.Reset(NewStr(s));
+		}
+
+		InitializeCriticalSection(&StackTraceSync);
+		#if !defined(_DEBUG)
+		_PrevExceptionHandler = SetUnhandledExceptionFilter(_ExceptionFilter_Redir);
+		#endif
+		_set_invalid_parameter_handler(LgiInvalidParam);
+	}
 	
 DumpTime("exception handler");
 
@@ -446,74 +449,13 @@ DumpTime("ms hook");
 
 	if
 	(
-		#if 0 // defined(LGI_STATIC) && _MSC_VER < _MSC_VER_VS2010
-		0
-		#else
-		(
-			!ObjArgs
-			||
-			!ObjArgs->NoSkin
-		)
+		(!Opts || !Opts->NoSkin)
 		&&
 		!GetOption("noskin")
-		#endif
 	)
 	{
-		// Load library
-		char SkinLibName[] =
-		#ifdef __GNUC__
-			"lib"
-		#endif
-			"lgiskin"
-		#if _MSC_VER == _MSC_VER_VC7
-			"7"
-		#endif
-		#if _MSC_VER == _MSC_VER_VS2005
-			"8"
-		#endif
-		#if _MSC_VER == _MSC_VER_VS2008
-			"9"
-		#endif
-		#if _MSC_VER == _MSC_VER_VS2010
-			"10"
-		#endif
-		#if _MSC_VER == _MSC_VER_VS2012
-			"11"
-		#endif
-		#if _MSC_VER == _MSC_VER_VS2013
-			"12"
-		#endif
-		#if _MSC_VER == _MSC_VER_VS2015
-			"14"
-		#endif
-		#ifdef _DEBUG
-			"d"
-		#endif
-			;
-		
-		#if HAS_SHARED_OBJECT_SKIN
-		d->SkinLib = new GLibrary(SkinLibName);
-		if (d->SkinLib)
-		{
-			if (d->SkinLib->IsLoaded())
-			{
-				Proc_CreateSkinEngine CreateSkinEngine =
-					(Proc_CreateSkinEngine)d->SkinLib->GetAddress(LgiSkinEntryPoint);
-				if (CreateSkinEngine)
-				{
-					SkinEngine = CreateSkinEngine(this);
-				}
-			}
-			else
-			{
-				DeleteObj(d->SkinLib);
-				printf("Failed to load '%s'\n", SkinLibName);
-			}
-		}
-		#else
 		extern GSkinEngine *CreateSkinEngine(GApp *App);
 		SkinEngine = CreateSkinEngine(this);
-		#endif
 	}
 
 DumpTime("skin");
