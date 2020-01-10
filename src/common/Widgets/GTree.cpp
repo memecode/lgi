@@ -2022,32 +2022,40 @@ void GTree::OnPulse()
 		GMouse m;
 		if (GetMouse(m))
 		{
-			GRect c = GetClient();
-			if (VScroll)
+			if (!m.Left() && !m.Right() && !m.Middle())
 			{
-				if (m.y < DRAG_SCROLL_EDGE)
-				{
-					// Scroll up...
-					VScroll->Value(VScroll->Value() - DRAG_SCROLL_Y);
-				}
-				else if (m.y > c.Y() - DRAG_SCROLL_EDGE)
-				{
-					// Scroll down...
-					VScroll->Value(VScroll->Value() + DRAG_SCROLL_Y);
-				}
+				// Be robust against missing drag exit events (Mac specific?)
+				InsideDragOp(false);
 			}
-
-			if (HScroll)
+			else
 			{
-				if (m.x < DRAG_SCROLL_EDGE)
+				GRect c = GetClient();
+				if (VScroll)
 				{
-					// Scroll left...
-					HScroll->Value(HScroll->Value() - DRAG_SCROLL_X);
+					if (m.y < DRAG_SCROLL_EDGE)
+					{
+						// Scroll up...
+						VScroll->Value(VScroll->Value() - DRAG_SCROLL_Y);
+					}
+					else if (m.y > c.Y() - DRAG_SCROLL_EDGE)
+					{
+						// Scroll down...
+						VScroll->Value(VScroll->Value() + DRAG_SCROLL_Y);
+					}
 				}
-				else if (m.x > c.X() - DRAG_SCROLL_EDGE)
+
+				if (HScroll)
 				{
-					// Scroll right...
-					HScroll->Value(HScroll->Value() + DRAG_SCROLL_X);
+					if (m.x < DRAG_SCROLL_EDGE)
+					{
+						// Scroll left...
+						HScroll->Value(HScroll->Value() - DRAG_SCROLL_X);
+					}
+					else if (m.x > c.X() - DRAG_SCROLL_EDGE)
+					{
+						// Scroll right...
+						HScroll->Value(HScroll->Value() + DRAG_SCROLL_X);
+					}
 				}
 			}
 		}

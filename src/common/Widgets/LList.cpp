@@ -2148,7 +2148,7 @@ int LList::IndexOf(LListItem *Obj)
 
 LListItem *LList::ItemAt(size_t Index)
 {
-	return Items.ItemAt(Index);
+	return Index < Items.Length() ? Items.ItemAt(Index) : NULL;
 }
 
 void LList::ScrollToSelection()
