@@ -585,6 +585,11 @@ void GWindow::Visible(bool i)
 	}
 }
 
+bool GWindow::IsActive()
+{
+	return Wnd ? [Wnd.p isKeyWindow] : false;
+}
+
 void GWindow::SetDeleteOnClose(bool i)
 {
 	d->DeleteOnClose = i;
@@ -662,7 +667,7 @@ bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 				GPopup *pu = GPopup::CurrentPopups[i];
 				if (pu->Visible())
 				{
-					printf("Hiding popup %s\n", pu->GetClass());
+					// printf("Hiding popup %s\n", pu->GetClass());
 					pu->Visible(false);
 				}
 			}

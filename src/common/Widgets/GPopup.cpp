@@ -531,10 +531,12 @@ class GPopupPrivate
 {
 public:
 	bool TakeFocus;
+	bool GotOnCreate;
 	
 	GPopupPrivate()
 	{
 		TakeFocus = true;
+		GotOnCreate = false;
 	}
 };
 
@@ -853,7 +855,14 @@ void GPopup::Visible(bool i)
 			if (Panel)
 			{
 				if (i)
+				{
 					[Panel.p makeKeyAndOrderFront:NULL];
+					if (!d->GotOnCreate)
+					{
+						d->GotOnCreate = true;
+						OnCreate();
+					}
+				}
 				else
 					[Panel.p orderOut:Panel.p];
 			}

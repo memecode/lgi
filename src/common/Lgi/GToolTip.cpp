@@ -52,6 +52,7 @@ public:
 	
 	void OnCreate()
 	{
+		GPopup::OnCreate();
 		if (!PulseRunning)
 		{
 			PulseRunning = this;
@@ -160,26 +161,24 @@ class GToolTipPrivate
 public:
 	int NextUid;
 
-	#if defined(LGI_CARBON)
-	HMHelpContentRec Tag;
-	#elif LGI_NATIVE_TIPS
+	#if LGI_NATIVE_TIPS
 	GView *Parent;
 	LHashTbl<IntKey<int>, NativeTip*> Tips;
+	#elif defined(LGI_CARBON)
+	HMHelpContentRec Tag;
 	#endif
 	
 	GToolTipPrivate()
 	{
 		NextUid = 1;
-		#if defined(MAC)
-		#elif LGI_NATIVE_TIPS
-		Parent = 0;
+		#if LGI_NATIVE_TIPS
+		Parent = NULL;
 		#endif
 	}
 
 	~GToolTipPrivate()
 	{
-		#if defined(MAC)
-		#elif LGI_NATIVE_TIPS
+		#if LGI_NATIVE_TIPS
 		// for (NativeTip *t = Tips.First(); t; t = Tips.Next())
 		for (auto t : Tips)
 		{
@@ -203,50 +202,7 @@ int GToolTip::NewTip(char *Name, GRect &Pos)
 {
 	int Status = 0;
 
-	#if defined(MAC)
-
-		#if LGI_COCOA
-
-
-		#elif LGI_CARBON
-	
-			#ifdef __MACHELP__
-			HMSetHelpTagsDisplayed(true);
-			#else
-			#error "__MACHELP__ not defined"
-			#endif
-
-			if (Name)
-			{
-				d->Tag.version = kMacHelpVersion;
-				d->Tag.tagSide = kHMDefaultSide;
-				d->Tag.content[kHMMinimumContentIndex].contentType = kHMCFStringLocalizedContent;
-				d->Tag.content[kHMMinimumContentIndex].u.tagCFString = CFStringCreateWithCString(NULL, Name, kCFStringEncodingUTF8);
-				d->Tag.absHotRect = Pos;
-			}
-
-		#endif
-	
-	#elif WINNATIVE
-
-		if (_View && Name && GetParent())
-		{
-			TOOLINFOW ti;
-
-			ZeroObj(ti);
-			ti.cbSize = sizeof(ti);
-			ti.uFlags = TTF_SUBCLASS;
-			ti.hwnd = GetParent()->Handle();
-			ti.rect = Pos;
-			ti.lpszText = Utf8ToWide(Name);
-			ti.uId = Status = d->NextUid++;
-
-			auto Result = SendMessage(_View, TTM_ADDTOOLW, 0, (LPARAM) &ti);
-
-			DeleteArray(ti.lpszText);
-		}
-	
-	#elif LGI_NATIVE_TIPS
+	#if LGI_NATIVE_TIPS
 	
 		if (ValidStr(Name) && d->Parent)
 		{
@@ -269,6 +225,42 @@ int GToolTip::NewTip(char *Name, GRect &Pos)
 			}
 		}
 	
+	#elif LGI_CARBON
+
+		#ifdef __MACHELP__
+		HMSetHelpTagsDisplayed(true);
+		#else
+		#error "__MACHELP__ not defined"
+		#endif
+
+		if (Name)
+		{
+			d->Tag.version = kMacHelpVersion;
+			d->Tag.tagSide = kHMDefaultSide;
+			d->Tag.content[kHMMinimumContentIndex].contentType = kHMCFStringLocalizedContent;
+			d->Tag.content[kHMMinimumContentIndex].u.tagCFString = CFStringCreateWithCString(NULL, Name, kCFStringEncodingUTF8);
+			d->Tag.absHotRect = Pos;
+		}
+	
+	#elif WINNATIVE
+
+		if (_View && Name && GetParent())
+		{
+			TOOLINFOW ti;
+
+			ZeroObj(ti);
+			ti.cbSize = sizeof(ti);
+			ti.uFlags = TTF_SUBCLASS;
+			ti.hwnd = GetParent()->Handle();
+			ti.rect = Pos;
+			ti.lpszText = Utf8ToWide(Name);
+			ti.uId = Status = d->NextUid++;
+
+			auto Result = SendMessage(_View, TTM_ADDTOOLW, 0, (LPARAM) &ti);
+
+			DeleteArray(ti.lpszText);
+		}
+	
 	#endif
 
 	return Status;
@@ -276,10 +268,20 @@ int GToolTip::NewTip(char *Name, GRect &Pos)
 
 void GToolTip::DeleteTip(int Id)
 {
-	#if defined(MAC)
+	#if LGI_NATIVE_TIPS
 	
-	
-	
+	for (unsigned i = 0; i < NativeTip::All.Length(); i++)
+	{
+		NativeTip *&t = NativeTip::All[i];
+		if (t->Id == Id)
+		{
+			d->Tips.Delete(Id);
+			DeleteObj(t);
+			NativeTip::All.DeleteAt(i);
+			break;
+		}
+	}
+
 	#elif WINNATIVE
 
 	if (GetParent())
@@ -294,58 +296,16 @@ void GToolTip::DeleteTip(int Id)
 		SendMessage(_View, TTM_DELTOOL, 0, (LPARAM) &ti);
 	}
 	
-	#elif LGI_NATIVE_TIPS
-	
-	for (unsigned i = 0; i < NativeTip::All.Length(); i++)
-	{
-		NativeTip *&t = NativeTip::All[i];
-		if (t->Id == Id)
-		{
-			d->Tips.Delete(Id);
-			DeleteObj(t);
-			NativeTip::All.DeleteAt(i);
-			break;
-		}
-	}
-
 	#endif
 }
 
 bool GToolTip::Attach(GViewI *p)
 {
-	#if defined(MAC)
+	#if LGI_NATIVE_TIPS
 	
-	/*
-	if (!p)
-	{
-		LgiTrace("%s:%i - Error: no parent for tip.\n", _FL);
-		return false;
-	}
+	d->Parent = p->GetGView();
+	return false;
 
-	GWindow *w = p->GetWindow();
-	if (!w)
-	{
-		LgiTrace("%s:%i - Error: no window to attach tip to.\n", _FL);
-		return false;
-	}
-	
-	GdcPt2 pt(0, 0);
-	for (GViewI *v = p; v && v != (GViewI*)w; v = v->GetParent())
-	{
-		GRect r = v->GetPos();
-		pt.x += r.x1;
-		pt.y += r.y1;
-	}
-	
-	d->Tag.absHotRect.left += pt.x;
-	d->Tag.absHotRect.top += pt.y;
-	d->Tag.absHotRect.right += pt.x;
-	d->Tag.absHotRect.bottom += pt.y;
-	
-	HMSetWindowHelpContent(w->WindowHandle(), &d->Tag);
-	HMDisplayTag(&d->Tag);
-	*/
-	
 	#elif WINNATIVE
 
 	if (!p)
@@ -373,11 +333,6 @@ bool GToolTip::Attach(GViewI *p)
 						0, 0, 0, 0,
 						SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 	
-	#elif LGI_NATIVE_TIPS
-	
-	d->Parent = p->GetGView();
-	return false;
-
 	#endif
 
 	return true;
