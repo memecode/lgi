@@ -327,21 +327,26 @@ struct DndEvent
 	if (!t)
 		return;
 
-	static CGFloat total = 0.0;
-	auto deltaY = ev.scrollingDeltaY;
-	total += deltaY;
+	static double total = 0.0;
+	double deltaY = ev.scrollingDeltaY;
 	
-	int lines;
+	int diff = 0;
     if ([ev hasPreciseScrollingDeltas])
-		lines = (int) (deltaY * 0.1);
-    else
-		lines = (int) total;
-
-	if (lines)
-	{
-		total -= lines;
-		t->OnMouseWheel(-lines);
+    {
+    	double scale = 0.1;
+    	int old = (int)(total * scale);
+		total += deltaY;
+		int cur = (int)(total * scale);
+		diff = cur - old;
+		// printf("wheel delta=%g total=%g\n", deltaY, total);
 	}
+    else
+    {
+		diff = (int)deltaY;
+	}
+
+	if (diff)
+		t->OnMouseWheel(-diff);
 }
 
 const char *LVirtualKeyToString(LVirtualKeys c)
