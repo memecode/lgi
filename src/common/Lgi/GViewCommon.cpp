@@ -596,7 +596,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	// Paint this view's contents...
 	pDC->SetClient(&r);
 
-	#if 1
+	#if 0
 	if (_Debug)
 	{
 		#if defined(__GTK_H__)
