@@ -596,22 +596,31 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	// Paint this view's contents...
 	pDC->SetClient(&r);
 
-	#if 0
-	if (GetParent() && GetParent()->GetGView()->_Debug)
+	#if 1
+	if (_Debug)
 	{
-		Gtk::cairo_matrix_t matrix;
-		cairo_get_matrix(pDC->Handle(), &matrix);
+		#if defined(__GTK_H__)
+			Gtk::cairo_matrix_t matrix;
+			cairo_get_matrix(pDC->Handle(), &matrix);
 
-		double ex[4];
-		cairo_clip_extents(pDC->Handle(), ex+0, ex+1, ex+2, ex+3);
-		ex[0] += matrix.x0;
-		ex[1] += matrix.y0;
-		ex[2] += matrix.x0;
-		ex[3] += matrix.y0;
-		LgiTrace("%s::_Paint, r=%s, clip=%g,%g,%g,%g - %g,%g\n",
-				GetClass(), r.GetStr(),
-				ex[0], ex[1], ex[2], ex[3],
-				matrix.x0, matrix.y0);
+			double ex[4];
+			cairo_clip_extents(pDC->Handle(), ex+0, ex+1, ex+2, ex+3);
+			ex[0] += matrix.x0; ex[1] += matrix.y0; ex[2] += matrix.x0; ex[3] += matrix.y0;
+			LgiTrace("%s::_Paint, r=%s, clip=%g,%g,%g,%g - %g,%g\n",
+					GetClass(), r.GetStr(),
+					ex[0], ex[1], ex[2], ex[3],
+					matrix.x0, matrix.y0);
+		#elif LGI_COCOA
+			auto Ctx = pDC->Handle();
+			CGAffineTransform t = CGContextGetCTM(Ctx);
+			GRect cr = CGContextGetClipBoundingBox(Ctx);
+			printf("%s::_Paint() pos=%s transform=%g,%g,%g,%g-%g,%g clip=%s r=%s\n",
+					GetClass(),
+					GetPos().GetStr(),
+  					t.a, t.b, t.c, t.d, t.tx, t.ty,
+					cr.GetStr(),
+					r.GetStr());
+		#endif
 	}
 	#endif
 
@@ -628,7 +637,10 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 			if (!w->Pos.Valid())
 				continue;
 
-			// LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), o.x, o.y);
+			#if 0
+			if (w->_Debug)
+				LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), o.x, o.y);
+			#endif
 			w->_Paint(pDC, &o);
 		}
 	}

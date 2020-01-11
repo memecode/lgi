@@ -1945,6 +1945,8 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
 	Mem.SetOrigin(0, 0);
 	pScreen->Blt(Areas[GRichTextEdit::ContentArea].x1, Areas[GRichTextEdit::ContentArea].y1, &Mem);
+	#else
+	pDC->ClipRgn(NULL);
 	#endif
 }
 	

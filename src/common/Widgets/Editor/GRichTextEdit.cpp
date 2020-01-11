@@ -1110,6 +1110,8 @@ void GRichTextEdit::OnPosChange()
 		// GRect c = GetClient();
 		Processing = false;
 	}
+	
+	GLayout::OnPosChange();
 }
 
 int GRichTextEdit::WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState)
