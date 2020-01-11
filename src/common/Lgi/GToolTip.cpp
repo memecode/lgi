@@ -21,6 +21,7 @@ class NativeTip : public GPopup
 public:
 	static GArray<NativeTip*> All;
 	static NativeTip *PulseRunning;
+	static GdcPt2 Padding;
 
 	int Id;
 	GRect Watch;
@@ -111,7 +112,7 @@ public:
 		if (s.Reset(new GDisplayString(SysFont, GView::Name())))
 		{
 			GRect r = GetPos();
-			r.Dimension(s->X() + 4, s->Y() + 2);
+			r.Dimension(s->X()+NativeTip::Padding.x, s->Y()+NativeTip::Padding.y);
 			SetPos(r);
 		}
 		return Status;
@@ -123,7 +124,11 @@ public:
 		auto b = L_TOOL_TIP;
 		
 		// Draw border
+		#ifdef MAC
+		pDC->Colour(L_LIGHT);
+		#else
 		pDC->Colour(L_BLACK);
+		#endif
 		pDC->Box(&c);
 		c.Size(1, 1);
 		
@@ -133,7 +138,7 @@ public:
 
 		if (s)
 		{
-			s->Draw(pDC, c.x1+1, c.y1, &c);
+			s->Draw(pDC, c.x1+((c.X()-s->X())>>1), c.y1+((c.Y()-s->Y())>>1), &c);
 		}
 		else
 		{
@@ -151,6 +156,11 @@ public:
 	}
 };
 
+#ifdef MAC
+GdcPt2 NativeTip::Padding(8, 4);
+#else
+GdcPt2 NativeTip::Padding(4, 2);
+#endif
 NativeTip *NativeTip::PulseRunning = NULL;
 GArray<NativeTip*> NativeTip::All;
 

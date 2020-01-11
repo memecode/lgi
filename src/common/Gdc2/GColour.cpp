@@ -824,7 +824,11 @@ void GColour::OnChange()
 	}
 	
 	_LgiColours[L_DEBUG_CURRENT_LINE].Rgb(0xff, 0xe0, 0x00);
+	#ifdef MAC
+	_LgiColours[L_TOOL_TIP].Rgb(0xef, 0xef, 0xef);
+	#else
 	_LgiColours[L_TOOL_TIP].Rgb(255, 255, 231);
+	#endif
 
 	// Read any settings out of config
 	ReadColourConfig(L_SHADOW);
