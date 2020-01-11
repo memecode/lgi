@@ -487,7 +487,7 @@ public:
 			return;
 
 		LListItem *Kb = Items[Keyboard];
-		Items.Sort//<int>
+		Items.Sort
 		(
 			[](LListItem *a, LListItem *b, int Column) -> int
 			{
