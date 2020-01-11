@@ -191,19 +191,33 @@ public:
 		
 		GRect &operator =(OsRect &r)
 		{
-			x1 = r.origin.x;
-			y1 = r.origin.y;
-			x2 = x1 + r.size.width - 1;
-			y2 = y1 + r.size.height - 1;
+			if (isinf(r.origin.x) || isinf(r.origin.y))
+			{
+				ZOff(-1, -1);
+			}
+			else
+			{
+				x1 = r.origin.x;
+				y1 = r.origin.y;
+				x2 = x1 + r.size.width - 1;
+				y2 = y1 + r.size.height - 1;
+			}
 			return *this;
 		}
 		
 		GRect(OsRect r)
 		{
-			x1 = r.origin.x;
-			y1 = r.origin.y;
-			x2 = x1 + r.size.width - 1;
-			y2 = y1 + r.size.height - 1;
+			if (isinf(r.origin.x) || isinf(r.origin.y))
+			{
+				ZOff(-1, -1);
+			}
+			else
+			{
+				x1 = r.origin.x;
+				y1 = r.origin.y;
+				x2 = x1 + r.size.width - 1;
+				y2 = y1 + r.size.height - 1;
+			}
 		}
 	
 	#elif !defined(__GTK_H__)
