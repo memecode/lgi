@@ -309,6 +309,7 @@ DumpTime("start");
 
 DumpTime("priv");
 
+	InitializeCriticalSection(&StackTraceSync);
 	if (!Opts || Opts->NoCrashHandler == false)
 	{
 		// Setup exception handler
@@ -330,7 +331,6 @@ DumpTime("priv");
 			d->ProductId.Reset(NewStr(s));
 		}
 
-		InitializeCriticalSection(&StackTraceSync);
 		#if !defined(_DEBUG)
 		_PrevExceptionHandler = SetUnhandledExceptionFilter(_ExceptionFilter_Redir);
 		#endif
