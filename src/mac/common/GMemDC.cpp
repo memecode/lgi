@@ -279,6 +279,20 @@ void MemRelease(void * __nullable info, const void *  data, size_t size)
 }
 
 #if LGI_COCOA
+GMemDC::GMemDC(NSImage *img)
+{
+	d = new GMemDCPrivate;
+	pMem = 0;
+
+	if (img &&
+		Create(img.size.width, img.size.height, System32BitColourSpace) )
+	{
+		NSPoint p = {0.0, 0.0};
+		NSRect r = {{0.0, 0.0}, {img.size.width, img.size.height}};
+		[img drawAtPoint:p fromRect:r operation:NSCompositingOperationCopy fraction:0.0];
+	}
+}
+
 NSImage *GMemDC::NsImage(GRect *rc)
 {
 	if (!pMem || !pMem->Base)

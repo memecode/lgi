@@ -60,22 +60,29 @@
 #define MAX_PATH						260
 
 // File system types (used by GDirectory and GVolume)
-#define VT_NONE							0
-#define VT_3_5FLOPPY					1
-#define VT_5_25FLOPPY					2
-#define VT_HARDDISK						3
-#define VT_CDROM						4
-#define VT_RAMDISK						5
-#define VT_REMOVABLE					6
-#define VT_FOLDER						7
-#define VT_FILE							8
-#define VT_DESKTOP						9
-#define VT_NETWORK_NEIGHBOURHOOD		10
-#define VT_NETWORK_MACHINE				11
-#define VT_NETWORK_SHARE				12
-#define VT_NETWORK_PRINTER				13
-#define VT_NETWORK_GROUP				14	 // e.g. workgroup
-#define VT_MAX							15
+enum LVolumeTypes
+{
+	VT_NONE,
+	VT_FLOPPY,
+	VT_HARDDISK,
+	VT_CDROM,
+	VT_RAMDISK,
+	VT_FOLDER,
+	VT_FILE,
+	VT_DESKTOP,
+	VT_MUSIC,
+	VT_PICTURES,
+	VT_DOWNLOADS,
+	VT_TRASH,
+	VT_USB_FLASH,
+	VT_APPLICATIONS,
+	VT_NETWORK_NEIGHBOURHOOD,
+	VT_NETWORK_MACHINE,
+	VT_NETWORK_SHARE,
+	VT_NETWORK_PRINTER,
+	VT_NETWORK_GROUP,
+	VT_MAX,
+};
 
 // Volume attributes
 #define VA_CASE_SENSITIVE				0x0001
@@ -205,6 +212,7 @@ protected:
 	int _Flags;			// VA_??
 	int64 _Size;
 	int64 _Free;
+	GAutoPtr<GSurface> _Icon;
 
 public:
 	GVolume();
@@ -216,6 +224,7 @@ public:
 	int Flags() { return _Flags; }
 	uint64 Size() { return _Size; }
 	uint64 Free() { return _Free; }
+	GSurface *Icon() { return _Icon; }
 
 	virtual bool IsMounted() = 0;
 	virtual bool SetMounted(bool Mount) = 0;

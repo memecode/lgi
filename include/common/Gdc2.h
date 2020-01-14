@@ -1027,6 +1027,7 @@ public:
 			OsBitmap GetBitmap();
 	
 			#if LGI_COCOA && defined(__OBJC__)
+			GMemDC(NSImage *img);
 			NSImage *NsImage(GRect *rc = NULL);
 			#endif
 	

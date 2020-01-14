@@ -512,49 +512,74 @@ public:
 		{
 			GMacVolume *v = NULL;
 
-			/*
-			// Get various shortcuts to points of interest
-			if (v)
-			{
-				v->_Path = "/";
-				v->_Name = "Root";
-				v->_Type = VT_HARDDISK;
-				_Sub.Insert(v);
-			}
-			
-			struct passwd *pw = getpwuid(getuid());
-			if (pw)
-			{
-				v = new GMacVolume(0);
-				if (v)
+			#if 1
+
+				// List any favorites
+				UInt32 seed;
+				LSSharedFileListRef sflRef = LSSharedFileListCreate(NULL,
+																	kLSSharedFileListFavoriteItems,
+																	NULL);
+				CFArrayRef items = LSSharedFileListCopySnapshot( sflRef, &seed );
+				for( size_t i = 0; i < CFArrayGetCount(items); i++ )
 				{
-					v->_Path = pw->pw_dir;
-					v->_Name = "Home";
-					v->_Type = VT_HARDDISK;
-					_Sub.Insert(v);
-				}
-			}
-			*/
-			
-			// List some user folders
-			const char *n[]   = {"Home",   "Downloads",        "Documents",        "Music",        "Video",        "Pictures"};
-			LgiSystemPath a[] = {LSP_HOME, LSP_USER_DOWNLOADS, LSP_USER_DOCUMENTS, LSP_USER_MUSIC, LSP_USER_VIDEO, LSP_USER_PICTURES};
-			for (int i=0; i<CountOf(a); i++)
-			{
-				GFile::Path p(a[i]);
-				if (p.Exists())
-				{
-					auto f = p.GetFull();
+					LSSharedFileListItemRef item = (LSSharedFileListItemRef)CFArrayGetValueAtIndex(items, i);
+					if( !item )
+						continue;
+					auto outURL = LSSharedFileListItemCopyResolvedURL(item,kLSSharedFileListNoUserInteraction, NULL);
+					if( !outURL )
+						continue;
+					
+					CFStringRef itemPath = CFURLCopyFileSystemPath(outURL,kCFURLPOSIXPathStyle);
+					GString s = itemPath;
+
 					v = new GMacVolume(0);
 					if (v)
 					{
-						v->_Path = f;
-						v->_Name = n[i];
+						v->_Path = s;
+						v->_Name = LgiGetLeaf(s);
 						v->_Type = VT_FOLDER;
+
+						auto IcoRef = LSSharedFileListItemCopyIconRef(item);
+						if (IcoRef)
+						{
+							NSImage *img = [[NSImage alloc] initWithIconRef:IcoRef];
+							_Icon.Reset(new GMemDC(img));							
+							[img release];
+							CFRelease(IcoRef);
+						}
+
 						_Sub.Insert(v);
 					}
+
+					CFRelease(outURL);
+					CFRelease(itemPath);
 				}
-			}
+				CFRelease(items);
+				CFRelease(sflRef);
+
+			#else
+
+				// List some user folders
+				const char *n[]   = {"Home",   "Downloads",        "Documents",        "Music",        "Video",        "Pictures"};
+				LgiSystemPath a[] = {LSP_HOME, LSP_USER_DOWNLOADS, LSP_USER_DOCUMENTS, LSP_USER_MUSIC, LSP_USER_VIDEO, LSP_USER_PICTURES};
+				for (int i=0; i<CountOf(a); i++)
+				{
+					GFile::Path p(a[i]);
+					if (p.Exists())
+					{
+						auto f = p.GetFull();
+						v = new GMacVolume(0);
+						if (v)
+						{
+							v->_Path = f;
+							v->_Name = n[i];
+							v->_Type = VT_FOLDER;
+							_Sub.Insert(v);
+						}
+					}
+				}
+			
+			#endif
 			
 			// List the local hard disks
 			NSWorkspace   *ws = [NSWorkspace sharedWorkspace];
