@@ -3415,8 +3415,61 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	GAutoPtr<GSurface> Local;
 	if (!pDC)
 	{
+<<<<<<< working copy
+		GRect c = Ctrl->View()->GetPos();
+		c.Size(-GOOBER_BORDER, -GOOBER_BORDER);
+
+		GAutoPtr<GSurface> pMemDC(new GMemDC);
+		if (pMemDC &&
+			pMemDC->Create(c.X(), c.Y(), GdcD->GetColourSpace()))
+		{
+			// Draw client
+			pMemDC->Colour(L_WORKSPACE);
+			// pMemDC->Colour(Rgb24(0, 128, 0), 24);
+			pMemDC->Rectangle();
+
+			// Paint children
+			GRect Pos = Ctrl->View()->GetPos();
+			pMemDC->SetClient(&Pos);
+			GView::_Paint(pMemDC);
+			pMemDC->SetClient(0);
+			
+			if (GetParent())
+			{
+                #if 0 //def MAC
+                if (Scr) Scr->PopState();
+                #endif
+				// Draw selection
+				DrawSelection(pMemDC);
+			}
+
+			// Put on screen
+			pMemDC->SetOrigin(0, 0);
+			pDC->Blt(0, 0, pMemDC);
+
+			// Draw other non Mem-DC regions
+			pDC->Colour(L_WORKSPACE);
+			if (X() > c.X())
+			{
+				pDC->Rectangle(c.x2 + 1, 0, X()-1, c.y2);
+			}
+			if (Y() > c.Y())
+			{
+				pDC->Rectangle(0, c.y2 + 1, X()-1, Y()-1);
+			}
+		}
+		else
+		{
+			// error
+			SysFont->Colour(L_TEXT, L_WORKSPACE);
+			SysFont->Transparent(false);
+			GDisplayString Ds(SysFont, "Can't create memory bitmap.");
+			Ds.Draw(pDC, 2, 0, &GetClient());
+		}
+=======
 		if (!Local.Reset(new GScreenDC(this))) return;
 		pDC = Local;
+>>>>>>> destination
 	}
 
 	#if USE_MEM_DC

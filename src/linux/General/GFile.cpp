@@ -644,7 +644,7 @@ public:
 									// char *FileSys = M[2];
 									if (stristr(Device, "fd"))
 									{
-										v->_Type = VT_3_5FLOPPY;
+										v->_Type = VT_FLOPPY;
 									}
 									else if (stristr(Device, "cdrom"))
 									{
