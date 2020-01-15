@@ -3276,25 +3276,11 @@ void GTextView3::OnPosChange()
 	}
 }
 
-int GTextView3::WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState)
+int GTextView3::WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
 {
-	for (auto It = Formats.begin(); It != Formats.end(); )
-	{
-		auto s = *It;
-
-		if (!_stricmp(s, "text/uri-list") ||
-			!_stricmp(s, "text/html") ||
-			!_stricmp(s, "UniformResourceLocatorW"))
-		{
-			It++;
-		}
-		else
-		{
-			Formats.Delete(It);
-			DeleteArray(s);
-		}
-	}
-
+	Formats.Supports("text/uri-list");
+	Formats.Supports("text/html");
+	Formats.Supports("UniformResourceLocatorW");
 	return Formats.Length() ? DROPEFFECT_COPY : DROPEFFECT_NONE;
 }
 

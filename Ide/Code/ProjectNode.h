@@ -74,7 +74,7 @@ public:
 	char *GetCharset() override { return Charset; }
 	
 	// Dnd
-	bool GetFormats(List<char> &Formats) override;
+	bool GetFormats(GDragFormats &Formats) override;
 	bool GetData(GArray<GDragData> &Data) override;
 	
 	// Ui events

@@ -165,32 +165,10 @@ bool GWindow::MoveSameScreen(GViewI *View)
 	return true;
 }
 
-int GWindow::WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState)
+int GWindow::WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
 {
-	int Status = DROPEFFECT_NONE;
-
-	#if DEBUG_DND	
-	LgiTrace("%s:%i - WillAccept Formats=%i Pt=%i,%i Key=0x%x\n", _FL, Formats.Length(), Pt.x, Pt.y, KeyState);
-	#endif
-	for (auto It = Formats.begin(); It != Formats.end(); )
-	{
-		#if DEBUG_DND
-		LgiTrace("\tFmt=%s\n", f);
-		#endif
-		auto f = *It;
-		if (!stricmp(f, LGI_FileDropFormat))
-		{
-			It++;
-			Status = DROPEFFECT_COPY;
-		}
-		else
-		{
-			Formats.Delete(It);
-			DeleteArray(f);
-		}
-	}
-	
-	return Status;
+	Formats.SupportsFileDrops();
+	return true;
 }
 
 int GWindow::OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)

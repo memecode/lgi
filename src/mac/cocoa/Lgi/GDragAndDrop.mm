@@ -97,18 +97,13 @@ public:
 	GRect ExternSubRgn;
 	int Effect;
 	GMemDC Icon;
-	List<char> Formats;
+	GDragFormats Formats;
 
-	GDndSourcePriv()
+	GDndSourcePriv() : Formats(true)
 	{
 		Effect = 0;
 		ExternImg = NULL;
 		ExternSubRgn.ZOff(-1, -1);
-	}
-
-	~GDndSourcePriv()
-	{
-		Formats.DeleteArrays();
 	}
 };
 
@@ -425,14 +420,14 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	auto pt = Event.p.locationInWindow;
 	pt.y -= Mem->Y();
 	
-	List<char> Formats;
+	GDragFormats Formats(true);
 	if (!GetFormats(Formats))
 		return DROPEFFECT_NONE;
 
 	GArray<GDragData> Data;
-	for (auto f: Formats)
+	for (auto f: Formats.Formats)
 		Data.New().Format = f;
-	Formats.DeleteArrays();
+	Formats.Empty();
 
 	if (!GetData(Data))
 		return DROPEFFECT_NONE;
@@ -546,14 +541,13 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-GDragDropTarget::GDragDropTarget()
+GDragDropTarget::GDragDropTarget() : Formats(false)
 {
 	To = 0;
 }
 
 GDragDropTarget::~GDragDropTarget()
 {
-	Formats.DeleteArrays();
 }
 
 void GDragDropTarget::SetWindow(GView *to)
@@ -574,3 +568,70 @@ void GDragDropTarget::SetWindow(GView *to)
 		}
 	}
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+GDragFormats::GDragFormats(bool source)
+{
+	Source = source;
+}
+
+GString GDragFormats::ToString()
+{
+	GStringPipe p(256);
+	p.Print("{");
+	for (auto &f: Formats)
+		p.Print("%s,", f.Get());
+	p.Print("}");
+	return p.NewGStr();
+}
+
+void GDragFormats::SupportsFileDrops()
+{
+	#ifdef MAC
+	Supports("NSFilenamesPboardType");
+	#endif
+	Supports(LGI_FileDropFormat);
+}
+
+void GDragFormats::SupportsFileStreams()
+{
+	Supports(LGI_StreamDropFormat);
+}
+
+bool GDragFormats::HasFormat(const char *Fmt)
+{
+	for (auto f: Formats)
+		if (f.Equals(Fmt))
+			return true;
+	return false;
+}
+
+void GDragFormats::Supports(const char *Fmt)
+{
+	if (Source)
+	{
+		// Drag sources just add the formats to the list
+		if (!HasFormat(Fmt))
+			Formats.New().Set(Fmt);
+	}
+	else
+	{
+		// Drag targets mark the supported formats
+		for (auto &f: Formats)
+		{
+			if (f.Equals(Fmt))
+				f.Val = true;
+		}
+	}
+}
+
+GString::Array GDragFormats::GetSupported()
+{
+	GString::Array a;
+	a.SetFixedLength(false);
+	for (auto &f: Formats)
+		if (f.Val)
+			a.Add(f);
+	return a;
+}
+

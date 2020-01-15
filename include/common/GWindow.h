@@ -233,7 +233,7 @@ public:
 	GRect &GetPos();
 
 	// D'n'd
-	int WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState);
+	int WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState);
 	int OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState);
 
 	#if !WINNATIVE

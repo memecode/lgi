@@ -114,13 +114,14 @@ struct DndEvent
 	LCocoaView *cv;
 	GViewI *v;
 	GDragDropTarget *target;
-	List<char> InputFmts, AcceptedFmts;
+	GDragFormats InputFmts, AcceptedFmts;
 	GdcPt2 Pt;
 	int Keys;
 
 	int result;
 	
-	DndEvent(LCocoaView *Cv, id <NSDraggingInfo> sender) : cv(Cv)
+	DndEvent(LCocoaView *Cv, id <NSDraggingInfo> sender) :
+		cv(Cv), InputFmts(true), AcceptedFmts(false)
 	{
 		v = cv.w;
 		target = NULL;
@@ -138,17 +139,11 @@ struct DndEvent
 		{
 			for (id type in pb.types)
 			{
-				auto s = NewStr([type UTF8String]);
-				InputFmts.Add(s);
-				printf("Drop has type '%s'\n", s);
+				auto f = [type UTF8String];
+				InputFmts.Supports(f);
+				printf("Drop has type '%s'\n", f);
 			}
 		}
-	}
-	
-	~DndEvent()
-	{
-		InputFmts.DeleteArrays();
-		AcceptedFmts.DeleteArrays();
 	}
 	
 	void setPoint(NSPoint loc)
@@ -451,10 +446,13 @@ GKey KeyEvent(NSEvent *ev)
 
 void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 {
-	e.AcceptedFmts.DeleteArrays();
+	e.AcceptedFmts.Empty();
+	e.AcceptedFmts.SetSource(true);
 	GString LgiFmt = LBinaryDataPBoardType;
-	for (auto f: e.InputFmts)
+	for (size_t i=0; i<e.InputFmts.Length(); i++)
 	{
+		auto f = e.InputFmts[i];
+		
 		if (LgiFmt.Equals(f))
 		{
 			NSString *nsFmt = LgiFmt.NsStr();
@@ -467,15 +465,16 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 				[bin release];
 				
 				if (realFmt)
-					e.AcceptedFmts.Add(NewStr(realFmt));
+					e.AcceptedFmts.Supports(realFmt);
 			}
 			[nsFmt release];
 		}
 		else
 		{
-			e.AcceptedFmts.Add(NewStr(f));
+			e.AcceptedFmts.Supports(f);
 		}
 	}
+	e.AcceptedFmts.SetSource(false);
 }
 
 - (NSDragOperation)draggingEntered:(id <NSDraggingInfo>)sender
@@ -544,7 +543,9 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 
 	GArray<GDragData> Data;
 	auto pb = sender.draggingPasteboard;
-	for (auto f: e.AcceptedFmts)
+	
+	auto Accepted = e.AcceptedFmts.GetSupported();
+	for (auto &f: Accepted)
 	{
 		auto &dd = Data.New();
 		dd.Format = f;

@@ -89,6 +89,40 @@ struct LgiClass GDragData
 	}
 };
 
+class LgiClass GDragFormats
+{
+	friend class GDragDropSource;
+	bool Source;
+	
+	struct Fmt : public GString
+	{
+		bool Val;
+		Fmt()
+		{
+			Val = false;
+		}
+	};
+	
+	GArray<Fmt> Formats;
+
+public:
+	GDragFormats(bool source);
+
+	bool IsSource() { return Source; }
+	void SetSource(bool s) { Source = s; }
+	GString ToString();
+	size_t Length() { return Formats.Length(); }
+	void Empty() { Formats.Empty(); }
+	const char *operator[](ssize_t Idx) { return Formats.IdxCheck(Idx) ? Formats[Idx] : NULL; }
+	
+	bool HasFormat(const char *Fmt);
+
+	void SupportsFileDrops();
+	void SupportsFileStreams();
+	void Supports(const char *Fmt);
+	GString::Array GetSupported();
+};
+
 /// A drag source class
 class LgiClass GDragDropSource
 #if WINNATIVE
@@ -174,7 +208,7 @@ public:
 	(
 		/// List of format you can provide. You should keep the format
 		/// length to 4 bytes on the Mac.
-		List<char> &Formats
+		GDragFormats &Formats
 	)
 	{ return false; }
 
@@ -190,7 +224,7 @@ class LgiClass GDragDropTarget
 {
 private:
 	GView *To;
-	List<char> Formats;
+	GDragFormats Formats;
 
 	#ifdef __GTK_H__
 	friend Gtk::gboolean GWindowDragDataDrop(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::guint time, class GWindow *Wnd);
@@ -250,7 +284,7 @@ public:
 	virtual int WillAccept
 	(
 		/// The list of formats the source provides, delete any you can't handle
-		List<char> &Formats,
+		GDragFormats &Formats,
 		/// The mouse pointer in view space co-ords
 		GdcPt2 Pt,
 		/// The current keyboard mobifiers

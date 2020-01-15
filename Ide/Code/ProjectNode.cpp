@@ -374,9 +374,9 @@ IdeProject *ProjectNode::GetProject()
 	return Project;
 }
 
-bool ProjectNode::GetFormats(List<char> &Formats)
+bool ProjectNode::GetFormats(GDragFormats &Formats)
 {
-	Formats.Insert(NewStr(NODE_DROP_FORMAT));
+	Formats.Supports(NODE_DROP_FORMAT);
 	return true;
 }
 
