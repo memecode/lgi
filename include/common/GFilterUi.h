@@ -65,7 +65,7 @@ public:
 
 	// Dnd
 	bool OnBeginDrag(GMouse &m);
-	bool GetFormats(List<char> &Formats);
+	bool GetFormats(GDragFormats &Formats);
 	bool GetData(GArray<GDragData> &Data);
 };
 

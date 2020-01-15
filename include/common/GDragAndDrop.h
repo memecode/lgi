@@ -92,6 +92,9 @@ struct LgiClass GDragData
 class LgiClass GDragFormats
 {
 	friend class GDragDropSource;
+	friend class GDataObject;
+	friend class GDragDropTarget;
+
 	bool Source;
 	
 	struct Fmt : public GString
@@ -113,13 +116,13 @@ public:
 	GString ToString();
 	size_t Length() { return Formats.Length(); }
 	void Empty() { Formats.Empty(); }
-	const char *operator[](ssize_t Idx) { return Formats.IdxCheck(Idx) ? Formats[Idx] : NULL; }
+	const char *operator[](ssize_t Idx) { return Formats.IdxCheck(Idx) ? Formats[Idx].Get() : NULL; }
 	
 	bool HasFormat(const char *Fmt);
 
 	void SupportsFileDrops();
 	void SupportsFileStreams();
-	void Supports(const char *Fmt);
+	void Supports(GString Fmt);
 	GString::Array GetSupported();
 };
 

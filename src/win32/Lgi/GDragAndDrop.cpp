@@ -114,10 +114,10 @@ HRESULT GDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 	HRESULT Ret = E_INVALIDARG;
 
 	int CurFormat = 0;
-	List<char> Formats;
+	GDragFormats Formats(true);
 	Source->d->CurData.Length(0);
 	Source->GetFormats(Formats);
-	for (auto f: Formats)
+	for (auto f: Formats.Formats)
 	{
 		int n = FormatToInt(f);
 		char *efmt = FormatToStr(pFormatEtc->cfFormat);
@@ -128,7 +128,7 @@ HRESULT GDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 			CurData.Format = f;
 		}
 	}
-	Formats.DeleteArrays();
+	Formats.Empty();
 
 	#ifdef DND_DEBUG_TRACE
 	LgiTrace(	"GetData 0, pFormatEtc{'%s',%p,%i,%i,%i} PMedium{%i} CurrentFormat=%s",
@@ -236,17 +236,17 @@ HRESULT GDataObject::QueryGetData(FORMATETC *pFormatEtc)
 	{
 		Ret = S_OK;
 
-		List<char> Formats;
+		GDragFormats Formats(true);
 		Source->GetFormats(Formats);
 		bool HaveFormat = false;
-		for (auto i: Formats)
+		for (auto i: Formats.Formats)
 		{
 			if (pFormatEtc->cfFormat == FormatToInt(i))
 			{
 				HaveFormat = true;
 			}
 		}
-		Formats.DeleteArrays();
+		Formats.Empty();
 
 		if (!HaveFormat)
 		{
@@ -427,11 +427,11 @@ GDragDropSource::Next(ULONG celt, FORMATETC *rgelt, ULONG *pceltFetched)
 	LgiTrace("Next[%i]=", Index);
 	#endif
 
-	List<char> Formats;
+	GDragFormats Formats(true);
 	if (rgelt &&
 		GetFormats(Formats))
 	{
-		char *i = Formats.ItemAt(Index);
+		auto i = Formats[Index];
 
 		if (pceltFetched)
 		{
@@ -454,8 +454,6 @@ GDragDropSource::Next(ULONG celt, FORMATETC *rgelt, ULONG *pceltFetched)
 			Ret = S_OK;
 		}
 	}
-
-	Formats.DeleteArrays();
 
 	return Ret;
 }
@@ -525,7 +523,7 @@ GDragDropSource::GiveFeedback(DWORD dwEffect)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-GDragDropTarget::GDragDropTarget()
+GDragDropTarget::GDragDropTarget() : Formats(true)
 {
 	To = 0;
 
@@ -537,7 +535,6 @@ GDragDropTarget::GDragDropTarget()
 
 GDragDropTarget::~GDragDropTarget()
 {
-	Formats.DeleteArrays();
 }
 
 void GDragDropTarget::SetWindow(GView *to)
@@ -610,7 +607,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::DragEnter(IDataObject *pDataObject, D
 	GdcPt2 Pt(p.x, p.y);
 
 	// Clean out format list
-	Formats.DeleteArrays();
+	Formats.Empty();
 
 	// Something from another app, enum the formats.
 	IEnumFORMATETC *FormatETC = 0;
@@ -628,7 +625,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::DragEnter(IDataObject *pDataObject, D
 			{
 				char *s = FormatToStr(Format.cfFormat);
 				if (s)
-					Formats.Insert(NewStr(s));
+					Formats.Supports(s);
 			}
 		}
 		FormatETC->Release();
@@ -698,7 +695,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::Drop(IDataObject *pDataObject, DWORD 
 	GdcPt2 Pt(p.x, p.y);
 
 	GArray<GDragData> Data;	
-	for (auto FormatName: Formats)
+	for (auto FormatName: Formats.Formats)
 	{
 		GString Str;
 		bool IsStreamDrop = !_stricmp(FormatName, Str = LGI_StreamDropFormat);

@@ -103,30 +103,14 @@ public:
 	}
 
 	// Dnd
-	int WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState)
+	int WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
 	{
 		GFilterItem *i = dynamic_cast<GFilterItem*>(ItemAtPoint(Pt.x, Pt.y));
 		if (!i || i->GetNode() == LNODE_NEW)
-		{
 			return DROPEFFECT_NONE;
-		}
 		
 		SelectDropTarget(i);
-
-		for (auto It = Formats.begin(); It != Formats.end(); )
-		{
-			auto f = *It;
-			if (!_stricmp(f, FILTER_DRAG_FORMAT))
-			{
-				It++;
-			}
-			else
-			{
-				Formats.Delete(f);
-				DeleteArray(f);
-			}
-		}
-		
+		Formats.Supports(FILTER_DRAG_FORMAT);
 		return DROPEFFECT_MOVE;
 	}
 	
@@ -937,9 +921,9 @@ bool GFilterItem::OnBeginDrag(GMouse &m)
 	return true;
 }
 
-bool GFilterItem::GetFormats(List<char> &Formats)
+bool GFilterItem::GetFormats(GDragFormats &Formats)
 {
-	Formats.Add(NewStr(FILTER_DRAG_FORMAT));
+	Formats.Supports(FILTER_DRAG_FORMAT);
 	return true;
 }
 

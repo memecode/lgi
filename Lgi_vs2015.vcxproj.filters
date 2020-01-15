@@ -488,6 +488,9 @@
     <ClCompile Include="src\common\Lgi\GDropFiles.cpp">
       <Filter>Source Files\Core\Drag and Drop</Filter>
     </ClCompile>
+    <ClCompile Include="src\common\Lgi\GDragAndDropCommon.cpp">
+      <Filter>Source Files\Core\Drag and Drop</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\common\GLibrary.h">

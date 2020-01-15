@@ -1114,24 +1114,12 @@ void GRichTextEdit::OnPosChange()
 	GLayout::OnPosChange();
 }
 
-int GRichTextEdit::WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState)
+int GRichTextEdit::WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
 {
-	const char *Fd = LGI_FileDropFormat;
-
-	for (auto It = Formats.begin(); It != Formats.end(); )
-	{
-		auto s = *It;
-		if (!_stricmp(s, Fd) ||
-			!_stricmp(s, "UniformResourceLocatorW"))
-		{
-			It++;
-		}
-		else
-		{
-			Formats.Delete(It);
-			DeleteArray(s);
-		}
-	}
+	Formats.SupportsFileDrops();
+	#ifdef WINDOWS
+	Formats.Supports("UniformResourceLocatorW");
+	#endif
 
 	return Formats.Length() ? DROPEFFECT_COPY : DROPEFFECT_NONE;
 }

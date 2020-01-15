@@ -398,6 +398,10 @@ GVolume::GVolume()
 	_Free = 0;
 }
 
+GVolume::~GVolume()
+{
+}
+
 class GWin32Volume : public GVolume
 {
 	bool IsRoot;
@@ -446,13 +450,11 @@ public:
 			{
 				case DRIVE_REMOVABLE:
 				{
-					_Type = VT_REMOVABLE;
+					_Type = VT_FLOPPY;
 
 					if (GetVolumeInformationA(Drive, Buf, sizeof(Buf), 0, 0, 0, 0, 0) &&
 						ValidStr(Buf))
-					{
 						Desc = Buf;
-					}
 					break;
 				}
 				case DRIVE_REMOTE:

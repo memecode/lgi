@@ -216,7 +216,7 @@ protected:
 
 public:
 	GVolume();
-	virtual ~GVolume() {}
+	virtual ~GVolume();
 
 	char *Name() { return _Name; }
 	char *Path() { return _Path; }
