@@ -206,32 +206,27 @@ class LgiClass GVolume
 	friend class GFileSystem;
 
 protected:
-	GString _Name;
-	GString _Path;
-	int _Type;			// VT_??
-	int _Flags;			// VA_??
-	int64 _Size;
-	int64 _Free;
-	GAutoPtr<GSurface> _Icon;
+	struct GVolumePriv *d;
 
 public:
-	GVolume();
+	GVolume(const char *Path = NULL);
+	GVolume(LgiSystemPath SysPath, const char *Name);
 	virtual ~GVolume();
 
-	char *Name() { return _Name; }
-	char *Path() { return _Path; }
-	int Type() { return _Type; } // VT_??
-	int Flags() { return _Flags; }
-	uint64 Size() { return _Size; }
-	uint64 Free() { return _Free; }
-	GSurface *Icon() { return _Icon; }
+	char *Name();
+	char *Path();
+	int Type();
+	int Flags();
+	uint64 Size();
+	uint64 Free();
+	GSurface *Icon();
 
-	virtual bool IsMounted() = 0;
-	virtual bool SetMounted(bool Mount) = 0;
-	virtual GVolume *First() = 0;
-	virtual GVolume *Next() = 0;
-	virtual GDirectory *GetContents() = 0;
-	virtual void Insert(GAutoPtr<GVolume> v) = 0;
+	virtual bool IsMounted();
+	virtual bool SetMounted(bool Mount);
+	virtual GVolume *First();
+	virtual GVolume *Next();
+	virtual GDirectory *GetContents();
+	virtual void Insert(GAutoPtr<GVolume> v);
 };
 
 typedef int (*CopyFileCallback)(void *token, int64 Done, int64 Total);

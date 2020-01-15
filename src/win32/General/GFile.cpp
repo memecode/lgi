@@ -15,9 +15,7 @@
 #include <fcntl.h>
 #include <Userenv.h>
 
-#include "LgiInc.h"
-#include "LgiOsDefs.h"
-#include "GVariant.h"
+#include "Lgi.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -27,16 +25,6 @@
 #include <direct.h>
 #include <tchar.h>
 #endif
-
-#include "GFile.h"
-#include "GContainers.h"
-#include "GLibrary.h"
-#include "GToken.h"
-#include "LgiCommon.h"
-#include "LMutex.h"
-#include "GString.h"
-#include "GLibrary.h"
-#include "LThread.h"
 
 /****************************** Defines *************************************************************************************/
 #define FILEDEBUG
@@ -390,30 +378,33 @@ bool LgiGetDriveInfo
 }
  
 /****************************** Classes ***************************************/
-GVolume::GVolume()
+struct GVolumePriv
 {
-	_Type = VT_NONE;
-	_Flags = 0;
-	_Size = 0;
-	_Free = 0;
-}
-
-GVolume::~GVolume()
-{
-}
-
-class GWin32Volume : public GVolume
-{
+	GString Name;
+	GString Path;
+	int Type;			// VT_??
+	int Flags;			// VA_??
+	int64 Size;
+	int64 Free;
+	GAutoPtr<GSurface> Icon;
 	bool IsRoot;
-	List<GVolume> _Sub;
-	List<GVolume>::I _It;
+	List<GVolume> Sub;
+	List<GVolume>::I It;
 
-public:
-	GWin32Volume(LgiSystemPath Type, char *Name) : _It(_Sub.end())
+	void Init()
 	{
+		Type = VT_NONE;
+		Flags = 0;
+		Size = 0;
+		Free = 0;
+	}
+
+	GVolumePriv(LgiSystemPath SysPath, const char *Name) : It(Sub.end())
+	{
+		Init();
 		IsRoot = Type == LSP_ROOT;
-		_Name = Name;
-		_Type = VT_FOLDER;
+		Name = Name;
+		Type = VT_FOLDER;
 
 		int Id = 0;
 		switch (Type)
@@ -425,20 +416,21 @@ public:
 			}
 			case LSP_DESKTOP:
 			{
-				_Type = VT_DESKTOP;
+				Type = VT_DESKTOP;
 				Id = CSIDL_DESKTOPDIRECTORY;
 				break;
 			}
 		}
 		
 		if (Id)
-			_Path = WinGetSpecialFolderPath(Id);
+			Path = WinGetSpecialFolderPath(Id);
 		else
-			_Path = LGetSystemPath(Type);
+			Path = LGetSystemPath(SysPath);
 	}
 
-	GWin32Volume(const char *Drive) : _It(_Sub.end())
+	GVolumePriv(const char *Drive) : It(Sub.end())
 	{
+		Init();
 		IsRoot = false;
 		int type = GetDriveTypeA(Drive);
 		if (type != DRIVE_UNKNOWN &&
@@ -450,7 +442,7 @@ public:
 			{
 				case DRIVE_REMOVABLE:
 				{
-					_Type = VT_FLOPPY;
+					Type = VT_FLOPPY;
 
 					if (GetVolumeInformationA(Drive, Buf, sizeof(Buf), 0, 0, 0, 0, 0) &&
 						ValidStr(Buf))
@@ -459,15 +451,15 @@ public:
 				}
 				case DRIVE_REMOTE:
 					Desc = "Network";
-					_Type = VT_NETWORK_SHARE;
+					Type = VT_NETWORK_SHARE;
 					break;
 				case DRIVE_CDROM:
 					Desc = "Cdrom";
-					_Type = VT_CDROM;
+					Type = VT_CDROM;
 					break;
 				case DRIVE_RAMDISK:
 					Desc = "Ramdisk";
-					_Type = VT_RAMDISK;
+					Type = VT_RAMDISK;
 					break;
 				case DRIVE_FIXED:
 				default:
@@ -481,7 +473,7 @@ public:
 					{
 						Desc = "Hard Disk";
 					}
-					_Type = VT_HARDDISK;
+					Type = VT_HARDDISK;
 					break;
 				}
 			}
@@ -490,82 +482,106 @@ public:
 			{
 				char s[DIR_PATH_SIZE];
 				sprintf_s(s, sizeof(s), "%s (%.2s)", Desc, Drive);
-				_Name = s;
+				Name = s;
 			}
 			
-			_Path = Drive;
+			Path = Drive;
 		}
 	}
 
-	~GWin32Volume()
+	~GVolumePriv()
 	{
-		_Sub.DeleteObjects();
-	}
-
-	bool IsMounted()
-	{
-		return false;
-	}
-
-	bool SetMounted(bool Mount)
-	{
-		return Mount;
-	}
-
-	void Insert(GAutoPtr<GVolume> v)
-	{
-		_Sub.Insert(v.Release());		
-	}
-	
-	GVolume *First()
-	{
-		if (IsRoot)
-		{
-			// Get drive list
-			IsRoot = false;
-			
-			char Str[512];
-			if (GetLogicalDriveStringsA(sizeof(Str), Str) > 0)
-			{
-				for (char *d = Str; *d; d += strlen(d) + 1)
-				{
-					GWin32Volume *v = new GWin32Volume(d);
-					if (v)
-					{
-						if (v->Name())
-							_Sub.Insert(v);
-						else
-							DeleteObj(v);
-					}
-				}
-			}
-		}
-
-		_It = _Sub.begin();
-		return *_It;
-	}
-
-	GVolume *Next()
-	{
-		return *(++_It);
-	}
-
-	GDirectory *GetContents()
-	{
-		GDirectory *Dir = 0;
-		if (_Path.Get())
-		{
-			if (Dir = new GDirectory)
-			{
-				if (!Dir->First(_Path))
-				{
-					DeleteObj(Dir);
-				}
-			}
-		}
-		return Dir;
+		Sub.DeleteObjects();
 	}
 };
+
+GVolume::GVolume(const char *Path)
+{
+	d = new GVolumePriv(Path);
+}
+
+GVolume::GVolume(LgiSystemPath SysPath, const char *Name)
+{
+	d = new GVolumePriv(SysPath, Name);
+}
+
+GVolume::~GVolume()
+{
+	DeleteObj(d);
+}
+
+char *GVolume::Name() { return d->Name; }
+char *GVolume::Path() { return d->Path; }
+int GVolume::Type() { return d->Type; } // VT_??
+int GVolume::Flags() { return d->Flags; }
+uint64 GVolume::Size() { return d->Size; }
+uint64 GVolume::Free() { return d->Free; }
+GSurface *GVolume::Icon() { return d->Icon; }
+
+
+bool GVolume::IsMounted()
+{
+	return false;
+}
+
+bool GVolume::SetMounted(bool Mount)
+{
+	return Mount;
+}
+
+void GVolume::Insert(GAutoPtr<GVolume> v)
+{
+	d->Sub.Insert(v.Release());		
+}
+	
+GVolume *GVolume::First()
+{
+	if (d->IsRoot)
+	{
+		// Get drive list
+		d->IsRoot = false;
+			
+		char Str[512];
+		if (GetLogicalDriveStringsA(sizeof(Str), Str) > 0)
+		{
+			for (char *p = Str; *p; p += strlen(p) + 1)
+			{
+				GVolume *v = new GVolume(p);
+				if (v)
+				{
+					if (v->Name())
+						d->Sub.Insert(v);
+					else
+						DeleteObj(v);
+				}
+			}
+		}
+	}
+
+	d->It = d->Sub.begin();
+	return *d->It;
+}
+
+GVolume *GVolume::Next()
+{
+	return *(++d->It);
+}
+
+GDirectory *GVolume::GetContents()
+{
+	GDirectory *Dir = 0;
+	if (d->Path.Get())
+	{
+		if (Dir = new GDirectory)
+		{
+			if (!Dir->First(d->Path))
+			{
+				DeleteObj(Dir);
+			}
+		}
+	}
+	return Dir;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 GFileSystem *GFileSystem::Instance = 0;
@@ -604,11 +620,11 @@ GVolume *GFileSystem::GetRootVolume()
 {
 	if (!Root)
 	{
-		Root = new GWin32Volume(LSP_ROOT, "Computer");
+		Root = new GVolume(LSP_ROOT, "Computer");
 		
-		GAutoPtr<GVolume> v(new GWin32Volume(LSP_DESKTOP, "Desktop"));
+		GAutoPtr<GVolume> v(new GVolume(LSP_DESKTOP, "Desktop"));
 		Root->Insert(v);
-		v.Reset(new GWin32Volume(LSP_USER_DOWNLOADS, "Downloads"));
+		v.Reset(new GVolume(LSP_USER_DOWNLOADS, "Downloads"));
 		Root->Insert(v);
 	}
 
@@ -798,7 +814,7 @@ bool GFileSystem::CreateFolder(const char *PathName, bool CreateParentFoldersIfN
 			}
 			while (!DirExists(Base));
 			
-			GToken Parts(PathName + strlen(Base), DIR_STR);
+			GString::Array Parts = GString(PathName + strlen(Base)).SplitDelimit(DIR_STR);
 			for (int i=0; i<Parts.Length(); i++)
 			{
 				LgiMakePath(Base, sizeof(Base), Base, Parts[i]);

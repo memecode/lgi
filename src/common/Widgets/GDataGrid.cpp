@@ -592,17 +592,10 @@ void GDataGrid::SetDndFormats(char *SrcFmt, char *AcceptFmt)
 	d->AcceptFmt = AcceptFmt;
 }
 
-int GDataGrid::WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState)
+int GDataGrid::WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
 {
-	for (auto f: Formats)
-	{
-		if (d->AcceptFmt && !stricmp(f, d->AcceptFmt))
-		{
-			return DROPEFFECT_COPY;
-		}
-	}
-
-	return DROPEFFECT_NONE;
+	Formats.Supports(d->AcceptFmt);
+	return Formats.GetSupported().Length() ? DROPEFFECT_COPY : DROPEFFECT_NONE;
 }
 
 GDataGrid::ItemArray *GDataGrid::GetDroppedItems()
@@ -649,12 +642,12 @@ void GDataGrid::OnItemBeginDrag(LListItem *Item, GMouse &m)
 	Drag(this, m.Event, DROPEFFECT_COPY);
 }
 
-bool GDataGrid::GetFormats(List<char> &Formats)
+bool GDataGrid::GetFormats(GDragFormats &Formats)
 {
 	if (!d->SrcFmt)
 		return false;
 
-	Formats.Insert(NewStr(d->SrcFmt));
+	Formats.Supports(d->SrcFmt);
 	return true;
 }
 
