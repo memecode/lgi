@@ -59,7 +59,11 @@ struct LgiClass GDragData
 	// \sa GDropFiles
 	bool IsFileDrop()
 	{
-		return IsFormat(LGI_FileDropFormat);
+		return IsFormat(LGI_FileDropFormat)
+			#ifdef MAC
+			|| IsFormat("NSFilenamesPboardType")
+			#endif
+			;
 	}
 	
 	bool IsFileStream()
