@@ -3707,11 +3707,33 @@ void IdeTree::OnDragExit()
 int IdeTree::WillAccept(List<char> &Formats, GdcPt2 p, int KeyState)
 {
 	static bool First = true;
+	bool HasFilesType = false;
+	
+	#if LGI_COCOA
+	GString NSFilenamesPboardType = "NSFilenamesPboardType";
+	for (auto f: Formats)
+	{
+		if (NSFilenamesPboardType.Equals(f))
+			HasFilesType = true;
+	}
+	#endif
 	
 	for (auto It = Formats.begin(); It != Formats.end(); )
 	{
 		auto f = *It;
-		if (stricmp(f, NODE_DROP_FORMAT) == 0 ||
+		if (HasFilesType)
+		{
+			#if LGI_COCOA
+			if (NSFilenamesPboardType.Equals(f))
+				It++;
+			else
+			{
+				Formats.Delete(It);
+				DeleteArray(f);
+			}
+			#endif
+		}
+		else if (stricmp(f, NODE_DROP_FORMAT) == 0 ||
 			stricmp(f, LGI_FileDropFormat) == 0)
 		{
 			It++;
@@ -3730,7 +3752,7 @@ int IdeTree::WillAccept(List<char> &Formats, GdcPt2 p, int KeyState)
 		Hit = ItemAtPoint(p.x, p.y);
 		if (Hit)
 		{
-			if (!stricmp(Formats[0], LGI_FileDropFormat))
+			if (HasFilesType || !stricmp(Formats[0], LGI_FileDropFormat))
 			{
 				SelectDropTarget(Hit);
 				return DROPEFFECT_LINK;

@@ -3,6 +3,7 @@
 
 #include "GVariant.h"
 #include "GArray.h"
+#include "GXmlTree.h"
 
 #if WINNATIVE
 #include <Shlobj.h>
@@ -15,11 +16,14 @@ LgiFunc bool LMacFileToPath(GAutoString &a);
 
 class GDropFiles : public GArray<char*>
 {
+	GString Fmt;
+
 public:
 	GDropFiles(GDragData &dd)
 	{
-		if (!_stricmp(dd.Format, LGI_FileDropFormat))
+		if (dd.IsFileDrop())
 		{
+			Fmt = dd.Format;
 			for (unsigned i=0; i<dd.Data.Length(); i++)
 				Init(dd.Data[i]);
 		}
@@ -141,7 +145,30 @@ public:
 				else if (v->Type == GV_BINARY)
 					s.Set((char*)v->Value.Binary.Data, v->Value.Binary.Length);
 
-				if (s)
+				if (!s)
+					return;
+
+				if (Fmt.Equals("NSFilenamesPboardType"))
+				{
+					GXmlTree t;
+					GXmlTag r;
+					GMemStream ms(v->Value.Binary.Data, v->Value.Binary.Length, false);
+					printf("s=%s\n", s.Get());
+					if (t.Read(&r, &ms))
+					{
+						auto Arr = r.GetChildTag("array");
+						if (!Arr) return;
+						for (auto c: Arr->Children)
+						{
+							if (c->IsTag("string"))
+							{
+								auto fn = c->GetContent();
+								Add(NewStr(fn));
+							}
+						}
+					}
+				}
+				else
 				{
 					GUri u(s);
 					if
