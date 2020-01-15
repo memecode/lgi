@@ -450,212 +450,282 @@ bool LgiGetDriveInfo
 }
 
 /****************************** Classes *************************************************************************************/
-GVolume::GVolume()
-{
-	_Type = VT_NONE;
-	_Flags = 0;
-	_Size = 0;
-	_Free = 0;
-}
-
 /////////////////////////////////////////////////////////////////////////
 #include <sys/types.h>
 #include <pwd.h>
 
-class GMacVolume : public GVolume
+struct GVolumePriv
 {
-	int Which;
-	List<GVolume> _Sub;
-	List<GVolume>::I _It;
+	GString Name;
+	GString Path;
+	int Type;			// VT_??
+	int Flags;			// VA_??
+	int64 Size;
+	int64 Free;
+	GAutoPtr<GSurface> Icon;
 
-public:
-	GMacVolume(int w) : _It(_Sub.end())
+	LgiSystemPath SysPath;
+	List<GVolume> Sub;
+	List<GVolume>::I It;
+
+	void Init()
 	{
-		Which = w;
-		_Type = VT_NONE;
-		_Flags = 0;
-		_Size = 0;
-		_Free = 0;
+		Type = VT_NONE;
+		Flags = 0;
+		Size = 0;
+		Free = 0;
+		SysPath = LSP_ROOT;
+	}
+
+	GVolumePriv(const char *init) : It(Sub.end())
+	{
+		Init();
 		
-		if (Which < 0)
+		if (init)
 		{
-			_Name = "Desktop";
-			_Type = VT_DESKTOP;
-			_Path = LGetSystemPath(LSP_DESKTOP);
+			Name = LgiGetLeaf(init);
+			Type = VT_FOLDER;
+			Path = init;
 		}
 	}
-	
-	~GMacVolume()
+
+	GVolumePriv(LgiSystemPath type, const char *name) : It(Sub.end())
 	{
-		_Sub.DeleteObjects();
-	}
-	
-	bool IsMounted()
-	{
-		return false;
-	}
-	
-	bool SetMounted(bool Mount)
-	{
-		return Mount;
-	}
-	
-	void Insert(GAutoPtr<GVolume> v)
-	{
-		_Sub.Insert(v.Release());
-	}
-	
-	GVolume *First()
-	{
-		if (Which < 0 &&
-			!_Sub.Length())
-		{
-			GMacVolume *v = NULL;
-
-			#if 1
-
-				// List any favorites
-				UInt32 seed;
-				LSSharedFileListRef sflRef = LSSharedFileListCreate(NULL,
-																	kLSSharedFileListFavoriteItems,
-																	NULL);
-				CFArrayRef items = LSSharedFileListCopySnapshot( sflRef, &seed );
-				for( size_t i = 0; i < CFArrayGetCount(items); i++ )
-				{
-					LSSharedFileListItemRef item = (LSSharedFileListItemRef)CFArrayGetValueAtIndex(items, i);
-					if( !item )
-						continue;
-					auto outURL = LSSharedFileListItemCopyResolvedURL(item,kLSSharedFileListNoUserInteraction, NULL);
-					if( !outURL )
-						continue;
-					
-					CFStringRef itemPath = CFURLCopyFileSystemPath(outURL,kCFURLPOSIXPathStyle);
-					GString s = itemPath;
-
-					v = new GMacVolume(0);
-					if (v)
-					{
-						v->_Path = s;
-						v->_Name = LgiGetLeaf(s);
-						v->_Type = VT_FOLDER;
-
-						auto IcoRef = LSSharedFileListItemCopyIconRef(item);
-						if (IcoRef)
-						{
-							NSImage *img = [[NSImage alloc] initWithIconRef:IcoRef];
-							_Icon.Reset(new GMemDC(img));							
-							[img release];
-							CFRelease(IcoRef);
-						}
-
-						_Sub.Insert(v);
-					}
-
-					CFRelease(outURL);
-					CFRelease(itemPath);
-				}
-				CFRelease(items);
-				CFRelease(sflRef);
-
-			#else
-
-				// List some user folders
-				const char *n[]   = {"Home",   "Downloads",        "Documents",        "Music",        "Video",        "Pictures"};
-				LgiSystemPath a[] = {LSP_HOME, LSP_USER_DOWNLOADS, LSP_USER_DOCUMENTS, LSP_USER_MUSIC, LSP_USER_VIDEO, LSP_USER_PICTURES};
-				for (int i=0; i<CountOf(a); i++)
-				{
-					GFile::Path p(a[i]);
-					if (p.Exists())
-					{
-						auto f = p.GetFull();
-						v = new GMacVolume(0);
-						if (v)
-						{
-							v->_Path = f;
-							v->_Name = n[i];
-							v->_Type = VT_FOLDER;
-							_Sub.Insert(v);
-						}
-					}
-				}
-			
-			#endif
-			
-			// List the local hard disks
-			NSWorkspace   *ws = [NSWorkspace sharedWorkspace];
-			NSArray     *vols = [ws mountedLocalVolumePaths];
-			NSFileManager *fm = [NSFileManager defaultManager];
-
-			for (NSString *path in vols)
-			{
-				NSDictionary* fsAttributes;
-				NSString *description, *type, *name;
-				BOOL removable, writable, unmountable, res;
-				NSNumber *size;
-
-				res = [ws getFileSystemInfoForPath:path
-									   isRemovable:&removable
-										isWritable:&writable
-									 isUnmountable:&unmountable
-									   description:&description
-											  type:&type];
-				if (!res) continue;
-				// fsAttributes = [fm fileSystemAttributesAtPath:path];
-				NSError *err = nil;
-				fsAttributes = [fm attributesOfFileSystemForPath:path error:&err];
-				name         = [fm displayNameAtPath:path];
-				size         = [fsAttributes objectForKey:NSFileSystemSize];
-
-				#if 0
-				NSLog(@"path=%@\nname=%@\nremovable=%d\nwritable=%d\nunmountable=%d\n"
-					   "description=%@\ntype=%@, size=%@\n\n",
-					  path, name, removable, writable, unmountable, description, type, size);
-				#endif
-				
-				GString s = [type UTF8String];
-				GString p = [path UTF8String];
-				if (!s.Equals("autofs") && p.Find("/private") < 0)
-				{
-					v = new GMacVolume(0);
-					if (v)
-					{
-						v->_Path = p;
-						v->_Name = [name UTF8String];
-						v->_Type = VT_HARDDISK;
-						v->_Size = size.longLongValue;
-						_Sub.Insert(v);
-					}
-				}
-			}
-		}
+		Init();
 		
-		_It = _Sub.begin();
-		return *_It;
-	}
-	
-	GVolume *Next()
-	{
-		return *(++_It);
-	}
-	
-	GDirectory *GetContents()
-	{
-		GDirectory *Dir = 0;
-		if (Which >= 0 &&
-			_Path)
+		if (type)
 		{
-			Dir = new GDirectory;
-			if (Dir)
+			Name = name;
+			switch (SysPath = type)
 			{
-				if (!Dir->First(_Path))
-				{
-					DeleteObj(Dir);
-				}
+				case LSP_DESKTOP:
+					Type = VT_DESKTOP;
+					break;
+				default:
+					Type = VT_FOLDER;
+					break;
 			}
+			Path = LGetSystemPath(type);
 		}
-		return Dir;
+	}
+
+	~GVolumePriv()
+	{
+		Sub.DeleteObjects();
 	}
 };
+
+GVolume::GVolume(const char *init)
+{
+	d = new GVolumePriv(init);
+}
+
+GVolume::GVolume(LgiSystemPath syspath, const char *name)
+{
+	d = new GVolumePriv(syspath, name);
+}
+
+GVolume::~GVolume()
+{
+	DeleteObj(d);
+}
+
+const char *GVolume::Name()
+{
+	return d->Name;
+}
+
+const char *GVolume::Path()
+{
+	return d->Path;
+}
+
+int GVolume::Type()
+{
+	return d->Type;
+}
+
+int GVolume::Flags()
+{
+	return d->Flags;
+}
+
+uint64 GVolume::Size()
+{
+	return d->Size;
+}
+
+uint64 GVolume::Free()
+{
+	return d->Free;
+}
+
+GSurface *GVolume::Icon()
+{
+	return d->Icon;
+}
+
+GDirectory *GVolume::GetContents()
+{
+	GDirectory *Dir = NULL;
+	if (d->Path)
+	{
+		Dir = new GDirectory;
+		if (Dir && !Dir->First(d->Path))
+			DeleteObj(Dir);
+	}
+	return Dir;
+}
+
+GVolume *GVolume::First()
+{
+	if (d->SysPath == LSP_DESKTOP &&
+		!d->Sub.Length())
+	{
+		GVolume *v = NULL;
+
+		#if 1
+
+			// List any favorites
+			UInt32 seed;
+			LSSharedFileListRef sflRef = LSSharedFileListCreate(NULL,
+																kLSSharedFileListFavoriteItems,
+																NULL);
+			CFArrayRef items = LSSharedFileListCopySnapshot( sflRef, &seed );
+			for( size_t i = 0; i < CFArrayGetCount(items); i++ )
+			{
+				LSSharedFileListItemRef item = (LSSharedFileListItemRef)CFArrayGetValueAtIndex(items, i);
+				if( !item )
+					continue;
+				auto outURL = LSSharedFileListItemCopyResolvedURL(item,kLSSharedFileListNoUserInteraction, NULL);
+				if( !outURL )
+					continue;
+				
+				CFStringRef itemPath = CFURLCopyFileSystemPath(outURL,kCFURLPOSIXPathStyle);
+				GString s = itemPath;
+
+				v = new GVolume();
+				if (v)
+				{
+					v->d->Path = s;
+					v->d->Name = LgiGetLeaf(s);
+					v->d->Type = VT_FOLDER;
+
+					auto IcoRef = LSSharedFileListItemCopyIconRef(item);
+					if (IcoRef)
+					{
+						NSImage *img = [[NSImage alloc] initWithIconRef:IcoRef];
+						v->d->Icon.Reset(new GMemDC(img));
+						[img release];
+						CFRelease(IcoRef);
+					}
+
+					d->Sub.Insert(v);
+				}
+
+				CFRelease(outURL);
+				CFRelease(itemPath);
+			}
+			CFRelease(items);
+			CFRelease(sflRef);
+
+		#else
+
+			// List some user folders
+			const char *n[]   = {"Home",   "Downloads",        "Documents",        "Music",        "Video",        "Pictures"};
+			LgiSystemPath a[] = {LSP_HOME, LSP_USER_DOWNLOADS, LSP_USER_DOCUMENTS, LSP_USER_MUSIC, LSP_USER_VIDEO, LSP_USER_PICTURES};
+			for (int i=0; i<CountOf(a); i++)
+			{
+				GFile::Path p(a[i]);
+				if (p.Exists())
+				{
+					auto f = p.GetFull();
+					v = new GMacVolume(0);
+					if (v)
+					{
+						v->_Path = f;
+						v->_Name = n[i];
+						v->_Type = VT_FOLDER;
+						_Sub.Insert(v);
+					}
+				}
+			}
+		
+		#endif
+		
+		// List the local hard disks
+		NSWorkspace   *ws = [NSWorkspace sharedWorkspace];
+		NSArray     *vols = [ws mountedLocalVolumePaths];
+		NSFileManager *fm = [NSFileManager defaultManager];
+
+		for (NSString *path in vols)
+		{
+			NSDictionary* fsAttributes;
+			NSString *description, *type, *name;
+			BOOL removable, writable, unmountable, res;
+			NSNumber *size;
+
+			res = [ws getFileSystemInfoForPath:path
+								   isRemovable:&removable
+									isWritable:&writable
+								 isUnmountable:&unmountable
+								   description:&description
+										  type:&type];
+			if (!res) continue;
+			// fsAttributes = [fm fileSystemAttributesAtPath:path];
+			NSError *err = nil;
+			fsAttributes = [fm attributesOfFileSystemForPath:path error:&err];
+			name         = [fm displayNameAtPath:path];
+			size         = [fsAttributes objectForKey:NSFileSystemSize];
+
+			#if 0
+			NSLog(@"path=%@\nname=%@\nremovable=%d\nwritable=%d\nunmountable=%d\n"
+				   "description=%@\ntype=%@, size=%@\n\n",
+				  path, name, removable, writable, unmountable, description, type, size);
+			#endif
+			
+			GString s = [type UTF8String];
+			GString p = [path UTF8String];
+			if (!s.Equals("autofs") && p.Find("/private") < 0)
+			{
+				v = new GVolume();
+				if (v)
+				{
+					v->d->Path = p;
+					v->d->Name = [name UTF8String];
+					v->d->Type = VT_HARDDISK;
+					v->d->Size = size.longLongValue;
+					d->Sub.Insert(v);
+				}
+			}
+		}
+	}
+	
+	d->It = d->Sub.begin();
+	return *d->It;
+}
+
+GVolume *GVolume::Next()
+{
+	return *(++d->It);
+}
+
+bool GVolume::IsMounted()
+{
+	return false;
+}
+
+bool GVolume::SetMounted(bool Mount)
+{
+	return Mount;
+}
+
+void GVolume::Insert(GAutoPtr<GVolume> v)
+{
+	d->Sub.Insert(v.Release());
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 GFileSystem *GFileSystem::Instance = 0;
@@ -678,9 +748,7 @@ void GFileSystem::OnDeviceChange(char *Reserved)
 GVolume *GFileSystem::GetRootVolume()
 {
 	if (!Root)
-	{
-		Root = new GMacVolume(-1);
-	}
+		Root = new GVolume(LSP_DESKTOP, "Desktop");
 	
 	return Root;
 }

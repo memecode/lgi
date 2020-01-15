@@ -204,6 +204,7 @@ public:
 class LgiClass GVolume
 {
 	friend class GFileSystem;
+	friend class GVolumePriv;
 
 protected:
 	struct GVolumePriv *d;
@@ -213,8 +214,8 @@ public:
 	GVolume(LgiSystemPath SysPath, const char *Name);
 	virtual ~GVolume();
 
-	char *Name();
-	char *Path();
+	const char *Name();
+	const char *Path();
 	int Type();
 	int Flags();
 	uint64 Size();
