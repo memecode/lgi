@@ -167,7 +167,7 @@ public:
 	{
 	}
 
-	int WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState)
+	int WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
 	{
 		return DROPEFFECT_COPY;
 	}
