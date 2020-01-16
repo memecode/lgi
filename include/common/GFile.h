@@ -204,7 +204,7 @@ public:
 class LgiClass GVolume
 {
 	friend class GFileSystem;
-	friend class GVolumePriv;
+	friend struct GVolumePriv;
 
 protected:
 	struct GVolumePriv *d;

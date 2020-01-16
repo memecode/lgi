@@ -510,8 +510,8 @@ GVolume::~GVolume()
 	DeleteObj(d);
 }
 
-char *GVolume::Name() { return d->Name; }
-char *GVolume::Path() { return d->Path; }
+const char *GVolume::Name() { return d->Name; }
+const char *GVolume::Path() { return d->Path; }
 int GVolume::Type() { return d->Type; } // VT_??
 int GVolume::Flags() { return d->Flags; }
 uint64 GVolume::Size() { return d->Size; }
