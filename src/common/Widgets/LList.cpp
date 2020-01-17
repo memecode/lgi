@@ -1650,9 +1650,10 @@ void LList::OnPulse()
 						int Space = -m.y;
 
 						int n = FirstVisible - 1;
-						auto It = Items.begin(n);
-						for (LListItem *i = *It; i; i=*(--It), n--)
+						for (auto It = Items.begin(n); It != Items.end(); --It, n--)
 						{
+							LListItem *i = *It;
+							
 							GdcPt2 Info;
 							i->OnMeasure(&Info);
 							if (Space > Info.y)
@@ -1678,9 +1679,10 @@ void LList::OnPulse()
 						int Space = m.y - Y();
 						int n = LastVisible + 1;
 
-						auto It = Items.begin(n);
-						for (LListItem *i = *It; i; i=*(++It), n++)
+						for (auto It = Items.begin(n); It != Items.end(); ++It, n++)
 						{
+							LListItem *i = *It;
+							
 							GdcPt2 Info;
 							i->OnMeasure(&Info);
 							if (Space > Info.y)
@@ -1706,9 +1708,9 @@ void LList::OnPulse()
 					int Max = MAX(d->DragData, OverIndex);
 					int n = Min;
 
-					auto It = Items.begin(Min);
-					for (LListItem *i = *It; i && n <= Max; i=*(++It), n++)
+					for (auto It = Items.begin(Min); It != Items.end() && n <= Max; ++It, n++)
 					{
+						LListItem *i = *It;
 						if (!i->Select())
 							i->Select(true);
 					}
