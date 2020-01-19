@@ -522,87 +522,70 @@ bool LgiGetDriveInfo
 	return Status;
 }
 
-/****************************** Classes *************************************************************************************/
-GVolume::GVolume()
-{
-	_Type = VT_NONE;
-	_Flags = 0;
-	_Size = 0;
-	_Free = 0;
-}
-
 /////////////////////////////////////////////////////////////////////////
 #include <sys/types.h>
 #include <pwd.h>
 
-class GLinuxVolume : public GVolume
+struct GVolumePriv
 {
-	int Which;
+	int64 _Size, _Free;
+	int _Type, _Flags;
+	LgiSystemPath SysPath;
+	GString _Name, _Path;
 	List<GVolume> _Sub;
 	List<GVolume>::I _It;
 
-public:
-	GLinuxVolume(int w) : _It(_Sub.end())
+	void Init()
 	{
-		Which = w;
+		SysPath = LSP_ROOT;
 		_Type = VT_NONE;
 		_Flags = 0;
 		_Size = 0;
 		_Free = 0;
+	}
 
-		if (Which < 0)
+	GVolumePriv(const char *path) : _It(_Sub.end())
+	{
+		Init();
+		
+		_Path = path;
+		_Name = LgiGetLeaf(path);
+		_Type = VT_FOLDER;
+	}
+
+	GVolumePriv(LgiSystemPath sys, const char *name) : _It(_Sub.end())
+	{
+		SysPath = sys;
+		Init();
+
+		if (SysPath)
 		{
-			_Name = "Desktop";
-			_Type = VT_DESKTOP;
-			_Path = LGetSystemPath(LSP_DESKTOP);
+			_Name = name;
+			_Type = sys == LSP_DESKTOP ? VT_DESKTOP : VT_FOLDER;
+			_Path = LGetSystemPath(SysPath);
 		}
 	}
 	
-	~GLinuxVolume()
+	~GVolumePriv()
 	{
 		_Sub.DeleteObjects();
 	}
 
-	bool IsMounted()
-	{
-		return false;
-	}
-
-	bool SetMounted(bool Mount)
-	{
-		return Mount;
-	}
-
-	void Insert(GAutoPtr<GVolume> v)
-	{
-		LgiAssert(0);
-	}
-
 	GVolume *First()
 	{
-		if (Which < 0 && !_Sub.Length())
+		if (SysPath == LSP_DESKTOP && !_Sub.Length())
 		{
 			// Get various shortcuts to points of interest
-			GLinuxVolume *v = new GLinuxVolume(0);
+			GVolume *v = new GVolume(LSP_ROOT, "Root");
 			if (v)
-			{
-				v->_Path = "/";
-				v->_Name = "Root";
-				v->_Type = VT_HARDDISK;
 				_Sub.Insert(v);
-			}
 
 			struct passwd *pw = getpwuid(getuid());
 			if (pw)
 			{
-				v = new GLinuxVolume(0);
+				v = new GVolume(LSP_HOME, "Home");
 				if (v)
-				{
-					v->_Path = pw->pw_dir;
-					v->_Name = "Home";
-					v->_Type = VT_HARDDISK;
 					_Sub.Insert(v);
-				}
 			}
 
 			// Get mount list
@@ -632,23 +615,23 @@ public:
 								strlen(M[1]) > 1 &&
 								stricmp(M[2], "swap") != 0)
 							{
-								v = new GLinuxVolume(0);
+								v = new GVolume(0);
 								if (v)
 								{
 									char *MountName = strrchr(Mount, '/');
-									v->_Name = (MountName ? MountName + 1 : Mount);
-									v->_Path = Mount;
-									v->_Type = VT_HARDDISK;
+									v->d->_Name = (MountName ? MountName + 1 : Mount);
+									v->d->_Path = Mount;
+									v->d->_Type = VT_HARDDISK;
 
 									char *Device = M[0];
 									// char *FileSys = M[2];
 									if (stristr(Device, "fd"))
 									{
-										v->_Type = VT_FLOPPY;
+										v->d->_Type = VT_FLOPPY;
 									}
 									else if (stristr(Device, "cdrom"))
 									{
-										v->_Type = VT_CDROM;
+										v->d->_Type = VT_CDROM;
 									}
 
 									_Sub.Insert(v);
@@ -668,12 +651,12 @@ public:
 			{
 				GString Path = LGetSystemPath(p[i]);
 				if (Path &&
-					(v = new GLinuxVolume(0)))
+					(v = new GVolume(0)))
 				{
 					auto Parts = Path.Split("/");
-					v->_Path = Path;
-					v->_Name = *Parts.rbegin();
-					v->_Type = VT_FOLDER;
+					v->d->_Path = Path;
+					v->d->_Name = *Parts.rbegin();
+					v->d->_Type = VT_FOLDER;
 					_Sub.Insert(v);
 				}
 			}
@@ -687,25 +670,94 @@ public:
 	{
 		return *(++_It);
 	}
-
-	GDirectory *GetContents()
-	{
-		GDirectory *Dir = 0;
-		if (Which >= 0 &&
-			_Path)
-		{
-			Dir = new GDirectory;
-			if (Dir)
-			{
-				if (!Dir->First(_Path))
-				{
-					DeleteObj(Dir);
-				}
-			}
-		}
-		return Dir;
-	}
 };
+
+GVolume::GVolume(const char *Path = NULL)
+{
+	d = new GVolumePriv(Path);
+}
+
+GVolume::GVolume(LgiSystemPath SysPath, const char *Name)
+{
+	d = new GVolumePriv(SysPath, Name);
+}
+
+GVolume::~GVolume()
+{
+	DeleteObj(d);
+}
+
+const char *GVolume::Name()
+{
+    return d->_Name;
+}
+
+const char *GVolume::Path()
+{
+    return d->_Path;
+}
+
+int GVolume::Type()
+{
+    return d->_Type;
+}
+
+int GVolume::Flags()
+{
+    return d->_Flags;
+}
+
+uint64 GVolume::Size()
+{
+    return d->_Size;
+}
+
+uint64 GVolume::Free()
+{
+    return d->_Free;
+}
+
+GSurface *GVolume::Icon()
+{
+    return NULL;
+}
+
+bool GVolume::IsMounted()
+{
+    return true;
+}
+
+bool GVolume::SetMounted(bool Mount)
+{
+    return Mount;
+}
+
+GVolume *GVolume::First()
+{
+    return d->First();
+}
+
+GVolume *GVolume::Next()
+{
+    return d->Next();
+}
+
+void GVolume::Insert(GAutoPtr<GVolume> v)
+{
+    d->_Sub.Insert(v.Release());
+}
+
+GDirectory *GVolume::GetContents()
+{
+	GDirectory *Dir = 0;
+	if (d->_Path)
+	{
+		Dir = new GDirectory;
+		if (Dir && !Dir->First(d->_Path))
+			DeleteObj(Dir);
+	}
+	return Dir;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 GFileSystem *GFileSystem::Instance = 0;
@@ -728,9 +780,7 @@ void GFileSystem::OnDeviceChange(char *Reserved)
 GVolume *GFileSystem::GetRootVolume()
 {
 	if (!Root)
-	{
-		Root = new GLinuxVolume(-1);
-	}
+		Root = new GVolume(LSP_DESKTOP, "Desktop");
 
 	return Root;
 }

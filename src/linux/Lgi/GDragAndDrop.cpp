@@ -270,7 +270,7 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 		return -1;
 	}
 
-	List<char> Formats;
+	GDragFormats Formats(true);
 	if (!GetFormats(Formats))
 	{
 		LgiTrace("%s:%i - Error: Failed to get source formats.\n", _FL);
@@ -278,7 +278,7 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	}
 	
 	::GArray<GtkTargetEntry> e;
-	for (auto f: Formats)
+	for (auto f: Formats.Formats)
 	{
 		Gtk::GtkTargetEntry &entry = e.New();
 		entry.target = f;
@@ -338,14 +338,13 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-GDragDropTarget::GDragDropTarget()
+GDragDropTarget::GDragDropTarget() : Formats(true)
 {
 	To = 0;
 }
 
 GDragDropTarget::~GDragDropTarget()
 {
-	Formats.DeleteArrays();
 }
 
 void GDragDropTarget::SetWindow(GView *to)

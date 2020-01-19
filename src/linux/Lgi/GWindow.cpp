@@ -731,7 +731,7 @@ GWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint
 int GetAcceptFmts(::GString::Array &Formats, GdkDragContext *context, GDragDropTarget *t, GdcPt2 &p)
 {
 	int KeyState = 0;
-	List<char> Fmts;
+	GDragFormats Fmts(true);
 	int Flags = DROPEFFECT_NONE;
 
 	GList *targets = gdk_drag_context_list_targets(context);
@@ -740,15 +740,14 @@ int GetAcceptFmts(::GString::Array &Formats, GdkDragContext *context, GDragDropT
 	{
 		auto a = gdk_atom_name((GdkAtom)i->data);
 		if (a)
-			Fmts.Add(NewStr(a));
+			Fmts.Supports(a);
 		i = i->next;
 	}
 
 	Flags = t->WillAccept(Fmts, p, KeyState);
-	for (auto f: Fmts)
-		Formats.New() = f;
+	for (unsigned i=0; i<Formats.Length(); i++)
+		Formats.New() = Formats[i];
 
-	Fmts.DeleteArrays();
 	return Flags;
 }
 
@@ -1573,88 +1572,6 @@ void GWindow::PourAll()
 
 	// _Dump();
 }
-
-/*
-int GWindow::WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState)
-{
-	int Status = DROPEFFECT_NONE;
-	
-	for (char *f=Formats.First(); f; )
-	{
-		if (stricmp(f, LGI_FileDropFormat) == 0)
-		{
-			f = Formats.Next();
-			Status = DROPEFFECT_COPY;
-		}
-		else
-		{
-			Formats.Delete(f);
-			DeleteArray(f);
-			f = Formats.Current();
-		}
-	}
-	
-	return Status;
-}
-
-int GWindow::OnDrop(char *Format, ::GVariant *Data, GdcPt2 Pt, int KeyState)
-{
-	int Status = DROPEFFECT_NONE;
-
-	if (Format && Data)
-	{
-		if (stricmp(Format, LGI_FileDropFormat) == 0)
-		{
-			::GArray<char*> Files;
-			if (Data->IsBinary())
-			{
-				GToken Uri(	(char*)Data->Value.Binary.Data,
-							"\r\n,",
-							true,
-							Data->Value.Binary.Length);
-				for (int i=0; i<Uri.Length(); i++)
-				{
-					char *File = Uri[i];
-					if (strnicmp(File, "file:", 5) == 0)
-						File += 5;
-					
-					char *in = File, *out = File;
-					while (*in)
-					{
-						if (in[0] == '%' &&
-							in[1] &&
-							in[2])
-						{
-							char h[3] = { in[1], in[2], 0 };
-							*out++ = htoi(h);
-							in += 3;
-						}
-						else
-						{
-							*out++ = *in++;
-						}
-					}
-					*out++ = 0;
-					
-					if (FileExists(File))
-					{
-						Files.Add(NewStr(File));
-					}
-				}
-			}
-			
-			if (Files.Length())
-			{
-				Status = DROPEFFECT_COPY;
-				OnReceiveFiles(Files);
-				Files.DeleteArrays();
-			}
-		}
-	}
-	
-	return Status;
-}
-*/
 
 GMessage::Param GWindow::OnEvent(GMessage *m)
 {
