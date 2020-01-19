@@ -555,14 +555,17 @@ struct GVolumePriv
 
 	GVolumePriv(LgiSystemPath sys, const char *name) : _It(_Sub.end())
 	{
-		SysPath = sys;
 		Init();
+		SysPath = sys;
 
-		if (SysPath)
+		if (SysPath == LSP_ROOT)
+			_Path = "/";
+		else
+			_Path = LGetSystemPath(SysPath);
+		if (_Path)
 		{
 			_Name = name;
 			_Type = sys == LSP_DESKTOP ? VT_DESKTOP : VT_FOLDER;
-			_Path = LGetSystemPath(SysPath);
 		}
 	}
 	
@@ -783,47 +786,6 @@ GVolume *GFileSystem::GetRootVolume()
 		Root = new GVolume(LSP_DESKTOP, "Desktop");
 
 	return Root;
-}
-
-int FloppyType(int Letter)
-{
-	/*
-	uchar MaxTrack;
-	uchar SecPerTrack;
-
-	_asm {
-		mov eax, 0800h
-		mov edx, Letter
-		int 13h
-		mov MaxTrack, ch
-		mov SecPerTrack, cl
-	}
-
-	if (MaxTrack > 39)
-	{
-		switch (SecPerTrack)
-		{
-			case 9:
-			{
-				return FLOPPY_720K;
-			}
-			case 15:
-			{
-				return FLOPPY_1_2M;
-			}
-			case 18:
-			{
-				return FLOPPY_1_4M;
-			}
-		}
-	}
-	else
-	{
-		return FLOPPY_360K;
-	}
-	*/
-
-	return 0;
 }
 
 bool GFileSystem::Copy(const char *From, const char *To, LError *Status, CopyFileCallback Callback, void *Token)
