@@ -1621,16 +1621,15 @@ bool LMenu::OnKey(GView *v, GKey &k)
 						if (ValidStr(n))
 						{
 							char *Amp = strchr(n, '&');
-							while (Amp && Amp[1] == '&')
+							if (Amp)
 							{
-								Amp = strchr(Amp + 2, '&');
-							}
+								while (Amp && Amp[1] == '&')
+									Amp = strchr(Amp + 2, '&');
 
-							char16 Accel = tolower(Amp[1]);
-							char16 Press = tolower(k.c16);
-							if (Accel == Press)
-							{
-								Hide = true;
+								char16 Accel = tolower(Amp[1]);
+								char16 Press = tolower(k.c16);
+								if (Accel == Press)
+									Hide = true;
 							}
 						}
 						
