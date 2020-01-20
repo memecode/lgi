@@ -45,7 +45,7 @@ protected:
 
 	GWindow *HookWnd()
 	{
-		#if defined(LGI_CARBON) || defined(__GTK_H__)
+		#if defined(LGI_CARBON)// || defined(__GTK_H__)
 		return GetWindow();
 		#else
 		return Edit->GetWindow();

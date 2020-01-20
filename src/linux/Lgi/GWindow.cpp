@@ -1051,15 +1051,14 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{
 		#if DEBUG_HANDLEVIEWKEY
-		if (Debug)
-			LgiTrace("\tHook[%i]\n", i);
+		// if (Debug) LgiTrace("\tHook[%i]\n", i);
 		#endif
 		if (d->Hooks[i].Flags & GKeyEvents)
 		{
 			GView *Target = d->Hooks[i].Target;
 			#if DEBUG_HANDLEVIEWKEY
 			if (Debug)
-				LgiTrace("\tHook.Target=%p %s\n", Target, Target->GetClass());
+				LgiTrace("\tHook[%i].Target=%p %s\n", i, Target, Target->GetClass());
 			#endif
 			if (Target->OnViewKey(v, k))
 			{
@@ -1067,7 +1066,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 				
 				#if DEBUG_HANDLEVIEWKEY
 				if (Debug)
-					LgiTrace("\tHook ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n", SafePrint, k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
+					LgiTrace("\tHook[%i] ate '%c'(%i) down=%i alt=%i ctrl=%i sh=%i\n", i, SafePrint, k.c16, k.Down(), k.Alt(), k.Ctrl(), k.Shift());
 				#endif
 				
 				goto AllDone;
@@ -1641,7 +1640,7 @@ static GAutoString DescribeView(GViewI *v)
 	{
 		p.Add(i);
 	}
-	for (int n=min(3, p.Length()-1); n>=0; n--)
+	for (int n=MIN(3, p.Length()-1); n>=0; n--)
 	{
 		char Buf[256] = "";
 		if (!stricmp(v->GetClass(), "GMdiChild"))
@@ -1710,10 +1709,9 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 				{
 					#if DEBUG_SETFOCUS
 					GAutoString _set = DescribeView(d->Focus);
-					LgiTrace("GWindow::SetFocus(%s, %s) focusing GView %p\n",
+					LgiTrace("GWindow::SetFocus(%s, %s) focusing GView\n",
 						_set.Get(),
-						TypeName,
-						d->Focus->Handle());
+						TypeName);
 					#endif
 
 					gv->_Focus(true);
@@ -1722,10 +1720,9 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 				{			
 					#if DEBUG_SETFOCUS
 					GAutoString _set = DescribeView(d->Focus);
-					LgiTrace("GWindow::SetFocus(%s, %s) focusing nonGView %p (active=%i)\n",
+					LgiTrace("GWindow::SetFocus(%s, %s) focusing nonGView (active=%i)\n",
 						_set.Get(),
 						TypeName,
-						d->Focus->Handle(),
 						IsActive());
 					#endif
 
