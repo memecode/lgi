@@ -735,7 +735,7 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 	q->New().Set(View, Msg, a, b);
 	
 	#if 1 // defined(_DEBUG)
-	if (q->Length() > 200)
+	if (q->Length() > 200 && (q->Length()%20)==0)
 	{
 		#if defined(WIN32)
 			char s[256];
