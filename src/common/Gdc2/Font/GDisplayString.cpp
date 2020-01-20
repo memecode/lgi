@@ -1106,7 +1106,11 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 		}
 		return 0;
 		#else
-		return StrWords;
+			#if LGI_DSP_STR_CACHE
+				return WideWords;
+			#else
+				return StrWords;
+			#endif
 		#endif
 	}
 
@@ -1152,31 +1156,32 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 			
 			#if USE_CORETEXT
 
-				#if 1
-			
 				CGPoint pos = { (CGFloat)Px, 1.0f };
-				CFIndex idx = CTLineGetStringIndexForPosition(Hnd, pos);
-				return idx;
+				CFIndex utf16 = CTLineGetStringIndexForPosition(Hnd, pos);
 			
-				#else
-			
-				CTTypesetterRef typesetter = CTTypesetterCreateWithAttributedString(AttrStr);
-				if (typesetter)
+				// 'utf16' is in UTF-16, and the API needs to return a UTF-32 index...
+				// So convert between the 2 here...
+				LgiAssert(Str != NULL);
+				int utf32 = 0;
+				for (int i=0; Str[i] && i<utf16;)
 				{
-					CFIndex count = CTTypesetterSuggestLineBreak(typesetter, 0, Px);
-					CFRelease(typesetter);
-					// printf("CharAt(%i) = %i\n", Px, (int)count);
-					return count;
+					if (IsUtf16_Lead(Str[i]))
+					{
+						if (!Str[i+1])
+							break;
+						i += 2;
+					}
+					else i++;
+					utf32++;
 				}
-
-				Status = Off;
-
-				#endif
-
+			
+				// printf("utf=%i,%i\n", (int)utf16, utf32);
+				return utf32;
+			
 			#else
 
 				UniCharArrayOffset Off = 0;
-				// Boolean IsLeading;
+				Boolean IsLeading;
 				OSStatus e = ATSUPositionToOffset(Hnd, FloatToFixed(Px), FloatToFixed(y / 2), &Off, &IsLeading, &Off2);
 				if (e) printf("%s:%i - ATSUPositionToOffset failed with %i, CharAt(%i) x=%i len=%i\n", _FL, (int)e, Px, x, len);
 				else Status = Off;

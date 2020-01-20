@@ -140,6 +140,7 @@
 		34B531D822F65734002B50F7 /* LMenu.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B531D722F65734002B50F7 /* LMenu.h */; };
 		34B6B19123CFD0F100C24906 /* GDragAndDropCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B6B19023CFD0F100C24906 /* GDragAndDropCommon.cpp */; };
 		34C072C12369878100E1E222 /* GDropFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C072C02369878100E1E222 /* GDropFiles.cpp */; };
+		34CD9F7223D5768B0039F259 /* GUnicode.h in Headers */ = {isa = PBXBuildFile; fileRef = 34CD9F7123D5768B0039F259 /* GUnicode.h */; };
 		34D1B3C121748A2800BC6B58 /* GPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D1B3C021748A2800BC6B58 /* GPath.cpp */; };
 		34D21CEC217981AE003D1EA6 /* GEventTargetThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D21CEB217981AE003D1EA6 /* GEventTargetThread.h */; };
 		34D6AA1722D3749A005D739E /* Gdc2.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D6AA1622D3749A005D739E /* Gdc2.h */; };
@@ -282,6 +283,7 @@
 		34B531D722F65734002B50F7 /* LMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LMenu.h; path = ../../../../include/common/LMenu.h; sourceTree = "<group>"; };
 		34B6B19023CFD0F100C24906 /* GDragAndDropCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GDragAndDropCommon.cpp; path = ../../../common/Lgi/GDragAndDropCommon.cpp; sourceTree = "<group>"; };
 		34C072C02369878100E1E222 /* GDropFiles.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GDropFiles.cpp; path = ../../../common/Lgi/GDropFiles.cpp; sourceTree = "<group>"; };
+		34CD9F7123D5768B0039F259 /* GUnicode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GUnicode.h; path = ../../../../include/common/GUnicode.h; sourceTree = "<group>"; };
 		34D1B3C021748A2800BC6B58 /* GPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GPath.cpp; path = ../../../common/Gdc2/Path/GPath.cpp; sourceTree = "<group>"; };
 		34D21CEB217981AE003D1EA6 /* GEventTargetThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GEventTargetThread.h; path = ../../../../include/common/GEventTargetThread.h; sourceTree = "<group>"; };
 		34D6AA1622D3749A005D739E /* Gdc2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Gdc2.h; path = ../../../../include/common/Gdc2.h; sourceTree = "<group>"; };
@@ -512,13 +514,14 @@
 		3477C2BF1CBF99F00028B84B /* Text */ = {
 			isa = PBXGroup;
 			children = (
-				3477C33E1CC0A6780028B84B /* GToken.cpp */,
 				3477C30E1CC04C790028B84B /* GCss.cpp */,
 				3477C30F1CC04C790028B84B /* GCssTools.cpp */,
+				3477C2C01CBF9A040028B84B /* GString.cpp */,
+				3477C33E1CC0A6780028B84B /* GToken.cpp */,
 				3477C2C51CC046310028B84B /* GUnicode.cpp */,
+				34CD9F7123D5768B0039F259 /* GUnicode.h */,
 				3477C2C61CC046310028B84B /* GUtf8.cpp */,
 				3477C2C71CC046310028B84B /* GXmlTree.cpp */,
-				3477C2C01CBF9A040028B84B /* GString.cpp */,
 			);
 			name = Text;
 			sourceTree = "<group>";
@@ -642,6 +645,7 @@
 				345EB84E235C6C01007D05DB /* GPopup.h in Headers */,
 				34D21CEC217981AE003D1EA6 /* GEventTargetThread.h in Headers */,
 				343BE8C72355D0CE00742E21 /* GPopupList.h in Headers */,
+				34CD9F7223D5768B0039F259 /* GUnicode.h in Headers */,
 				3477C2A11CBF0A920028B84B /* GMem.h in Headers */,
 				3477C2D51CC0481B0028B84B /* GArray.h in Headers */,
 				3477C5171CC303B70028B84B /* LgiClass.h in Headers */,
