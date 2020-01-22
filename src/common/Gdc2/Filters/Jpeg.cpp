@@ -53,8 +53,15 @@ class LibJpeg : public GLibrary
 public:
 	LibJpeg() : GLibrary(sLibrary)
 	{
-		if (!IsLoaded())
-			LgiTrace("%s:%i - JPEG: failed to find '%s'\n", _FL, sLibrary);
+		static bool First = true;
+		if (First)
+		{
+			First = false;
+			if (IsLoaded())
+				LgiTrace("%s:%i - JPEG: %s\n", _FL, GetFullPath().Get());
+			else
+				LgiTrace("%s:%i - JPEG: failed to find '%s'\n", _FL, sLibrary);
+		}
 	}
 
 	DynFunc1(boolean, jpeg_finish_decompress, j_decompress_ptr, cinfo);

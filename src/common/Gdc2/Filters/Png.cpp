@@ -71,7 +71,7 @@ const char *sLibrary =
 		#ifdef __GTK_H__
 		"libpng16.16"
 		#else
-		"libpng15"
+		"libpng15.15.4.0"
 		#endif
 	#elif defined(LINUX)
 		LinuxLibName()
@@ -102,28 +102,16 @@ class LibPng : public GLibrary
 public:
 	LibPng() : GLibrary(sLibrary)
 	{
-		auto Loaded = IsLoaded();
-		if (!Loaded)
+		static bool First = true;
+		if (First)
 		{
-			#if defined(MAC)
-			if (!Load("/opt/local/lib/libpng.dylib"))
-			#endif
-			{
-				static bool First = true;
-				if (First)
-				{
-					LgiTrace("%s:%i - Failed to load libpng.\n", _FL);
-					First = false;
-				}
-			}
-		}
-		else
-		{
-			#if 0
-			char File[256];
-			GetModuleFileName(Handle(), File, sizeof(File));
-			LgiTrace("%s:%i - PNG: %s\n", _FL, File);
-			#endif
+			First = false;
+
+			auto Loaded = IsLoaded();
+			if (Loaded)
+				LgiTrace("%s:%i - PNG: %s\n", _FL, GetFullPath().Get());
+			else
+				LgiTrace("%s:%i - Failed to load libpng.\n", _FL);
 		}
 	}
 
