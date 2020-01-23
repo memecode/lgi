@@ -1005,9 +1005,12 @@ bool LList::OnKey(GKey &k)
 							LListItem *To = 0;
 							int ToDist = 0x7fffffff;
 							
-							auto It = Items.begin(FirstVisible);
-							for (LListItem *i=*It; i && i->Pos.Valid(); i = *(++It))
+							for (auto It = Items.begin(FirstVisible); It != Items.end(); ++It)
 							{
+								LListItem *i = *It;
+								if (!i->Pos.Valid())
+									break;
+
 								if (i->Pos.x2 < Hit->Pos.x1)
 								{
 									int Dx = i->Pos.x1 - Hit->Pos.x1;
@@ -1065,9 +1068,12 @@ bool LList::OnKey(GKey &k)
 							LListItem *To = 0;
 							int ToDist = 0x7fffffff;
 							
-							auto It = Items.begin(FirstVisible);
-							for (LListItem *i=*It; i && i->Pos.Valid(); i=*(++It))
+							for (auto It = Items.begin(FirstVisible); It != Items.end(); ++It)
 							{
+								LListItem *i = *It;
+								if (!i->Pos.Valid())
+									break;
+								
 								if (i->Pos.x1 > Hit->Pos.x2)
 								{
 									int Dx = i->Pos.x1 - Hit->Pos.x1;
