@@ -248,12 +248,26 @@ public:
 		{
 		    class GSurface *Ptr;
 		    bool Own;
+			GSurface *Release()
+			{
+				auto p = Ptr;
+				Ptr = NULL;
+				Own = false;
+				return p;
+			}
 		} Surface;
 		/// Valid when Type == #GV_STREAM
 		struct
 		{
 			class GStreamI *Ptr;
 			bool Own;
+			GStreamI *Release()
+			{
+				auto p = Ptr;
+				Ptr = NULL;
+				Own = false;
+				return p;
+			}
 		} Stream;
 		/// Valid when Type == #GV_GVIEW
 		class GView *View;

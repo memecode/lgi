@@ -155,50 +155,63 @@ HRESULT GDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 		GDragData &CurData = Source->d->CurData[0];
 		if (CurData.Data.Length() > 0)
 		{
-			GVariant &Data = CurData.Data[0];
-			switch (Data.Type)
+			if (CurData.IsFileStream())
 			{
-				case GV_NULL:
-					break;
-				case GV_BINARY:
+				if (CurData.Data.Length() == 3)
 				{
-					PMedium->tymed = TYMED_HGLOBAL;
-					Ptr = (uchar*)Data.Value.Binary.Data;
-					Size = Data.Value.Binary.Length;
-					break;
-				}
-				case GV_STRING:
-				{
-					PMedium->tymed = TYMED_HGLOBAL;
-					Ptr = (uchar*)Data.Value.String;
-					Size = Ptr ? strlen((char*)Ptr) + 1 : 0;
-					break;
-				}
-				case GV_VOID_PTR:
-				{
-					PMedium->tymed = TYMED_HGLOBAL;
-					Ptr = (uchar*)&Data.Value.Ptr;
-					Size = sizeof(Data.Value.Ptr);
-					break;
-				}
-				case GV_STREAM:
-				{
-					PMedium->tymed = TYMED_ISTREAM;
+					auto FileName = CurData.Data[0].Str();
+					auto MimeType = CurData.Data[1].Str();
+					auto &v = CurData.Data[2];
+					if (v.Type == GV_STREAM)
+					{
+						PMedium->tymed = TYMED_ISTREAM;
 					
-					PMedium->pstm = new GStreamWrap(Data.Value.Stream.Ptr);
-					PMedium->pstm->AddRef();
+						PMedium->pstm = new GStreamWrap(FileName, v.Value.Stream.Release());
+						PMedium->pstm->AddRef();
 					
-					PMedium->pUnkForRelease = PMedium->pstm;
-					PMedium->pUnkForRelease->AddRef();
+						PMedium->pUnkForRelease = PMedium->pstm;
+						PMedium->pUnkForRelease->AddRef();
 
-					Ret = S_OK;
-					break;
+						Ret = S_OK;
+					}
+					else LgiAssert(!"Not a stream object?");
 				}
-				default:
+				else LgiAssert(!"What now?");
+			}
+			else
+			{
+				GVariant &Data = CurData.Data[0];
+				switch (Data.Type)
 				{
-					// Unsupported format...
-					LgiAssert(0);
-					break;
+					case GV_NULL:
+						break;
+					case GV_BINARY:
+					{
+						PMedium->tymed = TYMED_HGLOBAL;
+						Ptr = (uchar*)Data.Value.Binary.Data;
+						Size = Data.Value.Binary.Length;
+						break;
+					}
+					case GV_STRING:
+					{
+						PMedium->tymed = TYMED_HGLOBAL;
+						Ptr = (uchar*)Data.Value.String;
+						Size = Ptr ? strlen((char*)Ptr) + 1 : 0;
+						break;
+					}
+					case GV_VOID_PTR:
+					{
+						PMedium->tymed = TYMED_HGLOBAL;
+						Ptr = (uchar*)&Data.Value.Ptr;
+						Size = sizeof(Data.Value.Ptr);
+						break;
+					}
+					default:
+					{
+						// Unsupported format...
+						LgiAssert(0);
+						break;
+					}
 				}
 			}
 
@@ -608,6 +621,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::DragEnter(IDataObject *pDataObject, D
 
 	// Clean out format list
 	Formats.Empty();
+	Formats.SetSource(true);
 
 	// Something from another app, enum the formats.
 	IEnumFORMATETC *FormatETC = 0;
@@ -636,7 +650,9 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::DragEnter(IDataObject *pDataObject, D
 	{
 		// Ask the app what formats it supports.
 		// It deletes those it doesn't and leaves the formats it can handle
+		Formats.SetSource(false);
 		*pdwEffect = WillAccept(Formats, Pt, MapW32FlagsToLgi(grfKeyState));
+		LgiTrace("WillAccept=%i\n", *pdwEffect);
 		Result = S_OK;
 	}
 

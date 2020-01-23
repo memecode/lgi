@@ -268,11 +268,13 @@ public:
 class GStreamWrap : public GUnknownImpl<IStream>
 {
 	bool Own;
+	GString FileName;
 	GStreamI *s;
 
 public:
-	GStreamWrap(GStreamI *src, bool own = true)
+	GStreamWrap(GString fileName, GStreamI *src, bool own = true)
 	{
+		FileName = fileName;
 		s = src;
 		Own = own;
 		TraceRefs = true;
@@ -360,9 +362,9 @@ public:
 		
 		GVariant Name;
 		if (pstatstg->pwcsName &&
-			s->GetValue("FileName", Name))
+			FileName)
 		{
-			GAutoWString w(Utf8ToWide(Name.Str()));
+			GAutoWString w(Utf8ToWide(FileName));
 			Strcpy(pstatstg->pwcsName, 256, w.Get());
 		}
 		
