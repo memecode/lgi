@@ -8,6 +8,8 @@
 #include "ScribeDefs.h"
 #include "LJson.h"
 
+#define DEBUG_LOGGING			0
+
 #define Push(s) Write(s, (int)strlen(s))
 
 #define ClearFields() \
@@ -666,7 +668,9 @@ bool VIo::ReadField(GStreamI &s, GString &Name, ParamArray *Params, GString &Dat
 			{
 				QuotedPrintable = true;
 			}
+			#if DEBUG_LOGGING
 			else LgiTrace("%s:%i - Unknown encoding '%s'\n", __FILE__, __LINE__, Enc);
+			#endif
 		}
 
 		DeEscape(e, QuotedPrintable);
@@ -920,7 +924,9 @@ bool EvalRule(LDateTime &out, VIo::TimeZoneSection &tz, int yr)
 	const char *ByMonth = Params.Find("bymonth");
 	if (!ByDay || !ByMonth)
 	{
+		#if DEBUG_LOGGING
 		LgiTrace("%s:%i - Missing byday/bymonth\n", _FL);
+		#endif
 		return false;
 	}
 
@@ -929,7 +935,9 @@ bool EvalRule(LDateTime &out, VIo::TimeZoneSection &tz, int yr)
 //	RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=2SU;BYMONTH=3
 	if (!IsDigit(*ByMonth))
 	{
+		#if DEBUG_LOGGING
 		LgiTrace("%s:%i - Unexpected format for ByMonth: %s\n", _FL, ByMonth);
+		#endif
 		return false;
 	}
 
@@ -937,7 +945,9 @@ bool EvalRule(LDateTime &out, VIo::TimeZoneSection &tz, int yr)
 	
 	if (!IsDigit(*ByDay))
 	{
+		#if DEBUG_LOGGING
 		LgiTrace("%s:%i - Unexpected format for ByDay: %s\n", _FL, ByDay);
+		#endif
 		return false;
 	}
 	
@@ -948,7 +958,9 @@ bool EvalRule(LDateTime &out, VIo::TimeZoneSection &tz, int yr)
 	int WeekDay = StringToWeekDay(ByDay);
 	if (WeekDay < 0)
 	{
+		#if DEBUG_LOGGING
 		LgiTrace("%s:%i - No week day in ByDay: %s\n", _FL, ByDay);
+		#endif
 		return false;
 	}
 	
@@ -1264,7 +1276,7 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 						IsDst = true;
 				}
 				
-				#ifdef _DEBUG
+				#if DEBUG_LOGGING
 				LgiTrace("Eval Start=%s, Norm=%s, Dst=%s, IsDst=%i\n", EventStart.Get().Get(), Norm.Get().Get(), Dst.Get().Get(), IsDst);
 				#endif
 				
@@ -1301,17 +1313,17 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 			// Convert the event to UTC
 			int e = abs(EffectiveTz);
 			int Mins = (((e / 100) * 60) + (e % 100)) * (EffectiveTz < 0 ? -1 : 1);
-			#ifdef _DEBUG
+			#if DEBUG_LOGGING
 			LgiTrace("%s:%i - EffectiveTz=%i, Mins=%i\n", _FL, EffectiveTz, Mins);
 			#endif
 			if (EventStart.IsValid())
 			{
-				#ifdef _DEBUG
+				#if DEBUG_LOGGING
 				LgiTrace("EventStart=%s\n", EventStart.Get().Get());
 				#endif
 
 				EventStart.AddMinutes(-Mins);
-				#ifdef _DEBUG
+				#if DEBUG_LOGGING
 				LgiTrace("EventStart=%s\n", EventStart.Get().Get());
 				#endif
 			}
