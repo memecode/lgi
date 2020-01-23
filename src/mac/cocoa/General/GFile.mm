@@ -586,6 +586,8 @@ GVolume *GVolume::First()
 
 		#if 1
 
+			GString DesktopPath = LGetSystemPath(LSP_DESKTOP);
+
 			// List any favorites
 			UInt32 seed;
 			LSSharedFileListRef sflRef = LSSharedFileListCreate(NULL,
@@ -604,23 +606,26 @@ GVolume *GVolume::First()
 				CFStringRef itemPath = CFURLCopyFileSystemPath(outURL,kCFURLPOSIXPathStyle);
 				GString s = itemPath;
 
-				v = new GVolume();
-				if (v)
+				if (!s.Equals(DesktopPath)) // This is the root item, don't duplicate
 				{
-					v->d->Path = s;
-					v->d->Name = LgiGetLeaf(s);
-					v->d->Type = VT_FOLDER;
-
-					auto IcoRef = LSSharedFileListItemCopyIconRef(item);
-					if (IcoRef)
+					v = new GVolume();
+					if (v)
 					{
-						NSImage *img = [[NSImage alloc] initWithIconRef:IcoRef];
-						v->d->Icon.Reset(new GMemDC(img));
-						[img release];
-						CFRelease(IcoRef);
-					}
+						v->d->Path = s;
+						v->d->Name = LgiGetLeaf(s);
+						v->d->Type = VT_FOLDER;
 
-					d->Sub.Insert(v);
+						auto IcoRef = LSSharedFileListItemCopyIconRef(item);
+						if (IcoRef)
+						{
+							NSImage *img = [[NSImage alloc] initWithIconRef:IcoRef];
+							v->d->Icon.Reset(new GMemDC(img));
+							[img release];
+							CFRelease(IcoRef);
+						}
+
+						d->Sub.Insert(v);
+					}
 				}
 
 				CFRelease(outURL);
