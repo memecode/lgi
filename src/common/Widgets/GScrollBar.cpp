@@ -240,7 +240,7 @@ public:
 		#if LGI_SDL
 		int MinSize = w; // Touch UI needs large slide....
 		#else
-		int MinSize = 12;
+		int MinSize = 18;
 		#endif
 
 		// printf("Calc %i, " LPrintfInt64 ", " LPrintfInt64 "\n", IsValid(), Min, Max);

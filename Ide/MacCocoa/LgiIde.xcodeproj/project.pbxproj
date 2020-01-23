@@ -53,6 +53,7 @@
 		34D21CEA217978DA003D1EA6 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CE9217978DA003D1EA6 /* Base64.cpp */; };
 		34D21CEE21798240003D1EA6 /* Png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CED21798240003D1EA6 /* Png.cpp */; };
 		34F566AB237BD55F0027133A /* JavascriptParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34F566A0237BD55F0027133A /* JavascriptParser.cpp */; };
+		34FC784E23D920A900B72108 /* libpng15.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 346A86832325CBA000FBC545 /* libpng15.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -135,6 +136,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				34FC784E23D920A900B72108 /* libpng15.dylib in CopyFiles */,
 				34148AFC2349ECA200D5E495 /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

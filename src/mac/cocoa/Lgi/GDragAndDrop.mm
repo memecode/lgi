@@ -321,7 +321,11 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::
 	if (OutputData && Files.First())
 	{
 		for (auto f : Files)
-			OutputData->Data.New().OwnStr(NewStr(f));
+		{
+			GString s;
+			s.Printf("file://%s", f.Get());
+			OutputData->Data.New().OwnStr(NewStr(s));
+		}
 
 		OutputData->Format = LGI_FileDropFormat;
 		return true;
@@ -374,6 +378,7 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 		return DROPEFFECT_NONE;
 	}
 
+	d->Formats.SetSource(true);
 	if (!GetFormats(d->Formats))
 	{
 		LgiAssert(!"No formats");

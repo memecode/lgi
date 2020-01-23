@@ -368,41 +368,6 @@ bool LSubMenu::OnKey(GKey &k)
 	return false;
 }
 
-#if 0
-bool IsOverMenu(XEvent *e)
-{
-	if (e->xany.type == ButtonPress OR
-		e->xany.type == ButtonRelease)
-	{
-		QWidget *q = QWidget::Find(e->xany.window);
-		if (q)
-		{
-			QPopup *m = 0;
-			for (; q; q = q->parentWidget())
-			{
-				if (m = dynamic_cast<QPopup*>(q))
-				{
-					break;
-				}
-			}
-			
-			if (m)
-			{
-				GRect gr = m->geometry();
-				
-				return gr.Overlap
-				(
-				 e->xbutton.x_root,
-				 e->xbutton.y_root
-					);
-			}
-		}
-	}
-	
-	return false;
-}
-#endif
-
 void LSubMenu::OnActivate(LMenuItem *item)
 {
 	if (!item)
@@ -936,12 +901,6 @@ void LMenuItem::Focus(bool f)
 void LMenuItem::Sub(LSubMenu *s)
 {
 	Child = s;
-}
-
-void releaseData(void *info, const void *data, size_t size)
-{
-	uchar *i = (uchar*)info;
-	DeleteArray(i);
 }
 
 void LMenuItem::Icon(int i)
