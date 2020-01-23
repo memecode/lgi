@@ -1173,6 +1173,10 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 					Attendee++;
 				}
 			}
+			else if (IsVar(Field, "status"))
+			{
+				c->SetStr(FIELD_CAL_STATUS, Data);
+			}
 		}
 		else if (IsTimeZone && TzInfo)
 		{
@@ -1369,7 +1373,7 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 
 		#define OutputStr(Field, Name)						\
 		{													\
-			const char *_s = 0;									\
+			const char *_s = 0;								\
 			if ((_s = c->GetStr(Field)))					\
 			{												\
 				WriteField(*o, Name, 0, _s);				\
@@ -1384,6 +1388,7 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 		OutputStr(FIELD_CAL_SUBJECT, "SUMMARY");
 		OutputStr(FIELD_CAL_LOCATION, "LOCATION");
 		OutputStr(FIELD_CAL_NOTES, "DESCRIPTION");
+		OutputStr(FIELD_CAL_STATUS, "STATUS");
 
 		int64 ShowAs;
 		if ((ShowAs = c->GetInt(FIELD_CAL_SHOW_TIME_AS)))
