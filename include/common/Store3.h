@@ -215,7 +215,7 @@ public:
 
 	/// Returns the type of object
 	/// \sa MAGIC_MAIL and it's like
-	virtual int Type() = 0;
+	virtual uint32_t Type() = 0;
 	/// \return true if the object has been written to disk. By default the object
 	/// starts life in memory only.
 	virtual bool IsOnDisk() = 0;
