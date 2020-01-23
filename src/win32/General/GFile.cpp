@@ -386,8 +386,8 @@ struct GVolumePriv
 	int Flags;			// VA_??
 	int64 Size;
 	int64 Free;
+	LgiSystemPath SysPath;
 	GAutoPtr<GSurface> Icon;
-	bool IsRoot;
 	List<GVolume> Sub;
 	List<GVolume>::I It;
 
@@ -397,13 +397,14 @@ struct GVolumePriv
 		Flags = 0;
 		Size = 0;
 		Free = 0;
+		SysPath = LSP_ROOT;
 	}
 
-	GVolumePriv(LgiSystemPath SysPath, const char *Name) : It(Sub.end())
+	GVolumePriv(LgiSystemPath sysPath, const char *name) : It(Sub.end())
 	{
 		Init();
-		IsRoot = Type == LSP_ROOT;
-		Name = Name;
+		SysPath = sysPath;
+		Name = name;
 		Type = VT_FOLDER;
 
 		int Id = 0;
@@ -431,7 +432,6 @@ struct GVolumePriv
 	GVolumePriv(const char *Drive) : It(Sub.end())
 	{
 		Init();
-		IsRoot = false;
 		int type = GetDriveTypeA(Drive);
 		if (type != DRIVE_UNKNOWN &&
 			type != DRIVE_NO_ROOT_DIR)
@@ -518,7 +518,6 @@ uint64 GVolume::Size() { return d->Size; }
 uint64 GVolume::Free() { return d->Free; }
 GSurface *GVolume::Icon() { return d->Icon; }
 
-
 bool GVolume::IsMounted()
 {
 	return false;
@@ -536,11 +535,18 @@ void GVolume::Insert(GAutoPtr<GVolume> v)
 	
 GVolume *GVolume::First()
 {
-	if (d->IsRoot)
+	if (d->SysPath == LSP_DESKTOP && !d->Sub.Length())
 	{
+		// Add some basic shortcuts
+		LgiSystemPath Paths[] = {LSP_HOME, LSP_USER_DOCUMENTS, LSP_USER_MUSIC, LSP_USER_VIDEO, LSP_USER_DOWNLOADS, LSP_USER_PICTURES};
+		const char   *Names[] = {"Home",   "Documents",        "Music",        "Video",        "Downloads",        "Pictures"};
+		for (unsigned i=0; i<CountOf(Paths); i++)
+		{
+			GAutoPtr<GVolume> a(new GVolume(Paths[i], Names[i]));
+			Insert(a);
+		}
+
 		// Get drive list
-		d->IsRoot = false;
-			
 		char Str[512];
 		if (GetLogicalDriveStringsA(sizeof(Str), Str) > 0)
 		{
@@ -619,14 +625,7 @@ void GFileSystem::OnDeviceChange(char *Reserved)
 GVolume *GFileSystem::GetRootVolume()
 {
 	if (!Root)
-	{
-		Root = new GVolume(LSP_ROOT, "Computer");
-		
-		GAutoPtr<GVolume> v(new GVolume(LSP_DESKTOP, "Desktop"));
-		Root->Insert(v);
-		v.Reset(new GVolume(LSP_USER_DOWNLOADS, "Downloads"));
-		Root->Insert(v);
-	}
+		Root = new GVolume(LSP_DESKTOP, "Desktop");
 
 	return Root;
 }

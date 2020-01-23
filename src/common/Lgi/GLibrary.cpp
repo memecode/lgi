@@ -316,7 +316,7 @@ GString GLibrary::GetFullPath()
 	#elif defined(WINDOWS)
 		if (hLib)
 		{
-			wchar_t File[MAX_PATH] = "";
+			wchar_t File[MAX_PATH] = L"";
 			GetModuleFileNameW(Handle(), File, sizeof(File));
 			return File;
 		}
