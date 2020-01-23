@@ -828,6 +828,9 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								break;
 						}
 
+						/*	What the hell is this even doing?
+							We can't have nested tags now?
+						
 						GHtmlElement *p;
 						for (int TagIdx = (int)OpenTags.Length()-1; TagIdx >= 0 && (p = OpenTags[TagIdx]) && p->TagId != TAG_TABLE; TagIdx--)
 						{
@@ -837,6 +840,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								break;
 							}
 						}
+						*/
 												
 						bool Reattach = !ParentTags.HasItem(Elem->Parent->TagId);						
 						if (Reattach)
@@ -865,7 +869,16 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								if (Parent)
 								{
 									// Reattach to the right parent.
-									// LgiTrace("Reattaching '%s'(%p) to '%s'(%p) count=%i\n", Elem->Tag, Elem, Parent->Tag, Parent, ++count);
+									auto IsOpen = OpenTags.IndexOf(Elem->Parent);
+									
+									#if 0
+									LgiTrace("Reattaching '%s'(%p) to '%s'(%p) (Old=%s  %i)\n",
+										Elem->Tag.Get(), Elem, Parent->Tag.Get(), Parent,
+										Elem->Parent->Tag.Get(),
+										IsOpen);
+									#endif
+									
+									CloseTag(Elem->Parent);
 									Parent->Attach(Elem);
 								}
 								else

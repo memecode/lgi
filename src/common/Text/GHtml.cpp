@@ -5555,7 +5555,6 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 
 				if (PreText())
 					TextPos.FlowText(this, Flow, f, f->GetHeight(), PreText(), AlignLeft);
-				
 				break;
 			}
 			case TAG_IMG:
