@@ -789,6 +789,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 					if (Elem->Info->Reattach)
 					{
 						GArray<int> ParentTags;
+						bool CloseExisting = false;
 						switch (Elem->TagId)
 						{
 							case TAG_LI:
@@ -810,37 +811,39 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 							case TAG_TBODY:
 							{
 								ParentTags.Add(TAG_TABLE);
+								CloseExisting = true;
 								break;
 							}
 							case TAG_TR:
 							{
 								ParentTags.Add(TAG_TBODY);
 								ParentTags.Add(TAG_TABLE);
+								CloseExisting = true;
 								break;
 							}
 							case TAG_TD:
 							case TAG_TH:
 							{
 								ParentTags.Add(TAG_TR);
+								CloseExisting = true;
 								break;
 							}
 							default:
 								break;
 						}
 
-						/*	What the hell is this even doing?
-							We can't have nested tags now?
-						
-						GHtmlElement *p;
-						for (int TagIdx = (int)OpenTags.Length()-1; TagIdx >= 0 && (p = OpenTags[TagIdx]) && p->TagId != TAG_TABLE; TagIdx--)
+						if (CloseExisting)
 						{
-							if (p->TagId == Elem->TagId)
+							GHtmlElement *p;
+							for (int TagIdx = (int)OpenTags.Length()-1; TagIdx >= 0 && (p = OpenTags[TagIdx]) && p->TagId != TAG_TABLE; TagIdx--)
 							{
-								CloseTag(p);
-								break;
+								if (p->TagId == Elem->TagId)
+								{
+									CloseTag(p);
+									break;
+								}
 							}
 						}
-						*/
 												
 						bool Reattach = !ParentTags.HasItem(Elem->Parent->TagId);						
 						if (Reattach)
@@ -878,7 +881,6 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 										IsOpen);
 									#endif
 									
-									CloseTag(Elem->Parent);
 									Parent->Attach(Elem);
 								}
 								else

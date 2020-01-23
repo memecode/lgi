@@ -217,8 +217,8 @@
     <Manifest Include="..\src\win32\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Files\apple2.html" />
-    <None Include="Files\gumtree2.html" />
+    <None Include="Files\amp-super.html" />
+    <None Include="Files\cisra_new_building.html" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lgi_vs2015.vcxproj">
