@@ -219,6 +219,7 @@
   <ItemGroup>
     <None Include="Files\amp-super.html" />
     <None Include="Files\cisra_new_building.html" />
+    <None Include="Files\steam1.html" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lgi_vs2015.vcxproj">
