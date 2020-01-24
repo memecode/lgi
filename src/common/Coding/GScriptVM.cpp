@@ -731,7 +731,9 @@ public:
 		{
 			GDirectory SrcD, ObjD;
 			bool OutOfDate = true;
-			if (SrcD.First(SourceFileName, NULL) != 0 && ObjD.First(Obj, NULL) != 0)
+			if (FileExists(SourceFileName) &&
+				SrcD.First(SourceFileName, NULL) != 0 &&
+				ObjD.First(Obj, NULL) != 0)
 			{
 				OutOfDate = ObjD.GetLastWriteTime() < SrcD.GetLastWriteTime();
 			}			
