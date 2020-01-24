@@ -79,6 +79,17 @@ class LUnicodeString
 		int n = *s & 0xfc00;
 		if (n == 0xd800 || n == 0xdc00)
 		{
+			if (words >= 0)
+			{
+				// Do buffer length check...
+				auto Remaining = ((const uint16_t*)start + words) - s;
+				if (Remaining < 2) return 0;
+			}
+			else
+			{
+				if (!s[1]) return 0; // Do NULL check...
+			}
+
 			int w = (*s & 0x3c0) >> 6;
 			int zy = *s++ & 0x3f;
 			return ((w + 1) << 16) | (zy << 10) | (*s++ & 0x3ff);
@@ -142,6 +153,8 @@ class LUnicodeString
 			{
 				if (Read(s))
 					chars++;
+				else
+					break;
 			}
 		}
 		else
