@@ -306,6 +306,8 @@ const char * pathname_for_handle(void *handle)
     }
     return NULL;
 }
+#elif defined(LINUX)
+#include <link.h>
 #endif
 
 GString GLibrary::GetFullPath()
@@ -319,6 +321,14 @@ GString GLibrary::GetFullPath()
 			wchar_t File[MAX_PATH] = L"";
 			GetModuleFileNameW(Handle(), File, sizeof(File));
 			return File;
+		}
+	#elif defined(LINUX)
+		if (hLib)
+		{
+			struct link_map *map = NULL;
+			dlinfo(hLib, RTLD_DI_LINKMAP, &map);
+			if (map)
+				return realpath(map->l_name, NULL);
 		}
 	#else
 		LgiAssert(!"Impl me.");

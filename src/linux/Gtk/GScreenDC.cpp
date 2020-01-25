@@ -544,9 +544,9 @@ void GScreenDC::Ellipse(double cx, double cy, double x, double y)
 {
 	cairo_save(d->cr);
 	cairo_translate(d->cr, cx, cy);
-	cairo_scale(d->cr, x / 2.0, y / 2.0);
+	cairo_scale(d->cr, x, y);
 	cairo_arc(d->cr, 0.0, 0.0, 1.0, 0.0, 2 * LGI_PI);
-	cairo_stroke(d->cr);
+	// cairo_stroke(d->cr);
 	cairo_restore(d->cr);
 }
 
@@ -554,7 +554,7 @@ void GScreenDC::FilledEllipse(double cx, double cy, double x, double y)
 {
 	cairo_save(d->cr);
 	cairo_translate(d->cr, cx, cy);
-	cairo_scale(d->cr, x / 2.0, y / 2.0);
+	cairo_scale(d->cr, x, y);
 	cairo_arc(d->cr, 0.0, 0.0, 1.0, 0.0, 2 * LGI_PI);
 	cairo_fill(d->cr);
 	cairo_restore(d->cr);
