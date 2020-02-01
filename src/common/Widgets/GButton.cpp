@@ -48,7 +48,6 @@ public:
 		KeyDown = false;
 		Toggle = false;
 		Over = 0;
-		// Txt = 0;
 		WantsDefault = false;
 		Image = NULL;
 		OwnImage = false;
@@ -57,7 +56,6 @@ public:
 
 	~GButtonPrivate()
 	{
-		// DeleteObj(Txt);
 		if (OwnImage)
 			DeleteObj(Image);
 	}
@@ -92,14 +90,6 @@ GButton::GButton(int id, int x, int y, int cx, int cy, const char *name) :
 	SetPos(r);
 	SetId(id);
 	SetTabStop(true);
-	/*
-	#ifndef MAC
-	SetFont(SysBold, false);
-	#endif
-	
-	if (LgiApp->SkinEngine)
-		SetFont(LgiApp->SkinEngine->GetDefaultFont(_ObjName));
-	*/
 }
 
 GButton::~GButton()

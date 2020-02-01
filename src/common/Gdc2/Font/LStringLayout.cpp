@@ -63,9 +63,14 @@ bool LStringLayout::Add(const char *Str, GCss *Style)
 		for (const char *s = Str; *s; )
 		{
 			const char *e = s;
+
 			// Find '&' or end of string
-			while (*e && !(e[0] == '&' && e[1] != '&'))
+			while (*e)
+			{
+				if (e[0] == '&')
+					break;
 				e++;
+			}
 
 			if (e > s)
 			{
@@ -77,17 +82,28 @@ bool LStringLayout::Add(const char *Str, GCss *Style)
 			if (!*e)
 				break; // End of string
 
-			// Add '&'ed char
-			r = new LLayoutRun(Style);
-			r->TextDecoration(GCss::TextDecorUnderline);
-			s = e + 1; // Skip the '&' itself
-			GUtf8Ptr p(s); // Find the end of the next unicode char
-			p++;
-			if ((const char*)p.GetPtr() == s)
-				break; // No more text: exit
-			r->Text.Set(s, (const char*)p.GetPtr()-s);
-			Text.Add(r);
-			s = (const char*) p.GetPtr();
+			if (e[0] == '&' && e[1] == '&')
+			{
+				// '&' literal...
+				r = new LLayoutRun(Style);
+				r->Text.Set("&", 1);
+				Text.Add(r);
+				s = e + 2;
+			}
+			else
+			{
+				// Add '&'ed char
+				r = new LLayoutRun(Style);
+				r->TextDecoration(GCss::TextDecorUnderline);
+				s = e + 1; // Skip the '&' itself
+				GUtf8Ptr p(s); // Find the end of the next unicode char
+				p++;
+				if ((const char*)p.GetPtr() == s)
+					break; // No more text: exit
+				r->Text.Set(s, (const char*)p.GetPtr()-s);
+				Text.Add(r);
+				s = (const char*) p.GetPtr();
+			}
 		}
 	}
 	else // No parsing required
