@@ -22,6 +22,7 @@ public:
 	char			*Cp;
 	GSurface		*pSurface;
 	bool			OwnerUnderline;
+	bool			WarnOnDelete;
 
 	// Glyph substitution
 	uchar			*GlyphMap;
@@ -58,6 +59,7 @@ public:
 		Dirty = true;
 		Height = 0;
 		Cp = 0;
+		WarnOnDelete = false;
 	}
 	
 	~GFontPrivate()

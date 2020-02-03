@@ -2440,7 +2440,7 @@ uint32_t GCss::Selector::GetSpecificity()
 {
 	uint8_t s[4] = {0};
 	
-	for (unsigned i=0; i<Parts.Length(); i++)
+	for (int i=(int)Parts.Length()-1; i>=0; i--)
 	{
 		Part &p = Parts[i];
 		switch (p.Type)
@@ -2455,6 +2455,11 @@ uint32_t GCss::Selector::GetSpecificity()
 				break;
 			case SelID:
 				s[2]++;
+				break;
+			case CombDesc:
+			case CombChild:
+			case CombAdjacent:
+				i = 0; // exit loop
 				break;
 			default:
 				break;

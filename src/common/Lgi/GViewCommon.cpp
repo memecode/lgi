@@ -1821,11 +1821,13 @@ void GView::SetFont(GFont *Font, bool OwnIt)
 	{
 		if (d->FontOwnType == GV_FontOwned)
 		{
+			LgiAssert(d->Font != SysFont);
 			DeleteObj(d->Font);
 		}
 
 		d->FontOwnType = OwnIt ? GV_FontOwned : GV_FontPtr;
 		d->Font = Font;
+
 		#if WINNATIVE
 		if (_View)
 			SendMessage(_View, WM_SETFONT, (WPARAM) (Font ? Font->Handle() : 0), 0);

@@ -479,6 +479,7 @@ GFont::GFont(GFont &Fnt)
 
 GFont::~GFont()
 {
+	LgiAssert(d->WarnOnDelete == false);
 	Destroy();
 	DeleteObj(d);
 }
@@ -501,6 +502,8 @@ bool GFont::CreateFromCss(GCss *Css)
 	GCss::StringsDef Fam = Css->FontFamily();
 	if (Fam.Length())
 		Face(Fam[0]);
+	else
+		Face(SysFont->Face());
 
 	GCss::Len Sz = Css->FontSize();
 	switch (Sz.Type)
@@ -532,6 +535,11 @@ bool GFont::CreateFromCss(GCss *Css)
 		Underline(true);
 
 	return Create();
+}
+
+void GFont::WarnOnDelete(bool w)
+{
+	d->WarnOnDelete = w;
 }
 
 bool GFont::Destroy()

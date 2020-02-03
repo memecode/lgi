@@ -748,5 +748,11 @@
     <ClInclude Include="include\common\GSubProcess.h">
       <Filter>Source Files\Core\Process</Filter>
     </ClInclude>
+    <ClInclude Include="src\common\Gdc2\Font\GFontPriv.h">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="include\common\GView.h">
+      <Filter>Source Files\Interface</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

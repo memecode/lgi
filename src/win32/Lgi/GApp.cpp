@@ -409,6 +409,7 @@ DumpTime("vars");
 		{
 			// Force load
 			SystemNormal->Create();
+			SystemNormal->WarnOnDelete(true);
 		}
 		else
 		{
@@ -464,6 +465,7 @@ DumpTime("skin");
 GApp::~GApp()
 {
 	DeleteObj(AppWnd);
+	SystemNormal->WarnOnDelete(false);
 	DeleteObj(SystemNormal);
 	DeleteObj(SystemBold);
 	DeleteObj(MouseHook);

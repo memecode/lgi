@@ -243,6 +243,7 @@ public:
 
 	/// Clears any handles and memory associated with the object.
 	virtual bool Destroy();
+	void WarnOnDelete(bool w);
 
 	/// Returns the OS font handle
 	virtual OsFont Handle();
