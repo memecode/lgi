@@ -473,8 +473,6 @@ public:
 	/// Only works for top level windows.
 	void SetMinimumSize(GdcPt2 Size);	
 
-    /// Sets the style of the control
-    bool SetCssStyle(const char *CssStyle);
     /// Gets the style of the control
     class GCss *GetCss(bool Create = false);
 
@@ -497,6 +495,8 @@ public:
 
 	/// The array of CSS class names.
 	GString::Array *CssClasses();
+	/// Any element level styles
+	GString CssStyles(const char *Set = NULL);
 
 	/// \brief Captures all mouse events to this view
 	///

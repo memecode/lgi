@@ -405,21 +405,26 @@ bool LgiResources::StyleElement(GViewI *v)
 	if (!v) return false;
 	if (!LoadStyles) return true;
 
+	GCss::SelArray Selectors;
 	for (auto r: _ResourceOwner)
 	{
-		GCss::SelArray Selectors;
 		GViewCssCb Ctx;
 		r->CssStore.Match(Selectors, &Ctx, v);
+	}
+	
+	GCss *Css = v->GetCss(true);
+	for (auto *Sel: Selectors)
+	{
+		const char *Defs = Sel->Style;
+		if (Css && Defs)
+			Css->Parse(Defs, GCss::ParseRelaxed);
+	}
 
-		for (unsigned i=0; i<Selectors.Length(); i++)
-		{
-			const char *Defs = Selectors[i]->Style;
-			GCss *Css = v->GetCss(true);
-			if (Css && Defs)
-			{
-				Css->Parse(Defs, GCss::ParseRelaxed);
-			}
-		}
+	auto ElemStyles = v->CssStyles();
+	if (ElemStyles)
+	{
+		const char *Defs = ElemStyles;
+		Css->Parse(Defs, GCss::ParseRelaxed);
 	}
 	
 	return true;
@@ -894,7 +899,7 @@ bool LgiResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 		v->Visible(i.CastInt32() != 0);
 
 	if (Props->GetValue("style", i))
-		v->SetCssStyle(i.Str());
+		v->CssStyles(i.Str());
 
 	if (Props->GetValue("class", i))
 	{

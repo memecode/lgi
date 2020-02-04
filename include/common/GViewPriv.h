@@ -139,6 +139,10 @@ public:
 	
 	// Style
 	GAutoPtr<GCss>  Css;
+	bool CssDirty;			// This is set when 'Styles' changes, the next call to GetCss(...) parses
+							// the styles into the 'Css' object.
+	GString			Styles; // Somewhat temporary object to store unparsed styles particular to
+							// this view until runtime, where the view heirarchy is known.
 	GString::Array	Classes;
 
 	// Event dispatch handle

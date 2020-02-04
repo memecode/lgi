@@ -455,8 +455,9 @@ public:
 	// Style
     virtual GCss *GetCss(bool Create = false) = 0;
     virtual void SetCss(GCss *css) = 0;
-    virtual bool SetCssStyle(const char *CssStyle) = 0;
     virtual bool SetColour(GColour &c, bool Fore) = 0;
+	virtual GString CssStyles(const char *Set = NULL) { return GString(); }
+	virtual GString::Array *CssClasses() { return NULL; }
 	virtual GFont *GetFont() = 0;
 	virtual void SetFont(GFont *Fnt, bool OwnIt = false) = 0;
 
@@ -468,7 +469,6 @@ public:
 	virtual int64 Value() = 0;
 	virtual void Value(int64 i) = 0;
 	virtual const char *GetClass() { return "GViewI"; } // mainly for debugging
-	virtual GString::Array *CssClasses() { return NULL; }
 
 	// Size and position	
 	virtual GRect &GetPos() = 0;

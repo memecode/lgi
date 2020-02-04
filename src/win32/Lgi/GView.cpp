@@ -48,6 +48,7 @@ GViewPrivate::GViewPrivate()
 	WantsPulse = -1;
 	hTheme = NULL;
 	IsThemed = true;
+	CssDirty = false;
 }
 
 GViewPrivate::~GViewPrivate()

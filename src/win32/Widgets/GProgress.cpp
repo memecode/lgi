@@ -119,9 +119,9 @@ GMessage::Result GProgress::OnEvent(GMessage *Msg)
 	return GControl::OnEvent(Msg);
 }
 
-bool GProgress::SetCssStyle(const char *CssStyle)
+GString GProgress::CssStyles(const char *CssStyle)
 {
-	bool Status = GControl::SetCssStyle(CssStyle);
+	GString Status = GControl::CssStyles(CssStyle);
 	if (Status && GetCss())
 	{
 		GCss::ColorDef f = GetCss()->Color();

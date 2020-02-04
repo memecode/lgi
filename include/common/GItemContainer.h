@@ -133,12 +133,14 @@ public:
 		return Css;
 	}
 	
+	/*
 	bool SetCssStyle(const char *CssStyle)
 	{
 		if (!Css && ValidStr(CssStyle)) Css.Reset(new GCss);
 		if (!Css) return false;
 		return Css->Parse(CssStyle, GCss::ParseRelaxed);		
 	}
+	*/
 };
 
 /// The popup label for GItem's

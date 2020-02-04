@@ -283,6 +283,16 @@ int GView::AddDispatch()
 	return d->SinkHnd;
 }
 
+GString GView::CssStyles(const char *Set)
+{
+	if (Set)
+	{
+		d->Styles = Set;
+		d->CssDirty = true;
+	}
+	return d->Styles;
+}
+
 GString::Array *GView::CssClasses()
 {
 	return &d->Classes;
@@ -2259,6 +2269,7 @@ bool GView::SetColour(GColour &c, bool Fore)
 }
 
 
+/*
 bool GView::SetCssStyle(const char *CssStyle)
 {
     if (!d->Css && !d->Css.Reset(new GCss))
@@ -2274,6 +2285,7 @@ bool GView::SetCssStyle(const char *CssStyle)
     
     return b;    
 }
+*/
 
 void GView::SetCss(GCss *css)
 {
@@ -2284,6 +2296,13 @@ GCss *GView::GetCss(bool Create)
 {
     if (Create && !d->Css)
         d->Css.Reset(new GCss);
+
+	if (d->CssDirty && d->Css)
+	{
+		const char *Defs = d->Styles;
+		if (d->Css->Parse(Defs, GCss::ParseRelaxed))
+			d->CssDirty = false;
+	}
 
     return d->Css;
 }

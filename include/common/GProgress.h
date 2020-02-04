@@ -31,7 +31,7 @@ public:
 	bool Pour(GRegion &r);
 
 	#if WINNATIVE
-	bool SetCssStyle(const char *CssStyle);
+	GString CssStyles(const char *CssStyle = NULL);
 	#else
 	void OnPaint(GSurface *pDC);
 	void GetLimits(int64 *l, int64 *h);

@@ -190,28 +190,8 @@ void GTextLabel::OnStyleChange()
 {
 	if (d->Lock(_FL))
 	{
-		auto a = CssClasses();
-		if (a)
-		{
-			for (auto c: *a)
-			{
-				if (c.Equals("ia-label"))
-				{
-					int asd=0;
-				}
-			}
-		}
-
 		d->Empty();
-		
-		auto Css = GetCss();
-		if (Css)
-		{
-			SetFont(NULL);
-			d->SetBaseFont(GetFont());
-		}
-
-		d->Add(GView::Name(), Css);
+		d->Add(GView::Name(), GetCss());
 		d->DoLayout(X());
 		d->Unlock();
 		Invalidate();
