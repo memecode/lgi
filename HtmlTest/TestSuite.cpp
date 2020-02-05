@@ -372,7 +372,7 @@ public:
 				s->AddView(Lst = new LList(IDC_LIST, 0, 0, 100, 100));
 				Lst->Sunken(false);
 				Lst->AddColumn("File", 400);
-				Lst->SetCssStyle("width: 200px;");
+				Lst->CssStyles("width: 200px;");
 
 				#if HAS_LOG_VIEW
 				GBox *vert = new GBox;
