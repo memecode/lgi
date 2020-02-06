@@ -416,7 +416,7 @@ GDisplayString *LListItem::GetDs(int Col, int FitTo)
 	if (!d->Display[Col])
 	{
 		GFont *f = GetFont();
-		if (!f) f = Parent->GetFont();
+		if (!f && Parent) f = Parent->GetFont();
 		if (!f) f = SysFont;
 
 		const char *Text = d->Str[Col] ? d->Str[Col] : GetText(Col);

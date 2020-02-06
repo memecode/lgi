@@ -474,7 +474,7 @@ public:
 		if (!Compare || !Lock(_FL))
 			return;
 
-		LListItem *Kb = Items.Length() ? Items[Keyboard] : NULL;
+		LListItem *Kb = Keyboard >= 0 && Keyboard < Items.Length() ? Items[Keyboard] : NULL;
 		Items.Sort(Compare, Data);
 		Keyboard = Kb ? (int)Items.IndexOf(Kb) : -1;
 		Unlock();
