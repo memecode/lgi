@@ -584,6 +584,7 @@ lgi_widget_drag_motion(GtkWidget	   *widget,
 	}
 	
 	GdcPt2 p(x, y);
+	Formats.SetSource(false);
 	int Result = Target->WillAccept(Formats, p, 0);
 	Formats.Empty();
 	if (Result != DROPEFFECT_NONE)

@@ -744,9 +744,12 @@ int GetAcceptFmts(::GString::Array &Formats, GdkDragContext *context, GDragDropT
 		i = i->next;
 	}
 
+	Fmts.SetSource(false);
 	Flags = t->WillAccept(Fmts, p, KeyState);
-	for (unsigned i=0; i<Formats.Length(); i++)
-		Formats.New() = Formats[i];
+	
+	auto Sup = Fmts.GetSupported();
+	for (auto &s: Sup)
+		Formats.New() = s;
 
 	return Flags;
 }
