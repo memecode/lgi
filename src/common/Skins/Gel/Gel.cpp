@@ -216,9 +216,9 @@ class GelSkin : public GSkinEngine
 				{
 					{0.0, Rgba32(192, 192, 192, 255)},
 					{0.1, Top},
-					{0.6, Mid},
-					{0.601, Mid2},
-					{1.0, Bot},
+					{0.6, LgiDarken(Mid, 230)},
+					{0.601, LgiDarken(Mid2, 230)},
+					{1.0, LgiDarken(Bot, 230)},
 				};					
 				GLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
 				e.Fill(pDC, b1);
