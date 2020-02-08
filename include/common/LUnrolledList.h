@@ -659,17 +659,21 @@ public:
 		// Copy any items to fill gaps...
 		while (in.i != e.i && in.Cur != e.Cur)
 		{
-			if (in.i != out.i || in.Cur != out.Cur)
-				out.i->Obj[out.Cur] = in.i->Obj[in.Cur];
-
-			if (out.Cur < BlockSize)
-				out.Cur++;
-			else
+			if (out.Cur >= BlockSize)
 			{
 				out.i = out.i->Next;
 				out.Cur = 0;
+				if (!out.i)
+					break;
 			}
 
+			if (in.i != out.i || in.Cur != out.Cur)
+			{
+				// printf("out.Cur=%i\n", out.Cur);
+				out.i->Obj[out.Cur] = in.i->Obj[in.Cur];
+			}
+
+			out.Cur++;
 			in++;
 		}
 

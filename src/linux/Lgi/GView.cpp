@@ -125,6 +125,7 @@ GViewPrivate::GViewPrivate()
 	GotOnCreate = false;
 	WantsFocus = false;
 	SinkHnd = -1;
+	CssDirty = false;
 
 	DropTarget = NULL;
 	DropSource = NULL;
