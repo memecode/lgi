@@ -652,25 +652,37 @@ public:
 		if (!FirstObj || !LastObj)
 			return;
 
+		/*
+		int n=0;
+		for (auto i: *this) LgiTrace("Before[%i]=%p\n", n++, i);
+		*/
+
 		auto in = begin();
 		auto out = begin();
-		Iter e(this, LastObj, LastObj->Count);
 
 		// Copy any items to fill gaps...
-		while (in.i != e.i && in.Cur != e.Cur)
+		n = 0;
+		while (in.i)
 		{
 			if (out.Cur >= BlockSize)
 			{
 				out.i = out.i->Next;
 				out.Cur = 0;
 				if (!out.i)
+				{
+					LgiAssert(!"Out should always trail in, and therefor be valid.");
 					break;
+				}
 			}
 
 			if (in.i != out.i || in.Cur != out.Cur)
 			{
-				// printf("out.Cur=%i\n", out.Cur);
+				// LgiTrace("Assign[%i/%i]: %p:%i=%p:%i %p\n", n++, (int)Items, out.i, out.Cur, in.i, in.Cur, out.i->Obj[out.Cur]);
 				out.i->Obj[out.Cur] = in.i->Obj[in.Cur];
+			}
+			else
+			{
+				// LgiTrace("NoAssign[%i/%i]: %p:%i=%p:%i %p\n", n++, (int)Items, out.i, out.Cur, in.i, in.Cur, out.i->Obj[out.Cur]);
 			}
 
 			out.Cur++;
@@ -692,6 +704,11 @@ public:
 		// Free any empty blocks...
 		while (LastObj->Count <= 0)
 			DeleteBlock(LastObj);
+
+		/*
+		n=0;
+		for (auto i: *this) LgiTrace("After[%i]=%p\n", n++, i);
+		*/
 	}
 
 	void Swap(LUnrolledList<T> &other)

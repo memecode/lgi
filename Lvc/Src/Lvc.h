@@ -15,7 +15,7 @@
 #define OPT_Folders		"Folders"
 #define OPT_Folder		"Folder"
 
-#define APP_VERSION		"0.5"
+#define APP_VERSION		"0.6"
 extern const char *AppName;
 
 enum LvcIcon
