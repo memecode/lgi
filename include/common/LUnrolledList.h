@@ -655,13 +655,13 @@ public:
 		/*
 		int n=0;
 		for (auto i: *this) LgiTrace("Before[%i]=%p\n", n++, i);
+		n = 0;
 		*/
 
 		auto in = begin();
 		auto out = begin();
 
 		// Copy any items to fill gaps...
-		n = 0;
 		while (in.i)
 		{
 			if (out.Cur >= BlockSize)
