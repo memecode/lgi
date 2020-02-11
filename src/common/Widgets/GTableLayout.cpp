@@ -32,7 +32,7 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		1150
+// #define DEBUG_LAYOUT		2222
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
 
@@ -1087,6 +1087,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			Tbl->d->InitBorderSpacing();
 			Tbl->d->LayoutHorizontal(r);
 			Tbl->d->LayoutVertical(r, &MinY, &MaxY, &Flags);
+			Tbl->d->LayoutPost(r);
 			Pos.y2 += MinY;
 			
 			c->Inf.Height.Min = MinY;
