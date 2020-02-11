@@ -1805,8 +1805,9 @@ void GWindow::Quit(bool DontDelete)
 	if (Wnd)
 	{
 		d->AttachState = LDetaching;
-		gtk_widget_destroy(GTK_WIDGET(Wnd));
+		auto wnd = Wnd;
 		Wnd = NULL;
+		gtk_widget_destroy(GTK_WIDGET(wnd));
 	}
 }
 
