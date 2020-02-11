@@ -372,10 +372,10 @@ GXmlTag::~GXmlTag()
 
 void GXmlTag::EmptyAttributes()
 {
-	for (int i=0; i<Attr.Length(); i++)
+	for (auto &a: Attr)
 	{
-		Allocator->Free(Attr[i].Name);
-		Allocator->Free(Attr[i].Value);
+		Allocator->Free(a.Name);
+		Allocator->Free(a.Value);
 	}
 	Attr.Length(0);
 }
