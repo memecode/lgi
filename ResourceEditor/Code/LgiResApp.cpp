@@ -197,7 +197,7 @@ char *DecodeXml(char *Str, int Len)
 						// named entity
 						char *Name = e;
 						while (*e && *e != ';') e++;
-						int Len = e - Name;
+						auto Len = e - Name;
 						if (Len == 3 && strnicmp(Name, "amp", Len) == 0)
 						{
 							p.Push("&");
@@ -1182,7 +1182,7 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 	{
 		case M_CHANGE:
 		{
-			return OnNotify((GViewI*) m->A(), m->B());
+			return OnNotify((GViewI*) m->A(), (int)m->B());
 		}
 		case M_DESCRIBE:
 		{
@@ -1613,7 +1613,7 @@ int AppWnd::GetUniqueStrRef(int	Start)
 				}
 				else
 				{
-				    int Idx = Grp->GetStrs()->IndexOf(s);
+				    // auto Idx = Grp->GetStrs()->IndexOf(s);
 				    LgiAssert(!"No string ref?");
 				}
 			}			
@@ -2173,7 +2173,7 @@ public:
 				}
 			}
 
-			int Max = MAX(r1.Length(), r2.Length());
+			auto Max = MAX(r1.Length(), r2.Length());
 			for (int i = 0; i<Max; i++)
 			{
 				if (r1[i] && r2[i])
@@ -3019,10 +3019,10 @@ bool AppWnd::WriteDefines(GFile &Defs)
 		for (int n=0; n<Pairs.Length(); n++)
 		{
 			DefinePair &p = Pairs[n];
-			int Tabs = (43 - strlen(p.Name)) / 4;
+			auto Tabs = (43 - strlen(p.Name)) / 4;
 			char Tab[32];
 			ZeroObj(Tab);
-			for (int n=0; n<Tabs; n++) Tab[n] = '\t';
+			for (size_t n=0; n<Tabs; n++) Tab[n] = '\t';
 
 			char s[4];
 			memcpy(s, &p.Value, 4);

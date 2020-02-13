@@ -809,10 +809,28 @@ struct SearchParams
 	}
 };
 
+class SearchThread : public GEventTargetThread, public LCancel
+{
+	List<Resource> Res;
+	AppWnd *App;
+	LList *Results;
+	SearchParams Params;
+
+	bool HasContent(char *s);
+	class Result *Test(class ResString *s);
+	class Result *Test(class ResMenuItem *mi);
+
+public:
+	SearchThread(AppWnd *app, LList *results);
+
+	void Search(SearchParams &p);
+	GMessage::Result OnEvent(GMessage *Msg);
+};
+
 class Search : public GDialog, public SearchParams
 {
 	AppWnd *App;
-	GAutoPtr<class SearchThread> Thread;
+	GAutoPtr<SearchThread> Thread;
 	void OnCheck();
 
 public:

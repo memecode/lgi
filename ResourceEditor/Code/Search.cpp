@@ -76,203 +76,194 @@ public:
 	}
 };
 
-class SearchThread : public GEventTargetThread, public LCancel
+bool SearchThread::HasContent(char *s)
 {
-	List<Resource> Res;
-	AppWnd *App;
-	LList *Results;
-	SearchParams Params;
-
-	bool HasContent(char *s)
+	while (s && *s)
 	{
-		while (s && *s)
+		if (((*s & 0x80) != 0) || isalpha(*s))
 		{
-			if (((*s & 0x80) != 0) || isalpha(*s))
-			{
-				return true;
-			}
-			s++;
+			return true;
 		}
-
-		return false;
+		s++;
 	}
 
-	Result *Test(ResString *s)
+	return false;
+}
+
+Result *SearchThread::Test(ResString *s)
+{
+	if (!s)
+		return NULL;
+
+	if (Params.Text)
 	{
-		if (!s)
+		if (Params.LimitToDefine &&
+			!Params.LimitToText &&
+			!Params.InLang)
+		{
+			if (s->GetDefine())
+			{
+				if (stristr(s->GetDefine(), Params.Text))
+					return new Result(App, s);
+			}
+		}
+
+		if (Params.LimitToDefine)
 			return NULL;
 
-		if (Params.Text)
+		if (Params.InLang)
 		{
-			if (Params.LimitToDefine &&
-				!Params.LimitToText &&
-				!Params.InLang)
+			char *Txt = s->Get(Params.InLang);
+			if (Txt && stristr(Txt, Params.Text))
+				return new Result(App, s, Params.InLang);
+		}
+		else
+		{
+			for (auto t: s->Items)
 			{
-				if (s->GetDefine())
-				{
-					if (stristr(s->GetDefine(), Params.Text))
-						return new Result(App, s);
-				}
+				if (t->GetStr() && stristr(t->GetStr(), Params.Text))
+					return new Result(App, s, t->GetLang());
 			}
+		}
 
-			if (Params.LimitToDefine)
-				return NULL;
+		if (Params.LimitToText)
+			return NULL;
+	}
 
-			if (Params.InLang)
+	if (Params.NotInLang)
+	{
+		if (s->Items.Length() > 0 &&
+			!s->Get(Params.NotInLang) &&
+			HasContent(s->Get("en")))
+			return new Result(App, s, Params.NotInLang);
+	}
+
+	if (Params.Ref != INVALID_INT)
+	{
+		if (s->GetRef() == Params.Ref)
+			return new Result(App, s);
+	}
+
+	if (Params.CtrlId != INVALID_INT)
+	{
+		if (s->GetId() == Params.CtrlId)
+			return new Result(App, s);
+	}
+
+	return NULL;
+}
+
+Result *SearchThread::Test(ResMenuItem *mi)
+{
+	Result *r = Test(mi->GetStr());
+	if (r)
+		return r;
+	
+	if (ValidStr(Params.Text) && mi->Shortcut())
+	{
+		if (stristr(mi->Shortcut(), Params.Text))
+		{
+			if ((r = new Result(App, mi->GetStr(), Params.InLang)))
 			{
-				char *Txt = s->Get(Params.InLang);
-				if (Txt && stristr(Txt, Params.Text))
-					return new Result(App, s, Params.InLang);
-			}
+				r->Menu = mi;
+				return r;
+			}				
+		}
+	}
+	
+	return NULL;
+}
+
+SearchThread::SearchThread(AppWnd *app, LList *results) :
+	App(app), Results(results), GEventTargetThread("SearchThread")
+{
+	App->ListObjects(Res);
+	Run();
+}
+
+void SearchThread::Search(SearchParams &p)
+{
+	Cancel(true);
+	PostEvent(M_SEARCH, (GMessage::Param)new SearchParams(p));
+}
+
+GMessage::Result SearchThread::OnEvent(GMessage *Msg)
+{
+	switch (Msg->Msg())
+	{
+		case M_SEARCH:
+		{
+			GAutoPtr<SearchParams> p;
+			if (ReceiveA(p, Msg))
+				Params = *p;
 			else
-			{
-				for (auto t: s->Items)
-				{
-					if (t->GetStr() && stristr(t->GetStr(), Params.Text))
-						return new Result(App, s, t->GetLang());
-				}
-			}
-
-			if (Params.LimitToText)
-				return NULL;
-		}
-
-		if (Params.NotInLang)
-		{
-			if (s->Items.Length() > 0 &&
-				!s->Get(Params.NotInLang) &&
-				HasContent(s->Get("en")))
-				return new Result(App, s, Params.NotInLang);
-		}
-
-		if (Params.Ref != INVALID_INT)
-		{
-			if (s->GetRef() == Params.Ref)
-				return new Result(App, s);
-		}
-
-		if (Params.CtrlId != INVALID_INT)
-		{
-			if (s->GetId() == Params.CtrlId)
-				return new Result(App, s);
-		}
-
-		return NULL;
-	}
-
-	Result *Test(ResMenuItem *mi)
-	{
-		Result *r = Test(mi->GetStr());
-		if (r)
-			return r;
-		
-		if (ValidStr(Params.Text) && mi->Shortcut())
-		{
-			if (stristr(mi->Shortcut(), Params.Text))
-			{
-				if ((r = new Result(App, mi->GetStr(), Params.InLang)))
-				{
-					r->Menu = mi;
-					return r;
-				}				
-			}
-		}
-		
-		return NULL;
-	}
-
-public:
-	SearchThread(AppWnd *app, LList *results) : 
-		App(app), Results(results), GEventTargetThread("SearchThread")
-	{
-		App->ListObjects(Res);
-		Run();
-	}
-
-	void Search(SearchParams &p)
-	{
-		Cancel(true);
-		PostEvent(M_SEARCH, (GMessage::Param)new SearchParams(p));
-	}
-
-	GMessage::Result OnEvent(GMessage *Msg)
-	{
-		switch (Msg->Msg())
-		{
-			case M_SEARCH:
-			{
-				GAutoPtr<SearchParams> p;
-				if (ReceiveA(p, Msg))
-					Params = *p;
-				else
-					return 0;
-				break;
-			}
-			default:
 				return 0;
+			break;
 		}
-
-		Cancel(false);
-		Results->Empty();
-
-		for (auto r: Res)
-		{
-			if (IsCancelled() || Results->Length() > 100)
-				break;
-
-			if (r->IsStringGroup())
-			{
-				List<ResString>::I it = r->IsStringGroup()->GetStrs()->begin();
-				for (ResString *s = *it; s && !IsCancelled(); s = *++it)
-				{
-					Result *Res = Test(s);
-					if (Res)
-					{
-						Res->Grp = r->IsStringGroup();
-						Results->Insert(Res);
-					}
-				}
-			}
-			else if (r->IsDialog())
-			{
-				List<ResDialogCtrl> Ctrls;
-				r->IsDialog()->EnumCtrls(Ctrls);
-				for (auto c: Ctrls)
-				{
-					if (IsCancelled())
-						break;
-
-					Result *Res = Test(c->Str);
-					if (Res)
-					{
-						Res->Ctrl = c;
-						Res->Dialog = r->IsDialog();
-						Results->Insert(Res);
-					}
-				}
-			}
-			else if (r->IsMenu())
-			{
-				List<ResMenuItem> Items;
-				r->IsMenu()->EnumItems(Items);
-				for (auto c: Items)
-				{
-					if (IsCancelled())
-						break;
-
-					Result *Res = Test(c);
-					if (Res)
-					{
-						Res->Menu = c;
-						Results->Insert(Res);
-					}
-				}
-			}
-		}
-
-		return 1;
+		default:
+			return 0;
 	}
-};
+
+	Cancel(false);
+	Results->Empty();
+
+	for (auto r: Res)
+	{
+		if (IsCancelled() || Results->Length() > 100)
+			break;
+
+		if (r->IsStringGroup())
+		{
+			List<ResString>::I it = r->IsStringGroup()->GetStrs()->begin();
+			for (ResString *s = *it; s && !IsCancelled(); s = *++it)
+			{
+				Result *Res = Test(s);
+				if (Res)
+				{
+					Res->Grp = r->IsStringGroup();
+					Results->Insert(Res);
+				}
+			}
+		}
+		else if (r->IsDialog())
+		{
+			List<ResDialogCtrl> Ctrls;
+			r->IsDialog()->EnumCtrls(Ctrls);
+			for (auto c: Ctrls)
+			{
+				if (IsCancelled())
+					break;
+
+				Result *Res = Test(c->Str);
+				if (Res)
+				{
+					Res->Ctrl = c;
+					Res->Dialog = r->IsDialog();
+					Results->Insert(Res);
+				}
+			}
+		}
+		else if (r->IsMenu())
+		{
+			List<ResMenuItem> Items;
+			r->IsMenu()->EnumItems(Items);
+			for (auto c: Items)
+			{
+				if (IsCancelled())
+					break;
+
+				Result *Res = Test(c);
+				if (Res)
+				{
+					Res->Menu = c;
+					Results->Insert(Res);
+				}
+			}
+		}
+	}
+
+	return 1;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Search window
