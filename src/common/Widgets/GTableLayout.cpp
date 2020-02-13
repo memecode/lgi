@@ -35,6 +35,7 @@ enum CellFlag
 // #define DEBUG_LAYOUT		2222
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
+// #define DEBUG_CTRL_ID		970
 
 int GTableLayout::CellSpacing = 4;
 
@@ -747,6 +748,13 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 			GCss::Len ChildWid;
 			if (Css)
 				ChildWid = Css->Width();
+
+			#ifdef DEBUG_CTRL_ID
+			if (v->GetId() == DEBUG_CTRL_ID)
+			{
+				int asd=0;
+			}
+			#endif
 				
 			if (ChildWid.IsValid())
 			{
@@ -945,8 +953,14 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			// In the case where the CSS width is set, we need to default the
 			// OnLayout info with valid widths otherwise the OnLayout calls will
 			// not fill out the height, but initialize the width instead.
-			c->Inf.Width.Min = Width;
-			c->Inf.Width.Max = Width;
+
+			// Without this !zero check the Bayesian Filter setting dialog in Scribe
+			// has the wrong Help button size. ie if the PreLayout step gave a valid
+			// layout size, don't override it here.
+			if (!c->Inf.Width.Min)
+				c->Inf.Width.Min = Width;
+			if (!c->Inf.Width.Max)
+				c->Inf.Width.Max = Width;
 		}
 		
 		GTableLayout *Tbl = NULL;
@@ -964,6 +978,13 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		if (c->Inf.Width.Max > Width)
 			c->Inf.Width.Max = Width;
 
+		#ifdef DEBUG_CTRL_ID
+		if (v->GetId() == DEBUG_CTRL_ID)
+		{
+			int asd=0;
+		}
+		#endif
+				
 		if (Ht.IsValid())
 		{
 			int CtrlHeight = Ht.ToPx(Table->Y(), v->GetFont());
