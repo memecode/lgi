@@ -277,7 +277,7 @@ public:
 					LgiTrace("%s:%i - No text specified.\n", _FL);
 					break;
 				}
-
+				
 				for (char *s = Ct->Text; s; )
 				{
 					while (*s && strchr(Delim, *s))

@@ -100,32 +100,6 @@ bool GRichTextEdit::SetSpellCheck(GSpellCheck *sp)
 	return d->SpellCheck != NULL;
 }
 
-/*
-bool GRichTextEdit::NeedsCapability(const char *Name, const char *Param)
-{
-	for (unsigned i=0; i<d->NeedsCap.Length(); i++)
-	{
-		if (d->NeedsCap[i].Name.Equals(Name))
-			return true;
-	}
-
-	d->NeedsCap.New().Set(Name, Param);
-	Invalidate();
-	return true;
-}
-
-void GRichTextEdit::OnInstall(CapsHash *Caps, bool Status)
-{
-	OnCloseInstaller();
-}
-
-void GRichTextEdit::OnCloseInstaller()
-{
-	d->NeedsCap.Length(0);
-	Invalidate();
-}
-*/
-
 bool GRichTextEdit::IsDirty()
 {
 	return d->Dirty;
@@ -2539,9 +2513,8 @@ GMessage::Result GRichTextEdit::OnEvent(GMessage *Msg)
 
 			// LgiTrace("%s:%i - Got M_ENUMERATE_LANGUAGES %s\n", _FL, d->SpellLang.Get());
 			bool Match = false;
-			for (unsigned i=0; i<Languages->Length(); i++)
+			for (auto &s: *Languages)
 			{
-				GSpellCheck::LanguageId &s = (*Languages)[i];
 				if (s.LangCode.Equals(d->SpellLang) ||
 					s.EnglishName.Equals(d->SpellLang))
 				{
@@ -2562,19 +2535,18 @@ GMessage::Result GRichTextEdit::OnEvent(GMessage *Msg)
 				break;
 	
 			bool Match = false;		
-			for (unsigned i=0; i<Dictionaries->Length(); i++)
+			for (auto &s: *Dictionaries)
 			{
-				GSpellCheck::DictionaryId &s = (*Dictionaries)[i];
+				// LgiTrace("%s:%i - M_ENUMERATE_DICTIONARIES: %s, %s\n", _FL, s.Dict.Get(), d->SpellDict.Get());
 				if (s.Dict.Equals(d->SpellDict))
 				{
-					// LgiTrace("%s:%i - M_ENUMERATE_DICTIONARIES: %s, %s\n", _FL, s.Dict.Get(), d->SpellDict.Get());
 					d->SpellCheck->SetDictionary(AddDispatch(), s.Lang, s.Dict);
 					Match = true;
 					break;
 				}
 			}
 			if (!Match)
-				LgiTrace("%s:%i - No match in M_ENUMERATE_DICTIONARIES: %s\n", _FL, d->SpellDict.Get());
+				d->SpellCheck->SetDictionary(AddDispatch(), d->SpellLang, NULL);
 			break;
 		}
 		case M_SET_DICTIONARY:
@@ -2605,7 +2577,7 @@ GMessage::Result GRichTextEdit::OnEvent(GMessage *Msg)
 				LgiAssert(0);
 				break;
 			}
-
+			
 			GRichTextPriv::Block *b = (GRichTextPriv::Block*)Ct->User[SpellBlockPtr].CastVoidPtr();
 			if (!d->Blocks.HasItem(b))
 				break;
