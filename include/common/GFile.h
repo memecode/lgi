@@ -482,6 +482,13 @@ public:
 				*this = Init.Get();
 		}
 		
+		Path(GString Init)
+		{
+			SetFixedLength(false);
+			if (Init)
+				*this = Init.Get();
+		}
+		
 		Path(LgiSystemPath Which, int WordSize = 0)
 		{
 			SetFixedLength(false);

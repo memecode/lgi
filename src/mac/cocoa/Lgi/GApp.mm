@@ -735,7 +735,6 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 	else
 	{
 		// NSWindow nextEventMatchingMask may be useful here.
-		
 	}
 		
 	return 0;
