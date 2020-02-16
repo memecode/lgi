@@ -111,13 +111,6 @@ FallbackMethod:
 
 static const unsigned int kShortLanguageCodeSize = 2;
 
-/*
-static int GVariantCmp(GVariant *a, GVariant *b, NativeInt Data)
-{
-	return stricmp(a->Str(), b->Str());
-}
-*/
-
 int LangCmp(GSpellCheck::LanguageId *a, GSpellCheck::LanguageId *b)
 {
 	return stricmp(a->LangCode, b->LangCode);
@@ -138,8 +131,6 @@ class AppleSpellChecker :
 		// if ([lang_code isEqualToString:@"en"]) return NewStr("en-US");
 		// if ([lang_code isEqualToString:@"pt"]) return NewStr("pt-PT");
 		
-		// NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-		
 		GString s;
 		if ([lang_code length] > kShortLanguageCodeSize && [lang_code characterAtIndex:kShortLanguageCodeSize] == '_')
 		{
@@ -153,14 +144,11 @@ class AppleSpellChecker :
 			s = (char*)[lang_code UTF8String];
 		}
 		
-		// [pool release];
-		
 		return s;
 	}
 
 	bool ListDictionaries(List<char> &d)
 	{
-		// NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 		NSArray *availableLanguages = [[NSSpellChecker sharedSpellChecker] availableLanguages];
 		NSEnumerator *e = [availableLanguages objectEnumerator];
 
@@ -176,7 +164,6 @@ class AppleSpellChecker :
 				d.Add(lang.Release());*/
 		}
 
-		// [pool release];
 		return d.Length();
 	}
 
