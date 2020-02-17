@@ -243,7 +243,7 @@ public:
 		self->ReqClose = CSInRequest;
 		if (!self.d ||
 			!self.d->Wnd ||
-			self.d->Wnd->OnRequestClose(false))
+			!self.d->Wnd->OnRequestClose(false))
 		{
 			self->ReqClose = CSNone;
 			return;
