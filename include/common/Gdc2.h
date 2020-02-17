@@ -552,6 +552,8 @@ public:
 	virtual bool IsPrint() { return false; }
 	/// Returns a pointer to the start of a scanline, or NULL if not available
 	virtual uchar *operator[](int y);
+	/// Dumps various debug information
+	virtual GString Dump() { return GString("Not implemented."); }
 
 	/// Returns true if this surface supports alpha compositing when using Blt
 	virtual bool SupportsAlphaCompositing() { return false; }
@@ -789,6 +791,7 @@ public:
 	COLOUR Colour();
 	COLOUR Colour(COLOUR c, int Bits = 0);
 	GColour Colour(GColour c);
+	GString Dump();
 
 	int Op();
 	int Op(int Op, NativeInt Param = -1);

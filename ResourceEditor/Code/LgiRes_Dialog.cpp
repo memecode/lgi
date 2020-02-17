@@ -3422,10 +3422,23 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	#if USE_MEM_DC
 	GDoubleBuffer DblBuf(pDC);
 	#endif
+	
 	GView::_Paint(pDC, Offset, Update);
 
 	if (GetParent())
+	{
+		#ifndef WIN32
+		GRect p = GetPos();
+		if (Offset) p.Offset(Offset);
+		pDC->SetClient(&p);
+		#endif
+		
 		DrawSelection(pDC);
+
+		#ifndef WIN32
+		pDC->SetClient(NULL);
+		#endif
+	}
 }
 
 void ResDialog::OnPaint(GSurface *pDC)

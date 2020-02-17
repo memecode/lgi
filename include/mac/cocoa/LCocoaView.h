@@ -89,7 +89,14 @@ LgiExtern GRect LScreenFlip(GRect r);
 
 @interface LNsWindow : NSWindow
 {
-	bool ReqClose;
+	enum CloseState
+	{
+		CSNone,
+		CSInRequest,
+		CSClosed,
+	};
+	
+	CloseState ReqClose;
 }
 
 @property GWindowPrivate *d;

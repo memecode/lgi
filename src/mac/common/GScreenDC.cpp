@@ -155,6 +155,18 @@ GScreenDC::~GScreenDC()
 	DeleteObj(d);
 }
 
+GString GScreenDC::Dump()
+{
+	auto Ctx = Handle();
+	CGAffineTransform t = CGContextGetCTM(Ctx);
+	GRect cr = CGContextGetClipBoundingBox(Ctx);
+	GString s;
+	s.Printf("ScreenDC transform=%g,%g,%g,%g-%g,%g clip=%s",
+			t.a, t.b, t.c, t.d, t.tx, t.ty,
+			cr.GetStr());
+	return s;
+}
+
 bool GScreenDC::SupportsAlphaCompositing()
 {
 	return true;

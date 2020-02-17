@@ -200,7 +200,7 @@ public:
 					defer:NO ]) != nil)
 	{
 		self.d = priv;
-		self->ReqClose = false;
+		self->ReqClose = CSNone;
 		
 		self.contentView = [[LCocoaView alloc] init:priv->Wnd];
 		[self makeFirstResponder:self.contentView];
@@ -238,16 +238,20 @@ public:
 
 - (void)onQuit
 {
-	if (!self->ReqClose)
+	if (self->ReqClose == CSNone)
 	{
+		self->ReqClose = CSInRequest;
 		if (!self.d ||
 			!self.d->Wnd ||
 			self.d->Wnd->OnRequestClose(false))
-			self->ReqClose = true;
-		else
+		{
+			self->ReqClose = CSNone;
 			return;
+		}
 	}
+	else return;
 	
+	self->ReqClose = CSClosed;
 	[self close];
 }
 
