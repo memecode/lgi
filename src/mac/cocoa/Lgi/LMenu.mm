@@ -320,7 +320,9 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 				[i->Info.p setSubmenu:i->Child->Info.p];
 				
 				auto Index = Items.IndexOf(i);
-				[Info.p insertItem:i->Info atIndex:Index];
+				auto IsMenu = dynamic_cast<LMenu*>(this);
+				auto Offset = IsMenu && Where >= 0 ? 1 : 0; // Adjust for 'Root' element "app menu"
+				[Info.p insertItem:i->Info atIndex:Index + Offset];
 			}
 		}
 		else
