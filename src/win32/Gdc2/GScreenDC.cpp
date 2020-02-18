@@ -432,6 +432,13 @@ GColour GScreenDC::Colour(GColour c)
 	return cPrev;
 }
 
+GString GScreenDC::Dump()
+{
+	GString s;
+	s.Printf("GScreenDC hnd=%p size=%i,%i\n", hDC, d->Sx, d->Sy);
+	return s;
+}
+
 int GScreenDC::Op(int Op, NativeInt Param)
 {
 	int Prev = d->Mode;
