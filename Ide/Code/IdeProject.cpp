@@ -1315,50 +1315,66 @@ struct ProjInfo
 
 GString BuildThread::FindExe()
 {
-	GToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
+	GString::Array p = LGetPath();
 
 	if (Compiler == PythonScript)
 	{
 		#if defined(WINDOWS)
 		uint32_t BestVer = 0;
+		#else
+		GString BestVer;
 		#endif
-		GString Best;
+		static GString Best;
 
-		for (int i=0; i<p.Length(); i++)
+		if (!Best)
 		{
-			char Path[MAX_PATH];
-			LgiMakePath(Path, sizeof(Path), p[i], "python" LGI_EXECUTABLE_EXT);
-			if (FileExists(Path))
+			for (int i=0; i<p.Length(); i++)
 			{
-				// Check version
-				#if defined(WINDOWS)
-				DWORD Sz = GetFileVersionInfoSizeA(Path, NULL);
-				void *Buf = malloc(Sz);
-				if (GetFileVersionInfoA(Path, NULL, Sz, Buf))
+				char Path[MAX_PATH];
+				LgiMakePath(Path, sizeof(Path), p[i], "python" LGI_EXECUTABLE_EXT);
+				if (FileExists(Path))
 				{
-					LPVOID Ptr = NULL;
-					UINT Bytes;
-					if (VerQueryValueA(Buf, "\\", &Ptr, &Bytes))
-					{
-						VS_FIXEDFILEINFO *v = (VS_FIXEDFILEINFO *)Ptr;
-						if (v->dwProductVersionMS > BestVer)
+					// Check version
+					#if defined(WINDOWS)
+						DWORD Sz = GetFileVersionInfoSizeA(Path, NULL);
+						void *Buf = malloc(Sz);
+						if (GetFileVersionInfoA(Path, NULL, Sz, Buf))
 						{
-							BestVer = v->dwProductVersionMS;
+							LPVOID Ptr = NULL;
+							UINT Bytes;
+							if (VerQueryValueA(Buf, "\\", &Ptr, &Bytes))
+							{
+								VS_FIXEDFILEINFO *v = (VS_FIXEDFILEINFO *)Ptr;
+								if (v->dwProductVersionMS > BestVer)
+								{
+									BestVer = v->dwProductVersionMS;
+									Best = Path;
+								}
+							}
+						}
+						else if (!Best)
+						{
 							Best = Path;
 						}
-					}
-				}
-				else if (!Best)
-				{
-					Best = Path;
-				}
-				free(Buf);
-				#else
-				Best = Path;
-				break;
-				#endif
-			}
+						free(Buf);
+					#else
+						GSubProcess p(Path, "--version");
+						GStringPipe o;
+						if (p.Start())
+							p.Communicate(&o);
+						auto Out = o.NewGStr();
+						auto Ver = Out.SplitDelimit().Last();
+						printf("Ver=%s\n", Ver.Get());
 
+						if (!BestVer || Stricmp(Ver.Get(), BestVer.Get()) > 0)
+						{
+							Best = Path;
+							BestVer = Ver;
+						}
+						break;
+					#endif
+				}
+			}
 		}
 
 		return Best;
