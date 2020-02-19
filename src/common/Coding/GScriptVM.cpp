@@ -692,7 +692,7 @@ public:
 		Scope[SCOPE_OBJECT] = NULL;
 		Scope[SCOPE_RETURN] = Args->GetReturn();
 
-		#if 1
+		#ifdef _DEBUG
 		const char *SourceFileName = Code->GetFileName();
 		char Obj[MAX_PATH];
 		if (SourceFileName)
