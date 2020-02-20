@@ -76,6 +76,54 @@ public:
 		return Str->Get();
 	}
 
+	void Move(int Dir)
+	{
+		auto Cur = IndexOf();
+		GTreeNode *p = GetParent();
+		if (!p)
+			p = GetTree();
+		if (Dir < 0)
+		{
+			if (Cur == 0) return;
+			Remove();
+			p->Insert(this, Cur-1);
+		}
+		else
+		{
+			Remove();
+			p->Insert(this, Cur+1);
+		}
+	}
+
+	bool OnKey(GKey &k)
+	{
+		switch (k.vkey)
+		{
+			case VK_UP:
+			{
+				if (k.Alt())
+				{
+					if (k.Down())
+						Move(-1);
+					return true;
+				}
+				break;
+			}
+			case VK_DOWN:
+			{
+				if (k.Alt())
+				{
+					if (k.Down())
+						Move(1);
+					return true;
+				}
+				break;
+			}
+		}
+
+		return false;
+	}
+
 	void OnMouseClick(GMouse &m)
 	{
 		if (m.IsContextMenu())
@@ -87,6 +135,10 @@ public:
 			s.AppendSeparator();
 			s.AppendItem("Copy Text", IDM_COPY_TEXT, true);
 			s.AppendItem("Paste Text", IDM_PASTE_TEXT, true);
+			s.AppendSeparator();
+			s.AppendItem("Move Up", IDM_UP, true);
+			s.AppendItem("Move Down", IDM_DOWN, true);
+
 			m.ToScreen();
 
 			int Cmd;
@@ -96,6 +148,12 @@ public:
 
 				switch (Cmd)
 				{
+					case IDM_UP:
+						Move(-1);
+						break;
+					case IDM_DOWN:
+						Move(1);
+						break;
 					case IDM_NEW_CHILD:
 					{
 						// Insert at the start... user can use "next" for positions other than the start.
