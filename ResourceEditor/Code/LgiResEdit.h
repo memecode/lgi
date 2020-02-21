@@ -95,6 +95,7 @@
 #define VAL_Children				"children"
 #define VAL_Span					"span"
 #define VAL_Image					"image"
+#define VAL_Toggle					"toggle"
 
 // Misc
 class AppWnd;

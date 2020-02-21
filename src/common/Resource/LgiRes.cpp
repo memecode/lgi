@@ -906,31 +906,12 @@ bool LgiResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 		GString::Array *a = v->CssClasses();
 		if (a)
 			(*a) = GString(i.Str()).SplitDelimit(" \t");
-		
-		/*	Lets resolve the CSS styles at runtime, when the object 
-			is in position.
-			
-		ResObjectCallback Cb(Props);
-		GCss::SelArray a;
-		if (CssStore.Match(a, &Cb, Obj))
-		{
-			for (int i=0; i<a.Length(); i++)
-			{
-				GCss::Selector *s = a[i];
-				if (s)
-				{
-					const char *style = s->Style;
-					v->SetCssStyle(style);
-				}
-			}
-		}
-		*/
 	}
 
 	if (Props->GetValue("image", i))
 		v->GetCss(true)->BackgroundImage(GCss::ImageDef(i.Str()));
 
-	GEdit *e = dynamic_cast<GEdit*>(v);
+	auto e = dynamic_cast<GEdit*>(v);
 	if (e)
 	{
 		if (Props->GetValue("pw", i))
@@ -938,6 +919,16 @@ bool LgiResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 
 		if (Props->GetValue("multiline", i))
 			e->MultiLine(i.CastInt32() != 0);
+	}
+
+	auto b = dynamic_cast<GButton*>(v);
+	if (b)
+	{
+		if (Props->GetValue("image", i))
+			b->GetCss(true)->BackgroundImage(GCss::ImageDef(i.Str()));
+
+		if (Props->GetValue("toggle", i))
+			b->SetIsToggle(i.CastInt32()!=0);
 	}
 
 	return true;

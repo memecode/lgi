@@ -1099,6 +1099,7 @@ void CtrlCheckbox::OnPaint(GSurface *pDC)
 CtrlButton::CtrlButton(ResDialog *dlg, GXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Button, load)
 {
+	IsToggle = false;
 }
 
 IMPL_DIALOG_CTRL(CtrlButton)
@@ -1109,6 +1110,7 @@ bool CtrlButton::GetFields(FieldTree &Fields)
 	
 	int Id = 160;
 	Fields.Insert(this, DATA_FILENAME, Id++, VAL_Image, "Image");
+	Fields.Insert(this, DATA_BOOL, Id++, VAL_Toggle, "Toggle");
 	
 	return Status;
 }
@@ -1117,7 +1119,10 @@ bool CtrlButton::Serialize(FieldTree &Fields)
 {
 	bool Status = ResDialogCtrl::Serialize(Fields);
 	if (Status)
+	{
 		Fields.Serialize(this, VAL_Image, Image);
+		Fields.Serialize(this, VAL_Toggle, IsToggle);
+	}
 	return Status;
 }
 

@@ -336,6 +336,7 @@ public:
 class CtrlButton : public ResDialogCtrl, public GView
 {
 	GString Image;
+	bool IsToggle;
 
 public:
 	CtrlButton(ResDialog *dlg, GXmlTag *load);
