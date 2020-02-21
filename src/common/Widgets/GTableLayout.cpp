@@ -1121,8 +1121,13 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		}
 	}
 	
-	MinY = MAX(MinY, Pos.Y() + Padding.y1 + Padding.y2);
-	MaxY = MAX(MaxY, Pos.Y() + Padding.y1 + Padding.y2);
+	// Fix: This if statement is needed to stop GFileSelect dialogs only growing in size, and
+	// the Ok/Cancel shifting off the bottom of the dialog if you shrink the window.
+	if (Flags != SizeFill)
+	{
+		MinY = MAX(MinY, Pos.Y() + Padding.y1 + Padding.y2);
+		MaxY = MAX(MaxY, Pos.Y() + Padding.y1 + Padding.y2);
+	}
 }
 
 /// Called after the layout has been done to move the controls into place
@@ -1657,6 +1662,14 @@ void GTableLayoutPrivate::LayoutVertical(GRect &Client, int *MinY, int *MaxY, Ce
 		}
 	}
 
+	#if DEBUG_LAYOUT
+	if (DebugLayout)
+	{
+		for (i=0; i<Rows.Length(); i++)
+			Dbg.Print("\tLayoutVertical.AfterSingle[%i]: min=%i max=%i (%s)\n", i, MinRow[i], MaxRow[i], FlagToString(RowFlags[i]));
+	}
+	#endif
+
 	// Row height for spanned cells
 	for (Cy=0; Cy<Rows.Length(); Cy++)
 	{
@@ -1763,9 +1776,7 @@ void GTableLayoutPrivate::LayoutVertical(GRect &Client, int *MinY, int *MaxY, Ce
 	if (DebugLayout)
 	{
 		for (i=0; i<Rows.Length(); i++)
-		{
 			Dbg.Print("\tLayoutVertical.AfterSpanned[%i]: min=%i max=%i (%s)\n", i, MinRow[i], MaxRow[i], FlagToString(RowFlags[i]));
-		}
 	}
 	#endif
 
