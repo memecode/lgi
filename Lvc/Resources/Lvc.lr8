@@ -55,10 +55,10 @@
 					<Custom pos="189,7,223,27" ref="14" Ctrl="DropDownBtn" />
 				</td>
 				<td>
-					<Button pos="266,7,321,27" ref="3" />
+					<Button pos="266,7,321,27" ref="3" toggle="0" />
 				</td>
 				<td>
-					<Button pos="357,7,405,27" ref="13" />
+					<Button pos="357,7,405,27" ref="13" toggle="0" />
 				</td>
 			</tr>
 			<tr>
@@ -86,7 +86,7 @@
 					<EditBox Pos="105,7,335,27" ref="25" />
 				</td>
 				<td>
-					<Button pos="371,7,391,27" ref="26" />
+					<Button pos="371,7,391,27" ref="26" toggle="0" />
 				</td>
 			</tr>
 			<tr>
@@ -97,7 +97,7 @@
 					<EditBox Pos="105,41,335,61" ref="28" />
 				</td>
 				<td>
-					<Button pos="371,42,391,62" ref="29" />
+					<Button pos="371,42,391,62" ref="29" toggle="0" />
 				</td>
 			</tr>
 			<tr>
@@ -108,7 +108,7 @@
 					<EditBox Pos="105,75,321,95" ref="32" />
 				</td>
 				<td>
-					<Button pos="371,75,391,95" ref="36" />
+					<Button pos="371,75,391,95" ref="36" toggle="0" />
 				</td>
 			</tr>
 			<tr>
@@ -119,36 +119,36 @@
 					<EditBox Pos="105,109,328,129" ref="33" />
 				</td>
 				<td>
-					<Button pos="371,109,391,129" ref="37" />
+					<Button pos="371,109,391,129" ref="37" toggle="0" />
 				</td>
 			</tr>
 			<tr>
 				<td />
 				<td colspan="2" align="Max">
-					<Button pos="266,145,321,165" ref="34" />
-					<Button pos="343,145,405,165" ref="35" />
+					<Button pos="266,145,321,165" ref="34" toggle="0" />
+					<Button pos="343,145,405,165" ref="35" toggle="0" />
 				</td>
 			</tr>
 		</TableLayout>
 	</Dialog>
 	<Dialog pos="7,7,998,136" ref="1">
-		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" CellStyle="padding-right: 1em;" cols="0.091,0.094,0.088,0.060,0.045,0.082,0.060,0.149,0.149,0.091,0.091" rows="1.000">
+		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" cols="0.091,0.094,0.088,0.060,0.045,0.082,0.060,0.149,0.149,0.091,0.091" rows="1.000">
 			<tr>
 				<td valign="Center" style="padding-left: 4px;&#10;padding-right: 1em;">
-					<Button pos="7,21,71,48" ref="18" />
+					<Button pos="7,21,71,48" ref="18" toggle="0" />
 				</td>
 				<td valign="Center">
-					<Button pos="96,14,130,41" ref="5" />
-					<Button pos="131,14,158,41" ref="39" />
+					<Button pos="96,14,130,41" ref="5" toggle="0" />
+					<Button pos="131,14,158,41" ref="39" toggle="0" />
 				</td>
 				<td valign="Center" style="padding-right: 1em;">
 					<CheckBox pos="189,21,223,41" ref="48" />
 				</td>
 				<td valign="Center" style="padding-right: 1em;">
-					<Button pos="260,14,301,41" ref="6" />
+					<Button pos="260,14,301,41" ref="6" toggle="0" />
 				</td>
 				<td valign="Center" style="padding-right: 1em;">
-					<Button pos="315,14,355,41" ref="40" />
+					<Button pos="315,14,355,41" ref="40" toggle="0" />
 				</td>
 				<td valign="Center">
 					<StaticText pos="359,21,399,41" ref="7" />
@@ -157,7 +157,7 @@
 					<EditBox Pos="435,14,490,41" Style="width: 200px;" ref="8" />
 				</td>
 				<td style="padding-right: 1em;">
-					<Button pos="513,14,540,41" ref="17" />
+					<Button pos="513,14,540,41" ref="17" toggle="0" />
 				</td>
 				<td valign="Center">
 					<CheckBox pos="639,21,701,41" ref="38" />
@@ -182,10 +182,14 @@
 			<String Ref="46" Cid="517" Define="IDM_REFRESH" en="&Refresh" />
 			<String Ref="41" Cid="514" Define="IDM_VIEW_MENU" en="&View" />
 			<String Ref="49" Cid="518" Define="IDM_UNTRACKED" en="Untracked" />
+			<String Ref="47" Cid="519" Define="IDM_MENU_519" />
+			<String Ref="51" Cid="520" Define="IDM_EXIT" en="E&xit" />
 		</string-group>
 		<submenu Ref="4">
 			<menuitem Ref="46" Shortcut="F5" />
 			<menuitem Ref="19" />
+			<menuitem Sep="1" />
+			<menuitem Ref="51" />
 		</submenu>
 		<submenu Ref="42">
 			<menuitem Ref="43" Shortcut="Ctrl+F" />

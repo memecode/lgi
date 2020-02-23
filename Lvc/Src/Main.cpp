@@ -694,6 +694,11 @@ public:
 				}
 				break;
 			}
+			case IDM_EXIT:
+			{
+				LgiCloseApp();
+				break;
+			}
 		}
 
 		return 0;

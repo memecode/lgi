@@ -99,7 +99,7 @@ public:
 	{
 		switch (k.vkey)
 		{
-			case VK_UP:
+			case LK_UP:
 			{
 				if (k.Alt())
 				{
@@ -109,7 +109,7 @@ public:
 				}
 				break;
 			}
-			case VK_DOWN:
+			case LK_DOWN:
 			{
 				if (k.Alt())
 				{

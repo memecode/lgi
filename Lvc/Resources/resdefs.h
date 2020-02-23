@@ -39,3 +39,5 @@
 #define IDM_FIND								516
 #define IDM_REFRESH								517
 #define IDM_UNTRACKED							518
+#define IDM_MENU_519							519
+#define IDM_EXIT								520
