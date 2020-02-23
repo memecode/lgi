@@ -203,6 +203,13 @@ OsPainter GScreenDC::Handle()
 	#endif
 }
 
+::GString GScreenDC::Dump()
+{
+	::GString s;
+	s.Printf("GScreenDC size=%i,%i\n", d->x, d->y);
+	return s;
+}
+
 bool GScreenDC::SupportsAlphaCompositing()
 {
 	// GTK/X11 doesn't seem to support alpha compositing.
