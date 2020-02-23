@@ -35,7 +35,7 @@ enum CellFlag
 // #define DEBUG_LAYOUT		2222
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
-// #define DEBUG_CTRL_ID		970
+// #define DEBUG_CTRL_ID		245
 
 int GTableLayout::CellSpacing = 4;
 
@@ -759,12 +759,12 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 			if (ChildWid.IsValid())
 			{
 				int MaxPx = MaxCellWidth();
-				int Px = ChildWid.ToPx(MaxPx, v->GetFont());
-				Min = MAX(Min, Px);
-				Max = MAX(Max, Px);
+				c->Inf.Width.Min = c->Inf.Width.Max = ChildWid.ToPx(MaxPx, v->GetFont());
+				Min = MAX(Min, c->Inf.Width.Min);
+				Max = MAX(Max, c->Inf.Width.Min);
 				
 				GRect r = v->GetPos();
-				r.x2 = r.x1 + Px - 1;
+				r.x2 = r.x1 + c->Inf.Width.Min - 1;
 				v->SetPos(r);
 			}
 			else if (v->OnLayout(c->Inf))
