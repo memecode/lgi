@@ -11,7 +11,7 @@ class GTextLog : public GTextView3, public GStream
 protected:
 	bool RemoveReturns;
 	LMutex Sem;
-	GArray<char16*> Txt;
+	GArray<char16> Txt;
 
 	void ProcessTxt()
 	{
@@ -19,22 +19,9 @@ protected:
 			return;
 		if (Sem.Lock(_FL))
 		{
-			auto Ts = LgiCurrentTime();
-
-			GRange Del(0, 0);
-			for (uint32_t i=0; i<Txt.Length(); i++)
-			{
-				Add(Txt[i]);
-				Del.Len = i + 1;
-				if (i % 10 == 0 && (LgiCurrentTime() - Ts) > 50)
-				{
-					// Yeah stop doing this and let the message loop run
-					PostEvent(M_LOG_TEXT);
-					break;
-				}
-			}
-
-			Txt.DeleteRange(Del);
+			GProfile p("GTextLog::ProcessTxt()", 100);
+			Add(Txt.AddressOf(), Txt.Length());
+			Txt.Empty();
 			Sem.Unlock();
 		}
 	}
@@ -46,15 +33,6 @@ public:
 		Sunken(true);
 		SetPourLargest(true);
 		SetWrapType(TEXTED_WRAP_NONE);
-	}
-	
-	~GTextLog()
-	{
-		if (Sem.Lock(_FL))
-		{
-			Txt.DeleteArrays();
-			Sem.Unlock();
-		}
 	}
 	
 	void OnCreate()
@@ -105,7 +83,7 @@ public:
 
 		if (Sem.LockWithTimeout(200, _FL))
 		{
-			Txt.Add(w.Release());
+			Txt.Add(w.Get(), Strlen(w.Get()));
 			Sem.Unlock();
 		}
 		#if LGI_VIEW_HANDLE
