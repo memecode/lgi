@@ -326,19 +326,19 @@ struct DndEvent
 	double deltaY = ev.scrollingDeltaY;
 	
 	int diff = 0;
-    if ([ev hasPreciseScrollingDeltas])
-    {
-    	double scale = 0.1;
-    	int old = (int)(total * scale);
-		total += deltaY;
-		int cur = (int)(total * scale);
-		diff = cur - old;
-		// printf("wheel delta=%g total=%g\n", deltaY, total);
-	}
-    else
-    {
-		diff = (int)deltaY;
-	}
+	double scale = 1.0;
+	bool precise = [ev hasPreciseScrollingDeltas];
+    if (precise)
+    	scale = 0.1;
+
+	int old = (int)(total * scale);
+	total += deltaY;
+	int cur = (int)(total * scale);
+	diff = cur - old;
+	// printf("wheel delta=%g total=%g\n", deltaY, total);
+
+	if (!diff && !precise)
+		diff = deltaY > 0 ? 1 : -1;
 
 	if (diff)
 		t->OnMouseWheel(-diff);
