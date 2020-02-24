@@ -479,10 +479,13 @@ int LstCmp(LListItem *a, LListItem *b, int Col)
 class App : public GWindow, public AppPriv
 {
 	GAutoPtr<GImageList> ImgLst;
+	GBox *FoldersBox;
 
 public:
 	App()
 	{
+		FoldersBox = NULL;
+		
 		GString AppRev;
 		AppRev.Printf("%s v%s", AppName, APP_VERSION);
 		Name(AppRev);
@@ -513,7 +516,7 @@ public:
 			}
 
 			GBox *ToolsBox = new GBox(IDC_TOOLS_BOX, true, "ToolsBox");
-			GBox *FoldersBox = new GBox(IDC_FOLDERS_BOX, false, "FoldersBox");
+			FoldersBox = new GBox(IDC_FOLDERS_BOX, false, "FoldersBox");
 			GBox *CommitsBox = new GBox(IDC_COMMITS_BOX, true, "CommitsBox");
 
 			ToolBar *Tools = new ToolBar;
@@ -522,8 +525,8 @@ public:
 			Tools->Attach(ToolsBox);
 			FoldersBox->Attach(ToolsBox);
 
-			Tree = new GTree(IDC_TREE, 0, 0, 200, 200);
-			Tree->GetCss(true)->Width(GCss::Len("320px"));
+			Tree = new GTree(IDC_TREE, 0, 0, 320, 200);
+			// Tree->GetCss(true)->Width(GCss::Len("320px"));
 			Tree->ShowColumnHeader(true);
 			Tree->AddColumn("Folder", 250);
 			Tree->AddColumn("Counts", 50);
@@ -609,6 +612,19 @@ public:
 				}
 			}
 			Opts.Unlock();
+			
+			GRect Large(0, 0, 2000, 200);
+			Tree->SetPos(Large);
+			Tree->ResizeColumnsToContent();
+			
+			GItemColumn *c;
+			int i = 0, px = 0;
+			while ((c = Tree->ColumnAt(i++)))
+			{
+				px += c->Width();
+			}
+			
+			FoldersBox->Value(MAX(320, px + 20));
 		}
 		
 		SetPulse(200);
