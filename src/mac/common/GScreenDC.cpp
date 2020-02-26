@@ -304,7 +304,8 @@ GRect GScreenDC::ClipRgn(GRect *Rgn)
 	if (Rgn)
 	{
 		GRect c = *Rgn;
-		GRect Client = d->Client();
+		auto Client = d->Client();
+		Client.Offset(OriginX, OriginY);
 		c.Bound(&Client);
 		
 		CGContextSaveGState(d->Ctx);
@@ -630,41 +631,41 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 					if (i)
 					{
 						#if LGI_COCOA
-						CGRect r;
-						r.origin.x = x;
-						r.origin.y = -y;
-						r.size.width = b.X();
-						r.size.height = b.Y();
-						CGImageRef Img = *i;
+							CGRect r;
+							r.origin.x = x;
+							r.origin.y = -y;
+							r.size.width = b.X();
+							r.size.height = b.Y();
+							CGImageRef Img = *i;
 						
-						CGContextSaveGState(d->Ctx);
-						CGContextTranslateCTM(d->Ctx, 0.0f, b.Y());
-						CGContextScaleCTM(d->Ctx, 1.0f, -1.0f);
+							CGContextSaveGState(d->Ctx);
+							CGContextTranslateCTM(d->Ctx, 0.0f, b.Y());
+							CGContextScaleCTM(d->Ctx, 1.0f, -1.0f);
 
-						bool HasConstAlpha = d->ConstAlpha >= 0 && d->ConstAlpha < 255;
-						if (HasConstAlpha)
-							CGContextSetAlpha(d->Ctx, d->ConstAlpha / 255.0);
+							bool HasConstAlpha = d->ConstAlpha >= 0 && d->ConstAlpha < 255;
+							if (HasConstAlpha)
+								CGContextSetAlpha(d->Ctx, d->ConstAlpha / 255.0);
 
-						CGContextDrawImage(d->Ctx, r, Img);
-						count++;
+							CGContextDrawImage(d->Ctx, r, Img);
+							count++;
 						
-						CGContextRestoreGState(d->Ctx);
+							CGContextRestoreGState(d->Ctx);
 						#else
-						HIRect r;
-						r.origin.x = x;
-						r.origin.y = y;
-						r.size.width = b.X();
-						r.size.height = b.Y();
-						CGImageRef Img = *i;
+							HIRect r;
+							r.origin.x = x;
+							r.origin.y = y;
+							r.size.width = b.X();
+							r.size.height = b.Y();
+							CGImageRef Img = *i;
 						
-						bool HasConstAlpha = d->ConstAlpha >= 0 && d->ConstAlpha < 255;
-						if (HasConstAlpha)
-							CGContextSetAlpha(d->Ctx, d->ConstAlpha / 255.0);
-					 
-						err = HIViewDrawCGImage(d->Ctx, &r, Img);
+							bool HasConstAlpha = d->ConstAlpha >= 0 && d->ConstAlpha < 255;
+							if (HasConstAlpha)
+								CGContextSetAlpha(d->Ctx, d->ConstAlpha / 255.0);
+						
+							err = HIViewDrawCGImage(d->Ctx, &r, Img);
 
-						if (HasConstAlpha)
-							CGContextSetAlpha(d->Ctx, 1.0);
+							if (HasConstAlpha)
+								CGContextSetAlpha(d->Ctx, 1.0);
 						#endif
 						
 						DeleteObj(i);
