@@ -182,6 +182,9 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
 
 void GRadioGroup::OnAttach()
 {
+	LgiResources::StyleElement(this);
+	OnStyleChange();
+	GView::OnAttach();
 }
 
 GMessage::Result GRadioGroup::OnEvent(GMessage *m)
