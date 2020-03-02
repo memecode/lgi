@@ -39,6 +39,7 @@ public:
 	void OnAttach();
 	GMessage::Result OnEvent(GMessage *m);
 	bool OnLayout(GViewLayoutInfo &Inf);
+	void OnStyleChange();
 
 	char *Name() { return GView::Name(); }
 	char16 *NameW() { return GView::NameW(); }

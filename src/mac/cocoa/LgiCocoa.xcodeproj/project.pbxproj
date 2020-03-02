@@ -21,6 +21,7 @@
 		345921001F25649000098DFD /* GFontCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FD1F25649000098DFD /* GFontCache.h */; };
 		345921011F25649000098DFD /* GFontSelect.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FE1F25649000098DFD /* GFontSelect.h */; };
 		345EB84E235C6C01007D05DB /* GPopup.h in Headers */ = {isa = PBXBuildFile; fileRef = 345EB84D235C6C01007D05DB /* GPopup.h */; };
+		346DDEC1240C882900751380 /* GRadioGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = 346DDEC0240C882900751380 /* GRadioGroup.h */; };
 		346FACE71D3C720B00FFEBCE /* GMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 346FACE61D3C720B00FFEBCE /* GMessage.h */; };
 		346FACEB1D3C75AE00FFEBCE /* GUri.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 346FACE91D3C75AE00FFEBCE /* GUri.cpp */; };
 		346FACEC1D3C75AE00FFEBCE /* MDStringToDigest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 346FACEA1D3C75AE00FFEBCE /* MDStringToDigest.cpp */; };
@@ -162,6 +163,7 @@
 		345920FD1F25649000098DFD /* GFontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFontCache.h; path = ../../../../include/common/GFontCache.h; sourceTree = "<group>"; };
 		345920FE1F25649000098DFD /* GFontSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFontSelect.h; path = ../../../../include/common/GFontSelect.h; sourceTree = "<group>"; };
 		345EB84D235C6C01007D05DB /* GPopup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GPopup.h; path = ../../../../include/common/GPopup.h; sourceTree = "<group>"; };
+		346DDEC0240C882900751380 /* GRadioGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GRadioGroup.h; path = ../../../../include/common/GRadioGroup.h; sourceTree = "<group>"; };
 		346FACE61D3C720B00FFEBCE /* GMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMessage.h; path = ../../../../include/common/GMessage.h; sourceTree = "<group>"; };
 		346FACE91D3C75AE00FFEBCE /* GUri.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GUri.cpp; path = ../../../common/INet/GUri.cpp; sourceTree = "<group>"; };
 		346FACEA1D3C75AE00FFEBCE /* MDStringToDigest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MDStringToDigest.cpp; path = ../../../common/INet/MDStringToDigest.cpp; sourceTree = "<group>"; };
@@ -529,6 +531,7 @@
 		3477C2CC1CC046370028B84B /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
+				346DDEC0240C882900751380 /* GRadioGroup.h */,
 				345EB84D235C6C01007D05DB /* GPopup.h */,
 				343BE8C62355D0CE00742E21 /* GPopupList.h */,
 				3477C2F21CC04BF00028B84B /* GBitmap.cpp */,
@@ -655,6 +658,7 @@
 				34D6AA1722D3749A005D739E /* Gdc2.h in Headers */,
 				3477C2A41CBF0A920028B84B /* LgiOs.h in Headers */,
 				343874B7230F46B200CF96B4 /* GApp.h in Headers */,
+				346DDEC1240C882900751380 /* GRadioGroup.h in Headers */,
 				3477C26C1CBF020F0028B84B /* LgiProject.h in Headers */,
 				345921011F25649000098DFD /* GFontSelect.h in Headers */,
 				346FACE71D3C720B00FFEBCE /* GMessage.h in Headers */,
@@ -993,6 +997,7 @@
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				VALID_ARCHS = x86_64;
+				WARNING_CFLAGS = "-Wno-nullability-completeness";
 			};
 			name = Debug;
 		};
@@ -1035,6 +1040,7 @@
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				VALID_ARCHS = x86_64;
+				WARNING_CFLAGS = "-Wno-nullability-completeness";
 			};
 			name = Release;
 		};

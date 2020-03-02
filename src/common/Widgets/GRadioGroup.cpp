@@ -81,6 +81,18 @@ GRadioGroup::~GRadioGroup()
 	DeleteObj(d);
 }
 
+void GRadioGroup::OnStyleChange()
+{
+	if (d->Lock(_FL))
+	{
+		d->Empty();
+		d->Add(GView::Name(), GetCss());
+		d->DoLayout(X());
+		d->Unlock();
+		Invalidate();
+	}
+}
+
 bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
 {
 	GViewIterator *it = IterateViews();
