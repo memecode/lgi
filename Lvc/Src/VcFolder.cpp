@@ -2470,6 +2470,19 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 			}
 			break;
 		}
+		case VcCvs:
+		{
+			CurrentCommit.Empty();
+			CommitListDirty = true;
+			GetTree()->SendNotify(LvcCommandEnd);
+			if (!Result)
+			{
+				Unpushed = 0;
+				Update();
+				Color(GColour::Green);
+			}
+			break;
+		}
 		default:
 		{
 			LgiAssert(!"Impl me.");
@@ -3411,7 +3424,7 @@ void VcLeaf::OnBrowse()
 		if (Dir.IsDir())
 			continue;
 
-		VcFile *f = new VcFile(d, Parent, NULL);
+		VcFile *f = new VcFile(d, Parent, NULL, true);
 		if (f)
 		{
 			f->SetPath(full);

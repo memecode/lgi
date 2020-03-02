@@ -864,12 +864,25 @@ public:
 				const char *Msg = GetCtrlName(IDC_MSG);
 				if (BuildFix || ValidStr(Msg))
 				{
-					VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
-					if (f)
+					auto Sel = Tree->Selection();
+					if (Sel)
 					{
-						char *Branch = GetCtrlName(IDC_BRANCH);
-						bool AndPush = c->GetId() == IDC_COMMIT_AND_PUSH;
-						f->Commit(BuildFix ? DEFAULT_BUILD_FIX_MSG : Msg, ValidStr(Branch) ? Branch : NULL, AndPush);
+						VcFolder *f = dynamic_cast<VcFolder*>(Sel);
+						if (!f)
+						{
+							for (auto p = Sel->GetParent(); p; p = p->GetParent())
+							{
+								f = dynamic_cast<VcFolder*>(p);
+								if (f)
+									break;
+							}
+						}
+						if (f)
+						{
+							char *Branch = GetCtrlName(IDC_BRANCH);
+							bool AndPush = c->GetId() == IDC_COMMIT_AND_PUSH;
+							f->Commit(BuildFix ? DEFAULT_BUILD_FIX_MSG : Msg, ValidStr(Branch) ? Branch : NULL, AndPush);
+						}
 					}
 				}
 				else LgiMsg(this, "No message for commit.", AppName);

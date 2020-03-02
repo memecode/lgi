@@ -38,6 +38,7 @@ VcFile::FileStatus VcFile::GetStatus()
 		else STATE("!", 1, SMissing);
 		else STATE("D", 1, SDeleted);
 		else STATE("R", 1, SDeleted); // "Removed"
+		else STATE("Locally Modified", 1, SModified);
 		else
 		{
 			LgiAssert(!"Impl state");
