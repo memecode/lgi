@@ -305,6 +305,7 @@ public:
 	{
 		GViewLayoutInfo Inf;
 		GView *View;
+		GRect r;
 		bool IsLayout;
 		bool Debug;
 	};
@@ -742,8 +743,8 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 				continue;
 
 			ZeroObj(c->Inf);
+			c->r = v->GetPos();
 			
-			// const char *Cls = v->GetClass();
 			GCss *Css = v->GetCss();
 			GCss::Len ChildWid;
 			if (Css)
@@ -763,9 +764,8 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 				Min = MAX(Min, c->Inf.Width.Min);
 				Max = MAX(Max, c->Inf.Width.Min);
 				
-				GRect r = v->GetPos();
-				r.x2 = r.x1 + c->Inf.Width.Min - 1;
-				v->SetPos(r);
+				c->r = v->GetPos();
+				c->r.x2 = c->r.x1 + c->Inf.Width.Min - 1;
 			}
 			else if (v->OnLayout(c->Inf))
 			{
@@ -988,46 +988,44 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		if (Ht.IsValid())
 		{
 			int CtrlHeight = Ht.ToPx(Table->Y(), v->GetFont());
+			c->Inf.Height.Min = c->Inf.Height.Max = CtrlHeight;
 			if (MaxY < CtrlHeight)
 				MaxY = CtrlHeight;
 			if (!Ht.IsDynamic() && MinY < CtrlHeight)
 				MinY = CtrlHeight;
 			
-			GRect r = v->GetPos();
-			r.y2 = r.y1 + CtrlHeight - 1;
-			v->SetPos(r, true);
-			
-			Pos.y2 = MAX(Pos.y2, r.Y()-1);
+			c->r = v->GetPos();
+			c->r.y2 = c->r.y1 + CtrlHeight - 1;			
+			Pos.y2 = MAX(Pos.y2, c->r.Y()-1);
 		}
 		else if (v->OnLayout(c->Inf))
 		{
 			// Supports layout info
-			GRect r = v->GetPos();
+			c->r = v->GetPos();
 
 			// Process height
 			if (c->Inf.Height.Max < 0)
 				Flags = SizeFill;
 			else
-				r.y2 = r.y1 + c->Inf.Height.Max - 1;
+				c->r.y2 = c->r.y1 + c->Inf.Height.Max - 1;
 			
 			// Process width
 			if (c->Inf.Width.Max < 0)
-				r.x2 = r.x1 + Width - 1;
+				c->r.x2 = c->r.x1 + Width - 1;
 			else
-				r.x2 = r.x1 + c->Inf.Width.Max - 1;
+				c->r.x2 = c->r.x1 + c->Inf.Width.Max - 1;
 
-			if (Cur.x > Pos.x1 && Cur.x + r.X() > Pos.x2)
+			if (Cur.x > Pos.x1 && Cur.x + c->r.X() > Pos.x2)
 			{
 				// Wrap
 				Cur.x = Pos.x1;
 				Cur.y = NextY + GTableLayout::CellSpacing;
 			}
 
-			r.Offset(Cur.x - r.x1, Cur.y - r.y1);
-			v->SetPos(r, true);
-			Cur.x = r.x2 + 1;
-			NextY = MAX(NextY, r.y2 + 1);
-			Pos.y2 = MAX(Pos.y2, r.y2);
+			c->r.Offset(Cur.x - c->r.x1, Cur.y - c->r.y1);
+			Cur.x = c->r.x2 + 1;
+			NextY = MAX(NextY, c->r.y2 + 1);
+			Pos.y2 = MAX(Pos.y2, c->r.y2);
 
 			c->IsLayout = true;
 		}
@@ -1037,31 +1035,27 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		}
 		else if (Izza(GButton))
 		{
-			GRect r;
-			r.ZOff(c->Inf.Width.Min-1, c->Inf.Height.Min-1);
+			c->r.ZOff(c->Inf.Width.Min-1, c->Inf.Height.Min-1);
 			
-			if (Cur.x + r.X() > Width)
+			if (Cur.x + c->r.X() > Width)
 			{
 				// Wrap
 				Cur.x = Pos.x1;
 				Cur.y = NextY + GTableLayout::CellSpacing;
 			}
 			
-			r.Offset(Cur.x, Cur.y);
-			v->SetPos(r, true);
-			Cur.x = r.x2 + 1;
-			NextY = MAX(NextY, r.y2 + 1);
-			Pos.y2 = MAX(Pos.y2, r.y2);
+			c->r.Offset(Cur.x, Cur.y);
+			Cur.x = c->r.x2 + 1;
+			NextY = MAX(NextY, c->r.y2 + 1);
+			Pos.y2 = MAX(Pos.y2, c->r.y2);
 		}
 		else if (Izza(GEdit) || Izza(GCombo))
 		{
 			GFont *f = v->GetFont();
 			int y = (f ? f : SysFont)->GetHeight() + 8;
 			
-			GRect r = v->GetPos();
-			r.y2 = r.y1 + y - 1;
-			v->SetPos(r);
-
+			c->r = v->GetPos();
+			c->r.y2 = c->r.y1 + y - 1;
 			Pos.y2 += y;
 
 			if (Izza(GEdit) &&
@@ -1074,9 +1068,8 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		{
 			int y = v->GetFont()->GetHeight() + 2;
 			
-			GRect r = v->GetPos();
-			r.y2 = r.y1 + y - 1;
-			v->SetPos(r);
+			c->r = v->GetPos();
+			c->r.y2 = c->r.y1 + y - 1;
 
 			Pos.y2 += y;
 		}
@@ -1103,12 +1096,11 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		}
 		else if ((Tbl = Izza(GTableLayout)))
 		{
-			GRect r;
-			r.ZOff(Width-1, Table->Y()-1);
+			c->r.ZOff(Width-1, Table->Y()-1);
 			Tbl->d->InitBorderSpacing();
-			Tbl->d->LayoutHorizontal(r);
-			Tbl->d->LayoutVertical(r, &MinY, &MaxY, &Flags);
-			Tbl->d->LayoutPost(r);
+			Tbl->d->LayoutHorizontal(c->r);
+			Tbl->d->LayoutVertical(c->r, &MinY, &MaxY, &Flags);
+			Tbl->d->LayoutPost(c->r);
 			Pos.y2 += MinY;
 			
 			c->Inf.Height.Min = MinY;
@@ -1155,9 +1147,8 @@ void TableCell::PostLayout()
 		}
 		
 		GTableLayout *Tbl = Izza(GTableLayout);
-		GRect r = v->GetPos();
-
-		if (i > 0 && Cx + r.X() > Pos.X())
+		
+		if (i > 0 && Cx + c->r.X() > Pos.X())
 		{
 			// Do wrapping
 			int Wid = Cx - Table->d->BorderSpacing;
@@ -1181,22 +1172,22 @@ void TableCell::PostLayout()
 			Cy = MaxY + Table->d->BorderSpacing;
 		}
 
-		r.Offset(Pos.x1 - r.x1 + Cx, Pos.y1 - r.y1 + Cy);
+		c->r.Offset(Pos.x1 - c->r.x1 + Cx, Pos.y1 - c->r.y1 + Cy);
 
 		if (c->Inf.Width.Max >= WidthPx)
 			c->Inf.Width.Max = WidthPx;
 		if (c->Inf.Height.Max >= HeightPx)
 			c->Inf.Height.Max = HeightPx;
 
-		if (r.Y() > HeightPx)
+		if (c->r.Y() > HeightPx)
 		{
-			r.y2 = r.y1 + HeightPx - 1;
+			c->r.y2 = c->r.y1 + HeightPx - 1;
 		}
 
 		if (Tbl)
 		{
 			int HeightPx = c->Inf.Height.Min < c->Inf.Height.Max ? c->Inf.Height.Min : Pos.Y();
-			r.Dimension(Pos.X(), HeightPx);
+			c->r.Dimension(Pos.X(), HeightPx);
 		}
 		else if
 		(
@@ -1206,28 +1197,28 @@ void TableCell::PostLayout()
 			(Izza(GEdit) && Izza(GEdit)->MultiLine())
 		)
 		{
-			r.y2 = Pos.y2;
+			c->r.y2 = Pos.y2;
 		}
 		else if (c->IsLayout)
 		{
 			if (c->Inf.Height.Max < 0)
-				r.y2 = Pos.y2;
+				c->r.y2 = Pos.y2;
 			else
-				r.y2 = r.y1 + c->Inf.Height.Max - 1;
+				c->r.y2 = c->r.y1 + c->Inf.Height.Max - 1;
 		}
 
 		if (!Izza(GButton) && !Tbl)
 		{
 			if (c->Inf.Width.Max <= 0 ||
 				c->Inf.Width.Max >= WidthPx)
-				r.x2 = r.x1 + WidthPx - 1;
+				c->r.x2 = c->r.x1 + WidthPx - 1;
 			else if (c->Inf.Width.Max)
-				r.x2 = r.x1 + c->Inf.Width.Max - 1;
+				c->r.x2 = c->r.x1 + c->Inf.Width.Max - 1;
 		}
 
-		New[i] = r;
-		MaxY = MAX(MaxY, r.y2 - Pos.y1);
-		Cx += r.X() + Table->d->BorderSpacing;
+		New[i] = c->r;
+		MaxY = MAX(MaxY, c->r.y2 - Pos.y1);
+		Cx += c->r.X() + Table->d->BorderSpacing;
 	}
 
 	if (Disp == DispNone)
