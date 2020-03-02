@@ -178,79 +178,19 @@ int GWindow::OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
 	#ifdef DEBUG_DND	
 	LgiTrace("%s:%i - OnDrop Data=%i Pt=%i,%i Key=0x%x\n", _FL, Data.Length(), Pt.x, Pt.y, KeyState);
 	#endif
-	for (unsigned i=0; i<Data.Length(); i++)
+	for (auto &dd: Data)
 	{
-		GDragData &dd = Data[i];
-
-		#ifdef DEBUG_DND	
+		#ifdef DEBUG_DND
 		LgiTrace("\tFmt=%s\n", dd.Format.Get());
 		#endif
-		
 		if (dd.IsFileDrop())
 		{
-			#if 1
 			GDropFiles Files(dd);
-			#else
-			GArray<char*> Files;
-			GString::Array Uri;
-			
-			for (unsigned n=0; n<dd.Data.Length(); n++)
-			{
-				GVariant *Data = &dd.Data[n];
-				if (Data->IsBinary())
-				{
-					GString::Array a = GString((char*)Data->Value.Binary.Data, Data->Value.Binary.Length).SplitDelimit("\r\n");
-					Uri.Add(a);
-				}
-				else if (Data->Str())
-				{
-					Uri.New() = Data->Str();
-				}
-				else if (Data->Type == GV_LIST)
-				{
-					for (auto v: *Data->Value.Lst)
-					{
-						char *f = v->Str();
-						Uri.New() = f;
-					}
-				}
-			}
-			
-			for (int i=0; i<Uri.Length(); i++)
-			{
-				GString File = Uri[i].Strip();
-				GUri u(File);
-				
-				char *in = u.Path, *out = u.Path;
-				while (*in)
-				{
-					if (in[0] == '%' &&
-						in[1] &&
-						in[2])
-					{
-						char h[3] = { in[1], in[2], 0 };
-						*out++ = htoi(h);
-						in += 3;
-					}
-					else
-					{
-						*out++ = *in++;
-					}
-				}
-				*out++ = 0;
-				
-				if (FileExists(u.Path))
-				{
-					Files.Add(NewStr(u.Path));
-				}
-			}
-			#endif
-			
 			if (Files.Length())
 			{
 				Status = DROPEFFECT_COPY;
 				OnReceiveFiles(Files);
-				Files.DeleteArrays();
+				break;
 			}
 		}
 	}
