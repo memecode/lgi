@@ -212,14 +212,16 @@ void GPanel::OnPaint(GSurface *pDC)
 
 	pDC->Colour(cBack);
 	pDC->Rectangle(&r);
-	SysFont->Transparent(false);
-	SysFont->Fore(cFore);
-	SysFont->Back(cBack);
+
+	auto Fnt = GetFont();
+	Fnt->Transparent(false);
+	Fnt->Fore(cFore);
+	Fnt->Back(cBack);
 	if (!Open())
 	{
 		// title
 		if (!Ds)
-			Ds = new GDisplayString(GetFont(), Name());
+			Ds = new GDisplayString(Fnt, Name());
 		if (Ds)
 			Ds->Draw(pDC, r.x1 + 20, r.y1 + 1);
 	}
