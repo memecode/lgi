@@ -7238,10 +7238,11 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 						}
 						else
 						{
+							/*
 							Html1::GTag *p = ToTag(r->Parent);
-							while (p->Parent)
+							while (p && p->Parent)
 								p = ToTag(p->Parent);
-							
+							*/
 							LgiTrace("%s:%i - No child tag for job.\n", _FL);
 						}
 					}
