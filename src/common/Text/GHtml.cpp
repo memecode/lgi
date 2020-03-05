@@ -4424,7 +4424,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 		// Off -> 'cisra-cqs.html' renders correctly.
 		// On -> 'cisra_outage.html', 'steam1.html' renders correctly.
 		#if 1
-		DeallocatePx(0, MinCol.Length(), AvailableX);
+		DeallocatePx(0, (int)MinCol.Length(), AvailableX);
 		TotalX = GetTotalX();
 		#endif
 	}
