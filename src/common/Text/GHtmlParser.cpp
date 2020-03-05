@@ -872,9 +872,8 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								if (Parent)
 								{
 									// Reattach to the right parent.
-									auto IsOpen = OpenTags.IndexOf(Elem->Parent);
-									
 									#if 0
+									auto IsOpen = OpenTags.IndexOf(Elem->Parent);
 									LgiTrace("Reattaching '%s'(%p) to '%s'(%p) (Old=%s  %i)\n",
 										Elem->Tag.Get(), Elem, Parent->Tag.Get(), Parent,
 										Elem->Parent->Tag.Get(),
