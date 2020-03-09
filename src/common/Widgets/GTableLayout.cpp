@@ -32,10 +32,10 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		2222
+// #define DEBUG_LAYOUT		539
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
-// #define DEBUG_CTRL_ID		245
+// #define DEBUG_CTRL_ID		1049
 
 int GTableLayout::CellSpacing = 4;
 
@@ -376,7 +376,7 @@ public:
 
 	// Layout staged methods, call in order to complete the layout
 	void LayoutHorizontal(GRect &Client, int *MinX = NULL, int *MaxX = NULL, CellFlag *Flag = NULL);
-	void LayoutVertical(GRect &Client, int *MinY = NULL, int *MaxY = NULL, CellFlag *Flag = NULL);
+	void LayoutVertical(GRect &Client, int *MinY = NULL, int *MaxY = NULL, CellFlag *Flag = NULL, int Depth = 0);
 	void LayoutPost(GRect &Client);
 	
 	// This does the whole layout, basically calling all the stages for you
@@ -1061,7 +1061,8 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			if (Izza(GEdit) &&
 				Izza(GEdit)->MultiLine())
 			{
-				MaxY = MAX(MaxY, 1000);
+				Flags = SizeFill;
+				// MaxY = MAX(MaxY, 1000);
 			}
 		}
 		else if (Izza(GRadioButton))
@@ -1099,7 +1100,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			c->r.ZOff(Width-1, Table->Y()-1);
 			Tbl->d->InitBorderSpacing();
 			Tbl->d->LayoutHorizontal(c->r);
-			Tbl->d->LayoutVertical(c->r, &MinY, &MaxY, &Flags);
+			Tbl->d->LayoutVertical(c->r, &MinY, &MaxY, &Flags, 1);
 			Tbl->d->LayoutPost(c->r);
 			Pos.y2 += MinY;
 			
@@ -1622,7 +1623,7 @@ void GTableLayoutPrivate::LayoutHorizontal(GRect &Client, int *MinX, int *MaxX, 
 	Prof.Reset();
 }
 
-void GTableLayoutPrivate::LayoutVertical(GRect &Client, int *MinY, int *MaxY, CellFlag *Flag)
+void GTableLayoutPrivate::LayoutVertical(GRect &Client, int *MinY, int *MaxY, CellFlag *Flag, int Depth)
 {
 	int Cx, Cy, i;
 
@@ -1772,7 +1773,8 @@ void GTableLayoutPrivate::LayoutVertical(GRect &Client, int *MinY, int *MaxY, Ce
 	#endif
 
 	// Allocate remaining vertical space
-	DistributeUnusedSpace(MinRow, MaxRow, RowFlags, Client.Y(), BorderSpacing);
+	if (Depth == 0)
+		DistributeUnusedSpace(MinRow, MaxRow, RowFlags, Client.Y(), BorderSpacing);
 	
 	#if DEBUG_LAYOUT
 	if (DebugLayout)
