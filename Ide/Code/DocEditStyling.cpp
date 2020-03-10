@@ -597,7 +597,7 @@ void DocEditStyling::StyleDefault(StylingParams &p)
 	char16 *e = Text + p.Text.Length();
 		
 	auto &Style = p.Styles;
-	for (char16 *s = Text; s < e; s++)
+	for (char16 *s = Text; s < e && ParentState < KCancel; s++)
 	{
 		switch (*s)
 		{
