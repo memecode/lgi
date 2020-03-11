@@ -190,6 +190,8 @@ public:
 bool GView::LockHandler(GViewI *v, GView::LockOp Op)
 {
 	ViewTbl::T *m = ViewTblInst.Lock();
+	if (!m)
+		return false;
 	int Ref = m->Find(v);
 	bool Status = false;
 	switch (Op)
