@@ -489,6 +489,7 @@ LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *Str, int Id, int Pos, co
 	_Flags = 0;
 	d->Shortcut = Shortcut;
 	Name(Str);
+	ScanForAccel();
 }
 
 LMenuItem::~LMenuItem()
@@ -791,6 +792,126 @@ bool LMenuItem::ScanForAccel()
 	if (!d->Shortcut)
 		return false;
 	
+	auto Keys = d->Shortcut.SplitDelimit("+-");
+	if (Keys.Length() > 0)
+	{
+		int Flags = 0;
+		char16 Key = 0;
+		
+		for (int i=0; i<Keys.Length(); i++)
+		{
+			const char *k = Keys[i];
+
+			if (!stricmp(k, "CtrlCmd"))
+			{
+				Flags |= LGI_EF_SYSTEM;
+			}
+			else if (!stricmp(k, "AltCmd"))
+			{
+				Flags |= LGI_EF_SYSTEM;
+			}
+			else if (stricmp(k, "Ctrl") == 0)
+			{
+				Flags |= LGI_EF_CTRL;
+			}
+			else if (stricmp(k, "Alt") == 0)
+			{
+				Flags |= LGI_EF_ALT;
+			}
+			else if (stricmp(k, "Shift") == 0)
+			{
+				Flags |= LGI_EF_SHIFT;
+			}
+			else if (stricmp(k, "Del") == 0 ||
+					 stricmp(k, "Delete") == 0)
+			{
+				Key = LK_DELETE;
+			}
+			else if (stricmp(k, "Ins") == 0 ||
+					 stricmp(k, "Insert") == 0)
+			{
+				Key = LK_INSERT;
+			}
+			else if (stricmp(k, "Home") == 0)
+			{
+				Key = LK_HOME;
+			}
+			else if (stricmp(k, "End") == 0)
+			{
+				Key = LK_END;
+			}
+			else if (stricmp(k, "PageUp") == 0)
+			{
+				Key = LK_PAGEUP;
+			}
+			else if (stricmp(k, "PageDown") == 0)
+			{
+				Key = LK_PAGEDOWN;
+			}
+			else if (stricmp(k, "Backspace") == 0)
+			{
+				Key = LK_BACKSPACE;
+			}
+			else if (stricmp(k, "Left") == 0)
+			{
+				Key = LK_LEFT;
+			}
+			else if (stricmp(k, "Up") == 0)
+			{
+				Key = LK_UP;
+			}
+			else if (stricmp(k, "Right") == 0)
+			{
+				Key = LK_RIGHT;
+			}
+			else if (stricmp(k, "Down") == 0)
+			{
+				Key = LK_DOWN;
+			}
+			else if (!stricmp(k, "Esc") || !stricmp(k, "Escape"))
+			{
+				Key = LK_ESCAPE;
+			}
+			else if (stricmp(k, "Space") == 0)
+			{
+				Key = ' ';
+			}
+			else if (k[0] == 'F' && isdigit(k[1]))
+			{
+				int Idx = atoi(k+1);
+				Key = LK_F1 + Idx - 1;
+			}
+			else if (isalpha(k[0]))
+			{
+				Key = toupper(k[0]);
+			}
+			else if (isdigit(k[0]) || strchr(",", k[0]))
+			{
+				Key = k[0];
+			}
+			else
+			{
+				LgiTrace("%s:%i - Unknown part '%s' in shortcut '%s'\n", _FL, k, d->Shortcut.Get());
+			}
+		}
+		
+		if (Key)
+		{
+			if ((Flags & LGI_EF_ALT) != 0 &&
+				(Flags & LGI_EF_SYSTEM) == 0)
+			{
+				auto Ident = Id();
+				LgiAssert(Ident > 0);
+				Menu->Accel.Insert( new GAccelerator(Flags, Key, Ident) );
+			}
+		}
+		else
+		{
+			printf("%s:%i - Accel scan failed, str='%s'\n", _FL, d->Shortcut.Get());
+			return false;
+		}
+	}
+
 	
 	return true;
 }
@@ -1213,11 +1334,13 @@ GAccelerator::GAccelerator(int flags, int key, int id)
 bool GAccelerator::Match(GKey &k)
 {
 	int Press = (uint) k.c16;
+	auto Up = toupper(Press);
+	bool Match = false;
 	
 #if 0
 	printf("GAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s\n",
-		   Press,
-		   Press>=' '?Press:'.',
+		   Up,
+		   Up>=' '?Up:'.',
 		   k.Ctrl()?" ctrl":"",
 		   k.Alt()?" alt":"",
 		   k.Shift()?" shift":"",
@@ -1229,7 +1352,26 @@ bool GAccelerator::Match(GKey &k)
 		   );
 #endif
 	
-	if (toupper(Press) == (uint)Key)
+	if (k.Alt() && !k.System() && !k.Ctrl())
+	{
+		switch (k.vkey)
+		{
+			#define _(k) case LK_##k: \
+				Match = Key == #k[0]; break;
+			_(A) _(B) _(C) _(D) _(E) _(F) _(G) _(H) _(I) _(J) _(K) _(L) _(M)
+			_(N) _(O) _(P) _(Q) _(R) _(S) _(T) _(U) _(V) _(W) _(X) _(Y) _(Z)
+			default:
+				printf("%s:%i - No case for '%i'\n", _FL, k.vkey);
+				break;
+		}
+	}
+	else
+	{
+		Match = Up == (uint)Key;
+	}
+	
+	
+	if (Match)
 	{
 		if
 			(

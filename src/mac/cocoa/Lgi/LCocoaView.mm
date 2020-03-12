@@ -372,7 +372,8 @@ GKey KeyEvent(NSEvent *ev)
 	uint32_t u32 = LgiUtf8To32(p, len);
 	k.c16 = u32;
 	k.vkey = ev.keyCode;
-	
+	k.SetModifer((uint32_t)mod);
+
 	// printf("MacKeyToStr %i/%s/%i -> %s\n", u32, s.Get(), k.vkey, LVirtualKeyToString((LVirtualKeys)k.vkey));
 	switch (ev.keyCode)
 	{
@@ -381,8 +382,7 @@ GKey KeyEvent(NSEvent *ev)
 			break;
 	}
 	
-	k.SetModifer((uint32_t)mod);
-	
+
 	k.IsChar =	!func
 				&&
 				!cmd
