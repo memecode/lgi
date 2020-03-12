@@ -110,6 +110,16 @@ GHistory::~GHistory()
 	DeleteArrays();
 }
 
+bool GHistory::OnLayout(GViewLayoutInfo &Inf)
+{
+	if (!Inf.Width.Min)
+		Inf.Width.Min = Inf.Width.Max = 24;
+	else
+		Inf.Height.Min = Inf.Height.Max = SysFont->GetHeight() + 6;
+	
+	return true;
+}
+
 int GHistory::GetTargetId()
 {
 	return d->TargetId;

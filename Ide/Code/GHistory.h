@@ -26,6 +26,9 @@ public:
 	void Update();
 	void OnPopupClose();
 	int Add(char *s);
+	
+	// Impl
+	bool OnLayout(GViewLayoutInfo &Inf);
 };
 
 #endif
