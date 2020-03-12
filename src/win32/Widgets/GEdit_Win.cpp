@@ -379,6 +379,8 @@ bool GEdit::OnKey(GKey &k)
 				d->NotificationProcessed = false;
 				return true;
 			}
+			if (MultiLine())
+				return true;
 			break;
 		}
 		case LK_ESCAPE:

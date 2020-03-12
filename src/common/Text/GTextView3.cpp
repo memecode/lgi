@@ -97,8 +97,9 @@ enum Cmds
 	}
 
 static char SelectWordDelim[] = " \t\n.,()[]<>=?/\\{}\"\';:+=-|!@#$%^&*";
+#ifndef WINDOWS
 static GArray<GTextView3*> Ctrls;
-
+#endif
 
 //////////////////////////////////////////////////////////////////////
 class GDocFindReplaceParams3 :
@@ -451,7 +452,9 @@ GTextView3::GTextView3(	int Id,
 
 GTextView3::~GTextView3()
 {
+	#ifndef WINDOWS
 	Ctrls.Delete(this);
+	#endif
 	Line.DeleteObjects();
 	Style.Empty();
 
@@ -3356,9 +3359,13 @@ void GTextView3::OnCreate()
 	SetWindow(this);
 	DropTarget(true);
 
+	#ifndef WINDOWS
 	if (Ctrls.Length() == 0)
+	#endif
 		SetPulse(PULSE_TIMEOUT);
+	#ifndef WINDOWS
 	Ctrls.Add(this);
+	#endif
 }
 
 void GTextView3::OnEscape(GKey &K)
@@ -5362,8 +5369,12 @@ void GTextView3::InternalPulse()
 
 void GTextView3::OnPulse()
 {
+	#ifdef WINDOWS
+	InternalPulse();
+	#else
 	for (auto c: Ctrls)
 		c->InternalPulse();
+	#endif
 }
 
 void GTextView3::OnUrl(char *Url)
