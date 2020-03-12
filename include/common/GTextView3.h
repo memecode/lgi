@@ -284,7 +284,8 @@ protected:
 	int ScrollYPixel();
 	GRect DocToScreen(GRect r);
 	ptrdiff_t MatchText(const char16 *Text, bool MatchWord, bool MatchCase, bool SelectionOnly, bool SearchUpwards);
-	
+	void InternalPulse();
+
 	// styles
 	bool InsertStyle(GAutoPtr<GStyle> s);
 	GStyle *GetNextStyle(StyleIter &it, ssize_t Where = -1);
