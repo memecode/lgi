@@ -1605,7 +1605,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 						}
 						
 						char p[MAX_PATH];
-						if (!LgiMakePath(p, sizeof(p), Home, ".local/share/Trash") ||
+						if (!LgiMakePath(p, sizeof(p), Home, ".local/share/Trash/files") ||
 							!DirExists(p))
 						{
 							LgiTrace("%s:%i - '%s' doesn't exist.\n", _FL, p);
