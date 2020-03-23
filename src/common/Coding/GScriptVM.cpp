@@ -571,6 +571,19 @@ public:
 
 	void OnException(const char *File, int Line, ssize_t Address, const char *Msg)
 	{
+		if (Address < 0)
+		{
+			uint8_t *Base = &Code->ByteCode[0];
+			Address = c.u8 - Base;
+		}
+
+		if (!File || Line < 0)
+		{
+			// Extract the file / line from the current script location
+			File = Code->GetFileName();
+			Line = Code->ObjectToSourceAddress(Address);
+		}
+
 		if (Log)
 		{
 			char *Last = strrchr((char*)File, DIR_CHAR);
@@ -2115,6 +2128,6 @@ bool LScriptArguments::Throw(const char *File, int Line, const char *Msg, ...)
 
 	va_end(Arg);
 	
-	Vm->d->OnException(File, Line, 0, s);
+	Vm->d->OnException(File, Line, -1, s);
 	return true;
 }
