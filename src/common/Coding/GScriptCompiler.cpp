@@ -6,6 +6,7 @@
 #include "GString.h"
 #include "GToken.h"
 
+#define DEBUG_SCRIPT_FILE		"Mail Filters Menu.script"
 #define GetTok(c) ((c) < Tokens.Length() ? Tokens[c] : NULL)
 #define GetTokType(c) ((c) < Tokens.Length() ? ExpTok.Find(Tokens[c]) : TNone)
 #define GV_VARIANT	GV_MAX
@@ -398,6 +399,7 @@ public:
 	GVarRef ScriptArgsRef;
 	bool ErrShowFirstOnly;
 	GArray<GString> ErrLog;
+	bool Debug;
 
 	#ifdef _DEBUG
 	GArray<GVariant> RegAllocators;
@@ -405,6 +407,7 @@ public:
 
 	GCompilerPriv()
 	{
+		Debug = false;
 		ErrShowFirstOnly = true;
 		SysCtx = NULL;
 		UserCtx = NULL;
@@ -3513,6 +3516,10 @@ bool GCompiler::Compile
 		return false;
 
 	GStringPipe p;
+
+	#ifdef DEBUG_SCRIPT_FILE
+	d->Debug = Stristr(FileName, DEBUG_SCRIPT_FILE) != NULL;
+	#endif
 	
 	if (SysContext && SysContext->GetLog())
 		d->Log = SysContext->GetLog();
