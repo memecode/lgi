@@ -389,6 +389,8 @@ class GVirtualMachine : public GScriptUtils
 	class GVirtualMachinePriv *d;
 
 public:
+	static bool BreakOnWarning;
+
 	GVirtualMachine(GVmDebuggerCallback *callback = NULL);
 	GVirtualMachine(GVirtualMachine *vm);
 	~GVirtualMachine();

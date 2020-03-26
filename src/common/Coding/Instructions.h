@@ -86,11 +86,15 @@ case ICast:
 		}
 		default:
 		{
-			if (Log)
-				Log->Print(	"%s ICast warning: unknown type %i/%s\n",
+			GString s;
+			s.Printf("%s ICast warning: unknown type %i/%s\n",
 							Code->AddrToSourceRef(CurrentScriptAddress),
 							Var->Type,
 							GVariant::TypeToString(Var->Type));
+			if (Log)
+				Log->Write(s, s.Length());
+			if (GVirtualMachine::BreakOnWarning)
+				OnException(NULL, -1, CurrentScriptAddress, s);
 			Status = ScriptWarning;
 			break;
 		}
@@ -802,10 +806,14 @@ case IArrayGet:
 		}
 		default:
 		{
+			GString s;
+			s.Printf("%s IArrayGet warning: Can't array deref variant type %i\n",
+					Code->AddrToSourceRef(CurrentScriptAddress),
+					Var->Type);
 			if (Log)
-				Log->Print(	"%s IArrayGet warning: Can't array deref variant type %i\n",
-							Code->AddrToSourceRef(CurrentScriptAddress),
-							Var->Type);
+				Log->Write(s, s.Length());
+			if (GVirtualMachine::BreakOnWarning)
+				OnException(NULL, -1, CurrentScriptAddress, s);
 			Status = ScriptWarning;
 			break;
 		}
@@ -846,10 +854,14 @@ case IArraySet:
 		}
 		default:
 		{
+			GString s;
+			s.Printf("%s IArraySet warning: Can't dereference type '%s'\n",
+					Code->AddrToSourceRef(CurrentScriptAddress),
+					GVariant::TypeToString(Var->Type));
 			if (Log)
-				Log->Print(	"%s IArraySet warning: Can't dereference type '%s'\n",
-							Code->AddrToSourceRef(CurrentScriptAddress),
-							GVariant::TypeToString(Var->Type));
+				Log->Write(s, s.Length());
+			if (GVirtualMachine::BreakOnWarning)
+				OnException(NULL, -1, CurrentScriptAddress, s);
 			Status = ScriptWarning;
 			break;
 		}
@@ -944,11 +956,16 @@ case IDomGet:
 				if (!Ret)
 				{
 					Dst->Empty();
+
+					GString s;
+					s.Printf("%s IDomGet warning: Unexpected %s member '%s'.\n",
+							Code->AddrToSourceRef(CurrentScriptAddress),
+							GVariant::TypeToString(Dom->Type),
+							sName);
 					if (Log)
-						Log->Print("%s IDomGet warning: Unexpected %s member '%s'.\n",
-									Code->AddrToSourceRef(CurrentScriptAddress),
-									GVariant::TypeToString(Dom->Type),
-									sName);
+						Log->Write(s, s.Length());
+					if (GVirtualMachine::BreakOnWarning)
+						OnException(NULL, -1, CurrentScriptAddress, s);
 					Status = ScriptWarning;
 				}
 				break;
@@ -962,11 +979,15 @@ case IDomGet:
 				if (!Ret)
 				{
 					Dst->Empty();
+					GString s;
+					s.Printf("%s IDomGet warning: Unexpected %s member '%s'.\n",
+							Code->AddrToSourceRef(CurrentScriptAddress),
+							GVariant::TypeToString(Dom->Type),
+							sName);
 					if (Log)
-						Log->Print("%s IDomGet warning: Unexpected %s member '%s'.\n",
-									Code->AddrToSourceRef(CurrentScriptAddress),
-									GVariant::TypeToString(Dom->Type),
-									sName);
+						Log->Write(s, s.Length());
+					if (GVirtualMachine::BreakOnWarning)
+						OnException(NULL, -1, CurrentScriptAddress, s);
 					Status = ScriptWarning;
 				}
 				break;
@@ -1041,10 +1062,14 @@ case IDomGet:
 					default:
 					{
 						Dst->Empty();
+						GString s;
+						s.Printf("%s IDomGet warning: Unexpected string member '%s'.\n",
+								Code->AddrToSourceRef(CurrentScriptAddress),
+								sName);
 						if (Log)
-							Log->Print("%s IDomGet warning: Unexpected string member '%s'.\n",
-										Code->AddrToSourceRef(CurrentScriptAddress),
-										sName);
+							Log->Write(s, s.Length());
+						if (GVirtualMachine::BreakOnWarning)
+							OnException(NULL, -1, CurrentScriptAddress, s);
 						Status = ScriptWarning;
 						break;
 					}
@@ -1053,24 +1078,28 @@ case IDomGet:
 			}
 			case GV_NULL:
 			{
-				#if 1
+				GString s;
+				s.Printf("%s IDomGet warning: Can't deref NULL object.\n",
+						Code->AddrToSourceRef(CurrentScriptAddress));
 				if (Log)
-					Log->Print("%s IDomGet warning: Can't deref NULL object.\n",
-								Code->AddrToSourceRef(CurrentScriptAddress));
-				#else // If you want exceptions on NULL deref
-				OnException(_FL, CurrentScriptAddress-1, "NULL Dom Ptr");
-				#endif
+					Log->Write(s, s.Length());
+				if (GVirtualMachine::BreakOnWarning)
+					OnException(NULL, -1, CurrentScriptAddress, s);
 				Status = ScriptWarning;
 				break;
 			}
 			default:
 			{
+				GString s;
+				s.Printf("%s IDomGet warning: Unexpected type %s (Src=%s:%i IP=0x%x).\n",
+						Code->AddrToSourceRef(CurrentScriptAddress),
+						GVariant::TypeToString(Dom->Type),
+						_FL,
+						CurrentScriptAddress);
 				if (Log)
-					Log->Print("%s IDomGet warning: Unexpected type %s (Src=%s:%i IP=0x%x).\n",
-								Code->AddrToSourceRef(CurrentScriptAddress),
-								GVariant::TypeToString(Dom->Type),
-								_FL,
-								CurrentScriptAddress);
+					Log->Write(s, s.Length());
+				if (GVirtualMachine::BreakOnWarning)
+					OnException(NULL, -1, CurrentScriptAddress, s);
 				Status = ScriptWarning;
 				break;
 			}

@@ -997,6 +997,8 @@ public:
 	}
 };
 
+bool GVirtualMachine::BreakOnWarning = false;
+
 GVirtualMachine::GVirtualMachine(GVmDebuggerCallback *callback)
 {
 	d = new GVirtualMachinePriv(this, callback);

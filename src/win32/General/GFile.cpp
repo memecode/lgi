@@ -1444,13 +1444,7 @@ public:
 			if (ThreadWarn)
 			{
 				ThreadWarn = false;
-				/*
-				#ifdef _DEBUG
-				LgiAssert(!"Using GFile in multiple threads.");
-				#else
-				*/
-				LgiTrace("%s:%i - Warning: multi-threaded file access.\n", _FL);
-				// #endif
+				LgiTrace("%s:%i - Warning: multi-threaded file access (me=%x, user=%x).\n", _FL, Cur, UseId);
 			}
 			return false;
 		}
