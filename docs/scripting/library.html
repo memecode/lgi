@@ -58,6 +58,8 @@
 					<a href="#Sprintf">Sprintf</a><br>
 					<a href="#Print">Print</a><br>
 					<a href="#ToString">ToString</a><br>
+					<a href="#ToString">Assert</a><br>
+					<a href="#ToString">Throw</a><br>
 				<td>
 					<a href="#New">New</a><br>
 					<a href="#Delete">Delete</a><br>
@@ -236,6 +238,37 @@ Print(c);</pre>
 				Returns:
 				<ul>
 					<li> String.
+				</ul>
+			</div>
+			
+		<h4>bool <a name="Assert">Assert</a>(value[, msg]);</h4>
+			<div>
+				Checks that 'value' is non-zero, if it is zero, it throws an exception with 'msg' if supplied.
+				<br><br>
+				Arguments:
+				<ul>
+					<li> value - The value to check.
+					<li> msg - [Optional] the message to pass to Throw.
+				</ul>
+				<br>
+				Returns:
+				<ul>
+					<li> Bool - true if value is non-zero.
+				</ul>
+			</div>
+			
+		<h4>void <a name="Throw">Throw</a>([msg]);</h4>
+			<div>
+				Throws an exception, optionally with 'msg' as the message.
+				<br><br>
+				Arguments:
+				<ul>
+					<li> msg - [Optional] the message to display in the debugger.
+				</ul>
+				<br>
+				Returns:
+				<ul>
+					<li> None.
 				</ul>
 			</div>
 			

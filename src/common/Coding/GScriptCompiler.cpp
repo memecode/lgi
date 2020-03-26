@@ -6,11 +6,11 @@
 #include "GString.h"
 #include "GToken.h"
 
-#define DEBUG_SCRIPT_FILE		"Mail Filters Menu.script"
-#define GetTok(c) ((c) < Tokens.Length() ? Tokens[c] : NULL)
-#define GetTokType(c) ((c) < Tokens.Length() ? ExpTok.Find(Tokens[c]) : TNone)
-#define GV_VARIANT	GV_MAX
-const char *sDebugger = "Debugger";
+// #define DEBUG_SCRIPT_FILE	"Mail Filters Menu.script"
+#define GetTok(c)			((c) < Tokens.Length() ? Tokens[c] : NULL)
+#define GetTokType(c)		((c) < Tokens.Length() ? ExpTok.Find(Tokens[c]) : TNone)
+#define GV_VARIANT			GV_MAX
+const char *sDebugger		= "Debugger";
 
 int GFunctionInfo::_Infos = 0;
 
@@ -50,7 +50,7 @@ struct Node
 		}
 	};
 
-	// Heirarchy
+	// Hierarchy
 	NodeExp Child;
 
 	// One of the following are valid:

@@ -166,6 +166,30 @@ void SystemFunctions::SetEngine(GScriptEngine *Eng)
 	Engine = Eng;
 }
 
+bool SystemFunctions::Assert(LScriptArguments &Args)
+{
+	*Args.GetReturn() = true;
+	if (Args.Length() == 0)
+		return true;
+
+	auto v = Args[0]->CastInt32();
+	if (!v)
+	{
+		const char *Msg = Args.Length() > 1 ? Args[1]->CastString() : NULL;
+		*Args.GetReturn() = false;
+		Args.Throw(NULL, -1, Msg);
+	}
+
+	return true;
+}
+
+bool SystemFunctions::Throw(LScriptArguments &Args)
+{
+	const char *Msg = Args.Length() > 0 ? Args[0]->CastString() : NULL;
+	Args.Throw(NULL, -1, Msg);
+	return true;
+}
+
 bool SystemFunctions::LoadString(LScriptArguments &Args)
 {
 	if (Args.Length() != 1)
@@ -944,6 +968,10 @@ bool SystemFunctions::OsVersion(LScriptArguments &Args)
 
 GHostFunc SystemLibrary[] =
 {
+	// Debug
+	DefFn(Assert),
+	DefFn(Throw),
+
 	// String handling
 	DefFn(LoadString),
 	DefFn(FormatSize),

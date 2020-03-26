@@ -466,6 +466,10 @@ public:
 	
 	GHostFunc *GetCommands();
 
+	// Debug
+		bool Assert(LScriptArguments &Args);
+		bool Throw(LScriptArguments &Args);
+
 	// String
 		bool LoadString(LScriptArguments &Args);
 		/// Formats a string
