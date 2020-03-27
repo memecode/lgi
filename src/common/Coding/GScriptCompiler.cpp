@@ -475,40 +475,6 @@ public:
 		Methods.Empty();
 	}
 
-	struct Jump
-	{
-		GCompiledCode *Code;
-		size_t Start;
-
-		Jump(GCompiledCode *code)
-		{
-			Code = code;
-			Start = 0;
-		}
-
-		void Resolve()
-		{
-			if (Start)
-			{
-				int32 *Ptr = (int32*)&Code->ByteCode[Start];
-				*Ptr = (int32) (Code->ByteCode.Length() - Start - sizeof(int32));
-				Start = 0;
-			}
-		}
-	};
-
-	Jump CreateJumpZ(int tok, GVarRef var)
-	{
-		Jump j(Code);
-		if (Asm1(tok, IJumpZero, var))
-		{
-			j.Start = Code->ByteCode.Length();
-			Code->ByteCode.Length(j.Start + sizeof(int32));
-		}
-
-		return j;
-	}
-
 	/// Prints the error message
 	bool OnError
 	(
@@ -2274,6 +2240,7 @@ public:
 				else
 				{
 					GVarRef *NullRef = NULL;
+					GAutoPtr<GJumpZero> Jmp;
 					
 					if (!TokenToVarRef(a, NullRef))
 						return OnError(a.Tok, "Can't convert left token to var ref.");
@@ -2281,7 +2248,7 @@ public:
 					if (Op == OpAnd)
 					{
 						// Jump over 'b' if 'a' is FALSE
-
+						Jmp.Reset(new GJumpZero(this, a.Tok, a.Reg, false));
 					}
 					else if (Op == OpOr)
 					{
@@ -2516,9 +2483,7 @@ public:
 					return OnError(Cur, "if missing body statement.");
 
 				// Output the jump instruction
-				auto Jmp = CreateJumpZ(ExpressionTok, Result);
-				DeallocReg(Result);
-
+				GAutoPtr<GJumpZero> Jmp(new GJumpZero(this, ExpressionTok, Result));
 				if (!StricmpW(t, sStartCurlyBracket))
 				{
 					// Statement block
@@ -2562,7 +2527,7 @@ public:
 						*Ptr = 0;
 
 						// Resolve jz to here...
-						Jmp.Resolve();
+						Jmp.Reset();
 
 						// Compile the else block
 						Cur++;
@@ -2607,7 +2572,6 @@ public:
 					else OnError(Cur, "Mem alloc");
 				}
 				
-				Jmp.Resolve();
 				return true;
 			}
 		}
@@ -2627,12 +2591,13 @@ public:
 		int JzOffset;
 
 	public:
-		GJumpZero(GCompilerPriv *d, uint32_t &Cur, GVarRef &r)
+		GJumpZero(GCompilerPriv *d, int Tok, GVarRef &r, bool DeallocReg = true)
 		{
 			// Create jump instruction to jump over the body if the expression evaluates to false
 			Comp = d;
-			Comp->Asm1(Cur, IJumpZero, r);
-			Comp->DeallocReg(r);
+			Comp->Asm1(Tok, IJumpZero, r);
+			if (DeallocReg)
+				Comp->DeallocReg(r);
 			JzOffset = (int) Comp->GetByteCode().Length();
 			Comp->GetByteCode().Length(JzOffset + sizeof(int32));
 		}
