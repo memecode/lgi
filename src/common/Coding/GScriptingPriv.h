@@ -435,6 +435,7 @@ public:
 	bool BreakPoint(const char *File, int Line, bool Add);
 	bool BreakPoint(int Addr, bool Add);
 	void SetBreakCpp(bool Brk);
+	void SetDebuggerEnabled(bool b);
 	
 	// Properties
 	void SetTempPath(const char *Path);
@@ -469,6 +470,7 @@ public:
 	// Debug
 		bool Assert(LScriptArguments &Args);
 		bool Throw(LScriptArguments &Args);
+		bool DebuggerEnabled(LScriptArguments &Args);
 
 	// String
 		bool LoadString(LScriptArguments &Args);

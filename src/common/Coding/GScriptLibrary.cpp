@@ -183,6 +183,14 @@ bool SystemFunctions::Assert(LScriptArguments &Args)
 	return true;
 }
 
+bool SystemFunctions::DebuggerEnabled(LScriptArguments &Args)
+{
+	if (Args.Length() == 0)
+		return false;
+	Args.GetVm()->SetDebuggerEnabled(Args[0]->CastInt32() != 0);
+	return true;
+}
+
 bool SystemFunctions::Throw(LScriptArguments &Args)
 {
 	const char *Msg = Args.Length() > 0 ? Args[0]->CastString() : NULL;
@@ -971,6 +979,7 @@ GHostFunc SystemLibrary[] =
 	// Debug
 	DefFn(Assert),
 	DefFn(Throw),
+	DefFn(DebuggerEnabled),
 
 	// String handling
 	DefFn(LoadString),

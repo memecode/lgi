@@ -1,5 +1,6 @@
 
-
+// This allows the script to fail without pulling up the debugger.
+DebuggerEnabled(false);
 
 function Func()
 {
@@ -10,10 +11,21 @@ function Func()
 	return "Failed";
 }
 
+function ThrowAnError()
+{
+	Throw("Don't run me.");
+}
 
 t = Func();
 Print("t=", t, "\n");
 
 if (t)
 	return false;
+
+a = false;
+if (a && ThrowAnError())
+{
+	return false;
+}
+
 return true;

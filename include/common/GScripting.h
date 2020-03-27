@@ -37,6 +37,7 @@ public:
 			Console = &NullConsole;
 	}
 
+	GVirtualMachine *GetVm() { return Vm; }
 	GVariant *GetReturn() { return PtrRet; }
 	GStream *GetConsole() { return Console; }
 	bool Throw(const char *File, int Line, const char *Msg, ...);

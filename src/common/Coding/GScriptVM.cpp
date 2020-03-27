@@ -444,6 +444,7 @@ public:
 	GArray<StackFrame> Frames;
 	RunType StepType;
 	GVmDebuggerCallback *DbgCallback;
+	bool DebuggerEnabled;
 	GVmDebugger *Debugger;
 	GVirtualMachine *Vm;
 	LScriptArguments *ArgsOutput;
@@ -454,6 +455,7 @@ public:
 	GVirtualMachinePriv(GVirtualMachine *vm, GVmDebuggerCallback *Callback)
 	{
 		Vm = vm;
+		DebuggerEnabled = true;
 		BreakCpp = false;
 		ArgsOutput = NULL;
 		Log = NULL;
@@ -589,6 +591,10 @@ public:
 			char *Last = strrchr((char*)File, DIR_CHAR);
 			Log->Print("%s Exception: %s (%s:%i)\n", Code->AddrToSourceRef(Address), Msg, Last?Last+1:File, Line);
 		}
+		else
+		{
+			LgiTrace("%s:%i - Exception @ %i: %s\n", File, Line, Address, Msg);
+		}
 		
 		if (Vm && Vm->OpenDebugger(Code))
 		{
@@ -613,8 +619,20 @@ public:
 		}
 		else
 		{
-			LgiAssert(!"Scripting engine exception");
-			LgiTrace("%s:%i - Exception @ %i: %s\n", File, Line, Address, Msg);
+			// Set the script return value to FALSE
+			if (Frames.Length())
+			{
+				StackFrame Sf = Frames[0];
+				GVarRef &Ret = Sf.ReturnValue;
+				GVariant *RetVar = &Scope[Ret.Scope][Ret.Index];
+				*RetVar = false;
+			}			
+
+			// Exit the script
+			c.u8 = Code->ByteCode.AddressOf() + Code->ByteCode.Length();
+
+			// Set the script status...
+			Status = ScriptError;
 		}
 	}
 
@@ -1048,9 +1066,14 @@ GExecutionStatus GVirtualMachine::ExecuteFunction(GCompiledCode *Code, GFunction
 	return r;
 }
 
+void GVirtualMachine::SetDebuggerEnabled(bool b)
+{
+	d->DebuggerEnabled = b;
+}
+
 GVmDebugger *GVirtualMachine::OpenDebugger(GCompiledCode *Code, const char *Assembly)
 {
-	if (!d->Debugger)
+	if (d->DebuggerEnabled && !d->Debugger)
 	{
 		if (!d->DbgCallback)
 			return NULL;

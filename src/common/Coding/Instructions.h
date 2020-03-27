@@ -680,7 +680,7 @@ case ICallScript:
 	// Set IP to start of function
 	Sf.ReturnIp = CurrentScriptAddress;
 	c.u8 = Base + FuncAddr;
-	Scope[SCOPE_LOCAL] = &Locals[LocalsBase];
+	Scope[SCOPE_LOCAL] = Locals.AddressOf(LocalsBase); // This can evaluation to NULL when there is NO locals.
 	#endif
 
 	#if VM_DECOMP
