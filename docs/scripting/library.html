@@ -58,8 +58,6 @@
 					<a href="#Sprintf">Sprintf</a><br>
 					<a href="#Print">Print</a><br>
 					<a href="#ToString">ToString</a><br>
-					<a href="#ToString">Assert</a><br>
-					<a href="#ToString">Throw</a><br>
 				<td>
 					<a href="#New">New</a><br>
 					<a href="#Delete">Delete</a><br>
@@ -89,8 +87,10 @@
 					<a href="#System">System</a><br>
 					<a href="#OsName">OsName</a><br>
 					<a href="#OsVersion">OsVersion</a><br>
-					<br>
 					<a href="#CurrentScript">CurrentScript</a><br>
+					<a href="#Assert">Assert</a><br>
+					<a href="#Throw">Throw</a><br>
+					<a href="#DebuggerEnabled">DebuggerEnabled</a><br>
 			<tr>
 				<td>
 					Object Members:
@@ -238,37 +238,6 @@ Print(c);</pre>
 				Returns:
 				<ul>
 					<li> String.
-				</ul>
-			</div>
-			
-		<h4>bool <a name="Assert">Assert</a>(value[, msg]);</h4>
-			<div>
-				Checks that 'value' is non-zero, if it is zero, it throws an exception with 'msg' if supplied.
-				<br><br>
-				Arguments:
-				<ul>
-					<li> value - The value to check.
-					<li> msg - [Optional] the message to pass to Throw.
-				</ul>
-				<br>
-				Returns:
-				<ul>
-					<li> Bool - true if value is non-zero.
-				</ul>
-			</div>
-			
-		<h4>void <a name="Throw">Throw</a>([msg]);</h4>
-			<div>
-				Throws an exception, optionally with 'msg' as the message.
-				<br><br>
-				Arguments:
-				<ul>
-					<li> msg - [Optional] the message to display in the debugger.
-				</ul>
-				<br>
-				Returns:
-				<ul>
-					<li> None.
 				</ul>
 			</div>
 			
@@ -707,6 +676,54 @@ System.script is 837 bytes</pre>
 				</ul>
 			</div>
 
+		<h4>bool <a name="Assert">Assert</a>(value[, msg]);</h4>
+			<div>
+				Checks that 'value' is non-zero, if it is zero, it throws an exception with 'msg' if supplied.
+				<br><br>
+				Arguments:
+				<ul>
+					<li> value - The value to check.
+					<li> msg - [Optional] the message to pass to Throw.
+				</ul>
+				<br>
+				Returns:
+				<ul>
+					<li> Bool - true if value is non-zero.
+				</ul>
+			</div>
+			
+		<h4>void <a name="Throw">Throw</a>([msg]);</h4>
+			<div>
+				Throws an exception, optionally with 'msg' as the message.
+				<br><br>
+				Arguments:
+				<ul>
+					<li> msg - [Optional] the message to display in the debugger.
+				</ul>
+				<br>
+				Returns:
+				<ul>
+					<li> None.
+				</ul>
+			</div>
+			
+		<h4>void <a name="DebuggerEnabled">DebuggerEnabled</a>(enabled);</h4>
+			<div>
+				Turns the debugger on or off.
+				<br><br>
+				Arguments:
+				<ul>
+					<li> enabled - True if you want the debugger to appear on an exception.
+						If false the script will just exit at the point the
+						exception happened, returning "false" to the caller.
+				</ul>
+				<br>
+				Returns:
+				<ul>
+					<li> None.
+				</ul>
+			</div>
+			
 		<h4>int <a name="PathExists">PathExists</a>(path);</h4>
 			<div>
 				Queries the file system to see if a path exists as a file
