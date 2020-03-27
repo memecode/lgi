@@ -347,7 +347,7 @@ case IMod:
 {
 	#if VM_DECOMP
 	if (Log)
-		Log->Print("%p Mod %s %= %s\n",
+		Log->Print("%p Mod %s %%= %s\n",
 			CurrentScriptAddress - 1,
 			c.r[0].GetStr(),
 			c.r[1].GetStr());
