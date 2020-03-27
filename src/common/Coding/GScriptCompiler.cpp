@@ -475,6 +475,40 @@ public:
 		Methods.Empty();
 	}
 
+	struct Jump
+	{
+		GCompiledCode *Code;
+		size_t Start;
+
+		Jump(GCompiledCode *code)
+		{
+			Code = code;
+			Start = 0;
+		}
+
+		void Resolve()
+		{
+			if (Start)
+			{
+				int32 *Ptr = (int32*)&Code->ByteCode[Start];
+				*Ptr = (int32) (Code->ByteCode.Length() - Start - sizeof(int32));
+				Start = 0;
+			}
+		}
+	};
+
+	Jump CreateJumpZ(int tok, GVarRef var)
+	{
+		Jump j(Code);
+		if (Asm1(tok, IJumpZero, var))
+		{
+			j.Start = Code->ByteCode.Length();
+			Code->ByteCode.Length(j.Start + sizeof(int32));
+		}
+
+		return j;
+	}
+
 	/// Prints the error message
 	bool OnError
 	(
@@ -2247,6 +2281,7 @@ public:
 					if (Op == OpAnd)
 					{
 						// Jump over 'b' if 'a' is FALSE
+
 					}
 					else if (Op == OpOr)
 					{
@@ -2481,10 +2516,8 @@ public:
 					return OnError(Cur, "if missing body statement.");
 
 				// Output the jump instruction
-				Asm1(ExpressionTok, IJumpZero, Result);
+				auto Jmp = CreateJumpZ(ExpressionTok, Result);
 				DeallocReg(Result);
-				size_t JzOffset = Code->ByteCode.Length();
-				Code->ByteCode.Length(JzOffset + sizeof(int32));
 
 				if (!StricmpW(t, sStartCurlyBracket))
 				{
@@ -2529,13 +2562,7 @@ public:
 						*Ptr = 0;
 
 						// Resolve jz to here...
-						if (JzOffset)
-						{
-							// Adjust the "if" jump point
-							int32 *Ptr = (int32*)&Code->ByteCode[JzOffset];
-							*Ptr = (int32) (Code->ByteCode.Length() - JzOffset - sizeof(int32));
-							JzOffset = 0;
-						}
+						Jmp.Resolve();
 
 						// Compile the else block
 						Cur++;
@@ -2579,14 +2606,8 @@ public:
 					}
 					else OnError(Cur, "Mem alloc");
 				}
-				if (JzOffset)
-				{
-					// Adjust the jump point
-					int32 *Ptr = (int32*)&Code->ByteCode[JzOffset];
-					size_t CurLen = Code->ByteCode.Length();
-					*Ptr = (int32) (CurLen - JzOffset - sizeof(int32));
-					LgiAssert(*Ptr != 0);
-				}
+				
+				Jmp.Resolve();
 				return true;
 			}
 		}
