@@ -4,7 +4,7 @@ import subprocess
 
 files = []
 scripts_path = os.path.join(os.getcwd(), "Scripts")
-exe_path = os.path.join(os.getcwd(), "x64Debug\\LgiScript.exe")
+exe_path = os.path.join(os.getcwd(), "x64Debug14\\LgiScript.exe")
 
 dir = os.listdir(scripts_path)
 for d in dir:

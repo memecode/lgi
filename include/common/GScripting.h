@@ -77,15 +77,20 @@ struct GFunc
 {
 	GFuncType Type;
 	GString Method;
+	bool InUse;
 
 	GFunc(const char *m = 0, GFuncType t = NullFunc)
 	{
 		Type = t;
 		Method = m;
+		InUse = false;
+
+		// LgiStackTrace("%p alloc\n", this);
 	}
 
 	virtual ~GFunc()
 	{
+		// LgiAssert(!InUse);
 	}
 
 	virtual GExecutionStatus Call(GScriptContext *Ctx, LScriptArguments &Args) = 0;

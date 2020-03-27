@@ -147,6 +147,9 @@ GCompiledCode::GCompiledCode(GCompiledCode &copy) : Globals(SCOPE_GLOBAL), Debug
 
 GCompiledCode::~GCompiledCode()
 {
+	for (auto e: Externs)
+		e->InUse = false;
+	Externs.DeleteObjects();
 }
 
 GCompiledCode &GCompiledCode::operator =(const GCompiledCode &c)
@@ -470,7 +473,6 @@ public:
 		DeleteArray(Script);
 		Defines.DeleteArrays();
 		Methods.Empty();
-		FuncMem.Empty();
 	}
 
 	/// Prints the error message
@@ -1527,6 +1529,7 @@ public:
 				p.u8 = Start;
 				*p.u8++ = ICallMethod;
 				*p.fn++ = n.ContextFunc;
+				n.ContextFunc->InUse = true;
 				*p.r++ = *OutRef;
 				*p.u16++ = (uint16) n.Args.Length();
 				for (unsigned i=0; i<n.Args.Length(); i++)
@@ -2217,56 +2220,69 @@ public:
 						LValue = &LRef;
 				}
 
-				if (TokenToVarRef(b, LValue))
+				if (Op == OpAssign)
+				{
+					if (!TokenToVarRef(b, LValue))
+						return OnError(b.Tok, "Can't convert right token to var ref.");
+						
+					if (LValue)
+					{
+						// We already did the assignment as part of the
+						// L value optimization.
+					}
+					else
+					{	
+						// However without the L value we have to do the output
+						// assignment.
+						AssignVarRef(a, b.Reg);
+					}
+				}
+				else
 				{
 					GVarRef *NullRef = NULL;
 					
-					if (Op == OpAssign)
+					if (!TokenToVarRef(a, NullRef))
+						return OnError(a.Tok, "Can't convert left token to var ref.");
+
+					if (Op == OpAnd)
 					{
-						if (LValue)
-						{
-							// We already did the assignment as part of the
-							// L value optimization.
-						}
-						else
-						{	
-							// However without the L value we have to do the output
-							// assignment.
-							AssignVarRef(a, b.Reg);
-						}
+						// Jump over 'b' if 'a' is FALSE
 					}
-					else if (TokenToVarRef(a, NullRef))
+					else if (Op == OpOr)
 					{
-						GVarRef Reg;
-						if (a.Reg.Scope != SCOPE_REGISTER)
+						// Jump over 'b' if 'a' is TRUE
+					}					
+					
+					if (!TokenToVarRef(b, LValue))
+						return OnError(b.Tok, "Can't convert right token to var ref.");
+					
+					GVarRef Reg;
+					if (a.Reg.Scope != SCOPE_REGISTER)
+					{
+						if (AllocReg(Reg, _FL))
 						{
-							if (AllocReg(Reg, _FL))
-							{
-								LgiAssert(Reg != a.Reg);
-								Asm2(a.Tok, IAssign, Reg, a.Reg);
-								a.Reg = Reg;
-							}
-							else return OnError(a.Tok, "Can't alloc register, Regs=0x%x", Regs);
+							LgiAssert(Reg != a.Reg);
+							Asm2(a.Tok, IAssign, Reg, a.Reg);
+							a.Reg = Reg;
 						}
-
-						Asm2(a.Tok, Op, a.Reg, b.Reg);
-
-						if ((int)Op == (int)IPlusEquals ||
-							(int)Op == (int)IMinusEquals ||
-							(int)Op == (int)IMulEquals ||
-							(int)Op == (int)IDivEquals)
-						{
-							AssignVarRef(a, a.Reg);
-						}
+						else return OnError(a.Tok, "Can't alloc register, Regs=0x%x", Regs);
 					}
-					else return OnError(a.Tok, "Can't convert left token to var ref.");
 
-					if (a.Reg != b.Reg)
-						DeallocReg(b.Reg);
-					n.DeleteAt(OpIdx+1, true);
-					n.DeleteAt(OpIdx, true);
+					Asm2(a.Tok, Op, a.Reg, b.Reg);
+
+					if ((int)Op == (int)IPlusEquals ||
+						(int)Op == (int)IMinusEquals ||
+						(int)Op == (int)IMulEquals ||
+						(int)Op == (int)IDivEquals)
+					{
+						AssignVarRef(a, a.Reg);
+					}
 				}
-				else return OnError(b.Tok, "Can't convert right token to var ref.");
+
+				if (a.Reg != b.Reg)
+					DeallocReg(b.Reg);
+				n.DeleteAt(OpIdx+1, true);
+				n.DeleteAt(OpIdx, true);
 			}
 			else
 			{
@@ -3099,7 +3115,6 @@ public:
 			Cur++;
 		}
 		
-		FuncMem.New().Reset(e);
 		Methods.Add(e->Method, e);
 		return true;
 	}
