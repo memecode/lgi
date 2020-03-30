@@ -315,7 +315,6 @@ bool GButton::OnKey(GKey &k)
 		}
 		case VK_RETURN:
 		{
-			k.Trace("Btn key");
 			if (!k.IsChar && k.Down())
 				OnClick();
 			return true;
