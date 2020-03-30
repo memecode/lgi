@@ -148,7 +148,9 @@ bool GUri::Set(const char *uri)
 					*Col++ = 0;
 					Pass = NewStr(Col);
 				}
-				User = NewStr(Host);
+
+				auto sUser = Decode(Host);
+				User = sUser.Release();
 
 				memmove(Host, At, strlen(At) + 1);
 			}
