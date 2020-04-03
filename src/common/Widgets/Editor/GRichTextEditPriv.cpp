@@ -516,18 +516,21 @@ GRichTextPriv::Block *GRichTextPriv::Prev(Block *b)
 
 bool GRichTextPriv::AddTrans(GAutoPtr<Transaction> &t)
 {
-	// Delete any transaction history after 'UndoPos'
-	for (ssize_t i=UndoPos; i<UndoQue.Length(); i++)
+	if (t)
 	{
-		delete UndoQue[i];
+		// Delete any transaction history after 'UndoPos'
+		for (ssize_t i=UndoPos; i<UndoQue.Length(); i++)
+		{
+			delete UndoQue[i];
+		}
+		UndoQue.Length(UndoPos);
+
+		// Now add the new transaction
+		UndoQue.Add(t.Release());
+
+		// And the position is now at the end of the que
+		UndoPos = UndoQue.Length();
 	}
-	UndoQue.Length(UndoPos);
-
-	// Now add the new transaction
-	UndoQue.Add(t.Release());
-
-	// And the position is now at the end of the que
-	UndoPos = UndoQue.Length();
 
 	return true;
 }
