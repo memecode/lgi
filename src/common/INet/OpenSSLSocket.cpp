@@ -61,16 +61,17 @@ public:
 	{
 		#if defined MAC
 		char p[MAX_PATH];
-		LgiMakePath(p, sizeof(p), LGetExeFile(), "Contents/MacOS/libssl.1.0.0.dylib");
-		if (FileExists(p))
-			Load(p);
+		LgiMakePath(p, sizeof(p), LGetExeFile(), "Contents/Frameworks/libssl");
+		Load(p);
 
-        if (!IsLoaded())
-        {
-			auto Opt = "/opt/local/lib/" SSL_LIBRARY;
-			if (!Load(Opt))
-				LgiTrace("%s:%i - Failed to load '%s'\n", _FL, Opt);
-		}
+			#if 0
+			if (!IsLoaded())
+			{
+				auto Opt = "/opt/local/lib/" SSL_LIBRARY;
+				if (!Load(Opt))
+					LgiTrace("%s:%i - Failed to load '%s'\n", _FL, Opt);
+			}
+			#endif
 		#elif defined LINUX
 		char p[MAX_PATH];
 		if (LgiMakePath(p, sizeof(p), LGetExePath(), "libssl.so"))

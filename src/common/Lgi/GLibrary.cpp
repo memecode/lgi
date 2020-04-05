@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #define DEBUG_LIB_MSGS		0
+#define ALLOW_FALLBACK_PATH	0
 
 #include "Lgi.h"
 #if defined(LINUX) || defined(MAC) || defined(BEOS)
@@ -141,30 +142,32 @@ bool GLibrary::Load(const char *File, bool Quiet)
 							LgiTrace("%s:%i - dlopen(%s) failed: %s\n", _FL, File, e);
 						#endif
 
-						#ifdef BEOS
-						GToken t("/boot/system/develop/lib/x86", ":");
-						#else
-						GToken t("/opt/local/lib", ":");
-						#endif
-						for (int i=0; i<t.Length(); i++)
-						{
-							char full[MAX_PATH];
-							LgiMakePath(full, sizeof(full), t[i], f);
-							if (FileExists(full))
-							{
-								hLib = dlopen(full, RTLD_NOW);
-								#if DEBUG_LIB_MSGS
-								if (!Quiet)
-									LgiTrace("%s:%i - dlopen(%s)=%p\n", _FL, full, hLib);
-								#endif
-								if (hLib)
-									break;
-							}
-							#if DEBUG_LIB_MSGS
-							else if (!Quiet)
-								LgiTrace("%s doesn't exist\n", full);
+						#if ALLOW_FALLBACK_PATH
+							#ifdef BEOS
+							GToken t("/boot/system/develop/lib/x86", ":");
+							#else
+							GToken t("/opt/local/lib", ":");
 							#endif
-						}
+							for (int i=0; i<t.Length(); i++)
+							{
+								char full[MAX_PATH];
+								LgiMakePath(full, sizeof(full), t[i], f);
+								if (FileExists(full))
+								{
+									hLib = dlopen(full, RTLD_NOW);
+									#if DEBUG_LIB_MSGS
+									if (!Quiet)
+										LgiTrace("%s:%i - dlopen(%s)=%p\n", _FL, full, hLib);
+									#endif
+									if (hLib)
+										break;
+								}
+								#if DEBUG_LIB_MSGS
+								else if (!Quiet)
+									LgiTrace("%s doesn't exist\n", full);
+								#endif
+							}
+						#endif
 
 						if (!hLib && !Quiet)
 						{
