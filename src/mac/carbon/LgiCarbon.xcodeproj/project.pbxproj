@@ -109,6 +109,7 @@
 		3479DB1019C1AAA800E0D1E5 /* GWindowCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3479DB0E19C1AAA800E0D1E5 /* GWindowCommon.cpp */; };
 		347CB600172A97D600AC3EA6 /* GTableLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 347CB5FF172A97D600AC3EA6 /* GTableLayout.h */; };
 		347D192721B1F5700008C4CB /* LUnicodeString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D192621B1F5700008C4CB /* LUnicodeString.cpp */; };
+		347D69C4242F3907003FD996 /* GDragAndDropCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D69C3242F3906003FD996 /* GDragAndDropCommon.cpp */; };
 		34841A9523702C9F0010B3ED /* GDropFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34841A9423702C9F0010B3ED /* GDropFiles.cpp */; };
 		3489C3EA0DD1C4DB0095F0E1 /* GMru.h in Headers */ = {isa = PBXBuildFile; fileRef = 3489C3E90DD1C4DB0095F0E1 /* GMru.h */; };
 		348BFBE1202C0F0E00B87DD7 /* LListItemCheckBox.h in Headers */ = {isa = PBXBuildFile; fileRef = 348BFBDF202C0F0E00B87DD7 /* LListItemCheckBox.h */; };
@@ -253,7 +254,7 @@
 		344B737708D83F6C00D49457 /* LgiClasses.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = LgiClasses.h; path = ../../../include/common/LgiClasses.h; sourceTree = "<group>"; };
 		344B737A08D8401600D49457 /* LgiCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 30; name = LgiCommon.cpp; path = ../../common/Lgi/LgiCommon.cpp; sourceTree = "<group>"; };
 		344B738008D8406900D49457 /* GdcCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GdcCommon.cpp; path = ../../common/Gdc2/GdcCommon.cpp; sourceTree = "<group>"; };
-		344B738608D840CF00D49457 /* GFile.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GFile.cpp; path = General/GFile.cpp; sourceTree = "<group>"; };
+		344B738608D840CF00D49457 /* GFile.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 30; name = GFile.cpp; path = General/GFile.cpp; sourceTree = "<group>"; };
 		344B738908D8410B00D49457 /* LgiMsg.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMsg.cpp; path = ../../common/Lgi/LgiMsg.cpp; sourceTree = "<group>"; };
 		344B738C08D8414400D49457 /* GGuiUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GGuiUtils.cpp; path = ../../common/Lgi/GGuiUtils.cpp; sourceTree = "<group>"; };
 		344CD2D3176C75B9008A716C /* GCssTools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCssTools.cpp; path = ../../common/Lgi/GCssTools.cpp; sourceTree = "<group>"; };
@@ -298,6 +299,7 @@
 		3479DB0E19C1AAA800E0D1E5 /* GWindowCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GWindowCommon.cpp; path = ../../common/Lgi/GWindowCommon.cpp; sourceTree = "<group>"; };
 		347CB5FF172A97D600AC3EA6 /* GTableLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GTableLayout.h; path = ../../../include/common/GTableLayout.h; sourceTree = SOURCE_ROOT; };
 		347D192621B1F5700008C4CB /* LUnicodeString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LUnicodeString.cpp; path = ../../common/Text/LUnicodeString.cpp; sourceTree = "<group>"; };
+		347D69C3242F3906003FD996 /* GDragAndDropCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GDragAndDropCommon.cpp; path = ../../common/Lgi/GDragAndDropCommon.cpp; sourceTree = "<group>"; };
 		34841A9423702C9F0010B3ED /* GDropFiles.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GDropFiles.cpp; path = ../../common/Lgi/GDropFiles.cpp; sourceTree = "<group>"; };
 		3489C3E90DD1C4DB0095F0E1 /* GMru.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMru.h; path = ../../../include/common/GMru.h; sourceTree = "<group>"; };
 		348BFBDF202C0F0E00B87DD7 /* LListItemCheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LListItemCheckBox.h; path = ../../../include/common/LListItemCheckBox.h; sourceTree = "<group>"; };
@@ -708,6 +710,7 @@
 		344D1B5208F4A52200228075 /* D'n'd */ = {
 			isa = PBXGroup;
 			children = (
+				347D69C3242F3906003FD996 /* GDragAndDropCommon.cpp */,
 				34841A9423702C9F0010B3ED /* GDropFiles.cpp */,
 				34F96DA90DB9B82B009C64B8 /* GDragAndDrop.h */,
 				34983BE208F4A54C0054868C /* GDragAndDrop.cpp */,
@@ -1039,6 +1042,7 @@
 				3446E32808D0E9D6005024EB /* 24Bit.cpp in Sources */,
 				3446E32908D0E9D6005024EB /* 32Bit.cpp in Sources */,
 				3446E32B08D0E9E4005024EB /* Alpha.cpp in Sources */,
+				347D69C4242F3907003FD996 /* GDragAndDropCommon.cpp in Sources */,
 				344B736C08D83F1800D49457 /* GGeneral.cpp in Sources */,
 				344B737B08D8401600D49457 /* LgiCommon.cpp in Sources */,
 				344B738108D8406900D49457 /* GdcCommon.cpp in Sources */,

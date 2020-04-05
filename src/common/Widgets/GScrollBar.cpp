@@ -124,7 +124,7 @@ public:
 						(255 + SlideCol.g()) >> 1,
 						(255 + SlideCol.b()) >> 1);
 
-		#if MAC_LOOK
+		#if MAC_LOOK || MAC_SKIN
 		
 			pDC->Colour(SlideCol);
 			pDC->Rectangle();

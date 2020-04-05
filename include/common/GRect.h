@@ -253,6 +253,14 @@ public:
 		}
 
 		#if defined(MAC)
+		GRect(const CGRect &r)
+		{
+			x1 = (int)r.origin.x;
+			y1 = (int)r.origin.y;
+			x2 = x1 + (int)r.size.width - 1;
+			y2 = y1 + (int)r.size.height - 1;
+		}
+
 		GRect &operator =(const CGRect &r)
 		{
 			x1 = (int)r.origin.x;

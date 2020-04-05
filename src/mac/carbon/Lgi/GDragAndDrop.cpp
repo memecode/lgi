@@ -140,7 +140,7 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	Er.where.v = 0;
 	Er.modifiers = 0;
 
-	List<char> Formats;
+	GDragFormats Formats(true);
 	if (!GetFormats(Formats))
 	{
 		printf("%s:%i - GetFormats failed\n", _FL);
@@ -348,9 +348,9 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	if (status == dragNotAcceptedErr)
 	{
 		printf("%s:%i - error 'dragNotAcceptedErr', formats were:\n", _FL);
-		for (auto f: Formats)
+		for (auto f: Formats.Formats)
 		{
-			printf("\t'%s'\n", f);
+			printf("\t'%s'\n", f.Get());
 		}
 	}
 	else if (status)
@@ -377,11 +377,11 @@ struct DropItemFlavor
 struct DragParams
 {
 	GdcPt2 Pt;
-	List<char> Formats;
+	GDragFormats Formats;
 	GArray<GDragData> Data;
 	int KeyState;
 	
-	DragParams(GViewI *v, DragRef Drag, const char *DropFormat)
+	DragParams(GViewI *v, DragRef Drag, const char *DropFormat) : Formats(true)
 	{
 		KeyState = 0;
 		
@@ -486,7 +486,7 @@ struct DragParams
 						}
 						else
 						{
-							Formats.Insert(NewStr(n));
+							Formats.Supports(n);
 						}
 					}
 				}
@@ -589,7 +589,6 @@ struct DragParams
 	
 	~DragParams()
 	{
-		Formats.DeleteArrays();
 	}
 	
 	DragActions Map(int Accept)
@@ -606,14 +605,13 @@ struct DragParams
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-GDragDropTarget::GDragDropTarget()
+GDragDropTarget::GDragDropTarget() : Formats(true)
 {
 	To = 0;
 }
 
 GDragDropTarget::~GDragDropTarget()
 {
-	Formats.DeleteArrays();
 }
 
 void GDragDropTarget::SetWindow(GView *to)
