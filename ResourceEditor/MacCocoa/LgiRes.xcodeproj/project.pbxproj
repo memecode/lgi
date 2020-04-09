@@ -106,7 +106,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 504BA09A47E449699B8583CD;
+			remoteGlobalIDString = 73620A5B92B34DD3B0B12540;
 			remoteInfo = libpng15;
 		};
 /* End PBXContainerItemProxy section */
@@ -281,7 +281,7 @@
 				34CC005623AAD57F00CCAAEA /* libpng15_static.a */,
 				34CC005823AAD57F00CCAAEA /* minigzip */,
 				34CC005A23AAD57F00CCAAEA /* pngtest */,
-				34CC005C23AAD57F00CCAAEA /* libzd.1.2.5.dylib */,
+				34CC005C23AAD57F00CCAAEA /* libz_local.dylib */,
 				34CC005E23AAD57F00CCAAEA /* libzlib_static.a */,
 			);
 			name = Products;
@@ -395,10 +395,11 @@
 			remoteRef = 34CC005923AAD57F00CCAAEA /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		34CC005C23AAD57F00CCAAEA /* libzd.1.2.5.dylib */ = {
+		34CC005C23AAD57F00CCAAEA /* libz_local.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			path = libzd.1.2.5.dylib;
+			name = libz_local.dylib;
+			path = libz_local.1.2.5.dylib;
 			remoteRef = 34CC005B23AAD57F00CCAAEA /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -585,8 +586,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 2AV9WN2LD8;
 				HEADER_SEARCH_PATHS = (
 					../../include/common,
 					../../include/mac/cocoa,
@@ -607,6 +610,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.LgiRes;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
@@ -614,8 +618,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 2AV9WN2LD8;
 				HEADER_SEARCH_PATHS = (
 					../../include/common,
 					../../include/mac/cocoa,
@@ -635,6 +641,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.LgiRes;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};
