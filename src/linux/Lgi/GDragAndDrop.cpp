@@ -94,6 +94,7 @@ void RemoveExistingSignals(OsView w)
 				g_signal_handler_disconnect(G_OBJECT(w), Si.Sig);
 				Si.Sig = 0;
 			}
+			else printf("%s:%i - No sig?\n", _FL);
 			
 			ExistingSignals.DeleteAt(i--);			
 		}
@@ -108,7 +109,8 @@ GDragDropSource::GDragDropSource()
 
 GDragDropSource::~GDragDropSource()
 {
-	RemoveExistingSignals(d->SignalWnd);
+	if (d->SignalWnd)
+		RemoveExistingSignals(d->SignalWnd);
 	DeleteObj(d);
 }
 
@@ -176,7 +178,7 @@ LgiDragDataGet(GtkWidget        *widget,
 		for (node = g_list_first(targets); node != NULL; node = ((node) ? (((Gtk::GList *)(node))->next) : NULL))
         {
 			gchar *format = gdk_atom_name((GdkAtom)node->data);
-			dd[dd.Length()].Format = format;
+			dd.New().Format = format;
         }
 		
 		if (Src->GetData(dd))
@@ -302,15 +304,22 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 		return -1;
 	}
 	
-	RemoveExistingSignals(d->SignalWnd);
+	if (d->SignalWnd)
+	{
+		RemoveExistingSignals(d->SignalWnd);
 
-	SignalInfo &Si = ExistingSignals.New();
-	Si.Wnd = d->SignalWnd;
-	Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-data-get", G_CALLBACK(LgiDragDataGet), this);
-
-	Si = ExistingSignals.New();
-	Si.Wnd = d->SignalWnd;
-	Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-failed", G_CALLBACK(DragFailed), this);
+		{
+			auto &Si = ExistingSignals.New();
+			Si.Wnd = d->SignalWnd;
+			Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-data-get", G_CALLBACK(LgiDragDataGet), this);
+		}
+		{
+			auto &Si = ExistingSignals.New();
+			Si.Wnd = d->SignalWnd;
+			Si.Sig = g_signal_connect(G_OBJECT(d->SignalWnd), "drag-failed", G_CALLBACK(DragFailed), this);
+		}
+	}
+	else LgiTrace("%s:%i - No signal window?\n", _FL);
 
 	GMouse m;
 	SourceWnd->GetMouse(m);
