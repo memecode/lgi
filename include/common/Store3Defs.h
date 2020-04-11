@@ -79,6 +79,8 @@ enum Store3Status
 	Store3UpgradeRequired = -2,
 	/// Function not implemented.
 	Store3NotImpl = -3,
+	/// Missing permissions for operation.
+	Store3NoPermissions = -4,
 
 	// General:
 	//--------------------------------------------------------------------------------
