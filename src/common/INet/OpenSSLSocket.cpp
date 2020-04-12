@@ -38,8 +38,10 @@
 		#endif
 	#else
 		#define SSL_LIBRARY			"ssleay32"
-		#define EAY_LIBRARY            "libeay32"
+		#define EAY_LIBRARY         "libeay32"
 	#endif
+#elif defined MAC
+#define SSL_LIBRARY					"libssl.1.1"
 #else
 #define SSL_LIBRARY					"libssl"
 #endif
@@ -61,17 +63,9 @@ public:
 	{
 		#if defined MAC
 		char p[MAX_PATH];
-		LgiMakePath(p, sizeof(p), LGetExeFile(), "Contents/Frameworks/libssl");
-		Load(p);
-
-			#if 0
-			if (!IsLoaded())
-			{
-				auto Opt = "/opt/local/lib/" SSL_LIBRARY;
-				if (!Load(Opt))
-					LgiTrace("%s:%i - Failed to load '%s'\n", _FL, Opt);
-			}
-			#endif
+		LgiMakePath(p, sizeof(p), LGetExeFile(), "Contents/Frameworks/" SSL_LIBRARY);
+		if (!Load(p))
+			LgiTrace("%s:%i - Failed to load '%s'\n", _FL, p);
 		#elif defined LINUX
 		char p[MAX_PATH];
 		if (LgiMakePath(p, sizeof(p), LGetExePath(), "libssl.so"))
