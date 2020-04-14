@@ -71,6 +71,16 @@ enum FtpOpenStatus
 	FO_Connected
 };
 
+class IFtpCallback
+{
+public:
+	virtual ~IFtpCallback() {}
+	
+	virtual int MsgBox(const char *Msg, const char *Title, int Btn = MB_OK) = 0;
+	virtual int Alert(const char *Title, const char *Text, const char *Btn1, const char *Btn2 = 0, const char *Btn3 = 0) = 0;
+	virtual void Disconnect() = 0;
+};
+
 /// Represents a file or folder in the remote systemß
 class IFtpEntry
 {
