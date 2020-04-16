@@ -612,7 +612,10 @@ void LgiTrace(const char *Msg, ...)
 		}
 
 		if (Output && Ch > 0)
+		{
+			Output->ChangeThread();
 			Output->Write(Buffer, Ch);
+		}
 
 		if (!_LgiTraceStream)
 		{

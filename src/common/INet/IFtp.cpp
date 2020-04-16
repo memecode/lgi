@@ -990,35 +990,35 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 								if (Upload)
 								{
 									// upload loop
+									d->Data->SetTimeout(1000);
 									do
 									{
 										Len = d->F->Read(Temp, TempLen);
-										if (Len > 0)
+										for (ssize_t i=0; i<Len; )
 										{
 											ssize_t WriteLen = 0;
 											
 											if (d->Data)
-											{
 												WriteLen = d->Data->Write((char*) Temp, Len, 0);
-											}
+											else
+												break;
 
-											if (WriteLen == Len)
+											LgiTrace("Transfer %s...\n", LFormatSize(WriteLen).Get());
+											if (WriteLen >= 0)
 											{
-												Processed += Len;
-
+												Processed += WriteLen;
+												i += WriteLen;
 												if (Meter)
-												{
-													Meter->Value(Meter->Value() + Len);
-												}
+													Meter->Value(Meter->Value() + WriteLen);
 											}
 											else
 											{
 												printf("%s:%i - Data->Write failed, %i of %i bytes written.\n",
 													_FL, (int)WriteLen, (int)Len);
 												Error = true;
+												break;
 											}
 										}
-										else break;
 
 										if (Meter && Meter->IsCancelled())
 										{
@@ -1026,7 +1026,7 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 											break;
 										}
 									}
-									while (	Len > 0 && !AbortTransfer);
+									while (Len > 0 && !AbortTransfer && !Error);
 								}
 								else
 								{
