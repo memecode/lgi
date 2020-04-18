@@ -415,26 +415,27 @@ bool GDocApp<OptionsFmt>::_LoadMenu(const char *Resource, const char *Tags, int 
 
 		if (_FileMenu)
 		{
+			int Idx = 0;
 			if (!_FileMenu->FindItem(IDM_OPEN))
-				_FileMenu->AppendItem("&Open", IDM_OPEN, true, -1, "Ctrl+O");
+				_FileMenu->AppendItem("&Open", IDM_OPEN, true, Idx++, "Ctrl+O");
 
 			if (!_FileMenu->FindItem(IDM_SAVE))
-				_FileMenu->AppendItem("&Save", IDM_SAVE, true, -1, "Ctrl+S");
+				_FileMenu->AppendItem("&Save", IDM_SAVE, true, Idx++, "Ctrl+S");
 			
 			if (!_FileMenu->FindItem(IDM_SAVEAS))
-				_FileMenu->AppendItem("Save &As", IDM_SAVEAS, true);
+				_FileMenu->AppendItem("Save &As", IDM_SAVEAS, true, Idx++);
 			
 			if (!_FileMenu->FindItem(IDM_CLOSE))
 			{
-				_FileMenu->AppendItem("Close", IDM_CLOSE, true, -1, "Ctrl+W");			
-				_FileMenu->AppendSeparator();
+				_FileMenu->AppendItem("Close", IDM_CLOSE, true, Idx++, "Ctrl+W");			
+				_FileMenu->AppendSeparator(Idx++);
 			}
 
 			LSubMenu *Recent = NULL;
 			if (RecentMenuId >= 0)
 				Recent = _FileMenu->FindSubMenu(RecentMenuId);
 			else
-				Recent = _FileMenu->AppendSub("Recent...");
+				Recent = _FileMenu->AppendSub("Recent...", Idx++);
 			if (Recent)
 			{
 				Set(Recent);
