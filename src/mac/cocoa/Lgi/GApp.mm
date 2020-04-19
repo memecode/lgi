@@ -727,6 +727,7 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 	
 		#else
 		
+			OnCommandLine();
 			NSApplicationMain(GetArgs(), GetArg());
 		
 		#endif

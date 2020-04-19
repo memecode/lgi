@@ -142,7 +142,11 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 void NewProjectFromTemplate(GViewI *parent)
 {
 	GFile::Path p(LSP_APP_INSTALL);
-	p += "../templates";
+	p +=
+		#ifdef MAC
+		"../../"
+		#endif
+		"../templates";
 	TemplatesPath = p;
 
 	NewProjFromTemplate Dlg(parent);
