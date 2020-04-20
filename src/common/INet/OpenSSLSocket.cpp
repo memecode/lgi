@@ -579,11 +579,11 @@ SslSocket::SslSocket(GStreamI *logger, GCapabilityClient *caps, bool sslonconnec
 	GAutoString ErrMsg;
 	if (StartSSL(ErrMsg, this))
 	{
-		#ifdef WIN32
 		if (Library->IsOk(this))
 		{
-			char n[MAX_PATH];
 			char s[MAX_PATH];
+			#ifdef WIN32
+			char n[MAX_PATH];
 			if (GetModuleFileNameA(Library->LibSSL::Handle(), n, sizeof(n)))
 			{
 				sprintf_s(s, sizeof(s), "Using '%s'", n);
@@ -594,8 +594,15 @@ SslSocket::SslSocket(GStreamI *logger, GCapabilityClient *caps, bool sslonconnec
 				sprintf_s(s, sizeof(s), "Using '%s'", n);
 				OnInformation(s);
 			}
+			#else
+			GString fp = Library->GetFullPath();
+			if (fp)
+			{
+				sprintf_s(s, sizeof(s), "Using '%s'", fp.Get());
+				OnInformation(s);
+			}
+			#endif
 		}
-		#endif
 	}
 	else if (caps)
 	{
