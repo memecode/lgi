@@ -136,6 +136,7 @@ public:
 	int Wait();
 	bool Interrupt();
 	bool Kill();
+	bool Signal(int which);
 	int32 Communicate(GStreamI *Out, GStreamI *In = NULL, LCancel *Cancel = NULL);
 	
 	// IO

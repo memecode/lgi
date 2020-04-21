@@ -25,6 +25,7 @@
 	#include <signal.h>
 	#include <sys/wait.h>
 	#include <sys/ioctl.h>
+	#include <sys/types.h>
 #endif
 
 #include "Lgi.h"
@@ -917,9 +918,7 @@ int GSubProcess::Wait()
 bool GSubProcess::Interrupt()
 {
 	#if defined(POSIX)
-		if (ChildPid == INVALID_PID)
-			return false;
-		return kill(ChildPid, SIGINT) == 0;
+		return Signal(SIGINT);
 	#elif defined(WIN32)
 		if (!ChildHnd)
 			return false;
@@ -963,7 +962,7 @@ bool GSubProcess::Interrupt()
 	#endif
 }
 
-bool GSubProcess::Kill()
+bool GSubProcess::Signal(int which)
 {
 	#if defined(POSIX)
 		if (ChildPid == INVALID_PID)
@@ -972,16 +971,32 @@ bool GSubProcess::Kill()
 			return false;
 		}
 
-		if (kill(ChildPid, SIGTERM) == 0)
+		if (kill(ChildPid, which))
 		{
-			printf("%s:%i - kill(%i).\n", _FL, ChildPid);
-			ChildPid = INVALID_PID;
-		}
-		else
-		{
-			printf("%s:%i - kill(%i) failed.\n", _FL, ChildPid);
+			printf("%s:%i - kill(%i, %i) failed.\n", _FL, ChildPid, which);
 			return false;
 		}
+
+		printf("%s:%i - kill(%i, %i).\n", _FL, ChildPid, which);
+		if (which == SIGTERM)
+			ChildPid = INVALID_PID;
+	#elif defined(WIN32)
+		if (!ChildHnd)
+		{
+			LgiTrace("%s:%i - No child process.\n", _FL);
+			return false;
+		}
+
+		LgiAssert(!"Impl me.");
+	#endif
+	
+	return true;
+}
+
+bool GSubProcess::Kill()
+{
+	#if defined(POSIX)
+		return Signal(SIGTERM);
 	#elif defined(WIN32)
 		if (!ChildHnd)
 		{
