@@ -32,6 +32,7 @@
 #include "GToken.h"
 
 #define DEBUG_SUBPROCESS		0
+#define DEBUG_ARGS				1
 
 #if defined(WIN32)
 #define NULL_PIPE NULL
@@ -77,6 +78,32 @@ void GSubProcess::Pipe::Close()
 	}
 }
 
+char *ArgTok(const char *&s)
+{
+	if (!s || !*s)
+		return false;
+	while (*s && strchr(WhiteSpace, *s))
+		s++;
+	if (*s == '\'' || *s == '\"')
+	{
+		char delim = *s++;
+		const char *start = s;
+		while (*s && *s != delim)
+			s++;
+		char *r = NewStr(start, s - start);
+		if (*s)
+			s++;
+		return r;
+	}
+	else
+	{
+		const char *start = s;
+		while (*s && !strchr(WhiteSpace, *s))
+			s++;
+		return NewStr(start, s - start);
+	}
+}
+
 GSubProcess::GSubProcess(const char *exe, const char *args)
 {
 	#if defined(POSIX)
@@ -102,9 +129,12 @@ GSubProcess::GSubProcess(const char *exe, const char *args)
 	#endif
 	
 	char *s;
-	while ((s = LgiTokStr(args)))
+	while ((s = ArgTok(args)))
 	{
 		Args.Add(s);
+		#if DEBUG_ARGS
+		LgiTrace("a='%s'\n", s);
+		#endif
 	}
 }
 
@@ -717,14 +747,14 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 				Ch += swprintf_s(WArg+Ch, CountOf(WArg)-Ch, L"%s", aw.Get());
 		}
 
-		#if DEBUG_SUBPROCESS
+		#if DEBUG_SUBPROCESS || DEBUG_ARGS
 		LgiTrace("%s:%i - Args='%S'\n", _FL, WArg);
 		#endif
 		
 		bool HasExternIn = ExternIn != NULL_PIPE;
 
 		#if DEBUG_SUBPROCESS
-		LgiTrace("%s:%i - Oringinal handles, out=%p, in=%p, HasExternIn=%i\n", _FL, OldStdout, OldStdin, HasExternIn);
+		LgiTrace("%s:%i - Original handles, out=%p, in=%p, HasExternIn=%i\n", _FL, OldStdout, OldStdin, HasExternIn);
 		#endif
 		
 		if (ChildOutput.Create(&Attr) &&
