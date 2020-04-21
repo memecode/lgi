@@ -33,7 +33,7 @@
 #include "GToken.h"
 
 #define DEBUG_SUBPROCESS		0
-#define DEBUG_ARGS				1
+#define DEBUG_ARGS				0
 
 #if defined(WIN32)
 #define NULL_PIPE NULL
