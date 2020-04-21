@@ -621,13 +621,14 @@ public:
 				if (!dc->Apply(Ctx, Forward))
 					return false;
 			}
-
+			
 			return true;
 		}
 	};
 
 	GArray<Transaction*> UndoQue;
 	ssize_t UndoPos;
+	bool UndoPosLock;
 
 	bool AddTrans(GAutoPtr<Transaction> &t);
 	bool SetUndoPos(ssize_t Pos);

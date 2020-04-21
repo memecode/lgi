@@ -302,6 +302,7 @@ GRichTextPriv::GRichTextPriv(GRichTextEdit *view, GRichTextPriv **Ptr) :
 	Log = &LogBuffer;
 	NextUid = 1;
 	UndoPos = 0;
+	UndoPosLock = false;
 	WordSelectMode = false;
 	Dirty = false;
 	ScrollOffsetPx = 0;
@@ -518,6 +519,12 @@ bool GRichTextPriv::AddTrans(GAutoPtr<Transaction> &t)
 {
 	if (t)
 	{
+		if (UndoPosLock)
+		{
+			LgiTrace("%s:%i - AddTrans failed - UndoPosLocked.\n", _FL);
+			return false;
+		}
+
 		// Delete any transaction history after 'UndoPos'
 		for (ssize_t i=UndoPos; i<UndoQue.Length(); i++)
 		{
@@ -537,27 +544,40 @@ bool GRichTextPriv::AddTrans(GAutoPtr<Transaction> &t)
 
 bool GRichTextPriv::SetUndoPos(ssize_t Pos)
 {
+	if (UndoPosLock)
+		return false;
+
 	Pos = limit(Pos, 0, (int)UndoQue.Length());
 	if (UndoQue.Length() == 0)
 		return true;
 
 	while (Pos != UndoPos)
 	{
+		auto Prev = UndoPos;
 		if (Pos > UndoPos)
 		{
-			// Forward in que
+			// Forward in queue
 			Transaction *t = UndoQue[UndoPos];
-			if (!t->Apply(this, true))
-				return false;
 
+			UndoPosLock = true;
+			if (!t->Apply(this, true))
+				goto ApplyError;
+			UndoPosLock = false;
+
+			LgiAssert(UndoPos == Prev);
 			UndoPos++;
 		}
 		else if (Pos < UndoPos)
 		{
+			// Back in queue
 			Transaction *t = UndoQue[UndoPos-1];
-			if (!t->Apply(this, false))
-				return false;
 
+			UndoPosLock = true;
+			if (!t->Apply(this, false))
+				goto ApplyError;
+			UndoPosLock = false;
+
+			LgiAssert(UndoPos == Prev);
 			UndoPos--;
 		}
 		else break; // We are done
@@ -566,6 +586,10 @@ bool GRichTextPriv::SetUndoPos(ssize_t Pos)
 	Dirty = true;
 	InvalidateDoc(NULL);
 	return true;
+
+ApplyError:
+	UndoPosLock = false;
+	return false;	
 }
 
 bool GRichTextPriv::IsBusy(bool Stop)
