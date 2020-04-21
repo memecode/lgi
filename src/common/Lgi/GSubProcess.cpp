@@ -81,7 +81,7 @@ void GSubProcess::Pipe::Close()
 char *ArgTok(const char *&s)
 {
 	if (!s || !*s)
-		return false;
+		return NULL;
 	while (*s && strchr(WhiteSpace, *s))
 		s++;
 	if (*s == '\'' || *s == '\"')
