@@ -1250,10 +1250,13 @@ int GDirectory::First(const char *InName, const char *Pattern)
 	d->Handle = FindFirstFileW(FindArg, &d->Data);
 	if (d->Handle != INVALID_HANDLE_VALUE)
 	{
-		while (	stricmp(GetName(), ".") == 0 ||
-				stricmp(GetName(), "..") == 0)
+		const char *n;
+		while (	(n = GetName()) &&
+				(stricmp(n, ".") == 0 || stricmp(n, "..") == 0))
 		{
-			if (!Next()) return false;
+			if (!FindNextFileW(d->Handle, &d->Data))
+				return false;
+		    d->Utf.Empty();
 		}
 	}
 
@@ -1268,7 +1271,14 @@ int GDirectory::Next()
 
 	if (d->Handle != INVALID_HANDLE_VALUE)
 	{
-		Status = FindNextFileW(d->Handle, &d->Data);
+		const char *n;
+		do
+		{
+			Status = FindNextFileW(d->Handle, &d->Data);
+			if (!Status || !(n = GetName()))
+				return false;
+		}
+		while (stricmp(n, ".") == 0 || stricmp(n, "..") == 0);
 	}
 
 	return Status;
