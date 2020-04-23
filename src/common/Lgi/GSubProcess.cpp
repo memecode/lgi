@@ -119,7 +119,7 @@ GSubProcess::GSubProcess(const char *exe, const char *args)
 	ErrorCode = 0;
 	Parent = Child = NULL;
 	Exe = exe;
-	Args.Add(Exe);
+	Args.Add(NewStr(Exe));
 	EnvironmentChanged = false;
 
 	ExternIn = NULL_PIPE;
@@ -144,7 +144,7 @@ GSubProcess::~GSubProcess()
 	#if defined(POSIX)
 	Io.Close();
 	#endif
-	
+	Args.DeleteArrays();
 	if (Child)
 	{
 		LgiAssert(Child->Parent == this);
