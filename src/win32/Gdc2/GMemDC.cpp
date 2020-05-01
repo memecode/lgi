@@ -114,7 +114,7 @@ void GMemDC::SetClient(GRect *c)
 		OriginX = -c->x1;
 		OriginY = -c->y1;
 
-		LgiTrace("SetClient(%s) clip=%s, ori=%i,%i\n", c->GetStr(), Clip.GetStr(), OriginX, OriginY);
+		// LgiTrace("SetClient(%s) clip=%s, ori=%i,%i\n", c->GetStr(), Clip.GetStr(), OriginX, OriginY);
 	}
 	else
 	{
@@ -129,7 +129,7 @@ void GMemDC::SetClient(GRect *c)
 		OriginY = 0;
 		Clip.ZOff(pMem->x-1, pMem->y-1);
 
-		LgiTrace("SetClient(NULL) clip=%s, ori=%i,%i\n", Clip.GetStr(), OriginX, OriginY);
+		// LgiTrace("SetClient(NULL) clip=%s, ori=%i,%i\n", Clip.GetStr(), OriginX, OriginY);
 	}
 }
 

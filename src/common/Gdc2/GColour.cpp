@@ -15,6 +15,14 @@ GColour::GColour()
 	pal = NULL;
 }
 
+GColour::GColour(const char *Str)
+{
+	space = CsNone;
+	flat = 0;
+	pal = NULL;
+	SetStr(Str);
+}
+
 GColour::GColour(uint8_t idx8, GPalette *palette)
 {
 	c8(idx8, palette);
@@ -552,6 +560,30 @@ bool GColour::SetStr(const char *str)
 		return false;
 
 	GString Str = str;
+	if (*str == '#')
+	{
+		// Web colour
+		Str = Str.Strip("# \t\r\n");
+		if (Str.Length() == 3)
+		{
+			auto h = htoi(Str.Get());
+			uint8_t r = (h >> 8) & 0xf;
+			uint8_t g = (h >> 4) & 0xf;
+			uint8_t b = (h) & 0xf;
+			Rgb(r | (r << 4), g | (g << 4), b | (b << 4));
+		}
+		else if (Str.Length() == 6)
+		{
+			auto h = htoi(Str.Get());
+			uint8_t r = (h >> 16) & 0xff;
+			uint8_t g = (h >> 8) & 0xff;
+			uint8_t b = (h) & 0xff;
+			Rgb(r, g, b);
+		}
+		else return false;
+		return true;
+	}
+
 	char *s = strchr(Str, '(');
 	if (!s)
 		return false;

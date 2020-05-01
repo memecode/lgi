@@ -154,6 +154,12 @@ ResString::ResString(ResStringGroup *grp, int init_ref)
 
 ResString::~ResString()
 {
+	while (Refs.Length() != 0)
+	{
+		auto r = Refs[0];
+		r->SetStr(NULL);
+	}
+
 	if (Group)
 	{
 		Group->App()->OnObjDelete(this);

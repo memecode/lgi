@@ -68,6 +68,8 @@ class ResDialogCtrl : public FieldSource, public ResObject
 {
 	friend class ResDialog;
 
+	ResString *_Str;
+
 protected:
 	static int TabDepth;
 
@@ -94,7 +96,6 @@ protected:
 	GAutoString CssStyle;
 
 public:
-	ResString *Str;
 	typedef GAutoPtr<GViewIterator> ChildIterator;
 	
 	ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, GXmlTag *load);
@@ -104,6 +105,8 @@ public:
 	virtual GView *View() = 0;
 	ResDialogCtrl *ParentCtrl() { return dynamic_cast<ResDialogCtrl*>(View()->GetParent()); }
 	ResDialog *GetDlg() { return Dlg; }
+	ResString *GetStr() { return _Str; }
+	bool SetStr(ResString *s);
 
 	bool IsContainer() { return AcceptChildren; }
 	void OnPaint(GSurface *pDC);

@@ -58,6 +58,7 @@ protected:
 public:
 	char *Tag;			// Optional component tag, for turning off features.
 	List<StrLang> Items;
+	GArray<class ResDialogCtrl*> Refs;
 	GView *UpdateWnd;
 
 	ResString(ResStringGroup *group, int init_ref = -1);

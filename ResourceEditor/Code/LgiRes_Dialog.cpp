@@ -81,14 +81,14 @@ public:
 		{
 			case 0:
 			{
-				if (Ctrl && Ctrl->Str)
-					return Ctrl->Str->GetDefine();
+				if (Ctrl && Ctrl->GetStr())
+					return Ctrl->GetStr()->GetDefine();
 				break;
 			}
 			case 1:
 			{
-				if (Ctrl && Ctrl->Str)
-					return Ctrl->Str->Get();
+				if (Ctrl && Ctrl->GetStr())
+					return Ctrl->GetStr()->Get();
 				break;
 			}
 		}
@@ -138,7 +138,7 @@ public:
 			}
 
 			char s[256];
-			sprintf(s, "Set Tab Order: %s", Top->Str->GetDefine());
+			sprintf(s, "Set Tab Order: %s", Top->GetStr()->GetDefine());
 			Name(s);
 
 			DoModal();
@@ -263,6 +263,7 @@ ResDialogCtrl::ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, GXmlTag *load) 
 	ResObject(CtrlTypeName)
 {
 	Dlg = dlg;
+	_Str = NULL;
 	DragCtrl = -1;
 	AcceptChildren = false;
 	Movable = true;
@@ -278,40 +279,40 @@ ResDialogCtrl::ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, GXmlTag *load) 
 		int r = load->GetAsInt("ref");
 		if (Dlg)
 		{
-			Str = Dlg->Symbols->FindRef(r);
-			LgiAssert(Str);
+			SetStr(Dlg->Symbols->FindRef(r));
+			LgiAssert(GetStr());
 
-			if (!Str) // oh well we should have one anyway... fix things up so to speak.
-				Dlg->Symbols->CreateStr();
+			if (!GetStr()) // oh well we should have one anyway... fix things up so to speak.
+				SetStr(Dlg->Symbols->CreateStr());
 		}
 
-		LgiAssert(Str);
+		LgiAssert(GetStr());
 	}
 	else if (Dlg->CreateSymbols)
 	{
 		// We create a symbol for this resource
-		Str = (Dlg && Dlg->Symbols) ? Dlg->Symbols->CreateStr() : 0;
-		if (Str)
+		SetStr((Dlg && Dlg->Symbols) ? Dlg->Symbols->CreateStr() : NULL);
+		if (GetStr())
 		{
 			char Def[256];
-			sprintf(Def, "IDC_%i", Str->GetRef());
-			Str->SetDefine(Def);
+			sprintf(Def, "IDC_%i", GetStr()->GetRef());
+			GetStr()->SetDefine(Def);
 		}
 	}
 	else
 	{
 		// Someone else is going to create the symbol
-		Str = 0;
+		SetStr(NULL);
 	}
-
-	LgiAssert(Str);
 }
 
 ResDialogCtrl::~ResDialogCtrl()
 {
 	if (ResDialog::Symbols)
 	{
-		ResDialog::Symbols->DeleteStr(Str);
+		auto s = GetStr();
+		SetStr(NULL);
+		ResDialog::Symbols->DeleteStr(s);
 	}
 
 	if (Dlg)
@@ -324,9 +325,9 @@ ResDialogCtrl::~ResDialogCtrl()
 char *ResDialogCtrl::GetRefText()
 {
 	static char Buf[64];
-	if (Str)
+	if (GetStr())
 	{
-		sprintf(Buf, "Ref=%i", Str->GetRef());
+		sprintf(Buf, "Ref=%i", GetStr()->GetRef());
 	}
 	else
 	{
@@ -420,6 +421,42 @@ bool ResDialogCtrl::SetPos(GRect &p, bool Repaint)
 	return true;
 }
 
+bool ResDialogCtrl::SetStr(ResString *s)
+{
+	if (_Str == s)
+	{
+		if (_Str)
+			LgiAssert(_Str->Refs.HasItem(this));
+		return true;
+	}
+
+	if (_Str)
+	{
+		if (!_Str->Refs.HasItem(this))
+		{
+			LgiAssert(!"Refs incorrect.");
+			return false;
+		}
+
+		_Str->Refs.Delete(this);
+	}
+
+	_Str = s;
+
+	if (_Str)
+	{
+		if (_Str->Refs.HasItem(this))
+		{
+			LgiAssert(!"Refs already has us.");
+			return false;
+		}
+
+		_Str->Refs.Add(this);
+	}
+
+	return true;
+}
+
 void ResDialogCtrl::TabString(char *Str)
 {
 	if (Str)
@@ -460,16 +497,16 @@ GRect ResDialogCtrl::AbsPos()
 void ResDialogCtrl::StrFromRef(int Ref)
 {
 	// get the string object
-	Str = Dlg->App()->GetStrFromRef(Ref);
-	
-	if (!Str)
+	SetStr(Dlg->App()->GetStrFromRef(Ref));
+	if (!GetStr())
 	{
 		LgiTrace("%s:%i - String with ref '%i' missing.\n", _FL, Ref);
 		LgiAssert(0);
-		if ((Str = Dlg->App()->GetDialogSymbols()->CreateStr()))
+		if (SetStr(Dlg->App()->GetDialogSymbols()->CreateStr()))
 		{
-			Str->SetRef(Ref);
+			GetStr()->SetRef(Ref);
 		}
+		else return;
 	}
 	
 	// if this assert fails then the Ref doesn't exist
@@ -482,19 +519,19 @@ void ResDialogCtrl::StrFromRef(int Ref)
 	// LgiAssert(Str->UpdateWnd == 0);
 
 	// set the string's control to us
-	Str->UpdateWnd = View();
+	GetStr()->UpdateWnd = View();
 
 	// make the strings refid unique
-	Str->UnDuplicate();
+	GetStr()->UnDuplicate();
 	
-	View()->Name(Str->Get());
+	View()->Name(GetStr()->Get());
 }
 
 bool ResDialogCtrl::GetFields(FieldTree &Fields)
 {
-	if (Str)
+	if (GetStr())
 	{
-		Str->GetFields(Fields);
+		GetStr()->GetFields(Fields);
 	}
 
 	int Id = 101;
@@ -511,9 +548,9 @@ bool ResDialogCtrl::Serialize(FieldTree &Fields)
 {
 	if ((Fields.GetMode() == FieldTree::ObjToUi ||
 		Fields.GetMode() == FieldTree::UiToObj) &&
-		Str)
+		GetStr())
 	{
-		Str->Serialize(Fields);
+		GetStr()->Serialize(Fields);
 	}
 
 	GRect r = View()->GetPos(), Old = View()->GetPos();
@@ -553,17 +590,15 @@ bool ResDialogCtrl::Serialize(FieldTree &Fields)
 
 void ResDialogCtrl::CopyText()
 {
-	if (Str)
-	{
-		Str->CopyText();
-	}
+	if (GetStr())
+		GetStr()->CopyText();
 }
 
 void ResDialogCtrl::PasteText()
 {
-	if (Str)
+	if (GetStr())
 	{
-		Str->PasteText();
+		GetStr()->PasteText();
 		View()->Invalidate();
 	}
 }
@@ -875,7 +910,7 @@ CtrlDlg::CtrlDlg(ResDialog *dlg, GXmlTag *load) :
 {
 	Movable = false;
 	AcceptChildren = true;
-	Str->UpdateWnd = View();
+	GetStr()->UpdateWnd = View();
 	View()->Name("CtrlDlg");
 }
 
@@ -909,9 +944,9 @@ void CtrlDlg::OnNcPaint(GSurface *pDC, GRect &r)
 	t.y2 = t.y1 + TitleY - 1;
 	pDC->Colour(L_ACTIVE_TITLE);
 	pDC->Rectangle(&t);
-	if (Str)
+	if (GetStr())
 	{
-		GDisplayString ds(SysFont, Str->Get());
+		GDisplayString ds(SysFont, GetStr()->Get());
 		SysFont->Fore(L_ACTIVE_TITLE_TEXT);
 		SysFont->Transparent(true);
 		ds.Draw(pDC, t.x1 + 10, t.y1 + ((t.Y()-ds.Y())/2));
@@ -942,9 +977,9 @@ void CtrlDlg::OnPaint(GSurface *pDC)
 CtrlText::CtrlText(ResDialog *dlg, GXmlTag *load) :
 	ResDialogCtrl(dlg, Res_StaticText, load)
 {
-	if (Str && !load)
+	if (GetStr() && !load)
 	{
-		Str->SetDefine("IDC_STATIC");
+		GetStr()->SetDefine("IDC_STATIC");
 	}
 }
 
@@ -953,7 +988,7 @@ IMPL_DIALOG_CTRL(CtrlText)
 void CtrlText::OnPaint(GSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
-	char *Text = Str->Get();
+	char *Text = GetStr()->Get();
 	SysFont->Fore(L_TEXT);
 	SysFont->Transparent(true);
 
@@ -1000,7 +1035,7 @@ void CtrlEditbox::OnPaint(GSurface *pDC)
 	pDC->Colour(Enabled() ? L_WORKSPACE : L_MED);
 	pDC->Rectangle(&r);
 
-	char *Text = Str->Get();
+	char *Text = GetStr()->Get();
 	SysFont->Fore(Enabled() ? L_TEXT : L_LOW);
 	SysFont->Transparent(true);
 	if (Text)
@@ -1081,7 +1116,7 @@ void CtrlCheckbox::OnPaint(GSurface *pDC)
 	pDC->Polygon(6, Pt);
 	pDC->Set(3, 5);
 
-	char *Text = Str->Get();
+	char *Text = GetStr()->Get();
 	if (Text)
 	{
 		SysFont->Fore(L_TEXT);
@@ -1130,7 +1165,7 @@ void CtrlButton::OnPaint(GSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
 	GRect r = Client;
-	char *Text = Str->Get();
+	char *Text = GetStr()->Get();
 	
 	// Draw the ctrl
 	LgiWideBorder(pDC, r, DefaultRaisedEdge);
@@ -1161,9 +1196,9 @@ CtrlGroup::CtrlGroup(ResDialog *dlg, GXmlTag *load) :
 {
 	AcceptChildren = true;
 
-	if (Str && !load)
+	if (GetStr() && !load)
 	{
-		Str->SetDefine("IDC_STATIC");
+		GetStr()->SetDefine("IDC_STATIC");
 	}
 }
 
@@ -1181,7 +1216,7 @@ void CtrlGroup::OnPaint(GSurface *pDC)
 	SysFont->Fore(L_TEXT);
 	SysFont->Back(L_MED);
 	SysFont->Transparent(false);
-	char *Text = Str->Get();
+	char *Text = GetStr()->Get();
 	GDisplayString ds(SysFont, Text);
 	ds.Draw(pDC, r.x1 + 8, r.y1 - 2);
 
@@ -1245,7 +1280,7 @@ void CtrlRadio::OnPaint(GSurface *pDC)
 	if (Bmp)
 		pDC->Blt(r.x1, r.y1, Bmp);
 
-	char *Text = Str->Get();
+	char *Text = GetStr()->Get();
 	if (Text)
 	{
 		SysFont->Fore(L_TEXT);
@@ -1263,7 +1298,7 @@ void CtrlRadio::OnPaint(GSurface *pDC)
 CtrlTab::CtrlTab(ResDialog *dlg, GXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Tab, load)
 {
-	Str->UpdateWnd = this;
+	GetStr()->UpdateWnd = this;
 }
 
 IMPL_DIALOG_CTRL(CtrlTab)
@@ -1313,9 +1348,9 @@ CtrlTabs::CtrlTabs(ResDialog *dlg, GXmlTag *load) :
 			{
 				char Text[256];
 				sprintf(Text, "Tab %i", i+1);
-				if (t->Str)
+				if (t->GetStr())
 				{
-					t->Str->Set(Text);
+					t->GetStr()->Set(Text);
 					t->SetParent(this);
 					Tabs.Insert(t);
 				}
@@ -1434,7 +1469,7 @@ void CtrlTabs::OnPaint(GSurface *pDC)
 	int x = 2;
 	for (auto Tab: Tabs)
 	{
-		char *Str = Tab->Str ? Tab->Str->Get() : 0;
+		char *Str = Tab->GetStr() ? Tab->GetStr()->Get() : 0;
 		GDisplayString ds(SysFont, Str);
 
 		int Width = 12 + ds.X();
@@ -1582,7 +1617,7 @@ void CtrlTabs::OnMouseClick(GMouse &m)
 							{
 								char Text[256];
 								sprintf(Text, "Tab " LPrintfSizeT, Tabs.Length()+1);
-								t->Str->Set(Text);
+								t->GetStr()->Set(Text);
 								t->SetParent(this);
 
 								Tabs.Insert(t);
@@ -1606,14 +1641,14 @@ void CtrlTabs::OnMouseClick(GMouse &m)
 							CtrlTab *t = Tabs.ItemAt(Current);
 							if (t)
 							{
-								if (!t->Str)
-									t->Str = Dlg->CreateSymbol();
+								if (!t->GetStr())
+									t->SetStr(Dlg->CreateSymbol());
 
-								GInput Input(this, t->Str->Get(), "Enter tab name:", "Rename");
+								GInput Input(this, t->GetStr()->Get(), "Enter tab name:", "Rename");
 								Input.SetParent(Dlg);
 								if (Input.DoModal() && Input.GetStr())
 								{
-									t->Str->Set(Input.GetStr());
+									t->GetStr()->Set(Input.GetStr());
 								}
 							}
 							break;
@@ -1674,9 +1709,9 @@ void CtrlTabs::OnMouseClick(GMouse &m)
 ListCol::ListCol(ResDialog *dlg, GXmlTag *load, char *s, int Width) :
 	ResDialogCtrl(dlg, Res_Column, load)
 {
-	if (s && Str)
+	if (s && GetStr())
 	{
-		Str->Set(s);
+		GetStr()->Set(s);
 	}
 	
 	GRect r(0, 0, Width-1, 18);
@@ -1783,17 +1818,17 @@ void CtrlList::OnMouseClick(GMouse &m)
 						{
 							case IDM_COPY_TEXT:
 							{
-								if (c && c->Str)
+								if (c && c->GetStr())
 								{
-									c->Str->CopyText();
+									c->GetStr()->CopyText();
 								}
 								break;
 							}
 							case IDM_PASTE_TEXT:
 							{
-								if (c && c->Str)
+								if (c && c->GetStr())
 								{
-									c->Str->PasteText();
+									c->GetStr()->PasteText();
 								}
 								break;
 							}
@@ -1804,7 +1839,7 @@ void CtrlList::OnMouseClick(GMouse &m)
 								{
 									char Text[256];
 									sprintf(Text, "Col " LPrintfSizeT, Cols.Length()+1);
-									c->Str->Set(Text);
+									c->GetStr()->Set(Text);
 									Cols.Insert(c);
 								}
 								break;
@@ -1819,11 +1854,11 @@ void CtrlList::OnMouseClick(GMouse &m)
 							{
 								if (c)
 								{
-									GInput Input(this, c->Str->Get(), "Enter column name:", "Rename");
+									GInput Input(this, c->GetStr()->Get(), "Enter column name:", "Rename");
 									Input.SetParent(Dlg);
 									if (Input.DoModal())
 									{
-										c->Str->Set(Input.GetStr());
+										c->GetStr()->Set(Input.GetStr());
 									}
 								}
 								break;
@@ -1930,7 +1965,7 @@ void CtrlList::OnPaint(GSurface *pDC)
 			SysFont->Back(L_MED);
 			SysFont->Transparent(false);
 
-			const char *Str = c->Str->Get();
+			const char *Str = c->GetStr()->Get();
 			if (!Str) Str = "";
 			GDisplayString ds(SysFont, Str);
 			ds.Draw(pDC, r.x1 + 2, r.y1 + ((r.Y()-ds.Y())/2) - 1, &r);
@@ -1990,7 +2025,7 @@ void CtrlComboBox::OnPaint(GSurface *pDC)
 	}
 
 	// Text
-	char *Text = Str->Get();
+	char *Text = GetStr()->Get();
 	SysFont->Fore(L_TEXT);
 	SysFont->Transparent(true);
 	if (Text)
@@ -2316,9 +2351,9 @@ char *ResDialog::Name()
 {
 	GViewI *v = Children[0];
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(v);
-	if (Ctrl && Ctrl->Str && Ctrl->Str->GetDefine())
+	if (Ctrl && Ctrl->GetStr() && Ctrl->GetStr()->GetDefine())
 	{
-		return Ctrl->Str->GetDefine();
+		return Ctrl->GetStr()->GetDefine();
 	}
 	return (char*)"<no object>";
 }
@@ -2326,10 +2361,10 @@ char *ResDialog::Name()
 bool ResDialog::Name(const char *n)
 {
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
-	if (Ctrl && Ctrl->Str)
+	if (Ctrl && Ctrl->GetStr())
 	{
-		Ctrl->Str->SetDefine((n)?n:"");
-		return Ctrl->Str->GetDefine() != 0;
+		Ctrl->GetStr()->SetDefine((n)?n:"");
+		return Ctrl->GetStr()->GetDefine() != 0;
 	}
 	return false;
 }
@@ -2438,7 +2473,7 @@ int ResDialog::Res_GetStrRef(ResObject *Obj)
 		ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>((ResDialogCtrl*)Obj);
 		if (Ctrl)
 		{
-			return Ctrl->Str->GetRef();
+			return Ctrl->GetStr()->GetRef();
 		}
 	}
 	return -1;
@@ -2455,8 +2490,8 @@ bool ResDialog::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 		return false;
 
 	Ctrl->StrFromRef(Ref);
-	LgiAssert(Ctrl && Ctrl->Str);
-	return Ctrl->Str != 0;
+	LgiAssert(Ctrl && Ctrl->GetStr());
+	return Ctrl->GetStr() != 0;
 }
 
 void ResDialog::Res_Attach(ResObject *Obj, ResObject *Parent)
@@ -2572,8 +2607,8 @@ void ResDialog::Create(GXmlTag *load, SerialiseContext *Ctx)
 		else
 		{
 			Dlg->ResDialogCtrl::SetPos(r);
-			if (Dlg->Str)
-				Dlg->Str->Set("Dialog");
+			if (Dlg->GetStr())
+				Dlg->GetStr()->Set("Dialog");
 		}
 	}
 }
@@ -2676,7 +2711,7 @@ void ResDialog::Copy(bool Delete)
 		{
 			// Write the string out
 			GXmlTag *t = new GXmlTag;
-			if (t && c->Str->Write(t, Ctx))
+			if (t && c->GetStr()->Write(t, Ctx))
 			{
 				Root->InsertTag(t);
 			}
@@ -3268,9 +3303,9 @@ ResDialogCtrl *ResDialog::CreateCtrl(int Tool, GXmlTag *load)
 		case UI_TEXT:
 		{
 			Ctrl = new CtrlText(this, load);
-			if (Ctrl && Ctrl->Str && !load)
+			if (Ctrl && Ctrl->GetStr() && !load)
 			{
-				Ctrl->Str->Set("Some text");
+				Ctrl->GetStr()->Set("Some text");
 			}
 			break;
 		}
@@ -3282,39 +3317,39 @@ ResDialogCtrl *ResDialog::CreateCtrl(int Tool, GXmlTag *load)
 		case UI_CHECKBOX:
 		{
 			Ctrl = new CtrlCheckbox(this, load);
-			if (Ctrl && Ctrl->Str && !load)
+			if (Ctrl && Ctrl->GetStr() && !load)
 			{
-				Ctrl->Str->Set("Checkbox");
+				Ctrl->GetStr()->Set("Checkbox");
 			}
 			break;
 		}
 		case UI_BUTTON:
 		{
 			Ctrl = new CtrlButton(this, load);
-			if (Ctrl && Ctrl->Str && !load)
+			if (Ctrl && Ctrl->GetStr() && !load)
 			{
 				static int i = 1;
 				char Text[256];
 				sprintf(Text, "Button %i", i++);
-				Ctrl->Str->Set(Text);
+				Ctrl->GetStr()->Set(Text);
 			}
 			break;
 		}
 		case UI_GROUP:
 		{
 			Ctrl = new CtrlGroup(this, load);
-			if (Ctrl && Ctrl->Str && !load)
+			if (Ctrl && Ctrl->GetStr() && !load)
 			{
-				Ctrl->Str->Set("Text");
+				Ctrl->GetStr()->Set("Text");
 			}
 			break;
 		}
 		case UI_RADIO:
 		{
 			Ctrl = new CtrlRadio(this, load);
-			if (Ctrl && Ctrl->Str && !load)
+			if (Ctrl && Ctrl->GetStr() && !load)
 			{
-				Ctrl->Str->Set("Radio");
+				Ctrl->GetStr()->Set("Radio");
 			}
 			break;
 		}
@@ -3380,9 +3415,9 @@ ResDialogCtrl *ResDialog::CreateCtrl(int Tool, GXmlTag *load)
 		}
 	}
 
-	if (Ctrl && Ctrl->Str)
+	if (Ctrl && Ctrl->GetStr())
 	{
-		Ctrl->Str->UpdateWnd = Ctrl->View();
+		Ctrl->GetStr()->UpdateWnd = Ctrl->View();
 	}
 
 	return Ctrl;
@@ -3703,8 +3738,8 @@ void ResDialog::CleanSymbols()
 		// remove duplicate string entries
 		for (auto c: l)
 		{
-			LgiAssert(c->Str);
-			c->Str->UnDuplicate();
+			LgiAssert(c->GetStr());
+			c->GetStr()->UnDuplicate();
 		}
 	}
 
@@ -3780,7 +3815,7 @@ const char *TextOfCtrl(ResDialogCtrl *Ctrl)
 		case UI_RADIO:
 		case UI_COMBO:
 		{
-			char *s = Ctrl->Str->Get();
+			char *s = Ctrl->GetStr()->Get();
 			sprintf(Buf, ", \"%s\"", s?s:"");
 			return Buf;
 		}
@@ -3829,17 +3864,17 @@ void OutputCtrl(GStringPipe &Def,
 
 	if (stricmp(Type, "GDialog"))
 	{
-		if (ValidStr(Ctrl->Str->GetDefine()) &&
-			stricmp(Ctrl->Str->GetDefine(), "IDOK") &&
-			stricmp(Ctrl->Str->GetDefine(), "IDCANCEL") &&
-			stricmp(Ctrl->Str->GetDefine(), "IDC_STATIC"))
+		if (ValidStr(Ctrl->GetStr()->GetDefine()) &&
+			stricmp(Ctrl->GetStr()->GetDefine(), "IDOK") &&
+			stricmp(Ctrl->GetStr()->GetDefine(), "IDCANCEL") &&
+			stricmp(Ctrl->GetStr()->GetDefine(), "IDC_STATIC"))
 		{
 			char Tab[8];
-			auto Tabs = (32 - strlen(Ctrl->Str->GetDefine()) - 1) / 4;
+			auto Tabs = (32 - strlen(Ctrl->GetStr()->GetDefine()) - 1) / 4;
 			memset(Tab, '\t', Tabs);
 			Tab[Tabs] = 0;
 
-			sprintf(Str, "#define %s%s%i\n", Ctrl->Str->GetDefine(), Tab, 1000 + Index);
+			sprintf(Str, "#define %s%s%i\n", Ctrl->GetStr()->GetDefine(), Tab, 1000 + Index);
 			Def.Push(Str);
 		}
 
@@ -3853,7 +3888,7 @@ void OutputCtrl(GStringPipe &Def,
 				"\tChildren.Insert(Ctrl%i = new %s(%s, %i, %i, %i, %i%s));\n",
 				Index,
 				Type,
-				Ctrl->Str->GetDefine(),
+				Ctrl->GetStr()->GetDefine(),
 				Ctrl->View()->GetPos().x1 - 3,
 				Ctrl->View()->GetPos().y1 - 17,
 				Ctrl->View()->X(),
@@ -3867,7 +3902,7 @@ void OutputCtrl(GStringPipe &Def,
 			// output columns
 			for (auto c: List->Cols)
 			{
-				sprintf(Str, "\tCtrl%i->AddColumn(\"%s\", %i);\n", Index, c->Str->Get(), c->X());
+				sprintf(Str, "\tCtrl%i->AddColumn(\"%s\", %i);\n", Index, c->GetStr()->Get(), c->X());
 				Inst.Push(Str);
 			}
 		}
@@ -3939,7 +3974,7 @@ void ResDialog::OnCommand(int Cmd)
 						"\tName(\"%s\");\n"
 						"\tGRegion r(0, 0, %i, %i);\n"
 						"\tSetPos(r);\n",
-						Dlg->Str->Get(),
+						Dlg->GetStr()->Get(),
 						Dlg->View()->X(),
 						Dlg->View()->Y());
 				Buf.Push(Str);

@@ -1542,120 +1542,108 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 			d->SetValue("style", v);
 
 		GRect Bounds(0, 0, Cx-1, Cy-1);
-		#define UsedCell(x, y) Used[(Cx * y) + x]
-		bool *Used = new bool[Cx * Cy];
-		if (Used)
-		{
-			memset(Used, 0, sizeof(*Used) * Cx * Cy);
+		int PadCellX = Cx << 1;
+		#define UsedCell(x, y) Used[(PadCellX * y) + x]
+		GArray<bool> Used;
 
-			int x = 0, y = 0;
-			for (auto Tr: Tag->Children)
+		int x = 0, y = 0;
+		for (auto Tr: Tag->Children)
+		{
+			if (!Tr->IsTag("Tr"))
+				continue;
+
+			for (auto Td: Tr->Children)
 			{
-				if (!Tr->IsTag("Tr"))
+				if (!Td->IsTag("Td"))
 					continue;
 
-				for (auto Td: Tr->Children)
+				while (UsedCell(x, y))
 				{
-					if (!Td->IsTag("Td"))
-						continue;
+					x++;
+				}
 
-					while (UsedCell(x, y))
+				int ColSpan = 1;
+				int RowSpan = 1;
+				if ((s = Td->GetAttr("colspan")))
+					ColSpan = atoi(s);
+				if ((s = Td->GetAttr("rowspan")))
+					RowSpan = atoi(s);
+
+				char CellName[32];
+				GDom *Cell = 0;
+				v = (void*) &Cell;
+				sprintf_s(CellName, sizeof(CellName), "cell[%i,%i]", x, y);
+				if (d->SetValue(CellName, v))
+				{
+					GRect Span(x, y, x + ColSpan - 1, y + RowSpan - 1);
+						
+					for (int Y=Span.y1; Y<=Span.y2; Y++)
 					{
-						x++;
+						for (int X=Span.x1; X<=Span.x2; X++)
+						{
+							UsedCell(X, Y) = true;
+						}
 					}
 
-					int ColSpan = 1;
-					int RowSpan = 1;
-					if ((s = Td->GetAttr("colspan")))
-						ColSpan = atoi(s);
-					if ((s = Td->GetAttr("rowspan")))
-						RowSpan = atoi(s);
+					if (ColSpan > 1 || RowSpan > 1)
+					{
+						v = Span.GetStr();
+						Cell->SetValue("span", v);
+					}
 
+					if ((s = Td->GetAttr("align")))
+						Cell->SetValue("align", v = s);
+					if ((s = Td->GetAttr("valign")))
+						Cell->SetValue("valign", v = s);
+					if ((s = Td->GetAttr("class")))
+						Cell->SetValue("class", v = s);
+					if ((s = Td->GetAttr("style")))
+						Cell->SetValue("style", v = s);
+
+					if (v.SetList())
+					{
+						for (auto Ctrl: Td->Children)
+						{
+							ResObjectImpl *c = CreateCtrl(Ctrl, Object);
+							if (c)
+							{
+								ResObjectImpl::SStatus Status = c->Res_Read(Ctrl, Ctx);
+								if (Status == SOk)
+								{
+									v.Value.Lst->Insert(new GVariant((void*)c->Object));
+								}
+								else
+								{
+									delete c->Object;
+								}
+							}
+						}
+					}
+
+					Cell->SetValue("children", v);
+				}
+
+				x += ColSpan;
+			}
+
+			y++;
+			x = 0;
+		}
+
+		for (y=0; y<Cy; y++)
+		{
+			for (x=0; x<Cx; x++)
+			{
+				if (!UsedCell(x, y))
+				{
+					// Create empty cell for unused slot
 					char CellName[32];
 					GDom *Cell = 0;
 					v = (void*) &Cell;
 					sprintf_s(CellName, sizeof(CellName), "cell[%i,%i]", x, y);
-					if (d->SetValue(CellName, v))
-					{
-						GRect Span(x, y, x + ColSpan - 1, y + RowSpan - 1);
-						if (Span.x2 < Cx &&
-							Span.y2 < Cy)
-						{
-							for (int Y=Span.y1; Y<=Span.y2; Y++)
-							{
-								for (int X=Span.x1; X<=Span.x2; X++)
-								{
-									UsedCell(X, Y) = true;
-								}
-							}
-
-							if (ColSpan > 1 || RowSpan > 1)
-							{
-								v = Span.GetStr();
-								Cell->SetValue("span", v);
-							}
-
-							if ((s = Td->GetAttr("align")))
-								Cell->SetValue("align", v = s);
-							if ((s = Td->GetAttr("valign")))
-								Cell->SetValue("valign", v = s);
-							if ((s = Td->GetAttr("class")))
-								Cell->SetValue("class", v = s);
-							if ((s = Td->GetAttr("style")))
-								Cell->SetValue("style", v = s);
-
-							if (v.SetList())
-							{
-								for (auto Ctrl: Td->Children)
-								{
-									ResObjectImpl *c = CreateCtrl(Ctrl, Object);
-									if (c)
-									{
-										ResObjectImpl::SStatus Status = c->Res_Read(Ctrl, Ctx);
-										if (Status == SOk)
-										{
-											v.Value.Lst->Insert(new GVariant((void*)c->Object));
-										}
-										else
-										{
-											delete c->Object;
-										}
-									}
-								}
-							}
-
-							Cell->SetValue("children", v);
-						}
-						else
-						{
-							LgiAssert(0);
-						}
-					}
-
-					x += ColSpan;
-				}
-
-				y++;
-				x = 0;
-			}
-
-			for (y=0; y<Cy; y++)
-			{
-				for (x=0; x<Cx; x++)
-				{
-					if (!UsedCell(x, y))
-					{
-						// Create empty cell for unused slot
-						char CellName[32];
-						GDom *Cell = 0;
-						v = (void*) &Cell;
-						sprintf_s(CellName, sizeof(CellName), "cell[%i,%i]", x, y);
-						d->SetValue(CellName, v);
-					}
+					d->SetValue(CellName, v);
 				}
 			}
-
-			DeleteArray(Used);
 		}
 	}
 

@@ -234,7 +234,7 @@ GMessage::Result SearchThread::OnEvent(GMessage *Msg)
 				if (IsCancelled())
 					break;
 
-				Result *Res = Test(c->Str);
+				Result *Res = Test(c->GetStr());
 				if (Res)
 				{
 					Res->Ctrl = c;
@@ -688,7 +688,7 @@ Results::Results(AppWnd *app, Search *params)
 						if (!d || !d->Searching)
 							break;
 
-						Result *Res = d->Test(c->Str);
+						Result *Res = d->Test(c->GetStr());
 						if (Res)
 						{
 							Res->Ctrl = c;

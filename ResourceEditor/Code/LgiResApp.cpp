@@ -3577,11 +3577,11 @@ bool AppWnd::LoadWin32(char *FileName)
 											GRect r(Pos[0], Pos[1], Pos[0]+(Pos[2]*DIALOG_X), Pos[1]+(Pos[3]*DIALOG_Y));
 											r.Offset(7, 7);
 											Dlg->ResDialogCtrl::SetPos(r);
-											Dlg->Str->SetDefine(T[0]);
+											Dlg->GetStr()->SetDefine(T[0]);
 											ImportDefine *Def = Defines.GetDefine(T[0]);
 											if (Def)
 											{
-												Dlg->Str->SetId(atoi(Def->Value));
+												Dlg->GetStr()->SetId(atoi(Def->Value));
 											}
 										}
 									}
@@ -3661,7 +3661,7 @@ bool AppWnd::LoadWin32(char *FileName)
 									char *Caption = T[1];
 									if (Caption)
 									{
-										Dlg->Str->Set(Caption, LanguageId);
+										Dlg->GetStr()->Set(Caption, LanguageId);
 									}
 								}
 								else if (stricmp(T[0], "BEGIN") == 0)
@@ -3705,12 +3705,12 @@ bool AppWnd::LoadWin32(char *FileName)
 									CtrlText *Ctrl = new CtrlText(Dialog, 0);
 									if (Ctrl)
 									{
-										Ctrl->Str->Set(T[1], LanguageId);
-										Ctrl->Str->SetDefine(T[2]);
+										Ctrl->GetStr()->Set(T[1], LanguageId);
+										Ctrl->GetStr()->SetDefine(T[2]);
 										ImportDefine *Def = Defines.GetDefine(T[2]);
 										if (Def)
 										{
-											Ctrl->Str->SetId(atoi(Def->Value));
+											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
 										GRect r;
@@ -3729,11 +3729,11 @@ bool AppWnd::LoadWin32(char *FileName)
 									CtrlEditbox *Ctrl = new CtrlEditbox(Dialog, 0);
 									if (Ctrl)
 									{
-										Ctrl->Str->SetDefine(T[1]);
+										Ctrl->GetStr()->SetDefine(T[1]);
 										ImportDefine *Def = Defines.GetDefine(T[1]);
 										if (Def)
 										{
-											Ctrl->Str->SetId(atoi(Def->Value));
+											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
 										GRect r;
@@ -3752,11 +3752,11 @@ bool AppWnd::LoadWin32(char *FileName)
 									CtrlComboBox *Ctrl = new CtrlComboBox(Dialog, 0);
 									if (Ctrl)
 									{
-										Ctrl->Str->SetDefine(T[1]);
+										Ctrl->GetStr()->SetDefine(T[1]);
 										ImportDefine *Def = Defines.GetDefine(T[1]);
 										if (Def)
 										{
-											Ctrl->Str->SetId(atoi(Def->Value));
+											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
 										GRect r;
@@ -3775,11 +3775,11 @@ bool AppWnd::LoadWin32(char *FileName)
 									CtrlScrollBar *Ctrl = new CtrlScrollBar(Dialog, 0);
 									if (Ctrl)
 									{
-										Ctrl->Str->SetDefine(T[1]);
+										Ctrl->GetStr()->SetDefine(T[1]);
 										ImportDefine *Def = Defines.GetDefine(T[1]);
 										if (Def)
 										{
-											Ctrl->Str->SetId(atoi(Def->Value));
+											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
 										GRect r;
@@ -3798,12 +3798,12 @@ bool AppWnd::LoadWin32(char *FileName)
 									CtrlGroup *Ctrl = new CtrlGroup(Dialog, 0);
 									if (Ctrl)
 									{
-										Ctrl->Str->Set(T[1], LanguageId);
-										Ctrl->Str->SetDefine(T[2]);
+										Ctrl->GetStr()->Set(T[1], LanguageId);
+										Ctrl->GetStr()->SetDefine(T[2]);
 										ImportDefine *Def = Defines.GetDefine(T[2]);
 										if (Def)
 										{
-											Ctrl->Str->SetId(atoi(Def->Value));
+											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
 										GRect r;
@@ -3823,12 +3823,12 @@ bool AppWnd::LoadWin32(char *FileName)
 									CtrlButton *Ctrl = new CtrlButton(Dialog, 0);
 									if (Ctrl)
 									{
-										Ctrl->Str->Set(T[1], LanguageId);
-										Ctrl->Str->SetDefine(T[2]);
+										Ctrl->GetStr()->Set(T[1], LanguageId);
+										Ctrl->GetStr()->SetDefine(T[2]);
 										ImportDefine *Def = Defines.GetDefine(T[2]);
 										if (Def)
 										{
-											Ctrl->Str->SetId(atoi(Def->Value));
+											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
 										GRect r;
@@ -3899,12 +3899,12 @@ bool AppWnd::LoadWin32(char *FileName)
 											r.Offset(atoi(T[i])*CTRL_X+ADJUST_CTRLS_X, atoi(T[i+1])*CTRL_Y+ADJUST_CTRLS_Y);
 											Ctrl->SetPos(r);
 
-											if (Caption) Ctrl->Str->Set(Caption, LanguageId);
-											if (Id) Ctrl->Str->SetDefine(Id);
+											if (Caption) Ctrl->GetStr()->Set(Caption, LanguageId);
+											if (Id) Ctrl->GetStr()->SetDefine(Id);
 											ImportDefine *Def = Defines.GetDefine(Id);
 											if (Def)
 											{
-												Ctrl->Str->SetId(atoi(Def->Value));
+												Ctrl->GetStr()->SetId(atoi(Def->Value));
 											}
 
 											Dlg->AddView(Ctrl->View());
@@ -3919,11 +3919,11 @@ bool AppWnd::LoadWin32(char *FileName)
 									CtrlBitmap *Ctrl = new CtrlBitmap(Dialog, 0);
 									if (Ctrl)
 									{
-										Ctrl->Str->SetDefine(T[1]);
+										Ctrl->GetStr()->SetDefine(T[1]);
 										ImportDefine *Def = Defines.GetDefine(T[1]);
 										if (Def)
 										{
-											Ctrl->Str->SetId(atoi(Def->Value));
+											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
 										GRect r;
@@ -3942,11 +3942,11 @@ bool AppWnd::LoadWin32(char *FileName)
 									CtrlList *Ctrl = new CtrlList(Dialog, 0);
 									if (Ctrl)
 									{
-										Ctrl->Str->SetDefine(T[1]);
+										Ctrl->GetStr()->SetDefine(T[1]);
 										ImportDefine *Def = Defines.GetDefine(T[1]);
 										if (Def)
 										{
-											Ctrl->Str->SetId(atoi(Def->Value));
+											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
 										GRect r;
@@ -3973,7 +3973,7 @@ bool AppWnd::LoadWin32(char *FileName)
 										CtrlDlg *Obj = dynamic_cast<CtrlDlg*>(Wnd);
 										if (Obj)
 										{
-											if (Obj->Str->GetId() == Dlg->Str->GetId())
+											if (Obj->GetStr()->GetId() == Dlg->GetStr()->GetId())
 											{
 												MatchObj = Obj;
 												Match = d;
@@ -3995,11 +3995,11 @@ bool AppWnd::LoadWin32(char *FileName)
 									// add the language strings for the caption
 									// without clobbering the languages already
 									// present
-									for (auto s: Dlg->Str->Items)
+									for (auto s: Dlg->GetStr()->Items)
 									{
-										if (!MatchObj->Str->Get(s->GetLang()))
+										if (!MatchObj->GetStr()->Get(s->GetLang()))
 										{
-											MatchObj->Str->Set(s->GetStr(), s->GetLang());
+											MatchObj->GetStr()->Set(s->GetStr(), s->GetLang());
 										}
 									}
 
@@ -4011,8 +4011,8 @@ bool AppWnd::LoadWin32(char *FileName)
 										{
 											for (auto Mc: Old)
 											{
-												if (Mc->Str->GetId() == c->Str->GetId() &&
-													Mc->Str->GetId() > 0)
+												if (Mc->GetStr()->GetId() == c->GetStr()->GetId() &&
+													Mc->GetStr()->GetId() > 0)
 												{
 													MatchCtrl = Mc;
 													break;
@@ -4054,9 +4054,9 @@ bool AppWnd::LoadWin32(char *FileName)
 										if (MatchCtrl)
 										{
 											// woohoo we are cool
-											for (auto s: c->Str->Items)
+											for (auto s: c->GetStr()->Items)
 											{
-												MatchCtrl->Str->Set(s->GetStr(), s->GetLang());
+												MatchCtrl->GetStr()->Set(s->GetStr(), s->GetLang());
 											}
 										}
 									}
@@ -4514,10 +4514,10 @@ void FindShortCuts(LList *Out, GViewI *In)
 	for (GViewI *c = it->First(); c; c = it->Next())
 	{
 		ResDialogCtrl *rdc = dynamic_cast<ResDialogCtrl*>(c);
-		if (!rdc || !rdc->Str)
+		if (!rdc || !rdc->GetStr())
 			continue;
 
-		char *n = rdc->Str->Get();
+		char *n = rdc->GetStr()->Get();
 		if (n)
 		{
 			char *a = strchr(n, '&');
@@ -4526,7 +4526,7 @@ void FindShortCuts(LList *Out, GViewI *In)
 				LListItem *li = new LListItem;
 				GString s(++a, 1);
 				GString id;
-				id.Printf("%i", rdc->Str->GetRef());
+				id.Printf("%i", rdc->GetStr()->GetRef());
 				li->SetText(s.Upper(), 0);
 				li->SetText(id, 1);
 				li->SetText(rdc->GetClass(), 2);
@@ -4553,7 +4553,7 @@ int ShortCutView::OnNotify(GViewI *Ctrl, int Flags)
 					GString s = li->GetText(1);
 					ResDialogCtrl *c = (ResDialogCtrl*) li->_UserPtr;
 					if (c)
-						App->GotoObject(c->Str, NULL, c->GetDlg(), NULL, c);
+						App->GotoObject(c->GetStr(), NULL, c->GetDlg(), NULL, c);
 				}
 				break;
 			}

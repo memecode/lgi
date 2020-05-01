@@ -101,6 +101,8 @@ public:
 	GColour(int r, int g, int b, int a = 255);
 	/// Conversion from COLOUR
 	GColour(uint32_t c, int bits, GPalette *palette = NULL);
+	/// Web colour
+	GColour(const char *Str);
 	#ifdef __GTK_H__
 	GColour(Gtk::GdkRGBA c);
 	#endif
