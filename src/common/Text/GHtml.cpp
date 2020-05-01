@@ -1444,7 +1444,7 @@ ssize_t GTag::GetTextStart()
 		if (t)
 			return t->Text - Text();
 	}
-	else
+	else if (TextPos.Length() > 0)
 	{
 		GFlowRect *t = TextPos[0];
 		if (t)
@@ -1728,26 +1728,27 @@ void GTag::CopyClipboard(GMemQueue &p, bool &InSelection)
 
 	ssize_t Off = -1;
 	ssize_t Chars = 0;
+	auto Start = GetTextStart();
 	if (Min >= 0 && Max >= 0)
 	{
-		Off = Min;
+		Off = Min + Start;
 		Chars = Max - Min;
 	}
 	else if (Min >= 0)
 	{
-		Off = Min;
+		Off = Min + Start;
 		Chars = StrlenW(Text()) - Min;
 		InSelection = true;
 	}
 	else if (Max >= 0)
 	{
-		Off = 0;
+		Off = Start;
 		Chars = Max;
 		InSelection = false;
 	}
 	else if (InSelection)
 	{
-		Off = 0;
+		Off = Start;
 		Chars = StrlenW(Text());
 	}
 
