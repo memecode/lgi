@@ -104,6 +104,7 @@ GProgressPane::GProgressPane(GProgressDlg *dlg) : Dlg(dlg)
 		#ifdef PAD
 		c->Padding(GCss::Len(GCss::LenPx, PAD));
 		#endif
+		c->Height("1.1em"); // This stops the layout flickering
 		c->Add(Desc = new GTextLabel(IDC_DESCRIPTION, 0, 0, -1, -1, "##"));
 
 		c = t->GetCell(0, Row);

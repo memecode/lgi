@@ -80,7 +80,13 @@ public:
 	    Auto(LMutex *s, int timeout, const char *file, int line)
 	    {
 	        LgiAssert(s != NULL);
-	        Locked = (Sem = s) ? Sem->LockWithTimeout(timeout, File = file, Line = line) : 0;
+			Sem = s;
+			if (!Sem)
+				Locked = false;
+			else if (timeout >= 0)
+				Locked = Sem->LockWithTimeout(timeout, File = file, Line = line);
+			else
+				Locked = Sem->Lock(File = file, Line = line);
 	    }
 	    
 	    ~Auto()
@@ -93,6 +99,50 @@ public:
 		int GetLine() { return Line; }
 		operator bool() { return Locked; }
 	};
+};
+
+
+template<typename T>
+class LThreadSafeInterface : public LMutex
+{
+	T *object;
+
+public:
+	class Locked : public LMutex::Auto
+	{
+		LThreadSafeInterface *tsi;
+	
+	public:
+		Locked(LThreadSafeInterface *i, const char *file, int line) : LMutex::Auto(i, -1, file, line), tsi(i)
+		{			
+		}
+
+		operator bool()
+		{
+			return GetLocked();
+		}
+
+		T *operator ->()
+		{
+			LgiAssert(GetLocked());
+			return tsi->object;
+		}
+	};
+
+	LThreadSafeInterface(T *obj, const char *name = NULL) : LMutex(name ? name : "LThreadSafeInterface")
+	{
+		object = obj;
+	}
+
+	~LThreadSafeInterface()
+	{
+		Lock(_FL);
+	}
+
+	Locked Lock(const char *file, int line)
+	{
+		return Locked(this, file, line);
+	}
 };
 
 #endif
