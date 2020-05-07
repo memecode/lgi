@@ -307,6 +307,8 @@ class LJson
 			c = e;
 			return true;
 		}
+		else if (!*c)
+			return true;
 
 		return false;
 	}

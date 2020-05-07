@@ -30,7 +30,7 @@ Progress::Progress() : LMutex("ProgressObj")
 
 Progress::Progress(char *desc, int64 l, int64 h, char *type, double scale)
 {
-	Description.Reset(NewStr(desc));
+	Description = desc;
 	Start = 0;
 	Val = Low = l;
 	High = h;
@@ -50,10 +50,30 @@ void Progress::GetLimits(int64 *l, int64 *h)
 	if (h) *h = High;
 }
 
+GString Progress::GetDescription()
+{
+	GString r;
+
+	LMutex::Auto lck(this, _FL);
+	if (!lck)
+		LgiAssert(0);
+	else
+		r = Description.Get();
+
+	return r;
+}
+
 void Progress::SetDescription(const char *d)
 {
+	LMutex::Auto lck(this, _FL);
+	if (!lck)
+	{
+		LgiAssert(0);
+		return;
+	}
+	
     if (d != Description)
-    	Description.Reset(NewStr(d));
+   		Description = d;
 }
 
 Progress &Progress::operator =(Progress &p)
@@ -313,11 +333,6 @@ GFont *GProgressPane::GetFont()
 	return 0;
 }
 
-char *GProgressPane::GetDescription()
-{
-	return Progress::GetDescription();
-}
-
 void GProgressPane::SetDescription(const char *d)
 {
 	Progress::SetDescription(d);
@@ -515,9 +530,12 @@ void GProgressDlg::SetCanCancel(bool cc)
 	CanCancel = cc;
 }
 
-char *GProgressDlg::GetDescription()
+GString GProgressDlg::GetDescription()
 {
-	return Panes.Length() ? Panes.First()->GetDescription() : NULL;
+	GString s;
+	if (Panes.Length())
+		s = Panes.First()->GetDescription();
+	return s;
 }
 
 void GProgressDlg::SetDescription(const char *d)

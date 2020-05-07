@@ -30,7 +30,6 @@ public:
 	GProgressPane(GProgressDlg *dlg);
 	~GProgressPane();
 
-	char *GetDescription();
 	void SetDescription(const char *d);
 	void GetLimits(int64 *l, int64 *h) { Progress::GetLimits(l, h); }
 	void SetLimits(int64 l, int64 h);
@@ -86,7 +85,7 @@ public:
 	void SetCanCancel(bool cc);
 
 	/// Returns the description of the first pane
-	char *GetDescription();
+	GString GetDescription();
 	/// Sets the description of the first pane
 	void SetDescription(const char *d);
 	/// Returns the upper and lower limits of the first pane

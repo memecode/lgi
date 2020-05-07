@@ -5,6 +5,7 @@
 
 #include "LMutex.h"
 #include "LCancel.h"
+#include "GStringClass.h"
 
 /// Generic progress class, keeps track of how far through a task you are.
 class LgiClass Progress :
@@ -12,7 +13,7 @@ class LgiClass Progress :
 	public LCancel
 {
 protected:
-	GAutoString Description;
+	GString Description;
 	int64 Start;
 	int64 Val;
 	int64 Low, High;
@@ -26,7 +27,7 @@ public:
 	Progress(char *desc, int64 l, int64 h, char *type = NULL, double scale = 1.0);
 	virtual ~Progress() {}
 
-	virtual char *GetDescription() { return Description; }
+	virtual GString GetDescription();
 	virtual void SetDescription(const char *d = 0);
 	virtual void GetLimits(int64 *l, int64 *h);
 	virtual void SetLimits(int64 l, int64 h);

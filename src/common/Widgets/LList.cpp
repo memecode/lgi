@@ -2277,7 +2277,7 @@ void LList::UpdateScrollBars()
 {
 	static bool Processing = false;
 	
-	if (!Processing)
+	if (!Processing && InThread())
 	{
 		Processing = true;
 		
