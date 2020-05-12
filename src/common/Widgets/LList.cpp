@@ -1434,6 +1434,10 @@ void LList::OnMouseClick(GMouse &m)
 					{
 						bool PostSelect = false;
 						bool SelectionChanged = false;
+
+						// Temporaily turn off selection events... 
+						// and just send one at the end.
+						// d->NoSelectEvent = true;
 						
 						ForAllItems(i)
 						{
@@ -1448,6 +1452,7 @@ void LList::OnMouseClick(GMouse &m)
 									}
 
 									i->Select(!i->Select());
+									SelectionChanged = true;
 								}
 								else
 								{
@@ -1467,6 +1472,7 @@ void LList::OnMouseClick(GMouse &m)
 
 						if (PostSelect)
 						{
+							SelectionChanged |= Item->Select() == false;
 							Item->Select(true);
 							Keyboard = (int)Items.IndexOf(Item);
 						}
@@ -1482,6 +1488,8 @@ void LList::OnMouseClick(GMouse &m)
 						{
 							SendNotify(GNotifyItem_Select);
 						}
+
+						// d->NoSelectEvent = false;
 					}
 
 					OnItemClick(Item, m);
