@@ -1783,6 +1783,11 @@ void VcFolder::OnMouseClick(GMouse &m)
 			IDM_TERMINAL);
 		s.AppendItem("Clean", IDM_CLEAN);
 		s.AppendSeparator();
+		s.AppendItem("Pull", IDM_PULL);
+		s.AppendItem("Status", IDM_STATUS);
+		s.AppendItem("Push", IDM_PUSH);
+		s.AppendItem("Update Subs", IDM_UPDATE_SUBS, GetType() == VcGit);
+		s.AppendSeparator();
 		s.AppendItem("Remove", IDM_REMOVE);
 		int Cmd = s.Float(GetTree(), m);
 		switch (Cmd)
@@ -1800,6 +1805,26 @@ void VcFolder::OnMouseClick(GMouse &m)
 			case IDM_CLEAN:
 			{
 				Clean();
+				break;
+			}
+			case IDM_PULL:
+			{
+				Pull();
+				break;
+			}
+			case IDM_STATUS:
+			{
+				FolderStatus();
+				break;
+			}
+			case IDM_PUSH:
+			{
+				Push();
+				break;
+			}
+			case IDM_UPDATE_SUBS:
+			{
+				UpdateSubs();
 				break;
 			}
 			case IDM_REMOVE:
@@ -2213,6 +2238,41 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 		Params->Leaf->AfterBrowse();
 
 	return false; // Don't refresh list
+}
+
+// Clone/checkout any sub-repositries.
+bool VcFolder::UpdateSubs()
+{
+	GString Arg;
+	switch (GetType())
+	{
+		default:
+		case VcSvn:
+		case VcHg:
+		case VcCvs:
+			return false;
+		case VcGit:
+			Arg = "submodule update --init";
+			break;
+	}
+
+	return StartCmd(Arg, &VcFolder::ParseUpdateSubs);
+}
+
+bool VcFolder::ParseUpdateSubs(int Result, GString s, ParseParams *Params)
+{
+	switch (GetType())
+	{
+		default:
+		case VcSvn:
+		case VcHg:
+		case VcCvs:
+			return false;
+		case VcGit:
+			break;
+	}
+
+	return false;
 }
 
 void VcFolder::FolderStatus(const char *Path, VcLeaf *Notify)
@@ -2670,9 +2730,13 @@ bool VcFolder::ParsePush(int Result, GString s, ParseParams *Params)
 	return Status; // no reselect
 }
 
-void VcFolder::Pull(bool AndUpdate, LoggingType Logging)
+void VcFolder::Pull(int AndUpdate, LoggingType Logging)
 {
 	bool Status = false;
+
+	if (AndUpdate < 0)
+		AndUpdate = GetTree()->GetWindow()->GetCtrlValue(IDC_UPDATE) != 0;
+
 	switch (GetType())
 	{
 		case VcNone:

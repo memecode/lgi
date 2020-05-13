@@ -228,6 +228,7 @@ class VcFolder : public GTreeItem, public GCss
 	bool ParseDiff(int Result, GString s, ParseParams *Params);
 	bool ParseMerge(int Result, GString s, ParseParams *Params);
 	bool ParseCountToTip(int Result, GString s, ParseParams *Params);
+	bool ParseUpdateSubs(int Result, GString s, ParseParams *Params);
 	
 public:
 	VcFolder(AppPriv *priv, const char *p);
@@ -246,7 +247,7 @@ public:
 	void FolderStatus(const char *Path = NULL, VcLeaf *Notify = NULL);
 	void Commit(const char *Msg, const char *Branch, bool AndPush);
 	void Push();
-	void Pull(bool AndUpdate, LoggingType Logging = LogNormal);
+	void Pull(int AndUpdate = -1, LoggingType Logging = LogNormal);
 	void Clean();
 	bool Revert(const char *Path, const char *Revision = NULL);
 	bool Resolve(const char *Path);
@@ -263,6 +264,7 @@ public:
 	bool GetBranches(ParseParams *Params = NULL);
 	void GetCurrentRevision(ParseParams *Params = NULL);
 	void CountToTip();
+	bool UpdateSubs(); // Clone/checkout any sub-repositries.
 
 	void OnPulse();
 	void OnUpdate(const char *Rev);

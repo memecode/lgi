@@ -41,3 +41,9 @@
 #define IDM_UNTRACKED							518
 #define IDM_MENU_519							519
 #define IDM_EXIT								520
+#define IDM_REPO								521
+#define IDM_PULL								522
+#define IDM_PUSH								523
+#define IDM_STATUS								524
+#define IDM_MENU_525							525
+#define IDM_UPDATE_SUBS							526

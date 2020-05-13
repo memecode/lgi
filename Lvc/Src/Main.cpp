@@ -664,16 +664,6 @@ public:
 	{
 		switch (Cmd)
 		{
-			case IDM_REFRESH:
-			{
-				GArray<VcFolder*> Flds;
-				Tree->GetSelection(Flds);
-				for (auto f : Flds)
-				{
-					f->Refresh();
-				}
-				break;
-			}
 			case IDM_OPTIONS:
 			{
 				OptionsDlg Dlg(this, Opts);
@@ -708,6 +698,47 @@ public:
 				{
 					f->Refresh();
 				}
+				break;
+			}
+			case IDM_REFRESH:
+			{
+				GArray<VcFolder*> Flds;
+				Tree->GetSelection(Flds);
+				for (auto f: Flds)
+					f->Refresh();
+				break;
+			}
+			case IDM_PULL:
+			{
+				GArray<VcFolder*> Flds;
+				Tree->GetSelection(Flds);
+				for (auto f: Flds)
+					f->Pull();
+				break;
+			}
+			case IDM_PUSH:
+			{
+				GArray<VcFolder*> Flds;
+				Tree->GetSelection(Flds);
+				for (auto f: Flds)
+					f->Push();
+				break;
+			}
+			case IDM_STATUS:
+			{
+				GArray<VcFolder*> Flds;
+				Tree->GetSelection(Flds);
+				for (auto f: Flds)
+					f->FolderStatus();
+				break;
+			}
+			case IDM_UPDATE_SUBS:
+			{
+				GArray<VcFolder*> Flds;
+				Tree->GetSelection(Flds);
+				for (auto f: Flds)
+					f->UpdateSubs();
+				break;
 				break;
 			}
 			case IDM_EXIT:
@@ -899,7 +930,7 @@ public:
 			{
 				VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
 				if (f)
-					f->Pull(GetCtrlValue(IDC_UPDATE) != 0);
+					f->Pull();
 				break;
 			}
 			case IDC_PULL_ALL:

@@ -184,6 +184,12 @@
 			<String Ref="49" Cid="518" Define="IDM_UNTRACKED" en="Untracked" />
 			<String Ref="47" Cid="519" Define="IDM_MENU_519" />
 			<String Ref="51" Cid="520" Define="IDM_EXIT" en="E&xit" />
+			<String Ref="52" Cid="521" Define="IDM_REPO" en="&Repository" />
+			<String Ref="53" Cid="522" Define="IDM_PULL" en="&Pull" />
+			<String Ref="54" Cid="523" Define="IDM_PUSH" en="Pus&h" />
+			<String Ref="55" Cid="524" Define="IDM_STATUS" en="&Status" />
+			<String Ref="56" Cid="525" Define="IDM_MENU_525" />
+			<String Ref="57" Cid="526" Define="IDM_UPDATE_SUBS" en="&Update Subs" />
 		</string-group>
 		<submenu Ref="4">
 			<menuitem Ref="46" Shortcut="F5" />
@@ -193,6 +199,13 @@
 		</submenu>
 		<submenu Ref="42">
 			<menuitem Ref="43" Shortcut="Ctrl+F" />
+		</submenu>
+		<submenu Ref="52">
+			<menuitem Ref="53" />
+			<menuitem Ref="55" />
+			<menuitem Ref="54" />
+			<menuitem Sep="1" />
+			<menuitem Ref="57" />
 		</submenu>
 		<submenu Ref="41">
 			<menuitem Ref="49" />
