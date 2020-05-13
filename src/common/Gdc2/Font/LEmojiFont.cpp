@@ -159,6 +159,8 @@ bool LEmojiFont::Create(const char *Face, GCss::Len Sz, GSurface *pSurface)
 	{
 		if (priv->Img.Reset(GdcD->Load(priv->Fn)))
 		{
+			// This assert happens when the libpng library is not available and
+			// the fallback windows loader is used.
 			LgiAssert(priv->Img->GetBits() == 32);
 		}
 		else return false;
