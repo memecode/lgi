@@ -2161,6 +2161,12 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 		case VcHg:
 		case VcSvn:
 		{
+			if (s.Find("failed to import") >= 0)
+			{
+				OnCmdError(s, "Tool error.");
+				return false;
+			}
+			
 			GString::Array Lines = s.SplitDelimit("\r\n");
 			for (auto Ln : Lines)
 			{
