@@ -342,7 +342,9 @@ bool DocEdit::OnKey(GKey &k)
 		// This allows the Alt+Left/Right to be processed by the prev/next navigator menu.
 		if (k.vkey == LK_LEFT ||
 			k.vkey == LK_RIGHT)
+		{
 			return false;
+		}
 	}
 
 	if (k.AltCmd())
