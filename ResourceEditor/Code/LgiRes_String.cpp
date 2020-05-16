@@ -1221,7 +1221,8 @@ ResString *ResStringGroup::CreateStr(bool User)
 
 void ResStringGroup::DeleteStr(ResString *Str)
 {
-	DeleteObj(Str);
+	if (Str->Items.Length() == 0)
+		DeleteObj(Str);
 }
 
 ResString *ResStringGroup::FindName(char *Name)

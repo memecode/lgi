@@ -453,6 +453,10 @@ bool ResDialogCtrl::SetStr(ResString *s)
 
 		_Str->Refs.Add(this);
 	}
+	else
+	{
+		LgiTrace("%s:%i - %p::SetStr(NULL)\n", _FL, this);
+	}
 
 	return true;
 }
@@ -2761,7 +2765,8 @@ void ResDialog::Copy(bool Delete)
 		{
 			// delete them
 			ResDialogCtrl *c;
-			while ((c = Selection[0]))
+			while (	Selection.Length() &&
+					(c = Selection[0]))
 			{
 				c->View()->Detach();
 				Selection.Delete(c);
