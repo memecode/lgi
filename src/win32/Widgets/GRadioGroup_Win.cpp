@@ -1,6 +1,7 @@
 // \file
 // \author Matthew Allen
 // \brief Native Win32 Radio Group and Button
+#if !XP_BUTTON
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,6 +10,7 @@
 #include "GDisplayString.h"
 #include "GNotifications.h"
 #include "GCss.h"
+#include "LgiRes.h"
 
 #define RADIO_GRID  2
 static int PadXPx = 30;
@@ -338,8 +340,15 @@ GRadioButton::~GRadioButton()
 
 void GRadioButton::OnAttach()
 {
-	SetFont(SysFont);
+	LgiResources::StyleElement(this);
+	OnStyleChange();
+	GView::OnAttach();
+
 	Value(d->InitVal);
+}
+
+void GRadioButton::OnStyleChange()
+{
 }
 
 int GRadioButton::SysOnNotify(int Msg, int Code)
@@ -374,39 +383,45 @@ int64 GRadioButton::Value()
 
 void GRadioButton::Value(int64 i)
 {
-	if (Handle())
+	static bool InValue = false;
+	if (!InValue)
 	{
-		if (i)
+		InValue = true;
+		if (Handle())
 		{
-			// Turn off any other radio buttons in the current group
-			GAutoPtr<GViewIterator> it(GetParent()->IterateViews());
-			if (it)
+			if (i)
 			{
-				for (GViewI *c = it->First(); c; c = it->Next())
+				// Turn off any other radio buttons in the current group
+				GAutoPtr<GViewIterator> it(GetParent()->IterateViews());
+				if (it)
 				{
-					GRadioButton *b = dynamic_cast<GRadioButton*>(c);
-					if (b &&
-						b != this &&
-						b-Value())
+					for (GViewI *c = it->First(); c; c = it->Next())
 					{
-						b->Value(false);
+						GRadioButton *b = dynamic_cast<GRadioButton*>(c);
+						if (b &&
+							b != this &&
+							b-Value())
+						{
+							b->Value(false);
+						}
 					}
 				}
 			}
+
+			// Change the value of this button
+			SendMessage(Handle(), BM_SETCHECK, i, 0);
+
+			if (i)
+			{
+				// If gaining selection, tell the parent
+				SendNotify(true);
+			}
 		}
-
-		// Change the value of this button
-		SendMessage(Handle(), BM_SETCHECK, i, 0);
-
-		if (i)
+		else
 		{
-			// If gaining selection, tell the parent
-			SendNotify(true);
+			d->InitVal = i;
 		}
-	}
-	else
-	{
-		d->InitVal = i;
+		InValue = false;
 	}
 }
 
@@ -506,3 +521,4 @@ bool GRadioButton::OnKey(GKey &k)
 	return Status;
 }
 
+#endif

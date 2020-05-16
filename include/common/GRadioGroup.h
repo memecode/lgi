@@ -51,7 +51,7 @@ public:
 /// A radio button control. A radio button is used to select between mutually exclusive options. i.e.
 /// only one can be valid at any given time. For non-mutually exclusive options see the GCheckBox control.
 class LgiClass GRadioButton :
-	#if WINNATIVE
+	#if WINNATIVE && !XP_BUTTON
 	public GControl,
 	#else
 	public GView,
@@ -82,7 +82,7 @@ public:
 	void OnStyleChange();
 	bool OnKey(GKey &k);
 	
-	#if WINNATIVE
+	#if WINNATIVE && !XP_BUTTON
 	int SysOnNotify(int Msg, int Code);
 	#else
 	void OnMouseClick(GMouse &m);

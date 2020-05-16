@@ -1,3 +1,5 @@
+#if !defined(_WIN32) || (XP_BUTTON != 0)
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -801,3 +803,4 @@ void GRadioButton::OnPaint(GSurface *pDC)
 	}
 }
 
+#endif

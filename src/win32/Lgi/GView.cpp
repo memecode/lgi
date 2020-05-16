@@ -353,12 +353,20 @@ bool GWin32Class::Register()
 		Status = GetClassInfoExW(LgiProcessInst(), NameW(), &Class) != 0;
 		LgiAssert(Status);
 	}
-	else if (!Class.lpszClassName)
+	else // if (!Class.lpszClassName)
 	{
 		Class.hInstance = LgiProcessInst();
-		Class.lpszClassName = NameW();
+		if (!Class.lpszClassName)
+			Class.lpszClassName = NameW();
 		Status = RegisterClassExW(&Class) != 0;
-		LgiAssert(Status);
+		if (!Status)
+		{
+			auto err = GetLastError();
+			if (err == 1410)
+				Status = true;
+			else
+				LgiAssert(Status);
+		}
 	}
 
 	return Status;
@@ -641,7 +649,13 @@ bool GView::Attach(GViewI *p)
 		bool IsSystemClass = GWin32Class::IsSystem(ClsName);
         GWin32Class *Cls = GWin32Class::Create(ClsName);
         if (Cls)
-            Cls->Register();
+		{
+            auto r = Cls->Register();
+			if (!r)
+			{
+				LgiAssert(0);
+			}
+		}
         else if (!IsSystemClass)
             return false;
 

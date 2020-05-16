@@ -263,6 +263,8 @@ class GelSkin : public GSkinEngine
 		if (Mem && Mem->Create(14, 14, OsDefaultCs))
 		{
 			// blank out background
+
+			#if 0
 			GCss::ColorDef Back;
 			if (Ctrl->GetCss())
 				Back = Ctrl->GetCss()->BackgroundColor();
@@ -270,6 +272,10 @@ class GelSkin : public GSkinEngine
 				Mem->Colour(Back.Rgb32, 32);
 			else
 				Mem->Colour(LColour(L_MED));
+			#else
+			GColour Back = Ctrl->GetGView()->StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
+			Mem->Colour(Back);
+			#endif
 			Mem->Rectangle();
 			
 			GRectF Box(0, 0, Mem->X(), Mem->Y());
