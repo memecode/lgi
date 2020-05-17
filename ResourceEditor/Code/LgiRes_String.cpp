@@ -164,6 +164,7 @@ ResString::~ResString()
 	{
 		Group->App()->OnObjDelete(this);
 
+		bool HasStr = Group->Strs.HasItem(this);
 		if (!Group->Strs.Delete(this))
 		{
 			LgiAssert(0);
@@ -1108,9 +1109,12 @@ void ResStringGroup::RemoveUnReferenced()
 	{
 		auto s = *It;
 		if (!s->UpdateWnd)
+		{
+			s->Group = NULL;
+			Strs.Delete(It);
 			DeleteStr(s);
-		else
-			It++;
+		}
+		else It++;
 	}
 }
 

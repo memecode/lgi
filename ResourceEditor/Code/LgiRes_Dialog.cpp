@@ -463,14 +463,11 @@ bool ResDialogCtrl::SetStr(ResString *s)
 
 void ResDialogCtrl::TabString(char *Str)
 {
-	if (Str)
-	{
-		for (int i=0; i<TabDepth; i++)
-		{
-			*Str++ = 9;
-		}
-		*Str = 0;
-	}
+	if (!Str)
+		return;
+
+	memset(Str, '\t', TabDepth);
+	Str[TabDepth] = 0;
 }
 
 GRect ResDialogCtrl::AbsPos()
