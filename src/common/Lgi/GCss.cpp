@@ -173,8 +173,9 @@ static char *ParseString(const char *&s)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-GCss::GCss() : Props(32)
+void GCss::Init()
 {
+	ReadOnly = false;
 	if (Lut.Length() == 0)
 	{
 		Lut.Add("letter-spacing", PropLetterSpacing);
@@ -293,8 +294,14 @@ GCss::GCss() : Props(32)
 	}
 }
 
+GCss::GCss() : Props(32)
+{
+	Init();
+}
+
 GCss::GCss(const GCss &c)
 {
+	Init();
 	*this = c;
 }
 
@@ -429,6 +436,11 @@ bool GCss::ColorDef::ToString(GStream &p)
 		case ColorInherit:
 		{
 			p.Print("inherit");
+			break;
+		}
+		case ColorTransparent:
+		{
+			p.Print("transparent");
 			break;
 		}
 		case ColorRgb:

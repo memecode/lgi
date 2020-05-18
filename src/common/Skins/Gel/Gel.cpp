@@ -28,13 +28,15 @@
 #define Btn_Enabled				0x2
 #define Btn_Max					((Btn_Value|Btn_Enabled)+1)
 
+/*
 #if defined(WIN32) && !defined(LGI_SDL)
 // Wine can't handle 32 bit DIB sections... :(
 #define OsDefaultCs				System24BitColourSpace
 #else
+*/
 // 32bit is marginally faster to render to.
 #define OsDefaultCs				System32BitColourSpace
-#endif
+// #endif
 
 #define CUSTOM_COLOURS			0
 

@@ -88,6 +88,7 @@ public:
 	void OnPaint(GSurface *pDC);
 	void OnCreate();
 	void OnAttach();
+	void OnStyleChange();
 	virtual void OnClick();
 
 	// Impl

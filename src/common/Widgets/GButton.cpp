@@ -60,11 +60,11 @@ public:
 			DeleteObj(Image);
 	}
 
-	void Layout(GFont *f, char *s)
+	void Layout(GCss *css, char *s)
 	{
 		Empty();
 
-		GCss c;
+		GCss c(*css);
 		c.FontWeight(GCss::FontWeightBold);
 		
 		Add(s, &c);
@@ -171,27 +171,30 @@ bool GButton::SetImage(GSurface *Img, bool OwnIt)
 	return d->OwnImage;
 }
 
+void GButton::OnStyleChange()
+{
+	d->Layout(GetCss(true), GBase::Name());
+}
+
 bool GButton::Name(const char *n)
 {
 	bool Status = GView::Name(n);
-	d->Layout(GetFont(), GBase::Name());
+	OnStyleChange();
 	return Status;
 }
 
 bool GButton::NameW(const char16 *n)
 {
 	bool Status = GView::NameW(n);
-	d->Layout(GetFont(), GBase::Name());
+	OnStyleChange();
 	return Status;
 }
 
 void GButton::SetFont(GFont *Fnt, bool OwnIt)
 {
 	LgiAssert(Fnt && Fnt->Handle());
-
-
 	GView::SetFont(Fnt, OwnIt);
-	d->Layout(GetFont(), GBase::Name());
+	OnStyleChange();
 	Invalidate();
 }
 

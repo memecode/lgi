@@ -21,6 +21,8 @@
 /// Css property container
 class LgiClass GCss
 {
+	bool ReadOnly;
+
 public:
 	enum ParsingStyle {
 		ParseStrict,
@@ -1113,6 +1115,7 @@ public:
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 	GCss();
 	GCss(const GCss &c);
+	void Init();
 	virtual ~GCss();
 
 	#define Accessor(PropName, Type, Default, BaseProp) \
@@ -1120,7 +1123,8 @@ public:
 							if (Member) return *Member; \
 							else if ((Member = (Type*)Props.Find(BaseProp))) return *Member; \
 							return Default; } \
-		void PropName(Type t) { Type *Member = (Type*)Props.Find(Prop##PropName); \
+		void PropName(Type t) {	LgiAssert(!ReadOnly); \
+								Type *Member = (Type*)Props.Find(Prop##PropName); \
 								if (Member) *Member = t; \
 								else { Props.Add(Prop##PropName, Member = new Type); \
 										*Member = t; } \
@@ -1194,6 +1198,8 @@ public:
 	Accessor(BackgroundY, Len, Len(), PropNull);
 	Accessor(BackgroundPos, Len, Len(), PropNull);
 	
+	bool GetReadOnly() { return ReadOnly; }
+	void SetReadOnly(bool b) { ReadOnly = b; };
 	void Empty();
 	void DeleteProp(PropType p);
 	size_t Length() { return Props.Length(); }
