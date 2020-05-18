@@ -1630,7 +1630,8 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 ./include/common/LMenuImpl.h : ./include/common/GPopup.h
 
 ./include/common/Progress.h : ./include/common/LMutex.h \
-	./include/common/LCancel.h
+	./include/common/LCancel.h \
+	./include/common/GStringClass.h
 
 ./src/common/Gdc2/GRopsCases.cpp : 
 
