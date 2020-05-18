@@ -555,31 +555,35 @@ bool TableCell::SetVariant(const char *Name, GVariant &Value, char *Array)
 				return false;
 			}
 			
+			// GProfile p("ContainerChildren");
 			for (auto v: *Value.Value.Lst)
 			{
-				if (v->Type == GV_VOID_PTR)
-				{
-					ResObject *o = (ResObject*)v->Value.Ptr;
-					if (o)
-					{
-						GView *gv = dynamic_cast<GView*>(o);
-						if (gv)
-						{
-							Children.SetFixedLength(false);
-							Children.New().View = gv;
-							Children.SetFixedLength(true);
+				if (v->Type != GV_VOID_PTR)
+					continue;
 
-							Table->AddView(gv);
-							gv->SetParent(Table);
+				ResObject *o = (ResObject*)v->Value.Ptr;
+				if (!o)
+					continue;
 
-							GTextLabel *t = dynamic_cast<GTextLabel*>(gv);
-							if (t)
-							{
-								t->SetWrap(true);
-							}
-						}
-					}
-				}
+				GView *gv = dynamic_cast<GView*>(o);
+				if (!gv)
+					continue;
+
+				// p.Add("c1");
+				Children.SetFixedLength(false);
+				Children.New().View = gv;
+				Children.SetFixedLength(true);
+
+				// p.Add("c2");
+				Table->AddView(gv);
+
+				// p.Add("c3");
+				gv->SetParent(Table);
+
+				// p.Add("c4");
+				GTextLabel *t = dynamic_cast<GTextLabel*>(gv);
+				if (t)
+					t->SetWrap(true);
 			}			
 			break;
 		}

@@ -117,13 +117,16 @@ bool GDialog::LoadFromResource(int Resource, char *TagList)
 {
 	GAutoString n;
 	GRect p;
+	GProfile Prof("GDialog::LoadFromResource");
 
 	bool Status = GLgiRes::LoadFromResource(Resource, this, &p, &n, TagList);
 	if (Status)
 	{
+		Prof.Add("Name.");
 		Name(n);
 		SetPos(p);
 	}
+	
 	return Status;
 }
 
