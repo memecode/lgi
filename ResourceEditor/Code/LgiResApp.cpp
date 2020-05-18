@@ -3077,15 +3077,9 @@ bool AppWnd::SaveLgi(char *FileName)
 	// Save the file to xml
 	if (FileName)
 	{
-		GFile f;
-		GFile Defs;
-		// ResFileFormat Format = GetFormat(FileName);		
-		
-		char DefsName[256];
-		strcpy(DefsName, FileName);
-		LgiTrimDir(DefsName);
-		strcat(DefsName, DIR_STR);
-		strcat(DefsName, "resdefs.h");
+		GFile f, Defs;		
+		GFile::Path DefsName = FileName;
+		DefsName += "../resdefs.h";
 
 		if (f.Open(FileName, O_WRITE) &&
 			Defs.Open(DefsName, O_WRITE))
@@ -3155,7 +3149,7 @@ bool AppWnd::SaveLgi(char *FileName)
 				// Set the offset type.
 				//
 				// Older versions of LgiRes stored the dialog's controls at a fixed
-				// offset (3,17) from where they shouldv'e been. That was fixed, but
+				// offset (3,17) from where they should've been. That was fixed, but
 				// to differentiate between the 2 systems, we store a tag at the
 				// root element.
 				Root.SetAttr("Offset", 1);
