@@ -1191,8 +1191,7 @@ void TableCell::PostLayout()
 
 		if (Tbl)
 		{
-			// int HeightPx = c->Inf.Height.Min < c->Inf.Height.Max ? c->Inf.Height.Min : Pos.Y();
-			c->r.Dimension(Pos.X(), MIN(Pos.Y(), c->Inf.Height.Max));
+			c->r.Dimension(Pos.X(), MIN(Pos.Y(), c->Inf.Height.Min));
 		}
 		else if
 		(
