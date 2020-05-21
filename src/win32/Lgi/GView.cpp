@@ -1663,7 +1663,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 							_Over->OnMouseExit(m);
 
 							#if DEBUG_OVER
-							LgiTrace("LoseOver=%p '%-20s'\\n", _Over, _Over->Name());
+							LgiTrace("Enter.LoseOver=%p/%s '%-20s'\n", _Over, _Over->GetClass(), _Over->Name());
 							#endif
 						}
 
@@ -1672,7 +1672,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 						if (_Over)
 						{
 							#if DEBUG_OVER
-							LgiTrace("GetOver=%p '%-20s'\\n", _Over, _Over->Name());
+							LgiTrace("Enter.GetOver=%p/%s '%-20s'\n", _Over, _Over->GetClass(), _Over->Name());
 							#endif
 
 							GMouse m = lgi_adjust_click(Ms, _Over);
@@ -1719,7 +1719,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 						else
 						{
 							#if DEBUG_OVER
-							LgiTrace("LoseOver=%p '%-20s'\\n", _Over, _Over->Name());
+							LgiTrace("Exit.LoseOver=%p '%-20s'\n", _Over, _Over->Name());
 							#endif
 
 							_Over->OnMouseExit(Ms);
@@ -1744,13 +1744,13 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				SetKeyFlag(Ms.Flags, VK_MENU, MK_ALT);
 				Ms.Down((Msg->a & (MK_LBUTTON|MK_MBUTTON|MK_RBUTTON)) != 0);
 
-				GViewI *MouseOver = WindowFromPoint(Ms.x, Ms.y);
+				GViewI *MouseOver = WindowFromPoint(Ms.x, Ms.y, true);
 				if (_Over != MouseOver)
 				{
 					if (_Over)
 					{
 						#if DEBUG_OVER
-						LgiTrace("LoseOver=%p '%-20s'\\n", _Over, _Over->Name());
+						LgiTrace("Move.LoseOver=%p/%s '%-20s'\n", _Over, _Over->GetClass(), _Over->Name());
 						#endif
 
 						GMouse m = lgi_adjust_click(Ms, _Over);
@@ -1765,7 +1765,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 						_Over->OnMouseEnter(m);
 
 						#if DEBUG_OVER
-						LgiTrace("GetOver=%p '%-20s'\\n", _Over, _Over->Name());
+						LgiTrace("Move.GetOver=%p/%s '%-20s'\n", _Over, _Over->GetClass(), _Over->Name());
 						#endif
 					}
 				}

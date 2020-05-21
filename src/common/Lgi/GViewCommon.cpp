@@ -1908,16 +1908,21 @@ bool GView::WindowVirtualOffset(GdcPt2 *Offset)
 	return Status;
 }
 
-static int Debug_Depth = 0;
+GString _ViewDesc(GViewI *v)
+{
+	GString s;
+	s.Printf("%s/%s/%i", v->GetClass(), v->Name(), v->GetId());
+	return s;
+}
 
-GViewI *GView::WindowFromPoint(int x, int y, bool Debug)
+GViewI *GView::WindowFromPoint(int x, int y, int DebugDepth)
 {
 	char Tabs[64];
-	if (Debug)
+	if (DebugDepth)
 	{
-		memset(Tabs, 9, Debug_Depth);
-		Tabs[Debug_Depth] = 0;
-		LgiTrace("%s%s %i\n", Tabs, GetClass(), Children.Length());
+		memset(Tabs, 9, DebugDepth);
+		Tabs[DebugDepth] = 0;
+		LgiTrace("%s%s %i\n", Tabs, _ViewDesc(this).Get(), Children.Length());
 	}
 
 	// We iterate over the child in reverse order because if they overlap the
@@ -1936,28 +1941,24 @@ GViewI *GView::WindowFromPoint(int x, int y, bool Debug)
 
             int Ox = CPos.x1 + CClient.x1;
             int Oy = CPos.y1 + CClient.y1;
-			if (Debug)
+			if (DebugDepth)
 			{
 				LgiTrace("%s[%i] %s Pos=%s Client=%s m(%i,%i)->(%i,%i)\n",
 						Tabs, n--,
-						c->GetClass(),
+						_ViewDesc(c).Get(),
 						CPos.GetStr(),
 						CClient.GetStr(),
 						x, y,
 						x - Ox, y - Oy);
 			}
 
-			Debug_Depth++;
-			GViewI *Child = c->WindowFromPoint(x - Ox, y - Oy, Debug);
-			Debug_Depth--;
+			GViewI *Child = c->WindowFromPoint(x - Ox, y - Oy, DebugDepth ? DebugDepth  + 1 : 0);
 			if (Child)
-			{
 				return Child;
-			}
 		}
-		else if (Debug)
+		else if (DebugDepth)
 		{
-			LgiTrace("%s[%i] MISSED %s Pos=%s m(%i,%i)\n", Tabs, n--, c->GetClass(), CPos.GetStr(), x, y);
+			LgiTrace("%s[%i] MISSED %s Pos=%s m(%i,%i)\n", Tabs, n--, _ViewDesc(c).Get(), CPos.GetStr(), x, y);
 		}
 	}
 

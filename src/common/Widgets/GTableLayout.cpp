@@ -32,7 +32,7 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		14
+// #define DEBUG_LAYOUT		166
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
 // #define DEBUG_CTRL_ID		1049
@@ -1191,8 +1191,8 @@ void TableCell::PostLayout()
 
 		if (Tbl)
 		{
-			int HeightPx = c->Inf.Height.Min < c->Inf.Height.Max ? c->Inf.Height.Min : Pos.Y();
-			c->r.Dimension(Pos.X(), HeightPx);
+			// int HeightPx = c->Inf.Height.Min < c->Inf.Height.Max ? c->Inf.Height.Min : Pos.Y();
+			c->r.Dimension(Pos.X(), MIN(Pos.Y(), c->Inf.Height.Max));
 		}
 		else if
 		(
@@ -1271,7 +1271,8 @@ void TableCell::PostLayout()
 	#endif
 	for (n=0; n<Children.Length(); n++)
 	{
-		GView *v = Children[n].View;
+		auto &Child = Children[n];
+		auto v = Child.View;
 		if (!v)
 			break;
 
