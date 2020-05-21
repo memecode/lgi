@@ -552,7 +552,7 @@ int64 GRadioButton::Value()
 
 void GRadioButton::Value(int64 i)
 {
-	if (d->Val != (bool)i)
+	if (d->Val != (i != 0))
 	{
 		if (i)
 		{
@@ -580,7 +580,7 @@ void GRadioButton::Value(int64 i)
 			}
 		}
 
-		d->Val = i;
+		d->Val = i != 0;
 		Invalidate();
 
 		if (i)

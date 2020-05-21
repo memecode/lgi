@@ -98,6 +98,7 @@ public:
 	uint32_t PrevChar(char *s);
 	GFont *GetBaseFont();
 	void SetBaseFont(GFont *f);
+	GFont *GetFont();
 
 	// Pre-layout min/max calculation
 	void DoPreLayout(int32 &MinX, int32 &MaxX);

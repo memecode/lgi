@@ -148,6 +148,13 @@ void LStringLayout::SetBaseFont(GFont *f)
 		FontCache->SetDefaultFont(f);
 }
 
+GFont *LStringLayout::GetFont()
+{
+	if (Strs.Length() == 0)
+		return NULL;
+	return Strs[0]->GetFont();
+}
+
 typedef GArray<LLayoutString*> LayoutArray;
 
 // Pre-layout min/max calculation

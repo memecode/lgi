@@ -85,9 +85,7 @@ bool GTextLabel::SetVariant(const char *Name, GVariant &Value, char *Array)
 	{
 		const char *Style = Value.Str();
 		if (Style)
-		{
 			GetCss(true)->Parse(Style, GCss::ParseRelaxed);
-		}
 		return true;
 	}
 	
@@ -114,13 +112,7 @@ bool GTextLabel::Name(const char *n)
 	if (InThread())
 	{
 		GView::Name(n);
-
-		d->Empty();
-		d->Add(n, GetCss());
-		int x = X();
-		d->Layout(GetFont(), x ? x : GdcD->X());
-
-		Invalidate();
+		OnStyleChange();
 		SendNotify(GNotifyTableLayout_Refresh);
 	}
 	else if (IsAttached())
@@ -145,13 +137,7 @@ bool GTextLabel::NameW(const char16 *n)
 	if (InThread())
 	{
 		GView::NameW(n);
-
-		d->Empty();
-		d->Add(GView::Name(), GetCss());
-		int x = X();
-		d->Layout(GetFont(), x ? x : GdcD->X());
-
-		Invalidate();
+		OnStyleChange();
 		SendNotify(GNotifyTableLayout_Refresh);
 	}
 	else if (IsAttached())
@@ -190,11 +176,18 @@ void GTextLabel::OnStyleChange()
 {
 	if (d->Lock(_FL))
 	{
+		GCss::Len oldsz, newsz;
+		if (d->GetFont())
+			oldsz = d->GetFont()->Size();
+
 		d->Empty();
 		d->Add(GView::Name(), GetCss());
 		d->DoLayout(X());
 		d->Unlock();
 		Invalidate();
+
+		if (d->GetFont())
+			newsz = d->GetFont()->Size();
 	}
 }
 
@@ -203,11 +196,11 @@ void GTextLabel::OnPosChange()
 	if (d->PrevX != X())
 	{
 		if (d->Debug)
-			printf("Layout %i, %i\n", d->PrevX, X());
+			LgiTrace("Layout %i, %i\n", d->PrevX, X());
 		d->Layout(GetFont(), X());
 	}
 	else if (d->Debug)
-			printf("No Layout %i, %i\n", d->PrevX, X());
+		LgiTrace("No Layout %i, %i\n", d->PrevX, X());
 }
 
 bool GTextLabel::OnLayout(GViewLayoutInfo &Inf)

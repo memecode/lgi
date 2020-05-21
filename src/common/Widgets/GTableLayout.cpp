@@ -32,7 +32,7 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-//#define DEBUG_LAYOUT		14
+// #define DEBUG_LAYOUT		14
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
 // #define DEBUG_CTRL_ID		1049
@@ -2073,6 +2073,7 @@ GMessage::Result GTableLayout::OnEvent(GMessage *m)
 	{
 		case M_TABLE_LAYOUT:
 		{
+			SendNotify(GNotifyTableLayout_Refresh);
 			OnPosChange();
 			Invalidate();
 			return 0;

@@ -476,6 +476,9 @@ void GButton::OnCreate()
 void GButton::OnAttach()
 {
 	LgiResources::StyleElement(this);
+	OnStyleChange();
+	GView::OnAttach();
+
 	if (d->WantsDefault)
 	{
 		d->WantsDefault = false;

@@ -1345,7 +1345,7 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 		{
 			if (Dlg->Id() == ((int) Resource))
 			{
-				GProfile p("LoadDialog");
+				// GProfile p("LoadDialog");
 			
 				// found the dialog to load, set properties
 				if (Dlg->Name())
@@ -1356,7 +1356,7 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 						Parent->Name(Dlg->Name());
 				}
 				
-				p.Add("1");
+				// p.Add("1");
 				int x = Dlg->X();
 				int y = Dlg->Y();
 				x += LgiApp->GetMetric(LGI_MET_DECOR_X) - 4;
@@ -1371,13 +1371,13 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 				}
 
 				// instantiate control list
-				p.Add("2");
+				// p.Add("2");
 				for (GXmlTag *t: Dlg->Dialog->Children)
 				{
 					ResObject *Obj = CreateObject(t, 0);
 					if (Obj)
 					{
-						p.Add("3");
+						// p.Add("3");
 						if (Tags.Check(t))
 						{
 							if (Res_Read(Obj, t, Tags))
