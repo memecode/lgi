@@ -625,6 +625,16 @@ public:
 			else
 				NoPaint.Empty();
 		}
+		#if defined(WINDOWS)
+		if (!NoPaint.IsValid())
+		{
+			// We have to paint something otherwise we'll get garbage
+			auto p = Ctrl->GetParent();
+			NoPaint = LColour(L_MED);
+			if (p) // Use the parent's background?
+				NoPaint = p->GetGView()->StyleColour(GCss::PropBackgroundColor, NoPaint);
+		}
+		#endif
 		if (NoPaint.IsValid())
 			Mem.Colour(NoPaint);
 		else
