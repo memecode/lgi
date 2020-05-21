@@ -483,6 +483,8 @@ public:
 
 	void Sort(int Column)
 	{
+		if (Items.Length() == 0)
+			return;
 		if (!Lock(_FL))
 			return;
 

@@ -1309,6 +1309,9 @@ public:
 		GAutoString File(WideToUtf8(Txt+Line, i-Line));
 		if (!File)
 			return;
+		char *Sep;
+		while (Sep = strchr(File, DIR_CHAR == '\\' ? '/' : '\\'))
+			*Sep = DIR_CHAR;
 
 		// Scan over the line number..
 		auto NumIndex = ++i;
