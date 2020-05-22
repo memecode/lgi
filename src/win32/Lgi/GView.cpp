@@ -1744,7 +1744,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				SetKeyFlag(Ms.Flags, VK_MENU, MK_ALT);
 				Ms.Down((Msg->a & (MK_LBUTTON|MK_MBUTTON|MK_RBUTTON)) != 0);
 
-				GViewI *MouseOver = WindowFromPoint(Ms.x, Ms.y, true);
+				GViewI *MouseOver = WindowFromPoint(Ms.x, Ms.y);
 				if (_Over != MouseOver)
 				{
 					if (_Over)

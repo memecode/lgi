@@ -32,7 +32,7 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		166
+// #define DEBUG_LAYOUT		546
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
 // #define DEBUG_CTRL_ID		1049
@@ -322,6 +322,7 @@ public:
 	GTableLayout *GetTable() { return Table; }
 	bool Add(GView *v);	
 	bool Remove(GView *v);
+	GArray<GView*> GetChildren();
 	bool RemoveAll();
 	Child *HasView(GView *v);
 
@@ -424,6 +425,14 @@ TableCell::Child *TableCell::HasView(GView *v)
 		s++;
 	}
 	return NULL;
+}
+
+GArray<GView*> TableCell::GetChildren()
+{
+	GArray<GView*> a;
+	for (auto &c: Children)
+		a.Add(c.View);
+	return a;
 }
 
 bool TableCell::Add(GView *v)
@@ -1265,7 +1274,7 @@ void TableCell::PostLayout()
 	#if DEBUG_LAYOUT
 	if (Table->d->DebugLayout)
 	{
-		Table->d->Dbg.Print("\tCell[%i,%i]=%s\n", Cell.x1, Cell.y1, Pos.GetStr());
+		Table->d->Dbg.Print("\tCell[%i,%i]=%s (%ix%i)\n", Cell.x1, Cell.y1, Pos.GetStr(), Pos.X(), Pos.Y());
 	}
 	#endif
 	for (n=0; n<Children.Length(); n++)
@@ -1300,6 +1309,14 @@ void TableCell::OnPaint(GSurface *pDC)
 	GCssTools t(this, Table->GetFont());
 	GRect r = Pos;	
 	t.PaintBorder(pDC, r);
+
+	GColour Trans;
+	auto bk = t.GetBack(&Trans);
+	if (bk.IsValid())
+	{
+		pDC->Colour(bk);
+		pDC->Rectangle(&r);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////

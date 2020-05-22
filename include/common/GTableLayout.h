@@ -19,6 +19,7 @@ public:
 	virtual class GTableLayout *GetTable() = 0;
 	virtual bool Add(GView *v) = 0;
 	virtual bool Remove(GView *v) = 0;
+	virtual GArray<GView*> GetChildren() = 0;
 };
 
 /// A table layout control. This uses techniques similar to HTML table layout to set the position
