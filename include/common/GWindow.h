@@ -275,7 +275,7 @@ public:
 		bool PostEvent(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0);
 		void Quit(bool DontDelete = false);
 		int OnCommand(int Cmd, int Event, OsView Wnd);
-		GViewI *WindowFromPoint(int x, int y, bool Debug = false);
+		GViewI *WindowFromPoint(int x, int y, int DebugDebug = 0);
 		
 		#if defined(LGI_CARBON)
 			OSErr HandlerCallback(DragTrackingMessage *tracking, DragRef theDrag);
