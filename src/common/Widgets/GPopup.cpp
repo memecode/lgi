@@ -40,7 +40,7 @@ enum PopupNotifications
 		#endif
 	}
 
-	OsView WindowFromPoint(int x, int y, int DebugDepth)
+	OsView WindowFromPoint(int x, int y, int DebugDepth = 0)
 	{
 		return NULL;
 	}
