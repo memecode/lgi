@@ -35,7 +35,7 @@ enum CellFlag
 // #define DEBUG_LAYOUT		546
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
-// #define DEBUG_CTRL_ID		1049
+// #define DEBUG_CTRL_ID		1400
 
 int GTableLayout::CellSpacing = 4;
 
@@ -961,6 +961,13 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		if (!v)
 			continue;
 
+		#ifdef DEBUG_CTRL_ID
+		if (v->GetId() == DEBUG_CTRL_ID)
+		{
+			int asd=0;
+		}
+		#endif
+
 		if (CssWidth.Type != LenInherit)
 		{
 			// In the case where the CSS width is set, we need to default the
@@ -1160,6 +1167,13 @@ void TableCell::PostLayout()
 			continue;
 		}
 		
+		#ifdef DEBUG_CTRL_ID
+		if (v->GetId() == DEBUG_CTRL_ID)
+		{
+			int asd=0;
+		}
+		#endif
+
 		GTableLayout *Tbl = Izza(GTableLayout);
 		
 		if (i > 0 && Cx + c->r.X() > Pos.X())
@@ -1219,8 +1233,8 @@ void TableCell::PostLayout()
 			else
 				c->r.y2 = c->r.y1 + c->Inf.Height.Max - 1;
 		}
-
-		if (!Izza(GButton) && !Tbl)
+		else 
+		// if (!Izza(GButton) && !Tbl)
 		{
 			if (c->Inf.Width.Max <= 0 ||
 				c->Inf.Width.Max >= WidthPx)
