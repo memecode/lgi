@@ -35,7 +35,7 @@ enum CellFlag
 // #define DEBUG_LAYOUT		546
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
-// #define DEBUG_CTRL_ID		14
+// #define DEBUG_CTRL_ID		16
 
 int GTableLayout::CellSpacing = 4;
 
@@ -1229,6 +1229,12 @@ void TableCell::PostLayout()
 		)
 		{
 			c->r.y2 = Pos.y2;
+
+			if (c->Inf.Width.Max <= 0 ||
+				c->Inf.Width.Max >= WidthPx)
+				c->r.x2 = c->r.x1 + WidthPx - 1;
+			else if (c->Inf.Width.Max)
+				c->r.x2 = c->r.x1 + c->Inf.Width.Max - 1;
 		}
 		else if (c->IsLayout)
 		{
