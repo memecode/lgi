@@ -1713,10 +1713,8 @@ void GView::SetCtrlValue(int Id, int64 i)
 	ThreadCheck();
 
 	GViewI *w = FindControl(Id);
-	if (!w)
-		printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
-	if (w)
-		w->Value(i);
+	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
+	if (w) w->Value(i);
 }
 
 char *GView::GetCtrlName(int Id)
@@ -1724,8 +1722,7 @@ char *GView::GetCtrlName(int Id)
 	ThreadCheck();
 
 	GViewI *w = FindControl(Id);
-	if (!w)
-		printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
+	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	return (w) ? w->Name() : 0;
 }
 
@@ -1734,10 +1731,8 @@ void GView::SetCtrlName(int Id, const char *s)
 	ThreadCheck();
 	
 	GViewI *w = FindControl(Id);
-	if (!w)
-		printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
-	if (w)
-		w->Name(s);
+	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
+	if (w) w->Name(s);
 }
 
 bool GView::GetCtrlEnabled(int Id)
@@ -1745,8 +1740,7 @@ bool GView::GetCtrlEnabled(int Id)
 	ThreadCheck();
 
 	GViewI *w = FindControl(Id);
-	if (!w)
-		printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
+	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	return (w) ? w->Enabled() : 0;
 }
 
@@ -1755,10 +1749,8 @@ void GView::SetCtrlEnabled(int Id, bool Enabled)
 	ThreadCheck();
 
 	GViewI *w = FindControl(Id);
-	if (!w)
-		printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
-	if (w)
-		w->Enabled(Enabled);
+	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
+	if (w) w->Enabled(Enabled);
 }
 
 bool GView::GetCtrlVisible(int Id)

@@ -203,13 +203,24 @@ GMessage::Result GButton::OnEvent(GMessage *Msg)
 	return GView::OnEvent(Msg);
 }
 
+#if 0
+#define DEBUG(arg, ...) printf(arg  __VA_OPT__(,) __VA_ARGS__)
+#else
+#define DEBUG(arg, ...)
+#endif
+
 void GButton::OnMouseClick(GMouse &m)
 {
 	if (!Enabled())
+	{
+		DEBUG("Not enabled\n");
 		return;
+	}
 
+	DEBUG("d->Toggle=%i\n", d->Toggle);
 	if (d->Toggle)
 	{
+		DEBUG("m.Down=%i\n", m.Down());
 		if (m.Down())
 		{
 			Value(!Value());
@@ -219,10 +230,12 @@ void GButton::OnMouseClick(GMouse &m)
 	else
 	{
 		bool Click = IsCapturing();
+		DEBUG("Click=%i, m.Down()=%i\n", Click, m.Down());
 		Capture(m.Down());
 		
 		if (Click ^ m.Down())
 		{
+			DEBUG("d->Over=%i\n", d->Over);
 			if (d->Over)
 			{
 				if (m.Down())
@@ -237,6 +250,7 @@ void GButton::OnMouseClick(GMouse &m)
 				
 				Invalidate();
 
+				DEBUG("m.Down()=%i d->Pressed=%i\n", m.Down(), d->Pressed);
 				if (!m.Down() &&
 					d->Pressed == 0)
 				{

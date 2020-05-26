@@ -135,11 +135,11 @@ lgi_widget_remove(GtkContainer *wid, GtkWidget *child)
 		gtk_widget_queue_resize(GTK_WIDGET(wid));
 }
 
-GMouse _map_mouse_event(GView *v, int x, int y, bool Motion)
+GMouse _map_mouse_event(GView *v, int x, int y, bool Motion, bool Debug = false)
 {
 	GMouse m;
 
-	auto View = v->WindowFromPoint(x, y);
+	auto View = v->WindowFromPoint(x, y, Debug);
 	GdcPt2 Offset;
 	bool FoundParent = false;
 	for (auto i=View; i != NULL; i=i->GetParent())
@@ -179,15 +179,24 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 {
 	LgiWidget *p = LGI_WIDGET(widget);
 	if (!p)
+	{
+		printf("%s:%i - no widget\n", _FL);
 		return false;
+	}
 	
 	GView *v = dynamic_cast<GView*>(p->target);
 	if (!v)
+	{
+		printf("%s:%i - no view\n", _FL);
 		return false;
-
+	}
+	
 	GMouse m = _map_mouse_event(v, ev->x, ev->y, false);
 	if (!m.Target)
+	{
+		printf("%s:%i - no target\n", _FL);
 		return false;
+	}
 
 	m.Double(ev->type == GDK_2BUTTON_PRESS ||
 			ev->type == GDK_3BUTTON_PRESS);

@@ -370,7 +370,8 @@ bool GView::_Mouse(GMouse &m, bool Move)
 	#endif
 
 	#if DEBUG_MOUSE_EVENTS
-	// LgiTrace("%s:%i - _Mouse([%i,%i], %i)\n", _FL, m.x, m.y, Move);
+	if (!Move)
+		LgiTrace("%s:%i - _Mouse([%i,%i], %i) View=%p/%s\n", _FL, m.x, m.y, Move, _Over, _Over ? _Over->GetClass() : NULL);
 	#endif
 
 	if
@@ -387,14 +388,15 @@ bool GView::_Mouse(GMouse &m, bool Move)
 	)
 	{
 		#if DEBUG_MOUSE_EVENTS
-		LgiTrace("%s:%i - HandleViewMouse consumed event, _View=%p\n", _FL, _View);
+		LgiTrace("%s:%i - HandleViewMouse consumed event, cls=%s\n", _FL, GetClass());
 		#endif
 		return false;
 	}
 
 	// GViewI *cap = _Capturing;
 	#if DEBUG_MOUSE_EVENTS
-	// LgiTrace("%s:%i - _Capturing=%p/%s\n", _FL, _Capturing, _Capturing ? _Capturing->GetClass() : NULL);
+	if (!Move)
+		LgiTrace("%s:%i - _Capturing=%p/%s\n", _FL, _Capturing, _Capturing ? _Capturing->GetClass() : NULL);
 	#endif
 	if (_Capturing)
 	{

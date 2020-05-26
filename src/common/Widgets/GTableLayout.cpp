@@ -35,7 +35,7 @@ enum CellFlag
 // #define DEBUG_LAYOUT		546
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
-// #define DEBUG_CTRL_ID		1400
+// #define DEBUG_CTRL_ID		14
 
 int GTableLayout::CellSpacing = 4;
 
@@ -1154,6 +1154,10 @@ void TableCell::PostLayout()
 	int WidthPx = Pos.X() - Padding.x1 - Padding.x2;
 	int HeightPx = Pos.Y() - Padding.y1 - Padding.y2;
 
+	#ifdef DEBUG_CTRL_ID
+	bool HasDebugCtrl = false;
+	#endif
+
 	Child *c = Children.AddressOf();
 	for (int i=0; i<Children.Length(); i++, c++)
 	{
@@ -1170,7 +1174,7 @@ void TableCell::PostLayout()
 		#ifdef DEBUG_CTRL_ID
 		if (v->GetId() == DEBUG_CTRL_ID)
 		{
-			int asd=0;
+			HasDebugCtrl = true;
 		}
 		#endif
 
@@ -1274,10 +1278,20 @@ void TableCell::PostLayout()
 
 	int OffsetY = 0;
 	GCss::Len VAlign = VerticalAlign();
+
+	#ifdef DEBUG_CTRL_ID
+	if (HasDebugCtrl)
+		printf("VAlign.Type=%i\n", VAlign.Type);
+	#endif
+
 	if (VAlign.Type == VerticalMiddle)
 	{
 		int Py = Pos.Y();
 		OffsetY = (Py - MaxY) / 2;
+		#ifdef DEBUG_CTRL_ID
+		if (HasDebugCtrl)
+			printf("Py=%i MaxY=%i OffsetY=%i\n", Py, MaxY, OffsetY);
+		#endif
 	}
 	else if (VAlign.Type == VerticalBottom)
 	{
