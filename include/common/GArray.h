@@ -607,7 +607,7 @@ public:
 			qsort_r(p, len, sizeof(Type), user_param, (qsort_r_compare)Compare);
 		}
 	
-	#elif !defined(BEOS) // POSIX?
+	#else
 	
 		#define DeclGArrayCompare(func_name, type, user_type) \
 			int func_name(type *a, type *b, user_type *param)

@@ -535,10 +535,6 @@ bool LDateTime::GetDaylightSavingsInfo(GArray<GDstInfo> &Info, LDateTime &Start,
 		}
 	}
 	
-	#elif defined BEOS
-	
-	
-	
 	#else
 
 	LgiAssert(!"Not implemented.");

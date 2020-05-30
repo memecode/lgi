@@ -85,25 +85,6 @@
 #include "LgiNetInc.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-#ifdef BEOS
-uint32 inet_addr(char *HostAddr)
-{
-	uint32 s = 0;
-	GToken Ip(HostAddr, ".");
-	if (Ip.Length() == 4)
-	{
-		uchar *IpAddress = (uchar*)&s;
-		for (int i=0; i<4; i++)
-		{
-			IpAddress[i] = atoi(Ip[i]);
-		}				
-	}
-	return s;
-}
-#endif
-
-
-///////////////////////////////////////////////////////////////////////////////
 #ifdef WIN32
 static bool SocketsOpen = false;
 #endif
@@ -177,7 +158,7 @@ bool GSocket::EnumInterfaces(GArray<Interface> &Out)
 			Status = true;
 		}
 	}
-	#elif !defined(BEOS)
+	#else
 	// Posix
 	struct ifaddrs *addrs = NULL;
 	int r = getifaddrs(&addrs);
@@ -419,9 +400,6 @@ void GSocket::IsBlocking(bool block)
 		ioctlsocket(d->Socket, FIONBIO, &NonBlocking);
 		#elif defined POSIX
 		fcntl(d->Socket, F_SETFL, d->Blocking ? 0 : O_NONBLOCK);
-		#elif defined BEOS
-		uint32 b = d->Blocking ? 0 : -1;
-		setsockopt(d->Socket, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
 		#else
 		#error Impl me.
 		#endif
@@ -562,7 +540,7 @@ int GSocket::Open(const char *HostAddr, int Port)
 		{
 			GArray<char> Buf(512);
 
-			#if !defined(MAC) && !defined(BEOS)
+			#if !defined(MAC)
 			option_t i;
 			int sz = sizeof(i);
 			int r = getsockopt(d->Socket, IPPROTO_TCP, TCP_NODELAY, (char*)&i, &sz);
@@ -584,7 +562,7 @@ int GSocket::Open(const char *HostAddr, int Port)
 				}
 				
 				/* This seems complete unnecessary? -fret Dec 2018
-				#if defined(WIN32) || defined(BEOS)
+				#if defined(WIN32)
 
 				Host = c((const char*) &IpAddress, 4, AF_INET);
 				if (!Host)
@@ -1184,12 +1162,9 @@ int GSocket::Error(void *Param)
 		{NO_RECOVERY,		"This is a non-recoverable error."},
 		{TRY_AGAIN,			"Non-authoritative host not found."},
 		{ETIMEOUT,			"Operation timed out."},
-
-		#ifndef BEOS
 		{EDESTADDRREQ,		"Destination address required."},
 		{EHOSTDOWN,			"Host is down."},
 		{ESOCKTNOSUPPORT,	"Socket type not supported."},
-		#endif
 		
 		#endif
 		{-1, 0}
@@ -1558,44 +1533,7 @@ bool WhatsMyIp(GAutoString &Ip)
 					(uchar)e->h_addr_list[Which][3]);
 		Status = Ip.Reset(NewStr(IpAddr));
 	}
-
-	#elif defined BEOS
-
-	struct sockaddr_in addr;
-	int sock, size;
-		
-	memset((char *)&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = INADDR_ANY;
-	addr.sin_port = 0;
-		
-	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-		return false;
-		
-	if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-		return false;
-		
-	size = sizeof(addr);
-	if ((getsockname(sock, (struct sockaddr *)&addr, &size)) < 0)
-		return false;
-		
-	close(sock);
-		
-	if (addr.sin_addr.s_addr == INADDR_ANY)
-		return false;
-		
-	uchar *a = (uchar*)&addr.sin_addr.s_addr;
-	char IpAddr[32];
-	sprintf_s(	IpAddr,
-				sizeof(IpAddr),
-				"%i.%i.%i.%i",
-				a[0],
-				a[1],
-				a[2],
-				a[3]);
-	Ip.Reset(NewStr(IpAddr));
-	Status = true;
-		
+	
 	#endif
 
 	return Status;

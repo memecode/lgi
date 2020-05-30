@@ -6,7 +6,7 @@
 #include "GLibrary.h"
 #include "GLibraryUtils.h"
 
-#if defined(LGI_STATIC) || defined(BEOS)
+#if defined(LGI_STATIC)
 #undef HAS_ICONV
 #endif
 

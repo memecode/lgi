@@ -11,8 +11,8 @@ LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
 /// \brief The base class for all windows in the GUI.
 ///
 /// This is the core object that all on screen windows inherit from. It encapsulates
-/// a HWND on Win32, a BView on BeOS, a Window on X11 + Mac OS X. Used by itself it's not a
-/// top level window, for that see the GWindow class.
+/// a HWND on Win32, a GtkWidget on Linux, and a NSView for Mac OS X. Used by
+/// itself it's not a top level window, for that see the GWindow class.
 ///
 /// To create a top level window see GWindow or GDialog.
 ///
@@ -73,14 +73,6 @@ private:
 			friend OSStatus LgiViewDndHandler(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *inUserData);
 
 		#endif
-
-	#elif defined BEOS
-
-		friend		class GButtonRedir;
-		friend		class _OsEditFrame;
-		friend		class BViewRedir;
-		friend		long _lgi_pulse_thread(void *ptr);
-		friend 		GView *_lgi_search_children(GView *v, int &x, int &y);
 
 	#endif
 
@@ -222,8 +214,7 @@ public:
 	/// On non-Win32 platforms the default argument is the class that redirects the
 	/// C++ virtual event handlers to the GView handlers. Which is usually the
 	/// 'DefaultOsView' class. If you pass NULL in a DefaultOsView will be created to
-	/// do the job. On BeOS you can subclass the native controls by passing in an
-	/// instance of the BView based class.
+	/// do the job.
 	GView
 	(
 		/// The handle that the OS knows the window by

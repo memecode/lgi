@@ -242,9 +242,6 @@ GTabView::GTabView(int id, int x, int y, int cx, int cy, const char *name, int I
 
 	#if WINNATIVE
 	SetDlgCode(DLGC_WANTARROWS);
-	#elif defined BEOS
-	Handle()->SetFlags(	Handle()->Flags() |
-						B_FULL_UPDATE_ON_RESIZE);
 	#endif
 	LgiResources::StyleElement(this);
 }
@@ -1169,14 +1166,7 @@ GTabPage::GTabPage(const char *name) : ResObject(Res_Tab)
 	BtnPos.ZOff(-1, -1);
 	GetCss(true)->Padding("4px");
 
-	#if defined BEOS
-	if (Handle())
-	{
-		Handle()->SetViewColor(216, 216, 216);
-		Handle()->SetResizingMode(B_FOLLOW_ALL_SIDES);
-		Handle()->SetFlags(Handle()->Flags() & ~B_NAVIGABLE);
-	}
-	#elif WINNATIVE
+	#if WINNATIVE
 	SetStyle(GetStyle() | WS_CLIPCHILDREN);
 	CreateClassW32(GetClass(), 0, CS_HREDRAW | CS_VREDRAW);
 	#endif

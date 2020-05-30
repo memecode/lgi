@@ -863,77 +863,6 @@ void GDisplayString::Layout(bool Debug)
 		xf = x;
 		yf = y;
 	
-	#elif defined BEOS
-	
-		if (Font && Font->Handle())
-		{
-			int TabSize = Font->TabSize() ? Font->TabSize() : 32;
-			int TabOrigin = DrawOffsetF / FScale;
-			char *End = Str + len;
-			char *s = Str;
-			
-			x = 0;
-			while (s < End)
-			{
-				char *Start = s;
-				while (s < End && *s && *s != '\t')
-					s++;
-
-				if (s > Start)
-				{
-					// Normal segment
-					CharInfo &i = Info.New();
-					i.Str = Start;
-					i.Len = s - Start;
-					
-					GdcPt2 size = Font->StringBounds(i.Str, i.Len);
-					i.X = size.x;
-					i.FontId = -1;
-					i.SizeDelta = 0;
-					
-					x += size.x;
-				}
-				
-				Start = s;
-				while (s < End && *s && *s == '\t')
-					s++;
-
-				if (s > Start)
-				{
-					// Tabs segment
-					CharInfo &i = Info.New();
-					i.Str = Start;
-					i.Len = s - Start;
-					
-					i.X = 0;
-					i.FontId = -1;
-					i.SizeDelta = 0;
-					
-					for (int n=0; n<i.Len; n++)
-					{
-						int Dx = TabSize - ((x + TabOrigin) % TabSize);
-						i.X += Dx;
-						x += Dx;
-					}
-				}
-			}
-			
-			LgiAssert(s == End);
-			
-			yf = y = Font->GetHeight();
-			xf = x;
-
-			#if 0
-			printf("Layout '%s' = %i,%i\n", Str, x, y);
-			for (int i=0; i<Blocks; i++)
-			{
-				CharInfo *ci = Info + i;
-				printf("  [%i]=%s,%i x=%i\n", i, ci->Str, ci->Len, ci->X);
-			}
-			#endif		
-		}
-		else printf("%s:%i - No font or handle.\n", _FL);
-	
 	#endif
 }
 
@@ -1193,9 +1122,7 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 	
 	#else // This case is for Win32 and Haiku.
 	
-	#if defined(BEOS)
-	if (Font && Font->Handle())
-	#elif defined(WINNATIVE)
+	#if defined(WINNATIVE)
 	GFontSystem *Sys = GFontSystem::Inst();
 	if (Info.Length() && Font && Sys)
 	#endif
@@ -1245,11 +1172,7 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 					// Find the pos in this block
 					GFont *f = Font;
 
-					#if defined(BEOS)
-					BString s(Info[i].Str, Info[i].Len);
-					Font->Handle()->TruncateString(&s, B_TRUNCATE_END, Px - Cx);
-					int Fit = s.CountChars();
-					#elif defined(WIN32)
+					#if defined(WIN32)
 					if (Info[i].FontId)
 					{
 						f = Sys->Font[Info[i].FontId];
@@ -1944,81 +1867,6 @@ void GDisplayString::Draw(GSurface *pDC, int px, int py, GRect *r, bool Debug)
 		pDC->Rectangle(r);
 	}
 	
-	#elif defined(BEOS)
-
-	if (pDC && Font)
-	{
-		rgb_color Fg = Font->Fore(), Bk = Font->Back();
-		
-		// Paint text
-		BView *Hnd = pDC->Handle();
-		if (Hnd)
-		{
-			GLocker Locker(Hnd, _FL);
-			Locker.Lock();
-			
-			drawing_mode Prev = Hnd->DrawingMode();
-			Hnd->SetDrawingMode(B_OP_COPY);
-
-			// Draw background if required.		
-			if (!Font->Transparent())
-			{
-				Hnd->SetHighColor(Bk);
-				if (r)
-				{
-					Hnd->FillRect(*r);
-				}
-				else
-				{
-					GRect b;
-					b.ZOff(x-1, y-1);
-					b.Offset(px, py);
-					Hnd->FillRect(b);				
-				}
-			}
-
-			// Draw foreground text segments		
-			Hnd->SetHighColor(Fg);
-			Hnd->SetLowColor(Bk);
-			Hnd->SetFont(Font->Handle());
-			Hnd->SetDrawingMode(B_OP_OVER);
-
-			int CurX = 0;
-			for (int i=0; i<Info.Length(); i++)
-			{
-				CharInfo *ci = &Info[i];
-				BPoint pos(px + CurX, py + Font->Ascent());
-				if (ci->Str[0] != '\t')
-					Hnd->DrawString(ci->Str, ci->Len, pos);
-
-				/*
-				printf("DrawString %i, %i -> '%.*s' in %x,%x,%x\n",
-					px, py,
-					ci->Len, ci->Str,
-					Fg.red, Fg.green, Fg.blue);
-				*/
-
-				#if 0 // useful to debug where strings are drawn
-				{
-					GRect r;
-					r.ZOff(ci->X-1, Font->GetHeight()-1);
-					r.Offset(px + CurX, py);
-					pDC->Box(&r);
-				}
-				#endif
-
-				CurX += ci->X;
-			}
-
-			Hnd->SetDrawingMode(Prev);
-			
-			if (!pDC->IsScreen())
-				Hnd->Sync();
-		}
-		else printf("%s:%i - Error: no BView to draw on.\n", _FL);
-	}
-	else printf("%s:%i - Error: no DC or Font.\n", _FL);
-
 	#endif
 }
 

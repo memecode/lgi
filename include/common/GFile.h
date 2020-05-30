@@ -302,24 +302,6 @@ public:
 	bool Move(const char *OldName, const char *NewName, LError *Err = NULL);
 };
 
-#ifdef BEOS
-
-#define GFileOps()						\
-	GFilePre char GFilePost;			\
-	GFilePre int8 GFilePost;			\
-	GFilePre uint8_t GFilePost;			\
-	GFilePre int16 GFilePost;			\
-	GFilePre uint16 GFilePost;			\
-	GFilePre signed int GFilePost;		\
-	GFilePre unsigned int GFilePost;	\
-	GFilePre signed long GFilePost;		\
-	GFilePre unsigned long GFilePost;	\
-	GFilePre int64 GFilePost;			\
-	GFilePre uint64 GFilePost;			\
-	GFilePre double GFilePost
-
-#else
-
 #define GFileOps()						\
 	GFilePre char GFilePost;			\
 	GFilePre int8 GFilePost;			\
@@ -334,8 +316,6 @@ public:
 	GFilePre uint64 GFilePost;			\
 	GFilePre float GFilePost;			\
 	GFilePre double GFilePost
-
-#endif
 
 /// Generic file access class
 class LgiClass GFile : public GStream, public GRefCount

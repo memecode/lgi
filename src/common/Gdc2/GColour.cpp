@@ -822,13 +822,7 @@ void GColour::OnChange()
 
 	_LgiColours[L_SHADOW].Rgb(64, 64, 64); // LC_SHADOW
 	_LgiColours[L_LOW].Rgb(128, 128, 128); // LC_LOW
-
-	//#ifdef BEOS
 	_LgiColours[L_MED].Rgb(216, 216, 216); // LC_MED
-	//#else
-	//SetCol(Rgb24(230, 230, 230)); // LC_MED
-	//#endif
-
 	_LgiColours[L_HIGH].Rgb(230, 230, 230); // LC_HIGH
 	_LgiColours[L_LIGHT].Rgb(255, 255, 255); // LC_LIGHT
 	_LgiColours[L_DIALOG].Rgb(216, 216, 216); // LC_DIALOG

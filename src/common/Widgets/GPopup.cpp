@@ -72,7 +72,7 @@ uint32_t LgiGetViewPid(OsView View)
 	return hWndProcess;
 	#endif
 	
-	// FIXME: Linux and BeOS
+	// FIXME: Linux
 	
 	return LgiProcessId();
 }
@@ -229,7 +229,7 @@ public:
 							// This is a bit of a hack to prevent GPopup's with open context menus from
 							// closing when the user clicks on the context menu.
 							//
-							// FIXME: Linux/BeOS
+							// FIXME: Linux
 
 							// Scan the window under the mouse up the parent tree
 							POINT p = { m.x, m.y };

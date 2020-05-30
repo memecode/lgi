@@ -1238,7 +1238,7 @@ bool GWindow::UnregisterHook(GView *Target)
 	return false;
 }
 
-GViewI *GWindow::WindowFromPoint(int x, int y, bool Debug)
+GViewI *GWindow::WindowFromPoint(int x, int y, int DebugDepth)
 {
 	for (int i=0; i<GPopup::CurrentPopups.Length(); i++)
 	{
@@ -1249,12 +1249,12 @@ GViewI *GWindow::WindowFromPoint(int x, int y, bool Debug)
 			if (r.Overlap(x, y))
 			{
 				// printf("WindowFromPoint got %s click (%i,%i)\n", p->GetClass(), x, y);
-				return p->WindowFromPoint(x - r.x1, y - r.y1, Debug);
+				return p->WindowFromPoint(x - r.x1, y - r.y1, DebugDepth ? DebugDepth + 1 : 0);
 			}
 		}
 	}
 	
-	return GView::WindowFromPoint(x, y, Debug);
+	return GView::WindowFromPoint(x, y, DebugDepth ? DebugDepth + 1 : 0);
 }
 
 int GWindow::OnCommand(int Cmd, int Event, OsView SrcCtrl)

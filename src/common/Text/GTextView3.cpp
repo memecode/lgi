@@ -2781,19 +2781,9 @@ bool GTextView3::DoFind()
 		u = d->FindReplaceParams->LastFind.Get();
 	}
 
-	#ifdef BEOS
-
-		GFindDlg *Dlg = new GFindDlg(this, u, Text3_FindCallback, this);
-		if (Dlg)
-			Dlg->DoModeless();
-
-	#else
-
-		GFindDlg Dlg(this, u, Text3_FindCallback, this);
-		Dlg.DoModal();
-		Focus(true);
-
-	#endif
+	GFindDlg Dlg(this, u, Text3_FindCallback, this);
+	Dlg.DoModal();
+	Focus(true);
 
 	return false;
 }

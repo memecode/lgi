@@ -36,10 +36,6 @@ bool BltDcToBmp(HBITMAP hDest, int xDst, int yDst, int cx, int cy, HDC SrcDC, in
 
 #endif
 
-#ifdef BEOS
-#include <Bitmap.h>
-#endif
-
 enum IconCacheType
 {
 	IconNormal,
@@ -214,14 +210,7 @@ GImageList::GImageList(int x, int y, GSurface *pDC)
 {
 	d = new GImageListPriv(this, x, y);
 
-	// BeOS transparent pixels:
-	// B_TRANSPARENT_MAGIC_CMAP8, B_TRANSPARENT_MAGIC_RGBA15, B_TRANSPARENT_MAGIC_RGBA32
-	uint32_t Transparent =
-		#ifdef BEOS
-		B_TRANSPARENT_MAGIC_RGBA32;
-		#else
-		0;
-		#endif
+	uint32_t Transparent = 0;
 
 	if (pDC &&
 		Create(pDC->X(), pDC->Y(), System32BitColourSpace, GSurface::SurfaceRequireExactCs))
@@ -941,14 +930,6 @@ void GToolButton::OnMouseEnter(GMouse &m)
 
 void GToolButton::OnMouseMove(GMouse &m)
 {
-	#ifdef BEOS
-	if (GetParent())
-	{
-		GToolBar *tb = dynamic_cast<GToolBar*>(GetParent());
-		if (tb)
-			tb->PostDescription(this, Name());
-	}
-	#endif
 }
 
 void GToolButton::OnMouseExit(GMouse &m)
@@ -997,9 +978,6 @@ GToolBar::GToolBar()
 	d->OwnImgList = false;
 	d->ImgList = 0;
 
-	#if defined BEOS
-	Handle()->SetViewColor(B_TRANSPARENT_COLOR);
-	#endif
 	GetCss(true)->BackgroundColor(LColour(L_MED).Mix(GColour::Black, 0.05f));
 	LgiResources::StyleElement(this);
 }

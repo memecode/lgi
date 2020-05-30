@@ -620,8 +620,6 @@ LList::LList(int id, int x, int y, int cx, int cy, const char *name)
 	SetStyle(GetStyle() | WS_TABSTOP);
 	SetDlgCode(DLGC_WANTARROWS);
 	Cursor = 0;
-	#elif defined BEOS
-	Handle()->SetViewColor(B_TRANSPARENT_COLOR);
 	#endif
 	SetTabStop(true);
 

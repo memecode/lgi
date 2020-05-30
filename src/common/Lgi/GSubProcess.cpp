@@ -243,10 +243,7 @@ bool GSubProcess::Dupe(PipeHandle Old, PipeHandle &New)
 
 bool GSubProcess::IsRunning()
 {
-	#if defined(BEOS)
-		LgiAssert(!"Impl me.");
-		return false;
-	#elif defined(POSIX)
+	#if defined(POSIX)
 		int Status = 0;
 		pid_t r = waitpid(ChildPid, &Status, WNOHANG);
 		if (r == ChildPid)

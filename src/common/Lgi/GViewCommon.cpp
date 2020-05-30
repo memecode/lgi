@@ -1245,13 +1245,6 @@ void GView::Visible(bool v)
 
 			ShowWindow(_View, (v) ? SW_SHOWNORMAL : SW_HIDE);
 
-		#elif defined(BEOS)
-
-			if (v)
-				_View->Show();
-			else
-				_View->Hide();
-
 		#elif LGI_COCOA
 
 			LAutoPool Pool;
@@ -1282,7 +1275,7 @@ bool GView::Focus()
 
 	bool Has = false;
 	
-	#if defined(__GTK_H__) || defined(BEOS)
+	#if defined(__GTK_H__)
 	GWindow *w = GetWindow();
 	if (w)
 	{
@@ -2014,18 +2007,6 @@ bool GView::InThread()
 		DWORD ViewThread = Hnd ? GetWindowThreadProcessId(Hnd, NULL) : GuiThreadId;
 		return CurThreadId == ViewThread;
 	
-	#elif defined BEOS
-
-		OsThreadId Me = LgiGetCurrentThread();
-		OsThreadId Wnd = _View && _View->Window() ? _View->Window()->Thread() : 0;
-		if (Me == Wnd)
-		{
-			return true;
-		}
-		
-		// LgiTrace("InThread failed %p!=%p, %p, %p\n", Me, Wnd, _View, _View?_View->Window():0);
-		return false;
-
 	#else
 
 		OsThreadId Me = GetCurrentThreadId();

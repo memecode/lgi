@@ -103,54 +103,7 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 	Msg.Printf(Arg, Str);
 	va_end(Arg);
 
-	#if defined BEOS
-
-	if (Str)
-	{
-		BAlert *Dlg = 0;
-		
-		switch (Type)
-		{
-			case MB_OK:
-			{
-				Dlg = new BAlert((Title) ? Title : "Message", Msg, "Ok");
-				break;
-			}
-			case MB_YESNO:
-			{
-				Dlg = new BAlert((Title) ? Title : "Message", Msg, "Yes", "No", NULL, B_WIDTH_AS_USUAL, B_IDEA_ALERT);
-				break;
-			}
-			case MB_YESNOCANCEL:
-			{
-				Dlg = new BAlert((Title) ? Title : "Message", Msg, "Yes", "No", "Cancel", B_WIDTH_AS_USUAL, B_IDEA_ALERT);
-				break;
-			}
-			default:
-			{
-				LgiAssert(0);
-				break;
-			}
-		}
-		
-		if (Dlg)
-		{
-			Res = Dlg->Go();
-		}
-		
-		if (Res >= 0 &&
-			(Type == MB_YESNO || Type == MB_YESNOCANCEL))
-		{
-			if (Res == 0)
-				return IDYES;
-			if (Res == 1)
-				return IDNO;
-			if (Res == 2)
-				return IDCANCEL;
-		}
-	}
-	
-	#elif WINNATIVE
+	#if WINNATIVE
 
 	if (Str)
 	{

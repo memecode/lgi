@@ -30,8 +30,6 @@
 	#include "LgiWinManGlue.h"
 #elif defined(WINDOWS)
 	#include "GRegKey.h"
-#elif defined(BEOS)
-	#include <FindDirectory.h>
 #endif
 
 #if defined POSIX
@@ -40,8 +38,6 @@
 	#include <pwd.h>
 	#include <sys/utsname.h>
 	#include "GSubProcess.h"
-#elif defined BEOS
-	#include <Path.h>
 #endif
 
 #if defined(WIN32)
@@ -145,18 +141,6 @@ bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 		return m.Send(View);
 	}
 	else printf("%s:%i - Error: LgiPostEvent can't cast OsView to GViewI\n", _FL);
-
-	#elif defined(BEOS)
-	
-	if (Wnd)
-	{
-		BMessage Msg(Event);
-		Msg.AddInt32("a", a);
-		Msg.AddInt32("b", b);
-
-		BMessenger m(Wnd);
-		return m.SendMessage(&Msg) == B_OK;
-	}
 
 	#elif defined(MAC) && !LGI_COCOA
 	
@@ -327,16 +311,6 @@ int LgiGetOs
 	}
 
 	return Os;
-
-	#elif defined BEOS
-
-	if (Ver)
-	{
-		Ver->Add(5);
-		Ver->Add(0);
-	}
-	
-	return LGI_OS_HAIKU;
 
 	#elif defined LINUX
 
@@ -1197,8 +1171,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			Path = "/Applications";
 			#elif defined LINUX
 			Path = "/usr/bin";
-			#elif defined BEOS
-			Path = "/boot/system/apps";
 			#else
 			LgiAssert(!"Impl me.");
 			#endif
@@ -1421,10 +1393,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			#elif defined LINUX
 
 				Path = "/usr";
-
-			#elif defined BEOS
-
-				Path = "/boot/apps";
 
 			#endif
 			break;
@@ -1989,10 +1957,6 @@ uint64 LgiCurrentTime()
 	// Fall back for systems without a performance counter.
 	return GetTickCount();
 
-	#elif defined BEOS
-
-	return system_time() / 1000;
-
 	#elif defined LGI_CARBON
 	
 	UnsignedWide t;
@@ -2028,11 +1992,6 @@ uint64 LgiMicroTime()
 			return i.QuadPart * 1000000 / Freq.QuadPart;
 		}
 	}
-	return 0;
-
-	#elif defined BEOS
-
-	LgiAssert(!"Not impl.");
 	return 0;
 
 	#elif defined LGI_CARBON

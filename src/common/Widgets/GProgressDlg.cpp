@@ -362,9 +362,6 @@ GProgressDlg::GProgressDlg(GView *parent, uint64 timeout)
 	Resize();
 	MoveToCenter();
 	Name(LgiLoadString(L_PROGRESSDLG_PROGRESS, "Progress"));
-	#ifdef BEOS
-	WindowHandle()->SetFeel(B_NORMAL_WINDOW_FEEL);
-	#endif
 	if (Timeout == 0)
 		DoModeless();
 	else

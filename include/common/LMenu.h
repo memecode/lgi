@@ -306,16 +306,13 @@ class LgiClass LMenuItem :
 	friend class MenuItemImpl;
 	friend class MenuImpl;
 	friend class SubMenuImplPrivate;
-	#ifdef BEOS
-	friend class LgiMenuItem;
-	#endif
 
 private:
 	#ifdef WIN32
 	bool			Insert(int Pos);
 	bool			Update();
 	#endif
-	#if defined(__GTK_H__) || defined(BEOS) || defined(LGI_SDL)
+	#if defined(__GTK_H__) || defined(LGI_SDL)
 	GString			ShortCut;
 	#endif
 
@@ -356,10 +353,6 @@ protected:
 
 public:
 	LMenuItem();
-	#if defined BEOS
-	LMenuItem(BMenuItem *item);
-	LMenuItem(LSubMenu *p);
-	#endif
 	LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int Id, int Pos, const char *Shortcut = 0);
 	virtual ~LMenuItem();
 
@@ -549,8 +542,6 @@ public:
 
 	#if defined(WIN32)
 	static int _OnEvent(GMessage *Msg);
-	#elif defined(BEOS)
-	GRect GetPos();
 	#elif defined(MAC)
 	int GetIdForCommand(uint32_t Cmd);
 	#endif

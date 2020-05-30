@@ -751,10 +751,6 @@ public:
 			void PushState();
 			void PopState();
 	
-		#elif defined(BEOS)
-		
-			GScreenDC(BView *view);
-		
 		#endif
 
 		OsPainter Handle();
@@ -1039,7 +1035,7 @@ public:
 				CGImg *GetImg(GRect *Sub = 0, int Debug = 0);
 			#endif
 		
-		#elif defined(BEOS) || defined(LGI_SDL)
+		#elif defined(LGI_SDL)
 
 			OsBitmap GetBitmap();
 
@@ -1472,8 +1468,6 @@ LgiFunc bool LgiFindBounds
 
 #if defined(LGI_SDL)
 LgiFunc GColourSpace PixelFormat2ColourSpace(SDL_PixelFormat *pf);
-#elif defined(BEOS)
-LgiFunc GColourSpace BeosColourSpaceToLgi(color_space cs);
 #endif
 
 #endif

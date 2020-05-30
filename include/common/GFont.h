@@ -66,11 +66,6 @@
 	#define PrevOsChar(Ptr)	Ptr--
 	#define NextOsChar(Ptr)	Ptr++
 
-#elif defined(BEOS)
-
-	#define PrevOsChar(Ptr)	LgiPrevUtf8((char*&)Ptr)
-	#define NextOsChar(Ptr)	LgiNextUtf8((char*&)Ptr)
-
 #endif
 
 #define LGI_WHITESPACE_WEIGHT			0.15f		// amount of foreground colour in visible whitespace
@@ -115,10 +110,6 @@ public:
 	void Fore(LSystemColour c);
 	void Fore(GColour c);
 
-	/// Sets the background colour as a 24 bit RGB value. In most systems this is not important,
-	/// but on BeOS the anti-aliasing is done from the foreground colour to the background colour
-	/// with no regards for what is underneath the rendered text, thus you need to set the back
-	/// colour correctly
 	void Back(LSystemColour c);
 	void Back(GColour c);
 
@@ -263,9 +254,7 @@ public:
 	/// Converts printable characters to unicode.
 	GAutoString ConvertToUnicode(char16 *Input, ssize_t Len = -1);
 	
-	#if defined(BEOS)
-	GdcPt2 StringBounds(const char *s, int len = -1);
-	#elif USE_CORETEXT
+	#if USE_CORETEXT
 	CFDictionaryRef GetAttributes();
 	#endif
 };

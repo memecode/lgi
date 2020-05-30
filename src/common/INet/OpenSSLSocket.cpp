@@ -565,7 +565,7 @@ struct SslSocketPriv : public LCancel
 	}
 };
 
-bool SslSocket::DebugLogging = true;
+bool SslSocket::DebugLogging = false;
 
 SslSocket::SslSocket(GStreamI *logger, GCapabilityClient *caps, bool sslonconnect, bool RawLFCheck)
 {
@@ -1104,7 +1104,7 @@ void SslSocket::IsBlocking(bool block)
 	if (Bio)
 	{
 		auto r = Library->BIO_set_nbio(Bio, !d->IsBlocking);
-		printf("%s:%i - BIO_set_nbio=%i\n", _FL, r);
+		// printf("%s:%i - BIO_set_nbio=%i\n", _FL, r);
 	}
 }
 

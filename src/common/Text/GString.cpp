@@ -382,11 +382,6 @@ char *NewStr(const char *s, ptrdiff_t Len)
 	return NULL;
 }
 
-#ifdef BEOS
-#define toupper(c) ( ((c)>='a' && (c)<='z') ? (c)-'a'+'A' : (c) )
-#define tolower(c) ( ((c)>='A' && (c)<='Z') ? (c)-'A'+'a' : (c) )
-#endif
-
 bool MatchStr(const char *Template, const char *Data)
 {
 	if (!Template)

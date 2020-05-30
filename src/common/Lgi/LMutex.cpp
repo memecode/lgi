@@ -33,10 +33,6 @@ LMutex::LMutex(const char *name)
 	// _Sem = CreateMutex(NULL, FALSE, NULL);
 	InitializeCriticalSection(&_Sem);
 	
-	#elif defined BEOS
-	
-	_Sem = create_sem(1, _Name ? _Name :"LGI.LMutex");
-
 	#elif defined POSIX
 
 	ZeroObj(_Sem);
@@ -56,14 +52,6 @@ LMutex::~LMutex()
 	// _Sem = 0;
 	DeleteCriticalSection(&_Sem);
 
-	#elif defined BEOS
-
-	if (_Sem > 0)
-	{
-		delete_sem(_Sem);
-		_Sem = 0;
-	}
-	
 	#elif defined POSIX
 
 	pthread_mutex_destroy(&_Sem);
@@ -93,10 +81,6 @@ bool LMutex::_Lock()
 	EnterCriticalSection(&_Sem);
 	return true;
 
-	#elif defined BEOS
-
-	return acquire_sem(_Sem) == B_OK;
-	
 	#elif defined POSIX
 
 	if (pthread_mutex_trylock(&_Sem))
@@ -117,10 +101,6 @@ void LMutex::_Unlock()
 	// ReleaseMutex(_Sem);
 	LeaveCriticalSection(&_Sem);
 
-	#elif defined BEOS
-
-	release_sem(_Sem);
-	
 	#elif defined POSIX
 
 	if (pthread_mutex_unlock(&_Sem))

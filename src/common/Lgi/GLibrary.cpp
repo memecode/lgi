@@ -5,7 +5,7 @@
 #define ALLOW_FALLBACK_PATH	0
 
 #include "Lgi.h"
-#if defined(LINUX) || defined(MAC) || defined(BEOS)
+#if defined(LINUX) || defined(MAC)
 #include <dlfcn.h>
 #endif
 #include "GToken.h"
@@ -143,11 +143,7 @@ bool GLibrary::Load(const char *File, bool Quiet)
 						#endif
 
 						#if ALLOW_FALLBACK_PATH
-							#ifdef BEOS
-							GToken t("/boot/system/develop/lib/x86", ":");
-							#else
 							GToken t("/opt/local/lib", ":");
-							#endif
 							for (int i=0; i<t.Length(); i++)
 							{
 								char full[MAX_PATH];
@@ -192,7 +188,7 @@ bool GLibrary::Unload()
 	{
 		#if defined WIN32
 		FreeLibrary(hLib);
-		#elif defined(LINUX) || defined(MAC) || defined(BEOS)
+		#elif defined(LINUX) || defined(MAC)
 		dlclose(hLib);
 		#else
 		LgiAssert(0);
@@ -213,7 +209,7 @@ void *GLibrary::GetAddress(const char *Resource)
 	{
 		#if defined WIN32
 		p = (void*) GetProcAddress(hLib, Resource);
-		#elif defined(LINUX) || defined(MAC) || defined(BEOS)
+		#elif defined(LINUX) || defined(MAC)
 		p = dlsym(hLib, Resource);
 		#else
 		LgiAssert(0);

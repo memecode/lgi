@@ -377,18 +377,6 @@ GVariant &GVariant::operator =(uint64 i)
 	return *this;
 }
 
-#ifdef BEOS
-GVariant &GVariant::operator =(int32 i)
-{
-	Empty();
-	Type = GV_INT32;
-	Value.Int = i;
-	// if (Dirty) *Dirty = true;
-
-	return *this;
-}
-#endif
-
 GVariant &GVariant::operator =(double i)
 {
 	Empty();

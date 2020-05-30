@@ -565,8 +565,6 @@ bool GFont::Destroy()
 			#else
 			ATSUDisposeStyle(d->hFont);
 			#endif
-		#elif defined BEOS
-			DeleteObj(d->hFont);
 		#else
 			LgiAssert(0);
 		#endif
@@ -582,47 +580,6 @@ bool GFont::Destroy()
 CFDictionaryRef GFont::GetAttributes()
 {
 	return d->Attributes;
-}
-#endif
-
-#ifdef BEOS
-#include "GUtf8.h"
-GdcPt2 GFont::StringBounds(const char *s, int len)
-{
-	GdcPt2 Sz(0, GetHeight());
-	GArray<uint32_t> CacheMiss;
-	
-	if (s)
-	{
-		GUtf8Ptr p(s);
-		GUtf8Ptr end(s + (len < 0 ? strlen(s) : len);
-		while (p < end)
-		{
-			uint32_t c = p;
-			if (c < 0x80)
-			{
-				Sz.x += d->CharX[c];
-			}
-			else
-			{
-				int cx = d->UnicodeX.Find(c);
-				if (cx)
-				{
-					Sz.x += cx;
-				}
-				else
-				{
-					CacheMiss.Add(c);
-					printf("%s:%i - Char cache miss: %i (0x%x)\n", _FL, c, c);
-					// LgiAssert(!"Impl me.");
-				}
-			}
-			
-			p++;
-		}
-	}
-	
-	return Sz;
 }
 #endif
 
@@ -1440,25 +1397,6 @@ bool GFont::Create(GFontType *LogFont, GSurface *pSurface)
 
 	return (d->hFont != 0);
 }
-#elif defined BEOS
-
-bool GFont::Create(GFontType *LogFont, GSurface *pSurface)
-{
-	bool Status = false;
-
-	if (LogFont)
-	{
-		Face(LogFont->Info.Face());
-		PointSize(LogFont->Info.PointSize());
-		Italic(LogFont->Info.Italic());
-		Underline(LogFont->Info.Underline());
-		Bold(LogFont->Info.Bold());
-
-		Status = true;
-	}
-	
-	return Status;
-}
 
 #else
 
@@ -1916,13 +1854,6 @@ bool GFontType::GetSystemFont(const char *Which)
 				}
 				else LgiTrace("%s:%i - Info not ok.\n", _FL);
 
-			#elif defined BEOS
-
-				// BeOS has no system wide setting so give a valid default
-				Info.Face("Swis721 BT");
-				Info.PointSize(11);
-				Status = true;
-
 			#elif defined __GTK_H__
 
 				Info.Face(DefFont);
@@ -1978,13 +1909,6 @@ bool GFontType::GetSystemFont(const char *Which)
 				Status = true;
 			}
 
-			#elif defined BEOS
-
-			// BeOS has no system wide setting so give a valid default
-			Info.Face("Swis721 BT");
-			Info.PointSize(11);
-			Status = true;
-
 			#elif defined __GTK_H__
 
 			Info.Face(DefFont);
@@ -2038,13 +1962,6 @@ bool GFontType::GetSystemFont(const char *Which)
 					Status = true;
 				}
 			
-			#elif defined BEOS
-
-				// BeOS has no system wide setting so give a valid default
-				Info.Face("Swis721 BT");
-				Info.PointSize(11);
-				Status = true;
-
 			#elif defined LINUX
 
 			#elif defined __GTK_H__
@@ -2100,13 +2017,6 @@ bool GFontType::GetSystemFont(const char *Which)
 				Status = true;
 			}
 			
-			#elif defined BEOS
-
-			// BeOS has no system wide setting so give a valid default
-			Info.Face("Swis721 BT");
-			Info.PointSize(11);
-			Status = true;
-
 			#elif defined __GTK_H__
 
 			Info.Face(DefFont);
@@ -2218,12 +2128,6 @@ bool GFontType::GetSystemFont(const char *Which)
 			// SetFace("Courier New");
 			SetFace("Consolas");
 			Info.lfHeight = WinPointToHeight(10);
-			Status = true;
-
-			#elif defined BEOS
-
-			Info.Face("Courier10 BT");
-			Info.PointSize(12);
 			Status = true;
 
 			#elif defined __GTK_H__

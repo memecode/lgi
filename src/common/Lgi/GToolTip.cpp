@@ -6,8 +6,6 @@
 	#include <commctrl.h>
 #elif defined(LGI_CARBON)
 	#include <Carbon/Carbon.h>
-#elif !defined(BEOS)
-	#define LGI_NATIVE_TIPS 1
 #endif
 
 #if LGI_NATIVE_TIPS

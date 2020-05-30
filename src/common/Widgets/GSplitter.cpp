@@ -66,8 +66,6 @@ GSplitter::GSplitter()
 	d->Cursor = 0;
 	d->OldCursor = 0;
 	SetStyle(GetStyle() | WS_CLIPCHILDREN);
-	#elif defined BEOS
-	Handle()->SetViewColor(B_TRANSPARENT_COLOR);
 	#endif
 
 	IsVertical(true);

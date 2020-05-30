@@ -20,9 +20,6 @@ class GdcPt2;
 class GRegion;
 class GSurface;
 class GViewI;
-#ifndef BEOS
-class GMessage;
-#endif
 class GMouse;
 class GKey;
 class GWindow;
