@@ -23,6 +23,7 @@ LMutex::LMutex(const char *name)
 	_Count = 0;
 	File = 0;
 	Line = 0;
+	MaxLockTime = -1;
 	_Name = NewStr(name);
 	#ifdef _DEBUG
 	_DebugSem = false;
@@ -63,7 +64,7 @@ LMutex::~LMutex()
 
 char *LMutex::GetName()
 {
-	return _Name;
+	return _Name ? _Name : "LMutex";
 }
 
 void LMutex::SetName(const char *s)

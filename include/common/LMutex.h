@@ -2,6 +2,8 @@
 #ifndef _GMUTEX_H_
 #define _GMUTEX_H_
 
+LgiFunc uint64_t LgiCurrentTime();
+
 /// This is a re-enterant mutex class for thread locking.
 class LgiClass LMutex
 {
@@ -9,6 +11,7 @@ class LgiClass LMutex
 	OsSemaphore _Sem;
 	const char *File;
 	int Line;
+	int MaxLockTime; // Warn if locked too long, default off (-1)
 	#ifdef _DEBUG
 	bool _DebugSem;
 	#endif
@@ -56,6 +59,9 @@ public:
 
 	char *GetName();
 	void SetName(const char *s);
+
+	int GetMaxLock() { return MaxLockTime; }
+	void SetMaxLock(int Ms = -1) { MaxLockTime = Ms; }
 	
 	#ifdef _DEBUG
 	void SetDebug(bool b = true) { _DebugSem = b; }
@@ -68,6 +74,7 @@ public:
 	    bool Locked;
 	    const char *File;
 	    int Line;
+		uint64_t LockTs;
 	
 	public:
 	    Auto(LMutex *s, const char *file, int line)
@@ -75,6 +82,7 @@ public:
 	        LgiAssert(s != NULL);
 	        Locked = (Sem = s) ? Sem->Lock(File = file, Line = line) : 0;
 			LgiAssert(Locked);
+			LockTs = Locked && s->MaxLockTime > 0 ? LgiCurrentTime() : 0;
 	    }
 
 	    Auto(LMutex *s, int timeout, const char *file, int line)
@@ -87,11 +95,22 @@ public:
 				Locked = Sem->LockWithTimeout(timeout, File = file, Line = line);
 			else
 				Locked = Sem->Lock(File = file, Line = line);
+			LockTs = Locked && s->MaxLockTime > 0 ? LgiCurrentTime() : 0;
 	    }
 	    
 	    ~Auto()
 	    {
 	        if (Locked) Sem->Unlock();
+			if (LockTs)
+			{
+				uint64_t Now = LgiCurrentTime();
+				if (Now - LockTs >= Sem->MaxLockTime)
+					LgiTrace(	"Warning: %s locked for %ims (%s:%i)\n",
+								Sem->GetName(),
+								(int)(Now-LockTs),
+								GetFile(),
+								GetLine());
+			}
 	    }
 
 		bool GetLocked() { return Locked; }

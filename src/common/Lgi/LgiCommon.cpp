@@ -1930,7 +1930,7 @@ static LARGE_INTEGER Freq = {0};
 static bool CurTimeInit = false;
 #endif
 
-uint64 LgiCurrentTime()
+uint64_t LgiCurrentTime()
 {
 	#if defined WIN32
 
