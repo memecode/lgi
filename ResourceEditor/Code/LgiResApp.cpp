@@ -3169,7 +3169,7 @@ bool AppWnd::SaveLgi(char *FileName)
 					AppName,
 					MB_OK,
 					FileName,
-					DefsName);
+					DefsName.GetFull().Get());
 		}
 	}
 
