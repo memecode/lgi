@@ -62,7 +62,7 @@ LMutex::~LMutex()
 	DeleteArray(_Name);
 }
 
-char *LMutex::GetName()
+const char *LMutex::GetName()
 {
 	return _Name ? _Name : "LMutex";
 }

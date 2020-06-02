@@ -57,7 +57,7 @@ public:
 	/// Unlocks the semaphore
 	void Unlock();
 
-	char *GetName();
+	const char *GetName();
 	void SetName(const char *s);
 
 	int GetMaxLock() { return MaxLockTime; }

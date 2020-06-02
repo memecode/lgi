@@ -241,6 +241,10 @@ public:
 	if (self->ReqClose == CSNone)
 	{
 		self->ReqClose = CSInRequest;
+		
+		if (!self.d)
+			printf("%s:%i - No priv pointer?\n", _FL);
+		
 		if (!self.d ||
 			!self.d->Wnd ||
 			!self.d->Wnd->OnRequestClose(false))
@@ -361,6 +365,7 @@ GWindow::~GWindow()
 	
 	_Delete();
 	d->OnClose();
+	
 	DeleteObj(Menu);
 	DeleteObj(d);
 	DeleteObj(_Lock);
@@ -518,12 +523,23 @@ void GWindow::Quit(bool DontDelete)
 		LgiCloseApp();
 	}
 	
-	if (d && DontDelete)
-		d->DeleteOnClose = false;
-	
 	if (Wnd)
-	{
 		SetDragHandlers(false);
+
+	if (d && DontDelete)
+	{
+		// If DontDelete is true, we should be already in the destructor of the GWindow.
+		// Which means we DON'T call onQuit, as it's too late to ask the user if they don't
+		// want to close the window. The window IS closed come what may, and the object is
+		// going away. Futhermore we can't access the window's memory after it's deleted and
+		// that may happen if the onQuit is processed after ~GWindow.
+		d->DeleteOnClose = false;
+		
+		if (Wnd)
+			[Wnd.p close];
+	}
+	else if (Wnd)
+	{
 		[Wnd.p performSelectorOnMainThread:@selector(onQuit) withObject:nil waitUntilDone:false];
 	}
 }
