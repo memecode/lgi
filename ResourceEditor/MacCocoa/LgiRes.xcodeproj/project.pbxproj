@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 48;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -29,7 +29,7 @@
 		34CC003D23AAD33500CCAAEA /* lgires.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 34CC003B23AAD33500CCAAEA /* lgires.lr8 */; };
 		34CC003F23AAD34600CCAAEA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34CC003E23AAD34600CCAAEA /* Cocoa.framework */; };
 		34CC004223AAD54200CCAAEA /* Png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC004123AAD54200CCAAEA /* Png.cpp */; };
-		34CC006123AAD5A200CCAAEA /* libpng15.15.4.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CC005423AAD57F00CCAAEA /* libpng15.15.4.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		34CC006123AAD5A200CCAAEA /* libpng15.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CC005423AAD57F00CCAAEA /* libpng15.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34CC006623AAD5DB00CCAAEA /* _StringIcons.gif in Resources */ = {isa = PBXBuildFile; fileRef = 34CC006223AAD5DB00CCAAEA /* _StringIcons.gif */; };
 		34CC006723AAD5DB00CCAAEA /* _DialogIcons.gif in Resources */ = {isa = PBXBuildFile; fileRef = 34CC006323AAD5DB00CCAAEA /* _DialogIcons.gif */; };
 		34CC006823AAD5DB00CCAAEA /* _MenuIcons.gif in Resources */ = {isa = PBXBuildFile; fileRef = 34CC006423AAD5DB00CCAAEA /* _MenuIcons.gif */; };
@@ -106,7 +106,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 73620A5B92B34DD3B0B12540;
+			remoteGlobalIDString = FEA4458D289145EDB6E2BE90;
 			remoteInfo = libpng15;
 		};
 /* End PBXContainerItemProxy section */
@@ -118,7 +118,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				34CC006123AAD5A200CCAAEA /* libpng15.15.4.0.dylib in CopyFiles */,
+				34CC006123AAD5A200CCAAEA /* libpng15.dylib in CopyFiles */,
 				343FB8C82386639C00797ABC /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -277,7 +277,7 @@
 			isa = PBXGroup;
 			children = (
 				34CC005223AAD57F00CCAAEA /* example */,
-				34CC005423AAD57F00CCAAEA /* libpng15.15.4.0.dylib */,
+				34CC005423AAD57F00CCAAEA /* libpng15.dylib */,
 				34CC005623AAD57F00CCAAEA /* libpng15_static.a */,
 				34CC005823AAD57F00CCAAEA /* minigzip */,
 				34CC005A23AAD57F00CCAAEA /* pngtest */,
@@ -321,11 +321,12 @@
 				TargetAttributes = {
 					343FB88D2386621400797ABC = {
 						CreatedOnToolsVersion = 10.1;
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
 			buildConfigurationList = 343FB8892386621400797ABC /* Build configuration list for PBXProject "LgiRes" */;
-			compatibilityVersion = "Xcode 9.3";
+			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -367,9 +368,10 @@
 			remoteRef = 34CC005123AAD57F00CCAAEA /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		34CC005423AAD57F00CCAAEA /* libpng15.15.4.0.dylib */ = {
+		34CC005423AAD57F00CCAAEA /* libpng15.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
+			name = libpng15.dylib;
 			path = libpng15.15.4.0.dylib;
 			remoteRef = 34CC005323AAD57F00CCAAEA /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -599,10 +601,7 @@
 					../../../../../CodeLib/libpng,
 				);
 				INFOPLIST_FILE = Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				OTHER_CFLAGS = (
 					"-DMAC",
 					"-DLGI_COCOA",
@@ -631,10 +630,7 @@
 					../../../../../CodeLib/libpng,
 				);
 				INFOPLIST_FILE = Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				OTHER_CFLAGS = (
 					"-DMAC",
 					"-DLGI_COCOA",
