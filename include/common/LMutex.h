@@ -2,7 +2,7 @@
 #ifndef _GMUTEX_H_
 #define _GMUTEX_H_
 
-LgiFunc uint64_t LgiCurrentTime();
+#include "LCurrentTime.h"
 
 /// This is a re-enterant mutex class for thread locking.
 class LgiClass LMutex

@@ -27,6 +27,7 @@
 #include "LgiClass.h"
 #include "GString.h"
 #include "GStringClass.h"
+#include "LCurrentTime.h"
 
 /// Returns the system path specified
 /// \ingroup Base
@@ -361,13 +362,6 @@ LgiFunc bool LgiGetAppsForMimeType
 	/// -1 means return all matches.
 	int Limit = -1
 );
-
-/// Gets the current clock in milli-seconds. (1,000th of a second)
-/// \ingroup Time
-LgiFunc uint64_t LgiCurrentTime();
-
-/// Get the current clock in micro-seconds (1,000,000th of a second)
-LgiFunc uint64 LgiMicroTime();
 
 // Debug
 
