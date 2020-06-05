@@ -792,6 +792,7 @@ bool LMenuItem::ScanForAccel()
 	if (!d->Shortcut)
 		return false;
 	
+	printf("d->Shortcut=%s\n", d->Shortcut.Get());
 	auto Keys = d->Shortcut.SplitDelimit("+-");
 	if (Keys.Length() > 0)
 	{
@@ -1255,7 +1256,7 @@ bool LMenu::OnKey(GView *v, GKey &k)
 {
 	if (k.Down())
 	{
-		// k.Trace("MenuKey");
+		k.Trace("MenuKey");
 		for (auto a: Accel)
 		{
 			if (a->Match(k))
@@ -1337,7 +1338,7 @@ bool GAccelerator::Match(GKey &k)
 	auto Up = toupper(Press);
 	bool Match = false;
 	
-#if 0
+#if 1
 	printf("GAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s\n",
 		   Up,
 		   Up>=' '?Up:'.',

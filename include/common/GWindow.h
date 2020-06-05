@@ -91,6 +91,8 @@ protected:
 	void SetDragHandlers(bool On);
 
 public:
+	GMemDC DebugDC;
+
 	#ifdef __GTK_H__
 		GWindow(Gtk::GtkWidget *w = NULL);
 	#elif LGI_CARBON

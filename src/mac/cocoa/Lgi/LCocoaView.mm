@@ -239,6 +239,12 @@ struct DndEvent
 	LAutoPool Pool;
 	GScreenDC Dc(self.w);
 	self.w->_Paint(&Dc);
+	
+	/*
+	GWindow *w = self.w->GetWindow();
+	Dc.Op(GDC_SET);
+	Dc.Blt(0, 0, &w->DebugDC);
+	*/
 }
 
 - (void)layout

@@ -19,6 +19,7 @@
 #include "GCss.h"
 #include "LCocoaView.h"
 #include "GPopup.h"
+#include "GDisplayString.h"
 
 #define ADJ_LEFT					1
 #define ADJ_RIGHT					2
@@ -220,12 +221,64 @@ bool GView::_Mouse(GMouse &m, bool Move)
 		auto t = WindowFromPoint(m.x, m.y);
 		if (t)
 		{
+			/*
+			GColour col(255, 0, 255);
+			GArray<GRect> rc;
+			GArray<GString> names;
+			auto w = GetWindow();
+			int yy = 200;
+			bool Debug = !stricmp(t->GetClass(), "CtrlEditbox") && w->DebugDC.X() == 0 && !Move;
+			if (Debug && w)
+			{
+				w->DebugDC.Create(w->X(), w->Y(), System32BitColourSpace);
+				w->DebugDC.Colour(0, 32);
+				w->DebugDC.Rectangle();
+				w->DebugDC.Colour(col);
+			}
+			*/
+			
 			for (auto i = t; i && i != this; i = i->GetParent())
 			{
 				auto p = i->GetPos();
-				m.x -= p.x1;
-				m.y -= p.y1;
+				auto cli = i->GetClient(false);
+				
+				/*
+				if (Debug)
+				{
+					GRect r = p;
+					r.Offset(cli.x1, cli.y1);
+					rc.AddAt(0,r);
+					names.AddAt(0,i->GetClass());
+					printf("%s %s\n", i->GetClass(), p.GetStr());
+				}
+				*/
+
+				m.x -= p.x1 + cli.x1;
+				m.y -= p.y1 + cli.y1;
 			}
+			
+			/*
+			if (Debug)
+			{
+				int x = rc[0].x1, y = rc[0].y1;
+				for (unsigned i=0; i<rc.Length(); i++)
+				{
+					auto &r = rc[i];
+					w->DebugDC.Line(x, y, x+r.x1, y+r.y1);
+					x += r.x1;
+					y += r.y1;
+					
+					GDisplayString ds(SysFont, names[i]);
+					SysFont->Fore(col);
+					SysFont->Transparent(true);
+					ds.Draw(&w->DebugDC, 120-ds.X(), yy);
+					w->DebugDC.Line(120, yy, x, y);
+					yy += 10 + ds.Y();
+				}
+				w->Invalidate();
+			}
+			*/
+			
 			m.Target = t;
 		}
 		
