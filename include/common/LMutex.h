@@ -120,8 +120,12 @@ public:
 	};
 };
 
-
-template<typename T>
+/*
+Use this class to wrap data in a thread safe manner.
+Pass the object it via a pointer during initialization.
+Call the .Lock to get access to it again.
+*/
+template<typename T, bool Own = false>
 class LThreadSafeInterface : public LMutex
 {
 	T *object;
@@ -146,6 +150,12 @@ public:
 			LgiAssert(GetLocked());
 			return tsi->object;
 		}
+		
+		T *Get()
+		{
+			LgiAssert(GetLocked());
+			return tsi->object;
+		}
 	};
 
 	LThreadSafeInterface(T *obj, const char *name = NULL) : LMutex(name ? name : "LThreadSafeInterface")
@@ -156,6 +166,8 @@ public:
 	~LThreadSafeInterface()
 	{
 		Lock(_FL);
+		if (Own)
+			DeleteObj(object);
 	}
 
 	Locked Lock(const char *file, int line)

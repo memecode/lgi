@@ -654,13 +654,20 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 				GRect c = View()->GetClient();
 				bool ClickedThis = c.Overlap(m.x, m.y);
 
-				GRect Cli = View()->GetClient(false);
+				// Convert co-ords from out own local space to be relative to 'Dlg'
+				// the parent dialog.
 				GMouse Ms = m;
 				GdcPt2 Off;
-				View()->WindowVirtualOffset(&Off);
-				Ms.x += Off.x + Cli.x1;
-				Ms.y += Off.y + Cli.y1;
-
+				GViewI *Parent;
+				for (GViewI *i = View(); i && i != (GViewI*)Dlg; i = Parent)
+				{
+					Parent = i->GetParent();
+					GRect Pos = i->GetPos(), Cli;
+					if (Parent)
+						Cli = Parent->GetClient(false);
+					Ms.x += Pos.x1 + Cli.x1;
+					Ms.y += Pos.y1 + Cli.y1;
+				}
 				Dlg->OnMouseClick(Ms);
 
 				if (ClickedThis &&
@@ -3574,7 +3581,12 @@ void ResDialog::OnMouseClick(GMouse &m)
 					{
 						DragGoober = i;
 						DragCtrl = c;
+						// LgiTrace("IN goober[%i]=%s %i,%i\n", i, c->Goobers[i].GetStr(), m.x, m.y);
 						break;
+					}
+					else
+					{
+						// LgiTrace("goober[%i]=%s %i,%i\n", i, c->Goobers[i].GetStr(), m.x, m.y);
 					}
 				}
 			}
