@@ -1973,7 +1973,7 @@ uint64_t LgiCurrentTime()
 	#endif
 }
 
-uint64 LgiMicroTime()
+uint64_t LgiMicroTime()
 {
 	#if defined WIN32
 
