@@ -91,7 +91,9 @@ protected:
 	void SetDragHandlers(bool On);
 
 public:
+	#ifdef _DEBUG
 	GMemDC DebugDC;
+	#endif
 
 	#ifdef __GTK_H__
 		GWindow(Gtk::GtkWidget *w = NULL);

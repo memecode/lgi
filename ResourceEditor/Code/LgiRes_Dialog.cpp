@@ -648,6 +648,7 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 	{
 		if (m.Left())
 		{
+			LgiTrace("Click down=%i %i,%i\n", m.Down(), m.x, m.y);
 			if (Dlg)
 			{
 				bool Processed = false;
@@ -858,6 +859,7 @@ void ResDialogCtrl::OnMouseMove(GMouse &m)
 		int Dy = m.y - DragRgn.y1;
 		if (Dx != 0 || Dy != 0)
 		{
+			LgiTrace("Move %i,%i + %i,%i\n", m.x, m.y, Dx, Dy);
 			if (!Dlg->IsSelected(this))
 			{
 				Dlg->OnSelect(this);
@@ -3058,76 +3060,62 @@ void ResDialog::MoveSelection(int Dx, int Dy)
 {
 	auto It = Selection.begin();
 	ResDialogCtrl *w = *It;
-	if (w)
+	if (!w)
+		return;
+
+	ResDialogCtrl *Parent = w->ParentCtrl();
+	if (!Parent)
+		return;
+
+	// find dimensions of group
+	GRect All = w->View()->GetPos();
+	for (; w; w = *(++It))
+		All.Union(&w->View()->GetPos());
+
+	// limit the move to the top-left corner of the parent's client
+	GRect ParentClient = Parent->Client;
+	if (dynamic_cast<CtrlDlg*>(Parent))
+		ParentClient.ZOff(-ParentClient.x1, -ParentClient.y1);
+
+	if (All.x1 + Dx < ParentClient.x1)
+		Dx = ParentClient.x1 - All.x1;
+	if (All.y1 + Dy < ParentClient.y1)
+		Dy = ParentClient.y1 - All.y1;
+
+	// move the ctrls
+	GRegion Update;
+	for (auto w: Selection)
 	{
-		ResDialogCtrl *Parent = w->ParentCtrl();
-		if (Parent)
+		GRect Old = w->View()->GetPos();
+		GRect New = Old;
+		New.Offset(Dx, Dy);
+
+		// optionally limit the move to the containers bounds
+		GRect *b = w->ParentCtrl()->GetChildArea(w);
+		if (b)
 		{
-			// find dimensions of group
-			GRect All = w->View()->GetPos();
-			for (; w; w = *(++It))
-			{
-				All.Union(&w->View()->GetPos());
-			}
-
-			// limit the move to the top-left corner of the parent's client
-			GRect ParentClient = Parent->Client;
-			if (dynamic_cast<CtrlDlg*>(Parent))
-				ParentClient.ZOff(-ParentClient.x1, -ParentClient.y1);
-
-			if (All.x1 + Dx < ParentClient.x1)
-			{
-				Dx = ParentClient.x1 - All.x1;
-			}
-			if (All.y1 + Dy < ParentClient.y1)
-			{
-				Dy = ParentClient.y1 - All.y1;
-			}
-
-			// move the ctrls
-			GRegion Update;
-			for (auto w: Selection)
-			{
-				GRect Old = w->View()->GetPos();
-				GRect New = Old;
-				New.Offset(Dx, Dy);
-
-				// optionally limit the move to the containers bounds
-				GRect *b = w->ParentCtrl()->GetChildArea(w);
-				if (b)
-				{
-					if (New.x1 < b->x1)
-					{
-						New.Offset(b->x1 - New.x1, 0);
-					}
-					else if (New.x2 > b->x2)
-					{
-						New.Offset(b->x2 - New.x2, 0);
-					}
-					if (New.y1 < b->y1)
-					{
-						New.Offset(0, b->y1 - New.y1);
-					}
-					else if (New.y2 > b->y2)
-					{
-						New.Offset(0, b->y2 - New.y2);
-					}
-				}
-
-				GRect Up = w->AbsPos();
-				Up.Size(-GOOBER_BORDER, -GOOBER_BORDER);
-				Update.Union(&Up);
-
-				w->SetPos(New, false);
-
-				Up = w->AbsPos();
-				Up.Size(-GOOBER_BORDER, -GOOBER_BORDER);
-				Update.Union(&Up);
-			}
-
-			Invalidate(&Update);
+			if (New.x1 < b->x1)
+				New.Offset(b->x1 - New.x1, 0);
+			else if (New.x2 > b->x2)
+				New.Offset(b->x2 - New.x2, 0);
+			if (New.y1 < b->y1)
+				New.Offset(0, b->y1 - New.y1);
+			else if (New.y2 > b->y2)
+				New.Offset(0, b->y2 - New.y2);
 		}
+
+		GRect Up = w->AbsPos();
+		Up.Size(-GOOBER_BORDER, -GOOBER_BORDER);
+		Update.Union(&Up);
+
+		w->SetPos(New, false);
+
+		Up = w->AbsPos();
+		Up.Size(-GOOBER_BORDER, -GOOBER_BORDER);
+		Update.Union(&Up);
 	}
+
+	Invalidate(&Update);
 }
 
 void ResDialog::SelectCtrl(ResDialogCtrl *c)
