@@ -455,7 +455,7 @@ bool ResDialogCtrl::SetStr(ResString *s)
 	}
 	else
 	{
-		LgiTrace("%s:%i - %p::SetStr(NULL)\n", _FL, this);
+		// LgiTrace("%s:%i - %p::SetStr(NULL)\n", _FL, this);
 	}
 
 	return true;
@@ -648,7 +648,7 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 	{
 		if (m.Left())
 		{
-			LgiTrace("Click down=%i %i,%i\n", m.Down(), m.x, m.y);
+			// LgiTrace("Click down=%i %i,%i\n", m.Down(), m.x, m.y);
 			if (Dlg)
 			{
 				bool Processed = false;
@@ -859,7 +859,7 @@ void ResDialogCtrl::OnMouseMove(GMouse &m)
 		int Dy = m.y - DragRgn.y1;
 		if (Dx != 0 || Dy != 0)
 		{
-			LgiTrace("Move %i,%i + %i,%i\n", m.x, m.y, Dx, Dy);
+			// LgiTrace("Move %i,%i + %i,%i\n", m.x, m.y, Dx, Dy);
 			if (!Dlg->IsSelected(this))
 			{
 				Dlg->OnSelect(this);

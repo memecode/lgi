@@ -195,11 +195,16 @@ bool GView::_Mouse(GMouse &m, bool Move)
 	if (_Capturing)
 	{
 		// Convert root NSView coords to capture view coords
-		for (auto i = _Capturing; i && i != this; i = i->GetParent())
+		GViewI *par;
+		for (auto i = _Capturing; i && i != this; i = par)
 		{
-			auto p = i->GetPos();
-			m.x -= p.x1;
-			m.y -= p.y1;
+			par = i->GetParent();
+			GRect cli, p = i->GetPos();
+			if (par)
+				cli = i->GetClient(false);
+
+			m.x -= p.x1 + cli.x1;
+			m.y -= p.y1 + cli.y1;
 		}
 		
 		// if (!m.IsMove()) m.Trace("Capture");
