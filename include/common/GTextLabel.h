@@ -35,9 +35,9 @@ public:
 	const char *GetClass() { return "GTextLabel"; }
 
 	/// Set the text
-	bool Name(const char *n);
+	bool Name(const char *n) override;
 	/// Set the text with a wide string
-	bool NameW(const char16 *n);
+	bool NameW(const char16 *n) override;
 	/// Sets the font used to render the text
 	void SetFont(GFont *Fnt, bool OwnIt = false);
 
@@ -46,9 +46,9 @@ public:
 	/// Sets the text to a number
 	void Value(int64 i);
 	/// Gets the text
-	char *Name() { return GView::Name(); }
+	char *Name() override { return GView::Name(); }
 	/// Gets the text as a wide string
-	char16 *NameW() { return GView::NameW(); }
+	char16 *NameW() override { return GView::NameW(); }
 	/// Word wrap
 	bool GetWrap();
 	/// Sets the use of word wrap

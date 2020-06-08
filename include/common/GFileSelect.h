@@ -59,9 +59,9 @@ public:
 	// Properties
 	
 	/// Returns the first file name selected.
-	char *Name();
+	char *Name() override;
 	/// Sets the file name
-	bool Name(const char *n);
+	bool Name(const char *n) override;
 	/// Returns the n'th file name selected
 	char *operator [](size_t i);
 	/// Returns the number of file names selected

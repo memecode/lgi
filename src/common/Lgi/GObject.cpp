@@ -15,7 +15,7 @@ GBase::~GBase()
 	DeleteArray(_Name16);
 }
 
-char *GBase::Name()
+const char *GBase::Name()
 {
 	if (!_Name8 && _Name16)
 	{
@@ -36,7 +36,7 @@ bool GBase::Name(const char *n)
 	return _Name8 != 0;
 }
 
-char16 *GBase::NameW()
+const char16 *GBase::NameW()
 {
 	if (!_Name16 && _Name8)
 	{

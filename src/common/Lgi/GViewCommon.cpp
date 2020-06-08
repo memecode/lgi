@@ -2117,7 +2117,7 @@ bool GView::Name(const char *n)
 	return true;
 }
 
-char *GView::Name()
+const char *GView::Name()
 {
 	#if WINNATIVE
 	if (_View)
@@ -2145,7 +2145,7 @@ bool GView::NameW(const char16 *n)
 	return true;
 }
 
-char16 *GView::NameW()
+const char16 *GView::NameW()
 {
 	#if WINNATIVE
 	if (_View)

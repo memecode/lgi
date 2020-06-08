@@ -65,8 +65,8 @@ public:
 	int64 Value() { return Down; }
 	void Value(int64 i);
 
-	char *Name() { return GView::Name(); }
-	bool Name(const char *n);
+	char *Name() override { return GView::Name(); }
+	bool Name(const char *n) override;
 
 	/// Gets the icon index into the parent GToolBar's image list
 	int Image() { return ImgIndex; }

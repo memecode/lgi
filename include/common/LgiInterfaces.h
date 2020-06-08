@@ -461,8 +461,8 @@ public:
 	// Name and value
 	virtual bool Name(const char *n) = 0;
 	virtual bool NameW(const char16 *n) = 0;
-	virtual char *Name() = 0;
-	virtual char16 *NameW() = 0;
+	virtual const char *Name() = 0;
+	virtual const char16 *NameW() = 0;
 	virtual int64 Value() = 0;
 	virtual void Value(int64 i) = 0;
 	virtual const char *GetClass() { return "GViewI"; } // mainly for debugging

@@ -1270,7 +1270,7 @@ bool GWindow::Name(const char *n)
 	return GBase::Name(n);
 }
 
-char *GWindow::Name()
+const char *GWindow::Name()
 {
 	return GBase::Name();
 }

@@ -2357,15 +2357,20 @@ void ResDialog::OnShowLanguages()
 	OnLanguageChange();
 }
 
-char *ResDialog::Name()
+const char *ResDialog::Name()
 {
 	GViewI *v = Children[0];
+	printf("v=%p len=%i\n", v, (int)Children.Length());
+
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(v);
-	if (Ctrl && Ctrl->GetStr() && Ctrl->GetStr()->GetDefine())
-	{
-		return Ctrl->GetStr()->GetDefine();
-	}
-	return (char*)"<no object>";
+	if (!Ctrl)
+		return "#no_ctrl";
+	if (!Ctrl->GetStr())
+		return "#no_str";
+	if (!Ctrl->GetStr()->GetDefine())
+		return "#no_defined";
+	
+	return Ctrl->GetStr()->GetDefine();
 }
 
 bool ResDialog::Name(const char *n)

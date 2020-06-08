@@ -47,9 +47,9 @@ public:
 	GBase();	
 	virtual ~GBase();
 
-	virtual char *Name();
+	virtual const char *Name();
 	virtual bool Name(const char *n);
-	virtual char16 *NameW();
+	virtual const char16 *NameW();
 	virtual bool NameW(const char16 *n);
 };
 

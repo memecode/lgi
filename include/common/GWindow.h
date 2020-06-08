@@ -246,8 +246,8 @@ public:
 
 		// Props
 		OsWindow WindowHandle() { return Wnd; }
-		bool Name(const char *n);
-		char *Name();
+		bool Name(const char *n) override;
+		const char *Name() override;
 		bool SetPos(GRect &p, bool Repaint = false);
 		GRect &GetClient(bool InClientSpace = true);
 	

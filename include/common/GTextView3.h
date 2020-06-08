@@ -322,10 +322,10 @@ public:
 	const char *GetClass() { return "GTextView3"; }
 
 	// Data
-	char *Name();
-	bool Name(const char *s);
-	char16 *NameW();
-	bool NameW(const char16 *s);
+	char *Name() override;
+	bool Name(const char *s) override;
+	char16 *NameW() override;
+	bool NameW(const char16 *s) override;
 	int64 Value();
 	void Value(int64 i);
 	const char *GetMimeType() { return "text/plain"; }

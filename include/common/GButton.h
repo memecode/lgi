@@ -92,10 +92,10 @@ public:
 	virtual void OnClick();
 
 	// Impl
-	char *Name() { return GView::Name(); }
-	char16 *NameW() { return GView::NameW(); }
-	bool Name(const char *n);
-	bool NameW(const char16 *n);
+	char *Name() override { return GView::Name(); }
+	char16 *NameW() override { return GView::NameW(); }
+	bool Name(const char *n) override;
+	bool NameW(const char16 *n) override;
 	void SetFont(GFont *Fnt, bool OwnIt = false);
 	int OnNotify(GViewI *Ctrl, int Flags);
 

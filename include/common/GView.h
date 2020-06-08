@@ -418,19 +418,19 @@ public:
 	/// text between utf-8 and wide to satify any requirement. Generally once the opposing
 	/// version of the string is required both the utf-8 and wide copies of the string
 	/// remain cached in RAM until the Name is changed.
-	bool Name(const char *n);
+	bool Name(const char *n) override;
 	
 	/// Returns the utf-8 text associated with this view
-	char *Name();
+	const char *Name() override;
 	
 	/// Sets the wide char text associated with this view
-	virtual bool NameW(const char16 *n);
+	bool NameW(const char16 *n) override;
 
 	/// \brief Returns the wide char text associated with this view
 	///
 	/// On Win32 the wide characters are 16 bits, on unix systems they are 32-bit 
 	/// characters.
-	virtual char16 *NameW();
+	const char16 *NameW() override;
 
 	/// \brief Gets the font this control should draw with.
 	///

@@ -379,7 +379,7 @@ public:
 	void Checked(bool c);
 	/// \brief Set the text of the item
 	/// \sa LSubMenu::AppendItem()
-	bool Name(const char *n);
+	bool Name(const char *n) override;
 	/// Enable or disable the item
 	void Enabled(bool e);
 	void Visible(bool v);
@@ -392,7 +392,7 @@ public:
 	/// Get the id
 	int Id();
 	/// Get the text of the item
-	char *Name();
+	char *Name() override;
 	/// Return whether this item is a separator
 	bool Separator();
 	/// Return whether this item has a check mark

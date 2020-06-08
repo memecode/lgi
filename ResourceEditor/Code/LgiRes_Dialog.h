@@ -173,8 +173,8 @@ public:
 	void EnumCtrls(List<ResDialogCtrl> &Ctrls);
 
 	// GObj overrides
-	char *Name();
-	bool Name(const char *n);
+	const char *Name() override;
+	bool Name(const char *n) override;
 
 	// Factory
 	char *StringFromRef(int Ref);
