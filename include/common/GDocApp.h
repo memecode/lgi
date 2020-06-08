@@ -47,9 +47,9 @@ protected:
 	/// Call this to destroy the window, usually in the destuctor of your main window class.
 	bool			_Destroy();
 	/// Use the open file dialog to select a document to open.
-	bool			_OpenFile(char *File, bool ReadOnly);
+	bool			_OpenFile(const char *File, bool ReadOnly);
 	/// Save the current document.
-	bool			_SaveFile(char *File);
+	bool			_SaveFile(const char *File);
 
 	bool			_DoSerialize(bool Write);
 	bool			_SerializeFile(bool Write);
@@ -76,9 +76,9 @@ public:
 	/// Gets the install mode
 	GDocAppInstallMode GetInstallMode();
 	/// Sets the current file name.
-	void SetCurFile(char *f);
+	void SetCurFile(const char *f);
 	/// Gets the current file name.
-	char *GetCurFile();
+	const char *GetCurFile();
 	/// Sets the dirty state. If the doc is clean you are not asked to save it when you close the window.
 	bool SetDirty(bool Dirty = true);
 	/// Gets the dirty state.

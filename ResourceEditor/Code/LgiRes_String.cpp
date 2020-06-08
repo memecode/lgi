@@ -1437,7 +1437,7 @@ bool ResStringGroup::Write(GXmlTag *t, SerialiseContext &Ctx)
 	bool Status = true;
 
 	t->SetTag("string-group");
-	char *n = Ctx.Format == XmlFile ? EncodeXml(Name()) : NewStr(Name());
+	auto n = Ctx.Format == XmlFile ? EncodeXml(Name()) : NewStr(Name());
 	t->SetAttr("Name", n);
 	DeleteArray(n);
 

@@ -59,7 +59,7 @@ public:
 	/// Sets the selected item by name
 	bool Name(const char *n) override;
 	/// Returns the selected item's name
-	char *Name() override;
+	const char *Name() override;
 	/// Gets the menu used
 	LSubMenu *GetMenu();
 	/// Sets the menu used

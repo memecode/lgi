@@ -129,7 +129,7 @@ public:
 	const char *GetClass() override { return "GTabPage"; }
 	GColour GetBackground();
 
-	char *Name() override;
+	const char *Name() override;
 	bool Name(const char *n) override;
 	bool HasButton();
 	void HasButton(bool b);

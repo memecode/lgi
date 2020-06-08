@@ -171,7 +171,7 @@ public:
 	~DocEdit();
 
 	const char *GetClass() override { return "DocEdit"; }
-	char *Name() override { return GTextView3::Name(); }
+	const char *Name() override { return GTextView3::Name(); }
 	bool Name(const char *s) override { return GTextView3::Name(s); }
 	bool SetPourEnabled(bool b);
 	int GetTopPaddingPx();

@@ -206,7 +206,7 @@ GToolTip::~GToolTip()
 	DeleteObj(d);
 }
 
-int GToolTip::NewTip(char *Name, GRect &Pos)
+int GToolTip::NewTip(const char *Name, GRect &Pos)
 {
 	int Status = 0;
 

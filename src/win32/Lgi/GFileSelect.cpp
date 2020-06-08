@@ -207,7 +207,7 @@ GFileSelect::~GFileSelect()
 	DeleteObj(d);
 }
 
-char *GFileSelect::Name()
+const char *GFileSelect::Name()
 {
 	return d->Files[0];
 }
@@ -377,10 +377,10 @@ bool GFileSelect::OpenFolder()
 	Status = GetSaveFileNameW(&Info) != 0;
 	d->AfterDlg(Info, Status);
 	
-	char *f = Name();
+	auto f = d->Files.Length() ? d->Files[0] : NULL;
 	if (f)
 	{
-		char *d = strrchr(f, DIR_CHAR);
+		auto d = strrchr(f, DIR_CHAR);
 		if (d && d > f)
 		{
 			if (d[-1] == ':')

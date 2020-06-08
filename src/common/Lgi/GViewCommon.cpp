@@ -1710,7 +1710,7 @@ void GView::SetCtrlValue(int Id, int64 i)
 	if (w) w->Value(i);
 }
 
-char *GView::GetCtrlName(int Id)
+const char *GView::GetCtrlName(int Id)
 {
 	ThreadCheck();
 
@@ -2105,7 +2105,7 @@ bool GView::Name(const char *n)
 	{
 		#if WINNATIVE
 		
-		char16 *Temp = GBase::NameW();
+		auto Temp = GBase::NameW();
 		SetWindowTextW(_View, Temp ? Temp : L"");
 		
 		#endif
@@ -2136,7 +2136,7 @@ bool GView::NameW(const char16 *n)
 	#if WINNATIVE
 	if (_View && n)
 	{
-		char16 *Txt = GBase::NameW();
+		auto Txt = GBase::NameW();
 		SetWindowTextW(_View, Txt);
 	}
 	#endif

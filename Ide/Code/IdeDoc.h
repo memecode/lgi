@@ -54,8 +54,8 @@ public:
 
 	// Source tools
 	bool BuildIncludePaths(GArray<GString> &Paths, IdePlatform Platform, bool IncludeSysPaths);
-	bool BuildHeaderList(char16 *Cpp, GArray<char*> &Headers, GArray<GString> &IncPaths);
-	bool FindDefn(char16 *Def, char16 *Source, List<DefnInfo> &Matches);
+	bool BuildHeaderList(const char16 *Cpp, GArray<char*> &Headers, GArray<GString> &IncPaths);
+	bool FindDefn(char16 *Def, const char16 *Source, List<DefnInfo> &Matches);
 
 	// Events
 	void OnLineChange(int Line);

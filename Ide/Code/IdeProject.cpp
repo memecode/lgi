@@ -2694,7 +2694,7 @@ void IdeProject::CreateProject()
 	Expanded(true);	
 }
 
-ProjectStatus IdeProject::OpenFile(char *FileName)
+ProjectStatus IdeProject::OpenFile(const char *FileName)
 {
 	GProfile Prof("IdeProject::OpenFile");
 	Prof.HideResultsIfBelow(1000);
@@ -3204,7 +3204,7 @@ char *GetQuotedStr(char *Str)
 	return 0;
 }
 
-void IdeProject::ImportDsp(char *File)
+void IdeProject::ImportDsp(const char *File)
 {
 	if (File && FileExists(File))
 	{

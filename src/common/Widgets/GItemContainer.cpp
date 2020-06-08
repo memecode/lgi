@@ -1156,7 +1156,7 @@ GItemEdit::~GItemEdit()
 	{
 		if (d->Edit && !d->Esc)
 		{
-			char *Str = d->Edit->Name();
+			auto Str = d->Edit->Name();
 			#if DEBUG_EDIT_LABEL
 			LgiTrace("%s:%i - ~GItemEdit, updating item(%i) with '%s'\n", _FL,
 				d->Index, Str);

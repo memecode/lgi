@@ -203,7 +203,7 @@ public:
 		return 0;
 	}
 
-	void Load(char *File)
+	void Load(const char *File)
 	{
 		LHashTbl<ConstStrKey<char,false>, bool> Except(0, false);
 		Except.Add("GString.cpp", true);

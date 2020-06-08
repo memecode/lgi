@@ -178,7 +178,7 @@ bool GCombo::Name(const char *n)
 	return true;
 }
 
-char *GCombo::Name()
+const char *GCombo::Name()
 {
 	if (d->Value >= 0 &&
 		d->Value < (ssize_t)d->Strs.Length())

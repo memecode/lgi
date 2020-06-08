@@ -573,7 +573,7 @@ int FindSymbolDlg::OnNotify(GViewI *v, int f)
 		{
 			if (f != LK_RETURN)
 			{
-				char *Str = v->Name();
+				auto Str = v->Name();
 				if (Str && strlen(Str) > 2)
 				{
 					// Create a search

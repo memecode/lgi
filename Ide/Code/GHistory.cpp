@@ -161,7 +161,7 @@ void GHistory::Value(int64 i)
 	else LgiTrace("%s:%i - No list?\n", _FL);
 }
 
-int GHistory::Add(char *Str)
+int GHistory::Add(const char *Str)
 {
 	if (!Str)
 		return -1;

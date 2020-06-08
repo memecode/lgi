@@ -29,7 +29,7 @@ public:
 	bool Detach();
 
 	bool PourAll();
-	char *Name();
+	const char *Name();
 	bool Name(const char *n);
 	
 	virtual void Raise();

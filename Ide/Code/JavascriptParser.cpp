@@ -27,7 +27,7 @@ Known bugs:
 	while (*c && (IsAlpha(*c) || IsDigit(*c) || strchr("_",*c))) \
 		c++;
 
-bool BuildJsDefnList(char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug)
+bool BuildJsDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug)
 {
 	if (!Source)
 		return false;

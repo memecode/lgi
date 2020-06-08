@@ -41,8 +41,8 @@ public:
 	bool OnLayout(GViewLayoutInfo &Inf);
 	void OnStyleChange();
 
-	char *Name() override { return GView::Name(); }
-	char16 *NameW() override { return GView::NameW(); }
+	const char *Name() override { return GView::Name(); }
+	const char16 *NameW() override { return GView::NameW(); }
 	bool Name(const char *n) override;
 	bool NameW(const char16 *n) override;
 	void SetFont(GFont *Fnt, bool OwnIt = false);
@@ -68,8 +68,8 @@ public:
 	const char *GetClass() { return "GRadioButton"; }
 
 	// Impl
-	char *Name() override { return GView::Name(); }
-	char16 *NameW() override { return GView::NameW(); }
+	const char *Name() override { return GView::Name(); }
+	const char16 *NameW() override { return GView::NameW(); }
 	bool Name(const char *n) override;
 	bool NameW(const char16 *n) override;
 	int64 Value();

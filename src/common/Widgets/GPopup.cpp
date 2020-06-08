@@ -1089,7 +1089,7 @@ void GDropDown::OnPaint(GSurface *pDC)
 		pDC->Line(Cx+i, Cy+i, Cx+ArrowWidth-i, Cy+i);
 	}
 
-	char *Nm = Name();
+	auto Nm = Name();
 	if (Nm && X() >= 32)
 	{
 		GDisplayString Ds(SysFont, Nm);

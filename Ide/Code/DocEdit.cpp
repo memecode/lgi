@@ -414,12 +414,12 @@ bool DocEdit::OnMenu(GDocView *View, int Id, void *Context)
 				const char *Template = Doc->GetProject()->GetFunctionComment();
 				if (ValidStr(Template))
 				{
-					char16 *n = NameW();
+					const char16 *n = NameW();
 					if (n)
 					{
 						List<char16> Tokens;
 						char16 *s;
-						char16 *p = n + GetCaret();
+						char16 *p = (char16*)n + GetCaret();
 						char16 OpenBrac[] = { '(', 0 };
 						char16 CloseBrac[] = { ')', 0 };
 						ssize_t OpenBracketIndex = -1;							

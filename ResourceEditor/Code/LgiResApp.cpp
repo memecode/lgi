@@ -51,7 +51,7 @@ const char *TypeNames[] = {
 	0};
 
 //////////////////////////////////////////////////////////////////////////////
-ResFileFormat GetFormat(char *File)
+ResFileFormat GetFormat(const char *File)
 {
 	ResFileFormat Format = Lr8File;
 	char *Ext = LgiGetExtension(File);
@@ -63,7 +63,7 @@ ResFileFormat GetFormat(char *File)
 	return Format;
 }
 
-char *EncodeXml(char *Str, int Len)
+char *EncodeXml(const char *Str, int Len)
 {
 	char *Ret = 0;
 	
@@ -71,8 +71,8 @@ char *EncodeXml(char *Str, int Len)
 	{
 		GStringPipe p;
 		
-		char *s = Str;
-		for (char *e = Str; e && *e && (Len < 0 || ((e-Str) < Len)); )
+		const char *s = Str;
+		for (const char *e = Str; e && *e && (Len < 0 || ((e-Str) < Len)); )
 		{
 			switch (*e)
 			{
@@ -140,14 +140,14 @@ char *EncodeXml(char *Str, int Len)
 	return Ret;
 }
 
-char *DecodeXml(char *Str, int Len)
+char *DecodeXml(const char *Str, int Len)
 {
 	if (Str)
 	{
 		GStringPipe p;
 		
-		char *s = Str;
-		for (char *e = Str; e && *e && (Len < 0 || ((e-Str) < Len)); )
+		const char *s = Str;
+		for (const char *e = Str; e && *e && (Len < 0 || ((e-Str) < Len)); )
 		{
 			switch (*e)
 			{
@@ -195,7 +195,7 @@ char *DecodeXml(char *Str, int Len)
 					else if (isalpha(*e))
 					{
 						// named entity
-						char *Name = e;
+						const char *Name = e;
 						while (*e && *e != ';') e++;
 						auto Len = e - Name;
 						if (Len == 3 && strnicmp(Name, "amp", Len) == 0)
@@ -821,7 +821,7 @@ int FieldView::OnNotify(GViewI *Ctrl, int Flags)
 					s.Parent(this);
 					if (s.Open())
 					{
-						char *File = App->GetCurFile();
+						auto File = App->GetCurFile();
 						if (File)
 						{
 							GFile::Path p = File;
@@ -1678,7 +1678,7 @@ ResStringGroup *AppWnd::GetDialogSymbols()
 				ResStringGroup *Grp = dynamic_cast<ResStringGroup*>(r);
 				if (Grp)
 				{
-					char *ObjName = Grp->Wnd()->Name();
+					auto ObjName = Grp->Wnd()->Name();
 					if (ObjName && stricmp(ObjName, StrDialogSymbols) == 0)
 					{
 						return Grp;
@@ -2007,7 +2007,7 @@ class ResCompare : public GWindow, public GLgiRes
 	LList *Lst;
 
 public:
-	ResCompare(char *File1, char *File2)
+	ResCompare(const char *File1, const char *File2)
 	{
 		Lst = 0;
 		GRect p;
@@ -2517,7 +2517,7 @@ bool AppWnd::Empty()
 	return true;
 }
 
-bool AppWnd::OpenFile(char *FileName, bool Ro)
+bool AppWnd::OpenFile(const char *FileName, bool Ro)
 {
 	if (stristr(FileName, ".lr8") ||
 		stristr(FileName, ".xml"))
@@ -2532,7 +2532,7 @@ bool AppWnd::OpenFile(char *FileName, bool Ro)
 	return false;
 }
 
-bool AppWnd::SaveFile(char *FileName)
+bool AppWnd::SaveFile(const char *FileName)
 {
 	if (stristr(FileName, ".lr8") ||
 		stristr(FileName, ".xml"))
@@ -2593,7 +2593,7 @@ bool AppWnd::TestLgi(bool Quite)
 	return Status;
 }
 
-bool AppWnd::LoadLgi(char *FileName)
+bool AppWnd::LoadLgi(const char *FileName)
 {
 	bool Status = false;
 
@@ -2751,8 +2751,8 @@ void SerialiseContext::PostLoad(AppWnd *App)
 
 int DialogNameCompare(ResDialog *a, ResDialog *b, NativeInt Data)
 {
-	char *A = (a)?a->Name():0;
-	char *B = (b)?b->Name():0;
+	const char *A = (a)?a->Name():0;
+	const char *B = (b)?b->Name():0;
 	if (A && B) return stricmp(A, B);
 	return -1;
 }
@@ -3046,7 +3046,7 @@ bool AppWnd::WriteDefines(GFile &Defs)
 	return Status;
 }
 
-bool AppWnd::SaveLgi(char *FileName)
+bool AppWnd::SaveLgi(const char *FileName)
 {
 	bool Status = false;
 
@@ -3428,7 +3428,7 @@ void TokLine(GArray<char*> &T, char *Line)
 	}
 }
 
-bool AppWnd::LoadWin32(char *FileName)
+bool AppWnd::LoadWin32(const char *FileName)
 {
 	bool Status = false;
 	GFileSelect Select;

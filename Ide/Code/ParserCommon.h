@@ -47,7 +47,7 @@ public:
 		Line = d.Line;
 	}
 	
-	void Set(DefnType type, char *file, GString s, int line)
+	void Set(DefnType type, const char *file, GString s, int line)
 	{
 		if (s(0) == ')')
 			printf("%s:%i - Unexpected ')'.\n", _FL);
@@ -130,7 +130,7 @@ extern const char *TypeToStr(DefnType t);
 
 extern bool BuildCppDefnList
 (
-	char *FileName,
+	const char *FileName,
 	char16 *Cpp,
 	GArray<DefnInfo> &Funcs,
 	/// Use DefnType bits
@@ -138,10 +138,10 @@ extern bool BuildCppDefnList
 	bool Debug = false
 );
 
-extern bool BuildPyDefnList(char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
-extern bool BuildJsDefnList(char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
+extern bool BuildPyDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
+extern bool BuildJsDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
 
-inline bool BuildDefnList(char *FileName, char16 *Source, GArray<DefnInfo> &Funcs, int LimitTo, bool Debug = false)
+inline bool BuildDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Funcs, int LimitTo, bool Debug = false)
 {
 	auto Ext = LgiGetExtension(FileName);
 	auto Fn = BuildCppDefnList;

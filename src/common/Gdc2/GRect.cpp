@@ -293,7 +293,7 @@ char *GRect::GetStr()
 	return b;
 }
 
-bool GRect::SetStr(char *s)
+bool GRect::SetStr(const char *s)
 {
 	bool Status = false;
 	if (s)

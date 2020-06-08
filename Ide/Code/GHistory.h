@@ -25,7 +25,7 @@ public:
 	/// Call after you change the list of strings
 	void Update();
 	void OnPopupClose();
-	int Add(char *s);
+	int Add(const char *s);
 	
 	// Impl
 	bool OnLayout(GViewLayoutInfo &Inf);

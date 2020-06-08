@@ -161,7 +161,7 @@ void GTextLabel::SetFont(GFont *Fnt, bool OwnIt)
 
 int64 GTextLabel::Value()
 {
-	char *n = Name();
+	auto n = Name();
 	return (n) ? Atoi(n) : 0;
 }
 

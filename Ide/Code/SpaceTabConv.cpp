@@ -1,18 +1,18 @@
 #include "GMem.h"
 #include "GContainers.h"
 
-char *SpacesToTabs(char *Text, int TabSize)
+char *SpacesToTabs(const char *Text, int TabSize)
 {
 	GStringPipe p(4 << 10);
 	
 	if (Text)
 	{
 		int	x = 0;
-		for	(char *s = Text; s && *s;  )
+		for	(const char *s = Text; s && *s;  )
 		{
 			if (*s == ' ')
 			{
-				char *Sp = s;
+				const char *Sp = s;
 				if (s[1] == ' ')
 				{
 					while (*s == ' ')
@@ -47,7 +47,7 @@ char *SpacesToTabs(char *Text, int TabSize)
 			}
 			else
 			{
-				char *e = s;
+				const char *e = s;
 				while (*e && *e != ' ' && *e != '\n' && *e != '\t') e++;
 				auto Len = e-s;
 				p.Push(s, Len);
@@ -60,14 +60,14 @@ char *SpacesToTabs(char *Text, int TabSize)
 	return p.NewStr();
 }
 
-char *TabsToSpaces(char *Text, int TabSize)
+char *TabsToSpaces(const char *Text, int TabSize)
 {
 	GStringPipe p(4 << 10);
 	
 	if (Text)
 	{
 		int x = 0;
-		for (char *s = Text; s && *s; )
+		for (const char *s = Text; s && *s; )
 		{
 			if (*s == '\t')
 			{
@@ -89,7 +89,7 @@ char *TabsToSpaces(char *Text, int TabSize)
 			}
 			else
 			{
-				char *e = s;
+				const char *e = s;
 				while (*e && *e != '\n' && *e != '\t') e++;
 				auto Len = e-s;
 				p.Push(s, Len);

@@ -498,7 +498,7 @@ public:
 	virtual GViewI *FindControl(int Id) = 0;
 	virtual int64 GetCtrlValue(int Id) = 0;
 	virtual void SetCtrlValue(int Id, int64 i) = 0;
-	virtual char *GetCtrlName(int Id) = 0;
+	virtual const char *GetCtrlName(int Id) = 0;
 	virtual void SetCtrlName(int Id, const char *s) = 0;
 	virtual bool GetCtrlEnabled(int Id) = 0;
 	virtual void SetCtrlEnabled(int Id, bool Enabled) = 0;

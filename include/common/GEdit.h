@@ -84,9 +84,9 @@ public:
 	#if WINNATIVE
 	GMessage::Result OnEvent(GMessage *Msg);
 	void OnFocus(bool f);
-	char *Name() override;
+	const char *Name() override;
 	bool Name(const char *s) override;
-	char16 *NameW() override;
+	const char16 *NameW() override;
 	bool NameW(const char16 *s) override;
 	#else
 	bool Paste();

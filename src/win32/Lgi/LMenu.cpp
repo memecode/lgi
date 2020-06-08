@@ -544,7 +544,7 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 	bool Disabled = TestFlag(Flags, ODS_DISABLED);
 	bool Checked = TestFlag(Flags, ODS_CHECKED);
 	GRect r(0, 0, pDC->X()-1, pDC->Y()-1);
-	char *Text = Name();
+	auto Text = Name();
 
 	if (Separator())
 	{
@@ -654,10 +654,10 @@ bool LMenuItem::ScanForAccel()
 	}
 	else
 	{
-		char *n = GBase::Name();
+		auto n = GBase::Name();
 		if (n)
 		{
-			char *Tab = strchr(n, '\t');
+			auto Tab = strchr(n, '\t');
 			if (Tab)
 				Accel = Tab + 1;
 		}
@@ -924,7 +924,7 @@ bool LMenuItem::Name(const char *Txt)
 		if (n)
 		{
 			// Set OS menu structure
-			Info.dwTypeData = GBase::NameW();
+			Info.dwTypeData = (LPWSTR)GBase::NameW();
 			Info.cch = (UINT) StrlenW(GBase::NameW());
 			Info.fType |= MFT_STRING;
 			Info.fMask |= MIIM_TYPE | MIIM_DATA;
@@ -1011,7 +1011,7 @@ void LMenuItem::Visible(bool i)
 }
 
 int LMenuItem::Id() { return Info.wID; }
-char *LMenuItem::Name() { return GBase::Name(); }
+const char *LMenuItem::Name() { return GBase::Name(); }
 bool LMenuItem::Separator() { return (Info.fType & MFT_SEPARATOR) != 0; }
 bool LMenuItem::Checked() { return (Info.fState & MF_CHECKED) != 0; }
 bool LMenuItem::Enabled()
@@ -1150,7 +1150,7 @@ int LMenu::_OnEvent(GMessage *Msg)
 						int Index=0;
 						for (auto i: Menu->Items)
 						{
-							char *n = i->Name();
+							auto n = i->Name();
 							if (n)
 							{
 								char *Amp = strchr(n, '&');

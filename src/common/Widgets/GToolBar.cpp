@@ -541,7 +541,7 @@ void GToolButton::Layout()
 		return;
 
 	// Text
-	char *s = Name();
+	auto s = Name();
 	if (!ToolBar->d->ShowTextLabels() || !s)
 		return;
 

@@ -635,7 +635,7 @@ void VcFolder::Select(bool b)
 		if (GetBranches())
 			OnBranchesChange();
 
-		char *Ctrl = d->Lst->GetWindow()->GetCtrlName(IDC_FILTER);
+		auto Ctrl = d->Lst->GetWindow()->GetCtrlName(IDC_FILTER);
 		GString Filter = ValidStr(Ctrl) ? Ctrl : NULL;
 
 		if (d->CurFolder != this)

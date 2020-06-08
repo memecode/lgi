@@ -320,7 +320,7 @@ void EditTray::OnFunctionList(GMouse &m)
 {
 	GArray<DefnInfo> Funcs;
 
-	if (BuildDefnList(Doc->GetFileName(), Ctrl->NameW(), Funcs, DefnNone /*DefnFunc | DefnClass*/))
+	if (BuildDefnList(Doc->GetFileName(), (char16*)Ctrl->NameW(), Funcs, DefnNone /*DefnFunc | DefnClass*/))
 	{
 		LSubMenu s;
 		GArray<DefnInfo*> a;					
@@ -774,7 +774,7 @@ public:
 			Ctrl == Edit &&
 			(!Flags || Flags == GNotifyDocChanged))
 		{
-			char *s = Ctrl->Name();
+			auto s = Ctrl->Name();
 			if (ValidStr(s))
 				Update(s);
 		}
@@ -1336,7 +1336,7 @@ void IdeDoc::SearchSymbol()
 	}
 	
 	ssize_t Cur = d->Edit->GetCaret();
-	char16 *Txt = d->Edit->NameW();
+	auto Txt = d->Edit->NameW();
 	if (Cur >= 0 &&
 		Txt != NULL)
 	{
@@ -1699,7 +1699,7 @@ int IdeDoc::OnNotify(GViewI *v, int f)
 				break;
 			}
 			
-			char *SearchStr = v->Name();
+			auto SearchStr = v->Name();
 			if (ValidStr(SearchStr))
 			{
 				if (!d->FilePopup)
@@ -1747,7 +1747,7 @@ int IdeDoc::OnNotify(GViewI *v, int f)
 				break;
 			}
 			
-			char *SearchStr = v->Name();
+			auto SearchStr = v->Name();
 			if (ValidStr(SearchStr))
 			{
 				if (!d->MethodPopup)
@@ -1756,7 +1756,7 @@ int IdeDoc::OnNotify(GViewI *v, int f)
 				{
 					// Populate with symbols
 					d->MethodPopup->All.Length(0);
-					BuildDefnList(GetFileName(), d->Edit->NameW(), d->MethodPopup->All, DefnFunc);
+					BuildDefnList(GetFileName(), (char16*)d->Edit->NameW(), d->MethodPopup->All, DefnFunc);
 
 					// Update list elements...
 					d->MethodPopup->OnNotify(v, f);
@@ -1777,7 +1777,7 @@ int IdeDoc::OnNotify(GViewI *v, int f)
 				break;
 			}
 			
-			char *SearchStr = v->Name();
+			auto SearchStr = v->Name();
 			if (ValidStr(SearchStr))
 			{
 				if (!d->SymPopup)
@@ -1926,7 +1926,7 @@ bool IdeDoc::BuildIncludePaths(GArray<GString> &Paths, IdePlatform Platform, boo
 	return Status;
 }
 
-bool IdeDoc::BuildHeaderList(char16 *Cpp, GArray<char*> &Headers, GArray<GString> &IncPaths)
+bool IdeDoc::BuildHeaderList(const char16 *Cpp, GArray<char*> &Headers, GArray<GString> &IncPaths)
 {
 	GAutoString c8(WideToUtf8(Cpp));
 	if (!c8)
@@ -1941,13 +1941,13 @@ bool MatchSymbol(DefnInfo *Def, char16 *Symbol)
 
 	GBase o;
 	o.Name(Def->Name);
-	char16 *Name = o.NameW();
+	auto Name = o.NameW();
 
-	char16 *Sep = StristrW(Name, Dots);
-	char16 *Start = Sep ? Sep : Name;
+	auto Sep = StristrW((char16*)Name, Dots);
+	auto Start = Sep ? Sep : Name;
 	// char16 *End = StrchrW(Start, '(');
 	ssize_t Len = StrlenW(Symbol);
-	char16 *Match = StristrW(Start, Symbol);
+	char16 *Match = StristrW((char16*)Start, Symbol);
 
 	if (Match) // && Match + Len <= End)
 	{
@@ -1968,7 +1968,7 @@ bool MatchSymbol(DefnInfo *Def, char16 *Symbol)
 	return false;
 }
 
-bool IdeDoc::FindDefn(char16 *Symbol, char16 *Source, List<DefnInfo> &Matches)
+bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matches)
 {
 	if (!Symbol || !Source)
 	{
@@ -2040,7 +2040,7 @@ bool IdeDoc::FindDefn(char16 *Symbol, char16 *Source, List<DefnInfo> &Matches)
 		}
 
 		char *FileName = GetFileName();
-		if (BuildDefnList(FileName, Source, Defns, DefnNone))
+		if (BuildDefnList(FileName, (char16*)Source, Defns, DefnNone))
 		{
 			#if DEBUG_FIND_DEFN
 			bool Found = false;

@@ -952,7 +952,7 @@ public:
 					w.Reset(Utf8ToWide(Utf, (ssize_t)Size));
 				}
 				
-				char16 *OldText = Txt[Channel]->NameW();
+				auto OldText = Txt[Channel]->NameW();
 				size_t OldLen = 0;
 				if (OldText)
 					OldLen = StrlenW(OldText);
@@ -1187,7 +1187,7 @@ public:
 		}
 	}
 	
-	void GetContext(char16 *Txt, ssize_t &i, char16 *&Context)
+	void GetContext(const char16 *Txt, ssize_t &i, char16 *&Context)
 	{
 		static char16 NMsg[] = L"In file included ";
 		static char16 FromMsg[] = L"from ";
@@ -1212,10 +1212,10 @@ public:
 				break;
 
 			i += 5;
-			char16 *Start = Txt + i;
+			auto Start = Txt + i;
 
 			// Skip to end of doc or line
-			char16 *Colon = 0;
+			const char16 *Colon = 0;
 			while (Txt[i] && Txt[i] != '\n')
 			{
 				if (Txt[i] == ':' && Txt[i+1] != '\n')
@@ -1251,7 +1251,7 @@ public:
 		if (!o)
 			return;
 
-		char16 *Txt = o->NameW();
+		auto Txt = o->NameW();
 		if (!Txt)
 			return;
 
@@ -1430,7 +1430,7 @@ public:
 		}
 	}
 	
-	void RemoveRecent(char *File)
+	void RemoveRecent(const char *File)
 	{
 		if (File)
 		{
@@ -1474,7 +1474,7 @@ public:
 		return 0;
 	}
 
-	IdeProject *IsProjectOpen(char *File)
+	IdeProject *IsProjectOpen(const char *File)
 	{
 		if (File)
 		{
@@ -2628,7 +2628,7 @@ IdeProject *AppWnd::RootProject()
 	return Root;
 }
 
-IdeProject *AppWnd::OpenProject(char *FileName, IdeProject *ParentProj, bool Create, bool Dep)
+IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bool Create, bool Dep)
 {	
 	if (!FileName)
 	{
@@ -2664,7 +2664,7 @@ IdeProject *AppWnd::OpenProject(char *FileName, IdeProject *ParentProj, bool Cre
 		
 		if (!Dep)
 		{
-			char *d = strrchr(FileName, DIR_CHAR);
+			auto d = strrchr(FileName, DIR_CHAR);
 			if (d++)
 			{
 				char n[256];
@@ -2872,7 +2872,7 @@ void AppWnd::UpdateMemoryDump()
 {
 	if (d->DbgContext)
 	{
-		char *sWord = GetCtrlName(IDC_MEM_SIZE);
+		const char *sWord = GetCtrlName(IDC_MEM_SIZE);
 		int iWord = sWord ? atoi(sWord) : 1;
 		int64 RowLen = GetCtrlValue(IDC_MEM_ROW_LEN);
 		bool InHex = GetCtrlValue(IDC_MEM_HEX) != 0;
@@ -2899,7 +2899,7 @@ int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
 		{
 			if (Flags == LK_RETURN && d->DbgContext)
 			{
-				char *Cmd = Ctrl->Name();
+				const char *Cmd = Ctrl->Name();
 				if (Cmd)
 				{
 					d->DbgContext->OnUserCommand(Cmd);
@@ -2914,10 +2914,10 @@ int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
 			{
 				if (d->DbgContext)
 				{
-					char *s = Ctrl->Name();
+					const char *s = Ctrl->Name();
 					if (s)
 					{
-						char *sWord = GetCtrlName(IDC_MEM_SIZE);
+						auto sWord = GetCtrlName(IDC_MEM_SIZE);
 						int iWord = sWord ? atoi(sWord) : 1;
 						d->DbgContext->OnMemoryDump(s, iWord, (int)GetCtrlValue(IDC_MEM_ROW_LEN), GetCtrlValue(IDC_MEM_HEX) != 0);
 					}

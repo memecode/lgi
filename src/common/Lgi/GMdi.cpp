@@ -186,7 +186,7 @@ bool GMdiChild::Detach()
 	return GLayout::Detach();
 }
 
-char *GMdiChild::Name()
+const char *GMdiChild::Name()
 {
 	return GView::Name();
 }

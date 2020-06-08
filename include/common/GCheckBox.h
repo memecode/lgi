@@ -58,8 +58,8 @@ public:
 	void Value(int64 b);
 
 	// Impl
-	char *Name() { return GView::Name(); }
-	char16 *NameW() { return GView::NameW(); }
+	const char *Name() { return GView::Name(); }
+	const char16 *NameW() { return GView::NameW(); }
 	bool Name(const char *n) override;
 	bool NameW(const char16 *n) override;
 	void SetFont(GFont *Fnt, bool OwnIt = false);

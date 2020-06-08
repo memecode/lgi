@@ -540,7 +540,7 @@ public:
 	/// Sets the value of the control identified by the ID
 	void SetCtrlValue(int Id, int64 i);
 	/// Gets the name (text) of the control identified by the ID
-	char *GetCtrlName(int Id);
+	const char *GetCtrlName(int Id);
 	/// Sets the name (text) of the control identified by the ID
 	void SetCtrlName(int Id, const char *s);
 	/// Gets the enabled state of the control identified by the ID

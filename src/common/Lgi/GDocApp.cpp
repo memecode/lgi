@@ -452,7 +452,7 @@ bool GDocApp<OptionsFmt>::_LoadMenu(const char *Resource, const char *Tags, int 
 }
 
 template <typename OptionsFmt>
-bool GDocApp<OptionsFmt>::_OpenFile(char *File, bool ReadOnly)
+bool GDocApp<OptionsFmt>::_OpenFile(const char *File, bool ReadOnly)
 {
 	bool Status = false;
 	if (SetDirty(false))
@@ -475,7 +475,7 @@ bool GDocApp<OptionsFmt>::_OpenFile(char *File, bool ReadOnly)
 }
 
 template <typename OptionsFmt>
-bool GDocApp<OptionsFmt>::_SaveFile(char *File)
+bool GDocApp<OptionsFmt>::_SaveFile(const char *File)
 {
 	char RealPath[256];
 	if (ResolveShortcut(File, RealPath, sizeof(RealPath)))
@@ -505,7 +505,7 @@ char *GDocApp<OptionsFmt>::GetAppName()
 }
 
 template <typename OptionsFmt>
-void GDocApp<OptionsFmt>::SetCurFile(char *f)
+void GDocApp<OptionsFmt>::SetCurFile(const char *f)
 {
 	if (!d->CurFile.Equals(f))
 	{
@@ -537,7 +537,7 @@ void GDocApp<OptionsFmt>::SetCurFile(char *f)
 }
 
 template <typename OptionsFmt>
-char *GDocApp<OptionsFmt>::GetCurFile()
+const char *GDocApp<OptionsFmt>::GetCurFile()
 {
 	return d->CurFile;
 }

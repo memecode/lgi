@@ -322,9 +322,9 @@ public:
 	const char *GetClass() { return "GTextView3"; }
 
 	// Data
-	char *Name() override;
+	const char *Name() override;
 	bool Name(const char *s) override;
-	char16 *NameW() override;
+	const char16 *NameW() override;
 	bool NameW(const char16 *s) override;
 	int64 Value();
 	void Value(int64 i);
@@ -390,7 +390,7 @@ public:
 	virtual bool DoReplace();
 
 	// Action Processing	
-	bool ClearDirty(bool Ask, char *FileName = 0);
+	bool ClearDirty(bool Ask, const char *FileName = 0);
 	void UpdateScrollBars(bool Reset = false);
 	ssize_t GetLine();
 	void SetLine(int Line);

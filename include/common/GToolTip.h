@@ -14,7 +14,7 @@ public:
 	int NewTip
 	(
 		/// The text to display
-		char *Name,
+		const char *Name,
 		/// The region the mouse has to be in to trigger the tip
 		GRect &Pos
 	);

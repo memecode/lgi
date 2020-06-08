@@ -666,7 +666,7 @@ bool GView::Attach(GViewI *p)
 		if (!TestFlag(WndFlags, GWF_SYS_BORDER))
 			ExStyle &= ~(WS_EX_CLIENTEDGE | WS_EX_WINDOWEDGE);
 							
-		char16 *Text = GBase::NameW();
+		auto Text = GBase::NameW();
 		GAutoWString WCls(Utf8ToWide(ClsName));
 
 		_View = CreateWindowExW(ExStyle,

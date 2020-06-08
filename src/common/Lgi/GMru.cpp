@@ -97,7 +97,7 @@ GFileType *GMru::GetSelectedType()
 	return d->SelectedType;
 }
 
-bool GMru::_OpenFile(char *File, bool ReadOnly)
+bool GMru::_OpenFile(const char *File, bool ReadOnly)
 {
 	bool Status = OpenFile(File, ReadOnly);
 
@@ -113,7 +113,7 @@ bool GMru::_OpenFile(char *File, bool ReadOnly)
 	return Status;
 }
 
-bool GMru::_SaveFile(char *FileName)
+bool GMru::_SaveFile(const char *FileName)
 {
 	bool Status = false;
 
@@ -210,12 +210,12 @@ bool GMru::Set(LSubMenu *parent, int size)
 	return true;
 }
 
-char *GMru::AddFile(char *FileName, bool Update)
+const char *GMru::AddFile(const char *FileName, bool Update)
 {
 	if (!FileName)
 		return NULL;
 
-	char *Status = FileName;
+	auto Status = FileName;
 	GMruEntry *c = NULL;
 	for (int i=0; i<d->Items.Length(); i++)
 	{
@@ -258,7 +258,7 @@ char *GMru::AddFile(char *FileName, bool Update)
 	return Status;
 }
 
-void GMru::RemoveFile(char *FileName, bool Update)
+void GMru::RemoveFile(const char *FileName, bool Update)
 {
 	// remove from list if there
 	for (int i=0; i<d->Items.Length(); i++)

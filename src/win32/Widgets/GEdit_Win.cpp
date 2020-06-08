@@ -178,7 +178,7 @@ void GEdit::Value(int64 i)
 
 int64 GEdit::Value()
 {
-	char *n = Name();
+	auto n = Name();
 	return (n) ? atoi64(n) : 0;
 }
 
@@ -267,7 +267,7 @@ GMessage::Result GEdit::OnEvent(GMessage *Msg)
 					SendMessage(_View, EM_GETSEL, (WPARAM) &Start, (LPARAM) &End);
 					int Chars = End - Start;
 
-					char16 *n = NameW();
+					char16 *n = (char16*)NameW();
 					if (n)
 					{
 						if (GetKeyState(VK_SHIFT) & 0xFF00)
@@ -511,7 +511,7 @@ bool GEdit::SysName(const char16 *n)
 	return SetWindowTextW(_View, n ? n : L"") != FALSE;
 }
 
-char *GEdit::Name()
+const char *GEdit::Name()
 {
 	if (Handle() && !d->InEmptyMode)
 	{
@@ -537,7 +537,7 @@ bool GEdit::Name(const char *n)
 	return Status;
 }
 
-char16 *GEdit::NameW()
+const char16 *GEdit::NameW()
 {
 	if (Handle() && !d->InEmptyMode)
 	{

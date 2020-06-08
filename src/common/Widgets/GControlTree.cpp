@@ -146,7 +146,7 @@ void GControlTree::Item::Save()
 		{
 			case GV_STRING:
 			{
-				char *v = Ctrl->Name();
+				auto v = Ctrl->Name();
 				if (Stricmp(v, Value.Str()))
 				{
 					Value = v;

@@ -163,7 +163,7 @@ public:
 	char *Describe() { return GetStr(); }
 
 	/// Sets the rect from a string containing: x1,y1,x2,y2
-	bool SetStr(char *s);
+	bool SetStr(const char *s);
 
 	/// Returns how near a point is to a rectangle
 	int Near(int x, int y);

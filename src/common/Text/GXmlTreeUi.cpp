@@ -399,7 +399,7 @@ bool GXmlTreeUi::Convert(GDom *Tag, GViewI *Ui, bool ToUI)
 						}
 						default:
 						{
-							char *Str = c->Name();
+							auto Str = c->Name();
 							
 							if (ValidStr(Str))
 								v = Str;

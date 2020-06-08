@@ -156,7 +156,7 @@ bool SeekPtr(char16 *&s, char16 *end, int &Line)
 	return true;
 }
 
-bool BuildCppDefnList(char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns, int LimitTo, bool Debug)
+bool BuildCppDefnList(const char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns, int LimitTo, bool Debug)
 {
 	if (!Cpp)
 		return false;
@@ -227,12 +227,12 @@ bool BuildCppDefnList(char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns, int 
 			}
 			case '#':
 			{
-				char16 *Hash = s;
+				const char16 *Hash = s;
 				
 				s++;
 				skipws(s)
 
-				char16 *End = s;
+				const char16 *End = s;
 				while (*End && IsAlpha(*End))
 					End++;
 

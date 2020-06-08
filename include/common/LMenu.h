@@ -392,7 +392,7 @@ public:
 	/// Get the id
 	int Id();
 	/// Get the text of the item
-	char *Name() override;
+	const char *Name() override;
 	/// Return whether this item is a separator
 	bool Separator();
 	/// Return whether this item has a check mark

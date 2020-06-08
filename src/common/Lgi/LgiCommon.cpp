@@ -1203,7 +1203,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		case LSP_APP_ROOT:
 		{
 			#ifndef LGI_STATIC
-			char *Name = NULL;
+			const char *Name = NULL;
 			
 			// Try and get the configured app name:
 			if (LgiApp)

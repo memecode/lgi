@@ -16,7 +16,7 @@ void GWindow::BuildShortcuts(ShortcutMap &Map, GViewI *v)
 	GAutoPtr<GViewIterator> Ch(v->IterateViews());
 	for (GViewI *c = Ch->First(); c; c = Ch->Next())
 	{
-		char *n = c->Name(), *amp;
+		const char *n = c->Name(), *amp;
 		if (n && (amp = strchr(n, '&')))		
 		{
 			amp++;

@@ -46,9 +46,9 @@ public:
 	/// Sets the text to a number
 	void Value(int64 i);
 	/// Gets the text
-	char *Name() override { return GView::Name(); }
+	const char *Name() override { return GView::Name(); }
 	/// Gets the text as a wide string
-	char16 *NameW() override { return GView::NameW(); }
+	const char16 *NameW() override { return GView::NameW(); }
 	/// Word wrap
 	bool GetWrap();
 	/// Sets the use of word wrap

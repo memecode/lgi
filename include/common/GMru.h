@@ -17,8 +17,8 @@ private:
 	void _Update();
 
 protected:
-	virtual bool _OpenFile(char *File, bool ReadOnly);
-	virtual bool _SaveFile(char *File);
+	virtual bool _OpenFile(const char *File, bool ReadOnly);
+	virtual bool _SaveFile(const char *File);
 
 	virtual char *_GetCurFile();
 	virtual void GetFileTypes(GFileSelect *Dlg, bool Write);
@@ -48,8 +48,8 @@ public:
 
 	// Impl
 	bool Set(LSubMenu *parent, int size = -1);
-	char *AddFile(char *FileName, bool Update = true);
-	void RemoveFile(char *FileName, bool Update = true);
+	const char *AddFile(const char *FileName, bool Update = true);
+	void RemoveFile(const char *FileName, bool Update = true);
 	GMessage::Result OnEvent(GMessage *Msg);
 	bool OnCommand(int Cmd);
 
@@ -60,8 +60,8 @@ public:
 	#endif
 
 	// Events
-	virtual bool OpenFile(char *FileName, bool ReadOnly) = 0;
-	virtual bool SaveFile(char *FileName) = 0;
+	virtual bool OpenFile(const char *FileName, bool ReadOnly) = 0;
+	virtual bool SaveFile(const char *FileName) = 0;
 };
 
 #endif

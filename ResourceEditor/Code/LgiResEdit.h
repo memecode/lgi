@@ -129,8 +129,8 @@ extern char AppName[];
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Functions
-extern char *EncodeXml(char *s, int l = -1);
-extern char *DecodeXml(char *s, int l = -1);
+extern char *EncodeXml(const char *s, int l = -1);
+extern char *DecodeXml(const char *s, int l = -1);
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Classes
@@ -496,7 +496,7 @@ public:
 			case UiToObj:
 			{
 				DeleteArray(s);
-				char *t = View->GetCtrlName(f->Id);
+				auto t = View->GetCtrlName(f->Id);
 				if (ValidStr(t))
 					s = NewStr(t);
 				break;
@@ -529,7 +529,7 @@ public:
 				break;
 			case UiToObj:
 			{
-				char *t = View->GetCtrlName(f->Id);
+				auto t = View->GetCtrlName(f->Id);
 				s.Reset(ValidStr(t) ? NewStr(t) : 0);
 				break;
 			}
@@ -761,16 +761,16 @@ public:
 	// Methods
 	void SetStatusText(char *Text, int Pane = 0);
 	bool TestLgi(bool Quite = true);
-	bool LoadLgi(char *FileName = 0);
-	bool SaveLgi(char *FileName = 0);
-	bool LoadWin32(char *FileName = 0);
+	bool LoadLgi(const char *FileName = 0);
+	bool SaveLgi(const char *FileName = 0);
+	bool LoadWin32(const char *FileName = 0);
 	bool SaveWin32();
 	void ImportLang();
 	void Compare();
 	bool WriteDefines(GFile &Defs);
 
-	bool OpenFile(char *FileName, bool Ro);
-	bool SaveFile(char *FileName);
+	bool OpenFile(const char *FileName, bool Ro);
+	bool SaveFile(const char *FileName);
 
 	// ---------------------------------------------------------------------
 	// Window

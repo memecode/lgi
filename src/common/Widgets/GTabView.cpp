@@ -176,7 +176,7 @@ struct GTabPagePriv
 
 	GDisplayString *GetDs()
 	{
-		char *Text = Tab->Name();
+		auto Text = Tab->Name();
 		if (Text && !Ds)
 		{
 			GFont *f = NULL;
@@ -1242,7 +1242,7 @@ void GTabPage::OnButtonPaint(GSurface *pDC)
 	#endif
 }
 
-char *GTabPage::Name()
+const char *GTabPage::Name()
 {
 	return GBase::Name();
 }
@@ -1303,7 +1303,7 @@ void GTabPage::PaintTab(GSurface *pDC, bool Selected)
 	pDC->Set(r.x2, r.y1);
 	
 	int Cx = r.x1 + TAB_MARGIN_X;
-	char *t = Name();
+	auto t = Name();
 	if (t)
 	{
 		GFont *f = GetFont();

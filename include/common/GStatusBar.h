@@ -37,7 +37,7 @@ public:
 	~GStatusPane();
 
 	const char *GetClass() { return "GStatusPane"; }
-	char *Name() { return GBase::Name(); }
+	const char *Name() { return GBase::Name(); }
 	bool Name(const char *n);
 	void OnPaint(GSurface *pDC);
 

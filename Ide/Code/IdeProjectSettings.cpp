@@ -377,7 +377,7 @@ public:
 				if (!Ctrls[i].Text)
 					continue;
 				
-				char *Path = Ctrls[i].Text->Name();
+				auto Path = Ctrls[i].Text->Name();
 				if (!Path)
 				{
 					LgiAssert(0);
@@ -393,7 +393,7 @@ public:
 
 				if (Ctrls[i].Edit)
 				{
-					char *Val = Ctrls[i].Edit->Name();
+					auto Val = Ctrls[i].Edit->Name();
 					// LgiTrace("Saving edit setting '%s': '%s'\n", Path, Val);
 					t->SetContent(Val);
 				}
@@ -405,7 +405,7 @@ public:
 				}
 				else if (Ctrls[i].Cbo)
 				{
-					char *Val = Ctrls[i].Cbo->Name();
+					auto Val = Ctrls[i].Cbo->Name();
 					// LgiTrace("Saving enum setting '%s': '%s'\n", Path, Val);
 					t->SetContent(Val);
 				}

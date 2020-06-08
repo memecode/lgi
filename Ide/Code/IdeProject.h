@@ -178,13 +178,13 @@ public:
 
 	// File
 	void CreateProject();
-	ProjectStatus OpenFile(char *FileName);
+	ProjectStatus OpenFile(const char *FileName);
 	bool SaveFile();
 	bool SetClean();
 	void SetDirty();
 	void SetUserFileDirty();
 	bool Serialize(bool Write);
-	void ImportDsp(char *File);
+	void ImportDsp(const char *File);
 
 	// Dependency calculation
 	bool GetAllDependencies(GArray<char*> &Files, IdePlatform Platform);

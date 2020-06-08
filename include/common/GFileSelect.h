@@ -24,7 +24,7 @@ public:
 
 	char *Extension() { return Ext; }
 	bool Extension(const char *e) { return (Ext = NewStr(e)) != 0; }
-	char *Description() { return Name(); }
+	const char *Description() { return Name(); }
 	bool Description(const char *d) { return Name(d); }
 	int Data() { return _Data; }
 	void Data(int i) { _Data = i; }
@@ -59,7 +59,7 @@ public:
 	// Properties
 	
 	/// Returns the first file name selected.
-	char *Name() override;
+	const char *Name() override;
 	/// Sets the file name
 	bool Name(const char *n) override;
 	/// Returns the n'th file name selected

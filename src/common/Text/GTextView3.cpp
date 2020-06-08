@@ -1760,7 +1760,7 @@ List<GTextView3::GTextLine>::I GTextView3::GetTextLineIt(ssize_t Offset, ssize_t
 
 int64 GTextView3::Value()
 {
-	char *n = Name();
+	auto n = Name();
 	#ifdef _MSC_VER
 	return (n) ? _atoi64(n) : 0;
 	#else
@@ -1788,7 +1788,7 @@ GString GTextView3::operator[](ssize_t LineIdx)
 	return s; 
 }
 
-char *GTextView3::Name()
+const char *GTextView3::Name()
 {
 	UndoQue.Empty();
 	DeleteArray(TextCache);
@@ -1854,7 +1854,7 @@ bool GTextView3::Name(const char *s)
 	return true;
 }
 
-char16 *GTextView3::NameW()
+const char16 *GTextView3::NameW()
 {
 	return Text;
 }
@@ -2298,7 +2298,7 @@ bool GTextView3::Paste()
 	return true;
 }
 
-bool GTextView3::ClearDirty(bool Ask, char *FileName)
+bool GTextView3::ClearDirty(bool Ask, const char *FileName)
 {
 	if (Dirty)
 	{

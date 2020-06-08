@@ -12,7 +12,7 @@ Known bugs:
 #define DEBUG_LINE		550
 #endif
 
-bool BuildPyDefnList(char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug)
+bool BuildPyDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug)
 {
 	if (!Source)
 		return false;

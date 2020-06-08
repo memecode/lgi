@@ -198,7 +198,7 @@ public:
 			Ctrl == Edit &&
 			(!Flags || Flags == GNotifyDocChanged))
 		{
-			char *Str = Edit->Name();
+			auto Str = Edit->Name();
 			Name(Str);
 
 			bool Has = ValidStr(Str) && Lst->Length();

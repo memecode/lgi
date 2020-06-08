@@ -250,7 +250,7 @@ public:
 	IdeDoc *OpenFile(const char *FileName, NodeSource *Src = 0);
 	IdeDoc *NewDocWnd(const char *FileName, NodeSource *Src);
 	IdeDoc *GetCurrentDoc();
-	IdeProject *OpenProject(char *FileName, IdeProject *ParentProj, bool Create = false, bool Dep = false);
+	IdeProject *OpenProject(const char *FileName, IdeProject *ParentProj, bool Create = false, bool Dep = false);
 	IdeProject *RootProject();
 	IdeDoc *TopDoc();
 	IdeDoc *FocusDoc();

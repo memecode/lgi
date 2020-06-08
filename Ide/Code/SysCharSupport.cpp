@@ -48,14 +48,14 @@ public:
 		Match = NonMatch = 0;
 	}
 
-	void Search(char *ch)
+	void Search(const char *ch)
 	{
 		if (ch && Match && NonMatch)
 		{
 			Match->Empty();
 			NonMatch->Empty();
 
-			GUtf8Str Utf(ch);
+			GUtf8Str Utf((char*)ch);
 			uint32_t c = Utf;
 
 			char msg[256];

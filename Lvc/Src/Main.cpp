@@ -910,7 +910,7 @@ public:
 						}
 						if (f)
 						{
-							char *Branch = GetCtrlName(IDC_BRANCH);
+							auto Branch = GetCtrlName(IDC_BRANCH);
 							bool AndPush = c->GetId() == IDC_COMMIT_AND_PUSH;
 							f->Commit(BuildFix ? DEFAULT_BUILD_FIX_MSG : Msg, ValidStr(Branch) ? Branch : NULL, AndPush);
 						}
