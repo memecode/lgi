@@ -475,7 +475,7 @@ bool GClipBoard::Empty()
 }
 
 // Text
-bool GClipBoard::Text(char *Str, bool AutoEmpty)
+bool GClipBoard::Text(const char *Str, bool AutoEmpty)
 {
 	bool Status = false;
 
@@ -506,7 +506,7 @@ char *GClipBoard::Text()
 	return NULL;
 }
 
-bool GClipBoard::TextW(char16 *Str, bool AutoEmpty)
+bool GClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 {
 	if (Str)
 	{

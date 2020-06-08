@@ -10,7 +10,7 @@ class LgiClass GPassword
 	char *Data; // this is binary data... may contain NULL's
 	ssize_t Len;
 
-	void Process(char *Out, char *In, ssize_t Len);
+	void Process(char *Out, const char *In, ssize_t Len);
 
 public:
 	GPassword(GPassword *p = 0);
@@ -19,7 +19,7 @@ public:
 	bool IsValid() { return Data && Len > 0; }
 	void Get(char *Buf);
 	GString Get();
-	void Set(char *Buf);
+	void Set(const char *Buf);
 	
 	// bool Serialize(ObjProperties *Options, char *Option, int Write);
 	bool Serialize(GDom *Options, const char *Option, int Write);

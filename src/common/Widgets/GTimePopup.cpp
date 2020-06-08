@@ -26,7 +26,7 @@ int GTimeDropDown::OnNotify(GViewI *Ctrl, int Flags)
 		auto a = Drop->GetTime();
 		
 		LDateTime ts;
-		char *str = DateSrc->Name();
+		const char *str = DateSrc->Name();
 		ts.Set(str);
 		ts.SetTime(a);
 		
@@ -67,7 +67,7 @@ void GTimeDropDown::SetDate(char *d)
 	{
 		LDateTime New;
 		New.SetNow();
-		char *Old = n->Name();
+		const char *Old = n->Name();
 		if (ValidStr(Old))
 		{
 			New.Set(Old);
@@ -106,7 +106,7 @@ void GTimeDropDown::OnMouseClick(GMouse &m)
 			if (n)
 			{
 				LDateTime New;
-				char *Old = n->Name();
+				const char *Old = n->Name();
 				if (Old &&
 					New.Set(Old))
 				{

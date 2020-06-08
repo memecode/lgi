@@ -236,7 +236,7 @@ bool GRichTextEdit::DeleteSelection(char16 **Cut)
 
 int64 GRichTextEdit::Value()
 {
-	char *n = Name();
+	const char *n = Name();
 	#ifdef _MSC_VER
 	return (n) ? _atoi64(n) : 0;
 	#else
@@ -263,7 +263,7 @@ bool GRichTextEdit::GetFormattedContent(const char *MimeType, GString &Out, GArr
 	return true;
 }
 
-char *GRichTextEdit::Name()
+const char *GRichTextEdit::Name()
 {
 	d->ToHtml();
 	return d->UtfNameCache;
@@ -403,7 +403,7 @@ bool GRichTextEdit::Name(const char *s)
 	return Status;
 }
 
-char16 *GRichTextEdit::NameW()
+const char16 *GRichTextEdit::NameW()
 {
 	d->WideNameCache.Reset(Utf8ToWide(Name()));
 	return d->WideNameCache;
@@ -781,7 +781,7 @@ bool GRichTextEdit::Paste()
 	return d->AddTrans(Trans);
 }
 
-bool GRichTextEdit::ClearDirty(bool Ask, char *FileName)
+bool GRichTextEdit::ClearDirty(bool Ask, const char *FileName)
 {
 	if (1 /*dirty*/)
 	{
@@ -863,7 +863,7 @@ bool GRichTextEdit::Save(const char *FileName, const char *CharSet)
 		return false;
 
 	f.SetSize(0);
-	char *Nm = Name();
+	const char *Nm = Name();
 	if (!Nm)
 		return false;
 

@@ -99,7 +99,7 @@ public:
 						if (r.Len == 0)
 							break;
 
-						char16 *Txt = NameW();
+						const char16 *Txt = NameW();
 						r.Len = Txt ? StrlenW(Txt) : 0;
 						auto Cursor = GetCaret();
 						if (Cursor >= r.Len)
@@ -188,7 +188,7 @@ void GDataGridPriv::Save()
 		}
 		else
 		{
-			char *OldTxt = e->Name();
+			const char *OldTxt = e->Name();
 			if (!OldTxt && Cur == NewRecord)
 				return;
 

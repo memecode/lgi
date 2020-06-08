@@ -525,9 +525,10 @@ bool GFilterItem::GetNot()
 	return d->Not;
 }
 
-char *GFilterItem::GetField()
+const char *GFilterItem::GetField()
 {
-	if (d->FieldEd) return d->FieldEd->Name();
+	if (d->FieldEd)
+		return d->FieldEd->Name();
 
 	return d->Field;
 }
@@ -539,9 +540,10 @@ int GFilterItem::GetOp()
 	return d->Op;
 }
 
-char *GFilterItem::GetValue()
+const char *GFilterItem::GetValue()
 {
-	if (d->ValueEd) return d->ValueEd->Name();
+	if (d->ValueEd)
+		return d->ValueEd->Name();
 
 	return d->Value;
 }

@@ -47,9 +47,9 @@ public:
 	~GFilterItem();
 
 	bool GetNot();
-	char *GetField();
+	const char *GetField();
 	int GetOp();
-	char *GetValue();
+	const char *GetValue();
 
 	void SetNot(bool b);
 	void SetField(const char *s);

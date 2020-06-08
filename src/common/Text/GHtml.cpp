@@ -7081,7 +7081,7 @@ bool GHtml::NameW(const char16 *s)
 	return Name(utf);
 }
 
-char16 *GHtml::NameW()
+const char16 *GHtml::NameW()
 {
 	GBase::Name(Source);
 	return GBase::NameW();
@@ -7137,7 +7137,7 @@ bool GHtml::Name(const char *s)
 	return true;
 }
 
-char *GHtml::Name()
+const char *GHtml::Name()
 {
 	if (!Source && Tag)
 	{

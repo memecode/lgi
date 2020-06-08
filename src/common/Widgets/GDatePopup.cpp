@@ -299,7 +299,7 @@ void GDateDropDown::SetDate(char *d)
 	if (n && d)
 	{
 		LDateTime New;
-		char *Old = n->Name();
+		const char *Old = n->Name();
 		if (Old)
 		{
 			New.Set(Old);
@@ -335,7 +335,7 @@ void GDateDropDown::OnMouseClick(GMouse &m)
 			if (n)
 			{
 				LDateTime New;
-				char *Old = n->Name();
+				const char *Old = n->Name();
 				GViewI *DateSrc = GetNotify();
 				
 				if (!ValidStr(Old) && DateSrc)

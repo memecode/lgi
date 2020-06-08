@@ -499,7 +499,7 @@ public:
 extern GDataStoreI *OpenMail3
 (
 	/// The file to open
-	char *Mail3Folder,
+	const char *Mail3Folder,
 	/// Event interface,
 	GDataEventsI *Callback,
 	/// true if you want to create a new mail3 file.

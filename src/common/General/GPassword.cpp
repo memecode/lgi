@@ -54,7 +54,7 @@ bool GPassword::operator ==(GPassword &p)
 	return false;
 }
 
-void GPassword::Process(char *Out, char *In, ssize_t Len)
+void GPassword::Process(char *Out, const char *In, ssize_t Len)
 {
 	if (Out && In && Len > 0)
 	{
@@ -88,7 +88,7 @@ void GPassword::Get(char *Buf)
 	}
 }
 
-void GPassword::Set(char *Buf)
+void GPassword::Set(const char *Buf)
 {
 	DeleteArray(Data);
 	Len = 0;

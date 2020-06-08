@@ -78,7 +78,7 @@ char BinToBase64(uchar c)
 	return 0;
 }
 
-ssize_t ConvertBase64ToBinary(uchar *Binary, ssize_t OutBuf, char *Base64, ssize_t InBuf)
+ssize_t ConvertBase64ToBinary(uchar *Binary, ssize_t OutBuf, const char *Base64, ssize_t InBuf)
 {
 	uchar *Start = Binary;
 
@@ -129,7 +129,7 @@ ssize_t ConvertBase64ToBinary(uchar *Binary, ssize_t OutBuf, char *Base64, ssize
 	return (int) (Binary - Start);
 }
 
-ssize_t ConvertBinaryToBase64(char *Base64, ssize_t OutBuf, uchar *Binary, ssize_t InBuf)
+ssize_t ConvertBinaryToBase64(char *Base64, ssize_t OutBuf, const uchar *Binary, ssize_t InBuf)
 {
 	char *Start = Base64;
 

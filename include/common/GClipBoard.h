@@ -35,10 +35,10 @@ public:
 	bool EnumFormats(GArray<FormatType> &Formats);
 
 	// Text
-	bool Text(char *Str, bool AutoEmpty = true);
+	bool Text(const char *Str, bool AutoEmpty = true);
 	char *Text(); // ptr returned is still owned by this object
 
-	bool TextW(char16 *Str, bool AutoEmpty = true);
+	bool TextW(const char16 *Str, bool AutoEmpty = true);
 	char16 *TextW(); // ptr returned is still owned by this object
 
 	// HTML

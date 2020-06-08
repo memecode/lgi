@@ -551,7 +551,7 @@ int GBrowser::OnNotify(GViewI *c, int f)
 		{
 			if (d->Events && d->SearchEdit)
 			{
-				char *Search = d->SearchEdit->Name();
+				const char *Search = d->SearchEdit->Name();
 				if (Search)
 					d->Events->OnSearch(this, Search);
 			}
@@ -561,7 +561,7 @@ int GBrowser::OnNotify(GViewI *c, int f)
 		{
 			if (f == LK_RETURN)
 			{
-				char *u = c->Name();
+				const char *u = c->Name();
 				SetUri(u);
 				break;
 			}

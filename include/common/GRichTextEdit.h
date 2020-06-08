@@ -79,9 +79,9 @@ public:
 	const char *GetClass() { return "GRichTextEdit"; }
 
 	// Data
-	char *Name();
+	const char *Name();
 	bool Name(const char *s);
-	char16 *NameW();
+	const char16 *NameW();
 	bool NameW(const char16 *s);
 	int64 Value();
 	void Value(int64 i);
@@ -181,7 +181,7 @@ public:
 	virtual bool DoReplace();
 
 	// Action Processing	
-	bool ClearDirty(bool Ask, char *FileName = 0);
+	bool ClearDirty(bool Ask, const char *FileName = 0);
 	void UpdateScrollBars(bool Reset = false);
 	int GetLine();
 	void SetLine(int Line);

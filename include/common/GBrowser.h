@@ -17,7 +17,7 @@ public:
 	public:
 		virtual ~GBrowserEvents() {}
 
-		virtual bool OnSearch(GBrowser *br, char *txt) { return false; }
+		virtual bool OnSearch(GBrowser *br, const char *txt) { return false; }
 	};
 	
 	GBrowser(GViewI *owner, const char *Title, char *Uri = 0);

@@ -124,11 +124,11 @@ public:
 	/// Sets the HTML content of the control
 	bool Name(const char *s);
 	/// Returns the HTML content
-	char *Name();
+	const char *Name();
 	/// Sets the HTML content of the control
 	bool NameW(const char16 *s);
 	/// Returns the HTML content
-	char16 *NameW();
+	const char16 *NameW();
 
 	// Impl
 	void OnPaint(GSurface *pDC);
