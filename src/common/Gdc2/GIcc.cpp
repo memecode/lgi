@@ -965,7 +965,7 @@ bool GIccProfile::CreateNamed(const char *name)
 	return false;
 }
 
-bool GIccProfile::Open(char *file)
+bool GIccProfile::Open(const char *file)
 {
 	GFile f;
 	if (file && f.Open(file, O_READ))
@@ -1027,7 +1027,7 @@ bool GIccProfile::Open(GStream *Stream)
 	return false;
 }
 
-bool GIccProfile::Save(char *file)
+bool GIccProfile::Save(const char *file)
 {
 	GFile f;
 	if (f.Open(file, O_WRITE))

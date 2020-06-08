@@ -14,9 +14,9 @@ public:
 
 	// I/O
 	bool CreateNamed(const char *name);
-	bool Open(char *file);
+	bool Open(const char *file);
 	bool Open(GStream *stream);
-	bool Save(char *file);
+	bool Save(const char *file);
 	bool Save(GStream *stream);
 	
 	// Props
