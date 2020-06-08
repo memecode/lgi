@@ -85,7 +85,7 @@ public:
 	    return true;
 	}
 	
-	char *Name()
+	const char *Name()
 	{
 		GString Sep("\t");
 		All = Sep.Join(Strs);
