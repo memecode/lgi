@@ -171,6 +171,7 @@ public:
 	static void AddLanguage(GLanguageId Id);
 	ResDialog *IsDialog() { return this; }
 	void EnumCtrls(List<ResDialogCtrl> &Ctrls);
+	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
 
 	// GObj overrides
 	const char *Name() override;

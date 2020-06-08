@@ -2357,6 +2357,15 @@ void ResDialog::OnShowLanguages()
 	OnLanguageChange();
 }
 
+void ResDialog::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+{
+	printf("ResDialog::OnChildrenChanged %p, %i\n", Wnd, Attaching);
+	if (!Attaching)
+	{
+		int asd=0;
+	}
+}
+
 const char *ResDialog::Name()
 {
 	GViewI *v = Children[0];
