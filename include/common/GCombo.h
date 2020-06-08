@@ -39,7 +39,7 @@ public:
 	~GCombo();
 
 	// Properties
-	const char *GetClass() { return "GCombo"; }
+	const char *GetClass() override { return "GCombo"; }
 	/// Returns whether to sort the list
 	bool Sort();
 	/// Sets whether to sort the list
@@ -53,9 +53,9 @@ public:
 		int Type
 	);
 	/// Sets the selected item
-	void Value(int64 i);
+	void Value(int64 i) override;
 	/// Returns the select item
-	int64 Value();
+	int64 Value() override;
 	/// Sets the selected item by name
 	bool Name(const char *n) override;
 	/// Returns the selected item's name
@@ -111,19 +111,19 @@ public:
 	virtual void DoMenu();
 
 	// Events/Window/Implementation
-	GMessage::Result OnEvent(GMessage *Msg);
-	void OnAttach();
-	bool OnKey(GKey &k);
+	GMessage::Result OnEvent(GMessage *Msg) override;
+	void OnAttach() override;
+	bool OnKey(GKey &k) override;
 	
 	#if WINNATIVE
 	bool SetPos(GRect &p, bool Repaint = false);
 	int SysOnNotify(int Msg, int Code);
 	#else
-	void OnFocus(bool f);
-	void OnPaint(GSurface *pDC);
-	void OnMouseClick(GMouse &m);
-	void OnPosChange();
-	void SetFont(GFont *Fnt, bool OwnIt = false);
+	void OnFocus(bool f) override;
+	void OnPaint(GSurface *pDC) override;
+	void OnMouseClick(GMouse &m) override;
+	void OnPosChange() override;
+	void SetFont(GFont *Fnt, bool OwnIt = false) override;
 	#endif
 };
 

@@ -552,7 +552,8 @@ void LMenuItem::_Measure(GdcPt2 &Size)
 	{
 		// remove '&' chars for string measurement
 		char Str[256];
-		char *n = Name(), *i = n, *o = Str;
+		const char *n = Name(), *i = n;
+		char *o = Str;
 		
 		while (i && *i)
 		{
@@ -605,13 +606,13 @@ void LMenuItem::_Measure(GdcPt2 &Size)
 
 void LMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 {
-	char *n = Name();
+	auto n = Name();
 	if (n)
 	{
 		GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 		bool Underline = false;
-		char *e = 0;
-		for (char *s=n; s && *s; s = *e ? e : 0)
+		const char *e = 0;
+		for (auto s=n; s && *s; s = *e ? e : 0)
 		{
 			switch (*s)
 			{
@@ -1051,7 +1052,7 @@ int LMenuItem::Id()
 	return _Id;
 }
 
-char *LMenuItem::Name()
+const char *LMenuItem::Name()
 {
 	return GBase::Name();
 }
@@ -1282,7 +1283,7 @@ bool LMenu::OnKey(GView *v, GKey &k)
 					}
 					else
 					{
-						char *n = s->Name();
+						auto n = s->Name();
 						if (ValidStr(n))
 						{
 							char *Amp = strchr(n, '&');

@@ -60,7 +60,7 @@ public:
 			DeleteObj(Image);
 	}
 
-	void Layout(GCss *css, char *s)
+	void Layout(GCss *css, const char *s)
 	{
 		Empty();
 

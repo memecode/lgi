@@ -256,9 +256,10 @@ inline bool LgiUtf32To16(uint32_t c, uint16_t *&i, ssize_t &Len)
 }
 
 /// Seeks the pointer 'Ptr' to the next utf-8 character
-inline bool LgiNextUtf8(char *&p)
+template<typename T>
+inline bool LgiNextUtf8(T *&p)
 {
-	char *old = p;
+	T *old = p;
 	
 	if (IsUtf8_Lead(*p))
 	{
@@ -273,7 +274,8 @@ inline bool LgiNextUtf8(char *&p)
 }
 
 /// Seeks the pointer 'Ptr' to the previous utf-8 character
-inline void LgiPrevUtf8(char *&p)
+template<typename T>
+inline void LgiPrevUtf8(T *&p)
 {
 	p--;
 	while (IsUtf8_Trail(*p))

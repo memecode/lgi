@@ -195,8 +195,8 @@ protected:
 	bool HandleCapture(GView *Wnd, bool c);
 
 	
-	virtual bool OnViewMouse(GView *v, GMouse &m) { return true; }
-	virtual bool OnViewKey(GView *v, GKey &k) { return false; }
+	virtual bool OnViewMouse(GView *v, GMouse &m) override { return true; }
+	virtual bool OnViewKey(GView *v, GKey &k) override { return false; }
 	virtual void OnNcPaint(GSurface *pDC, GRect &r);
 
 	/// List of children views.
@@ -230,16 +230,16 @@ public:
 	#endif
 
 	/// Returns the ptr to a GView
-	GView *GetGView() { return this; }
+	GView *GetGView() override { return this; }
 	
 	/// Returns the OS handle of the top level window
-	OsWindow WindowHandle();
+	OsWindow WindowHandle() override;
 
 	// Attaching windows / heirarchy
-	bool AddView(GViewI *v, int Where = -1);
-	bool DelView(GViewI *v);
-	bool HasView(GViewI *v);
-	GViewIterator *IterateViews();
+	bool AddView(GViewI *v, int Where = -1) override;
+	bool DelView(GViewI *v) override;
+	bool HasView(GViewI *v) override;
+	GViewIterator *IterateViews() override;
 	
 	/// \brief Attaches the view to a parent view.
 	///
@@ -256,44 +256,44 @@ public:
 	(
 		/// The parent view or NULL for a top level window
 		GViewI *p
-	);
+	) override;
 	
 	/// Attachs all the views in the Children list if not already attached.
-	virtual bool AttachChildren();
+	virtual bool AttachChildren() override;
 	
 	/// Detachs a window from it's parent.
-	virtual bool Detach();
+	virtual bool Detach() override;
 	
 	/// Returns true if the window is attached
-	virtual bool IsAttached();
+	virtual bool IsAttached() override;
 	
 	/// Destroys the window async
-	virtual void Quit(bool DontDelete = false);
+	virtual void Quit(bool DontDelete = false) override;
 	
 	// Properties
 	
 	/// Gets the top level window that this view belongs to
-	GWindow *GetWindow();
+	GWindow *GetWindow() override;
 	
 	/// Gets the parent view.
-	GViewI *GetParent();
+	GViewI *GetParent() override;
 
 	/// \brief Sets the parent view.
 	///
 	/// This doesn't attach the window so that it will display. You should use GView::Attach for that.
-	virtual void SetParent(GViewI *p);
+	virtual void SetParent(GViewI *p) override;
 
 	/// Sends a notification to the notify target or the parent chain
-	void SendNotify(int Data = 0);
+	void SendNotify(int Data = 0) override;
 	
 	/// Gets the window that receives event notifications
-	GViewI *GetNotify();
+	GViewI *GetNotify() override;
 
 	/// \brief Sets the view to receive event notifications.
 	///
 	/// The notify window will receive events when this view changes. By
 	/// default the parent view receives the events.
-	virtual void SetNotify(GViewI *n);
+	virtual void SetNotify(GViewI *n) override;
 
 	/// \brief Each top level window (GWindow) has a lock. By calling this function
 	/// you lock the whole GWindow and all it's children.
@@ -305,10 +305,10 @@ public:
 		int line,
 		/// The timeout in milli-seconds or -1 to block until locked.
 		int TimeOut = -1
-	);
+	) override;
 	
 	/// Unlocks the GWindow and that this view belongs to.
-	void Unlock();
+	void Unlock() override;
 
 	/// Add this view to the event target sink dispatch hash table.
 	/// This allows you to use PostThreadEvent with a handle. Which
@@ -321,67 +321,67 @@ public:
 	/// deletion.
 	///
 	/// \returns the handle for PostThreadEvent.
-	int AddDispatch();
+	int AddDispatch() override;
 
 	/// Called to process every message received by this window.
-	GMessage::Result OnEvent(GMessage *Msg);
+	GMessage::Result OnEvent(GMessage *Msg) override;
 
 	/// true if the view is enabled
-	bool Enabled();
+	bool Enabled() override;
 	
 	/// Sets the enabled state
-	void Enabled(bool e);
+	void Enabled(bool e) override;
 	
 	/// true if the view is visible
-	bool Visible();
+	bool Visible() override;
 	
 	/// Hides/Shows the view
 	void Visible
 	(
 		/// True if you want to show the view, False to hide the view/
 		bool v
-	);
+	) override;
 
 	/// true if the view has keyboard focus
-	bool Focus();
+	bool Focus() override;
 	
 	/// Sets the keyboard focus state on the view.
-	void Focus(bool f);
+	void Focus(bool f) override;
 	
 	/// Get/Set the drop source
-	GDragDropSource *DropSource(GDragDropSource *Set = NULL);
+	GDragDropSource *DropSource(GDragDropSource *Set = NULL) override;
 
 	/// Get/Set the drop target
-	GDragDropTarget *DropTarget(GDragDropTarget *Set = NULL);
+	GDragDropTarget *DropTarget(GDragDropTarget *Set = NULL) override;
 	
 	/// Sets the drop target state of this view
-	bool DropTarget(bool t);
+	bool DropTarget(bool t) override;
 
 	/// \brief Gives this view a 1 or 2 px sunken border.
 	///
 	/// The size is set by the _BorderSize member variable. This border is
 	/// not considered part of the client area. Mouse and drawing coordinates
 	/// do not take it into account.
-	bool Sunken();
+	bool Sunken() override;
 	
 	/// Sets a sunken border around the control
-	void Sunken(bool i);
+	void Sunken(bool i) override;
 
 	/// true if the view has a flat border
-	bool Flat();
+	bool Flat() override;
 	
 	/// Sets the flat border state
-	void Flat(bool i);
+	void Flat(bool i) override;
 	
 	/// \brief true if the view has a raised border
 	///
 	/// The size is set by the _BorderSize member variable. This border is
 	/// not considered part of the client area. Mouse and drawing coordinates
 	/// do not take it into account.
-	bool Raised();
+	bool Raised() override;
 	
 	/// Sets the raised border state
-	void Raised(bool i);
+	void Raised(bool i) override;
 
 	/// Draws an OS themed border
 	void DrawThemeBorder(GSurface *pDC, GRect &r);
@@ -392,7 +392,7 @@ public:
 	/// thread. In the Linux implementation the GUI thread can change from time
 	/// to time. On Win32 it stays the same. In any case if this function returns
 	/// true it's safe to do just about anything.
-	bool InThread();
+	bool InThread() override;
 	
 	/// \brief Asyncronously posts an event to be received by this view
 	virtual bool PostEvent
@@ -404,7 +404,7 @@ public:
 		GMessage::Param a = 0,
 		/// The second 32-bits of data. Equivalent to lParam on Win32.
 		GMessage::Param b = 0
-	);
+	) override;
 
 	template<typename T>
 	bool PostEvent(int Cmd, T *Ptr)
@@ -435,46 +435,46 @@ public:
 	/// \brief Gets the font this control should draw with.
 	///
 	/// The default font is the system font, owned by the GApp object.
-	virtual GFont *GetFont();
+	virtual GFont *GetFont() override;
 	
 	/// \brief Sets the font for this control
 	///
 	/// The lifetime of the font passed in is the responsibility of the caller.
 	/// The GView object assumes the pointer will be valid at all times.
-	virtual void SetFont(GFont *Fnt, bool OwnIt = false);
+	virtual void SetFont(GFont *Fnt, bool OwnIt = false) override;
 
 	/// Returns the cursor that should be displayed for the given location
 	/// \returns a cursor type. i.e. LCUR_Normal from LgiDefs.h
-	LgiCursor GetCursor(int x, int y);
+	LgiCursor GetCursor(int x, int y) override;
 	
 	/// \brief Get the position of the view relitive to it's parent.
-	virtual GRect &GetPos() { return Pos; }
+	virtual GRect &GetPos() override { return Pos; }
 	/// Get the client region of the window relitive to itself (ie always 0,0-x,y)
-	virtual GRect &GetClient(bool InClientSpace = true);
+	virtual GRect &GetClient(bool InClientSpace = true) override;
 	/// Set the position of the view in terms of it's parent
-	virtual bool SetPos(GRect &p, bool Repaint = false);
+	virtual bool SetPos(GRect &p, bool Repaint = false) override;
 	/// Gets the width of the view in pixels
-	int X() { return Pos.X(); }
+	int X() override { return Pos.X(); }
 	/// Gets the height of the view in pixels.
-	int Y() { return Pos.Y(); }
+	int Y() override { return Pos.Y(); }
 	/// Gets the minimum size of the view
-	GdcPt2 GetMinimumSize();
+	GdcPt2 GetMinimumSize() override;
 	/// \brief Set the minimum size of the view.
 	///
 	/// Only works for top level windows.
-	void SetMinimumSize(GdcPt2 Size);	
+	void SetMinimumSize(GdcPt2 Size) override;
 
     /// Gets the style of the control
-    class GCss *GetCss(bool Create = false);
+    class GCss *GetCss(bool Create = false) override;
 
 	/// Resolve a CSS colour, e.g.:
 	/// auto Back = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 	GColour StyleColour(int CssPropType, GColour Default, int Depth = 5);
 
     /// Sets the style of the control (will take ownership of 'css')
-    void SetCss(GCss *css);
+    void SetCss(GCss *css) override;
     /// Sets the CSS foreground or background colour
-	bool SetColour(GColour &c, bool Fore);
+	bool SetColour(GColour &c, bool Fore) override;
 
 	/// The class' name. Should be overriden in child classes to return the
 	/// right class name. Mostly used for debugging, but in the win32 port it
@@ -482,20 +482,20 @@ public:
 	/// GView::CreateClass().
 	///
 	/// \returns the Class' name for debugging
-	const char *GetClass();
+	const char *GetClass() override;
 
 	/// The array of CSS class names.
-	GString::Array *CssClasses();
+	GString::Array *CssClasses() override;
 	/// Any element level styles
-	GString CssStyles(const char *Set = NULL);
+	GString CssStyles(const char *Set = NULL) override;
 
 	/// \brief Captures all mouse events to this view
 	///
 	/// Once you have mouse capture all mouse events will be passed to this
 	/// view. i.e. during a mouse click.
-	bool Capture(bool c);
+	bool Capture(bool c) override;
 	/// true if this view is capturing mouse events.
-	bool IsCapturing();
+	bool IsCapturing() override;
 	/// \brief Gets the current mouse location
 	/// \return true on success
 	bool GetMouse
@@ -504,26 +504,26 @@ public:
 		GMouse &m,
 		/// Get the location in screen coordinates
 		bool ScreenCoords = false
-	);
+	) override;
 
 	/// \brief Gets the ID associated with the view
 	///
 	/// The ID of a view is designed to associate controls defined in resource
 	/// files with a object at runtime via a C header file define.
-	int GetId();
+	int GetId() override;
 	/// Sets the view's ID.
-	void SetId(int i);
+	void SetId(int i) override;
 	/// true if this control is a tab stop.
-	bool GetTabStop();
+	bool GetTabStop() override;
 	/// \brief Sets whether this control is a tab stop.
 	///
 	/// A top stop is a control that receives focus if the user scrolls through the controls
 	/// with the tab key.
-	void SetTabStop(bool b);
+	void SetTabStop(bool b) override;
 	/// Gets the integer representation of the view's contents
-	virtual int64 Value() { return 0; }
+	virtual int64 Value() override { return 0; }
 	/// Sets the integer representation of the view's contents
-	virtual void Value(int64 i) {}
+	virtual void Value(int64 i) override {}
 	#if LGI_VIEW_HANDLE
 	/// Find a view by it's os handle
 	virtual GViewI *FindControl(OsView hnd);
@@ -533,24 +533,24 @@ public:
 	(
 		// The ID to look for
 		int Id
-	);
+	) override;
 
 	/// Gets the value of the control identified by the ID
-	int64 GetCtrlValue(int Id);
+	int64 GetCtrlValue(int Id) override;
 	/// Sets the value of the control identified by the ID
-	void SetCtrlValue(int Id, int64 i);
+	void SetCtrlValue(int Id, int64 i) override;
 	/// Gets the name (text) of the control identified by the ID
-	const char *GetCtrlName(int Id);
+	const char *GetCtrlName(int Id) override;
 	/// Sets the name (text) of the control identified by the ID
-	void SetCtrlName(int Id, const char *s);
+	void SetCtrlName(int Id, const char *s) override;
 	/// Gets the enabled state of the control identified by the ID
-	bool GetCtrlEnabled(int Id);
+	bool GetCtrlEnabled(int Id) override;
 	/// Sets the enabled state of the control identified by the ID
-	void SetCtrlEnabled(int Id, bool Enabled);
+	void SetCtrlEnabled(int Id, bool Enabled) override;
 	/// Gets the visible state of the control identified by the ID
-	bool GetCtrlVisible(int Id);
+	bool GetCtrlVisible(int Id) override;
 	/// Sets the visible state of the control identified by the ID
-	void SetCtrlVisible(int Id, bool Visible);
+	void SetCtrlVisible(int Id, bool Visible) override;
 
 	/// Causes the given area of the view to be repainted to update the screen
 	bool Invalidate
@@ -561,7 +561,7 @@ public:
 		bool Repaint = false,
 		/// false to update in client coordinates, true to update the non client region
 		bool NonClient = false
-	);
+	) override;
 
 	/// Causes the given area of the view to be repainted to update the screen
 	bool Invalidate
@@ -572,87 +572,87 @@ public:
 		bool Repaint = false,
 		/// false to update in client coordinates, true to update the non client region
 		bool NonClient = false
-	);
+	) override;
 
 	/// true if the mouse event is over the view
-	bool IsOver(GMouse &m);
+	bool IsOver(GMouse &m) override;
 	/// returns the sub window located at the point x,y	
-	GViewI *WindowFromPoint(int x, int y, int DebugDepth = 0);
+	GViewI *WindowFromPoint(int x, int y, int DebugDepth = 0) override;
 	/// Sets a timer to call the OnPulse() event
 	void SetPulse
 	(
 		/// The milliseconds between calls to OnPulse() or -1 to disable
 		int Ms = -1
-	);
+	) override;
 	/// Convert a point form view coordinates to screen coordinates
-	bool PointToScreen(GdcPt2 &p);
+	bool PointToScreen(GdcPt2 &p) override;
 	/// Convert a point form screen coordinates to view coordinates
-	bool PointToView(GdcPt2 &p);
+	bool PointToView(GdcPt2 &p) override;
 	/// Get the x,y offset from the virtual window to the first real view in the parent chain
-	bool WindowVirtualOffset(GdcPt2 *Offset);	
+	bool WindowVirtualOffset(GdcPt2 *Offset) override;
 	/// Get the size of the window borders
-	GdcPt2 &GetWindowBorderSize();
+	GdcPt2 &GetWindowBorderSize() override;
 	/// Layout all the child views
 	virtual bool Pour
 	(
 		/// The available space to lay out the views into
 		GRegion &r
-	) { return false; }
+	) override { return false; }
 
 	/// The mouse was clicked over this view
 	void OnMouseClick
 	(
 		/// The event parameters
 		GMouse &m
-	);
+	) override;
 	/// Mouse moves into the area over the control
 	void OnMouseEnter
 	(
 		/// The event parameters
 		GMouse &m
-	);
+	) override;
 	/// Mouse leaves the area over the control
 	void OnMouseExit
 	(
 		/// The event parameters
 		GMouse &m
-	);
+	) override;
 	/// The mouse moves over the control
 	void OnMouseMove
 	(
 		/// The event parameters
 		GMouse &m
-	);
+	) override;
 	/// The mouse wheel was scrolled.
 	bool OnMouseWheel
 	(
 		/// The amount scrolled
 		double Lines
-	);
+	) override;
 	/// A key was pressed while this view has focus
-	bool OnKey(GKey &k);
+	bool OnKey(GKey &k) override;
 	/// The view is attached
-	void OnCreate();
+	void OnCreate() override;
 	/// The view is detached
-	void OnDestroy();
+	void OnDestroy() override;
 	/// The view gains or loses the keyboard focus
 	void OnFocus
 	(
 		/// True if the control is receiving focus
 		bool f
-	);
+	) override;
 	/// \brief Called every so often by the timer system.
 	/// \sa SetPulse()
-	void OnPulse();
+	void OnPulse() override;
 	/// Called when the view position changes
-	void OnPosChange();
+	void OnPosChange() override;
 	/// Called on a top level window when something requests to close the window
 	/// \returns true if it's ok to continue shutting down.
 	bool OnRequestClose
 	(
 		/// True if the operating system is shutting down.
 		bool OsShuttingDown
-	);
+	) override;
 	/// Return the type of cursor that should be visible when the mouse is at x,y
 	/// e.g. #LCUR_Normal
 	int OnHitTest
@@ -661,21 +661,21 @@ public:
 		int x,
 		/// The y coordinate in view coordinates
 		int y
-	);
+	) override;
 	/// Called when the contents of the Children list have changed.
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
+	void OnChildrenChanged(GViewI *Wnd, bool Attaching) override;
 	/// Called to paint the onscreen representation of the view
-	void OnPaint(GSurface *pDC);
+	void OnPaint(GSurface *pDC) override;
 	/// \brief Called when a child view or view with it's SetNotify() set to this window changes.
 	///
 	/// The event by default will bubble up to the GWindow at the top of the window heirarchy visiting
 	/// each GView on the way. If it reaches a GView that processes it then the event stops propergating
 	/// up the heirarchy.
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(GViewI *Ctrl, int Flags) override;
 	/// Called when a menu command is activated by the user.
-	int OnCommand(int Cmd, int Event, OsView Wnd);
+	int OnCommand(int Cmd, int Event, OsView Wnd) override;
 	/// Called after the view is attached to a new parent
-	void OnAttach();
+	void OnAttach() override;
 	
 	/// Called to get layout information for the control. It's called
 	/// up to 3 times to collect various dimensions:
@@ -691,7 +691,7 @@ public:
 	///		Min height currently not used.
 	/// 3) PostLayout: Called to position view in cell.
 	///		Not called.
-	bool OnLayout(GViewLayoutInfo &Inf) { return false; }
+	bool OnLayout(GViewLayoutInfo &Inf) override { return false; }
 
 	#if defined(_DEBUG)
 	bool _Debug;

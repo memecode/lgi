@@ -44,7 +44,7 @@ bool GClipBoard::Empty()
 	return Status;
 }
 
-bool GClipBoard::Text(char *Str, bool AutoEmpty)
+bool GClipBoard::Text(const char *Str, bool AutoEmpty)
 {
 	LAutoPool Ap;
 	
@@ -81,7 +81,7 @@ char *GClipBoard::Text()
 	return Txt;
 }
 
-bool GClipBoard::TextW(char16 *Str, bool AutoEmpty)
+bool GClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 {
 	bool Status = false;
 

@@ -191,7 +191,7 @@ bool GCombo::Name(const char *n)
 	return true;
 }
 
-char *GCombo::Name()
+const char *GCombo::Name()
 {
 	return d->Items.ItemAt(d->Current);
 }
@@ -542,7 +542,7 @@ void GCombo::OnPaint(GSurface *pDC)
 	
 	if (!d->GetText(_FL))
 	{
-		char *n = Name();
+		auto n = Name();
 		if (n)
 			d->SetText(new GDisplayString(GetFont(), n), _FL);
 	}

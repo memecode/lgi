@@ -52,16 +52,16 @@ public:
 	);
 	~GButton();
 	
-	const char *GetClass() { return "GButton"; }
+	const char *GetClass() override { return "GButton"; }
 	
 	/// True if the button is the default action on the dialog
 	bool Default();
 	/// Sets the button to be the default action on the dialog
 	void Default(bool b);
 	/// True if the button is down.
-	int64 Value();
+	int64 Value() override;
 	/// Sets the button to down.
-	void Value(int64 i);
+	void Value(int64 i) override;
 
 	/// Returns true if the button is set to toggle mode
 	bool GetIsToggle();
@@ -79,15 +79,15 @@ public:
     void SetPreferredSize(int x = -1, int y = -1);
 
 	// Events
-	GMessage::Result OnEvent(GMessage *Msg);
-	void OnMouseClick(GMouse &m);
-	void OnMouseEnter(GMouse &m);
-	void OnMouseExit(GMouse &m);
-	bool OnKey(GKey &k);
-	void OnFocus(bool f);
-	void OnPaint(GSurface *pDC);
-	void OnCreate();
-	void OnAttach();
+	GMessage::Result OnEvent(GMessage *Msg) override;
+	void OnMouseClick(GMouse &m) override;
+	void OnMouseEnter(GMouse &m) override;
+	void OnMouseExit(GMouse &m) override;
+	bool OnKey(GKey &k) override;
+	void OnFocus(bool f) override;
+	void OnPaint(GSurface *pDC) override;
+	void OnCreate() override;
+	void OnAttach() override;
 	void OnStyleChange();
 	virtual void OnClick();
 
@@ -96,13 +96,13 @@ public:
 	const char16 *NameW() override { return GView::NameW(); }
 	bool Name(const char *n) override;
 	bool NameW(const char16 *n) override;
-	void SetFont(GFont *Fnt, bool OwnIt = false);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	void SetFont(GFont *Fnt, bool OwnIt = false) override;
+	int OnNotify(GViewI *Ctrl, int Flags) override;
 
 	#if WINNATIVE && !XP_BUTTON
 	int SysOnNotify(int Msg, int Code);
 	#else
-	bool OnLayout(GViewLayoutInfo &Inf);
+	bool OnLayout(GViewLayoutInfo &Inf) override;
 	#endif
 };
 

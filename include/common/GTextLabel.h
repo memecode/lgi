@@ -32,19 +32,19 @@ public:
 	);
 	~GTextLabel();
 	
-	const char *GetClass() { return "GTextLabel"; }
+	const char *GetClass() override { return "GTextLabel"; }
 
 	/// Set the text
 	bool Name(const char *n) override;
 	/// Set the text with a wide string
 	bool NameW(const char16 *n) override;
 	/// Sets the font used to render the text
-	void SetFont(GFont *Fnt, bool OwnIt = false);
+	void SetFont(GFont *Fnt, bool OwnIt = false) override;
 
 	/// Returns the numeric value of the text (atoi)
-	int64 Value();
+	int64 Value() override;
 	/// Sets the text to a number
-	void Value(int64 i);
+	void Value(int64 i) override;
 	/// Gets the text
 	const char *Name() override { return GView::Name(); }
 	/// Gets the text as a wide string
@@ -55,14 +55,14 @@ public:
 	void SetWrap(bool b);
 	
 	// Events
-	GMessage::Result OnEvent(GMessage *Msg);
-	int OnNotify(GViewI *Ctrl, int Flags);
-	void OnPaint(GSurface *pDC);
-	void OnPosChange();
-	void OnAttach();
-	bool OnLayout(GViewLayoutInfo &Inf);
+	GMessage::Result OnEvent(GMessage *Msg) override;
+	int OnNotify(GViewI *Ctrl, int Flags) override;
+	void OnPaint(GSurface *pDC) override;
+	void OnPosChange() override;
+	void OnAttach() override;
+	bool OnLayout(GViewLayoutInfo &Inf) override;
 	void OnStyleChange();
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = NULL);
+	bool SetVariant(const char *Name, GVariant &Value, char *Array = NULL) override;
 };
 
 #endif

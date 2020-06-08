@@ -18,34 +18,34 @@ class LgiClass GRadioGroup :
 	public ResObject
 {
 	class GRadioGroupPrivate *d;
-	void OnCreate();
+	void OnCreate() override;
 
 public:
 	GRadioGroup(int id, int x, int y, int cx, int cy, const char *name, int Init = 0);
 	~GRadioGroup();
 	
-	const char *GetClass() { return "GRadioGroup"; }
+	const char *GetClass() override { return "GRadioGroup"; }
 
 	/// Returns the index of the set radio button
-	int64 Value();
+	int64 Value() override;
 	/// Sets the 'ith' radio button to on.
-	void Value(int64 i);
+	void Value(int64 i) override;
 	/// Adds a radio button to the group.
 	GRadioButton *Append(int x, int y, const char *name);
 
 	// Impl
-	int OnNotify(GViewI *Ctrl, int Flags);
-	void OnPaint(GSurface *pDC);
-	void OnAttach();
-	GMessage::Result OnEvent(GMessage *m);
-	bool OnLayout(GViewLayoutInfo &Inf);
+	int OnNotify(GViewI *Ctrl, int Flags) override;
+	void OnPaint(GSurface *pDC) override;
+	void OnAttach() override;
+	GMessage::Result OnEvent(GMessage *m) override;
+	bool OnLayout(GViewLayoutInfo &Inf) override;
 	void OnStyleChange();
 
 	const char *Name() override { return GView::Name(); }
 	const char16 *NameW() override { return GView::NameW(); }
 	bool Name(const char *n) override;
 	bool NameW(const char16 *n) override;
-	void SetFont(GFont *Fnt, bool OwnIt = false);
+	void SetFont(GFont *Fnt, bool OwnIt = false) override;
 };
 
 /// A radio button control. A radio button is used to select between mutually exclusive options. i.e.
@@ -65,32 +65,32 @@ public:
 	GRadioButton(int id, int x, int y, int cx, int cy, const char *name);
 	~GRadioButton();
 
-	const char *GetClass() { return "GRadioButton"; }
+	const char *GetClass() override { return "GRadioButton"; }
 
 	// Impl
 	const char *Name() override { return GView::Name(); }
 	const char16 *NameW() override { return GView::NameW(); }
 	bool Name(const char *n) override;
 	bool NameW(const char16 *n) override;
-	int64 Value();
-	void Value(int64 i);
-	bool OnLayout(GViewLayoutInfo &Inf);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int64 Value() override;
+	void Value(int64 i) override;
+	bool OnLayout(GViewLayoutInfo &Inf) override;
+	int OnNotify(GViewI *Ctrl, int Flags) override;
 
 	// Events
-	void OnAttach();
+	void OnAttach() override;
 	void OnStyleChange();
-	bool OnKey(GKey &k);
+	bool OnKey(GKey &k) override;
 	
 	#if WINNATIVE && !XP_BUTTON
 	int SysOnNotify(int Msg, int Code);
 	#else
-	void OnMouseClick(GMouse &m);
-	void OnMouseEnter(GMouse &m);
-	void OnMouseExit(GMouse &m);
-	void OnFocus(bool f);
-	void OnPaint(GSurface *pDC);
-	void SetFont(GFont *Fnt, bool OwnIt = false);
+	void OnMouseClick(GMouse &m) override;
+	void OnMouseEnter(GMouse &m) override;
+	void OnMouseExit(GMouse &m) override;
+	void OnFocus(bool f) override;
+	void OnPaint(GSurface *pDC) override;
+	void SetFont(GFont *Fnt, bool OwnIt = false) override;
 	#endif
 };
 

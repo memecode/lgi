@@ -60,10 +60,10 @@ public:
 	GToolButton(int Bx, int By);
 	~GToolButton();
 
-	const char *GetClass() { return "GToolButton"; }
+	const char *GetClass() override { return "GToolButton"; }
 
-	int64 Value() { return Down; }
-	void Value(int64 i);
+	int64 Value() override { return Down; }
+	void Value(int64 i) override;
 
 	const char *Name() override { return GView::Name(); }
 	bool Name(const char *n) override;
@@ -80,12 +80,12 @@ public:
 	bool GetNeedsRightClick() { return NeedsRightClick; }
 	void SetNeedsRightClick(bool b) { NeedsRightClick = b; }
 
-	void OnPaint(GSurface *pDC);
+	void OnPaint(GSurface *pDC) override;
 
-	void OnMouseClick(GMouse &m);
-	void OnMouseMove(GMouse &m);
-	void OnMouseEnter(GMouse &m);
-	void OnMouseExit(GMouse &m);
+	void OnMouseClick(GMouse &m) override;
+	void OnMouseMove(GMouse &m) override;
+	void OnMouseEnter(GMouse &m) override;
+	void OnMouseExit(GMouse &m) override;
 
 	virtual void SendCommand();
 	virtual bool GetDimension(int &x, int &y) { return false; }

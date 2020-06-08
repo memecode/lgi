@@ -106,7 +106,7 @@ public:
 	#endif
 	~GWindow();
 
-	const char *GetClass() { return "GWindow"; }
+	const char *GetClass() override { return "GWindow"; }
 
 	/// Lays out the child views into the client area.
 	virtual void PourAll();
@@ -224,36 +224,36 @@ public:
 	virtual void OnUrl(const char *Url) {};
 
 	///////////////// Implementation ////////////////////////////
-	void OnPosChange();
-	GMessage::Result OnEvent(GMessage *Msg);
-	void OnPaint(GSurface *pDC);
+	void OnPosChange() override;
+	GMessage::Result OnEvent(GMessage *Msg) override;
+	void OnPaint(GSurface *pDC) override;
 	bool HandleViewMouse(GView *v, GMouse &m);
 	bool HandleViewKey(GView *v, GKey &k);
-	bool OnRequestClose(bool OsShuttingDown);
+	bool OnRequestClose(bool OsShuttingDown) override;
 	bool Obscured();
-	bool Visible();
-	void Visible(bool i);
+	bool Visible() override;
+	void Visible(bool i) override;
 	bool IsActive();
-	GRect &GetPos();
+	GRect &GetPos() override;
 
 	// D'n'd
-	int WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState);
-	int OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState);
+	int WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState) override;
+	int OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState) override;
 
 	#if !WINNATIVE
 	
-		bool Attach(GViewI *p);
+		bool Attach(GViewI *p) override;
 
 		// Props
-		OsWindow WindowHandle() { return Wnd; }
+		OsWindow WindowHandle() override { return Wnd; }
 		bool Name(const char *n) override;
 		const char *Name() override;
-		bool SetPos(GRect &p, bool Repaint = false);
-		GRect &GetClient(bool InClientSpace = true);
+		bool SetPos(GRect &p, bool Repaint = false) override;
+		GRect &GetClient(bool InClientSpace = true) override;
 	
 		// Events
-		void OnChildrenChanged(GViewI *Wnd, bool Attaching);
-		void OnCreate();
+		void OnChildrenChanged(GViewI *Wnd, bool Attaching) override;
+		void OnCreate() override;
 		virtual void OnFrontSwitch(bool b);
 
 	#endif
@@ -276,10 +276,10 @@ public:
 	
 	#elif defined(MAC)
 	
-		bool PostEvent(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0);
-		void Quit(bool DontDelete = false);
-		int OnCommand(int Cmd, int Event, OsView Wnd);
-		GViewI *WindowFromPoint(int x, int y, int DebugDebug = 0);
+		bool PostEvent(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0) override;
+		void Quit(bool DontDelete = false) override;
+		int OnCommand(int Cmd, int Event, OsView Wnd) override;
+		GViewI *WindowFromPoint(int x, int y, int DebugDebug = 0) override;
 		
 		#if defined(LGI_CARBON)
 			OSErr HandlerCallback(DragTrackingMessage *tracking, DragRef theDrag);

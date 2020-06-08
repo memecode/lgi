@@ -951,7 +951,7 @@ bool GWindow::Name(const char *n)
 	return Status;
 }
 
-char *GWindow::Name()
+const char *GWindow::Name()
 {
 	return GBase::Name();
 }

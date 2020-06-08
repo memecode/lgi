@@ -515,7 +515,7 @@ public:
 		return n;		
 	}
 
-	char *Name()
+	const char *Name()
 	{
 		GString n = NameAt(Cursor);
 		GBase::Name(n);
@@ -1036,7 +1036,7 @@ GFileSelectDlg::~GFileSelectDlg()
 	d->InitShowHiddenFiles = ShowHidden ? ShowHidden->Value() : false;
 	d->InitSize = GetPos();
 
-	char *CurPath = GetCtrlName(IDC_PATH);
+	auto CurPath = GetCtrlName(IDC_PATH);
 	if (ValidStr(CurPath))
 	{
 		DeleteArray(d->InitPath);
@@ -1055,7 +1055,7 @@ void GFileSelectDlg::OnFile(char *f)
 
 void GFileSelectDlg::SetFolder(char *f)
 {
-	char *CurPath = GetCtrlName(IDC_PATH);
+	auto CurPath = GetCtrlName(IDC_PATH);
 	if (CurPath)
 	{
 		d->History.Insert(NewStr(CurPath));
@@ -1072,14 +1072,14 @@ void GFileSelectDlg::OnFolder()
 	if (FileLst)
 		FileLst->OnFolder();
 
-	char *CurPath = GetCtrlName(IDC_PATH);
+	auto CurPath = GetCtrlName(IDC_PATH);
 	if (CurPath && UpBtn)
 		UpBtn->Enabled(strlen(CurPath)>3);
 }
 
 void GFileSelectDlg::OnUpFolder()
 {
-	char *Cur = GetCtrlName(IDC_PATH);
+	auto Cur = GetCtrlName(IDC_PATH);
 	if (Cur)
 	{
 		char Dir[MAX_PATH];
@@ -1161,7 +1161,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 		}
 		case IDC_FILE:
 		{
-			char *f = Ctrl->Name();
+			auto f = Ctrl->Name();
 			if (!f)
 				break;
 
@@ -1276,7 +1276,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 			{
 				// change extension of current file
 				GFileType *Type = d->Types.ItemAt(d->CurrentType);
-				char *File = FileNameEdit->Name();
+				auto File = FileNameEdit->Name();
 				if (Type && File)
 				{
 					char *Ext = strchr(File, '.');
@@ -1345,8 +1345,8 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 				break;
 			}
 			
-			char *Path = GetCtrlName(IDC_PATH);
-			char *File = GetCtrlName(IDC_FILE);
+			auto Path = GetCtrlName(IDC_PATH);
+			auto File = GetCtrlName(IDC_FILE);
 			if (Path)
 			{
 				char f[MAX_PATH];
@@ -1407,7 +1407,7 @@ public:
 		return Path;
 	}
 
-	void OnPath(char *p);
+	void OnPath(const char *p);
 	void OnMouseClick(GMouse &m);
 	bool OnKey(GKey &k);
 };
@@ -1522,7 +1522,7 @@ GFileSystemItem::GFileSystemItem(GFileSystemPopup *popup, GVolume *Vol, char *pa
 	}
 }
 
-void GFileSystemItem::OnPath(char *p)
+void GFileSystemItem::OnPath(const char *p)
 {
 	switch (GetImage())
 	{
@@ -1569,7 +1569,7 @@ void GFileSystemItem::OnPath(char *p)
 			if (GetImage() != FSI_DESKTOP &&
 				strlen(p) > 3)
 			{
-				char *Start = p + strlen(Path);
+				auto Start = p + strlen(Path);
 				if (Start)
 				{
 					char s[256];
@@ -1867,7 +1867,7 @@ bool GFolderList::OnKey(GKey &k)
 				{
 					if (Sel->IsDir)
 					{
-						char *Cur = GetWindow()->GetCtrlName(IDC_PATH);
+						auto Cur = GetWindow()->GetCtrlName(IDC_PATH);
 						if (Cur)
 						{
 							char Path[256];
@@ -2024,7 +2024,7 @@ bool GFileSelect::ReadOnly()
 	return d->ReadOnly;
 }
 
-char *GFileSelect::Name()
+const char *GFileSelect::Name()
 {
 	return d->Files[0];
 }

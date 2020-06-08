@@ -319,16 +319,16 @@ public:
 				GFontType *FontInfo = NULL);
 	~GTextView3();
 
-	const char *GetClass() { return "GTextView3"; }
+	const char *GetClass() override { return "GTextView3"; }
 
 	// Data
 	const char *Name() override;
 	bool Name(const char *s) override;
 	const char16 *NameW() override;
 	bool NameW(const char16 *s) override;
-	int64 Value();
-	void Value(int64 i);
-	const char *GetMimeType() { return "text/plain"; }
+	int64 Value() override;
+	void Value(int64 i) override;
+	const char *GetMimeType() override { return "text/plain"; }
 	size_t GetSize() { return Size; }
 	GString operator[](ssize_t LineIdx);
 
@@ -336,45 +336,45 @@ public:
 	void DeleteSelection(char16 **Cut = 0);
 
 	// Font
-	GFont *GetFont();
+	GFont *GetFont() override;
 	GFont *GetBold();
-	void SetFont(GFont *f, bool OwnIt = false);
-	void SetFixedWidthFont(bool i);
+	void SetFont(GFont *f, bool OwnIt = false) override;
+	void SetFixedWidthFont(bool i) override;
 
 	// Options
-	void SetTabSize(uint8_t i);
+	void SetTabSize(uint8_t i) override;
 	void SetBorder(int b);
-	void SetReadOnly(bool i);
-	void SetCrLf(bool crlf);
+	void SetReadOnly(bool i) override;
+	void SetCrLf(bool crlf) override;
 
 	/// Sets the wrapping on the control, use #TEXTED_WRAP_NONE or #TEXTED_WRAP_REFLOW
-	void SetWrapType(LDocWrapType i);
+	void SetWrapType(LDocWrapType i) override;
 	
 	// State / Selection
-	ssize_t GetCaret(bool Cursor = true);
-	virtual void SetCaret(size_t i, bool Select, bool ForceFullUpdate = false);
-	ssize_t IndexAt(int x, int y);
-	bool IsDirty() { return Dirty; }
+	ssize_t GetCaret(bool Cursor = true) override;
+	virtual void SetCaret(size_t i, bool Select, bool ForceFullUpdate = false) override;
+	ssize_t IndexAt(int x, int y) override;
+	bool IsDirty() override { return Dirty; }
 	void IsDirty(bool d) { Dirty = d; }
-	bool HasSelection();
-	void UnSelectAll();
-	void SelectWord(size_t From);
-	void SelectAll();
-	bool GetLineColumnAtIndex(GdcPt2 &Pt, ssize_t Index = -1);
-	size_t GetLines();
-	void GetTextExtent(int &x, int &y);
-	char *GetSelection();
+	bool HasSelection() override;
+	void UnSelectAll() override;
+	void SelectWord(size_t From) override;
+	void SelectAll() override;
+	bool GetLineColumnAtIndex(GdcPt2 &Pt, ssize_t Index = -1) override;
+	size_t GetLines() override;
+	void GetTextExtent(int &x, int &y) override;
+	char *GetSelection() override;
 	GRange GetSelectionRange();
 
 	// File IO
-	bool Open(const char *Name, const char *Cs = 0);
-	bool Save(const char *Name, const char *Cs = 0);
+	bool Open(const char *Name, const char *Cs = 0) override;
+	bool Save(const char *Name, const char *Cs = 0) override;
 	const char *GetLastError();
 
 	// Clipboard IO
-	bool Cut();
-	bool Copy();
-	bool Paste();
+	bool Cut() override;
+	bool Copy() override;
+	bool Paste() override;
 
 	// Undo/Redo
 	void Undo();
@@ -385,17 +385,17 @@ public:
 	// Action UI
 	virtual bool DoGoto();
 	virtual bool DoCase(bool Upper);
-	virtual bool DoFind();
+	virtual bool DoFind() override;
 	virtual bool DoFindNext();
-	virtual bool DoReplace();
+	virtual bool DoReplace() override;
 
 	// Action Processing	
 	bool ClearDirty(bool Ask, const char *FileName = 0);
 	void UpdateScrollBars(bool Reset = false);
 	ssize_t GetLine();
 	void SetLine(int Line);
-	GDocFindReplaceParams *CreateFindReplaceParams();
-	void SetFindReplaceParams(GDocFindReplaceParams *Params);
+	GDocFindReplaceParams *CreateFindReplaceParams() override;
+	void SetFindReplaceParams(GDocFindReplaceParams *Params) override;
 
 	// Object Events
 	virtual bool OnFind(	const char16 *Find,
@@ -412,31 +412,31 @@ public:
 							bool SearchUpwards);
 	bool OnMultiLineTab(bool In);
 	void OnSetHidden(int Hidden);
-	void OnPosChange();
-	void OnCreate();
-	void OnEscape(GKey &K);
-	bool OnMouseWheel(double Lines);
+	void OnPosChange() override;
+	void OnCreate() override;
+	void OnEscape(GKey &K) override;
+	bool OnMouseWheel(double Lines) override;
 
 	// Window Events
-	void OnFocus(bool f);
-	void OnMouseClick(GMouse &m);
-	void OnMouseMove(GMouse &m);
-	bool OnKey(GKey &k);
-	void OnPaint(GSurface *pDC);
-	GMessage::Result OnEvent(GMessage *Msg);
-	int OnNotify(GViewI *Ctrl, int Flags);
-	void OnPulse();
-	int OnHitTest(int x, int y);
-	bool OnLayout(GViewLayoutInfo &Inf);
-	int WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState);
-	int OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState);
-	LgiCursor GetCursor(int x, int y);
+	void OnFocus(bool f) override;
+	void OnMouseClick(GMouse &m) override;
+	void OnMouseMove(GMouse &m) override;
+	bool OnKey(GKey &k) override;
+	void OnPaint(GSurface *pDC) override;
+	GMessage::Result OnEvent(GMessage *Msg) override;
+	int OnNotify(GViewI *Ctrl, int Flags) override;
+	void OnPulse() override;
+	int OnHitTest(int x, int y) override;
+	bool OnLayout(GViewLayoutInfo &Inf) override;
+	int WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState) override;
+	int OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState) override;
+	LgiCursor GetCursor(int x, int y) override;
 
 	// Virtuals
 	virtual bool Insert(size_t At, const char16 *Data, ssize_t Len);
 	virtual bool Delete(size_t At, ssize_t Len);
-	virtual void OnEnter(GKey &k);
-	virtual void OnUrl(char *Url);
+	virtual void OnEnter(GKey &k) override;
+	virtual void OnUrl(char *Url) override;
 	virtual void DoContextMenu(GMouse &m);
 	virtual bool OnStyleClick(GStyle *style, GMouse *m);
 	virtual bool OnStyleMenu(GStyle *style, LSubMenu *m);

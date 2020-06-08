@@ -135,7 +135,7 @@ void GEdit::Value(int64 i)
 
 int64 GEdit::Value()
 {
-	char *n = Name();
+	auto n = Name();
 	return (n) ? atoi(n) : 0;
 }
 

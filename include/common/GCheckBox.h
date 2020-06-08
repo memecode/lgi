@@ -39,7 +39,7 @@ public:
 	~GCheckBox();
 
 	// Methods
-	const char *GetClass() { return "GCheckBox"; }
+	const char *GetClass() override { return "GCheckBox"; }
 	
 	/// Returns whether the control is 3 state
 	bool ThreeState();
@@ -53,29 +53,29 @@ public:
 	/// </ul>
 	void ThreeState(bool t);
 	/// Returns the current value, 0 or 1. Or possibly 2 if ThreeState() is set.
-	int64 Value();
+	int64 Value() override;
 	/// Sets the current value.
-	void Value(int64 b);
+	void Value(int64 b) override;
 
 	// Impl
-	const char *Name() { return GView::Name(); }
-	const char16 *NameW() { return GView::NameW(); }
+	const char *Name() override { return GView::Name(); }
+	const char16 *NameW() override { return GView::NameW(); }
 	bool Name(const char *n) override;
 	bool NameW(const char16 *n) override;
-	void SetFont(GFont *Fnt, bool OwnIt = false);
-    bool OnLayout(GViewLayoutInfo &Inf);
+	void SetFont(GFont *Fnt, bool OwnIt = false) override;
+    bool OnLayout(GViewLayoutInfo &Inf) override;
 
-	void OnMouseClick(GMouse &m);
-	void OnMouseEnter(GMouse &m);
-	void OnMouseExit(GMouse &m);
-	bool OnKey(GKey &k);
-	void OnFocus(bool f);
-	void OnPosChange();
-	void OnPaint(GSurface *pDC);
-	void OnAttach();
+	void OnMouseClick(GMouse &m) override;
+	void OnMouseEnter(GMouse &m) override;
+	void OnMouseExit(GMouse &m) override;
+	bool OnKey(GKey &k) override;
+	void OnFocus(bool f) override;
+	void OnPosChange() override;
+	void OnPaint(GSurface *pDC) override;
+	void OnAttach() override;
 	void OnStyleChange();
-	GMessage::Result OnEvent(GMessage *Msg);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	GMessage::Result OnEvent(GMessage *Msg) override;
+	int OnNotify(GViewI *Ctrl, int Flags) override;
 
 	#ifdef WINNATIVE
 	int SysOnNotify(int Msg, int Code);
