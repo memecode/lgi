@@ -106,7 +106,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = FEA4458D289145EDB6E2BE90;
+			remoteGlobalIDString = 3A3094BF1FDC4A8E873E741D;
 			remoteInfo = libpng15;
 		};
 /* End PBXContainerItemProxy section */
@@ -602,6 +602,7 @@
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = (
 					"-DMAC",
 					"-DLGI_COCOA",
@@ -631,6 +632,7 @@
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_CFLAGS = (
 					"-DMAC",
 					"-DLGI_COCOA",
