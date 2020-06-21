@@ -1069,7 +1069,7 @@ protected:
 		}
 	};
 
-	int PreAlloc;
+	size_t PreAlloc;
 	List<Block> Mem;
 
 public:
@@ -1078,7 +1078,7 @@ public:
 	(
 		/// Sets the block size, which means allocating ahead and then joining
 		/// together smaller inserts into 1 continuous block.
-		int PreAlloc = 0
+		size_t PreAlloc = 0
 	);
 	/// Destructor
 	virtual ~GMemQueue();

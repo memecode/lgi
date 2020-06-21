@@ -100,7 +100,7 @@ bool UnitTest_ListClass()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-GMemQueue::GMemQueue(int prealloc)
+GMemQueue::GMemQueue(size_t prealloc)
 {
 	PreAlloc = prealloc;
 }

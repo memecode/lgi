@@ -289,7 +289,10 @@ GMemDC::GMemDC(NSImage *img)
 	{
 		NSPoint p = {0.0, 0.0};
 		NSRect r = {{0.0, 0.0}, {img.size.width, img.size.height}};
+		
+		NSGraphicsContext *g = [[NSGraphicsContext alloc] init:d->Bmp flipped:false];
 		[img drawAtPoint:p fromRect:r operation:NSCompositingOperationCopy fraction:0.0];
+		[g release];
 	}
 }
 

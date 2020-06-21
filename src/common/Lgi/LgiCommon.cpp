@@ -112,89 +112,93 @@ bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 {
 	#if LGI_SDL
 
-	SDL_Event e;
+		SDL_Event e;
 
-	e.type = SDL_USEREVENT;
-	e.user.code = Event;
-	e.user.data1 = Wnd;
-	e.user.data2 = a || b ? new GMessage::EventParams(a, b) : NULL;
+		e.type = SDL_USEREVENT;
+		e.user.code = Event;
+		e.user.data1 = Wnd;
+		e.user.data2 = a || b ? new GMessage::EventParams(a, b) : NULL;
 
-	/*
-	printf("LgiPostEvent Wnd=%p, Event=%i, a/b: %i/%i\n",
-		Wnd, Event, (int)a, (int)b);
-	*/
+		/*
+		printf("LgiPostEvent Wnd=%p, Event=%i, a/b: %i/%i\n",
+			Wnd, Event, (int)a, (int)b);
+		*/
 
-	return SDL_PushEvent(&e) == 0;
+		return SDL_PushEvent(&e) == 0;
 
 	#elif WINNATIVE
 
-	return PostMessage(Wnd, Event, a, b) != 0;
+		return PostMessage(Wnd, Event, a, b) != 0;
 
 	#elif defined(__GTK_H__)
 
-	LgiAssert(Wnd);
-	GViewI *View = (GViewI*) g_object_get_data(GtkCast(Wnd, g_object, GObject), "GViewI");
-	if (View)
-	{
-		GMessage m(0);
-		m.Set(Event, a, b);
-		return m.Send(View);
-	}
-	else printf("%s:%i - Error: LgiPostEvent can't cast OsView to GViewI\n", _FL);
+		LgiAssert(Wnd);
+		GViewI *View = (GViewI*) g_object_get_data(GtkCast(Wnd, g_object, GObject), "GViewI");
+		if (View)
+		{
+			GMessage m(0);
+			m.Set(Event, a, b);
+			return m.Send(View);
+		}
+		else printf("%s:%i - Error: LgiPostEvent can't cast OsView to GViewI\n", _FL);
 
 	#elif defined(MAC) && !LGI_COCOA
 	
-	#if 0
-	int64 Now = LgiCurrentTime();
-	static int64 Last = 0;
-	static int Count = 0;
+		#if 0
+		int64 Now = LgiCurrentTime();
+		static int64 Last = 0;
+		static int Count = 0;
 	
-	Count++;
-	if (Now > Last + 1000)
-	{
-		printf("Sent %i events in the last %ims\n", Count, (int)(Now-Last));
-		Last = Now;
-		Count = 0;
-	}
-	#endif
+		Count++;
+		if (Now > Last + 1000)
+		{
+			printf("Sent %i events in the last %ims\n", Count, (int)(Now-Last));
+			Last = Now;
+			Count = 0;
+		}
+		#endif
 	
-	EventRef Ev;
-	OSStatus e = CreateEvent(NULL,
-							kEventClassUser,
-							kEventUser,
-							0, // EventTime 
-							kEventAttributeNone,
-							&Ev);
-	if (e)
-	{
-		printf("%s:%i - CreateEvent failed with %i\n", _FL, (int)e);
-	}
-	else
-	{
-		EventTargetRef t = GetControlEventTarget(Wnd);
-		
-		e = SetEventParameter(Ev, kEventParamLgiEvent, typeUInt32, sizeof(Event), &Event);
-		if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-		e = SetEventParameter(Ev, kEventParamLgiA, typeUInt32, sizeof(a), &a);
-		if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-		e = SetEventParameter(Ev, kEventParamLgiB, typeUInt32, sizeof(b), &b);
-		if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-		
-		bool Status = false;
-		EventQueueRef q = GetMainEventQueue();
+		EventRef Ev;
+		OSStatus e = CreateEvent(NULL,
+								kEventClassUser,
+								kEventUser,
+								0, // EventTime
+								kEventAttributeNone,
+								&Ev);
+		if (e)
+		{
+			printf("%s:%i - CreateEvent failed with %i\n", _FL, (int)e);
+		}
+		else
+		{
+			EventTargetRef t = GetControlEventTarget(Wnd);
+			
+			e = SetEventParameter(Ev, kEventParamLgiEvent, typeUInt32, sizeof(Event), &Event);
+			if (e) printf("%s:%i - error %i\n", _FL, (int)e);
+			e = SetEventParameter(Ev, kEventParamLgiA, typeUInt32, sizeof(a), &a);
+			if (e) printf("%s:%i - error %i\n", _FL, (int)e);
+			e = SetEventParameter(Ev, kEventParamLgiB, typeUInt32, sizeof(b), &b);
+			if (e) printf("%s:%i - error %i\n", _FL, (int)e);
+			
+			bool Status = false;
+			EventQueueRef q = GetMainEventQueue();
 
-		e = SetEventParameter(Ev, kEventParamPostTarget, typeEventTargetRef, sizeof(t), &t);
-		if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-		e = PostEventToQueue(q, Ev, kEventPriorityStandard);
-		if (e) printf("%s:%i - error %i\n", _FL, (int)e);
-		else Status = true;
-		
-		// printf("PostEventToQueue %i,%i,%i -> %p\n", Event, a, b, q);
-		
-		ReleaseEvent(Ev);
-		
-		return Status;
-	}
+			e = SetEventParameter(Ev, kEventParamPostTarget, typeEventTargetRef, sizeof(t), &t);
+			if (e) printf("%s:%i - error %i\n", _FL, (int)e);
+			e = PostEventToQueue(q, Ev, kEventPriorityStandard);
+			if (e) printf("%s:%i - error %i\n", _FL, (int)e);
+			else Status = true;
+			
+			// printf("PostEventToQueue %i,%i,%i -> %p\n", Event, a, b, q);
+			
+			ReleaseEvent(Ev);
+			
+			return Status;
+		}
+	
+	#else
+	
+		LgiAssert(!"Not impl.");
 	
 	#endif
 

@@ -379,7 +379,7 @@ public:
 		return *this;
 	}
 
-	void SetMaxSize(int m)
+	void SetMaxSize(size_t m)
 	{
 		MaxSize = m;
 	}

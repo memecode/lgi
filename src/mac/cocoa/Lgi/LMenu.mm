@@ -793,7 +793,7 @@ bool LMenuItem::ScanForAccel()
 	if (!d->Shortcut)
 		return false;
 	
-	printf("d->Shortcut=%s\n", d->Shortcut.Get());
+	// printf("d->Shortcut=%s\n", d->Shortcut.Get());
 	auto Keys = d->Shortcut.SplitDelimit("+-");
 	if (Keys.Length() > 0)
 	{
@@ -805,96 +805,54 @@ bool LMenuItem::ScanForAccel()
 			const char *k = Keys[i];
 
 			if (!stricmp(k, "CtrlCmd"))
-			{
 				Flags |= LGI_EF_SYSTEM;
-			}
 			else if (!stricmp(k, "AltCmd"))
-			{
 				Flags |= LGI_EF_SYSTEM;
-			}
 			else if (stricmp(k, "Ctrl") == 0)
-			{
 				Flags |= LGI_EF_CTRL;
-			}
 			else if (stricmp(k, "Alt") == 0)
-			{
 				Flags |= LGI_EF_ALT;
-			}
 			else if (stricmp(k, "Shift") == 0)
-			{
 				Flags |= LGI_EF_SHIFT;
-			}
 			else if (stricmp(k, "Del") == 0 ||
 					 stricmp(k, "Delete") == 0)
-			{
 				Key = LK_DELETE;
-			}
 			else if (stricmp(k, "Ins") == 0 ||
 					 stricmp(k, "Insert") == 0)
-			{
 				Key = LK_INSERT;
-			}
 			else if (stricmp(k, "Home") == 0)
-			{
 				Key = LK_HOME;
-			}
 			else if (stricmp(k, "End") == 0)
-			{
 				Key = LK_END;
-			}
 			else if (stricmp(k, "PageUp") == 0)
-			{
 				Key = LK_PAGEUP;
-			}
 			else if (stricmp(k, "PageDown") == 0)
-			{
 				Key = LK_PAGEDOWN;
-			}
 			else if (stricmp(k, "Backspace") == 0)
-			{
 				Key = LK_BACKSPACE;
-			}
 			else if (stricmp(k, "Left") == 0)
-			{
 				Key = LK_LEFT;
-			}
 			else if (stricmp(k, "Up") == 0)
-			{
 				Key = LK_UP;
-			}
 			else if (stricmp(k, "Right") == 0)
-			{
 				Key = LK_RIGHT;
-			}
 			else if (stricmp(k, "Down") == 0)
-			{
 				Key = LK_DOWN;
-			}
 			else if (!stricmp(k, "Esc") || !stricmp(k, "Escape"))
-			{
 				Key = LK_ESCAPE;
-			}
 			else if (stricmp(k, "Space") == 0)
-			{
 				Key = ' ';
-			}
 			else if (k[0] == 'F' && isdigit(k[1]))
 			{
 				int Idx = atoi(k+1);
 				Key = LK_F1 + Idx - 1;
 			}
 			else if (isalpha(k[0]))
-			{
 				Key = toupper(k[0]);
-			}
 			else if (isdigit(k[0]) || strchr(",", k[0]))
-			{
 				Key = k[0];
-			}
 			else
-			{
 				LgiTrace("%s:%i - Unknown part '%s' in shortcut '%s'\n", _FL, k, d->Shortcut.Get());
-			}
 		}
 		
 		if (Key)
