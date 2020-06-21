@@ -417,17 +417,17 @@ bool GDocApp<OptionsFmt>::_LoadMenu(const char *Resource, const char *Tags, int 
 		{
 			int Idx = 0;
 			if (!_FileMenu->FindItem(IDM_OPEN))
-				_FileMenu->AppendItem("&Open", IDM_OPEN, true, Idx++, "Ctrl+O");
+				_FileMenu->AppendItem("&Open", IDM_OPEN, true, Idx++, "CtrlCmd+O");
 
 			if (!_FileMenu->FindItem(IDM_SAVE))
-				_FileMenu->AppendItem("&Save", IDM_SAVE, true, Idx++, "Ctrl+S");
+				_FileMenu->AppendItem("&Save", IDM_SAVE, true, Idx++, "CtrlCmd+S");
 			
 			if (!_FileMenu->FindItem(IDM_SAVEAS))
 				_FileMenu->AppendItem("Save &As", IDM_SAVEAS, true, Idx++);
 			
 			if (!_FileMenu->FindItem(IDM_CLOSE))
 			{
-				_FileMenu->AppendItem("Close", IDM_CLOSE, true, Idx++, "Ctrl+W");			
+				_FileMenu->AppendItem("Close", IDM_CLOSE, true, Idx++, "CtrlCmd+W");
 				_FileMenu->AppendSeparator(Idx++);
 			}
 
@@ -444,7 +444,7 @@ bool GDocApp<OptionsFmt>::_LoadMenu(const char *Resource, const char *Tags, int 
 			}
 
 			if (!_FileMenu->FindItem(IDM_EXIT))
-				_FileMenu->AppendItem("&Quit", IDM_EXIT, true, -1, "Ctrl+Q");
+				_FileMenu->AppendItem("&Quit", IDM_EXIT, true, -1, "CtrlCmd+Q");
 		}
 	}
 
