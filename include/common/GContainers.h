@@ -1069,7 +1069,7 @@ protected:
 		}
 	};
 
-	size_t PreAlloc;
+	ssize_t PreAlloc;
 	List<Block> Mem;
 
 public:
