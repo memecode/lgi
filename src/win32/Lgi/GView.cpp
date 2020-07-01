@@ -743,7 +743,6 @@ bool GView::Detach()
 	}
 	if (d->Parent)
 	{
-		Visible(false);
 		d->Parent->DelView(this);
 		d->Parent->OnChildrenChanged(this, false);
 		d->Parent = 0;
