@@ -171,12 +171,12 @@ public:
 	class TextConvertState
 	{
 		GStream *Out;
-		int PrevLineLen;
+		ssize_t PrevLineLen;
 		GArray<char> Buf;
 	
 	public:
 		int Depth;
-		int CharsOnLine;
+		ssize_t CharsOnLine;
 		
 		TextConvertState(GStream *o)
 		{
@@ -233,7 +233,7 @@ public:
 			return _Write(start, (int) (end - start));
 		}
 		
-		int GetPrev()
+		ssize_t GetPrev()
 		{
 			return PrevLineLen;
 		}
