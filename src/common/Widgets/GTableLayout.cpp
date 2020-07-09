@@ -2151,13 +2151,9 @@ void GTableLayout::OnPaint(GSurface *pDC)
 		#endif
 	}
 
-	// LgiTrace("%s:%i - Painting table %i\n", _FL, GetId());
-	GColour Back = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
-	if (!Back.IsTransparent())
-	{
-		pDC->Colour(Back);
-		pDC->Rectangle();
-	}
+	GCssTools Tools(this);
+	GRect Client = GetClient();
+	Tools.PaintContent(pDC, Client);
 
 	for (int i=0; i<d->Cells.Length(); i++)
 	{

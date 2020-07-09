@@ -1203,6 +1203,11 @@ public:
 		// Restore state
 		*In = Screen;
 	}
+
+	GMemDC *GetMem()
+	{
+		return &Mem;
+	}
 };
 
 #ifdef WIN32

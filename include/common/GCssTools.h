@@ -11,6 +11,8 @@ class LgiClass GCssTools
 	
 	GColour Fore, Back;
 	uint8_t ForeInit : 1, BackInit : 1;
+	GSurface *BackImg;
+	GRect BackPos;
 	
 	bool SetLineStyle(GSurface *pDC, GCss::BorderDef &d);
 	
@@ -22,6 +24,7 @@ public:
 		Font = font;
 		ForeInit = 0;
 		BackInit = 0;
+		BackImg = NULL;
 	}
 	
 	GCssTools(GView *view)
@@ -31,6 +34,7 @@ public:
 		Font = view->GetFont();
 		ForeInit = 0;
 		BackInit = 0;
+		BackImg = NULL;
 	}
 		
 	/// Gets the foreground colour for text
@@ -38,6 +42,9 @@ public:
 	
 	/// Gets the background colour for filling
 	GColour &GetBack(GColour *Default = NULL);
+
+	/// Gets the background image for filling
+	GSurface *GetBackImage();
 
 	/// Applies the margin to a rectangle
 	GRect ApplyMargin(GRect &in);
@@ -70,7 +77,13 @@ public:
 	}
 	
 	/// Paint the content area
-	void PaintContent(GSurface *pDC, GRect &in, const char *utf8, GSurface *img = NULL);
+	void PaintContent(GSurface *pDC, GRect &in, const char *utf8 = NULL, GSurface *img = NULL);
+
+	/// Tiles an image in the space 'in'
+	bool Tile(GSurface *pDC, GRect in, GSurface *Img, int Ox = 0, int Oy = 0);
+
+	/// Get cached image
+	GSurface *GetCachedImage(const char *Uri);
 };
 
 #endif

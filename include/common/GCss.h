@@ -550,7 +550,8 @@ public:
 		~ImageDef();
 
 		bool Parse(const char *&s);
-		bool operator !=(const ImageDef &i);		
+		bool operator !=(const ImageDef &i);
+		bool IsValid();
 		ImageDef &operator =(const ImageDef &o);
 	};
 

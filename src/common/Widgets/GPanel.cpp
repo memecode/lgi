@@ -207,14 +207,14 @@ int GPanel::OnNotify(GViewI *Ctrl, int Flags)
 void GPanel::OnPaint(GSurface *pDC)
 {
 	GRect r = GetClient();
-	GColour cFore = StyleColour(GCss::PropColor, LColour(L_TEXT));
-	GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
+	GCssTools Tools(this);
+	GColour cFore = Tools.GetFore();
+	GColour cBack = Tools.GetBack();
+	Tools.PaintContent(pDC, r);
 
-	pDC->Colour(cBack);
-	pDC->Rectangle(&r);
-
+	auto BackImg = Tools.GetBackImage();
 	auto Fnt = GetFont();
-	Fnt->Transparent(false);
+	Fnt->Transparent(BackImg ? true : false);
 	Fnt->Fore(cFore);
 	Fnt->Back(cBack);
 	if (!Open())

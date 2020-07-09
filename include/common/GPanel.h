@@ -31,6 +31,8 @@ public:
 	GPanel(const char *name, int size, bool open = true);
 	~GPanel();
 
+	const char *GetClass() { return "GPanel"; }
+
 	bool Open();
 	virtual void Open(bool i);
 	int GetClosedSize();

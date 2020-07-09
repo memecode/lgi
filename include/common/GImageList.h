@@ -34,6 +34,9 @@ public:
 	GRect *GetBounds();
 	/// Gets the full source rect for the icon
 	GRect GetIconRect(int Idx);
+	/// Level of alpha blending for disabled icons
+	uint8_t GetDisabledAlpha();
+	void SetDisabledAlpha(uint8_t alpha);
 
 	/// Notifies the image list that it's image data has changed and it should flush any
 	/// cached info about the images

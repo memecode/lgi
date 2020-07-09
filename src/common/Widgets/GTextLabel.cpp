@@ -7,6 +7,7 @@
 #include "GVariant.h"
 #include "GNotifications.h"
 #include "LgiRes.h"
+#include "GCssTools.h"
 
 class GTextPrivate : public LStringLayout, public LMutex
 {
@@ -55,6 +56,11 @@ GTextLabel::GTextLabel(int id, int x, int y, int cx, int cy, const char *name) :
 	ResObject(Res_StaticText)
 {
 	d = new GTextPrivate(this);
+
+	// This allows LStringLayout::DoLayout to do some basic layout for GetMax.
+	GRect rc(0, 0, 1, 20);
+	SetPos(rc);
+
 	if (name)
 		Name(name);
 
@@ -262,7 +268,12 @@ int GTextLabel::OnNotify(GViewI *Ctrl, int Flags)
 
 void GTextLabel::OnPaint(GSurface *pDC)
 {
-	GColour Back = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
+	GCssTools Tools(this);
+	GColour Back = Tools.GetBack();
+	Tools.PaintContent(pDC, GetClient());
+	if (Tools.GetBackImage())
+		Back.Empty();
+
 	if (d->Lock(_FL))
 	{
 		GRect c = GetClient();

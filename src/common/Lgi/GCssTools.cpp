@@ -1,5 +1,33 @@
 #include "Lgi.h"
 #include "GCssTools.h"
+#include "GDisplayString.h"
+
+struct CssImageCache
+{
+	GArray<GAutoPtr<GSurface>> Store;
+	LHashTbl<ConstStrKey<char, false>, GSurface*> Map;
+
+	GSurface *Get(const char *uri)
+	{
+		auto Uri = GString(uri).Strip("\'\"");
+		auto i = Map.Find(Uri);
+		if (i)
+			return i;
+
+		GString file = LFindFile(Uri);
+		if (!file)
+			return NULL;
+
+		GAutoPtr<GSurface> img(GdcD->Load(file));
+		if (!img)
+			return NULL;
+
+		Map.Add(Uri, img);
+		auto &s = Store.New();
+		s = img;
+		return s;
+	}
+}	Cache;
 
 GColour &GCssTools::GetFore(GColour *Default)
 {
@@ -321,4 +349,109 @@ GRect GCssTools::PaintPadding(GSurface *pDC, GRect &in)
 	}
 	
 	return Content;
+}
+
+GSurface *GCssTools::GetCachedImage(const char *Uri)
+{
+	return Cache.Get(Uri);
+}
+
+bool GCssTools::Tile(GSurface *pDC, GRect in, GSurface *Img, int Ox, int Oy)
+{
+	if (!pDC || !Img)
+		return false;
+
+	for (int y=in.y1; y<in.y2; y+=Img->Y())
+		for (int x=in.x1; x<in.x2; x+=Img->X())
+			pDC->Blt(x - Ox, y - Oy, Img);
+
+	return true;
+}
+
+GSurface *GCssTools::GetBackImage()
+{
+	GCss::ImageDef BackDef;
+	auto Parent = View ? View->GetParent() : NULL;
+
+	if (Css)
+		BackDef = Css->BackgroundImage();
+	if (BackDef.IsValid() && View)
+		BackPos = View->GetClient();
+	else if (Parent && Parent->GetCss())
+	{
+		BackDef = Parent->GetCss()->BackgroundImage();
+		BackPos = View->GetPos();
+	}
+
+	if (BackDef.IsValid())
+		BackImg = GetCachedImage(BackDef.Uri);
+
+	return BackImg;
+}
+
+void GCssTools::PaintContent(GSurface *pDC, GRect &in, const char *utf8, GSurface *img)
+{
+	GCss::ColorDef BackCol;
+	if (Css)
+		BackCol = Css->BackgroundColor();
+
+	bool BackgroundDrawn = false;
+	auto BkImg = GetBackImage();
+	if (BkImg)
+		BackgroundDrawn = Tile(pDC, in, BkImg, BackPos.x1, BackPos.y1);
+	if (!BackgroundDrawn)
+	{
+		GColour Background;
+		if (BackCol.IsValid())
+		{
+			if (BackCol.Type == GCss::ColorRgb)
+				Background.c32(BackCol.Rgb32);
+			else
+				LgiAssert(!"Unsupported");
+		}
+		else
+			Background = LColour(L_MED);
+		pDC->Colour(Background);
+		pDC->Rectangle(&in);
+		BackgroundDrawn = true;
+	}
+
+	if (utf8 || img)
+	{
+		GAutoPtr<GDisplayString> Ds;
+		auto Fnt = View ? View->GetFont() : SysFont;
+		if (utf8)
+		{
+			Ds.Reset(new GDisplayString(Fnt, utf8));
+		}
+
+		int Spacer = Ds && img ? 8 : 0;
+		int Wid = Spacer + (Ds ? Ds->X() : 0) + (img ? img->X() : 0);
+		int x = in.x1 + ((in.X() - Wid) >> 1);
+
+		// Draw any icon
+		if (img)
+		{
+			int y = in.y1 + ((in.Y() - img->Y()) >> 1);
+			int Op = pDC->Op(GDC_ALPHA);
+			pDC->Blt(x, y, img);
+			pDC->Op(Op);
+			x += img->X() + Spacer;
+		}
+
+		// Draw any text...
+		if (Ds)
+		{
+			int y = in.y1 + ((in.Y() - Ds->Y()) >> 1);
+			GCss::ColorDef Fore;
+			if (Css)
+				Fore = Css->Color();
+			GColour ForeCol(L_TEXT);
+			if (Fore.IsValid())
+				ForeCol = Fore;
+			Fnt->Fore(ForeCol);
+			Fnt->Transparent(true);
+			Ds->Draw(pDC, x, y);
+		}
+	}
 }

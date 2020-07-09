@@ -122,6 +122,7 @@ class GImageListPriv
 public:
 	GImageList *ImgLst;
 	int Sx, Sy;
+	uint8_t DisabledAlpha;
 
 	struct CacheDC : public GMemDC
 	{
@@ -134,6 +135,9 @@ public:
 
 	CacheDC *GetCache(GColour Back, bool Disabled)
 	{
+		if (Back.IsTransparent())
+			return NULL;
+
 		for (int i=0; i<Cache.Length(); i++)
 		{
 			CacheDC *dc = Cache[i];
@@ -162,7 +166,7 @@ public:
 					tmp.Rectangle();
 					tmp.Op(GDC_ALPHA);
 					tmp.Blt(0, 0, ImgLst);
-					tmp.SetConstantAlpha(40);
+					tmp.SetConstantAlpha(DisabledAlpha);
 					
 					dc->Blt(0, 0, &tmp);
 				}
@@ -188,6 +192,7 @@ public:
 		ImgLst = imglst;
 		Sx = x;
 		Sy = y;
+		DisabledAlpha = 40;
 	}
 
 	~GImageListPriv()
@@ -303,7 +308,7 @@ void GImageList::Draw(GSurface *pDC, int Dx, int Dy, int Image, GColour Backgrou
 	rSrc.Offset(Image * d->Sx, 0);
 
 	GImageListPriv::CacheDC *Cache = d->GetCache(Background, Disabled);
-	if (!Cache)
+	if (!Cache && Background.IsValid())
 	{
 		GRect rDst;
 		rDst.ZOff(d->Sx-1, d->Sy-1);
@@ -319,14 +324,15 @@ void GImageList::Draw(GSurface *pDC, int Dx, int Dy, int Image, GColour Backgrou
 
 	if (pDC->SupportsAlphaCompositing())
 	{
-		int Old = pDC->Op(GDC_ALPHA, Disabled ? 40 : -1);
+		int Old = pDC->Op(GDC_ALPHA, Disabled ? d->DisabledAlpha : -1);
 		pDC->Blt(Dx, Dy, this, &rSrc);
 		pDC->Op(Old);
 	}
-	else
+	else if (Cache)
 	{
 		pDC->Blt(Dx, Dy, Cache, &rSrc);
 	}
+	else LgiAssert(!"Impl me.");
 }
 
 int GImageList::TileX()
@@ -346,6 +352,16 @@ int GImageList::GetItems()
 
 void GImageList::Update(int Flags)
 {
+}
+
+uint8_t GImageList::GetDisabledAlpha()
+{
+	return d->DisabledAlpha;
+}
+
+void GImageList::SetDisabledAlpha(uint8_t alpha)
+{
+	d->DisabledAlpha = alpha;
 }
 
 GRect GImageList::GetIconRect(int Idx)
@@ -595,24 +611,36 @@ void GToolButton::OnPaint(GSurface *pDC)
 		pDC->Rectangle();
 		#endif
 
-		GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
-		if (e && Over)
+		GCssTools Tools(this);
+		GColour cBack = Tools.GetBack();
+		auto BackImg = Tools.GetBackImage();
+		bool Hilight = e && Over;
+		if (Hilight)
 			cBack = cBack.Mix(GColour::White);
 
 		// Draw Background
 		if (GetId() >= 0)
 		{
 			// Draw border
-			GColour Background(cBack);
-			if (Down)
-			{
-				// Sunken if the button is pressed
+			GColour Background;
+			if (Down) // Sunken if the button is pressed
 				LgiThinBorder(pDC, p, DefaultSunkenEdge);
-				pDC->Colour(Background);
-				pDC->Box(&p);
+
+			if (BackImg)
+			{
+				GDoubleBuffer Buf(pDC);
+				Tools.PaintContent(pDC, p);
+				if (Hilight)
+				{
+					// Draw translucent white over image...
+					int Op = pDC->Op(GDC_ALPHA);
+					pDC->Colour(GColour(255, 255, 255, 128));
+					pDC->Rectangle(&p);
+				}
 			}
 			else
 			{
+				Background = cBack;
 				pDC->Colour(Background);
 				pDC->Box(&p);
 				p.Size(1, 1);
@@ -638,7 +666,11 @@ void GToolButton::OnPaint(GSurface *pDC)
 				if (Par->d->ImgList)
 				{
 					// Draw cached
-					if (pDC->SupportsAlphaCompositing())
+					if (BackImg)
+					{
+						Par->d->ImgList->SetDisabledAlpha(0x60);
+					}
+					else if (pDC->SupportsAlphaCompositing())
 					{
 						pDC->Colour(Background);
 						pDC->Rectangle(&IconPos);
@@ -648,11 +680,12 @@ void GToolButton::OnPaint(GSurface *pDC)
 
 					Unpainted.Subtract(&IconPos);
 
-					// Fill in the rest of the area
-					pDC->Colour(Background);
-					for (GRect *r = Unpainted.First(); r; r = Unpainted.Next())
+					if (!BackImg)
 					{
-						pDC->Rectangle(r);
+						// Fill in the rest of the area
+						pDC->Colour(Background);
+						for (GRect *r = Unpainted.First(); r; r = Unpainted.Next())
+							pDC->Rectangle(r);
 					}
 				}
 				else
@@ -660,15 +693,14 @@ void GToolButton::OnPaint(GSurface *pDC)
 					// Draw a red cross indicating no icons.
 					pDC->Colour(Background);
 					pDC->Rectangle(&p);
-					pDC->Colour(Rgb24(255, 0, 0), 24);
+					pDC->Colour(GColour::Red);
 					pDC->Line(IconPos.x1, IconPos.y1, IconPos.x2, IconPos.y2);
 					pDC->Line(IconPos.x2, IconPos.y1, IconPos.x1, IconPos.y2);
 				}
 			}
-			else
+			else if (!BackImg)
 			{
-				pDC->Colour(Background);
-				pDC->Rectangle(&p);
+				Tools.PaintContent(pDC, p);
 			}
 
 			// Text
@@ -683,8 +715,10 @@ void GToolButton::OnPaint(GSurface *pDC)
 				{
 					// Write each word centered on a different line
 					int Ty = Down + Par->d->By + 2;
-					GColour a(e ? L_TEXT : L_LOW);
-					GColour b(L_MED);
+					GColour a = Tools.GetFore();
+					GColour b = Tools.GetBack();
+					if (!e)
+						a = b.Mix(a);
 
 					Par->d->Font->Colour(a, b);
 					for (int i=0; i<d->Text.Length(); i++)
@@ -701,8 +735,14 @@ void GToolButton::OnPaint(GSurface *pDC)
 			// Separator
 			int Px = X()-1;
 			int Py = Y()-1;
-			pDC->Colour(cBack);
-			pDC->Rectangle();
+
+			if (BackImg)
+				Tools.PaintContent(pDC, p);
+			else
+			{
+				pDC->Colour(cBack);
+				pDC->Rectangle();
+			}
 
 			GColour cLow = cBack.Mix(GColour::Black);
 			GColour cHigh = cBack.Mix(GColour::White, 0.8f);
@@ -1371,8 +1411,7 @@ void GToolBar::OnPaint(GSurface *pDC)
 	GCssTools Tools(this);
 	Tools.PaintBorder(pDC, c);
 	Tools.PaintPadding(pDC, c);
-	pDC->Colour(Tools.GetBack());
-	pDC->Rectangle(&c);
+	Tools.PaintContent(pDC, c);
 }
 
 void GToolBar::OnMouseClick(GMouse &m)

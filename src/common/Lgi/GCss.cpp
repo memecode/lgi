@@ -2244,6 +2244,15 @@ GCss::ImageDef::~ImageDef()
 		DeleteObj(Img);
 }
 
+bool GCss::ImageDef::IsValid()
+{
+	if (Type == ImageUri)
+		return Uri.Get() != NULL;
+	if (Type == ImageOwn)
+		return Img != NULL;
+	return false;
+}
+
 bool GCss::ImageDef::Parse(const char *&s)
 {
 	SkipWhite(s);
