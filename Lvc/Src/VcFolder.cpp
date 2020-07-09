@@ -2262,7 +2262,7 @@ bool VcFolder::UpdateSubs()
 			break;
 	}
 
-	return StartCmd(Arg, &VcFolder::ParseUpdateSubs);
+	return StartCmd(Arg, &VcFolder::ParseUpdateSubs, NULL, LogNormal);
 }
 
 bool VcFolder::ParseUpdateSubs(int Result, GString s, ParseParams *Params)
