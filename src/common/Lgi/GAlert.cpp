@@ -6,7 +6,7 @@
 #include "GTableLayout.h"
 
 //////////////////////////////////////////////////////////////////////////////
-#define CMD_BASE		100
+#define CMD_BASE		10000
 #ifdef LGI_SDL
 #define BTN_SCALE		2.0f
 #else
