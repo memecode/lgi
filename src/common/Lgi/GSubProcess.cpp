@@ -476,16 +476,37 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			
 			if (Environment.Length())
 			{
-				GString::Array Vars;
+				GString::Array Vars, Path;
 				GArray<char*> Env;
+                
 				Vars.SetFixedLength(false);
 				for (auto v : Environment)
 				{
 					GString &s = Vars.New();
 					s.Printf("%s=%s", v.Var.Get(), v.Val.Get());
 					Env.Add(s.Get());
+                    
+                    if (v.Var.Equals("PATH"))
+                        Path = v.Val.Split(LGI_PATH_SEPARATOR);
 				}
 				Env.Add(NULL);
+                
+                if (!FileExists(Exe))
+                {
+                    // Apparently 'execve' doesn't search the path... so we're going to look up the
+                    // full executable path ourselves.
+                    if (!Path.Length())
+                        Path = LGetPath();
+                    for (auto s: Path)
+                    {
+                        GFile::Path p(s, Exe);
+                        if (p.Exists())
+                        {
+                            Exe = p.GetFull();
+                            break;
+                        }
+                    }
+                }
 				
 				#if 0
 				printf("Exe=%s\n", Exe.Get());

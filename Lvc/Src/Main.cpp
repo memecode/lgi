@@ -476,6 +476,33 @@ int LstCmp(LListItem *a, LListItem *b, int Col)
 	return 0;
 }
 
+struct TestThread : public LThread
+{
+public:
+    TestThread() : LThread("test")
+    {
+        Run();
+    }
+    
+    int Main()
+    {
+        auto Path = LGetPath();
+        GSubProcess p("python", "/Users/matthew/CodeLib/test.py");
+        
+        auto t = GString(LGI_PATH_SEPARATOR).Join(Path);
+        for (auto s: Path)
+            printf("s: %s\n", s.Get());
+        p.SetEnvironment("PATH", t);
+        if (p.Start())
+        {
+            GStringPipe s;
+            p.Communicate(&s);
+            printf("Test: %s\n", s.NewGStr().Get());
+        }
+        return 0;
+    }
+};
+
 class App : public GWindow, public AppPriv
 {
 	GAutoPtr<GImageList> ImgLst;
@@ -625,6 +652,8 @@ public:
 			}
 			
 			FoldersBox->Value(MAX(320, px + 20));
+            
+            // new TestThread();
 		}
 		
 		SetPulse(200);
