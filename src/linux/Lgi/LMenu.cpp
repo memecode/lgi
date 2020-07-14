@@ -1414,7 +1414,7 @@ int LMenuItem::Id()
 	return _Id;
 }
 
-char *LMenuItem::Name()
+const char *LMenuItem::Name()
 {
 	return GBase::Name();
 }

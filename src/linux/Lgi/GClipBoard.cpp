@@ -75,7 +75,7 @@ bool GClipBoard::Html(const char *doc, bool AutoEmpty)
 	return ::GString();
 }
 
-bool GClipBoard::Text(char *Str, bool AutoEmpty)
+bool GClipBoard::Text(const char *Str, bool AutoEmpty)
 {
 	bool Status = false;
 
@@ -116,7 +116,7 @@ char *GClipBoard::Text()
 	return t;
 }
 
-bool GClipBoard::TextW(char16 *Str, bool AutoEmpty)
+bool GClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 {
 	GAutoString u(WideToUtf8(Str));
 	return Text(u, AutoEmpty);
