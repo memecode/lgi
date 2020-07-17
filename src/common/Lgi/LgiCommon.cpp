@@ -1844,7 +1844,10 @@ static void _LFindFile(const char *Name, GString *GStr, GAutoString *AStr)
 		#endif
 		"../Code",
 		"../../Resources",
-		#ifdef WIN32
+		#if defined(LINUX)
+		// AppDir support:
+		"../../usr/share/applications",
+		#elif defined(WIN32)
 		"../Debug",
 		"../Release",
 		"../../Debug",
