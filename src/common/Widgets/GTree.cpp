@@ -1217,7 +1217,7 @@ void GTree::_UpdateScrollBars()
 				int All = d->Limit.y / TREE_BLOCK;
 				int Visible = Client.Y() / TREE_BLOCK;
 
-				VScroll->SetLimits(0, All - 1);
+				VScroll->SetLimits(0, All);
 				VScroll->SetPage(Visible);
 
 				/* Why is this commented out? -fret Dec2018
