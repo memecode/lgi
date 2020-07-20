@@ -850,7 +850,8 @@ bool GWindow::Attach(GViewI *p)
 	{
 		auto Widget = GTK_WIDGET(Wnd);
 		GView *i = this;
-		gtk_window_resize(Wnd, Pos.X(), Pos.Y());
+		if (Pos.X() > 0 && Pos.Y() > 0)
+			gtk_window_resize(Wnd, Pos.X(), Pos.Y());
 		gtk_window_move(Wnd, Pos.x1, Pos.y1);
 		
 		auto Obj = G_OBJECT(Wnd);
@@ -1416,7 +1417,7 @@ bool GWindow::SetPos(GRect &p, bool Repaint)
 	{
 		ThreadCheck();
 		
-		gtk_window_resize(Wnd, Pos.X(), Pos.Y());
+		gtk_window_resize(Wnd, MAX(1, Pos.X()), Pos.Y());
 		gtk_window_move(Wnd, Pos.x1, Pos.y1);
 	}
 

@@ -132,6 +132,7 @@ struct GSoftwareUpdatePriv
 									GStringPipe p;
 									p.Print(LgiLoadString(L_ERROR_UPDATE, sUpdateError), Msg?Msg->GetContent():(char*)"Unknown");
 									d->Error.Reset(p.NewStr());
+									LgiTrace("UpdateURI=%s\n", GetUri.Get());
 								}
 							}
 							else d->SetError(L_ERROR_UNEXPECTED_XML, sUnexpectedXml);

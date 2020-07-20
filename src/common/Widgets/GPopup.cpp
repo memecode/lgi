@@ -786,7 +786,7 @@ void GPopup::Visible(bool i)
 		    {
 		        gtk_widget_show_all(GTK_WIDGET(Wnd));
 				gtk_window_move(Wnd, Pos.x1, Pos.y1);
-				gtk_window_resize(Wnd, Pos.X(), Pos.Y());
+				gtk_window_resize(Wnd, MAX(1, Pos.X()), Pos.Y());
 				// printf("%s:%i - Showing Wnd %s.\n", _FL, Pos.GetStr());
 		    }
 		    else

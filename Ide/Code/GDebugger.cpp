@@ -885,7 +885,7 @@ public:
 					{
 					}
 					
-					bool Status = Cmd("c");
+					bool Status = Cmd(a);
 					if (Status)
 						SetState(true, true);
 
