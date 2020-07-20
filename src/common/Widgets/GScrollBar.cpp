@@ -203,7 +203,7 @@ public:
 
 	int64 GetRange()
 	{
-		return Max >= Min ? (int) (Max - Min + 1) : 0;
+		return Max >= Min ? Max - Min + 1 : 0;
 	}
 
 	bool IsValid()
@@ -252,6 +252,12 @@ public:
 			if (Size < MinSize) Size = MinSize;
 			Start = Range > Page ? Value * (len - Size) / (Range - (int)Page) : 0;
 			End = Start + Size;
+
+			/*
+			printf("Range=%i Page=%i Size=%i Start=%i End=%i\n",
+				(int)Range, (int)Page,
+				(int)Size, (int)Start, (int)End);
+			*/
 
 			if (IsVertical())
 			{

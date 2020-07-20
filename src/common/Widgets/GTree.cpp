@@ -1214,19 +1214,16 @@ void GTree::_UpdateScrollBars()
 			// y scroll... in items
 			if (VScroll)
 			{
-				int All = d->Limit.y / TREE_BLOCK;
+				int All = (d->Limit.y + TREE_BLOCK - 1) / TREE_BLOCK;
 				int Visible = Client.Y() / TREE_BLOCK;
 
-				VScroll->SetLimits(0, All);
+				VScroll->SetLimits(0, All-1);
 				VScroll->SetPage(Visible);
 
 				/* Why is this commented out? -fret Dec2018
-				
 				int Max = All - Visible + 1;
 				if (VScroll->Value() > Max)
-				{
 					VScroll->Value(Max);
-				}
 				*/
 			}
 
