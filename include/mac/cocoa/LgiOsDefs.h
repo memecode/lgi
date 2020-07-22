@@ -110,6 +110,7 @@ LgiFunc void LgiSleep(uint32_t i);
 #define atoi64						atoll
 #define sprintf_s					snprintf
 #define vsprintf_s					vsnprintf
+#define stricmp						strcasecmp
 #define LGI_IllegalFileNameChars	"/" // FIXME: what other characters should be in here?
 #define LGI_EXECUTABLE_EXT			"" // Empty
 
@@ -287,42 +288,6 @@ enum LVirtualKeys
 	
 	LK_RETURN = LK_ENTER,
 	LK_APPS = 0x1000,
-	
-	/*
-	LK_TAB = '\t',
-	LK_RETURN = '\r',
-	LK_ESCAPE = 27,
-	LK_SPACE = ' ',
-	LK_BACKSPACE = 0x7F,
-
-	LK_PAGEUP = _KEY(NSPageUpFunctionKey, 0xF72C),
-	LK_PAGEDOWN = _KEY(NSPageDownFunctionKey, 0xF72D),
-	LK_DELETE = _KEY(NSDeleteFunctionKey, 0xF728),
-	LK_HOME = _KEY(NSHomeFunctionKey, 0xF729),
-	LK_END = _KEY(NSEndFunctionKey, 0xF72B),
-	LK_UP = _KEY(NSUpArrowFunctionKey, 0xF700),
-	LK_DOWN = _KEY(NSDownArrowFunctionKey, 0xF701),
-	LK_LEFT = _KEY(NSLeftArrowFunctionKey, 0xF702),
-	LK_RIGHT = _KEY(NSRightArrowFunctionKey, 0xF703),
-
-	LK_F1 = _KEY(NSF1FunctionKey, 0xF704),
-	LK_F2 = _KEY(NSF2FunctionKey, 0xF705),
-	LK_F3 = _KEY(NSF3FunctionKey, 0xF706),
-	LK_F4 = _KEY(NSF4FunctionKey, 0xF707),
-	LK_F5 = _KEY(NSF5FunctionKey, 0xF708),
-	LK_F6 = _KEY(NSF6FunctionKey, 0xF709),
-	LK_F7 = _KEY(NSF7FunctionKey, 0xF70A),
-	LK_F8 = _KEY(NSF8FunctionKey, 0xF70B),
-	LK_F9 = _KEY(NSF9FunctionKey, 0xF70C),
-	LK_F10 = _KEY(NSF10FunctionKey, 0xF70D),
-	LK_F11 = _KEY(NSF11FunctionKey, 0xF70E),
-	LK_F12 = _KEY(NSF12FunctionKey, 0xF70F),
-
-	LK_INSERT = 0xF748,
-	LK_APPS,
-	LK_ENTER,
-	LK_SHIFT,
-	*/
 };
 
 #undef _KEY
