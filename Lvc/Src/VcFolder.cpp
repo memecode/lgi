@@ -1339,12 +1339,12 @@ void VcFolder::OnCmdError(GString Output, const char *Msg)
 				
 	CmdErrors++;
 	d->Tabs->Value(1);
-	Color(GColour::Red);
+	GetCss(true)->Color(GColour::Red);
 }
 
 void VcFolder::ClearError()
 {
-	Color(GCss::ColorInherit);
+	GetCss(true)->Color(GCss::ColorInherit);
 }
 
 bool VcFolder::ParseInfo(int Result, GString s, ParseParams *Params)
@@ -1927,18 +1927,6 @@ void VcFolder::OnExpand(bool b)
 	}
 }
 
-void VcFolder::OnPaint(ItemPaintCtx &Ctx)
-{
-	auto c = Color();
-	if (c.IsValid())
-		Ctx.Fore = c;
-	c = BackgroundColor();
-	if (c.IsValid() && !GTreeItem::Select())
-		Ctx.Back = c;
-
-	GTreeItem::OnPaint(Ctx);
-}
-
 void VcFolder::ListCommit(VcCommit *c)
 {
 	if (!IsFilesCmd)
@@ -2228,11 +2216,11 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 
 	if ((Unpushed = Ins.Length() > 0))
 	{
-		Color(GColour(255, 128, 0));
+		GetCss(true)->Color(GColour(255, 128, 0));
 	}
 	else if (Unpulled == 0)
 	{
-		Color(GCss::ColorInherit);
+		GetCss(true)->Color(GCss::ColorInherit);
 	}
 
 	Update();
@@ -2521,7 +2509,7 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 			{
 				Unpushed = 0;
 				Update();
-				Color(GColour::Green);
+				GetCss(true)->Color(GColour::Green);
 			}
 			break;
 		}
@@ -2538,7 +2526,7 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 				if (Params && Params->Str.Find("Push") >= 0)
 					Push();
 				else
-					Color(GColour::Green);
+					GetCss(true)->Color(GColour::Green);
 			}
 			break;
 		}
@@ -2551,7 +2539,7 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 			{
 				Unpushed = 0;
 				Update();
-				Color(GColour::Green);
+				GetCss(true)->Color(GColour::Green);
 			}
 			break;
 		}
@@ -2733,7 +2721,7 @@ bool VcFolder::ParsePush(int Result, GString s, ParseParams *Params)
 		}
 
 		Unpushed = 0;
-		Color(GColour::Green);
+		GetCss(true)->Color(GColour::Green);
 		Update();
 		Status = true;
 	}
@@ -2815,9 +2803,9 @@ bool VcFolder::ParsePull(int Result, GString s, ParseParams *Params)
 				}
 			}
 			if (HasUpdates)
-				Color(GColour::Green);
+				GetCss(true)->Color(GColour::Green);
 			else
-				Color(GCss::ColorInherit);
+				GetCss(true)->Color(GCss::ColorInherit);
 			break;
 		}
 		case VcSvn:
@@ -2927,7 +2915,7 @@ bool VcFolder::ParseClean(int Result, GString s, ParseParams *Params)
 	{
 		case VcSvn:
 			if (Result == 0)
-				Color(ColorInherit);
+				GetCss(true)->Color(GCss::ColorInherit);
 			break;
 		default:
 			LgiAssert(!"Impl me.");

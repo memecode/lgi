@@ -66,7 +66,7 @@ struct VcBranch
 	}
 };
 
-class VcFolder : public GTreeItem, public GCss
+class VcFolder : public GTreeItem
 {
 	friend class VcCommit;
 	struct ParseParams
@@ -197,7 +197,6 @@ class VcFolder : public GTreeItem, public GCss
 	void OnBranchesChange();
 	void OnCmdError(GString Output, const char *Msg);
 	void ClearError();
-	void OnChange(PropType Prop) { Update(); }
 	VcFile *FindFile(const char *Path);
 	void LinkParents();
 	GString CurrentRev();
@@ -271,7 +270,6 @@ public:
 	void OnMouseClick(GMouse &m);
 	void OnRemove();
 	void OnExpand(bool b);
-	void OnPaint(ItemPaintCtx &Ctx);
 };
 
 class VcLeaf : public GTreeItem

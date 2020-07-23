@@ -22,10 +22,10 @@ public:
 		/// The surface to draw on
 		GSurface *pDC;
 
-		/// Current foreground colour (24bit)
+		/// Current foreground colour
 		GColour Fore;
-		/// Current background colour (24bit)
-		GColour Back;
+		/// Current background colour
+		GColour TxtBack, Back;
 		
 		// Horizontal alignment of content
 		GCss::Len Align;
