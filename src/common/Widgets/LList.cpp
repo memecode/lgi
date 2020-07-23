@@ -18,6 +18,7 @@
 #include "GScrollBar.h"
 #include "GDisplayString.h"
 #include "LgiRes.h"
+#include "GCssTools.h"
 
 // Debug defines
 #define DEBUG_EDIT_LABEL				1
@@ -2499,109 +2500,112 @@ void LList::OnPaint(GSurface *pDC)
 	int Start = LgiCurrentTime(), t1, t2, t3, t4, t5;
 	#endif
 	
-	if (Lock(_FL))
+	if (!Lock(_FL))
+		return;
+
+	GCssTools Tools(this);
+	GColour Workspace = LColour(L_WORKSPACE);
+	GColour Fore = Enabled() ? Tools.GetFore() : Tools.GetFore().Mix(LColour(L_LOW));
+	GColour Back = Tools.GetBack(&Workspace);
+	if (!Enabled())
+		Back = Back.Mix(LColour(L_MED));
+	GColour SelFore(Focus() ? L_FOCUS_SEL_FORE : L_NON_FOCUS_SEL_FORE);
+	GColour SelBack(Focus() ? L_FOCUS_SEL_BACK : (Enabled() ? L_NON_FOCUS_SEL_BACK : L_MED));
+	PourAll();
+		
+	#if LList_ONPAINT_PROFILE
+	t1 = LgiCurrentTime();
+	#endif
+
+	// Check icon column status then draw
+	if (AskImage() && !IconCol)
 	{
-		GColour Back(Enabled() ? L_WORKSPACE : L_MED);
-		PourAll();
-		
-		#if LList_ONPAINT_PROFILE
-		t1 = LgiCurrentTime();
-		#endif
-
-		// Check icon column status then draw
-		if (AskImage() && !IconCol)
+		IconCol.Reset(new GItemColumn(this, 0, 18));
+		if (IconCol)
 		{
-			IconCol.Reset(new GItemColumn(this, 0, 18));
-			if (IconCol)
-			{
-				IconCol->Resizable(false);
-				IconCol->Type(GIC_ASK_IMAGE);
-			}
+			IconCol->Resizable(false);
+			IconCol->Type(GIC_ASK_IMAGE);
 		}
-		else if (!AskImage())
-			IconCol.Reset();
-
-		PaintColumnHeadings(pDC);
-
-		#if LList_ONPAINT_PROFILE
-		t2 = LgiCurrentTime();
-		#endif
-
-		// Draw items
-		if (!Buf)
-		{
-			Buf = new GMemDC;
-		}
-
-		GRect r = ItemsPos;
-		int n = FirstVisible;
-		int LastY = r.y1;
-		GCss::ColorDef Fill;
-		GColour SelFore(Focus() ? L_FOCUS_SEL_FORE : L_NON_FOCUS_SEL_FORE);
-		GColour SelBack(Focus() ? L_FOCUS_SEL_BACK : (Enabled() ? L_NON_FOCUS_SEL_BACK : L_MED));
-		int LastSelected = -1;
-
-		GItem::ItemPaintCtx Ctx;
-		Ctx.pDC = pDC;
-
-		GRegion Rgn(ItemsPos);
-		if (Items.Length())
-		{
-			for (auto It = Items.begin(n); It != Items.end(); ++It, n++)
-			{
-				LListItem *i = *It;
-				if (i->Pos.Valid())
-				{
-					// Setup painting colours in the context
-					if (LastSelected ^ (int)i->Select())
-					{
-						if ((LastSelected = i->Select()))
-						{
-							Ctx.Fore = SelFore;
-							Ctx.Back = SelBack;
-						}
-						else
-						{
-							Ctx.Fore = LColour(L_TEXT);
-							Ctx.Back = Back;
-						}
-					}
-
-					// tell the item what colour to use
-					#if DOUBLE_BUFFER_PAINT
-					if (Buf->X() < i->Pos.X() ||
-						Buf->Y() < i->Pos.Y())
-					{
-						Buf->Create(i->Pos.X(), i->Pos.Y(), GdcD->GetBits());
-					}
-
-					Ctx = i->Pos;
-					Ctx.r.Offset(-Ctx.r.x1, -Ctx.r.y1);
-					i->OnPaint(Ctx);
-					pDC->Blt(i->Pos.x1, i->Pos.y1, Buf, &Ctx.r);
-					#else
-					(GRect&)Ctx = i->Pos;
-					i->OnPaint(Ctx);
-					#endif
-					Rgn.Subtract(&i->Pos);
-
-					LastY = i->Pos.y2 + 1;
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
-		
-		pDC->Colour(Back);
-		for (GRect *w=Rgn.First(); w; w=Rgn.Next())
-		{
-			pDC->Rectangle(w);
-		}
-
-		Unlock();
 	}
+	else if (!AskImage())
+		IconCol.Reset();
+
+	PaintColumnHeadings(pDC);
+
+	#if LList_ONPAINT_PROFILE
+	t2 = LgiCurrentTime();
+	#endif
+
+	// Draw items
+	if (!Buf)
+		Buf = new GMemDC;
+	
+	GRect r = ItemsPos;
+	int n = FirstVisible;
+	int LastY = r.y1;
+	GCss::ColorDef Fill;
+	int LastSelected = -1;
+
+	GItem::ItemPaintCtx Ctx;
+	Ctx.pDC = pDC;
+
+	GRegion Rgn(ItemsPos);
+	if (Items.Length())
+	{
+		for (auto It = Items.begin(n); It != Items.end(); ++It, n++)
+		{
+			LListItem *i = *It;
+			if (i->Pos.Valid())
+			{
+				// Setup painting colours in the context
+				if (LastSelected ^ (int)i->Select())
+				{
+					if ((LastSelected = i->Select()))
+					{
+						Ctx.Fore = SelFore;
+						Ctx.Back = SelBack;
+					}
+					else
+					{
+						Ctx.Fore = Fore;
+						Ctx.Back = Back;
+					}
+				}
+
+				// tell the item what colour to use
+				#if DOUBLE_BUFFER_PAINT
+				if (Buf->X() < i->Pos.X() ||
+					Buf->Y() < i->Pos.Y())
+				{
+					Buf->Create(i->Pos.X(), i->Pos.Y(), GdcD->GetBits());
+				}
+
+				Ctx = i->Pos;
+				Ctx.r.Offset(-Ctx.r.x1, -Ctx.r.y1);
+				i->OnPaint(Ctx);
+				pDC->Blt(i->Pos.x1, i->Pos.y1, Buf, &Ctx.r);
+				#else
+				(GRect&)Ctx = i->Pos;
+				i->OnPaint(Ctx);
+				#endif
+				Rgn.Subtract(&i->Pos);
+
+				LastY = i->Pos.y2 + 1;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+		
+	pDC->Colour(Back);
+	for (GRect *w=Rgn.First(); w; w=Rgn.Next())
+	{
+		pDC->Rectangle(w);
+	}
+
+	Unlock();
 
 	#if LList_ONPAINT_PROFILE
 	int64 End = LgiCurrentTime();
