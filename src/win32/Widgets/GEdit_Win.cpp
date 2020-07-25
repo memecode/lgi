@@ -10,6 +10,7 @@
 #include "Lgi.h"
 #include "GSkinEngine.h"
 #include "GEdit.h"
+#include "LgiRes.h"
 
 GAutoWString LgiAddReturns(const char16 *n)
 {
@@ -322,6 +323,7 @@ GMessage::Result GEdit::OnEvent(GMessage *Msg)
 		case WM_CREATE:
 		{
 			d->IgnoreNotify = false;
+			LgiResources::StyleElement(this);
 			break;
 		}
 		case WM_LBUTTONDBLCLK:

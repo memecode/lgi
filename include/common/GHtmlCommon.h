@@ -107,6 +107,7 @@ public:
 
 	GHtmlElemInfo *GetTagInfo(const char *Tag);
 	GHtmlElemInfo *GetTagInfo(HtmlTag TagId);
+	void OnSystemColourChange();
 };
 
 /// Static data setup/pulldown
