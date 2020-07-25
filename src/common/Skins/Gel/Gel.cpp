@@ -143,6 +143,7 @@ class GelSkin : public GSkinEngine
 	{
 		if (!pDC)
 			return;
+		LgiAssert(Back.IsValid());
 
 		#if LGI_SDL
 		
@@ -608,7 +609,7 @@ public:
 
 		// Background
 		GCssTools Tools(Ctrl->GetCss(), Ctrl->GetFont());
-		GColour DefaultBack;
+		GColour DefaultBack(L_HIGH);
 		GColour &Fore = Tools.GetFore(), &Back = Tools.GetBack(&DefaultBack);
 		GColour NoPaint(LColour(L_MED));
 		if (Ctrl->GetCss())
@@ -757,7 +758,7 @@ public:
 				Ctrl->SetFont(SysBold);
 
 			// Back
-			GColour TextDefault(GREY24, 24);
+			GColour TextDefault(L_TEXT), BackDefault(L_HIGH);
 			GCssTools Tools(Ctrl->GetCss(), Ctrl->GetFont());
 			GColour &Fore = Tools.GetFore(&TextDefault), &Back = Tools.GetBack();
 			if (Back.IsValid())
@@ -766,7 +767,7 @@ public:
 				Mem.Rectangle();
 			}
 
-			DrawBtn(&Mem, Ctrl->GetClient(), NULL, false, State->Enabled);
+			DrawBtn(&Mem, Ctrl->GetClient(), BackDefault, false, State->Enabled);
 			
 			int n = 22;
 			GColour DkGrey(LColour(L_DKGREY));

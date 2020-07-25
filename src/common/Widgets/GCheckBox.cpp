@@ -88,10 +88,12 @@ GCheckBox::~GCheckBox()
 	DeleteObj(d);
 }
 
+#ifdef WINNATIVE
 int GCheckBox::SysOnNotify(int Msg, int Code)
 {
 	return 0;
 }
+#endif
 
 void GCheckBox::OnAttach()
 {

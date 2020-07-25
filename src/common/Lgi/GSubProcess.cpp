@@ -350,8 +350,7 @@ bool GSubProcess::SetEnvironment(const char *Var, const char *Value)
 			char *Dir = t[i];
 			if (DirExists(Dir))
 				p.Print("%s%s", p.GetSize() ? LGI_PATH_SEPARATOR : "", Dir);
-			else
-				LgiTrace("%s:%i - Removing missing path '%s'\n", _FL, Dir);
+			// else LgiTrace("%s:%i - Removing missing path '%s'\n", _FL, Dir);
 		}
 		v->Val = p.NewGStr();
 	}

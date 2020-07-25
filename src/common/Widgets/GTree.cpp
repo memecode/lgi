@@ -1803,8 +1803,10 @@ void GTree::OnPaint(GSurface *pDC)
 	}
 
 	d->IconTextGap = GetFont()->GetHeight() / 6;
-	GColour Fore = Tools.GetFore(&LColour(L_TEXT));
-	GColour Background = Tools.GetBack(&LColour(L_WORKSPACE), 0);
+	auto cText = LColour(L_TEXT);
+	auto cWs = LColour(L_WORKSPACE);
+	GColour Fore = Tools.GetFore(&cText);
+	GColour Background = Tools.GetBack(&cWs, 0);
 
 	// icon cache
 	if (GetImageList() &&
