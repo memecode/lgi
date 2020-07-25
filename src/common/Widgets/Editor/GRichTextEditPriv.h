@@ -108,7 +108,7 @@ enum RteCommands
 #undef IntToFixed
 #define IntToFixed(val)					((val)<<GDisplayString::FShift)
 
-#define CursorColour					GColour::Black
+#define CursorColour					LColour(L_TEXT)
 #define TextColour						GColour::Black
 
 //////////////////////////////////////////////////////////////////////

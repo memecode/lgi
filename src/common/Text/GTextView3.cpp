@@ -5133,7 +5133,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 							c.Offset(-d->rPadding.x1, -y);
 							#endif
 
-							pOut->Colour((!ReadOnly) ? Fore : GColour(192, 192, 192));
+							pOut->Colour(!ReadOnly ? Fore : GColour(192, 192, 192));
 							pOut->Rectangle(&c);
 						}
 
