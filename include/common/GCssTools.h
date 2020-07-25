@@ -29,9 +29,10 @@ public:
 	
 	GCssTools(GView *view)
 	{
+		LgiAssert(view != NULL);
 		View = view;
-		Css = view->GetCss(true);
-		Font = view->GetFont();
+		Css = view ? view->GetCss(true) : 0;
+		Font = view ? view->GetFont() : 0;
 		ForeInit = 0;
 		BackInit = 0;
 		BackImg = NULL;
@@ -41,7 +42,7 @@ public:
 	GColour &GetFore(GColour *Default = NULL);
 	
 	/// Gets the background colour for filling
-	GColour &GetBack(GColour *Default = NULL);
+	GColour &GetBack(GColour *Default = NULL, int Depth = -1);
 
 	/// Gets the background image for filling
 	GSurface *GetBackImage();

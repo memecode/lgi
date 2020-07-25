@@ -21,6 +21,7 @@
 #include "GViewPriv.h"
 #include "GCss.h"
 #include "GEdit.h"
+#include "LgiRes.h"
 
 #define DEBUG_MOUSE_CLICKS		0
 #define DEBUG_OVER				0
@@ -47,7 +48,7 @@ GViewPrivate::GViewPrivate()
 	Notify = 0;
 	WantsPulse = -1;
 	hTheme = NULL;
-	IsThemed = true;
+	IsThemed = LgiResources::DefaultColours;
 	CssDirty = false;
 }
 
@@ -1268,6 +1269,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 		switch (Msg->m)
 		{
 			#if 1
+			case WM_CTLCOLORBTN:
 			case WM_CTLCOLOREDIT:
 			case WM_CTLCOLORSTATIC:
 			{
@@ -1276,34 +1278,33 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 
 				GViewI *v = FindControl(hwnd);
 				GView *gv = v ? v->GetGView() : NULL;
-				if (gv)
-				{
-					int Depth = dynamic_cast<GEdit*>(gv) ? 1 : 10;
-					GColour Fore = gv->StyleColour(GCss::PropColor, GColour(), Depth);
-					GColour Back = gv->StyleColour(GCss::PropBackgroundColor, GColour(), Depth);
+				if (!gv)
+					goto ReturnDefaultProc;
+									
+				int Depth = dynamic_cast<GEdit*>(gv) ? 1 : 10;
+				GColour Fore = gv->StyleColour(GCss::PropColor, GColour(), Depth);
+				GColour Back = gv->StyleColour(GCss::PropBackgroundColor, GColour(), Depth);
 						
-					if (Fore.IsValid())
-					{
-						COLORREF c = RGB(Fore.r(), Fore.g(), Fore.b());
-						SetTextColor(hdc, c);
-					}							
-					if (Back.IsValid())
-					{
-						COLORREF c = RGB(Back.r(), Back.g(), Back.b());
-						SetBkColor(hdc, c);
-						SetDCBrushColor(hdc, c);
-					}
-
-					if (Fore.IsValid() || Back.IsValid())
-					{
-						#if !defined(DC_BRUSH)
-						#define DC_BRUSH            18
-						#endif
-						return (LRESULT) GetStockObject(DC_BRUSH);
-					}
+				if (Fore.IsValid())
+				{
+					COLORREF c = RGB(Fore.r(), Fore.g(), Fore.b());
+					SetTextColor(hdc, c);
+				}							
+				if (Back.IsValid())
+				{
+					COLORREF c = RGB(Back.r(), Back.g(), Back.b());
+					SetBkColor(hdc, c);
+					SetDCBrushColor(hdc, c);
 				}
 
-				goto ReturnDefaultProc;
+				if (Fore.IsValid() || Back.IsValid())
+				{
+					#if !defined(DC_BRUSH)
+					#define DC_BRUSH            18
+					#endif
+					return (LRESULT) GetStockObject(DC_BRUSH);
+				}
+
 				return 0;
 			}
 			#endif

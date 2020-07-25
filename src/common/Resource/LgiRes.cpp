@@ -248,7 +248,8 @@ class LgiResourcesPrivate
 public:
 	bool Ok;
 	ResFileFormat Format;
-	GAutoString File;
+	GString File;
+	GString ThemeFolder;
 	LHashTbl<IntKey<int>, LgiStringRes*> StrRef;
 	LHashTbl<IntKey<int>, LgiStringRes*> Strings;
 	LHashTbl<IntKey<int>, LgiStringRes*> DlgStrings;
@@ -269,7 +270,7 @@ public:
 GResourceContainer _ResourceOwner;
 bool LgiResources::LoadStyles = false;
 
-LgiResources::LgiResources(const char *FileName, bool Warn)
+LgiResources::LgiResources(const char *FileName, bool Warn, const char *ThemeFolder)
 {
 	d = new LgiResourcesPrivate;
 	ScriptEngine = 0;
@@ -365,6 +366,9 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 	if (FullPath)
 	{
 		Load(FullPath);
+
+		if (ThemeFolder)
+			SetThemeFolder(ThemeFolder);
 	}
 	else
 	{
@@ -398,6 +402,33 @@ LgiResources::~LgiResources()
 	Dialogs.DeleteObjects();
 	Menus.DeleteObjects();
 	DeleteObj(d);
+}
+
+const char *LgiResources::GetThemeFolder()
+{
+	return d->ThemeFolder;
+}
+
+bool LgiResources::DefaultColours = true;
+void LgiResources::SetThemeFolder(const char *f)
+{
+	d->ThemeFolder = f;
+
+	GFile::Path Colours(f, "colours.json");
+	if (Colours.Exists())
+		DefaultColours = !LColourLoad(Colours.GetFull());
+
+	GFile::Path Css(f, "styles.css");
+	if (Css.Exists())
+	{
+		GFile in(Css, O_READ);
+		if (in.IsOpen())
+		{
+			auto s = in.Read();
+			const char *css = s;
+			CssStore.Parse(css);
+		}
+	}		
 }
 
 bool LgiResources::StyleElement(GViewI *v)
@@ -475,7 +506,7 @@ bool LgiResources::Load(const char *FileName)
 		return false;
 	}
 
-	d->File.Reset(NewStr(FileName));
+	d->File = FileName;
 	d->Format = Lr8File;
 	char *Ext = LgiGetExtension(FileName);
 	if (Ext && stricmp(Ext, "lr") == 0)

@@ -10,6 +10,7 @@
 #include "GToken.h"
 #include "GButton.h"
 #include "GNotifications.h"
+#include "GCssTools.h"
 
 #define DEBUG_WINDOW_PLACEMENT				0
 #define DEBUG_HANDLE_VIEW_KEY				0
@@ -565,8 +566,9 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 
 void GWindow::OnPaint(GSurface *pDC)
 {
-	pDC->Colour(L_MED);
-	pDC->Rectangle();
+	auto c = GetClient();
+	GCssTools Tools(this);
+	Tools.PaintContent(pDC, c);
 }
 
 bool GWindow::Obscured()

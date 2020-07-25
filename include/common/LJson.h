@@ -362,6 +362,15 @@ public:
 		return k ? k->Str : GString();
 	}
 
+	struct Pair
+	{
+		GString key;
+		GString value;
+
+		Pair() { }
+		Pair(GString k, GString v) : key(k), value(v) { }
+	};
+
 	class Iter
 	{
 		LJson *j;
@@ -412,6 +421,19 @@ public:
 					return GString();
 
 				return v->Str;
+			}
+
+			Pair Get()
+			{
+				auto &Arr = *It->a;
+				if (Pos >= Arr.Length())
+					return Pair();
+				Key &k = Arr[Pos];
+				if (k.Name)
+					return Pair(k.Name, k.Str);
+				if (k.Obj.Length())
+					return Pair(k.Obj[0].Name, k.Obj[0].Str);
+				return Pair();
 			}
 
 			Iter GetArray(GString Addr)

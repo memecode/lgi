@@ -1836,7 +1836,8 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 		#ifdef WIN32
 		GDoubleBuffer Buf(pDC, &t);
 		#endif
-		pDC->Colour(GColour(180, 180, 206));
+		GColour ToolBar = LColour(L_FOCUS_SEL_BACK).Mix(LColour(L_LOW), 0.75f);
+		pDC->Colour(ToolBar);
 		pDC->Rectangle(&t);
 
 		GRect r = t;

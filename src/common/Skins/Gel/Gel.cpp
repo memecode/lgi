@@ -43,16 +43,17 @@
 class GelSkin : public GSkinEngine
 {
 	GApp *App;
-	COLOUR c80;
-	COLOUR c160;
-	COLOUR c172;
-	COLOUR c222;
-	COLOUR c232;
-	COLOUR c253;
-	COLOUR c255;
+	GColour c80;
+	GColour c160;
+	GColour c172;
+	GColour c222;
+	GColour c232;
+	GColour c253;
+	GColour c255;
 	GMemDC *CheckBox[Btn_Max];
 	GMemDC *RadioBtn[Btn_Max];
 
+	/*
 	COLOUR LgiLighten(COLOUR c32, int Amount)
 	{
 		System32BitPixel *p = (System32BitPixel*)&c32;
@@ -70,31 +71,32 @@ class GelSkin : public GSkinEngine
 		p->b = (p->b * Amount) >> 8;
 		return Rgba32(p->r, p->g, p->b, p->a);
 	}
+	*/
 
-	void FillPath(GPath *Path, GSurface *pDC, bool Down, bool Enabled = true)
+	GColour Tint(GColour back, double amt)
+	{
+		bool Darken = back.GetGray() >= 128;
+		GColour Mixer = Darken ? GColour::Black : GColour::White;
+		return back.Mix(Mixer, (float)(1.0f - amt));
+	}
+
+	void FillPath(GPath *Path, GSurface *pDC, GColour Back, bool Down, bool Enabled = true)
 	{
 		if (pDC)
 		{
 			GRect r(0, 0, pDC->X()-1, pDC->Y()-1);
 
-			#if 0
-
-			COLOUR Top = LgiLighten(Rgb24To32(LC_MED), 62 * 256 / 63); // Rgba32(253, 253, 253, 255);
-			COLOUR Mid = LgiLighten(Rgb24To32(LC_MED), 49 * 256 / 63); // Rgba32(239, 239, 239, 255);
-			COLOUR Mid2 = LgiLighten(Rgb24To32(LC_MED), 31 * 256 / 63); // Rgba32(222, 222, 222, 255);
-
-			#endif
-
-			COLOUR Top = c253;
-			COLOUR Mid = c232;
-			COLOUR Mid2 = c222;
-			COLOUR Bot = c255;
+			auto Top = Tint(Back, 253.0 / 240.0);
+			auto Mid = Tint(Back, 232.0 / 240.0);
+			auto Mid2 = Tint(Back, 222.0 / 240.0);
+			auto Bot = Tint(Back, 255 / 240.0);
 			if (!Enabled)
 			{
-				Top = LgiDarken(Top, 230);
-				Mid = LgiDarken(Mid, 230);
-				Mid2 = LgiDarken(Mid2, 230);
-				Bot = LgiDarken(Bot, 230);
+				double Amt = 230.0 / 255.0;
+				Top = Tint(Top, Amt);
+				Mid = Tint(Mid, Amt);
+				Mid2 = Tint(Mid2, Amt);
+				Bot = Tint(Bot, Amt);
 			}
 			
 			// Draw background
@@ -108,10 +110,10 @@ class GelSkin : public GSkinEngine
 				GBlendStop s1[] =
 				{
 					{0.0, Rgba32(192, 192, 192, 255)},
-					{0.1, Top},
-					{0.6, Mid},
-					{0.601, Mid2},
-					{1.0, Bot},
+					{0.1, Top.c32()},
+					{0.6, Mid.c32()},
+					{0.601, Mid2.c32()},
+					{1.0, Bot.c32()},
 				};					
 				GLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
 				e.Fill(pDC, b1);
@@ -120,31 +122,31 @@ class GelSkin : public GSkinEngine
 			{
 				GBlendStop s1[] =
 				{
-					{0.0, Top},
-					{0.5, Mid},
-					{0.501, Mid2},
-					{1.0, Bot},
+					{0.0, Top.c32()},
+					{0.5, Mid.c32()},
+					{0.501, Mid2.c32()},
+					{1.0, Bot.c32()},
 				};					
 				GLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
 				e.Fill(pDC, b1);
 			}
 
-			pDC->Colour(GREY32(255), 32);
+			pDC->Colour(Tint(Back, 255.0/240.0));
 			pDC->Line(0, pDC->Y()-1, pDC->X()-1, pDC->Y()-1);
-			pDC->Colour(Rgba32(0xc6, 0xc6, 0xc6, 255), 32);
+			pDC->Colour(Tint(Back, 198.0/240.0));
 			pDC->Line(0, pDC->Y()-2, pDC->X()-2, pDC->Y()-2);
 			pDC->Line(pDC->X()-1, 0, pDC->X()-1, pDC->Y()-2);
 		}
 	}
 	
-	void DrawBtn(GSurface *pDC, GRect &r, GColour *Base, bool Down, bool Enabled, bool Default = false)
+	void DrawBtn(GSurface *pDC, GRect &r, GColour Back, bool Down, bool Enabled, bool Default = false)
 	{
 		if (!pDC)
 			return;
 
 		#if LGI_SDL
 		
-		pDC->Colour(Base?*Base:GColour(192, 192, 192));
+		pDC->Colour(Base);
 		pDC->Rectangle(&r);
 		pDC->Colour(GColour(96, 96, 96));
 		if (Down)
@@ -188,26 +190,17 @@ class GelSkin : public GSkinEngine
 			e.RoundRect(r, 6 - Resize);
 
 			// Fill
-			COLOUR Top = c253;
-			COLOUR Mid = c232;
-			COLOUR Mid2 = c222;
-			COLOUR Bot = c255;
-			if (Base)
+			GColour Top = Tint(Back, 253.0 / 240.0);
+			GColour Mid = Tint(Back, 232.0 / 240.0);
+			GColour Mid2 = Tint(Back, 222.0 / 240.0);
+			GColour Bot = Tint(Back, 255.0 / 240.0);
+			if (!Enabled)
 			{
-				Top = Base->c32();
-				Mid = Base->c32();
-				Mid2 = Base->c32();
-				Bot = Base->c32();
-			}
-			else
-			{
-				if (!Enabled)
-				{
-					Top = LgiDarken(Top, 230);
-					Mid = LgiDarken(Mid, 230);
-					Mid2 = LgiDarken(Mid2, 230);
-					Bot = LgiDarken(Bot, 230);
-				}
+				auto Amt = 230.0 / 240.0;
+				Top = Tint(Top, Amt);
+				Mid = Tint(Mid, Amt);
+				Mid2 = Tint(Mid2, Amt);
+				Bot = Tint(Bot, Amt);
 			}
 		
 			GPointF c1(r.x1, r.y1);
@@ -217,10 +210,10 @@ class GelSkin : public GSkinEngine
 				GBlendStop s1[] =
 				{
 					{0.0, Rgba32(192, 192, 192, 255)},
-					{0.1, Top},
-					{0.6, LgiDarken(Mid, 230)},
-					{0.601, LgiDarken(Mid2, 230)},
-					{1.0, LgiDarken(Bot, 230)},
+					{0.1, Top.c32()},
+					{0.6, Tint(Mid, 230.0/240.0).c32()},
+					{0.601, Tint(Mid2, 230.0/240.0).c32()},
+					{1.0, Tint(Bot, 230.0/240.0).c32()},
 				};					
 				GLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
 				e.Fill(pDC, b1);
@@ -229,10 +222,10 @@ class GelSkin : public GSkinEngine
 			{
 				GBlendStop s1[] =
 				{
-					{0.0, Top},
-					{0.5, Mid},
-					{0.501, Mid2},
-					{1.0, Bot},
+					{0.0, Top.c32()},
+					{0.5, Mid.c32()},
+					{0.501, Mid2.c32()},
+					{1.0, Bot.c32()},
 				};					
 				GLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
 				e.Fill(pDC, b1);
@@ -301,8 +294,8 @@ class GelSkin : public GSkinEngine
 				GPointF a(0, 0), b(0, 15);
 				GBlendStop s[] =
 				{
-					{0, c172},
-					{1, c253}
+					{0, c172.c32()},
+					{1, c253.c32()}
 				};
 				GLinearBlendBrush c(a, b, 2, s);
 				p.Fill(Mem, c);
@@ -324,9 +317,9 @@ class GelSkin : public GSkinEngine
 					GPointF a(0, r.y1), b(0, r.y2);
 					GBlendStop s[] =
 					{
-						{1.0/15.0, c255},
-						{1.0/14.0, c253},
-						{1, c232}
+						{1.0/15.0, c255.c32()},
+						{1.0/14.0, c253.c32()},
+						{1, c232.c32()}
 					};
 					GLinearBlendBrush c(a, b, CountOf(s), s);
 					p.Fill(Mem, c);
@@ -505,13 +498,14 @@ public:
 		ZeroObj(RadioBtn);
 
 		GColour Med = LColour(L_MED);
-		c80 = LgiDarken(Med.c32(), 80 * 256 / 192);
-		c160 = LgiDarken(Med.c32(), 160 * 256 / 192);
-		c172 = LgiDarken(Med.c32(), 172 * 256 / 192);
-		c222 = Med.c32();
-		c232 = LgiLighten(Med.c32(), 33 * 256 / 63);
-		c253 = LgiLighten(Med.c32(), 60 * 256 / 63);
-		c255 = Rgba32(255, 255, 255, 255);
+		double Nominal = 240.0;
+		c80 = Tint(Med, 80.0/Nominal);
+		c160 = Tint(Med, 160.0/Nominal);
+		c172 = Tint(Med, 172.0/Nominal);
+		c222 = Tint(Med, 222.0/Nominal);
+		c232 = Tint(Med, 232.0/Nominal);
+		c253 = Tint(Med, 252.0/Nominal);
+		c255 = Tint(Med, 255.0/Nominal);
 	}
 	
 	~GelSkin()
@@ -643,7 +637,7 @@ public:
 		
 		DrawBtn(&Mem,
 				Ctrl->GetClient(),
-				Back.IsValid() ? &Back : NULL,
+				Back,
 				Ctrl->Value() != 0,
 				Ctrl->Enabled(),
 				Ctrl->Default());
@@ -725,29 +719,32 @@ public:
 		// Setup memory context
 		GRect r = State->Rect;
 		GMemDC Mem(r.X(), r.Y(), OsDefaultCs);
-		if (Mem[0])
+		if (!Mem[0])
+			return;
+
+		GCssTools Tools(State->View);
+		auto Ws = LColour(L_WORKSPACE);
+		auto Back = Tint(Tools.GetBack(&Ws, 0), 220.0/240.0);
+		r.Offset(-r.x1, -r.y1);
+
+		GPath e;
+		e.Rectangle(r.x1, r.y1, r.x2, r.y2);
+		static bool LastEnabled = true;			
+		FillPath(&e, &Mem, Back, State ? State->Value != 0 : false, State ? LastEnabled = State->Enabled : LastEnabled);
+		if (State && State->Value)
 		{
-			r.Offset(-r.x1, -r.y1);		
-			
-			GPath e;
-			e.Rectangle(r.x1, r.y1, r.x2, r.y2);
-			static bool LastEnabled = true;			
-			FillPath(&e, &Mem, State ? State->Value != 0 : false, State ? LastEnabled = State->Enabled : LastEnabled);
-			if (State && State->Value)
-			{
-				Mem.Colour(Rgb24(0xc0, 0xc0, 0xc0), 24);
-				Mem.Line(r.x1, r.y1, r.x1, r.y2-1);
-				Mem.Colour(Rgb24(0xe0, 0xe0, 0xe0), 24);
-				Mem.Line(r.x1+1, r.y1+1, r.x1+1, r.y2-2);
-			}
-			r.Size(2, 2);
-			if (Callback)
-			{
-				Mem.Op(GDC_ALPHA);
-				Callback(UserData, &Mem, r, false);
-			}
-			State->pScreen->Blt(State->Rect.x1, State->Rect.y1, &Mem);
+			Mem.Colour(Rgb24(0xc0, 0xc0, 0xc0), 24);
+			Mem.Line(r.x1, r.y1, r.x1, r.y2-1);
+			Mem.Colour(Rgb24(0xe0, 0xe0, 0xe0), 24);
+			Mem.Line(r.x1+1, r.y1+1, r.x1+1, r.y2-2);
 		}
+		r.Size(2, 2);
+		if (Callback)
+		{
+			Mem.Op(GDC_ALPHA);
+			Callback(UserData, &Mem, r, false);
+		}
+		State->pScreen->Blt(State->Rect.x1, State->Rect.y1, &Mem);
 	}
 
 	void OnPaint_GCombo(GCombo *Ctrl, GSkinState *State)

@@ -2494,6 +2494,13 @@ void LList::PourAll()
 	}
 }
 
+static GColour Tint(GColour back, double amt)
+{
+	bool Darken = back.GetGray() >= 128;
+	GColour Mixer = Darken ? GColour::Black : GColour::White;
+	return back.Mix(Mixer, (float)(1.0f - amt));
+}
+
 void LList::OnPaint(GSurface *pDC)
 {
 	#if LList_ONPAINT_PROFILE
@@ -2504,13 +2511,16 @@ void LList::OnPaint(GSurface *pDC)
 		return;
 
 	GCssTools Tools(this);
-	GColour Workspace = LColour(L_WORKSPACE);
-	GColour Fore = Enabled() ? Tools.GetFore() : Tools.GetFore().Mix(LColour(L_LOW));
-	GColour Back = Tools.GetBack(&Workspace);
+	GColour DisabledTint(L_MED);
+	GColour Workspace(L_WORKSPACE);
+	GColour NonFocusBack(L_NON_FOCUS_SEL_BACK);	
+	GColour Fore = Enabled() ? Tools.GetFore() : Tools.GetFore().Mix(DisabledTint);
+	GColour Back = Tools.GetBack(&Workspace, 0);
+	double NonFocusBackAmt = (double)NonFocusBack.r() / Workspace.r();
 	if (!Enabled())
-		Back = Back.Mix(LColour(L_MED));
+		Back = Back.Mix(DisabledTint);
 	GColour SelFore(Focus() ? L_FOCUS_SEL_FORE : L_NON_FOCUS_SEL_FORE);
-	GColour SelBack(Focus() ? L_FOCUS_SEL_BACK : (Enabled() ? L_NON_FOCUS_SEL_BACK : L_MED));
+	GColour SelBack(Focus() ? L_FOCUS_SEL_BACK : (Enabled() ? Tint(Back, NonFocusBackAmt) : DisabledTint));
 	PourAll();
 		
 	#if LList_ONPAINT_PROFILE

@@ -15,6 +15,7 @@
 #include "GTableLayout.h"
 #include "GDisplayString.h"
 #include "GButton.h"
+#include "LgiRes.h"
 
 #define USE_DIALOGBOXINDIRECTPARAM         0
 
@@ -451,6 +452,8 @@ GMessage::Result GDialog::OnEvent(GMessage *Msg)
 			if (!_Default)
 				SetDefault(FindControl(IDOK));
 
+			LgiResources::StyleElement(this);			
+
 			// This was commented out. I've re-introduced it until such time
 			// as there is a good reason not to have it enabled. If such a reason
 			// arises, update this comment to reflect that.
@@ -606,6 +609,7 @@ GMessage::Result GControl::OnEvent(GMessage *Msg)
 		case WM_CTLCOLOREDIT:
 		case WM_CTLCOLORSTATIC:
 		{
+			// These should never be called.. but just in case.
 			return GView::OnEvent(Msg);
 			break;
 		}

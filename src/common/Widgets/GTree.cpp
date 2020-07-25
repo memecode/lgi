@@ -858,7 +858,9 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	Pos.x2 = Pos.x1 + Ctx.ColPx[0] - 1;
 
 	int x = 0;
-	GColour Lines(L_MED);
+	GColour Ws(L_WORKSPACE);
+	GColour Lines = Ws.Invert().Mix(Ws);
+
 	pDC->Colour(Lines);
 	if (Tree->d->JoiningLines)
 	{
@@ -910,7 +912,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 			case GTree::TreeTriangle:
 			{
 				// Triangle style expander
-				pDC->Colour(L_LOW);
+				pDC->Colour(Lines);
 
 				int Off = 2;
 				if (d->Open)
@@ -1802,7 +1804,7 @@ void GTree::OnPaint(GSurface *pDC)
 
 	d->IconTextGap = GetFont()->GetHeight() / 6;
 	GColour Fore = Tools.GetFore(&LColour(L_TEXT));
-	GColour Background = Tools.GetBack(&LColour(L_WORKSPACE));
+	GColour Background = Tools.GetBack(&LColour(L_WORKSPACE), 0);
 
 	// icon cache
 	if (GetImageList() &&

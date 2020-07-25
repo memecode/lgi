@@ -7,6 +7,8 @@
 #include "Lgi.h"
 #include "GSkinEngine.h"
 #include "GCheckBox.h"
+#include "LgiRes.h"
+#include "GCssTools.h"
 
 class GCheckBoxPrivate
 {
@@ -64,10 +66,20 @@ GCheckBox::~GCheckBox()
 	DeleteObj(d);
 }
 
+#include "Uxtheme.h"
 void GCheckBox::OnAttach()
 {
+	LgiResources::StyleElement(this);
+	OnStyleChange();
+	GView::OnAttach();
+
 	SetFont(SysFont);
 	Value(d->InitState);
+}
+
+void GCheckBox::OnStyleChange()
+{
+	Invalidate();
 }
 
 bool GCheckBox::ThreeState()
@@ -124,6 +136,11 @@ GMessage::Result GCheckBox::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
+		case WM_CREATE:
+		{
+			HRESULT r = SetWindowTheme(Handle(), NULL, NULL);
+			break;			
+		}
 		case WM_DESTROY:
 		{
 			// Copy state back into a local var
@@ -133,10 +150,8 @@ GMessage::Result GCheckBox::OnEvent(GMessage *Msg)
 		case WM_ERASEBKGND:
 		{
 			GScreenDC Dc((HDC)Msg->A(), _View);
-			GColour cMed = LColour(L_MED);
-			GColour cBack = StyleColour(GCss::PropBackgroundColor, cMed, 10);
-			// LgiTrace("cBack=%s cMed=%s\n", cBack.GetStr(), cMed.GetStr());
-			Dc.Colour(cBack);
+			GCssTools Tools(this);
+			Dc.Colour(Tools.GetBack());
 			Dc.Rectangle();
 			return true;
 			break;
@@ -147,9 +162,7 @@ GMessage::Result GCheckBox::OnEvent(GMessage *Msg)
 		case WM_KEYUP:
 		{
 			if (SysOnKey(this, Msg))
-			{
 				return 0;
-			}
 			break;
 		}
 	}

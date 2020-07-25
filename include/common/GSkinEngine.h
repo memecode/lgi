@@ -35,6 +35,7 @@ public:
 	bool Enabled;					// TRUE if the control is enabled
 	bool Focus;						// TRUE if the control has focus
 	GSurface *Image;				// Any icon that needs displaying
+	GView *View;
 
 	GSkinState()
 	{
@@ -47,6 +48,7 @@ public:
 		pScreen = 0;
 		MouseOver = false;
 		Image = NULL;
+		View = NULL;
 	}
 
 	size_t TextObjects()
@@ -133,10 +135,10 @@ public:
 	virtual GFont *GetDefaultFont(char *Class) { return SysFont; }
 
 	// Fills an abitary path with the skin's default fill...
-	virtual void FillPath(class GPath *Path, GSurface *pDC, bool Down, bool Enabled = true) {}
+	virtual void FillPath(class GPath *Path, GSurface *pDC, GColour Back, bool Down, bool Enabled = true) {}
 
 	// Draws a button
-	virtual void DrawBtn(GSurface *pDC, GRect &r, GColour *Base, bool Down, bool Enabled, bool Default = false) = 0;
+	virtual void DrawBtn(GSurface *pDC, GRect &r, GColour Back, bool Down, bool Enabled, bool Default = false) = 0;
 
 	///////////////////////////////////////////////////////////////////////////////
 	// Add new features down here with an associated feature flag defined above. //

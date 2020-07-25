@@ -124,12 +124,13 @@ class LgiClass LgiResources : public ResFactory
 	static bool LoadStyles;
 
 public:
+	static bool DefaultColours;
 	LHashTbl<ConstStrKey<char>, char*> LanguageNames;
 	
 	/// This is all the CSS loaded from the lr8 file (and possibly other sources as well)
 	GCss::Store CssStore;
 
-	/// Get the load styles setting
+	/// Get the load styles setting (enable 'StyleElement' to do something)
 	static bool GetLoadStyles() { return LoadStyles; }
 	
 	/// Sets the loading of styles for all UI elements.
@@ -138,13 +139,18 @@ public:
 	/// This is called by UI elements to load styles if necessary.
 	static bool StyleElement(GViewI *v);
 	
+	const char *GetThemeFolder();
+	void SetThemeFolder(const char *f);
+
 	/// The constructor
 	LgiResources
 	(
 		/// [optional] The filename to use.
-		const char *FileName = 0,
+		const char *FileName = NULL,
 		/// [optional] Warn if the file is not found.
-		bool Warn = false
+		bool Warn = false,
+		/// [optional] Folder for theming info
+		const char *ThemeFolder = NULL
 	);
 	virtual ~LgiResources();
 

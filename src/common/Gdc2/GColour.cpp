@@ -340,6 +340,12 @@ void GColour::c32(uint32_t c)
 	rgb.a = A32(c);
 }
 
+GColour GColour::Invert()
+{
+	GColour i(255-r(), 255-g(), 255-b());
+	return i;
+}
+
 GColour GColour::Mix(GColour Tint, float RatioOfTint) const
 {
 	COLOUR c1 = c32();
@@ -350,7 +356,7 @@ GColour GColour::Mix(GColour Tint, float RatioOfTint) const
 	int r = (int) ((R32(c1) * RatioThis) + (R32(c2) * RatioOfTint));
 	int g = (int) ((G32(c1) * RatioThis) + (G32(c2) * RatioOfTint));
 	int b = (int) ((B32(c1) * RatioThis) + (B32(c2) * RatioOfTint));
-	int a = (int) ((A32(c1) * RatioThis) + (A32(c2) * RatioOfTint));
+	int a = (int) ((RatioThis * A32(c1)) + (RatioOfTint * A32(c2)) + 0.5f);
 	
 	return GColour(r, g, b, a);
 }
@@ -855,22 +861,6 @@ void GColour::OnChange()
 	#else
 	_LgiColours[L_TOOL_TIP].Rgb(255, 255, 231);
 	#endif
-
-	// Read any settings out of config
-	ReadColourConfig(L_SHADOW);
-	ReadColourConfig(L_LOW);
-	ReadColourConfig(L_MED);
-	ReadColourConfig(L_HIGH);
-	ReadColourConfig(L_LIGHT);
-	ReadColourConfig(L_DIALOG);
-	ReadColourConfig(L_WORKSPACE);
-	ReadColourConfig(L_TEXT);
-	ReadColourConfig(L_FOCUS_SEL_BACK);
-	ReadColourConfig(L_FOCUS_SEL_FORE);
-	ReadColourConfig(L_ACTIVE_TITLE);
-	ReadColourConfig(L_ACTIVE_TITLE_TEXT);
-	ReadColourConfig(L_INACTIVE_TITLE);
-	ReadColourConfig(L_INACTIVE_TITLE_TEXT);
 }
 
 GColour::GColour(LSystemColour sc)
@@ -881,27 +871,44 @@ GColour::GColour(LSystemColour sc)
 
 GColour LColour(LSystemColour Colour)
 {
-	#ifndef LGI_STATIC
-	if (GApp::SkinEngine &&
-		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_COLOUR))
-	{
-		return GApp::SkinEngine->GetColour(Colour);
-	}
-	#endif
-	
 	return Colour < L_MAXIMUM ? _LgiColours[Colour] : GColour();
 }
 
-COLOUR LgiColour(LSystemColour Colour)
+#include "LJson.h"
+bool LColourLoad(const char *Json)
 {
-	#ifndef LGI_STATIC
-	if (GApp::SkinEngine &&
-		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_COLOUR))
-	{
-		return GApp::SkinEngine->GetColour(Colour).c24();
-	}
+	#ifdef LGI_STATIC
+		// Not supported due to no CSS in static build
+		return false;
+	#else
+		if (!Json)
+			return false;
+
+		LHashTbl<ConstStrKey<char,false>,LSystemColour> Map;
+		#define _(name) Map.Add("L_" #name, L_##name);
+		_SystemColour();
+		#undef _
+
+		GFile f(Json, O_READ);
+		if (!f.IsOpen())
+			return false;
+		LJson j(f.Read());
+		for (auto i: j.GetArray("colors"))
+		{
+			auto p = i.Get();
+			auto c = Map.Find(p.key);
+			if (c > L_TRANSPARENT && c < L_MAXIMUM)
+			{
+				GCss::ColorDef cd(p.value);
+				if (cd.Type == GCss::ColorRgb)
+					_LgiColours[c].Set(cd.Rgb32, 32);
+				else
+					LgiAssert(!"Invalid colour type.");
+			}
+		}
+
+		return true;
 	#endif
-	
-	return Colour < L_MAXIMUM ? _LgiColours[Colour].c24() : 0;
 }
+
 

@@ -88,6 +88,11 @@ GCheckBox::~GCheckBox()
 	DeleteObj(d);
 }
 
+int GCheckBox::SysOnNotify(int Msg, int Code)
+{
+	return 0;
+}
+
 void GCheckBox::OnAttach()
 {
 	LgiResources::StyleElement(this);

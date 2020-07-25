@@ -56,7 +56,7 @@ GColour &GCssTools::GetFore(GColour *Default)
 	return Fore;
 }
 	
-GColour &GCssTools::GetBack(GColour *Default)
+GColour &GCssTools::GetBack(GColour *Default, int Depth)
 {
 	if (!BackInit)
 	{
@@ -69,7 +69,7 @@ GColour &GCssTools::GetBack(GColour *Default)
 
 		if (View)
 		{
-			Back = View->StyleColour(GCss::PropBackgroundColor, Back);
+			Back = View->StyleColour(GCss::PropBackgroundColor, Back, Depth >= 0 ? Depth : 5);
 		}
 		else if (Css)
 		{
@@ -323,19 +323,9 @@ GRect GCssTools::PaintPadding(GSurface *pDC, GRect &in)
 	if (r != Content)
 	{
 		// Draw the padding in the background colour
-		GCss::ColorDef BackgroundDef = Css->BackgroundColor();
-		GColour Background;
-		if (BackgroundDef.IsValid())
-		{
-			if (BackgroundDef.Type == GCss::ColorRgb)
-				Background.c32(BackgroundDef.Rgb32);
-			else
-				LgiAssert(!"Unsupported");
-		}
-		else
-			Background = LColour(L_MED);
-		
+		GColour Background = GetBack();
 		pDC->Colour(Background);
+
 		if (r.x1 > Content.x1)
 			pDC->Rectangle(Content.x1, Content.y1, r.x1 - 1, Content.y2);
 		if (r.x2 < Content.x2)
@@ -391,26 +381,13 @@ GSurface *GCssTools::GetBackImage()
 
 void GCssTools::PaintContent(GSurface *pDC, GRect &in, const char *utf8, GSurface *img)
 {
-	GCss::ColorDef BackCol;
-	if (Css)
-		BackCol = Css->BackgroundColor();
-
 	bool BackgroundDrawn = false;
 	auto BkImg = GetBackImage();
 	if (BkImg)
 		BackgroundDrawn = Tile(pDC, in, BkImg, BackPos.x1, BackPos.y1);
 	if (!BackgroundDrawn)
 	{
-		GColour Background;
-		if (BackCol.IsValid())
-		{
-			if (BackCol.Type == GCss::ColorRgb)
-				Background.c32(BackCol.Rgb32);
-			else
-				LgiAssert(!"Unsupported");
-		}
-		else
-			Background = LColour(L_MED);
+		GColour Background = GetBack();
 		pDC->Colour(Background);
 		pDC->Rectangle(&in);
 		BackgroundDrawn = true;

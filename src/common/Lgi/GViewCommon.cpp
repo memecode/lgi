@@ -13,6 +13,7 @@
 #include "LgiRes.h"
 #include "GEventTargetThread.h"
 #include "GPopup.h"
+#include "GCssTools.h"
 
 #if WINNATIVE
 #define GViewFlags d->WndStyle
@@ -500,6 +501,9 @@ void GView::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 
 void GView::OnPaint(GSurface *pDC)
 {
+	auto c = GetClient();
+	GCssTools Tools(this);
+	Tools.PaintContent(pDC, c);
 }
 
 int GView::OnNotify(GViewI *Ctrl, int Flags)

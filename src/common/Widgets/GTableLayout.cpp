@@ -2011,7 +2011,6 @@ void GTableLayoutPrivate::Layout(GRect &Client)
 
 GTableLayout::GTableLayout(int id) : ResObject(Res_Table)
 {
-	LgiResources::StyleElement(this);
 	d = new GTableLayoutPrivate(this);
 	SetPourLargest(true);
 	Name("GTableLayout");
@@ -2035,6 +2034,8 @@ void GTableLayout::OnFocus(bool b)
 
 void GTableLayout::OnCreate()
 {
+	LgiTrace("GTableLayout::StyleElement\n");
+	LgiResources::StyleElement(this);
 	AttachChildren();
 }
 

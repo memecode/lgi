@@ -15,6 +15,7 @@
 #include "GDisplayString.h"
 #include "GTableLayout.h"
 #include "LgiRes.h"
+#include "GCssTools.h"
 #include "GPath.h"
 
 enum TabViewStyle
@@ -92,7 +93,7 @@ public:
 		ResMax
 	};
 	GAutoPtr<GSurface> Corners[ResMax];
-	GColour cBorder, cFill;
+	GColour cBack, cBorder, cFill;
 	
 	// Scrolling
 	int Scroll;			// number of buttons scrolled off the left of the control
@@ -113,6 +114,13 @@ public:
 		RightBtn.ZOff(-1, -1);
 
 		Style = TvMac;
+	}
+
+	GColour Tint(double amt)
+	{
+		bool Darken = cBack.GetGray() >= 128;
+		GColour Mixer = Darken ? GColour::Black : GColour::White;
+		return cBack.Mix(Mixer, (float)(1.0f - amt));
 	}
 
 	bool DrawCircle(GAutoPtr<GSurface> &Dc, GColour c)
@@ -139,9 +147,11 @@ public:
 		p.Circle(r, r, r - 1.0);
 		p.SetFillRule(FILLRULE_ODDEVEN);
 		// GSolidBrush s2(GColour(0xcb, 0xcb, 0xcb));
+		GColour cTopEdge = Tint(203.0 / 240.0);
+		GColour cBottomEdge = Tint(170.0 / 240.0);
 		GBlendStop Stops[2] = {
-			{0.0, Rgb32(0xcb, 0xcb, 0xcb)},
-			{1.0, Rgb32(0xaa, 0xaa, 0xaa)}
+			{0.0, cTopEdge.c32()},
+			{1.0, cBottomEdge.c32()}
 		};
 		GPointF a(4, 4), b(9, 9);
 		GLinearBlendBrush s2(a, b, CountOf(Stops), Stops);
@@ -157,8 +167,8 @@ public:
 		GAutoPtr<GSurface> &c248 = Corners[Res248];
 		GAutoPtr<GSurface> &Sel = Corners[ResSel];
 
-		DrawCircle(White, GColour::White);
-		DrawCircle(c248, GColour(248, 248, 248));
+		DrawCircle(White, Tint(255.0 / 240.0));
+		DrawCircle(c248, Tint(248.0 / 240.0));
 		DrawCircle(Sel, cFocusBack);
 	}
 };
@@ -243,7 +253,6 @@ GTabView::GTabView(int id, int x, int y, int cx, int cy, const char *name, int I
 	#if WINNATIVE
 	SetDlgCode(DLGC_WANTARROWS);
 	#endif
-	LgiResources::StyleElement(this);
 }
 
 GTabView::~GTabView()
@@ -366,12 +375,27 @@ int64 GTabView::Value()
 
 void GTabView::OnCreate()
 {
-	TabIterator it(Children);
-	GTabPage *p = d->Current < it.Length() ? it[d->Current] : 0;
-	if (p)
+	LgiResources::StyleElement(this);			
+
+	d->Depth = 0;
+	GViewI *p = this;
+	while ((p = p->GetParent()))
 	{
-		p->Attach(this);
-		p->Visible(true);
+		if (p == (GViewI*)GetWindow())
+			break;
+		GTabView *tv = dynamic_cast<GTabView*>(p);
+		if (tv)
+			d->Depth++;
+	}
+
+	OnStyleChange();
+
+	TabIterator it(Children);
+	GTabPage *page = d->Current < it.Length() ? it[d->Current] : 0;
+	if (page)
+	{
+		page->Attach(this);
+		page->Visible(true);
 	}
 }
 
@@ -669,33 +693,6 @@ void GTabView::OnFocus(bool f)
 
 void GTabView::OnAttach()
 {
-	d->Depth = 0;
-	GViewI *p = this;
-	while ((p = p->GetParent()))
-	{
-		if (p == (GViewI*)GetWindow())
-			break;
-		GTabView *tv = dynamic_cast<GTabView*>(p);
-		if (tv)
-			d->Depth++;
-	}
-
-	GColour cDialog(L_MED);
-			
-	auto mul = pow(0.91f, 1+d->Depth);
-	auto c = (int) ((double)cDialog.r() * mul);
-	d->cBorder.Rgb(c, c, c);
-			
-	mul = pow(0.959f, 1+d->Depth);
-	c = (int) ((double)cDialog.r() * mul);
-	d->cFill.Rgb(c, c, c);
-
-	auto *Css = GetCss(true);
-	if (Css)
-	{
-		if (!Css->BackgroundColor().IsValid())
-			Css->BackgroundColor(GCss::ColorDef(d->cFill));
-	}
 }
 
 GRect &GTabView::CalcInset()
@@ -744,14 +741,38 @@ GRect &GTabView::CalcInset()
 
 void GTabView::OnStyleChange()
 {
+	if (!d->cBack.IsValid())
+	{
+		GCssTools Tools(this);
+		d->cBack = Tools.GetBack();
+
+		auto mul = pow(0.909f, 1+d->Depth); // 240->218
+		d->cBorder = d->Tint(mul);
+			
+		mul = pow(0.959f, 1+d->Depth); // 240->230
+		d->cFill = d->Tint(mul);
+
+		LgiTrace("Tab = %s %s %s depth=%i\n", d->cBack.GetStr(), d->cBorder.GetStr(), d->cFill.GetStr(), d->Depth);
+
+		auto *Css = GetCss(true);
+		if (Css)
+		{
+			if (!Css->BackgroundColor().IsValid())
+				Css->BackgroundColor(GCss::ColorDef(d->cFill));
+		}
+	}
+
 	TabIterator Tabs(Children);
 	for (auto t : Tabs)
 		t->OnStyleChange();
+
 	Invalidate();
 }
 
 void GTabView::OnPaint(GSurface *pDC)
 {
+	GCssTools Tools(this);
+
 	TabIterator it(Children);
 	if (d->Current >= it.Length())
 		Value(it.Length() - 1);
@@ -839,10 +860,10 @@ void GTabView::OnPaint(GSurface *pDC)
 			
 			#else
 
-				GColour cTopEdge(203, 203, 203);
-				GColour cBottomEdge(170, 170, 170);
-				GColour cTabFill = IsCurrent ? (Foc ? cFocusBack : GColour(248, 248, 248)) : GColour::White;
-				GColour cInterTabBorder(231, 231, 231);
+				GColour cTopEdge = d->Tint(203.0 / 240.0);
+				GColour cBottomEdge = d->Tint(170.0 / 240.0);
+				GColour cTabFill = IsCurrent ? (Foc ? cFocusBack : d->Tint(248.0 / 240.0)) : d->Tint(255.0 / 240.0);
+				GColour cInterTabBorder = d->Tint(231.0 / 240.0);
 				GRect b = r;
 
 				#if MAC_DBL_BUF
@@ -948,7 +969,7 @@ void GTabView::OnPaint(GSurface *pDC)
 			if (Tab->GetCss())
 				Fore = Tab->GetCss()->Color();
 			tf->Fore(Fore.IsValid() ? (GColour)Fore : 
-					IsCurrent && Foc ? cFocusFore : LColour(L_TEXT));
+					IsCurrent && Foc ? cFocusFore : Tools.GetFore());
 			
 			int DsX = r.x1 + TAB_MARGIN_X;
 			int DsY = r.y1 + TAB_TXT_PAD + BaselineOff;

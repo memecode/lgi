@@ -4,6 +4,7 @@
 #include "GSkinEngine.h"
 #include "GScrollBar.h"
 #include "GEdit.h"
+#include "GCssTools.h"
 
 // Colours
 #if defined(__GTK_H__)
@@ -90,107 +91,104 @@ GItemContainer::~GItemContainer()
 void GItemContainer::PaintColumnHeadings(GSurface *pDC)
 {
 	// Draw column headings
-	if (ColumnHeaders && ColumnHeader.Valid())
+	if (!ColumnHeaders || !ColumnHeader.Valid())
+		return;
+
+	GSurface *ColDC = pDC;
+	GRect cr;
+
+	#if DOUBLE_BUFFER_COLUMN_DRAWING
+	GMemDC Bmp;
+	if (!pDC->SupportsAlphaCompositing() &&
+		Bmp.Create(ColumnHeader.X(), ColumnHeader.Y(), System32BitColourSpace))
 	{
-		GSurface *ColDC = pDC;
-		GRect cr;
+		ColDC = &Bmp;
+		Bmp.Op(GDC_ALPHA);
+		cr = ColumnHeader.ZeroTranslate();
+	}
+	else
+	#endif
+	{
+		cr = ColumnHeader;
+		pDC->ClipRgn(&cr);
+	}
 
-		#if DOUBLE_BUFFER_COLUMN_DRAWING
-		GMemDC Bmp;
-		if (!pDC->SupportsAlphaCompositing() &&
-			Bmp.Create(ColumnHeader.X(), ColumnHeader.Y(), System32BitColourSpace))
-		{
-			ColDC = &Bmp;
-			Bmp.Op(GDC_ALPHA);
-			cr = ColumnHeader.ZeroTranslate();
-		}
-		else
-		#endif
-		{
-			cr = ColumnHeader;
-			pDC->ClipRgn(&cr);
-		}
+	// Draw columns
+	int cx = cr.x1;
+	if (IconCol)
+	{
+		cr.x1 = cx;
+		cr.x2 = cr.x1 + IconCol->Width() - 1;
+		IconCol->SetPos(cr);
+		IconCol->OnPaint(ColDC, cr);
+		cx += IconCol->Width();
+	}
 
-		// Draw columns
-		int cx = cr.x1;
-		if (IconCol)
+	// Draw other columns
+	for (int i=0; i<Columns.Length(); i++)
+	{
+		GItemColumn *c = Columns[i];
+		if (c)
 		{
 			cr.x1 = cx;
-			cr.x2 = cr.x1 + IconCol->Width() - 1;
-			IconCol->SetPos(cr);
-			IconCol->OnPaint(ColDC, cr);
-			cx += IconCol->Width();
+			cr.x2 = cr.x1 + c->Width() - 1;
+			c->SetPos(cr);
+			c->OnPaint(ColDC, cr);
+			cx += c->Width();
 		}
+		else LgiAssert(0);
+	}
 
-		// Draw other columns
-		for (int i=0; i<Columns.Length(); i++)
-		{
-			GItemColumn *c = Columns[i];
-			if (c)
-			{
-				cr.x1 = cx;
-				cr.x2 = cr.x1 + c->Width() - 1;
-				c->SetPos(cr);
-				c->OnPaint(ColDC, cr);
-				cx += c->Width();
-			}
-			else LgiAssert(0);
-		}
+	// Draw ending piece
+	cr.x1 = cx;
+	cr.x2 = ColumnHeader.x2 + 2;
 
-		// Draw ending piece
-		cr.x1 = cx;
-		cr.x2 = ColumnHeader.x2 + 2;
-
-		if (cr.Valid())
-		{
-			#ifdef MAC
-			GArray<GColourStop> Stops;
-			GRect j(cr.x1, cr.y1, cr.x2-1, cr.y2-1); 
-			// ColDC->Colour(Rgb24(160, 160, 160), 24);
-			// ColDC->Line(r.x1, r.y1, r.x2, r.y1);
+	if (cr.Valid())
+	{
+		#ifdef MAC
+		GArray<GColourStop> Stops;
+		GRect j(cr.x1, cr.y1, cr.x2-1, cr.y2-1); 
+		// ColDC->Colour(Rgb24(160, 160, 160), 24);
+		// ColDC->Line(r.x1, r.y1, r.x2, r.y1);
 				
-			Stops[0].Pos = 0.0;
-			Stops[0].Colour = Rgb32(255, 255, 255);
-			Stops[1].Pos = 0.5;
-			Stops[1].Colour = Rgb32(241, 241, 241);
-			Stops[2].Pos = 0.51;
-			Stops[2].Colour = Rgb32(233, 233, 233);
-			Stops[3].Pos = 1.0;
-			Stops[3].Colour = Rgb32(255, 255, 255);
+		Stops[0].Pos = 0.0;
+		Stops[0].Colour = Rgb32(255, 255, 255);
+		Stops[1].Pos = 0.5;
+		Stops[1].Colour = Rgb32(241, 241, 241);
+		Stops[2].Pos = 0.51;
+		Stops[2].Colour = Rgb32(233, 233, 233);
+		Stops[3].Pos = 1.0;
+		Stops[3].Colour = Rgb32(255, 255, 255);
 			
-			LgiFillGradient(ColDC, j, true, Stops);
+		LgiFillGradient(ColDC, j, true, Stops);
 			
-			ColDC->Colour(Rgb24(178, 178, 178), 24);
-			ColDC->Line(cr.x1, cr.y2, cr.x2, cr.y2);
-			#else
-			if (GApp::SkinEngine)
-			{
-				GSkinState State;
-				State.pScreen = ColDC;
-				State.Rect = cr;
-				State.Enabled = Enabled();
-				GApp::SkinEngine->OnPaint_ListColumn(0, 0, &State);
-			}
-			else
-			{
-				LgiWideBorder(ColDC, cr, DefaultRaisedEdge);
-				ColDC->Colour(LColour(L_MED));
-				ColDC->Rectangle(&cr);
-			}
-			#endif
-		}
-
-		#if DOUBLE_BUFFER_COLUMN_DRAWING
-		if (!pDC->SupportsAlphaCompositing())
+		ColDC->Colour(Rgb24(178, 178, 178), 24);
+		ColDC->Line(cr.x1, cr.y2, cr.x2, cr.y2);
+		#else
+		if (GApp::SkinEngine)
 		{
-			pDC->Blt(ColumnHeader.x1, ColumnHeader.y1, &Bmp);
+			GSkinState State;
+			State.pScreen = ColDC;
+			State.Rect = cr;
+			State.Enabled = Enabled();
+			State.View = this;
+			GApp::SkinEngine->OnPaint_ListColumn(0, 0, &State);
 		}
 		else
-		#endif
 		{
-			pDC->ClipRgn(0);
+			LgiWideBorder(ColDC, cr, DefaultRaisedEdge);
+			ColDC->Colour(LColour(L_MED));
+			ColDC->Rectangle(&cr);
 		}
+		#endif
 	}
+
+	#if DOUBLE_BUFFER_COLUMN_DRAWING
+	if (!pDC->SupportsAlphaCompositing())
+		pDC->Blt(ColumnHeader.x1, ColumnHeader.y1, &Bmp);
+	else
+	#endif
+		pDC->ClipRgn(0);
 }
 
 GItemColumn *GItemContainer::AddColumn(const char *Name, int Width, int Where)
@@ -764,6 +762,8 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 {
 	if (!d->Drag)
 	{
+		GCssTools Tools(d->Parent);
+		auto Fore = Tools.GetFore();
 		auto cMed = LColour(L_MED);
 		int Off = d->Down ? 1 : 0;
 		int Mx = r.x1 + 8, My = r.y1 + ((r.Y() - 8) / 2);
@@ -829,7 +829,7 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 			}
 
 			f->Transparent(!FillBackground);
-			f->Colour(LColour(L_TEXT), cMed);
+			f->Colour(Fore, cMed);
 			int ty = d->Txt->Y();
 			int ry = r.Y();
 			int y = r.y1 + ((ry - ty) >> 1);
@@ -850,7 +850,7 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 		}
 
 		#define ARROW_SIZE	9
-		pDC->Colour(L_TEXT);
+		pDC->Colour(Fore);
 		Mx += Off;
 		My += Off - 1;
 
@@ -957,6 +957,7 @@ void GItemColumn::OnPaint(GSurface *pDC, GRect &Rgn)
 			State.Rect = Rgn;
 			State.Value = Value();
 			State.Enabled = GetList()->Enabled();
+			State.View = d->Parent;
 
 			GApp::SkinEngine->OnPaint_ListColumn(ColumnPaint, this, &State);
 		}

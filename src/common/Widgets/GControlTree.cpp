@@ -9,6 +9,7 @@
 #include "GButton.h"
 #include "GDisplayString.h"
 #include "LgiRes.h"
+#include "GCssTools.h"
 
 #define IDC_BROWSE -10
 
@@ -305,7 +306,9 @@ void GControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 
 	if (!Ctrl)
 	{
-		SysBold->Colour(LColour(L_TEXT), LColour(L_WORKSPACE));
+		GCssTools Tools(GetTree());
+		auto Ws = LColour(L_WORKSPACE);
+		SysBold->Colour(Tools.GetFore(), Tools.GetBack(&Ws, 0));
 		SysBold->Transparent(true);
 
 		GRect p = GetRect();

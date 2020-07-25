@@ -344,26 +344,16 @@ void GSplitter::OnPaint(GSurface *pDC)
 
 	// bar
 	if (d->Vertical)
-	{
-		/* Old Win32
-		pDC->Rectangle(PosA.x2, PosA.y1, PosB.x1, PosA.y2);
-		pDC->Rectangle(PosA.x1, PosA.y2, PosA.x2, PosB.y1);
-		*/
 		pDC->Rectangle(d->PosA.x2+1, r.y1, d->PosB.x1-1, r.y2);
-	}
 	else
-	{
 		pDC->Rectangle(r.x1, d->PosA.y2+1, r.x2, d->PosB.y1-1);
-	}
 
 	// PosA region
 	r = d->PosA;
 	if (r.X() > SPLITER_MIN_X && r.Y() > SPLITER_MIN_Y)
 	{
 		if (d->BorderA)
-		{
 			LgiWideBorder(pDC, r, DefaultSunkenEdge);
-		}
 
 		if (d->ViewA)
 		{
@@ -395,9 +385,7 @@ void GSplitter::OnPaint(GSurface *pDC)
 	if (r.X() > SPLITER_MIN_X && r.Y() > SPLITER_MIN_Y)
 	{
 		if (d->BorderB)
-		{
 			LgiWideBorder(pDC, r, DefaultSunkenEdge);
-		}
 
 		if (d->ViewB)
 		{

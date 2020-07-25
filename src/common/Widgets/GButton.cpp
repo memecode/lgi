@@ -497,9 +497,7 @@ void GButton::OnAttach()
 	{
 		d->WantsDefault = false;
 		if (GetWindow())
-		{
 			GetWindow()->_Default = this;
-		}
 	}
 }
 
