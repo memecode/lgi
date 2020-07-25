@@ -68,6 +68,33 @@ public:
 	}
 };
 
+static GColour cActiveCol(0x86, 0xba, 0xe9);
+static void FillStops(GArray<GColourStop> &Stops, GRect &r, bool Active)
+{
+	if (Active)
+	{
+		Stops[0].Set(0.0f, GColour(0xd0, 0xe2, 0xf5));
+		Stops[1].Set(2.0f / (r.Y() - 2), GColour(0x98, 0xc1, 0xe9));
+		Stops[2].Set(0.5f, GColour(0x86, 0xba, 0xe9));
+		Stops[3].Set(0.51f, GColour(0x68, 0xaf, 0xea));
+		Stops[4].Set(1.0f, GColour(0xbb, 0xfc, 0xff));
+	}
+	else
+	{
+		GColour cMed(L_MED), cWs(L_WORKSPACE);
+		if (cWs.GetGray() < 96)
+		{
+			cMed = cMed.Mix(GColour::White, 0.25f);
+			cWs = cWs.Mix(GColour::White, 0.25f);
+		}
+		Stops[0].Set(0.0f, cWs);
+		Stops[1].Set(0.5f, cMed.Mix(cWs));
+		Stops[2].Set(0.51f, cMed);
+		Stops[3].Set(1.0f, cWs);
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////
 GItemContainer::GItemContainer()
 {
@@ -145,41 +172,32 @@ void GItemContainer::PaintColumnHeadings(GSurface *pDC)
 
 	if (cr.Valid())
 	{
+		// Draw end section where there are no columns
 		#ifdef MAC
-		GArray<GColourStop> Stops;
-		GRect j(cr.x1, cr.y1, cr.x2-1, cr.y2-1); 
-		// ColDC->Colour(Rgb24(160, 160, 160), 24);
-		// ColDC->Line(r.x1, r.y1, r.x2, r.y1);
-				
-		Stops[0].Pos = 0.0;
-		Stops[0].Colour = Rgb32(255, 255, 255);
-		Stops[1].Pos = 0.5;
-		Stops[1].Colour = Rgb32(241, 241, 241);
-		Stops[2].Pos = 0.51;
-		Stops[2].Colour = Rgb32(233, 233, 233);
-		Stops[3].Pos = 1.0;
-		Stops[3].Colour = Rgb32(255, 255, 255);
-			
-		LgiFillGradient(ColDC, j, true, Stops);
-			
-		ColDC->Colour(Rgb24(178, 178, 178), 24);
-		ColDC->Line(cr.x1, cr.y2, cr.x2, cr.y2);
+			GArray<GColourStop> Stops;
+			GRect j(cr.x1, cr.y1, cr.x2-1, cr.y2-1);
+		
+			FillStops(Stops, j, false);
+			LgiFillGradient(ColDC, j, true, Stops);
+		
+			ColDC->Colour(L_LOW);
+			ColDC->Line(cr.x1, cr.y2, cr.x2, cr.y2);
 		#else
-		if (GApp::SkinEngine)
-		{
-			GSkinState State;
-			State.pScreen = ColDC;
-			State.Rect = cr;
-			State.Enabled = Enabled();
-			State.View = this;
-			GApp::SkinEngine->OnPaint_ListColumn(0, 0, &State);
-		}
-		else
-		{
-			LgiWideBorder(ColDC, cr, DefaultRaisedEdge);
-			ColDC->Colour(LColour(L_MED));
-			ColDC->Rectangle(&cr);
-		}
+			if (GApp::SkinEngine)
+			{
+				GSkinState State;
+				State.pScreen = ColDC;
+				State.Rect = cr;
+				State.Enabled = Enabled();
+				State.View = this;
+				GApp::SkinEngine->OnPaint_ListColumn(0, 0, &State);
+			}
+			else
+			{
+				LgiWideBorder(ColDC, cr, DefaultRaisedEdge);
+				ColDC->Colour(LColour(L_MED));
+				ColDC->Rectangle(&cr);
+			}
 		#endif
 	}
 
@@ -828,8 +846,18 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 				return;
 			}
 
+			GColour cText = Fore;
+			#ifdef MAC
+			if (d->cMark)
+			{
+				// Contrast check
+				if ((cText - cActiveCol) < 64)
+					cText = cText.Invert();
+			}
+			#endif
+
 			f->Transparent(!FillBackground);
-			f->Colour(Fore, cMed);
+			f->Colour(cText, cMed);
 			int ty = d->Txt->Y();
 			int ry = r.Y();
 			int y = r.y1 + ((ry - ty) >> 1);
@@ -898,83 +926,51 @@ void GItemColumn::OnPaint(GSurface *pDC, GRect &Rgn)
 	{
 		#ifdef MAC
 
-		GArray<GColourStop> Stops;
-		GRect j(r.x1, r.y1, r.x2-1, r.y2-1); 
-		if (d->cMark)
-		{
-			// pDC->Colour(Rgb24(0, 0x4e, 0xc1), 24);
-			// pDC->Line(r.x1, r.y1, r.x2, r.y1);
-
-			Stops[0].Pos = 0.0;
-			Stops[0].Colour = Rgb32(0xd0, 0xe2, 0xf5);
-			Stops[1].Pos = 2.0 / (r.Y() - 2);
-			Stops[1].Colour = Rgb32(0x98, 0xc1, 0xe9);
-			Stops[2].Pos = 0.5;
-			Stops[2].Colour = Rgb32(0x86, 0xba, 0xe9);
-			Stops[3].Pos = 0.51;
-			Stops[3].Colour = Rgb32(0x68, 0xaf, 0xea);
-			Stops[4].Pos = 1.0;
-			Stops[4].Colour = Rgb32(0xbb, 0xfc, 0xff);
-			
+			GArray<GColourStop> Stops;
+			GRect j(r.x1, r.y1, r.x2-1, r.y2-1);
+			FillStops(Stops, j, d->cMark != 0);
 			LgiFillGradient(pDC, j, true, Stops);
-			
-			pDC->Colour(Rgb24(0x66, 0x93, 0xc0), 24);
+			if (d->cMark)
+				pDC->Colour(Rgb24(0x66, 0x93, 0xc0), 24);
+			else
+				pDC->Colour(Rgb24(178, 178, 178), 24);
 			pDC->Line(r.x1, r.y2, r.x2, r.y2);
 			pDC->Line(r.x2, r.y1, r.x2, r.y2);
-		}
-		else
-		{
-			// pDC->Colour(Rgb24(160, 160, 160), 24);
-			// pDC->Line(r.x1, r.y1, r.x2, r.y1);
-			
-			Stops[0].Pos = 0.0;
-			Stops[0].Colour = Rgb32(255, 255, 255);
-			Stops[1].Pos = 0.5;
-			Stops[1].Colour = Rgb32(241, 241, 241);
-			Stops[2].Pos = 0.51;
-			Stops[2].Colour = Rgb32(233, 233, 233);
-			Stops[3].Pos = 1.0;
-			Stops[3].Colour = Rgb32(255, 255, 255);
-			
-			LgiFillGradient(pDC, j, true, Stops);
-			
-			pDC->Colour(Rgb24(178, 178, 178), 24);
-			pDC->Line(r.x1, r.y2, r.x2, r.y2);
-			pDC->Line(r.x2, r.y1, r.x2, r.y2);
-		}
 
-		GRect n = r;
-		n.Size(2, 2);
-		OnPaint_Content(pDC, n, false);
+			GRect n = r;
+			n.Size(2, 2);
+			OnPaint_Content(pDC, n, false);
 
 		#else
-		if (GApp::SkinEngine)
-		{
-			GSkinState State;
-			
-			State.pScreen = pDC;			
-			State.ptrText = &d->Txt;
-			State.Rect = Rgn;
-			State.Value = Value();
-			State.Enabled = GetList()->Enabled();
-			State.View = d->Parent;
-
-			GApp::SkinEngine->OnPaint_ListColumn(ColumnPaint, this, &State);
-		}
-		else
-		{
-			if (d->Down)
+		
+			if (GApp::SkinEngine)
 			{
-				LgiThinBorder(pDC, r, DefaultSunkenEdge);
-				LgiFlatBorder(pDC, r, 1);
+				GSkinState State;
+				
+				State.pScreen = pDC;
+				State.ptrText = &d->Txt;
+				State.Rect = Rgn;
+				State.Value = Value();
+				State.Enabled = GetList()->Enabled();
+				State.View = d->Parent;
+
+				GApp::SkinEngine->OnPaint_ListColumn(ColumnPaint, this, &State);
 			}
 			else
 			{
-				LgiWideBorder(pDC, r, DefaultRaisedEdge);
+				if (d->Down)
+				{
+					LgiThinBorder(pDC, r, DefaultSunkenEdge);
+					LgiFlatBorder(pDC, r, 1);
+				}
+				else
+				{
+					LgiWideBorder(pDC, r, DefaultRaisedEdge);
+				}
+				
+				OnPaint_Content(pDC, r, true);
 			}
-			
-			OnPaint_Content(pDC, r, true);
-		}	
+		
 		#endif	
 	}
 }

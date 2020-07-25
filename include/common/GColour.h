@@ -96,6 +96,11 @@ public:
 	{
 		return c32() != c.c32();
 	}
+	int operator -(const GColour &c)
+	{
+		auto Diff = GetGray() - c.GetGray();
+		return abs(Diff);
+	}
 	
 	bool IsValid();
 	void Empty();
@@ -163,7 +168,7 @@ public:
 
 	// Conversion
 	void ToRGB();
-	int GetGray(int BitDepth = 8);
+	int GetGray(int BitDepth = 8) const;
 	uint32_t GetNative();
 	
 	// String IO

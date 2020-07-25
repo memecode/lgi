@@ -464,7 +464,7 @@ void GColour::ToRGB()
 	}
 }
 
-int GColour::GetGray(int BitDepth)
+int GColour::GetGray(int BitDepth) const
 {
 	if (BitDepth == 8)
 	{
@@ -826,10 +826,10 @@ void GColour::OnChange()
 
 	#endif
 
-	_LgiColours[L_SHADOW].Rgb(64, 64, 64); // LC_SHADOW
-	_LgiColours[L_LOW].Rgb(128, 128, 128); // LC_LOW
-	_LgiColours[L_MED].Rgb(216, 216, 216); // LC_MED
-	_LgiColours[L_HIGH].Rgb(230, 230, 230); // LC_HIGH
+	_LgiColours[L_SHADOW].Rgb(96, 96, 96); // LC_SHADOW
+	_LgiColours[L_LOW].Rgb(150, 150, 150); // LC_LOW
+	_LgiColours[L_MED].Rgb(230, 230, 230); // LC_MED
+	_LgiColours[L_HIGH].Rgb(240, 240, 240); // LC_HIGH
 	_LgiColours[L_LIGHT].Rgb(255, 255, 255); // LC_LIGHT
 	_LgiColours[L_DIALOG].Rgb(216, 216, 216); // LC_DIALOG
 	_LgiColours[L_WORKSPACE].Rgb(0xff, 0xff, 0xff); // LC_WORKSPACE

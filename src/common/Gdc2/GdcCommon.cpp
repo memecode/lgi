@@ -362,7 +362,7 @@ void LgiFillGradient(GSurface *pDC, GRect &r, bool Vert, GArray<GColourStop> &St
 	int Limit = Vert ? r.Y() : r.X();
 	for (int n=0; n<Limit; n++)
 	{
-		COLOUR c = Rgb32(0, 0, 0);
+		GColour c(0, 32);
 		float p = (float)n/Limit;
 		if (This)
 		{
@@ -378,11 +378,11 @@ void LgiFillGradient(GSurface *pDC, GRect &r, bool Vert, GArray<GColourStop> &St
 				float d = Next->Pos - This->Pos;
 				float t = (Next->Pos - p) / d;
 				float n = (p - This->Pos) / d;
-				uint8_t r = (uint8_t) ((R32(This->Colour) * t) + (R32(Next->Colour) * n));
-				uint8_t g = (uint8_t) ((G32(This->Colour) * t) + (G32(Next->Colour) * n));
-				uint8_t b = (uint8_t) ((B32(This->Colour) * t) + (B32(Next->Colour) * n));
-				uint8_t a = (uint8_t) ((A32(This->Colour) * t) + (A32(Next->Colour) * n));
-				c = Rgba32(r, g, b, a);
+				uint8_t r = (uint8_t) ((This->Colour.r() * t) + (Next->Colour.r() * n));
+				uint8_t g = (uint8_t) ((This->Colour.g() * t) + (Next->Colour.g() * n));
+				uint8_t b = (uint8_t) ((This->Colour.b() * t) + (Next->Colour.b() * n));
+				uint8_t a = (uint8_t) ((This->Colour.a() * t) + (Next->Colour.a() * n));
+				c.Rgb(r, g, b, a);
 			}
 			else if (p >= Next->Pos)
 			{
@@ -393,7 +393,7 @@ void LgiFillGradient(GSurface *pDC, GRect &r, bool Vert, GArray<GColourStop> &St
 				goto DoStop;
 			}
 
-			pDC->Colour(c, 32);
+			pDC->Colour(c);
 			if (Vert)
 				pDC->Line(r.x1, r.y1 + n, r.x2, r.y1 + n);
 			else

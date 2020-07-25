@@ -115,12 +115,21 @@ public:
 
 		Style = TvMac;
 	}
+	
+	uint8_t Clamp(int i)
+	{
+		if (i < 0) return 0;
+		if (i > 255) return 255;
+		return (uint8_t)i;
+	}
 
 	GColour Tint(double amt)
 	{
-		bool Darken = cBack.GetGray() >= 128;
-		GColour Mixer = Darken ? GColour::Black : GColour::White;
-		return cBack.Mix(Mixer, (float)(1.0f - amt));
+		// bool Darken = cBack.GetGray() >= 128;
+		GColour c(	Clamp(amt * cBack.r()),
+					Clamp(amt * cBack.g()),
+					Clamp(amt * cBack.b()));
+		return c;
 	}
 
 	bool DrawCircle(GAutoPtr<GSurface> &Dc, GColour c)
@@ -146,9 +155,9 @@ public:
 		p.Circle(r, r, r);
 		p.Circle(r, r, r - 1.0);
 		p.SetFillRule(FILLRULE_ODDEVEN);
-		// GSolidBrush s2(GColour(0xcb, 0xcb, 0xcb));
-		GColour cTopEdge = Tint(203.0 / 240.0);
-		GColour cBottomEdge = Tint(170.0 / 240.0);
+		GColour cMed(L_MED);
+		GColour cTopEdge = Tint(203.0 / cMed.r());
+		GColour cBottomEdge = Tint(170.0 / cMed.r());
 		GBlendStop Stops[2] = {
 			{0.0, cTopEdge.c32()},
 			{1.0, cBottomEdge.c32()}
@@ -167,8 +176,9 @@ public:
 		GAutoPtr<GSurface> &c248 = Corners[Res248];
 		GAutoPtr<GSurface> &Sel = Corners[ResSel];
 
-		DrawCircle(White, Tint(255.0 / 240.0));
-		DrawCircle(c248, Tint(248.0 / 240.0));
+		GColour cMed(L_MED);
+		DrawCircle(White, Tint(255.0 / cMed.r()));
+		DrawCircle(c248, Tint(248.0 / cMed.r()));
 		DrawCircle(Sel, cFocusBack);
 	}
 };
@@ -860,10 +870,12 @@ void GTabView::OnPaint(GSurface *pDC)
 			
 			#else
 
-				GColour cTopEdge = d->Tint(203.0 / 240.0);
-				GColour cBottomEdge = d->Tint(170.0 / 240.0);
-				GColour cTabFill = IsCurrent ? (Foc ? cFocusBack : d->Tint(248.0 / 240.0)) : d->Tint(255.0 / 240.0);
-				GColour cInterTabBorder = d->Tint(231.0 / 240.0);
+				GColour cMed(L_MED);
+				GColour cTopEdge = d->Tint(203.0 / cMed.r());
+				GColour cBottomEdge = d->Tint(170.0 / cMed.r());
+				auto cBaseFill = d->Tint(255.0 / cMed.r());
+				GColour cTabFill = IsCurrent ? (Foc ? cFocusBack : d->Tint(248.0 / cMed.r())) : cBaseFill;
+				GColour cInterTabBorder = d->Tint(231.0 / cMed.r());
 				GRect b = r;
 
 				#if MAC_DBL_BUF
