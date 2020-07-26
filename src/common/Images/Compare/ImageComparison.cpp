@@ -369,7 +369,7 @@ public:
 	
 	void OnPaint(GSurface *pDC)
 	{
-		pDC->Colour(LC_MED, 24);
+		pDC->Colour(L_MED);
 		pDC->Rectangle();
 	}
 	
@@ -863,7 +863,7 @@ struct ImageCompareDlgPriv : public GZoomViewCallback
 
 	void DrawBackground(GZoomView *View, GSurface *Dst, GdcPt2 Offset, GRect *Where)
 	{
-		Dst->Colour(LC_WORKSPACE, 24);
+		Dst->Colour(L_WORKSPACE, 24);
 		Dst->Rectangle(Where);
 	}
 	
