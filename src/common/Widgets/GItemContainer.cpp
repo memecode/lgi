@@ -848,12 +848,9 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 
 			GColour cText = Fore;
 			#ifdef MAC
-			if (d->cMark)
-			{
-				// Contrast check
-				if ((cText - cActiveCol) < 64)
-					cText = cText.Invert();
-			}
+			// Contrast check
+			if (d->cMark && (cText - cActiveCol) < 64)
+				cText = cText.Invert();
 			#endif
 
 			f->Transparent(!FillBackground);

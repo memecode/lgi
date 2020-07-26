@@ -256,17 +256,15 @@ bool GCombo::Delete(char *p)
 
 bool GCombo::Insert(const char *p, int Index)
 {
-	bool Status = false;
-	if (p)
-	{
-		Status = d->Items.Insert(NewStr(p), Index);
-		if (Status)
-		{
-			d->LayoutDirty = true;
-			Invalidate();
-		}
-	}
-	return Status;
+	if (!p)
+		return false;
+
+	if (!d->Items.Insert(NewStr(p), Index))
+		return false;
+	
+	d->LayoutDirty = true;
+	Invalidate();
+	return true;
 }
 
 void GCombo::DoMenu()

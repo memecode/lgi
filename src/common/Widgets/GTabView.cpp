@@ -762,7 +762,7 @@ void GTabView::OnStyleChange()
 		mul = pow(0.959f, 1+d->Depth); // 240->230
 		d->cFill = d->Tint(mul);
 
-		LgiTrace("Tab = %s %s %s depth=%i\n", d->cBack.GetStr(), d->cBorder.GetStr(), d->cFill.GetStr(), d->Depth);
+		// LgiTrace("Tab = %s %s %s depth=%i\n", d->cBack.GetStr(), d->cBorder.GetStr(), d->cFill.GetStr(), d->Depth);
 
 		auto *Css = GetCss(true);
 		if (Css)

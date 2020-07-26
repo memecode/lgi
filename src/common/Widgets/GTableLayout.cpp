@@ -2034,7 +2034,6 @@ void GTableLayout::OnFocus(bool b)
 
 void GTableLayout::OnCreate()
 {
-	LgiTrace("GTableLayout::StyleElement\n");
 	LgiResources::StyleElement(this);
 	AttachChildren();
 }

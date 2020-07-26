@@ -2369,8 +2369,7 @@ void ResDialog::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 const char *ResDialog::Name()
 {
 	GViewI *v = Children[0];
-	printf("v=%p len=%i\n", v, (int)Children.Length());
-
+	
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(v);
 	if (!Ctrl)
 		return "#no_ctrl";
