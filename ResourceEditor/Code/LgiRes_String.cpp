@@ -164,11 +164,8 @@ ResString::~ResString()
 	{
 		Group->App()->OnObjDelete(this);
 
-		bool HasStr = Group->Strs.HasItem(this);
 		if (!Group->Strs.Delete(this))
-		{
 			LgiAssert(0);
-		}
 
 		Group->LList::Remove(this);
 	}

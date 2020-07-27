@@ -643,7 +643,7 @@ void GToolButton::OnPaint(GSurface *pDC)
 				if (Hilight)
 				{
 					// Draw translucent white over image...
-					int Op = pDC->Op(GDC_ALPHA);
+					pDC->Op(GDC_ALPHA);
 					pDC->Colour(GColour(255, 255, 255, 128));
 					pDC->Rectangle(&p);
 				}

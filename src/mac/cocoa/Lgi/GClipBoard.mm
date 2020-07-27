@@ -116,19 +116,26 @@ GString GClipBoard::Html()
 
 bool GClipBoard::Bitmap(GSurface *pDC, bool AutoEmpty)
 {
-	bool Status = false;
-	if (pDC && Owner)
-	{
-	}
-	return Status;
+	LgiAssert(!"Not impl.");
+	return false;
 }
 
 GSurface *GClipBoard::Bitmap()
 {
-	GSurface *pDC = NULL;
+	LgiAssert(!"Not impl.");
+	return NULL;
+}
 
+GString::Array GClipBoard::Files()
+{
+	LgiAssert(!"Not impl.");
+	return GString::Array();
+}
 
-	return pDC;
+bool GClipBoard::Files(GString::Array &Paths, bool AutoEmpty)
+{
+	LgiAssert(!"Not impl.");
+	return false;
 }
 
 // This is a custom type to wrap binary data.

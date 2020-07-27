@@ -164,35 +164,35 @@ protected:
 public:
 	ResDialog(AppWnd *w, int type = TYPE_DIALOG);
 	~ResDialog();
-	void Create(GXmlTag *load, SerialiseContext *Ctx);
+	void Create(GXmlTag *load, SerialiseContext *Ctx) override;
 
-	const char *GetClass() { return "ResDialog"; }
-	GView *Wnd() { return dynamic_cast<GView*>(this); }
+	const char *GetClass() override { return "ResDialog"; }
+	GView *Wnd() override { return dynamic_cast<GView*>(this); }
 	static void AddLanguage(GLanguageId Id);
-	ResDialog *IsDialog() { return this; }
+	ResDialog *IsDialog() override { return this; }
 	void EnumCtrls(List<ResDialogCtrl> &Ctrls);
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
+	void OnChildrenChanged(GViewI *Wnd, bool Attaching) override;
 
 	// GObj overrides
 	const char *Name() override;
 	bool Name(const char *n) override;
 
 	// Factory
-	char *StringFromRef(int Ref);
-	ResObject *CreateObject(GXmlTag *Tag, ResObject *Parent);
+	char *StringFromRef(int Ref) override;
+	ResObject *CreateObject(GXmlTag *Tag, ResObject *Parent) override;
 
-	int Res_GetStrRef(ResObject *Obj);
-	bool Res_SetStrRef(ResObject *Obj, int Id, ResReadCtx *Ctx);
-	void Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2);
-	void Res_SetPos(ResObject *Obj, char *s);
-	GRect Res_GetPos(ResObject *Obj);
-	void Res_Attach(ResObject *Obj, ResObject *Parent);
-	bool Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep);
-	void Res_Append(ResObject *Obj, ResObject *Parent);
-	bool Res_GetItems(ResObject *Obj, List<ResObject> *l);
-	bool Res_GetProperties(ResObject *Obj, GDom *Props);
-	bool Res_SetProperties(ResObject *Obj, GDom *Props);
-	GDom *Res_GetDom(ResObject *Obj);
+	int Res_GetStrRef(ResObject *Obj) override;
+	bool Res_SetStrRef(ResObject *Obj, int Id, ResReadCtx *Ctx) override;
+	void Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2) override;
+	void Res_SetPos(ResObject *Obj, char *s) override;
+	GRect Res_GetPos(ResObject *Obj) override;
+	void Res_Attach(ResObject *Obj, ResObject *Parent) override;
+	bool Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep) override;
+	void Res_Append(ResObject *Obj, ResObject *Parent) override;
+	bool Res_GetItems(ResObject *Obj, List<ResObject> *l) override;
+	bool Res_GetProperties(ResObject *Obj, GDom *Props) override;
+	bool Res_SetProperties(ResObject *Obj, GDom *Props) override;
+	GDom *Res_GetDom(ResObject *Obj) override;
 
 	// Implementation
 	int CurrentTool();
@@ -208,31 +208,31 @@ public:
 	void SelectCtrl(ResDialogCtrl *c);
 	void CleanSymbols();
 	ResString *CreateSymbol();
-	void OnShowLanguages();
+	void OnShowLanguages() override;
 
 	// Copy/Paste whole controls
-	void Delete();
-	void Copy(bool Delete = false);
-	void Paste();
+	void Delete() override;
+	void Copy(bool Delete = false) override;
+	void Paste() override;
 
 	// Methods
-	GView *CreateUI();
-	void OnMouseClick(GMouse &m);
-	void OnMouseMove(GMouse &m);
-	bool OnKey(GKey &k);
+	GView *CreateUI() override;
+	void OnMouseClick(GMouse &m) override;
+	void OnMouseMove(GMouse &m) override;
+	bool OnKey(GKey &k) override;
 	void OnSelect(ResDialogCtrl *Wnd, bool ClearPrev = true);
 	void OnDeselect(ResDialogCtrl *Wnd);
-	void OnRightClick(LSubMenu *RClick);
-	void OnCommand(int Cmd);
-	int OnCommand(int Cmd, int Event, OsView hWnd);
+	void OnRightClick(LSubMenu *RClick) override;
+	void OnCommand(int Cmd) override;
+	int OnCommand(int Cmd, int Event, OsView hWnd) override;
 	void OnLanguageChange();
 
-	void _Paint(GSurface *pDC = NULL, GdcPt2 *Offset = NULL, GRect *Update = NULL);
-	void OnPaint(GSurface *pDC);
+	void _Paint(GSurface *pDC = NULL, GdcPt2 *Offset = NULL, GRect *Update = NULL) override;
+	void OnPaint(GSurface *pDC) override;
 
-	bool Test(ErrorCollection *e);
-	bool Read(GXmlTag *Tag, SerialiseContext &Ctx);
-	bool Write(GXmlTag *Tag, SerialiseContext &Ctx);
+	bool Test(ErrorCollection *e) override;
+	bool Read(GXmlTag *Tag, SerialiseContext &Ctx) override;
+	bool Write(GXmlTag *Tag, SerialiseContext &Ctx) override;
 };
 
 class ResDialogUi : public GLayout

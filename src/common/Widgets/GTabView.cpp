@@ -755,6 +755,7 @@ void GTabView::OnStyleChange()
 	{
 		GCssTools Tools(this);
 		d->cBack = Tools.GetBack();
+		printf("%p.onstyle %s\n", this, d->cBack.GetStr());
 
 		auto mul = pow(0.909f, 1+d->Depth); // 240->218
 		d->cBorder = d->Tint(mul);
@@ -781,6 +782,8 @@ void GTabView::OnStyleChange()
 
 void GTabView::OnPaint(GSurface *pDC)
 {
+	if (!d->cBack.IsValid())
+		OnStyleChange();
 	GCssTools Tools(this);
 
 	TabIterator it(Children);
