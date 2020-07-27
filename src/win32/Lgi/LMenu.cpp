@@ -920,7 +920,7 @@ bool LMenuItem::Name(const char *Txt)
 	bool Status = GBase::Name(Txt);
 	if (Status)
 	{
-		char *n = NewStr(Txt);
+		GString n = NewStr(Txt);
 		if (n)
 		{
 			// Set OS menu structure
@@ -934,8 +934,6 @@ bool LMenuItem::Name(const char *Txt)
 
 			// Tell the OS
 			Update();
-			
-			DeleteArray(n);
 		}
 	}
 	return Status;
