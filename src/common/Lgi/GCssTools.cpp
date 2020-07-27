@@ -1,6 +1,7 @@
 #include "Lgi.h"
 #include "GCssTools.h"
 #include "GDisplayString.h"
+#include "LgiRes.h"
 
 struct CssImageCache
 {
@@ -14,11 +15,25 @@ struct CssImageCache
 		if (i)
 			return i;
 
-		GString file = LFindFile(Uri);
-		if (!file)
+		// Check theme folder first...
+		GString File;
+		auto Res = LgiGetResObj();
+		auto ThemeFolder = Res ? Res->GetThemeFolder() : NULL;
+		if (ThemeFolder)
+		{
+			GFile::Path p = ThemeFolder;
+			p += Uri;
+			if (p.Exists())
+				File = p.GetFull();
+		}
+
+		// Then find it normally...
+		if (!File)
+			File = LFindFile(Uri);
+		if (!File)
 			return NULL;
 
-		GAutoPtr<GSurface> img(GdcD->Load(file));
+		GAutoPtr<GSurface> img(GdcD->Load(File));
 		if (!img)
 			return NULL;
 

@@ -598,7 +598,7 @@ GArray<GGraph::GGraphPair*> *GGraph::GetSelection()
 
 void GGraph::OnPaint(GSurface *pDC)
 {
-	pDC->Colour(LC_WORKSPACE, 24);
+	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle();
 
 	GRect c = GetClient();
