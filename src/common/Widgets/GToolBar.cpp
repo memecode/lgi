@@ -50,34 +50,44 @@ GImageList *LgiLoadImageList(const char *File, int x, int y)
 {
 	if (x < 0 || y < 0)
 	{
-		GString f = File;
-		GString leaf = f(f.RFind(DIR_STR)+1, -1);
-		GString width = leaf(leaf.RFind("-")+1, leaf.RFind("."));
-		ptrdiff_t sep = width.Find("x");
-		GString height = width(sep+1, -1);
-		if (sep > 0)
-			width.Length((int)sep);
-		if (x < 0 && width.Get())
-			x = (int)width.Int();
-		if (y < 0 && (width.Get() || height.Get()))
-			y = (int)(height.Get() ? height.Int() : width.Int());
+		// Detect dimensions in the filename.
+		auto leaf = GString(File).Split(DIR_STR).Last();
+		auto parts = leaf.RSplit(".", 1);
+		auto last = parts[0].Split("-").Last();
+		auto dim = last.Split("x");
+		if (dim.Length() == 1)
+		{
+			auto i = dim[0].Strip().Int();
+			if (i > 0)
+				x = y = (int)i;
+		}
+		else if (dim.Length() == 2)
+		{
+			auto X = dim[0].Strip().Int(), Y = dim[1].Strip().Int();
+			if (X > 0 && Y > 0)
+			{
+				x = (int)X;
+				y = (int)Y;
+			}
+		}
 	}		
 
 	GImageList *ImgList = 0;
 	auto Path = FileExists(File) ? GString(File) : LFindFile(File);
-	if (Path)
+	if (!Path)
 	{
-		GSurface *pDC = GdcD->Load(Path);
-		if (pDC)
-		{
-			ImgList = new GImageList(x, y, pDC);
-			DeleteObj(pDC);
-		}
-		else LgiTrace("%s:%i - Couldn't load '%s'\n", _FL, Path.Get());
+		LgiTrace("%s:%i - Couldn't find '%s'\n", _FL, File);
+		return NULL;
 	}
-	else LgiTrace("%s:%i - Couldn't find '%s'\n", _FL, File);
 
-	return ImgList;
+	GAutoPtr<GSurface> pDC(GdcD->Load(Path));
+	if (!pDC)
+	{
+		LgiTrace("%s:%i - Couldn't load '%s'\n", _FL, Path.Get());
+		return NULL;
+	}
+
+	return new GImageList(x, y, pDC);
 }
 
 GToolBar *LgiLoadToolbar(GViewI *Parent, const char *File, int x, int y)
