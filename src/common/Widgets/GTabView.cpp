@@ -87,13 +87,13 @@ public:
 	TabViewStyle Style;
 	enum ResType
 	{
-		ResWhite,
-		Res248,
-		ResSel,
+		ResWorkspace,
+		ResSelectedUnfocused,
+		ResSelectedFocused,
 		ResMax
 	};
 	GAutoPtr<GSurface> Corners[ResMax];
-	GColour cBack, cBorder, cFill;
+	GColour cBack, cBorder, cFill, cSelUnfoc, cTopEdge, cBottomEdge;
 	
 	// Scrolling
 	int Scroll;			// number of buttons scrolled off the left of the control
@@ -125,10 +125,12 @@ public:
 
 	GColour Tint(double amt)
 	{
-		// bool Darken = cBack.GetGray() >= 128;
-		GColour c(	Clamp(amt * cBack.r()),
-					Clamp(amt * cBack.g()),
-					Clamp(amt * cBack.b()));
+		auto Bk = cBack.GetGray();
+		double Ratio = Bk < 100 ? 1.0 / amt : amt;
+
+		GColour c(	Clamp((int)(Ratio * cBack.r())),
+					Clamp((int)(Ratio * cBack.g())),
+					Clamp((int)(Ratio  * cBack.b())));
 		return c;
 	}
 
@@ -155,9 +157,6 @@ public:
 		p.Circle(r, r, r);
 		p.Circle(r, r, r - 1.0);
 		p.SetFillRule(FILLRULE_ODDEVEN);
-		GColour cMed(L_MED);
-		GColour cTopEdge = Tint(203.0 / cMed.r());
-		GColour cBottomEdge = Tint(170.0 / cMed.r());
 		GBlendStop Stops[2] = {
 			{0.0, cTopEdge.c32()},
 			{1.0, cBottomEdge.c32()}
@@ -172,13 +171,12 @@ public:
 
 	void CreateCorners()
 	{
-		GAutoPtr<GSurface> &White = Corners[ResWhite];
-		GAutoPtr<GSurface> &c248 = Corners[Res248];
-		GAutoPtr<GSurface> &Sel = Corners[ResSel];
+		GAutoPtr<GSurface> &White = Corners[ResWorkspace];
+		GAutoPtr<GSurface> &Unfoc = Corners[ResSelectedUnfocused];
+		GAutoPtr<GSurface> &Sel = Corners[ResSelectedFocused];
 
-		GColour cMed(L_MED);
-		DrawCircle(White, Tint(255.0 / cMed.r()));
-		DrawCircle(c248, Tint(248.0 / cMed.r()));
+		DrawCircle(White, LColour(L_WORKSPACE));
+		DrawCircle(Unfoc, cSelUnfoc);
 		DrawCircle(Sel, cFocusBack);
 	}
 };
@@ -755,7 +753,9 @@ void GTabView::OnStyleChange()
 	{
 		GCssTools Tools(this);
 		d->cBack = Tools.GetBack();
-		printf("%p.onstyle %s\n", this, d->cBack.GetStr());
+		d->cTopEdge = d->Tint(0.845);
+		d->cBottomEdge = d->Tint(0.708);
+		d->cSelUnfoc = LColour(L_NON_FOCUS_SEL_BACK);
 
 		auto mul = pow(0.909f, 1+d->Depth); // 240->218
 		d->cBorder = d->Tint(mul);
@@ -763,14 +763,14 @@ void GTabView::OnStyleChange()
 		mul = pow(0.959f, 1+d->Depth); // 240->230
 		d->cFill = d->Tint(mul);
 
-		// LgiTrace("Tab = %s %s %s depth=%i\n", d->cBack.GetStr(), d->cBorder.GetStr(), d->cFill.GetStr(), d->Depth);
-
 		auto *Css = GetCss(true);
 		if (Css)
 		{
 			if (!Css->BackgroundColor().IsValid())
 				Css->BackgroundColor(GCss::ColorDef(d->cFill));
 		}
+
+		d->CreateCorners();
 	}
 
 	TabIterator Tabs(Children);
@@ -873,12 +873,8 @@ void GTabView::OnPaint(GSurface *pDC)
 			
 			#else
 
-				GColour cMed(L_MED);
-				GColour cTopEdge = d->Tint(203.0 / cMed.r());
-				GColour cBottomEdge = d->Tint(170.0 / cMed.r());
-				auto cBaseFill = d->Tint(255.0 / cMed.r());
-				GColour cTabFill = IsCurrent ? (Foc ? cFocusBack : d->Tint(248.0 / cMed.r())) : cBaseFill;
-				GColour cInterTabBorder = d->Tint(231.0 / cMed.r());
+				GColour cTabFill = IsCurrent ? (Foc ? cFocusBack : d->cSelUnfoc) : LColour(L_WORKSPACE);
+				GColour cInterTabBorder = d->Tint(0.9625);
 				GRect b = r;
 
 				#if MAC_DBL_BUF
@@ -893,9 +889,9 @@ void GTabView::OnPaint(GSurface *pDC)
 				}
 				#endif
 
-				d->CreateCorners();
+				// d->CreateCorners();
 
-				pDC->Colour(cTopEdge);
+				pDC->Colour(d->cTopEdge);
 				pDC->Line(b.x1, b.y1, b.x2, b.y1); // top edge
 				if (i == 0)
 				{
@@ -906,7 +902,7 @@ void GTabView::OnPaint(GSurface *pDC)
 					pDC->Colour(cInterTabBorder);
 					pDC->Line(b.x1, b.y1+1, b.x1, b.y2+1); // left edge
 				}
-				pDC->Colour(cBottomEdge);
+				pDC->Colour(d->cBottomEdge);
 				pDC->Line(b.x2, b.y2, b.x1, b.y2); // bottom edge
 				if (Last)
 				{
@@ -923,7 +919,7 @@ void GTabView::OnPaint(GSurface *pDC)
 				pDC->Rectangle(&b);
 
 				GRect Clip00(0, 0, MAC_STYLE_RADIUS-1, MAC_STYLE_RADIUS-1);
-				auto Res = IsCurrent ? (Foc ? GTabViewPrivate::ResSel : GTabViewPrivate::Res248) : GTabViewPrivate::ResWhite;
+				auto Res = IsCurrent ? (Foc ? GTabViewPrivate::ResSelectedFocused : GTabViewPrivate::ResSelectedUnfocused) : GTabViewPrivate::ResWorkspace;
 				if (First)
 				{
 					GRect Clip01 = Clip00.Move(0, r.Y() - Clip00.Y());
