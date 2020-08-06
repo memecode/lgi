@@ -146,7 +146,7 @@ public:
 
 		LNsWindow *w = objc_dynamic_cast(LNsWindow, osw.p);
 		if (w)
-			w.d = NULL;
+			[w onDelete];
 
 		osw.p.delegate = nil;
 		[osw.p autorelease];
@@ -257,6 +257,18 @@ public:
 	
 	self->ReqClose = CSClosed;
 	[self close];
+}
+
+- (void)onDelete
+{
+	// This is called during the ~GWindow destructor to make sure we
+	// closed the window
+	if (self->ReqClose != CSClosed)
+	{
+		self->ReqClose = CSClosed;
+		[self close];
+	}
+	self.d = NULL;
 }
 
 @end

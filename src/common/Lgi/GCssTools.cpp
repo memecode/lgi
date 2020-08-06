@@ -84,7 +84,7 @@ GColour &GCssTools::GetBack(GColour *Default, int Depth)
 
 		if (View)
 		{
-			Back = View->StyleColour(GCss::PropBackgroundColor, Back, Depth >= 0 ? Depth : 5);
+			Back = View->StyleColour(GCss::PropBackgroundColor, Back, Depth >= 0 ? Depth : 6);
 		}
 		else if (Css)
 		{

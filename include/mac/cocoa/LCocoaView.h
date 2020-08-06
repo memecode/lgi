@@ -106,6 +106,7 @@ LgiExtern GRect LScreenFlip(GRect r);
 - (BOOL)canBecomeKeyWindow;
 - (GWindow*)getWindow;
 - (void)onQuit;
+- (void)onDelete;
 
 @end
 

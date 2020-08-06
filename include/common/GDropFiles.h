@@ -153,7 +153,6 @@ public:
 					GXmlTree t;
 					GXmlTag r;
 					GMemStream ms(v->Value.Binary.Data, v->Value.Binary.Length, false);
-					printf("s=%s\n", s.Get());
 					if (t.Read(&r, &ms))
 					{
 						auto Arr = r.GetChildTag("array");

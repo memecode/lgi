@@ -1363,7 +1363,7 @@ int LDateTime::Compare(const LDateTime *Date) const
 	#endif
 }
 
-bool LDateTime::operator <(LDateTime &dt) const
+bool LDateTime::operator <(const LDateTime &dt) const
 {
 	if (_Year < dt._Year) return true;
 	else if (_Year > dt._Year) return false;
@@ -1389,12 +1389,12 @@ bool LDateTime::operator <(LDateTime &dt) const
 	return false;
 }
 
-bool LDateTime::operator <=(LDateTime &dt) const
+bool LDateTime::operator <=(const LDateTime &dt) const
 {
 	return !(*this > dt);
 }
 
-bool LDateTime::operator >(LDateTime &dt) const
+bool LDateTime::operator >(const LDateTime &dt) const
 {
 	if (_Year > dt._Year) return true;
 	else if (_Year < dt._Year) return false;
@@ -1420,7 +1420,7 @@ bool LDateTime::operator >(LDateTime &dt) const
 	return false;
 }
 
-bool LDateTime::operator >=(LDateTime &dt) const
+bool LDateTime::operator >=(const LDateTime &dt) const
 {
 	return !(*this < dt);
 }
@@ -1436,7 +1436,7 @@ bool LDateTime::operator ==(const LDateTime &dt) const
 			_Thousands == dt._Thousands;
 }
 
-bool LDateTime::operator !=(LDateTime &dt) const
+bool LDateTime::operator !=(const LDateTime &dt) const
 {
 	return	_Year != dt._Year ||
 			_Month != dt._Month ||
@@ -1447,14 +1447,14 @@ bool LDateTime::operator !=(LDateTime &dt) const
 			_Thousands != dt._Thousands;
 }
 
-int LDateTime::DiffMonths(LDateTime &dt)
+int LDateTime::DiffMonths(const LDateTime &dt)
 {
 	int a = (Year() * 12) + Month();
 	int b = (dt.Year() * 12) + dt.Month();
 	return b - a;
 }
 
-LDateTime LDateTime::operator -(LDateTime &dt)
+LDateTime LDateTime::operator -(const LDateTime &dt)
 {
     uint64 a, b;
     Get(a);
@@ -1485,7 +1485,7 @@ LDateTime LDateTime::operator -(LDateTime &dt)
 	return r;
 }
 
-LDateTime LDateTime::operator +(LDateTime &dt)
+LDateTime LDateTime::operator +(const LDateTime &dt)
 {
 	LDateTime s = *this;
 

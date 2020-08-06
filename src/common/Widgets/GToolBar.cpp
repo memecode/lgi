@@ -72,7 +72,6 @@ GImageList *LgiLoadImageList(const char *File, int x, int y)
 		}
 	}		
 
-	GImageList *ImgList = 0;
 	auto Path = FileExists(File) ? GString(File) : LFindFile(File);
 	if (!Path)
 	{

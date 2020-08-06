@@ -1102,10 +1102,7 @@ void SslSocket::IsBlocking(bool block)
 {
 	d->IsBlocking = block;
 	if (Bio)
-	{
-		auto r = Library->BIO_set_nbio(Bio, !d->IsBlocking);
-		// printf("%s:%i - BIO_set_nbio=%i\n", _FL, r);
-	}
+		Library->BIO_set_nbio(Bio, !d->IsBlocking);
 }
 
 bool SslSocket::IsReadable(int TimeoutMs)

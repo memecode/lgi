@@ -331,17 +331,17 @@ public:
 	bool Serialize(class GDom *Props, char *Name, bool Write);
 
 	// operators
-	bool operator <(LDateTime &dt) const;
-	bool operator <=(LDateTime &dt) const;
-	bool operator >(LDateTime &dt) const;
-	bool operator >=(LDateTime &dt) const;
+	bool operator <(const LDateTime &dt) const;
+	bool operator <=(const LDateTime &dt) const;
+	bool operator >(const LDateTime &dt) const;
+	bool operator >=(const LDateTime &dt) const;
 	bool operator ==(const LDateTime &dt) const;
-	bool operator !=(LDateTime &dt) const;
+	bool operator !=(const LDateTime &dt) const;
 	int Compare(const LDateTime *d) const;
 
-	LDateTime operator -(LDateTime &dt);
-	LDateTime operator +(LDateTime &dt);
-	int DiffMonths(LDateTime &dt);
+	LDateTime operator -(const LDateTime &dt);
+	LDateTime operator +(const LDateTime &dt);
+	int DiffMonths(const LDateTime &dt);
 
 	operator uint64()
 	{

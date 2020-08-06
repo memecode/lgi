@@ -58,6 +58,7 @@ struct LPermissions
 	union
 	{
 		uint32_t u32;
+		uint64_t u64;
 		_Win Win;
 		_Unix Unix;
 	};
