@@ -13,6 +13,38 @@ extern void BuildTabStops(GArray<GViewI*> &Stops, GViewI *v);
 
 #define DEBUG_KEYS			0
 #define DEBUG_SETFOCUS		0
+#define DEBUG_LOGGING		0
+
+#if DEBUG_LOGGING
+#define LOG(...)			printf(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
+/*
+
+Deleting a GWindow senarios:
+ 
+	Users clicks close:
+        NSWindowDelegate::windowWillClose
+            GWindowPrivate::OnClose(CloseUser)
+                LNsWindow::onDelete
+
+    Something deletes the GWindow programmatically:
+        GWindow::~GWindow
+			GWindowPriv::OnClose(CloseDestructor)
+				LNsWindow::onDelete
+					self.close
+						windowWillClose -> block
+
+	Something calls GWindow::Quit()
+		LNsWindow::onQuit (async)
+			self.close
+				NSWindowDelegate::windowWillClose
+					GWindowPrivate::OnClose(CloseUser)
+						LNsWindow::onDelete
+
+*/
 
 #if DEBUG_SETFOCUS || DEBUG_KEYS
 static GString DescribeView(GViewI *v)
@@ -133,8 +165,9 @@ public:
 		DeleteObj(EmptyMenu);
 	}
 	
-	void OnClose()
+	void OnClose(LCloseContext Ctx)
 	{
+		LOG("GWindowPrivate::OnClose %p/%s\n", Wnd, Wnd?Wnd->GetClass():NULL);
 		auto &osw = Wnd->Wnd;
 
 		if (!osw)
@@ -146,7 +179,7 @@ public:
 
 		LNsWindow *w = objc_dynamic_cast(LNsWindow, osw.p);
 		if (w)
-			[w onDelete];
+			[w onDelete:Ctx];
 
 		osw.p.delegate = nil;
 		[osw.p autorelease];
@@ -238,36 +271,48 @@ public:
 
 - (void)onQuit
 {
+	#if DEBUG_LOGGING
+	GWindow *wnd = self.d ? self.d->Wnd : NULL;
+	auto cls = wnd ? wnd->GetClass() : NULL;
+	#endif
+
+	LOG("LNsWindow::onQuit %p/%s %i\n", wnd, cls, self->ReqClose);
 	if (self->ReqClose == CSNone)
 	{
 		self->ReqClose = CSInRequest;
 		
 		if (!self.d)
-			printf("%s:%i - No priv pointer?\n", _FL);
+			LOG("%s:%i - No priv pointer?\n", _FL);
 		
 		if (!self.d ||
 			!self.d->Wnd ||
 			!self.d->Wnd->OnRequestClose(false))
 		{
+			LOG("	::onQuit %p/%s no 'd' or OnReqClose failed\n", wnd, cls);
 			self->ReqClose = CSNone;
 			return;
 		}
 	}
 	else return;
 	
+	LOG("	::onQuit %p/%s self.close\n", wnd, cls);
 	self->ReqClose = CSClosed;
 	[self close];
 }
 
-- (void)onDelete
+- (void)onDelete:(LCloseContext)ctx
 {
-	// This is called during the ~GWindow destructor to make sure we
-	// closed the window
-	if (self->ReqClose != CSClosed)
+	LOG("LNsWindow::onDelete %p/%s\n", self.d->Wnd, self.d->Wnd->GetClass());
+	
+	if (ctx == CloseDestructor && self->ReqClose != CSClosed)
 	{
+		// This is called during the ~GWindow destructor to make sure we
+		// closed the window
 		self->ReqClose = CSClosed;
+		LOG("	::onDelete %p self.close\n", self.d->Wnd);
 		[self close];
 	}
+	
 	self.d = NULL;
 }
 
@@ -315,7 +360,7 @@ public:
 {
 	LNsWindow *w = event.object;
 	if (w && w.d)
-		w.d->OnClose();
+		w.d->OnClose(CloseUser);
 }
 
 - (void)windowDidBecomeMain:(NSNotification*)event
@@ -372,11 +417,13 @@ GWindow::GWindow(OsWindow wnd) : GView(NULL)
 
 GWindow::~GWindow()
 {
+	LOG("GWindow::~GWindow %p\n", this);
 	if (LgiApp->AppWnd == this)
 		LgiApp->AppWnd = 0;
 	
 	_Delete();
-	d->OnClose();
+	d->DeleteOnClose = false; // We're already in the destructor, don't redelete.
+	d->OnClose(CloseDestructor);
 	
 	DeleteObj(Menu);
 	DeleteObj(d);

@@ -15,6 +15,13 @@ class GViewI;
 class GWindow;
 class GWindowPrivate;
 
+enum LCloseContext
+{
+	CloseNone,
+	CloseUser,
+	CloseDestructor,
+};
+
 LgiExtern GRect LScreenFlip(GRect r);
 
 #define objc_dynamic_cast(TYPE, object) \
@@ -106,7 +113,7 @@ LgiExtern GRect LScreenFlip(GRect r);
 - (BOOL)canBecomeKeyWindow;
 - (GWindow*)getWindow;
 - (void)onQuit;
-- (void)onDelete;
+- (void)onDelete:(LCloseContext)ctx;
 
 @end
 

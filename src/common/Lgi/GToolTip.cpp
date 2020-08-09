@@ -8,6 +8,17 @@
 	#include <Carbon/Carbon.h>
 #endif
 
+#if LGI_COCOA
+#define LGI_NATIVE_TIPS			1
+#endif
+
+#define DEBUG_TOOLTIPS			0
+#if DEBUG_TOOLTIPS
+#define LOG(...)				printf(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 #if LGI_NATIVE_TIPS
 #include "GDisplayString.h"
 #include "GPopup.h"
@@ -77,7 +88,9 @@ public:
 			
 					GRect w = t->Watch;
 					bool Vis = w.Overlap(m.x, m.y);					
-					// printf("Tip %s, in=%i, act=%i\n", t->GView::Name(), Vis, Active);					
+					
+					LOG("Tip %s, in=%i, act=%i\n", t->GView::Name(), Vis, Active);
+					
 					Vis = Vis && Active;
 					
 					if (Vis ^ t->Visible())
@@ -89,7 +102,7 @@ public:
 						#endif
 						t->Owner->PointToScreen(pt);
 
-						// printf("Vis(%i): r=%s pt=%i,%i->%i,%i\n", in, r.GetStr(), w.x1, w.y2, pt.x, pt.y);
+						LOG("Vis(%i): r=%s pt=%i,%i->%i,%i\n", Vis, r.GetStr(), w.x1, w.y2, pt.x, pt.y);
 						
 						r.Offset(pt.x - r.x1, pt.y - r.y1);
 						t->SetPos(r);
@@ -187,11 +200,8 @@ public:
 	~GToolTipPrivate()
 	{
 		#if LGI_NATIVE_TIPS
-		// for (NativeTip *t = Tips.First(); t; t = Tips.Next())
 		for (auto t : Tips)
-		{
 			delete t.value;
-		}
 		#endif
 	}
 };
@@ -214,7 +224,7 @@ int GToolTip::NewTip(const char *Name, GRect &Pos)
 	
 		if (ValidStr(Name) && d->Parent)
 		{
-			// printf("NewTip('%s',%s)\n", Name, Pos.Describe());
+			LOG("NewTip('%s',%s)\n", Name, Pos.Describe());
 			
 			NativeTip *t = new NativeTip(d->NextUid++, d->Parent);
 			if (t)
@@ -224,6 +234,7 @@ int GToolTip::NewTip(const char *Name, GRect &Pos)
 				
 				// This is a hack to get it to create a window...
 				t->Visible(true);
+				
 				// But not show it yet... duh...
 				t->Visible(false);
 				
