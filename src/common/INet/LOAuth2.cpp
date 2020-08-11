@@ -298,7 +298,7 @@ struct LOAuth2Priv
 		if (Svr.GetReq())
 		{
 			Token = Svr.Params.Find("code");
-			Svr.Response(Token ? "Ok: Got token." : "Error: No token.");
+			Svr.Response(Token ? "Ok: Got token. You can close this window/tab now." : "Error: No token.");
 		}
 
 		return Token != NULL;
