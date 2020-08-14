@@ -3,14 +3,17 @@
 
 class GRefCount
 {
+	#if defined(_WIN32)
+	LONG _Count;
+	#else
 	int _Count;
+	#endif
 
-protected:
+public:
     #ifdef _DEBUG
     int _GetCount() { return _Count; }
     #endif
 
-public:
 	GRefCount()
 	{
 		_Count = 0;
@@ -23,13 +26,23 @@ public:
 
 	virtual void AddRef()
 	{
-		_Count++;
+		#if defined(_WIN32)
+			InterlockedIncrement(&_Count);
+		#else
+			#error "Impl me."
+			_Count++;
+		#endif
 	}
 
 	virtual bool DecRef()
 	{
 		LgiAssert(_Count > 0);
-		if (--_Count == 0)
+		#if defined(_WIN32)
+			if (InterlockedDecrement(&_Count) == 0)
+		#else
+			#error "Impl me."
+			if (--_Count == 0)
+		#endif
 		{
 			delete this;
 			return true;

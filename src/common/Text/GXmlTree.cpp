@@ -55,13 +55,17 @@ public:
 	XmlPoolAlloc()
 	{
 		_Pools++;
-		// LgiTrace("%p::XmlPoolAlloc _Pools=%i, Refs=%i\n", this, _Pools, _GetCount());
+		#ifndef LGI_STATIC
+		// LgiTrace("%p::XmlPoolAlloc _Pools=%i, Refs=%i\n", (GXmlAlloc*)this, _Pools, _GetCount());
+		#endif
 	}
 
 	~XmlPoolAlloc()
 	{
 		_Pools--;
-		// LgiTrace("%p::~XmlPoolAlloc _Pools=%i, Refs=%i\n", this, _Pools, _GetCount());
+		#ifndef LGI_STATIC
+		// LgiStackTrace("%p::~XmlPoolAlloc _Pools=%i, Refs=%i\n", (GXmlAlloc*)this, _Pools, _GetCount());
+		#endif
 	}
 
 	void *Alloc(size_t Size)
@@ -96,11 +100,17 @@ public:
 	XmlNormalAlloc()
 	{
 		_Normals++;
+		#ifndef LGI_STATIC
+		// LgiTrace("%p::XmlNormalAlloc _Normals=%i\n", (GXmlAlloc*)this, _Normals);
+		#endif
 	}
 
 	~XmlNormalAlloc()
 	{
 		_Normals--;
+		#ifndef LGI_STATIC
+		// LgiStackTrace("%p::~XmlNormalAlloc _Normals=%i\n", (GXmlAlloc*)this, _Normals);
+		#endif
 	}
 
 	void *Alloc(size_t Size)
