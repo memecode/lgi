@@ -2482,7 +2482,10 @@ IdeDoc *AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithH
 
 	IdeDoc *Doc = File ? OpenFile(File) : GetCurrentDoc();
 	if (Doc)
+	{
 		Doc->SetLine(Line, CurIp);
+		Doc->Focus(true);
+	}
 
 	if (!WithHistory)
 		d->InHistorySeek = false;

@@ -529,7 +529,7 @@ public:
 
 	GString ToString(DefnInfo *Obj)
 	{
-		return GString(Obj->Name);
+		return Obj->Name;
 	}
 	
 	void OnSelect(DefnInfo *Obj)

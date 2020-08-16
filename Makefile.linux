@@ -289,6 +289,7 @@ GViewCommon.o : ./src/common/Lgi/GViewCommon.cpp ./include/common/Lgi.h \
 	./include/common/LgiRes.h \
 	./include/common/GEventTargetThread.h \
 	./include/common/GPopup.h \
+	./include/common/GCssTools.h \
 	./include/linux/Gtk/LgiWidget.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
@@ -540,7 +541,8 @@ Gdc2.o : ./src/linux/Gtk/Gdc2.cpp ./include/common/Lgi.h \
 
 GColour.o : ./src/common/Gdc2/GColour.cpp ./include/common/Lgi.h \
 	./include/common/GPalette.h \
-	./include/common/GSkinEngine.h
+	./include/common/GSkinEngine.h \
+	./include/common/LJson.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -819,7 +821,8 @@ GItemContainer.o : ./src/common/Widgets/GItemContainer.cpp ./include/common/Lgi.
 	./include/common/GDisplayString.h \
 	./include/common/GSkinEngine.h \
 	./include/common/GScrollBar.h \
-	./include/common/GEdit.h
+	./include/common/GEdit.h \
+	./include/common/GCssTools.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -883,6 +886,7 @@ GTabView.o : ./src/common/Widgets/GTabView.cpp ./include/common/Lgi.h \
 	./include/common/GDisplayString.h \
 	./include/common/GTableLayout.h \
 	./include/common/LgiRes.h \
+	./include/common/GCssTools.h \
 	./include/common/GPath.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
@@ -926,7 +930,8 @@ GTree.o : ./src/common/Widgets/GTree.cpp ./include/common/Lgi.h \
 	./include/common/GScrollBar.h \
 	./include/common/GDisplayString.h \
 	./include/common/GPalette.h \
-	./include/common/LgiRes.h
+	./include/common/LgiRes.h \
+	./include/common/GCssTools.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -935,7 +940,8 @@ LList.o : ./src/common/Widgets/LList.cpp ./include/common/Lgi.h \
 	./include/common/LList.h \
 	./include/common/GScrollBar.h \
 	./include/common/GDisplayString.h \
-	./include/common/LgiRes.h
+	./include/common/LgiRes.h \
+	./include/common/GCssTools.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -946,7 +952,8 @@ GCss.o : ./src/common/Lgi/GCss.cpp ./include/common/Lgi.h \
 
 GCssTools.o : ./src/common/Lgi/GCssTools.cpp ./include/common/Lgi.h \
 	./include/common/GCssTools.h \
-	./include/common/GDisplayString.h
+	./include/common/GDisplayString.h \
+	./include/common/LgiRes.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 

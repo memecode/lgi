@@ -28,6 +28,8 @@ public:
 	{
 		#if defined(_WIN32)
 			InterlockedIncrement(&_Count);
+		#elif defined(__GNUC__)
+			__sync_fetch_and_add(&_Count, 1);
 		#else
 			#error "Impl me."
 			_Count++;
@@ -39,6 +41,8 @@ public:
 		LgiAssert(_Count > 0);
 		#if defined(_WIN32)
 			if (InterlockedDecrement(&_Count) == 0)
+		#elif defined(__GNUC__)
+			if (__sync_sub_and_fetch(&_Count, 1) == 0)
 		#else
 			#error "Impl me."
 			if (--_Count == 0)
