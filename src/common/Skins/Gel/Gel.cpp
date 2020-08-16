@@ -76,7 +76,9 @@ class GelSkin : public GSkinEngine
 	GColour Tint(GColour back, double amt)
 	{
 		bool Darken = back.GetGray() >= 128;
+		auto ff = (float)(1.0f - amt);
 		GColour Mixer = Darken ? GColour::Black : GColour::White;
+		// printf("Darken=%i, Mixer=%s, back=%s %f\n", Darken, Mixer.GetStr(), back.GetStr(), ff);
 		return back.Mix(Mixer, (float)(1.0f - amt));
 	}
 
@@ -195,6 +197,7 @@ class GelSkin : public GSkinEngine
 			GColour Mid = Tint(Back, 232.0 / 240.0);
 			GColour Mid2 = Tint(Back, 222.0 / 240.0);
 			GColour Bot = Tint(Back, 255.0 / 240.0);
+			
 			if (!Enabled)
 			{
 				auto Amt = 230.0 / 240.0;

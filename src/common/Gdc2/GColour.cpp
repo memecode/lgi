@@ -30,7 +30,11 @@ GColour::GColour(uint8_t idx8, GPalette *palette)
 
 GColour::GColour(int r, int g, int b, int a)
 {
-	c32(Rgba32(r, g, b, a));
+	space = System32BitColourSpace;
+	rgb.r = limit(r, 0, 255);
+	rgb.g = limit(g, 0, 255);
+	rgb.b = limit(b, 0, 255);
+	rgb.a = limit(a, 0, 255);
 }
 
 GColour::GColour(uint32_t c, int bits, GPalette *palette)
@@ -351,11 +355,11 @@ GColour GColour::Mix(GColour Tint, float RatioOfTint) const
 	COLOUR c1 = c32();
 	COLOUR c2 = Tint.c32();
 	
-	double RatioThis = 1.0 - RatioOfTint;
+	float RatioThis = 1.0 - RatioOfTint;
 	
-	int r = (int) ((R32(c1) * RatioThis) + (R32(c2) * RatioOfTint));
-	int g = (int) ((G32(c1) * RatioThis) + (G32(c2) * RatioOfTint));
-	int b = (int) ((B32(c1) * RatioThis) + (B32(c2) * RatioOfTint));
+	int r = (int) ((RatioThis * R32(c1)) + (RatioOfTint * R32(c2)) + 0.5f);
+	int g = (int) ((RatioThis * G32(c1)) + (RatioOfTint * G32(c2)) + 0.5f);
+	int b = (int) ((RatioThis * B32(c1)) + (RatioOfTint * B32(c2)) + 0.5f);
 	int a = (int) ((RatioThis * A32(c1)) + (RatioOfTint * A32(c2)) + 0.5f);
 	
 	return GColour(r, g, b, a);
