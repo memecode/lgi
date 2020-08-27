@@ -1758,7 +1758,7 @@ GString LGetExeFile()
 			LgiMakePath(Dest, sizeof(Dest), LgiArgsAppPath, "../../..");
 			return Dest;
 		}
-		else LgiTrace("%s:%i - No executable path.");
+		else printf("%s:%i - No executable path.", _FL);
 	
 		#else
 	

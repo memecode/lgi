@@ -109,22 +109,25 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		int Result = -1;
 		
 #if LGI_COCOA
-		LCocoaAssert *ca = [[LCocoaAssert alloc] init:p.NewGStr()];
-		auto hnd = LgiApp->Handle();
-		[hnd.p performSelectorOnMainThread:@selector(assert:) withObject:ca waitUntilDone:true];
-		switch (ca.result)
-		{
-			case NSAlertFirstButtonReturn: // Debug/Break
-				Result = 2;
-				break;
-			case NSAlertSecondButtonReturn: // Ingore/Continue
-				Result = 3;
-				break;
-			case NSAlertThirdButtonReturn: // Exit/Abort
-				Result = 1;
-				break;
-		}
-		[ca release];
+        if (LgiApp)
+        {
+            LCocoaAssert *ca = [[LCocoaAssert alloc] init:p.NewGStr()];
+            auto hnd = LgiApp->Handle();
+            [hnd.p performSelectorOnMainThread:@selector(assert:) withObject:ca waitUntilDone:true];
+            switch (ca.result)
+            {
+                case NSAlertFirstButtonReturn: // Debug/Break
+                    Result = 2;
+                    break;
+                case NSAlertSecondButtonReturn: // Ingore/Continue
+                    Result = 3;
+                    break;
+                case NSAlertThirdButtonReturn: // Exit/Abort
+                    Result = 1;
+                    break;
+            }
+            [ca release];
+        }
 #else
 		GAlert a(0, "Assert Failed", Assert.Msg, "Abort", "Debug", "Ignore");
 		Result = a.DoModal();

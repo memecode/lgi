@@ -8,7 +8,7 @@ class GMemoryPool : public GMemoryPoolI
 {
 	struct Block
 	{
-		int Used, Len;
+		size_t Used, Len;
 		char *Ptr;
 
 		Block()
@@ -22,7 +22,7 @@ class GMemoryPool : public GMemoryPoolI
 			delete [] Ptr;
 		}
 
-		bool Has(int Bytes)
+		bool Has(size_t Bytes)
 		{
 			return Used + Bytes <= Len;
 		}
@@ -66,7 +66,7 @@ public:
 		Mem.Length(0);
 	}
 	
-	char *Strdup(const char *s, int len = -1)
+	char *Strdup(const char *s, ssize_t len = -1)
 	{
 		if (!s)
 			return NULL;
@@ -80,13 +80,13 @@ public:
 		return n;
 	}
 
-	char16 *StrdupW(const char16 *s, int len = -1)
+	char16 *StrdupW(const char16 *s, ssize_t len = -1)
 	{
 		if (!s)
 			return NULL;
 		if (len < 0)
 			len = StrlenW(s);
-		int bytes = len * sizeof(char16);
+		size_t bytes = len * sizeof(char16);
 		char16 *n = (char16*)Alloc(bytes + sizeof(char16));
 		if (!n)
 			return NULL;
