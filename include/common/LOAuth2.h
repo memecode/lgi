@@ -32,14 +32,9 @@ public:
 		GString Scope;
 		GUri Proxy;
 		
-		// GString AccessToken;
-		// GString RefreshToken;
-		// int ExpiresIn;
-		
 		Params()
 		{
 			Provider = None;
-			// ExpiresIn = 0;
 		}
 
 		bool IsValid()
@@ -49,12 +44,10 @@ public:
 					ClientSecret &&
 					RedirURIs &&
 					AuthUri &&
-					// RevokeUri &&
 					Scope &&
 					ApiUri;
 		}
 	};
-
 
 	LOAuth2(Params &params, const char *account, GDom *store, LCancel *cancel, GStream *log = NULL);
 	virtual ~LOAuth2();

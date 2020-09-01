@@ -136,6 +136,9 @@ public:
 	virtual LCancel *GetCancel() { return NULL; }
 	virtual void SetCancel(LCancel *c) { }
 
+	// Logging
+	virtual class GStreamI *GetLog() { return NULL; }
+
 	// Host/Port meta data
 		/// Returns the IP at this end of the socket
 		virtual bool GetLocalIp

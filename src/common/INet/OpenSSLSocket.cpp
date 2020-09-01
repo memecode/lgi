@@ -652,6 +652,11 @@ void SslSocket::SetLogger(GStreamI *logger)
 	d->Logger = logger;
 }
 
+GStreamI *SslSocket::GetLog()
+{
+	return d->Logger;
+}
+
 void SslSocket::SetSslOnConnect(bool b)
 {
 	d->SslOnConnect = b;

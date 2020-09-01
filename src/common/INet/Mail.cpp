@@ -1462,16 +1462,14 @@ bool MailSmtp::Open(GSocketI *S,
 							ConvertBinaryToBase64(Buffer, sizeof(Buffer), (uchar*)UserName, strlen(UserName));
 							strcat(Buffer, "\r\n");
 							VERIFY_RET_VAL(Write(0, true));
-							if (ReadReply("334"))
+							if (ReadReply("334") && Password)
 							{
 								ZeroObj(Buffer);
 								ConvertBinaryToBase64(Buffer, sizeof(Buffer), (uchar*)Password, strlen(Password));
 								strcat(Buffer, "\r\n");
 								VERIFY_RET_VAL(Write(0, true));
 								if (ReadReply("235"))
-								{
 									Authed = true;
-								}
 							}
 						}
 						else if (Auth.Equals("PLAIN"))
@@ -1549,7 +1547,8 @@ bool MailSmtp::Open(GSocketI *S,
 						}
 						else if (Auth.Equals("XOAUTH2"))
 						{
-							LOAuth2 Authenticator(OAuth2, UserName, SettingStore, Socket->GetCancel());
+							auto Log = dynamic_cast<GStream*>(Socket->GetLog());
+							LOAuth2 Authenticator(OAuth2, UserName, SettingStore, Socket->GetCancel(), Log);
 							auto Tok = Authenticator.GetAccessToken();
 							if (Tok)
 							{
@@ -1944,7 +1943,7 @@ bool MailSmtp::ReadReply(const char *Str, GStringPipe *Pipe, MailProtocolError *
 	bool Status = false;
 	if (Socket && Str)
 	{
-		int Pos = 0;
+		ssize_t Pos = 0;
 		char *Start = Buffer;
 		ZeroObj(Buffer);
 

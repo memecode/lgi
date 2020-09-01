@@ -293,6 +293,8 @@ struct LOAuth2Priv
 					RedirEnc.Get(),
 					Params.Scope.Get(),
 					CodeVerifier.Get());
+		if (Log)
+			Log->Print("%s:%i - Uri: %s\n", _FL, Uri.Get());
 		LgiExecute(Uri); // Open browser for user to auth
 
 		if (Svr.GetReq())
@@ -309,7 +311,7 @@ struct LOAuth2Priv
 		if (!AccessToken)
 		{
 			GStringPipe p(1024);
-			GUri u(Params.Scope);
+			GUri u(Params.ApiUri);
 			SslSocket sock(NULL, NULL, true);
 			if (!sock.Open(u.Host, HTTPS_PORT))
 			{
@@ -359,6 +361,9 @@ struct LOAuth2Priv
 			AccessToken = j.Get("access_token");
 			RefreshToken = j.Get("refresh_token");
 			ExpiresIn = j.Get("expires_in").Int();
+
+			if (!AccessToken)
+				Log->Print("Failed to get AccessToken: %s\n", Body.Get());
 		}
 
 		return AccessToken.Get() != NULL;
@@ -410,7 +415,7 @@ struct LOAuth2Priv
 			return false;
 		}
 
-		Log->Print("Body=%s\n", Body.Get());
+		Log->Print("Body=%s\n%s\n", Params.ApiUri.Get(), Body.Get());
 		LJson j(Body);
 
 		AccessToken = j.Get("access_token");
@@ -487,9 +492,10 @@ GString LOAuth2::GetAccessToken()
 	{
 		d->Log->Print("Got token.\n");
 		if (d->GetAccess())
-		{
 			return d->AccessToken;
-		}
+		else
+			d->Log->Print("No access.\n");
+			
 	}
 	else d->Log->Print("No token.\n");
 

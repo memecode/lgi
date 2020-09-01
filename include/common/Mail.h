@@ -80,7 +80,7 @@ class MailProtocolProgress
 {
 public:
 	uint64 Start;
-	int Value;
+	ssize_t Value;
 	ssize_t Range;
 
 	MailProtocolProgress()

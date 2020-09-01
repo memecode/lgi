@@ -39,6 +39,7 @@ public:
 	~SslSocket();
 
 	void SetLogger(GStreamI *logger);
+	GStreamI *GetLog();
 	void SetSslOnConnect(bool b);
 	LCancel *GetCancel();
 	void SetCancel(LCancel *c);
