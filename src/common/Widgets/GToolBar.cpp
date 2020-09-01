@@ -667,7 +667,7 @@ void GToolButton::OnPaint(GSurface *pDC)
 				IconPos.Offset((p.X() - IconPos.X()) >> 1, 0);
 			// Offset it if the button is pressed
 			if (Down)
-				IconPos.Offset(1, 1);
+				IconPos.Offset(2, 2);
 
 			// Draw any icon.
 			if (ImgIndex >= 0)
