@@ -284,15 +284,16 @@ struct LOAuth2Priv
 		CodeVerifier = ToText(SslSocket::Random(48));
 
 		GUri u(Endpoint);
-		GString Uri, Redir, RedirEnc;
+		GString Uri, Redir, RedirEnc, Scope;
 		Redir.Printf("http://localhost:%i", LOCALHOST_PORT);
+		Scope = u.Encode(Params.Scope);
 		RedirEnc = u.Encode(Redir, ":/");
-		Uri.Printf("%s?client_id=%s&redirect_uri=%s&response_type=code&scope=%s&code_challenge=%s",
+		Uri.Printf("%s?client_id=%s&redirect_uri=%s&response_type=code&code_challenge=%s&scope=%s",
 					Params.AuthUri.Get(),
 					Params.ClientID.Get(),
 					RedirEnc.Get(),
-					Params.Scope.Get(),
-					CodeVerifier.Get());
+					CodeVerifier.Get(),
+					Scope.Get());
 		if (Log)
 			Log->Print("%s:%i - Uri: %s\n", _FL, Uri.Get());
 		LgiExecute(Uri); // Open browser for user to auth
@@ -322,15 +323,18 @@ struct LOAuth2Priv
 			GString Body, Http;
 			Body.Printf("code=%s&"
 						"client_id=%s&"
-						"client_secret=%s&"
 						"redirect_uri=http://localhost:%i&"
 						"code_verifier=%s&"
 						"grant_type=authorization_code",
 						FormEncode(Token).Get(),
 						Params.ClientID.Get(),
-						Params.ClientSecret.Get(),
 						LOCALHOST_PORT,
 						FormEncode(CodeVerifier).Get());
+			if (Params.ClientSecret)
+			{
+				Body += "&client_secret=";
+				Body += Params.ClientSecret;
+			}
 
 			GUri Api(Params.ApiUri);
 			Http.Printf("POST %s HTTP/1.1\r\n"

@@ -2394,7 +2394,7 @@ bool MailPop3::ReadReply()
 	bool Status = false;
 	if (Socket)
 	{
-		int Pos = 0;
+		ssize_t Pos = 0;
 		ZeroObj(Buffer);
 		do
 		{
@@ -2738,7 +2738,7 @@ bool MailPop3::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 					// Read status line
 					ZeroObj(Buffer);
 
-					int Used = 0;
+					ssize_t Used = 0;
 					bool Ok = false;
 					bool Finished = false;
 					int64 DataPos = 0;
