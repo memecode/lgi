@@ -227,13 +227,13 @@ const char *VcCommit::GetText(int Col)
 	if (!Folder)
 	{
 		LgiAssert(0);
-		return NULL;
+		return "#nofolder";
 	}
 
 	if (!Folder->Fields.IdxCheck(Col))
 	{
 		LgiAssert(0);
-		return NULL;
+		return "#nofield";
 	}
 
 	return (char*)GetFieldText(Folder->Fields[Col]);
@@ -386,6 +386,8 @@ bool VcCommit::SvnParse(GString s)
 
 	Msg = Msg.Strip();
 	OnParse();
+	
+	LgiTrace("SvnParse %s %i %s %s %s\n", Rev.Get(), (int)Index, Author.Get(), Ts.GetDate().Get(), Msg.Get());
 
 	return Author && Rev && Ts.IsValid();
 }

@@ -237,6 +237,8 @@ public:
 	AppPriv *GetPriv() { return d; }
 	const char *GetPath() { return Path; }
 	VcLeaf *Find(const char *Path);
+	void DefaultFields();
+	void UpdateColumns();
 	const char *GetText(int Col);
 	GArray<CommitField> &GetFields() { return Fields; }
 	bool Serialize(GXmlTag *t, bool Write);

@@ -63,6 +63,7 @@ Depends =	 \
 			GSubProcess.o \
 			GXmlTreeUi.o \
 			LgiMain.o \
+			Png.o \
 			BlameUi.o \
 			DropDownBtn.o \
 			Main.o \
@@ -380,6 +381,13 @@ GXmlTreeUi.o : ../src/common/Text/GXmlTreeUi.cpp ../include/common/Lgi.h \
 
 LgiMain.o : ../src/common/Lgi/LgiMain.cpp ../include/common/Lgi.h \
 	../include/common/GToken.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
+Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/common/Lgi.h \
+	../include/common/GPalette.h \
+	../include/common/GLibraryUtils.h \
+	../include/common/GVariant.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 

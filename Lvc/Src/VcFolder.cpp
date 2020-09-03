@@ -539,6 +539,56 @@ void VcFolder::OnBranchesChange()
 	}
 }
 
+void VcFolder::DefaultFields()
+{
+	if (Fields.Length() == 0)
+	{
+		switch (GetType())
+		{
+			case VcHg:
+			{
+				Fields.Add(LGraph);
+				Fields.Add(LIndex);
+				Fields.Add(LRevision);
+				Fields.Add(LBranch);
+				Fields.Add(LAuthor);
+				Fields.Add(LTimeStamp);
+				Fields.Add(LMessage);
+				break;
+			}
+			default:
+			{
+				Fields.Add(LGraph);
+				Fields.Add(LRevision);
+				Fields.Add(LAuthor);
+				Fields.Add(LTimeStamp);
+				Fields.Add(LMessage);
+				break;
+			}
+		}
+	}
+}
+
+void VcFolder::UpdateColumns()
+{
+	d->Lst->EmptyColumns();
+
+	for (auto c: Fields)
+	{
+		switch (c)
+		{
+			case LGraph: d->Lst->AddColumn("---", 60); break;
+			case LIndex: d->Lst->AddColumn("Index", 60); break;
+			case LBranch: d->Lst->AddColumn("Branch", 60); break;
+			case LRevision: d->Lst->AddColumn("Revision", 60); break;
+			case LAuthor: d->Lst->AddColumn("Author", 240); break;
+			case LTimeStamp: d->Lst->AddColumn("Date", 130); break;
+			case LMessage: d->Lst->AddColumn("Message", 400); break;
+			default: LgiAssert(0); break;
+		}
+	}
+}
+
 void VcFolder::Select(bool b)
 {
 	#if PROFILE_FN
@@ -559,53 +609,13 @@ void VcFolder::Select(bool b)
 			return;
 
 		PROF("DefaultFields");
-		if (Fields.Length() == 0)
-		{
-			switch (GetType())
-			{
-				case VcHg:
-				{
-					Fields.Add(LGraph);
-					Fields.Add(LIndex);
-					Fields.Add(LRevision);
-					Fields.Add(LBranch);
-					Fields.Add(LAuthor);
-					Fields.Add(LTimeStamp);
-					Fields.Add(LMessage);
-					break;
-				}
-				default:
-				{
-					Fields.Add(LGraph);
-					Fields.Add(LRevision);
-					Fields.Add(LAuthor);
-					Fields.Add(LTimeStamp);
-					Fields.Add(LMessage);
-					break;
-				}
-			}
-		}
+		DefaultFields();
 
 		PROF("Type Change");
 		if (GetType() != d->PrevType)
 		{
-			d->PrevType = GetType();
-			d->Lst->EmptyColumns();
-
-			for (auto c: Fields)
-			{
-				switch (c)
-				{
-					case LGraph: d->Lst->AddColumn("---", 60); break;
-					case LIndex: d->Lst->AddColumn("Index", 60); break;
-					case LBranch: d->Lst->AddColumn("Branch", 60); break;
-					case LRevision: d->Lst->AddColumn("Revision", 60); break;
-					case LAuthor: d->Lst->AddColumn("Author", 240); break;
-					case LTimeStamp: d->Lst->AddColumn("Date", 130); break;
-					case LMessage: d->Lst->AddColumn("Message", 400); break;
-					default: LgiAssert(0); break;
-				}
-			}
+			d->PrevType = GetType();			
+			UpdateColumns();
 		}
 
 		PROF("UpdateCommitList");
@@ -1001,7 +1011,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 				GString Raw = c[i].Strip();
 				if (Rev->SvnParse(Raw))
 				{
-					if (!Map.Find(Rev->GetRev()))
+					if (File || !Map.Find(Rev->GetRev()))
 						Out->Add(Rev.Release());
 					else
 						Skipped++;
@@ -3614,8 +3624,15 @@ void VcLeaf::Select(bool b)
 
 void VcLeaf::ShowLog()
 {
-	for (auto i: Log)
-		d->Lst->Insert(i);
+	d->Log->Print("Showlog %i\n", (int)Log.Length());
+	if (Log.Length())
+	{	
+		d->Lst->Empty();
+		Parent->DefaultFields();
+		Parent->UpdateColumns();
+		for (auto i: Log)
+			d->Lst->Insert(i);
+	}
 }
 
 void VcLeaf::OnMouseClick(GMouse &m)
