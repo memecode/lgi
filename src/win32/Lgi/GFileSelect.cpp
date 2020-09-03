@@ -373,7 +373,8 @@ bool GFileSelect::OpenFolder()
 	Info.Flags &= ~OFN_ALLOWMULTISELECT;
 	Info.Flags |= OFN_NOVALIDATE;
 	Info.Flags |= OFN_NOTESTFILECREATE;
-	// Info.Flags |= OFN_PATHMUSTEXIST;
+	if (!Info.lpstrInitialDir && d->FileStr)
+		Info.lpstrInitialDir = Utf8ToWide(d->FileStr);
 	Status = GetSaveFileNameW(&Info) != 0;
 	d->AfterDlg(Info, Status);
 	
