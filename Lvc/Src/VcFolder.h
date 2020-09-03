@@ -236,6 +236,7 @@ public:
 	VersionCtrl GetType();
 	AppPriv *GetPriv() { return d; }
 	const char *GetPath() { return Path; }
+	VcLeaf *Find(const char *Path);
 	const char *GetText(int Col);
 	GArray<CommitField> &GetFields() { return Fields; }
 	bool Serialize(GXmlTag *t, bool Write);
@@ -264,6 +265,7 @@ public:
 	void GetCurrentRevision(ParseParams *Params = NULL);
 	void CountToTip();
 	bool UpdateSubs(); // Clone/checkout any sub-repositries.
+	void LogFile(const char *Path);
 
 	void OnPulse();
 	void OnUpdate(const char *Rev);
@@ -281,9 +283,12 @@ class VcLeaf : public GTreeItem
 	GTreeItem *Tmp;
 
 public:
+	GArray<VcCommit*> Log;
+
 	VcLeaf(VcFolder *parent, GTreeItem *Item, GString path, GString leaf, bool folder);
 
 	GString Full();
+	VcLeaf *Find(const char *Path);
 	void OnBrowse();
 	void AfterBrowse();
 	void OnExpand(bool b);
@@ -293,6 +298,7 @@ public:
 	bool Select();
 	void Select(bool b);
 	void OnMouseClick(GMouse &m);
+	void ShowLog();
 };
 
 #endif

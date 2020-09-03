@@ -78,6 +78,7 @@ enum AppIds
 	IDM_TERMINAL,
 	IDM_RESOLVE,
 	IDM_MERGE,
+	IDM_LOG_FILE,
 };
 
 enum VersionCtrl

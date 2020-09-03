@@ -899,6 +899,43 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 	return true;
 }
 
+void VcFolder::LogFile(const char *Path)
+{
+	GString Args;
+	
+	switch (GetType())
+	{
+		case VcGit:
+			break;
+		case VcSvn:
+		{
+			ParseParams *Params = new ParseParams(Path);
+			Args.Printf("log \"%s\"", Path);
+			IsLogging = StartCmd(Args, &VcFolder::ParseLog, Params, LogNormal);
+			break;
+		}
+		case VcHg:
+			break;
+		case VcCvs:
+			break;
+		default:
+			break;
+	}
+}
+
+VcLeaf *VcFolder::Find(const char *Path)
+{
+	VcLeaf *r = NULL;	
+	for (auto n = GetChild(); !r && n; n = n->GetNext())
+	{
+		auto l = dynamic_cast<VcLeaf*>(n);
+		if (l)
+			r = l->Find(Path);
+	}
+	
+	return r;
+}
+
 bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 {
 	LHashTbl<StrKey<char>, VcCommit*> Map;
@@ -954,6 +991,9 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 		}
 		case VcSvn:
 		{
+			VcLeaf *File = Params ? Find(Params->Str) : NULL;
+			GArray<VcCommit*> *Out = File ? &File->Log : &Log;
+		
 			GString::Array c = s.Split("------------------------------------------------------------------------");
 			for (unsigned i=0; i<c.Length(); i++)
 			{
@@ -962,7 +1002,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 				if (Rev->SvnParse(Raw))
 				{
 					if (!Map.Find(Rev->GetRev()))
-						Log.Add(Rev.Release());
+						Out->Add(Rev.Release());
 					else
 						Skipped++;
 				}
@@ -972,7 +1012,10 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 					Errors++;
 				}
 			}
-			Log.Sort(CommitRevCmp);
+			
+			Out->Sort(CommitRevCmp);
+			if (File)
+				File->ShowLog();
 			break;
 		}
 		case VcHg:
@@ -1316,9 +1359,7 @@ VcFile *VcFolder::FindFile(const char *Path)
 		{
 			auto Fn = f->GetFileName();
 			if (p.Equals(Fn))
-			{
 				return f;
-			}
 		}
 	}
 
@@ -3504,6 +3545,22 @@ void VcLeaf::AfterBrowse()
 {
 }
 
+VcLeaf *VcLeaf::Find(const char *Path)
+{
+	if (!Stricmp(Path, Full().Get()))
+		return this;
+
+	VcLeaf *r = NULL;	
+	for (auto n = GetChild(); !r && n; n = n->GetNext())
+	{
+		auto l = dynamic_cast<VcLeaf*>(n);
+		if (l)
+			r = l->Find(Path);
+	}
+	
+	return r;
+}
+
 void VcLeaf::OnExpand(bool b)
 {
 	if (Tmp && b)
@@ -3548,7 +3605,17 @@ bool VcLeaf::Select()
 void VcLeaf::Select(bool b)
 {
 	GTreeItem::Select(b);
-	if (b) OnBrowse();
+	if (b)
+	{
+		OnBrowse();
+		ShowLog();
+	}
+}
+
+void VcLeaf::ShowLog()
+{
+	for (auto i: Log)
+		d->Lst->Insert(i);
 }
 
 void VcLeaf::OnMouseClick(GMouse &m)
@@ -3567,6 +3634,7 @@ void VcLeaf::OnMouseClick(GMouse &m)
 		{
 			case IDM_LOG:
 			{
+				Parent->LogFile(Full());
 				break;
 			}
 			case IDM_BLAME:

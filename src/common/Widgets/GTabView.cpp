@@ -27,10 +27,11 @@ enum TabViewStyle
 
 #define MAC_STYLE_RADIUS		7
 #define MAC_DBL_BUF				1
-#ifdef __GTK_H__
-#define TAB_TXT_PAD				5
+
+#if defined(__GTK_H__)
+	#define TAB_TXT_PAD				2
 #else
-#define TAB_TXT_PAD				3
+	#define TAB_TXT_PAD				3
 #endif
 
 #if defined(MAC) && !LGI_COCOA && !defined(LGI_SDL)
@@ -64,7 +65,7 @@ enum TabViewStyle
 
 #endif
 
-#define TAB_MARGIN_X		12 // Px each side of the text label on the tab
+#define TAB_MARGIN_X		10 // Px each side of the text label on the tab
 #define CLOSE_BTN_SIZE		8
 #define CLOSE_BTN_GAP		8
 #define cFocusFore			LColour(L_FOCUS_SEL_FORE)
