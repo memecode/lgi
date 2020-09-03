@@ -176,6 +176,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../include/common/INet.h \
 	../include/common/INetTools.h \
 	../include/common/LCancel.h \
+	../include/common/LCurrentTime.h \
 	../include/common/LDateTime.h \
 	../include/common/LDomFields.h \
 	../include/common/LError.h \
@@ -253,6 +254,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../src/common/Lgi/GCss.cpp \
 	../src/common/Lgi/GCssTools.cpp \
 	../src/common/Lgi/GDataDlg.cpp \
+	../src/common/Lgi/GDragAndDropCommon.cpp \
 	../src/common/Lgi/GFileSelect.cpp \
 	../src/common/Lgi/GFindReplace.cpp \
 	../src/common/Lgi/GFontSelect.cpp \
@@ -352,7 +354,8 @@ GControlTree.o : ../src/common/Widgets/GControlTree.cpp ../include/common/Lgi.h 
 	../include/common/GCombo.h \
 	../include/common/GButton.h \
 	../include/common/GDisplayString.h \
-	../include/common/LgiRes.h
+	../include/common/LgiRes.h \
+	../include/common/GCssTools.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -452,6 +455,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/GDropFiles.h : ../include/common/GVariant.h \
 	../include/common/GArray.h \
+	../include/common/GXmlTree.h \
 	../include/common/GToken.h \
 	../include/common/INet.h
 
@@ -502,7 +506,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GDisplayString.h \
 	../include/common/GTableLayout.h \
 	../include/common/LgiRes.h \
-	../include/common/LStringLayout.h
+	../include/common/LStringLayout.h \
+	../include/common/GCssTools.h
 
 ../include/common/LgiWidgets.h : 
 
@@ -511,7 +516,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GLibrary.h \
 	../include/common/GLibraryUtils.h
 
-../include/common/LMutex.h : 
+../include/common/LMutex.h : ../include/common/LCurrentTime.h
 
 ../include/common/LMenu.h : ../include/common/LMenuImpl.h \
 	../include/common/GXmlTree.h \
@@ -556,7 +561,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GDisplayString.h \
 	../include/common/GSkinEngine.h \
 	../include/common/GScrollBar.h \
-	../include/common/GEdit.h
+	../include/common/GEdit.h \
+	../include/common/GCssTools.h
 
 ../src/common/Lgi/GGuiUtils.cpp : ../include/common/Lgi.h \
 	../include/common/GSkinEngine.h \
@@ -580,7 +586,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LStringLayout.h \
 	../include/common/GVariant.h \
 	../include/common/GNotifications.h \
-	../include/common/LgiRes.h
+	../include/common/LgiRes.h \
+	../include/common/GCssTools.h
 
 ../include/common/GHashTable.h : ../include/common/GMem.h \
 	../include/common/GArray.h \
@@ -697,7 +704,9 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LThreadEvent.h
 
 ../src/common/Lgi/GCssTools.cpp : ../include/common/Lgi.h \
-	../include/common/GCssTools.h
+	../include/common/GCssTools.h \
+	../include/common/GDisplayString.h \
+	../include/common/LgiRes.h
 
 ../src/common/INet/INetTools.cpp : ../include/common/GMem.h \
 	../include/linux/Gtk/LgiOsDefs.h \
@@ -779,6 +788,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LgiRes.h \
 	../include/common/GEventTargetThread.h \
 	../include/common/GPopup.h \
+	../include/common/GCssTools.h \
 	../include/linux/Gtk/LgiWidget.h
 
 ../include/linux/Gtk/LgiWidget.h : 
@@ -847,7 +857,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GDataDlg.h
 
 ../include/common/Progress.h : ../include/common/LMutex.h \
-	../include/common/LCancel.h
+	../include/common/LCancel.h \
+	../include/common/GStringClass.h
 
 ../src/common/Lgi/LgiMsg.cpp : ../include/common/Lgi.h \
 	../include/common/GTextLog.h \
@@ -876,6 +887,9 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 ../include/common/GColour.h : ../include/common/GColourSpace.h
 
 ../include/common/GColourSpace.h : 
+
+../src/common/Lgi/GDragAndDropCommon.cpp : ../include/common/Lgi.h \
+	../include/common/GDragAndDrop.h
 
 ../include/common/GClipBoard.h : 
 
@@ -943,6 +957,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/GDropFiles.h : ../include/common/GVariant.h \
 	../include/common/GArray.h \
+	../include/common/GXmlTree.h \
 	../include/common/GToken.h \
 	../include/common/INet.h
 
@@ -1018,17 +1033,21 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GDisplayString.h \
 	../include/common/GTableLayout.h \
 	../include/common/LgiRes.h \
+	../include/common/GCssTools.h \
 	../include/common/GPath.h
 
 ../include/common/GPath.h : ../include/common/GMatrix.h
 
 ../include/common/LgiInc.h : 
 
+../include/common/LCurrentTime.h : 
+
 ../include/common/LgiCommon.h : ../include/common/GMem.h \
 	../include/common/GArray.h \
 	../include/common/LgiClass.h \
 	../include/common/GString.h \
-	../include/common/GStringClass.h
+	../include/common/GStringClass.h \
+	../include/common/LCurrentTime.h
 
 ../include/common/GScrollBar.h : 
 
@@ -1104,7 +1123,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GScrollBar.h \
 	../include/common/GDisplayString.h \
 	../include/common/GPalette.h \
-	../include/common/LgiRes.h
+	../include/common/LgiRes.h \
+	../include/common/GCssTools.h
 
 ../src/common/Lgi/GLibrary.cpp : ../include/common/Lgi.h \
 	../include/common/GToken.h
@@ -1114,7 +1134,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LList.h \
 	../include/common/GScrollBar.h \
 	../include/common/GDisplayString.h \
-	../include/common/LgiRes.h
+	../include/common/LgiRes.h \
+	../include/common/GCssTools.h
 
 ../include/common/GToken.h : ../include/common/GArray.h \
 	../include/common/GString.h
@@ -1244,7 +1265,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GArray.h \
 	../include/common/LgiClass.h \
 	../include/common/GString.h \
-	../include/common/GStringClass.h
+	../include/common/GStringClass.h \
+	../include/common/LCurrentTime.h
 
 ../include/common/LThreadEvent.h : 
 
@@ -1256,7 +1278,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 ../include/common/GPassword.h : 
 
 ../include/common/Progress.h : ../include/common/LMutex.h \
-	../include/common/LCancel.h
+	../include/common/LCancel.h \
+	../include/common/GStringClass.h
 
 ../src/linux/Lgi/LThread.cpp : ../include/common/Lgi.h
 
@@ -1459,7 +1482,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GVariant.h \
 	../include/common/LOAuth2.h
 
-../include/common/LMutex.h : 
+../include/common/LMutex.h : ../include/common/LCurrentTime.h
 
 ../include/common/GRegKey.h : ../include/common/GContainers.h
 
@@ -1485,7 +1508,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GPopup.h \
 	../include/common/GDisplayString.h \
 	../include/common/GCss.h \
-	../include/common/GItemContainer.h
+	../include/common/GItemContainer.h \
+	../include/common/LUnrolledList.h
 
 ../src/common/General/GContainers.cpp : ../include/common/GMem.h \
 	../include/common/GContainers.h \
@@ -1553,7 +1577,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../src/common/Gdc2/GColour.cpp : ../include/common/Lgi.h \
 	../include/common/GPalette.h \
-	../include/common/GSkinEngine.h
+	../include/common/GSkinEngine.h \
+	../include/common/LJson.h
 
 ../src/common/Gdc2/Font/LStringLayout.cpp : ../include/common/Lgi.h \
 	../include/common/LStringLayout.h
@@ -1573,6 +1598,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LList.h \
 	../include/common/GButton.h \
 	../include/common/GPrinter.h
+
+../include/common/LCurrentTime.h : 
 
 ../include/common/GDom.h : ../include/common/LgiInterfaces.h \
 	../include/common/GMem.h \
@@ -1844,7 +1871,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GPopup.h \
 	../include/common/GDisplayString.h \
 	../include/common/GCss.h \
-	../include/common/GItemContainer.h
+	../include/common/GItemContainer.h \
+	../include/common/LUnrolledList.h
 
 ../include/common/GView.h : 
 
@@ -1926,10 +1954,10 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LHashTable.h
 
 VPATH=%.cpp \
-	../include/linux/Gtk \
-	../include/linux \
 	../include/common \
 	./Resources \
 	./Src \
+	../include/linux/Gtk \
+	../include/linux \
 	$(BuildDir)
 

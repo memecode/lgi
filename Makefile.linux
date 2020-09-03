@@ -1649,10 +1649,10 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/LHashTable.h
 
 VPATH=%.cpp \
-	./include/linux/Gtk \
-	./include/linux \
 	./src/common/Hash/sha1 \
 	./include/common \
 	./src/common/Hash/md5 \
+	./include/linux/Gtk \
+	./include/linux \
 	$(BuildDir)
 

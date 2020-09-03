@@ -41,7 +41,8 @@ VcFile::FileStatus VcFile::GetStatus()
 		else STATE("Locally Modified", 1, SModified);
 		else
 		{
-			LgiAssert(!"Impl state");
+			//LgiAssert(!"Impl state");
+			d->Log->Print("%s:%i - Unknown status '%s'\n", _FL, s);
 		}
 	}
 
@@ -131,6 +132,7 @@ void VcFile::OnMouseClick(GMouse &m)
 					break;
 			}					
 			s.AppendItem("Browse To", IDM_BROWSE);
+			s.AppendItem("Log", IDM_LOG_FILE);
 
 			int Cur = GetEol(p);
 			auto Ln = s.AppendSub("Line Endings");
@@ -192,6 +194,11 @@ void VcFile::OnMouseClick(GMouse &m)
 			case IDM_EOL_AUTO:
 			{
 				Owner->SetEol(p, Cmd);
+				break;
+			}
+			case IDM_LOG_FILE:
+			{
+				Owner->LogFile(p);
 				break;
 			}
 		}

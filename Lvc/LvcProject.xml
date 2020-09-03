@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Project>
 	<Node Name="Headers" Type="1" Platforms="15" Id="2">
-		<Node File="./Src/VcFolder.h" Type="3" Platforms="15" />
-		<Node File="./Src/VcCommit.h" Type="3" Platforms="15" />
-		<Node File="./Src/Lvc.h" Type="3" Platforms="15" />
 		<Node File="./Resources/resdefs.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Source" Type="1" Platforms="15" Id="1">
@@ -13,18 +10,22 @@
 			<Node File="../src/common/Text/GXmlTreeUi.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node File=".\Src\BlameUi.cpp" Type="2" Platforms="15" />
-		<Node File=".\Src\DropDownBtn.cpp" Type="2" Platforms="15" />
-		<Node File=".\Src\Main.cpp" Type="2" Platforms="15" />
-		<Node File=".\Src\VcCommit.cpp" Type="2" Platforms="15" />
-		<Node File=".\Src\VcFile.cpp" Type="2" Platforms="15" />
-		<Node File=".\Src\VcFolder.cpp" Type="2" Platforms="15" />
+		<Node File="./Src/BlameUi.cpp" Type="2" Platforms="15" />
+		<Node File="./Src/DropDownBtn.cpp" Type="2" Platforms="15" />
+		<Node File="./Src/Main.cpp" Type="2" Platforms="15" />
+		<Node File="./Src/VcCommit.cpp" Type="2" Platforms="15" />
+		<Node File="./Src/VcFile.cpp" Type="2" Platforms="15" />
+		<Node File="./Src/VcFile.h" Type="3" Platforms="15" />
+		<Node File="./Src/VcFolder.cpp" Type="2" Platforms="15" />
+		<Node File="./Src/VcFolder.h" Type="3" Platforms="15" />
+		<Node File="./Src/Lvc.h" Type="3" Platforms="15" />
+		<Node File="./Src/VcCommit.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" />
 	<Node Name="Resources" Type="1" Platforms="15" Id="1">
-		<Node File=".\Resources\icon32.png" Type="6" Platforms="15" />
-		<Node File=".\installer-zip.py" Type="8" Platforms="15" />
-		<Node File=".\Makefile.linux" Type="9" Platforms="15" />
+		<Node File="./Resources/icon32.png" Type="6" Platforms="15" />
+		<Node File="./installer-zip.py" Type="8" Platforms="15" />
+		<Node File="./Makefile.linux" Type="9" Platforms="15" />
 	</Node>
 	<Settings>
 		<General>
@@ -41,21 +42,12 @@
 					<Debug>.\x64Debug14\Lvc.exe</Debug>
 				</Windows>
 			</Executable>
-			<Arguments>
-				<All />
-			</Arguments>
-			<Defines>
-				<All />
-				<Windows />
-			</Defines>
-			<DebugAdmin>
-				<All>0</All>
-			</DebugAdmin>
 			<Compiler>
 				<Linux>gcc</Linux>
 			</Compiler>
-			<CCrossCompiler />
-			<CppCrossCompiler />
+			<DebugAdmin>
+				<All>0</All>
+			</DebugAdmin>
 		</General>
 		<Build>
 			<IncludePaths>
@@ -73,7 +65,6 @@
 ../include/linux/Gtk
 </Release>
 				</Linux>
-				<Windows />
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
@@ -84,10 +75,8 @@
 /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
-				<Windows />
 			</SystemIncludes>
 			<Libraries>
-				<All />
 				<Linux>
 					<Debug>magic
 -static-libgcc 
@@ -96,19 +85,10 @@
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
-				<Windows />
 			</Libraries>
-			<LibraryPaths>
-				<All />
-				<Windows />
-			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
 			</TargetType>
-			<TargetName>
-				<Windows />
-			</TargetName>
-			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -120,15 +100,7 @@
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<ShowWhiteSpace />
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
-		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Windows />
-			</PostBuildCommands>
-		</Advanced>
+		<Advanced />
 	</Settings>
 </Project>
