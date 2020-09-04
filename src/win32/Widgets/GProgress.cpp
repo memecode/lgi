@@ -26,6 +26,34 @@ GProgress::~GProgress()
 {
 }
 
+GColour GProgress::cNormal(0, 222, 0);
+GColour GProgress::cPaused(255, 222, 0);
+GColour GProgress::cError(255, 0, 0);
+
+bool GProgress::Colour(GColour Col)
+{
+	c = Col;
+	if (!_View)
+		return false;
+
+	int msg = 0;
+	if (Col == cNormal)
+		msg = PBST_NORMAL;
+	else if (Col == cPaused)
+		msg = PBST_PAUSED;
+	else if (Col == cError)
+		msg = PBST_ERROR;
+	if (!msg)
+		return false;
+	
+	return SendMessage(_View, PBM_SETSTATE, msg, 0);
+}
+
+GColour GProgress::Colour()
+{
+	return c;
+}
+
 void GProgress::SetLimits(int64 l, int64 h)
 {
 	Low = l;

@@ -11,12 +11,16 @@ class LgiClass GProgress :
 	public Progress,
 	public ResObject
 {
-	COLOUR c;
+	GColour c;
 	#ifdef WIN32
 	int Shift;
 	#endif
 
 public:
+	static GColour cNormal;
+	static GColour cPaused;
+	static GColour cError;
+
 	GProgress(int id, int x, int y, int cx, int cy, const char *name);
 	~GProgress();
 
@@ -29,14 +33,14 @@ public:
 	GMessage::Result OnEvent(GMessage *Msg);
 	bool OnLayout(GViewLayoutInfo &Inf);
 	bool Pour(GRegion &r);
+	bool Colour(GColour Col);
+	GColour Colour();
 
 	#if WINNATIVE
 	GString CssStyles(const char *CssStyle = NULL);
 	#else
 	void OnPaint(GSurface *pDC);
 	void GetLimits(int64 *l, int64 *h);
-	void Colour(COLOUR Col);
-	COLOUR Colour();
 	#endif
 };
 

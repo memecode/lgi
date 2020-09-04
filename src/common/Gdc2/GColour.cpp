@@ -355,7 +355,7 @@ GColour GColour::Mix(GColour Tint, float RatioOfTint) const
 	COLOUR c1 = c32();
 	COLOUR c2 = Tint.c32();
 	
-	float RatioThis = 1.0 - RatioOfTint;
+	float RatioThis = 1.0f - RatioOfTint;
 	
 	int r = (int) ((RatioThis * R32(c1)) + (RatioOfTint * R32(c2)) + 0.5f);
 	int g = (int) ((RatioThis * G32(c1)) + (RatioOfTint * G32(c2)) + 0.5f);
