@@ -99,7 +99,7 @@ struct AppPriv
 {
 	GTree *Tree;
 	VcFolder *CurFolder;
-	LList *Lst;
+	LList *Commits;
 	LList *Files;
 	GOptionsFile Opts;
 	GEdit *Msg;
@@ -111,7 +111,7 @@ struct AppPriv
 
 	AppPriv()  : Opts(GOptionsFile::DesktopMode, AppName)
 	{
-		Lst = NULL;
+		Commits = NULL;
 		PrevType = VcNone;
 		Tree = NULL;
 		Files = NULL;

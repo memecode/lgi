@@ -295,7 +295,7 @@ GArray<VcCommit*> AppPriv::GetRevs(GString::Array &Revs)
 {
 	GArray<VcCommit*> a;
 	
-	for (auto i = Lst->begin(); i != Lst->end(); i++)
+	for (auto i = Commits->begin(); i != Commits->end(); i++)
 	{
 		VcCommit *c = dynamic_cast<VcCommit*>(*i);
 		if (c)
@@ -561,9 +561,9 @@ public:
 			Tree->SetImageList(ImgLst, false);
 			CommitsBox->Attach(FoldersBox);
 
-			Lst = new CommitList(IDC_LIST);
-			Lst->Attach(CommitsBox);
-			Lst->GetCss(true)->Height("40%");
+			Commits = new CommitList(IDC_LIST);
+			Commits->Attach(CommitsBox);
+			Commits->GetCss(true)->Height("40%");
 
 			GBox *FilesBox = new GBox(IDC_FILES_BOX, false);
 			FilesBox->Attach(CommitsBox);
@@ -1004,8 +1004,8 @@ public:
 					{
 						int Col = -1;
 						GMouse Ms;
-						Lst->GetColumnClickInfo(Col, Ms);
-						Lst->Sort(LstCmp, Col);
+						Commits->GetColumnClickInfo(Col, Ms);
+						Commits->Sort(LstCmp, Col);
 						break;
 					}
 					case GNotifyItem_DoubleClick:
@@ -1015,7 +1015,7 @@ public:
 							break;
 
 						GArray<VcCommit*> s;
-						if (Lst->GetSelection(s) && s.Length() == 1)
+						if (Commits->GetSelection(s) && s.Length() == 1)
 							f->OnUpdate(s[0]->GetRev());
 						break;
 					}
@@ -1038,6 +1038,7 @@ int LgiMain(OsAppArguments &AppArgs)
 		a.Run();
 	}
 
+	LgiAssert(VcCommit::Instances == 0);
 	return 0;
 }
 

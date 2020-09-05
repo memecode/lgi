@@ -43,8 +43,10 @@ void VcEdge::Set(VcCommit *p, VcCommit *c)
 		Child->Edges.Add(this);
 }
 
+size_t VcCommit::Instances = 0;
 VcCommit::VcCommit(AppPriv *priv, VcFolder *folder) : Pos(32, -1)
 {
+	VcCommit::Instances++;
 	d = priv;
 	Index = -1;
 	Folder = folder;
@@ -58,6 +60,7 @@ VcCommit::~VcCommit()
 {
 	for (auto e: Edges)
 		e->Detach(this);
+	VcCommit::Instances--;
 }
 
 char *VcCommit::GetRev()

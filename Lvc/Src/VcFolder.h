@@ -232,6 +232,7 @@ class VcFolder : public GTreeItem
 public:
 	VcFolder(AppPriv *priv, const char *p);
 	VcFolder(AppPriv *priv, GXmlTag *t);
+	~VcFolder();
 
 	VersionCtrl GetType();
 	AppPriv *GetPriv() { return d; }
@@ -288,6 +289,7 @@ public:
 	GArray<VcCommit*> Log;
 
 	VcLeaf(VcFolder *parent, GTreeItem *Item, GString path, GString leaf, bool folder);
+	~VcLeaf();
 
 	GString Full();
 	VcLeaf *Find(const char *Path);

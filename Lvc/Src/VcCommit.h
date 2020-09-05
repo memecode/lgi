@@ -54,6 +54,8 @@ protected:
 	void OnParse();
 
 public:
+	static size_t Instances;
+
 	GString::Array Files;
 	GArray<VcEdge*> Edges;
 	int NodeIdx;

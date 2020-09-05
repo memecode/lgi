@@ -236,6 +236,11 @@ VcFolder::VcFolder(AppPriv *priv, GXmlTag *t)
 	Serialize(t, false);
 }
 
+VcFolder::~VcFolder()
+{
+	Log.DeleteObjects();
+}
+
 VersionCtrl VcFolder::GetType()
 {
 	if (Type == VcNone)
@@ -571,19 +576,19 @@ void VcFolder::DefaultFields()
 
 void VcFolder::UpdateColumns()
 {
-	d->Lst->EmptyColumns();
+	d->Commits->EmptyColumns();
 
 	for (auto c: Fields)
 	{
 		switch (c)
 		{
-			case LGraph: d->Lst->AddColumn("---", 60); break;
-			case LIndex: d->Lst->AddColumn("Index", 60); break;
-			case LBranch: d->Lst->AddColumn("Branch", 60); break;
-			case LRevision: d->Lst->AddColumn("Revision", 60); break;
-			case LAuthor: d->Lst->AddColumn("Author", 240); break;
-			case LTimeStamp: d->Lst->AddColumn("Date", 130); break;
-			case LMessage: d->Lst->AddColumn("Message", 400); break;
+			case LGraph: d->Commits->AddColumn("---", 60); break;
+			case LIndex: d->Commits->AddColumn("Index", 60); break;
+			case LBranch: d->Commits->AddColumn("Branch", 60); break;
+			case LRevision: d->Commits->AddColumn("Revision", 60); break;
+			case LAuthor: d->Commits->AddColumn("Author", 240); break;
+			case LTimeStamp: d->Commits->AddColumn("Date", 130); break;
+			case LMessage: d->Commits->AddColumn("Message", 400); break;
 			default: LgiAssert(0); break;
 		}
 	}
@@ -651,47 +656,47 @@ void VcFolder::Select(bool b)
 		if (GetBranches())
 			OnBranchesChange();
 
-		auto Ctrl = d->Lst->GetWindow()->GetCtrlName(IDC_FILTER);
+		auto Ctrl = d->Commits->GetWindow()->GetCtrlName(IDC_FILTER);
 		GString Filter = ValidStr(Ctrl) ? Ctrl : NULL;
 
 		if (d->CurFolder != this)
 		{
 			PROF("RemoveAll");
 			d->CurFolder = this;
-			d->Lst->RemoveAll();
+			d->Commits->RemoveAll();
 		}
 
 		PROF("Uncommit");
 		if (!Uncommit)
 			Uncommit.Reset(new UncommitedItem(d));
-		d->Lst->Insert(Uncommit, 0);
+		d->Commits->Insert(Uncommit, 0);
 
 		PROF("Log Loop");
 		int64 CurRev = Atoi(CurrentCommit.Get());
 		List<LListItem> Ls;
-		for (unsigned i=0; i<Log.Length(); i++)
+		for (auto l: Log)
 		{
 			if (CurrentCommit &&
-				Log[i]->GetRev())
+				l->GetRev())
 			{
 				switch (GetType())
 				{
 					case VcSvn:
 					{
-						int64 LogRev = Atoi(Log[i]->GetRev());
+						int64 LogRev = Atoi(l->GetRev());
 						if (CurRev >= 0 && CurRev >= LogRev)
 						{
 							CurRev = -1;
-							Log[i]->SetCurrent(true);
+							l->SetCurrent(true);
 						}
 						else
 						{
-							Log[i]->SetCurrent(false);
+							l->SetCurrent(false);
 						}
 						break;
 					}
 					default:
-						Log[i]->SetCurrent(!_stricmp(CurrentCommit, Log[i]->GetRev()));
+						l->SetCurrent(!_stricmp(CurrentCommit, l->GetRev()));
 						break;
 				}
 			}
@@ -699,70 +704,70 @@ void VcFolder::Select(bool b)
 			bool Add = !Filter;
 			if (Filter)
 			{
-				const char *s = Log[i]->GetRev();
+				const char *s = l->GetRev();
 				if (s && strstr(s, Filter) != NULL)
 					Add = true;
 
-				s = Log[i]->GetAuthor();
+				s = l->GetAuthor();
 				if (s && stristr(s, Filter) != NULL)
 					Add = true;
 				
-				s = Log[i]->GetMsg();
+				s = l->GetMsg();
 				if (s && stristr(s, Filter) != NULL)
 					Add = true;
 				
 			}
 
-			LList *CurOwner = Log[i]->GetList();
+			LList *CurOwner = l->GetList();
 			if (Add ^ (CurOwner != NULL))
 			{
 				if (Add)
-					Ls.Insert(Log[i]);
+					Ls.Insert(l);
 				else
-					d->Lst->Remove(Log[i]);
+					d->Commits->Remove(l);
 			}
 		}
 
 		PROF("Ls Ins");
-		d->Lst->Insert(Ls);
+		d->Commits->Insert(Ls);
 		if (d->Resort >= 0)
 		{
 			PROF("Resort");
-			d->Lst->Sort(LstCmp, d->Resort);
+			d->Commits->Sort(LstCmp, d->Resort);
 			d->Resort = -1;
 		}
 
 		PROF("ColSizing");
 		if (GetType() == VcHg)
 		{
-			if (d->Lst->GetColumns() >= 7)
+			if (d->Commits->GetColumns() >= 7)
 			{
 				int i = 0;
-				d->Lst->ColumnAt(i++)->Width(60); // LGraph
-				d->Lst->ColumnAt(i++)->Width(40); // LIndex
-				d->Lst->ColumnAt(i++)->Width(100); // LRevision
-				d->Lst->ColumnAt(i++)->Width(60); // LBranch
-				d->Lst->ColumnAt(i++)->Width(240); // LAuthor
-				d->Lst->ColumnAt(i++)->Width(130); // LTimeStamp
-				d->Lst->ColumnAt(i++)->Width(400); // LMessage
+				d->Commits->ColumnAt(i++)->Width(60); // LGraph
+				d->Commits->ColumnAt(i++)->Width(40); // LIndex
+				d->Commits->ColumnAt(i++)->Width(100); // LRevision
+				d->Commits->ColumnAt(i++)->Width(60); // LBranch
+				d->Commits->ColumnAt(i++)->Width(240); // LAuthor
+				d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
+				d->Commits->ColumnAt(i++)->Width(400); // LMessage
 			}
 		}
 		else
 		{
-			if (d->Lst->GetColumns() >= 5)
+			if (d->Commits->GetColumns() >= 5)
 			{
 				// This is too slow, over 2 seconds for Lgi
 				// d->Lst->ResizeColumnsToContent();
-				d->Lst->ColumnAt(0)->Width(40); // LGraph
-				d->Lst->ColumnAt(1)->Width(270); // LRevision
-				d->Lst->ColumnAt(2)->Width(240); // LAuthor
-				d->Lst->ColumnAt(3)->Width(130); // LTimeStamp
-				d->Lst->ColumnAt(4)->Width(400); // LMessage
+				d->Commits->ColumnAt(0)->Width(40); // LGraph
+				d->Commits->ColumnAt(1)->Width(270); // LRevision
+				d->Commits->ColumnAt(2)->Width(240); // LAuthor
+				d->Commits->ColumnAt(3)->Width(130); // LTimeStamp
+				d->Commits->ColumnAt(4)->Width(400); // LMessage
 			}
 		}
 
 		PROF("UpdateAll");
-		d->Lst->UpdateAllItems();
+		d->Commits->UpdateAllItems();
 
 		PROF("GetCur");
 		GetCurrentRevision();
@@ -915,20 +920,22 @@ void VcFolder::LogFile(const char *Path)
 	
 	switch (GetType())
 	{
-		case VcGit:
-			break;
 		case VcSvn:
+		case VcHg:
 		{
 			ParseParams *Params = new ParseParams(Path);
 			Args.Printf("log \"%s\"", Path);
 			IsLogging = StartCmd(Args, &VcFolder::ParseLog, Params, LogNormal);
 			break;
 		}
-		case VcHg:
+		/*
+		case VcGit:
 			break;
 		case VcCvs:
 			break;
+		*/
 		default:
+			LgiAssert(!"Impl me.");
 			break;
 	}
 }
@@ -953,6 +960,9 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 		Map.Add((*pc)->GetRev(), *pc);
 
 	int Skipped = 0, Errors = 0;
+	VcLeaf *File = Params ? Find(Params->Str) : NULL;
+	GArray<VcCommit*> *Out = File ? &File->Log : &Log;
+
 	switch (GetType())
 	{
 		case VcGit:
@@ -986,7 +996,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 				if (Rev->GitParse(c[i], false))
 				{
 					if (!Map.Find(Rev->GetRev()))
-						Log.Add(Rev.Release());
+						Out->Add(Rev.Release());
 					else
 						Skipped++;
 				}
@@ -996,14 +1006,12 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 					Errors++;
 				}
 			}
-			Log.Sort(CommitDateCmp);
+			
+			Out->Sort(CommitDateCmp);
 			break;
 		}
 		case VcSvn:
 		{
-			VcLeaf *File = Params ? Find(Params->Str) : NULL;
-			GArray<VcCommit*> *Out = File ? &File->Log : &Log;
-		
 			GString::Array c = s.Split("------------------------------------------------------------------------");
 			for (unsigned i=0; i<c.Length(); i++)
 			{
@@ -1024,8 +1032,6 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 			}
 			
 			Out->Sort(CommitRevCmp);
-			if (File)
-				File->ShowLog();
 			break;
 		}
 		case VcHg:
@@ -1037,31 +1043,37 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 				GAutoPtr<VcCommit> Rev(new VcCommit(d, this));
 				if (Rev->HgParse(*Commit))
 				{
-					auto Existing = Map.Find(Rev->GetRev());
+					auto Existing = File ? false : Map.Find(Rev->GetRev());
 					if (!Existing)
-						Log.Add(Existing = Rev.Release());
+						Out->Add(Existing = Rev.Release());
 					if (Existing->GetIndex() >= 0)
 						Idx.Add(Existing->GetIndex(), Existing);
 				}
 			}
 
-			// Patch all the trivial parents...
-			for (auto c: Log)
+			if (!File)
 			{
-				if (c->GetParents()->Length() > 0)
-					continue;
+				// Patch all the trivial parents...
+				for (auto c: Log)
+				{
+					if (c->GetParents()->Length() > 0)
+						continue;
 
-				auto CIdx = c->GetIndex();
-				if (CIdx <= 0)
-					continue;
+					auto CIdx = c->GetIndex();
+					if (CIdx <= 0)
+						continue;
 
-				auto Par = Idx.Find(CIdx - 1);
-				if (Par)
-					c->GetParents()->Add(Par->GetRev());
+					auto Par = Idx.Find(CIdx - 1);
+					if (Par)
+						c->GetParents()->Add(Par->GetRev());
+				}
 			}
 
-			Log.Sort(CommitIndexCmp);
-			LinkParents();
+			Out->Sort(CommitIndexCmp);
+			
+			if (!File)
+				LinkParents();
+
 			d->Resort = 1;
 			break;
 		}
@@ -1132,7 +1144,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 									if (!Cc)
 									{
 										Map.Add(Ts, Cc = new VcCommit(d, this));
-										Log.Add(Cc);
+										Out->Add(Cc);
 										Cc->CvsParse(Dt, Author, Msg);
 									}
 									Cc->Files.Add(File.Get());
@@ -1150,6 +1162,9 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 			LgiAssert(!"Impl me.");
 			break;
 	}
+
+	if (File)
+		File->ShowLog();
 
 	// LgiTrace("%s:%i - ParseLog: Skip=%i, Error=%i\n", _FL, Skipped, Errors);
 	IsLogging = false;
@@ -1807,7 +1822,7 @@ void VcFolder::OnRemove()
 		if (GTreeItem::Select())
 		{
 			d->Files->Empty();
-			d->Lst->Empty();
+			d->Commits->Empty();
 		}
 
 		for (auto c: t->Children)
@@ -2328,6 +2343,13 @@ bool VcFolder::ParseUpdateSubs(int Result, GString s, ParseParams *Params)
 
 void VcFolder::FolderStatus(const char *Path, VcLeaf *Notify)
 {
+	GFile::Path FilePath(Path);
+	if (!FilePath.IsFolder())
+	{
+		LgiAssert(!"Needs to be a folder.");
+		return;
+	}
+
 	if (GTreeItem::Select())
 		d->ClearFiles();
 
@@ -3520,6 +3542,11 @@ VcLeaf::VcLeaf(VcFolder *parent, GTreeItem *Item, GString path, GString leaf, bo
 	}
 }
 
+VcLeaf::~VcLeaf()
+{
+	Log.DeleteObjects();
+}
+
 GString VcLeaf::Full()
 {
 	GFile::Path p(Path);
@@ -3548,7 +3575,8 @@ void VcLeaf::OnBrowse()
 		}
 	}
 	Files->ResizeColumnsToContent();
-	Parent->FolderStatus(full, this);
+	if (Folder)
+		Parent->FolderStatus(full, this);
 }
 
 void VcLeaf::AfterBrowse()
@@ -3617,6 +3645,7 @@ void VcLeaf::Select(bool b)
 	GTreeItem::Select(b);
 	if (b)
 	{
+		d->Commits->RemoveAll();
 		OnBrowse();
 		ShowLog();
 	}
@@ -3624,14 +3653,13 @@ void VcLeaf::Select(bool b)
 
 void VcLeaf::ShowLog()
 {
-	d->Log->Print("Showlog %i\n", (int)Log.Length());
 	if (Log.Length())
 	{	
-		d->Lst->Empty();
+		d->Commits->RemoveAll();
 		Parent->DefaultFields();
 		Parent->UpdateColumns();
 		for (auto i: Log)
-			d->Lst->Insert(i);
+			d->Commits->Insert(i);
 	}
 }
 
