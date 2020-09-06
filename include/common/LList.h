@@ -120,7 +120,7 @@ public:
 	const char *GetText
 	(
 		/// The index of the column.
-		int i
+		int i = 0
 	)	override;
 
 	/// Get the icon index to display in the '0th' column. The image list is stored in

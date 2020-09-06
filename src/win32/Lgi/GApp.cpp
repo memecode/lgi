@@ -702,7 +702,7 @@ void GApp::OnCommandLine()
 	if (ValidStr(CmdLine))
 	{
 		// LgiTrace("CmdLine='%s'\n", CmdLine);
-		GArray<char*> Files;
+		GArray<const char*> Files;
 		
 		char *Delim = "\'\"";
 		char *s;
@@ -762,7 +762,7 @@ void GApp::OnUrl(const char *Url)
 		AppWnd->OnUrl(Url);
 }
 
-void GApp::OnReceiveFiles(GArray<char*> &Files)
+void GApp::OnReceiveFiles(GArray<const char*> &Files)
 {
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);

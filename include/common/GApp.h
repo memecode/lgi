@@ -212,7 +212,7 @@ public:
 	void OnCommandLine();
 	
 	/// Event called to process files dropped on the application
-	void OnReceiveFiles(GArray<char*> &Files);
+	void OnReceiveFiles(GArray<const char*> &Files);
 
 	/// Event called to process URLs given to the application
 	void OnUrl(const char *Url);

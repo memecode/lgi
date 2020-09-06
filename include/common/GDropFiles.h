@@ -14,7 +14,7 @@
 LgiFunc bool LMacFileToPath(GAutoString &a);
 #endif
 
-class GDropFiles : public GArray<char*>
+class GDropFiles : public GArray<const char*>
 {
 	GString Fmt;
 

@@ -260,7 +260,7 @@ public:
 	virtual void OnCommandLine() = 0;
 	
 	/// Event called to process files dropped on the application
-	virtual void OnReceiveFiles(GArray<char*> &Files) = 0;
+	virtual void OnReceiveFiles(GArray<const char*> &Files) = 0;
 
 	/// Event called to process URLs given to the application
 	virtual void OnUrl(const char *Url) = 0;

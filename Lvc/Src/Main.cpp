@@ -680,7 +680,7 @@ public:
 		Opts.SerializeFile(true);
 	}
 
-	void OnReceiveFiles(GArray<char*> &Files)
+	void OnReceiveFiles(GArray<const char*> &Files)
 	{
 		for (auto f : Files)
 		{

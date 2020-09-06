@@ -1015,7 +1015,7 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 			HDROP hDrop = (HDROP) Msg->a;
 			if (hDrop)
 			{
-				GArray<char*> FileNames;
+				GArray<const char*> FileNames;
 				int Count = 0;
 				
 				Count = DragQueryFileW(hDrop, -1, NULL, 0);

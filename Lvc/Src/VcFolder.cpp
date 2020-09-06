@@ -2343,11 +2343,14 @@ bool VcFolder::ParseUpdateSubs(int Result, GString s, ParseParams *Params)
 
 void VcFolder::FolderStatus(const char *Path, VcLeaf *Notify)
 {
-	GFile::Path FilePath(Path);
-	if (!FilePath.IsFolder())
+	if (Path)
 	{
-		LgiAssert(!"Needs to be a folder.");
-		return;
+		GFile::Path FilePath(Path);
+		if (!FilePath.IsFolder())
+		{
+			LgiAssert(!"Needs to be a folder.");
+			return;
+		}
 	}
 
 	if (GTreeItem::Select())
