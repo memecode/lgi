@@ -26,6 +26,8 @@
 #define IDC_UP						101
 #define IDC_DOWN					102
 
+#define DEBUG_OVERLAY				0
+
 // Name mapping table
 class LgiObjectName
 {
@@ -203,7 +205,7 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////
-void DrawGoobers(GSurface *pDC, GRect &r, GRect *Goobers, GColour c)
+void DrawGoobers(GSurface *pDC, GRect &r, GRect *Goobers, GColour c, int OverIdx)
 {
 	int Mx = (r.x2 + r.x1) / 2 - (GOOBER_SIZE / 2);
 	int My = (r.y2 + r.y1) / 2 - (GOOBER_SIZE / 2);
@@ -252,7 +254,10 @@ void DrawGoobers(GSurface *pDC, GRect &r, GRect *Goobers, GColour c)
 
 	for (int i=0; i<8; i++)
 	{
-		pDC->Box(Goobers+i);
+		if (OverIdx == i)
+			pDC->Rectangle(Goobers+i);
+		else
+			pDC->Box(Goobers+i);
 	}
 }
 
@@ -272,7 +277,8 @@ ResDialogCtrl::ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, GXmlTag *load) 
 	Client.ZOff(-1, -1);
 	SelectMode = SelNone;
 	SelectStart.ZOff(-1, -1);
-
+	OverGoober = -1;
+	
 	if (load)
 	{
 		// Base a string off the xml
@@ -642,6 +648,29 @@ void ResDialogCtrl::OnPaint(GSurface *pDC)
 	}
 }
 
+GMouse ResDialogCtrl::MapToDialog(GMouse m)
+{
+	// Convert co-ords from out own local space to be relative to 'Dlg'
+	// the parent dialog.
+	GMouse Ms = m;
+	GViewI *Parent;
+	for (GViewI *i = View(); i && i != (GViewI*)Dlg; i = Parent)
+	{
+		Parent = i->GetParent();
+		GRect Pos = i->GetPos(), Cli = i->GetClient(false);
+
+		#if DEBUG_OVERLAY
+		LgiTrace("%s %i,%i + %i,%i + %i,%i = %i,%i\n",
+			i->GetClass(),
+			Ms.x, Ms.y, Pos.x1, Pos.y1, Cli.x1, Cli.y1, Ms.x + Pos.x1 + Cli.x1, Ms.y + Pos.y1 + Cli.y1);
+		#endif
+		Ms.x += Pos.x1 + Cli.x1;
+		Ms.y += Pos.y1 + Cli.y1;
+
+	}
+	return Ms;
+}
+
 void ResDialogCtrl::OnMouseClick(GMouse &m)
 {
 	if (m.Down())
@@ -651,24 +680,33 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 			// LgiTrace("Click down=%i %i,%i\n", m.Down(), m.x, m.y);
 			if (Dlg)
 			{
+				#if DEBUG_OVERLAY
+				GdcPt2 Prev(0, 0);
+				auto &DebugOverlay = Dlg->DebugOverlay;
+				if (!DebugOverlay)
+				{
+					DebugOverlay.Reset(new GMemDC(Dlg->X(), Dlg->Y(), System32BitColourSpace));
+					DebugOverlay->Colour(0, 32);
+					DebugOverlay->Rectangle();
+					DebugOverlay->Colour(GColour(64, 192, 64));
+				}
+				#endif
+
 				bool Processed = false;
 				GRect c = View()->GetClient();
 				bool ClickedThis = c.Overlap(m.x, m.y);
 
 				// Convert co-ords from out own local space to be relative to 'Dlg'
 				// the parent dialog.
-				GMouse Ms = m;
-				GdcPt2 Off;
-				GViewI *Parent;
-				for (GViewI *i = View(); i && i != (GViewI*)Dlg; i = Parent)
+				GMouse Ms = MapToDialog(m);
+				#if DEBUG_OVERLAY
+				if (DebugOverlay)
 				{
-					Parent = i->GetParent();
-					GRect Pos = i->GetPos(), Cli;
-					if (Parent)
-						Cli = Parent->GetClient(false);
-					Ms.x += Pos.x1 + Cli.x1;
-					Ms.y += Pos.y1 + Cli.y1;
+					DebugOverlay->Line(Prev.x, Prev.y, Ms.x, Ms.y);
+					DebugOverlay->Circle(Ms.x, Ms.y, 5);
+					Prev.x = Ms.x; Prev.y = Ms.y;
 				}
+				#endif
 				Dlg->OnMouseClick(Ms);
 
 				if (ClickedThis &&
@@ -850,6 +888,12 @@ void ResDialogCtrl::OnMouseMove(GMouse &m)
 		Old.Size(-1, -1);
 
 		View()->Invalidate(&Old);
+	}
+
+	if (Dlg)
+	{
+		GMouse Ms = MapToDialog(m);
+		Dlg->OnMouseMove(Ms);
 	}
 	
 	// Move some ctrl(s)
@@ -3445,7 +3489,7 @@ void ResDialog::DrawSelection(GSurface *pDC)
 		GRect r = Ctrl->AbsPos();
 		GColour s(255, 0, 0);
 		GColour c = GetParent()->Focus() ? s : s.Mix(LColour(L_MED), 0.4);
-		DrawGoobers(pDC, r, Ctrl->Goobers, c);
+		DrawGoobers(pDC, r, Ctrl->Goobers, c, Ctrl->OverGoober);
 	}
 }
 
@@ -3480,10 +3524,15 @@ void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 		#endif
 		
 		DrawSelection(pDC);
-
 		#ifndef WIN32
 		pDC->SetClient(NULL);
 		#endif
+
+		if (DebugOverlay)
+		{
+			pDC->Op(GDC_ALPHA);
+			pDC->Blt(0, 0, DebugOverlay);
+		}
 	}
 }
 
@@ -3578,12 +3627,13 @@ void ResDialog::OnMouseClick(GMouse &m)
 					{
 						DragGoober = i;
 						DragCtrl = c;
-						// LgiTrace("IN goober[%i]=%s %i,%i\n", i, c->Goobers[i].GetStr(), m.x, m.y);
+						
+						LgiTrace("IN goober[%i]=%s %i,%i\n", i, c->Goobers[i].GetStr(), m.x, m.y);
 						break;
 					}
 					else
 					{
-						// LgiTrace("goober[%i]=%s %i,%i\n", i, c->Goobers[i].GetStr(), m.x, m.y);
+						LgiTrace("goober[%i]=%s %i,%i\n", i, c->Goobers[i].GetStr(), m.x, m.y);
 					}
 				}
 			}
@@ -3648,16 +3698,29 @@ void ResDialog::OnMouseClick(GMouse &m)
 
 void ResDialog::OnMouseMove(GMouse &m)
 {
+	// This code hilights the goober when the mouse is over it.
+	for (auto c: Selection)
+	{
+		int Old = c->OverGoober;
+		c->OverGoober = -1;
+		for (int i=0; i<8; i++)
+		{
+			if (c->Goobers[i].Overlap(m.x, m.y))
+			{
+				c->OverGoober = i;
+				break;
+			}
+		}
+		if (c->OverGoober != Old)
+			Invalidate();
+	}
+
 	if (DragGoober >= 0)
 	{
 		if (DragX)
-		{
 			*DragX = m.x - DragOx;
-		}
 		if (DragY)
-		{
 			*DragY = m.y - DragOy;
-		}
 
 		// DragRgn in real coords
 		GRect Old = DragCtrl->View()->GetPos();
@@ -3665,9 +3728,7 @@ void ResDialog::OnMouseMove(GMouse &m)
 		
 		GAutoPtr<GViewIterator> It(IterateViews());
 		if (DragCtrl->View() != It->First())
-		{
 			SnapRect(&New, DragCtrl->ParentCtrl());
-		}
 
 		// New now in snapped coords
 		

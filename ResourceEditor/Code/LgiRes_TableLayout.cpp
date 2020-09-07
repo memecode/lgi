@@ -24,6 +24,8 @@ enum Cmds
 	IDM_INSERT_COL,
 };
 
+static GColour Blue(0, 30, 222);
+
 /////////////////////////////////////////////////////////////////////
 struct Pair { int Pos, Size; };
 void CalcCell(GArray<Pair> &p, GArray<double> &s, int Total)
@@ -331,10 +333,79 @@ public:
 	}
 };
 
-class CellJoin : public GRect
+enum HandleTypes
 {
-public:
+	LAddCol,
+	LAddRow,
+	LDeleteCol,
+	LDeleteRow,
+	LSizeCol,
+	LSizeRow,
+	LJoinCells,
+};
+
+struct OpHandle : public GRect
+{
+	bool Over;
+	HandleTypes Type;
+	int Index;
 	ResTableCell *a, *b;
+
+	OpHandle &Set(HandleTypes type, int x = -1, int y = -1)
+	{
+		Type = type;
+		Over = false;
+		Index = -1;
+		a = b = NULL;
+		if (x > 0 && y > 0)
+			ZOff(x, y);
+		return *this;
+	}
+
+	void OnPaint(GSurface *pDC)
+	{
+		#define OFF			1
+		int cx = X() >> 1;
+		int cy = Y() >> 1;
+
+		pDC->Colour(Over ? GColour::Red : Blue);
+		pDC->Rectangle(this);
+
+		pDC->Colour(GColour::White);
+		switch (Type)
+		{
+			case LSizeRow:
+			{
+				pDC->Line(x1 + cx, y1 + OFF, x1 + cx, y2 - OFF);
+				pDC->Line(x1 + cx - 1, y1 + OFF + 1, x1 + cx + 1, y1 + OFF + 1);
+				pDC->Line(x1 + cx - 1, y2 - OFF - 1, x1 + cx + 1, y2 - OFF - 1);
+				break;
+			}
+			case LSizeCol:
+			{
+				pDC->Line(x1 + OFF, y1 + cy, x2 - OFF, y1 + cy);
+				pDC->Line(x1 + OFF + 1, y1 + cy - 1, x1 + OFF + 1, y1 + cy + 1);
+				pDC->Line(x2 - OFF - 1, y1 + cy - 1, x2 - OFF - 1, y1 + cy + 1);
+				break;
+			}
+			case LAddCol:
+			case LAddRow:
+			case LJoinCells:
+			{
+				pDC->Line(x1 + cx, y1 + OFF, x1 + cx, y2 - OFF);
+				pDC->Line(x1 + OFF, y1 + cy, x2 - OFF, y1 + cy);
+				break;
+			}
+			case LDeleteCol:
+			case LDeleteRow:
+			{
+				pDC->Line(x1 + OFF, y1 + cy, x2 - OFF, y1 + cy);
+				break;
+			}
+			default:
+				LgiAssert(!"Impl me.");
+		}
+	}
 };
 
 class CtrlTablePrivate
@@ -351,12 +422,7 @@ public:
 	GArray<double> RowSize;
 
 	// Goobers for editing the cell layout
-	GRect AddX, AddY;
-	GArray<GRect> DelCol;
-	GArray<GRect> DelRow;
-	GArray<GRect> SizeRow;
-	GArray<GRect> SizeCol;
-	GArray<CellJoin> JoinBtns;
+	GArray<OpHandle> Handles;
 
 	int DragRowSize;
 	int DragColSize;
@@ -411,21 +477,18 @@ public:
 		#define ADD_BORDER		10
 		#define CELL_SPACING	1
 
+		Handles.Length(0);
+
 		int x, y;
 		int BtnSize = ADD_BORDER * 2 / 3;
-		AddX.ZOff(BtnSize, BtnSize);
-		AddY.ZOff(BtnSize, BtnSize);
+		auto &AddX = Handles.New().Set(LAddCol, BtnSize, BtnSize);
+		auto &AddY = Handles.New().Set(LAddRow, BtnSize, BtnSize);
 		int BtnX = c.X() - AddX.X() - 2;
 		int BtnY = c.Y() - AddY.Y() - 2;
 		AddX.Offset(BtnX, 0);
 		AddY.Offset(0, BtnY);
 		c.x2 = AddX.x2 - ADD_BORDER;
 		c.y2 = AddY.y2 - ADD_BORDER;
-		DelCol.Length(0);
-		DelRow.Length(0);
-		SizeRow.Length(0);
-		SizeCol.Length(0);
-		JoinBtns.Length(0);
 
 		if (c.Valid())
 		{
@@ -439,25 +502,29 @@ public:
 
 			for (x=0; x<CellX; x++)
 			{
-				DelCol[x].ZOff(BtnSize, BtnSize);
-				DelCol[x].Offset(XPair[x].Pos + (XPair[x].Size / 2), BtnY);
+				auto &DelCol = Handles.New().Set(LDeleteCol, BtnSize, BtnSize);
+				DelCol.Index = x;
+				DelCol.Offset(XPair[x].Pos + (XPair[x].Size / 2), BtnY);
 
 				if (x < CellX - 1)
 				{
-					SizeCol[x].ZOff(BtnSize+4, BtnSize-2);
-					SizeCol[x].Offset(XPair[x+1].Pos - (SizeCol[x].X() / 2) - 1, BtnY);
+					auto &SizeCol = Handles.New().Set(LSizeCol, BtnSize+4, BtnSize-2);
+					SizeCol.Index = x;
+					SizeCol.Offset(XPair[x+1].Pos - (SizeCol.X() / 2) - 1, BtnY);
 				}
 			}
 
 			for (y=0; y<CellY; y++)
 			{
-				DelRow[y].ZOff(BtnSize, BtnSize);
-				DelRow[y].Offset(BtnX, YPair[y].Pos + (YPair[y].Size / 2));
+				auto &DelRow = Handles.New().Set(LDeleteRow, BtnSize, BtnSize);
+				DelRow.Index = y;
+				DelRow.Offset(BtnX, YPair[y].Pos + (YPair[y].Size / 2));
 
 				if (y < CellY - 1)
 				{
-					SizeRow[y].ZOff(BtnSize-2, BtnSize+4);
-					SizeRow[y].Offset(BtnX, YPair[y+1].Pos - (SizeRow[y].Y() / 2) - 1);
+					auto &SizeRow = Handles.New().Set(LSizeRow, BtnSize-2, BtnSize+4);
+					SizeRow.Index = y;
+					SizeRow.Offset(BtnX, YPair[y+1].Pos - (SizeRow.Y() / 2) - 1);
 				}
 			}
 
@@ -493,21 +560,19 @@ public:
 								ResTableCell *c = GetCellAt(x + Cell->Cell.X(), y);
 								if (c && c->Selected)
 								{
-									CellJoin *j = &JoinBtns[JoinBtns.Length()];
-									j->a = Cell;
-									j->b = c;
-									j->ZOff(BtnSize, BtnSize);
-									j->Offset(Cell->Pos.x2 - (j->X()>>1), Cell->Pos.y1 + ((Cell->Pos.Y()-j->Y()) >> 1));
+									auto &j = Handles.New().Set(LJoinCells, BtnSize, BtnSize);
+									j.a = Cell;
+									j.b = c;
+									j.Offset(Cell->Pos.x2 - (j.X()>>1), Cell->Pos.y1 + ((Cell->Pos.Y()-j.Y()) >> 1));
 								}
 
 								c = GetCellAt(x, y + Cell->Cell.Y());
 								if (c && c->Selected)
 								{
-									CellJoin *j = &JoinBtns[JoinBtns.Length()];
-									j->a = Cell;
-									j->b = c;
-									j->ZOff(BtnSize, BtnSize);
-									j->Offset(Cell->Pos.x1 + ((Cell->Pos.X()-j->X()) >> 1), Cell->Pos.y2 - (j->Y()>>1));
+									auto &j = Handles.New().Set(LJoinCells, BtnSize, BtnSize);
+									j.a = Cell;
+									j.b = c;
+									j.Offset(Cell->Pos.x1 + ((Cell->Pos.X()-j.X()) >> 1), Cell->Pos.y2 - (j.Y()>>1));
 								}
 							}
 						}
@@ -523,51 +588,10 @@ public:
 		}
 	}
 
-	void DrawBtn(GSurface *pDC, GRect &r, char Btn)
-	{
-		#define OFF			1
-
-		pDC->Rectangle(&r);
-
-		int cx = r.X() >> 1;
-		int cy = r.Y() >> 1;
-
-		GColour Old = pDC->Colour(L_WHITE);
-		switch (Btn)
-		{
-			case '|':
-			{
-				pDC->Line(r.x1 + cx, r.y1 + OFF, r.x1 + cx, r.y2 - OFF);
-				pDC->Line(r.x1 + cx - 1, r.y1 + OFF + 1, r.x1 + cx + 1, r.y1 + OFF + 1);
-				pDC->Line(r.x1 + cx - 1, r.y2 - OFF - 1, r.x1 + cx + 1, r.y2 - OFF - 1);
-				break;
-			}
-			case '_':
-			{
-				pDC->Line(r.x1 + OFF, r.y1 + cy, r.x2 - OFF, r.y1 + cy);
-				pDC->Line(r.x1 + OFF + 1, r.y1 + cy - 1, r.x1 + OFF + 1, r.y1 + cy + 1);
-				pDC->Line(r.x2 - OFF - 1, r.y1 + cy - 1, r.x2 - OFF - 1, r.y1 + cy + 1);
-				break;
-			}
-			case '+':
-			{
-				pDC->Line(r.x1 + cx, r.y1 + OFF, r.x1 + cx, r.y2 - OFF);
-				pDC->Line(r.x1 + OFF, r.y1 + cy, r.x2 - OFF, r.y1 + cy);
-				break;
-			}
-			case '-':
-			{
-				pDC->Line(r.x1 + OFF, r.y1 + cy, r.x2 - OFF, r.y1 + cy);
-				break;
-			}
-		}
-
-		pDC->Colour(Old);
-	}
-
 	bool DeleteCol(int x)
 	{
 		bool Status = false;
+		int OldCellX = CellX;
 
 		// Delete column 'x'
 		for (int y=0; y<CellY; )
@@ -599,7 +623,7 @@ public:
 		}
 
 		// Move down all the columns after 'x'
-		for (x++; x<DelCol.Length(); x++)
+		for (x++; x<OldCellX; x++)
 		{
 			for (int y=0; y<CellY; y++)
 			{
@@ -615,6 +639,7 @@ public:
 			}
 		}
 
+		Handles.Length(0);
 		return Status;
 	}
 
@@ -622,6 +647,7 @@ public:
 	{
 		bool Status = false;
 		int x;
+		int OldCellY = CellY;
 
 		// Delete row 'y'
 		for (x=0; x<CellX; )
@@ -654,7 +680,7 @@ public:
 		}
 
 		// Move down all the rows after 'y'
-		for (y++; y<DelRow.Length(); y++)
+		for (y++; y<OldCellY; y++)
 		{
 			for (int x=0; x<CellX; x++)
 			{
@@ -670,6 +696,7 @@ public:
 			}
 		}
 
+		Handles.Length(0);
 		return Status;
 	}
 
@@ -962,13 +989,19 @@ void CtrlTable::Layout()
 	d->Layout(GetClient());
 }
 
+void CtrlTable::OnPosChange()
+{
+	Layout();
+}
+
 void CtrlTable::OnPaint(GSurface *pDC)
 {
 	int i;
-	GColour Blue(0, 30, 222);
 	Client.Set(0, 0, X()-1, Y()-1);
 
-	d->Layout(GetClient());
+	if (d->Handles.Length() == 0)
+		d->Layout(GetClient());
+	
 	pDC->Colour(Blue);
 	for (i=0; i<d->Cells.Length(); i++)
 	{
@@ -1001,29 +1034,8 @@ void CtrlTable::OnPaint(GSurface *pDC)
 		}
 	}
 
-	pDC->Colour(Blue);
-	d->DrawBtn(pDC, d->AddX, '+');
-	d->DrawBtn(pDC, d->AddY, '+');
-	for (i=0; i<d->DelCol.Length(); i++)
-	{
-		d->DrawBtn(pDC, d->DelCol[i], '-');
-	}
-	for (i=0; i<d->DelRow.Length(); i++)
-	{
-		d->DrawBtn(pDC, d->DelRow[i], '-');
-	}
-	for (i=0; i<d->SizeCol.Length(); i++)
-	{
-		d->DrawBtn(pDC, d->SizeCol[i], '_');
-	}
-	for (i=0; i<d->SizeRow.Length(); i++)
-	{
-		d->DrawBtn(pDC, d->SizeRow[i], '|');
-	}
-	for (i=0; i<d->JoinBtns.Length(); i++)
-	{
-		d->DrawBtn(pDC, d->JoinBtns[i], '+');
-	}
+	for (auto &h: d->Handles)
+		h.OnPaint(pDC);
 
 	#if DRAW_TABLE_SIZE
 	SysFont->Colour(Blue, 24);
@@ -1038,21 +1050,43 @@ void CtrlTable::OnPaint(GSurface *pDC)
 
 void CtrlTable::OnMouseMove(GMouse &m)
 {
+	bool Change = false;
+	for (auto &h: d->Handles)
+	{
+		bool Over = h.Overlap(m.x, m.y);
+		if (Over != h.Over)
+		{
+			h.Over = Over;
+			Change = true;
+		}
+	}
+	if (Change)
+		Invalidate();
+
 	if (IsCapturing())
 	{
 		GArray<Pair> p;
 
+		int Fudge = 6;
 		if (d->DragRowSize >= 0)
 		{
 			// Adjust RowSize[d->DragRowSize] and RowSize[d->DragRowSize+1] to
 			// center on the mouse y location
 			int AvailY = GetClient().Y();
-			double Total = d->RowSize[d->DragRowSize] + d->RowSize[d->DragRowSize+1];
 			CalcCell(p, d->RowSize, AvailY);
-			int y = m.y - p[d->DragRowSize].Pos;
-			double fy = (double) y / AvailY;
-			d->RowSize[d->DragRowSize] = fy;
-			d->RowSize[d->DragRowSize+1] = Total - fy;
+			
+			int BothPx = p[d->DragRowSize].Size + p[d->DragRowSize+1].Size;
+			int PxOffset = m.y - p[d->DragRowSize].Pos + Fudge;
+			PxOffset = limit(PxOffset, 2, BothPx - 2);
+
+			double Frac = (double) PxOffset / BothPx;
+			double Total = d->RowSize[d->DragRowSize] + d->RowSize[d->DragRowSize+1];
+
+			d->RowSize[d->DragRowSize] = Frac * Total;
+			d->RowSize[d->DragRowSize+1] = (1.0 - Frac) * Total;
+
+			LgiTrace("Int: %i/%i, Frac: %f,%f\n", PxOffset, BothPx, d->RowSize[d->DragRowSize], d->RowSize[d->DragRowSize+1]);
+
 			Layout();
 			Invalidate();
 			return;
@@ -1062,12 +1096,18 @@ void CtrlTable::OnMouseMove(GMouse &m)
 			// Adjust ColSize[d->DragColSize] and ColSize[d->DragColSize+1] to
 			// center on the mouse x location
 			int AvailX = GetClient().X();
-			double Total = d->ColSize[d->DragColSize] + d->ColSize[d->DragColSize+1];
 			CalcCell(p, d->ColSize, AvailX);
-			int x = m.x - p[d->DragColSize].Pos;
-			double fx = (double) x / AvailX;
-			d->ColSize[d->DragColSize] = fx;
-			d->ColSize[d->DragColSize+1] = Total - fx;
+
+			int BothPx = p[d->DragColSize].Size + p[d->DragColSize+1].Size;
+			int PxOffset = m.x - p[d->DragColSize].Pos + Fudge;
+			PxOffset = limit(PxOffset, 2, BothPx - 2);
+
+			double Frac = (double) PxOffset / BothPx;
+			double Total = d->ColSize[d->DragColSize] + d->ColSize[d->DragColSize+1];
+
+			d->ColSize[d->DragColSize] = Frac * Total;
+			d->ColSize[d->DragColSize+1] = (1.0 - Frac) * Total;
+
 			Layout();
 			Invalidate();
 			return;
@@ -1242,43 +1282,47 @@ void CtrlTable::OnMouseClick(GMouse &m)
 	{
 		if (m.Left())
 		{
-			if (d->AddX.Overlap(m.x, m.y))
+			OpHandle *h = NULL;
+			for (auto &i: d->Handles)
 			{
-				int i;
-				for (i=0; i<d->CellY; i++)
+				if (i.Overlap(m.x, m.y))
 				{
-					d->Cells.Add(new ResTableCell(this, d->CellX, i));
+					h = &i;
+					break;
 				}
+			}
+
+			if (h && h->Type == LAddCol)
+			{
+				for (int i=0; i<d->CellY; i++)
+					d->Cells.Add(new ResTableCell(this, d->CellX, i));
 				d->CellX++;
 
 				double Last = d->ColSize[d->ColSize.Length()-1];
 				d->ColSize.Add(Last);
-				for (i=0; i<d->ColSize.Length(); i++)
-				{
+				for (int i=0; i<d->ColSize.Length(); i++)
 					d->ColSize[i] = d->ColSize[i] / (1.0 + Last);
-				}
 
+				Layout();
 				Invalidate();
 				return;
 			}
-			else if (d->AddY.Overlap(m.x, m.y))
+			else if (h && h->Type == LAddRow)
 			{
-				int i;
-				for (i=0; i<d->CellX; i++)
-				{
+				for (int i=0; i<d->CellX; i++)
 					d->Cells.Add(new ResTableCell(this, i, d->CellY));
-				}
 				d->CellY++;
 
 				double Total = 0;
 				double Last = d->RowSize[d->RowSize.Length()-1];
 				d->RowSize.Add(Last);
-				for (i=0; i<d->RowSize.Length(); i++)
+				for (int i=0; i<d->RowSize.Length(); i++)
 				{
 					d->RowSize[i] = d->RowSize[i] / (1.0 + Last);
 					Total += d->RowSize[i];
 				}
 
+				Layout();
 				Invalidate();
 				return;
 			}
@@ -1290,32 +1334,28 @@ void CtrlTable::OnMouseClick(GMouse &m)
 				ResTableCell *Over = 0;
 
 				// Look at cell joins
-				for (i=0; i<d->JoinBtns.Length(); i++)
+				if (h && h->Type == LJoinCells)
 				{
-					CellJoin *j = &d->JoinBtns[i];
-					if (j->Overlap(m.x, m.y))
-					{
-						// Do a cell merge
-						GRect u = j->a->Cell;
-						u.Union(&j->b->Cell);
+					// Do a cell merge
+					GRect u = h->a->Cell;
+					u.Union(&h->b->Cell);
 
-						d->Cells.Delete(j->a);
-						for (int y=u.y1; y<=u.y2; y++)
+					d->Cells.Delete(h->a);
+					for (int y=u.y1; y<=u.y2; y++)
+					{
+						for (int x=u.x1; x<=u.x2; x++)
 						{
-							for (int x=u.x1; x<=u.x2; x++)
+							ResTableCell *c = d->GetCellAt(x, y);
+							if (c)
 							{
-								ResTableCell *c = d->GetCellAt(x, y);
-								if (c)
-								{
-									d->Cells.Delete(c);
-									DeleteObj(c);
-								}
+								d->Cells.Delete(c);
+								DeleteObj(c);
 							}
 						}
-						j->a->Cell = u;
-						d->Cells.Add(j->a);
-						Dirty = true;
 					}
+					h->a->Cell = u;
+					d->Cells.Add(h->a);
+					Dirty = true;
 				}
 
 				if (!Dirty)
@@ -1347,54 +1387,27 @@ void CtrlTable::OnMouseClick(GMouse &m)
 				}
 
 				// Delete column goobers
-				for (int x=0; x<d->DelCol.Length(); x++)
-				{
-					if (d->DelCol[x].Overlap(m.x, m.y))
-					{
-						if ((Dirty = d->DeleteCol(x)))
-						{
-							break;
-						}
-					}
-				}
+				if (h && h->Type == LDeleteCol)
+					Dirty = d->DeleteCol(h->Index);
+
 				// Delete row goobers
-				for (int y=0; y<d->DelRow.Length(); y++)
-				{
-					if (d->DelRow[y].Overlap(m.x, m.y))
-					{
-						if ((Dirty = d->DeleteRow(y)))
-						{
-							break;
-						}
-					}
-				}
+				if (!Dirty && h && h->Type == LDeleteRow)
+					Dirty = d->DeleteRow(h->Index);
 
 				// Size row goobs
-				if (!Dirty)
+				if (!Dirty && h && h->Type == LSizeRow)
 				{
-					for (int i=0; i<d->SizeRow.Length(); i++)
-					{
-						if ((Dirty = d->SizeRow[i].Overlap(m.x, m.y)))
-						{
-							d->DragRowSize = i;
-							Capture(true);
-							break;
-						}
-					}
+					Dirty = true;
+					d->DragRowSize = h->Index;
+					Capture(true);
 				}
 
 				// Size col goobs
-				if (!Dirty)
+				if (!Dirty && h && h->Type == LSizeCol)
 				{
-					for (int i=0; i<d->SizeCol.Length(); i++)
-					{
-						if ((Dirty = d->SizeCol[i].Overlap(m.x, m.y)))
-						{
-							d->DragColSize = i;
-							Capture(true);
-							break;
-						}
-					}
+					Dirty = true;
+					d->DragColSize = h->Index;
+					Capture(true);
 				}
 
 				if (Dirty)
@@ -1405,7 +1418,7 @@ void CtrlTable::OnMouseClick(GMouse &m)
 				}
 			}
 		}
-		else if (m.Right())
+		else if (m.IsContextMenu())
 		{
 			for (int i=0; i<d->Cells.Length(); i++)
 			{

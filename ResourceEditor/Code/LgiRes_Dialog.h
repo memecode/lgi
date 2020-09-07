@@ -78,6 +78,7 @@ protected:
 	char *GetRefText();
 
 	GRect Goobers[8];
+	int OverGoober;
 
 	ResDialog *Dlg;
 	GRect Title;
@@ -94,6 +95,8 @@ protected:
 	bool Vis;
 	GAutoString CssClass;
 	GAutoString CssStyle;
+
+	GMouse MapToDialog(GMouse m);
 
 public:
 	typedef GAutoPtr<GViewIterator> ChildIterator;
@@ -162,6 +165,8 @@ protected:
 	void DrawSelection(GSurface *pDC);
 
 public:
+	GAutoPtr<GSurface> DebugOverlay;
+
 	ResDialog(AppWnd *w, int type = TYPE_DIALOG);
 	~ResDialog();
 	void Create(GXmlTag *load, SerialiseContext *Ctx) override;
@@ -299,6 +304,7 @@ public:
 	void InsertCol(int x);
 	void InsertRow(int y);
 	void EnumCtrls(List<ResDialogCtrl> &Ctrls);
+	void OnPosChange();
 
 	bool GetVariant(const char *Name, GVariant &Value, char *Array = 0);
 	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
