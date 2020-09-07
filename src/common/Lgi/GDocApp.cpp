@@ -601,9 +601,9 @@ OptionsFmt *GDocApp<OptionsFmt>::GetOptions()
 }
 
 template <typename OptionsFmt>
-void GDocApp<OptionsFmt>::OnReceiveFiles(GArray<char*> &Files)
+void GDocApp<OptionsFmt>::OnReceiveFiles(GArray<const char*> &Files)
 {
-	char *f = Files.Length() ? Files[0] : 0;
+	const char *f = Files.Length() ? Files[0] : 0;
 	if (f && _OpenFile(f, false))
 	{
 		GMru::AddFile(f);

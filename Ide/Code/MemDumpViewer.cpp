@@ -122,7 +122,7 @@ class DumpView : public GWindow
 	GEdit *Ed;
 
 public:
-	DumpView(AppWnd *app, char *file)
+	DumpView(AppWnd *app, const char *file)
 	{
 		App = app;
 		Name("Memory Dump Viewer");
@@ -378,7 +378,7 @@ public:
 	}
 };
 
-void NewMemDumpViewer(AppWnd *App, char *File)
+void NewMemDumpViewer(AppWnd *App, const char *File)
 {
 	new DumpView(App, File);
 }

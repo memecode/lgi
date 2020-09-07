@@ -1691,9 +1691,9 @@ ResStringGroup *AppWnd::GetDialogSymbols()
 	return NULL;
 }
 
-void AppWnd::OnReceiveFiles(GArray<char*> &Files)
+void AppWnd::OnReceiveFiles(GArray<const char*> &Files)
 {
-	char *f = Files.Length() ? Files[0] : 0;
+	auto f = Files.Length() ? Files[0] : 0;
 	if (f)
 	{
 		_OpenFile(f, false);

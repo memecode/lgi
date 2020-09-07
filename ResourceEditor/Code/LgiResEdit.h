@@ -777,7 +777,7 @@ public:
 	int OnNotify(GViewI *Ctrl, int Flags);
 	GMessage::Result OnEvent(GMessage *m);
 	int OnCommand(int Cmd, int Event, OsView Handle);
-	void OnReceiveFiles(GArray<char*> &Files);
+	void OnReceiveFiles(GArray<const char*> &Files);
 	void OnCreate();
 };
 

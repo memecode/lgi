@@ -45,7 +45,7 @@ public:
 	GHostFunc *GetCommands() { return NULL; }
 	void SetEngine(GScriptEngine *Eng) { Engine = Eng; }
 
-	void OnReceiveFiles(GArray<char*> &Files)
+	void OnReceiveFiles(GArray<const char*> &Files)
 	{
 		for (int i=0; i<Files.Length(); i++)
 		{

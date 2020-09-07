@@ -1936,13 +1936,13 @@ public:
 	}
 };
 
-void AppWnd::OnReceiveFiles(GArray<char*> &Files)
+void AppWnd::OnReceiveFiles(GArray<const char*> &Files)
 {
 	for (int i=0; i<Files.Length(); i++)
 	{
-		char *f = Files[i];
+		auto f = Files[i];
 		
-		char *ext = LgiGetExtension(f);
+		auto ext = LgiGetExtension(f);
 		if (ext && !stricmp(ext, "mem"))
 		{
 			NewMemDumpViewer(this, f);

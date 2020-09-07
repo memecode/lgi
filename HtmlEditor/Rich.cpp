@@ -693,7 +693,7 @@ public:
 		return 0;
 	}
 	
-	void OnReceiveFiles(GArray<char*> &Files)
+	void OnReceiveFiles(GArray<const char*> &Files)
 	{
 		if (Edit && Files.Length() > 0)
 		{

@@ -259,7 +259,7 @@ public:
 	void OnFixBuildErrors();
 	void OnBuildStateChanged(bool NewState);
 	void UpdateState(int Debugging = -1, int Building = -1);
-	void OnReceiveFiles(GArray<char*> &Files) override;
+	void OnReceiveFiles(GArray<const char*> &Files) override;
 	int GetBuildMode();
 	GTree *GetTree();
 	GOptionsFile *GetOptions();
@@ -299,7 +299,7 @@ public:
 #include "IdeProject.h"
 #include "FindInFiles.h"
 
-extern void NewMemDumpViewer(AppWnd *App, char *file = 0);
+extern void NewMemDumpViewer(AppWnd *App, const char *file = 0);
 extern void NewProjectFromTemplate(GViewI *parent);
 
 class SysCharSupport : public GWindow

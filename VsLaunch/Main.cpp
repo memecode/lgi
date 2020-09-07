@@ -74,7 +74,7 @@ public:
 		Visible(true);
 	}
     
-	void OnReceiveFiles(GArray<char*> &Files)
+	void OnReceiveFiles(GArray<const char*> &Files)
 	{
 		Log->Print("Got %i files...\n", Files.Length());
 		for (unsigned i=0; i<Files.Length(); i++)
