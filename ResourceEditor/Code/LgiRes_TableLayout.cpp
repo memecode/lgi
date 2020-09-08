@@ -639,7 +639,7 @@ public:
 			}
 		}
 
-		Handles.Length(0);
+		Table->Layout();
 		return Status;
 	}
 
@@ -696,7 +696,7 @@ public:
 			}
 		}
 
-		Handles.Length(0);
+		Table->Layout();
 		return Status;
 	}
 
@@ -1210,6 +1210,7 @@ void CtrlTable::InsertRow(int y)
 	}
 
 	// Refresh the screen
+	Layout();
 	Invalidate();
 }
 
@@ -1246,6 +1247,7 @@ void CtrlTable::InsertCol(int x)
 	}
 
 	// Refresh the screen
+	Layout();
 	Invalidate();
 }
 
@@ -1272,6 +1274,7 @@ void CtrlTable::UnMerge(ResTableCell *Cell)
 		Cell->Cell.x2 = Cell->Cell.x1;
 		Cell->Cell.y2 = Cell->Cell.y1;
 
+		Layout();
 		Invalidate();
 	}
 }

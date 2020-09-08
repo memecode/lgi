@@ -76,40 +76,21 @@ public:
 	};
 
 protected:
-	GString Exe;
-	GArray<char*> Args;
-	GString InitialFolder;
-	bool NewGroup;
+	struct GSubProcessPriv *d;
+	friend struct GSubProcessPriv;
 	
 	struct Variable
 	{
 		GString Var, Val;
 	};
-	bool EnvironmentChanged;
-	GArray<Variable> Environment;
-	uint32_t ErrorCode;
-
-	PipeHandle ExternIn, ExternOut;
 
 	Variable *GetEnvVar(const char *Var, bool Create = false);
-
-	ProcessId ChildPid;
-	#if defined(POSIX)
-		Pipe Io;
-		int ExitValue; // was uint32
-		bool Dupe(PipeHandle Old, PipeHandle New);
-	#elif defined(WIN32)
-		HANDLE ChildHnd;
-		DWORD ExitValue;
-		Pipe ChildOutput, ChildInput;
-		bool Dupe(PipeHandle Old, PipeHandle &New);
-	#endif
-
+	bool Dupe(PipeHandle Old, PipeHandle New);
 	GSubProcess *Parent, *Child;
 
 public:
 	// Object
-	GSubProcess(const char *exe, const char *args = NULL);	
+	GSubProcess(const char *exe, const char *args = NULL, bool pseudoConsole = false);
 	~GSubProcess();
 
 	// Environment
@@ -125,9 +106,9 @@ public:
 	void SetStdout(PipeHandle Hnd);
 
 	// Process lifecycle
-	bool GetNewGroup() { return NewGroup; }
-	void SetNewGroup(bool ng) { NewGroup = ng; }
-	ProcessId Handle() { return ChildPid; }
+	bool GetNewGroup();
+	void SetNewGroup(bool ng);
+	ProcessId Handle();
 	bool IsRunning();
 	uint32_t GetErrorCode();
 	int32 GetExitValue();

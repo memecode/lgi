@@ -36,12 +36,12 @@
 #define DEBUG_ARGS				0
 
 #if defined(WIN32)
-#define NULL_PIPE NULL
-#define ClosePipe CloseHandle
+	#define NULL_PIPE NULL
+	#define ClosePipe CloseHandle
 #else
-#define NULL_PIPE -1
-#define ClosePipe close
-#define INVALID_PID -1
+	#define NULL_PIPE -1
+	#define ClosePipe close
+	#define INVALID_PID -1
 #endif
 
 GSubProcess::Pipe::Pipe()
@@ -105,25 +105,63 @@ char *ArgTok(const char *&s)
 	}
 }
 
-GSubProcess::GSubProcess(const char *exe, const char *args)
+struct GSubProcessPriv
 {
-	#if defined(POSIX)
-	ChildPid = INVALID_PID;
-	ExitValue = -1;
-	#elif defined(WIN32)
-	ChildPid = NULL;
-	ChildHnd = NULL;
-	ExitValue = 0;
-	#endif
-	NewGroup = true;
-	ErrorCode = 0;
-	Parent = Child = NULL;
-	Exe = exe;
-	Args.Add(NewStr(Exe));
-	EnvironmentChanged = false;
+	GString Exe;
+	GString InitialFolder;
+	GArray<char*> Args;
+	bool NewGroup;
+	bool PseudoConsole;
 
-	ExternIn = NULL_PIPE;
-	ExternOut = NULL_PIPE;
+	bool EnvironmentChanged;
+	GArray<GSubProcess::Variable> Environment;
+	uint32_t ErrorCode;
+
+	GSubProcess::PipeHandle ExternIn, ExternOut;
+	GSubProcess::ProcessId ChildPid;
+
+	#if defined(POSIX)
+		Pipe Io;
+		int ExitValue; // was uint32
+	#elif defined(WIN32)
+		HANDLE ChildHnd;
+		DWORD ExitValue;
+		GSubProcess::Pipe ChildOutput, ChildInput;
+		HPCON hConsole;
+	#endif
+
+	GSubProcessPriv()
+	{
+		NewGroup = true;
+		ErrorCode = 0;
+		EnvironmentChanged = false;
+		ExternIn = NULL_PIPE;
+		ExternOut = NULL_PIPE;
+
+		#if defined(POSIX)
+			ChildPid = INVALID_PID;
+			ExitValue = -1;
+		#elif defined(WIN32)
+			ChildPid = NULL;
+			ChildHnd = NULL;
+			ExitValue = 0;
+			hConsole = NULL;
+		#endif
+	}
+
+	~GSubProcessPriv()
+	{
+		Args.DeleteArrays();
+	}
+};
+
+GSubProcess::GSubProcess(const char *exe, const char *args, bool pseudoConsole)
+{
+	d = new GSubProcessPriv();
+	d->PseudoConsole = pseudoConsole;
+	Parent = Child = NULL;
+	d->Exe = exe;
+	d->Args.Add(NewStr(d->Exe));
 
 	#if DEBUG_SUBPROCESS
 	LgiTrace("%s:%i - %p::GSubProcess('%s','%s')\n", _FL, this, exe, args);
@@ -132,7 +170,7 @@ GSubProcess::GSubProcess(const char *exe, const char *args)
 	char *s;
 	while ((s = ArgTok(args)))
 	{
-		Args.Add(s);
+		d->Args.Add(s);
 		#if DEBUG_ARGS
 		LgiTrace("a='%s'\n", s);
 		#endif
@@ -144,7 +182,6 @@ GSubProcess::~GSubProcess()
 	#if defined(POSIX)
 	Io.Close();
 	#endif
-	Args.DeleteArrays();
 	if (Child)
 	{
 		LgiAssert(Child->Parent == this);
@@ -155,15 +192,31 @@ GSubProcess::~GSubProcess()
 		LgiAssert(Parent->Child == this);
 		Parent->Child = NULL;
 	}
+	DeleteObj(d);
 }
 
 #ifndef WINDOWS
 extern char **environ;
 #endif
 
+bool GSubProcess::GetNewGroup()
+{
+	return d->NewGroup;
+}
+
+void GSubProcess::SetNewGroup(bool ng)
+{
+	d->NewGroup = ng;
+}
+
+GSubProcess::ProcessId GSubProcess::Handle()
+{
+	return d->ChildPid;
+}
+
 GSubProcess::Variable *GSubProcess::GetEnvVar(const char *Var, bool Create)
 {
-	if (Environment.Length() == 0)
+	if (d->Environment.Length() == 0)
 	{
 		// Read all variables in
 		#ifdef WINDOWS
@@ -180,7 +233,7 @@ GSubProcess::Variable *GSubProcess::GetEnvVar(const char *Var, bool Create)
 				ptrdiff_t NameChars = eq - s;
 				if (NameChars > 0)
 				{					
-					Variable &v = Environment.New();
+					Variable &v = d->Environment.New();
 					v.Var.SetW(s, eq - s);
 					eq++;
 					v.Val.SetW(eq);
@@ -206,17 +259,15 @@ GSubProcess::Variable *GSubProcess::GetEnvVar(const char *Var, bool Create)
 		#endif
 	}
 	
-	for (unsigned i=0; i<Environment.Length(); i++)
+	for (unsigned i=0; i<d->Environment.Length(); i++)
 	{
-		if (Environment[i].Var.Equals(Var))
-		{
-			return &Environment[i];
-		}
+		if (d->Environment[i].Var.Equals(Var))
+			return &d->Environment[i];
 	}
 	
 	if (Create)
 	{
-		Variable &v = Environment.New();
+		Variable &v = d->Environment.New();
 		v.Var = Var;
 		return &v;
 	}
@@ -224,22 +275,20 @@ GSubProcess::Variable *GSubProcess::GetEnvVar(const char *Var, bool Create)
 	return NULL;
 }
 
-#if defined(POSIX)
 bool GSubProcess::Dupe(PipeHandle Old, PipeHandle New)
 {
-	while ((dup2(Old, New) == -1) && (errno == EINTR))
-		;
-
-	return true;
+	#if defined(POSIX)
+		while ((dup2(Old, New) == -1) && (errno == EINTR))
+			;
+		return true;
+	#elif defined(WIN32)
+		return DuplicateHandle(	GetCurrentProcess(), Old,
+								GetCurrentProcess(), &New,
+								0, false, DUPLICATE_SAME_ACCESS) != 0;
+	#else
+		return false;
+	#endif
 }
-#elif defined(WIN32)
-bool GSubProcess::Dupe(PipeHandle Old, PipeHandle &New)
-{
-	return DuplicateHandle(	GetCurrentProcess(), Old,
-							GetCurrentProcess(), &New,
-							0, false, DUPLICATE_SAME_ACCESS) != 0;
-}
-#endif
 
 bool GSubProcess::IsRunning()
 {
@@ -256,12 +305,12 @@ bool GSubProcess::IsRunning()
 		}
 		return ChildPid != INVALID_PID;
 	#elif defined(WIN32)
-		if (!GetExitCodeProcess(ChildHnd, &ExitValue))
+		if (!GetExitCodeProcess(d->ChildHnd, &d->ExitValue))
 			return false;
 	
-		if (ExitValue != STILL_ACTIVE)
+		if (d->ExitValue != STILL_ACTIVE)
 		{
-			ChildPid = 0;
+			d->ChildPid = 0;
 			return false;
 		}
 		else
@@ -273,7 +322,7 @@ bool GSubProcess::IsRunning()
 
 uint32_t GSubProcess::GetErrorCode()
 {
-	return ErrorCode;
+	return d->ErrorCode;
 }
 
 int32 GSubProcess::GetExitValue()
@@ -283,14 +332,14 @@ int32 GSubProcess::GetExitValue()
 	 	// This will set ExitValue if the process has finished.
 		IsRunning();
 	#elif defined(WIN32)
-	GetExitCodeProcess(ChildHnd, &ExitValue);
+	GetExitCodeProcess(d->ChildHnd, &d->ExitValue);
 	#endif
-	return ExitValue;
+	return d->ExitValue;
 }
 
 void GSubProcess::SetInitFolder(const char *f)
 {
-	InitialFolder = f;
+	d->InitialFolder = f;
 }
 
 const char *GSubProcess::GetEnvironment(const char *Var)
@@ -355,7 +404,7 @@ bool GSubProcess::SetEnvironment(const char *Var, const char *Value)
 		v->Val = p.NewGStr();
 	}
 	
-	EnvironmentChanged = true;
+	d->EnvironmentChanged = true;
 	
 	return true;
 }	
@@ -369,7 +418,7 @@ bool GSubProcess::GetValue(const char *Var, ::GVariant &Value)
 			#ifdef WINNATIVE
 			char Buf[32] = "";
 			DWORD lpBytesRead = 0;
-			BOOL b = PeekNamedPipe(	ChildOutput.Read,
+			BOOL b = PeekNamedPipe(	d->ChildOutput.Read,
 									Buf,
 									sizeof(Buf),
 									&lpBytesRead,
@@ -394,12 +443,12 @@ bool GSubProcess::GetValue(const char *Var, ::GVariant &Value)
 
 void GSubProcess::SetStdin(OsFile Hnd)
 {
-	ExternIn = Hnd;
+	d->ExternIn = Hnd;
 }
 
 void GSubProcess::SetStdout(OsFile Hnd)
 {
-	ExternOut = Hnd;
+	d->ExternOut = Hnd;
 }
 
 void GSubProcess::Connect(GSubProcess *child)
@@ -702,13 +751,13 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		#elif defined(WIN32)
 		
 		GAutoWString WExe;
-		if (FileExists(Exe))
+		if (FileExists(d->Exe))
 		{
-			WExe.Reset(Utf8ToWide(Exe));
+			WExe.Reset(Utf8ToWide(d->Exe));
 		}
 		else
 		{
-			char *Ext = LgiGetExtension(Exe);
+			char *Ext = LgiGetExtension(d->Exe);
 			bool HasExt = Ext && _stricmp(Ext, "exe") == 0;
 			
 			#if defined(WIN32) && !defined(PLATFORM_MINGW)
@@ -725,7 +774,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			for (unsigned i=0; i<p.Length(); i++)
 			{
 				char s[MAX_PATH];
-				LgiMakePath(s, sizeof(s), p[i], Exe);
+				LgiMakePath(s, sizeof(s), p[i], d->Exe);
 				if (FileExists(s))
 				{
 					WExe.Reset(Utf8ToWide(s));
@@ -749,9 +798,9 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		
 		char16 WArg[2048];
 		int Ch = 0;
-		for (unsigned i=0; i<Args.Length(); i++)
+		for (unsigned i=0; i<d->Args.Length(); i++)
 		{
-			char *a = Args[i];
+			char *a = d->Args[i];
 			GAutoWString aw(Utf8ToWide(a));
 			
 			if (i > 0)
@@ -769,52 +818,99 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		LgiTrace("%s:%i - Args='%S'\n", _FL, WArg);
 		#endif
 		
-		bool HasExternIn = ExternIn != NULL_PIPE;
+		bool HasExternIn = d->ExternIn != NULL_PIPE;
 
 		#if DEBUG_SUBPROCESS
 		LgiTrace("%s:%i - Original handles, out=%p, in=%p, HasExternIn=%i\n", _FL, OldStdout, OldStdin, HasExternIn);
 		#endif
 		
-		if (ChildOutput.Create(&Attr) &&
-			(HasExternIn || ChildInput.Create(&Attr)))
+		if (d->ChildOutput.Create(&Attr) &&
+			(HasExternIn || d->ChildInput.Create(&Attr)))
 		{
-			if (!SetHandleInformation(ChildOutput.Read, HANDLE_FLAG_INHERIT, 0))
+			if (!SetHandleInformation(d->ChildOutput.Read, HANDLE_FLAG_INHERIT, 0))
 				LgiTrace("%s:%i - SetHandleInformation failed.\n", _FL);
 			
-			if (!HasExternIn && !SetHandleInformation(ChildInput.Write, HANDLE_FLAG_INHERIT, 0))
+			if (!HasExternIn && !SetHandleInformation(d->ChildInput.Write, HANDLE_FLAG_INHERIT, 0))
 				LgiTrace("%s:%i - SetHandleInformation failed.\n", _FL);
 
 			#if DEBUG_SUBPROCESS
-			LgiTrace("%s:%i - Output Pipe: rd=%p, wr=%p\n", _FL, ChildOutput.Read, ChildOutput.Write);
+			LgiTrace("%s:%i - Output Pipe: rd=%p, wr=%p\n", _FL, d->ChildOutput.Read, d->ChildOutput.Write);
 			if (!HasExternIn)
-				LgiTrace("%s:%i - Input Pipe: rd=%p, wr=%p\n", _FL, ChildInput.Read, ChildInput.Write);
+				LgiTrace("%s:%i - Input Pipe: rd=%p, wr=%p\n", _FL, d->ChildInput.Read, d->ChildInput.Write);
 			#endif
 
-			STARTUPINFOW Info;
-			ZeroObj(Info);
-			Info.cb = sizeof(Info);
+			DWORD CreateFlags = CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT;
+
+			STARTUPINFOEXW InfoEx;
+			ZeroObj(InfoEx);
+			auto &Info = InfoEx.StartupInfo;
+			Info.cb = sizeof(InfoEx);
 			
 			PROCESS_INFORMATION ProcInfo;
 			ZeroObj(ProcInfo);
 
 			Info.dwFlags = STARTF_USESTDHANDLES;
-			Info.hStdOutput = ChildOutput.Write;
-			Info.hStdInput = HasExternIn ? ExternIn : ChildInput.Read;
-			if (MapStderrToStdout)
-				Info.hStdError = ChildOutput.Write;
-			GAutoWString WInitialFolder(Utf8ToWide(InitialFolder));
+			if (d->PseudoConsole)
+			{
+				CreateFlags |= EXTENDED_STARTUPINFO_PRESENT;
+
+				size_t size;
+				InitializeProcThreadAttributeList(NULL, 1, 0, (PSIZE_T)&size);
+				BYTE *attrList = new BYTE[size];
+				InfoEx.lpAttributeList = reinterpret_cast<PPROC_THREAD_ATTRIBUTE_LIST>(attrList);
+				auto b = InitializeProcThreadAttributeList(InfoEx.lpAttributeList, 1, 0, (PSIZE_T)&size);
+				if (!b)
+				{
+					LgiTrace("%s:%s - InitializeProcThreadAttributeList failed.\n", _FL);
+					return false;
+				}
+
+				COORD dimensions = { 500, 500 };
+				auto r = CreatePseudoConsole(dimensions,
+											HasExternIn ? d->ExternIn : d->ChildInput.Read,
+											d->ChildOutput.Write,
+											0,
+											&d->hConsole);
+				if (FAILED(r))
+				{
+					LgiTrace("%s:%s - CreatePseudoConsole failed.\n", _FL);
+					return false;
+				}
+				
+				b = UpdateProcThreadAttribute(	InfoEx.lpAttributeList,
+                                                0,
+                                                PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE,
+                                                &d->hConsole,
+                                                sizeof(HPCON),
+                                                NULL,
+                                                NULL);
+				if (!b)
+				{
+					LgiTrace("%s:%s - UpdateProcThreadAttribute failed.\n", _FL);
+					return false;
+				}
+			}
+			else
+			{
+				Info.hStdOutput = d->ChildOutput.Write;
+				Info.hStdInput = HasExternIn ? d->ExternIn : d->ChildInput.Read;
+				if (MapStderrToStdout)
+					Info.hStdError = d->ChildOutput.Write;
+			}
+			
+			GAutoWString WInitialFolder(Utf8ToWide(d->InitialFolder));
 
 			#if DEBUG_SUBPROCESS
 			LgiTrace("%s:%i - WInitialFolder=%S, EnvironmentChanged=%i\n", _FL, WInitialFolder.Get(), EnvironmentChanged);
 			#endif
 
 			GAutoWString WEnv;
-			if (EnvironmentChanged)
+			if (d->EnvironmentChanged)
 			{
 				GMemQueue q(256);
-				for (unsigned i=0; i<Environment.Length(); i++)
+				for (unsigned i=0; i<d->Environment.Length(); i++)
 				{
-					Variable &v = Environment[i];
+					Variable &v = d->Environment[i];
 					GAutoWString Var(Utf8ToWide(v.Var));
 					GAutoWString Val(Utf8ToWide(v.Val));
 					q.Write(Var, sizeof(char16)*(StrlenW(Var)));
@@ -829,15 +925,14 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 								&Attr,				// lpProcessAttributes
 								NULL,				// lpThreadAttributes
 								TRUE,				// bInheritHandles
-								CREATE_NO_WINDOW|CREATE_UNICODE_ENVIRONMENT/*|
-									(NewGroup?CREATE_NEW_PROCESS_GROUP:0)*/, // dwCreationFlags
+								CreateFlags,		// dwCreationFlags
 								WEnv,				// lpEnvironment
 								WInitialFolder,		// lpCurrentDirectory
 								&Info,				// lpStartupInfo
 								&ProcInfo))
 			{
-				ChildPid = ProcInfo.dwProcessId;
-				ChildHnd = ProcInfo.hProcess;
+				d->ChildPid = ProcInfo.dwProcessId;
+				d->ChildHnd = ProcInfo.hProcess;
 				CloseHandle(ProcInfo.hThread);
 
 				#if DEBUG_SUBPROCESS
@@ -848,16 +943,18 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			}
 			else
 			{
-				ErrorCode = GetLastError();
+				d->ErrorCode = GetLastError();
 				LgiTrace("%s:%i - CreateProces('%S', '%S'...) failed with %i\n",
-					_FL, WExe.Get(), WArg, ErrorCode);
+					_FL, WExe.Get(), WArg, d->ErrorCode);
 			}
 			
 			#if DEBUG_SUBPROCESS
 			LgiTrace("%s:%i - Closing handles: %p, %p\n", _FL, ChildOutput.Write, ChildInput.Read);
 			#endif
-			CloseHandle(ChildOutput.Write);
-			CloseHandle(ChildInput.Read);
+			CloseHandle(d->ChildOutput.Write);
+			CloseHandle(d->ChildInput.Read);
+			if (d->PseudoConsole)
+				DeleteProcThreadAttributeList(InfoEx.lpAttributeList);
 		}
 
 		#if DEBUG_SUBPROCESS
@@ -916,12 +1013,12 @@ int GSubProcess::Wait()
 			}
 		}
 	#elif defined(WIN32)
-		if (ChildHnd)
+		if (d->ChildHnd)
 		{
-			DWORD r = WaitForSingleObject(ChildHnd, INFINITE);
+			DWORD r = WaitForSingleObject(d->ChildHnd, INFINITE);
 			if (r == WAIT_OBJECT_0)
 			{
-				if (GetExitCodeProcess(ChildHnd, &r))
+				if (GetExitCodeProcess(d->ChildHnd, &r))
 				{
 					Status = r;
 				}
@@ -937,7 +1034,7 @@ bool GSubProcess::Interrupt()
 	#if defined(POSIX)
 		return Signal(SIGINT);
 	#elif defined(WIN32)
-		if (!ChildHnd)
+		if (!d->ChildHnd)
 			return false;
 
 		#if 1
@@ -946,7 +1043,7 @@ bool GSubProcess::Interrupt()
 		FreeConsole();
  
 		// This does not require the console window to be visible.
-		if (AttachConsole(ChildPid))
+		if (AttachConsole(d->ChildPid))
 		{
 			// Disable Ctrl-C handling for our program
 			SetConsoleCtrlHandler(NULL, true);
@@ -998,7 +1095,7 @@ bool GSubProcess::Signal(int which)
 		if (which == SIGTERM)
 			ChildPid = INVALID_PID;
 	#elif defined(WIN32)
-		if (!ChildHnd)
+		if (!d->ChildHnd)
 		{
 			LgiTrace("%s:%i - No child process.\n", _FL);
 			return false;
@@ -1015,15 +1112,15 @@ bool GSubProcess::Kill()
 	#if defined(POSIX)
 		return Signal(SIGTERM);
 	#elif defined(WIN32)
-		if (!ChildHnd)
+		if (!d->ChildHnd)
 		{
 			LgiTrace("%s:%i - No child process.\n", _FL);
 			return false;
 		}
 
-		if (TerminateProcess(ChildHnd, -1))
+		if (TerminateProcess(d->ChildHnd, -1))
 		{
-			ChildHnd = NULL;
+			d->ChildHnd = NULL;
 		}
 		else
 		{
@@ -1084,7 +1181,7 @@ ssize_t GSubProcess::Read(void *Buf, ssize_t Size, int TimeoutMs)
 		return (int)read(Io.Read, Buf, Size);
 	#else		
 		DWORD Rd = -1, Sz;
-		if (!ReadFile(ChildOutput.Read, Buf, AssertCast(Sz, Size), &Rd, NULL))
+		if (!ReadFile(d->ChildOutput.Read, Buf, AssertCast(Sz, Size), &Rd, NULL))
 			return -1;
 		return Rd;
 	#endif
@@ -1099,7 +1196,7 @@ int GSubProcess::Peek()
 	#else		
 		DWORD Rd = 0, Avail = 0;
 		char Buf[32];
-		if (PeekNamedPipe(ChildOutput.Read, Buf, sizeof(Buf), &Rd, &Avail, NULL))
+		if (PeekNamedPipe(d->ChildOutput.Read, Buf, sizeof(Buf), &Rd, &Avail, NULL))
 			return Rd;		
 		return 0;
 	#endif	
@@ -1117,7 +1214,7 @@ ssize_t GSubProcess::Write(const void *Buf, ssize_t Size, int Flags)
 		return (int)write(Io.Write, Buf, Size);
 	#else
 		DWORD Wr = -1, Sz;
-		if (!WriteFile(ChildInput.Write, Buf, AssertCast(Sz, Size), &Wr, NULL))
+		if (!WriteFile(d->ChildInput.Write, Buf, AssertCast(Sz, Size), &Wr, NULL))
 			return -1;
 		return Wr;
 	#endif
