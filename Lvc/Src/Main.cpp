@@ -685,7 +685,7 @@ public:
 		for (auto f : Files)
 		{
 			if (DirExists(f))
-				OpenFolder(f);
+				OpenLocalFolder(f);
 		}
 	}
 
@@ -790,7 +790,7 @@ public:
 		}
 	}
 
-	void OpenFolder(const char *Fld = NULL)
+	void OpenLocalFolder(const char *Fld = NULL)
 	{
 		GFileSelect s;
 
@@ -824,6 +824,10 @@ public:
 			else
 				LgiMsg(this, "Folder not under version control.", AppName);
 		}
+	}
+
+	void OpenRemoteFolder()
+	{
 	}
 
 	int OnNotify(GViewI *c, int flag)
@@ -861,7 +865,7 @@ public:
 			}
 			case IDC_OPEN:
 			{
-				OpenFolder();
+				OpenLocalFolder();
 				break;
 			}
 			case IDC_TREE:
@@ -875,13 +879,19 @@ public:
 						if (m.Right())
 						{
 							LSubMenu s;
-							s.AppendItem("Add", IDM_ADD);
+							s.AppendItem("Add Local", IDM_ADD_LOCAL);
+							s.AppendItem("Add Remote", IDM_ADD_REMOTE);
 							int Cmd = s.Float(c->GetGView(), m);
 							switch (Cmd)
 							{
-								case IDM_ADD:
+								case IDM_ADD_LOCAL:
 								{
-									OpenFolder();
+									OpenLocalFolder();
+									break;
+								}
+								case IDM_ADD_REMOTE:
+								{
+									OpenRemoteFolder();
 									break;
 								}
 							}

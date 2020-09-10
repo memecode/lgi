@@ -190,8 +190,14 @@
 			<String Ref="55" Cid="524" Define="IDM_STATUS" en="&Status" />
 			<String Ref="56" Cid="525" Define="IDM_MENU_525" />
 			<String Ref="57" Cid="526" Define="IDM_UPDATE_SUBS" en="&Update Subs" />
+			<String Ref="58" Cid="527" Define="IDM_OPEN_LOCAL" en="Open Local" />
+			<String Ref="59" Cid="528" Define="IDM_OPEN_REMOTE" en="Open Remote" />
+			<String Ref="60" Cid="529" Define="IDM_MENU_529" />
 		</string-group>
 		<submenu Ref="4">
+			<menuitem Ref="58" />
+			<menuitem Ref="59" />
+			<menuitem Sep="1" />
 			<menuitem Ref="46" Shortcut="F5" />
 			<menuitem Ref="19" />
 			<menuitem Sep="1" />

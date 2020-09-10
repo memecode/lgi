@@ -55,7 +55,7 @@ char *ReadTextFile(const char *File)
 	return s;
 }
 
-int64 LgiFileSize(const char *FileName)
+int64 LFileSize(const char *FileName)
 {
 	int64 Size = -1;
 	GDirectory Dir;

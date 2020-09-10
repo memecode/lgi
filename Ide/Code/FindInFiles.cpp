@@ -309,7 +309,7 @@ void FindInFilesThread::SearchFile(char *File)
 
 			DeleteArray(Doc);
 		}
-		else if (LgiFileSize(File) > 0)
+		else if (LFileSize(File) > 0)
 		{
 			LgiTrace("%s:%i - Couldn't Read file '%s'\n", _FL, File);
 		}

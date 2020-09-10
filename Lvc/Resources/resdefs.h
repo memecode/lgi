@@ -47,3 +47,6 @@
 #define IDM_STATUS								524
 #define IDM_MENU_525							525
 #define IDM_UPDATE_SUBS							526
+#define IDM_OPEN_LOCAL							527
+#define IDM_OPEN_REMOTE							528
+#define IDM_MENU_529							529

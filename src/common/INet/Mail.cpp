@@ -2265,7 +2265,7 @@ int MailReceiveFolder::Sizeof(int Message)
 	MailItem *m = d->Mail[Message];
 	if (m)
 	{
-		return (int)LgiFileSize(m->File);
+		return (int)LFileSize(m->File);
 	}
 
 	return 0;

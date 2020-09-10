@@ -902,7 +902,7 @@ bool IFtp::DownloadFile(const char *Local, IFtpEntry *Remote, bool Binary)
 
 bool IFtp::UploadFile(const char *Local, const char *Remote, bool Binary)
 {
-	return TransferFile(Local, Remote, LgiFileSize(Local), true, Binary);
+	return TransferFile(Local, Remote, LFileSize(Local), true, Binary);
 }
 
 bool IFtp::ResumeAt(int64 Pos)
