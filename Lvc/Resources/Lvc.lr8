@@ -53,6 +53,10 @@
 		<String Ref="70" Cid="70" Define="IDC_70" en="Button 1" />
 		<String Ref="71" Cid="-1" Define="IDC_STATIC" en="User name:" />
 		<String Ref="72" Cid="-1" Define="IDC_STATIC" en="Password:" />
+		<String Ref="73" Cid="-1" Define="IDC_STATIC" en="Remote Path:" />
+		<String Ref="74" Cid="74" Define="IDC_REMOTE_PATH" />
+		<String Ref="75" Cid="1" Define="IDOK" en="Ok" />
+		<String Ref="76" Cid="2" Define="IDCANCEL" en="Cancel" />
 	</string-group>
 	<Dialog pos="7,7,464,203" ref="9">
 		<TableLayout pos="7,7,447,167" ref="10" cols="0.200,0.200,0.200,0.200,0.200" rows="0.311,0.454,0.236">
@@ -231,12 +235,19 @@
 				</td>
 			</tr>
 			<tr>
-				<td />
-				<td />
+				<td>
+					<StaticText pos="14,259,83,279" ref="73" />
+				</td>
+				<td>
+					<EditBox Pos="217,259,447,279" ref="74" />
+				</td>
 			</tr>
 			<tr>
 				<td />
-				<td />
+				<td>
+					<Button pos="217,308,286,328" ref="75" image="" toggle="0" />
+					<Button pos="301,308,370,328" ref="76" image="" toggle="0" />
+				</td>
 			</tr>
 		</TableLayout>
 	</Dialog>

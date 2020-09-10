@@ -28,6 +28,7 @@
 #define IDC_USER								68
 #define IDC_PASS								69
 #define IDC_70									70
+#define IDC_REMOTE_PATH							74
 #define IDC_TABLE								500
 #define IDC_COMMIT								501
 #define IDC_PULL								502
