@@ -20,14 +20,14 @@
 #define IDC_UPDATE								41
 #define IDC_HEADS								45
 #define IDC_BUILD_FIX							47
-#define IDC_61									61
+#define IDD_REMOTE_FOLDER						61
 #define IDC_62									62
 #define IDC_HOSTS								64
 #define IDC_65									65
 #define IDC_HOSTNAME							67
 #define IDC_USER								68
 #define IDC_PASS								69
-#define IDC_70									70
+#define IDC_DELETE								70
 #define IDC_REMOTE_PATH							74
 #define IDC_TABLE								500
 #define IDC_COMMIT								501

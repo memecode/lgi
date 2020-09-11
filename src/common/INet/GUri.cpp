@@ -9,13 +9,6 @@ static const char *Ws = " \t\r\n";
 
 GUri::GUri(const char *uri)
 {
-	Protocol = 0;
-	User = 0;
-	Pass = 0;
-	Host = 0;
-	Port = 0;
-	Path = 0;
-	Anchor = 0;
 	if (uri)
 		Set(uri);
 }
@@ -28,59 +21,52 @@ GUri::~GUri()
 GUri &GUri::operator =(const GUri &u)
 {
 	Empty();
-	Protocol = NewStr(u.Protocol);
-	User = NewStr(u.User);
-	Pass = NewStr(u.Pass);
-	Host = NewStr(u.Host);
-	Path = NewStr(u.Path);
-	Anchor = NewStr(u.Anchor);
+	sProtocol = u.sProtocol;
+	sUser = u.sUser;
+	sPass = u.sPass;
+	sHost = u.sHost;
+	sPath = u.sPath;
+	sAnchor = u.sAnchor;
 	return *this;
 }
 
 void GUri::Empty()
 {
 	Port = 0;
-	DeleteArray(Protocol);
-	DeleteArray(User);
-	DeleteArray(Pass);
-	DeleteArray(Host);
-	DeleteArray(Path);
-	DeleteArray(Anchor);
+	sProtocol.Empty();
+	sUser.Empty();
+	sPass.Empty();
+	sHost.Empty();
+	sPath.Empty();
+	sAnchor.Empty();
 }
 
-GAutoString GUri::GetUri()
+GString GUri::ToString()
 {
-	const char *Empty = "";
 	GStringPipe p;
-	if (Protocol)
+	if (sProtocol)
+		p.Print("%s://", sProtocol.Get());
+
+	if (sUser || sPass)
 	{
-		p.Print("%s://", Protocol);
+		auto UserEnc = EncodeStr(sUser, "@:");
+		auto PassEnc = EncodeStr(sPass, "@:");
+		p.Print("%s:%s@", UserEnc?UserEnc:"", PassEnc?PassEnc:"");
 	}
-	if (User || Pass)
-	{
-		GAutoString UserEnc = Encode(User, "@:");
-		GAutoString PassEnc = Encode(Pass, "@:");
-		p.Print("%s:%s@", UserEnc?UserEnc:Empty, PassEnc?PassEnc:Empty);
-	}
-	if (Host)
-	{
-		p.Write(Host, (int)strlen(Host));
-	}
+	if (sHost)
+		p.Write(sHost);
 	if (Port)
-	{
 		p.Print(":%i", Port);
-	}
-	if (Path)
+	if (sPath)
 	{
-		GAutoString e = Encode(Path);
-		char *s = e ? e : Path;
+		auto e = EncodeStr(sPath);
+		char *s = e ? e : sPath;
 		p.Print("%s%s", *s == '/' ? "" : "/", s);
 	}
-	if (Anchor)
-		p.Print("#%s", Anchor);
+	if (sAnchor)
+		p.Print("#%s", sAnchor.Get());
 		
-	GAutoString a(p.NewStr());
-	return a;
+	return p.NewGStr();
 }
 
 bool GUri::Set(const char *uri)
@@ -98,7 +84,7 @@ bool GUri::Set(const char *uri)
 	while (*s && IsAlpha(*s)) s++;
 	if (s[0] == ':' && (s - p) > 1)
 	{
-		Protocol = NewStr(p, s - p);
+		sProtocol.Set(p, s - p);
 		s++;
 		if (*s == '/') s++;
 		if (*s == '/') s++;
@@ -135,31 +121,29 @@ bool GUri::Set(const char *uri)
 			s++;
 		}
 
-		Host = NewStr(p, s - p);
-		if (Host)
+		sHost.Set(p, s - p);
+		if (sHost)
 		{
-			char *At = strchr(Host, '@');
+			char *At = strchr(sHost, '@');
 			if (At)
 			{
 				*At++ = 0;
-				char *Col = strchr(Host, ':');
+				char *Col = strchr(sHost, ':');
 				if (Col)
 				{
 					*Col++ = 0;
-					Pass = NewStr(Col);
+					sPass = DecodeStr(Col);
 				}
 
-				auto sUser = Decode(Host);
-				User = sUser.Release();
-
-				memmove(Host, At, strlen(At) + 1);
+				sUser = DecodeStr(sHost);
+				sHost = At;
 			}
 
-			char *Col = strchr(Host, ':');
+			char *Col = strchr(sHost, ':');
 			if (Col)
 			{
-				*Col++ = 0;
-				Port = atoi(Col);
+				Port = atoi(Col+1);
+				sHost.Length(Col-sHost.Get());
 			}
 		}
 
@@ -174,12 +158,12 @@ bool GUri::Set(const char *uri)
 
 		if (*s)
 		{
-			Path = NewStr(Start, s - Start);
-			Anchor = NewStr(s + 1);
+			sPath.Set(Start, s - Start);
+			sAnchor = s + 1;
 		}
 		else
 		{
-			Path = NewStr(Start);
+			sPath = Start;
 		}
 		
 		#if 0
@@ -205,10 +189,10 @@ bool GUri::Set(const char *uri)
 		#endif
 	}
 
-	return Host || Path;
+	return sHost || sPath;
 }
 
-GAutoString GUri::Encode(const char *s, const char *ExtraCharsToEncode)
+GString GUri::EncodeStr(const char *s, const char *ExtraCharsToEncode)
 {
 	GStringPipe p(256);
 	if (s)
@@ -227,16 +211,17 @@ GAutoString GUri::Encode(const char *s, const char *ExtraCharsToEncode)
 			}
 		}
 	}
-	return GAutoString(p.NewStr());
+	
+	return p.NewGStr();
 }
 
 GUri::StrMap GUri::Params()
 {
 	StrMap m;
 
-	if (Path)
+	if (sPath)
 	{
-		const char *q = strchr(Path, '?');
+		const char *q = strchr(sPath, '?');
 		if (q++)
 		{
 			auto Parts = GString(q).SplitDelimit("&");
@@ -252,7 +237,7 @@ GUri::StrMap GUri::Params()
 	return m;
 }
 
-GAutoString GUri::Decode(const char *s)
+GString GUri::DecodeStr(const char *s)
 {
 	GStringPipe p(256);
 	if (s)
@@ -273,7 +258,7 @@ GAutoString GUri::Decode(const char *s)
 		}
 	}
 
-	return GAutoString(p.NewStr());
+	return p.NewGStr();
 }
 
 #if defined LGI_CARBON

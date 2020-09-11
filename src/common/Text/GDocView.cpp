@@ -122,8 +122,8 @@ GDocumentEnv::LoadType GDefaultDocumentEnv::GetContent(LoadJob *&j)
 	char *FullPath = NULL;
 	char *FileName = NULL;
 	GUri u(j->Uri);
-	if (u.Protocol && !_stricmp(u.Protocol, "file"))
-		FileName = u.Path;
+	if (u.sProtocol && !_stricmp(u.sProtocol, "file"))
+		FileName = u.sPath;
 	else
 		FileName = j->Uri;
 

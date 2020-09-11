@@ -46,15 +46,12 @@ void AddFtpFile::OnCmdComplete(FtpCmd *Cmd)
 			{
 				GUri fu(Cmd->Uri);
 				char path[256];
-				if (Base->Path)
-					sprintf(path, "%s/%s", Base->Path, e->Name.Get());
+				if (Base->sPath)
+					sprintf(path, "%s/%s", Base->sPath.Get(), e->Name.Get());
 				else
 					sprintf(path, "/%s", e->Name.Get());
-				DeleteArray(fu.Path);
-				fu.Path = NewStr(path);
-				GAutoString Uri = fu.GetUri();
-
-				Files->Insert(new FtpFile(e, Uri));
+				fu.sPath = path;
+				Files->Insert(new FtpFile(e, fu.ToString()));
 			}
 		}
 

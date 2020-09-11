@@ -351,13 +351,13 @@ public:
 class LgiNetClass GUri
 {
 public:
-	char *Protocol;
-	char *User;
-	char *Pass;
-	char *Host;
+	GString sProtocol;
+	GString sUser;
+	GString sPass;
+	GString sHost;
 	int Port;
-	char *Path;
-	char *Anchor;
+	GString sPath;
+	GString sAnchor;
 
 	/// Parser for URI's.
 	GUri
@@ -371,13 +371,13 @@ public:
 	bool Set(const char *uri);
 
 	/// Re-constructs the URI
-	GAutoString GetUri();
+	GString ToString();
 
 	/// Empty this object...
 	void Empty();
 
 	/// URL encode
-	GAutoString Encode
+	GString EncodeStr
 	(
 		/// The string to encode
 		const char *s,
@@ -386,7 +386,7 @@ public:
 	);
 
 	/// URL decode
-	GAutoString Decode(const char *s);
+	GString DecodeStr(const char *s);
 
 	/// Separate args into map
 	typedef LHashTbl<StrKey<char,false>,GString> StrMap;

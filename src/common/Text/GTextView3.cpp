@@ -5375,7 +5375,7 @@ void GTextView3::OnUrl(char *Url)
 	{
 		GUri u(Url);
 		bool Email = LIsValidEmail(Url);
-		const char *Proto = Email ? "mailto" : u.Protocol;
+		const char *Proto = Email ? "mailto" : u.sProtocol;
 		GString App = LGetAppForProtocol(Proto);
 		if (App)
 			LgiExecute(App, Url);

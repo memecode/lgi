@@ -14,10 +14,10 @@ WebFldDlg::WebFldDlg(GViewI *p, char *name, char *ftp, char *www)
 	if (ftp)
 	{
 		GUri u(ftp);
-		SetCtrlName(IDC_HOST, u.Host);
-		SetCtrlName(IDC_USERNAME, u.User);
-		SetCtrlName(IDC_PASSWORD, u.Pass);
-		SetCtrlName(IDC_PATH, u.Path);
+		SetCtrlName(IDC_HOST, u.sHost);
+		SetCtrlName(IDC_USERNAME, u.sUser);
+		SetCtrlName(IDC_PASSWORD, u.sPass);
+		SetCtrlName(IDC_PATH, u.sPath);
 	}
 
 	SetCtrlName(IDC_NAME, name);
@@ -38,12 +38,12 @@ int WebFldDlg::OnNotify(GViewI *v, int f)
 		case IDOK:
 		{
 			GUri u;
-			u.Host = NewStr(GetCtrlName(IDC_HOST));
-			u.User = NewStr(GetCtrlName(IDC_USERNAME));
-			u.Pass = NewStr(GetCtrlName(IDC_PASSWORD));
-			u.Path = NewStr(GetCtrlName(IDC_PATH));
-			u.Protocol = NewStr("ftp");
-			Ftp = u.GetUri();
+			u.sHost = GetCtrlName(IDC_HOST);
+			u.sUser = GetCtrlName(IDC_USERNAME);
+			u.sPass = GetCtrlName(IDC_PASSWORD);
+			u.sPath = GetCtrlName(IDC_PATH);
+			u.sProtocol = "ftp";
+			Ftp = u.ToString();
 			Www = NewStr(GetCtrlName(IDC_WWW));
 			Name = NewStr(GetCtrlName(IDC_NAME));
 			EndModal(1);

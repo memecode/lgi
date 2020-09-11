@@ -286,8 +286,8 @@ struct LOAuth2Priv
 		GUri u(Endpoint);
 		GString Uri, Redir, RedirEnc, Scope;
 		Redir.Printf("http://localhost:%i", LOCALHOST_PORT);
-		Scope = u.Encode(Params.Scope);
-		RedirEnc = u.Encode(Redir, ":/");
+		Scope = u.EncodeStr(Params.Scope);
+		RedirEnc = u.EncodeStr(Redir, ":/");
 		Uri.Printf("%s?client_id=%s&redirect_uri=%s&response_type=code&code_challenge=%s&scope=%s",
 					Params.AuthUri.Get(),
 					Params.ClientID.Get(),
@@ -314,9 +314,9 @@ struct LOAuth2Priv
 			GStringPipe p(1024);
 			GUri u(Params.ApiUri);
 			SslSocket sock(NULL, NULL, true);
-			if (!sock.Open(u.Host, HTTPS_PORT))
+			if (!sock.Open(u.sHost, HTTPS_PORT))
 			{
-				Log->Print("Error: Can't connect to '%s:%i'\n", u.Host, HTTPS_PORT);
+				Log->Print("Error: Can't connect to '%s:%i'\n", u.sHost, HTTPS_PORT);
 				return NULL;
 			}
 		
@@ -343,8 +343,8 @@ struct LOAuth2Priv
 						"Content-length: " LPrintfSizeT "\r\n"
 						"\r\n"
 						"%s",
-						Api.Path,
-						Api.Host,
+						Api.sPath.Get(),
+						Api.sHost.Get(),
 						Body.Length(),
 						Body.Get());
 			if (!Write(&sock, Http))
@@ -381,9 +381,9 @@ struct LOAuth2Priv
 		GStringPipe p(1024);
 		GUri u(Params.Scope);
 		SslSocket sock(NULL, NULL, true);
-		if (!sock.Open(u.Host, HTTPS_PORT))
+		if (!sock.Open(u.sHost, HTTPS_PORT))
 		{
-			Log->Print("Error: Can't connect to '%s:%i'\n", u.Host, HTTPS_PORT);
+			Log->Print("Error: Can't connect to '%s:%i'\n", u.sHost.Get(), HTTPS_PORT);
 			return NULL;
 		}
 		
@@ -403,8 +403,8 @@ struct LOAuth2Priv
 					"Content-length: " LPrintfSizeT "\r\n"
 					"\r\n"
 					"%s",
-					Api.Path,
-					Api.Host,
+					Api.sPath.Get(),
+					Api.sHost.Get(),
 					Body.Length(),
 					Body.Get());
 		if (!Write(&sock, Http))

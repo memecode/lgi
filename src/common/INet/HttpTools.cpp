@@ -703,20 +703,20 @@ char *HttpTools::Fetch(char *uri, GStream *Log, GViewI *Dump, CookieJar *Cookies
 		IHttp h;
 
 		GProxyUri Proxy;
-		if (Proxy.Host)
-			h.SetProxy(Proxy.Host, Proxy.Port);
+		if (Proxy.sHost)
+			h.SetProxy(Proxy.sHost, Proxy.Port);
 
 		GUri u(uri);
 		if (!u.Port)
 			u.Port = HTTP_PORT;
 
 		GAutoPtr<GSocketI> Sock(new GSocket);
-		if (h.Open(Sock, u.Host))
+		if (h.Open(Sock, u.sHost))
 		{
 			int ProtocolStatus = 0;
 			GStringPipe p, hdr;
 
-			GAutoString Enc = u.GetUri();
+			auto Enc = u.ToString();
 			IHttp::ContentEncoding type;
 			if (h.Get(Enc, DefHeaders, &ProtocolStatus, &p, &type, &hdr))
 			{
@@ -784,7 +784,7 @@ char *HttpTools::Fetch(char *uri, GStream *Log, GViewI *Dump, CookieJar *Cookies
 		}
 		else if (Log)
 		{
-			Log->Print("Error: Couldn't open connection to '%s' [:%s]\n", u.Host, u.Port);
+			Log->Print("Error: Couldn't open connection to '%s' [:%s]\n", u.sHost.Get(), u.Port);
 		}
 	}
 	
@@ -802,13 +802,13 @@ char *HttpTools::Post(char *uri, char *headers, char *body, GStream *Log, GViewI
 		bool Open;
 
 		GProxyUri Proxy;
-		if (Proxy.Host)
+		if (Proxy.sHost)
 		{
-			Open = s.Open(Proxy.Host, Proxy.Port) != 0;
+			Open = s.Open(Proxy.sHost, Proxy.Port) != 0;
 		}
 		else
 		{
-			Open = s.Open(u.Host, u.Port ? u.Port : 80) != 0;
+			Open = s.Open(u.sHost, u.Port ? u.Port : 80) != 0;
 		}
 
 		if (Open)
@@ -821,22 +821,22 @@ char *HttpTools::Post(char *uri, char *headers, char *body, GStream *Log, GViewI
 
 			size_t ContentLen = strlen(body);
 			GStringPipe p;
-			char *EncPath = u.Encode(u.Path);
+			auto EncPath = u.EncodeStr(u.sPath);
 
-			if (Proxy.Host)
+			if (Proxy.sHost)
 			{
 				p.Print("POST http://%s%s HTTP/1.1\r\n"
 						"Host: %s\r\n",
-						u.Host,
+						u.sHost.Get(),
 						EncPath,
-						u.Host);
+						u.sHost.Get());
 			}
 			else
 			{
 				p.Print("POST %s HTTP/1.1\r\n"
 						"Host: %s\r\n",
 						EncPath,
-						u.Host);
+						u.sHost.Get());
 			}
 			DeleteArray(EncPath);
 
@@ -1098,12 +1098,12 @@ GSurface *GetHttpImage(char *Uri)
 		IHttp Http;
 
 		GProxyUri p;
-		if (p.Host)
-			Http.SetProxy(p.Host, p.Port);
+		if (p.sHost)
+			Http.SetProxy(p.sHost, p.Port);
 
 		GUri u(Uri);
 		GAutoPtr<GSocketI> Sock(new GSocket);
-		if (Http.Open(Sock, u.Host))
+		if (Http.Open(Sock, u.sHost))
 		{
 			GStringPipe Data;
 			int Code = 0;
@@ -1141,7 +1141,7 @@ GSurface *GetHttpImage(char *Uri)
 			}
 			else LgiTrace("%s:%i - failed to download to '%s'\n", _FL, Uri);
 		}
-		else LgiTrace("%s:%i - failed to connect to '%s:%i'\n", _FL, u.Host, u.Port);
+		else LgiTrace("%s:%i - failed to connect to '%s:%i'\n", _FL, u.sHost.Get(), u.Port);
 	}
 
 	return Img;

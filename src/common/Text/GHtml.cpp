@@ -2568,11 +2568,11 @@ void GTag::LoadImage(const char *Uri)
 
 	GUri u(Uri);
 	bool LdImg = Html->GetLoadImages();
-	bool IsRemote = u.Protocol &&
+	bool IsRemote = u.sProtocol &&
 					(
-						!_stricmp(u.Protocol, "http") ||
-						!_stricmp(u.Protocol, "https") ||
-						!_stricmp(u.Protocol, "ftp")
+						!_stricmp(u.sProtocol, "http") ||
+						!_stricmp(u.sProtocol, "https") ||
+						!_stricmp(u.sProtocol, "ftp")
 					);
 	if (IsRemote && !LdImg)
 	{

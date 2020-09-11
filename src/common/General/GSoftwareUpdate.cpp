@@ -77,25 +77,24 @@ struct GSoftwareUpdatePriv
 					OsName.Printf("Win%i", WordSize);
 				}
 
-				sprintf_s(Dir, sizeof(Dir), "%s?name=%s&os=%s&betas=%i", Uri.Path, (char*)d->Name, OsName.Get(), IncBetas);
-				DeleteArray(Uri.Path);
-				Uri.Path = NewStr(Dir);
+				sprintf_s(Dir, sizeof(Dir), "%s?name=%s&os=%s&betas=%i", Uri.sPath.Get(), (char*)d->Name, OsName.Get(), IncBetas);
+				Uri.sPath = Dir;
 
-				GAutoString GetUri = Uri.GetUri();
+				GString GetUri = Uri.ToString();
 				
 				// LgiTrace("UpdateURI=%s\n", GetUri.Get());
 				
 				if (d->Proxy)
 				{
 				    GUri Proxy(d->Proxy);
-				    if (Proxy.Host)
-					    Http.SetProxy(Proxy.Host, Proxy.Port?Proxy.Port:HTTP_PORT);
+				    if (Proxy.sHost)
+					    Http.SetProxy(Proxy.sHost, Proxy.Port?Proxy.Port:HTTP_PORT);
 				}
 				
 				GStringPipe RawXml;
 				int ProtocolStatus = 0;
 				GAutoPtr<GSocketI> s(new GSocket);
-				if (Http.Open(s, Uri.Host, Uri.Port))
+				if (Http.Open(s, Uri.sHost, Uri.Port))
 				{
 					IHttp::ContentEncoding Enc;
 					if (Http.Get(GetUri, NULL, &ProtocolStatus, &RawXml, &Enc))
@@ -262,14 +261,12 @@ struct GSoftwareUpdatePriv
 		int Main() override
 		{
 			IHttp Http;
-			if (Proxy->Host)
-			{
-				Http.SetProxy(Proxy->Host, Proxy->Port?Proxy->Port:HTTP_PORT);
-			}
+			if (Proxy->sHost)
+				Http.SetProxy(Proxy->sHost, Proxy->Port?Proxy->Port:HTTP_PORT);
 
 			GAutoPtr<GSocketI> s(new GSocket);
 			IHttp::ContentEncoding Enc;
-			if (!Http.Open(s, Uri->Host, Uri->Port))
+			if (!Http.Open(s, Uri->sHost, Uri->Port))
 			{
 				Err->Reset(NewStr(LgiLoadString(L_ERROR_CONNECT_FAILED, sSocketConnectFailed)));
 			}
@@ -329,14 +326,14 @@ bool GSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, GViewI *W
 	}
 
 	GUri Uri(Info.Uri);
-	if (!Uri.Path)
+	if (!Uri.sPath)
 	{
 		d->SetError(L_ERROR_URI_ERROR, "No path in URI.");
 		return false;
 	}
 
-	char *File = strrchr(Uri.Path, '/');
-	if (!File) File = Uri.Path;
+	char *File = strrchr(Uri.sPath, '/');
+	if (!File) File = Uri.sPath;
 	else File++;
 
 	char Tmp[MAX_PATH];

@@ -21,7 +21,7 @@ LWebdav::LWebdav(GString endPoint, GString user, GString pass)
 	Pass = pass;
 
 	GUri u(EndPoint);
-	EndPointPath = u.Path;
+	EndPointPath = u.sPath;
 }
 
 void LWebdav::PrettyPrint(GXmlTag &x)
@@ -38,7 +38,7 @@ bool LWebdav::Request(Req &r, const char *Name, GString Resource)
 	auto sock = GetSocket();
 	IHttp http;
 	GUri u(EndPoint);
-	if (!http.Open(sock, u.Host, u.Port ? u.Port : HTTPS_PORT))
+	if (!http.Open(sock, u.sHost, u.Port ? u.Port : HTTPS_PORT))
 	{
 		r.Status = false;
 	}
@@ -47,12 +47,11 @@ bool LWebdav::Request(Req &r, const char *Name, GString Resource)
 		GStringPipe OutPipe, OutHdrsPipe;
 
 		GString Delim("/");
-		auto Path = GString(u.Path).SplitDelimit(Delim);
+		auto Path = u.sPath.SplitDelimit(Delim);
 		Path += Resource.SplitDelimit(Delim);
 		auto Res = Delim + Delim.Join(Path);
-		DeleteArray(u.Path);
-		u.Path = NewStr(Res);
-		auto Full = u.GetUri();
+		u.sPath = Res;
+		auto Full = u.ToString();
 		GMemStream In(r.InBody.Get(), r.InBody.Length(), false);
 
 		http.SetAuth(User, Pass);

@@ -6,7 +6,7 @@ class WebFldDlg : public GDialog
 {
 public:
 	char *Name;
-	GAutoString Ftp;
+	GString Ftp;
 	char *Www;
 
 	WebFldDlg(GViewI *p, char *name, char *ftp, char *www);

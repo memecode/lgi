@@ -266,15 +266,15 @@ bool MailIMap::Http(GSocketI *S,
 			"Host: %s\r\n"
 			"Content-length: %i\r\n"
 			"\r\n%s",
-			u.Path,
-			u.Host,
+			u.sPath.Get(),
+			u.sHost.Get(),
 			InBody?strlen(InBody):0,
 			InBody?InBody:"");
 
 	GAutoString Req(p.NewStr());
 	size_t ReqLen = strlen(Req);
 
-	if (!S->Open(u.Host, u.Port?u.Port:443))
+	if (!S->Open(u.sHost, u.Port?u.Port:443))
 		return false;
 
 	ssize_t w = S->Write(Req, ReqLen);

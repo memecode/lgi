@@ -104,13 +104,13 @@ bool IHttp::Open(GAutoPtr<GSocketI> S, const char *RemoteHost, int Port)
 		if (stristr(RemoteHost, "://") || strchr(RemoteHost, '/'))
 			u.Set(RemoteHost);
 		else
-			u.Host = NewStr(RemoteHost);
+			u.sHost = RemoteHost;
 		if (!u.Port && Port)
 			u.Port = Port;
 
 		if (!Socket)
 			ErrorMsg = "No socket object.";
-		else if (Socket->Open(u.Host, u.Port > 0 ? u.Port : HTTP_PORT))
+		else if (Socket->Open(u.sHost, u.Port > 0 ? u.Port : HTTP_PORT))
 			return true;
 		else
 			ErrorMsg = Socket->GetErrorString();
@@ -397,8 +397,8 @@ bool IHttp::Request
 	// Generate the request string
 	GStringPipe Cmd;
 	GUri u(Uri);
-	bool IsHTTPS = u.Protocol && !_stricmp(u.Protocol, "https");
-	GAutoString EncPath = u.Encode(u.Path ? u.Path : (char*)"/"), Mem;
+	bool IsHTTPS = u.sProtocol && !_stricmp(u.sProtocol, "https");
+	GString EncPath = u.EncodeStr(u.sPath ? u.sPath : (char*)"/"), Mem;
 	char s[1024];
 	GLinePrefix EndHeaders("\r\n");
 	GStringPipe Headers;
@@ -408,8 +408,8 @@ bool IHttp::Request
 		Cmd.Print(	"CONNECT %s:%i HTTP/1.1\r\n"
 					"Host: %s\r\n"
 					"\r\n",
-					u.Host, u.Port ? u.Port : HTTPS_PORT,
-					u.Host);
+					u.sHost.Get(), u.Port ? u.Port : HTTPS_PORT,
+					u.sHost.Get());
 		GAutoString c(Cmd.NewStr());
 		size_t cLen = strlen(c);
 		ssize_t r = Socket->Write(c, cLen);
@@ -450,7 +450,7 @@ bool IHttp::Request
 	}
 
 	Cmd.Print("%s %s HTTP/1.1\r\n", Type, (Proxy && !IsHTTPS) ? Uri : EncPath.Get());
-	Cmd.Print("Host: %s\r\n", u.Host);
+	Cmd.Print("Host: %s\r\n", u.sHost.Get());
 	if (InHeaders)
 		Cmd.Write(InHeaders, strlen(InHeaders));
 
@@ -908,13 +908,11 @@ bool LgiGetUri(LCancel *Cancel, GStreamI *Out, GString *OutError, const char *In
 		i++)
 	{
 		GUri u(InUri);
-		bool IsHTTPS = u.Protocol && !_stricmp(u.Protocol, "https");
+		bool IsHTTPS = u.sProtocol && !_stricmp(u.sProtocol, "https");
 		int DefaultPort = IsHTTPS ? HTTPS_PORT : HTTP_PORT;
 
 		if (InProxy)
-		{
-			Http.SetProxy(InProxy->Host, InProxy->Port ? InProxy->Port : DefaultPort);
-		}
+			Http.SetProxy(InProxy->sHost, InProxy->Port ? InProxy->Port : DefaultPort);
 
 		GAutoPtr<GSocketI> s;
 		

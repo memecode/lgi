@@ -857,13 +857,12 @@ GString IdeDocPrivate::GetDisplayName()
 			if (stristr(Fn, "://"))
 			{
 				GUri u(nSrc->GetFileName());
-				if (u.Pass)
+				if (u.sPass)
 				{
-					DeleteArray(u.Pass);
-					u.Pass = NewStr("******");
+					u.sPass = "******";
 				}
 				
-				return u.GetUri().Release();
+				return u.ToString();
 			}
 			else if (*Fn == '.')
 			{

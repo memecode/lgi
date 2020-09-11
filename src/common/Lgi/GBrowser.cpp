@@ -66,7 +66,7 @@ public:
 	GButton *Forward;
 	GButton *Stop;
 	GButton *Search;
-	GArray<GAutoString> History;
+	GArray<GString> History;
 	ssize_t CurHistory;
 	bool Loading;
 	GBrowser::GBrowserEvents *Events;
@@ -107,33 +107,26 @@ public:
 
 		GUri u(Uri);
 		#ifdef WIN32
-		char *ch;
-		if (u.Path)
-		{
-			while (ch = strchr(u.Path, '/'))
-				*ch = '\\';
-		}
+		if (u.sPath)
+			u.sPath = u.sPath.Replace("/", DIR_STR);
 		#endif
-		bool IsFile = FileExists(u.Path);
+		bool IsFile = FileExists(u.sPath);
 		bool IsHttp = false;
 
 		if (IsFile)
-		{
-			DeleteArray(u.Protocol);
-			u.Protocol = NewStr("file");
-		}
+			u.sProtocol = "file";
 		else if (u.Set(Uri))
 		{
-			if (u.Protocol)
+			if (u.sProtocol)
 			{
-				if (!_stricmp(u.Protocol, "file"))
+				if (!_stricmp(u.sProtocol, "file"))
 				{
-					if (!u.Path)
+					if (!u.sPath)
 						return false;
 
 					IsFile = true;
 				}
-				else if (!_stricmp(u.Protocol, "http"))
+				else if (!_stricmp(u.sProtocol, "http"))
 				{
 					IsHttp = true;
 				}
@@ -144,16 +137,15 @@ public:
 			{
 				// Probably...?
 				IsHttp = true;
-				DeleteArray(u.Protocol);
-				u.Protocol = NewStr("http");
-				History[CurHistory] = u.GetUri();
+				u.sProtocol = "http";
+				History[CurHistory] = u.ToString();
 				Uri = History[CurHistory];
 			}
 		}
 		
 		if (IsFile)
 		{
-			GAutoString txt(ReadTextFile(u.Path));
+			GAutoString txt(ReadTextFile(u.sPath));
 			if (txt)
 			{
 				Html->Name(txt);
@@ -167,12 +159,12 @@ public:
 			Thread->Add(Uri);
 		}
 
-		if (u.Anchor)
+		if (u.sAnchor)
 		{
-			Html->GotoAnchor(u.Anchor);
+			Html->GotoAnchor(u.sAnchor);
 		}
 
-		GAutoString a = u.GetUri();
+		GString a = u.ToString();
 		UriEdit->Name(a);
 
 		Wnd->SetCtrlEnabled(IDC_BACK, CurHistory > 0);
@@ -188,7 +180,7 @@ public:
 
 		GUri u(Uri);
 		char Sep, Buf[MAX_PATH];
-		if (!u.Protocol)
+		if (!u.sProtocol)
 		{
 			// Relative link?
 			char *Cur = History[CurHistory];
@@ -232,8 +224,8 @@ public:
 
 			Uri = Buf;
 		}
-		else if (!_stricmp(u.Protocol, "mailto") ||
-				 !_stricmp(u.Protocol, "http"))
+		else if (!_stricmp(u.sProtocol, "mailto") ||
+				 !_stricmp(u.sProtocol, "http"))
 		{
 			LgiExecute(Uri);
 			return true;
@@ -252,7 +244,7 @@ public:
 		
 		GUri u(j->Uri);
 		char *LoadFileName = 0;
-		if (u.Protocol)
+		if (u.sProtocol)
 		{
 			
 		}
@@ -261,7 +253,7 @@ public:
 		if (LoadFileName)
 		{
 			char p[MAX_PATH];
-			LgiMakePath(p, sizeof(p), BaseUri.Path ? BaseUri.Path : Uri, "..");
+			LgiMakePath(p, sizeof(p), BaseUri.sPath ? BaseUri.sPath : Uri, "..");
 			LgiMakePath(p, sizeof(p), p, LoadFileName);
 			if (FileExists(p))
 			{
@@ -370,11 +362,11 @@ int GBrowserThread::Main()
 			if (p)
 			{
 				GProxyUri Proxy;
-				if (Proxy.Host)
-					d->Http.SetProxy(Proxy.Host, Proxy.Port);
+				if (Proxy.sHost)
+					d->Http.SetProxy(Proxy.sHost, Proxy.Port);
 
 				GAutoPtr<GSocketI> Sock(new GSocket);
-				if (d->Http.Open(Sock, u.Host, u.Port))
+				if (d->Http.Open(Sock, u.sHost, u.Port))
 				{
 					IHttp::ContentEncoding Enc;
 					bool b = d->Http.Get(Uri, "Cache-Control:no-cache", &Status, p, &Enc);
@@ -462,7 +454,7 @@ bool GBrowser::SetUri(const char *Uri)
 		}
 
 		// Add a new URI to the history
-		d->History.New().Reset(NewStr(Uri));
+		d->History.New() = Uri;
 		d->CurHistory = d->History.Length() - 1;
 
 		// Enabled the controls accordingly

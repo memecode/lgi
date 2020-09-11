@@ -200,23 +200,23 @@ public:
 				GUri u(Job->Uri);
 				if
 				(
-					u.Protocol &&
+					u.sProtocol &&
 					(
-						!stricmp(u.Protocol, "http") ||
-						!stricmp(u.Protocol, "https")
+						!stricmp(u.sProtocol, "http") ||
+						!stricmp(u.sProtocol, "https")
 					)
 				)
 				{				
 					IHttp http;
 					GProxyUri proxy;
-					if (proxy.Host)
-						http.SetProxy(proxy.Host, proxy.Port);
+					if (proxy.sHost)
+						http.SetProxy(proxy.sHost, proxy.Port);
 					
 					GStringPipe p;
 					int Status = 0;
 					IHttp::ContentEncoding Encoding = IHttp::EncodeRaw;
-					GAutoPtr<GSocketI> sock = CreateSock(u.Protocol);
-					if (http.Open(sock, u.Host, u.Port))
+					GAutoPtr<GSocketI> sock = CreateSock(u.sProtocol);
+					if (http.Open(sock, u.sHost, u.Port))
 					{
 						int RedirCount = 0;
 						GStringPipe Headers;
@@ -226,7 +226,7 @@ public:
 							GAutoString Hdr(Headers.NewStr());
 							GAutoString Loc(InetGetHeaderField(Hdr,	"Location"));
 							u.Set(Loc);
-							sock = CreateSock(u.Protocol);
+							sock = CreateSock(u.sProtocol);
 							
 							if (!_stricmp(Loc, Job->Uri))
 							{
@@ -243,7 +243,7 @@ public:
 						{
 							uchar Hint[16];
 							p.Peek(Hint, sizeof(Hint));
-							GAutoPtr<GFilter> Filter(GFilterFactory::New(u.Path, FILTER_CAP_READ, Hint));
+							GAutoPtr<GFilter> Filter(GFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint));
 							if (Filter)
 							{
 								GAutoPtr<GSurface> Img(new GMemDC);
@@ -258,17 +258,17 @@ public:
 									}
 									else
 									{
-										LgiTrace("%s:%i - No env for '%s'\n", _FL, u.Path);
+										LgiTrace("%s:%i - No env for '%s'\n", _FL, u.sPath.Get());
 										LgiAssert(0);
 									}
 								}
-								else LgiTrace("%s:%i - Failed to read '%s'\n", _FL, u.Path);
+								else LgiTrace("%s:%i - Failed to read '%s'\n", _FL, u.sPath.Get());
 							}
-							else LgiTrace("%s:%i - Failed to find filter for '%s'\n", _FL, u.Path);
+							else LgiTrace("%s:%i - Failed to find filter for '%s'\n", _FL, u.sPath.Get());
 						}
 						else LgiTrace("%s:%i - Failed to get '%s', status=%i\n", _FL, Job->Uri.Get(), Status);
 					}
-					else LgiTrace("%s:%i - Failed to open connection to '%s:%i'\n", _FL, u.Host, u.Port);
+					else LgiTrace("%s:%i - Failed to open connection to '%s:%i'\n", _FL, u.sHost.Get(), u.Port);
 				}
 				else
 				{
@@ -304,7 +304,7 @@ class AppWnd : public GWindow, public GDefaultDocumentEnv
 	LoadType GetContent(LoadJob *&j)
 	{
 		GUri u(j->Uri);
-		if (!u.Protocol)
+		if (!u.sProtocol)
 		{
 			char p[MAX_PATH];
 			if (LgiMakePath(p, sizeof(p), Base, j->Uri) &&

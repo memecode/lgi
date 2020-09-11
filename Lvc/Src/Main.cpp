@@ -8,11 +8,13 @@
 #include "GTextLog.h"
 #include "GButton.h"
 #include "GXmlTreeUi.h"
-
+#include "GTree.h"
 
 //////////////////////////////////////////////////////////////////
 const char *AppName =			"Lvc";
 #define DEFAULT_BUILD_FIX_MSG	"Build fix."
+#define OPT_Hosts				"Hosts"
+#define OPT_Host				"Host"
 
 VersionCtrl DetectVcs(const char *Path)
 {
@@ -503,6 +505,22 @@ public:
     }
 };
 
+class RemoteFolderDlg : public GDialog
+{
+	class App *app;
+	GTree *tree;
+	struct SshHost *root, *newhost;
+	GXmlTreeUi Ui;
+
+public:
+	GString Folder;
+
+	RemoteFolderDlg(App *application);
+	~RemoteFolderDlg();
+
+	int OnNotify(GViewI *Ctrl, int Flags);
+};
+
 class App : public GWindow, public AppPriv
 {
 	GAutoPtr<GImageList> ImgLst;
@@ -693,6 +711,16 @@ public:
 	{
 		switch (Cmd)
 		{
+			case IDM_OPEN_LOCAL:
+			{
+				OpenLocalFolder();
+				break;
+			}
+			case IDM_OPEN_REMOTE:
+			{
+				OpenRemoteFolder();
+				break;
+			}
 			case IDM_OPTIONS:
 			{
 				OptionsDlg Dlg(this, Opts);
@@ -828,6 +856,11 @@ public:
 
 	void OpenRemoteFolder()
 	{
+		RemoteFolderDlg dlg(this);
+		if (!dlg.DoModal())
+			return;
+
+		
 	}
 
 	int OnNotify(GViewI *c, int flag)
@@ -1037,6 +1070,187 @@ public:
 		return 0;
 	}
 };
+
+struct SshHost : public GTreeItem
+{
+	GXmlTag *t;
+	GString Host, User, Pass;
+
+	SshHost(GXmlTag *tag = NULL)
+	{
+		t = tag;
+		if (t)
+		{
+			Serialize(false);
+			SetText(Host);
+		}
+	}
+
+	void Serialize(bool WriteToTag)
+	{
+		if (WriteToTag)
+		{
+			GUri u;
+			u.sProtocol = "ssh";
+			u.sHost = Host;
+			u.sUser = User;
+			u.sPass = Pass;
+			t->SetContent(u.ToString());
+		}
+		else
+		{
+			GUri u(t->GetContent());
+			if (!Stricmp(u.sProtocol.Get(), "ssh"))
+			{
+				Host = u.sHost;
+				User = u.sUser;
+				Pass = u.sPass;
+			}
+		}
+	}
+};
+
+RemoteFolderDlg::RemoteFolderDlg(App *application) : app(application), root(NULL), newhost(NULL)
+{
+	SetParent(app);
+	LoadFromResource(IDD_REMOTE_FOLDER);
+
+	if (GetViewById(IDC_HOSTS, tree))
+	{
+		tree->Insert(root = new SshHost());
+		root->SetText("Ssh Hosts");
+	}
+	else return;
+
+	GViewI *v;
+	if (GetViewById(IDC_HOSTNAME, v))
+		v->Focus(true);
+
+	Ui.Map("Host", IDC_HOSTNAME);
+	Ui.Map("User", IDC_USER);
+	Ui.Map("Password", IDC_PASS);
+
+	GXmlTag *hosts = app->Opts.LockTag(OPT_Hosts, _FL);
+	if (hosts)
+	{
+		SshHost *h;
+		for (auto c: hosts->Children)
+			if (c->IsTag(OPT_Host) && (h = new SshHost(c)))
+				root->Insert(h);
+		app->Opts.Unlock();
+	}
+
+	root->Insert(newhost = new SshHost());
+	newhost->SetText("New Host");
+	root->Expanded(true);
+	newhost->Select(true);
+}
+
+RemoteFolderDlg::~RemoteFolderDlg()
+{
+}
+
+int RemoteFolderDlg::OnNotify(GViewI *Ctrl, int Flags)
+{
+	SshHost *cur = dynamic_cast<SshHost*>(tree->Selection());
+
+	#define CHECK_SPECIAL() \
+		if (cur == newhost) \
+		{ \
+			root->Insert(cur = new SshHost()); \
+			cur->Select(true); \
+		} \
+		if (cur == root) \
+			break;
+
+	switch (Ctrl->GetId())
+	{
+		case IDC_HOSTS:
+		{
+			switch (Flags)
+			{
+				case GNotifyItem_Select:
+				{
+					bool isRoot = cur == root;
+					SetCtrlEnabled(IDC_HOSTNAME, !isRoot);
+					SetCtrlEnabled(IDC_USER, !isRoot);
+					SetCtrlEnabled(IDC_PASS, !isRoot);
+					SetCtrlEnabled(IDC_DELETE, !isRoot && !(cur == newhost));
+					
+					SetCtrlName(IDC_HOSTNAME, cur ? cur->Host : NULL);
+					SetCtrlName(IDC_USER, cur ? cur->User : NULL);
+					SetCtrlName(IDC_PASS, cur ? cur->Pass : NULL);
+					break;
+				}
+			}			
+			break;
+		}
+		case IDC_HOSTNAME:
+		{
+			CHECK_SPECIAL()
+			if (cur)
+			{
+				cur->Host = Ctrl->Name();
+				cur->SetText(cur->Host ? cur->Host : "<empty>");
+			}
+			break;
+		}
+		case IDC_USER:
+		{
+			CHECK_SPECIAL()
+			if (cur)
+				cur->User = Ctrl->Name();
+			break;
+		}
+		case IDC_PASS:
+		{
+			CHECK_SPECIAL()
+			if (cur)
+				cur->Pass = Ctrl->Name();
+			break;
+		}
+		case IDOK:
+		{
+			GXmlTag *hosts;
+			if (!(hosts = app->Opts.LockTag(OPT_Hosts, _FL)))
+			{
+				if (!(app->Opts.CreateTag(OPT_Hosts) && (hosts = app->Opts.LockTag(OPT_Hosts, _FL))))
+					break;
+			}
+			LgiAssert(hosts != NULL);
+			
+			for (auto i = root->GetChild(); i; i = i->GetNext())
+			{
+				SshHost *h = dynamic_cast<SshHost*>(i);
+				if (!h || h == newhost)
+					continue;
+
+				if (h->t)
+					;
+				else if (h->t = new GXmlTag(OPT_Host))
+					hosts->InsertTag(cur->t);
+				else
+					return false;
+
+				h->Serialize(true);
+			}
+
+			app->Opts.Unlock();
+
+			GUri u;
+
+
+			// Fall through
+		}
+		case IDCANCEL:
+		{
+			EndModal(Ctrl->GetId() == IDOK);
+			break;
+		}
+	}
+
+	return 0;
+}
 
 //////////////////////////////////////////////////////////////////
 int LgiMain(OsAppArguments &AppArgs)

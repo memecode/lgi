@@ -100,13 +100,13 @@ struct FtpConn
 		GUri u(Uri);
 		
 		if (Base &&
-			u.Host && Base->Host &&
-			u.User && Base->User &&
-			u.Pass && Base->Pass)
+			u.sHost && Base->sHost &&
+			u.sUser && Base->sUser &&
+			u.sPass && Base->sPass)
 		{
-			return	stricmp(u.Host, Base->Host) == 0 &&
-					strcmp(u.User, Base->User) == 0 &&
-					strcmp(u.Pass, Base->Pass) == 0;
+			return	stricmp(u.sHost, Base->sHost) == 0 &&
+					strcmp(u.sUser, Base->sUser) == 0 &&
+					strcmp(u.sPass, Base->sPass) == 0;
 		}
 
 		return false;
@@ -121,10 +121,10 @@ struct FtpConn
 				Ftp.Open
 				(
 					Sock = new LogSock(Watch),
-					Base->Host,
+					Base->sHost,
 					Base->Port ? Base->Port : 21,
-					Base->User,
-					Base->Pass
+					Base->sUser,
+					Base->sPass
 				)
 				==
 				FO_Connected
@@ -291,9 +291,9 @@ int FtpThread::Main()
 						FtpConn *Conn = d->GetConn(c->Uri, c->Watch);
 						if (Conn)
 						{
-							if (Conn->Base->Path)
+							if (Conn->Base->sPath)
 							{
-								if (!Conn->Ftp.SetDir(Conn->Base->Path))
+								if (!Conn->Ftp.SetDir(Conn->Base->sPath))
 								{
 									c->Error("Couldn't set path.");
 								}
@@ -315,10 +315,10 @@ int FtpThread::Main()
 						if (Conn)
 						{
 							GUri u(c->Uri);
-							if (u.Path)
+							if (u.sPath)
 							{
 								char p[256];
-								strcpy_s(p, sizeof(p), u.Path);
+								strcpy_s(p, sizeof(p), u.sPath);
 								char *d = strrchr(p, '/');
 								if (d) *d = 0;
 
@@ -361,10 +361,10 @@ int FtpThread::Main()
 						if (Conn)
 						{
 							GUri u(c->Uri);
-							if (u.Path)
+							if (u.sPath)
 							{
 								char p[256];
-								strcpy_s(p, sizeof(p), u.Path);
+								strcpy_s(p, sizeof(p), u.sPath);
 								char *d = strrchr(p, '/');
 								if (d) *d = 0;
 
