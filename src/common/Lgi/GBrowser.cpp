@@ -239,7 +239,7 @@ public:
 		if (!j || !j->Uri)
 			return LoadError;
 
-		char *Uri = History[CurHistory];
+		auto Uri = History[CurHistory];
 		GUri BaseUri(Uri);
 		
 		GUri u(j->Uri);
@@ -253,7 +253,7 @@ public:
 		if (LoadFileName)
 		{
 			char p[MAX_PATH];
-			LgiMakePath(p, sizeof(p), BaseUri.sPath ? BaseUri.sPath : Uri, "..");
+			LgiMakePath(p, sizeof(p), !BaseUri.sPath.IsEmpty() ? BaseUri.sPath : Uri, "..");
 			LgiMakePath(p, sizeof(p), p, LoadFileName);
 			if (FileExists(p))
 			{

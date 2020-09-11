@@ -121,7 +121,7 @@ struct GSubProcessPriv
 	GSubProcess::ProcessId ChildPid;
 
 	#if defined(POSIX)
-		Pipe Io;
+		GSubProcess::Pipe Io;
 		int ExitValue; // was uint32
 	#elif defined(WIN32)
 		HANDLE ChildHnd;
@@ -180,7 +180,7 @@ GSubProcess::GSubProcess(const char *exe, const char *args, bool pseudoConsole)
 GSubProcess::~GSubProcess()
 {
 	#if defined(POSIX)
-	Io.Close();
+	d->Io.Close();
 	#endif
 	if (Child)
 	{
@@ -251,7 +251,7 @@ GSubProcess::Variable *GSubProcess::GetEnvVar(const char *Var, bool Create)
 			auto p = GString(environ[i]).Split("=", 1);
 			if (p.Length() == 2)
 			{
-				Variable &v = Environment.New();
+				Variable &v = d->Environment.New();
 				v.Var = p[0];
 				v.Val = p[1];
 			}
@@ -294,16 +294,16 @@ bool GSubProcess::IsRunning()
 {
 	#if defined(POSIX)
 		int Status = 0;
-		pid_t r = waitpid(ChildPid, &Status, WNOHANG);
-		if (r == ChildPid)
+		pid_t r = waitpid(d->ChildPid, &Status, WNOHANG);
+		if (r == d->ChildPid)
 		{
-			ChildPid = INVALID_PID;
+			d->ChildPid = INVALID_PID;
 			if (WIFEXITED(Status))
-				ExitValue = WEXITSTATUS(Status);
+				d->ExitValue = WEXITSTATUS(Status);
 			else
-				ExitValue = 255;
+				d->ExitValue = 255;
 		}
-		return ChildPid != INVALID_PID;
+		return d->ChildPid != INVALID_PID;
 	#elif defined(WIN32)
 		if (!GetExitCodeProcess(d->ChildHnd, &d->ExitValue))
 			return false;
@@ -328,7 +328,7 @@ uint32_t GSubProcess::GetErrorCode()
 int32 GSubProcess::GetExitValue()
 {
 	#if defined(POSIX)
-	if (ChildPid != INVALID_PID)
+	if (d->ChildPid != INVALID_PID)
 	 	// This will set ExitValue if the process has finished.
 		IsRunning();
 	#elif defined(WIN32)
@@ -480,13 +480,13 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			return false;
 		}
 		
-		ChildPid = fork();
-		if (ChildPid == 0)
+		d->ChildPid = fork();
+		if (d->ChildPid == 0)
 		{
 			// We are in the child process.
-			if (InitialFolder)
+			if (d->InitialFolder)
 			{
-				chdir(InitialFolder);
+				chdir(d->InitialFolder);
 			}
 
 			// Child shouldn't write to its stdin.
@@ -520,15 +520,15 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			close(out[1]);
 
 			// Execute the child
-			Args.Add(NULL);
+			d->Args.Add(NULL);
 			
-			if (Environment.Length())
+			if (d->Environment.Length())
 			{
 				GString::Array Vars, Path;
 				GArray<char*> Env;
                 
 				Vars.SetFixedLength(false);
-				for (auto v : Environment)
+				for (auto v : d->Environment)
 				{
 					GString &s = Vars.New();
 					s.Printf("%s=%s", v.Var.Get(), v.Val.Get());
@@ -539,7 +539,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 				}
 				Env.Add(NULL);
                 
-                if (!FileExists(Exe))
+                if (!FileExists(d->Exe))
                 {
                     // Apparently 'execve' doesn't search the path... so we're going to look up the
                     // full executable path ourselves.
@@ -547,10 +547,10 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
                         Path = LGetPath();
                     for (auto s: Path)
                     {
-                        GFile::Path p(s, Exe);
+                        GFile::Path p(s, d->Exe);
                         if (p.Exists())
                         {
-                            Exe = p.GetFull();
+                            d->Exe = p.GetFull();
                             break;
                         }
                     }
@@ -563,12 +563,12 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 					printf("Env[%i]=%s\n", i, Env[i]);
 				#endif
 				
-				int r = execve(Exe, &Args[0], Env.AddressOf());
+				int r = execve(d->Exe, &d->Args[0], Env.AddressOf());
 				printf("execve=%i err=%i\n", r, errno);
 			}
 			else
 			{
-				execvp(Exe, &Args[0]);
+				execvp(d->Exe, &d->Args[0]);
 			}
 
 			// Execution will pass to here if the 'Exe' can't run or doesn't exist
@@ -579,7 +579,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		else
 		{
 			// We are in the parent process.
-			if (ChildPid == -1)
+			if (d->ChildPid == -1)
 			{
 				printf("%s:%i - parent: Failed to create child", _FL);
 				return false;
@@ -593,8 +593,8 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			if (close(out[1]))
 				printf("%s:%i - close failed.\n", _FL);
 
-			Io.Read = out[0];
-			Io.Write = in[1];
+			d->Io.Read = out[0];
+			d->Io.Write = in[1];
 			
 			// printf("USE_SIMPLE_FORK success.\n");
 			return true;
@@ -999,17 +999,17 @@ int GSubProcess::Wait()
 	int Status = -1;
 
 	#if defined(POSIX)
-		if (ChildPid != INVALID_PID)
+		if (d->ChildPid != INVALID_PID)
 		{
 			int Status = 0;
-			pid_t r = waitpid(ChildPid, &Status, 0);
-			if (r == ChildPid)
+			pid_t r = waitpid(d->ChildPid, &Status, 0);
+			if (r == d->ChildPid)
 			{
-				ChildPid = INVALID_PID;
+				d->ChildPid = INVALID_PID;
 				if (WIFEXITED(Status))
-					ExitValue = WEXITSTATUS(Status);
+					d->ExitValue = WEXITSTATUS(Status);
 				else
-					ExitValue = 255;
+					d->ExitValue = 255;
 			}
 		}
 	#elif defined(WIN32)
@@ -1079,21 +1079,21 @@ bool GSubProcess::Interrupt()
 bool GSubProcess::Signal(int which)
 {
 	#if defined(POSIX)
-		if (ChildPid == INVALID_PID)
+		if (d->ChildPid == INVALID_PID)
 		{
 			printf("%s:%i - child pid doesn't exist.\n", _FL);
 			return false;
 		}
 
-		if (kill(ChildPid, which))
+		if (kill(d->ChildPid, which))
 		{
-			printf("%s:%i - kill(%i, %i) failed.\n", _FL, ChildPid, which);
+			printf("%s:%i - kill(%i, %i) failed.\n", _FL, d->ChildPid, which);
 			return false;
 		}
 
-		printf("%s:%i - kill(%i, %i).\n", _FL, ChildPid, which);
+		printf("%s:%i - kill(%i, %i).\n", _FL, d->ChildPid, which);
 		if (which == SIGTERM)
-			ChildPid = INVALID_PID;
+			d->ChildPid = INVALID_PID;
 	#elif defined(WIN32)
 		if (!d->ChildHnd)
 		{
@@ -1155,7 +1155,7 @@ ssize_t GSubProcess::Read(void *Buf, ssize_t Size, int TimeoutMs)
 		bool DoRead = true;
 		if (TimeoutMs)
 		{
-			OsSocket s = Io.Read;
+			OsSocket s = d->Io.Read;
 			if (ValidSocket(s))
 			{
 				struct timeval t = {TimeoutMs / 1000, (TimeoutMs % 1000) * 1000};
@@ -1178,7 +1178,7 @@ ssize_t GSubProcess::Read(void *Buf, ssize_t Size, int TimeoutMs)
 			else LgiTrace("%s:%i - Invalid socket.\n", _FL);
 		}
 		
-		return (int)read(Io.Read, Buf, Size);
+		return (int)read(d->Io.Read, Buf, Size);
 	#else		
 		DWORD Rd = -1, Sz;
 		if (!ReadFile(d->ChildOutput.Read, Buf, AssertCast(Sz, Size), &Rd, NULL))
@@ -1191,7 +1191,7 @@ int GSubProcess::Peek()
 {
 	#if defined(POSIX)
 		int bytesAvailable = 0;
-		int r = ioctl(Io.Read, FIONREAD, &bytesAvailable);
+		int r = ioctl(d->Io.Read, FIONREAD, &bytesAvailable);
 		return r ? -1 : bytesAvailable;
 	#else		
 		DWORD Rd = 0, Avail = 0;
@@ -1211,7 +1211,7 @@ bool GSubProcess::Write(GString s)
 ssize_t GSubProcess::Write(const void *Buf, ssize_t Size, int Flags)
 {
 	#if defined(POSIX)
-		return (int)write(Io.Write, Buf, Size);
+		return (int)write(d->Io.Write, Buf, Size);
 	#else
 		DWORD Wr = -1, Sz;
 		if (!WriteFile(d->ChildInput.Write, Buf, AssertCast(Sz, Size), &Wr, NULL))

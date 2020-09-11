@@ -828,17 +828,16 @@ char *HttpTools::Post(char *uri, char *headers, char *body, GStream *Log, GViewI
 				p.Print("POST http://%s%s HTTP/1.1\r\n"
 						"Host: %s\r\n",
 						u.sHost.Get(),
-						EncPath,
+						EncPath.Get(),
 						u.sHost.Get());
 			}
 			else
 			{
 				p.Print("POST %s HTTP/1.1\r\n"
 						"Host: %s\r\n",
-						EncPath,
+						EncPath.Get(),
 						u.sHost.Get());
 			}
-			DeleteArray(EncPath);
 
 			p.Print("Content-Length: %i\r\n"
 					"%s\r\n"

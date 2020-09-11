@@ -1227,7 +1227,7 @@ int RemoteFolderDlg::OnNotify(GViewI *Ctrl, int Flags)
 
 				if (h->t)
 					;
-				else if (h->t = new GXmlTag(OPT_Host))
+				else if ((h->t = new GXmlTag(OPT_Host)))
 					hosts->InsertTag(cur->t);
 				else
 					return false;

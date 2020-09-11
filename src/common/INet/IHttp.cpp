@@ -398,7 +398,7 @@ bool IHttp::Request
 	GStringPipe Cmd;
 	GUri u(Uri);
 	bool IsHTTPS = u.sProtocol && !_stricmp(u.sProtocol, "https");
-	GString EncPath = u.EncodeStr(u.sPath ? u.sPath : (char*)"/"), Mem;
+	GString EncPath = u.EncodeStr(u.sPath.Get() ? u.sPath.Get() : (char*)"/"), Mem;
 	char s[1024];
 	GLinePrefix EndHeaders("\r\n");
 	GStringPipe Headers;

@@ -316,7 +316,7 @@ struct LOAuth2Priv
 			SslSocket sock(NULL, NULL, true);
 			if (!sock.Open(u.sHost, HTTPS_PORT))
 			{
-				Log->Print("Error: Can't connect to '%s:%i'\n", u.sHost, HTTPS_PORT);
+				Log->Print("Error: Can't connect to '%s:%i'\n", u.sHost.Get(), HTTPS_PORT);
 				return NULL;
 			}
 		

@@ -11,7 +11,7 @@
 #include "GToken.h"
 #elif defined MAC
 #include "INet.h"
-LgiFunc bool LMacFileToPath(GAutoString &a);
+LgiFunc bool LMacFileToPath(GString &a);
 #endif
 
 class GDropFiles : public GArray<const char*>
@@ -173,31 +173,31 @@ public:
 					if
 					(
 						(
-							u.Protocol
+							u.sProtocol
 							&&
-							stricmp(u.Protocol, "file") == 0
+							stricmp(u.sProtocol, "file") == 0
 						)
 						&&
 						(
-							!u.Host
+							!u.sHost
 							||
 							(
-								ValidStr(u.Host)
+								ValidStr(u.sHost)
 								&&
-								stricmp(u.Host, "localhost") == 0
+								stricmp(u.sHost, "localhost") == 0
 							)
 						)
 					)
 					{
-						GAutoString a = u.Decode(u.Path);
+						GString a = u.DecodeStr(u.sPath);
 						
 						if (a.Get() && !strncasecmp(a, "/.file/", 7))
 							LMacFileToPath(a);
 					
 						if (a)
-							Add(a.Release());
+							Add(NewStr(a));
 					}
-					else if (!u.Protocol &&
+					else if (!u.sProtocol &&
 							FileExists(s))
 					{
 						Add(NewStr(s));

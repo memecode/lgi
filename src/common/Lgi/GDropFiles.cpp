@@ -2,19 +2,20 @@
 #include "GDropFiles.h"
 
 #ifdef MAC
-LgiFunc bool LMacFileToPath(GAutoString &a)
+LgiFunc bool LMacFileToPath(GString &a)
 {
 	bool Status = true;
 
 	#if LGI_COCOA
 
-		auto *s = [[NSString alloc] initWithBytes:a.Get() length:strlen(a) encoding:NSUTF8StringEncoding];
+		auto *s = [[NSString alloc] initWithBytes:a.Get() length:a.Length() encoding:NSUTF8StringEncoding];
 		if (s)
 		{
 			NSURL *url = [[NSURL alloc] initFileURLWithPath:s];
 			if (url)
 			{
-				Status = a.Reset(NewStr([url.path UTF8String]));
+				a = [url.path UTF8String];
+				Status = !a.IsEmpty();
 				[url release];
 			}
 			else

@@ -51,7 +51,7 @@ GString GUri::ToString()
 	{
 		auto UserEnc = EncodeStr(sUser, "@:");
 		auto PassEnc = EncodeStr(sPass, "@:");
-		p.Print("%s:%s@", UserEnc?UserEnc:"", PassEnc?PassEnc:"");
+		p.Print("%s:%s@", UserEnc?UserEnc.Get():"", PassEnc?PassEnc.Get():"");
 	}
 	if (sHost)
 		p.Write(sHost);

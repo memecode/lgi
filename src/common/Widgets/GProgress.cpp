@@ -11,7 +11,7 @@ GProgress::GProgress(int id, int x, int y, int cx, int cy, const char *name) :
 	SetPos(r);
 	if (name) GControl::Name(name);
 
-	c = Rgb24(50, 150, 255);
+	c.Rgb(50, 150, 255);
 }
 
 GProgress::~GProgress()
@@ -81,18 +81,18 @@ void GProgress::OnPaint(GSurface *pDC)
 		int Pos = (int) (((double) (r.X()-1) * (((double) Val - Low) / High)));
 		if (Pos > 0)
 		{
-			COLOUR High = Rgb24( (R24(c)+255)/2, (G24(c)+255)/2, (B24(c)+255)/2 );
-			COLOUR Low = Rgb24( (R24(c)+0)/2, (G24(c)+0)/2, (B24(c)+0)/2 );
+			GColour High( (c.r()+255)/2, (c.g()+255)/2, (c.b()+255)/2 );
+			GColour Low( (c.r()+0)/2, (c.g()+0)/2, (c.b()+0)/2 );
 			GRect p = r;
 
 			p.x2 = p.x1 + Pos;
 			r.x1 = p.x2 + 1;
 
-			pDC->Colour(Low, 24);
+			pDC->Colour(Low);
 			pDC->Line(p.x2, p.y2, p.x2, p.y1);
 			pDC->Line(p.x2, p.y2, p.x1, p.y2);
 
-			pDC->Colour(High, 24);
+			pDC->Colour(High);
 			pDC->Line(p.x1, p.y1, p.x2, p.y1);
 			pDC->Line(p.x1, p.y1, p.x1, p.y2);
 
@@ -104,7 +104,7 @@ void GProgress::OnPaint(GSurface *pDC)
 			if (f.Type == GCss::ColorRgb)
 				pDC->Colour(f.Rgb32, 32);
 			else
-				pDC->Colour(c, 24);
+				pDC->Colour(c);
 			pDC->Rectangle(&p);
 		}
 	}
