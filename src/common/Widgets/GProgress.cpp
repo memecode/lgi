@@ -2,7 +2,10 @@
 #include "GProgress.h"
 #include "GCss.h"
 
-///////////////////////////////////////////////////////////////////////////////////////////
+GColour GProgress::cNormal(50, 150, 255);
+GColour GProgress::cPaused(222, 160, 0);
+GColour GProgress::cError(255, 0, 0);
+
 GProgress::GProgress(int id, int x, int y, int cx, int cy, const char *name) :
 	ResObject(Res_Progress)
 {
@@ -11,11 +14,23 @@ GProgress::GProgress(int id, int x, int y, int cx, int cy, const char *name) :
 	SetPos(r);
 	if (name) GControl::Name(name);
 
-	c.Rgb(50, 150, 255);
+	c = cNormal;
 }
 
 GProgress::~GProgress()
 {
+}
+
+bool GProgress::Colour(GColour Col)
+{
+	c = Col;
+	Invalidate();
+	return true;
+}
+
+GColour GProgress::Colour()
+{
+	return c;
 }
 
 bool GProgress::Pour(GRegion &r)
