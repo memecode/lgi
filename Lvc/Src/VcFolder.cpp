@@ -3677,7 +3677,7 @@ void VcLeaf::OnMouseClick(GMouse &m)
 		s.AppendItem("Browse To", IDM_BROWSE_FOLDER);
 		s.AppendItem("Terminal At", IDM_TERMINAL);
 		
-		int Cmd = s.Float(GetTree(), m);
+		int Cmd = s.Float(GetTree(), m - _ScrollPos());
 		switch (Cmd)
 		{
 			case IDM_LOG:

@@ -239,6 +239,8 @@ public:
 	bool IsContextMenu();
 };
 
+#include "GPoint.h"
+
 /// \brief All the parameters of a mouse click event
 ///
 /// The parent class GUiEvent keeps information about whether it was a Down()
@@ -249,23 +251,34 @@ public:
 /// GView::GetMouse() and pass true in the 'ScreenCoords' parameter. Or you can
 /// construct a GdcPt2 out of the x,y fields of this class and use GView::PointToScreen()
 /// to map the point to screen co-ordinates.
-class LgiClass GMouse : public GUiEvent
+class LgiClass GMouse : public GUiEvent, public GdcPt2
 {
 public:
 	/// Receiving view
 	class GViewI *Target;
 	/// True if specified in view coordinates, false if in screen coords
 	bool ViewCoords;
-	/// The x co-ordinate of the mouse relative to the current view
-	int x;
-	/// The y co-ordinate of the mouse relative to the current view
-	int y;
-	
+
 	GMouse(GViewI *target = NULL)
 	{
 		Target = target;
 		ViewCoords = true;
-		x = y = 0;
+	}
+
+	GMouse operator -(GdcPt2 p)
+	{
+		GMouse m = *this;
+		m.x -= p.x;
+		m.y -= p.y;
+		return m;
+	}
+
+	GMouse operator +(GdcPt2 p)
+	{
+		GMouse m = *this;
+		m.x += p.x;
+		m.y += p.y;
+		return m;
 	}
 
 	void Trace(const char *Msg)

@@ -46,7 +46,8 @@ bool GProgress::Colour(GColour Col)
 	if (!msg)
 		return false;
 	
-	return SendMessage(_View, PBM_SETSTATE, msg, 0);
+	SendMessage(_View, PBM_SETSTATE, msg, 0);
+	return true;
 }
 
 GColour GProgress::Colour()
