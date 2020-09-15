@@ -920,7 +920,7 @@ bool ObjContainer::ListObjects(List<Resource> &Lst)
 
 //////////////////////////////////////////////////////////////////////////////
 #ifdef WIN32
-const char *Icon = MAKEINTRESOURCE(IDI_ICON1);
+int Icon = IDI_ICON1;
 #else
 const char *Icon = "icon64.png";
 #endif

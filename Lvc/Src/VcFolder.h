@@ -158,7 +158,8 @@ class VcFolder : public GTreeItem
 
 	AppPriv *d;
 	VersionCtrl Type;
-	GString Path, CurrentCommit, RepoUrl, VcCmd;
+	GUri Uri;
+	GString CurrentCommit, RepoUrl, VcCmd;
 	int64 CurrentCommitIdx;
 	GArray<VcCommit*> Log;
 	GString CurrentBranch;
@@ -230,13 +231,13 @@ class VcFolder : public GTreeItem
 	bool ParseUpdateSubs(int Result, GString s, ParseParams *Params);
 	
 public:
-	VcFolder(AppPriv *priv, const char *p);
+	VcFolder(AppPriv *priv, const char *uri);
 	VcFolder(AppPriv *priv, GXmlTag *t);
 	~VcFolder();
 
 	VersionCtrl GetType();
 	AppPriv *GetPriv() { return d; }
-	const char *GetPath() { return Path; }
+	const char *LocalPath();
 	VcLeaf *Find(const char *Path);
 	void DefaultFields();
 	void UpdateColumns();
@@ -257,7 +258,7 @@ public:
 	bool AddFile(const char *Path, bool AsBinary = true);
 	bool Blame(const char *Path);
 	bool SaveFileAs(const char *Path, const char *Revision);
-	void ReadDir(GTreeItem *Parent, const char *Path);
+	void ReadDir(GTreeItem *Parent, const char *Uri);
 	void SetEol(const char *Path, int Type);
 	void GetVersion();
 	void Diff(VcFile *file);

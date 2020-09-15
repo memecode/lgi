@@ -224,10 +224,10 @@ void VcFolder::Init(AppPriv *priv)
 	LgiAssert(d != NULL);
 }
 
-VcFolder::VcFolder(AppPriv *priv, const char *p)
+VcFolder::VcFolder(AppPriv *priv, const char *uri)
 {
 	Init(priv);
-	Path = p;
+	Uri.Set(uri);
 }
 
 VcFolder::VcFolder(AppPriv *priv, GXmlTag *t)
@@ -244,8 +244,20 @@ VcFolder::~VcFolder()
 VersionCtrl VcFolder::GetType()
 {
 	if (Type == VcNone)
-		Type = DetectVcs(Path);
+		Type = DetectVcs(Uri.ToString());
 	return Type;
+}
+
+const char *VcFolder::LocalPath()
+{
+	if (!Uri.IsProtocol("file") || Uri.sPath.IsEmpty())
+	{
+		LgiAssert(!"Shouldn't call this if not a file path.");
+		return NULL;
+	}
+	auto c = Uri.sPath.Get();
+	if (*c == '/') c++;
+	return c;
 }
 
 const char *VcFolder::GetText(int Col)
@@ -254,13 +266,15 @@ const char *VcFolder::GetText(int Col)
 	{
 		case 0:
 		{
+			if (Uri.IsFile())
+				Cache = LocalPath();
+			else
+				Cache.Printf("%s%s", Uri.sHost, Uri.sPath);
+
 			if (Cmds.Length())
-			{
-				Cache = Path;
 				Cache += " (...)";
-				return Cache;
-			}
-			return Path;
+
+			return Cache;
 		}
 		case 1:
 		{
@@ -276,9 +290,16 @@ const char *VcFolder::GetText(int Col)
 bool VcFolder::Serialize(GXmlTag *t, bool Write)
 {
 	if (Write)
-		t->SetContent(Path);
+		t->SetContent(Uri.ToString());
 	else
-		Path = t->GetContent();
+	{
+		GString s = t->GetContent();
+		bool isUri = s.Find("://") >= 0;
+		if (isUri)
+			Uri.Set(s);
+		else
+			Uri.SetFile(s);
+	}
 	return true;
 }
 
@@ -335,19 +356,32 @@ Result VcFolder::RunCmd(const char *Args, LoggingType Logging)
 	if (!Exe || CmdErrors > 2)
 		return Ret;
 
-	GSubProcess Process(Exe, Args);
-	Process.SetInitFolder(Path);
-	if (!Process.Start())
+	if (Uri.IsFile())
 	{
-		Ret.Out.Printf("Process failed with %i", Process.GetErrorCode());
-		return Ret;
-	}
+		GSubProcess Process(Exe, Args);
+		Process.SetInitFolder(LocalPath());
+		if (!Process.Start())
+		{
+			Ret.Out.Printf("Process failed with %i", Process.GetErrorCode());
+			return Ret;
+		}
 
-	if (Logging == LogNormal)
-		d->Log->Print("%s %s\n", Exe, Args);
+		if (Logging == LogNormal)
+			d->Log->Print("%s %s\n", Exe, Args);
 
-	while (Process.IsRunning())
-	{
+		while (Process.IsRunning())
+		{
+			auto Rd = Process.Read();
+			if (Rd.Length())
+			{
+				Ret.Out += Rd;
+				if (Logging == LogNormal)
+					d->Log->Write(Rd.Get(), Rd.Length());
+			}
+
+			LgiYield();
+		}
+
 		auto Rd = Process.Read();
 		if (Rd.Length())
 		{
@@ -356,18 +390,13 @@ Result VcFolder::RunCmd(const char *Args, LoggingType Logging)
 				d->Log->Write(Rd.Get(), Rd.Length());
 		}
 
-		LgiYield();
+		Ret.Code = Process.GetExitValue();
 	}
-
-	auto Rd = Process.Read();
-	if (Rd.Length())
+	else
 	{
-		Ret.Out += Rd;
-		if (Logging == LogNormal)
-			d->Log->Write(Rd.Get(), Rd.Length());
+		LgiAssert(!"Impl me.");
 	}
 
-	Ret.Code = Process.GetExitValue();
 	return Ret;
 }
 
@@ -382,35 +411,42 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 	if (d->Log && Logging != LogSilo)
 		d->Log->Print("%s %s\n", Exe, Args);
 
-	GAutoPtr<GSubProcess> Process(new GSubProcess(Exe, Args));
-	if (!Process)
-		return false;
+	if (Uri.IsFile())
+	{
+		GAutoPtr<GSubProcess> Process(new GSubProcess(Exe, Args));
+		if (!Process)
+			return false;
 
-	Process->SetInitFolder(Params && Params->AltInitPath ? Params->AltInitPath : Path);
-    #ifdef MAC
-    // Mac GUI apps don't share the terminal path, so this overrides that and make it work
-    auto Path = LGetPath();
-    GString Tmp = GString(LGI_PATH_SEPARATOR).Join(Path);
-    Process->SetEnvironment("PATH", Tmp);
-    #endif
+		Process->SetInitFolder(Params && Params->AltInitPath ? Params->AltInitPath : LocalPath());
+		#ifdef MAC
+		// Mac GUI apps don't share the terminal path, so this overrides that and make it work
+		auto Path = LGetPath();
+		GString Tmp = GString(LGI_PATH_SEPARATOR).Join(Path);
+		Process->SetEnvironment("PATH", Tmp);
+		#endif
 
-	GString::Array Ctx;
-	Ctx.SetFixedLength(false);
-	Ctx.Add(Path);
-	Ctx.Add(Exe);
-	Ctx.Add(Args);
-	GAutoPtr<Cmd> c(new Cmd(Ctx, Logging, d->Log));
-	if (!c)
-		return false;
+		GString::Array Ctx;
+		Ctx.SetFixedLength(false);
+		Ctx.Add(LocalPath());
+		Ctx.Add(Exe);
+		Ctx.Add(Args);
+		GAutoPtr<Cmd> c(new Cmd(Ctx, Logging, d->Log));
+		if (!c)
+			return false;
 
-	c->PostOp = Parser;
-	c->Params.Reset(Params);
-	c->Rd.Reset(new ReaderThread(GetType(), Process.Release(), c));
-	Cmds.Add(c.Release());
+		c->PostOp = Parser;
+		c->Params.Reset(Params);
+		c->Rd.Reset(new ReaderThread(GetType(), Process.Release(), c));
+		Cmds.Add(c.Release());
 
-	Update();
+		Update();
 
-	// LgiTrace("Cmd: %s %s\n", Exe, Args);
+		// LgiTrace("Cmd: %s %s\n", Exe, Args);
+	}
+	else
+	{
+		LgiAssert(!"Impl me.");
+	}
 
 	return true;
 }
@@ -610,7 +646,7 @@ void VcFolder::Select(bool b)
 	
 	if (b)
 	{
-		if (!DirExists(Path))
+		if (Uri.IsFile() && !DirExists(LocalPath()))
 			return;
 
 		PROF("DefaultFields");
@@ -1829,7 +1865,7 @@ void VcFolder::OnRemove()
 		{
 			if (c->IsTag(OPT_Folder) &&
 				c->GetContent() &&
-				!_stricmp(c->GetContent(), Path))
+				!_stricmp(c->GetContent(), LocalPath())) // FIXME for ssh?
 			{
 				c->RemoveTag();
 				delete c;
@@ -1845,14 +1881,14 @@ void VcFolder::OnMouseClick(GMouse &m)
 	if (m.IsContextMenu())
 	{
 		LSubMenu s;
-		s.AppendItem("Browse To", IDM_BROWSE_FOLDER);
+		s.AppendItem("Browse To", IDM_BROWSE_FOLDER, Uri.IsFile());
 		s.AppendItem(
 			#ifdef WINDOWS
 			"Command Prompt At",
 			#else
 			"Terminal At",
 			#endif
-			IDM_TERMINAL);
+			IDM_TERMINAL, Uri.IsFile());
 		s.AppendItem("Clean", IDM_CLEAN);
 		s.AppendSeparator();
 		s.AppendItem("Pull", IDM_PULL);
@@ -1866,12 +1902,12 @@ void VcFolder::OnMouseClick(GMouse &m)
 		{
 			case IDM_BROWSE_FOLDER:
 			{
-				LgiBrowseToFile(Path);
+				LgiBrowseToFile(LocalPath());
 				break;
 			}
 			case IDM_TERMINAL:
 			{
-				TerminalAt(Path);
+				TerminalAt(LocalPath());
 				break;
 			}
 			case IDM_CLEAN:
@@ -1954,30 +1990,39 @@ int FolderCompare(GTreeItem *a, GTreeItem *b, NativeInt UserData)
 	return A->Compare(B);
 }
 
-void VcFolder::ReadDir(GTreeItem *Parent, const char *Path)
+void VcFolder::ReadDir(GTreeItem *Parent, const char *Uri)
 {
-	// Read child items
-	GDirectory Dir;
-	for (int b = Dir.First(Path); b; b = Dir.Next())
+	GUri u(Uri);
+
+	if (u.IsFile())
 	{
-		if (Dir.IsDir())
+		// Read child items
+		GDirectory Dir;
+		for (int b = Dir.First(LocalPath()); b; b = Dir.Next())
 		{
-			if (Dir.GetName()[0] != '.')
+			if (Dir.IsDir())
 			{
-				new VcLeaf(this, Parent, Path, Dir.GetName(), true);
+				if (Dir.GetName()[0] != '.')
+				{
+					new VcLeaf(this, Parent, LocalPath(), Dir.GetName(), true);
+				}
+			}
+			else if (!Dir.IsHidden())
+			{
+				char *Ext = LgiGetExtension(Dir.GetName());
+				if (!Ext) continue;
+				if (!stricmp(Ext, "c") ||
+					!stricmp(Ext, "cpp") ||
+					!stricmp(Ext, "h"))
+				{
+					new VcLeaf(this, Parent, LocalPath(), Dir.GetName(), false);
+				}
 			}
 		}
-		else if (!Dir.IsHidden())
-		{
-			char *Ext = LgiGetExtension(Dir.GetName());
-			if (!Ext) continue;
-			if (!stricmp(Ext, "c") ||
-				!stricmp(Ext, "cpp") ||
-				!stricmp(Ext, "h"))
-			{
-				new VcLeaf(this, Parent, Path, Dir.GetName(), false);
-			}
-		}
+	}
+	else
+	{
+		LgiAssert(!"Impl me.");
 	}
 
 	Parent->SortChildren(FolderCompare);
@@ -1989,7 +2034,7 @@ void VcFolder::OnExpand(bool b)
 	{
 		Tmp->Remove();
 		DeleteObj(Tmp);
-		ReadDir(this, Path);
+		ReadDir(this, Uri.ToString());
 	}
 }
 

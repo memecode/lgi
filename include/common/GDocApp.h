@@ -33,6 +33,13 @@ class GDocApp :
 	public GWindow,
 	public GMru
 {
+public:
+	#ifdef _WIN32
+	typedef int LIcon;
+	#else
+	typedef char *LIcon;
+	#endif
+
 private:
 	class GDocAppPrivate *d;
 	OptionsFmt		*Options;
@@ -43,8 +50,8 @@ protected:
 	/// Loads the given menu.
 	bool			_LoadMenu(const char *Resource = 0, const char *Tags = 0, int FileMenuId = -1, int RecentMenuId = -1);
 	/// Call this to create the window, usually in the constructor of your main window class.
-	bool			_Create();
-	/// Call this to destroy the window, usually in the destuctor of your main window class.
+	bool			_Create(LIcon IconResource = 0);
+	/// Call this to destroy the window, usually in the destructor of your main window class.
 	bool			_Destroy();
 	/// Use the open file dialog to select a document to open.
 	bool			_OpenFile(const char *File, bool ReadOnly);
@@ -67,8 +74,8 @@ public:
 		/// The name of the application
 		const char *appname = 0,
 		/// [Optional] The icon resource for the window.
-		const TCHAR *icon = 0,
-		/// Options file base name..
+		LIcon icon = 0,
+		/// [Optional] Options file base name..
 		char *optsname = 0
 	);
 	~GDocApp();

@@ -182,7 +182,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////
 template <typename OptionsFmt>
-GDocApp<OptionsFmt>::GDocApp(const char *appname, const TCHAR *icon, char *optsname)
+GDocApp<OptionsFmt>::GDocApp(const char *appname, LIcon icon, char *optsname)
 {
 	Options = 0;
 	_LangOptsName = 0;
@@ -216,27 +216,15 @@ GDocApp<OptionsFmt>::GDocApp(const char *appname, const TCHAR *icon, char *optsn
 	if (icon)
 	{
 		#if defined WIN32
-		GWin32Class *c = GWin32Class::Create(d->AppName);
-		if (c)
-		{
-			#ifdef UNICODE
-			GPointer p;
-			p.w = (TCHAR*)icon;
-			if (p.i < 0x10000)
+			GWin32Class *c = GWin32Class::Create(d->AppName);
+			if (c)
 			{
-				c->Class.hIcon = LoadIcon(LgiProcessInst(), MAKEINTRESOURCE(icon));
+				if (icon < 0x10000)
+					c->Class.hIcon = LoadIcon(LgiProcessInst(), MAKEINTRESOURCE(icon));
+				else
+					c->Class.hIcon = LoadIcon(LgiProcessInst(), (TCHAR*)(size_t)icon);
 			}
-			else
-			{
-				GAutoWString wIcon(NewStrW(icon));
-				c->Class.hIcon = LoadIcon(LgiProcessInst(), wIcon);
-			}
-			#else
-			c->Class.hIcon = LoadIcon(LgiProcessInst(), (size_t)icon & (~0xffff) ? icon : MAKEINTRESOURCE((size_t)icon));
-			#endif
-		}
 		#else
-		if (icon)
 			SetIcon(icon);
 		#endif
 	}
@@ -355,14 +343,17 @@ bool GDocApp<OptionsFmt>::_SerializeFile(bool Write)
 }
 
 template <typename OptionsFmt>
-bool GDocApp<OptionsFmt>::_Create()
+bool GDocApp<OptionsFmt>::_Create(LIcon IconResource)
 {
 	// Load options
 	_DoSerialize(false);
 
 	// Create and setup the main application window
 	#ifdef WIN32
-	CreateClassW32(d->AppName);
+	HICON hIcon = NULL;
+	if (IconResource)
+		hIcon = LoadIcon(LgiProcessInst(), MAKEINTRESOURCE(IconResource));
+	CreateClassW32(d->AppName, hIcon);
 	#endif
 
 	if (Attach(0))

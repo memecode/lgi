@@ -81,7 +81,7 @@ public:
 	virtual void Disconnect() = 0;
 };
 
-/// Represents a file or folder in the remote systemß
+/// Represents a file or folder in the remote system.
 class IFtpEntry
 {
 public:

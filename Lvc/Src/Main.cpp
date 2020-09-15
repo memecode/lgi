@@ -16,12 +16,20 @@ const char *AppName =			"Lvc";
 #define OPT_Hosts				"Hosts"
 #define OPT_Host				"Host"
 
-VersionCtrl DetectVcs(const char *Path)
+VersionCtrl DetectVcs(const char *Uri)
 {
 	char p[MAX_PATH];
+	GUri u(Uri);
 
-	if (!Path)
+	if (!u.IsFile() || !u.sPath)
+	{
+		LgiAssert(!"Impl me.");
 		return VcNone;
+	}
+
+	auto Path = u.sPath.Get();
+	if (*Path == '/')
+		Path++;
 
 	if (LgiMakePath(p, sizeof(p), Path, ".git") &&
 		DirExists(p))
@@ -839,7 +847,7 @@ public:
 				Tree->GetAll(Folders);
 				for (auto f: Folders)
 				{
-					if (!Stricmp(f->GetPath(), Fld))
+					if (!Stricmp(f->LocalPath(), Fld))
 					{
 						Has = true;
 						break;
@@ -847,7 +855,11 @@ public:
 				}
 
 				if (!Has)
-					Tree->Insert(new VcFolder(this, Fld));
+				{
+					GUri u;
+					u.SetFile(Fld);
+					Tree->Insert(new VcFolder(this, u.ToString()));
+				}
 			}
 			else
 				LgiMsg(this, "Folder not under version control.", AppName);
@@ -860,7 +872,7 @@ public:
 		if (!dlg.DoModal())
 			return;
 
-		
+		Tree->Insert(new VcFolder(this, dlg.Folder));
 	}
 
 	int OnNotify(GViewI *c, int flag)

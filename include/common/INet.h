@@ -367,6 +367,11 @@ public:
 	);
 	~GUri();
 
+	bool IsProtocol(const char *p) { return sProtocol.Equals(p); }
+	bool IsHttp() { return sProtocol.Equals("http") || sProtocol.Equals("https"); }
+	bool IsFile() { return sProtocol.Equals("file"); }
+	void SetFile(GString Path) { Empty(); sProtocol = "file"; sPath = Path; }
+
 	/// Parse a URI into it's sub fields...
 	bool Set(const char *uri);
 
