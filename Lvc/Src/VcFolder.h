@@ -238,6 +238,7 @@ public:
 	VersionCtrl GetType();
 	AppPriv *GetPriv() { return d; }
 	const char *LocalPath();
+	GUri GetUri() { return Uri; }
 	VcLeaf *Find(const char *Path);
 	void DefaultFields();
 	void UpdateColumns();
@@ -283,13 +284,14 @@ class VcLeaf : public GTreeItem
 	AppPriv *d;
 	VcFolder *Parent;
 	bool Folder;
-	GString Path, Leaf;
+	GUri Uri;
+	GString Leaf;
 	GTreeItem *Tmp;
 
 public:
 	GArray<VcCommit*> Log;
 
-	VcLeaf(VcFolder *parent, GTreeItem *Item, GString path, GString leaf, bool folder);
+	VcLeaf(VcFolder *parent, GTreeItem *Item, GString uri, GString leaf, bool folder);
 	~VcLeaf();
 
 	GString Full();

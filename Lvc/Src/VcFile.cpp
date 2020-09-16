@@ -49,6 +49,20 @@ VcFile::FileStatus VcFile::GetStatus()
 	return Status;
 }
 
+GString VcFile::GetUri()
+{
+	const char *File = GetText(COL_FILENAME);
+	GUri u = Uri || !Owner ? Uri : Owner->GetUri();
+	LgiAssert(u && File);
+	u += File;
+	return u.ToString();
+}
+
+void VcFile::SetUri(GString uri)
+{
+	Uri.Set(uri);
+}
+
 int VcFile::Checked(int Set)
 {
 	if (!Chk)
@@ -95,8 +109,15 @@ void VcFile::OnMouseClick(GMouse &m)
 	{
 		LSubMenu s;
 		const char *File = GetText(COL_FILENAME);
-		GFile::Path p = Path ? Path.Get() : Owner->LocalPath();
-		p += File;
+		GString LocalPath;
+		GString FullUri = GetUri();
+
+		if (Uri.IsProtocol("file"))
+		{
+			GFile::Path p = Uri.sPath ? Uri.sPath(1,-1) : Owner->LocalPath();
+			p += File;
+			LocalPath = p.GetFull();
+		}
 
 		GetStatus();
 		if (Revision)
@@ -134,12 +155,12 @@ void VcFile::OnMouseClick(GMouse &m)
 			s.AppendItem("Browse To", IDM_BROWSE);
 			s.AppendItem("Log", IDM_LOG_FILE);
 
-			int Cur = GetEol(p);
+			int CurEol = LocalPath ? GetEol(LocalPath) : 0;
 			auto Ln = s.AppendSub("Line Endings");
 			auto Item = Ln->AppendItem("LF", IDM_EOL_LF);
-			if (Item && Cur == IDM_EOL_LF) Item->Checked(true);
+			if (Item && CurEol == IDM_EOL_LF) Item->Checked(true);
 			Ln->AppendItem("CRLF", IDM_EOL_CRLF);
-			if (Item && Cur == IDM_EOL_CRLF) Item->Checked(true);
+			if (Item && CurEol == IDM_EOL_CRLF) Item->Checked(true);
 			Ln->AppendItem("Auto", IDM_EOL_AUTO);
 		}
 
@@ -148,57 +169,57 @@ void VcFile::OnMouseClick(GMouse &m)
 		{
 			case IDM_REVERT:
 			{
-				Owner->Revert(p);
+				Owner->Revert(FullUri);
 				break;
 			}
 			case IDM_RESOLVE:
 			{
-				Owner->Resolve(p);
+				Owner->Resolve(FullUri);
 				break;
 			}
 			case IDM_ADD_FILE:
 			{
-				Owner->AddFile(p, false);
+				Owner->AddFile(FullUri, false);
 				break;
 			}
 			case IDM_ADD_BINARY_FILE:
 			{
-				Owner->AddFile(p, true);
+				Owner->AddFile(FullUri, true);
 				break;
 			}
 			case IDM_BROWSE:
 			{
-				if (p.Exists())
-					LgiBrowseToFile(p);
+				if (LocalPath && DirExists(LocalPath))
+					LgiBrowseToFile(LocalPath);
 				else
-					LgiMsg(GetList(), "Can't find file...", AppName);
+					LgiMsg(GetList(), "Can't find path '%s'.", AppName, MB_OK, LocalPath.Get());
 				break;
 			}
 			case IDM_REVERT_TO_REV:
 			{
-				Owner->Revert(p, Revision);
+				Owner->Revert(FullUri, Revision);
 				break;
 			}
 			case IDM_BLAME:
 			{
-				Owner->Blame(p);
+				Owner->Blame(FullUri);
 				break;
 			}
 			case IDM_SAVE_AS:
 			{
-				Owner->SaveFileAs(p, Revision);
+				Owner->SaveFileAs(FullUri, Revision);
 				break;
 			}
 			case IDM_EOL_LF:
 			case IDM_EOL_CRLF:
 			case IDM_EOL_AUTO:
 			{
-				Owner->SetEol(p, Cmd);
+				Owner->SetEol(FullUri, Cmd);
 				break;
 			}
 			case IDM_LOG_FILE:
 			{
-				Owner->LogFile(p);
+				Owner->LogFile(FullUri);
 				break;
 			}
 		}

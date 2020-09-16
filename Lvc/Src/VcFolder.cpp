@@ -950,17 +950,19 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 	return true;
 }
 
-void VcFolder::LogFile(const char *Path)
+void VcFolder::LogFile(const char *uri)
 {
 	GString Args;
+	GUri u(uri);
 	
 	switch (GetType())
 	{
 		case VcSvn:
 		case VcHg:
 		{
-			ParseParams *Params = new ParseParams(Path);
-			Args.Printf("log \"%s\"", Path);
+			GString File = u.IsFile() ? u.LocalPath() : u.sPath;
+			ParseParams *Params = new ParseParams(uri);
+			Args.Printf("log \"%s\"", File.Get());
 			IsLogging = StartCmd(Args, &VcFolder::ParseLog, Params, LogNormal);
 			break;
 		}
@@ -1998,13 +2000,13 @@ void VcFolder::ReadDir(GTreeItem *Parent, const char *Uri)
 	{
 		// Read child items
 		GDirectory Dir;
-		for (int b = Dir.First(LocalPath()); b; b = Dir.Next())
+		for (int b = Dir.First(u.LocalPath()); b; b = Dir.Next())
 		{
 			if (Dir.IsDir())
 			{
 				if (Dir.GetName()[0] != '.')
 				{
-					new VcLeaf(this, Parent, LocalPath(), Dir.GetName(), true);
+					new VcLeaf(this, Parent, u.ToString(), Dir.GetName(), true);
 				}
 			}
 			else if (!Dir.IsHidden())
@@ -2015,7 +2017,9 @@ void VcFolder::ReadDir(GTreeItem *Parent, const char *Uri)
 					!stricmp(Ext, "cpp") ||
 					!stricmp(Ext, "h"))
 				{
-					new VcLeaf(this, Parent, LocalPath(), Dir.GetName(), false);
+					GUri Path = u;
+					Path += Dir.GetName();
+					new VcLeaf(this, Parent, u.ToString(), Dir.GetName(), false);
 				}
 			}
 		}
@@ -2386,12 +2390,13 @@ bool VcFolder::ParseUpdateSubs(int Result, GString s, ParseParams *Params)
 	return false;
 }
 
-void VcFolder::FolderStatus(const char *Path, VcLeaf *Notify)
+void VcFolder::FolderStatus(const char *uri, VcLeaf *Notify)
 {
-	if (Path)
+	GUri Uri(uri);
+	if (Uri.IsFile() && Uri.sPath)
 	{
-		GFile::Path FilePath(Path);
-		if (!FilePath.IsFolder())
+		GFile::Path p(Uri.sPath(1,-1));
+		if (!p.IsFolder())
 		{
 			LgiAssert(!"Needs to be a folder.");
 			return;
@@ -2427,9 +2432,9 @@ void VcFolder::FolderStatus(const char *Path, VcLeaf *Notify)
 	}
 
 	ParseParams *p = new ParseParams;
-	if (Path && Notify)
+	if (uri && Notify)
 	{
-		p->AltInitPath = Path;
+		p->AltInitPath = uri;
 		p->Leaf = Notify;
 	}
 	else
@@ -3329,17 +3334,20 @@ bool VcFolder::ParseRevert(int Result, GString s, ParseParams *Params)
 	return false;
 }
 
-bool VcFolder::Revert(const char *Path, const char *Revision)
+bool VcFolder::Revert(const char *uri, const char *Revision)
 {
-	if (!Path)
+	if (!uri)
 		return false;
+
+	GUri u(uri);
+	GString Path = u.IsFile() ? u.LocalPath() : u.sPath;
 
 	switch (GetType())
 	{
 		case VcGit:
 		{
 			GString a;
-			a.Printf("checkout \"%s\"", Path);
+			a.Printf("checkout \"%s\"", Path.Get());
 			return StartCmd(a, &VcFolder::ParseRevert);
 			break;
 		}
@@ -3347,7 +3355,7 @@ bool VcFolder::Revert(const char *Path, const char *Revision)
 		case VcSvn:
 		{
 			GString a;
-			a.Printf("revert \"%s\"", Path);
+			a.Printf("revert \"%s\"", Path.Get());
 			return StartCmd(a, &VcFolder::ParseRevert);
 			break;
 		}
@@ -3573,11 +3581,13 @@ void VcFolder::UncommitedItem::OnPaint(GItem::ItemPaintCtx &Ctx)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-VcLeaf::VcLeaf(VcFolder *parent, GTreeItem *Item, GString path, GString leaf, bool folder)
+VcLeaf::VcLeaf(VcFolder *parent, GTreeItem *Item, GString uri, GString leaf, bool folder)
 {
 	Parent = parent;
 	d = Parent->GetPriv();
-	Path = path;
+	LgiAssert(uri.Find("://") >= 0); // Is URI
+	Uri.Set(uri);
+	LgiAssert(Uri);
 	Leaf = leaf;
 	Folder = folder;
 	Tmp = NULL;
@@ -3597,9 +3607,9 @@ VcLeaf::~VcLeaf()
 
 GString VcLeaf::Full()
 {
-	GFile::Path p(Path);
-	p += Leaf;
-	return p.GetFull();
+	GUri u = Uri;
+	u += Leaf;
+	return u.ToString();
 }
 
 void VcLeaf::OnBrowse()
@@ -3617,7 +3627,7 @@ void VcLeaf::OnBrowse()
 		VcFile *f = new VcFile(d, Parent, NULL, true);
 		if (f)
 		{
-			f->SetPath(full);
+			f->SetUri(GString("file://") + full);
 			f->SetText(Dir.GetName(), COL_FILENAME);
 			Files->Insert(f);
 		}
@@ -3653,10 +3663,7 @@ void VcLeaf::OnExpand(bool b)
 	{
 		Tmp->Remove();
 		DeleteObj(Tmp);
-			
-		GFile::Path p(Path);
-		p += Leaf;
-		Parent->ReadDir(this, p);
+		Parent->ReadDir(this, Full());
 	}
 }
 
