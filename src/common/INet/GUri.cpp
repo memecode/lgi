@@ -18,6 +18,25 @@ GUri::~GUri()
 	Empty();
 }
 
+GUri &GUri::operator +=(const char *s)
+{
+	// Add segment to path
+	if (!sPath.Length() || sPath(-1) != '/')
+		sPath += IsFile() ? DIR_STR : "/";
+
+	auto len = sPath.Length();
+	sPath += s;
+
+	char *c = sPath.Get(), from = DIR_CHAR == '/' ? '\\' : '/';
+	for (size_t i=len; c && i<sPath.Length(); i++)
+	{
+		if (c[i] == from)
+			c[i] = DIR_CHAR;
+	}
+
+	return *this;
+}
+
 GUri &GUri::operator =(const GUri &u)
 {
 	Empty();
@@ -39,6 +58,23 @@ void GUri::Empty()
 	sHost.Empty();
 	sPath.Empty();
 	sAnchor.Empty();
+}
+
+GUri::operator bool()
+{
+	return IsFile() ? !sPath.IsEmpty() : !sHost.IsEmpty();
+}
+
+const char *GUri::LocalPath()
+{
+	if (!IsFile())
+		return NULL;
+	auto s = sPath.Get();
+	if (!s)
+		return NULL;
+	if (*s == '/')
+		s++;
+	return s;
 }
 
 GString GUri::ToString()

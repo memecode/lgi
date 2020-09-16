@@ -371,6 +371,8 @@ public:
 	bool IsHttp() { return sProtocol.Equals("http") || sProtocol.Equals("https"); }
 	bool IsFile() { return sProtocol.Equals("file"); }
 	void SetFile(GString Path) { Empty(); sProtocol = "file"; sPath = Path; }
+	const char *LocalPath();
+	operator bool();
 
 	/// Parse a URI into it's sub fields...
 	bool Set(const char *uri);
@@ -398,7 +400,8 @@ public:
 	StrMap Params();
 
 	GUri &operator =(const GUri &u);
-	GUri &operator =(char *s) { Set(s); return *this; }
+	GUri &operator =(const char *s) { Set(s); return *this; }
+	GUri &operator +=(const char *s);
 };
 
 /// Proxy settings lookup
