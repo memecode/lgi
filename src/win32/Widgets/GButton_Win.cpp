@@ -197,6 +197,11 @@ GMessage::Result GButton::OnEvent(GMessage *Msg)
 				Value(d->Value);
 			break;
 		}
+		case WM_DESTROY:
+		{
+			d->Value = SendMessage(Handle(), BM_GETCHECK, 0, 0);
+			break;
+		}
 		case WM_GETDLGCODE:
 		{
 			return CallWindowProc(d->ButtonClassProc, Handle(), Msg->Msg(), Msg->A(), Msg->B()) |
