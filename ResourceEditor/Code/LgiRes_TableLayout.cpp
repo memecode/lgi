@@ -411,6 +411,8 @@ struct OpHandle : public GRect
 class CtrlTablePrivate
 {
 public:
+	bool InLayout;
+
 	// The cell container
 	CtrlTable *Table;
 	ssize_t CellX, CellY;
@@ -453,6 +455,7 @@ public:
 
 	CtrlTablePrivate(CtrlTable *t)
 	{
+		InLayout = false;
 		Table = t;
 		CellX = CellY = 2;
 		AttachTo = 0;
@@ -477,6 +480,9 @@ public:
 		#define ADD_BORDER		10
 		#define CELL_SPACING	1
 
+		if (InLayout)
+			return;
+		InLayout = true;
 		Handles.Length(0);
 
 		int x, y;
@@ -586,6 +592,8 @@ public:
 				}
 			}
 		}
+
+		InLayout = false;
 	}
 
 	bool DeleteCol(int x)
@@ -986,6 +994,7 @@ bool CtrlTable::AttachCtrl(ResDialogCtrl *Ctrl, GRect *r)
 
 void CtrlTable::Layout()
 {
+	
 	d->Layout(GetClient());
 }
 
@@ -1216,6 +1225,8 @@ void CtrlTable::InsertRow(int y)
 
 void CtrlTable::InsertCol(int x)
 {
+	auto Par = GetParent();
+
 	// Shift existing cells down
 	int i;
 	for (i=0; i<d->Cells.Length(); i++)
