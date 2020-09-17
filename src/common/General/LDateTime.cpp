@@ -920,6 +920,12 @@ void LDateTime::Month(char *m)
 		_Month = i + 1;	
 }
 
+int DateComponent(const char *s)
+{
+	int64 i = Atoi(s);
+	return i ? (int)i : LDateTime::IsMonth(s);
+}
+
 bool LDateTime::SetDate(const char *Str)
 {
 	bool Status = false;
@@ -929,73 +935,61 @@ bool LDateTime::SetDate(const char *Str)
 		GToken T(Str, "/-.,_\\");
 		if (T.Length() == 3)
 		{
-			switch (_Format & GDTF_DATE_MASK)
+			int i[3] = { DateComponent(T[0]), DateComponent(T[1]), DateComponent(T[2]) };
+			int fmt = _Format & GDTF_DATE_MASK;
+			
+			// Do some guessing / overrides.
+			// Don't let _Format define the format completely.
+			if (i[0] > 1000)
+			{
+				fmt = GDTF_YEAR_MONTH_DAY;
+			}
+			else if (i[2] > 1000)
+			{
+				if (i[0] > 12)
+					fmt = GDTF_DAY_MONTH_YEAR;
+				else if (i[1] > 12)
+					fmt = GDTF_MONTH_DAY_YEAR;
+			}
+
+			switch (fmt)
 			{
 				case GDTF_MONTH_DAY_YEAR:
 				{
-					_Month = atoi(T[0]);
-					_Day = atoi(T[1]);
-					_Year = atoi(T[2]);
+					_Month = i[0];
+					_Day = i[1];
+					_Year = i[2];
 					break;
 				}
 				case GDTF_DAY_MONTH_YEAR:
 				{
-					_Day = atoi(T[0]);
-					_Month = atoi(T[1]);
-					_Year = atoi(T[2]);
+					_Day = i[0];
+					_Month = i[1];
+					_Year = i[2];
 					break;
 				}
 				case GDTF_YEAR_MONTH_DAY:
 				{
-					_Year = atoi(T[0]);
-					_Month = atoi(T[1]);
-					_Day = atoi(T[2]);
+					_Year = i[0];
+					_Month = i[1];
+					_Day = i[2];
 					break;
 				}
 				default:
 				{
-					int n[3] =
+					_Year = i[2];
+					if ((DefaultFormat & GDTF_DATE_MASK) == GDTF_MONTH_DAY_YEAR)
 					{
-						atoi(T[0]),
-						atoi(T[1]),
-						atoi(T[2])
-					};
-
-					if (n[0] > 1000)
-					{
-						// yyyy/m/d
-						_Year = n[0];
-						_Month = n[1];
-						_Day = n[2];
+						// Assume m/d/yyyy
+						_Day = i[1];
+						_Month = i[0];
 					}
-					else if (n[2] > 1000)
+					else
 					{
-						_Year = n[2];
-						if (n[0] > 12)
-						{
-							// d/m/yyyy
-							_Day = n[0];
-							_Month = n[1];
-						}
-						else if (n[1] > 12)
-						{
-							// m/d/yyyy
-							_Day = n[1];
-							_Month = n[0];
-						}
-						else if ((DefaultFormat & GDTF_DATE_MASK) == GDTF_MONTH_DAY_YEAR)
-						{
-							// Assume m/d/yyyy
-							_Day = n[1];
-							_Month = n[0];
-						}
-						else
-						{
-							// Who knows???
-							// Assume d/m/yyyy
-							_Day = n[0];
-							_Month = n[1];
-						}
+						// Who knows???
+						// Assume d/m/yyyy
+						_Day = i[0];
+						_Month = i[1];
 					}
 					break;
 				}
@@ -1003,14 +997,11 @@ bool LDateTime::SetDate(const char *Str)
 
 			if (_Year < 100)
 			{
+				LgiAssert(_Day < 1000 && _Month < 1000);
 				if (_Year >= 80)
-				{
 					_Year += 1900;
-				}
 				else
-				{
 					_Year += 2000;
-				}
 			}
 
 			Status = true;
