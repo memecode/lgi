@@ -543,6 +543,7 @@ public:
 					int Px = XPair[x].Pos;
 
 					ResTableCell *Cell = GetCellAt(x, y);
+					// LgiTrace("Layout[%i,%i] %p\n", x, y, Cell);
 					if (Cell)
 					{
 						if (Cell->Cell.x1 == x &&
@@ -570,15 +571,18 @@ public:
 									j.a = Cell;
 									j.b = c;
 									j.Offset(Cell->Pos.x2 - (j.X()>>1), Cell->Pos.y1 + ((Cell->Pos.Y()-j.Y()) >> 1));
+									int asd=0;
 								}
 
 								c = GetCellAt(x, y + Cell->Cell.Y());
+								LgiTrace("%s %i,%i+%i = %p\n", Cell->Cell.GetStr(), x, y, Cell->Cell.Y(), c);
 								if (c && c->Selected)
 								{
 									auto &j = Handles.New().Set(LJoinCells, BtnSize, BtnSize);
 									j.a = Cell;
 									j.b = c;
 									j.Offset(Cell->Pos.x1 + ((Cell->Pos.X()-j.X()) >> 1), Cell->Pos.y2 - (j.Y()>>1));
+									int asd=0;
 								}
 							}
 						}
@@ -1134,6 +1138,7 @@ void CtrlTable::Fix()
 		for (int x=0; x<d->CellX; )
 		{
 			ResTableCell *c = d->GetCellAt(x, y);
+			LgiTrace("[%i][%i] = %p (%ix%i, %s)\n", x, y, c, c ? c->Cell.X() : -1, c ? c->Cell.Y() : -1, c ? c->Pos.GetStr() : NULL);
 			if (c)
 			{
 				x += c->Cell.X();
@@ -1183,6 +1188,7 @@ void CtrlTable::Fix()
 		}
 	}
 
+	Layout();
 	Invalidate();
 }
 
@@ -1426,6 +1432,7 @@ void CtrlTable::OnMouseClick(GMouse &m)
 
 				if (Dirty)
 				{
+					Layout();
 					Invalidate();
 					if (EatClick)
 						return;
