@@ -132,7 +132,7 @@ struct GSubProcessPriv
 
 	GSubProcessPriv()
 	{
-		NewGroup = true;
+		NewGroup = false;
 		ErrorCode = 0;
 		EnvironmentChanged = false;
 		ExternIn = NULL_PIPE;
@@ -840,6 +840,8 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			#endif
 
 			DWORD CreateFlags = CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT;
+			if (d->NewGroup)
+				CreateFlags |= CREATE_NEW_PROCESS_GROUP;
 
 			STARTUPINFOEXW InfoEx;
 			ZeroObj(InfoEx);
