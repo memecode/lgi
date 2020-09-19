@@ -3728,41 +3728,42 @@ int IdeTree::WillAccept(GDragFormats &Formats, GdcPt2 p, int KeyState)
 	Formats.Supports(NODE_DROP_FORMAT);
 	First = false;
 		
-	if (Formats.Length() > 0)
+	if (Formats.Length() == 0)
 	{
-		Hit = ItemAtPoint(p.x, p.y);
-		if (Hit)
-		{
-			if (!stricmp(Formats[0], LGI_FileDropFormat))
-			{
-				SelectDropTarget(Hit);
-				return DROPEFFECT_LINK;
-			}
-			else
-			{
-				IdeCommon *Src = dynamic_cast<IdeCommon*>(Selection());
-				IdeCommon *Dst = dynamic_cast<IdeCommon*>(Hit);
-				if (Src && Dst)
-				{
-					// Check this folder is not a child of the src
-					for (IdeCommon *n=Dst; n; n=dynamic_cast<IdeCommon*>(n->GetParent()))
-					{
-						if (n == Src)
-						{
-							return DROPEFFECT_NONE;
-						}
-					}
-				}
+		LgiTrace("%s:%i - No valid drop formats.\n", _FL);
+		return DROPEFFECT_NONE;
+	}
 
-				// Valid target
-				SelectDropTarget(Hit);
-				return DROPEFFECT_MOVE;
+	Hit = ItemAtPoint(p.x, p.y);
+	if (!Hit)
+	{
+		SelectDropTarget(NULL);
+		return DROPEFFECT_NONE;
+	}
+
+	if (Formats.HasFormat(LGI_FileDropFormat))
+	{
+		SelectDropTarget(Hit);
+		return DROPEFFECT_LINK;
+	}
+
+	IdeCommon *Src = dynamic_cast<IdeCommon*>(Selection());
+	IdeCommon *Dst = dynamic_cast<IdeCommon*>(Hit);
+	if (Src && Dst)
+	{
+		// Check this folder is not a child of the src
+		for (IdeCommon *n=Dst; n; n=dynamic_cast<IdeCommon*>(n->GetParent()))
+		{
+			if (n == Src)
+			{
+				return DROPEFFECT_NONE;
 			}
 		}
 	}
-	else LgiTrace("%s:%i - No valid drop formats.\n", _FL);
 
-	return DROPEFFECT_NONE;
+	// Valid target
+	SelectDropTarget(Hit);
+	return DROPEFFECT_MOVE;
 }
 
 int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
@@ -3770,9 +3771,7 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
 	int Ret = DROPEFFECT_NONE;
 	SelectDropTarget(0);
 
-	if (!Hit)
-		Hit = ItemAtPoint(p.x, p.y);
-
+	Hit = ItemAtPoint(p.x, p.y);
 	if (!Hit)
 		return Ret;
 	
