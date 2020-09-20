@@ -37,7 +37,7 @@ public:
 	#ifdef _WIN32
 	typedef int LIcon;
 	#else
-	typedef char *LIcon;
+	typedef const char *LIcon;
 	#endif
 
 private:

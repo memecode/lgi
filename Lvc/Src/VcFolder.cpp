@@ -269,7 +269,7 @@ const char *VcFolder::GetText(int Col)
 			if (Uri.IsFile())
 				Cache = LocalPath();
 			else
-				Cache.Printf("%s%s", Uri.sHost, Uri.sPath);
+				Cache.Printf("%s%s", Uri.sHost.Get(), Uri.sPath.Get());
 
 			if (Cmds.Length())
 				Cache += " (...)";
@@ -417,7 +417,7 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 		if (!Process)
 			return false;
 
-		Process->SetInitFolder(Params && Params->AltInitPath ? Params->AltInitPath : LocalPath());
+		Process->SetInitFolder(Params && Params->AltInitPath ? Params->AltInitPath.Get() : LocalPath());
 		#ifdef MAC
 		// Mac GUI apps don't share the terminal path, so this overrides that and make it work
 		auto Path = LGetPath();
@@ -960,7 +960,7 @@ void VcFolder::LogFile(const char *uri)
 		case VcSvn:
 		case VcHg:
 		{
-			GString File = u.IsFile() ? u.LocalPath() : u.sPath;
+			GString File = u.IsFile() ? GString(u.LocalPath()) : u.sPath;
 			ParseParams *Params = new ParseParams(uri);
 			Args.Printf("log \"%s\"", File.Get());
 			IsLogging = StartCmd(Args, &VcFolder::ParseLog, Params, LogNormal);
@@ -3340,7 +3340,7 @@ bool VcFolder::Revert(const char *uri, const char *Revision)
 		return false;
 
 	GUri u(uri);
-	GString Path = u.IsFile() ? u.LocalPath() : u.sPath;
+	GString Path = u.IsFile() ? GString(u.LocalPath()) : u.sPath;
 
 	switch (GetType())
 	{

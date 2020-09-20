@@ -114,7 +114,7 @@ void VcFile::OnMouseClick(GMouse &m)
 
 		if (Uri.IsProtocol("file"))
 		{
-			GFile::Path p = Uri.sPath ? Uri.sPath(1,-1) : Owner->LocalPath();
+			GFile::Path p = Uri.sPath ? Uri.sPath(1,-1).Get() : Owner->LocalPath();
 			p += File;
 			LocalPath = p.GetFull();
 		}

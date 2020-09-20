@@ -1454,7 +1454,7 @@ void GTableLayoutPrivate::LayoutHorizontal(GRect &Client, int *MinX, int *MaxX, 
 	#if DEBUG_LAYOUT
 	if (DebugLayout)
 	{
-		int asd=0;
+		// int asd=0;
 	}
 	#endif
 		
@@ -1967,7 +1967,7 @@ void GTableLayoutPrivate::Layout(GRect &Client)
     DebugLayout = CtrlId == DEBUG_LAYOUT;
     if (DebugLayout)
     {
-		int asd=0;
+		// int asd=0;
     }
     #endif
 
