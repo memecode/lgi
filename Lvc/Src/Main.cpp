@@ -11,20 +11,217 @@
 #include "GTree.h"
 
 //////////////////////////////////////////////////////////////////
+enum SshMsgs
+{
+	M_DETECT_VCS = M_USER + 100,
+	M_RUN_CMD,
+	M_RESPONSE,
+};
+
+SshConnection::SshConnection(GTextLog *log, const char *uri, const char *prompt) : LSsh(log), GEventTargetThread("SshConnection")
+{
+	GuiHnd = log->GetWindow()->AddDispatch();
+	Prompt = prompt;
+	Host.Set(Uri = uri);
+}
+
+bool SshConnection::DetectVcs(VcFolder *Fld)
+{
+	GAutoPtr<GString> p(new GString(Fld->GetUri().sPath(1, -1)));
+	TypeNotify.Add(Fld);
+	return PostObject(GetHandle(), M_DETECT_VCS, p);
+}
+
+bool SshConnection::Command(VcFolder *Fld, GString Exe, GString Args, ParseFn Parser, ParseParams *Params)
+{
+	if (!Fld || !Exe || !Parser)
+		return false;
+
+	GAutoPtr<SshParams> p(new SshParams(this));
+	p->f = Fld;
+	p->Exe = Exe;
+	p->Args = Args;
+	p->Parser = Parser;
+	p->Params = Params;
+	p->Path = Fld->GetUri().sPath(1, -1);
+
+	return PostObject(GetHandle(), M_RUN_CMD, p);
+}
+
+GStream *SshConnection::GetConsole()
+{
+	if (!Connected)
+	{
+		auto r = Open(Host.sHost, Host.sUser, Host.sPass, true);
+		Log->Print("Ssh: %s open: %i\n", Host.sHost.Get(), r);
+	}
+	if (Connected && !c)
+	{
+		c = CreateConsole();
+		WaitPrompt(c);
+	}
+	return c;
+}
+
+bool SshConnection::WaitPrompt(GStream *con, GString *Data)
+{
+	char buf[512];
+	GString out;
+	while (!IsCancelled())
+	{
+		auto rd = con->Read(buf, sizeof(buf));
+		if (rd < 0)
+			return false;
+
+		if (rd == 0)
+		{
+			LgiSleep(10);
+			continue;
+		}
+				
+		out += GString(buf, rd);
+		DeEscape(out);
+		auto lines = out.SplitDelimit("\n");
+		auto last = lines.Last();
+		if (last.Find(Prompt) >= 0)
+		{
+			if (Data)
+			{
+				lines.DeleteAt(0, true);
+				lines.PopLast();
+				*Data = GString("\n").Join(lines);
+			}
+			break;
+		}
+	}
+
+	return true;
+}
+
+bool SshConnection::HandleMsg(GMessage *m)
+{
+	if (m->Msg() != M_RESPONSE)
+		return false;
+
+	GAutoPtr<SshParams> u((SshParams*)m->A());
+	if (!u || !u->c)
+		return false;
+
+	SshConnection &c = *u->c;
+	if (u->Vcs) // Check the VCS type..
+	{
+		c.Types.Add(u->Path, u->Vcs);
+		for (auto f: c.TypeNotify)
+			f->OnVcsType();
+	}
+	else if (u->Output) // Cmd output
+	{
+		LgiAssert(u->f != NULL);
+		u->f->OnSshCmd(u);
+	}
+	else return false; // ?
+
+	return true;
+}
+
+GMessage::Result SshConnection::OnEvent(GMessage *Msg)
+{
+	switch (Msg->Msg())
+	{
+		case M_DETECT_VCS:
+		{
+			GAutoPtr<GString> p;
+			if (!ReceiveA(p, Msg))
+				break;
+
+			GStream *con = GetConsole();
+			if (!con)
+				break;
+
+			GString ls, out;
+			ls.Printf("find \"%s\" -maxdepth 1 -printf \"%%f\n\"\n", p->Get());
+			auto wr = con->Write(ls, ls.Length());
+			auto pr = WaitPrompt(con, &out);
+			auto lines = out.SplitDelimit("\r\n");
+
+			VersionCtrl Vcs = VcNone;
+			for (auto ln: lines)
+			{
+				if (ln.Equals(".svn"))
+					Vcs = VcSvn;
+				else if (ln.Equals("CVS"))
+					Vcs = VcCvs;
+				else if (ln.Equals(".hg"))
+					Vcs = VcHg;
+				else if (ln.Equals(".git"))
+					Vcs = VcGit;
+			}
+			if (Vcs)
+			{
+				GAutoPtr<SshParams> r(new SshParams(this));
+				r->Path = *p;
+				r->Vcs = Vcs;
+				PostObject(GuiHnd, M_RESPONSE, r);
+			}
+			break;
+		}
+		case M_RUN_CMD:
+		{
+			GAutoPtr<SshParams> p;
+			if (!ReceiveA(p, Msg))
+				break;
+
+			GStream *con = GetConsole();
+			if (!con)
+				break;
+
+			GString cmd;
+			cmd.Printf("( cd \"%s\" && %s %s )\n", p->Path.Get(), p->Exe.Get(), p->Args.Get());
+			auto wr = con->Write(cmd, cmd.Length());
+			auto pr = WaitPrompt(con, &p->Output);
+
+			GString result;
+			cmd = "echo $?\n";
+			wr = con->Write(cmd, cmd.Length());
+			pr = WaitPrompt(con, &result);
+			if (pr)
+				p->ExitCode = (int)result.Int();
+
+			PostObject(GuiHnd, M_RESPONSE, p);
+			break;
+		}
+		default:
+		{
+			LgiAssert(!"Unhandled msg.");
+			break;
+		}
+	}
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////
 const char *AppName =			"Lvc";
 #define DEFAULT_BUILD_FIX_MSG	"Build fix."
 #define OPT_Hosts				"Hosts"
 #define OPT_Host				"Host"
 
-VersionCtrl DetectVcs(const char *Uri)
+VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 {
 	char p[MAX_PATH];
-	GUri u(Uri);
+	GUri u = Fld->GetUri();
 
 	if (!u.IsFile() || !u.sPath)
 	{
-		LgiAssert(!"Impl me.");
-		return VcNone;
+		auto c = GetConnection(u.ToString());
+		if (!c)
+			return VcNone;
+		
+		auto type = c->Types.Find(u.sPath);
+		if (type)
+			return type;
+
+		c->DetectVcs(Fld);
+		return VcPending;
 	}
 
 	auto Path = u.sPath.Get();
@@ -521,7 +718,7 @@ class RemoteFolderDlg : public GDialog
 	GXmlTreeUi Ui;
 
 public:
-	GString Folder;
+	GString Uri;
 
 	RemoteFolderDlg(App *application);
 	~RemoteFolderDlg();
@@ -706,6 +903,13 @@ public:
 		Opts.SerializeFile(true);
 	}
 
+	GMessage::Result OnEvent(GMessage *Msg)
+	{
+		if (Msg->Msg() == M_RESPONSE)
+			SshConnection::HandleMsg(Msg);
+		return GWindow::OnEvent(Msg);
+	}
+
 	void OnReceiveFiles(GArray<const char*> &Files)
 	{
 		for (auto f : Files)
@@ -839,30 +1043,25 @@ public:
 
 		if (Fld)
 		{
-			if (DetectVcs(Fld))
+			// Check the folder isn't already loaded...
+			bool Has = false;
+			GArray<VcFolder*> Folders;
+			Tree->GetAll(Folders);
+			for (auto f: Folders)
 			{
-				// Check the folder isn't already loaded...
-				bool Has = false;
-				GArray<VcFolder*> Folders;
-				Tree->GetAll(Folders);
-				for (auto f: Folders)
+				if (!Stricmp(f->LocalPath(), Fld))
 				{
-					if (!Stricmp(f->LocalPath(), Fld))
-					{
-						Has = true;
-						break;
-					}
-				}
-
-				if (!Has)
-				{
-					GUri u;
-					u.SetFile(Fld);
-					Tree->Insert(new VcFolder(this, u.ToString()));
+					Has = true;
+					break;
 				}
 			}
-			else
-				LgiMsg(this, "Folder not under version control.", AppName);
+
+			if (!Has)
+			{
+				GUri u;
+				u.SetFile(Fld);
+				Tree->Insert(new VcFolder(this, u.ToString()));
+			}
 		}
 	}
 
@@ -872,7 +1071,7 @@ public:
 		if (!dlg.DoModal())
 			return;
 
-		Tree->Insert(new VcFolder(this, dlg.Folder));
+		Tree->Insert(new VcFolder(this, dlg.Uri));
 	}
 
 	int OnNotify(GViewI *c, int flag)
@@ -1250,7 +1449,12 @@ int RemoteFolderDlg::OnNotify(GViewI *Ctrl, int Flags)
 			app->Opts.Unlock();
 
 			GUri u;
-
+			u.sProtocol = "ssh";
+			u.sHost = GetCtrlName(IDC_HOSTNAME);
+			u.sUser = GetCtrlName(IDC_USER);
+			u.sPass = GetCtrlName(IDC_PASS);
+			u.sPath = GetCtrlName(IDC_REMOTE_PATH);
+			Uri = u.ToString();
 
 			// Fall through
 		}

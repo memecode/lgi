@@ -66,26 +66,30 @@ struct VcBranch
 	}
 };
 
+struct SshParams
+{
+	SshConnection *c;
+	VcFolder *f;
+	GString Exe, Args, Path, Output;
+	VersionCtrl Vcs;
+	ParseFn Parser;
+	ParseParams *Params;
+	int ExitCode;
+
+	SshParams(SshConnection *con) : c(con)
+	{
+		f = NULL;
+		Parser = NULL;
+		Params = NULL;
+		Vcs = VcNone;
+		ExitCode = -1;
+	}
+};
+
 class VcFolder : public GTreeItem
 {
 	friend class VcCommit;
-	struct ParseParams
-	{
-		GString Str;
-		GString AltInitPath;
-		VcLeaf *Leaf;
-		bool IsWorking;
 
-		ParseParams(const char *str = NULL)
-		{
-			Str = str;
-			Leaf = NULL;
-			IsWorking = false;
-		}
-	};
-
-	typedef bool (VcFolder::*ParseFn)(int, GString, ParseParams*);
-	
 	class Cmd : public GStream
 	{
 		GString::Array Context;
@@ -277,6 +281,8 @@ public:
 	void OnMouseClick(GMouse &m);
 	void OnRemove();
 	void OnExpand(bool b);
+	void OnVcsType();
+	void OnSshCmd(SshParams *p);
 };
 
 class VcLeaf : public GTreeItem

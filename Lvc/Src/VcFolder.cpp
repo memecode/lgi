@@ -244,7 +244,7 @@ VcFolder::~VcFolder()
 VersionCtrl VcFolder::GetType()
 {
 	if (Type == VcNone)
-		Type = DetectVcs(Uri.ToString());
+		Type = d->DetectVcs(this);
 	return Type;
 }
 
@@ -438,16 +438,18 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 		c->Params.Reset(Params);
 		c->Rd.Reset(new ReaderThread(GetType(), Process.Release(), c));
 		Cmds.Add(c.Release());
-
-		Update();
-
-		// LgiTrace("Cmd: %s %s\n", Exe, Args);
 	}
 	else
 	{
-		LgiAssert(!"Impl me.");
+		auto c = d->GetConnection(Uri.ToString());
+		if (!c)
+			return false;
+		
+		if (!c->Command(this, Exe, Args, Parser, Params))
+			return false;
 	}
 
+	Update();
 	return true;
 }
 
@@ -1796,6 +1798,31 @@ bool VcFolder::ParseFiles(int Result, GString s, ParseParams *Params)
 	return false;
 }
 
+void VcFolder::OnSshCmd(SshParams *p)
+{
+	if (!p || !p->f)
+	{
+		LgiAssert(!"Param error.");
+		return;
+	}
+
+	GString s = p->Output;
+	int Result = p->ExitCode;
+	if (Result == ErrSubProcessFailed)
+	{
+		CmdErrors++;
+	}
+	else if (p->Parser)
+	{
+		bool Reselect = CALL_MEMBER_FN(*this, p->Parser)(Result, s, p->Params);
+		if (Reselect)
+		{
+			if (GTreeItem::Select())
+				Select(true);
+		}
+	}
+}
+
 void VcFolder::OnPulse()
 {
 	bool Reselect = false, CmdsChanged = false;
@@ -2030,6 +2057,20 @@ void VcFolder::ReadDir(GTreeItem *Parent, const char *Uri)
 	}
 
 	Parent->SortChildren(FolderCompare);
+}
+
+void VcFolder::OnVcsType()
+{
+	auto c = d->GetConnection(Uri.ToString(), false);
+	if (c)
+	{
+		Type = c->Types.Find(Uri.sPath(1, -1));
+		if (Type)
+		{	
+			ClearError();
+			Update();
+		}
+	}
 }
 
 void VcFolder::OnExpand(bool b)

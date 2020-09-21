@@ -3755,9 +3755,7 @@ int IdeTree::WillAccept(GDragFormats &Formats, GdcPt2 p, int KeyState)
 		for (IdeCommon *n=Dst; n; n=dynamic_cast<IdeCommon*>(n->GetParent()))
 		{
 			if (n == Src)
-			{
 				return DROPEFFECT_NONE;
-			}
 		}
 	}
 
@@ -3769,10 +3767,8 @@ int IdeTree::WillAccept(GDragFormats &Formats, GdcPt2 p, int KeyState)
 int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
 {
 	int Ret = DROPEFFECT_NONE;
-	SelectDropTarget(0);
-
-	Hit = ItemAtPoint(p.x, p.y);
-	if (!Hit)
+	SelectDropTarget(NULL);
+	if (!(Hit = ItemAtPoint(p.x, p.y)))
 		return Ret;
 	
 	for (unsigned n=0; n<Data.Length(); n++)
@@ -3788,9 +3784,7 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
 				{
 					ProjectNode *Folder = dynamic_cast<ProjectNode*>(Hit);
 					while (Folder && Folder->GetType() != NodeDir)
-					{
 						Folder = dynamic_cast<ProjectNode*>(Folder->GetParent());
-					}
 
 					IdeCommon *Dst = dynamic_cast<IdeCommon*>(Folder?Folder:Hit);
 					if (Dst)
@@ -3799,9 +3793,7 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
 						for (IdeCommon *n=Dst; n; n=dynamic_cast<IdeCommon*>(n->GetParent()))
 						{
 							if (n == Src)
-							{
 								return DROPEFFECT_NONE;
-							}
 						}
 
 						// Detach
@@ -3832,9 +3824,7 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
 		{
 			ProjectNode *Folder = dynamic_cast<ProjectNode*>(Hit);
 			while (Folder && Folder->GetType() > NodeDir)
-			{
 				Folder = dynamic_cast<ProjectNode*>(Folder->GetParent());
-			}
 			
 			IdeCommon *Dst = dynamic_cast<IdeCommon*>(Folder?Folder:Hit);
 			if (Dst)
@@ -3848,10 +3838,7 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
 				}
 			}
 		}
-		else
-		{
-			LgiTrace("%s:%i - Unknown drop format: %s.\n", _FL, dd.Format.Get());
-		}
+		else LgiTrace("%s:%i - Unknown drop format: %s.\n", _FL, dd.Format.Get());
 	}
 
 	return Ret;

@@ -9,6 +9,7 @@ static const char *Ws = " \t\r\n";
 
 GUri::GUri(const char *uri)
 {
+	Port = 0;
 	if (uri)
 		Set(uri);
 }

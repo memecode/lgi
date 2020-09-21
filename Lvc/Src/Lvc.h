@@ -11,6 +11,8 @@
 #include "GTabView.h"
 #include "GEdit.h"
 #include "LMenu.h"
+#include "LSsh.h"
+#include "GEventTargetThread.h"
 
 #define OPT_Folders		"Folders"
 #define OPT_Folder		"Folder"
@@ -91,10 +93,50 @@ enum VersionCtrl
 	VcGit,
 	VcHg,
 	
+	VcPending,
 	VcMax,
 };
 
 class VcFolder;
+struct ParseParams
+{
+	GString Str;
+	GString AltInitPath;
+	class VcLeaf *Leaf;
+	bool IsWorking;
+
+	ParseParams(const char *str = NULL)
+	{
+		Str = str;
+		Leaf = NULL;
+		IsWorking = false;
+	}
+};
+
+typedef bool (VcFolder::*ParseFn)(int, GString, ParseParams*);
+
+class SshConnection : public LSsh, public GEventTargetThread
+{
+	int GuiHnd;
+	GUri Host;
+	GAutoPtr<GStream> c;
+	GString Uri, Prompt;
+
+	GMessage::Result OnEvent(GMessage *Msg);
+	GStream *GetConsole();
+	bool WaitPrompt(GStream *c, GString *Data = NULL);
+
+public:
+	LHashTbl<StrKey<char,false>,VersionCtrl> Types;
+	GArray<VcFolder*> TypeNotify;
+	
+	SshConnection(GTextLog *log, const char *uri, const char *prompt);
+	bool DetectVcs(VcFolder *Fld);
+	bool Command(VcFolder *Fld, GString Exe, GString Args, ParseFn Parser, ParseParams *Params);
+	
+	// This is the GUI thread message handler
+	static bool HandleMsg(GMessage *m);
+};
 
 struct AppPriv
 {
@@ -110,6 +152,8 @@ struct AppPriv
 	VersionCtrl PrevType;
 	int Resort;
 
+	LHashTbl<StrKey<char,false>,SshConnection*> Connections;
+	
 	AppPriv()  : Opts(GOptionsFile::DesktopMode, AppName)
 	{
 		Commits = NULL;
@@ -122,6 +166,17 @@ struct AppPriv
 		Tabs = NULL;
 		CurFolder = NULL;
 		Resort = -1;
+	}
+
+	SshConnection *GetConnection(const char *Uri, bool Create = true)
+	{
+		GUri u(Uri);
+		u.sPath.Empty();
+		auto s = u.ToString();
+		auto Conn = Connections.Find(s);
+		if (!Conn && Create)
+			Connections.Add(s, Conn = new SshConnection(Log, s, "matthew@matthew-linux:"));
+		return Conn;
 	}
 
 	void ClearFiles()
@@ -140,6 +195,8 @@ struct AppPriv
 		LMenuItem *i = m ? m->FindItem(Item) : NULL;
 		return i ? i->Checked() : false;
 	}
+
+	VersionCtrl DetectVcs(VcFolder *Fld);
 };
 
 class BlameUi : public GWindow
@@ -165,7 +222,6 @@ public:
 	bool OnLayout(GViewLayoutInfo &Inf);
 };
 
-extern VersionCtrl DetectVcs(const char *Path);
 extern bool ConvertEol(const char *Path, bool Cr);
 extern int GetEol(const char *Path);
 extern GString::Array GetProgramsInPath(const char *Program);
