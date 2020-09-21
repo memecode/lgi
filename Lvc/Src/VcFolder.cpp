@@ -3245,6 +3245,9 @@ void VcFolder::GetVersion()
 		case VcCvs:
 			StartCmd("--version", &VcFolder::ParseVersion, NULL, LogNormal);
 			break;
+		case VcPending:
+			GetCss(true)->Color(GColour::Blue);
+			break;
 		default:
 			OnCmdError(NULL, "No version control found.");
 			break;
