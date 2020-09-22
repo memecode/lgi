@@ -498,6 +498,37 @@ public:
 	}
 };
 
+int CommitDataCmp(VcCommit **_a, VcCommit **_b)
+{
+	auto a = *_a;
+	auto b = *_b;
+	return a->GetTs().Compare(&b->GetTs());
+}
+
+GString::Array AppPriv::GetCommitRange()
+{
+	GString::Array r;
+
+	if (Commits)
+	{
+		GArray<VcCommit*> Sel;
+		Commits->GetSelection(Sel);
+		if (Sel.Length() > 1)
+		{
+			Sel.Sort(CommitDataCmp);
+			r.Add(Sel[0]->GetRev());
+			r.Add(Sel.Last()->GetRev());
+		}
+		else
+		{
+			r.Add(Sel[0]->GetRev());
+		}
+	}
+	else LgiAssert(!"No commit list ptr");
+
+	return r;
+}
+
 GArray<VcCommit*> AppPriv::GetRevs(GString::Array &Revs)
 {
 	GArray<VcCommit*> a;

@@ -188,6 +188,7 @@ struct AppPriv
 	}
 
 	GArray<class VcCommit*> GetRevs(GString::Array &Revs);
+	GString::Array GetCommitRange();
 	
 	bool IsMenuChecked(int Item)
 	{

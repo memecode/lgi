@@ -267,6 +267,7 @@ public:
 	void SetEol(const char *Path, int Type);
 	void GetVersion();
 	void Diff(VcFile *file);
+	void DiffRange(const char *FromRev, const char *ToRev);
 	void MergeToLocal(GString Rev);
 	bool RenameBranch(GString NewName, GArray<VcCommit*> &Revs);
 	void Refresh();

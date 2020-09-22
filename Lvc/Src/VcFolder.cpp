@@ -1564,9 +1564,39 @@ bool VcFolder::ParseWorking(int Result, GString s, ParseParams *Params)
 	return false;
 }
 
+void VcFolder::DiffRange(const char *FromRev, const char *ToRev)
+{
+	if (!FromRev || !ToRev)
+		return;
+
+	switch (GetType())
+	{
+		case VcSvn:
+		{
+			ParseParams *p = new ParseParams;
+			p->IsWorking = false;
+			p->Str = GString(FromRev) + ":" + ToRev;
+
+			GString a;
+			a.Printf("diff -r%s:%s", FromRev, ToRev);
+			StartCmd(a, &VcFolder::ParseDiff, p);
+			break;
+		}
+		case VcCvs:
+		case VcGit:
+		case VcHg:
+		default:
+			LgiAssert(!"Impl me.");
+			break;
+	}
+}
+
 bool VcFolder::ParseDiff(int Result, GString s, ParseParams *Params)
 {
-	ParseDiffs(s, NULL, true);
+	if (Params)
+		ParseDiffs(s, Params->Str, Params->IsWorking);
+	else
+		ParseDiffs(s, NULL, true);
 	return false;
 }
 

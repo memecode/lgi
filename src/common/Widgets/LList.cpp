@@ -1428,6 +1428,7 @@ void LList::OnMouseClick(GMouse &m)
 						}
 
 						OnItemSelect(Sel);
+						Item->Select(true);
 					}
 					else
 					{
