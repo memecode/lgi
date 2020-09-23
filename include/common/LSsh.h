@@ -167,10 +167,10 @@ public:
 			Log->Print("%s:%i - ssh_connect failed.\n", _FL);
 			return false;
 		}
-		Log->Print("%s:%i - ssh_connect ok.\n", _FL);
+		// Log->Print("%s:%i - ssh_connect ok.\n", _FL);
 
 		auto State = ssh_session_is_known_server(Ssh);
-		Log->Print("%s:%i - ssh_session_is_known_server=%i.\n", _FL, State);
+		// Log->Print("%s:%i - ssh_session_is_known_server=%i.\n", _FL, State);
 
 		if (PublicKey)
 			r = ssh_userauth_publickey_auto(Ssh, Username, Password);
