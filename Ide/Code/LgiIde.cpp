@@ -4139,12 +4139,44 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 	return true;
 }
 
+/*
+class SocketTest : public GWindow, public LThread
+{
+	GTextLog *Log;
+
+public:
+	SocketTest() : LThread("SocketTest")
+	{
+		Log = new GTextLog(100);
+
+		SetPos(GRect(200, 200, 900, 800));
+		Attach(0);
+		Visible(true);
+		Log->Attach(this);
+
+		Run();
+	}
+
+	int Main()
+	{
+		GSocket s;
+		s.SetTimeout(15000);
+		Log->Print("Starting...\n");
+		auto r = s.Open("192.168.1.30", 7000);
+		Log->Print("Open =%i\n", r);
+		return 0;
+	}
+};
+*/
+
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);
 	GApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
+		// new SocketTest();
+
 		a.AppWnd = new AppWnd;
 		a.Run();
 	}

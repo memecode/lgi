@@ -678,7 +678,8 @@ void VcFolder::Select(bool b)
 						IsLogging = StartCmd("up", &VcFolder::ParsePull, new ParseParams("log"));
 						break;
 					}
-					// else fall through
+					IsLogging = StartCmd("log --limit 1000", &VcFolder::ParseLog);
+					break;
 				}
 				default:
 				{
@@ -3276,7 +3277,6 @@ void VcFolder::GetVersion()
 			StartCmd("--version", &VcFolder::ParseVersion, NULL, LogNormal);
 			break;
 		case VcPending:
-			GetCss(true)->Color(GColour::Blue);
 			break;
 		default:
 			OnCmdError(NULL, "No version control found.");

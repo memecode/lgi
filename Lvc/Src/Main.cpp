@@ -10,6 +10,8 @@
 #include "GXmlTreeUi.h"
 #include "GTree.h"
 
+#define TIMEOUT_PROMPT			2000
+
 //////////////////////////////////////////////////////////////////
 enum SshMsgs
 {
@@ -65,8 +67,11 @@ GStream *SshConnection::GetConsole()
 
 bool SshConnection::WaitPrompt(GStream *con, GString *Data)
 {
-	char buf[512];
+	char buf[1024];
 	GString out;
+	auto Ts = LgiCurrentTime();
+	int64 Count = 0;
+
 	while (!IsCancelled())
 	{
 		auto rd = con->Read(buf, sizeof(buf));
@@ -80,6 +85,7 @@ bool SshConnection::WaitPrompt(GStream *con, GString *Data)
 		}
 				
 		out += GString(buf, rd);
+		Count += rd;
 		DeEscape(out);
 		auto lines = out.SplitDelimit("\n");
 		auto last = lines.Last();
@@ -92,6 +98,14 @@ bool SshConnection::WaitPrompt(GStream *con, GString *Data)
 				*Data = GString("\n").Join(lines);
 			}
 			break;
+		}
+
+		auto Now = LgiCurrentTime();
+		if (Now - Ts >= TIMEOUT_PROMPT)
+		{
+			Log->Print("...reading: %s\n", LFormatSize(Count).Get());
+			Count = 0;
+			Ts = Now;
 		}
 	}
 
@@ -108,6 +122,7 @@ bool SshConnection::HandleMsg(GMessage *m)
 		return false;
 
 	SshConnection &c = *u->c;
+	// LgiTrace("Response vcs: %s\n", u->Path.Get());
 	if (u->Vcs) // Check the VCS type..
 	{
 		c.Types.Add(u->Path, u->Vcs);
@@ -221,6 +236,7 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 			return type;
 
 		c->DetectVcs(Fld);
+		Fld->GetCss(true)->Color(GColour::Blue);
 		return VcPending;
 	}
 
