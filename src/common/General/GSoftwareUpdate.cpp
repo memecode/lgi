@@ -82,7 +82,9 @@ struct GSoftwareUpdatePriv
 
 				GString GetUri = Uri.ToString();
 				
-				// LgiTrace("UpdateURI=%s\n", GetUri.Get());
+				#ifdef _DEBUG
+				LgiTrace("UpdateURI=%s\n", GetUri.Get());
+				#endif
 				
 				if (d->Proxy)
 				{
