@@ -6,7 +6,8 @@
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 #endif
 
-#define PROFILE_FN 0
+#define MAX_AUTO_RESIZE_ITEMS	1000
+#define PROFILE_FN				0
 #if PROFILE_FN
 #define PROF(s) Prof.Add(s)
 #else
@@ -786,33 +787,26 @@ void VcFolder::Select(bool b)
 		}
 
 		PROF("ColSizing");
-		if (d->Commits->Length() > 1000)
+		if (d->Commits->Length() > MAX_AUTO_RESIZE_ITEMS)
 		{
-			if (GetType() == VcHg)
+			int i = 0;
+			if (GetType() == VcHg && d->Commits->GetColumns() >= 7)
 			{
-				if (d->Commits->GetColumns() >= 7)
-				{
-					int i = 0;
-					d->Commits->ColumnAt(i++)->Width(60); // LGraph
-					d->Commits->ColumnAt(i++)->Width(40); // LIndex
-					d->Commits->ColumnAt(i++)->Width(100); // LRevision
-					d->Commits->ColumnAt(i++)->Width(60); // LBranch
-					d->Commits->ColumnAt(i++)->Width(240); // LAuthor
-					d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
-					d->Commits->ColumnAt(i++)->Width(400); // LMessage
-				}
+				d->Commits->ColumnAt(i++)->Width(60); // LGraph
+				d->Commits->ColumnAt(i++)->Width(40); // LIndex
+				d->Commits->ColumnAt(i++)->Width(100); // LRevision
+				d->Commits->ColumnAt(i++)->Width(60); // LBranch
+				d->Commits->ColumnAt(i++)->Width(240); // LAuthor
+				d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
+				d->Commits->ColumnAt(i++)->Width(400); // LMessage
 			}
-			else
+			else if (d->Commits->GetColumns() >= 5)
 			{
-				if (d->Commits->GetColumns() >= 5)
-				{
-					// This is too slow, over 2 seconds for Lgi
-					d->Commits->ColumnAt(0)->Width(40); // LGraph
-					d->Commits->ColumnAt(1)->Width(270); // LRevision
-					d->Commits->ColumnAt(2)->Width(240); // LAuthor
-					d->Commits->ColumnAt(3)->Width(130); // LTimeStamp
-					d->Commits->ColumnAt(4)->Width(400); // LMessage
-				}
+				d->Commits->ColumnAt(i++)->Width(40); // LGraph
+				d->Commits->ColumnAt(i++)->Width(270); // LRevision
+				d->Commits->ColumnAt(i++)->Width(240); // LAuthor
+				d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
+				d->Commits->ColumnAt(i++)->Width(400); // LMessage
 			}
 		}
 		else d->Commits->ResizeColumnsToContent();

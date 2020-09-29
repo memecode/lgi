@@ -82,6 +82,8 @@ enum AppIds
 	IDM_RESOLVE,
 	IDM_MERGE,
 	IDM_LOG_FILE,
+	IDM_COPY_PATH,
+	IDM_COPY_LEAF,
 };
 
 enum VersionCtrl

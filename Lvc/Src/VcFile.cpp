@@ -1,4 +1,5 @@
 #include "Lvc.h"
+#include "GClipBoard.h"
 
 VcFile::VcFile(AppPriv *priv, VcFolder *owner, GString revision, bool working)
 {
@@ -164,6 +165,17 @@ void VcFile::OnMouseClick(GMouse &m)
 			Ln->AppendItem("Auto", IDM_EOL_AUTO);
 		}
 
+		s.AppendSeparator();
+		GString Fn;
+		auto FileParts = GString(File).SplitDelimit("/\\");
+		if (FileParts.Length() > 1)
+		{
+			Fn.Printf("Copy '%s'", FileParts.Last().Get());
+			s.AppendItem(Fn, IDM_COPY_LEAF);
+		}
+		Fn.Printf("Copy '%s'", File);
+		s.AppendItem(Fn, IDM_COPY_PATH);
+
 		int Cmd = s.Float(GetList(), m);
 		switch (Cmd)
 		{
@@ -220,6 +232,18 @@ void VcFile::OnMouseClick(GMouse &m)
 			case IDM_LOG_FILE:
 			{
 				Owner->LogFile(FullUri);
+				break;
+			}
+			case IDM_COPY_LEAF:
+			{
+				GClipBoard c(GetList());
+				c.Text(FileParts.Last());
+				break;
+			}
+			case IDM_COPY_PATH:
+			{
+				GClipBoard c(GetList());
+				c.Text(File);
 				break;
 			}
 		}
