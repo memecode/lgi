@@ -673,12 +673,21 @@ void VcFolder::Select(bool b)
 				}
 				case VcSvn:
 				{
+					GVariant Limit;
+					d->Opts.GetValue("svn-limit", Limit);
+
 					if (CommitListDirty)
 					{
 						IsLogging = StartCmd("up", &VcFolder::ParsePull, new ParseParams("log"));
 						break;
 					}
-					IsLogging = StartCmd("log --limit 1000", &VcFolder::ParseLog);
+					
+					GString s;
+					if (Limit.CastInt32())
+						s.Printf("log --limit %i", Limit.CastInt32());
+					else
+						s = "log";
+					IsLogging = StartCmd(s, &VcFolder::ParseLog);
 					break;
 				}
 				default:
@@ -777,33 +786,36 @@ void VcFolder::Select(bool b)
 		}
 
 		PROF("ColSizing");
-		if (GetType() == VcHg)
+		if (d->Commits->Length() > 1000)
 		{
-			if (d->Commits->GetColumns() >= 7)
+			if (GetType() == VcHg)
 			{
-				int i = 0;
-				d->Commits->ColumnAt(i++)->Width(60); // LGraph
-				d->Commits->ColumnAt(i++)->Width(40); // LIndex
-				d->Commits->ColumnAt(i++)->Width(100); // LRevision
-				d->Commits->ColumnAt(i++)->Width(60); // LBranch
-				d->Commits->ColumnAt(i++)->Width(240); // LAuthor
-				d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
-				d->Commits->ColumnAt(i++)->Width(400); // LMessage
+				if (d->Commits->GetColumns() >= 7)
+				{
+					int i = 0;
+					d->Commits->ColumnAt(i++)->Width(60); // LGraph
+					d->Commits->ColumnAt(i++)->Width(40); // LIndex
+					d->Commits->ColumnAt(i++)->Width(100); // LRevision
+					d->Commits->ColumnAt(i++)->Width(60); // LBranch
+					d->Commits->ColumnAt(i++)->Width(240); // LAuthor
+					d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
+					d->Commits->ColumnAt(i++)->Width(400); // LMessage
+				}
+			}
+			else
+			{
+				if (d->Commits->GetColumns() >= 5)
+				{
+					// This is too slow, over 2 seconds for Lgi
+					d->Commits->ColumnAt(0)->Width(40); // LGraph
+					d->Commits->ColumnAt(1)->Width(270); // LRevision
+					d->Commits->ColumnAt(2)->Width(240); // LAuthor
+					d->Commits->ColumnAt(3)->Width(130); // LTimeStamp
+					d->Commits->ColumnAt(4)->Width(400); // LMessage
+				}
 			}
 		}
-		else
-		{
-			if (d->Commits->GetColumns() >= 5)
-			{
-				// This is too slow, over 2 seconds for Lgi
-				// d->Lst->ResizeColumnsToContent();
-				d->Commits->ColumnAt(0)->Width(40); // LGraph
-				d->Commits->ColumnAt(1)->Width(270); // LRevision
-				d->Commits->ColumnAt(2)->Width(240); // LAuthor
-				d->Commits->ColumnAt(3)->Width(130); // LTimeStamp
-				d->Commits->ColumnAt(4)->Width(400); // LMessage
-			}
-		}
+		else d->Commits->ResizeColumnsToContent();
 
 		PROF("UpdateAll");
 		d->Commits->UpdateAllItems();

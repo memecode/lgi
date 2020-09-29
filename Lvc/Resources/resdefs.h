@@ -5,7 +5,7 @@
 #define IDC_BRANCH_DROPDOWN						14
 #define IDC_MSG									16
 #define IDD_OPTIONS								22
-#define IDC_23									23
+#define IDC_OPTIONS_TABLE						23
 #define IDC_SVN									25
 #define IDC_SVN_BROWSE							26
 #define IDC_GIT									28
@@ -29,6 +29,10 @@
 #define IDC_PASS								69
 #define IDC_DELETE								70
 #define IDC_REMOTE_PATH							74
+#define IDC_SVN_LIMIT							79
+#define IDC_GIT_LIMIT							80
+#define IDC_HG_LIMIT							81
+#define IDC_CVS_LIMIT							82
 #define IDC_TABLE								500
 #define IDC_COMMIT								501
 #define IDC_PULL								502
