@@ -827,6 +827,24 @@ public:
 		Ptr = p + (++Idx);
 		return PtrCheck(Ptr);		
 	}
+
+	GArray<Type> Slice(ssize_t Start, ssize_t End = -1)
+	{
+		GArray<Type> a;
+
+		if (Start < 0) Start = 0;
+		if (End < 0) End = len;
+		if (End > Start)
+		{
+			a.Length(End - Start);
+			for (size_t i=0; i<a.Length(); i++)
+			{
+				a[i] = p[Start + i];
+			}
+		}
+
+		return a;
+	}
 };
 
 #endif

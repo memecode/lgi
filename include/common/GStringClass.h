@@ -695,7 +695,7 @@ public:
 	}
 	
 	/// Joins an array of strings using a separator
-	GString Join(Array &a)
+	GString Join(GArray<GString> &a)
 	{
 		GString ret;
 		
