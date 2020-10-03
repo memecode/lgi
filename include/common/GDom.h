@@ -53,7 +53,7 @@ public:
 enum GDomProperty
 {
 	#undef _
-	#define _(symbol) symbol,
+	#define _(symbol, txt) symbol,
 	#include "LDomFields.h"
 	#undef _
 };

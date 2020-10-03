@@ -411,7 +411,7 @@ struct OpHandle : public GRect
 class CtrlTablePrivate
 {
 public:
-	bool InLayout;
+	bool InLayout, LayoutDirty;
 
 	// The cell container
 	CtrlTable *Table;
@@ -429,33 +429,11 @@ public:
 	int DragRowSize;
 	int DragColSize;
 
-	bool GetSelected(GArray<ResTableCell*> &s)
-	{
-		for (int i=0; i<Cells.Length(); i++)
-		{
-			if (Cells[i]->Selected)
-				s.Add(Cells[i]);
-		}
-		return s.Length();
-	}
-
 	// Methods
-	ResTableCell *GetCellAt(int cx, int cy)
-	{
-		for (int i=0; i<Cells.Length(); i++)
-		{
-			if (Cells[i]->Cell.Overlap(cx, cy))
-			{
-				return Cells[i];
-			}
-		}
-
-		return 0;
-	}
-
 	CtrlTablePrivate(CtrlTable *t)
 	{
 		InLayout = false;
+		LayoutDirty = false;
 		Table = t;
 		CellX = CellY = 2;
 		AttachTo = 0;
@@ -475,6 +453,29 @@ public:
 		Cells.DeleteObjects();
 	}
 
+	bool GetSelected(GArray<ResTableCell*> &s)
+	{
+		for (int i=0; i<Cells.Length(); i++)
+		{
+			if (Cells[i]->Selected)
+				s.Add(Cells[i]);
+		}
+		return s.Length();
+	}
+
+	ResTableCell *GetCellAt(int cx, int cy)
+	{
+		for (int i=0; i<Cells.Length(); i++)
+		{
+			if (Cells[i]->Cell.Overlap(cx, cy))
+			{
+				return Cells[i];
+			}
+		}
+
+		return 0;
+	}
+
 	void Layout(GRect c)
 	{
 		#define ADD_BORDER		10
@@ -483,6 +484,7 @@ public:
 		if (InLayout)
 			return;
 		InLayout = true;
+		LayoutDirty = false;
 		Handles.Length(0);
 
 		int x, y;
@@ -575,7 +577,7 @@ public:
 								}
 
 								c = GetCellAt(x, y + Cell->Cell.Y());
-								LgiTrace("%s %i,%i+%i = %p\n", Cell->Cell.GetStr(), x, y, Cell->Cell.Y(), c);
+								// LgiTrace("%s %i,%i+%i = %p\n", Cell->Cell.GetStr(), x, y, Cell->Cell.Y(), c);
 								if (c && c->Selected)
 								{
 									auto &j = Handles.New().Set(LJoinCells, BtnSize, BtnSize);
@@ -784,111 +786,115 @@ void CtrlTable::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 
 bool CtrlTable::GetVariant(const char *Name, GVariant &Value, char *Array)
 {
-	if (stricmp(Name, "cols") == 0)
+	GDomProperty p = LgiStringToDomProp(Name);
+	switch (p)
 	{
-		GStringPipe p;
-		for (int i=0; i<d->ColSize.Length(); i++)
+		case TableLayoutCols:
 		{
-			if (i) p.Push(",");
-			p.Print("%.3f", d->ColSize[i]);
-		}
-		char *s = p.NewStr();
-		if (s)
-		{
-			Value = s;
-			DeleteArray(s);
-		}
-	}
-	else if (stricmp(Name, "rows") == 0)
-	{
-		GStringPipe p;
-		for (int i=0; i<d->RowSize.Length(); i++)
-		{
-			if (i) p.Push(",");
-			p.Print("%.3f", d->RowSize[i]);
-		}
-		char *s = p.NewStr();
-		if (s)
-		{
-			Value = s;
-			DeleteArray(s);
-		}
-	}
-	else if (stricmp(Name, "Cell") == 0)
-	{
-		if (Array)
-		{
-			GToken t(Array, ",");
-			if (t.Length() == 2)
+			GStringPipe p;
+			for (int i=0; i<d->ColSize.Length(); i++)
 			{
-				Value = d->GetCellAt(atoi(t[0]), atoi(t[1]));
+				if (i) p.Push(",");
+				p.Print("%.3f", d->ColSize[i]);
 			}
-			else return false;
+			Value.OwnStr(p.NewStr());
+			break;
 		}
-		else return false;
+		case TableLayoutRows:
+		{
+			GStringPipe p;
+			for (int i=0; i<d->RowSize.Length(); i++)
+			{
+				if (i) p.Push(",");
+				p.Print("%.3f", d->RowSize[i]);
+			}
+			Value.OwnStr(p.NewStr());
+			break;
+		}
+		case TableLayoutCell:
+		{
+			auto Coords = GString(Array).SplitDelimit(",");
+			if (Coords.Length() != 2)
+				return false;
+
+			Value = d->GetCellAt(Coords[0].Int(), Coords[1].Int());
+			break;
+		}
+		default:
+		{
+			LgiAssert(!"Invalid property.");
+			return false;
+		}
 	}
-	else return false;
 
 	return true;
 }
 
 bool CtrlTable::SetVariant(const char *Name, GVariant &Value, char *Array)
 {
-	if (stricmp(Name, "cols") == 0)
+	GDomProperty p = LgiStringToDomProp(Name);
+	switch (p)
 	{
-		d->Cells.DeleteObjects();
-
-		GToken t(Value.Str(), ",");
-		d->ColSize.Length(0);
-		for (int i=0; i<t.Length(); i++)
+		case TableLayoutCols:
 		{
-			d->ColSize.Add(atof(t[i]));
-		}
+			d->Cells.DeleteObjects();
 
-		MakeSumUnity(d->ColSize);
-
-		d->CellX = d->ColSize.Length();
-	}
-	else if (stricmp(Name, "rows") == 0)
-	{
-		d->Cells.DeleteObjects();
-
-		GToken t(Value.Str(), ",");
-		d->RowSize.Length(0);
-		for (int i=0; i<t.Length(); i++)
-		{
-			d->RowSize.Add(atof(t[i]));
-		}
-
-		MakeSumUnity(d->RowSize);
-
-		d->CellY = d->RowSize.Length();
-	}
-	else if (stricmp(Name, "Cell") == 0)
-	{
-		if (Array)
-		{
-			GToken t(Array, ",");
-			if (t.Length() == 2)
+			GToken t(Value.Str(), ",");
+			d->ColSize.Length(0);
+			for (int i=0; i<t.Length(); i++)
 			{
-				int Cx = atoi(t[0]);
-				int Cy = atoi(t[1]);
-				ResTableCell *c = new ResTableCell(this, Cx, Cy);
-				if (c)
-				{
-					d->Cells.Add(c);
-					GDom **Ptr = (GDom**)Value.Value.Ptr;
-					if (Ptr)
-					{
-						*Ptr = c;
-					}
-				}
+				d->ColSize.Add(atof(t[i]));
 			}
-			else return false;
+
+			MakeSumUnity(d->ColSize);
+
+			d->CellX = d->ColSize.Length();
+			break;
 		}
-		else return false;
+		case TableLayoutRows:
+		{
+			d->Cells.DeleteObjects();
+
+			GToken t(Value.Str(), ",");
+			d->RowSize.Length(0);
+			for (int i=0; i<t.Length(); i++)
+			{
+				d->RowSize.Add(atof(t[i]));
+			}
+
+			MakeSumUnity(d->RowSize);
+
+			d->CellY = d->RowSize.Length();
+			break;
+		}
+		case TableLayoutCell:
+		{
+			auto Coords = GString(Array).SplitDelimit(",");
+			if (Coords.Length() != 2)
+				return false;
+
+			auto Cx = Coords[0].Int();
+			auto Cy = Coords[1].Int();
+			ResTableCell *c = new ResTableCell(this, Cx, Cy);
+			if (!c)
+				return false;
+
+			d->Cells.Add(c);
+			GDom **Ptr = (GDom**)Value.Value.Ptr;
+			if (!Ptr)
+				return false;
+		
+			*Ptr = c;
+			// LgiTrace("Create cell %i,%i = %p\n", (int)Cx, (int)Cy, c);
+			d->LayoutDirty = true;
+			break;
+		}
+		default:
+		{
+			LgiAssert(!"Invalid property.");
+			return false;
+		}
 	}
-	else return false;
 
 	return true;
 }
@@ -898,9 +904,7 @@ GRect *CtrlTable::GetPasteArea()
 	for (int i=0; i<d->Cells.Length(); i++)
 	{
 		if (d->Cells[i]->Selected)
-		{
 			return &d->Cells[i]->Pos;
-		}
 	}
 
 	return 0;
@@ -910,25 +914,21 @@ GRect *CtrlTable::GetChildArea(ResDialogCtrl *Ctrl)
 {
 	ResTableCell *c = d->GetCell(Ctrl);
 	if (c)
-	{
 		return &c->Pos;
-	}
-	return 0;
+	return NULL;
 }
 
 void CtrlTable::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 {
-	if (!Attaching)
+	if (Attaching)
+		return;
+
+	ResDialogCtrl *Rc = dynamic_cast<ResDialogCtrl*>(Wnd);
+	if (Rc)
 	{
-		ResDialogCtrl *Rc = dynamic_cast<ResDialogCtrl*>(Wnd);
-		if (Rc)
-		{
-			ResTableCell *c = d->GetCell(Rc);
-			if (c)
-			{
-				c->Ctrls.Delete(Rc);
-			}
-		}
+		ResTableCell *c = d->GetCell(Rc);
+		if (c)
+			c->Ctrls.Delete(Rc);
 	}
 }
 
@@ -1012,7 +1012,7 @@ void CtrlTable::OnPaint(GSurface *pDC)
 	int i;
 	Client.Set(0, 0, X()-1, Y()-1);
 
-	if (d->Handles.Length() == 0)
+	if (d->LayoutDirty || d->Handles.Length() == 0)
 		d->Layout(GetClient());
 	
 	pDC->Colour(Blue);
@@ -1044,6 +1044,8 @@ void CtrlTable::OnPaint(GSurface *pDC)
 			sprintf(s, "%i,%i-%i,%i", c->Cell.x1, c->Cell.y1, c->Cell.X(), c->Cell.Y());
 			SysFont->Text(pDC, c->Pos.x1 + 3, c->Pos.y1 + 1, s);
 			#endif
+
+			// LgiTrace("Drawing %i,%i = %p @ %s\n", c->Cell.x1, c->Cell.y1, c, c->Pos.GetStr());
 		}
 	}
 
@@ -1098,7 +1100,7 @@ void CtrlTable::OnMouseMove(GMouse &m)
 			d->RowSize[d->DragRowSize] = Frac * Total;
 			d->RowSize[d->DragRowSize+1] = (1.0 - Frac) * Total;
 
-			LgiTrace("Int: %i/%i, Frac: %f,%f\n", PxOffset, BothPx, d->RowSize[d->DragRowSize], d->RowSize[d->DragRowSize+1]);
+			// LgiTrace("Int: %i/%i, Frac: %f,%f\n", PxOffset, BothPx, d->RowSize[d->DragRowSize], d->RowSize[d->DragRowSize+1]);
 
 			Layout();
 			Invalidate();
@@ -1138,7 +1140,7 @@ void CtrlTable::Fix()
 		for (int x=0; x<d->CellX; )
 		{
 			ResTableCell *c = d->GetCellAt(x, y);
-			LgiTrace("[%i][%i] = %p (%ix%i, %s)\n", x, y, c, c ? c->Cell.X() : -1, c ? c->Cell.Y() : -1, c ? c->Pos.GetStr() : NULL);
+			// LgiTrace("[%i][%i] = %p (%ix%i, %s)\n", x, y, c, c ? c->Cell.X() : -1, c ? c->Cell.Y() : -1, c ? c->Pos.GetStr() : NULL);
 			if (c)
 			{
 				x += c->Cell.X();

@@ -733,9 +733,6 @@
     <ClInclude Include="include\common\LStringLayout.h">
       <Filter>Source Files\Graphics\Font</Filter>
     </ClInclude>
-    <ClInclude Include="include\common\LDomFields.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\common\GTextView3.h">
       <Filter>Source Files\Widgets</Filter>
     </ClInclude>
@@ -753,6 +750,9 @@
     </ClInclude>
     <ClInclude Include="include\common\GView.h">
       <Filter>Source Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="include\common\LDomFields.h">
+      <Filter>Source Files\Core\Stream</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

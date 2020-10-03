@@ -2204,46 +2204,48 @@ bool ConvertNumbers(GArray<double> &a, char *s)
 
 bool GTableLayout::SetVariant(const char *Name, GVariant &Value, char *Array)
 {
-	if (stricmp(Name, "cols") == 0)
+	GDomProperty p = LgiStringToDomProp(Name);
+	switch (p)
 	{
-		return ConvertNumbers(d->Cols, Value.Str());
-	}
-	else if (stricmp(Name, "rows") == 0)
-	{
-		return ConvertNumbers(d->Rows, Value.Str());
-	}
-	else if (!stricmp(Name, "style"))
-	{
-		const char *Defs = Value.Str();
-		if (Defs)
-			GetCss(true)->Parse(Defs, GCss::ParseRelaxed);
-	}
-	else if (stricmp(Name, "cell") == 0)
-	{
-		if (!Array)
-			return false;
-
-		GToken t(Array, ",");
-		if (t.Length() != 2)
-			return false;
-
-		int cx = atoi(t[0]);
-		int cy = atoi(t[1]);
-		TableCell *c = new TableCell(this, cx, cy);
-		if (!c)
-			return false;
-
-		d->Cells.Add(c);
-		if (Value.Type == GV_VOID_PTR)
+		case TableLayoutCols:
+			return ConvertNumbers(d->Cols, Value.Str());
+		case TableLayoutRows:
+			return ConvertNumbers(d->Rows, Value.Str());
+		case ObjStyle:
 		{
-			GDom **d = (GDom**)Value.Value.Ptr;
-			if (d)
+			const char *Defs = Value.Str();
+			if (Defs)
+				GetCss(true)->Parse(Defs, GCss::ParseRelaxed);
+			break;
+		}
+		case TableLayoutCell:
+		{
+			auto Coords = GString(Array).SplitDelimit(",");
+			if (Coords.Length() != 2)
+				return false;
+
+			auto Cx = Coords[0].Int();
+			auto Cy = Coords[1].Int();
+			TableCell *c = new TableCell(this, (int)Cx, (int)Cy);
+			if (!c)
+				return false;
+
+			d->Cells.Add(c);
+			
+			if (Value.Type == GV_VOID_PTR)
 			{
-				*d = c;
+				GDom **d = (GDom**)Value.Value.Ptr;
+				if (d)
+					*d = c;
 			}
+			break;
+		}
+		default:
+		{
+			LgiAssert(!"Unsupported property.");
+			return false;
 		}
 	}
-	else return false;
 
 	return true;
 }

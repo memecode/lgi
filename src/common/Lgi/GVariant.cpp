@@ -1644,120 +1644,25 @@ struct GDomPropMap
 	GDomPropMap()
 	{
 		#undef _
-		#define _(symbol) Define(#symbol, symbol);
+		#define _(symbol, txt) Define(txt, symbol);
 		#include "LDomFields.h"
 		#undef _
-
-		Check("Length", ObjLength);
-		Check("Type", ObjType);
-		Check("Name", ObjName);
-		Check("Style", ObjStyle);
-		Check("Class", ObjClass);
-		Check("Field", ObjField);
-		Check("Debug", ObjDebug);
-		Check("textContent", ObjTextContent);
-		Check("innerHTML", ObjInnerHtml);
-
-		Check("List", TypeList);
-		Check("HashTable", TypeHashTable);
-		Check("File", TypeFile);
-		Check("Surface", TypeSurface);
-		Check("Int", TypeInt);
-		Check("Double", TypeDouble);
-		Check("String", TypeString);
-		Check("DateTime", TypeDateTime);
-		
-		Check("Year", DateYear);
-		Check("Month", DateMonth);
-		Check("Day", DateDay);
-		Check("Hour", DateHour);
-		Check("Minute", DateMinute);
-		Check("Second", DateSecond);
-		Check("Date", DateDate);
-		Check("Time", DateTime);
-		Check("DateAndTime", DateDateAndTime);
-		Check("Timestamp", DateTimestamp);
-		Check("SetNow", DateSetNow);
-		Check("SetStr", DateSetStr);
-		Check("GetStr", DateGetStr);
-		Check("Second64Bit", DateSecond64Bit);
-
-		Check("Join", StrJoin);
-		Check("Split", StrSplit);
-		Check("SplitDelimit", StrSplitDelimit);
-		Check("Find", StrFind);
-		Check("Rfind", StrRfind);
-		Check("Lower", StrLower);
-		Check("Upper", StrUpper);
-		Check("Strip", StrStrip);
-		Check("Sub", StrSub);
-		
-		Check("X", SurfaceX);
-		Check("Y", SurfaceY);
-		Check("Bits", SurfaceBits);
-		Check("ColourSpace", SurfaceColourSpace);
-		Check("IncludeCursor", SurfaceIncludeCursor);
-
-		Check("Add", ContainerAdd);
-		Check("Delete", ContainerDelete);
-		Check("HasKey", ContainerHasKey);
-		Check("Sort", ContainerSort);
-		Check("Children", ContainerChildren);
-		Check("Span", ContainerSpan);
-		Check("Align", ContainerAlign);
-		Check("VAlign", ContainerVAlign);
-
-		Check("Open", FileOpen);
-		Check("Read", FileRead);
-		Check("Write", FileWrite);
-		Check("Pos", FilePos);
-		Check("Close", FileClose);
-		Check("Modified", FileModified);
-		Check("Folder", FileFolder);
-		Check("Encoding", FileEncoding);
-		
-		Check("Readable", StreamReadable);
-		Check("Writable", StreamWritable);
-		
-		Check("HtmlImagesLinkCid", HtmlImagesLinkCid);
-		Check("SpellCheckLanguage", SpellCheckLanguage);
-		Check("SpellCheckDictionary", SpellCheckDictionary);
-
-		Check("AppendSeparator", AppendSeparator);
-		Check("AppendItem", AppendItem);
-		Check("AppendSubmenu", AppendSubmenu);
 	}
 	
 	void Define(const char *s, GDomProperty p)
 	{
-		static const char *Prefixes[] = { "Obj", "File", "Date", "Type", "Surface", "Stream", "Str", "Container" };
-		
-		if (!p)
+		if (!s)
 			return;
 
-		for (unsigned i=0; i<CountOf(Prefixes); i++)
-		{
-			size_t len = strlen(Prefixes[i]);
-			if (_strnicmp(s, Prefixes[i], len) == 0)
-			{
-				s += len;
-				break;
-			}
-		}
-
-		#if defined(_DEBUG)
-		GDomProperty e = ToProp.Find(s);
-		LgiAssert(e == ObjNone);
+		#if defined(_DEBUG) // Check for duplicates.
+		auto existing_prop = ToProp.Find(s);
+		LgiAssert(existing_prop == ObjNone);
+		auto existing_str = ToString.Find(p);
+		LgiAssert(existing_str == NULL);
 		#endif
 
 		ToProp.Add(s, p);
 		ToString.Add(p, s);
-	} 
-
-	void Check(const char *s, GDomProperty p)
-	{
-		LgiAssert(ToProp.Find(s) == p);
-		LgiAssert(!_stricmp(ToString.Find(p), s));
 	}
 	
 } DomPropMap;

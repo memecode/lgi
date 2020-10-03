@@ -31,11 +31,12 @@ public:
 	GFile *F;
 	char *Charset;
 	GString ErrBuf;
+	IFtpCallback *Callback;
 	
 	GAutoString Host;
 	int Port;
 
-	IFtpPrivate()
+	IFtpPrivate(IFtpCallback *cb) : Callback(cb)
 	{
 		Charset = NewStr(DefaultFtpCharset);
 		InBuf[0] = 0;
@@ -278,11 +279,9 @@ IFtpEntry &IFtpEntry::operator =(const IFtpEntry &e)
 #define Verify(i, ret) { ssize_t Code = i; if (Code != (ret)) throw Code; }
 #define VerifyRange(i, range) { ssize_t Code = i; if ((Code/100) != range) throw Code; }
 
-IFtp::IFtp(/* FtpSocketFactory sockFactory, void *factoryParam */)
+IFtp::IFtp(IFtpCallback *cb)
 {
-	d = new IFtpPrivate;
-	// SockFactory = sockFactory;
-	// FactoryParam = factoryParam;
+	d = new IFtpPrivate(cb);	
 	Authenticated = false;
 	Meter = 0;
 
@@ -459,6 +458,9 @@ FtpOpenStatus IFtp::Open(GSocketI *S, char *RemoteHost, int Port, char *User, ch
 
 		if (Socket && Socket->Open(RemoteHost, Port))
 		{
+			if (d->Callback)
+				d->Callback->OnSocketConnect();
+
 			Verify(ReadLine(), 220);
 
 			if (User)

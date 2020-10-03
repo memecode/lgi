@@ -1578,12 +1578,8 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 					GRect Span(x, y, x + ColSpan - 1, y + RowSpan - 1);
 						
 					for (int Y=Span.y1; Y<=Span.y2; Y++)
-					{
 						for (int X=Span.x1; X<=Span.x2; X++)
-						{
 							UsedCell(X, Y) = true;
-						}
-					}
 
 					if (ColSpan > 1 || RowSpan > 1)
 					{
@@ -1697,6 +1693,10 @@ ResObjectImpl::SStatus ResTableLayout::Res_Write(GXmlTag *t)
 									if (Td)
 									{
 										Tr->InsertTag(Td);
+
+										sprintf_s(a, sizeof(a), "%i,%i", x, y);
+										Td->SetAttr("addr", a); // Debugging mostly.
+
 										if (Span.X() > 1)
 											Td->SetAttr("colspan", Span.X());
 										if (Span.Y() > 1)

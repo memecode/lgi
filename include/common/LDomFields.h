@@ -1,92 +1,96 @@
-_(ObjNone)
+_(ObjNone, NULL)
 	
 // Common
-_(ObjLength)
-_(ObjType)
-_(ObjName)
-_(ObjIdentifier)
-_(ObjStyle)
-_(ObjClass)
-_(ObjField)
-_(ObjDebug)
-_(ObjTextContent)
-_(ObjInnerHtml)
+_(ObjLength, "Length")
+_(ObjType, "Type")
+_(ObjName, "Name")
+_(ObjIdentifier, "Id")
+_(ObjStyle, "Style")
+_(ObjClass, "Class")
+_(ObjField, "Field")
+_(ObjDebug, "Debug")
+_(ObjTextContent, "textContent")
+_(ObjInnerHtml, "innerHTML")
 	
 // Types
-_(TypeList)
-_(TypeHashTable)
-_(TypeFile)
-_(TypeSurface)
-_(TypeDateTime)
-_(TypeInt)
-_(TypeDouble)
-_(TypeString)
+_(TypeList, "List")
+_(TypeHashTable, "HashTable")
+_(TypeFile, "File")
+_(TypeSurface, "Surface")
+_(TypeDateTime, "DateTime")
+_(TypeInt, "Int")
+_(TypeDouble, "Double")
+_(TypeString, "String")
 
 // LDateTime
-_(DateNone)
-_(DateYear)
-_(DateMonth)
-_(DateDay)
-_(DateHour)
-_(DateMinute)
-_(DateSecond)
-_(DateDate) // "yyyymmdd"
-_(DateTime) // "hhmmss"
-_(DateDateAndTime) // "yyyymmdd hhmmss"
-_(DateTimestamp) // 64bit UTC
-_(DateSetNow)
-_(DateSetStr)
-_(DateGetStr)
-_(DateSecond64Bit)
+_(DateYear, "Year")
+_(DateMonth, "Month")
+_(DateDay, "Day")
+_(DateHour, "Hour")
+_(DateMinute, "Minute")
+_(DateSecond, "Second")
+_(DateDate, "Date") // "yyyymmdd"
+_(DateTime, "Time") // "hhmmss"
+_(DateDateAndTime, "DateAndTime") // "yyyymmdd hhmmss"
+_(DateTimestamp, "Timestamp") // 64bit UTC
+_(DateSetNow, "SetNow")
+_(DateSetStr, "SetStr")
+_(DateGetStr, "GetStr")
+_(DateSecond64Bit, "Second64Bit")
 
 // GVariant string
-_(StrJoin)
-_(StrSplit)
-_(StrSplitDelimit)
-_(StrFind)
-_(StrRfind)
-_(StrLower)
-_(StrUpper)
-_(StrStrip)
-_(StrSub)
+_(StrJoin, "Join")
+_(StrSplit, "Split")
+_(StrSplitDelimit, "SplitDelimit")
+_(StrFind, "Find")
+_(StrRfind, "Rfind")
+_(StrLower, "Lower")
+_(StrUpper, "Upper")
+_(StrStrip, "Strip")
+_(StrSub, "Sub")
 	
 // GSurface
-_(SurfaceX)
-_(SurfaceY)
-_(SurfaceBits)
-_(SurfaceColourSpace)
-_(SurfaceIncludeCursor)
+_(SurfaceX, "X")
+_(SurfaceY, "Y")
+_(SurfaceBits, "Bits")
+_(SurfaceColourSpace, "ColourSpace")
+_(SurfaceIncludeCursor, "IncludeCursor")
 	
 // List GHashTbl/LHashTbl
-_(ContainerAdd)
-_(ContainerDelete)
-_(ContainerHasKey)
-_(ContainerSort)
-_(ContainerChildren)
-_(ContainerSpan)
-_(ContainerAlign)
-_(ContainerVAlign)
+_(ContainerAdd, "Add")
+_(ContainerDelete, "Delete")
+_(ContainerHasKey, "HasKey")
+_(ContainerSort, "Sort")
+_(ContainerChildren, "Children")
+_(ContainerSpan, "Span")
+_(ContainerAlign, "Align")
+_(ContainerVAlign, "VAlign")
 	
 // GFile
-_(FileOpen)
-_(FileRead)
-_(FileWrite)
-_(FilePos)
-_(FileClose)
-_(FileModified)
-_(FileFolder)
-_(FileEncoding)
+_(FileOpen, "Open")
+_(FileRead, "Read")
+_(FileWrite, "Write")
+_(FilePos, "Pos")
+_(FileClose, "Close")
+_(FileModified, "Modified")
+_(FileFolder, "Folder")
+_(FileEncoding, "Encoding")
 	
 // GStream
-_(StreamReadable)
-_(StreamWritable)
+_(StreamReadable, "Readable")
+_(StreamWritable, "Writable")
 
 // Rich text editor
-_(HtmlImagesLinkCid) // output CID image links rather than files.
-_(SpellCheckLanguage)
-_(SpellCheckDictionary)
+_(HtmlImagesLinkCid, "HtmlImagesLinkCid") // output CID image links rather than files.
+_(SpellCheckLanguage, "SpellCheckLanguage")
+_(SpellCheckDictionary, "SpellCheckDictionary")
 
 // Menu
-_(AppendSeparator)
-_(AppendItem)
-_(AppendSubmenu)
+_(AppendSeparator, "AppendSeparator")
+_(AppendItem, "AppendItem")
+_(AppendSubmenu, "AppendSubmenu")
+
+// Ctrl Table
+_(TableLayoutCols, "Cols")
+_(TableLayoutRows, "Rows")
+_(TableLayoutCell, "Cell")

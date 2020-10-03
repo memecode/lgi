@@ -76,6 +76,7 @@ class IFtpCallback
 public:
 	virtual ~IFtpCallback() {}
 	
+	virtual void OnSocketConnect() = 0;
 	virtual int MsgBox(const char *Msg, const char *Title, int Btn = MB_OK) = 0;
 	virtual int Alert(const char *Title, const char *Text, const char *Btn1, const char *Btn2 = 0, const char *Btn3 = 0) = 0;
 	virtual void Disconnect() = 0;
@@ -129,7 +130,7 @@ public:
 	bool PermissionsFromStr(const char *s);
 };
 
-/// The remote folder system interfaceß
+/// The remote folder system interface.
 class IFileProtocol
 {
 public:
@@ -214,7 +215,7 @@ protected:
 
 public:
 	/// Construct an FTP protocol handler.
-	IFtp();
+	IFtp(IFtpCallback *cb = NULL);
 	virtual ~IFtp();
 
 	/// \returns the current charset
