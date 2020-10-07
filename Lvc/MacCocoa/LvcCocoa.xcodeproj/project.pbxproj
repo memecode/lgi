@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */; };
 		3448F8C62081D2500038AE76 /* mac-icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 3448F8C52081D2500038AE76 /* mac-icon.icns */; };
-		3454683E23AA0442001B2825 /* libpng15.15.4.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CE07222327B3F900807DCB /* libpng15.15.4.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		3457FE492081CB3D00014BE4 /* BlameUi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE3E2081CB3D00014BE4 /* BlameUi.cpp */; };
 		3457FE4A2081CB3D00014BE4 /* DropDownBtn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE3F2081CB3D00014BE4 /* DropDownBtn.cpp */; };
 		3457FE4B2081CB3D00014BE4 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE412081CB3D00014BE4 /* Main.cpp */; };
@@ -18,6 +17,10 @@
 		3457FE4E2081CB3D00014BE4 /* VcFolder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE472081CB3D00014BE4 /* VcFolder.cpp */; };
 		3457FE502081CBE500014BE4 /* GSubProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE4F2081CBE500014BE4 /* GSubProcess.cpp */; };
 		3457FE522081CC4800014BE4 /* Lvc.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 3457FE512081CC4800014BE4 /* Lvc.lr8 */; };
+		347D1484252D450500422DA9 /* libssh.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.dylib */; };
+		347D1486252D451600422DA9 /* libssh.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		347D1487252D451C00422DA9 /* libpng15.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CE07222327B3F900807DCB /* libpng15.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		347D1489252D453300422DA9 /* DeEscape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D1488252D453300422DA9 /* DeEscape.cpp */; };
 		34BD35B120C5484A0001838A /* GControlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B020C5484A0001838A /* GControlTree.cpp */; };
 		34BD35B320C548710001838A /* GXmlTreeUi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B220C548710001838A /* GXmlTreeUi.cpp */; };
 		34C032B32319CDE900470DF2 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C032B22319CDE900470DF2 /* Cocoa.framework */; };
@@ -30,6 +33,83 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		347D146D252D44EE00422DA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E7B7EBF2E2E94B119E531A89;
+			remoteInfo = exec;
+		};
+		347D146F252D44EE00422DA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DD956992C30A4BF184529B89;
+			remoteInfo = libssh_scp;
+		};
+		347D1471252D44EE00422DA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0E7EB5AA394C4113A5D0EE27;
+			remoteInfo = libsshpp;
+		};
+		347D1473252D44EE00422DA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = AE81894E52BF4DA59548676E;
+			remoteInfo = libsshpp_noexcept;
+		};
+		347D1475252D44EE00422DA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D4B00784B7B24F5E8FD509DC;
+			remoteInfo = samplesftp;
+		};
+		347D1477252D44EE00422DA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F26DAFAF6A004E7AB969A293;
+			remoteInfo = scp_download;
+		};
+		347D1479252D44EE00422DA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5B89EEC82A1A4D30A30253B2;
+			remoteInfo = senddata;
+		};
+		347D147B252D44EE00422DA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C8A8CF13F28F48F68C943CCA;
+			remoteInfo = "ssh-client";
+		};
+		347D147D252D44EE00422DA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 918DBE79178E4403B12D04C9;
+			remoteInfo = ssh_shared;
+		};
+		347D147F252D44EE00422DA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 31153E90BDBA4EC6977031A8;
+			remoteInfo = sshnetcat;
+		};
+		347D1481252D44F900422DA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = A8DB251542A64409BA09F891;
+			remoteInfo = ssh_shared;
+		};
 		34C032B82319CDFE00470DF2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */;
@@ -97,7 +177,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 73620A5B92B34DD3B0B12540;
+			remoteGlobalIDString = 6E9F212716234520A9337DA1;
 			remoteInfo = libpng15;
 		};
 /* End PBXContainerItemProxy section */
@@ -109,17 +189,9 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				347D1487252D451C00422DA9 /* libpng15.dylib in CopyFiles */,
+				347D1486252D451600422DA9 /* libssh.dylib in CopyFiles */,
 				34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		34CE072F2327B40D00807DCB /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				3454683E23AA0442001B2825 /* libpng15.15.4.0.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,6 +213,8 @@
 		3457FE482081CB3D00014BE4 /* VcFolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VcFolder.h; path = ../Src/VcFolder.h; sourceTree = "<group>"; };
 		3457FE4F2081CBE500014BE4 /* GSubProcess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GSubProcess.cpp; path = ../../src/common/Lgi/GSubProcess.cpp; sourceTree = "<group>"; };
 		3457FE512081CC4800014BE4 /* Lvc.lr8 */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Lvc.lr8; path = ../Resources/Lvc.lr8; sourceTree = "<group>"; };
+		347D145B252D44EE00422DA9 /* libssh.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libssh.xcodeproj; path = ../../../../../CodeLib/libssh/build/libssh.xcodeproj; sourceTree = "<group>"; };
+		347D1488252D453300422DA9 /* DeEscape.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DeEscape.cpp; path = ../../src/common/Text/DeEscape.cpp; sourceTree = "<group>"; };
 		3488EE99233C16AF00756838 /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		34BD35B020C5484A0001838A /* GControlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GControlTree.cpp; path = ../../src/common/Widgets/GControlTree.cpp; sourceTree = "<group>"; };
 		34BD35B220C548710001838A /* GXmlTreeUi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GXmlTreeUi.cpp; path = ../../src/common/Text/GXmlTreeUi.cpp; sourceTree = "<group>"; };
@@ -159,6 +233,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				347D1484252D450500422DA9 /* libssh.dylib in Frameworks */,
 				34C032BB2319CE8C00470DF2 /* LgiCocoa.framework in Frameworks */,
 				34C032B32319CDE900470DF2 /* Cocoa.framework in Frameworks */,
 			);
@@ -182,6 +257,7 @@
 				20286C2CFDCF999611CA2CEA /* Resources */,
 				20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */,
 				195DF8CFFE9D517E11CA2CBB /* Products */,
+				347D1483252D450500422DA9 /* Frameworks */,
 			);
 			name = i.Hex;
 			sourceTree = "<group>";
@@ -220,6 +296,7 @@
 		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				347D145B252D44EE00422DA9 /* libssh.xcodeproj */,
 				34CE07112327B3F900807DCB /* libpng.xcodeproj */,
 				34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */,
 				34C032B22319CDE900470DF2 /* Cocoa.framework */,
@@ -230,6 +307,7 @@
 		342D52A30F0CBA07002A1C7C /* Lgi */ = {
 			isa = PBXGroup;
 			children = (
+				347D1488252D453300422DA9 /* DeEscape.cpp */,
 				34CE070F2327B3B100807DCB /* Png.cpp */,
 				34C032BC2319CEC100470DF2 /* GOptionsFile.cpp */,
 				34BD35B220C548710001838A /* GXmlTreeUi.cpp */,
@@ -238,6 +316,30 @@
 				342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */,
 			);
 			name = Lgi;
+			sourceTree = "<group>";
+		};
+		347D145C252D44EE00422DA9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				347D146E252D44EE00422DA9 /* exec */,
+				347D1470252D44EE00422DA9 /* libssh_scp */,
+				347D1472252D44EE00422DA9 /* libsshpp */,
+				347D1474252D44EE00422DA9 /* libsshpp_noexcept */,
+				347D1476252D44EE00422DA9 /* samplesftp */,
+				347D1478252D44EE00422DA9 /* scp_download */,
+				347D147A252D44EE00422DA9 /* senddata */,
+				347D147C252D44EE00422DA9 /* ssh-client */,
+				347D147E252D44EE00422DA9 /* libssh.dylib */,
+				347D1480252D44EE00422DA9 /* sshnetcat */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		347D1483252D450500422DA9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		34C032B52319CDFE00470DF2 /* Products */ = {
@@ -252,11 +354,11 @@
 			isa = PBXGroup;
 			children = (
 				34CE07202327B3F900807DCB /* example */,
-				34CE07222327B3F900807DCB /* libpng15.15.4.0.dylib */,
+				34CE07222327B3F900807DCB /* libpng15.dylib */,
 				34CE07242327B3F900807DCB /* libpng15_static.a */,
 				34CE07262327B3F900807DCB /* minigzip */,
 				34CE07282327B3F900807DCB /* pngtest */,
-				34CE072A2327B3F900807DCB /* libzd.dylib */,
+				34CE072A2327B3F900807DCB /* libz_local.dylib */,
 				34CE072C2327B3F900807DCB /* libzlib_static.a */,
 			);
 			name = Products;
@@ -273,11 +375,11 @@
 				8D0C4E8F0486CD37000505A6 /* Sources */,
 				8D0C4E910486CD37000505A6 /* Frameworks */,
 				34640D3212D5D8AB00B207F4 /* CopyFiles */,
-				34CE072F2327B40D00807DCB /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				347D1482252D44F900422DA9 /* PBXTargetDependency */,
 				34CE072E2327B40200807DCB /* PBXTargetDependency */,
 				34C032C02319CF1A00470DF2 /* PBXTargetDependency */,
 			);
@@ -314,6 +416,10 @@
 					ProductGroup = 34CE07122327B3F900807DCB /* Products */;
 					ProjectRef = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
 				},
+				{
+					ProductGroup = 347D145C252D44EE00422DA9 /* Products */;
+					ProjectRef = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -323,6 +429,77 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		347D146E252D44EE00422DA9 /* exec */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = exec;
+			remoteRef = 347D146D252D44EE00422DA9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		347D1470252D44EE00422DA9 /* libssh_scp */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = libssh_scp;
+			remoteRef = 347D146F252D44EE00422DA9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		347D1472252D44EE00422DA9 /* libsshpp */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = libsshpp;
+			remoteRef = 347D1471252D44EE00422DA9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		347D1474252D44EE00422DA9 /* libsshpp_noexcept */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = libsshpp_noexcept;
+			remoteRef = 347D1473252D44EE00422DA9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		347D1476252D44EE00422DA9 /* samplesftp */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = samplesftp;
+			remoteRef = 347D1475252D44EE00422DA9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		347D1478252D44EE00422DA9 /* scp_download */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = scp_download;
+			remoteRef = 347D1477252D44EE00422DA9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		347D147A252D44EE00422DA9 /* senddata */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = senddata;
+			remoteRef = 347D1479252D44EE00422DA9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		347D147C252D44EE00422DA9 /* ssh-client */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = "ssh-client";
+			remoteRef = 347D147B252D44EE00422DA9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		347D147E252D44EE00422DA9 /* libssh.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			name = libssh.dylib;
+			path = libssh.4.7.2.dylib;
+			remoteRef = 347D147D252D44EE00422DA9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		347D1480252D44EE00422DA9 /* sshnetcat */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = sshnetcat;
+			remoteRef = 347D147F252D44EE00422DA9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		34C032B92319CDFE00470DF2 /* LgiCocoa.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -337,9 +514,10 @@
 			remoteRef = 34CE071F2327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		34CE07222327B3F900807DCB /* libpng15.15.4.0.dylib */ = {
+		34CE07222327B3F900807DCB /* libpng15.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
+			name = libpng15.dylib;
 			path = libpng15.15.4.0.dylib;
 			remoteRef = 34CE07212327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -365,7 +543,7 @@
 			remoteRef = 34CE07272327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		34CE072A2327B3F900807DCB /* libzd.dylib */ = {
+		34CE072A2327B3F900807DCB /* libz_local.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
 			name = libz_local.dylib;
@@ -401,6 +579,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				347D1489252D453300422DA9 /* DeEscape.cpp in Sources */,
 				3457FE502081CBE500014BE4 /* GSubProcess.cpp in Sources */,
 				34BD35B320C548710001838A /* GXmlTreeUi.cpp in Sources */,
 				3457FE4C2081CB3D00014BE4 /* VcCommit.cpp in Sources */,
@@ -419,6 +598,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		347D1482252D44F900422DA9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = ssh_shared;
+			targetProxy = 347D1481252D44F900422DA9 /* PBXContainerItemProxy */;
+		};
 		34C032C02319CF1A00470DF2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = LgiCocoa;
@@ -453,6 +637,13 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				HEADER_SEARCH_PATHS = (
+					../../include/common,
+					../../include/mac/cocoa,
+					../../../../../CodeLib/libpng,
+					../../../../../CodeLib/libpng/build,
+					../../../../../CodeLib/libssh/include,
+				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
@@ -472,6 +663,13 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				HEADER_SEARCH_PATHS = (
+					../../include/common,
+					../../include/mac/cocoa,
+					../../../../../CodeLib/libpng,
+					../../../../../CodeLib/libpng/build,
+					../../../../../CodeLib/libssh/include,
+				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";

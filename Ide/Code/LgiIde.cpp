@@ -1310,7 +1310,7 @@ public:
 		if (!File)
 			return;
 		char *Sep;
-		while (Sep = strchr(File, DIR_CHAR == '\\' ? '/' : '\\'))
+		while ((Sep = strchr(File, DIR_CHAR == '\\' ? '/' : '\\')))
 			*Sep = DIR_CHAR;
 
 		// Scan over the line number..

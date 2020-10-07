@@ -257,7 +257,10 @@ const char *VcFolder::LocalPath()
 		return NULL;
 	}
 	auto c = Uri.sPath.Get();
-	if (*c == '/') c++;
+	#ifdef WINDOWS
+	if (*c == '/')
+		c++;
+	#endif
 	return c;
 }
 

@@ -241,8 +241,10 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 	}
 
 	auto Path = u.sPath.Get();
+	#ifdef WINDOWS
 	if (*Path == '/')
 		Path++;
+	#endif
 
 	if (LgiMakePath(p, sizeof(p), Path, ".git") &&
 		DirExists(p))
