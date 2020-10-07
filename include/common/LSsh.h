@@ -174,8 +174,10 @@ public:
 
 		if (PublicKey)
 			r = ssh_userauth_publickey_auto(Ssh, Username, Password);
-		else
+		else if (Username && Password)
 			r = ssh_userauth_password(Ssh, Username, Password);
+		else
+			Log->Print("%s:%i - No username and password.\n", _FL);
 
 		if (r != S_OK)
 			return false;

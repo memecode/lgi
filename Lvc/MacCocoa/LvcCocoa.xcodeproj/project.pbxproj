@@ -375,6 +375,7 @@
 				8D0C4E8F0486CD37000505A6 /* Sources */,
 				8D0C4E910486CD37000505A6 /* Frameworks */,
 				34640D3212D5D8AB00B207F4 /* CopyFiles */,
+				347D148F252D51F300422DA9 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -573,6 +574,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		347D148F252D51F300422DA9 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nexport FW=${CONFIGURATION_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\nln -s ./libssh.4.7.2.dylib ${FW}/libssh.4.dylib\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8D0C4E8F0486CD37000505A6 /* Sources */ = {
