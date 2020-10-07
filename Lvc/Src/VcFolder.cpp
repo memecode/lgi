@@ -2101,6 +2101,11 @@ void VcFolder::ReadDir(GTreeItem *Parent, const char *Uri)
 
 void VcFolder::OnVcsType()
 {
+	if (!d)
+	{
+		LgiAssert(!"No priv instance");
+		return;
+	}
 	auto c = d->GetConnection(Uri.ToString(), false);
 	if (c)
 	{

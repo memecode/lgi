@@ -591,7 +591,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nexport FW=${CONFIGURATION_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\nln -s ./libssh.4.7.2.dylib ${FW}/libssh.4.dylib\n";
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nexport FW=${CONFIGURATION_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\nrm -f ${FW}/libssh.4.dylib\nln -s ./libssh.4.7.2.dylib ${FW}/libssh.4.dylib\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

@@ -1378,18 +1378,20 @@ struct SshHost : public GTreeItem
 	}
 };
 
-RemoteFolderDlg::RemoteFolderDlg(App *application) : app(application), root(NULL), newhost(NULL)
+RemoteFolderDlg::RemoteFolderDlg(App *application) : app(application), root(NULL), newhost(NULL), tree(NULL)
 {
 	SetParent(app);
 	LoadFromResource(IDD_REMOTE_FOLDER);
 
 	if (GetViewById(IDC_HOSTS, tree))
 	{
+		printf("tree=%p\n", tree);
+
 		tree->Insert(root = new SshHost());
 		root->SetText("Ssh Hosts");
 	}
 	else return;
-
+	
 	GViewI *v;
 	if (GetViewById(IDC_HOSTNAME, v))
 		v->Focus(true);
@@ -1420,7 +1422,7 @@ RemoteFolderDlg::~RemoteFolderDlg()
 
 int RemoteFolderDlg::OnNotify(GViewI *Ctrl, int Flags)
 {
-	SshHost *cur = dynamic_cast<SshHost*>(tree->Selection());
+	SshHost *cur = tree ? dynamic_cast<SshHost*>(tree->Selection()) : NULL;
 
 	#define CHECK_SPECIAL() \
 		if (cur == newhost) \
