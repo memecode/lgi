@@ -1474,17 +1474,12 @@ bool MailSmtp::Open(GSocketI *S,
 						}
 						else if (Auth.Equals("PLAIN"))
 						{
-							char Tmp[256];
-							ZeroObj(Tmp);
-							int ch = 1;
-							ch += sprintf_s(Tmp+ch, sizeof(Tmp)-ch, "%s", UserName) + 1;
-							ch += sprintf_s(Tmp+ch, sizeof(Tmp)-ch, "%s", Password) + 1;
+							char Ascii[512];
+							int ch = sprintf_s(Ascii, sizeof(Ascii), "%c%s%c%s", 0, UserName, 0, Password);
+							char Base64[512] = {0};
+							ConvertBinaryToBase64(Base64, sizeof(Base64), (uint8_t*)Ascii, ch);
 
-							char B64[256];
-							ZeroObj(B64);
-							ConvertBinaryToBase64(B64, sizeof(B64), (uint8_t*)Tmp, ch);
-
-							sprintf_s(Buffer, sizeof(Buffer), "AUTH PLAIN %s\r\n", B64);
+							sprintf_s(Buffer, sizeof(Buffer), "AUTH PLAIN %s\r\n", Base64);
 							VERIFY_RET_VAL(Write(0, true));
 							if (ReadReply("235"))
 							{
