@@ -253,6 +253,8 @@ public:
 
 	bool UploadFile(const char *To, const char *From)
 	{
+		bool Status = false;
+
 		// Write the file...
 		auto Parts = GString(To).RSplit("/", 1);
 		ssh_scp Scp = ssh_scp_new(Ssh, SSH_SCP_WRITE, Parts[0]);
@@ -295,7 +297,8 @@ public:
 						Meter.Value(i);
 					}
 
-					Log->Print("%s:%i - Upload: %s.\n", _FL, i==length ? "Ok" : "Error");
+					Status = i==length;
+					Log->Print("%s:%i - Upload: %s.\n", _FL, Status ? "Ok" : "Error");
 				}
 				else Log->Print("%s:%i - Can't open '%s'.\n", _FL, From);
 			}
@@ -306,7 +309,7 @@ public:
 		ssh_scp_close(Scp);
 		ssh_scp_free(Scp);
 
-		return true;
+		return Status;
 	}
 
 	GAutoPtr<GStream> CreateConsole()
