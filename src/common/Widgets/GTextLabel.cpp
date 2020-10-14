@@ -112,7 +112,8 @@ void GTextLabel::SetWrap(bool b)
 
 bool GTextLabel::Name(const char *n)
 {
-	if (!d->Lock(_FL))
+	LMutex::Auto Lck(d, _FL);
+	if (!Lck)
 		return false;
 
 	if (InThread())
@@ -123,7 +124,7 @@ bool GTextLabel::Name(const char *n)
 	}
 	else if (IsAttached())
 	{
-		d->ThreadName = n;
+		d->ThreadName = n ? n : "";
 		PostEvent(M_TEXT_UPDATE_NAME);
 	}
 	else
@@ -131,13 +132,13 @@ bool GTextLabel::Name(const char *n)
 		GView::Name(n);
 	}
 
-	d->Unlock();
 	return true;
 }
 
 bool GTextLabel::NameW(const char16 *n)
 {
-	if (!d->Lock(_FL))
+	LMutex::Auto Lck(d, _FL);
+	if (!Lck)
 		return false;
 
 	if (InThread())
@@ -148,12 +149,10 @@ bool GTextLabel::NameW(const char16 *n)
 	}
 	else if (IsAttached())
 	{
-		d->ThreadName = n;
+		d->ThreadName = n ? n : L"";
 		PostEvent(M_TEXT_UPDATE_NAME);
 	}
 	else LgiAssert(!"Can't update name.");
-
-	d->Unlock();
 
 	return true;
 }
@@ -237,8 +236,8 @@ GMessage::Result GTextLabel::OnEvent(GMessage *Msg)
 				GString s = d->ThreadName;
 				d->ThreadName.Empty();
 				d->Unlock();
-				
-				Name(s);
+				if (s)
+					Name(s);
 			}
 			break;
 		}
