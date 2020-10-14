@@ -10,8 +10,8 @@
 #include "GButton.h"
 
 const char TagSettings[] = "Settings";
-// const char TagConfigs[] = "Configurations";
 
+const char sRemote[] = "Remote";
 const char sGeneral[] = "General";
 const char sBuild[] = "Build";
 const char sEditor[] = "Editor";
@@ -79,6 +79,7 @@ static const char **GetEnumValues(ProjSetting s)
 #define SF_CONFIG_SPECIFIC		0x08	// Can have a different setting in different configs
 #define SF_ENUM					0x10	// Integer is actually an enum index, not a straight number
 #define SF_FILE_SELECT			0x20	// UI needs a file selection button
+#define SF_PASSWORD				0x40	// UI needs to hide the characters of the password
 
 #define IDC_TEXT_BASE			100
 #define IDC_EDIT_BASE			200
@@ -96,6 +97,7 @@ struct SettingInfo
 		uint32_t ConfigSpecific : 1;
 		uint32_t Enum : 1;
 		uint32_t FileSelect : 1;
+		uint32_t IsPassword : 1;
 	};
 	
 	ProjSetting Setting;
@@ -110,6 +112,9 @@ struct SettingInfo
 
 SettingInfo AllSettings[] =
 {
+	{ProjRemoteUri,				GV_STRING,		"RemoteUri",		sRemote,	{SF_CROSSPLATFORM}},
+	{ProjRemotePass,			GV_STRING,		"RemotePass",		sRemote,	{SF_CROSSPLATFORM|SF_PASSWORD}},
+	
 	{ProjMakefile,				GV_STRING,		"Makefile",			sGeneral,	{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
 	{ProjExe,					GV_STRING,		"Executable",		sGeneral,	{SF_PLATFORM_SPECIFC|SF_CONFIG_SPECIFIC|SF_FILE_SELECT}},
 	{ProjArgs,					GV_STRING,		"Arguments",		sGeneral,	{SF_CROSSPLATFORM|SF_CONFIG_SPECIFIC}},
@@ -118,6 +123,7 @@ SettingInfo AllSettings[] =
 	{ProjCompiler,				GV_INT32,		"Compiler",			sGeneral,	{SF_PLATFORM_SPECIFC|SF_ENUM}},
 	{ProjCCrossCompiler,		GV_STRING,		"CCrossCompiler",	sGeneral,	{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
 	{ProjCppCrossCompiler,		GV_STRING,		"CppCrossCompiler",	sGeneral,	{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
+	
 	{ProjIncludePaths,			GV_STRING,		"IncludePaths",		sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
 	{ProjSystemIncludes,		GV_STRING,		"SystemIncludes",	sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC|SF_PLATFORM_SPECIFC}},
 	{ProjLibraries,				GV_STRING,		"Libraries",		sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
@@ -125,14 +131,17 @@ SettingInfo AllSettings[] =
 	{ProjTargetType,			GV_INT32,		"TargetType",		sBuild,		{SF_CROSSPLATFORM|SF_ENUM}},
 	{ProjTargetName,			GV_STRING,		"TargetName",		sBuild,		{SF_PLATFORM_SPECIFC|SF_CONFIG_SPECIFIC}},
 	{ProjApplicationIcon,		GV_STRING,		"ApplicationIcon",	sBuild,		{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
+	
 	{ProjEditorTabSize,			GV_INT32,		"TabSize",			sEditor,	{SF_CROSSPLATFORM}},
 	{ProjEditorIndentSize,		GV_INT32,		"IndentSize",		sEditor,	{SF_CROSSPLATFORM}},
 	{ProjEditorShowWhiteSpace,	GV_BOOL,		"ShowWhiteSpace",	sEditor,	{SF_CROSSPLATFORM}},
 	{ProjEditorUseHardTabs,		GV_BOOL,		"UseHardTabs",		sEditor,	{SF_CROSSPLATFORM}},
 	{ProjCommentFile,			GV_STRING,		"CommentFile",		sEditor,	{SF_MULTILINE|SF_CROSSPLATFORM}},
 	{ProjCommentFunction,		GV_STRING,		"CommentFunction",	sEditor,	{SF_MULTILINE|SF_CROSSPLATFORM}},
+	
 	{ProjMakefileRules,			GV_STRING,		"OtherMakefileRules", sAdvanced, {SF_MULTILINE}},
 	{ProjPostBuildCommands,		GV_STRING,		"PostBuildCommands", sAdvanced, {SF_PLATFORM_SPECIFC|SF_CONFIG_SPECIFIC|SF_MULTILINE}},
+	
 	{ProjNone,					GV_NULL,		NULL,				NULL,		{0}},
 };
 
@@ -314,22 +323,28 @@ public:
 		// Do value cell
 		c = Tbl->GetCell(0, CellY + 1);
 		
+		if (Setting->Flag.IsPassword)
+		{
+			int asd=0;
+		}
+
 		GXmlTag *t = d->Editing.GetChildTag(Path);
 		if (Setting->Type == GV_STRING)
 		{
-			c->Add(Ctrls[i].Edit = new GEdit(IDC_EDIT_BASE + i, 0, 0, 60, 20));
+			Ctrls[i].Edit = new GEdit(IDC_EDIT_BASE + i, 0, 0, 60, 20);
 			Ctrls[i].Edit->MultiLine(Setting->Flag.MultiLine);
+			Ctrls[i].Edit->Password(Setting->Flag.IsPassword);
 			if (t && t->GetContent())
 				Ctrls[i].Edit->Name(t->GetContent());
 			
+			c->Add(Ctrls[i].Edit);
 			if (Setting->Flag.FileSelect)
 			{
 				c = Tbl->GetCell(1, CellY + 1);
 				if (c)
-				{
 					c->Add(new GButton(IDC_BROWSE_FILE + i, 0, 0, -1, -1, "..."));
-				}
-				else LgiTrace("%s:%i - No cell.\n", _FL);
+				else
+					LgiTrace("%s:%i - No cell.\n", _FL);
 			}
 		}
 		else if (Setting->Type == GV_INT32)
@@ -420,14 +435,10 @@ public:
 		
 		if (Setting)
 		{
-			// GLayoutCell *c;
-			
 			if (Setting->Flag.ConfigSpecific)
 			{
 				for (int i=0; i<d->Configs.Length(); i++)
-				{
 					AddLine(i, i);
-				}
 			}
 			else
 			{

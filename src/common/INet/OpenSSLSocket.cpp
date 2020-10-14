@@ -181,6 +181,7 @@ public:
 	DynFunc1(int, BIO_free, BIO*, a);
 	DynFunc1(int, BIO_free_all, BIO*, a);
 	DynFunc2(int, BIO_test_flags, const BIO *, b, int, flags);
+	DynFunc1(int,  BIO_get_retry_reason, BIO *, bio);
 
 
 	DynFunc0(int, ERR_load_BIO_strings);
@@ -1363,9 +1364,12 @@ DebugTrace("%s:%i - BIO_read(%p,%i)=%i\n", _FL, Data, Len, r);
 				if (r < 0)
 				{
 					auto Retry = Library->BIO_should_retry(Bio);
-DebugTrace("%s:%i - BIO_should_retry = %i\n", _FL, Retry);
+DebugTrace("%s:%i - BIO_should_retry=%i IsBlocking=%i\n", _FL, Retry, d->IsBlocking);
 					if (!Retry)
+					{
+						auto Reason = Library->BIO_get_retry_reason(Bio);
 						break;
+					}
 					if (d->IsBlocking)
 						LgiSleep(1);
 					else
@@ -1373,7 +1377,8 @@ DebugTrace("%s:%i - BIO_should_retry = %i\n", _FL, Retry);
 				}
 				else
 				{
-					OnRead((char*)Data, r);
+					if (r > 0)
+						OnRead((char*)Data, r);
 					break;
 				}
 			}
@@ -1428,7 +1433,7 @@ void SslSocket::DebugTrace(const char *fmt, ...)
 		
 		if (Ch > 0)
 		{
-			#if 1
+			#if 0
 			LgiTrace("SSL:%p: %s", this, Buffer);
 			#else
 			OnInformation(Buffer);

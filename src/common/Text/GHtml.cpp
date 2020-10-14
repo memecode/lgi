@@ -1447,7 +1447,7 @@ ssize_t GTag::GetTextStart()
 	else if (TextPos.Length() > 0)
 	{
 		GFlowRect *t = TextPos[0];
-		if (t)
+		if (t && Text())
 		{
 			LgiAssert(t->Text >= Text() && t->Text <= Text()+2);
 			return t->Text - Text();

@@ -5,7 +5,10 @@
 #include "LCancel.h"
 
 // If you get a compile error on Linux:
-// sudo apt-get install libssl-dev
+//		sudo apt-get install libssl-dev
+//
+// On windows:
+//		https://slproweb.com/products/Win32OpenSSL.html
 #include "openssl/bio.h"
 #include "openssl/ssl.h"
 #include "openssl/err.h"

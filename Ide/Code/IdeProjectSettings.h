@@ -27,6 +27,8 @@ enum ProjSetting
 	ProjMakefileRules,
 	ProjApplicationIcon,
 	ProjPostBuildCommands,
+	ProjRemoteUri,
+	ProjRemotePass,
 };
 
 class IdeProjectSettings

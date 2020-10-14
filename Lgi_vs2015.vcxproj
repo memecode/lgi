@@ -29,7 +29,7 @@
   <PropertyGroup Label="Globals">
     <ProjectName>Lgi</ProjectName>
     <ProjectGuid>{95DF9CA4-6D37-4A85-A648-80C2712E0DA1}</ProjectGuid>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(SolutionDir)\Lgi.props" Condition="Exists('$(SolutionDir)\Lgi.props')" />

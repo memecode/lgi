@@ -804,6 +804,28 @@ case IArrayGet:
 			Dst->Value.Custom.Data = Var->Value.Custom.Data + (Sz * Index);
 			break;
 		}
+		case GV_STRING:
+		{
+			auto c = Var->Str();
+			auto i = Idx->CastInt64();
+			if (!c || i < 0)
+				break;
+
+			GUtf8Ptr p(c);
+			uint32_t ch;
+			do
+			{
+				ch = p;
+				if (i-- == 0)
+				{
+					*Dst = ch;
+					break;
+				}
+				p++;
+			}
+			while (ch);
+			break;
+		}
 		default:
 		{
 			GString s;
