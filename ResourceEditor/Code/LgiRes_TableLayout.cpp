@@ -889,6 +889,12 @@ bool CtrlTable::SetVariant(const char *Name, GVariant &Value, char *Array)
 			d->LayoutDirty = true;
 			break;
 		}
+		case ObjStyle:
+		{
+			const char *s = Value.Str();
+			GetCss(true)->Parse(s);
+			break;
+		}
 		default:
 		{
 			LgiAssert(!"Invalid property.");
