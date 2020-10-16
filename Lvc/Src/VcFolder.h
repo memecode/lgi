@@ -233,6 +233,7 @@ class VcFolder : public GTreeItem
 	bool ParseMerge(int Result, GString s, ParseParams *Params);
 	bool ParseCountToTip(int Result, GString s, ParseParams *Params);
 	bool ParseUpdateSubs(int Result, GString s, ParseParams *Params);
+	bool ParseRemoteFind(int Result, GString s, ParseParams *Params);
 	
 public:
 	VcFolder(AppPriv *priv, const char *uri);

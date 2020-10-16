@@ -192,6 +192,7 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 
 			GString cmd;
 			cmd.Printf("( cd \"%s\" && %s %s )\n", p->Path.Get(), p->Exe.Get(), p->Args.Get());
+			Log->Print("Ssh: %s\n", cmd.Get());
 			auto wr = con->Write(cmd, cmd.Length());
 			auto pr = WaitPrompt(con, &p->Output);
 

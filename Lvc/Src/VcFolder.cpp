@@ -1,6 +1,7 @@
 #include "Lvc.h"
 #include "../Resources/resdefs.h"
 #include "GCombo.h"
+#include "GClipBoard.h"
 
 #ifndef CALL_MEMBER_FN
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
@@ -1612,14 +1613,33 @@ bool VcFolder::ParseDiff(int Result, GString s, ParseParams *Params)
 
 void VcFolder::Diff(VcFile *file)
 {
+	auto Fn = file->GetFileName();
+	if (!Fn ||
+		!Stricmp(Fn, ".") ||
+		!Stricmp(Fn, ".."))
+		return;
+
 	switch (GetType())
 	{
-		case VcSvn:
 		case VcGit:
 		case VcHg:
 		{
 			GString a;
-			a.Printf("diff \"%s\"", file->GetFileName());
+
+			if (file->GetRevision())
+				LgiAssert(!"impl the revision cmd line arg.");
+
+			a.Printf("diff \"%s\"", Fn);
+			StartCmd(a, &VcFolder::ParseDiff);
+			break;
+		}
+		case VcSvn:
+		{
+			GString a;
+			if (file->GetRevision())
+				a.Printf("diff -r %s \"%s\"", file->GetRevision(), Fn);
+			else
+				a.Printf("diff \"%s\"", Fn);
 			StartCmd(a, &VcFolder::ParseDiff);
 			break;
 		}
@@ -2059,9 +2079,84 @@ int FolderCompare(GTreeItem *a, GTreeItem *b, NativeInt UserData)
 	return A->Compare(B);
 }
 
-void VcFolder::ReadDir(GTreeItem *Parent, const char *Uri)
+struct SshFindEntry
 {
-	GUri u(Uri);
+	GString Flags, Name, User, Group;
+	uint64_t Size;
+	LDateTime Modified, Access;
+
+	SshFindEntry &operator =(const GString &s)
+	{
+		auto p = s.SplitDelimit("/");
+		if (p.Length() == 7)
+		{
+			Flags = p[0];
+			Group = p[1];
+			User = p[2];
+			Access.Set(p[3].Int());
+			Modified.Set(p[4].Int());
+			Size = p[5].Int();
+			Name = p[6];
+		}
+
+		return *this;
+	}
+
+	bool IsDir() { return Flags(0) == 'd'; }
+	bool IsHidden() { return Name(0) == '.'; }
+	const char *GetName() { return Name; }
+	static int Compare(SshFindEntry *a, SshFindEntry *b) { return Stricmp(a->Name.Get(), b->Name.Get()); }
+};
+
+bool VcFolder::ParseRemoteFind(int Result, GString s, ParseParams *Params)
+{
+	if (!Params || !s)
+		return false;
+
+	auto Parent = Params->Leaf ? static_cast<GTreeItem*>(Params->Leaf) : static_cast<GTreeItem*>(this);
+	GUri u(Params->Str);
+
+	auto Lines = s.SplitDelimit("\r\n");
+	GArray<SshFindEntry> Entries;
+	for (size_t i=1; i<Lines.Length(); i++)
+	{
+		auto &e = Entries.New();
+		e = Lines[i];
+		if (!e.Name)
+			Entries.PopLast();
+	}
+	Entries.Sort(SshFindEntry::Compare);
+
+	for (auto &Dir: Entries)
+	{
+		if (Dir.IsDir())
+		{
+			if (Dir.GetName()[0] != '.')
+			{
+				new VcLeaf(this, Parent, Params->Str, Dir.GetName(), true);
+			}
+		}
+		else if (!Dir.IsHidden())
+		{
+			char *Ext = LgiGetExtension(Dir.GetName());
+			if (!Ext) continue;
+			if (!stricmp(Ext, "c") ||
+				!stricmp(Ext, "cpp") ||
+				!stricmp(Ext, "h"))
+			{
+				GUri Path = u;
+				Path += Dir.GetName();
+				new VcLeaf(this, Parent, Params->Str, Dir.GetName(), false);
+			}
+		}
+	}
+
+	return false;
+}
+
+void VcFolder::ReadDir(GTreeItem *Parent, const char *ReadUri)
+{
+	GUri u(ReadUri);
 
 	if (u.IsFile())
 	{
@@ -2093,7 +2188,19 @@ void VcFolder::ReadDir(GTreeItem *Parent, const char *Uri)
 	}
 	else
 	{
-		LgiAssert(!"Impl me.");
+		auto c = d->GetConnection(ReadUri);
+		if (!c)
+			return;
+		
+		GString Path = u.sPath(Uri.sPath.Length(), -1).LStrip("/");
+		GString Args;
+		Args.Printf("\"%s\" -maxdepth 1 -printf \"%%M/%%g/%%u/%%A@/%%T@/%%s/%%P\n\"", Path ? Path.Get() : ".");
+
+		auto *Params = new ParseParams(ReadUri);
+		Params->Leaf = dynamic_cast<VcLeaf*>(Parent);
+
+		c->Command(this, "find", Args, &VcFolder::ParseRemoteFind, Params);
+		return;
 	}
 
 	Parent->SortChildren(FolderCompare);

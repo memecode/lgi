@@ -34,6 +34,7 @@ public:
 	~VcFile();
 
 	int Checked(int Set = -1);
+	const char *GetRevision() { return Revision; }
 	const char *GetDiff() { return Diff; }
 	const char *GetFileName() { return GetText(COL_FILENAME); }
 	FileStatus GetStatus();
