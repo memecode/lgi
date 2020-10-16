@@ -973,7 +973,7 @@ void VcFolder::LogFile(const char *uri)
 		case VcSvn:
 		case VcHg:
 		{
-			GString File = u.IsFile() ? GString(u.LocalPath()) : u.sPath;
+			GString File = u.IsFile() ? GString(u.LocalPath()) : u.sPath(Uri.sPath.Length(), -1).LStrip("/");
 			ParseParams *Params = new ParseParams(uri);
 			Args.Printf("log \"%s\"", File.Get());
 			IsLogging = StartCmd(Args, &VcFolder::ParseLog, Params, LogNormal);
