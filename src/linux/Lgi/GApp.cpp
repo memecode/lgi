@@ -763,7 +763,7 @@ void GApp::OnUrl(const char *Url)
 		AppWnd->OnUrl(Url);
 }
 
-void GApp::OnReceiveFiles(::GArray<char*> &Files)
+void GApp::OnReceiveFiles(::GArray<const char*> &Files)
 {
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);
@@ -914,7 +914,7 @@ bool GApp::GetOption(const char *Option, ::GString &Buf)
 
 void GApp::OnCommandLine()
 {
-	::GArray<char*> Files;
+	::GArray<const char*> Files;
 
 	for (int i=1; i<GetAppArgs()->Args; i++)
 	{

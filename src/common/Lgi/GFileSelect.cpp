@@ -2202,8 +2202,8 @@ bool LgiGetUsersLinks(GArray<GString> &Links)
 		for (unsigned i=0; i<a.Length(); i++)
 		{
 			GUri u(a[i]);
-			if (u.Protocol && !_stricmp(u.Protocol, "file"))
-				Links.New() = u.Path;
+			if (u.sProtocol.Equals("file"))
+				Links.New() = u.sPath;
 		}
 	#else
 		LgiAssert(!"Not impl yet.");

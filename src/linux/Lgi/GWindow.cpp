@@ -1209,29 +1209,38 @@ GWindowZoom GWindow::GetZoom()
 
 void GWindow::SetZoom(GWindowZoom i)
 {
-	if (Wnd)
+	if (!Wnd)
 	{
-		ThreadCheck();
+		LgiTrace("%s:%i - No window.\n", _FL);
+		return;
+	}
+	
 
-		switch (i)
+	ThreadCheck();
+
+	switch (i)
+	{
+		case GZoomMin:
 		{
-			case GZoomMin:
-			{
-				gtk_window_iconify(Wnd);
-				break;
-			}
-			case GZoomNormal:
-			{
-				gtk_window_deiconify(Wnd);
-				gtk_window_unmaximize(Wnd);
-				break;
-			}
-			case GZoomMax:
-			{
-				gtk_window_unmaximize(Wnd);
-				break;
-			}
-		}	
+			gtk_window_iconify(Wnd);
+			break;
+		}
+		case GZoomNormal:
+		{
+			gtk_window_deiconify(Wnd);
+			gtk_window_unmaximize(Wnd);
+			break;
+		}
+		case GZoomMax:
+		{
+			gtk_window_maximize(Wnd);
+			break;
+		}
+		default:
+		{
+			LgiTrace("%s:%i - Error: unsupported zoom.\n", _FL);
+			break;
+		}
 	}
 }
 
