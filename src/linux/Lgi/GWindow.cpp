@@ -292,6 +292,14 @@ GRect *GWindow::GetDecorSize()
 	return d->Decor.x2 >= 0 ? &d->Decor : NULL;
 }
 
+void GWindow::SetDecor(bool Visible)
+{
+	if (Wnd)
+		gtk_window_set_decorated (Wnd, Visible);
+	else
+		LgiTrace("%s:%i - No window to set decor.\n", _FL);
+}
+
 GViewI *GWindow::WindowFromPoint(int x, int y, bool Debug)
 {
 	if (!_Root)
@@ -1392,30 +1400,6 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 
 GRect &GWindow::GetPos()
 {
-	if (Wnd)
-	{
-		/*
-		OsRect r = _View->geometry();
-
-		Pos.x1 = r.left;
-		Pos.y1 = r.top;
-		Pos.x2 = r.right;
-		Pos.y2 = r.bottom;
-
-		#if defined XWIN
-		XWindowAttributes a;
-		ZeroObj(a);
-		XGetWindowAttributes(Handle()->XDisplay(), Handle()->handle(), &a);
-		if (!a.override_redirect)
-		{
-			int Dx, Dy;
-			_View->GetDecorationSize(Dx, Dy);
-			Pos.Offset(Dx, Dy);
-		}
-		#endif
-		*/
-	}
-
 	return Pos;
 }
 

@@ -235,7 +235,8 @@ public:
 	void Visible(bool i) override;
 	bool IsActive();
 	GRect &GetPos() override;
-
+	void SetDecor(bool Visible);
+	
 	// D'n'd
 	int WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState) override;
 	int OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState) override;
