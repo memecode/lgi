@@ -413,7 +413,12 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 					{
 						auto &st = Out.New().Construct(View, STYLE_IDE);
 						st.Start = s - Text;
+						#ifdef MAC
+						#warning "Weird mac bold issues fixme.")
+						st.Font = View->GetFont();
+						#else
 						st.Font = n->Type == KType ? View->GetFont() : View->GetBold();
+						#endif
 						st.Len = e - s;
 						st.Fore = n->Type == KType ? ColourType : ColourKeyword;
 					}

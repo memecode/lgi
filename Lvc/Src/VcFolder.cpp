@@ -2093,8 +2093,8 @@ struct SshFindEntry
 			Flags = p[0];
 			Group = p[1];
 			User = p[2];
-			Access.Set(p[3].Int());
-			Modified.Set(p[4].Int());
+			Access.Set((uint64_t) p[3].Int());
+			Modified.Set((uint64_t) p[4].Int());
 			Size = p[5].Int();
 			Name = p[6];
 		}

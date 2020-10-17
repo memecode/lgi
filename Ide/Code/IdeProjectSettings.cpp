@@ -322,11 +322,6 @@ public:
 		
 		// Do value cell
 		c = Tbl->GetCell(0, CellY + 1);
-		
-		if (Setting->Flag.IsPassword)
-		{
-			int asd=0;
-		}
 
 		GXmlTag *t = d->Editing.GetChildTag(Path);
 		if (Setting->Type == GV_STRING)
