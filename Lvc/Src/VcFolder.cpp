@@ -1940,27 +1940,35 @@ void VcFolder::OnPulse()
 
 void VcFolder::OnRemove()
 {
-	GXmlTag *t = d->Opts.LockTag(NULL, _FL);
+	GXmlTag *t = d->Opts.LockTag(OPT_Folders, _FL);
 	if (t)
 	{
 		Uncommit.Reset();
 		if (GTreeItem::Select())
 		{
 			d->Files->Empty();
-			d->Commits->Empty();
+			d->Commits->RemoveAll();
 		}
 
+		bool Found = false;
+		auto u = Uri.ToString();
 		for (auto c: t->Children)
 		{
 			if (c->IsTag(OPT_Folder) &&
-				c->GetContent() &&
-				!_stricmp(c->GetContent(), LocalPath())) // FIXME for ssh?
+				c->GetContent())
 			{
-				c->RemoveTag();
-				delete c;
-				break;
+				auto Content = c->GetContent();				
+				if (!_stricmp(Content, u))
+				{
+					c->RemoveTag();
+					delete c;
+					Found = true;
+					break;
+				}
 			}
 		}
+		LgiAssert(Found);
+
 		d->Opts.Unlock();
 	}
 }
