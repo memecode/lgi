@@ -5574,31 +5574,29 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			// Setup the line height cache
 			if (LineHeightCache < 0)
 			{
-				GCss::PropMap Map;
-				GCss Final;
-				Map.Add(PropLineHeight, new GCss::PropArray);
-				for (GTag *t = this; t; t = t->TagId == TAG_TABLE ? NULL : ToTag(t->Parent))
-				{
-					if (!Final.InheritCollect(*t, Map))
-						break;
-				}	
-				Final.InheritResolve(Map);
-				Map.DeleteObjects();
+				GCss::Len LineHt;
+				GFont *LineFnt = GetFont();
 
-				GCss::Len CssLineHeight = Final.LineHeight();    
-				if (f)
+				for (GTag *t = this; t && !LineHt.IsValid(); t = ToTag(t->Parent))
 				{
-					int FontPx = FontPxHeight(f);
+					LineHt = t->LineHeight();
+					if (t->TagId == TAG_TABLE)
+						break;
+				}
+
+				if (LineFnt)
+				{
+					int FontPx = FontPxHeight(LineFnt);
 					
-					if (!CssLineHeight.IsValid() ||
-						CssLineHeight.Type == GCss::LenAuto ||
-						CssLineHeight.Type == GCss::LenNormal)
+					if (!LineHt.IsValid() ||
+						LineHt.Type == GCss::LenAuto ||
+						LineHt.Type == GCss::LenNormal)
 					{
-						LineHeightCache = f->GetHeight();
+						LineHeightCache = FontPx;
 					}
 					else
-					{					
-						LineHeightCache = CssLineHeight.ToPx(FontPx, f);
+					{
+						LineHeightCache = LineHt.ToPx(FontPx, f);
 					}
 				}
 			}

@@ -59,6 +59,7 @@ enum HtmlTag
 	TAG_NOSCRIPT,
 	TAG_SUP,
 	TAG_SUB,
+	TAG_EM,
 	TAG_LAST
 };
 
