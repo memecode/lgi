@@ -714,6 +714,12 @@ void GRadioButton::OnPaint(GSurface *pDC)
 		State.MouseOver = d->Over;
 		State.aText = d->GetStrs();
 		State.View = this;
+
+		auto Fnt = GetFont();
+		int Px = (int) Fnt->Ascent() + 0.5;
+		State.Rect.ZOff(Px-1, Px-1);
+		State.Rect.Offset(0, (Y()-State.Rect.Y())>>1);
+
 		GApp::SkinEngine->OnPaint_GRadioButton(this, &State);
 	}
 	else

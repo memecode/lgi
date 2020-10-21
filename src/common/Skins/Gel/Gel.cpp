@@ -441,6 +441,7 @@ class GelSkin : public GSkinEngine
 		GSurface *pDC = State->pScreen;
 		if (Text && Text->Length() > 0 && rcFill.X() > 3)
 		{
+			GRect Bounds;
 			for (unsigned i=0; i<Text->Length(); i++)
 			{
 				LLayoutString *t = dynamic_cast<LLayoutString*>((*Text)[i]);
@@ -457,21 +458,13 @@ class GelSkin : public GSkinEngine
 					f->Colour(Fore, Back);
 					if (Ctrl->Focus())
 					{
-						pDC->Colour(LColour(L_MIDGREY));
-						pDC->Box(&c);
-						c.Size(1, 1);
-						pDC->Colour(Back);
-						pDC->Rectangle(&c);
-						c.Size(-1, -1);
-						
-						f->Transparent(true);
-						t->Draw(pDC, c.x1, c.y1, &c);
+						if (i)
+							Bounds.Union(&c);
+						else
+							Bounds = c;
 					}
-					else
-					{
-						f->Transparent(!Back.IsValid());
-						t->Draw(pDC, c.x1, c.y1, &c);
-					}
+					f->Transparent(!Back.IsValid());
+					t->Draw(pDC, c.x1, c.y1, &c);
 				}
 				else
 				{
@@ -483,6 +476,12 @@ class GelSkin : public GSkinEngine
 					f->Colour(Low, Back);
 					t->Draw(pDC, c.x1, c.y1, &c);
 				}
+			}
+
+			if (Ctrl->Focus() && Enabled)
+			{
+				pDC->Colour(LColour(L_MIDGREY));
+				pDC->Box(&Bounds);
 			}
 		}
 		
