@@ -85,7 +85,7 @@ protected:
 	GRect Client;
 	int DragCtrl;
 	GRect DragRgn;
-	GdcPt2 DragStart;
+	LPoint DragStart;
 	bool MoveCtrl;
 	DlgSelectMode SelectMode;
 	GRect SelectStart;
@@ -205,7 +205,7 @@ public:
 	ResDialogCtrl *CreateCtrl(int Tool, GXmlTag *load);
 	bool IsSelected(ResDialogCtrl *Ctrl);
 	bool IsDraging();
-	void SnapPoint(GdcPt2 *p, ResDialogCtrl *From);
+	void SnapPoint(LPoint *p, ResDialogCtrl *From);
 	void SnapRect(GRect *r, ResDialogCtrl *From);
 	void MoveSelection(int Dx, int Dy);
 	void SelectRect(ResDialogCtrl *Parent, GRect *r, bool ClearPrev = true);
@@ -232,7 +232,7 @@ public:
 	int OnCommand(int Cmd, int Event, OsView hWnd) override;
 	void OnLanguageChange();
 
-	void _Paint(GSurface *pDC = NULL, GdcPt2 *Offset = NULL, GRect *Update = NULL) override;
+	void _Paint(GSurface *pDC = NULL, LPoint *Offset = NULL, GRect *Update = NULL) override;
 	void OnPaint(GSurface *pDC) override;
 
 	bool Test(ErrorCollection *e) override;

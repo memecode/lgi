@@ -103,7 +103,7 @@ public:
 	}
 
 	// Dnd
-	int WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
+	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 	{
 		GFilterItem *i = dynamic_cast<GFilterItem*>(ItemAtPoint(Pt.x, Pt.y));
 		if (!i || i->GetNode() == LNODE_NEW)
@@ -114,7 +114,7 @@ public:
 		return DROPEFFECT_MOVE;
 	}
 	
-	int OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
+	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 	{
 		SelectDropTarget(NULL);
 		
@@ -580,7 +580,7 @@ void GFilterItem::SetValue(char *s)
 #define StartCtrl(Rc, Ed, Name, Obj) \
 	if (!d->Ed) \
 	{ \
-		GdcPt2 sc = d->Data->Tree->_ScrollPos(); \
+		LPoint sc = d->Data->Tree->_ScrollPos(); \
 		d->Ed = new Obj(n++, c.x1 + Pos->x1 + Rc.x1 - sc.x, c.y1 + Pos->y1 + Rc.y1 - sc.y, \
 								Rc.X(), Rc.Y(), \
 								Name); \
@@ -592,7 +592,7 @@ void GFilterItem::SetValue(char *s)
 	else \
 	{ \
 		GRect r = Rc; \
-		GdcPt2 sc = d->Data->Tree->_ScrollPos(); \
+		LPoint sc = d->Data->Tree->_ScrollPos(); \
 		r.Offset(c.x1 + Pos->x1 - sc.x, c.y1 + Pos->y1 - sc.y); \
 		d->Ed->SetPos(r); \
 	}
@@ -605,7 +605,7 @@ void GFilterItem::SetValue(char *s)
 		DeleteObj(d->Ed); \
 	}
 
-void GFilterItem::_PourText(GdcPt2 &Size)
+void GFilterItem::_PourText(LPoint &Size)
 {
 	Size.y = SysFont->GetHeight() +
 	#ifdef MAC
@@ -1104,7 +1104,7 @@ void GFilterItem::OptionsMenu()
 
 	GRect r = d->Btns[d->Node == LNODE_NEW ? IconNewCond : IconOptions];
 	r.Offset(Pos->x1 + Client.x1, Pos->y1 + Client.y1);
-	GdcPt2 p(r.x1, r.y2+1);
+	LPoint p(r.x1, r.y2+1);
 	GetTree()->PointToScreen(p);
 
 	int Cmd = s.Float(GetTree(), p.x, p.y, true);

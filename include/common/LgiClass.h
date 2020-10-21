@@ -239,7 +239,7 @@ public:
 	bool IsContextMenu();
 };
 
-#include "GPoint.h"
+#include "LPoint.h"
 
 /// \brief All the parameters of a mouse click event
 ///
@@ -249,9 +249,9 @@ public:
 ///
 /// To get the position of the mouse in screen co-ordinates you can either use
 /// GView::GetMouse() and pass true in the 'ScreenCoords' parameter. Or you can
-/// construct a GdcPt2 out of the x,y fields of this class and use GView::PointToScreen()
+/// construct a LPoint out of the x,y fields of this class and use GView::PointToScreen()
 /// to map the point to screen co-ordinates.
-class LgiClass GMouse : public GUiEvent, public GdcPt2
+class LgiClass GMouse : public GUiEvent, public LPoint
 {
 public:
 	/// Receiving view
@@ -265,7 +265,7 @@ public:
 		ViewCoords = true;
 	}
 
-	GMouse operator -(GdcPt2 p)
+	GMouse operator -(LPoint p)
 	{
 		GMouse m = *this;
 		m.x -= p.x;
@@ -273,7 +273,7 @@ public:
 		return m;
 	}
 
-	GMouse operator +(GdcPt2 p)
+	GMouse operator +(LPoint p)
 	{
 		GMouse m = *this;
 		m.x += p.x;

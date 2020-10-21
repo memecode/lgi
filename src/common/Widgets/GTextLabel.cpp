@@ -276,7 +276,7 @@ void GTextLabel::OnPaint(GSurface *pDC)
 	if (d->Lock(_FL))
 	{
 		GRect c = GetClient();
-		GdcPt2 pt(c.x1, c.y1);
+		LPoint pt(c.x1, c.y1);
 		d->Paint(pDC, pt, Back, c, Enabled(), false);
 		d->Unlock();
 	}

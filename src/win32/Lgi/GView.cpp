@@ -891,7 +891,7 @@ bool LgiToWindowsCursor(OsView Hnd, LgiCursor Cursor)
 	return true;
 }
 
-bool GView::PointToScreen(GdcPt2 &p)
+bool GView::PointToScreen(LPoint &p)
 {
 	POINT pt = {p.x, p.y};
 	GViewI *t = this;
@@ -909,7 +909,7 @@ bool GView::PointToScreen(GdcPt2 &p)
 	return true;
 }
 
-bool GView::PointToView(GdcPt2 &p)
+bool GView::PointToView(LPoint &p)
 {
 	POINT pt = {p.x, p.y};
 	GViewI *t = this;

@@ -97,7 +97,7 @@ public:
 	int TileSize;
 	
 	/// Size of image in tiles
-	GdcPt2 Tiles;
+	LPoint Tiles;
 	
 	/// The array of tiles. Unused entries will be NULL.
 	ZoomTile ***Tile;
@@ -189,7 +189,7 @@ public:
 		return s;
 	}
 	
-	GdcPt2 ScreenToDoc(GdcPt2 p)
+	LPoint ScreenToDoc(LPoint p)
 	{
 		int f = Factor();
 		if (GetZoom() > 0)
@@ -207,7 +207,7 @@ public:
 		return p;
 	}
 
-	GdcPt2 DocToScreen(GdcPt2 p)
+	LPoint DocToScreen(LPoint p)
 	{
 		int f = Factor();
 		if (GetZoom() < 0)
@@ -780,7 +780,7 @@ public:
 					s.ZOff(TileSize-1, TileSize-1);
 					s.Offset(Sx, Sy);
 					
-					GdcPt2 off(Sx, Sy);
+					LPoint off(Sx, Sy);
 					Callback->DrawBackground(View, TileCache, off, NULL);
 					TileCache->Op(GDC_ALPHA);
 					TileCache->Blt(0, 0, Src, &s);
@@ -1111,7 +1111,7 @@ public:
 			if (Callback)
             {
                 GRect r = Dst->Bounds();
-                GdcPt2 off(x, y);
+                LPoint off(x, y);
 				Callback->DrawBackground(View, Dst, off, &r);
             }
 			else
@@ -1174,7 +1174,7 @@ public:
 			if (Callback)
 			{
                 GRect r = Dst->Bounds();
-                GdcPt2 off(x, y);
+                LPoint off(x, y);
 				Callback->DrawForeground(View, Dst, off, &r);
 			}
 
@@ -1204,7 +1204,7 @@ bool GZoomView::OnLayout(GViewLayoutInfo &Inf)
 	return true;
 }
 
-void GZoomView::UpdateScrollBars(GdcPt2 *MaxScroll, bool ResetPos)
+void GZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 {
 	GSurface *Src = d->pDC;
 	if (!Src)
@@ -1221,8 +1221,8 @@ void GZoomView::UpdateScrollBars(GdcPt2 *MaxScroll, bool ResetPos)
 		// int Factor = d->Factor();
 		// int Fmin1 = Factor - 1;
 
-		GdcPt2 DocSize(Src->X(), Src->Y());		
-		GdcPt2 DocClientSize(c.X(), c.Y());
+		LPoint DocSize(Src->X(), Src->Y());		
+		LPoint DocClientSize(c.X(), c.Y());
 		DocClientSize = d->ScreenToDoc(DocClientSize);
 		SetScrollBars(DocSize.x > DocClientSize.x, DocSize.y > DocClientSize.y);
 
@@ -1346,7 +1346,7 @@ GZoomView::DefaultZoomMode GZoomView::GetDefaultZoomMode()
 	return d->DefaultZoom;
 }
 
-void GZoomView::ScrollToPoint(GdcPt2 DocCoord)
+void GZoomView::ScrollToPoint(LPoint DocCoord)
 {
 	if (!d->pDC)
 		return;
@@ -1390,7 +1390,7 @@ void GZoomView::SetViewport(ViewportInfo i)
 	GSurface *Src = d->pDC;
 	if (Src)
 	{
-		GdcPt2 MaxScroll;
+		LPoint MaxScroll;
 		UpdateScrollBars(&MaxScroll);
 		if (HScroll)
 		{
@@ -1525,13 +1525,13 @@ bool GZoomView::OnMouseWheel(double Lines)
 					NewSy = (int) (DocPt.y - m.y);
 				}
 				
-				GdcPt2 ScaledDocSize(Src->X(), Src->Y());
+				LPoint ScaledDocSize(Src->X(), Src->Y());
 				ScaledDocSize = d->DocToScreen(ScaledDocSize);
 
 				SetScrollBars(ScaledDocSize.x > c.X(), ScaledDocSize.y > c.Y());
 
 				/*
-				GdcPt2 MaxScroll(	HScroll ? ScaledDocSize.x - c.X() : 0,
+				LPoint MaxScroll(	HScroll ? ScaledDocSize.x - c.X() : 0,
 									VScroll ? ScaledDocSize.y - c.Y() : 0);
 				MaxScroll = d->ScreenToDoc(MaxScroll);
 				if (NewSx > MaxScroll.x)
@@ -1540,7 +1540,7 @@ bool GZoomView::OnMouseWheel(double Lines)
 					NewSy = MaxScroll.y;
 				*/
 
-				GdcPt2 ScaledClient(c.X(), c.Y());
+				LPoint ScaledClient(c.X(), c.Y());
 				ScaledClient = d->ScreenToDoc(ScaledClient);
 
 				if (HScroll)
@@ -1728,7 +1728,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 		GRect s = ScaledDocSize;
 		
 		// Scroll positions are in doc px, so scale them here to screen
-		GdcPt2 ScaledScroll((int)Sx, (int)Sy);
+		LPoint ScaledScroll((int)Sx, (int)Sy);
 		ScaledScroll = d->DocToScreen(ScaledScroll);
 		s.Offset(-ScaledScroll.x, -ScaledScroll.y);
 

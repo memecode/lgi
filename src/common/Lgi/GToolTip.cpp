@@ -30,7 +30,7 @@ class NativeTip : public GPopup
 public:
 	static GArray<NativeTip*> All;
 	static NativeTip *PulseRunning;
-	static GdcPt2 Padding;
+	static LPoint Padding;
 
 	int Id;
 	GRect Watch;
@@ -96,7 +96,7 @@ public:
 					if (Vis ^ t->Visible())
 					{
 						GRect r = t->GetPos();
-						GdcPt2 pt(w.x1, w.y2);
+						LPoint pt(w.x1, w.y2);
 						#ifdef __GTK_H__
 						pt.y += 8;
 						#endif
@@ -168,9 +168,9 @@ public:
 };
 
 #ifdef MAC
-GdcPt2 NativeTip::Padding(8, 4);
+LPoint NativeTip::Padding(8, 4);
 #else
-GdcPt2 NativeTip::Padding(4, 2);
+LPoint NativeTip::Padding(4, 2);
 #endif
 NativeTip *NativeTip::PulseRunning = NULL;
 GArray<NativeTip*> NativeTip::All;

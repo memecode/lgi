@@ -72,7 +72,7 @@ GCheckBox::GCheckBox(int id, int x, int y, int cx, int cy, const char *name, int
 {
 	d = new GCheckBoxPrivate(this);
 	Name(name);
-	GdcPt2 Max = d->GetMax();
+	LPoint Max = d->GetMax();
 	if (cx < 0) cx = Max.x + PadX1Px + PadX2Px;
 	if (cy < 0) cy = MAX(Max.y, MinYSize) + PadYPx;
 
@@ -362,7 +362,7 @@ void GCheckBox::OnPaint(GSurface *pDC)
 		if (d->Lock(_FL))
 		{
 			int Ty = MAX(0, r.Y() - d->GetBounds().Y()) >> 1;
-			GdcPt2 pt(t.x1, t.y1 + MIN(Ty, TextYOffset));
+			LPoint pt(t.x1, t.y1 + MIN(Ty, TextYOffset));
 					
 			d->Paint(pDC, pt, cBack, t, en, false);
 			d->Unlock();

@@ -360,7 +360,7 @@ public:
 	void UnSelectAll() override;
 	void SelectWord(size_t From) override;
 	void SelectAll() override;
-	bool GetLineColumnAtIndex(GdcPt2 &Pt, ssize_t Index = -1) override;
+	bool GetLineColumnAtIndex(LPoint &Pt, ssize_t Index = -1) override;
 	size_t GetLines() override;
 	void GetTextExtent(int &x, int &y) override;
 	char *GetSelection() override;
@@ -428,8 +428,8 @@ public:
 	void OnPulse() override;
 	int OnHitTest(int x, int y) override;
 	bool OnLayout(GViewLayoutInfo &Inf) override;
-	int WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState) override;
-	int OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState) override;
+	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState) override;
+	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState) override;
 	LgiCursor GetCursor(int x, int y) override;
 
 	// Virtuals

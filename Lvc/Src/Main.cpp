@@ -458,7 +458,7 @@ public:
 	void BrowseFiles(GViewI *Ctrl, const char *Bin, int EditId)
 	{
 		GRect Pos = Ctrl->GetPos();
-		GdcPt2 Pt(Pos.x1, Pos.y2 + 1);
+		LPoint Pt(Pos.x1, Pos.y2 + 1);
 		PointToScreen(Pt);
 		
 		LSubMenu s;

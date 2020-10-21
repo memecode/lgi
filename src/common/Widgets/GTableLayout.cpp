@@ -349,7 +349,7 @@ class GTableLayoutPrivate
 	bool DebugLayout;
 
 public:
-	GdcPt2 PrevSize;
+	LPoint PrevSize, Dpi;
 	bool LayoutDirty;
 	GArray<double> Rows, Cols;
 	GArray<TableCell*> Cells;
@@ -368,6 +368,7 @@ public:
 	void Empty(GRect *Range = NULL);
     bool CollectRadioButtons(GArray<GRadioButton*> &Btns);
     void InitBorderSpacing();
+	double Scale() { return Dpi.x / 96.0; }
 
 	// Layout temporary values
 	GStringPipe Dbg;
@@ -804,8 +805,11 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 			else if (Izza(GButton))
 			{
 				GDisplayString ds(v->GetFont(), v->Name());
-				c->Inf.Width.Min = c->Inf.Width.Max = ds.X() + GButton::Overhead.x;
-				c->Inf.Height.Min = c->Inf.Height.Max = ds.Y() + GButton::Overhead.y;
+				auto Scale = Table->d->Scale();
+				LPoint Pad((int)(Scale * GButton::Overhead.x + 0.5), (int)(Scale * GButton::Overhead.y + 0.5));
+
+				c->Inf.Width.Min = c->Inf.Width.Max = ds.X() + Pad.x;
+				c->Inf.Height.Min = c->Inf.Height.Max = ds.Y() + Pad.y;
 
 				MaxBtnX = MAX(MaxBtnX, c->Inf.Width.Min);
 				TotalBtnX = TotalBtnX ?
@@ -949,7 +953,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		}
 	}
 	
-	GdcPt2 Cur(Pos.x1, Pos.y1);
+	LPoint Cur(Pos.x1, Pos.y1);
 	int NextY = Pos.y1;
 	
 	GCss::Len CssWidth = GCss::Width();
@@ -2152,6 +2156,7 @@ void GTableLayout::OnPaint(GSurface *pDC)
 		#endif
 	}
 
+	d->Dpi = GetWindow()->GetDpi();
 	GCssTools Tools(this);
 	GRect Client = GetClient();
 	Tools.PaintContent(pDC, Client);

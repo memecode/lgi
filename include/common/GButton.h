@@ -32,7 +32,7 @@ class LgiClass GButton :
 public:
     /// The extra pixels beyond the size of the text needed
     /// to display the button;
-    static GdcPt2 Overhead;
+    static LPoint Overhead;
 
 	/// Construct the control
 	GButton

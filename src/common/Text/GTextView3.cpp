@@ -1962,7 +1962,7 @@ void GTextView3::GetTextExtent(int &x, int &y)
 	y = (int)(Line.Length() * LineY);
 }
 
-bool GTextView3::GetLineColumnAtIndex(GdcPt2 &Pt, ssize_t Index)
+bool GTextView3::GetLineColumnAtIndex(LPoint &Pt, ssize_t Index)
 {
 	ssize_t FromIndex = 0;
 	GTextLine *From = GetTextLine(Index < 0 ? Cursor : Index, &FromIndex);
@@ -3272,7 +3272,7 @@ void GTextView3::OnPosChange()
 	}
 }
 
-int GTextView3::WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
+int GTextView3::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 {
 	Formats.Supports("text/uri-list");
 	Formats.Supports("text/html");
@@ -3280,7 +3280,7 @@ int GTextView3::WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
 	return Formats.Length() ? DROPEFFECT_COPY : DROPEFFECT_NONE;
 }
 
-int GTextView3::OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
+int GTextView3::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 {
 	int Status = DROPEFFECT_NONE;
 	

@@ -480,7 +480,7 @@ void GDisplayString::Layout(bool Debug)
 		}
 		
 		// Measure the string...
-		GdcPt2 Sz;
+		LPoint Sz;
 		int FontHt = Font->GetHeight();
 		int AscentF = (int) (Font->Ascent() * FScale);
 		int LoadMode = FT_LOAD_FORCE_AUTOHINT;
@@ -1302,10 +1302,10 @@ int GDisplayString::Y()
 	return y;
 }
 
-GdcPt2 GDisplayString::Size()
+LPoint GDisplayString::Size()
 {
 	Layout();
-	return GdcPt2(x, y);
+	return LPoint(x, y);
 }
 
 #if defined LGI_SDL
@@ -1894,10 +1894,10 @@ int GDisplayString::FY()
 	return y;
 }
 
-GdcPt2 GDisplayString::FSize()
+LPoint GDisplayString::FSize()
 {
 	Layout();
-	return GdcPt2(xf, yf);
+	return LPoint(xf, yf);
 }
 
 void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug)

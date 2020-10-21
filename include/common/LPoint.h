@@ -1,6 +1,101 @@
+/// 2d Point classes
 #pragma once
 
 #include <math.h>
+
+class LgiClass LPoint
+{
+public:
+	int x, y;
+
+	LPoint(int Ix = 0, int Iy = 0)
+	{
+		x = Ix;
+		y = Iy;
+	}
+
+	LPoint(const LPoint &p)
+	{
+		x = p.x;
+		y = p.y;
+	}
+
+	bool Inside(class GRect &r);
+	
+	LPoint operator +(const LPoint &p)
+	{
+		LPoint r;
+		r.x = x + p.x;
+		r.y = y + p.y;
+		return r;
+	}
+
+	LPoint &operator +=(const LPoint &p)
+	{
+		x += p.x;
+		y += p.y;
+		return *this;
+	}
+
+	LPoint operator -(const LPoint &p)
+	{
+		LPoint r;
+		r.x = x - p.x;
+		r.y = y - p.y;
+		return r;
+	}
+
+	LPoint &operator -=(const LPoint &p)
+	{
+		x -= p.x;
+		y -= p.y;
+		return *this;
+	}
+
+	LPoint &operator *=(int factor)
+	{
+		x *= factor;
+		y *= factor;
+		return *this;
+	}
+
+	LPoint &operator /=(int factor)
+	{
+		x /= factor;
+		y /= factor;
+		return *this;
+	}
+
+	bool operator ==(const LPoint &p)
+	{
+		return x == p.x && y == p.y;
+	}
+
+	bool operator !=(const LPoint &p)
+	{
+		return !(*this == p);
+	}
+
+	void Set(int X, int Y)
+	{
+		x = X;
+		y = Y;
+	}
+
+	void Zero()
+	{
+		x = 0;
+		y = 0;
+	}
+};
+
+/// 3d Point
+class LgiClass LPoint3
+{
+public:
+	int x, y, z;
+};
+
 
 class LgiClass LPointF
 {
@@ -25,7 +120,7 @@ public:
 		y = p.y;
 	}
 
-	LPointF(const GdcPt2 &p)
+	LPointF(const LPoint &p)
 	{
 		x = p.x;
 		y = p.y;
@@ -91,4 +186,3 @@ public:
 		return *this;
 	}
 };
-

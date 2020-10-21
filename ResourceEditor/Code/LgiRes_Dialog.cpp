@@ -716,7 +716,7 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 					if ((DragCtrl > 0 && AcceptChildren) ||
 						((DragCtrl == 0) && !Movable))
 					{
-						GdcPt2 p(m.x, m.y);
+						LPoint p(m.x, m.y);
 						Dlg->SnapPoint(&p, ParentCtrl());
 
 						DragStart.x = DragRgn.x1 = DragRgn.x2 = p.x;
@@ -914,7 +914,7 @@ void ResDialogCtrl::OnMouseMove(GMouse &m)
 			New.Offset(	m.x - DragRgn.x1,
 						m.y - DragRgn.y1);
 
-			GdcPt2 p(New.x1, New.y1);
+			LPoint p(New.x1, New.y1);
 			Dlg->SnapPoint(&p, ParentCtrl());
 			New.Set(p.x, p.y, p.x + New.X() - 1, p.y + New.Y() - 1);
 
@@ -1159,13 +1159,13 @@ void CtrlCheckbox::OnPaint(GSurface *pDC)
 	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle(&r);
 
-	GdcPt2 Pt[6] = {
-		GdcPt2(3, 4),
-		GdcPt2(3, 7),
-		GdcPt2(5, 10),
-		GdcPt2(10, 5),
-		GdcPt2(10, 2),
-		GdcPt2(5, 7)};
+	LPoint Pt[6] = {
+		LPoint(3, 4),
+		LPoint(3, 7),
+		LPoint(5, 10),
+		LPoint(10, 5),
+		LPoint(10, 2),
+		LPoint(5, 7)};
 	pDC->Colour(0);
 	pDC->Polygon(6, Pt);
 	pDC->Set(3, 5);
@@ -3045,7 +3045,7 @@ void ResDialog::Paste()
 	DeleteArray(Mem);
 }
 
-void ResDialog::SnapPoint(GdcPt2 *p, ResDialogCtrl *From)
+void ResDialog::SnapPoint(LPoint *p, ResDialogCtrl *From)
 {
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	if (p && Ctrl)
@@ -3499,7 +3499,7 @@ void ResDialog::DrawSelection(GSurface *pDC)
 #define USE_MEM_DC		0
 #endif
 
-void ResDialog::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
+void ResDialog::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
 {
 	// Create temp DC if needed...
 	GAutoPtr<GSurface> Local;

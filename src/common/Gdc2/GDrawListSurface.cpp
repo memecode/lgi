@@ -45,7 +45,7 @@ struct GDrawListSurfacePriv : public GArray<LCmd*>
 
 struct LCmdTxt : public LCmd
 {
-	GdcPt2 p;
+	LPoint p;
 	GDisplayString *Ds;
 
 	LCmdTxt(int x, int y, GDisplayString *ds) : p(x, y)
@@ -65,7 +65,7 @@ struct LCmdTxt : public LCmd
 
 struct LCmdBlt : public LCmd
 {
-	GdcPt2 p;
+	LPoint p;
 	GSurface *Img;
 	GRect Dst;
 	GRect Src;
@@ -121,7 +121,7 @@ struct LCmdRect : public LCmd
 
 struct LCmdPixel : public LCmd
 {
-	GdcPt2 p;
+	LPoint p;
 	
 	LCmdPixel(int x, int y) : p(x, y)
 	{
@@ -152,7 +152,7 @@ struct LCmdColour : public LCmd
 
 struct LCmdLine : public LCmd
 {
-	GdcPt2 s, e;
+	LPoint s, e;
 	
 	LCmdLine(int x1, int y1, int x2, int y2) : s(x1, y1), e(x2, y2)
 	{
@@ -487,12 +487,12 @@ void GDrawListSurface::StretchBlt(GRect *drc, GSurface *Src, GRect *s)
 		LgiAssert(0);	
 }
 
-void GDrawListSurface::Polygon(int Points, GdcPt2 *Data)
+void GDrawListSurface::Polygon(int Points, LPoint *Data)
 {
 	LgiAssert(!"Impl me.");
 }
 
-void GDrawListSurface::Bezier(int Threshold, GdcPt2 *Pt)
+void GDrawListSurface::Bezier(int Threshold, LPoint *Pt)
 {
 	LgiAssert(!"Impl me.");
 }

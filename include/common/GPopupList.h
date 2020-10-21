@@ -107,7 +107,7 @@ public:
 	{
 		// Set position relative to editbox
 		GRect r = GetPos();
-		GdcPt2 p(0, PosType == PopupAbove ? 0 : Edit->Y());
+		LPoint p(0, PosType == PopupAbove ? 0 : Edit->Y());
 		Edit->PointToScreen(p);
 		if (PosType == PopupAbove)
 			r.Offset(p.x - r.x1, (p.y - r.Y()) - r.y1);

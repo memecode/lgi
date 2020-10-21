@@ -16,7 +16,7 @@ class GXmlTag;
 class GMouseHook;
 class GFont;
 class GRect;
-class GdcPt2;
+class LPoint;
 class GRegion;
 class GSurface;
 class GViewI;
@@ -476,8 +476,8 @@ public:
 	virtual bool SetPos(GRect &p, bool Repaint = false) = 0;
 	virtual int X() = 0;
 	virtual int Y() = 0;
-	virtual GdcPt2 GetMinimumSize() = 0;
-	virtual void SetMinimumSize(GdcPt2 Size) = 0;	
+	virtual LPoint GetMinimumSize() = 0;
+	virtual void SetMinimumSize(LPoint Size) = 0;	
 
 	// Id
 	virtual int GetId() = 0;
@@ -520,11 +520,11 @@ public:
 	}
 
 	// Points
-	virtual bool PointToScreen(GdcPt2 &p) = 0;
-	virtual bool PointToView(GdcPt2 &p) = 0;
-	virtual bool WindowVirtualOffset(GdcPt2 *Offset) = 0;	
+	virtual bool PointToScreen(LPoint &p) = 0;
+	virtual bool PointToView(LPoint &p) = 0;
+	virtual bool WindowVirtualOffset(LPoint *Offset) = 0;	
 	virtual GViewI *WindowFromPoint(int x, int y, int DebugDepth = 0) = 0;
-	virtual GdcPt2 &GetWindowBorderSize() = 0;
+	virtual LPoint &GetWindowBorderSize() = 0;
 	virtual bool IsOver(GMouse &m) = 0;
 
 	// Misc

@@ -77,7 +77,7 @@ GEdit::GEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	ResObject(Res_EditBox)
 {
 	d = new GEditPrivate;
-	GdcPt2 Size = SizeOfStr((name)?name:(char*)"A");
+	LPoint Size = SizeOfStr((name)?name:(char*)"A");
 	if (cx < 0) cx = Size.x + 6;
 	if (cy < 0) cy = Size.y + 4;
 	WndFlags |= GWF_SYS_BORDER;

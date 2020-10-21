@@ -18,7 +18,7 @@
 #include "LgiCommon.h"
 #include "GXmlTree.h"
 #include "GDragAndDrop.h"
-#include "LPointF.h"
+#include "LPoint.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs
@@ -186,7 +186,7 @@ struct GDisplayInfo
 	/// The name of any attached monitor
 	GString Monitor;
 	/// The dots per inch of the display
-	GdcPt2 Dpi;
+	LPoint Dpi;
 
 	GDisplayInfo()
 	{

@@ -289,7 +289,7 @@ public:
 		/// The list of formats the source provides, delete any you can't handle
 		GDragFormats &Formats,
 		/// The mouse pointer in view space co-ords
-		GdcPt2 Pt,
+		LPoint Pt,
 		/// The current keyboard mobifiers
 		/// \sa #LGI_EF_CTRL, #LGI_EF_ALT, #LGI_EF_SHIFT
 		int KeyState
@@ -304,7 +304,7 @@ public:
 		/// All the available data formats for this drop
 		GArray<GDragData> &Data,
 		/// The mouse coords
-		GdcPt2 Pt,
+		LPoint Pt,
 		/// The keyboard modifiers
 		/// \sa #LGI_EF_CTRL, #LGI_EF_ALT, #LGI_EF_SHIFT
 		int KeyState

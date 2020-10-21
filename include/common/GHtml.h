@@ -91,10 +91,10 @@ public:
 	/// Get the tag at an x,y location
 	GTag *GetTagByPos(	int x, int y,
 						ssize_t *Index,
-						GdcPt2 *LocalCoords = NULL,
+						LPoint *LocalCoords = NULL,
 						bool DebugLog = false);
 	/// Layout content and return size.
-	GdcPt2 Layout(bool ForceLayout = false);
+	LPoint Layout(bool ForceLayout = false);
 
 	// Options
 	bool GetLinkDoubleClick();

@@ -65,7 +65,7 @@ public:
 	/// Called when the item is dragged
 	virtual bool OnBeginDrag(GMouse &m) { return false; }
 	/// Called when the owning container needs to know the size of the item
-	virtual void OnMeasure(GdcPt2 *Info) {}
+	virtual void OnMeasure(LPoint *Info) {}
 	/// Called when the item is inserted into a new container
 	virtual void OnInsert() {}
 	/// Called when the item is removed from it's container
@@ -411,7 +411,7 @@ class GDragColumn : public GWindow
 	GItemColumn *Col;
 	int Index;
 	int Offset;
-	GdcPt2 ListScrPos;
+	LPoint ListScrPos;
 	
 	#ifdef LINUX
 	GSurface *Back;

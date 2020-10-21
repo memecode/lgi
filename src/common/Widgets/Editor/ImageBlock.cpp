@@ -943,7 +943,7 @@ void GRichTextPriv::ImageBlock::IncAllStyleRefs()
 		Style->RefCount++;
 }
 
-bool GRichTextPriv::ImageBlock::DoContext(LSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling)
+bool GRichTextPriv::ImageBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling)
 {
 	if (SourceImg && !Spelling)
 	{

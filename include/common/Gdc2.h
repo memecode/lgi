@@ -176,8 +176,7 @@ class GFilter;
 class GSurface;
 
 #include "GRect.h"
-// #include "GFont.h"
-#include "GPoint.h"
+#include "LPoint.h"
 #include "GColour.h"
 
 class LgiClass GBmpMem
@@ -436,7 +435,7 @@ public:
 	#if defined(__GTK_H__)
 
 	/// Gets the drawable size, regardless of clipping or client rect
-	virtual GdcPt2 GetSize() { GdcPt2 p; return p; }
+	virtual LPoint GetSize() { LPoint p; return p; }
 	virtual Gtk::GtkPrintContext *GetPrintContext() { return NULL; }
 	virtual Gtk::GdkPixbuf *CreatePixBuf() { return NULL; }
 
@@ -656,9 +655,9 @@ public:
 	// Other
 
 	/// Fill a polygon in the current colour
-	virtual void Polygon(int Points, GdcPt2 *Data);
+	virtual void Polygon(int Points, LPoint *Data);
 	/// Stroke a bezier in the current colour
-	virtual void Bezier(int Threshold, GdcPt2 *Pt);
+	virtual void Bezier(int Threshold, LPoint *Pt);
 	/// Flood fill in the current colour (doesn't work on a GScreenDC)
 	virtual void FloodFill
 	(
@@ -741,7 +740,7 @@ public:
 			GScreenDC(Gtk::cairo_t *cr, int x, int y);
 			
 			// Gtk::cairo_surface_t *GetSurface(bool Render);
-			GdcPt2 GetSize();
+			LPoint GetSize();
 		
 		#elif defined(MAC)
 	
@@ -810,8 +809,8 @@ public:
 	void Rectangle(GRect *a = NULL);
 	void Blt(int x, int y, GSurface *Src, GRect *a = NULL);
 	void StretchBlt(GRect *d, GSurface *Src, GRect *s = NULL);
-	void Polygon(int Points, GdcPt2 *Data);
-	void Bezier(int Threshold, GdcPt2 *Pt);
+	void Polygon(int Points, LPoint *Data);
+	void Bezier(int Threshold, LPoint *Pt);
 	void FloodFill(int x, int y, int Mode, COLOUR Border = 0, GRect *Bounds = NULL);
 	#endif
 };
@@ -1009,7 +1008,7 @@ public:
 
 		#if defined(__GTK_H__)
 
-			GdcPt2 GetSize();
+			LPoint GetSize();
 
 			/// This returns the surface owned by the GMemDC
 			Gtk::cairo_surface_t *GetSurface();
@@ -1136,8 +1135,8 @@ public:
 	void Blt(int x, int y, GSurface *Src, GRect *a = NULL);
 	void StretchBlt(GRect *d, GSurface *Src, GRect *s);
 
-	void Polygon(int Points, GdcPt2 *Data);
-	void Bezier(int Threshold, GdcPt2 *Pt);
+	void Polygon(int Points, LPoint *Data);
+	void Bezier(int Threshold, LPoint *Pt);
 
 	#endif
 };

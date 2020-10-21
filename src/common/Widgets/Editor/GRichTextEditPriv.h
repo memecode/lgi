@@ -231,7 +231,7 @@ class SelectColour : public GPopup
 	GArray<Entry> e;
 
 public:
-	SelectColour(GRichTextPriv *priv, GdcPt2 p, GRichTextEdit::RectType t);
+	SelectColour(GRichTextPriv *priv, LPoint p, GRichTextEdit::RectType t);
 	
 	const char *GetClass() { return "SelectColour"; }
 
@@ -258,7 +258,7 @@ class EmojiMenu : public GPopup
 	static int Cur;
 
 public:
-	EmojiMenu(GRichTextPriv *priv, GdcPt2 p);
+	EmojiMenu(GRichTextPriv *priv, LPoint p);
 
 	void OnPaint(GSurface *pDC);
 	void OnMouseClick(GMouse &m);
@@ -346,7 +346,7 @@ public:
 	GAutoPtr<GFont> Font;
 	bool WordSelectMode;
 	bool Dirty;
-	GdcPt2 DocumentExtent; // Px
+	LPoint DocumentExtent; // Px
 	GString Charset;
 	GHtmlStaticInst Inst;
 	int NextUid;
@@ -571,7 +571,7 @@ public:
 
 	struct HitTestResult
 	{
-		GdcPt2 In;
+		LPoint In;
 		Block *Blk;
 		DisplayStr *Ds;
 		ssize_t Idx;
@@ -730,7 +730,7 @@ public:
 			virtual void Dump() {}
 			virtual GNamedStyle *GetStyle(ssize_t At = -1) = 0;
 			virtual int GetUid() const { return BlockUid; }
-			virtual bool DoContext(LSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling) { return false; }
+			virtual bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling) { return false; }
 			#ifdef _DEBUG
 			virtual void DumpNodes(GTreeItem *Ti) = 0;
 			#endif
@@ -1063,7 +1063,7 @@ public:
 		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
 		void IncAllStyleRefs();
 		void SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, GRange r);
-		bool DoContext(LSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling);
+		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
 		void DumpNodes(GTreeItem *Ti);
 		#endif
@@ -1116,7 +1116,7 @@ public:
 		bool Seek(SeekType To, BlockCursor &Cursor);
 		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
 		void IncAllStyleRefs();
-		bool DoContext(LSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling);
+		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
 		void DumpNodes(GTreeItem *Ti);
 		#endif
@@ -1139,7 +1139,7 @@ public:
 	public:
 		struct ScaleInf
 		{
-			GdcPt2 Sz;
+			LPoint Sz;
 			GString MimeType;
 			GAutoPtr<GStreamI> Compressed;
 			int Percent;
@@ -1177,7 +1177,7 @@ public:
 		GAutoPtr<GSurface> SourceImg, DisplayImg, SelectImg;
 		GRect Margin, Border, Padding;
 		GString Source;
-		GdcPt2 Size;
+		LPoint Size;
 		
 		bool LayoutDirty;
 		GRect Pos; // position in document co-ordinates
@@ -1211,7 +1211,7 @@ public:
 		bool Seek(SeekType To, BlockCursor &Cursor);
 		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
 		void IncAllStyleRefs();
-		bool DoContext(LSubMenu &s, GdcPt2 Doc, ssize_t Offset, bool Spelling);
+		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
 		void DumpNodes(GTreeItem *Ti);
 		#endif
@@ -1256,8 +1256,8 @@ public:
 	bool InsertHorzRule();
 	void Paint(GSurface *pDC, GScrollBar *&ScrollY);
 	GHtmlElement *CreateElement(GHtmlElement *Parent);
-	GdcPt2 ScreenToDoc(int x, int y);
-	GdcPt2 DocToScreen(int x, int y);
+	LPoint ScreenToDoc(int x, int y);
+	LPoint DocToScreen(int x, int y);
 	bool Merge(Transaction *Trans, Block *a, Block *b);
 	bool DeleteSelection(Transaction *t, char16 **Cut);
 	GRichTextEdit::RectType PosToButton(GMouse &m);

@@ -54,7 +54,7 @@ bool GMouse::ToScreen()
 			return false;
 		}
 		
-		GdcPt2 p(x, y);
+		LPoint p(x, y);
 		Target->PointToScreen(p);
 		x = p.x; y = p.y;
 		ViewCoords = false;
@@ -76,7 +76,7 @@ bool GMouse::ToView()
 			return false;
 		}
 		
-		GdcPt2 p(x, y);
+		LPoint p(x, y);
 		Target->PointToView(p);
 		x = p.x; y = p.y;
 		ViewCoords = true;

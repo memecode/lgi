@@ -20,7 +20,7 @@ enum GPathFillRule
 	FILLRULE_NONZERO
 };
 
-#include "LPointF.h"
+#include "LPoint.h"
 #include "LRectF.h"
 
 class LgiClass GBrush

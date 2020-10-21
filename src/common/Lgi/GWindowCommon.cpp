@@ -165,13 +165,13 @@ bool GWindow::MoveSameScreen(GViewI *View)
 	return true;
 }
 
-int GWindow::WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
+int GWindow::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 {
 	Formats.SupportsFileDrops();
 	return true;
 }
 
-int GWindow::OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
+int GWindow::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 {
 	int Status = DROPEFFECT_NONE;
 	

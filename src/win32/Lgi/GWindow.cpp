@@ -37,6 +37,7 @@ public:
 	GWindowZoom Show;
 	bool InCreate;
 	WINDOWPLACEMENT *Wp;
+	LPoint Dpi;
 
 	// Focus stuff
 	GViewI *Focus;
@@ -801,6 +802,13 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 
 	switch (Msg->Msg())
 	{
+		case WM_DPICHANGED:
+		{
+			d->Dpi.x = HIWORD(Msg->A());
+			d->Dpi.y = LOWORD(Msg->A());
+			OnPosChange();
+			break;
+		}
 		case M_ASSERT_UI:
 		{
 			int *Result = (int*)Msg->A();
@@ -1068,6 +1076,26 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 	}
 
 	return Status;
+}
+
+LPoint GWindow::GetDpi()
+{
+	if (!d->Dpi.x)
+	{
+		if (_View)
+			d->Dpi.x = d->Dpi.y = GetDpiForWindow(_View);
+		else
+			d->Dpi.x = d->Dpi.y = GetDpiForSystem();
+	}
+
+	return d->Dpi;
+}
+
+LPointF GWindow::GetDpiScale()
+{
+	auto Dpi = GetDpi();
+	LPointF r( Dpi.x / 96.0, Dpi.y / 96.0 );
+	return r;
 }
 
 GRect &GWindow::GetPos()

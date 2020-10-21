@@ -216,7 +216,7 @@ public:
 		/// Returns the height of the whole string
 		int Y();
 		/// Returns the width and height of the whole string
-		GdcPt2 Size();
+		LPoint Size();
 		/// Returns the number of characters that fit in 'x' pixels.
 		ssize_t CharAt(int x, LgiPxToIndexType Type = LgiTruncate);
 
@@ -282,7 +282,7 @@ public:
 		/// \returns the fractional height of the string
 		int FY();
 		/// \returns both the fractional width and height of the string
-		GdcPt2 FSize();
+		LPoint FSize();
 		/// Draws the string using fractional co-ordinates.
 		void FDraw
 		(

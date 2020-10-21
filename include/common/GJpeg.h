@@ -18,7 +18,7 @@ private:
 	class LibJpeg *d;
 	#endif
 
-	GFilter::IoStatus _Write(GStream *Out, GSurface *pDC, int Quality, SubSampleMode SubSample, GdcPt2 Dpi);
+	GFilter::IoStatus _Write(GStream *Out, GSurface *pDC, int Quality, SubSampleMode SubSample, LPoint Dpi);
 
 public:
 	GdcJpeg();

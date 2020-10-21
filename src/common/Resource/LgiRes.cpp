@@ -1405,11 +1405,10 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 							if (d->r.Overlap(Pos))
 							{
 								auto s = d->Scale();
-								if (s.x > 1.0)
-								{
+								if (s.x != 1.0)
+								{									
 									Pos->Dimension(	(int) (s.x * Pos->X()),
 													(int) (s.y * Pos->Y()));
-									int asd=0;
 								}
 							}
 						}

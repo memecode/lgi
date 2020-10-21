@@ -269,7 +269,7 @@ bool GCombo::Insert(const char *p, int Index)
 
 void GCombo::DoMenu()
 {
-	GdcPt2 p(0, Y());
+	LPoint p(0, Y());
 	PointToScreen(p);
 
 	if (d->Menu)

@@ -541,7 +541,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 }
 	
 void LStringLayout::Paint(	GSurface *pDC,
-							GdcPt2 pt,
+							LPoint pt,
 							GColour Back,
 							GRect &rc,
 							bool Enabled,
@@ -589,7 +589,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 			#ifdef WINNATIVE
 			s->Draw(pDC, r.x1, r.y1, &r);
 			#else
-			GdcPt2 k((pt.x << Shift) + s->Fx, (pt.y + s->y) << Shift);
+			LPoint k((pt.x << Shift) + s->Fx, (pt.y + s->y) << Shift);
 			s->FDraw(pDC, k.x, k.y);
 			#endif
 		}
@@ -600,7 +600,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 			#ifdef WINNATIVE
 			s->Draw(pDC, r.x1+1, r.y1+1, &r);
 			#else
-			GdcPt2 k(((pt.x+1) << Shift) + s->Fx, (pt.y + 1 + s->y) << Shift);
+			LPoint k(((pt.x+1) << Shift) + s->Fx, (pt.y + 1 + s->y) << Shift);
 			s->FDraw(pDC, k.x, k.y);
 			#endif
 				

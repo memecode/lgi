@@ -65,7 +65,7 @@ protected:
 	GFontCache *FontCache;
 
 	// Min and max bounds (in pixels)
-	GdcPt2 Min, Max;
+	LPoint Min, Max;
 	int MinLines;
 	
 	// Setting
@@ -87,8 +87,8 @@ public:
 
 	bool GetWrap() { return Wrap; }
 	void SetWrap(bool b) { Wrap = b; }
-	GdcPt2 GetMin() { return Min; }
-	GdcPt2 GetMax() { return Max; }
+	LPoint GetMin() { return Min; }
+	LPoint GetMax() { return Max; }
 	GArray<GDisplayString*> *GetStrs() { return &Strs; }
 	GRect GetBounds() { return Bounds; }
 
@@ -108,7 +108,7 @@ public:
 	
 	/// Paints the laid out strings at 'pt'.
 	void Paint(	GSurface *pDC,
-				GdcPt2 pt,
+				LPoint pt,
 				GColour Back,
 				GRect &rc,
 				bool Enabled,

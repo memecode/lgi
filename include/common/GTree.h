@@ -99,17 +99,17 @@ protected:
 
 	// Private methods
 	void _RePour();
-	void _Pour(GdcPt2 *Limit, int ColumnPx, int Depth, bool Visible);
+	void _Pour(LPoint *Limit, int ColumnPx, int Depth, bool Visible);
 	void _Remove();
 	void _MouseClick(GMouse &m);
 	void _SetTreePtr(GTree *t);
 	GTreeItem *_HitTest(int x, int y, bool Debug = false);
 	GRect *_GetRect(GTreeItemRect Which);
-	GdcPt2 _ScrollPos();
+	LPoint _ScrollPos();
 	GTreeItem *Item() override { return this; }
 	GRect *Pos() override;
 
-	virtual void _PourText(GdcPt2 &Size);
+	virtual void _PourText(LPoint &Size);
 	virtual void _PaintText(GItem::ItemPaintCtx &Ctx);
 	void _ClearDs(int Col) override;
 	virtual void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c);
@@ -196,7 +196,7 @@ protected:
 	
 	GRect rItems;
 	
-	GdcPt2 _ScrollPos();
+	LPoint _ScrollPos();
 	GTreeItem *GetAdjacent(GTreeItem *From, bool Down);
 	void OnDragEnter();
 	void OnDragExit();
