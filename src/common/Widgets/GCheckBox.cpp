@@ -325,11 +325,16 @@ void GCheckBox::OnPaint(GSurface *pDC)
 	if (GApp::SkinEngine &&
 		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_CHECKBOX))
 	{
+		auto Fnt = GetFont();
+		int Px = (int) Fnt->Ascent() + 0.5;
+
 		GSkinState State;
 		State.pScreen = pDC;
 		State.MouseOver = d->Over;
 		State.aText = d->GetStrs();
-		d->ValuePos.Set(0, 0, 15, 15);
+		d->ValuePos.Set(0, 0, Px-1, Px-1);
+		d->ValuePos.Offset(0, (int)Fnt->Leading()-1);
+		State.Rect = d->ValuePos;
 		GApp::SkinEngine->OnPaint_GCheckBox(this, &State);
 	}
 	else

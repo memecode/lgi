@@ -256,10 +256,10 @@ class GelSkin : public GSkinEngine
 		#endif
 	}
 
-	GMemDC *DrawCtrl(GViewI *Ctrl, int Flags, bool Round)
+	GMemDC *DrawCtrl(GViewI *Ctrl, GRect *Sz, int Flags, bool Round)
 	{
 		GMemDC *Mem = new GMemDC;
-		if (Mem && Mem->Create(14, 14, OsDefaultCs))
+		if (Mem && Mem->Create(Sz ? Sz->X() : 14, Sz ? Sz->Y() : 14, OsDefaultCs))
 		{
 			// blank out background
 
@@ -336,7 +336,7 @@ class GelSkin : public GSkinEngine
 			}
 			else
 			{
-				// draw button hightlight, a white outline shifted down 1 pixel
+				// draw button highlight, a white outline shifted down 1 pixel
 				GRectF r = Box;
 				r.Size(CHECK_BORDER, CHECK_BORDER);
 				r.Offset(0, 1);
@@ -382,7 +382,8 @@ class GelSkin : public GSkinEngine
 			{
 				// draw the check mark
 				GRectF r = Box;
-				r.Size(CHECK_BORDER+2, CHECK_BORDER+2);
+				int Px = Box.X()/6;
+				r.Size(CHECK_BORDER+Px, CHECK_BORDER+Px);
 
 				double Cx = r.x1 + (r.X() / 2);
 				double Cy = r.y1 + (r.Y() / 2);
@@ -848,7 +849,7 @@ public:
 
 	void OnPaint_GCheckBox(GCheckBox *Ctrl, GSkinState *State)
 	{
-		int Flags = (Ctrl->Value() ? Btn_Value : 0) |
+		int Flags = (Ctrl->Value()   ? Btn_Value   : 0) |
 					(Ctrl->Enabled() ? Btn_Enabled : 0);
 		
 		// Create the bitmaps in cache if not already there
@@ -857,10 +858,11 @@ public:
 
 		GMemDC *Temp = 0;
 		GMemDC *&Mem = Back.IsValid() ? Temp : CheckBox[Flags];
+		
+		if (Mem && (Mem->X() != State->Rect.X() || Mem->Y() != State->Rect.Y()))
+			DeleteObj(Mem);
 		if (!Mem)
-		{
-			Mem = DrawCtrl(Ctrl, Flags, false);
-		}
+			Mem = DrawCtrl(Ctrl, &State->Rect, Flags, false);
 
 		// Output to screen
 		if (Mem)
@@ -868,10 +870,7 @@ public:
 			// Draw icon
 			int FontY = Ctrl->GetFont()->GetHeight();
 
-			GRect Box(0, 0, Mem->X()-1, Mem->Y()-1);
-			if (FontY > Mem->Y())
-				Box.Offset(0, FontY - Mem->Y());
-
+			GRect &Box = State->Rect;
 			State->pScreen->Blt(Box.x1, Box.y1, Mem);
 
 			GRect Box1(Box.x1, 0, Box.x2, Box.y1 - 1);
@@ -923,7 +922,7 @@ public:
 		GMemDC *&Mem = RadioBtn[Flags];
 		if (!Mem)
 		{
-			Mem = DrawCtrl(Ctrl, Flags, true);
+			Mem = DrawCtrl(Ctrl, &State->Rect, Flags, true);
 		}
 
 		// Output to screen
