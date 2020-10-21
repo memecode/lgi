@@ -1419,7 +1419,7 @@ void GZoomView::SetCallback(GZoomViewCallback *cb)
 	d->Callback = cb;
 }
 
-bool GZoomView::Convert(GPointF &p, int x, int y)
+bool GZoomView::Convert(LPointF &p, int x, int y)
 {
 	int64 Sx = 0, Sy = 0;
 	int64 Factor = d->Factor();
@@ -1469,7 +1469,7 @@ bool GZoomView::OnMouseWheel(double Lines)
 	
 	if (m.Ctrl())
 	{
-		GPointF DocPt;
+		LPointF DocPt;
 		bool In = Convert(DocPt, m.x, m.y);
 
 		// Zoom the graphic

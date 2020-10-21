@@ -72,7 +72,7 @@
 #define ToInt(d)				((int)( (d+(0.5/SUB_SAMPLE)+0.00000001) * SUB_SAMPLE))
 #define ToDbl(i)				((double)i / SUB_SAMPLE)
 
-double GPointF::Threshold		= 0.00000001;
+double LPointF::Threshold		= 0.00000001;
 
 bool _Disable_ActiveList		= false;
 bool _Disable_XSort				= false;
@@ -92,8 +92,8 @@ class GVector
 public:
 	bool Up;
 	int Points;
-	GPointF *p;
-	GRectF Bounds;
+	LPointF *p;
+	LRectF Bounds;
 	int Index;
 
 	int y1, y2;
@@ -139,8 +139,8 @@ public:
 				memset(aax, 0, sizeof(*aax) * n);
 
 				int Inc = (Up) ? -1 : 1;
-				GPointF *a = p + (Up ? Points-1 : 0);
-				GPointF *b = a + Inc;
+				LPointF *a = p + (Up ? Points-1 : 0);
+				LPointF *b = a + Inc;
 
 				aay1 = ToInt(Bounds.y1);
 				aay2 = ToInt(Bounds.y2);
@@ -245,8 +245,8 @@ public:
 			x = new double[n];
 			if (x)
 			{
-				GPointF *Cur = p + (Up ? Points - 1 : 0);
-				GPointF *Last = Cur;
+				LPointF *Cur = p + (Up ? Points - 1 : 0);
+				LPointF *Last = Cur;
 				Cur += Up ? -1 : 1;
 				bool CSide = 0;
 				bool LSide = 1;
@@ -313,7 +313,7 @@ class GSeg
 public:
 	GSegType Type;
 	int Points;
-	GPointF *Point;
+	LPointF *Point;
 
 	GSeg(GSegType t)
 	{
@@ -330,7 +330,7 @@ public:
 			default:
 				Points = 0; break;
 		}
-		Point = Points ? new GPointF[Points] : 0;
+		Point = Points ? new LPointF[Points] : 0;
 	}
 
 	~GSeg()
@@ -347,7 +347,7 @@ public:
 		}
 	}
 
-	GPointF *First()
+	LPointF *First()
 	{
 		if (Points > 0 && Point)
 		{
@@ -356,7 +356,7 @@ public:
 		return 0;
 	}
 
-	GPointF *Last()
+	LPointF *Last()
 	{
 		if (Points > 0 && Point)
 		{
@@ -378,7 +378,7 @@ void Round(double &n)
 	}
 }
 
-void GRectF::Normalize()
+void LRectF::Normalize()
 {
 	Round(x1);
 	Round(y1);
@@ -400,7 +400,7 @@ void GRectF::Normalize()
 	}
 }
 
-void GRectF::Intersect(GRectF &p)
+void LRectF::Intersect(LRectF &p)
 {
 	if (Defined)
 	{
@@ -411,7 +411,7 @@ void GRectF::Intersect(GRectF &p)
 	}
 }
 
-void GRectF::Union(GPointF &p)
+void LRectF::Union(LPointF &p)
 {
 	if (Defined)
 	{
@@ -428,7 +428,7 @@ void GRectF::Union(GPointF &p)
 	}
 }
 
-void GRectF::Union(GRectF &p)
+void LRectF::Union(LRectF &p)
 {
 	if (Defined)
 	{
@@ -444,7 +444,7 @@ void GRectF::Union(GRectF &p)
 	}
 }
 
-bool GRectF::Overlap(GPointF &p)
+bool LRectF::Overlap(LPointF &p)
 {
 	return	(p.x >= x1) &&
 			(p.y >= y1) &&
@@ -452,7 +452,7 @@ bool GRectF::Overlap(GPointF &p)
 			(p.y <= y2);
 }
 
-bool GRectF::Overlap(GRectF &p)
+bool LRectF::Overlap(LRectF &p)
 {
 	return	(p.x1 <= x2) &&
 			(p.x2 >= x1) &&
@@ -460,7 +460,7 @@ bool GRectF::Overlap(GRectF &p)
 			(p.y2 >= y1);
 }
 
-void GRectF::Offset(double x, double y)
+void LRectF::Offset(double x, double y)
 {
 	x1 += x;
 	y1 += y;
@@ -468,7 +468,7 @@ void GRectF::Offset(double x, double y)
 	y2 += y;
 }
 
-void GRectF::Size(double dx, double dy)
+void LRectF::Size(double dx, double dy)
 {
 	x1 += dx;
 	y1 += dy;
@@ -476,7 +476,7 @@ void GRectF::Size(double dx, double dy)
 	y2 -= dy;
 }
 
-GRectF &GRectF::operator =(GRect &f)
+LRectF &LRectF::operator =(GRect &f)
 {
 	x1 = f.x1;
 	y1 = f.y1;
@@ -486,7 +486,7 @@ GRectF &GRectF::operator =(GRect &f)
 	return *this;
 }
 
-GRectF &GRectF::operator =(GRectF &f)
+LRectF &LRectF::operator =(LRectF &f)
 {
 	x1 = f.x1;
 	y1 = f.y1;
@@ -496,7 +496,7 @@ GRectF &GRectF::operator =(GRectF &f)
 	return *this;
 }
 
-GRectF &GRectF::operator =(GPointF &p)
+LRectF &LRectF::operator =(LPointF &p)
 {
 	x1 = x2 = p.x;
 	y1 = y2 = p.y;
@@ -504,7 +504,7 @@ GRectF &GRectF::operator =(GPointF &p)
 	return *this;
 }
 
-char *GRectF::Describe()
+char *LRectF::Describe()
 {
 	static char s[64];
 	sprintf_s(s, sizeof(s), "%f,%f,%f,%f", x1, y1, x2, y2);
@@ -512,7 +512,7 @@ char *GRectF::Describe()
 }
 
 ///////////////////////////////////////////////////////////
-void FlattenQuadratic(GPointF *&Out, GPointF &p1, GPointF &p2, GPointF &p3, int numsteps)
+void FlattenQuadratic(LPointF *&Out, LPointF &p1, LPointF &p2, LPointF &p3, int numsteps)
 {
 	double xdelta, xdelta2;
 	double ydelta, ydelta2;
@@ -520,11 +520,11 @@ void FlattenQuadratic(GPointF *&Out, GPointF &p1, GPointF &p2, GPointF &p3, int 
 	double ax, ay;
 	double bx, by;
 	double i;
-	GPointF v1, v2, *o;
+	LPointF v1, v2, *o;
 	
 	if (!Out)
 	{
-		Out = new GPointF[numsteps];
+		Out = new LPointF[numsteps];
 	}
 	if (Out)
 	{
@@ -568,7 +568,7 @@ void FlattenQuadratic(GPointF *&Out, GPointF &p1, GPointF &p2, GPointF &p3, int 
 	}
 }
 
-void FlattenCubic(GPointF *&Out, GPointF &p1, GPointF &p2, GPointF &p3, GPointF &p4, int numsteps)
+void FlattenCubic(LPointF *&Out, LPointF &p1, LPointF &p2, LPointF &p3, LPointF &p4, int numsteps)
 {
 	double xdelta, xdelta2, xdelta3;
 	double ydelta, ydelta2, ydelta3;
@@ -577,11 +577,11 @@ void FlattenCubic(GPointF *&Out, GPointF &p1, GPointF &p2, GPointF &p3, GPointF 
 	double bx, by;
 	double cx, cy;
 	double i;
-	GPointF v1, v2, *o;
+	LPointF v1, v2, *o;
 	
 	if (!Out)
 	{
-		Out = new GPointF[numsteps];
+		Out = new LPointF[numsteps];
 	}
 	if (Out)
 	{
@@ -664,7 +664,7 @@ GPath::~GPath()
 	Segs.DeleteObjects();
 }
 
-void GPath::GetBounds(GRectF *b)
+void GPath::GetBounds(LRectF *b)
 {
 	if (b)
 	{
@@ -686,11 +686,11 @@ void GPath::MoveTo(double x, double y)
 {
 	Close();
 	
-	GPointF p(x, y);
+	LPointF p(x, y);
 	MoveTo(p);
 }
 
-void GPath::MoveTo(GPointF &pt)
+void GPath::MoveTo(LPointF &pt)
 {
 	GSeg *s = new GSeg(SegMove);
 	if (s)
@@ -702,11 +702,11 @@ void GPath::MoveTo(GPointF &pt)
 
 void GPath::LineTo(double x, double y)
 {
-	GPointF p(x, y);
+	LPointF p(x, y);
 	LineTo(p);
 }
 
-void GPath::LineTo(GPointF &pt)
+void GPath::LineTo(LPointF &pt)
 {
 	GSeg *s = new GSeg(SegLine);
 	if (s)
@@ -718,12 +718,12 @@ void GPath::LineTo(GPointF &pt)
 
 void GPath::QuadBezierTo(double cx, double cy, double px, double py)
 {
-	GPointF c(cx, cy);
-	GPointF p(px, py);
+	LPointF c(cx, cy);
+	LPointF p(px, py);
 	QuadBezierTo(c, p);
 }
 
-void GPath::QuadBezierTo(GPointF &c, GPointF &p)
+void GPath::QuadBezierTo(LPointF &c, LPointF &p)
 {
 	GSeg *s = new GSeg(SegQuad);
 	if (s)
@@ -736,13 +736,13 @@ void GPath::QuadBezierTo(GPointF &c, GPointF &p)
 
 void GPath::CubicBezierTo(double c1x, double c1y, double c2x, double c2y, double px, double py)
 {
-	GPointF c1(c1x, c1y);
-	GPointF c2(c2x, c2y);
-	GPointF p(px, py);
+	LPointF c1(c1x, c1y);
+	LPointF c2(c2x, c2y);
+	LPointF p(px, py);
 	CubicBezierTo(c1, c2, p);
 }
 
-void GPath::CubicBezierTo(GPointF &c1, GPointF &c2, GPointF &p)
+void GPath::CubicBezierTo(LPointF &c1, LPointF &c2, LPointF &p)
 {
 	GSeg *s = new GSeg(SegCube);
 	if (s)
@@ -763,12 +763,12 @@ void GPath::Rectangle(double x1, double y1, double x2, double y2)
 	LineTo(x1, y1); // is this last one necessary?
 }
 
-void GPath::Rectangle(GPointF &tl, GPointF &rb)
+void GPath::Rectangle(LPointF &tl, LPointF &rb)
 {
 	Rectangle(tl.x, tl.y, rb.x, rb.y);
 }
 
-void GPath::Rectangle(GRectF &r)
+void GPath::Rectangle(LRectF &r)
 {
 	MoveTo(r.x1, r.y1);
 	LineTo(r.x2, r.y1);
@@ -777,13 +777,13 @@ void GPath::Rectangle(GRectF &r)
 	LineTo(r.x1, r.y1);
 }
 
-void GPath::RoundRect(GRectF &b, double r)
+void GPath::RoundRect(LRectF &b, double r)
 {
 	double k = 0.5522847498 * r;
 	
 	MoveTo(b.x1 + r, b.y1);
 
-	GPointF c(b.x2 - r, b.y1 + r);
+	LPointF c(b.x2 - r, b.y1 + r);
 	LineTo(c.x, b.y1);
 	CubicBezierTo(	c.x + k, c.y - r,
 					c.x + r, c.y - k,
@@ -813,11 +813,11 @@ void GPath::RoundRect(GRectF &b, double r)
 
 void GPath::Circle(double cx, double cy, double radius)
 {
-	GPointF c(cx, cy);
+	LPointF c(cx, cy);
 	Circle(c, radius);
 }
 
-void GPath::Circle(GPointF &c, double r)
+void GPath::Circle(LPointF &c, double r)
 {
 	/*
 	double theta;
@@ -853,11 +853,11 @@ void GPath::Circle(GPointF &c, double r)
 
 void GPath::Ellipse(double cx, double cy, double x, double y)
 {
-	GPointF c(cx, cy);
+	LPointF c(cx, cy);
 	Ellipse(c, x, y);
 }
 
-void GPath::Ellipse(GPointF &c, double x, double y)
+void GPath::Ellipse(LPointF &c, double x, double y)
 {
 	double dx = x * 0.552;
 	double dy = y * 0.552;
@@ -878,9 +878,9 @@ void GPath::Ellipse(GPointF &c, double x, double y)
 }
 
 #ifdef WIN32
-GPointF &PointConv(POINTFX pt, double x, double y, double Scale)
+LPointF &PointConv(POINTFX pt, double x, double y, double Scale)
 {
-	static GPointF f;
+	static LPointF f;
 	f.x = x + (FixedToDbl(pt.x) * Scale);
 	f.y = y - (FixedToDbl(pt.y) * Scale);
 	return f;
@@ -950,7 +950,7 @@ bool GPath::Text(	GFont *Font,
 												&Metrics,
 												BufSize, Buf, &Mat) > 0)
 							{
-								GPointF Cur;
+								LPointF Cur;
 
 								TTPOLYGONHEADER *tt = (TTPOLYGONHEADER*)Buf;
 								while ((void*)tt < (void*)((char*)Buf + BufSize))
@@ -958,7 +958,7 @@ bool GPath::Text(	GFont *Font,
 									if (tt->dwType == TT_POLYGON_TYPE)
 									{
 										Cur = PointConv(tt->pfxStart, _x, _y, Scale);
-										GPointF Start = Cur;
+										LPointF Start = Cur;
 										Temp.MoveTo(Cur);
 
 										#ifdef DEBUG_LOG
@@ -987,8 +987,8 @@ bool GPath::Text(	GFont *Font,
 												{
 													for (int i = 0; i < c->cpfx;)
 													{
-														GPointF c1 = PointConv(c->apfx[i], _x, _y, Scale);
-														GPointF e;
+														LPointF c1 = PointConv(c->apfx[i], _x, _y, Scale);
+														LPointF e;
 														i++;
 
 														if (i == (c->cpfx - 1))
@@ -998,7 +998,7 @@ bool GPath::Text(	GFont *Font,
 														}     
 														else
 														{
-															GPointF b = PointConv(c->apfx[i], _x, _y, Scale);
+															LPointF b = PointConv(c->apfx[i], _x, _y, Scale);
 
 															e.x = (c1.x + b.x) / 2;
 															e.y = (c1.y + b.y) / 2;
@@ -1060,7 +1060,7 @@ bool GPath::Text(	GFont *Font,
 			DEBUG_LOG("\n");
 			#endif
 
-			GRectF b;
+			LRectF b;
 			Temp.GetBounds(&b);
 
 			double Dx = x - b.x1;
@@ -1097,8 +1097,8 @@ bool GPath::IsClosed()
 	GSeg *l = *e;
 	if (f && l)
 	{
-		GPointF *Start = f->First();
-		GPointF *End = l->Last();
+		LPointF *Start = f->First();
+		LPointF *End = l->Last();
 		if (Start && End)
 		{
 			return *Start == *End;
@@ -1177,13 +1177,13 @@ bool GPath::Flatten()
 		}
 	}
 
-	Point = new GPointF[Points];
+	Point = new LPointF[Points];
 	if (Point)
 	{
 		int n = 0;
 
-		GPointF *c = Point;
-		GPointF *OutlineStart = Point;
+		LPointF *c = Point;
+		LPointF *OutlineStart = Point;
 		for (auto s: Segs)
 		{
 			switch (s->Type)
@@ -1289,16 +1289,16 @@ bool GPath::Flatten()
 	for (int i=1; i<Points; i++)
 	{
 		// Collect points
-		GPointF *Prev = Point + i - 1;
-		GPointF *Cur = Point + i;
-		GPointF *Next = i < Points - 1 && i < Outline[NextOutline] ? Point + i + 1 : 0;
+		LPointF *Prev = Point + i - 1;
+		LPointF *Cur = Point + i;
+		LPointF *Next = i < Points - 1 && i < Outline[NextOutline] ? Point + i + 1 : 0;
 
 		// Get absolute change in y
 		double dy = Cur->y - Prev->y;
 		dy = dy < 0 ? -dy : dy;
 
 		// Start the next segment if no start defined and there is some change in y
-		if (Start < 0 && dy > GPointF::Threshold)
+		if (Start < 0 && dy > LPointF::Threshold)
 		{
 			// Store the index of the start for this vector
 			Start = i - 1;
@@ -1447,7 +1447,7 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 			#define CHECK_ALPHA(idx)
 		#endif
 
-		GRectF Doc = Bounds;
+		LRectF Doc = Bounds;
 		int Ox = 0, Oy = 0;
 		
 		pDC->GetOrigin(Ox, Oy);
@@ -1455,11 +1455,11 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 		double OffsetY = Mat[2][1] - Oy;
 		
 		Doc.Offset(OffsetX, OffsetY);
-		GRectF Page(0, 0, pDC->X(), pDC->Y());
+		LRectF Page(0, 0, pDC->X(), pDC->Y());
 		GRect DcClip = pDC->ClipRgn();
 		if (DcClip.Valid())
 			Page = DcClip;
-		GRectF Clip = Doc;
+		LRectF Clip = Doc;
 		Clip.Intersect(Page);
 		
 		// Convert the doc and clip back to path coords.
@@ -1632,7 +1632,7 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 									{
 										double Cx = a->aax[(y>>SUB_SHIFT) - a->y1].x[s];
 
-										PathAssert(Cx >= Bounds.x1 - GPointF::Threshold && Cx <= Bounds.x2 + GPointF::Threshold);
+										PathAssert(Cx >= Bounds.x1 - LPointF::Threshold && Cx <= Bounds.x2 + LPointF::Threshold);
 
 										if (Xs == 0 || (Xs > 0 && Cx >= x[Xs-1]))
 										{
@@ -1861,7 +1861,7 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 
 		#if DEBUG_DRAW_SEGMENTS
 		// Debug
-		GPointF Cur;
+		LPointF Cur;
 		int n = 0;
 		for (GSeg *s=Segs.First(); s; s=Segs.Next(), n++)
 		{
@@ -1938,7 +1938,7 @@ void GPath::Stroke(GSurface *pDC, GBrush &Brush, double Width)
 		pDC->SetOrigin((int)-Mat[2][0], (int)-Mat[2][1]);
 
 		int i;
-		GPointF *p = Point;
+		LPointF *p = Point;
 		for (i=0; i<Points-1; i++)
 		{
 			pDC->Line(  (int)p[i].x,
@@ -2071,15 +2071,15 @@ bool GLinearBlendBrush::Start(GRopArgs &Args)
 	double d = sqrt( (dx*dx) + (dy*dy) );
 	double a = atan2(dy, dx);
 
-	GPointF Origin(0, 0);
+	LPointF Origin(0, 0);
 	Origin.Translate(-p[0].x, -p[0].y);
 	Origin.Rotate(-a);
 
-	GPointF x(1, 0);
+	LPointF x(1, 0);
 	x.Translate(-p[0].x, -p[0].y);
 	x.Rotate(-a);
 
-	GPointF y(0, 1);
+	LPointF y(0, 1);
 	y.Translate(-p[0].x, -p[0].y);
 	y.Rotate(-a);
 

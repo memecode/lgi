@@ -18,6 +18,7 @@
 #include "LgiCommon.h"
 #include "GXmlTree.h"
 #include "GDragAndDrop.h"
+#include "LPointF.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs
@@ -179,28 +180,22 @@ struct GDisplayInfo
 	/// The refresh rate
 	int Refresh;
 	/// The device's path, system specific
-	char *Device;
+	GString Device;
 	/// A descriptive name of the device, usually the video card
-	char *Name;
+	GString Name;
 	/// The name of any attached monitor
-	char *Monitor;
+	GString Monitor;
+	/// The dots per inch of the display
+	GdcPt2 Dpi;
 
 	GDisplayInfo()
 	{
 		r.ZOff(-1, -1);
 		BitDepth = 0;
 		Refresh = 0;
-		Device = 0;
-		Name = 0;
-		Monitor = 0;
 	}
 
-	~GDisplayInfo()
-	{
-		DeleteArray(Device);
-		DeleteArray(Name);
-		DeleteArray(Monitor);
-	}
+	LPointF Scale();
 };
 
 /// Returns infomation about the displays attached to the system.

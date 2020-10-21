@@ -75,7 +75,7 @@ public:
 
 	// Methods
 	void SetCallback(GZoomViewCallback *cb);
-	bool Convert(GPointF &p, int x, int y);
+	bool Convert(LPointF &p, int x, int y);
 	ViewportInfo GetViewport();
 	void SetViewport(ViewportInfo i);
 	void SetSampleMode(SampleMode sm);

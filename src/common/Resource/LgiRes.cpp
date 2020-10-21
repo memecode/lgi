@@ -1393,7 +1393,29 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 				x += LgiApp->GetMetric(LGI_MET_DECOR_X) - 4;
 				y += LgiApp->GetMetric(LGI_MET_DECOR_Y) - 18;
 				if (Pos)
+				{
 					Pos->ZOff(x, y);
+
+					// Do some scaling for the monitor's DPI
+					GArray<GDisplayInfo*> Displays;
+					if (LgiGetDisplays(Displays))
+					{
+						for (auto d: Displays)
+						{
+							if (d->r.Overlap(Pos))
+							{
+								auto s = d->Scale();
+								if (s.x > 1.0)
+								{
+									Pos->Dimension(	(int) (s.x * Pos->X()),
+													(int) (s.y * Pos->Y()));
+									int asd=0;
+								}
+							}
+						}
+						Displays.DeleteObjects();
+					}
+				}
 				else if (Parent && stricmp(Parent->GetClass(), "GTabPage"))
 				{
 					GRect r = Parent->GetPos();
@@ -1403,7 +1425,7 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 
 				// instantiate control list
 				// p.Add("2");
-				for (GXmlTag *t: Dlg->Dialog->Children)
+				for (auto t: Dlg->Dialog->Children)
 				{
 					ResObject *Obj = CreateObject(t, 0);
 					if (Obj)

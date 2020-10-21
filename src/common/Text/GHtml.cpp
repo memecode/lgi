@@ -6023,14 +6023,14 @@ public:
 				#endif
 				Rectangle();
 
-				GPointF ctr(Px, Px);
-				GPointF LeftPt(0.0, Px);
-				GPointF TopPt(Px, 0.0);
-				GPointF RightPt(X(), Px);
-				GPointF BottomPt(Px, Y());
+				LPointF ctr(Px, Px);
+				LPointF LeftPt(0.0, Px);
+				LPointF TopPt(Px, 0.0);
+				LPointF RightPt(X(), Px);
+				LPointF BottomPt(Px, Y());
 				int x_px[4] = {BorderPx->x1, BorderPx->x2, BorderPx->x2, BorderPx->x1};
 				int y_px[4] = {BorderPx->y1, BorderPx->y1, BorderPx->y2, BorderPx->y2};
-				GPointF *pts[4] = {&LeftPt, &TopPt, &RightPt, &BottomPt};
+				LPointF *pts[4] = {&LeftPt, &TopPt, &RightPt, &BottomPt};
 				
 				// Draw border parts..
 				for (int i=0; i<4; i++)

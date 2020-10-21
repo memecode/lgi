@@ -237,7 +237,7 @@ public:
 
 		// Draw the icon backrgound
 		double n = pDC->X() - 2;
-		GPointF Ctr(n/2, n), Rim(n/2, 0);
+		LPointF Ctr(n/2, n), Rim(n/2, 0);
 
 		if (1)
 		{
@@ -313,10 +313,10 @@ public:
 			case IconDelete:
 			{
 				GPath p;
-				GPointF Ctr(n/2, n/2);
+				LPointF Ctr(n/2, n/2);
 				for (int i=0; i<CountOf(Plus); i++)
 				{
-					GPointF pt(k[Plus[i][0]], k[Plus[i][1]]);
+					LPointF pt(k[Plus[i][0]], k[Plus[i][1]]);
 					pt = pt - Ctr;
 					pt.Rotate(LGI_DegToRad(45));
 					pt = pt + Ctr;					
@@ -358,7 +358,7 @@ public:
 				GPath p;
 				for (int i=0; i<CountOf(Pt); i++)
 				{
-					GPointF m(Pt[i][0]+0.5, Pt[i][1]+0.5);
+					LPointF m(Pt[i][0]+0.5, Pt[i][1]+0.5);
 					if (Icon == IconMoveDown)
 						m.y = k[3] - (m.y - k[0]);
 					if (i) p.LineTo(m.x, m.y);
@@ -373,7 +373,7 @@ public:
 				GPath p;
 				for (int i=0; i<3; i++)
 				{
-					GPointF c(n * (1+i) / 4, n / 2);
+					LPointF c(n * (1+i) / 4, n / 2);
 					p.Circle(c, n/10);
 				}
 				
@@ -662,7 +662,7 @@ void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	{
 		GPath p;
 		GSolidBrush b(LColour(L_FOCUS_SEL_BACK));
-		GRectF PosF(0, 0, Pos->X()-1, Pos->Y());
+		LRectF PosF(0, 0, Pos->X()-1, Pos->Y());
 		p.RoundRect(PosF, PosF.Y()/2);
 		p.Fill(&Buf, b);
 	}
@@ -671,7 +671,7 @@ void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	{
 		GPath p;
 		GSolidBrush b(BackCol);
-		GRectF PosF(0, 0, Pos->X()-(ox*2)-1, Pos->Y()-(oy*2));
+		LRectF PosF(0, 0, Pos->X()-(ox*2)-1, Pos->Y()-(oy*2));
 		PosF.Offset(ox, oy);
 		p.RoundRect(PosF, r);
 		p.Fill(&Buf, b);
@@ -681,7 +681,7 @@ void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	{
 		GPath p;
 		GSolidBrush b(Workspace);
-		GRectF PosF(0, 0, Pos->X()-(ox*2)-3, Pos->Y()-(oy*2)-2);
+		LRectF PosF(0, 0, Pos->X()-(ox*2)-3, Pos->Y()-(oy*2)-2);
 		PosF.Offset(ox+1, oy+1);
 		p.RoundRect(PosF, r);
 		p.Fill(&Buf, b);

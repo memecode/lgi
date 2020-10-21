@@ -162,7 +162,7 @@ public:
 			{0.0, cTopEdge.c32()},
 			{1.0, cBottomEdge.c32()}
 		};
-		GPointF a(4, 4), b(9, 9);
+		LPointF a(4, 4), b(9, 9);
 		GLinearBlendBrush s2(a, b, CountOf(Stops), Stops);
 		p.Fill(Dc, s2);
 

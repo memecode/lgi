@@ -105,8 +105,8 @@ class GelSkin : public GSkinEngine
 			GPath e;
 			e.Rectangle(r.x1, r.y1, r.x2+1, r.y2+1);
 			
-			GPointF c1(r.x1, r.y1);
-			GPointF d1(r.x1, r.y2+1);
+			LPointF c1(r.x1, r.y1);
+			LPointF d1(r.x1, r.y2+1);
 			if (Down)
 			{
 				GBlendStop s1[] =
@@ -169,7 +169,7 @@ class GelSkin : public GSkinEngine
 		{
 			// Edge
 			GPath e;
-			GRectF r(Client);
+			LRectF r(Client);
 			// r.y2++;
 			e.RoundRect(r, 6);
 		
@@ -181,7 +181,7 @@ class GelSkin : public GSkinEngine
 		{
 			// Border
 			GPath e;
-			GRectF r(Client);
+			LRectF r(Client);
 			// r.y2++;
 			int Resize = Default ? 2 : 1;
 			r.Size(Resize, Resize);
@@ -207,8 +207,8 @@ class GelSkin : public GSkinEngine
 				Bot = Tint(Bot, Amt);
 			}
 		
-			GPointF c1(r.x1, r.y1);
-			GPointF d1(r.x1, r.y2);
+			LPointF c1(r.x1, r.y1);
+			LPointF d1(r.x1, r.y2);
 			if (Down)
 			{
 				GBlendStop s1[] =
@@ -247,8 +247,8 @@ class GelSkin : public GSkinEngine
 			};					
 			
 			// Rounded corners
-			GPointF c3(r.x1 + (r.X()/2), r.y1 + (r.Y()/2));
-			GPointF d3(r.x1, r.y1);
+			LPointF c3(r.x1 + (r.X()/2), r.y1 + (r.Y()/2));
+			LPointF d3(r.x1, r.y1);
 			GRadialBlendBrush b3(c3, d3, CountOf(s3), s3);
 			e.Fill(pDC, b3);
 		}
@@ -277,9 +277,9 @@ class GelSkin : public GSkinEngine
 			#endif
 			Mem->Rectangle();
 			
-			GRectF Box(0, 0, Mem->X(), Mem->Y());
+			LRectF Box(0, 0, Mem->X(), Mem->Y());
 			double Radius = Box.X()/2;
-			GPointF Center(Box.X()/2, Box.Y()/2);
+			LPointF Center(Box.X()/2, Box.Y()/2);
 
 			// int Grey = R24(LC_MED);
 			bool Enabled = (Flags & Btn_Enabled) != 0;
@@ -287,7 +287,7 @@ class GelSkin : public GSkinEngine
 			if (Enabled)
 			{
 				// draw sunken border
-				GRectF r = Box;
+				LRectF r = Box;
 				GPath p;
 				if (Round)
 					p.Circle(Center, Radius);
@@ -295,7 +295,7 @@ class GelSkin : public GSkinEngine
 					p.RoundRect(r, CHECK_RADIUS + CHECK_BORDER);
 				
 				// gradient from 169,169,169 at the top through to 225,225,225
-				GPointF a(0, 0), b(0, 15);
+				LPointF a(0, 0), b(0, 15);
 				GBlendStop s[] =
 				{
 					{0, c172.c32()},
@@ -308,7 +308,7 @@ class GelSkin : public GSkinEngine
 			if (Enabled)
 			{
 				// draw button center
-				GRectF r = Box;
+				LRectF r = Box;
 				r.Size(CHECK_BORDER+1, CHECK_BORDER+1);
 				GPath p;
 				if (Round)
@@ -318,7 +318,7 @@ class GelSkin : public GSkinEngine
 
 				if (Enabled)
 				{
-					GPointF a(0, r.y1), b(0, r.y2);
+					LPointF a(0, r.y1), b(0, r.y2);
 					GBlendStop s[] =
 					{
 						{1.0/15.0, c255.c32()},
@@ -337,10 +337,10 @@ class GelSkin : public GSkinEngine
 			else
 			{
 				// draw button highlight, a white outline shifted down 1 pixel
-				GRectF r = Box;
+				LRectF r = Box;
 				r.Size(CHECK_BORDER, CHECK_BORDER);
 				r.Offset(0, 1);
-				GPointF Cntr = Center;
+				LPointF Cntr = Center;
 				Cntr.y = Cntr.y + 1;
 				
 				GPath p;
@@ -360,7 +360,7 @@ class GelSkin : public GSkinEngine
 
 			{
 				// draw button outline
-				GRectF r = Box;
+				LRectF r = Box;
 				r.Size(CHECK_BORDER, CHECK_BORDER);
 				GPath p;
 				if (Round)
@@ -381,8 +381,8 @@ class GelSkin : public GSkinEngine
 			if (Flags & Btn_Value)
 			{
 				// draw the check mark
-				GRectF r = Box;
-				int Px = Box.X()/6;
+				LRectF r = Box;
+				int Px = (int) (Box.X()/6);
 				r.Size(CHECK_BORDER+Px, CHECK_BORDER+Px);
 
 				double Cx = r.x1 + (r.X() / 2);
