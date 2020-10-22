@@ -385,7 +385,7 @@ void LSubMenu::OnActivate(LMenuItem *item)
 
 int LSubMenu::Float(GView *From, int x, int y, int Btns)
 {
-	GdcPt2 p(x, y);
+	LPoint p(x, y);
 	OsView v = nil;
 	
 	if (From)
@@ -534,7 +534,7 @@ void LMenuItem::OnAttach(bool Attach)
 // control over the colours displayed. these functions remove that
 // limitation and also provide the application the ability to override
 // the default painting behaviour if desired.
-void LMenuItem::_Measure(GdcPt2 &Size)
+void LMenuItem::_Measure(LPoint &Size)
 {
 	GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 	bool BaseMenu = Parent == Menu; // true if attached to a windows menu

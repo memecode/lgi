@@ -115,7 +115,7 @@ struct DndEvent
 	GViewI *v;
 	GDragDropTarget *target;
 	GDragFormats InputFmts, AcceptedFmts;
-	GdcPt2 Pt;
+	LPoint Pt;
 	int Keys;
 
 	int result;

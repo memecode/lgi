@@ -718,7 +718,7 @@ public:
 		}
 
 		Part &i = p[Level];
-		GdcPt2 pt(i.Arrow.x1, i.Arrow.y2+1);
+		LPoint pt(i.Arrow.x1, i.Arrow.y2+1);
 		PointToScreen(pt);
 		int Cmd = s.Float(this, pt.x, pt.y, true);
 		if (Cmd)

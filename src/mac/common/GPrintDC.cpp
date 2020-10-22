@@ -5,7 +5,7 @@ class GPrintDCPrivate
 {
 public:
 	int x, y;
-	GdcPt2 Dpi;
+	LPoint Dpi;
 	bool PageOpen;
 	bool DocOpen;
 	CGContextRef Ctx;

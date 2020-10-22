@@ -1089,6 +1089,12 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 	return true;
 }
 
+LPoint GWindow::GetDpi()
+{
+	auto Dpi = LgiScreenDpi();
+	return LPoint(Dpi, Dpi);
+}
+
 GRect &GWindow::GetPos()
 {
 	// LAutoPool Pool;
