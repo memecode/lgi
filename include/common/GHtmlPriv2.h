@@ -240,8 +240,8 @@ public:
 	GFont *GetFont();
 
 	// Style
-	GdcPt2 Pos;
-	GdcPt2 Size;
+	LPoint Pos;
+	LPoint Size;
 	GFont *Font;
 	
 	// Images
@@ -252,8 +252,8 @@ public:
 	void ImageLoaded(char *uri, GSurface *img, int &Used);
 
 	// Table stuff
-	GdcPt2 Cell;
-	GdcPt2 Span;
+	LPoint Cell;
+	LPoint Span;
 	uint16 MinContent, MaxContent;
 	GCss::LengthType XAlign;
 	GCellStore *Cells;
@@ -310,7 +310,7 @@ public:
 		/// [Optional] The size of the border painted
 		GRect *Px = NULL);
 	void OnPaint(GSurface *pDC);
-	void SetSize(GdcPt2 &s);
+	void SetSize(LPoint &s);
 	void SetTag(const char *Tag);
 	void GetTagByPos(GTagHit &hit, int x, int y);
 	GTag *GetTagByName(const char *Name);
@@ -343,7 +343,7 @@ public:
 
 	// Tables
 	GTag *GetTableCell(int x, int y);
-	GdcPt2 GetTableSize();
+	LPoint GetTableSize();
 };
 
 }

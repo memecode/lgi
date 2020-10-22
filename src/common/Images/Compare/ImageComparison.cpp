@@ -37,7 +37,7 @@ GArray<uint32> RDiff, GDiff, BDiff;
 #endif
 
 template<typename Px>
-void CompareRgb(GSurface *A, GSurface *B, uint8_t *c, GdcPt2 size, int threshold)
+void CompareRgb(GSurface *A, GSurface *B, uint8_t *c, LPoint size, int threshold)
 {
 	if (!A || !B || !c)
 		return;
@@ -77,7 +77,7 @@ void CompareRgb(GSurface *A, GSurface *B, uint8_t *c, GdcPt2 size, int threshold
 }
 
 template<typename Px>
-void CompareRgba(GSurface *A, GSurface *B, uint8_t *c, GdcPt2 size, int threshold)
+void CompareRgba(GSurface *A, GSurface *B, uint8_t *c, LPoint size, int threshold)
 {
 	Px *a = (Px*) (*A)[size.y];
 	Px *b = (Px*) (*B)[size.y];
@@ -176,7 +176,7 @@ GAutoPtr<GMemDC> CreateDiff(GViewI *Parent, GSurface *A, GSurface *B)
 
 				#define CompareCaseRgb(type, threshold) \
 					case Cs##type: \
-						CompareRgb<G##type>(A, B, c, GdcPt2(Cx, y), threshold); \
+						CompareRgb<G##type>(A, B, c, LPoint(Cx, y), threshold); \
 						break
 				
 				CompareCaseRgb(Rgb24, DIFF_LARGE_8BIT);
@@ -192,7 +192,7 @@ GAutoPtr<GMemDC> CreateDiff(GViewI *Parent, GSurface *A, GSurface *B)
 
 				#define CompareCaseRgba(type, threshold) \
 					case Cs##type: \
-						CompareRgba<G##type>(A, B, c, GdcPt2(Cx, y), threshold); \
+						CompareRgba<G##type>(A, B, c, LPoint(Cx, y), threshold); \
 						break
 				
 				CompareCaseRgba(Rgba32, DIFF_LARGE_8BIT);
@@ -308,7 +308,7 @@ class CompareView : public GLayout
 	GStatusBar *Status;
 	GStatusPane *Pane[3];
 	bool DraggingView;	
-	GPointF DocPos;
+	LPointF DocPos;
 	
 public:
 	CompareView(GZoomViewCallback *callback, const char *FileA = NULL, const char *FileB = NULL)
@@ -573,7 +573,7 @@ public:
 		Diff->a = p->a;
 	}
 
-	GAutoString DescribePixel(GSurface *pDC, GdcPt2 Pos, GRgba64 *Diff)
+	GAutoString DescribePixel(GSurface *pDC, LPoint Pos, GRgba64 *Diff)
 	{
 		char s[256] = "No Data";
 		int ch = 0;
@@ -714,10 +714,10 @@ public:
 				ZeroObj(ap);
 				ZeroObj(bp);
 				
-				GAutoString Apix = DescribePixel(a, GdcPt2(m.x, m.y), &ap);
+				GAutoString Apix = DescribePixel(a, LPoint(m.x, m.y), &ap);
 				Pane[0]->Name(Apix);
 
-				GAutoString Bpix = DescribePixel(b, GdcPt2(m.x, m.y), &bp);
+				GAutoString Bpix = DescribePixel(b, LPoint(m.x, m.y), &bp);
 				Pane[2]->Name(Bpix);
 
 				int Channels = GColourSpaceChannels(a->GetColourSpace());
@@ -736,7 +736,7 @@ public:
 					diff##c, (ap.c ? (double)abs(diff##c) * 100 / ap.c : (diff##c ? 100.0 : 0.0))
 
 				GZoomView *zv = dynamic_cast<GZoomView*>(m.Target);
-				GPointF Doc;
+				LPointF Doc;
 				zv->Convert(Doc, m.x, m.y);
 				
 				int ch = sprintf_s(s, sizeof(s), "Mouse: %.1f, %.1f  Tile: %i (%i, %i)  Diff: %i(%.1f%%),%i(%.1f%%),%i(%.1f%%)",
@@ -861,13 +861,13 @@ struct ImageCompareDlgPriv : public GZoomViewCallback
 		tabs = NULL;
 	}
 
-	void DrawBackground(GZoomView *View, GSurface *Dst, GdcPt2 Offset, GRect *Where)
+	void DrawBackground(GZoomView *View, GSurface *Dst, LPoint Offset, GRect *Where)
 	{
 		Dst->Colour(L_WORKSPACE, 24);
 		Dst->Rectangle(Where);
 	}
 	
-	void DrawForeground(GZoomView *View, GSurface *Dst, GdcPt2 Offset, GRect *Where)
+	void DrawForeground(GZoomView *View, GSurface *Dst, LPoint Offset, GRect *Where)
 	{
 	}
 

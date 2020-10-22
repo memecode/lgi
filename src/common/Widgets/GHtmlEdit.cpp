@@ -1080,7 +1080,7 @@ public:
 		if (Base)
 		{
 			GFlowRect *Inside = 0;
-			GdcPt2 BaseOff = t->AbsolutePos();
+			LPoint BaseOff = t->AbsolutePos();
 			GRect BasePos;
 			char16 *End = Base + StrlenW(Base);
 			for (unsigned i=0; i<t->TextPos.Length(); i++)
@@ -1127,7 +1127,7 @@ public:
 				{
 					Added = 0;
 					
-					GdcPt2 Off = b->AbsolutePos();
+					LPoint Off = b->AbsolutePos();
 					for (unsigned i=0; i<b->TextPos.Length(); i++)
 					{
 						GFlowRect *f = b->TextPos[i];
@@ -1148,7 +1148,7 @@ public:
 				{
 					Added = 0;
 					
-					GdcPt2 Off = b->AbsolutePos();
+					LPoint Off = b->AbsolutePos();
 					for (unsigned i=0; i<b->TextPos.Length(); i++)
 					{
 						GFlowRect *f = b->TextPos[i];
@@ -1421,7 +1421,7 @@ public:
 				{
 					while (!NewCur && NextTextTag(t, Idx, t, NULL))
 					{
-						GdcPt2 Off = t->AbsolutePos();
+						LPoint Off = t->AbsolutePos();
 						
 						Idx = 0;
 						for (unsigned i=0; i<t->TextPos.Length(); i++)
@@ -1444,7 +1444,7 @@ public:
 				{
 					while (!NewCur && PrevTextTag(t, Idx, t, NULL))
 					{
-						GdcPt2 Off = t->AbsolutePos();
+						LPoint Off = t->AbsolutePos();
 						
 						Idx = 0;
 						for (int i=t->TextPos.Length()-1; i>=0; i--)

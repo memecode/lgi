@@ -175,12 +175,12 @@ public:
 		int Cy = (Rect.Y() / 2);
 		#define Rx(x, y)		((cos(Ang)*(x-Cx)) - (sin(Ang)*(y-Cy)))
 		#define Ry(x, y)		((sin(Ang)*(x-Cx)) + (cos(Ang)*(y-Cy)))
-		GdcPt2 p[4] =
+		LPoint p[4] =
 		{
-			GdcPt2(0, 0),
-			GdcPt2(Rect.X()-1, 0),
-			GdcPt2(0, Rect.Y()-1),
-			GdcPt2(Rect.X()-1, Rect.Y()-1)
+			LPoint(0, 0),
+			LPoint(Rect.X()-1, 0),
+			LPoint(0, Rect.Y()-1),
+			LPoint(Rect.X()-1, Rect.Y()-1)
 		};
 
 		int MinX = 100000, MaxX = -100000;

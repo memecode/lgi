@@ -167,12 +167,12 @@ public:
 	{
 	}
 
-	int WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
+	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 	{
 		return DROPEFFECT_COPY;
 	}
 
-	int OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
+	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 	{
 		GString Keys;
 		if (KeyState & LGI_EF_CTRL)

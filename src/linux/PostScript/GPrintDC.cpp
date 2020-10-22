@@ -765,11 +765,11 @@ void GPrintDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
 {
 }
 
-void GPrintDC::Polygon(int Points, GdcPt2 *Data)
+void GPrintDC::Polygon(int Points, LPoint *Data)
 {
 }
 
-void GPrintDC::Bezier(int Threshold, GdcPt2 *Pt)
+void GPrintDC::Bezier(int Threshold, LPoint *Pt)
 {
 }
 

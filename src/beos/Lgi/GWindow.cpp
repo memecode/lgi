@@ -492,7 +492,7 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 	return GView::OnEvent(Msg);
 }
 
-int GWindow::WillAccept(List<char> &Formats, GdcPt2 Pt, int KeyState)
+int GWindow::WillAccept(List<char> &Formats, LPoint Pt, int KeyState)
 {
 	int Status = DROPEFFECT_NONE;
 	
@@ -519,7 +519,7 @@ bool GWindow::SetIcon(char const *IcoFile)
 	return false;
 }
 
-int GWindow::OnDrop(char *Format, GVariant *Data, GdcPt2 Pt, int KeyState)
+int GWindow::OnDrop(char *Format, GVariant *Data, LPoint Pt, int KeyState)
 {
 	int Status = DROPEFFECT_NONE;
 

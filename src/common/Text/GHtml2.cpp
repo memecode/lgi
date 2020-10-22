@@ -98,7 +98,7 @@ public:
 	bool CursorVis;
 	GRect CursorPos;
 	bool WordSelectMode;
-	GdcPt2 Content;
+	LPoint Content;
 	bool LinkDoubleClick;
 	GAutoString OnLoadAnchor;
 	bool DecodeEmoji;
@@ -4292,9 +4292,9 @@ void GTag::ZeroTableElements()
 	}
 }
 
-GdcPt2 GTag::GetTableSize()
+LPoint GTag::GetTableSize()
 {
-	GdcPt2 s(0, 0);
+	LPoint s(0, 0);
 	
 	if (Cells)
 	{
@@ -4417,7 +4417,7 @@ bool GTag::GetWidthMetrics(uint16 &Min, uint16 &Max)
 			}
 			else
 			{
-				GdcPt2 s;
+				LPoint s;
 				GCellStore c(this);
 				c.GetSize(s.x, s.y);
 
@@ -4543,7 +4543,7 @@ T Sum(GArray<T> &a)
 
 void GTag::LayoutTable(GFlowRegion *f)
 {
-	GdcPt2 s;
+	LPoint s;
 
 	if (!Cells)
 	{
@@ -5155,7 +5155,7 @@ int GTag::AbsY()
 	return a;
 }
 
-void GTag::SetSize(GdcPt2 &s)
+void GTag::SetSize(LPoint &s)
 {
 	Size = s;
 }
@@ -6889,7 +6889,7 @@ void GHtml2::OnPosChange()
 	}
 }
 
-GdcPt2 GHtml2::Layout()
+LPoint GHtml2::Layout()
 {
 	GRect Client = GetClient();
 	if (IsAttached() && ViewWidth != Client.X())

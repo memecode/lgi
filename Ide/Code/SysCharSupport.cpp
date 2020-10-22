@@ -30,7 +30,7 @@ public:
 		}
 	}
 
-	void OnMeasure(GdcPt2 *Info)
+	void OnMeasure(LPoint *Info)
 	{
 		LListItem::OnMeasure(Info);
 		if (pDC)

@@ -176,10 +176,10 @@ GMessage::Result GControl::OnEvent(GMessage *Msg)
 	return 0;
 }
 
-GdcPt2 GControl::SizeOfStr(const char *Str)
+LPoint GControl::SizeOfStr(const char *Str)
 {
 	int y = SysFont->GetHeight();
-	GdcPt2 Pt(0, 0);
+	LPoint Pt(0, 0);
 
 	if (Str)
 	{

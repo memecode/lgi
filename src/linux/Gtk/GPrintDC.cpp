@@ -310,12 +310,12 @@ void GPrintDC::StretchBlt(GRect *rc, GSurface *Src, GRect *s)
 	cairo_surface_destroy(Img);
 }
 
-void GPrintDC::Polygon(int Points, GdcPt2 *Data)
+void GPrintDC::Polygon(int Points, LPoint *Data)
 {
 	LgiAssert(!"Not impl.");
 }
 
-void GPrintDC::Bezier(int Threshold, GdcPt2 *Pt)
+void GPrintDC::Bezier(int Threshold, LPoint *Pt)
 {
 	LgiAssert(!"Not impl.");
 }

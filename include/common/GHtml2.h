@@ -89,7 +89,7 @@ public:
 	/// Get the tag at an x,y location
 	GTag *GetTagByPos(int x, int y, int *Index);
 	/// Layout content and return size.
-	GdcPt2 Layout();
+	LPoint Layout();
 
 	// Options
 	bool GetLinkDoubleClick();

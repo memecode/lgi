@@ -343,7 +343,7 @@ int LSubMenu::Float(GView *From, int x, int y, int Button)
 	int MenuId = 0;
 	_ContextMenuId = &MenuId;
 
-	GdcPt2 Pos(x, y);
+	LPoint Pos(x, y);
 	gtk_menu_popup(GTK_MENU(Info.obj),
 					NULL, NULL, NULL, NULL,
 					Button,

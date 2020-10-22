@@ -809,7 +809,7 @@ bool LMenuItem::ScanForAccel()
 				}
 				else
 				{
-					LgiAssert(!"Unknown Accel Part");
+					LgiTrace("%s:%i - Unknown Accel Part '%s'\n", _FL, k.Get());
 				}
 			}
 

@@ -245,7 +245,7 @@ bool LgiToWindowsCursor(LgiCursor Cursor)
 	return false;
 }
 
-void GView::PointToScreen(GdcPt2 &p)
+void GView::PointToScreen(LPoint &p)
 {
 	for (GViewI *i = this; i; i = i->GetParent())
 	{
@@ -256,7 +256,7 @@ void GView::PointToScreen(GdcPt2 &p)
 	}
 }
 
-void GView::PointToView(GdcPt2 &p)
+void GView::PointToView(LPoint &p)
 {
 	for (GViewI *i = this; i; i = i->GetParent())
 	{

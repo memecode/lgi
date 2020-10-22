@@ -151,9 +151,9 @@ bool GMemDC::SupportsAlphaCompositing()
 	return true;
 }
 
-GdcPt2 GMemDC::GetSize()
+LPoint GMemDC::GetSize()
 {
-	return GdcPt2(pMem->x, pMem->y);
+	return LPoint(pMem->x, pMem->y);
 }
 
 GRect GMemDC::ClipRgn(GRect *Rgn)

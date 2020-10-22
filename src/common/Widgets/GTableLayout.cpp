@@ -368,7 +368,21 @@ public:
 	void Empty(GRect *Range = NULL);
     bool CollectRadioButtons(GArray<GRadioButton*> &Btns);
     void InitBorderSpacing();
-	double Scale() { return Dpi.x / 96.0; }
+	double Scale()
+	{
+		if (!Dpi.x)
+		{
+			auto Wnd = Ctrl->GetWindow();
+			if (Wnd)
+				Dpi = Wnd->GetDpi();
+			else
+				Dpi.x = Dpi.y = 96;
+		}
+
+		LgiAssert(Dpi.x > 0);
+
+		return Dpi.x / 96.0;
+	}
 
 	// Layout temporary values
 	GStringPipe Dbg;
@@ -2085,7 +2099,7 @@ void GTableLayout::OnPosChange()
 				r = t.ApplyPadding(r);
 			}
 			
-			d->LayoutDirty = false;
+			d->LayoutDirty = false;			
 			d->Layout(r);
 		}
 	}

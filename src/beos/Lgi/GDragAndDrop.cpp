@@ -113,7 +113,7 @@ void GDragDropTarget::SetWindow(GView *to)
 }
 
 int GDragDropTarget::OnDrop(GArray<GDragData> &DropData,
-							GdcPt2 Pt,
+							LPoint Pt,
 							int KeyState)
 {
 	if (DropData.Length() == 0 ||

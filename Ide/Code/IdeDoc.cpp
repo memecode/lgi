@@ -290,7 +290,7 @@ void EditTray::OnHeaderList(GMouse &m)
 				}
 				
 				// Show the menu
-				GdcPt2 p(m.x, m.y);
+				LPoint p(m.x, m.y);
 				PointToScreen(p);
 				int Goto = s->Float(this, p.x, p.y, true);
 				if (Goto > 0)
@@ -378,7 +378,7 @@ void EditTray::OnFunctionList(GMouse &m)
 			}
 		}
 		
-		GdcPt2 p(m.x, m.y);
+		LPoint p(m.x, m.y);
 		PointToScreen(p);
 		int Goto = s.Float(this, p.x, p.y, true);
 		if (Goto)
@@ -443,7 +443,7 @@ void EditTray::OnSymbolList(GMouse &m)
 				}
 				
 				// Show the menu
-				GdcPt2 p(m.x, m.y);
+				LPoint p(m.x, m.y);
 				PointToScreen(p);
 				int Goto = s->Float(this, p.x, p.y, true);
 				if (Goto)
@@ -488,7 +488,7 @@ void EditTray::OnSymbolList(GMouse &m)
 		if (s)
 		{
 			s->AppendItem("(No symbol currently selected)", 0, false);
-			GdcPt2 p(m.x, m.y);
+			LPoint p(m.x, m.y);
 			PointToScreen(p);
 			s->Float(this, p.x, p.y, true);
 			DeleteObj(s);
@@ -1677,7 +1677,7 @@ int IdeDoc::OnNotify(GViewI *v, int f)
 				{
 					if (d->Tray)
 					{
-						GdcPt2 Pt;
+						LPoint Pt;
 						if (d->Edit->GetLineColumnAtIndex(Pt, d->Edit->GetCaret()))
 						{
 							d->Tray->Col = Pt.x;

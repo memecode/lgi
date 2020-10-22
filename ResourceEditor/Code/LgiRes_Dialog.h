@@ -275,7 +275,7 @@ public:
 
 	GRect &GetClient(bool InClientSpace = true);
 	
-	// void _Paint(GSurface *pDC = NULL, GdcPt2 *Offset = NULL, GRect *Update = NULL);
+	// void _Paint(GSurface *pDC = NULL, LPoint *Offset = NULL, GRect *Update = NULL);
 	void OnNcPaint(GSurface *pDC, GRect &r);
 };
 

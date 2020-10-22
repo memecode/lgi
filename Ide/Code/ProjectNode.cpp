@@ -1009,7 +1009,7 @@ void ProjectNode::OnMouseClick(GMouse &m)
 		Sub.AppendItem("Properties", IDM_PROPERTIES, true);
 
 		m.ToScreen();
-		GdcPt2 c = _ScrollPos();
+		LPoint c = _ScrollPos();
 		m.x -= c.x;
 		m.y -= c.y;
 		switch (Sub.Float(Tree, m.x, m.y))

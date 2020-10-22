@@ -2987,7 +2987,7 @@ void IdeProject::OnMouseClick(GMouse &m)
 		Sub.AppendItem("Insert Dependency", IDM_INSERT_DEP);
 
 		m.ToScreen();
-		GdcPt2 c = _ScrollPos();
+		auto c = _ScrollPos();
 		m.x -= c.x;
 		m.y -= c.y;
 		switch (Sub.Float(Tree, m.x, m.y))
@@ -3720,7 +3720,7 @@ void IdeTree::OnDragExit()
 	SelectDropTarget(0);
 }
 
-int IdeTree::WillAccept(GDragFormats &Formats, GdcPt2 p, int KeyState)
+int IdeTree::WillAccept(GDragFormats &Formats, LPoint p, int KeyState)
 {
 	static bool First = true;
 	
@@ -3764,7 +3764,7 @@ int IdeTree::WillAccept(GDragFormats &Formats, GdcPt2 p, int KeyState)
 	return DROPEFFECT_MOVE;
 }
 
-int IdeTree::OnDrop(GArray<GDragData> &Data, GdcPt2 p, int KeyState)
+int IdeTree::OnDrop(GArray<GDragData> &Data, LPoint p, int KeyState)
 {
 	int Ret = DROPEFFECT_NONE;
 	SelectDropTarget(NULL);

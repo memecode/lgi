@@ -476,7 +476,7 @@ public:
 		{
 			case IDM_SAVE_IMGS:
 			{
-				GdcPt2 PageSize(1000, 2000);
+				LPoint PageSize(1000, 2000);
 				
 				GProgressDlg Prog(this, true);
 				Prog.SetDescription("Scanning for HTML...");

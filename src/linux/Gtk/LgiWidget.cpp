@@ -140,7 +140,7 @@ GMouse _map_mouse_event(GView *v, int x, int y, bool Motion, bool Debug = false)
 	GMouse m;
 
 	auto View = v->WindowFromPoint(x, y, Debug);
-	GdcPt2 Offset;
+	LPoint Offset;
 	bool FoundParent = false;
 	for (auto i=View; i != NULL; i=i->GetParent())
 	{
@@ -592,7 +592,7 @@ lgi_widget_drag_motion(GtkWidget	   *widget,
 		Target->OnDragEnter();
 	}
 	
-	GdcPt2 p(x, y);
+	LPoint p(x, y);
 	Formats.SetSource(false);
 	int Result = Target->WillAccept(Formats, p, 0);
 	Formats.Empty();
@@ -645,7 +645,7 @@ lgi_widget_drag_drop(GtkWidget	       *widget,
 	}
 
 	// Select a format from the supplied types
-	GdcPt2 p(x, y);
+	LPoint p(x, y);
 	int Result = Target->WillAccept(Formats, p, 0);
 	if (Result == DROPEFFECT_NONE)
 		return false;
@@ -705,7 +705,7 @@ lgi_widget_drag_data_received(	GtkWidget			*widget,
 	#if DEBUG_DND
 	printf("%s:%i - Type=%s, Target=%s\n", _FL, Type, v->target->GetClass());
 	#endif
-	GdcPt2 p(x, y);
+	LPoint p(x, y);
 	gint Len = gtk_selection_data_get_length(data);
 	#if DEBUG_DND
 	printf("%s:%i - Len=%i\n", _FL, Len);

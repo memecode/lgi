@@ -1397,22 +1397,28 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 					Pos->ZOff(x, y);
 
 					// Do some scaling for the monitor's DPI
-					GArray<GDisplayInfo*> Displays;
-					if (LgiGetDisplays(Displays))
+					LPoint Dpi;
+					GWindow *Wnd = Parent ? Parent->GetWindow() : NULL;
+					if (Wnd)
+						Dpi = Wnd->GetDpi();
+					else
 					{
-						for (auto d: Displays)
+						GArray<GDisplayInfo*> Displays;
+						if (LgiGetDisplays(Displays))
 						{
-							if (d->r.Overlap(Pos))
+							for (auto d: Displays)
 							{
-								auto s = d->Scale();
-								if (s.x != 1.0)
-								{									
-									Pos->Dimension(	(int) (s.x * Pos->X()),
-													(int) (s.y * Pos->Y()));
-								}
+								if (d->r.Overlap(Pos) && d->Dpi.x)
+									Dpi = d->Dpi;
 							}
+							Displays.DeleteObjects();
 						}
-						Displays.DeleteObjects();
+					}
+					if (Dpi.x)
+					{
+						LPointF s((double)Dpi.x / 96.0, (double)Dpi.y / 96.0);
+						Pos->Dimension(	(int) (s.x * Pos->X()),
+										(int) (s.y * Pos->Y()));
 					}
 				}
 				else if (Parent && stricmp(Parent->GetClass(), "GTabPage"))

@@ -216,9 +216,9 @@ bool GScreenDC::SupportsAlphaCompositing()
 	return false;
 }
 
-GdcPt2 GScreenDC::GetSize()
+LPoint GScreenDC::GetSize()
 {
-	return GdcPt2(d->x, d->y);
+	return LPoint(d->x, d->y);
 }
 
 bool GScreenDC::GetClient(GRect *c)
@@ -613,7 +613,7 @@ void GScreenDC::Rectangle(GRect *a)
 	}
 }
 
-void GScreenDC::Polygon(int Points, GdcPt2 *Data)
+void GScreenDC::Polygon(int Points, LPoint *Data)
 {
 	if (!Data || Points <= 0)
 		return;
@@ -696,7 +696,7 @@ void GScreenDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
 	LgiAssert(0);
 }
 
-void GScreenDC::Bezier(int Threshold, GdcPt2 *Pt)
+void GScreenDC::Bezier(int Threshold, LPoint *Pt)
 {
 	LgiAssert(0);
 }

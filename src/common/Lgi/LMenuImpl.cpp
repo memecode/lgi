@@ -276,7 +276,7 @@ void SubMenuImpl::Layout(int Bx, int By)
 		int n = 0;
 		for (GMenuItem *i=d->Sub->Items[c * Col]; i && n < Col; i=d->Sub->Items.Next(), n++)
 		{
-			GdcPt2 Size;
+			LPoint Size;
 			i->_Measure(Size);
 			x = MAX(x, Size.x+4);
 		}
@@ -284,7 +284,7 @@ void SubMenuImpl::Layout(int Bx, int By)
 		n = 0;
 		for (GMenuItem *i=d->Sub->Items[c * Col]; i && n < Col; i=d->Sub->Items.Next(), n++)
 		{
-			GdcPt2 Size;
+			LPoint Size;
 			i->_Measure(Size);
 
 			int Ht = Size.y;
@@ -454,7 +454,7 @@ bool MenuImpl::Pour(GRegion &r)
 	
 	for (::GMenuItem *i=d->Menu->Items.First(); i; i=d->Menu->Items.Next())
 	{
-		GdcPt2 Size;
+		LPoint Size;
 		i->_Measure(Size);
 		int Tx = Size.x;
 		
@@ -599,7 +599,7 @@ void MenuItemImpl::ShowSub()
 	if (d->Item->Child)
 	{
 		// Open the submenu
-		GdcPt2 p(X(), 0);
+		LPoint p(X(), 0);
 
 		if (!IsOnSubMenu())
 		{

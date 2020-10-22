@@ -580,7 +580,7 @@ GMenuItem *GMenuItem::MatchShortcut(GKey &k)
 	return NULL;
 }
 
-void GMenuItem::_Measure(GdcPt2 &Size)
+void GMenuItem::_Measure(LPoint &Size)
 {
 }
 

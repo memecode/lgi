@@ -1037,7 +1037,7 @@ int TtfGlyph::DrawEm(GSurface *pDC, int x, int y, int EmUnits, double PixelsPerE
 							SCALEX(X[Prev]),
 							SCALEY(Y[Prev]));
 					#else
-					GdcPt2 p[3];
+					LPoint p[3];
 	
 					if (Flags[Prev] & OnCurve)
 					{

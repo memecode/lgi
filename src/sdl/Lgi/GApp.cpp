@@ -446,7 +446,7 @@ void SDL_to_Mouse(GMouse &ms, T &ev)
 	GViewI *Over = ms.Target->WindowFromPoint(ms.x, ms.y);
 	if (Over != ms.Target)
 	{
-		GdcPt2 p;
+		LPoint p;
 		Over->WindowVirtualOffset(&p);
 		ms.Target = Over;
 		ms.x -= p.x;
@@ -492,7 +492,7 @@ void GApp::OnSDLEvent(GMessage *m)
 				GViewI *v = AppWnd->WindowFromPoint(ms.x, ms.y);
 				if (v)
 				{
-					GdcPt2 p(ms.x, ms.y);
+					LPoint p(ms.x, ms.y);
 					v->PointToView(p);
 					ms.Target = v;
 					ms.x = p.x;

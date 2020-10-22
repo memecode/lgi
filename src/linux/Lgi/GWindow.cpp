@@ -669,7 +669,7 @@ GWindowUnrealize(GtkWidget *widget, GWindow *wnd)
 	// printf("%s:%i - GWindowUnrealize %s\n", _FL, wnd->GetClass());
 }
 
-bool DndPointMap(GViewI *&v, GdcPt2 &p, GDragDropTarget *&t, GWindow *Wnd, int x, int y)
+bool DndPointMap(GViewI *&v, LPoint &p, GDragDropTarget *&t, GWindow *Wnd, int x, int y)
 {
 	GRect cli = Wnd->GetClient();
 	t = NULL;
@@ -714,7 +714,7 @@ GWindowDragDataGet(GtkWidget *widget, GdkDragContext *context, GtkSelectionData 
 void
 GWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint y, GtkSelectionData *data, guint info, guint time, GWindow *Wnd)
 {
-	GdcPt2 p;
+	LPoint p;
 	GViewI *v;
 	GDragDropTarget *t;
 	if (!DndPointMap(v, p, t, Wnd, x, y))
@@ -736,7 +736,7 @@ GWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint
 	}
 }
 
-int GetAcceptFmts(::GString::Array &Formats, GdkDragContext *context, GDragDropTarget *t, GdcPt2 &p)
+int GetAcceptFmts(::GString::Array &Formats, GdkDragContext *context, GDragDropTarget *t, LPoint &p)
 {
 	int KeyState = 0;
 	GDragFormats Fmts(true);
@@ -766,7 +766,7 @@ gboolean
 GWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, GWindow *Wnd)
 {
 	// Map the point to a view...
-	GdcPt2 p;
+	LPoint p;
 	GViewI *v;
 	GDragDropTarget *t;
 	if (!DndPointMap(v, p, t, Wnd, x, y))
@@ -825,7 +825,7 @@ GWindowDragLeave(GtkWidget *widget, GdkDragContext *context, guint time, GWindow
 gboolean
 GWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, GWindow *Wnd)
 {
-	GdcPt2 p;
+	LPoint p;
 	GViewI *v;
 	GDragDropTarget *t;
 	if (!DndPointMap(v, p, t, Wnd, x, y))

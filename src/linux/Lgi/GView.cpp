@@ -37,42 +37,42 @@ struct CursorInfo
 {
 public:
 	GRect Pos;
-	GdcPt2 HotSpot;
+	LPoint HotSpot;
 }
 CursorMetrics[] =
 {
 	// up arrow
-	{ GRect(0, 0, 8, 15),			GdcPt2(4, 0) },
+	{ GRect(0, 0, 8, 15),			LPoint(4, 0) },
 	// cross hair
-	{ GRect(20, 0, 38, 18),			GdcPt2(29, 9) },
+	{ GRect(20, 0, 38, 18),			LPoint(29, 9) },
 	// hourglass
-	{ GRect(40, 0, 51, 15),			GdcPt2(45, 8) },
+	{ GRect(40, 0, 51, 15),			LPoint(45, 8) },
 	// I beam
-	{ GRect(60, 0, 66, 17),			GdcPt2(63, 8) },
+	{ GRect(60, 0, 66, 17),			LPoint(63, 8) },
 	// N-S arrow
-	{ GRect(80, 0, 91, 16),			GdcPt2(85, 8) },
+	{ GRect(80, 0, 91, 16),			LPoint(85, 8) },
 	// E-W arrow
-	{ GRect(100, 0, 116, 11),		GdcPt2(108, 5) },
+	{ GRect(100, 0, 116, 11),		LPoint(108, 5) },
 	// NW-SE arrow
-	{ GRect(120, 0, 132, 12),		GdcPt2(126, 6) },
+	{ GRect(120, 0, 132, 12),		LPoint(126, 6) },
 	// NE-SW arrow
-	{ GRect(140, 0, 152, 12),		GdcPt2(146, 6) },
+	{ GRect(140, 0, 152, 12),		LPoint(146, 6) },
 	// 4 way arrow
-	{ GRect(160, 0, 178, 18),		GdcPt2(169, 9) },
+	{ GRect(160, 0, 178, 18),		LPoint(169, 9) },
 	// Blank
-	{ GRect(0, 0, 0, 0),			GdcPt2(0, 0) },
+	{ GRect(0, 0, 0, 0),			LPoint(0, 0) },
 	// Vertical split
-	{ GRect(180, 0, 197, 16),		GdcPt2(188, 8) },
+	{ GRect(180, 0, 197, 16),		LPoint(188, 8) },
 	// Horizontal split
-	{ GRect(200, 0, 216, 17),		GdcPt2(208, 8) },
+	{ GRect(200, 0, 216, 17),		LPoint(208, 8) },
 	// Hand
-	{ GRect(220, 0, 233, 13),		GdcPt2(225, 0) },
+	{ GRect(220, 0, 233, 13),		LPoint(225, 0) },
 	// No drop
-	{ GRect(240, 0, 258, 18),		GdcPt2(249, 9) },
+	{ GRect(240, 0, 258, 18),		LPoint(249, 9) },
 	// Copy drop
-	{ GRect(260, 0, 279, 19),		GdcPt2(260, 0) },
+	{ GRect(260, 0, 279, 19),		LPoint(260, 0) },
 	// Move drop
-	{ GRect(280, 0, 299, 19),		GdcPt2(280, 0) },
+	{ GRect(280, 0, 299, 19),		LPoint(280, 0) },
 };
 
 // CursorData is a bitmap in an array of uint32's. This is generated from a graphics file:
@@ -636,7 +636,7 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 	if (!Frame)
 		r.Offset(_BorderSize, _BorderSize);
 
-	GdcPt2 Offset;
+	LPoint Offset;
 	WindowVirtualOffset(&Offset);
 	r.Offset(Offset.x, Offset.y);
 	if (!r.Valid())
@@ -721,7 +721,7 @@ GMessage::Param GView::OnEvent(GMessage *Msg)
 	return 0;
 }
 
-GdcPt2 GtkGetOrigin(GWindow *w)
+LPoint GtkGetOrigin(GWindow *w)
 {
 	auto Hnd = w->WindowHandle();
 	if (Hnd)
@@ -731,13 +731,13 @@ GdcPt2 GtkGetOrigin(GWindow *w)
 		{
 			GdkRectangle rect;
 			gdk_window_get_frame_extents(Wnd, &rect);
-			return GdcPt2(rect.x, rect.y);
+			return LPoint(rect.x, rect.y);
 			
 			/*
 			gint x = 0, y = 0;
 			gdk_window_get_origin(Wnd, &x, &y);
 			gdk_window_get_root_origin(Wnd, &x, &y);
-			return GdcPt2(x, y);
+			return LPoint(x, y);
 			*/
 		}
 		else
@@ -746,14 +746,14 @@ GdcPt2 GtkGetOrigin(GWindow *w)
 		}
 	}
 	
-	return GdcPt2();
+	return LPoint();
 }
 
-bool GView::PointToScreen(GdcPt2 &p)
+bool GView::PointToScreen(LPoint &p)
 {
 	ThreadCheck();
 
-	GdcPt2 Offset;
+	LPoint Offset;
 	WindowVirtualOffset(&Offset);
 	p += Offset;
 
@@ -775,11 +775,11 @@ bool GView::PointToScreen(GdcPt2 &p)
 	return true;
 }
 
-bool GView::PointToView(GdcPt2 &p)
+bool GView::PointToView(LPoint &p)
 {
 	ThreadCheck();
 
-	GdcPt2 Offset;
+	LPoint Offset;
 	WindowVirtualOffset(&Offset);
 	p -= Offset;
 
@@ -834,7 +834,7 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 			return false;
 		}
 
-		GdcPt2 p;
+		LPoint p;
 		WindowVirtualOffset(&p);
 		m.x = (int)axes[0] - p.x - _BorderSize;
 		m.y = (int)axes[1] - p.y - _BorderSize;

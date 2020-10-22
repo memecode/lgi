@@ -160,7 +160,7 @@ class DocEdit :
 {
 	IdeDoc *Doc;
 	int CurLine;
-	GdcPt2 MsClick;
+	LPoint MsClick;
 
 	void OnApplyStyles();
 	int CountRefreshEdges(size_t At, ssize_t Len);

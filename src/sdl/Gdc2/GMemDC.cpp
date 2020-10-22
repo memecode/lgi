@@ -124,7 +124,7 @@ GRect GMemDC::ClipRgn(GRect *Rgn)
 
 	if (Rgn)
 	{
-		GdcPt2 Origin(0, 0);
+		LPoint Origin(0, 0);
 		/*
 		if (hDC)
 		    GetWindowOrgEx(hDC, &Origin);

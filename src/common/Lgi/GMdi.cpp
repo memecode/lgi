@@ -126,7 +126,7 @@ public:
 GMdiChild::GMdiChild()
 {
 	d = new GMdiChildPrivate(this);
-	GdcPt2 m(100, d->Fy + 8);
+	LPoint m(100, d->Fy + 8);
 	SetMinimumSize(m);
 
 	#if WINNATIVE
@@ -418,7 +418,7 @@ void GMdiChild::OnMouseClick(GMouse &m)
 				else
 				{
 					/*
-					GdcPt2 p(d->System.x1, d->System.y2+1);
+					LPoint p(d->System.x1, d->System.y2+1);
 					PointToScreen(p);
 					GSubMenu *Sub = new GSubMenu;
 					if (Sub)
@@ -546,7 +546,7 @@ void GMdiChild::OnMouseMove(GMouse &m)
 	if (IsCapturing())
 	{
 		GRect p = GetPos();
-		GdcPt2 Min = GetMinimumSize();
+		LPoint Min = GetMinimumSize();
 
 		if (d->Drag == DragClose)
 		{
@@ -560,7 +560,7 @@ void GMdiChild::OnMouseMove(GMouse &m)
 		else
 		{
 			// GetMouse(m, true);
-			GdcPt2 n(m.x, m.y);
+			LPoint n(m.x, m.y);
 			n.x += GetPos().x1;
 			n.y += GetPos().y1;
 			// GetParent()->PointToView(n);

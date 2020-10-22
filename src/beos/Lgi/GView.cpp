@@ -207,36 +207,36 @@ struct CursorInfo
 {
 public:
 	GRect Pos;
-	GdcPt2 HotSpot;
+	LPoint HotSpot;
 }
 CursorMetrics[] =
 {
 	// up arrow
-	{ GRect(0, 0, 8, 15),			GdcPt2(4, 0) },
+	{ GRect(0, 0, 8, 15),			LPoint(4, 0) },
 	// cross hair
-	{ GRect(16, 0, 30, 13),		GdcPt2(23, 7) },
+	{ GRect(16, 0, 30, 13),		LPoint(23, 7) },
 	// hourglass
-	{ GRect(32, 0, 43, 15),		GdcPt2(37, 7) },
+	{ GRect(32, 0, 43, 15),		LPoint(37, 7) },
 	// I beam
-	{ GRect(48, 0, 54, 15),		GdcPt2(51, 7) },
+	{ GRect(48, 0, 54, 15),		LPoint(51, 7) },
 	// N-S arrow
-	{ GRect(64, 0, 75, 15),		GdcPt2(69, 7) },
+	{ GRect(64, 0, 75, 15),		LPoint(69, 7) },
 	// E-W arrow
-	{ GRect(80, 0, 95, 11),		GdcPt2(87, 5) },
+	{ GRect(80, 0, 95, 11),		LPoint(87, 5) },
 	// NW-SE arrow
-	{ GRect(96, 0, 108, 12),		GdcPt2(102, 6) },
+	{ GRect(96, 0, 108, 12),		LPoint(102, 6) },
 	// NE-SW arrow
-	{ GRect(112, 0, 124, 12),		GdcPt2(118, 6) },
+	{ GRect(112, 0, 124, 12),		LPoint(118, 6) },
 	// 4 way arrow
-	{ GRect(128, 0, 142, 14),		GdcPt2(135, 7) },
+	{ GRect(128, 0, 142, 14),		LPoint(135, 7) },
 	// Blank
-	{ GRect(0, 0, 0, 0),			GdcPt2(0, 0) },
+	{ GRect(0, 0, 0, 0),			LPoint(0, 0) },
 	// Vertical split
-	{ GRect(144, 0, 158, 15),		GdcPt2(151, 7) },
+	{ GRect(144, 0, 158, 15),		LPoint(151, 7) },
 	// Horizontal split
-	{ GRect(160, 0, 174, 15),		GdcPt2(167, 7) },
+	{ GRect(160, 0, 174, 15),		LPoint(167, 7) },
 	// Hand
-	{ GRect(176, 0, 189, 13),		GdcPt2(180, 0) },
+	{ GRect(176, 0, 189, 13),		LPoint(180, 0) },
 };
 
 
@@ -444,7 +444,7 @@ GViewI *GView::FindControl(OsView hCtrl)
 	return 0;
 }
 
-void GView::PointToScreen(GdcPt2 &p)
+void GView::PointToScreen(LPoint &p)
 {
 	if (_View)
 	{
@@ -461,7 +461,7 @@ void GView::PointToScreen(GdcPt2 &p)
 	}
 }
 
-void GView::PointToView(GdcPt2 &p)
+void GView::PointToView(LPoint &p)
 {
 	if (_View)
 	{
@@ -785,7 +785,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				GDragDropTarget *Target = dynamic_cast<GDragDropTarget*>(TargetView);
 				if (Target)
 				{
-					GdcPt2 MousePt(m.x, m.y);
+					LPoint MousePt(m.x, m.y);
 					List<char> Formats;
 					if (Target->WillAccept(Formats, MousePt, 0) != DROPEFFECT_NONE)
 					{

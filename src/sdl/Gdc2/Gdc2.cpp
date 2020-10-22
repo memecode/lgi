@@ -544,7 +544,7 @@ public:
 	GdcDevicePrivate(GdcDevice *d)
 	{
 		const SDL_VideoInfo *vi = SDL_GetVideoInfo();
-		GdcPt2 ScreenSz(320, 240);
+		LPoint ScreenSz(320, 240);
 		GString ScrOpt;
 		if (LgiApp->GetOption("screen", ScrOpt))
 		{

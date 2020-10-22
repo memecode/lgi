@@ -376,7 +376,7 @@ struct DropItemFlavor
 
 struct DragParams
 {
-	GdcPt2 Pt;
+	LPoint Pt;
 	GDragFormats Formats;
 	GArray<GDragData> Data;
 	int KeyState;
@@ -635,7 +635,7 @@ void GDragDropTarget::SetWindow(GView *to)
 
 /*
 int GDragDropTarget::OnDrop(GArray<GDragData> &DropData,
-							GdcPt2 Pt,
+							LPoint Pt,
 							int KeyState)
 {
 	if (DropData.Length() == 0 ||

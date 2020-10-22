@@ -27,7 +27,7 @@ struct GGraphPriv
     int BucketSize;
     
     // Selection
-    GAutoPtr<GdcPt2> Select;
+    GAutoPtr<LPoint> Select;
     GArray<GGraph::GGraphPair*> Selection;
 	
 	GGraphPriv()
@@ -584,7 +584,7 @@ void GGraph::OnMouseClick(GMouse &m)
     }
     else if (m.Left() && m.Down())
     {
-        d->Select.Reset(new GdcPt2);
+        d->Select.Reset(new LPoint);
         d->Select->x = m.x;
         d->Select->y = m.y;
         Invalidate();        

@@ -681,7 +681,7 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 			if (Dlg)
 			{
 				#if DEBUG_OVERLAY
-				GdcPt2 Prev(0, 0);
+				LPoint Prev(0, 0);
 				auto &DebugOverlay = Dlg->DebugOverlay;
 				if (!DebugOverlay)
 				{
