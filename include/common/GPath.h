@@ -20,149 +20,8 @@ enum GPathFillRule
 	FILLRULE_NONZERO
 };
 
-class LgiClass GPointF
-{
-public:
-	static double Threshold;
-	double x, y;
-
-	GPointF()
-	{
-		x = y = 0;
-	}
-
-	GPointF(double X, double Y)
-	{
-		x = X;
-		y = Y;
-	}
-
-	GPointF(const GPointF &p)
-	{
-		x = p.x;
-		y = p.y;
-	}
-
-	GPointF(const GdcPt2 &p)
-	{
-		x = p.x;
-		y = p.y;
-	}
-
-	GPointF &operator =(GPointF &p)
-	{
-		x = p.x;
-		y = p.y;
-		return *this;
-	}
-
-	GPointF &operator -(GPointF &p)
-	{
-		static GPointF Result;
-		Result.x = x - p.x;
-		Result.y = y - p.y;
-		return Result;
-	}
-
-	GPointF &operator +(GPointF &p)
-	{
-		static GPointF Result;
-		Result.x = x + p.x;
-		Result.y = y + p.y;
-		return Result;
-	}
-
-	bool operator ==(GPointF &p)
-	{
-		double dx = x - p.x;
-		if (dx < 0) dx = -dx;
-		double dy = y - p.y;
-		if (dy < 0) dy = -dy;
-		return dx<Threshold && dy<Threshold;
-	}
-
-	bool operator !=(GPointF &p)
-	{
-		return !(*this == p);
-	}
-
-	void Set(double X, double Y)
-	{
-		x = X;
-		y = Y;
-	}
-	
-	GPointF &Translate(double tx, double ty)
-	{
-		x += tx;
-		y += ty;
-		return *this;
-	}
-
-	// Angle in radians
-	GPointF &Rotate(double a)
-	{
-		double ix = x;
-		double iy = y;
-		x = (cos(a)*ix) - (sin(a)*iy);
-		y = (sin(a)*ix) + (cos(a)*iy);
-		return *this;
-	}
-};
-
-class LgiClass GRectF
-{
-public:
-	double x1, y1, x2, y2;
-	bool Defined;
-
-	GRectF()
-	{
-		Defined = false;
-	}
-
-	GRectF(GRect &r)
-	{
-		*this = r;
-	}
-
-	GRectF(double X1, double Y1, double X2, double Y2)
-	{
-		x1 = X1; y1 = Y1; x2 = X2; y2 = Y2;
-		Defined = true;
-	}
-
-	void Set(double X1, double Y1, double X2, double Y2)
-	{
-		x1 = X1; y1 = Y1; x2 = X2; y2 = Y2;
-		Defined = true;
-	}
-
-	GRectF(GPointF &a, GPointF &b)
-	{
-		x1 = a.x; y1 = a.y; x2 = b.x; y2 = b.y;
-		Defined = true;
-	}
-
-	double X() { return x2 - x1; }
-	double Y() { return y2 - y1; }
-	bool IsNormal() { return x2 >= x1 && y2 >= y1; }
-	bool Valid() { return Defined && IsNormal(); }
-	
-	void Normalize();
-	void Union(GPointF &p);
-	void Union(GRectF &p);
-	void Intersect(GRectF &p);
-	bool Overlap(GPointF &p);
-	bool Overlap(GRectF &p);
-	void Offset(double x, double y);
-	void Size(double dx, double dy);
-	char *Describe();
-
-	GRectF &operator =(GRect &f);
-	GRectF &operator =(GRectF &f);
-	GRectF &operator =(GPointF &p);
-};
+#include "LPoint.h"
+#include "LRectF.h"
 
 class LgiClass GBrush
 {
@@ -361,7 +220,7 @@ protected:
 	COLOUR Lut[256];
 	double Base, IncX, IncY;
 
-	GPointF p[2];
+	LPointF p[2];
 
 	bool Start(GRopArgs &a);
 
@@ -404,7 +263,7 @@ class LgiClass GLinearBlendBrush : public GBlendBrush
 	void Rop(GRopArgs &Args);
 
 public:
-	GLinearBlendBrush(GPointF a, GPointF b, int stops = 0, GBlendStop *stop = 0) :
+	GLinearBlendBrush(LPointF a, LPointF b, int stops = 0, GBlendStop *stop = 0) :
 		GBlendBrush(stops, stop)
 	{
 		p[0] = a;
@@ -575,7 +434,7 @@ class LgiClass GRadialBlendBrush : public GBlendBrush
 	void Rop(GRopArgs &Args);
 
 public:
-	GRadialBlendBrush(GPointF center, GPointF rim, int stops = 0, GBlendStop *stop = 0) :
+	GRadialBlendBrush(LPointF center, LPointF rim, int stops = 0, GBlendStop *stop = 0) :
 		GBlendBrush(stops, stop)
 	{
 		p[0] = center;
@@ -921,7 +780,7 @@ protected:
 	// Data
 	List<GSeg> Segs;
 	List<GVector> Vecs;
-	GRectF Bounds;
+	LRectF Bounds;
 	bool Aa;
 	GPathFillRule FillRule;
 	Matrix Mat;
@@ -929,7 +788,7 @@ protected:
 	// Flattened representation
 	int Points;
 	GArray<int> Outline;
-	GPointF *Point;
+	LPointF *Point;
 
 	// Methods
 	void Unflatten();
@@ -942,36 +801,36 @@ public:
 	// Primitives
 	void MoveTo(		double x,
 						double y);
-	void MoveTo(		GPointF &pt);
+	void MoveTo(		LPointF &pt);
 	void LineTo(		double x,
 						double y);
-	void LineTo(		GPointF &pt);
+	void LineTo(		LPointF &pt);
 	void QuadBezierTo(	double cx, double cy,
 						double px, double py);
-	void QuadBezierTo(	GPointF &c,
-						GPointF &p);
+	void QuadBezierTo(	LPointF &c,
+						LPointF &p);
 	void CubicBezierTo(	double c1x, double c1y,
 						double c2x, double c2y,
 						double px, double py);
-	void CubicBezierTo(	GPointF &c1,
-						GPointF &c2,
-						GPointF &p);
+	void CubicBezierTo(	LPointF &c1,
+						LPointF &c2,
+						LPointF &p);
 	void Rectangle(		double x1, double y1,
 						double x2, double y2);
-	void Rectangle(		GPointF &tl,
-						GPointF &rb);
-	void Rectangle(		GRectF &r);
-	void RoundRect(		GRectF &b, double r);
+	void Rectangle(		LPointF &tl,
+						LPointF &rb);
+	void Rectangle(		LRectF &r);
+	void RoundRect(		LRectF &b, double r);
 	void Circle(		double cx,
 						double cy,
 						double radius);
-	void Circle(		GPointF &c,
+	void Circle(		LPointF &c,
 						double radius);
 	void Ellipse(		double cx,
 						double cy,
 						double x,
 						double y);
-	void Ellipse(		GPointF &c,
+	void Ellipse(		LPointF &c,
 						double x,
 						double y);
 	bool Text(			GFont *Font,
@@ -982,7 +841,7 @@ public:
 
 	// Properties
 	int Segments();
-	void GetBounds(GRectF *b);
+	void GetBounds(LRectF *b);
 	GPathFillRule GetFillRule() { return FillRule; }
 	void SetFillRule(GPathFillRule r) { FillRule = r; }
 
@@ -1008,7 +867,7 @@ public:
 	#endif
 };
 
-void FlattenQuadratic(GPointF *&Out, GPointF &p1, GPointF &p2, GPointF &p3, int Steps);
-void FlattenCubic(GPointF *&Out, GPointF &p1, GPointF &p2, GPointF &p3, GPointF &p4, int Steps);
+void FlattenQuadratic(LPointF *&Out, LPointF &p1, LPointF &p2, LPointF &p3, int Steps);
+void FlattenCubic(LPointF *&Out, LPointF &p1, LPointF &p2, LPointF &p3, LPointF &p4, int Steps);
 
 #endif

@@ -50,7 +50,7 @@ enum PopupNotifications
 		return false;
 	}
 
-	bool ScreenToClient(OsView Wnd, GdcPt2 &p)
+	bool ScreenToClient(OsView Wnd, LPoint &p)
 	{
 		return false;
 	}
@@ -309,13 +309,13 @@ public:
 				GetClientRect(hOver, &WinRect);
 				ScreenToClient(hOver, &WinPt);
 				GRect rc = WinRect;
-				GdcPt2 p(WinPt.x, WinPt.y);
+				LPoint p(WinPt.x, WinPt.y);
 
 				#elif defined __GTK_H__
 				
 				hOver = WindowFromPoint(m.x, m.y);
 				GRect rc;
-				GdcPt2 p(m.x, m.y);
+				LPoint p(m.x, m.y);
 				if (hOver)
 				{
 					if (!GetWindowRect(hOver, rc))
@@ -335,7 +335,7 @@ public:
 				#else
 				
 				// Not implemented.
-				GdcPt2 p;
+				LPoint p;
 				GRect rc;
 				
 				#endif
@@ -1110,7 +1110,7 @@ void GDropDown::Activate()
 	else // Show
 	{
 		// Locate under myself
-		GdcPt2 p(X()-1, Y());
+		LPoint p(X()-1, Y());
 		PointToScreen(p);
 		GRect r(p.x-Popup->X()+1, p.y, p.x, p.y+Popup->Y()-1);
 		

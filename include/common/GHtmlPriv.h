@@ -26,7 +26,7 @@ struct GTagHit
 	int Near;			// How close in px was the position to NearestText.
 						// 0 if a direct hit, >0 is near miss, -1 if invalid.
 	bool NearSameRow;	// True if 'NearestText' on the same row as click.
-	GdcPt2 LocalCoords;	// The position in local co-ords of the tag
+	LPoint LocalCoords;	// The position in local co-ords of the tag
 
 	GFlowRect *Block;	// Text block hit
 	ssize_t Index; // If Block!=NULL then index into text, otherwise -1.
@@ -122,7 +122,7 @@ struct GHtmlTableLayout
 	typedef GArray<GTag*> CellArray;
 	GArray<CellArray> c;
 	GTag *Table;
-	GdcPt2 s;
+	LPoint s;
 	GCss::Len TableWidth;
 	
 	// Various pixels sizes
@@ -319,8 +319,8 @@ public:
 	GFont *GetFont();
 
 	// Style
-	GdcPt2 Pos;
-	GdcPt2 Size;
+	LPoint Pos;
+	LPoint Size;
 	GFont *Font;
 	int LineHeightCache;
 	GRect PadPx;
@@ -336,8 +336,8 @@ public:
 	// Table stuff
 	struct TblCell
 	{
-		GdcPt2 Pos;
-		GdcPt2 Span;
+		LPoint Pos;
+		LPoint Span;
 		GRect BorderPx;
 		GRect PaddingPx;
 		uint16 MinContent, MaxContent;
@@ -417,7 +417,7 @@ public:
 	/// This fills 'rgn' with all the rectangles making up the inline tags region
 	void GetInlineRegion(GRegion &rgn, int ox = 0, int oy = 0);
 	void OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth);
-	void SetSize(GdcPt2 &s);
+	void SetSize(LPoint &s);
 	void SetTag(const char *Tag);
 	void GetTagByPos(GTagHit &TagHit, int x, int y, int Depth, bool InBody, bool DebugLog = false);
 	GTag *GetTagByName(const char *Name);
@@ -443,7 +443,7 @@ public:
 	// Positioning
 	int RelX() { return Pos.x + (int)MarginLeft().Value; }
 	int RelY() { return Pos.y + (int)MarginTop().Value; }
-	GdcPt2 AbsolutePos();
+	LPoint AbsolutePos();
 	inline int AbsX() { return AbsolutePos().x; }
 	inline int AbsY() { return AbsolutePos().y; }
 	GRect GetRect(bool Client = true);
@@ -451,7 +451,7 @@ public:
 
 	// Tables
 	GTag *GetTableCell(int x, int y);
-	GdcPt2 GetTableSize();
+	LPoint GetTableSize();
 	void ResetCaches();
 };
 

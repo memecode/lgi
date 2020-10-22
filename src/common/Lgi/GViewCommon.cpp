@@ -23,9 +23,9 @@
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Helper
-GdcPt2 lgi_view_offset(GViewI *v, bool Debug = false)
+LPoint lgi_view_offset(GViewI *v, bool Debug = false)
 {
-	GdcPt2 Offset;
+	LPoint Offset;
 	
 	for (GViewI *p = v; p; p = p->GetParent())
 	{
@@ -77,10 +77,10 @@ GMouse &lgi_adjust_click(GMouse &Info, GViewI *Wnd, bool Capturing, bool Debug)
 				GWindow *WndWnd = Wnd->GetWindow();
 				if (TargetWnd == WndWnd)
 				{
-					GdcPt2 TargetOff = lgi_view_offset(Temp.Target, Debug);
+					LPoint TargetOff = lgi_view_offset(Temp.Target, Debug);
 					if (Debug)
 						LgiTrace("	WndOffset:\n");
-					GdcPt2 WndOffset = lgi_view_offset(Wnd, Debug);
+					LPoint WndOffset = lgi_view_offset(Wnd, Debug);
 
 					Temp.x += TargetOff.x - WndOffset.x;
 					Temp.y += TargetOff.y - WndOffset.y;
@@ -98,7 +98,7 @@ GMouse &lgi_adjust_click(GMouse &Info, GViewI *Wnd, bool Capturing, bool Debug)
 			}
 			else
 			{
-				GdcPt2 Offset;
+				LPoint Offset;
 				Temp.Target = Wnd;
 				if (Wnd->WindowVirtualOffset(&Offset))
 				{
@@ -562,7 +562,7 @@ uint64 nPaint = 0;
 uint64 PaintTime = 0;
 */
 
-void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
+void GView::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
 {
 	/*
 	uint64 StartTs = Update ? LgiCurrentTime() : 0;
@@ -607,7 +607,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 		r.x2 -= zr2.x2 - zr1.x2;
 		r.y2 -= zr2.y2 - zr1.y2;
 	}
-	GdcPt2 o(r.x1, r.y1); // Origin of client
+	LPoint o(r.x1, r.y1); // Origin of client
 
 	// Paint this view's contents...
 	pDC->SetClient(&r);
@@ -662,7 +662,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 	}
 }
 #else
-void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
+void GView::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
 {
 	// Create temp DC if needed...
 	GAutoPtr<GSurface> Local;
@@ -685,7 +685,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 
 	bool HasClient = false;
 	GRect r(0, 0, Pos.X()-1, Pos.Y()-1), Client;
-	GdcPt2 o;
+	LPoint o;
 	if (Offset)
 		o = *Offset;
 
@@ -735,7 +735,7 @@ void GView::_Paint(GSurface *pDC, GdcPt2 *Offset, GRect *Update)
 				if (HasClient)
 					p.Offset(Client.x1 - r.x1, Client.y1 - r.y1);
 				
-				GdcPt2 co(p.x1, p.y1);
+				LPoint co(p.x1, p.y1);
 				// LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), p.x1, p.y1);
 				pDC->SetClient(&p);
 				w->_Paint(pDC, &co);
@@ -1054,7 +1054,7 @@ GRect *GView::FindLargestEdge(GRegion &r, int Edge)
 	return Best;
 }
 
-GViewI *GView::FindReal(GdcPt2 *Offset)
+GViewI *GView::FindReal(LPoint *Offset)
 {
 	ThreadCheck();
 
@@ -1119,7 +1119,7 @@ bool GView::HandleCapture(GView *Wnd, bool c)
 			_Capturing = Wnd;
 			
 			#if WINNATIVE
-				GdcPt2 Offset;
+				LPoint Offset;
 				GViewI *v = _Capturing->Handle() ? _Capturing : FindReal(&Offset);
 				HWND h = v ? v->Handle() : NULL;
 				if (h)
@@ -1856,7 +1856,7 @@ bool GView::IsOver(GMouse &m)
 			(m.y < Pos.Y());
 }
 
-bool GView::WindowVirtualOffset(GdcPt2 *Offset)
+bool GView::WindowVirtualOffset(LPoint *Offset)
 {
 	bool Status = false;
 
@@ -2197,12 +2197,12 @@ GViewI *GView::FindControl(int Id)
 	return 0;
 }
 
-GdcPt2 GView::GetMinimumSize()
+LPoint GView::GetMinimumSize()
 {
 	return d->MinimumSize;
 }
 
-void GView::SetMinimumSize(GdcPt2 Size)
+void GView::SetMinimumSize(LPoint Size)
 {
 	d->MinimumSize = Size;
 
@@ -2287,9 +2287,9 @@ GCss *GView::GetCss(bool Create)
     return d->Css;
 }
 
-GdcPt2 &GView::GetWindowBorderSize()
+LPoint &GView::GetWindowBorderSize()
 {
-	static GdcPt2 s;
+	static LPoint s;
 
 	ZeroObj(s);
 

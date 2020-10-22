@@ -617,7 +617,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::DragEnter(IDataObject *pDataObject, D
 	p.x = pt.x;
 	p.y = pt.y;
 	ScreenToClient(To->Handle(), &p);
-	GdcPt2 Pt(p.x, p.y);
+	LPoint Pt(p.x, p.y);
 
 	// Clean out format list
 	Formats.Empty();
@@ -668,7 +668,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::DragOver(DWORD grfKeyState, POINTL pt
 		p.x = pt.x;
 		p.y = pt.y;
 		ScreenToClient(To->Handle(), &p);
-		GdcPt2 Pt(p.x, p.y);
+		LPoint Pt(p.x, p.y);
 		*pdwEffect = WillAccept(Formats, Pt, MapW32FlagsToLgi(grfKeyState));
 	}
 
@@ -683,7 +683,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::DragLeave()
 
 /*
 int GDragDropTarget::OnDrop(GArray<GDragData> &DropData,
-							GdcPt2 Pt,
+							LPoint Pt,
 							int KeyState)
 {
 	if (DropData.Length() == 0 ||
@@ -708,7 +708,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::Drop(IDataObject *pDataObject, DWORD 
 	p.x = pt.x;
 	p.y = pt.y;
 	ScreenToClient(To->Handle(), &p);
-	GdcPt2 Pt(p.x, p.y);
+	LPoint Pt(p.x, p.y);
 
 	GArray<GDragData> Data;	
 	for (auto FormatName: Formats.Formats)

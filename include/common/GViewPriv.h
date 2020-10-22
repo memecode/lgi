@@ -24,7 +24,7 @@ extern GMouse &lgi_adjust_click(GMouse &Info,
 								bool Capturing = false,
 								bool Debug = false);
 #ifdef __GTK_H__
-extern GdcPt2 GtkAbsPos(Gtk::GtkWidget *w);
+extern LPoint GtkAbsPos(Gtk::GtkWidget *w);
 extern GRect GtkGetPos(Gtk::GtkWidget *w);
 #endif
 
@@ -131,7 +131,7 @@ public:
 	GViewI			*Notify;
 
 	// Size
-	GdcPt2			MinimumSize;
+	LPoint			MinimumSize;
 	
 	// Font
 	GFont			*Font;

@@ -899,9 +899,9 @@ struct EDGE {
 
 int nActive, nNextEdge;
 
-void GSurface::Polygon(int nPoints, GdcPt2 *aPoints)
+void GSurface::Polygon(int nPoints, LPoint *aPoints)
 {
-	GdcPt2 p0, p1;
+	LPoint p0, p1;
 	int i, j, gap, x0, x1, y, nEdges;
 	EDGE *ET, **GET, **AET;
 
@@ -1127,7 +1127,7 @@ public:
 
 typedef FPt2 BPt;
 
-void GSurface::Bezier(int Threshold, GdcPt2 *Pt)
+void GSurface::Bezier(int Threshold, LPoint *Pt)
 {
 	if (Pt)
 	{
@@ -1215,16 +1215,16 @@ class PointStack {
 
 	int Used;
 	int Size;
-	GdcPt2 *Stack;
+	LPoint *Stack;
 
 	bool SetSize(int s)
 	{
-		GdcPt2 *Next = new GdcPt2[Size + s];
+		LPoint *Next = new LPoint[Size + s];
 		if (Next)
 		{
 			Size += s;
 			Used = MIN(Size, Used);
-			memcpy(Next, Stack, sizeof(GdcPt2)*Used);
+			memcpy(Next, Stack, sizeof(LPoint)*Used);
 			DeleteArray(Stack);
 			Stack = Next;
 			return true;
@@ -1237,7 +1237,7 @@ public:
 	{
 		Used = 0;
 		Size = 1024;
-		Stack = new GdcPt2[Size];
+		Stack = new LPoint[Size];
 	}
 
 	~PointStack()

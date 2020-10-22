@@ -54,7 +54,7 @@ bool GMouse::ToScreen()
 			return false;
 		}
 		
-		GdcPt2 p(x, y);
+		LPoint p(x, y);
 		Target->PointToScreen(p);
 		x = p.x; y = p.y;
 		ViewCoords = false;
@@ -76,7 +76,7 @@ bool GMouse::ToView()
 			return false;
 		}
 		
-		GdcPt2 p(x, y);
+		LPoint p(x, y);
 		Target->PointToView(p);
 		x = p.x; y = p.y;
 		ViewCoords = true;
@@ -97,6 +97,12 @@ bool GMouse::ToView()
 	typedef WINUSERAPI BOOL (WINAPI *pEnumDisplaySettingsW)(LPCWSTR lpszDeviceName, DWORD iModeNum, LPDEVMODEW lpDevMode);
 
 #endif
+
+LPointF GDisplayInfo::Scale()
+{
+	LPointF p((double)Dpi.x / 96.0, (double)Dpi.y / 96.0);
+	return p;
+}
 
 bool LgiGetDisplays(::GArray<GDisplayInfo*> &Displays, GRect *AllDisplays)
 {
@@ -144,14 +150,13 @@ bool LgiGetDisplays(::GArray<GDisplayInfo*> &Displays, GRect *AllDisplays)
 
 					Dsp->BitDepth = mode.dmBitsPerPel;
 					Dsp->Refresh = mode.dmDisplayFrequency;
-					Dsp->Name = WideToUtf8(disp.DeviceString);
-					Dsp->Device = WideToUtf8(disp.DeviceName);
+					Dsp->Name = disp.DeviceString;
+					Dsp->Device = disp.DeviceName;
+					Dsp->Dpi.x = Dsp->Dpi.y = mode.dmLogPixels;
 
 					DISPLAY_DEVICEW temp = disp;
 					if (EnumDisplayDevicesW(temp.DeviceName, 0, &disp, 0))
-					{
-						Dsp->Monitor = WideToUtf8(disp.DeviceString);
-					}
+						Dsp->Monitor = disp.DeviceString;
 
 					Displays.Add(Dsp);
 				}
@@ -179,8 +184,8 @@ bool LgiGetDisplays(::GArray<GDisplayInfo*> &Displays, GRect *AllDisplays)
 				Gtk::GdkRectangle geometry;
 				gdk_monitor_get_geometry (m, &geometry);
 				di->r = geometry;
-				di->Device = NewStr(Gtk::gdk_monitor_get_manufacturer(m));
-				di->Name = NewStr(Gtk::gdk_monitor_get_model(m));
+				di->Device = Gtk::gdk_monitor_get_manufacturer(m);
+				di->Name = Gtk::gdk_monitor_get_model(m);
 				di->Refresh = Gtk::gdk_monitor_get_refresh_rate(m);
 
 				Displays.Add(di);

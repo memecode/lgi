@@ -879,7 +879,7 @@ void GScreenDC::StretchBlt(GRect *dst, GSurface *Src, GRect *s)
 	}
 }
 
-void GScreenDC::Polygon(int Points, GdcPt2 *Data)
+void GScreenDC::Polygon(int Points, LPoint *Data)
 {
 	if (Points > 0 && Data)
 	{
@@ -900,7 +900,7 @@ void GScreenDC::Polygon(int Points, GdcPt2 *Data)
 	}
 }
 
-void GScreenDC::Bezier(int Threshold, GdcPt2 *Pt)
+void GScreenDC::Bezier(int Threshold, LPoint *Pt)
 {
 }
 

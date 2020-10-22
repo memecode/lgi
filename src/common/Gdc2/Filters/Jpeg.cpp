@@ -887,7 +887,7 @@ GFilter::IoStatus GdcJpeg::WriteImage(GStream *Out, GSurface *pDC)
 
 	// Setup quality setting
 	GVariant Quality(80), SubSample(Sample_1x1_1x1_1x1), DpiX, DpiY;
-	GdcPt2 Dpi;
+	LPoint Dpi;
 	if (Props)
 	{
 		Props->GetValue(LGI_FILTER_QUALITY, Quality);
@@ -921,7 +921,7 @@ void Rop24(GRgb24 *dst, I *p, int x)
 	}
 }
 
-GFilter::IoStatus GdcJpeg::_Write(GStream *Out, GSurface *pDC, int Quality, SubSampleMode SubSample, GdcPt2 Dpi)
+GFilter::IoStatus GdcJpeg::_Write(GStream *Out, GSurface *pDC, int Quality, SubSampleMode SubSample, LPoint Dpi)
 {
 	struct jpeg_compress_struct cinfo;
 	struct my_error_mgr jerr;

@@ -147,7 +147,7 @@ protected:
 		bool _Attach(GViewI *parent);
 		#if LGI_COCOA
 		public:
-			GdcPt2 Flip(GdcPt2 p);
+			LPoint Flip(LPoint p);
 			GRect Flip(GRect p);
 			virtual void OnDealloc();
 	
@@ -191,7 +191,7 @@ protected:
 	);
 
 	virtual void _Delete();
-	GViewI *FindReal(GdcPt2 *Offset = 0);
+	GViewI *FindReal(LPoint *Offset = 0);
 	bool HandleCapture(GView *Wnd, bool c);
 
 	
@@ -206,7 +206,7 @@ protected:
 #if defined(LGI_SDL) || defined(LGI_COCOA)
 public:
 #endif
-	virtual void	_Paint(GSurface *pDC = NULL, GdcPt2 *Offset = NULL, GRect *Update = NULL);
+	virtual void	_Paint(GSurface *pDC = NULL, LPoint *Offset = NULL, GRect *Update = NULL);
 
 public:
 	/// \brief Creates a view/window.
@@ -458,11 +458,11 @@ public:
 	/// Gets the height of the view in pixels.
 	int Y() override { return Pos.Y(); }
 	/// Gets the minimum size of the view
-	GdcPt2 GetMinimumSize() override;
+	LPoint GetMinimumSize() override;
 	/// \brief Set the minimum size of the view.
 	///
 	/// Only works for top level windows.
-	void SetMinimumSize(GdcPt2 Size) override;
+	void SetMinimumSize(LPoint Size) override;
 
     /// Gets the style of the control
     class GCss *GetCss(bool Create = false) override;
@@ -585,13 +585,13 @@ public:
 		int Ms = -1
 	) override;
 	/// Convert a point form view coordinates to screen coordinates
-	bool PointToScreen(GdcPt2 &p) override;
+	bool PointToScreen(LPoint &p) override;
 	/// Convert a point form screen coordinates to view coordinates
-	bool PointToView(GdcPt2 &p) override;
+	bool PointToView(LPoint &p) override;
 	/// Get the x,y offset from the virtual window to the first real view in the parent chain
-	bool WindowVirtualOffset(GdcPt2 *Offset) override;
+	bool WindowVirtualOffset(LPoint *Offset) override;
 	/// Get the size of the window borders
-	GdcPt2 &GetWindowBorderSize() override;
+	LPoint &GetWindowBorderSize() override;
 	/// Layout all the child views
 	virtual bool Pour
 	(

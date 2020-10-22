@@ -1115,7 +1115,7 @@ GItemEdit::GItemEdit(GView *parent, GItem *item, int index, int SelStart, int Se
 		SelStart, SelEnd);
 	#endif
 	
-	GdcPt2 p;
+	LPoint p;
 	SetParent(parent);
 	GetParent()->PointToScreen(p);
 

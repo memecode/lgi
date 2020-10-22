@@ -48,7 +48,7 @@
 
 #endif
 
-#include "GPoint.h"
+#include "LPoint.h"
 
 /// Rectangle class
 class LgiClass GRect
@@ -110,7 +110,7 @@ public:
 	
 	/// Moves the rectangle by an offset
 	void Offset(int x, int y);
-	void Offset(GdcPt2 *p);
+	void Offset(LPoint *p);
 	
 	/// Moves the edges by an offset
 	void Offset(GRect *a);
@@ -330,27 +330,27 @@ public:
 	}
 	#endif
 
-	GRect operator +(const GdcPt2 &p)
+	GRect operator +(const LPoint &p)
 	{
 		GRect r = *this;
 		r.Offset(p.x, p.y);
 		return r;
 	}
 	
-	GRect &operator +=(const GdcPt2 &p)
+	GRect &operator +=(const LPoint &p)
 	{
 		Offset(p.x, p.y);
 		return *this;
 	}
 	
-	GRect operator -(const GdcPt2 &p)
+	GRect operator -(const LPoint &p)
 	{
 		GRect r = *this;
 		r.Offset(-p.x, -p.y);
 		return r;
 	}
 	
-	GRect &operator -=(const GdcPt2 &p)
+	GRect &operator -=(const LPoint &p)
 	{
 		Offset(-p.x, -p.y);
 		return *this;

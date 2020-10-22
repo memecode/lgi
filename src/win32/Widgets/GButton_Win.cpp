@@ -11,8 +11,8 @@
 #include "LgiRes.h"
 
 // Size of extra pixels, beyond the size of the text itself.
-GdcPt2 GButton::Overhead =
-    GdcPt2(	16,	// Extra width needed
+LPoint GButton::Overhead =
+    LPoint(	16,	// Extra width needed
 			8);	// Extra height needed
 
 static int IsWin7 = -1;

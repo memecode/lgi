@@ -103,7 +103,7 @@ public:
 	}
 
 	// Dnd
-	int WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
+	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 	{
 		GFilterItem *i = dynamic_cast<GFilterItem*>(ItemAtPoint(Pt.x, Pt.y));
 		if (!i || i->GetNode() == LNODE_NEW)
@@ -114,7 +114,7 @@ public:
 		return DROPEFFECT_MOVE;
 	}
 	
-	int OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
+	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 	{
 		SelectDropTarget(NULL);
 		
@@ -237,7 +237,7 @@ public:
 
 		// Draw the icon backrgound
 		double n = pDC->X() - 2;
-		GPointF Ctr(n/2, n), Rim(n/2, 0);
+		LPointF Ctr(n/2, n), Rim(n/2, 0);
 
 		if (1)
 		{
@@ -313,10 +313,10 @@ public:
 			case IconDelete:
 			{
 				GPath p;
-				GPointF Ctr(n/2, n/2);
+				LPointF Ctr(n/2, n/2);
 				for (int i=0; i<CountOf(Plus); i++)
 				{
-					GPointF pt(k[Plus[i][0]], k[Plus[i][1]]);
+					LPointF pt(k[Plus[i][0]], k[Plus[i][1]]);
 					pt = pt - Ctr;
 					pt.Rotate(LGI_DegToRad(45));
 					pt = pt + Ctr;					
@@ -358,7 +358,7 @@ public:
 				GPath p;
 				for (int i=0; i<CountOf(Pt); i++)
 				{
-					GPointF m(Pt[i][0]+0.5, Pt[i][1]+0.5);
+					LPointF m(Pt[i][0]+0.5, Pt[i][1]+0.5);
 					if (Icon == IconMoveDown)
 						m.y = k[3] - (m.y - k[0]);
 					if (i) p.LineTo(m.x, m.y);
@@ -373,7 +373,7 @@ public:
 				GPath p;
 				for (int i=0; i<3; i++)
 				{
-					GPointF c(n * (1+i) / 4, n / 2);
+					LPointF c(n * (1+i) / 4, n / 2);
 					p.Circle(c, n/10);
 				}
 				
@@ -580,7 +580,7 @@ void GFilterItem::SetValue(char *s)
 #define StartCtrl(Rc, Ed, Name, Obj) \
 	if (!d->Ed) \
 	{ \
-		GdcPt2 sc = d->Data->Tree->_ScrollPos(); \
+		LPoint sc = d->Data->Tree->_ScrollPos(); \
 		d->Ed = new Obj(n++, c.x1 + Pos->x1 + Rc.x1 - sc.x, c.y1 + Pos->y1 + Rc.y1 - sc.y, \
 								Rc.X(), Rc.Y(), \
 								Name); \
@@ -592,7 +592,7 @@ void GFilterItem::SetValue(char *s)
 	else \
 	{ \
 		GRect r = Rc; \
-		GdcPt2 sc = d->Data->Tree->_ScrollPos(); \
+		LPoint sc = d->Data->Tree->_ScrollPos(); \
 		r.Offset(c.x1 + Pos->x1 - sc.x, c.y1 + Pos->y1 - sc.y); \
 		d->Ed->SetPos(r); \
 	}
@@ -605,7 +605,7 @@ void GFilterItem::SetValue(char *s)
 		DeleteObj(d->Ed); \
 	}
 
-void GFilterItem::_PourText(GdcPt2 &Size)
+void GFilterItem::_PourText(LPoint &Size)
 {
 	Size.y = SysFont->GetHeight() +
 	#ifdef MAC
@@ -662,7 +662,7 @@ void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	{
 		GPath p;
 		GSolidBrush b(LColour(L_FOCUS_SEL_BACK));
-		GRectF PosF(0, 0, Pos->X()-1, Pos->Y());
+		LRectF PosF(0, 0, Pos->X()-1, Pos->Y());
 		p.RoundRect(PosF, PosF.Y()/2);
 		p.Fill(&Buf, b);
 	}
@@ -671,7 +671,7 @@ void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	{
 		GPath p;
 		GSolidBrush b(BackCol);
-		GRectF PosF(0, 0, Pos->X()-(ox*2)-1, Pos->Y()-(oy*2));
+		LRectF PosF(0, 0, Pos->X()-(ox*2)-1, Pos->Y()-(oy*2));
 		PosF.Offset(ox, oy);
 		p.RoundRect(PosF, r);
 		p.Fill(&Buf, b);
@@ -681,7 +681,7 @@ void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	{
 		GPath p;
 		GSolidBrush b(Workspace);
-		GRectF PosF(0, 0, Pos->X()-(ox*2)-3, Pos->Y()-(oy*2)-2);
+		LRectF PosF(0, 0, Pos->X()-(ox*2)-3, Pos->Y()-(oy*2)-2);
 		PosF.Offset(ox+1, oy+1);
 		p.RoundRect(PosF, r);
 		p.Fill(&Buf, b);
@@ -1104,7 +1104,7 @@ void GFilterItem::OptionsMenu()
 
 	GRect r = d->Btns[d->Node == LNODE_NEW ? IconNewCond : IconOptions];
 	r.Offset(Pos->x1 + Client.x1, Pos->y1 + Client.y1);
-	GdcPt2 p(r.x1, r.y2+1);
+	LPoint p(r.x1, r.y2+1);
 	GetTree()->PointToScreen(p);
 
 	int Cmd = s.Float(GetTree(), p.x, p.y, true);

@@ -139,7 +139,7 @@ public:
 	GHtmlStaticInst Inst;
 	bool CursorVis;
 	GRect CursorPos;
-	GdcPt2 Content;
+	LPoint Content;
 	bool WordSelectMode;
 	bool LinkDoubleClick;
 	GAutoString OnLoadAnchor;
@@ -437,7 +437,7 @@ public:
 	int y2;						// Maximum used y position
 	int cx;						// Current insertion point
 	int my;						// How much of the area above y2 was just margin
-	GdcPt2 MAX;					// Max dimensions
+	LPoint MAX;					// Max dimensions
 	int Inline;
 
 	int InBody;
@@ -3811,9 +3811,9 @@ void GTag::ResetCaches()
 		ToTag(Children[i])->ResetCaches();
 }
 
-GdcPt2 GTag::GetTableSize()
+LPoint GTag::GetTableSize()
 {
-	GdcPt2 s(0, 0);
+	LPoint s(0, 0);
 	
 	if (Cell && Cell->Cells)
 	{
@@ -3980,7 +3980,7 @@ bool GTag::GetWidthMetrics(GTag *Table, uint16 &Min, uint16 &Max)
 			}
 			else
 			{
-				GdcPt2 s;
+				LPoint s;
 				GHtmlTableLayout c(this);
 				c.GetSize(s.x, s.y);
 
@@ -4804,9 +4804,9 @@ GRect GTag::ChildBounds()
 	return b;
 }
 
-GdcPt2 GTag::AbsolutePos()
+LPoint GTag::AbsolutePos()
 {
-	GdcPt2 p;
+	LPoint p;
 	for (GTag *t=this; t; t=ToTag(t->Parent))
 	{
 		p += t->Pos;
@@ -4814,7 +4814,7 @@ GdcPt2 GTag::AbsolutePos()
 	return p;
 }
 
-void GTag::SetSize(GdcPt2 &s)
+void GTag::SetSize(LPoint &s)
 {
 	Size = s;
 }
@@ -6023,14 +6023,14 @@ public:
 				#endif
 				Rectangle();
 
-				GPointF ctr(Px, Px);
-				GPointF LeftPt(0.0, Px);
-				GPointF TopPt(Px, 0.0);
-				GPointF RightPt(X(), Px);
-				GPointF BottomPt(Px, Y());
+				LPointF ctr(Px, Px);
+				LPointF LeftPt(0.0, Px);
+				LPointF TopPt(Px, 0.0);
+				LPointF RightPt(X(), Px);
+				LPointF BottomPt(Px, Y());
 				int x_px[4] = {BorderPx->x1, BorderPx->x2, BorderPx->x2, BorderPx->x1};
 				int y_px[4] = {BorderPx->y1, BorderPx->y1, BorderPx->y2, BorderPx->y2};
-				GPointF *pts[4] = {&LeftPt, &TopPt, &RightPt, &BottomPt};
+				LPointF *pts[4] = {&LeftPt, &TopPt, &RightPt, &BottomPt};
 				
 				// Draw border parts..
 				for (int i=0; i<4; i++)
@@ -6352,7 +6352,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 	{
 		Gtk::cairo_matrix_t mx;
 		Gtk::cairo_get_matrix(pDC->Handle(), &mx);
-		GdcPt2 Offset;
+		LPoint Offset;
 		Html->WindowVirtualOffset(&Offset);
 		GRect cli;
 		pDC->GetClient(&cli);
@@ -7311,7 +7311,7 @@ void GHtml::OnPosChange()
 	}
 }
 
-GdcPt2 GHtml::Layout(bool ForceLayout)
+LPoint GHtml::Layout(bool ForceLayout)
 {
 	GRect Client = GetClient();
 	if (Tag && (ViewWidth != Client.X() || ForceLayout))
@@ -7386,7 +7386,7 @@ void GHtml::OnPaint(GSurface *ScreenDC)
 	#if 0
 	Gtk::cairo_matrix_t mx;
 	Gtk::cairo_get_matrix(pDC->Handle(), &mx);
-	GdcPt2 Offset;
+	LPoint Offset;
 	WindowVirtualOffset(&Offset);
 	printf("\tHtml paint mx=%g,%g off=%i,%i\n",
 		mx.x0, mx.y0,
@@ -8366,7 +8366,7 @@ void GHtml::OnLoad()
 	SendNotify(GNotifyDocLoaded);
 }
 
-GTag *GHtml::GetTagByPos(int x, int y, ssize_t *Index, GdcPt2 *LocalCoords, bool DebugLog)
+GTag *GHtml::GetTagByPos(int x, int y, ssize_t *Index, LPoint *LocalCoords, bool DebugLog)
 {
 	GTag *Status = NULL;
 
@@ -8407,7 +8407,7 @@ LgiCursor GHtml::GetCursor(int x, int y)
 {
 	int Offset = ScrollY();
 	ssize_t Index = -1;
-	GdcPt2 LocalCoords;
+	LPoint LocalCoords;
 	GTag *Tag = GetTagByPos(x, y + Offset, &Index, &LocalCoords);
 	if (Tag)
 	{

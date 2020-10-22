@@ -343,7 +343,7 @@ protected:
 		void PaintIcon(Gtk::cairo_t *cr);
 	protected:
 	#else
-		virtual void _Measure(GdcPt2 &Size);
+		virtual void _Measure(LPoint &Size);
 		virtual void _Paint(GSurface *pDC, int Flags);
 		virtual void _PaintText(GSurface *pDC, int x, int y, int Width);
 	#endif

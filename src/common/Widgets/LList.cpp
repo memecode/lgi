@@ -58,7 +58,7 @@ public:
 	bool NoSelectEvent;
 
 	// Drag'n'drop
-	GdcPt2 DragStart;
+	LPoint DragStart;
 	int DragData;
 	
 	// Kayboard search
@@ -348,7 +348,7 @@ void LListItem::Update()
 		{
 			d->EmptyDisplay();
 
-			GdcPt2 Info;
+			LPoint Info;
 			OnMeasure(&Info);
 
 			GRect r = Pos;
@@ -375,7 +375,7 @@ void LListItem::Update()
 	}
 }
 
-void LListItem::OnMeasure(GdcPt2 *Info)
+void LListItem::OnMeasure(LPoint *Info)
 {
 	if (Info)
 	{
@@ -1579,7 +1579,7 @@ void LList::OnMouseClick(GMouse &m)
 					if (DragCol)
 					{
 						GRect DragPos = DragCol->GetPos();
-						GdcPt2 p(DragPos.x1 + (DragPos.X()/2), 0);
+						LPoint p(DragPos.x1 + (DragPos.X()/2), 0);
 						PointToView(p);
 
 						int OldIndex = DragCol->GetIndex();
@@ -1668,7 +1668,7 @@ void LList::OnPulse()
 						{
 							LListItem *i = *It;
 							
-							GdcPt2 Info;
+							LPoint Info;
 							i->OnMeasure(&Info);
 							if (Space > Info.y)
 							{
@@ -1697,7 +1697,7 @@ void LList::OnPulse()
 						{
 							LListItem *i = *It;
 							
-							GdcPt2 Info;
+							LPoint Info;
 							i->OnMeasure(&Info);
 							if (Space > Info.y)
 							{
@@ -1759,7 +1759,7 @@ void LList::OnMouseMove(GMouse &m)
 		{
 			if (DragCol)
 			{
-				GdcPt2 p;
+				LPoint p;
 				PointToScreen(p);
 
 				GRect r = DragCol->GetPos();
@@ -2359,7 +2359,7 @@ void LList::PourAll()
 			}
 			else
 			{
-				GdcPt2 Info;
+				LPoint Info;
 				
 				i->OnMeasure(&Info);
 				if (i->Pos.Valid() && Info.y != i->Pos.Y())
@@ -2417,7 +2417,7 @@ void LList::PourAll()
 
 		ForAllItems(i)
 		{
-			GdcPt2 Info;
+			LPoint Info;
 			i->OnMeasure(&Info);
 
 			if (d->Columns <= ScrollX ||

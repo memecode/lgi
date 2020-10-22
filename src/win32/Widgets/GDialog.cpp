@@ -627,9 +627,9 @@ GMessage::Result GControl::OnEvent(GMessage *Msg)
 	return Status;
 }
 
-GdcPt2 GControl::SizeOfStr(const char *Str)
+LPoint GControl::SizeOfStr(const char *Str)
 {
-	GdcPt2 Pt(0, 0);
+	LPoint Pt(0, 0);
 	if (Str)
 	{
 		for (const char *s=Str; s && *s; )

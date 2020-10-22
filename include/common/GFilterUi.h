@@ -38,7 +38,7 @@ class GFilterItem : public GTreeItem, public GDragDropSource
 	class GFilterItemPrivate *d;
 
 protected:
-	void _PourText(GdcPt2 &Size);
+	void _PourText(LPoint &Size);
 	void _PaintText(GItem::ItemPaintCtx &Ctx);
 	void ShowControls(bool s);
 

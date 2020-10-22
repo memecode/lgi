@@ -105,8 +105,8 @@ class GelSkin : public GSkinEngine
 			GPath e;
 			e.Rectangle(r.x1, r.y1, r.x2+1, r.y2+1);
 			
-			GPointF c1(r.x1, r.y1);
-			GPointF d1(r.x1, r.y2+1);
+			LPointF c1(r.x1, r.y1);
+			LPointF d1(r.x1, r.y2+1);
 			if (Down)
 			{
 				GBlendStop s1[] =
@@ -169,7 +169,7 @@ class GelSkin : public GSkinEngine
 		{
 			// Edge
 			GPath e;
-			GRectF r(Client);
+			LRectF r(Client);
 			// r.y2++;
 			e.RoundRect(r, 6);
 		
@@ -181,7 +181,7 @@ class GelSkin : public GSkinEngine
 		{
 			// Border
 			GPath e;
-			GRectF r(Client);
+			LRectF r(Client);
 			// r.y2++;
 			int Resize = Default ? 2 : 1;
 			r.Size(Resize, Resize);
@@ -207,8 +207,8 @@ class GelSkin : public GSkinEngine
 				Bot = Tint(Bot, Amt);
 			}
 		
-			GPointF c1(r.x1, r.y1);
-			GPointF d1(r.x1, r.y2);
+			LPointF c1(r.x1, r.y1);
+			LPointF d1(r.x1, r.y2);
 			if (Down)
 			{
 				GBlendStop s1[] =
@@ -247,8 +247,8 @@ class GelSkin : public GSkinEngine
 			};					
 			
 			// Rounded corners
-			GPointF c3(r.x1 + (r.X()/2), r.y1 + (r.Y()/2));
-			GPointF d3(r.x1, r.y1);
+			LPointF c3(r.x1 + (r.X()/2), r.y1 + (r.Y()/2));
+			LPointF d3(r.x1, r.y1);
 			GRadialBlendBrush b3(c3, d3, CountOf(s3), s3);
 			e.Fill(pDC, b3);
 		}
@@ -256,10 +256,10 @@ class GelSkin : public GSkinEngine
 		#endif
 	}
 
-	GMemDC *DrawCtrl(GViewI *Ctrl, int Flags, bool Round)
+	GMemDC *DrawCtrl(GViewI *Ctrl, GRect *Sz, int Flags, bool Round)
 	{
 		GMemDC *Mem = new GMemDC;
-		if (Mem && Mem->Create(14, 14, OsDefaultCs))
+		if (Mem && Mem->Create(Sz ? Sz->X() : 14, Sz ? Sz->Y() : 14, OsDefaultCs))
 		{
 			// blank out background
 
@@ -277,9 +277,9 @@ class GelSkin : public GSkinEngine
 			#endif
 			Mem->Rectangle();
 			
-			GRectF Box(0, 0, Mem->X(), Mem->Y());
+			LRectF Box(0, 0, Mem->X(), Mem->Y());
 			double Radius = Box.X()/2;
-			GPointF Center(Box.X()/2, Box.Y()/2);
+			LPointF Center(Box.X()/2, Box.Y()/2);
 
 			// int Grey = R24(LC_MED);
 			bool Enabled = (Flags & Btn_Enabled) != 0;
@@ -287,7 +287,7 @@ class GelSkin : public GSkinEngine
 			if (Enabled)
 			{
 				// draw sunken border
-				GRectF r = Box;
+				LRectF r = Box;
 				GPath p;
 				if (Round)
 					p.Circle(Center, Radius);
@@ -295,7 +295,7 @@ class GelSkin : public GSkinEngine
 					p.RoundRect(r, CHECK_RADIUS + CHECK_BORDER);
 				
 				// gradient from 169,169,169 at the top through to 225,225,225
-				GPointF a(0, 0), b(0, 15);
+				LPointF a(0, 0), b(0, 15);
 				GBlendStop s[] =
 				{
 					{0, c172.c32()},
@@ -308,7 +308,7 @@ class GelSkin : public GSkinEngine
 			if (Enabled)
 			{
 				// draw button center
-				GRectF r = Box;
+				LRectF r = Box;
 				r.Size(CHECK_BORDER+1, CHECK_BORDER+1);
 				GPath p;
 				if (Round)
@@ -318,7 +318,7 @@ class GelSkin : public GSkinEngine
 
 				if (Enabled)
 				{
-					GPointF a(0, r.y1), b(0, r.y2);
+					LPointF a(0, r.y1), b(0, r.y2);
 					GBlendStop s[] =
 					{
 						{1.0/15.0, c255.c32()},
@@ -336,11 +336,11 @@ class GelSkin : public GSkinEngine
 			}
 			else
 			{
-				// draw button hightlight, a white outline shifted down 1 pixel
-				GRectF r = Box;
+				// draw button highlight, a white outline shifted down 1 pixel
+				LRectF r = Box;
 				r.Size(CHECK_BORDER, CHECK_BORDER);
 				r.Offset(0, 1);
-				GPointF Cntr = Center;
+				LPointF Cntr = Center;
 				Cntr.y = Cntr.y + 1;
 				
 				GPath p;
@@ -360,7 +360,7 @@ class GelSkin : public GSkinEngine
 
 			{
 				// draw button outline
-				GRectF r = Box;
+				LRectF r = Box;
 				r.Size(CHECK_BORDER, CHECK_BORDER);
 				GPath p;
 				if (Round)
@@ -381,8 +381,9 @@ class GelSkin : public GSkinEngine
 			if (Flags & Btn_Value)
 			{
 				// draw the check mark
-				GRectF r = Box;
-				r.Size(CHECK_BORDER+2, CHECK_BORDER+2);
+				LRectF r = Box;
+				int Px = (int) (Box.X()/6);
+				r.Size(CHECK_BORDER+Px, CHECK_BORDER+Px);
 
 				double Cx = r.x1 + (r.X() / 2);
 				double Cy = r.y1 + (r.Y() / 2);
@@ -440,6 +441,7 @@ class GelSkin : public GSkinEngine
 		GSurface *pDC = State->pScreen;
 		if (Text && Text->Length() > 0 && rcFill.X() > 3)
 		{
+			GRect Bounds;
 			for (unsigned i=0; i<Text->Length(); i++)
 			{
 				LLayoutString *t = dynamic_cast<LLayoutString*>((*Text)[i]);
@@ -456,21 +458,13 @@ class GelSkin : public GSkinEngine
 					f->Colour(Fore, Back);
 					if (Ctrl->Focus())
 					{
-						pDC->Colour(LColour(L_MIDGREY));
-						pDC->Box(&c);
-						c.Size(1, 1);
-						pDC->Colour(Back);
-						pDC->Rectangle(&c);
-						c.Size(-1, -1);
-						
-						f->Transparent(true);
-						t->Draw(pDC, c.x1, c.y1, &c);
+						if (i)
+							Bounds.Union(&c);
+						else
+							Bounds = c;
 					}
-					else
-					{
-						f->Transparent(!Back.IsValid());
-						t->Draw(pDC, c.x1, c.y1, &c);
-					}
+					f->Transparent(!Back.IsValid());
+					t->Draw(pDC, c.x1, c.y1, &c);
 				}
 				else
 				{
@@ -482,6 +476,12 @@ class GelSkin : public GSkinEngine
 					f->Colour(Low, Back);
 					t->Draw(pDC, c.x1, c.y1, &c);
 				}
+			}
+
+			if (Ctrl->Focus() && Enabled)
+			{
+				pDC->Colour(LColour(L_MIDGREY));
+				pDC->Box(&Bounds);
 			}
 		}
 		
@@ -848,7 +848,7 @@ public:
 
 	void OnPaint_GCheckBox(GCheckBox *Ctrl, GSkinState *State)
 	{
-		int Flags = (Ctrl->Value() ? Btn_Value : 0) |
+		int Flags = (Ctrl->Value()   ? Btn_Value   : 0) |
 					(Ctrl->Enabled() ? Btn_Enabled : 0);
 		
 		// Create the bitmaps in cache if not already there
@@ -857,10 +857,11 @@ public:
 
 		GMemDC *Temp = 0;
 		GMemDC *&Mem = Back.IsValid() ? Temp : CheckBox[Flags];
+		
+		if (Mem && (Mem->X() != State->Rect.X() || Mem->Y() != State->Rect.Y()))
+			DeleteObj(Mem);
 		if (!Mem)
-		{
-			Mem = DrawCtrl(Ctrl, Flags, false);
-		}
+			Mem = DrawCtrl(Ctrl, &State->Rect, Flags, false);
 
 		// Output to screen
 		if (Mem)
@@ -868,10 +869,7 @@ public:
 			// Draw icon
 			int FontY = Ctrl->GetFont()->GetHeight();
 
-			GRect Box(0, 0, Mem->X()-1, Mem->Y()-1);
-			if (FontY > Mem->Y())
-				Box.Offset(0, FontY - Mem->Y());
-
+			GRect &Box = State->Rect;
 			State->pScreen->Blt(Box.x1, Box.y1, Mem);
 
 			GRect Box1(Box.x1, 0, Box.x2, Box.y1 - 1);
@@ -923,7 +921,7 @@ public:
 		GMemDC *&Mem = RadioBtn[Flags];
 		if (!Mem)
 		{
-			Mem = DrawCtrl(Ctrl, Flags, true);
+			Mem = DrawCtrl(Ctrl, &State->Rect, Flags, true);
 		}
 
 		// Output to screen

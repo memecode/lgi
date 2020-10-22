@@ -592,7 +592,7 @@ void GDataGrid::SetDndFormats(char *SrcFmt, char *AcceptFmt)
 	d->AcceptFmt = AcceptFmt;
 }
 
-int GDataGrid::WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
+int GDataGrid::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 {
 	Formats.Supports(d->AcceptFmt);
 	return Formats.GetSupported().Length() ? DROPEFFECT_COPY : DROPEFFECT_NONE;
@@ -608,7 +608,7 @@ GDataGrid::IndexArray *GDataGrid::GetDeletedItems()
 	return &d->Deleted;
 }
 
-int GDataGrid::OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
+int GDataGrid::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 {
 	if (!d->AcceptFmt)
 		return DROPEFFECT_NONE;

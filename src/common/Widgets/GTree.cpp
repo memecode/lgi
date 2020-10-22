@@ -26,9 +26,9 @@ public:
 	// Private data
 	int				LineFlags[4];
 	bool			LayoutDirty;
-	GdcPt2			Limit;
-	GdcPt2			LastClick;
-	GdcPt2			DragStart;
+	LPoint			Limit;
+	LPoint			LastClick;
+	LPoint			DragStart;
 	int				DragData;
 	GMemDC			*IconCache;
 	bool			InPour;
@@ -437,9 +437,9 @@ GRect *GTreeItem::Pos()
 	return &d->Pos;
 }
 
-GdcPt2 GTreeItem::_ScrollPos()
+LPoint GTreeItem::_ScrollPos()
 {
-	GdcPt2 p;
+	LPoint p;
 	if (Tree) p = Tree->_ScrollPos();
 	return p;
 }
@@ -599,7 +599,7 @@ void GTreeItem::_Remove()
 	_SetTreePtr(0);
 }
 
-void GTreeItem::_PourText(GdcPt2 &Size)
+void GTreeItem::_PourText(LPoint &Size)
 {
 	GFont *f = Tree ? Tree->GetFont() : SysFont;
 	auto *Txt = GetText();
@@ -651,14 +651,14 @@ void GTreeItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	}
 }
 
-void GTreeItem::_Pour(GdcPt2 *Limit, int ColumnPx, int Depth, bool Visible)
+void GTreeItem::_Pour(LPoint *Limit, int ColumnPx, int Depth, bool Visible)
 {
 	d->Visible = Visible;
 	d->Depth = Depth;
 
 	if (d->Visible)
 	{
-		GdcPt2 TextSize;
+		LPoint TextSize;
 		_PourText(TextSize);
 		GImageList *ImgLst = Tree->GetImageList();
 		// int IconX = (ImgLst && GetImage() >= 0) ? ImgLst->TileX() + Tree->d->IconTextGap : 0;
@@ -1019,7 +1019,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	// text: first column
 	Ctx.Fore = f.Type == GCss::ColorRgb ? (GColour)f : (IsSelected ? SelFore : Fore);
 	Ctx.TxtBack = b.Type == GCss::ColorRgb ? (GColour)b : (IsSelected ? SelBack : Ctx.Back);
-	GdcPt2 TextSize;
+	LPoint TextSize;
 	_PourText(TextSize);
 	d->Text.ZOff(TextSize.x-1, Pos.Y()-1);
 	d->Text.Offset(x, Pos.y1);
@@ -1129,7 +1129,7 @@ void GTree::_Update(GRect *r, bool Now)
 	if (r)
 	{
 		GRect u = *r;
-		GdcPt2 s = _ScrollPos();
+		LPoint s = _ScrollPos();
 		GRect c = GetClient();
 		u.Offset(c.x1-s.x, c.y1-s.y);
 		Invalidate(&u, Now && !d->InPour);
@@ -1144,7 +1144,7 @@ void GTree::_UpdateBelow(int y, bool Now)
 {
 	TREELOCK
 
-	GdcPt2 s = _ScrollPos();
+	LPoint s = _ScrollPos();
 	GRect c = GetClient();
 	GRect u(c.x1, y - s.y + c.y1, X()-1, Y()-1);
 	Invalidate(&u, Now);
@@ -1159,11 +1159,11 @@ void GTree::ClearDs(int Col)
 		i->_ClearDs(Col);
 }
 
-GdcPt2 GTree::_ScrollPos()
+LPoint GTree::_ScrollPos()
 {
 	TREELOCK
 
-	GdcPt2 Status;
+	LPoint Status;
 	Status.x = (HScroll) ? (int)HScroll->Value() : 0;
 	Status.y = (VScroll) ? (int)VScroll->Value() * TREE_BLOCK : 0;
 
@@ -1179,7 +1179,7 @@ void GTree::_UpdateScrollBars()
 		
 		{
 			TREELOCK
-			GdcPt2 Old = _ScrollPos();
+			LPoint Old = _ScrollPos();
 			
 			GRect Client = GetClient();
 			bool x = d->Limit.x > Client.X();
@@ -1216,7 +1216,7 @@ void GTree::_UpdateScrollBars()
 				*/
 			}
 
-			GdcPt2 New = _ScrollPos();
+			LPoint New = _ScrollPos();
 			if (Old.x != New.x ||
 				Old.y != New.y)
 			{
@@ -1589,7 +1589,7 @@ GTreeItem *GTree::ItemAtPoint(int x, int y, bool Debug)
 {
 	TREELOCK
 
-	GdcPt2 s = _ScrollPos();
+	LPoint s = _ScrollPos();
 
 	List<GTreeItem>::I it = Items.begin();
 	GTreeItem *Hit = NULL;
@@ -1673,7 +1673,7 @@ void GTree::OnMouseClick(GMouse &m)
 			d->LastHit = ItemAtPoint(m.x, m.y, true);
 			if (d->LastHit)
 			{
-				GdcPt2 c = _ScrollPos();
+				LPoint c = _ScrollPos();
 				m.x += c.x;
 				m.y += c.y;
 				d->LastHit->_MouseClick(m);
@@ -1696,7 +1696,7 @@ void GTree::OnMouseClick(GMouse &m)
 			d->LastHit = ItemAtPoint(m.x, m.y);
 			if (d->LastHit)
 			{
-				GdcPt2 c = _ScrollPos();
+				LPoint c = _ScrollPos();
 				m.x += c.x;
 				m.y += c.y;
 				d->LastHit->_MouseClick(m);
@@ -1721,7 +1721,7 @@ void GTree::OnMouseMove(GMouse &m)
 		{
 			if (DragCol)
 			{
-				GdcPt2 p;
+				LPoint p;
 				PointToScreen(p);
 
 				GRect r = DragCol->GetPos();
@@ -1840,7 +1840,7 @@ void GTree::OnPaint(GSurface *pDC)
 	}
 
 	// scroll
-	GdcPt2 s = _ScrollPos();
+	LPoint s = _ScrollPos();
 	int Ox, Oy;
 	pDC->GetOrigin(Ox, Oy);
 	pDC->SetOrigin(Ox + s.x, Oy + s.y);

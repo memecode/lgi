@@ -24,8 +24,8 @@ public:
 	
 	#undef DefOption
 	
-	virtual void DrawBackground(GZoomView *View, GSurface *Dst, GdcPt2 TileIdx, GRect *Where = NULL) = 0;
-	virtual void DrawForeground(GZoomView *View, GSurface *Dst, GdcPt2 TileIdx, GRect *Where = NULL) = 0;
+	virtual void DrawBackground(GZoomView *View, GSurface *Dst, LPoint TileIdx, GRect *Where = NULL) = 0;
+	virtual void DrawForeground(GZoomView *View, GSurface *Dst, LPoint TileIdx, GRect *Where = NULL) = 0;
 	virtual void SetStatusText(const char *Msg, int Pane = 0) {}
 };
 
@@ -75,13 +75,13 @@ public:
 
 	// Methods
 	void SetCallback(GZoomViewCallback *cb);
-	bool Convert(GPointF &p, int x, int y);
+	bool Convert(LPointF &p, int x, int y);
 	ViewportInfo GetViewport();
 	void SetViewport(ViewportInfo i);
 	void SetSampleMode(SampleMode sm);
 	void SetDefaultZoomMode(DefaultZoomMode m);
 	DefaultZoomMode GetDefaultZoomMode();
-	void ScrollToPoint(GdcPt2 DocCoord);
+	void ScrollToPoint(LPoint DocCoord);
 
 	// Subclass
 	void SetSurface(GSurface *dc, bool own);
@@ -98,7 +98,7 @@ public:
 	int OnNotify(GViewI *v, int f);
 	GMessage::Param OnEvent(GMessage *m);
 	bool OnLayout(GViewLayoutInfo &Inf);
-	void UpdateScrollBars(GdcPt2 *MaxScroll = NULL, bool ResetPos = false);
+	void UpdateScrollBars(LPoint *MaxScroll = NULL, bool ResetPos = false);
 	void OnPosChange();
 };
 

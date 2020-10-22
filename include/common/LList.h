@@ -146,7 +146,7 @@ public:
 	
 	// Events;
 	void OnMouseClick(GMouse &m) override;
-	void OnMeasure(GdcPt2 *Info) override;
+	void OnMeasure(LPoint *Info) override;
 	void OnPaint(GSurface *pDC) override { LgiAssert(0); }
 	void OnPaint(GItem::ItemPaintCtx &Ctx) override;
 	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c) override;

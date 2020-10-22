@@ -16,8 +16,8 @@
 #define DOWN_KEY		0x2
 
 // Size of extra pixels, beyond the size of the text itself.
-GdcPt2 GButton::Overhead =
-    GdcPt2(
+LPoint GButton::Overhead =
+    LPoint(
         // Extra width needed
         #if defined(MAC) && !defined(LGI_SDL)
         24,
@@ -416,7 +416,7 @@ void GButton::OnPaint(GSurface *pDC)
 		if (e) printf("%s:%i - HIThemeDrawButton failed %li\n", _FL, e);
 		else
 		{
-			GdcPt2 pt;
+			LPoint pt;
 			GRect r = GetClient();
 			pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
 			pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
@@ -437,7 +437,7 @@ void GButton::OnPaint(GSurface *pDC)
 			if (X() < GdcD->X() && Y() < GdcD->Y())
 				GApp::SkinEngine->OnPaint_GButton(this, &State);
 			
-			GdcPt2 pt;
+			LPoint pt;
 			GRect r = GetClient();
 			pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
 			pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
@@ -463,7 +463,7 @@ void GButton::OnPaint(GSurface *pDC)
 			}
 			LgiWideBorder(pDC, r, d->Pressed ? DefaultSunkenEdge : DefaultRaisedEdge);
 
-			GdcPt2 pt;
+			LPoint pt;
 			pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
 			pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
 			d->Paint(pDC, pt, Back, r, Enabled(), false);
@@ -518,13 +518,20 @@ void GButton::SetPreferredSize(int x, int y)
 
 bool GButton::OnLayout(GViewLayoutInfo &Inf)
 {
+	LPoint Dpi(96, 96);
 	auto Css = GetCss();
 	auto Font = GetFont();
 	GCssTools Tools(Css, Font);
 	auto c = GetClient();
 	auto TxtMin = d->GetMin();
 	auto TxtMax = d->GetMax();
-	GRect DefaultPad(Overhead.x>>1, Overhead.y>>1, Overhead.x>>1, Overhead.y>>1);
+
+	auto Wnd = GetWindow();
+	if (Wnd)
+		Dpi = Wnd->GetDpi();
+	double Scale = (double)Dpi.x / 96.0;
+
+	GRect DefaultPad(Scale*Overhead.x/2, Scale*Overhead.y/2, Scale*Overhead.x/2, Scale*Overhead.y/2);
 	GRect Pad = Tools.GetPadding(c, &DefaultPad), Border = Tools.GetBorder(c);
 
 	if (!Inf.Width.Min)

@@ -296,7 +296,7 @@ protected:
 	GWin32Class *SubClass;
 	#endif
 
-	GdcPt2 SizeOfStr(const char *Str);
+	LPoint SizeOfStr(const char *Str);
 
 public:
 	#if WINNATIVE

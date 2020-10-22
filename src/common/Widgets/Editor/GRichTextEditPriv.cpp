@@ -1142,16 +1142,16 @@ ssize_t GRichTextPriv::IndexOfCursor(BlockCursor *c)
 	return -1;
 }
 
-GdcPt2 GRichTextPriv::ScreenToDoc(int x, int y)
+LPoint GRichTextPriv::ScreenToDoc(int x, int y)
 {
 	GRect &Content = Areas[GRichTextEdit::ContentArea];
-	return GdcPt2(x - Content.x1, y - Content.y1 + ScrollOffsetPx);
+	return LPoint(x - Content.x1, y - Content.y1 + ScrollOffsetPx);
 }
 
-GdcPt2 GRichTextPriv::DocToScreen(int x, int y)
+LPoint GRichTextPriv::DocToScreen(int x, int y)
 {
 	GRect &Content = Areas[GRichTextEdit::ContentArea];
-	return GdcPt2(x + Content.x1, y + Content.y1 - ScrollOffsetPx);
+	return LPoint(x + Content.x1, y + Content.y1 - ScrollOffsetPx);
 }
 
 bool GRichTextPriv::Merge(Transaction *Trans, Block *a, Block *b)
@@ -1623,7 +1623,7 @@ bool GRichTextPriv::ClickBtn(GMouse &m, GRichTextEdit::RectType t)
 				}
 			}
 
-			GdcPt2 p(Areas[t].x1, Areas[t].y2 + 1);
+			LPoint p(Areas[t].x1, Areas[t].y2 + 1);
 			View->PointToScreen(p);
 			int Result = s.Float(View, p.x, p.y, true);
 			if (Result)
@@ -1642,7 +1642,7 @@ bool GRichTextPriv::ClickBtn(GMouse &m, GRichTextEdit::RectType t)
 			for (int Idx = 0; Sizes[Idx]; Idx++)
 				s.AppendItem(Sizes[Idx], Idx+1);
 
-			GdcPt2 p(Areas[t].x1, Areas[t].y2 + 1);
+			LPoint p(Areas[t].x1, Areas[t].y2 + 1);
 			View->PointToScreen(p);
 			int Result = s.Float(View, p.x, p.y, true);
 			if (Result)
@@ -1665,7 +1665,7 @@ bool GRichTextPriv::ClickBtn(GMouse &m, GRichTextEdit::RectType t)
 		case GRichTextEdit::ForegroundColourBtn:
 		case GRichTextEdit::BackgroundColourBtn:
 		{
-			GdcPt2 p(Areas[t].x1, Areas[t].y2 + 1);
+			LPoint p(Areas[t].x1, Areas[t].y2 + 1);
 			View->PointToScreen(p);
 			new SelectColour(this, p, t);
 			break;
@@ -1768,7 +1768,7 @@ bool GRichTextPriv::ClickBtn(GMouse &m, GRichTextEdit::RectType t)
 		*/
 		case GRichTextEdit::EmojiBtn:
 		{
-			GdcPt2 p(Areas[t].x1, Areas[t].y2 + 1);
+			LPoint p(Areas[t].x1, Areas[t].y2 + 1);
 			View->PointToScreen(p);
 			new EmojiMenu(this, p);
 			break;
@@ -1879,7 +1879,7 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 		}
 	}
 
-	GdcPt2 Origin;
+	LPoint Origin;
 	
 	GRect r = Areas[GRichTextEdit::ContentArea];
 	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF

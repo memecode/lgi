@@ -468,7 +468,7 @@ LMenuItem::~LMenuItem()
 // control over the colours displayed. these functions remove that
 // limitation and also provide the application the ability to override
 // the default painting behaviour if desired.
-void LMenuItem::_Measure(GdcPt2 &Size)
+void LMenuItem::_Measure(LPoint &Size)
 {
 	if (Separator())
 	{
@@ -1170,7 +1170,7 @@ int LMenu::_OnEvent(GMessage *Msg)
 			LPMEASUREITEMSTRUCT Item = (LPMEASUREITEMSTRUCT)Msg->b;
 			if (Item)
 			{
-				GdcPt2 Size;
+				LPoint Size;
 
 				((LMenuItem*)Item->itemData)->_Measure(Size);
 				Item->itemWidth = Size.x;

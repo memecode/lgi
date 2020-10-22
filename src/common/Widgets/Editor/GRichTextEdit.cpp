@@ -548,7 +548,7 @@ void GRichTextEdit::GetTextExtent(int &x, int &y)
 	y = d->DocumentExtent.y;
 }
 
-bool GRichTextEdit::GetLineColumnAtIndex(GdcPt2 &Pt, ssize_t Index)
+bool GRichTextEdit::GetLineColumnAtIndex(LPoint &Pt, ssize_t Index)
 {
 	ssize_t Offset = -1;
 	int BlockLines = -1;
@@ -586,7 +586,7 @@ ssize_t GRichTextEdit::GetCaret(bool Cur)
 
 bool GRichTextEdit::IndexAt(int x, int y, ssize_t &Off, int &LineHint)
 {
-	GdcPt2 Doc = d->ScreenToDoc(x, y);
+	LPoint Doc = d->ScreenToDoc(x, y);
 	Off = d->HitTest(Doc.x, Doc.y, LineHint);
 	return Off >= 0;
 }
@@ -1088,7 +1088,7 @@ void GRichTextEdit::OnPosChange()
 	GLayout::OnPosChange();
 }
 
-int GRichTextEdit::WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
+int GRichTextEdit::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 {
 	Formats.SupportsFileDrops();
 	#ifdef WINDOWS
@@ -1098,7 +1098,7 @@ int GRichTextEdit::WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState)
 	return Formats.Length() ? DROPEFFECT_COPY : DROPEFFECT_NONE;
 }
 
-int GRichTextEdit::OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
+int GRichTextEdit::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 {
 	int Effect = DROPEFFECT_NONE;
 
@@ -1108,7 +1108,7 @@ int GRichTextEdit::OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState)
 		if (dd.IsFileDrop() && d->Areas[ContentArea].Overlap(Pt.x, Pt.y))
 		{
 			int AddIndex = -1;
-			GdcPt2 TestPt(	Pt.x - d->Areas[ContentArea].x1,
+			LPoint TestPt(	Pt.x - d->Areas[ContentArea].x1,
 							Pt.y - d->Areas[ContentArea].y1);
 
 			GDropFiles Df(dd);
@@ -1257,7 +1257,7 @@ void GRichTextEdit::DoContextMenu(GMouse &m)
 
 	GRichTextPriv::Block *Over = NULL;
 	GRect &Content = d->Areas[ContentArea];
-	GdcPt2 Doc = d->ScreenToDoc(m.x, m.y);
+	LPoint Doc = d->ScreenToDoc(m.x, m.y);
 	// int BlockIndex = -1;
 	ssize_t Offset = -1;
 	if (Content.Overlap(m.x, m.y))
@@ -1467,7 +1467,7 @@ void GRichTextEdit::OnMouseClick(GMouse &m)
 				d->WordSelectMode = !Processed && m.Double();
 
 				AutoCursor c(new BlkCursor(NULL, 0, 0));
-				GdcPt2 Doc = d->ScreenToDoc(m.x, m.y);
+				LPoint Doc = d->ScreenToDoc(m.x, m.y);
 				ssize_t Idx = -1;
 				if (d->CursorFromPos(Doc.x, Doc.y, &c, &Idx))
 				{
@@ -1533,7 +1533,7 @@ void GRichTextEdit::OnMouseMove(GMouse &m)
 		if (d->ClickedBtn == ContentArea)
 		{
 			AutoCursor c;
-			GdcPt2 Doc = d->ScreenToDoc(m.x, m.y);
+			LPoint Doc = d->ScreenToDoc(m.x, m.y);
 			ssize_t Idx = -1;
 			if (d->CursorFromPos(Doc.x, Doc.y, &c, &Idx) && c)
 			{
@@ -2686,7 +2686,7 @@ void GRichTextEdit::OnPulse()
 			if (!r.Overlap(m.x, m.y))
 			{
 				AutoCursor c(new BlkCursor(NULL, 0, 0));
-				GdcPt2 Doc = d->ScreenToDoc(m.x, m.y);
+				LPoint Doc = d->ScreenToDoc(m.x, m.y);
 				ssize_t Idx = -1;
 				if (d->CursorFromPos(Doc.x, Doc.y, &c, &Idx))
 				{
@@ -2747,7 +2747,7 @@ void GRichTextEdit::DumpNodes(GTree *Root)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-SelectColour::SelectColour(GRichTextPriv *priv, GdcPt2 p, GRichTextEdit::RectType t) : GPopup(priv->View)
+SelectColour::SelectColour(GRichTextPriv *priv, LPoint p, GRichTextEdit::RectType t) : GPopup(priv->View)
 {
 	d = priv;
 	Type = t;
@@ -2842,7 +2842,7 @@ void SelectColour::Visible(bool i)
 #include "Emoji.h"
 int EmojiMenu::Cur = 0;
 
-EmojiMenu::EmojiMenu(GRichTextPriv *priv, GdcPt2 p) : GPopup(priv->View)
+EmojiMenu::EmojiMenu(GRichTextPriv *priv, LPoint p) : GPopup(priv->View)
 {
 	d = priv;
 	d->GetEmojiImage();

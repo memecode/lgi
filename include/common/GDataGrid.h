@@ -47,8 +47,8 @@ public:
 	void OnItemBeginDrag(LListItem *Item, GMouse &m);
 	bool GetData(GArray<GDragData> &Data);
 	bool GetFormats(GDragFormats &Formats);
-	int WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState);
-	int OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState);
+	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState);
+	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState);
 	ItemArray *GetDroppedItems();
 };
 

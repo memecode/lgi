@@ -21,7 +21,7 @@ public:
 	bool Vertical;
 	GArray<GBox::Spacer> Spacers;
 	GBox::Spacer *Dragging;
-	GdcPt2 DragOffset;
+	LPoint DragOffset;
 	bool Dirty;
 	
 	GBoxPriv()

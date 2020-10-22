@@ -343,7 +343,7 @@ void GRadioGroup::OnPaint(GSurface *pDC)
 		GRect b(0, y/2, X()-1, Y()-1);
 		LgiWideBorder(pDC, b, EdgeXpChisel);
 
-		GdcPt2 TxtPt(6, 0);
+		LPoint TxtPt(6, 0);
 		GRect TxtRc = d->GetBounds();
 		TxtRc.Offset(TxtPt.x, TxtPt.y);		
 		d->Paint(pDC, TxtPt, Back, TxtRc, Enabled(), false);
@@ -714,6 +714,12 @@ void GRadioButton::OnPaint(GSurface *pDC)
 		State.MouseOver = d->Over;
 		State.aText = d->GetStrs();
 		State.View = this;
+
+		auto Fnt = GetFont();
+		int Px = (int) Fnt->Ascent() + 0.5;
+		State.Rect.ZOff(Px-1, Px-1);
+		State.Rect.Offset(0, (Y()-State.Rect.Y())>>1);
+
 		GApp::SkinEngine->OnPaint_GRadioButton(this, &State);
 	}
 	else
@@ -725,7 +731,7 @@ void GRadioButton::OnPaint(GSurface *pDC)
 		
 		// bool e = Enabled();
 		GRect fill(c.x2 + 1, r.y1, r.x2, r.x2);
-		GdcPt2 TxtPt(c.x2 + 11, (r.Y() - d->GetBounds().Y()) >> 1);
+		LPoint TxtPt(c.x2 + 11, (r.Y() - d->GetBounds().Y()) >> 1);
 		d->Paint(pDC, TxtPt, Back, fill, Enabled(), false);
 		
 		#if defined LGI_CARBON

@@ -236,10 +236,12 @@ public:
 	bool IsActive();
 	GRect &GetPos() override;
 	void SetDecor(bool Visible);
+	LPoint GetDpi();
+	LPointF GetDpiScale();
 	
 	// D'n'd
-	int WillAccept(GDragFormats &Formats, GdcPt2 Pt, int KeyState) override;
-	int OnDrop(GArray<GDragData> &Data, GdcPt2 Pt, int KeyState) override;
+	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState) override;
+	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState) override;
 
 	#if !WINNATIVE
 	

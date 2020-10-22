@@ -14,7 +14,7 @@
 #include "Gdc2.h"
 #include "GToken.h"
 
-bool GdcPt2::Inside(GRect &r)
+bool LPoint::Inside(GRect &r)
 {
 	return	(x >= r.x1) &&
 			(x <= r.x2) &&
@@ -149,7 +149,7 @@ void GRect::Offset(int x, int y)
 	y2 += y;
 }
 
-void GRect::Offset(GdcPt2 *p)
+void GRect::Offset(LPoint *p)
 {
 	if (!p) return;
 	x1 += p->x;
