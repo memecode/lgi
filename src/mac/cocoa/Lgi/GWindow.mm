@@ -1095,6 +1095,12 @@ LPoint GWindow::GetDpi()
 	return LPoint(Dpi, Dpi);
 }
 
+LPointF GWindow::GetDpiScale()
+{
+	auto Dpi = GetDpi();
+	return LPointF(Dpi.x / 100.0, Dpi.y / 100.0);
+}
+
 GRect &GWindow::GetPos()
 {
 	// LAutoPool Pool;
