@@ -99,7 +99,7 @@ GVariant::GVariant(ssize_t i)
 }
 #endif
 
-GVariant::GVariant(int32 i)
+GVariant::GVariant(int32_t i)
 {
 	Type = GV_INT32;
 	Value.Int = i;
@@ -111,13 +111,13 @@ GVariant::GVariant(uint32_t i)
 	Value.Int = i;
 }
 
-GVariant::GVariant(int64 i)
+GVariant::GVariant(int64_t i)
 {
 	Type = GV_INT64;
 	Value.Int64 = i;
 }
 
-GVariant::GVariant(uint64 i)
+GVariant::GVariant(uint64_t i)
 {
 	Type = GV_INT64;
 	Value.Int64 = i;

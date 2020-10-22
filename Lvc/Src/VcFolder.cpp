@@ -1446,12 +1446,21 @@ void VcFolder::OnCmdError(GString Output, const char *Msg)
 {
 	if (!CmdErrors)
 	{
-		d->Log->Write(Output, Output.Length());
+		if (Output.Length())
+			d->Log->Write(Output, Output.Length());
 
-		GString::Array a = GetProgramsInPath(GetVcName());
-		d->Log->Print("'%s' executables in the path:\n", GetVcName());
-		for (auto Bin : a)
-			d->Log->Print("    %s\n", Bin.Get());
+		auto vc_name = GetVcName();
+		if (vc_name)
+		{
+			GString::Array a = GetProgramsInPath(GetVcName());
+			d->Log->Print("'%s' executables in the path:\n", GetVcName());
+			for (auto Bin : a)
+				d->Log->Print("    %s\n", Bin.Get());
+		}
+		else if (Msg)
+		{
+			d->Log->Print("%s\n", Msg);
+		}
 	}
 				
 	CmdErrors++;

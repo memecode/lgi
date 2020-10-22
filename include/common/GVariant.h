@@ -280,10 +280,10 @@ public:
 	/// Constructor to null
 	GVariant();
 	/// Constructor for integers
-	GVariant(int32 i);
+	GVariant(int32_t i);
 	GVariant(uint32_t i);
-	GVariant(int64 i);
-	GVariant(uint64 i);
+	GVariant(int64_t i);
+	GVariant(uint64_t i);
 	#if GVARIANT_SIZET
 	GVariant(size_t i);
 	#endif
