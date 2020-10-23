@@ -1978,7 +1978,7 @@ void GTag::Invalidate()
 	Html->Invalidate(&p);
 }
 
-GTag *GTag::IsAnchor(GAutoString *Uri)
+GTag *GTag::IsAnchor(GString *Uri)
 {
 	GTag *a = 0;
 	for (GTag *t = this; t; t = ToTag(t->Parent))
@@ -1998,7 +1998,7 @@ GTag *GTag::IsAnchor(GAutoString *Uri)
 			GAutoWString w(CleanText(u, strlen(u), "utf-8"));
 			if (w)
 			{
-				Uri->Reset(WideToUtf8(w));
+				*Uri = w;
 			}
 		}
 	}
@@ -2012,18 +2012,27 @@ bool GTag::OnMouseClick(GMouse &m)
 
 	if (m.IsContextMenu())
 	{
-		GAutoString Uri;
+		GString Uri;
+		const char *ImgSrc = NULL;
 		GTag *a = IsAnchor(&Uri);
-		if (a && ValidStr(Uri))
+		bool IsImg = TagId == TAG_IMG;
+		if (IsImg)
+			Get("src", ImgSrc);
+		bool IsAnchor = a && ValidStr(Uri);
+		if (IsAnchor || IsImg)
 		{
 			LSubMenu RClick;
 
 			#define IDM_COPY_LINK	100
+			#define IDM_COPY_IMG	101
 			if (Html->GetMouse(m, true))
 			{
 				int Id = 0;
 
-				RClick.AppendItem(LgiLoadString(L_COPY_LINK_LOCATION, "&Copy Link Location"), IDM_COPY_LINK, Uri != 0);
+				if (IsAnchor)
+					RClick.AppendItem(LgiLoadString(L_COPY_LINK_LOCATION, "&Copy Link Location"), IDM_COPY_LINK, Uri != NULL);
+				if (IsImg)
+					RClick.AppendItem("Copy Image Location", IDM_COPY_IMG, ImgSrc != NULL);
 				if (Html->GetEnv())
 					Html->GetEnv()->AppendItems(&RClick);
 
@@ -2035,12 +2044,16 @@ bool GTag::OnMouseClick(GMouse &m)
 						Clip.Text(Uri);
 						break;
 					}
+					case IDM_COPY_IMG:
+					{
+						GClipBoard Clip(Html);						
+						Clip.Text(ImgSrc);
+						break;
+					}
 					default:
 					{
 						if (Html->GetEnv())
-						{
 							Html->GetEnv()->OnMenu(Html, Id, a);
-						}
 						break;
 					}
 				}
@@ -2116,7 +2129,7 @@ bool GTag::OnMouseClick(GMouse &m)
 		else
 		#endif
 		{
-			GAutoString Uri;
+			GString Uri;
 			
 			if (Html &&
 				Html->Environment)
@@ -8411,7 +8424,7 @@ LgiCursor GHtml::GetCursor(int x, int y)
 	GTag *Tag = GetTagByPos(x, y + Offset, &Index, &LocalCoords);
 	if (Tag)
 	{
-		GAutoString Uri;
+		GString Uri;
 		if (LocalCoords.x >= 0 &&
 			LocalCoords.y >= 0 &&
 			Tag->IsAnchor(&Uri))
@@ -8439,7 +8452,7 @@ void GHtml::OnMouseMove(GMouse &m)
 	if (!Hit.Direct && !Hit.NearestText)
 		return;
 
-	GAutoString Uri;
+	GString Uri;
 	GTag *HitTag = Hit.NearestText && Hit.Near == 0 ? Hit.NearestText : Hit.Direct;
 	if (HitTag &&
 		HitTag->TipId == 0 &&
