@@ -11,6 +11,8 @@
 #include "Base64.h"
 #include "GVariant.h"
 
+#define DEBUG_LOGGING		0
+
 ///////////////////////////////////////////////////////////////////
 class ILogProxy : public GSocketI
 {
@@ -59,8 +61,6 @@ IHttp::IHttp()
 	Proxy = 0;
 	ProxyPort = 0;
 	Headers = 0;
-	AuthUser = 0;
-	AuthPassword = 0;
 	NoCache = false;
 	BufferLen = 16 << 10;
 	Buffer = new char[BufferLen];
@@ -386,6 +386,10 @@ bool IHttp::Request
 	if (!Socket || !Uri || !Out || !Type)
 		return false;
 
+	#if DEBUG_LOGGING
+	GStringPipe Log;
+	#endif
+
 	HttpRequestType ReqType = HttpNone;
 	if (!_stricmp(Type, "GET"))
 		ReqType = HttpGet;
@@ -476,8 +480,10 @@ bool IHttp::Request
 	}
 	Cmd.Push("\r\n");
 	
-	GString c = Cmd.NewGStr();
-	//LgiTrace("HTTP hdrs=%s\n\n", c.Get());
+	auto c = Cmd.NewGStr();
+	#if DEBUG_LOGGING
+	Log.Print("HTTP req.hdrs=%s\n-------------------------------------\nHTTP req.body=", c.Get());
+	#endif
 
 	bool Status = false;
 	if (Socket && c)
@@ -497,6 +503,10 @@ bool IHttp::Request
 					{
 						return false;
 					}
+
+					#if DEBUG_LOGGING
+					Log.Print("%.*s", (int)w, s);
+					#endif
 				}
 			}
 			
@@ -535,6 +545,10 @@ bool IHttp::Request
 			GAutoString h(Headers.NewStr());
 			if (h)
 			{
+				#if DEBUG_LOGGING
+				Log.Print("HTTP res.hdrs=%s\n-------------------------------------\nHTTP res.body=", h);
+				#endif
+
 				GAutoString sContentLen(InetGetHeaderField(h, "Content-Length"));
 				int64 ContentLen = sContentLen ? atoi64(sContentLen) : -1;
 				bool IsChunked = false;
@@ -666,6 +680,10 @@ bool IHttp::Request
 						LgiTrace("%s:%i - Write @ " LPrintfInt64 " of " LPrintfSSizeT " = " LPrintfSSizeT " (%x,%x,%x,%x)\n",
 							_FL, Pos, Used, w, (uint8_t)s[0], (uint8_t)s[1], (uint8_t)s[2], (uint8_t)s[3]);
 						*/
+						#if DEBUG_LOGGING
+						Log.Print("%.*s", (int)w, s);
+						#endif
+
 						if (w == Used)
 						{
 							Written += w;
@@ -697,6 +715,9 @@ bool IHttp::Request
 						LgiTrace("%s:%i - Write @ " LPrintfInt64 " of " LPrintfSSizeT " = " LPrintfSSizeT " (%x,%x,%x,%x) " LPrintfSSizeT "\n",
 							_FL, Pos, r, w, (uint8_t)s[0], (uint8_t)s[1], (uint8_t)s[2], (uint8_t)s[3], NewPos);
 						*/
+						#if DEBUG_LOGGING
+						Log.Print("%.*s", (int)w, s);
+						#endif
 
 						if (w != r)
 						{
@@ -712,10 +733,25 @@ bool IHttp::Request
 					{
 						LgiTrace("%s:%i - HTTP length not reached.\n", _FL);
 					}
+					#if DEBUG_LOGGING
+					Log.Print("\n---------------------------------------------\n");
+					#endif
 				}
 			}
 		}
 	}
+
+	#if DEBUG_LOGGING
+	if (ProtocolStatus && *ProtocolStatus >= 300)
+	{
+		auto LogData = Log.NewGStr();
+		if (LogData)
+		{
+			LgiTrace("%.*s\n", (int)LogData.Length(), LogData.Get());
+			int asd=0;
+		}
+	}
+	#endif
 
 	return Status;
 }
@@ -953,7 +989,6 @@ bool LgiGetUri(LCancel *Cancel, GStreamI *Out, GString *OutError, const char *In
 		GString InputHeaders;
 		if (InHeaders)
 		{
-			InputHeaders = DefaultHeaders;
 			auto Hdrs = GString(InHeaders).SplitDelimit("\r\n");
 			for (auto h: Hdrs)
 			{
@@ -961,6 +996,10 @@ bool LgiGetUri(LCancel *Cancel, GStreamI *Out, GString *OutError, const char *In
 				s.Printf("%s\r\n", h.Get());
 				InputHeaders += s;
 			}
+		}
+		else
+		{
+			InputHeaders = DefaultHeaders;
 		}
 
 		int Status = 0;
@@ -995,10 +1034,11 @@ bool LgiGetUri(LCancel *Cancel, GStreamI *Out, GString *OutError, const char *In
 		}		
 		else if (StatusCatagory != 2)
 		{
+			// auto Hdr = OutHeaders.NewGStr();
 			Enc = IHttp::EncodeRaw;
 
 			if (OutError)
-				OutError->Printf("Got %i for '%.200s'", Status, InUri);
+				OutError->Printf("Got %i for '%.200s'\n", Status, InUri);
 			return false;
 		}
 
