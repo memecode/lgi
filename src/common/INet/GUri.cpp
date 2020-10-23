@@ -28,16 +28,19 @@ GUri &GUri::operator +=(const char *s)
 	auto len = sPath.Length();
 	sPath += s;
 
-	char *c = sPath.Get();
-	#if DIR_CHAR == '/'
-	char from = '\\';
-	#else
-	char from = '/';
-	#endif
-	for (size_t i=len; c && i<sPath.Length(); i++)
+	if (IsFile())
 	{
-		if (c[i] == from)
-			c[i] = DIR_CHAR;
+		char *c = sPath.Get();
+		#if DIR_CHAR == '/'
+		char from = '\\';
+		#else
+		char from = '/';
+		#endif
+		for (size_t i=len; c && i<sPath.Length(); i++)
+		{
+			if (c[i] == from)
+				c[i] = DIR_CHAR;
+		}
 	}
 
 	return *this;

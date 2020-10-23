@@ -963,17 +963,23 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 	return true;
 }
 
+GString VcFolder::GetFilePart(const char *uri)
+{
+	GUri u(uri);
+	GString File = u.IsFile() ? GString(u.LocalPath()) : u.sPath(Uri.sPath.Length(), -1).LStrip("/");
+	return File;
+}
+
 void VcFolder::LogFile(const char *uri)
 {
 	GString Args;
-	GUri u(uri);
 	
 	switch (GetType())
 	{
 		case VcSvn:
 		case VcHg:
 		{
-			GString File = u.IsFile() ? GString(u.LocalPath()) : u.sPath(Uri.sPath.Length(), -1).LStrip("/");
+			GString File = GetFilePart(uri);
 			ParseParams *Params = new ParseParams(uri);
 			Args.Printf("log \"%s\"", File.Get());
 			IsLogging = StartCmd(Args, &VcFolder::ParseLog, Params, LogNormal);
@@ -2541,7 +2547,8 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 
 	if ((Unpushed = Ins.Length() > 0))
 	{
-		GetCss(true)->Color(GColour(255, 128, 0));
+		if (CmdErrors == 0)
+			GetCss(true)->Color(GColour(255, 128, 0));
 	}
 	else if (Unpulled == 0)
 	{
@@ -3542,6 +3549,17 @@ bool VcFolder::AddFile(const char *Path, bool AsBinary)
 
 bool VcFolder::ParseRevert(int Result, GString s, ParseParams *Params)
 {
+	if (GetType() == VcSvn)
+	{
+		if (s.Find("Skipped ") >= 0)
+			Result = 1; // Stupid svn... *sigh*
+	}
+
+	if (Result)
+	{
+		OnCmdError(s, "Error reverting changes.");
+	}
+
 	ListWorkingFolder();
 	return false;
 }
@@ -3551,9 +3569,7 @@ bool VcFolder::Revert(const char *uri, const char *Revision)
 	if (!uri)
 		return false;
 
-	GUri u(uri);
-	GString Path = u.IsFile() ? GString(u.LocalPath()) : u.sPath;
-
+	auto Path = GetFilePart(uri);
 	switch (GetType())
 	{
 		case VcGit:

@@ -277,6 +277,7 @@ public:
 	void CountToTip();
 	bool UpdateSubs(); // Clone/checkout any sub-repositries.
 	void LogFile(const char *Path);
+	GString GetFilePart(const char *uri);
 
 	void OnPulse();
 	void OnUpdate(const char *Rev);
