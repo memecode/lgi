@@ -148,6 +148,7 @@ public:
 	bool EvaluateCondition(const char *Cond);
 	bool GetVariant(const char *Name, GVariant &Value, char *Array = NULL);
 	bool DoFind();
+	LPointF GetDpiScale();
 
 	// Javascript handlers
 	GDom *getElementById(char *Id);

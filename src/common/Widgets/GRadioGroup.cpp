@@ -717,6 +717,8 @@ void GRadioButton::OnPaint(GSurface *pDC)
 
 		auto Fnt = GetFont();
 		int Px = (int) Fnt->Ascent() + 0.5;
+		if (Px > Y()) Px = Y();
+
 		State.Rect.ZOff(Px-1, Px-1);
 		State.Rect.Offset(0, (Y()-State.Rect.Y())>>1);
 

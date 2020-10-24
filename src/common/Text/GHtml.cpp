@@ -276,9 +276,11 @@ public:
 			Size.Value = (float)Default->PointSize();
 		}
 
+		auto Scale = Owner->GetDpiScale();
 		if (Size.Type == GCss::LenPx)
 		{
-		    int RequestPx = (int)Size.Value;
+			Size.Value *= Scale.y;
+		    int RequestPx = (int) Size.Value;
 
 			// Look for cached fonts of the right size...
 			for (auto f: Fonts)
@@ -5607,6 +5609,11 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 					{
 						LineHeightCache = FontPx;
 					}
+					else if (LineHt.Type == GCss::LenPx)
+					{
+						LineHt.Value *= Html->GetDpiScale().y;
+						LineHeightCache = LineHt.ToPx(FontPx, f);
+					}
 					else
 					{
 						LineHeightCache = LineHt.ToPx(FontPx, f);
@@ -7363,6 +7370,15 @@ LPoint GHtml::Layout(bool ForceLayout)
 	}
 
 	return d->Content;
+}
+
+LPointF GHtml::GetDpiScale()
+{
+	LPointF Scale(1.0, 1.0);
+	auto Wnd = GetWindow();
+	if (Wnd)
+		Scale = Wnd->GetDpiScale();
+	return Scale;
 }
 
 void GHtml::OnPaint(GSurface *ScreenDC)

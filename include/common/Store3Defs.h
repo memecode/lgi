@@ -438,6 +438,7 @@ enum Store3Fields
 	FIELD_TRASH,						// (GDataFolderI*) Trash folder for mail store
 	FIELD_IMAP_SEQ,						// (uint32_t) IMAP sequence number
 	FIELD_CAL_STATUS,					// (char*) Status of the vCal event.
+	FIELD_STORE_STATUS,					// (ScribeAccountletStatusIcon) Status (icon) of a GDataStoreI
 
 	FIELD_MAX,
 };

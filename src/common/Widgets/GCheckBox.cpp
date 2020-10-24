@@ -327,6 +327,7 @@ void GCheckBox::OnPaint(GSurface *pDC)
 	{
 		auto Fnt = GetFont();
 		int Px = (int) Fnt->Ascent() + 2;
+		if (Px > Y()) Px = Y();
 
 		GSkinState State;
 		State.pScreen = pDC;
