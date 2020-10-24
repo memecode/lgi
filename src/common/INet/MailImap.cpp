@@ -655,9 +655,10 @@ void MailImapFolder::SetName(const char *s)
 class MailIMapPrivate : public LMutex
 {
 public:
-	int NextCmd;
+	int NextCmd, IdleCmd;
 	bool Logging;
 	bool ExpungeOnExit;
+	bool ReadDebug;
 	char FolderSep;
 	char *Current;
 	char *Flags;
@@ -673,12 +674,14 @@ public:
 		ParentWnd = NULL;
 		FolderSep = '/';
 		NextCmd = 1;
+		IdleCmd = -1;
 		Logging = true;
 		ExpungeOnExit = true;
 		Current = 0;
 		Flags = 0;
 		InCommand = 0;
 		Cancel = NULL;
+		ReadDebug = false;
 	}
 
 	~MailIMapPrivate()
@@ -858,6 +861,12 @@ bool MailIMap::Read(GStreamI *Out, int Timeout)
 					LgiTrace("%s:%i - Wut? IsReadable/Read mismatch.\n", _FL);
 					return false;
 				}
+				#if 0
+				else if (d->ReadDebug)
+				{
+					LgiTrace("%s:%i - Idle Read '%.*s'\n", _FL, (int)r, Buffer);
+				}
+				#endif
 			}
 			else
 			{
@@ -3209,8 +3218,8 @@ bool MailIMap::StartIdle()
 
 	if (Lock(_FL))
 	{
-		int Cmd = d->NextCmd++;
-		sprintf_s(Buf, sizeof(Buf), "A%4.4i IDLE\r\n", Cmd);
+		d->IdleCmd = d->NextCmd++;
+		sprintf_s(Buf, sizeof(Buf), "A%4.4i IDLE\r\n", d->IdleCmd);
 		Status = WriteBuf();
 		CommandFinished();
 		Unlock();
@@ -3229,17 +3238,9 @@ bool MailIMap::OnIdle(int Timeout, GString::Array &Resp)
 		auto Blk = Socket->IsBlocking();
 		Socket->IsBlocking(false);
 		
-		#if 0 // def _DEBUG
-		auto Start = LgiCurrentTime();
-		#endif
+		d->ReadDebug = true;
 		Read(NULL, Timeout);
-		#if 0 // def _DEBUG
-		auto Time = LgiCurrentTime() - Start;
-		if (Timeout > 0 && Time < (uint64)(Timeout * 0.9))
-		{
-			printf("Short rd " LPrintfInt64 " of %i\n", Time, Timeout);
-		}
-		#endif
+		d->ReadDebug = false;
 		
 		Socket->IsBlocking(Blk);
 		Resp.SetFixedLength(false);
@@ -3274,8 +3275,9 @@ bool MailIMap::FinishIdle()
 	{
 		if (WriteBuf(false, "DONE\r\n"))
 		{
-			Status = ReadResponse();
+			Status = ReadResponse(d->IdleCmd);
 			CommandFinished();
+			d->IdleCmd = -1;
 		}
 		Unlock();
 	}
