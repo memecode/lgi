@@ -437,16 +437,18 @@ struct GVolumePriv
 			type != DRIVE_NO_ROOT_DIR)
 		{
 			char Buf[DIR_PATH_SIZE];
-			const char *Desc = 0;
+			const char *Desc = NULL;
 			switch (type)
 			{
 				case DRIVE_REMOVABLE:
 				{
-					Type = VT_FLOPPY;
+					Type = VT_USB_FLASH;
 
 					if (GetVolumeInformationA(Drive, Buf, sizeof(Buf), 0, 0, 0, 0, 0) &&
 						ValidStr(Buf))
-						Desc = Buf;
+						Desc = Buf;						
+					else
+						Desc = "Usb Drive";
 					break;
 				}
 				case DRIVE_REMOTE:
@@ -466,25 +468,20 @@ struct GVolumePriv
 				{
 					if (GetVolumeInformationA(Drive, Buf, sizeof(Buf), 0, 0, 0, 0, 0) &&
 						ValidStr(Buf))
-					{
 						Desc = Buf;
-					}
 					else
-					{
 						Desc = "Hard Disk";
-					}
 					Type = VT_HARDDISK;
 					break;
 				}
 			}
 
+			char s[DIR_PATH_SIZE];
 			if (Desc)
-			{
-				char s[DIR_PATH_SIZE];
 				sprintf_s(s, sizeof(s), "%s (%.2s)", Desc, Drive);
-				Name = s;
-			}
-			
+			else
+				sprintf_s(s, sizeof(s), "%s", Drive);
+			Name = s;
 			Path = Drive;
 		}
 	}
@@ -554,12 +551,7 @@ GVolume *GVolume::First()
 			{
 				GVolume *v = new GVolume(p);
 				if (v)
-				{
-					if (v->Name())
-						d->Sub.Insert(v);
-					else
-						DeleteObj(v);
-				}
+					d->Sub.Insert(v);
 			}
 		}
 	}
