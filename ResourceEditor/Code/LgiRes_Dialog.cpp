@@ -747,6 +747,7 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 			LSubMenu RClick;
 			bool PasteData = false;
 			bool PasteTranslations = false;
+			CtrlButton *Btn = dynamic_cast<CtrlButton*>(this);
 
 			{
 				GClipBoard c(Dlg);
@@ -771,6 +772,13 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 			RClick.AppendSeparator();
 
 			RClick.AppendItem("&Delete", IDM_DELETE, Dlg->Selection.Length()>0);
+
+			if (Btn)
+			{
+				RClick.AppendSeparator();
+				RClick.AppendItem("Set 'Ok'", IDM_SET_OK);
+				RClick.AppendItem("Set 'Cancel'", IDM_SET_CANCEL);
+			}
 
 			if (Dlg->GetMouse(m, true))
 			{
@@ -801,14 +809,32 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 					{
 						ResDialogCtrl *Ctrl = Dlg->Selection[0];
 						if (Ctrl)
-						{
 							Ctrl->CopyText();
-						}
 						break;
 					}
 					case IDM_PASTE_TEXT:
 					{
 						PasteText();
+						break;
+					}
+					case IDM_SET_OK:
+					{
+						ResString *s = Btn->GetStr();
+						if (s)
+						{
+							s->Set("Ok");
+							s->SetDefine("IDOK");
+						}
+						break;
+					}
+					case IDM_SET_CANCEL:
+					{
+						ResString *s = Btn->GetStr();
+						if (s)
+						{
+							s->Set("Cancel");
+							s->SetDefine("IDCANCEL");
+						}
 						break;
 					}
 				}

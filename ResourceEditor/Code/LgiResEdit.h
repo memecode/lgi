@@ -63,6 +63,8 @@
 #define IDM_ID_EQ_REF				327
 #define IDM_UP						328
 #define IDM_DOWN					329
+#define IDM_SET_OK					330
+#define IDM_SET_CANCEL				331
 
 #define IDM_LANG_BASE				2000
 

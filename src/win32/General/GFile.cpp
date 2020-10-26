@@ -1726,7 +1726,7 @@ ssize_t GFile::Write(const void *Buffer, ssize_t Size, int Flags)
 		else
 		{
 			d->LastError = GetLastError();
-			LgiTrace("%s:%i - LastErr = %x\n", _FL, d->LastError);
+			LgiTrace("%s:%i - GFile::Write Err=%x\n", _FL, d->LastError);
 			break;
 		}
 	}

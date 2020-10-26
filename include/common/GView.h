@@ -743,5 +743,15 @@ public:
 		} \
 	}	CLS ## FactoryInst;
 
+#define DeclFactoryParam1(CLS, Param1) \
+	class CLS ## Factory : public GViewFactory \
+	{ \
+		GView *NewView(const char *Name, GRect *Pos, const char *Text) \
+		{ \
+			if (!_stricmp(Name, #CLS)) return new CLS(Param1); \
+			return NULL; \
+		} \
+	}	CLS ## FactoryInst;
+
 
 #endif

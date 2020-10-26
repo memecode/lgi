@@ -151,6 +151,11 @@ public:
 		Ssh = NULL;
 	}
 
+	void SetLog(GTextLog *log)
+	{
+		Log = log;
+	}
+
 	bool Open(const char *Host, const char *Username, const char *Password, bool PublicKey)
 	{
 		int Port = 22;

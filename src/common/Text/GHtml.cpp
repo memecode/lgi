@@ -5601,22 +5601,26 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 
 				if (LineFnt)
 				{
-					int FontPx = FontPxHeight(LineFnt);
+					int FontPx = LineFnt->GetHeight();
 					
 					if (!LineHt.IsValid() ||
 						LineHt.Type == GCss::LenAuto ||
 						LineHt.Type == GCss::LenNormal)
 					{
 						LineHeightCache = FontPx;
+						// LgiTrace("LineHeight FontPx=%i Px=%i Auto\n", FontPx, LineHeightCache);
 					}
 					else if (LineHt.Type == GCss::LenPx)
 					{
-						LineHt.Value *= Html->GetDpiScale().y;
+						auto Scale = Html->GetDpiScale().y;
+						LineHt.Value *= Scale;
 						LineHeightCache = LineHt.ToPx(FontPx, f);
+						// LgiTrace("LineHeight FontPx=%i Px=%i (Scale=%f)\n", FontPx, LineHeightCache, Scale);
 					}
 					else
 					{
 						LineHeightCache = LineHt.ToPx(FontPx, f);
+						// LgiTrace("LineHeight FontPx=%i Px=%i ToPx\n", FontPx, LineHeightCache);
 					}
 				}
 			}
