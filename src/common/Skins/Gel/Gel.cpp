@@ -867,7 +867,7 @@ public:
 		if (Mem)
 		{
 			// Draw icon
-			int FontY = Ctrl->GetFont()->GetHeight();
+			// int FontY = Ctrl->GetFont()->GetHeight();
 
 			GRect &Box = State->Rect;
 			State->pScreen->Blt(Box.x1, Box.y1, Mem);

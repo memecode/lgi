@@ -126,14 +126,14 @@ public:
 		y = p.y;
 	}
 
-	LPointF &operator =(LPointF &p)
+	LPointF &operator =(const LPointF &p)
 	{
 		x = p.x;
 		y = p.y;
 		return *this;
 	}
 
-	LPointF &operator -(LPointF &p)
+	LPointF &operator -(const LPointF &p)
 	{
 		static LPointF Result;
 		Result.x = x - p.x;
@@ -141,7 +141,7 @@ public:
 		return Result;
 	}
 
-	LPointF &operator +(LPointF &p)
+	LPointF &operator +(const LPointF &p)
 	{
 		static LPointF Result;
 		Result.x = x + p.x;
@@ -149,7 +149,7 @@ public:
 		return Result;
 	}
 
-	bool operator ==(LPointF &p)
+	bool operator ==(const LPointF &p)
 	{
 		double dx = x - p.x;
 		if (dx < 0) dx = -dx;
@@ -158,7 +158,7 @@ public:
 		return dx<Threshold && dy<Threshold;
 	}
 
-	bool operator !=(LPointF &p)
+	bool operator !=(const LPointF &p)
 	{
 		return !(*this == p);
 	}
