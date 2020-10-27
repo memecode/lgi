@@ -257,6 +257,7 @@ public:
 	/// Delete a sub-folder under the current folder.
 	bool DeleteDir(const char *Dir);
 	/// List the current remote folder contents.
+	/// Caller is responsible for freeing the objects in Dir (e.g. use GArray::DeleteObjects).
 	bool ListDir(GArray<IFtpEntry*> &Dir);
 	/// Move up to the parent remote folder.
 	bool UpDir();

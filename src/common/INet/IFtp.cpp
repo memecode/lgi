@@ -1006,7 +1006,7 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 												break;
 
 											// LgiTrace("Transfer %s...\n", LFormatSize(WriteLen).Get());
-											if (WriteLen >= 0)
+											if (WriteLen > 0)
 											{
 												Processed += WriteLen;
 												i += WriteLen;
