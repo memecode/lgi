@@ -833,14 +833,14 @@ public:
 		GArray<Type> a;
 
 		if (Start < 0) Start = 0;
-		if (End < 0) End = len;
+		if (End < 0) End = len + End + 1;
+		if (End > (ssize_t)len) End = len;
+
 		if (End > Start)
 		{
 			a.Length(End - Start);
 			for (size_t i=0; i<a.Length(); i++)
-			{
 				a[i] = p[Start + i];
-			}
 		}
 
 		return a;
