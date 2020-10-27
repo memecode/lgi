@@ -1988,6 +1988,35 @@ void VcFolder::OnRemove()
 	}
 }
 
+void VcFolder::Empty()
+{
+	Type = VcNone;
+	
+	IsCommit = false;
+	IsLogging = false;
+	IsUpdate = false;
+	IsFilesCmd = false;
+	IsWorkingFld = false;
+	CommitListDirty = false;
+	IsUpdatingCounts = false;
+	IsBranches = StatusNone;
+	IsIdent = StatusNone;
+
+	Unpushed = Unpulled = -1;
+	CmdErrors = 0;
+	CurrentCommitIdx = -1;
+
+	CurrentCommit.Empty();
+	RepoUrl.Empty();
+	VcCmd.Empty();
+
+	d->Commits->Empty();
+	d->Files->Empty();
+
+	if (!Uri.IsFile())	
+		GetCss(true)->Color(GColour::Blue);
+}
+
 void VcFolder::OnMouseClick(GMouse &m)
 {
 	if (m.IsContextMenu())
@@ -2009,6 +2038,11 @@ void VcFolder::OnMouseClick(GMouse &m)
 		s.AppendItem("Update Subs", IDM_UPDATE_SUBS, GetType() == VcGit);
 		s.AppendSeparator();
 		s.AppendItem("Remove", IDM_REMOVE);
+		if (!Uri.IsFile())
+		{
+			s.AppendSeparator();
+			s.AppendItem("Edit Location", IDM_EDIT);
+		}
 		int Cmd = s.Float(GetTree(), m);
 		switch (Cmd)
 		{
@@ -2051,6 +2085,17 @@ void VcFolder::OnMouseClick(GMouse &m)
 			{
 				OnRemove();
 				delete this;
+				break;
+			}
+			case IDM_EDIT:
+			{
+				GInput Dlg(GetTree(), Uri.ToString(), "URI:", "Remote Folder Location");
+				if (Dlg.DoModal())
+				{
+					Uri.Set(Dlg.GetStr());
+					Empty();
+					Select(true);
+				}
 				break;
 			}
 			default:

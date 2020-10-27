@@ -84,6 +84,7 @@ enum AppIds
 	IDM_LOG_FILE,
 	IDM_COPY_PATH,
 	IDM_COPY_LEAF,
+	IDM_EDIT,
 };
 
 enum VersionCtrl

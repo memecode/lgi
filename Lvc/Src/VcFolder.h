@@ -206,6 +206,7 @@ class VcFolder : public GTreeItem
 	void LinkParents();
 	GString CurrentRev();
 	GColour BranchColour(const char *Name);
+	void Empty();
 
 	bool ParseDiffs(GString s, GString Rev, bool IsWorking);
 	
