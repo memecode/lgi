@@ -5452,10 +5452,10 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			Flow->EndBlock(GetAlign(true));
 		}
 		
-		/*
+		#ifdef _DEBUG
 		if (Debug)
 			LgiTrace("Before %s\n", Flow->ToString().Get());
-		*/
+		#endif
 
 		BlockFlowWidth = Flow->X();
 		
@@ -5467,33 +5467,33 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		Flow->Indent(this, left, top, right, bottom, true);
 
 		// Set the width if any
-		if (Disp == DispBlock)
+		GCss::Len Wid = Width();
+		if (!IsTableCell(TagId) && Wid.IsValid())
+			Size.x = Flow->ResolveX(Wid, this, false);
+		else if (TagId != TAG_IMG)
 		{
-			GCss::Len Wid = Width();
-			if (!IsTableCell(TagId) && Wid.IsValid())
-				Size.x = Flow->ResolveX(Wid, this, false);
-			else if (TagId != TAG_IMG)
-			{
-				if (Flow->Inline)
-					Size.x = 0; // block inside inline-block default to fit the content
-				else
-					Size.x = Flow->X();
-			}
-
-			if (MaxWidth().IsValid())
-			{
-				int Px = Flow->ResolveX(MaxWidth(), this, false);
-				if (Size.x > Px)
-					Size.x = Px;
-			}
-
-			Pos.x = Flow->x1;
+			if (Disp == DispInlineBlock) // Flow->Inline)
+				Size.x = 0; // block inside inline-block default to fit the content
+			else
+				Size.x = Flow->X();
 		}
-		else
+		else if (Disp == DispInlineBlock)
+			Size.x = 0;
+
+		if (MaxWidth().IsValid())
 		{
-			Size.x = 0; // Child content should expand this to fit
-			Pos.x = Flow->cx;
+			int Px = Flow->ResolveX(MaxWidth(), this, false);
+			if (Size.x > Px)
+				Size.x = Px;
 		}
+		if (MinWidth().IsValid())
+		{
+			int Px = Flow->ResolveX(MinWidth(), this, false);
+			if (Size.x < Px)
+				Size.x = Px;
+		}
+
+		Pos.x = Disp == DispInlineBlock ? Flow->cx : Flow->x1;
 		Pos.y = Flow->y1;
 
 		Flow->y1 -= Pos.y;

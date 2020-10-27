@@ -586,6 +586,10 @@ bool IHttp::Request
 
 				if (IsChunked)
 				{
+					#ifdef _DEBUG
+					GStringPipe Log;
+					#endif
+
 					while (true)
 					{
 						// Try and get chunk header
@@ -626,24 +630,45 @@ bool IHttp::Request
 						{
 							ssize_t Remaining = ChunkSize - ChunkDone;
 							ssize_t Common = MIN(Used, Remaining);
+
+							#ifdef _DEBUG
+							Log.Print("%s:%i - remaining:%i, common=%i\n", _FL, (int)Remaining, (int)Common);
+							#endif
+
 							if (Common > 0)
 							{
 								ssize_t w = Out->Write(s, Common);
+								#ifdef _DEBUG
+								Log.Print("%s:%i - w:%i\n", _FL, (int)w);
+								#endif
 								if (w != Common)
 								{
 									LgiAssert(!"Write failed.");
 									break;
 								}
 								if (Used > Common)
+								{
+									#ifdef _DEBUG
+									Log.Print("%s:%i - common:%i, used=%i\n", _FL, (int)Common, (int)Used);
+									#endif
 									memmove(s, s + Common, Used - Common);
+								}
 								ChunkDone += Common;
 								Used -= Common;
 
 								if (ChunkDone >= ChunkSize)
+								{
+									#ifdef _DEBUG
+									Log.Print("%s:%i - chunkdone\n", _FL);
+									#endif
 									break;
+								}
 							}
 
 							ssize_t r = Socket->Read(s + Used, sizeof(s) - Used);
+							#ifdef _DEBUG
+							Log.Print("%s:%i - r:%i\n", _FL, (int)r);
+							#endif
 							if (r < 0)
 								break;
 							
@@ -654,12 +679,18 @@ bool IHttp::Request
 						if (Socket && Used < 2)
 						{
 							ssize_t r = Socket->Read(s + Used, sizeof(s) - Used);
+							#ifdef _DEBUG
+							Log.Print("%s:%i - r:%i\n", _FL, (int)r);
+							#endif
 							if (r < 0)
 								break;
 							Used += r;
 						}							
 						if (Used < 2 || s[0] != '\r' || s[1] != '\n')
 						{
+							#ifdef _DEBUG
+							LgiTrace("Log: %s\n", Log.NewGStr().Get());
+							#endif
 							LgiAssert(!"Post fix missing.");
 							break;
 						}
