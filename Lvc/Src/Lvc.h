@@ -14,8 +14,10 @@
 #include "LSsh.h"
 #include "GEventTargetThread.h"
 
-#define OPT_Folders		"Folders"
-#define OPT_Folder		"Folder"
+#define OPT_Folders			"Folders"
+#define OPT_Folder			"Folder"
+
+#define METHOD_GetContext	"GetContext"
 
 #define APP_VERSION		"0.7"
 extern const char *AppName;
@@ -117,29 +119,7 @@ struct ParseParams
 };
 
 typedef bool (VcFolder::*ParseFn)(int, GString, ParseParams*);
-
-class SshConnection : public LSsh, public GEventTargetThread
-{
-	int GuiHnd;
-	GUri Host;
-	GAutoPtr<GStream> c;
-	GString Uri, Prompt;
-
-	GMessage::Result OnEvent(GMessage *Msg);
-	GStream *GetConsole();
-	bool WaitPrompt(GStream *c, GString *Data = NULL);
-
-public:
-	LHashTbl<StrKey<char,false>,VersionCtrl> Types;
-	GArray<VcFolder*> TypeNotify;
-	
-	SshConnection(GTextLog *log, const char *uri, const char *prompt);
-	bool DetectVcs(VcFolder *Fld);
-	bool Command(VcFolder *Fld, GString Exe, GString Args, ParseFn Parser, ParseParams *Params);
-	
-	// This is the GUI thread message handler
-	static bool HandleMsg(GMessage *m);
-};
+class SshConnection;
 
 struct AppPriv
 {
@@ -171,17 +151,8 @@ struct AppPriv
 		Resort = -1;
 	}
 
-	SshConnection *GetConnection(const char *Uri, bool Create = true)
-	{
-		GUri u(Uri);
-		u.sPath.Empty();
-		auto s = u.ToString();
-		auto Conn = Connections.Find(s);
-		if (!Conn && Create)
-			Connections.Add(s, Conn = new SshConnection(Log, s, "matthew@matthew-linux:"));
-		return Conn;
-	}
-
+	SshConnection *GetConnection(const char *Uri, bool Create = true);
+	
 	void ClearFiles()
 	{
 		if (Files)
@@ -201,6 +172,30 @@ struct AppPriv
 	}
 
 	VersionCtrl DetectVcs(VcFolder *Fld);
+};
+
+class SshConnection : public LSsh, public GEventTargetThread
+{
+	int GuiHnd;
+	GUri Host;
+	GAutoPtr<GStream> c;
+	GString Uri, Prompt;
+	AppPriv *d;
+
+	GMessage::Result OnEvent(GMessage *Msg);
+	GStream *GetConsole();
+	bool WaitPrompt(GStream *c, GString *Data = NULL);
+
+public:
+	LHashTbl<StrKey<char,false>,VersionCtrl> Types;
+	GArray<VcFolder*> TypeNotify;
+	
+	SshConnection(GTextLog *log, const char *uri, const char *prompt);
+	bool DetectVcs(VcFolder *Fld);
+	bool Command(VcFolder *Fld, GString Exe, GString Args, ParseFn Parser, ParseParams *Params);
+	
+	// This is the GUI thread message handler
+	static bool HandleMsg(GMessage *m);
 };
 
 class BlameUi : public GWindow

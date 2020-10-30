@@ -10,7 +10,7 @@
 #include "GXmlTreeUi.h"
 #include "GTree.h"
 
-#define TIMEOUT_PROMPT			2000
+#define TIMEOUT_PROMPT			1000
 
 //////////////////////////////////////////////////////////////////
 enum SshMsgs
@@ -20,11 +20,32 @@ enum SshMsgs
 	M_RESPONSE,
 };
 
+SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
+{
+	GUri u(Uri);
+	u.sPath.Empty();
+	auto s = u.ToString();
+	auto Conn = Connections.Find(s);
+	if (!Conn && Create)
+		Connections.Add(s, Conn = new SshConnection(Log, s, "matthew@matthew-linux:"));
+	return Conn;
+}
+
 SshConnection::SshConnection(GTextLog *log, const char *uri, const char *prompt) : LSsh(log), GEventTargetThread("SshConnection")
 {
-	GuiHnd = log->GetWindow()->AddDispatch();
+	auto Wnd = log->GetWindow();
+	GuiHnd = Wnd->AddDispatch();
 	Prompt = prompt;
 	Host.Set(Uri = uri);
+	d = NULL;
+
+	GVariant Ret;
+	GArray<GVariant*> Args;
+	if (Wnd->CallMethod(METHOD_GetContext, &Ret, Args))
+	{
+		if (Ret.Type == GV_VOID_PTR)
+			d = (AppPriv*) Ret.Value.Ptr;
+	}
 }
 
 bool SshConnection::DetectVcs(VcFolder *Fld)
@@ -65,12 +86,45 @@ GStream *SshConnection::GetConsole()
 	return c;
 }
 
+class ProgressListItem : public LListItem
+{
+	int64_t v, maximum;
+
+public:
+	ProgressListItem(int64_t mx = 100) : maximum(mx)
+	{
+		v = 0;
+	}
+
+	int64_t Value() { return v; }
+	void Value(int64_t val) { v = val; Update(); }
+	void OnPaint(GItem::ItemPaintCtx &Ctx)
+	{
+		auto pDC = Ctx.pDC;
+		pDC->Colour(Ctx.Back);
+		pDC->Rectangle(&Ctx);
+		
+		auto Fnt = GetList()->GetFont();
+		GDisplayString ds(Fnt, LFormatSize(v));
+		Fnt->Transparent(true);
+		Fnt->Colour(Ctx.Fore, Ctx.Back);
+		ds.Draw(pDC, Ctx.x1 + 10, Ctx.y1 + ((Ctx.Y() - ds.Y()) >> 1));
+
+		pDC->Colour(GProgress::cNormal);
+		int x1 = 120;
+		int prog = Ctx.X() - x1;
+		int x2 = (int) (v * prog / maximum);
+		pDC->Rectangle(Ctx.x1 + x1, Ctx.y1 + 1, Ctx.x1 + x1 + x2, Ctx.y2 - 1);
+	}
+};
+
 bool SshConnection::WaitPrompt(GStream *con, GString *Data)
 {
 	char buf[1024];
 	GString out;
 	auto Ts = LgiCurrentTime();
-	int64 Count = 0;
+	int64 Count = 0, Total = 0;
+	ProgressListItem *Prog = NULL;
 
 	while (!IsCancelled())
 	{
@@ -86,6 +140,7 @@ bool SshConnection::WaitPrompt(GStream *con, GString *Data)
 				
 		out += GString(buf, rd);
 		Count += rd;
+		Total += rd;
 		DeEscape(out);
 		auto lines = out.SplitDelimit("\n");
 		auto last = lines.Last();
@@ -103,12 +158,21 @@ bool SshConnection::WaitPrompt(GStream *con, GString *Data)
 		auto Now = LgiCurrentTime();
 		if (Now - Ts >= TIMEOUT_PROMPT)
 		{
+			if (!Prog && d->Commits)
+			{
+				Prog = new ProgressListItem(1 << 20);
+				d->Commits->Insert(Prog);
+			}
+			if (Prog)
+				Prog->Value(Total);
+
 			Log->Print("...reading: %s\n", LFormatSize(Count).Get());
 			Count = 0;
 			Ts = Now;
 		}
 	}
 
+	DeleteObj(Prog);
 	return true;
 }
 
@@ -122,17 +186,27 @@ bool SshConnection::HandleMsg(GMessage *m)
 		return false;
 
 	SshConnection &c = *u->c;
-	// LgiTrace("Response vcs: %s\n", u->Path.Get());
+	AppPriv *d = c.d;
+	if (!d)
+		return false;
+
 	if (u->Vcs) // Check the VCS type..
 	{
 		c.Types.Add(u->Path, u->Vcs);
 		for (auto f: c.TypeNotify)
-			f->OnVcsType();
+		{
+			if (d->Tree->HasItem(f))
+				f->OnVcsType();
+			else
+				LgiTrace("%s:%i - Folder no longer in tree (recently deleted?).\n", _FL);
+		}
 	}
 	else if (u->Output) // Cmd output
 	{
-		LgiAssert(u->f != NULL);
-		u->f->OnSshCmd(u);
+		if (d && d->Tree->HasItem(u->f))
+			u->f->OnSshCmd(u);
+		else
+			LgiTrace("%s:%i - Folder no longer in tree (recently deleted?).\n", _FL);
 	}
 	else return false; // ?
 
@@ -243,6 +317,7 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 
 		c->DetectVcs(Fld);
 		Fld->GetCss(true)->Color(GColour::Blue);
+		Fld->Update();
 		return VcPending;
 	}
 
@@ -793,6 +868,17 @@ class App : public GWindow, public AppPriv
 {
 	GAutoPtr<GImageList> ImgLst;
 	GBox *FoldersBox;
+
+	bool CallMethod(const char *MethodName, GVariant *ReturnValue, GArray<GVariant*> &Args)
+	{
+		if (!Stricmp(MethodName, METHOD_GetContext))
+		{
+			*ReturnValue = (AppPriv*)this;
+			return true;
+		}
+
+		return false;
+	}
 
 public:
 	App()

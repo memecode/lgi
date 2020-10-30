@@ -452,12 +452,15 @@ void VcCommit::OnMouseClick(GMouse &m)
 
 	if (m.IsContextMenu())
 	{
+		GArray<VcCommit*> Sel;
+		GetList()->GetSelection(Sel);
+
 		LSubMenu s;
 		s.AppendItem("Update", IDM_UPDATE, !Current);
 		s.AppendSeparator();
 		s.AppendItem("Merge With Local", IDM_MERGE, !Current);
 		if (Rev)
-			s.AppendItem("Copy Revision", IDM_COPY_REV);		
+			s.AppendItem("Copy Revision", IDM_COPY_REV);
 		if (Index >= 0)
 			s.AppendItem("Copy Index", IDM_COPY_INDEX);
 		s.AppendItem("Rename Branch", IDM_RENAME_BRANCH);
@@ -492,7 +495,13 @@ void VcCommit::OnMouseClick(GMouse &m)
 			case IDM_COPY_REV:
 			{
 				GClipBoard c(GetList());
-				c.Text(Rev);
+
+				GString::Array a;
+				a.SetFixedLength(false);
+				for (auto i: Sel)
+					a.New() = i->GetRev();
+
+				c.Text(GString(",").Join(a));
 				break;
 			}
 			case IDM_COPY_INDEX:

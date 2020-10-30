@@ -56,7 +56,9 @@ public:
 	/// Returns the index of this node in the list of item owned by it's parent.
 	ssize_t IndexOf();
 	/// \returns number of child.
-	size_t GetItems();
+	size_t Length();
+	/// \returns if the object is in the tree
+	bool HasItem(GTreeItem *obj, bool recurse = true);
 
 	List<GTreeItem>::I begin()
 	{
@@ -241,6 +243,8 @@ public:
 	bool Remove(GTreeItem *Obj);
 	/// Gets the item at an index
 	GTreeItem *ItemAt(size_t Pos) { return Items[Pos]; }
+	/// \returns if the object is in the tree
+	bool HasItem(GTreeItem *obj, bool recurse = true);
 
 	/// Select the item 'Obj'
 	bool Select(GTreeItem *Obj);

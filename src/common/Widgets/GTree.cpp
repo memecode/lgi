@@ -290,9 +290,25 @@ bool GTreeNode::IsRoot()
 	return Parent == 0 || (GTreeNode*)Parent == (GTreeNode*)Tree;
 }
 
-size_t GTreeNode::GetItems()
+size_t GTreeNode::Length()
 {
 	return Items.Length();
+}
+
+bool GTreeNode::HasItem(GTreeItem *obj, bool recurse)
+{
+	if (this == (GTreeNode*)obj)
+		return true;
+
+	for (auto i: Items)
+	{
+		if (i == obj)
+			return true;
+		if (recurse && i->HasItem(obj, recurse))
+			return true;
+	}
+
+	return false;
 }
 
 int GTreeNode::ForEach(std::function<void(GTreeItem*)> Fn)
@@ -731,7 +747,7 @@ void GTreeItem::Update()
 	if (Tree)
 	{
 		GRect p = d->Pos;
-		p.x2 = 1000;
+		p.x2 = 10000;
 		d->ClearDs();
 		Tree->_Update(&p, TreeUpdateNow);
 	}
@@ -1921,6 +1937,12 @@ GTreeItem *GTree::Insert(GTreeItem *Obj, ssize_t Pos)
 		NewObj->_SetTreePtr(this);
 	
 	return NewObj;
+}
+
+bool GTree::HasItem(GTreeItem *Obj, bool Recurse)
+{
+	TREELOCK
+	return GTreeNode::HasItem(Obj, Recurse);
 }
 
 bool GTree::Remove(GTreeItem *Obj)

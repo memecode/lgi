@@ -7,7 +7,7 @@
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
 #endif
 
-#define MAX_AUTO_RESIZE_ITEMS	1000
+#define MAX_AUTO_RESIZE_ITEMS	2000
 #define PROFILE_FN				0
 #if PROFILE_FN
 #define PROF(s) Prof.Add(s)
@@ -230,6 +230,7 @@ VcFolder::VcFolder(AppPriv *priv, const char *uri)
 {
 	Init(priv);
 	Uri.Set(uri);
+	GetType();
 }
 
 VcFolder::VcFolder(AppPriv *priv, GXmlTag *t)
@@ -2009,6 +2010,8 @@ void VcFolder::Empty()
 	CurrentCommit.Empty();
 	RepoUrl.Empty();
 	VcCmd.Empty();
+	Uncommit.Reset();
+	Log.DeleteObjects();
 
 	d->Commits->Empty();
 	d->Files->Empty();
@@ -2284,11 +2287,15 @@ void VcFolder::OnVcsType()
 	auto c = d->GetConnection(Uri.ToString(), false);
 	if (c)
 	{
-		Type = c->Types.Find(Uri.sPath(1, -1));
-		if (Type)
-		{	
+		auto NewType = c->Types.Find(Uri.sPath(1, -1));
+		if (NewType && NewType != Type)
+		{
+			Type = NewType;
 			ClearError();
 			Update();
+
+			if (GTreeItem::Select())
+				Select(true);
 		}
 	}
 }
