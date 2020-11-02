@@ -52,9 +52,9 @@ class WindowsSpellCheck : public GSpellCheck
 		if (!f.Open(File, O_READ))
 			return false;
 		GString::Array Lines = f.Read().SplitDelimit("\r\n");
-		for (GString *Ln = NULL; Lines.Iterate(Ln);)
+		for (auto Ln: Lines)
 		{
-			GString::Array v = Ln->Split(",");
+			GString::Array v = Ln.Split(",");
 			if (v.Length() > 1)
 			{
 				Lang *l = Languages.Find(v[0].Strip());

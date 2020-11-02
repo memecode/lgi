@@ -5810,16 +5810,11 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			case TAG_CENTER:
 			{
 				int Px = Flow->X();
-				for (GHtmlElement **e = NULL; Children.Iterate(e); )
+				for (auto e: Children)
 				{
-					GTag *t = ToTag(*e);
-					if (t->IsBlock())
-					{
-						if (t->Size.x < Px)
-						{
-							t->Pos.x = (Px - t->Size.x) >> 1;
-						}
-					}
+					GTag *t = ToTag(e);
+					if (t && t->IsBlock() && t->Size.x < Px)
+						t->Pos.x = (Px - t->Size.x) >> 1;
 				}
 				break;
 			}

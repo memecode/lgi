@@ -132,9 +132,9 @@ bool GMru::_SaveFile(const char *FileName)
 			{
 				// extract extension
 				GString::Array a = GString(st->Extension()).Split(LGI_PATH_SEPARATOR);
-				for (GString *e = NULL; a.Iterate(e); )
+				for (auto e: a)
 				{
-					GString::Array p = e->RSplit(".", 1);
+					GString::Array p = e.RSplit(".", 1);
 					if (!p.Last().Equals("*"))
 					{
 						// bung the extension from the file type if not there
