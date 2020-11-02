@@ -505,6 +505,12 @@ uint32_t GColour::GetNative()
 	{
 		return RGB(rgb.r, rgb.g, rgb.b);
 	}
+	else if (space == CsHls32)
+	{
+		GColour c(*this);
+		c.ToRGB();
+		return RGB(c.r(), c.g(), c.b());
+	}
 	else
 	{
 		LgiAssert(0);

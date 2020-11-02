@@ -591,7 +591,7 @@ public:
 		std::qsort(p, len, sizeof(*p), [](const void *a, const void *b)
 		{
 			auto cmp = *((const Type*)b) - *((const Type*)a);
-			return cmp < 0 ? -1 : (cmp > 1 ? 1 : 0);
+			return cmp < 0 ? -1 : (cmp > 0 ? 1 : 0);
 		});
 	}
 
