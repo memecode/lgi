@@ -1063,45 +1063,43 @@ bool LDateTime::SetDate(const char *Str)
 
 bool LDateTime::SetTime(const char *Str)
 {
-	bool Status = false;
+	if (!Str)
+		return false;
 
-	if (Str)
+	GToken T(Str, ":.");
+	if (T.Length() < 2 || T.Length() > 4)
+		return false;
+
+	_Hours = atoi(T[0]);
+	_Minutes = atoi(T[1]);
+			
+	char *s = T[2];
+	if (s) _Seconds = atoi(s);
+	else _Seconds = 0;
+	_Thousands = 0;
+			
+	s = T.Last();
+	if (s)
 	{
-		GToken T(Str, ":.");
-		if (T.Length() >= 2 && T.Length() <= 4)
+		if (strchr(s, 'p') || strchr(s, 'P'))
 		{
-			_Hours = atoi(T[0]);
-			_Minutes = atoi(T[1]);
-			
-			char *s = T[2];
-			if (s) _Seconds = atoi(s);
-			else _Seconds = 0;
-			
-			s = T[T.Length()-1];
-			if (s)
-			{
-				if (strchr(s, 'p') || strchr(s, 'P'))
-				{
-					if (_Hours != 12)
-					{
-						_Hours += 12;
-					}
-				}
-				else if (strchr(s, 'a') || strchr(s, 'A'))
-				{
-					if (_Hours == 12)
-					{
-						_Hours -= 12;
-					}
-				}
-			}
-
-			_Thousands = (T.Length() > 3) ? atoi(T[3]) : 0;
-			Status = true;
+			if (_Hours != 12)
+				_Hours += 12;
+		}
+		else if (strchr(s, 'a') || strchr(s, 'A'))
+		{
+			if (_Hours == 12)
+				_Hours -= 12;
 		}
 	}
 
-	return Status;
+	if (T.Length() > 3)
+	{
+		GString t = "0.";
+		t += s;
+		_Thousands = (int) (t.Float() * 1000);
+	}
+	return true;
 }
 
 int LDateTime::IsWeekDay(const char *s)
