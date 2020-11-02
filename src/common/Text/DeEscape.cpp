@@ -15,10 +15,8 @@ char *SkipEscape(char *c)
 		return c + 1;
 
 	if (*c != '[')
-	{
-		LgiAssert(!"Invalid escape seq.");
 		return NULL;
-	}
+
 	c++;
 	while (*c >= '0' && *c <= '?')
 		c++;

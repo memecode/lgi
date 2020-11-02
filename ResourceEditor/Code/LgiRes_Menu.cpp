@@ -498,7 +498,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 				if (Parent)
 				{
 					auto n = Item->IndexOf();
-					if (n < Parent->GetItems() - 1)
+					if (n < Parent->Length() - 1)
 					{
 						Item->Remove();
 						Parent->Insert(Item, n + 1);

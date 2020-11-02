@@ -3,7 +3,7 @@
 #include <libssh/sftp.h>
 #include "DeEscape.h"
 
-#define DEFAULT_PROMPT		"~#"
+#define DEFAULT_PROMPT		"# "
 
 class LSsh : public LCancel
 {
