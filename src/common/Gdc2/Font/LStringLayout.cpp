@@ -170,10 +170,10 @@ void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
 	GArray<LayoutArray> Lines;
 	int Line = 0;
 
-	for (LLayoutRun **Run = NULL; Text.Iterate(Run); )
+	for (auto Run: Text)
 	{
-		char *s = (*Run)->Text;
-		GFont *f = FontCache ? FontCache->GetFont(*Run) : SysFont;
+		char *s = Run->Text;
+		GFont *f = FontCache ? FontCache->GetFont(Run) : SysFont;
 		LgiAssert(f != NULL);
 
 		char *Start = s;
@@ -191,7 +191,7 @@ void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
 			Lines[Line].Add(new LLayoutString(f, Start, s - Start));
 		}
 
-		s = (*Run)->Text;
+		s = Run->Text;
 		while (*s)
 		{
 			while (*s && strchr(White, *s))
@@ -303,17 +303,17 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 	#if DEBUG_LAYOUT
 	if (Debug) LgiTrace("Text.Len=%i\n", Text.Length());
 	#endif
-	for (LLayoutRun **Run = NULL; Text.Iterate(Run); )
+	for (auto Run: Text)
 	{
-		char *Start = (*Run)->Text;
+		char *Start = Run->Text;
 		GUtf8Ptr s(Start);
 
 		#if DEBUG_LAYOUT
-		if (Debug) LgiTrace("    Run='%s' %p\n", s.GetPtr(), *Run);
+		if (Debug) LgiTrace("    Run='%s' %p\n", s.GetPtr(), Run);
 		#endif
 		#if DEBUG_PROFILE_LAYOUT
 		Prof.Add(Buf+Ch);
-		Ch += sprintf(Buf+Ch, "[%i] Run = '%.*s'\n", (int) (Run - Text.AddressOf()), (int) max(20, (*Run)->Text.Length()), s.GetPtr());
+		Ch += sprintf(Buf+Ch, "[%i] Run = '%.*s'\n", (int) (Run - Text.AddressOf()), (int) max(20, Run->Text.Length()), s.GetPtr());
 		#endif
 
 		while (s)
@@ -335,7 +335,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 					#if DEBUG_LAYOUT
 					if (Debug) LgiTrace("%i, ", (int)Pos);
 					#endif
-					Breaks.New().Set(*Run, Pos);
+					Breaks.New().Set(Run, Pos);
 				}
 			}
 			#if DEBUG_LAYOUT
@@ -346,7 +346,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 
 			GFont *Fnt = NULL;
 			if (FontCache)
-				Fnt = FontCache->GetFont(*Run);
+				Fnt = FontCache->GetFont(Run);
 			if (!Fnt)
 				Fnt = f;
 
@@ -358,7 +358,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 			LLayoutString *n = new LLayoutString(Fnt, Bytes ? (char*)s.GetPtr() : (char*)"", Bytes ? (int)Bytes : 1);
 			if (n)
 			{
-				n->Set(MinLines - 1, LineFX, y, *Run, StartOffset);
+				n->Set(MinLines - 1, LineFX, y, Run, StartOffset);
 				LineFX += n->FX();
 				
 				// Do min / max size calculation
@@ -452,7 +452,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 									return false;
 								}
 
-								Run = Text.AddressOf(Idx);
+								Run = Text[Idx];
 								break;
 							}
 						}
@@ -485,7 +485,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 					DeleteObj(n);
 		
 					n = new LLayoutString(Fnt, (char*)s.GetPtr(), e - s);
-					n->Set(MinLines - 1, LineFX, y, *Run, (char*)s.GetPtr() - Start);
+					n->Set(MinLines - 1, LineFX, y, Run, (char*)s.GetPtr() - Start);
 					LineHeight = MAX(LineHeight, n->Y());
 
 					GotoNextLine();
@@ -565,9 +565,9 @@ void LStringLayout::Paint(	GSurface *pDC,
 	GColour FocusFore = LColour(L_FOCUS_SEL_FORE);
 	
 	// Draw all the text
-	for (GDisplayString **ds = NULL; Strs.Iterate(ds); )
+	for (auto ds: Strs)
 	{
-		LLayoutString *s = dynamic_cast<LLayoutString*>(*ds);
+		LLayoutString *s = dynamic_cast<LLayoutString*>(ds);
 		GFont *f = s->GetFont();
 		GColour Bk = s->Back.IsTransparent() ? Back : s->Back;
 

@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <cstdlib>
 
 #define GARRAY_MIN_SIZE			16
 
@@ -575,11 +576,23 @@ public:
 		return true;
 	}
 
-	/// Sorts the array
+	/// Sorts the array via a comparison function
 	void Sort(int (*Compare)(Type*, Type*))
 	{
 		typedef int (*qsort_compare)(const void *, const void *);
 		qsort(p, len, sizeof(Type), (qsort_compare)Compare);
+	}
+
+	/// Sorts the array via objects '-' operator
+	void Sort()
+	{
+		if (len <= 0)
+			return;
+		std::qsort(p, len, sizeof(*p), [](const void *a, const void *b)
+		{
+			auto cmp = *((const Type*)b) - *((const Type*)a);
+			return cmp < 0 ? -1 : (cmp > 1 ? 1 : 0);
+		});
 	}
 
 	// Sorts the array with a comparison function (can I get a standard here?)
@@ -781,51 +794,6 @@ public:
 	bool Delete(I &It)
 	{
 		return DeleteAt(It.i, true);
-	}
-
-	/*
-	To use this iteration method in a for loop:
-
-	for (T *Ptr = NULL; Array.Iterate(Ptr); )
-	{
-		// Use 'Ptr' here
-	}
-	*/
-	bool Iterate(Type *&Ptr)
-	{
-		if (!len || !p)
-			return false;
-		
-		return	Ptr
-				?
-				PtrCheck(++Ptr)
-				:
-				(Ptr = p) != NULL;
-	}
-
-	/*
-	To use this iteration method in a for loop:
-
-	for (T *Ptr = NULL, size_t Idx; Array.Iterate(Idx, Ptr); )
-	{
-		// Use 'Ptr' here
-	}
-	*/
-	template<typename T>
-	bool IteratePtr(size_t &Idx, T &Ptr)
-	{
-		if (!len || !p)
-			return false;
-		
-		if (!Ptr)
-		{
-			Ptr = dynamic_cast<T>(*p);
-			Idx = 0;
-			return true;
-		}
-
-		Ptr = p + (++Idx);
-		return PtrCheck(Ptr);		
 	}
 
 	GArray<Type> Slice(ssize_t Start, ssize_t End = -1)

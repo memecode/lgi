@@ -376,10 +376,8 @@ GProgressDlg::~GProgressDlg()
 
 bool GProgressDlg::OnRequestClose(bool OsClose)
 {
-	for (GProgressPane **p = NULL; Panes.Iterate(p); )
-	{
-		(*p)->Cancel(true);
-	}
+	for (auto p: Panes)
+		p->Cancel(true);
 		
 	return false;
 }
@@ -400,11 +398,11 @@ void GProgressDlg::Resize()
 
 	// Layout all the panes...
 	int y = 0;
-	for (GProgressPane **p = NULL; Panes.Iterate(p); )
+	for (auto p: Panes)
 	{
 		GRect r(0, y, PANE_X - 1, y + PANE_Y - 1);
-		(*p)->SetPos(r);
-		(*p)->Visible(true);
+		p->SetPos(r);
+		p->Visible(true);
 		y = r.y2 + 1;
 	}
 }
@@ -418,10 +416,8 @@ void GProgressDlg::OnCreate()
 
 void GProgressDlg::OnPulse()
 {
-	for (GProgressPane **p = NULL; Panes.Iterate(p); )
-	{
-		(*p)->UpdateUI();
-	}
+	for (auto p: Panes)
+		p->UpdateUI();
 }
 
 void GProgressDlg::OnPosChange()
@@ -430,14 +426,14 @@ void GProgressDlg::OnPosChange()
 	
 	// Layout all the panes...
 	int y = 0;
-	for (GProgressPane **p = NULL; Panes.Iterate(p); )
+	for (auto p: Panes)
 	{
-		GRect r = (*p)->GetPos();
+		GRect r = p->GetPos();
 		r.Offset(0, y-r.y1);
 		r.x2 = c.x2;
 			
-		(*p)->SetPos(r);
-		(*p)->Visible(true);
+		p->SetPos(r);
+		p->Visible(true);
 			
 		y = r.y2 + 1;
 	}
@@ -451,9 +447,9 @@ int GProgressDlg::OnNotify(GViewI *Ctrl, int Flags)
 		// This code recalculates the size needed by all the progress panes
 		// and then resizes the window to contain them all.
 		GRect u(0, 0, -1, -1);
-		for (GProgressPane **p = NULL; Panes.Iterate(p); )
+		for (auto p: Panes)
 		{
-			GRect r = (*p)->GetPos();
+			GRect r = p->GetPos();
 			if (u.Valid()) u.Union(&r);
 			else u = r;
 		}
@@ -636,9 +632,9 @@ void GProgressDlg::SetType(const char *t)
 
 bool GProgressDlg::IsCancelled()
 {
-	for (GProgressPane **p = NULL; Panes.Iterate(p); )
+	for (auto p: Panes)
 	{
-		if ((*p)->IsCancelled())
+		if (p->IsCancelled())
 			return true;
 	}
 	return false;

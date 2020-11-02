@@ -418,10 +418,8 @@ void TableCell::OnChange(PropType Prop)
 	if (Prop == PropDisplay)
 	{
 		bool Vis = Display() != GCss::DispNone;
-		for (Child *c = NULL; Children.Iterate(c);)
-		{
-			c->View->Visible(Vis);
-		}
+		for (auto c: Children)
+			c.View->Visible(Vis);
 	}
 }
 
