@@ -481,9 +481,9 @@ bool VcFolder::ParseBranches(int Result, GString s, ParseParams *Params)
 		case VcGit:
 		{
 			GString::Array a = s.SplitDelimit("\r\n");
-			for (GString *l = NULL; a.Iterate(l); )
+			for (auto &l: a)
 			{
-				GString n = l->Strip();
+				GString n = l.Strip();
 				if (n(0) == '*')
 				{
 					GString::Array c = n.SplitDelimit(" \t", 1);
@@ -1014,8 +1014,8 @@ VcLeaf *VcFolder::Find(const char *Path)
 bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 {
 	LHashTbl<StrKey<char>, VcCommit*> Map;
-	for (VcCommit **pc = NULL; Log.Iterate(pc); )
-		Map.Add((*pc)->GetRev(), *pc);
+	for (auto pc: Log)
+		Map.Add(pc->GetRev(), pc);
 
 	int Skipped = 0, Errors = 0;
 	VcLeaf *File = Params ? Find(Params->Str) : NULL;
@@ -1096,7 +1096,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 		{
 			GString::Array c = s.Split("\n\n");
 			LHashTbl<IntKey<int64_t>, VcCommit*> Idx;
-			for (GString *Commit = NULL; c.Iterate(Commit); )
+			for (auto &Commit: c)
 			{
 				GAutoPtr<VcCommit> Rev(new VcCommit(d, this));
 				if (Rev->HgParse(*Commit))
@@ -1145,16 +1145,16 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 
 			LHashTbl<IntKey<uint64>, VcCommit*> Map;
 			GString::Array c = s.Split("=============================================================================");
-			for (GString *Commit = NULL; c.Iterate(Commit);)
+			for (auto &Commit: c)
 			{
-				if (Commit->Strip().Length())
+				if (Commit.Strip().Length())
 				{
 					GString Head, File;
-					GString::Array Versions = Commit->Split("----------------------------");
+					GString::Array Versions = Commit.Split("----------------------------");
 					GString::Array Lines = Versions[0].SplitDelimit("\r\n");
-					for (GString *Line = NULL; Lines.Iterate(Line);)
+					for (auto &Line: Lines)
 					{
-						GString::Array p = Line->Split(":", 1);
+						GString::Array p = Line.Split(":", 1);
 						if (p.Length() == 2)
 						{
 							// LgiTrace("Line: %s\n", Line->Get());
@@ -3209,15 +3209,15 @@ bool VcFolder::ParsePull(int Result, GString s, ParseParams *Params)
 			CurrentCommit.Empty();
 
 			GString::Array a = s.SplitDelimit("\r\n");
-			for (GString *Ln = NULL; a.Iterate(Ln); )
+			for (auto &Ln: a)
 			{
-				if (Ln->Find("At revision") >= 0)
+				if (Ln.Find("At revision") >= 0)
 				{
-					GString::Array p = Ln->SplitDelimit(" .");
+					GString::Array p = Ln.SplitDelimit(" .");
 					CurrentCommit = p.Last();
 					break;
 				}
-				else if (Ln->Find("svn cleanup") >= 0)
+				else if (Ln.Find("svn cleanup") >= 0)
 				{
 					OnCmdError(s, "Needs cleanup");
 					break;

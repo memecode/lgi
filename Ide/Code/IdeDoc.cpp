@@ -1622,9 +1622,9 @@ void IdeDoc::OnPulse()
 		if (d->WriteBuf.Length())
 		{
 			bool Pour = d->Edit->SetPourEnabled(false);
-			for (GString *s = NULL; d->WriteBuf.Iterate(s); )
+			for (auto s: d->WriteBuf)
 			{
-				GAutoWString w(Utf8ToWide(*s, s->Length()));
+				GAutoWString w(Utf8ToWide(s, s.Length()));
 				d->Edit->Insert(d->Edit->GetSize(), w, Strlen(w.Get()));
 			}
 			d->Edit->SetPourEnabled(Pour);

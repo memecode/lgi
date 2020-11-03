@@ -2410,9 +2410,9 @@ bool IdeProject::FindDuplicateSymbols()
 					q.Write(Buf, Rd);
 				GString::Array a = q.NewGStr().SplitDelimit("\r\n");
 				LHashTbl<StrKey<char,false>,bool> Local(200000);
-				for (GString *Ln = NULL; a.Iterate(Ln); Lines++)
+				for (auto &Ln: a)
 				{
-					GString::Array p = Ln->SplitDelimit(" \t", 3);
+					GString::Array p = Ln.SplitDelimit(" \t", 3);
 					if (!Local.Find(p.Last()))
 					{
 						Local.Add(p.Last(), true);
@@ -2436,9 +2436,10 @@ bool IdeProject::FindDuplicateSymbols()
 						}
 						else
 						{
-							printf("Bad line: %s\n", Ln->Get());
+							printf("Bad line: %s\n", Ln.Get());
 						}
 					}
+					Lines++;
 				}
 			}
 		}

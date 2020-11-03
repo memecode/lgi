@@ -1,7 +1,9 @@
 #pragma once
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
+
 #include "DeEscape.h"
+#include "GTextLog.h"
 
 #define DEFAULT_PROMPT		"# "
 

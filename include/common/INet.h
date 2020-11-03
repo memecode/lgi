@@ -190,6 +190,8 @@ public:
 		/// Flags to pass to send
 		int Flags = 0
 	);
+
+	ssize_t Write(GString &s) { return Write(s.Get(), s.Length()); }
 	
 	/// \brief Reads data from the remote host.
 	/// \return the number of bytes read or <= 0 on error.

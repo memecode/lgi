@@ -82,7 +82,7 @@ class LJson
 
 			if (Name)
 			{
-				s.Printf("%s\"%s\" : ", d.Get(), Name.Get());
+				s.Printf("%s\"%s\": ", d.Get(), Name.Get());
 				r += s;
 			}
 			if (Str)

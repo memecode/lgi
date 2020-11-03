@@ -122,10 +122,10 @@ bool DropDownBtn::SetList(int EditCtrl, GString::Array a)
 		return false;
 	Pu->Lst->Empty();
 	d->EditId = EditCtrl;
-	for (GString *s = NULL; a.Iterate(s); )
+	for (auto s: a)
 	{
 		LListItem *i = new LListItem;
-		i->SetText(*s);
+		i->SetText(s);
 		Pu->Lst->Insert(i);
 	}
 

@@ -328,9 +328,9 @@ bool VcCommit::HgParse(GString s)
 	if (Lines.Length() < 1)
 		return false;
 
-	for (GString *Ln = NULL; Lines.Iterate(Ln); )
+	for (auto Ln: Lines)
 	{
-		GString::Array f = Ln->Split(":", 1);
+		GString::Array f = Ln.Split(":", 1);
 		if (f.Length() == 2)
 		{
 			if (f[0].Equals("changeset"))
