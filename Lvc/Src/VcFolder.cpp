@@ -1099,7 +1099,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 			for (auto &Commit: c)
 			{
 				GAutoPtr<VcCommit> Rev(new VcCommit(d, this));
-				if (Rev->HgParse(*Commit))
+				if (Rev->HgParse(Commit))
 				{
 					auto Existing = File ? NULL : Map.Find(Rev->GetRev());
 					if (!Existing)
