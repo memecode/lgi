@@ -74,6 +74,11 @@ public:
 		Name(0);
 		return 0;
 	}
+
+	bool Write(GString &s)
+	{
+		return Write(s.Get(), s.Length()) == s.Length();
+	}
 	
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0)
 	{

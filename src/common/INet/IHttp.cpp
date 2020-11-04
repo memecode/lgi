@@ -712,7 +712,7 @@ bool IHttp::Request
 							_FL, Pos, Used, w, (uint8_t)s[0], (uint8_t)s[1], (uint8_t)s[2], (uint8_t)s[3]);
 						*/
 						#if DEBUG_LOGGING
-						Log.Print("%.*s", (int)w, s);
+						Log.Write(s, w);
 						#endif
 
 						if (w == Used)
@@ -773,7 +773,7 @@ bool IHttp::Request
 	}
 
 	#if DEBUG_LOGGING
-	if (ProtocolStatus && *ProtocolStatus >= 300)
+	// if (ProtocolStatus && *ProtocolStatus >= 300)
 	{
 		auto LogData = Log.NewGStr();
 		if (LogData)

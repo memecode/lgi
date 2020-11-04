@@ -660,3 +660,35 @@ bool GHtmlElement::HasChild(GHtmlElement *c)
 	return false;
 }
 
+////////////////////////////////////////////////////////////////////////
+bool GCssStyle::GetVariant(const char *Name, GVariant &Value, char *Array)
+{
+	if (!Stricmp(Name, "Display")) // Type: String
+	{
+		Value = Css->ToString(Css->Display());
+		return Value.Str() != NULL;
+	}
+	else LgiAssert(!"Impl me.");
+	
+	return false;
+}
+
+bool GCssStyle::SetVariant(const char *Name, GVariant &Value, char *Array)
+{
+	if (!Stricmp(Name, "display"))
+	{
+		const char *d = Value.Str();
+		if (Css->ParseDisplayType(d))
+		{
+			GHtmlElement *e = dynamic_cast<GHtmlElement*>(Css);
+			if (e)
+				e->OnStyleChange(Name);
+			return true;
+		}
+	}
+	else LgiAssert(!"Impl me.");
+	
+	return false;
+}
+
+

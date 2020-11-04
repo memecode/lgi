@@ -3361,6 +3361,15 @@ void GTag::SetStyle()
 	}
 }
 
+void GTag::OnStyleChange(const char *name)
+{
+	if (!Stricmp(name, "display") && Html)
+	{
+		Html->Layout(true);
+		Html->Invalidate();
+	}
+}
+
 void GTag::SetCssStyle(const char *Style)
 {
 	if (Style)
@@ -9262,45 +9271,4 @@ void GTagHit::Dump(const char *Desc)
 		Block ? Block->GetStr() : NULL,
 		Block ? Block->Text + Index : NULL);
 }
-
-////////////////////////////////////////////////////////////////////////
-bool GCssStyle::GetVariant(const char *Name, GVariant &Value, char *Array)
-{
-	if (!Name)
-		return false;
-
-	if (!_stricmp(Name, "Display")) // Type: String
-	{
-		Value = Css->ToString(Css->Display());
-		return Value.Str() != NULL;
-	}
-	else LgiAssert(!"Impl me.");
-	
-	return false;
-}
-
-bool GCssStyle::SetVariant(const char *Name, GVariant &Value, char *Array)
-{
-	if (!Name)
-		return false;
-
-	if (!_stricmp(Name, "display"))
-	{
-		const char *d = Value.Str();
-		if (Css->ParseDisplayType(d))
-		{
-			GTag *t = dynamic_cast<GTag*>(Css);
-			if (t)
-			{
-				t->Html->Layout(true);
-				t->Html->Invalidate();
-			}
-			return true;
-		}
-	}
-	else LgiAssert(!"Impl me.");
-	
-	return false;
-}
-
 

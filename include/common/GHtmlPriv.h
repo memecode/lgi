@@ -404,6 +404,8 @@ public:
 	/// Takes the CSS styles, parses and stores them in the current object,
 	//// overwriting any duplicate properties.
 	void SetCssStyle(const char *Style);
+	/// Event received by scripts change CSS properties.
+	void OnStyleChange(const char *name);
 	/// Positions the tag according to the flow region passed in
 	void OnFlow(GFlowRegion *Flow, uint16 Depth);
 	/// Paints the border and background of the tag

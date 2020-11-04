@@ -193,6 +193,7 @@ public:
 	virtual void Set(const char *attr, const char *val) {}
 	virtual void SetStyle() {}
 	virtual GAutoString DescribeElement() { return GAutoString(); }
+	virtual void OnStyleChange(const char *name) {}
 
 	// Helper
 	void Set(const char *attr, const char16 *val)
