@@ -896,21 +896,23 @@ bool LDateTime::Set(const char *Str)
 {
 	bool Status = false;
 
-	if (Str)
-	{
-		char Local[256];
-		strcpy_s(Local, sizeof(Local), Str);
-		char *Sep = strchr(Local, ' ');
-		if (Sep)
-		{
-			*Sep++ = 0;
-			Status |= SetTime(Sep);
-		}
+	if (!Str)
+		return false;
 
-		Status |= SetDate(Local);
+	char Local[256];
+	strcpy_s(Local, sizeof(Local), Str);
+	char *Sep = strchr(Local, ' ');
+	if (Sep)
+	{
+		*Sep++ = 0;
+		if (!SetTime(Sep))
+			return false;
 	}
 
-	return Status;
+	if (!SetDate(Local))
+		return false;
+
+	return true;
 }
 
 void LDateTime::Month(char *m)
@@ -1070,8 +1072,11 @@ bool LDateTime::SetTime(const char *Str)
 	if (T.Length() < 2 || T.Length() > 4)
 		return false;
 
-	_Hours = atoi(T[0]);
-	_Minutes = atoi(T[1]);
+	_Hours = (int)Atoi(T[0]);
+	_Minutes = (int)Atoi(T[1]);
+
+	if (_Hours < 0 || _Minutes < 0)
+		return false;
 			
 	char *s = T[2];
 	if (s) _Seconds = atoi(s);
