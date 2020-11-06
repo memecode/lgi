@@ -160,17 +160,21 @@ public:
 
 	bool Open(const char *Host, const char *Username, const char *Password, bool PublicKey)
 	{
-		int Port = 22;
+		int Port = 22, Timeout = 60;
 		Ssh = ssh_new();
 		ssh_set_log_userdata(this);
 		// ssh_set_log_callback(logging_callback);
 		ssh_set_log_level(SSH_LOG_PROTOCOL);
 		auto r = ssh_options_set(Ssh, SSH_OPTIONS_HOST, Host);
 		r = ssh_options_set(Ssh, SSH_OPTIONS_PORT, &Port);
+		r = ssh_options_set(Ssh, SSH_OPTIONS_TIMEOUT, &Timeout);
 
 		r = ssh_connect(Ssh);
 		if (r != SSH_OK)
 		{
+			ssh_free(Ssh);
+			Ssh = NULL;
+
 			Log->Print("%s:%i - ssh_connect failed.\n", _FL);
 			return false;
 		}
