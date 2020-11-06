@@ -498,6 +498,20 @@ public:
 		return true;
 	}
 
+	bool Set(GString Addr, int64_t Int)
+	{
+		char s[32];
+		sprintf_s(s, sizeof(s), LPrintfInt64, Int);
+		return Set(Addr, s);
+	}
+
+	bool Set(GString Addr, double Dbl)
+	{
+		char s[32];
+		sprintf_s(s, sizeof(s), "%f", Dbl);
+		return Set(Addr, s);
+	}
+
 	bool Set(GString Addr, GArray<GString> &Array)
 	{
 		Key *k = Deref(Addr, true);
