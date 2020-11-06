@@ -38,6 +38,8 @@
 #if defined(WIN32)
 	#define NULL_PIPE NULL
 	#define ClosePipe CloseHandle
+
+	typedef HRESULT (WINAPI *ProcCreatePseudoConsole)(_In_ COORD size, _In_ HANDLE hInput, _In_ HANDLE hOutput, _In_ DWORD dwFlags, _Out_ HPCON* phPC);
 #else
 	#define NULL_PIPE -1
 	#define ClosePipe close
@@ -128,15 +130,21 @@ struct GSubProcessPriv
 		DWORD ExitValue;
 		GSubProcess::Pipe ChildOutput, ChildInput;
 		HPCON hConsole;
+		GLibrary Kernel;
+		ProcCreatePseudoConsole CreatePseudoConsole;
 	#endif
 
-	GSubProcessPriv()
+	GSubProcessPriv(bool pseudoConsole)
+		#ifdef WINDOWS
+		: Kernel("Kernel32")
+		#endif
 	{
 		NewGroup = false;
 		ErrorCode = 0;
 		EnvironmentChanged = false;
 		ExternIn = NULL_PIPE;
 		ExternOut = NULL_PIPE;
+		PseudoConsole = false;
 
 		#if defined(POSIX)
 			ChildPid = INVALID_PID;
@@ -146,7 +154,10 @@ struct GSubProcessPriv
 			ChildHnd = NULL;
 			ExitValue = 0;
 			hConsole = NULL;
+			CreatePseudoConsole = (ProcCreatePseudoConsole)Kernel.GetAddress("CreatePseudoConsole");
+			PseudoConsole = CreatePseudoConsole != NULL && pseudoConsole;
 		#endif
+		int asd=0;
 	}
 
 	~GSubProcessPriv()
@@ -157,8 +168,7 @@ struct GSubProcessPriv
 
 GSubProcess::GSubProcess(const char *exe, const char *args, bool pseudoConsole)
 {
-	d = new GSubProcessPriv();
-	d->PseudoConsole = pseudoConsole;
+	d = new GSubProcessPriv(pseudoConsole);
 	Parent = Child = NULL;
 	d->Exe = exe;
 	d->Args.Add(NewStr(d->Exe));
@@ -868,7 +878,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 				}
 
 				COORD dimensions = { 500, 500 };
-				auto r = CreatePseudoConsole(dimensions,
+				auto r = d->CreatePseudoConsole(dimensions,
 											HasExternIn ? d->ExternIn : d->ChildInput.Read,
 											d->ChildOutput.Write,
 											0,
