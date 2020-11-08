@@ -20,6 +20,28 @@
 
 extern bool In_SetWindowPos;
 
+typedef UINT (WINAPI *ProcGetDpiForWindow)(_In_ HWND hwnd);
+typedef UINT (WINAPI *ProcGetDpiForSystem)(VOID);
+GLibrary User32("User32");
+
+UINT LGetDpiForWindow(HWND hwnd)
+{
+	static bool init = false;
+	static ProcGetDpiForWindow pGetDpiForWindow = NULL;
+	static ProcGetDpiForSystem pGetDpiForSystem = NULL;
+	if (!init)
+	{
+		init = true;
+		pGetDpiForWindow = (ProcGetDpiForWindow) User32.GetAddress("GetDpiForWindow");
+		pGetDpiForSystem = (ProcGetDpiForSystem) User32.GetAddress("GetDpiForSystem");
+	}
+
+	if (pGetDpiForWindow && pGetDpiForSystem)
+		return hwnd ? pGetDpiForWindow(hwnd) : pGetDpiForSystem();
+
+	return LgiScreenDpi();
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 class HookInfo
 {
@@ -1081,12 +1103,7 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 LPoint GWindow::GetDpi()
 {
 	if (!d->Dpi.x)
-	{
-		if (_View)
-			d->Dpi.x = d->Dpi.y = GetDpiForWindow(_View);
-		else
-			d->Dpi.x = d->Dpi.y = GetDpiForSystem();
-	}
+		d->Dpi.x = d->Dpi.y = LGetDpiForWindow(_View);
 
 	return d->Dpi;
 }
