@@ -75,7 +75,7 @@ public:
 		return 0;
 	}
 
-	bool Write(GString &s)
+	bool Write(const GString &s)
 	{
 		return Write(s.Get(), s.Length()) == s.Length();
 	}

@@ -695,7 +695,7 @@ public:
 	}
 	
 	/// Joins an array of strings using a separator
-	GString Join(GArray<GString> &a)
+	GString Join(const GArray<GString> &a)
 	{
 		GString ret;
 		
@@ -708,7 +708,7 @@ public:
 		GArray<size_t> ALen;
 		for (unsigned i=0; i<a.Length(); i++)
 		{
-			ALen[i] = a[i].Length();
+			ALen[i] = a.ItemAt(i).Length();
 			Bytes += ALen[i];
 		}
 		
@@ -723,7 +723,7 @@ public:
 					memcpy(ptr, Sep, SepLen);
 					ptr += SepLen;
 				}
-				memcpy(ptr, a[i].Get(), ALen[i]);
+				memcpy(ptr, a.ItemAt(i).Get(), ALen[i]);
 				ptr += ALen[i];
 			}
 			assert(ptr - ret.Get() == Bytes);
