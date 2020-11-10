@@ -312,6 +312,8 @@ public:
 	GFilePre uint32_t GFilePost;		\
 	GFilePre int64_t GFilePost;			\
 	GFilePre uint64_t GFilePost;		\
+	GFilePre size_t GFilePost;			\
+	GFilePre ssize_t GFilePost;			\
 	GFilePre float GFilePost;			\
 	GFilePre double GFilePost
 
