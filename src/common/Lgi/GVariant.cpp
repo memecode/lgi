@@ -361,7 +361,7 @@ GVariant &GVariant::operator =(uint32_t i)
 	return *this;
 }
 
-GVariant &GVariant::operator =(int64 i)
+GVariant &GVariant::operator =(int64_t i)
 {
 	Empty();
 	Type = GV_INT64;
@@ -369,7 +369,7 @@ GVariant &GVariant::operator =(int64 i)
 	return *this;
 }
 
-GVariant &GVariant::operator =(uint64 i)
+GVariant &GVariant::operator =(uint64_t i)
 {
 	Empty();
 	Type = GV_INT64;
@@ -1046,7 +1046,7 @@ GVariant &GVariant::Cast(GVariantType NewType)
 			}
 			case GV_INT64:
 			{
-				*this = CastInt64();
+				*this = (int64_t) CastInt64();
 				break;
 			}
 			case GV_BOOL:
@@ -1094,7 +1094,7 @@ GVariant &GVariant::Cast(GVariantType NewType)
 						LDateTime *Dt = new LDateTime;
 						if (Dt)
 						{
-							Dt->Set((uint64)Value.Int64);
+							Dt->Set((uint64_t)Value.Int64);
 							Empty();
 							Value.Date = Dt;
 							Type = NewType;

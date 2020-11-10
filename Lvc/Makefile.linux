@@ -21,9 +21,11 @@ ifeq ($(Build),Debug)
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
+		-lssh \
 		-lmagic \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
+		-pthread \
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
@@ -40,9 +42,11 @@ else
 	Flags += -s -Os -std=c++11
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
+		-lssh \
 		-lmagic \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
+		-pthread \
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
@@ -65,6 +69,7 @@ Depends =	 \
 			LgiMain.o \
 			Png.o \
 			BlameUi.o \
+			DeEscape.o \
 			DropDownBtn.o \
 			Main.o \
 			VcCommit.o \
@@ -134,7 +139,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../include/common/GPassword.h \
 	../include/common/GPath.h \
 	../include/common/GPixelRops.h \
-	../include/common/GPoint.h \
 	../include/common/GPopup.h \
 	../include/common/GPopupList.h \
 	../include/common/GPrinter.h \
@@ -201,6 +205,8 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../include/common/LMenuImpl.h \
 	../include/common/LMutex.h \
 	../include/common/LOAuth2.h \
+	../include/common/LPoint.h \
+	../include/common/LRectF.h \
 	../include/common/LStringLayout.h \
 	../include/common/LThread.h \
 	../include/common/LThreadEvent.h \
@@ -397,6 +403,11 @@ BlameUi.o : ./Src/BlameUi.cpp ../include/common/Lgi.h \
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
+DeEscape.o : ../src/common/Text/DeEscape.cpp ../include/common/Lgi.h \
+	../include/common/DeEscape.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
 DropDownBtn.o : ./Src/DropDownBtn.cpp ../include/common/Lgi.h \
 	./Src/Lvc.h
 	@echo $(<F) [$(Build)]
@@ -409,7 +420,8 @@ Main.o : ./Src/Main.cpp ../include/common/Lgi.h \
 	./Resources/resource.h \
 	../include/common/GTextLog.h \
 	../include/common/GButton.h \
-	../include/common/GXmlTreeUi.h
+	../include/common/GXmlTreeUi.h \
+	../include/common/GTree.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -421,13 +433,15 @@ VcCommit.o : ./Src/VcCommit.cpp ./Src/Lvc.h \
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-VcFile.o : ./Src/VcFile.cpp ./Src/Lvc.h
+VcFile.o : ./Src/VcFile.cpp ./Src/Lvc.h \
+	../include/common/GClipBoard.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	./Resources/resdefs.h \
-	../include/common/GCombo.h
+	../include/common/GCombo.h \
+	../include/common/GClipBoard.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -440,6 +454,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LgiCommon.h \
 	../include/common/GXmlTree.h \
 	../include/common/GDragAndDrop.h \
+	../include/common/LPoint.h \
 	../include/common/GApp.h \
 	../include/common/GView.h \
 	../include/common/GLayout.h \
@@ -497,6 +512,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GVariant.h
 
 ../src/common/Gdc2/GRopsCases.cpp : 
+
+../include/common/LPoint.h : 
 
 ../include/common/LListItemCheckBox.h : ../include/common/LList.h
 
@@ -681,6 +698,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/LgiClass.h : ../include/common/LgiInc.h \
 	../include/common/LgiDefs.h \
+	../include/common/LPoint.h \
 	../include/common/GAutoPtr.h
 
 ../src/common/Lgi/GOptionsFile.cpp : ../include/common/Lgi.h \
@@ -888,7 +906,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GLibrary.h \
 	../include/common/GColourSpace.h \
 	../include/common/GRect.h \
-	../include/common/GPoint.h \
+	../include/common/LPoint.h \
 	../include/common/GColour.h \
 	../include/common/GFilter.h
 
@@ -920,7 +938,11 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/GTextLabel.h : 
 
-../include/common/GPath.h : ../include/common/GMatrix.h
+../include/common/GPath.h : ../include/common/GMatrix.h \
+	../include/common/LPoint.h \
+	../include/common/LRectF.h
+
+../include/common/LRectF.h : 
 
 ../include/common/GUnicode.h : ../include/common/LgiInc.h
 
@@ -983,7 +1005,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GLibrary.h \
 	../include/common/GColourSpace.h \
 	../include/common/GRect.h \
-	../include/common/GPoint.h \
+	../include/common/LPoint.h \
 	../include/common/GColour.h \
 	../include/common/GFilter.h
 
@@ -1044,7 +1066,9 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GCssTools.h \
 	../include/common/GPath.h
 
-../include/common/GPath.h : ../include/common/GMatrix.h
+../include/common/GPath.h : ../include/common/GMatrix.h \
+	../include/common/LPoint.h \
+	../include/common/LRectF.h
 
 ../include/common/LgiInc.h : 
 
@@ -1256,8 +1280,6 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/GCssTools.h : ../include/common/GCss.h
 
-../include/common/GPoint.h : 
-
 ../include/common/GFontSelect.h : 
 
 ../src/common/Widgets/GCombo.cpp : ../include/common/Lgi.h \
@@ -1318,7 +1340,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/GClipBoard.h : 
 
-../include/common/GRect.h : ../include/common/GPoint.h
+../include/common/GRect.h : ../include/common/LPoint.h
 
 ../include/common/Mail.h : ../include/common/INet.h \
 	../include/common/Base64.h \
@@ -1415,6 +1437,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/INet.h \
 	../include/common/GRegKey.h
 
+../include/common/LPoint.h : 
+
 ../include/common/GTree.h : ../include/common/GItemContainer.h
 
 ../include/common/GDataDlg.h : ../include/common/GProperties.h \
@@ -1443,6 +1467,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LgiCommon.h \
 	../include/common/GXmlTree.h \
 	../include/common/GDragAndDrop.h \
+	../include/common/LPoint.h \
 	../include/common/GApp.h \
 	../include/common/GView.h \
 	../include/common/GLayout.h \
@@ -1624,6 +1649,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GPixelRops.h \
 	../include/common/LUnicodeString.h
 
+../include/common/DeEscape.h : 
+
 ../include/common/GFileSelect.h : 
 
 ../include/common/LgiMsgs.h : 
@@ -1663,11 +1690,18 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/GTabView.h \
 	../include/common/GEdit.h \
 	../include/common/LMenu.h \
+	../include/common/LSsh.h \
+	../include/common/GEventTargetThread.h \
 	./Src/VcFile.h \
 	./Src/VcCommit.h \
 	./Src/VcFolder.h
 
 ./Src/VcFolder.h : ../include/common/GSubProcess.h
+
+../include/common/LSsh.h : ../include/common/DeEscape.h \
+	../include/common/GTextLog.h
+
+../include/common/DeEscape.h : 
 
 ./Src/VcFile.h : ../include/common/LListItemCheckBox.h
 
@@ -1693,7 +1727,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LCancel.h \
 	../include/common/LHashTable.h
 
-../include/common/GRect.h : ../include/common/GPoint.h
+../include/common/GRect.h : ../include/common/LPoint.h
 
 ../include/common/GOptionsFile.h : ../include/common/GVariant.h \
 	../include/common/GXmlTree.h \
@@ -1747,6 +1781,8 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/GDocView.h : ../include/common/GVariant.h \
 	../include/common/GNotifications.h
+
+../include/common/LRectF.h : 
 
 ../src/common/General/GProperties.cpp : ../include/linux/Gtk/LgiOsDefs.h \
 	../include/common/GFile.h \
@@ -1823,6 +1859,7 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 
 ../include/common/LgiClass.h : ../include/common/LgiInc.h \
 	../include/common/LgiDefs.h \
+	../include/common/LPoint.h \
 	../include/common/GAutoPtr.h
 
 ../include/common/LListItemCheckBox.h : ../include/common/LList.h
@@ -1862,8 +1899,6 @@ VcFolder.o : ./Src/VcFolder.cpp ./Src/Lvc.h \
 	../include/common/LDateTime.h \
 	../include/common/GToken.h \
 	../include/common/GDocView.h
-
-../include/common/GPoint.h : 
 
 ../include/common/GProgressDlg.h : ../include/common/GTextLabel.h \
 	../include/common/GTableLayout.h

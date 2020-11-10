@@ -81,8 +81,10 @@ const char *GUri::LocalPath()
 	auto s = sPath.Get();
 	if (!s)
 		return NULL;
+	#ifdef WINDOWS
 	if (*s == '/')
 		s++;
+	#endif
 	return s;
 }
 

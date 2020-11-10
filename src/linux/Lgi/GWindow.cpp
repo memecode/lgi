@@ -1325,6 +1325,17 @@ void ClientCallback(GtkWidget *w, CallbackParams *p)
 	}
 }
 
+LPoint GWindow::GetDpi()
+{
+	return LPoint(96,96);
+}
+
+LPointF GWindow::GetDpiScale()
+{
+	auto Dpi = GetDpi();
+	return LPointF((double)Dpi.x/96.0, (double)Dpi.y/96.0);
+}
+
 GRect &GWindow::GetClient(bool ClientSpace)
 {
 	static GRect r;

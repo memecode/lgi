@@ -97,7 +97,7 @@ bool ResolveShortcut(const char *LinkFile, char *Path, int Length)
 	return Status;
 }
 
-int64 LgiFileSize(const char *FileName)
+int64 LFileSize(const char *FileName)
 {
 	BEntry e(FileName);
 	off_t s = 0;

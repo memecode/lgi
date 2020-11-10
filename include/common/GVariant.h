@@ -17,7 +17,7 @@
 
 class GCompiledCode;
 
-#if !defined(_MSC_VER) && (defined(LGI_64BIT) || defined(MAC))
+#if !defined(_MSC_VER) && !defined(LINUX) && (defined(LGI_64BIT) || defined(MAC))
 	#define GVARIANT_SIZET	1
 	#define GVARIANT_SSIZET	1
 #endif
@@ -314,10 +314,10 @@ public:
 	/// Assign bool value
 	GVariant &operator =(bool i);
 	/// Assign an integer value
-	GVariant &operator =(int32 i);
+	GVariant &operator =(int32_t i);
 	GVariant &operator =(uint32_t i);
-	GVariant &operator =(int64 i);
-	GVariant &operator =(uint64 i);
+	GVariant &operator =(int64_t i);
+	GVariant &operator =(uint64_t i);
 	#if GVARIANT_SIZET
 	GVariant &operator =(size_t i);
 	#endif

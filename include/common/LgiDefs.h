@@ -42,6 +42,11 @@ typedef		unsigned long				ulong;
 		typedef signed int			ssize_t;
 	#endif
 
+#elif defined(LINUX)
+	/// 64-bit signed int type (size safe, guaranteed to be 64 bits)
+	typedef		int64_t						int64;
+	/// 64-bit unsigned int type (size safe, guaranteed to be 64 bits)
+	typedef		uint64_t					uint64;
 #else
 	/// 64-bit signed int type (size safe, guaranteed to be 64 bits)
 	typedef		signed long long			int64;

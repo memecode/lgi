@@ -324,7 +324,7 @@ char *ReadTextFile(const char *File)
 	return s;
 }
 
-int64 LgiFileSize(const char *FileName)
+int64 LFileSize(const char *FileName)
 {
 	struct stat64 s;
 	if (FileName &&

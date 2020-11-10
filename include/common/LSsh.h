@@ -1,4 +1,7 @@
 #pragma once
+
+// If you don't have libssh.h then you might want to:
+//		sudo apt-get install libssh-dev
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 
@@ -180,7 +183,7 @@ public:
 		}
 		// Log->Print("%s:%i - ssh_connect ok.\n", _FL);
 
-		auto State = ssh_session_is_known_server(Ssh);
+		auto State = ssh_is_server_known /*ssh_session_is_known_server*/(Ssh);
 		// Log->Print("%s:%i - ssh_session_is_known_server=%i.\n", _FL, State);
 
 		if (PublicKey)

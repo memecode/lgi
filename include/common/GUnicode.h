@@ -28,6 +28,9 @@ typedef unsigned int uint32_t;
 	#else
 	typedef signed int			ssize_t;
 	#endif
+#elif defined(LINUX)
+	typedef int64_t int64;
+	typedef uint64_t uint64;
 #else
 	typedef signed long long int64;
 	typedef unsigned long long uint64;

@@ -12,15 +12,16 @@
 			<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node File="./Src/BlameUi.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Text/DeEscape.cpp" Type="2" Platforms="15" />
 		<Node File="./Src/DropDownBtn.cpp" Type="2" Platforms="15" />
+		<Node File="./Src/Lvc.h" Type="3" Platforms="15" />
 		<Node File="./Src/Main.cpp" Type="2" Platforms="15" />
 		<Node File="./Src/VcCommit.cpp" Type="2" Platforms="15" />
+		<Node File="./Src/VcCommit.h" Type="3" Platforms="15" />
 		<Node File="./Src/VcFile.cpp" Type="2" Platforms="15" />
 		<Node File="./Src/VcFile.h" Type="3" Platforms="15" />
 		<Node File="./Src/VcFolder.cpp" Type="2" Platforms="15" />
 		<Node File="./Src/VcFolder.h" Type="3" Platforms="15" />
-		<Node File="./Src/Lvc.h" Type="3" Platforms="15" />
-		<Node File="./Src/VcCommit.h" Type="3" Platforms="15" />
 	</Node>
 	<Node File="../Lgi.xml" Type="4" Platforms="15" />
 	<Node Name="Resources" Type="1" Platforms="15" Id="1">
@@ -81,11 +82,17 @@
 				<Linux>
 					<Debug>magic
 -static-libgcc 
-`pkg-config --libs gtk+-3.0`</Debug>
+`pkg-config --libs gtk+-3.0`
+-pthread</Debug>
 					<Release>magic
 -static-libgcc 
-`pkg-config --libs gtk+-3.0`</Release>
+`pkg-config --libs gtk+-3.0`
+-pthread</Release>
 				</Linux>
+				<All>
+					<Debug>ssh</Debug>
+					<Release>ssh</Release>
+				</All>
 			</Libraries>
 			<TargetType>
 				<All>Executable</All>
@@ -102,5 +109,6 @@
 				<All>1</All>
 			</UseHardTabs>
 		</Editor>
+		<Advanced />
 	</Settings>
 </Project>

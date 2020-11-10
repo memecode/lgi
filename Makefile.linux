@@ -1087,7 +1087,7 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/GLibrary.h \
 	./include/common/GColourSpace.h \
 	./include/common/GRect.h \
-	./include/common/GPoint.h \
+	./include/common/LPoint.h \
 	./include/common/GColour.h \
 	./include/common/GFilter.h
 
@@ -1103,16 +1103,18 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 
 ./include/common/LCurrentTime.h : 
 
-./include/common/GPath.h : ./include/common/GMatrix.h
+./include/common/GPath.h : ./include/common/GMatrix.h \
+	./include/common/LPoint.h \
+	./include/common/LRectF.h
+
+./include/common/LRectF.h : 
 
 ./include/common/INetTools.h : ./include/common/GContainers.h \
 	./include/common/LgiNetInc.h
 
 ./include/common/LgiNetInc.h : 
 
-./include/common/Progress.h : ./include/common/LMutex.h \
-	./include/common/LCancel.h \
-	./include/common/GStringClass.h
+./include/common/LPoint.h : 
 
 ./include/common/GButton.h : 
 
@@ -1138,8 +1140,6 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 
 ./include/common/GArray.h : ./include/common/GRange.h
 
-./include/common/LMutex.h : ./include/common/LCurrentTime.h
-
 ./include/common/INet.h : ./include/common/LgiNetInc.h \
 	./include/common/LgiInterfaces.h \
 	./include/common/GMem.h \
@@ -1154,7 +1154,7 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 ./include/common/GDocView.h : ./include/common/GVariant.h \
 	./include/common/GNotifications.h
 
-./include/common/GRect.h : ./include/common/GPoint.h
+./include/common/GRect.h : ./include/common/LPoint.h
 
 ./include/common/GDragAndDrop.h : ./include/common/GVariant.h
 
@@ -1264,6 +1264,8 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/LCancel.h \
 	./include/common/LHashTable.h
 
+./include/common/LMutex.h : ./include/common/LCurrentTime.h
+
 ./include/common/LThread.h : ./include/common/LMutex.h
 
 ./include/common/GXmlTree.h : ./include/common/GHashTable.h \
@@ -1324,6 +1326,7 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/LgiCommon.h \
 	./include/common/GXmlTree.h \
 	./include/common/GDragAndDrop.h \
+	./include/common/LPoint.h \
 	./include/common/GApp.h \
 	./include/common/GView.h \
 	./include/common/GLayout.h \
@@ -1390,6 +1393,10 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 ./include/common/GFindReplaceDlg.h : 
 
 ./include/common/GNotifications.h : 
+
+./include/common/Progress.h : ./include/common/LMutex.h \
+	./include/common/LCancel.h \
+	./include/common/GStringClass.h
 
 ./include/common/GTableLayout.h : ./include/common/GCss.h \
 	./include/common/GNotifications.h
@@ -1522,7 +1529,7 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/GLibrary.h \
 	./include/common/GColourSpace.h \
 	./include/common/GRect.h \
-	./include/common/GPoint.h \
+	./include/common/LPoint.h \
 	./include/common/GColour.h \
 	./include/common/GFilter.h
 
@@ -1563,6 +1570,7 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 
 ./include/common/LgiClass.h : ./include/common/LgiInc.h \
 	./include/common/LgiDefs.h \
+	./include/common/LPoint.h \
 	./include/common/GAutoPtr.h
 
 ./include/common/GCapabilities.h : ./include/common/LHashTable.h
@@ -1575,6 +1583,7 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 
 ./include/common/LgiClass.h : ./include/common/LgiInc.h \
 	./include/common/LgiDefs.h \
+	./include/common/LPoint.h \
 	./include/common/GAutoPtr.h
 
 ./include/common/GTableLayout.h : ./include/common/GCss.h \
@@ -1586,8 +1595,6 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/linux/Gtk/LgiOsDefs.h
 
 ./include/common/GLibrary.h : 
-
-./include/common/GPoint.h : 
 
 ./include/common/GDragAndDrop.h : ./include/common/GVariant.h
 

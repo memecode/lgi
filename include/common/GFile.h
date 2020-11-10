@@ -304,16 +304,14 @@ public:
 
 #define GFileOps()						\
 	GFilePre char GFilePost;			\
-	GFilePre int8 GFilePost;			\
+	GFilePre int8_t GFilePost;			\
 	GFilePre uint8_t GFilePost;			\
-	GFilePre int16 GFilePost;			\
-	GFilePre uint16 GFilePost;			\
-	GFilePre signed int GFilePost;		\
-	GFilePre unsigned int GFilePost;	\
-	GFilePre signed long GFilePost;		\
-	GFilePre unsigned long GFilePost;	\
-	GFilePre int64 GFilePost;			\
-	GFilePre uint64 GFilePost;			\
+	GFilePre int16_t GFilePost;			\
+	GFilePre uint16_t GFilePost;		\
+	GFilePre int32_t GFilePost;			\
+	GFilePre uint32_t GFilePost;		\
+	GFilePre int64_t GFilePost;			\
+	GFilePre uint64_t GFilePost;		\
 	GFilePre float GFilePost;			\
 	GFilePre double GFilePost
 
