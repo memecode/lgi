@@ -302,20 +302,37 @@ public:
 	bool Move(const char *OldName, const char *NewName, LError *Err = NULL);
 };
 
-#define GFileOps()						\
-	GFilePre char GFilePost;			\
-	GFilePre int8_t GFilePost;			\
-	GFilePre uint8_t GFilePost;			\
-	GFilePre int16_t GFilePost;			\
-	GFilePre uint16_t GFilePost;		\
-	GFilePre int32_t GFilePost;			\
-	GFilePre uint32_t GFilePost;		\
-	GFilePre int64_t GFilePost;			\
-	GFilePre uint64_t GFilePost;		\
-	GFilePre size_t GFilePost;			\
-	GFilePre ssize_t GFilePost;			\
-	GFilePre float GFilePost;			\
-	GFilePre double GFilePost
+#if defined(WINDOWS)
+	#define GFileOps()			\
+		GFileOp(char)			\
+		GFileOp(int8_t)			\
+		GFileOp(uint8_t)		\
+		GFileOp(int16_t)		\
+		GFileOp(uint16_t)		\
+		GFileOp(int32_t)		\
+		GFileOp(uint32_t)		\
+		GFileOp(int64_t)		\
+		GFileOp(uint64_t)		\
+		GFileOp(long)			\
+		GFileOp(ulong)			\
+		GFileOp(float)			\
+		GFileOp(double)
+#else
+	#define GFileOps()			\
+		GFileOp(char)			\
+		GFileOp(int8_t)			\
+		GFileOp(uint8_t)		\
+		GFileOp(int16_t)		\
+		GFileOp(uint16_t)		\
+		GFileOp(int32_t)		\
+		GFileOp(uint32_t)		\
+		GFileOp(int64_t)		\
+		GFileOp(uint64_t)		\
+		GFileOp(size_t)			\
+		GFileOp(ssize_t)		\
+		GFileOp(float)			\
+		GFileOp(double)
+#endif
 
 /// Generic file access class
 class LgiClass GFile : public GStream, public GRefCount
@@ -416,17 +433,13 @@ public:
 	}
 
 	// Operators
-	#define GFilePre		virtual GFile &operator >> (
-	#define GFilePost		&i)
+	#define GFileOp(type)		virtual GFile &operator >> (type &i);
 	GFileOps();
-	#undef GFilePre
-	#undef GFilePost
+	#undef GFileOp
 
-	#define GFilePre		virtual GFile &operator << (
-	#define GFilePost		i)
+	#define GFileOp(type)		virtual GFile &operator << (type i);
 	GFileOps();
-	#undef GFilePre
-	#undef GFilePost
+	#undef GFileOp
 
 	// GDom impl
 	bool GetVariant(const char *Name, GVariant &Value, char *Array = NULL) override;

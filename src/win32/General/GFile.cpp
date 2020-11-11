@@ -1862,33 +1862,22 @@ bool GFile::GetStatus()
 	return d->Status;
 }
 
-#define RdIO \
+#define GFileOp(type)	GFile &GFile::operator >> (type &i) \
 { \
-	if (d->Swap) \
-		SwapRead((uchar*) &i, sizeof(i)); \
-	else \
-		Read(&i, sizeof(i)); \
+	if (d->Swap) SwapRead((uchar*) &i, sizeof(i)); \
+	else Read(&i, sizeof(i)); \
+	return *this; \
+}
+GFileOps(); 
+#undef GFileOp
+
+#define GFileOp(type)	GFile &GFile::operator << (type i) \
+{ \
+	if (d->Swap) SwapWrite((uchar*) &i, sizeof(i)); \
+	else Write(&i, sizeof(i)); \
 	return *this; \
 }
 
-#define WrIO \
-{ \
-	if (d->Swap) \
-		SwapWrite((uchar*) &i, sizeof(i)); \
-	else \
-		Write(&i, sizeof(i)); \
-	return *this; \
-}
-
-#define GFilePre		GFile &GFile::operator >> (
-#define GFilePost		&i) RdIO
 GFileOps(); 
-#undef GFilePre
-#undef GFilePost
-
-#define GFilePre		GFile &GFile::operator << (
-#define GFilePost		i) WrIO
-GFileOps(); 
-#undef GFilePre
-#undef GFilePost
+#undef GFileOp
 
