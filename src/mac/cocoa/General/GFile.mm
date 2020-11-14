@@ -1969,18 +1969,19 @@ const char *GFile::GetName()
 	return d->Name;
 }
 
-#define RdIO { d->Status |= ((d->Swap) ? SwapRead((uchar*) &i, sizeof(i)) : Read(&i, sizeof(i))) != sizeof(i); return *this; }
-#define WrIO { d->Status |= ((d->Swap) ? SwapWrite((uchar*) &i, sizeof(i)) : Write(&i, sizeof(i))) != sizeof(i); return *this; }
-
-#define GFilePre		GFile &GFile::operator >> (
-#define GFilePost		&i) RdIO
+#define GFileOp(type)	GFile &GFile::operator >> (type &i) \
+	{ \
+		d->Status |= ((d->Swap) ? SwapRead((uchar*) &i, sizeof(i)) : Read(&i, sizeof(i))) != sizeof(i); \
+		return *this; \
+	}
 GFileOps();
-#undef GFilePre
-#undef GFilePost
+#undef GFileOp
 
-#define GFilePre		GFile &GFile::operator << (
-#define GFilePost		i) WrIO
+#define GFileOp(type)	GFile &GFile::operator << (type i) \
+	{ \
+		d->Status |= ((d->Swap) ? SwapWrite((uchar*) &i, sizeof(i)) : Write(&i, sizeof(i))) != sizeof(i); \
+		return *this; \
+	}
 GFileOps();
-#undef GFilePre
-#undef GFilePost
+#undef GFileOp
 
