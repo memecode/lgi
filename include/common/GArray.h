@@ -599,7 +599,7 @@ public:
 		// Insert items
 		memset(p + Index, 0, a.Length() * sizeof(*p));
 		for (size_t i=0; i<a.Length(); i++)
-			p[Index+i] = a[i];
+			p[Index+i] = a.ItemAt(i);
 
 		return true;
 	}
