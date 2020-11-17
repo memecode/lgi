@@ -317,6 +317,19 @@ public:
 		GFileOp(ulong)			\
 		GFileOp(float)			\
 		GFileOp(double)
+#elif defined(LINUX)
+	#define GFileOps()			\
+		GFileOp(char)			\
+		GFileOp(int8_t)			\
+		GFileOp(uint8_t)		\
+		GFileOp(int16_t)		\
+		GFileOp(uint16_t)		\
+		GFileOp(int32_t)		\
+		GFileOp(uint32_t)		\
+		GFileOp(int64_t)		\
+		GFileOp(uint64_t)		\
+		GFileOp(float)			\
+		GFileOp(double)
 #else
 	#define GFileOps()			\
 		GFileOp(char)			\
@@ -458,6 +471,8 @@ public:
 			TypeFolder = 1,
 			TypeFile = 2,
 		};
+		
+		static GString Sep;
 
 		Path(const char *init = NULL, const char *join = NULL)
 		{
@@ -479,7 +494,7 @@ public:
 		{
 			SetFixedLength(false);
 			if (Init)
-				*this = Init.Get();
+				*this = Init;
 		}
 		
 		Path(LgiSystemPath Which, int WordSize = 0)
@@ -571,24 +586,46 @@ public:
 		
 		operator const char *()
 		{
-			GString Sep(DIR_STR);
-			#ifdef WINDOWS
-			Full = Sep.Join(*this);
-			#else
-			Full = Sep + Sep.Join(*this);
-			#endif
-			return Full;
+			return GetFull();
 		}
 
 		GString GetFull()
 		{
-			GString Sep(DIR_STR);
-			#ifdef WINDOWS
-			Full = Sep.Join(*this);
-			#else
-			Full = Sep + Sep.Join(*this);
+			#if !defined(WINDOWS)
+			if (!IsRelative())
+				Full = Sep + Sep.Join(*this);
+			else
 			#endif
+				Full = Sep.Join(*this);
 			return Full;
+		}
+		
+		bool IsRelative()
+		{
+			if (Length() == 0)
+				return false;
+			auto &f = (*this)[0];
+			if (f.Equals("~") || f.Equals(".") || f.Equals(".."))
+				return true;
+			return false;
+		}
+		
+		GFile::Path Absolute()
+		{
+			GFile::Path p = *this;
+			p.SetFixedLength(false);
+			
+			for (size_t i=0; i<p.Length(); i++)
+			{
+				if (p[i].Equals("~"))
+				{
+					auto h = GetSystem(LSP_HOME, 0).SplitDelimit(DIR_STR);
+					p.DeleteAt(i, true);
+					p.AddAt(i, h);
+					break;
+				}
+			}
+			return p;
 		}
 
 		State Exists();

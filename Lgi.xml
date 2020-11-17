@@ -14,7 +14,7 @@
 					<Node File=".\src\mac\cocoa\Lgi\GDragAndDrop.mm" Type="8" Platforms="4" />
 				</Node>
 				<Node Name="Windows" Type="1" Platforms="15" Open="0" Id="7">
-					<Node File=".\include\common\GCom.h" Type="3" Platforms="15" />
+					<Node File="./include/common/GCom.h" Type="3" Platforms="15" />
 					<Node File=".\src\win32\Lgi\GDragAndDrop.cpp" Type="2" Platforms="1" />
 				</Node>
 				<Node File="./include/common/GDragAndDrop.h" Type="3" Platforms="15" />
@@ -484,5 +484,9 @@ include/linux/Gtk</Release>
 				<Linux />
 			</PostBuildCommands>
 		</Advanced>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

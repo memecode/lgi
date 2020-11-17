@@ -41,7 +41,7 @@
 	#define GSUBPROCESS_ERROR	ERROR_PROCESS_ABORTED
 #endif
 
-class LgiClass GSubProcess : public GStreamI
+class LgiClass GSubProcess : public GStream
 {
 public:
 	#if defined(WIN32)

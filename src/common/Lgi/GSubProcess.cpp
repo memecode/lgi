@@ -474,6 +474,10 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 {
 	bool Status = false;
 
+	#if DEBUG_SUBPROCESS
+	LgiTrace("%s:%i - %p::Start(%i,%i,%i)\n", _FL, this, ReadAccess, WriteAccess, MapStderrToStdout);
+	#endif
+
 	#if USE_SIMPLE_FORK
 	
 		int in[2];
@@ -566,8 +570,8 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
                     }
                 }
 				
-				#if 0
-				printf("Exe=%s\n", Exe.Get());
+				#if DEBUG_SUBPROCESS
+				printf("Exe=%s\n", d->Exe.Get());
 				printf("Env.Len=%i\n", (int)Env.Length());
 				for (int i=0; i<Env.Length(); i++)
 					printf("Env[%i]=%s\n", i, Env[i]);
@@ -612,10 +616,6 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 	
 	#else
 	
-		#if DEBUG_SUBPROCESS
-		LgiTrace("%s:%i - %p::Start(%i,%i,%i)\n", _FL, this, ReadAccess, WriteAccess, MapStderrToStdout);
-		#endif
-		
 		// Find the end of the process list
 		::GArray<GSubProcess*> p;
 		for (GSubProcess *s=this; s; s=s->Child)
@@ -1093,7 +1093,7 @@ bool GSubProcess::Signal(int which)
 	#if defined(POSIX)
 		if (d->ChildPid == INVALID_PID)
 		{
-			printf("%s:%i - child pid doesn't exist.\n", _FL);
+			printf("%s:%i - child pid doesn't exist (%s).\n", _FL, d->Exe.Get());
 			return false;
 		}
 

@@ -576,6 +576,34 @@ public:
 		return true;
 	}
 
+	/// Inserts an array into the array at a position
+	bool AddAt
+	(
+		/// Item to insert before
+		size_t Index,
+		/// Array to insert
+		const GArray<Type> &a
+	)
+	{
+		// Make room
+		if (!Length(len + a.Length()))
+			return false;
+
+		if (Index < len - 1)
+			// Shift elements after insert point up one
+			memmove(p + Index + a.Length(), p + Index, (len - Index - a.Length()) * sizeof(Type) );
+		else
+			// Add at the end, not after the end...
+			Index = len - 1;
+
+		// Insert items
+		memset(p + Index, 0, a.Length() * sizeof(*p));
+		for (size_t i=0; i<a.Length(); i++)
+			p[Index+i] = a[i];
+
+		return true;
+	}
+
 	/// Sorts the array via a comparison function
 	void Sort(int (*Compare)(Type*, Type*))
 	{
