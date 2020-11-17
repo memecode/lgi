@@ -38,6 +38,8 @@
 #define FLOPPY_3_5				(FLOPPY_720K | FLOPPY_1_4M)
 
 /****************************** Helper Functions ****************************************************************************/
+GString GFile::Path::Sep(DIR_STR);
+
 char *ReadTextFile(const char *File)
 {
 	char *s = 0;
