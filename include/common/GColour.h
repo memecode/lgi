@@ -101,8 +101,12 @@ public:
 		auto Diff = GetGray() - c.GetGray();
 		return abs(Diff);
 	}
+	operator bool() const
+	{
+		return IsValid();
+	}
 	
-	bool IsValid();
+	bool IsValid() const;
 	void Empty();
 	bool IsTransparent();
 	/// Sets the colour to a rgb(a) value

@@ -403,9 +403,12 @@ void GCssTools::PaintContent(GSurface *pDC, GRect &in, const char *utf8, GSurfac
 	if (!BackgroundDrawn)
 	{
 		GColour Background = GetBack();
-		pDC->Colour(Background);
-		pDC->Rectangle(&in);
-		BackgroundDrawn = true;
+		if (Background)
+		{
+			pDC->Colour(Background);
+			pDC->Rectangle(&in);
+			BackgroundDrawn = true;
+		}
 	}
 
 	if (utf8 || img)

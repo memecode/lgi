@@ -657,13 +657,9 @@ void GScreenDC::Box(GRect *a)
 {
 	HBRUSH hTemp = (HBRUSH) SelectObject(hDC, d->Null.Brush);
 	if (a)
-	{
 		::Rectangle(hDC, a->x1, a->y1, a->x2+1, a->y2+1);
-	}
 	else
-	{
 		::Rectangle(hDC, 0, 0, X(), Y());
-	}
 	SelectObject(hDC, hTemp);
 }
 
@@ -676,13 +672,9 @@ void GScreenDC::Rectangle(GRect *a)
 {
 	GRect b;
 	if (a)
-	{
 		b = *a;
-	}
 	else
-	{
 		b.ZOff(X()-1, Y()-1);
-	}
 
 	::Rectangle(hDC, b.x1, b.y1, b.x2+1, b.y2+1);
 }
@@ -693,13 +685,9 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	{
 		GRect b;
 		if (a)
-		{
 			b = *a;
-		}
 		else
-		{
 			b.ZOff(Src->X()-1, Src->Y()-1);
-		}
 
 		int RowOp;
 

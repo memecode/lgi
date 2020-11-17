@@ -86,7 +86,7 @@ bool GColour::SetColourSpace(GColourSpace cs)
 	return false;
 }
 
-bool GColour::IsValid()
+bool GColour::IsValid() const
 {
 	return space != CsNone;
 }
