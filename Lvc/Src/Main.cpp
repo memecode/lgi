@@ -1198,7 +1198,8 @@ public:
 			Tree->GetAll(Folders);
 			for (auto f: Folders)
 			{
-				if (!Stricmp(f->LocalPath(), Fld))
+				if (f->GetUri().IsFile() &&
+					!Stricmp(f->LocalPath(), Fld))
 				{
 					Has = true;
 					break;

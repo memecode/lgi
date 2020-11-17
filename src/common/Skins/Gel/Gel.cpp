@@ -145,7 +145,6 @@ class GelSkin : public GSkinEngine
 	{
 		if (!pDC)
 			return;
-		LgiAssert(Back.IsValid());
 
 		#if LGI_SDL
 		

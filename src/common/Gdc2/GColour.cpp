@@ -25,11 +25,13 @@ GColour::GColour(const char *Str)
 
 GColour::GColour(uint8_t idx8, GPalette *palette)
 {
+	pal = NULL;
 	c8(idx8, palette);
 }
 
 GColour::GColour(int r, int g, int b, int a)
 {
+	pal = NULL;
 	space = System32BitColourSpace;
 	rgb.r = limit(r, 0, 255);
 	rgb.g = limit(g, 0, 255);
@@ -39,12 +41,14 @@ GColour::GColour(int r, int g, int b, int a)
 
 GColour::GColour(uint32_t c, int bits, GPalette *palette)
 {
+	pal = NULL;
 	Set(c, bits, palette);
 }
 
 #ifdef __GTK_H__
 GColour::GColour(Gtk::GdkRGBA gtk)
 {
+	pal = NULL;
 	Rgb(gtk.red * 255.0, gtk.green * 255.0, gtk.blue * 255.0, gtk.alpha * 255.0);
 }
 #endif
