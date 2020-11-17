@@ -328,6 +328,8 @@ public:
 		GFileOp(uint32_t)		\
 		GFileOp(int64_t)		\
 		GFileOp(uint64_t)		\
+		GFileOp(long)			\
+		GFileOp(ulong)			\
 		GFileOp(float)			\
 		GFileOp(double)
 #else
@@ -600,11 +602,11 @@ public:
 			return Full;
 		}
 		
-		bool IsRelative()
+		bool IsRelative() const
 		{
 			if (Length() == 0)
 				return false;
-			auto &f = (*this)[0];
+			auto &f = ItemAt(0);
 			if (f.Equals("~") || f.Equals(".") || f.Equals(".."))
 				return true;
 			return false;
