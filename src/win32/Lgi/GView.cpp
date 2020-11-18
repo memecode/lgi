@@ -681,7 +681,7 @@ bool GView::Attach(GViewI *p)
 								LgiProcessInst(),
 								(GViewI*) this);
 
-		#if 1 // def _DEBUG
+		#ifdef _DEBUG
 		if (!_View)
 		{
 			DWORD e = GetLastError();
@@ -941,12 +941,12 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 	m.Target = this;
 
 	// buttons
-	m.Flags =	((GetAsyncKeyState(VK_LBUTTON)&0x8000) ? LGI_EF_LEFT : 0) |
+	m.Flags =	((GetAsyncKeyState(VK_LBUTTON)&0x8000) ? LGI_EF_LEFT   : 0) |
 				((GetAsyncKeyState(VK_MBUTTON)&0x8000) ? LGI_EF_MIDDLE : 0) |
-				((GetAsyncKeyState(VK_RBUTTON)&0x8000) ? LGI_EF_RIGHT : 0) |
-				((GetAsyncKeyState(VK_CONTROL)&0x8000) ? LGI_EF_CTRL : 0) |
-				((GetAsyncKeyState(VK_MENU)&0x8000) ? LGI_EF_ALT : 0) |
-				((GetAsyncKeyState(VK_SHIFT)&0x8000) ? LGI_EF_SHIFT : 0);
+				((GetAsyncKeyState(VK_RBUTTON)&0x8000) ? LGI_EF_RIGHT  : 0) |
+				((GetAsyncKeyState(VK_CONTROL)&0x8000) ? LGI_EF_CTRL   : 0) |
+				((GetAsyncKeyState(VK_MENU)   &0x8000) ? LGI_EF_ALT    : 0) |
+				((GetAsyncKeyState(VK_SHIFT)  &0x8000) ? LGI_EF_SHIFT  : 0);
 
 	if (m.Flags & (LGI_EF_LEFT | LGI_EF_MIDDLE | LGI_EF_RIGHT))
 	{

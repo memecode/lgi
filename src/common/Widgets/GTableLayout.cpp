@@ -32,10 +32,10 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		32
+// #define DEBUG_LAYOUT		24
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
-// #define DEBUG_CTRL_ID		16
+// #define DEBUG_CTRL_ID		609
 
 int GTableLayout::CellSpacing = 4;
 
@@ -2155,7 +2155,6 @@ void GTableLayout::OnPaint(GSurface *pDC)
 {
 	if (SizeChanged() || d->LayoutDirty)
 	{
-		// LgiTrace("%s:%i - Post M_TABLE_LAYOUT for %i\n", _FL, GetId());
 		#if LGI_VIEW_HANDLE
 		if (!_View)
 		#endif
@@ -2300,6 +2299,9 @@ int GTableLayout::OnNotify(GViewI *c, int f)
 				PostEvent(M_TABLE_LAYOUT);
 			}
 		}
+
+		SendNotify(GNotifyTableLayout_Refresh);
+
         return 0;
     }
 

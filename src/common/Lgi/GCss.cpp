@@ -2221,7 +2221,7 @@ bool GCss::ColorDef::Parse(const char *&s)
 	NamedColour(red, Rgb32(0xff, 0x00, 0x00))
 	NamedColour(yellow, Rgb32(0xff, 0xff, 0x00))
 	NamedColour(green, Rgb32(0x00, 0x80, 0x00))
-	NamedColour(orange, Rgb32(0xff, 0xA5, 0x00))
+	NamedColour(orange, Rgb32(0xff, 0xa5, 0x00))
 	NamedColour(blue, Rgb32(0x00, 0x00, 0xff))
 	NamedColour(maroon, Rgb32(0x80, 0x00, 0x00))
 	NamedColour(olive, Rgb32(0x80, 0x80, 0x00))
@@ -2232,6 +2232,7 @@ bool GCss::ColorDef::Parse(const char *&s)
 	NamedColour(aqua, Rgb32(0x00, 0xff, 0xff))
 	NamedColour(teal, Rgb32(0x00, 0x80, 0x80))
 	NamedColour(silver, Rgb32(0xc0, 0xc0, 0xc0))
+	NamedColour(ThreeDFace, LColour(L_MED).c32())
 	else
 		return false;
 

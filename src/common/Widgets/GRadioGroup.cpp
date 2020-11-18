@@ -369,11 +369,14 @@ public:
 	GRadioButton *Ctrl;
 	bool Val;
 	bool Over;
+	GRect Btn;
+	GColour BackCol;
 
 	GRadioButtonPrivate(GRadioButton *c) :
 		LMutex("GRadioButtonPrivate"),
 		LStringLayout(LgiApp->GetFontCache())
 	{
+		Btn.ZOff(-1,-1);
 		Ctrl = c;
 		Val = 0;
 		Over = 0;
@@ -382,6 +385,20 @@ public:
 
 	~GRadioButtonPrivate()
 	{
+	}
+
+	GRect GetBtn()
+	{
+		auto CtrlHt = Ctrl->Y();
+		auto Fnt = Ctrl->GetFont();
+		int Px = (int) (Fnt->Ascent() + 0.5);
+		if (Px > CtrlHt)
+			Px = CtrlHt;
+
+		Btn.ZOff(Px-1, Px-1);
+		Btn.Offset(0, (CtrlHt-Btn.Y())>>1);
+
+		return Btn;
 	}
 
 	bool PreLayout(int32 &Min, int32 &Max)
@@ -515,6 +532,9 @@ void GRadioButton::SetFont(GFont *Fnt, bool OwnIt)
 
 bool GRadioButton::OnLayout(GViewLayoutInfo &Inf)
 {
+	auto Btn = d->GetBtn();
+	int Pad = Btn.X() + 4;
+
 	if (!Inf.Width.Max)
 	{
 		d->PreLayout(Inf.Width.Min, Inf.Width.Max);
@@ -522,14 +542,13 @@ bool GRadioButton::OnLayout(GViewLayoutInfo &Inf)
 		// FIXME: Wrapping labels not supported yet. So use the max width.
 		Inf.Width.Min = Inf.Width.Max;
 		
-		Inf.Width.Min += PadXPx;
-		Inf.Width.Max += PadXPx;
+		Inf.Width.Min += Pad;
+		Inf.Width.Max += Pad;
 	}
 	else
 	{
-		d->Layout(Inf.Width.Max);
-		Inf.Height.Min = d->GetMin().y + PadYPx;
-		Inf.Height.Max = d->GetMax().y + PadYPx;
+		d->Layout(Inf.Width.Max);		
+		Inf.Height.Min = Inf.Height.Max = MAX(d->GetMin().y, Btn.Y());
 	}
 	
 	return true;	
@@ -714,13 +733,11 @@ void GRadioButton::OnPaint(GSurface *pDC)
 		State.MouseOver = d->Over;
 		State.aText = d->GetStrs();
 		State.View = this;
+		State.Rect = d->GetBtn();
 
-		auto Fnt = GetFont();
-		int Px = (int) Fnt->Ascent() + 0.5;
-		if (Px > Y()) Px = Y();
-
-		State.Rect.ZOff(Px-1, Px-1);
-		State.Rect.Offset(0, (Y()-State.Rect.Y())>>1);
+		GColour Back = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
+		State.ForceUpdate = d->BackCol != Back;
+		d->BackCol = Back;
 
 		GApp::SkinEngine->OnPaint_GRadioButton(this, &State);
 	}

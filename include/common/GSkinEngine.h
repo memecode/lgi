@@ -34,6 +34,7 @@ public:
 	int64 Value;					// Value of the control if available
 	bool Enabled;					// TRUE if the control is enabled
 	bool Focus;						// TRUE if the control has focus
+	bool ForceUpdate;				// TRUE if cached info should be discarded
 	GSurface *Image;				// Any icon that needs displaying
 	GView *View;
 
@@ -49,6 +50,7 @@ public:
 		MouseOver = false;
 		Image = NULL;
 		View = NULL;
+		ForceUpdate = false;
 	}
 
 	size_t TextObjects()

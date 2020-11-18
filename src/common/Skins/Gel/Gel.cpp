@@ -261,19 +261,8 @@ class GelSkin : public GSkinEngine
 		if (Mem && Mem->Create(Sz ? Sz->X() : 14, Sz ? Sz->Y() : 14, OsDefaultCs))
 		{
 			// blank out background
-
-			#if 0
-			GCss::ColorDef Back;
-			if (Ctrl->GetCss())
-				Back = Ctrl->GetCss()->BackgroundColor();
-			if (Back.Type == GCss::ColorRgb)
-				Mem->Colour(Back.Rgb32, 32);
-			else
-				Mem->Colour(LColour(L_MED));
-			#else
 			GColour Back = Ctrl->GetGView()->StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 			Mem->Colour(Back);
-			#endif
 			Mem->Rectangle();
 			
 			LRectF Box(0, 0, Mem->X(), Mem->Y());
@@ -918,8 +907,9 @@ public:
 		
 		// Create the bitmaps in cache if not already there
 		GMemDC *&Mem = RadioBtn[Flags];
-		if (!Mem)
+		if (!Mem || State->ForceUpdate)
 		{
+			DeleteObj(Mem);
 			Mem = DrawCtrl(Ctrl, &State->Rect, Flags, true);
 		}
 
