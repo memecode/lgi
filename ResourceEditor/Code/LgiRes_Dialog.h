@@ -99,8 +99,6 @@ protected:
 	GMouse MapToDialog(GMouse m);
 
 public:
-	typedef GAutoPtr<GViewIterator> ChildIterator;
-	
 	ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, GXmlTag *load);
 	~ResDialogCtrl();
 

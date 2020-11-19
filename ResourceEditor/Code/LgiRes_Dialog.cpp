@@ -129,10 +129,9 @@ public:
 
 		if (Top)
 		{
-			GAutoPtr<GViewIterator> It(Top->View()->IterateViews());
-			for (ResDialogCtrl *Ctrl=dynamic_cast<ResDialogCtrl*>(It->First());
-				Ctrl; Ctrl=dynamic_cast<ResDialogCtrl*>(It->Next()))
+			for (auto c: Top->View()->IterateViews())
 			{
+				ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(c);
 				if (Ctrl->GetType() != UI_TEXT)
 				{
 					Lst->Insert(new CtrlItem(Ctrl));
@@ -344,8 +343,7 @@ char *ResDialogCtrl::GetRefText()
 
 void ResDialogCtrl::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 {
-	GAutoPtr<GViewIterator> it(View()->IterateViews());
-	for (GViewI *w = it->First(); w; w = it->Next())
+	for (GViewI *w: View()->IterateViews())
 	{
 		ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(w);
 		LgiAssert(c);
@@ -368,8 +366,7 @@ GRect ResDialogCtrl::GetMinSize()
 	{
 		GRect cli = View()->GetClient(false);
 
-		GAutoPtr<GViewIterator> it(View()->IterateViews());
-		for (GViewI *c=it->First(); c; c=it->Next())
+		for (GViewI *c: View()->IterateViews())
 		{
 			GRect cpos = c->GetPos();
 			cpos.Offset(cli.x1, cli.y1);
@@ -1515,8 +1512,8 @@ void CtrlTabs::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 	{
 	    l.Add(t);
 	    
-		GAutoPtr<GViewIterator> It((Current == n ? (GViewI*)this : (GViewI*)t)->IterateViews());
-		for (GViewI *w = It->First(); w; w = It->Next())
+		auto It = (Current == n ? (GViewI*)this : (GViewI*)t)->IterateViews();
+		for (GViewI *w: It)
 		{
 			ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(w);
 			if (c)
@@ -1559,11 +1556,8 @@ void CtrlTabs::OnPaint(GSurface *pDC)
 		{
 			t.Size(-2, -2);
 
-			GAutoPtr<GViewIterator> It(Tab->IterateViews());
-			if (It->Length() > 0)
-			{
+			if (Tab->IterateViews().Length() > 0)
 				FromTab();
-			}
 		}
 
 		if (Tab->View()->GetPos() != t)
@@ -1608,14 +1602,13 @@ void CtrlTabs::ToTab()
 	if (Cur)
 	{
 		// move all our children into the tab losing focus
-		GAutoPtr<GViewIterator> CurIt(Cur->IterateViews());
-		GAutoPtr<GViewIterator> ThisIt(IterateViews());
-		GViewI *v;
-		while ((v = CurIt->First()))
+		auto CurIt = Cur->IterateViews();
+		auto ThisIt = IterateViews();
+		for (auto v: CurIt)
 		{
 			Cur->DelView(v);
 		}
-		while ((v = ThisIt->First()))
+		for (auto v: ThisIt)
 		{
 			DelView(v);
 			Cur->AddView(v);
@@ -1629,14 +1622,12 @@ void CtrlTabs::FromTab()
 	if (Cur)
 	{
 		// load all our children from the new tab
-		GAutoPtr<GViewIterator> CurIt(Cur->IterateViews());
-		GAutoPtr<GViewIterator> ThisIt(IterateViews());
-		GViewI *v;
-		while ((v = ThisIt->First()))
-		{
+		auto CurIt = Cur->IterateViews();
+		auto ThisIt = IterateViews();
+		for (auto v: ThisIt)
 			DelView(v);
-		}
-		while ((v = CurIt->First()))
+
+		for (auto v: CurIt)
 		{
 			Cur->DelView(v);
 			AddView(v);
@@ -2338,8 +2329,7 @@ void ResDialogCtrl::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 {
 	Ctrls.Insert(this);
 
-	ChildIterator It(View()->IterateViews());
-	for (GViewI *c = It->First(); c; c = It->Next())
+	for (GViewI *c: View()->IterateViews())
 	{
 		ResDialogCtrl *dc = dynamic_cast<ResDialogCtrl*>(c);
 		LgiAssert(dc);
@@ -3268,8 +3258,7 @@ void ResDialog::SelectRect(ResDialogCtrl *Parent, GRect *r, bool ClearPrev)
 
 	if (Parent && r)
 	{
-		GAutoPtr<GViewIterator>It(Parent->View()->IterateViews());
-		for (GViewI *c = It->First(); c; c = It->Next())
+		for (GViewI *c: Parent->View()->IterateViews())
 		{
 			if (c->GetPos().Overlap(r))
 			{
@@ -3752,8 +3741,8 @@ void ResDialog::OnMouseMove(GMouse &m)
 		GRect Old = DragCtrl->View()->GetPos();
 		GRect New = DragRgn;
 		
-		GAutoPtr<GViewIterator> It(IterateViews());
-		if (DragCtrl->View() != It->First())
+		auto It = IterateViews();
+		if (DragCtrl->View() != It[0])
 			SnapRect(&New, DragCtrl->ParentCtrl());
 
 		// New now in snapped coords
@@ -4008,12 +3997,8 @@ void OutputCtrl(GStringPipe &Def,
 		Index++;
 	}
 
-	GAutoPtr<GViewIterator> It(Ctrl->View()->IterateViews());
-	for (	ResDialogCtrl *c=dynamic_cast<ResDialogCtrl*>(It->First());
-			c; c=dynamic_cast<ResDialogCtrl*>(It->Next()))
-	{
-		OutputCtrl(Def, Var, Inst, c, Ctrl, Index);
-	}
+	for (auto c: Ctrl->View()->IterateViews())
+		OutputCtrl(Def, Var, Inst, dynamic_cast<ResDialogCtrl*>(c), Ctrl, Index);
 }
 
 void ResDialog::OnCommand(int Cmd)
@@ -4336,18 +4321,12 @@ int ResDialogUi::CurrentTool()
 {
 	if (Tools)
 	{
-		int i=0;
-		GAutoPtr<GViewIterator> It(Tools->IterateViews());
-		for (GViewI *w = It->First(); w; w = It->Next(), i++)
+		auto It = Tools->IterateViews();
+		for (size_t i=0; i<It.Length(); i++)
 		{
-			GToolButton *But = dynamic_cast<GToolButton*>(w);
-			if (But)
-			{
-				if (But->Value())
-				{
-					return But->GetId();
-				}
-			}
+			GToolButton *But = dynamic_cast<GToolButton*>(It[i]);
+			if (But && But->Value())
+				return But->GetId();
 		}
 	}
 
@@ -4358,15 +4337,13 @@ void ResDialogUi::SelectTool(int i)
 {
 	if (Tools)
 	{
-		GAutoPtr<GViewIterator> It(Tools->IterateViews());
-		GViewI *w = (*It)[i];
+		auto It = Tools->IterateViews();
+		GViewI *w = It[i];
 		if (w)
 		{
 			GToolButton *But = dynamic_cast<GToolButton*>(w);
 			if (But)
-			{
 				But->Value(true);
-			}
 		}
 	}
 }

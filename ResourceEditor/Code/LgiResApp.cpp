@@ -3548,8 +3548,8 @@ bool AppWnd::LoadWin32(const char *FileName)
 										Dialog->Create(NULL, NULL);
 										Dialog->Name(T[0]);
 
-										GAutoPtr<GViewIterator> It(Dialog->IterateViews());
-										Dlg = dynamic_cast<CtrlDlg*>(It->First());
+										auto It = Dialog->IterateViews();
+										Dlg = dynamic_cast<CtrlDlg*>(It[0]);
 										if (Dlg)
 										{
 											int Pos[4] = {0, 0, 0, 0};
@@ -3960,8 +3960,8 @@ bool AppWnd::LoadWin32(const char *FileName)
 								CtrlDlg *MatchObj = 0;
 								for (auto d: DlLList)
 								{
-									GAutoPtr<GViewIterator> It(d->IterateViews());
-									GViewI *Wnd = It->First();
+									auto It = d->IterateViews();
+									GViewI *Wnd = It[0];
 									if (Wnd)
 									{
 										CtrlDlg *Obj = dynamic_cast<CtrlDlg*>(Wnd);
@@ -4504,8 +4504,7 @@ ShortCutView::~ShortCutView()
 
 void FindShortCuts(LList *Out, GViewI *In)
 {
-	GAutoPtr<GViewIterator> it(In->IterateViews());
-	for (GViewI *c = it->First(); c; c = it->Next())
+	for (GViewI *c: In->IterateViews())
 	{
 		ResDialogCtrl *rdc = dynamic_cast<ResDialogCtrl*>(c);
 		if (!rdc || !rdc->GetStr())
