@@ -367,19 +367,6 @@ public:
 	virtual int OnCommand(int Cmd, int Event, OsView Wnd) = 0;
 };
 
-class GViewIterator
-{
-public:
-	virtual ~GViewIterator() {}
-	virtual GViewI *First() = 0;
-	virtual GViewI *Last() = 0;
-	virtual GViewI *Next() = 0;
-	virtual GViewI *Prev() = 0;
-	virtual size_t Length() = 0;
-	virtual ssize_t IndexOf(GViewI *view) = 0;
-	virtual GViewI *operator [](ssize_t Idx) = 0;
-};
-
 class GViewLayoutInfo
 {
 public:
@@ -426,7 +413,7 @@ public:
 	virtual bool AddView(GViewI *v, int Where = -1) = 0;
 	virtual bool DelView(GViewI *v) = 0;
 	virtual bool HasView(GViewI *v) = 0;
-	virtual GViewIterator *IterateViews() = 0;
+	virtual GArray<GViewI*> IterateViews() = 0;
 
 	// Threading
 	virtual bool Lock(const char *file, int line, int TimeOut = -1) = 0;

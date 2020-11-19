@@ -452,8 +452,7 @@ public:
 		// all the buttons between them are switched off.
 		GToolButton *Last = 0;
 		bool HasVis = false;
-		GAutoPtr<GViewIterator> It(Tb->IterateViews());
-		for (GViewI *v = It->First(); v; v = It->Next())
+		for (GViewI *v: Tb->IterateViews())
 		{
 			GToolButton *Btn = dynamic_cast<GToolButton*>(v);
 			if (Btn)
@@ -497,9 +496,7 @@ public:
 				Text = stricmp(t[0], "text") == 0;
 				
 				// Make all controls not visible.
-				GViewI *v;
-				GAutoPtr<GViewIterator> It(Tb->IterateViews());
-				for (v = It->First(); v; v = It->Next())
+				for (auto v: Tb->IterateViews())
 				{
 					GToolButton *Btn = dynamic_cast<GToolButton*>(v);
 					if (Btn) v->Visible(false);
@@ -816,29 +813,26 @@ void GToolButton::Value(int64 b)
 			if (GetParent() && b)
 			{
 				// Clear any other radio buttons that are down
-				GAutoPtr<GViewIterator> it(GetParent()->IterateViews());
-				if (it)
-				{
-					ssize_t CurIdx = it->IndexOf(this);
-					if (CurIdx >= 0)
-					{						
-						for (ssize_t i=CurIdx-1; i>=0; i--)
-						{
-							GToolButton *But = dynamic_cast<GToolButton*>((*it)[i]);
-							if (But->Separator())
-								break;
-							if (But->Type == TBT_RADIO && But->Down)
-								But->Value(false);
-						}
+				auto it = GetParent()->IterateViews();
+				ssize_t CurIdx = it.IndexOf(this);
+				if (CurIdx >= 0)
+				{						
+					for (ssize_t i=CurIdx-1; i>=0; i--)
+					{
+						GToolButton *But = dynamic_cast<GToolButton*>(it[i]);
+						if (But->Separator())
+							break;
+						if (But->Type == TBT_RADIO && But->Down)
+							But->Value(false);
+					}
 
-						for (size_t i=CurIdx+1; i<it->Length(); i++)
-						{
-							GToolButton *But = dynamic_cast<GToolButton*>((*it)[i]);
-							if (But->Separator())
-								break;
-							if (But->Type == TBT_RADIO && But->Down)
-								But->Value(false);
-						}
+					for (size_t i=CurIdx+1; i<it.Length(); i++)
+					{
+						GToolButton *But = dynamic_cast<GToolButton*>(it[i]);
+						if (But->Separator())
+							break;
+						if (But->Type == TBT_RADIO && But->Down)
+							But->Value(false);
 					}
 				}
 			}

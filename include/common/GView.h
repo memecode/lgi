@@ -239,7 +239,7 @@ public:
 	bool AddView(GViewI *v, int Where = -1) override;
 	bool DelView(GViewI *v) override;
 	bool HasView(GViewI *v) override;
-	GViewIterator *IterateViews() override;
+	GArray<GViewI*> IterateViews() override;
 	
 	/// \brief Attaches the view to a parent view.
 	///

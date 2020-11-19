@@ -1058,14 +1058,11 @@ bool LgiResources::Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep
 	GView *o = CastToGWnd(Obj);
 	if (o && l)
 	{
-		GAutoPtr<GViewIterator> It(o->IterateViews());
-		for (GViewI *w = It->First(); w; w = It->Next())
+		for (GViewI *w: o->IterateViews())
 		{
 			ResObject *n = dynamic_cast<ResObject*>(w);
 			if (n)
-			{
 				l->Insert(n);
-			}
 		}
 		return true;
 	}

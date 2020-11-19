@@ -28,23 +28,6 @@ extern LPoint GtkAbsPos(Gtk::GtkWidget *w);
 extern GRect GtkGetPos(Gtk::GtkWidget *w);
 #endif
 
-class GViewIter : public GViewIterator
-{
-	GView *v;
-	List<GViewI>::I i;
-
-public:
-	GViewIter(GView *view);
-	~GViewIter() {}
-	GViewI *First();
-	GViewI *Last();
-	GViewI *Next();
-	GViewI *Prev();
-	size_t Length();
-	ssize_t IndexOf(GViewI *view);
-	GViewI *operator [](ssize_t Idx);
-};
-
 #if !WINNATIVE
 #include "LThreadEvent.h"
 

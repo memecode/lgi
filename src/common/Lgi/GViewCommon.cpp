@@ -116,52 +116,6 @@ GMouse &lgi_adjust_click(GMouse &Info, GViewI *Wnd, bool Capturing, bool Debug)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-// Iterator
-GViewIter::GViewIter(GView *view) : i(view->Children.begin())
-{
-	v = view;
-}
-
-GViewI *GViewIter::First()
-{
-	i = v->Children.begin();
-	return *i;
-}
-
-GViewI *GViewIter::Last()
-{
-	i = v->Children.rbegin();
-	return *i;
-}
-
-GViewI *GViewIter::Next()
-{
-	i++;
-	return *i;
-}
-
-GViewI *GViewIter::Prev()
-{
-	i--;
-	return *i;
-}
-
-size_t GViewIter::Length()
-{
-	return v->Children.Length();
-}
-
-ssize_t GViewIter::IndexOf(GViewI *view)
-{
-	return v->Children.IndexOf(view);
-}
-
-GViewI *GViewIter::operator [](ssize_t Idx)
-{
-	return v->Children[Idx];
-}
-
-//////////////////////////////////////////////////////////////////////////////////////
 // GView class methods
 GViewI *GView::_Capturing = 0;
 GViewI *GView::_Over = 0;
@@ -301,9 +255,12 @@ GString::Array *GView::CssClasses()
 	return &d->Classes;
 }
 
-GViewIterator *GView::IterateViews()
+GArray<GViewI*> GView::IterateViews()
 {
-	return new GViewIter(this);
+	GArray<GViewI*> a;
+	for (auto c: Children)
+		a.Add(c);
+	return a;
 }
 
 bool GView::AddView(GViewI *v, int Where)
@@ -2076,25 +2033,19 @@ GButton *FindDefault(GViewI *w)
 {
 	GButton *But = 0;
 
-	GViewIterator *i = w->IterateViews();
-	if (i)
+	for (auto c: w->IterateViews())
 	{
-		for (GViewI *c = i->First(); c; c = i->Next())
+		But = dynamic_cast<GButton*>(c);
+		if (But && But->Default())
 		{
-			But = dynamic_cast<GButton*>(c);
-			if (But && But->Default())
-			{
-				break;
-			}
-			
-			But = FindDefault(c);
-			if (But)
-			{
-				break;
-			}
+			break;
 		}
-
-		DeleteObj(i);
+			
+		But = FindDefault(c);
+		if (But)
+		{
+			break;
+		}
 	}
 
 	return But;

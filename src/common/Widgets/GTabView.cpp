@@ -1135,18 +1135,15 @@ void GTabView::OnPosChange()
 				r.Offset(-r.x1, -r.y1);
 				GRegion Rgn(r);
 
-				GAutoPtr<GViewIterator> It(p->IterateViews());
-				for (GViewI *c = It->First(); c; c = It->Next())
-				{
+				for (GViewI *c: p->IterateViews())
 					c->Pour(Rgn);
-				}
 			}
 			else
 			{
-				GAutoPtr<GViewIterator> It(p->IterateViews());
-				if (It->Length() == 1)
+				auto It = p->IterateViews();
+				if (It.Length() == 1)
 				{
-					GTableLayout *tl = dynamic_cast<GTableLayout*>(It->First());
+					GTableLayout *tl = dynamic_cast<GTableLayout*>(It[0]);
 					if (tl)
 					{
 						GRect r = p->GetClient();
@@ -1279,8 +1276,7 @@ int64 GTabPage::Value()
 {
 	if (!TabCtrl)
 		return false;
-	GAutoPtr<GViewIterator> i(TabCtrl->IterateViews());
-	ssize_t Idx = i->IndexOf(this);
+	ssize_t Idx = TabCtrl->IterateViews().IndexOf(this);
 	return TabCtrl->Value() == Idx;
 }
 
@@ -1500,16 +1496,13 @@ bool GTabPage::LoadFromResource(int Res)
 {
 	GAutoString n;
 
-	GViewIterator *ch = IterateViews();
-	if (ch)
+	auto ch = IterateViews();
+	GViewI *v;
+	while ((v = ch[0]))
 	{
-		GViewI *v;
-		while ((v = ch->First()))
-		{
-			v->Detach();
-			DelView(v);
-		}
-		DeleteObj(ch);
+		v->Detach();
+		DelView(v);
+		ch.Delete(v, true);
 	}
 	
 	bool Status = GLgiRes::LoadFromResource(Res, this, 0, &n);
@@ -1533,12 +1526,9 @@ void GTabPage::Select()
 {
 	if (GetParent())
 	{
-		GAutoPtr<GViewIterator> i(GetParent()->IterateViews());
-		ssize_t Idx = i->IndexOf(this);
+		ssize_t Idx = GetParent()->IterateViews().IndexOf(this);
 		if (Idx >= 0)
-		{
 			GetParent()->Value(Idx);
-		}
 	}
 }
 

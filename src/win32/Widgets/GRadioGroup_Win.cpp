@@ -199,7 +199,7 @@ GRadioButton *GRadioGroup::Append(int x, int y, const char *name)
 
 bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
 {
-    GViewIterator *it = IterateViews();
+    auto it = IterateViews();
     const int BORDER_PX = 2;
 
     GDisplayString Txt(GetFont(), Name());
@@ -212,7 +212,7 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
         d->Info.DeleteObjects();
         Inf.Width.Min = 16 + TextPx;
         Inf.Width.Max = RADIO_GRID + BORDER_PX * 2;
-	    for (GViewI *w = it->First(); w; w = it->Next())
+	    for (GViewI *w: it)
 	    {
 	        GAutoPtr<GViewLayoutInfo> c(new GViewLayoutInfo);
             if (w->OnLayout(*c))
@@ -242,7 +242,7 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
         bool Horiz = d->MaxLayoutWidth <= Inf.Width.Max;
         int Cx = BORDER_PX + RADIO_GRID, Cy = Txt.Y();
         int LastY = 0;
-	    for (GViewI *w = it->First(); w; w = it->Next())
+	    for (GViewI *w: it)
 	    {
 	        GViewLayoutInfo *c = d->Info.Find(w);
             if (c)
@@ -284,7 +284,6 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
 	    Inf.Height.Min = Inf.Height.Max = LastY + RADIO_GRID * 2 + BORDER_PX;
     }
     
-    DeleteObj(it);
     return true;
 }
 
@@ -394,18 +393,14 @@ void GRadioButton::Value(int64 i)
 			if (i)
 			{
 				// Turn off any other radio buttons in the current group
-				GAutoPtr<GViewIterator> it(GetParent()->IterateViews());
-				if (it)
+				for (GViewI *c: GetParent()->IterateViews())
 				{
-					for (GViewI *c = it->First(); c; c = it->Next())
+					GRadioButton *b = dynamic_cast<GRadioButton*>(c);
+					if (b &&
+						b != this &&
+						b-Value())
 					{
-						GRadioButton *b = dynamic_cast<GRadioButton*>(c);
-						if (b &&
-							b != this &&
-							b-Value())
-						{
-							b->Value(false);
-						}
+						b->Value(false);
 					}
 				}
 			}
@@ -496,27 +491,23 @@ bool GRadioButton::OnKey(GKey &k)
 	if (Move)
 	{
 		List<GRadioButton> Btns;
-		GViewIterator *L = GetParent()->IterateViews();
-		if (L)
+		auto L = GetParent()->IterateViews();
+		for (GViewI *c: L)
 		{
-			for (GViewI *c=L->First(); c; c=L->Next())
+			GRadioButton *b = dynamic_cast<GRadioButton*>(c);
+			if (b) Btns.Insert(b);
+		}
+		if (Btns.Length() > 1)
+		{
+			auto Index = Btns.IndexOf(this);
+			if (Index >= 0)
 			{
-				GRadioButton *b = dynamic_cast<GRadioButton*>(c);
-				if (b) Btns.Insert(b);
-			}
-			if (Btns.Length() > 1)
-			{
-				auto Index = Btns.IndexOf(this);
-				if (Index >= 0)
+				GRadioButton *n = Btns[(Index + Move + Btns.Length()) % Btns.Length()];
+				if (n)
 				{
-					GRadioButton *n = Btns[(Index + Move + Btns.Length()) % Btns.Length()];
-					if (n)
-					{
-						n->Focus(true);
-					}
+					n->Focus(true);
 				}
 			}
-			DeleteObj(L);
 		}
 	}
 

@@ -301,13 +301,7 @@ public:
 	
 	GArray<GViewI*> GetChildren(GViewI *obj)
 	{
-		GArray<GViewI*> a;
-		GAutoPtr<GViewIterator> it(obj->IterateViews());
-		for (GViewI *i = it->First(); i; i = it->Next())
-		{
-			a.Add(i);
-		}
-		return a;
+		return obj->IterateViews();
 	}
 };
 

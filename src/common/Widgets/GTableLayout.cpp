@@ -1391,8 +1391,7 @@ GTableLayoutPrivate::~GTableLayoutPrivate()
 
 bool GTableLayoutPrivate::CollectRadioButtons(GArray<GRadioButton*> &Btns)
 {
-    GAutoPtr<GViewIterator> it(Ctrl->IterateViews());
-    for (GViewI *i = it->First(); i; i = it->Next())
+    for (GViewI *i: Ctrl->IterateViews())
     {
         GRadioButton *b = dynamic_cast<GRadioButton*>(i);
         if (b) Btns.Add(b);
@@ -1419,13 +1418,7 @@ void GTableLayoutPrivate::Empty(GRect *Range)
 	else
 	{
 		// Clear all the cells
-		GViewI *c;
-		GAutoPtr<GViewIterator> it(Ctrl->IterateViews());
-		while ((c = it->First()))
-		{
-			DeleteObj(c);
-		}
-		
+		Ctrl->IterateViews().DeleteObjects();
 		Cells.DeleteObjects();
 		Rows.Length(0);
 		Cols.Length(0);

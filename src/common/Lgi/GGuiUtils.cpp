@@ -209,40 +209,34 @@ bool LgiGetDisplays(::GArray<GDisplayInfo*> &Displays, GRect *AllDisplays)
 
 void GetChildrenList(GViewI *w, List<GViewI> &l)
 {
-	if (w)
+	if (!w)
+		return;
+
+	for (auto v: w->IterateViews())
 	{
-		GViewIterator *it = w->IterateViews();
-		if (it)
+		#if WINNATIVE
+		int Style = GetWindowLong(v->Handle(), GWL_STYLE);
+		if (TestFlag(Style, WS_VISIBLE) &&
+			!TestFlag(Style, WS_DISABLED))
 		{
-			for (GViewI *v = it->First(); v; v = it->Next())
+			if (TestFlag(Style, WS_TABSTOP))
 			{
-				#if WINNATIVE
-				int Style = GetWindowLong(v->Handle(), GWL_STYLE);
-				if (TestFlag(Style, WS_VISIBLE) &&
-					!TestFlag(Style, WS_DISABLED))
-				{
-					if (TestFlag(Style, WS_TABSTOP))
-					{
-						l.Insert(v);
-					}
-
-					GetChildrenList(v, l);
-				}
-				#else
-				if (v->Visible() && v->Enabled())
-				{
-					if (v->GetTabStop())
-					{
-						l.Insert(v);
-					}
-
-					GetChildrenList(v, l);
-				}
-				#endif
+				l.Insert(v);
 			}
 
-			DeleteObj(it);
+			GetChildrenList(v, l);
 		}
+		#else
+		if (v->Visible() && v->Enabled())
+		{
+			if (v->GetTabStop())
+			{
+				l.Insert(v);
+			}
+
+			GetChildrenList(v, l);
+		}
+		#endif
 	}
 }
 

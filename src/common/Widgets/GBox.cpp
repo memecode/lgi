@@ -285,7 +285,7 @@ void GBox::OnPosChange()
 	content = tools.ApplyPadding(content);
 	GetSpacer(0);
 
-	GAutoPtr<GViewIterator> views(IterateViews());
+	auto views = IterateViews();
 	int Cur = content.x1, Idx = 0;
 	int AvailablePx = d->GetBox(content);
 	if (AvailablePx <= 0)
@@ -310,11 +310,11 @@ void GBox::OnPosChange()
 	int AutoChildren = 0;
 
 	#ifdef _DEBUG
-	if (_Debug) LgiTrace("%s:%i - %i views.\n", _FL, (int)views->Length());
+	if (_Debug) LgiTrace("%s:%i - %i views.\n", _FL, (int)views.Length());
 	#endif
 
 	// Do first pass over children and find their sizes
-	for (GViewI *c = views->First(); c; c = views->Next(), Idx++)
+	for (GViewI *c: views)
 	{
 		GCss *css = c->GetCss();
 		BoxRange &box = Sizes.New();
@@ -362,6 +362,8 @@ void GBox::OnPosChange()
 			Spacer &s = d->Spacers[Idx];
 			SpacerPx += s.SizePx;
 		}
+
+		Idx++;
 	}
 
 	// Convert all the percentage sizes to px
