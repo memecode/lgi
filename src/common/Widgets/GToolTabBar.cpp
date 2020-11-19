@@ -61,11 +61,10 @@ GToolTabBar::~GToolTabBar()
 
 int64 GToolTabBar::Value()
 {
-	int n=0;
-	GAutoPtr<GViewIterator> it(IterateViews());
-	for (GViewI *i=it->First(); i; i=it->Next(), n++)
+	auto it = IterateViews();
+	for (int n=0; n<it.Length(); n++)
 	{
-		GToolTab *tt = dynamic_cast<GToolTab*>(i);
+		GToolTab *tt = dynamic_cast<GToolTab*>(it[n]);
 		if (tt && tt->Value())
 			return n;
 	}
@@ -75,13 +74,12 @@ int64 GToolTabBar::Value()
 
 void GToolTabBar::Value(int64 new_value)
 {
-	int n=0;
-	GAutoPtr<GViewIterator> it(IterateViews());
-	for (GViewI *i=it->First(); i; i=it->Next(), n++)
+	auto it = IterateViews();
+	for (int n=0; n<it.Length(); n++)
 	{
 		if (n == new_value)
 		{
-			GToolButton *b = dynamic_cast<GToolButton*>(i);
+			GToolButton *b = dynamic_cast<GToolButton*>(it[n]);
 			if (b)
 			{
 				OnChange(b);
@@ -115,8 +113,7 @@ int GToolTabBar::OnNotify(GViewI *c, int f)
 bool GToolTabBar::IsOk()
 {
 	int Count[2] = {0, 0};
-	GAutoPtr<GViewIterator> it(IterateViews());
-	for (GViewI *c = it->First(); c; c = it->Next())
+	for (GViewI *c: IterateViews())
 	{
 		GToolTab *tt = dynamic_cast<GToolTab*>(c);
 		if (tt && tt->GetId() > 0)
