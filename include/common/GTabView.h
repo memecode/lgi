@@ -131,6 +131,8 @@ public:
 
 	const char *Name() override;
 	bool Name(const char *n) override;
+	int64 Value() override;
+	void Value(int64 v) override;
 	bool HasButton();
 	void HasButton(bool b);
 	GTabView *GetTabControl() { return TabCtrl; }

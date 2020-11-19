@@ -1275,6 +1275,21 @@ void GTabPage::OnButtonPaint(GSurface *pDC)
 	#endif
 }
 
+int64 GTabPage::Value()
+{
+	if (!TabCtrl)
+		return false;
+	GAutoPtr<GViewIterator> i(TabCtrl->IterateViews());
+	ssize_t Idx = i->IndexOf(this);
+	return TabCtrl->Value() == Idx;
+}
+
+void GTabPage::Value(int64 v)
+{
+	if (v)
+		Select();
+}
+
 const char *GTabPage::Name()
 {
 	return GBase::Name();
