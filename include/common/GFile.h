@@ -328,10 +328,12 @@ public:
 		GFileOp(uint32_t)		\
 		GFileOp(int64_t)		\
 		GFileOp(uint64_t)		\
-		GFileOp(long)			\
-		GFileOp(ulong)			\
 		GFileOp(float)			\
 		GFileOp(double)
+/*
+		GFileOp(long)			\
+		GFileOp(ulong)			\
+*/
 #else
 	#define GFileOps()			\
 		GFileOp(char)			\
