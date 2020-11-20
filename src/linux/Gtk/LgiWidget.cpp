@@ -310,8 +310,7 @@ void BuildTabStops(GViewI *v, ::GArray<GViewI*> &a)
 		v->GetTabStop())
 		a.Add(v);
 	
-	GAutoPtr<GViewIterator> it(v->IterateViews());
-	for (GViewI *c = it->First(); c; c = it->Next())
+	for (GViewI *c: v->IterateViews())
 	{
 		if (c->Enabled() &&
 			c->Visible())

@@ -1390,14 +1390,8 @@ bool GtkAddDragDest(GViewI *v, bool IsTarget)
 		Gtk::gtk_drag_dest_unset(wid);
 	}
 	
-	GAutoPtr<GViewIterator> it(v->IterateViews());
-	if (it)
-	{
-		for (GViewI *c = it->First(); c; c = it->Next())
-		{
-			GtkAddDragDest(c, IsTarget);
-		}
-	}	
+	for (GViewI *c: v->IterateViews())
+		GtkAddDragDest(c, IsTarget);
 	
 	return true;
 }
