@@ -1472,6 +1472,10 @@ void GWindow::PourAll()
 		c = GtkGetPos(_Root).ZeroTranslate();
 	else
 		c = GetClient();
+		
+	if (c.X() < 20 || c.Y() < 20)
+		return; // IDK, GTK is weird sometimes... filter out low sizes.
+
 	GRegion Client(c);
 	GViewI *MenuView = 0;
 
