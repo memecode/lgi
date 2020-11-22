@@ -40,6 +40,8 @@
 
 /****************************** Globals ***********************************/
 
+GString GFile::Path::Sep(DIR_STR);
+
 struct ErrorCodeType
 {
 	const char *Name;

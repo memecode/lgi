@@ -696,15 +696,8 @@ void BuildTabStops(GArray<GViewI*> &Stops, GViewI *v)
 		if (v->GetTabStop() && v->Enabled())
 			Stops.Add(v);
 
-		GViewIterator *it = v->IterateViews();
-		if (it)
-		{
-			for (GViewI *c = it->First(); c; c = it->Next())
-			{
-				BuildTabStops(Stops, c);
-			}
-			DeleteObj(it);
-		}
+		for (GViewI *c: v->IterateViews())
+			BuildTabStops(Stops, c);
 	}
 }
 
