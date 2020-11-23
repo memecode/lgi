@@ -253,6 +253,7 @@
     <ClCompile Include="src\GMatrixTest.cpp" />
     <ClCompile Include="src\GStringClassTests.cpp" />
     <ClCompile Include="src\GStringPipeTests.cpp" />
+    <ClCompile Include="src\LBitsTest.cpp" />
     <ClCompile Include="src\LRangeTest.cpp" />
     <ClCompile Include="src\UnitTests.cpp" />
   </ItemGroup>

@@ -111,4 +111,13 @@ public:
 	bool Run();
 };
 
+class LBitsTest : public UnitTest
+{
+public:
+	LBitsTest() : UnitTest("LBitsTest") {}
+	~LBitsTest() {}
+
+	bool Run();
+};
+
 #endif

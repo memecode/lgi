@@ -6,7 +6,6 @@ void UnitTests()
 	GArray<UnitTest*> Tests;
 
 	Tests.Add(new LRangeTest);
-	#if 1
 	Tests.Add(new GContainers);
 	Tests.Add(new GAutoPtrTest);
 	Tests.Add(new GCssTest);
@@ -14,7 +13,7 @@ void UnitTests()
 	Tests.Add(new GStringClassTest);
 	Tests.Add(new LDateTimeTest);
 	Tests.Add(new GStringPipeTest);
-	#endif
+	Tests.Add(new LBitsTest);
 
 	for (int i=0; i<Tests.Length(); i++)
 	{
