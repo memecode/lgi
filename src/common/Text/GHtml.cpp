@@ -24,6 +24,7 @@
 #include "GCssTools.h"
 #include "LgiRes.h"
 #include "INet.h"
+#include "Base64.h"
 
 #define DEBUG_TABLE_LAYOUT			0
 #define DEBUG_DRAW_TD				0
@@ -2594,6 +2595,39 @@ void GTag::LoadImage(const char *Uri)
 		Html->NeedsCapability("RemoteContent");
 		return;
 	}
+	else if (u.IsProtocol("data"))
+	{
+		if (!u.sPath)
+			return;
+
+		const char *s = u.sPath;
+		if (*s++ != '/')
+			return;
+		GAutoString Type(LgiTokStr(s));
+		if (*s++ != ',')
+			return;
+		auto p = GString(Type).SplitDelimit(",;:");
+		if (p.Length() != 2 || !p.Last().Equals("base64"))
+			return;
+		GString Name = GString("name.") + p[0];
+		GAutoPtr<GFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, NULL));
+		if (!Filter)
+			return;
+
+		auto slen = strlen(s);
+		auto blen = BufferLen_64ToBin(slen);
+		GMemStream bin;
+		bin.SetSize(blen);
+		auto r = ConvertBase64ToBinary((uint8_t*)bin.GetBasePtr(), blen, s, slen);
+		
+		bin.SetPos(0);
+		if (!Image.Reset(new GMemDC))
+			return;
+		auto result = Filter->ReadImage(Image, &bin);
+		if (result != GFilter::IoSuccess)
+			Image.Reset();
+		return;
+	}
 
 	GDocumentEnv::LoadJob *j = Html->Environment->NewJob();
 	if (j)
@@ -2626,10 +2660,10 @@ void GTag::LoadImages()
 	const char *Uri = 0;
 	if (Html->Environment &&
 		TagId == TAG_IMG &&
-		!Image &&
-		Get("src", Uri))
+		!Image)
 	{
-		LoadImage(Uri);
+		if (Get("src", Uri))
+			LoadImage(Uri);
 	}
 
 	for (unsigned i=0; i<Children.Length(); i++)
