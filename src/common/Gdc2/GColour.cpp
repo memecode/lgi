@@ -738,6 +738,7 @@ void GColour::OnChange()
 	g_object_unref(set);
 
 	LHashTbl<ConstStrKey<char,false>, int> Colours(0, -1);
+	auto ScreenBits = GdcD->GetBits();
 	for (int i=0; i<Lines.Length(); i++)
 	{
 		char *var = Lines[i];
@@ -750,12 +751,14 @@ void GColour::OnChange()
 			if (*val == ' ') val++;
 			if (*val == '#') val++;
 			uint64 c = htoi64(val);
-			// printf("%s -> %llX\n", val, c);
-			COLOUR c24 = ((c >> 8) & 0xff) |
+			COLOUR c24 = c;
+			if (ScreenBits == 32)			
+			{
+				c24 = ((c >> 8) & 0xff) |
 						((c >> 16) & 0xff00) |
 						((c >> 24) & 0xff0000);
+			}
 
-			// printf("ParseSysColour %s = %x\n", var, c24);
 			Colours.Add(var, c24);
 		}
 	}

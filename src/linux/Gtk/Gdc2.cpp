@@ -905,7 +905,7 @@ GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 		
 		#if VisualToColourSpaceDebug
 		bool LittleEndian = Test.s == 1;
-		printf("GdkVisualToColourSpace, Type: %i, LittleEndian=%i\n", v->type, LittleEndian);
+		printf("GdkVisualToColourSpace, Type: %i, LittleEndian=%i\n", gdk_visual_get_visual_type(v), LittleEndian);
 		#endif
 
 		auto Depth = gdk_visual_get_depth(v);
@@ -960,12 +960,19 @@ GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 				int bits = GColourSpaceToBits((GColourSpace) c);
 	
 				#if VisualToColourSpaceDebug
-				printf("GdkVisualToColourSpace, rgb: %i/%i, %i/%i, %i/%i  bits: %i  output_bits: %i\n",
-					v->red_prec, v->red_shift,
-					v->green_prec, v->green_shift,
-					v->blue_prec, v->blue_shift,
-					bits, output_bits
-					);
+				{
+					Gtk::guint32 mask[3];
+					Gtk::gint shift[3], precision[3];
+					gdk_visual_get_red_pixel_details(v, mask+0, shift+0, precision+0);
+					gdk_visual_get_green_pixel_details(v, mask+1, shift+1, precision+1);
+					gdk_visual_get_blue_pixel_details(v, mask+2, shift+2, precision+2);
+					printf("GdkVisualToColourSpace, rgb: %i/%i, %i/%i, %i/%i  bits: %i  output_bits: %i\n",
+						precision[0], shift[0],
+						precision[1], shift[1],
+						precision[2], shift[2],
+						bits, output_bits
+						);
+				}
 				#endif
 				
 				if (bits != output_bits)
@@ -990,6 +997,7 @@ GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 			}
 		}
 
+		#if 1
 		if (Depth != 16)
 		{
 			#if GTK_MAJOR_VERSION == 3
@@ -1006,6 +1014,7 @@ GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 					c >>= 8;
 			}
 		}
+		#endif
 	}
 	
 	GColourSpace Cs = (GColourSpace)c;
