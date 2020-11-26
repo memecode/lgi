@@ -122,14 +122,10 @@ bool GTextLabel::Name(const char *n)
 		OnStyleChange();
 		SendNotify(GNotifyTableLayout_Refresh);
 	}
-	else if (IsAttached())
-	{
-		d->ThreadName = n ? n : "";
-		PostEvent(M_TEXT_UPDATE_NAME);
-	}
 	else
 	{
-		GView::Name(n);
+		d->ThreadName = n ? n : "";
+		PostEvent(M_TEXT_UPDATE_NAME); // It's ok if this fails...
 	}
 
 	return true;
@@ -147,12 +143,11 @@ bool GTextLabel::NameW(const char16 *n)
 		OnStyleChange();
 		SendNotify(GNotifyTableLayout_Refresh);
 	}
-	else if (IsAttached())
+	else
 	{
 		d->ThreadName = n ? n : L"";
-		PostEvent(M_TEXT_UPDATE_NAME);
+		PostEvent(M_TEXT_UPDATE_NAME); // It's ok if this fails...
 	}
-	else LgiAssert(!"Can't update name.");
 
 	return true;
 }
@@ -272,6 +267,12 @@ void GTextLabel::OnPaint(GSurface *pDC)
 
 	if (d->Lock(_FL))
 	{
+		if (d->ThreadName)
+		{
+			Name(d->ThreadName);
+			d->ThreadName.Empty();
+		}
+		
 		GRect c = GetClient();
 		LPoint pt(c.x1, c.y1);
 		d->Paint(pDC, pt, Back, c, Enabled(), false);

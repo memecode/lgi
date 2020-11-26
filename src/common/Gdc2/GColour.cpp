@@ -760,6 +760,7 @@ void GColour::OnChange()
 			}
 
 			Colours.Add(var, c24);
+			// printf("Color %s = %x\n", var, c24);
 		}
 	}
 	#define LookupColour(name, default) ((Colours.Find(name) >= 0) ? GColour(Colours.Find(name),24) : default)
@@ -783,9 +784,13 @@ void GColour::OnChange()
 	_LgiColours[L_INACTIVE_TITLE].Rgb(0xc0, 0xc0, 0xc0); // LC_INACTIVE_TITLE
 	_LgiColours[L_INACTIVE_TITLE_TEXT].Rgb(0x80, 0x80, 0x80); // LC_INACTIVE_TITLE_TEXT
 	_LgiColours[L_MENU_BACKGROUND] = LookupColour("bg_color", White); // LC_MENU_BACKGROUND
-	_LgiColours[L_MENU_TEXT] = LookupColour("text_color", Black); // LC_MENU_TEXT
-	_LgiColours[L_NON_FOCUS_SEL_BACK] = GdcMixColour(LookupColour("selected_bg_color", Sel), _LgiColours[11]); // LC_NON_FOCUS_SEL_BACK
-	_LgiColours[L_NON_FOCUS_SEL_FORE] = LookupColour("selected_fg_color", White); // LC_NON_FOCUS_SEL_FORE
+	_LgiColours[L_MENU_TEXT] = _LgiColours[L_TEXT]; // LC_MENU_TEXT
+	_LgiColours[L_NON_FOCUS_SEL_BACK] = _LgiColours[L_FOCUS_SEL_BACK].Mix(_LgiColours[L_WORKSPACE]); // LC_NON_FOCUS_SEL_BACK
+	_LgiColours[L_NON_FOCUS_SEL_FORE] = _LgiColours[L_TEXT]; // LC_NON_FOCUS_SEL_FORE
+	
+	// printf("_LgiColours[L_FOCUS_SEL_BACK]=%s\n", _LgiColours[L_FOCUS_SEL_BACK].GetStr());
+	// printf("_LgiColours[L_NON_FOCUS_SEL_BACK]=%s\n", _LgiColours[L_NON_FOCUS_SEL_BACK].GetStr());
+	
 
 	#elif defined(WINDOWS)
 

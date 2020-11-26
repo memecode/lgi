@@ -91,16 +91,18 @@ void GProgress::OnPaint(GSurface *pDC)
 	GRect r(0, 0, X()-1, Y()-1);
 	LgiThinBorder(pDC, r, DefaultSunkenEdge);
 
-	if (High != 0)
+	if (High > Low)
 	{
-		int Pos = (int) (((double) (r.X()-1) * (((double) Val - Low) / High)));
+		double v = ((double)Val - Low) / ((double)High - Low);
+		int Pos = (int) (v * r.X());
+		// printf("Prog Paint v=%f val=%i range=%i-%i pos=%i\n", v, (int)Val, (int)Low, (int)High, Pos);
 		if (Pos > 0)
 		{
-			GColour High( (c.r()+255)/2, (c.g()+255)/2, (c.b()+255)/2 );
-			GColour Low( (c.r()+0)/2, (c.g()+0)/2, (c.b()+0)/2 );
+			GColour High = c.Mix(GColour::White);
+			GColour Low = c.Mix(GColour::Black);
 			GRect p = r;
 
-			p.x2 = p.x1 + Pos;
+			p.x2 = p.x1 + Pos - 1;
 			r.x1 = p.x2 + 1;
 
 			pDC->Colour(Low);

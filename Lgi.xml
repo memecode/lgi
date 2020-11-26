@@ -325,6 +325,7 @@
 				<Node File="./include/common/LList.h" Type="3" Platforms="15" />
 				<Node File="./include/common/LListItemCheckBox.h" Type="3" Platforms="15" />
 				<Node File="./include/common/LListItemRadioBtn.h" Type="3" Platforms="15" />
+				<Node File="./include/common/Progress.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Css" Type="1" Platforms="15" Open="0" Id="64">
 				<Node File="./src/common/Lgi/GCss.cpp" Type="2" Platforms="15" />

@@ -617,8 +617,10 @@ GRect GtkGetPos(GtkWidget *w)
 bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 {
 	GWindow *ParWnd = GetWindow();
-	if (!ParWnd || !InThread())
+	if (!ParWnd)
 		return false; // Nothing we can do till we attach
+	if (!InThread())
+		return PostEvent(M_INVALIDATE, NULL, (GMessage::Param)this);
 
 	GRect r;
 	if (rc)
