@@ -32,7 +32,7 @@
 #include "GSubProcess.h"
 #include "GToken.h"
 
-#define DEBUG_SUBPROCESS		0
+#define DEBUG_SUBPROCESS		1
 #define DEBUG_ARGS				0
 
 #if defined(WIN32)
@@ -610,7 +610,9 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			d->Io.Read = out[0];
 			d->Io.Write = in[1];
 			
-			// printf("USE_SIMPLE_FORK success.\n");
+			#if DEBUG_SUBPROCESS
+			printf("USE_SIMPLE_FORK success.\n");
+			#endif
 			return true;
 		}
 	

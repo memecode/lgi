@@ -147,7 +147,8 @@ class BuildThread : public LThread, public GStream
 		PythonScript,
 		IAR,
 		Nmake,
-		Cygwin
+		Cygwin,
+		Xcode,
 	}
 		Compiler;
 
@@ -1215,13 +1216,11 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, bool rele
 
 	char *Ext = LgiGetExtension(Makefile);
 	if (Ext && !_stricmp(Ext, "py"))
-	{
 		Compiler = PythonScript;
-	}
 	else if (Ext && !_stricmp(Ext, "sln"))
-	{
 		Compiler = VisualStudio;
-	}
+	else if (Ext && !Stricmp(Ext, "xcodeproj"))
+		Compiler = Xcode;
 	else
 	{
 		GAutoString Comp(NewStr(Proj->GetSettings()->GetStr(ProjCompiler)));
@@ -1586,6 +1585,10 @@ GString BuildThread::FindExe()
 				return p;
 		}
 	}
+	else if (Compiler == Xcode)
+	{
+		return "/usr/bin/xcodebuild";
+	}
 	else if (Compiler == Cygwin)
 	{
 		#ifdef WINDOWS
@@ -1797,6 +1800,21 @@ int BuildThread::Main()
 			}
 
 			TmpArgs.Printf("\"%s\" %s %s -log warnings", Makefile.Get(), Clean ? "-clean" : "-make", Conf.Get());
+		}
+		else if (Compiler == Xcode)
+		{
+			GString a;
+			a.Printf("-list -project \"%s\"", Makefile.Get());
+			GSubProcess Ls(Exe, a);
+			if (Ls.Start())
+			{
+				GStringPipe o;
+				auto ret = Ls.Communicate(&o);
+				GString Cfgs = o.NewGStr();
+
+				return 0;
+			}
+			TmpArgs.Printf("-project \"%s\" -configuration Debug", Makefile.Get());
 		}
 		else
 		{

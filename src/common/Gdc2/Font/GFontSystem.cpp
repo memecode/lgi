@@ -330,10 +330,15 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, GStreamI *Out, const char *
 	    
 #if defined(MAC)
 
-	#if defined LGI_CARBON
 	char Buf[2 << 10];
-	CFStringEncoding InEnc = CharsetToEncoding(InCs);
-	CFStringEncoding OutEnc = CharsetToEncoding(OutCs);
+	#if defined LGI_CARBON
+		CFStringEncoding InEnc = CharsetToEncoding(InCs);
+		CFStringEncoding OutEnc = CharsetToEncoding(OutCs);
+	#else
+		GString InCharset = InCs, OutCharset = OutCs;
+		CFStringEncoding InEnc = CFStringConvertIANACharSetNameToEncoding(InCharset.CreateStringRef());
+		CFStringEncoding OutEnc = CFStringConvertIANACharSetNameToEncoding(OutCharset.CreateStringRef());
+	#endif
 	if (InEnc != kCFStringEncodingInvalidId &&
 		OutEnc != kCFStringEncodingInvalidId)
 	{
@@ -356,7 +361,6 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, GStreamI *Out, const char *
 		else return 0;
 	}
 	else return 0;
-	#endif
 
 #elif HAS_ICONV
 
