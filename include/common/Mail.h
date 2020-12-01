@@ -22,12 +22,6 @@
 
 // #define IsDigit(c) ((c) >= '0' AND (c) <= '9')
 
-// MIME content types
-#define CONTENT_NONE						0
-#define CONTENT_BASE64						1
-#define CONTENT_QUOTED_PRINTABLE			2
-#define CONTENT_OCTET_STREAM				3
-
 // Mail logging defines
 #define MAIL_SEND_COLOUR					Rgb24(0, 0, 0xff)
 #define MAIL_RECEIVE_COLOUR					Rgb24(0, 0x8f, 0)
@@ -40,11 +34,6 @@ extern void TokeniseStrList(char *Str, List<char> &Output, const char *Delim);
 extern char ConvHexToBin(char c);
 #define ConvBinToHex(i) (((i)<10)?'0'+(i):'A'+(i)-10)
 extern void DecodeAddrName(const char *Start, GAutoString &Name, GAutoString &Addr, const char *DefaultDomain);
-extern char *DecodeRfc2047(char *Str);
-extern char *EncodeRfc2047(char *Str, const char *CodePage, List<char> *CharsetPrefs, ssize_t LineLength = 0);
-extern char *DecodeBase64Str(char *Str, int Len = -1);
-extern char *DecodeQuotedPrintableStr(char *Str, ssize_t Len = -1);
-extern bool Is8Bit(char *Text);
 extern int MaxLineLen(char *Text);
 extern char *EncodeImapString(const char *s);
 extern char *DecodeImapString(const char *s);
@@ -202,68 +191,6 @@ public:
 		return Status;
 	}
 };
-
-/*
-class MailMessage : public GStream
-{
-	char*						Text;
-	char*						TextCharset;
-	
-	char*						Html;
-	char*						HtmlCharset;
-
-public:
-	List<AddressDescriptor>		To;
-	AddressDescriptor			*From;
-	AddressDescriptor			*Reply;
-	GAutoString					Subject;
-	GAutoString					MessageID;
-	GAutoString					FwdMsgId;
-	GAutoString					BounceMsgId;
-	List<FileDescriptor>		FileDesc;
-	char*						InternetHeader;
-	char						Priority;
-	int							MarkColour;
-	uint8						DispositionNotificationTo : 1; // read receipt
-	uint8						EncryptedMsg : 1;
-	GAutoString					References;
-
-	// Protocol specific
-	GAutoString					UserData;
-	
-	// Class
-	MailMessage();
-	virtual ~MailMessage();
-	void Empty();
-
-	virtual char *GetBody();
-	virtual bool SetBody(const char *Txt, int Bytes = -1, bool Copy = true, const char *Cs = 0);
-	virtual char *GetBodyCharset();
-	virtual bool SetBodyCharset(const char *Cs);
-
-	virtual char *GetHtml();
-	virtual bool SetHtml(const char *Txt, int Bytes = -1, bool Copy = true, const char *Cs = 0);
-	virtual char *GetHtmlCharset();
-	virtual bool SetHtmlCharset(const char *Cs);
-	
-	// Logging
-	GStream						*Log;
-	int Write(const void *Ptr, int Size, int Flags = 0);
-	
-	// Conversion to/from MIME
-	GStringPipe					*Raw;
-
-	// High level encoding functions
-	bool Encode					(GStreamI &Out, GStream *HeadersSink, MailProtocol *Protocol, bool Mime = true);
-	bool EncodeHeaders			(GStreamI &Out, MailProtocol *Protocol, bool Mime = true);
-	bool EncodeBody				(GStreamI &Out, MailProtocol *Protocol, bool Mime = true);
-
-	// Encoding mime segment data	
-	int EncodeText				(GStreamI &Out, GStreamI &In);
-	int EncodeQuotedPrintable	(GStreamI &Out, GStreamI &In);
-	int EncodeBase64			(GStreamI &Out, GStreamI &In);
-};
-*/
 
 /// Base class for mail protocol implementations
 class MailProtocol

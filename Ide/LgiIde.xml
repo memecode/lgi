@@ -18,11 +18,11 @@
 		</Node>
 		<Node Name="Docs" Type="1" Platforms="15" Id="1">
 			<Node File=".\Code\DocEdit.cpp" Type="2" Platforms="15" />
-			<Node File=".\Code\DocEdit.h" Type="3" Platforms="15" />
+			<Node File="./Code/DocEdit.h" Type="3" Platforms="15" />
 			<Node File=".\Code\DocEditStyling.cpp" Type="2" Platforms="15" />
 			<Node File=".\Code\IdeDoc.cpp" Type="2" Platforms="15" />
-			<Node File=".\Code\IdeDoc.h" Type="3" Platforms="15" />
-			<Node File=".\Code\IdeDocPrivate.h" Type="3" Platforms="15" />
+			<Node File="./Code/IdeDoc.h" Type="3" Platforms="15" />
+			<Node File="./Code/IdeDocPrivate.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Ftp" Type="1" Platforms="15" Open="0" Id="4">
 			<Node File="./Code/FtpThread.cpp" Type="2" Platforms="15" />
@@ -32,15 +32,15 @@
 		</Node>
 		<Node Name="Projects" Type="1" Platforms="15" Id="1">
 			<Node File=".\Code\IdeProject.cpp" Type="2" Platforms="15" />
-			<Node File=".\Code\IdeProject.h" Type="3" Platforms="15" />
+			<Node File="./Code/IdeProject.h" Type="3" Platforms="15" />
 			<Node File=".\Code\IdeProjectSettings.cpp" Type="2" Platforms="15" />
-			<Node File=".\Code\IdeProjectSettings.h" Type="3" Platforms="15" />
+			<Node File="./Code/IdeProjectSettings.h" Type="3" Platforms="15" />
 			<Node File=".\Code\levenshtein.c" Type="2" Platforms="15" />
-			<Node File=".\Code\levenshtein.h" Type="3" Platforms="15" />
+			<Node File="./Code/levenshtein.h" Type="3" Platforms="15" />
 			<Node File=".\Code\MissingFiles.cpp" Type="2" Platforms="15" />
 			<Node File=".\Code\NewProjectFromTemplate.cpp" Type="2" Platforms="15" />
 			<Node File=".\Code\ProjectNode.cpp" Type="2" Platforms="15" />
-			<Node File=".\Code\ProjectNode.h" Type="3" Platforms="15" />
+			<Node File="./Code/ProjectNode.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Search" Type="1" Platforms="15" Open="1" Id="5">
 			<Node File="./Code/FindInFiles.cpp" Type="2" Platforms="15" />
@@ -60,13 +60,13 @@
 			<Node File="../src/common/Coding/GParseCpp.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/SysCharSupport.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node File=".\Code\IdeCommon.cpp" Type="2" Platforms="15" />
-		<Node File=".\Code\LgiIde.cpp" Type="2" Platforms="15" />
-		<Node File=".\Code\LgiIde.h" Type="3" Platforms="15" />
-		<Node File=".\Code\LgiUtils.cpp" Type="2" Platforms="15" />
-		<Node File=".\Code\MemDumpViewer.cpp" Type="2" Platforms="15" />
-		<Node File=".\Code\SpaceTabConv.cpp" Type="2" Platforms="15" />
-		<Node File=".\Code\SpaceTabConv.h" Type="3" Platforms="15" />
+		<Node File="./Code/IdeCommon.cpp" Type="2" Platforms="15" />
+		<Node File="./Code/LgiIde.cpp" Type="2" Platforms="15" />
+		<Node File="./Code/LgiIde.h" Type="3" Platforms="15" />
+		<Node File="./Code/LgiUtils.cpp" Type="2" Platforms="15" />
+		<Node File="./Code/MemDumpViewer.cpp" Type="2" Platforms="15" />
+		<Node File="./Code/SpaceTabConv.h" Type="3" Platforms="15" />
+		<Node File="./Code/SpaceTabConv.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Lgi" Type="1" Platforms="15" Open="1" Id="7">
 		<Node File="../src/common/Text/GDocView.cpp" Type="2" Platforms="15" />
@@ -77,6 +77,7 @@
 		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/INet/OpenSSLSocket.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Text/TextConvert.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Open="1" Id="8">
 		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
@@ -90,7 +91,7 @@
 			<Makefile>
 				<Windows>.\LgiIde_vs2013.sln</Windows>
 				<Linux>./Makefile.linux</Linux>
-				<Mac>./MacCocoa/LgiIde.xcodeproj</Mac>
+				<Mac>./Gtk3/build/Makefile</Mac>
 				<Haiku>Makefile.haiku</Haiku>
 			</Makefile>
 			<Executable>
@@ -102,7 +103,6 @@
 					<Debug>LgiIde.exe</Debug>
 					<Release>LgiIde.exe</Release>
 				</Windows>
-				<Mac />
 			</Executable>
 			<Defines>
 				<Windows>
@@ -115,12 +115,10 @@ WINNATIVE</Release>
 					<Debug>POSIX</Debug>
 					<Release>POSIX</Release>
 				</Haiku>
-				<All />
 				<Linux>
 					<Debug>LIBPNG_VERSION=\&quot;1.2\&quot;</Debug>
 					<Release>LIBPNG_VERSION=\&quot;1.2\&quot;</Release>
 				</Linux>
-				<Mac />
 			</Defines>
 			<Compiler>
 				<Windows>MingW</Windows>
@@ -130,9 +128,6 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
-			<CppCrossCompiler />
-			<DebugAdmin />
-			<CCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -161,7 +156,6 @@ WINNATIVE</Release>
 					<Debug>../include/beos</Debug>
 					<Release>../include/beos</Release>
 				</Haiku>
-				<Mac />
 			</IncludePaths>
 			<Libraries>
 				<Windows>
@@ -182,15 +176,12 @@ pthread
 					<Debug>be</Debug>
 					<Release>be</Release>
 				</Haiku>
-				<All />
-				<Mac />
 			</Libraries>
 			<LibraryPaths>
 				<All>
 					<Debug>..\Debug</Debug>
 					<Release>..\Release</Release>
 				</All>
-				<Mac />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -208,7 +199,6 @@ pthread
 					<Debug>lgiide</Debug>
 					<Release>lgiide</Release>
 				</Linux>
-				<Mac />
 			</TargetName>
 			<SystemIncludes>
 				<Windows>
@@ -221,7 +211,6 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
-				<Mac />
 			</SystemIncludes>
 			<ApplicationIcon>
 				<Haiku>./Code/icon-haiku</Haiku>
@@ -240,18 +229,7 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
-		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Mac />
-			</PostBuildCommands>
-		</Advanced>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Advanced />
 	</Settings>
 </Project>

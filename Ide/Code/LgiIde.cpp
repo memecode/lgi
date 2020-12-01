@@ -4169,6 +4169,7 @@ public:
 };
 */
 
+#include "Rfc2047.h"
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);
@@ -4176,6 +4177,9 @@ int LgiMain(OsAppArguments &AppArgs)
 	if (a.IsOk())
 	{
 		// new SocketTest();
+		auto s = "=?gb18030?B?0Nyz9sO7?=";
+		GAutoString out(DecodeRfc2047(NewStr(s)));
+		printf("out=%s\n", out.Get());
 
 		a.AppWnd = new AppWnd;
 		a.Run();

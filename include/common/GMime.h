@@ -7,6 +7,15 @@
 
 extern void CreateMimeBoundary(char *Buf, int BufLen);
 
+// MIME content types
+enum LMimeEncodings
+{
+	CONTENT_NONE,
+	CONTENT_BASE64,
+	CONTENT_QUOTED_PRINTABLE,
+	CONTENT_OCTET_STREAM
+};
+
 class GMime;
 
 class GMimeAction
