@@ -633,7 +633,7 @@ LgiIde.o : ./Code/LgiIde.cpp ../include/common/Lgi.h \
 	./Code/ProjectNode.h \
 	../include/common/GSubProcess.h \
 	../include/common/GAbout.h \
-	../include/common/Rfc2047.h
+	../include/common/TextConvert.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -703,7 +703,7 @@ Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/common/Lgi.h \
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
-	../include/common/Rfc2047.h \
+	../include/common/TextConvert.h \
 	../include/common/GMime.h \
 	../include/common/Base64.h
 	@echo $(<F) [$(Build)]
@@ -785,6 +785,8 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 ../include/common/LListItemCheckBox.h : ../include/common/LList.h
 
 ../include/linux/Gtk/LgiOsClasses.h : 
+
+../include/common/TextConvert.h : 
 
 ../include/common/GDisplayString.h : ../include/common/GFont.h
 
@@ -1214,8 +1216,6 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 ../src/common/Lgi/GToolTip.cpp : ../include/common/Lgi.h \
 	../include/common/GDisplayString.h \
 	../include/common/GPopup.h
-
-../include/common/Rfc2047.h : 
 
 ../src/linux/Gtk/LgiWidget.cpp : ../include/common/Lgi.h \
 	../include/common/GDragAndDrop.h \

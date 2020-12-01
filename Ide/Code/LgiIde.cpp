@@ -953,16 +953,14 @@ public:
 				}
 				
 				auto OldText = Txt[Channel]->NameW();
-				size_t OldLen = 0;
-				if (OldText)
-					OldLen = StrlenW(OldText);
+				ssize_t OldLen = Txt[Channel]->Length();
 
 				auto Cur = Txt[Channel]->GetCaret();
 				Txt[Channel]->Insert(OldLen, w, StrlenW(w));
 				if (Cur > OldLen - 1)
-				{
 					Txt[Channel]->SetCaret(OldLen + StrlenW(w), false);
-				}
+				else
+					printf("Caret move: %i, %i = %i\n", (int)Cur, (int)OldLen, Cur > OldLen - 1);
 				Changed = Channel;
 				Buf[Channel].Length(0);
 				Txt[Channel]->Invalidate();
@@ -2251,7 +2249,9 @@ void AppWnd::AppendOutput(char *Txt, AppWnd::Channels Channel)
 	}
 	else
 	{
-		d->Output->Txt[Channel]->Name("");
+		auto Ctrl = d->Output->Txt[Channel];
+		Ctrl->UnSelectAll();
+		Ctrl->Name("");
 	}
 }
 
@@ -4169,7 +4169,7 @@ public:
 };
 */
 
-#include "Rfc2047.h"
+#include "TextConvert.h"
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);

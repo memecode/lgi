@@ -31,15 +31,15 @@
 			<Node File="../include/common/IFtp.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Projects" Type="1" Platforms="15" Id="1">
-			<Node File=".\Code\IdeProject.cpp" Type="2" Platforms="15" />
+			<Node File="./Code/IdeProject.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/IdeProject.h" Type="3" Platforms="15" />
-			<Node File=".\Code\IdeProjectSettings.cpp" Type="2" Platforms="15" />
+			<Node File="./Code/IdeProjectSettings.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/IdeProjectSettings.h" Type="3" Platforms="15" />
-			<Node File=".\Code\levenshtein.c" Type="2" Platforms="15" />
+			<Node File="./Code/levenshtein.c" Type="2" Platforms="15" />
 			<Node File="./Code/levenshtein.h" Type="3" Platforms="15" />
-			<Node File=".\Code\MissingFiles.cpp" Type="2" Platforms="15" />
-			<Node File=".\Code\NewProjectFromTemplate.cpp" Type="2" Platforms="15" />
-			<Node File=".\Code\ProjectNode.cpp" Type="2" Platforms="15" />
+			<Node File="./Code/MissingFiles.cpp" Type="2" Platforms="15" />
+			<Node File="./Code/NewProjectFromTemplate.cpp" Type="2" Platforms="15" />
+			<Node File="./Code/ProjectNode.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/ProjectNode.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Search" Type="1" Platforms="15" Open="1" Id="5">
@@ -73,6 +73,7 @@
 		<Node File="../src/common/Lgi/GMdi.cpp" Type="2" Platforms="15" />
 		<Node File="../include/common/GMdi.h" Type="3" Platforms="15" />
 		<Node File="../include/common/GPopupList.h" Type="3" Platforms="15" />
+		<Node File="../include/common/GTextLog.h" Type="3" Platforms="15" />
 		<Node File="../src/common/INet/IHttp.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/INet/OpenSSLSocket.cpp" Type="2" Platforms="15" />
@@ -230,6 +231,5 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 				<All>1</All>
 			</UseHardTabs>
 		</Editor>
-		<Advanced />
 	</Settings>
 </Project>

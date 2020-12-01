@@ -1,5 +1,5 @@
 #include "Lgi.h"
-#include "Rfc2047.h"
+#include "TextConvert.h"
 #include "GMime.h"
 #include "Base64.h"
 

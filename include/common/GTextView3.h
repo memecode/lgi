@@ -329,7 +329,7 @@ public:
 	int64 Value() override;
 	void Value(int64 i) override;
 	const char *GetMimeType() override { return "text/plain"; }
-	size_t GetSize() { return Size; }
+	size_t Length() { return Size; }
 	GString operator[](ssize_t LineIdx);
 
 	ssize_t HitText(int x, int y, bool Nearest);

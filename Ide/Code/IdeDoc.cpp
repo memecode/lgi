@@ -1625,7 +1625,7 @@ void IdeDoc::OnPulse()
 			for (auto s: d->WriteBuf)
 			{
 				GAutoWString w(Utf8ToWide(s, s.Length()));
-				d->Edit->Insert(d->Edit->GetSize(), w, Strlen(w.Get()));
+				d->Edit->Insert(d->Edit->Length(), w, Strlen(w.Get()));
 			}
 			d->Edit->SetPourEnabled(Pour);
 
