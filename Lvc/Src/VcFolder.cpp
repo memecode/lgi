@@ -3034,7 +3034,7 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 			case VcHg:
 			{
 				GString::Array a;
-				a.New().Printf("commit -m \"%s\"", Msg);
+				a.New().Printf("commit -m \"%s\"", GString(Msg).Replace("\n", "\\n").Get());
 				for (auto pf: Add)
 				{
 					GString s = pf->GetFileName();
