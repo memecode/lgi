@@ -253,20 +253,6 @@ public:
 	GDom* Res_GetDom(ResObject *Obj);
 };
 
-/// A collection of resources
-/// \ingroup Resources
-class GResourceContainer : public GArray<LgiResources*>
-{
-public:
-	~GResourceContainer()
-	{
-		DeleteObjects();
-	}
-};
-
-/// \private
-LgiExtern GResourceContainer _ResourceOwner;
-
 /// Loads a resource and returns a pointer to it.
 /// \ingroup Resources
 LgiExtern LgiResources *LgiGetResObj(bool Warn = false, const char *filename = 0);

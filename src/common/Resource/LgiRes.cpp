@@ -267,8 +267,20 @@ public:
 	}
 };
 
-GResourceContainer _ResourceOwner;
+/// A collection of resources
+/// \ingroup Resources
+class GResourceContainer : public GArray<LgiResources*>
+{
+public:
+	~GResourceContainer()
+	{
+		DeleteObjects();
+	}
+};
+
+static GResourceContainer ResourceOwner;
 bool LgiResources::LoadStyles = false;
+
 
 LgiResources::LgiResources(const char *FileName, bool Warn, const char *ThemeFolder)
 {
@@ -276,7 +288,7 @@ LgiResources::LgiResources(const char *FileName, bool Warn, const char *ThemeFol
 	ScriptEngine = 0;
 
 	// global pointer list
-	_ResourceOwner.Add(this);
+	ResourceOwner.Add(this);
 
 	GString File;
 	GString FullPath;
@@ -396,7 +408,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 
 LgiResources::~LgiResources()
 {
-	_ResourceOwner.Delete(this);
+	ResourceOwner.Delete(this);
 	LanguageNames.DeleteArrays();
 	
 	Dialogs.DeleteObjects();
@@ -437,7 +449,7 @@ bool LgiResources::StyleElement(GViewI *v)
 	if (!LoadStyles) return true;
 
 	GCss::SelArray Selectors;
-	for (auto r: _ResourceOwner)
+	for (auto r: ResourceOwner)
 	{
 		GViewCssCb Ctx;
 		r->CssStore.Match(Selectors, &Ctx, v);
@@ -1217,9 +1229,9 @@ bool GLgiRes::LoadFromResource(int Resource, GViewI *Parent, GRect *Pos, GAutoSt
 {
 	LgiGetResObj();
 
-	for (int i=0; i<_ResourceOwner.Length(); i++)
+	for (int i=0; i<ResourceOwner.Length(); i++)
 	{		
-		if (_ResourceOwner[i]->LoadDialog(Resource, Parent, Pos, Name, 0, TagList))
+		if (ResourceOwner[i]->LoadDialog(Resource, Parent, Pos, Name, 0, TagList))
 			return true;
 	}
 
@@ -1608,22 +1620,16 @@ LgiResources *LgiGetResObj(bool Warn, const char *filename)
 	// Look for existing file?
 	if (filename)
 	{
-		for (int i=0; i<_ResourceOwner.Length(); i++)
-		{
-			LgiResources *r = _ResourceOwner[i];
-			if (r && r->GetFileName())
-			{
-				if (!_stricmp(filename, r->GetFileName()))
-					return r;
-			}
-		}
+		for (auto r: ResourceOwner)
+			if (!Stricmp(filename, r->GetFileName()))
+				return r;
 
 		// Load the new file...
 		return new LgiResources(filename, Warn);
 	}
 
-	if (_ResourceOwner.Length())
-		return _ResourceOwner[0];
+	if (ResourceOwner.Length())
+		return ResourceOwner[0];
 	
 	return new LgiResources(filename, Warn);
 }
