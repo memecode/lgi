@@ -15,6 +15,39 @@
 #define PROF(s)
 #endif
 
+class TmpFile : public GFile
+{
+	int Status;
+	GString Hint;
+	
+public:
+	TmpFile(const char *hint = NULL)
+	{
+		Status = 0;
+		if (hint)
+			Hint = hint;
+		else
+			Hint = "_lvc";
+	}
+	
+	GFile &Open()
+	{
+		GFile::Path p(LSP_TEMP);
+		p += Hint;
+		
+		do
+		{
+			char s[256];
+			sprintf_s(s, sizeof(s), "../%s%i.tmp", Hint.Get(), LgiRand());
+			p += s;
+		}
+		while (p.Exists());
+	
+		Status = GFile::Open(p.GetFull(), O_READWRITE);
+		return *this;
+	}
+};
+
 bool TerminalAt(GString Path)
 {
 	#if defined(MAC)
@@ -3034,7 +3067,17 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 			case VcHg:
 			{
 				GString::Array a;
-				a.New().Printf("commit -m \"%s\"", GString(Msg).Replace("\n", "\\n").Get());
+				GString CommitMsg = Msg;
+				TmpFile Tmp;
+				if (CommitMsg.Find("\n"))
+				{
+					Tmp.Open().Write(Msg);
+					a.New().Printf("commit -l \"%s\"", Tmp.GetName());
+				}
+				else
+				{				
+					a.New().Printf("commit -m \"%s\"", Msg);
+				}
 				for (auto pf: Add)
 				{
 					GString s = pf->GetFileName();
