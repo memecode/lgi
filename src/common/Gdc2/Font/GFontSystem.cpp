@@ -10,6 +10,8 @@
 #undef HAS_ICONV
 #endif
 
+#define DEBUG_ICONV_LOG			0
+
 #if HAS_ICONV
 //
 // Get 'iconv.h' from http://www.gnu.org/software/libiconv
@@ -307,19 +309,27 @@ bool GFontSystem::HasIconv(bool Quiet)
 	return Status;
 }
 
-#if defined LGI_CARBON
 // This converts a normal charset to an Apple encoding ID
-static CFStringEncoding CharsetToEncoding(const char *cs)
-{
-	CFStringRef InputCs = CFStringCreateWithCString(0, cs, kCFStringEncodingUTF8);
-	if (!InputCs)
-		return kCFStringEncodingUTF8; // Um what to do here?
-	CFStringEncoding enc = CFStringConvertIANACharSetNameToEncoding(InputCs);
-	CFRelease(InputCs);
-	return enc;
-}
+#if defined LGI_CARBON
+	static CFStringEncoding CharsetToEncoding(const char *cs)
+	{
+		CFStringRef InputCs = CFStringCreateWithCString(0, cs, kCFStringEncodingUTF8);
+		if (!InputCs)
+			return kCFStringEncodingUTF8; // Um what to do here?
+		CFStringEncoding enc = CFStringConvertIANACharSetNameToEncoding(InputCs);
+		CFRelease(InputCs);
+		return enc;
+	}
+#elif defined LGI_COCOA
+	static CFStringEncoding CharsetToEncoding(const char *cs)
+	{
+		GString s = cs;
+		auto r = s.CreateStringRef();
+		auto e = CFStringConvertIANACharSetNameToEncoding(r);
+		CFRelease(r);
+		return e;
+	}
 #endif
-
 
 ssize_t GFontSystem::IconvConvert(const char *OutCs, GStreamI *Out, const char *InCs, const char *&In, ssize_t InLen)
 {
@@ -331,14 +341,8 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, GStreamI *Out, const char *
 #if defined(MAC)
 
 	char Buf[2 << 10];
-	#if defined LGI_CARBON
-		CFStringEncoding InEnc = CharsetToEncoding(InCs);
-		CFStringEncoding OutEnc = CharsetToEncoding(OutCs);
-	#else
-		GString InCharset = InCs, OutCharset = OutCs;
-		CFStringEncoding InEnc = CFStringConvertIANACharSetNameToEncoding(InCharset.CreateStringRef());
-		CFStringEncoding OutEnc = CFStringConvertIANACharSetNameToEncoding(OutCharset.CreateStringRef());
-	#endif
+	CFStringEncoding InEnc = CharsetToEncoding(InCs);
+	CFStringEncoding OutEnc = CharsetToEncoding(OutCs);
 	if (InEnc != kCFStringEncodingInvalidId &&
 		OutEnc != kCFStringEncodingInvalidId)
 	{
@@ -369,7 +373,7 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, GStreamI *Out, const char *
 		return 0;
 	}
 
-	char Buf[2 << 10];
+	char Buf[2 << 10] = {0};
 	iconv_t Conv;
 	if ((NativeInt)(Conv = d->libiconv_open(OutCs, InCs)) >= 0)
 	{
@@ -382,7 +386,16 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, GStreamI *Out, const char *
 			size_t OutLen = sizeof(Buf);
 			ssize_t OldInLen = InLen;
 			size_t InSz = InLen;
+			#if DEBUG_ICONV_LOG
+				printf("iconv %s,%p,%i->%s,%p,%i",
+					InCs, In, (int)InSz,
+					OutCs, Out, (int)sizeof(Buf));
+			#endif		
 			ssize_t s = d->libiconv(Conv, (IconvChar**)&i, &InSz, &o, &OutLen);
+			#if DEBUG_ICONV_LOG
+				printf(" = %i\n", (int)s);
+			#endif
+
 			InLen = InSz;
 			Out->Write((uchar*)Buf, sizeof(Buf) - OutLen);
 			if (OldInLen == InLen) break;
@@ -410,7 +423,6 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, char *Out, ssize_t OutLen, 
 
 #if defined(MAC)
 
-	#if defined LGI_CARBON
 	CFStringEncoding InEnc = CharsetToEncoding(InCs);
 	CFStringEncoding OutEnc = CharsetToEncoding(OutCs);
 	if (InEnc != kCFStringEncodingInvalidId &&
@@ -425,7 +437,6 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, char *Out, ssize_t OutLen, 
 			return ret;
 		}
 	}
-	#endif
 
 #elif HAS_ICONV
 
@@ -438,8 +449,6 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, char *Out, ssize_t OutLen, 
 	}
 
 	// Iconv conversion
-	// const char *InCs = InInfo->GetIconvName();
-	// const char *OutCs = OutInfo->GetIconvName();
 	iconv_t Conv;
 	if ((Conv = d->libiconv_open(OutCs, InCs)) >= 0)
 	{
@@ -450,13 +459,23 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, char *Out, ssize_t OutLen, 
 
 		// Convert
 		char *Start = o;
+		
+		#if DEBUG_ICONV_LOG
+			printf("iconv %s,%p,%i->%s,%p,%i",
+				InCs, In, (int)InSz,
+				OutCs, Out, (int)OutSz);
+		#endif		
 		ssize_t s = d->libiconv(Conv, (IconvChar**)&i, &InSz, &o, &OutSz);
+		#if DEBUG_ICONV_LOG
+			printf(" = %i\n", (int)s);
+		#endif
+		
 		InLen = InSz;
 		OutLen = OutSz;
 		d->libiconv_close(Conv);
 
 		In = (const char*)i;
-		Status = (NativeInt)o-(NativeInt)Out;
+		Status = o - Out;
 	}
 	else
 	{

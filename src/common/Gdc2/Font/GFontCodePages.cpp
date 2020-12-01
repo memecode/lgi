@@ -1201,17 +1201,11 @@ void *LgiNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 	if (!stricmp(InCp, OutCp))
 	{
 		if (InInfo->Type == CpUtf16)
-		{
 			return DupeString((uint16*)In, InLen/sizeof(uint16));
-		}
 		else if (InInfo->Type == CpUtf32)
-		{
 			return DupeString((uint32_t*)In, InLen/sizeof(uint32_t));
-		}
 		else
-		{
 			return NewStr((char*)In, InLen);
-		}
 	}
 
 	if (InInfo->Type == CpIconv ||
