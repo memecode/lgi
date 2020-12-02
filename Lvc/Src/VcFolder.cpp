@@ -30,7 +30,7 @@ public:
 			Hint = "_lvc";
 	}
 	
-	GFile &Open()
+	GFile &Create()
 	{
 		GFile::Path p(LSP_TEMP);
 		p += Hint;
@@ -3069,9 +3069,9 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 				GString::Array a;
 				GString CommitMsg = Msg;
 				TmpFile Tmp;
-				if (CommitMsg.Find("\n"))
+				if (CommitMsg.Find("\n") >= 0)
 				{
-					Tmp.Open().Write(Msg);
+					Tmp.Create().Write(Msg);
 					a.New().Printf("commit -l \"%s\"", Tmp.GetName());
 				}
 				else
