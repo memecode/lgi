@@ -936,6 +936,7 @@ bool GView::Detach()
 	d->Parent = 0;
 	d->ParentI = 0;
 
+	#if 0 // Windows is not doing a deep detach... so we shouldn't either?
 	{
 		int Count = Children.Length();
 		if (Count)
@@ -956,6 +957,7 @@ bool GView::Detach()
 			LgiAssert(Count == Detached);
 		}
 	}
+	#endif
 
 	return true;
 }

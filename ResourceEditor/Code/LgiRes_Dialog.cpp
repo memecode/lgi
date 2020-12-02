@@ -2428,7 +2428,11 @@ const char *ResDialog::Name()
 	
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(v);
 	if (!Ctrl)
-		return "#no_ctrl";
+	{
+		static char msg[256];
+		sprintf_s(msg, sizeof(msg), "#no_ctrl=%p,children=%i", v, (int)Children.Length());
+		return msg;
+	}
 	if (!Ctrl->GetStr())
 		return "#no_str";
 	if (!Ctrl->GetStr()->GetDefine())
