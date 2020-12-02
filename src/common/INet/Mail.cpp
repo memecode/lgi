@@ -23,6 +23,8 @@
 #include "Store3Defs.h"
 #include "LgiRes.h"
 #include "../Hash/md5/md5.h"
+#include "TextConvert.h"
+#include "GMime.h"
 
 const char *sTextPlain = "text/plain";
 const char *sTextHtml = "text/html";
@@ -145,17 +147,6 @@ bool IsDotLined(char *Text)
 	}
 
 	return false;
-}
-
-char ConvHexToBin(char c)
-{
-	if (c >= '0' && c <= '9')
-		return c - '0';
-	if (c >= 'a' && c <= 'f')
-		return c + 10 - 'a';
-	if (c >= 'A' && c <= 'F')
-		return c + 10 - 'A';
-	return 0;
 }
 
 // Is s a valid non-whitespace string?

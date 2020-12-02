@@ -1615,10 +1615,10 @@ bool LMenu::Load(GView *w, const char *Res, const char *TagList)
 	return Status;
 }
 
-LgiResources *LgiGetResObj(bool Warn, const char *filename)
+LgiResources *LgiGetResObj(bool Warn, const char *filename, bool LoadOnDemand)
 {
 	// Look for existing file?
-	if (filename)
+	if (filename && LoadOnDemand)
 	{
 		for (auto r: ResourceOwner)
 			if (!Stricmp(filename, r->GetFileName()))
@@ -1630,6 +1630,8 @@ LgiResources *LgiGetResObj(bool Warn, const char *filename)
 
 	if (ResourceOwner.Length())
 		return ResourceOwner[0];
-	
+	if (!LoadOnDemand)
+		return NULL;
+
 	return new LgiResources(filename, Warn);
 }
