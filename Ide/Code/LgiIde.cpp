@@ -4177,9 +4177,11 @@ int LgiMain(OsAppArguments &AppArgs)
 	if (a.IsOk())
 	{
 		// new SocketTest();
+		#if 0
 		auto s = "=?gb18030?B?0Nyz9sO7?=";
 		GAutoString out(DecodeRfc2047(NewStr(s)));
 		printf("out=%s\n", out.Get());
+		#endif
 
 		a.AppWnd = new AppWnd;
 		a.Run();
