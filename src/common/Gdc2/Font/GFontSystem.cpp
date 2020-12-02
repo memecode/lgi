@@ -292,7 +292,7 @@ bool GFontSystem::HasIconv(bool Quiet)
 		d->LibCheck = true;
 		
 		#ifdef WINDOWS
-		auto LibName = "iconv-1.16." LGI_LIBRARY_EXT;
+		auto LibName = "iconv-2." LGI_LIBRARY_EXT;
 		#else
 		auto LibName = "libiconv." LGI_LIBRARY_EXT;
 		#endif
