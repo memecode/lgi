@@ -1905,7 +1905,7 @@ void GVmDebuggerWnd::OnAddress(size_t Addr)
 	d->CurrentAddr = Addr;
 	if (d->Text)
 	{
-		ssize_t Sz = d->Text->GetSize();
+		ssize_t Sz = d->Text->Length();
 		d->Text->PourText(0, Sz);
 		d->Text->ScrollToCurLine();
 		d->Text->Invalidate();

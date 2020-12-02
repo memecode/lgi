@@ -291,7 +291,12 @@ bool GFontSystem::HasIconv(bool Quiet)
 	{
 		d->LibCheck = true;
 		
-		Status = d->Load("libiconv." LGI_LIBRARY_EXT);
+		#ifdef WINDOWS
+		auto LibName = "iconv-1.16." LGI_LIBRARY_EXT;
+		#else
+		auto LibName = "libiconv." LGI_LIBRARY_EXT;
+		#endif
+		Status = d->Load(LibName);
 		if (!Status && !Quiet)
 		{
 			if (!NeedsCapability("libiconv"))

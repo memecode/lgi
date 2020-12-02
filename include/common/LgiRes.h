@@ -255,7 +255,7 @@ public:
 
 /// Loads a resource and returns a pointer to it.
 /// \ingroup Resources
-LgiExtern LgiResources *LgiGetResObj(bool Warn = false, const char *filename = 0);
+LgiExtern LgiResources *LgiGetResObj(bool Warn = false, const char *filename = 0, bool LoadOnDemand = true);
 
 /// This class is used to style GView controls with CSS
 class LgiClass GViewCssCb : public GCss::ElementCallback<GViewI>

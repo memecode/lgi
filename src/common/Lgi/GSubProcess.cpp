@@ -32,7 +32,7 @@
 #include "GSubProcess.h"
 #include "GToken.h"
 
-#define DEBUG_SUBPROCESS		1
+#define DEBUG_SUBPROCESS		0
 #define DEBUG_ARGS				0
 
 #if defined(WIN32)
