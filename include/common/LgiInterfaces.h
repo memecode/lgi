@@ -213,6 +213,12 @@ public:
 	/// Process an error
 	virtual int Error(void *Param) { return 0; }
 	virtual const char *GetErrorString() { return NULL; }
+	
+	GString LocalIp()
+	{
+		char Ip[32];
+		return GetLocalIp(Ip) ? Ip : NULL;
+	}
 };
 
 class GAppI
