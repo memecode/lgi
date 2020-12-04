@@ -63,7 +63,7 @@ bool TerminalAt(GString Path)
 			return LgiExecute(p);
 		}
 	#elif defined(LINUX)
-		// #error "Impl me."
+		LgiExecute("gnome-terminal", NULL, Path);
 	#endif
 
 	return false;

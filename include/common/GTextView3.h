@@ -352,7 +352,7 @@ public:
 	
 	// State / Selection
 	ssize_t GetCaret(bool Cursor = true) override;
-	virtual void SetCaret(size_t i, bool Select, bool ForceFullUpdate = false) override;
+	virtual void SetCaret(size_t i, bool Select = false, bool ForceFullUpdate = false) override;
 	ssize_t IndexAt(int x, int y) override;
 	bool IsDirty() override { return Dirty; }
 	void IsDirty(bool d) { Dirty = d; }

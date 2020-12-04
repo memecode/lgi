@@ -226,54 +226,11 @@ bool GDebugContext::DumpObject(const char *Var, const char *Val)
 		return false;
 	
 	ObjectDump->Name(NULL);
-	
-	if (Val && *Val == '{')
-	{
-		// Local parse the value into the dump
-		int Depth = 0;
-		const char *Start = NULL;
-		char Spaces[256];
-		memset(Spaces, ' ', sizeof(Spaces));
-		int IndentShift = 2;
-
-		#define Emit() \
-			if (Start) \
-			{ \
-				auto bytes = s - Start; \
-				const char *last = s-1; while (last > Start && strchr(WhiteSpace, *last)) last--; \
-				ObjectDump->Print("%.*s%.*s%s\n", Depth<<IndentShift, Spaces, bytes, Start, *last == '=' ? "" : ";"); \
-				Start = NULL; \
-			}
-			
-		for (const char *s = Val; *s; s++)
-		{
-			if (*s == '{')
-			{
-				Emit();
-				ObjectDump->Print("%.*s%c\n", Depth<<IndentShift, Spaces, *s);
-				Depth++;
-			}
-			else if (*s == '}')
-			{
-				Emit();
-				Depth--;
-				ObjectDump->Print("%.*s%c\n", Depth<<IndentShift, Spaces, *s);
-			}
-			else if (*s == ',')
-			{
-				Emit();
-			}
-			else if (!strchr(WhiteSpace, *s))
-			{
-				if (Start == NULL)
-					Start = s;
-			}
-		}
+	if (!d->Db->PrintObject(Var, ObjectDump))
+		return false;
 		
-		return true;
-	}
-	
-	return d->Db->PrintObject(Var, ObjectDump);
+	ObjectDump->SetCaret(0);
+	return true;	
 }
 
 bool GDebugContext::UpdateRegisters()

@@ -1112,13 +1112,21 @@ public:
 				
 				if (Detailed)
 				{
-					GStringPipe p;
-					char c[256];
-					sprintf_s(c, sizeof(c), "p %s", v.Name.Get());
-					if (Cmd(c, &p))
+					GStringPipe typePipe, valPipe;
+					GString c;					
+
+					// Get the type...
+					c.Printf("whatis %s", v.Name.Get());
+					Cmd(c, &typePipe);
+					auto type = typePipe.NewGStr();
+					printf("Type='%s'\n", type.Get());
+
+					c.Printf("p %s", v.Name.Get());
+					Cmd(c, &valPipe);
+					auto val = valPipe.NewGStr();					
+					if (val)
 					{
-						GAutoString tmp(p.NewStr());
-						for (char *s = tmp; s && *s; )
+						for (char *s = val; s && *s; )
 						{
 							if (*s == '\"')
 							{
@@ -1250,54 +1258,100 @@ public:
 		if (!Var || !Output)
 			return false;
 	
+		GStringPipe q;
 		char c[256];
-		sprintf_s(c, sizeof(c), "p *%s", Var);
 		
-		GMemQueue q;
+		// Get type...
+		sprintf_s(c, sizeof(c), "whatis %s", Var);
 		if (!Cmd(c, &q))
 			return false;
-		
-		GAutoString a((char*)q.New(1));
-		if (!a)
-			return false;
-			
-		int Depth = 0;
-		char *Start = NULL;
-		char Spaces[256];
-		memset(Spaces, ' ', sizeof(Spaces));
-		int IndentShift = 2;
+		auto Type = q.NewGStr().SplitDelimit("=").Last().Strip();
+		bool IsPtr = Type.Find("*") >= 0;
+		bool IsChar = Type.Find("const char") == 0 || Type.Find("char") == 0;
+		bool IsGString = Type.Find("GString") == 0;
 
-		#define Emit() \
-			if (Start) \
-			{ \
-				auto bytes = s - Start; \
-				char *last = s-1; while (last > Start && strchr(WhiteSpace, *last)) last--; \
-				Output->Print("%.*s%.*s%s\n", Depth<<IndentShift, Spaces, bytes, Start, *last == '=' ? "" : ";"); \
-				Start = NULL; \
-			}
-		
-		for (char *s = a; *s; s++)
+		#if 1		
+		Output->Print("Type: %s\n", Type.Get());
+		#else // Debugging
+		Output->Print("Type: %s (IsPtr=%i, IsGString=%i)\n", Type.Get(), IsPtr, IsGString);
+		#endif
+
+		// Get value...
+		if (IsGString)
 		{
-			if (*s == '{')
+			if (IsPtr) sprintf_s(c, sizeof(c), "p (char*)%s->Str.Str", Var);
+			else       sprintf_s(c, sizeof(c), "p (char*)%s.Str.Str", Var);
+		}
+		else
+			sprintf_s(c, sizeof(c), "p %s%s", IsPtr && !IsChar ? "*" : "", Var);
+		if (!Cmd(c, &q))
+		{
+			Output->Print("%s:%i - Can't get value.\n", _FL);
+			return false;
+		}
+		
+		auto val = q.NewGStr();
+		if (!val)
+		{
+			Output->Print("%s:%i - No value.\n", _FL);
+			return false;
+		}
+		// Output->Print("val=%s\n", val.Get());
+		
+		auto Eq = Strchr(val.Get(), '=');
+		if (Eq)
+		{
+			Eq++;
+			while (Strchr(" \t\r\n", *Eq))
+				Eq++;
+		}
+		
+		if (Eq && *Eq != '{')
+		{
+			auto s = val.SplitDelimit("=").Last().Strip();
+			Output->Print("%s\n", s.Get());
+		}
+		else // Parse object format.
+		{			
+			int Depth = 0;
+			char *Start = NULL;
+			char Spaces[256];
+			memset(Spaces, ' ', sizeof(Spaces));
+			int IndentShift = 2;
+
+			#define Emit() \
+				if (Start) \
+				{ \
+					auto bytes = s - Start; \
+					char *last = s-1; while (last > Start && strchr(WhiteSpace, *last)) last--; \
+					Output->Print("%.*s%.*s%s\n", Depth<<IndentShift, Spaces, bytes, Start, *last == '=' ? "" : ";"); \
+					Start = NULL; \
+				}
+			
+			Output->Print("Parsed:\n");
+			for (char *s = Eq ? Eq : val.Get(); *s; s++)
 			{
-				Emit();
-				Output->Print("%.*s%c\n", Depth<<IndentShift, Spaces, *s);
-				Depth++;
-			}
-			else if (*s == '}')
-			{
-				Emit();
-				Depth--;
-				Output->Print("%.*s%c\n", Depth<<IndentShift, Spaces, *s);
-			}
-			else if (*s == ',')
-			{
-				Emit();
-			}
-			else if (!strchr(WhiteSpace, *s))
-			{
-				if (Start == NULL)
-					Start = s;
+				if (*s == '{')
+				{
+					Emit();
+					Output->Print("%.*s%c\n", Depth<<IndentShift, Spaces, *s);
+					Depth++;
+				}
+				else if (*s == '}')
+				{
+					Emit();
+					Depth--;
+					Output->Print("%.*s%c\n", Depth<<IndentShift, Spaces, *s);
+				}
+				else if (*s == ',')
+				{
+					Emit();
+				}
+				else if (!strchr(WhiteSpace, *s))
+				{
+					if (Start == NULL)
+						Start = s;
+				}
 			}
 		}
 	

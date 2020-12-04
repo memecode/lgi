@@ -404,11 +404,14 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Er
 						// printf("LGetFileMimeType(%s)=%s\n", File, Mime);
 						
 						if (stricmp(Mime, "application/x-executable") == 0 ||
-							stricmp(Mime, "application/x-shellscript") == 0)
+							stricmp(Mime, "application/x-shellscript") == 0 ||
+							stricmp(Mime, "text/x-python") == 0)
 						{
 							TreatAsExe:
 							char f[512];
 							sprintf_s(f, sizeof(f), "\"%s\" %s &", File, Args ? Args : (char*)"");
+							if (Dir)
+								chdir(Dir);
 							return system(f) == 0;
 						}
 						else

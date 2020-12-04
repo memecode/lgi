@@ -967,6 +967,23 @@ void GApp::OnCommandLine()
 		{
 			Status = mt;
 			g_free(mt);
+			
+			if (!Status.Equals("application/octet-stream"))
+				return Status;
+				
+			// So gnome has no clue... lets try 'file'
+			::GString args;
+			args.Printf("--mime-type \"%s\"", File);
+			GSubProcess sub("file", args);
+			if (sub.Start())
+			{
+				GStringPipe p;
+				sub.Communicate(&p);
+				auto s = p.NewGStr();
+				if (s && s.Find(":") > 0)
+					Status = s.SplitDelimit(":").Last().Strip();
+			}
+
 			return Status;
 		}
 	}
