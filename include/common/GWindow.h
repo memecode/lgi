@@ -234,6 +234,7 @@ public:
 	bool Visible() override;
 	void Visible(bool i) override;
 	bool IsActive();
+	bool SetActive();
 	GRect &GetPos() override;
 	void SetDecor(bool Visible);
 	LPoint GetDpi();

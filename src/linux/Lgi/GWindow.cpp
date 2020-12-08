@@ -218,6 +218,14 @@ bool GWindow::IsActive()
 	return d->Active;
 }
 
+bool GWindow::SetActive()
+{
+	if (!Wnd)
+		return false;
+	gtk_window_present(Wnd);
+	return true;
+}
+
 bool GWindow::Visible()
 {
 	return GView::Visible();
