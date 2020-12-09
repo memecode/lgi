@@ -833,7 +833,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		bool HasExternIn = d->ExternIn != NULL_PIPE;
 
 		#if DEBUG_SUBPROCESS
-		LgiTrace("%s:%i - Original handles, out=%p, in=%p, HasExternIn=%i\n", _FL, OldStdout, OldStdin, HasExternIn);
+		LgiTrace("%s:%i - HasExternIn=%i\n", _FL, HasExternIn);
 		#endif
 		
 		if (d->ChildOutput.Create(&Attr) &&
@@ -915,7 +915,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			GAutoWString WInitialFolder(Utf8ToWide(d->InitialFolder));
 
 			#if DEBUG_SUBPROCESS
-			LgiTrace("%s:%i - WInitialFolder=%S, EnvironmentChanged=%i\n", _FL, WInitialFolder.Get(), EnvironmentChanged);
+			LgiTrace("%s:%i - WInitialFolder=%S\n", _FL, WInitialFolder.Get());
 			#endif
 
 			GAutoWString WEnv;
@@ -950,7 +950,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 				CloseHandle(ProcInfo.hThread);
 
 				#if DEBUG_SUBPROCESS
-				LgiTrace("%s:%i - CreateProcessW OK, ChildPid=%p, ChildHnd=%p\n", _FL, ChildPid, ChildHnd);
+				LgiTrace("%s:%i - CreateProcessW OK, ChildPid=%p, ChildHnd=%p\n", _FL, d->ChildPid, d->ChildHnd);
 				#endif
 
 				Status = true;
@@ -963,17 +963,13 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			}
 			
 			#if DEBUG_SUBPROCESS
-			LgiTrace("%s:%i - Closing handles: %p, %p\n", _FL, ChildOutput.Write, ChildInput.Read);
+			LgiTrace("%s:%i - Closing handles: %p, %p\n", _FL, d->ChildOutput.Write, d->ChildInput.Read);
 			#endif
 			CloseHandle(d->ChildOutput.Write);
 			CloseHandle(d->ChildInput.Read);
 			if (d->PseudoConsole)
 				DeleteProcThreadAttributeList(InfoEx.lpAttributeList);
 		}
-
-		#if DEBUG_SUBPROCESS
-		LgiTrace("%s:%i - Restoring original handles\n", _FL, OldStdout, OldStdin);
-		#endif
 
 		#endif
 	
