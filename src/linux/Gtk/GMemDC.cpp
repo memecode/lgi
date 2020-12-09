@@ -78,9 +78,9 @@ cairo_surface_t *GMemDC::GetSurface()
 	return d->Img;
 }
 
-LCairoSurface GMemDC::GetSubImage(GRect &r)
+LCairoSurfaceT GMemDC::GetSubImage(GRect &r)
 {
-	LCairoSurface s;
+	LCairoSurfaceT s;
 
 	if (d->Img)
 	{

@@ -2,11 +2,15 @@
 
 #include <cairo.h>
 
+#ifdef __GTK_H__
+using Gtk::cairo_surface_t;
+#endif
 class LCairoSurfaceT
 {
 	cairo_surface_t *surface;
 
 public:
+
 	LCairoSurfaceT(cairo_surface_t *s = NULL)
 	{
 		surface = s;

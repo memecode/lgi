@@ -918,6 +918,10 @@ public:
 };
 #endif
 
+#ifdef __GTK_H__
+#include "LCairoSurface.h"
+#endif
+
 /// \brief An implemenation of GSurface to draw into a memory bitmap.
 ///
 /// This class uses a block of memory to represent an image. You have direct
@@ -973,7 +977,7 @@ public:
 
 			/// This returns a sub-image, caller is responsible to free via
 			/// calling cairo_surface_destroy
-			LCairoSurface GetSubImage(GRect &r);
+			LCairoSurfaceT GetSubImage(GRect &r);
 			
 			GColourSpace GetCreateCs();
 			Gtk::GdkPixbuf *CreatePixBuf();
