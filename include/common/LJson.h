@@ -518,8 +518,19 @@ public:
 		if (!k)
 			return false;
 		for (auto &a : Array)
-		{
 			k->Array.New().Str = a;
+		return true;
+	}
+
+	bool Set(GString Addr, GArray<LJson> &Array)
+	{
+		Key *k = Deref(Addr, true);
+		if (!k)
+			return false;
+		for (auto &in : Array)
+		{
+			auto &out = k->Array.New();
+			out = in.Root;
 		}
 		return true;
 	}
