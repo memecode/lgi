@@ -1259,23 +1259,21 @@ int GDirectory::First(const char *InName, const char *Pattern)
 
 int GDirectory::Next()
 {
-	int Status = false;
-	
-    d->Utf.Empty();
+	if (d->Handle == INVALID_HANDLE_VALUE)
+		return false;
 
-	if (d->Handle != INVALID_HANDLE_VALUE)
+	const char *n;
+	do
 	{
-		const char *n;
-		do
-		{
-			Status = FindNextFileW(d->Handle, &d->Data);
-			if (!Status || !(n = GetName()))
-				return false;
-		}
-		while (stricmp(n, ".") == 0 || stricmp(n, "..") == 0);
+		d->Utf.Empty();
+		if (!FindNextFileW(d->Handle, &d->Data))
+			return false;
+		if (!(n = GetName()))
+			return false;
 	}
+	while (stricmp(n, ".") == 0 || stricmp(n, "..") == 0);
 
-	return Status;
+	return true;
 }
 
 int GDirectory::Close()
