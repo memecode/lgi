@@ -700,6 +700,31 @@ void GWindow::Visible(bool v)
 	}
 }
 
+static bool IsAppWnd(HWND h)
+{
+	if (!IsWindowVisible(h))
+		return false;
+	auto flags = GetWindowLong(h, GWL_STYLE);
+	if (flags & WS_POPUP)
+		return false;
+	return true;
+}
+
+bool GWindow::IsActive()
+{
+	auto top = GetTopWindow(GetDesktopWindow());
+	while (top && !IsAppWnd(top))
+		top = ::GetWindow(top, GW_HWNDNEXT);
+	return top == _View;
+}
+
+bool GWindow::SetActive()
+{
+	if (!_View)
+		return false;
+	return SetWindowPos(_View, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE) != 0;
+}
+
 void GWindow::PourAll()
 {
 	GRegion Client(GetClient());
