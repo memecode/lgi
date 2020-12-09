@@ -1,5 +1,5 @@
 /*hdr
-**	FILE:			GMemDC.cpp
+**	FILE:			LCairoSurface.cpp
 **	AUTHOR:			Matthew Allen
 **	DATE:			14/10/2000
 **	DESCRIPTION:	GDC v2.xx header
@@ -11,29 +11,31 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GString.h"
+#include "Lgi.h"
+#include "LCairoSurface.h"
+
+#ifdef LINUX
 using namespace Gtk;
+#endif
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ROUND_UP(bits) (((bits) + 7) / 8)
 
-class GMemDCPrivate
+class LCairoSurfacePriv
 {
 public:
 	::GArray<GRect> Client;
-	// GRect Client;
 	cairo_t *cr;
 	LCairoSurfaceT Img;
 	GColourSpace CreateCs;
 
-    GMemDCPrivate()
+    LCairoSurfacePriv()
     {
 		cr = NULL;
 		CreateCs = CsNone;
     }
 
-    ~GMemDCPrivate()
+    ~LCairoSurfacePriv()
     {
     	Empty();
 	}
@@ -49,16 +51,16 @@ public:
 	}
 };
 
-GMemDC::GMemDC(int x, int y, GColourSpace cs, int flags)
+LCairoSurface::LCairoSurface(int x, int y, GColourSpace cs, int flags)
 {
-	d = new GMemDCPrivate;
+	d = new LCairoSurfacePriv;
 	if (cs != CsNone)
 		Create(x, y, cs, flags);
 }
 
-GMemDC::GMemDC(GSurface *pDC)
+LCairoSurface::LCairoSurface(GSurface *pDC)
 {
-	d = new GMemDCPrivate;
+	d = new LCairoSurfacePriv;
 	
 	if (pDC &&
 		Create(pDC->X(), pDC->Y(), pDC->GetColourSpace()))
@@ -67,18 +69,19 @@ GMemDC::GMemDC(GSurface *pDC)
 	}
 }
 
-GMemDC::~GMemDC()
+LCairoSurface::~LCairoSurface()
 {
 	Empty();
 	DeleteObj(d);
 }
 
-cairo_surface_t *GMemDC::GetSurface()
+#if defined(__GTK_H__)
+cairo_surface_t *LCairoSurface::GetSurface()
 {
 	return d->Img;
 }
 
-LCairoSurface GMemDC::GetSubImage(GRect &r)
+LCairoSurface LCairoSurface::GetSubImage(GRect &r)
 {
 	LCairoSurface s;
 
@@ -96,31 +99,14 @@ LCairoSurface GMemDC::GetSubImage(GRect &r)
 	return s;
 }
 
-OsPainter GMemDC::Handle()
-{
-	if (!d->cr)
-	{
-		d->cr = cairo_create(d->Img);
-		/*
-		if (d->cr && d->Client.Length())
-		{
-			auto &c = d->Client.Last();
-			printf("Translating new handle to %i,%i\n", c.x1, c.y1);
-			cairo_translate(d->cr, c.x1, c.y1);
-		}
-		*/
-	}
-	return d->cr;
-}
-
-void FreeMemDC(guchar *pixels, GMemDC *data)
+void FreeMemDC(guchar *pixels, LCairoSurface *data)
 {
 	delete data;	
 }
 
-GdkPixbuf *GMemDC::CreatePixBuf()
+GdkPixbuf *LCairoSurface::CreatePixBuf()
 {
-	GMemDC *Tmp = new GMemDC(X(), Y(), CsRgba32, SurfaceRequireExactCs);
+	LCairoSurface *Tmp = new LCairoSurface(X(), Y(), CsRgba32, SurfaceRequireExactCs);
 	if (!Tmp)
 		return NULL;
 
@@ -145,18 +131,39 @@ GdkPixbuf *GMemDC::CreatePixBuf()
 	return Pb;
 }
 
-bool GMemDC::SupportsAlphaCompositing()
+#endif
+
+#if !WINNATIVE
+OsPainter LCairoSurface::Handle()
+{
+	if (!d->cr)
+	{
+		d->cr = cairo_create(d->Img);
+		/*
+		if (d->cr && d->Client.Length())
+		{
+			auto &c = d->Client.Last();
+			printf("Translating new handle to %i,%i\n", c.x1, c.y1);
+			cairo_translate(d->cr, c.x1, c.y1);
+		}
+		*/
+	}
+	return d->cr;
+}
+#endif
+
+bool LCairoSurface::SupportsAlphaCompositing()
 {
 	// We can blend RGBA into memory buffers, mostly because the code is in Lgi not GTK.
 	return true;
 }
 
-LPoint GMemDC::GetSize()
+LPoint LCairoSurface::GetSize()
 {
 	return LPoint(pMem->x, pMem->y);
 }
 
-GRect GMemDC::ClipRgn(GRect *Rgn)
+GRect LCairoSurface::ClipRgn(GRect *Rgn)
 {
 	GRect Old = Clip;
 	
@@ -176,7 +183,7 @@ GRect GMemDC::ClipRgn(GRect *Rgn)
 	return Old;
 }
 
-void GMemDC::SetClient(GRect *c)
+void LCairoSurface::SetClient(GRect *c)
 {
 	if (c)
 	{
@@ -225,28 +232,28 @@ void GMemDC::SetClient(GRect *c)
 }
 
 
-void GMemDC::Empty()
+void LCairoSurface::Empty()
 {
 	d->Empty();
 	DeleteObj(pMem);
 }
 
-bool GMemDC::Lock()
+bool LCairoSurface::Lock()
 {
 	return false;
 }
 
-bool GMemDC::Unlock()
+bool LCairoSurface::Unlock()
 {
 	return false;
 }
 
-void GMemDC::GetOrigin(int &x, int &y)
+void LCairoSurface::GetOrigin(int &x, int &y)
 {
 	GSurface::GetOrigin(x, y);
 }
 
-void GMemDC::SetOrigin(int x, int y)
+void LCairoSurface::SetOrigin(int x, int y)
 {
 	Handle();
 	GSurface::SetOrigin(x, y);
@@ -261,14 +268,14 @@ void GMemDC::SetOrigin(int x, int y)
 	}
 }
 
-GColourSpace GMemDC::GetCreateCs()
+GColourSpace LCairoSurface::GetCreateCs()
 {
 	// Sometimes the colour space we get is different to the requested colour space.
 	// This function returns the original requested colour space.
 	return d->CreateCs;
 }
 
-bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
+bool LCairoSurface::Create(int x, int y, GColourSpace Cs, int Flags)
 {
 	int Bits = GColourSpaceToBits(Cs);
 	if (x < 1 || y < 1 || Bits < 1)
@@ -384,7 +391,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 
 	if (!pApp)
 	{
-		printf("GMemDC::Create(%i,%i,%i) No Applicator.\n", x, y, Bits);
+		printf("LCairoSurface::Create(%i,%i,%i) No Applicator.\n", x, y, Bits);
 		LgiAssert(0);
 	}
 
@@ -393,7 +400,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	return true;
 }
 
-void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
+void LCairoSurface::Blt(int x, int y, GSurface *Src, GRect *a)
 {
 	if (!Src)
 		return;
@@ -408,6 +415,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	{
 		if (pMem->Base)
 		{
+			#if defined LINUX
 			// Screen -> Memory
 			GdkWindow *root_window = gdk_get_default_root_window();
 			if (root_window)
@@ -440,6 +448,9 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 				
 				Status = true;
 			}
+			#else
+			LgiAssert(!"Not impl.");
+			#endif
 		}
 		
 		if (!Status)
@@ -455,12 +466,12 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	}
 }
 
-void GMemDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
+void LCairoSurface::StretchBlt(GRect *d, GSurface *Src, GRect *s)
 {
     LgiAssert(!"Not implemented");
 }
 
-void GMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
+void LCairoSurface::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 {
 	if (x1 > x2) LgiSwap(x1, x2);
 
@@ -493,7 +504,7 @@ void GMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 	}
 }
 
-void GMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
+void LCairoSurface::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 {
 	if (y1 > y2) LgiSwap(y1, y2);
 	
