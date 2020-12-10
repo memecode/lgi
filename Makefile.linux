@@ -1089,6 +1089,7 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/GRect.h \
 	./include/common/LPoint.h \
 	./include/common/GColour.h \
+	./include/common/LCairoSurface.h \
 	./include/common/GFilter.h
 
 ./include/common/LDomFields.h : 
@@ -1106,13 +1107,6 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 ./include/common/GPath.h : ./include/common/GMatrix.h \
 	./include/common/LPoint.h \
 	./include/common/LRectF.h
-
-./include/common/LRectF.h : 
-
-./include/common/INetTools.h : ./include/common/GContainers.h \
-	./include/common/LgiNetInc.h
-
-./include/common/LgiNetInc.h : 
 
 ./include/common/LPoint.h : 
 
@@ -1148,6 +1142,8 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/GString.h \
 	./include/common/LCancel.h \
 	./include/common/LHashTable.h
+
+./include/common/LgiNetInc.h : 
 
 ./include/common/GInput.h : 
 
@@ -1390,9 +1386,14 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 
 ./include/common/GFontCache.h : 
 
+./include/common/LRectF.h : 
+
 ./include/common/GFindReplaceDlg.h : 
 
 ./include/common/GNotifications.h : 
+
+./include/common/INetTools.h : ./include/common/GContainers.h \
+	./include/common/LgiNetInc.h
 
 ./include/common/Progress.h : ./include/common/LMutex.h \
 	./include/common/LCancel.h \
@@ -1531,6 +1532,7 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 	./include/common/GRect.h \
 	./include/common/LPoint.h \
 	./include/common/GColour.h \
+	./include/common/LCairoSurface.h \
 	./include/common/GFilter.h
 
 ./include/win32/GSymLookup.h : 
@@ -1607,6 +1609,8 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi
 ./include/common/GRefCount.h : 
 
 ./include/common/GStatusBar.h : 
+
+./include/common/LCairoSurface.h : 
 
 ./include/common/GScrollBar.h : 
 
