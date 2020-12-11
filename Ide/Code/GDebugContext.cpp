@@ -164,7 +164,7 @@ GDebugContext::GDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, con
 	d->Proj = Proj;
 	d->Exe.Reset(NewStr(Exe));
 	
-	if (d->Db.Reset(CreateGdbDebugger()))
+	if (d->Db.Reset(CreateGdbDebugger(App->GetDebugLog())))
 	{
 		GFile::Path p = Exe;
 		p--;
@@ -648,8 +648,7 @@ void GDebugContext::FormatMemoryDump(int WordSize, int Width, bool InHex)
 		p.Print("    \"%s\"\n", Char);
 	}
 	
-	GAutoString a(p.NewStr());
-	MemoryDump->Name(a);
+	MemoryDump->Name(p.NewGStr());
 }
 
 void GDebugContext::OnMemoryDump(const char *Addr, int WordSize, int Width, bool IsHex)

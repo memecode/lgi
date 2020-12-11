@@ -108,6 +108,6 @@ public:
 	virtual bool UserCommand(const char *Cmd) = 0;
 };
 
-extern GDebugger *CreateGdbDebugger();
+extern GDebugger *CreateGdbDebugger(GStream *Log);
 
 #endif

@@ -4023,6 +4023,11 @@ GStream *AppWnd::GetBuildLog()
 	return d->Output->Txt[AppWnd::BuildTab];
 }
 
+GStream *AppWnd::GetDebugLog()
+{
+	return d->Output->Txt[AppWnd::DebugTab];
+}
+
 void AppWnd::FindSymbol(int ResultsSinkHnd, const char *Sym, bool AllPlatforms)
 {
 	d->FindSym->Search(ResultsSinkHnd, Sym, AllPlatforms);

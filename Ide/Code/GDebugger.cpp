@@ -84,6 +84,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 	int ProcessId;
 	bool SuppressNextFileLine;
 	GArray<Visualizer*> Vis;
+	GStream *Log;
 
 	LMutex StateMutex;
 	bool DebuggingProcess;
@@ -201,7 +202,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 		}
 	}
 
-	void Log(const char *Fmt, ...)
+	void LogMsg(const char *Fmt, ...)
 	{
 		if (Events)
 		{
@@ -378,6 +379,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 						#ifdef POSIX
 						int Pid = 
 						getpgid(ThreadId);
+						LogMsg("Pid for Thread %i = %i\n", ThreadId, Pid);
 						if (Pid > 0 && ProcessId < 0)
 						{
 							// LgiTrace("Got the thread id: %i, and pid: %i\n", ThreadId, Pid);
@@ -531,7 +533,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 		#endif
 		SetState(false, false);
 
-		Log("Debugger exited.\n");
+		LogMsg("Debugger exited.\n");
 		return 0;
 	}
 
@@ -572,7 +574,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 
 		if (!AtPrompt)
 		{
-			Log("Error: Not at prompt...\n");
+			LogMsg("Error: Not at prompt...\n");
 			return false;
 		}
 
@@ -627,7 +629,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 	}
 	
 public:
-	Gdb() : LThread("Gdb")
+	Gdb(GStream *log) : LThread("Gdb"), Log(log)
 	{
 		Events = NULL;
 		State = Init;
@@ -858,8 +860,10 @@ public:
 					
 					RemoveBreakPoint(&bp);
 					
-					// Get process info
 					GStringPipe p;
+
+					#if 0 // For some reason this is returning the wrong PID... WTH gdb... WTH.
+					// Get process info
 					if (Cmd("info inferiors", &p))
 					{
 						GString::Array Ln = p.NewGStr().SplitDelimit("\r\n");
@@ -868,18 +872,20 @@ public:
 							GString::Array a = Ln[1].SplitDelimit(" \t");
 							for (unsigned i=0; i<a.Length()-1; i++)
 							{
-								if (a[i].Equals("process"))
+								if (!a[i].Equals("process"))
+									continue;
+
+								int Id = (int)a[i+1].Int();
+								if (Id >= 0)
 								{
-									int Id = (int)a[i+1].Int();
-									if (Id >= 0)
-									{
-										ProcessId = Id;
-									}
-									break;
+									LogMsg("%s:%i - ProcessId was %i, now %i (%s)\n", _FL, ProcessId, Id, Ln[1].Get());
+									ProcessId = Id;
 								}
+								break;
 							}
 						}
 					}
+					#endif
 					
 					if (Cmd("handle SIGTTOU ignore nostop", &p))
 					{
@@ -889,7 +895,7 @@ public:
 					if (Status)
 						SetState(true, true);
 
-					Log("[ProcessId=%i]\n", ProcessId);
+					LogMsg("[ProcessId=%i]\n", ProcessId);
 					return Status;					
 				}
 			}
@@ -1501,19 +1507,21 @@ public:
 		}
 		
 		SuppressNextFileLine = SuppressFL;
-		LgiTrace("%s:%i - sending SIGINT to %i(0x%x)...\n", _FL, ProcessId, ProcessId);
+		// LogMsg("Break: Sending SIGINT to %i(0x%x)...\n", ProcessId, ProcessId);
 		int result = 
 			#ifdef __GTK_H__
 			Gtk::
 			#endif
 			kill(ProcessId, SIGINT);
+		auto ErrNo = errno;
+		// LogMsg("Break: result=%i\n", result);
 		if (!result)
 		{
-			LgiTrace("%s:%i - success... waiting prompt\n", _FL);
+			// LogMsg("%s:%i - success... waiting prompt\n", _FL);
 			return WaitPrompt();
 		}
 		
-		LgiTrace("%s:%i - kill failed with %i(0x%x)\n", _FL, errno, errno);
+		LogMsg("%s:%i - SIGINT failed with %i(0x%x): %s\n", _FL, ErrNo, ErrNo, LErrorCodeToString(ErrNo).Get());
 		return false;
 		#else
 		LgiAssert(!"Impl me");
@@ -1538,7 +1546,7 @@ public:
 	}
 };
 
-GDebugger *CreateGdbDebugger()
+GDebugger *CreateGdbDebugger(GStream *Log)
 {
-	return new Gdb;
+	return new Gdb(Log);
 }
