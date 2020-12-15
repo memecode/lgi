@@ -27,7 +27,6 @@
 					<Node File="./src/linux/General/ShowFileProp_Linux.cpp" Type="2" Platforms="2" />
 				</Node>
 				<Node Name="Mac" Type="1" Platforms="15" Id="1">
-					<Node File="./src/mac/carbon/General/GFile.cpp" Type="2" Platforms="4" />
 					<Node File="./src/mac/cocoa/General/ShowFileProp_Mac.mm" Type="8" Platforms="15" />
 				</Node>
 				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="11">
@@ -51,13 +50,7 @@
 					<Node File="./src/linux/Gtk/LgiWidget.cpp" Type="2" Platforms="2" />
 					<Node File="./include/linux/Gtk/LgiWidget.h" Type="3" Platforms="15" />
 				</Node>
-				<Node Name="Mac" Type="1" Platforms="15" Id="1">
-					<Node File="./src/mac/carbon/Lgi/GGeneral.cpp" Type="2" Platforms="4" />
-					<Node File="./src/mac/carbon/Lgi/GApp.cpp" Type="2" Platforms="4" />
-					<Node File="./src/mac/carbon/Lgi/GPrinter.cpp" Type="2" Platforms="4" />
-					<Node File="./src/mac/carbon/Lgi/GView.cpp" Type="2" Platforms="4" />
-					<Node File="./src/mac/carbon/Lgi/GWindow.cpp" Type="2" Platforms="4" />
-				</Node>
+				<Node Name="Mac" Type="1" Platforms="15" Id="1" />
 				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="16">
 					<Node File=".\src\win32\Lgi\GApp.cpp" Type="2" Platforms="1" />
 					<Node File=".\src\win32\Lgi\GGeneral.cpp" Type="2" Platforms="1" />
@@ -375,9 +368,7 @@
 		<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="75">
 			<Node File="./include/linux/Gtk/LgiOsDefs.h" Type="3" Platforms="2" />
 		</Node>
-		<Node Name="Mac" Type="1" Platforms="15" Id="1">
-			<Node File="./include/mac/carbon/LgiOsDefs.h" Type="3" Platforms="4" />
-		</Node>
+		<Node Name="Mac" Type="1" Platforms="15" Id="1" />
 		<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
 			<Node File="./include/win32/LgiOsDefs.h" Type="3" Platforms="1" />
 		</Node>

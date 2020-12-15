@@ -6190,20 +6190,24 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, GRect *BorderP
 
 	// Get all the border info and work out the pixel sizes.
 	GFont *f = GetFont();
-	BorderDef Left = BorderLeft();
-	BorderPx->x1 = Left.ToPx(Size.x, f);
-	BorderDef Top = BorderTop();
-	BorderPx->y1 = Top.ToPx(Size.x, f);
-	BorderDef Right = BorderRight();
-	BorderPx->x2 = Right.ToPx(Size.x, f);
-	BorderDef Bottom = BorderBottom();
-	BorderPx->y2 = Bottom.ToPx(Size.x, f);
+	
+	#define DoEdge(coord, axis, name) \
+		BorderDef name = Border##name(); \
+		BorderPx->coord = name.Style != GCss::BorderNone ? name.ToPx(Size.axis, f) : 0;
+	#define BorderValid(name) \
+		((name).IsValid() && (name).Style != GCss::BorderNone)
+	
+	DoEdge(x1, x, Left);
+	DoEdge(y1, y, Top);
+	DoEdge(x2, x, Right);
+	DoEdge(y2, y, Bottom);
+	
 	GCss::BorderDef *defs[4] = {&Left, &Top, &Right, &Bottom};
 
-	if (Left.IsValid() ||
-		Right.IsValid() ||
-		Top.IsValid() ||
-		Bottom.IsValid() ||
+	if (BorderValid(Left) ||
+		BorderValid(Right) ||
+		BorderValid(Top) ||
+		BorderValid(Bottom) ||
 		DrawBackground)
 	{
 		// Work out the rectangles
@@ -6305,7 +6309,7 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, GRect *BorderP
 			}
 
 			GCss::BorderDef *b;
-			if ((b = &Left)->IsValid())
+			if ((b = &Left) && BorderValid(*b))
 			{
 				pDC->Colour(b->Color.Rgb32, 32);
 				DrawBorder db(pDC, *b);
@@ -6315,7 +6319,7 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, GRect *BorderP
 					pDC->Line(rc.x1 + i, rc.y1+Px, rc.x1+i, rc.y2-Px);
 				}
 			}
-			if ((b = &Top)->IsValid())
+			if ((b = &Top) && BorderValid(*b))
 			{
 				pDC->Colour(b->Color.Rgb32, 32);
 				DrawBorder db(pDC, *b);
@@ -6325,7 +6329,7 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, GRect *BorderP
 					pDC->Line(rc.x1+Px, rc.y1+i, rc.x2-Px, rc.y1+i);
 				}
 			}
-			if ((b = &Right)->IsValid())
+			if ((b = &Right) && BorderValid(*b))
 			{
 				pDC->Colour(b->Color.Rgb32, 32);
 				DrawBorder db(pDC, *b);
@@ -6335,7 +6339,7 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, GRect *BorderP
 					pDC->Line(rc.x2-i, rc.y1+Px, rc.x2-i, rc.y2-Px);
 				}			
 			}
-			if ((b = &Bottom)->IsValid())
+			if ((b = &Bottom) && BorderValid(*b))
 			{
 				pDC->Colour(b->Color.Rgb32, 32);
 				DrawBorder db(pDC, *b);

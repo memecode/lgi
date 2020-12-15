@@ -352,9 +352,6 @@ public:
 		Base[0] = 0;
 		Emoji.Reset(new LEmojiFont());
 		
-		GRect r(0, 0, 1200, 800);
-		SetPos(r);
-		MoveToCenter();
 		Name("Html Test Suite");
 		SetQuitOnClose(true);
 		if (Attach(0))
@@ -369,10 +366,12 @@ public:
 			GBox *s = new GBox;
 			if (s)
 			{
+				AddView(s);
 				s->AddView(Lst = new LList(IDC_LIST, 0, 0, 100, 100));
 				Lst->Sunken(false);
 				Lst->AddColumn("File", 400);
 				Lst->CssStyles("width: 200px;");
+				s->Value(200);
 
 				#if HAS_LOG_VIEW
 				GBox *vert = new GBox;
@@ -413,8 +412,6 @@ public:
 					#endif
 					#if defined(MAC) && defined(__GTK_H__)
 					LgiMakePath(Base, sizeof(Base), Base, "../../../..");
-					#elif defined(MAC) || defined(__GTK_H__)
-					LgiMakePath(Base, sizeof(Base), Base, "../../..");
 					#endif
 
 					List<FileInf> Files;
@@ -456,9 +453,13 @@ public:
 						Files.DeleteObjects();
 					}
 				}
-				
-				s->Attach(this);
 			}
+			
+			
+			GRect r(0, 0, 1200, 800);
+			SetPos(r);
+			MoveToCenter();
+			AttachChildren();
 			
 			Visible(true);
 			OnNotify(FindControl(IDC_LIST), GNotifyItem_Select);

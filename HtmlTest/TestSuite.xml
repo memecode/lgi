@@ -1,23 +1,93 @@
-<?xml version="1.0" ?>
-<Project TargetType="0" TabSize="4" IndentSize="4" UseTabs="1" ShowWhitespace="0" Makefile="./Makefile" TargetName="test-suite" IncludePaths="../../../../Lgi/include/common
-../../../../Lgi/include/linux/Xcb
-" Exe="./test-suite" Compiler="0">
-	<Node Name="Source" Type="1" Open="1" Platforms="7">
+<?xml version="1.0" encoding="UTF-8" ?>
+<Project TargetType="0" TabSize="4" IndentSize="4" UseTabs="1" ShowWhitespace="0" Makefile="./Makefile" TargetName="test-suite" IncludePaths="../../../../Lgi/include/common&#10;../../../../Lgi/include/linux/Xcb&#10;" Exe="./test-suite" Compiler="0">
+	<Node Name="Lgi" Type="1" Open="1" Platforms="7" Id="4">
+		<Node Name="Scripting" Type="1" Platforms="15" Id="1">
+			<Node File="../src/common/Coding/GScriptLibrary.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Coding/GScriptVM.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Coding/GScriptCompiler.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Coding/GLexCpp.cpp" Type="2" Platforms="15" />
+		</Node>
+		<Node File="../src/common/Text/Emoji/EmojiMap.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Text/Emoji/EmojiTools.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Widgets/GZoomView.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Images/Compare/ImageComparison.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Gdc2/Font/LEmojiFont.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="7" />
+	</Node>
+	<Node Name="Source" Type="1" Open="1" Platforms="7" Id="1">
 		<Node File="./TestSuite.cpp" Type="2" Platforms="7" />
-		<Node Name="1" Type="1" Platforms="7" Open="1">
-			<Node File="../../../../Lgi/src/common/Text/GHtml.cpp" Type="2" Platforms="7" />
-			<Node File="../../../../Lgi/include/common/GHtml.h" Type="3" Platforms="7" />
-			<Node File="../../../../Lgi/include/common/GHtmlPriv.h" Type="3" Platforms="7" />
-			<Node File="../../../../Lgi/src/common/Text/GHtmlStatic.cpp" Type="2" Platforms="7" />
-		</Node>
-		<Node Name="2" Type="1" Platforms="7" Open="1">
-			<Node File="../../../../Lgi/src/common/Text/GHtml2.cpp" Type="2" Platforms="7" />
-			<Node File="../../../../Lgi/include/common/GHtml2.h" Type="3" Platforms="7" />
-			<Node File="../../../../Lgi/include/common/GHtmlPriv2.h" Type="3" Platforms="7" />
+		<Node Name="1" Type="1" Platforms="7" Open="1" Id="2">
+			<Node File="../src/common/Text/GHtml.cpp" Type="2" Platforms="7" />
+			<Node File="../include/common/GHtml.h" Type="3" Platforms="7" />
+			<Node File="../src/common/Text/GHtmlCommon.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Text/GHtmlParser.cpp" Type="2" Platforms="15" />
+			<Node File="../include/common/GHtmlPriv.h" Type="3" Platforms="7" />
 		</Node>
 	</Node>
-	<Node Name="Lgi" Type="1" Open="1" Platforms="7">
-		<Node File="../../../../Lgi/src/common/Lgi/LgiMain.cpp" Type="2" Platforms="7" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Settings>
+		<Build>
+			<IncludePaths>
+				<All>
+					<Debug>../include/common</Debug>
+					<Release>../include/common</Release>
+				</All>
+				<Linux>
+					<Debug>../include/linux
+../include/linux/Gtk</Debug>
+					<Release>../include/linux
+../include/linux/Gtk</Release>
+				</Linux>
+			</IncludePaths>
+			<SystemIncludes>
+				<Linux>
+					<Debug>/usr/include/gstreamer-1.0
+/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
+`pkg-config --cflags gtk+-3.0`</Debug>
+					<Release>/usr/include/gstreamer-1.0
+/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
+`pkg-config --cflags gtk+-3.0`</Release>
+				</Linux>
+			</SystemIncludes>
+			<TargetType>
+				<All>Executable</All>
+			</TargetType>
+			<Libraries>
+				<Linux>
+					<Debug>-static-libgcc 
+`pkg-config --libs gtk+-3.0`</Debug>
+					<Release>-static-libgcc 
+`pkg-config --libs gtk+-3.0`</Release>
+				</Linux>
+			</Libraries>
+			<TargetName>
+				<Linux>
+					<Debug>lgi-html-test-suite</Debug>
+					<Release>lgi-html-test-suite</Release>
+				</Linux>
+			</TargetName>
+			<LibraryPaths />
+		</Build>
+		<General>
+			<Makefile>
+				<Linux>Makefile.linux</Linux>
+			</Makefile>
+			<Executable>
+				<Linux>
+					<Debug>lgi-html-test-suite</Debug>
+					<Release>lgi-html-test-suite</Release>
+				</Linux>
+			</Executable>
+			<Arguments />
+			<Defines />
+		</General>
+		<Remote />
+		<Editor />
+		<Advanced>
+			<PostBuildCommands />
+		</Advanced>
+	</Settings>
+	<Node Name="Tests" Type="1" Platforms="15" Id="1">
+		<Node File="./Files/whistle.html" Type="7" Platforms="15" />
 	</Node>
-	<Node File="/home/matthew/Code/Lgi/Lgi.xml" Type="4" Platforms="7" />
 </Project>
