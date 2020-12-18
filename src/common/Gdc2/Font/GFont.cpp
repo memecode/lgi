@@ -613,7 +613,8 @@ int GFont::GetHeight()
 		Create();
 	}
 	
-	LgiAssert(d->Height != 0);
+	// I've decided for the moment to allow zero pt fonts to make a HTML test case render correctly.
+	// LgiAssert(d->Height != 0);
 	return d->Height;
 }
 
@@ -945,20 +946,21 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 							GTypeFace::d->_Underline;
 
 		GAutoWString wFace(Utf8ToWide(GTypeFace::d->_Face));
-		d->hFont = ::CreateFont(Win32Height,
-								0,
-								0,
-								0,
-								GTypeFace::d->_Weight,
-								GTypeFace::d->_Italic,
-								d->OwnerUnderline ? false : GTypeFace::d->_Underline,
-								false,
-								Cs,
-								OUT_DEFAULT_PRECIS,
-								CLIP_DEFAULT_PRECIS,
-								GTypeFace::d->_Quality,
-								FF_DONTCARE,
-								wFace);
+		if (Win32Height)
+			d->hFont = ::CreateFont(Win32Height,
+									0,
+									0,
+									0,
+									GTypeFace::d->_Weight,
+									GTypeFace::d->_Italic,
+									d->OwnerUnderline ? false : GTypeFace::d->_Underline,
+									false,
+									Cs,
+									OUT_DEFAULT_PRECIS,
+									CLIP_DEFAULT_PRECIS,
+									GTypeFace::d->_Quality,
+									FF_DONTCARE,
+									wFace);
 	
 		if (d->hFont)
 		{

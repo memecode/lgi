@@ -1287,7 +1287,15 @@ int32 GVariant::CastInt32()
 		case GV_INT64:
 			return (int32)Value.Int64;
 		case GV_STRING:
-			return Value.String ? atoi(Value.String) : 0;
+			if (!Value.String)
+				return 0;
+			
+			if (IsAlpha(Value.String[0]))
+				return !Stricmp(Value.String, "true");
+			else if (Value.String[0] == '0' && tolower(Value.String[1]) == 'x')
+				return static_cast<int32>(Atoi(Value.String, 16));
+
+			return atoi(Value.String);
 		case GV_DOM:
 			return Value.Dom != 0;
 		case GV_DOMREF:
@@ -1337,15 +1345,15 @@ int64 GVariant::CastInt64()
 			return Value.Int64;
 		case GV_STRING:
 		{
-			if (Value.String)
-			{
-				#ifdef _MSC_VER
-				return _atoi64(Value.String);
-				#else
-				return atoll(Value.String);
-				#endif
-			}
-			break;
+			if (!Value.String)
+				return 0;
+
+			if (IsAlpha(Value.String[0]))
+				return !Stricmp(Value.String, "true");
+			else if (Value.String[0] == '0' && tolower(Value.String[1]) == 'x')
+				return Atoi(Value.String, 16);
+
+			return Atoi(Value.String);
 		}
 		case GV_DOMREF:
 		{

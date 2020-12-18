@@ -38,6 +38,7 @@
 #define MAX_RECURSION_DEPTH			300
 #define ALLOW_TABLE_GROWTH			1
 #define LGI_HTML_MAXPAINT_TIME		250 // ms
+#define FLOAT_TOLERANCE				0.001
 
 #define CRASH_TRACE					0
 #ifdef MAC
@@ -301,7 +302,12 @@ public:
 		}
 		else if (Size.Type == GCss::LenPt)
 		{
-			double Pt = MAX(MinimumPointSize, Size.Value);
+			double Pt = Size.Value;
+			if (std::abs(Pt) < FLOAT_TOLERANCE)
+			{
+				int asd=0;
+			}
+
 			for (auto f: Fonts)
 			{
 				if (!f->Face() || Face.Length() == 0)
@@ -314,7 +320,7 @@ public:
 				if (f->Face() &&
 					_stricmp(f->Face(), Face[0]) == 0 &&
 					FntSz.Type == GCss::LenPt &&
-					std::abs(FntSz.Value - Pt) < 0.001 &&
+					std::abs(FntSz.Value - Pt) < FLOAT_TOLERANCE &&
 					f->Bold() == IsBold &&
 					f->Italic() == IsItalic &&
 					f->Underline() == IsUnderline)
@@ -384,7 +390,9 @@ public:
 			f->Underline(IsUnderline);
 			
 			// printf("Add cache font %s,%i %i,%i,%i\n", f->Face(), f->PointSize(), f->Bold(), f->Italic(), f->Underline());
-			if (!f->Create((char*)0, 0))
+			if (std::abs(Size.Value) < FLOAT_TOLERANCE)
+				;
+			else if (!f->Create((char*)0, 0))
 			{
 				// Broken font...
 				f->Face(Default->Face());
