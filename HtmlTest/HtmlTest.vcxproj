@@ -221,6 +221,7 @@
     <None Include="Files\cisra_new_building.html" />
     <None Include="Files\steam1.html" />
     <None Include="Files\steam3.html" />
+    <None Include="Files\steam4.html" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lgi_vs2015.vcxproj">

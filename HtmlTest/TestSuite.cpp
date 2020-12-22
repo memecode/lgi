@@ -17,9 +17,10 @@
 #include "OpenSSLSocket.h"
 #include "INet.h"
 #include "LEmojiFont.h"
+#include "IHttp.h"
 
 #define HAS_LOG_VIEW			0
-#define HAS_IMAGE_LOADER		0
+#define HAS_IMAGE_LOADER		1
 
 enum Controls
 {
@@ -136,21 +137,19 @@ GHostFunc HtmlScriptContext::Methods[] =
 	GHostFunc(0, 0, 0),
 };
 
-class HtmlImageLoader : public LThread, public LMutex
+class HtmlImageLoader : public LThread, public LMutex, public LCancel
 {
-	bool Loop;
 	GArray<GDocumentEnv::LoadJob*> In;
 
 public:
 	HtmlImageLoader() : LThread("HtmlImageLoader")
 	{
-		Loop = true;
 		Run();
 	}
 	
 	~HtmlImageLoader()
 	{
-		Loop = false;
+		Cancel(true);
 		while (!IsExited())
 			LgiSleep(1);
 	}
@@ -181,7 +180,7 @@ public:
 	
 	int Main()
 	{
-		while (Loop)
+		while (!IsCancelled())
 		{
 			GAutoPtr<LThreadJob> j;
 			if (Lock(_FL))
@@ -198,79 +197,7 @@ public:
 			if (Job)
 			{
 				GUri u(Job->Uri);
-				if
-				(
-					u.sProtocol &&
-					(
-						!stricmp(u.sProtocol, "http") ||
-						!stricmp(u.sProtocol, "https")
-					)
-				)
-				{				
-					IHttp http;
-					GProxyUri proxy;
-					if (proxy.sHost)
-						http.SetProxy(proxy.sHost, proxy.Port);
-					
-					GStringPipe p;
-					int Status = 0;
-					IHttp::ContentEncoding Encoding = IHttp::EncodeRaw;
-					GAutoPtr<GSocketI> sock = CreateSock(u.sProtocol);
-					if (http.Open(sock, u.sHost, u.Port))
-					{
-						int RedirCount = 0;
-						GStringPipe Headers;
-						bool Result = http.Get(Job->Uri, NULL, &Status, &p, &Encoding, &Headers);
-						while (Result && ((Status / 100) == 3) && RedirCount < 4)
-						{
-							GAutoString Hdr(Headers.NewStr());
-							GAutoString Loc(InetGetHeaderField(Hdr,	"Location"));
-							u.Set(Loc);
-							sock = CreateSock(u.sProtocol);
-							
-							if (!_stricmp(Loc, Job->Uri))
-							{
-								// Same location as before??
-								LgiTrace("%s\n", Hdr.Get());
-								break;
-							}
-							
-							Result = http.Get(Loc, NULL, &Status, &p, &Encoding, &Headers);
-							RedirCount++;
-						}
-						
-						if (Result && ((Status / 100) == 2))
-						{
-							uchar Hint[16];
-							p.Peek(Hint, sizeof(Hint));
-							GAutoPtr<GFilter> Filter(GFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint));
-							if (Filter)
-							{
-								GAutoPtr<GSurface> Img(new GMemDC);
-								GFilter::IoStatus Rd = Filter->ReadImage(Img, &p);
-								if (Rd == GFilter::IoSuccess)
-								{
-									Job->pDC = Img;
-									if (Job->Env)
-									{
-										// LgiTrace("Loaded '%s' as image %ix%i\n", u.Path, j->pDC->X(), j->pDC->Y());
-										Job->Env->OnDone(j);
-									}
-									else
-									{
-										LgiTrace("%s:%i - No env for '%s'\n", _FL, u.sPath.Get());
-										LgiAssert(0);
-									}
-								}
-								else LgiTrace("%s:%i - Failed to read '%s'\n", _FL, u.sPath.Get());
-							}
-							else LgiTrace("%s:%i - Failed to find filter for '%s'\n", _FL, u.sPath.Get());
-						}
-						else LgiTrace("%s:%i - Failed to get '%s', status=%i\n", _FL, Job->Uri.Get(), Status);
-					}
-					else LgiTrace("%s:%i - Failed to open connection to '%s:%i'\n", _FL, u.sHost.Get(), u.Port);
-				}
-				else
+				if (u.IsFile())
 				{
 					// Local document?
 					if (Job->pDC.Reset(GdcD->Load(Job->Uri)))
@@ -283,8 +210,42 @@ public:
 						}
 					}
 				}
+				else
+				{
+					GMemQueue p(1024);
+					GString Err;
+					auto r = LgiGetUri(this, &p, &Err, Job->Uri);
+					if (r)
+					{
+						uchar Hint[16];
+						p.Peek(Hint, sizeof(Hint));
+						GAutoPtr<GFilter> Filter(GFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint));
+						if (Filter)
+						{
+							GAutoPtr<GSurface> Img(new GMemDC);
+							GFilter::IoStatus Rd = Filter->ReadImage(Img, &p);
+							if (Rd == GFilter::IoSuccess)
+							{
+								Job->pDC = Img;
+								if (Job->Env)
+								{
+									// LgiTrace("Loaded '%s' as image %ix%i\n", u.Path, j->pDC->X(), j->pDC->Y());
+									Job->Env->OnDone(j);
+								}
+								else
+								{
+									LgiTrace("%s:%i - No env for '%s'\n", _FL, u.sPath.Get());
+									LgiAssert(0);
+								}
+							}
+							else LgiTrace("%s:%i - Failed to read '%s'\n", _FL, u.sPath.Get());
+						}
+						else LgiTrace("%s:%i - Failed to find filter for '%s'\n", _FL, u.sPath.Get());
+					}
+					else LgiTrace("%s:%i - Failed to get '%s'\n", _FL, Job->Uri.Get());
+				}
 			}
-			else LgiSleep(1);
+			else LgiSleep(10);
 		}
 	
 		return 0;
@@ -403,6 +364,9 @@ public:
 
 				if (Html)
 					Html->SetEnv(this);
+				#if HAS_IMAGE_LOADER
+				Html->SetLoadImages(true);
+				#endif
 				
 				if (sprintf_s(Base, sizeof(Base), "%s", LGetExePath().Get()) > 0)
 				{
