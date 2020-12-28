@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <cstdlib>
+#include <initializer_list>
 
 #define GARRAY_MIN_SIZE			16
 
@@ -87,6 +88,19 @@ public:
 			{
 				alloc = len = 0;
 			}
+		}
+	}
+
+	GArray(std::initializer_list<Type> il)
+	{
+		p = NULL;
+		alloc = len = 0;
+		fixed = false;
+		if (Length(il.size()))
+		{
+			size_t n = 0;
+			for (auto i: il)
+				p[n++] = i;
 		}
 	}
 

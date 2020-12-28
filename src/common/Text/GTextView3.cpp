@@ -1352,7 +1352,7 @@ void GTextView3::PourStyle(size_t Start, ssize_t EditSize)
 		return;
 
 	ssize_t Length = MAX(EditSize, 0);
-	if (Start + Length >= Size)
+	if (Start + Length >= (ssize_t)Size)
 		Length = Size - Start; // For deletes, this sizes the edit length within bounds.
 
 	// Expand re-style are to word boundaries before and after the area of change
