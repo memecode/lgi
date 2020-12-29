@@ -220,6 +220,16 @@ bool GTextLabel::OnLayout(GViewLayoutInfo &Inf)
 	return true;
 }
 
+void GTextLabel::OnCreate()
+{
+	if (d->ThreadName)
+	{
+		GString s;
+		s.Swap(d->ThreadName);
+		Name(s);
+	}
+}
+
 GMessage::Result GTextLabel::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())

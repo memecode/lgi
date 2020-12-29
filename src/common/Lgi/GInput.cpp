@@ -39,7 +39,8 @@ GInput::GInput(GViewI *parent, const char *InitStr, const char *Msg, const char 
 	}
 	AddView(Tbl);
 
-	GLayoutCell *c = Tbl->GetCell(0, 0, true);
+	int Cy = 0;
+	GLayoutCell *c = Tbl->GetCell(0, Cy++);
 	GView *Txt;
 	c->Add(Txt = new GTextLabel(-1, 5, 5, -1, -1, Msg));
 
@@ -54,14 +55,12 @@ GInput::GInput(GViewI *parent, const char *InitStr, const char *Msg, const char 
 	int CallbackX = callback ? GBUTTON_MIN_X + 20 : 0;
 	ContextX = MAX(ContextX, Txt->X() + CallbackX);
 
-	GRect r(0, 0, ContextX + CallbackX + Dx, 80 + Txt->Y() + Dy);
+	GRect r(0, 0, ContextX + CallbackX + Dx, 80 + MAX(SysFont->GetHeight(), Txt->Y()) + Dy);
 
 	SetParent(parent);
 	Name(Title);
-	SetPos(r);
-	MoveToCenter();
 
-	c = Tbl->GetCell(0, 1, true);
+	c = Tbl->GetCell(0, Cy++);
 	c->Add(Edit = new GEdit(IDC_EDIT, 5, Txt->GetPos().y2 + 5, EditX - 1, MsgDs.Y()+7, InitStr));
 	if (Edit)
 	{
@@ -71,13 +70,16 @@ GInput::GInput(GViewI *parent, const char *InitStr, const char *Msg, const char 
 			c->Add(new GButton(IDC_CALLBACK, 0, 0, -1, -1, "..."));
 	}
 
-	c = Tbl->GetCell(0, 2, true);
+	c = Tbl->GetCell(0, Cy++);
 	c->TextAlign(GCss::AlignRight);
 
 	GButton *Ok;
 	c->Add(Ok = new GButton(IDOK, 0, 0, -1, -1, LgiLoadString(L_BTN_OK, "Ok")));
 	c->Add(new GButton(IDCANCEL, 0, 0, -1, -1, LgiLoadString(L_BTN_CANCEL, "Cancel")));
 	Ok->Default(true);
+
+	SetPos(r);
+	MoveToCenter();
 }
 
 int GInput::OnNotify(GViewI *Ctrl, int Flags)
