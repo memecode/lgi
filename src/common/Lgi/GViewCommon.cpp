@@ -1503,7 +1503,7 @@ bool GView::DropTarget(bool t)
 
 bool GView::Sunken()
 {
-	ThreadCheck();
+	// ThreadCheck();
 
 	#if WINNATIVE
 	return TestFlag(d->WndExStyle, WS_EX_CLIENTEDGE);
@@ -1536,7 +1536,7 @@ void GView::Sunken(bool i)
 
 bool GView::Flat()
 {
-	ThreadCheck();
+	// ThreadCheck();
 
 	#if WINNATIVE
 	return	!TestFlag(d->WndExStyle, WS_EX_CLIENTEDGE) &&
@@ -1560,7 +1560,7 @@ void GView::Flat(bool i)
 
 bool GView::Raised()
 {
-	ThreadCheck();
+	// ThreadCheck();
 	
 	#if WINNATIVE
 	return TestFlag(d->WndExStyle, WS_EX_WINDOWEDGE);

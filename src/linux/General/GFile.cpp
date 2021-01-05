@@ -1127,7 +1127,7 @@ int GDirectory::First(const char *Name, const char *Pattern)
 			d->De = readdir(d->Dir);
 			if (d->De)
 			{
-				char s[256];
+				char s[512];
 				LgiMakePath(s, sizeof(s), d->BasePath, GetName());
 				lstat(s, &d->Stat);
 
@@ -1153,7 +1153,7 @@ int GDirectory::Next()
 	{
 		if ((d->De = readdir(d->Dir)))
 		{
-			char s[256];
+			char s[512];
 			LgiMakePath(s, sizeof(s), d->BasePath, GetName());			
 			lstat(s, &d->Stat);
 			if (!d->Ignore())
@@ -1535,19 +1535,6 @@ int64 GFile::SetSize(int64 Size)
 	if (ValidHandle(d->hFile))
 	{
 		int64 Pos = GetPos();
-		
-		/*
-		close(d->hFile);
-		if (d->Name)
-		{
-			#if LINUX64
-			truncate64(Name, Size);
-			#else
-			truncate(Name, Size);
-			#endif
-		}
-		d->hFile = open(Name, Attributes, 0);
-		*/
 		
 		#if LINUX64
 		ftruncate64(d->hFile, Size);
