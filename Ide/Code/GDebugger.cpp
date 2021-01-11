@@ -377,20 +377,17 @@ class Gdb : public GDebugger, public LThread, public Callback
 					{
 						// Ok so whats the process ID?
 						#ifdef POSIX
-						int Pid = 
-						getpgid(ThreadId);
-						LogMsg("Pid for Thread %i = %i\n", ThreadId, Pid);
-						if (Pid > 0 && ProcessId < 0)
-						{
-							// LgiTrace("Got the thread id: %i, and pid: %i\n", ThreadId, Pid);
-							ProcessId = Pid;
-						}
-						/*
-						else
-							LgiTrace("Not setting pid: pid=%i, processid=%i\n", Pid, ProcessId);
-						*/
+						
+							int Pid = 
+							getpgid(ThreadId);
+							// LogMsg("Pid for Thread %i = %i\n", ThreadId, Pid);
+							if (Pid > 0 && ProcessId < 0)
+								// LgiTrace("Got the thread id: %i, and pid: %i\n", ThreadId, Pid);
+								ProcessId = Pid;
 						#else
-						LgiAssert(!"Impl me.");
+
+							LgiAssert(!"Impl me.");
+
 						#endif
 					}
 					else LgiTrace("%s:%i - No thread id?\n", _FL);
@@ -795,6 +792,8 @@ public:
 		if (Running)
 			Break(true);
 		
+		ProcessId = -1;
+
 		GString a;
 		if (Args)
 			a.Printf("r %s", Args.Get());
@@ -866,7 +865,10 @@ public:
 					// Get process info
 					if (Cmd("info inferiors", &p))
 					{
-						GString::Array Ln = p.NewGStr().SplitDelimit("\r\n");
+						auto s = p.NewGStr();
+						// LogMsg("%s\n", s.Get());
+						
+						auto Ln = s.SplitDelimit("\r\n");
 						if (Ln.Length() >= 2)
 						{
 							GString::Array a = Ln[1].SplitDelimit(" \t");
@@ -886,6 +888,9 @@ public:
 						}
 					}
 					#endif
+					
+					// Redetect the process id from the new threads...
+					ProcessId = -1;
 					
 					if (Cmd("handle SIGTTOU ignore nostop", &p))
 					{
@@ -1502,7 +1507,7 @@ public:
 		#ifdef POSIX
 		if (ProcessId < 0)
 		{
-			LgiTrace("%s:%i - No process ID (yet?).\n", _FL);
+			LogMsg("%s:%i - No process ID (yet?).\n", _FL);
 			return false;
 		}
 		
@@ -1521,7 +1526,7 @@ public:
 			return WaitPrompt();
 		}
 		
-		LogMsg("%s:%i - SIGINT failed with %i(0x%x): %s\n", _FL, ErrNo, ErrNo, LErrorCodeToString(ErrNo).Get());
+		LogMsg("%s:%i - SIGINT failed with %i(0x%x): %s (pid=%i)\n", _FL, ErrNo, ErrNo, LErrorCodeToString(ErrNo).Get(), ProcessId);
 		return false;
 		#else
 		LgiAssert(!"Impl me");
