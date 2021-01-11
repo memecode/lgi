@@ -1724,14 +1724,19 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 
 			if (d->Focus)
 			{
+				#if DEBUG_SETFOCUS
+				static int Count = 0;
+				#endif
+				
 				GView *gv = d->Focus->GetGView();
 				if (gv)
 				{
 					#if DEBUG_SETFOCUS
 					GAutoString _set = DescribeView(d->Focus);
-					LgiTrace("GWindow::SetFocus(%s, %s) focusing GView\n",
+					LgiTrace("GWindow::SetFocus(%s, %s) %i focusing GView\n",
 						_set.Get(),
-						TypeName);
+						TypeName,
+						Count++);
 					#endif
 
 					gv->_Focus(true);
@@ -1740,9 +1745,10 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 				{			
 					#if DEBUG_SETFOCUS
 					GAutoString _set = DescribeView(d->Focus);
-					LgiTrace("GWindow::SetFocus(%s, %s) focusing nonGView (active=%i)\n",
+					LgiTrace("GWindow::SetFocus(%s, %s) %i focusing nonGView (active=%i)\n",
 						_set.Get(),
 						TypeName,
+						Count++,
 						IsActive());
 					#endif
 
