@@ -260,7 +260,7 @@ public:
 	void Push();
 	void Pull(int AndUpdate = -1, LoggingType Logging = LogNormal);
 	void Clean();
-	bool Revert(const char *Path, const char *Revision = NULL);
+	bool Revert(GString::Array &uris, const char *Revision = NULL);
 	bool Resolve(const char *Path);
 	bool AddFile(const char *Path, bool AsBinary = true);
 	bool Blame(const char *Path);

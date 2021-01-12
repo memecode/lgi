@@ -111,7 +111,6 @@ void VcFile::OnMouseClick(GMouse &m)
 		LSubMenu s;
 		const char *File = GetText(COL_FILENAME);
 		GString LocalPath;
-		GString FullUri = GetUri();
 
 		if (Uri.IsProtocol("file"))
 		{
@@ -119,6 +118,12 @@ void VcFile::OnMouseClick(GMouse &m)
 			p += File;
 			LocalPath = p.GetFull();
 		}
+		
+		GArray<VcFile*> Files;
+		GetList()->GetSelection(Files);
+		GString::Array Uris;
+		for (auto f: Files)
+			Uris.New() = f->GetUri();
 
 		GetStatus();
 		if (Revision)
@@ -134,6 +139,8 @@ void VcFile::OnMouseClick(GMouse &m)
 			switch (Status)
 			{
 				case SModified:
+				case SAdded:
+				case SDeleted:
 					s.AppendItem("Revert Changes", IDM_REVERT);
 					break;
 				case SConflicted:
@@ -181,22 +188,22 @@ void VcFile::OnMouseClick(GMouse &m)
 		{
 			case IDM_REVERT:
 			{
-				Owner->Revert(FullUri);
+				Owner->Revert(Uris);
 				break;
 			}
 			case IDM_RESOLVE:
 			{
-				Owner->Resolve(FullUri);
+				Owner->Resolve(Uris[0]);
 				break;
 			}
 			case IDM_ADD_FILE:
 			{
-				Owner->AddFile(FullUri, false);
+				Owner->AddFile(Uris[0], false);
 				break;
 			}
 			case IDM_ADD_BINARY_FILE:
 			{
-				Owner->AddFile(FullUri, true);
+				Owner->AddFile(Uris[0], true);
 				break;
 			}
 			case IDM_BROWSE:
@@ -209,29 +216,29 @@ void VcFile::OnMouseClick(GMouse &m)
 			}
 			case IDM_REVERT_TO_REV:
 			{
-				Owner->Revert(FullUri, Revision);
+				Owner->Revert(Uris, Revision);
 				break;
 			}
 			case IDM_BLAME:
 			{
-				Owner->Blame(FullUri);
+				Owner->Blame(Uris[0]);
 				break;
 			}
 			case IDM_SAVE_AS:
 			{
-				Owner->SaveFileAs(FullUri, Revision);
+				Owner->SaveFileAs(Uris[0], Revision);
 				break;
 			}
 			case IDM_EOL_LF:
 			case IDM_EOL_CRLF:
 			case IDM_EOL_AUTO:
 			{
-				Owner->SetEol(FullUri, Cmd);
+				Owner->SetEol(Uris[0], Cmd);
 				break;
 			}
 			case IDM_LOG_FILE:
 			{
-				Owner->LogFile(FullUri);
+				Owner->LogFile(Uris[0]);
 				break;
 			}
 			case IDM_COPY_LEAF:

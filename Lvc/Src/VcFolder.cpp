@@ -3659,26 +3659,39 @@ bool VcFolder::ParseRevert(int Result, GString s, ParseParams *Params)
 	return false;
 }
 
-bool VcFolder::Revert(const char *uri, const char *Revision)
+bool VcFolder::Revert(GString::Array &Uris, const char *Revision)
 {
-	if (!uri)
+	if (Uris.Length() == 0)
 		return false;
 
-	auto Path = GetFilePart(uri);
 	switch (GetType())
 	{
 		case VcGit:
 		{
-			GString a;
-			a.Printf("checkout \"%s\"", Path.Get());
+			GStringPipe p;
+			p.Print("checkout");
+			for (auto u: Uris)
+			{
+				auto Path = GetFilePart(u);
+				p.Print(" \"%s\"", Path.Get());
+			}
+			
+			auto a = p.NewGStr();			
 			return StartCmd(a, &VcFolder::ParseRevert);
 			break;
 		}
 		case VcHg:
 		case VcSvn:
 		{
-			GString a;
-			a.Printf("revert \"%s\"", Path.Get());
+			GStringPipe p;
+			p.Print("revert");
+			for (auto u: Uris)
+			{
+				auto Path = GetFilePart(u);
+				p.Print(" \"%s\"", Path.Get());
+			}
+
+			auto a = p.NewGStr();			
 			return StartCmd(a, &VcFolder::ParseRevert);
 			break;
 		}
