@@ -3269,7 +3269,16 @@ bool VcFolder::ParsePull(int Result, GString s, ParseParams *Params)
 
 			if (Params && Params->Str.Equals("log"))
 			{
-				IsLogging = StartCmd("log", &VcFolder::ParseLog);
+				GVariant Limit;
+				d->Opts.GetValue("svn-limit", Limit);
+				
+				GString Args;
+				if (Limit.CastInt32() > 0)
+					Args.Printf("log --limit %i", Limit.CastInt32());
+				else
+					Args = "log";				
+				
+				IsLogging = StartCmd(Args, &VcFolder::ParseLog);
 				return false;
 			}
 			break;
