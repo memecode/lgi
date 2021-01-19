@@ -8,7 +8,7 @@ class LTelnet : public GStream
 {
 	GSocket s;
 	GArray<uint8_t> buf;
-	int used;
+	ssize_t used;
 	
 public:
 	LTelnet(const char *host = NULL, int port = 23)
@@ -41,12 +41,12 @@ public:
 			used += rd;
 		
 		uint8_t *p = (uint8_t*)Ptr;
-		int i, start = 0, wr = 0;
+		ssize_t i, start = 0, wr = 0;
 		for (i=0; i<used; i++)
 		{
 			if (buf[i] == 255)
 			{
-				int common = MIN(Size-wr, i-start);
+				auto common = MIN(Size-wr, i-start);
 				if (common > 0)
 				{
 					memcpy(p+wr, buf.AddressOf(start), common);
@@ -65,7 +65,7 @@ public:
 		}
 		if (start < i)
 		{
-			int common = MIN(Size-wr, i-start);
+			auto common = MIN(Size-wr, i-start);
 			if (common > 0)
 			{
 				memcpy(p+wr, buf.AddressOf(start), common);
