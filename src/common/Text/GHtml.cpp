@@ -2843,14 +2843,18 @@ void GTag::SetStyle()
 	switch (TagId)
 	{
 		default:
+		{
+			if (!Stricmp(Tag.Get(), "o:p"))
+				Display(GCss::DispNone);
 			break;
+		}
 		case TAG_LINK:
 		{
 			const char *Type, *Href;
 			if (Html->Environment &&
 				Get("type", Type) &&
 				Get("href", Href) &&
-				!_stricmp(Type, "text/css") &&
+				!Stricmp(Type, "text/css") &&
 				!Html->CssHref.Find(Href))
 			{
 				GDocumentEnv::LoadJob *j = Html->Environment->NewJob();
