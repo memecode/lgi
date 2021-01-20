@@ -157,7 +157,6 @@ struct GSubProcessPriv
 			CreatePseudoConsole = (ProcCreatePseudoConsole)Kernel.GetAddress("CreatePseudoConsole");
 			PseudoConsole = CreatePseudoConsole != NULL && pseudoConsole;
 		#endif
-		int asd=0;
 	}
 
 	~GSubProcessPriv()

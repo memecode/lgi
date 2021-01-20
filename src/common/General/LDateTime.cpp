@@ -894,8 +894,6 @@ void LDateTime::Get(char *Str, size_t SLen) const
 
 bool LDateTime::Set(const char *Str)
 {
-	bool Status = false;
-
 	if (!Str)
 		return false;
 
