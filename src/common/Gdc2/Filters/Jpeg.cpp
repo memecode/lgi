@@ -1030,6 +1030,7 @@ GFilter::IoStatus GdcJpeg::_Write(GStream *Out, GSurface *pDC, int Quality, SubS
 
 	JPEGLIB jpeg_start_compress(&cinfo, true);
 
+	auto Status = IoSuccess;
 	row_stride = pDC->X() * cinfo.input_components;
 	uchar *Buffer = new uchar[row_stride];
 	if (Buffer)
@@ -1132,7 +1133,15 @@ GFilter::IoStatus GdcJpeg::_Write(GStream *Out, GSurface *pDC, int Quality, SubS
 					break;
 			}
 
-			JPEGLIB jpeg_write_scanlines(&cinfo, &Buffer, 1);
+			auto old = cinfo.next_scanline;
+			auto wr = JPEGLIB jpeg_write_scanlines(&cinfo, &Buffer, 1);
+			if (old == cinfo.next_scanline)
+			{
+				LgiTrace("%s:%i - jpeg_write_scanlines didn't advance next_scanline? wr=%i\n", _FL, (int)wr);
+				Status = IoError;
+				break;
+			}
+			
 			if (Meter) Meter->Value(cinfo.next_scanline);
 		}
 
@@ -1142,7 +1151,7 @@ GFilter::IoStatus GdcJpeg::_Write(GStream *Out, GSurface *pDC, int Quality, SubS
 	JPEGLIB jpeg_finish_compress(&cinfo);
 	JPEGLIB jpeg_destroy_compress(&cinfo);
 
-	return GFilter::IoSuccess;
+	return Status;
 }
 
 #endif
