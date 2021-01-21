@@ -8,7 +8,7 @@
 	#include <Carbon/Carbon.h>
 #endif
 
-#if LGI_COCOA
+#if LGI_COCOA || defined(__GTK_H__)
 #define LGI_NATIVE_TIPS			1
 #endif
 
@@ -220,12 +220,12 @@ int GToolTip::NewTip(const char *Name, GRect &Pos)
 {
 	int Status = 0;
 
+	LOG("%s:%i NewTip(%s,%s)\n", _FL, Name, Pos.GetStr());
+
 	#if LGI_NATIVE_TIPS
 	
 		if (ValidStr(Name) && d->Parent)
 		{
-			LOG("NewTip('%s',%s)\n", Name, Pos.Describe());
-			
 			NativeTip *t = new NativeTip(d->NextUid++, d->Parent);
 			if (t)
 			{
@@ -240,9 +240,11 @@ int GToolTip::NewTip(const char *Name, GRect &Pos)
 				
 				d->Tips.Add(t->Id, t);
 				
-				Status = true;
+				Status = t->Id;
 			}
+			else LOG("Error: Alloc failed.");
 		}
+		else LOG("Error: Invalid params.");
 	
 	#elif LGI_CARBON
 

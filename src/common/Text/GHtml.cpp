@@ -8542,7 +8542,8 @@ void GHtml::OnMouseMove(GMouse &m)
 
 		GRect r = HitTag->GetRect(false);
 		r.Offset(0, -Offset);
-		HitTag->TipId = Tip.NewTip(Uri, r);
+		if (!HitTag->TipId)
+			HitTag->TipId = Tip.NewTip(Uri, r);
 		// LgiTrace("NewTip: %s @ %s, ID=%i\n", Uri.Get(), r.GetStr(), HitTag->TipId);
 	}
 

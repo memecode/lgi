@@ -11,6 +11,7 @@ public:
 	~GToolTip();
 
 	/// Create a tip
+	/// \returns the id of the tip or 0 on failure.
 	int NewTip
 	(
 		/// The text to display
