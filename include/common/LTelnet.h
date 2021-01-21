@@ -18,7 +18,7 @@ public:
 			Open(host, port);
 	}
 	
-	int Open(const char *host, int port = 23)
+	int Open(const char *host, int port = 23) override
 	{
 		if (!s.Open(host, port))
 			return false;
@@ -28,7 +28,7 @@ public:
 		return true;
 	}
 	
-	bool IsOpen() { return s.IsOpen(); }
+	bool IsOpen() override { return s.IsOpen(); }
 	
 	ssize_t Read(void *Ptr, ssize_t Size, int Flags = 0) override
 	{

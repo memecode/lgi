@@ -63,7 +63,7 @@ public:
 	bool OnLayout(GViewLayoutInfo &Inf) override;
 	void OnStyleChange();
 	bool SetVariant(const char *Name, GVariant &Value, char *Array = NULL) override;
-	void OnCreate();
+	void OnCreate() override;
 };
 
 #endif

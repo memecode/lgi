@@ -669,6 +669,12 @@ bool GWindow::IsActive()
 	return Wnd ? [Wnd.p isKeyWindow] : false;
 }
 
+bool GWindow::SetActive()
+{
+	[[NSApplication sharedApplication] activateIgnoringOtherApps : YES];
+	return false;
+}
+
 void GWindow::SetDeleteOnClose(bool i)
 {
 	d->DeleteOnClose = i;
