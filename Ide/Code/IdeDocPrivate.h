@@ -73,7 +73,7 @@ public:
 	{
 		LDateTime Ts;
 
-		GString Full = nSrc ? nSrc->GetFullPath() : FileName;
+		auto Full = nSrc ? nSrc->GetFullPath() : FileName;
 		if (Full)
 		{
 			GDirectory Dir;

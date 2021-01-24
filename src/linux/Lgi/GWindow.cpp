@@ -376,22 +376,19 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		case GDK_KEY_PRESS:
 		case GDK_KEY_RELEASE:
 		{
+			auto ModFlags = LgiApp->GetKeyModFlags();
 			auto e = &event->key;
 			#define KEY(name) GDK_KEY_##name
 
 			GKey k;
 			k.Down(e->type == GDK_KEY_PRESS);
 			k.c16 = k.vkey = e->keyval;
-			k.Shift((e->state & GDK_SHIFT_MASK) != 0);
-			k.Ctrl((e->state & GDK_CONTROL_MASK) != 0);
-			k.Alt((e->state & GDK_MOD1_MASK) != 0);
-			#ifdef MAC
-			k.System((e->state & GDK_MOD2_MASK) != 0);
-			#else
-			k.System((e->state & GDK_SUPER_MASK) != 0);
-			#endif
-		
-			#ifdef _DEBUG
+			k.Shift((e->state & ModFlags->Shift) != 0);
+			k.Ctrl((e->state & ModFlags->Ctrl) != 0);
+			k.Alt((e->state & ModFlags->Alt) != 0);
+			k.System((e->state & ModFlags->System) != 0);
+			
+			#if 0//def _DEBUG
 			if (k.vkey == GDK_KEY_Meta_L ||
 				k.vkey == GDK_KEY_Meta_R)
 				break;
@@ -494,9 +491,12 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 				KeyPadMap(KEY(KP_Divide), '/', true)
 			}
 		
-			#if DEBUG_KEY_EVENT
-			k.Trace("gtk_key_event");
-			#endif
+			if (ModFlags->Debug)
+			{
+				::	GString Msg;
+				Msg.Printf("e->state=%x %s", e->state, ModFlags->FlagsToString(e->state).Get());
+				k.Trace(Msg);
+			}
 
 			auto v = d->Focus ? d->Focus : this;
 			if (!HandleViewKey(v->GetGView(), k))
@@ -1227,7 +1227,7 @@ void GWindow::SetZoom(GWindowZoom i)
 {
 	if (!Wnd)
 	{
-		LgiTrace("%s:%i - No window.\n", _FL);
+		// LgiTrace("%s:%i - No window.\n", _FL);
 		return;
 	}
 	

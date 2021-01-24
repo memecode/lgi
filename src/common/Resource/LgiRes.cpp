@@ -1253,17 +1253,12 @@ GLanguage *LgiGetLanguageId()
 	}
 
 	// Check for config setting
-	GXmlTag *LangConfig = LgiApp->GetConfig("Language");
-	if (LangConfig)
+	auto LangId = LgiApp->GetConfig("Language");
+	if (LangId)
 	{
-		char *Id;
-		if ((Id = LangConfig->GetAttr("Id")) &&
-			ValidStr(Id))
-		{
-			GLanguage *l = GFindLang(Id);
-			if (l)
-				return l;
-		}
+		GLanguage *l = GFindLang(LangId);
+		if (l)
+			return l;
 	}
 
 	// Use a system setting

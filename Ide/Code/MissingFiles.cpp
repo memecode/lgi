@@ -192,7 +192,7 @@ public:
 				{
 					for (unsigned i=0; i<Nodes.Length(); i++)
 					{
-						GString s = Nodes[i]->GetFullPath();
+						auto s = Nodes[i]->GetFullPath();
 						if (s)
 						{
 							SearchResults *Sr = new SearchResults;

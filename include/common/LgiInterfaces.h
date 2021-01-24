@@ -301,10 +301,10 @@ public:
 	) = 0;
 	
 	/// Gets the application conf stored in lgi.conf
-	virtual GXmlTag *GetConfig(const char *Tag) = 0;
+	virtual GString GetConfig(const char *Tag) = 0;
 
 	/// Sets a single tag in the config. (Not written to disk)
-	virtual void SetConfig(GXmlTag *Tag) = 0;
+	virtual void SetConfig(const char *Var, const char *Val) = 0;
 	
 	/// Gets the control with the keyboard focus
 	virtual GViewI *GetFocus() = 0;

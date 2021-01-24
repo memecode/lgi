@@ -984,7 +984,7 @@ public:
 		return s;
 	}
 
-	/// Strip off any leading and trailing whitespace	
+	/// Strip off any leading and trailing characters from 'set' (or whitespace if NULL)	
 	GString Strip(const char *set = NULL)
 	{
 		GString ret;
@@ -992,7 +992,7 @@ public:
 		return ret;
 	}
 
-	/// Strip off any leading whitespace	
+	/// Strip off any leading characters from 'set' (or whitespace if NULL)	
 	GString LStrip(const char *set = NULL)
 	{
 		GString ret;
@@ -1000,7 +1000,7 @@ public:
 		return ret;
 	}	
 
-	/// Strip off any trailing whitespace	
+	/// Strip off any trailing characters from 'set' (or whitespace if NULL)	
 	GString RStrip(const char *set = NULL)
 	{
 		GString ret;

@@ -326,7 +326,7 @@ void BuildTabStops(GViewI *v, ::GArray<GViewI*> &a)
 
 gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 {
-	#if 0
+	#if 1
 	// This is useful for debugging...
 	if (e->keyval == GDK_Shift_L ||
 		e->keyval == GDK_Shift_R ||
@@ -351,6 +351,8 @@ gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 		k.Shift((e->state & 1) != 0);
 		k.Ctrl((e->state & 4) != 0);
 		k.Alt((e->state & 8) != 0);
+		
+		printf("####### e->state=%x\n", e->state);
 		
 		// k.IsChar = !k.Ctrl() && (k.c16 >= ' ' && k.c16 <= 0x7f);
 		k.IsChar = !k.Ctrl() &&

@@ -929,7 +929,7 @@ char *IdeDocPrivate::GetLocalFile()
 		if (nSrc->IsWeb())
 			return nSrc->GetLocalCache();
 		
-		GString fp = nSrc->GetFullPath();
+		auto fp = nSrc->GetFullPath();
 		if (_stricmp(fp.Get()?fp.Get():"", Buffer.Get()?Buffer.Get():""))
 			Buffer = fp;
 		return Buffer;
@@ -1007,7 +1007,7 @@ void IdeDocPrivate::OnSaveComplete(bool Status)
 	ProjectNode *Node = dynamic_cast<ProjectNode*>(nSrc);
 	if (Node)
 	{
-		GString Full = nSrc->GetFullPath();
+		auto Full = nSrc->GetFullPath();
 		App->OnNode(Full, Node, FindSymbolSystem::FileReparse);
 	}
 }

@@ -1601,17 +1601,18 @@ bool GFontType::GetConfigFont(const char *Tag)
 {
 	bool Status = false;
 
-	GXmlTag *Font = LgiApp->GetConfig(Tag);
+	auto Font = LgiApp->GetConfig(Tag);
 	if (Font)
 	{
 		// read from config file
-		char *f, *p;
-		if ((f = Font->GetAttr("Face")) && (p = Font->GetAttr("Point")))
+		auto p = Font.Split(":");
+		if (p.Length() == 2)
 		{
-			SetFace(f);
-			SetPointSize(atoi(p));
+			SetFace(p[0]);
+			SetPointSize(p[1].Int());
 			Status = true;
 		}
+		else LgiTrace("%s:%i - Font specification should be: <font>:<pointSize>\n", _FL);
 	}
 
 	return Status;

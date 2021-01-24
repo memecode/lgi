@@ -384,6 +384,7 @@
 		<Node File="./include/common/LgiInc.h" Type="3" Platforms="15" />
 		<Node File="./include/common/LgiInterfaces.h" Type="3" Platforms="15" />
 		<Node File="./include/common/LgiMsgs.h" Type="3" Platforms="15" />
+		<Node File="./include/common/LJson.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
 		<Node File="./Ide/Gtk3/CMakeLists.txt" Type="8" Platforms="15" />

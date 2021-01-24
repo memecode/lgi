@@ -199,6 +199,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../include/common/GXmlTree.h \
 	../include/common/INet.h \
 	../include/common/INetTools.h \
+	../include/common/LCairoSurface.h \
 	../include/common/LCancel.h \
 	../include/common/LCurrentTime.h \
 	../include/common/LDateTime.h \
@@ -1197,6 +1198,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 	../include/common/GRect.h \
 	../include/common/LPoint.h \
 	../include/common/GColour.h \
+	../include/common/LCairoSurface.h \
 	../include/common/GFilter.h
 
 ../include/common/GColour.h : ../include/common/GColourSpace.h
@@ -1299,6 +1301,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 	../include/common/GRect.h \
 	../include/common/LPoint.h \
 	../include/common/GColour.h \
+	../include/common/LCairoSurface.h \
 	../include/common/GFilter.h
 
 ../include/common/GTree.h : ../include/common/GItemContainer.h
@@ -1399,6 +1402,8 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 	../include/common/GNotifications.h
 
 ../include/common/GScrollBar.h : 
+
+../include/common/LCairoSurface.h : 
 
 ../include/common/GWindow.h : 
 
@@ -2278,18 +2283,11 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 
 ../include/common/GTextFile.h : 
 
+../include/common/LCairoSurface.h : 
+
 ../src/common/Gdc2/Font/GFontCodePages.cpp : ../include/common/Lgi.h \
 	../include/common/GToken.h \
 	../include/common/GFont.h
-
-../src/linux/General/GFile.cpp : ../include/common/LgiDefs.h \
-	../include/common/GFile.h \
-	../include/common/GContainers.h \
-	../include/common/GToken.h \
-	../include/common/Gdc2.h \
-	../include/common/LgiCommon.h \
-	../include/common/GString.h \
-	../include/common/LDateTime.h
 
 ../src/common/Skins/Gel/Gel.cpp : ../include/common/Lgi.h \
 	../include/common/GSkinEngine.h \
@@ -2306,6 +2304,15 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 	../include/common/GContainers.h \
 	../include/common/GToken.h \
 	../include/common/GString.h
+
+../src/linux/General/GFile.cpp : ../include/common/LgiDefs.h \
+	../include/common/GFile.h \
+	../include/common/GContainers.h \
+	../include/common/GToken.h \
+	../include/common/Gdc2.h \
+	../include/common/LgiCommon.h \
+	../include/common/GString.h \
+	../include/common/LDateTime.h
 
 ../include/common/GStatusBar.h : 
 
@@ -2349,11 +2356,11 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 	../include/common/LHashTable.h
 
 VPATH=%.cpp \
-	../include/common \
-	./ \
-	./Code \
 	../include/linux/Gtk \
 	./Resources \
 	../include/linux \
+	../include/common \
+	./Code \
+	./ \
 	$(BuildDir)
 

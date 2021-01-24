@@ -1979,6 +1979,15 @@ void AppWnd::OnReceiveFiles(GArray<const char*> &Files)
 	}
 	
 	Raise();
+	
+	if (LgiApp->GetOption("createMakeFiles"))
+	{
+		IdeProject *p = RootProject();
+		if (p)
+		{
+			p->CreateMakefile(PlatformCurrent, false);
+		}
+	}
 }
 
 void AppWnd::OnDebugState(bool Debugging, bool Running)
@@ -2699,6 +2708,19 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 {
 	switch (m->Msg())
 	{
+		case M_MAKEFILES_CREATED:
+		{
+			IdeProject *p = (IdeProject*)m->A();
+			if (p)
+				p->OnMakefileCreated();
+			break;
+		}
+		case M_LAST_MAKEFILE_CREATED:
+		{
+			if (LgiApp->GetOption("exit"))
+				LgiCloseApp();
+			break;
+		}
 		case M_START_BUILD:
 		{
 			IdeProject *p = RootProject();

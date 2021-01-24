@@ -63,9 +63,7 @@ char *ToUnixPath(char *s)
 	{
 		char *c;
 		while ((c = strchr(s, '\\')))
-		{
 			*c = '/';
-		}
 	}
 	return s;
 }
@@ -214,12 +212,15 @@ class MakefileThread : public LThread, public LCancel
 	bool BuildAfterwards;
 	
 public:
+	static int Instances;
+
 	MakefileThread(IdeProjectPrivate *priv, IdePlatform platform, bool Build) : LThread("MakefileThread")
 	{
 		d = priv;
 		Proj = d->Project;
 		Platform = platform;
 		BuildAfterwards = Build;
+		Instances++;
 		
 		Run();
 	}
@@ -229,8 +230,9 @@ public:
 		Cancel();
 		while (!IsExited())
 			LgiSleep(1);
+		Instances--;
 	}
-
+	
 	int Main()
 	{
 		const char *PlatformName = PlatformNames[Platform];
@@ -267,6 +269,7 @@ public:
 
 		char Buf[256];
 		GAutoString MakeFile = Proj->GetMakefile();
+		Proj->CheckExists(MakeFile);
 		if (!MakeFile)
 		{
 			MakeFile.Reset(NewStr("../Makefile"));
@@ -390,7 +393,7 @@ public:
 
 		// Output the build mode, flags and some paths
 		int BuildMode = d->App->GetBuildMode();
-		char *BuildModeName = BuildMode ? (char*)"Release" : (char*)"Debug";
+		auto BuildModeName = BuildMode ? "Release" : "Debug";
 		m.Print("ifndef Build\n"
 				"	Build = %s\n"
 				"endif\n",
@@ -469,13 +472,19 @@ public:
 						continue;
 					
 					if (in(0) == '-')
+					{
+						Proj->CheckExists(in);
 						s.Printf(" \\\n\t\t%s", in.Get());
+					}
 					else
 					{
 						GAutoString Rel;
 						if (!LgiIsRelativePath(in))
 							Rel = LgiMakeRelativePath(Base, in);
-						s.Printf(" \\\n\t\t-L%s", ToUnixPath(Rel ? Rel.Get() : in.Get()));
+
+						GString Final = Rel ? Rel : in;
+						Proj->CheckExists(Final);
+						s.Printf(" \\\n\t\t-L%s", ToUnixPath(Final));
 					}
 					
 					sLibs[Cfg] += s;
@@ -488,12 +497,16 @@ public:
 				GToken Libs(PLibs, "\r\n");
 				for (int i=0; i<Libs.Length(); i++)
 				{
-					char *l = Libs[i];
+					GString l = Libs[i];
+
 					GString s;
-					if (*l == '`' || *l == '-')
-						s.Printf(" \\\n\t\t%s", Libs[i]);
+					if (l(0) == '`' || l(0) == '-')
+						s.Printf(" \\\n\t\t%s", l);
 					else
-						s.Printf(" \\\n\t\t-l%s", ToUnixPath(Libs[i]));
+					{
+						Proj->CheckExists(l);
+						s.Printf(" \\\n\t\t-l%s", ToUnixPath(l));
+					}
 					sLibs[Cfg] += s;
 				}
 			}
@@ -511,20 +524,22 @@ public:
 					if (dot)
 						*dot = 0;
 													
-					GString s;
-					s.Printf(" \\\n\t\t-l%s$(Tag)", ToUnixPath(t));
+					GString s, sTarget = t;
+					Proj->CheckExists(sTarget);
+					s.Printf(" \\\n\t\t-l%s$(Tag)", ToUnixPath(sTarget));
 					sLibs[Cfg] += s;
 
-					GAutoString DepBase = dep->GetBasePath();
+					auto DepBase = dep->GetBasePath();
 					if (DepBase)
 					{
-						GString DepPath;
-						DepPath.Printf("%s/$(BuildDir)", ToUnixPath(DepBase));
+						GString DepPath = ToUnixPath(DepBase);
 						
 						GAutoString Rel;
 						Rel = LgiMakeRelativePath(Base, DepPath);
 
-						s.Printf(" \\\n\t\t-L%s", ToUnixPath(Rel?Rel.Get():DepPath.Get()));
+						GString Final = Rel ? Rel : DepPath;
+						Proj->CheckExists(Final, true);
+						s.Printf(" \\\n\t\t-L%s/$(BuildDir)", ToUnixPath(Final));
 						sLibs[Cfg] += s;
 					}
 				}
@@ -534,7 +549,7 @@ public:
 
 			// Do include paths
 			LHashTbl<StrKey<char>,bool> Inc;
-			const char *ProjIncludes = d->Settings.GetStr(ProjIncludePaths, NULL, Platform);
+			auto ProjIncludes = d->Settings.GetStr(ProjIncludePaths, NULL, Platform);
 			if (ValidStr(ProjIncludes))
 			{
 				// Add settings include paths.
@@ -542,7 +557,8 @@ public:
 				for (int i=0; i<Paths.Length(); i++)
 				{
 					char *p = Paths[i];
-					GAutoString pn = ToNativePath(p);
+					GAutoString pn = ToNativePath(p);					
+					Proj->CheckExists(pn);					
 					if (!Inc.Find(pn))
 					{
 						Inc.Add(pn, true);
@@ -558,6 +574,7 @@ public:
 				{
 					char *p = Paths[i];
 					GAutoString pn = ToNativePath(p);
+					Proj->CheckExists(pn);
 					if (!Inc.Find(pn))
 					{
 						Inc.Add(pn, true);
@@ -589,15 +606,14 @@ public:
 
 						LgiTrimDir(Path);
 					
-						char Rel[256];
+						GString Rel;
 						if (!Proj->RelativePath(Rel, Path))
-						{
-							strcpy(Rel, Path);
-						}
+							Rel = Path;
 						
 						if (stricmp(Rel, ".") != 0)
 						{
 							GAutoString RelN = ToNativePath(Rel);
+							Proj->CheckExists(RelN);
 							if (!Inc.Find(RelN))
 							{
 								Inc.Add(RelN, true);
@@ -608,8 +624,6 @@ public:
 			}
 
 			List<char> Incs;
-			// char *i;
-			// for (bool b=Inc.First(&i); b; b=Inc.Next(&i))
 			for (auto i : Inc)
 			{
 				Incs.Insert(NewStr(i.key));
@@ -710,11 +724,9 @@ public:
 							
 							if (DepBase && Base && Dep->GetTargetFile(t, sizeof(t)))
 							{
-								char Rel[MAX_PATH] = "";
+								GString Rel;
 								if (!Proj->RelativePath(Rel, DepBase))
-								{
-									strcpy_s(Rel, sizeof(Rel), DepBase);
-								}
+									Rel = DepBase;
 								ToUnixPath(Rel);
 								
 								// Add tag to target name
@@ -724,7 +736,7 @@ public:
 								else
 									sprintf_s(t, sizeof(t), "%s", Parts[0]);
 
-								sprintf(Buf, "%s/$(BuildDir)/%s", Rel, t);
+								sprintf(Buf, "%s/$(BuildDir)/%s", Rel.Get(), t);
 								m.Print(" %s", Buf);
 								
 								GArray<char*> AllDeps;
@@ -738,8 +750,7 @@ public:
 									if (i)
 										Rules.Print(" \\\n\t");
 									
-									char Rel[MAX_PATH];
-									char *f = Proj->RelativePath(Rel, AllDeps[i]) ? Rel : AllDeps[i];
+									char *f = Proj->RelativePath(Rel, AllDeps[i]) ? Rel.Get() : AllDeps[i];
 									ToUnixPath(f);
 									Rules.Print("%s", f);
 									
@@ -922,10 +933,10 @@ public:
 					ProjectNode *n = Files[idx];
 					if (n->GetType() == NodeSrc)
 					{
-						GString Src = n->GetFullPath();
+						auto Src = n->GetFullPath();
 						if (Src)
 						{
-							char Part[256];
+							char Part[256];						
 							
 							char *d = strrchr(Src, DIR_CHAR);
 							d = d ? d + 1 : Src.Get();
@@ -933,12 +944,11 @@ public:
 							char *Dot = strrchr(Part, '.');
 							if (Dot) *Dot = 0;
 
-							char Rel[MAX_PATH];
-							
+							GString Rel;							
 							if (Platform != PlatformHaiku)
 							{
 								if (!Proj->RelativePath(Rel, Src))
-						 			strcpy_s(Rel, sizeof(Rel), Src);
+						 			Rel = Src;
 							}
 							else
 							{
@@ -946,7 +956,7 @@ public:
 								// find the source correctly. As there are duplicate filenames
 								// for different platforms it's better to rely on full paths
 								// rather than filename index to find the right file.
-					 			strcpy_s(Rel, sizeof(Rel), Src);
+					 			Rel = Src;
 							}
 							
 							m.Print("%s.o : %s ", Part, ToUnixPath(Rel));
@@ -991,8 +1001,7 @@ public:
 				while (!Done)
 				{
 					Done = true;
-					// char *Src;
-					// for (bool b=DepFiles.First(&Src); b; b=DepFiles.Next(&Src))
+
 					for (auto it : DepFiles)
 					{
 						if (IsCancelled())
@@ -1001,18 +1010,20 @@ public:
 							continue;
 
 						Done = false;
-						Processed.Add(it.key, true);
+						GString Path = it.key;
+						Proj->CheckExists(Path);
+						Processed.Add(Path, true);
 						
 						char Full[MAX_PATH], Rel[MAX_PATH];
-						if (LgiIsRelativePath(it.key))
+						if (LgiIsRelativePath(Path))
 						{
-							LgiMakePath(Full, sizeof(Full), Base, it.key);
-							strcpy_s(Rel, sizeof(Rel), it.key);
+							LgiMakePath(Full, sizeof(Full), Base, Path);
+							strcpy_s(Rel, sizeof(Rel), Path);
 						}
 						else
 						{
-							strcpy_s(Full, sizeof(Full), it.key);
-							GAutoString a = LgiMakeRelativePath(Base, it.key);
+							strcpy_s(Full, sizeof(Full), Path);
+							GAutoString a = LgiMakeRelativePath(Base, Path);
 							if (a)
 							{
 								strcpy_s(Rel, sizeof(Rel), a);
@@ -1026,7 +1037,7 @@ public:
 							}
 						}
 						
-						char *c8 = ReadTextFile(Full);
+						GAutoString c8(ReadTextFile(Full));
 						if (c8)
 						{
 							GArray<char*> Headers;
@@ -1040,11 +1051,10 @@ public:
 									
 									if (n) m.Print(" \\\n\t");
 									
-									char Rel[MAX_PATH];
+									GString Rel;
 									if (!Proj->RelativePath(Rel, i))
-									{
-				 						strcpy(Rel, i);
-									}
+										Rel = i;
+									Proj->CheckExists(Rel);
 
 									if (stricmp(i, Full) != 0)
 										m.Print("%s", ToUnixPath(Rel));
@@ -1059,8 +1069,6 @@ public:
 								m.Print("\n\n");
 							}
 							else LgiTrace("%s:%i - Error: BuildHeaderList failed for '%s'\n", _FL, Full);
-							
-							DeleteArray(c8);
 						}
 						else LgiTrace("%s:%i - Error: Failed to read '%s'\n", _FL, Full);
 						
@@ -1107,8 +1115,13 @@ public:
 			if (!Proj->GetApp()->PostEvent(M_START_BUILD))
 				printf("%s:%i - PostEvent(M_START_BUILD) failed.\n", _FL);
 		}
-
+		
 		return true;
+	}
+
+	void OnAfterMain()
+	{
+		Proj->GetApp()->PostEvent(M_MAKEFILES_CREATED, (GMessage::Param)Proj);
 	}
 };
 
@@ -2055,72 +2068,73 @@ bool IdeProject::GetChildProjects(List<IdeProject> &c)
 	return c.Length() > 0;
 }
 
-bool IdeProject::RelativePath(char *Out, const char *In, bool Debug)
+bool IdeProject::RelativePath(GString &Out, const char *In, bool Debug)
 {
-	if (Out && In)
-	{
-		GAutoString Base = GetBasePath();
-		if (Base)
-		{
+	if (!In)
+		return false;
+
+	GAutoString Base = GetBasePath();
+	if (!Base)
+		return false;
+
 if (Debug) LgiTrace("XmlBase='%s'\n		In='%s'\n", Base.Get(), In);
-			
-			GToken b(Base, DIR_STR);
-			GToken i(In, DIR_STR);
-			
+		
+	GToken b(Base, DIR_STR);
+	GToken i(In, DIR_STR);
+	char out[MAX_PATH] = "";
+	
 if (Debug) LgiTrace("Len %i-%i\n", b.Length(), i.Length());
-			
-			auto ILen = i.Length() + (DirExists(In) ? 0 : 1);
-			auto Max = MIN(b.Length(), ILen);
-			int Common = 0;
-			for (; Common < Max; Common++)
-			{
-				#ifdef WIN32
-				#define StrCompare stricmp
-				#else
-				#define StrCompare strcmp
-				#endif
-				
+	
+	auto ILen = i.Length() + (DirExists(In) ? 0 : 1);
+	auto Max = MIN(b.Length(), ILen);
+	int Common = 0;
+	for (; Common < Max; Common++)
+	{
+		#ifdef WIN32
+		#define StrCompare stricmp
+		#else
+		#define StrCompare strcmp
+		#endif
+		
 if (Debug) LgiTrace("Cmd '%s'-'%s'\n", b[Common], i[Common]);
-				if (StrCompare(b[Common], i[Common]) != 0)
-				{
-					break;
-				}
-			}
-			
-if (Debug) LgiTrace("Common=%i\n", Common);
-			if (Common > 0)
-			{
-				if (Common < b.Length())
-				{
-					Out[0] = 0;
-					auto Back = b.Length() - Common;
-if (Debug) LgiTrace("Back=%i\n", (int)Back);
-					for (int n=0; n<Back; n++)
-					{
-						strcat(Out, "..");
-						if (n < Back - 1) strcat(Out, DIR_STR);
-					}
-				}
-				else
-				{
-					strcpy(Out, ".");
-				}
-				for (int n=Common; n<i.Length(); n++)
-				{
-					sprintf(Out+strlen(Out), "%s%s", DIR_STR, i[n]);
-				}
-				
-				return true;
-			}	
-			else
-			{
-				strcpy(Out, In);
-				return true;
-			}		
+		if (StrCompare(b[Common], i[Common]) != 0)
+		{
+			break;
 		}
 	}
 	
-	return false;
+if (Debug) LgiTrace("Common=%i\n", Common);
+	if (Common > 0)
+	{
+		if (Common < b.Length())
+		{
+			out[0] = 0;
+			auto Back = b.Length() - Common;
+if (Debug) LgiTrace("Back=%i\n", (int)Back);
+			for (int n=0; n<Back; n++)
+			{
+				strcat(out, "..");
+				if (n < Back - 1) strcat(out, DIR_STR);
+			}
+		}
+		else
+		{
+			strcpy(out, ".");
+		}
+		for (int n=Common; n<i.Length(); n++)
+		{
+			sprintf(out+strlen(out), "%s%s", DIR_STR, i[n]);
+		}
+		
+		Out = out;
+	}	
+	else
+	{
+		Out = In;
+	}		
+
+	CheckExists(Out);
+	return true;
 }
 
 bool IdeProject::GetExePath(char *Path, int Len)
@@ -2363,7 +2377,7 @@ bool IdeProject::IsMakefileUpToDate()
 		for (auto p: Proj)
 		{
 			// Is the project file modified after the makefile?
-			GAutoString Proj = p->GetFullPath();
+			auto Proj = p->GetFullPath();
 			uint64 ProjModTime = 0, MakeModTime = 0;
 			GDirectory dir;
 			if (dir.First(Proj))
@@ -2676,7 +2690,7 @@ GAutoString IdeProject::GetFullPath()
 
 GAutoString IdeProject::GetBasePath()
 {
-	GAutoString a = GetFullPath();
+	auto a = GetFullPath();
 	LgiTrimDir(a);
 	return a;
 }
@@ -2745,9 +2759,11 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	Prof.Add("FileOpen");
 
 	GFile f;
-	if (!f.Open(d->FileName, O_READWRITE))
+	GString FullPath = d->FileName.Get();
+	if (CheckExists(FullPath) &&
+		!f.Open(FullPath, O_READWRITE))
 	{
-		LgiTrace("%s:%i - Error: Can't open '%s'.\n", _FL, d->FileName.Get());
+		LgiTrace("%s:%i - Error: Can't open '%s'.\n", _FL, FullPath.Get());
 		return OpenError;
 	}
 
@@ -2823,7 +2839,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 
 bool IdeProject::SaveFile()
 {
-	GAutoString Full = GetFullPath();
+	auto Full = GetFullPath();
 
 	printf("IdeProject::SaveFile %s %i\n", Full.Get(), d->Dirty);
 	if (ValidStr(Full) && d->Dirty)
@@ -2911,6 +2927,90 @@ void IdeProject::SetExpanded(int Id, bool Exp)
 int IdeProject::AllocateId()
 {
 	return d->NextNodeId++;
+}
+
+template<typename T, typename Fn>
+bool CheckExists(GAutoString Base, T &p, Fn Setter, bool Debug)
+{
+	GFile::Path Full;
+	bool WasRel = LgiIsRelativePath(p);
+	if (WasRel)
+	{
+		Full = Base.Get();
+		Full += p.Get();
+	}
+	else Full = p.Get();
+	
+	bool Ret = Full.Exists();
+	if (!Ret)
+	{
+		// Is the case wrong?
+		for (int i=1; i<Full.Length(); i++)
+		{
+			GFile::Path t;
+			t = Full.Slice(0, i);
+			if (!t.Exists())
+			{
+				GDirectory dir;
+				bool Matched = false;
+				auto &Leaf = Full[i-1];
+				auto Parent = t.GetParent();
+				
+				if (Debug)
+					printf("Searching '%s' for missing '%s'\n", Parent.GetFull().Get(), Leaf.Get());
+				
+				for (auto b=dir.First(Parent); b; b = dir.Next())
+				{
+					if (!Stricmp(dir.GetName(), t.Last().Get()))
+					{
+						if (Debug)
+							printf("t[%i]: %s->%s\n", i, Leaf.Get(), dir.GetName());
+						Leaf = dir.GetName();
+						Matched = true;
+						break;
+					}
+				}
+				if (!Matched)					
+					break;
+			}
+		}
+		
+		if (Ret = Full.Exists())
+		{
+			GString Old = p.Get();
+			if (WasRel)
+			{
+				auto r = LgiMakeRelativePath(Base, Full);
+				Setter(p, r);
+			}
+			else
+			{
+				Setter(p, Full.GetFull());
+			}
+			
+			if (Debug)
+				printf("%s -> %s\n", Old.Get(), p.Get());
+		}
+	}
+
+	if (Debug)
+		printf("CheckExists '%s' = %i\n", Full.GetFull().Get(), Ret);		
+
+	return Ret;
+}
+
+bool IdeProject::CheckExists(GString &p, bool Debug)
+{
+	return ::CheckExists(GetBasePath(), p, [](GString &o, const char *i) {
+			o = i;
+		}, Debug);
+}
+
+bool IdeProject::CheckExists(GAutoString &p, bool Debug)
+{
+	return ::CheckExists(GetBasePath(), p, [](GAutoString &o, const char *i) {
+			o.Reset(NewStr(i));
+		}, Debug);
 }
 
 bool IdeProject::SetClean()
@@ -3430,7 +3530,7 @@ bool IdeProject::BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool In
 		GArray<ProjectNode*> Nodes;
 		if (p->GetAllNodes(Nodes))
 		{
-			GAutoString Base = p->GetFullPath();
+			auto Base = p->GetFullPath();
 			if (Base)
 			{
 				LgiTrimDir(Base);
@@ -3674,9 +3774,10 @@ bool IdeProject::GetAllDependencies(GArray<char*> &Files, IdePlatform Platform)
 	return true;
 }
 
-bool IdeProject::GetDependencies(const char *SourceFile, GArray<GString> &IncPaths, GArray<char*> &Files, IdePlatform Platform)
+bool IdeProject::GetDependencies(const char *InSourceFile, GArray<GString> &IncPaths, GArray<char*> &Files, IdePlatform Platform)
 {
-	if (!FileExists(SourceFile))
+	GString SourceFile = InSourceFile;
+	if (!CheckExists(SourceFile))
 	{
 		LgiTrace("%s:%i - can't read '%s'\n", _FL, SourceFile);
 		return false;
@@ -3693,11 +3794,9 @@ bool IdeProject::GetDependencies(const char *SourceFile, GArray<GString> &IncPat
 	for (int n=0; n<Headers.Length(); n++)
 	{
 		char *i = Headers[n];
-		char p[MAX_PATH];
+		GString p;
 		if (!RelativePath(p, i))
-		{
-			strcpy_s(p, sizeof(p), i);
-		}
+			p = i;
 		ToUnixPath(p);
 		Files.Add(NewStr(p));
 	}
@@ -3705,6 +3804,8 @@ bool IdeProject::GetDependencies(const char *SourceFile, GArray<GString> &IncPat
 	
 	return true;
 }
+
+int MakefileThread::Instances = 0;
 
 bool IdeProject::CreateMakefile(IdePlatform Platform, bool BuildAfterwards)
 {
@@ -3717,9 +3818,22 @@ bool IdeProject::CreateMakefile(IdePlatform Platform, bool BuildAfterwards)
 			d->App->GetBuildLog()->Print("%s:%i - Makefile thread still running.\n", _FL);
 			return false;
 		}
-	}		
+	}
+	
+	if (Platform == PlatformCurrent)
+		Platform = GetCurrentPlatform();
 
 	return d->CreateMakefile.Reset(new MakefileThread(d, Platform, BuildAfterwards));
+}
+
+void IdeProject::OnMakefileCreated()
+{
+	if (d->CreateMakefile)
+	{
+		d->CreateMakefile.Reset();
+		if (MakefileThread::Instances == 0)
+			GetApp()->PostEvent(M_LAST_MAKEFILE_CREATED);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////

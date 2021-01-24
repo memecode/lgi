@@ -658,17 +658,11 @@ bool GColour::GetConfigColour(const char *Tag, GColour &c)
 	if (!Tag)
 		return false;
 
-	GXmlTag *Col = LgiApp->GetConfig(Tag);
+	auto Col = LgiApp->GetConfig(Tag);
 	if (!Col)
 		return false;
 
-	char *h;
-	if (!(h = Col->GetAttr("Hex")))
-		return false;
-
-	if (*h == '#') h++;
-	int n = htoi(h);
-
+	auto n = Col.Strip("#").Int(16);
 	c.Rgb( n>>16, n>>8, n );
 	return true;
 	#endif

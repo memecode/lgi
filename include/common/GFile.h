@@ -522,10 +522,10 @@ public:
 			return *this;
 		}
 		
-		Path &operator =(const Path &p)
+		Path &operator =(const GArray<GString> &p)
 		{
-			*((GString::Array*)this) = p;
-			Full = p.Full;
+			*((GArray<GString>*)this) = p;
+			Full.Empty();
 			SetFixedLength(false);
 			return *this;
 		}

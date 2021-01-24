@@ -245,12 +245,15 @@ public:
 		/// The buffer size in bytes
 		int DstSize = 0
 	);
+
+	/// Return the path to the Lgi config file... (not the same as the application options, more global Lgi apps settings)
+	::GString GetConfigPath();
 	
 	/// Gets the application conf stored in lgi.conf
-	GXmlTag *GetConfig(const char *Tag);
+	::GString GetConfig(const char *Variable);
 
 	/// Sets a single tag in the config. (Not written to disk)
-	void SetConfig(GXmlTag *Tag);
+	void SetConfig(const char *Variable, const char *Value);
 
 	/// Gets the control with the keyboard focus
 	GViewI *GetFocus();
@@ -375,8 +378,32 @@ public:
 	#endif
 
 	#ifdef __GTK_H__
+		
+		struct KeyModFlags
+		{
+			int Shift, Alt, Ctrl, System;
+			bool Debug;
+			
+			KeyModFlags()
+			{
+				Shift = 0;
+				Alt = 0;
+				Ctrl = 0;
+				System = 0;
+				Debug = false;
+			}
+			
+			const char *FlagName(int Flag); // Single flag to string
+			int FlagValue(const char *Name); // Single name to bitmask
+			::GString FlagsToString(int Flags); // Turn multiple flags to string
+		};	
+		
+		KeyModFlags *GetKeyModFlags();
 		void OnDetach(GViewI *View);
+	
+	
 	#endif
+	
 	#if !LGI_VIEW_HANDLE
 		bool PostEvent(GViewI *View, int Msg, GMessage::Param a = 0, GMessage::Param b = 0);
 	#endif

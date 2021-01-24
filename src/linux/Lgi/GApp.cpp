@@ -249,8 +249,10 @@ class GAppPrivate : public GSymLookup
 {
 public:
 	// Common
+	GApp *Owner;
 	GtkApplication *App;
-	GXmlTag *Config;
+	GAutoPtr<LJson> Config;
+	GAutoPtr<GApp::KeyModFlags> ModFlags;
 	GFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
@@ -297,7 +299,7 @@ public:
 	int LastClickX;
 	int LastClickY;
 
-	GAppPrivate() : Args(0, 0)
+	GAppPrivate(GApp *a) : Args(0, 0), Owner(a)
 		#if HAS_LIB_MAGIC
 		, MagicLock("MagicLock")
 		#endif
@@ -309,7 +311,6 @@ public:
 		WmLib = 0;
 		FileSystem = 0;
 		GdcSystem = 0;
-		Config = 0;
 		SkinLib = 0;
 		MessageLoopDepth = 0;
 		#if HAS_SHARED_MIME
@@ -367,6 +368,108 @@ public:
 			DeleteObj(p.value);
 		}
 	}
+
+	LJson *GetConfig()
+	{
+		if (!Config)
+		{
+			auto Path = Owner->GetConfigPath();
+			if (Config.Reset(new LJson()))
+			{
+				::GFile f;
+				if (f.Open(Path, O_READ))
+					Config->SetJson(f.Read());
+				
+				bool Dirty = false;				
+				#define DEFAULT(var, val) \
+					if (Config->Get(var).Length() == 0) \
+						Dirty |= Config->Set(var, val);
+				DEFAULT("Linux.Keys.Shift", "GDK_SHIFT_MASK");
+				DEFAULT("Linux.Keys.Ctrl", "GDK_CONTROL_MASK");
+				DEFAULT("Linux.Keys.Alt", "GDK_MOD1_MASK");
+				DEFAULT("Linux.Keys.System",
+					#ifdef MAC
+					"GDK_MOD2_MASK"
+					#else
+					"GDK_SUPER_MASK"
+					#endif
+					);
+				DEFAULT("Linux.Keys.Debug", "0");
+				DEFAULT("Language", "-");
+				DEFAULT("Fonts.GlyphSub", "1");
+				
+				DEFAULT("Colours.Comment", "Use CSS hex definitions here, ie #RRGGBB in hex.");
+				#define _(name) \
+					if (L_##name < L_MAXIMUM) \
+						DEFAULT("Colours.L_" #name, "-");
+				_SystemColour();
+				#undef _
+				
+				if (Dirty)
+					SaveConfig();
+				
+				printf("Using LGI config: '%s'\n", Path.Get()); 
+			}
+			else printf("%s:%i - Alloc failed.\n", _FL);
+		}
+		
+		return Config;
+	}
+	
+	bool SaveConfig()
+	{
+		auto Path = Owner->GetConfigPath();
+		if (!Path || !Config)
+			return false;
+			
+		::GFile f;
+		if (!f.Open(Path, O_WRITE))
+			return false;
+			
+		f.SetSize(0);
+		return f.Write(Config->GetJson());		
+	}
+	
+	GApp::KeyModFlags *GetModFlags()
+	{
+		if (ModFlags.Reset(new GApp::KeyModFlags))
+		{
+			#define _(name) \
+				{ \
+					auto f = Owner->GetConfig("Linux.Keys." #name); \
+					if (f) \
+					{ \
+						auto i = ModFlags->FlagValue(f); \
+						if (i) ModFlags->name = i; \
+					} \
+				}
+			
+			_(Shift)
+			_(Alt)
+			_(Ctrl)
+			_(System)
+			#undef _
+			
+			if (Owner->GetConfig("Linux.Keys.Debug").Int() != 0)
+				ModFlags->Debug = true;
+			
+
+			if (!ModFlags->Ctrl ||
+				!ModFlags->Shift ||
+				!ModFlags->Alt ||
+				!ModFlags->System)
+			{
+				printf("%s:%i - Invalid ModFlags ctrl:%x sh:%x alt:%x sys:%x\n",
+					_FL,
+					ModFlags->Ctrl,
+					ModFlags->Shift,
+					ModFlags->Alt,
+					ModFlags->System);
+			}
+		}
+		
+		return ModFlags;
+	}
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -380,7 +483,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	TheApp = this;
 	SystemNormal = 0;
 	SystemBold = 0;
-	d = new GAppPrivate;
+	d = new GAppPrivate(this);
 	Name(name);
 	LgiArgsAppPath = AppArgs.Arg[0];
 	if (LgiIsRelativePath(LgiArgsAppPath))
@@ -418,7 +521,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 
 	srand(LgiCurrentTime());
 	GColour::OnChange();
-	AppWnd = 0;
+	AppWnd = NULL;
 
 	Gtk::gchar id[256];
 	sprintf_s(id, sizeof(id), "com.memecode.%s", name);
@@ -435,6 +538,8 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 		signal(SIGSEGV, LgiCrashHandler);
 	}
 	#endif
+
+	d->GetConfig();
 
 	// System font setup
 	SystemNormal = 0;
@@ -512,7 +617,6 @@ GApp::~GApp()
 	DeleteObj(MouseHook);
 	DeleteObj(d->FileSystem);
 	DeleteObj(d->GdcSystem);
-	DeleteObj(d->Config);
 	DeleteObj(GFontSystem::Me);
 	DeleteObj(d);
 	TheApp = 0;
@@ -769,68 +873,96 @@ void GApp::OnReceiveFiles(::GArray<const char*> &Files)
 		AppWnd->OnReceiveFiles(Files);
 }
 
-void GApp::SetConfig(GXmlTag *Tag)
+::GString GApp::GetConfigPath()
 {
-	if (IsOk() && Tag)
+	::GFile::Path p(LSP_HOME);
+	p += ".config";
+	if (p.Exists())
 	{
-		GXmlTag *Old = GetConfig(Tag->GetTag());
-		if (Old)
-		{
-			Old->RemoveTag();
-			DeleteObj(Old);
-		}
-
-		if (!d->Config)
-		{
-			d->Config = new GXmlTag("Config");
-		}
-		if (d->Config)
-		{
-			d->Config->InsertTag(Tag);
-		}
+		p += "lgi.json";
+		return p.GetFull();
 	}
+	
+	p--;
+	p += ".lgi.json";
+	return p.GetFull();
 }
 
-GXmlTag *GApp::GetConfig(const char *Tag)
+::GString GApp::GetConfig(const char *Variable)
 {
-	if (IsOk() && !d->Config)
-	{
-		char File[] = "lgi.conf";
-		char Path[256];
-		if (LgiMakePath(Path, sizeof(Path), LGetExePath(), File))
-		{
-			if (!FileExists(Path))
-			{
-				char *f = LgiFindFile(File);
-				if (f)
-				{
-					strcpy(Path, f);
-					DeleteArray(f);
-				}
-			}
+	auto c = d->GetConfig();
+	return c ? c->Get(Variable) : NULL;
+}
 
-			if (FileExists(Path))
-			{
-				d->Config = new GXmlTag("Config");
-				if (d->Config)
-				{
-					::GFile f;
-					if (f.Open(Path, O_READ))
-					{
-						GXmlTree t;
-						t.Read(d->Config, &f, 0);
-					}
-				}
-			}
-		}
-	}
+void GApp::SetConfig(const char *Variable, const char *Value)
+{
+	auto c = d->GetConfig();
+	if (c && c->Set(Variable, Value))
+		d->SaveConfig();
+}
 
-	if (Tag && d->Config)
-	{
-		return d->Config->GetChildTag(Tag);
-	}
+const char *GApp::KeyModFlags::FlagName(int Flag)
+{
+	#define CHECK(f) if (Flag & f) return #f;
+	CHECK(GDK_SHIFT_MASK)
+	CHECK(GDK_LOCK_MASK)
+	CHECK(GDK_CONTROL_MASK)
+	CHECK(GDK_MOD1_MASK)
+	CHECK(GDK_MOD2_MASK)
+	CHECK(GDK_MOD3_MASK)
+	CHECK(GDK_MOD4_MASK)
+	CHECK(GDK_MOD5_MASK)
+	CHECK(GDK_BUTTON1_MASK)
+	CHECK(GDK_BUTTON2_MASK)
+	CHECK(GDK_BUTTON3_MASK)
+	CHECK(GDK_BUTTON4_MASK)
+	CHECK(GDK_BUTTON5_MASK)
+	CHECK(GDK_SUPER_MASK)
+	CHECK(GDK_HYPER_MASK)
+	CHECK(GDK_META_MASK)
+	CHECK(GDK_RELEASE_MASK)
+	#undef CHECK
+	return NULL;
+}
 
+int GApp::KeyModFlags::FlagValue(const char *Name)
+{
+	#define CHECK(f) if (!Stricmp(Name, #f)) return f;
+	CHECK(GDK_SHIFT_MASK)
+	CHECK(GDK_LOCK_MASK)
+	CHECK(GDK_CONTROL_MASK)
+	CHECK(GDK_MOD1_MASK)
+	CHECK(GDK_MOD2_MASK)
+	CHECK(GDK_MOD3_MASK)
+	CHECK(GDK_MOD4_MASK)
+	CHECK(GDK_MOD5_MASK)
+	CHECK(GDK_BUTTON1_MASK)
+	CHECK(GDK_BUTTON2_MASK)
+	CHECK(GDK_BUTTON3_MASK)
+	CHECK(GDK_BUTTON4_MASK)
+	CHECK(GDK_BUTTON5_MASK)
+	CHECK(GDK_SUPER_MASK)
+	CHECK(GDK_HYPER_MASK)
+	CHECK(GDK_META_MASK)
+	CHECK(GDK_RELEASE_MASK)
+	#undef CHECK
 	return 0;
+}
+
+::GString GApp::KeyModFlags::FlagsToString(int s)
+{
+	::GString::Array a;
+	for (int i=0; i<32; i++)
+	{
+		if (((1 << i) & s) != 0)
+			a.New() = FlagName(1 << i);
+	}
+	return ::GString(",").Join(a);
+}
+
+GApp::KeyModFlags *GApp::GetKeyModFlags()
+{
+	return d->GetModFlags();
 }
 
 const char *GApp::GetArgumentAt(int n)
@@ -1241,6 +1373,17 @@ GApp::DesktopInfo::DesktopInfo(const char *file)
 bool GApp::DesktopInfo::Serialize(bool Write)
 {
 	::GFile f;
+	
+	if (Write)
+	{
+		::GFile::Path p(File);
+		p--;
+		if (!p.Exists())
+			return false;
+	}
+	else if (!FileExists(File))	
+		return false;
+	
 	if (!f.Open(File, Write?O_WRITE:O_READ))
 	{
 		LgiTrace("%s:%i - Failed to open '%s'\n", _FL, File.Get());

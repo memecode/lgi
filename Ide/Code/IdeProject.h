@@ -146,7 +146,7 @@ public:
 	void Empty();
 	GAutoString GetMakefile();
 	bool GetExePath(char *Path, int Len);
-	bool RelativePath(char *Out, const char *In, bool Debug = false);
+	bool RelativePath(GString &Out, const char *In, bool Debug = false);
 	void Build(bool All, bool Release);
 	void StopBuild();
 	void Clean(bool All, bool Release);
@@ -165,6 +165,9 @@ public:
 	bool GetExpanded(int Id);
 	void SetExpanded(int Id, bool Exp);
 	int AllocateId();
+	bool CheckExists(GString &p, bool Debug = false);
+	bool CheckExists(GAutoString &p, bool Debug = false);
+	void OnMakefileCreated();
 	
 	// Nodes
 	char *FindFullPath(const char *File, class ProjectNode **Node = NULL);

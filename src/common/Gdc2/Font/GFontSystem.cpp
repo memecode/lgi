@@ -169,14 +169,10 @@ bool GFontSystem::GetDefaultGlyphSub()
 {
 	if (!d->CheckedConfig && LgiApp)
 	{
-		GXmlTag *FontSys = LgiApp->GetConfig("font_system");
-		if (FontSys)
+		auto GlyphSub = LgiApp->GetConfig("Fonts.GlyphSub");
+		if (GlyphSub)
 		{
-			char *GlyphSub;
-			if ((GlyphSub = FontSys->GetAttr("glyph_sub")))
-			{
-				d->DefaultGlyphSub = atoi(GlyphSub) != 0;
-			}
+			d->DefaultGlyphSub = atoi(GlyphSub) != 0;
 		}
 		d->CheckedConfig = true;
 	}

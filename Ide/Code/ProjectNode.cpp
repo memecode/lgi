@@ -242,7 +242,7 @@ bool ProjectNode::Load(GDocView *Edit, NodeView *Callback)
 	}
 	else
 	{
-		GString Full = GetFullPath();
+		auto Full = GetFullPath();
 		Status = Edit->Open(Full, Charset);
 	}
 	
@@ -279,7 +279,7 @@ bool ProjectNode::Save(GDocView *Edit, NodeView *Callback)
 	}
 	else
 	{
-		GString f = GetFullPath();
+		auto f = GetFullPath();
 		Status = Edit->Save(f, Charset);
 
 		if (Callback)
@@ -408,7 +408,7 @@ char *ProjectNode::GetFileName()
 
 void ProjectNode::AutoDetectType()
 {
-	GString FullPath = GetFullPath();
+	auto FullPath = GetFullPath();
 	if (FullPath)
 	{
 		auto MimeType = LGetFileMimeType(FullPath);
@@ -465,24 +465,20 @@ void ProjectNode::AutoDetectType()
 
 void ProjectNode::SetFileName(const char *f)
 {
-	char Rel[MAX_PATH];
+	GString Rel;
 
 	if (File && Project)
 		Project->OnNode(File, this, false);
 
 	DeleteArray(File);
 	if (Project->RelativePath(Rel, f))
-	{
 		File = NewStr(Rel);
-	}
 	else
-	{
 		File = NewStr(f);
-	}
-
+	
 	if (File)
 	{
-		GString FullPath = GetFullPath();
+		auto FullPath = GetFullPath();
 
 		if (Project)
 			Project->OnNode(FullPath, this, true);
@@ -631,7 +627,7 @@ bool ProjectNode::Serialize(bool Write)
 	{
 		if (!Write)
 		{
-			GString Full = GetFullPath();				
+			auto Full = GetFullPath();				
 			Dep = Project->GetApp()->OpenProject(Full, Project, false, true);
 		}
 	}
@@ -641,7 +637,7 @@ bool ProjectNode::Serialize(bool Write)
 		if (!Write)
 		{
 			// Check that file exists.
-			GString p = GetFullPath();
+			auto p = GetFullPath();
 			if (p)
 			{
 				if (FileExists(p))
@@ -849,7 +845,7 @@ IdeDoc *ProjectNode::Open()
 				}
 				case NodeResources:
 				{
-					GString FullPath = GetFullPath();
+					auto FullPath = GetFullPath();
 					if (FullPath)
 					{
 						char Exe[MAX_PATH];
@@ -873,7 +869,7 @@ IdeDoc *ProjectNode::Open()
 				}
 				case NodeGraphic:
 				{
-					GString FullPath = GetFullPath();
+					auto FullPath = GetFullPath();
 					if (FullPath)
 					{
 						LgiExecute(FullPath);
@@ -886,7 +882,7 @@ IdeDoc *ProjectNode::Open()
 				}
 				default:
 				{
-					GString FullPath = GetFullPath();
+					auto FullPath = GetFullPath();
 					if (FullPath)
 					{
 						Doc = Project->GetApp()->FindOpenFile(FullPath);
@@ -1185,7 +1181,7 @@ void ProjectNode::OnMouseClick(GMouse &m)
 			}
 			case IDM_BROWSE_FOLDER:
 			{
-				GString Path = GetFullPath();
+				auto Path = GetFullPath();
 				if (Path)
 					LgiBrowseToFile(Path);
 				break;
@@ -1197,7 +1193,7 @@ void ProjectNode::OnMouseClick(GMouse &m)
 				}
 				else
 				{
-					GString Path = GetFullPath();
+					auto Path = GetFullPath();
 					if (Path)
 					{
 						LgiTrimDir(Path);
@@ -1403,12 +1399,12 @@ void ProjectNode::OnProperties()
 	}
 	else if (Type == NodeDependancy)
 	{
-		GString Path = GetFullPath();
+		auto Path = GetFullPath();
 		LgiMsg(Tree, "Path: %s", AppName, MB_OK, Path.Get());
 	}
 	else
 	{
-		GString Path = GetFullPath();
+		auto Path = GetFullPath();
 		if (Path)
 		{
 			char Size[32];

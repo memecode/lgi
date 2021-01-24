@@ -34,6 +34,8 @@ enum IdeMessages
 	M_BUILD_ERR,
 	M_BUILD_DONE,
 	M_DEBUG_ON_STATE,
+	M_MAKEFILES_CREATED,
+	M_LAST_MAKEFILE_CREATED,
 	
 	/// Find symbol results message:
 	/// GAutoPtr<FindSymRequest> Req((FindSymRequest*)Msg->A());

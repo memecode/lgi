@@ -14,6 +14,13 @@
 #include "GDisplayString.h"
 
 using namespace Gtk;
+#define DEBUG_MENUS		0
+
+#if DEBUG_MENUS
+	#define LOG(...)	printf(__VA_ARGS__)
+#else
+	#define LOG(...)
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 static ::GArray<LSubMenu*> Active;
@@ -119,7 +126,7 @@ gboolean LSubMenuClick(GMouse *m)
 			}
 		}
 	}
-	// else LgiTrace("LSubMenuClick Down=%i OverMenu=%i HasVIsible=%i ActiveTs=%i\n", m->Down(), OverMenu, HasVisible, ActiveTs > 0);
+	else LOG("LSubMenuClick Down=%i OverMenu=%i HasVIsible=%i ActiveTs=%i\n", m->Down(), OverMenu, HasVisible, ActiveTs > 0);
 
 	DeleteObj(m);
 
@@ -324,7 +331,7 @@ int LSubMenu::Float(GView *From, int x, int y, int Button)
 	
 	if (!From || !From->Handle())
 	{
-		printf("%s:%i - No menu handle\n", _FL);
+		LOG("%s:%i - No menu handle\n", _FL);
 		return -1;
 	}
 	
@@ -361,7 +368,7 @@ LSubMenu *LSubMenu::FindSubMenu(int Id)
 	{
 		LSubMenu *Sub = i->Sub();
 
-		// printf("Find(%i) '%s' %i sub=%p\n", Id, i->Name(), i->Id(), Sub);
+		// LOG("Find(%i) '%s' %i sub=%p\n", Id, i->Name(), i->Id(), Sub);
 		if (i->Id() == Id)
 		{
 			return Sub;
@@ -894,7 +901,7 @@ bool LMenuItem::ScanForAccel()
 			}
 			else
 			{
-				printf("%s:%i - No gtk key for '%s'\n", _FL, Sc);
+				LOG("%s:%i - No gtk key for '%s'\n", _FL, Sc);
 			}
 			
 			auto Ident = Id();
@@ -903,7 +910,7 @@ bool LMenuItem::ScanForAccel()
 		}
 		else
 		{
-			printf("%s:%i - Accel scan failed, str='%s'\n", _FL, Sc);
+			LOG("%s:%i - Accel scan failed, str='%s'\n", _FL, Sc);
 			return false;
 		}
 	}
@@ -1115,7 +1122,7 @@ bool LMenuItem::ScanForAccel()
 		}
 		else
 		{
-			printf("%s:%i - No gtk key for '%s'\n", _FL, Accel.Get());
+			LOG("%s:%i - No gtk key for '%s'\n", _FL, Accel.Get());
 		}
 		
 		auto Ident = Id();
@@ -1126,7 +1133,7 @@ bool LMenuItem::ScanForAccel()
 	}
 	else
 	{
-		printf("%s:%i - Accel scan failed, str='%s'\n", _FL, Accel.Get());
+		LOG("%s:%i - Accel scan failed, str='%s'\n", _FL, Accel.Get());
 		return false;
 	}
 }
@@ -1200,7 +1207,7 @@ FindMenuItemIndex(Gtk::GtkWidget *w, Gtk::gpointer data)
 {
 	MenuItemIndex *d = (MenuItemIndex*)data;
 
-	printf("w=%p d->w=%p name=%s cur=%i d->Index=%i\n", w, d->w, G_OBJECT_TYPE_NAME(w), d->Current, d->Index);
+	LOG("w=%p d->w=%p name=%s cur=%i d->Index=%i\n", w, d->w, G_OBJECT_TYPE_NAME(w), d->Current, d->Index);
 	if (w == d->w)
 		d->Index = d->Current;
 	d->Current++;
@@ -1502,12 +1509,12 @@ GFont *LMenu::GetFont()
 			}
 			else
 			{
-				printf("LMenu::GetFont Couldn't create menu font.\n");
+				LOG("LMenu::GetFont Couldn't create menu font.\n");
 			}
 		}
 		else
 		{
-			printf("LMenu::GetFont Couldn't get menu typeface.\n");
+			LOG("LMenu::GetFont Couldn't get menu typeface.\n");
 		}
 
 		if (!MenuFont.f)
@@ -1677,8 +1684,8 @@ bool GAccelerator::Match(GKey &k)
 		return false;
 	}
 	
-	#if 0
-	printf("GAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s%s\n",
+	#if 1
+	LOG("GAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s%s\n",
 		Press,
 		Press>=' '?Press:'.',
 		k.Ctrl()?" ctrl":"",

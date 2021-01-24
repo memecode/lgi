@@ -505,7 +505,7 @@ public:
 		{
 			MoveToCenter();
 			
-			GAutoString FullPath = d->Project->GetFullPath();
+			auto FullPath = d->Project->GetFullPath();
 			if (FullPath)
 			{
 				SetCtrlName(IDC_PATH, FullPath);
