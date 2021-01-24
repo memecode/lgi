@@ -491,6 +491,9 @@
     <ClCompile Include="src\common\Lgi\GDragAndDropCommon.cpp">
       <Filter>Source Files\Core\Drag and Drop</Filter>
     </ClCompile>
+    <ClCompile Include="src\common\Lgi\GAppCommon.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\common\GLibrary.h">
@@ -759,6 +762,9 @@
     </ClInclude>
     <ClInclude Include="include\common\GPath.h">
       <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="private\win\GAppPriv.h">
+      <Filter>Source Files\Interface</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1609,7 +1609,7 @@ bool GFontType::GetConfigFont(const char *Tag)
 		if (p.Length() == 2)
 		{
 			SetFace(p[0]);
-			SetPointSize(p[1].Int());
+			SetPointSize((int)p[1].Int());
 			Status = true;
 		}
 		else LgiTrace("%s:%i - Font specification should be: <font>:<pointSize>\n", _FL);

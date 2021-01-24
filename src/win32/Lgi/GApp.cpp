@@ -7,13 +7,12 @@
 #include <commctrl.h>
 #include <time.h>
 #include "GSkinEngine.h"
-#include "GSymLookup.h"
 #include "GDocView.h"
 #include "GToken.h"
 #include "GCss.h"
-#include "GFontCache.h"
 #include <stdio.h>
 #include "LgiSpellCheck.h"
+#include "LJson.h"
 
 // Don't have a better place to put this...
 const char GSpellCheck::Delimiters[] =
@@ -90,51 +89,7 @@ GApp *GApp::ObjInstance()
 	return TheApp;
 }
 
-class GAppPrivate
-{
-public:
-	// Common
-	GXmlTag *Config;
-	GFileSystem *FileSystem;
-	GdcDevice *GdcSystem;
-	OsAppArguments Args;
-	GLibrary *SkinLib;
-	OsThread GuiThread;
-	int LinuxWine;
-	GAutoString Mime, ProductId;
-	bool ThemeAware;
-
-	/// Any fonts needed for styling the elements
-	GAutoPtr<GFontCache> FontCache;
-
-	// Win32
-	bool QuitReceived;
-	GApp::ClassContainer Classes;
-	GSymLookup *SymLookup;
-
-	GAppPrivate()
-	{
-		LinuxWine = -1;
-		SymLookup = 0;
-		QuitReceived = false;
-		SkinLib = 0;
-		GuiThread = NULL;
-		auto b = DuplicateHandle(GetCurrentProcess(),
-									GetCurrentThread(),
-									GetCurrentProcess(),
-									&GuiThread,
-									0,
-									false,
-									DUPLICATE_SAME_ACCESS);
-		ThemeAware = true;
-	}
-
-	~GAppPrivate()
-	{
-		DeleteObj(SkinLib);
-		DeleteObj(SymLookup);
-	}
-};
+#include "GAppPriv.h"
 
 /////////////////////////////////////////////////////////////////////////////
 LONG __stdcall _ExceptionFilter_Redir(LPEXCEPTION_POINTERS e)
@@ -302,7 +257,7 @@ int64 Time = LgiCurrentTime();
 DumpTime("start");
 
 	// Private data
-	d = new GAppPrivate;
+	d = new GAppPrivate(this);
 	char Mime[256];
 	sprintf_s(Mime, sizeof(Mime), "application/x-%s", AppName);
 	d->Mime.Reset(NewStr(Mime));
@@ -394,7 +349,6 @@ DumpTime("file sys");
 DumpTime("gdc");
 
 	// Vars...
-	d->Config = 0;
 	AppWnd = 0;
 	SetAppArgs(AppArgs);
 
@@ -476,7 +430,6 @@ GApp::~GApp()
 	DeleteObj(GFontSystem::Me);
 	DeleteObj(d->FileSystem);
 	DeleteObj(d->GdcSystem);
-	DeleteObj(d->Config);
 	d->Classes.DeleteObjects();
 
 	CoUninitialize();
@@ -530,64 +483,6 @@ GApp::ClassContainer *GApp::GetClasses()
 OsAppArguments *GApp::GetAppArgs()
 {
 	return IsOk() ? &d->Args : 0;
-}
-
-GXmlTag *GApp::GetConfig(const char *Tag)
-{
-	if (IsOk() && !d->Config)
-	{
-		const char File[] = "lgi.conf";
-		auto ExePath = LGetExePath();
-		char Path[MAX_PATH];
-		LgiMakePath(Path, sizeof(Path), ExePath, File);
-		if (FileExists(Path))
-		{
-			d->Config = new GXmlTag("Config");
-			if (d->Config)
-			{
-				GFile f;
-				if (f.Open(Path, O_READ))
-				{
-					GXmlTree t;
-					t.Read(d->Config, &f, 0);
-				}
-			}
-		}
-
-		if (!d->Config)
-		{
-			d->Config = new GXmlTag("Options");
-		}
-	}
-
-	if (Tag && d->Config)
-	{
-		return d->Config->GetChildTag(Tag);
-	}
-
-	return 0;
-}
-
-void GApp::SetConfig(GXmlTag *Tag)
-{
-	if (IsOk() && Tag)
-	{
-		GXmlTag *Old = GetConfig(Tag->GetTag());
-		if (Old)
-		{
-			Old->RemoveTag();
-			DeleteObj(Old);
-		}
-
-		if (!d->Config)
-		{
-			GetConfig(0);
-		}
-		if (d->Config)
-		{
-			d->Config->InsertTag(Tag);
-		}
-	}
 }
 
 const char *GApp::GetArgumentAt(int n)

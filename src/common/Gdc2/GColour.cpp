@@ -662,7 +662,7 @@ bool GColour::GetConfigColour(const char *Tag, GColour &c)
 	if (!Col)
 		return false;
 
-	auto n = Col.Strip("#").Int(16);
+	auto n = (int)Col.Strip("#").Int(16);
 	c.Rgb( n>>16, n>>8, n );
 	return true;
 	#endif

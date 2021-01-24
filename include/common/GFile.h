@@ -444,9 +444,9 @@ public:
 	virtual ssize_t WriteStr(char *Buf, ssize_t Size);
 
 	// Helpers
-	ssize_t Write(GString s)
+	bool Write(GString s)
 	{
-		return Write(s.Get(), s.Length());
+		return Write(s.Get(), s.Length()) == s.Length();
 	}
 
 	// Operators
