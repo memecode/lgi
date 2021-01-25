@@ -22,7 +22,7 @@ ifeq ($(Build),Debug)
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
 		-lmagic \
-		-static-libgcc \
+		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
 		-I./include/common \
@@ -42,7 +42,7 @@ else
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
 		-lmagic \
-		-static-libgcc \
+		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
 		-I./include/common \
@@ -72,8 +72,8 @@ Depends =	LDateTime.o \
 			GView.o \
 			GWindow.o \
 			LgiWidget.o \
-			GViewCommon.o \
 			GWindowCommon.o \
+			GViewCommon.o \
 			GAppCommon.o \
 			GLibrary.o \
 			GMem.o \
@@ -178,7 +178,7 @@ Depends =	LDateTime.o \
 TargetFile = lib$(Target)$(Tag).so
 $(TargetFile) : outputfolder $(Depends)
 	@echo Linking $(TargetFile) [$(Build)]...
-	$(CPP) -shared \
+	$(CPP)$s -shared \
 		 \
 		-o $(BuildDir)/$(TargetFile) \
 		$(addprefix $(BuildDir)/,$(Depends)) \
@@ -282,6 +282,12 @@ LgiWidget.o : ./src/linux/Gtk/LgiWidget.cpp ./include/common/Lgi.h \
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
+GWindowCommon.o : ./src/common/Lgi/GWindowCommon.cpp ./include/common/Lgi.h \
+	./include/common/INet.h \
+	./include/common/GDropFiles.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
 GViewCommon.o : ./src/common/Lgi/GViewCommon.cpp ./include/common/Lgi.h \
 	./include/common/GViewPriv.h \
 	./include/common/GDragAndDrop.h \
@@ -293,12 +299,6 @@ GViewCommon.o : ./src/common/Lgi/GViewCommon.cpp ./include/common/Lgi.h \
 	./include/common/GPopup.h \
 	./include/common/GCssTools.h \
 	./include/linux/Gtk/LgiWidget.h
-	@echo $(<F) [$(Build)]
-	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
-
-GWindowCommon.o : ./src/common/Lgi/GWindowCommon.cpp ./include/common/Lgi.h \
-	./include/common/INet.h \
-	./include/common/GDropFiles.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 

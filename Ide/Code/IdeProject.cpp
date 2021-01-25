@@ -501,7 +501,7 @@ public:
 
 					GString s;
 					if (l(0) == '`' || l(0) == '-')
-						s.Printf(" \\\n\t\t%s", l);
+						s.Printf(" \\\n\t\t%s", l.Get());
 					else
 					{
 						Proj->CheckExists(l);
@@ -738,11 +738,14 @@ public:
 
 								sprintf(Buf, "%s/$(BuildDir)/%s", Rel.Get(), t);
 								m.Print(" %s", Buf);
+								printf("%s:%i - Rel='%s'\n", _FL, Rel.Get());
 								
 								GArray<char*> AllDeps;
 								Dep->GetAllDependencies(AllDeps, Platform);
 								LgiAssert(AllDeps.Length() > 0);
 								AllDeps.Sort(StrSort);
+
+								printf("%s:%i - Rel='%s'\n", _FL, Rel.Get());
 
 								Rules.Print("%s : ", Buf);
 								for (int i=0; i<AllDeps.Length(); i++)
@@ -750,7 +753,8 @@ public:
 									if (i)
 										Rules.Print(" \\\n\t");
 									
-									char *f = Proj->RelativePath(Rel, AllDeps[i]) ? Rel.Get() : AllDeps[i];
+									GString DepRel;
+									char *f = Proj->RelativePath(DepRel, AllDeps[i]) ? DepRel.Get() : AllDeps[i];
 									ToUnixPath(f);
 									Rules.Print("%s", f);
 									
@@ -758,12 +762,16 @@ public:
 									if (!DepFiles.Find(f))
 										DepFiles.Add(f, true);
 								}
+
+								printf("%s:%i - Rel='%s'\n", _FL, Rel.Get());
 								
 								AllDeps.DeleteArrays();
 								
+								printf("%s:%i - Rel='%s'\n", _FL, Rel.Get());
+
 								Rules.Print("\n\texport Build=$(Build); \\\n"
 											"\t$(MAKE) -C %s",
-											Rel);
+											Rel.Get());
 
 								GAutoString Mk = Dep->GetMakefile();
 								// RenameMakefileForPlatform(Mk, Platform);
