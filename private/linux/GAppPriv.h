@@ -1,6 +1,21 @@
 #pragma once
 
 #include "LJson.h"
+#if defined(WIN32) && defined(__GTK_H__)
+#include "../win32/GSymLookup.h"
+#else
+#include "GSymLookup.h"
+#endif
+
+#if HAS_LIB_MAGIC
+// sudo apt-get install libmagic-dev
+#include <magic.h>
+#endif
+
+#include "LgiWinManGlue.h"
+
+typedef GArray<GAppInfo*> AppArray;
+using namespace Gtk;
 
 class GAppPrivate : public GSymLookup
 {

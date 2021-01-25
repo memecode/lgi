@@ -60,12 +60,14 @@
 					<Node File=".\src\win32\Lgi\LgiException.cpp" Type="2" Platforms="1" />
 				</Node>
 				<Node File="./include/common/GApp.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Lgi/GWindowCommon.cpp" Type="2" Platforms="15" />
+				<Node File="./private/linux/GAppPriv.h" Type="3" Platforms="15" />
 				<Node File="./include/common/GMessage.h" Type="3" Platforms="15" />
 				<Node File="./include/common/GView.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/GViewCommon.cpp" Type="2" Platforms="15" />
 				<Node File="./include/common/GViewPriv.h" Type="3" Platforms="15" />
 				<Node File="./include/common/GWindow.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Lgi/GWindowCommon.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Lgi/GAppCommon.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Libraries" Type="1" Platforms="15" Open="1" Id="17">
 				<Node File="./src/common/Lgi/GLibrary.cpp" Type="2" Platforms="15" />
@@ -396,24 +398,12 @@
 				<Linux>Makefile.linux</Linux>
 				<Windows>Makefile.win64</Windows>
 			</Makefile>
-			<Executable>
-				<Linux />
-			</Executable>
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin>
-				<All>0</All>
-			</DebugAdmin>
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
 			<Compiler>
 				<Linux>gcc</Linux>
 			</Compiler>
-			<CCrossCompiler />
-			<CppCrossCompiler />
+			<DebugAdmin>
+				<All>0</All>
+			</DebugAdmin>
 		</General>
 		<Build>
 			<IncludePaths>
@@ -423,9 +413,11 @@
 				</All>
 				<Linux>
 					<Debug>include/linux
-include/linux/Gtk</Debug>
+include/linux/Gtk
+private/linux</Debug>
 					<Release>include/linux
-include/linux/Gtk</Release>
+include/linux/Gtk
+private/linux</Release>
 				</Linux>
 			</IncludePaths>
 			<SystemIncludes>
@@ -439,7 +431,6 @@ include/linux/Gtk</Release>
 				</Linux>
 			</SystemIncludes>
 			<Libraries>
-				<All />
 				<Linux>
 					<Debug>magic
 -static-libgcc 
@@ -449,38 +440,16 @@ include/linux/Gtk</Release>
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
 			</Libraries>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<TargetType>
-				<All>DynamicLibrary</All>
-			</TargetType>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
 			</TargetName>
-			<ApplicationIcon />
+			<TargetType>
+				<All>DynamicLibrary</All>
+			</TargetType>
 		</Build>
-		<Editor>
-			<TabSize />
-			<IndentSize />
-			<ShowWhiteSpace />
-			<UseHardTabs />
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
-		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-		</Advanced>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Advanced />
 	</Settings>
 </Project>

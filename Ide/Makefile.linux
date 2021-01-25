@@ -27,7 +27,7 @@ ifeq ($(Build),Debug)
 		`pkg-config --libs gtk+-3.0` \
 		-static-libgcc \
 		-llgi-gtk3$(Tag) \
-		-L../$(BuildDir)
+		-L..//$(BuildDir)
 	Inc =  \
 		-I../include/common \
 		-I../include/linux \
@@ -45,7 +45,7 @@ else
 		`pkg-config --libs gtk+-3.0` \
 		-static-libgcc \
 		-llgi-gtk3$(Tag) \
-		-L../$(BuildDir)
+		-L..//$(BuildDir)
 	Inc =  \
 		-I../include/common \
 		-I../include/linux \
@@ -241,6 +241,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../include/linux/Gtk/LgiWidget.h \
 	../include/linux/Gtk/LgiWinManGlue.h \
 	../include/win32/GSymLookup.h \
+	../private/linux/GAppPriv.h \
 	../src/common/Gdc2/15Bit.cpp \
 	../src/common/Gdc2/16Bit.cpp \
 	../src/common/Gdc2/24Bit.cpp \
@@ -278,6 +279,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../src/common/INet/INetTools.cpp \
 	../src/common/INet/MDStringToDigest.cpp \
 	../src/common/Lgi/GAlert.cpp \
+	../src/common/Lgi/GAppCommon.cpp \
 	../src/common/Lgi/GCss.cpp \
 	../src/common/Lgi/GCssTools.cpp \
 	../src/common/Lgi/GDataDlg.cpp \
@@ -1152,16 +1154,9 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 ../src/linux/Lgi/GApp.cpp : ../include/common/Lgi.h \
 	../include/common/GSkinEngine.h \
 	../include/common/GArray.h \
-	../include/linux/Gtk/LgiWinManGlue.h \
 	../include/common/GVariant.h \
-	../include/win32/GSymLookup.h \
-	../include/linux/GSymLookup.h \
 	../include/common/GToken.h \
-	../include/common/GFontCache.h \
-	../include/common/LJson.h
-
-../include/common/LJson.h : ../include/common/GArray.h \
-	../include/common/GStringClass.h
+	../include/common/GFontCache.h
 
 ../include/common/GMessage.h : 
 
@@ -1581,8 +1576,6 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 	../include/common/LHashTable.h \
 	../include/common/GString.h
 
-../include/linux/GSymLookup.h : ../include/common/GSubProcess.h
-
 ../include/common/GMru.h : ../include/common/GProperties.h
 
 ../src/common/Gdc2/GRopsCases.cpp : 
@@ -1590,6 +1583,16 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 ../include/common/GCssTools.h : ../include/common/GCss.h
 
 ../include/common/ZlibWrapper.h : ../include/common/GLibraryUtils.h
+
+../private/linux/GAppPriv.h : ../include/common/LJson.h \
+	../include/win32/GSymLookup.h \
+	../include/linux/GSymLookup.h \
+	../include/linux/Gtk/LgiWinManGlue.h
+
+../include/common/LJson.h : ../include/common/GArray.h \
+	../include/common/GStringClass.h
+
+../include/linux/GSymLookup.h : ../include/common/GSubProcess.h
 
 ../include/common/GFontSelect.h : 
 
@@ -1964,6 +1967,8 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 ../include/common/GStringClass.h : ../include/common/GUnicode.h \
 	../include/common/GArray.h \
 	../include/common/LgiClass.h
+
+../src/common/Lgi/GAppCommon.cpp : ../include/common/Lgi.h
 
 ../src/common/Gdc2/GColour.cpp : ../include/common/Lgi.h \
 	../include/common/GPalette.h \

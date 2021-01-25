@@ -11,28 +11,15 @@
 #include "Lgi.h"
 #include "GSkinEngine.h"
 #include "GArray.h"
-#include "LgiWinManGlue.h"
 #include "GVariant.h"
-#if defined(WIN32) && defined(__GTK_H__)
-#include "../win32/GSymLookup.h"
-#else
-#include "GSymLookup.h"
-#endif
 #include "GToken.h"
 #include "GFontCache.h"
-#include "LJson.h"
-
-#if HAS_LIB_MAGIC
-// sudo apt-get install libmagic-dev
-#include <magic.h>
-#endif
+#include "GAppPriv.h"
 
 #define DEBUG_MSG_TYPES				0
 #define DEBUG_HND_WARNINGS			0
 #define IDLE_ALWAYS					0
 
-typedef GArray<GAppInfo*> AppArray;
-using namespace Gtk;
 
 #if GTK_MAJOR_VERSION == 3
 #else
@@ -646,34 +633,6 @@ void GApp::OnReceiveFiles(::GArray<const char*> &Files)
 {
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);
-}
-
-::GString GApp::GetConfigPath()
-{
-	::GFile::Path p(LSP_HOME);
-	p += ".config";
-	if (p.Exists())
-	{
-		p += "lgi.json";
-		return p.GetFull();
-	}
-	
-	p--;
-	p += ".lgi.json";
-	return p.GetFull();
-}
-
-::GString GApp::GetConfig(const char *Variable)
-{
-	auto c = d->GetConfig();
-	return c ? c->Get(Variable) : NULL;
-}
-
-void GApp::SetConfig(const char *Variable, const char *Value)
-{
-	auto c = d->GetConfig();
-	if (c && c->Set(Variable, Value))
-		d->SaveConfig();
 }
 
 const char *GApp::KeyModFlags::FlagName(int Flag)

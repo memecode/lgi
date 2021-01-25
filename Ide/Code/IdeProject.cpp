@@ -482,7 +482,7 @@ public:
 						if (!LgiIsRelativePath(in))
 							Rel = LgiMakeRelativePath(Base, in);
 
-						GString Final = Rel ? Rel.Get() : in;
+						GString Final = Rel ? Rel : in;
 						Proj->CheckExists(Final);
 						s.Printf(" \\\n\t\t-L%s", ToUnixPath(Final));
 					}
@@ -537,7 +537,7 @@ public:
 						GAutoString Rel;
 						Rel = LgiMakeRelativePath(Base, DepPath);
 
-						GString Final = Rel ? Rel.Get() : DepPath;
+						GString Final = Rel ? Rel.Get() : DepPath.Get();
 						Proj->CheckExists(Final, true);
 						s.Printf(" \\\n\t\t-L%s/$(BuildDir)", ToUnixPath(Final));
 						sLibs[Cfg] += s;
