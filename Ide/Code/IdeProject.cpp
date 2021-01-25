@@ -482,7 +482,7 @@ public:
 						if (!LgiIsRelativePath(in))
 							Rel = LgiMakeRelativePath(Base, in);
 
-						GString Final = Rel ? Rel : in;
+						GString Final = Rel ? Rel.Get() : in;
 						Proj->CheckExists(Final);
 						s.Printf(" \\\n\t\t-L%s", ToUnixPath(Final));
 					}
