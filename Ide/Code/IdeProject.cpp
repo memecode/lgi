@@ -57,6 +57,31 @@ int PlatformCtrlId[] =
 	0
 };
 
+const char *PlatformDynamicLibraryExt(IdePlatform Platform)
+{
+	if (Platform == PlatformWin)
+		return "dll";
+	if (Platform == PlatformMac)
+		return "dylib";
+	
+	return "so";
+}
+
+const char *PlatformSharedLibraryExt(IdePlatform Platform)
+{
+	if (Platform == PlatformWin)
+		return "lib";
+
+	return "a";
+}
+
+const char *PlatformExecutableExt(IdePlatform Platform)
+{
+	if (Platform == PlatformWin)
+		return ".exe";
+	return "";
+}
+
 char *ToUnixPath(char *s)
 {
 	if (s)
@@ -254,7 +279,7 @@ public:
 		
 		Log->Print("CreateMakefile for '%s'...\n", PlatformName);
 		
-		if (Platform == PlatformWin32)
+		if (Platform == PlatformWin)
 		{
 			LinkerFlags = ",--enable-auto-import";
 		}
@@ -268,17 +293,15 @@ public:
 		}
 
 		char Buf[256];
-		GAutoString MakeFile = Proj->GetMakefile();
+		auto MakeFile = Proj->GetMakefile(Platform);
 		Proj->CheckExists(MakeFile);
 		if (!MakeFile)
-		{
-			MakeFile.Reset(NewStr("../Makefile"));
-		}
+			MakeFile = "../Makefile";
 		
 		// LGI_LIBRARY_EXT
 		switch (Platform)
 		{
-			case PlatformWin32:
+			case PlatformWin:
 				PlatformLibraryExt = "dll";
 				PlatformStaticLibExt = "lib";
 				PlatformExeExt = ".exe";
@@ -404,7 +427,7 @@ public:
 		GString sIncludes[2];
 		const char *ExtraLinkFlags = NULL;
 		const char *ExeFlags = NULL;
-		if (Platform == PlatformWin32)
+		if (Platform == PlatformWin)
 		{
 			ExtraLinkFlags = "";
 			ExeFlags = " -mwindows";
@@ -532,14 +555,14 @@ public:
 					auto DepBase = dep->GetBasePath();
 					if (DepBase)
 					{
-						GString DepPath = ToUnixPath(DepBase);
+						GString DepPath = DepBase;
 						
 						GAutoString Rel;
 						Rel = LgiMakeRelativePath(Base, DepPath);
 
 						GString Final = Rel ? Rel.Get() : DepPath.Get();
 						Proj->CheckExists(Final, true);
-						s.Printf(" \\\n\t\t-L%s/$(BuildDir)", ToUnixPath(Final));
+						s.Printf(" \\\n\t\t-L%s/$(BuildDir)", ToUnixPath(Final.RStrip("/\\")));
 						sLibs[Cfg] += s;
 					}
 				}
@@ -718,11 +741,11 @@ public:
 							Dep->CreateMakefile(Platform, false);
 						
 							// Build a rule to make the dependency if any of the source changes...
-							char t[MAX_PATH] = "";
 							GAutoString DepBase = Dep->GetBasePath();
 							GAutoString Base = Proj->GetBasePath();
+							auto TargetFile = Dep->GetTargetFile(Platform);
 							
-							if (DepBase && Base && Dep->GetTargetFile(t, sizeof(t)))
+							if (DepBase && Base && TargetFile)
 							{
 								GString Rel;
 								if (!Proj->RelativePath(Rel, DepBase))
@@ -730,22 +753,17 @@ public:
 								ToUnixPath(Rel);
 								
 								// Add tag to target name
-								GToken Parts(t, ".");
+								GToken Parts(TargetFile, ".");
 								if (Parts.Length() == 2)
-									sprintf_s(t, sizeof(t), "lib%s$(Tag).%s", Parts[0], Parts[1]);
-								else
-									sprintf_s(t, sizeof(t), "%s", Parts[0]);
+									TargetFile.Printf("lib%s$(Tag).%s", Parts[0], Parts[1]);
 
-								sprintf(Buf, "%s/$(BuildDir)/%s", Rel.Get(), t);
+								sprintf(Buf, "%s/$(BuildDir)/%s", Rel.Get(), TargetFile.Get());
 								m.Print(" %s", Buf);
-								printf("%s:%i - Rel='%s'\n", _FL, Rel.Get());
 								
 								GArray<char*> AllDeps;
 								Dep->GetAllDependencies(AllDeps, Platform);
 								LgiAssert(AllDeps.Length() > 0);
 								AllDeps.Sort(StrSort);
-
-								printf("%s:%i - Rel='%s'\n", _FL, Rel.Get());
 
 								Rules.Print("%s : ", Buf);
 								for (int i=0; i<AllDeps.Length(); i++)
@@ -763,17 +781,13 @@ public:
 										DepFiles.Add(f, true);
 								}
 
-								printf("%s:%i - Rel='%s'\n", _FL, Rel.Get());
-								
 								AllDeps.DeleteArrays();
-								
-								printf("%s:%i - Rel='%s'\n", _FL, Rel.Get());
 
 								Rules.Print("\n\texport Build=$(Build); \\\n"
 											"\t$(MAKE) -C %s",
 											Rel.Get());
 
-								GAutoString Mk = Dep->GetMakefile();
+								auto Mk = Dep->GetMakefile(Platform);
 								// RenameMakefileForPlatform(Mk, Platform);
 
 								char *DepMakefile = strrchr(Mk, DIR_CHAR);
@@ -839,17 +853,17 @@ public:
 								"	rm -f $(BuildDir)/*.o $(Target)%s\n"
 								"	@echo Cleaned $(BuildDir)\n"
 								"\n",
-								LGI_EXECUTABLE_EXT);
+								PlatformExecutableExt(Platform));
 						
 						m.Print("# Clean all targets\n"
 								"cleanall :\n"
 								"	rm -f $(BuildDir)/*.o $(Target)%s\n"
 								"	@echo Cleaned $(BuildDir)\n",
-								LGI_EXECUTABLE_EXT);
+								PlatformExecutableExt(Platform));
 						
 						for (auto d: Deps)
 						{
-							GAutoString mk = d->GetMakefile();
+							auto mk = d->GetMakefile(Platform);
 							if (mk)
 							{
 								GAutoString my_base = Proj->GetBasePath();
@@ -1051,7 +1065,7 @@ public:
 							GArray<char*> Headers;
 							if (BuildHeaderList(c8, Headers, IncPaths, false))
 							{
-								m.Print("%s : ", Rel);
+								m.Print("%s : ", ToUnixPath(Rel));
 
 								for (int n=0; n<Headers.Length() && !IsCancelled(); n++)
 								{
@@ -2169,10 +2183,10 @@ bool IdeProject::GetExePath(char *Path, int Len)
 	else return false;
 }
 
-GAutoString IdeProject::GetMakefile()
+GString IdeProject::GetMakefile(IdePlatform Platform)
 {
-	GAutoString Path;
-	const char *PMakefile = d->Settings.GetStr(ProjMakefile);
+	GString Path;
+	const char *PMakefile = d->Settings.GetStr(ProjMakefile, NULL, Platform);
 	if (PMakefile)
 	{
 		if (LgiIsRelativePath(PMakefile))
@@ -2182,12 +2196,12 @@ GAutoString IdeProject::GetMakefile()
 			{
 				char p[MAX_PATH];
 				LgiMakePath(p, sizeof(p), Base, PMakefile);
-				Path.Reset(NewStr(p));
+				Path = p;
 			}
 		}
 		else
 		{
-			Path.Reset(NewStr(PMakefile));
+			Path = PMakefile;
 		}
 	}
 	
@@ -2199,7 +2213,7 @@ void IdeProject::Clean(bool All, bool Release)
 	if (!d->Thread &&
 		d->Settings.GetStr(ProjMakefile))
 	{
-		GAutoString m = GetMakefile();
+		auto m = GetMakefile(PlatformCurrent);
 		if (m)
 			d->Thread.Reset(new BuildThread(this, m, true, Release, All, sizeof(ssize_t)*8));
 	}
@@ -2394,7 +2408,7 @@ bool IdeProject::IsMakefileUpToDate()
 				dir.Close();
 			}
 
-			GAutoString m = p->GetMakefile();
+			auto m = p->GetMakefile(PlatformCurrent);
 			if (!m)
 			{		
 				d->App->GetBuildLog()->Print("Error: no makefile? (%s:%i)\n", _FL);
@@ -2513,7 +2527,7 @@ void IdeProject::Build(bool All, bool Release)
 		return;
 	}
 
-	GAutoString m = GetMakefile();
+	auto m = GetMakefile(PlatformCurrent);
 	if (!m)
 	{		
 		d->App->GetBuildLog()->Print("Error: no makefile? (%s:%i)\n", _FL);
@@ -2600,7 +2614,7 @@ GString IdeProject::GetExecutable(IdePlatform Platform)
 		
 		switch (Platform)
 		{			
-			case PlatformWin32:
+			case PlatformWin:
 			{
 				Bin.Printf("%s%s.dll", Target.Get(), Postfix);
 				break;
@@ -3644,9 +3658,9 @@ GString IdeProject::GetTargetName(IdePlatform Platform)
 	return Status;
 }
 
-bool IdeProject::GetTargetFile(char *Buf, int BufSize)
+GString IdeProject::GetTargetFile(IdePlatform Platform)
 {
-	bool Status = false;
+	GString Ret;
 	GString Target = GetTargetName(PlatformCurrent);
 	if (Target)
 	{
@@ -3655,30 +3669,28 @@ bool IdeProject::GetTargetFile(char *Buf, int BufSize)
 		{
 			if (!stricmp(TargetType, "Executable"))
 			{
-				strcpy_s(Buf, BufSize, Target);
-				Status = true;
+				Ret = Target;
 			}
 			else if (!stricmp(TargetType, "DynamicLibrary"))
 			{
 				char t[MAX_PATH];
+				auto DefExt = PlatformDynamicLibraryExt(Platform);
 				strcpy_s(t, sizeof(t), Target);
 				char *ext = LgiGetExtension(t);
 				if (!ext)
-					sprintf(t + strlen(t), ".%s", LGI_LIBRARY_EXT);
-				else if (stricmp(ext, LGI_LIBRARY_EXT))
-					strcpy(ext, LGI_LIBRARY_EXT);
-				strcpy_s(Buf, BufSize, t);
-				Status = true;
+					sprintf(t + strlen(t), ".%s", DefExt);
+				else if (stricmp(ext, DefExt))
+					strcpy(ext, DefExt);				
+				Ret = t;
 			}
 			else if (!stricmp(TargetType, "StaticLibrary"))
 			{
-				snprintf(Buf, BufSize, "lib%s.%s", Target.Get(), LGI_STATIC_LIBRARY_EXT);
-				Status = true;
+				Ret.Printf("lib%s.%s", Target.Get(), PlatformSharedLibraryExt(Platform));
 			}
 		}
 	}
 	
-	return Status;
+	return Ret;
 }
 
 struct Dependency

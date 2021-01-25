@@ -766,5 +766,8 @@
     <ClInclude Include="private\win\GAppPriv.h">
       <Filter>Source Files\Interface</Filter>
     </ClInclude>
+    <ClInclude Include="include\common\GSlider.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

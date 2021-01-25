@@ -132,13 +132,13 @@ enum IdeMenuCmds
 enum IdePlatform
 {
 	PlatformCurrent = -1,
-	PlatformWin32 = 0,
+	PlatformWin = 0,
 	PlatformLinux,
 	PlatformMac,
 	PlatformHaiku,
 	PlatformMax,
 };
-#define PLATFORM_WIN32			(1 << PlatformWin32)
+#define PLATFORM_WIN32			(1 << PlatformWin)
 #define PLATFORM_LINUX			(1 << PlatformLinux)
 #define PLATFORM_MAC			(1 << PlatformMac)
 #define PLATFORM_HAIKU			(1 << PlatformHaiku)

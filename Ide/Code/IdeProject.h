@@ -144,7 +144,7 @@ public:
 
 	GXmlTag *Create(char *Tag);
 	void Empty();
-	GAutoString GetMakefile();
+	GString GetMakefile(IdePlatform Platform);
 	bool GetExePath(char *Path, int Len);
 	bool RelativePath(GString &Out, const char *In, bool Debug = false);
 	void Build(bool All, bool Release);
@@ -159,7 +159,7 @@ public:
 	bool IsMakefileUpToDate();
 	bool CreateMakefile(IdePlatform Platform, bool BuildAfterwards);
 	GString GetTargetName(IdePlatform Platform);
-	bool GetTargetFile(char *Buf, int BufSize);
+	GString GetTargetFile(IdePlatform Platform);
 	bool BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool IncludeSystem, IdePlatform Platform);
 	void ShowFileProperties(const char *File);
 	bool GetExpanded(int Id);

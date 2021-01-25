@@ -705,8 +705,8 @@ GAutoString LgiMakeRelativePath(const char *Base, const char *Path)
 		#endif
 		if (SameNs)
 		{
-			GToken b(Base + 1, ":" DIR_STR);
-			GToken p(Path + 1, ":" DIR_STR);
+			GToken b(Base + 1, ":\\/");
+			GToken p(Path + 1, ":\\/");
 			int Same = 0;
 			while (b[Same] && p[Same] && stricmp(b[Same], p[Same]) == 0)
 			{

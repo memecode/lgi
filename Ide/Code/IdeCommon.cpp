@@ -64,7 +64,7 @@ void IdeCommon::CollectAllSubProjects(List<IdeProject> &c)
 IdePlatform GetCurrentPlatform()
 {
 	#if defined(WIN32)
-	return PlatformWin32;
+	return PlatformWin;
 	#elif defined(LINUX)
 	return PlatformLinux;
 	#elif defined(MAC)

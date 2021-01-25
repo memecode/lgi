@@ -23,7 +23,7 @@
 		<Node File="./Src/VcFolder.cpp" Type="2" Platforms="15" />
 		<Node File="./Src/VcFolder.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
 	<Node Name="Resources" Type="1" Platforms="15" Id="1">
 		<Node File="./Resources/icon32.png" Type="6" Platforms="15" />
 		<Node File="./installer-zip.py" Type="8" Platforms="15" />
@@ -33,7 +33,7 @@
 		<General>
 			<Makefile>
 				<Linux>Makefile.linux</Linux>
-				<Windows>.\Lvc.sln</Windows>
+				<Windows>.\Makefile.linux</Windows>
 			</Makefile>
 			<Executable>
 				<Linux>
@@ -50,6 +50,15 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<Arguments>
+				<All />
+			</Arguments>
+			<Defines>
+				<All />
+				<Windows />
+			</Defines>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -67,6 +76,7 @@
 ../include/linux/Gtk
 </Release>
 				</Linux>
+				<Windows />
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
@@ -77,6 +87,7 @@
 /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -93,10 +104,19 @@
 					<Debug>ssh</Debug>
 					<Release>ssh</Release>
 				</All>
+				<Windows />
 			</Libraries>
 			<TargetType>
 				<All>Executable</All>
 			</TargetType>
+			<LibraryPaths>
+				<All />
+				<Windows />
+			</LibraryPaths>
+			<TargetName>
+				<Windows />
+			</TargetName>
+			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -108,7 +128,19 @@
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<ShowWhiteSpace />
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
-		<Advanced />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Windows />
+			</PostBuildCommands>
+		</Advanced>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

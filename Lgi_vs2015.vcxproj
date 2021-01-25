@@ -615,6 +615,7 @@
     <ClInclude Include="include\common\GMatrix.h" />
     <ClInclude Include="include\common\GMem.h" />
     <ClInclude Include="include\common\GPath.h" />
+    <ClInclude Include="include\common\GSlider.h" />
     <ClInclude Include="include\common\GView.h" />
     <ClInclude Include="include\common\LMenu.h" />
     <ClInclude Include="include\common\GMessage.h" />
