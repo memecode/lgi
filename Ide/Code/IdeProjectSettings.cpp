@@ -443,6 +443,7 @@ public:
 			Tbl->InvalidateLayout();
 			Tbl->AttachChildren();
 			Tbl->SetPos(GetClient());
+			Invalidate();
 		}
 	}
 	
