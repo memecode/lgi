@@ -2190,6 +2190,9 @@ bool LgiGetUsersLinks(GArray<GString> &Links)
 			return false;
 		}
 
+		if (!FileExists(p))
+			return false;
+			
 		GAutoString Txt(ReadTextFile(p));
 		if (!Txt)
 		{

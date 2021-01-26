@@ -805,6 +805,7 @@ bool GView::PointToView(LPoint &p)
 
 bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 {
+	bool Status = true;
 	ThreadCheck();
 
 	GWindow *w = GetWindow();
@@ -833,14 +834,16 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 		if (axes[0] == 0.0 || axes[0] > 10000)
 		{
 			// LgiTrace("%s:%i - gdk_device_get_state failed.\n", _FL);
-			return false;
+			Status = false;
 		}
-
-		LPoint p;
-		WindowVirtualOffset(&p);
-		m.x = (int)axes[0] - p.x - _BorderSize;
-		m.y = (int)axes[1] - p.y - _BorderSize;
-		// printf("GetMs %g,%g %i,%i %i,%i device=%p wnd=%p\n", axes[0], axes[1], p.x, p.y, m.x, m.y, device, wnd);
+		else
+		{
+			LPoint p;
+			WindowVirtualOffset(&p);
+			m.x = (int)axes[0] - p.x - _BorderSize;
+			m.y = (int)axes[1] - p.y - _BorderSize;
+			// printf("GetMs %g,%g %i,%i %i,%i device=%p wnd=%p\n", axes[0], axes[1], p.x, p.y, m.x, m.y, device, wnd);
+		}
 	}
 
 	m.SetModifer(mask);
@@ -849,7 +852,7 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 	m.Right((mask & GDK_BUTTON3_MASK) != 0);
 	m.Down(m.Left() || m.Middle() || m.Right());
 	
-	return true;
+	return Status;
 }
 
 bool GView::IsAttached()

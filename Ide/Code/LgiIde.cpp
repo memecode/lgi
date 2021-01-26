@@ -4206,16 +4206,6 @@ int LgiMain(OsAppArguments &AppArgs)
 	GApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
-		GString f = "fff", g = "gggg";
-		GArray<GString> aa = {g, f};
-		auto c1 = f - g;
-		auto c2 = g - f;
-		aa.Sort();
-		for (auto s: aa)
-			printf("%s\n", s.Get());
-		int asd=0;
-	
-	
 		// new SocketTest();
 		#if 0
 		auto s = "=?gb18030?B?0Nyz9sO7?=";

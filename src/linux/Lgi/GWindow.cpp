@@ -1354,7 +1354,12 @@ GRect &GWindow::GetClient(bool ClientSpace)
 		CallbackParams p;
 		gtk_container_forall(GTK_CONTAINER(Wnd), (GtkCallback)ClientCallback, &p);
 		if (p.Menu.Valid())
-			r.y1 += p.Menu.Y();
+		{
+			if (ClientSpace)
+				r.y2 -= p.Menu.Y();
+			else
+				r.y1 += p.Menu.Y();
+		}
 	}
 
 	return r;

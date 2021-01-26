@@ -1254,7 +1254,8 @@ void DocEdit::PourStyle(size_t Start, ssize_t EditSize)
 
 		#ifdef _DEBUG
 		uint64 Tm = LgiMicroTime() - Start;
-		LgiTrace("DocEdit: Styling->Waiting time: %.1g ms\n", (double) Tm / 1000.0);
+		if (Tm >= 10000)
+			LgiTrace("DocEdit: Styling->Waiting time: %.1g ms\n", (double) Tm / 1000.0);
 		#endif
 	}
 
