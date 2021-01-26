@@ -27,14 +27,14 @@ ifeq ($(Build),Debug)
 		`pkg-config --libs gtk+-3.0` \
 		-static-libgcc \
 		-llgi-gtk3$(Tag) \
-		-L..//$(BuildDir)
+		-L../$(BuildDir)
 	Inc =  \
-		-I../include/common \
-		-I../include/linux \
-		-I../include/linux/Gtk \
-		-I./Code \
+		`pkg-config --cflags gtk+-3.0` \
 		-I./Resources \
-		`pkg-config --cflags gtk+-3.0`
+		-I./Code \
+		-I../include/linux/Gtk \
+		-I../include/linux \
+		-I../include/common
 else
 	Flags += -s -Os -std=c++11
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLIBPNG_VERSION=\"1.2\"
@@ -45,14 +45,14 @@ else
 		`pkg-config --libs gtk+-3.0` \
 		-static-libgcc \
 		-llgi-gtk3$(Tag) \
-		-L..//$(BuildDir)
+		-L../$(BuildDir)
 	Inc =  \
-		-I../include/common \
-		-I../include/linux \
-		-I../include/linux/Gtk \
-		-I./Code \
+		`pkg-config --cflags gtk+-3.0` \
 		-I./Resources \
-		`pkg-config --cflags gtk+-3.0`
+		-I./Code \
+		-I../include/linux/Gtk \
+		-I../include/linux \
+		-I../include/common
 endif
 
 # Dependencies
@@ -2362,9 +2362,9 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 
 VPATH=%.cpp \
 	../include/linux/Gtk \
-	./Resources \
 	../include/linux \
 	../include/common \
+	./Resources \
 	./Code \
 	./ \
 	$(BuildDir)

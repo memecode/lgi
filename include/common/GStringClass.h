@@ -454,7 +454,7 @@ public:
 		return Str ? Str->Str : NULL;
 	}
 	
-	int operator -(const GString &s)
+	int operator -(const GString &s) const
 	{
 		return Stricmp(Get(), s.Get());
 	}

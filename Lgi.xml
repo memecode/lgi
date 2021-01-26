@@ -436,10 +436,8 @@ private/linux</Release>
 			<SystemIncludes>
 				<Linux>
 					<Debug>/usr/include/gstreamer-1.0
-/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
 `pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>/usr/include/gstreamer-1.0
-/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>

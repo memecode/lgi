@@ -520,9 +520,11 @@ public:
 
 						GString Final = Rel ? Rel.Get() : in.Get();
 						if (!Proj->CheckExists(Final))
-							OnError("%s:%i - Library path '%s' doesn't exist.\n", Final.Get());
-						else
-							s.Printf(" \\\n\t\t-L%s", ToUnixPath(Final));
+							OnError("%s:%i - Library path '%s' doesn't exist (from %s).\n",
+								_FL, Final.Get(),
+								Proj->GetFileName());
+
+						s.Printf(" \\\n\t\t-L%s", ToUnixPath(Final));
 					}
 					
 					sLibs[Cfg] += s;
@@ -611,8 +613,10 @@ public:
 				{
 					char *p = Paths[i];
 					GAutoString pn = ToNativePath(p);
-					if (pn.Get()[0] != '`' && Proj->CheckExists(pn))
-						OnError("%s:%i - System include path '%s' doesn't exist.\n", _FL, pn.Get());
+					if (pn.Get()[0] != '`' && !Proj->CheckExists(pn))
+						OnError("%s:%i - System include path '%s' doesn't exist (from %s).\n",
+							_FL, pn.Get(),
+							Proj->GetFileName());
 					else if (!Inc.Find(pn))
 						Inc.Add(pn, true);
 				}
@@ -883,7 +887,11 @@ public:
 							{
 								GAutoString my_base = Proj->GetBasePath();
 								GAutoString dep_base = d->GetBasePath();
+								d->CheckExists(dep_base);
+
 								GAutoString rel_dir = LgiMakeRelativePath(my_base, dep_base);
+								d->CheckExists(rel_dir);
+								
 								char *mk_leaf = strrchr(mk, DIR_CHAR);
 								m.Print("	+make -C \"%s\" -f \"%s\" clean\n",
 									ToUnixPath(rel_dir ? rel_dir.Get() : dep_base.Get()),
