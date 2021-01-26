@@ -127,10 +127,12 @@ public:
 		FilterFiles(Matches, Nodes, s);
 
 		Lst->Empty();
-		for (unsigned i=0; i<Matches.Length(); i++)
+		for (auto m: Matches)
 		{
 			LListItem *li = new LListItem;
-			li->SetText(Matches[i]->GetFileName());
+			GString Fn = m->GetFileName();
+			m->GetProject()->CheckExists(Fn);
+			li->SetText(Fn);
 			Lst->Insert(li);
 		}
 
@@ -2564,9 +2566,10 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 				GAutoString ProjPath = Project->GetBasePath();
 				char p[MAX_PATH];
 				LgiMakePath(p, sizeof(p), ProjPath, File);
-				if (FileExists(p))
+				GString Path = p;
+				if (Project->CheckExists(Path))
 				{
-					FullPath = p;
+					FullPath = Path;
 					File = FullPath;
 					break;
 				}

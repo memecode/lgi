@@ -375,6 +375,7 @@
 		<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
 			<Node File="./include/win32/LgiOsDefs.h" Type="3" Platforms="1" />
 		</Node>
+		<Node File="./include/common/GAutoPtr.h" Type="3" Platforms="15" />
 		<Node File="./include/common/GNotifications.h" Type="3" Platforms="15" />
 		<Node File="./include/common/LCancel.h" Type="3" Platforms="15" />
 		<Node File="./include/common/LError.h" Type="3" Platforms="15" />
@@ -404,6 +405,18 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<Executable>
+				<Linux />
+			</Executable>
+			<Arguments>
+				<All />
+			</Arguments>
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -439,6 +452,7 @@ private/linux</Release>
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
+				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -449,7 +463,29 @@ private/linux</Release>
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
-		<Advanced />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
 	</Settings>
 </Project>

@@ -681,7 +681,7 @@ void FilterFiles(GArray<ProjectNode*> &Perfect, GArray<ProjectNode*> &Nodes, GSt
 			break;
 		}
 		ProjectNode *Pn = Nodes[i];
-		char *Fn = Pn->GetFileName();
+		auto Fn = Pn->GetFileName();
 		if (Fn)
 		{
 			char *Dir = strchr(Fn, '/');
@@ -922,7 +922,7 @@ bool IdeDocPrivate::IsFile(const char *File)
 	return true;
 }
 
-char *IdeDocPrivate::GetLocalFile()
+const char *IdeDocPrivate::GetLocalFile()
 {
 	if (nSrc)
 	{
@@ -1550,7 +1550,7 @@ void IdeDoc::SetProject(IdeProject *p)
 		d->Project->GetApp()->LoadBreakPoints(this);
 }
 
-char *IdeDoc::GetFileName()
+const char *IdeDoc::GetFileName()
 {
 	return d->GetLocalFile();
 }
@@ -1827,6 +1827,9 @@ bool IdeDoc::SetClean()
 		{
 			LocalPath = d->GetLocalFile();
 		}
+		
+		if (d->Project)
+			d->Project->CheckExists(LocalPath);
 
 		if (d->Edit->IsDirty() &&
 			!FileExists(LocalPath))

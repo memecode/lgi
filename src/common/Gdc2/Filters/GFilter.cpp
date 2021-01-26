@@ -1440,16 +1440,21 @@ GSurface *GdcDevice::Load(GStream *In, const char *Name, bool UseOSLoader)
 		return NULL;
 	}
 
+	GXmlTag Props;
 	GAutoPtr<GFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, Hint));
 	GAutoPtr<GSurface> pDC;
 	if (Filter &&
 		pDC.Reset(new GMemDC))
 	{
+		Filter->Props = &Props;
 		FilterStatus = Filter->ReadImage(pDC, In);
 		if (FilterStatus != GFilter::IoSuccess)
 		{
 			pDC.Reset();
-			LgiTrace("%s:%i - Filter couldn't cope with '%s'.\n", _FL, Name);
+			
+			GVariant m;
+			Props.GetValue(LGI_FILTER_ERROR, m);			
+			LgiTrace("%s:%i - Filter couldn't cope with '%s' (msg=%s).\n", _FL, Name, m.Str());
 		}
 	}
 

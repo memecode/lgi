@@ -184,9 +184,9 @@ public:
 
 	virtual GString GetFullPath() = 0;
 	virtual bool IsWeb() = 0;
-	virtual char *GetFileName() = 0;
-	virtual char *GetLocalCache() = 0;
-	virtual char *GetCharset() = 0;
+	virtual const char *GetFileName() = 0;
+	virtual const char *GetLocalCache() = 0;
+	virtual const char *GetCharset() = 0;
 	virtual bool Load(GDocView *Edit, NodeView *Callback) = 0;
 	virtual bool Save(GDocView *Edit, NodeView *Callback) = 0;
 	virtual IdeProject *GetProject() = 0;

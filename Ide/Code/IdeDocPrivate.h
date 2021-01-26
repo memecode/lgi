@@ -63,7 +63,7 @@ public:
 	void UpdateName();
 	GString GetDisplayName();
 	bool IsFile(const char *File);
-	char *GetLocalFile();
+	const char *GetLocalFile();
 	void SetFileName(const char *f);
 	bool Load();
 	bool Save();

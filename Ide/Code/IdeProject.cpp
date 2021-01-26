@@ -234,18 +234,23 @@ class MakefileThread : public LThread, public LCancel
 	IdeProjectPrivate *d;
 	IdeProject *Proj;
 	IdePlatform Platform;
+	GStream *Log;
 	bool BuildAfterwards;
+	bool HasError;
 	
 public:
 	static int Instances;
 
 	MakefileThread(IdeProjectPrivate *priv, IdePlatform platform, bool Build) : LThread("MakefileThread")
 	{
+		Instances++;
+
 		d = priv;
 		Proj = d->Project;
 		Platform = platform;
 		BuildAfterwards = Build;
-		Instances++;
+		HasError = false;
+		Log = d->App->GetBuildLog();
 		
 		Run();
 	}
@@ -256,6 +261,15 @@ public:
 		while (!IsExited())
 			LgiSleep(1);
 		Instances--;
+	}
+	
+	void OnError(const char *Fmt, ...)
+	{
+		va_list Arg;
+		va_start(Arg, Fmt);
+		GStreamPrintf(Log, 0, Fmt, Arg);
+		va_end(Arg);
+		HasError = true;
 	}
 	
 	int Main()
@@ -496,7 +510,6 @@ public:
 					
 					if (in(0) == '-')
 					{
-						Proj->CheckExists(in);
 						s.Printf(" \\\n\t\t%s", in.Get());
 					}
 					else
@@ -506,8 +519,10 @@ public:
 							Rel = LgiMakeRelativePath(Base, in);
 
 						GString Final = Rel ? Rel.Get() : in.Get();
-						Proj->CheckExists(Final);
-						s.Printf(" \\\n\t\t-L%s", ToUnixPath(Final));
+						if (!Proj->CheckExists(Final))
+							OnError("%s:%i - Library path '%s' doesn't exist.\n", Final.Get());
+						else
+							s.Printf(" \\\n\t\t-L%s", ToUnixPath(Final));
 					}
 					
 					sLibs[Cfg] += s;
@@ -555,13 +570,13 @@ public:
 					auto DepBase = dep->GetBasePath();
 					if (DepBase)
 					{
-						GString DepPath = DepBase;
+						GString DepPath = DepBase.Get();
 						
 						GAutoString Rel;
 						Rel = LgiMakeRelativePath(Base, DepPath);
 
 						GString Final = Rel ? Rel.Get() : DepPath.Get();
-						Proj->CheckExists(Final, true);
+						Proj->CheckExists(Final);
 						s.Printf(" \\\n\t\t-L%s/$(BuildDir)", ToUnixPath(Final.RStrip("/\\")));
 						sLibs[Cfg] += s;
 					}
@@ -581,11 +596,10 @@ public:
 				{
 					char *p = Paths[i];
 					GAutoString pn = ToNativePath(p);					
-					Proj->CheckExists(pn);					
-					if (!Inc.Find(pn))
-					{
+					if (pn.Get()[0] != '`' && !Proj->CheckExists(pn))
+						OnError("%s:%i - Include path '%s' doesn't exist.\n", _FL, pn.Get());
+					else if (!Inc.Find(pn))
 						Inc.Add(pn, true);
-					}
 				}
 			}
 			const char *SysIncludes = d->Settings.GetStr(ProjSystemIncludes, NULL, Platform);
@@ -597,11 +611,10 @@ public:
 				{
 					char *p = Paths[i];
 					GAutoString pn = ToNativePath(p);
-					Proj->CheckExists(pn);
-					if (!Inc.Find(pn))
-					{
+					if (pn.Get()[0] != '`' && Proj->CheckExists(pn))
+						OnError("%s:%i - System include path '%s' doesn't exist.\n", _FL, pn.Get());
+					else if (!Inc.Find(pn))
 						Inc.Add(pn, true);
-					}
 				}
 			}
 
@@ -636,28 +649,25 @@ public:
 						if (stricmp(Rel, ".") != 0)
 						{
 							GAutoString RelN = ToNativePath(Rel);
-							Proj->CheckExists(RelN);
-							if (!Inc.Find(RelN))
-							{
+							if (!Proj->CheckExists(RelN))
+								OnError("Header include path '%s' doesn't exist.\n", RelN.Get());
+							else if (!Inc.Find(RelN))
 								Inc.Add(RelN, true);
-							}
 						}
 					}
 				}
 			}
 
-			List<char> Incs;
-			for (auto i : Inc)
-			{
-				Incs.Insert(NewStr(i.key));
-			}
-			Incs.Sort(StrCmp);
+			GString::Array Incs;
+			for (auto i: Inc)
+				Incs.New() = i.key;
+			Incs.Sort();
 			
 			for (auto i: Incs)
 			{
 				GString s;
 				if (*i == '`')
-					s.Printf(" \\\n\t\t%s", i);
+					s.Printf(" \\\n\t\t%s", i.Get());
 				else
 					s.Printf(" \\\n\t\t-I%s", ToUnixPath(i));
 				sIncludes[Cfg] += s;
@@ -789,11 +799,16 @@ public:
 
 								auto Mk = Dep->GetMakefile(Platform);
 								// RenameMakefileForPlatform(Mk, Platform);
-
-								char *DepMakefile = strrchr(Mk, DIR_CHAR);
-								if (DepMakefile)
+								if (Mk)
 								{
-									Rules.Print(" -f %s", DepMakefile + 1);
+									char *DepMakefile = strrchr(Mk, DIR_CHAR);
+									if (DepMakefile)
+										Rules.Print(" -f %s", DepMakefile + 1);
+								}
+								else
+								{
+									Mk = Dep->GetMakefile(Platform);
+									OnError("%s:%i - No makefile for '%s'\n", _FL, Dep->GetFullPath());
 								}
 
 								Rules.Print("\n\n");
@@ -1100,9 +1115,11 @@ public:
 
 				// Output VPATH
 				m.Print("VPATH=%%.cpp \\\n");
+				IncPaths.Sort();
 				for (int i=0; i<IncPaths.Length() && !IsCancelled(); i++)
 				{
-					char *p = IncPaths[i];
+					GString p = IncPaths[i];
+					Proj->CheckExists(p);
 					if (p && !strchr(p, '`'))
 					{
 						if (!LgiIsRelativePath(p))
@@ -1138,7 +1155,7 @@ public:
 				printf("%s:%i - PostEvent(M_START_BUILD) failed.\n", _FL);
 		}
 		
-		return true;
+		return HasError;
 	}
 
 	void OnAfterMain()
@@ -2660,7 +2677,7 @@ GString IdeProject::GetExecutable(IdePlatform Platform)
 	return GString();
 }
 
-char *IdeProject::GetFileName()
+const char *IdeProject::GetFileName()
 {
 	return d->FileName;
 }

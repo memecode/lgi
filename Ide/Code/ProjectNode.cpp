@@ -137,35 +137,25 @@ ProjectNode::ProjectNode(IdeProject *p) : IdeCommon(p)
 	NodeId = 0;
 	Type = NodeNone;
 	ChildCount = -1;
-	File = 0;
-	Name = 0;
 	IgnoreExpand = false;
 	Dep = 0;
-	LocalCache = 0;
 	Tag = NewStr("Node");
 }
 
 ProjectNode::~ProjectNode()
 {
-	if (File && Project)
-		Project->OnNode(File, this, false);
+	if (sFile && Project)
+		Project->OnNode(sFile, this, false);
 
 	if (Dep)
-	{
 		DeleteObj(Dep);
-	}
-
-	DeleteArray(File);
-	DeleteArray(Name);
-	DeleteArray(LocalCache);
 }
 
 void ProjectNode::OpenLocalCache(IdeDoc *&Doc)
 {
-	printf("OpenLocalCache %p\n", LocalCache);
-	if (LocalCache)
+	if (sLocalCache)
 	{
-		Doc = Project->GetApp()->OpenFile(LocalCache, this);
+		Doc = Project->GetApp()->OpenFile(sLocalCache, this);
 		if (Doc)
 		{
 			Doc->SetProject(Project);
@@ -178,7 +168,7 @@ void ProjectNode::OpenLocalCache(IdeDoc *&Doc)
 		}
 		else
 		{
-			LgiMsg(Tree, "Couldn't open file '%s'", AppName, MB_OK, LocalCache);
+			LgiMsg(Tree, "Couldn't open file '%s'", AppName, MB_OK, sLocalCache.Get());
 		}
 	}
 }
@@ -205,9 +195,7 @@ void ProjectNode::OnCmdComplete(FtpCmd *Cmd)
 	{
 		if (Cmd->Cmd == FtpRead)
 		{
-			DeleteArray(LocalCache);
-			LocalCache = NewStr(Cmd->File);
-
+			sLocalCache = Cmd->File;
 			IdeDoc *Doc;
 			OpenLocalCache(Doc);
 		}
@@ -223,9 +211,9 @@ int ProjectNode::GetPlatforms()
 	return Platforms;
 }
 
-char *ProjectNode::GetLocalCache()
+const char *ProjectNode::GetLocalCache()
 {
-	return LocalCache;
+	return sLocalCache;
 }
 
 bool ProjectNode::Load(GDocView *Edit, NodeView *Callback)
@@ -234,11 +222,10 @@ bool ProjectNode::Load(GDocView *Edit, NodeView *Callback)
 
 	if (IsWeb())
 	{
-		if (LocalCache)
-		{
-			Status = Edit->Open(LocalCache);
-		}
-		else LgiAssert(!"No LocalCache");
+		if (sLocalCache)
+			Status = Edit->Open(sLocalCache);
+		else
+			LgiAssert(!"No LocalCache");
 	}
 	else
 	{
@@ -255,9 +242,9 @@ bool ProjectNode::Save(GDocView *Edit, NodeView *Callback)
 
 	if (IsWeb())
 	{
-		if (LocalCache)
+		if (sLocalCache)
 		{
-			if (Edit->Save(LocalCache))
+			if (Edit->Save(sLocalCache))
 			{
 				FtpThread *t = GetFtpThread();
 				if (t)
@@ -267,8 +254,8 @@ bool ProjectNode::Save(GDocView *Edit, NodeView *Callback)
 					{
 						c->View = Callback;
 						c->Watch = Project->GetApp()->GetFtpLog();
-						c->Uri = NewStr(File);
-						c->File = NewStr(LocalCache);
+						c->Uri = NewStr(sFile);
+						c->File = NewStr(sLocalCache);
 						t->Post(c);
 					}
 				}
@@ -280,6 +267,8 @@ bool ProjectNode::Save(GDocView *Edit, NodeView *Callback)
 	else
 	{
 		auto f = GetFullPath();
+		if (Project)
+			Project->CheckExists(f);
 		Status = Edit->Save(f, Charset);
 
 		if (Callback)
@@ -307,7 +296,7 @@ bool ProjectNode::IsWeb()
 	(
 		Www ||
 		Ftp ||
-		(File && strnicmp(File, "ftp://", 6) == 0)
+		(sFile && strnicmp(sFile, "ftp://", 6) == 0)
 	)
 		return true;
 
@@ -316,7 +305,7 @@ bool ProjectNode::IsWeb()
 
 bool ProjectNode::HasNode(ProjectNode *Node)
 {
-	printf("Has %s %s %p\n", File, Name, Dep);
+	printf("Has %s %s %p\n", sFile.Get(), sName.Get(), Dep);
 
 	if (this == Node)
 		return true;
@@ -401,9 +390,9 @@ bool ProjectNode::OnBeginDrag(GMouse &m)
 	return Drag(Tree, m.Event, DROPEFFECT_MOVE);
 }
 
-char *ProjectNode::GetFileName()
+const char *ProjectNode::GetFileName()
 {
-	return File;
+	return sFile;
 }
 
 void ProjectNode::AutoDetectType()
@@ -421,10 +410,10 @@ void ProjectNode::AutoDetectType()
 		
 	if (!Type)
 	{
-		char *Ext = LgiGetExtension(File);
+		char *Ext = LgiGetExtension(sFile);
 
-		if (stristr(File, "makefile") ||
-			!stricmp(File, "CMakeLists.txt"))
+		if (stristr(sFile, "makefile") ||
+			!stricmp(sFile, "CMakeLists.txt"))
 		{
 			Type = NodeMakeFile;
 		}
@@ -467,16 +456,15 @@ void ProjectNode::SetFileName(const char *f)
 {
 	GString Rel;
 
-	if (File && Project)
-		Project->OnNode(File, this, false);
+	if (sFile && Project)
+		Project->OnNode(sFile, this, false);
 
-	DeleteArray(File);
 	if (Project->RelativePath(Rel, f))
-		File = NewStr(Rel);
+		sFile = Rel;
 	else
-		File = NewStr(f);
+		sFile = f;
 	
-	if (File)
+	if (sFile)
 	{
 		auto FullPath = GetFullPath();
 
@@ -491,13 +479,12 @@ void ProjectNode::SetFileName(const char *f)
 
 char *ProjectNode::GetName()
 {
-	return Name;
+	return sName;
 }
 
 void ProjectNode::SetName(const char *f)
 {
-	DeleteArray(Name);
-	Name = NewStr(f);
+	sName = f;
 	Type = NodeDir;
 }
 
@@ -515,7 +502,7 @@ int ProjectNode::GetImage(int f)
 {
 	if (IsWeb())
 	{
-		return File ? ICON_SOURCE : ICON_WEB;
+		return sFile ? ICON_SOURCE : ICON_WEB;
 	}
 
 	switch (Type)
@@ -539,13 +526,13 @@ int ProjectNode::GetImage(int f)
 
 const char *ProjectNode::GetText(int c)
 {
-	if (File)
+	if (sFile)
 	{
 		char *d = 0;
 
 		if (IsWeb())
 		{
-			d = File ? strrchr(File, '/') : 0;
+			d = sFile ? strrchr(sFile, '/') : 0;
 		}
 		else
 		{
@@ -555,16 +542,16 @@ const char *ProjectNode::GetText(int c)
 			char Other = '\\';
 			#endif
 			char *s;
-			while ((s = strchr(File, Other)))
+			while ((s = strchr(sFile, Other)))
 			{
 				*s = DIR_CHAR;
 			}
 			
-			d = strrchr(File, DIR_CHAR);
+			d = strrchr(sFile, DIR_CHAR);
 		}
 		
 		if (d) return d + 1;
-		else return File;
+		else return sFile;
 	}
 
 	#if DEBUG_SHOW_NODE_COUNTS
@@ -577,7 +564,7 @@ const char *ProjectNode::GetText(int c)
 	}
 	#endif
 
-	return Name ? Name : (char*)Untitled;
+	return sName ? sName.Get() : Untitled;
 }
 
 void ProjectNode::OnExpand(bool b)
@@ -590,17 +577,17 @@ void ProjectNode::OnExpand(bool b)
 
 bool ProjectNode::Serialize(bool Write)
 {
-	if (!Write && File)
-		Project->OnNode(File, this, false);
+	if (!Write && sFile)
+		Project->OnNode(sFile, this, false);
 
-	SerializeAttr("File", File);
-	SerializeAttr("Name", Name);
+	SerializeAttr("File", sFile);
+	SerializeAttr("Name", sName);
 	SerializeAttr("Charset", Charset);
 	SerializeAttr("Type", (int&)Type);
 	SerializeAttr("Platforms", (int&)Platforms);
 	
-	if (!Write && File)
-		Project->OnNode(File, this, true);
+	if (!Write && sFile)
+		Project->OnNode(sFile, this, true);
 
 	if (Type == NodeNone)
 	{
@@ -776,21 +763,21 @@ GString ProjectNode::GetFullPath()
 {
 	GString FullPath;
 	
-	if (LgiIsRelativePath(File))
+	if (LgiIsRelativePath(sFile))
 	{
 		// Relative path
 		GAutoString Path = Project->GetBasePath();
 		if (Path)
 		{
 			char p[MAX_PATH];
-			LgiMakePath(p, sizeof(p), Path, File);
+			LgiMakePath(p, sizeof(p), Path, sFile);
 			FullPath = p;
 		}
 	}
 	else
 	{
 		// Absolute path
-		FullPath = File;
+		FullPath = sFile;
 	}
 	
 	return FullPath;
@@ -812,9 +799,9 @@ IdeDoc *ProjectNode::Open()
 
 		if (IsWeb())
 		{
-			if (File)
+			if (sFile)
 			{
-				if (LocalCache)
+				if (sLocalCache)
 				{
 					OpenLocalCache(Doc);
 				}
@@ -827,7 +814,7 @@ IdeDoc *ProjectNode::Open()
 						if (c)
 						{
 							c->Watch = Project->GetApp()->GetFtpLog();
-							c->Uri = NewStr(File);
+							c->Uri = NewStr(sFile);
 							t->Post(c);
 						}
 					}
@@ -883,7 +870,7 @@ IdeDoc *ProjectNode::Open()
 				default:
 				{
 					auto FullPath = GetFullPath();
-					if (FullPath)
+					if (Project->CheckExists(FullPath))
 					{
 						Doc = Project->GetApp()->FindOpenFile(FullPath);
 						if (!Doc)
@@ -1000,8 +987,8 @@ void ProjectNode::OnMouseClick(GMouse &m)
 		Sub.AppendItem("Remove", IDM_DELETE, true);
 		Sub.AppendItem("Sort", IDM_SORT_CHILDREN, true);
 		Sub.AppendSeparator();
-		Sub.AppendItem("Browse Folder", IDM_BROWSE_FOLDER, ValidStr(File));
-		Sub.AppendItem("Open Terminal", IDM_OPEN_TERM, ValidStr(File));
+		Sub.AppendItem("Browse Folder", IDM_BROWSE_FOLDER, ValidStr(sFile));
+		Sub.AppendItem("Open Terminal", IDM_OPEN_TERM, ValidStr(sFile));
 		Sub.AppendItem("Properties", IDM_PROPERTIES, true);
 
 		m.ToScreen();
@@ -1262,7 +1249,7 @@ void ProjectNode::OnMouseClick(GMouse &m)
 					Type != NodeDir
 				)
 				&&
-				ValidStr(File)
+				ValidStr(sFile)
 			)
 			{
 				Open();
@@ -1277,30 +1264,30 @@ void ProjectNode::OnMouseClick(GMouse &m)
 
 ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 {
-	if (File)
+	if (sFile)
 	{
 		bool Match = false;
 
 		if (IsWeb())
 		{
-			Match = File ? stricmp(In, File) == 0 : false;
+			Match = sFile ? stricmp(In, sFile) == 0 : false;
 		}
 		else if (strchr(In, DIR_CHAR))
 		{
 			// Match partial or full path
 			char Full[MAX_PATH] = "";
 			
-			if (LgiIsRelativePath(File))
+			if (LgiIsRelativePath(sFile))
 			{
 				GAutoString Base = Project->GetBasePath();
 				if (Base)
-					LgiMakePath(Full, sizeof(Full), Base, File);
+					LgiMakePath(Full, sizeof(Full), Base, sFile);
 				else
-					LgiTrace("%s,%i - Couldn't get full IDoc path.\n", __FILE__, __LINE__);
+					LgiTrace("%s,%i - Couldn't get full IDoc path.\n", _FL);
 			}
 			else
 			{
-				strcpy_s(Full, sizeof(Full), File);
+				strcpy_s(Full, sizeof(Full), sFile);
 			}
 			
 			GString MyPath(Full);
@@ -1323,7 +1310,7 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 		else
 		{
 			// Match file name only
-			char *Dir = strrchr(File, DIR_CHAR);
+			char *Dir = strrchr(sFile, DIR_CHAR);
 			if (Dir)
 			{
 				Match = stricmp(Dir + 1, In) == 0;
@@ -1334,19 +1321,19 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 		{
 			if (Full)
 			{
-				if (File[0] == '.')
+				if (sFile(0) == '.')
 				{
 					GAutoString Base = Project->GetBasePath();
 					if (Base)
 					{
 						char f[256];
-						LgiMakePath(f, sizeof(f), Base, File);
+						LgiMakePath(f, sizeof(f), Base, sFile);
 						*Full = NewStr(f);
 					}
 				}
 				else
 				{
-					*Full = NewStr(File);
+					*Full = NewStr(sFile);
 				}
 			}
 			
@@ -1373,9 +1360,9 @@ void ProjectNode::OnProperties()
 {
 	if (IsWeb())
 	{
-		bool IsFolder = File == 0;
+		bool IsFolder = sFile.IsEmpty();
 
-		WebFldDlg Dlg(Tree, Name, IsFolder ? GetAttr(OPT_Ftp) : File, GetAttr(OPT_Www));
+		WebFldDlg Dlg(Tree, sName, IsFolder ? GetAttr(OPT_Ftp) : sFile, GetAttr(OPT_Www));
 		if (Dlg.DoModal())
 		{
 			if (IsFolder)
@@ -1386,8 +1373,7 @@ void ProjectNode::OnProperties()
 			}
 			else
 			{
-				DeleteArray(File);
-				File = NewStr(Dlg.Ftp);
+				sFile = Dlg.Ftp;
 			}
 
 			Project->SetDirty();

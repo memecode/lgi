@@ -28,9 +28,9 @@ class ProjectNode : public IdeCommon, public GDragDropSource, public FtpCallback
 	NodeType Type;
 	int NodeId;
 	int Platforms;
-	char *File;
-	char *LocalCache;
-	char *Name;
+	GString sFile;
+	GString sLocalCache;
+	GString sName;
 	GString Charset;
 	IdeProject *Dep;
 	bool IgnoreExpand;
@@ -57,7 +57,7 @@ public:
 	bool IsWeb() override;
 	IdeProject *GetDep();
 	IdeProject *GetProject() override;
-	char *GetFileName() override;
+	const char *GetFileName() override;
 	void SetFileName(const char *f);
 	char *GetName();
 	void SetName(const char *f);
@@ -69,7 +69,7 @@ public:
 	ProjectNode *FindFile(const char *In, char **Full);
 	/// \sa Some combination of PLATFORM_WIN32, PLATFORM_LINUX, PLATFORM_MAC, PLATFORM_HAIKU or PLATFORM_ALL
 	int GetPlatforms() override;
-	char *GetLocalCache() override;
+	const char *GetLocalCache() override;
 	void AutoDetectType();
 	char *GetCharset() override { return Charset; }
 	

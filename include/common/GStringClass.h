@@ -449,14 +449,14 @@ public:
 	}
 	
 	/// Cast to C string operator
-	operator char *()
-	{
-		return Str ? Str->Str : NULL;
-	}
-
 	operator const char *() const
 	{
 		return Str ? Str->Str : NULL;
+	}
+	
+	int operator -(const GString &s)
+	{
+		return Stricmp(Get(), s.Get());
 	}
 
 	/// Concatenation operator

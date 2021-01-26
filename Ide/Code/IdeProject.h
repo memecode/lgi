@@ -132,7 +132,7 @@ public:
 	bool IsWeb() { return false; }
 	int GetPlatforms();
 
-	char *GetFileName(); // Can be a relative path
+	const char *GetFileName(); // Can be a relative path
 	GAutoString GetFullPath(); // Always a complete path
 	GAutoString GetBasePath(); // A non-relative path to the folder containing the project
 

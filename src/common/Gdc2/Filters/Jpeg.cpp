@@ -26,22 +26,26 @@
 #include "GLibraryUtils.h"
 
 #if LIBJPEG_SHARED
-#define JPEGLIB d->
-const char sLibrary[] =
-	"libjpeg9a"
-	#if defined(WINDOWS)
-		"_"
-		_MSC_VER_STR
-		#ifdef LGI_64BIT
-		"x64"
+	#define JPEGLIB d->
+	const char sLibrary[] =
+		#if defined(LINUX)
+			"libjpeg"
 		#else
-		"x32"
+			"libjpeg9a"
+			#if defined(WINDOWS)
+				"_"
+				_MSC_VER_STR
+				#ifdef LGI_64BIT
+				"x64"
+				#else
+				"x32"
+				#endif
+				#ifdef _DEBUG
+				"d"
+				#endif
+			#endif
 		#endif
-		#ifdef _DEBUG
-		"d"
-		#endif
-	#endif
-	;
+		;
 #else
 #define JPEGLIB
 #endif
@@ -564,7 +568,9 @@ GFilter::IoStatus GdcJpeg::ReadImage(GSurface *pDC, GStream *In)
 
 	if (setjmp(jerr.setjmp_buffer))
 	{
-		const char *msg = cinfo.err->jpeg_message_table[cinfo.err->msg_code];
+		char msg[JMSG_LENGTH_MAX] = "format_message failed";
+		(*cinfo.err->format_message)((j_common_ptr)&cinfo, msg);
+		// const char *msg = e->jpeg_message_table[cinfo.err->msg_code];
 		if (Props)
 		{
 			Props->SetValue(LGI_FILTER_ERROR, v = msg);

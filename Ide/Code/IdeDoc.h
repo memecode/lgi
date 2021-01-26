@@ -23,7 +23,7 @@ public:
 		
 	void SetProject(IdeProject *p);	
 	IdeProject *GetProject();
-	char *GetFileName();
+	const char *GetFileName();
 	void SetFileName(const char *f, bool Write);
 	void Focus(bool f) override;
 	bool SetClean();
