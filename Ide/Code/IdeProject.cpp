@@ -1274,7 +1274,7 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, bool rele
 	if (ValidStr(Cmds))
 		PostBuild = Cmds.SplitDelimit("\r\n");
 
-	char *Ext = LgiGetExtension(Makefile);
+	auto Ext = LgiGetExtension(Makefile);
 	if (Ext && !_stricmp(Ext, "py"))
 		Compiler = PythonScript;
 	else if (Ext && !_stricmp(Ext, "sln"))
@@ -1283,7 +1283,7 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, bool rele
 		Compiler = Xcode;
 	else
 	{
-		GAutoString Comp(NewStr(Proj->GetSettings()->GetStr(ProjCompiler)));
+		auto Comp = Proj->GetSettings()->GetStr(ProjCompiler);
 		if (Comp)
 		{
 			// Use the specified compiler...
@@ -2417,43 +2417,41 @@ GDebugContext *IdeProject::Execute(ExeAction Act)
 bool IdeProject::IsMakefileUpToDate()
 {
 	List<IdeProject> Proj;
-	if (GetChildProjects(Proj))
+	GetChildProjects(Proj);
+
+	Proj.Insert(this);
+	for (auto p: Proj)
 	{
-		Proj.Insert(this);
-		
-		for (auto p: Proj)
+		// Is the project file modified after the makefile?
+		auto Proj = p->GetFullPath();
+		uint64 ProjModTime = 0, MakeModTime = 0;
+		GDirectory dir;
+		if (dir.First(Proj))
 		{
-			// Is the project file modified after the makefile?
-			auto Proj = p->GetFullPath();
-			uint64 ProjModTime = 0, MakeModTime = 0;
-			GDirectory dir;
-			if (dir.First(Proj))
-			{
-				ProjModTime = dir.GetLastWriteTime();
-				dir.Close();
-			}
+			ProjModTime = dir.GetLastWriteTime();
+			dir.Close();
+		}
 
-			auto m = p->GetMakefile(PlatformCurrent);
-			if (!m)
-			{		
-				d->App->GetBuildLog()->Print("Error: no makefile? (%s:%i)\n", _FL);
-				break;
-			}
+		auto m = p->GetMakefile(PlatformCurrent);
+		if (!m)
+		{		
+			d->App->GetBuildLog()->Print("Error: no makefile? (%s:%i)\n", _FL);
+			break;
+		}
 
-			if (dir.First(m))
-			{
-				MakeModTime = dir.GetLastWriteTime();
-				dir.Close();
-			}
+		if (dir.First(m))
+		{
+			MakeModTime = dir.GetLastWriteTime();
+			dir.Close();
+		}
 
-			// printf("Proj=%s - Timestamps " LGI_PrintfInt64 " - " LGI_PrintfInt64 "\n", Proj.Get(), ProjModTime, MakeModTime);
-			if (ProjModTime != 0 &&
-				MakeModTime != 0 &&
-				ProjModTime > MakeModTime)
-			{
-				// Need to rebuild the makefile...
-				return false;
-			}
+		// printf("Proj=%s - Timestamps " LGI_PrintfInt64 " - " LGI_PrintfInt64 "\n", Proj.Get(), ProjModTime, MakeModTime);
+		if (ProjModTime != 0 &&
+			MakeModTime != 0 &&
+			ProjModTime > MakeModTime)
+		{
+			// Need to rebuild the makefile...
+			return false;
 		}
 	}
 	

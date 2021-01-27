@@ -3626,18 +3626,16 @@ bool VcFolder::AddFile(const char *Path, bool AsBinary)
 	{
 		case VcCvs:
 		{
-			GString p = Path;
-			auto dir = strrchr(p, DIR_CHAR);
+			auto p = GString(Path).RSplit(DIR_CHAR, 1);
 			ParseParams *params = NULL;
-			if (dir)
+			if (p.Length() >= 2)
 			{
-				*dir++ = 0;
 				if ((params = new ParseParams))
-					params->AltInitPath = p;
+					params->AltInitPath = p[0];
 			}
 
 			GString a;
-			a.Printf("add%s \"%s\"", AsBinary ? " -kb" : "", dir ? dir : Path);
+			a.Printf("add%s \"%s\"", AsBinary ? " -kb" : "", p.Length() > 1 ? p.Last().Get() : Path);
 			return StartCmd(a, &VcFolder::ParseAddFile, params);
 			break;
 		}
