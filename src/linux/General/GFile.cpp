@@ -600,47 +600,50 @@ struct GVolumePriv
 			GFile f;
 			if (f.Open("/etc/fstab", O_READ))
 			{
-				int Len = f.GetSize();
-				GAutoString Buf(new char[Len+1]);
-				if (Buf)
+				auto Buf= f.Read();
+				f.Close();
+
+				auto Lines = Buf.SplitDelimit("\r\n");
+				for (auto ln : Lines)
 				{
-					f.Read(Buf, Len);
-					Buf[Len] = 0;
-					f.Close();
-
-					GToken L(Buf, "\r\n");
-					for (int l=0; l<L.Length(); l++)
+					auto M = ln.Strip().SplitDelimit(" \t");
+					if (M[0](0) != '#' && M.Length() > 2)
 					{
-						GToken M(L[l], " \t");
-						if (M.Length() > 2)
+						auto &Device = M[0];
+						auto &Mount = M[1];
+						auto &FileSys = M[2];
+						
+						if
+						(
+							(Device.Find("/dev/") == 0 || Mount.Find("/mnt/") == 0)
+							&&
+							Device.Lower().Find("/by-uuid/") < 0
+							&& 
+							Mount.Length() > 1
+							&&
+							!FileSys.Equals("swap")
+						)
 						{
-							char *Mount = M[1];
-							if (Mount &&
-								strnicmp(M[0], "/dev/", 5) == 0 &&
-								strlen(M[1]) > 1 &&
-								stricmp(M[2], "swap") != 0)
+							v = new GVolume(0);
+							if (v)
 							{
-								v = new GVolume(0);
-								if (v)
+								char *MountName = strrchr(Mount, '/');
+								v->d->_Name = (MountName ? MountName + 1 : Mount);
+								v->d->_Path = Mount;
+								v->d->_Type = VT_HARDDISK;
+
+								char *Device = M[0];
+								// char *FileSys = M[2];
+								if (stristr(Device, "fd"))
 								{
-									char *MountName = strrchr(Mount, '/');
-									v->d->_Name = (MountName ? MountName + 1 : Mount);
-									v->d->_Path = Mount;
-									v->d->_Type = VT_HARDDISK;
-
-									char *Device = M[0];
-									// char *FileSys = M[2];
-									if (stristr(Device, "fd"))
-									{
-										v->d->_Type = VT_FLOPPY;
-									}
-									else if (stristr(Device, "cdrom"))
-									{
-										v->d->_Type = VT_CDROM;
-									}
-
-									_Sub.Insert(v);
+									v->d->_Type = VT_FLOPPY;
 								}
+								else if (stristr(Device, "cdrom"))
+								{
+									v->d->_Type = VT_CDROM;
+								}
+
+								_Sub.Insert(v);
 							}
 						}
 					}
