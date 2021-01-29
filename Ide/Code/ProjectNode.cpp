@@ -1362,7 +1362,7 @@ void ProjectNode::OnProperties()
 	{
 		bool IsFolder = sFile.IsEmpty();
 
-		WebFldDlg Dlg(Tree, sName, IsFolder ? GetAttr(OPT_Ftp) : sFile, GetAttr(OPT_Www));
+		WebFldDlg Dlg(Tree, sName, IsFolder ? GetAttr(OPT_Ftp) : sFile.Get(), GetAttr(OPT_Www));
 		if (Dlg.DoModal())
 		{
 			if (IsFolder)

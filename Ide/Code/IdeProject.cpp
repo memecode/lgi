@@ -2239,8 +2239,11 @@ void IdeProject::Clean(bool All, bool Release)
 		d->Settings.GetStr(ProjMakefile))
 	{
 		auto m = GetMakefile(PlatformCurrent);
-		if (m)
+		if (m)		
+		{
+			CheckExists(m);
 			d->Thread.Reset(new BuildThread(this, m, true, Release, All, sizeof(ssize_t)*8));
+		}
 	}
 }
 
@@ -2551,6 +2554,7 @@ void IdeProject::Build(bool All, bool Release)
 	}
 
 	auto m = GetMakefile(PlatformCurrent);
+	CheckExists(m);
 	if (!m)
 	{		
 		d->App->GetBuildLog()->Print("Error: no makefile? (%s:%i)\n", _FL);

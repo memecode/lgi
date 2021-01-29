@@ -628,7 +628,7 @@ struct GVolumePriv
 							if (v)
 							{
 								char *MountName = strrchr(Mount, '/');
-								v->d->_Name = (MountName ? MountName + 1 : Mount);
+								v->d->_Name = (MountName ? MountName + 1 : Mount.Get());
 								v->d->_Path = Mount;
 								v->d->_Type = VT_HARDDISK;
 
