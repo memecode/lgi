@@ -2073,8 +2073,9 @@ bool IdeProject::OnNode(const char *Path, ProjectNode *Node, bool Add)
 	else
 		Status = d->Nodes.Delete(Path);
 	
-	if (Status)
-		d->App->OnNode(Path, Node, Add ? FindSymbolSystem::FileAdd : FindSymbolSystem::FileRemove);
+	GString p = Path;
+	if (Status && CheckExists(p))
+		d->App->OnNode(p, Node, Add ? FindSymbolSystem::FileAdd : FindSymbolSystem::FileRemove);
 
 	return Status;
 }

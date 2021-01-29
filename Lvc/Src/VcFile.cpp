@@ -94,7 +94,8 @@ void VcFile::Select(bool b)
 			if (!LoadDiff)
 			{
 				LoadDiff = true;
-				Owner->Diff(this);
+				if (Owner)
+					Owner->Diff(this);
 			}
 		}
 		else

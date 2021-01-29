@@ -864,6 +864,95 @@ public:
 	int OnNotify(GViewI *Ctrl, int Flags);
 };
 
+class VcDiffFile : public GTreeItem
+{
+	AppPriv *d;
+	GString File;
+	
+public:
+	VcDiffFile(AppPriv *priv, GString file) : d(priv), File(file)
+	{
+	}
+	
+	const char *GetText(int i = 0) override
+	{
+		return i ? NULL : File;
+	}
+	
+	void Select(bool s) override
+	{
+		GTreeItem::Select(s);
+		if (s)
+		{
+			d->Files->Empty();
+			d->Diff->Name(NULL);
+			
+			GFile in(File, O_READ);
+			GString s = in.Read();
+			if (!s)
+				return;
+			
+			GString::Array a = s.Replace("\r").Split("\n");
+			GString Diff;
+			VcFile *f = NULL;
+			bool InPreamble = false;
+			bool InDiff = false;
+			for (unsigned i=0; i<a.Length(); i++)
+			{
+				const char *Ln = a[i];
+				if (!_strnicmp(Ln, "Index:", 6))
+				{
+					if (f)
+					{
+						f->SetDiff(Diff);
+						f->Select(false);
+					}
+					Diff.Empty();
+					InDiff = false;
+					InPreamble = false;
+
+					GString Fn = a[i].Split(":", 1).Last().Strip();
+
+					f = d->FindFile(Fn);
+					if (!f)
+						f = new VcFile(d, NULL, NULL, false);
+
+					f->SetText(Fn.Replace("\\","/"), COL_FILENAME);
+					f->SetText("M", COL_STATE);
+					f->GetStatus();
+					d->Files->Insert(f);
+				}
+				else if (!_strnicmp(Ln, "------", 6))
+				{
+					InPreamble = !InPreamble;
+				}
+				else if (!_strnicmp(Ln, "======", 6))
+				{
+					InPreamble = false;
+					InDiff = true;
+				}
+				else if (InDiff)
+				{
+					if (!strncmp(Ln, "--- ", 4) ||
+						!strncmp(Ln, "+++ ", 4))
+					{
+					}
+					else
+					{
+						if (Diff) Diff += "\n";
+						Diff += a[i];
+					}
+				}
+			}
+			if (f && Diff)
+			{
+				f->SetDiff(Diff);
+				Diff.Empty();
+			}
+		}
+	}
+};
+
 class App : public GWindow, public AppPriv
 {
 	GAutoPtr<GImageList> ImgLst;
@@ -1082,6 +1171,16 @@ public:
 				OpenRemoteFolder();
 				break;
 			}
+			case IDM_OPEN_DIFF:
+			{
+				GFileSelect s;
+				s.Parent(this);
+				if (s.Open())
+				{
+					OpenDiff(s.Name());
+				}
+				break;
+			}
 			case IDM_OPTIONS:
 			{
 				OptionsDlg Dlg(this, Opts);
@@ -1222,6 +1321,11 @@ public:
 			return;
 
 		Tree->Insert(new VcFolder(this, dlg.Uri));
+	}
+	
+	void OpenDiff(const char *File)
+	{
+		Tree->Insert(new VcDiffFile(this, File));
 	}
 
 	int OnNotify(GViewI *c, int flag)

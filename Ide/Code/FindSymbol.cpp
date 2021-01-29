@@ -101,6 +101,7 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 	};
 
 	int hApp;
+	int MissingFiles;
 	GArray<GString::Array*> IncPaths;
 	
 	#if USE_HASH
@@ -119,6 +120,7 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 	{
 		Tasks = 0;
 		MsgTs = 0;
+		MissingFiles = 0;
 		DoingProgress = false;
 	}
 
@@ -163,6 +165,8 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 	
 	bool AddFile(GString Path, int Platforms)
 	{
+		// printf("AddFile %s\n", Path.Get());		
+		
 		// Already added?
 		#if USE_HASH
 		FileSyms *f = Files.Find(Path);
@@ -192,7 +196,10 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 		#endif
 
 		if (!FileExists(Path))
+		{
+			MissingFiles++;
 			return false;
+		}
 			
 		LgiAssert(!LgiIsRelativePath(Path));
 
@@ -276,7 +283,6 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 		if (IsCancelled())
 			return -1;
 		
-		//printf("Msg->Msg()=%i\n", Msg->Msg());
 		switch (Msg->Msg())
 		{
 			case M_FIND_SYM_REQUEST:
@@ -387,7 +393,6 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 			}
 			case M_FIND_SYM_FILE:
 			{
-				uint64 Now = LgiCurrentTime();
 				GAutoPtr<FindSymbolSystem::SymFileParams> Params((FindSymbolSystem::SymFileParams*)Msg->A());
 				if (Params)
 				{
@@ -401,25 +406,6 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 						else if (Params->Action == FindSymbolSystem::FileReparse)
 							ReparseFile(Params->File);
 					}
-				}
-
-				if (Now - MsgTs > MSG_TIME_MS)
-				{
-					MsgTs = Now;
-					DoingProgress = true;
-					uint32_t Remaining = (uint32_t) (Tasks - GetQueueSize());
-					if (Remaining > 0)
-						Log("FindSym: %i of %i (%.1f%%)\n", Remaining, Tasks, (double)Remaining * 100.0 / MAX(Tasks, 1));
-				}
-				else if (GetQueueSize() == 0 && MsgTs)
-				{
-					if (DoingProgress)
-					{
-						Log("FindSym: Done.\n");
-						DoingProgress = false;
-					}
-					MsgTs = 0;
-					Tasks = 0;
 				}
 
 				SYM_FILE_SENT--;
@@ -439,6 +425,32 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 			}
 		}
 		
+		auto Now = LgiCurrentTime();
+		// printf("Msg->Msg()=%i " LPrintfInt64 " %i\n", Msg->Msg(), MsgTs, (int)GetQueueSize());
+		if (Now - MsgTs > MSG_TIME_MS)
+		{
+			MsgTs = Now;
+			DoingProgress = true;
+			uint32_t Remaining = (uint32_t) (Tasks - GetQueueSize());
+			if (Remaining > 0)
+				Log("FindSym: %i of %i (%.1f%%)\n", Remaining, Tasks, (double)Remaining * 100.0 / MAX(Tasks, 1));
+		}
+		else if (GetQueueSize() == 0 && MsgTs)
+		{
+			if (DoingProgress)
+			{
+				Log("FindSym: Done.\n");
+				DoingProgress = false;
+			}
+			if (MissingFiles > 0)
+			{
+				Log("(%i files are missing)\n", MissingFiles);
+			}
+			
+			MsgTs = 0;
+			Tasks = 0;
+		}
+
 		return 0;
 	}	
 };

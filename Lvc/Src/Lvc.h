@@ -172,6 +172,7 @@ struct AppPriv
 	}
 
 	VersionCtrl DetectVcs(VcFolder *Fld);
+	class VcFile *FindFile(const char *Path);
 };
 
 class SshConnection : public LSsh, public GEventTargetThread

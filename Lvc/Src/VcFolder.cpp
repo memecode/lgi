@@ -1461,17 +1461,17 @@ void VcFolder::LinkParents()
 	}
 }
 
-VcFile *VcFolder::FindFile(const char *Path)
+VcFile *AppPriv::FindFile(const char *Path)
 {
 	if (!Path)
 		return NULL;
 
-	GArray<VcFile*> Files;
-	if (d->Files->GetAll(Files))
+	GArray<VcFile*> files;
+	if (Files->GetAll(files))
 	{
 		GString p = Path;
 		p = p.Replace(DIR_STR, "/");
-		for (auto f : Files)
+		for (auto f : files)
 		{
 			auto Fn = f->GetFileName();
 			if (p.Equals(Fn))
@@ -1480,6 +1480,11 @@ VcFile *VcFolder::FindFile(const char *Path)
 	}
 
 	return NULL;
+}
+
+VcFile *VcFolder::FindFile(const char *Path)
+{
+	return d->FindFile(Path);
 }
 
 void VcFolder::OnCmdError(GString Output, const char *Msg)
