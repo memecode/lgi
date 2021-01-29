@@ -373,7 +373,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 	LgiTrace("::ParseHtml Doc='%.10s'\n", Doc);
 	#endif
 
-	if (Depth >= 1024)
+	if (Depth >= 500)
 	{
 		// Bail
 		return Doc + strlen(Doc);
@@ -918,7 +918,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 												}
 												else LgiAssert(!"Alloc error");
 											}
-											else LgiAssert(!"What now?");											
+											// else LgiAssert(!"What now?");											
 											break;
 										}
 										default:

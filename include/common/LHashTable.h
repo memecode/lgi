@@ -305,6 +305,8 @@ protected:
 	}
 
 public:
+	constexpr static size_t Unlimited = 0;
+
 	/// Constructs the hash table
 	LHashTbl
 	(
@@ -379,6 +381,7 @@ public:
 		return *this;
 	}
 
+	/// Sets the maximum table size. Or LHashTbl::Unlimited (0) for unlimited.
 	void SetMaxSize(size_t m)
 	{
 		MaxSize = m;
@@ -405,7 +408,11 @@ public:
 			Pair *OldTable = Table;
 
 			Used = 0;
-			LgiAssert(NewSize <= MaxSize);
+			if (MaxSize && NewSize <= MaxSize)
+			{
+				LgiAssert(!"Max size reached.");
+				return false;
+			}
 			Size = NewSize;
 
 			Table = new Pair[Size];
@@ -475,8 +482,8 @@ public:
 		Value v
 	)
 	{
-		if (!Size)
-			SetSize(DefaultSize);
+		if (!Size && !SetSize(DefaultSize))
+			return false;
 
 		if (IsOk() &&
 			k == this->NullKey &&
@@ -515,7 +522,8 @@ public:
 
 			if (Percent() > HASH_TABLE_GROW_THRESHOLD)
 			{
-				SetSize(Size << 1);
+				if (!SetSize(Size << 1))
+					return false;
 			}
 			return true;
 		}
@@ -574,7 +582,8 @@ public:
 			if (!NoResize &&
 				Percent() < HASH_TABLE_SHRINK_THRESHOLD)
 			{
-				SetSize(Size >> 1);
+				if (!SetSize(Size >> 1))
+					return false;
 			}
 			
 			return true;
