@@ -558,7 +558,7 @@ public:
 	class StringsDef : public GArray<char*>
 	{
 	public:
-		StringsDef(char *init = 0)
+		StringsDef(const char *init = 0)
 		{
 			if (ValidStr(init))
 				*this = init;
