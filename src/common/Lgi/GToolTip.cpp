@@ -315,7 +315,10 @@ void GToolTip::DeleteTip(int Id)
 		ti.uId = Id;
 
 		SendMessage(_View, TTM_DELTOOL, 0, (LPARAM) &ti);
+		
+		LOG("DeleteTip: Tip %i.\n", Id);
 	}
+	else LOG("Error: No parent?\n");
 	
 	#endif
 }

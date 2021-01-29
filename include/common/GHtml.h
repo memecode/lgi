@@ -149,6 +149,7 @@ public:
 	bool GetVariant(const char *Name, GVariant &Value, char *Array = NULL);
 	bool DoFind();
 	LPointF GetDpiScale();
+	void SetVScroll(int64 v);
 
 	// Javascript handlers
 	GDom *getElementById(char *Id);

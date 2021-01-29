@@ -5291,6 +5291,12 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 	GRect rc(Flow->X(), Html->Y());
 	PadPx = Tools.GetPadding(rc);
 
+	if (TipId)
+	{
+		Html->Tip.DeleteTip(TipId);
+		TipId = 0;
+	}
+
 	switch (TagId)
 	{
 		default:
@@ -7356,6 +7362,9 @@ int GHtml::OnNotify(GViewI *c, int f)
 		{
 			int LineY = GetFont()->GetHeight();
 
+			if (Tag)
+				Tag->ClearToolTips();
+
 			if (f == GNotifyScrollBar_Create && VScroll && LineY > 0)
 			{
 				int y = Y();
@@ -7919,7 +7928,7 @@ bool GHtml::OnFind(GFindReplaceCommon *Params)
 						int y = s->AbsY();
 						int LineY = GetFont()->GetHeight();
 						int Val = y / LineY;
-						VScroll->Value(Val);
+						SetVScroll(Val);
 					}
 					
 					Invalidate();
@@ -8033,11 +8042,8 @@ bool GHtml::OnKey(GKey &k)
 			}
 		}
 
-		if (Dy && VScroll)
-		{
-			VScroll->Value(VScroll->Value() + Dy);
-			Invalidate();
-		}
+		if (Dy)
+			SetVScroll(VScroll->Value() + Dy);
 	}
 
 	return Status;
@@ -8479,14 +8485,21 @@ GTag *GHtml::GetTagByPos(int x, int y, ssize_t *Index, LPoint *LocalCoords, bool
 	return Status;
 }
 
+void GHtml::SetVScroll(int64 v)
+{
+	if (!VScroll)
+		return;
+	
+	if (Tag)
+		Tag->ClearToolTips();
+
+	VScroll->Value(v);
+	Invalidate();
+}
+
 bool GHtml::OnMouseWheel(double Lines)
 {
-	if (VScroll)
-	{
-		VScroll->Value(VScroll->Value() + (int)Lines);
-		Invalidate();
-	}
-	
+	SetVScroll(VScroll->Value() + (int64)Lines);
 	return true;
 }
 
@@ -8514,6 +8527,19 @@ LgiCursor GHtml::GetCursor(int x, int y)
 	
 	return LCUR_Normal;
 }
+
+void GTag::ClearToolTips()
+{
+	if (TipId)
+	{
+		Html->Tip.DeleteTip(TipId);
+		TipId = 0;
+	}
+
+	for (auto c: Children)
+		ToTag(c)->ClearToolTips();
+}
+
 
 void GHtml::OnMouseMove(GMouse &m)
 {
@@ -8544,7 +8570,7 @@ void GHtml::OnMouseMove(GMouse &m)
 		r.Offset(0, -Offset);
 		if (!HitTag->TipId)
 			HitTag->TipId = Tip.NewTip(Uri, r);
-		// LgiTrace("NewTip: %s @ %s, ID=%i\n", Uri.Get(), r.GetStr(), HitTag->TipId);
+		LgiTrace("NewTip: %s @ %s, ID=%i\n", Uri.Get(), r.GetStr(), HitTag->TipId);
 	}
 
 	if (IsCapturing() &&
@@ -8642,10 +8668,7 @@ void GHtml::OnPulse()
 			}
 			
 			if (Lines)
-			{
-				VScroll->Value(VScroll->Value() +  Lines);
-				Invalidate();
-			}
+				SetVScroll(VScroll->Value() +  Lines);
 		}
 	}
 }
@@ -8879,7 +8902,7 @@ bool GHtml::GotoAnchor(char *Name)
 				int LineY = GetFont()->GetHeight();
 				int Ay = a->AbsY();
 				int Scr = Ay / LineY;
-				VScroll->Value(Scr);
+				SetVScroll(Scr);
 				VScroll->SendNotify();
 			}
 			else

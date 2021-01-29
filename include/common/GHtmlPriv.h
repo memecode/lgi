@@ -332,6 +332,7 @@ public:
 	void LoadImage(const char *Uri); // Load just this URI
 	void LoadImages(); // Recursive load all image URI's
 	void ImageLoaded(char *uri, GSurface *img, int &Used);
+	void ClearToolTips();
 
 	// Table stuff
 	struct TblCell
