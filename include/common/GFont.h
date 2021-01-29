@@ -284,7 +284,7 @@ public:
 	#endif
 
 	/// Gets the type face name
-	char *GetFace();
+	const char *GetFace();
 	
 	/// Sets the type face name
 	void SetFace(const char *Face);

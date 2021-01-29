@@ -634,7 +634,10 @@ public:
 		{
 			auto B = (const Type*)b;
 			auto A = (const Type*)a;
-			return *B - *A;
+			auto r = *B - *A;
+			if (r > 0)
+				return 1;
+			return r < 0 ? -1 : 0;
 		});
 	}
 

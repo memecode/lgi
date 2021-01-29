@@ -449,7 +449,7 @@ public:
 	}
 	
 	/// Cast to C string operator
-	operator const char *() const
+	operator char *() const
 	{
 		return Str ? Str->Str : NULL;
 	}
@@ -861,7 +861,7 @@ public:
 		if (Length() > 0)
 		{
 			s = Str->Str;
-			for (char *a = s, *b = s.Get() + s.Length() - 1; a < b; a++, b--)
+			for (auto *a = s.Get(), *b = s.Get() + s.Length() - 1; a < b; a++, b--)
 			{
 				char t = *a;
 				*a = *b;

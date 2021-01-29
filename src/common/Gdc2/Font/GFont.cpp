@@ -1457,7 +1457,7 @@ GFontType::~GFontType()
 {
 }
 
-char *GFontType::GetFace()
+const char *GFontType::GetFace()
 {
 	#ifdef WINNATIVE
 	Buf = Info.lfFaceName;
