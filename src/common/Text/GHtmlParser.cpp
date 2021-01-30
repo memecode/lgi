@@ -913,7 +913,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 													{
 														OpenTags.Add(NewRow);
 														NewRow->Attach(Elem);
-														LgiTrace("Inserted new TAG_TR: %p\n", NewRow);
+														// LgiTrace("Inserted new TAG_TR: %p\n", NewRow);
 													}
 												}
 												else LgiAssert(!"Alloc error");

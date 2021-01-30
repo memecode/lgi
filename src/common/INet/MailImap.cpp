@@ -3008,16 +3008,12 @@ bool MailIMap::SetFlagsByUid(GArray<uint32_t> &Uids, const char *Flags)
 			p.Print("1:*");
 		p.Print(" FLAGS (%s)\r\n", Flags?Flags:"");
 
-		char *Buffer = p.NewStr();
-		if (Buffer)
+		auto Buffer = p.NewGStr();
+		if (Buffer && WriteBuf(false, Buffer))
 		{
-			if (WriteBuf(false, Buffer))
-			{
-				ClearDialog();
-				Status = ReadResponse(Cmd);
-				CommandFinished();
-			}
-			DeleteArray(Buffer);
+			ClearDialog();
+			Status = ReadResponse(Cmd);
+			CommandFinished();
 		}
 
 		Unlock();

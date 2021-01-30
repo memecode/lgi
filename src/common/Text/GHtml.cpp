@@ -8042,7 +8042,7 @@ bool GHtml::OnKey(GKey &k)
 			}
 		}
 
-		if (Dy)
+		if (Dy && VScroll)
 			SetVScroll(VScroll->Value() + Dy);
 	}
 
@@ -8499,7 +8499,8 @@ void GHtml::SetVScroll(int64 v)
 
 bool GHtml::OnMouseWheel(double Lines)
 {
-	SetVScroll(VScroll->Value() + (int64)Lines);
+	if (VScroll)
+		SetVScroll(VScroll->Value() + (int64)Lines);
 	return true;
 }
 
@@ -8667,7 +8668,7 @@ void GHtml::OnPulse()
 				Lines = (m.y - c.y2 + Fy - 1) / Fy;
 			}
 			
-			if (Lines)
+			if (Lines && VScroll)
 				SetVScroll(VScroll->Value() +  Lines);
 		}
 	}

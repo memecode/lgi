@@ -408,7 +408,7 @@ public:
 			Pair *OldTable = Table;
 
 			Used = 0;
-			if (MaxSize && NewSize <= MaxSize)
+			if (MaxSize && NewSize > MaxSize)
 			{
 				LgiAssert(!"Max size reached.");
 				return false;
