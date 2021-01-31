@@ -102,6 +102,9 @@ char *GClipBoard::Text()
 	
 	if (d->c)
 	{
+		#if DEBUG_CLIPBOARD
+		printf("gtk_clipboard_wait_for_text starting...\n");
+		#endif
 		gchar *txt = gtk_clipboard_wait_for_text(d->c);
 		#if DEBUG_CLIPBOARD
 		printf("gtk_clipboard_wait_for_text(%i)='%s'\n", d->c, txt);
