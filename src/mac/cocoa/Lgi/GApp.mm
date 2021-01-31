@@ -13,9 +13,6 @@
 #include "GArray.h"
 #include "GToken.h"
 #include "LThread.h"
-#include "GXmlTree.h"
-#include "GSymLookup.h"
-#include "GFontCache.h"
 
 #include <sys/poll.h>
 #include <sys/types.h>
@@ -25,6 +22,7 @@
 
 #import "LCocoaView.h"
 #include "GEventTargetThread.h"
+#include "GAppPriv.h"
 
 extern int hndstate(int hnd);
 
@@ -201,8 +199,6 @@ void GMessage::Set(int msg, Param A, Param B)
 }
 
 ////////////////////////////////////////////////////////////////
-typedef GArray<GAppInfo*> AppArray;
-
 void OnSigPipe(int i)
 {
 }
@@ -310,55 +306,7 @@ void OnCrash(int i)
 	exit(-1);
 }
 
-class GAppPrivate
-{
-public:
-	GApp *App;
-	OsApp NsApp;
-	int RunDepth;
-
-	// Common
-	GXmlTag *Config;
-	GFileSystem *FileSystem;
-	GdcDevice *GdcSystem;
-	OsAppArguments Args;
-	GLibrary *SkinLib;
-	LHashTbl<StrKey<char,false>,AppArray*> MimeToApp;
-	OsThread GuiThread;
-	OsThreadId GuiThreadId;
-	GSymLookup SymLookup;
-	GAutoString Mime;
-	GAutoString Name;
-	GAutoString UrlArg;
-	
-	/// Any fonts needed for styling the elements
-	GAutoPtr<GFontCache> FontCache;
-	
-	GAppPrivate(GApp *app) : App(app)
-	{
-		NsApp = NULL;
-		RunDepth = 0;
-		FileSystem = 0;
-		GdcSystem = 0;
-		Config = 0;
-		SkinLib = 0;
-		GuiThread = LgiGetCurrentThread();
-		GuiThreadId = GetCurrentThreadId();
-	}
-	
-	~GAppPrivate()
-	{
-		DeleteObj(SkinLib);
-		
-		for (auto p : MimeToApp)
-		{
-			p.value->DeleteObjects();
-			DeleteObj(p.value);
-		}
-	}
-};
-
-/////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 @implementation LNsApplication
 
 - (id)init
@@ -402,8 +350,8 @@ public:
 - (void)onUrl:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)reply
 {
 	GString s = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
-	if (self.d && self.d->App)
-    	self.d->App->OnUrl(s);
+	if (self.d && self.d->Owner)
+    	self.d->Owner->OnUrl(s);
 }
 
 @end
@@ -522,7 +470,6 @@ GApp::~GApp()
 	DeleteObj(MouseHook);
 	DeleteObj(d->FileSystem);
 	DeleteObj(d->GdcSystem);
-	DeleteObj(d->Config);
 	DeleteObj(GFontSystem::Me);
 	DeleteObj(d);
 	TheApp = 0;
@@ -777,63 +724,6 @@ void GApp::OnReceiveFiles(GArray<const char*> &Files)
 {
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);
-}
-
-GXmlTag *GApp::GetConfig(const char *Tag)
-{
-	if (IsOk() && !d->Config)
-	{
-		char File[] = "lgi.conf";
-		char Path[MAX_PATH];
-		LgiMakePath(Path, sizeof(Path), LGetExePath(), File);
-		if (FileExists(Path))
-		{
-			d->Config = new GXmlTag("Config");
-			if (d->Config)
-			{
-				GFile f;
-				if (f.Open(Path, O_READ))
-				{
-					GXmlTree t;
-					t.Read(d->Config, &f, 0);
-				}
-			}
-		}
-		
-		if (!d->Config)
-		{
-			d->Config = new GXmlTag("Options");
-		}
-	}
-	
-	if (Tag && d->Config)
-	{
-		return d->Config->GetChildTag(Tag);
-	}
-	
-	return 0;
-}
-
-void GApp::SetConfig(GXmlTag *Tag)
-{
-	if (IsOk() && Tag)
-	{
-		GXmlTag *Old = GetConfig(Tag->GetTag());
-		if (Old)
-		{
-			Old->RemoveTag();
-			DeleteObj(Old);
-		}
-		
-		if (!d->Config)
-		{
-			GetConfig(0);
-		}
-		if (d->Config)
-		{
-			d->Config->InsertTag(Tag);
-		}
-	}
 }
 
 const char *GApp::GetArgumentAt(int n)
