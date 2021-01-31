@@ -8,19 +8,30 @@ class GRefCount
 	#else
 	int _Count;
 	#endif
+	bool _DebugTrace;
 
 public:
     #ifdef _DEBUG
     int _GetCount() { return _Count; }
     #endif
 
-	GRefCount()
+	GRefCount(bool trace = false)
 	{
 		_Count = 0;
+		_DebugTrace = trace;
+		if (_DebugTrace)
+			LgiTrace("%s:%i - GRefCount.Construct=%i\n", _FL, _Count);
+	}
+
+	void SetDebug(bool b)
+	{
+		_DebugTrace = b;
 	}
 
 	virtual ~GRefCount()
 	{
+		if (_DebugTrace)
+			LgiTrace("%s:%i - ~GRefCount=%i\n", _FL, _Count);
 		LgiAssert(_Count == 0);
 	}
 
@@ -34,10 +45,14 @@ public:
 			#error "Impl me."
 			_Count++;
 		#endif
+		if (_DebugTrace)
+			LgiTrace("%s:%i - GRefCount.AddRef=%i\n", _FL, _Count);
 	}
 
 	virtual bool DecRef()
 	{
+		if (_DebugTrace)
+			LgiTrace("%s:%i - GRefCount.DecRef=%i\n", _FL, _Count);
 		LgiAssert(_Count > 0);
 		#if defined(_WIN32)
 			if (InterlockedDecrement(&_Count) == 0)
