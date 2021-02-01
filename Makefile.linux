@@ -639,16 +639,11 @@ MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 VPATH=%.cpp \
-	./include/linux/Gtk \
-	./include/linux \
 	./src/common/Hash/sha1 \
 	./src/common/Hash/md5 \
-<<<<<<< working copy
-=======
 	./private/linux \
 	./include/linux/Gtk \
 	./include/linux \
 	./include/common \
->>>>>>> destination
 	$(BuildDir)
 

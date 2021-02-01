@@ -704,7 +704,7 @@ public:
 					CastEmpty(sLibs[1].Get()),
 					CastEmpty(sIncludes[1].Get()));
 		
-		if (Files.First())
+		if (Files.Length())
 		{
 			GArray<GString> IncPaths;
 			if (Proj->BuildIncludePaths(IncPaths, false, false, Platform))
