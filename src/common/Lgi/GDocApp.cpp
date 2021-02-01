@@ -317,12 +317,7 @@ bool GDocApp<OptionsFmt>::_DoSerialize(bool Write)
 		if (_LangOptsName &&
 			Options->GetValue(_LangOptsName, Lang))
 		{
-			GXmlTag *t = new GXmlTag("language");
-			if (t)
-			{
-				t->SetAttr("id", Lang.Str());
-				LgiApp->SetConfig(t);
-			}
+			LgiApp->SetConfig("language", Lang.Str());
 		}
 
 		// read misc options
