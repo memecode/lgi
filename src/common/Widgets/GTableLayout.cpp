@@ -32,7 +32,7 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		24
+// #define DEBUG_LAYOUT		539
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
 // #define DEBUG_CTRL_ID		609
@@ -1565,6 +1565,8 @@ void GTableLayoutPrivate::LayoutHorizontal(GRect &Client, int *MinX, int *MaxX, 
 						c->PreLayout(Min, Max, Flag);
 					}
 
+					// Dbg.Print("Spanned cell: %i,%i\n", Min, Max);
+
 					if (Max > Client.X())
 						Max = Client.X();
 					if (Flag)
@@ -1608,6 +1610,8 @@ void GTableLayoutPrivate::LayoutHorizontal(GRect &Client, int *MinX, int *MaxX, 
 					int MyPx = CountRange(MinCol, c->Cell.x1, c->Cell.x2) + ((c->Cell.X() - 1) * BorderSpacing);
 					
 					int Remaining = Client.X() - AllPx;
+					
+					// Dbg.Print("AllPx=%i MyPx=%i, Remaining=%i\n", AllPx, MyPx, Remaining);
 			
 					// This is the total remaining px we could add...
 					if (Remaining > 0)
@@ -1616,7 +1620,7 @@ void GTableLayoutPrivate::LayoutHorizontal(GRect &Client, int *MinX, int *MaxX, 
 						Max = MIN(Max, MyPx + Remaining);
 						
 						// Distribute the max px across the cell's columns.
-						DistributeSize(MinCol, ColFlags, c->Cell.x1, c->Cell.X(), Max, BorderSpacing);
+						DistributeSize(MinCol, ColFlags, c->Cell.x1, c->Cell.X(), Min, BorderSpacing);
 						DistributeSize(MaxCol, ColFlags, c->Cell.x1, c->Cell.X(), Max, BorderSpacing);
 					}
 				}
