@@ -414,11 +414,11 @@ void VcCommit::Select(bool b)
 	if (Rev && b)
 	{
 		VcFolder *f = GetFolder();
-		LgiTrace("%s:%i select %s %i f=%p\n", _FL, Rev.Get(), b, f);
+		// LgiTrace("%s:%i select %s %i f=%p\n", _FL, Rev.Get(), b, f);
 		if (f)
 		{
 			auto Rng = d->GetCommitRange();
-			LgiTrace("%s:%i select rng=%i\n", _FL, (int)Rng.Length());
+			// LgiTrace("%s:%i select rng=%i\n", _FL, (int)Rng.Length());
 			if (Rng.Length() > 1)
 			{
 				// Show the diffs over a range of commits.

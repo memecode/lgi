@@ -204,7 +204,7 @@ void GCombo::Value(int64 i)
 		d->SetText(NULL, _FL);
 		Invalidate();
 
-		SendNotify((int)d->Current);
+		SendNotify(GNotifyValueChanged);
 	}
 }
 
@@ -410,7 +410,7 @@ void GCombo::DoMenu()
 			d->SetText(NULL, _FL);
 			Invalidate();
 
-			SendNotify((int)d->Current);
+			SendNotify(GNotifyValueChanged);
 		}
 	}
 }

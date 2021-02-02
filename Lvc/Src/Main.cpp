@@ -673,14 +673,22 @@ public:
 		for (auto i: *this)
 		{
 			VcCommit *item = dynamic_cast<VcCommit*>(i);
-			if (item)
+			if (!item)
+				continue;
+
+			bool IsMatch = false;
+			for (auto r: Revs)
 			{
-				for (auto r: Revs)
+				if (item->IsRev(r))
 				{
-					if (item->IsRev(r))
-						Matches.Add(item);
+					IsMatch = true;
+					break;
 				}
 			}
+			if (IsMatch)
+				Matches.Add(item);
+			else if (i->Select())
+				i->Select(false);
 		}
 
 		for (auto item: Matches)
