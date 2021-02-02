@@ -3193,7 +3193,6 @@ void ResDialog::MoveSelection(int Dx, int Dy)
 
 void ResDialog::SelectCtrl(ResDialogCtrl *c)
 {
-
 	Selection.Empty();
 	if (c)
 	{
@@ -3225,21 +3224,13 @@ void ResDialog::SelectCtrl(ResDialogCtrl *c)
 				else break;
 			}
 		}
-		else
-		{
-			printf("%s:%i - Ctrl doesn't belong to me.\n", __FILE__, __LINE__);
-		}
+		else LgiTrace("%s:%i - Ctrl doesn't belong to me.\n", __FILE__, __LINE__);
 	}
-	else
-	{
-		printf("Selecting '0'\n");
-	}
+	else LgiTrace("Selecting '0'\n");
 	
 	Invalidate();
 	if (AppWindow)
-	{
 		AppWindow->OnObjSelect(c);
-	}
 }
 
 void ResDialog::SelectNone()

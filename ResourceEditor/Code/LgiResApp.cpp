@@ -750,6 +750,7 @@ void FieldView::OnSelect(FieldSource *s)
 			AddView(t);
 			OnPosChange();
 			AttachChildren();
+			Invalidate();
 		}
 
 		Serialize(false);
