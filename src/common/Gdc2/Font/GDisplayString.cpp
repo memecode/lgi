@@ -272,8 +272,8 @@ bool StringConvert(Out *&out, ssize_t &OutWords, const In *in, ssize_t InLen)
 			CFDictionaryRef attributes = Font->GetAttributes();
 			if (attributes)
 				AttrStr = CFAttributedStringCreate(kCFAllocatorDefault, string, attributes);
-			else
-				LgiAssert(0);
+			
+			// else LgiAssert(0);
 			
 			CFRelease(string);
 		}
