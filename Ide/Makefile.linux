@@ -2362,15 +2362,9 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 
 VPATH=%.cpp \
 	../include/linux/Gtk \
-<<<<<<< working copy
-	./Resources \
-	../include/linux \
-	../include/common \
-=======
 	../include/linux \
 	../include/common \
 	./Resources \
->>>>>>> destination
 	./Code \
 	./ \
 	$(BuildDir)
