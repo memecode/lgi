@@ -2515,15 +2515,18 @@ void LList::OnPaint(GSurface *pDC)
 	GColour DisabledTint(L_MED);
 	GColour Workspace(L_WORKSPACE);
 	GColour NonFocusBack(L_NON_FOCUS_SEL_BACK);	
+	
 	GColour Fore = Enabled() ? Tools.GetFore() : Tools.GetFore().Mix(DisabledTint);
 	GColour Back = Tools.GetBack(&Workspace, 0);
-	double NonFocusBackAmt = (double)NonFocusBack.r() / Workspace.r();
+	double NonFocusBackAmt = (double)NonFocusBack.GetGray() / Workspace.GetGray();
 	if (!Enabled())
 		Back = Back.Mix(DisabledTint);
 	GColour SelFore(Focus() ? L_FOCUS_SEL_FORE : L_NON_FOCUS_SEL_FORE);
 	GColour SelBack(Focus() ? L_FOCUS_SEL_BACK : (Enabled() ? Tint(Back, NonFocusBackAmt) : DisabledTint));
 	PourAll();
-		
+	
+	// printf("ListPaint SelFore=%s SelBack=%s Back=%s %f NonFocusBack=%s\n", SelFore.GetStr(), SelBack.GetStr(), Back.GetStr(), NonFocusBackAmt, NonFocusBack.GetStr());
+	
 	#if LList_ONPAINT_PROFILE
 	t1 = LgiCurrentTime();
 	#endif

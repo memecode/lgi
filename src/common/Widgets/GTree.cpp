@@ -1021,6 +1021,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 
 	GColour SelFore(Tree->Focus() ? L_FOCUS_SEL_FORE : L_NON_FOCUS_SEL_FORE);
 	GColour SelBack(Tree->Focus() ? L_FOCUS_SEL_BACK : L_NON_FOCUS_SEL_BACK);
+
 	bool IsSelected = (Tree->d->DropTarget == this) || (Tree->d->DropTarget == NULL && Select());
 	GColour Fore = Ctx.Fore;
 	GColour TxtBack = Ctx.TxtBack;
@@ -1035,6 +1036,14 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	// text: first column
 	Ctx.Fore = f.Type == GCss::ColorRgb ? (GColour)f : (IsSelected ? SelFore : Fore);
 	Ctx.TxtBack = b.Type == GCss::ColorRgb ? (GColour)b : (IsSelected ? SelBack : Ctx.Back);
+
+	auto ColourDiff = abs(Ctx.Fore.GetGray() - Ctx.TxtBack.GetGray());
+	if (ColourDiff < 32) // Check if the colours are too similar and then disambiguate...
+	{
+		// LgiTrace("%s %s are too similar %i\n", Ctx.Fore.GetStr(), Ctx.TxtBack.GetStr(), (int)ColourDiff);
+		Ctx.TxtBack = Ctx.TxtBack.Mix(L_WORKSPACE);
+	}
+
 	LPoint TextSize;
 	_PourText(TextSize);
 	d->Text.ZOff(TextSize.x-1, Pos.Y()-1);

@@ -167,7 +167,7 @@ public:
 		Ssh = ssh_new();
 		ssh_set_log_userdata(this);
 		// ssh_set_log_callback(logging_callback);
-		ssh_set_log_level(SSH_LOG_PROTOCOL);
+		// ssh_set_log_level(SSH_LOG_PROTOCOL);
 		auto r = ssh_options_set(Ssh, SSH_OPTIONS_HOST, Host);
 		r = ssh_options_set(Ssh, SSH_OPTIONS_PORT, &Port);
 		r = ssh_options_set(Ssh, SSH_OPTIONS_TIMEOUT, &Timeout);
@@ -295,7 +295,7 @@ public:
 					Meter.SetLength(length);
 
 					Log->Print("%s:%i - Writing %s.\n", _FL, LFormatSize(length).Get());
-					for (i=0; i<length; )
+					for (i=0; !IsCancelled() && i<length; )
 					{
 						auto rd = in.Read(Buf.AddressOf(), Buf.Length());
 						if (rd <= 0)
