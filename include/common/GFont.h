@@ -232,6 +232,9 @@ public:
 	/// Creates the font from a CSS object.
 	bool CreateFromCss(GCss *Css);
 
+	/// Returns CSS styles to describe font
+	GString FontToCss();
+
 	/// Clears any handles and memory associated with the object.
 	virtual bool Destroy();
 	void WarnOnDelete(bool w);

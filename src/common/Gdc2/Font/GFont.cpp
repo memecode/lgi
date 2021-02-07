@@ -537,6 +537,19 @@ bool GFont::CreateFromCss(GCss *Css)
 	return Create();
 }
 
+GString GFont::FontToCss()
+{
+	GCss c;
+	c.FontFamily(Face());
+	c.FontSize(Size());
+	if (Bold())
+		c.FontWeight(GCss::FontWeightBold);
+	if (Italic())
+		c.FontStyle(GCss::FontStyleItalic);
+	auto aStr = c.ToString();
+	return aStr.Get();
+}
+
 void GFont::WarnOnDelete(bool w)
 {
 	d->WarnOnDelete = w;
