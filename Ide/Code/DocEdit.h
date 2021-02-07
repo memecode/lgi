@@ -176,7 +176,7 @@ public:
 	bool SetPourEnabled(bool b);
 	int GetTopPaddingPx();
 	void InvalidateLine(int Idx);
-	char *TemplateMerge(const char *Template, char *Name, List<char> *Params);
+	char *TemplateMerge(const char *Template, const char *Name, List<char> *Params);
 	bool GetVisible(GStyle &s);
 	void OnCreate() override;
 

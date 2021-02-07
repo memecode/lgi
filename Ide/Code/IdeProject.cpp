@@ -633,7 +633,8 @@ public:
 					char *e = LgiGetExtension(n->GetFileName());
 					if (e && stricmp(e, "h") == 0)
 					{
-						for (char *Dir=n->GetFileName(); *Dir; Dir++)
+						GString Fn = n->GetFileName();
+						for (char *Dir = Fn; *Dir; Dir++)
 						{
 							if (*Dir == '/' || *Dir == '\\')
 							{
@@ -641,8 +642,8 @@ public:
 							}
 						}						
 
-						char Path[256];
-						strcpy_s(Path, sizeof(Path), n->GetFileName());
+						char Path[MAX_PATH];
+						strcpy_s(Path, sizeof(Path), Fn);
 
 						LgiTrimDir(Path);
 					
@@ -1133,7 +1134,7 @@ public:
 						if (!LgiIsRelativePath(p))
 						{
 							GAutoString a = LgiMakeRelativePath(Base, p);
-							m.Print("\t%s \\\n", a?a:p);
+							m.Print("\t%s \\\n", a?a.Get():p.Get());
 						}
 						else
 						{
@@ -2707,7 +2708,7 @@ GAutoString IdeProject::GetFullPath()
 		return Status;
 	}
 
-	GArray<char*> sections;
+	GArray<const char*> sections;
 	IdeProject *proj = this;
 	while (	proj &&
 			proj->GetFileName() &&
@@ -3591,7 +3592,7 @@ bool IdeProject::BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool In
 					if (n->GetType() == NodeHeader &&				// Only look at headers.
 						(n->GetPlatforms() & (1 << Platform)) != 0)	// Exclude files not on this platform.
 					{
-						char *f = n->GetFileName();
+						auto f = n->GetFileName();
 						char p[MAX_PATH];
 						if (f &&
 							LgiMakePath(p, sizeof(p), Base, f))

@@ -686,7 +686,7 @@ void FilterFiles(GArray<ProjectNode*> &Perfect, GArray<ProjectNode*> &Nodes, GSt
 		{
 			char *Dir = strchr(Fn, '/');
 			if (!Dir) Dir = strchr(Fn, '\\');
-			char *Leaf = Dir ? strrchr(Fn, *Dir) : Fn;
+			auto Leaf = Dir ? strrchr(Fn, *Dir) : Fn;
 				
 			bool Match = true;
 			for (unsigned n=0; n<p.Length(); n++)
@@ -700,10 +700,10 @@ void FilterFiles(GArray<ProjectNode*> &Perfect, GArray<ProjectNode*> &Nodes, GSt
 			if (Match)
 			{
 				bool PerfectMatch = false;
-				char *Leaf = LgiGetLeaf(Fn);
+				auto Leaf = LgiGetLeaf(Fn);
 				if (Leaf)
 				{
-					char *Dot = strrchr(Leaf, '.');
+					auto Dot = strrchr(Leaf, '.');
 					if (Dot)
 					{
 						auto Len = Dot - Leaf;
@@ -746,7 +746,7 @@ public:
 	
 	void OnSelect(ProjectNode *Obj)
 	{
-		char *Fn = Obj->GetFileName();
+		auto Fn = Obj->GetFileName();
 		if (LgiIsRelativePath(Fn))
 		{
 			IdeProject *Proj = Obj->GetProject();
@@ -851,7 +851,7 @@ GString IdeDocPrivate::GetDisplayName()
 {
 	if (nSrc)
 	{
-		char *Fn = nSrc->GetFileName();
+		auto Fn = nSrc->GetFileName();
 		if (Fn)
 		{
 			if (stristr(Fn, "://"))
@@ -1177,7 +1177,7 @@ void IdeDoc::OnTitleClick(GMouse &m)
 	if (m.IsContextMenu())
 	{
 		char Full[MAX_PATH] = "", sFile[MAX_PATH] = "", sFull[MAX_PATH] = "", sBrowse[MAX_PATH] = "";
-		char *Fn = GetFileName(), *Dir = NULL;
+		const char *Fn = GetFileName(), *Dir = NULL;
 		IdeProject *p = GetProject();
 		if (Fn)
 		{
@@ -1365,7 +1365,7 @@ void IdeDoc::SearchFile()
 
 bool IdeDoc::IsCurrentIp()
 {
-	char *Fn = GetFileName();
+	auto Fn = GetFileName();
 	bool DocMatch = CurIpDoc &&
 					Fn &&
 					!_stricmp(Fn, CurIpDoc);
@@ -2041,7 +2041,7 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 			}
 		}
 
-		char *FileName = GetFileName();
+		auto FileName = GetFileName();
 		if (BuildDefnList(FileName, (char16*)Source, Defns, DefnNone))
 		{
 			#if DEBUG_FIND_DEFN

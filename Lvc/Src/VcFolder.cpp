@@ -3631,7 +3631,7 @@ bool VcFolder::AddFile(const char *Path, bool AsBinary)
 	{
 		case VcCvs:
 		{
-			auto p = GString(Path).RSplit(DIR_CHAR, 1);
+			auto p = GString(Path).RSplit(DIR_STR, 1);
 			ParseParams *params = NULL;
 			if (p.Length() >= 2)
 			{

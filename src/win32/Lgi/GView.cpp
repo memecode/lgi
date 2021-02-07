@@ -1321,7 +1321,10 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			case WM_GETFONT:
 			{
 				GFont *f = GetFont();
-				return (GMessage::Result) (f ? f->Handle() : SysFont->Handle());
+				if (!f || f == SysFont)
+					return (GMessage::Result) SysFont->Handle();
+
+				return (GMessage::Result) f->Handle();
 				break;
 			}
 			case WM_MENUCHAR:

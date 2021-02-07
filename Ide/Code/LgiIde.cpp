@@ -976,12 +976,12 @@ public:
 
 int DocSorter(IdeDoc *a, IdeDoc *b, NativeInt d)
 {
-	char *A = a->GetFileName();
-	char *B = b->GetFileName();
+	auto A = a->GetFileName();
+	auto B = b->GetFileName();
 	if (A && B)
 	{
-		char *Af = strrchr(A, DIR_CHAR);
-		char *Bf = strrchr(B, DIR_CHAR);
+		auto Af = strrchr(A, DIR_CHAR);
+		auto Bf = strrchr(B, DIR_CHAR);
 		return stricmp(Af?Af+1:A, Bf?Bf+1:B);
 	}
 	
@@ -2311,7 +2311,7 @@ bool AppWnd::OnBreakPoint(GDebugger::BreakPoint &b, bool Add)
 
 	for (IdeDoc *doc = *it; doc; doc = *++it)
 	{
-		char *fn = doc->GetFileName();
+		auto fn = doc->GetFileName();
 		bool Match = !Stricmp(fn, b.File.Get());
 		if (Match)
 			doc->AddBreakPoint(b.Line, Add);
@@ -2328,7 +2328,7 @@ bool AppWnd::LoadBreakPoints(IdeDoc *doc)
 	if (!doc)
 		return false;
 
-	char *fn = doc->GetFileName();
+	auto fn = doc->GetFileName();
 	for (int i=0; i<d->BreakPoints.Length(); i++)
 	{
 		GDebugger::BreakPoint &b = d->BreakPoints[i];
@@ -2509,7 +2509,7 @@ IdeDoc *AppWnd::FindOpenFile(char *FileName)
 	List<IdeDoc>::I it = d->Docs.begin();
 	for (IdeDoc *i=*it; i; i=*++it)
 	{
-		char *f = i->GetFileName();
+		auto f = i->GetFileName();
 		if (f)
 		{
 			IdeProject *p = i->GetProject();

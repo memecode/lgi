@@ -71,7 +71,7 @@ public:
 	int GetPlatforms() override;
 	const char *GetLocalCache() override;
 	void AutoDetectType();
-	char *GetCharset() override { return Charset; }
+	const char *GetCharset() override { return Charset; }
 	
 	// Dnd
 	bool GetFormats(GDragFormats &Formats) override;

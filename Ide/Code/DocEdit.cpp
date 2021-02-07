@@ -228,7 +228,7 @@ void DocEdit::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 	}
 }
 	
-char *DocEdit::TemplateMerge(const char *Template, char *Name, List<char> *Params)
+char *DocEdit::TemplateMerge(const char *Template, const char *Name, List<char> *Params)
 {
 	// Parse template and insert into doc
 	GStringPipe T;
@@ -390,10 +390,10 @@ bool DocEdit::OnMenu(GDocView *View, int Id, void *Context)
 				const char *Template = Doc->GetProject()->GetFileComment();
 				if (Template)
 				{
-					char *File = strrchr(Doc->GetFileName(), DIR_CHAR);
+					auto File = strrchr(Doc->GetFileName(), DIR_CHAR);
 					if (File)
 					{
-						char *Comment = TemplateMerge(Template, File + 1, 0);
+						auto Comment = TemplateMerge(Template, File + 1, 0);
 						if (Comment)
 						{
 							char16 *C16 = Utf8ToWide(Comment);
