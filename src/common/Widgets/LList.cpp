@@ -536,9 +536,10 @@ void LListItem::OnPaint(GItem::ItemPaintCtx &Ctx)
 	    return;
 
 	int x = Ctx.x1;
-
+	GAutoPtr<ItemPaintCtx> Prev;
 	if (GetCss())
 	{
+		Prev.Reset(new ItemPaintCtx(Ctx));
 		GCss::ColorDef Fill = GetCss()->Color();
 		if (Fill.Type == GCss::ColorRgb)
 			Ctx.Fore.Set(Fill.Rgb32, 32);
@@ -594,6 +595,9 @@ void LListItem::OnPaint(GItem::ItemPaintCtx &Ctx)
 		Ctx.pDC->Colour(Ctx.Back);
 		Ctx.pDC->Rectangle(x, Ctx.y1, Ctx.x2, Ctx.y2);
 	}
+	
+	if (Prev)
+		Ctx = *Prev;
 }
 
 //////////////////////////////////////////////////////////////////////////////
