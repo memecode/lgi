@@ -61,12 +61,6 @@ bool GProgress::OnLayout(GViewLayoutInfo &Inf)
 	return true;
 }
 
-void GProgress::SetLimits(int64 l, int64 h)
-{
-	Low = l;
-	High = h;
-}
-
 void GProgress::Value(int64 v)
 {
 	if (Val != v)

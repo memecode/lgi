@@ -24,15 +24,13 @@ public:
 	GProgress(int id, int x, int y, int cx, int cy, const char *name);
 	~GProgress();
 
-	const char *GetClass() { return "GProgress"; }
-	/// Sets the range that the Value() is between
-	void SetLimits(int64 l, int64 h);
-	/// Sets the point between the limits that defines where the progress is up to
-	void Value(int64 v);
-	int64 Value();
-	GMessage::Result OnEvent(GMessage *Msg);
-	bool OnLayout(GViewLayoutInfo &Inf);
-	bool Pour(GRegion &r);
+	const char *GetClass() override { return "GProgress"; }
+	bool SetRange(const GRange &r) override;
+	void Value(int64 v) override;
+	int64 Value() override;
+	GMessage::Result OnEvent(GMessage *Msg) override;
+	bool OnLayout(GViewLayoutInfo &Inf) override;
+	bool Pour(GRegion &r) override;
 	bool Colour(GColour Col);
 	GColour Colour();
 
@@ -40,7 +38,6 @@ public:
 	GString CssStyles(const char *CssStyle = NULL);
 	#else
 	void OnPaint(GSurface *pDC);
-	void GetLimits(int64 *l, int64 *h);
 	#endif
 };
 

@@ -38,18 +38,6 @@ Progress::Progress(char *desc, int64 l, int64 h, char *type, double scale)
 	Scale = scale;
 }
 
-void Progress::SetLimits(int64 l, int64 h)
-{
-	Low = l;
-	High = h;
-}
-
-void Progress::GetLimits(int64 *l, int64 *h)
-{
-	if (l) *l = Low;
-	if (h) *h = High;
-}
-
 GString Progress::GetDescription()
 {
 	GString r;
@@ -76,14 +64,27 @@ void Progress::SetDescription(const char *d)
    		Description = d;
 }
 
+GString Progress::GetType()
+{
+	GString s;
+	{
+		LMutex::Auto lck(this, _FL);
+		if (lck) s = Type.Get();
+	}
+	return s;
+}
+
+void Progress::SetType(const char *t)
+{
+	LMutex::Auto lck(this, _FL);
+	Type = t;
+}
+
 Progress &Progress::operator =(Progress &p)
 {
 	SetDescription(p.GetDescription());
 
-	int64 h, l;
-	p.GetLimits(&h, &l);
-	SetLimits(h, l);
-
+	SetRange(p.GetRange());
 	SetScale(p.GetScale());
 	SetType(p.GetType());
 	Value(p.Value());
@@ -158,18 +159,12 @@ GProgressPane::~GProgressPane()
 {
 }
 
-void GProgressPane::SetLimits(int64 l, int64 h)
+bool GProgressPane::SetRange(const GRange &r)
 {
-	Progress::SetLimits(l, h);
+	Progress::SetRange(r);
 
 	if (Bar)
-	{
-		#ifdef ALT_SCALE
-		Bar->SetLimits(0, ALT_SCALE);
-		#else
-		Bar->SetLimits(l, h);
-		#endif
-	}
+		Bar->SetRange(r);
 
 	if (InThread())
 	{
@@ -177,6 +172,8 @@ void GProgressPane::SetLimits(int64 l, int64 h)
 		if (Pd && But)
 			But->Enabled(Pd->CanCancel);
 	}
+
+	return true;
 }
 
 void GProgressPane::UpdateUI()
@@ -269,7 +266,6 @@ GProgressPane &GProgressPane::operator--(int)
 	Value(Progress::Value() - 1);
 	return *this;
 }
-
 
 int GProgressPane::OnNotify(GViewI *Ctrl, int Flags)
 {
@@ -537,21 +533,19 @@ void GProgressDlg::SetDescription(const char *d)
 		Panes.First()->SetDescription(d);
 }
 
-void GProgressDlg::GetLimits(int64 *l, int64 *h)
+GRange GProgressDlg::GetRange()
 {
 	if (Panes.Length())
-		Panes.First()->GetLimits(l, h);
-	else
-	{
-		if (l) *l = 0;
-		if (h) *h = 0;
-	}
+		return Panes.First()->GetRange();
+	return GRange();
 }
 
-void GProgressDlg::SetLimits(int64 l, int64 h)
+bool GProgressDlg::SetRange(const GRange &r)
 {
-	if (Panes.Length())
-		Panes.First()->SetLimits(l, h);
+	if (!Panes.Length())
+		return false;
+	Panes.First()->SetRange(r);
+	return true;
 }
 
 GProgressDlg &GProgressDlg::operator++(int)
@@ -619,7 +613,7 @@ void GProgressDlg::SetScale(double s)
 		Panes.First()->SetScale(s);
 }
 
-const char *GProgressDlg::GetType()
+GString GProgressDlg::GetType()
 {
 	return Panes.Length() ? Panes.First()->GetType() : NULL;
 }

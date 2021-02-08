@@ -55,15 +55,15 @@ GColour GProgress::Colour()
 	return c;
 }
 
-void GProgress::SetLimits(int64 l, int64 h)
+bool GProgress::SetRange(const GRange &r)
 {
-	Low = l;
-	High = h;
+	Low = r.Start;
+	High = r.End();
 	Shift = 0;
 
-	if (h > 0x7fffffff)
+	if (High > 0x7fffffff)
 	{
-		int64 i = h;
+		int64 i = High;
 		while (i > 0x7fffffff)
 		{
 			i >>= 1;
@@ -72,9 +72,8 @@ void GProgress::SetLimits(int64 l, int64 h)
 	}
 
 	if (Handle())
-	{
 		PostMessage(Handle(), PBM_SETRANGE32, Low>>Shift, High>>Shift);
-	}
+	return true;
 }
 
 int64 GProgress::Value()

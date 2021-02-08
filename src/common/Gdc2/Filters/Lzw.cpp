@@ -400,7 +400,7 @@ public:
 			DoEvery Do(200);
 			if (Meter)
 			{
-				Meter->SetLimits(0, InputLen-1);
+				Meter->SetRange(GRange(0, InputLen));
 			}
 
 			for (uchar *p = Input + 1; p < End; p++)

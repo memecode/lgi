@@ -30,11 +30,10 @@ public:
 	GProgressPane(GProgressDlg *dlg);
 	~GProgressPane();
 
-	void SetDescription(const char *d);
-	void GetLimits(int64 *l, int64 *h) { Progress::GetLimits(l, h); }
-	void SetLimits(int64 l, int64 h);
-	int64 Value() { return Progress::Value(); }
-	void Value(int64 v);
+	void SetDescription(const char *d) override;
+	bool SetRange(const GRange &r) override;
+	int64 Value() override { return Progress::Value(); }
+	void Value(int64 v) override;
 	GFont *GetFont();
 	void UpdateUI();
 
@@ -85,23 +84,23 @@ public:
 	void SetCanCancel(bool cc);
 
 	/// Returns the description of the first pane
-	GString GetDescription();
+	GString GetDescription() override;
 	/// Sets the description of the first pane
-	void SetDescription(const char *d);
+	void SetDescription(const char *d) override;
 	/// Returns the upper and lower limits of the first pane
-	void GetLimits(int64 *l, int64 *h);
+	GRange GetRange() override;
 	/// Sets the upper and lower limits of the first pane
-	void SetLimits(int64 l, int64 h);
+	bool SetRange(const GRange &r) override;
 	/// Returns the scaling factor of the first pane
-	double GetScale();
+	double GetScale() override;
 	/// Sets the scaling factor of the first pane
-	void SetScale(double s);
+	void SetScale(double s) override;
 	/// Returns the current value of the first pane
-	int64 Value();
+	int64 Value() override;
 	/// Sets the current value of the first pane
-	void Value(int64 v);
+	void Value(int64 v) override;
 	/// Returns the type description of the first pane
-	const char *GetType();
+	GString GetType() override;
 	/// Sets the type description of the first pane
 	void SetType(const char *t);
 	/// Returns whether the user has cancelled the operation

@@ -29,7 +29,7 @@
 enum ProgressMessages
 {
     IDM_SET_LIMITS   = M_USER + 100,
-    IDM_SET_PARAM,
+    IDM_SET_START_VAL,
 };
 
 int PipeSize[] =
@@ -445,12 +445,14 @@ GMessage::Result FileTransferProgress::OnEvent(GMessage *m)
     switch (m->Msg())
     {
         case IDM_SET_LIMITS:
-        {
-            SetLimits((int64)m->A(), (int64)m->B());
+        {			
+            SetRange(GRange(m->A(), m->B()));
             break;
         }
-        case IDM_SET_PARAM:
+        case IDM_SET_START_VAL:
         {
+			GVariant v = m->A();
+			SetVariant(sStartValue, v);
             break;
         }
     }
@@ -458,21 +460,21 @@ GMessage::Result FileTransferProgress::OnEvent(GMessage *m)
     return GStatusPane::OnEvent(m);
 }
 
-void FileTransferProgress::SetLimits(int64 l, int64 h)
+bool FileTransferProgress::SetRange(const GRange &r)
 {
     if (!InThread())
     {
-        bool Status = PostEvent(IDM_SET_LIMITS, (GMessage::Param)l, (GMessage::Param)h);
+        bool Status = PostEvent(IDM_SET_LIMITS, (GMessage::Param)r.Start, (GMessage::Param)r.Len);
         LgiAssert(Status);
     }
     else
     {
-    	Progress::SetLimits(l, h);
+    	Progress::SetRange(r);
     	if (ProgressPane)
-    	{
-    		ProgressPane->SetLimits(l, h);
-    	}
+    		ProgressPane->SetRange(r);
     }
+
+	return true;
 }
 
 void FileTransferProgress::Value(int64 v)
@@ -550,22 +552,21 @@ void FileTransferProgress::UpdateUi()
 	DspVal = Val;
 }
 
-void FileTransferProgress::SetParameter(int Which, int What)
+bool FileTransferProgress::SetVariant(const char *Name, GVariant &Value, char *Array)
 {
+	if (Stricmp(Name, sStartValue))
+		return false;
+
 	if (!InThread())
 	{
-		bool Status = PostEvent(IDM_SET_PARAM, (GMessage::Param)Which, (GMessage::Param)What);
+		bool Status = PostEvent(IDM_SET_START_VAL, (GMessage::Param)Value.CastInt32());
 		LgiAssert(Status);
 	}
 	else
 	{
-		switch (Which)
-		{
-			case PARM_START_VALUE:
-			{
-				Progress::Value(StartPos = What);
-				if (StatusInfo[_STATUS_HISTORY]) StatusInfo[_STATUS_HISTORY]->Value(-Val);
-			}
-		}
+		Progress::Value(StartPos = Value.CastInt32());
+		if (StatusInfo[_STATUS_HISTORY]) StatusInfo[_STATUS_HISTORY]->Value(-Value.CastInt32());
 	}
+
+	return true;
 }

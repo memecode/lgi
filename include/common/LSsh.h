@@ -48,7 +48,7 @@ protected:
 			Length = len;
 			if (s->Prog)
 			{
-				s->Prog->SetLimits(0, Length);
+				s->Prog->SetRange(GRange(0, Length));
 				s->Prog->Colour(GProgress::cPaused);
 			}
 		}

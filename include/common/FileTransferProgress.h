@@ -14,9 +14,6 @@
 #define	_STATUS_TIME_LEFT			6
 #define	_STATUS_MAX					7
 
-// Parameter
-#define PARM_START_VALUE			10
-
 // Options
 #define OPT_Throttle				"Throttle"	// (int)
 #define OPT_PipeSize				"PipeSize"	// (int)
@@ -36,9 +33,12 @@ public:
 	FileTransferProgress(GDom *App, GStatusBar *Status, bool Limit = false);
 
 	// Progress Api (must be thread-safe)
-	void SetLimits(int64 l, int64 h);
+	bool SetRange(const GRange &r) override;
 	void Value(int64 v);
-	void SetParameter(int Which, int What);
+
+	// Parameters
+	constexpr static char *sStartValue = "StartValue";
+	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
 
 	// Impl
 	GMessage::Result OnEvent(GMessage *m);
