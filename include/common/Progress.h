@@ -27,6 +27,8 @@ public:
 	Progress(char *desc, int64 l, int64 h, char *type = NULL, double scale = 1.0);
 	virtual ~Progress() {}
 
+	GRange GetRange() { return GRange(Low, High - Low); }
+
 	virtual GString GetDescription();
 	virtual void SetDescription(const char *d = 0);
 	virtual void GetLimits(int64 *l, int64 *h);

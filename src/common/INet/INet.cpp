@@ -134,6 +134,8 @@ void StopNetworkStack()
 
 #ifdef WIN32
 #include "..\..\Win32\INet\MibAccess.h"
+#include <iphlpapi.h>
+#pragma comment(lib, "iphlpapi.lib")
 #endif
 
 bool GSocket::EnumInterfaces(GArray<Interface> &Out)
@@ -143,45 +145,65 @@ bool GSocket::EnumInterfaces(GArray<Interface> &Out)
 	StartNetworkStack();
 
 	#ifdef WIN32
-	MibII m;
-	m.Init();
 
-	MibInterface Intf[16];
-	int Count = m.GetInterfaces(Intf, CountOf(Intf));
-	if (Count)
-	{
-		for (int i=0; i<Count; i++)
-		{
-			auto &OutIntf = Out.New();
-			OutIntf.Ip4 = htonl(Intf[i].Ip);
-			OutIntf.Netmask4 = htonl(Intf[i].Netmask);
-			Status = true;
-		}
-	}
-	#else
-	// Posix
-	struct ifaddrs *addrs = NULL;
-	int r = getifaddrs(&addrs);
-	if (r == 0)
-	{
-		for (ifaddrs *a = addrs; a; a = a->ifa_next)
-		{
-			if (a->ifa_addr->sa_family == AF_INET)
+		#if 0
+
+			PMIB_IF_TABLE2 Tbl;
+			SecureZeroMemory(&Tbl, sizeof(Tbl));
+			auto r = GetIfTable2(&Tbl);
+
+			for (size_t i=0; i<Tbl->NumEntries; i++)
 			{
-				sockaddr_in *in = (sockaddr_in*)a->ifa_addr;
-				sockaddr_in *mask = (sockaddr_in*)a->ifa_netmask;
-				
-				auto &Intf = Out.New();
-				Intf.Ip4 = ntohl(in->sin_addr.s_addr);
-				Intf.Netmask4 = ntohl(mask->sin_addr.s_addr);
-				Intf.Name = a->ifa_name;
-
-				Status = true;
+				auto &e = Tbl->Table[i];
+				int asd=0;
 			}
-		}
+
+			FreeMibTable(Tbl);
+
+		#else
+
+			MibII m;
+			m.Init();
+
+			MibInterface Intf[16] = {0};
+			int Count = m.GetInterfaces(Intf, CountOf(Intf));
+			if (Count)
+			{
+				for (int i=0; i<Count; i++)
+				{
+					auto &OutIntf = Out.New();
+					OutIntf.Ip4 = htonl(Intf[i].Ip);
+					OutIntf.Netmask4 = htonl(Intf[i].Netmask);
+					Status = true;
+				}
+			}
+
+		#endif
+
+	#else
+		// Posix
+		struct ifaddrs *addrs = NULL;
+		int r = getifaddrs(&addrs);
+		if (r == 0)
+		{
+			for (ifaddrs *a = addrs; a; a = a->ifa_next)
+			{
+				if (a->ifa_addr->sa_family == AF_INET)
+				{
+					sockaddr_in *in = (sockaddr_in*)a->ifa_addr;
+					sockaddr_in *mask = (sockaddr_in*)a->ifa_netmask;
+				
+					auto &Intf = Out.New();
+					Intf.Ip4 = ntohl(in->sin_addr.s_addr);
+					Intf.Netmask4 = ntohl(mask->sin_addr.s_addr);
+					Intf.Name = a->ifa_name;
+
+					Status = true;
+				}
+			}
 		
-		freeifaddrs(addrs);
-	}	
+			freeifaddrs(addrs);
+		}	
 	#endif
 
 	return Status;
