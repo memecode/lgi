@@ -155,7 +155,20 @@ bool GSocket::EnumInterfaces(GArray<Interface> &Out)
 			for (size_t i=0; i<Tbl->NumEntries; i++)
 			{
 				auto &e = Tbl->Table[i];
-				int asd=0;
+
+				WCHAR w[256] = {0};
+				r = ConvertInterfaceLuidToNameW(&e.InterfaceLuid, w, 256);
+
+				MIB_UNICASTIPADDRESS_ROW Addr;
+				InitializeUnicastIpAddressEntry(&Addr);
+				Addr.Address.si_family = AF_INET;
+				Addr.InterfaceLuid = e.InterfaceLuid;
+				Addr.InterfaceIndex = e.InterfaceIndex;
+				r = GetUnicastIpAddressEntry(&Addr);
+				if (r == NO_ERROR)
+				{
+					int asd=0;
+				}
 			}
 
 			FreeMibTable(Tbl);
@@ -174,6 +187,7 @@ bool GSocket::EnumInterfaces(GArray<Interface> &Out)
 					auto &OutIntf = Out.New();
 					OutIntf.Ip4 = htonl(Intf[i].Ip);
 					OutIntf.Netmask4 = htonl(Intf[i].Netmask);
+					OutIntf.Name = Intf[i].Name;
 					Status = true;
 				}
 			}

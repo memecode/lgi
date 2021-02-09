@@ -124,9 +124,13 @@ int MibII::GetInterfaces(MibInterface *In, int Max)
 {
 	UINT IpAddr[]  = { 1, 3, 6, 1, 2, 1, 4, 20, 1, 1 };
 	UINT NetMask[] = { 1, 3, 6, 1, 2, 1, 4, 20, 1, 3 };
+	UINT IfDescr[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 2 };
+	UINT IfName[]  = { 1, 3, 6, 1, 2, 1, 31, 1, 1 };
 	
 	AsnObjectIdentifier IpAddrId = { sizeof(IpAddr)/sizeof(UINT), IpAddr };
 	AsnObjectIdentifier NetMaskId = { sizeof(NetMask)/sizeof(UINT), NetMask };
+	AsnObjectIdentifier IfDescrId = { sizeof(IfDescr)/sizeof(UINT), IfDescr };
+	AsnObjectIdentifier IfNameId = { sizeof(IfName)/sizeof(UINT), IfName };
 	
 	RFC1157VarBindList  varBindList = {0};
 	RFC1157VarBind      varBind[3] = {0};
@@ -135,10 +139,12 @@ int MibII::GetInterfaces(MibInterface *In, int Max)
 	AsnObjectIdentifier MIB_NULL = {0,0};
 	
 	varBindList.list = varBind;
-	varBindList.len  = 2;
+	varBindList.len  = sizeof(varBind)/sizeof(varBind[0]);
 	// varBind[0].name  = MIB_NULL;
 	m_SnmpUtilOidCpy(&varBind[0].name, &IpAddrId);
 	m_SnmpUtilOidCpy(&varBind[1].name, &NetMaskId);
+	m_SnmpUtilOidCpy(&varBind[2].name, &IfDescrId);
+	// m_SnmpUtilOidCpy(&varBind[3].name, &IfNameId);
 	
 	int Idx;
 	for (Idx = 0; Idx < Max; Idx++)
@@ -152,6 +158,16 @@ int MibII::GetInterfaces(MibInterface *In, int Max)
 
 		ret = m_SnmpUtilOidNCmp(&varBind[1].name, &NetMaskId, NetMaskId.idLength);
 		In[Idx].Netmask = ret ? 0 : *((DWORD *)varBind[1].value.asnValue.address.stream);
+
+		ret = m_SnmpUtilOidNCmp(&varBind[2].name, &IfDescrId, IfDescrId.idLength);
+		if (varBind[2].value.asnType == ASN_OCTETSTRING)
+			strcpy_s(In[Idx].Name, sizeof(In[Idx].Name), (const char*)varBind[2].value.asnValue.string.stream);
+
+		/*
+		ret = m_SnmpUtilOidNCmp(&varBind[3].name, &IfNameId, IfNameId.idLength);
+		if (varBind[3].value.asnType == ASN_OCTETSTRING)
+			strcpy_s(In[Idx].Name, sizeof(In[Idx].Name), (const char*)varBind[3].value.asnValue.string.stream);
+		*/
 
 		if (!In[Idx].Ip && !In[Idx].Netmask)
 			break;
