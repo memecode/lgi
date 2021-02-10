@@ -815,7 +815,7 @@ void GColour::OnChange()
 	_LgiColours[L_INACTIVE_TITLE_TEXT] = ConvertWinColour(GetSysColor(COLOR_INACTIVECAPTIONTEXT)); // LC_INACTIVE_TITLE_TEXT
 	_LgiColours[L_MENU_BACKGROUND] = ConvertWinColour(GetSysColor(COLOR_MENU)); // LC_MENU_BACKGROUND
 	_LgiColours[L_MENU_TEXT] = ConvertWinColour(GetSysColor(COLOR_MENUTEXT)); // LC_MENU_TEXT
-	_LgiColours[L_NON_FOCUS_SEL_BACK] = ConvertWinColour(GetSysColor(COLOR_BTNFACE)); // LC_NON_FOCUS_SEL_BACK
+	_LgiColours[L_NON_FOCUS_SEL_BACK] = ConvertWinColour(GetSysColor(COLOR_3DLIGHT)); // LC_NON_FOCUS_SEL_BACK
 	_LgiColours[L_NON_FOCUS_SEL_FORE] = ConvertWinColour(GetSysColor(COLOR_BTNTEXT)); // LC_NON_FOCUS_SEL_FORE
 
 	#else // defaults for non-windows, plain grays
