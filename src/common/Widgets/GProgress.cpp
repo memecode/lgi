@@ -61,6 +61,14 @@ bool GProgress::OnLayout(GViewLayoutInfo &Inf)
 	return true;
 }
 
+bool GProgress::SetRange(const GRange &r)
+{
+	Low = r.Start;
+	High = r.End();
+	Invalidate();
+	return true;
+}
+
 void GProgress::Value(int64 v)
 {
 	if (Val != v)
@@ -125,9 +133,4 @@ void GProgress::OnPaint(GSurface *pDC)
 		pDC->Colour(L_MED);
 		pDC->Rectangle(&r);
 	}
-}
-
-void GProgress::GetLimits(int64 *l, int64 *h)
-{
-	Progress::GetLimits(l, h);
 }

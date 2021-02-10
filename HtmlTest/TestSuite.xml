@@ -10,9 +10,11 @@
 		<Node File="../src/common/Text/Emoji/EmojiMap.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Text/Emoji/EmojiTools.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Widgets/GZoomView.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/INet/IHttp.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Images/Compare/ImageComparison.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Gdc2/Font/LEmojiFont.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="7" />
+		<Node File="../src/common/INet/OpenSSLSocket.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Source" Type="1" Open="1" Platforms="7" Id="1">
 		<Node File="./TestSuite.cpp" Type="2" Platforms="7" />
@@ -25,6 +27,9 @@
 		</Node>
 	</Node>
 	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node Name="Tests" Type="1" Platforms="15" Id="1">
+		<Node File="./Files/whistle.html" Type="7" Platforms="15" />
+	</Node>
 	<Settings>
 		<Build>
 			<IncludePaths>
@@ -42,10 +47,8 @@
 			<SystemIncludes>
 				<Linux>
 					<Debug>/usr/include/gstreamer-1.0
-/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
 `pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>/usr/include/gstreamer-1.0
-/usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
@@ -66,7 +69,6 @@
 					<Release>lgi-html-test-suite</Release>
 				</Linux>
 			</TargetName>
-			<LibraryPaths />
 		</Build>
 		<General>
 			<Makefile>
@@ -78,16 +80,7 @@
 					<Release>lgi-html-test-suite</Release>
 				</Linux>
 			</Executable>
-			<Arguments />
-			<Defines />
 		</General>
-		<Remote />
-		<Editor />
-		<Advanced>
-			<PostBuildCommands />
-		</Advanced>
+		<Advanced />
 	</Settings>
-	<Node Name="Tests" Type="1" Platforms="15" Id="1">
-		<Node File="./Files/whistle.html" Type="7" Platforms="15" />
-	</Node>
 </Project>
