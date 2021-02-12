@@ -459,7 +459,7 @@ void ProjectNode::SetFileName(const char *f)
 	if (sFile && Project)
 		Project->OnNode(sFile, this, false);
 
-	if (Project->RelativePath(Rel, f))
+	if (Project->RelativePath(Rel, f, true))
 		sFile = Rel;
 	else
 		sFile = f;
@@ -766,7 +766,7 @@ GString ProjectNode::GetFullPath()
 	if (LgiIsRelativePath(sFile))
 	{
 		// Relative path
-		GAutoString Path = Project->GetBasePath();
+		auto Path = Project->GetBasePath();
 		if (Path)
 		{
 			char p[MAX_PATH];

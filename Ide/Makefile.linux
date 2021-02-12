@@ -1169,7 +1169,8 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 
 ../include/common/Progress.h : ../include/common/LMutex.h \
 	../include/common/LCancel.h \
-	../include/common/GStringClass.h
+	../include/common/GStringClass.h \
+	../include/common/GDom.h
 
 ../src/common/Lgi/LgiMsg.cpp : ../include/common/Lgi.h \
 	../include/common/GTextLog.h \
@@ -1623,7 +1624,8 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 
 ../include/common/Progress.h : ../include/common/LMutex.h \
 	../include/common/LCancel.h \
-	../include/common/GStringClass.h
+	../include/common/GStringClass.h \
+	../include/common/GDom.h
 
 ../src/linux/Lgi/LThread.cpp : ../include/common/Lgi.h
 
@@ -2362,6 +2364,9 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 
 VPATH=%.cpp \
 	../include/linux/Gtk \
+	../include/linux \
+	../include/common \
+	./Resources \
 	./Code \
 	./ \
 	$(BuildDir)

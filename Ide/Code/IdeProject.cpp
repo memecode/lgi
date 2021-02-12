@@ -2122,10 +2122,11 @@ bool IdeProject::RelativePath(GString &Out, const char *In, bool Debug)
 	if (!In)
 		return false;
 
-	GAutoString Base = GetBasePath();
+	auto Base = GetBasePath();
 	if (!Base)
 		return false;
 
+	CheckExists(Base);
 if (Debug) LgiTrace("XmlBase='%s'\n		In='%s'\n", Base.Get(), In);
 		
 	GToken b(Base, DIR_STR);

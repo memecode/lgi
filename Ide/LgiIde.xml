@@ -53,7 +53,6 @@
 			<Node File="./Code/ParserCommon.h" Type="3" Platforms="15" />
 			<Node File="./Code/PythonParser.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/SimpleCppParser.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/SimpleCppParser.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Source Code" Type="1" Platforms="15" Open="1" Id="6">
 			<Node File="../src/common/Coding/GLexCpp.cpp" Type="2" Platforms="15" />
@@ -120,6 +119,7 @@ WINNATIVE</Release>
 					<Debug>LIBPNG_VERSION=\&quot;1.2\&quot;</Debug>
 					<Release>LIBPNG_VERSION=\&quot;1.2\&quot;</Release>
 				</Linux>
+				<All />
 			</Defines>
 			<Compiler>
 				<Windows>MingW</Windows>
@@ -129,6 +129,9 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
+			<DebugAdmin />
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -177,12 +180,14 @@ pthread
 					<Debug>be</Debug>
 					<Release>be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<LibraryPaths>
 				<All>
 					<Debug>..\Debug</Debug>
 					<Release>..\Release</Release>
 				</All>
+				<Linux />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -230,10 +235,18 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
-		<Remote />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
 	</Settings>
 </Project>

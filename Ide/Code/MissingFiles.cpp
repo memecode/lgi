@@ -102,12 +102,15 @@ public:
 					if (p->Equals(Search[i]) ||
 						(IsParent = IsParentFolder(Search[i], *p)))
 					{
-						// printf("'%s' is parent of '%s'\n", Search[i].Get(), p->Get());
+						printf("'%s' is parent of '%s'\n", Search[i].Get(), p->Get());
 						break;
 					}
 				}
 				if (!IsParent)
+				{
+					printf("Adding '%s'\n", p->Get());
 					Search.New() = *p;
+				}
 				break;
 			}
 			case M_RECURSE:
@@ -190,13 +193,22 @@ public:
 			{
 				if (p->GetAllNodes(Nodes))
 				{
-					for (unsigned i=0; i<Nodes.Length(); i++)
+					for (auto Node: Nodes)
 					{
-						auto s = Nodes[i]->GetFullPath();
+						auto s = Node->GetFullPath();
 						if (s)
 						{
+							GString sOld = s.Get();
+							if (p->CheckExists(s) &&
+								Strcmp(sOld.Get(), s.Get()) != 0 &&
+								Stricmp(sOld.Get(), s.Get()) == 0)
+							{
+								// Case change?
+								Node->SetFileName(s);
+							}
+
 							SearchResults *Sr = new SearchResults;
-							Sr->Node = Nodes[i];
+							Sr->Node = Node;
 							Sr->Path = s;
 							PostThreadEvent(ExistsHnd, M_CHECK_FILE, (GMessage::Param) Sr);
 							
@@ -207,13 +219,11 @@ public:
 					}
 				}
 
-				GAutoString s = p->GetBasePath();
+				auto s = p->GetBasePath();
 				if (s)
 					Flds.Add(s, true);
 			}
 
-			// char *Path;
-			// for (bool b = Flds.First(&Path); b; b = Flds.Next(&Path))
 			for (auto i : Flds)
 				PostThreadEvent(SearchHnd, M_ADD_SEARCH_PATH, (GMessage::Param) new GString(i.key));
 
