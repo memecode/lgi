@@ -233,6 +233,9 @@ bool LListItem::SetText(const char *s, int i)
 	// Add new string in
 	d->Str[i] = NewStr(s);
 
+	if (Parent)
+		Parent->SendNotify(GNotifyItem_Change);
+
 	return true;
 }
 
