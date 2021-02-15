@@ -34,16 +34,16 @@ public:
 	bool SetRange(const GRange &r) override;
 	int64 Value() override { return Progress::Value(); }
 	void Value(int64 v) override;
-	GFont *GetFont();
+	GFont *GetFont() override;
 	void UpdateUI();
 
 	GProgressPane &operator++(int);
 	GProgressPane &operator--(int);
 
-	void OnCreate();
-	int OnNotify(GViewI *Ctrl, int Flags);
-	void OnPaint(GSurface *pDC);
-	void OnPosChange();
+	void OnCreate() override;
+	int OnNotify(GViewI *Ctrl, int Flags) override;
+	void OnPaint(GSurface *pDC) override;
+	void OnPosChange() override;
 };
 
 /// Progress dialog
@@ -102,20 +102,20 @@ public:
 	/// Returns the type description of the first pane
 	GString GetType() override;
 	/// Sets the type description of the first pane
-	void SetType(const char *t);
+	void SetType(const char *t) override;
 	/// Returns whether the user has cancelled the operation
-	bool IsCancelled();
+	bool IsCancelled() override;
 	
 	GProgressDlg &operator++(int);
 	GProgressDlg &operator--(int);
 
-	int OnNotify(GViewI *Ctrl, int Flags);
-	GMessage::Result OnEvent(GMessage *Msg);
-	void OnPaint(GSurface *pDC);
-	void OnCreate();
-	void OnPosChange();
-	bool OnRequestClose(bool OsClose);
-	void OnPulse();
+	int OnNotify(GViewI *Ctrl, int Flags) override;
+	GMessage::Result OnEvent(GMessage *Msg) override;
+	void OnPaint(GSurface *pDC) override;
+	void OnCreate() override;
+	void OnPosChange() override;
+	bool OnRequestClose(bool OsClose) override;
+	void OnPulse() override;
 };
 
 #endif

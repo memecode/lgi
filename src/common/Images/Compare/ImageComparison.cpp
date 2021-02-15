@@ -896,7 +896,7 @@ ImageCompareDlg::ImageCompareDlg(GView *p, const char *OutPath)
 	ResFile += "ImageComparison.lr8";
 	if (!ResFile.Exists())
 	{
-		GAutoString r(LgiFindFile("ImageComparison.lr8"));
+		auto r =LFindFile("ImageComparison.lr8");
 		if (r)
 			ResFile = r.Get();
 	}
@@ -978,7 +978,7 @@ int ImageCompareDlg::OnNotify(GViewI *Ctrl, int Flags)
 					}
 					#else
 					const char *Leaf = strrchr(left, DIR_CHAR);
-					int Len = d->tabs->GetTabs();
+					auto Len = d->tabs->GetTabs();
 					GTabPage *t = d->tabs->Append(Leaf ? Leaf + 1 : left);
 					if (t)
 					{

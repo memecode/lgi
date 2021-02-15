@@ -176,7 +176,7 @@ public:
 		auto len = Src->GetSize();
 		int64 written = 0;
 		if (len > 0)
-			SetLimits(0, len-1);
+			SetRange(GRange(0, len));
 		SetScale(1.0/1024.0/1024.0);
 		SetType("MiB");
 

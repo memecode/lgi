@@ -303,11 +303,6 @@ public:
 		else if (Size.Type == GCss::LenPt)
 		{
 			double Pt = Size.Value;
-			if (std::abs(Pt) < FLOAT_TOLERANCE)
-			{
-				int asd=0;
-			}
-
 			for (auto f: Fonts)
 			{
 				if (!f->Face() || Face.Length() == 0)
@@ -2626,7 +2621,7 @@ void GTag::LoadImage(const char *Uri)
 		auto blen = BufferLen_64ToBin(slen);
 		GMemStream bin;
 		bin.SetSize(blen);
-		auto r = ConvertBase64ToBinary((uint8_t*)bin.GetBasePtr(), blen, s, slen);
+		ConvertBase64ToBinary((uint8_t*)bin.GetBasePtr(), blen, s, slen);
 		
 		bin.SetPos(0);
 		if (!Image.Reset(new GMemDC))

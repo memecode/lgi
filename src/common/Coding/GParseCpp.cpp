@@ -87,7 +87,7 @@ public:
 	
 	// Unparsed string data
 	char16 *Start;
-	int Len;
+	ssize_t Len;
 	
 	// -or-
 	
@@ -956,7 +956,7 @@ GAutoWString GCppParserWorker::GetSymbolName(GArray<char16*> &in, bool IsEnum)
 
 GSymbol *GCppParserWorker::Resolve(char16 *Symbol)
 {
-	for (int i = Scopes.Length()-1; i >= 0; i--)
+	for (auto i = Scopes.Length()-1; i >= 0; i--)
 	{
 		GSourceScope *scope = Scopes[i];
 		GSymbol *sym = scope->Find(Symbol);
@@ -1104,7 +1104,7 @@ int GCppParserWorker::Evaluate(GArray<char16*> &Exp)
 	// Evaluate the contents of Values
 	while (Values.Length() > 1)
 	{
-		int StartLength = Values.Length();
+		auto StartLength = Values.Length();
 		int OpIdx = -1;
 		int Prec = -1;
 		for (int i=0; i<Values.Length(); i++)

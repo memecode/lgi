@@ -11,6 +11,8 @@
 		34114C8B23091E6E00F342B1 /* LgiClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = 34114C8A23091E6E00F342B1 /* LgiClasses.h */; };
 		3413170E23068FFE008CE982 /* GFileSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3413170D23068FFE008CE982 /* GFileSelect.cpp */; };
 		34131710230694D1008CE982 /* Gel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3413170F230694D1008CE982 /* Gel.cpp */; };
+		3418EBCF25D9FEA600EA168A /* GProgress.h in Headers */ = {isa = PBXBuildFile; fileRef = 3418EBCE25D9FEA600EA168A /* GProgress.h */; };
+		3418EBD125D9FEF500EA168A /* GProgressDlg.h in Headers */ = {isa = PBXBuildFile; fileRef = 3418EBD025D9FEF500EA168A /* GProgressDlg.h */; };
 		343874B5230F46B200CF96B4 /* GWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B1230F46B200CF96B4 /* GWindow.h */; };
 		343874B6230F46B200CF96B4 /* GView.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B2230F46B200CF96B4 /* GView.h */; };
 		343874B7230F46B200CF96B4 /* GApp.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B3230F46B200CF96B4 /* GApp.h */; };
@@ -143,6 +145,7 @@
 		34B531D822F65734002B50F7 /* LMenu.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B531D722F65734002B50F7 /* LMenu.h */; };
 		34B6B19123CFD0F100C24906 /* GDragAndDropCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B6B19023CFD0F100C24906 /* GDragAndDropCommon.cpp */; };
 		34C072C12369878100E1E222 /* GDropFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C072C02369878100E1E222 /* GDropFiles.cpp */; };
+		34C81A5A25DA0AA10053F93A /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C81A5925DA0AA10053F93A /* Base64.cpp */; };
 		34CD9F7223D5768B0039F259 /* GUnicode.h in Headers */ = {isa = PBXBuildFile; fileRef = 34CD9F7123D5768B0039F259 /* GUnicode.h */; };
 		34D1B3C121748A2800BC6B58 /* GPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D1B3C021748A2800BC6B58 /* GPath.cpp */; };
 		34D21CEC217981AE003D1EA6 /* GEventTargetThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D21CEB217981AE003D1EA6 /* GEventTargetThread.h */; };
@@ -155,6 +158,8 @@
 		34114C8A23091E6E00F342B1 /* LgiClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiClasses.h; path = ../../../include/common/LgiClasses.h; sourceTree = "<group>"; };
 		3413170D23068FFE008CE982 /* GFileSelect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GFileSelect.cpp; path = ../../../common/Lgi/GFileSelect.cpp; sourceTree = "<group>"; };
 		3413170F230694D1008CE982 /* Gel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Gel.cpp; path = ../../../common/Skins/Gel/Gel.cpp; sourceTree = "<group>"; };
+		3418EBCE25D9FEA600EA168A /* GProgress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GProgress.h; path = ../../../../include/common/GProgress.h; sourceTree = "<group>"; };
+		3418EBD025D9FEF500EA168A /* GProgressDlg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GProgressDlg.h; path = ../../../../include/common/GProgressDlg.h; sourceTree = "<group>"; };
 		343874B1230F46B200CF96B4 /* GWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GWindow.h; path = ../../../../include/common/GWindow.h; sourceTree = "<group>"; };
 		343874B2230F46B200CF96B4 /* GView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GView.h; path = ../../../../include/common/GView.h; sourceTree = "<group>"; };
 		343874B3230F46B200CF96B4 /* GApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GApp.h; path = ../../../../include/common/GApp.h; sourceTree = "<group>"; };
@@ -289,6 +294,7 @@
 		34B531D722F65734002B50F7 /* LMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LMenu.h; path = ../../../../include/common/LMenu.h; sourceTree = "<group>"; };
 		34B6B19023CFD0F100C24906 /* GDragAndDropCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GDragAndDropCommon.cpp; path = ../../../common/Lgi/GDragAndDropCommon.cpp; sourceTree = "<group>"; };
 		34C072C02369878100E1E222 /* GDropFiles.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GDropFiles.cpp; path = ../../../common/Lgi/GDropFiles.cpp; sourceTree = "<group>"; };
+		34C81A5925DA0AA10053F93A /* Base64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base64.cpp; path = ../../../common/INet/Base64.cpp; sourceTree = "<group>"; };
 		34CD9F7123D5768B0039F259 /* GUnicode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GUnicode.h; path = ../../../../include/common/GUnicode.h; sourceTree = "<group>"; };
 		34D1B3C021748A2800BC6B58 /* GPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GPath.cpp; path = ../../../common/Gdc2/Path/GPath.cpp; sourceTree = "<group>"; };
 		34D21CEB217981AE003D1EA6 /* GEventTargetThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GEventTargetThread.h; path = ../../../../include/common/GEventTargetThread.h; sourceTree = "<group>"; };
@@ -402,6 +408,7 @@
 		3477C2931CBF09240028B84B /* General */ = {
 			isa = PBXGroup;
 			children = (
+				34C81A5925DA0AA10053F93A /* Base64.cpp */,
 				3477C34C1CC0ACED0028B84B /* md5.c */,
 				3477C3421CC0A6B90028B84B /* GDocView.cpp */,
 				3477C3401CC0A68E0028B84B /* LDateTime.cpp */,
@@ -537,29 +544,31 @@
 		3477C2CC1CC046370028B84B /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
-				346DDEC0240C882900751380 /* GRadioGroup.h */,
-				345EB84D235C6C01007D05DB /* GPopup.h */,
-				343BE8C62355D0CE00742E21 /* GPopupList.h */,
 				3477C2F21CC04BF00028B84B /* GBitmap.cpp */,
 				3477C2F31CC04BF00028B84B /* GBox.cpp */,
 				3477C2F41CC04BF00028B84B /* GButton.cpp */,
 				3477C2F51CC04BF00028B84B /* GCheckBox.cpp */,
 				3477C2F61CC04BF00028B84B /* GCombo.cpp */,
 				3477C2F71CC04BF00028B84B /* GEdit.cpp */,
+				3477C2EC1CC04BBB0028B84B /* GItemContainer.cpp */,
 				3477C2F81CC04BF00028B84B /* GPanel.cpp */,
+				3477C2D61CC048390028B84B /* GPopup.cpp */,
+				345EB84D235C6C01007D05DB /* GPopup.h */,
+				343BE8C62355D0CE00742E21 /* GPopupList.h */,
 				3477C2F91CC04BF00028B84B /* GProgress.cpp */,
+				3418EBCE25D9FEA600EA168A /* GProgress.h */,
+				3418EBD025D9FEF500EA168A /* GProgressDlg.h */,
 				3477C2FA1CC04BF00028B84B /* GRadioGroup.cpp */,
+				346DDEC0240C882900751380 /* GRadioGroup.h */,
+				3477C2DE1CC04A030028B84B /* GScrollBar.cpp */,
 				3477C2FB1CC04BF00028B84B /* GSplitter.cpp */,
 				3477C2FC1CC04BF00028B84B /* GTableLayout.cpp */,
 				3477C2FD1CC04BF00028B84B /* GTabView.cpp */,
 				3477C2FE1CC04BF00028B84B /* GTextLabel.cpp */,
-				3477C2EC1CC04BBB0028B84B /* GItemContainer.cpp */,
-				3477C2ED1CC04BBB0028B84B /* LList.cpp */,
-				3477C2EE1CC04BBB0028B84B /* GTree.cpp */,
-				3477C2DE1CC04A030028B84B /* GScrollBar.cpp */,
-				3477C2D61CC048390028B84B /* GPopup.cpp */,
-				3477C2CF1CC047F50028B84B /* GToolBar.cpp */,
 				3477C2C41CC046310028B84B /* GTextView3.cpp */,
+				3477C2CF1CC047F50028B84B /* GToolBar.cpp */,
+				3477C2EE1CC04BBB0028B84B /* GTree.cpp */,
+				3477C2ED1CC04BBB0028B84B /* LList.cpp */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -665,11 +674,13 @@
 				34D6AA1722D3749A005D739E /* Gdc2.h in Headers */,
 				3477C2A41CBF0A920028B84B /* LgiOs.h in Headers */,
 				343874B7230F46B200CF96B4 /* GApp.h in Headers */,
+				3418EBCF25D9FEA600EA168A /* GProgress.h in Headers */,
 				346DDEC1240C882900751380 /* GRadioGroup.h in Headers */,
 				3477C26C1CBF020F0028B84B /* LgiProject.h in Headers */,
 				345921011F25649000098DFD /* GFontSelect.h in Headers */,
 				346FACE71D3C720B00FFEBCE /* GMessage.h in Headers */,
 				3477C2A31CBF0A920028B84B /* LgiMac.h in Headers */,
+				3418EBD125D9FEF500EA168A /* GProgressDlg.h in Headers */,
 				343874B6230F46B200CF96B4 /* GView.h in Headers */,
 				345920FF1F25649000098DFD /* GFont.h in Headers */,
 				3477C2A81CBF0AAF0028B84B /* Lgi.h in Headers */,
@@ -850,6 +861,7 @@
 				3477C2751CBF07DD0028B84B /* GApp.mm in Sources */,
 				348CD46A25C63E56001AA32B /* GAppCommon.cpp in Sources */,
 				3477C3411CC0A68E0028B84B /* LDateTime.cpp in Sources */,
+				34C81A5A25DA0AA10053F93A /* Base64.cpp in Sources */,
 				3477C2C11CBF9A040028B84B /* GString.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

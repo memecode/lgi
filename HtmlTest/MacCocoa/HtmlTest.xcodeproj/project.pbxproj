@@ -30,6 +30,7 @@
 		343FB8C62386638C00797ABC /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 343FB8A92386627A00797ABC /* LgiCocoa.framework */; };
 		343FB8C82386639C00797ABC /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 343FB8A92386627A00797ABC /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		343FB8DC2386642A00797ABC /* GOptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8DB2386642A00797ABC /* GOptionsFile.cpp */; };
+		34C81A5825DA09770053F93A /* IHttp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C81A5725DA09770053F93A /* IHttp.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -88,6 +89,7 @@
 		343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
 		343FB8AA238662C500797ABC /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = "<group>"; };
 		343FB8DB2386642A00797ABC /* GOptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GOptionsFile.cpp; path = ../../src/common/Lgi/GOptionsFile.cpp; sourceTree = "<group>"; };
+		34C81A5725DA09770053F93A /* IHttp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IHttp.cpp; path = ../../src/common/INet/IHttp.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +136,7 @@
 		343FB8A32386626700797ABC /* Lgi */ = {
 			isa = PBXGroup;
 			children = (
+				34C81A5725DA09770053F93A /* IHttp.cpp */,
 				3431903F238DFA4B00DDE1F5 /* GZoomView.cpp */,
 				34319047238DFA9100DDE1F5 /* GdcTools.cpp */,
 				3431903D238DF9FB00DDE1F5 /* ImageComparison.cpp */,
@@ -271,6 +274,7 @@
 				3431904A238DFAB000DDE1F5 /* EmojiMap.cpp in Sources */,
 				34319039238DF9C600DDE1F5 /* GParseCpp.cpp in Sources */,
 				3431903C238DF9C600DDE1F5 /* GScriptVM.cpp in Sources */,
+				34C81A5825DA09770053F93A /* IHttp.cpp in Sources */,
 				34319029238DF4A700DDE1F5 /* TestSuite.cpp in Sources */,
 				34319030238DF57C00DDE1F5 /* GHtmlCommon.cpp in Sources */,
 				3431903B238DF9C600DDE1F5 /* GScriptLibrary.cpp in Sources */,

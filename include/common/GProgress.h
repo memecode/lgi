@@ -37,7 +37,7 @@ public:
 	#if WINNATIVE
 	GString CssStyles(const char *CssStyle = NULL);
 	#else
-	void OnPaint(GSurface *pDC);
+	void OnPaint(GSurface *pDC) override;
 	#endif
 };
 

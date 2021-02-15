@@ -203,7 +203,7 @@ void GProgressPane::UpdateUI()
 		else
 			PerSec = 0;
 		
-		sprintf_s(Str, sizeof(Str), LgiLoadString(L_PROGRESSDLG_RATE_FMT, "@ %.2f %s / sec"), PerSec * Scale, (Type) ? Type : "");
+		sprintf_s(Str, sizeof(Str), LgiLoadString(L_PROGRESSDLG_RATE_FMT, "@ %.2f %s / sec"), PerSec * Scale, (Type) ? Type.Get() : "");
 		Update |= Rate->Name(Str);
 	}
 
@@ -213,7 +213,7 @@ void GProgressPane::UpdateUI()
 		sprintf_s(Str, sizeof(Str), ValFmt,
 			(double)Val * Scale,
 			(double)(High - Low) * Scale,
-			(Type) ? Type : "");
+			(Type) ? Type.Get() : "");
 		
 		Update |= ValText->Name(Str);
 	}
