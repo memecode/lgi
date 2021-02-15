@@ -535,7 +535,7 @@ public:
 	GTabPage *Find;
 	GTabPage *Ftp;
 	LList *FtpLog;
-	GTextLog *Txt[3];
+	GTextLog *Txt[4];
 	GArray<char> Buf[3];
 	GFont Small;
 	GFont Fixed;

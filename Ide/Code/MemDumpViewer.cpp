@@ -229,7 +229,7 @@ public:
 			LHashTbl<StrKeyPool<char,false>,DumpItem*> h;
 
 			Prog.SetDescription("Reading memory dump...");
-			Prog.SetLimits(0, f.GetSize());
+			Prog.SetRange(GRange(0, f.GetSize()));
 			Prog.SetScale(1.0 / 1024.0 / 1024.0);
 			Prog.SetType("MB");
 

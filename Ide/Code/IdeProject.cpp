@@ -813,7 +813,7 @@ public:
 								else
 								{
 									Mk = Dep->GetMakefile(Platform);
-									OnError("%s:%i - No makefile for '%s'\n", _FL, Dep->GetFullPath());
+									OnError("%s:%i - No makefile for '%s'\n", _FL, Dep->GetFullPath().Get());
 								}
 
 								Rules.Print("\n\n");
@@ -1138,7 +1138,7 @@ public:
 						}
 						else
 						{
-							m.Print("\t%s \\\n", p);
+							m.Print("\t%s \\\n", p.Get());
 						}
 					}
 				}
@@ -3027,7 +3027,7 @@ bool CheckExists(GAutoString Base, T &p, Fn Setter, bool Debug)
 			}
 		}
 		
-		if (Ret = Full.Exists())
+		if ((Ret = Full.Exists()))
 		{
 			GString Old = p.Get();
 			if (WasRel)
@@ -3829,7 +3829,7 @@ bool IdeProject::GetDependencies(const char *InSourceFile, GArray<GString> &IncP
 	GString SourceFile = InSourceFile;
 	if (!CheckExists(SourceFile))
 	{
-		LgiTrace("%s:%i - can't read '%s'\n", _FL, SourceFile);
+		LgiTrace("%s:%i - can't read '%s'\n", _FL, SourceFile.Get());
 		return false;
 	}
 
