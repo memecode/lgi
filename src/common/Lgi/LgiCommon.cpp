@@ -893,7 +893,93 @@ GFile::Path::State GFile::Path::Exists()
 	return TypeNone;
 }
 
-GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
+GString GFile::Path::PrintAll()
+{
+	GStringPipe p;
+	
+	#define _(name) \
+		p.Print(#name ": '%s'\n", GetSystem(name).Get());
+
+	_(LSP_OS)
+	_(LSP_OS_LIB)
+	_(LSP_TEMP)
+	_(LSP_COMMON_APP_DATA)
+	_(LSP_USER_APP_DATA)
+	_(LSP_LOCAL_APP_DATA)
+	_(LSP_DESKTOP)
+	_(LSP_HOME)
+	_(LSP_USER_APPS)
+	_(LSP_EXE)
+	_(LSP_TRASH)
+	_(LSP_APP_INSTALL)
+	_(LSP_APP_ROOT)
+	_(LSP_USER_DOCUMENTS)
+	_(LSP_USER_MUSIC)
+	_(LSP_USER_VIDEO)
+	_(LSP_USER_DOWNLOADS)
+	_(LSP_USER_LINKS)
+	_(LSP_USER_PICTURES)
+	
+	#undef _
+
+	#if LGI_COCOA
+
+		int Domains[] = {NSUserDomainMask, NSSystemDomainMask};
+		const char *DomainName[] = {"User", "System"};
+		for (int i=0; i<CountOf(Domains); i++)
+		{
+			#define _(name) \
+			{ \
+				NSArray *paths = NSSearchPathForDirectoriesInDomains( name, Domains[i], YES); \
+				if (paths) \
+				{ \
+					if ([paths count] > 0) \
+					{ \
+						GString s = [paths objectAtIndex:0]; \
+						p.Print("%s." #name ": '%s'\n", DomainName[i], s.Get()); \
+					} \
+					else p.Print("%s." #name ": null\n", DomainName[i]); \
+					[paths release]; \
+				} \
+			}
+
+			_(NSApplicationDirectory)
+			_(NSDemoApplicationDirectory)
+			_(NSDeveloperApplicationDirectory)
+			_(NSAdminApplicationDirectory)
+			_(NSLibraryDirectory)
+			_(NSDeveloperDirectory)
+			_(NSUserDirectory)
+			_(NSDocumentationDirectory)
+			_(NSDocumentDirectory)
+			_(NSCoreServiceDirectory)
+			_(NSAutosavedInformationDirectory)
+			_(NSDesktopDirectory)
+			_(NSCachesDirectory)
+			_(NSApplicationSupportDirectory)
+			_(NSDownloadsDirectory)
+			_(NSInputMethodsDirectory)
+			_(NSMoviesDirectory)
+			_(NSMusicDirectory)
+			_(NSPicturesDirectory)
+			_(NSPrinterDescriptionDirectory)
+			_(NSSharedPublicDirectory)
+			_(NSPreferencePanesDirectory)
+			_(NSApplicationScriptsDirectory)
+			_(NSItemReplacementDirectory)
+			_(NSAllApplicationsDirectory)
+			_(NSAllLibrariesDirectory)
+			_(NSTrashDirectory)
+
+			#undef _
+		}
+
+	#endif
+
+	return p.NewGStr();
+}
+
+GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 {
 	GString Path;
 
@@ -1008,11 +1094,14 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 				}
 
 			#elif LGI_COCOA
-			
-				NSFileManager *fm = [NSFileManager defaultManager];
-				auto urls = [fm URLsForDirectory:NSDownloadsDirectory inDomains:NSUserDomainMask];
-				if (urls && urls.count > 0)
-					Path = [urls[0] path];
+
+				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSDownloadsDirectory, NSUserDomainMask, YES);
+				if (paths)
+				{
+					if ([paths count])
+						Path = [paths objectAtIndex:0];
+					[paths release];
+				}
 
 			#else
 
@@ -1053,6 +1142,16 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 				if (Path)
 					return Path;
 	
+			#elif defined LGI_COCOA
+
+				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSPicturesDirectory, NSUserDomainMask, YES);
+				if (paths)
+				{
+					if ([paths count])
+						Path = [paths objectAtIndex:0];
+					[paths release];
+				}
+
 			#endif
 
 			// Default to ~/Pictures
@@ -1075,6 +1174,16 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 				if (Path)
 					return Path;
 			
+			#elif defined LGI_COCOA
+
+				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSDocumentDirectory, NSUserDomainMask, YES);
+				if (paths)
+				{
+					if ([paths count])
+						Path = [paths objectAtIndex:0];
+					[paths release];
+				}
+
 			#endif
 
 			// Default to ~/Documents
@@ -1107,6 +1216,16 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 						Path = a.Get();
 				}
 
+			#elif LGI_COCOA
+
+				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSMusicDirectory, NSUserDomainMask, YES);
+				if (paths)
+				{
+					if ([paths count])
+						Path = [paths objectAtIndex:0];
+					[paths release];
+				}
+
 			#endif
 			
 			if (!Path)
@@ -1123,7 +1242,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		{
 			#if defined WIN32
 
-			Path = WinGetSpecialFolderPath(CSIDL_MYVIDEO);
+				Path = WinGetSpecialFolderPath(CSIDL_MYVIDEO);
 
 			#elif defined(__GTK_H__)
 			
@@ -1132,15 +1251,25 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			
 			#elif defined LGI_CARBON
 
-			FSRef Ref;
-			OSErr e = FSFindFolder(kUserDomain, kMovieDocumentsFolderType, kDontCreateFolder, &Ref);
-			if (e) printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
-			else
-			{
-				GAutoString a = FSRefPath(Ref);
-				if (a)
-					Path = a.Get();
-			}
+				FSRef Ref;
+				OSErr e = FSFindFolder(kUserDomain, kMovieDocumentsFolderType, kDontCreateFolder, &Ref);
+				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
+				else
+				{
+					GAutoString a = FSRefPath(Ref);
+					if (a)
+						Path = a.Get();
+				}
+
+			#elif LGI_COCOA
+
+				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSMoviesDirectory, NSUserDomainMask, YES);
+				if (paths)
+				{
+					if ([paths count])
+						Path = [paths objectAtIndex:0];
+					[paths release];
+				}
 
 			#endif
 			
@@ -1157,26 +1286,44 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 		case LSP_USER_APPS:
 		{
 			#if defined WIN32
-			int Id = 
-				#ifdef WIN64
-				CSIDL_PROGRAM_FILES
-				#else
-				CSIDL_PROGRAM_FILESX86
-				#endif
-				;
 
-			if (WordSize == 32)
-				Id = CSIDL_PROGRAM_FILESX86;
-			else if (WordSize == 64)
-				Id = CSIDL_PROGRAM_FILES;
+				int Id =
+					#ifdef WIN64
+					CSIDL_PROGRAM_FILES
+					#else
+					CSIDL_PROGRAM_FILESX86
+					#endif
+					;
 
-			Path = WinGetSpecialFolderPath(Id);
+				if (WordSize == 32)
+					Id = CSIDL_PROGRAM_FILESX86;
+				else if (WordSize == 64)
+					Id = CSIDL_PROGRAM_FILES;
+
+				Path = WinGetSpecialFolderPath(Id);
+
+			#elif LGI_COCOA
+
+				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSApplicationDirectory, NSSystemDomainMask, YES);
+				if (paths)
+				{
+					if ([paths count])
+						Path = [paths objectAtIndex:0];
+					[paths release];
+				}
+
 			#elif defined MAC
-			Path = "/Applications";
+
+				Path = "/Applications";
+
 			#elif defined LINUX
-			Path = "/usr/bin";
+
+				Path = "/usr/bin";
+
 			#else
-			LgiAssert(!"Impl me.");
+
+				LgiAssert(!"Impl me.");
+
 			#endif
 			break;
 		}
@@ -1316,7 +1463,17 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 						Path = u.Get();
 				}
 
-			#else
+			#elif defined LGI_COCOA
+			
+				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSLibraryDirectory, NSSystemDomainMask, YES);
+				if (paths)
+				{
+					Path = [paths objectAtIndex:0];
+					LgiTrimDir(Path);
+					[paths release];
+				}
+
+			#elif defined LINUX
 
 				Path = "/boot"; // it'll do for now...
 
@@ -1335,7 +1492,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			
 				Path = "/Library";
 
-			#else
+			#elif defined LINUX
 
 				Path = "/lib"; // it'll do for now...
 
@@ -1369,9 +1526,21 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 					else LgiTrace("%s:%i - FSRefPath failed.\n", _FL);
 				}
 			
-			#else
+			#elif defined LGI_COCOA
+			
+				NSString *tempDir = NSTemporaryDirectory();
+				if (tempDir)
+					Path = tempDir;
+				else
+					LgiAssert(!"No tmp folder?");
+			
+			#elif defined LINUX
 
 				Path = "/tmp"; // it'll do for now...
+			
+			#else
+			
+				LgiAssert(!"Impl me.");
 
 			#endif
 			break;
@@ -1389,14 +1558,27 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
 				else
 				{
-					GAutoString u = FSRefPath(Ref);
+					auto u = FSRefPath(Ref);
 					if (u)
 						Path = u.Get();
+				}
+			
+			#elif defined LGI_COCOA
+			
+				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSLibraryDirectory, NSSystemDomainMask, YES);
+				if (paths)
+				{
+					Path = [paths objectAtIndex:0];
+					[paths release];
 				}
 
 			#elif defined LINUX
 
 				Path = "/usr";
+			
+			#else
+			
+				LgiAssert(!"Impl me.");
 
 			#endif
 			break;
@@ -1414,14 +1596,27 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", __FILE__, __LINE__, e);
 				else
 				{
-					GAutoString u = FSRefPath(Ref);
+					auto u = FSRefPath(Ref);
 					if (u)
 						Path = u.Get();
 				}
-
+			
+			#elif defined LGI_COCOA
+			
+				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSLibraryDirectory, NSUserDomainMask, YES);
+				if (paths)
+				{
+					Path = [paths objectAtIndex:0];
+					[paths release];
+				}
+			
 			#elif defined LINUX
 
 				Path = "/usr";
+
+			#else
+			
+				LgiAssert(!"Impl me.");
 
 			#endif
 			break;
@@ -1431,6 +1626,15 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			#if defined WIN32
 			
 				Path = WinGetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
+			
+			#elif defined LGI_COCOA
+			
+				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSLibraryDirectory, NSUserDomainMask, YES);
+				if (paths)
+				{
+					Path = [paths objectAtIndex:0];
+					[paths release];
+				}
 			
 			#else
 			
@@ -1450,27 +1654,26 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 				auto p = Gtk::g_get_user_special_dir(Gtk::G_USER_DIRECTORY_DESKTOP);
 				Path = p;
 			
-			#elif defined(MAC)
+			#elif defined LGI_COCOA
 			
-				#if defined LGI_COCOA
+				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSDesktopDirectory, NSUserDomainMask, YES);
+				if (paths)
+				{
+					Path = [paths objectAtIndex:0];
+					[paths release];
+				}
 			
-					auto f = [NSURL fileURLWithPath:[NSHomeDirectory()stringByAppendingPathComponent:@"Desktop"]];
-					Path = [[f path] UTF8String];
-					// [f release];
-			
-				#elif defined LGI_CARBON
-					FSRef Ref;
-					OSErr e = FSFindFolder(kOnAppropriateDisk, kDesktopFolderType, kDontCreateFolder, &Ref);
-					if (e) printf("%s:%i - FSFindFolder failed e=%i\n", __FILE__, __LINE__, e);
-					else
-					{
-						GAutoString u = FSRefPath(Ref);
-						if (u)
-							Path = u.Get();
-					}
-				#else
-					#error "Impl."
-				#endif
+			#elif defined LGI_CARBON
+
+				FSRef Ref;
+				OSErr e = FSFindFolder(kOnAppropriateDisk, kDesktopFolderType, kDontCreateFolder, &Ref);
+				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", __FILE__, __LINE__, e);
+				else
+				{
+					GAutoString u = FSRefPath(Ref);
+					if (u)
+						Path = u.Get();
+				}
 
 			#elif defined POSIX
 
@@ -1492,7 +1695,9 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 				}
 			
 			#else
+
 				#error "Impl me."
+
 			#endif
 			break;
 		}
@@ -1501,15 +1706,25 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 			#if defined WIN32
 
 				Path = WinGetSpecialFolderPath(CSIDL_PROFILE);
+			
+			#elif defined LGI_COCOA
+			
+				NSString *home = NSHomeDirectory();
+				if (home)
+					Path = home;
+				else
+					LgiAssert(!"No home path?");
 
 			#elif defined POSIX
 
 				struct passwd *pw = getpwuid(getuid());
 				if (pw)
 					Path = pw->pw_dir;
-
+			
 			#else
+			
 				#error "Impl me."
+			
 			#endif
 			break;
 		}
@@ -1604,17 +1819,18 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize = 0)
 						Path = u.Get();
 				}
 			
+			#elif defined LGI_COCOA
+
+				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSTrashDirectory, NSUserDomainMask, YES);
+				if (paths)
+				{
+					Path = [paths objectAtIndex:0];
+					[paths release];
+				}
+
 			#elif defined(WIN32)
 
 				LgiAssert(0);
-
-			#elif defined(MAC)
-
-				// Non carbon mac builds (e.g. GTK3)
-				struct passwd *pw = getpwuid(getuid());
-				if (!pw)
-					return GString();
-				Path.Printf("%s/.Trash", pw->pw_dir);
 
 			#endif
 			break;

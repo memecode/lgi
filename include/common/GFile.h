@@ -635,7 +635,8 @@ public:
 		State Exists();
 		bool IsFile() { return Exists() == TypeFile; }
 		bool IsFolder() { return Exists() == TypeFolder; }
-		static GString GetSystem(LgiSystemPath Which, int WordSize);
+		static GString GetSystem(LgiSystemPath Which, int WordSize = 0);
+		static GString PrintAll();
 	};
 
 	/// Read the whole file into a string
