@@ -34,16 +34,16 @@ public:
 
 	// Progress Api (must be thread-safe)
 	bool SetRange(const GRange &r) override;
-	void Value(int64 v);
+	void Value(int64 v) override;
 
 	// Parameters
-	constexpr static char *sStartValue = "StartValue";
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
+	constexpr static const char *sStartValue = "StartValue";
+	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0) override;
 
 	// Impl
-	GMessage::Result OnEvent(GMessage *m);
-	void OnCreate();
-	void OnPulse();
+	GMessage::Result OnEvent(GMessage *m) override;
+	void OnCreate() override;
+	void OnPulse() override;
 };
 
 #endif
