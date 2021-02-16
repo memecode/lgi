@@ -447,6 +447,8 @@ enum LgiSystemMetric
 /// \sa LgiGetSystemPath
 enum LgiSystemPath
 {
+	LSP_ROOT,
+	
 	/// The location of the operating system folder
 	///		[Win32] = e.g. C:\Windows
 	///		[Mac] = /System
