@@ -377,7 +377,13 @@ void GTrayIcon::Visible(bool v)
 			#elif LGI_COCOA
 			
 				if (d->StatusItem)
+				{
 					d->StatusItem.visible = true;
+					
+					// Force display of the right icon...
+					auto v = d->Val++;
+					Value(v);
+				}
 			
 			#elif defined MAC
 
@@ -470,12 +476,14 @@ void GTrayIcon::Value(int64 v)
 		
 		#elif LGI_COCOA
 		
-			d->Val = limit(v, 0, d->Icon.Length());
+			d->Val = limit(v, 0, d->Icon.Length()-1);
 			if (d->StatusItem)
 			{
 				auto img = d->Icon[d->Val];
 				[d->StatusItem setImage:img];
+				printf("setImage %i/%p\n", (int)d->Val, img);
 			}
+			else LgiTrace("%s:%i - No status item?\n", _FL);
 
 			Visible(true);
 		
