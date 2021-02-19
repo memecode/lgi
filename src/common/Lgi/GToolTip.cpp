@@ -12,7 +12,7 @@
 #define LGI_NATIVE_TIPS			1
 #endif
 
-#define DEBUG_TOOLTIPS			0
+#define DEBUG_TOOLTIPS			1
 #if DEBUG_TOOLTIPS
 #define LOG(...)				printf(__VA_ARGS__)
 #else
@@ -201,7 +201,10 @@ public:
 	{
 		#if LGI_NATIVE_TIPS
 		for (auto t : Tips)
+		{
+			LOG("Deleting tip %p\n", t.value);
 			delete t.value;
+		}
 		#endif
 	}
 };
@@ -291,16 +294,12 @@ void GToolTip::DeleteTip(int Id)
 {
 	#if LGI_NATIVE_TIPS
 	
-	for (unsigned i = 0; i < NativeTip::All.Length(); i++)
+	auto t = d->Tips.Find(Id);
+	LOG("%s:%i DeleteTip(%i)=%p\n", _FL, Id, t);
+	if (t)
 	{
-		NativeTip *&t = NativeTip::All[i];
-		if (t->Id == Id)
-		{
-			d->Tips.Delete(Id);
-			DeleteObj(t);
-			NativeTip::All.DeleteAt(i);
-			break;
-		}
+		d->Tips.Delete(Id);
+		delete t;
 	}
 
 	#elif WINNATIVE

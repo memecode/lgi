@@ -752,7 +752,7 @@ void GPopup::Visible(bool i)
 			bool HaveFocus = false;
 			for (auto Foc = Wnd->GetFocus(); Foc; Foc = Foc->GetParent())
 			{
-				printf("%p::HidePopup %p (%s)\n", (GViewI*)this, Foc, Foc->GetClass());
+				// printf("%p::HidePopup %p (%s)\n", (GViewI*)this, Foc, Foc->GetClass());
 				if (Foc == (GViewI*)this)
 				{
 					HaveFocus = true;
@@ -760,11 +760,11 @@ void GPopup::Visible(bool i)
 				}
 			}
 			
-			printf("%s:%i - HaveFocus=%i\n", _FL, HaveFocus);
+			// printf("%s:%i - HaveFocus=%i\n", _FL, HaveFocus);
 			if (HaveFocus)
 			{
 				auto Par = GetParent();
-				printf("%s:%i - Par=%s\n", _FL, Par?Par->GetClass():"NULL");
+				// printf("%s:%i - Par=%s\n", _FL, Par?Par->GetClass():"NULL");
 				if (Par) Par->Focus(true);
 			}
 		}
