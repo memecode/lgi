@@ -48,8 +48,7 @@ public:
 	}
 	[[deprecated]] virtual void SetLimits(int64 l, int64 h)
 	{
-		Low = l;
-		High = h;
+		SetRange(GRange(l, h - l + 1));
 	}
 };
 

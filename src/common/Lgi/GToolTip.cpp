@@ -12,7 +12,7 @@
 #define LGI_NATIVE_TIPS			1
 #endif
 
-#define DEBUG_TOOLTIPS			1
+#define DEBUG_TOOLTIPS			0
 #if DEBUG_TOOLTIPS
 #define LOG(...)				printf(__VA_ARGS__)
 #else
