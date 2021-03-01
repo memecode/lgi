@@ -9,6 +9,9 @@
 
 	#include "commctrl.h"
 	#include "Uxtheme.h"
+	#define GViewFlags d->WndStyle
+#else
+	#define GViewFlags WndFlags
 #endif
 
 #ifdef MAC

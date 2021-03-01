@@ -15,12 +15,6 @@
 #include "GPopup.h"
 #include "GCssTools.h"
 
-#if WINNATIVE
-#define GViewFlags d->WndStyle
-#else
-#define GViewFlags WndFlags
-#endif
-
 //////////////////////////////////////////////////////////////////////////////////////
 // Helper
 LPoint lgi_view_offset(GViewI *v, bool Debug = false)
@@ -1413,23 +1407,16 @@ bool GView::DropTarget(bool t)
 			if (t)
 			{
 				if (!d->DropTarget)
-				{
 					DragAcceptFiles(_View, t);
-				}
 				else
-				{
 					Status = RegisterDragDrop(_View, (IDropTarget*) d->DropTarget) == S_OK;
-				}
 			}
 			else
 			{
 				if (_View && d->DropTarget)
-				{
 					Status = RevokeDragDrop(_View) == S_OK;
-				}
 			}
 		}
-		else LgiAssert(!"No window handle");
 
 	#elif defined MAC && !defined(LGI_SDL)
 

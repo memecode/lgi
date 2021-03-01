@@ -1536,6 +1536,11 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 					}
 				}
 
+				if (TestFlag(GViewFlags, GWF_DROP_TARGET))
+				{
+					DropTarget(true);
+				}
+
 				OnCreate();
 				break;
 			}
