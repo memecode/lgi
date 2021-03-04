@@ -202,7 +202,8 @@ bool GSocket::EnumInterfaces(GArray<Interface> &Out)
 		{
 			for (ifaddrs *a = addrs; a; a = a->ifa_next)
 			{
-				if (a->ifa_addr->sa_family == AF_INET)
+				if (a->ifa_addr &&
+					a->ifa_addr->sa_family == AF_INET)
 				{
 					sockaddr_in *in = (sockaddr_in*)a->ifa_addr;
 					sockaddr_in *mask = (sockaddr_in*)a->ifa_netmask;
@@ -217,7 +218,7 @@ bool GSocket::EnumInterfaces(GArray<Interface> &Out)
 			}
 		
 			freeifaddrs(addrs);
-		}	
+		}
 	#endif
 
 	return Status;
