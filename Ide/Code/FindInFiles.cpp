@@ -232,86 +232,92 @@ FindInFilesThread::~FindInFilesThread()
 	DeleteObj(d);
 }
 
+void FindInFilesThread::Log(const char *Str)
+{
+	GEventSinkMap::Dispatch.PostEvent(d->AppHnd, M_APPEND_TEXT, (GMessage::Param)Str, 2);
+}
+
 void FindInFilesThread::SearchFile(char *File)
 {
-	if (File && ValidStr(d->Params->Text))
+	if (!File || !ValidStr(d->Params->Text))
+		return;
+
+	GFile f;
+	if (!f.Open(File, O_READ))
 	{
-		char *Doc = ReadTextFile(File);
-		if (Doc)
+		GString s;
+		s.Printf("Couldn't Read file '%s'\n", File);
+		Log(NewStr(s));
+		return;
+	}
+
+	auto Doc = f.Read();
+	if (!Doc)
+		return;
+
+	auto Len = d->Params->Text.Length();
+	const char *Text = d->Params->Text;
+	
+	char *LineStart = 0;
+	int Line = 0;
+	for (char *s = Doc; *s && d->Loop; s++)
+	{
+		if (*s == '\n')
 		{
-			auto Len = d->Params->Text.Length();
-			const char *Text = d->Params->Text;
-			
-			char *LineStart = 0;
-			int Line = 0;
-			for (char *s = Doc; *s && d->Loop; s++)
+			Line++;
+			LineStart = 0;
+		}
+		else
+		{
+			if (!LineStart)
+				LineStart = s;
+				
+			bool Match = false;
+			if (d->Params->MatchCase)
 			{
-				if (*s == '\n')
+				if (Text[0] == *s)
 				{
-					Line++;
-					LineStart = 0;
-				}
-				else
-				{
-					if (!LineStart)
-						LineStart = s;
-						
-					bool Match = false;
-					if (d->Params->MatchCase)
-					{
-						if (Text[0] == *s)
-						{
-							Match = strncmp(s, Text, Len) == 0;
-						}
-					}
-					else
-					{
-						if (toupper(Text[0]) == toupper(*s))
-						{
-							Match = strnicmp(s, Text, Len) == 0;
-						}
-					}
-					
-					if (Match)
-					{
-						char *Eol = s + Len;
-						while (*Eol && *Eol != '\n') Eol++;
-						auto LineLen = Eol - LineStart;						
-						
-						bool StartOk = true;
-						bool EndOk = true;
-						if (d->Params->MatchWord)
-						{
-							if (s > Doc)
-							{
-								StartOk = IsWordBoundry(s[-1]);
-							}
-							
-							EndOk = IsWordBoundry(s[Len]);
-						}
-						
-						if (StartOk && EndOk)
-						{
-							static char Buf[1024];
-							int Chars = snprintf(Buf, sizeof(Buf), "%s:%i:%.*s\n", File, Line + 1, (int)LineLen, LineStart);
-							d->Pipe.Push(Buf, Chars);
-							
-							int64 Now = LgiCurrentTime();
-							if (Now > d->Last  + 500)
-							{
-								GEventSinkMap::Dispatch.PostEvent(d->AppHnd, M_APPEND_TEXT, (GMessage::Param)d->Pipe.NewStr(), 2);
-							}
-						}
-						s = Eol - 1;
-					}
+					Match = strncmp(s, Text, Len) == 0;
 				}
 			}
-
-			DeleteArray(Doc);
-		}
-		else if (LFileSize(File) > 0)
-		{
-			LgiTrace("%s:%i - Couldn't Read file '%s'\n", _FL, File);
+			else
+			{
+				if (toupper(Text[0]) == toupper(*s))
+				{
+					Match = strnicmp(s, Text, Len) == 0;
+				}
+			}
+			
+			if (Match)
+			{
+				char *Eol = s + Len;
+				while (*Eol && *Eol != '\n') Eol++;
+				auto LineLen = Eol - LineStart;						
+				
+				bool StartOk = true;
+				bool EndOk = true;
+				if (d->Params->MatchWord)
+				{
+					if (s > Doc)
+					{
+						StartOk = IsWordBoundry(s[-1]);
+					}
+					
+					EndOk = IsWordBoundry(s[Len]);
+				}
+				
+				if (StartOk && EndOk)
+				{
+					static char Buf[1024];
+					int Chars = snprintf(Buf, sizeof(Buf), "%s:%i:%.*s\n", File, Line + 1, (int)LineLen, LineStart);
+					d->Pipe.Push(Buf, Chars);
+					
+					int64 Now = LgiCurrentTime();
+					if (Now > d->Last  + 500)
+						Log(d->Pipe.NewStr());
+				}
+				s = Eol - 1;
+			}
 		}
 	}
 }
@@ -360,8 +366,8 @@ GMessage::Result FindInFilesThread::OnEvent(GMessage *Msg)
 				d->Loop = true;
 				d->Busy = true;
 				snprintf(Msg, sizeof(Msg), "Searching for '%s'...\n", d->Params->Text.Get());
-				GEventSinkMap::Dispatch.PostEvent(d->AppHnd, M_APPEND_TEXT, 0, 2);
-				GEventSinkMap::Dispatch.PostEvent(d->AppHnd, M_APPEND_TEXT, (GMessage::Param)NewStr(Msg), 2);
+				Log(NULL);
+				Log(NewStr(Msg));
 
 				GArray<const char*> Ext;
 				GToken e(d->Params->Ext, ";, ");
@@ -374,22 +380,15 @@ GMessage::Result FindInFilesThread::OnEvent(GMessage *Msg)
 				if (d->Params->Type == FifSearchSolution)
 				{
 					// Do the extension filtering...
-					for (unsigned i=0; i<d->Params->ProjectFiles.Length(); i++)
+					for (auto p: d->Params->ProjectFiles)
 					{
-						GString p = d->Params->ProjectFiles[i];
 						if (p)
 						{
 							const char *Leaf = LgiGetLeaf(p);
-							for (unsigned n=0; n<Ext.Length(); n++)
+							for (auto e: Ext)
 							{
-								if (MatchStr(Ext[n], Leaf))
-								{
-									char *np = NewStr(p);
-									if (np)
-										Files.Add(np);
-									else
-										LgiTrace("%s:%i - Can't dup '%s'\n", _FL, p.Get());
-								}
+								if (MatchStr(e, Leaf))
+									Files.Add(NewStr(p));
 							}
 						}
 						else LgiTrace("%s:%i - Null string in project files array.\n", _FL);
@@ -404,40 +403,31 @@ GMessage::Result FindInFilesThread::OnEvent(GMessage *Msg)
 				if (Files.Length() > 0)
 				{			
 					sprintf(Msg, "in %i files...\n", (int)Files.Length());
-					GEventSinkMap::Dispatch.PostEvent(d->AppHnd, M_APPEND_TEXT, (GMessage::Param)NewStr(Msg), 2);
+					Log(NewStr(Msg));
 
 					for (int i=0; i<Files.Length() && d->Loop; i++)
 					{
-						char *f = Files[i];
+						auto f = Files[i];
 						if (f)
 						{
-							char *Dir = strrchr(f, DIR_CHAR);
+							auto Dir = strrchr(f, DIR_CHAR);
 							if (!Dir || Dir[1] != '.')
-							{
-								/*
-								sprintf(Msg, "%s\n", f);
-								GEventSinkMap::Dispatch.PostEvent(d->AppHnd, M_APPEND_TEXT, (GMessage::Param)NewStr(Msg), 2);
-								*/
-
 								SearchFile(f);
-							}
 						}
 						else LgiTrace("%s:%i - NULL Ptr in list????", _FL);
 					}
 			
 					char *Str = d->Pipe.NewStr();
 					if (Str)
-					{
-						GEventSinkMap::Dispatch.PostEvent(d->AppHnd, M_APPEND_TEXT, (GMessage::Param)Str, 2);
-					}
+						Log(Str);
 			
 					Files.DeleteArrays();
 
-					GEventSinkMap::Dispatch.PostEvent(d->AppHnd, M_APPEND_TEXT, (GMessage::Param)NewStr("Done.\n"), 2);
+					Log(NewStr("Done.\n"));
 				}
 				else
 				{
-					GEventSinkMap::Dispatch.PostEvent(d->AppHnd, M_APPEND_TEXT, (GMessage::Param)NewStr("No files matched.\n"), 2);
+					Log(NewStr("No files matched.\n"));
 				}
 				
 				d->Busy = false;

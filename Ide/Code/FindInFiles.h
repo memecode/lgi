@@ -81,6 +81,7 @@ class FindInFilesThread : public GEventTargetThread
 {
 	class FindInFilesThreadPrivate *d;
 
+	void Log(const char *Str /*Heap Str*/);
 	void SearchFile(char *File);
 
 public:
