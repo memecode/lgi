@@ -1053,9 +1053,9 @@ public:
 	int AppHnd;
 	
 	// Mru
-	List<char> RecentFiles;
+	GString::Array RecentFiles;
 	LSubMenu *RecentFilesMenu;
-	List<char> RecentProjects;
+	GString::Array RecentProjects;
 	LSubMenu *RecentProjectsMenu;
 
 	// Object
@@ -1089,6 +1089,11 @@ public:
 	
 	~AppWndPrivate()
 	{
+		if (RecentFilesMenu)
+			RecentFilesMenu->Empty();
+		if (RecentProjectsMenu)
+			RecentProjectsMenu->Empty();
+
 		FindSym.Reset();
 		Finder.Reset();
 		if (Output)
@@ -1098,8 +1103,6 @@ public:
 		SerializeStringList("RecentProjects", &RecentProjects, true);
 		Options.SerializeFile(true);
 		
-		RecentFiles.DeleteArrays();
-		RecentProjects.DeleteArrays();
 		Docs.DeleteObjects();
 		Projects.DeleteObjects();
 		DeleteObj(Icons);
@@ -1370,7 +1373,7 @@ public:
 			int n=0;
 
 			auto It = RecentProjects.begin();
-			char *f = *It;
+			auto f = *It;
 			if (f)
 			{
 				for (; f; f = *(++It))
@@ -1408,19 +1411,18 @@ public:
 	{
 		if (File)
 		{
-			List<char> *Recent = IsProject ? &RecentProjects : &RecentFiles;
-			for (auto f: *Recent)
+			auto *Recent = IsProject ? &RecentProjects : &RecentFiles;
+			for (auto &f: *Recent)
 			{
-				if (stricmp(f, File) == 0)
+				if (LFileCompare(f, File) == 0)
 				{
-					Recent->Delete(f);
-					Recent->Insert(f, 0);
+					f = File;
 					UpdateMenus();
 					return;
 				}
 			}
 
-			Recent->Insert(NewStr(File), 0);
+			Recent->New() = File;
 			while (Recent->Length() > 10)
 			{
 				char *f = *Recent->rbegin();
@@ -1436,17 +1438,15 @@ public:
 	{
 		if (File)
 		{
-			List<char> *Recent[3] = { &RecentProjects, &RecentFiles, 0 };
-			for (List<char> **r = Recent; *r; r++)
+			GString::Array *Recent[3] = { &RecentProjects, &RecentFiles, 0 };
+			for (int i=0; Recent[i]; i++)
 			{
-				for (auto f: **r)
+				auto &a = *Recent[i];
+				for (size_t n=0; n<a.Length(); n++)
 				{
-					if (stricmp(f, File) == 0)
+					if (stricmp(a[n], File) == 0)
 					{
-						// LgiTrace("Remove '%s'\n", f);
-
-						(*r)->Delete(f);
-						DeleteArray(f);
+						a.DeleteAt(n--);
 						break;
 					}
 				}
@@ -1492,7 +1492,7 @@ public:
 		return 0;
 	}
 
-	void SerializeStringList(const char *Opt, List<char> *Lst, bool Write)
+	void SerializeStringList(const char *Opt, GString::Array *Lst, bool Write)
 	{
 		GVariant v;
 		if (Write)
@@ -1500,7 +1500,7 @@ public:
 			GMemQueue p;
 			for (auto s: *Lst)
 			{
-				p.Write((uchar*)s, strlen(s)+1);
+				p.Write((uchar*)s.Get(), s.Length()+1);
 			}
 			
 			ssize_t Size = (ssize_t)p.GetSize();
@@ -1516,10 +1516,7 @@ public:
 			{
 				char *Data = (char*)v.Value.Binary.Data;
 				for (char *s=Data; (NativeInt)s<(NativeInt)Data+v.Value.Binary.Length; s += strlen(s) + 1)
-				{
-					auto ns = NewStr(s);
-					Lst->Insert(ns);
-				}
+					Lst->New() = s;
 			}
 		}
 	}
@@ -3927,7 +3924,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				}
 			}
 
-			char *p = d->RecentProjects[Cmd - IDM_RECENT_PROJECT];
+			auto p = d->RecentProjects[Cmd - IDM_RECENT_PROJECT];
 			if (p)
 			{
 				CloseAll();

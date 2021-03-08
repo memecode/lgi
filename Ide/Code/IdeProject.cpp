@@ -756,8 +756,8 @@ public:
 							Dep->CreateMakefile(Platform, false);
 						
 							// Build a rule to make the dependency if any of the source changes...
-							GAutoString DepBase = Dep->GetBasePath();
-							GAutoString Base = Proj->GetBasePath();
+							auto DepBase = Dep->GetBasePath();
+							auto Base = Proj->GetBasePath();
 							auto TargetFile = Dep->GetTargetFile(Platform);
 							
 							if (DepBase && Base && TargetFile)

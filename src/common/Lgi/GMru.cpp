@@ -220,7 +220,7 @@ const char *GMru::AddFile(const char *FileName, bool Update)
 	for (int i=0; i<d->Items.Length(); i++)
 	{
 		GMruEntry *e = d->Items[i];
-		if (stricmp(e->Raw, FileName) == 0)
+		if (!LFileCompare(e->Raw, FileName))
 		{
 			// exact string being added.. just move to the top
 			// no need to reallocate

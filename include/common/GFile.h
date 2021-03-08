@@ -25,6 +25,7 @@
 	#define INVALID_HANDLE					INVALID_HANDLE_VALUE
 	#define ValidHandle(hnd)				((hnd) != INVALID_HANDLE_VALUE)
 	#define DIR_PATH_SIZE					512
+	#define LFileCompare					_stricmp
 
 	#define O_READ							GENERIC_READ
 	#define O_WRITE							GENERIC_WRITE
@@ -42,6 +43,7 @@
 	typedef int								OsFile;
 	#define INVALID_HANDLE					-1
 	#define ValidHandle(hnd)				((hnd) >= 0)
+	#define LFileCompare					strcmp
 
 	#define O_READ							O_RDONLY
 	#define O_WRITE							O_WRONLY
