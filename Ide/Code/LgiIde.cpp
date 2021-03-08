@@ -550,7 +550,7 @@ public:
 	GEdit *DebugEdit;
 	GTextLog *DebuggerLog;
 
-	IdeOutput(AppWnd *app)
+	IdeOutput(AppWnd *app) : Txt({0})
 	{
 		App = app;
 		Build = Output = Debug = Find = Ftp = 0;
@@ -819,6 +819,8 @@ public:
 
 		for (int n=0; n<CountOf(Txt); n++)
 		{
+			if (!Txt[n])
+				continue;
 			Txt[n]->SetTabSize(8);
 			Txt[n]->Sunken(true);
 		}

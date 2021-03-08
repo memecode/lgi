@@ -10,7 +10,7 @@ CC = gcc
 CPP = g++
 Target = lgi-gtk3
 ifndef Build
-	Build = Release
+	Build = Debug
 endif
 BuildDir = $(Build)
 
