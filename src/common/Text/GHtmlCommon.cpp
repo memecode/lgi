@@ -49,6 +49,7 @@ static GHtmlElemInfo TagInfo[] =
 	{TAG_SUP,			"sup",			0,			GHtmlElemInfo::TI_NONE},
 	{TAG_SUB,			"sub",			0,			GHtmlElemInfo::TI_NONE},
 	{TAG_EM,			"em",			0,			GHtmlElemInfo::TI_NONE},
+	{TAG_TITLE,			"title",		0,			GHtmlElemInfo::TI_NONE},
 	{TAG_LAST,			NULL,			0,			GHtmlElemInfo::TI_BLOCK}
 };
 

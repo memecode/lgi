@@ -756,6 +756,15 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 						case TAG_STYLE:
 						{
 							char *End = stristr(s, "</style>");
+							if (!End)
+							{
+								// wtf? Better come up with a plan b...
+								for (End = s; *End; End++)
+								{
+									if (End[0] == '<' && IsAlpha(End[1]))
+										break;
+								}
+							}
 							if (End)
 							{
 								if (View)
@@ -771,8 +780,9 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 							}
 							else
 							{
-								// wtf?
-								return s + strlen(s);
+								// It might be better to let the style bleed into the 
+								// layout rather than miss the rest of the document?
+								return s;
 							}
 							break;
 						}

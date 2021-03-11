@@ -3050,6 +3050,11 @@ void GTag::SetStyle()
 			FontSize(SizeSmaller);
 			break;
 		}
+		case TAG_TITLE:
+		{
+			Display(GCss::DispNone);
+			break;
+		}
 	}
 
 	if (Get("width", s))

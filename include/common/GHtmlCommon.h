@@ -60,6 +60,7 @@ enum HtmlTag
 	TAG_SUP,
 	TAG_SUB,
 	TAG_EM,
+	TAG_TITLE,
 	TAG_LAST
 };
 
