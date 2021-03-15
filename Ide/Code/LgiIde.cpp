@@ -535,7 +535,7 @@ public:
 	GTabPage *Find;
 	GTabPage *Ftp;
 	LList *FtpLog;
-	GTextLog *Txt[4];
+	GTextLog *Txt[3];
 	GArray<char> Buf[3];
 	GFont Small;
 	GFont Fixed;
@@ -1423,12 +1423,8 @@ public:
 			}
 
 			Recent->New() = File;
-			while (Recent->Length() > 10)
-			{
-				char *f = *Recent->rbegin();
-				Recent->Delete(f);
-				DeleteArray(f);
-			}
+			if (Recent->Length() > 10)
+				Recent->Length(10);
 
 			UpdateMenus();
 		}
