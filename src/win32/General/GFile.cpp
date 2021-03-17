@@ -1453,6 +1453,11 @@ public:
 
 		return true;
 	}
+
+	void OnError(const char *File, int Line, DWORD Code, const char *Ctx)
+	{
+		LgiTrace("%s:%i - GFile::Write(%s) Err=0x%x\n", File, Line, Name.Get(), LastError = Code);
+	}
 };
 
 GFile::GFile(const char *Path, int Mode)
@@ -1561,6 +1566,7 @@ int GFile::Open(const char *File, int Mode)
 
 		if (!ValidHandle(d->hFile))
 		{
+			// d->OnError(_FL, GetLastError(), "Open");
 			switch (d->LastError = GetLastError())
 			{
 				case ERROR_FILE_NOT_FOUND:
@@ -1693,7 +1699,7 @@ ssize_t GFile::Read(void *Buffer, ssize_t Size, int Flags)
 		{
 			Rd += Bytes;
 			d->Status &= Bytes > 0;
-			d->LastError = GetLastError();
+			d->OnError(_FL, GetLastError(), "Read");
 			break;
 		}
 	}
@@ -1725,8 +1731,7 @@ ssize_t GFile::Write(const void *Buffer, ssize_t Size, int Flags)
 		}
 		else
 		{
-			d->LastError = GetLastError();
-			LgiTrace("%s:%i - GFile::Write Err=%x\n", _FL, d->LastError);
+			d->OnError(_FL, GetLastError(), "Write");
 			break;
 		}
 	}
@@ -1772,7 +1777,7 @@ ssize_t GFile::SwapRead(uchar *Buf, ssize_t Size)
 
 	if (!ReadFile(d->hFile, Buf, (DWORD)Size, &r, NULL) || r != Size)
 	{
-		d->LastError = GetLastError();
+		d->OnError(_FL, GetLastError(), "SwapRead");
 		return 0;
 	}
 
