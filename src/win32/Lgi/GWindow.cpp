@@ -58,7 +58,7 @@ public:
 	bool AlwaysOnTop;
 	GWindowZoom Show;
 	bool InCreate;
-	WINDOWPLACEMENT *Wp;
+	GAutoPtr<WINDOWPLACEMENT> Wp;
 	LPoint Dpi;
 
 	// Focus stuff
@@ -71,12 +71,10 @@ public:
 		Show = GZoomNormal;
 		SnapToEdge = false;
 		AlwaysOnTop = false;
-		Wp = 0;
 	}
 
 	~GWindowPrivate()
 	{
-		DeleteObj(Wp);
 	}
 	
 	ssize_t GetHookIndex(GView *Target, bool Create = false)
@@ -643,10 +641,10 @@ void GWindow::Visible(bool v)
 			GWindowZoom z = d->Show;
 			char *Cmd = 0;
 
-			WINDOWPLACEMENT *Wp = new WINDOWPLACEMENT;
+			GAutoPtr<WINDOWPLACEMENT> Wp(new WINDOWPLACEMENT);
 			if (Wp)
 			{
-				ZeroObj(*Wp);
+				ZeroObj(*Wp.Get());
 				Wp->length = sizeof(*Wp);
 				Wp->flags = 2;
 				Wp->ptMaxPosition.x = -1;
@@ -675,14 +673,7 @@ void GWindow::Visible(bool v)
 				SetWindowPlacement(_View, Wp);
 
 				if (d->InCreate)
-				{
-					DeleteObj(d->Wp);
 					d->Wp = Wp;
-				}
-				else
-				{
-					DeleteObj(Wp);
-				}
 			}
 		}
 	}
@@ -870,30 +861,23 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 		}
 		case M_SET_WINDOW_PLACEMENT:
 		{
-			/*	
-				Apparently if you use SetWindowPlacement inside the WM_CREATE handler,
+			/*	Apparently if you use SetWindowPlacement inside the WM_CREATE handler,
 				then the restored rect doesn't "stick", it gets stomped on by windows.
-				So this code... RESETS it to be what we set earlier. Windows sucks.
-			*/
-			if (d->Wp)
-			{
-				if (_View)
-				{
-					GRect r = d->Wp->rcNormalPosition;
+				So this code... RESETS it to be what we set earlier. Windows sucks. */
+			if (!d->Wp || !_View)
+				break;
 
-					if (!GView::Visible())
-					{
-						d->Wp->showCmd = SW_HIDE;
-					}
+			GRect r = d->Wp->rcNormalPosition;
 
-					#if DEBUG_WINDOW_PLACEMENT
-					LgiTrace("%s:%i - SetWindowPlacement, pos=%s, show=%i\n", __FILE__, __LINE__, r.GetStr(), d->Wp->showCmd);
-					#endif
+			if (!GView::Visible())
+				d->Wp->showCmd = SW_HIDE;
 
-					SetWindowPlacement(_View, d->Wp);
-				}
-				DeleteObj(d->Wp);
-			}
+			#if DEBUG_WINDOW_PLACEMENT
+			LgiTrace("%s:%i - SetWindowPlacement, pos=%s, show=%i\n", __FILE__, __LINE__, r.GetStr(), d->Wp->showCmd);
+			#endif
+
+			SetWindowPlacement(_View, d->Wp);
+			d->Wp.Reset();
 			break;
 		}
 		case WM_SYSCOLORCHANGE:
@@ -930,6 +914,7 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 					Info->cy = GetMinimumSize().y;
 				}
 
+				/* This is broken on windows 10... windows get stuck on the edge of the desktop.
 				RECT Rc;
 				if (d->SnapToEdge &&
 					SystemParametersInfo(SPI_GETWORKAREA, 0, &Rc, SPIF_SENDCHANGE))
@@ -967,6 +952,7 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 						}
 					}
 				}
+				*/
 			}
 			break;
 		}
@@ -1025,7 +1011,7 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 		}
 		case WM_WINDOWPOSCHANGED:
 		{
-			DeleteObj(d->Wp);
+			d->Wp.Reset();
 			Status = GView::OnEvent(Msg) != 0;
 			break;
 		}
@@ -1266,11 +1252,11 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 				State = GZoomMax;
 			}
 
-			WINDOWPLACEMENT *Wp = new WINDOWPLACEMENT;
+			GAutoPtr<WINDOWPLACEMENT> Wp(new WINDOWPLACEMENT);
 			if (Wp)
 			{
-				ZeroObj(*Wp);
-				Wp->length = sizeof(*Wp);
+				ZeroObj(*Wp.Get());
+				Wp->length = sizeof(WINDOWPLACEMENT);
 				if (Visible())
 				{
 					if (State == GZoomMax)
@@ -1331,14 +1317,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 				SetWindowPlacement(Handle(), Wp);
 
 				if (d->InCreate)
-				{
-					DeleteObj(d->Wp);
 					d->Wp = Wp;
-				}
-				else
-				{
-					DeleteObj(Wp);
-				}
 			}
 		}
 		else return false;
