@@ -550,8 +550,9 @@ public:
 	GEdit *DebugEdit;
 	GTextLog *DebuggerLog;
 
-	IdeOutput(AppWnd *app) : Txt({0})
+	IdeOutput(AppWnd *app)
 	{
+		ZeroObj(Txt);
 		App = app;
 		Build = Output = Debug = Find = Ftp = 0;
 		FtpLog = 0;
@@ -1414,7 +1415,7 @@ public:
 			auto *Recent = IsProject ? &RecentProjects : &RecentFiles;
 			for (auto &f: *Recent)
 			{
-				if (LFileCompare(f, File) == 0)
+				if (f && LFileCompare(f, File) == 0)
 				{
 					f = File;
 					UpdateMenus();
@@ -1778,12 +1779,17 @@ public:
 		return true;
 	}
 
-	GString::Array Dependencies()
+	GString::Array Dependencies(const char *Executable, int Depth = 0)
 	{
 		GString Args;
 		GStringPipe p;
-		Args.Printf("/dependents \"%s\"", InFile.Get());
+		Args.Printf("/dependents \"%s\"", Executable);
 		DumpBin(Args, &p);
+
+		char Spaces[256];
+		int Len = Depth * 2;
+		memset(Spaces, ' ', Len);
+		Spaces[Len] = 0;
 
 		GString::Array Files;
 		auto Parts = p.NewGStr().Replace("\r", "").Split("\n\n");
@@ -1791,8 +1797,9 @@ public:
 		{
 			Files = Parts[4].Strip().Split("\n");
 			auto Path = LGetPath();
-			for (auto &f : Files)
+			for (size_t i=0; i<Files.Length(); i++)
 			{
+				auto &f = Files[i];
 				f = f.Strip();
 
 				bool Found = false;
@@ -1810,6 +1817,22 @@ public:
 
 				if (!Found)
 					f += " (not found in path)";
+				else
+				{
+					if (!stristr(f, "\\system32\\") &&
+						!stristr(f, "\\Windows Kits\\") &&
+						!stristr(f, "vcruntime"))
+					{
+						auto Deps = Dependencies(f, Depth + 1);
+						Files.SetFixedLength(false);
+						for (auto s: Deps)
+						{
+							GString p;
+							p.Printf("%s%s", Spaces, s.Get());
+							Files.AddAt(++i, p);
+						}
+					}
+				}
 			}
 		}
 
@@ -1915,7 +1938,7 @@ public:
 	{
 		if (!IsLib)
 		{
-			auto Deps = Dependencies();
+			auto Deps = Dependencies(InFile);
 			if (Deps.Length())
 				Out->Print("Dependencies:\n\t%s\n\n", GString("\n\t").Join(Deps).Get());
 		}
@@ -4207,6 +4230,8 @@ int LgiMain(OsAppArguments &AppArgs)
 		GAutoString out(DecodeRfc2047(NewStr(s)));
 		printf("out=%s\n", out.Get());
 		#endif
+
+		auto hnd = LoadLibraryA("C:\\Users\\Matthew\\gst\\gst-build\\plugins\\gstaccurip.dll");
 
 		a.AppWnd = new AppWnd;
 		a.Run();

@@ -939,7 +939,8 @@ DebugTrace("%s:%i - open loop finished=%i\n", _FL, r);
 					sprintf_s(m, sizeof(m), "Connected to '%s'", h);
 					OnInformation(m);
 				}
-				else SslError(_FL, "BIO_do_connect failed");
+				else
+					SslError(_FL, "BIO_do_connect failed");
 			}
 			else SslError(_FL, "BIO_new_connect failed");
 		}

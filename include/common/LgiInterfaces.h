@@ -507,8 +507,10 @@ public:
 	{
 		GViewI *Ctrl = FindControl(Id);
 		Ptr = dynamic_cast<T*>(Ctrl);
+		#ifdef _DEBUG
 		if (Ctrl != NULL && Ptr == NULL)
 			LgiTrace("%s:%i - Can't cast '%s' to target type.\n", _FL, Ctrl->GetClass());
+		#endif
 		return Ptr != NULL;
 	}
 

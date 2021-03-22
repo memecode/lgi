@@ -2252,7 +2252,8 @@ bool MailPop3::Open(GSocketI *S, const char *RemoteHost, int Port, const char *U
 					LgiTrace("%s:%i - Failed auth.\n", _FL);
 				}
 			}
-			else Error(_FL, "Failed to open socket to %s:%i and read reply.\n", Server, Port);
+			else
+				Error(_FL, "Failed to open socket to %s:%i and read reply.\n", Server, Port);
 		}
 		else Error(_FL, "No user/pass.\n");
 	}
