@@ -447,8 +447,9 @@ bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 
 	s.InitialDir(Args.Length() > 2 ? Args[2]->CastString() : 0);
 	s.MultiSelect(Args.Length() > 3 ? Args[3]->CastInt32() != 0 : true);
+	bool SaveAs = Args.Length() > 4 ? Args[4]->CastInt32() != 0 : false;
 
-	if (s.Open())
+	if (SaveAs ? s.Save() : s.Open())
 	{
 		Args.GetReturn()->SetList();
 		for (unsigned i=0; i<s.Length(); i++)
@@ -456,6 +457,22 @@ bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 			Args.GetReturn()->Value.Lst->Insert(new GVariant(s[i]));
 		}
 	}
+
+	return true;
+}
+
+bool SystemFunctions::SelectFolder(LScriptArguments &Args)
+{
+	GFileSelect s;
+	
+	if (Args.Length() > 0)
+		s.Parent(CastGView(*Args[0]));
+	s.InitialDir(Args.Length() > 1 ? Args[1]->CastString() : 0);
+
+	if (s.OpenFolder())
+		*Args.GetReturn() = s.Name();
+	else
+		Args.GetReturn()->Empty();
 
 	return true;
 }
@@ -996,6 +1013,7 @@ GHostFunc SystemLibrary[] =
 	DefFn(ReadTextFile),
 	DefFn(WriteTextFile),
 	DefFn(SelectFiles),
+	DefFn(SelectFolder),
 	DefFn(ListFiles),
 	DefFn(DeleteFile),
 

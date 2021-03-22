@@ -65,6 +65,7 @@
 					<a href="#ReadTextFile">ReadTextFile</a><br>
 					<a href="#WriteTextFile">WriteTextFile</a><br>
 					<a href="#SelectFiles">SelectFiles</a><br>
+					<a href="#SelectFolder">SelectFolder</a><br>
 					<a href="#ListFiles">ListFiles</a><br>
 					<a href="#DeleteFile">DeleteFile</a><br>
 					<br>
@@ -583,7 +584,7 @@ c.Sort();
 				</ul>
 			</div>
 
-		<h4>list <a name="SelectFiles">SelectFiles</a>(parent_wnd[, file_types[, initial_dir[, multi_select]]]);</h4>
+		<h4>list <a name="SelectFiles">SelectFiles</a>(parent_wnd[, file_types[, initial_dir[, multi_select[, save_as]]]]);</h4>
 			<div>
 				Shows a file select dialog.
 				<br><br>
@@ -593,6 +594,7 @@ c.Sort();
 					<li> [optional] file_types - the types of files to select, e.g. "*.gif;*.png;*.jpg".
 					<li> [optional] initial_dir - the initial folder to select from.
 					<li> [optional] multi_select - TRUE if multiple file can be selected.
+					<li> [optional] save_as - TRUE if dialog should be for saving a file.
 				</ul>
 				<br>
 				Returns:
@@ -612,6 +614,22 @@ if (files)
 				<pre class=output>C:\Users\matthew\Desktop\2channel.png
 C:\Users\matthew\Desktop\19.Poster_1.png
 C:\Users\matthew\Desktop\payment.png</pre>
+			</div>
+
+		<h4>list <a name="SelectFolder">SelectFolder</a>(parent_wnd[, initial_dir]);</h4>
+			<div>
+				Shows a folder select dialog.
+				<br><br>
+				Arguments:
+				<ul>
+					<li> parent_wnd - the handle of the parent window.
+					<li> [optional] initial_dir - the initial folder to select from.
+				</ul>
+				<br>
+				Returns:
+				<ul>
+					<li> String FolderPath.
+				</ul>
 			</div>
 
 		<h4>list <a name="ListFiles">ListFiles</a>(folder_path[, pattern]);</h4>

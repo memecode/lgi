@@ -497,6 +497,10 @@ public:
 		/// Args: GView *Parent, char *Patterns, 
 		///		  char *InitFolder, bool Multiselect
 		bool SelectFiles(LScriptArguments &Args);
+		/// Open a folder select dialog
+		///
+		/// Args: GView *Parent, char *InitFolder
+		bool SelectFolder(LScriptArguments &Args);
 		/// Lists file in folder
 		///
 		/// Args; char *Path, [optional] char *Pattern
