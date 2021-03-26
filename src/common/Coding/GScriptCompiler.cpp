@@ -3552,7 +3552,10 @@ bool GCompiler::Compile
 			if (!d->Methods.Find(f[i].Method))
 				d->Methods.Add(f[i].Method, f+i);
 			else
+			{
+				LgiTrace("%s:%i - Conflicting name of method in application's context: '%s'\n", _FL, f[i].Method.Get());
 				LgiAssert(!"Conflicting name of method in application's context.");
+			}
 		}
 	}
 
