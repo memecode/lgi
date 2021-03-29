@@ -224,6 +224,9 @@
   <ItemGroup>
     <Image Include="Resources\icon-win.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Installer.nsi" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

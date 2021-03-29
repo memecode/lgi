@@ -1456,7 +1456,7 @@ public:
 
 	void OnError(const char *File, int Line, DWORD Code, const char *Ctx)
 	{
-		LgiTrace("%s:%i - GFile::Write(%s) Err=0x%x\n", File, Line, Name.Get(), LastError = Code);
+		LgiTrace("%s:%i - GFile::%s(%s) Err=0x%x\n", File, Line, Ctx, Name.Get(), LastError = Code);
 	}
 };
 
@@ -1689,7 +1689,7 @@ ssize_t GFile::Read(void *Buffer, ssize_t Size, int Flags)
 		int BlockSz = (int) MIN( Size - Pos, 1 << 30 ); // 1 GiB blocks
 
 		if (ReadFile(d->hFile, (char*)Buffer + Pos, BlockSz, &Bytes, NULL) &&
-			Bytes == BlockSz)
+			Bytes > 0)
 		{
 			Rd += Bytes;
 			Pos += Bytes;
