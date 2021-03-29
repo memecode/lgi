@@ -13,6 +13,9 @@ ln -s Makefile.linux makefile
 (cd ResourceEditor && make -j 4)
 
 WD=$(pwd)
-echo "Add these paths to your .profile's LD_LIBRARY_PATH:"
-echo "$WD/Debug"
-echo "$WD/Release"
+if [ ! -f /usr/lib/liblgi-gtk3d.so ]; then
+	sudo ln -s "$WD/Debug/liblgi-gtk3d.so" /usr/lib/liblgi-gtk3d.so
+fi
+if [ ! -f /usr/lib/liblgi-gtk3.so ]; then
+	sudo ln -s "$WD/Release/liblgi-gtk3.so" /usr/lib/liblgi-gtk3.so
+fi
