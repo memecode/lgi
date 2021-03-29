@@ -4231,8 +4231,6 @@ int LgiMain(OsAppArguments &AppArgs)
 		printf("out=%s\n", out.Get());
 		#endif
 
-		auto hnd = LoadLibraryA("C:\\Users\\Matthew\\gst\\gst-build\\plugins\\gstaccurip.dll");
-
 		a.AppWnd = new AppWnd;
 		a.Run();
 	}
