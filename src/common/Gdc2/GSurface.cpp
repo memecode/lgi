@@ -103,6 +103,23 @@ GSurface::~GSurface()
 	}
 }
 
+GString GSurface::GetStr()
+{
+	GString::Array s;
+	s.SetFixedLength(false);
+	s.New().Printf("Size(%ix%i)", X(), Y());
+	s.New().Printf("ColourSpace(%s)", GColourSpaceToString(ColourSpace));
+	s.New().Printf("IsScreen(%i)", IsScreen());
+	if (pAlphaDC)
+		s.New().Printf("pAlphaDC(%ix%i,%s)", pAlphaDC->X(), pAlphaDC->Y(), GColourSpaceToString(pAlphaDC->GetColourSpace()));
+	if (Clip.Valid())
+		s.New().Printf("Clip(%s)", Clip.GetStr());
+	s.New().Printf("Op(%i)", Op());
+	s.New().Printf("GetRowStep(" LPrintfSizeT ")", GetRowStep());
+	
+	return GString(" ").Join(s);
+}
+
 GSurface *GSurface::SubImage(GRect r)
 {
 	if (!pMem || !pMem->Base)

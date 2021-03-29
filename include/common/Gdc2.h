@@ -672,6 +672,9 @@ public:
 		/// The bounds of the filled area or NULL if you don't care
 		GRect *Bounds = NULL
 	);
+	
+	/// Describes the image
+	virtual GString GetStr();
 
 	// GDom interface
 	bool GetVariant(const char *Name, GVariant &Value, char *Array = NULL);

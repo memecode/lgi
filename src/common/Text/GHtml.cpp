@@ -2549,7 +2549,17 @@ void GTag::SetImage(const char *Uri, GSurface *Img)
 		}
 		else
 		{
-			Image.Reset(Img);
+			if (Img->GetColourSpace() == CsIndex8)
+			{
+				if (Image.Reset(new GMemDC(Img->X(), Img->Y(), System32BitColourSpace)))
+				{
+					Image->Colour(0, 32);
+					Image->Rectangle();
+					Image->Blt(0, 0, Img);
+				}
+				else LgiTrace("%s:%i - SetImage can't promote 8bit image to 32bit.\n", _FL);
+			}
+			else Image.Reset(Img);
 			
 			GRect r = XSubRect();
 			if (r.Valid())
