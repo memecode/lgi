@@ -914,7 +914,32 @@ bool GFileSystem::CreateFolder(const char *PathName, bool CreateParentTree, LErr
 	{
 		if (ErrorCode)
 			*ErrorCode = errno;
-		printf("%s:%i - mkdir('%s') failed with %i, errno=%i\n", _FL, PathName, r, errno);
+
+		if (CreateParentTree)
+		{
+			GFile::Path p(PathName);
+			GString dir = DIR_STR;
+			for (size_t i=1; i<=p.Length(); i++)
+			{
+				GFile::Path Par(dir + dir.Join(p.Slice(0, i)));
+				if (!Par.Exists())
+				{
+					const char *ParDir = Par;
+					r = mkdir(ParDir, S_IRWXU | S_IXGRP | S_IXOTH);
+					if (r)
+					{
+						if (ErrorCode)
+							*ErrorCode = errno;
+						break;
+					}
+					LgiTrace("%s:%i - Created '%s'\n", _FL, Par.GetFull().Get());
+				}
+			}
+			if (p.Exists())
+				return true;
+		}
+	
+		LgiTrace("%s:%i - mkdir('%s') failed with %i, errno=%i\n", _FL, PathName, r, errno);
 	}
 	
 	return r == 0;
