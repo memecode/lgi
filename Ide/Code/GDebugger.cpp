@@ -73,6 +73,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 	GDebugEvents *Events;
 	GAutoPtr<GSubProcess> Sp;
 	GString Exe, Args, InitDir;
+	GString ChildEnv;
 	bool RunAsAdmin;
 	bool AtPrompt;
 	char Line[256], *LinePtr;
@@ -488,7 +489,22 @@ class Gdb : public GDebugger, public LThread, public Callback
 
 		if (InitDir)
 			Sp->SetInitFolder(InitDir);
-		
+		if (ChildEnv)
+		{
+			auto p = ChildEnv.Split("\n");
+			for (auto &v: p)
+			{
+				auto a = v.Strip().Split("=", 1);
+				if (a.Length() == 2)
+				{
+					LogMsg("%s:%i - env %s=%s\n", _FL, a[0].Get(), a[1].Get());					
+					Sp->SetEnvironment(a[0], a[1]);
+				}
+				else LogMsg("%s:%i - Wrong parts %s.", _FL, v.Get());
+			}
+		}
+		else LogMsg("%s:%i - No env.", _FL);
+					
 		LgiTrace("Starting gdb subprocess...\n");
 		if (!Sp->Start(true, true, false))
 		{
@@ -665,14 +681,16 @@ public:
 		}
 	}
 
-	bool Load(GDebugEvents *EventHandler, const char *exe, const char *args, bool runAsAdmin, const char *initDir)
+	bool Load(GDebugEvents *EventHandler, const char *exe, const char *args, bool runAsAdmin, const char *initDir, const char *Env)
 	{
 		Events = EventHandler;
 		Exe = exe;
 		Args = args;
 		RunAsAdmin = runAsAdmin;
+		ChildEnv = Env;
 		InitDir = initDir;
 		Running = false;
+		
 		Run();
 		
 		return true;
@@ -896,7 +914,7 @@ public:
 					{
 					}
 					
-					bool Status = Cmd(a);
+					bool Status = Cmd("c"); // Continue
 					if (Status)
 						SetState(true, true);
 

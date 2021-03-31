@@ -129,9 +129,8 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
-			<DebugAdmin />
-			<CCrossCompiler />
 			<CppCrossCompiler />
+			<CCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -248,5 +247,14 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>
+		<Debug>
+			<Environment>
+				<All>SOME_TEST=testing</All>
+			</Environment>
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+		</Debug>
 	</Settings>
 </Project>

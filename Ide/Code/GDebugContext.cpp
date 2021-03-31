@@ -19,7 +19,7 @@ public:
 	IdeProject *Proj;
 	bool InDebugging;
 	GAutoPtr<GDebugger> Db;
-	GAutoString Exe, Args;
+	GString Exe, Args;
 	
 	GString SeekFile;
 	int SeekLine;
@@ -150,7 +150,7 @@ public:
 	}
 };
 
-GDebugContext::GDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, const char *Args, bool RunAsAdmin)
+GDebugContext::GDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir)
 {
 	Watch = NULL;
 	Locals = NULL;
@@ -162,14 +162,22 @@ GDebugContext::GDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, con
 	d = new GDebugContextPriv(this);
 	d->App = App;
 	d->Proj = Proj;
-	d->Exe.Reset(NewStr(Exe));
+	d->Exe = Exe;
 	
 	if (d->Db.Reset(CreateGdbDebugger(App->GetDebugLog())))
 	{
-		GFile::Path p = Exe;
-		p--;
+		GFile::Path p;
+		if (InitDir)
+		{
+			p = InitDir;
+		}
+		else
+		{
+			p = Exe;
+			p--;
+		}
 	
-		if (!d->Db->Load(this, Exe, Args, RunAsAdmin, p))
+		if (!d->Db->Load(this, Exe, Args, RunAsAdmin, p, Env))
 		{
 			d->Log("Failed to load '%s' into debugger.\n", d->Exe.Get());
 			d->Db.Reset();

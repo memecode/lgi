@@ -29,6 +29,8 @@ enum ProjSetting
 	ProjPostBuildCommands,
 	ProjRemoteUri,
 	ProjRemotePass,
+	ProjEnv,
+	ProjInitDir
 };
 
 class IdeProjectSettings

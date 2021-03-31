@@ -76,7 +76,7 @@ public:
 	
 	virtual ~GDebugger() {}
 	
-	virtual bool Load(GDebugEvents *EventHandler, const char *Exe, const char *Args, bool RunAsAdmin, const char *InitDir) = 0;
+	virtual bool Load(GDebugEvents *EventHandler, const char *Exe, const char *Args, bool RunAsAdmin, const char *InitDir, const char *Env) = 0;
 	virtual bool Restart() = 0;
 	virtual bool Unload() = 0;
 	

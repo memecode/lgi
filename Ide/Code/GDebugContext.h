@@ -16,7 +16,7 @@ public:
 	class GTextLog *Registers;
 
 	// Object
-	GDebugContext(AppWnd *App, class IdeProject *Proj, const char *Exe, const char *Args, bool RunAsAdmin = false);
+	GDebugContext(AppWnd *App, class IdeProject *Proj, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir);
 	virtual ~GDebugContext();
 
 	// Impl

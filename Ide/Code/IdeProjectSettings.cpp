@@ -79,13 +79,15 @@ static const char **GetEnumValues(ProjSetting s)
 #define SF_CONFIG_SPECIFIC		0x08	// Can have a different setting in different configs
 #define SF_ENUM					0x10	// Integer is actually an enum index, not a straight number
 #define SF_FILE_SELECT			0x20	// UI needs a file selection button
-#define SF_PASSWORD				0x40	// UI needs to hide the characters of the password
+#define SF_FOLDER_SELECT		0x40	// UI needs a file selection button
+#define SF_PASSWORD				0x80	// UI needs to hide the characters of the password
 
 #define IDC_TEXT_BASE			100
 #define IDC_EDIT_BASE			200
 #define IDC_CHECKBOX_BASE		300
 #define IDC_COMBO_BASE			400
 #define IDC_BROWSE_FILE			500
+#define IDC_BROWSE_FOLDER		600
 
 struct SettingInfo
 {
@@ -97,6 +99,7 @@ struct SettingInfo
 		uint32_t ConfigSpecific : 1;
 		uint32_t Enum : 1;
 		uint32_t FileSelect : 1;
+		uint32_t FolderSelect : 1;
 		uint32_t IsPassword : 1;
 	};
 	
@@ -117,13 +120,16 @@ SettingInfo AllSettings[] =
 	
 	{ProjMakefile,				GV_STRING,		"Makefile",			sGeneral,	{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
 	{ProjExe,					GV_STRING,		"Executable",		sGeneral,	{SF_PLATFORM_SPECIFC|SF_CONFIG_SPECIFIC|SF_FILE_SELECT}},
-	{ProjArgs,					GV_STRING,		"Arguments",		sGeneral,	{SF_CROSSPLATFORM|SF_CONFIG_SPECIFIC}},
-	{ProjDebugAdmin,			GV_BOOL,		"DebugAdmin",		sGeneral,	{SF_CROSSPLATFORM}},
-	{ProjDefines,				GV_STRING,		"Defines",			sGeneral,	{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
 	{ProjCompiler,				GV_INT32,		"Compiler",			sGeneral,	{SF_PLATFORM_SPECIFC|SF_ENUM}},
 	{ProjCCrossCompiler,		GV_STRING,		"CCrossCompiler",	sGeneral,	{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
 	{ProjCppCrossCompiler,		GV_STRING,		"CppCrossCompiler",	sGeneral,	{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
+
+	{ProjEnv,					GV_STRING,		"Environment",		sDebug,		{SF_CROSSPLATFORM|SF_MULTILINE}},
+	{ProjArgs,					GV_STRING,		"Arguments",		sDebug,		{SF_CROSSPLATFORM|SF_CONFIG_SPECIFIC}},
+	{ProjDebugAdmin,			GV_BOOL,		"DebugAdmin",		sDebug,		{SF_CROSSPLATFORM}},
+	{ProjInitDir,				GV_STRING,		"InitialDir",		sDebug,		{SF_CROSSPLATFORM|SF_FOLDER_SELECT}},
 	
+	{ProjDefines,				GV_STRING,		"Defines",			sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
 	{ProjIncludePaths,			GV_STRING,		"IncludePaths",		sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
 	{ProjSystemIncludes,		GV_STRING,		"SystemIncludes",	sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC|SF_PLATFORM_SPECIFC}},
 	{ProjLibraries,				GV_STRING,		"Libraries",		sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
@@ -333,11 +339,13 @@ public:
 				Ctrls[i].Edit->Name(t->GetContent());
 			
 			c->Add(Ctrls[i].Edit);
-			if (Setting->Flag.FileSelect)
+			if (Setting->Flag.FileSelect ||	
+				Setting->Flag.FolderSelect)
 			{
 				c = Tbl->GetCell(1, CellY + 1);
+				int Base = Setting->Flag.FileSelect ? IDC_BROWSE_FILE : IDC_BROWSE_FOLDER;
 				if (c)
-					c->Add(new GButton(IDC_BROWSE_FILE + i, 0, 0, -1, -1, "..."));
+					c->Add(new GButton(Base + i, 0, 0, -1, -1, "..."));
 				else
 					LgiTrace("%s:%i - No cell.\n", _FL);
 			}
@@ -638,11 +646,23 @@ public:
 			default:
 			{
 				int Id = Ctrl->GetId();
+				int BrowseIdx = -1;
+				bool BrowseFolder = false;
+				
 				if (Id >= IDC_BROWSE_FILE && Id < IDC_BROWSE_FILE+100)
 				{
-					int i = Id - IDC_BROWSE_FILE;
+					BrowseIdx = Id - IDC_BROWSE_FILE;
+				}
+				else if (Id >= IDC_BROWSE_FOLDER && Id < IDC_BROWSE_FOLDER+100)
+				{
+					BrowseIdx = Id - IDC_BROWSE_FOLDER;
+					BrowseFolder = true;
+				}
+				
+				if (BrowseIdx >= 0)
+				{
 					GEdit *e;
-					if (GetViewById(IDC_EDIT_BASE + i, e))
+					if (GetViewById(IDC_EDIT_BASE + BrowseIdx, e))
 					{
 						GFileSelect s;
 						s.Parent(this);
@@ -654,7 +674,7 @@ public:
 						if (Path.Exists())
 							s.InitialDir(Path);
 
-						if (s.Open())
+						if (BrowseFolder ? s.OpenFolder() : s.Open())
 						{
 							const char *Base = GetCtrlName(IDC_PATH);
 							GAutoString Rel;
@@ -668,7 +688,6 @@ public:
 
 						return 0; // no default btn handling.
 					}
-					//       else LgiTrace("%s:%i - Failed to find editbox: %i\n", _FL, i);
 				}
 				break;
 			}

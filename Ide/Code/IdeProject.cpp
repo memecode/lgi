@@ -2400,10 +2400,19 @@ GDebugContext *IdeProject::Execute(ExeAction Act)
 			if (FileExists(e))
 			{
 				const char *Args = d->Settings.GetStr(ProjArgs);
+				const char *Env = d->Settings.GetStr(ProjEnv);
+				GString InitDir = d->Settings.GetStr(ProjInitDir);
 				int RunAsAdmin = d->Settings.GetInt(ProjDebugAdmin);
 				if (Act == ExeDebug)
 				{
-					return new GDebugContext(d->App, this, e, Args, RunAsAdmin != 0);
+					if (InitDir && LgiIsRelativePath(InitDir))
+					{
+						GFile::Path p(Base);
+						p += InitDir;
+						InitDir = p.GetFull();
+					}
+						
+					return new GDebugContext(d->App, this, e, Args, RunAsAdmin != 0, Env, InitDir);
 				}
 				else
 				{
