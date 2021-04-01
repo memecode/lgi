@@ -1410,25 +1410,25 @@ public:
 	
 	void OnFile(const char *File, bool IsProject = false)
 	{
-		if (File)
+		if (!File)
+			return;
+
+		auto *Recent = IsProject ? &RecentProjects : &RecentFiles;
+		for (auto &f: *Recent)
 		{
-			auto *Recent = IsProject ? &RecentProjects : &RecentFiles;
-			for (auto &f: *Recent)
+			if (f && LFileCompare(f, File) == 0)
 			{
-				if (f && LFileCompare(f, File) == 0)
-				{
-					f = File;
-					UpdateMenus();
-					return;
-				}
+				f = File;
+				UpdateMenus();
+				return;
 			}
-
-			Recent->New() = File;
-			if (Recent->Length() > 10)
-				Recent->Length(10);
-
-			UpdateMenus();
 		}
+
+		Recent->AddAt(0, File);
+		if (Recent->Length() > 10)
+			Recent->Length(10);
+
+		UpdateMenus();
 	}
 	
 	void RemoveRecent(const char *File)
@@ -2581,7 +2581,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 
 			for (auto Project : Projs)
 			{
-				GAutoString ProjPath = Project->GetBasePath();
+				auto ProjPath = Project->GetBasePath();
 				char p[MAX_PATH];
 				LgiMakePath(p, sizeof(p), ProjPath, File);
 				GString Path = p;

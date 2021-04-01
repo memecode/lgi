@@ -5,6 +5,7 @@
 #include "GVariant.h"
 
 ////////////////////////////////////////////////////////////////////
+#define DEBUG_LOG				1
 #define M_MRU_BASE				(M_USER+0x3500)
 
 struct GMruEntry
@@ -212,6 +213,9 @@ bool GMru::Set(LSubMenu *parent, int size)
 
 const char *GMru::AddFile(const char *FileName, bool Update)
 {
+	#if DEBUG_LOG
+	LgiTrace("%s:%i - AddFile(%s,%i)\n", _FL, FileName, Update);
+	#endif
 	if (!FileName)
 		return NULL;
 
@@ -220,6 +224,9 @@ const char *GMru::AddFile(const char *FileName, bool Update)
 	for (int i=0; i<d->Items.Length(); i++)
 	{
 		GMruEntry *e = d->Items[i];
+		#if DEBUG_LOG
+		LgiTrace("[%i] cmp '%s' '%s'\n", i, e->Raw.Get(), FileName);
+		#endif
 		if (!LFileCompare(e->Raw, FileName))
 		{
 			// exact string being added.. just move to the top
@@ -229,6 +236,15 @@ const char *GMru::AddFile(const char *FileName, bool Update)
 				e->Raw.Length() == strlen(FileName))
 			{
 				e->Raw = FileName; // This fixes any changes in case...
+				#if DEBUG_LOG
+				LgiTrace("Updating raw case\n");
+				#endif
+			}
+			else
+			{
+				#if DEBUG_LOG
+				LgiTrace("Moving to the top\n");
+				#endif
 			}
 			
 			d->Items.DeleteAt(i, true);
@@ -244,9 +260,15 @@ const char *GMru::AddFile(const char *FileName, bool Update)
 		c->Raw = FileName;
 		if (SerializeEntry(&c->Display, &c->Raw, NULL))
 		{
+			#if DEBUG_LOG
+			LgiTrace("Adding new entry %s %s\n", c->Raw.Get(), c->Display.Get());
+			#endif
 			d->Items.AddAt(0, c);
 		}
-		else LgiAssert(0);
+		else
+		{
+			LgiAssert(0);
+		}
 	}
 
 	if (Update)
