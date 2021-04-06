@@ -3714,7 +3714,10 @@ bool VcFolder::Revert(GString::Array &Uris, const char *Revision)
 		case VcSvn:
 		{
 			GStringPipe p;
-			p.Print("revert");
+			if (Revision)
+				p.Print("up -r %s", Revision);
+			else
+				p.Print("revert");
 			for (auto u: Uris)
 			{
 				auto Path = GetFilePart(u);
