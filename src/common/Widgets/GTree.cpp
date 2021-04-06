@@ -36,6 +36,7 @@ public:
     int8            IconTextGap;
     int				LastLayoutPx;
 	GMouse			*CurrentClick;
+	GTreeItem		*ScrollTo;
     
     // Visual style
 	GTree::ThumbStyle Btns;
@@ -57,6 +58,7 @@ public:
 		IconCache = 0;
 		LayoutDirty = true;
 		IconTextGap = 0;
+		ScrollTo = NULL;
 		
 		Btns = GTree::TreeTriangle;
 		JoiningLines = false;
@@ -537,7 +539,10 @@ void GTreeItem::_RePour()
 
 void GTreeItem::ScrollTo()
 {
-	if (Tree && Tree->VScroll)
+	if (!Tree)
+		return;
+
+	if (Tree->VScroll)
 	{
 		GRect c = Tree->GetClient();
 		GRect p = d->Pos;
@@ -554,6 +559,10 @@ void GTreeItem::ScrollTo()
 			int Lines = (p.y2 - c.y2 + y - 1) / y;
 			Tree->VScroll->Value(Tree->VScroll->Value() + Lines);
 		}
+	}
+	else
+	{
+		Tree->d->ScrollTo = this;
 	}
 }
 
@@ -1922,7 +1931,14 @@ int GTree::OnNotify(GViewI *Ctrl, int Flags)
 		{
 			TREELOCK
 			if (Flags == GNotifyScrollBar_Create)
+			{
 				_UpdateScrollBars();
+				if (VScroll && d->ScrollTo && HasItem(d->ScrollTo))
+				{
+					d->ScrollTo->ScrollTo();
+					d->ScrollTo = NULL;
+				}
+			}
 
 			Invalidate();
 			break;
@@ -1934,6 +1950,20 @@ int GTree::OnNotify(GViewI *Ctrl, int Flags)
 
 GMessage::Result GTree::OnEvent(GMessage *Msg)
 {
+	switch (Msg->Msg())
+	{
+		case M_SCROLL_TO:
+		{
+			GTreeItem *Item = (GTreeItem*)Msg->A();
+			if (!HasItem(Item))
+				break;
+			
+			if (VScroll)
+				Item->ScrollTo();
+			break;
+		}
+	}
+
 	return GLayout::OnEvent(Msg);
 }
 

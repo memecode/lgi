@@ -1031,14 +1031,18 @@ void VcFolder::LogFile(const char *uri)
 	}
 }
 
-VcLeaf *VcFolder::Find(const char *Path)
+VcLeaf *VcFolder::FindLeaf(const char *Path, bool OpenTree)
 {
 	VcLeaf *r = NULL;	
+	
+	if (OpenTree)
+		DoExpand();
+	
 	for (auto n = GetChild(); !r && n; n = n->GetNext())
 	{
 		auto l = dynamic_cast<VcLeaf*>(n);
 		if (l)
-			r = l->Find(Path);
+			r = l->FindLeaf(Path, OpenTree);
 	}
 	
 	return r;
@@ -1051,8 +1055,16 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 		Map.Add(pc->GetRev(), pc);
 
 	int Skipped = 0, Errors = 0;
-	VcLeaf *File = Params ? Find(Params->Str) : NULL;
+	VcLeaf *File = Params ? FindLeaf(Params->Str, true) : NULL;
 	GArray<VcCommit*> *Out = File ? &File->Log : &Log;
+
+	if (File)
+	{
+		for (auto Leaf = File; Leaf; Leaf = Leaf->GetParent())
+			Leaf->OnExpand(true);
+		File->Select(true);
+		File->ScrollTo();
+	}	
 
 	switch (GetType())
 	{
@@ -2338,14 +2350,20 @@ void VcFolder::OnVcsType()
 	}
 }
 
-void VcFolder::OnExpand(bool b)
+void VcFolder::DoExpand()
 {
-	if (Tmp && b)
+	if (Tmp)
 	{
 		Tmp->Remove();
 		DeleteObj(Tmp);
 		ReadDir(this, Uri.ToString());
 	}
+}
+
+void VcFolder::OnExpand(bool b)
+{
+	if (b)
+		DoExpand();
 }
 
 void VcFolder::ListCommit(VcCommit *c)
@@ -3989,30 +4007,39 @@ void VcLeaf::AfterBrowse()
 {
 }
 
-VcLeaf *VcLeaf::Find(const char *Path)
+VcLeaf *VcLeaf::FindLeaf(const char *Path, bool OpenTree)
 {
 	if (!Stricmp(Path, Full().Get()))
 		return this;
+
+	if (OpenTree)
+		DoExpand();
 
 	VcLeaf *r = NULL;	
 	for (auto n = GetChild(); !r && n; n = n->GetNext())
 	{
 		auto l = dynamic_cast<VcLeaf*>(n);
 		if (l)
-			r = l->Find(Path);
+			r = l->FindLeaf(Path, OpenTree);
 	}
 	
 	return r;
 }
 
-void VcLeaf::OnExpand(bool b)
+void VcLeaf::DoExpand()
 {
-	if (Tmp && b)
+	if (Tmp)
 	{
 		Tmp->Remove();
 		DeleteObj(Tmp);
 		Parent->ReadDir(this, Full());
 	}
+}
+
+void VcLeaf::OnExpand(bool b)
+{
+	if (b)
+		DoExpand();
 }
 
 const char *VcLeaf::GetText(int Col)

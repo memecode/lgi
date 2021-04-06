@@ -133,6 +133,7 @@ void VcFile::OnMouseClick(GMouse &m)
 			s.AppendItem("Revert To This Revision", IDM_REVERT_TO_REV, Status != SClean);
 			s.AppendItem("Blame", IDM_BLAME);
 			s.AppendItem("Save As", IDM_SAVE_AS);
+			s.AppendItem("Log", IDM_LOG_FILE);
 		}
 		else
 		{

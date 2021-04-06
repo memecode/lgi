@@ -235,6 +235,7 @@ class VcFolder : public GTreeItem
 	bool ParseCountToTip(int Result, GString s, ParseParams *Params);
 	bool ParseUpdateSubs(int Result, GString s, ParseParams *Params);
 	bool ParseRemoteFind(int Result, GString s, ParseParams *Params);
+	void DoExpand();
 	
 public:
 	VcFolder(AppPriv *priv, const char *uri);
@@ -245,7 +246,7 @@ public:
 	AppPriv *GetPriv() { return d; }
 	const char *LocalPath();
 	GUri GetUri() { return Uri; }
-	VcLeaf *Find(const char *Path);
+	VcLeaf *FindLeaf(const char *Path, bool OpenTree);
 	void DefaultFields();
 	void UpdateColumns();
 	const char *GetText(int Col);
@@ -298,6 +299,8 @@ class VcLeaf : public GTreeItem
 	GString Leaf;
 	GTreeItem *Tmp;
 
+	void DoExpand();
+
 public:
 	GArray<VcCommit*> Log;
 
@@ -305,7 +308,7 @@ public:
 	~VcLeaf();
 
 	GString Full();
-	VcLeaf *Find(const char *Path);
+	VcLeaf *FindLeaf(const char *Path, bool OpenTree);
 	void OnBrowse();
 	void AfterBrowse();
 	void OnExpand(bool b);
