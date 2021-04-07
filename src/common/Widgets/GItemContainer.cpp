@@ -388,6 +388,12 @@ void GItemContainer::GetColumnSizes(ColSizes &cs)
 
 void GItemContainer::ResizeColumnsToContent(int Border)
 {
+	if (!InThread())
+	{
+		PostEvent(M_RESIZE_TO_CONTENT, Border);
+		return;
+	}
+	
 	if (Lock(_FL))
 	{
 		// Read in the current sizes
@@ -705,11 +711,9 @@ void GItemColumn::Width(int i)
 		}
 
 		// Notify listener
-		GViewI *n = d->Parent->GetNotify() ? d->Parent->GetNotify() : d->Parent->GetParent();
-		if (n)
-		{
-			n->OnNotify(d->Parent, GNotifyItem_ColumnsResized);
-		}
+		auto p = d->Parent;
+		if (p)
+			p->SendNotify(GNotifyItem_ColumnsResized);
 	}
 }
 

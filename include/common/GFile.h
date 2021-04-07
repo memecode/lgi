@@ -633,7 +633,8 @@ public:
 			}
 			return p;
 		}
-
+		
+		bool FixCase();
 		State Exists();
 		bool IsFile() { return Exists() == TypeFile; }
 		bool IsFolder() { return Exists() == TypeFolder; }

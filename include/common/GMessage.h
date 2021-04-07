@@ -43,6 +43,9 @@ enum LgiMessages
 		
 		/// Sent from a worker thread when calling GTextLabel::Name
 		M_TEXT_UPDATE_NAME,
+		
+		/// Item container
+		M_RESIZE_TO_CONTENT,
 	
 	#elif defined(WINNATIVE)
 

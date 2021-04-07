@@ -1693,3 +1693,40 @@ GFileOps();
 GFileOps();
 #undef GFileOp
 
+//////////////////////////////////////////////////////////////////////////////
+bool GFile::Path::FixCase()
+{
+	GString Prev;
+	bool Changed = false;
+	
+	// printf("FixCase '%s'\n", GetFull().Get());
+	for (size_t i=0; i<Length(); i++)
+	{
+		auto &Part = (*this)[i];
+		auto Next = (Prev ? Prev : "") + Sep + Part;
+		
+		struct stat Info;
+		auto r = lstat(Next, &Info);
+		// printf("[%i] %s=%i\n", (int)i, Next.Get(), r);
+		if (r)
+		{
+			GDirectory Dir;
+			for (auto b=Dir.First(Prev); b; b=Dir.Next())
+			{
+				auto Name = Dir.GetName();
+				if (!stricmp(Name, Part) && strcmp(Name, Part))
+				{
+					// Found alt case part..?
+					// printf("Altcase: %s -> %s\n", part.Get(), name);
+					Part = Name;
+					Next = (Prev ? Prev : "") + Sep + Part;
+					Changed = true;
+				}
+			}
+		}
+		
+		Prev = Next;
+	}
+	
+	return Changed;	
+}
