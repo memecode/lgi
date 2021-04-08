@@ -384,6 +384,7 @@ public:
 	/// Resizes all the columns to their content, allowing a little extra space for visual effect
 	virtual void ResizeColumnsToContent(int Border = DEFAULT_COLUMN_SPACING);
 
+	GMessage::Result OnEvent(GMessage *Msg);
 
 	GItemContainer &operator =(const GItemContainer &i)
 	{

@@ -386,6 +386,22 @@ void GItemContainer::GetColumnSizes(ColSizes &cs)
 	}
 }
 
+GMessage::Result GItemContainer::OnEvent(GMessage *Msg)
+{
+	switch (Msg->Msg())
+	{
+		case M_RESIZE_TO_CONTENT:
+		{
+			ResizeColumnsToContent((int)Msg->A());
+			break;
+		}
+		default:
+			break;
+	}
+
+	return GLayout::OnEvent(Msg);
+}
+
 void GItemContainer::ResizeColumnsToContent(int Border)
 {
 	if (!InThread())

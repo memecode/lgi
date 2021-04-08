@@ -299,6 +299,8 @@ size_t GTreeNode::Length()
 
 bool GTreeNode::HasItem(GTreeItem *obj, bool recurse)
 {
+	if (!obj)
+		return false;
 	if (this == (GTreeNode*)obj)
 		return true;
 
@@ -563,6 +565,8 @@ void GTreeItem::ScrollTo()
 	else
 	{
 		Tree->d->ScrollTo = this;
+		if (Tree->IsAttached())
+			Tree->PostEvent(M_SCROLL_TO);
 	}
 }
 
@@ -1933,9 +1937,10 @@ int GTree::OnNotify(GViewI *Ctrl, int Flags)
 			if (Flags == GNotifyScrollBar_Create)
 			{
 				_UpdateScrollBars();
-				if (VScroll && d->ScrollTo && HasItem(d->ScrollTo))
+				if (VScroll)
 				{
-					d->ScrollTo->ScrollTo();
+					if (HasItem(d->ScrollTo))
+						d->ScrollTo->ScrollTo();
 					d->ScrollTo = NULL;
 				}
 			}
@@ -1981,6 +1986,8 @@ GTreeItem *GTree::Insert(GTreeItem *Obj, ssize_t Pos)
 bool GTree::HasItem(GTreeItem *Obj, bool Recurse)
 {
 	TREELOCK
+	if (!Obj)
+		return false;
 	return GTreeNode::HasItem(Obj, Recurse);
 }
 

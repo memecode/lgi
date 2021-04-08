@@ -44,9 +44,6 @@ enum LgiMessages
 		/// Sent from a worker thread when calling GTextLabel::Name
 		M_TEXT_UPDATE_NAME,
 		
-		/// Item container
-		M_RESIZE_TO_CONTENT,
-	
 	#elif defined(WINNATIVE)
 
 		// [WM_APP:WM_APP+200] is reserved for LGI itself.
@@ -169,6 +166,8 @@ enum LgiMessages
 	M_LOG_TEXT,
 	M_ASSERT_UI,
 	M_INVALIDATE, // A=(GRect*)Rectangle, B=(GView*)this
+	M_RESIZE_TO_CONTENT, // GItemContainer
+	M_SCROLL_TO, // GTreeItem->GTree
 
 	#ifdef WINDOWS
 	M_USER = WM_APP + 200
