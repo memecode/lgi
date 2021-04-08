@@ -377,56 +377,68 @@ bool LDateTime::GetDaylightSavingsInfo(GArray<GDstInfo> &Info, LDateTime &Start,
 	#if defined(WIN32)
 
 	TIME_ZONE_INFORMATION Tzi;
-	if (GetTimeZoneInformation(&Tzi) == TIME_ZONE_ID_DAYLIGHT)
+	auto r = GetTimeZoneInformation(&Tzi);
+	if (r > TIME_ZONE_ID_UNKNOWN)
 	{
 		Info.Length(0);
 
-		// Find the DST->Normal date in the same year as Start
-		LDateTime n = ConvertSysTime(Tzi.StandardDate, Start.Year());
-		// Find the Normal->DST date in the same year as Start
-		LDateTime d = ConvertSysTime(Tzi.DaylightDate, Start.Year());
+		// Find the dates for the previous year from Start. This allows
+		// us to cover the start of the current year.
+		LDateTime s = ConvertSysTime(Tzi.StandardDate, Start.Year() - 1);
+		LDateTime d = ConvertSysTime(Tzi.DaylightDate, Start.Year() - 1);
 
-		// Create initial Info entry
-		Info[0].UtcTimeStamp = Start;
-		bool IsDst = (n < d) ^ !(Start < n || Start > d);
-		if (IsDst)
-			// Start is DST
-			Info[0].Offset = -(Tzi.Bias + Tzi.DaylightBias);
-		else
-			// Start is normal
-			Info[0].Offset = -(Tzi.Bias + Tzi.StandardBias);
-
-		if (End)
+		// Create initial Info entry, as the last change in the previous year
+		auto *i = &Info.New();
+		if (s < d)
 		{
-			// Build list of DST change dates
-			GArray<LDateTime> c;
-			c.Add(n);
-			c.Add(d);
-			for (int y = Start.Year() + 1; y <= End->Year(); y++)
+			// Year is: Daylight->Standard->Daylight
+			LDateTime tmp = d;
+			i->Offset = -(Tzi.Bias + Tzi.DaylightBias);
+			tmp.AddMinutes(-i->Offset);
+			i->UtcTimeStamp = tmp.Ts();
+		}
+		else
+		{
+			// Year is: Standard->Daylight->Standard
+			LDateTime tmp = s;
+			i->Offset = -(Tzi.Bias + Tzi.StandardBias);
+			tmp.AddMinutes(-i->Offset);
+			i->UtcTimeStamp = tmp.Ts();;
+		}
+			
+		for (auto y=Start.Year(); y<=(End?End->Year():Start.Year()); y++)
+		{
+			if (s < d)
 			{
-				// Calculate the dates for the following years if required
-				c.Add(ConvertSysTime(Tzi.StandardDate, y));
-				c.Add(ConvertSysTime(Tzi.DaylightDate, y));			
+				// Cur year, first event: end of DST
+				i = &Info.New();
+				auto tmp = ConvertSysTime(Tzi.StandardDate, y);
+				i->Offset = -(Tzi.Bias + Tzi.StandardBias);
+				tmp.AddMinutes(-i->Offset);
+				i->UtcTimeStamp = tmp.Ts();
+
+				// Cur year, second event: start of DST
+				i = &Info.New();
+				tmp = ConvertSysTime(Tzi.DaylightDate, y);
+				i->Offset = -(Tzi.Bias + Tzi.DaylightBias);
+				tmp.AddMinutes(-i->Offset);
+				i->UtcTimeStamp = tmp.Ts();
 			}
-			c.Sort(GDateCmp);
-
-			// Itererate over the list to generate further Info entries
-			for (int i=0; i<c.Length(); i++)
+			else
 			{
-				LDateTime &dt = c[i];
-				if (dt > Start && dt < *End)
-				{
-					IsDst = !IsDst;
+				// Cur year, first event: start of DST
+				i = &Info.New();
+				auto tmp = ConvertSysTime(Tzi.DaylightDate, Start.Year());
+				i->Offset = -(Tzi.Bias + Tzi.DaylightBias);
+				tmp.AddMinutes(-i->Offset);
+				i->UtcTimeStamp = tmp.Ts();
 
-					GDstInfo &inf = Info.New();
-					if (IsDst)
-						inf.Offset = -(Tzi.Bias + Tzi.DaylightBias);
-					else
-						inf.Offset = -(Tzi.Bias + Tzi.StandardBias);
-					dt.SetTimeZone(inf.Offset, false);
-					dt.SetTimeZone(0, true);
-					inf.UtcTimeStamp = dt;
-				}
+				// Cur year, second event: end of DST
+				i = &Info.New();
+				tmp = ConvertSysTime(Tzi.StandardDate, Start.Year());
+				i->Offset = -(Tzi.Bias + Tzi.StandardBias);
+				tmp.AddMinutes(-i->Offset);
+				i->UtcTimeStamp = tmp.Ts();
 			}
 		}
 
@@ -542,6 +554,32 @@ bool LDateTime::GetDaylightSavingsInfo(GArray<GDstInfo> &Info, LDateTime &Start,
 	#endif
 
 	return Status;
+}
+
+bool LDateTime::DstToLocal(GArray<GDstInfo> &Dst, LDateTime &dt)
+{
+	if (dt.GetTimeZone())
+	{
+		LgiAssert(!"Should be a UTC date.");
+		return true;
+	}
+
+	for (size_t i=0; i<Dst.Length()-1; i++)
+	{
+		auto &a = Dst[i];
+		auto &b = Dst[i+1];
+		LDateTime start, end;
+		start.Set(a.UtcTimeStamp);
+		end.Set(b.UtcTimeStamp);
+		if (dt >= start && dt < end)
+		{
+			dt.SetTimeZone(a.Offset, true);
+			return true;
+		}
+	}
+
+	LgiAssert(!"No valid DST range for this date.");
+	return false;
 }
 
 int LDateTime::DayOfWeek() const

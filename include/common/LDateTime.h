@@ -318,6 +318,8 @@ public:
 		LDateTime *End = 0
 	);
 
+	/// Using the DST info this will convert 'dt' from UTC to local
+	static bool DstToLocal(GArray<GDstInfo> &Dst, LDateTime &dt);
 
 	/// Decodes an email date into the current instance
 	bool Decode(const char *In);
