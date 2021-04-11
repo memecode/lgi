@@ -445,7 +445,26 @@ bool LDateTime::GetDaylightSavingsInfo(GArray<GDstInfo> &Info, LDateTime &Start,
 		Status = true;
 	}
 	
-	#elif defined(MAC) || defined(LINUX)
+	#elif defined(MAC)
+	
+	LDateTime Before = Start;
+	Before.AddMonths(-6);
+	// NSTimeZone *utc = [NSTimeZone timeZoneWithName:@"UTC"];
+	NSTimeZone *tz = [NSTimeZone systemTimeZone];
+	NSDate *startDate = [[NSDate alloc] initWithTimeIntervalSince1970:Before.Ts()/1000];
+	for (int n=0; n<6; n++)
+	{
+		NSDate *next = [tz nextDaylightSavingTimeTransitionAfterDate:startDate];
+		auto &i = Info.New();
+		
+		i.UtcTimeStamp = [next timeIntervalSince1970] * 1000;
+		i.Offset = [tz secondsFromGMTForDate:[next dateByAddingTimeInterval:60]]/60;
+		
+		[startDate release];
+		startDate = next;
+	}
+	
+	#elif defined(LINUX)
 
 	if (!Zdump.Length())
 	{	
