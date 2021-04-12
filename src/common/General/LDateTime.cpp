@@ -370,205 +370,230 @@ struct MonthHash : public LHashTbl<ConstStrKey<char,false>,int>
 
 GString::Array Zdump;
 
+#define DEBUG_DST_INFO		0
+
 bool LDateTime::GetDaylightSavingsInfo(GArray<GDstInfo> &Info, LDateTime &Start, LDateTime *End)
 {
 	bool Status = false;
 	
 	#if defined(WIN32)
 
-	TIME_ZONE_INFORMATION Tzi;
-	auto r = GetTimeZoneInformation(&Tzi);
-	if (r > TIME_ZONE_ID_UNKNOWN)
-	{
-		Info.Length(0);
+		TIME_ZONE_INFORMATION Tzi;
+		auto r = GetTimeZoneInformation(&Tzi);
+		if (r > TIME_ZONE_ID_UNKNOWN)
+		{
+			Info.Length(0);
 
-		// Find the dates for the previous year from Start. This allows
-		// us to cover the start of the current year.
-		LDateTime s = ConvertSysTime(Tzi.StandardDate, Start.Year() - 1);
-		LDateTime d = ConvertSysTime(Tzi.DaylightDate, Start.Year() - 1);
+			// Find the dates for the previous year from Start. This allows
+			// us to cover the start of the current year.
+			LDateTime s = ConvertSysTime(Tzi.StandardDate, Start.Year() - 1);
+			LDateTime d = ConvertSysTime(Tzi.DaylightDate, Start.Year() - 1);
 
-		// Create initial Info entry, as the last change in the previous year
-		auto *i = &Info.New();
-		if (s < d)
-		{
-			// Year is: Daylight->Standard->Daylight
-			LDateTime tmp = d;
-			i->Offset = -(Tzi.Bias + Tzi.DaylightBias);
-			tmp.AddMinutes(-i->Offset);
-			i->UtcTimeStamp = tmp.Ts();
-		}
-		else
-		{
-			// Year is: Standard->Daylight->Standard
-			LDateTime tmp = s;
-			i->Offset = -(Tzi.Bias + Tzi.StandardBias);
-			tmp.AddMinutes(-i->Offset);
-			i->UtcTimeStamp = tmp.Ts();;
-		}
-			
-		for (auto y=Start.Year(); y<=(End?End->Year():Start.Year()); y++)
-		{
+			// Create initial Info entry, as the last change in the previous year
+			auto *i = &Info.New();
 			if (s < d)
 			{
-				// Cur year, first event: end of DST
-				i = &Info.New();
-				auto tmp = ConvertSysTime(Tzi.StandardDate, y);
-				i->Offset = -(Tzi.Bias + Tzi.StandardBias);
-				tmp.AddMinutes(-i->Offset);
-				i->UtcTimeStamp = tmp.Ts();
-
-				// Cur year, second event: start of DST
-				i = &Info.New();
-				tmp = ConvertSysTime(Tzi.DaylightDate, y);
+				// Year is: Daylight->Standard->Daylight
+				LDateTime tmp = d;
 				i->Offset = -(Tzi.Bias + Tzi.DaylightBias);
 				tmp.AddMinutes(-i->Offset);
 				i->UtcTimeStamp = tmp.Ts();
 			}
 			else
 			{
-				// Cur year, first event: start of DST
-				i = &Info.New();
-				auto tmp = ConvertSysTime(Tzi.DaylightDate, Start.Year());
-				i->Offset = -(Tzi.Bias + Tzi.DaylightBias);
-				tmp.AddMinutes(-i->Offset);
-				i->UtcTimeStamp = tmp.Ts();
-
-				// Cur year, second event: end of DST
-				i = &Info.New();
-				tmp = ConvertSysTime(Tzi.StandardDate, Start.Year());
+				// Year is: Standard->Daylight->Standard
+				LDateTime tmp = s;
 				i->Offset = -(Tzi.Bias + Tzi.StandardBias);
 				tmp.AddMinutes(-i->Offset);
-				i->UtcTimeStamp = tmp.Ts();
+				i->UtcTimeStamp = tmp.Ts();;
 			}
-		}
+				
+			for (auto y=Start.Year(); y<=(End?End->Year():Start.Year()); y++)
+			{
+				if (s < d)
+				{
+					// Cur year, first event: end of DST
+					i = &Info.New();
+					auto tmp = ConvertSysTime(Tzi.StandardDate, y);
+					i->Offset = -(Tzi.Bias + Tzi.StandardBias);
+					tmp.AddMinutes(-i->Offset);
+					i->UtcTimeStamp = tmp.Ts();
 
-		Status = true;
-	}
+					// Cur year, second event: start of DST
+					i = &Info.New();
+					tmp = ConvertSysTime(Tzi.DaylightDate, y);
+					i->Offset = -(Tzi.Bias + Tzi.DaylightBias);
+					tmp.AddMinutes(-i->Offset);
+					i->UtcTimeStamp = tmp.Ts();
+				}
+				else
+				{
+					// Cur year, first event: start of DST
+					i = &Info.New();
+					auto tmp = ConvertSysTime(Tzi.DaylightDate, Start.Year());
+					i->Offset = -(Tzi.Bias + Tzi.DaylightBias);
+					tmp.AddMinutes(-i->Offset);
+					i->UtcTimeStamp = tmp.Ts();
+
+					// Cur year, second event: end of DST
+					i = &Info.New();
+					tmp = ConvertSysTime(Tzi.StandardDate, Start.Year());
+					i->Offset = -(Tzi.Bias + Tzi.StandardBias);
+					tmp.AddMinutes(-i->Offset);
+					i->UtcTimeStamp = tmp.Ts();
+				}
+			}
+
+			Status = true;
+		}
 	
 	#elif defined(MAC)
 	
-	LDateTime Before = Start;
-	Before.AddMonths(-6);
-	// NSTimeZone *utc = [NSTimeZone timeZoneWithName:@"UTC"];
-	NSTimeZone *tz = [NSTimeZone systemTimeZone];
-	NSDate *startDate = [[NSDate alloc] initWithTimeIntervalSince1970:Before.Ts()/1000];
-	for (int n=0; n<6; n++)
-	{
-		NSDate *next = [tz nextDaylightSavingTimeTransitionAfterDate:startDate];
-		auto &i = Info.New();
-		
-		i.UtcTimeStamp = [next timeIntervalSince1970] * 1000;
-		i.Offset = [tz secondsFromGMTForDate:[next dateByAddingTimeInterval:60]]/60;
-		
-		[startDate release];
-		startDate = next;
-	}
+		LDateTime Before = Start;
+		Before.AddMonths(-6);
+		// NSTimeZone *utc = [NSTimeZone timeZoneWithName:@"UTC"];
+		NSTimeZone *tz = [NSTimeZone systemTimeZone];
+		NSDate *startDate = [[NSDate alloc] initWithTimeIntervalSince1970:Before.Ts()/1000];
+		for (int n=0; n<6; n++)
+		{
+			NSDate *next = [tz nextDaylightSavingTimeTransitionAfterDate:startDate];
+			auto &i = Info.New();
+			
+			i.UtcTimeStamp = [next timeIntervalSince1970] * 1000;
+			i.Offset = [tz secondsFromGMTForDate:[next dateByAddingTimeInterval:60]]/60;
+			
+			[startDate release];
+			startDate = next;
+		}
 	
 	#elif defined(LINUX)
 
-	if (!Zdump.Length())
-	{	
-		FILE *f = popen("zdump -v /etc/localtime", "r");
-		if (f)
-		{
-			char s[256];
-			size_t r;
-			GStringPipe p(1024);
-			while ((r = fread(s, 1, sizeof(s), f)) > 0)
+		if (!Zdump.Length())
+		{	
+			FILE *f = popen("zdump -v /etc/localtime", "r");
+			if (f)
 			{
-				p.Write(s, (int)r);
-			}		
-			fclose(f);
-			
-			GString ps = p.NewGStr();
-			Zdump = ps.Split("\n");
+				char s[256];
+				size_t r;
+				GStringPipe p(1024);
+				while ((r = fread(s, 1, sizeof(s), f)) > 0)
+				{
+					p.Write(s, (int)r);
+				}		
+				fclose(f);
+				
+				GString ps = p.NewGStr();
+				Zdump = ps.Split("\n");
+			}
 		}
-	}
-		
-	MonthHash Lut;
-	LDateTime Prev;
-	int PrevOff = 0;
-	for (int i=0; i<Zdump.Length(); i++)
-	{
-		char *Line = Zdump[i];
-		GToken l(Line, " \t");
-		if (l.Length() >= 16 &&
-			!stricmp(l[0], "/etc/localtime"))
+			
+		MonthHash Lut;
+		LDateTime Prev;
+		int PrevOff = 0;
+		for (int i=0; i<Zdump.Length(); i++)
 		{
-			// /etc/localtime  Sat Oct  3 15:59:59 2037 UTC = Sun Oct  4 01:59:59 2037 EST isdst=0 gmtoff=36000
-			// 0               1   2    3 4        5    6   7 8   9    10 11      12   13  14      15
-			LDateTime Utc;
-			Utc.Year(atoi(l[5]));
-			GToken Tm(l[4], ":");
-			if (Tm.Length() == 3)
+			char *Line = Zdump[i];
+			GToken l(Line, " \t");
+			if (l.Length() >= 16 &&
+				!stricmp(l[0], "/etc/localtime"))
 			{
+				// /etc/localtime  Sat Oct  3 15:59:59 2037 UTC = Sun Oct  4 01:59:59 2037 EST isdst=0 gmtoff=36000
+				// 0               1   2    3 4        5    6   7 8   9    10 11      12   13  14      15
+				#if DEBUG_DST_INFO
+				printf("DST: %s\n", Line);
+				#endif				
+				
+				LDateTime Utc;
+				Utc.Year(atoi(l[5]));
+				GToken Tm(l[4], ":");
+				if (Tm.Length() != 3)
+				{
+					#if DEBUG_DST_INFO
+					printf("%s:%i - Tm '%s' has wrong parts: %s\n", _FL, l[4], Line);
+					#endif
+					continue;
+				}
+
 				Utc.Hours(atoi(Tm[0]));
 				Utc.Minutes(atoi(Tm[1]));
 				Utc.Seconds(atoi(Tm[2]));
-				if (Utc.Minutes() == 0)
+				if (Utc.Minutes() < 0)
 				{
-					int m = Lut.Find(l[2]);
-					if (m)
-					{
-						Utc.Day(atoi(l[3]));
-						Utc.Month(m);
-
-						GAutoString Var, Val;
-						if (ParseValue(l[14], Var, Val) &&
-							!stricmp(Var, "isdst"))
-						{
-							// int IsDst = atoi(Val);
-							if (ParseValue(l[15], Var, Val) &&
-								!stricmp(Var, "gmtoff"))
-							{
-								int Off = atoi(Val) / 60;
-
-								if (Prev.Year() &&
-									Prev < Start &&
-									Start < Utc)
-								{
-									/*
-									char Tmp[64];
-									Utc.Get(Tmp, sizeof(Tmp));
-									printf("[%i] Utc=%s\n", Info.Length(), Tmp);
-									Prev.Get(Tmp, sizeof(Tmp));
-									printf("[%i] Prev=%s\n", Info.Length(), Tmp);
-									Start.Get(Tmp, sizeof(Tmp));
-									printf("[%i] Start=%s\n", Info.Length(), Tmp);
-									*/
-								
-									// Emit initial entry for 'start'
-									Info[0].UtcTimeStamp = Start;
-									Info[0].Offset = PrevOff;
-									Status = true;
-								}
-								
-								if (Utc > Start && End && Utc < *End)
-								{
-									// Emit furthur entries for DST events between start and end.
-									GDstInfo &inf = Info.New();
-									inf.UtcTimeStamp = Utc;
-									inf.Offset = Off;
-								}
-
-								Prev = Utc;
-								PrevOff = Off;
-							}
-							else printf("%s:%i - Unknown value for isdst\n", _FL);
-						}
-						else printf("%s:%i - Unknown value for isdst\n", _FL);
-					}
-					else printf("%s:%i - Unknown month '%s'\n", _FL, l[2]);
+					#if DEBUG_DST_INFO
+					printf("%s:%i - Mins is zero: %s\n", _FL, l[4]);
+					#endif
+					continue;
 				}
-				// else printf("%s:%i - UTC min wrong %s.\n", _FL, l[4]);
+
+				int m = Lut.Find(l[2]);
+				if (!m)
+				{
+					#if DEBUG_DST_INFO
+					printf("%s:%i - Unknown month '%s'\n", _FL, l[2]);
+					#endif
+					continue;
+				}
+
+				Utc.Day(atoi(l[3]));
+				Utc.Month(m);
+
+				GAutoString Var, Val;
+				if (!ParseValue(l[14], Var, Val) ||
+					stricmp(Var, "isdst"))
+				{
+					#if DEBUG_DST_INFO
+					printf("%s:%i - Unknown value for isdst\n", _FL);
+					#endif
+					continue;
+				}
+				
+				if (!ParseValue(l[15], Var, Val) ||
+					stricmp(Var, "gmtoff"))
+				{
+					#if DEBUG_DST_INFO
+					printf("%s:%i - Unknown value for isdst\n", _FL);
+					#endif
+					continue;
+				}
+				
+				int Off = atoi(Val) / 60;
+
+				if (Prev.Year() &&
+					Prev < Start &&
+					Start < Utc)
+				{
+					// Emit initial entry for 'start'
+					auto &inf = Info.New();
+					inf.UtcTimeStamp = Prev;
+					inf.Offset = PrevOff;
+					#if DEBUG_DST_INFO
+					printf("Info: Start=%s %i\n", Prev.Get().Get(), inf.Offset);
+					#endif
+				}
+				
+				if (Utc > Start)
+				{
+					// Emit furthur entries for DST events between start and end.
+					auto &inf = Info.New();
+					inf.UtcTimeStamp = Utc;
+					inf.Offset = Off;
+					#if DEBUG_DST_INFO
+					printf("Info: Next=%s %i\n", Utc.Get().Get(), inf.Offset);
+					#endif
+					
+					if (End && Utc > *End)
+						break;
+				}
+
+				Prev = Utc;
+				PrevOff = Off;
 			}
-			else printf("%s:%i - Tm '%s' has wrong parts: %s\n", _FL, l[4], Line);
 		}
-	}
+		Status = Info.Length() > 1;
 	
 	#else
 
-	LgiAssert(!"Not implemented.");
+		LgiAssert(!"Not implemented.");
 
 	#endif
 
