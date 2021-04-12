@@ -161,6 +161,7 @@ GProgressPane::~GProgressPane()
 
 bool GProgressPane::SetRange(const GRange &r)
 {
+	UiDirty = true;
 	Progress::SetRange(r);
 
 	if (Bar)
@@ -356,7 +357,7 @@ GProgressDlg::GProgressDlg(GView *parent, uint64 timeout)
 	CanCancel = true;
 	SetParent(parent);
 	Resize();
-	MoveToCenter();
+	MoveSameScreen(parent);
 	Name(LgiLoadString(L_PROGRESSDLG_PROGRESS, "Progress"));
 	if (Timeout == 0)
 		DoModeless();

@@ -229,7 +229,6 @@ GMessage::Param GDialog::OnEvent(GMessage *Msg)
 	return GView::OnEvent(Msg);
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////
 GControl::GControl(OsView view) : GView(view)
 {
