@@ -9,7 +9,9 @@
 class GTextLog : public GTextView3, public GStream
 {
 protected:
-	bool RemoveReturns;
+	bool ProcessReturns;
+	size_t Pos;
+	
 	LMutex Sem;
 	GArray<char16> Txt;
 
@@ -29,9 +31,11 @@ protected:
 public:
 	GTextLog(int id) : GTextView3(id, 0, 0, 2000, 1000)
 	{
-		RemoveReturns = true;
+		ProcessReturns = true;
+		Pos = 0;
 		Sunken(true);
 		SetPourLargest(true);
+		SetUndoOn(false);
 		SetWrapType(TEXTED_WRAP_NONE);
 	}
 	
@@ -44,21 +48,41 @@ public:
 	virtual void Add(char16 *w, ssize_t chars = -1)
 	{
 		ssize_t Len = chars >= 0 ? chars : StrlenW(w);
+		bool AtEnd = GetCaret() == Size;
 		
-		if (RemoveReturns)
+		if (ProcessReturns)
 		{
-			char16 *end = w + Len;
-			for (char16 *s = w; *s; )
+			auto *s = w, *prev = w;
+			
+			auto Ins = [this](char16 *s, ssize_t len)
 			{
-				char16 *e = s;
-				while (e < end && *e != '\r')
-					e++;
-				if (e > s)
-					Insert(Size, s, e - s);
-				if (e >= end)
-					break;
-				s = e + 1;
+				if (len > 0)
+				{
+					auto del = MIN(Size - Pos, len);
+					if (del > 0)
+						Delete(Pos, del);
+					Insert(Pos, s, len);
+					Pos += len;
+				}
+			};			
+			
+			for (s = w;
+				chars >= 0 ? s < w + chars : *s;
+				s++)
+			{
+				if (*s == '\r')
+				{
+					Ins(prev, s - prev);
+					prev = s + 1;
+					while (Pos > 0 && Text[Pos-1] != '\n')
+						Pos--;
+				}
+				else if (*s == '\n')
+				{
+					Pos = Size;
+				}
 			}
+			Ins(prev, s - prev);
 		}
 		else
 		{
@@ -66,7 +90,8 @@ public:
 		}
 		
 		Invalidate();
-		SetCaret(Size, false);
+		if (AtEnd)
+			SetCaret(Size, false);
 	}
 
 	int64 SetSize(int64 s)

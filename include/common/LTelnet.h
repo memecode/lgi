@@ -36,7 +36,7 @@ public:
 			return -1;
 			
 		auto rd = s.Read(buf.AddressOf() + used, buf.Length() - used);
-		LgiTrace("telnet.rd=%i  used=%i\n", (int)rd, (int)used);
+		// LgiTrace("telnet.rd=%i  used=%i\n", (int)rd, (int)used);
 		if (rd > 0)
 			used += rd;
 		

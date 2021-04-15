@@ -386,7 +386,8 @@ bool GSocket::IsReadable(int TimeoutMs)
 		
 		#endif
 	}
-	else LgiTrace("%s:%i - Not a valid socket.\n", _FL);
+	else
+		LgiTrace("%s:%i - Not a valid socket.\n", _FL);
 
 	return false;
 }

@@ -377,6 +377,7 @@
 		</Node>
 		<Node File="./include/common/GAutoPtr.h" Type="3" Platforms="15" />
 		<Node File="./include/common/GNotifications.h" Type="3" Platforms="15" />
+		<Node File="./include/common/GTextLog.h" Type="3" Platforms="15" />
 		<Node File="./include/common/LCancel.h" Type="3" Platforms="15" />
 		<Node File="./include/common/LError.h" Type="3" Platforms="15" />
 		<Node File="./include/common/Lgi.h" Type="3" Platforms="15" />
@@ -408,13 +409,8 @@
 			<Executable>
 				<Linux />
 			</Executable>
-			<Arguments>
-				<All />
-			</Arguments>
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
+			<Arguments />
+			<Defines />
 			<CCrossCompiler />
 			<CppCrossCompiler />
 		</General>
@@ -466,6 +462,10 @@ private/linux</Release>
 				<Linux />
 			</LibraryPaths>
 			<ApplicationIcon />
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
 		</Build>
 		<Advanced>
 			<OtherMakefileRules />
@@ -485,5 +485,13 @@ private/linux</Release>
 			<CommentFile />
 			<CommentFunction />
 		</Editor>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
 	</Settings>
 </Project>
