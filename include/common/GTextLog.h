@@ -58,7 +58,7 @@ public:
 			{
 				if (len > 0)
 				{
-					auto del = MIN(Size - Pos, len);
+					auto del = MIN(Size - (ssize_t)Pos, len);
 					if (del > 0)
 						Delete(Pos, del);
 					Insert(Pos, s, len);
