@@ -409,8 +409,6 @@
 			<Executable>
 				<Linux />
 			</Executable>
-			<Arguments />
-			<Defines />
 			<CCrossCompiler />
 			<CppCrossCompiler />
 		</General>
@@ -432,17 +430,21 @@ private/linux</Release>
 			<SystemIncludes>
 				<Linux>
 					<Debug>/usr/include/gstreamer-1.0
+/usr/include/libappindicator3-0.1
 `pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>/usr/include/gstreamer-1.0
+/usr/include/libappindicator3-0.1
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
 					<Debug>magic
+appindicator3
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Debug>
 					<Release>magic
+appindicator3
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
@@ -457,15 +459,15 @@ private/linux</Release>
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
 			<LibraryPaths>
 				<All />
 				<Linux />
 			</LibraryPaths>
 			<ApplicationIcon />
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
 		</Build>
 		<Advanced>
 			<OtherMakefileRules />
@@ -473,6 +475,14 @@ private/linux</Release>
 				<Linux />
 			</PostBuildCommands>
 		</Advanced>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
 		<Remote>
 			<RemoteUri />
 			<RemotePass />
@@ -485,13 +495,5 @@ private/linux</Release>
 			<CommentFile />
 			<CommentFunction />
 		</Editor>
-		<Debug>
-			<Environment />
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
-		</Debug>
 	</Settings>
 </Project>

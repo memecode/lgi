@@ -18,9 +18,19 @@
 
 #elif defined __GTK_H__
 
+	#define USE_APPINDICATOR	1
+
+	// Change to use:
+	// AppIndicator* appind = app_indicator_new("appname", "appname", APP_INDICATOR_CATEGORY_HARDWARE);
+	// https://wiki.ubuntu.com/DesktopExperienceTeam/ApplicationIndicators
+
 	namespace Gtk {
 		#include <glib.h>
 		#include <gdk-pixbuf/gdk-pixbuf.h>
+		#if USE_APPINDICATOR
+			// sudo apt-get install libappindicator3-dev
+			#include <libappindicator/app-indicator.h>
+		#endif
 	}
 	using namespace Gtk;
 
@@ -56,7 +66,11 @@ public:
 	#elif defined(__GTK_H__)
 	
 		::GArray<GSurface*> Images;
-		GlibWrapper<GtkStatusIcon> tray_icon;
+		#if USE_APPINDICATOR
+			AppIndicator *appind;
+		#else
+			GlibWrapper<GtkStatusIcon> tray_icon;
+		#endif
 		typedef GdkPixbuf *IconRef;
 		::GArray<IconRef> Icon;
 		uint64 LastClickTime;
@@ -64,6 +78,12 @@ public:
 	
 		void OnClick()
 		{
+			#if USE_APPINDICATOR
+			if (!appind)
+				return;
+				
+			LgiAssert(!"Impl me.");
+			#else
 			if (!tray_icon)
 				return;
 
@@ -83,6 +103,7 @@ public:
 			m.Double(Now - LastClickTime < DoubleClickTime);
 			Parent->OnTrayClick(m);
 			LastClickTime = Now;
+			#endif
 		}
 	
 		void OnMenu(guint button, guint activate_time)
@@ -139,12 +160,18 @@ public:
 				g_object_get(G_OBJECT(settings), "gtk-double-click-time", &DoubleClickTime, NULL);
 
 			LastClickTime = 0;
-			tray_icon = Gtk::gtk_status_icon_new();
-			if (tray_icon)
-			{
-				tray_icon.Connect("activate", G_CALLBACK(tray_icon_on_click), this);
-				tray_icon.Connect("popup-menu", G_CALLBACK(tray_icon_on_menu), this);
-			}
+			#if USE_APPINDICATOR
+				auto name = LgiApp->Name();
+				LgiAssert(name != NULL);
+				appind = app_indicator_new(name, name, APP_INDICATOR_CATEGORY_COMMUNICATIONS);
+			#else
+				tray_icon = Gtk::gtk_status_icon_new();
+				if (tray_icon)
+				{
+					tray_icon.Connect("activate", G_CALLBACK(tray_icon_on_click), this);
+					tray_icon.Connect("popup-menu", G_CALLBACK(tray_icon_on_menu), this);
+				}
+			#endif
 		
 		#endif
 	}	
@@ -354,6 +381,13 @@ void GTrayIcon::Visible(bool v)
 					int asd=0;
 				}
 			
+			#elif USE_APPINDICATOR
+				
+				if (d->appind)
+				{
+					LgiAssert(!"Impl me.");
+				}
+				
 			#elif defined(__GTK_H__)
 
 				if (d->tray_icon)
@@ -412,6 +446,13 @@ void GTrayIcon::Visible(bool v)
 			
 				RestoreApplicationDockTileImage();
 
+			#elif USE_APPINDICATOR
+				
+				if (d->appind)
+				{
+					LgiAssert(!"Impl me.");
+				}
+				
 			#elif defined(__GTK_H__)
 
 				if (d->tray_icon)
@@ -458,6 +499,13 @@ void GTrayIcon::Value(int64 v)
 				}
 			}
 		
+		#elif USE_APPINDICATOR
+			
+			if (d->appind)
+			{
+				LgiAssert(!"Impl me.");
+			}
+			
 		#elif defined __GTK_H__
 
 			if (d->tray_icon)

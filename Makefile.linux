@@ -22,6 +22,7 @@ ifeq ($(Build),Debug)
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
 		-lmagic \
+		-lappindicator3 \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
@@ -30,6 +31,7 @@ ifeq ($(Build),Debug)
 		-Iinclude/linux \
 		-Iinclude/common \
 		`pkg-config --cflags gtk+-3.0` \
+		-I/usr/include/libappindicator3-0.1 \
 		-I/usr/include/gstreamer-1.0 \
 		-I./src/common/Hash/sha1 \
 		-I./src/common/Hash/md5 \
@@ -41,6 +43,7 @@ else
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
 		-lmagic \
+		-lappindicator3 \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
@@ -49,6 +52,7 @@ else
 		-Iinclude/linux \
 		-Iinclude/common \
 		`pkg-config --cflags gtk+-3.0` \
+		-I/usr/include/libappindicator3-0.1 \
 		-I/usr/include/gstreamer-1.0 \
 		-I./src/common/Hash/sha1 \
 		-I./src/common/Hash/md5 \
