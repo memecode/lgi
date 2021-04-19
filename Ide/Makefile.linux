@@ -19,7 +19,7 @@ Flags = -fPIC -w -fno-inline -fpermissive
 ifeq ($(Build),Debug)
 	Flags += -g -std=c++11
 	Tag = d
-	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLIBPNG_VERSION=\"1.2\"
+	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
 		-L../Debug \
 		-lmagic \
@@ -37,7 +37,7 @@ ifeq ($(Build),Debug)
 		-I../include/common
 else
 	Flags += -s -Os -std=c++11
-	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLIBPNG_VERSION=\"1.2\"
+	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
 		-L../Release \
 		-lmagic \
