@@ -18,7 +18,7 @@
 
 #elif defined __GTK_H__
 
-	#define USE_APPINDICATOR	1
+	#define USE_APPINDICATOR	0
 
 	// Change to use:
 	// AppIndicator* appind = app_indicator_new("appname", "appname", APP_INDICATOR_CATEGORY_HARDWARE);
