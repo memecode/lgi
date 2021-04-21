@@ -1060,7 +1060,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 
 	if (File)
 	{
-		for (auto Leaf = File; Leaf; Leaf = Leaf->GetParent())
+		for (auto Leaf = File; Leaf; Leaf = dynamic_cast<VcLeaf*>(Leaf->GetParent()))
 			Leaf->OnExpand(true);
 		File->Select(true);
 		File->ScrollTo();

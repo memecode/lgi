@@ -40,6 +40,12 @@
 /****************************** Helper Functions ****************************************************************************/
 GString GFile::Path::Sep(DIR_STR);
 
+bool GFile::Path::FixCase()
+{
+	// Windows is case insensitive.. so meh... do nothing.
+	return true;
+}
+
 char *ReadTextFile(const char *File)
 {
 	char *s = 0;
