@@ -94,6 +94,7 @@ public:
 	void SendNotify(int Data = 0);
 	bool OnLayout(GViewLayoutInfo &Inf) { return false; }
     void OnPaint(GSurface *pDC);
+	bool SetScrollBars(bool x, bool y);
 	#endif
 };
 

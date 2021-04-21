@@ -225,7 +225,8 @@ int LDateTime::SystemTimeZone(bool ForceUpdate)
 					CurTz = then_tz.tm_gmtoff / 60;
 				}
 				else
-					CurTzOff = (then_tz.tm_gmtoff - now_tz.tm_gmtoff) / 60;
+					// This is not DST so there is no offset right?
+					CurTzOff = 0; // (then_tz.tm_gmtoff - now_tz.tm_gmtoff) / 60;
 			}
 			else return NO_ZONE;
 		

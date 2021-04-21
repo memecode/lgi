@@ -347,12 +347,15 @@ char *GXmlTree::DecodeEntities(GXmlAlloc *Alloc, char *In, ssize_t Len)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-GAutoRefPtr<XmlNormalAlloc> TagHeapAllocator(new XmlNormalAlloc);
+GAutoRefPtr<GXmlAlloc> TagHeapAllocator(new XmlNormalAlloc);
 
 GXmlTag::GXmlTag(const char *tag, GXmlAlloc *alloc)
 {
 	Children.SetFixedLength(true);
-	Allocator = alloc ? alloc : TagHeapAllocator;
+	if (alloc)
+		Allocator = alloc;
+	else
+		Allocator = TagHeapAllocator;
 
 	Write = false;
 	Parent = NULL;

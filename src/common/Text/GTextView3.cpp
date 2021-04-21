@@ -1198,7 +1198,7 @@ void GTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 
 	if (ScrollChange)
 	{
-		// printf("%s:%i - SetScrollBars(%i)\n", _FL, ScrollYNeeded);
+		// printf("%s:%i - SetScrollBars(%i) %i %i\n", _FL, ScrollYNeeded, Client.Y(), (Line.Length() * LineY));
 		SetScrollBars(false, ScrollYNeeded);
 	}
 	UpdateScrollBars();

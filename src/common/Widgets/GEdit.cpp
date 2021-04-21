@@ -159,6 +159,12 @@ void GEdit::Password(bool m)
 	SetObscurePassword(d->Password = m);
 }
 
+bool GEdit::SetScrollBars(bool x, bool y)
+{
+	// Prevent scrollbars if the control is not multiline.
+	return GTextView3::SetScrollBars(x, y && d->Multiline);
+}
+
 void GEdit::OnPaint(GSurface *pDC)
 {
     GTextView3::OnPaint(pDC);

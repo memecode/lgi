@@ -74,11 +74,13 @@ template <typename T>
 class GAutoRefPtr
 {
 	T *Ptr;
+	bool Debug;
 
 public:
-	GAutoRefPtr(T *ptr = 0)
+	GAutoRefPtr(T *ptr = 0, bool debug = false)
 	{
 		Ptr = ptr;
+		Debug = debug;
 		if (Ptr)
 			Ptr->AddRef();
 	}
@@ -108,6 +110,9 @@ public:
 	{
 		if (Ptr)
 		{
+		    #ifdef _DEBUG
+			if (Debug) printf("GAutoRefPtr.Empty %p %i->%i\n", Ptr, Ptr->_GetCount(), Ptr->_GetCount()-1);
+			#endif
 			Ptr->DecRef();
 			Ptr = NULL;
 		}
@@ -118,7 +123,12 @@ public:
 		Empty();
 		Ptr = p;
 		if (Ptr)
+		{
+		    #ifdef _DEBUG
+			if (Debug) printf("GAutoRefPtr.Assign %p %i->%i\n", Ptr, Ptr->_GetCount(), Ptr->_GetCount()+1);
+			#endif
 			Ptr->AddRef();
+		}
 		return *this;
 	}
 
@@ -126,8 +136,14 @@ public:
 	{
 		Empty();
 		Ptr = refptr.Ptr;
+		Debug = refptr.Debug;
 		if (Ptr)
+		{
+		    #ifdef _DEBUG
+			if (Debug) printf("GAutoRefPtr.ObjAssign %p %i->%i\n", Ptr, Ptr->_GetCount(), Ptr->_GetCount()+1);
+			#endif
 			Ptr->AddRef();
+		}
 		return *this;
 	}
 
