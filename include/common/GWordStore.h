@@ -19,6 +19,7 @@ public:
 	bool Insert(const char *Word);
 	long GetWordCount(const char *Word);
 	int SetWordCount(const char *Word, ssize_t Count);
+	bool DeleteWord(const char *Word);
 	void Empty();
 	char *GetFile();
 	void SetFile(const char *file);
