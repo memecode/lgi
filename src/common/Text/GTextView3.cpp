@@ -3508,7 +3508,7 @@ void GTextView3::DoContextMenu(GMouse &m)
 	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_TAB_SIZE, "Tab Size"), IDM_TAB_SIZE, true);
 
 	if (Environment)
-		Environment->AppendItems(&RClick);
+		Environment->AppendItems(&RClick, NULL);
 
 	int Id = 0;
 	m.ToScreen();

@@ -67,7 +67,7 @@ void DocEdit::OnCreate()
 	Run();
 }
 
-bool DocEdit::AppendItems(LSubMenu *Menu, int Base)
+bool DocEdit::AppendItems(LSubMenu *Menu, const char *Param, int Base)
 {
 	LSubMenu *Insert = Menu->AppendSub("Insert...");
 	if (Insert)

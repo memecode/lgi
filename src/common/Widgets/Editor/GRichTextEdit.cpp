@@ -1313,7 +1313,7 @@ void GRichTextEdit::DoContextMenu(GMouse &m)
 		Over->DoContext(RClick, Doc, Offset, false);
 	}
 	if (Environment)
-		Environment->AppendItems(&RClick);
+		Environment->AppendItems(&RClick, NULL);
 
 	int Id = 0;
 	m.ToScreen();

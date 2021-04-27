@@ -2040,7 +2040,7 @@ bool GTag::OnMouseClick(GMouse &m)
 				if (IsImg)
 					RClick.AppendItem("Copy Image Location", IDM_COPY_IMG, ImgSrc != NULL);
 				if (Html->GetEnv())
-					Html->GetEnv()->AppendItems(&RClick);
+					Html->GetEnv()->AppendItems(&RClick, Uri);
 
 				switch (Id = RClick.Float(Html, m.x, m.y))
 				{
