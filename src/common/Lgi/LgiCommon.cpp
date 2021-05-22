@@ -939,7 +939,6 @@ GString GFile::Path::PrintAll()
 						p.Print("%s." #name ": '%s'\n", DomainName[i], s.Get()); \
 					} \
 					else p.Print("%s." #name ": null\n", DomainName[i]); \
-					[paths release]; \
 				} \
 			}
 
@@ -1100,7 +1099,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				{
 					if ([paths count])
 						Path = [paths objectAtIndex:0];
-					[paths release];
 				}
 
 			#else
@@ -1149,7 +1147,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				{
 					if ([paths count])
 						Path = [paths objectAtIndex:0];
-					[paths release];
 				}
 
 			#endif
@@ -1181,7 +1178,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				{
 					if ([paths count])
 						Path = [paths objectAtIndex:0];
-					[paths release];
 				}
 
 			#endif
@@ -1223,7 +1219,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				{
 					if ([paths count])
 						Path = [paths objectAtIndex:0];
-					[paths release];
 				}
 
 			#endif
@@ -1268,7 +1263,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				{
 					if ([paths count])
 						Path = [paths objectAtIndex:0];
-					[paths release];
 				}
 
 			#endif
@@ -1309,7 +1303,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				{
 					if ([paths count])
 						Path = [paths objectAtIndex:0];
-					[paths release];
 				}
 
 			#elif defined MAC
@@ -1470,7 +1463,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				{
 					Path = [paths objectAtIndex:0];
 					LgiTrimDir(Path);
-					[paths release];
 				}
 
 			#elif defined LINUX
@@ -1569,7 +1561,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (paths)
 				{
 					Path = [paths objectAtIndex:0];
-					[paths release];
 				}
 
 			#elif defined LINUX
@@ -1607,7 +1598,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (paths)
 				{
 					Path = [paths objectAtIndex:0];
-					[paths release];
 				}
 			
 			#elif defined LINUX
@@ -1633,7 +1623,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (paths)
 				{
 					Path = [paths objectAtIndex:0];
-					[paths release];
 				}
 			
 			#else
@@ -1660,7 +1649,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (paths)
 				{
 					Path = [paths objectAtIndex:0];
-					[paths release];
 				}
 			
 			#elif defined LGI_CARBON
@@ -1825,7 +1813,6 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (paths)
 				{
 					Path = [paths objectAtIndex:0];
-					[paths release];
 				}
 
 			#elif defined(WIN32)
@@ -2394,6 +2381,11 @@ GString::Array LGetPath()
 		// that for the time being.
 		GFile::Path Home(LSP_HOME);
 		Home += ".profile";
+		if (!Home.Exists())
+		{
+			Home--;
+			Home += ".zprofile";
+		}
 		auto Profile = GFile(Home, O_READ).Read().Split("\n");
 		for (auto Ln : Profile)
 		{

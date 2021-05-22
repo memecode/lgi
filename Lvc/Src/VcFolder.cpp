@@ -460,8 +460,11 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 		#ifdef MAC
 		// Mac GUI apps don't share the terminal path, so this overrides that and make it work
 		auto Path = LGetPath();
-		GString Tmp = GString(LGI_PATH_SEPARATOR).Join(Path);
-		Process->SetEnvironment("PATH", Tmp);
+		if (Path.Length())
+		{
+			GString Tmp = GString(LGI_PATH_SEPARATOR).Join(Path);
+			Process->SetEnvironment("PATH", Tmp);
+		}
 		#endif
 
 		GString::Array Ctx;

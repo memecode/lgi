@@ -133,6 +133,7 @@ public:
 	GDialog *ChildDlg;
 	LMenu *EmptyMenu;
 	GViewI *Focus;
+    NSView *ContentCache;
 
 	int Sx, Sy;
 
@@ -148,6 +149,7 @@ public:
 	
 	GWindowPrivate(GWindow *wnd)
 	{
+        ContentCache = NULL;
 		Focus = NULL;
 		InitVisible = false;
 		LastMinimize = 0;
@@ -412,6 +414,7 @@ GWindow::GWindow(OsWindow wnd) : GView(NULL)
 			Delegate = [[LWindowDelegate alloc] init];
 		//[Wnd.p makeKeyAndOrderFront:NSApp];
 		Wnd.p.delegate = Delegate;
+        d->ContentCache = Wnd.p.contentView;
 	}
 }
 
@@ -432,8 +435,11 @@ GWindow::~GWindow()
 
 NSView *GWindow::Handle()
 {
+    if (!InThread())
+        return d->ContentCache;
+    
 	if (Wnd.p != nil)
-		return Wnd.p.contentView; //Wnd.p.contentViewController.view;
+		return Wnd.p.contentView;
 	
 	return NULL;
 }
