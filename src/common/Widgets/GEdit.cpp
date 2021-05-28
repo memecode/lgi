@@ -173,7 +173,12 @@ void GEdit::OnPaint(GSurface *pDC)
     {
         GFont *f = GetFont();
         GDisplayString ds(f, d->EmptyTxt);
-        f->Colour(L_MED, L_WORKSPACE);
+        
+        static int diff = -1;
+        if (diff < 0)
+        	diff = abs(GColour(L_MED).GetGray()-GColour(L_WORKSPACE).GetGray());
+        
+        f->Colour(diff < 30 ? L_LOW : L_MED, L_WORKSPACE);
         f->Transparent(true);
         ds.Draw(pDC, 2, 2);
     }

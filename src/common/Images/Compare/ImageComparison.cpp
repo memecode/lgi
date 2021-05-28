@@ -11,7 +11,7 @@
 #include "resdefs.h"
 #include "LgiRes.h"
 
-#define DIFF_LARGE_8BIT		(10)
+#define DIFF_LARGE_8BIT		(45)
 #define DIFF_LARGE_16BIT	(DIFF_LARGE_8BIT << 8)
 #define M_LOAD				(M_USER + 2000)
 

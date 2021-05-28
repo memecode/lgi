@@ -86,14 +86,21 @@ bool GLibrary::Load(const char *File, bool Quiet)
 				#ifdef LINUX
 				if (!hLib)
 				{
+					char *err = dlerror();
+					if (!Quiet && !stristr(err, "No such file or directory"))
+					{
+						LgiTrace("%s:%i - dlopen(%s) failed: %s\n", _FL, File, err);
+						Quiet = true;
+					}
+								
 					// Try with an extra ".0"... just for fun.
-					char *e = FileName + strlen(FileName);
-					strcpy(e, ".0");
+					char *end = FileName + strlen(FileName);
+					strcpy(end, ".0");
 					hLib = dlopen(FileName, RTLD_NOW);
 					#if DEBUG_LIB_MSGS
 					LgiTrace("%s:%i - dlopen('%s') = %p\n", _FL, FileName, hLib);
 					#endif
-					*e = 0;
+					*end = 0;
 				}
 				#endif	
 				

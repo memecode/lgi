@@ -505,7 +505,7 @@ public:
 						uint32_t *dst = (uint32_t*) (*Dst)[y];
 						src += Sx;
 						
-						LgiAssert(Dst->GetColourSpace() == System32BitColourSpace);
+						// LgiAssert(Dst->GetColourSpace() == System32BitColourSpace);
 						
 						while (src < end)
 						{
@@ -600,9 +600,10 @@ public:
 
 					#define rop(c) dst->c = (DivLut[DivLut[dst->c * dst->a] * o] + DivLut[src->c * src->a]) * 255 / ra;
 
-					LgiAssert(Dst->GetColourSpace() == Src->GetColourSpace());
 					if (SampleMode == GZoomView::SampleNearest)
 					{
+						// if (Dst->GetColourSpace() == Src->GetColourSpace())
+
 						while (src < end)
 						{
 							if (src->a == 255)
