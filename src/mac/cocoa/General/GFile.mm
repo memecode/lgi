@@ -42,6 +42,11 @@
 
 GString GFile::Path::Sep(DIR_STR);
 
+bool GFile::Path::FixCase()
+{
+	return false;
+}
+
 struct ErrorCodeType
 {
 	const char *Name;
