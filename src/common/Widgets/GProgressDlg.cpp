@@ -357,7 +357,12 @@ GProgressDlg::GProgressDlg(GView *parent, uint64 timeout)
 	CanCancel = true;
 	SetParent(parent);
 	Resize();
-	MoveSameScreen(parent);
+	
+	if (parent)
+		MoveSameScreen(parent);
+	else
+		MoveToCenter();	
+	
 	Name(LgiLoadString(L_PROGRESSDLG_PROGRESS, "Progress"));
 	if (Timeout == 0)
 		DoModeless();
