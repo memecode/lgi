@@ -64,6 +64,7 @@ public:
 	bool NameW(const char16 *n) override;
 	void SetFont(GFont *Fnt, bool OwnIt = false) override;
     bool OnLayout(GViewLayoutInfo &Inf) override;
+	int BoxSize();
 
 	void OnMouseClick(GMouse &m) override;
 	void OnMouseEnter(GMouse &m) override;

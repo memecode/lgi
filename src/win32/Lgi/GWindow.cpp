@@ -743,14 +743,26 @@ void GWindow::PourAll()
 							v->Visible(true);
 						}
 
-						if (OldPos != v->GetPos())
+						auto vpos = v->GetPos();
+						if (OldPos != vpos)
 						{
 							// position has changed update...
 							v->Invalidate();
 						}
 
-						Tools.Subtract(&v->GetPos());
-						Update.Subtract(&v->GetPos());
+						// Has it increased the size of the toolbar area?
+						auto b = Tools.Bound();
+						if (vpos.y2 >= b.y2)
+						{
+							GRect Bar = Client;
+							Bar.y2 = vpos.y2;
+							Client.Subtract(&Bar);
+							// LgiTrace("IncreaseToolbar=%s\n", Bar.GetStr());
+						}
+
+						Tools.Subtract(&vpos);
+						Update.Subtract(&vpos);
+						// LgiTrace("vpos=%s\n", vpos.GetStr());
 					}
 				}
 				else
@@ -782,6 +794,7 @@ void GWindow::PourAll()
 		}
 	}
 
+	// LgiTrace("Client=%s\n", Client.Bound().GetStr());
 	for (auto v: Children)
 	{
 		GView *k = dynamic_cast<GView*>(v);

@@ -281,7 +281,6 @@ public:
 static GResourceContainer ResourceOwner;
 bool LgiResources::LoadStyles = false;
 
-
 LgiResources::LgiResources(const char *FileName, bool Warn, const char *ThemeFolder)
 {
 	d = new LgiResourcesPrivate;

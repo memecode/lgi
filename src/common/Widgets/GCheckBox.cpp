@@ -297,14 +297,22 @@ bool GCheckBox::OnLayout(GViewLayoutInfo &Inf)
 {
 	if (!Inf.Width.Min)
 	{
-		d->PreLayout(Inf.Width.Min,
-					 Inf.Width.Max);
+		auto n = Name();
+		if (n)
+		{
+			d->PreLayout(Inf.Width.Min,
+						 Inf.Width.Max);
 		
-		// FIXME: no wrapping support so....
-		Inf.Width.Min = Inf.Width.Max;
+			// FIXME: no wrapping support so....
+			Inf.Width.Min = Inf.Width.Max;
 		
-		Inf.Width.Min += PadX1Px + PadX2Px;
-		Inf.Width.Max += PadX1Px + PadX2Px;
+			Inf.Width.Min += PadX1Px + PadX2Px;
+			Inf.Width.Max += PadX1Px + PadX2Px;
+		}
+		else
+		{
+			Inf.Width.Min = Inf.Width.Max = BoxSize();
+		}
 	}
 	else
 	{
@@ -313,6 +321,14 @@ bool GCheckBox::OnLayout(GViewLayoutInfo &Inf)
 		Inf.Height.Max = d->GetMax().y + PadYPx;
 	}
 	return true;
+}
+
+int GCheckBox::BoxSize()
+{
+	auto Fnt = GetFont();
+	int Px = (int) Fnt->Ascent() + 2;
+	if (Px > Y()) Px = Y();
+	return Px;
 }
 
 void GCheckBox::OnPaint(GSurface *pDC)
@@ -326,8 +342,7 @@ void GCheckBox::OnPaint(GSurface *pDC)
 		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_CHECKBOX))
 	{
 		auto Fnt = GetFont();
-		int Px = (int) Fnt->Ascent() + 2;
-		if (Px > Y()) Px = Y();
+		int Px = BoxSize();
 
 		GSkinState State;
 		State.pScreen = pDC;
