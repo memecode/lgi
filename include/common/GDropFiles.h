@@ -73,7 +73,7 @@ public:
 			if (v.IsBinary())
 			{
 				GString s((char*)v.Value.Binary.Data, v.Value.Binary.Length);
-				auto Uri = s.SplitDelimit("\r\n,");
+				auto Uri = s.SplitDelimit("\r\n");
 				for (int i=0; i<Uri.Length(); i++)
 				{
 					char *File = Uri[i];
