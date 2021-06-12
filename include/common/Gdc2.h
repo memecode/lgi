@@ -419,11 +419,6 @@ protected:
 	#if WINNATIVE
 		OsPainter	hDC;
 		OsBitmap	hBmp;
-	#elif defined __GTK_H__
-		#if GTK_MAJOR_VERSION == 3
-		#else
-			OsPainter	Cairo;
-		#endif
 	#endif
 
 public:
@@ -697,11 +692,7 @@ struct GPrintDcParams
 #endif
 
 #if defined(__GTK_H__)
-	#if GTK_MAJOR_VERSION == 3
 	typedef Gtk::GdkWindow OsDrawable;
-	#else
-	typedef Gtk::GdkDrawable OsDrawable;
-	#endif
 #endif
 
 /// \brief An implemenation of GSurface to draw onto the screen.

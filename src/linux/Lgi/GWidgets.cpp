@@ -153,10 +153,6 @@ void GDialog::IsResizeable(bool r)
 
 bool GDialog::SetupDialog(bool Modal)
 {
-	#if GTK_MAJOR_VERSION == 3
-	#else
-	gtk_dialog_set_has_separator(GTK_DIALOG(Wnd), false);
-	#endif
 	if (IsResizeable())
 	{
 	    gtk_window_set_default_size(Wnd, Pos.X(), Pos.Y());

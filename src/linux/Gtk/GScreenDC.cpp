@@ -78,23 +78,6 @@ GScreenDC::GScreenDC(OsDrawable *Drawable)
 	d = new GScreenPrivate;
 	d->Own = false;
 	d->d = Drawable;
-
-	#if GTK_MAJOR_VERSION == 3
-	#else
-	if (d->gc = gdk_gc_new(Drawable))
-	{
-	    GdkScreen *s = gdk_gc_get_screen(d->gc);
-	    if (s)
-	    {
-	        GdkVisual *v = gdk_screen_get_system_visual(s);
-	        if (v)
-	        {
-	            d->Bits = v->depth;
-		        ColourSpace = GdkVisualToColourSpace(v, v->depth);
-	        }
-	    }
-	}
-	#endif
 }
 
 GScreenDC::GScreenDC(GView *view, void *param)
@@ -108,27 +91,7 @@ GScreenDC::GScreenDC(GView *view, void *param)
 		if (v)
 		{
 			d->v = v;
-
-			#if GTK_MAJOR_VERSION == 3
 			LgiAssert(!"Gtk3 FIXME");
-			#else
-			d->d = v->window;	
-			d->x = v->allocation.width;
-			d->y = v->allocation.height;	
-			if (d->gc = gdk_gc_new(v->window))
-			{
-			    GdkScreen *s = gdk_gc_get_screen(d->gc);
-			    if (s)
-			    {
-			        GdkVisual *v = gdk_screen_get_system_visual(s);
-			        if (v)
-			        {
-			            d->Bits = v->depth;
-				        ColourSpace = GdkVisualToColourSpace(v, v->depth);
-			        }
-			    }
-			}
-			#endif
 		}
 		else
 		{
@@ -163,44 +126,7 @@ GScreenDC::~GScreenDC()
 
 OsPainter GScreenDC::Handle()
 {
-	#if GTK_MAJOR_VERSION == 3
 	return d->cr;
-	#else
-	if (!Cairo)
-	{
-		Cairo = gdk_cairo_create(d->d);
-		if (Cairo)
-		{
-			// cairo_reset_clip(Cairo);
-
-			double x1, y1, x2, y2;
-			cairo_clip_extents (Cairo, &x1, &y1, &x2, &y2);
-			
-			#ifdef _DEBUG
-			int x = (int) (x2 - x1);
-			int y = (int) (y2 - y1);
-			
-			if (d->View &&
-				d->View->_Debug)
-			{
-				int width, height;
-
-				gdk_drawable_get_size (d->d, &width, &height);
-				
-				printf("%s:%i %s %g,%g,%g,%g %i,%i  %i,%i  %i,%i\n",
-					_FL,
-					d->View ? d->View->GetClass() : NULL,
-					x1,y1,x2,y2,
-					x,y,
-					d->x, d->y,
-					width, height);
-			}
-			#endif
-		}
-	}
-	
-	return Cairo;
-	#endif
 }
 
 ::GString GScreenDC::Dump()
@@ -357,7 +283,6 @@ GColour GScreenDC::Colour(GColour c)
 	GColour Prev = d->Col;
 	d->Col = c;
 
-	#if GTK_MAJOR_VERSION == 3
 	if (d->cr)
 	{
 		double r = (double)d->Col.r()/255.0;
@@ -366,28 +291,6 @@ GColour GScreenDC::Colour(GColour c)
 		double a = (double)d->Col.a()/255.0;
 		cairo_set_source_rgba(d->cr, r, g, b, a);
 	}
-	#else
-	if (d->gc)
-	{
-		GdkColor col;
-		
-		col.pixel = 0;
-		
-		col.red = c.r();
-		col.red |= col.red << 8;
-		
-		col.green = c.g();
-		col.green |= col.green << 8;
-
-		col.blue = c.b();
-		col.blue |= col.blue << 8;
-		
-		// printf("Setting Col %x, %x, %x\n", col.red, col.green, col.blue);
-		
-		gdk_gc_set_rgb_fg_color(d->gc, &col);
-		gdk_gc_set_rgb_bg_color(d->gc, &col);
-	}
-	#endif
 
 	return Prev;
 }
@@ -480,12 +383,8 @@ void GScreenDC::Palette(GPalette *pPal, bool bOwnIt)
 
 void GScreenDC::Set(int x, int y)
 {
-	#if GTK_MAJOR_VERSION == 3
 	cairo_rectangle(d->cr, x, y, 1, 1);
 	cairo_fill(d->cr);
-	#else
-	gdk_draw_point(d->d, d->gc, x-OriginX, y-OriginY);
-	#endif
 }
 
 COLOUR GScreenDC::Get(int x, int y)
@@ -495,22 +394,14 @@ COLOUR GScreenDC::Get(int x, int y)
 
 void GScreenDC::HLine(int x1, int x2, int y)
 {
-	#if GTK_MAJOR_VERSION == 3
 	cairo_rectangle(d->cr, x1, y, x2-x1+1, 1);
 	cairo_fill(d->cr);
-	#else
-	gdk_draw_line(d->d, d->gc, x1-OriginX, y-OriginY, x2-OriginX, y-OriginY);
-	#endif
 }
 
 void GScreenDC::VLine(int x, int y1, int y2)
 {
-	#if GTK_MAJOR_VERSION == 3
 	cairo_rectangle(d->cr, x, y1, 1, y2-y1+1);
 	cairo_fill(d->cr);
-	#else
-	gdk_draw_line(d->d, d->gc, x-OriginX, y1-OriginY, x-OriginX, y2-OriginY);
-	#endif
 }
 
 void GScreenDC::Line(int x1, int y1, int x2, int y2)

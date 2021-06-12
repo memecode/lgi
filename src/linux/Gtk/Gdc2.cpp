@@ -452,11 +452,7 @@ public:
 				Gtk::GdkVisual *Vis = Gtk::gdk_screen_get_system_visual(Scr);
 				if (Vis)
 				{
-					#if GTK_MAJOR_VERSION == 3
 					ScrBits = gdk_visual_get_depth(Vis);
-					#else
-					ScrBits = Vis->depth;
-					#endif
 					ScrColourSpace = GdkVisualToColourSpace(Vis, ScrBits);
 				}
 			}
@@ -1000,11 +996,7 @@ GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 		#if 1
 		if (Depth != 16)
 		{
-			#if GTK_MAJOR_VERSION == 3
 			if (gdk_visual_get_byte_order(v) == Gtk::GDK_LSB_FIRST)
-			#else
-			if (v->byte_order == Gtk::GDK_LSB_FIRST)
-			#endif
 			{
 				#if VisualToColourSpaceDebug
 				printf("GdkVisualToColourSpace swapping\n");
