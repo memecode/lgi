@@ -131,6 +131,11 @@ public:
 		{
 			LListItem *li = new LListItem;
 			GString Fn = m->GetFileName();
+			#ifdef WINDOWS
+			Fn = Fn.Replace("/","\\");
+			#else
+			Fn = Fn.Replace("\\","/");
+			#endif
 			m->GetProject()->CheckExists(Fn);
 			li->SetText(Fn);
 			Lst->Insert(li);
