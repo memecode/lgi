@@ -192,11 +192,17 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 	}
 	
 	GMouse m = _map_mouse_event(v, ev->x, ev->y, false);
+	/* This breaks capturing... e.g.
+		If the user clicks something that captures the mouse then drags the mouse off the window,
+		releases the mouse button, then moves back over the window, it would still think the mouse
+		button is clicks and capturing. Removing this code fixed that.
+		
 	if (!m.Target)
 	{
 		printf("%s:%i - no target\n", _FL);
 		return false;
 	}
+	*/
 
 	m.Double(ev->type == GDK_2BUTTON_PRESS ||
 			ev->type == GDK_3BUTTON_PRESS);

@@ -393,19 +393,13 @@ bool GView::_Mouse(GMouse &m, bool Move)
 		return false;
 	}
 
-	// GViewI *cap = _Capturing;
 	#if DEBUG_MOUSE_EVENTS
-	if (!Move)
+	// if (!Move)
 		LgiTrace("%s:%i - _Capturing=%p/%s\n", _FL, _Capturing, _Capturing ? _Capturing->GetClass() : NULL);
 	#endif
 	if (Move)
 	{
-		// bool Change = false;
-		#if 1
 		auto *o = m.Target;
-		#else
-		GViewI *o = WindowFromPoint(m.x, m.y);
-		#endif
 		if (_Over != o)
 		{
 			#if DEBUG_MOUSE_EVENTS
