@@ -398,80 +398,67 @@ bool GView::_Mouse(GMouse &m, bool Move)
 	if (!Move)
 		LgiTrace("%s:%i - _Capturing=%p/%s\n", _FL, _Capturing, _Capturing ? _Capturing->GetClass() : NULL);
 	#endif
-	if (_Capturing)
+	if (Move)
 	{
+		// bool Change = false;
+		#if 1
+		auto *o = m.Target;
+		#else
+		GViewI *o = WindowFromPoint(m.x, m.y);
+		#endif
+		if (_Over != o)
+		{
+			#if DEBUG_MOUSE_EVENTS
+			// if (!o) WindowFromPoint(m.x, m.y, true);
+			LgiTrace("%s:%i - _Over changing from %p/%s to %p/%s\n", _FL,
+					_Over, _Over ? _Over->GetClass() : NULL,
+					o, o ? o->GetClass() : NULL);
+			#endif
+			if (_Over)
+				_Over->OnMouseExit(lgi_adjust_click(m, _Over));
+			_Over = o;
+			if (_Over)
+				_Over->OnMouseEnter(lgi_adjust_click(m, _Over));
+		}
+	}
+		
+	GView *Target = NULL;
+	if (_Capturing)
+		Target = dynamic_cast<GView*>(_Capturing);
+	else
+		Target = dynamic_cast<GView*>(_Over ? _Over : this);
+	if (!Target)
+		return false;
+
+	GRect Client = Target->GView::GetClient(false);
+	
+	m = lgi_adjust_click(m, Target, !Move);
+	if (!Client.Valid() || Client.Overlap(m.x, m.y) || _Capturing)
+	{
+		LgiToGtkCursor(Target, Target->GetCursor(m.x, m.y));
+
 		if (Move)
 		{
-			GMouse Local = lgi_adjust_click(m, _Capturing);
-			LgiToGtkCursor(_Capturing, _Capturing->GetCursor(Local.x, Local.y));
-			#if DEBUG_MOUSE_EVENTS
-			LgiTrace("%s:%i - Local=%i,%i\n", _FL, Local.x, Local.y);
-			#endif
-			_Capturing->OnMouseMove(Local); // This can set _Capturing to NULL
+			Target->OnMouseMove(m);
 		}
 		else
 		{
-			_Capturing->OnMouseClick(lgi_adjust_click(m, _Capturing));
+			#if 0
+			if (!Move)
+			{
+				char Msg[256];
+				sprintf(Msg, "_Mouse Target %s", Target->GetClass());
+				m.Trace(Msg);
+			}
+			#endif
+			Target->OnMouseClick(m);
 		}
 	}
-	else
+	else if (!Move)
 	{
-		if (Move)
-		{
-			// bool Change = false;
-			#if 1
-			auto *o = m.Target;
-			#else
-			GViewI *o = WindowFromPoint(m.x, m.y);
-			#endif
-			if (_Over != o)
-			{
-				#if DEBUG_MOUSE_EVENTS
-				// if (!o) WindowFromPoint(m.x, m.y, true);
-				LgiTrace("%s:%i - _Over changing from %p/%s to %p/%s\n", _FL,
-						_Over, _Over ? _Over->GetClass() : NULL,
-						o, o ? o->GetClass() : NULL);
-				#endif
-				if (_Over)
-					_Over->OnMouseExit(lgi_adjust_click(m, _Over));
-				_Over = o;
-				if (_Over)
-					_Over->OnMouseEnter(lgi_adjust_click(m, _Over));
-			}
-		}
-			
-		GView *Target = dynamic_cast<GView*>(_Over ? _Over : this);
-
-		GRect Client = Target->GView::GetClient(false);
-		
-		m = lgi_adjust_click(m, Target, !Move);
-		if (!Client.Valid() || Client.Overlap(m.x, m.y))
-		{
-			LgiToGtkCursor(Target, Target->GetCursor(m.x, m.y));
-
-			if (Move)
-			{
-				Target->OnMouseMove(m);
-			}
-			else
-			{
-				#if 0
-				if (!Move)
-				{
-					char Msg[256];
-					sprintf(Msg, "_Mouse Target %s", Target->GetClass());
-					m.Trace(Msg);
-				}
-				#endif
-				Target->OnMouseClick(m);
-			}
-		}
-		else if (!Move)
-		{
-			#if DEBUG_MOUSE_EVENTS
-			LgiTrace("%s:%i - Click outside %s %s %i,%i\n", _FL, Target->GetClass(), Client.GetStr(), m.x, m.y);
-			#endif
-		}
+		#if DEBUG_MOUSE_EVENTS
+		LgiTrace("%s:%i - Click outside %s %s %i,%i\n", _FL, Target->GetClass(), Client.GetStr(), m.x, m.y);
+		#endif
 	}
 	
 	return true;

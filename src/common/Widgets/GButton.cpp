@@ -15,6 +15,12 @@
 #define DOWN_MOUSE		0x1
 #define DOWN_KEY		0x2
 
+#if 0
+#define DEBUG_LOG(...) printf(__VA_ARGS__)
+#else
+#define DEBUG_LOG(...)
+#endif
+
 // Size of extra pixels, beyond the size of the text itself.
 LPoint GButton::Overhead =
     LPoint(
@@ -203,12 +209,6 @@ GMessage::Result GButton::OnEvent(GMessage *Msg)
 	return GView::OnEvent(Msg);
 }
 
-#if 0
-#define DEBUG_LOG(arg, ...) printf(arg  __VA_OPT__(,) __VA_ARGS__)
-#else
-#define DEBUG_LOG(arg, ...)
-#endif
-
 void GButton::OnMouseClick(GMouse &m)
 {
 	if (!Enabled())
@@ -217,10 +217,9 @@ void GButton::OnMouseClick(GMouse &m)
 		return;
 	}
 
-	DEBUG_LOG("d->Toggle=%i\n", d->Toggle);
 	if (d->Toggle)
 	{
-		DEBUG_LOG("m.Down=%i\n", m.Down());
+		DEBUG_LOG("OnMouseClick: Toggle=true, m.Down=%i\n", m.Down());
 		if (m.Down())
 		{
 			Value(!Value());
@@ -230,7 +229,7 @@ void GButton::OnMouseClick(GMouse &m)
 	else
 	{
 		bool Click = IsCapturing();
-		DEBUG_LOG("Click=%i, m.Down()=%i\n", Click, m.Down());
+		DEBUG_LOG("OnMouseClick: Toggle=false, Click=%i, m.Down()=%i\n", Click, m.Down());
 		Capture(m.Down());
 		
 		if (Click ^ m.Down())
@@ -264,6 +263,7 @@ void GButton::OnMouseClick(GMouse &m)
 
 void GButton::OnMouseEnter(GMouse &m)
 {
+	DEBUG_LOG("OnMouseEnter\n");
 	d->Over = true;
 	if (IsCapturing())
 	{
@@ -278,6 +278,7 @@ void GButton::OnMouseEnter(GMouse &m)
 
 void GButton::OnMouseExit(GMouse &m)
 {
+	DEBUG_LOG("OnMouseExit\n");
 	d->Over = false;
 	if (IsCapturing())
 	{

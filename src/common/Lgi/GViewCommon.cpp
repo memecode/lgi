@@ -15,6 +15,12 @@
 #include "GPopup.h"
 #include "GCssTools.h"
 
+#if 0
+#define DEBUG_CAPTURE(...) printf(__VA_ARGS__)
+#else
+#define DEBUG_CAPTURE(...)
+#endif
+
 //////////////////////////////////////////////////////////////////////////////////////
 // Helper
 LPoint lgi_view_offset(GViewI *v, bool Debug = false)
@@ -1054,19 +1060,16 @@ bool GView::HandleCapture(GView *Wnd, bool c)
 {
 	ThreadCheck();
 	
+	DEBUG_CAPTURE("%s::HandleCapture(%i)=%i\n", GetClass(), c, (int)(_Capturing == Wnd));
 	if (c)
 	{
 		if (_Capturing == Wnd)
 		{
-			#if DEBUG_CAPTURE
-			LgiTrace("%s:%i - %s already has capture\n", _FL, _Capturing?_Capturing->GetClass():0);
-			#endif
+			DEBUG_CAPTURE("    %s already has capture\n", _Capturing?_Capturing->GetClass():0);
 		}
 		else
 		{
-			#if DEBUG_CAPTURE
-			LgiStackTrace("%s:%i - _Capturing=%s -> %s\n", _FL, _Capturing?_Capturing->GetClass():0, Wnd?Wnd->GetClass():0);
-			#endif
+			DEBUG_CAPTURE("    _Capturing=%s -> %s\n", _Capturing?_Capturing->GetClass():0, Wnd?Wnd->GetClass():0);
 			_Capturing = Wnd;
 			
 			#if WINNATIVE
@@ -1089,9 +1092,7 @@ bool GView::HandleCapture(GView *Wnd, bool c)
 	}
 	else if (_Capturing)
 	{
-		#if DEBUG_CAPTURE
-		LgiTrace("%s:%i - _Capturing=%s -> NULL\n", _FL, _Capturing?_Capturing->GetClass():0);
-		#endif
+		DEBUG_CAPTURE("    _Capturing=%s -> NULL\n", _Capturing?_Capturing->GetClass():0);
 		_Capturing = NULL;
 		
 		#if WINNATIVE
@@ -1112,13 +1113,15 @@ bool GView::IsCapturing()
 {
 	ThreadCheck();
 	
+	DEBUG_CAPTURE("%s::IsCapturing()=%i\n", GetClass(), (int)(_Capturing == this));
 	return _Capturing == this;
 }
 
 bool GView::Capture(bool c)
 {
 	ThreadCheck();
-	
+
+	DEBUG_CAPTURE("%s::Capture(%i)\n", GetClass());
 	return HandleCapture(this, c);
 }
 
