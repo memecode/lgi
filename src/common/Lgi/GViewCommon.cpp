@@ -2420,27 +2420,7 @@ void GView::Debug()
 {
     _Debug = true;
 
-	#if defined(__GTK_H__)
-    /*
-	if (_View)
-    {
-		#if GTK_MAJOR_VERSION == 3
-			LgiAssert(!"Gtk3 FIXME");
-		#else
-		if (LGI_IS_WIDGET(_View))
-    	{
-    		LgiWidget *w = LGI_WIDGET(_View);
-    		if (w)
-    		{
-    			w->debug = true;
-    		}
-    		else LgiTrace("%s:%i - NULL widget.\n", _FL);
-    	}
-    	else LgiTrace("%s:%i - Not a widget.\n", _FL);
-		#endif
-    }
-	*/
-    #elif defined LGI_COCOA
+	#if defined LGI_COCOA
     d->ClassName = GetClass();
 	#endif
 }

@@ -23,6 +23,12 @@ using namespace Gtk;
 
 #define DEBUG_MOUSE_EVENTS			0
 
+#if 0
+#define DEBUG_INVALIDATE(...)		printf(__VA_ARGS__)
+#else
+#define DEBUG_INVALIDATE(...)
+#endif
+
 #define ADJ_LEFT					1
 #define ADJ_RIGHT					2
 #define ADJ_UP						3
@@ -560,6 +566,7 @@ GRect &GView::GetClient(bool ClientSpace)
 		c.ZOff(Pos.X()-1, Pos.Y()-1);
 		c.Size(Edge, Edge);
 	}
+	
 	return c;
 }
 
@@ -601,7 +608,10 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 	if (!ParWnd)
 		return false; // Nothing we can do till we attach
 	if (!InThread())
+	{
+		DEBUG_INVALIDATE("%s::Invalidate out of thread\n", GetClass());
 		return PostEvent(M_INVALIDATE, NULL, (GMessage::Param)this);
+	}
 
 	GRect r;
 	if (rc)
@@ -616,14 +626,19 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 			r = GetClient().ZeroTranslate();
 	}
 
+	DEBUG_INVALIDATE("%s::Invalidate r=%s frame=%i\n", GetClass(), r.GetStr(), Frame);
 	if (!Frame)
 		r.Offset(_BorderSize, _BorderSize);
 
 	LPoint Offset;
 	WindowVirtualOffset(&Offset);
 	r.Offset(Offset.x, Offset.y);
+	DEBUG_INVALIDATE("	voffset=%i,%i = %s\n", Offset.x, Offset.y, r.GetStr());
 	if (!r.Valid())
+	{
+		DEBUG_INVALIDATE("	error: invalid\n");
 		return false;
+	}
 
 	static bool Repainting = false;
 	if (!Repainting)
@@ -638,15 +653,21 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 				(h = gtk_widget_get_window(w)))
 			{
 				GdkRectangle grc = r;
+				DEBUG_INVALIDATE("	gdk_window_invalidate_rect %i,%i %i,%i\n", grc.x, grc.y, grc.width, grc.height);
 				gdk_window_invalidate_rect(h, &grc, true);
 			}
 			else
 			{
+				DEBUG_INVALIDATE("	gtk_widget_queue_draw\n");
 				gtk_widget_queue_draw(w);
 			}
 		}
 
 		Repainting = false;
+	}
+	else
+	{
+		DEBUG_INVALIDATE("	error: repainting\n");
 	}
 
 	return true;

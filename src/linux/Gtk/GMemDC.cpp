@@ -412,22 +412,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 			GdkWindow *root_window = gdk_get_default_root_window();
 			if (root_window)
 			{
-				#if GTK_MAJOR_VERSION == 3
 				LgiAssert(!"Gtk3 FIXME");
-				#else
-				gint x_orig, y_orig;
-				gint width, height;
-				gdk_drawable_get_size(root_window, &width, &height);      
-				gdk_window_get_origin(root_window, &x_orig, &y_orig);
-				gdk_drawable_copy_to_image(	root_window,
-											d->Img,
-											br.SrcClip.x1,
-											br.SrcClip.y1,
-											x,
-											y,
-											br.SrcClip.X(),
-											br.SrcClip.Y());
-				#endif
 				
 				// Call the capture screen handler to draw anything between the screen and
 				// cursor layers

@@ -21,10 +21,6 @@
 #define IDLE_ALWAYS					0
 
 
-#if GTK_MAJOR_VERSION == 3
-#else
-LTHREAD_DATA int GtkLockCount = 0;
-#endif
 bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth = 0);
 
 ////////////////////////////////////////////////////////////////
@@ -366,11 +362,6 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 
 GApp::~GApp()
 {
-	#if GTK_MAJOR_VERSION == 3
-	#else
-	GtkLock _Lock;
-	#endif
-
 	DeleteObj(AppWnd);
 	DeleteObj(SystemNormal);
 	DeleteObj(SystemBold);

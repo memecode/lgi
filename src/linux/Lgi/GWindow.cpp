@@ -9,10 +9,6 @@
 
 #include "GViewPriv.h"
 using namespace Gtk;
-#if GTK_MAJOR_VERSION == 3
-#else
-#include <gdk/gdkx.h>
-#endif
 #undef Status
 #include "LgiWidget.h"
 
