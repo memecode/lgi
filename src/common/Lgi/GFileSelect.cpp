@@ -436,6 +436,23 @@ enum FolderCtrlMessages
 {
 	M_DELETE_EDIT				=	M_USER + 100,
 	M_NOTIFY_VALUE_CHANGED,
+	M_LOST_FOCUS,
+};
+
+class FolderCtrlEdit : public GEdit
+{
+public:
+	FolderCtrlEdit(int id, GRect c) :
+		GEdit(id, c.x1, c.y1, c.X()-1, c.Y()-1)
+	{
+	}
+
+	void OnFocus(bool f)
+	{
+		printf("OnFocus(%i)\n", f);
+		if (!f && GetParent())
+			GetParent()->PostEvent(M_LOST_FOCUS);
+	}
 };
 
 class FolderCtrl : public GView
@@ -601,6 +618,20 @@ public:
 		pDC->Colour(L_WORKSPACE);
 		pDC->Rectangle(&c);
 	}
+	
+	void ExitEditMode()
+	{
+		if (e)
+		{
+			Name(e->Name());
+			DeleteObj(e);
+
+			PostEvent(M_DELETE_EDIT);
+			PostEvent(M_NOTIFY_VALUE_CHANGED);
+			
+			Invalidate();
+		}
+	}
 
 	void OnMouseClick(GMouse &m)
 	{
@@ -630,7 +661,7 @@ public:
 				{
 					// In empty space
 					GRect c = GetClient();
-					e = new GEdit(GetId()+1, c.x1, c.y1, c.X()-1, c.Y()-1);
+					e = new FolderCtrlEdit(GetId()+1, c);
 					if (e)
 					{
 						e->Attach(this);
@@ -669,10 +700,7 @@ public:
 		{
 			if (f == LK_RETURN)
 			{
-				GString s = e->Name();
-				Name(s);
-				PostEvent(M_DELETE_EDIT);
-				PostEvent(M_NOTIFY_VALUE_CHANGED);
+				ExitEditMode();
 			}
 		}
 
@@ -683,6 +711,11 @@ public:
 	{
 		switch (m->Msg())
 		{
+			case M_LOST_FOCUS:
+			{
+				ExitEditMode();
+				break;
+			}
 			case M_DELETE_EDIT:
 			{
 				DeleteObj(e);
