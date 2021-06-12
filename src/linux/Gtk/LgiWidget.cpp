@@ -2,7 +2,7 @@
 #include "GDragAndDrop.h"
 #include "GViewPriv.h"
 
-#define DEBUG_KEY_EVENT		1
+#define DEBUG_KEY_EVENT		0
 
 using namespace Gtk;
 #include "LgiWidget.h"
@@ -264,20 +264,6 @@ static gboolean lgi_widget_mouse_enter_leave(GtkWidget *widget, GdkEventCrossing
 	return TRUE;
 }
 
-/*
-static gboolean lgi_widget_focus_event(GtkWidget *wid, GdkEventFocus *e)
-{
-	LgiWidget *p = LGI_WIDGET(wid);
-	GView *v = dynamic_cast<GView*>(p->target);
-	if (v)
-		v->OnFocus(e->in);
-	else
-		LgiAssert(0);
-	
-	return TRUE;
-}
-*/
-
 void BuildTabStops(GViewI *v, ::GArray<GViewI*> &a)
 {
 	if (v->Enabled() &&
@@ -323,9 +309,6 @@ gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 		k.Ctrl((e->state & 4) != 0);
 		k.Alt((e->state & 8) != 0);
 		
-		printf("####### e->state=%x\n", e->state);
-		
-		// k.IsChar = !k.Ctrl() && (k.c16 >= ' ' && k.c16 <= 0x7f);
 		k.IsChar = !k.Ctrl() &&
 					!k.Alt() && 
 					(k.c16 >= ' ') &&
@@ -924,7 +907,6 @@ lgi_widget_map(GtkWidget *widget)
 	auto parentWidget = gtk_widget_get_parent(widget);
 	if (pos.x1 == -1 && parentWidget)
 	{
-		// auto pp = GtkGetPos(parentWidget);
 		auto cp = p->target->GetPos();
 
 		GtkAllocation a;
@@ -1007,42 +989,42 @@ lgi_widget_class_init(LgiWidgetClass *cls)
 	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(cls);
 	widget_class->destroy = lgi_widget_destroy;
 
-	widget_class->draw					= lgi_widget_draw;
-	widget_class->get_preferred_height	= lgi_widget_get_preferred_height;
-	widget_class->get_preferred_width	= lgi_widget_get_preferred_width;
+	widget_class->draw							= lgi_widget_draw;
+	widget_class->get_preferred_height			= lgi_widget_get_preferred_height;
+	widget_class->get_preferred_width			= lgi_widget_get_preferred_width;
 	widget_class->get_preferred_width_for_height = lgi_widget_get_preferred_width_for_height;
 	widget_class->get_preferred_height_for_width = gtk_button_get_preferred_height_for_width;
-	widget_class->unrealize				= lgi_widget_unrealize;
-	widget_class->map					= lgi_widget_map;
-	widget_class->unmap					= lgi_widget_unmap;
-	widget_class->realize					= lgi_widget_realize;
-	widget_class->size_allocate				= lgi_widget_size_allocate;
-	widget_class->button_press_event		= lgi_widget_click;
-	widget_class->button_release_event		= lgi_widget_click;
-	widget_class->motion_notify_event		= lgi_widget_motion;
-	widget_class->scroll_event				= lgi_widget_scroll;
-	widget_class->enter_notify_event		= lgi_widget_mouse_enter_leave;
-	widget_class->leave_notify_event		= lgi_widget_mouse_enter_leave;
+	widget_class->unrealize						= lgi_widget_unrealize;
+	widget_class->map							= lgi_widget_map;
+	widget_class->unmap							= lgi_widget_unmap;
+	widget_class->realize						= lgi_widget_realize;
+	widget_class->size_allocate					= lgi_widget_size_allocate;
+	widget_class->button_press_event			= lgi_widget_click;
+	widget_class->button_release_event			= lgi_widget_click;
+	widget_class->motion_notify_event			= lgi_widget_motion;
+	widget_class->scroll_event					= lgi_widget_scroll;
+	widget_class->enter_notify_event			= lgi_widget_mouse_enter_leave;
+	widget_class->leave_notify_event			= lgi_widget_mouse_enter_leave;
 	/*
-	widget_class->focus_in_event			= lgi_widget_focus_event;
-	widget_class->focus_out_event			= lgi_widget_focus_event;
+	widget_class->focus_in_event				= lgi_widget_focus_event;
+	widget_class->focus_out_event				= lgi_widget_focus_event;
 	*/
-	widget_class->key_press_event			= lgi_widget_key_event;
-	widget_class->key_release_event			= lgi_widget_key_event;
-	widget_class->drag_begin				= lgi_widget_drag_begin;
-	widget_class->drag_end					= lgi_widget_drag_end;
-	widget_class->drag_data_get				= lgi_widget_drag_data_get;
-	widget_class->drag_data_delete			= lgi_widget_drag_data_delete;
-	widget_class->drag_leave				= lgi_widget_drag_leave;
-	widget_class->drag_motion				= lgi_widget_drag_motion;
-	widget_class->drag_drop					= lgi_widget_drag_drop;
-	widget_class->drag_data_received		= lgi_widget_drag_data_received;
+	widget_class->key_press_event				= lgi_widget_key_event;
+	widget_class->key_release_event				= lgi_widget_key_event;
+	widget_class->drag_begin					= lgi_widget_drag_begin;
+	widget_class->drag_end						= lgi_widget_drag_end;
+	widget_class->drag_data_get					= lgi_widget_drag_data_get;
+	widget_class->drag_data_delete				= lgi_widget_drag_data_delete;
+	widget_class->drag_leave					= lgi_widget_drag_leave;
+	widget_class->drag_motion					= lgi_widget_drag_motion;
+	widget_class->drag_drop						= lgi_widget_drag_drop;
+	widget_class->drag_data_received			= lgi_widget_drag_data_received;
 
 	GtkContainerClass *container_class = (GtkContainerClass*)cls;
-	container_class->add					= lgi_widget_add;
-	container_class->remove					= lgi_widget_remove;
-	container_class->forall					= lgi_widget_forall;
-	container_class->child_type				= lgi_widget_child_type;
+	container_class->add						= lgi_widget_add;
+	container_class->remove						= lgi_widget_remove;
+	container_class->forall						= lgi_widget_forall;
+	container_class->child_type					= lgi_widget_child_type;
 }
 
 void
