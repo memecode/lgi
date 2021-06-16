@@ -44,17 +44,21 @@ public:
 	/// Makes the scrollar vertical
 	void SetVertical(bool v);
 	/// Gets the current position of the scrollbar
+	
 	int64 Value();
 	/// Sets the position of the scrollbar
 	void Value(int64 p);
-	/// Gets the limits
-	void Limits(int64 &Low, int64 &High);
-	/// Sets the limits
-	void SetLimits(int64 Low, int64 High);
+
+	// Gets the range of the scoll bar
+	GRange GetRange() const;
+	/// Sets the range of the scroll bar
+	bool SetRange(const GRange &r);
+	
 	/// Gets the page size
 	int64 Page();
 	/// Sets the page size
 	void SetPage(int64 p);
+
 	/// Returns true if the range is valid
 	bool Valid();
 
@@ -80,6 +84,11 @@ public:
 	virtual void OnChange(int Pos) {}
 	/// Called when the Limits or Page changes
 	virtual void OnConfigure() {}
+
+	/// Gets the limits (use GetRange)
+	[[deprecated]] void Limits(int64 &Low, int64 &High);
+	/// Sets the limits (use SetRange)
+	[[deprecated]] void SetLimits(int64 Low, int64 High);
 };
 
 #endif

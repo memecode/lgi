@@ -36,10 +36,11 @@ public:
 	void Value(int64 i);
 	/// Gets the position of the slider
 	int64 Value();
-	/// Gets the limits of the slider
-	void GetLimits(int64 &x, int64 &y);
-	/// Sets the limits of the slider
-	void SetLimits(int64 x, int64 y);
+
+	// Gets the range of the slider
+	GRange GetRange() const;
+	/// Sets the range of the slider
+	bool SetRange(const GRange &r);
 
 	GMessage::Result OnEvent(GMessage *Msg);
 	
@@ -48,6 +49,11 @@ public:
 	void OnMouseClick(GMouse &m);
 	void OnMouseMove(GMouse &m);
 	#endif
+
+	/// Gets the limits of the slider (use GetRange)
+	[[deprecated]] void GetLimits(int64 &x, int64 &y);
+	/// Sets the limits of the slider (use SetRange)
+	[[deprecated]] void SetLimits(int64 x, int64 y);
 };
 
 #endif

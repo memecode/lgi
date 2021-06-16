@@ -662,10 +662,21 @@ void GScrollBar::Value(int64 v)
 	d->SetValue(v);
 }
 
+GRange GScrollBar::GetRange() const
+{
+	return GRange(d->Min, d->Max - d->Min + 1);
+}
+
 void GScrollBar::Limits(int64 &Low, int64 &High)
 {
 	Low = d->Min;
 	High = d->Max;
+}
+
+bool GScrollBar::SetRange(const GRange &r)
+{
+	SetLimits(r.Start, r.End());
+	return true;
 }
 
 void GScrollBar::SetLimits(int64 Low, int64 High)

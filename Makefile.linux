@@ -166,11 +166,11 @@ Depends =	LDateTime.o \
 			LList.o \
 			GCss.o \
 			GCssTools.o \
-			GLayout.o \
-			GWidgets.o \
 			GBox.o \
 			GSplitter.o \
 			GTableLayout.o \
+			GLayout.o \
+			GWidgets.o \
 			GUri.o \
 			INet.o \
 			INetTools.o \
@@ -966,22 +966,6 @@ GCssTools.o : ./src/common/Lgi/GCssTools.cpp ./include/common/Lgi.h \
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GLayout.o : ./src/linux/Lgi/GLayout.cpp ./include/common/Lgi.h \
-	./include/common/GScrollBar.h \
-	./include/common/GNotifications.h
-	@echo $(<F) [$(Build)]
-	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
-
-GWidgets.o : ./src/linux/Lgi/GWidgets.cpp ./include/common/Lgi.h \
-	./include/common/GSlider.h \
-	./include/common/GBitmap.h \
-	./include/common/GTableLayout.h \
-	./include/common/GDisplayString.h \
-	./include/common/GButton.h \
-	./include/linux/Gtk/LgiWidget.h
-	@echo $(<F) [$(Build)]
-	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
-
 GBox.o : ./src/common/Widgets/GBox.cpp ./include/common/Lgi.h \
 	./include/common/GBox.h \
 	./include/common/GCssTools.h \
@@ -1016,6 +1000,22 @@ GTableLayout.o : ./src/common/Widgets/GTableLayout.cpp ./include/common/Lgi.h \
 	./include/common/GTabView.h \
 	./include/common/GScrollBar.h \
 	./include/common/GCss.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
+GLayout.o : ./src/linux/Lgi/GLayout.cpp ./include/common/Lgi.h \
+	./include/common/GScrollBar.h \
+	./include/common/GNotifications.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
+GWidgets.o : ./src/linux/Lgi/GWidgets.cpp ./include/common/Lgi.h \
+	./include/common/GSlider.h \
+	./include/common/GBitmap.h \
+	./include/common/GTableLayout.h \
+	./include/common/GDisplayString.h \
+	./include/common/GButton.h \
+	./include/linux/Gtk/LgiWidget.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 

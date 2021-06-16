@@ -305,6 +305,17 @@ int64 GSlider::Value()
 	return Val;
 }
 
+GRange GSlider::GetRange() const
+{
+	return GRange(Min, Max-Min+1);
+}
+
+bool GSlider::SetRange(const GRange &r)
+{
+	Min = r.Start;
+	Max = r.End();
+}
+
 void GSlider::GetLimits(int64 &min, int64 &max)
 {
 	min = Min;
@@ -335,7 +346,7 @@ void GSlider::OnPaint(GSurface *pDC)
 	r.x2 -= 3;
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
 	
-	if (Min <= Max)
+	if (Min < Max)
 	{
 		int x = Val * r.X() / (Max-Min);
 		Thumb.ZOff(5, 9);
