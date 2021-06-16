@@ -42,6 +42,7 @@ public:
 	/// Sets the range of the slider
 	bool SetRange(const GRange &r);
 
+	bool OnLayout(GViewLayoutInfo &Inf);
 	GMessage::Result OnEvent(GMessage *Msg);
 	
 	#if !WINNATIVE

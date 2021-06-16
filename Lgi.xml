@@ -294,6 +294,7 @@
 				<Node File="./include/common/GEdit.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GItemContainer.cpp" Type="2" Platforms="15" />
 				<Node File="./include/common/GItemContainer.h" Type="3" Platforms="15" />
+				<Node File="./include/common/GLayout.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GPanel.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Widgets/GPopup.cpp" Type="2" Platforms="15" />
 				<Node File="./include/common/GPopup.h" Type="3" Platforms="15" />

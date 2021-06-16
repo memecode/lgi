@@ -539,7 +539,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		{
 			GdkEventConfigure *c = &event->configure;
 			Pos.Set(c->x, c->y, c->x+c->width-1, c->y+c->height-1);
-			printf("%s::GDK_CONFIGURE %s\n", GetClass(), Pos.GetStr());
+			// printf("%s::GDK_CONFIGURE %s\n", GetClass(), Pos.GetStr());
 			OnPosChange();
 			return FALSE;
 			break;

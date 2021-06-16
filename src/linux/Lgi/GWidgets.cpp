@@ -328,9 +328,27 @@ void GSlider::SetLimits(int64 min, int64 max)
 	Max = max;
 }
 
+bool GSlider::OnLayout(GViewLayoutInfo &Inf)
+{
+	if (Inf.Width.Min)
+	{
+		// Height
+		Inf.Height.Min = GetFont()->GetHeight();
+		Inf.Height.Max = Inf.Height.Min;
+	}
+	else
+	{
+		// Width
+		Inf.Width.Min = GetFont()->GetHeight();
+		Inf.Width.Max = -1; // Fill
+	}
+
+	return true;
+}
+
 GMessage::Param GSlider::OnEvent(GMessage *Msg)
 {
-	return 0;
+	return GControl::OnEvent(Msg);
 }
 
 void GSlider::OnPaint(GSurface *pDC)

@@ -594,16 +594,22 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 	#if 1 // defined(_DEBUG)
 	if (q->Length() > 200 && (q->Length()%20)==0)
 	{
-		#if defined(WIN32)
-			char s[256];
-			sprintf_s(s, sizeof(s), 
-		#else
-			printf(
-		#endif
-			"PostEvent Que=" LPrintfSizeT "\n", q->Length());
-		#if defined(WIN32)
-			OutputDebugStringA(s);
-		#endif
+		static uint64 prev = 0;
+		auto now = LgiCurrentTime();
+		if (now - prev >= 500)
+		{
+			prev = now;
+			#if defined(WIN32)
+				char s[256];
+				sprintf_s(s, sizeof(s), 
+			#else
+				printf(
+			#endif
+				"PostEvent Que=" LPrintfSizeT " (msg=%i)\n", q->Length(), Msg);
+			#if defined(WIN32)
+				OutputDebugStringA(s);
+			#endif
+		}
 	}
 	#endif
 

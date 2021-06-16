@@ -140,7 +140,21 @@ bool GLayout::SetScrollBars(bool x, bool y)
 		||
 		y ^ (VScroll != NULL))
 	{
-		return PostEvent(M_SET_SCROLL, x, y);
+		if (_SetScroll.x != x ||
+			_SetScroll.y != y ||
+			!_SetScroll.SentMsg)
+		{
+			// This is to filter out masses of duplicate messages
+			// before they have a chance to be processed. Esp important on
+			// GTK systems where the message handling isn't very fast.
+			_SetScroll.x = x;
+			_SetScroll.y = y;
+			_SetScroll.SentMsg = true;
+			return PostEvent(M_SET_SCROLL, x, y);
+		}
+		
+		// Duplicate... ignore...
+		return true;
 	}
 	#else
 	_SetScrollBars(x, y);
@@ -276,6 +290,7 @@ GMessage::Param GLayout::OnEvent(GMessage *Msg)
 	#ifdef M_SET_SCROLL
 	if (Msg->Msg() == M_SET_SCROLL)
 	{
+		_SetScroll.SentMsg = false;
 		_SetScrollBars(Msg->A(), Msg->B());
 		
 		if (HScroll)

@@ -44,6 +44,11 @@ class LgiClass GLayout : public GView
 	// Private variables
 	bool			_SettingScrollBars;
 	bool			_PourLargest;
+	struct LayoutScroll
+	{
+		bool			SentMsg = 0;
+		int				x = 0, y = 0;
+	}					_SetScroll;
 	bool			WantX, WantY;
 
 protected:
