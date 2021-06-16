@@ -218,9 +218,6 @@
     <ClCompile Include="src\win32\Lgi\GScrollBar.cpp">
       <Filter>Source Files\Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="src\win32\Widgets\GSlider.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Widgets\GSplitter.cpp">
       <Filter>Source Files\Widgets</Filter>
     </ClCompile>
@@ -493,6 +490,12 @@
     </ClCompile>
     <ClCompile Include="src\common\Lgi\GAppCommon.cpp">
       <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win32\Widgets\GSlider_Win.cpp">
+      <Filter>Source Files\Widgets\Native Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\GSlider.cpp">
+      <Filter>Source Files\Widgets\Xp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -767,7 +770,7 @@
       <Filter>Source Files\Interface</Filter>
     </ClInclude>
     <ClInclude Include="include\common\GSlider.h">
-      <Filter>Source Files\Widgets</Filter>
+      <Filter>Source Files\Widgets\Native Windows</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

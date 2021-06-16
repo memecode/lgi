@@ -535,6 +535,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="src\common\Widgets\GSlider.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\common\Widgets\GSplitter.cpp" />
     <ClCompile Include="src\common\Widgets\GStatusBar.cpp" />
     <ClCompile Include="src\common\Widgets\GTableLayout.cpp" />
@@ -579,7 +587,7 @@
     <ClCompile Include="src\win32\Widgets\GEdit_Win.cpp" />
     <ClCompile Include="src\win32\Widgets\GProgress.cpp" />
     <ClCompile Include="src\win32\Widgets\GRadioGroup_Win.cpp" />
-    <ClCompile Include="src\win32\Widgets\GSlider.cpp" />
+    <ClCompile Include="src\win32\Widgets\GSlider_Win.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\common\GArray.h" />

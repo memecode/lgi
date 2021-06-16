@@ -48,29 +48,38 @@ int64 GSlider::Value()
 	return Val;
 }
 
-void GSlider::GetLimits(int64 &min, int64 &max)
+GRange GSlider::GetRange()
 {
 	if (Handle())
 	{
-		min = Min = SendMessage(Handle(), TBM_GETRANGEMIN, 0, 0);
-		max = Max = SendMessage(Handle(), TBM_GETRANGEMAX, 0, 0);
+		Min = SendMessage(Handle(), TBM_GETRANGEMIN, 0, 0);
+		Max = SendMessage(Handle(), TBM_GETRANGEMAX, 0, 0);
 	}
-	else
-	{
-		min = Min;
-		max = Max;
-	}
+	return GRange(Min, Max-Min+1);
 }
 
-void GSlider::SetLimits(int64 min, int64 max)
+bool GSlider::SetRange(const GRange &r)
 {
-	Min = min;
-	Max = max;
+	Min = r.Start;
+	Max = r.End();
 	if (Handle())
 	{
 		SendMessage(Handle(), TBM_SETRANGEMIN, false, (LPARAM)Min);
 		SendMessage(Handle(), TBM_SETRANGEMAX, true, (LPARAM)Max);
 	}
+	return true;
+}
+
+void GSlider::GetLimits(int64 &min, int64 &max)
+{
+	auto r = GetRange();
+	min = r.Start;
+	max = r.End();
+}
+
+void GSlider::SetLimits(int64 min, int64 max)
+{
+	SetRange(GRange(Min, max-min+1));
 }
 
 GMessage::Result GSlider::OnEvent(GMessage *Msg)
@@ -139,13 +148,31 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 	{
 		case WM_CREATE:
 		{
-			SetLimits(Min, Max);
+			SetRange(GRange(Min, Max-Min+1));
 			Value(Val);
 			break;
 		}
 	}
 
 	return Status;
+}
+
+bool GSlider::OnLayout(GViewLayoutInfo &Inf)
+{
+	if (Inf.Width.Min)
+	{
+		// Height
+		Inf.Height.Min = GetFont()->GetHeight();
+		Inf.Height.Max = Inf.Height.Min;
+	}
+	else
+	{
+		// Width
+		Inf.Width.Min = GetFont()->GetHeight();
+		Inf.Width.Max = -1; // Fill
+	}
+
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////

@@ -225,7 +225,7 @@ public:
 
 	/// Returns the OS handle of the view
 	#if LGI_VIEW_HANDLE
-	OsView Handle() { return _View; }
+	OsView Handle() const { return _View; }
 	#endif
 
 	/// Returns the ptr to a GView

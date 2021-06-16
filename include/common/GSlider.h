@@ -38,7 +38,7 @@ public:
 	int64 Value();
 
 	// Gets the range of the slider
-	GRange GetRange() const;
+	GRange GetRange();
 	/// Sets the range of the slider
 	bool SetRange(const GRange &r);
 
