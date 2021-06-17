@@ -13,6 +13,7 @@ struct VsInfo
 }
 Versions[] =
 {
+	{2019, _MSC_VER_VS2019, 16.0},
 	{2017, _MSC_VER_VS2017, 15.0},
 	{2015, _MSC_VER_VS2015, 14.0},
 	{2013, _MSC_VER_VS2013,	12.0},
@@ -113,7 +114,7 @@ public:
 									VsVersion = YearToVer(VsYear);
 									break;
 								}
-								else if (i >= 10 && i <= 15)
+								else if (i >= 10 && i <= 16)
 								{
 									VsVersion = (double)i;
 									VsYear = VerToYear(VsVersion);
@@ -127,7 +128,12 @@ public:
 						// C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\devenv.exe
 						GFile::Path p(LSP_USER_APPS, 32);
 						GString v;
-						v.Printf("Microsoft Visual Studio %.1f", VsVersion);
+
+						if (VsVersion >= 16.0)
+							v.Printf("Microsoft Visual Studio\\%" PRIi64 "\\Community", VsYear);
+						else
+							v.Printf("Microsoft Visual Studio %.1f", VsVersion);
+
 						p += v;
 						p += "Common7\\IDE\\devenv.exe";
 						if (p.IsFile())
