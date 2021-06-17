@@ -44,7 +44,7 @@ int64 GSlider::Value()
 	return Val;
 }
 
-GRange GSlider::GetRange() const
+GRange GSlider::GetRange()
 {
 	return GRange(Min, Max-Min+1);
 }

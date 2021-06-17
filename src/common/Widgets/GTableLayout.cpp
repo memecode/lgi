@@ -32,10 +32,10 @@ enum CellFlag
 #include "GCss.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		539
+// #define DEBUG_LAYOUT		82
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
-// #define DEBUG_CTRL_ID		609
+// #define DEBUG_CTRL_ID		90
 
 int GTableLayout::CellSpacing = 4;
 
@@ -1016,13 +1016,6 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		if (c->Inf.Width.Max > Width)
 			c->Inf.Width.Max = Width;
 
-		#ifdef DEBUG_CTRL_ID
-		if (v->GetId() == DEBUG_CTRL_ID)
-		{
-			int asd=0;
-		}
-		#endif
-				
 		if (Ht.IsValid())
 		{
 			int CtrlHeight = Ht.ToPx(Table->Y(), v->GetFont());

@@ -307,6 +307,8 @@
 				<Node File="./include/common/GRadioGroup.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GScrollBar.cpp" Type="2" Platforms="14" />
 				<Node File="./include/common/GScrollBar.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/GSlider.cpp" Type="2" Platforms="15" />
+				<Node File="./include/common/GSlider.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GStatusBar.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Widgets/GTabView.cpp" Type="2" Platforms="15" />
 				<Node File="./include/common/GTabView.h" Type="3" Platforms="15" />
@@ -350,7 +352,6 @@
 				<Node File="./src/win32/Widgets/GProgress.cpp" Type="2" Platforms="1" />
 				<Node File="./src/win32/Lgi/GScrollBar.cpp" Type="2" Platforms="1" />
 			</Node>
-			<Node File="./include/common/GSlider.h" Type="3" Platforms="15" />
 		</Node>
 	</Node>
 	<Node Name="LgiNet" Type="1" Platforms="15" Open="0" Id="69">
@@ -409,11 +410,7 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable>
-				<Linux />
-			</Executable>
-			<CCrossCompiler />
-			<CppCrossCompiler />
+			<Executable />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -451,7 +448,6 @@ appindicator3
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
-				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -462,41 +458,16 @@ appindicator3
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<ApplicationIcon />
+			<Defines />
+			<LibraryPaths />
 		</Build>
 		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
+			<PostBuildCommands />
 		</Advanced>
 		<Debug>
-			<Environment />
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
+			<Arguments />
 		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
-		<Editor>
-			<TabSize />
-			<IndentSize />
-			<ShowWhiteSpace />
-			<UseHardTabs />
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
+		<Remote />
+		<Editor />
 	</Settings>
 </Project>

@@ -331,6 +331,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../src/common/Widgets/GProgressDlg.cpp \
 	../src/common/Widgets/GRadioGroup.cpp \
 	../src/common/Widgets/GScrollBar.cpp \
+	../src/common/Widgets/GSlider.cpp \
 	../src/common/Widgets/GSplitter.cpp \
 	../src/common/Widgets/GStatusBar.cpp \
 	../src/common/Widgets/GTableLayout.cpp \
@@ -1724,6 +1725,9 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/common/Lgi.h \
 	../include/common/GColour.h \
 	../include/common/LCancel.h \
 	../include/common/GStringClass.h
+
+../src/common/Widgets/GSlider.cpp : ../include/common/Lgi.h \
+	../include/common/GSlider.h
 
 ../include/common/GToolBar.h : ../include/common/GImageList.h
 

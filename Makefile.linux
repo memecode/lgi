@@ -157,6 +157,7 @@ Depends =	LDateTime.o \
 			GProgressDlg.o \
 			GRadioGroup.o \
 			GScrollBar.o \
+			GSlider.o \
 			GStatusBar.o \
 			GTabView.o \
 			GTextLabel.o \
@@ -880,6 +881,11 @@ GRadioGroup.o : ./src/common/Widgets/GRadioGroup.cpp ./include/common/Lgi.h \
 GScrollBar.o : ./src/common/Widgets/GScrollBar.cpp ./include/common/Lgi.h \
 	./include/common/GScrollBar.h \
 	./include/common/LgiRes.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
+GSlider.o : ./src/common/Widgets/GSlider.cpp ./include/common/Lgi.h \
+	./include/common/GSlider.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
