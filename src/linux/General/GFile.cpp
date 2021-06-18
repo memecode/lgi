@@ -338,7 +338,7 @@ int64 LFileSize(const char *FileName)
 	return 0;
 }
 
-bool DirExists(const char *FileName, char *CorrectCase)
+bool LDirExists(const char *FileName, char *CorrectCase)
 {
 	bool Status = false;
 	
@@ -373,7 +373,7 @@ bool DirExists(const char *FileName, char *CorrectCase)
 	return Status;
 }
 
-bool FileExists(const char *FileName, char *CorrectCase)
+bool LFileExists(const char *FileName, char *CorrectCase)
 {
 	bool Status = false;
 	
@@ -420,7 +420,7 @@ bool FileExists(const char *FileName, char *CorrectCase)
 							{
 								// It didn't work :(
 								#ifdef _DEBUG
-								printf("%s,%i - FileExists(%s) found an alternate case version but couldn't return it to the caller.\n",
+								printf("%s,%i - LFileExists(%s) found an alternate case version but couldn't return it to the caller.\n",
 										__FILE__, __LINE__, FileName);
 								#endif
 							}

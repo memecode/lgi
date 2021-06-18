@@ -690,7 +690,7 @@ void VcFolder::Select(bool b)
 	
 	if (b)
 	{
-		if (Uri.IsFile() && !DirExists(LocalPath()))
+		if (Uri.IsFile() && !LDirExists(LocalPath()))
 			return;
 
 		PROF("DefaultFields");

@@ -1117,7 +1117,7 @@ GSurface *GetHttpImage(char *Uri)
 						sprintf_s(r, sizeof(r), "_%x", LgiRand());
 						LgiMakePath(n, sizeof(n), LGetSystemPath(LSP_TEMP), r);
 					}
-					while (FileExists(n));
+					while (LFileExists(n));
 
 					GFile f;
 					if (f.Open(n, O_WRITE))

@@ -140,7 +140,7 @@ bool _GetApps_Add(GArray<GAppInfo*> &Apps, char *In)
 		{
 			char old = *i;
 			*i = 0;
-			if (FileExists(In))
+			if (LFileExists(In))
 			{
 				Path.Reset(NewStr(In));
 			}

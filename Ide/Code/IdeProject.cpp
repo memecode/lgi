@@ -105,7 +105,7 @@ bool FindInPath(GString &Exe)
 	{
 		char p[MAX_PATH];
 		LgiMakePath(p, sizeof(p), Path[i], Exe);
-		if (FileExists(p))
+		if (LFileExists(p))
 		{
 			Exe = p;
 			return true;
@@ -339,17 +339,17 @@ public:
 			if (!stricmp(CompilerName, "cross"))
 			{
 				GString CBin = d->Settings.GetStr(ProjCCrossCompiler, NULL, Platform);
-				if (CBin && !FileExists(CBin))
+				if (CBin && !LFileExists(CBin))
 					FindInPath(CBin);
-				if (CBin && FileExists(CBin))
+				if (CBin && LFileExists(CBin))
 					CCompilerBinary = CBin;
 				else
 					Log->Print("%s:%i - Error: C cross compiler '%s' not found.\n", _FL, CBin.Get());
 				
 				GString CppBin = d->Settings.GetStr(ProjCppCrossCompiler, NULL, Platform);
-				if (CppBin && !FileExists(CppBin))
+				if (CppBin && !LFileExists(CppBin))
 					FindInPath(CppBin);
-				if (CppBin && FileExists(CppBin))
+				if (CppBin && LFileExists(CppBin))
 					CppCompilerBinary = CppBin;
 				else
 					Log->Print("%s:%i - Error: C++ cross compiler '%s' not found.\n", _FL, CppBin.Get());
@@ -1392,7 +1392,7 @@ GString BuildThread::FindExe()
 			{
 				char Path[MAX_PATH];
 				LgiMakePath(Path, sizeof(Path), p[i], "python" LGI_EXECUTABLE_EXT);
-				if (FileExists(Path))
+				if (LFileExists(Path))
 				{
 					// Check version
 					#if defined(WINDOWS)
@@ -1476,7 +1476,7 @@ GString BuildThread::FindExe()
 								char f[MAX_PATH];
 								LgiMakePath(f, sizeof(f), Makefile, "..");
 								LgiMakePath(f, sizeof(f), f, i->File);
-								if (FileExists(f))
+								if (LFileExists(f))
 									i->File = f;
 								else
 									LgiAssert(0);
@@ -1606,7 +1606,7 @@ GString BuildThread::FindExe()
 			{
 				GString p;
 				p.Printf("C:\\Program Files (x86)\\Microsoft Visual Studio %.1f\\Common7\\IDE\\%s", fVer, VsBinaries[i]);
-				if (FileExists(p))
+				if (LFileExists(p))
 				{
 					return p;
 				}
@@ -1642,7 +1642,7 @@ GString BuildThread::FindExe()
 			LgiMakePath(p, sizeof(p), p, Latest) &&
 			LgiMakePath(p, sizeof(p), p, "common\\bin\\IarBuild.exe"))
 		{
-			if (FileExists(p))
+			if (LFileExists(p))
 				return p;
 		}
 	}
@@ -1681,7 +1681,7 @@ GString BuildThread::FindExe()
 		{
 			// Have a look in the default spot first...
 			const char *Def = "C:\\MinGW\\msys\\1.0\\bin\\make.exe";
-			if (FileExists(Def))
+			if (LFileExists(Def))
 			{
 				return Def;
 			}				
@@ -1700,7 +1700,7 @@ GString BuildThread::FindExe()
 				".exe"
 				#endif
 			);
-			if (FileExists(Exe))
+			if (LFileExists(Exe))
 			{
 				return Exe;
 			}
@@ -2135,7 +2135,7 @@ if (Debug) LgiTrace("XmlBase='%s'\n		In='%s'\n", Base.Get(), In);
 	
 if (Debug) LgiTrace("Len %i-%i\n", b.Length(), i.Length());
 	
-	auto ILen = i.Length() + (DirExists(In) ? 0 : 1);
+	auto ILen = i.Length() + (LDirExists(In) ? 0 : 1);
 	auto Max = MIN(b.Length(), ILen);
 	int Common = 0;
 	for (; Common < Max; Common++)
@@ -2397,7 +2397,7 @@ GDebugContext *IdeProject::Execute(ExeAction Act)
 		char e[MAX_PATH];
 		if (GetExePath(e, sizeof(e)))
 		{
-			if (FileExists(e))
+			if (LFileExists(e))
 			{
 				const char *Args = d->Settings.GetStr(ProjArgs);
 				const char *Env = d->Settings.GetStr(ProjEnv);
@@ -2687,7 +2687,7 @@ GString IdeProject::GetExecutable(IdePlatform Platform)
 		char Path[MAX_PATH];
 		LgiMakePath(Path, sizeof(Path), Base, Name);
 		LgiMakePath(Path, sizeof(Path), Path, Bin);
-		if (FileExists(Path))
+		if (LFileExists(Path))
 			Bin = Path;
 		else
 			printf("%s:%i - '%s' doesn't exist.\n", _FL, Path);
@@ -2852,7 +2852,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 
 	Prof.Add("UserFile");
 
-	if (FileExists(d->UserFile))
+	if (LFileExists(d->UserFile))
 	{
 		GFile Uf;
 		if (Uf.Open(d->UserFile, O_READ))
@@ -3386,7 +3386,7 @@ char *GetQuotedStr(char *Str)
 
 void IdeProject::ImportDsp(const char *File)
 {
-	if (File && FileExists(File))
+	if (File && LFileExists(File))
 	{
 		char Base[256];
 		strcpy(Base, File);

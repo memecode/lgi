@@ -131,7 +131,7 @@ GDocumentEnv::LoadType GDefaultDocumentEnv::GetContent(LoadJob *&j)
 	{
 		LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
 		LgiMakePath(p, sizeof(p), p, FileName);
-		if (FileExists(p))
+		if (LFileExists(p))
 		{
 			FullPath = p;
 		}
@@ -143,7 +143,7 @@ GDocumentEnv::LoadType GDefaultDocumentEnv::GetContent(LoadJob *&j)
 		}
 	}			
 
-	if (FileExists(FullPath))
+	if (LFileExists(FullPath))
 	{
 		GString Mt = LGetFileMimeType(FullPath);
 		if (Mt.Find("image/") == 0)

@@ -179,7 +179,7 @@ public:
 		LGetSystemPath(LSP_APP_INSTALL, EmojiPng, sizeof(EmojiPng));
 		LgiMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "resources/emoji.png");
 		#endif
-		if (FileExists(EmojiPng))
+		if (LFileExists(EmojiPng))
 		{
 			DecodeEmoji = true;
 			EmojiImg.Reset(NewStr(EmojiPng));

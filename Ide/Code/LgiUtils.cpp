@@ -14,7 +14,7 @@ char *FindHeader(char *Short, GArray<GString> &Paths)
 		
 		char f[MAX_PATH];
 		LgiMakePath(f, sizeof(f), Path, Short);
-		if (FileExists(f))
+		if (LFileExists(f))
 		{
 			Status = NewStr(f);
 		}

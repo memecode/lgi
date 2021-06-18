@@ -100,7 +100,7 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 	}
 	
 	// Make sure output folder exists?
-	if (!DirExists(Folder))
+	if (!LDirExists(Folder))
 	{
 		if (!FileDev->CreateFolder(Folder))
 		{

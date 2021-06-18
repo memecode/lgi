@@ -1376,7 +1376,7 @@ GSurface *LoadDC(const char *Name, bool UseOSLoader)
 
 GSurface *GdcDevice::Load(const char *Name, bool UseOSLoader)
 {
-	if (!FileExists(Name))
+	if (!LFileExists(Name))
 	{
 		// Loading non-file resource...
 		#if WINNATIVE
@@ -1467,7 +1467,7 @@ GSurface *GdcDevice::Load(GStream *In, const char *Name, bool UseOSLoader)
 		#elif defined MAC && !LGI_COCOA
 		
 		CGImageRef Img = NULL;
-		if (FileExists(Name))
+		if (LFileExists(Name))
 		{
 			CFURLRef FileUrl = CFURLCreateFromFileSystemRepresentation(0, (const UInt8*)Name, strlen(Name), false);
 			if (!FileUrl)

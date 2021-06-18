@@ -2219,7 +2219,7 @@ bool GCppParserWorker::ParsePreprocessor(GSourceFile *sf)
 			{
 				LgiMakePath(p, sizeof(p), sf->Path, "..");
 				LgiMakePath(p, sizeof(p), p, FileName8);
-				if ((Exists = FileExists(p)))
+				if ((Exists = LFileExists(p)))
 					IncPath = p;
 			}
 			

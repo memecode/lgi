@@ -689,7 +689,7 @@ public:
 								v = p;
 							}
 							
-							if (FileExists(v.Str()))
+							if (LFileExists(v.Str()))
 							{
 								IncCode.Reset(ReadTextFile(v.Str()));
 								if (IncCode)

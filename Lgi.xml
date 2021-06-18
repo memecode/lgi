@@ -347,10 +347,9 @@
 			<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="67">
 				<Node File="./src/win32/Widgets/GEdit_Win.cpp" Type="2" Platforms="1" />
 				<Node File="./src/win32/Widgets/GDialog.cpp" Type="2" Platforms="1" />
-				<Node File="./src/win32/Widgets/GSlider.cpp" Type="2" Platforms="1" />
+				<Node File="./src/win32/Lgi/GScrollBar.cpp" Type="2" Platforms="1" />
 				<Node File="./src/win32/Lgi/GLayout.cpp" Type="2" Platforms="1" />
 				<Node File="./src/win32/Widgets/GProgress.cpp" Type="2" Platforms="1" />
-				<Node File="./src/win32/Lgi/GScrollBar.cpp" Type="2" Platforms="1" />
 			</Node>
 		</Node>
 	</Node>
@@ -410,7 +409,11 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable />
+			<Executable>
+				<Linux />
+			</Executable>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -448,6 +451,7 @@ appindicator3
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
+				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -458,16 +462,41 @@ appindicator3
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
-			<Defines />
-			<LibraryPaths />
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
 		<Debug>
-			<Arguments />
+			<Arguments>
+				<All />
+			</Arguments>
+			<Environment />
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
-		<Remote />
-		<Editor />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
 	</Settings>
 </Project>

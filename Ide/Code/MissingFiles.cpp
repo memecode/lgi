@@ -42,7 +42,7 @@ public:
 			case M_CHECK_FILE:
 			{
 				GAutoPtr<SearchResults> Sr((SearchResults*)Msg->A());
-				bool e = FileExists(Sr->Path);
+				bool e = LFileExists(Sr->Path);
 				// printf("Checking '%s' = %i\n", Sr->Path.Get(), e);
 				if (!e)
 					PostObject(Hnd, M_MISSING_FILE, Sr);

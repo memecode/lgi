@@ -624,7 +624,7 @@ void GApp::OnCommandLine()
 			char *Arg = NewStr(s, e - s);
 			if (Arg)
 			{
-				if (FileExists(Arg))
+				if (LFileExists(Arg))
 				{
 					Files.Add(Arg);
 				}

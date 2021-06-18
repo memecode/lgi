@@ -198,7 +198,7 @@ public:
 							Add(NewStr(a));
 					}
 					else if (!u.sProtocol &&
-							FileExists(s))
+							LFileExists(s))
 					{
 						Add(NewStr(s));
 					}

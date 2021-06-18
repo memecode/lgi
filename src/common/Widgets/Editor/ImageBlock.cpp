@@ -491,7 +491,7 @@ bool GRichTextPriv::ImageBlock::Load(const char *Src)
 		
 		DeleteObj(j);
 	}
-	else if (FileExists(Source))
+	else if (LFileExists(Source))
 	{
 		FileName = Source;
 		FileMimeType = LgiApp->GetFileMimeType(Source);
@@ -591,7 +591,7 @@ bool GRichTextPriv::ImageBlock::ToHtml(GStream &s, GArray<GDocView::ContentMedia
 {
 	if (Media)
 	{
-		bool ValidSourceFile = FileExists(Source);
+		bool ValidSourceFile = LFileExists(Source);
 		GDocView::ContentMedia &Cm = Media->New();
 		
 		int Idx = LgiRand() % 10000;

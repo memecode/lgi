@@ -50,7 +50,7 @@ public:
 		char Opt[MAX_PATH];
 		if (LgiApp->GetOption("o", Opt, sizeof(Opt)))
 		{
-			if (FileExists(Opt))
+			if (LFileExists(Opt))
 				Status = Opt;
 		}
 
@@ -84,7 +84,7 @@ public:
 				else
 				{
 					if (LGetSystemPath(LSP_APP_ROOT, p, sizeof(p)) &&
-						!DirExists(p))
+						!LDirExists(p))
 					{
 						FileDev->CreateFolder(p);
 					}
@@ -289,7 +289,7 @@ bool GDocApp<OptionsFmt>::_DoSerialize(bool Write)
 
 	if (!Options)
 	{
-		if (FileExists(d->OptionsFile))
+		if (LFileExists(d->OptionsFile))
 			Options = new OptionsFmt(d->OptionsFile);
 		else
 			Options = new OptionsFmt(GOptionsFile::PortableMode, d->OptionsParam);

@@ -195,7 +195,7 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 		FileSyms *f;
 		#endif
 
-		if (!FileExists(Path))
+		if (!LFileExists(Path))
 		{
 			Log("Missing '%s'\n", Path.Get());
 			MissingFiles++;

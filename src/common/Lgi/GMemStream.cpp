@@ -319,7 +319,7 @@ ssize_t GTempStream::Write(const void *Buffer, ssize_t Size, int Flags)
 				break;
 			LgiMakePath(c, sizeof(c), TmpFolder, f);
 		}
-		while (FileExists(c));
+		while (LFileExists(c));
 
 		LgiAssert(Tmp == 0);
 		if ((Tmp = new GFile))

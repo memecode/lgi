@@ -762,7 +762,7 @@ public:
 		{
 			GDirectory SrcD, ObjD;
 			bool OutOfDate = true;
-			if (FileExists(SourceFileName) &&
+			if (LFileExists(SourceFileName) &&
 				SrcD.First(SourceFileName, NULL) != 0 &&
 				ObjD.First(Obj, NULL) != 0)
 			{
@@ -2122,7 +2122,7 @@ int GVmDebuggerWnd::OnNotify(GViewI *Ctrl, int Flags)
 					break;
 
 				const char *full = it->GetText(1);
-				if (!FileExists(full))
+				if (!LFileExists(full))
 					break;
 
 				LoadFile(full);

@@ -1186,7 +1186,7 @@ GSurface *GEmojiContext::GetEmojiImage()
 		char File[MAX_PATH] = "";
 		LgiMakePath(File, sizeof(File), p, "..\\src\\common\\Text\\Emoji\\EmojiMap.png");
 		GString a;
-		if (!FileExists(File))
+		if (!LFileExists(File))
 			a = LFindFile("EmojiMap.png");
 		
 		EmojiImg.Reset(GdcD->Load(a ? a : File, false));

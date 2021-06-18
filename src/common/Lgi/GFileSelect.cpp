@@ -1150,7 +1150,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 				if (s)
 				{
 					const char *p = s->GetText(1);
-					if (DirExists(p))
+					if (LDirExists(p))
 					{
 						SetCtrlName(IDC_PATH, p);
 						OnFolder();
@@ -1252,7 +1252,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 					break;
 				}
 				
-				if (DirExists(f))
+				if (LDirExists(f))
 				{
 					// Switch to the folder...
 					SetCtrlName(IDC_PATH, f);
@@ -1260,7 +1260,7 @@ int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
 					Ctrl->Name(NULL);
 					d->EatClose = true;
 				}
-				else if (FileExists(f))
+				else if (LFileExists(f))
 				{
 					// Select the file...
 					d->Files.Insert(NewStr(f));
@@ -1905,7 +1905,7 @@ bool GFolderList::OnKey(GKey &k)
 						{
 							char Path[256];
 							LgiMakePath(Path, sizeof(Path), Cur, Sel->GetText(0));
-							if (DirExists(Path))
+							if (LDirExists(Path))
 							{
 								GetWindow()->SetCtrlName(IDC_PATH, Path);
 								Dlg->OnFolder();
@@ -2223,7 +2223,7 @@ bool LgiGetUsersLinks(GArray<GString> &Links)
 			return false;
 		}
 
-		if (!FileExists(p))
+		if (!LFileExists(p))
 			return false;
 			
 		GAutoString Txt(ReadTextFile(p));

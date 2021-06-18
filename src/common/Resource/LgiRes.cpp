@@ -296,7 +296,7 @@ LgiResources::LgiResources(const char *FileName, bool Warn, const char *ThemeFol
 LgiTrace("%s:%i - Filename='%s'\n", _FL, FileName);
 #endif
 	
-	if (FileExists(FileName))
+	if (LFileExists(FileName))
 	{
 		if (Load(FileName))
 			return;

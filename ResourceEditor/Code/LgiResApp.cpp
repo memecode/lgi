@@ -1411,12 +1411,12 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 			{
 				char p[256];
 				LgiMakePath(p, sizeof(p), ExeName, "index.html");
-				if (!FileExists(p))
+				if (!LFileExists(p))
 				{
 					LgiMakePath(p, sizeof(p), ExeName, "help");
 					LgiMakePath(p, sizeof(p), p, "index.html");
 				}
-				if (FileExists(p))
+				if (LFileExists(p))
 				{
 					LgiExecute(HelpFile, NULL, ExeName);
 					break;
@@ -3060,7 +3060,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 	}
 
 	// Rename the existing file to 'xxxxxx.bak'
-	if (FileExists(FileName))
+	if (LFileExists(FileName))
 	{
 		char Bak[MAX_PATH];
 		strcpy_s(Bak, sizeof(Bak), FileName);
@@ -3068,7 +3068,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 		if (e)
 		{
 			strcpy(e, "bak");
-			if (FileExists(Bak))
+			if (LFileExists(Bak))
 				FileDev->Delete(Bak, false);
 
 			FileDev->Move(FileName, Bak);

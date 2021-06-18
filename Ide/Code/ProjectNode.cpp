@@ -843,7 +843,7 @@ IdeDoc *ProjectNode::Open()
 						LgiMakePath(Exe, sizeof(Exe), Exe, "LgiRes/lgires");
 						#endif
 						
-						if (FileExists(Exe))
+						if (LFileExists(Exe))
 						{
 							LgiExecute(Exe, FullPath);
 						}

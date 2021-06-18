@@ -782,7 +782,7 @@ void GApp::OnCommandLine()
 	for (int i=1; i<GetAppArgs()->Args; i++)
 	{
 		char *a = GetAppArgs()->Arg[i];
-		if (FileExists(a))
+		if (LFileExists(a))
 		{
 			Files.Add(NewStr(a));
 		}
@@ -803,14 +803,14 @@ void GApp::OnCommandLine()
 	::GString Status;
 	char Full[MAX_PATH] = "";
 
-	if (!FileExists(File))
+	if (!LFileExists(File))
 	{
 		// Look in the path
 		GToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
 		for (int i=0; i<p.Length(); i++)
 		{
 			LgiMakePath(Full, sizeof(Full), p[i], File);
-			if (FileExists(Full))
+			if (LFileExists(Full))
 			{
 				File = Full;
 				break;
@@ -1112,7 +1112,7 @@ bool GApp::DesktopInfo::Serialize(bool Write)
 		if (!p.Exists())
 			return false;
 	}
-	else if (!FileExists(File))	
+	else if (!LFileExists(File))	
 		return false;
 	
 	if (!f.Open(File, Write?O_WRITE:O_READ))

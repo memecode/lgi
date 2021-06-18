@@ -106,7 +106,7 @@ bool LgiIsProcess(OsProcessId Pid)
 
 		char ProcPath[256];
 		sprintf_s(ProcPath, sizeof(ProcPath), "/proc/%i", Pid);
-		Status = DirExists(ProcPath);
+		Status = LDirExists(ProcPath);
 	
 	#elif defined BEOS
 	
@@ -373,7 +373,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 	GNativeString NExe;
 	if (Exe)
 	{
-		if (FileExists((char*)Exe))
+		if (LFileExists((char*)Exe))
 		{
 			NExe = Exe;
 		}
@@ -384,7 +384,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 			{
 				char s[MAX_PATH];
 				LgiMakePath(s, sizeof(s), Path, Exe);
-				if (FileExists(s))
+				if (LFileExists(s))
 				{
 					NExe = s;
 					break;
@@ -683,14 +683,14 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 		if (Args)
 		{
 			char ExeName[256] = "";
-			if (!FileExists(Exe))
+			if (!LFileExists(Exe))
 			{
 				// Find exe in path
 				GToken Path(getenv("PATH"), ":");
 				for (int i=0; i<Path.Length(); i++)
 				{
 					LgiMakePath(ExeName, sizeof(ExeName), Path[i], Exe);
-					if (FileExists(ExeName))
+					if (LFileExists(ExeName))
 					{
 						Exe = ExeName;
 						break;

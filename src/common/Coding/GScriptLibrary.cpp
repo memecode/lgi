@@ -357,7 +357,7 @@ bool SystemFunctions::Sprintf(LScriptArguments &Args)
 bool SystemFunctions::ReadTextFile(LScriptArguments &Args)
 {
 	if (Args.Length() == 1 &&
-		FileExists(Args[0]->CastString()))
+		LFileExists(Args[0]->CastString()))
 	{
 		if (Args.GetReturn()->OwnStr(::ReadTextFile(Args[0]->CastString())))
 			return true;

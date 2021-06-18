@@ -328,19 +328,19 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 	#endif
 
 	if (LgiMakePath(p, sizeof(p), Path, ".git") &&
-		DirExists(p))
+		LDirExists(p))
 		return VcGit;
 
 	if (LgiMakePath(p, sizeof(p), Path, ".svn") &&
-		DirExists(p))
+		LDirExists(p))
 		return VcSvn;
 
 	if (LgiMakePath(p, sizeof(p), Path, ".hg") &&
-		DirExists(p))
+		LDirExists(p))
 		return VcHg;
 
 	if (LgiMakePath(p, sizeof(p), Path, "CVS") &&
-		DirExists(p))
+		LDirExists(p))
 		return VcCvs;
 
 	return VcNone;
@@ -1160,7 +1160,7 @@ public:
 	{
 		for (auto f : Files)
 		{
-			if (DirExists(f))
+			if (LDirExists(f))
 				OpenLocalFolder(f);
 		}
 	}

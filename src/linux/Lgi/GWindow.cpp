@@ -164,13 +164,13 @@ bool GWindow::SetIcon(const char *FileName)
 	GAutoString a;
 	if (Wnd)
 	{
-		if (!FileExists(FileName))
+		if (!LFileExists(FileName))
 		{
 			if (a.Reset(LgiFindFile(FileName)))
 				FileName = a;
 		}
 
-		if (!FileExists(FileName))
+		if (!LFileExists(FileName))
 		{
 			LgiTrace("%s:%i - SetIcon failed to find '%s'\n", _FL, FileName);
 			return false;

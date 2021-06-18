@@ -124,7 +124,7 @@ bool GMru::_SaveFile(const char *FileName)
 		strcpy_s(File, sizeof(File), FileName);
 		
 		GFileType *st;
-		if (!FileExists(File) &&
+		if (!LFileExists(File) &&
 			(st = GetSelectedType()) &&
 			st->Extension())
 		{
@@ -331,13 +331,13 @@ bool GMru::OnCommand(int Cmd)
 		
 		if (_GetCurFile())
 		{
-			if (FileExists(_GetCurFile()))
+			if (LFileExists(_GetCurFile()))
 				Select.Name(_GetCurFile());
 			
 			char Path[256];
 			strcpy_s(Path, sizeof(Path), _GetCurFile());
 			LgiTrimDir(Path);
-			if (DirExists(Path))
+			if (LDirExists(Path))
 				Select.InitialDir(Path);
 		}
 

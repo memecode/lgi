@@ -72,7 +72,7 @@ GImageList *LgiLoadImageList(const char *File, int x, int y)
 		}
 	}		
 
-	auto Path = FileExists(File) ? GString(File) : LFindFile(File);
+	auto Path = LFileExists(File) ? GString(File) : LFindFile(File);
 	if (!Path)
 	{
 		LgiTrace("%s:%i - Couldn't find '%s'\n", _FL, File);

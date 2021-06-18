@@ -955,7 +955,7 @@ bool IdeDocPrivate::Load()
 	}
 	else if (FileName)
 	{
-		if (FileExists(FileName))
+		if (LFileExists(FileName))
 		{
 			Status = Edit->Open(FileName);
 		}
@@ -1832,7 +1832,7 @@ bool IdeDoc::SetClean()
 			d->Project->CheckExists(LocalPath);
 
 		if (d->Edit->IsDirty() &&
-			!FileExists(LocalPath))
+			!LFileExists(LocalPath))
 		{
 			// We need a valid filename to save to...			
 			GFileSelect s;

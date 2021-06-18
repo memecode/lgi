@@ -21,7 +21,9 @@ protected:
 			return;
 		if (Sem.Lock(_FL))
 		{
-			GProfile p("GTextLog::ProcessTxt()", 100);
+			GString msg;
+			msg.Printf("GTextLog::ProcessTxt(%" PRIu64 ")", (uint64)Txt.Length());
+			GProfile p(msg, 100);
 			Add(Txt.AddressOf(), Txt.Length());
 			Txt.Empty();
 			Sem.Unlock();

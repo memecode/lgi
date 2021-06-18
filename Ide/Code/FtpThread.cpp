@@ -331,7 +331,7 @@ int FtpThread::Main()
 
 							char r[256], *d = strrchr(c->Uri, '/');
 							LgiMakePath(r, sizeof(r), LGetSystemPath(LSP_TEMP), d + 1);
-							if (FileExists(r))
+							if (LFileExists(r))
 							{
 								FileDev->Delete(r, false);
 							}
@@ -375,7 +375,7 @@ int FtpThread::Main()
 								}
 							}
 
-							if (FileExists(c->File))
+							if (LFileExists(c->File))
 							{
 								char *d = strrchr(c->File, DIR_CHAR);
 								c->Status = Conn->Ftp.UploadFile(c->File, d + 1);

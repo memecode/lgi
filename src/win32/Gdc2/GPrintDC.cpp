@@ -46,14 +46,14 @@ GPrintDC::GPrintDC(void *Handle, const char *PrintJobName, const char *PrinterNa
 			GString FileName;
 			FileName.Printf("%s.xps", PrintJobName);
 			p += FileName;
-			if (FileExists(p.GetFull()))
+			if (LFileExists(p.GetFull()))
 			{
 				for (unsigned i=1; i<1000; i++)
 				{
 					p--;
 					FileName.Printf("%s%i.xps", PrintJobName, i);
 					p += FileName;
-					if (!FileExists(p.GetFull()))
+					if (!LFileExists(p.GetFull()))
 						break;
 				}
 			}

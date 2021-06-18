@@ -518,7 +518,7 @@ bool LgiTraceGetFilePath(char *LogPath, int BufLen)
 			{
 				strcpy_s(Leaf, sizeof(Leaf), Dir + 1);
 				LGetSystemPath(LSP_APP_ROOT, LogPath, BufLen);
-				if (!DirExists(LogPath))
+				if (!LDirExists(LogPath))
 					FileDev->CreateFolder(LogPath);
 				LgiMakePath(LogPath, BufLen, LogPath, Leaf);
 			}
@@ -1784,7 +1784,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 						
 						char p[MAX_PATH];
 						if (!LgiMakePath(p, sizeof(p), Home, ".local/share/Trash/files") ||
-							!DirExists(p))
+							!LDirExists(p))
 						{
 							LgiTrace("%s:%i - '%s' doesn't exist.\n", _FL, p);
 							break;
@@ -1862,7 +1862,7 @@ GString LGetExeFile()
 		{
 			// First try the self method
 			int Len = readlink("/proc/self/exe", ExePathCache, sizeof(ExePathCache));
-			Status = FileExists(ExePathCache);
+			Status = LFileExists(ExePathCache);
 			// printf("readlink=%i Status=%i Exe='%s'\n", Len, Status, ExePathCache);
 			if (!Status)
 			{
@@ -1956,7 +1956,7 @@ GString LGetExeFile()
 		#if LGI_COCOA || defined __GTK_H__
 
 		char Dest[MAX_PATH];
-		if (FileExists(LgiArgsAppPath))
+		if (LFileExists(LgiArgsAppPath))
 		{
 			LgiMakePath(Dest, sizeof(Dest), LgiArgsAppPath, "../../..");
 			return Dest;
@@ -2077,7 +2077,7 @@ static void _LFindFile(const char *Name, GString *GStr, GAutoString *AStr)
 		LgiAssert(PathLen < sizeof(Path));
 
 		// printf("\t%s\n", Path);
-		if (FileExists(Path))
+		if (LFileExists(Path))
 		{
 			if (GStr)
 				*GStr = Path;

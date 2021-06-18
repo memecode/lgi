@@ -22,7 +22,7 @@ GOptionsFile::GOptionsFile(const char *FileName) : LMutex("GOptionsFile")
 {
 	_Init();
 
-	if (FileExists(FileName))
+	if (LFileExists(FileName))
 		File = FileName;
 	else
 		SetMode(GuessMode(), FileName);
@@ -69,14 +69,14 @@ bool GOptionsFile::SetMode(PortableType mode, const char *BaseName)
 	if (!LGetSystemPath(Mode == DesktopMode ? LSP_APP_ROOT : LSP_APP_INSTALL, FullPath, sizeof(FullPath)))
 		return false;
 
-	if (!DirExists(FullPath))
+	if (!LDirExists(FullPath))
 		FileDev->CreateFolder(FullPath);
 
 	LgiMakePath(FullPath, sizeof(FullPath), FullPath, BaseName ? BaseName : (char*)"Options");
 	if (!LgiGetExtension(FullPath))
 		strcat_s(FullPath, sizeof(FullPath), ".xml");
 	File = FullPath;
-	Dirty = !FileExists(File);
+	Dirty = !LFileExists(File);
 
 	return true;
 }
@@ -128,7 +128,7 @@ bool GOptionsFile::SerializeFile(bool Write)
 			(
 				Write
 				||
-				FileExists(File)
+				LFileExists(File)
 			)
 			&&
 			f.Open(File, Write ? O_WRITE : O_READ)

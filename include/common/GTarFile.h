@@ -92,7 +92,7 @@ protected:
 			if (f.Dir)
 			{
 				LgiMakePath(o, sizeof(o), ExtractTo, f.Dir);
-				if (!DirExists(o) &&
+				if (!LDirExists(o) &&
 					!FileDev->CreateFolder(o, true))
 				{
 					return false;

@@ -28,7 +28,7 @@ bool _lgi_check_file(char *Path)
 {
 	if (Path)
 	{
-		if (FileExists(Path))
+		if (LFileExists(Path))
 		{
 			// file is there
 			return true;
@@ -38,14 +38,14 @@ bool _lgi_check_file(char *Path)
 			// shortcut?
 			char *e = Path + strlen(Path);
 			strcpy(e, ".lnk");
-			if (FileExists(Path))
+			if (LFileExists(Path))
 			{
 				// resolve shortcut
 				char Link[256];
 				if (ResolveShortcut(Path, Link, sizeof(Link)))
 				{
 					// check destination of link
-					if (FileExists(Link))
+					if (LFileExists(Link))
 					{
 						strcpy(Path, Link);
 						return true;
@@ -253,7 +253,7 @@ bool LgiGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 			char p[MAX_PATH];
 			if (LgiMakePath(p, sizeof(p), "/usr/share/applications", o))
 			{
-				if (FileExists(p))
+				if (LFileExists(p))
 				{
 					GAutoString txt(ReadTextFile(p));
 					GAutoString Section;

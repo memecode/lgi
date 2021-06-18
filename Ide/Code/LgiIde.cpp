@@ -216,7 +216,7 @@ public:
 		Loaded = false;
 		Insert(Fake = new GTreeItem);
 
-		if (FileExists(File))
+		if (LFileExists(File))
 		{
 			SetText(d?d+1:File);
 		}
@@ -264,7 +264,7 @@ public:
 		{
 			char Full[256];
 			LgiMakePath(Full, sizeof(Full), Path[p], e);
-			if (FileExists(Full))
+			if (LFileExists(Full))
 			{
 				return NewStr(Full);
 			}
@@ -1023,6 +1023,7 @@ public:
 	bool Debugging;
 	bool Running;
 	bool Building;
+	bool FixBuildWait = false;
 	LSubMenu *WindowsMenu;
 	LSubMenu *CreateMakefileMenu;
 	GAutoPtr<FindSymbolSystem> FindSym;
@@ -1138,7 +1139,7 @@ public:
 				
 				char p[300];
 				LgiMakePath(p, sizeof(p), ContextPath, File);
-				if (FileExists(p))
+				if (LFileExists(p))
 				{
 					Full.Reset(NewStr(p));
 				}
@@ -1159,7 +1160,7 @@ public:
 				{
 					char Path[MAX_PATH];
 					LgiMakePath(Path, sizeof(Path), Base, File);
-					if (FileExists(Path))
+					if (LFileExists(Path))
 					{
 						Full.Reset(NewStr(Path));
 						break;
@@ -1179,7 +1180,7 @@ public:
 			
 			if (!Full)
 			{
-				if (FileExists(File))
+				if (LFileExists(File))
 				{
 					Full.Reset(NewStr(File));
 				}
@@ -1739,6 +1740,12 @@ void AppWnd::OnPulse()
 	IdeDoc *Top = TopDoc();
 	if (Top)
 		Top->OnPulse();
+
+	if (d->FixBuildWait)
+	{
+		d->FixBuildWait = false;
+		OnFixBuildErrors();
+	}
 }
 
 GDebugContext *AppWnd::GetDebugContext()
@@ -1976,7 +1983,7 @@ void AppWnd::OnReceiveFiles(GArray<const char*> &Files)
 			if (!OpenProject(f, NULL))
 				OpenFile(f);
 		}
-		else if (DirExists(f))
+		else if (LDirExists(f))
 			;
 		else if
 		(
@@ -2216,7 +2223,8 @@ void AppWnd::OnFixBuildErrors()
 	}
 
 	Log->Print("%i replacements made.\n", Replacements);
-	d->Output->Value(AppWnd::OutputTab);
+	if (Replacements > 0)
+		d->Output->Value(AppWnd::OutputTab);
 }
 
 void AppWnd::OnBuildStateChanged(bool NewState)
@@ -2226,12 +2234,14 @@ void AppWnd::OnBuildStateChanged(bool NewState)
 		GetOptions()->GetValue(OPT_FIX_RENAMED, v) &&
 		v.CastInt32())
 	{
-		OnFixBuildErrors();
+		d->FixBuildWait = true;
 	}
 }
 
 void AppWnd::UpdateState(int Debugging, int Building)
 {
+	printf("UpdateState %i %i\n", Debugging, Building);
+	
 	if (Debugging >= 0) d->Debugging = Debugging;
 	if (Building >= 0)
 	{
@@ -2621,7 +2631,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 		}
 	}
 
-	if (!Doc && FileExists(File))
+	if (!Doc && LFileExists(File))
 	{
 		Doc = new IdeDoc(this, 0, File);
 		if (Doc)
@@ -3841,7 +3851,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (p)
 			{
 				GString Exe = p->GetExecutable(GetCurrentPlatform());
-				if (FileExists(Exe))
+				if (LFileExists(Exe))
 				{
 					Depends Dlg(this, Exe);
 				}

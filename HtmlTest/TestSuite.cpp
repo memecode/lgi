@@ -269,7 +269,7 @@ class AppWnd : public GWindow, public GDefaultDocumentEnv
 		{
 			char p[MAX_PATH];
 			if (LgiMakePath(p, sizeof(p), Base, j->Uri) &&
-				FileExists(p))
+				LFileExists(p))
 			{
 				GString Ext = LgiGetExtension(p);
 				if (Ext.Equals("css") ||
@@ -462,10 +462,10 @@ public:
 								Now.Year(), Now.Month(), Now.Day(),
 								Now.Hours(), Now.Minutes(), Now.Seconds());
 					LgiMakePath(OutPath, sizeof(OutPath), p, "Output");
-					if (!DirExists(OutPath))
+					if (!LDirExists(OutPath))
 						FileDev->CreateFolder(OutPath);
 					LgiMakePath(OutPath, sizeof(OutPath), OutPath, NowStr);
-					if (!DirExists(OutPath))
+					if (!LDirExists(OutPath))
 						FileDev->CreateFolder(OutPath);
 					
 					Prog.SetDescription("Saving renders...");
@@ -521,7 +521,7 @@ public:
 
 				char OutPath[MAX_PATH];
 				LgiMakePath(OutPath, sizeof(OutPath), p, "Output");
-				if (!DirExists(OutPath))
+				if (!LDirExists(OutPath))
 				{
 					LgiMsg(this, "No output render folder.", "Html Test Suite");
 					break;
@@ -549,7 +549,7 @@ public:
 						char p[256];
 
 						LgiMakePath(p, sizeof(p), Base, s->GetText(0));
-						if (FileExists(p))
+						if (LFileExists(p))
 						{
 							char *h = ReadTextFile(p);
 							if (h)

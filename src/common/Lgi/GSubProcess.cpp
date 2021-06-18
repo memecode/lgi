@@ -406,7 +406,7 @@ bool GSubProcess::SetEnvironment(const char *Var, const char *Value)
 		for (unsigned i=0; i<t.Length(); i++)
 		{
 			char *Dir = t[i];
-			if (DirExists(Dir))
+			if (LDirExists(Dir))
 				p.Print("%s%s", p.GetSize() ? LGI_PATH_SEPARATOR : "", Dir);
 			// else LgiTrace("%s:%i - Removing missing path '%s'\n", _FL, Dir);
 		}
@@ -552,7 +552,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 				}
 				Env.Add(NULL);
                 
-                if (!FileExists(d->Exe))
+                if (!LFileExists(d->Exe))
                 {
                     // Apparently 'execve' doesn't search the path... so we're going to look up the
                     // full executable path ourselves.
@@ -762,7 +762,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		#elif defined(WIN32)
 		
 		GAutoWString WExe;
-		if (FileExists(d->Exe))
+		if (LFileExists(d->Exe))
 		{
 			WExe.Reset(Utf8ToWide(d->Exe));
 		}
@@ -786,7 +786,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			{
 				char s[MAX_PATH];
 				LgiMakePath(s, sizeof(s), p[i], d->Exe);
-				if (FileExists(s))
+				if (LFileExists(s))
 				{
 					WExe.Reset(Utf8ToWide(s));
 					break;
@@ -794,7 +794,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 				if (!HasExt)
 				{
 					strcat_s(s, sizeof(s), ".exe");
-					if (FileExists(s))
+					if (LFileExists(s))
 					{
 						WExe.Reset(Utf8ToWide(s));
 						break;

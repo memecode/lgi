@@ -72,7 +72,7 @@ public:
 		char p[MAX_PATH];
 		if (LgiMakePath(p, sizeof(p), LGetExePath(), "libssl.so"))
 		{
-			if (FileExists(p))
+			if (LFileExists(p))
 			{
 			    LgiTrace("%s:%i - loading SSL library '%s'\n", _FL, p);
 				Load(p);

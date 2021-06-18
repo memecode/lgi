@@ -144,7 +144,7 @@ bool IdeCommon::RemoveTag()
 
 bool IdeCommon::AddFiles(AddFilesProgress *Prog, const char *Path)
 {
-	bool IsDir = DirExists(Path);
+	bool IsDir = LDirExists(Path);
 	if (IsDir)
 	{
 		GString s = Path;

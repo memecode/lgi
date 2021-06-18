@@ -155,7 +155,7 @@ bool GLibrary::Load(const char *File, bool Quiet)
 							{
 								char full[MAX_PATH];
 								LgiMakePath(full, sizeof(full), t[i], f);
-								if (FileExists(full))
+								if (LFileExists(full))
 								{
 									hLib = dlopen(full, RTLD_NOW);
 									#if DEBUG_LIB_MSGS

@@ -868,7 +868,7 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 		p += FaceName;
 		GString Full = p.GetFull();
 	
-		if (!FileExists(Full))
+		if (!LFileExists(Full))
 		{
 			GArray<char*> Files;
 			GArray<const char*> Extensions;
@@ -1767,7 +1767,7 @@ bool GFontType::GetSystemFont(const char *Which)
 		char p[MAX_PATH];
 		LGetSystemPath(LSP_HOME, p, sizeof(p));
 		LgiMakePath(p, sizeof(p), p, ".lgi.conf");
-		if (FileExists(p))
+		if (LFileExists(p))
 		{
 			GAutoString a(ReadTextFile(p));
 			if (a)

@@ -110,7 +110,7 @@ public:
 		if (u.sPath)
 			u.sPath = u.sPath.Replace("/", DIR_STR);
 		#endif
-		bool IsFile = FileExists(u.sPath);
+		bool IsFile = LFileExists(u.sPath);
 		bool IsHttp = false;
 
 		if (IsFile)
@@ -255,7 +255,7 @@ public:
 			char p[MAX_PATH];
 			LgiMakePath(p, sizeof(p), !BaseUri.sPath.IsEmpty() ? BaseUri.sPath : Uri, "..");
 			LgiMakePath(p, sizeof(p), p, LoadFileName);
-			if (FileExists(p))
+			if (LFileExists(p))
 			{
 				char *Ext = LgiGetExtension(p);
 				if
@@ -441,7 +441,7 @@ bool GBrowser::SetUri(const char *Uri)
 	if (Uri)
 	{
 		char s[MAX_PATH];
-		if (DirExists(Uri))
+		if (LDirExists(Uri))
 		{
 			sprintf_s(s, sizeof(s), "%s%cindex.html", Uri, DIR_CHAR);
 			Uri = s;

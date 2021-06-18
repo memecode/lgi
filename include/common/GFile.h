@@ -682,10 +682,10 @@ public:
 LgiFunc int64 LFileSize(const char *FileName);
 
 /// This function checks for the existance of a file (will return false for a folder).
-LgiFunc bool FileExists(const char *File, char *CorrectCase = NULL);
+LgiFunc bool LFileExists(const char *File, char *CorrectCase = NULL);
 
 /// This function checks for the existance of a directory.
-LgiFunc bool DirExists(const char *Dir, char *CorrectCase = NULL);
+LgiFunc bool LDirExists(const char *Dir, char *CorrectCase = NULL);
 
 LgiFunc bool ResolveShortcut(const char *LinkFile, char *Path, ssize_t Len);
 LgiFunc void WriteStr(GFile &f, const char *s);

@@ -74,7 +74,7 @@ int64 LFileSize(const char *FileName)
 	return Size;
 }
 
-bool FileExists(const char *Name, char *CorrectCase)
+bool LFileExists(const char *Name, char *CorrectCase)
 {
 	bool Status = false;
 	if (Name)
@@ -100,7 +100,7 @@ bool FileExists(const char *Name, char *CorrectCase)
 	return false;
 }
 
-bool DirExists(const char *Dir, char *CorrectCase)
+bool LDirExists(const char *Dir, char *CorrectCase)
 {
 	GAutoWString n(Utf8ToWide(Dir));
 	DWORD e = GetFileAttributesW(n);

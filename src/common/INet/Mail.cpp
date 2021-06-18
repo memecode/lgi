@@ -1647,7 +1647,7 @@ public:
 			sprintf_s(n, sizeof(n), "%u.mail", LgiRand());
 			LgiMakePath(File, sizeof(File), Path, n);
 		}
-		while (FileExists(File));
+		while (LFileExists(File));
 
 		if (F.Open(File, O_WRITE))
 		{
@@ -1714,7 +1714,7 @@ MailSendFolder::~MailSendFolder()
 
 bool MailSendFolder::Open(GSocketI *S, const char *RemoteHost, const char *LocalDomain, const char *UserName, const char *Password, int Port, int Flags)
 {
-	return DirExists(d->Path);
+	return LDirExists(d->Path);
 }
 
 bool MailSendFolder::Close()
@@ -1800,7 +1800,7 @@ bool MailReceiveFolder::Open(GSocketI *S, const char *RemoteHost, int Port, cons
 	DeleteObj(S);
 
 	// Argument check
-	if (!DirExists(d->Path))
+	if (!LDirExists(d->Path))
 		return false;
 	
 	GDirectory Dir;
