@@ -316,7 +316,7 @@ public:
 				}
 				else Log->Print("%s:%i - Can't open '%s'.\n", _FL, From);
 			}
-			else Log->Print("%s:%i - ssh_scp_push_file failed.\n", _FL);
+			else Log->Print("%s:%i - ssh_scp_push_file(%s,%" PRIi64 ") failed.\n", _FL, Parts[1].Get(), length);
 		}
 		else Log->Print("%s:%i - ssh_scp_init failed.\n", _FL);
 

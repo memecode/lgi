@@ -255,6 +255,10 @@ public:
 	bool SetTime(const char *Str);
 	/// Parses the date time from a free form string
 	bool Parse(GString s);
+	/// Describes the perios between this and 'to' in the form:
+	/// ##d ##h ##m ##s
+	/// Order of the dates isn't important.
+	GString DescribePeriod(LDateTime &to);
 
 	/// \returns true if 'd' is on the same day as this object
 	bool IsSameDay(LDateTime &d) const;

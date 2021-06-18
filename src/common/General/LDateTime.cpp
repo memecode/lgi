@@ -1739,6 +1739,25 @@ void LDateTime::AddMonths(int64 Months)
 		_Day = DaysInMonth();
 }
 
+GString LDateTime::DescribePeriod(LDateTime &to)
+{
+	auto ThisTs = Ts();
+	auto ToTs = to.Ts();
+	auto diff = ThisTs < ToTs ? ToTs - ThisTs : ThisTs - ToTs;
+
+	auto seconds = diff / LDateTime::Second64Bit;
+	int mins = (int) (seconds / 60);
+	seconds -= mins * 60;
+	int hrs = mins / 60;
+	mins -= hrs * 60;
+	int days = hrs / 24;
+	hrs -= days * 24;
+	
+	GString s;
+	s.Printf("%id %ih %im %is", days, hrs, mins, (int)seconds);
+	return s;
+}
+
 int LDateTime::MonthFromName(const char *Name)
 {
 	if (Name)
