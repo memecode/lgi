@@ -106,6 +106,9 @@ public:
         Second64Bit = 1000,
         #endif
     };
+    constexpr static int64 MinuteLength = Second64Bit * 60;
+    constexpr static int64 HourLength = MinuteLength * 60;
+    constexpr static int64 DayLength = HourLength * 24;
 
 	/// Returns true if all the components are in a valid range
 	bool IsValid() const;

@@ -630,6 +630,8 @@ void GApp::OnReceiveFiles(::GArray<const char*> &Files)
 {
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);
+	else
+		LgiAssert(!"You probably want to set 'AppWnd' before calling GApp::Run... maybe.");
 }
 
 const char *GApp::KeyModFlags::FlagName(int Flag)

@@ -2268,7 +2268,7 @@ char *QuoteStr(char *s)
 class ExecuteThread : public LThread, public GStream
 {
 	IdeProject *Proj;
-	char *Exe, *Args, *Path;
+	GString Exe, Args, Path;
 	int Len;
 	ExeAction Act;
 
@@ -2278,9 +2278,9 @@ public:
 		Len = 32 << 10;
 		Proj = proj;
 		Act = act;
-		Exe = NewStr(exe);
-		Args = NewStr(args);
-		Path = NewStr(path);
+		Exe = exe;
+		Args = args;
+		Path = path;
 		DeleteOnExit = true;
 		
 		Run();
@@ -2288,9 +2288,6 @@ public:
 	
 	~ExecuteThread()
 	{
-		DeleteArray(Exe);
-		DeleteArray(Args);
-		DeleteArray(Path);
 	}
 	
 	int Main() override
@@ -2318,7 +2315,7 @@ public:
 				{
 					char Path[MAX_PATH];
 					char *ExeLeaf = LgiGetLeaf(Exe);
-					strcpy_s(Path, sizeof(Path), ExeLeaf ? ExeLeaf : Exe);
+					strcpy_s(Path, sizeof(Path), ExeLeaf ? ExeLeaf : Exe.Get());
 					LgiTrimDir(Path);
 									
 					char *Term = 0;
