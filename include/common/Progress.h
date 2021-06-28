@@ -38,7 +38,8 @@ public:
 	virtual void SetScale(double s) { Scale = s; }
 	virtual GString GetType();
 	virtual void SetType(const char *t);
-	virtual Progress &operator =(Progress &p);
+	
+	Progress &operator =(Progress &p);
 
 	[[deprecated]] virtual void SetParameter(int Which, int What) {}
 	[[deprecated]] virtual void GetLimits(int64 *l, int64 *h)

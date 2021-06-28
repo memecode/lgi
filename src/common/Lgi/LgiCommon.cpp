@@ -1064,7 +1064,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				{
 					GRegKey k(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders");
 					char *p = k.GetStr("{374DE290-123F-4565-9164-39C4925E467B}");
-					if (DirExists(p))
+					if (LDirExists(p))
 						Path = p;
 				}
 			
@@ -1075,7 +1075,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 					{
 						char Buf[MAX_PATH];
 						LgiMakePath(Buf, sizeof(Buf), MyDoc, "Downloads");
-						if (DirExists(Buf))
+						if (LDirExists(Buf))
 							Path = Buf;
 					}
 				}
@@ -1087,7 +1087,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 					{
 						char Buf[MAX_PATH];
 						LgiMakePath(Buf, sizeof(Buf), Profile, "Downloads");
-						if (DirExists(Buf))
+						if (LDirExists(Buf))
 							Path = Buf;
 					}
 				}

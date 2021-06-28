@@ -811,7 +811,7 @@ bool GFileSystem::CreateFolder(const char *PathName, bool CreateParentFoldersIfN
 				if (!Leaf) return false;
 				*Leaf = 0;
 			}
-			while (!DirExists(Base));
+			while (!LDirExists(Base));
 			
 			GString::Array Parts = GString(PathName + strlen(Base)).SplitDelimit(DIR_STR);
 			for (int i=0; i<Parts.Length(); i++)

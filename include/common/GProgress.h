@@ -6,10 +6,10 @@
 #define _GPROGRESS_H_
 
 /// Progress bar control
-class LgiClass GProgress :
-	public GControl,
-	public Progress,
-	public ResObject
+class LgiClass GProgress
+	: public GControl
+	, public Progress
+	, public ResObject
 {
 	GColour c;
 	#ifdef WIN32
@@ -22,7 +22,7 @@ public:
 	static GColour cError;
 
 	GProgress(int id, int x, int y, int cx, int cy, const char *name);
-	~GProgress();
+	virtual ~GProgress();
 
 	const char *GetClass() override { return "GProgress"; }
 	bool SetRange(const GRange &r) override;
