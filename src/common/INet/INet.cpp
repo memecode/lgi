@@ -856,6 +856,16 @@ int GSocket::Open(const char *HostAddr, int Port)
 	return Status == 0;
 }
 
+bool GSocket::Bind(int Port)
+{
+	sockaddr_in add;
+	add.sin_family = AF_INET;
+	add.sin_addr.s_addr = htonl(INADDR_ANY);
+	add.sin_port = htons(Port);
+	int ret = bind(Handle(), (sockaddr*)&add, sizeof(add));
+	return ret == 0;
+}
+
 bool GSocket::Listen(int Port)
 {
 	Close();
@@ -1347,7 +1357,8 @@ bool GSocket::CreateUdpSocket()
 				option_t enabled = d->Broadcast != 0;
 				auto r = setsockopt(Handle(), SOL_SOCKET, SO_BROADCAST, (char*)&enabled, sizeof(enabled));
 				if (r)
-					Error();			}
+					Error();
+			}
 		}
 	}
 
@@ -1373,31 +1384,16 @@ int GSocket::ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip, uint16_t *
 	a.sin_addr.s_addr = INADDR_ANY;
 	#endif
 
+	//printf("recvfrom(%i,%p,%i,%i,%i:%i,%i)\n",
+	// 	d->Socket, Buffer, Size, Flags, a.sin_addr.s_addr, a.sin_port, AddrSize);
 	ssize_t b = recvfrom(d->Socket, (char*)Buffer, Size, Flags, (sockaddr*)&a, &AddrSize);
 	if (b > 0)
 	{
+		printf("recvfrom=%i\n", (int)b);
 		OnRead((char*)Buffer, (int)b);
 
 		if (Ip)
-		{
 			*Ip = ntohl(a.sin_addr.OsAddr);
-			
-			/*
-			printf("ip=%i.%i.%i.%i osaddr=%i.%i.%i.%i\n",
-			
-				((*Ip) >> 24) & 0xff,
-				((*Ip) >> 16) & 0xff,
-				((*Ip) >> 8) & 0xff,
-				((*Ip)) & 0xff,
-				
-				((a.sin_addr.OsAddr) >> 24) & 0xff,
-				((a.sin_addr.OsAddr) >> 16) & 0xff,
-				((a.sin_addr.OsAddr) >> 8) & 0xff,
-				((a.sin_addr.OsAddr)) & 0xff
-
-				);
-			*/
-		}
 		if (Port)
 			*Port = ntohs(a.sin_port);
 	}

@@ -622,7 +622,14 @@ void GDisplayString::Layout(bool Debug)
 
 			if (b.Hnd)
 			{
-				Gtk::pango_layout_set_text(b.Hnd, b.Str, b.Bytes);
+				if (!LgiIsUtf8(b.Str, b.Bytes))
+				{
+					LgiTrace("Invalid UTF8: '%.*S'\n", (int)b.Bytes, b.Str);
+				}
+				else
+				{
+					Gtk::pango_layout_set_text(b.Hnd, b.Str, b.Bytes);
+				}
 				Gtk::pango_layout_get_size(b.Hnd, &bx, &by);
 			}
 			else if (b.Fnt)
