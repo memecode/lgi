@@ -169,7 +169,10 @@ public:
 	/// Closes the connection to the remote host.
 	int Close();
 
-	/// Listens on a given port for an incomming connection.
+	/// Binds on a given port.
+	bool Bind(int Port);
+
+	/// Binds and listens on a given port for an incomming connection.
 	bool Listen(int Port = 0);
 	
 	/// Accepts an incomming connection and connects the socket you pass in to the remote host.
