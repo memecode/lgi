@@ -484,8 +484,8 @@ GDragColumn::GDragColumn(GItemContainer *list, int col)
 		
 		GArray<int> Ver;
 		bool Layered = (
-							LgiGetOs(&Ver) == LGI_OS_WIN32 ||
-							LgiGetOs(&Ver) == LGI_OS_WIN64
+							LGetOs(&Ver) == LGI_OS_WIN32 ||
+							LGetOs(&Ver) == LGI_OS_WIN64
 						) &&
 						Ver[0] >= 5;
 		SetStyle(WS_POPUP);

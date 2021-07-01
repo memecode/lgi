@@ -99,7 +99,7 @@ public:
 		if (PluginDir[strlen(PluginDir)-1] != DIR_CHAR) strcat(PluginDir, DIR_STR);
 		strcat(PluginDir, "Plugins");
 
-		if (LgiRecursiveFileSearch(PluginDir, &Ext, &Files))
+		if (LRecursiveFileSearch(PluginDir, &Ext, &Files))
 		{
 			for (int i=0; i<Files.Length(); i++)
 			{

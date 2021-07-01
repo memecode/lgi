@@ -59,7 +59,7 @@ static unsigned long mt[N];			/* the array for the state vector  */
 static int mti=N+1;					/* mti==N+1 means mt[N] is not initialized */
 
 /* initializes mt[N] with a seed */
-void LgiRandomize(uint s)
+void LRandomize(uint s)
 {
     mt[0]= s & 0xffffffffUL;
     for (mti=1; mti<N; mti++) {
@@ -77,10 +77,10 @@ void LgiRandomize(uint s)
 /* initialize by an array with array-length */
 /* init_key is the array for initializing keys */
 /* key_length is its length */
-void LgiRandomizeArray(uint init_key[], uint key_length)
+void LRandomizeArray(uint init_key[], uint key_length)
 {
     int i, j, k;
-    LgiRandomize(19650218UL);
+    LRandomize(19650218UL);
     i=1; j=0;
     k = (N>key_length ? N : key_length);
     for (; k; k--)
@@ -105,7 +105,7 @@ void LgiRandomizeArray(uint init_key[], uint key_length)
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
-uint LgiRand(uint Max)
+uint LRand(uint Max)
 {
     unsigned long y;
     static unsigned long mag01[2]={0x0UL, MATRIX_A};
@@ -116,7 +116,7 @@ uint LgiRand(uint Max)
         int kk;
 
         if (mti == N+1)   /* if init_genrand() has not been called, */
-            LgiRandomize(5489UL); /* a default initial seed is used */
+            LRandomize(5489UL); /* a default initial seed is used */
 
         for (kk=0;kk<N-M;kk++)
 		{

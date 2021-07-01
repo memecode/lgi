@@ -220,7 +220,7 @@ public:
 					DEBUG_LOG("\n");
 			}
 
-			COLOUR c = LgiRand(0xffffff);
+			COLOUR c = LRand(0xffffff);
 			DEBUG_LOG("\" stroke=\"#%06.6x\" fill=\"none\" stroke-width=\"0.1\" />\n", c);
 			DEBUG_LOG("<text x=\"%g\" y=\"%g\" font-family=\"Verdana\" font-size=\"2\" fill=\"#%06.6x\">%i%c</text>\n", p[0].x - 2.5, p[0].y, c, Index, Up?'u':'d');
 			

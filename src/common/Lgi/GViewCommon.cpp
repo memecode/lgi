@@ -772,7 +772,7 @@ void GView::SendNotify(int Data)
 				else
 				{
 					// Ok this is really bad... go random (better than nothing)
-					SetId(5000 + LgiRand(2000));
+					SetId(5000 + LRand(2000));
 				}
 			}
 			

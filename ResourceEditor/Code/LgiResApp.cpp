@@ -1418,7 +1418,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 				}
 				if (LFileExists(p))
 				{
-					LgiExecute(HelpFile, NULL, ExeName);
+					LExecute(HelpFile, NULL, ExeName);
 					break;
 				}
 				
@@ -3421,7 +3421,7 @@ void TokLine(GArray<char*> &T, char *Line)
 		for (const char *s = Line; s && *s; )
 		{
 			while (*s && strchr(" \t", *s)) s++;
-			char *t = LgiTokStr(s);
+			char *t = LTokStr(s);
 			if (t)
 				T.Add(t);
 			else break;
@@ -3678,7 +3678,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 								if (Next)
 								{
 									Next = LgiSkipDelim(Next);
-									char *NextTok = LgiTokStr((const char*&)Next);
+									char *NextTok = LTokStr((const char*&)Next);
 									if (NextTok)
 									{
 										if (stricmp(NextTok, "END") != 0 &&

@@ -80,7 +80,7 @@ namespace Gtk {
 			{
 				if (_get_path_FSRef(Parent, a))
 				{
-					GAutoString u((char*)LgiNewConvertCp("utf-8", Name.unicode, "utf-16", Name.length * sizeof(Name.unicode[0]) ));
+					GAutoString u((char*)LNewConvertCp("utf-8", Name.unicode, "utf-16", Name.length * sizeof(Name.unicode[0]) ));
 
 					// printf("CatInfo = '%s' %x %x\n", u.Get(), Cat.nodeID, Cat.volume);
 					if (u && Cat.nodeID > 2)
@@ -242,7 +242,7 @@ bool RegisterActiveXControl(char *Dll)
 
 /// \brief Returns the operating system that Lgi is running on.
 /// \sa Returns one of the defines starting with LGI_OS_UNKNOWN in LgiDefs.h
-int LgiGetOs
+int LGetOs
 (
 	/// Returns the version of the OS or NULL if you don't care
 	GArray<int> *Ver
@@ -354,7 +354,7 @@ int LgiGetOs
 	#endif
 }
 
-const char *LgiGetOsName()
+const char *LGetOsName()
 {
 	const char *Str[LGI_OS_MAX] =
 	{
@@ -367,7 +367,7 @@ const char *LgiGetOsName()
 		"MacOSX",
 	};
 
-	return Str[LgiGetOs()];
+	return Str[LGetOs()];
 }
 
 #ifdef WIN32
@@ -376,7 +376,7 @@ const char *LgiGetOsName()
 #define RecursiveFileSearch_Wildcard "*"
 #endif
 
-bool LgiRecursiveFileSearch(const char *Root,
+bool LRecursiveFileSearch(const char *Root,
 							GArray<const char*> *Ext,
 							GArray<char*> *Files,
 							uint64 *Size,
@@ -411,7 +411,7 @@ bool LgiRecursiveFileSearch(const char *Root,
 		if (Dir.IsDir())
 		{
 			// dir
-			LgiRecursiveFileSearch(	Name,
+			LRecursiveFileSearch(	Name,
 									Ext,
 									Files,
 									Size,
@@ -1669,14 +1669,14 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (pw)
 				{
 					#ifdef LINUX
-					WindowManager wm = LgiGetWindowManager();
+					WindowManager wm = LGetWindowManager();
 					if (wm == WM_Gnome)
 					{
 						Path.Printf("%s/.gnome-desktop", pw->pw_dir);
 					}
 					#endif
 
-					if (!DirExists(Path))
+					if (!LDirExists(Path))
 					{
 						Path.Printf("%s/Desktop", pw->pw_dir);
 					}
@@ -1730,7 +1730,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 		{
 			#if defined LINUX
 			
-				switch (LgiGetWindowManager())
+				switch (LGetWindowManager())
 				{
 					case WM_Kde:
 					{
@@ -1841,7 +1841,7 @@ GString LGetExeFile()
 			}
 			else
 			{
-				LgiMsg(0, "LgiFromNativeCp returned 0, ANSI CodePage=%i (%s)", "LgiGetExeFile Error", MB_OK, GetACP(), LgiAnsiToLgiCp());
+				LgiMsg(0, "LgiFromNativeCp returned 0, ANSI CodePage=%i (%s)", "LgiGetExeFile Error", MB_OK, GetACP(), LAnsiToLgiCp());
 				return GString();
 			}
 		}
@@ -2106,7 +2106,7 @@ static void _LFindFile(const char *Name, GString *GStr, GAutoString *AStr)
 	GArray<const char*> Ext;
 	GArray<char*> Files;
 	Ext.Add((char*)Name);
-	if (LgiRecursiveFileSearch(Exe, &Ext, &Files) &&
+	if (LRecursiveFileSearch(Exe, &Ext, &Files) &&
 		Files.Length())
 	{
 		if (GStr)
@@ -2125,14 +2125,6 @@ GString LFindFile(const char *Name)
 	GString s;
 	_LFindFile(Name, &s, NULL);
 	return s;
-}
-
-/// This is deprecated in favour of the GString version...
-char *LgiFindFile(const char *Name)
-{
-	GAutoString s;
-	_LFindFile(Name, NULL, &s);
-	return s.Release();
 }
 
 #if defined WIN32
@@ -2219,7 +2211,7 @@ uint64_t LgiMicroTime()
 	#endif
 }
 
-int LgiIsReleaseBuild()
+int LIsReleaseBuild()
 {
 	#ifdef _DEBUG
 	return 0;
@@ -2228,7 +2220,7 @@ int LgiIsReleaseBuild()
  	#endif
 }
 
-bool LgiIsVolumeRoot(const char *Path)
+bool LIsVolumeRoot(const char *Path)
 {
 	if (!Path)
 		return false;
@@ -2270,11 +2262,11 @@ bool LgiIsVolumeRoot(const char *Path)
 GString LFormatSize(uint64 Size)
 {
 	char Buf[64];
-	LgiFormatSize(Buf, sizeof(Buf), Size);
+	LFormatSize(Buf, sizeof(Buf), Size);
 	return Buf;
 }
 
-void LgiFormatSize(char *Str, int SLen, uint64 Size)
+void LFormatSize(char *Str, int SLen, uint64 Size)
 {
 	uint64 K = 1024;
 	uint64 M = K * K;
@@ -2315,7 +2307,7 @@ void LgiFormatSize(char *Str, int SLen, uint64 Size)
 	}
 }
 
-char *LgiTokStr(const char *&s)
+char *LTokStr(const char *&s)
 {
 	char *Status = 0;
 
@@ -2711,7 +2703,7 @@ GString LGetAppForProtocol(const char *Protocol)
 			const char *p = k.GetStr();
 			if (p)
 			{
-				GAutoString a(LgiTokStr(p));
+				GAutoString a(LTokStr(p));
 				App = a.Get();
 			}
 		}

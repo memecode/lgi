@@ -291,31 +291,31 @@ void LSwap(T &a, T &b)
 enum LgiOs
 {
 	/// \brief Unknown OS
-	/// \sa LgiGetOs
+	/// \sa LGetOs
 	LGI_OS_UNKNOWN = 0,
 
 	/// \brief Windows 95, 98[se] or ME. (Not supported)
-	/// \sa LgiGetOs
+	/// \sa LGetOs
 	LGI_OS_WIN9X,
 
 	/// \brief 32bit NT, 2k, XP, Vista, 7, 8 or later. (XP and later supported)
-	/// \sa LgiGetOs
+	/// \sa LGetOs
 	LGI_OS_WIN32,
 
 	/// \brief 64bit NT, 2k, XP, Vista, 7, 8 or later. (XP and later supported)
-	/// \sa LgiGetOs
+	/// \sa LGetOs
 	LGI_OS_WIN64,
 
 	/// \brief BeOS/Haiku. (Somewhat supported)
-	/// \sa LgiGetOs
+	/// \sa LGetOs
 	LGI_OS_HAIKU,
 
 	/// \brief Linux. (Kernels v2.4 and up supported)
-	/// \sa LgiGetOs
+	/// \sa LGetOs
 	LGI_OS_LINUX,
 
 	/// \brief There was an Atheos port at one point. (Not supported)
-	/// \sa LgiGetOs
+	/// \sa LGetOs
 	LGI_OS_MAC_OS_X,
 
 	/// One higher than the maximum OS define

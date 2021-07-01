@@ -114,7 +114,7 @@ GFontSystem::GFontSystem()
 	d = new GFontSystemPrivate;
 
 	// Glyph sub setup
-	int Os = LgiGetOs();
+	int Os = LGetOs();
 
 	d->SubSupport =	(Os == LGI_OS_LINUX) ||
 					(Os == LGI_OS_WIN64) ||
@@ -639,8 +639,8 @@ GFont *GFontSystem::GetGlyph(uint32_t u, GFont *UserFont)
 				{
 					// Reorder font list to prefer certain known as good fonts or
 					// avoid certain bad fonts.
-					if (LgiGetOs() == LGI_OS_WIN32 ||
-						LgiGetOs() == LGI_OS_WIN64)
+					if (LGetOs() == LGI_OS_WIN32 ||
+						LGetOs() == LGI_OS_WIN64)
 					{
 						Pref.Add("Microsoft Sans Serif", 1);
 						Pref.Add("Arial Unicode MS", 1);
@@ -652,7 +652,7 @@ GFont *GFontSystem::GetGlyph(uint32_t u, GFont *UserFont)
 						Pref.Add("MingLiU", -1);
 					}
 					
-					if (LgiGetOs() == LGI_OS_LINUX)
+					if (LGetOs() == LGI_OS_LINUX)
 					{
 						// Windows fonts are much better than anything Linux 
 						// has to offer.

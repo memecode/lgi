@@ -271,7 +271,7 @@ GXmlTag *GApp::GetConfig(const char *Tag)
 			strcat(Path, File);
 
 			/*
-			if (!FileExists(Path))
+			if (!LFileExists(Path))
 			{
 				char *f = LgiFindFile(File);
 				if (f)
@@ -282,7 +282,7 @@ GXmlTag *GApp::GetConfig(const char *Tag)
 			}
 			*/
 
-			if (FileExists(Path))
+			if (LFileExists(Path))
 			{
 				d->Config = new GXmlTag("Config");
 				if (d->Config)

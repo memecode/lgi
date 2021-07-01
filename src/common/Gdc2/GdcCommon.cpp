@@ -554,8 +554,8 @@ COLOUR CBit(int DstBits, COLOUR c, int SrcBits, GPalette *Pal)
 					}
 					case 16:
 					{
-						if (LgiGetOs() == LGI_OS_WIN32 ||
-							LgiGetOs() == LGI_OS_WIN64)
+						if (LGetOs() == LGI_OS_WIN32 ||
+							LGetOs() == LGI_OS_WIN64)
 						{
 							return Rgb24To16(c);
 						}

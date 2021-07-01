@@ -852,7 +852,7 @@ bool ValidStrW(const char16 *s)
 	return false;
 }
 
-char *LgiDecodeUri(const char *uri, int len)
+char *LDecodeUri(const char *uri, int len)
 {
 	GStringPipe p;
 	if (uri)
@@ -888,7 +888,7 @@ char *LgiDecodeUri(const char *uri, int len)
 	return p.NewStr();
 }
 
-char *LgiEncodeUri(const char *uri, int len)
+char *LEncodeUri(const char *uri, int len)
 {
 	GStringPipe p;
 	if (uri)

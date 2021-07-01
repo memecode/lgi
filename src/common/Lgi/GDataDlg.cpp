@@ -88,7 +88,7 @@ bool DataDlgTools::ProcessField(DataDlgField *f, bool Write, char *OptionOverrid
 			}
 			case DATA_STR_SYSTEM:
 			{
-				sprintf(OsOpt, "%s-%s", Opt, LgiGetOsName());
+				sprintf(OsOpt, "%s-%s", Opt, LGetOsName());
 				Opt = OsOpt;
 				// fall through
 			}

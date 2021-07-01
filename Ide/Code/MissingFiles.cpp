@@ -124,7 +124,7 @@ public:
 					Ext.Add("*.cpp");
 
 					// printf("Recursing '%s'\n", Search[i].Get());
-					LgiRecursiveFileSearch(Search[i], &Ext, &Files);
+					LRecursiveFileSearch(Search[i], &Ext, &Files);
 				}
 				break;
 			}

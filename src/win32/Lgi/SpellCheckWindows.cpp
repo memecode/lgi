@@ -42,9 +42,9 @@ class WindowsSpellCheck : public GSpellCheck
 	{
 		GString File = __FILE__;
 		File = File.Replace(".cpp", ".csv");
-		if (!FileExists(File))
+		if (!LFileExists(File))
 		{
-			GAutoString f(LgiFindFile(LgiGetLeaf(File)));
+			auto f = LFindFile(LgiGetLeaf(File));
 			File = f.Get();
 		}
 

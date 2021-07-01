@@ -114,7 +114,7 @@ GImageList::GImageList(int x, int y, GSurface *pDC)
 	#if WINNATIVE
 
 	/*
-	if (LgiGetOs() != LGI_OS_WIN9X)
+	if (LGetOs() != LGI_OS_WIN9X)
 		d->AlphaBlend = (MsImg32_AlphaBlend)GetProcAddress(GetModuleHandle("Msimg32.dll"), "AlphaBlend");
 	*/
 

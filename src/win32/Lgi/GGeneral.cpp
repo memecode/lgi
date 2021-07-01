@@ -23,7 +23,7 @@ GString LCurrentUserName()
 	return username;
 }
 
-bool LgiGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
+bool LGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
 {
 	auto Start = Ext.Length();
 	char *e;
@@ -96,7 +96,7 @@ GString LGetFileMimeType(const char *File)
 					Sub.DeleteArrays();
 
 					// This is a hack to get around file types without a MIME database entry
-					// but do have a .ext entry. LgiGetAppsForMimeType knows about the hack too.
+					// but do have a .ext entry. LGetAppsForMimeType knows about the hack too.
 					GString MimeType;	
 					MimeType.Printf("application/%s", Dot);
 					return MimeType;
@@ -222,7 +222,7 @@ bool _GetApps_Add(GArray<GAppInfo*> &Apps, char *In)
 	return false;
 }
 
-bool LgiGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
+bool LGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 
@@ -370,7 +370,7 @@ bool LgiGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 						if (Path)
 						{
 							const char *c = Path;
-							char *Part = LgiTokStr(c);
+							char *Part = LTokStr(c);
 							if (Part)
 							{
 								char AppPath[256];
@@ -397,18 +397,18 @@ GString LGetAppForMimeType(const char *Mime)
 {
 	GString App;
 	GArray<GAppInfo*> Apps;
-	if (LgiGetAppsForMimeType(Mime, Apps, 1))
+	if (LGetAppsForMimeType(Mime, Apps, 1))
 		App = Apps[0]->Path.Get();
 	Apps.DeleteObjects();
 	return App;
 }
 
-int LgiRand(int i)
+int LRand(int i)
 {
 	return (rand() % i);
 }
 
-bool LgiPlaySound(const char *FileName, int Flags)
+bool LPlaySound(const char *FileName, int Flags)
 {
 	bool Status = false;
 
@@ -420,7 +420,7 @@ bool LgiPlaySound(const char *FileName, int Flags)
 
 		if (psndPlaySound)
 		{
-			if (LgiGetOs() == LGI_OS_WIN9X)
+			if (LGetOs() == LGI_OS_WIN9X)
 			{
 				// async broken on 98?
 				Flags = 0;
@@ -496,7 +496,7 @@ GString LErrorCodeToString(uint32_t ErrorCode)
     return Str;
 }
 
-bool LgiExecute(const char *File, const char *Arguments, const char *Dir, GString *ErrorMsg)
+bool LExecute(const char *File, const char *Arguments, const char *Dir, GString *ErrorMsg)
 {
 	int Error = 0;
 	HINSTANCE Status = NULL;
@@ -505,7 +505,7 @@ bool LgiExecute(const char *File, const char *Arguments, const char *Dir, GStrin
 		return false;
 
 	uint64 Now = LgiCurrentTime();
-	if (LgiGetOs() == LGI_OS_WIN9X)
+	if (LGetOs() == LGI_OS_WIN9X)
 	{
 		auto f = LToNativeCp(File);
 		auto a = LToNativeCp(Arguments);

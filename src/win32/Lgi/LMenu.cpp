@@ -35,7 +35,7 @@ public:
 	LMenuPrivate()
 	{
 		GArray<int> Ver;
-		int Os = LgiGetOs(&Ver);
+		int Os = LGetOs(&Ver);
 		if
 		(
 			(
@@ -361,7 +361,7 @@ public:
 			Strs.Insert(new GDisplayString(Font, n, Amp - n ));
 
 			// Amp'd letter
-			char *e = LgiSeekUtf8(++Amp, 1);
+			char *e = LSeekUtf8(++Amp, 1);
 			Strs.Insert(new GDisplayString(Font, Amp, e - Amp ));
 
 			// After Amp

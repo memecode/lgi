@@ -594,7 +594,7 @@ bool GRichTextPriv::ImageBlock::ToHtml(GStream &s, GArray<GDocView::ContentMedia
 		bool ValidSourceFile = LFileExists(Source);
 		GDocView::ContentMedia &Cm = Media->New();
 		
-		int Idx = LgiRand() % 10000;
+		int Idx = LRand() % 10000;
 		if (!ContentId)
 			ContentId.Printf("%u@memecode.com", Idx);
 		Cm.Id = ContentId;
@@ -974,7 +974,7 @@ bool GRichTextPriv::ImageBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offse
 				if (si.Compressed)
 				{
 					char Sz[128];
-					LgiFormatSize(Sz, sizeof(Sz), si.Compressed->GetSize());
+					LFormatSize(Sz, sizeof(Sz), si.Compressed->GetSize());
 					GString s;
 					s.Printf(" (%s)", Sz);
 					m += s;

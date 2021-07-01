@@ -82,7 +82,7 @@ public:
 					if (Cs)
 					{
 						// printf("Text file read: %s\n", GetName());
-						Ret.Reset((char*)LgiNewConvertCp("utf-8", Buf, Cs, Rd));
+						Ret.Reset((char*)LNewConvertCp("utf-8", Buf, Cs, Rd));
 					}
 				}
 			}
@@ -106,7 +106,7 @@ public:
 				{
 					const char *Cs = GetTypeString();
 					if (Cs)
-						Ret.Reset((char16*)LgiNewConvertCp(LGI_WideCharset, Buf, Cs, Sz));
+						Ret.Reset((char16*)LNewConvertCp(LGI_WideCharset, Buf, Cs, Sz));
 				}
 			}
 		}

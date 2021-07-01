@@ -283,7 +283,7 @@ public:
 				f.Close();
 			}
 
-			LgiExecute(p);
+			LExecute(p);
 		}
 	}
 
@@ -305,7 +305,7 @@ public:
 					Sz = Cm->Data.Value.Binary.Length;
 
 				char s[64];
-				LgiFormatSize(s, sizeof(s), Sz);
+				LFormatSize(s, sizeof(s), Sz);
 				sSize = s;
 				return sSize;
 			}
@@ -573,7 +573,7 @@ public:
 				p += "export.html";
 				if (Edit->Save(p))
 				{
-					LgiExecute(p);
+					LExecute(p);
 				}
 				break;
 			}
@@ -630,7 +630,7 @@ public:
 								}
 							}
 							
-							LgiExecute(FileName);
+							LExecute(FileName);
 						}
 					}
 				}

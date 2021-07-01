@@ -351,7 +351,7 @@ public:
 	{
 		GString s = Root.Print(0);
 		#ifdef _DEBUG
-		LgiAssert(LgiIsUtf8(s));
+		LgiAssert(LIsUtf8(s));
 		#endif
 		return s;
 	}

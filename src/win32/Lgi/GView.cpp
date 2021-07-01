@@ -91,7 +91,7 @@ int _lgi_get_key_flags()
 {
 	int Flags = 0;
 	
-	if (LgiGetOs() == LGI_OS_WIN9X)
+	if (LGetOs() == LGI_OS_WIN9X)
 	{
 		SetKeyFlag(Flags, VK_MENU, LGI_EF_ALT);
 
@@ -851,7 +851,7 @@ bool LgiToWindowsCursor(OsView Hnd, LgiCursor Cursor)
 		case LCUR_PointingHand:
 		{
 			GArray<int> Ver;
-			int Os = LgiGetOs(&Ver);
+			int Os = LGetOs(&Ver);
 			if
 			(
 				(

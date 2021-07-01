@@ -863,9 +863,9 @@ void GColour::OnChange()
 	#endif
 
 	// Tweak
-	if (LgiGetOs() == LGI_OS_WIN32
+	if (LGetOs() == LGI_OS_WIN32
 		||
-		LgiGetOs() == LGI_OS_WIN64)
+		LGetOs() == LGI_OS_WIN64)
 	{
 		// Win32 doesn't seem to get this right, so we just tweak it here
 		_LgiColours[L_LIGHT] = _LgiColours[L_MED].Mix(_LgiColours[L_LIGHT]);

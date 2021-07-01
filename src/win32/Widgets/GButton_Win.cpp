@@ -226,7 +226,7 @@ GMessage::Result GButton::OnEvent(GMessage *Msg)
 			if (IsWin7 < 0)
 			{
 				GArray<int> Ver;
-				int Os = LgiGetOs(&Ver);
+				int Os = LGetOs(&Ver);
 				if (Os == LGI_OS_WIN32 ||
 					Os == LGI_OS_WIN64)
 				{

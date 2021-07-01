@@ -137,7 +137,7 @@ struct EmojiMemQ : GMemQueue
 	#ifdef WINDOWS
 	int WriteWide(const char16 *s, ssize_t bytes)
 	{
-		GAutoPtr<uint32_t> c((uint32_t*)LgiNewConvertCp("utf-32", s, LGI_WideCharset, bytes));
+		GAutoPtr<uint32_t> c((uint32_t*)LNewConvertCp("utf-32", s, LGI_WideCharset, bytes));
 		int len = Strlen(c.Get());
 		return GMemQueue::Write(c, len * sizeof(uint32_t));
 	}
@@ -244,7 +244,7 @@ GAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 	}
 
 	GAutoPtr<WChar, true> WideVer( (WChar*)p.New(sizeof(*s)) );
-	GAutoWString Final( (char16*)LgiNewConvertCp(LGI_WideCharset, WideVer, "utf-32") );
+	GAutoWString Final( (char16*)LNewConvertCp(LGI_WideCharset, WideVer, "utf-32") );
 	return Final;
 }
 */

@@ -728,7 +728,7 @@ bool GRichTextEdit::Paste()
 	}
 	else if (Text)
 	{
-		GAutoPtr<uint32_t,true> Utf32((uint32_t*)LgiNewConvertCp("utf-32", Text, LGI_WideCharset));
+		GAutoPtr<uint32_t,true> Utf32((uint32_t*)LNewConvertCp("utf-32", Text, LGI_WideCharset));
 		ptrdiff_t Len = Strlen(Utf32.Get());
 		if (!d->Cursor->Blk->AddText(Trans, d->Cursor->Offset, Utf32.Get(), (int)Len))
 		{
@@ -988,7 +988,7 @@ bool GRichTextEdit::OnFind(GFindReplaceCommon *Params)
 		return false;
 	}
 	
-	GAutoPtr<uint32_t,true> w((uint32_t*)LgiNewConvertCp("utf-32", Params->Find, "utf-8", Params->Find.Length()));
+	GAutoPtr<uint32_t,true> w((uint32_t*)LNewConvertCp("utf-32", Params->Find, "utf-8", Params->Find.Length()));
 	ssize_t Idx = d->Blocks.IndexOf(d->Cursor->Blk);
 	if (Idx < 0)
 	{
@@ -2597,7 +2597,7 @@ GMessage::Result GRichTextEdit::OnEvent(GMessage *Msg)
 			char *Out = (char*)Msg->B();
 			if (Out)
 			{
-				char *In = (char*)LgiNewConvertCp(LgiAnsiToLgiCp(), NameW(), LGI_WideCharset, Chars);
+				char *In = (char*)LNewConvertCp(LAnsiToLgiCp(), NameW(), LGI_WideCharset, Chars);
 				if (In)
 				{
 					int Len = (int)strlen(In);
@@ -2630,7 +2630,7 @@ GMessage::Result GRichTextEdit::OnEvent(GMessage *Msg)
 					{
 						ImmGetCompositionString(hIMC, GCS_RESULTSTR, Buf, Size);
 
-						char16 *Utf = (char16*)LgiNewConvertCp(LGI_WideCharset, Buf, LgiAnsiToLgiCp(), Size);
+						char16 *Utf = (char16*)LNewConvertCp(LGI_WideCharset, Buf, LAnsiToLgiCp(), Size);
 						if (Utf)
 						{
 							Insert(Cursor, Utf, StrlenW(Utf));

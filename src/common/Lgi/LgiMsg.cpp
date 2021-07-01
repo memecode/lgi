@@ -107,7 +107,7 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 
 	if (Str)
 	{
-		if (LgiGetOs() == LGI_OS_WIN9X)
+		if (LGetOs() == LGI_OS_WIN9X)
 		{
 			auto t = LToNativeCp(Title ? Title : (char*)"Message");
 			auto m = LToNativeCp(Msg);

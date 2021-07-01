@@ -10,7 +10,7 @@ bool LgiBrowseToFile(const char *Filename)
 	/*
 	char Args[MAX_PATH];
 	sprintf(Args, "/e,/select,\"%s\"", Filename);
-	return LgiExecute("explorer", Args);
+	return LExecute("explorer", Args);
 	*/
 	LgiAssert(!"Impl me.");
 	return false;

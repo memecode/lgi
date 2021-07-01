@@ -11,7 +11,7 @@ void LgiSleep(uint32 i)
 	SDL_Delay(i);
 }
 
-bool LgiGetMimeTypeExtensions(const char *Mime, GArray<char*> &Ext)
+bool LGetMimeTypeExtensions(const char *Mime, GArray<char*> &Ext)
 {
 	int Start = Ext.Length();
 	char *e;
@@ -90,7 +90,7 @@ bool LgiGetFileMimeType(const char *File, char *Mime, int BufLen)
 					if (!Status)
 					{
 						// This is a hack to get around file types without a MIME database entry
-						// but do have a .ext entry. LgiGetAppsForMimeType knows about the hack too.
+						// but do have a .ext entry. LGetAppsForMimeType knows about the hack too.
 						snprintf(Mime, BufLen, "application/%s", Dot);
 						Status = true;
 					}
@@ -218,7 +218,7 @@ bool _GetApps_Add(GArray<GAppInfo*> &Apps, char *In)
 	return false;
 }
 
-bool LgiGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
+bool LGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 
@@ -365,7 +365,7 @@ bool LgiGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 						if (Path)
 						{
 							const char *c = Path;
-							char *Part = LgiTokStr(c);
+							char *Part = LTokStr(c);
 							if (Part)
 							{
 								char AppPath[256];
@@ -394,7 +394,7 @@ bool LgiGetAppForMimeType(const char *Mime, char *AppPath, int BufSize)
 	if (AppPath)
 	{
 		GArray<GAppInfo*> Apps;
-		Status = LgiGetAppsForMimeType(Mime, Apps, 1);
+		Status = LGetAppsForMimeType(Mime, Apps, 1);
 		if (Status)
 		{
 			strcpy_s(AppPath, BufSize, Apps[0]->Path);
@@ -404,12 +404,12 @@ bool LgiGetAppForMimeType(const char *Mime, char *AppPath, int BufSize)
 	return Status;
 }
 
-uint LgiRand(uint i)
+uint LRand(uint i)
 {
 	return (rand() % i);
 }
 
-bool LgiPlaySound(const char *FileName, int Flags)
+bool LPlaySound(const char *FileName, int Flags)
 {
 	bool Status = false;
 
@@ -421,7 +421,7 @@ bool LgiPlaySound(const char *FileName, int Flags)
 
 		if (psndPlaySound)
 		{
-			if (LgiGetOs() == LGI_OS_WIN9X)
+			if (LGetOs() == LGI_OS_WIN9X)
 			{
 				// async broken on 98?
 				Flags = 0;
@@ -498,7 +498,7 @@ GAutoString LgiErrorCodeToString(uint32 ErrorCode)
     return Str;
 }
 
-bool LgiExecute(const char *File, const char *Arguments, const char *Dir, GAutoString *ErrorMsg)
+bool LExecute(const char *File, const char *Arguments, const char *Dir, GAutoString *ErrorMsg)
 {
 	int Status = 0, Error = 0;
 	
@@ -506,7 +506,7 @@ bool LgiExecute(const char *File, const char *Arguments, const char *Dir, GAutoS
 		return false;
 
 	uint64 Now = LgiCurrentTime();
-	if (LgiGetOs() == LGI_OS_WIN9X)
+	if (LGetOs() == LGI_OS_WIN9X)
 	{
 		GAutoString f(LgiToNativeCp(File));
 		GAutoString a(LgiToNativeCp(Arguments));

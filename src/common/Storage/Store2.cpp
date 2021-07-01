@@ -2006,7 +2006,7 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 						
 						char Size[64];
 						uint32 Change = (uint32)(OldSize - File->GetSize());
-						LgiFormatSize(Size, sizeof(Size), Change);
+						LFormatSize(Size, sizeof(Size), Change);
 						sprintf_s(Msg, sizeof(Msg), "Compact complete, %s was recovered.", Size);
 					}
 

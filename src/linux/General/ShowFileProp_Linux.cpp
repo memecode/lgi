@@ -20,5 +20,5 @@ bool LgiBrowseToFile(const char *Filename)
 	else
 		f = Filename;
 	
-	return LgiExecute(Browser, f);
+	return LExecute(Browser, f);
 }

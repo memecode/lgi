@@ -490,7 +490,7 @@ bool GRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 	if (Cut)
 	{
 		DelTxt->Add(0);
-		*Cut = (char16*)LgiNewConvertCp(LGI_WideCharset, &DelTxt->First(), "utf-32", DelTxt->Length()*sizeof(uint32_t));
+		*Cut = (char16*)LNewConvertCp(LGI_WideCharset, &DelTxt->First(), "utf-32", DelTxt->Length()*sizeof(uint32_t));
 	}
 
 	return true;
@@ -2411,7 +2411,7 @@ bool GRichTextPriv::GetSelection(GArray<char16> *Text, GAutoString *Html)
 			End->Blk->CopyAt(0, End->Offset, &Utf32);
 		}
 
-		char16 *w = (char16*)LgiNewConvertCp(LGI_WideCharset, &Utf32[0], "utf-32", Utf32.Length() * sizeof(uint32_t));
+		char16 *w = (char16*)LNewConvertCp(LGI_WideCharset, &Utf32[0], "utf-32", Utf32.Length() * sizeof(uint32_t));
 		if (!w)
 			return Error(_FL, "Failed to convert %i utf32 to wide.", Utf32.Length());
 

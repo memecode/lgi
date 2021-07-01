@@ -452,7 +452,7 @@ public:
 				GArray<char*> Files;
 				Ext.Add("*.html");
 				Ext.Add("*.htm");				
-				if (LgiRecursiveFileSearch(p, &Ext, &Files))
+				if (LRecursiveFileSearch(p, &Ext, &Files))
 				{
 					LDateTime Now;
 					Now.SetNow();
@@ -517,7 +517,7 @@ public:
 				GArray<const char*> Ext;
 				GArray<char*> Files;
 				Ext.Add("*.png");
-				// if (LgiRecursiveFileSearch(p, &Ext, &Files))
+				// if (LRecursiveFileSearch(p, &Ext, &Files))
 
 				char OutPath[MAX_PATH];
 				LgiMakePath(OutPath, sizeof(OutPath), p, "Output");

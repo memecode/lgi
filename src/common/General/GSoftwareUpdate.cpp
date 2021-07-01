@@ -68,8 +68,8 @@ struct GSoftwareUpdatePriv
 				GUri Uri(d->UpdateUri);
 				char Dir[256];
 				int WordSize = sizeof(size_t) << 3;
-				GString OsName = LgiGetOsName();
-				int Os = LgiGetOs();
+				GString OsName = LGetOsName();
+				int Os = LGetOs();
 				if (Os == LGI_OS_WIN32 ||
 					Os == LGI_OS_WIN64 ||
 					Os == LGI_OS_WIN9X)
@@ -396,7 +396,7 @@ bool GSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, GViewI *W
 			if (!_stricmp(Ext, "exe"))
 			{
 				// Execute to install...
-				LgiExecute(Tmp);
+				LExecute(Tmp);
 				return true;
 			}
 			else

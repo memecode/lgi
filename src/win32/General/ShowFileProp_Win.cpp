@@ -28,5 +28,5 @@ bool LgiBrowseToFile(const char *Filename)
 {
 	char Args[MAX_PATH];
 	sprintf_s(Args, sizeof(Args), "/e,/select,\"%s\"", Filename);
-	return LgiExecute("explorer", Args);
+	return LExecute("explorer", Args);
 }

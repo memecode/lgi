@@ -360,7 +360,7 @@ public:
 	GDataStoreI()
 	{
 		LgiAssert(LgiApp->InThread());
-		while (Map.Find(Id = LgiRand(1000)))
+		while (Map.Find(Id = LRand(1000)))
 			;
 		Map.Add(Id, this);
 	}

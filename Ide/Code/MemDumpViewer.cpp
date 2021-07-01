@@ -35,7 +35,7 @@ public:
 		{
 			case 0:
 			{
-				LgiFormatSize(s, sizeof(s), Size);
+				LFormatSize(s, sizeof(s), Size);
 				return s;
 				break;
 			}

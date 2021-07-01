@@ -296,7 +296,7 @@ struct LOAuth2Priv
 					Scope.Get());
 		if (Log)
 			Log->Print("%s:%i - Uri: %s\n", _FL, Uri.Get());
-		LgiExecute(Uri); // Open browser for user to auth
+		LExecute(Uri); // Open browser for user to auth
 
 		if (Svr.GetReq())
 		{

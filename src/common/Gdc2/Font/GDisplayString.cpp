@@ -238,7 +238,7 @@ bool StringConvert(Out *&out, ssize_t &OutWords, const In *in, ssize_t InLen)
 		// Convert the string to new word size
 		static const char *Cp[] = { NULL, "utf-8", "utf-16", NULL, "utf-32"};
 		LgiAssert(OutSz <= 4 && InSz <= 4 && Cp[OutSz] && Cp[InSz]);
-		out = (Out*) LgiNewConvertCp(Cp[OutSz], in, Cp[InSz], InWords*sizeof(In));
+		out = (Out*) LNewConvertCp(Cp[OutSz], in, Cp[InSz], InWords*sizeof(In));
 		OutWords = Strlen(out);
 		return out != NULL;
 	}
@@ -622,7 +622,7 @@ void GDisplayString::Layout(bool Debug)
 
 			if (b.Hnd)
 			{
-				if (!LgiIsUtf8(b.Str, b.Bytes))
+				if (!LIsUtf8(b.Str, b.Bytes))
 				{
 					LgiTrace("Invalid UTF8: '%.*S'\n", (int)b.Bytes, b.Str);
 				}

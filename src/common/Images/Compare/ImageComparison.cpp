@@ -974,7 +974,7 @@ int ImageCompareDlg::OnNotify(GViewI *Ctrl, int Flags)
 					{
 						char args[MAX_PATH];
 						sprintf_s(args, sizeof(args), "\"%s\" \"%s\"", left, right);
-						LgiExecute(p, args);
+						LExecute(p, args);
 					}
 					#else
 					const char *Leaf = strrchr(left, DIR_CHAR);

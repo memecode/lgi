@@ -1478,7 +1478,7 @@ GMessage::Result GRichTextPriv::TextBlock::OnEvent(GMessage *Msg)
 					DeleteAt(t, Start, e->Len); // 'e' might disappear here
 
 					// Insert the new text....
-					GAutoPtr<uint32_t,true> u((uint32_t*)LgiNewConvertCp("utf-32", s, "utf-8"));
+					GAutoPtr<uint32_t,true> u((uint32_t*)LNewConvertCp("utf-32", s, "utf-8"));
 					AddText(t, Start, u.Get(), Strlen(u.Get()));
 					
 					d->AddTrans(t);

@@ -315,7 +315,7 @@ DumpTime("exception handler");
 		*/
 			
 		GArray<int> Ver;
-		LgiGetOs(&Ver);
+		LGetOs(&Ver);
 		if (Ver.Length() > 1)
 		{
 			// LgiTrace("Windows v%i.%i\n", Ver[0], Ver[1]);
@@ -388,7 +388,7 @@ DumpTime("fonts");
 
 	// Other vars and init
 	hNormalCursor = LoadCursor(NULL, IDC_ARROW);
-	LgiRandomize((uint) (LgiCurrentTime()*GetCurrentThreadId()));
+	LRandomize((uint) (LgiCurrentTime()*GetCurrentThreadId()));
 	MouseRollMsg = RegisterWindowMessage(L"MSWHEEL_ROLLMSG");
 
 DumpTime("cursor/rand/msg");

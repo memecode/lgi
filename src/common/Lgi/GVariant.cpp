@@ -2189,7 +2189,7 @@ bool GCustomType::Set(int Index, GVariant &In, uint8_t *This, int ArrayIndex)
 				// utf8 -> wide conversion...
 				const void *In = Ptr;
 				ssize_t Len = strlen(s);
-				ssize_t Ch = LgiBufConvertCp(Ptr, LGI_WideCharset, Def->ArrayLen-1, In, "utf-8", Len);
+				ssize_t Ch = LBufConvertCp(Ptr, LGI_WideCharset, Def->ArrayLen-1, In, "utf-8", Len);
 				if (Ch >= 0)
 				{
 					// Null terminate
@@ -2197,7 +2197,7 @@ bool GCustomType::Set(int Index, GVariant &In, uint8_t *This, int ArrayIndex)
 				}
 				else
 				{
-					LgiAssert(!"LgiBufConvertCp failed.");
+					LgiAssert(!"LBufConvertCp failed.");
 					return false;
 				}
 			}
@@ -2222,7 +2222,7 @@ bool GCustomType::Set(int Index, GVariant &In, uint8_t *This, int ArrayIndex)
 				// Conversion to utf-8
 				const void *In = Ptr;
 				ssize_t Len = StrlenW(w) * sizeof(char16);
-				ssize_t Ch = LgiBufConvertCp(Ptr, "utf-8", Def->ArrayLen-sizeof(char16),
+				ssize_t Ch = LBufConvertCp(Ptr, "utf-8", Def->ArrayLen-sizeof(char16),
 										In, LGI_WideCharset, Len);
 				if (Ch >= 0)
 				{
@@ -2231,7 +2231,7 @@ bool GCustomType::Set(int Index, GVariant &In, uint8_t *This, int ArrayIndex)
 				}
 				else
 				{
-					LgiAssert(!"LgiBufConvertCp failed.");
+					LgiAssert(!"LBufConvertCp failed.");
 					return false;
 				}
 			}

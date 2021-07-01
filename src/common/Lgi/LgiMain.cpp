@@ -47,7 +47,7 @@ bool _BuildCheck()
 	#else
 	const char *AppBuild = "Release";
 	#endif
-	char *LgiBuild = (char*) (LgiIsReleaseBuild() ? "Release" : "Debug");
+	char *LgiBuild = (char*) (LIsReleaseBuild() ? "Release" : "Debug");
 
 	if (_stricmp(AppBuild, LgiBuild))
 	{

@@ -1287,10 +1287,10 @@ char16 *GHtmlParser::CleanText(const char *s, ssize_t Len, bool ConversionAllowe
 			!View->GetOverideDocCharset())
 		{
 			const char *ViewCs = View->GetCharset();
-			char *DocText = (char*)LgiNewConvertCp(DocCharSet, s, ViewCs, Len);
+			char *DocText = (char*)LNewConvertCp(DocCharSet, s, ViewCs, Len);
 			if (DocText)
 			{
-				t = (char16*) LgiNewConvertCp(LGI_WideCharset, DocText, DocCharSet, -1);
+				t = (char16*) LNewConvertCp(LGI_WideCharset, DocText, DocCharSet, -1);
 				DeleteArray(DocText);
 			}
 			else
@@ -1301,12 +1301,12 @@ char16 *GHtmlParser::CleanText(const char *s, ssize_t Len, bool ConversionAllowe
 		}
 		else if (DocCharSet)
 		{
-			t = (char16*) LgiNewConvertCp(LGI_WideCharset, s, DocCharSet, Len);
+			t = (char16*) LNewConvertCp(LGI_WideCharset, s, DocCharSet, Len);
 		}
 		else
 		{
 			const char *ViewCs = View ? View->GetCharset() : NULL;
-			t = (char16*) LgiNewConvertCp(LGI_WideCharset, s, ViewCs?ViewCs:DefaultCs, Len);
+			t = (char16*) LNewConvertCp(LGI_WideCharset, s, ViewCs?ViewCs:DefaultCs, Len);
 		}
 
 		if (t && ConversionAllowed)

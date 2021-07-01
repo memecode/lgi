@@ -16,7 +16,7 @@ wchar_t *Utf8ToWide(const char *In, ssize_t InLen)
 		s[r] = 0;
 		return s;	
 	#else
-		return (wchar_t*) LgiNewConvertCp(LGI_WideCharset, In, "utf-8", InLen);
+		return (wchar_t*) LNewConvertCp(LGI_WideCharset, In, "utf-8", InLen);
 	#endif
 }
 
@@ -36,7 +36,7 @@ char *WideToUtf8(const wchar_t *In, ptrdiff_t InLen)
 		s[r] = 0;
 		return s;	
 	#else
-		return (char*) LgiNewConvertCp("utf-8", In, LGI_WideCharset, InLen*sizeof(*In));
+		return (char*) LNewConvertCp("utf-8", In, LGI_WideCharset, InLen*sizeof(*In));
 	#endif
 }
 

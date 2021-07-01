@@ -1007,8 +1007,8 @@ bool GApp::GetAppsForMimeType(char *Mime, GArray<GAppInfo*> &Apps)
 		}
 	}
 
-	LgiGetAppsForMimeType(Mime, Apps);
-	LgiGetAppsForMimeType(AltMime, Apps);
+	LGetAppsForMimeType(Mime, Apps);
+	LGetAppsForMimeType(AltMime, Apps);
 	
 	return Apps.Length() > 0;
 }

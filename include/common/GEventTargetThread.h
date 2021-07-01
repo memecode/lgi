@@ -35,7 +35,7 @@ public:
 
 		// Find free handle...
 		int Hnd;
-		while (ToPtr.Find(Hnd = LgiRand(10000) + 1))
+		while (ToPtr.Find(Hnd = LRand(10000) + 1))
 			;
 
 		// Add the new sink

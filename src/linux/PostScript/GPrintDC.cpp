@@ -151,7 +151,7 @@ public:
 		do
 		{
 			LgiGetSystemPath(LSP_TEMP, Temp, sizeof(Temp));
-			sprintf(Part, "_lgi_printjob_%x.ps", LgiRand());
+			sprintf(Part, "_lgi_printjob_%x.ps", LRand());
 			LgiMakePath(Temp, sizeof(Temp), Temp, Part);
 		}
 		while (FileExists(Temp));
@@ -494,7 +494,7 @@ GPrintDC::~GPrintDC()
 		
 		char a[256];
 		sprintf(a, "-t \"%s\" %s", d->PrintJobName, d->FileName);
-		LgiExecute("kprinter", a);
+		LExecute("kprinter", a);
 		new DeleterThread(d->FileName);
 	}	
 	

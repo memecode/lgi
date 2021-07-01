@@ -771,7 +771,7 @@ void IdeProjectSettings::InitAllSettings(bool ClearCurrent)
 			case ProjMakefile:
 			{
 				char s[64];
-				sprintf_s(s, sizeof(s), "Makefile.%s", LgiGetOsName());
+				sprintf_s(s, sizeof(s), "Makefile.%s", LGetOsName());
 				strlwr(s + 1);
 				Default = s;
 				break;

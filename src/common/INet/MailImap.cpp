@@ -61,13 +61,13 @@ bool JsonDecode(GXmlTag &t, const char *s)
 		SkipWhiteSpace(s);
 		if (*s != '\"')
 			break;
-		GAutoString Variable(LgiTokStr(s));
+		GAutoString Variable(LTokStr(s));
 		SkipWhiteSpace(s);
 		if (*s != ':')
 			return false;
 		s++;
 		SkipWhiteSpace(s);
-		GAutoString Value(LgiTokStr(s));
+		GAutoString Value(LTokStr(s));
 		SkipWhiteSpace(s);
 		
 		t.SetAttr(Variable, Value);
@@ -1634,7 +1634,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 										DeleteArray(Comma);
 									}
 
-									int32 CnonceI[2] = { (int32)LgiRand(), (int32)LgiRand() };
+									int32 CnonceI[2] = { (int32)LRand(), (int32)LRand() };
 									char Cnonce[32];
 									if (TestCnonce)
 										strcpy_s(Cnonce, sizeof(Cnonce), TestCnonce);
@@ -2795,7 +2795,7 @@ bool MailIMap::GetFolders(GArray<MailImapFolder*> &Folders)
 				{
 					GArray<GAutoString> t;
 					char *s;
-					while ((s = LgiTokStr((const char*&)d)))
+					while ((s = LTokStr((const char*&)d)))
 					{
 						t[t.Length()].Reset(s);
 					}

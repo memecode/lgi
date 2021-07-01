@@ -176,10 +176,10 @@ char *DecodeRfc2047(char *Str)
 						}
 						else
 						{
-							GAutoString Utf8((char*)LgiNewConvertCp("utf-8", Block, Cp, Len));
+							GAutoString Utf8((char*)LNewConvertCp("utf-8", Block, Cp, Len));
 							if (Utf8)
 							{
-								if (LgiIsUtf8(Utf8))
+								if (LIsUtf8(Utf8))
 									p.Write((uchar*)Utf8.Get(), strlen(Utf8));
 							}
 							else
@@ -277,7 +277,7 @@ char *EncodeRfc2047(char *Str, const char *CodePage, List<char> *CharsetPrefs, s
 			Base64 = true;
 		}
 
-		char *Buf = (char*)LgiNewConvertCp(DestCp, Str, CodePage, Len);
+		char *Buf = (char*)LNewConvertCp(DestCp, Str, CodePage, Len);
 		if (Buf)
 		{
 			// encode the word

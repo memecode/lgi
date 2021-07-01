@@ -397,7 +397,7 @@ GMessage::Result FindInFilesThread::OnEvent(GMessage *Msg)
 				else
 				{
 					// Find the files recursively...
-					LgiRecursiveFileSearch(d->Params->Dir, &Ext, &Files, 0, 0, FindInFilesCallback);
+					LRecursiveFileSearch(d->Params->Dir, &Ext, &Files, 0, 0, FindInFilesCallback);
 				}
 
 				if (Files.Length() > 0)

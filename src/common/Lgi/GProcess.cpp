@@ -328,7 +328,7 @@ public:
 	GString GetString()
 	{
 		if (w)
-			return LNewConvertCp("utf-8", w, LGI_WideCharset);
+			return LStrConvertCp("utf-8", w, LGI_WideCharset);
 		else if (n)
 			return n;
 
@@ -355,7 +355,7 @@ bool GProcess::Terminate()
 	#endif
 }
 
-bool GNativeString::WinNT = LgiGetOs() == LGI_OS_WIN32 || LgiGetOs() == LGI_OS_WIN64;
+bool GNativeString::WinNT = LGetOs() == LGI_OS_WIN32 || LGetOs() == LGI_OS_WIN64;
 
 bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool Wait, GStream *In, GStream *Out, int Priority)
 {
@@ -398,7 +398,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 		GNativeString Buf;
 		GNativeString Delim;
 		#ifdef WIN32
-		if (FileExists(Exe))
+		if (LFileExists(Exe))
 			Delim = "\"";
 		#endif
 		GNativeString Space = " ";
@@ -452,7 +452,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 				ZeroObj(SiA);
 				ZeroObj(SiW);
 
-				if (LgiGetOs() == LGI_OS_WIN9X)
+				if (LGetOs() == LGI_OS_WIN9X)
 				{
 					SiA.cb = sizeof(SiA);
 					SiA.dwFlags = In || Out ? STARTF_USESTDHANDLES : 0;
@@ -524,7 +524,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 				}
 
 				bool Ok = false;				
-				if (LgiGetOs() == LGI_OS_WIN9X)
+				if (LGetOs() == LGI_OS_WIN9X)
 				{
 					Ok = CreateProcessA(0, 
 										Buf,			// command line 

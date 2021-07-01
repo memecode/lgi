@@ -28,7 +28,7 @@ public:
 			}
 			case 2:
 			{
-				LgiFormatSize(buf, sizeof(buf), e->Size);
+				LFormatSize(buf, sizeof(buf), e->Size);
 				return buf;
 			}
 			case 3:

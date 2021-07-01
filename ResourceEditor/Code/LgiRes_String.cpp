@@ -360,7 +360,7 @@ bool ResString::Test(ErrorCollection *e)
 
 	for (auto s: Items)
 	{
-		if (!LgiIsUtf8(s->GetStr()))
+		if (!LIsUtf8(s->GetStr()))
 		{
 			ErrorInfo *Err = &e->StrErr.New();
 			Err->Str = this;
@@ -429,12 +429,12 @@ bool ResString::Read(GXmlTag *t, SerialiseContext &Ctx)
 			{
 				if (Ctx.Format == Lr8File)
 				{
-					LgiAssert(LgiIsUtf8(v->GetName()));
+					LgiAssert(LIsUtf8(v->GetName()));
 					Set(v->GetValue(), Lang->Id);
 				}
 				else if (Ctx.Format == CodepageFile)
 				{
-					char *Utf8 = (char*)LgiNewConvertCp("utf-8", v->GetValue(), Lang->Charset);
+					char *Utf8 = (char*)LNewConvertCp("utf-8", v->GetValue(), Lang->Charset);
 					Set(Utf8 ? Utf8 : v->GetValue(), Lang->Id);
 					if (Utf8)
 					{
@@ -503,7 +503,7 @@ bool ResString::Write(GXmlTag *t, SerialiseContext &Ctx)
 				GLanguage *Li = GFindLang(s->GetLang());
 				if (Li)
 				{
-					Mem = String = (char*)LgiNewConvertCp(Li->Charset, s->GetStr(), "utf-8");
+					Mem = String = (char*)LNewConvertCp(Li->Charset, s->GetStr(), "utf-8");
 				}
 
 				if (!String) String = s->GetStr();

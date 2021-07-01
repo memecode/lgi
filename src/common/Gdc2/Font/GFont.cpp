@@ -875,7 +875,7 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 			GString Pattern;
 			Pattern.Printf("*.%s", Ext);
 			Extensions.Add(Pattern.Get());
-			LgiRecursiveFileSearch(FontPath, &Extensions, &Files, NULL, NULL, NULL, NULL);
+			LRecursiveFileSearch(FontPath, &Extensions, &Files, NULL, NULL, NULL, NULL);
 			char *Match = NULL;
 			for (unsigned i=0; i<Files.Length(); i++)
 			{
@@ -1006,7 +1006,7 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 				memset(d->GlyphMap, 0, Bytes);
 
 				GArray<int> OsVer;
-				int OsType = LgiGetOs(&OsVer);
+				int OsType = LGetOs(&OsVer);
 				if (OsType == LGI_OS_WIN9X ||
 					OsVer[0] < 5) // GetFontUnicodeRanges is supported on >= Win2k
 				{
@@ -1079,14 +1079,14 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 					{
 						// not a TTF? assume that it can handle 00-ff in the current ansi cp
 						/*
-						char *Cp = LgiAnsiToLgiCp();
+						char *Cp = LAnsiToLgiCp();
 						for (int i=0; i<=0x7f; i++)
 						{
 							char16 u;
 							uchar c = i;
 							void *In = &c;
 							int Size = sizeof(c);
-							LgiBufConvertCp(&u, "ucs-2", sizeof(u), In, Cp, Size);
+							LBufConvertCp(&u, "ucs-2", sizeof(u), In, Cp, Size);
 
 							if ((u >> 3) < Bytes)
 							{
@@ -1368,7 +1368,7 @@ char16 *GFont::_ToUnicode(char *In, ssize_t &Len)
 	if (In &&
 		Len > 0)
 	{
-		WStr = (char16*)LgiNewConvertCp(LGI_WideCharset, In, GTypeFace::d->_CodePage, Len);
+		WStr = (char16*)LNewConvertCp(LGI_WideCharset, In, GTypeFace::d->_CodePage, Len);
 		if (WStr)
 		{
 			ssize_t l = StrlenW(WStr);
@@ -1729,7 +1729,7 @@ bool GFontType::GetSystemFont(const char *Which)
 	info.cbSize = sizeof(info);
 	#if (WINVER >= 0x0600)
 	GArray<int> Ver;
-	if (LgiGetOs(&Ver) == LGI_OS_WIN32 &&
+	if (LGetOs(&Ver) == LGI_OS_WIN32 &&
 		Ver[0] <= 5)
 		info.cbSize -= 4;
 	#endif
@@ -1742,7 +1742,7 @@ bool GFontType::GetSystemFont(const char *Which)
 		LgiTrace("%s:%i - SystemParametersInfo failed with 0x%x (info.cbSize=%i, os=%i, %i)\n",
 			_FL, GetLastError(),
 			info.cbSize,
-			LgiGetOs(), LGI_OS_WIN9X);
+			LGetOs(), LGI_OS_WIN9X);
 	}
 
 	// Convert windows font height into points
@@ -2083,7 +2083,7 @@ bool GFontType::GetSystemFont(const char *Which)
 			{
 				// Copy the font metrics
 				memcpy(&Info, &info.lfSmCaptionFont, sizeof(Info));
-				if (LgiGetOs() == LGI_OS_WIN9X && _wcsicmp(Info.lfFaceName, L"ms sans serif") == 0)
+				if (LGetOs() == LGI_OS_WIN9X && _wcsicmp(Info.lfFaceName, L"ms sans serif") == 0)
 				{
 					SetFace("Arial");
 				}

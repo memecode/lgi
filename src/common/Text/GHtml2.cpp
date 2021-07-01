@@ -3338,17 +3338,17 @@ char16 *GTag::CleanText(const char *s, int Len, bool ConversionAllowed, bool Kee
 			Html->Charset &&
 			!Html->OverideDocCharset)
 		{
-			char *DocText = (char*)LgiNewConvertCp(Html->DocCharSet, s, Html->Charset, Len);
-			t = (char16*) LgiNewConvertCp(LGI_WideCharset, DocText, Html->DocCharSet, -1);
+			char *DocText = (char*)LNewConvertCp(Html->DocCharSet, s, Html->Charset, Len);
+			t = (char16*) LNewConvertCp(LGI_WideCharset, DocText, Html->DocCharSet, -1);
 			DeleteArray(DocText);
 		}
 		else if (Html->DocCharSet)
 		{
-			t = (char16*) LgiNewConvertCp(LGI_WideCharset, s, Html->DocCharSet, Len);
+			t = (char16*) LNewConvertCp(LGI_WideCharset, s, Html->DocCharSet, Len);
 		}
 		else
 		{
-			t = (char16*) LgiNewConvertCp(LGI_WideCharset, s, Html->Charset ? Html->Charset : DefaultCs, Len);
+			t = (char16*) LNewConvertCp(LGI_WideCharset, s, Html->Charset ? Html->Charset : DefaultCs, Len);
 		}
 
 		if (t && ConversionAllowed)
@@ -7645,7 +7645,7 @@ void GHtml2::OnMouseClick(GMouse &m)
 								GClipBoard c(this);
 								if (Is8Bit(Source))
 								{
-									GAutoWString w((char16*)LgiNewConvertCp(LGI_WideCharset, Source, DocCharSet ? DocCharSet : (char*)"windows-1252"));
+									GAutoWString w((char16*)LNewConvertCp(LGI_WideCharset, Source, DocCharSet ? DocCharSet : (char*)"windows-1252"));
 									if (w)
 										c.TextW(w);
 								}
@@ -7681,7 +7681,7 @@ void GHtml2::OnMouseClick(GMouse &m)
 							if (Source && LgiGetSystemPath(LSP_TEMP, Path, sizeof(Path)))
 							{
 								char f[32];
-								sprintf(f, "_%i.html", LgiRand(1000000));
+								sprintf(f, "_%i.html", LRand(1000000));
 								LgiMakePath(Path, sizeof(Path), Path, f);
 								
 								LgiCheckHeap();
@@ -7777,7 +7777,7 @@ void GHtml2::OnMouseClick(GMouse &m)
 											F.Write(Final, strlen(Final));
 											DeleteArray(Final);
 											F.Close();
-											LgiExecute(Path);
+											LExecute(Path);
 										}
 									}
 								}
@@ -8098,7 +8098,7 @@ bool GHtml2::GetFormattedContent(char *MimeType, GAutoString &Out, GArray<GDocVi
 					!Img->Get("cid", Cid))
 				{
 					char id[256];
-					sprintf(id, "%x.%x", (unsigned)LgiCurrentTime(), (unsigned)LgiRand());
+					sprintf(id, "%x.%x", (unsigned)LgiCurrentTime(), (unsigned)LRand());
 					Img->Set("cid", id);
 					Img->Get("cid", Cid);
 				}

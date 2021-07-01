@@ -170,7 +170,7 @@ bool LgiStringRes::Read(GXmlTag *t, ResFileFormat Format)
 
 			if (Cp)
 			{
-				Str = (char*)LgiNewConvertCp("utf-8", n, Cp);
+				Str = (char*)LNewConvertCp("utf-8", n, Cp);
 			}
 			else
 			{
@@ -529,7 +529,7 @@ bool LgiResources::Load(const char *FileName)
 		d->Format = XmlFile;
 	}
 
-	LgiStringRes::CurLang = LgiGetLanguageId();
+	LgiStringRes::CurLang = LGetLanguageId();
 	if (d->Format != CodepageFile)
 	{
 		LgiStringRes::CodePage = 0;
@@ -1240,7 +1240,7 @@ bool GLgiRes::LoadFromResource(int Resource, GViewI *Parent, GRect *Pos, GAutoSt
 
 ////////////////////////////////////////////////////////////////////////
 // Get language
-GLanguage *LgiGetLanguageId()
+GLanguage *LGetLanguageId()
 {
 	// Check for command line override
 	char Buf[64];

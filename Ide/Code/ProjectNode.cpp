@@ -627,7 +627,7 @@ bool ProjectNode::Serialize(bool Write)
 			auto p = GetFullPath();
 			if (p)
 			{
-				if (FileExists(p))
+				if (LFileExists(p))
 				{
 					if (!LgiIsRelativePath(File))
 					{
@@ -657,7 +657,7 @@ bool ProjectNode::Serialize(bool Write)
 						GArray<char*> Files;
 						GArray<const char*> Ext;
 						Ext.Add(d ? d + 1 : p.Get());
-						if (LgiRecursiveFileSearch(Path, &Ext, &Files))
+						if (LRecursiveFileSearch(Path, &Ext, &Files))
 						{
 							if (Files.Length())
 							{
@@ -845,7 +845,7 @@ IdeDoc *ProjectNode::Open()
 						
 						if (LFileExists(Exe))
 						{
-							LgiExecute(Exe, FullPath);
+							LExecute(Exe, FullPath);
 						}
 					}
 					else
@@ -859,7 +859,7 @@ IdeDoc *ProjectNode::Open()
 					auto FullPath = GetFullPath();
 					if (FullPath)
 					{
-						LgiExecute(FullPath);
+						LExecute(FullPath);
 					}
 					else
 					{
@@ -1075,7 +1075,7 @@ void ProjectNode::OnMouseClick(GMouse &m)
 						Ext.Add(e[i]);
 					}
 					
-					if (LgiRecursiveFileSearch(s.Name(), &Ext, &Files))
+					if (LRecursiveFileSearch(s.Name(), &Ext, &Files))
 					{
 						auto Start = strlen(s.Name()) + 1;
 						for (int i=0; i<Files.Length(); i++)
@@ -1189,7 +1189,7 @@ void ProjectNode::OnMouseClick(GMouse &m)
 						
 						char *Term = 0;
 						char *Format = 0;
-						switch (LgiGetWindowManager())
+						switch (LGetWindowManager())
 						{
 							case WM_Kde:
 								Term = "konsole";
@@ -1218,12 +1218,12 @@ void ProjectNode::OnMouseClick(GMouse &m)
 							}
 							*o++ = '\"';
 							*o++ = 0;
-							LgiExecute(Term, s);
+							LExecute(Term, s);
 						}
 						
 						#elif defined WIN32
 						
-						LgiExecute("cmd", 0, Path);
+						LExecute("cmd", 0, Path);
 						
 						#endif
 					}
@@ -1395,7 +1395,7 @@ void ProjectNode::OnProperties()
 		{
 			char Size[32];
 			int64 FSize = LFileSize(Path);
-			LgiFormatSize(Size, sizeof(Size), FSize);
+			LFormatSize(Size, sizeof(Size), FSize);
 			char Msg[512];
 			sprintf(Msg, "Source Code:\n\n\t%s\n\nSize: %s (%i bytes)", Path.Get(), Size, (int32)FSize);
 		

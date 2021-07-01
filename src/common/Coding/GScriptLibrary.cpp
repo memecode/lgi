@@ -75,7 +75,7 @@ int GScriptUtils::atoi(char16 *s)
 	{
 		char b[64];
 		ssize_t Len = StrlenW(s) * sizeof(*s);
-		ssize_t Bytes = LgiBufConvertCp(b, "utf-8", sizeof(b), (const void*&)s, LGI_WideCharset, Len);
+		ssize_t Bytes = LBufConvertCp(b, "utf-8", sizeof(b), (const void*&)s, LGI_WideCharset, Len);
 		b[Bytes/sizeof(*b)] = 0;
 		i = ::atoi(b);
 	}
@@ -95,7 +95,7 @@ int64 GScriptUtils::atoi64(char16 *s)
 
 		char b[64];
 		ssize_t Len = StrlenW(s) * sizeof(*s);
-		ssize_t Bytes = LgiBufConvertCp(b, "utf-8", sizeof(b), (const void*&)s, LGI_WideCharset, Len);
+		ssize_t Bytes = LBufConvertCp(b, "utf-8", sizeof(b), (const void*&)s, LGI_WideCharset, Len);
 		b[Bytes/sizeof(*b)] = 0;
 
 		i = strtoll(b, 0, 10);
@@ -112,7 +112,7 @@ double GScriptUtils::atof(char16 *s)
 	{
 		char b[64];
 		ssize_t Len = StrlenW(s) * sizeof(*s);
-		ssize_t Bytes = LgiBufConvertCp(b, "utf-8", sizeof(b), (const void*&)s, LGI_WideCharset, Len);
+		ssize_t Bytes = LBufConvertCp(b, "utf-8", sizeof(b), (const void*&)s, LGI_WideCharset, Len);
 		b[Bytes/sizeof(*b)] = 0;
 		i = ::atof(b);
 	}
@@ -126,7 +126,7 @@ int GScriptUtils::htoi(char16 *s)
 	{
 		char b[64];
 		ssize_t Len = StrlenW(s) * sizeof(*s);
-		ssize_t Bytes = LgiBufConvertCp(b, "utf-8", sizeof(b), (const void*&)s, LGI_WideCharset, Len);
+		ssize_t Bytes = LBufConvertCp(b, "utf-8", sizeof(b), (const void*&)s, LGI_WideCharset, Len);
 		b[Bytes/sizeof(*b)] = 0;
 		i = ::htoi(b);
 	}
@@ -566,7 +566,7 @@ bool SystemFunctions::FormatSize(LScriptArguments &Args)
 		return false;
 
 	char s[64];
-	LgiFormatSize(s, sizeof(s), Args[0]->CastInt64());
+	LFormatSize(s, sizeof(s), Args[0]->CastInt64());
 	*Args.GetReturn() = s;
 	return true;
 }
@@ -967,20 +967,20 @@ bool SystemFunctions::System(LScriptArguments &Args)
 
 	char *Exe = Args[0]->Str();
 	char *Arg = Args[1]->Str();
-	*Args.GetReturn() = LgiExecute(Exe, Arg);
+	*Args.GetReturn() = LExecute(Exe, Arg);
 	return true;
 }
 
 bool SystemFunctions::OsName(LScriptArguments &Args)
 {
-	*Args.GetReturn() = LgiGetOsName();
+	*Args.GetReturn() = LGetOsName();
 	return true;
 }
 
 bool SystemFunctions::OsVersion(LScriptArguments &Args)
 {
 	GArray<int> Ver;
-	LgiGetOs(&Ver);
+	LGetOs(&Ver);
 	Args.GetReturn()->SetList();
 	for (int i=0; i<3; i++)
 		Args.GetReturn()->Value.Lst->Insert(new GVariant(Ver[i]));

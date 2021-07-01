@@ -1312,7 +1312,7 @@ CURSOR_CHAR GetCursor()
 {
 	#ifdef WIN32
 	GArray<int> Ver;
-	int Os = LgiGetOs(&Ver);
+	int Os = LGetOs(&Ver);
 	if ((Os == LGI_OS_WIN32 || Os == LGI_OS_WIN64) &&
 		Ver[0] >= 5)
 	{
@@ -1809,7 +1809,7 @@ bool GTextView3::Name(const char *s)
 		Line.DeleteObjects();
 		Style.Empty();
 
-		LgiAssert(LgiIsUtf8(s));
+		LgiAssert(LIsUtf8(s));
 		Text = Utf8ToWide(s);
 		if (!Text)
 		{
@@ -1920,7 +1920,7 @@ char *GTextView3::GetSelection()
 	GRange s = GetSelectionRange();
 	if (s.Len > 0)
 	{
-		return (char*)LgiNewConvertCp("utf-8", Text + s.Start, LGI_WideCharset, s.Len*sizeof(Text[0]) );
+		return (char*)LNewConvertCp("utf-8", Text + s.Start, LGI_WideCharset, s.Len*sizeof(Text[0]) );
 	}
 
 	return 0;
@@ -2211,7 +2211,7 @@ bool GTextView3::Cut()
 		#ifdef WIN32
 		Txt16 = ConvertToCrLf(Txt16);
 		#endif
-		char *Txt8 = (char*)LgiNewConvertCp(LgiAnsiToLgiCp(), Txt16, LGI_WideCharset);
+		char *Txt8 = (char*)LNewConvertCp(LAnsiToLgiCp(), Txt16, LGI_WideCharset);
 
 		GClipBoard Clip(this);
 
@@ -2237,9 +2237,9 @@ bool GTextView3::Copy()
 		#ifdef WIN32
 		char16 *Txt16 = NewStrW(Text+Min, Max-Min);
 		Txt16 = ConvertToCrLf(Txt16);
-		char *Txt8 = (char*)LgiNewConvertCp(LgiAnsiToLgiCp(), Txt16, LGI_WideCharset);
+		char *Txt8 = (char*)LNewConvertCp(LAnsiToLgiCp(), Txt16, LGI_WideCharset);
 		#else
-		char *Txt8 = (char*)LgiNewConvertCp("utf-8", Text+Min, LGI_WideCharset, (Max-Min)*sizeof(*Text));
+		char *Txt8 = (char*)LNewConvertCp("utf-8", Text+Min, LGI_WideCharset, (Max-Min)*sizeof(*Text));
 		#endif
 
 		GClipBoard Clip(this);
@@ -2377,7 +2377,7 @@ bool GTextView3::Open(const char *Name, const char *CharSet)
 				}
 				else
 				{
-					Text = (char16*)LgiNewConvertCp(LGI_WideCharset, DataStart, CharSet ? CharSet : DefaultCharset);
+					Text = (char16*)LNewConvertCp(LGI_WideCharset, DataStart, CharSet ? CharSet : DefaultCharset);
 				}
 				
 				if (Text)
@@ -2529,7 +2529,7 @@ bool GTextView3::Save(const char *Name, const char *CharSet)
 				else
 				{
 					// 32->16 convert
-					GAutoPtr<uint16_t,true> c16((uint16_t*)LgiNewConvertCp(CharSet, Text, LGI_WideCharset, InSize));
+					GAutoPtr<uint16_t,true> c16((uint16_t*)LNewConvertCp(CharSet, Text, LGI_WideCharset, InSize));
 					if (c16)
 						Status = WriteToStream(f, c16.Get(), Strlen(c16.Get()), CrLf);
 				}
@@ -2544,14 +2544,14 @@ bool GTextView3::Save(const char *Name, const char *CharSet)
 				else
 				{
 					// 16->32 convert
-					GAutoPtr<uint32_t,true> c32((uint32_t*)LgiNewConvertCp(CharSet, Text, LGI_WideCharset, InSize));
+					GAutoPtr<uint32_t,true> c32((uint32_t*)LNewConvertCp(CharSet, Text, LGI_WideCharset, InSize));
 					if (c32)
 						Status = WriteToStream(f, c32.Get(), Strlen(c32.Get()), CrLf);
 				}
 			}
 			else
 			{
-				GAutoString c8((char*)LgiNewConvertCp(CharSet ? CharSet : DefaultCharset, Text, LGI_WideCharset, InSize));
+				GAutoString c8((char*)LNewConvertCp(CharSet ? CharSet : DefaultCharset, Text, LGI_WideCharset, InSize));
 				if (c8)
 					Status = WriteToStream(f, c8.Get(), strlen(c8), CrLf);
 			}
@@ -3308,7 +3308,7 @@ int GTextView3::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 				
 				GAutoWString w
 				(
-					(char16*)LgiNewConvertCp
+					(char16*)LNewConvertCp
 					(
 						LGI_WideCharset,
 						s,
@@ -5273,7 +5273,7 @@ GMessage::Result GTextView3::OnEvent(GMessage *Msg)
 			char *Out = (char*)Msg->B();
 			if (Out)
 			{
-				char *In = (char*)LgiNewConvertCp(LgiAnsiToLgiCp(), NameW(), LGI_WideCharset, Chars);
+				char *In = (char*)LNewConvertCp(LAnsiToLgiCp(), NameW(), LGI_WideCharset, Chars);
 				if (In)
 				{
 					int Len = (int)strlen(In);
@@ -5299,7 +5299,7 @@ GMessage::Result GTextView3::OnEvent(GMessage *Msg)
 					{
 						ImmGetCompositionString(hIMC, GCS_RESULTSTR, Buf, Size);
 
-						char16 *Utf = (char16*)LgiNewConvertCp(LGI_WideCharset, Buf, LgiAnsiToLgiCp(), Size);
+						char16 *Utf = (char16*)LNewConvertCp(LGI_WideCharset, Buf, LAnsiToLgiCp(), Size);
 						if (Utf)
 						{
 							Insert(Cursor, Utf, StrlenW(Utf));
@@ -5380,7 +5380,7 @@ void GTextView3::OnUrl(char *Url)
 		const char *Proto = Email ? "mailto" : u.sProtocol;
 		GString App = LGetAppForProtocol(Proto);
 		if (App)
-			LgiExecute(App, Url);
+			LExecute(App, Url);
 		else
 			LgiMsg(this, "Failed to find application for protocol '%s'", "Error", MB_OK, Proto);
 	}

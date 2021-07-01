@@ -176,7 +176,7 @@ bool GDefaultDocumentEnv::OnNavigate(GDocView *Parent, const char *Uri)
 		{
 			// email
 			GArray<GAppInfo*> Apps;
-			if (LgiGetAppsForMimeType("application/email", Apps))
+			if (LGetAppsForMimeType("application/email", Apps))
 			{
 				GAppInfo *First = Apps[0];
 				GStringPipe a;
@@ -198,7 +198,7 @@ bool GDefaultDocumentEnv::OnNavigate(GDocView *Parent, const char *Uri)
 				GAutoString Args(a.NewStr());
 
 				GString ErrorMsg;
-				if (LgiExecute(Exe, Args, ".", &ErrorMsg))
+				if (LExecute(Exe, Args, ".", &ErrorMsg))
 					return true;
 
 				LgiMsg(Parent, "Failed to open '%s':\n%s", LgiApp->GBase::Name(), MB_OK, Exe.Get(), ErrorMsg.Get());
@@ -212,7 +212,7 @@ bool GDefaultDocumentEnv::OnNavigate(GDocView *Parent, const char *Uri)
 		{
 			// webpage
 			GString ErrorMsg;
-			if (LgiExecute(Uri, NULL, NULL, &ErrorMsg))
+			if (LExecute(Uri, NULL, NULL, &ErrorMsg))
 				return true;
 
 			LgiMsg(Parent, "Failed to open '%s':\n%s", LgiApp->GBase::Name(), MB_OK, Uri, ErrorMsg.Get());

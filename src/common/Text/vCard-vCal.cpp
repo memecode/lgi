@@ -678,7 +678,7 @@ bool VIo::ReadField(GStreamI &s, GString &Name, ParamArray *Params, GString &Dat
 		const char *Charset = Params->Find("charset");
 		if (Charset)
 		{
-			GAutoString u((char*)LgiNewConvertCp("utf-8", e, Charset));
+			GAutoString u((char*)LNewConvertCp("utf-8", e, Charset));
 			Data = u.Get();
 		}
 		else

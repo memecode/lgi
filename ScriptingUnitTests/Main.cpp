@@ -61,7 +61,7 @@ public:
 		char p[MAX_PATH];
 		LgiMakePath(p, sizeof(p), SrcFile, "..");
 		LgiMakePath(p, sizeof(p), p, FileName);
-		if (FileExists(p))
+		if (LFileExists(p))
 		{
 			return ::ReadTextFile(p);
 		}
@@ -72,7 +72,7 @@ public:
 	bool RunScript(const char *File)
 	{
 		bool Disassemble = LgiApp->GetOption("disassemble");
-		if (!FileExists(File))
+		if (!LFileExists(File))
 		{
 			printf("Error: '%s' not found.\n", File);
 			return false;

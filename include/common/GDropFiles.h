@@ -62,7 +62,7 @@ public:
 					char *f = (char*)FilesPtr;
 					while (*f)
 					{
-						Add((char*)LgiNewConvertCp("utf-8", f, LgiAnsiToLgiCp()));
+						Add((char*)LNewConvertCp("utf-8", f, LAnsiToLgiCp()));
 						f += strlen(f) + 1;
 					}
 				}

@@ -259,7 +259,7 @@ bool GDocApp<OptionsFmt>::SetLanguage(char *LangId)
 	GetOptions()->SetValue(_LangOptsName, v = LangId);
 	GetOptions()->SerializeFile(true);
 	LgiCloseApp();
-	LgiExecute(LGetExeFile());
+	LExecute(LGetExeFile());
 	return true;
 }
 

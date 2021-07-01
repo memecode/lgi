@@ -38,7 +38,7 @@ public:
 		do
 		{
 			char s[256];
-			sprintf_s(s, sizeof(s), "../%s%i.tmp", Hint.Get(), LgiRand());
+			sprintf_s(s, sizeof(s), "../%s%i.tmp", Hint.Get(), LRand());
 			p += s;
 		}
 		while (p.Exists());
@@ -51,7 +51,7 @@ public:
 bool TerminalAt(GString Path)
 {
 	#if defined(MAC)
-		return LgiExecute("/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal", Path);
+		return LExecute("/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal", Path);
 	#elif defined(WINDOWS)
 		TCHAR w[MAX_PATH];
 		auto r = GetWindowsDirectory(w, CountOf(w));
@@ -60,10 +60,10 @@ bool TerminalAt(GString Path)
 			GFile::Path p = GString(w);
 			p += "system32\\cmd.exe";
 			FileDev->SetCurrentFolder(Path);
-			return LgiExecute(p);
+			return LExecute(p);
 		}
 	#elif defined(LINUX)
-		LgiExecute("gnome-terminal", NULL, Path);
+		LExecute("gnome-terminal", NULL, Path);
 	#endif
 
 	return false;

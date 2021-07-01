@@ -413,7 +413,7 @@ public:
 			}
 			case IDM_REPORT_BUG:
 			{
-				LgiExecute("http://www.memecode.com/scribe/tutorials/html-editor-bug-report");
+				LExecute("http://www.memecode.com/scribe/tutorials/html-editor-bug-report");
 				break;
 			}
 		}

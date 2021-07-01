@@ -138,7 +138,7 @@ public:
 						p += "Common7\\IDE\\devenv.exe";
 						if (p.IsFile())
 						{
-							LgiExecute(p, File);
+							LExecute(p, File);
 							LgiCloseApp();
 						}
 						else Log->Print("\t\tError: The file '%s' doesn't exist.", p.GetFull().Get());

@@ -130,7 +130,7 @@ public:
 } Iso2022Jp;
 
 /////////////////////////////////////////////////////////////////////////////////////
-bool LgiIsUtf8(const char *s, ssize_t len)
+bool LIsUtf8(const char *s, ssize_t len)
 {
 	#define LenCheck(Need) \
 		if (len >= 0 && (len - (s - Start)) < Need) \
@@ -795,7 +795,7 @@ int LgiCpToAnsi(char *cp)
 	return Ansi;
 }
 
-ssize_t LgiBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *&In, const char *InCp, ssize_t &InLen)
+ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *&In, const char *InCp, ssize_t &InLen)
 {
 	int Status = 0;
 
@@ -1038,7 +1038,7 @@ ssize_t LgiBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void
 		}
 		else
 		{
-			// printf("%s:%i - LgiBufConvertCp failed '%s' -> '%s'.\n", __FILE__, __LINE__, InCp, OutCp);
+			// printf("%s:%i - LBufConvertCp failed '%s' -> '%s'.\n", __FILE__, __LINE__, InCp, OutCp);
 		}
 	}
 
@@ -1064,7 +1064,7 @@ T *DupeString(T *s, ssize_t Len = -1)
 	return ns;
 }
 
-GString LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t InLen)
+GString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t InLen)
 {
 	if (!OutCp || !In || !InCp)
 		return GString();
@@ -1135,7 +1135,7 @@ GString LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 	char Buf[2 << 10];
 	while (InLen > 0)
 	{
-		ssize_t Bytes = LgiBufConvertCp(Buf, OutCp, sizeof(Buf), In, InCp, InLen);
+		ssize_t Bytes = LBufConvertCp(Buf, OutCp, sizeof(Buf), In, InCp, InLen);
 		if (Bytes > 0)
 			b.Write((uchar*)Buf, (int)Bytes);
 		else
@@ -1145,7 +1145,7 @@ GString LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 	return b.NewGStr();
 }
 
-void *LgiNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t InLen)
+void *LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t InLen)
 {
 	if (!OutCp || !In || !InCp)
 		return NULL;
@@ -1233,7 +1233,7 @@ void *LgiNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 		char Buf[2 << 10];
 		while (InLen > 0)
 		{
-			ssize_t Bytes = LgiBufConvertCp(Buf, OutCp, sizeof(Buf), In, InCp, InLen);
+			ssize_t Bytes = LBufConvertCp(Buf, OutCp, sizeof(Buf), In, InCp, InLen);
 			if (Bytes > 0)
 			{
 				b.Write((uchar*)Buf, (int)Bytes);
@@ -1248,7 +1248,7 @@ void *LgiNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 	return b.GetSize() ? b.New(NullSize) : 0;
 }
 
-int LgiCharLen(const void *Str, const char *Cp, int Bytes)
+int LCharLen(const void *Str, const char *Cp, int Bytes)
 {
 	if (Str && Cp)
 	{
@@ -1300,12 +1300,12 @@ int LgiCharLen(const void *Str, const char *Cp, int Bytes)
 	return 0;
 }
 
-bool LgiIsCpImplemented(char *Cp)
+bool LIsCpImplemented(char *Cp)
 {
 	return LgiGetCpInfo(Cp) != 0;
 }
 
-const char *LgiAnsiToLgiCp(int AnsiCodePage)
+const char *LAnsiToLgiCp(int AnsiCodePage)
 {
 	if (AnsiCodePage < 0)
 	{
@@ -1372,7 +1372,7 @@ const char *LgiAnsiToLgiCp(int AnsiCodePage)
 	return 0;
 }
 
-char *LgiSeekUtf8(const char *Ptr, ssize_t D, char *Start)
+char *LSeekUtf8(const char *Ptr, ssize_t D, char *Start)
 {
 	uchar *p = (uchar*)Ptr;
 	if (p)
@@ -1448,7 +1448,7 @@ const char *LgiDetectCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
 {
 	const char *Status = "utf-8"; // The default..
 
-	GAutoWString Utf((char16*)LgiNewConvertCp(LGI_WideCharset, Utf8, "utf-8", Len));
+	GAutoWString Utf((char16*)LNewConvertCp(LGI_WideCharset, Utf8, "utf-8", Len));
 	if (Utf)
 	{
 		if (Prefs)
@@ -1496,7 +1496,7 @@ const char *LgiDetectCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
 
 GString LToNativeCp(const char *In, ssize_t InLen)
 {
-	const char *Cp = LgiAnsiToLgiCp();
+	const char *Cp = LAnsiToLgiCp();
 	GString s;
 
 	#ifdef WIN32
@@ -1528,14 +1528,14 @@ GString LToNativeCp(const char *In, ssize_t InLen)
 	#endif
 
 	if (!s)
-		s = LNewConvertCp(Cp, In, "utf-8", InLen);
+		s = LStrConvertCp(Cp, In, "utf-8", InLen);
 
 	return s;
 }
 
 GString LFromNativeCp(const char *In, ssize_t InLen)
 {
-	const char *Cp = LgiAnsiToLgiCp();
+	const char *Cp = LAnsiToLgiCp();
 	GString s;
 
 	#ifdef WIN32
@@ -1595,7 +1595,7 @@ GString LFromNativeCp(const char *In, ssize_t InLen)
 	#endif
 
 	if (!s)
-		s = LNewConvertCp("utf-8", In, Cp, InLen);
+		s = LStrConvertCp("utf-8", In, Cp, InLen);
 
 	return s;
 }

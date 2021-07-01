@@ -105,12 +105,12 @@ bool LgiGetsAppForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 	return Status;
 }
 
-int LgiRand(int Limit)
+int LRand(int Limit)
 {
 	return rand() % Limit;
 }
 
-bool LgiPlaySound(char *FileName, int ASync)
+bool LPlaySound(char *FileName, int ASync)
 {
 	bool Status = false;
 
@@ -131,7 +131,7 @@ bool LgiPlaySound(char *FileName, int ASync)
 	return Status;
 }
 
-bool LgiExecute(const char *File, const char *Args, const char *Dir, GAutoString *ErrorMsg)
+bool LExecute(const char *File, const char *Args, const char *Dir, GAutoString *ErrorMsg)
 {
 	if (File)
 	{
@@ -250,7 +250,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 	}
 }
 
-bool LgiGetAppsForMimeType(const char *Mime,
+bool LGetAppsForMimeType(const char *Mime,
 							GArray<GAppInfo*> &Apps,
 							int Limit = -1)
 {
@@ -258,13 +258,13 @@ bool LgiGetAppsForMimeType(const char *Mime,
 	return false;
 }
 
-bool LgiGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
+bool LGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
 {
 	LgiAssert(!"Impl me.");
 	return false;
 }
 
-bool LgiPlaySound(const char *File, int Flags)
+bool LPlaySound(const char *File, int Flags)
 {
 	LgiAssert(!"Impl me.");
 	return false;

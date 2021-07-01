@@ -932,7 +932,7 @@ public:
 				char *Utf = &Buf[Channel][0];
 				GAutoPtr<char16, true> w;
 
-				if (!LgiIsUtf8(Utf, (ssize_t)Size))
+				if (!LIsUtf8(Utf, (ssize_t)Size))
 				{
 					LgiTrace("Ch %i not utf len=" LPrintfInt64 "\n", Channel, Size);
 					
@@ -1362,7 +1362,7 @@ public:
 			{
 				for (; f; f=*(++It))
 				{
-					if (LgiIsUtf8(f))
+					if (LIsUtf8(f))
 						RecentFilesMenu->AppendItem(f, IDM_RECENT_FILE+n++, true);
 					else
 						RecentFiles.Delete(It);
@@ -3271,7 +3271,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_HELP:
 		{
-			LgiExecute(APP_URL);
+			LExecute(APP_URL);
 			break;
 		}
 		case IDM_ABOUT:
@@ -4133,7 +4133,7 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 		char p[MAX_PATH];
 		LGetSystemPath(LSP_USER_DOCUMENTS, p, sizeof(p));
 		LgiMakePath(p, sizeof(p), p, "Visual Studio 2008\\Settings\\CurrentSettings.xml");
-		if (FileExists(p))
+		if (LFileExists(p))
 		{
 			GFile f;
 			if (f.Open(p, O_READ))

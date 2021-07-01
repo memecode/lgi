@@ -391,7 +391,7 @@ bool LWebSocket::SendMessage(char *Data, uint64 Len)
 	if (Masked)
 	{
 		uint8_t *Mask = p.u8;
-		*p.u32++ = LgiRand();
+		*p.u32++ = LRand();
 		if (!MaskData.Reset(new uint8_t[Len]))
 			return d->Error("Alloc failed.");
 		

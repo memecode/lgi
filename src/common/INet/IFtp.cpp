@@ -235,7 +235,7 @@ IFtpEntry::IFtpEntry(char *Entry, const char *Cs)
 					for (; *n && strchr(Ws, *n); n++);
 				}
 				
-				GAutoString Utf((char*) LgiNewConvertCp("utf-8", n, Cs));
+				GAutoString Utf((char*) LNewConvertCp("utf-8", n, Cs));
 				Name = Utf.Get();
 			}
 
@@ -308,12 +308,12 @@ const char *IFtp::GetError()
 
 char *IFtp::ToFtpCs(const char *s)
 {
-	return (char*) LgiNewConvertCp(GetCharset(), s, "utf-8");
+	return (char*) LNewConvertCp(GetCharset(), s, "utf-8");
 }
 
 char *IFtp::FromFtpCs(const char *s)
 {
-	return (char*) LgiNewConvertCp("utf-8", s, GetCharset());
+	return (char*) LNewConvertCp("utf-8", s, GetCharset());
 }
 
 const char *IFtp::GetCharset()

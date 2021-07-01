@@ -809,7 +809,7 @@ public:
 
 		Sz += Sz * sizeof(Entry);
 
-		// LgiFormatSize(s, Size);
+		// LFormatSize(s, Size);
 		// LgiTrace("%s in %i hash entries (%i used)\n", s, Size, Used);
 
 		int Keys = 0;
@@ -834,7 +834,7 @@ public:
 			}
 		}
 
-		// LgiFormatSize(s, KeySize);
+		// LFormatSize(s, KeySize);
 		// LgiTrace("%s in %i keys\n", s, Keys);
 
 		return Sz + KeySize;

@@ -158,7 +158,7 @@ GMessage CreateMsg(int m, int a, int b)
 	return Msg;
 }
 
-bool LgiGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
+bool LGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
 {
 	int Start = Ext.Length();
 	char *e;
@@ -218,7 +218,7 @@ bool _GetSystemFont(char *FontType, char *Font, int FontBufSize, int &PointSize)
 	return Status;
 }
 
-bool LgiGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
+bool LGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 
@@ -226,12 +226,12 @@ bool LgiGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 	sprintf(Args, "query default %s", Mime);
 	GStringPipe Output;
 
-	GLanguage *CurLang = LgiGetLanguageId();	
+	GLanguage *CurLang = LGetLanguageId();	
 	char LangName[64];
 	sprintf_s(LangName, sizeof(LangName), "Name[%s]", CurLang ? CurLang->Id : "en");
 
 	#if DEBUG_GET_APPS_FOR_MIMETYPE
-	printf("LgiGetAppsForMimeType('%s', ..., %i)\nRunning 'xdg-mime %s'\n",
+	printf("LGetAppsForMimeType('%s', ..., %i)\nRunning 'xdg-mime %s'\n",
 		Mime, Limit, Args);
 	#endif
 
@@ -332,13 +332,13 @@ GString LGetAppForMimeType(const char *Mime)
 {
 	GString App;
 	GArray<GAppInfo*> Apps;
-	if (LgiGetAppsForMimeType(Mime, Apps, 1))
+	if (LGetAppsForMimeType(Mime, Apps, 1))
 		App = Apps[0]->Path.Get();
 	Apps.DeleteObjects();
 	return App;
 }
 
-int LgiRand(int Limit)
+int LRand(int Limit)
 {
 	return rand() % Limit;
 }
@@ -351,7 +351,7 @@ GString LErrorCodeToString(uint32_t ErrorCode)
 	return e;
 }
 
-bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Error)
+bool LExecute(const char *File, const char *Args, const char *Dir, GString *Error)
 {
 	if (File)
 	{
@@ -419,14 +419,14 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Er
 							// got the mime type
 							if (!LGetAppForMimeType(Mime, App, sizeof(App)))
 							{
-								// printf("%s:%i: LgiExecute - LgiGetAppForMimeType failed to return the app for '%s'\n", _FL, File);
+								// printf("%s:%i: LExecute - LgiGetAppForMimeType failed to return the app for '%s'\n", _FL, File);
 								goto TreatAsExe;
 							}
 						}
 					}
 					else
 					{
-						// printf("LgiExecute: LGetFileMimeType failed to return a mime type for '%s'\n", File);
+						// printf("LExecute: LGetFileMimeType failed to return a mime type for '%s'\n", File);
 						
 						// If a file can't be typed it's most likely an executable.
 						// goto TreatAsExe;
@@ -503,7 +503,7 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Er
 }
 
 //////////////////////////////////////////////////////////////////////////
-WindowManager LgiGetWindowManager()
+WindowManager LGetWindowManager()
 {
 	static WindowManager Status = WM_Unknown;
 
@@ -634,11 +634,11 @@ using namespace Gtk;
 #include <gst/gst.h>
 #endif
 
-bool LgiPlaySound(const char *FileName, int ASync)
+bool LPlaySound(const char *FileName, int ASync)
 {
 	#if HAS_GSTREAMER
 	
 	#else
-	return LgiExecute(FileName);
+	return LExecute(FileName);
 	#endif
 }

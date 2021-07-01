@@ -291,7 +291,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	#if 0
 	// Setup the SIGSEGV signal to call the KDE crash handler
 	if (!GetOption("nch") &&
-		LgiGetWindowManager() == WM_Kde)
+		LGetWindowManager() == WM_Kde)
 	{
 		signal(SIGSEGV, LgiCrashHandler);
 	}
@@ -996,8 +996,8 @@ bool GApp::GetAppsForMimeType(char *Mime, ::GArray<::GAppInfo*> &Apps)
 		}
 	}
 
-	LgiGetAppsForMimeType(Mime, Apps);
-	LgiGetAppsForMimeType(AltMime, Apps);
+	LGetAppsForMimeType(Mime, Apps);
+	LGetAppsForMimeType(AltMime, Apps);
 	
 	return Apps.Length() > 0;
 }
@@ -1008,7 +1008,7 @@ GLibrary *GApp::GetWindowManagerLib()
 	if (this != NULL && !d->WmLib)
 	{
 		char Lib[32];
-		WindowManager Wm = LgiGetWindowManager();
+		WindowManager Wm = LGetWindowManager();
 		switch (Wm)
 		{
 			case WM_Kde:

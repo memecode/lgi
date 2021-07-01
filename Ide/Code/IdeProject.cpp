@@ -1559,7 +1559,7 @@ GString BuildThread::FindExe()
 				}
 			}
 
-			if (FileExists(NmakePath))
+			if (LFileExists(NmakePath))
 			{
 				Compiler = Nmake;
 				return NmakePath;
@@ -1568,7 +1568,7 @@ GString BuildThread::FindExe()
 		}
 
 		/*
-		if (ProjFile && FileExists(ProjFile))
+		if (ProjFile && LFileExists(ProjFile))
 		{
 			GString sVer;
 			if (ReadVsProjFile(ProjFile, sVer, BuildConfigs))
@@ -1662,7 +1662,7 @@ GString BuildThread::FindExe()
 			s = k.GetStr(i);
 			if (s.Find("\\??\\") == 0)
 				s = s(4,-1);
-			if (DirExists(s))
+			if (LDirExists(s))
 			{
 				CygwinPath = s;
 				break;
@@ -2321,7 +2321,7 @@ public:
 					char *Term = 0;
 					char *WorkDir = 0;
 					char *Execute = 0;
-					switch (LgiGetWindowManager())
+					switch (LGetWindowManager())
 					{
 						case WM_Kde:
 							Term = "konsole";
@@ -2350,7 +2350,7 @@ public:
 								Execute,
 								e, a);
 								
-						LgiExecute(Term, Args);
+						LExecute(Term, Args);
 					}
 				}
 				#endif

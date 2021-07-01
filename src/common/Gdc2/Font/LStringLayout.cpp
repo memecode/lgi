@@ -207,10 +207,10 @@ void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
 					break;
 				
 				char *cur = e;
-				e = LgiSeekUtf8(e, 1);
+				e = LSeekUtf8(e, 1);
 				if (e == cur) // sanity check...
 				{
-					LgiAssert(!"LgiSeekUtf8 broke.");
+					LgiAssert(!"LSeekUtf8 broke.");
 					break;
 				}
 			}

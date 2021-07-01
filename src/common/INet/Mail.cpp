@@ -1644,7 +1644,7 @@ public:
 		do
 		{
 			char n[32];
-			sprintf_s(n, sizeof(n), "%u.mail", LgiRand());
+			sprintf_s(n, sizeof(n), "%u.mail", LRand());
 			LgiMakePath(File, sizeof(File), Path, n);
 		}
 		while (LFileExists(File));
@@ -2149,8 +2149,8 @@ bool MailPop3::Open(GSocketI *S, const char *RemoteHost, int Port, const char *U
 
 				// login
 				bool Authed = false;
-				char *user = (char*) LgiNewConvertCp("iso-8859-1", User, "utf-8");
-				char *pass = (char*) LgiNewConvertCp("iso-8859-1", Password, "utf-8");
+				char *user = (char*) LNewConvertCp("iso-8859-1", User, "utf-8");
+				char *pass = (char*) LNewConvertCp("iso-8859-1", Password, "utf-8");
 
 				if (user && (pass || SecureAuth))
 				{

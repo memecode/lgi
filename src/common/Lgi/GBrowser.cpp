@@ -227,7 +227,7 @@ public:
 		else if (!_stricmp(u.sProtocol, "mailto") ||
 				 !_stricmp(u.sProtocol, "http"))
 		{
-			LgiExecute(Uri);
+			LExecute(Uri);
 			return true;
 		}
 

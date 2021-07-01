@@ -1590,7 +1590,7 @@ public:
 		GArray<const char*> Ext;
 		GArray<char*> Files;
 		Ext.Add("*.lr8");
-		if (LgiRecursiveFileSearch(Base, &Ext, &Files))
+		if (LRecursiveFileSearch(Base, &Ext, &Files))
 		{
 			for (int i=0; i<Files.Length(); i++)
 			{

@@ -2616,7 +2616,7 @@ void GTag::LoadImage(const char *Uri)
 		const char *s = u.sPath;
 		if (*s++ != '/')
 			return;
-		GAutoString Type(LgiTokStr(s));
+		GAutoString Type(LTokStr(s));
 		if (*s++ != ',')
 			return;
 		auto p = GString(Type).SplitDelimit(",;:");
@@ -3462,24 +3462,24 @@ char16 *GTag::CleanText(const char *s, ssize_t Len, const char *SourceCs,  bool 
 
 	if (SourceCs)
 	{
-		t = (char16*) LgiNewConvertCp(LGI_WideCharset, s, SourceCs, Len);
+		t = (char16*) LNewConvertCp(LGI_WideCharset, s, SourceCs, Len);
 	}
 	else if (Html->DocCharSet &&
 		Html->Charset &&
 		!DocAndCsTheSame &&
 		!Html->OverideDocCharset)
 	{
-		char *DocText = (char*)LgiNewConvertCp(Html->DocCharSet, s, Html->Charset, Len);
-		t = (char16*) LgiNewConvertCp(LGI_WideCharset, DocText, Html->DocCharSet, -1);
+		char *DocText = (char*)LNewConvertCp(Html->DocCharSet, s, Html->Charset, Len);
+		t = (char16*) LNewConvertCp(LGI_WideCharset, DocText, Html->DocCharSet, -1);
 		DeleteArray(DocText);
 	}
 	else if (Html->DocCharSet)
 	{
-		t = (char16*) LgiNewConvertCp(LGI_WideCharset, s, Html->DocCharSet, Len);
+		t = (char16*) LNewConvertCp(LGI_WideCharset, s, Html->DocCharSet, Len);
 	}
 	else
 	{
-		t = (char16*) LgiNewConvertCp(LGI_WideCharset, s, Html->Charset.Get() ? Html->Charset.Get() : DefaultCs, Len);
+		t = (char16*) LNewConvertCp(LGI_WideCharset, s, Html->Charset.Get() ? Html->Charset.Get() : DefaultCs, Len);
 	}
 
 	if (t && ConversionAllowed)
@@ -6996,7 +6996,7 @@ void GHtml::OnAddStyle(const char *MimeType, const char *Styles)
 		if (!Status)
 		{
 			char p[MAX_PATH];
-			sprintf_s(p, sizeof(p), "c:\\temp\\css_parse_failure_%i.txt", LgiRand());
+			sprintf_s(p, sizeof(p), "c:\\temp\\css_parse_failure_%i.txt", LRand());
 			GFile f;
 			if (f.Open(p, O_WRITE))
 			{
@@ -8247,7 +8247,7 @@ void GHtml::OnMouseClick(GMouse &m)
 							const char *ViewCs = GetCharset();
 							if (ViewCs)
 							{
-								GAutoWString w((char16*)LgiNewConvertCp(LGI_WideCharset, Source, ViewCs));
+								GAutoWString w((char16*)LNewConvertCp(LGI_WideCharset, Source, ViewCs));
 								if (w)
 									c.TextW(w);
 							}
@@ -8289,7 +8289,7 @@ void GHtml::OnMouseClick(GMouse &m)
 						}
 						
 						char f[32];
-						sprintf_s(f, sizeof(f), "_%i.html", LgiRand(1000000));
+						sprintf_s(f, sizeof(f), "_%i.html", LRand(1000000));
 						LgiMakePath(Path, sizeof(Path), Path, f);
 						
 						GFile F;
@@ -8307,7 +8307,7 @@ void GHtml::OnMouseClick(GMouse &m)
 						GAutoWString SrcMem;
 						const char *ViewCs = GetCharset();
 						if (ViewCs)
-							SrcMem.Reset((char16*)LgiNewConvertCp(LGI_WideCharset, Source, ViewCs));
+							SrcMem.Reset((char16*)LNewConvertCp(LGI_WideCharset, Source, ViewCs));
 						else
 							SrcMem.Reset(Utf8ToWide(Source));						
 
@@ -8402,7 +8402,7 @@ void GHtml::OnMouseClick(GMouse &m)
 							F.Close();
 							
 							GString Err;
-							if (!LgiExecute(Path, NULL, NULL, &Err))
+							if (!LExecute(Path, NULL, NULL, &Err))
 							{
 								LgiMsg(	this,
 										"Failed to open '%s'\n%s",
@@ -8766,7 +8766,7 @@ bool GHtml::GetFormattedContent(const char *MimeType, GString &Out, GArray<GDocV
 					!Img->Get("cid", Cid))
 				{
 					char id[256];
-					sprintf_s(id, sizeof(id), "%x.%x", (unsigned)LgiCurrentTime(), (unsigned)LgiRand());
+					sprintf_s(id, sizeof(id), "%x.%x", (unsigned)LgiCurrentTime(), (unsigned)LRand());
 					Img->Set("cid", id);
 					Img->Get("cid", Cid);
 				}
@@ -8852,7 +8852,7 @@ bool GHtml::EvaluateCondition(const char *Cond)
 	{
 		if (IsAlpha(*c))
 		{
-			Str.Add(LgiTokStr(c));
+			Str.Add(LTokStr(c));
 		}
 		else if (IsWhiteSpace(*c))
 		{

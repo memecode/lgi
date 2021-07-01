@@ -97,7 +97,7 @@ LgiExtern GString LToNativeCp(const char *In, ssize_t InLen = -1);
 /// \ingroup Text
 LgiExtern GString LFromNativeCp(const char *In, ssize_t InLen = -1);
 
-LgiExtern GString LNewConvertCp
+LgiExtern GString LStrConvertCp
 (
 	/// Output charset
 	const char *OutCp,
@@ -122,12 +122,12 @@ extern "C"
 /// Converts a buffer of text to a different charset
 /// \ingroup Text
 /// \returns the bytes written to the location pointed to by 'Out'
-LgiFunc ssize_t LgiBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *&In, const char *InCp, ssize_t &InLen);
+LgiFunc ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *&In, const char *InCp, ssize_t &InLen);
 
 /// \brief Converts a string to a new charset
 /// \return A dynamically allocate, null terminated string in the new charset
 /// \ingroup Text
-LgiFunc void *LgiNewConvertCp
+LgiFunc void *LNewConvertCp
 (
 	/// Output charset
 	const char *OutCp,
@@ -141,19 +141,19 @@ LgiFunc void *LgiNewConvertCp
 
 /// Return true if Lgi support the charset
 /// \ingroup Text
-LgiFunc bool LgiIsCpImplemented(const char *Cp);
+LgiFunc bool LIsCpImplemented(const char *Cp);
 
 /// Converts the ANSI code page to a charset name
 /// \ingroup Text
-LgiFunc const char *LgiAnsiToLgiCp(int AnsiCodePage = -1);
+LgiFunc const char *LAnsiToLgiCp(int AnsiCodePage = -1);
 
 /// Calculate the number of characters in a string
 /// \ingroup Text
-LgiFunc int LgiCharLen(const void *Str, const char *Cp, int Bytes = -1);
+LgiFunc int LCharLen(const void *Str, const char *Cp, int Bytes = -1);
 
 /// Move a pointer along a utf-8 string by characters
 /// \ingroup Text
-LgiFunc char *LgiSeekUtf8
+LgiFunc char *LSeekUtf8
 (
 	/// Pointer to the current character
 	const char *Ptr,
@@ -165,15 +165,15 @@ LgiFunc char *LgiSeekUtf8
 
 /// Return true if the string is valid utf-8
 /// \ingroup Text
-LgiFunc bool LgiIsUtf8(const char *s, ssize_t len = -1);
+LgiFunc bool LIsUtf8(const char *s, ssize_t len = -1);
 
 /// Returns the next token in a string, leaving the argument pointing to the end of the token
 /// \ingroup Text
-LgiFunc char *LgiTokStr(const char *&s);
+LgiFunc char *LTokStr(const char *&s);
 
 /// Formats a data size into appropriate units
 /// \ingroup Base
-LgiFunc void LgiFormatSize
+LgiFunc void LFormatSize
 (
 	/// Output string
 	char *Str,
@@ -184,12 +184,12 @@ LgiFunc void LgiFormatSize
 );
 
 /// \returns true if the path is a volume root.
-LgiFunc bool LgiIsVolumeRoot(const char *Path);
+LgiFunc bool LIsVolumeRoot(const char *Path);
 
 /// Converts a string from URI encoding (ala %20 -> ' ')
 /// \returns a dynamically allocated string or NULL on error
 /// \ingroup Text
-LgiFunc char *LgiDecodeUri
+LgiFunc char *LDecodeUri
 (
 	/// The URI
 	const char *uri,
@@ -200,7 +200,7 @@ LgiFunc char *LgiDecodeUri
 /// Converts a string to URI encoding (ala %20 -> ' ')
 /// \returns a dynamically allocated string or NULL on error
 /// \ingroup Text
-LgiFunc char *LgiEncodeUri
+LgiFunc char *LEncodeUri
 (
 	/// The URI
 	const char *uri,
@@ -212,11 +212,6 @@ LgiFunc char *LgiEncodeUri
 #if LGI_COCOA || defined(__GTK_H__)
 	LgiExtern GString LgiArgsAppPath;
 #endif
-
-/// Gets the path of the temporary file directory
-/// \ingroup Base
-/// \deprecated Use 'LGetSystemPath(LSP_TEMP)'
-LgiFunc bool DEPRECATED(LgiGetTempPath(char *Dst, int DstSize));
 
 /// Returns the system path specified
 /// \ingroup Base
@@ -230,11 +225,6 @@ LgiFunc bool LGetSystemPath
 	ssize_t DstSize
 );
 
-/// Finds a file in the applications directory or nearby
-/// \ingroup Base
-/// \deprecated Use 'LFindFile()'
-LgiFunc DEPRECATED(char *LgiFindFile(const char *Name));
-
 /// Returns 0 to end search
 /// \ingroup Base
 typedef bool (*RecursiveFileSearch_Callback)(void *UserData, char *Path, class GDirectory *Dir);
@@ -242,7 +232,7 @@ typedef bool (*RecursiveFileSearch_Callback)(void *UserData, char *Path, class G
 /// \brief Recursively search for files
 /// \return Non zero if something was found
 /// \ingroup Base
-LgiFunc bool LgiRecursiveFileSearch
+LgiFunc bool LRecursiveFileSearch
 (
 	/// Start search in this dir
 	const char *Root,
@@ -264,18 +254,18 @@ LgiFunc bool LgiRecursiveFileSearch
 
 /// Gets the currently selected language
 /// \ingroup Resources
-LgiFunc struct GLanguage *LgiGetLanguageId();
+LgiFunc struct GLanguage *LGetLanguageId();
 
 // Os version functions
 
 /// Gets the current operating system and optionally it's version.
 /// \returns One of the defines starting with #LGI_OS_UNKNOWN in LgiDefs.h
 /// \ingroup Base
-LgiFunc int LgiGetOs(GArray<int> *Ver = 0);
+LgiFunc int LGetOs(GArray<int> *Ver = 0);
 
 /// Gets the current operation systems name.
 /// \ingroup Base
-LgiFunc const char *LgiGetOsName();
+LgiFunc const char *LGetOsName();
 
 // System
 
@@ -288,7 +278,7 @@ LgiFunc const char *LgiGetOsName();
 /// directory.
 ///
 /// \ingroup Base
-LgiFunc bool LgiExecute
+LgiFunc bool LExecute
 (
 	/// The file to open
 	const char *File,
@@ -302,11 +292,11 @@ LgiFunc bool LgiExecute
 
 /// Initializes the random number generator
 /// \ingroup Base
-LgiFunc void LgiRandomize(uint Seed);
+LgiFunc void LRandomize(uint Seed);
 
 /// Returns a random number between 0 and Max-1
 /// \ingroup Base
-LgiFunc uint LgiRand(uint Max = 0);
+LgiFunc uint LRand(uint Max = 0);
 
 LgiFunc bool _lgi_read_colour_config(const char *Tag, uint32_t *c);
 
@@ -316,7 +306,7 @@ LgiFunc bool _lgi_read_colour_config(const char *Tag, uint32_t *c);
 
 /// Plays a sound
 /// \ingroup Base
-LgiFunc bool LgiPlaySound
+LgiFunc bool LPlaySound
 (
 	/// File name of the sound to play
 	const char *FileName,
@@ -331,7 +321,7 @@ LgiFunc bool LgiPlaySound
 
 /// Returns the file extensions associated with the mimetype
 /// \ingroup Mime
-LgiExtern bool LgiGetMimeTypeExtensions
+LgiExtern bool LGetMimeTypeExtensions
 (
 	/// The returned mime type
 	const char *Mime,
@@ -348,7 +338,7 @@ inline bool LGetAppForMimeType(const char *Mime, char *AppPath, int BufSize)
 
 /// Returns the all applications that can open a given mime type.
 /// \ingroup Mime
-LgiFunc bool LgiGetAppsForMimeType
+LgiFunc bool LGetAppsForMimeType
 (
 	/// The type of files to match apps to.
 	///
@@ -367,7 +357,7 @@ LgiFunc bool LgiGetAppsForMimeType
 
 /// Returns true if the build is for release.
 /// \ingroup Base
-LgiFunc int LgiIsReleaseBuild();
+LgiFunc int LIsReleaseBuild();
 
 #if defined WIN32
 
@@ -416,7 +406,7 @@ LgiFunc int LgiIsReleaseBuild();
 	};
 
 	/// Returns the currently running window manager
-	WindowManager LgiGetWindowManager();
+	WindowManager LGetWindowManager();
 
 #elif defined(__OBJC__)
 

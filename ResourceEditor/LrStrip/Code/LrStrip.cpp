@@ -248,7 +248,7 @@ public:
 					}
 
 					// overwrite check
-					if (FileExists(s.Name()))
+					if (LFileExists(s.Name()))
 					{
 						if (LgiMsg(this, "Overwrite '%s'?", AppName, MB_YESNO, s.Name()) == IDNO)
 						{

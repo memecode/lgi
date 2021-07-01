@@ -424,7 +424,7 @@ bool GDebugContext::ParseFrameReference(const char *Frame, GAutoString &File, in
 		return false;
 
 	At += 3;
-	if (!File.Reset(LgiTokStr(At)))
+	if (!File.Reset(LTokStr(At)))
 		return false;
 	
 	char *Colon = strchr(File, ':');
@@ -622,7 +622,7 @@ void GDebugContext::FormatMemoryDump(int WordSize, int Width, bool InHex)
 					{
 						// printf("print %i\n", *ptr.u32);
 						LgiUtf32To8(*ptr.u32, ChPtr, Len);
-						// printf("valid=%i\n", LgiIsUtf8(Char, (char*)ChPtr-Char));
+						// printf("valid=%i\n", LIsUtf8(Char, (char*)ChPtr-Char));
 					}
 
 					if (InHex)
