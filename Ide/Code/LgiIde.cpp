@@ -1024,6 +1024,7 @@ public:
 	bool Running;
 	bool Building;
 	bool FixBuildWait = false;
+	int RebuildWait = 0;
 	LSubMenu *WindowsMenu;
 	LSubMenu *CreateMakefileMenu;
 	GAutoPtr<FindSymbolSystem> FindSym;
@@ -1744,7 +1745,13 @@ void AppWnd::OnPulse()
 	if (d->FixBuildWait)
 	{
 		d->FixBuildWait = false;
-		OnFixBuildErrors();
+		if (OnFixBuildErrors() > 0)
+			d->RebuildWait = 3;
+	}
+	else if (d->RebuildWait > 0)
+	{
+		if (--d->RebuildWait == 0)
+			Build();
 	}
 }
 
@@ -2095,7 +2102,7 @@ struct LFileInfo
 };
 
 
-void AppWnd::OnFixBuildErrors()
+int AppWnd::OnFixBuildErrors()
 {
 	LHashTbl<StrKey<char>, GString> Map;
 	GVariant v;
@@ -2200,11 +2207,13 @@ void AppWnd::OnFixBuildErrors()
 								auto &errLine = Lines[LineNo-1];
 								auto Pos = errLine.Find(wrongName);
 								
+								/*
 								if (Pos < 0)
 								{
 									for (int i=0; i<Lines.Length(); i++)
 										Log->Print("[%i]=%s\n", i, Lines[i].Get());
 								}
+								*/
 
 								if (Pos > 0)
 								{
@@ -2245,6 +2254,8 @@ void AppWnd::OnFixBuildErrors()
 
 									if (newPath)
 									{
+										newPath = newPath.Replace("\\", "/"); // Use unix dir chars
+
 										GString newLine = errLine(0, Pos) + newPath + errLine(Pos + wrongName.Length(), -1);
 										GString backup = GString(Full.Get()) + ".orig";
 										if (LFileExists(backup))
@@ -2309,6 +2320,8 @@ void AppWnd::OnFixBuildErrors()
 	Log->Print("%i replacements made.\n", Replacements);
 	if (Replacements > 0)
 		d->Output->Value(AppWnd::OutputTab);
+
+	return Replacements;
 }
 
 void AppWnd::OnBuildStateChanged(bool NewState)

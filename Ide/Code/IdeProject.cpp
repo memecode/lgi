@@ -1510,6 +1510,17 @@ GString BuildThread::FindExe()
 							}
 						}
 					}
+					else if (Section == "SolutionConfigurationPlatforms")
+					{
+						auto p = s.SplitDelimit();
+						auto config = p[0];
+						for (auto &it: Projects)
+						{							
+							auto proj = it.value;
+							if (!proj->Configs.Find(config))
+								proj->Configs.Add(config, proj->Configs.Length()+1);
+						}
+					}
 				}
 			}
 		}
@@ -1751,8 +1762,7 @@ int BuildThread::Main()
 		
 		if (Compiler == VisualStudio)
 		{
-			// TmpArgs.Printf("\"%s\" /make \"All - Win32 Debug\"", Makefile.Get());
-			GString BuildConf = "All - Win32 Debug";
+			GString BuildConf;
 			if (BuildConfigs.Length())
 			{
 				const char *Key = Release ? "Release" : "Debug";
@@ -1761,8 +1771,8 @@ int BuildThread::Main()
 					GString c = BuildConfigs[i];
 					if (c.Find(Key) >= 0)
 					{
-						BuildConf = c;
-						break;
+						if (!BuildConf || (c.Find("x64") >= 0 && BuildConf.Find("x64") < 0))
+							BuildConf = c;
 					}
 				}
 			}
