@@ -1,5 +1,5 @@
 #include "Lvc.h"
-#include "GClipBoard.h"
+#include "lgi/common/ClipBoard.h"
 
 VcFile::VcFile(AppPriv *priv, VcFolder *owner, GString revision, bool working)
 {

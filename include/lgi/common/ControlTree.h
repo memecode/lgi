@@ -1,8 +1,8 @@
 #ifndef _GCTRLTREE_H_
 #define _GCTRLTREE_H_
 
-#include "GTree.h"
-#include "GVariant.h"
+#include "lgi\common\Tree.h"
+#include "lgi/common/Variant.h"
 
 class GControlTree : public GTree, public GDom
 {

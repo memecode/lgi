@@ -1,15 +1,15 @@
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GControlTree.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ControlTree.h"
 // #include "GToken.h"
-#include "GEdit.h"
-#include "GCheckBox.h"
-#include "GCombo.h"
-#include "GButton.h"
-#include "GDisplayString.h"
-#include "LgiRes.h"
-#include "GCssTools.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/CssTools.h"
 
 #define IDC_BROWSE -10
 

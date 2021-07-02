@@ -7,10 +7,10 @@
 #include <stdio.h>
 #include "lgi/common/Lgi.h"
 #include "lgi/common/RadioGroup.h"
-#include "lgi\common\DisplayString.h"
-#include "lgi\common\Notifications.h"
-#include "lgi\common\Css.h"
-#include "lgi\common\LgiRes.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/Notifications.h"
+#include "lgi/common/Css.h"
+#include "lgi/common/LgiRes.h"
 
 #define RADIO_GRID  2
 static int PadXPx = 30;

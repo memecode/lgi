@@ -1,16 +1,16 @@
 /// \file
 /// \author Matthew Allen
 
-#include "Lgi.h"
-#include "GXmlTreeUi.h"
-#include "GCheckBox.h"
-#include "GButton.h"
-#include "GRadioGroup.h"
-#include "GSlider.h"
-#include "GCombo.h"
-#include "GEdit.h"
-#include "GTree.h"
-#include "GControlTree.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/XmlTreeUi.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/RadioGroup.h"
+#include "lgi/common/Slider.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/Tree.h"
+#include "lgi/common/ControlTree.h"
 
 #include <ctype.h>
 

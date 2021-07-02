@@ -23,7 +23,7 @@
 #ifndef _SHA1_H_
 #define _SHA1_H_
 
-#include "lgi\common\LgiInc.h"
+#include "lgi/common/LgiInc.h"
 
 /*
  *  This structure will hold context information for the hashing

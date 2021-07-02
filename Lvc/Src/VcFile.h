@@ -1,7 +1,7 @@
 #ifndef _VcFile_h_
 #define _VcFile_h_
 
-#include "LListItemCheckBox.h"
+#include "lgi/common/ListItemCheckBox.h"
 
 class VcFile : public LListItem
 {

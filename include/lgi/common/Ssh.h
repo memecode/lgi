@@ -6,7 +6,7 @@
 #include <libssh/sftp.h>
 
 #include "DeEscape.h"
-#include "GTextLog.h"
+#include "lgi/common/TextLog.h"
 
 #define DEFAULT_PROMPT		"# "
 

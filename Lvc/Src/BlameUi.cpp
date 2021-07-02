@@ -1,6 +1,6 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "Lvc.h"
-#include "GTextLog.h"
+#include "lgi/common/TextLog.h"
 
 #define OPT_WND_STATE		"BlameUiState"
 struct BlameUiPriv

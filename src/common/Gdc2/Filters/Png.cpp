@@ -25,8 +25,8 @@
 #include "png.h"
 #endif
 
-#include "lgi\common\Lgi.h"
-#include "lgi\common\Palette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Palette.h"
 
 #ifdef __CYGWIN__ 
 #include "png.h"
@@ -36,11 +36,11 @@
 #include <string.h>
 #include <math.h>
 
-#include "lgi\common\LibraryUtils.h"
+#include "lgi/common/LibraryUtils.h"
 #ifdef FILTER_UI
 #include "GTransparentDlg.h"
 #endif
-#include "lgi\common\Variant.h"
+#include "lgi/common/Variant.h"
 
 // Pixel formats
 typedef uint8_t   Png8;

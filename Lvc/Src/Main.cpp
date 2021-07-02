@@ -1,14 +1,14 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "../Resources/resdefs.h"
 #include "Lvc.h"
-#include "GTableLayout.h"
+#include "lgi/common/TableLayout.h"
 #ifdef WINDOWS
 #include "../Resources/resource.h"
 #endif
-#include "GTextLog.h"
-#include "GButton.h"
-#include "GXmlTreeUi.h"
-#include "GTree.h"
+#include "lgi/common/TextLog.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/XmlTreeUi.h"
+#include "lgi/common/Tree.h"
 
 #define TIMEOUT_PROMPT			1000
 

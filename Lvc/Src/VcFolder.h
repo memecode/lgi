@@ -1,7 +1,7 @@
 #ifndef _VcFolder_h_
 #define _VcFolder_h_
 
-#include "GSubProcess.h"
+#include "lgi/common/SubProcess.h"
 
 class VcLeaf;
 

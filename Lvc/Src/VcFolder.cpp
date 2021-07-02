@@ -1,7 +1,7 @@
 #include "Lvc.h"
 #include "../Resources/resdefs.h"
-#include "GCombo.h"
-#include "GClipBoard.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/ClipBoard.h"
 
 #ifndef CALL_MEMBER_FN
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))

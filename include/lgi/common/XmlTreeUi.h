@@ -4,8 +4,8 @@
 #ifndef _GXML_TREE_UI_H_
 #define _GXML_TREE_UI_H_
 
-#include "GVariant.h"
-#include "LList.h"
+#include "lgi\common\Variant.h"
+#include "lgi/common/List.h"
 
 /// This class allows you to serialize data between the user interface and a
 /// GDom instance. Useful for storing user visible application settings in

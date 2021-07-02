@@ -1,6 +1,6 @@
-#include "lgi\common\Lgi.h"
-#include "lgi\common\Slider.h"
-#include "lgi\common\Css.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Slider.h"
+#include "lgi/common/Css.h"
 #include <COMMCTRL.H>
 
 //////////////////////////////////////////////////////////////////////////////////
