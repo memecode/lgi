@@ -133,7 +133,7 @@ void StopNetworkStack()
 }
 
 #ifdef WIN32
-#include "..\..\Win32\INet\MibAccess.h"
+#include "..\..\Win\INet\MibAccess.h"
 #include <iphlpapi.h>
 #pragma comment(lib, "iphlpapi.lib")
 #endif

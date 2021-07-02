@@ -551,30 +551,30 @@
     <ClCompile Include="src\common\Widgets\GToolBar.cpp" />
     <ClCompile Include="src\common\Widgets\GTree.cpp" />
     <ClCompile Include="src\common\Widgets\LList.cpp" />
-    <ClCompile Include="src\win32\Gdc2\Gdc2.cpp" />
-    <ClCompile Include="src\win32\Gdc2\GdiLeak.cpp" />
-    <ClCompile Include="src\win32\Gdc2\GMemDC.cpp" />
-    <ClCompile Include="src\win32\Gdc2\GPrintDC.cpp" />
-    <ClCompile Include="src\win32\Gdc2\GScreenDC.cpp" />
-    <ClCompile Include="src\win32\General\GFile.cpp" />
-    <ClCompile Include="src\win32\General\GMem.cpp" />
-    <ClCompile Include="src\win32\General\ShowFileProp_Win.cpp" />
-    <ClCompile Include="src\win32\INet\MibAccess.cpp" />
-    <ClCompile Include="src\win32\Lgi\GApp.cpp" />
-    <ClCompile Include="src\win32\Lgi\GClipBoard.cpp" />
-    <ClCompile Include="src\win32\Lgi\GDragAndDrop.cpp" />
-    <ClCompile Include="src\win32\Lgi\GFileSelect.cpp" />
-    <ClCompile Include="src\win32\Lgi\GGeneral.cpp" />
-    <ClCompile Include="src\win32\Lgi\GLayout.cpp" />
-    <ClCompile Include="src\win32\Lgi\LMenu.cpp" />
-    <ClCompile Include="src\win32\Lgi\GPrinter.cpp" />
-    <ClCompile Include="src\win32\Lgi\GScrollBar.cpp" />
-    <ClCompile Include="src\win32\Lgi\GView.cpp" />
-    <ClCompile Include="src\win32\Lgi\GWindow.cpp" />
-    <ClCompile Include="src\win32\Lgi\LgiException.cpp" />
-    <ClCompile Include="src\win32\Lgi\LThread.cpp" />
-    <ClCompile Include="src\win32\Widgets\GButton_Win.cpp" />
-    <ClCompile Include="src\win32\Widgets\GCheckBox_Win.cpp">
+    <ClCompile Include="src\win\Gdc2\Gdc2.cpp" />
+    <ClCompile Include="src\win\Gdc2\GdiLeak.cpp" />
+    <ClCompile Include="src\win\Gdc2\GMemDC.cpp" />
+    <ClCompile Include="src\win\Gdc2\GPrintDC.cpp" />
+    <ClCompile Include="src\win\Gdc2\GScreenDC.cpp" />
+    <ClCompile Include="src\win\General\GFile.cpp" />
+    <ClCompile Include="src\win\General\GMem.cpp" />
+    <ClCompile Include="src\win\General\ShowFileProp_Win.cpp" />
+    <ClCompile Include="src\win\INet\MibAccess.cpp" />
+    <ClCompile Include="src\win\Lgi\GApp.cpp" />
+    <ClCompile Include="src\win\Lgi\GClipBoard.cpp" />
+    <ClCompile Include="src\win\Lgi\GDragAndDrop.cpp" />
+    <ClCompile Include="src\win\Lgi\GFileSelect.cpp" />
+    <ClCompile Include="src\win\Lgi\GGeneral.cpp" />
+    <ClCompile Include="src\win\Lgi\GLayout.cpp" />
+    <ClCompile Include="src\win\Lgi\LMenu.cpp" />
+    <ClCompile Include="src\win\Lgi\GPrinter.cpp" />
+    <ClCompile Include="src\win\Lgi\GScrollBar.cpp" />
+    <ClCompile Include="src\win\Lgi\GView.cpp" />
+    <ClCompile Include="src\win\Lgi\GWindow.cpp" />
+    <ClCompile Include="src\win\Lgi\LgiException.cpp" />
+    <ClCompile Include="src\win\Lgi\LThread.cpp" />
+    <ClCompile Include="src\win\Widgets\GButton_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\GCheckBox_Win.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -582,12 +582,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\win32\Widgets\GCombo_Win.cpp" />
-    <ClCompile Include="src\win32\Widgets\GDialog.cpp" />
-    <ClCompile Include="src\win32\Widgets\GEdit_Win.cpp" />
-    <ClCompile Include="src\win32\Widgets\GProgress.cpp" />
-    <ClCompile Include="src\win32\Widgets\GRadioGroup_Win.cpp" />
-    <ClCompile Include="src\win32\Widgets\GSlider_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\GCombo_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\GDialog.cpp" />
+    <ClCompile Include="src\win\Widgets\GEdit_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\GProgress.cpp" />
+    <ClCompile Include="src\win\Widgets\GRadioGroup_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\GSlider_Win.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\common\GArray.h" />
@@ -673,14 +673,14 @@
     <ClInclude Include="include\common\LThread.h" />
     <ClInclude Include="include\common\LThreadEvent.h" />
     <ClInclude Include="include\common\Res.h" />
-    <ClInclude Include="include\win32\GCom.h" />
-    <ClInclude Include="include\win32\LgiOsClasses.h" />
-    <ClInclude Include="include\win32\LgiOsDefs.h" />
+    <ClInclude Include="include\win\GCom.h" />
+    <ClInclude Include="include\win\LgiOsClasses.h" />
+    <ClInclude Include="include\win\LgiOsDefs.h" />
     <ClInclude Include="private\win\GAppPriv.h" />
     <ClInclude Include="src\common\Gdc2\Font\GFontPriv.h" />
     <ClInclude Include="src\common\Hash\md5\md5.h" />
     <ClInclude Include="src\common\Hash\sha1\sha1.h" />
-    <ClInclude Include="src\win32\INet\MibAccess.h" />
+    <ClInclude Include="src\win\INet\MibAccess.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

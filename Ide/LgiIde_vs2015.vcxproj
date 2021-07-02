@@ -251,7 +251,7 @@
     <ClCompile Include="Code\WebFldDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\src\win32\General\Lgi.manifest" />
+    <Manifest Include="..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources\Script1.rc" />
