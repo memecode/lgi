@@ -33,7 +33,7 @@ Known bugs:
 	
 
 */
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "ParserCommon.h"
 
 #if 0
@@ -916,4 +916,4 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns
 	
 	return Defns.Length() > 0;
 }
-
+

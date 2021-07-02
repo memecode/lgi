@@ -1,25 +1,25 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "LgiIde.h"
-#include "GToken.h"
-#include "INet.h"
-#include "GClipBoard.h"
-#include "GDisplayString.h"
-#include "GScrollBar.h"
-#include "LgiRes.h"
-#include "GEdit.h"
-#include "LList.h"
-#include "GPopupList.h"
-#include "GTableLayout.h"
+#include "lgi\common\Token.h"
+#include "lgi\common\Net.h"
+#include "lgi\common\ClipBoard.h"
+#include "lgi\common\DisplayString.h"
+#include "lgi\common\ScrollBar.h"
+#include "lgi\common\LgiRes.h"
+#include "lgi\common\Edit.h"
+#include "lgi\common\List.h"
+#include "lgi\common\PopupList.h"
+#include "lgi\common\TableLayout.h"
 #include "ProjectNode.h"
-#include "GEventTargetThread.h"
-#include "GCheckBox.h"
+#include "lgi\common\EventTargetThread.h"
+#include "lgi\common\CheckBox.h"
 #include "SpaceTabConv.h"
 #include "DocEdit.h"
 #include "IdeDocPrivate.h"
-#include "IHttp.h"
+#include "lgi\common\Http.h"
 
 const char *Untitled = "[untitled]";
 // static const char *White = " \r\t\n";
@@ -2072,4 +2072,4 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 	#endif
 	
 	return Matches.Length() > 0;
-}
+}

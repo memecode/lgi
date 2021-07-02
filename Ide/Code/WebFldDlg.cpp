@@ -1,7 +1,7 @@
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "WebFldDlg.h"
 #include "resdefs.h"
-#include "INet.h"
+#include "lgi\common\Net.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 WebFldDlg::WebFldDlg(GViewI *p, char *name, char *ftp, char *www)
@@ -58,4 +58,4 @@ int WebFldDlg::OnNotify(GViewI *v, int f)
 
 	return 0;
 }
-
+

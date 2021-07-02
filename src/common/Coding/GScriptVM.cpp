@@ -1,17 +1,17 @@
 #include <math.h>
-#include "Lgi.h"
-#include "GScripting.h"
+#include "lgi\common\Lgi.h"
+#include "lgi\common\Scripting.h"
 #include "GScriptingPriv.h"
-#include "GBox.h"
-#include "GTabView.h"
-#include "GTextLog.h"
-#include "LList.h"
-#include "GToolBar.h"
-#include "GToken.h"
-#include "GTableLayout.h"
-#include "GTextLabel.h"
-#include "GScrollBar.h"
-#include "GMatrix.h"
+#include "lgi\common\Box.h"
+#include "lgi\common\TabView.h"
+#include "lgi\common\TextLog.h"
+#include "lgi\common\List.h"
+#include "lgi\common\ToolBar.h"
+#include "lgi\common\Token.h"
+#include "lgi\common\TableLayout.h"
+#include "lgi\common\TextLabel.h"
+#include "lgi\common\ScrollBar.h"
+#include "lgi\common\Matrix.h"
 
 #define TIME_INSTRUCTIONS		0
 #define POST_EXECUTE_STATE		0
@@ -2155,4 +2155,4 @@ bool LScriptArguments::Throw(const char *File, int Line, const char *Msg, ...)
 	
 	Vm->d->OnException(File, Line, -1, s);
 	return true;
-}
+}

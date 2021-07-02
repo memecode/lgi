@@ -1,8 +1,8 @@
 #ifndef _OPEN_SSL_SOCKET_H_
 #define _OPEN_SSL_SOCKET_H_
 
-#include "GLibraryUtils.h"
-#include "LCancel.h"
+#include "lgi\common\LibraryUtils.h"
+#include "lgi\common\Cancel.h"
 
 // If you get a compile error on Linux:
 //		sudo apt-get install libssl-dev
@@ -78,4 +78,4 @@ public:
 extern bool StartSSL(GAutoString &ErrorMsg, SslSocket *Sock);
 extern void EndSSL();
 
-#endif
+#endif

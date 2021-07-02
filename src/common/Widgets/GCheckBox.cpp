@@ -1,12 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GSkinEngine.h"
-#include "GCheckBox.h"
-#include "GDisplayString.h"
-#include "LStringLayout.h"
-#include "LgiRes.h"
+#include "lgi\common\Lgi.h"
+#include "lgi\common\SkinEngine.h"
+#include "lgi\common\CheckBox.h"
+#include "lgi\common\DisplayString.h"
+#include "lgi\common\StringLayout.h"
+#include "lgi\common\LgiRes.h"
 
 static int PadX1Px = 20;
 static int PadX2Px = 6;

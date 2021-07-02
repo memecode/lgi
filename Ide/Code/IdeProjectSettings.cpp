@@ -1,13 +1,13 @@
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "LgiIde.h"
 #include "IdeProject.h"
-#include "GTableLayout.h"
+#include "lgi\common\TableLayout.h"
 #include "resdefs.h"
-#include "GTextLabel.h"
-#include "GEdit.h"
-#include "GCheckBox.h"
-#include "GCombo.h"
-#include "GButton.h"
+#include "lgi\common\TextLabel.h"
+#include "lgi\common\Edit.h"
+#include "lgi\common\CheckBox.h"
+#include "lgi\common\Combo.h"
+#include "lgi\common\Button.h"
 
 const char TagSettings[] = "Settings";
 
@@ -1017,4 +1017,4 @@ bool IdeProjectSettings::Set(ProjSetting Setting, int Value, IdePlatform Platfor
 	else LgiTrace("%s:%i - Warning: missing setting tag '%s'\n", _FL, path);
 
 	return Status;
-}
+}

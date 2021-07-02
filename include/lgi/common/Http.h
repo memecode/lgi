@@ -1,7 +1,7 @@
 #ifndef __IHTTP_H
 #define __IHTTP_H
 
-#include "INet.h"
+#include "lgi\common\Net.h"
 
 #define GET_TYPE_NORMAL				0x1 // Use basic URI, else file + host format
 #define GET_NO_CACHE				0x2

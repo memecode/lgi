@@ -1,6 +1,5 @@
-#include "GMem.h"
-#include "GContainers.h"
-
+#include "lgi\common\Mem.h"
+#include "lgi\common\Containers.h"
 char *SpacesToTabs(const char *Text, int TabSize)
 {
 	GStringPipe p(4 << 10);
@@ -59,7 +58,6 @@ char *SpacesToTabs(const char *Text, int TabSize)
 	
 	return p.NewStr();
 }
-
 char *TabsToSpaces(const char *Text, int TabSize)
 {
 	GStringPipe p(4 << 10);
@@ -101,4 +99,3 @@ char *TabsToSpaces(const char *Text, int TabSize)
 	
 	return p.NewStr();
 }
-

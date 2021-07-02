@@ -1,4 +1,4 @@
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "LgiIde.h"
 #include "ProjectNode.h"
 #include "levenshtein.h"
@@ -390,4 +390,4 @@ void FixMissingFilesDlg(IdeProject *Proj)
 {
 	MissingFiles Dlg(Proj);
 	Dlg.DoModal();
-}
+}

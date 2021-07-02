@@ -1,10 +1,8 @@
-#include "Lgi.h"
-#include "GMdi.h"
+#include "lgi\common\Lgi.h"
+#include "lgi\common\Mdi.h"
 #include <stdio.h>
-#include "GDisplayString.h"
-
+#include "lgi\common\DisplayString.h"
 #define DEBUG_MDI			0
-
 enum GMdiDrag
 {
 	DragNone	= 0,
@@ -16,12 +14,10 @@ enum GMdiDrag
 	DragClose	= 1 << 6,
 	DragSystem	= 1 << 7
 };
-
 class GMdiChildPrivate
 {
 public:
 	GMdiChild *Child;
-
 	GRect Title;
 	#if MDI_TAB_STYLE
 	GRect Tab, Btn;
@@ -53,7 +49,6 @@ public:
 		System.ZOff(-1, -1);
 		#endif
 	}
-
 	#if !MDI_TAB_STYLE
 	GMdiDrag HitTest(int x, int y)
 	{
@@ -98,12 +93,10 @@ public:
 				}
 			}
 		}
-
 		return Hit;
 	}
 	#endif
 };
-
 class GMdiParentPrivate
 {
 public:
@@ -121,32 +114,27 @@ public:
 		Content.ZOff(-1, -1);
 	}
 };
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 GMdiChild::GMdiChild()
 {
 	d = new GMdiChildPrivate(this);
 	LPoint m(100, d->Fy + 8);
 	SetMinimumSize(m);
-
 	#if WINNATIVE
 	SetStyle(GetStyle() | WS_CLIPSIBLINGS);
 	#endif
 }
-
 GMdiChild::~GMdiChild()
 {
 	Detach();
 	DeleteObj(d);
 }
-
 bool GMdiChild::Attach(GViewI *p)
 {
 	#if MDI_TAB_STYLE
 	GMdiParent *par = dynamic_cast<GMdiParent*>(p);
 	if (!par)
 		return false;	
-
 	if (par->d->Children.HasItem(this))
 	{
 		LgiTrace("%s:%i - Already attached:\n", _FL);
@@ -165,13 +153,11 @@ bool GMdiChild::Attach(GViewI *p)
 	par->d->Children.Add(this);
 	d->Order = par->GetNextOrder();
 	#endif
-
 	bool s = GLayout::Attach(p);
 	if (s)
 		AttachChildren();
 	return s;
 }
-
 bool GMdiChild::Detach()
 {
 	#if MDI_TAB_STYLE
@@ -182,15 +168,12 @@ bool GMdiChild::Detach()
 		par->d->Children.Delete(this);
 	}
 	#endif
-
 	return GLayout::Detach();
 }
-
 const char *GMdiChild::Name()
 {
 	return GView::Name();
 }
-
 bool GMdiChild::Name(const char *n)
 {
 	bool s = GView::Name(n);
@@ -204,37 +187,30 @@ bool GMdiChild::Name(const char *n)
 	
 	return s;
 }
-
 bool GMdiChild::PourAll()
 {
 	GRect c = GetClient();
 	#if !MDI_TAB_STYLE
 	c.Size(2, 2);
 	#endif
-
 	GRegion Client(c);
 	GRegion Update;
-
 	#if DEBUG_MDI
 	LgiTrace("    GMdiChild::Pour() '%s', cli=%s, vis=%i, children=%i\n",
 		Name(), c.GetStr(), Visible(), Children.Length());
 	#endif
-
 	for (auto w: Children)
 	{
 		if (Visible())
 		{
 			GRect OldPos = w->GetPos();
 			Update.Union(&OldPos);
-
 			if (w->Pour(Client))
 			{
 				if (!w->IsAttached())
 					w->Attach(this);
-
 				if (!w->Visible())
 					w->Visible(true);
-
 				Client.Subtract(&w->GetPos());
 				Update.Subtract(&w->GetPos());
 			}
@@ -247,15 +223,12 @@ bool GMdiChild::PourAll()
 		{
 			w->Visible(false);
 		}
-
 		#if DEBUG_MDI
 		LgiTrace("      %s, vis=%i\n", w->GetClass(), w->Visible());
 		#endif
 	}
-
 	return true;
 }
-
 void GMdiChild::OnTitleClick(GMouse &m)
 {
 	if (!m.IsContextMenu() && m.Down())
@@ -263,7 +236,6 @@ void GMdiChild::OnTitleClick(GMouse &m)
 		Raise();
 	}
 }
-
 void GMdiChild::OnButtonClick(GMouse &m)
 {
 	if (m.Down())
@@ -274,7 +246,6 @@ void GMdiChild::OnButtonClick(GMouse &m)
 		}
 	}
 }
-
 void GMdiChild::OnPaintButton(GSurface *pDC, GRect &rc)
 {
 	// Default: Draw little 'x' for closing the MDI child
@@ -285,12 +256,10 @@ void GMdiChild::OnPaintButton(GSurface *pDC, GRect &rc)
 	pDC->Line(r.x1, r.y1, r.x2, r.y2);
 	pDC->Line(r.x1+1, r.y1, r.x2, r.y2-1);
 	pDC->Line(r.x1, r.y1+1, r.x2-1, r.y2);
-
 	pDC->Line(r.x2, r.y1, r.x1, r.y2);
 	pDC->Line(r.x2-1, r.y1, r.x1, r.y2-1);
 	pDC->Line(r.x2, r.y1+1, r.x1+1, r.y2);
 }
-
 #if MDI_TAB_STYLE
 int GMdiChild::GetOrder()
 {
@@ -308,17 +277,14 @@ GRect &GMdiChild::GetClient(bool ClientSpace)
 	
 	return r;
 }
-
 void GMdiChild::OnPaint(GSurface *pDC)
 {
 	GRect p = GLayout::GetClient();
-
 	// Border
 	LgiWideBorder(pDC, p, RAISED);
 	pDC->Colour(LC_MED, 24);
 	pDC->Box(&p);
 	p.Size(1, 1);
-
 	// Title bar
 	char *n = Name();
 	if (!n) n = "";
@@ -326,7 +292,6 @@ void GMdiChild::OnPaint(GSurface *pDC)
 	d->Title.Offset(p.x1, p.y1);
 	d->System = d->Title;
 	d->System.x2 = d->System.x1 + d->System.Y() - 1;
-
 	// Title text
 	bool Top = false;
 	if (GetParent())
@@ -354,7 +319,6 @@ void GMdiChild::OnPaint(GSurface *pDC)
 	{
 		pDC->Line(r.x1 + 1, k, r.x2 - 1, k);
 	}
-
 	// Close button
 	d->Close = d->Title;
 	d->Close.x1 = d->Close.x2 - d->Close.Y() + 1;
@@ -374,7 +338,6 @@ void GMdiChild::OnPaint(GSurface *pDC)
 	pDC->Colour(LC_BLACK, 24);
 	pDC->Line(Cx-s, Cy-s, Cx+s, Cy+s);
 	pDC->Line(Cx-s, Cy+s, Cx+s, Cy-s);
-
 	// Client
 	GRect Client = GetClient();
 	Client.Size(-1, -1);
@@ -390,13 +353,11 @@ void GMdiChild::OnPaint(GSurface *pDC)
 	
 	Pour();
 }
-
 void GMdiChild::OnMouseClick(GMouse &m)
 {
 	if (m.Left())
 	{
 		Raise();
-
 		if (m.Down())
 		{
 			GRect c = GLayout::GetClient();
@@ -408,7 +369,6 @@ void GMdiChild::OnMouseClick(GMouse &m)
 			{
 				Capture(true);
 			}
-
 			if (d->Drag == DragSystem)
 			{
 				if (m.Double())
@@ -466,7 +426,6 @@ void GMdiChild::OnMouseClick(GMouse &m)
 			{
 				Capture(false);
 			}
-
 			if (d->CloseOnUp)
 			{
 				d->Drag = DragNone;
@@ -499,7 +458,6 @@ void GMdiChild::OnMouseClick(GMouse &m)
 		}
 	}
 }
-
 LgiCursor GMdiChild::GetCursor(int x, int y)
 {
 	GMdiDrag Hit = d->HitTest(x, y);
@@ -540,14 +498,12 @@ LgiCursor GMdiChild::GetCursor(int x, int y)
 	
 	return LCUR_Normal;
 }
-
 void GMdiChild::OnMouseMove(GMouse &m)
 {
 	if (IsCapturing())
 	{
 		GRect p = GetPos();
 		LPoint Min = GetMinimumSize();
-
 		if (d->Drag == DragClose)
 		{
 			bool Over = d->Close.Overlap(m.x, m.y);
@@ -593,16 +549,13 @@ void GMdiChild::OnMouseMove(GMouse &m)
 				}
 			}
 		}
-
 		SetPos(p);
 	}
 }
 #endif
-
 #if defined __GTK_H__
 using namespace Gtk;
 #endif
-
 void GMdiChild::Raise()
 {
 	GMdiParent *p = dynamic_cast<GMdiParent*>(GetParent());
@@ -611,7 +564,6 @@ void GMdiChild::Raise()
 		#if MDI_TAB_STYLE
 		
 		#else
-
 			#if defined __GTK_H__
 				GtkWidget *wid = Handle();
 				GdkWindow *wnd = wid ? GDK_WINDOW(wid->window) : NULL;
@@ -624,9 +576,7 @@ void GMdiChild::Raise()
 			#else
 				#error "Impl me."
 			#endif
-
 		#endif
-
 		/*
 		printf("%s:%i %p=%s %p=%s\n", _FL,
 			p->d->Children.Last(),
@@ -641,26 +591,20 @@ void GMdiChild::Raise()
 			p->d->Children.Add(this);
 			p->d->Tabs.ZOff(-1, -1);
 			p->OnPosChange();
-
 			Focus(true);
 		}
-
 		#if DEBUG_MDI
 		LgiTrace("GMdiChild::Raise() '%s'\n", Name());
 		#endif
 	}
 }
-
 void GMdiChild::Lower()
 {
 	GMdiParent *p = dynamic_cast<GMdiParent*>(GetParent());
 	if (p)
 	{
 		#if MDI_TAB_STYLE
-
-
 		#else
-
 			#if defined __GTK_H__
 				GtkWidget *wid = Handle();
 				GdkWindow *wnd = wid ? GDK_WINDOW(wid->window) : NULL;
@@ -673,9 +617,7 @@ void GMdiChild::Lower()
 			#else
 				#error "Impl me."
 			#endif
-
 		#endif
-
 		if (p->d->Children[0] != this)
 		{
 			p->d->Children.Delete(this);
@@ -689,14 +631,12 @@ void GMdiChild::Lower()
 		#endif
 	}
 }
-
 ///////////////////////////////////////////////////////////////////////////////////////////
 GMdiParent::GMdiParent()
 {
 	d = new GMdiParentPrivate;
 	SetPourLargest(true);
 }
-
 GMdiParent::~GMdiParent()
 {
 	if (GetWindow())
@@ -706,24 +646,20 @@ GMdiParent::~GMdiParent()
 	
 	DeleteObj(d);
 }
-
 bool GMdiParent::HasButton()
 {
 	return d->Btn;
 }
-
 void GMdiParent::HasButton(bool b)
 {
 	d->Btn = b;
 	if (IsAttached())
 		Invalidate();
 }
-
 ::GArray<GMdiChild*> &GMdiParent::PrivChildren()
 {
 	return d->Children;
 }
-
 /*
 #if MDI_TAB_STYLE
 int ViewCmp(GMdiChild **a, GMdiChild **b)
@@ -732,7 +668,6 @@ int ViewCmp(GMdiChild **a, GMdiChild **b)
 }
 #endif
 */
-
 void GMdiParent::OnPaint(GSurface *pDC)
 {
 	#if MDI_TAB_STYLE
@@ -790,7 +725,6 @@ void GMdiParent::OnPaint(GSurface *pDC)
 		GRect r = c->d->Tab;
 		if (Active)
 			r.y2 += 1;
-
 		int OffX = 0, OffY = 0;
 		for (; OffY < r.Y(); OffX++, OffY += 2)
 		{
@@ -807,10 +741,8 @@ void GMdiParent::OnPaint(GSurface *pDC)
 		pDC->Colour(Edge);
 		pDC->HLine(r.x1 + OffX - 1, r.x2, r.y1);
 		pDC->VLine(r.x2, r.y1, r.y2);
-
 		r.Size(1, 1);
 		r.y2 += 1;
-
 		Fnt->Fore(Txt);
 		Fnt->Back(Bk);
 		Fnt->Transparent(false);
@@ -821,12 +753,10 @@ void GMdiParent::OnPaint(GSurface *pDC)
 		
 		Cx += c->d->Tab.X();
 	}
-
 	pDC->Colour(Back);
 	pDC->Rectangle(d->Tabs.x1 + Cx, d->Tabs.y1, d->Tabs.x2, d->Tabs.y2 - 1);
 	#endif
 }
-
 bool GMdiParent::Attach(GViewI *p)
 {
 	bool s = GLayout::Attach(p);
@@ -837,7 +767,6 @@ bool GMdiParent::Attach(GViewI *p)
 	}
 	return s;
 }
-
 GMdiChild *GMdiParent::IsChild(GViewI *View)
 {
 	for (GViewI *v=View; v; v=v->GetParent())
@@ -856,7 +785,6 @@ GMdiChild *GMdiParent::IsChild(GViewI *View)
 	
 	return 0;
 }
-
 bool GMdiParent::OnViewMouse(GView *View, GMouse &m)
 {
 	if (m.Down())
@@ -871,7 +799,6 @@ bool GMdiParent::OnViewMouse(GView *View, GMouse &m)
 	
 	return true;
 }
-
 bool GMdiParent::OnViewKey(GView *View, GKey &Key)
 {
 	if (Key.Down() && Key.Ctrl() && Key.c16 == '\t')
@@ -892,14 +819,11 @@ bool GMdiParent::OnViewKey(GView *View, GKey &Key)
 			{
 				NewFront->Raise();
 			}
-
 			return true;
 		}
 	}
-
 	return false;
 }
-
 #if MDI_TAB_STYLE
 void GMdiParent::OnMouseClick(GMouse &m)
 {
@@ -909,7 +833,6 @@ void GMdiParent::OnMouseClick(GMouse &m)
 		for (int i=0; i<Views.Length(); i++)
 		{
 			GMdiChild *c = Views[i];
-
 			if (c->d->Btn.Overlap(m.x, m.y))
 			{
 				c->OnButtonClick(m);
@@ -923,12 +846,10 @@ void GMdiParent::OnMouseClick(GMouse &m)
 		}
 	}	
 }
-
 void GMdiParent::OnPosChange()
 {
 	if (!IsAttached())
 		return;
-
 	GFont *Fnt = GetFont();
 	GRect Client = GetClient();
 	GRect Tabs, Content;
@@ -947,18 +868,15 @@ void GMdiParent::OnPosChange()
 		d->Content = Content;
 		
 		GMdiChild *Last = d->Children.Length() ? d->Children.Last() : NULL;
-
 		#if DEBUG_MDI
 		LgiTrace("OnPosChange: Tabs=%s, Content=%s, Children=%i, Last=%s\n",
 			d->Tabs.GetStr(), d->Content.GetStr(),
 			Children.Length(),
 			Last ? Last->Name() : 0);
 		#endif
-
 		for (int Idx=0; Idx<d->Children.Length(); Idx++)
 		{
 			GMdiChild *c = d->Children[Idx];
-
 			if (c == Last)
 			{
 				#if DEBUG_MDI
@@ -968,7 +886,6 @@ void GMdiParent::OnPosChange()
 				
 				if (!c->IsAttached())
 					c->GLayout::Attach(this);
-
 				c->SetPos(d->Content);
 				c->Visible(true);
 				c->PourAll();
@@ -993,18 +910,14 @@ void GMdiParent::OnPosChange()
 				#endif
 			}
 		}
-
 		Invalidate();
 	}
-
 	d->InOnPosChange = false;
 }
 #endif
-
 GRect GMdiParent::NewPos()
 {
 	GRect Status(0, 0, (int)(X()*0.75), (int)(Y()*0.75));
-
 	int Block = 5;
 	for (int y=0; y<Y()>>Block; y++)
 	{
@@ -1032,13 +945,11 @@ GRect GMdiParent::NewPos()
 	
 	return Status;
 }
-
 bool GMdiParent::Detach()
 {
 	d->InOnPosChange = true;
 	return GLayout::Detach();
 }
-
 void GMdiParent::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 {
 	#if MDI_TAB_STYLE
@@ -1069,12 +980,10 @@ void GMdiParent::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 	}
 	#endif
 }
-
 GViewI *GMdiParent::GetTop()
 {
 	return d->Children.Length() > 0 ? d->Children.Last() : NULL;
 }
-
 #if MDI_TAB_STYLE
 int GMdiParent::GetNextOrder()
 {

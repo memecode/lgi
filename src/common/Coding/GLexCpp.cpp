@@ -1,4 +1,4 @@
-#include "GLexCpp.h"
+#include "lgi\common\LexCpp.h"
 #include <ctype.h>
 #include <string.h>
 
@@ -243,4 +243,4 @@ char16 *LexCpp
 
     return NULL;
 };
-
+

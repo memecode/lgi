@@ -1,7 +1,7 @@
 #ifndef _DOC_EDIT_H_
 #define _DOC_EDIT_H_
 
-#include "GTextView3.h"
+#include "lgi\common\TextView3.h"
 #include "IdeDoc.h"
 
 #define IDM_FILE_COMMENT			100

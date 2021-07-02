@@ -2,8 +2,8 @@
 #ifndef _LGI_SCRIPTING_H_
 #define _LGI_SCRIPTING_H_
 
-#include "GVariant.h"
-#include "LList.h"
+#include "lgi\common\Variant.h"
+#include "lgi\common\List.h"
 
 class GScriptContext;
 class GScriptEnginePrivate;
@@ -437,4 +437,4 @@ public:
 };
 
 #endif
-
+

@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "LgiIde.h"
-#include "GDocView.h"
-#include "GToken.h"
-#include "GEdit.h"
-#include "GCheckBox.h"
-#include "GTextLabel.h"
+#include "lgi\common\DocView.h"
+#include "lgi\common\Token.h"
+#include "lgi\common\Edit.h"
+#include "lgi\common\CheckBox.h"
+#include "lgi\common\TextLabel.h"
 
 #define DEBUG_HIST		0
 
@@ -437,4 +437,4 @@ GMessage::Result FindInFilesThread::OnEvent(GMessage *Msg)
 	}
 
 	return 0;
-}
+}

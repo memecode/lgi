@@ -1,7 +1,7 @@
 #ifndef _FTP_FILE_H_
 #define _FTP_FILE_H_
 
-#include "LListItemCheckBox.h"
+#include "lgi\common\ListItemCheckBox.h"
 
 class FtpFile : public LListItem
 {

@@ -5,7 +5,7 @@
 #ifndef __LList_ITEM_CHECKBOX_H
 #define __LList_ITEM_CHECKBOX_H
 
-#include "LList.h"
+#include "lgi\common\List.h"
 
 /// A checkbox suitable for a LListItem.
 class LListItemCheckBox : public LListItemColumn

@@ -3,7 +3,7 @@ Known bugs:
 
 
 */
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "ParserCommon.h"
 
 #if 0

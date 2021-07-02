@@ -1,11 +1,9 @@
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "LgiIde.h"
-#include "GTree.h"
+#include "lgi\common\Tree.h"
 #include "resdefs.h"
-#include "GSubProcess.h"
-
+#include "lgi\common\SubProcess.h"
 static GString TemplatesPath;
-
 class NewProjFromTemplate : public GDialog
 {
 public:
@@ -61,7 +59,6 @@ public:
 		return 0;
 	}
 };
-
 GString GetPython3()
 {
 	auto Path = LGetPath();
@@ -89,7 +86,6 @@ GString GetPython3()
 	
 	return GString();
 }
-
 bool CreateProject(const char *Name, const char *Template, const char *Folder)
 {
 	auto Py3 = GetPython3();
@@ -108,7 +104,6 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 			return false;
 		}
 	}
-
 	// Copy in script...
 	auto CreateProjectPy = "create_project.py";
 	GFile::Path ScriptIn(TemplatesPath);
@@ -120,7 +115,6 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 		LgiTrace("%s:%i - Copy '%s' to '%s' failed.\n", _FL, ScriptIn.GetFull().Get(), ScriptOut.GetFull().Get());
 		return false;
 	}
-
 	// Call the script
 	GString Args;
 	Args.Printf("\"%s\" \"%s\" \"%s\"", ScriptOut.GetFull().Get(), Template, Name);
@@ -138,7 +132,6 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 	FileDev->Delete(ScriptOut);
 	return true;
 }
-
 void NewProjectFromTemplate(GViewI *parent)
 {
 	GFile::Path p(LSP_APP_INSTALL);
@@ -148,14 +141,12 @@ void NewProjectFromTemplate(GViewI *parent)
 		#endif
 		"../templates";
 	TemplatesPath = p;
-
 	NewProjFromTemplate Dlg(parent);
 	if (!Dlg.DoModal())
 	{
 		LgiTrace("%s:%i - Dialog cancelled.\n", _FL);
 		return;
 	}
-
 	GTree *t;
 	if (!Dlg.GetViewById(IDC_TEMPLATES, t))
 	{

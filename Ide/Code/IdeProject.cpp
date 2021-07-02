@@ -5,25 +5,25 @@
 #endif
 #include <stdio.h>
 
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "LgiIde.h"
-#include "GDragAndDrop.h"
-#include "GToken.h"
+#include "lgi\common\DragAndDrop.h"
+#include "lgi\common\Token.h"
 #include "resdefs.h"
-#include "GCombo.h"
-#include "INet.h"
-#include "LListItemCheckBox.h"
+#include "lgi\common\Combo.h"
+#include "lgi\common\Net.h"
+#include "lgi\common\ListItemCheckBox.h"
 #include "FtpThread.h"
-#include "GClipBoard.h"
-#include "GDropFiles.h"
-#include "GSubProcess.h"
+#include "lgi\common\ClipBoard.h"
+#include "lgi\common\DropFiles.h"
+#include "lgi\common\SubProcess.h"
 #include "ProjectNode.h"
 #include "WebFldDlg.h"
-#include "GCss.h"
-#include "GTableLayout.h"
-#include "GTextLabel.h"
-#include "GButton.h"
-#include "GRegKey.h"
+#include "lgi\common\Css.h"
+#include "lgi\common\TableLayout.h"
+#include "lgi\common\TextLabel.h"
+#include "lgi\common\Button.h"
+#include "lgi\common\RegKey.h"
 
 extern const char *Untitled;
 const char SourcePatterns[] = "*.c;*.h;*.cpp;*.cc;*.java;*.d;*.php;*.html;*.css;*.js";
@@ -4102,4 +4102,4 @@ int AddFilesProgress::OnNotify(GViewI *c, int f)
 		Cancel = true;
 	return 0;
 }
-
+

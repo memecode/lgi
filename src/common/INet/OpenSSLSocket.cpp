@@ -16,15 +16,15 @@
 #include <unistd.h>
 #endif
 
-#include "Lgi.h"
-#include "OpenSSLSocket.h"
+#include "lgi\common\Lgi.h"
+#include "lgi\common\OpenSSLSocket.h"
 #include <openssl/rand.h>
 #ifdef WIN32
 #include <mmsystem.h>
 #endif
-#include "GToken.h"
-#include "GVariant.h"
-#include "INet.h"
+#include "lgi\common\Token.h"
+#include "lgi\common\Variant.h"
+#include "lgi\common\Net.h"
 
 #define PATH_OFFSET					"../"
 #ifdef WIN32
@@ -1476,4 +1476,4 @@ GString SslSocket::Random(int Len)
 	s.Length(Len);
 	auto r = Library ? Library->RAND_bytes((uint8_t*) s.Get(), Len) : 0;
 	return r ? s : NULL;
-}
+}

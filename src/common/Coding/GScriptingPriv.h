@@ -2,8 +2,8 @@
 #define _GSCRIPTING_PRIV_H_
 
 #include <stdio.h>
-#include "GScripting.h"
-#include "GRefCount.h"
+#include "lgi\common\Scripting.h"
+#include "lgi\common\RefCount.h"
 
 // Instructions
 #define _i(name, opcode, desc) \
@@ -555,4 +555,4 @@ public:
 		bool OsVersion(LScriptArguments &Args);
 };
 
-#endif
+#endif

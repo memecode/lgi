@@ -1,17 +1,13 @@
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "LgiIde.h"
-#include "LgiRes.h"
+#include "lgi\common\LgiRes.h"
 #include "DocEdit.h"
 #include "IdeDocPrivate.h"
-#include "GScrollBar.h"
-
+#include "lgi\common\ScrollBar.h"
 #define EDIT_TRAY_HEIGHT	(SysFont->GetHeight() + 10)
 #define EDIT_LEFT_MARGIN	16 // gutter for debug break points
-
 int DocEdit::LeftMarginPx = EDIT_LEFT_MARGIN;
-
 GAutoPtr<GDocFindReplaceParams> GlobalFindReplace;
-
 DocEdit::DocEdit(IdeDoc *d, GFontType *f) :
 	GTextView3(IDC_EDIT, 0, 0, 100, 100, f),
 	DocEditStyling(this)
@@ -60,13 +56,11 @@ DocEdit::~DocEdit()
 		LgiSleep(1);
 	SetEnv(0);
 }
-
 void DocEdit::OnCreate()
 {
 	GTextView3::OnCreate();
 	Run();
 }
-
 bool DocEdit::AppendItems(LSubMenu *Menu, const char *Param, int Base)
 {
 	LSubMenu *Insert = Menu->AppendSub("Insert...");
@@ -75,7 +69,6 @@ bool DocEdit::AppendItems(LSubMenu *Menu, const char *Param, int Base)
 		Insert->AppendItem("File Comment", IDM_FILE_COMMENT, Doc->GetProject() != 0);
 		Insert->AppendItem("Function Comment", IDM_FUNC_COMMENT, Doc->GetProject() != 0);
 	}
-
 	return true;
 }
 	
@@ -84,7 +77,6 @@ bool DocEdit::DoGoto()
 	GInput Dlg(this, "", LgiLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
 	if (Dlg.DoModal() != IDOK || !ValidStr(Dlg.GetStr()))
 		return false;
-
 	GString s = Dlg.GetStr();
 	GString::Array p = s.SplitDelimit(":,");
 	if (p.Length() == 2)
@@ -105,7 +97,6 @@ bool DocEdit::DoGoto()
 		
 	return true;
 }
-
 bool DocEdit::SetPourEnabled(bool b)
 {
 	bool e = PourEnabled;
@@ -115,15 +106,12 @@ bool DocEdit::SetPourEnabled(bool b)
 		PourText(0, Size);
 		PourStyle(0, Size);
 	}
-
 	return e;
 }
-
 int DocEdit::GetTopPaddingPx()
 {
 	return GetCss(true)->PaddingTop().ToPx(GetClient().Y(), GetFont());
 }
-
 void DocEdit::InvalidateLine(int Idx)
 {
 	GTextLine *Ln = GTextView3::Line[Idx];
@@ -144,7 +132,6 @@ void DocEdit::OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour)
 	int Y = ScrollYLine();
 		
 	int TopPaddingPx = GetTopPaddingPx();
-
 	pDC->Colour(GColour(200, 0, 0));
 	List<GTextLine>::I it = GTextView3::Line.begin(Y);
 	int DocOffset = (*it)->r.y1;
@@ -156,7 +143,6 @@ void DocEdit::OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour)
 			pDC->FilledCircle(8, l->r.y1 + r + TopPaddingPx - DocOffset, r - 1);
 		}
 	}
-
 	bool DocMatch = Doc->IsCurrentIp();
 	{
 		// We have the current IP location
@@ -175,7 +161,6 @@ void DocEdit::OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour)
 		}
 	}
 }
-
 void DocEdit::OnMouseClick(GMouse &m)
 {
 	if (m.Down())
@@ -210,10 +195,8 @@ void DocEdit::OnMouseClick(GMouse &m)
 			Doc->OnMarginClick(Idx);
 		}
 	}
-
 	GTextView3::OnMouseClick(m);
 }
-
 void DocEdit::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 {
 	GTextView3::SetCaret(i, Select, ForceFullUpdate);
@@ -288,7 +271,6 @@ char *DocEdit::TemplateMerge(const char *Template, const char *Name, List<char> 
 	T.Push("\n");
 	return T.NewStr();
 }
-
 bool DocEdit::GetVisible(GStyle &s)
 {
 	GRect c = GetClient();
@@ -298,17 +280,14 @@ bool DocEdit::GetVisible(GStyle &s)
 	s.Len = b - a + 1;
 	return true;
 }
-
 bool DocEdit::Pour(GRegion &r)
 {
 	GRect c = r.Bound();
-
 	c.y2 -= EDIT_TRAY_HEIGHT;
 	SetPos(c);
 		
 	return true;
 }
-
 bool DocEdit::Insert(size_t At, const char16 *Data, ssize_t Len)
 {
 	int Old = PourEnabled ? CountRefreshEdges(At, 0) : 0;
@@ -316,10 +295,8 @@ bool DocEdit::Insert(size_t At, const char16 *Data, ssize_t Len)
 	int New = PourEnabled ? CountRefreshEdges(At, Len) : 0;
 	if (Old != New)
 		Invalidate();
-
 	return Status;
 }
-
 bool DocEdit::Delete(size_t At, ssize_t Len)
 {
 	int Old = CountRefreshEdges(At, Len);
@@ -327,10 +304,8 @@ bool DocEdit::Delete(size_t At, ssize_t Len)
 	int New = CountRefreshEdges(At, 0);
 	if (Old != New)
 		Invalidate();
-
 	return Status;
 }
-
 bool DocEdit::OnKey(GKey &k)
 {
 	#ifdef MAC
@@ -346,7 +321,6 @@ bool DocEdit::OnKey(GKey &k)
 			return false;
 		}
 	}
-
 	if (k.AltCmd())
 	{
 		if (ToLower(k.c16) == 'm')
@@ -363,10 +337,8 @@ bool DocEdit::OnKey(GKey &k)
 			return true;
 		}
 	}
-
 	return GTextView3::OnKey(k); 
 }
-
 GMessage::Result DocEdit::OnEvent(GMessage *m)
 {
 	switch (m->Msg())
@@ -375,10 +347,8 @@ GMessage::Result DocEdit::OnEvent(GMessage *m)
 			OnApplyStyles();
 			break;
 	}
-
 	return GTextView3::OnEvent(m);
 }
-
 bool DocEdit::OnMenu(GDocView *View, int Id, void *Context)
 {
 	if (View)
@@ -431,9 +401,7 @@ bool DocEdit::OnMenu(GDocView *View, int Id, void *Context)
 							{
 								OpenBracketIndex = Tokens.Length();
 							}
-
 							Tokens.Insert(s);
-
 							if (StricmpW(s, CloseBrac) == 0)
 							{
 								break;

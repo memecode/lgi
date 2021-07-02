@@ -1,17 +1,17 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "LgiIde.h"
 #include "FindSymbol.h"
-#include "LList.h"
-#include "GToken.h"
-#include "GEventTargetThread.h"
-#include "GTextFile.h"
+#include "lgi\common\List.h"
+#include "lgi\common\Token.h"
+#include "lgi\common\EventTargetThread.h"
+#include "lgi\common\TextFile.h"
 #include "ParserCommon.h"
 
 #if 1
-#include "GParseCpp.h"
+#include "lgi\common\ParseCpp.h"
 #endif
 
 #include "resdefs.h"
@@ -681,4 +681,4 @@ void FindSymbolSystem::Search(int ResultsSinkHnd, const char *SearchStr, bool Al
 		Req->Str = SearchStr;
 		d->PostEvent(M_FIND_SYM_REQUEST, (GMessage::Param)Req, (GMessage::Param)AllPlat);
 	}
-}
+}

@@ -1,13 +1,13 @@
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "LgiIde.h"
 #include "IdeProject.h"
 #include "ProjectNode.h"
 #include "AddFtpFile.h"
-#include "GToken.h"
-#include "GCombo.h"
+#include "lgi\common\Token.h"
+#include "lgi\common\Combo.h"
 #include "WebFldDlg.h"
-#include "GClipBoard.h"
-#include "GTableLayout.h"
+#include "lgi\common\ClipBoard.h"
+#include "lgi\common\TableLayout.h"
 
 #define DEBUG_SHOW_NODE_COUNTS		0
 
@@ -1432,4 +1432,4 @@ void ProjectNode::OnProperties()
 			}
 		}
 	}
-}
+}

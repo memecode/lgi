@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "FtpThread.h"
 
 static FtpThread *Ftp = 0;
@@ -420,4 +420,4 @@ void ShutdownFtpThread()
 {
 	DeleteObj(Ftp);
 }
-
+

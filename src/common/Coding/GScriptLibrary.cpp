@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Lgi.h"
-#include "GScripting.h"
+#include "lgi\common\Lgi.h"
+#include "lgi\common\Scripting.h"
 #include "GScriptingPriv.h"
-#include "GToken.h"
-#include "GSubProcess.h"
-#include "LgiRes.h"
+#include "lgi\common\Token.h"
+#include "lgi\common\SubProcess.h"
+#include "lgi\common\LgiRes.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 char16 sChar[]		= L"char";
@@ -1049,4 +1049,4 @@ GHostFunc *SystemFunctions::GetCommands()
 {
 	return SystemLibrary;
 }
-
+

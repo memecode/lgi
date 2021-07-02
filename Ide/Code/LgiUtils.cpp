@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "LgiIde.h"
 
 char *FindHeader(char *Short, GArray<GString> &Paths)
@@ -107,4 +107,4 @@ bool BuildHeaderList(char *Cpp, GArray<char*> &Headers, GArray<GString> &IncPath
 	
 	return true;
 }
-
+

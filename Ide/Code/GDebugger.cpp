@@ -1,10 +1,10 @@
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "GDebugger.h"
-#include "GSubProcess.h"
-#include "GToken.h"
-#include "GDocView.h"
-#include "GStringClass.h"
-#include "GString.h"
+#include "lgi\common\SubProcess.h"
+#include "lgi\common\Token.h"
+#include "lgi\common\DocView.h"
+#include "lgi\common\StringClass.h"
+#include "lgi\common\String.h"
 #ifdef POSIX
 #include <sys/types.h>
 #include <signal.h>
@@ -1572,4 +1572,4 @@ public:
 GDebugger *CreateGdbDebugger(GStream *Log)
 {
 	return new Gdb(Log);
-}
+}

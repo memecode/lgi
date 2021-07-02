@@ -1,9 +1,9 @@
 #ifndef _POPUP_LIST_H_
 #define _POPUP_LIST_H_
 
-#include "LList.h"
-#include "GCss.h"
-#include "GCssTools.h"
+#include "lgi\common\List.h"
+#include "lgi\common\Css.h"
+#include "lgi\common\CssTools.h"
 
 /// This class displays a list of search results in a 
 /// popup connected to an editbox. To use override:

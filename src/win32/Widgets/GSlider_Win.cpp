@@ -1,6 +1,6 @@
-#include "Lgi.h"
-#include "GSlider.h"
-#include "GCss.h"
+#include "lgi\common\Lgi.h"
+#include "lgi\common\Slider.h"
+#include "lgi\common\Css.h"
 #include <COMMCTRL.H>
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -188,4 +188,4 @@ class GSlider_Factory : public GViewFactory
 		return 0;
 	}
 
-} GSliderFactory;
+} GSliderFactory;

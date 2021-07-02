@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-#include "Lgi.h"
+#include "lgi\common\Lgi.h"
 #include "LgiIde.h"
-#include "LList.h"
-#include "GDisplayString.h"
+#include "lgi\common\List.h"
+#include "lgi\common\DisplayString.h"
 
 class CharItem : public LListItem
 {
@@ -159,4 +159,4 @@ int SysCharSupport::OnNotify(GViewI *v, int f)
 
 	return 0;
 }
-
+
