@@ -13,13 +13,13 @@
 #include "resource.h"
 #endif
 #include "resdefs.h"
-#include "GDocView.h"
-#include "GOptionsFile.h"
+#include "lgi/common/DocView.h"
+#include "lgi/common/OptionsFile.h"
 #include "FindSymbol.h"
-#include "GStringClass.h"
+#include "lgi/common/StringClass.h"
 #include "GDebugger.h"
-#include "GTextView3.h"
-#include "LList.h"
+#include "lgi/common/TextView3.h"
+#include "lgi/common/List.h"
 
 #define APP_VER					"1.0"
 #define APP_URL					"http://www.memecode.com/lgi/ide"

@@ -11,9 +11,9 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GdiLeak.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/GdiLeak.h"
+#include "lgi/common/Palette.h"
 
 class GScreenPrivate
 {

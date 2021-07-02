@@ -1,6 +1,6 @@
-#include "Lgi.h"
-#include "GGrowl.h"
-#include "INet.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Growl.h"
+#include "lgi/common/Net.h"
 
 class GGrowlPriv : public LThread, public LMutex
 {

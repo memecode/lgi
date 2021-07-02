@@ -9,9 +9,9 @@
 */
 
 #include <stdio.h>
-#include "Lgi.h"
-#include "GScrollBar.h"
-#include "GCss.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/Css.h"
 
 //////////////////////////////////////////////////////////////////////////////
 GLayout::GLayout() : GView(0)

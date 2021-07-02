@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "GPalette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Palette.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // Mem ops
@@ -1037,7 +1037,7 @@ GSurface *GInlineBmp::Create(uint32_t TransparentPx)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-#include "GRops.h"
+#include "lgi/common/Rops.h"
 
 bool LgiRopRgb(uint8_t *d, GColourSpace DstCs, uint8_t *s, GColourSpace SrcCs, int x, bool Composite)
 {

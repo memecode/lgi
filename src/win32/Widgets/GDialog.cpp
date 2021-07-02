@@ -10,12 +10,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include <commctrl.h>
-#include "GTableLayout.h"
-#include "GDisplayString.h"
-#include "GButton.h"
-#include "LgiRes.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/LgiRes.h"
 
 #define USE_DIALOGBOXINDIRECTPARAM         0
 

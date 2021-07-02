@@ -8,10 +8,10 @@
 **              fret@memecode.com
 */
 
-#include "GMem.h"
-#include "LgiInc.h"
-#include "Base64.h"
-#include "GRange.h"
+#include "lgi/common/Mem.h"
+#include "lgi/common/LgiInc.h"
+#include "lgi/common/Base64.h"
+#include "lgi/common/Range.h"
 
 static bool HasBase64ToBinLut = false;
 static uchar Base64ToBinLut[128];

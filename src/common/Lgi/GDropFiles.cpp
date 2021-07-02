@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "GDropFiles.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DropFiles.h"
 
 #ifdef MAC
 LgiFunc bool LMacFileToPath(GString &a)

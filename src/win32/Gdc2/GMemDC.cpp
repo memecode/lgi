@@ -11,9 +11,9 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Lgi.h"
-#include "GdiLeak.h"
-#include "GPalette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/GdiLeak.h"
+#include "lgi/common/Palette.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 class GMemDCPrivate

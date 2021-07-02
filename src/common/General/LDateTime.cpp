@@ -22,10 +22,10 @@
 #include <tchar.h>
 #endif
 
-#include "Lgi.h"
-#include "LDateTime.h"
-#include "GToken.h"
-#include "GDocView.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DateTime.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/DocView.h"
 
 //////////////////////////////////////////////////////////////////////////////
 uint16 LDateTime::DefaultFormat = GDTF_DEFAULT;

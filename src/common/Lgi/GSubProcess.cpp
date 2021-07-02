@@ -28,9 +28,9 @@
 	#include <sys/types.h>
 #endif
 
-#include "Lgi.h"
-#include "GSubProcess.h"
-#include "GToken.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/SubProcess.h"
+#include "lgi/common/Token.h"
 
 #define DEBUG_SUBPROCESS		0
 #define DEBUG_ARGS				0

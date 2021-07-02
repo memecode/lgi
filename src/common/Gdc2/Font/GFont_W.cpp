@@ -15,11 +15,11 @@
 #include <string.h>
 #include <math.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 
 #if WINNATIVE
-#include "GFontSelect.h"
-#include "GdiLeak.h"
+#include "lgi/common/FontSelect.h"
+#include "lgi/common/GdiLeak.h"
 
 /////////////////////////////////////////////////////////////////////////////
 void GFont::_Measure(int &x, int &y, OsChar *Str, int Len)

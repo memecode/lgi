@@ -1,13 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GTextLabel.h"
-#include "LStringLayout.h"
-#include "GVariant.h"
-#include "GNotifications.h"
-#include "LgiRes.h"
-#include "GCssTools.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/StringLayout.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Notifications.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/CssTools.h"
 
 class GTextPrivate : public LStringLayout, public LMutex
 {

@@ -10,8 +10,8 @@
 #include <string.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/Palette.h"
 
 /// 16 bit rgb applicators
 template<typename Pixel, GColourSpace Cs>

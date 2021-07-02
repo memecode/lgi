@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include "Lgi.h"
-#include "GTextLog.h"
-#include "GTableLayout.h"
-#include "GButton.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/TextLog.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/Button.h"
 
 #if defined(__GTK_H__)
 #include "gtk/gtkdialog.h"

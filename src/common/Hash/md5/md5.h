@@ -61,8 +61,8 @@
 #else
 #include <stdbool.h>
 #endif
-#include "LgiInc.h"
-#include "LgiDefs.h"
+#include "lgi/common/LgiInc.h"
+#include "lgi/common/LgiDefs.h"
 
 #ifdef LINUX
 #include <unistd.h>

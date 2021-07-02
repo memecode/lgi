@@ -1,8 +1,8 @@
 #pragma once
 
-#include "LJson.h"
+#include "lgi/common/Json.h"
 #include "GSymLookup.h"
-#include "GFontCache.h"
+#include "lgi/common/FontCache.h"
 
 class GAppPrivate
 {

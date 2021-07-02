@@ -12,13 +12,13 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "Lgi.h"
-#include "GSkinEngine.h"
-#include "LList.h"
-#include "GScrollBar.h"
-#include "GDisplayString.h"
-#include "LgiRes.h"
-#include "GCssTools.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/List.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/CssTools.h"
 
 // Debug defines
 #define DEBUG_EDIT_LABEL				1

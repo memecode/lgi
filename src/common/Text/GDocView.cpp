@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GDocView.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DocView.h"
 
 #define SubtractPtr(a, b)		((a)-(b))
 
@@ -112,7 +112,7 @@ char16 *ConvertToCrLf(char16 *Text)
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-#include "INet.h"
+#include "lgi/common/Net.h"
 GDocumentEnv::LoadType GDefaultDocumentEnv::GetContent(LoadJob *&j)
 {
 	if (!j || !ValidStr(j->Uri))

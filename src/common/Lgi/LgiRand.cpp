@@ -1,7 +1,7 @@
-#include "GMem.h"
-#include "GFile.h"
-#include "GContainers.h"
-#include "LgiCommon.h"
+#include "lgi/common/Mem.h"
+#include "lgi/common/File.h"
+#include "lgi/common/Containers.h"
+#include "lgi/common/LgiCommon.h"
 
 /* 
    A C-program for MT19937, with initialization improved 2002/1/26.

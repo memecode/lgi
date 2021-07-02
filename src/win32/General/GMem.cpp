@@ -13,12 +13,12 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "GMem.h"
+#include "lgi/common/Mem.h"
 #include <malloc.h>
 
 #ifdef LGI_MEM_DEBUG
 
-#include "LgiDefs.h"
+#include "lgi/common/LgiDefs.h"
 #include "ImageHlp.h"
 #include <direct.h>
 #include "GSymLookup.h"

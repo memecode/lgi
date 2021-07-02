@@ -2,19 +2,19 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "Lgi.h"
-#include "GTextView3.h"
-#include "GInput.h"
-#include "GScrollBar.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/TextView3.h"
+#include "lgi/common/Input.h"
+#include "lgi/common/ScrollBar.h"
 #ifdef WIN32
 #include <imm.h>
 #endif
-#include "GClipBoard.h"
-#include "GDisplayString.h"
-#include "GViewPriv.h"
-#include "GCssTools.h"
-#include "LgiRes.h"
-#include "Mail.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/ViewPriv.h"
+#include "lgi/common/CssTools.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/Mail.h"
 
 #ifdef _DEBUG
 #define FEATURE_HILIGHT_ALL_MATCHES	1

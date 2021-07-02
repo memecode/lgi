@@ -1,6 +1,6 @@
-#include "Lgi.h"
-#include "GPalette.h"
-#include "GSkinEngine.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Palette.h"
+#include "lgi/common/SkinEngine.h"
 
 const GColour GColour::Black(0, 0, 0);
 const GColour GColour::White(255, 255, 255);
@@ -890,7 +890,7 @@ GColour LColour(LSystemColour Colour)
 	return Colour < L_MAXIMUM ? _LgiColours[Colour] : GColour();
 }
 
-#include "LJson.h"
+#include "lgi/common/Json.h"
 bool LColourLoad(const char *Json)
 {
 	#ifdef LGI_STATIC

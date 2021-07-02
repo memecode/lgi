@@ -1,12 +1,12 @@
 #include <math.h>
 
-#include "Lgi.h"
-#include "GTree.h"
-#include "GScrollBar.h"
-#include "GDisplayString.h"
-#include "GPalette.h"
-#include "LgiRes.h"
-#include "GCssTools.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Tree.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/Palette.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/CssTools.h"
 
 #define TREE_BLOCK          16
 #define DRAG_THRESHOLD		4

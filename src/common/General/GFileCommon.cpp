@@ -5,8 +5,8 @@
 //  Copyright (c) 2014 Memecode. All rights reserved.
 //
 
-#include "Lgi.h"
-#include "GVariant.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Variant.h"
 
 /////////////////////////////////////////////////////////////////////////////////
 bool GFileSystem::SetCurrentFolder(const char *PathName)

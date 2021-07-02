@@ -1,13 +1,13 @@
 #ifndef _IDE_PROJECT_H_
 #define _IDE_PROJECT_H_
 
-#include "GXmlTree.h"
-#include "GDragAndDrop.h"
-#include "GTree.h"
-#include "GOptionsFile.h"
+#include "lgi/common/XmlTree.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/Tree.h"
+#include "lgi/common/OptionsFile.h"
 #include "GDebugger.h"
-#include "GProgressDlg.h"
-#include "LList.h"
+#include "lgi/common/ProgressDlg.h"
+#include "lgi/common/List.h"
 
 #define NODE_DROP_FORMAT			"com.memecode.ProjectNode"
 

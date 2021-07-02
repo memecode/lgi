@@ -9,14 +9,14 @@
 */
 
 #include <stdio.h>
-#include "Lgi.h"
-#include "GTabView.h"
-#include "GSkinEngine.h"
-#include "GDisplayString.h"
-#include "GTableLayout.h"
-#include "LgiRes.h"
-#include "GCssTools.h"
-#include "GPath.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/TabView.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/CssTools.h"
+#include "lgi/common/Path.h"
 
 enum TabViewStyle
 {

@@ -1,6 +1,6 @@
 
 #define _WIN32_WINNT 0x500
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 
 #if defined(WIN32) && !defined(__GTK_H__)
 	#include <commctrl.h>
@@ -20,8 +20,8 @@
 #endif
 
 #if LGI_NATIVE_TIPS
-#include "GDisplayString.h"
-#include "GPopup.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/Popup.h"
 
 class NativeTip : public GPopup
 {

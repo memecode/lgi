@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "GDragAndDrop.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DragAndDrop.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 GDragFormats::GDragFormats(bool source)

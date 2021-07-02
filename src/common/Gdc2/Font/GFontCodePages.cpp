@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GToken.h"
-#include "GFont.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Font.h"
 
 struct UnicodeMappings
 {

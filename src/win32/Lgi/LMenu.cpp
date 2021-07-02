@@ -12,9 +12,9 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "Lgi.h"
-#include "GToken.h"
-#include "GDisplayString.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/DisplayString.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 #define LGI_OWNER_DRAW_MENUS

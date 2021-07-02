@@ -14,7 +14,7 @@
 
 #ifdef WINDOWS
 	#include <winsock2.h>
-	#include "GRegKey.h"
+	#include "lgi/common/RegKey.h"
 	#include <sys/types.h>
 	#include <sys/stat.h>
 #else
@@ -22,14 +22,14 @@
 	#define _getcwd getcwd
 #endif
 
-#include "Lgi.h"
-#include "GToken.h"
-#include "GCapabilities.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Capabilities.h"
 
 #if defined(LINUX) && !defined(LGI_SDL)
 	#include "LgiWinManGlue.h"
 #elif defined(WINDOWS)
-	#include "GRegKey.h"
+	#include "lgi/common/RegKey.h"
 #endif
 
 #if defined POSIX
@@ -41,13 +41,13 @@
 #endif
 
 #if defined(WIN32)
-	#include "../win32/GSymLookup.h"
+	#include "lgi/win/GSymLookup.h"
 #elif defined(LINUX)
-	#include "../linux/GSymLookup.h"
+	#include "lgi/linux/GSymLookup.h"
 #else
 	#include "GSymLookup.h"
 #endif
-#include "GLibrary.h"
+#include "lgi/common/Library.h"
 
 #if defined(__GTK_H__)
 namespace Gtk {

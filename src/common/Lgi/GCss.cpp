@@ -1,6 +1,6 @@
 #include <ctype.h>
-#include "Lgi.h"
-#include "LgiCommon.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/LgiCommon.h"
 
 #define DEBUG_CSS_LOGGING		0
 

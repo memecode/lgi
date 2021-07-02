@@ -8,11 +8,11 @@
 **		fret@memecode.com
 */
 #include <stdio.h>
-#include "Lgi.h"
-#include "GPanel.h"
-#include "GDisplayString.h"
-#include "LgiRes.h"
-#include "GCssTools.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Panel.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/CssTools.h"
 
 //////////////////////////////////////////////////////////////////////////////
 GPanel::GPanel(const char *name, int size, bool open)

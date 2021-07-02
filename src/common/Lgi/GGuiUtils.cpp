@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include "Lgi.h"
-#include "GSkinEngine.h"
-#include "GToken.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/Token.h"
 #if defined(LINUX) && !defined(LGI_SDL)
 #include "LgiWinManGlue.h"
 #endif

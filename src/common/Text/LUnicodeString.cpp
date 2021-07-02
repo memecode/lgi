@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "LUnicodeString.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/UnicodeString.h"
 
 static uint8_t u8[] = {
 	'T','h','i','s',' ','i','s',' ','s','o','m','e',' ','a','s','c','i','i',' ',

@@ -5,9 +5,9 @@
 //  Created by Matthew Allen on 11/09/14.
 //
 //
-#include "Lgi.h"
-#include "INet.h"
-#include "GDropFiles.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Net.h"
+#include "lgi/common/DropFiles.h"
 
 void GWindow::BuildShortcuts(ShortcutMap &Map, GViewI *v)
 {

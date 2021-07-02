@@ -2,17 +2,17 @@
 #ifndef _MSC_VER
 #include <basetyps.h>
 #endif
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include <ole2.h>
 #include <commctrl.h>
 #include <time.h>
-#include "GSkinEngine.h"
-#include "GDocView.h"
-#include "GToken.h"
-#include "GCss.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/DocView.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Css.h"
 #include <stdio.h>
-#include "LgiSpellCheck.h"
-#include "LJson.h"
+#include "lgi/common/SpellCheck.h"
+#include "lgi/common/Json.h"
 
 // Don't have a better place to put this...
 const char GSpellCheck::Delimiters[] =

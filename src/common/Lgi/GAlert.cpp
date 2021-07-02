@@ -1,9 +1,9 @@
 // Lgi.cpp
-#include "Lgi.h"
-#include "GTextLabel.h"
-#include "GButton.h"
-#include "GDisplayString.h"
-#include "GTableLayout.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/TableLayout.h"
 
 //////////////////////////////////////////////////////////////////////////////
 #define CMD_BASE		10000

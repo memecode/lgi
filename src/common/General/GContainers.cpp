@@ -16,10 +16,10 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-#include "GMem.h"
-#include "GContainers.h"
-#include "GString.h"
-#include "LgiCommon.h"
+#include "lgi/common/Mem.h"
+#include "lgi/common/Containers.h"
+#include "lgi/common/String.h"
+#include "lgi/common/LgiCommon.h"
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

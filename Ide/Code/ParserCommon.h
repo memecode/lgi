@@ -1,7 +1,7 @@
 #ifndef _PARSER_COMMON_H_
 #define _PARSER_COMMON_H_
 
-#include "GLexCpp.h"
+#include "lgi/common/LexCpp.h"
 
 #define isword(s)				(s && (isdigit(s) || isalpha(s) || (s) == '_') )
 #define iswhite(s)				(s && strchr(WhiteSpace, s) != 0)

@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "INet.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Net.h"
 #include "../Hash/md5/md5.h"
 
 /////////////////////////////////

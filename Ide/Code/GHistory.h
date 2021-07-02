@@ -4,7 +4,7 @@
 #ifndef __GHISTORY__
 #define __GHISTORY__
 
-#include "GPopup.h"
+#include "lgi/common/Popup.h"
 
 /// A history drop down for an edit box
 class GHistory : public GDropDown, public List<char>, public ResObject

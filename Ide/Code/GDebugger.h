@@ -1,8 +1,8 @@
 #ifndef _GDEBUGGER_H_
 #define _GDEBUGGER_H_
 
-#include "GVariant.h"
-#include "GStringClass.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/StringClass.h"
 
 #define DEBUG_SESSION_LOGGING		0
 

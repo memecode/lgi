@@ -1,16 +1,16 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Lgi.h"
-#include "GEdit.h"
-#include "GPopup.h"
-#include "GToolBar.h"
-#include "GPanel.h"
-#include "GVariant.h"
-#include "GToken.h"
-#include "GButton.h"
-#include "GNotifications.h"
-#include "GCssTools.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/Popup.h"
+#include "lgi/common/ToolBar.h"
+#include "lgi/common/Panel.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Notifications.h"
+#include "lgi/common/CssTools.h"
 
 #define DEBUG_WINDOW_PLACEMENT				0
 #define DEBUG_HANDLE_VIEW_KEY				0

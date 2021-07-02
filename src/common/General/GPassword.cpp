@@ -1,6 +1,6 @@
-#include "Lgi.h"
-#include "GPassword.h"
-#include "GVariant.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Password.h"
+#include "lgi/common/Variant.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // Password encryption for storing the passwords for accounts on the HD

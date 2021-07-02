@@ -12,16 +12,16 @@
 #include <time.h>
 
 
-#include "Lgi.h"
-#include "Base64.h"
-#include "GCom.h"
-#include "GDragAndDrop.h"
-#include "GDropFiles.h"
-#include "GdiLeak.h"
-#include "GViewPriv.h"
-#include "GCss.h"
-#include "GEdit.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Base64.h"
+#include "lgi/common/Com.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/DropFiles.h"
+#include "lgi/common/GdiLeak.h"
+#include "lgi/common/ViewPriv.h"
+#include "lgi/common/Css.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/LgiRes.h"
 
 #define DEBUG_MOUSE_CLICKS		0
 #define DEBUG_OVER				0

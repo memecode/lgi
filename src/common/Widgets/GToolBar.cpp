@@ -10,14 +10,14 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "Lgi.h"
-#include "GToken.h"
-#include "GVariant.h"
-#include "GDisplayString.h"
-#include "GPalette.h"
-#include "GNotifications.h"
-#include "LgiRes.h"
-#include "GCssTools.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/Palette.h"
+#include "lgi/common/Notifications.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/CssTools.h"
 
 #define ToolBarHilightColour LC_HIGH
 

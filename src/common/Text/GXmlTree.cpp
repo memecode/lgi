@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "Lgi.h"
-#include "GXmlTree.h"
-#include "GVariant.h"
-#include "GToken.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/XmlTree.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Token.h"
 
 static char GXmlHeader[] = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
 

@@ -2,12 +2,12 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "GMem.h"
+#include "lgi/common/Mem.h"
 #include "LgiOsDefs.h"
-#include "LgiClass.h"
-#include "GString.h"
-#include "GContainers.h"
-#include "LgiCommon.h"
+#include "lgi/common/LgiClass.h"
+#include "lgi/common/String.h"
+#include "lgi/common/Containers.h"
+#include "lgi/common/LgiCommon.h"
 
 char WhiteSpace[] = " \t\r\n";
 

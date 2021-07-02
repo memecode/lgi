@@ -1,10 +1,10 @@
-#include "Lgi.h"
-#include "GItemContainer.h"
-#include "GDisplayString.h"
-#include "GSkinEngine.h"
-#include "GScrollBar.h"
-#include "GEdit.h"
-#include "GCssTools.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ItemContainer.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/CssTools.h"
 
 // Colours
 #if defined(__GTK_H__)

@@ -1,12 +1,12 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include "LgiInc.h"
-#include "GdiLeak.h"
+#include "lgi/common/LgiInc.h"
+#include "lgi/common/GdiLeak.h"
 
 #if GDI_LEAK_DETECT
 
-#include "GMem.h"
-#include "GArray.h"
+#include "lgi/common/Mem.h"
+#include "lgi/common/Array.h"
 
 enum HndType
 {

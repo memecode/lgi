@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GPath.h"
-#include "GdiLeak.h"
-#include "GDisplayString.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Path.h"
+#include "lgi/common/GdiLeak.h"
+#include "lgi/common/DisplayString.h"
 
 #define CIRCLE_STEPS			24
 #define BEZIER_STEPS			24

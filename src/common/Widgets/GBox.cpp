@@ -1,9 +1,9 @@
-#include "Lgi.h"
-#include "GBox.h"
-#include "GCssTools.h"
-#include "LgiRes.h"
-#include "GPopup.h"
-#include "GNotifications.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Box.h"
+#include "lgi/common/CssTools.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/Popup.h"
+#include "lgi/common/Notifications.h"
 
 #define DEFAULT_SPACER_PX			5
 // #define DEFAULT_SPACER_COLOUR24		LColour(L_MED)

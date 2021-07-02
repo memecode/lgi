@@ -13,16 +13,16 @@
 #include <time.h>
 #include <ctype.h>
 
-#include "Lgi.h"
-#include "GToken.h"
-#include "LList.h"
-#include "GTableLayout.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/List.h"
+#include "lgi/common/TableLayout.h"
 #if defined(LINUX) && !defined(LGI_SDL)
 #include "LgiWinManGlue.h"
 #endif
-#include "GVariant.h"
-#include "GDisplayString.h"
-#include "LgiRes.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/LgiRes.h"
 
 // If it is defined it will use the cross platform 
 // "res" library distributed with the LGI library.
@@ -671,17 +671,17 @@ char *LgiResources::StringFromRef(int Ref)
 	return s ? s->Str : 0;
 }
 
-#include "GTextLabel.h"
-#include "GEdit.h"
-#include "GCheckBox.h"
-#include "GButton.h"
-#include "GRadioGroup.h"
-#include "GTabView.h"
-#include "GCombo.h"
-#include "GBitmap.h"
-#include "GSlider.h"
-#include "GScrollBar.h"
-#include "GTree.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/RadioGroup.h"
+#include "lgi/common/TabView.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/Bitmap.h"
+#include "lgi/common/Slider.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/Tree.h"
 
 class GMissingCtrl : public GLayout, public ResObject
 {

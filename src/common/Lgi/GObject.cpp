@@ -1,6 +1,6 @@
-#include "Gdc2.h"
-#include "LgiCommon.h"
-#include "GString.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/LgiCommon.h"
+#include "lgi/common/String.h"
 
 //////////////////////////////////////////////////////////////////////////
 GBase::GBase()

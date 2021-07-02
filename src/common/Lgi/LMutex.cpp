@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 
 //////////////////////////////////////////////////////////////////////////////
 char *SemPrint(OsSemaphore *s)

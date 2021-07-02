@@ -10,9 +10,9 @@
 
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GDragAndDrop.h"
-#include "GCom.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/Com.h"
 
 // #define DND_DEBUG_TRACE
 

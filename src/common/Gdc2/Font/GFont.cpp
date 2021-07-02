@@ -19,14 +19,14 @@
 #include <string.h>
 #include <math.h>
 
-#include "Lgi.h"
-#include "GVariant.h"
-#include "GFontSelect.h"
-#include "GDisplayString.h"
-#include "GdiLeak.h"
-#include "GDisplayString.h"
-#include "GStringClass.h"
-#include "GCss.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/FontSelect.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/GdiLeak.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/StringClass.h"
+#include "lgi/common/Css.h"
 
 #ifdef FontChange
 #undef FontChange

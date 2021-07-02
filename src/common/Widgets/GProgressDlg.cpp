@@ -10,12 +10,12 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "Lgi.h"
-#include "GProgressDlg.h"
-#include "GTextLabel.h"
-#include "GButton.h"
-#include "GTableLayout.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ProgressDlg.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/LgiRes.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////
 Progress::Progress() : LMutex("ProgressObj")

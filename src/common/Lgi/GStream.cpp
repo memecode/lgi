@@ -2,8 +2,8 @@
 #include <ctype.h>
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GStream.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Stream.h"
 
 //////////////////////////////////////////////////////////////////////
 int LgiPrintf(GString &Str, const char *Format, va_list &Arg)

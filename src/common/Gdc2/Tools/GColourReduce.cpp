@@ -1,6 +1,6 @@
 #include <math.h>
-#include "Gdc2.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/Palette.h"
 
 #define TABLE_COMPSIZE	6
 #define TABLE_SIZE		(1 << (3 * TABLE_COMPSIZE))

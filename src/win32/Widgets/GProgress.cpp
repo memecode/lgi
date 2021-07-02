@@ -1,7 +1,7 @@
-#include "Lgi.h"
-#include "GProgress.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Progress.h"
 #include <COMMCTRL.H>
-#include "GCss.h"
+#include "lgi/common/Css.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 GProgress::GProgress(int id, int x, int y, int cx, int cy, const char *name) :

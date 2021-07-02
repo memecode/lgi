@@ -1,7 +1,7 @@
 #ifndef _FIND_SYMBOL_H_
 #define _FIND_SYMBOL_H_
 
-#include "GEventTargetThread.h"
+#include "lgi/common/EventTargetThread.h"
 
 struct FindSymResult
 {

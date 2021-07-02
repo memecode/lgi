@@ -10,9 +10,9 @@
 #include <string.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GPalette.h"
-#include "GPixelRops.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/Palette.h"
+#include "lgi/common/PixelRops.h"
 
 #undef NonPreMulOver32
 #undef NonPreMulAlpha

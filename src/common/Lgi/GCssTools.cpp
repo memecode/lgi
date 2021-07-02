@@ -1,7 +1,7 @@
-#include "Lgi.h"
-#include "GCssTools.h"
-#include "GDisplayString.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/CssTools.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/LgiRes.h"
 
 struct CssImageCache
 {

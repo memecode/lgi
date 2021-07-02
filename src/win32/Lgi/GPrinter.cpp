@@ -1,6 +1,6 @@
-#include "Lgi.h"
-#include "Base64.h"
-#include "GPrinter.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Base64.h"
+#include "lgi/common/Printer.h"
 
 ////////////////////////////////////////////////////////////////////
 class GPrinterPrivate

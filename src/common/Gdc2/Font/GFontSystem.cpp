@@ -1,10 +1,10 @@
 #include <stdlib.h>
 #include <locale.h>
 
-#include "Lgi.h"
-#include "GToken.h"
-#include "GLibrary.h"
-#include "GLibraryUtils.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Library.h"
+#include "lgi/common/LibraryUtils.h"
 
 #if defined(LGI_STATIC)
 #undef HAS_ICONV

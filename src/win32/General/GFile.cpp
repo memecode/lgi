@@ -15,7 +15,7 @@
 #include <fcntl.h>
 #include <Userenv.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 
 #include <stdlib.h>
 #include <string.h>

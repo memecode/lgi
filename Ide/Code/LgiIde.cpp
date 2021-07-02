@@ -2,30 +2,30 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiIde.h"
-#include "GMdi.h"
-#include "GToken.h"
-#include "GXmlTree.h"
-#include "GPanel.h"
-#include "GButton.h"
-#include "GTabView.h"
+#include "lgi/common/Mdi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/XmlTree.h"
+#include "lgi/common/Panel.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/TabView.h"
 #include "FtpThread.h"
-#include "GClipBoard.h"
+#include "lgi/common/ClipBoard.h"
 #include "FindSymbol.h"
-#include "GBox.h"
-#include "GTextLog.h"
-#include "GEdit.h"
-#include "GTableLayout.h"
-#include "GTextLabel.h"
-#include "GCombo.h"
-#include "GCheckBox.h"
+#include "lgi/common/Box.h"
+#include "lgi/common/TextLog.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/CheckBox.h"
 #include "GDebugger.h"
-#include "LgiRes.h"
+#include "lgi/common/LgiRes.h"
 #include "ProjectNode.h"
-#include "GBox.h"
-#include "GSubProcess.h"
-#include "GAbout.h"
+#include "lgi/common/Box.h"
+#include "lgi/common/SubProcess.h"
+#include "lgi/common/About.h"
 
 #define IDM_RECENT_FILE			1000
 #define IDM_RECENT_PROJECT		1100
@@ -4091,7 +4091,7 @@ void AppWnd::FindSymbol(int ResultsSinkHnd, const char *Sym, bool AllPlatforms)
 	d->FindSym->Search(ResultsSinkHnd, Sym, AllPlatforms);
 }
 
-#include "GSubProcess.h"
+#include "lgi/common/SubProcess.h"
 bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 {
 	if (d->SystemIncludePaths.Length() == 0)
@@ -4232,7 +4232,7 @@ public:
 };
 */
 
-#include "TextConvert.h"
+#include "lgi/common/TextConvert.h"
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);

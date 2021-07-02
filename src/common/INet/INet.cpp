@@ -16,13 +16,13 @@
 #endif
 #include <ctype.h>
 
-#include "GFile.h"
-#include "INet.h"
-#include "GToken.h"
-#include "GString.h"
-#include "LgiCommon.h"
+#include "lgi/common/File.h"
+#include "lgi/common/Net.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/String.h"
+#include "lgi/common/LgiCommon.h"
 #include "LgiOsClasses.h"
-#include "GRegKey.h"
+#include "lgi/common/RegKey.h"
 #ifdef MAC
 #include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
 #include <SystemConfiguration/SCSchemaDefinitions.h>
@@ -82,7 +82,7 @@
 	
 #endif
 
-#include "LgiNetInc.h"
+#include "lgi/common/LgiNetInc.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef WIN32

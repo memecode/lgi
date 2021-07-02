@@ -1,8 +1,8 @@
 #ifndef _IDE_DOC_H_
 #define _IDE_DOC_H_
 
-#include "GMdi.h"
-#include "GTextView3.h"
+#include "lgi/common/Mdi.h"
+#include "lgi/common/TextView3.h"
 #include "ParserCommon.h"
 
 extern void FilterFiles(GArray<ProjectNode*> &Perfect, GArray<ProjectNode*> &Nodes, GString InputStr);

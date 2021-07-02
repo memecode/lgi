@@ -1,10 +1,10 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "GMem.h"
+#include "lgi/common/Mem.h"
 #include "LgiOsDefs.h"
-#include "INetTools.h"
-#include "GString.h"
+#include "lgi/common/NetTools.h"
+#include "lgi/common/String.h"
 
 #define IsAlpha(c)					(((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z'))
 

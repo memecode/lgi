@@ -8,7 +8,7 @@
 #if WINDOWS
 	#include <winsock2.h>
 	#include <Windows.h>
-	#include "Lgi.h"
+	#include "lgi/common/Lgi.h"
 	#ifdef _MSC_VER
 		#include <IImgCtx.h>
 	#endif
@@ -24,12 +24,12 @@
 #include <string.h>
 #include <math.h>
 
-#include "Lgi.h"
-#include "GString.h"
-#include "GVariant.h"
-#include "GClipBoard.h"
-#include "GToken.h"
-#include "GPalette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/String.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Palette.h"
 
 int FindHeader(int Offset, const char *Str, GStream *f)
 {

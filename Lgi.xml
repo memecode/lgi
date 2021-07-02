@@ -410,7 +410,7 @@
 				<All>0</All>
 			</DebugAdmin>
 			<Executable>
-				<Linux />
+				<Windows />
 			</Executable>
 			<CCrossCompiler />
 			<CppCrossCompiler />
@@ -418,8 +418,8 @@
 		<Build>
 			<IncludePaths>
 				<All>
-					<Debug>include/common</Debug>
-					<Release>include/common</Release>
+					<Debug>include</Debug>
+					<Release>include</Release>
 				</All>
 				<Linux>
 					<Debug>include/linux
@@ -429,6 +429,10 @@ private/linux</Debug>
 include/linux/Gtk
 private/linux</Release>
 				</Linux>
+				<Windows>
+					<Debug>include/lgi/win</Debug>
+					<Release>include/lgi/win</Release>
+				</Windows>
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
@@ -439,6 +443,7 @@ private/linux</Release>
 /usr/include/libappindicator3-0.1
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -452,29 +457,31 @@ appindicator3
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
 				<All />
+				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
+				<Windows />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
 			<Defines>
 				<All />
-				<Linux />
+				<Windows />
 			</Defines>
 			<LibraryPaths>
 				<All />
-				<Linux />
+				<Windows />
 			</LibraryPaths>
 			<ApplicationIcon />
 		</Build>
 		<Advanced>
 			<PostBuildCommands>
-				<Linux />
+				<Windows />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>

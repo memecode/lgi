@@ -5,10 +5,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "Lgi.h"
-#include "GSkinEngine.h"
-#include "GButton.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/LgiRes.h"
 
 // Size of extra pixels, beyond the size of the text itself.
 LPoint GButton::Overhead =

@@ -4,16 +4,16 @@
 #include <unistd.h>
 #endif
 
-#include "Lgi.h"
-#include "GViewPriv.h"
-#include "GDragAndDrop.h"
-#include "GTableLayout.h"
-#include "GButton.h"
-#include "GCss.h"
-#include "LgiRes.h"
-#include "GEventTargetThread.h"
-#include "GPopup.h"
-#include "GCssTools.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ViewPriv.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Css.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/EventTargetThread.h"
+#include "lgi/common/Popup.h"
+#include "lgi/common/CssTools.h"
 
 #if 0
 #define DEBUG_CAPTURE(...) printf(__VA_ARGS__)

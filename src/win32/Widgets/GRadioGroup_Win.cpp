@@ -5,9 +5,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "Lgi.h"
-#include "GRadioGroup.h"
-#include "GDisplayString.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/RadioGroup.h"
+#include "lgi\common\DisplayString.h"
 #include "GNotifications.h"
 #include "GCss.h"
 #include "LgiRes.h"
@@ -201,7 +201,6 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
 {
     auto it = IterateViews();
     const int BORDER_PX = 2;
-
     GDisplayString Txt(GetFont(), Name());
     if (!Inf.Width.Max)
     {
@@ -251,14 +250,12 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
                 {
                     GRect r(Cx, Cy, Cx + c->Width.Max - 1, Cy + c->Height.Max - 1);
                     w->SetPos(r);
-
                     if (Horiz)
                         // Horizontal layout
                         Cx += r.X() + RADIO_GRID;
                     else
                         // Vertical layout
                         Cy += r.Y() + RADIO_GRID;
-
                     LastY = max(LastY, r.y2);
                 }
                 else LgiAssert(!"This shouldn't fail.");
@@ -269,14 +266,12 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
                 GRect r = w->GetPos();
                 r.Offset(Cx - r.x1, Cy - r.y1);
                 w->SetPos(r);
-
                 if (Horiz)
                     // Horizontal layout
                     Cx += r.X() + RADIO_GRID;
                 else
                     // Vertical layout
                     Cy += r.Y() + RADIO_GRID;
-
                 LastY = max(LastY, r.y2);
             }
 	    }
@@ -351,7 +346,6 @@ void GRadioButton::OnAttach()
 void GRadioButton::OnStyleChange()
 {
 }
-
 int GRadioButton::SysOnNotify(int Msg, int Code)
 {
 	if (Msg == WM_COMMAND &&
@@ -363,7 +357,6 @@ int GRadioButton::SysOnNotify(int Msg, int Code)
 	
 	return 0;
 }
-
 bool GRadioButton::Name(const char *n)
 {
 	return GView::Name(n);
@@ -440,22 +433,18 @@ bool GRadioButton::OnLayout(GViewLayoutInfo &Inf)
 	
     return true;    
 }
-
 int GRadioButton::OnNotify(GViewI *Ctrl, int Flags)
 {
 	if (Ctrl == (GViewI*)this && Flags == GNotify_Activate)
 	{
 		Value(true);
 	}
-
 	return 0;
 }
-
 bool GRadioButton::OnKey(GKey &k)
 {
 	bool Status = false;
 	int Move = 0;
-
 	switch (k.vkey)
 	{
 		case VK_UP:
@@ -487,7 +476,6 @@ bool GRadioButton::OnKey(GKey &k)
             return true;
         }
 	}
-
 	if (Move)
 	{
 		List<GRadioButton> Btns;
@@ -510,8 +498,6 @@ bool GRadioButton::OnKey(GKey &k)
 			}
 		}
 	}
-
 	return Status;
 }
-
 #endif

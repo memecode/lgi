@@ -1,8 +1,8 @@
 #ifndef _FTP_THREAD_H_
 #define _FTP_THREAD_H_
 
-#include "LList.h"
-#include "IFtp.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Ftp.h"
 
 enum FtpCommand
 {

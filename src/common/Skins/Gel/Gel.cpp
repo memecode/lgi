@@ -1,16 +1,16 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GSkinEngine.h"
-#include "GPath.h"
-#include "GButton.h"
-#include "GCombo.h"
-#include "GCheckBox.h"
-#include "GRadioGroup.h"
-#include "GDisplayString.h"
-#include "GCssTools.h"
-#include "LStringLayout.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/Path.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/RadioGroup.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/CssTools.h"
+#include "lgi/common/StringLayout.h"
 
 #if defined WINNATIVE
 	#define BTN_TEXT_OFFSET_Y	-1

@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "GUnicode.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Unicode.h"
 
 wchar_t *Utf8ToWide(const char *In, ssize_t InLen)
 {

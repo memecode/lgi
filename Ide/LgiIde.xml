@@ -85,11 +85,11 @@
 		<Node File="./Resources/resource.h" Type="3" Platforms="15" />
 		<Node Name="Test" Type="1" Platforms="15" Id="1" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
 	<Settings>
 		<General>
 			<Makefile>
-				<Windows>.\LgiIde_vs2013.sln</Windows>
+				<Windows>.\LgiIde_vs2015.sln</Windows>
 				<Linux>./Makefile.linux</Linux>
 				<Mac>./Gtk3/build/Makefile</Mac>
 				<Haiku>Makefile.haiku</Haiku>
@@ -119,7 +119,6 @@ WINNATIVE</Release>
 					<Debug>LIBPNG_VERSION=\&quot;1.2\&quot;</Debug>
 					<Release>LIBPNG_VERSION=\&quot;1.2\&quot;</Release>
 				</Linux>
-				<All />
 			</Defines>
 			<Compiler>
 				<Windows>MingW</Windows>
@@ -137,15 +136,15 @@ WINNATIVE</Release>
 				<All>
 					<Debug>./Code
 ./Resources
-../include/common</Debug>
+../include</Debug>
 					<Release>./Code
 ./Resources
-../include/common</Release>
+../include</Release>
 				</All>
 				<Windows>
-					<Debug>..\include\win32
+					<Debug>..\include\lgi\win
 /local/include</Debug>
-					<Release>..\include\win32
+					<Release>..\include\lgi\win
 /local/include</Release>
 				</Windows>
 				<Linux>
@@ -186,7 +185,7 @@ pthread
 					<Debug>..\Debug</Debug>
 					<Release>..\Release</Release>
 				</All>
-				<Linux />
+				<Windows />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -220,6 +219,10 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<ApplicationIcon>
 				<Haiku>./Code/icon-haiku</Haiku>
 			</ApplicationIcon>
+			<Defines>
+				<All />
+				<Windows />
+			</Defines>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -243,7 +246,7 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 		</Remote>
 		<Advanced>
 			<PostBuildCommands>
-				<Linux />
+				<Windows />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>
@@ -255,6 +258,7 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 				<All />
 			</Arguments>
 			<DebugAdmin />
+			<InitialDir />
 		</Debug>
 	</Settings>
 </Project>

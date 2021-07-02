@@ -10,10 +10,10 @@
 #include <string.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GPath.h"
-#include "GPixelRops.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/Path.h"
+#include "lgi/common/PixelRops.h"
+#include "lgi/common/Palette.h"
 
 // #define Div255(a)	DivLut[a]
 #define Div255(a)	((a)/255)

@@ -4,7 +4,7 @@
 #include <winsock2.h>
 #include <shlobj.h>
 #endif
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 /*

@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GMru.h"
-#include "GVariant.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Mru.h"
+#include "lgi/common/Variant.h"
 
 ////////////////////////////////////////////////////////////////////
 #define DEBUG_LOG				1

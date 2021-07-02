@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "GEventTargetThread.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/EventTargetThread.h"
 
 GEventSinkMap GEventSinkMap::Dispatch(128);
 

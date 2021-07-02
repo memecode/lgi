@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "LThreadEvent.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ThreadEvent.h"
 
 #if USE_POSIX_SEM
 	#define SEM_NULL -1

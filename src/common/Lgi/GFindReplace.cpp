@@ -9,14 +9,14 @@
 */
 
 #include <stdio.h>
-#include "Lgi.h"
-#include "GTextView3.h"
-#include "GTextLabel.h"
-#include "GEdit.h"
-#include "GCheckBox.h"
-#include "GButton.h"
-#include "GTableLayout.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/TextView3.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/LgiRes.h"
 
 ////////////////////////////////////////////////////////////////////////////
 GFindReplaceCommon::GFindReplaceCommon()

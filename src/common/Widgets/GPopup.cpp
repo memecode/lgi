@@ -1,9 +1,9 @@
 #include <stdio.h>
-#include "Lgi.h"
-#include "GPopup.h"
-#include "GSkinEngine.h"
-#include "GDisplayString.h"
-#include "LThreadEvent.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Popup.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/ThreadEvent.h"
 #if LGI_COCOA
 	#include <Cocoa/Cocoa.h>
 #endif

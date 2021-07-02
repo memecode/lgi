@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "LStringLayout.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/StringLayout.h"
 
 #define DEBUG_PROFILE_LAYOUT	0
 #define DEBUG_LAYOUT			0

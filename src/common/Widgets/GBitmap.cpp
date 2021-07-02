@@ -1,7 +1,7 @@
-#include "Lgi.h"
-#include "GBitmap.h"
-#include "GTableLayout.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Bitmap.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/LgiRes.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 #ifdef _MT

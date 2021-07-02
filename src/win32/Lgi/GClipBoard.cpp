@@ -1,8 +1,8 @@
 
-#include "Lgi.h"
-#include "GClipBoard.h"
-#include "GPalette.h"
-#include "GCom.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/Palette.h"
+#include "lgi/common/Com.h"
 
 class GClipBoardPriv
 {

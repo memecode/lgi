@@ -4,11 +4,11 @@
 #define DEBUG_LIB_MSGS		0
 #define ALLOW_FALLBACK_PATH	0
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #if defined(LINUX) || defined(MAC)
 #include <dlfcn.h>
 #endif
-#include "GToken.h"
+#include "lgi/common/Token.h"
 
 GLibrary::GLibrary(const char *File, bool Quiet)
 {

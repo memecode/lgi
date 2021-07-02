@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "Lgi.h"
-#include "GRegKey.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/RegKey.h"
 
 ////////////////////////////////////////////////////////////////
 // Implementations

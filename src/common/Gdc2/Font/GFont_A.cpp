@@ -15,9 +15,9 @@
 #include <string.h>
 #include <math.h>
 
-#include "Lgi.h"
-#include "GFontSelect.h"
-#include "GdiLeak.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/FontSelect.h"
+#include "lgi/common/GdiLeak.h"
 
 #ifdef FontChange
 #undef FontChange

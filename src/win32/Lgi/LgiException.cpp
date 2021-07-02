@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "Lgi.h"
-#include "LDateTime.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DateTime.h"
 
 LPTOP_LEVEL_EXCEPTION_FILTER _PrevExceptionHandler = 0;
 

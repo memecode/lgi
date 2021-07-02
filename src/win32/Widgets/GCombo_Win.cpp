@@ -4,10 +4,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "Lgi.h"
-#include "GSkinEngine.h"
-#include "GVariant.h"
-#include "GCombo.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Combo.h"
 
 #define DEBUG_COMBOBOX	1365
 

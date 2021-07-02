@@ -14,10 +14,10 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "Lgi.h"
-#include "Res.h"
-#include "GVariant.h"
-#include "GToken.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Res.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Token.h"
 
 ////////////////////////////////////////////////////////////////////
 #ifdef WIN32

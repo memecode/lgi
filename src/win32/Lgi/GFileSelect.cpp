@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include <CdErr.h>
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 
 class GFileSelectPrivate
 {

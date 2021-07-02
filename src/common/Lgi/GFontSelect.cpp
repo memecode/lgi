@@ -1,21 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Lgi.h"
-#include "GFontSelect.h"
-#include "GToken.h"
-#include "GCheckBox.h"
-#include "GButton.h"
-#include "LList.h"
-#include "GRadioGroup.h"
-#include "GEdit.h"
-#include "GCombo.h"
-#include "GBitmap.h"
-#include "GTextLabel.h"
-#include "GDisplayString.h"
-#include "GdiLeak.h"
-#include "GTableLayout.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/FontSelect.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/List.h"
+#include "lgi/common/RadioGroup.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/Bitmap.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/GdiLeak.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/LgiRes.h"
 
 #define IDD_FONT					1000
 #define IDC_FONT					1001

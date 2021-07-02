@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "GScrollBar.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ScrollBar.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 class GScrollBarPrivate

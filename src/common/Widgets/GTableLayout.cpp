@@ -1,8 +1,8 @@
-#include "Lgi.h"
-#include "GTableLayout.h"
-#include "GCssTools.h"
-#include "GDisplayString.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/CssTools.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/LgiRes.h"
 
 enum CellFlag
 {
@@ -16,20 +16,20 @@ enum CellFlag
 	SizeFill,
 };
 
-#include "GToken.h"
-#include "GVariant.h"
-#include "GTextLabel.h"
-#include "GButton.h"
-#include "GEdit.h"
-#include "GCombo.h"
-#include "LList.h"
-#include "GTree.h"
-#include "GCheckBox.h"
-#include "GRadioGroup.h"
-#include "GBitmap.h"
-#include "GTabView.h"
-#include "GScrollBar.h"
-#include "GCss.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Tree.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/RadioGroup.h"
+#include "lgi/common/Bitmap.h"
+#include "lgi/common/TabView.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/Css.h"
 
 #define Izza(c)				dynamic_cast<c*>(v)
 // #define DEBUG_LAYOUT		82

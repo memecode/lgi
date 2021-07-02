@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GVariant.h"
-#include "GToken.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Token.h"
 
 const char *GVariant::TypeToString(GVariantType t)
 {
@@ -1653,7 +1653,7 @@ struct GDomPropMap
 	{
 		#undef _
 		#define _(symbol, txt) Define(txt, symbol);
-		#include "LDomFields.h"
+		#include "lgi/common/DomFields.h"
 		#undef _
 	}
 	

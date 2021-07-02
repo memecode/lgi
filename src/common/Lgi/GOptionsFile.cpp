@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "GOptionsFile.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/OptionsFile.h"
 
 #define DEBUG_OPTS_FILE		0
 
