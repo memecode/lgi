@@ -2,7 +2,7 @@
 #define _ZLIB_WRAPPER_H_
 
 #include "zlib.h"
-#include "GLibraryUtils.h"
+#include "lgi\common\LibraryUtils.h"
 
 #ifndef COMP_FUNCTIONS
 #define COMP_FUNCTIONS 0  // set to '1' if you need detailed compression functions
