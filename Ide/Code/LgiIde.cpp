@@ -2108,14 +2108,7 @@ void AppWnd::OnFixBuildErrors()
 			if (p.Length() == 2)
 				Map.Add(p[0], p[1]);
 		}
-
-		if (Map.Length() == 0)
-		{
-			LgiMsg(this, "No renamed symbols defined.", AppName);
-			return;
-		}
 	}
-	else return;
 
 	GString Raw = d->Output->Txt[AppWnd::BuildTab]->Name();
 	GString::Array Lines = Raw.Split("\n");
@@ -2131,7 +2124,6 @@ void AppWnd::OnFixBuildErrors()
 		auto ErrPos = Ln.Find("error");
 		if (ErrPos >= 0)
 		{
-			Log->Print("Error pos = %i\n", (int)ErrPos);
 			#ifdef WINDOWS
 			GString::Array p = Ln.SplitDelimit(">()");
 			#else
@@ -2152,9 +2144,11 @@ void AppWnd::OnFixBuildErrors()
 					continue;
 				}
 				auto LineNo = p[Base+1].Int();
+				bool FileNotFound = Ln.Find("Cannot open include file:") > 0;
 				#else
 				GString Fn = p[0];
 				auto LineNo = p[1].Int();
+				bool FileNotFound = false; // fixme
 				#endif
 
 				GAutoString Full;
@@ -2194,12 +2188,102 @@ void AppWnd::OnFixBuildErrors()
 					if (LineNo <= Fi->Lines.Length())
 					{
 						GString &s = Fi->Lines[LineNo-1];
-						for (auto i: Map)
+						if (FileNotFound)
 						{
-							if (ReplaceWholeWord(s, i.key, i.value))
+							auto n = p.Last().SplitDelimit("\'");
+							auto wrongName = n[1];
+							GFile f(Full, O_READ);
+							auto Lines = f.Read().SplitDelimit("\n", -1, false);
+							f.Close();
+							if (LineNo <= Lines.Length())
 							{
-								Fi->Dirty = true;
-								Replacements++;
+								auto &errLine = Lines[LineNo-1];
+								auto Pos = errLine.Find(wrongName);
+								
+								if (Pos < 0)
+								{
+									for (int i=0; i<Lines.Length(); i++)
+										Log->Print("[%i]=%s\n", i, Lines[i].Get());
+								}
+
+								if (Pos > 0)
+								{
+									// Find where it went...
+									GString newPath;
+									for (auto p: d->Projects)
+									{
+										const char *SubStr[] = { ".", "lgi/common" };
+
+										GArray<GString> IncPaths;
+										if (p->BuildIncludePaths(IncPaths, true, false, PlatformCurrent))
+										{
+											for (auto &inc: IncPaths)
+											{
+												for (int sub=0; !newPath && sub<CountOf(SubStr); sub++)
+												{
+													char path[MAX_PATH];
+													LgiMakePath(path, sizeof(path), inc, SubStr[sub]);
+													LgiMakePath(path, sizeof(path), path, wrongName);
+													if (LFileExists(path))
+													{
+														newPath = path + inc.Length() + 1;
+													}
+													else
+													{
+														GString minusFirst = wrongName(1,-1);
+														LgiMakePath(path, sizeof(path), inc, SubStr[sub]);
+														LgiMakePath(path, sizeof(path), path, minusFirst);
+														if (LFileExists(path))
+														{
+															newPath = path + inc.Length() + 1;
+														}
+													}
+												}
+											}
+										}
+									}
+
+									if (newPath)
+									{
+										GString newLine = errLine(0, Pos) + newPath + errLine(Pos + wrongName.Length(), -1);
+										GString backup = GString(Full.Get()) + ".orig";
+										if (LFileExists(backup))
+											FileDev->Delete(backup);
+										LError Err;
+										if (FileDev->Move(Full, backup, &Err))
+										{
+											errLine = newLine;
+											GString newLines = GString("\n").Join(Lines);
+											GFile out(Full, O_WRITE);
+											out.Write(newLines);
+											Log->Print("Fixed '%s'->'%s' on ln %i in %s\n",
+												wrongName.Get(), newPath.Get(),
+												(int)LineNo, Full.Get());
+											Replacements++;
+										}
+										else Log->Print("Error: moving '%s' to backup (%s).\n", Full.Get(), Err.GetMsg().Get());
+									}
+									else Log->Print("Error: Missing header '%s'.\n", wrongName.Get()); 
+								}
+								else
+								{
+									Log->Print("Error: '%s' not found in line %i of '%s' -> '%s'\n",
+										wrongName.Get(), (int)LineNo,
+										Fn.Get(), Full.Get());
+									// return;
+								}
+							}
+							else Log->Print("Error: Line %i is beyond file lines: %i\n", (int)LineNo, (int)Lines.Length());
+						}
+						else
+						{
+							for (auto i: Map)
+							{
+								if (ReplaceWholeWord(s, i.key, i.value))
+								{
+									Fi->Dirty = true;
+									Replacements++;
+								}
 							}
 						}
 					}

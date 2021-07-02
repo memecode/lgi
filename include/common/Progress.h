@@ -29,7 +29,7 @@ public:
 	virtual ~Progress() {}
 
 	virtual bool SetRange(const GRange &r) { Low = r.Start; High = r.End(); return true; }
-	virtual GRange GetRange() { return GRange(Low, High - Low); }
+	virtual GRange GetRange() { return GRange((ssize_t)Low, (ssize_t)(High - Low)); }
 	virtual GString GetDescription();
 	virtual void SetDescription(const char *d = 0);
 	virtual int64 Value() { return Val; }
