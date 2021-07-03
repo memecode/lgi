@@ -557,7 +557,7 @@ GControl::GControl(char *SubClassName) : GView(0)
 	if (SubClassName)
 	{
 		SetClassW32(SubClassName);
-		SubClass = GWin32Class::Create(SubClassName); // Owned by the GWin32Class object
+		SubClass = LWindowsClass::Create(SubClassName); // Owned by the LWindowsClass object
 	}
 	Pos.ZOff(10, 10);
 }

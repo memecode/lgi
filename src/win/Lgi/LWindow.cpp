@@ -110,7 +110,7 @@ LWindow::LWindow() : GView(0)
 	SetStyle(GetStyle() & ~WS_CHILD);
 	SetExStyle(GetExStyle() | WS_EX_CONTROLPARENT);
 	
-	GWin32Class *c = GWin32Class::Create(GetClass());
+	LWindowsClass *c = LWindowsClass::Create(GetClass());
 	if (c)
 	{
 		c->Register();

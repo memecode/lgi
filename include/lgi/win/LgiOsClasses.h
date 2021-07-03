@@ -86,7 +86,7 @@ public:
 };
 
 // Win32 window class
-class LgiClass GWin32Class : public GBase
+class LgiClass LWindowsClass : public GBase
 {
 	friend class GControl;
 	friend class GApp;
@@ -102,15 +102,15 @@ public:
 public:
 	WNDCLASSEXW Class;
 
-	GWin32Class(const char *Name);
-	~GWin32Class();
+	LWindowsClass(const char *Name);
+	~LWindowsClass();
 
 	static bool IsSystem(const char *Cls);
 	bool Register();
 	bool SubClass(char *Parent);
 	LRESULT CALLBACK CallParent(OsView hWnd, UINT m, WPARAM a, LPARAM b);
 
-	static GWin32Class *Create(const char *ClassName);
+	static LWindowsClass *Create(const char *ClassName);
 };
 
 #include "lgi/common/RegKey.h"

@@ -54,7 +54,7 @@ private:
 	
 	#if defined WIN32
 
-		friend		class GWin32Class;
+		friend		class LWindowsClass;
 		friend		class GCombo;
 		friend		LRESULT CALLBACK DlgRedir(OsView hWnd, UINT m, WPARAM a, LPARAM b);
 		static		void CALLBACK TimerProc(OsView hwnd, UINT uMsg, UINT_PTR idEvent, uint32_t dwTime);
@@ -137,7 +137,7 @@ protected:
 		/// \brief Creates a class to pass to CreateWindowEx(). If this methed is not
 		/// explicitly called then the string from GetClass() is used to create a class,
 		/// which is usually the name of the object.
-		GWin32Class *CreateClassW32(const char *Class = 0, HICON Icon = 0, int AddStyles = 0);
+		LWindowsClass *CreateClassW32(const char *Class = 0, HICON Icon = 0, int AddStyles = 0);
 
 		virtual int		SysOnNotify(int Msg, int Code) { return 0; }
 	

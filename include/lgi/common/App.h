@@ -105,7 +105,7 @@ class LgiClass GApp : virtual public GAppI,
 	friend class LWindow;
 
 public:
-	typedef LHashTbl<ConstStrKey<char>, GWin32Class*> ClassContainer;
+	typedef LHashTbl<ConstStrKey<char>, LWindowsClass*> ClassContainer;
 
 protected:
 	// private member vars
@@ -124,7 +124,7 @@ protected:
 	CRITICAL_SECTION StackTraceSync;
 	friend LONG __stdcall _ExceptionFilter_Redir(LPEXCEPTION_POINTERS e);
 	LONG __stdcall _ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId);
-	friend class GWin32Class;
+	friend class LWindowsClass;
 	ClassContainer *GetClasses();
 
 	#elif defined LINUX

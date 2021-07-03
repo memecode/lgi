@@ -58,7 +58,7 @@ GCombo::GCombo(int id, int x, int y, int cx, int cy, const char *name) :
 	#else
 	SetClassW32(GetClass());
 	if (!SubClass)
-		SubClass = GWin32Class::Create(GetClass());
+		SubClass = LWindowsClass::Create(GetClass());
 	if (SubClass)
 		SubClass->SubClass("COMBOBOX");
 	else

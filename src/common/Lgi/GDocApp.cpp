@@ -216,7 +216,7 @@ GDocApp<OptionsFmt>::GDocApp(const char *appname, LIcon icon, char *optsname)
 	if (icon)
 	{
 		#if defined WIN32
-			GWin32Class *c = GWin32Class::Create(d->AppName);
+			LWindowsClass *c = LWindowsClass::Create(d->AppName);
 			if (c)
 			{
 				if (icon < 0x10000)

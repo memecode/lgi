@@ -193,15 +193,15 @@ public:
 /// The built in controls that you can use are:
 /// <ul>
 ///		<li> GButton (Push button)
-///		<li> GEdit (Editbox for text entry)
+///		<li> GEdit (Edit box for text entry)
 ///		<li> GText (Static label)
-///		<li> GCheckBox (Independant boolean)
+///		<li> GCheckBox (Independent boolean)
 ///		<li> GCombo (Select one from many)
 ///		<li> GSlider (Select a position)
 ///		<li> GBitmap (Display an image)
 ///		<li> GProgress (Show a progress)
 ///		<li> GList (List containing LListItem)
-///		<li> GTree (Heirarchy of GTreeItem)
+///		<li> GTree (Hierarchy of GTreeItem)
 ///		<li> GRadioGroup (One of many selection using GRadioButton)
 ///		<li> GTabView (Containing GTabPage)
 /// </ul>
@@ -293,7 +293,7 @@ protected:
 	void MouseClickEvent(bool Down);
 	#elif WINNATIVE
 	bool *SetOnDelete;
-	GWin32Class *SubClass;
+	LWindowsClass *SubClass;
 	#endif
 
 	LPoint SizeOfStr(const char *Str);

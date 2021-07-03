@@ -206,7 +206,7 @@ bool SetLgiMagic(HWND hWnd)
 	return Status;
 }
 
-LRESULT CALLBACK GWin32Class::Redir(HWND hWnd, UINT m, WPARAM a, LPARAM b)
+LRESULT CALLBACK LWindowsClass::Redir(HWND hWnd, UINT m, WPARAM a, LPARAM b)
 {
 	if (m == WM_NCCREATE)
 	{
@@ -243,7 +243,7 @@ LRESULT CALLBACK GWin32Class::Redir(HWND hWnd, UINT m, WPARAM a, LPARAM b)
 	return DefWindowProcW(hWnd, m, a, b);
 }
 
-LRESULT CALLBACK GWin32Class::SubClassRedir(HWND hWnd, UINT m, WPARAM a, LPARAM b)
+LRESULT CALLBACK LWindowsClass::SubClassRedir(HWND hWnd, UINT m, WPARAM a, LPARAM b)
 {
 	if (m == WM_NCCREATE)
 	{
@@ -283,7 +283,7 @@ LRESULT CALLBACK GWin32Class::SubClassRedir(HWND hWnd, UINT m, WPARAM a, LPARAM 
 	return DefWindowProcW(hWnd, m, a, b);
 }
 
-GWin32Class::GWin32Class(const char *name)
+LWindowsClass::LWindowsClass(const char *name)
 {
 	Name(name);
 
@@ -297,13 +297,13 @@ GWin32Class::GWin32Class(const char *name)
 	ParentProc = 0;
 }
 
-GWin32Class::~GWin32Class()
+LWindowsClass::~LWindowsClass()
 {
 	UnregisterClassW(NameW(), LgiProcessInst());
 	Class.lpszClassName = NULL;
 }
 
-GWin32Class *GWin32Class::Create(const char *ClassName)
+LWindowsClass *LWindowsClass::Create(const char *ClassName)
 {
 	if (!LgiApp)
 		return NULL;
@@ -312,10 +312,10 @@ GWin32Class *GWin32Class::Create(const char *ClassName)
 	if (!Classes)
 		return NULL;
 
-	GWin32Class *c = Classes->Find(ClassName);
+	LWindowsClass *c = Classes->Find(ClassName);
 	if (!c)
 	{
-		c = new GWin32Class(ClassName);
+		c = new LWindowsClass(ClassName);
 		if (c)
 			Classes->Add(ClassName, c);
 	}
@@ -323,7 +323,7 @@ GWin32Class *GWin32Class::Create(const char *ClassName)
 	return c;
 }
 
-bool GWin32Class::IsSystem(const char *Cls)
+bool LWindowsClass::IsSystem(const char *Cls)
 {
 	if (!_stricmp(Cls, WC_BUTTONA) ||
 		!_stricmp(Cls, WC_COMBOBOXA) ||
@@ -343,7 +343,7 @@ bool GWin32Class::IsSystem(const char *Cls)
 	return false;
 }
 
-bool GWin32Class::Register()
+bool LWindowsClass::Register()
 {
 	bool Status = false;
 	
@@ -373,7 +373,7 @@ bool GWin32Class::Register()
 	return Status;
 }
 
-bool GWin32Class::SubClass(char *Parent)
+bool LWindowsClass::SubClass(char *Parent)
 {
 	bool Status = false;
 
@@ -406,7 +406,7 @@ bool GWin32Class::SubClass(char *Parent)
 	return Status;
 }
 
-LRESULT CALLBACK GWin32Class::CallParent(HWND hWnd, UINT m, WPARAM a, LPARAM b)
+LRESULT CALLBACK LWindowsClass::CallParent(HWND hWnd, UINT m, WPARAM a, LPARAM b)
 {
 	if (!ParentProc)
 		return 0;
@@ -593,7 +593,7 @@ void GView::SetClassW32(const char *c)
 	d->WndClass = c;
 }
 
-GWin32Class *GView::CreateClassW32(const char *Class, HICON Icon, int AddStyles)
+LWindowsClass *GView::CreateClassW32(const char *Class, HICON Icon, int AddStyles)
 {
 	if (Class)
 	{
@@ -602,7 +602,7 @@ GWin32Class *GView::CreateClassW32(const char *Class, HICON Icon, int AddStyles)
 
 	if (GetClassW32())
 	{
-		GWin32Class *c = GWin32Class::Create(GetClassW32());
+		LWindowsClass *c = LWindowsClass::Create(GetClassW32());
 		if (c)
 		{
 			if (Icon)
@@ -647,8 +647,8 @@ bool GView::Attach(GViewI *p)
 		bool Enab = Enabled();
 
         // Check the class is created
-		bool IsSystemClass = GWin32Class::IsSystem(ClsName);
-        GWin32Class *Cls = GWin32Class::Create(ClsName);
+		bool IsSystemClass = LWindowsClass::IsSystem(ClsName);
+        LWindowsClass *Cls = LWindowsClass::Create(ClsName);
         if (Cls)
 		{
             auto r = Cls->Register();

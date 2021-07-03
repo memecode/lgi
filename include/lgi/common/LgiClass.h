@@ -19,7 +19,7 @@ class GEvent;
 class GId;
 class GApp;
 class LWindow;
-class GWin32Class;
+class LWindowsClass;
 class GView;
 class GLayout;
 class GFileSelect;

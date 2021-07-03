@@ -51,7 +51,7 @@ GCheckBox::GCheckBox(int id, int x, int y, int cx, int cy, const char *name, int
 	#if 1
 	SetClassW32(GetClass());
 	if (!SubClass)
-		SubClass = GWin32Class::Create(GetClass());
+		SubClass = LWindowsClass::Create(GetClass());
 	if (SubClass)
 		SubClass->SubClass("BUTTON");
 	else

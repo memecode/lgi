@@ -59,7 +59,7 @@ GRadioGroup::GRadioGroup(int id, int x, int y, int cx, int cy, const char *name,
 
 	SetClassW32(GetClass());
 	if (!SubClass)
-		SubClass = GWin32Class::Create(GetClass());
+		SubClass = LWindowsClass::Create(GetClass());
 	if (SubClass)
 		SubClass->SubClass("BUTTON");
 	else
@@ -320,7 +320,7 @@ GRadioButton::GRadioButton(int id, int x, int y, int cx, int cy, const char *nam
 
 	SetClassW32(GetClass());
 	if (!SubClass)
-		SubClass = GWin32Class::Create(GetClass());
+		SubClass = LWindowsClass::Create(GetClass());
 	if (SubClass)
 		SubClass->SubClass("BUTTON");
 	else

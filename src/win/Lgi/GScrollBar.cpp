@@ -45,7 +45,7 @@ GScrollBar::GScrollBar(int id, int x, int y, int cx, int cy, const char *name)
 	if (name) Name(name);
 
 	SetStyle(GetStyle() | WS_CHILD | WS_TABSTOP | WS_VISIBLE);
-	if (SubClass = GWin32Class::Create(GetClass()))
+	if (SubClass = LWindowsClass::Create(GetClass()))
 	{
 		SubClass->SubClass("SCROLLBAR");
 	}
