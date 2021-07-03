@@ -977,8 +977,10 @@ public:
 			}
 		}
 		
+		/*
 		if (Changed >= 0)
 			Value(Changed);
+		*/
 	}
 };
 
@@ -2197,13 +2199,12 @@ int AppWnd::OnFixBuildErrors()
 					Loc.Printf("%s:%i", Full.Get(), (int)LineNo);
 					if (FixHistory.Find(Loc))
 					{
-						Log->Print("Already fixed %s\n", Loc.Get());
+						// Log->Print("Already fixed %s\n", Loc.Get());
 					}
 					else if (LineNo <= Fi->Lines.Length())
 					{
 						FixHistory.Add(Loc, true);
 
-						GString &s = Fi->Lines[LineNo-1];
 						if (FileNotFound)
 						{
 							auto n = p.Last().SplitDelimit("\'");
@@ -2305,10 +2306,16 @@ int AppWnd::OnFixBuildErrors()
 						{
 							for (auto i: Map)
 							{
-								if (ReplaceWholeWord(s, i.key, i.value))
+								for (int Offset = 0; (LineNo + Offset >= 1) && Offset >= -1; Offset--)
 								{
-									Fi->Dirty = true;
-									Replacements++;
+									GString &s = Fi->Lines[LineNo+Offset-1];
+									if (ReplaceWholeWord(s, i.key, i.value))
+									{
+										Log->Print("Renamed '%s' -> '%s' at %s:%i\n", i.key, i.value, Full.Get(), LineNo+Offset);
+										Fi->Dirty = true;
+										Replacements++;
+										Offset = -2;
+									}
 								}
 							}
 						}

@@ -807,26 +807,20 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		LgiTrace("%s:%i - Exe='%S'\n", _FL, WExe.Get());
 		#endif
 		
-		char16 WArg[3000];
-		int Ch = 0;
+		GStringPipe Args;
 		for (unsigned i=0; i<d->Args.Length(); i++)
 		{
 			char *a = d->Args[i];
-			GAutoWString aw(Utf8ToWide(a));
-			
-			if (i > 0)
-			{
-				WArg[Ch++] = ' ';
-			}
-			
+			const char *sp = i ? " " : "";
 			if (strchr(a, ' '))
-				Ch += swprintf_s(WArg+Ch, CountOf(WArg)-Ch, L"\"%s\"", aw.Get());
+				Args.Print("%s\"%s\"", sp, a);
 			else
-				Ch += swprintf_s(WArg+Ch, CountOf(WArg)-Ch, L"%s", aw.Get());
+				Args.Print("%s%s", sp, a);
 		}
+		GAutoWString WArg(Utf8ToWide(Args.NewGStr()));
 
 		#if DEBUG_SUBPROCESS || DEBUG_ARGS
-		LgiTrace("%s:%i - Args='%S'\n", _FL, WArg);
+		LgiTrace("%s:%i - Args='%S'\n", _FL, WArg.Get());
 		#endif
 		
 		bool HasExternIn = d->ExternIn != NULL_PIPE;
