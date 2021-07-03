@@ -27,7 +27,7 @@ class LgiClass GPopup :
 	friend class LWindow;
 	friend class GDropDown;
 	friend class LMouseHook;
-	friend class GMouseHookPrivate;
+	friend class LMouseHookPrivate;
     friend class GView;
 
     static GArray<GPopup*> CurrentPopups;
@@ -96,7 +96,7 @@ public:
 class GPopup;
 class LMouseHook
 {
-	class GMouseHookPrivate *d;
+	class LMouseHookPrivate *d;
 	
 public:
 	LMouseHook();

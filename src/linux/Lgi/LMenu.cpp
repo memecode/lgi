@@ -774,11 +774,11 @@ bool LMenuItem::ScanForAccel()
 
 			if (!stricmp(k, "CtrlCmd"))
 			{
-				k = GUiEvent::CtrlCmdName();
+				k = LUiEvent::CtrlCmdName();
 			}
 			else if (!stricmp(k, "AltCmd"))
 			{
-				k = GUiEvent::AltCmdName();
+				k = LUiEvent::AltCmdName();
 			}			
 		
 			if (stricmp(k, "Ctrl") == 0)
@@ -956,12 +956,12 @@ bool LMenuItem::ScanForAccel()
 
 		if (k.Equals("CtrlCmd"))
 		{
-			k = GUiEvent::CtrlCmdName();
+			k = LUiEvent::CtrlCmdName();
 			AccelDirty = true;
 		}
 		else if (k.Equals("AltCmd"))
 		{
-			k = GUiEvent::AltCmdName();
+			k = LUiEvent::AltCmdName();
 			AccelDirty = true;
 		}
 

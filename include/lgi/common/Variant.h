@@ -65,9 +65,9 @@ enum GVariantType
 	/// Pointer to GView
 	GV_GVIEW,
 	/// Pointer to LMouse
-	GV_GMOUSE,
+	GV_LMOUSE,
 	/// Pointer to LKey
-	GV_GKEY,
+	GV_LKEY,
 	/// Pointer to GStream
 	GV_STREAM,
 	/// The maximum value for the variant type.
@@ -207,7 +207,7 @@ public:
 		char16 *WString;
 		/// Valid when Type == #GV_DOM
 		GDom *Dom;
-		/// Valid when Type is #GV_VOID_PTR, #GV_GVIEW, #GV_GMOUSE or #GV_GKEY
+		/// Valid when Type is #GV_VOID_PTR, #GV_GVIEW, #GV_LMOUSE or #GV_LKEY
 		void *Ptr;
 		/// Valid when Type == #GV_BINARY
 	    struct _Binary
@@ -271,9 +271,9 @@ public:
 		} Stream;
 		/// Valid when Type == #GV_GVIEW
 		class GView *View;
-		/// Valid when Type == #GV_GMOUSE
+		/// Valid when Type == #GV_LMOUSE
 		class LMouse *Mouse;
-		/// Valid when Type == #GV_GKEY
+		/// Valid when Type == #GV_LKEY
 		class LKey *Key;
 	} Value;
 

@@ -87,7 +87,7 @@ class LgiClass LSubMenu :
 	friend class SubMenuImpl;
 	friend class MenuItemImpl;
 	friend class MenuImpl;
-	friend class GMouseHookPrivate;
+	friend class LMouseHookPrivate;
 
 	// This is not called in the GUI thread
 	static void SysMouseClick(LMouse &m);
@@ -414,7 +414,7 @@ public:
 };
 
 /// Encapsulates a keyboard shortcut
-class LgiClass GAccelerator : public GUiEvent
+class LgiClass GAccelerator : public LUiEvent
 {
 	int Key;
 	int Id;

@@ -27,7 +27,7 @@ enum PopupNotifications
 #if defined(__GTK_H__)
 
 	using namespace Gtk;
-	class GMouseHookPrivate *HookPrivate = 0;
+	class LMouseHookPrivate *HookPrivate = 0;
 	#include "LgiWidget.h"
 			
 	bool IsWindow(OsView Wnd)
@@ -77,7 +77,7 @@ uint32_t LgiGetViewPid(OsView View)
 	return LgiProcessId();
 }
 
-class GMouseHookPrivate : public ::LMutex, public ::LThread
+class LMouseHookPrivate : public ::LMutex, public ::LThread
 {
 public:
 	bool Loop;
@@ -88,7 +88,7 @@ public:
 	LThreadEvent Event;
 	#endif
 
-	GMouseHookPrivate() : LMutex("MouseHookLock"), LThread("MouseHook")
+	LMouseHookPrivate() : LMutex("MouseHookLock"), LThread("MouseHook")
 	{
 		Loop = false;
 		hMouseOver = NULL;
@@ -105,7 +105,7 @@ public:
 		#endif
 	}
 
-	~GMouseHookPrivate()
+	~LMouseHookPrivate()
 	{
 		if (Loop)
 		{
@@ -421,7 +421,7 @@ public:
 
 LMouseHook::LMouseHook()
 {
-	d = new GMouseHookPrivate;
+	d = new LMouseHookPrivate;
 }
 
 LMouseHook::~LMouseHook()

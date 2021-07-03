@@ -678,12 +678,12 @@ bool LMenuItem::ScanForAccel()
 
 				if (k.Equals("CtrlCmd"))
 				{
-					k = GUiEvent::CtrlCmdName();
+					k = LUiEvent::CtrlCmdName();
 					AccelDirty = true;
 				}
 				else if (k.Equals("AltCmd"))
 				{
-					k = GUiEvent::AltCmdName();
+					k = LUiEvent::AltCmdName();
 					AccelDirty = true;
 				}
 

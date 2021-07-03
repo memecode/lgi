@@ -76,7 +76,7 @@ LgiFunc void LgiTrace(const char *Format, ...);
 LgiFunc void LgiStackTrace(const char *Format, ...);
 #endif
 
-// OsEvent is defined here because the GUiEvent is the primary user.
+// OsEvent is defined here because the LUiEvent is the primary user.
 // And this header can be included independently of LgiOsDefs.h where
 // this would otherwise live.
 #if defined __GTK_H__
@@ -96,18 +96,18 @@ LgiFunc void LgiStackTrace(const char *Format, ...);
 #endif
 
 /// General user interface event
-class LgiClass GUiEvent
+class LgiClass LUiEvent
 {
 public:
 	int Flags;
 	OsEvent Event;
 
-	GUiEvent()
+	LUiEvent()
 	{
 		Flags = 0;
 	}
 
-	virtual ~GUiEvent() {}
+	virtual ~LUiEvent() {}
 	virtual void Trace(const char *Msg) {}
 
 	/// The key or mouse button was being pressed. false on the up-click.
@@ -164,7 +164,7 @@ public:
 };
 
 #ifdef WINDOWS
-struct GKeyWinBits
+struct LKeyWinBits
 {
 	unsigned Repeat : 16;
 	unsigned Scan : 8;
@@ -177,7 +177,7 @@ struct GKeyWinBits
 #endif
 
 /// All the information related to a keyboard event
-class LgiClass LKey : public GUiEvent
+class LgiClass LKey : public LUiEvent
 {
 public:
 	/// The virtual code for key
@@ -192,7 +192,7 @@ public:
 	#endif
 		uint32_t Data;
 	#ifdef WINDOWS
-		GKeyWinBits WinBits;
+		LKeyWinBits WinBits;
 	};
 	#endif
 	/// True if this is a standard character (ie not a control key)
@@ -243,7 +243,7 @@ public:
 
 /// \brief All the parameters of a mouse click event
 ///
-/// The parent class GUiEvent keeps information about whether it was a Down()
+/// The parent class LUiEvent keeps information about whether it was a Down()
 /// or Double() click. You can also query whether the Alt(), Ctrl() or Shift()
 /// keys were pressed at the time the event occurred.
 ///
@@ -251,7 +251,7 @@ public:
 /// GView::GetMouse() and pass true in the 'ScreenCoords' parameter. Or you can
 /// construct a LPoint out of the x,y fields of this class and use GView::PointToScreen()
 /// to map the point to screen co-ordinates.
-class LgiClass LMouse : public GUiEvent, public LPoint
+class LgiClass LMouse : public LUiEvent, public LPoint
 {
 public:
 	/// Receiving view

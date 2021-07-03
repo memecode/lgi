@@ -27,8 +27,8 @@ const char *GVariant::TypeToString(GVariantType t)
 		case GV_WSTRING:	return "WString";
 		case GV_GSURFACE:	return "Surface";
 		case GV_GVIEW:		return "View";
-		case GV_GMOUSE:		return "MouseEvent";
-		case GV_GKEY:		return "KeyboardEvent";
+		case GV_LMOUSE:		return "MouseEvent";
+		case GV_LKEY:		return "KeyboardEvent";
 		case GV_STREAM:		return "Stream";
 		default:			return "Unknown";
 	}
@@ -267,9 +267,9 @@ bool GVariant::operator ==(GVariant &v)
 		*/
 		case GV_STREAM:
 			return Value.Stream.Ptr == v.Value.Stream.Ptr;
-		case GV_GMOUSE:
+		case GV_LMOUSE:
 			return Value.Mouse == v.Value.Mouse;
-		case GV_GKEY:
+		case GV_LKEY:
 			return Value.Key == v.Value.Key;
 		case GV_VOID_PTR:
 			return Value.Ptr == v.Value.Ptr;
@@ -456,7 +456,7 @@ GVariant &GVariant::operator =(LMouse *p)
 	Empty();
 	if (p)
 	{
-		Type = GV_GMOUSE;
+		Type = GV_LMOUSE;
 		Value.Mouse = p;
 		// if (Dirty) *Dirty = true;
 	}
@@ -469,7 +469,7 @@ GVariant &GVariant::operator =(LKey *p)
 	Empty();
 	if (p)
 	{
-		Type = GV_GKEY;
+		Type = GV_LKEY;
 		Value.Key = p;
 	}
 
@@ -549,8 +549,8 @@ GVariant &GVariant::operator =(GVariant const &i)
 		}
 		case GV_VOID_PTR:
 		case GV_GVIEW:
-		case GV_GMOUSE:
-		case GV_GKEY:
+		case GV_LMOUSE:
+		case GV_LKEY:
 		{
 			Value.Ptr = i.Value.Ptr;
 			break;
@@ -984,9 +984,9 @@ int64 GVariant::Length()
 		}
 		case GV_GVIEW:
 			return sizeof(GView);
-		case GV_GMOUSE:
+		case GV_LMOUSE:
 			return sizeof(LMouse);
-		case GV_GKEY:
+		case GV_LKEY:
 			return sizeof(LKey);
 		case GV_STREAM:
 			return Value.Stream.Ptr->GetSize();
@@ -1145,9 +1145,9 @@ void *GVariant::CastVoidPtr()
 			return Value.Surface.Ptr;
 		case GV_GVIEW:
 			return Value.View;
-		case GV_GMOUSE:
+		case GV_LMOUSE:
 			return Value.Mouse;
-		case GV_GKEY:
+		case GV_LKEY:
 			return Value.Key;
 	}
 
@@ -1204,9 +1204,9 @@ bool GVariant::CastBool()
 			return Value.Ptr != NULL;
 		case GV_GVIEW:
 			return Value.View != NULL;
-		case GV_GMOUSE:
+		case GV_LMOUSE:
 			return Value.Mouse != NULL;
-		case GV_GKEY:
+		case GV_LKEY:
 			return Value.Key != NULL;
 		case GV_DATETIME:
 			return Value.Date != NULL;
@@ -1318,9 +1318,9 @@ int32 GVariant::CastInt32()
 			return Value.Surface.Ptr != NULL;
 		case GV_GVIEW:
 			return Value.View != NULL;
-		case GV_GMOUSE:
+		case GV_LMOUSE:
 			return Value.Mouse != NULL;
-		case GV_GKEY:
+		case GV_LKEY:
 			return Value.Key != NULL;
 		case GV_STREAM:
 			return Value.Stream.Ptr != NULL;
@@ -1837,10 +1837,10 @@ GString GVariant::ToString()
 		case GV_GVIEW:
 			s.Printf("(gview)%p", Value.View);
 			break;
-		case GV_GMOUSE:
+		case GV_LMOUSE:
 			s.Printf("(gmouse)%p", Value.Mouse);
 			break;
-		case GV_GKEY:
+		case GV_LKEY:
 			s.Printf("(gkey)%p", Value.Key);
 			break;
 		case GV_STREAM:
@@ -2042,9 +2042,9 @@ ssize_t GCustomType::CustomField::Sizeof()
 			return sizeof(GVariant::LHash);
 		case GV_OPERATOR:
 			return sizeof(GOperator);
-		case GV_GMOUSE:
+		case GV_LMOUSE:
 			return sizeof(LMouse);
-		case GV_GKEY:
+		case GV_LKEY:
 			return sizeof(LKey);
 		case GV_CUSTOM:
 			return Nested->Sizeof();

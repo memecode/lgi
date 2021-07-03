@@ -1090,7 +1090,7 @@ GMessage::Result LWindow::OnEvent(GMessage *Msg)
 		}
 		case M_HANDLEMOUSEMOVE:
 		{
-			// This receives events fired from the GMouseHookPrivate class so that
+			// This receives events fired from the LMouseHookPrivate class so that
 			// non-LGI windows create mouse hook events as well.
 			GTempView v((OsView)Msg->B());
 			LMouse m;
