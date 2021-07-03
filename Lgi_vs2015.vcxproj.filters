@@ -149,9 +149,6 @@
     <ClCompile Include="src\common\Resource\Res.cpp">
       <Filter>Source Files\Core\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\GVariant.cpp">
-      <Filter>Source Files\Core\Variant</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Lgi\GStream.cpp">
       <Filter>Source Files\Core\Stream</Filter>
     </ClCompile>
@@ -266,9 +263,6 @@
     <ClCompile Include="src\common\Text\GUtf8.cpp">
       <Filter>Source Files\Text</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Text\GXmlTree.cpp">
-      <Filter>Source Files\Text</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Gdc2\GColour.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
@@ -277,24 +271,6 @@
     </ClCompile>
     <ClCompile Include="src\common\Gdc2\Path\GPath.cpp">
       <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Font\GDisplayString.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Font\GFont.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Font\GFont_A.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Font\GFont_W.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Font\GFontCodePages.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Font\GFontSystem.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Gdc2\15Bit.cpp">
       <Filter>Source Files\Graphics\Applicators</Filter>
@@ -323,9 +299,6 @@
     <ClCompile Include="src\common\Gdc2\Filters\GFilter.cpp">
       <Filter>Source Files\Graphics\Filters</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Gdc2\GRect.cpp">
-      <Filter>Source Files\Graphics\Rect/Region</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Gdc2\GSurface.cpp">
       <Filter>Source Files\Graphics\Surfaces</Filter>
     </ClCompile>
@@ -336,9 +309,6 @@
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Lgi\GFindReplace.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GFontSelect.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Lgi\GInput.cpp">
@@ -497,6 +467,36 @@
     <ClCompile Include="src\win\Widgets\LDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Font\LDisplayString.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\LRect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\LVariant.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Text\LXmlTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Font\LFontType.cpp">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Font\LTypeFace.cpp">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Font\LFontSystem.cpp">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\LFontSelect.cpp">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Font\LFontCodePages.cpp">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Font\LFont.cpp">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\common\Hash\md5\md5.h">
@@ -504,9 +504,6 @@
     </ClInclude>
     <ClInclude Include="src\common\Hash\sha1\sha1.h">
       <Filter>Source Files\General\Hash</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common\Gdc2\Font\GFontPriv.h">
-      <Filter>Source Files\Graphics\Font</Filter>
     </ClInclude>
     <ClInclude Include="private\win\GAppPriv.h">
       <Filter>Source Files\Interface</Filter>
@@ -761,6 +758,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\win\INet\MibAccess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\Gdc2\Font\LFontPriv.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

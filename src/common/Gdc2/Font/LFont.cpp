@@ -21,11 +21,8 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Variant.h"
-#include "lgi/common/FontSelect.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/GdiLeak.h"
-#include "lgi/common/DisplayString.h"
-#include "lgi/common/StringClass.h"
 #include "lgi/common/Css.h"
 
 #ifdef FontChange
@@ -135,311 +132,7 @@
 
 #endif
 
-//////////////////////////////////////////////////////////////////////
-// Classes
-class GTypeFacePrivate
-{
-public:
-	// Type
-	char *_Face;			// type face
-	GCss::Len _Size;		// size
-	int _Weight;
-	bool _Italic;
-	bool _Underline;
-	char *_CodePage;
-	int _Quality;
-
-	// Output
-	GColour _Fore;
-	GColour _Back;
-	GColour WhiteSpace; // Can be empty (if so it's calculated)
-	int _TabSize;
-	bool _Transparent;
-	bool _SubGlyphs;
-
-	// Backs
-	bool IsSymbol;
-
-	// Props
-	double _Ascent, _Descent, _Leading;
-
-	GTypeFacePrivate()
-	{
-		IsSymbol = false;
-		_Ascent = _Descent = _Leading = 0.0;
-		_Face = 0;
-		_Size = GCss::Len(GCss::LenPt, 8.0f);
-		_Weight = FW_NORMAL;
-		_Italic = false;
-		_Underline = false;
-		_CodePage = NewStr("utf-8");
-		_Fore.Rgb(0, 0, 0);
-		_Back.Rgb(255, 255, 255);
-		_TabSize = 32; // px
-		_Transparent = false;
-		_Quality = DEFAULT_QUALITY;
-		_SubGlyphs = LFontSystem::Inst()->GetDefaultGlyphSub();
-	}
-
-	~GTypeFacePrivate()
-	{
-		DeleteArray(_Face);
-		DeleteArray(_CodePage);
-	}
-};
-
-LTypeFace::LTypeFace()
-{
-	d = new GTypeFacePrivate;
-}
-
-LTypeFace::~LTypeFace()
-{
-	DeleteObj(d);
-}
-
-bool LTypeFace::operator ==(LTypeFace &t)
-{
-	if ((Face() == 0) ^ (t.Face() == 0))
-		return false;
-	if (Face() && t.Face() && stricmp(Face(), t.Face()) != 0)
-		return false;
-	if (Size() != t.Size())
-		return false;
-	if (GetWeight() != t.GetWeight())
-		return false;
-	if (Italic() != t.Italic())
-		return false;
-	if (Underline() != t.Underline())
-		return false;
-	return true;
-}
-
-// set
-void LTypeFace::Face(const char *s)
-{
-	if (s &&
-		s != d->_Face &&
-		stricmp(s, d->_Face?d->_Face:(char*)"") != 0)
-	{
-		DeleteArray(d->_Face);
-		d->_Face = NewStr(s);
-		LgiAssert(d->_Face != NULL);
-		_OnPropChange(true);
-	}
-}
-
-void LTypeFace::Size(GCss::Len s)
-{
-	if (d->_Size != s)
-	{
-		d->_Size = s;
-		_OnPropChange(true);
-	}
-}
-
-void LTypeFace::PointSize(int i)
-{
-	Size(GCss::Len(GCss::LenPt, (float)i));
-}
-
-void LTypeFace::TabSize(int i)
-{
-	d->_TabSize = MAX(i, 8);
-	_OnPropChange(false);
-}
-
-void LTypeFace::Quality(int i)
-{
-	if (d->_Quality != i)
-	{
-		d->_Quality = i;
-		_OnPropChange(true);
-	}
-}
-
-GColour LTypeFace::WhitespaceColour()
-{
-	if (d->WhiteSpace.IsValid())
-		return d->WhiteSpace;
-	
-	return d->_Back.Mix(d->_Fore, LGI_WHITESPACE_WEIGHT);
-}
-
-void LTypeFace::WhitespaceColour(GColour c)
-{
-	d->WhiteSpace = c;
-	_OnPropChange(false);
-}
-
-void LTypeFace::Fore(LSystemColour c)
-{
-	d->_Fore = LColour(c);
-	_OnPropChange(false);
-}
-
-void LTypeFace::Fore(GColour c)
-{
-	d->_Fore = c;
-	_OnPropChange(false);
-}
-
-void LTypeFace::Back(LSystemColour c)
-{
-	d->_Back = LColour(c);
-	_OnPropChange(false);
-}
-
-void LTypeFace::Back(GColour c)
-{
-	d->_Back = c;
-	_OnPropChange(false);
-}
-
-void LTypeFace::SetWeight(int i)
-{
-	if (d->_Weight != i)
-	{
-		d->_Weight = i;
-		_OnPropChange(true);
-	}
-}
-
-void LTypeFace::Italic(bool i)
-{
-	if (d->_Italic != i)
-	{
-		d->_Italic = i;
-		_OnPropChange(true);
-	}
-}
-
-void LTypeFace::Underline(bool i)
-{
-	if (d->_Underline != i)
-	{
-		d->_Underline = i;
-		_OnPropChange(true);
-	}
-}
-
-void LTypeFace::Transparent(bool i)
-{
-	d->_Transparent = i;
-	_OnPropChange(false);
-}
-
-void LTypeFace::Colour(LSystemColour Fore, LSystemColour Back)
-{
-	d->_Fore = LColour(Fore);
-	d->_Back = LColour(Back);
-	_OnPropChange(false);
-}
-
-void LTypeFace::Colour(GColour Fore, GColour Back)
-{
-	LgiAssert(Fore.IsValid());
-	d->_Fore = Fore;
-	d->_Back = Back;
-	// Transparent(Back.Transparent());
-	_OnPropChange(false);
-}
-
-void LTypeFace::SubGlyphs(bool i)
-{
-	if (!i || LFontSystem::Inst()->GetGlyphSubSupport())
-	{
-		d->_SubGlyphs = i;
-		_OnPropChange(false);
-	}
-}
-
-////////////////////////
-// get
-char *LTypeFace::Face()
-{
-	return d->_Face;
-}
-
-GCss::Len LTypeFace::Size()
-{
-	return d->_Size;
-}
-
-int LTypeFace::PointSize()
-{
-	if (d->_Size.Type == GCss::LenPt)
-		return (int)d->_Size.Value;
-	
-	if (d->_Size.Type == GCss::LenPx)
-		return (int) (d->_Size.Value * 72 / LgiScreenDpi());
-
-	LgiAssert(!"What now?");
-	return 0;
-}
-
-int LTypeFace::TabSize()
-{
-	return d->_TabSize;
-}
-
-int LTypeFace::Quality()
-{
-	return d->_Quality;
-}
-
-GColour LTypeFace::Fore()
-{
-	return d->_Fore;
-}
-
-GColour LTypeFace::Back()
-{
-	return d->_Back;
-}
-
-int LTypeFace::GetWeight()
-{
-	return d->_Weight;
-}
-
-bool LTypeFace::Italic()
-{
-	return d->_Italic;
-}
-
-bool LTypeFace::Underline()
-{
-	return d->_Underline;
-}
-
-bool LTypeFace::Transparent()
-{
-	return d->_Transparent;
-}
-
-bool LTypeFace::SubGlyphs()
-{
-	return d->_SubGlyphs;
-}
-
-double LTypeFace::Ascent()
-{
-	return d->_Ascent;
-}
-
-double LTypeFace::Descent()
-{
-	return d->_Descent;
-}
-
-double LTypeFace::Leading()
-{
-	return d->_Leading;
-}
-
 ////////////////////////////////////////////////////////////////////
-// LFont class, the implemention
 #include "LFontPriv.h"
 
 #ifdef WINDOWS
@@ -1443,761 +1136,6 @@ LFont &LFont::operator =(LFont &f)
 	return *this;
 }
 
-///////////////////////////////////////////////////////////////////////
-LFontType::LFontType(const char *face, int pointsize)
-{
-	#if defined WINNATIVE
-
-	ZeroObj(Info);
-	if (face)
-	{
-		swprintf_s(Info.lfFaceName, CountOf(Info.lfFaceName), L"%S", face);
-	}
-	if (pointsize)
-	{
-		Info.lfHeight = WinHeightToPoint(pointsize);
-	}
-
-	#else
-
-	if (face) Info.Face(face);
-	if (pointsize) Info.PointSize(pointsize);
-
-	#endif
-}
-
-LFontType::~LFontType()
-{
-}
-
-const char *LFontType::GetFace()
-{
-	#ifdef WINNATIVE
-	Buf = Info.lfFaceName;
-	return Buf;
-	#else
-	return Info.Face();
-	#endif
-}
-
-void LFontType::SetFace(const char *Face)
-{
-	#ifdef WINNATIVE
-	if (Face)
-	{
-		swprintf_s(Info.lfFaceName, CountOf(Info.lfFaceName), L"%S", Face);
-	}
-	else
-	{
-		Info.lfFaceName[0] = 0;
-	}
-	#else
-	Info.Face(Face);
-	#endif
-}
-
-int LFontType::GetPointSize()
-{
-	#ifdef WINNATIVE
-	return WinHeightToPoint(Info.lfHeight);
-	#else
-	return Info.PointSize();
-	#endif
-}
-
-void LFontType::SetPointSize(int PointSize)
-{
-	#ifdef WINNATIVE
-	Info.lfHeight = WinPointToHeight(PointSize);
-	#else
-	Info.PointSize(PointSize);
-	#endif
-}
-
-bool LFontType::DoUI(GView *Parent)
-{
-	bool Status = false;
-
-	#if WINNATIVE
-	void *i = &Info;
-	int bytes = sizeof(Info);
-	#else
-	char i[128];
-	int bytes = sprintf_s(i, sizeof(i), "%s,%i", Info.Face(), Info.PointSize());
-	#endif
-
-	GFontSelect Dlg(Parent, i, bytes);
-	if (Dlg.DoModal() == IDOK)
-	{
-		#if WINNATIVE
-		Dlg.Serialize(i, sizeof(Info), true);
-		#else
-		if (Dlg.Face) Info.Face(Dlg.Face);
-		Info.PointSize(Dlg.Size);
-		#endif
-
-		Status = true;
-	}
-
-	return Status;
-}
-
-bool LFontType::GetDescription(char *Str, int SLen)
-{
-	if (Str && GetFace())
-	{
-		sprintf_s(Str, SLen, "%s, %i pt", GetFace(), GetPointSize());
-		return true;
-	}
-
-	return false;
-}
-
-bool LFontType::Serialize(GDom *Options, const char *OptName, bool Write)
-{
-	bool Status = false;
-
-	if (Options && OptName)
-	{
-		LVariant v;
-		#if defined WINNATIVE
-		if (Write)
-		{
-			v.SetBinary(sizeof(Info), &Info);
-			Status = Options->SetValue(OptName, v);
-		}
-		else
-		{
-			if (Options->GetValue(OptName, v))
-			{
-				if (v.Type == GV_BINARY &&
-					v.Value.Binary.Length == sizeof(Info))
-				{
-					memcpy(&Info, v.Value.Binary.Data, sizeof(Info));
-					Status = ValidStrW(Info.lfFaceName);
-				}
-			}
-		}
-		#else
-		if (Write)
-		{
-			char Temp[128];
-			sprintf_s(Temp, sizeof(Temp), "%s,%i pt", Info.Face(), Info.PointSize());
-			Status = Options->SetValue(OptName, v = Temp);
-		}
-		else
-		{
-			if (Options->GetValue(OptName, v) && ValidStr(v.Str()))
-			{
-				char *Comma = strchr(v.Str(), ',');
-				if (Comma)
-				{
-					*Comma++ = 0;
-					int PtSize = atoi(Comma);
-					if (stricmp(v.Str(), "(null)"))
-					{
-						Info.Face(v.Str());
-						Info.PointSize(PtSize);
-						// printf("FontTypeSer getting '%s' = '%s' pt %i\n", OptName, v.Str(), PtSize);
-						Status = true;
-					}
-				}
-			}
-		}
-		#endif
-	}
-
-	return Status;
-}
-
-bool LFontType::GetConfigFont(const char *Tag)
-{
-	bool Status = false;
-
-	auto Font = LgiApp->GetConfig(Tag);
-	if (Font)
-	{
-		// read from config file
-		auto p = Font.Split(":");
-		if (p.Length() == 2)
-		{
-			SetFace(p[0]);
-			SetPointSize((int)p[1].Int());
-			Status = true;
-		}
-		else LgiTrace("%s:%i - Font specification should be: <font>:<pointSize>\n", _FL);
-	}
-
-	return Status;
-}
-
-class GFontTypeCache
-{
-	char DefFace[64];
-	int DefSize;
-	char Face[64];
-	int Size;
-
-public:
-	GFontTypeCache(char *defface, int defsize)
-	{
-		ZeroObj(Face);
-		Size = -1;
-		strcpy_s(DefFace, sizeof(DefFace), defface);
-		DefSize = defsize;
-	}
-	
-	char *GetFace(char *Type = 0)
-	{
-		#ifdef LINUX
-		if (!IsInit())
-		{
-			char f[256];
-			int s;
-			if (_GetSystemFont(Type, f, sizeof(f), s))
-			{
-				strcpy_s(Face, sizeof(Face), f);
-				Size = s;
-			}
-			else
-			{
-				Face[0] = 0;
-				Size = 0;
-			}
-		}
-		#endif
-
-		return ValidStr(Face) ? Face : DefFace;
-	}
-	
-	int GetSize()
-	{
-		return Size > 0 ? Size : DefSize;
-	}
-	
-	bool IsInit()
-	{
-		return Size >= 0;
-	}
-};
-
-#if defined USE_CORETEXT
-
-bool MacGetSystemFont(LTypeFace &Info, CTFontUIFontType Which)
-{
-	CTFontRef ref = CTFontCreateUIFontForLanguage(Which, 0.0, NULL);
-	if (!ref)
-		return false;
-
-	bool Status = false;
-	CFStringRef name = CTFontCopyFamilyName(ref);
-	if (name)
-	{
-		CGFloat sz = CTFontGetSize(ref);
-		GString face(name);
-
-		Info.Face(face);
-		Info.PointSize((int)sz + MAC_FONT_SIZE_OFFSET);
-
-		CFRelease(name);
-		Status = true;
-	}
-
-	CFRelease(ref);
-
-	return Status;
-}
-
-#endif
-
-bool LFontType::GetSystemFont(const char *Which)
-{
-	bool Status = false;
-
-	if (!Which)
-	{
-		LgiAssert(!"No param supplied.");
-		return false;
-	}
-	
-	#if LGI_SDL
-
-	#elif defined WINNATIVE
-
-	// Get the system settings
-	NONCLIENTMETRICS info;
-	info.cbSize = sizeof(info);
-	#if (WINVER >= 0x0600)
-	GArray<int> Ver;
-	if (LGetOs(&Ver) == LGI_OS_WIN32 &&
-		Ver[0] <= 5)
-		info.cbSize -= 4;
-	#endif
-	BOOL InfoOk = SystemParametersInfo(	SPI_GETNONCLIENTMETRICS,
-										info.cbSize,
-										&info,
-										0);
-	if (!InfoOk)
-	{
-		LgiTrace("%s:%i - SystemParametersInfo failed with 0x%x (info.cbSize=%i, os=%i, %i)\n",
-			_FL, GetLastError(),
-			info.cbSize,
-			LGetOs(), LGI_OS_WIN9X);
-	}
-
-	// Convert windows font height into points
-	int Height = WinHeightToPoint(info.lfMessageFont.lfHeight);
-
-	#elif defined __GTK_H__
-
-	// Define some defaults.. in case the system settings aren't there
-	static char DefFont[64] =
-	#ifdef __CYGWIN__
-		"Luxi Sans";
-	#else
-		"Sans";
-	#endif
-	int DefSize = 10;
-	// int Offset = 0;
-
-	static bool First = true;
-	if (First)
-	{
-		bool ConfigFontUsed = false;
-		char p[MAX_PATH];
-		LGetSystemPath(LSP_HOME, p, sizeof(p));
-		LgiMakePath(p, sizeof(p), p, ".lgi.conf");
-		if (LFileExists(p))
-		{
-			GAutoString a(ReadTextFile(p));
-			if (a)
-			{
-				GString s;
-				s = a.Get();
-				GString::Array Lines = s.Split("\n");
-				for (int i=0; i<Lines.Length(); i++)
-				{
-					if (Lines[i].Find("=")>=0)
-					{
-						GString::Array p = Lines[i].Split("=", 1);
-						if (!_stricmp(p[0].Lower(), "font"))
-						{
-							GString::Array d = p[1].Split(":");
-							if (d.Length() > 1)
-							{
-								strcpy_s(DefFont, sizeof(DefFont), d[0]);
-								int PtSize = d[1].Int();
-								if (PtSize > 0)
-								{
-									DefSize = PtSize;
-									ConfigFontUsed = true;
-									
-									printf("Config font %s : %i\n", DefFont, DefSize);
-								}
-							}
-						}
-					}
-				}
-			}
-			else printf("Can't read '%s'\n", p);
-		}
-		
-		if (!ConfigFontUsed)
-		{	
-			Gtk::GtkStyle *s = Gtk::gtk_style_new();
-			if (s)
-			{
-				const char *fam = Gtk::pango_font_description_get_family(s->font_desc);
-				if (fam)
-				{
-					strcpy_s(DefFont, sizeof(DefFont), fam);
-				}
-				else printf("%s:%i - pango_font_description_get_family failed.\n", _FL);
-
-				if (Gtk::pango_font_description_get_size_is_absolute(s->font_desc))
-				{
-					float Px = Gtk::pango_font_description_get_size(s->font_desc) / PANGO_SCALE;
-					float Dpi = (float)LgiScreenDpi();
-					DefSize = (Px * 72.0) / Dpi;
-					printf("pango px=%f, Dpi=%f\n", Px, Dpi);
-				}
-				else
-				{
-					DefSize = Gtk::pango_font_description_get_size(s->font_desc) / PANGO_SCALE;
-				}
-				
-				g_object_unref(s);
-			}
-			else printf("%s:%i - gtk_style_new failed.\n", _FL);
-		}
-		
-		First = false;
-	}
-	
-	#endif
-
-	if (!_stricmp(Which, "System"))
-	{
-		Status = GetConfigFont("Font-System");
-		if (!Status)
-		{
-			// read from system
-			#if LGI_SDL
-
-				#if defined(WIN32)
-				Info.Face("Tahoma");
-				Info.PointSize(11);
-				Status = true;
-				#elif defined(MAC)
-				Info.Face("LucidaGrande");
-				Info.PointSize(11);
-				Status = true;
-				#elif defined(LINUX)
-				Info.Face("Sans");
-				Info.PointSize(11);
-				Status = true;
-				#else
-				#error fix me
-				#endif
-			
-			#elif defined WINNATIVE
-
-				if (InfoOk)
-				{
-					// Copy the font metrics
-					memcpy(&Info, &info.lfMessageFont, sizeof(Info));
-					Status = true;
-				}
-				else LgiTrace("%s:%i - Info not ok.\n", _FL);
-
-			#elif defined __GTK_H__
-
-				Info.Face(DefFont);
-				Info.PointSize(DefSize);
-				Status = true;
-		
-			#elif defined MAC
-			
-
-				#ifdef USE_CORETEXT
-
-				Status = MacGetSystemFont(Info, kCTFontUIFontControlContent);
-
-				#else
-			
-				Str255 Name;
-				SInt16 Size;
-				Style St;
-				OSStatus e = GetThemeFont(	kThemeSmallSystemFont,
-											smSystemScript,
-											Name,
-											&Size,
-											&St);
-				if (e) printf("%s:%i - GetThemeFont failed with %i\n", __FILE__, __LINE__, (int)e);
-				else
-				{
-					Info.Face(p2c(Name));
-					Info.PointSize(Size);
-					Status = true;
-					
-					// printf("System=%s,%i\n", Info.Face(), Size);
-				}
-				#endif
-
-			#endif
-		}
-	}
-	else if (!stricmp(Which, "Menu"))
-	{
-		Status = GetConfigFont("Font-Menu");
-		if (!Status)
-		{
-			#if LGI_SDL
-			
-			LgiAssert(!"Impl me.");
-			
-			#elif defined WINNATIVE
-
-			if (InfoOk)
-			{
-				// Copy the font metrics
-				memcpy(&Info, &info.lfMenuFont, sizeof(Info));
-				Status = true;
-			}
-
-			#elif defined __GTK_H__
-
-			Info.Face(DefFont);
-			Info.PointSize(DefSize);
-			Status = true;
-
-			#elif defined MAC && !LGI_COCOA
-			
-				#if USE_CORETEXT
-
-					Status = MacGetSystemFont(Info, kCTFontUIFontMenuItem);
-
-				#else
-
-					Str255 Name;
-					SInt16 Size;
-					Style St;
-					OSStatus e = GetThemeFont(	kThemeMenuItemFont,
-												smSystemScript,
-												Name,
-												&Size,
-												&St);
-					if (e) printf("%s:%i - GetThemeFont failed with %i\n", __FILE__, __LINE__, (int)e);
-					else
-					{
-						Info.Face(p2c(Name));
-						Info.PointSize(Size);
-						Status = true;
-					}
-			
-				#endif
-
-			#endif
-		}
-	}
-	else if (!stricmp(Which, "Caption"))
-	{
-		Status = GetConfigFont("Font-Caption");
-		if (!Status)
-		{
-			#if LGI_SDL
-			
-				LgiAssert(!"Impl me.");
-			
-			#elif defined WINNATIVE
-
-				if (InfoOk)
-				{
-					// Copy the font metrics
-					memcpy(&Info, &info.lfCaptionFont, sizeof(Info));
-					Status = true;
-				}
-			
-			#elif defined LINUX
-
-			#elif defined __GTK_H__
-
-				Info.Face(DefFont);
-				Info.PointSize(DefSize-1);
-				Status = true;
-
-			#elif defined MAC && !LGI_COCOA
-			
-				#if USE_CORETEXT
-
-				Status = MacGetSystemFont(Info, kCTFontUIFontToolbar);
-			
-				#else
-			
-				Str255 Name;
-				SInt16 Size;
-				Style St;
-				OSStatus e = GetThemeFont(	kThemeToolbarFont,
-											smSystemScript,
-											Name,
-											&Size,
-											&St);
-				if (e) printf("%s:%i - GetThemeFont failed with %i\n", __FILE__, __LINE__, (int)e);
-				else
-				{
-					Info.Face(p2c(Name));
-					Info.PointSize(Size);
-					Status = true;
-				}
-			
-				#endif
-
-			#endif
-		}
-	}
-	else if (!stricmp(Which, "Status"))
-	{
-		Status = GetConfigFont("Font-Status");
-		if (!Status)
-		{
-			#if LGI_SDL
-			
-				LgiAssert(!"Impl me.");
-			
-			#elif defined WINNATIVE
-			
-			if (InfoOk)
-			{
-				// Copy the font metrics
-				memcpy(&Info, &info.lfStatusFont, sizeof(Info));
-				Status = true;
-			}
-			
-			#elif defined __GTK_H__
-
-			Info.Face(DefFont);
-			Info.PointSize(DefSize);
-			Status = true;
-
-			#elif defined MAC && !LGI_COCOA
-			
-				#if USE_CORETEXT
-
-				Status = MacGetSystemFont(Info, kCTFontUIFontSystemDetail);
-			
-				#else
-			
-				Str255 Name;
-				SInt16 Size;
-				Style St;
-				OSStatus e = GetThemeFont(	kThemeToolbarFont,
-											smSystemScript,
-											Name,
-											&Size,
-											&St);
-				if (e) printf("%s:%i - GetThemeFont failed with %i\n", __FILE__, __LINE__, (int)e);
-				else
-				{
-					Info.Face(p2c(Name));
-					Info.PointSize(Size);
-					Status = true;
-				}
-			
-				#endif
-
-			#endif
-		}
-	}
-	else if (!stricmp(Which, "Small"))
-	{
-		Status = GetConfigFont("Font-Small");
-		if (!Status)
-		{
-			#if LGI_SDL
-			
-				LgiAssert(!"Impl me.");
-			
-			#elif defined WINNATIVE
-
-			if (InfoOk)
-			{
-				// Copy the font metrics
-				memcpy(&Info, &info.lfSmCaptionFont, sizeof(Info));
-				if (LGetOs() == LGI_OS_WIN9X && _wcsicmp(Info.lfFaceName, L"ms sans serif") == 0)
-				{
-					SetFace("Arial");
-				}
-
-				// Make it a bit smaller than the system font
-				Info.lfHeight = WinPointToHeight(WinHeightToPoint(info.lfMessageFont.lfHeight)-1);
-				Info.lfWeight = FW_NORMAL;
-
-				Status = true;
-			}
-
-			#elif defined __GTK_H__
-
-			Info.Face(DefFont);
-			Info.PointSize(DefSize-1);
-			Status = true;
-			
-			#elif defined MAC
-			
-				#if USE_CORETEXT
-
-				Status = MacGetSystemFont(Info, kCTFontUIFontSmallSystem);
-			
-				#else
-			
-				Str255 Name;
-				SInt16 Size;
-				Style St;
-				OSStatus e = GetThemeFont(	kThemeSmallSystemFont,
-											smSystemScript,
-											Name,
-											&Size,
-											&St);
-				if (e) printf("%s:%i - GetThemeFont failed with %i\n", __FILE__, __LINE__, (int)e);
-				else
-				{
-					Info.Face(p2c(Name));
-					Info.PointSize(Size - 2);
-					Status = true;
-				}
-			
-				#endif
-
-			#endif
-		}
-	}
-	else if (!stricmp(Which, "Fixed"))
-	{
-		Status = GetConfigFont("Font-Fixed");
-		if (!Status)
-		{
-			#if LGI_SDL
-			
-			LgiAssert(!"Impl me.");
-			
-			#elif defined WINNATIVE
-
-			// SetFace("Courier New");
-			SetFace("Consolas");
-			Info.lfHeight = WinPointToHeight(10);
-			Status = true;
-
-			#elif defined __GTK_H__
-
-			Info.Face("Courier New");
-			Info.PointSize(DefSize);
-			Status = true;
-			
-			#elif defined MAC
-			
-			Status = MacGetSystemFont(Info, kCTFontUIFontUserFixedPitch);
-
-			#else
-
-			#error "Impl me"
-
-			#endif
-		}
-	}
-	else
-	{
-		LgiAssert(!"Invalid param supplied.");
-	}
-	
-	// printf("GetSystemFont(%s)=%i %s,%i\n", Which, Status, Info.Face(), Info.PointSize());
-	return Status;
-}
-
-bool LFontType::GetFromRef(OsFont Handle)
-{
-	#if defined WIN32
-	return GetObject(Handle, sizeof(Info), &Info) == sizeof(Info);
-	#else
-	// FIXME
-	return false;
-	#endif
-}
-
-LFont *LFontType::Create(GSurface *pSurface)
-{
-	LFont *New = new LFont;
-	if (New)
-	{
-		if (!New->Create(this, pSurface))
-		{
-			DeleteObj(New);
-		}
-		
-		if (New)
-			LgiAssert(New->GetHeight() > 0);
-	}
-	return New;
-}
-
 char16 WinSymbolToUnicode[256] = 
 {
     /*   0 to  15 */ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -2256,4 +1194,159 @@ GAutoString LFont::ConvertToUnicode(char16 *Input, ssize_t Len)
 	
 	return a;
 }
+
+#if WINNATIVE
+#include "lgi/common/FontSelect.h"
+#include "lgi/common/GdiLeak.h"
+
+/////////////////////////////////////////////////////////////////////////////
+void LFont::_Measure(int &x, int &y, OsChar *Str, int Len)
+{
+	if (!Handle())
+	{
+		x = 0;
+		y = 0;
+		return;
+	}
+
+	HDC hDC = GetSurface() ? GetSurface()->Handle() : CreateCompatibleDC(0);
+	HFONT hOldFont = (HFONT) SelectObject(hDC, Handle());
+
+	SIZE Size;
+	if (GetTextExtentPoint32W(hDC, Str, Len, &Size))
+	{
+		x = Size.cx;
+		y = Size.cy;
+	}
+	else
+	{
+		x = y = 0;
+	}
+
+	SelectObject(hDC, hOldFont);
+	if (!GetSurface())
+		DeleteDC(hDC);
+}
+
+int LFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
+{
+	if (!Handle())
+		return -1;
+
+	INT Fit = 0;
+	HDC hDC = CreateCompatibleDC(GetSurface()?GetSurface()->Handle():0);
+	HFONT hOldFont = (HFONT) SelectObject(hDC, Handle());
+	if (hOldFont)
+	{
+		SIZE Size = {0, 0};
+
+		if (!GetTextExtentExPointW(hDC, Str, Len, x, &Fit, 0, &Size))
+		{
+			DWORD e = GetLastError();
+			Fit = -1;
+		}
+		else if (Type == LgiNearest && Fit < Len)
+		{
+			// Check if the next char is nearer...
+			SIZE Prev, Next;
+			if (GetTextExtentPoint32W(hDC, Str, Fit, &Prev) &&
+				GetTextExtentPoint32W(hDC, Str, Fit + 1, &Next))
+			{
+				int PrevDist = abs(Prev.cx - x);
+				int NextDist = abs(Next.cx - x);
+				if (NextDist <= PrevDist)
+					Fit++;
+			}
+		}
+
+		SelectObject(hDC, hOldFont);
+	}
+	else
+	{
+		DWORD e = GetLastError();
+		Fit = -1;
+		LgiAssert(0);
+	}
+
+	DeleteDC(hDC);
+	return Fit;
+}
+
+void LFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore)
+{
+	if (!Handle())
+		return;
+
+	HDC hDC = pDC->StartDC();
+	HFONT hOldFont = (HFONT) SelectObject(hDC, Handle());
+	if (hOldFont)
+	{
+		bool IsTransparent = Transparent();
+		
+		SetTextColor(hDC, fore.GetNative());
+		if (!IsTransparent)
+			SetBkColor(hDC, Back().GetNative());
+		SetBkMode(hDC, IsTransparent ? TRANSPARENT : OPAQUE);
+
+		SIZE Size;
+		if ((!IsTransparent && !r)
+			||
+			(GetOwnerUnderline()))
+		{
+			GetTextExtentPoint32W(hDC, Str, Len, &Size);
+		}
+
+		if (Transparent() && !r)
+		{
+			TextOutW(hDC, x, y, Str, Len);
+		}
+		else
+		{
+			RECT rc;
+			if (r)
+				rc = *r;
+			else
+			{
+				rc.left = x;
+				rc.top = y;
+				rc.right = x + Size.cx;
+				rc.top = y + Size.cy;
+			}
+			
+			ExtTextOutW(hDC, x, y, ETO_CLIPPED | (Transparent()?0:ETO_OPAQUE), &rc, Str, Len, 0);
+		}
+
+		if (GetOwnerUnderline())
+		{
+			pDC->Colour(fore);
+			pDC->Line(x, y + GetHeight() - 1, x + Size.cx + 1, y + GetHeight() - 1);
+		}
+
+		HANDLE h = SelectObject(hDC, hOldFont);
+	}
+	else
+	{
+		DWORD e = GetLastError();
+		LgiAssert(0);
+	}
+	pDC->EndDC();
+
+}
+
+#else
+
+void LFont::_Measure(int &x, int &y, OsChar *Str, int Len)
+{
+}
+
+int LFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
+{
+	return -1;
+}
+
+void LFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore)
+{
+}
+
+#endif
 

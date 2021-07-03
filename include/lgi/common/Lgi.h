@@ -166,7 +166,7 @@
 		<li> GAlert
 		<li> GInput
 		<li> GFileSelect
-		<li> GFontSelect
+		<li> LFontSelect
 		<li> GPrinter::Browse
 		<li> GProgressDlg
 		<li> GFindDlg

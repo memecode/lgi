@@ -8,6 +8,57 @@ typedef ATSUTextMeasurement OsTextSize;
 typedef double OsTextSize;
 #endif
 
+class LTypeFacePrivate
+{
+public:
+	// Type
+	char *_Face;			// type face
+	GCss::Len _Size;		// size
+	int _Weight;
+	bool _Italic;
+	bool _Underline;
+	char *_CodePage;
+	int _Quality;
+
+	// Output
+	GColour _Fore;
+	GColour _Back;
+	GColour WhiteSpace; // Can be empty (if so it's calculated)
+	int _TabSize;
+	bool _Transparent;
+	bool _SubGlyphs;
+
+	// Backs
+	bool IsSymbol;
+
+	// Props
+	double _Ascent, _Descent, _Leading;
+
+	LTypeFacePrivate()
+	{
+		IsSymbol = false;
+		_Ascent = _Descent = _Leading = 0.0;
+		_Face = 0;
+		_Size = GCss::Len(GCss::LenPt, 8.0f);
+		_Weight = FW_NORMAL;
+		_Italic = false;
+		_Underline = false;
+		_CodePage = NewStr("utf-8");
+		_Fore.Rgb(0, 0, 0);
+		_Back.Rgb(255, 255, 255);
+		_TabSize = 32; // px
+		_Transparent = false;
+		_Quality = DEFAULT_QUALITY;
+		_SubGlyphs = LFontSystem::Inst()->GetDefaultGlyphSub();
+	}
+
+	~LTypeFacePrivate()
+	{
+		DeleteArray(_Face);
+		DeleteArray(_CodePage);
+	}
+};
+
 class LFontPrivate
 {
 public:

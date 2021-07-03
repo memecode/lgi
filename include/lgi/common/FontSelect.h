@@ -14,13 +14,13 @@
 /// #endif
 /// ZeroObj(Info);
 /// 
-/// GFontSelect Dlg(MyWindow, Info);
+/// LFontSelect Dlg(MyWindow, Info);
 /// if (Dlg.DoModal() == IDOK)
 /// {
 /// 	Dlg.Serialize(Info, true);
 /// }
 /// \endcode
-class GFontSelect : public LDialog
+class LFontSelect : public LDialog
 {
 	struct GFontSelectPriv *d;
 	
@@ -44,7 +44,7 @@ public:
 	bool Italic;
 
 	/// Create the dialog
-	GFontSelect
+	LFontSelect
 	(
 		/// The parent window
 		GView *Parent,
@@ -53,7 +53,7 @@ public:
 		/// Buffer length of Init
 		int InitLen = 0
 	);
-	~GFontSelect();
+	~LFontSelect();
 
 	int OnNotify(GViewI *Ctrl, int Flags);
 

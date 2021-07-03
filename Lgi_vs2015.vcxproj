@@ -427,7 +427,9 @@
     <ClCompile Include="src\common\Gdc2\Font\LFont.cpp" />
     <ClCompile Include="src\common\Gdc2\Font\LFontCodePages.cpp" />
     <ClCompile Include="src\common\Gdc2\Font\LFontSystem.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\LFontType.cpp" />
     <ClCompile Include="src\common\Gdc2\Font\LStringLayout.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\LTypeFace.cpp" />
     <ClCompile Include="src\common\Gdc2\GColour.cpp" />
     <ClCompile Include="src\common\Gdc2\GdcCommon.cpp" />
     <ClCompile Include="src\common\Gdc2\LRect.cpp" />

@@ -46,7 +46,7 @@ struct GFontSelectPriv
 	}
 };
 
-GFontSelect::GFontSelect(GView *Parent, void *Init, int InitLen)
+LFontSelect::LFontSelect(GView *Parent, void *Init, int InitLen)
 {
 	// Initialize
 	d = new GFontSelectPriv;
@@ -120,12 +120,12 @@ GFontSelect::GFontSelect(GView *Parent, void *Init, int InitLen)
 	OnNotify(d->PtSizes, 0);
 }
 
-GFontSelect::~GFontSelect()
+LFontSelect::~LFontSelect()
 {
 	DeleteObj(d);
 }
 
-const char *GFontSelect::GetSelectedFace()
+const char *LFontSelect::GetSelectedFace()
 {
 	LListItem *i = d->Lst->GetSelected();
 	if (i)
@@ -133,7 +133,7 @@ const char *GFontSelect::GetSelectedFace()
 	return NULL;
 }
 
-void GFontSelect::InsertFont(const char *f)
+void LFontSelect::InsertFont(const char *f)
 {
 	if (f && f[0] != '@')
 	{
@@ -156,7 +156,7 @@ int SortFunc(LListItem *a, LListItem *b, NativeInt Data)
 	return Stricmp(a->GetText(0), b->GetText(0));
 }
 
-void GFontSelect::EnumerateFonts()
+void LFontSelect::EnumerateFonts()
 {
 	GString::Array Fonts;
 	if (LFontSystem::Inst()->EnumerateFonts(Fonts))
@@ -169,7 +169,7 @@ void GFontSelect::EnumerateFonts()
 	}
 }
 
-void GFontSelect::UpdatePreview()
+void LFontSelect::UpdatePreview()
 {
 	if (!d->Running)
 		return;
@@ -228,7 +228,7 @@ void GFontSelect::UpdatePreview()
 	}
 }
 
-void GFontSelect::OnCreate()
+void LFontSelect::OnCreate()
 {
 	LListItem *i = d->Lst->GetSelected();
 	if (i)
@@ -237,7 +237,7 @@ void GFontSelect::OnCreate()
 	}
 }
 
-void GFontSelect::UiToThis()
+void LFontSelect::UiToThis()
 {
 	Face = GetSelectedFace();
 	Size = (int)GetCtrlValue(IDC_PT_SIZE);
@@ -246,7 +246,7 @@ void GFontSelect::UiToThis()
 	Italic = GetCtrlValue(IDC_ITALIC) != 0;
 }
 
-bool GFontSelect::Serialize(void *Data, int DataLen, bool Write)
+bool LFontSelect::Serialize(void *Data, int DataLen, bool Write)
 {
 	if (Write) // Dialog -> Data
 	{
@@ -341,7 +341,7 @@ bool GFontSelect::Serialize(void *Data, int DataLen, bool Write)
 	return true;
 }
 
-int GFontSelect::OnNotify(GViewI *Ctrl, int Flags)
+int LFontSelect::OnNotify(GViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{

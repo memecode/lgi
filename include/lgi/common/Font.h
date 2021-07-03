@@ -86,7 +86,7 @@ class LFontType;
 class LgiClass LTypeFace
 {
 protected:
-	class GTypeFacePrivate *d;
+	class LTypeFacePrivate *d;
 
 	// Methods
 	virtual void _OnPropChange(bool c) {} // if false then it's just a property change
