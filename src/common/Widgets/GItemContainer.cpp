@@ -194,7 +194,7 @@ void GItemContainer::PaintColumnHeadings(LSurface *pDC)
 			}
 			else
 			{
-				LgiWideBorder(ColDC, cr, DefaultRaisedEdge);
+				LWideBorder(ColDC, cr, DefaultRaisedEdge);
 				ColDC->Colour(LColour(L_MED));
 				ColDC->Rectangle(&cr);
 			}
@@ -977,12 +977,12 @@ void GItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 			{
 				if (d->Down)
 				{
-					LgiThinBorder(pDC, r, DefaultSunkenEdge);
-					LgiFlatBorder(pDC, r, 1);
+					LThinBorder(pDC, r, DefaultSunkenEdge);
+					LFlatBorder(pDC, r, 1);
 				}
 				else
 				{
-					LgiWideBorder(pDC, r, DefaultRaisedEdge);
+					LWideBorder(pDC, r, DefaultRaisedEdge);
 				}
 				
 				OnPaint_Content(pDC, r, true);

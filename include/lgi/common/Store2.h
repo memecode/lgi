@@ -137,7 +137,7 @@ namespace Storage2
 	};
 
 	class StorageKitImpl :
-		public GBase,
+		public LBase,
 		public StorageKit,
 		public LMutex
 	{

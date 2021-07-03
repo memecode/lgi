@@ -579,7 +579,7 @@ bool GMenuItem::ScanForAccel()
 	const char *Sc = ShortCut;
 	if (!Sc)
 	{
-		char *n = GBase::Name();
+		char *n = LBase::Name();
 		if (n)
 		{
 			char *Tab = strchr(n, '\t');
@@ -709,7 +709,7 @@ void GMenuItem::Checked(bool c)
 
 bool GMenuItem::Name(const char *n)
 {
-	return GBase::Name(n);
+	return LBase::Name(n);
 }
 
 void GMenuItem::Enabled(bool e)
@@ -745,7 +745,7 @@ int GMenuItem::Id()
 
 char *GMenuItem::Name()
 {
-	return GBase::Name();
+	return LBase::Name();
 }
 
 bool GMenuItem::Separator()
@@ -979,7 +979,7 @@ bool GAccelerator::Match(LKey &k)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-GCommand::GCommand()
+LCommand::LCommand()
 {
 	Flags = GWF_VISIBLE;
 	Id = 0;
@@ -990,13 +990,13 @@ GCommand::GCommand()
 	PrevValue = false;
 }
 
-GCommand::~GCommand()
+LCommand::~LCommand()
 {
 	DeleteArray(Accelerator);
 	DeleteArray(TipHelp);
 }
 
-bool GCommand::Enabled()
+bool LCommand::Enabled()
 {
 	if (ToolButton)
 		return ToolButton->Enabled();
@@ -1005,7 +1005,7 @@ bool GCommand::Enabled()
 	return false;
 }
 
-void GCommand::Enabled(bool e)
+void LCommand::Enabled(bool e)
 {
 	if (ToolButton)
 	{
@@ -1017,7 +1017,7 @@ void GCommand::Enabled(bool e)
 	}
 }
 
-bool GCommand::Value()
+bool LCommand::Value()
 {
 	bool HasChanged = false;
 
@@ -1038,7 +1038,7 @@ bool GCommand::Value()
 	return PrevValue;
 }
 
-void GCommand::Value(bool v)
+void LCommand::Value(bool v)
 {
 	if (ToolButton)
 	{

@@ -44,7 +44,7 @@ void LWindow::MoveOnScreen()
 		!IsZoomed(Handle()) &&
 		!IsIconic(Handle()) &&
 		#endif
-		LgiGetDisplays(Displays))
+		LGetDisplays(Displays))
 	{
 		int Best = -1;
 		int Pixels = 0;
@@ -101,7 +101,7 @@ void LWindow::MoveToCenter()
 	LRect p = GetPos();
 
 	p.Offset(-p.x1, -p.y1);
-	if (LgiGetDisplays(Displays, &Screen) && Displays.Length() > 0)
+	if (LGetDisplays(Displays, &Screen) && Displays.Length() > 0)
 	{
 		GDisplayInfo *Dsp = NULL;
 		for (auto d: Displays)

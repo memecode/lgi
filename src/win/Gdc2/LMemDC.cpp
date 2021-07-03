@@ -542,7 +542,7 @@ void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 		else
 		{
 			GArray<GDisplayInfo*> Displays;
-			LgiGetDisplays(Displays, &b);
+			LGetDisplays(Displays, &b);
 		}
 
 		int RowOp;

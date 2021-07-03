@@ -630,7 +630,7 @@ void GToolButton::OnPaint(LSurface *pDC)
 			// Draw border
 			GColour Background;
 			if (Down) // Sunken if the button is pressed
-				LgiThinBorder(pDC, p, DefaultSunkenEdge);
+				LThinBorder(pDC, p, DefaultSunkenEdge);
 
 			if (BackImg)
 			{

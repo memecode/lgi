@@ -908,7 +908,7 @@ bool GWindow::Attach(GViewI *p)
 								GDK_FOCUS_CHANGE_MASK |
 								GDK_STRUCTURE_MASK |
 								GDK_VISIBILITY_NOTIFY_MASK);
-		gtk_window_set_title(Wnd, GBase::Name());
+		gtk_window_set_title(Wnd, LBase::Name());
 		d->AttachState = LAttaching;
 
 		// g_action_map_add_action_entries (G_ACTION_MAP(Wnd), app_entries, G_N_ELEMENTS (app_entries), Wnd);
@@ -1290,12 +1290,12 @@ bool GWindow::Name(const char *n)
 		gtk_window_set_title(Wnd, n);
 	}
 
-	return GBase::Name(n);
+	return LBase::Name(n);
 }
 
 const char *GWindow::Name()
 {
-	return GBase::Name();
+	return LBase::Name();
 }
 
 struct CallbackParams

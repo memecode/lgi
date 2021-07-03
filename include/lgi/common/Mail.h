@@ -105,7 +105,7 @@ public:
 };
 
 /// Attachment descriptor
-class FileDescriptor : public GBase
+class FileDescriptor : public LBase
 {
 protected:
 	// Global
@@ -152,7 +152,7 @@ public:
 };
 
 /// Address dscriptor
-class AddressDescriptor : public GBase
+class AddressDescriptor : public LBase
 {
 public:
 	uint8_t Status;

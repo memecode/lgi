@@ -2787,7 +2787,7 @@ void IdeProject::CreateProject()
 
 ProjectStatus IdeProject::OpenFile(const char *FileName)
 {
-	GProfile Prof("IdeProject::OpenFile");
+	LProfile Prof("IdeProject::OpenFile");
 	Prof.HideResultsIfBelow(1000);
 
 	Empty();

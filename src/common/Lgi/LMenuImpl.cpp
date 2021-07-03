@@ -255,7 +255,7 @@ bool SubMenuImpl::OnKey(LKey &k)
 void SubMenuImpl::OnPaint(LSurface *pDC)
 {
 	LRect c = GetClient();
-    LgiWideBorder(pDC, c, EdgeXpRaised);
+    LWideBorder(pDC, c, EdgeXpRaised);
     pDC->Colour(LC_MED, 24);
     pDC->Rectangle(&c);
 }
@@ -437,7 +437,7 @@ void MenuImpl::OnPaint(LSurface *pDC)
 {
 	LRect c = GetClient();
 	
-	LgiThinBorder(pDC, c, EdgeXpRaised);
+	LThinBorder(pDC, c, EdgeXpRaised);
     pDC->Colour(LC_MED, 24);
     pDC->Rectangle(&c);
 }

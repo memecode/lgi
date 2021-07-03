@@ -112,7 +112,7 @@ bool LgiGetFileMimeType(const char *File, char *Mime, int BufLen)
 	return Status;
 }
 
-bool _GetApps_Add(GArray<GAppInfo*> &Apps, char *In)
+bool _GetApps_Add(GArray<LAppInfo*> &Apps, char *In)
 {
 	GAutoString Path;
 
@@ -176,7 +176,7 @@ bool _GetApps_Add(GArray<GAppInfo*> &Apps, char *In)
 			p.Push(Path);
 		}
 
-		GAppInfo *a = new GAppInfo;
+		LAppInfo *a = new LAppInfo;
 		if (a)
 		{
 			Apps[Apps.Length()] = a;
@@ -218,7 +218,7 @@ bool _GetApps_Add(GArray<GAppInfo*> &Apps, char *In)
 	return false;
 }
 
-bool LGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
+bool LGetAppsForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 
@@ -393,7 +393,7 @@ bool LgiGetAppForMimeType(const char *Mime, char *AppPath, int BufSize)
 	bool Status = false;
 	if (AppPath)
 	{
-		GArray<GAppInfo*> Apps;
+		GArray<LAppInfo*> Apps;
 		Status = LGetAppsForMimeType(Mime, Apps, 1);
 		if (Status)
 		{

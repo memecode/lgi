@@ -39,7 +39,7 @@ namespace Storage1
 
 	};
 
-	class StorageItemImpl : public GBase, public StorageItem
+	class StorageItemImpl : public LBase, public StorageItem
 	{
 		friend class StorageKitImpl;
 		friend class StoreRef;
@@ -112,7 +112,7 @@ namespace Storage1
 		int Reserved3[12];
 	};
 
-	class StorageKitImpl : public GBase, public StorageKit
+	class StorageKitImpl : public LBase, public StorageKit
 	{
 		friend class StorageItemImpl;
 

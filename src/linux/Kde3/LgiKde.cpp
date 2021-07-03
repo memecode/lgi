@@ -16,7 +16,7 @@ KInstance Inst(InstName);
 extern "C"
 {
 	bool LgiWmInit(void *Reserved);
-	bool LgiWmMimeToApps(char *Mime, GArray<GAppInfo*> &Apps, int Limit);
+	bool LgiWmMimeToApps(char *Mime, GArray<LAppInfo*> &Apps, int Limit);
 	bool LgiWmGetSysFont(char *Type, char *Font, int FontLen, int &PtSize);
 	bool LgiWmGetLanguage(char *Lang);
 	bool LgiWmGetColour(int Which, WmColour *Colour);
@@ -46,7 +46,7 @@ bool LgiWmInit(void *Reserved)
 	return true;
 }
 
-bool LgiWmMimeToApps(char *Mime, GArray<GAppInfo*> &Apps, int Limit)
+bool LgiWmMimeToApps(char *Mime, GArray<LAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 
@@ -55,7 +55,7 @@ bool LgiWmMimeToApps(char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 	for (it=offers.begin(); Apps.Length()<Limit AND it!=offers.end(); it++)
 	{
 		KService::Ptr service = (*it).service();
-		GAppInfo *App = new GAppInfo;
+		LAppInfo *App = new LAppInfo;
 		if (App)
 		{
 			Apps.Add(App);

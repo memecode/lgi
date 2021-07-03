@@ -231,7 +231,7 @@ bool GRadioGroup::NameW(const char16 *n)
 		Status = GView::NameW(n);
 
 		d->Empty();
-		d->Add(GBase::Name(), GetCss());
+		d->Add(LBase::Name(), GetCss());
 		d->SetBaseFont(GetFont());
 		d->DoLayout(X());
 
@@ -340,7 +340,7 @@ void GRadioGroup::OnPaint(LSurface *pDC)
 
 		int y = d->GetMin().y;
 		LRect b(0, y/2, X()-1, Y()-1);
-		LgiWideBorder(pDC, b, EdgeXpChisel);
+		LWideBorder(pDC, b, EdgeXpChisel);
 
 		LPoint TxtPt(6, 0);
 		LRect TxtRc = d->GetBounds();
@@ -506,7 +506,7 @@ bool GRadioButton::NameW(const char16 *n)
 		Status = GView::NameW(n);
 
 		d->Empty();
-		d->Add(GBase::Name(), GetCss());
+		d->Add(LBase::Name(), GetCss());
 		d->SetBaseFont(GetFont());
 		d->DoLayout(X());
 

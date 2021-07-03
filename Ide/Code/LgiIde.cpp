@@ -1704,7 +1704,7 @@ Chk;
 	}
 	
 	#ifdef LINUX
-	LgiFinishXWindowsStartup(this);
+	LFinishXWindowsStartup(this);
 	#endif
 	
 	#if USE_HAIKU_PULSE_HACK

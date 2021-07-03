@@ -287,7 +287,7 @@ void GWindow::Visible(bool v)
 
 bool GWindow::Name(const char *n)
 {
-	bool Status = GBase::Name(n);
+	bool Status = LBase::Name(n);
 	if (Wnd)
 	{
 		bool Lock = Wnd->Lock();
@@ -299,7 +299,7 @@ bool GWindow::Name(const char *n)
 
 char *GWindow::Name()
 {
-	return GBase::Name();
+	return LBase::Name();
 }
 
 LRect &GWindow::GetPos()

@@ -2,8 +2,8 @@
 #include "GScrollBar.h"
 #include "LgiRes.h"
 
-// #define DrawBorder(dc, r, edge) LgiWideBorder(dc, r, edge)
-#define DrawBorder(dc, r, edge) LgiThinBorder(dc, r, edge)
+// #define DrawBorder(dc, r, edge) LWideBorder(dc, r, edge)
+#define DrawBorder(dc, r, edge) LThinBorder(dc, r, edge)
 
 #if defined(LGI_CARBON)
 	#define MAC_SKIN		1

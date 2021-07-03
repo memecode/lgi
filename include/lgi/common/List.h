@@ -43,7 +43,7 @@ public:
 	virtual void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c) = 0;
 };
 
-class LgiClass LListItemColumn : public GBase, public GItem, public LListItemPainter
+class LgiClass LListItemColumn : public LBase, public GItem, public LListItemPainter
 {
 	LListItem *_Item;
 	int _Column;

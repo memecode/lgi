@@ -145,7 +145,7 @@ bool LgiFindBounds(LSurface *pDC, LRect *rc)
 
 //////////////////////////////////////////////////////////////////////
 // Drawing functions
-void LgiDrawBox(LSurface *pDC, LRect &r, bool Sunken, bool Fill)
+void LDrawBox(LSurface *pDC, LRect &r, bool Sunken, bool Fill)
 {
 	if (Fill)
 	{
@@ -162,7 +162,7 @@ void LgiDrawBox(LSurface *pDC, LRect &r, bool Sunken, bool Fill)
 	pDC->Line(r.x1, r.y1, r.x2, r.y1);
 }
 
-void LgiWideBorder(LSurface *pDC, LRect &r, LgiEdge Type)
+void LWideBorder(LSurface *pDC, LRect &r, LgiEdge Type)
 {
 	if (!pDC) return;
 	COLOUR Old = pDC->Colour();
@@ -289,7 +289,7 @@ void LgiWideBorder(LSurface *pDC, LRect &r, LgiEdge Type)
 	pDC->Colour(Old);
 }
 
-void LgiThinBorder(LSurface *pDC, LRect &r, LgiEdge Type)
+void LThinBorder(LSurface *pDC, LRect &r, LgiEdge Type)
 {
 	if (!pDC) return;
 	COLOUR Old = pDC->Colour();
@@ -334,7 +334,7 @@ void LgiThinBorder(LSurface *pDC, LRect &r, LgiEdge Type)
 	pDC->Colour(Old);
 }
 
-void LgiFlatBorder(LSurface *pDC, LRect &r, int Width)
+void LFlatBorder(LSurface *pDC, LRect &r, int Width)
 {
 	pDC->Colour(LColour(L_MED));
 	if (Width < 1 || r.X() < (2 * Width) || r.Y() < (2 * Width))

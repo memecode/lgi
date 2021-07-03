@@ -150,7 +150,7 @@ void LgiCrashHandler(int Sig)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-typedef GArray<GAppInfo*> AppArray;
+typedef GArray<LAppInfo*> AppArray;
 
 #ifndef XK_Num_Lock
 #define XK_Num_Lock                      0xff7f
@@ -984,7 +984,7 @@ GAutoString GApp::GetFileMimeType(const char *File)
 	return Status;
 }
 
-bool GApp::GetAppsForMimeType(char *Mime, GArray<GAppInfo*> &Apps)
+bool GApp::GetAppsForMimeType(char *Mime, GArray<LAppInfo*> &Apps)
 {
 	// Find alternative version of the MIME type (e.g. x-type and type).
 	char AltMime[256];

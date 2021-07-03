@@ -242,9 +242,9 @@ LRect GCssTools::PaintBorder(LSurface *pDC, LRect &in)
 			int Px = b.ToPx(Content.X(), Font);
 			Drawn = true;
 			if (Px == 1)
-				LgiThinBorder(pDC, Content, DefaultSunkenEdge);
+				LThinBorder(pDC, Content, DefaultSunkenEdge);
 			else if (Px == 2)
-				LgiWideBorder(pDC, Content, DefaultSunkenEdge);
+				LWideBorder(pDC, Content, DefaultSunkenEdge);
 			else
 				LgiAssert(!"Unsupported sunken border width");
 			break;
@@ -254,9 +254,9 @@ LRect GCssTools::PaintBorder(LSurface *pDC, LRect &in)
 			int Px = b.ToPx(Content.X(), Font);
 			Drawn = true;
 			if (Px == 1)
-				LgiThinBorder(pDC, Content, DefaultRaisedEdge);
+				LThinBorder(pDC, Content, DefaultRaisedEdge);
 			else if (Px == 2)
-				LgiWideBorder(pDC, Content, DefaultRaisedEdge);
+				LWideBorder(pDC, Content, DefaultRaisedEdge);
 			else
 				LgiAssert(!"Unsupported raised border width");
 			break;

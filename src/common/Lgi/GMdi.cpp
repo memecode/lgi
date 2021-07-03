@@ -281,7 +281,7 @@ void GMdiChild::OnPaint(LSurface *pDC)
 {
 	LRect p = GLayout::GetClient();
 	// Border
-	LgiWideBorder(pDC, p, RAISED);
+	LWideBorder(pDC, p, RAISED);
 	pDC->Colour(LC_MED, 24);
 	pDC->Box(&p);
 	p.Size(1, 1);
@@ -324,7 +324,7 @@ void GMdiChild::OnPaint(LSurface *pDC)
 	d->Close.x1 = d->Close.x2 - d->Close.Y() + 1;
 	d->Close.Size(2, 2);
 	r = d->Close;
-	LgiWideBorder(pDC, r, d->CloseDown ? SUNKEN : RAISED);
+	LWideBorder(pDC, r, d->CloseDown ? SUNKEN : RAISED);
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle(&r);
 	int Cx = d->Close.x1 + (d->Close.X() >> 1) - 1 + d->CloseDown;

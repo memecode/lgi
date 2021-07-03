@@ -1013,7 +1013,7 @@ LRect &CtrlDlg::GetClient(bool InClientSpace)
 void CtrlDlg::OnNcPaint(LSurface *pDC, LRect &r)
 {
 	// Draw the border
-	LgiWideBorder(pDC, r, DefaultRaisedEdge);
+	LWideBorder(pDC, r, DefaultRaisedEdge);
 
 	// Draw the title bar
 	int TitleY = LgiApp->GetMetric(LGI_MET_DECOR_CAPTION);
@@ -1108,7 +1108,7 @@ void CtrlEditbox::OnPaint(LSurface *pDC)
 	Client = r;
 	
 	// Draw the ctrl
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 	pDC->Colour(Enabled() ? L_WORKSPACE : L_MED);
 	pDC->Rectangle(&r);
 
@@ -1178,7 +1178,7 @@ void CtrlCheckbox::OnPaint(LSurface *pDC)
 	LRect r(0, 0, 12, 12);
 	
 	// Draw the ctrl
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle(&r);
 
@@ -1245,7 +1245,7 @@ void CtrlButton::OnPaint(LSurface *pDC)
 	char *Text = GetStr()->Get();
 	
 	// Draw the ctrl
-	LgiWideBorder(pDC, r, DefaultRaisedEdge);
+	LWideBorder(pDC, r, DefaultRaisedEdge);
 	SysFont->Fore(L_TEXT);
 
 	if (ValidStr(Text))
@@ -1288,7 +1288,7 @@ void CtrlGroup::OnPaint(LSurface *pDC)
 	
 	// Draw the ctrl
 	r.y1 += 5;
-	LgiWideBorder(pDC, r, EdgeXpChisel);
+	LWideBorder(pDC, r, EdgeXpChisel);
 	r.y1 -= 5;
 	SysFont->Fore(L_TEXT);
 	SysFont->Back(L_MED);
@@ -1539,7 +1539,7 @@ void CtrlTabs::OnPaint(LSurface *pDC)
 	Client.ZOff(X()-1, Y()-1);
 	Client.y1 = Title.y2;
 	LRect r = Client;
-	LgiWideBorder(pDC, r, DefaultRaisedEdge);
+	LWideBorder(pDC, r, DefaultRaisedEdge);
 
 	// Draw the tabs
 	int i = 0;
@@ -2011,7 +2011,7 @@ void CtrlList::OnPaint(LSurface *pDC)
 	LRect r(0, 0, X()-1, Y()-1);
 
 	// Draw the ctrl
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 	Title = r;
 	Title.y2 = Title.y1 + 15;
 	Client = r;
@@ -2030,7 +2030,7 @@ void CtrlList::OnPaint(LSurface *pDC)
 		x = r.x2 + 1;
 		if (r.Valid())
 		{
-			LgiWideBorder(pDC, r, DefaultRaisedEdge);
+			LWideBorder(pDC, r, DefaultRaisedEdge);
 
 			SysFont->Fore(L_TEXT);
 			SysFont->Back(L_MED);
@@ -2046,7 +2046,7 @@ void CtrlList::OnPaint(LSurface *pDC)
 	LRect Client(x, Title.y1, Title.x2, Title.y2);
 	if (Client.Valid())
 	{
-		LgiWideBorder(pDC, Client, DefaultRaisedEdge);
+		LWideBorder(pDC, Client, DefaultRaisedEdge);
 		pDC->Colour(L_MED);;
 		pDC->Rectangle(&Client);
 	}
@@ -2069,7 +2069,7 @@ void CtrlComboBox::OnPaint(LSurface *pDC)
 	Client = r;
 	
 	// Draw the ctrl
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 	
 	// Allocate space
 	LRect e = r;
@@ -2082,7 +2082,7 @@ void CtrlComboBox::OnPaint(LSurface *pDC)
 	pDC->Rectangle(&e);
 
 	// Draw drap down
-	LgiWideBorder(pDC, d, DefaultRaisedEdge);
+	LWideBorder(pDC, d, DefaultRaisedEdge);
 	pDC->Colour(L_MED);
 	pDC->Rectangle(&d);
 
@@ -2140,8 +2140,8 @@ void CtrlScrollBar::OnPaint(LSurface *pDC)
 	}
 
 	// Buttons
-	LgiWideBorder(pDC, a, DefaultRaisedEdge);
-	LgiWideBorder(pDC, c, DefaultRaisedEdge);
+	LWideBorder(pDC, a, DefaultRaisedEdge);
+	LWideBorder(pDC, c, DefaultRaisedEdge);
 	pDC->Colour(L_MED);
 	pDC->Rectangle(&a);
 	pDC->Rectangle(&c);
@@ -2183,7 +2183,7 @@ void CtrlTree::OnPaint(LSurface *pDC)
 	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 	pDC->Colour(Rgb24(255, 255, 255), 24);
 	pDC->Rectangle(&r);
 	SysFont->Colour(L_TEXT, L_WORKSPACE);
@@ -2208,7 +2208,7 @@ void CtrlBitmap::OnPaint(LSurface *pDC)
 	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 	pDC->Colour(Rgb24(255, 255, 255), 24);
 	pDC->Rectangle(&r);
 	pDC->Colour(0, 24);
@@ -2232,7 +2232,7 @@ void CtrlProgress::OnPaint(LSurface *pDC)
 	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 
 	COLOUR Flat = Rgb24(0x7f, 0x7f, 0x7f);
 	COLOUR White = Rgb24(0xff, 0xff, 0xff);
@@ -2268,7 +2268,7 @@ void CtrlCustom::OnPaint(LSurface *pDC)
 	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 
 	COLOUR White = Rgb24(0xff, 0xff, 0xff);
 

@@ -50,13 +50,13 @@ void GDatePopup::OnPaint(LSurface *pDC)
 
 	// Border
 	LRect r = GetClient();
-	LgiWideBorder(pDC, r, DefaultRaisedEdge);
+	LWideBorder(pDC, r, DefaultRaisedEdge);
 	pDC->Colour(L_MED);
 	pDC->Line(r.x2, r.y1, r.x2, r.y2);
 	pDC->Line(r.x1, r.y2, r.x2-1, r.y2);
 	r.x2--;
 	r.y2--;
-	LgiThinBorder(pDC, r, DefaultSunkenEdge);
+	LThinBorder(pDC, r, DefaultSunkenEdge);
 
 	// Layout
 	Caption = r;
@@ -69,7 +69,7 @@ void GDatePopup::OnPaint(LSurface *pDC)
 
 	// Caption bar
 	r = Caption;
-	LgiThinBorder(pDC, r, DefaultRaisedEdge);
+	LThinBorder(pDC, r, DefaultRaisedEdge);
 	pDC->Colour(L_MED);
 	pDC->Rectangle(&r);
 	char *Title = Mv.Title();

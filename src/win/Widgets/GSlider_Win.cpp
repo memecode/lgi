@@ -120,11 +120,11 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 					RECT rc;
 					SendMessage(Handle(), TBM_GETCHANNELRECT, 0, (LPARAM)&rc);
 					LRect r = rc;
-					LgiWideBorder(&dc, r, DefaultSunkenEdge);
+					LWideBorder(&dc, r, DefaultSunkenEdge);
 
 					SendMessage(Handle(), TBM_GETTHUMBRECT, 0, (LPARAM)&rc);
 					LRect t = rc;
-					LgiWideBorder(&dc, t, DefaultRaisedEdge);
+					LWideBorder(&dc, t, DefaultRaisedEdge);
 					dc.Colour(L_MED);
 					dc.Rectangle(&t);
 

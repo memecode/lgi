@@ -667,7 +667,7 @@ bool GView::Attach(GViewI *p)
 		if (!TestFlag(WndFlags, GWF_SYS_BORDER))
 			ExStyle &= ~(WS_EX_CLIENTEDGE | WS_EX_WINDOWEDGE);
 							
-		auto Text = GBase::NameW();
+		auto Text = LBase::NameW();
 		GAutoWString WCls(Utf8ToWide(ClsName));
 
 		_View = CreateWindowExW(ExStyle,
@@ -1194,14 +1194,14 @@ void GView::DrawThemeBorder(LSurface *pDC, LRect &r)
 	}
 	else
 	{
-		LgiWideBorder(pDC, r, Sunken() ? DefaultSunkenEdge : DefaultRaisedEdge);
+		LWideBorder(pDC, r, Sunken() ? DefaultSunkenEdge : DefaultRaisedEdge);
 		d->IsThemed = false;
 	}
 }
 #else
 void GView::DrawThemeBorder(LSurface *pDC, LRect &r)
 {
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 }
 #endif
 

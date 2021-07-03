@@ -832,7 +832,7 @@ void GTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 	#if PROFILE_POUR
 	char _txt[256];
 	sprintf_s(_txt, sizeof(_txt), "%p::PourText Lines=%i Sz=%i", this, (int)Line.Length(), (int)Size);
-	GProfile Prof(_txt);
+	LProfile Prof(_txt);
 	#endif
 
 	LgiAssert(InThread());
@@ -1426,7 +1426,7 @@ void GTextView3::PourStyle(size_t Start, ssize_t EditSize)
 
 bool GTextView3::Insert(size_t At, const char16 *Data, ssize_t Len)
 {
-	GProfile Prof("GTextView3::Insert");
+	LProfile Prof("GTextView3::Insert");
 	Prof.HideResultsIfBelow(1000);
 
 	LgiAssert(InThread());
@@ -4771,7 +4771,7 @@ void GTextView3::OnPaint(LSurface *pDC)
 	#if PROFILE_PAINT
 	char s[256];
 	sprintf_s(s, sizeof(s), "%p::OnPaint Lines=%i Sz=%i", this, (int)Line.Length(), (int)Size);
-	GProfile Prof(s);
+	LProfile Prof(s);
 	#endif
 
 		if (d->LayoutDirty)

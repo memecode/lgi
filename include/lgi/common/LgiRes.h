@@ -83,7 +83,7 @@ public:
 
 /// A menu resource
 /// \ingroup Resources
-class LgiClass LgiMenuRes : public GBase
+class LgiClass LgiMenuRes : public LBase
 {
 	LResources *Res;
 	LHashTbl<IntKey<int>, LgiStringRes*> Strings;

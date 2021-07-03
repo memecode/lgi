@@ -201,7 +201,7 @@ LMenuItem *LSubMenu::AppendSeparator(int Where)
 
 LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 {
-	GBase::Name(Str);
+	LBase::Name(Str);
 	LMenuItem *i = new LMenuItem(Menu, this, Str, Where < 0 ? Items.Length() : Where, NULL);
 	if (i)
 	{
@@ -585,7 +585,7 @@ LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int id, int Pos, co
 {
 	d = NULL;
 	GAutoString Txt = MenuItemParse(txt);
-	GBase::Name(txt);
+	LBase::Name(txt);
 	Info = NULL;
 
 	Handle(GTK_MENU_ITEM(gtk_menu_item_new_with_mnemonic(Txt)));
@@ -750,7 +750,7 @@ bool LMenuItem::ScanForAccel()
 	const char *Sc = ShortCut;
 	if (!Sc)
 	{
-		char *n = GBase::Name();
+		char *n = LBase::Name();
 		if (n)
 		{
 			char *Tab = strchr(n, '\t');
@@ -930,7 +930,7 @@ bool LMenuItem::ScanForAccel()
 	}
 	else
 	{
-		char *n = GBase::Name();
+		char *n = LBase::Name();
 		if (n)
 		{
 			char *Tab = strchr(n, '\t');
@@ -1375,7 +1375,7 @@ void LMenuItem::Checked(bool c)
 
 bool LMenuItem::Name(const char *n)
 {
-	bool Status = GBase::Name(n);	
+	bool Status = LBase::Name(n);	
 	
 	#if GtkVer(2, 16)
 	LgiAssert(Info);
@@ -1423,7 +1423,7 @@ int LMenuItem::Id()
 
 const char *LMenuItem::Name()
 {
-	return GBase::Name();
+	return LBase::Name();
 }
 
 bool LMenuItem::Separator()
@@ -1718,7 +1718,7 @@ bool GAccelerator::Match(LKey &k)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-GCommand::GCommand()
+LCommand::LCommand()
 {
 	Flags = GWF_VISIBLE;
 	Id = 0;
@@ -1729,13 +1729,13 @@ GCommand::GCommand()
 	PrevValue = false;
 }
 
-GCommand::~GCommand()
+LCommand::~LCommand()
 {
 	DeleteArray(Accelerator);
 	DeleteArray(TipHelp);
 }
 
-bool GCommand::Enabled()
+bool LCommand::Enabled()
 {
 	if (ToolButton)
 		return ToolButton->Enabled();
@@ -1744,7 +1744,7 @@ bool GCommand::Enabled()
 	return false;
 }
 
-void GCommand::Enabled(bool e)
+void LCommand::Enabled(bool e)
 {
 	if (ToolButton)
 	{
@@ -1756,7 +1756,7 @@ void GCommand::Enabled(bool e)
 	}
 }
 
-bool GCommand::Value()
+bool LCommand::Value()
 {
 	bool HasChanged = false;
 
@@ -1777,7 +1777,7 @@ bool GCommand::Value()
 	return PrevValue;
 }
 
-void GCommand::Value(bool v)
+void LCommand::Value(bool v)
 {
 	if (ToolButton)
 	{

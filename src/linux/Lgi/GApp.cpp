@@ -973,7 +973,7 @@ void GApp::OnCommandLine()
 	return Status;
 }
 
-bool GApp::GetAppsForMimeType(char *Mime, ::GArray<::GAppInfo*> &Apps)
+bool GApp::GetAppsForMimeType(char *Mime, ::GArray<::LAppInfo*> &Apps)
 {
 	// Find alternative version of the MIME type (e.g. x-type and type).
 	char AltMime[256];

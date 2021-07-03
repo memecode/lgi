@@ -347,7 +347,7 @@ LgiFunc bool LGetAppsForMimeType
 	/// - application/browser get the default web browser
 	const char *Mime,
 	/// The applications that can handle the 
-	GArray<GAppInfo*> &Apps,
+	GArray<LAppInfo*> &Apps,
 	/// Limit the length of the results, i.e. stop looking after 'Limit' matches.
 	/// -1 means return all matches.
 	int Limit = -1

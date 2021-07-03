@@ -308,7 +308,7 @@ int GProgressPane::OnNotify(GViewI *Ctrl, int Flags)
 void GProgressPane::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
-	LgiThinBorder(pDC, r, DefaultRaisedEdge);
+	LThinBorder(pDC, r, DefaultRaisedEdge);
 	pDC->Colour(L_MED);
 	pDC->Rectangle(&r);
 }

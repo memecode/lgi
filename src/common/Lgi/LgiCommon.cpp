@@ -1351,7 +1351,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 			
 			// Try and get the configured app name:
 			if (LgiApp)
-				Name = LgiApp->GBase::Name();
+				Name = LgiApp->LBase::Name();
 			
 			if (!Name)
 			{
@@ -2469,7 +2469,7 @@ GCapabilityTarget::~GCapabilityTarget()
 #define BUF_SIZE (4 << 10)
 #define PROFILE_MICRO	1
 
-GProfile::GProfile(const char *Name, int HideMs)
+LProfile::LProfile(const char *Name, int HideMs)
 {
 	MinMs = HideMs;
 	Used = 0;
@@ -2477,7 +2477,7 @@ GProfile::GProfile(const char *Name, int HideMs)
 	Add(Name);
 }
 
-GProfile::~GProfile()
+LProfile::~LProfile()
 {
 	Add("End");
 	
@@ -2522,12 +2522,12 @@ GProfile::~GProfile()
 	DeleteArray(Buf);
 }
 
-void GProfile::HideResultsIfBelow(int Ms)
+void LProfile::HideResultsIfBelow(int Ms)
 {
 	MinMs = Ms;
 }
 
-void GProfile::Add(const char *Name)
+void LProfile::Add(const char *Name)
 {
 	s.Add(Sample(
 		#if PROFILE_MICRO
@@ -2538,7 +2538,7 @@ void GProfile::Add(const char *Name)
 		Name));
 }
 
-void GProfile::Add(const char *File, int Line)
+void LProfile::Add(const char *File, int Line)
 {
 	if (!Buf)
 		if (!(Buf = new char[BUF_SIZE]))

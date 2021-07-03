@@ -868,7 +868,7 @@ GString GApp::GetFileMimeType(const char *File)
 	return LGetFileMimeType(File);
 }
 
-bool GApp::GetAppsForMimeType(char *Mime, GArray<GAppInfo*> &Apps)
+bool GApp::GetAppsForMimeType(char *Mime, GArray<LAppInfo*> &Apps)
 {
 	LgiAssert(!"Not impl.");
 	return false;

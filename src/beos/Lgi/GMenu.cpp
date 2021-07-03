@@ -468,7 +468,7 @@ bool GMenuItem::ScanForAccel()
 	char *Sc = ShortCut;
 	if (!Sc)
 	{
-		char *n = GBase::Name();
+		char *n = LBase::Name();
 		if (n)
 		{
 			char *tab = strrchr(n, '\t');
@@ -692,7 +692,7 @@ bool GMenuItem::Name(const char *n)
 	GAutoString p((n) ? NewStrLessAnd(n) : NewStr(""));
 	if (p)
 	{
-		Status = GBase::Name(p);
+		Status = LBase::Name(p);
 		if (Info) Info->SetLabel(p);
 	}
 
@@ -854,7 +854,7 @@ bool GMenu::OnKey(GView *v, LKey &k)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GCommand::GCommand()
+LCommand::LCommand()
 {
 	Flags = GWF_ENABLED | GWF_VISIBLE;
 	Id = 0;
@@ -864,13 +864,13 @@ GCommand::GCommand()
 	TipHelp = 0;
 }
 
-GCommand::~GCommand()
+LCommand::~LCommand()
 {
 	DeleteArray(Accelerator);
 	DeleteArray(TipHelp);
 }
 
-bool GCommand::Enabled()
+bool LCommand::Enabled()
 {
 	if (ToolButton)
 	{
@@ -884,7 +884,7 @@ bool GCommand::Enabled()
 	return false;
 }
 
-void GCommand::Enabled(bool e)
+void LCommand::Enabled(bool e)
 {
 	if (Enabled() != e)
 	{
@@ -899,7 +899,7 @@ void GCommand::Enabled(bool e)
 	}
 }
 
-bool GCommand::Value()
+bool LCommand::Value()
 {
 	bool v = FALSE;
 	if (ToolButton)
@@ -913,7 +913,7 @@ bool GCommand::Value()
 	return v;
 }
 
-void GCommand::Value(bool v)
+void LCommand::Value(bool v)
 {
 	if (ToolButton)
 	{

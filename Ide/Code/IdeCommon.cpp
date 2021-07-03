@@ -193,7 +193,7 @@ bool IdeCommon::AddFiles(AddFilesProgress *Prog, const char *Path)
 	}
 	else
 	{
-		// GProfile p("IdeCommon::AddFiles");
+		// LProfile p("IdeCommon::AddFiles");
 		// p.HideResultsIfBelow(50);
 		if (!Project->InProject(false, Path, false))
 		{

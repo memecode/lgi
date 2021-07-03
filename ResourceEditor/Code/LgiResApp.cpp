@@ -618,7 +618,7 @@ public:
 	void OnPaint(LSurface *pDC)
 	{
 		LRect c = GetClient();
-		LgiThinBorder(pDC, c, DefaultSunkenEdge);
+		LThinBorder(pDC, c, DefaultSunkenEdge);
 	}
 
 	bool OnLayout(GViewLayoutInfo &Inf)
@@ -4446,10 +4446,10 @@ void ResFrame::OnPaint(LSurface *pDC)
 {
 	// Draw nice frame
 	LRect r(0, 0, X()-1, Y()-1);
-	LgiThinBorder(pDC, r, DefaultRaisedEdge);
+	LThinBorder(pDC, r, DefaultRaisedEdge);
 	pDC->Colour(L_MED);
-	LgiFlatBorder(pDC, r, 4);
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LFlatBorder(pDC, r, 4);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 
 	// Set the child to the client area
 	Child->Wnd()->SetPos(r);

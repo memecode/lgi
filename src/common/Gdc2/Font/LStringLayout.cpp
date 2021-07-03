@@ -264,7 +264,7 @@ struct Break
 bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 {
 	#if DEBUG_PROFILE_LAYOUT
-	GProfile Prof("LStringLayout::DoLayout");
+	LProfile Prof("LStringLayout::DoLayout");
 	char Buf[1024];
 	int Ch = 0;
 	// Prof.HideResultsIfBelow(100);

@@ -14,7 +14,7 @@
 
 #include "LgiWinManGlue.h"
 
-typedef GArray<GAppInfo*> AppArray;
+typedef GArray<LAppInfo*> AppArray;
 using namespace Gtk;
 
 class GAppPrivate : public GSymLookup

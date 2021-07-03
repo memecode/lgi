@@ -148,21 +148,21 @@ void EditTray::OnPaint(LSurface *pDC)
 	}
 
 	LRect f = FileBtn;
-	LgiThinBorder(pDC, f, DefaultRaisedEdge);
+	LThinBorder(pDC, f, DefaultRaisedEdge);
 	{
 		LDisplayString ds(SysFont, HEADER_BTN_LABEL);
 		ds.Draw(pDC, f.x1 + 4, f.y1);
 	}
 
 	f = FuncBtn;
-	LgiThinBorder(pDC, f, DefaultRaisedEdge);
+	LThinBorder(pDC, f, DefaultRaisedEdge);
 	{
 		LDisplayString ds(SysFont, FUNCTION_BTN_LABEL);
 		ds.Draw(pDC, f.x1 + 4, f.y1);
 	}
 
 	f = SymBtn;
-	LgiThinBorder(pDC, f, DefaultRaisedEdge);
+	LThinBorder(pDC, f, DefaultRaisedEdge);
 	{
 		LDisplayString ds(SysFont, SYMBOL_BTN_LABEL);
 		ds.Draw(pDC, f.x1 + 4, f.y1);
@@ -1859,7 +1859,7 @@ void IdeDoc::OnPaint(LSurface *pDC)
 	
 	#if !MDI_TAB_STYLE
 	LRect c = GetClient();
-	LgiWideBorder(pDC, c, SUNKEN);
+	LWideBorder(pDC, c, SUNKEN);
 	#endif
 }
 
@@ -1941,7 +1941,7 @@ bool MatchSymbol(DefnInfo *Def, char16 *Symbol)
 {
 	static char16 Dots[] = {':', ':', 0};
 
-	GBase o;
+	LBase o;
 	o.Name(Def->Name);
 	auto Name = o.NameW();
 

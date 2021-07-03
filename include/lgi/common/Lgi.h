@@ -163,7 +163,7 @@
 	pre-rolled dialogs are:
 	<ul>
 		<li> ::LgiMsg
-		<li> GAlert
+		<li> LAlert
 		<li> GInput
 		<li> GFileSelect
 		<li> LFontSelect

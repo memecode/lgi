@@ -249,7 +249,7 @@ void GToolTabBar::OnPaint(LSurface *pScreen)
 	if (Border)
 	{
 		// Draw border
-		LgiThinBorder(pDC, r, DefaultRaisedEdge);
+		LThinBorder(pDC, r, DefaultRaisedEdge);
 		pDC->Colour(L_MED);
 		pDC->Rectangle(&r);
 		r.Size(5, 5);
@@ -276,7 +276,7 @@ void GToolTabBar::OnPaint(LSurface *pScreen)
 	{
 		r.y1 = GetBy() + Off;
 	}
-	LgiThinBorder(pDC, r, DefaultRaisedEdge);
+	LThinBorder(pDC, r, DefaultRaisedEdge);
 	pDC->Colour(L_MED);
 	pDC->Rectangle(&r);
 

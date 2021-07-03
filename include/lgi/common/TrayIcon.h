@@ -4,7 +4,7 @@
 /////////////////////////////////////////////////////////////////////////
 /// Put an icon in the system tray
 class LgiClass GTrayIcon :
-	public GBase
+	public LBase
 	// public GFlags
 {
 	friend class GTrayWnd;

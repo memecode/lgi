@@ -1,22 +1,23 @@
 #ifndef _LGI_CLASS_H_
 #define _LGI_CLASS_H_
 
-#include "LgiInc.h"
-#include "LgiDefs.h"
+#include "lgi/common/LgiInc.h"
+#include "lgi/common/LgiDefs.h"
+#include "lgi/common/AutoPtr.h"
+#include "lgi/common/StringClass.h"
+#include "lgi/common/Point.h"
+
 #if defined(__OBJC__) && !defined(__GTK_H__)
 #include <Cocoa/Cocoa.h>
 #endif
 #include <functional>
+
 
 // Virtual input classes
 class LKey;
 class LMouse;
 
 // General GUI classes
-class GTarget;
-class GComponent;
-class GEvent;
-class GId;
 class GApp;
 class LWindow;
 class LWindowsClass;
@@ -38,14 +39,14 @@ class GImageList;
 class LDialog;
 
 // General objects
-class LgiClass GBase
+class LgiClass LBase
 {
 	char *_Name8;
 	char16 *_Name16;
 
 public:
-	GBase();	
-	virtual ~GBase();
+	LBase();	
+	virtual ~LBase();
 
 	virtual const char *Name();
 	virtual bool Name(const char *n);
@@ -239,8 +240,6 @@ public:
 	bool IsContextMenu();
 };
 
-#include "lgi/common/Point.h"
-
 /// \brief All the parameters of a mouse click event
 ///
 /// The parent class LUiEvent keeps information about whether it was a Down()
@@ -335,20 +334,18 @@ public:
 	#endif
 };
 
-#include "lgi/common/AutoPtr.h"
-
 /// Holds information pertaining to an application
-class GAppInfo
+class LAppInfo
 {
 public:
 	/// The path to the executable for the app
-	GAutoString Path;
+	GString Path;
 	/// Plain text name for the app
-	GAutoString Name;
+	GString Name;
 	/// A path to an icon to display for the app
-	GAutoString Icon;
+	GString Icon;
 	/// The params to call the app with
-	GAutoString Params;
+	GString Params;
 };
 
 template<typename RESULT, typename CHAR>

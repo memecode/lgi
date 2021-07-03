@@ -117,7 +117,7 @@ bool GDialog::LoadFromResource(int Resource, char *TagList)
 {
 	GAutoString n;
 	LRect p;
-	GProfile Prof("GDialog::LoadFromResource");
+	LProfile Prof("GDialog::LoadFromResource");
 
 	bool Status = GLgiRes::LoadFromResource(Resource, this, &p, &n, TagList);
 	if (Status)

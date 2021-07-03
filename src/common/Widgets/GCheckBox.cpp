@@ -183,7 +183,7 @@ bool GCheckBox::NameW(const char16 *n)
 		Status = GView::NameW(n);
 
 		d->Empty();
-		d->Add(GBase::Name(), GetCss());
+		d->Add(LBase::Name(), GetCss());
 		d->SetBaseFont(GetFont());
 
 		auto x = X();
@@ -427,7 +427,7 @@ void GCheckBox::OnPaint(LSurface *pDC)
 		
 		#else
 	
-			LgiWideBorder(pDC, d->ValuePos, DefaultSunkenEdge);
+			LWideBorder(pDC, d->ValuePos, DefaultSunkenEdge);
 			pDC->Colour(d->Over || !en ? L_MED : L_WORKSPACE);
 			pDC->Rectangle(&d->ValuePos);
 			pDC->Colour(en ? L_TEXT : L_LOW);

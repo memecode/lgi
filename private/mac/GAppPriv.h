@@ -4,7 +4,7 @@
 #include "GSymLookup.h"
 #include "GFontCache.h"
 
-typedef GArray<GAppInfo*> AppArray;
+typedef GArray<LAppInfo*> AppArray;
 
 class GAppPrivate
 {

@@ -577,7 +577,7 @@ bool TableCell::SetVariant(const char *Name, LVariant &Value, char *Array)
 				return false;
 			}
 			
-			// GProfile p("ContainerChildren");
+			// LProfile p("ContainerChildren");
 			for (auto v: *Value.Value.Lst)
 			{
 				if (v->Type != GV_VOID_PTR)
@@ -1443,7 +1443,7 @@ void GTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, 
 
 	GString::Array Ps;
 	Ps.SetFixedLength(false);
-	GAutoPtr<GProfile> Prof(/*Debug ? new GProfile("Layout") :*/ NULL);
+	GAutoPtr<LProfile> Prof(/*Debug ? new LProfile("Layout") :*/ NULL);
 
 	// Zero everything to start with
 	MinCol.Length(0);
@@ -1983,7 +1983,7 @@ void GTableLayoutPrivate::Layout(LRect &Client)
 
 	GString s;
 	s.Printf("Layout %i x %i", Client.X(), Client.Y());
-	GAutoPtr<GProfile> Prof(/*Debug ? new GProfile(s) :*/ NULL);
+	GAutoPtr<LProfile> Prof(/*Debug ? new LProfile(s) :*/ NULL);
 
 	if (Prof) Prof->Add("Horz");
 

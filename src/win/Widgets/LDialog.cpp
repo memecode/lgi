@@ -584,9 +584,9 @@ GMessage::Result GControl::OnEvent(GMessage *Msg)
 		case WM_SETTEXT:
 		{
 			if (IsWindowUnicode(_View))
-				GBase::NameW((char16*)Msg->b);
+				LBase::NameW((char16*)Msg->b);
 			else
-				GBase::Name((char*)Msg->b);
+				LBase::Name((char*)Msg->b);
 			break;
 		}
 		case WM_GETDLGCODE:

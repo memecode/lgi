@@ -677,7 +677,7 @@ void VcFolder::UpdateColumns()
 void VcFolder::Select(bool b)
 {
 	#if PROFILE_FN
-	GProfile Prof("Select");
+	LProfile Prof("Select");
 	#endif
 	if (!b)
 	{
@@ -1281,7 +1281,7 @@ bool VcFolder::ParseLog(int Result, GString s, ParseParams *Params)
 void VcFolder::LinkParents()
 {
 	#if PROFILE_FN
-	GProfile Prof("LinkParents");
+	LProfile Prof("LinkParents");
 	#endif	
 	LHashTbl<StrKey<char>,VcCommit*> Map;
 	

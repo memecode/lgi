@@ -674,7 +674,7 @@ bool ProjectNode::Serialize(bool Write)
 								char *Msg = Buf.NewStr();
 								if (Msg)
 								{
-									GAlert a(Project->GetApp(), "Missing File", Msg, "Yes", "No", "Browse...");
+									LAlert a(Project->GetApp(), "Missing File", Msg, "Yes", "No", "Browse...");
 									switch (a.DoModal())
 									{
 										case 1: // Yes
@@ -714,7 +714,7 @@ bool ProjectNode::Serialize(bool Write)
 								char *Msg = Buf.NewStr();
 								if (Msg)
 								{
-									GAlert a(Project->GetApp(), "Missing File", Msg, "Skip", "Delete", "Browse...");
+									LAlert a(Project->GetApp(), "Missing File", Msg, "Skip", "Delete", "Browse...");
 									switch (a.DoModal())
 									{
 										case 1: // Skip

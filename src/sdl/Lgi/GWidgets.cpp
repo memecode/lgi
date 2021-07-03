@@ -269,7 +269,7 @@ void GSlider::OnPaint(LSurface *pDC)
 	r.y2 = r.y1 + 3;
 	r.x1 += 3;
 	r.x2 -= 3;
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 	
 	if (Min <= Max)
 	{
@@ -277,7 +277,7 @@ void GSlider::OnPaint(LSurface *pDC)
 		Thumb.ZOff(5, 9);
 		Thumb.Offset(r.x1 + x - 3, y - 5);
 		LRect b = Thumb;
-		LgiWideBorder(pDC, b, DefaultRaisedEdge);
+		LWideBorder(pDC, b, DefaultRaisedEdge);
 		pDC->Rectangle(&b);		
 	}
 }

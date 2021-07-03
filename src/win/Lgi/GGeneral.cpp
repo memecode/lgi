@@ -114,7 +114,7 @@ GString LGetFileMimeType(const char *File)
 	return GString();
 }
 
-bool _GetApps_Add(GArray<GAppInfo*> &Apps, char *In)
+bool _GetApps_Add(GArray<LAppInfo*> &Apps, char *In)
 {
 	GAutoString Path;
 
@@ -180,13 +180,13 @@ bool _GetApps_Add(GArray<GAppInfo*> &Apps, char *In)
 			p.Push(Path);
 		}
 
-		GAppInfo *a = new GAppInfo;
+		LAppInfo *a = new LAppInfo;
 		if (a)
 		{
 			Apps[Apps.Length()] = a;
 			
-			a->Params.Reset(TrimStr(In));
-			a->Path.Reset(p.NewStr());
+			a->Params = GString(In).Strip();
+			a->Path = p.NewGStr();
 			if (a->Path)
 			{
 				char e[MAX_PATH];
@@ -196,7 +196,7 @@ bool _GetApps_Add(GArray<GAppInfo*> &Apps, char *In)
 				d = strchr(e, '.');
 				if (d) *d = 0;
 				e[0] = toupper(e[0]);
-				a->Name.Reset(NewStr(e));
+				a->Name = e;
 				if (ValidStr(a->Name))
 				{
 					bool AllCaps = true;
@@ -210,7 +210,7 @@ bool _GetApps_Add(GArray<GAppInfo*> &Apps, char *In)
 					}
 					if (AllCaps)
 					{
-						Strlwr(a->Name + 1);
+						Strlwr(a->Name.Get() + 1);
 					}
 				}
 			}
@@ -222,7 +222,7 @@ bool _GetApps_Add(GArray<GAppInfo*> &Apps, char *In)
 	return false;
 }
 
-bool LGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
+bool LGetAppsForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 
@@ -396,7 +396,7 @@ bool LGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 GString LGetAppForMimeType(const char *Mime)
 {
 	GString App;
-	GArray<GAppInfo*> Apps;
+	GArray<LAppInfo*> Apps;
 	if (LGetAppsForMimeType(Mime, Apps, 1))
 		App = Apps[0]->Path.Get();
 	Apps.DeleteObjects();
@@ -852,7 +852,7 @@ GString WinGetSpecialFolderPath(int Id)
 #ifndef LGI_STATIC
 int LgiAssertDlg(GString Msg)
 {
-	GAlert a(LgiApp ? LgiApp->AppWnd : NULL, "Assert Failed", Msg, "Abort", "Debug", "Ignore");
+	LAlert a(LgiApp ? LgiApp->AppWnd : NULL, "Assert Failed", Msg, "Abort", "Debug", "Ignore");
 	a.SetAppModal();
 	return a.DoModal();
 }

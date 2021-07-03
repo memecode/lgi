@@ -132,7 +132,7 @@ bool GStatusPane::Name(const char *n)
 			!l ||
 			strcmp(l, n) != 0)
 		{
-			Status = GBase::Name(n);
+			Status = LBase::Name(n);
 			LRect p(0, 0, X()-1, Y()-1);
 			p.Size(1, 1);
 			Invalidate(&p);

@@ -6710,8 +6710,8 @@ bool GHtml2::NameW(const char16 *s)
 
 char16 *GHtml2::NameW()
 {
-	GBase::Name(Source);
-	return GBase::NameW();
+	LBase::Name(Source);
+	return LBase::NameW();
 }
 
 bool GHtml2::Name(const char *s)

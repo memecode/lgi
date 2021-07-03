@@ -576,7 +576,7 @@ void LMenuItem::_Paint(LSurface *pDC, int Flags)
 			LRect rgn = r;
 			if (Selected)
 			{
-				LgiThinBorder(pDC, rgn, DefaultSunkenEdge);
+				LThinBorder(pDC, rgn, DefaultSunkenEdge);
 				Fore = LColour(L_MENU_TEXT);
 				x++;
 				y++;
@@ -654,7 +654,7 @@ bool LMenuItem::ScanForAccel()
 	}
 	else
 	{
-		auto n = GBase::Name();
+		auto n = LBase::Name();
 		if (n)
 		{
 			auto Tab = strchr(n, '\t');
@@ -917,15 +917,15 @@ void LMenuItem::Checked(bool c)
 
 bool LMenuItem::Name(const char *Txt)
 {
-	bool Status = GBase::Name(Txt);
+	bool Status = LBase::Name(Txt);
 	if (Status)
 	{
 		GString n = NewStr(Txt);
 		if (n)
 		{
 			// Set OS menu structure
-			Info.dwTypeData = (LPWSTR)GBase::NameW();
-			Info.cch = (UINT) StrlenW(GBase::NameW());
+			Info.dwTypeData = (LPWSTR)LBase::NameW();
+			Info.cch = (UINT) StrlenW(LBase::NameW());
 			Info.fType |= MFT_STRING;
 			Info.fMask |= MIIM_TYPE | MIIM_DATA;
 
@@ -1009,7 +1009,7 @@ void LMenuItem::Visible(bool i)
 }
 
 int LMenuItem::Id() { return Info.wID; }
-const char *LMenuItem::Name() { return GBase::Name(); }
+const char *LMenuItem::Name() { return LBase::Name(); }
 bool LMenuItem::Separator() { return (Info.fType & MFT_SEPARATOR) != 0; }
 bool LMenuItem::Checked() { return (Info.fState & MF_CHECKED) != 0; }
 bool LMenuItem::Enabled()
@@ -1249,7 +1249,7 @@ bool GAccelerator::Match(LKey &k)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-GCommand::GCommand()
+LCommand::LCommand()
 {
 	Flags = GWF_VISIBLE;
 	Id = 0;
@@ -1260,13 +1260,13 @@ GCommand::GCommand()
 	PrevValue = false;
 }
 
-GCommand::~GCommand()
+LCommand::~LCommand()
 {
 	DeleteArray(Accelerator);
 	DeleteArray(TipHelp);
 }
 
-bool GCommand::Enabled()
+bool LCommand::Enabled()
 {
 	if (ToolButton)
 		return ToolButton->Enabled();
@@ -1275,7 +1275,7 @@ bool GCommand::Enabled()
 	return false;
 }
 
-void GCommand::Enabled(bool e)
+void LCommand::Enabled(bool e)
 {
 	if (ToolButton)
 	{
@@ -1287,7 +1287,7 @@ void GCommand::Enabled(bool e)
 	}
 }
 
-bool GCommand::Value()
+bool LCommand::Value()
 {
 	bool HasChanged = false;
 
@@ -1308,7 +1308,7 @@ bool GCommand::Value()
 	return PrevValue;
 }
 
-void GCommand::Value(bool v)
+void LCommand::Value(bool v)
 {
 	if (ToolButton)
 	{

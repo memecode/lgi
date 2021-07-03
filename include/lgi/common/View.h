@@ -18,7 +18,7 @@ LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
 ///
 /// For a GView with scroll bars use GLayout.
 ///
-class LgiClass GView : virtual public GViewI, virtual public GBase
+class LgiClass GView : virtual public GViewI, virtual public LBase
 {
 	friend		class LWindow;
 	friend		class GLayout;

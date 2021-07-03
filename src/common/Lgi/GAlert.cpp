@@ -13,7 +13,7 @@
 #define BTN_SCALE		1.0f
 #endif
 
-GAlert::GAlert(	GViewI *parent,
+LAlert::LAlert(	GViewI *parent,
 				const char *Title,
 				const char *Text,
 				const char *Btn1,
@@ -63,7 +63,7 @@ GAlert::GAlert(	GViewI *parent,
 		MoveToCenter();
 }
 
-void GAlert::SetAppModal()
+void LAlert::SetAppModal()
 {
     #if WINNATIVE
     SetExStyle(GetExStyle() | WS_EX_TOPMOST);
@@ -77,7 +77,7 @@ void GAlert::SetAppModal()
     #endif
 }
 
-int GAlert::OnNotify(GViewI *Ctrl, int Flags)
+int LAlert::OnNotify(GViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{

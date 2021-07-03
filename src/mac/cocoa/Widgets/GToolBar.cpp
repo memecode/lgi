@@ -862,11 +862,11 @@ void GToolButton::OnPaint(LSurface *pDC)
 			// Draw border
 			if (Down)
 			{
-				LgiThinBorder(pDC, p, SUNKEN);
+				LThinBorder(pDC, p, SUNKEN);
 			}
 			else if (e && Over)
 			{
-				LgiThinBorder(pDC, p, RAISED);
+				LThinBorder(pDC, p, RAISED);
 			}
 
 			pDC->Colour(Grey, 24);

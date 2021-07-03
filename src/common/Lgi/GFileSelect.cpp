@@ -307,7 +307,7 @@ public:
 		LRect c = GetClient();
 		GColour Background(L_MED);
 		c.Offset(-c.x1, -c.y1);
-		LgiWideBorder(pDC, c, Down ? DefaultSunkenEdge : DefaultRaisedEdge);
+		LWideBorder(pDC, c, Down ? DefaultSunkenEdge : DefaultRaisedEdge);
 		pDC->Colour(Background);
 		pDC->Rectangle(&c);
 		
@@ -535,8 +535,8 @@ public:
 	const char *Name()
 	{
 		GString n = NameAt(Cursor);
-		GBase::Name(n);
-		return GBase::Name();
+		LBase::Name(n);
+		return LBase::Name();
 	}
 	
 	bool Name(const char *n)
@@ -564,7 +564,7 @@ public:
 	void OnPaint(LSurface *pDC)
 	{
 		LRect c = GetClient();
-		LgiThinBorder(pDC, c, EdgeWin7Sunken);
+		LThinBorder(pDC, c, EdgeWin7Sunken);
 		
 		LFont *f = GetFont();
 		f->Transparent(false);

@@ -1297,7 +1297,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 					GArray<GDisplayInfo*> Displays;
 					LRect AllDisplays;
 					bool PosOk = true;
-					if (LgiGetDisplays(Displays, &AllDisplays))
+					if (LGetDisplays(Displays, &AllDisplays))
 					{
 						// Check that the position is on one of the screens
 						PosOk = false;

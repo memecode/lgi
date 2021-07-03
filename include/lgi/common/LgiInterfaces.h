@@ -19,13 +19,14 @@ class LRect;
 class LPoint;
 class LRegion;
 class LSurface;
-class GViewI;
 class LMouse;
 class LKey;
 class LWindow;
-class GView;
 class LVariant;
 class LCss;
+
+class GViewI;
+class GView;
 
 // Classes
 class GDomI

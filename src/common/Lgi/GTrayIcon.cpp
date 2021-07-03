@@ -400,7 +400,7 @@ void GTrayIcon::Visible(bool v)
 						if (Ref)
 						{
 							Gtk::gtk_status_icon_set_from_pixbuf(d->tray_icon, Ref);
-							Gtk::gtk_status_icon_set_tooltip_text(d->tray_icon, GBase::Name());
+							Gtk::gtk_status_icon_set_tooltip_text(d->tray_icon, LBase::Name());
 							Gtk::gtk_status_icon_set_visible(d->tray_icon, true);
 						}
 					}

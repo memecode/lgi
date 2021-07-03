@@ -2323,7 +2323,7 @@ void LList::UpdateScrollBars()
 void LList::PourAll()
 {
 	#if LList_POUR_PROFILE
-	GProfile Prof("PourAll()", 100);
+	LProfile Prof("PourAll()", 100);
 	#endif
 
 	// Layout all the elements

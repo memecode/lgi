@@ -1189,7 +1189,7 @@ public:
 	
 	bool GetVariables(bool Locals, GArray<Variable> &vars, bool Detailed)
 	{
-		// GProfile Prof("GetVars");
+		// LProfile Prof("GetVars");
 		GStringPipe p(256);
 
 		if (vars.Length())

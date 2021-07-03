@@ -179,7 +179,7 @@ bool GButton::SetImage(LSurface *Img, bool OwnIt)
 
 void GButton::OnStyleChange()
 {
-	d->Layout(GetCss(true), GBase::Name());
+	d->Layout(GetCss(true), LBase::Name());
 }
 
 bool GButton::Name(const char *n)
@@ -462,7 +462,7 @@ void GButton::OnPaint(LSurface *pDC)
 				pDC->Box(&r);
 				r.Size(1, 1);
 			}
-			LgiWideBorder(pDC, r, d->Pressed ? DefaultSunkenEdge : DefaultRaisedEdge);
+			LWideBorder(pDC, r, d->Pressed ? DefaultSunkenEdge : DefaultRaisedEdge);
 
 			LPoint pt;
 			pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);

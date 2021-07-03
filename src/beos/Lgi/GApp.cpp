@@ -72,7 +72,7 @@ GApp::GApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : B
 	d = new GAppPrivate;
 	TheApp = this;
 	d->Args = OsArgs;
-	GBase::Name(Name);
+	LBase::Name(Name);
 
 	// Setup LGI Sub-systems
 	LFontSystem::Inst();

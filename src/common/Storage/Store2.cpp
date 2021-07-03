@@ -1306,7 +1306,7 @@ namespace Storage2
 					Item1Desc,
 					Item2Desc);
 
-			GAlert Dlg(	Wnd,
+			LAlert Dlg(	Wnd,
 						DlgTitle,
 						Msg,
 						KeepItem1,
@@ -1537,7 +1537,7 @@ namespace Storage2
 								Item1Desc,
 								Item2Desc);
 
-						GAlert Dlg(	Wnd,
+						LAlert Dlg(	Wnd,
 									DlgTitle,
 									Msg,
 									KeepItem1,

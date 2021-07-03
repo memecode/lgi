@@ -74,7 +74,7 @@ bool LGetFileMimeType(const char *File, char *Mime)
 	return Status;
 }
 
-bool LgiGetsAppForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
+bool LgiGetsAppForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 	if (Mime)
@@ -91,10 +91,10 @@ bool LgiGetsAppForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 				BEntry e(&ap);
 				if (e.GetPath(&p) == B_OK)
 				{
-					GAppInfo *i = new GAppInfo;
+					LAppInfo *i = new LAppInfo;
 					if (i)
 					{
-						i->Path.Reset(NewStr((char*) p.Path()));
+						i->Path = p.Path();
 						Apps[0] = i;
 						Status = true;
 					}
@@ -251,7 +251,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 }
 
 bool LGetAppsForMimeType(const char *Mime,
-							GArray<GAppInfo*> &Apps,
+							GArray<LAppInfo*> &Apps,
 							int Limit = -1)
 {
 	LgiAssert(!"Impl me.");

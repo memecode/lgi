@@ -7175,8 +7175,8 @@ bool GHtml::NameW(const char16 *s)
 
 const char16 *GHtml::NameW()
 {
-	GBase::Name(Source);
-	return GBase::NameW();
+	LBase::Name(Source);
+	return LBase::NameW();
 }
 
 bool GHtml::Name(const char *s)
@@ -7460,7 +7460,7 @@ LPointF GHtml::GetDpiScale()
 
 void GHtml::OnPaint(LSurface *ScreenDC)
 {
-	// GProfile Prof("GHtml::OnPaint");
+	// LProfile Prof("GHtml::OnPaint");
 
 	#if GHTML_USE_DOUBLE_BUFFER
 	LRect Client = GetClient();
@@ -8406,7 +8406,7 @@ void GHtml::OnMouseClick(LMouse &m)
 							{
 								LgiMsg(	this,
 										"Failed to open '%s'\n%s",
-										LgiApp ? LgiApp->GBase::Name() : GetClass(),
+										LgiApp ? LgiApp->LBase::Name() : GetClass(),
 										MB_OK,
 										Path,
 										Err.Get());

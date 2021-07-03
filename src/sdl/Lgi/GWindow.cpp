@@ -494,12 +494,12 @@ bool GWindow::Name(const char *n)
 		ThreadCheck();
 	}
 
-	return GBase::Name(n);
+	return LBase::Name(n);
 }
 
 char *GWindow::Name()
 {
-	return GBase::Name();
+	return LBase::Name();
 }
 
 struct CallbackParams

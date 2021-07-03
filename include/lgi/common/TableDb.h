@@ -87,7 +87,7 @@ public:
 		}
 	};
 
-	class Table : public GBase, public GDom
+	class Table : public LBase, public GDom
 	{
 		struct GTablePriv *d;
 		

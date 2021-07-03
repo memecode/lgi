@@ -368,7 +368,7 @@ void GView::SetPulse(int Length)
 
 void GView::DrawThemeBorder(LSurface *pDC, LRect &r)
 {
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 }
 
 bool IsKeyChar(LKey &k, int vk)

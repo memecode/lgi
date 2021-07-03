@@ -77,7 +77,7 @@ public:
 /// Sub menu.
 class LMenu;
 class LgiClass LSubMenu :
-	public GBase,
+	public LBase,
 	public LMenuLoader,
 	public GImageListOwner,
 	public GDom
@@ -296,7 +296,7 @@ public:
 
 /// An item an a menu
 class LgiClass LMenuItem :
-	public GBase,
+	public LBase,
 	public GDom
 {
 	friend class LSubMenu;

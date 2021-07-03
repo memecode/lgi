@@ -98,7 +98,7 @@ ObjCWrapper(LNsApplication, OsApp)
 /// is called to enter the main application loop that processes messages for the
 /// life time of the application.
 class LgiClass GApp : virtual public GAppI,
-	public GBase,
+	public LBase,
 	public OsApplication
 {
 	friend class GView;
@@ -267,7 +267,7 @@ public:
 	);
 
     /// Gets the applications that can handle a file of a certain mime type
-	bool GetAppsForMimeType(char *Mime, GArray<GAppInfo*> &Apps);
+	bool GetAppsForMimeType(char *Mime, GArray<LAppInfo*> &Apps);
 		
 	/// Get a system metric
 	int32 GetMetric

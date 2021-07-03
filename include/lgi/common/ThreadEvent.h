@@ -10,7 +10,7 @@
     #include <semaphore.h>
 #endif
 
-class LgiClass LThreadEvent : public GBase
+class LgiClass LThreadEvent : public LBase
 {
 	uint32_t LastError;
 	#if USE_MACH_SEM

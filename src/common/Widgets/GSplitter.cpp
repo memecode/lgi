@@ -353,7 +353,7 @@ void GSplitter::OnPaint(LSurface *pDC)
 	if (r.X() > SPLITER_MIN_X && r.Y() > SPLITER_MIN_Y)
 	{
 		if (d->BorderA)
-			LgiWideBorder(pDC, r, DefaultSunkenEdge);
+			LWideBorder(pDC, r, DefaultSunkenEdge);
 
 		if (d->ViewA)
 		{
@@ -385,7 +385,7 @@ void GSplitter::OnPaint(LSurface *pDC)
 	if (r.X() > SPLITER_MIN_X && r.Y() > SPLITER_MIN_Y)
 	{
 		if (d->BorderB)
-			LgiWideBorder(pDC, r, DefaultSunkenEdge);
+			LWideBorder(pDC, r, DefaultSunkenEdge);
 
 		if (d->ViewB)
 		{

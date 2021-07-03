@@ -160,10 +160,10 @@ int GEdit::SysOnNotify(int Msg, int Code)
 		if (!d->InEmptyMode)
 		{
 			GAutoWString w = SysName();
-			GBase::NameW(w);
+			LBase::NameW(w);
 		}
 		
-		// LgiTrace("GEdit::SysOnNotify EN_CHANGE inempty=%i, n16=%S\n", d->InEmptyMode, GBase::NameW());
+		// LgiTrace("GEdit::SysOnNotify EN_CHANGE inempty=%i, n16=%S\n", d->InEmptyMode, LBase::NameW());
 		SendNotify(0);
 	}
 
@@ -518,10 +518,10 @@ const char *GEdit::Name()
 	if (Handle() && !d->InEmptyMode)
 	{
 		GAutoWString w = SysName();
-		GBase::NameW(w);
+		LBase::NameW(w);
 	}
 	
-	return GBase::Name();
+	return LBase::Name();
 }
 
 bool GEdit::Name(const char *n)
@@ -529,10 +529,10 @@ bool GEdit::Name(const char *n)
 	bool Old = d->IgnoreNotify;
 	d->IgnoreNotify = true;
 
-	GBase::Name(n);
-	GAutoWString w = LgiAddReturns(GBase::NameW());
+	LBase::Name(n);
+	GAutoWString w = LgiAddReturns(LBase::NameW());
 	if (w)
-		GBase::NameW(w);
+		LBase::NameW(w);
 	bool Status = SysEmptyText();
 
 	d->IgnoreNotify = Old;
@@ -544,10 +544,10 @@ const char16 *GEdit::NameW()
 	if (Handle() && !d->InEmptyMode)
 	{
 		GAutoWString w = SysName();
-		GBase::NameW(w);
+		LBase::NameW(w);
 	}
 
-	return GBase::NameW();
+	return LBase::NameW();
 }
 
 bool GEdit::NameW(const char16 *s)
@@ -556,7 +556,7 @@ bool GEdit::NameW(const char16 *s)
 	d->IgnoreNotify = true;
 
 	GAutoWString w = LgiAddReturns(s);
-	GBase::NameW(w ? w : s);
+	LBase::NameW(w ? w : s);
 	bool Status = SysEmptyText();
 
 	d->IgnoreNotify = Old;
@@ -568,10 +568,10 @@ bool GEdit::SysEmptyText()
 	bool Status = false;
 	bool HasFocus = Focus();
 	bool Empty = ValidStrW(d->EmptyText) &&
-				!ValidStrW(GBase::NameW()) &&
+				!ValidStrW(LBase::NameW()) &&
 				!HasFocus;
 
-	// LgiTrace("GEdit::SysEmptyText Empty=%i W=%p Focus=%i\n", Empty, GBase::NameW(), HasFocus);
+	// LgiTrace("GEdit::SysEmptyText Empty=%i W=%p Focus=%i\n", Empty, LBase::NameW(), HasFocus);
 		
 	if (Empty)
 	{
@@ -616,7 +616,7 @@ bool GEdit::SysEmptyText()
 			}
 		}
 
-		Status = SysName(GBase::NameW());
+		Status = SysName(LBase::NameW());
 	}
 	
 	Invalidate();

@@ -504,11 +504,11 @@ void GView::OnNcPaint(LSurface *pDC, LRect &r)
 			DrawThemeBorder(pDC, r);
 		else
 		#endif
-			LgiWideBorder(pDC, r, e);
+			LWideBorder(pDC, r, e);
 	}
 	else if (Border == 1)
 	{
-		LgiThinBorder(pDC, r, Sunken() ? DefaultSunkenEdge : DefaultRaisedEdge);
+		LThinBorder(pDC, r, Sunken() ? DefaultSunkenEdge : DefaultRaisedEdge);
 	}
 }
 
@@ -2037,14 +2037,14 @@ GButton *FindDefault(GViewI *w)
 
 bool GView::Name(const char *n)
 {
-	GBase::Name(n);
+	LBase::Name(n);
 
 	#if LGI_VIEW_HANDLE
 	if (_View)
 	{
 		#if WINNATIVE
 		
-		auto Temp = GBase::NameW();
+		auto Temp = LBase::NameW();
 		SetWindowTextW(_View, Temp ? Temp : L"");
 		
 		#endif
@@ -2065,17 +2065,17 @@ const char *GView::Name()
 	}
 	#endif
 
-	return GBase::Name();
+	return LBase::Name();
 }
 
 bool GView::NameW(const char16 *n)
 {
-	GBase::NameW(n);
+	LBase::NameW(n);
 
 	#if WINNATIVE
 	if (_View && n)
 	{
-		auto Txt = GBase::NameW();
+		auto Txt = LBase::NameW();
 		SetWindowTextW(_View, Txt);
 	}
 	#endif
@@ -2098,18 +2098,18 @@ const char16 *GView::NameW()
 				Buf[0] = 0;
 				int Chars = GetWindowTextW(_View, Buf, Length+1);
 				Buf[Chars] = 0;
-				GBase::NameW(Buf);
+				LBase::NameW(Buf);
 			}
 			DeleteArray(Buf);
 		}
 		else
 		{
-			GBase::NameW(0);
+			LBase::NameW(0);
 		}
 	}
 	#endif
 
-	return GBase::NameW();
+	return LBase::NameW();
 }
 
 GViewI *GView::FindControl(int Id)

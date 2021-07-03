@@ -3,19 +3,19 @@
 #include "lgi/common/String.h"
 
 //////////////////////////////////////////////////////////////////////////
-GBase::GBase()
+LBase::LBase()
 {
 	_Name8 = 0;
 	_Name16 = 0;
 }
 
-GBase::~GBase()
+LBase::~LBase()
 {
 	DeleteArray(_Name8);
 	DeleteArray(_Name16);
 }
 
-const char *GBase::Name()
+const char *LBase::Name()
 {
 	if (!_Name8 && _Name16)
 	{
@@ -25,7 +25,7 @@ const char *GBase::Name()
 	return _Name8;
 }
 
-bool GBase::Name(const char *n)
+bool LBase::Name(const char *n)
 {
 	if (n == _Name8) return true;
 
@@ -36,7 +36,7 @@ bool GBase::Name(const char *n)
 	return _Name8 != 0;
 }
 
-const char16 *GBase::NameW()
+const char16 *LBase::NameW()
 {
 	if (!_Name16 && _Name8)
 	{
@@ -46,7 +46,7 @@ const char16 *GBase::NameW()
 	return _Name16;
 }
 
-bool GBase::NameW(const char16 *n)
+bool LBase::NameW(const char16 *n)
 {
 	if (n == _Name16) return true;
 

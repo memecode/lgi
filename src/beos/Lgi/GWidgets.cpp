@@ -141,7 +141,7 @@ int GDialog::DoModal(OsView ParentHnd)
 		// Setup the BWindow
 		Wnd->ResizeTo(Pos.X(), Pos.Y());
 		Wnd->MoveTo(Pos.x1, Pos.y1);
-		Wnd->SetTitle(GBase::Name());
+		Wnd->SetTitle(LBase::Name());
 
 		// Add BView here to move the "OnCreate" call to the correct place
 		BRect r = Wnd->Bounds();
@@ -214,7 +214,7 @@ int GDialog::DoModeless()
 		// Setup the BWindow
 		Wnd->ResizeTo(Pos.X(), Pos.Y());
 		Wnd->MoveTo(Pos.x1, Pos.y1);
-		Wnd->SetTitle(GBase::Name());
+		Wnd->SetTitle(LBase::Name());
 
 		// Add BView here to move the "OnCreate" call to the correct place
 		BRect r = Wnd->Bounds();
@@ -417,7 +417,7 @@ void GSlider::OnPaint(LSurface *pDC)
 		Bar.Offset(0, Mid-(Bar.Y()/2));
 	}
 	
-	LgiThinBorder(pDC, Bar, SUNKEN);
+	LThinBorder(pDC, Bar, SUNKEN);
 	pDC->Colour(0);
 	pDC->Line(Bar.x1, Bar.y1, Bar.x2, Bar.y2);
 	
@@ -436,7 +436,7 @@ void GSlider::OnPaint(LSurface *pDC)
 	}
 	
 	LRect t = Thumb;
-	LgiWideBorder(pDC, t, RAISED);
+	LWideBorder(pDC, t, RAISED);
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle(&t);
 }

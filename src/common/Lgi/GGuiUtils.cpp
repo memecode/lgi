@@ -104,7 +104,7 @@ LPointF GDisplayInfo::Scale()
 	return p;
 }
 
-bool LgiGetDisplays(::GArray<GDisplayInfo*> &Displays, LRect *AllDisplays)
+bool LGetDisplays(::GArray<GDisplayInfo*> &Displays, LRect *AllDisplays)
 {
 	#if WINNATIVE
 	

@@ -25,7 +25,7 @@ public:
 	void OnPaint(LSurface *pDC)
 	{
 		LRect r = GetClient();
-		LgiWideBorder(pDC, r, DefaultRaisedEdge);
+		LWideBorder(pDC, r, DefaultRaisedEdge);
 		pDC->Colour(L_MED);
 		pDC->Rectangle(&r);
 

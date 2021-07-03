@@ -175,10 +175,10 @@ bool GDefaultDocumentEnv::OnNavigate(GDocView *Parent, const char *Uri)
 		)
 		{
 			// email
-			GArray<GAppInfo*> Apps;
+			GArray<LAppInfo*> Apps;
 			if (LGetAppsForMimeType("application/email", Apps))
 			{
-				GAppInfo *First = Apps[0];
+				LAppInfo *First = Apps[0];
 				GStringPipe a;
 
 				char *Arg = First->Params ? strstr(First->Params, "%1") : 0;
@@ -201,11 +201,11 @@ bool GDefaultDocumentEnv::OnNavigate(GDocView *Parent, const char *Uri)
 				if (LExecute(Exe, Args, ".", &ErrorMsg))
 					return true;
 
-				LgiMsg(Parent, "Failed to open '%s':\n%s", LgiApp->GBase::Name(), MB_OK, Exe.Get(), ErrorMsg.Get());
+				LgiMsg(Parent, "Failed to open '%s':\n%s", LgiApp->LBase::Name(), MB_OK, Exe.Get(), ErrorMsg.Get());
 			}
 			else
 			{
-				LgiMsg(Parent, "Couldn't get app to handle email.", LgiApp->GBase::Name(), MB_OK);
+				LgiMsg(Parent, "Couldn't get app to handle email.", LgiApp->LBase::Name(), MB_OK);
 			}
 		}
 		else
@@ -215,7 +215,7 @@ bool GDefaultDocumentEnv::OnNavigate(GDocView *Parent, const char *Uri)
 			if (LExecute(Uri, NULL, NULL, &ErrorMsg))
 				return true;
 
-			LgiMsg(Parent, "Failed to open '%s':\n%s", LgiApp->GBase::Name(), MB_OK, Uri, ErrorMsg.Get());
+			LgiMsg(Parent, "Failed to open '%s':\n%s", LgiApp->LBase::Name(), MB_OK, Uri, ErrorMsg.Get());
 		}
 	}
 

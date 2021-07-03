@@ -218,7 +218,7 @@ bool _GetSystemFont(char *FontType, char *Font, int FontBufSize, int &PointSize)
 	return Status;
 }
 
-bool LGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
+bool LGetAppsForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 
@@ -264,7 +264,7 @@ bool LGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 
 					if (txt)
 					{
-						GAppInfo *ai = new GAppInfo;
+						LAppInfo *ai = new LAppInfo;
 						Apps.Add(ai);
 						
 						GToken t(txt, "\n");
@@ -331,7 +331,7 @@ bool LGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 GString LGetAppForMimeType(const char *Mime)
 {
 	GString App;
-	GArray<GAppInfo*> Apps;
+	GArray<LAppInfo*> Apps;
 	if (LGetAppsForMimeType(Mime, Apps, 1))
 		App = Apps[0]->Path.Get();
 	Apps.DeleteObjects();
@@ -552,7 +552,7 @@ WindowManager LGetWindowManager()
 	return Status;
 }
 
-void LgiFinishXWindowsStartup(GViewI *Wnd)
+void LFinishXWindowsStartup(GViewI *Wnd)
 {
 	// Get the startup ID
 	const char *EnvStartId = "DESKTOP_STARTUP_ID";

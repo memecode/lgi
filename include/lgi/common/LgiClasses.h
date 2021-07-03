@@ -44,7 +44,7 @@ LgiClass GString LErrorCodeToString(uint32_t ErrorCode);
 #include "lgi/common/StatusBar.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-class LgiClass GCommand : public GBase //, public GFlags
+class LgiClass LCommand : public LBase //, public GFlags
 {
 	int			Flags;
 	bool		PrevValue;
@@ -56,8 +56,8 @@ public:
 	LKey		*Accelerator;
 	char		*TipHelp;
 	
-	GCommand();
-	~GCommand();
+	LCommand();
+	~LCommand();
 
 	bool Enabled();
 	void Enabled(bool e);
@@ -79,11 +79,11 @@ public:
 ///
 /// The button pressed is returned as a index from the DoModal() function. Starting
 /// at '1'. i.e. Btn2 -> returns 2.
-class LgiClass GAlert : public LDialog
+class LgiClass LAlert : public LDialog
 {
 public:
 	/// Constructor
-	GAlert
+	LAlert
 	(
 		/// The parent view
 		GViewI *parent,
@@ -132,10 +132,10 @@ public:
 //////////////////////////////////////////////////////////
 
 // Graphics
-LgiFunc void LgiDrawBox(LSurface *pDC, LRect &r, bool Sunken, bool Fill);
-LgiFunc void LgiWideBorder(LSurface *pDC, LRect &r, LgiEdge Type);
-LgiFunc void LgiThinBorder(LSurface *pDC, LRect &r, LgiEdge Type);
-LgiFunc void LgiFlatBorder(LSurface *pDC, LRect &r, int Width = -1);
+LgiFunc void LDrawBox(LSurface *pDC, LRect &r, bool Sunken, bool Fill);
+LgiFunc void LWideBorder(LSurface *pDC, LRect &r, LgiEdge Type);
+LgiFunc void LThinBorder(LSurface *pDC, LRect &r, LgiEdge Type);
+LgiFunc void LFlatBorder(LSurface *pDC, LRect &r, int Width = -1);
 
 // Helpers
 #ifdef __GTK_H__
@@ -144,7 +144,7 @@ extern Gtk::gboolean GtkViewCallback(Gtk::GtkWidget *widget, Gtk::GdkEvent *even
 
 #ifdef LINUX
 /// Ends a x windows startup session
-LgiFunc void LgiFinishXWindowsStartup(class GViewI *Wnd);
+LgiFunc void LFinishXWindowsStartup(class GViewI *Wnd);
 #endif
 
 /// \brief Displays a message box
@@ -167,7 +167,7 @@ LgiFunc int LgiMsg
 LgiFunc void LDialogTextMsg(GViewI *Parent, const char *Title, GString Txt);
 
 /// Contains all the information about a display/monitor attached to the system.
-/// \sa LgiGetDisplays
+/// \sa LGetDisplays
 struct GDisplayInfo
 {
 	/// The position and dimensions of the display. On windows the left/upper 
@@ -199,7 +199,7 @@ struct GDisplayInfo
 
 /// Returns infomation about the displays attached to the system.
 /// \returns non-zero on success.
-LgiFunc bool LgiGetDisplays
+LgiFunc bool LGetDisplays
 (
 	/// [out] The array of display info structures. The caller should free these
 	/// objects using Displays.DeleteObjects().
@@ -210,7 +210,7 @@ LgiFunc bool LgiGetDisplays
 );
 
 /// This class makes it easy to profile a function and write out timings at the end
-class LgiClass GProfile
+class LgiClass LProfile
 {
 	struct Sample
 	{
@@ -230,8 +230,8 @@ class LgiClass GProfile
 	int MinMs;
 	
 public:
-	GProfile(const char *Name, int HideMs = -1);
-	virtual ~GProfile();
+	LProfile(const char *Name, int HideMs = -1);
+	virtual ~LProfile();
 	
 	void HideResultsIfBelow(int Ms);
 	virtual void Add(const char *Name);

@@ -5,7 +5,7 @@ LgiFunc bool LgiGetUsersLinks(GArray<GString> &Links);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // File select dialog
-class LgiClass GFileType : public GBase
+class LgiClass GFileType : public LBase
 {
 	char *Ext;
 	int _Data;
@@ -48,7 +48,7 @@ public:
 /// }
 /// \endcode
 class LgiClass GFileSelect :
-	public GBase
+	public LBase
 {
 	class GFileSelectPrivate *d;
 

@@ -1190,7 +1190,7 @@ bool LgiMenuRes::Read(LXmlTag *t, ResFileFormat Format)
 		char *n;
 		if ((n = t->GetAttr("name")))
 		{
-			GBase::Name(n);
+			LBase::Name(n);
 		}
 
 		for (auto c: t->Children)
@@ -1377,7 +1377,7 @@ bool LResources::LoadDialog(int Resource, GViewI *Parent, LRect *Pos, GAutoStrin
 		{
 			if (Dlg->Id() == ((int) Resource))
 			{
-				// GProfile p("LoadDialog");
+				// LProfile p("LoadDialog");
 			
 				// found the dialog to load, set properties
 				if (Dlg->Name())
@@ -1405,7 +1405,7 @@ bool LResources::LoadDialog(int Resource, GViewI *Parent, LRect *Pos, GAutoStrin
 					else
 					{
 						GArray<GDisplayInfo*> Displays;
-						if (LgiGetDisplays(Displays))
+						if (LGetDisplays(Displays))
 						{
 							for (auto d: Displays)
 							{

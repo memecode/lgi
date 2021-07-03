@@ -1498,7 +1498,7 @@ bool LScriptEnginePrivate::Compile_Expression(int &Cur, int Depth)
 				{
 					if (PrevIsOp == 1)
 					{
-						GBase u;
+						LBase u;
 						u.NameW(t);
 						Term.Print("%s:%i - Not expecting '%s', 2nd operator in a row.\n", ErrorTitle(), Lines[StartToken], u.Name());
 						break;
@@ -1513,7 +1513,7 @@ bool LScriptEnginePrivate::Compile_Expression(int &Cur, int Depth)
 				{
 					if (PrevIsOp == 0)
 					{
-						GBase u;
+						LBase u;
 						u.NameW(t);
 						Term.Print("%s:%i - Not expecting '%s' after non-operator token.\n", ErrorTitle(), Lines[StartToken], u.Name());
 						break;
@@ -1629,7 +1629,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 				{
 					if (PrevIsOp == 1)
 					{
-						GBase u;
+						LBase u;
 						u.NameW(t);
 						Term.Print("%s:%i - '%s' was the 2nd operator in a row.\n", ErrorTitle(), Lines[StartToken], u.Name());
 						break;
@@ -1652,7 +1652,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 						}
 						else
 						{						
-							GBase u;
+							LBase u;
 							u.NameW(t);
 							Term.Print("%s:%i - Not expecting '%s' after non-operator.\n", ErrorTitle(), Lines[StartToken], u.Name());
 							break;
@@ -3326,7 +3326,7 @@ bool LScriptEnginePrivate::Compile_Statement(GArray<GCode> &To, int &Cur)
 							}
 							else
 							{
-								GBase u;
+								LBase u;
 								u.NameW(t);
 								Term.Print("%s:%i - Not expecting token '%s' in argument list.\n",
 									ErrorTitle(),

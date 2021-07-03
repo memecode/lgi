@@ -91,7 +91,7 @@ DocEditStyling::DocEditStyling(DocEdit *view) :
 void DocEdit::OnApplyStyles()
 {
 	#if PROFILE_STYLE
-	GProfile Prof("OnApplyStyles");
+	LProfile Prof("OnApplyStyles");
 	#endif
 	PROF("Lock");
 	GTextView3::GStyle Vis(STYLE_NONE);
@@ -226,7 +226,7 @@ int DocEditStyling::Main()
 void DocEditStyling::StyleCpp(StylingParams &p)
 {
 	#if PROFILE_STYLE
-	GProfile Prof("DocEdit::StyleCpp");
+	LProfile Prof("DocEdit::StyleCpp");
 	#endif
 	if (!p.Text.Length())
 		return;

@@ -1022,7 +1022,7 @@ void GTabView::OnPaint(LSurface *pDC)
 			LRect r = GetTabClient();
 
 			r.Size(-2, -2);
-			LgiWideBorder(pDC, r, DefaultRaisedEdge);
+			LWideBorder(pDC, r, DefaultRaisedEdge);
 
 			pDC->Colour(L_MED);
 			pDC->Rectangle(0, 0, X()-1, d->TabClient.y1-3);
@@ -1091,7 +1091,7 @@ void GTabView::OnPaint(LSurface *pDC)
 			if (d->LeftBtn.Valid())
 			{
 				r = d->LeftBtn;
-				LgiWideBorder(pDC, r, DefaultRaisedEdge);
+				LWideBorder(pDC, r, DefaultRaisedEdge);
 
 				int x = r.x1 + (r.X() >> 1) + 1;
 				int y = r.y1 + (r.Y() >> 1) - 1;
@@ -1104,7 +1104,7 @@ void GTabView::OnPaint(LSurface *pDC)
 			if (d->RightBtn.Valid())
 			{
 				r = d->RightBtn;
-				LgiWideBorder(pDC, r, DefaultRaisedEdge);
+				LWideBorder(pDC, r, DefaultRaisedEdge);
 
 				int x = r.x1 + (r.X() >> 1) - 2;
 				int y = r.y1 + (r.Y() >> 1) - 1;
@@ -1288,7 +1288,7 @@ void GTabPage::Value(int64 v)
 
 const char *GTabPage::Name()
 {
-	return GBase::Name();
+	return LBase::Name();
 }
 
 bool GTabPage::Name(const char *name)
