@@ -1,9 +1,9 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiResEdit.h"
-#include "GTableLayout.h"
-#include "GTextLabel.h"
-#include "GEdit.h"
-#include "GTextView3.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/TextView3.h"
 
 /////////////////////////////////////////////////////////////////////////////
 enum Ids {

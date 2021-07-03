@@ -2,8 +2,8 @@
 #include <string.h>
 #include <math.h>
 
-#include "Lgi.h"
-#include "Lzw.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Lzw.h"
 
 #define HasLZW
 

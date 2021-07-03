@@ -1,8 +1,8 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiResEdit.h"
-#include "LList.h"
-#include "GButton.h"
-#include "LListItemCheckBox.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/ListItemCheckBox.h"
 
 class ShowLanguagesDlgPriv
 {

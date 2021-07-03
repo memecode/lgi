@@ -12,16 +12,16 @@
 #include "LgiResEdit.h"
 #include "LgiRes_Dialog.h"
 #include "LgiRes_Menu.h"
-#include "GAbout.h"
-#include "GTextLabel.h"
-#include "GEdit.h"
-#include "GCheckBox.h"
-#include "GProgressDlg.h"
-#include "GTextView3.h"
+#include "lgi/common/About.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/ProgressDlg.h"
+#include "lgi/common/TextView3.h"
 #include "resdefs.h"
-#include "GToken.h"
-#include "GDataDlg.h"
-#include "GButton.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/DataDlg.h"
+#include "lgi/common/Button.h"
 
 char AppName[]				= "Lgi Resource Editor";
 char HelpFile[]				= "Help.html";
@@ -1198,7 +1198,7 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 	return GWindow::OnEvent(m);
 }
 
-#include "GToken.h"
+#include "lgi/common/Token.h"
 void _CountGroup(ResStringGroup *Grp, int &Words, int &Multi)
 {
 	for (auto s: *Grp->GetStrs())
@@ -3187,7 +3187,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 #define IMP_MODE_STRINGS			3
 #define IMP_MODE_MENU				4
 
-#include "GToken.h"
+#include "lgi/common/Token.h"
 
 class ImportDefine
 {
@@ -4460,10 +4460,10 @@ void ResFrame::OnPaint(GSurface *pDC)
 
 ////////////////////////////////////////////////////////////////////
 LgiFunc char *_LgiGenLangLookup();
-#include "GAutoPtr.h"
-#include "GVariant.h"
-#include "GCss.h"
-#include "GTableLayout.h"
+#include "lgi/common/AutoPtr.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Css.h"
+#include "lgi/common/TableLayout.h"
 
 class Foo : public GLayoutCell
 {

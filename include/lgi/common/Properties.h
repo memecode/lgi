@@ -12,9 +12,9 @@
 #define __PROP_H
 
 #include <string.h>
-#include "GContainers.h"
+#include "lgi/common/Containers.h"
 #include "LgiClass.h"
-#include "GString.h"
+#include "lgi/common/String.h"
 
 #define OBJ_NULL		0
 #define OBJ_INT			1

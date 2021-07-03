@@ -5,9 +5,9 @@
 #ifndef __DATA_DLG_TOOLS
 #define __DATA_DLG_TOOLS
 
-#include "GProperties.h"
-#include "GScrollBar.h"
-#include "GTextLabel.h"
+#include "lgi/common/Properties.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/TextLabel.h"
 
 enum DataDlgType
 {

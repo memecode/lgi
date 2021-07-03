@@ -12,8 +12,8 @@
 #ifndef __LGIRES_STRING_H
 #define __LGIRES_STRING_H
 
-#include "Res.h"
-#include "LList.h"
+#include "lgi/common/Res.h"
+#include "lgi/common/List.h"
 
 ////////////////////////////////////////////////////////////////
 class ResStringGroup;

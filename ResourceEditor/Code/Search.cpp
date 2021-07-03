@@ -1,9 +1,9 @@
 #include <stdlib.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiResEdit.h"
 #include "resdefs.h"
-#include "GCombo.h"
+#include "lgi/common/Combo.h"
 #include "LgiRes_Dialog.h"
 #include "LgiRes_Menu.h"
 

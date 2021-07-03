@@ -1,11 +1,11 @@
 #include <stdlib.h>
 #include "LgiResEdit.h"
 #include "LgiRes_Dialog.h"
-#include "GButton.h"
-#include "GVariant.h"
-#include "GToken.h"
-#include "GTableLayout.h"
-#include "LgiRes.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/LgiRes.h"
 
 #define DRAW_CELL_INDEX			0
 #define DRAW_TABLE_SIZE			0

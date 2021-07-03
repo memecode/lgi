@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include "LgiResEdit.h"
 #include "LgiRes_Menu.h"
-#include "GClipBoard.h"
+#include "lgi/common/ClipBoard.h"
 
 #define IDC_TREE				100
 

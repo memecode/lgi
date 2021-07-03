@@ -12,7 +12,7 @@
 #ifndef __LGIRES_MENU_H
 #define __LGIRES_MENU_H
 
-#include "Res.h"
+#include "lgi/common/Res.h"
 #include "LgiRes_String.h"
 
 class ResMenu;

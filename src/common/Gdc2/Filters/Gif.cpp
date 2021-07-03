@@ -11,10 +11,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "Lgi.h"
-#include "Lzw.h"
-#include "GVariant.h"
-#include "GPalette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Lzw.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Palette.h"
 
 #ifdef FILTER_UI
 // define the symbol FILTER_UI to access the gif save options dialog

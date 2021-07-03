@@ -13,12 +13,12 @@
 #include <stdlib.h>
 #include "LgiResEdit.h"
 #include "LgiRes_String.h"
-#include "GToken.h"
-#include "GVariant.h"
-#include "GTextLabel.h"
-#include "GCombo.h"
-#include "GButton.h"
-#include "GClipBoard.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/ClipBoard.h"
 #include "resdefs.h"
 
 ////////////////////////////////////////////////////////////////////////////

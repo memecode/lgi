@@ -15,11 +15,11 @@
 #include <stdlib.h>
 #include "LgiResEdit.h"
 #include "LgiRes_Dialog.h"
-#include "GButton.h"
-#include "GVariant.h"
-#include "GToken.h"
-#include "GDisplayString.h"
-#include "GClipBoard.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/ClipBoard.h"
 #include "resdefs.h"
 
 ////////////////////////////////////////////////////////////////////

@@ -6,18 +6,18 @@
 **
 */
 
-#include "Lgi.h"
-#include "INet.h"
-#include "GDocApp.h"
-#include "GProperties.h"
-#include "GVariant.h"
-#include "GDataDlg.h"
-#include "GOptionsFile.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Net.h"
+#include "lgi/common/DocApp.h"
+#include "lgi/common/Properties.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/DataDlg.h"
+#include "lgi/common/OptionsFile.h"
 
 #include "resource.h"
-#include "GTree.h"
-#include "GBox.h"
-#include "GEventTargetThread.h"
+#include "lgi/common/Tree.h"
+#include "lgi/common/Box.h"
+#include "lgi/common/EventTargetThread.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Defines

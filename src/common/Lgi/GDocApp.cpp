@@ -7,13 +7,13 @@
 */
 
 #include <stdlib.h>
-#include "GDocApp.h"
-#include "GToken.h"
-#include "GOptionsFile.h"
+#include "lgi/common/DocApp.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/OptionsFile.h"
 #ifdef HAS_PROPERTIES
 #include "GProperties.h"
 #endif
-#include "LgiRes.h"
+#include "lgi/common/LgiRes.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
 class GDocAppPrivate
