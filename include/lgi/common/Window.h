@@ -12,7 +12,7 @@ enum LWindowZoom
 	GZoomMax
 };
 
-enum GWindowHookType
+enum LWindowHookType
 {
 	GNoEvents = 0,
 	/// \sa GWindow::RegisterHook()
@@ -43,7 +43,7 @@ class LgiClass LWindow :
 	bool _QuitOnClose;
 
 protected:
-	class GWindowPrivate *d;
+	class LWindowPrivate *d;
 
 	#if WINNATIVE
 
@@ -176,7 +176,7 @@ public:
 		/// and
 		///     #GKeyEvents - Where Target->OnViewKey(...) is called for each key.
 		/// OR'd together.
-		GWindowHookType EventType,
+		LWindowHookType EventType,
 		/// Not implemented
 		int Priority = 0
 	);
