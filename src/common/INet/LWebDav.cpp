@@ -2,7 +2,7 @@
 #include "LWebDav.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-bool LFindXml(GArray<GXmlTag*> &Results, GXmlTag *t, const char *Name)
+bool LFindXml(GArray<LXmlTag*> &Results, LXmlTag *t, const char *Name)
 {
 	if (t->IsTag(Name))
 		Results.Add(t);
@@ -24,10 +24,10 @@ LWebdav::LWebdav(GString endPoint, GString user, GString pass)
 	EndPointPath = u.sPath;
 }
 
-void LWebdav::PrettyPrint(GXmlTag &x)
+void LWebdav::PrettyPrint(LXmlTag &x)
 {
 	GStringPipe p;
-	GXmlTree t;
+	LXmlTree t;
 	t.Write(&x, &p);
 	auto s = p.NewGStr();
 	LgiTrace("Pretty: %s\n", s.Get());
@@ -109,23 +109,23 @@ bool LWebdav::PropFind(GArray<FileProps> &Files, GString Resource, int Depth)
 	if (!Request(r, "PROPFIND", Resource))
 		return false;
 
-	GXmlTag x;
-	GXmlTree t;
+	LXmlTag x;
+	LXmlTree t;
 	GMemStream m(r.OutBody.Get(), r.OutBody.Length(), false);
 	if (!t.Read(&x, &m))
 		return false;
 
 	// PrettyPrint(&x);
 
-	GArray<GXmlTag*> Responses;
+	GArray<LXmlTag*> Responses;
 	if (!LFindXml(Responses, &x, "d:response"))
 		return false;
 
 	for (auto r: Responses)
 	{
 		auto Href = r->GetChildTag("d:href");
-		GXmlTag *FileProps = NULL;
-		GArray<GXmlTag*> Props;
+		LXmlTag *FileProps = NULL;
+		GArray<LXmlTag*> Props;
 		if (LFindXml(Props, r, "d:prop"))
 		{
 			for (auto p: Props)

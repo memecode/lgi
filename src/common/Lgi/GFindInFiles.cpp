@@ -7,7 +7,7 @@
 #include "GTextLabel.h"
 #include "GEdit.h"
 #include "GCheckBox.h"
-#include "GXmlTreeUi.h"
+#include "LXmlTreeUi.h"
 #include "GStringClass.h"
 
 enum Ctrls
@@ -119,7 +119,7 @@ GHistoryPopup::GHistoryPopup(GHistory *h) : GPopup(h)
 	}
 }
 
-struct GFindInFilesPriv : public GXmlTreeUi
+struct GFindInFilesPriv : public LXmlTreeUi
 {
 	GTableLayout *Tbl;
 	GAutoString Search;

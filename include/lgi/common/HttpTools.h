@@ -3,9 +3,9 @@
 
 #include "INet.h"
 
-extern GXmlTag *ExtractForms(char *Html, GStream *Log);
-extern void XmlToStream(GStream *s, GXmlTag *x, char *Css = 0);
-extern GXmlTag *GetFormField(GXmlTag *Form, char *Field);
+extern LXmlTag *ExtractForms(char *Html, GStream *Log);
+extern void XmlToStream(GStream *s, LXmlTag *x, char *Css = 0);
+extern LXmlTag *GetFormField(LXmlTag *Form, char *Field);
 extern char *HtmlTidy(char *Html);
 extern GSurface *GetHttpImage(char *Uri);
 extern void StrFormEncode(GStream &p, char *s, bool InValue);
@@ -15,12 +15,12 @@ struct WebPage
 	char *Html;
 	char *Script;
 	char *Charset;
-	GXmlTag *Parsed;
+	LXmlTag *Parsed;
 
 	WebPage(char *Page, GStream *Log = 0);
 	~WebPage();
 	
-	GXmlTag *GetRoot(GStream *Log = 0);
+	LXmlTag *GetRoot(GStream *Log = 0);
 	char *GetFormValue(char *field);
 	char *GetCharSet();
 };
@@ -34,16 +34,16 @@ public:
 
 struct FormPost
 {
-	GXmlTag *Form;
+	LXmlTag *Form;
 	GArray<FormValue> Values;
 	
-	FormPost(GXmlTag *f);
+	FormPost(LXmlTag *f);
 	
 	char *GetActionUri();
 	char *EncodeFields(GStream *Debug = 0, char *RealFields = 0, bool EncodePlus = false);
 	FormValue *Get(char *Field, bool Create = true);
 	bool Set(char *field, char *value, GStream *Log, bool AllowCreate);
-	GXmlTag *GetField(char *n);
+	LXmlTag *GetField(char *n);
 };
 
 class CookieJar : public LHashTbl<StrKey<char,false>,char*>

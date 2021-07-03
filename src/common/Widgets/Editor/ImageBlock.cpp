@@ -269,7 +269,7 @@ public:
 					img = scaled;
 				}
 
-				GXmlTag Props;
+				LXmlTag Props;
 				f->Props = &Props;
 				Props.SetAttr(LGI_FILTER_QUALITY, RICH_TEXT_RESIZED_JPEG_QUALITY);
 				

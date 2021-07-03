@@ -60,7 +60,7 @@ protected:
 	class GControlTreePriv *d;
 
 	class Item *Resolve(bool Create, const char *Path, int CtrlId, GVariantType Type = GV_NULL, GArray<EnumValue> *Enum = 0);
-    void ReadTree(GXmlTag *t, GTreeNode *n);
+    void ReadTree(LXmlTag *t, GTreeNode *n);
 
 public:
 	GControlTree();

@@ -12,7 +12,7 @@
 #include "lgi/common/StringClass.h"
 
 // Fwd defs
-class GXmlTag;
+class LXmlTag;
 class LMouseHook;
 class GFont;
 class LRect;

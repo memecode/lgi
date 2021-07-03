@@ -51,7 +51,7 @@ struct TraceLog : public GStream
 
 /*
 #define SkipWhiteSpace(s)			while (*s && IsWhiteSpace(*s)) s++;
-bool JsonDecode(GXmlTag &t, const char *s)
+bool JsonDecode(LXmlTag &t, const char *s)
 {
 	if (*s != '{')
 		return false;

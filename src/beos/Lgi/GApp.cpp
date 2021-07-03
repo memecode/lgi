@@ -8,7 +8,7 @@ class GAppPrivate
 public:
 	// Common
 	OsAppArguments Args;
-	GXmlTag *Config;
+	LXmlTag *Config;
 	GFileSystem *FileSystem;
 	GLibrary *SkinLib;
 	GdcDevice *GdcSystem;
@@ -237,11 +237,11 @@ void GApp::OnReceiveFiles(GArray<char*> &Files)
 	}
 }
 
-void GApp::SetConfig(GXmlTag *Tag)
+void GApp::SetConfig(LXmlTag *Tag)
 {
 	if (IsOk() && Tag)
 	{
-		GXmlTag *Old = GetConfig(Tag->GetTag());
+		LXmlTag *Old = GetConfig(Tag->GetTag());
 		if (Old)
 		{
 			Old->RemoveTag();
@@ -259,7 +259,7 @@ void GApp::SetConfig(GXmlTag *Tag)
 	}
 }
 
-GXmlTag *GApp::GetConfig(const char *Tag)
+LXmlTag *GApp::GetConfig(const char *Tag)
 {
 	if (IsOk() && !d->Config)
 	{
@@ -284,13 +284,13 @@ GXmlTag *GApp::GetConfig(const char *Tag)
 
 			if (LFileExists(Path))
 			{
-				d->Config = new GXmlTag("Config");
+				d->Config = new LXmlTag("Config");
 				if (d->Config)
 				{
 					GFile f;
 					if (f.Open(Path, O_READ))
 					{
-						GXmlTree t;
+						LXmlTree t;
 						t.Read(d->Config, &f, 0);
 					}
 				}
@@ -299,7 +299,7 @@ GXmlTag *GApp::GetConfig(const char *Tag)
 
 		if (!d->Config)
 		{
-			d->Config = new GXmlTag("Options");
+			d->Config = new LXmlTag("Options");
 		}
 	}
 

@@ -56,7 +56,7 @@ public:
 	~LgiStringRes();
 
 	LResources *GetRes() { return Res; }
-	bool Read(GXmlTag *Tag, ResFileFormat Format);
+	bool Read(LXmlTag *Tag, ResFileFormat Format);
 };
 
 /// A dialog resource
@@ -66,7 +66,7 @@ class LgiClass LgiDialogRes
 	LResources *Res;
 
 public:
-	GXmlTag *Dialog;
+	LXmlTag *Dialog;
 	LgiStringRes *Str;
 	LRect Pos;
 
@@ -74,7 +74,7 @@ public:
 	~LgiDialogRes();
 
 	LResources *GetRes() { return Res; }
-	bool Read(GXmlTag *Tag, ResFileFormat Format);
+	bool Read(LXmlTag *Tag, ResFileFormat Format);
 	char *Name() { return (Str) ? Str->Str : 0; }
 	int Id() { return (Str) ? Str->Id : 0; }
 	int X() { return Pos.X(); }
@@ -89,14 +89,14 @@ class LgiClass LgiMenuRes : public GBase
 	LHashTbl<IntKey<int>, LgiStringRes*> Strings;
 
 public:
-	GXmlTag *Tag;
+	LXmlTag *Tag;
 
 	LgiMenuRes(LResources *res);
 	~LgiMenuRes();
 
-	bool Read(GXmlTag *Tag, ResFileFormat Format);
+	bool Read(LXmlTag *Tag, ResFileFormat Format);
 	LResources *GetRes() { return Res; }
-	LgiStringRes *GetString(GXmlTag *Tag);
+	LgiStringRes *GetString(LXmlTag *Tag);
 };
 
 /// A resource collection.
@@ -202,7 +202,7 @@ public:
 
 	/// Create a resource object
 	/// \private
-	ResObject *CreateObject(GXmlTag *Tag, ResObject *Parent);
+	ResObject *CreateObject(LXmlTag *Tag, ResObject *Parent);
 
 	/// Sets the position of an object
 	/// \private

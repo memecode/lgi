@@ -239,7 +239,7 @@ class VcFolder : public GTreeItem
 	
 public:
 	VcFolder(AppPriv *priv, const char *uri);
-	VcFolder(AppPriv *priv, GXmlTag *t);
+	VcFolder(AppPriv *priv, LXmlTag *t);
 	~VcFolder();
 
 	VersionCtrl GetType();
@@ -251,8 +251,8 @@ public:
 	void UpdateColumns();
 	const char *GetText(int Col);
 	GArray<CommitField> &GetFields() { return Fields; }
-	bool Serialize(GXmlTag *t, bool Write);
-	GXmlTag *Save();
+	bool Serialize(LXmlTag *t, bool Write);
+	LXmlTag *Save();
 	void Select(bool b);
 	void ListCommit(VcCommit *c);
 	void ListWorkingFolder();

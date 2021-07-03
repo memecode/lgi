@@ -53,7 +53,7 @@ public:
 	bool Edit(GViewI *parent);
 
 	// Serialization
-	bool Serialize(GXmlTag *Parent, bool Write);
+	bool Serialize(LXmlTag *Parent, bool Write);
 
 	// Accessors
 	const char *GetStr(ProjSetting Setting, const char *Default = NULL, IdePlatform Platform = PlatformCurrent);

@@ -45,8 +45,8 @@ public:
 	bool GetFields(FieldTree &Fields);
 	bool Serialize(FieldTree &Fields);
 
-	bool Read(GXmlTag *t, ResMenuItem *Parent = 0);
-	bool Write(GXmlTag *t, int Tabs);
+	bool Read(LXmlTag *t, ResMenuItem *Parent = 0);
+	bool Write(LXmlTag *t, int Tabs);
 
 	void OnMouseClick(LMouse &m);
 	bool OnNew();
@@ -66,7 +66,7 @@ public:
 	ResMenu(AppWnd *w, int type = TYPE_MENU);
 	~ResMenu();
 
-	void Create(GXmlTag *load, SerialiseContext *Ctx);
+	void Create(LXmlTag *load, SerialiseContext *Ctx);
 	GView *Wnd() { return dynamic_cast<GView*>(this); }
 	void SetLanguages() { if (Group) Group->SetLanguages(); }
 	List<ResString> *GetStrs() { return (Group)?Group->GetStrs():0; }
@@ -91,8 +91,8 @@ public:
 
 	// Serialize
 	bool Test(ErrorCollection *e);
-	bool Read(GXmlTag *t, SerialiseContext &Ctx);
-	bool Write(GXmlTag *t, SerialiseContext &Ctx);
+	bool Read(LXmlTag *t, SerialiseContext &Ctx);
+	bool Write(LXmlTag *t, SerialiseContext &Ctx);
 };
 
 class ResMenuUi : public GLayout

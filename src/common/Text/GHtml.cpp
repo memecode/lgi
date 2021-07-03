@@ -5097,7 +5097,7 @@ char16 htoi(char16 c)
 	return 0;
 }
 
-bool GTag::Serialize(GXmlTag *t, bool Write)
+bool GTag::Serialize(LXmlTag *t, bool Write)
 {
 	LRect pos;
 	if (Write)
@@ -5145,7 +5145,7 @@ bool GTag::Serialize(GXmlTag *t, bool Write)
 		
 		for (unsigned i=0; i<Children.Length(); i++)
 		{
-			GXmlTag *child = new GXmlTag("e");
+			LXmlTag *child = new LXmlTag("e");
 			GTag *tag = ToTag(Children[i]);
 			if (!child || !tag)
 			{
@@ -5221,7 +5221,7 @@ bool GTag::Serialize(GXmlTag *t, bool Write)
 		
 		for (int i=0; i<t->Children.Length(); i++)
 		{
-			GXmlTag *child = t->Children[i];
+			LXmlTag *child = t->Children[i];
 			if (child->IsTag("e"))
 			{
 				GTag *tag = new GTag(Html, NULL);

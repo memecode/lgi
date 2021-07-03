@@ -1709,7 +1709,7 @@ void AppWnd::SetStatusText(char *Text, int Pane)
 	}
 }
 
-Resource *AppWnd::NewObject(SerialiseContext ctx, GXmlTag *load, int Type, bool Select)
+Resource *AppWnd::NewObject(SerialiseContext ctx, LXmlTag *load, int Type, bool Select)
 {
 	Resource *r = 0;
 	ObjTreeItem *Dir = 0;
@@ -1986,10 +1986,10 @@ void AppWnd::OnResourceSelect(Resource *r)
 	}
 }
 
-char *TagName(GXmlTag *t)
+char *TagName(LXmlTag *t)
 {
 	static char Buf[1024];
-	GArray<GXmlTag*> Tags;
+	GArray<LXmlTag*> Tags;
 	for (; t; t = t->Parent)
 	{
 		Tags.AddAt(0, t);
@@ -2026,14 +2026,14 @@ public:
 				Visible(true);
 				AttachChildren();
 
-				GXmlTag *t1 = new GXmlTag;
-				GXmlTag *t2 = new GXmlTag;
+				LXmlTag *t1 = new LXmlTag;
+				LXmlTag *t2 = new LXmlTag;
 				if (t1 && File1)
 				{
 					GFile f;
 					if (f.Open(File1, O_READ))
 					{
-						GXmlTree x(GXT_NO_ENTITIES);
+						LXmlTree x(GXT_NO_ENTITIES);
 						if (!x.Read(t1, &f, 0))
 						{
 							DeleteObj(t1);
@@ -2049,7 +2049,7 @@ public:
 					GFile f;
 					if (f.Open(File2, O_READ))
 					{
-						GXmlTree x(GXT_NO_ENTITIES);
+						LXmlTree x(GXT_NO_ENTITIES);
 						if (!x.Read(t2, &f, 0))
 						{
 							DeleteObj(t2);
@@ -2074,7 +2074,7 @@ public:
 		}
 	}
 
-	void Compare(GXmlTag *t1, GXmlTag *t2)
+	void Compare(LXmlTag *t1, LXmlTag *t2)
 	{
 		char s[1024];
 
@@ -2090,17 +2090,17 @@ public:
 			}
 		}
 
-		LHashTbl<StrKey<char,false>,GXmlAttr*> a;
+		LHashTbl<StrKey<char,false>,LXmlAttr*> a;
 		for (int i=0; i<t1->Attr.Length(); i++)
 		{
-			GXmlAttr *a1 = &t1->Attr[i];
+			LXmlAttr *a1 = &t1->Attr[i];
 			a.Add(a1->GetName(), a1);
 		}
 
 		for (int n=0; n<t2->Attr.Length(); n++)
 		{
-			GXmlAttr *a2 = &t2->Attr[n];
-			GXmlAttr *a1 = (GXmlAttr*) a.Find(a2->GetName());
+			LXmlAttr *a2 = &t2->Attr[n];
+			LXmlAttr *a1 = (LXmlAttr*) a.Find(a2->GetName());
 			if (a1)
 			{
 				if (strcmp(a1->GetValue(), a2->GetValue()) != 0)
@@ -2135,7 +2135,7 @@ public:
 		// for (void *v = a.First(&Key); v; v = a.Next(&Key))
 		for (auto v : a)
 		{
-			GXmlAttr *a1 = v.value;
+			LXmlAttr *a1 = v.value;
 			sprintf(s, "[Left] Missing Attr: '%s' = '%s'", a1->GetName(), a1->GetValue());
 			LListItem *i = new LListItem;
 			if (i)
@@ -2148,7 +2148,7 @@ public:
 
 		if (t1->IsTag("string-group"))
 		{
-			GArray<GXmlTag*> r1, r2;
+			GArray<LXmlTag*> r1, r2;
 			for (auto t: t1->Children)
 			{
 				char *Ref;
@@ -2207,8 +2207,8 @@ public:
 		}
 		else
 		{
-			GXmlTag *c1 = t1->Children[0];
-			GXmlTag *c2 = t2->Children[0];
+			LXmlTag *c1 = t1->Children[0];
+			LXmlTag *c2 = t2->Children[0];
 			while (c1 && c2)
 			{
 				Compare(c1, c2);
@@ -2259,10 +2259,10 @@ void AppWnd::ImportLang()
 			Ctx.Format = GetFormat(Select.Name());
 
 			// convert file to Xml objects
-			GXmlTag *Root = new GXmlTag;
+			LXmlTag *Root = new LXmlTag;
 			if (Root)
 			{
-				GXmlTree Tree(GXT_NO_ENTITIES);
+				LXmlTree Tree(GXT_NO_ENTITIES);
 				if (Tree.Read(Root, &F, 0))
 				{
 					List<ResMenu> Menus;
@@ -2611,11 +2611,11 @@ bool AppWnd::LoadLgi(const char *FileName)
 			Progress.SetDescription("Initializing...");
 			Progress.SetType("Tags");
 
-			GXmlTag *Root = new GXmlTag;
+			LXmlTag *Root = new LXmlTag;
 			if (Root)
 			{				
 				// convert file to Xml objects
-				GXmlTree Xml(0);
+				LXmlTree Xml(0);
 				Progress.SetDescription("Lexing...");
 				if (Xml.Read(Root, &f, 0))
 				{
@@ -3107,7 +3107,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 				// write defines
 				WriteDefines(Defs);
 
-				GXmlTag Root("resources");
+				LXmlTag Root("resources");
 				// Write all string lists out first so that when we load objects
 				// back in again the strings will already be loaded and can
 				// be referenced
@@ -3115,7 +3115,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 				{
 					if (r->Type() == TYPE_STRING)
 					{
-						GXmlTag *c = new GXmlTag;
+						LXmlTag *c = new LXmlTag;
 						if (c && r->Write(c, Ctx))
 						{
 							Root.InsertTag(c);
@@ -3133,7 +3133,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 				{
 					if (r->Type() != TYPE_STRING)
 					{
-						GXmlTag *c = new GXmlTag;
+						LXmlTag *c = new LXmlTag;
 						if (c && r->Write(c, Ctx))
 						{
 							Root.InsertTag(c);
@@ -3155,7 +3155,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 				// root element.
 				Root.SetAttr("Offset", 1);
 
-				GXmlTree Tree(GXT_NO_ENTITIES);
+				LXmlTree Tree(GXT_NO_ENTITIES);
 				Status = Tree.Write(&Root, &f);
 			}
 		}

@@ -3,7 +3,7 @@
 
 #include "GVariant.h"
 #include "GMap.h"
-#include "GXmlTree.h"
+#include "LXmlTree.h"
 
 class GNamedVariant : public GVariant, public GObj
 {
@@ -31,7 +31,7 @@ public:
 	GTag &operator =(GTag &t);
 	GNamedVariant *GetNamed(char *Name);
 	void Empty();
-	bool Read(GXmlTag *t);
+	bool Read(LXmlTag *t);
 	void Write(GFile &f);
 	bool GetVariant(const char *Name, GVariant &Value, char *Array = 0);
 	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);

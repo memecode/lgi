@@ -2089,7 +2089,7 @@ bool MailPop3::Open(GSocketI *S, const char *RemoteHost, int Port, const char *U
 		Error(_FL, "No remote POP host.\n");
 	else 
 	{
-		GXmlTag LocalStore;
+		LXmlTag LocalStore;
 		if (!SettingStore)
 			SettingStore = &LocalStore;
 

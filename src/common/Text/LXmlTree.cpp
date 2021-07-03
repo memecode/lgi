@@ -7,13 +7,13 @@
 #include "lgi/common/Variant.h"
 #include "lgi/common/Token.h"
 
-static char GXmlHeader[] = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
+static char LXmlHeader[] = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
 
 //////////////////////////////////////////////////////////////////////////////
 int _Pools = 0;
 int _Normals = 0;
 
-char *GXmlAlloc::Alloc(const char *s, ssize_t len)
+char *LXmlAlloc::Alloc(const char *s, ssize_t len)
 {
 	if (!s) return NULL;
 	if (len < 0) len = (int)strlen(s);
@@ -25,7 +25,7 @@ char *GXmlAlloc::Alloc(const char *s, ssize_t len)
 	return p;
 }
 
-class XmlPoolAlloc : public GXmlAlloc
+class XmlPoolAlloc : public LXmlAlloc
 {
 	struct Block
 	{
@@ -56,7 +56,7 @@ public:
 	{
 		_Pools++;
 		#ifndef LGI_STATIC
-		// LgiTrace("%p::XmlPoolAlloc _Pools=%i, Refs=%i\n", (GXmlAlloc*)this, _Pools, _GetCount());
+		// LgiTrace("%p::XmlPoolAlloc _Pools=%i, Refs=%i\n", (LXmlAlloc*)this, _Pools, _GetCount());
 		#endif
 	}
 
@@ -64,7 +64,7 @@ public:
 	{
 		_Pools--;
 		#ifndef LGI_STATIC
-		// LgiStackTrace("%p::~XmlPoolAlloc _Pools=%i, Refs=%i\n", (GXmlAlloc*)this, _Pools, _GetCount());
+		// LgiStackTrace("%p::~XmlPoolAlloc _Pools=%i, Refs=%i\n", (LXmlAlloc*)this, _Pools, _GetCount());
 		#endif
 	}
 
@@ -94,14 +94,14 @@ public:
 	}
 };
 
-class XmlNormalAlloc : public GXmlAlloc
+class XmlNormalAlloc : public LXmlAlloc
 {
 public:
 	XmlNormalAlloc()
 	{
 		_Normals++;
 		#ifndef LGI_STATIC
-		// LgiTrace("%p::XmlNormalAlloc _Normals=%i\n", (GXmlAlloc*)this, _Normals);
+		// LgiTrace("%p::XmlNormalAlloc _Normals=%i\n", (LXmlAlloc*)this, _Normals);
 		#endif
 	}
 
@@ -109,7 +109,7 @@ public:
 	{
 		_Normals--;
 		#ifndef LGI_STATIC
-		// LgiStackTrace("%p::~XmlNormalAlloc _Normals=%i\n", (GXmlAlloc*)this, _Normals);
+		// LgiStackTrace("%p::~XmlNormalAlloc _Normals=%i\n", (LXmlAlloc*)this, _Normals);
 		#endif
 	}
 
@@ -125,11 +125,11 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////
-class GXmlTreePrivate
+class LXmlTreePrivate
 {
 public:
-	GXmlFactory *Factory;
-	GXmlTag *Current;
+	LXmlFactory *Factory;
+	LXmlTag *Current;
 	GStreamI *File;
 	GString Error;
 	int Flags;
@@ -146,7 +146,7 @@ public:
 		return TestFlag(Flags, GXT_NO_DOM);
 	}
 
-	GXmlTreePrivate()
+	LXmlTreePrivate()
 	{
 		Factory = 0;
 		File = 0;
@@ -163,7 +163,7 @@ public:
 		Entities.Add("apos", '\'');
 	}
 	
-	~GXmlTreePrivate()
+	~LXmlTreePrivate()
 	{
 		DeleteArray(StyleType);
 		DeleteArray(StyleFile);
@@ -174,7 +174,7 @@ public:
 const char *EncodeEntitiesAttr	= "\'<>\"\n";
 const char *EncodeEntitiesContent	= "\'<>\"";
 
-char *GXmlTree::EncodeEntities(const char *s, ssize_t len, const char *extra_characters)
+char *LXmlTree::EncodeEntities(const char *s, ssize_t len, const char *extra_characters)
 {
 	GStringPipe p;
 	if (EncodeEntities(&p, s, len, extra_characters))
@@ -185,7 +185,7 @@ char *GXmlTree::EncodeEntities(const char *s, ssize_t len, const char *extra_cha
 	return 0;
 }
 
-bool GXmlTree::EncodeEntities(GStreamI *to, const char *start, ssize_t len, const char *extra_characters)
+bool LXmlTree::EncodeEntities(GStreamI *to, const char *start, ssize_t len, const char *extra_characters)
 {
 	if (!start || !to)
 		return 0;
@@ -251,7 +251,7 @@ bool GXmlTree::EncodeEntities(GStreamI *to, const char *start, ssize_t len, cons
 	return true;
 }
 
-char *GXmlTree::DecodeEntities(GXmlAlloc *Alloc, char *In, ssize_t Len)
+char *LXmlTree::DecodeEntities(LXmlAlloc *Alloc, char *In, ssize_t Len)
 {
 	if (!In || !Alloc)
 	{
@@ -347,9 +347,9 @@ char *GXmlTree::DecodeEntities(GXmlAlloc *Alloc, char *In, ssize_t Len)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-GAutoRefPtr<GXmlAlloc> TagHeapAllocator(new XmlNormalAlloc);
+GAutoRefPtr<LXmlAlloc> TagHeapAllocator(new XmlNormalAlloc);
 
-GXmlTag::GXmlTag(const char *tag, GXmlAlloc *alloc)
+LXmlTag::LXmlTag(const char *tag, LXmlAlloc *alloc)
 {
 	Children.SetFixedLength(true);
 	if (alloc)
@@ -364,7 +364,7 @@ GXmlTag::GXmlTag(const char *tag, GXmlAlloc *alloc)
 	Tag = Allocator->Alloc(tag);
 }
 
-GXmlTag::GXmlTag(const GXmlTag &t)
+LXmlTag::LXmlTag(const LXmlTag &t)
 {
 	Allocator = t.Allocator;
 	LgiAssert(Allocator != NULL);
@@ -374,16 +374,16 @@ GXmlTag::GXmlTag(const GXmlTag &t)
 	Parent = NULL;
 	Content = NULL;
 
-	Copy((GXmlTag&)t);
+	Copy((LXmlTag&)t);
 }
 
-GXmlTag::~GXmlTag()
+LXmlTag::~LXmlTag()
 {
 	RemoveTag();
 	Empty(true);
 }
 
-void GXmlTag::EmptyAttributes()
+void LXmlTag::EmptyAttributes()
 {
 	for (auto &a: Attr)
 	{
@@ -393,9 +393,9 @@ void GXmlTag::EmptyAttributes()
 	Attr.Length(0);
 }
 
-void GXmlTag::EmptyChildren()
+void LXmlTag::EmptyChildren()
 {
-	GXmlTag *c;
+	LXmlTag *c;
 	while (Children.Length() &&
 		(c = Children[0]))
 	{
@@ -404,7 +404,7 @@ void GXmlTag::EmptyChildren()
 	}
 }
 
-void GXmlTag::Empty(bool Deep)
+void LXmlTag::Empty(bool Deep)
 {
 	EmptyAttributes();
 	Allocator->Free(Content);
@@ -414,7 +414,7 @@ void GXmlTag::Empty(bool Deep)
 		EmptyChildren();
 }
 
-void GXmlTag::Swap(GXmlTag &t)
+void LXmlTag::Swap(LXmlTag &t)
 {
 	Allocator.Swap(t.Allocator);
 	LSwap(Write, t.Write);
@@ -438,7 +438,7 @@ void GXmlTag::Swap(GXmlTag &t)
 		c->Parent = &t;
 }
 
-bool GXmlTag::Copy(GXmlTag &t, bool Deep)
+bool LXmlTag::Copy(LXmlTag &t, bool Deep)
 {
 	Empty(Deep);
 	
@@ -449,7 +449,7 @@ bool GXmlTag::Copy(GXmlTag &t, bool Deep)
 	Attr.Length(t.Attr.Length());
 	for (int i=0; i<t.Attr.Length(); i++)
 	{
-		GXmlAttr &a = t.Attr[i];
+		LXmlAttr &a = t.Attr[i];
 		Attr[i].Name = Allocator->Alloc(a.Name);
 		Attr[i].Value = Allocator->Alloc(a.Value);
 	}
@@ -458,7 +458,7 @@ bool GXmlTag::Copy(GXmlTag &t, bool Deep)
 	{
 		for (auto c: t.Children)
 		{
-			GXmlTag *n = new GXmlTag;
+			LXmlTag *n = new LXmlTag;
 			if (n)
 			{
 				n->Copy(*c, Deep);
@@ -470,30 +470,30 @@ bool GXmlTag::Copy(GXmlTag &t, bool Deep)
 	return true;
 }
 
-bool GXmlTag::XPath(GArray<GXmlTag*> &Results, const char *Path)
+bool LXmlTag::XPath(GArray<LXmlTag*> &Results, const char *Path)
 {
 	return false;
 }
 
-GXmlTag &GXmlTag::operator =(GXmlTag &t)
+LXmlTag &LXmlTag::operator =(LXmlTag &t)
 {
 	Copy(t);
 	return *this;
 }
 
-GXmlTag *GXmlTag::CreateTag(const char *Name, char *Content)
+LXmlTag *LXmlTag::CreateTag(const char *Name, char *Content)
 {
-	GXmlTag *c = GetChildTag(Name, true);
+	LXmlTag *c = GetChildTag(Name, true);
 	if (c) c->Content = NewStr(Content);
 	return c;
 }
 
-const char *GXmlTag::GetTag()
+const char *LXmlTag::GetTag()
 {
 	return Tag;
 }
 
-void GXmlTag::SetTag(const char *Str, ssize_t Len)
+void LXmlTag::SetTag(const char *Str, ssize_t Len)
 {
 	Allocator->Free(Tag);
 	Tag = NULL;
@@ -503,14 +503,14 @@ void GXmlTag::SetTag(const char *Str, ssize_t Len)
 	}
 }
 
-GXmlTag *GXmlTag::GetChildTag(const char *Name, bool Create, const char *TagSeparator)
+LXmlTag *LXmlTag::GetChildTag(const char *Name, bool Create, const char *TagSeparator)
 {
 	GToken p(Name, TagSeparator);
 
-	GXmlTag *t = this;
+	LXmlTag *t = this;
 	for (int i=0; i<p.Length() && t; i++)
 	{
-		GXmlTag *Child = 0;
+		LXmlTag *Child = 0;
 		char *Part = p[i];
 		
 		for (auto c: t->Children)
@@ -525,7 +525,7 @@ GXmlTag *GXmlTag::GetChildTag(const char *Name, bool Create, const char *TagSepa
 		{
 			if (Create)
 			{
-				t->InsertTag( Child = new GXmlTag(p[i]) );
+				t->InsertTag( Child = new LXmlTag(p[i]) );
 				if (!Child)
 				{
 					return 0;
@@ -539,7 +539,7 @@ GXmlTag *GXmlTag::GetChildTag(const char *Name, bool Create, const char *TagSepa
 	return t;
 }
 
-bool GXmlTag::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool LXmlTag::GetVariant(const char *Name, GVariant &Value, char *Array)
 {
 	/* !_stricmp(Name, "'attribute_name'") // Type: String
 	*/
@@ -610,7 +610,7 @@ bool GXmlTag::GetVariant(const char *Name, GVariant &Value, char *Array)
 	return false;	
 }
 
-bool GXmlTag::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool LXmlTag::SetVariant(const char *Name, GVariant &Value, char *Array)
 {
 	if (Name)
 	{
@@ -681,7 +681,7 @@ bool GXmlTag::SetVariant(const char *Name, GVariant &Value, char *Array)
 	return false;
 }
 
-void GXmlTag::InsertTag(GXmlTag *t)
+void LXmlTag::InsertTag(LXmlTag *t)
 {
 	if (t)
 	{
@@ -694,7 +694,7 @@ void GXmlTag::InsertTag(GXmlTag *t)
 	}
 }
 
-bool GXmlTag::RemoveTag()
+bool LXmlTag::RemoveTag()
 {
 	if (!Parent)
 		return true;
@@ -706,7 +706,7 @@ bool GXmlTag::RemoveTag()
 	return Status;
 }
 
-int64 GXmlTag::CountTags()
+int64 LXmlTag::CountTags()
 {
 	uint64 c = 1;
 
@@ -716,7 +716,7 @@ int64 GXmlTag::CountTags()
 	return c;
 }
 
-bool GXmlTag::Dump(int Depth)
+bool LXmlTag::Dump(int Depth)
 {
 	#define Tabs() { for (int i=0; i<Depth; i++) printf("    "); }
 	
@@ -743,18 +743,18 @@ bool GXmlTag::Dump(int Depth)
 	return true;
 }
 
-int GXmlTag::GetContentAsInt(int Default)
+int LXmlTag::GetContentAsInt(int Default)
 {
 	return Content ? atoi(Content) : Default;
 }
 
-bool GXmlTag::SetContent(int i)
+bool LXmlTag::SetContent(int i)
 {
 	char s[32];
 	return SetContent(s, sprintf_s(s, sizeof(s), "%i", i));
 }
 
-GXmlAttr *GXmlTag::_Attr(const char *Name, bool Wr)
+LXmlAttr *LXmlTag::_Attr(const char *Name, bool Wr)
 {
 	if (!Name)
 		return 0;
@@ -776,7 +776,7 @@ GXmlAttr *GXmlTag::_Attr(const char *Name, bool Wr)
 
 	for (int i=0; i<Attr.Length(); i++)
 	{
-		GXmlAttr *a = &Attr[i];
+		LXmlAttr *a = &Attr[i];
 		if (a->Name && stricmp(a->Name, Name) == 0)
 		{
 			if (Wr)
@@ -792,16 +792,16 @@ GXmlAttr *GXmlTag::_Attr(const char *Name, bool Wr)
 		return 0;
 
 	// Create
-	GXmlAttr &n = Attr.New();
+	LXmlAttr &n = Attr.New();
 	n.Name = Allocator->Alloc(Name);
 	return &n;
 }
 
-bool GXmlTag::DelAttr(const char *Name)
+bool LXmlTag::DelAttr(const char *Name)
 {
 	for (int i=0; i<Attr.Length(); i++)
 	{
-		GXmlAttr &a = Attr[i];
+		LXmlAttr &a = Attr[i];
 		if (a.Name && !stricmp(a.Name, Name))
 		{
 			Allocator->Free(a.Name);
@@ -813,7 +813,7 @@ bool GXmlTag::DelAttr(const char *Name)
 	return false;
 }
 
-bool GXmlTag::SetContent(const char *s, ssize_t len)
+bool LXmlTag::SetContent(const char *s, ssize_t len)
 {
 	char *n = s ? Allocator->Alloc(s, len > 0 ? len : strlen(s)) : NULL;
 	if (Content)
@@ -825,21 +825,21 @@ bool GXmlTag::SetContent(const char *s, ssize_t len)
 	return s ? Content != NULL : true;
 }
 
-char *GXmlTag::GetAttr(const char *n)
+char *LXmlTag::GetAttr(const char *n)
 {
-	GXmlAttr *a = _Attr(n, false);
+	LXmlAttr *a = _Attr(n, false);
 	return a ? a->Value : 0;	
 }
 
-int GXmlTag::GetAsInt(const char *n)
+int LXmlTag::GetAsInt(const char *n)
 {
-	GXmlAttr *a = _Attr(n, false);
+	LXmlAttr *a = _Attr(n, false);
 	return a ? atoi(a->Value) : -1;	
 }
 
-bool GXmlTag::SetAttr(const char *n, const char *Value)
+bool LXmlTag::SetAttr(const char *n, const char *Value)
 {
-	GXmlAttr *a = _Attr(n, true);
+	LXmlAttr *a = _Attr(n, true);
 	if (a)
 	{
 		a->Value = Allocator->Alloc(Value);
@@ -848,9 +848,9 @@ bool GXmlTag::SetAttr(const char *n, const char *Value)
 	return false;
 }
 
-bool GXmlTag::SetAttr(const char *n, int Value)
+bool LXmlTag::SetAttr(const char *n, int Value)
 {
-	GXmlAttr *a = _Attr(n, true);
+	LXmlAttr *a = _Attr(n, true);
 	if (a)
 	{
 		char s[32];
@@ -861,9 +861,9 @@ bool GXmlTag::SetAttr(const char *n, int Value)
 	return false;
 }
 
-bool GXmlTag::SetAttr(const char *n, int64 Value)
+bool LXmlTag::SetAttr(const char *n, int64 Value)
 {
-	GXmlAttr *a = _Attr(n, true);
+	LXmlAttr *a = _Attr(n, true);
 	if (a)
 	{
 		char s[32];
@@ -874,13 +874,13 @@ bool GXmlTag::SetAttr(const char *n, int64 Value)
 	return false;
 }
 
-bool GXmlTag::SerializeAttr(const char *Attr, GString &s)
+bool LXmlTag::SerializeAttr(const char *Attr, GString &s)
 {
 	if (Write) // arg -> attr
 	{
 		if (s)
 		{
-			GXmlAttr *a = _Attr(Attr, true);
+			LXmlAttr *a = _Attr(Attr, true);
 			if (!a)
 				return false;
 			a->Value = Allocator->Alloc(s);
@@ -893,7 +893,7 @@ bool GXmlTag::SerializeAttr(const char *Attr, GString &s)
 	}
 	else // attr -> arg
 	{
-		GXmlAttr *a = _Attr(Attr, false);
+		LXmlAttr *a = _Attr(Attr, false);
 		if (a)
 			s = a->Value;
 		else
@@ -903,9 +903,9 @@ bool GXmlTag::SerializeAttr(const char *Attr, GString &s)
 	return true;
 }
 
-bool GXmlTag::SerializeAttr(const char *Attr, int &Int)
+bool LXmlTag::SerializeAttr(const char *Attr, int &Int)
 {
-	GXmlAttr *a = _Attr(Attr, Write);
+	LXmlAttr *a = _Attr(Attr, Write);
 	if (a)
 	{
 		if (Write)
@@ -924,9 +924,9 @@ bool GXmlTag::SerializeAttr(const char *Attr, int &Int)
 	return false;
 }
 
-bool GXmlTag::SerializeAttr(const char *Name, char *&Str)
+bool LXmlTag::SerializeAttr(const char *Name, char *&Str)
 {
-	GXmlAttr *a = _Attr(Name, Write);
+	LXmlAttr *a = _Attr(Name, Write);
 	if (a)
 	{
 		if (Write)
@@ -951,9 +951,9 @@ bool GXmlTag::SerializeAttr(const char *Name, char *&Str)
 	return false;
 }
 
-bool GXmlTag::SerializeAttr(const char *Attr, double &Dbl)
+bool LXmlTag::SerializeAttr(const char *Attr, double &Dbl)
 {
-	GXmlAttr *a = _Attr(Attr, Write);
+	LXmlAttr *a = _Attr(Attr, Write);
 	if (a)
 	{
 		if (Write)
@@ -973,13 +973,13 @@ bool GXmlTag::SerializeAttr(const char *Attr, double &Dbl)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-GXmlTree::GXmlTree(int Flags)
+LXmlTree::LXmlTree(int Flags)
 {
-	d = new GXmlTreePrivate;
+	d = new LXmlTreePrivate;
 	d->Flags = Flags;
 }
 
-GXmlTree::~GXmlTree()
+LXmlTree::~LXmlTree()
 {
 	DeleteObj(d);
 }
@@ -987,7 +987,7 @@ GXmlTree::~GXmlTree()
 static const char *White = " \t\r\n";
 #define SkipWhiteSpace(s) while (*s && strchr(White, *s)) s++
 
-void GXmlTag::ParseAttribute(GXmlTree *Tree, GXmlAlloc *Alloc, char *&t, bool &NoChildren, bool &TypeDef)
+void LXmlTag::ParseAttribute(LXmlTree *Tree, LXmlAlloc *Alloc, char *&t, bool &NoChildren, bool &TypeDef)
 {
 	while (*t && *t != '>' && *t != '?')
 	{
@@ -1016,7 +1016,7 @@ void GXmlTag::ParseAttribute(GXmlTree *Tree, GXmlAlloc *Alloc, char *&t, bool &N
 				{
 					if (t > Start)
 					{
-						GXmlAttr &At = Attr.New();
+						LXmlAttr &At = Attr.New();
 						At.Name = Alloc->Alloc(Start, t - Start);
 					}
 
@@ -1035,7 +1035,7 @@ void GXmlTag::ParseAttribute(GXmlTree *Tree, GXmlAlloc *Alloc, char *&t, bool &N
 				while (*t && *t != ']')
 				{
 					bool NoChildren = false;
-					GXmlTag *c = Tree->Parse(0, Alloc, t, NoChildren, true);
+					LXmlTag *c = Tree->Parse(0, Alloc, t, NoChildren, true);
 					if (c)
 					{
 						InsertTag(c);
@@ -1065,7 +1065,7 @@ void GXmlTag::ParseAttribute(GXmlTree *Tree, GXmlAlloc *Alloc, char *&t, bool &N
 
 		if (t > AttrName)
 		{
-			GXmlAttr &At = Attr.New();
+			LXmlAttr &At = Attr.New();
 			At.Name = Alloc->Alloc(AttrName, t-AttrName);
 			
 			// Skip white
@@ -1141,7 +1141,7 @@ void GXmlTag::ParseAttribute(GXmlTree *Tree, GXmlAlloc *Alloc, char *&t, bool &N
 	}
 }
 
-GXmlTag *GXmlTree::Parse(GXmlTag *Tag, GXmlAlloc *Alloc, char *&t, bool &NoChildren, bool InTypeDef)
+LXmlTag *LXmlTree::Parse(LXmlTag *Tag, LXmlAlloc *Alloc, char *&t, bool &NoChildren, bool InTypeDef)
 {
 	bool KeepWs = TestFlag(d->Flags, GXT_KEEP_WHITESPACE);
 	char *Start = t;
@@ -1205,7 +1205,7 @@ ParsingStart:
 
 		if (Before.GetSize() > 0)
 		{
-			GXmlTag *PreContent = d->Factory ? d->Factory->Create(0) : new GXmlTag;
+			LXmlTag *PreContent = d->Factory ? d->Factory->Create(0) : new LXmlTag;
 			if (PreContent)
 			{
 				PreContent->Allocator = Alloc;
@@ -1217,7 +1217,7 @@ ParsingStart:
 				else
 				{
 					GAutoString Tmp(Before.NewStr());
-					GAutoRefPtr<GXmlAlloc> LocalAlloc(new XmlNormalAlloc);
+					GAutoRefPtr<LXmlAlloc> LocalAlloc(new XmlNormalAlloc);
 					PreContent->Content = DecodeEntities(Tag ? Tag->Allocator : LocalAlloc, Tmp, strlen(Tmp));
 				}
 
@@ -1264,7 +1264,7 @@ ParsingStart:
 			if (TagName[0] == '?')
 			{
 				GAutoString TmpStr(NewStr(TagName, t - TagName));
-				GXmlTag Temp(TmpStr, Alloc);
+				LXmlTag Temp(TmpStr, Alloc);
 				TmpStr.Reset();
 				bool bTrue = true;
 
@@ -1303,7 +1303,7 @@ ParsingStart:
 				*t = 0;
 				if (!Tag)
 				{
-					Tag = d->Factory ? d->Factory->Create(TagName) : new GXmlTag;
+					Tag = d->Factory ? d->Factory->Create(TagName) : new LXmlTag;
 					if (!Tag)
 						return 0;
 						
@@ -1369,7 +1369,7 @@ ParsingStart:
 	return Tag;
 }
 
-bool GXmlTree::Read(GXmlTag *Root, GStreamI *File, GXmlFactory *Factory)
+bool LXmlTree::Read(LXmlTag *Root, GStreamI *File, LXmlFactory *Factory)
 {
 	if (!Root)
 	{
@@ -1385,7 +1385,7 @@ bool GXmlTree::Read(GXmlTag *Root, GStreamI *File, GXmlFactory *Factory)
 	
 	GString t = Root->Tag;
 	Root->SetTag(NULL);	
-	GAutoRefPtr<GXmlAlloc> Allocator(new XmlPoolAlloc);
+	GAutoRefPtr<LXmlAlloc> Allocator(new XmlPoolAlloc);
 	Root->Allocator = Allocator;
 	Root->SetTag(t);
 
@@ -1420,7 +1420,7 @@ bool GXmlTree::Read(GXmlTag *Root, GStreamI *File, GXmlFactory *Factory)
 	{
 		bool NoChildren = true;
 		
-		GAutoPtr<GXmlTag> t
+		GAutoPtr<LXmlTag> t
 		(
 		    Parse(  First && !TestFlag(d->Flags, GXT_NO_DOM) ? Root : 0,
 					Allocator,
@@ -1443,8 +1443,8 @@ bool GXmlTree::Read(GXmlTag *Root, GStreamI *File, GXmlFactory *Factory)
 					{
 						if (c->Attr.Length() == 2)
 						{
-							GXmlAttr &Ent = c->Attr[0];
-							GXmlAttr &Value = c->Attr[1];
+							LXmlAttr &Ent = c->Attr[0];
+							LXmlAttr &Value = c->Attr[1];
 							if (Ent.Name &&
 								Value.Name &&
 								!d->Entities.Find(Ent.Name))
@@ -1478,7 +1478,7 @@ bool GXmlTree::Read(GXmlTag *Root, GStreamI *File, GXmlFactory *Factory)
 					d->Error.Printf("Mismatched '%s' tag, got '%s' instead (Line %i).\n", t->Tag, d->Current->Tag, Lines);
 
 					#ifdef _DEBUG
-					GXmlTree Dbg;
+					LXmlTree Dbg;
 					GFile Out;
 					if (Out.Open("c:\\temp\\out.xml", O_WRITE))
 					{
@@ -1494,7 +1494,7 @@ bool GXmlTree::Read(GXmlTag *Root, GStreamI *File, GXmlFactory *Factory)
 			{
 				t->Serialize(t->Write = false);
 
-			    GXmlTag *NewTag = t;
+			    LXmlTag *NewTag = t;
 			    if (t != Root)
 				    d->Current->InsertTag(t.Release());
 			    else
@@ -1520,7 +1520,7 @@ bool GXmlTree::Read(GXmlTag *Root, GStreamI *File, GXmlFactory *Factory)
 	return true;
 }
 
-void GXmlTree::Output(GXmlTag *t, int Depth)
+void LXmlTree::Output(LXmlTag *t, int Depth)
 {
 	#define Tabs if (!TestFlag(d->Flags, GXT_NO_PRETTY_WHITESPACE)) \
 		{ for (int i=0; i<Depth; i++) d->File->Write((void*)"\t", 1); }
@@ -1537,7 +1537,7 @@ void GXmlTree::Output(GXmlTag *t, int Depth)
 
 	for (int i=0; i<t->Attr.Length(); i++)
 	{
-		GXmlAttr &a = t->Attr[i];
+		LXmlAttr &a = t->Attr[i];
 
 		// Write the attribute name
 		GStreamPrint(d->File, " %s=\"", a.Name);
@@ -1560,7 +1560,7 @@ void GXmlTree::Output(GXmlTag *t, int Depth)
 	if (t->Children.Length() || HasContent)
 	{
 		auto It = t->Children.begin();
-		GXmlTag *c = t->Children.Length() ? *It : NULL;
+		LXmlTag *c = t->Children.Length() ? *It : NULL;
 		if (ValidTag)
 			d->File->Write(">", 1);
 		
@@ -1604,7 +1604,7 @@ void GXmlTree::Output(GXmlTag *t, int Depth)
 	#undef Tabs
 }
 
-bool GXmlTree::Write(GXmlTag *Root, GStreamI *File, Progress *Prog)
+bool LXmlTree::Write(LXmlTag *Root, GStreamI *File, Progress *Prog)
 {
 	bool Status = false;
 	
@@ -1616,7 +1616,7 @@ bool GXmlTree::Write(GXmlTag *Root, GStreamI *File, Progress *Prog)
 			d->Prog->SetRange(GRange(0, Root->CountTags()));
 
 		if (!TestFlag(d->Flags, GXT_NO_HEADER))
-			File->Write(GXmlHeader, strlen(GXmlHeader));
+			File->Write(LXmlHeader, strlen(LXmlHeader));
 		if (d->StyleFile && d->StyleType)
 			GStreamPrint(d->File, "<?xml-stylesheet href=\"%s\" type=\"%s\"?>\n", d->StyleFile, d->StyleType);
 
@@ -1630,29 +1630,29 @@ bool GXmlTree::Write(GXmlTag *Root, GStreamI *File, Progress *Prog)
 	return Status;
 }
 
-char *GXmlTree::GetErrorMsg()
+char *LXmlTree::GetErrorMsg()
 {
 	return d->Error;
 }
 
-LHashTbl<ConstStrKey<char,false>,bool> *GXmlTree::NoChildTags()
+LHashTbl<ConstStrKey<char,false>,bool> *LXmlTree::NoChildTags()
 {
 	return &d->NoChildTags;
 }
 
-LHashTbl<ConstStrKey<char,false>,char16> *GXmlTree::GetEntityTable()
+LHashTbl<ConstStrKey<char,false>,char16> *LXmlTree::GetEntityTable()
 {
 	return &d->Entities;
 }
 
-char *GXmlTree::GetStyleFile(char **StyleType)
+char *LXmlTree::GetStyleFile(char **StyleType)
 {
 	if (StyleType)
 		*StyleType = d->StyleType;
 	return d->StyleFile;
 }
 
-void GXmlTree::SetStyleFile(char *file, const char *type)
+void LXmlTree::SetStyleFile(char *file, const char *type)
 {
 	DeleteArray(d->StyleFile);
 	DeleteArray(d->StyleType);

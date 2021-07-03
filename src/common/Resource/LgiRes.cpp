@@ -27,8 +27,6 @@
 // If it is defined it will use the cross platform 
 // "res" library distributed with the LGI library.
 
-// #include "GXml.h"
-
 #define DEBUG_RES_FILE						0
 #define CastToGWnd(RObj)					((RObj != 0) ? dynamic_cast<GView*>(RObj) : 0)
 
@@ -67,7 +65,7 @@ public:
 		return Result;
 	}
 
-	bool Check(GXmlTag *t)
+	bool Check(LXmlTag *t)
 	{
 		if (!t)
 			return false;
@@ -99,7 +97,7 @@ LgiStringRes::~LgiStringRes()
 	DeleteArray(Tag);
 }
 
-bool LgiStringRes::Read(GXmlTag *t, ResFileFormat Format)
+bool LgiStringRes::Read(LXmlTag *t, ResFileFormat Format)
 {
 	if (LgiStringRes::CurLang &&
 		t &&
@@ -207,7 +205,7 @@ bool LgiStringRes::Read(GXmlTag *t, ResFileFormat Format)
 		{
 			for (int a=0; a<t->Attr.Length(); a++)
 			{
-				GXmlAttr *v = &t->Attr[a];
+				LXmlAttr *v = &t->Attr[a];
 				char *Name = v->GetName();
 
 				if (GFindLang(Name))
@@ -539,8 +537,8 @@ bool LResources::Load(const char *FileName)
 		LgiStringRes::CodePage = LgiStringRes::CurLang->Charset;
 	}
 
-	GXmlTree x(0);
-	GAutoPtr<GXmlTag> Root(new GXmlTag);
+	LXmlTree x(0);
+	GAutoPtr<LXmlTag> Root(new LXmlTag);
 	if (!x.Read(Root, &F, 0))
 	{
 		LgiTrace("%s:%i - ParseXmlFile failed: %s\n", _FL, x.GetErrorMsg());
@@ -574,7 +572,7 @@ bool LResources::Load(const char *FileName)
 					{
 						for (int i=0; i<c->Attr.Length(); i++)
 						{
-							GXmlAttr &a = c->Attr[i];
+							LXmlAttr &a = c->Attr[i];
 							LanguageNames.Add(a.GetName(), NewStr(a.GetValue()));
 						}
 					}
@@ -708,7 +706,7 @@ public:
     }
 };
 
-ResObject *LResources::CreateObject(GXmlTag *t, ResObject *Parent)
+ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 {
 	ResObject *Wnd = 0;
 	if (t && t->GetTag())
@@ -1145,7 +1143,7 @@ LgiDialogRes::~LgiDialogRes()
 	DeleteObj(Dialog);
 }
 
-bool LgiDialogRes::Read(GXmlTag *t, ResFileFormat Format)
+bool LgiDialogRes::Read(LXmlTag *t, ResFileFormat Format)
 {
 	if ((Dialog = t))
 	{
@@ -1184,7 +1182,7 @@ LgiMenuRes::~LgiMenuRes()
 	DeleteObj(Tag);
 }
 
-bool LgiMenuRes::Read(GXmlTag *t, ResFileFormat Format)
+bool LgiMenuRes::Read(LXmlTag *t, ResFileFormat Format)
 {
 	Tag = t;
 	if (t && stricmp(t->GetTag(), "menu") == 0)
@@ -1476,7 +1474,7 @@ bool LResources::LoadDialog(int Resource, GViewI *Parent, LRect *Pos, GAutoStrin
 
 //////////////////////////////////////////////////////////////////////
 // Menus
-LgiStringRes *LgiMenuRes::GetString(GXmlTag *Tag)
+LgiStringRes *LgiMenuRes::GetString(LXmlTag *Tag)
 {
 	if (Tag)
 	{
@@ -1493,7 +1491,7 @@ LgiStringRes *LgiMenuRes::GetString(GXmlTag *Tag)
 	return 0;
 }
 
-bool LMenuLoader::Load(LgiMenuRes *MenuRes, GXmlTag *Tag, ResFileFormat Format, TagHash *TagList)
+bool LMenuLoader::Load(LgiMenuRes *MenuRes, LXmlTag *Tag, ResFileFormat Format, TagHash *TagList)
 {
 	bool Status = false;
 

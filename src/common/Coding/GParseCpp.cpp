@@ -433,7 +433,7 @@ struct GSourceFile
 	void DumpBlocks()
 	{
 		#if 1
-		GXmlTree t;
+		LXmlTree t;
 		GFile f;
 		char *Leaf = strrchr(Path, DIR_CHAR);
 		char Out[MAX_PATH];
@@ -443,12 +443,12 @@ struct GSourceFile
 		if (f.Open(Out, O_WRITE))
 		{
 			f.SetSize(0);
-			GXmlTag r("Dump");
+			LXmlTag r("Dump");
 			r.SetAttr("Path", Path);
 			for (int i=0; i<Blocks.Length(); i++)
 			{
 				PreprocessBlock &b = Blocks[i];
-				GXmlTag *c = new GXmlTag(PreprocessSymbolNames[b.Type]);
+				LXmlTag *c = new LXmlTag(PreprocessSymbolNames[b.Type]);
 				r.InsertTag(c);
 				c->SetAttr("Line", b.BlockLine);
 				

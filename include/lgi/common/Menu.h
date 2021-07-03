@@ -65,7 +65,7 @@ public:
 	}
 
 	bool Load(	class LgiMenuRes *MenuRes,
-				GXmlTag *Tag,
+				LXmlTag *Tag,
 				ResFileFormat Format,
 				class TagHash *TagList);
 

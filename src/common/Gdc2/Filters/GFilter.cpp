@@ -1440,7 +1440,7 @@ GSurface *GdcDevice::Load(GStream *In, const char *Name, bool UseOSLoader)
 		return NULL;
 	}
 
-	GXmlTag Props;
+	LXmlTag Props;
 	GAutoPtr<GFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, Hint));
 	GAutoPtr<GSurface> pDC;
 	if (Filter &&

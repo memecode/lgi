@@ -940,7 +940,7 @@ protected:
 
 	void TabString(char *Str);
 	char *ReadInt(char *s, int &Value);
-	// bool IsEndTag(GXmlTag *Tag, char *ObjName);
+	// bool IsEndTag(LXmlTag *Tag, char *ObjName);
 
 public:
 	enum SStatus
@@ -958,21 +958,21 @@ public:
 
 	ResObjectImpl(ResFactory *factory, ResObject *object);
 	virtual ~ResObjectImpl() {}
-	ResObjectImpl *CreateCtrl(GXmlTag *Tag, ResObject *Parent);
+	ResObjectImpl *CreateCtrl(LXmlTag *Tag, ResObject *Parent);
 
 	// Store
-	virtual SStatus Res_Read(GXmlTag *Tag, ResReadCtx &Ctx);
-	virtual SStatus Res_Write(GXmlTag *Tag);
+	virtual SStatus Res_Read(LXmlTag *Tag, ResReadCtx &Ctx);
+	virtual SStatus Res_Write(LXmlTag *Tag);
 
 	// Ctrl
 	void Res_SetPos(int x1, int y1, int x2, int y2);
-	void Res_SetPos(GXmlTag *t);
-	bool Res_SetStrRef(GXmlTag *t, ResReadCtx *Ctx);
-	void Res_SetFlags(GXmlTag *t);
+	void Res_SetPos(LXmlTag *t);
+	bool Res_SetStrRef(LXmlTag *t, ResReadCtx *Ctx);
+	void Res_SetFlags(LXmlTag *t);
 
-	void WritePos(GXmlTag *t);
-	void WriteStrRef(GXmlTag *t);
-	void WriteFlags(GXmlTag *t);
+	void WritePos(LXmlTag *t);
+	void WriteStrRef(LXmlTag *t);
+	void WriteFlags(LXmlTag *t);
 
 	// Children
 	void Res_Attach(ResObjectImpl *Parent);
@@ -989,8 +989,8 @@ class ResDialogObj : public ResObjectImpl
 {
 public:
 	ResDialogObj(ResFactory *f, ResObject *o) : ResObjectImpl(f, o) {}
-	SStatus Res_Read(GXmlTag *Tag, ResReadCtx &Ctx);
-	SStatus Res_Write(GXmlTag *t);
+	SStatus Res_Read(LXmlTag *Tag, ResReadCtx &Ctx);
+	SStatus Res_Write(LXmlTag *t);
 };
 
 class ResTableLayout : public ResObjectImpl
@@ -1000,8 +1000,8 @@ public:
 	{
 	}
 	
-	SStatus Res_Read(GXmlTag *Tag, ResReadCtx &Ctx);
-	SStatus Res_Write(GXmlTag *t);
+	SStatus Res_Read(LXmlTag *Tag, ResReadCtx &Ctx);
+	SStatus Res_Write(LXmlTag *t);
 };
 
 class ResStaticText : public ResObjectImpl
@@ -1014,8 +1014,8 @@ class ResEditBox : public ResObjectImpl
 {
 public:
 	ResEditBox(ResFactory *f, ResObject *o) : ResObjectImpl(f, o) {}
-	SStatus Res_Read(GXmlTag *Tag, ResReadCtx &Ctx);
-	SStatus Res_Write(GXmlTag *t);
+	SStatus Res_Read(LXmlTag *Tag, ResReadCtx &Ctx);
+	SStatus Res_Write(LXmlTag *t);
 };
 
 class ResCheckBox : public ResObjectImpl
@@ -1034,8 +1034,8 @@ class ResGroup : public ResObjectImpl
 {
 public:
 	ResGroup(ResFactory *f, ResObject *o) : ResObjectImpl(f, o) {}
-	SStatus Res_Read(GXmlTag *Tag, ResReadCtx &Ctx);
-	SStatus Res_Write(GXmlTag *t);
+	SStatus Res_Read(LXmlTag *Tag, ResReadCtx &Ctx);
+	SStatus Res_Write(LXmlTag *t);
 };
 
 class ResRadio : public ResObjectImpl
@@ -1048,32 +1048,32 @@ class ResTabView : public ResObjectImpl
 {
 public:
 	ResTabView(ResFactory *f, ResObject *o) : ResObjectImpl(f, o) {}
-	SStatus Res_Read(GXmlTag *Tag, ResReadCtx &Ctx);
-	SStatus Res_Write(GXmlTag *t);
+	SStatus Res_Read(LXmlTag *Tag, ResReadCtx &Ctx);
+	SStatus Res_Write(LXmlTag *t);
 };
 
 class ResTab : public ResObjectImpl
 {
 public:
 	ResTab(ResFactory *f, ResObject *o) : ResObjectImpl(f, o) {}
-	SStatus Res_Read(GXmlTag *Tag, ResReadCtx &Ctx);
-	SStatus Res_Write(GXmlTag *t);
+	SStatus Res_Read(LXmlTag *Tag, ResReadCtx &Ctx);
+	SStatus Res_Write(LXmlTag *t);
 };
 
 class ResColumn : public ResObjectImpl
 {
 public:
 	ResColumn(ResFactory *f, ResObject *o) : ResObjectImpl(f, o) {}
-	SStatus Res_Read(GXmlTag *Tag, ResReadCtx &Ctx);
-	SStatus Res_Write(GXmlTag *t);
+	SStatus Res_Read(LXmlTag *Tag, ResReadCtx &Ctx);
+	SStatus Res_Write(LXmlTag *t);
 };
 
 class ResListView : public ResObjectImpl
 {
 public:
 	ResListView(ResFactory *f, ResObject *o) : ResObjectImpl(f, o) {}
-	SStatus Res_Read(GXmlTag *Tag, ResReadCtx &Ctx);
-	SStatus Res_Write(GXmlTag *t);
+	SStatus Res_Read(LXmlTag *Tag, ResReadCtx &Ctx);
+	SStatus Res_Write(LXmlTag *t);
 };
 
 class ResComboBox : public ResObjectImpl
@@ -1116,16 +1116,16 @@ class ResCustom : public ResObjectImpl
 {
 public:
 	ResCustom(ResFactory *f, ResObject *o) : ResObjectImpl(f, o) {}
-	SStatus Res_Read(GXmlTag *Tag, ResReadCtx &Ctx);
-	SStatus Res_Write(GXmlTag *t);
+	SStatus Res_Read(LXmlTag *Tag, ResReadCtx &Ctx);
+	SStatus Res_Write(LXmlTag *t);
 };
 
 class ResControlTree : public ResObjectImpl
 {
 public:
 	ResControlTree(ResFactory *f, ResObject *o) : ResObjectImpl(f, o) {}
-	SStatus Res_Read(GXmlTag *Tag, ResReadCtx &Ctx);
-	SStatus Res_Write(GXmlTag *t);
+	SStatus Res_Read(LXmlTag *Tag, ResReadCtx &Ctx);
+	SStatus Res_Write(LXmlTag *t);
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -1178,7 +1178,7 @@ ResObjectImpl *ResObject::GetObjectImpl(ResFactory *f)
 }
 
 ////////////////////////////////////////////////////////////////////
-bool ResFactory::Res_Read(ResObject *Obj, GXmlTag *Tag, ResReadCtx &Ctx)
+bool ResFactory::Res_Read(ResObject *Obj, LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	if (!Obj)
 	{
@@ -1196,7 +1196,7 @@ bool ResFactory::Res_Read(ResObject *Obj, GXmlTag *Tag, ResReadCtx &Ctx)
 	return Impl->Res_Read(Tag, Ctx) >= ResObjectImpl::SOk;
 }
 
-bool ResFactory::Res_Write(ResObject *Obj, GXmlTag *Tag)
+bool ResFactory::Res_Write(ResObject *Obj, LXmlTag *Tag)
 {
 	if (Obj)
 	{
@@ -1221,13 +1221,13 @@ ResObjectImpl::ResObjectImpl(ResFactory *factory, ResObject *object)
 	LgiAssert(Object && (NativeInt)Object != 0xcdcdcdcd);
 }
 
-ResObjectImpl *ResObjectImpl::CreateCtrl(GXmlTag *Tag, ResObject *Parent)
+ResObjectImpl *ResObjectImpl::CreateCtrl(LXmlTag *Tag, ResObject *Parent)
 {
 	ResObject *o = Factory->CreateObject(Tag, Parent);
 	return (o) ? o->GetObjectImpl(Factory) : 0;
 }
 
-ResObjectImpl::SStatus ResObjectImpl::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
+ResObjectImpl::SStatus ResObjectImpl::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	if (!Tag)
 	{
@@ -1264,7 +1264,7 @@ ResObjectImpl::SStatus ResObjectImpl::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 	return SError;
 }
 
-ResObjectImpl::SStatus ResObjectImpl::Res_Write(GXmlTag *t)
+ResObjectImpl::SStatus ResObjectImpl::Res_Write(LXmlTag *t)
 {
 	t->SetTag(Object->GetObjectName());
 	WritePos(t);
@@ -1279,13 +1279,13 @@ void ResObjectImpl::Res_SetPos(int x1, int y1, int x2, int y2)
 	Factory->Res_SetPos(Object, x1, y1, x2, y2);
 }
 
-void ResObjectImpl::WritePos(GXmlTag *t)
+void ResObjectImpl::WritePos(LXmlTag *t)
 {
 	LRect r = Factory->Res_GetPos(Object);
 	t->SetAttr("pos", r.Describe());
 }
 
-bool ResObjectImpl::Res_SetStrRef(GXmlTag *t, ResReadCtx *Ctx)
+bool ResObjectImpl::Res_SetStrRef(LXmlTag *t, ResReadCtx *Ctx)
 {
 	char *s;
 	if ((s = t->GetAttr("ref")))
@@ -1297,12 +1297,12 @@ bool ResObjectImpl::Res_SetStrRef(GXmlTag *t, ResReadCtx *Ctx)
 	return false;
 }
 
-void ResObjectImpl::Res_SetFlags(GXmlTag *t)
+void ResObjectImpl::Res_SetFlags(LXmlTag *t)
 {
 	Factory->Res_SetProperties(Object, t);
 }
 
-void ResObjectImpl::WriteStrRef(GXmlTag *t)
+void ResObjectImpl::WriteStrRef(LXmlTag *t)
 {
 	int Ref = Factory->Res_GetStrRef(Object);
 	if (Ref >= 0)
@@ -1313,7 +1313,7 @@ void ResObjectImpl::WriteStrRef(GXmlTag *t)
 	}
 }
 
-void ResObjectImpl::WriteFlags(GXmlTag *t)
+void ResObjectImpl::WriteFlags(LXmlTag *t)
 {
 	Factory->Res_GetProperties(Object, t);
 }
@@ -1384,7 +1384,7 @@ char *ResObjectImpl::ReadInt(char *s, int &Value)
 	return 0;
 }
 
-void ResObjectImpl::Res_SetPos(GXmlTag *t)
+void ResObjectImpl::Res_SetPos(LXmlTag *t)
 {
 	char *Str = t->GetAttr("pos");
 	if (Str)
@@ -1403,7 +1403,7 @@ void ResObjectImpl::Res_SetPos(GXmlTag *t)
 }
 
 ////////////////////////////////////////////////////////////////////
-ResObjectImpl::SStatus ResDialogObj::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
+ResObjectImpl::SStatus ResDialogObj::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	if (!Tag)
 	{
@@ -1412,7 +1412,7 @@ ResObjectImpl::SStatus ResDialogObj::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 	}
 
 	int OffsetType = 0;
-	for (GXmlTag *p = Tag; p; p = p->Parent)
+	for (LXmlTag *p = Tag; p; p = p->Parent)
 	{
 		if (!p->Parent)
 		{
@@ -1460,7 +1460,7 @@ ResObjectImpl::SStatus ResDialogObj::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 	return SOk;
 }
 
-ResObjectImpl::SStatus ResDialogObj::Res_Write(GXmlTag *t)
+ResObjectImpl::SStatus ResDialogObj::Res_Write(LXmlTag *t)
 {
 	ResObjectImpl::SStatus s = ResObjectImpl::Res_Write(t);
 
@@ -1469,7 +1469,7 @@ ResObjectImpl::SStatus ResDialogObj::Res_Write(GXmlTag *t)
 	{
 		for (auto c: Children)
 		{
-			GXmlTag *a = new GXmlTag;
+			LXmlTag *a = new LXmlTag;
 			if (a)
 			{
 				ResObjectImpl::SStatus r = c->Res_Write(a);
@@ -1499,7 +1499,7 @@ int CountNumbers(char *s)
 	return (int)t.Length();
 }
 
-ResObjectImpl::SStatus ResTableLayout::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
+ResObjectImpl::SStatus ResTableLayout::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	if (!Tag || !Tag->IsTag(Res_Table))
 		return SError;
@@ -1646,7 +1646,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 	return SOk;
 }
 
-ResObjectImpl::SStatus ResTableLayout::Res_Write(GXmlTag *t)
+ResObjectImpl::SStatus ResTableLayout::Res_Write(LXmlTag *t)
 {
 	ResObjectImpl::SStatus s = ResObjectImpl::Res_Write(t);
 
@@ -1667,7 +1667,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Write(GXmlTag *t)
 		}
 		for (int y=0; y<Cy; y++)
 		{
-			GXmlTag *Tr = new GXmlTag("tr");
+			LXmlTag *Tr = new LXmlTag("tr");
 			if (Tr)
 			{
 				t->InsertTag(Tr);
@@ -1689,7 +1689,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Write(GXmlTag *t)
 								if (Span.x1 == x &&
 									Span.y1 == y)
 								{
-									GXmlTag *Td = new GXmlTag("td");
+									LXmlTag *Td = new LXmlTag("td");
 									if (Td)
 									{
 										Tr->InsertTag(Td);
@@ -1732,7 +1732,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Write(GXmlTag *t)
 														ResObjectImpl *Impl = Obj->GetObjectImpl(Factory);
 														if (Impl)
 														{
- 															GXmlTag *a = new GXmlTag;
+ 															LXmlTag *a = new LXmlTag;
 															if (a && Impl->Res_Write(a))
 															{
 																Td->InsertTag(a);
@@ -1762,7 +1762,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Write(GXmlTag *t)
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-ResObjectImpl::SStatus ResEditBox::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
+ResObjectImpl::SStatus ResEditBox::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	bool Status = false;
 	if (Tag)
@@ -1781,14 +1781,14 @@ ResObjectImpl::SStatus ResEditBox::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 	return SOk;
 }
 
-ResObjectImpl::SStatus ResEditBox::Res_Write(GXmlTag *t)
+ResObjectImpl::SStatus ResEditBox::Res_Write(LXmlTag *t)
 {
 	Factory->Res_GetProperties(Object, t);
 	return ResObjectImpl::Res_Write(t);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-ResObjectImpl::SStatus ResGroup::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
+ResObjectImpl::SStatus ResGroup::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	ResObjectImpl::SStatus s = ResObjectImpl::Res_Read(Tag, Ctx);
 
@@ -1809,7 +1809,7 @@ ResObjectImpl::SStatus ResGroup::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 	return s;
 }
 
-ResObjectImpl::SStatus ResGroup::Res_Write(GXmlTag *t)
+ResObjectImpl::SStatus ResGroup::Res_Write(LXmlTag *t)
 {
 	ResObjectImpl::SStatus s = ResObjectImpl::Res_Write(t);
 
@@ -1818,7 +1818,7 @@ ResObjectImpl::SStatus ResGroup::Res_Write(GXmlTag *t)
 	{
 		for (auto c: Children)
 		{
-			GXmlTag *a = new GXmlTag;
+			LXmlTag *a = new LXmlTag;
 			if (a && c->Res_Write(a))
 			{
 				t->InsertTag(a);
@@ -1831,7 +1831,7 @@ ResObjectImpl::SStatus ResGroup::Res_Write(GXmlTag *t)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-ResObjectImpl::SStatus ResTab::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
+ResObjectImpl::SStatus ResTab::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	if (!Tag || !Tag->IsTag(Res_Tab))
 	{
@@ -1869,7 +1869,7 @@ ResObjectImpl::SStatus ResTab::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 	return SOk;
 }
 
-ResObjectImpl::SStatus ResTab::Res_Write(GXmlTag *t)
+ResObjectImpl::SStatus ResTab::Res_Write(LXmlTag *t)
 {
 	t->SetTag(Res_Tab);
 	WriteStrRef(t);
@@ -1879,7 +1879,7 @@ ResObjectImpl::SStatus ResTab::Res_Write(GXmlTag *t)
 	{
 		for (auto c: Children)
 		{
-			GXmlTag *a = new GXmlTag;
+			LXmlTag *a = new LXmlTag;
 			if (a && c->Res_Write(a))
 			{
 				t->InsertTag(a);
@@ -1892,7 +1892,7 @@ ResObjectImpl::SStatus ResTab::Res_Write(GXmlTag *t)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-ResObjectImpl::SStatus ResTabView::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
+ResObjectImpl::SStatus ResTabView::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	if (!Tag || !Tag->IsTag(Res_TabView))
 	{
@@ -1927,7 +1927,7 @@ ResObjectImpl::SStatus ResTabView::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 	return SOk;
 }
 
-ResObjectImpl::SStatus ResTabView::Res_Write(GXmlTag *t)
+ResObjectImpl::SStatus ResTabView::Res_Write(LXmlTag *t)
 {
 	ResObjectImpl::SStatus s = ResObjectImpl::Res_Write(t);
 	
@@ -1936,7 +1936,7 @@ ResObjectImpl::SStatus ResTabView::Res_Write(GXmlTag *t)
 	{
 		for (auto Tab: Items)
 		{
-			GXmlTag *a = new GXmlTag;
+			LXmlTag *a = new LXmlTag;
 			if (a && Tab->Res_Write(a))
 			{
 				t->InsertTag(a);
@@ -1949,7 +1949,7 @@ ResObjectImpl::SStatus ResTabView::Res_Write(GXmlTag *t)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-ResObjectImpl::SStatus ResColumn::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
+ResObjectImpl::SStatus ResColumn::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	if (!Tag || !Tag->IsTag(Res_Column))
 	{
@@ -1967,7 +1967,7 @@ ResObjectImpl::SStatus ResColumn::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 	return SOk;
 }
 
-ResObjectImpl::SStatus ResColumn::Res_Write(GXmlTag *t)
+ResObjectImpl::SStatus ResColumn::Res_Write(LXmlTag *t)
 {
 	LRect Pos = Factory->Res_GetPos(Object);
 
@@ -1979,7 +1979,7 @@ ResObjectImpl::SStatus ResColumn::Res_Write(GXmlTag *t)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-ResObjectImpl::SStatus ResListView::Res_Read(GXmlTag *t, ResReadCtx &Ctx)
+ResObjectImpl::SStatus ResListView::Res_Read(LXmlTag *t, ResReadCtx &Ctx)
 {
 	if (!t)
 	{
@@ -2024,7 +2024,7 @@ ResObjectImpl::SStatus ResListView::Res_Read(GXmlTag *t, ResReadCtx &Ctx)
 	return SOk;
 }
 
-ResObjectImpl::SStatus ResListView::Res_Write(GXmlTag *t)
+ResObjectImpl::SStatus ResListView::Res_Write(LXmlTag *t)
 {
 	ResObjectImpl::SStatus s = ResObjectImpl::Res_Write(t);
 
@@ -2033,7 +2033,7 @@ ResObjectImpl::SStatus ResListView::Res_Write(GXmlTag *t)
 	{
 		for (auto c: Items)
 		{
-			GXmlTag *a = new GXmlTag;
+			LXmlTag *a = new LXmlTag;
 			if (a && c->Res_Write(a))
 			{
 				t->InsertTag(a);
@@ -2046,7 +2046,7 @@ ResObjectImpl::SStatus ResListView::Res_Write(GXmlTag *t)
 }
 
 /////////////////////////////////////////////////////////////
-ResObjectImpl::SStatus ResCustom::Res_Read(GXmlTag *t, ResReadCtx &Ctx)
+ResObjectImpl::SStatus ResCustom::Res_Read(LXmlTag *t, ResReadCtx &Ctx)
 {
 	if (!t || !t->IsTag(Res_Custom))
 	{
@@ -2062,7 +2062,7 @@ ResObjectImpl::SStatus ResCustom::Res_Read(GXmlTag *t, ResReadCtx &Ctx)
 	return SOk;
 }
 
-ResObjectImpl::SStatus ResCustom::Res_Write(GXmlTag *t)
+ResObjectImpl::SStatus ResCustom::Res_Write(LXmlTag *t)
 {
 	char Tabs[256];
 	TabString(Tabs);
@@ -2074,7 +2074,7 @@ ResObjectImpl::SStatus ResCustom::Res_Write(GXmlTag *t)
 }
 
 /////////////////////////////////////////////////////////////
-ResObjectImpl::SStatus ResControlTree::Res_Read(GXmlTag *t, ResReadCtx &Ctx)
+ResObjectImpl::SStatus ResControlTree::Res_Read(LXmlTag *t, ResReadCtx &Ctx)
 {
 	if (!t || stricmp(t->GetTag(), Res_ControlTree))
 	{
@@ -2098,7 +2098,7 @@ ResObjectImpl::SStatus ResControlTree::Res_Read(GXmlTag *t, ResReadCtx &Ctx)
 	return SOk;
 }
 
-ResObjectImpl::SStatus ResControlTree::Res_Write(GXmlTag *t)
+ResObjectImpl::SStatus ResControlTree::Res_Write(LXmlTag *t)
 {
 	ResObjectImpl::SStatus s = ResObjectImpl::Res_Write(t);
 
@@ -2114,10 +2114,10 @@ ResObjectImpl::SStatus ResControlTree::Res_Write(GXmlTag *t)
 	GVariant v;
 	if (d->GetValue("Tree", v))
 	{
-		GXmlTag *n = dynamic_cast<GXmlTag*>(v.Value.Dom);
+		LXmlTag *n = dynamic_cast<LXmlTag*>(v.Value.Dom);
 		if (n)
 		{
-			GXmlTag *c;
+			LXmlTag *c;
 			while (n->Children.Length() &&
 				(c = n->Children[0]))
 			{

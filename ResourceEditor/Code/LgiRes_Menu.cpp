@@ -172,7 +172,7 @@ bool ResMenuItem::Serialize(FieldTree &Fields)
 	return true;
 }
 
-bool ResMenuItem::Read(GXmlTag *t, ResMenuItem *Parent)
+bool ResMenuItem::Read(LXmlTag *t, ResMenuItem *Parent)
 {
 	bool Status = false;
 	if (t)
@@ -238,7 +238,7 @@ bool ResMenuItem::Read(GXmlTag *t, ResMenuItem *Parent)
 	return Status;
 }
 
-bool ResMenuItem::Write(GXmlTag *t, int Tabs)
+bool ResMenuItem::Write(LXmlTag *t, int Tabs)
 {
 	bool SubMenu = GetChild() != 0;
 	t->SetTag(SubMenu ? (char*) "submenu" : (char*) "menuitem");
@@ -258,7 +258,7 @@ bool ResMenuItem::Write(GXmlTag *t, int Tabs)
 	{
 		for (ResMenuItem *i = dynamic_cast<ResMenuItem*>(GetChild()); i; i = dynamic_cast<ResMenuItem*>(i->GetNext()))
 		{
-			GXmlTag *c = new GXmlTag;
+			LXmlTag *c = new LXmlTag;
 			if (c && i->Write(c, 0))
 			{
 				t->InsertTag(c);
@@ -327,7 +327,7 @@ void ResMenu::EnumItems(List<ResMenuItem> &Items)
 	AddChildren(this, Items);
 }
 
-void ResMenu::Create(GXmlTag *load, SerialiseContext *Ctx)
+void ResMenu::Create(LXmlTag *load, SerialiseContext *Ctx)
 {
 	Name("IDM_MENU");
 
@@ -576,7 +576,7 @@ bool ResMenu::Test(ErrorCollection *e)
 	return Group->Test(e);
 }
 
-bool ResMenu::Read(GXmlTag *t, SerialiseContext &Ctx)
+bool ResMenu::Read(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = true;
 
@@ -628,7 +628,7 @@ bool ResMenu::Read(GXmlTag *t, SerialiseContext &Ctx)
 	return Status;
 }
 
-bool ResMenu::Write(GXmlTag *t, SerialiseContext &Ctx)
+bool ResMenu::Write(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = true;
 
@@ -639,7 +639,7 @@ bool ResMenu::Write(GXmlTag *t, SerialiseContext &Ctx)
 	// Write group
 	if (Group)
 	{
-		GXmlTag *g = new GXmlTag;
+		LXmlTag *g = new LXmlTag;
 		if (g && Group->Write(g, Ctx))
 		{
 			t->InsertTag(g);
@@ -657,7 +657,7 @@ bool ResMenu::Write(GXmlTag *t, SerialiseContext &Ctx)
 		ResMenuItem *m = dynamic_cast<ResMenuItem*>(i);
 		if (m)
 		{
-			GXmlTag *c = new GXmlTag;
+			LXmlTag *c = new LXmlTag;
 			if (c && m->Write(c, 1))
 			{
 				t->InsertTag(c);

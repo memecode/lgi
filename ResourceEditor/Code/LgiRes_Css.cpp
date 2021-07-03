@@ -70,7 +70,7 @@ ResCss::~ResCss()
 {
 }
 
-void ResCss::Create(GXmlTag *load, SerialiseContext *Ctx)
+void ResCss::Create(LXmlTag *load, SerialiseContext *Ctx)
 {
     if (load && Ctx)
     {
@@ -105,7 +105,7 @@ bool ResCss::Test(ErrorCollection *e)
     return true;
 }
 
-bool ResCss::Read(GXmlTag *t, SerialiseContext &Ctx)
+bool ResCss::Read(LXmlTag *t, SerialiseContext &Ctx)
 {
     if (!t->IsTag("style"))
         return false;
@@ -116,7 +116,7 @@ bool ResCss::Read(GXmlTag *t, SerialiseContext &Ctx)
     return true;
 }
 
-bool ResCss::Write(GXmlTag *t, SerialiseContext &Ctx)
+bool ResCss::Write(LXmlTag *t, SerialiseContext &Ctx)
 {
     if (Ui)
         Ui->Save();

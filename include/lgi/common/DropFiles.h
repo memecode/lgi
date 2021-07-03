@@ -150,8 +150,8 @@ public:
 
 				if (Fmt.Equals("NSFilenamesPboardType"))
 				{
-					GXmlTree t;
-					GXmlTag r;
+					LXmlTree t;
+					LXmlTag r;
 					GMemStream ms(v->Value.Binary.Data, v->Value.Binary.Length, false);
 					if (t.Read(&r, &ms))
 					{

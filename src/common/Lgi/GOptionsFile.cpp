@@ -139,7 +139,7 @@ bool GOptionsFile::SerializeFile(bool Write)
 				_FL, Write, File.Get());
 			#endif
 			
-			GXmlTree Tree(GXT_PRETTY_WHITESPACE);
+			LXmlTree Tree(GXT_PRETTY_WHITESPACE);
 			if (Write)
 			{
 				f.SetSize(0);
@@ -182,7 +182,7 @@ bool GOptionsFile::DeleteValue(const char *Name)
 
 bool GOptionsFile::CreateTag(const char *Name)
 {
-	GXmlTag *Status = 0;
+	LXmlTag *Status = 0;
 
 	if (Name && Lock(_FL))
 	{
@@ -199,7 +199,7 @@ bool GOptionsFile::DeleteTag(const char *Name)
 
 	if (Name && Lock(_FL))
 	{
-		GXmlTag *t = GetChildTag(Name);
+		LXmlTag *t = GetChildTag(Name);
 		if (t)
 		{
 			Status = t->RemoveTag();
@@ -211,13 +211,13 @@ bool GOptionsFile::DeleteTag(const char *Name)
 	return Status;
 }
 
-GXmlTag *GOptionsFile::LockTag(const char *Name, const char *File, int Line)
+LXmlTag *GOptionsFile::LockTag(const char *Name, const char *File, int Line)
 {
-	GXmlTag *t = 0;
+	LXmlTag *t = 0;
 
 	if (Lock(File, Line))
 	{
-		t = Name ? GXmlTag::GetChildTag(Name) : this;
+		t = Name ? LXmlTag::GetChildTag(Name) : this;
 		if (!t)
 		{
 			Unlock();

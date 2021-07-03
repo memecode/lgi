@@ -263,7 +263,7 @@ void DrawGoobers(GSurface *pDC, LRect &r, LRect *Goobers, GColour c, int OverIdx
 ////////////////////////////////////////////////////////////////////
 int ResDialogCtrl::TabDepth = 0;
 
-ResDialogCtrl::ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, GXmlTag *load) :
+ResDialogCtrl::ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, LXmlTag *load) :
 	ResObject(CtrlTypeName)
 {
 	Dlg = dlg;
@@ -982,7 +982,7 @@ void ResDialogCtrl::ReadPos(char *Str)
 }
 
 ////////////////////////////////////////////////////////////////////
-CtrlDlg::CtrlDlg(ResDialog *dlg, GXmlTag *load) :
+CtrlDlg::CtrlDlg(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Dialog, load)
 {
 	Movable = false;
@@ -1051,7 +1051,7 @@ void CtrlDlg::OnPaint(GSurface *pDC)
 
 /////////////////////////////////////////////////////////////////////
 // Text box
-CtrlText::CtrlText(ResDialog *dlg, GXmlTag *load) :
+CtrlText::CtrlText(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_StaticText, load)
 {
 	if (GetStr() && !load)
@@ -1093,7 +1093,7 @@ void CtrlText::OnPaint(GSurface *pDC)
 
 // Editbox
 
-CtrlEditbox::CtrlEditbox(ResDialog *dlg, GXmlTag *load) :
+CtrlEditbox::CtrlEditbox(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_EditBox, load)
 {
 	Password = false;
@@ -1165,7 +1165,7 @@ bool CtrlEditbox::Serialize(FieldTree &Fields)
 }
 
 // Check box
-CtrlCheckbox::CtrlCheckbox(ResDialog *dlg, GXmlTag *load) :
+CtrlCheckbox::CtrlCheckbox(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_CheckBox, load)
 {
 }
@@ -1208,7 +1208,7 @@ void CtrlCheckbox::OnPaint(GSurface *pDC)
 
 // Button
 
-CtrlButton::CtrlButton(ResDialog *dlg, GXmlTag *load) :
+CtrlButton::CtrlButton(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Button, load)
 {
 	IsToggle = false;
@@ -1268,7 +1268,7 @@ void CtrlButton::OnPaint(GSurface *pDC)
 
 // Group
 
-CtrlGroup::CtrlGroup(ResDialog *dlg, GXmlTag *load) :
+CtrlGroup::CtrlGroup(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Group, load)
 {
 	AcceptChildren = true;
@@ -1322,7 +1322,7 @@ uint32_t RadioBmp[] = {
 0xFFFFFFFF, 0xC0C0FFFF, 0xC0C0C0C0, 0xC0C0C0C0, 0xC0C0C0C0, 0xC0C0C0C0, 0xFFFFFFFF, 0xFFFFFFFF, 
 0xFFFFFFFF, 0xC0C0C0C0, 0xC0C0C0C0, 0xC0C0C0C0};
 
-CtrlRadio::CtrlRadio(ResDialog *dlg, GXmlTag *load) :
+CtrlRadio::CtrlRadio(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_RadioBox, load)
 {
 	Bmp = new GMemDC;
@@ -1372,7 +1372,7 @@ void CtrlRadio::OnPaint(GSurface *pDC)
 
 // Tab
 
-CtrlTab::CtrlTab(ResDialog *dlg, GXmlTag *load) :
+CtrlTab::CtrlTab(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Tab, load)
 {
 	GetStr()->UpdateWnd = this;
@@ -1410,7 +1410,7 @@ void CtrlTab::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 
 // Tab control
 
-CtrlTabs::CtrlTabs(ResDialog *dlg, GXmlTag *load) :
+CtrlTabs::CtrlTabs(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_TabView, load)
 {
 	AcceptChildren = true;
@@ -1777,7 +1777,7 @@ void CtrlTabs::OnMouseClick(LMouse &m)
 
 // List column
 
-ListCol::ListCol(ResDialog *dlg, GXmlTag *load, char *s, int Width) :
+ListCol::ListCol(ResDialog *dlg, LXmlTag *load, char *s, int Width) :
 	ResDialogCtrl(dlg, Res_Column, load)
 {
 	if (s && GetStr())
@@ -1796,7 +1796,7 @@ void ListCol::OnPaint(GSurface *pDC)
 
 // List control
 
-CtrlList::CtrlList(ResDialog *dlg, GXmlTag *load) :
+CtrlList::CtrlList(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_ListView, load)
 {
 	DragCol = -1;
@@ -2056,7 +2056,7 @@ void CtrlList::OnPaint(GSurface *pDC)
 }
 
 // Combo box
-CtrlComboBox::CtrlComboBox(ResDialog *dlg, GXmlTag *load) :
+CtrlComboBox::CtrlComboBox(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_ComboBox, load)
 {
 }
@@ -2110,7 +2110,7 @@ void CtrlComboBox::OnPaint(GSurface *pDC)
 }
 
 ////////////////////////////////////////////////////////////////////
-CtrlScrollBar::CtrlScrollBar(ResDialog *dlg, GXmlTag *load) :
+CtrlScrollBar::CtrlScrollBar(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_ScrollBar, load)
 {
 }
@@ -2171,7 +2171,7 @@ void CtrlScrollBar::OnPaint(GSurface *pDC)
 }
 
 ////////////////////////////////////////////////////////////////////
-CtrlTree::CtrlTree(ResDialog *dlg, GXmlTag *load) :
+CtrlTree::CtrlTree(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_TreeView, load)
 {
 }
@@ -2196,7 +2196,7 @@ void CtrlTree::OnPaint(GSurface *pDC)
 }
 
 ////////////////////////////////////////////////////////////////////
-CtrlBitmap::CtrlBitmap(ResDialog *dlg, GXmlTag *load) :
+CtrlBitmap::CtrlBitmap(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Bitmap, load)
 {
 }
@@ -2220,7 +2220,7 @@ void CtrlBitmap::OnPaint(GSurface *pDC)
 }
 
 ////////////////////////////////////////////////////////////////////
-CtrlProgress::CtrlProgress(ResDialog *dlg, GXmlTag *load) :
+CtrlProgress::CtrlProgress(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Progress, load)
 {
 }
@@ -2250,7 +2250,7 @@ void CtrlProgress::OnPaint(GSurface *pDC)
 }
 
 ////////////////////////////////////////////////////////////////////
-CtrlCustom::CtrlCustom(ResDialog *dlg, GXmlTag *load) :
+CtrlCustom::CtrlCustom(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Custom, load)
 {
 	Control = 0;
@@ -2505,7 +2505,7 @@ bool ResDialog::Res_SetProperties(ResObject *Obj, GDom *Props)
 	return false;
 }
 
-ResObject *ResDialog::CreateObject(GXmlTag *Tag, ResObject *Parent)
+ResObject *ResDialog::CreateObject(LXmlTag *Tag, ResObject *Parent)
 {
 	return dynamic_cast<ResObject*>(CreateCtrl(Tag));
 }
@@ -2670,7 +2670,7 @@ bool ResDialog::Res_GetItems(ResObject *Obj, List<ResObject> *l)
 	return false;
 }
 
-void ResDialog::Create(GXmlTag *load, SerialiseContext *Ctx)
+void ResDialog::Create(LXmlTag *load, SerialiseContext *Ctx)
 {
 	CtrlDlg *Dlg = new CtrlDlg(this, load);
 	if (Dlg)
@@ -2770,7 +2770,7 @@ void ResDialog::Copy(bool Delete)
 	// ok we have a top level list of ctrls
 	// write them to the file
 	List<ResDialogCtrl> All;
-	GXmlTag *Root = new GXmlTag("Resources");
+	LXmlTag *Root = new LXmlTag("Resources");
 	if (Root)
 	{
 		if (Delete)
@@ -2793,7 +2793,7 @@ void ResDialog::Copy(bool Delete)
 		for (auto c: All)
 		{
 			// Write the string out
-			GXmlTag *t = new GXmlTag;
+			LXmlTag *t = new LXmlTag;
 			if (t && c->GetStr()->Write(t, Ctx))
 			{
 				Root->InsertTag(t);
@@ -2807,7 +2807,7 @@ void ResDialog::Copy(bool Delete)
 		// write the objects themselves
 		for (auto c: Top)
 		{
-			GXmlTag *t = new GXmlTag;
+			LXmlTag *t = new LXmlTag;
 			if (t && Res_Write(c, t))
 			{
 				Root->InsertTag(t);
@@ -2821,7 +2821,7 @@ void ResDialog::Copy(bool Delete)
 
 		// Read the file in and copy to the clipboard
 		GStringPipe Xml;
-		GXmlTree Tree;
+		LXmlTree Tree;
 		if (Tree.Write(Root, &Xml))
 		{
 			char *s = Xml.NewStr();
@@ -2866,7 +2866,7 @@ public:
 	int NewRef;
 };
 
-void RemapAllRefs(GXmlTag *t, List<StringId> &Strs)
+void RemapAllRefs(LXmlTag *t, List<StringId> &Strs)
 {
 	char *RefStr;
 	if ((RefStr = t->GetAttr("Ref")))
@@ -2949,14 +2949,14 @@ void ResDialog::Paste()
 
 			// Parse the data
 			List<ResString> NewStrs;
-			GXmlTree Tree;
+			LXmlTree Tree;
 			GStringPipe p;
 			p.Push(Data);
 			
 			// Create the new controls, strings first
 			// that way we can setup the remapping properly to avoid
 			// string ref duplicates
-			GXmlTag Root;
+			LXmlTag Root;
 			if (Tree.Read(&Root, &p, 0))
 			{
 				for (auto t: Root.Children)
@@ -3328,7 +3328,7 @@ void ResDialog::OnDeselect(ResDialogCtrl *Wnd)
 	}
 }
 
-ResDialogCtrl *ResDialog::CreateCtrl(GXmlTag *t)
+ResDialogCtrl *ResDialog::CreateCtrl(LXmlTag *t)
 {
 	if (t)
 	{
@@ -3344,7 +3344,7 @@ ResDialogCtrl *ResDialog::CreateCtrl(GXmlTag *t)
 	return 0;
 }
 
-ResDialogCtrl *ResDialog::CreateCtrl(int Tool, GXmlTag *load)
+ResDialogCtrl *ResDialog::CreateCtrl(int Tool, LXmlTag *load)
 {
 	ResDialogCtrl *Ctrl = 0;
 
@@ -3779,7 +3779,7 @@ bool ResDialog::Test(ErrorCollection *e)
 	return true;
 }
 
-bool ResDialog::Read(GXmlTag *t, SerialiseContext &Ctx)
+bool ResDialog::Read(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = false;
 
@@ -3832,7 +3832,7 @@ void ResDialog::CleanSymbols()
 	}
 }
 
-bool ResDialog::Write(GXmlTag *t, SerialiseContext &Ctx)
+bool ResDialog::Write(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = false;
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);

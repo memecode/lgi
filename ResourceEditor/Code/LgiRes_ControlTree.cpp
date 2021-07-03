@@ -206,7 +206,7 @@ public:
 	}
 };
 
-CtrlControlTree::CtrlControlTree(ResDialog *dlg, GXmlTag *load) :
+CtrlControlTree::CtrlControlTree(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_ControlTree, load),
 	GTree(100, 0, 0, 100, 100)
 {
@@ -284,7 +284,7 @@ bool CtrlControlTree::Serialize(FieldTree &Fields)
 	return Status;
 }
 
-void WriteTree(GXmlTag *t, GTreeNode *n)
+void WriteTree(LXmlTag *t, GTreeNode *n)
 {
 	CtNode *ct = dynamic_cast<CtNode*>(n);
 	if (ct)
@@ -296,7 +296,7 @@ void WriteTree(GXmlTag *t, GTreeNode *n)
 
 	for (GTreeNode *c = n->GetChild(); c; c = c->GetNext())
 	{
-		GXmlTag *h = new GXmlTag;
+		LXmlTag *h = new LXmlTag;
 		WriteTree(h, c);
 		h->SetTag("Control");
 		t->InsertTag(h);
@@ -310,7 +310,7 @@ bool CtrlControlTree::GetVariant(const char *Name, GVariant &Value, char *Array)
 
 	if (!stricmp(Name, "Tree"))
 	{
-		GXmlTag *x = new GXmlTag;
+		LXmlTag *x = new LXmlTag;
 		WriteTree(x, this);
 		Value = x;
 	}
@@ -319,7 +319,7 @@ bool CtrlControlTree::GetVariant(const char *Name, GVariant &Value, char *Array)
 	return true;
 }
 
-void ReadTree(GXmlTag *t, GTreeNode *n, CtrlControlTreePriv *d, GView *v)
+void ReadTree(LXmlTag *t, GTreeNode *n, CtrlControlTreePriv *d, GView *v)
 {
 	CtNode *ct = dynamic_cast<CtNode*>(n);
 	if (ct && ct->Str)
@@ -352,7 +352,7 @@ bool CtrlControlTree::SetVariant(const char *Name, GVariant &Value, char *Array)
 
 		Empty();
 
-		GXmlTag *x = dynamic_cast<GXmlTag*>(Value.Value.Dom);
+		LXmlTag *x = dynamic_cast<LXmlTag*>(Value.Value.Dom);
 		if (!x)
 			LgiAssert(!"Not the right object.");
 		else

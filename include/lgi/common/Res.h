@@ -118,7 +118,7 @@ struct LgiClass ResReadCtx
 	virtual bool Check(const char *tags) { return true; }
 	/// Check the tags for matches...
 	/// \returns true when the element should be displayed
-	virtual bool Check(GXmlTag *t) { return true; }
+	virtual bool Check(LXmlTag *t) { return true; }
 };
 
 class LgiClass ResObject
@@ -143,12 +143,12 @@ class LgiClass ResFactory
 {
 public:
 	// Use to read and write the objects
-	bool Res_Read(ResObject *Obj, GXmlTag *Tag, ResReadCtx &Ctx);
-	bool Res_Write(ResObject *Obj, GXmlTag *Tag);
+	bool Res_Read(ResObject *Obj, LXmlTag *Tag, ResReadCtx &Ctx);
+	bool Res_Write(ResObject *Obj, LXmlTag *Tag);
 
 	// Overide
 	virtual char *StringFromRef(int Ref) = 0;
-	virtual ResObject *CreateObject(GXmlTag *Tag, ResObject *Parent) = 0;
+	virtual ResObject *CreateObject(LXmlTag *Tag, ResObject *Parent) = 0;
 
 	// Overide these to operate on the objects
 	virtual void		Res_SetPos		(ResObject *Obj, int x1, int y1, int x2, int y2) = 0;

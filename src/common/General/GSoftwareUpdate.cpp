@@ -101,18 +101,18 @@ struct GSoftwareUpdatePriv
 					IHttp::ContentEncoding Enc;
 					if (Http.Get(GetUri, NULL, &ProtocolStatus, &RawXml, &Enc))
 					{
-						GXmlTree Tree;
-						GXmlTag Root;
+						LXmlTree Tree;
+						LXmlTag Root;
 						if (Tree.Read(&Root, &RawXml))
 						{
-							GXmlTag *StatusCode;
+							LXmlTag *StatusCode;
 							if (Root.IsTag("software") &&
 								(StatusCode = Root.GetChildTag("status")))
 							{
 								if (StatusCode->GetContent() &&
 									atoi(StatusCode->GetContent()) > 0)
 								{
-									GXmlTag *t;
+									LXmlTag *t;
 									if ((t = Root.GetChildTag("version")))
 										Info->Version.Reset(NewStr(t->GetContent()));
 									if ((t = Root.GetChildTag("revision")))
@@ -129,7 +129,7 @@ struct GSoftwareUpdatePriv
 								}
 								else
 								{
-									GXmlTag *Msg = Root.GetChildTag("msg");
+									LXmlTag *Msg = Root.GetChildTag("msg");
 									GStringPipe p;
 									p.Print(LgiLoadString(L_ERROR_UPDATE, sUpdateError), Msg?Msg->GetContent():(char*)"Unknown");
 									d->Error.Reset(p.NewStr());

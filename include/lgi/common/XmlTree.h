@@ -1,7 +1,7 @@
 /// \file
 /// \author Matthew Allen <fret@memecode.com>
-#ifndef _GXMLTREE_H_
-#define _GXMLTREE_H_
+#ifndef _XML_TREE_H_
+#define _XML_TREE_H_
 
 #include "lgi/common/HashTable.h"
 #include "lgi/common/RefCount.h"
@@ -20,13 +20,13 @@
 /// Don't print <?xml ... ?> header
 #define GXT_NO_HEADER						0x0020
 
-class GXmlTree;
-class GXmlTreePrivate;
+class LXmlTree;
+class LXmlTreePrivate;
 
-class LgiClass GXmlAlloc : public GRefCount
+class LgiClass LXmlAlloc : public GRefCount
 {
 public:
-	virtual ~GXmlAlloc() {}
+	virtual ~LXmlAlloc() {}
 
 	virtual void *Alloc(size_t Size) = 0;
 	virtual void Free(void *Ptr) = 0;
@@ -36,10 +36,10 @@ public:
 };
 
 /// Xml attribute, a named value.
-class LgiClass GXmlAttr
+class LgiClass LXmlAttr
 {
-	friend class GXmlTag;
-	friend class GXmlTree;
+	friend class LXmlTag;
+	friend class LXmlTree;
 
 	/// The name of the attribute
 	char *Name;
@@ -47,7 +47,7 @@ class LgiClass GXmlAttr
 	char *Value;
 
 public:
-	GXmlAttr()
+	LXmlAttr()
 	{
 		Name = 0;
 		Value = 0;
@@ -63,18 +63,18 @@ public:
 /// virtual member function Serialize and call SerializeAttr on each of your native
 /// member variables. When loading and saving the attributes will be mapped to and
 /// from your native types.
-class LgiClass GXmlTag : virtual public GDom
+class LgiClass LXmlTag : virtual public GDom
 {
-	friend class GXmlTree;
+	friend class LXmlTree;
 
-	void ParseAttribute(GXmlTree *Tree, GXmlAlloc *Alloc, char *&t, bool &NoChildren, bool &TypeDef);
+	void ParseAttribute(LXmlTree *Tree, LXmlAlloc *Alloc, char *&t, bool &NoChildren, bool &TypeDef);
 
 protected:
 	/// This allocator is responsible for all the string memory used by the Attributes and Tag
-	GAutoRefPtr<GXmlAlloc> Allocator;
+	GAutoRefPtr<LXmlAlloc> Allocator;
 
 	bool Write;
-	GXmlAttr *_Attr(const char *Name, bool Write);
+	LXmlAttr *_Attr(const char *Name, bool Write);
 	bool GetVariant(const char *Name, GVariant &Value, char *Array);
 	bool SetVariant(const char *Name, GVariant &Value, char *Array);
 
@@ -89,24 +89,24 @@ protected:
 
 public:
 	/// The parent element/tag.
-	GXmlTag *Parent;
+	LXmlTag *Parent;
 	/// A list of attributes that this tag has
-	GArray<GXmlAttr> Attr;
+	GArray<LXmlAttr> Attr;
 	/// A list of child tags. Don't edit this list yourself, use the
 	/// InsertTag and RemoveTag methods.
-	GArray<GXmlTag*> Children;
+	GArray<LXmlTag*> Children;
 	
 	/// Construct the object
-	GXmlTag
+	LXmlTag
 	(
 		/// [Optional] Start with this name
 		const char *tag = 0,
 		/// [Optional] Use this allocator
-		GXmlAlloc *alloc = 0
+		LXmlAlloc *alloc = 0
 	);	
 	/// Construct the object
-	GXmlTag(const GXmlTag &t);	
-	virtual ~GXmlTag();
+	LXmlTag(const LXmlTag &t);	
+	virtual ~LXmlTag();
 
 	/// For debugging.
 	bool Dump(int Depth = 0);
@@ -117,7 +117,7 @@ public:
 	/// Frees all child tags
 	void EmptyChildren();
 	/// Swaps object contents
-	void Swap(GXmlTag &t);
+	void Swap(LXmlTag &t);
 
 	/// \return true if the tag is 's'
 	bool IsTag(const char *s) { return Tag && s ? _stricmp(Tag, s) == 0 : false; }
@@ -162,73 +162,73 @@ public:
 	/// Read/write all your native types in here
 	virtual bool Serialize(bool Write) { return false; }
 	/// Returns a pointer to a child tag if present, or NULL if not.
-	GXmlTag *GetChildTag(const char *Name, bool Create = false, const char *TagSeparator = ".");
+	LXmlTag *GetChildTag(const char *Name, bool Create = false, const char *TagSeparator = ".");
 	/// Creates a sub tag if it doesn't already exist.
-	GXmlTag *CreateTag(const char *Name, char *Content = 0);
+	LXmlTag *CreateTag(const char *Name, char *Content = 0);
 	/// Inserts a child tag.
-	virtual void InsertTag(GXmlTag *t);
+	virtual void InsertTag(LXmlTag *t);
 	/// Removes this tag from the DOM hierarchy.
 	virtual bool RemoveTag();
 	/// Counts all this and all child tags
 	int64 CountTags();
 
 	/// Copy operator, doesn't effect children.
-	GXmlTag &operator =(GXmlTag &t);
+	LXmlTag &operator =(LXmlTag &t);
 	/// Copy method, deep option copies all child elements as well.
-	bool Copy(GXmlTag &t, bool Deep = false);
+	bool Copy(LXmlTag &t, bool Deep = false);
 	
 	/// Retrieve elements using XPath notation.
-	bool XPath(GArray<GXmlTag*> &Results, const char *Path);
+	bool XPath(GArray<LXmlTag*> &Results, const char *Path);
 };
 
-/// In the case your inheriting objects from GXmlTag you need to instantiate your
+/// In the case your inheriting objects from LXmlTag you need to instantiate your
 /// types as the XML is loaded and elements are encountered. Pass this class to the
-/// GXmlTree::Read to get create events during the read process, create an object of
+/// LXmlTree::Read to get create events during the read process, create an object of
 /// the right type and pass it back.
-class GXmlFactory
+class LXmlFactory
 {
 public:
 	/// Creates an object of type 'Tag' and returns it.
-	virtual GXmlTag *Create(char *Tag) = 0;
+	virtual LXmlTag *Create(char *Tag) = 0;
 };
 
-/// The reader/writer for a tree of GXmlTag objects.
-class LgiClass GXmlTree
+/// The reader/writer for a tree of LXmlTag objects.
+class LgiClass LXmlTree
 {
-	friend class GXmlTag;
-	GXmlTreePrivate *d;
+	friend class LXmlTag;
+	LXmlTreePrivate *d;
 
 protected:
-	GXmlTag *Parse(GXmlTag *Tag, GXmlAlloc *Alloc, char *&t, bool &NoChildren, bool InTypeDef);
-	virtual void OnParseComment(GXmlTag *Ref, const char *Comment, ssize_t Bytes) {}
+	LXmlTag *Parse(LXmlTag *Tag, LXmlAlloc *Alloc, char *&t, bool &NoChildren, bool InTypeDef);
+	virtual void OnParseComment(LXmlTag *Ref, const char *Comment, ssize_t Bytes) {}
 
-	void Output(GXmlTag *t, int Depth);
+	void Output(LXmlTag *t, int Depth);
 
 public:
 	/// Constructor
-	GXmlTree
+	LXmlTree
 	(
 		/// \sa #GXT_NO_ENTITIES, #GXT_NO_PRETTY_WHITESPACE, #GXT_PRETTY_WHITESPACE, #GXT_KEEP_WHITESPACE and #GXT_NO_DOM
 		int Flags = 0
 	);
-	virtual ~GXmlTree();
+	virtual ~LXmlTree();
 	
-	/// Read an XML file into a DOM tree of GXmlTag objects from a stream.
+	/// Read an XML file into a DOM tree of LXmlTag objects from a stream.
 	bool Read
 	(
 		/// The root tag to create children from.
-		GXmlTag *Root,
+		LXmlTag *Root,
 		/// The stream to read from.
 		GStreamI *File,
-		/// [Optional] The factory to create GXmlTag type objects. If not specified
-		/// vanilla GXmlTag objects will be created.
-		GXmlFactory *Factory = 0
+		/// [Optional] The factory to create LXmlTag type objects. If not specified
+		/// vanilla LXmlTag objects will be created.
+		LXmlFactory *Factory = 0
 	);
-	/// Write an XML file from a DOM tree of GXmlTag objects into a stream.
+	/// Write an XML file from a DOM tree of LXmlTag objects into a stream.
 	bool Write
 	(
 		/// The DOM tree.
-		GXmlTag *Root,
+		LXmlTag *Root,
 		/// The output stream.
 		GStreamI *File,
 		/// [Optional] Progress reporting.
@@ -246,7 +246,7 @@ public:
 	/// Add entities
 	LHashTbl<ConstStrKey<char,false>,char16> *GetEntityTable();
 	/// Decode a string with entities
-	char *DecodeEntities(GXmlAlloc *Alloc, char *s, ssize_t len = -1);
+	char *DecodeEntities(LXmlAlloc *Alloc, char *s, ssize_t len = -1);
 	/// Encode a string to use entities
 	char *EncodeEntities(const char *s, ssize_t len = -1, const char *extra_characters = 0);
 	/// Encode a string to use entities

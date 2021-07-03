@@ -99,7 +99,7 @@ protected:
 	LMouse MapToDialog(LMouse m);
 
 public:
-	ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, GXmlTag *load);
+	ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, LXmlTag *load);
 	~ResDialogCtrl();
 
 	const char *GetClass() { return "ResDialogCtrl"; }
@@ -167,7 +167,7 @@ public:
 
 	ResDialog(AppWnd *w, int type = TYPE_DIALOG);
 	~ResDialog();
-	void Create(GXmlTag *load, SerialiseContext *Ctx) override;
+	void Create(LXmlTag *load, SerialiseContext *Ctx) override;
 
 	const char *GetClass() override { return "ResDialog"; }
 	GView *Wnd() override { return dynamic_cast<GView*>(this); }
@@ -182,7 +182,7 @@ public:
 
 	// Factory
 	char *StringFromRef(int Ref) override;
-	ResObject *CreateObject(GXmlTag *Tag, ResObject *Parent) override;
+	ResObject *CreateObject(LXmlTag *Tag, ResObject *Parent) override;
 
 	int Res_GetStrRef(ResObject *Obj) override;
 	bool Res_SetStrRef(ResObject *Obj, int Id, ResReadCtx *Ctx) override;
@@ -199,8 +199,8 @@ public:
 
 	// Implementation
 	int CurrentTool();
-	ResDialogCtrl *CreateCtrl(GXmlTag *Tag);
-	ResDialogCtrl *CreateCtrl(int Tool, GXmlTag *load);
+	ResDialogCtrl *CreateCtrl(LXmlTag *Tag);
+	ResDialogCtrl *CreateCtrl(int Tool, LXmlTag *load);
 	bool IsSelected(ResDialogCtrl *Ctrl);
 	bool IsDraging();
 	void SnapPoint(LPoint *p, ResDialogCtrl *From);
@@ -234,8 +234,8 @@ public:
 	void OnPaint(GSurface *pDC) override;
 
 	bool Test(ErrorCollection *e) override;
-	bool Read(GXmlTag *Tag, SerialiseContext &Ctx) override;
-	bool Write(GXmlTag *Tag, SerialiseContext &Ctx) override;
+	bool Read(LXmlTag *Tag, SerialiseContext &Ctx) override;
+	bool Write(LXmlTag *Tag, SerialiseContext &Ctx) override;
 };
 
 class ResDialogUi : public GLayout
@@ -266,7 +266,7 @@ public:
 class CtrlDlg : public ResDialogCtrl, public GView
 {
 public:
-	CtrlDlg(ResDialog *dlg, GXmlTag *load);
+	CtrlDlg(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_DIALOG)
 	const char *GetClass() { return "CtrlDlg"; }
@@ -282,7 +282,7 @@ class CtrlTable : public ResDialogCtrl, public GDom, public GView
 	class CtrlTablePrivate *d;
 
 public:
-	CtrlTable(ResDialog *dlg, GXmlTag *load);
+	CtrlTable(ResDialog *dlg, LXmlTag *load);
 	~CtrlTable();
 
 	DECL_DIALOG_CTRL(UI_TABLE)
@@ -311,7 +311,7 @@ public:
 class CtrlText : public ResDialogCtrl, public GView
 {
 public:
-	CtrlText(ResDialog *dlg, GXmlTag *load);
+	CtrlText(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_TEXT)
 	const char *GetClass() { return "CtrlText"; }
@@ -323,7 +323,7 @@ class CtrlEditbox : public ResDialogCtrl, public GView
 	bool MultiLine;
 
 public:
-	CtrlEditbox(ResDialog *dlg, GXmlTag *load);
+	CtrlEditbox(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_EDITBOX)
 	const char *GetClass() { return "CtrlEditbox"; }
@@ -335,7 +335,7 @@ public:
 class CtrlCheckbox : public ResDialogCtrl, public GView
 {
 public:
-	CtrlCheckbox(ResDialog *dlg, GXmlTag *load);
+	CtrlCheckbox(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_CHECKBOX)
 	const char *GetClass() { return "CtrlCheckbox"; }
@@ -347,7 +347,7 @@ class CtrlButton : public ResDialogCtrl, public GView
 	bool IsToggle;
 
 public:
-	CtrlButton(ResDialog *dlg, GXmlTag *load);
+	CtrlButton(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_BUTTON)
 	const char *GetClass() { return "CtrlButton"; }
@@ -358,7 +358,7 @@ public:
 class CtrlGroup : public ResDialogCtrl, public GView
 {
 public:
-	CtrlGroup(ResDialog *dlg, GXmlTag *load);
+	CtrlGroup(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_GROUP)
 	const char *GetClass() { return "CtrlGroup"; }
@@ -369,7 +369,7 @@ class CtrlRadio : public ResDialogCtrl, public GView
 	GSurface *Bmp;
 
 public:
-	CtrlRadio(ResDialog *dlg, GXmlTag *load);
+	CtrlRadio(ResDialog *dlg, LXmlTag *load);
 	~CtrlRadio();
 
 	DECL_DIALOG_CTRL(UI_RADIO)
@@ -379,7 +379,7 @@ public:
 class CtrlTab : public ResDialogCtrl, public GView
 {
 public:
-	CtrlTab(ResDialog *dlg, GXmlTag *load);
+	CtrlTab(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_TAB)
 	const char *GetClass() { return "CtrlTab"; }
@@ -396,7 +396,7 @@ class CtrlTabs : public ResDialogCtrl, public GView
 public:
 	List<CtrlTab> Tabs;
 
-	CtrlTabs(ResDialog *dlg, GXmlTag *load);
+	CtrlTabs(ResDialog *dlg, LXmlTag *load);
 	~CtrlTabs();
 
 	DECL_DIALOG_CTRL(UI_TABS)
@@ -420,7 +420,7 @@ public:
 	DECL_DIALOG_CTRL(UI_COLUMN)
 	const char *GetClass() { return "ListCol"; }
 
-	ListCol(ResDialog *dlg, GXmlTag *load, char *Str = 0, int Width = 50);
+	ListCol(ResDialog *dlg, LXmlTag *load, char *Str = 0, int Width = 50);
 };
 
 class CtrlList : public ResDialogCtrl, public GView
@@ -430,7 +430,7 @@ class CtrlList : public ResDialogCtrl, public GView
 public:
 	List<ListCol> Cols;
 
-	CtrlList(ResDialog *dlg, GXmlTag *load);
+	CtrlList(ResDialog *dlg, LXmlTag *load);
 	~CtrlList();
 
 	DECL_DIALOG_CTRL(UI_LIST)
@@ -443,7 +443,7 @@ public:
 class CtrlComboBox : public ResDialogCtrl, public GView
 {
 public:
-	CtrlComboBox(ResDialog *dlg, GXmlTag *load);
+	CtrlComboBox(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_COMBO)
 	const char *GetClass() { return "CtrlComboBox"; }
@@ -452,7 +452,7 @@ public:
 class CtrlScrollBar : public ResDialogCtrl, public GView
 {
 public:
-	CtrlScrollBar(ResDialog *dlg, GXmlTag *load);
+	CtrlScrollBar(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_SCROLL_BAR)
 	const char *GetClass() { return "CtrlScrollBar"; }
@@ -461,7 +461,7 @@ public:
 class CtrlTree : public ResDialogCtrl, public GView
 {
 public:
-	CtrlTree(ResDialog *dlg, GXmlTag *load);
+	CtrlTree(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_TREE)
 	const char *GetClass() { return "CtrlTree"; }
@@ -470,7 +470,7 @@ public:
 class CtrlBitmap : public ResDialogCtrl, public GView
 {
 public:
-	CtrlBitmap(ResDialog *dlg, GXmlTag *load);
+	CtrlBitmap(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_BITMAP)
 	const char *GetClass() { return "CtrlBitmap"; }
@@ -479,7 +479,7 @@ public:
 class CtrlProgress : public ResDialogCtrl, public GView
 {
 public:
-	CtrlProgress(ResDialog *dlg, GXmlTag *load);
+	CtrlProgress(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_PROGRESS)
 	const char *GetClass() { return "CtrlProgress"; }
@@ -490,7 +490,7 @@ class CtrlCustom : public ResDialogCtrl, public GView
 	char *Control;
 
 public:
-	CtrlCustom(ResDialog *dlg, GXmlTag *load);
+	CtrlCustom(ResDialog *dlg, LXmlTag *load);
 	~CtrlCustom();
 
 	DECL_DIALOG_CTRL(UI_CUSTOM)
@@ -505,7 +505,7 @@ class CtrlControlTree : public ResDialogCtrl, public GTree, public GDom
 	class CtrlControlTreePriv *d;
 
 public:
-	CtrlControlTree(ResDialog *dlg, GXmlTag *load);
+	CtrlControlTree(ResDialog *dlg, LXmlTag *load);
 	~CtrlControlTree();
 
 	DECL_DIALOG_CTRL(UI_CONTROL_TREE)

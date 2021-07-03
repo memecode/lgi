@@ -266,7 +266,7 @@ VcFolder::VcFolder(AppPriv *priv, const char *uri)
 	GetType();
 }
 
-VcFolder::VcFolder(AppPriv *priv, GXmlTag *t)
+VcFolder::VcFolder(AppPriv *priv, LXmlTag *t)
 {
 	Init(priv);
 	Serialize(t, false);
@@ -326,7 +326,7 @@ const char *VcFolder::GetText(int Col)
 	return NULL;
 }
 
-bool VcFolder::Serialize(GXmlTag *t, bool Write)
+bool VcFolder::Serialize(LXmlTag *t, bool Write)
 {
 	if (Write)
 		t->SetContent(Uri.ToString());
@@ -342,9 +342,9 @@ bool VcFolder::Serialize(GXmlTag *t, bool Write)
 	return true;
 }
 
-GXmlTag *VcFolder::Save()
+LXmlTag *VcFolder::Save()
 {
-	GXmlTag *t = new GXmlTag(OPT_Folder);
+	LXmlTag *t = new LXmlTag(OPT_Folder);
 	if (t)
 		Serialize(t, true);
 	return t;
@@ -2009,7 +2009,7 @@ void VcFolder::OnPulse()
 
 void VcFolder::OnRemove()
 {
-	GXmlTag *t = d->Opts.LockTag(OPT_Folders, _FL);
+	LXmlTag *t = d->Opts.LockTag(OPT_Folders, _FL);
 	if (t)
 	{
 		Uncommit.Reset();

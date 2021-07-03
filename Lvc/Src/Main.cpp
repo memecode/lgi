@@ -497,7 +497,7 @@ GString::Array GetProgramsInPath(const char *Program)
 	return Bin;
 }
 
-class OptionsDlg : public GDialog, public GXmlTreeUi
+class OptionsDlg : public GDialog, public LXmlTreeUi
 {
 	GOptionsFile &Opts;
 
@@ -861,7 +861,7 @@ class RemoteFolderDlg : public GDialog
 	class App *app;
 	GTree *tree;
 	struct SshHost *root, *newhost;
-	GXmlTreeUi Ui;
+	LXmlTreeUi Ui;
 
 public:
 	GString Uri;
@@ -1082,7 +1082,7 @@ public:
 			Visible(true);
 		}
 
-		GXmlTag *f = Opts.LockTag(OPT_Folders, _FL);
+		LXmlTag *f = Opts.LockTag(OPT_Folders, _FL);
 		if (!f)
 		{
 			Opts.CreateTag(OPT_Folders);
@@ -1133,7 +1133,7 @@ public:
 	{
 		SerializeState(&Opts, "WndPos", false);
 
-		GXmlTag *f = Opts.LockTag(OPT_Folders, _FL);
+		LXmlTag *f = Opts.LockTag(OPT_Folders, _FL);
 		if (f)
 		{
 			f->EmptyChildren();
@@ -1546,10 +1546,10 @@ public:
 
 struct SshHost : public GTreeItem
 {
-	GXmlTag *t;
+	LXmlTag *t;
 	GString Host, User, Pass;
 
-	SshHost(GXmlTag *tag = NULL)
+	SshHost(LXmlTag *tag = NULL)
 	{
 		t = tag;
 		if (t)
@@ -1605,7 +1605,7 @@ RemoteFolderDlg::RemoteFolderDlg(App *application) : app(application), root(NULL
 	Ui.Map("User", IDC_USER);
 	Ui.Map("Password", IDC_PASS);
 
-	GXmlTag *hosts = app->Opts.LockTag(OPT_Hosts, _FL);
+	LXmlTag *hosts = app->Opts.LockTag(OPT_Hosts, _FL);
 	if (hosts)
 	{
 		SshHost *h;
@@ -1686,7 +1686,7 @@ int RemoteFolderDlg::OnNotify(GViewI *Ctrl, int Flags)
 		}
 		case IDOK:
 		{
-			GXmlTag *hosts;
+			LXmlTag *hosts;
 			if (!(hosts = app->Opts.LockTag(OPT_Hosts, _FL)))
 			{
 				if (!(app->Opts.CreateTag(OPT_Hosts) && (hosts = app->Opts.LockTag(OPT_Hosts, _FL))))
@@ -1702,7 +1702,7 @@ int RemoteFolderDlg::OnNotify(GViewI *Ctrl, int Flags)
 
 				if (h->t)
 					;
-				else if ((h->t = new GXmlTag(OPT_Host)))
+				else if ((h->t = new LXmlTag(OPT_Host)))
 					hosts->InsertTag(cur->t);
 				else
 					return false;

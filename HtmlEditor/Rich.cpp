@@ -195,8 +195,8 @@ public:
 					break;
 				}
 
-				GXmlTree t;
-				GXmlTag r;
+				LXmlTree t;
+				LXmlTag r;
 				o.SetPos(0);
 				if (!t.Read(&r, &o))
 				{

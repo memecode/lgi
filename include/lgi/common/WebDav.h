@@ -4,7 +4,7 @@
 #include "IHttp.h"
 #include "OpenSSLSocket.h"
 
-extern bool LFindXml(GArray<GXmlTag*> &Results, GXmlTag *t, const char *Name);
+extern bool LFindXml(GArray<LXmlTag*> &Results, LXmlTag *t, const char *Name);
 
 class LWebdav
 {
@@ -41,7 +41,7 @@ protected:
 		}
 	};
 
-	void PrettyPrint(GXmlTag &x);
+	void PrettyPrint(LXmlTag &x);
 	bool Request(Req &r, const char *Name, GString Resource);
 
 public:

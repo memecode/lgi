@@ -76,7 +76,7 @@ extern IdePlatform GetCurrentPlatform();
 
 class AppWnd;
 class IdeProject;
-class IdeCommon : public GTreeItem, public GXmlTag
+class IdeCommon : public GTreeItem, public LXmlTag
 {
 	friend class IdeProject;
 
@@ -88,11 +88,11 @@ public:
 	~IdeCommon();
 
 	IdeProject *GetProject() { return Project; }
-	bool OnOpen(GProgressDlg *Prog, GXmlTag *Src);	
+	bool OnOpen(GProgressDlg *Prog, LXmlTag *Src);	
 	void CollectAllSubProjects(List<IdeProject> &c);
 	void CollectAllSource(GArray<GString> &c, IdePlatform Platform);
 	void SortChildren();
-	void InsertTag(GXmlTag *t) override;
+	void InsertTag(LXmlTag *t) override;
 	bool RemoveTag() override;
 	virtual bool IsWeb() = 0;	
 	virtual int GetPlatforms() = 0;
@@ -117,7 +117,7 @@ public:
 #include "IdeProjectSettings.h"
 #include "GDebugContext.h"
 
-class IdeProject : public GXmlFactory, public IdeCommon
+class IdeProject : public LXmlFactory, public IdeCommon
 {
 	friend class ProjectNode;
 	friend class BuildThread;
@@ -142,7 +142,7 @@ public:
 	const char *GetIncludePaths();
 	const char *GetPreDefinedValues();
 
-	GXmlTag *Create(char *Tag);
+	LXmlTag *Create(char *Tag);
 	void Empty();
 	GString GetMakefile(IdePlatform Platform);
 	bool GetExePath(char *Path, int Len);

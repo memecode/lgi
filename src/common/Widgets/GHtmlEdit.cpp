@@ -421,8 +421,8 @@ public:
 	
 	bool Serialize(GStream &s, bool Write)
 	{
-		GXmlTree t;
-		GXmlTag r("e");
+		LXmlTree t;
+		LXmlTag r("e");
 		
 		if (Write)
 		{

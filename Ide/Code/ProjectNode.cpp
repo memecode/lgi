@@ -931,7 +931,7 @@ void ProjectNode::Delete()
 	}
 
 	Project->SetDirty();
-	GXmlTag::RemoveTag();							
+	LXmlTag::RemoveTag();							
 	delete this;
 }
 

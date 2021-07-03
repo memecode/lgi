@@ -374,7 +374,7 @@ bool ResString::Test(ErrorCollection *e)
 	return Status;
 }
 
-bool ResString::Read(GXmlTag *t, SerialiseContext &Ctx)
+bool ResString::Read(LXmlTag *t, SerialiseContext &Ctx)
 {
 	if (!t || !t->IsTag("string"))
 	{
@@ -421,7 +421,7 @@ bool ResString::Read(GXmlTag *t, SerialiseContext &Ctx)
 
 	for (int i=0; i<t->Attr.Length(); i++)
 	{
-		GXmlAttr *v = &t->Attr[i];
+		LXmlAttr *v = &t->Attr[i];
 		if (v->GetName())
 		{
 			GLanguage *Lang = GFindLang(v->GetName());
@@ -459,7 +459,7 @@ bool ResString::Read(GXmlTag *t, SerialiseContext &Ctx)
 	return true;
 }
 
-bool ResString::Write(GXmlTag *t, SerialiseContext &Ctx)
+bool ResString::Write(LXmlTag *t, SerialiseContext &Ctx)
 {
 	t->SetTag("String");
 	t->SetAttr("Ref", Ref);
@@ -1373,7 +1373,7 @@ bool ResStringGroup::Test(ErrorCollection *e)
 	return Status;
 }
 
-bool ResStringGroup::Read(GXmlTag *t, SerialiseContext &Ctx)
+bool ResStringGroup::Read(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = false;
 
@@ -1429,7 +1429,7 @@ bool ResStringGroup::Read(GXmlTag *t, SerialiseContext &Ctx)
 	return Status;
 }
 
-bool ResStringGroup::Write(GXmlTag *t, SerialiseContext &Ctx)
+bool ResStringGroup::Write(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = true;
 
@@ -1443,7 +1443,7 @@ bool ResStringGroup::Write(GXmlTag *t, SerialiseContext &Ctx)
 		ResString *s = dynamic_cast<ResString*>(i);
 		if (s && (s->Define || s->Items.Length() > 0))
 		{
-			GXmlTag *c = new GXmlTag;
+			LXmlTag *c = new LXmlTag;
 			if (c && s->Write(c, Ctx))
 			{
 				t->InsertTag(c);
@@ -1531,7 +1531,7 @@ void ResStringGroup::OnCommand(int Cmd)
 	}
 }
 
-void ResStringGroup::Create(GXmlTag *load, SerialiseContext *ctx)
+void ResStringGroup::Create(LXmlTag *load, SerialiseContext *ctx)
 {
 	if (load)
 	{

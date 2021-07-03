@@ -14,7 +14,7 @@ IdeCommon::~IdeCommon()
 	Remove();
 }
 
-bool IdeCommon::OnOpen(GProgressDlg *Prog, GXmlTag *Src)
+bool IdeCommon::OnOpen(GProgressDlg *Prog, LXmlTag *Src)
 {
 	if (Prog)
 		Prog->Value(Prog->Value() + 1);
@@ -124,9 +124,9 @@ void IdeCommon::SortChildren()
 	}
 }
 
-void IdeCommon::InsertTag(GXmlTag *t)
+void IdeCommon::InsertTag(LXmlTag *t)
 {
-	GXmlTag::InsertTag(t);
+	LXmlTag::InsertTag(t);
 
 	GTreeItem *i = dynamic_cast<GTreeItem*>(t);
 	if (i)
@@ -137,7 +137,7 @@ void IdeCommon::InsertTag(GXmlTag *t)
 
 bool IdeCommon::RemoveTag()
 {
-	bool Status = GXmlTag::RemoveTag();
+	bool Status = LXmlTag::RemoveTag();
 	Detach();
 	return Status;
 }

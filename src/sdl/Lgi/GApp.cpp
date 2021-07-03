@@ -166,7 +166,7 @@ class GAppPrivate : public GSymLookup, public LMutex
 {
 public:
 	// Common
-	GXmlTag *Config;
+	LXmlTag *Config;
 	GFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
@@ -709,11 +709,11 @@ void GApp::OnReceiveFiles(GArray<char*> &Files)
 		AppWnd->OnReceiveFiles(Files);
 }
 
-void GApp::SetConfig(GXmlTag *Tag)
+void GApp::SetConfig(LXmlTag *Tag)
 {
 	if (IsOk() && Tag)
 	{
-		GXmlTag *Old = GetConfig(Tag->GetTag());
+		LXmlTag *Old = GetConfig(Tag->GetTag());
 		if (Old)
 		{
 			Old->RemoveTag();
@@ -722,7 +722,7 @@ void GApp::SetConfig(GXmlTag *Tag)
 
 		if (!d->Config)
 		{
-			d->Config = new GXmlTag("Config");
+			d->Config = new LXmlTag("Config");
 		}
 		if (d->Config)
 		{
@@ -731,7 +731,7 @@ void GApp::SetConfig(GXmlTag *Tag)
 	}
 }
 
-GXmlTag *GApp::GetConfig(const char *Tag)
+LXmlTag *GApp::GetConfig(const char *Tag)
 {
 	if (IsOk() && !d->Config)
 	{
@@ -754,13 +754,13 @@ GXmlTag *GApp::GetConfig(const char *Tag)
 
 			if (FileExists(Path))
 			{
-				d->Config = new GXmlTag("Config");
+				d->Config = new LXmlTag("Config");
 				if (d->Config)
 				{
 					GFile f;
 					if (f.Open(Path, O_READ))
 					{
-						GXmlTree t;
+						LXmlTree t;
 						t.Read(d->Config, &f, 0);
 					}
 				}

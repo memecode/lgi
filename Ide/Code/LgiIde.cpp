@@ -668,7 +668,7 @@ public:
 
 							Page->Append(Watch);
 								
-							GXmlTag *w = App->GetOptions()->LockTag("watches", _FL);
+							LXmlTag *w = App->GetOptions()->LockTag("watches", _FL);
 							if (!w)
 							{
 								App->GetOptions()->CreateTag("watches");
@@ -845,7 +845,7 @@ public:
 	{
 		if (Watch)
 		{
-			GXmlTag *w = App->GetOptions()->LockTag("watches", _FL);
+			LXmlTag *w = App->GetOptions()->LockTag("watches", _FL);
 			if (!w)
 			{
 				App->GetOptions()->CreateTag("watches");
@@ -856,7 +856,7 @@ public:
 				w->EmptyChildren();
 				for (GTreeItem *ti = Watch->GetChild(); ti; ti = ti->GetNext())
 				{
-					GXmlTag *t = new GXmlTag("watch");
+					LXmlTag *t = new LXmlTag("watch");
 					if (t)
 					{
 						t->SetContent(ti->GetText(0));
@@ -4138,14 +4138,14 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 			GFile f;
 			if (f.Open(p, O_READ))
 			{
-				GXmlTree t;
-				GXmlTag r;
+				LXmlTree t;
+				LXmlTag r;
 				if (t.Read(&r, &f))
 				{
-					GXmlTag *Opts = r.GetChildTag("ToolsOptions");
+					LXmlTag *Opts = r.GetChildTag("ToolsOptions");
 					if (Opts)
 					{
-						GXmlTag *Projects = NULL;
+						LXmlTag *Projects = NULL;
 						char *Name;
 						for (auto c: Opts->Children)
 						{
@@ -4158,7 +4158,7 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 							}
 						}
 
-						GXmlTag *VCDirectories = NULL;
+						LXmlTag *VCDirectories = NULL;
 						if (Projects)
 							for (auto c: Projects->Children)
 							{

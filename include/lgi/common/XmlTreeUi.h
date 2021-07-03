@@ -1,22 +1,22 @@
 /// \file
 /// \author Matthew Allen
 
-#ifndef _GXML_TREE_UI_H_
-#define _GXML_TREE_UI_H_
+#ifndef _XML_TREE_UI_H_
+#define _XML_TREE_UI_H_
 
-#include "lgi\common\Variant.h"
+#include "lgi/common/Variant.h"
 #include "lgi/common/List.h"
 
 /// This class allows you to serialize data between the user interface and a
 /// GDom instance. Useful for storing user visible application settings in
 /// XML or an optons file.
-class GXmlTreeUi
+class LXmlTreeUi
 {
-	class GXmlTreeUiPriv *d;
+	class LXmlTreeUiPriv *d;
 
 public:
-	GXmlTreeUi();
-	virtual ~GXmlTreeUi();
+	LXmlTreeUi();
+	virtual ~LXmlTreeUi();
 
 	typedef LListItem *(*CreateListItem)(void *User);
 	typedef GTreeItem *(*CreateTreeItem)(void *User);

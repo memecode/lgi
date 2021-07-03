@@ -486,7 +486,7 @@ GTreeItem *GControlTree::Insert(const char *DomPath, int CtrlId, GVariantType Ty
 	return 0;
 }
 
-void GControlTree::ReadTree(GXmlTag *t, GTreeNode *n)
+void GControlTree::ReadTree(LXmlTag *t, GTreeNode *n)
 {
 	for (auto c: t->Children)
 	{
@@ -546,7 +546,7 @@ bool GControlTree::SetVariant(const char *Name, GVariant &Value, char *Array)
 
 		Empty();
 
-		GXmlTag *x = dynamic_cast<GXmlTag*>(Value.Value.Dom);
+		LXmlTag *x = dynamic_cast<LXmlTag*>(Value.Value.Dom);
 		if (!x)
 			LgiAssert(!"Not the right object.");
 		else if (d->Factory)

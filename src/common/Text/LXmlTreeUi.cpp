@@ -18,8 +18,8 @@ struct Mapping
 {
 	int Id;
 	int Hint;
-	GXmlTreeUi::CreateListItem ListItemFactory;
-	GXmlTreeUi::CreateTreeItem TreeItemFactory;
+	LXmlTreeUi::CreateListItem ListItemFactory;
+	LXmlTreeUi::CreateTreeItem TreeItemFactory;
 	GVariant ChildElements;
 	void *User;
 
@@ -32,7 +32,7 @@ struct Mapping
 		User = 0;
 	}
 
-	void LoadTree(GTreeNode *n, GXmlTag *t)
+	void LoadTree(GTreeNode *n, LXmlTag *t)
 	{
 		for (auto c: t->Children)
 		{
@@ -47,11 +47,11 @@ struct Mapping
 		}
 	}
 
-	void SaveTree(GTreeNode *n, GXmlTag *t)
+	void SaveTree(GTreeNode *n, LXmlTag *t)
 	{
 		for (GTreeItem *i = n->GetChild(); i; i = i->GetNext())
 		{
-			GXmlTag *n = new GXmlTag(ChildElements.Str());
+			LXmlTag *n = new LXmlTag(ChildElements.Str());
 			if (n)
 			{
 				i->XmlIo(n, true);
@@ -63,28 +63,28 @@ struct Mapping
 	}
 };
 
-class GXmlTreeUiPriv
+class LXmlTreeUiPriv
 {
 public:
 	LHashTbl<ConstStrKey<char,false>,Mapping*> Maps;
 	
-	~GXmlTreeUiPriv()
+	~LXmlTreeUiPriv()
 	{
 	    Maps.DeleteObjects();
 	}
 };
 
-GXmlTreeUi::GXmlTreeUi()
+LXmlTreeUi::LXmlTreeUi()
 {
-	d = new GXmlTreeUiPriv;
+	d = new LXmlTreeUiPriv;
 }
 
-GXmlTreeUi::~GXmlTreeUi()
+LXmlTreeUi::~LXmlTreeUi()
 {
 	DeleteObj(d);
 }
 
-void GXmlTreeUi::EmptyAll(GViewI *Ui)
+void LXmlTreeUi::EmptyAll(GViewI *Ui)
 {
 	if (Ui)
 	{
@@ -97,7 +97,7 @@ void GXmlTreeUi::EmptyAll(GViewI *Ui)
 	}
 }
 
-void GXmlTreeUi::EnableAll(GViewI *Ui, bool Enable)
+void LXmlTreeUi::EnableAll(GViewI *Ui, bool Enable)
 {
 	if (Ui)
 	{
@@ -109,12 +109,12 @@ void GXmlTreeUi::EnableAll(GViewI *Ui, bool Enable)
 	}
 }
 
-bool GXmlTreeUi::IsMapped(const char *Attr)
+bool LXmlTreeUi::IsMapped(const char *Attr)
 {
 	return d->Maps.Find(Attr) != NULL;
 }
 
-void GXmlTreeUi::Map(const char *Attr, int UiIdent, int Type)
+void LXmlTreeUi::Map(const char *Attr, int UiIdent, int Type)
 {
 	if (UiIdent > 0 &&
 		(Attr != 0 || Type == GV_DOM))
@@ -135,7 +135,7 @@ void GXmlTreeUi::Map(const char *Attr, int UiIdent, int Type)
 	}
 }
 
-void GXmlTreeUi::Map(const char *Attr, int UiIdent, CreateListItem Factory, const char *ChildElements, void *User)
+void LXmlTreeUi::Map(const char *Attr, int UiIdent, CreateListItem Factory, const char *ChildElements, void *User)
 {
 	if (Attr && UiIdent > 0 && Factory && ChildElements)
 	{
@@ -158,7 +158,7 @@ void GXmlTreeUi::Map(const char *Attr, int UiIdent, CreateListItem Factory, cons
 	}
 }
 
-void GXmlTreeUi::Map(const char *Attr, int UiIdent, CreateTreeItem Factory, const char *ChildElements, void *User)
+void LXmlTreeUi::Map(const char *Attr, int UiIdent, CreateTreeItem Factory, const char *ChildElements, void *User)
 {
 	if (Attr && UiIdent > 0 && Factory && ChildElements)
 	{
@@ -181,7 +181,7 @@ void GXmlTreeUi::Map(const char *Attr, int UiIdent, CreateTreeItem Factory, cons
 	}
 }
 
-void GXmlTreeUi::EmptyMaps()
+void LXmlTreeUi::EmptyMaps()
 {
 	d->Maps.DeleteObjects();
 }
@@ -248,14 +248,14 @@ int GetDataType(char *str)
 	return GV_NULL;
 }
 
-bool GXmlTreeUi::Convert(GDom *Tag, GViewI *Ui, bool ToUI)
+bool LXmlTreeUi::Convert(GDom *Tag, GViewI *Ui, bool ToUI)
 {
 	bool Status = false;
 
 	if (Ui && Tag)
 	{
 		GVariant v;
-		GXmlTag *Xml = dynamic_cast<GXmlTag*>(Tag);
+		LXmlTag *Xml = dynamic_cast<LXmlTag*>(Tag);
 		if (ToUI)
 		{
 			// Xml -> UI
@@ -267,7 +267,7 @@ bool GXmlTreeUi::Convert(GDom *Tag, GViewI *Ui, bool ToUI)
 				{
 					if (Xml)
 					{
-						GXmlTag *t = Xml->GetChildTag(Map.key);
+						LXmlTag *t = Xml->GetChildTag(Map.key);
 						if (!t) continue;
 						LList *Lst;
 						if (!Ui->GetViewById(Map.value->Id, Lst)) continue;
@@ -287,7 +287,7 @@ bool GXmlTreeUi::Convert(GDom *Tag, GViewI *Ui, bool ToUI)
 				{
 					if (Xml)
 					{
-						GXmlTag *t = Xml->GetChildTag(Map.key);
+						LXmlTag *t = Xml->GetChildTag(Map.key);
 						if (!t) continue;
 
 						GTree *Tree;
@@ -346,7 +346,7 @@ bool GXmlTreeUi::Convert(GDom *Tag, GViewI *Ui, bool ToUI)
 						case GV_LIST:
 						{
 							if (!Xml) break;
-							GXmlTag *Child = Xml->GetChildTag(Map.key, true);
+							LXmlTag *Child = Xml->GetChildTag(Map.key, true);
 							if (!Child) break;
 							LList *Lst = dynamic_cast<LList*>(c);
 							if (!Lst) break;
@@ -357,7 +357,7 @@ bool GXmlTreeUi::Convert(GDom *Tag, GViewI *Ui, bool ToUI)
 							Lst->GetAll(All);
 							for (auto i: All)
 							{
-								GXmlTag *n = new GXmlTag(Map.value->ChildElements.Str());
+								LXmlTag *n = new LXmlTag(Map.value->ChildElements.Str());
 								if (n)
 								{
 									i->XmlIo(n, true);
@@ -369,7 +369,7 @@ bool GXmlTreeUi::Convert(GDom *Tag, GViewI *Ui, bool ToUI)
 						case GV_CUSTOM: // GTree
 						{
 							if (!Xml) break;
-							GXmlTag *Child = Xml->GetChildTag(Map.key, true);
+							LXmlTag *Child = Xml->GetChildTag(Map.key, true);
 							
 							if (!Child) break;
 							GTree *Tree = dynamic_cast<GTree*>(c);

@@ -151,11 +151,11 @@ SettingInfo AllSettings[] =
 	{ProjNone,					GV_NULL,		NULL,				NULL,		{0}},
 };
 
-static void ClearEmptyTags(GXmlTag *t)
+static void ClearEmptyTags(LXmlTag *t)
 {
 	for (int i=0; i<t->Children.Length(); i++)
 	{
-		GXmlTag *c = t->Children[i];
+		LXmlTag *c = t->Children[i];
 		if (!c->GetContent() && !c->Children.Length())
 		{
 			c->RemoveTag();
@@ -177,8 +177,8 @@ public:
 	IdeProject *Project;
 	LHashTbl<IntKey<int>, SettingInfo*> Map;
 	IdeProjectSettings *Parent;
-	GXmlTag Active;
-	GXmlTag Editing;
+	LXmlTag Active;
+	LXmlTag Editing;
 	GAutoString CurConfig;
 	GArray<char*> Configs;
 	
@@ -329,7 +329,7 @@ public:
 		// Do value cell
 		c = Tbl->GetCell(0, CellY + 1);
 
-		GXmlTag *t = d->Editing.GetChildTag(Path);
+		LXmlTag *t = d->Editing.GetChildTag(Path);
 		if (Setting->Type == GV_STRING)
 		{
 			Ctrls[i].Edit = new GEdit(IDC_EDIT_BASE + i, 0, 0, 60, 20);
@@ -402,7 +402,7 @@ public:
 					continue;
 				}
 
-				GXmlTag *t = d->Editing.GetChildTag(Path, true);
+				LXmlTag *t = d->Editing.GetChildTag(Path, true);
 				if (!t)
 				{
 					LgiAssert(0);
@@ -763,7 +763,7 @@ void IdeProjectSettings::InitAllSettings(bool ClearCurrent)
 	for (SettingInfo *i = AllSettings; i->Setting; i++)
 	{
 		GVariant Default;
-		GXmlTag *t = NULL;
+		LXmlTag *t = NULL;
 		switch (i->Setting)
 		{
 			default:
@@ -887,7 +887,7 @@ bool IdeProjectSettings::Edit(GViewI *parent)
 	return Changed;
 }
 
-bool IdeProjectSettings::Serialize(GXmlTag *Parent, bool Write)
+bool IdeProjectSettings::Serialize(LXmlTag *Parent, bool Write)
 {
 	if (!Parent)
 	{
@@ -895,7 +895,7 @@ bool IdeProjectSettings::Serialize(GXmlTag *Parent, bool Write)
 		return false;
 	}
 
-	GXmlTag *t = Parent->GetChildTag(TagSettings, Write);
+	LXmlTag *t = Parent->GetChildTag(TagSettings, Write);
 	if (!t)
 	{
 		LgiAssert(!"Can't find settings tags?");
@@ -927,7 +927,7 @@ const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default,
 	int Bytes = 0;
 	if (!s->Flag.PlatformSpecific)
 	{
-		GXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, 0, Platform));
+		LXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, 0, Platform));
 		if (t && t->GetContent())
 		{
 			Strs.Add(t->GetContent());
@@ -936,7 +936,7 @@ const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default,
 	}
 	if (!s->Flag.CrossPlatform)
 	{
-		GXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, SF_PLATFORM_SPECIFC, Platform));
+		LXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, SF_PLATFORM_SPECIFC, Platform));
 		if (t && t->GetContent())
 		{
 			Strs.Add(t->GetContent());
@@ -972,7 +972,7 @@ int IdeProjectSettings::GetInt(ProjSetting Setting, int Default, IdePlatform Pla
 	
 	if (!s->Flag.PlatformSpecific)
 	{
-		GXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, 0, Platform));
+		LXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, 0, Platform));
 		if (t)
 		{
 			Status = t->GetContent() ? atoi(t->GetContent()) : 0;
@@ -980,7 +980,7 @@ int IdeProjectSettings::GetInt(ProjSetting Setting, int Default, IdePlatform Pla
 	}
 	else if (!s->Flag.CrossPlatform)
 	{
-		GXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, SF_PLATFORM_SPECIFC, Platform));
+		LXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, SF_PLATFORM_SPECIFC, Platform));
 		if (t)
 		{
 			Status = t->GetContent() ? atoi(t->GetContent()) : 0;
@@ -995,7 +995,7 @@ bool IdeProjectSettings::Set(ProjSetting Setting, const char *Value, IdePlatform
 {
 	bool Status = false;
 	char *path = d->BuildPath(Setting, true, Platform);
-	GXmlTag *t = d->Active.GetChildTag(path, true);
+	LXmlTag *t = d->Active.GetChildTag(path, true);
 	if (t)
 	{
 		t->SetContent(Value);
@@ -1009,7 +1009,7 @@ bool IdeProjectSettings::Set(ProjSetting Setting, int Value, IdePlatform Platfor
 {
 	bool Status = false;
 	char *path = d->BuildPath(Setting, true, Platform);
-	GXmlTag *t = d->Active.GetChildTag(path, true);
+	LXmlTag *t = d->Active.GetChildTag(path, true);
 	if (t)
 	{
 		t->SetContent(Value);

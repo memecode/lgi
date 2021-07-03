@@ -5,7 +5,7 @@
 #include "lgi/common/XmlTree.h"
 #include "lgi/common/Mutex.h"
 
-class LgiClass GOptionsFile : public GXmlTag, public LMutex
+class LgiClass GOptionsFile : public LXmlTag, public LMutex
 {
 public:
 	enum PortableType
@@ -28,16 +28,16 @@ private:
 	bool _OnAccess(bool Start);
 
 	// Don't allow non-threadsafe access to these
-	char *GetAttr(const char *Name) { return GXmlTag::GetAttr(Name); }
-	int GetAsInt(const char *Name) { return GXmlTag::GetAsInt(Name); }
-	bool SetAttr(const char *Name, char *Value) { return GXmlTag::SetAttr(Name, Value); }
-	bool SetAttr(const char *Name, int Value) { return GXmlTag::SetAttr(Name, Value); }
-	bool SetAttr(const char *Name, int64 Value) { return GXmlTag::SetAttr(Name, Value); }
-	bool DelAttr(const char *Name) { return GXmlTag::DelAttr(Name); }
-	void InsertTag(GXmlTag *t) { GXmlTag::InsertTag(t); }
-	bool RemoveTag() { return GXmlTag::RemoveTag(); }
+	char *GetAttr(const char *Name) { return LXmlTag::GetAttr(Name); }
+	int GetAsInt(const char *Name) { return LXmlTag::GetAsInt(Name); }
+	bool SetAttr(const char *Name, char *Value) { return LXmlTag::SetAttr(Name, Value); }
+	bool SetAttr(const char *Name, int Value) { return LXmlTag::SetAttr(Name, Value); }
+	bool SetAttr(const char *Name, int64 Value) { return LXmlTag::SetAttr(Name, Value); }
+	bool DelAttr(const char *Name) { return LXmlTag::DelAttr(Name); }
+	void InsertTag(LXmlTag *t) { LXmlTag::InsertTag(t); }
+	bool RemoveTag() { return LXmlTag::RemoveTag(); }
 	bool Serialize(bool Write) { return false; }
-	GXmlTag *GetChildTag(const char *Name, bool Create = false) { return GXmlTag::GetChildTag(Name, Create); }
+	LXmlTag *GetChildTag(const char *Name, bool Create = false) { return LXmlTag::GetChildTag(Name, Create); }
 
 protected:
 	virtual void _Defaults() {}
@@ -65,14 +65,14 @@ public:
 	 If the return value is not NULL you have to Unlock the object
 	 when you're done with the tag. e.g:
 	 
-		GXmlTag *t = Options.LockTag("MyTagName");
+		LXmlTag *t = Options.LockTag("MyTagName");
 		if (t)
 		{
 			// Doing something with tag here...
 			Options.Unlock();
 		}
 	*/
-	GXmlTag *LockTag(const char *Name, const char *File, int Line);
+	LXmlTag *LockTag(const char *Name, const char *File, int Line);
 };
 
 #endif

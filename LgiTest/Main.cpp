@@ -6,7 +6,7 @@
 #include "GCss.h"
 #include "GTableLayout.h"
 #include "LDbTable.h"
-#include "GXmlTree.h"
+#include "LXmlTree.h"
 #include "GTabView.h"
 #include "GTextLog.h"
 #include "GDropFiles.h"
@@ -349,8 +349,8 @@ bool DbTesting()
 		return false;	
 	
 	// Read XML
-	GXmlTag r;
-	GXmlTree t;
+	LXmlTag r;
+	LXmlTree t;
 	uint64 Start = LgiMicroTime();
 	if (!t.Read(&r, &In))
 		return false;
@@ -368,7 +368,7 @@ bool DbTesting()
 	Tbl.AddField(M_FILENAME, GV_STRING);
 
 	Start = LgiMicroTime();
-	GXmlTag *Emails = r.GetChildTag("Emails");
+	LXmlTag *Emails = r.GetChildTag("Emails");
 	if (!Emails)
 		return false;
 	for (auto c: Emails->Children)

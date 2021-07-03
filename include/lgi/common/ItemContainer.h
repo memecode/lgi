@@ -104,7 +104,7 @@ public:
 	virtual GFont *GetFont() { return 0; }
 	
 	/// Reads / writes list item to XML
-	virtual bool XmlIo(class GXmlTag *Tag, bool Write) { return false; }
+	virtual bool XmlIo(class LXmlTag *Tag, bool Write) { return false; }
 
 	bool OnScriptEvent(GViewI *Ctrl) { return false; }
 	GMessage::Result OnEvent(GMessage *Msg) { return 0; }

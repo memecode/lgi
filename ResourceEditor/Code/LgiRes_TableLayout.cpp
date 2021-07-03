@@ -728,7 +728,7 @@ public:
 	}
 };
 
-CtrlTable::CtrlTable(ResDialog *dlg, GXmlTag *load) :
+CtrlTable::CtrlTable(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Table, load)
 {
 	d = new CtrlTablePrivate(this);
@@ -1516,7 +1516,7 @@ public:
 	}
 };
 
-static bool HasTableLayout(GXmlTag *t)
+static bool HasTableLayout(LXmlTag *t)
 {
 	if (t->IsTag("TableLayout"))
 		return true;

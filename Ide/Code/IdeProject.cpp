@@ -1217,7 +1217,7 @@ int NodeSort(GTreeItem *a, GTreeItem *b, NativeInt d)
 	return 0;
 }
 
-DeclGArrayCompare(XmlSort, GXmlTag*, NativeInt)
+DeclGArrayCompare(XmlSort, LXmlTag*, NativeInt)
 {
 	GTreeItem *A = dynamic_cast<GTreeItem*>(*a);
 	GTreeItem *B = dynamic_cast<GTreeItem*>(*b);
@@ -1235,14 +1235,14 @@ bool ReadVsProjFile(GString File, GString &Ver, GString::Array &Configs)
 	if (!f.Open(File, O_READ))
 		return false;
 
-	GXmlTree Io;
-	GXmlTag r;
+	LXmlTree Io;
+	LXmlTag r;
 	if (Io.Read(&r, &f) &&
 		r.IsTag("Project"))
 	{
 		Ver = r.GetAttr("ToolsVersion");
 
-		GXmlTag *ItemGroup = r.GetChildTag("ItemGroup");
+		LXmlTag *ItemGroup = r.GetChildTag("ItemGroup");
 		if (ItemGroup)
 			for (auto c: ItemGroup->Children)
 			{
@@ -1584,8 +1584,8 @@ GString BuildThread::FindExe()
 				BuildConfigs[i.value - 1] = i.key;
 
 				GFile f(First->File, O_READ);
-				GXmlTree t;
-				GXmlTag r;
+				LXmlTree t;
+				LXmlTag r;
 				if (t.Read(&r, &f))
 				{
 					if (r.IsTag("Project"))
@@ -1849,11 +1849,11 @@ int BuildThread::Main()
 			GFile f;
 			if (f.Open(Makefile, O_READ))
 			{
-				GXmlTree t;
-				GXmlTag r;
+				LXmlTree t;
+				LXmlTag r;
 				if (t.Read(&r, &f))
 				{
-					GXmlTag *c = r.GetChildTag("configuration");
+					LXmlTag *c = r.GetChildTag("configuration");
 					c = c ? c->GetChildTag("name") : NULL;
 					if (c)
 						Conf = c->GetContent();
@@ -2046,7 +2046,7 @@ IdeProject::IdeProject(AppWnd *App) : IdeCommon(NULL)
 IdeProject::~IdeProject()
 {
 	d->App->OnProjectDestroy(this);
-	GXmlTag::Empty(true);
+	LXmlTag::Empty(true);
 	DeleteObj(d);
 }
 
@@ -2827,8 +2827,8 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 
 	Prof.Add("Xml");
 
-	GXmlTree x;
-	GXmlTag r;
+	LXmlTree x;
+	LXmlTag r;
 	if (!x.Read(&r, &f))
 	{
 		LgiTrace("%s:%i - Error: Can't read XML: %s\n", _FL, x.GetErrorMsg());
@@ -2907,7 +2907,7 @@ bool IdeProject::SaveFile()
 		{
 			f.SetSize(0);
 
-			GXmlTree x;
+			LXmlTree x;
 			GProgressDlg Prog(d->App, 1000);
 			Prog.SetAlwaysOnTop(true);
 			Prog.SetDescription("Serializing project XML...");
@@ -3123,7 +3123,7 @@ int IdeProject::GetImage(int Flags)
 
 void IdeProject::Empty()
 {
-	GXmlTag *t;
+	LXmlTag *t;
 	while (Children.Length() > 0 &&
 		(t = Children[0]))
 	{
@@ -3136,7 +3136,7 @@ void IdeProject::Empty()
 	}
 }
 
-GXmlTag *IdeProject::Create(char *Tag)
+LXmlTag *IdeProject::Create(char *Tag)
 {
 	if (!stricmp(Tag, TagSettings))
 		return NULL;
@@ -3988,14 +3988,14 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, LPoint p, int KeyState)
 						// Detach
 						GTreeItem *i = dynamic_cast<GTreeItem*>(Src);
 						i->Detach();
-						if (Src->GXmlTag::Parent)
+						if (Src->LXmlTag::Parent)
 						{
-							LgiAssert(Src->GXmlTag::Parent->Children.HasItem(Src));
-							Src->GXmlTag::Parent->Children.Delete(Src);
+							LgiAssert(Src->LXmlTag::Parent->Children.HasItem(Src));
+							Src->LXmlTag::Parent->Children.Delete(Src);
 						}
 						
 						// Attach
-						Src->GXmlTag::Parent = Dst;
+						Src->LXmlTag::Parent = Dst;
 						Dst->Children.SetFixedLength(false);
 						Dst->Children.Add(Src);
 						Dst->Children.SetFixedLength(true);

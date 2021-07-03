@@ -11,12 +11,12 @@
 // #define PROXY_OVERRIDE		"10.10.0.50:8080"
 #endif
 
-GXmlTag *GetFormField(GXmlTag *Form, char *Field)
+LXmlTag *GetFormField(LXmlTag *Form, char *Field)
 {
 	if (Form && Field)
 	{
 		char *Ast = strchr(Field, '*');
-		GArray<GXmlTag*> Matches;
+		GArray<LXmlTag*> Matches;
 
 		for (auto x: Form->Children)
 		{
@@ -77,16 +77,16 @@ void StrFormEncode(GStream &p, char *s, bool InValue)
 }
 
 // This just extracts the forms in the HTML and makes an XML tree of what it finds.
-GXmlTag *ExtractForms(char *Html, GStream *Log)
+LXmlTag *ExtractForms(char *Html, GStream *Log)
 {
-	GXmlTag *f = 0;
+	LXmlTag *f = 0;
 
 	if (Html)
 	{
 		WebPage Page(Html, Log);
 		if (Page.Html)
 		{
-			GXmlTag *x = Page.GetRoot(Log);
+			LXmlTag *x = Page.GetRoot(Log);
 			if (x)
 			{
 				for (auto It = x->Children.begin(); It != x->Children.end(); It++)
@@ -96,11 +96,11 @@ GXmlTag *ExtractForms(char *Html, GStream *Log)
 					{
 						if (!f)
 						{
-							f = new GXmlTag("Forms");
+							f = new LXmlTag("Forms");
 						}
 						if (f)
 						{
-							GXmlTag *Form = new GXmlTag("Form");
+							LXmlTag *Form = new LXmlTag("Form");
 							if (Form)
 							{
 								f->InsertTag(Form);
@@ -134,7 +134,7 @@ GXmlTag *ExtractForms(char *Html, GStream *Log)
 
 									if (c->IsTag("input"))
 									{
-										GXmlTag *i = new GXmlTag("Input");
+										LXmlTag *i = new LXmlTag("Input");
 										if (i)
 										{
 											Form->InsertTag(i);
@@ -147,7 +147,7 @@ GXmlTag *ExtractForms(char *Html, GStream *Log)
 
 									if (c->IsTag("select"))
 									{
-										GXmlTag *i = new GXmlTag("Select");
+										LXmlTag *i = new LXmlTag("Select");
 										if (i)
 										{
 											Form->InsertTag(i);
@@ -160,7 +160,7 @@ GXmlTag *ExtractForms(char *Html, GStream *Log)
 											{
 												if (c->IsTag("option"))
 												{
-													GXmlTag *o = new GXmlTag("Option");
+													LXmlTag *o = new LXmlTag("Option");
 													if (o)
 													{
 														char *s = c->GetAttr("Value");
@@ -193,12 +193,12 @@ GXmlTag *ExtractForms(char *Html, GStream *Log)
 	return f;
 }
 
-void XmlToStream(GStream *s, GXmlTag *x, char *Style)
+void XmlToStream(GStream *s, LXmlTag *x, char *Style)
 {
 	if (s && x)
 	{
 		GStringPipe p(1024);
-		GXmlTree t;
+		LXmlTree t;
 		if (Style) t.SetStyleFile(Style, "text/xsl");
 		t.Write(x, &p);
 
@@ -274,11 +274,11 @@ char *WebPage::GetCharSet()
 {
 	if (!Charset)
 	{
-		GXmlTag *t = GetRoot();
+		LXmlTag *t = GetRoot();
 		if (t)
 		{
 			auto it = t->Children.begin();
-			for (GXmlTag *c = *it; !Charset && c; c = *++it)
+			for (LXmlTag *c = *it; !Charset && c; c = *++it)
 			{
 				if (c->IsTag("meta"))
 				{
@@ -306,12 +306,12 @@ char *WebPage::GetCharSet()
 	return Charset;
 }
 
-GXmlTag *WebPage::GetRoot(GStream *Log)
+LXmlTag *WebPage::GetRoot(GStream *Log)
 {
 	if (!Parsed && Html)
 	{
-		GXmlTree t(GXT_NO_DOM);
-		if ((Parsed = new GXmlTag))
+		LXmlTree t(GXT_NO_DOM);
+		if ((Parsed = new LXmlTag))
 		{
 			GStringPipe p;
 			p.Push(Html);
@@ -331,7 +331,7 @@ GXmlTag *WebPage::GetRoot(GStream *Log)
 
 char *WebPage::GetFormValue(char *field)
 {
-	GXmlTag *x = GetRoot();
+	LXmlTag *x = GetRoot();
 	if (x)
 	{
 		for (auto t: x->Children)
@@ -350,12 +350,12 @@ char *WebPage::GetFormValue(char *field)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-FormPost::FormPost(GXmlTag *f)
+FormPost::FormPost(LXmlTag *f)
 {
 	Form = f;
 }
 
-GXmlTag *FormPost::GetField(char *n)
+LXmlTag *FormPost::GetField(char *n)
 {
 	if (n && Form)
 	{
@@ -479,7 +479,7 @@ char *FormPost::EncodeFields(GStream *Debug, char *RealFields, bool EncodePlus)
 	#if 0
 	// if (Form)
 	{
-		for (GXmlTag *t = Form->Children.First(); t; t = Form->Children.Next())
+		for (LXmlTag *t = Form->Children.First(); t; t = Form->Children.Next())
 		{
 			char *Type = t->GetAttr("type");
 			if (Type && _stricmp(Type, "image") == 0)
@@ -530,7 +530,7 @@ bool FormPost::Set(char *field, char *value, GStream *Log, bool AllowCreate)
 
 	if (field && value && Form)
 	{
-		GXmlTag *f = GetFormField(Form, field);
+		LXmlTag *f = GetFormField(Form, field);
 		if (f)
 		{
 			if (f->GetTag())
