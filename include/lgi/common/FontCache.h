@@ -1,5 +1,7 @@
-#ifndef _GFONTCACHE_H_
-#define _GFONTCACHE_H_
+#pragma once
+
+#include "lgi/common/App.h"
+#include "lgi/common/Font.h"
 
 class GFontCache
 {
@@ -149,4 +151,3 @@ public:
 	}
 };
 
-#endif

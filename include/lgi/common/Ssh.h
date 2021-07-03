@@ -7,6 +7,7 @@
 
 #include "DeEscape.h"
 #include "lgi/common/TextLog.h"
+#include "lgi/common/ProgressView.h"
 
 #define DEFAULT_PROMPT		"# "
 
@@ -19,7 +20,7 @@ protected:
 	GTextLog *Log;
 	ssh_session Ssh;
 	LViewI *TxtLabel;
-	GProgress *Prog;
+	LProgressView *Prog;
 	bool Connected;
 
 	struct IoProgress
@@ -38,7 +39,7 @@ protected:
 		~IoProgress()
 		{
 			if (s->Prog)
-				s->Prog->Colour(Pos == Length ? GProgress::cNormal : GProgress::cError);
+				s->Prog->Colour(Pos == Length ? LProgressView::cNormal : LProgressView::cError);
 			if (s->TxtLabel)
 				s->TxtLabel->Name(NULL);
 		}
@@ -49,7 +50,7 @@ protected:
 			if (s->Prog)
 			{
 				s->Prog->SetRange(GRange(0, Length));
-				s->Prog->Colour(GProgress::cPaused);
+				s->Prog->Colour(LProgressView::cPaused);
 			}
 		}
 		

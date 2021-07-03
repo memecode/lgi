@@ -2,6 +2,14 @@
 #define _GSKIN_ENGINE_H_
 
 #include "lgi/common/List.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/RadioGroup.h"
+#include "lgi/common/TabView.h"
+#include "lgi/common/Slider.h"
+#include "lgi/common/Bitmap.h"
+#include "lgi/common/ProgressView.h"
+#include "lgi/common/Tree.h"
 
 // Feature support flags
 #define GSKIN_COLOUR		0x00000001
@@ -124,7 +132,7 @@ public:
 	virtual void OnPaint_GSlider      (GSlider *Ctrl,      GSkinState *State) {};
 	virtual void OnPaint_GCombo       (GCombo *Ctrl,       GSkinState *State) {};
 	virtual void OnPaint_GBitmap      (GBitmap *Ctrl,      GSkinState *State) {};
-	virtual void OnPaint_GProgress    (GProgress *Ctrl,    GSkinState *State) {};
+	virtual void OnPaint_GProgress    (LProgressView *Ctrl,GSkinState *State) {};
 	virtual void OnPaint_GTree        (GTree *Ctrl,        GSkinState *State) {};
 	virtual void OnPaint_LList        (LList *Ctrl,        GSkinState *State) {};
 	

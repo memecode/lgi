@@ -16,8 +16,10 @@
 #include <math.h>
 
 #include "lgi/common/Lgi.h"
+#include "lgi/common/Gdc2.h"
 #include "lgi/common/GdiLeak.h"
 #include "lgi/common/Palette.h"
+#include "lgi/common/ImageList.h"
 
 /****************************** Defines *************************************************************************************/
 

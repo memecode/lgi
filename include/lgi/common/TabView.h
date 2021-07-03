@@ -1,9 +1,9 @@
 /// \file
 /// \author Matthew Allen
 /// \brief A tab view
+#pragma once
 
-#ifndef _GTABVIEW_H_
-#define _GTABVIEW_H_
+#include "lgi/common/Layout.h"
 
 // Tab control
 class GTabPage;
@@ -150,4 +150,3 @@ public:
 	void Select();
 };
 
-#endif

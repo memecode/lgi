@@ -88,7 +88,7 @@ public:
 	~IdeCommon();
 
 	IdeProject *GetProject() { return Project; }
-	bool OnOpen(GProgressDlg *Prog, LXmlTag *Src);	
+	bool OnOpen(LProgressDlg *Prog, LXmlTag *Src);	
 	void CollectAllSubProjects(List<IdeProject> &c);
 	void CollectAllSource(GArray<GString> &c, IdePlatform Platform);
 	void SortChildren();

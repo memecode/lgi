@@ -1,6 +1,8 @@
 #ifndef _LWINDOW_H_
 #define _LWINDOW_H_
 
+#include "lgi/common/View.h"
+
 /// The available states for a top level window
 enum LWindowZoom
 {

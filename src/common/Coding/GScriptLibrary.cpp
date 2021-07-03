@@ -7,6 +7,7 @@
 #include "lgi\common\Token.h"
 #include "lgi\common\SubProcess.h"
 #include "lgi\common\LgiRes.h"
+#include "lgi\common\FileSelect.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 char16 sChar[]		= L"char";

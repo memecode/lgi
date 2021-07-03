@@ -21,7 +21,7 @@ class GTreeItem;
 class LgiClass GTreeNode
 {
 protected:
-	GTree *Tree;
+	class GTree *Tree;
 	GTreeItem *Parent;
 	List<GTreeItem> Items;
 

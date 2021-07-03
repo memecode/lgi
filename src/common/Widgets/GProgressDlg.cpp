@@ -1,5 +1,5 @@
 /*hdr
-**      FILE:           GProgressDlg.cpp
+**      FILE:           LProgressDlg.cpp
 **      AUTHOR:         Matthew Allen
 **      DATE:           11/11/98
 **      DESCRIPTION:    Progress stuff
@@ -104,7 +104,7 @@ Progress &Progress::operator =(Progress &p)
 #define PANE_X					300
 #define PANE_Y					100
 
-GProgressPane::GProgressPane(GProgressDlg *dlg) : Dlg(dlg)
+LProgressPane::LProgressPane(LProgressDlg *dlg) : Dlg(dlg)
 {
 	t = NULL;
 	UiDirty = false;
@@ -144,7 +144,7 @@ GProgressPane::GProgressPane(GProgressDlg *dlg) : Dlg(dlg)
 		#ifdef PAD
 		c->Padding(LCss::Len(LCss::LenPx, PAD));
 		#endif
-		c->Add(Bar = new GProgress(IDC_PROGRESS, 0, 0, PANE_X - 14, 10, "Progress"));
+		c->Add(Bar = new LProgressView(IDC_PROGRESS, 0, 0, PANE_X - 14, 10, "Progress"));
 
 		c = t->GetCell(0, Row++, true, 2, 1);
 		#ifdef PAD
@@ -155,11 +155,11 @@ GProgressPane::GProgressPane(GProgressDlg *dlg) : Dlg(dlg)
 	}
 }
 
-GProgressPane::~GProgressPane()
+LProgressPane::~LProgressPane()
 {
 }
 
-bool GProgressPane::SetRange(const GRange &r)
+bool LProgressPane::SetRange(const GRange &r)
 {
 	UiDirty = true;
 	Progress::SetRange(r);
@@ -169,7 +169,7 @@ bool GProgressPane::SetRange(const GRange &r)
 
 	if (InThread())
 	{
-		GProgressDlg *Pd = dynamic_cast<GProgressDlg*>(GetParent());
+		LProgressDlg *Pd = dynamic_cast<LProgressDlg*>(GetParent());
 		if (Pd && But)
 			But->Enabled(Pd->CanCancel);
 	}
@@ -177,7 +177,7 @@ bool GProgressPane::SetRange(const GRange &r)
 	return true;
 }
 
-void GProgressPane::UpdateUI()
+void LProgressPane::UpdateUI()
 {
 	if (!UiDirty)
 		return;
@@ -242,7 +242,7 @@ void GProgressPane::UpdateUI()
 		ValText->SendNotify(GNotifyTableLayout_Refresh);
 }
 
-void GProgressPane::Value(int64 v)
+void LProgressPane::Value(int64 v)
 {
 	Progress::Value(v);
 	
@@ -251,24 +251,24 @@ void GProgressPane::Value(int64 v)
 		Dlg->TimeCheck();
 }
 
-void GProgressPane::OnCreate()
+void LProgressPane::OnCreate()
 {
 	AttachChildren();
 }
 
-GProgressPane &GProgressPane::operator++(int)
+LProgressPane &LProgressPane::operator++(int)
 {
 	Value(Progress::Value() + 1);
 	return *this;
 }
 
-GProgressPane &GProgressPane::operator--(int)
+LProgressPane &LProgressPane::operator--(int)
 {
 	Value(Progress::Value() - 1);
 	return *this;
 }
 
-int GProgressPane::OnNotify(LViewI *Ctrl, int Flags)
+int LProgressPane::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{
@@ -305,7 +305,7 @@ int GProgressPane::OnNotify(LViewI *Ctrl, int Flags)
 	return 0;
 }
 
-void GProgressPane::OnPaint(LSurface *pDC)
+void LProgressPane::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
 	LThinBorder(pDC, r, DefaultRaisedEdge);
@@ -313,7 +313,7 @@ void GProgressPane::OnPaint(LSurface *pDC)
 	pDC->Rectangle(&r);
 }
 
-void GProgressPane::OnPosChange()
+void LProgressPane::OnPosChange()
 {
 	if (t)
 	{
@@ -323,14 +323,14 @@ void GProgressPane::OnPosChange()
 	}
 }
 
-LFont *GProgressPane::GetFont()
+LFont *LProgressPane::GetFont()
 {
 	// GdcBeTtf *Fnt = SysFont;
 	// return (Fnt) ? Fnt->Handle() : 0;
 	return 0;
 }
 
-void GProgressPane::SetDescription(const char *d)
+void LProgressPane::SetDescription(const char *d)
 {
 	Progress::SetDescription(d);
 	if (Desc)
@@ -349,7 +349,7 @@ void GProgressPane::SetDescription(const char *d)
 #define DefY		LgiApp->GetMetric(LGI_MET_DECOR_Y)
 // #endif
 
-GProgressDlg::GProgressDlg(LView *parent, uint64 timeout)
+LProgressDlg::LProgressDlg(LView *parent, uint64 timeout)
 {
 	Ts = LgiCurrentTime();
 	YieldTs = 0;
@@ -370,13 +370,13 @@ GProgressDlg::GProgressDlg(LView *parent, uint64 timeout)
 		Push();
 }
 
-GProgressDlg::~GProgressDlg()
+LProgressDlg::~LProgressDlg()
 {
 	if (Visible())
 		EndModeless(true);
 }
 
-bool GProgressDlg::OnRequestClose(bool OsClose)
+bool LProgressDlg::OnRequestClose(bool OsClose)
 {
 	for (auto p: Panes)
 		p->Cancel(true);
@@ -384,7 +384,7 @@ bool GProgressDlg::OnRequestClose(bool OsClose)
 	return false;
 }
 
-void GProgressDlg::Resize()
+void LProgressDlg::Resize()
 {
 	LRect r, c = GetPos();
 	int DecorX = LgiApp->GetMetric(LGI_MET_DECOR_X);
@@ -409,20 +409,20 @@ void GProgressDlg::Resize()
 	}
 }
 
-void GProgressDlg::OnCreate()
+void LProgressDlg::OnCreate()
 {
 	if (Panes.Length() == 0)
 		Push();
 	SetPulse(500);
 }
 
-void GProgressDlg::OnPulse()
+void LProgressDlg::OnPulse()
 {
 	for (auto p: Panes)
 		p->UpdateUI();
 }
 
-void GProgressDlg::OnPosChange()
+void LProgressDlg::OnPosChange()
 {
 	LRect c = GetClient();
 	
@@ -441,7 +441,7 @@ void GProgressDlg::OnPosChange()
 	}
 }
 
-int GProgressDlg::OnNotify(LViewI *Ctrl, int Flags)
+int LProgressDlg::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl->GetId() == IDC_PANE &&
 		Flags == GNotifyTableLayout_LayoutChanged)
@@ -470,7 +470,7 @@ int GProgressDlg::OnNotify(LViewI *Ctrl, int Flags)
 	return 0;
 }
 
-GMessage::Result GProgressDlg::OnEvent(GMessage *Msg)
+GMessage::Result LProgressDlg::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -485,14 +485,14 @@ GMessage::Result GProgressDlg::OnEvent(GMessage *Msg)
 	return LDialog::OnEvent(Msg);
 }
 
-GProgressPane *GProgressDlg::ItemAt(int i)
+LProgressPane *LProgressDlg::ItemAt(int i)
 {
 	return Panes.ItemAt(i);
 }
 
-GProgressPane *GProgressDlg::Push()
+LProgressPane *LProgressDlg::Push()
 {
-	GProgressPane *Pane = new GProgressPane(this);
+	LProgressPane *Pane = new LProgressPane(this);
 	if (Pane)
 	{
 		// Attach the new pane..
@@ -507,9 +507,9 @@ GProgressPane *GProgressDlg::Push()
 	return Pane;
 }
 
-void GProgressDlg::Pop(GProgressPane *p)
+void LProgressDlg::Pop(LProgressPane *p)
 {
-	GProgressPane *Pane = (p) ? p : Panes.Last();
+	LProgressPane *Pane = (p) ? p : Panes.Last();
 	if (Pane)
 	{
 		Pane->Detach();
@@ -520,12 +520,12 @@ void GProgressDlg::Pop(GProgressPane *p)
 	}
 }
 
-void GProgressDlg::SetCanCancel(bool cc)
+void LProgressDlg::SetCanCancel(bool cc)
 {
 	CanCancel = cc;
 }
 
-GString GProgressDlg::GetDescription()
+GString LProgressDlg::GetDescription()
 {
 	GString s;
 	if (Panes.Length())
@@ -533,20 +533,20 @@ GString GProgressDlg::GetDescription()
 	return s;
 }
 
-void GProgressDlg::SetDescription(const char *d)
+void LProgressDlg::SetDescription(const char *d)
 {
 	if (Panes.Length())
 		Panes.First()->SetDescription(d);
 }
 
-GRange GProgressDlg::GetRange()
+GRange LProgressDlg::GetRange()
 {
 	if (Panes.Length())
 		return Panes.First()->GetRange();
 	return GRange();
 }
 
-bool GProgressDlg::SetRange(const GRange &r)
+bool LProgressDlg::SetRange(const GRange &r)
 {
 	if (!Panes.Length())
 		return false;
@@ -554,7 +554,7 @@ bool GProgressDlg::SetRange(const GRange &r)
 	return true;
 }
 
-GProgressDlg &GProgressDlg::operator++(int)
+LProgressDlg &LProgressDlg::operator++(int)
 {
 	if (Panes.Length())
 	{
@@ -564,7 +564,7 @@ GProgressDlg &GProgressDlg::operator++(int)
 	return *this;
 }
 
-GProgressDlg &GProgressDlg::operator--(int)
+LProgressDlg &LProgressDlg::operator--(int)
 {
 	if (Panes.Length())
 	{
@@ -574,7 +574,7 @@ GProgressDlg &GProgressDlg::operator--(int)
 	return *this;
 }
 
-void GProgressDlg::TimeCheck()
+void LProgressDlg::TimeCheck()
 {
 	if (!InThread())
 		return;
@@ -597,40 +597,40 @@ void GProgressDlg::TimeCheck()
 	}
 }
 
-int64 GProgressDlg::Value()
+int64 LProgressDlg::Value()
 {
 	return Panes.Length() ? Panes.First()->Value() : -1;
 }
 
-void GProgressDlg::Value(int64 v)
+void LProgressDlg::Value(int64 v)
 {
 	if (Panes.Length())
 		Panes.First()->Value(v);
 }
 
-double GProgressDlg::GetScale()
+double LProgressDlg::GetScale()
 {
 	return Panes.Length() ? Panes.First()->GetScale() : 0.0;
 }
 
-void GProgressDlg::SetScale(double s)
+void LProgressDlg::SetScale(double s)
 {
 	if (Panes.Length())
 		Panes.First()->SetScale(s);
 }
 
-GString GProgressDlg::GetType()
+GString LProgressDlg::GetType()
 {
 	return Panes.Length() ? Panes.First()->GetType() : NULL;
 }
 
-void GProgressDlg::SetType(const char *t)
+void LProgressDlg::SetType(const char *t)
 {
 	if (Panes.Length())
 		Panes.First()->SetType(t);
 }
 
-bool GProgressDlg::IsCancelled()
+bool LProgressDlg::IsCancelled()
 {
 	for (auto p: Panes)
 	{
@@ -640,7 +640,7 @@ bool GProgressDlg::IsCancelled()
 	return false;
 }
 
-void GProgressDlg::OnPaint(LSurface *pDC)
+void LProgressDlg::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_MED);
 	pDC->Rectangle();

@@ -1,6 +1,8 @@
 #ifndef _GMDI_H_
 #define _GMDI_H_
 
+#include "lgi\common\Layout.h"
+
 #define MDI_TAB_STYLE	1
 
 class GMdiChild : public GLayout

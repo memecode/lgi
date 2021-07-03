@@ -22,6 +22,8 @@
 #include "lgi/common/Token.h"
 #include "lgi/common/DataDlg.h"
 #include "lgi/common/Button.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/StatusBar.h"
 
 char AppName[]				= "Lgi Resource Editor";
 char HelpFile[]				= "Help.html";
@@ -2606,7 +2608,7 @@ bool AppWnd::LoadLgi(const char *FileName)
 		GFile f;
 		if (f.Open(FileName, O_READ))
 		{
-			GProgressDlg Progress(this);
+			LProgressDlg Progress(this);
 
 			Progress.SetDescription("Initializing...");
 			Progress.SetType("Tags");
@@ -3459,7 +3461,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 
 	if (FileName)
 	{
-		GProgressDlg Progress(this);
+		LProgressDlg Progress(this);
 
 		Progress.SetDescription("Initializing...");
 		Progress.SetType("K");

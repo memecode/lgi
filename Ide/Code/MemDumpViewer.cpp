@@ -5,6 +5,8 @@
 #include "lgi\common\Edit.h"
 #include "lgi\common\ProgressDlg.h"
 #include "lgi\common\List.h"
+#include "lgi\common\Splitter.h"
+#include "lgi\common\FileSelect.h"
 
 #define IDC_LIST 100
 
@@ -219,7 +221,7 @@ public:
 			LgiMsg(this, "Couldn't read '%s'", AppName, MB_OK, File);
 		else
 		{
-			GProgressDlg Prog(this, true);
+			LProgressDlg Prog(this, true);
 			GArray<char> Buf;
 			Buf.Length(1 << 20);
 			ssize_t Pos = 0, Used = 0;

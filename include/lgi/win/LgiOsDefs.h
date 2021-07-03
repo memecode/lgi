@@ -94,7 +94,7 @@ typedef int (__stdcall *pSHFileOperationW)(LPSHFILEOPSTRUCTW lpFileOp);
 typedef int (__stdcall *p_vscprintf)(const char *format, va_list argptr);
 
 #include "lgi/common/Message.h"
-#include "lgi/common/LgiClass.h"
+#include "lgi/common/LgiUiBase.h"
 
 class LgiClass OsAppArguments
 {

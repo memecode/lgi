@@ -11,6 +11,7 @@
 #include "lgi/common/SkinEngine.h"
 #include "lgi/common/Edit.h"
 #include "lgi/common/LgiRes.h"
+#include "lgi/common/Widgets.h"
 
 GAutoWString LgiAddReturns(const char16 *n)
 {

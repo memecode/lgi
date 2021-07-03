@@ -4,6 +4,7 @@
 #include "lgi/common/Button.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/Token.h"
+#include "lgi/common/Menu.h"
 
 #define IDM_NEW_CHILD		100
 #define IDM_NEW_NEXT		101

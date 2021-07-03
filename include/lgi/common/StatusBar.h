@@ -1,5 +1,6 @@
-#ifndef _GSTATUSBAR_H_
-#define _GSTATUSBAR_H_
+#pragma once
+
+#include "lgi/common/Layout.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 #define STATUSBAR_SEPARATOR			4
@@ -48,5 +49,3 @@ public:
 	LSurface *Bitmap();
 	void Bitmap(LSurface *pdc);
 };
-
-#endif

@@ -1,6 +1,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/CssTools.h"
+#include "lgi/common/Splitter.h"
 
 //////////////////////////////////////////////////////////////////////////////
 #define SPLITER_BORDER			4

@@ -9,6 +9,7 @@
 #include "lgi/common/Button.h"
 #include "lgi/common/XmlTreeUi.h"
 #include "lgi/common/Tree.h"
+#include "lgi/common/FileSelect.h"
 
 #define TIMEOUT_PROMPT			1000
 
@@ -110,7 +111,7 @@ public:
 		Fnt->Colour(Ctx.Fore, Ctx.Back);
 		ds.Draw(pDC, Ctx.x1 + 10, Ctx.y1 + ((Ctx.Y() - ds.Y()) >> 1));
 
-		pDC->Colour(GProgress::cNormal);
+		pDC->Colour(LProgressView::cNormal);
 		int x1 = 120;
 		int prog = Ctx.X() - x1;
 		int x2 = (int) (v * prog / maximum);

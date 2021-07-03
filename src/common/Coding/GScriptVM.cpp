@@ -12,6 +12,7 @@
 #include "lgi\common\TextLabel.h"
 #include "lgi\common\ScrollBar.h"
 #include "lgi\common\Matrix.h"
+#include "lgi\common\Menu.h"
 
 #define TIME_INSTRUCTIONS		0
 #define POST_EXECUTE_STATE		0

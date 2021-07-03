@@ -3,6 +3,7 @@
 
 #include "lgi/common/List.h"
 #include "lgi/common/Ftp.h"
+#include "lgi/common/Thread.h"
 
 enum FtpCommand
 {

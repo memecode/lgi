@@ -19,6 +19,9 @@
 #include "lgi/common/Combo.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/ClipBoard.h"
+#include "lgi/common/ToolBar.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/StatusBar.h"
 #include "resdefs.h"
 
 ////////////////////////////////////////////////////////////////////////////

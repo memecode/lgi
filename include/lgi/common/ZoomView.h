@@ -5,6 +5,7 @@
 
 #include "lgi/common/Path.h"
 #include "lgi/common/Notifications.h"
+#include "lgi/common/Layout.h"
 
 class GZoomView;
 

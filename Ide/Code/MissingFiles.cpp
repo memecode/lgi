@@ -1,4 +1,5 @@
 #include "lgi\common\Lgi.h"
+#include "lgi\common\FileSelect.h"
 #include "LgiIde.h"
 #include "ProjectNode.h"
 #include "levenshtein.h"

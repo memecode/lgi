@@ -8,6 +8,8 @@
 #include "WebFldDlg.h"
 #include "lgi\common\ClipBoard.h"
 #include "lgi\common\TableLayout.h"
+#include "lgi\common\Menu.h"
+#include "lgi\common\FileSelect.h"
 
 #define DEBUG_SHOW_NODE_COUNTS		0
 

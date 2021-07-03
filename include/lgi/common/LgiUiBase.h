@@ -38,23 +38,7 @@ class GScrollBar;
 class GImageList;
 class LDialog;
 
-// General objects
-class LgiClass LBase
-{
-	char *_Name8;
-	char16 *_Name16;
-
-public:
-	LBase();	
-	virtual ~LBase();
-
-	virtual const char *Name();
-	virtual bool Name(const char *n);
-	virtual const char16 *NameW();
-	virtual bool NameW(const char16 *n);
-};
-
-#define AssignFlag(f, bit, to) if (to) f |= bit; else f &= ~(bit)
+// Tracing:
 
 /// Sets the output stream for the LgiTrace statement. By default the stream output
 /// is to <app_name>.txt in the executables folder or $LSP_APP_ROOT\<app_name>.txt if
@@ -76,6 +60,75 @@ LgiFunc void LgiTrace(const char *Format, ...);
 /// Same as LgiTrace but writes a stack trace as well.
 LgiFunc void LgiStackTrace(const char *Format, ...);
 #endif
+
+// Template hash function:
+template<typename RESULT, typename CHAR>
+RESULT LHash(const CHAR *v, ssize_t l, bool Case)
+{
+	RESULT h = 0;
+
+	if (Case)
+	{
+		// case sensitive
+		if (l > 0)
+		{
+			while (l--)
+				h = (h << 5) - h + *v++;
+		}
+		else
+		{
+			for (; *v; v ++)
+				h = (h << 5) - h + *v;
+		}
+	}
+	else
+	{
+		// case insensitive
+		CHAR c;
+		if (l > 0)
+		{
+			while (l--)
+			{
+				c = tolower(*v);
+				v++;
+				h = (h << 5) - h + c;
+			}
+		}
+		else
+		{
+			for (; *v; v++)
+			{
+				c = tolower(*v);
+				h = (h << 5) - h + c;
+			}
+		}
+	}
+
+	return h;
+}
+
+// Template sort function:
+template<typename T>
+void LSort(T *v, int left, int right, std::function<ssize_t(T, T)> comp)
+{
+    int i, last;
+
+    if (left >= right)
+        return;
+    
+	LSwap(v[left], v[(left + right)>>1]);
+
+    last = left;
+    for (i = left+1; i <= right; i++)
+        if (comp(v[i], v[left]) < 0) /* Here's the function call */
+            LSwap(v[++last], v[i]);
+    
+	LSwap(v[left], v[last]);
+    LSort(v, left, last-1, comp);
+    LSort(v, last+1, right, comp);
+}
+
+#define AssignFlag(f, bit, to) if (to) f |= bit; else f &= ~(bit)
 
 // OsEvent is defined here because the LUiEvent is the primary user.
 // And this header can be included independently of LgiOsDefs.h where
@@ -348,70 +401,20 @@ public:
 	GString Params;
 };
 
-template<typename RESULT, typename CHAR>
-RESULT LHash(const CHAR *v, ssize_t l, bool Case)
+// Base class for GUI objects
+class LgiClass LBase
 {
-	RESULT h = 0;
+	char *_Name8;
+	char16 *_Name16;
 
-	if (Case)
-	{
-		// case sensitive
-		if (l > 0)
-		{
-			while (l--)
-				h = (h << 5) - h + *v++;
-		}
-		else
-		{
-			for (; *v; v ++)
-				h = (h << 5) - h + *v;
-		}
-	}
-	else
-	{
-		// case insensitive
-		CHAR c;
-		if (l > 0)
-		{
-			while (l--)
-			{
-				c = tolower(*v);
-				v++;
-				h = (h << 5) - h + c;
-			}
-		}
-		else
-		{
-			for (; *v; v++)
-			{
-				c = tolower(*v);
-				h = (h << 5) - h + c;
-			}
-		}
-	}
+public:
+	LBase();	
+	virtual ~LBase();
 
-	return h;
-}
-
-template<typename T>
-void LSort(T *v, int left, int right, std::function<ssize_t(T, T)> comp)
-{
-    int i, last;
-
-    if (left >= right)
-        return;
-    
-	LSwap(v[left], v[(left + right)>>1]);
-
-    last = left;
-    for (i = left+1; i <= right; i++)
-        if (comp(v[i], v[left]) < 0) /* Here's the function call */
-            LSwap(v[++last], v[i]);
-    
-	LSwap(v[left], v[last]);
-    LSort(v, left, last-1, comp);
-    LSort(v, last+1, right, comp);
-}
-
+	virtual const char *Name();
+	virtual bool Name(const char *n);
+	virtual const char16 *NameW();
+	virtual bool NameW(const char16 *n);
+};
 
 #endif

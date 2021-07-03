@@ -122,40 +122,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\common\Lgi\GGuiUtils.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GObject.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GOptionsFile.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GToolTip.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GTrayIcon.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\LgiMsg.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GLibrary.cpp">
-      <Filter>Source Files\Core\Libraries</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Resource\LgiRes.cpp">
       <Filter>Source Files\Core\Resources</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Resource\Res.cpp">
       <Filter>Source Files\Core\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\GStream.cpp">
-      <Filter>Source Files\Core\Stream</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\General\GContainers.cpp">
-      <Filter>Source Files\Core\Memory Subsystem</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GMemStream.cpp">
       <Filter>Source Files\Core\Memory Subsystem</Filter>
     </ClCompile>
     <ClCompile Include="src\common\General\GExeCheck.cpp">
@@ -230,12 +203,6 @@
     <ClCompile Include="src\common\INet\Base64.cpp">
       <Filter>Source Files\General</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\LgiRand.cpp">
-      <Filter>Source Files\General</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GMru.cpp">
-      <Filter>Source Files\General\Mru</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Hash\md5\md5.c">
       <Filter>Source Files\General\Hash</Filter>
     </ClCompile>
@@ -296,12 +263,6 @@
     <ClCompile Include="src\common\Gdc2\Tools\GColourReduce.cpp">
       <Filter>Source Files\Graphics\Colour Reduction</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\GFindReplace.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GInput.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\General\GPassword.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
@@ -317,20 +278,11 @@
     <ClCompile Include="src\common\INet\MDStringToDigest.cpp">
       <Filter>Source Files\Network</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\LMutex.cpp">
-      <Filter>Source Files\Core\Mutex</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Widgets\LList.cpp">
       <Filter>Source Files\Widgets\Container</Filter>
     </ClCompile>
     <ClCompile Include="src\common\General\LDateTime.cpp">
       <Filter>Source Files\Core\DateTime</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\LThreadCommon.cpp">
-      <Filter>Source Files\Core\Threads</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\LThreadEvent.cpp">
-      <Filter>Source Files\Core\Threads</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Gdc2\Font\LStringLayout.cpp">
       <Filter>Source Files\Graphics\Font</Filter>
@@ -338,17 +290,8 @@
     <ClCompile Include="src\common\Lgi\LgiCommon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\GSubProcess.cpp">
-      <Filter>Source Files\Core\Process</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Text\LUnicodeString.cpp">
       <Filter>Source Files\Text</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GDropFiles.cpp">
-      <Filter>Source Files\Core\Drag and Drop</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GDragAndDropCommon.cpp">
-      <Filter>Source Files\Core\Drag and Drop</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Widgets\GSlider.cpp">
       <Filter>Source Files\Widgets\Xp</Filter>
@@ -402,9 +345,6 @@
       <Filter>Source Files\Graphics\Font</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Gdc2\Font\LFontSystem.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\LFontSelect.cpp">
       <Filter>Source Files\Graphics\Font</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Gdc2\Font\LFontCodePages.cpp">
@@ -496,6 +436,66 @@
     </ClCompile>
     <ClCompile Include="src\win\General\GMem.cpp">
       <Filter>Source Files\Core\Memory Subsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\DragAndDropCommon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\DropFiles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\FindReplace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\FontSelect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\GuiUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Library.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\MemStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Mru.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\OptionsFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Stream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\SubProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\ToolTip.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\TrayIcon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\LMsg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Rand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Mutex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\ThreadCommon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\ThreadEvent.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -761,6 +761,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\common\Gdc2\Font\LFontPriv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\LgiUiBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\ProgressView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\ProgressDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

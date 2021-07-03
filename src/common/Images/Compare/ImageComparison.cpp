@@ -10,6 +10,8 @@
 #include "lgi/common/TabView.h"
 #include "resdefs.h"
 #include "lgi/common/LgiRes.h"
+#include "lgi/common/Thread.h"
+#include "lgi/common/StatusBar.h"
 
 #define DIFF_LARGE_8BIT		(45)
 #define DIFF_LARGE_16BIT	(DIFF_LARGE_8BIT << 8)

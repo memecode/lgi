@@ -6,6 +6,7 @@
 #include "lgi/common/Token.h"
 #include "lgi/common/TableLayout.h"
 #include "lgi/common/LgiRes.h"
+#include "lgi/common/Menu.h"
 
 #define DRAW_CELL_INDEX			0
 #define DRAW_TABLE_SIZE			0

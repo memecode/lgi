@@ -10,6 +10,7 @@
 
 #include <string.h>
 #include "lgi/common/Containers.h"
+#include "lgi/common/Progress.h"
 
 // These are properties defined for use in the GFilter property list
 #define LGI_FILTER_ERROR		"ErrorMsg"

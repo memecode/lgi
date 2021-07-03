@@ -6,6 +6,7 @@
 
 #include "lgi/common/Css.h"
 #include "lgi/common/Notifications.h"
+#include "lgi/common/Layout.h"
 
 /// A layout cell, not currently implemened.
 class GLayoutCell : public GDom, public LCss

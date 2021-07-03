@@ -3,6 +3,8 @@
 #include "lgi\common\Tree.h"
 #include "resdefs.h"
 #include "lgi\common\SubProcess.h"
+#include "lgi\common\FileSelect.h"
+
 static GString TemplatesPath;
 class NewProjFromTemplate : public LDialog
 {

@@ -31,7 +31,6 @@
 #endif
 #include "lgi/common/Unicode.h"
 #include "lgi/common/Array.h"
-#include "lgi/common/LgiClass.h"
 #ifndef IsDigit
 	#define IsDigit(ch) ((ch) >= '0' && (ch) <= '9')
 #endif

@@ -15,35 +15,13 @@
 #include "LgiOsClasses.h"
 #include "lgi/common/Mem.h"
 #include "lgi/common/Array.h"
-#include "lgi/common/LgiCommon.h"
-#include "lgi/common/XmlTree.h"
 #include "lgi/common/DragAndDrop.h"
-#include "lgi/common/Point.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
-// Externs
+
 LgiFunc bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a = 0, GMessage::Param b = 0);
 LgiFunc LViewI *GetNextTabStop(LViewI *v, bool Back);
 
-/// Converts an OS error code into a text string
-LgiClass GString LErrorCodeToString(uint32_t ErrorCode);
-
-#include "lgi/common/App.h"
-#include "lgi/common/View.h"
-#include "lgi/common/Layout.h"
-#include "lgi/common/Menu.h"
-#include "lgi/common/Window.h"
-#include "lgi/common/ToolTip.h"
-#include "lgi/common/Widgets.h"
-#include "lgi/common/ProgressView.h"
-#include "lgi/common/FileSelect.h"
-#include "lgi/common/FindReplaceDlg.h"
-#include "lgi/common/ToolBar.h"
-#include "lgi/common/Thread.h"
-#include "lgi/common/Splitter.h"
-#include "lgi/common/StatusBar.h"
-
-/////////////////////////////////////////////////////////////////////////////////////////////
 class LgiClass LCommand : public LBase //, public GFlags
 {
 	int			Flags;

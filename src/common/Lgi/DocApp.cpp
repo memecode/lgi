@@ -14,6 +14,7 @@
 #include "GProperties.h"
 #endif
 #include "lgi/common/LgiRes.h"
+#include "lgi/common/Menu.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
 class GDocAppPrivate

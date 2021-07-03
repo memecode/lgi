@@ -1,6 +1,6 @@
-
 #define _WIN32_WINNT 0x500
 #include "lgi/common/Lgi.h"
+#include "lgi/common/ToolTip.h"
 
 #if defined(WIN32) && !defined(__GTK_H__)
 	#include <commctrl.h>

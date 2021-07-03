@@ -24,6 +24,8 @@
 #include "lgi\common\TextLabel.h"
 #include "lgi\common\Button.h"
 #include "lgi\common\RegKey.h"
+#include "lgi\common\FileSelect.h"
+#include "lgi\common\Menu.h"
 
 extern const char *Untitled;
 const char SourcePatterns[] = "*.c;*.h;*.cpp;*.cc;*.java;*.d;*.php;*.html;*.css;*.js";
@@ -2908,7 +2910,7 @@ bool IdeProject::SaveFile()
 			f.SetSize(0);
 
 			LXmlTree x;
-			GProgressDlg Prog(d->App, 1000);
+			LProgressDlg Prog(d->App, 1000);
 			Prog.SetAlwaysOnTop(true);
 			Prog.SetDescription("Serializing project XML...");
 			Prog.SetYieldTime(200);

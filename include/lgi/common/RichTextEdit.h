@@ -9,6 +9,7 @@
 #include "lgi/common/Undo.h"
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/Capabilities.h"
+#include "lgi/common/FindReplaceDlg.h"
 #if _DEBUG
 #include "lgi/common/Tree.h"
 #endif

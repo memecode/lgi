@@ -10,6 +10,8 @@
 #include "lgi/common/Http.h"
 #include "lgi/common/OptionsFile.h"
 #include "lgi/common/List.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/FileSelect.h"
 
 #if 1
 #include "lgi/common/RichTextEdit.h"

@@ -10,6 +10,7 @@
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/CssTools.h"
+#include "lgi/common/FileSelect.h"
 
 #define IDC_BROWSE -10
 

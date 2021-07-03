@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <time.h>
 
-
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Base64.h"
 #include "lgi/common/Com.h"
@@ -22,6 +21,7 @@
 #include "lgi/common/Css.h"
 #include "lgi/common/Edit.h"
 #include "lgi/common/LgiRes.h"
+#include "lgi/common/Menu.h"
 
 #define DEBUG_MOUSE_CLICKS		0
 #define DEBUG_OVER				0

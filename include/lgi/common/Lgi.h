@@ -168,7 +168,7 @@
 		<li> GFileSelect
 		<li> LFontSelect
 		<li> GPrinter::Browse
-		<li> GProgressDlg
+		<li> LProgressViewDlg
 		<li> GFindDlg
 		<li> GReplaceDlg
 		<li> GAbout
@@ -188,7 +188,7 @@
 		<li> GCombo (Select one from many)
 		<li> GSlider (Select a position)
 		<li> GBitmap (Display an image)
-		<li> GProgress (Show a progress)
+		<li> LProgressView (Show a progress)
 		<li> LList (List containing LListItem)
 		<li> GTree (Heirarchy of GTreeItem)
 		<li> GRadioGroup (One of many selection using GRadioButton)
@@ -238,8 +238,6 @@
 #include "lgi/common/LgiDefs.h"
 #include "lgi/common/Mem.h"
 #include "lgi/common/String.h"
-#include "lgi/common/LgiClass.h"
-#include "lgi/common/Progress.h"
 #include "lgi/common/File.h"
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/Font.h"

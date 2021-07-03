@@ -10,6 +10,7 @@
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/Css.h"
 #include "lgi/common/UnrolledList.h"
+#include "lgi/common/FindReplaceDlg.h"
 
 // use CRLF as opposed to just LF
 // internally it uses LF only... this is just to remember what to

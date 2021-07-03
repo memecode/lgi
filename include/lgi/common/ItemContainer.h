@@ -4,6 +4,7 @@
 #include "lgi/common/Popup.h"
 #include "lgi/common/Notifications.h"
 #include "lgi/common/Css.h"
+#include "lgi/common/ImageList.h"
 
 class GItemContainer;
 #define DragColumnColour				LColour(L_LOW)
@@ -257,7 +258,7 @@ public:
 
 class LgiClass GItemContainer :
 	public GLayout,
-	public GImageListOwner 
+	public GImageListOwner
 {
 	friend class GItemColumn;
 	friend class GItem;

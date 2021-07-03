@@ -7,6 +7,8 @@
 #include "lgi/common/HtmlCommon.h"
 #include "lgi/common/HtmlParser.h"
 #include "lgi/common/Capabilities.h"
+#include "lgi/common/ToolTip.h"
+#include "lgi/common/FindReplaceDlg.h"
 
 namespace Html1
 {
@@ -155,7 +157,7 @@ public:
 	GDom *getElementById(char *Id);
 
 	// Events
-	bool OnFind(class GFindReplaceCommon *Params);
+	bool OnFind(GFindReplaceCommon *Params);
 	virtual bool OnSubmitForm(GTag *Form);
 	virtual void OnCursorChanged() {}
 	virtual void OnLoad();

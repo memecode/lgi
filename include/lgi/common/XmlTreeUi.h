@@ -6,6 +6,7 @@
 
 #include "lgi/common/Variant.h"
 #include "lgi/common/List.h"
+#include "lgi/common/Tree.h"
 
 /// This class allows you to serialize data between the user interface and a
 /// GDom instance. Useful for storing user visible application settings in

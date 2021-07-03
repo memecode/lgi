@@ -24,7 +24,6 @@
 
 #include "lgi/common/Mem.h"
 #include "lgi/common/Array.h"
-#include "lgi/common/LgiClass.h"
 #include "lgi/common/String.h"
 #include "lgi/common/StringClass.h"
 #include "lgi/common/CurrentTime.h"
@@ -108,6 +107,9 @@ LgiExtern GString LStrConvertCp
 	/// Bytes of valid data in the input
 	ssize_t InLen = -1
 );
+
+/// Converts an OS error code into a text string
+LgiExtern GString LErrorCodeToString(uint32_t ErrorCode);
 
 #ifdef __cplusplus
 extern "C"

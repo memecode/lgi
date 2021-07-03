@@ -20,6 +20,7 @@
 #include "GDebugger.h"
 #include "lgi/common/TextView3.h"
 #include "lgi/common/List.h"
+#include "lgi/common/Tree.h"
 
 #define APP_VER					"1.0"
 #define APP_URL					"http://www.memecode.com/lgi/ide"
