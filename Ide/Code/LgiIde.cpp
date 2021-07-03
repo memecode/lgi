@@ -2125,6 +2125,7 @@ int AppWnd::OnFixBuildErrors()
 	Log->Print("Parsing errors...\n");
 	int Replacements = 0;
 	GArray<LFileInfo> Files;
+	LHashTbl<StrKey<char>,bool> FixHistory;
 
 	for (auto Ln : Lines)
 	{
@@ -2192,8 +2193,16 @@ int AppWnd::OnFixBuildErrors()
 
 				if (Fi)
 				{
-					if (LineNo <= Fi->Lines.Length())
+					GString Loc;
+					Loc.Printf("%s:%i", Full.Get(), (int)LineNo);
+					if (FixHistory.Find(Loc))
 					{
+						Log->Print("Already fixed %s\n", Loc.Get());
+					}
+					else if (LineNo <= Fi->Lines.Length())
+					{
+						FixHistory.Add(Loc, true);
+
 						GString &s = Fi->Lines[LineNo-1];
 						if (FileNotFound)
 						{
@@ -2255,24 +2264,30 @@ int AppWnd::OnFixBuildErrors()
 									if (newPath)
 									{
 										newPath = newPath.Replace("\\", "/"); // Use unix dir chars
-
 										GString newLine = errLine(0, Pos) + newPath + errLine(Pos + wrongName.Length(), -1);
-										GString backup = GString(Full.Get()) + ".orig";
-										if (LFileExists(backup))
-											FileDev->Delete(backup);
-										LError Err;
-										if (FileDev->Move(Full, backup, &Err))
+										if (newLine == errLine)
 										{
-											errLine = newLine;
-											GString newLines = GString("\n").Join(Lines);
-											GFile out(Full, O_WRITE);
-											out.Write(newLines);
-											Log->Print("Fixed '%s'->'%s' on ln %i in %s\n",
-												wrongName.Get(), newPath.Get(),
-												(int)LineNo, Full.Get());
-											Replacements++;
+											Log->Print("Already changed '%s'.\n", wrongName.Get()); 
 										}
-										else Log->Print("Error: moving '%s' to backup (%s).\n", Full.Get(), Err.GetMsg().Get());
+										else
+										{
+											GString backup = GString(Full.Get()) + ".orig";
+											if (LFileExists(backup))
+												FileDev->Delete(backup);
+											LError Err;
+											if (FileDev->Move(Full, backup, &Err))
+											{
+												errLine = newLine;
+												GString newLines = GString("\n").Join(Lines);
+												GFile out(Full, O_WRITE);
+												out.Write(newLines);
+												Log->Print("Fixed '%s'->'%s' on ln %i in %s\n",
+													wrongName.Get(), newPath.Get(),
+													(int)LineNo, Full.Get());
+												Replacements++;
+											}
+											else Log->Print("Error: moving '%s' to backup (%s).\n", Full.Get(), Err.GetMsg().Get());
+										}
 									}
 									else Log->Print("Error: Missing header '%s'.\n", wrongName.Get()); 
 								}
