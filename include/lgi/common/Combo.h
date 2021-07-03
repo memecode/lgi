@@ -123,7 +123,7 @@ public:
 	void OnPaint(GSurface *pDC) override;
 	void OnMouseClick(LMouse &m) override;
 	void OnPosChange() override;
-	void SetFont(GFont *Fnt, bool OwnIt = false) override;
+	void SetFont(LFont *Fnt, bool OwnIt = false) override;
 	#endif
 };
 

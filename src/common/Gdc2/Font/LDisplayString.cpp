@@ -42,7 +42,7 @@ struct Block : public LRect
 {
 	OsChar *Str;
 	int Bytes;
-	GFont *Fnt;
+	LFont *Fnt;
 	Gtk::PangoLayout *Hnd;
 
 	Block()
@@ -62,12 +62,12 @@ struct Block : public LRect
 
 struct GDisplayStringPriv
 {
-	GDisplayString *Ds;
+	LDisplayString *Ds;
 	GArray<Block> Blocks;
 	bool Debug;	
 	int LastTabOffset;
 
-	GDisplayStringPriv(GDisplayString *str) : Ds(str)
+	GDisplayStringPriv(LDisplayString *str) : Ds(str)
 	{
 		Debug = false;
 		LastTabOffset = -1;
@@ -80,7 +80,7 @@ struct GDisplayStringPriv
 	void Create(Gtk::GtkPrintContext *PrintCtx)
 	{
 		Start:
-		auto *Fs = GFontSystem::Inst();
+		auto *Fs = LFontSystem::Inst();
 		auto *Fnt = Ds->Font;
 		auto Tbl = Fnt->GetGlyphMap();
 
@@ -93,7 +93,7 @@ struct GDisplayStringPriv
 
 			while ((w = (int32)p))
 			{
-				GFont *f;
+				LFont *f;
 
 				if (w == 0x1f551)
 					Debug = true;
@@ -123,7 +123,7 @@ struct GDisplayStringPriv
 							if (PrintCtx)
 								b->Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
 							else
-								b->Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
+								b->Hnd = Gtk::pango_layout_new(LFontSystem::Inst()->GetContext());
 						}
 						else
 						{
@@ -155,7 +155,7 @@ struct GDisplayStringPriv
 			if (PrintCtx)
 				b.Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
 			else
-				b.Hnd = Gtk::pango_layout_new(GFontSystem::Inst()->GetContext());
+				b.Hnd = Gtk::pango_layout_new(LFontSystem::Inst()->GetContext());
 		}
 
 		for (auto &b: Blocks)
@@ -254,7 +254,7 @@ bool StringConvert(Out *&out, ssize_t &OutWords, const In *in, ssize_t InLen)
 #if USE_CORETEXT
 	#include <CoreFoundation/CFString.h>
 
-	void GDisplayString::CreateAttrStr()
+	void LDisplayString::CreateAttrStr()
 	{
 		if (!Wide)
 			return;
@@ -280,7 +280,7 @@ bool StringConvert(Out *&out, ssize_t &OutWords, const In *in, ssize_t InLen)
 	}
 #endif
 
-GDisplayString::GDisplayString(GFont *f, const char *s, ssize_t l, GSurface *pdc)
+LDisplayString::LDisplayString(LFont *f, const char *s, ssize_t l, GSurface *pdc)
 {
 	pDC = pdc;
 	Font = f;
@@ -326,7 +326,7 @@ GDisplayString::GDisplayString(GFont *f, const char *s, ssize_t l, GSurface *pdc
 	#endif
 }
 
-GDisplayString::GDisplayString(GFont *f, const char16 *s, ssize_t l, GSurface *pdc)
+LDisplayString::LDisplayString(LFont *f, const char16 *s, ssize_t l, GSurface *pdc)
 {
 	pDC = pdc;
 	Font = f;
@@ -370,7 +370,7 @@ GDisplayString::GDisplayString(GFont *f, const char16 *s, ssize_t l, GSurface *p
 }
 
 #ifdef _MSC_VER
-GDisplayString::GDisplayString(GFont *f, const uint32_t *s, ssize_t l, GSurface *pdc)
+LDisplayString::LDisplayString(LFont *f, const uint32_t *s, ssize_t l, GSurface *pdc)
 {
 	pDC = pdc;
 	Font = f;
@@ -395,7 +395,7 @@ GDisplayString::GDisplayString(GFont *f, const uint32_t *s, ssize_t l, GSurface 
 }
 #endif
 
-GDisplayString::~GDisplayString()
+LDisplayString::~LDisplayString()
 {
 	#if defined(LGI_SDL)
 	
@@ -435,7 +435,7 @@ GDisplayString::~GDisplayString()
 	#endif
 }
 
-void GDisplayString::DrawWhiteSpace(GSurface *pDC, char Ch, LRect &r)
+void LDisplayString::DrawWhiteSpace(GSurface *pDC, char Ch, LRect &r)
 {
 	if (Ch == '\t')
 	{
@@ -455,7 +455,7 @@ void GDisplayString::DrawWhiteSpace(GSurface *pDC, char Ch, LRect &r)
 	}
 }
 
-void GDisplayString::Layout(bool Debug)
+void LDisplayString::Layout(bool Debug)
 {
 	if (LaidOut || !Font)
 		return;
@@ -596,7 +596,7 @@ void GDisplayString::Layout(bool Debug)
 			Utf++;
 		}
 	
-		GFontSystem *FSys = GFontSystem::Inst();
+		LFontSystem *FSys = LFontSystem::Inst();
 		Gtk::pango_context_set_font_description(FSys->GetContext(), Font->Handle());
 
 		int TabSizePx = Font->TabSize();
@@ -761,10 +761,10 @@ void GDisplayString::Layout(bool Debug)
 		
 		y = Font->GetHeight();
 
-		GFontSystem *Sys = GFontSystem::Inst();
+		LFontSystem *Sys = LFontSystem::Inst();
 		if (Sys && Str)
 		{
-			GFont *f = Font;
+			LFont *f = Font;
 			bool GlyphSub = Font->SubGlyphs();
 
 			Info[i].Str = Str;
@@ -786,7 +786,7 @@ void GDisplayString::Layout(bool Debug)
 			for (LUnicodeString<wchar_t> u(Str, StrWords); true; u++)
 			{
 				u32 = *u;
-				GFont *n = GlyphSub ? Sys->GetGlyph(u32, Font) : Font;
+				LFont *n = GlyphSub ? Sys->GetGlyph(u32, Font) : Font;
 				bool Change =	n != f ||						// The font changed
 								(IsTabChar(u32) ^ WasTab) ||	// Entering/leaving a run of tabs
 								!u32 ||							// Hit a NULL character
@@ -817,7 +817,7 @@ void GDisplayString::Layout(bool Debug)
 						}
 						else
 						{
-							GFont *m = f;
+							LFont *m = f;
 
 							#if 0
 							// This code is causing email to display very slowly in Scribe...
@@ -873,34 +873,34 @@ void GDisplayString::Layout(bool Debug)
 	#endif
 }
 
-int GDisplayString::GetDrawOffset()
+int LDisplayString::GetDrawOffset()
 {
 	return DrawOffsetF >> FShift;
 }
 
-void GDisplayString::SetDrawOffset(int Px)
+void LDisplayString::SetDrawOffset(int Px)
 {
 	if (LaidOut)
 		LgiAssert(!"No point setting TabOrigin after string is laid out.\n");
 	DrawOffsetF = Px << FShift;
 }
 
-bool GDisplayString::ShowVisibleTab()
+bool LDisplayString::ShowVisibleTab()
 {
 	return VisibleTab;
 }
 
-void GDisplayString::ShowVisibleTab(bool i)
+void LDisplayString::ShowVisibleTab(bool i)
 {
 	VisibleTab = i;
 }
 
-bool GDisplayString::IsTruncated()
+bool LDisplayString::IsTruncated()
 {
 	return AppendDots;
 }
 
-void GDisplayString::TruncateWithDots(int Width)
+void LDisplayString::TruncateWithDots(int Width)
 {
 	Layout();
 	
@@ -951,10 +951,10 @@ void GDisplayString::TruncateWithDots(int Width)
 						Info[i].Len = (int) (c - Pos);
 						Info[i].Str[Info[i].Len] = 0;
 
-						GFont *f = Font;
+						LFont *f = Font;
 						if (Info[i].FontId)
 						{
-							GFontSystem *Sys = GFontSystem::Inst();
+							LFontSystem *Sys = LFontSystem::Inst();
 							f = Sys->Font[Info[i].FontId];
 							f->PointSize(Font->PointSize() + Info[i].SizeDelta);
 							if (!f->Handle())
@@ -1023,7 +1023,7 @@ void GDisplayString::TruncateWithDots(int Width)
 	#endif
 }
 
-ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
+ssize_t LDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 {
 	int Status = -1;
 
@@ -1130,7 +1130,7 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 	#else // This case is for Win32 and Haiku.
 	
 	#if defined(WINNATIVE)
-	GFontSystem *Sys = GFontSystem::Inst();
+	LFontSystem *Sys = LFontSystem::Inst();
 	if (Info.Length() && Font && Sys)
 	#endif
 	{
@@ -1177,7 +1177,7 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 				else
 				{
 					// Find the pos in this block
-					GFont *f = Font;
+					LFont *f = Font;
 
 					#if defined(WIN32)
 					if (Info[i].FontId)
@@ -1228,13 +1228,13 @@ ssize_t GDisplayString::CharAt(int Px, LgiPxToIndexType Type)
 	return Status;
 }
 
-ssize_t GDisplayString::Length()
+ssize_t LDisplayString::Length()
 {
 	return StrWords;
 }
 
 /* If this is only impl for windows either, impl for everything or don't use.
-void GDisplayString::Length(int New)
+void LDisplayString::Length(int New)
 {
 	Layout();
 
@@ -1242,7 +1242,7 @@ void GDisplayString::Length(int New)
 	
 	if (New < len)
 	{
-		GFontSystem *Sys = GFontSystem::Inst();
+		LFontSystem *Sys = LFontSystem::Inst();
 		
 		int CurX = 0;
 		int CurLen = 0;
@@ -1257,7 +1257,7 @@ void GDisplayString::Length(int New)
 				Info[i].Str[Info[i].Len] = 0;
 
 				// Get the font for this block of characters
-				GFont *f = 0;
+				LFont *f = 0;
 				if (Info[i].FontId)
 				{
 					f = Sys->Font[Info[i].FontId];
@@ -1297,19 +1297,19 @@ void GDisplayString::Length(int New)
 }
 */
 
-int GDisplayString::X()
+int LDisplayString::X()
 {
 	Layout();
 	return x;
 }
 
-int GDisplayString::Y()
+int LDisplayString::Y()
 {
 	Layout();
 	return y;
 }
 
-LPoint GDisplayString::Size()
+LPoint LDisplayString::Size()
 {
 	Layout();
 	return LPoint(x, y);
@@ -1318,7 +1318,7 @@ LPoint GDisplayString::Size()
 #if defined LGI_SDL
 
 template<typename OutPx>
-bool CompositeText8Alpha(GSurface *Out, GSurface *In, GFont *Font, int px, int py, GBlitRegions &Clip)
+bool CompositeText8Alpha(GSurface *Out, GSurface *In, LFont *Font, int px, int py, GBlitRegions &Clip)
 {
 	OutPx map[256];
 
@@ -1420,7 +1420,7 @@ bool CompositeText8Alpha(GSurface *Out, GSurface *In, GFont *Font, int px, int p
 }
 
 template<typename OutPx>
-bool CompositeText8NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int py, GBlitRegions &Clip)
+bool CompositeText8NoAlpha(GSurface *Out, GSurface *In, LFont *Font, int px, int py, GBlitRegions &Clip)
 {
 	GRgba32 map[256];
 
@@ -1530,7 +1530,7 @@ bool CompositeText8NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 }
 
 template<typename OutPx>
-bool CompositeText5NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int py, GBlitRegions &Clip)
+bool CompositeText5NoAlpha(GSurface *Out, GSurface *In, LFont *Font, int px, int py, GBlitRegions &Clip)
 {
 	OutPx map[256];
 
@@ -1654,7 +1654,7 @@ bool CompositeText5NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 
 #endif
 
-void GDisplayString::Draw(GSurface *pDC, int px, int py, LRect *r, bool Debug)
+void LDisplayString::Draw(GSurface *pDC, int px, int py, LRect *r, bool Debug)
 {
 	Layout();
 
@@ -1707,7 +1707,7 @@ void GDisplayString::Draw(GSurface *pDC, int px, int py, LRect *r, bool Debug)
 			DspStrCase(Argb32, 8Alpha)
 			DspStrCase(Abgr32, 8Alpha)
 			default:
-				LgiTrace("%s:%i - GDisplayString::Draw Unsupported colour space.\n", _FL);
+				LgiTrace("%s:%i - LDisplayString::Draw Unsupported colour space.\n", _FL);
 				// LgiAssert(!"Unsupported colour space.");
 				break;
 			
@@ -1721,7 +1721,7 @@ void GDisplayString::Draw(GSurface *pDC, int px, int py, LRect *r, bool Debug)
 	
 	if (Info.Length() && pDC && Font)
 	{
-		GFontSystem *Sys = GFontSystem::Inst();
+		LFontSystem *Sys = LFontSystem::Inst();
 		COLOUR Old = pDC->Colour();
 		int TabSize = Font->TabSize() ? Font->TabSize() : 32;
 		int Ox = px;
@@ -1737,7 +1737,7 @@ void GDisplayString::Draw(GSurface *pDC, int px, int py, LRect *r, bool Debug)
 
 		for (int i=0; i<Info.Length(); i++)
 		{
-			GFont *f = 0;
+			LFont *f = 0;
 
 			// Get the font for this block of characters
 			if (Info[i].FontId)
@@ -1877,37 +1877,37 @@ void GDisplayString::Draw(GSurface *pDC, int px, int py, LRect *r, bool Debug)
 	#endif
 }
 
-int GDisplayString::GetDrawOffsetF()
+int LDisplayString::GetDrawOffsetF()
 {
 	return DrawOffsetF;
 }
 
-void GDisplayString::SetDrawOffsetF(int Fpx)
+void LDisplayString::SetDrawOffsetF(int Fpx)
 {
 	if (LaidOut)
 		LgiAssert(!"No point setting TabOrigin after string is laid out.\n");
 	DrawOffsetF = Fpx;
 }
 
-int GDisplayString::FX()
+int LDisplayString::FX()
 {
 	Layout();
 	return xf;
 }
 
-int GDisplayString::FY()
+int LDisplayString::FY()
 {
 	Layout();
 	return y;
 }
 
-LPoint GDisplayString::FSize()
+LPoint LDisplayString::FSize()
 {
 	Layout();
 	return LPoint(xf, yf);
 }
 
-void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, LRect *frc, bool Debug)
+void LDisplayString::FDraw(GSurface *pDC, int fx, int fy, LRect *frc, bool Debug)
 {
 	Layout(Debug);
 
@@ -1935,7 +1935,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 			return;
 		}
 
-		pango_context_set_font_description(GFontSystem::Inst()->GetContext(), Font->Handle());
+		pango_context_set_font_description(LFontSystem::Inst()->GetContext(), Font->Handle());
 		cairo_save(cr);
 
 		GColour b = Font->Back();

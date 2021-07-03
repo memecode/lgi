@@ -20,7 +20,7 @@
 #include "FileTransferProgress.h"
 #include "GSlider.h"
 #include "LVariant.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 
 //////////////////////////////////////////////////////////////////
 #define THROTTLE_TEXT_WIDTH		80
@@ -163,7 +163,7 @@ void GPaneThrottle::OnPaint(GSurface *pDC)
 		}
 		
 		SysFont->Colour(LColour(L_TEXT), LColour(L_MED));
-		GDisplayString ds(SysFont, Str);
+		LDisplayString ds(SysFont, Str);
 		ds.Draw(pDC, r.x1+2, r.y1);
 	}
 }
@@ -278,7 +278,7 @@ void GPaneHistory::OnPaint(GSurface *pDC)
 	char Str[256];
 	sprintf_s(Str, sizeof(Str), "%.1f K/s", Max / 1024.0);
 	SysFont->Colour(LColour(L_TEXT), LColour(L_MED));
-	GDisplayString ds(SysFont, Str);
+	LDisplayString ds(SysFont, Str);
 	ds.Draw(pDC, r.x1+2, r.y1);
 
 	r.x1 += HISTORY_TEXT_WIDTH+1;

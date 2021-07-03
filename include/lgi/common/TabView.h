@@ -142,7 +142,7 @@ public:
 	bool OnKey(LKey &k) override;
 	void OnFocus(bool b) override;
 	void OnStyleChange();
-	void SetFont(GFont *Font, bool OwnIt = false) override;
+	void SetFont(LFont *Font, bool OwnIt = false) override;
 
 	void Append(GViewI *Wnd);
 	bool Remove(GViewI *Wnd);

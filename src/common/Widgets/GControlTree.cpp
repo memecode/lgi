@@ -340,12 +340,12 @@ void GControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 
 					if (Disp)
 					{
-						GDisplayString ds(SysBold, Disp);
+						LDisplayString ds(SysBold, Disp);
 						ds.Draw(Ctx.pDC, p.x1 + 8, p.y1 + 1);
 					}
 					else
 					{
-						GDisplayString ds(SysFont, LgiLoadString(L_CONTROLTREE_NO_VALUE, "(no value)"));
+						LDisplayString ds(SysFont, LgiLoadString(L_CONTROLTREE_NO_VALUE, "(no value)"));
 						SysFont->Colour(LColour(L_LOW), LColour(L_WORKSPACE));
 						ds.Draw(Ctx.pDC, p.x1 + 8, p.y1 + 1);
 					}
@@ -353,20 +353,20 @@ void GControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 				else
 				{
 					sprintf_s(Disp = s, sizeof(s), "%i", Value.CastInt32());
-					GDisplayString ds(SysBold, Disp);
+					LDisplayString ds(SysBold, Disp);
 					ds.Draw(Ctx.pDC, p.x1 + 6, p.y1 + 2);
 				}
 				break;
 			}
 			case GV_STRING:
 			{
-				GDisplayString ds(SysBold, Value.Str());
+				LDisplayString ds(SysBold, Value.Str());
 				ds.Draw(Ctx.pDC, p.x1 + 6, p.y1 + 2);
 				break;
 			}
 			case GV_BOOL:
 			{
-				GDisplayString ds(SysBold, (char*) (Value.CastInt32() ? "true" : "false"));
+				LDisplayString ds(SysBold, (char*) (Value.CastInt32() ? "true" : "false"));
 				ds.Draw(Ctx.pDC, p.x1 + 1, p.y1 + 1);
 				break;
 			}

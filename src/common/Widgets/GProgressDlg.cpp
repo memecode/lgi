@@ -323,7 +323,7 @@ void GProgressPane::OnPosChange()
 	}
 }
 
-GFont *GProgressPane::GetFont()
+LFont *GProgressPane::GetFont()
 {
 	// GdcBeTtf *Fnt = SysFont;
 	// return (Fnt) ? Fnt->Handle() : 0;

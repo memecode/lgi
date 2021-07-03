@@ -542,8 +542,8 @@ public:
 	LList *FtpLog;
 	GTextLog *Txt[3];
 	GArray<char> Buf[3];
-	GFont Small;
-	GFont Fixed;
+	LFont Small;
+	LFont Fixed;
 
 	GTabView *DebugTab;
 	GBox *DebugBox;
@@ -579,7 +579,7 @@ public:
 		Small.Create();
 		LgiAssert(Small.Handle());
 		
-		GFontType Type;
+		LFontType Type;
 		if (Type.GetSystemFont("Fixed"))
 		{
 			Type.SetPointSize(SysFont->PointSize()-1);
@@ -2866,7 +2866,7 @@ GOptionsFile *AppWnd::GetOptions()
 class Options : public LDialog
 {
 	AppWnd *App;
-	GFontType Font;
+	LFontType Font;
 
 public:
 	Options(AppWnd *a)

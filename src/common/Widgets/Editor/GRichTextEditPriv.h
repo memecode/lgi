@@ -104,9 +104,9 @@ enum RteCommands
 //////////////////////////////////////////////////////////////////////
 #define PtrCheckBreak(ptr)				if (!ptr) { LgiAssert(!"Invalid ptr"); break; }
 #undef FixedToInt
-#define FixedToInt(fixed)				((fixed)>>GDisplayString::FShift)
+#define FixedToInt(fixed)				((fixed)>>LDisplayString::FShift)
 #undef IntToFixed
-#define IntToFixed(val)					((val)<<GDisplayString::FShift)
+#define IntToFixed(val)					((val)<<LDisplayString::FShift)
 
 #define CursorColour					LColour(L_TEXT)
 #define TextColour						GColour::Black
@@ -343,7 +343,7 @@ public:
 	GString OriginalText;
 	GAutoWString WideNameCache;
 	GAutoString UtfNameCache;
-	GAutoPtr<GFont> Font;
+	GAutoPtr<LFont> Font;
 	bool WordSelectMode;
 	bool Dirty;
 	LPoint DocumentExtent; // Px
@@ -859,16 +859,16 @@ public:
 	GAutoPtr<BlockCursor> Cursor, Selection;
 
 	/// This is part or all of a Text run
-	struct DisplayStr : public GDisplayString
+	struct DisplayStr : public LDisplayString
 	{
 		StyleText *Src;
 		ssize_t Chars;	// The number of UTF-32 characters. This can be different to
-						// GDisplayString::Length() in the case that GDisplayString 
+						// LDisplayString::Length() in the case that LDisplayString 
 						// is using UTF-16 (i.e. Windows).
 		int OffsetY;	// Offset of this string from the TextLine's box in the Y axis
 		
-		DisplayStr(StyleText *src, GFont *f, const uint32_t *s, ssize_t l = -1, GSurface *pdc = NULL) :
-			GDisplayString(f,
+		DisplayStr(StyleText *src, LFont *f, const uint32_t *s, ssize_t l = -1, GSurface *pdc = NULL) :
+			LDisplayString(f,
 				#ifndef WINDOWS
 				(char16*)
 				#endif
@@ -976,7 +976,7 @@ public:
 		GArray<uint32_t> Utf32;
 		#endif
 
-		EmojiDisplayStr(StyleText *src, GSurface *img, GFont *f, const uint32_t *s, ssize_t l = -1);
+		EmojiDisplayStr(StyleText *src, GSurface *img, LFont *f, const uint32_t *s, ssize_t l = -1);
 		GAutoPtr<DisplayStr> Clone(ssize_t Start, ssize_t Len = -1);
 		void Paint(GSurface *pDC, int &FixX, int FixY, GColour &Back);
 		double GetAscent();
@@ -1028,7 +1028,7 @@ public:
 		LRect Margin, Border, Padding;
 		
 		// Default font for the block
-		GFont *Fnt;
+		LFont *Fnt;
 		
 		// Chars in the whole block (sum of all Text lengths)
 		ssize_t Len;

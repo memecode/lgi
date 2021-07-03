@@ -25,7 +25,7 @@
 
 class NativeTip : public GPopup
 {
-	GAutoPtr<GDisplayString> s;
+	GAutoPtr<LDisplayString> s;
 	
 public:
 	static GArray<NativeTip*> All;
@@ -120,7 +120,7 @@ public:
 	bool Name(const char *n)
 	{
 		bool Status = GView::Name(n);
-		if (s.Reset(new GDisplayString(SysFont, GView::Name())))
+		if (s.Reset(new LDisplayString(SysFont, GView::Name())))
 		{
 			LRect r = GetPos();
 			r.Dimension(s->X()+NativeTip::Padding.x, s->Y()+NativeTip::Padding.y);

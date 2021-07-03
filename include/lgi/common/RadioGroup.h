@@ -45,7 +45,7 @@ public:
 	const char16 *NameW() override { return GView::NameW(); }
 	bool Name(const char *n) override;
 	bool NameW(const char16 *n) override;
-	void SetFont(GFont *Fnt, bool OwnIt = false) override;
+	void SetFont(LFont *Fnt, bool OwnIt = false) override;
 };
 
 /// A radio button control. A radio button is used to select between mutually exclusive options. i.e.
@@ -90,7 +90,7 @@ public:
 	void OnMouseExit(LMouse &m) override;
 	void OnFocus(bool f) override;
 	void OnPaint(GSurface *pDC) override;
-	void SetFont(GFont *Fnt, bool OwnIt = false) override;
+	void SetFont(LFont *Fnt, bool OwnIt = false) override;
 	#endif
 };
 

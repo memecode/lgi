@@ -25,7 +25,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 /*
-void GFont::Text(	GSurface *pDC,
+void LFont::Text(	GSurface *pDC,
 					int x, int y,
 					char *Str,
 					int Len,
@@ -47,7 +47,7 @@ void GFont::Text(	GSurface *pDC,
 
 		if (Len > 0)
 		{
-			GDisplayString Ds(this, Str, Len, TabOrigin);
+			LDisplayString Ds(this, Str, Len, TabOrigin);
 			Ds.Draw(pDC, x, y, r);
 		}
 		else if (r AND !Transparent())
@@ -58,7 +58,7 @@ void GFont::Text(	GSurface *pDC,
 	}
 }
 
-void GFont::Size(int *x, int *y, char *Str, int Len, int Flags)
+void LFont::Size(int *x, int *y, char *Str, int Len, int Flags)
 {
 	if (x) *x = 0;
 	if (y) *y = GetHeight();
@@ -71,13 +71,13 @@ void GFont::Size(int *x, int *y, char *Str, int Len, int Flags)
 			{
 				Len = strlen(Str);
 			}
-			GDisplayString Ds(this, Str, Len);
+			LDisplayString Ds(this, Str, Len);
 			*x = Ds.X();
 		}
 	}
 }
 
-int GFont::CharAt(int x, char *Str, int Len, int TabOffset)
+int LFont::CharAt(int x, char *Str, int Len, int TabOffset)
 {
 	if (!Str || x <= 0)
 	{
@@ -86,14 +86,14 @@ int GFont::CharAt(int x, char *Str, int Len, int TabOffset)
 
 	if (IsValid())
 	{
-		GDisplayString s(this, Str, Len, TabOffset);
+		LDisplayString s(this, Str, Len, TabOffset);
 		return s.CharAt(x);
 	}
 
 	return 0;
 }
 
-int GFont::X(char *Str, int Len)
+int LFont::X(char *Str, int Len)
 {
 	int x = 0;
 	if (IsValid())
@@ -103,7 +103,7 @@ int GFont::X(char *Str, int Len)
 	return x;
 }
 
-int GFont::Y(char *Str, int Len)
+int LFont::Y(char *Str, int Len)
 {
 	int y = 0;
 	if (IsValid())

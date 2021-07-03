@@ -25,7 +25,7 @@ public:
 	char tmCharSet; 
 };
 
-class LgiClass GTypeFace {
+class LgiClass LTypeFace {
 protected:
 	uint Flags;			// FNT_xxx flags
 	uint Height; 
@@ -48,7 +48,7 @@ protected:
 	int TabSize;
 
 public:
-	GTypeFace()
+	LTypeFace()
 	{
 		ForeCol = 0;
 		BackCol = 0xFFFFFF;
@@ -56,7 +56,7 @@ public:
 		TabSize = 0;
 	}
 	
-	virtual ~GTypeFace() {}
+	virtual ~LTypeFace() {}
 
 	virtual void Colour(COLOUR Fore, COLOUR Back = 0xFFFFFFFF) { ForeCol = Fore; BackCol = Back; }
 	void Fore(COLOUR f) { ForeCol = f; }
@@ -459,7 +459,7 @@ public:
 	int DrawChar(GSurface *pDC, int x, int y, int Char);
 };
 
-class LgiClass GdcTtf : public GTypeFace {
+class LgiClass GdcTtf : public LTypeFace {
 
 	friend class TtfObj;
 
@@ -505,7 +505,7 @@ public:
 #define LFONT_NORMAL				FW_NORMAL
 #define LFONT_BOLD					FW_BOLD
 
-class LgiClass GFont : public GdcTtf {
+class LgiClass LFont : public GdcTtf {
 
 	HFONT	hFont;
 	float	*Widths;
@@ -513,8 +513,8 @@ class LgiClass GFont : public GdcTtf {
 	void SetWidths();
 
 public:
-	GFont();
-	~GFont();
+	LFont();
+	~LFont();
 
 	HFONT Handle() { return hFont; }
 

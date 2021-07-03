@@ -1441,7 +1441,7 @@ void GDebugView::OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour)
 	GTextView3::OnPaintLeftMargin(pDC, r, colour);
 
 	pDC->Colour(GColour(192, 0, 0));
-	GFont *f = GetFont();
+	LFont *f = GetFont();
 	f->Colour(L_LOW, L_WORKSPACE);
 	f->Transparent(true);
 	
@@ -1459,7 +1459,7 @@ void GDebugView::OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour)
 		/*
 		GString Num;
 		Num.Printf("%i", Ln);
-		GDisplayString Ds(f, Num);
+		LDisplayString Ds(f, Num);
 		Ds.Draw(pDC, 0, r.y1+OffY);
 		*/
 		
@@ -1482,10 +1482,10 @@ void GDebugView::OnPaint(GSurface *pDC)
 	{
 		GTextLine *Ln = Line[ErrorLine];
 
-		GFont *f = GetFont();
+		LFont *f = GetFont();
 		LRect c = GetClient();
 		int Pad = 3;
-		GDisplayString Ds(f, Error);
+		LDisplayString Ds(f, Error);
 		LRect r(0, 0, Ds.X()-1, Ds.Y()-1);
 		r.Size(-Pad, -Pad);
 		r.Offset(c.X()-r.X(), Ln ? Ln->r.y1 - ScrollYPixel(): 0);

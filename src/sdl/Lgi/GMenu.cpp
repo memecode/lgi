@@ -14,7 +14,7 @@
 
 #include "Lgi.h"
 #include "GToken.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 GSubMenu::GSubMenu(const char *name, bool Popup)
@@ -318,7 +318,7 @@ GMenuItem::~GMenuItem()
 // the default painting behaviour if desired.
 void GMenuItem::_Measure(LPoint &Size)
 {
-	GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+	LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 	bool BaseMenu = Parent == Menu; // true if attached to a windows menu
 									// else is a submenu
 	int Ht = Font->GetHeight();
@@ -360,15 +360,15 @@ void GMenuItem::_Measure(LPoint &Size)
 		if (Tab)
 		{
 			// string with accel
-			GDisplayString Name(Font, Str, (int)Tab-(int)Str);
-			GDisplayString ShCut(Font, Tab+1);
+			LDisplayString Name(Font, Str, (int)Tab-(int)Str);
+			LDisplayString ShCut(Font, Tab+1);
 			Size.x = IconX + 32 + Name.X() + ShCut.X();
 
 		}
 		else
 		{
 			// normal string
-			GDisplayString ds(Font, Str);
+			LDisplayString ds(Font, Str);
 			Size.x = IconX + ds.X() + 4;
 		}
 
@@ -389,7 +389,7 @@ void GMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 	char *n = Name();
 	if (n)
 	{
-		GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 		bool Underline = false;
 		int CharY = Font->GetHeight();
 
@@ -403,7 +403,7 @@ void GMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 					if (s[1] == '&')
 					{
 						e = s + 2;
-						GDisplayString d(Font, "&");
+						LDisplayString d(Font, "&");
 						d.Draw(pDC, x, y, 0);
 						x += d.X();
 					}
@@ -416,7 +416,7 @@ void GMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 				}
 				case '\t':
 				{
-					GDisplayString ds(Font, e + 1);
+					LDisplayString ds(Font, e + 1);
 					x = Width - ds.X() - 8;
 					e = s + 1;
 					break;
@@ -440,12 +440,12 @@ void GMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 					if (Len > 0)
 					{
 						// paint text till that point
-						GDisplayString d(Font, s, Len);
+						LDisplayString d(Font, s, Len);
 						d.Draw(pDC, x, y, 0);
 
 						if (Underline)
 						{
-							GDisplayString ds(Font, s, 1); 
+							LDisplayString ds(Font, s, 1); 
 							int UnderX = ds.X();
 							int Ascent = (int)ceil(Font->Ascent());
 							pDC->Colour(Font->Fore());
@@ -505,7 +505,7 @@ void GMenuItem::_Paint(GSurface *pDC, int Flags)
 		pDC->Rectangle(&r);
 
 		// Draw the text on top
-		GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 		Font->Transparent(true);
 		if (Disabled)
 		{
@@ -784,7 +784,7 @@ int GMenuItem::Icon()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GFont *GMenu::_Font = 0;
+LFont *GMenu::_Font = 0;
 
 GMenu::GMenu(const char *AppName) : GSubMenu("", false)
 {
@@ -796,11 +796,11 @@ GMenu::~GMenu()
 	Accel.DeleteObjects();
 }
 
-GFont *GMenu::GetFont()
+LFont *GMenu::GetFont()
 {
 	if (!_Font)
 	{
-		GFontType Type;
+		LFontType Type;
 		if (Type.GetSystemFont("Menu"))
 		{
 			_Font = Type.Create();
@@ -820,7 +820,7 @@ GFont *GMenu::GetFont()
 
 		if (!_Font)
 		{
-			_Font = new GFont;
+			_Font = new LFont;
 			if (_Font)
 			{
 				*_Font = *SysFont;

@@ -80,10 +80,10 @@ enum LgiPxToIndexType
 
 //////////////////////////////////////////////////////////////
 // Classes
-class GFontType;
+class LFontType;
 
 /// Font parameters collection
-class LgiClass GTypeFace
+class LgiClass LTypeFace
 {
 protected:
 	class GTypeFacePrivate *d;
@@ -92,8 +92,8 @@ protected:
 	virtual void _OnPropChange(bool c) {} // if false then it's just a property change
 
 public:
-	GTypeFace();
-	virtual ~GTypeFace();
+	LTypeFace();
+	virtual ~LTypeFace();
 
 	/// Sets the font face name
 	void Face(const char *s);
@@ -115,10 +115,10 @@ public:
 
     /// Get the whitespace rendering colour
     GColour WhitespaceColour();
-    /// Sets the rendering colour of whitespace characters when GDisplayString::ShowVisibleTab() is true.
+    /// Sets the rendering colour of whitespace characters when LDisplayString::ShowVisibleTab() is true.
     void WhitespaceColour(GColour c);
 
-	/// Sets the font's weight, use one the weight defines in GFont.h, e.g. #FW_NORMAL, #FW_BOLD
+	/// Sets the font's weight, use one the weight defines in LFont.h, e.g. #FW_NORMAL, #FW_BOLD
 	void SetWeight(int Weight);
 	/// Set a bold font
 	void Bold(bool i) { SetWeight(i ? FW_BOLD : FW_NORMAL); }
@@ -165,10 +165,10 @@ public:
 	double Leading();
 
 	/// \returns true if the font types are the same
-	bool operator ==(GTypeFace &t);
+	bool operator ==(LTypeFace &t);
 
 	/// Set the foreground and background in 24-bit colour.
-	/// \sa GTypeFace::Fore() and GTypeFace::Back()
+	/// \sa LTypeFace::Fore() and LTypeFace::Back()
 	virtual void Colour(LSystemColour Fore, LSystemColour Back = L_TRANSPARENT);
 
 	/// Set the foreground and background colour.
@@ -176,14 +176,14 @@ public:
 };
 
 /// \brief Font class.
-class LgiClass GFont :
-	public GTypeFace
+class LgiClass LFont :
+	public LTypeFace
 {
-	friend class GFontSystem;
-	friend class GDisplayString;
+	friend class LFontSystem;
+	friend class LDisplayString;
 
 protected:
-	class GFontPrivate *d;
+	class LFontPrivate *d;
 
 	// Methods
 	bool IsValid();
@@ -197,7 +197,7 @@ protected:
 
 public:
 	/// Construct from face/pt size.
-	GFont
+	LFont
 	(
 		/// Font face name
 		const char *face = 0,
@@ -205,12 +205,12 @@ public:
 		GCss::Len size = GCss::LenInherit
 	);
 	/// Construct from OS font handle
-	GFont(OsFont Handle);
+	LFont(OsFont Handle);
 	/// Construct from type information
-	GFont(GFontType &Type);
+	LFont(LFontType &Type);
 	/// Copy constructor
-	GFont(GFont &Fnt);
-	virtual ~GFont();
+	LFont(LFont &Fnt);
+	virtual ~LFont();
 
 	/// Creates a new font handle with the specified face / pt size
 	virtual bool Create
@@ -224,7 +224,7 @@ public:
 	);
 
 	/// Creates a new font from type infomation
-	bool Create(GFontType *Type, GSurface *pSurface = NULL);
+	bool Create(LFontType *Type, GSurface *pSurface = NULL);
 
 	/// Creates the font from CSS defs.
 	bool CreateFromCss(const char *Css);
@@ -243,7 +243,7 @@ public:
 	virtual OsFont Handle();
 
 	/// Copies the font
-	virtual GFont &operator =(GFont &f);
+	virtual LFont &operator =(LFont &f);
 
 	/// Returns the pixel height of the font
 	virtual int GetHeight();
@@ -263,27 +263,27 @@ public:
 };
 
 /// Font type information and system font query tools.
-class LgiClass GFontType
+class LgiClass LFontType
 {
-	friend class GFont;
-	friend class GTypeFace;
+	friend class LFont;
+	friend class LTypeFace;
 
 protected:
 	#if WINNATIVE
 	LOGFONTW Info;
 	#else
-	GTypeFace Info;
+	LTypeFace Info;
 	#endif
 	GString Buf;
 
 public:
-	GFontType(const char *face = 0, int pointsize = 0);
-	virtual ~GFontType();
+	LFontType(const char *face = 0, int pointsize = 0);
+	virtual ~LFontType();
 
 	#ifdef WINNATIVE
 	LOGFONTW *Handle() { return &Info; }
 	#else
-	GTypeFace *Handle() { return &Info; }
+	LTypeFace *Handle() { return &Info; }
 	#endif
 
 	/// Gets the type face name
@@ -319,7 +319,7 @@ public:
 	bool GetFromRef(OsFont Handle);
 
 	/// Create a font based on this font def
-	virtual GFont *Create(GSurface *pSurface = NULL);
+	virtual LFont *Create(GSurface *pSurface = NULL);
 };
 
 /// Charset definitions
@@ -394,12 +394,12 @@ LgiFunc const char *LgiDetectCharset
 
 #ifndef LGI_STATIC
 /// Overall font system class
-class LgiClass GFontSystem : public GCapabilityClient
+class LgiClass LFontSystem : public GCapabilityClient
 {
 	friend class GApp;
-	friend class GDisplayString;
+	friend class LDisplayString;
 
-	static GFontSystem *Me;
+	static LFontSystem *Me;
 
 private:
 	// System Font List
@@ -408,16 +408,16 @@ private:
 
 	// Missing Glyph Substitution
 	uchar Lut[MAX_UNICODE+1];
-	GFont *Font[256];
-	class GFontSystemPrivate *d;
+	LFont *Font[256];
+	class LFontSystemPrivate *d;
 
 public:
 	/// Get a pointer to the font system.
-	static GFontSystem *Inst();
+	static LFontSystem *Inst();
 
 	// Object
-	GFontSystem();
-	~GFontSystem();
+	LFontSystem();
+	~LFontSystem();
 
 	/// Enumerate all installed fonts
 	bool EnumerateFonts(GString::Array &Fonts);
@@ -429,19 +429,19 @@ public:
 	/// Turns the glyph sub feature on or off
 	void SetDefaultGlyphSub(bool i);
 	/// Returns a font that can render the specified unicode code point
-	GFont *GetGlyph
+	LFont *GetGlyph
 	(
 		/// A utf-32 character
 		uint32_t u,
 		/// The base font used for rendering
-		GFont *UserFont
+		LFont *UserFont
 	);
 	/// This looks for a font that can contains the most glyphs for a given string,
 	/// ideally it can render the whole thing. But the next best alternative is returned
 	/// when no font matches all characters in the string.
-	GFont *GetBestFont(char *Str);
+	LFont *GetBestFont(char *Str);
 	/// Add a custom font to the glyph lookup table
-	bool AddFont(GAutoPtr<GFont> Fnt);
+	bool AddFont(GAutoPtr<LFont> Fnt);
 
 	#ifdef __GTK_H__
 	

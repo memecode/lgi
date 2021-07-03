@@ -159,7 +159,7 @@ int SortFunc(LListItem *a, LListItem *b, NativeInt Data)
 void GFontSelect::EnumerateFonts()
 {
 	GString::Array Fonts;
-	if (GFontSystem::Inst()->EnumerateFonts(Fonts))
+	if (LFontSystem::Inst()->EnumerateFonts(Fonts))
 	{
 		for (auto &n : Fonts)
 			InsertFont(n);
@@ -175,7 +175,7 @@ void GFontSelect::UpdatePreview()
 		return;
 	UiToThis();
 	
-	GFont f;
+	LFont f;
 	f.Bold(Bold);
 	f.Underline(Underline);
 	f.Italic(Italic);
@@ -189,7 +189,7 @@ void GFontSelect::UpdatePreview()
 			f.Colour(LColour(L_BLACK), LColour(L_WORKSPACE));
 			f.Transparent(true);
 
-			GDisplayString ds(&f, "AaBbCcDdEeFf");
+			LDisplayString ds(&f, "AaBbCcDdEeFf");
 			ds.Draw(Dc, 5, 5);
 
 			if (Dc->GetBits() == 32)

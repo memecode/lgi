@@ -7,7 +7,7 @@
 #include "GSkinEngine.h"
 #include "GRadioGroup.h"
 #include "GCheckBox.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 #include "LgiRes.h"
 #include "LStringLayout.h"
 
@@ -241,7 +241,7 @@ bool GRadioGroup::NameW(const char16 *n)
 	return Status;
 }
 
-void GRadioGroup::SetFont(GFont *Fnt, bool OwnIt)
+void GRadioGroup::SetFont(LFont *Fnt, bool OwnIt)
 {
 	LgiAssert(Fnt && Fnt->Handle());
 
@@ -516,7 +516,7 @@ bool GRadioButton::NameW(const char16 *n)
 	return Status;
 }
 
-void GRadioButton::SetFont(GFont *Fnt, bool OwnIt)
+void GRadioButton::SetFont(LFont *Fnt, bool OwnIt)
 {
 	LgiAssert(Fnt && Fnt->Handle());
 

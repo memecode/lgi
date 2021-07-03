@@ -73,7 +73,7 @@ public:
 					int y = 0,
 					int cx = 100,
 					int cy = 100,
-					GFontType *FontInfo = 0);
+					LFontType *FontInfo = 0);
 	~GRichTextEdit();
 
 	const char *GetClass() { return "GRichTextEdit"; }
@@ -101,8 +101,8 @@ public:
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL);
 
 	// Font
-	GFont *GetFont();
-	void SetFont(GFont *f, bool OwnIt = false);
+	LFont *GetFont();
+	void SetFont(LFont *f, bool OwnIt = false);
 	void SetFixedWidthFont(bool i);
 
 	// Options

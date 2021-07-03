@@ -5,7 +5,7 @@
 #include "LVariant.h"
 #include "GSkinEngine.h"
 #include "GCombo.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 #include "LgiRes.h"
 
 #define COMBO_HEIGHT			20
@@ -31,7 +31,7 @@ int StringCompare(char *a, char *b, NativeInt c)
 
 class GComboPrivate
 {
-	GDisplayString *Text;
+	LDisplayString *Text;
 
 public:
 	ssize_t Current;
@@ -74,18 +74,18 @@ public:
 		DeleteObj(Text);
 	}
 	
-	GDisplayString *GetText(const char *File, int Line)
+	LDisplayString *GetText(const char *File, int Line)
 	{
 		return Text;
 	}
 
-	void SetText(GDisplayString *ds, const char *File, int Line)
+	void SetText(LDisplayString *ds, const char *File, int Line)
 	{
 		DeleteObj(Text);
 		Text = ds;
 	}
 	
-	GDisplayString **GetTextPtr()
+	LDisplayString **GetTextPtr()
 	{
 		return &Text;
 	}
@@ -516,16 +516,16 @@ void GCombo::OnFocus(bool f)
 	Invalidate();
 }
 
-void GCombo::SetFont(GFont *Fnt, bool OwnIt)
+void GCombo::SetFont(LFont *Fnt, bool OwnIt)
 {
 	GView::SetFont(Fnt, OwnIt);
-	d->SetText(new GDisplayString(GetFont(), Name()), _FL);
+	d->SetText(new LDisplayString(GetFont(), Name()), _FL);
 	Invalidate();
 }
 
 void GCombo::OnPosChange()
 {
-	GDisplayString *ds = d->GetText(_FL);
+	LDisplayString *ds = d->GetText(_FL);
 	if (ds && ds->IsTruncated())
 		d->SetText(NULL, _FL);
 }
@@ -542,7 +542,7 @@ void GCombo::OnPaint(GSurface *pDC)
 	{
 		auto n = Name();
 		if (n)
-			d->SetText(new GDisplayString(GetFont(), n), _FL);
+			d->SetText(new LDisplayString(GetFont(), n), _FL);
 	}
 
 	GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
@@ -578,7 +578,7 @@ void GCombo::OnPaint(GSurface *pDC)
 		{
 			LRect Txt;
 			Txt = LabelRect;
-			GDisplayString *Ds = d->GetText(_FL);
+			LDisplayString *Ds = d->GetText(_FL);
 			int y = Cli.y1 + ((Cli.Y() - Ds->Y()) / 2) + 1;
 
 			auto f = Ds->GetFont();
@@ -653,7 +653,7 @@ void GCombo::OnPaint(GSurface *pDC)
 		r.Size(1, 1);
 		if (r.Valid())
 		{
-			GDisplayString *ds = d->GetText(_FL);
+			LDisplayString *ds = d->GetText(_FL);
 			if (ds)
 			{
 				if (Enabled())

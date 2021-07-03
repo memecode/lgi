@@ -293,7 +293,7 @@ public:
 		Back = c;
 	}
 	
-	void setFont(GFont *f)
+	void setFont(LFont *f)
 	{
 		if (File().IsOpen() &&
 			(stricmp(f->Face(), Face) != 0 || PtSize != f->PointSize()))

@@ -7,7 +7,7 @@
 
 #include "Lgi.h"
 #include "GToken.h"
-#include "GScripting.h"
+#include "Scripting.h"
 #include "GLexCpp.h"
 #include "GScriptingPriv.h"
 #include "GUtf8.h"

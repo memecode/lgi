@@ -586,7 +586,7 @@ public:
 					int y,
 					int cx,
 					int cy,
-					GFontType *FontInfo = 0) :
+					LFontType *FontInfo = 0) :
 		GTextView3(Id, x, y, cx, cy, FontInfo)
 	{
 	    Multiline = false;
@@ -682,7 +682,7 @@ void FieldView::OnSelect(FieldSource *s)
 
 		if (Source->GetFields(Fields))
 		{
-			GFontType Sys;
+			LFontType Sys;
 			Sys.GetSystemFont("System");
 
 			GTableLayout *t = new GTableLayout(IDC_TABLE);

@@ -314,7 +314,7 @@ GRichTextPriv::GRichTextPriv(GRichTextEdit *view, GRichTextPriv **Ptr) :
 	SpellDictionaryLoaded = false;
 	HtmlLinkAsCid = false;
 	ScrollLinePx = SysFont->GetHeight();
-	if (Font.Reset(new GFont))
+	if (Font.Reset(new LFont))
 		*Font = *SysFont;
 
 	for (unsigned i=0; i<CountOf(Areas); i++)
@@ -636,7 +636,7 @@ void GRichTextPriv::UpdateStyleUI()
 		b->GetTextAt(Cursor->Offset, Styles);
 	StyleText *st = Styles.Length() ? Styles.First() : NULL;
 
-	GFont *f = NULL;
+	LFont *f = NULL;
 	if (st)
 		f = GetFont(st->GetStyle());
 	else if (View)
@@ -1492,7 +1492,7 @@ void GRichTextPriv::PaintBtn(GSurface *pDC, GRichTextEdit::RectType t)
 	{
 		case GV_STRING:
 		{
-			GDisplayString Ds(SysFont, v.Str());
+			LDisplayString Ds(SysFont, v.Str());
 			Ds.Draw(pDC,
 					r.x1 + ((r.X()-Ds.X())>>1) + Down,
 					r.y1 + ((r.Y()-Ds.Y())>>1) + Down,
@@ -1536,7 +1536,7 @@ void GRichTextPriv::PaintBtn(GSurface *pDC, GRichTextEdit::RectType t)
 					break;
 			}
 			if (!Label) break;
-			GDisplayString Ds(SysFont, Label);
+			LDisplayString Ds(SysFont, Label);
 			Ds.Draw(pDC,
 					r.x1 + ((r.X()-Ds.X())>>1) + Down,
 					r.y1 + ((r.Y()-Ds.Y())>>1) + Down,
@@ -1588,7 +1588,7 @@ bool GRichTextPriv::ClickBtn(LMouse &m, GRichTextEdit::RectType t)
 		case GRichTextEdit::FontFamilyBtn:
 		{
 			GString::Array Fonts;
-			if (!GFontSystem::Inst()->EnumerateFonts(Fonts))
+			if (!LFontSystem::Inst()->EnumerateFonts(Fonts))
 				return Error(_FL, "EnumerateFonts failed.");
 
 			bool UseSub = (SysFont->GetHeight() * Fonts.Length()) > (GdcD->Y() * 0.8);
@@ -1856,20 +1856,20 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 		Areas[GRichTextEdit::BackgroundColourBtn] = AllocPx(r.Y()*1.5, 6);
 
 		{
-			GDisplayString Ds(SysFont, TEXT_LINK);
+			LDisplayString Ds(SysFont, TEXT_LINK);
 			Areas[GRichTextEdit::MakeLinkBtn] = AllocPx(Ds.X() + 12, 0);
 		}
 		{
-			GDisplayString Ds(SysFont, TEXT_REMOVE_LINK);
+			LDisplayString Ds(SysFont, TEXT_REMOVE_LINK);
 			Areas[GRichTextEdit::RemoveLinkBtn] = AllocPx(Ds.X() + 12, 6);
 		}
 		{
-			GDisplayString Ds(SysFont, TEXT_REMOVE_STYLE);
+			LDisplayString Ds(SysFont, TEXT_REMOVE_STYLE);
 			Areas[GRichTextEdit::RemoveStyleBtn] = AllocPx(Ds.X() + 12, 6);
 		}
 		for (unsigned int i=GRichTextEdit::EmojiBtn; i<GRichTextEdit::MaxArea; i++)
 		{
-			GDisplayString Ds(SysFont, Values[i].Str());
+			LDisplayString Ds(SysFont, Values[i].Str());
 			Areas[i] = AllocPx(Ds.X() + 12, 6);
 		}
 

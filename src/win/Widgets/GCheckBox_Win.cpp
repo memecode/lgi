@@ -35,7 +35,7 @@ GCheckBox::GCheckBox(int id, int x, int y, int cx, int cy, const char *name, int
 	
 	if (cx < 0 || cy < 0)
 	{
-		GDisplayString ds(SysFont, name);
+		LDisplayString ds(SysFont, name);
 		if (cx < 0)
 			cx = 18 + ds.X();
 		if (cy < 0)
@@ -106,7 +106,7 @@ bool GCheckBox::NameW(const char16 *n)
 	return GView::NameW(n);
 }
 
-void GCheckBox::SetFont(GFont *Fnt, bool OwnIt)
+void GCheckBox::SetFont(LFont *Fnt, bool OwnIt)
 {
 	GView::SetFont(Fnt, OwnIt);
 }
@@ -227,7 +227,7 @@ bool GCheckBox::OnLayout(GViewLayoutInfo &Inf)
 	}
 	else
 	{
-		GDisplayString s(GetFont(), Name());
+		LDisplayString s(GetFont(), Name());
 		int x = s.X() + 32;
 		Inf.Width.Min = x;
 		Inf.Width.Max = x;

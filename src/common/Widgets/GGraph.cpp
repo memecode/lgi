@@ -1,7 +1,7 @@
 #include "Lgi.h"
 #include "GGraph.h"
 #include "GDocView.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 #include <math.h>
 
 #define SELECTION_SIZE          2
@@ -358,7 +358,7 @@ struct GGraphPriv
 
 			}
 
-			GDisplayString d(SysFont, s);
+			LDisplayString d(SysFont, s);
 			if (xaxis)
 				d.Draw(pDC, dx - (d.X()/2), dy + 10);
 			else

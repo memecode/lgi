@@ -316,7 +316,7 @@ class LMenuItemPrivate
 public:
 	bool StartUnderline;		// Underline the first display string
 	bool HasAccel;				// The last display string should be right aligned
-	List<GDisplayString> Strs;	// Draw each alternate display string with underline
+	List<LDisplayString> Strs;	// Draw each alternate display string with underline
 								// except the last in the case of HasAccel==true.
 	GString Shortcut;
 
@@ -331,7 +331,7 @@ public:
 		Strs.DeleteObjects();
 	}
 
-	void UpdateStrings(GFont *Font, char *n)
+	void UpdateStrings(LFont *Font, char *n)
 	{
 		// Build up our display strings, 
 		Strs.DeleteObjects();
@@ -358,31 +358,31 @@ public:
 		if (Amp)
 		{
 			// Before amp
-			Strs.Insert(new GDisplayString(Font, n, Amp - n ));
+			Strs.Insert(new LDisplayString(Font, n, Amp - n ));
 
 			// Amp'd letter
 			char *e = LSeekUtf8(++Amp, 1);
-			Strs.Insert(new GDisplayString(Font, Amp, e - Amp ));
+			Strs.Insert(new LDisplayString(Font, Amp, e - Amp ));
 
 			// After Amp
 			if (*e)
 			{
-				Strs.Insert(new GDisplayString(Font, e));
+				Strs.Insert(new LDisplayString(Font, e));
 			}
 		}
 		else
 		{
-			Strs.Insert(new GDisplayString(Font, n));
+			Strs.Insert(new LDisplayString(Font, n));
 		}
 
 		if (HasAccel = (Tab != 0))
 		{
-			Strs.Insert(new GDisplayString(Font, Tab + 1));
+			Strs.Insert(new LDisplayString(Font, Tab + 1));
 			*Tab = '\t';
 		}
 		else if (HasAccel = (Shortcut.Get() != 0))
 		{
-			Strs.Insert(new GDisplayString(Font, Shortcut));
+			Strs.Insert(new LDisplayString(Font, Shortcut));
 		}
 	}
 };
@@ -477,7 +477,7 @@ void LMenuItem::_Measure(LPoint &Size)
 	}
 	else
 	{
-		GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 		bool BaseMenu = Parent == Menu; // true if attached to a windows menu
 										// else is a submenu
 		int Ht = Font->GetHeight();
@@ -508,10 +508,10 @@ void LMenuItem::_Measure(LPoint &Size)
 void LMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 {
 	bool Underline = d->StartUnderline;
-	GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+	LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 	for (int i=0; i < (d->Strs.Length() - (d->HasAccel ? 1 : 0)); i++)
 	{
-		GDisplayString *s = d->Strs[i];
+		LDisplayString *s = d->Strs[i];
 		if (!s) break;
 
 		s->Draw(pDC, x, y);
@@ -528,7 +528,7 @@ void LMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 
 	if (d->HasAccel)
 	{
-		GDisplayString *s = *d->Strs.rbegin();
+		LDisplayString *s = *d->Strs.rbegin();
 		if (s)
 		{
 			s->Draw(pDC, Width - s->X() - 8, y);
@@ -566,7 +566,7 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 		GColour Fore(Selected ? L_FOCUS_SEL_FORE : L_MENU_TEXT);
 		GColour Back(BaseMenu ? Menu->d->RootMenuBack : (Selected ? LColour(L_FOCUS_SEL_BACK) : LColour(L_MENU_BACKGROUND)));
 		int x = IconX;
-		GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 		int y = (pDC->Y() - Font->GetHeight()) >> 1;
 
 		// paint the background
@@ -817,7 +817,7 @@ bool LMenuItem::ScanForAccel()
 			{
 				d->Shortcut = GString("+").Join(Keys);
 				GString n = Name();
-				GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+				LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 				d->UpdateStrings(Font, n);
 			}
 			
@@ -929,7 +929,7 @@ bool LMenuItem::Name(const char *Txt)
 			Info.fType |= MFT_STRING;
 			Info.fMask |= MIIM_TYPE | MIIM_DATA;
 
-			GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+			LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 			d->UpdateStrings(Font, n);
 
 			// Tell the OS
@@ -1047,7 +1047,7 @@ void LMenu::OnChange()
 
 struct LMenuFont
 {
-	GFont *f;
+	LFont *f;
 
 	LMenuFont()
 	{
@@ -1061,11 +1061,11 @@ struct LMenuFont
 }	MenuFont;
 
 
-GFont *LMenu::GetFont()
+LFont *LMenu::GetFont()
 {
 	if (!MenuFont.f)
 	{
-		GFontType Type;
+		LFontType Type;
 		if (Type.GetSystemFont("Menu"))
 		{
 			MenuFont.f = Type.Create();

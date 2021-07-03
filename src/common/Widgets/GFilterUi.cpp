@@ -6,7 +6,7 @@
 #include "GEdit.h"
 #include "GCombo.h"
 #include "GToken.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 #include "LgiRes.h"
 
 #define FILTER_DRAG_FORMAT	"Scribe.FilterItem"
@@ -192,22 +192,22 @@ public:
 	GArray<GSurface*> Icons;
 	FilterUi_Menu Callback;
 	void *CallbackData;
-	GAutoPtr<GDisplayString> dsNot;
-	GAutoPtr<GDisplayString> dsAnd;
-	GAutoPtr<GDisplayString> dsOr;
-	GAutoPtr<GDisplayString> dsNew;
-	GAutoPtr<GDisplayString> dsLegend;
+	GAutoPtr<LDisplayString> dsNot;
+	GAutoPtr<LDisplayString> dsAnd;
+	GAutoPtr<LDisplayString> dsOr;
+	GAutoPtr<LDisplayString> dsNew;
+	GAutoPtr<LDisplayString> dsLegend;
 	GArray<char*> OpNames;
 
 	GFilterViewPrivate(GFilterView *v)
 	{
 		View = v;
 
-		dsNot.Reset(new GDisplayString(SysFont, (char*)LgiLoadString(L_FUI_NOT, "Not")));
-		dsNew.Reset(new GDisplayString(SysBold, (char*)LgiLoadString(L_FUI_NEW, "New")));
-		dsAnd.Reset(new GDisplayString(SysBold, (char*)LgiLoadString(L_FUI_AND, "And")));
-		dsOr.Reset(new GDisplayString(SysBold, (char*)LgiLoadString(L_FUI_OR, "Or")));
-		dsLegend.Reset(new GDisplayString(SysBold, (char*)LgiLoadString(L_FUI_LEGEND, "Legend:")));
+		dsNot.Reset(new LDisplayString(SysFont, (char*)LgiLoadString(L_FUI_NOT, "Not")));
+		dsNew.Reset(new LDisplayString(SysBold, (char*)LgiLoadString(L_FUI_NEW, "New")));
+		dsAnd.Reset(new LDisplayString(SysBold, (char*)LgiLoadString(L_FUI_AND, "And")));
+		dsOr.Reset(new LDisplayString(SysBold, (char*)LgiLoadString(L_FUI_OR, "Or")));
+		dsLegend.Reset(new LDisplayString(SysBold, (char*)LgiLoadString(L_FUI_LEGEND, "Legend:")));
 		
 		ShowLegend = true;
 		Callback = 0;
@@ -804,17 +804,17 @@ void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 
 				if (d->Field)
 				{
-					GDisplayString ds(SysFont, d->Field);
+					LDisplayString ds(SysFont, d->Field);
 					ds.Draw(&Buf, d->FieldBtn.x1+Tx, d->FieldBtn.y1+Ty, &d->FieldBtn);
 				}
 				if (d->Op >= 0)
 				{
-					GDisplayString ds(SysFont, d->Data->OpNames[d->Op]);
+					LDisplayString ds(SysFont, d->Data->OpNames[d->Op]);
 					ds.Draw(&Buf, d->OpBtn.x1+Tx, d->OpBtn.y1+Ty, &d->OpBtn);
 				}
 				if (d->Value)
 				{
-					GDisplayString ds(SysFont, d->Value);
+					LDisplayString ds(SysFont, d->Value);
 					ds.Draw(&Buf, d->ValueBtn.x1+Tx, d->ValueBtn.y1+Ty, &d->ValueBtn);
 				}
 			}
@@ -1265,7 +1265,7 @@ void GFilterView::OnPaint(GSurface *pDC)
 				Buf.Blt(x, y, d->Icons[i]);
 				x += 3 + d->Icons[i]->X();
 				Buf.Op(GDC_SET);
-				GDisplayString ds(SysFont, (char*)IconName[i]);
+				LDisplayString ds(SysFont, (char*)IconName[i]);
 				ds.Draw(&Buf, x, y);
 				x += 12 + ds.X();
 			}

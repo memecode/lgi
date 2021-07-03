@@ -3944,11 +3944,11 @@ void VcFolder::UncommitedItem::Select(bool b)
 
 void VcFolder::UncommitedItem::OnPaint(GItem::ItemPaintCtx &Ctx)
 {
-	GFont *f = GetList()->GetFont();
+	LFont *f = GetList()->GetFont();
 	f->Transparent(false);
 	f->Colour(Ctx.Fore, Ctx.Back);
 	
-	GDisplayString ds(f, "(working folder)");
+	LDisplayString ds(f, "(working folder)");
 	ds.Draw(Ctx.pDC, Ctx.x1 + ((Ctx.X() - ds.X()) / 2), Ctx.y1 + ((Ctx.Y() - ds.Y()) / 2), &Ctx);
 }
 

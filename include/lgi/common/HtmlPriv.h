@@ -63,7 +63,7 @@ public:
 	GLength &operator =(float val);
 	GCss::LengthType GetUnits();
 	void Set(char *s);
-	float Get(GFlowRegion *Flow, GFont *Font, bool Lock = false);
+	float Get(GFlowRegion *Flow, LFont *Font, bool Lock = false);
 	float GetRaw() { return d; }
 };
 
@@ -114,7 +114,7 @@ public:
 	void Empty() { DeleteObjects(); }
 	LRect Bounds();
 	LRect *TopRect(LRegion *c);
-	void FlowText(GTag *Tag, GFlowRegion *c, GFont *Font, int LineHeight, char16 *Text, GCss::LengthType Align);
+	void FlowText(GTag *Tag, GFlowRegion *c, LFont *Font, int LineHeight, char16 *Text, GCss::LengthType Align);
 };
 
 struct GHtmlTableLayout
@@ -287,7 +287,7 @@ protected:
 	void _TraceOpenTags();
 
 	// Private methods
-	GFont *NewFont();
+	LFont *NewFont();
 	ssize_t NearestChar(GFlowRect *Fr, int x, int y);
 	GTag *HasOpenTag(char *t);
 	GTag *PrevTag();
@@ -316,12 +316,12 @@ public:
 	GHtml *Html;
 	bool IsBlock() { return Display() == GCss::DispBlock; }
 	GTag *GetBlockParent(ssize_t *Idx = 0);
-	GFont *GetFont();
+	LFont *GetFont();
 
 	// Style
 	LPoint Pos;
 	LPoint Size;
-	GFont *Font;
+	LFont *Font;
 	int LineHeightCache;
 	LRect PadPx;
 	

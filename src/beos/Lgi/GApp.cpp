@@ -75,7 +75,7 @@ GApp::GApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : B
 	GBase::Name(Name);
 
 	// Setup LGI Sub-systems
-	GFontSystem::Inst();
+	LFontSystem::Inst();
 	d->FileSystem = new GFileSystem;
 	d->GdcSystem = new GdcDevice;
 
@@ -88,7 +88,7 @@ GApp::GApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : B
 
 	// System font
 	SystemNormal = 0;
-	GFontType SysFontType;
+	LFontType SysFontType;
 	if (SysFontType.GetSystemFont("System"))
 	{
 		SystemNormal = SysFontType.Create();
@@ -96,7 +96,7 @@ GApp::GApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : B
 		{
 			SystemNormal->Transparent(true);
 			
-			SystemBold = new GFont;
+			SystemBold = new LFont;
 			if (SystemBold)
 			{
 				*SystemBold = *SystemNormal;

@@ -11,7 +11,7 @@
 
 #include "Lgi.h"
 #include "GToken.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 
 using namespace Gtk;
 #define DEBUG_MENUS		0
@@ -415,7 +415,7 @@ class LMenuItemPrivate
 public:
 	bool StartUnderline;		// Underline the first display string
 	bool HasAccel;				// The last display string should be right aligned
-	List<GDisplayString> Strs;	// Draw each alternate display string with underline
+	List<LDisplayString> Strs;	// Draw each alternate display string with underline
 								// except the last in the case of HasAccel==true.
 	::GString Shortcut;
 
@@ -430,7 +430,7 @@ public:
 		Strs.DeleteObjects();
 	}
 
-	void UpdateStrings(GFont *Font, char *n)
+	void UpdateStrings(LFont *Font, char *n)
 	{
 		// Build up our display strings, 
 		Strs.DeleteObjects();
@@ -457,31 +457,31 @@ public:
 		if (Amp)
 		{
 			// Before amp
-			Strs.Insert(new GDisplayString(Font, n, Amp - n ));
+			Strs.Insert(new LDisplayString(Font, n, Amp - n ));
 
 			// Amp'd letter
 			char *e = LSeekUtf8(++Amp, 1);
-			Strs.Insert(new GDisplayString(Font, Amp, e - Amp ));
+			Strs.Insert(new LDisplayString(Font, Amp, e - Amp ));
 
 			// After Amp
 			if (*e)
 			{
-				Strs.Insert(new GDisplayString(Font, e));
+				Strs.Insert(new LDisplayString(Font, e));
 			}
 		}
 		else
 		{
-			Strs.Insert(new GDisplayString(Font, n));
+			Strs.Insert(new LDisplayString(Font, n));
 		}
 
 		if (HasAccel = (Tab != 0))
 		{
-			Strs.Insert(new GDisplayString(Font, Tab + 1));
+			Strs.Insert(new LDisplayString(Font, Tab + 1));
 			*Tab = '\t';
 		}
 		else if (HasAccel = (Shortcut.Get() != 0))
 		{
-			Strs.Insert(new GDisplayString(Font, Shortcut));
+			Strs.Insert(new LDisplayString(Font, Shortcut));
 		}
 	}
 };
@@ -1464,7 +1464,7 @@ int LMenuItem::Icon()
 ///////////////////////////////////////////////////////////////////////////////////////////////
 struct LMenuFont
 {
-	GFont *f;
+	LFont *f;
 
 	LMenuFont()
 	{
@@ -1495,11 +1495,11 @@ LMenu::~LMenu()
 	Accel.DeleteObjects();
 }
 
-GFont *LMenu::GetFont()
+LFont *LMenu::GetFont()
 {
 	if (!MenuFont.f)
 	{
-		GFontType Type;
+		LFontType Type;
 		if (Type.GetSystemFont("Menu"))
 		{
 			MenuFont.f = Type.Create();
@@ -1519,7 +1519,7 @@ GFont *LMenu::GetFont()
 
 		if (!MenuFont.f)
 		{
-			MenuFont.f = new GFont;
+			MenuFont.f = new LFont;
 			if (MenuFont.f)
 			{
 				*MenuFont.f = *SysFont;

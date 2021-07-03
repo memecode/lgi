@@ -169,7 +169,7 @@ public:
 	/// Sets the image list to use
 	bool SetImageList(GImageList *l, int Bx, int By, bool Own = true);
 	/// Gets the font used to draw the text below the buttons
-	GFont *GetFont();
+	LFont *GetFont();
 
 	/// Adds a button to the toolbar
 	GToolButton *AppendButton

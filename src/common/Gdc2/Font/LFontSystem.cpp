@@ -37,7 +37,7 @@ typedef char IconvChar;
 
 /////////////////////////////////////////////////////////////////////
 // Private growable class for binary compatability
-class GFontSystemPrivate : public GLibrary
+class LFontSystemPrivate : public GLibrary
 {
 public:
 	bool DefaultGlyphSub;
@@ -51,7 +51,7 @@ public:
 	Gtk::PangoFontMap *Map;
 	Gtk::PangoContext *Ctx;
 	
-	GFontSystemPrivate()
+	LFontSystemPrivate()
 	{
 		Map = Gtk::pango_cairo_font_map_get_default();
 		if (!Map)
@@ -99,19 +99,19 @@ public:
 
 /////////////////////////////////////////////////////////////////////
 static bool FontSystemDone = false;
-GFontSystem *GFontSystem::Me = 0;
-GFontSystem *GFontSystem::Inst()
+LFontSystem *LFontSystem::Me = 0;
+LFontSystem *LFontSystem::Inst()
 {
 	if (!Me && !FontSystemDone)
-		new GFontSystem;
+		new LFontSystem;
 	
 	return Me;
 }
 
-GFontSystem::GFontSystem()
+LFontSystem::LFontSystem()
 {
 	Me = this;
-	d = new GFontSystemPrivate;
+	d = new LFontSystemPrivate;
 
 	// Glyph sub setup
 	int Os = LGetOs();
@@ -135,7 +135,7 @@ GFontSystem::GFontSystem()
 	ZeroObj(Font);		// Initialize the list of fonts to empty
 }
 
-GFontSystem::~GFontSystem()
+LFontSystem::~LFontSystem()
 {
 	// Clean up all our resources
 	for (int i=0; i<d->Used; i++)
@@ -149,23 +149,23 @@ GFontSystem::~GFontSystem()
 }
 
 #ifdef __GTK_H__
-Gtk::PangoFontMap *GFontSystem::GetFontMap()
+Gtk::PangoFontMap *LFontSystem::GetFontMap()
 {
 	return d->Map;
 }
 
-Gtk::PangoContext *GFontSystem::GetContext()
+Gtk::PangoContext *LFontSystem::GetContext()
 {
 	return d->Ctx;
 }
 #endif
 
-bool GFontSystem::GetGlyphSubSupport()
+bool LFontSystem::GetGlyphSubSupport()
 {
 	return d->SubSupport;
 }
 
-bool GFontSystem::GetDefaultGlyphSub()
+bool LFontSystem::GetDefaultGlyphSub()
 {
 	if (!d->CheckedConfig && LgiApp)
 	{
@@ -180,7 +180,7 @@ bool GFontSystem::GetDefaultGlyphSub()
 	return d->DefaultGlyphSub;
 }
 
-void GFontSystem::SetDefaultGlyphSub(bool i)
+void LFontSystem::SetDefaultGlyphSub(bool i)
 {
 	if (d->SubSupport)
 		d->DefaultGlyphSub = i;
@@ -205,7 +205,7 @@ int StringSort(GString *a, GString *b)
 	return 0;
 }
 
-bool GFontSystem::EnumerateFonts(GString::Array &Fonts)
+bool LFontSystem::EnumerateFonts(GString::Array &Fonts)
 {
 	Fonts.SetFixedLength(false);
 	if (!AllFonts.Length())
@@ -272,12 +272,12 @@ bool GFontSystem::EnumerateFonts(GString::Array &Fonts)
 	return true;
 }
 
-void GFontSystem::ResetLibCheck()
+void LFontSystem::ResetLibCheck()
 {
 	d->LibCheck = false;
 }
 
-bool GFontSystem::HasIconv(bool Quiet)
+bool LFontSystem::HasIconv(bool Quiet)
 {
 	if (d->IsLoaded())
 		return true;
@@ -332,7 +332,7 @@ bool GFontSystem::HasIconv(bool Quiet)
 	}
 #endif
 
-ssize_t GFontSystem::IconvConvert(const char *OutCs, GStreamI *Out, const char *InCs, const char *&In, ssize_t InLen)
+ssize_t LFontSystem::IconvConvert(const char *OutCs, GStreamI *Out, const char *InCs, const char *&In, ssize_t InLen)
 {
 	LgiAssert(InLen > 0);
 
@@ -415,7 +415,7 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, GStreamI *Out, const char *
 	return 1;
 }
 
-ssize_t GFontSystem::IconvConvert(const char *OutCs, char *Out, ssize_t OutLen, const char *InCs, const char *&In, ssize_t InLen)
+ssize_t LFontSystem::IconvConvert(const char *OutCs, char *Out, ssize_t OutLen, const char *InCs, const char *&In, ssize_t InLen)
 {
 	ssize_t Status = 0;
 
@@ -488,9 +488,9 @@ ssize_t GFontSystem::IconvConvert(const char *OutCs, char *Out, ssize_t OutLen, 
 	return Status;
 }
 
-GFont *GFontSystem::GetBestFont(char *Str)
+LFont *LFontSystem::GetBestFont(char *Str)
 {
-	GFont *MatchingFont = 0;
+	LFont *MatchingFont = 0;
 
 	if (d->SubSupport)
 	{
@@ -498,11 +498,11 @@ GFont *GFontSystem::GetBestFont(char *Str)
 		if (s)
 		{
 			// Make list of possible fonts
-			List<GFont> Possibles;
+			List<LFont> Possibles;
 			char16 *i;
 			for (i = s; *i; i++)
 			{
-				GFont *Font = GetGlyph(*i, SysFont);
+				LFont *Font = GetGlyph(*i, SysFont);
 				if (Font)
 				{
 					bool Has = false;
@@ -557,7 +557,7 @@ DeclGArrayCompare(FontNameCmp, GString, FontMap)
 	return bp - ap;
 }
 
-bool GFontSystem::AddFont(GAutoPtr<GFont> Fnt)
+bool LFontSystem::AddFont(GAutoPtr<LFont> Fnt)
 {
 	if (!Fnt)
 		return false;
@@ -597,7 +597,7 @@ bool GFontSystem::AddFont(GAutoPtr<GFont> Fnt)
 	return true;
 }
 
-GFont *GFontSystem::GetGlyph(uint32_t u, GFont *UserFont)
+LFont *LFontSystem::GetGlyph(uint32_t u, LFont *UserFont)
 {
 	if (u > MAX_UNICODE || !UserFont)
 	{
@@ -614,7 +614,7 @@ GFont *GFontSystem::GetGlyph(uint32_t u, GFont *UserFont)
 	}
 
 	// Check LUT
-	GFont *Has = 0;
+	LFont *Has = 0;
 	if (Lut[u])
 	{
 		Has = Font[Lut[u]];
@@ -635,7 +635,7 @@ GFont *GFontSystem::GetGlyph(uint32_t u, GFont *UserFont)
 			{
 			#endif
 				FontMap Pref(0, 0);
-				if (GFontSystem::Inst()->EnumerateFonts(SubFonts))
+				if (LFontSystem::Inst()->EnumerateFonts(SubFonts))
 				{
 					// Reorder font list to prefer certain known as good fonts or
 					// avoid certain bad fonts.
@@ -716,14 +716,14 @@ GFont *GFontSystem::GetGlyph(uint32_t u, GFont *UserFont)
 					break;
 				}
 
-				GAutoPtr<GFont> Fnt(new GFont);
+				GAutoPtr<LFont> Fnt(new LFont);
 				if (Fnt)
 				{
 					*Fnt.Get() = *UserFont;
 					Fnt->Face(f);
 					if (AddFont(Fnt))
 					{
-						GFont *Prev = Font[d->Used - 1];
+						LFont *Prev = Font[d->Used - 1];
 						auto PrevMap = Prev->GetGlyphMap();
 						if (PrevMap && _HasUnicodeGlyph(Prev->GetGlyphMap(), u))
 						{

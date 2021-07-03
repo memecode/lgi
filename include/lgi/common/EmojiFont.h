@@ -1,15 +1,15 @@
 /*	Instantiation:
 
-	GAutoPtr<GFont> f(new LEmojiFont());
+	GAutoPtr<LFont> f(new LEmojiFont());
 	if (f && f->Create())
-		GFontSystem::Inst()->AddFont(f);
+		LFontSystem::Inst()->AddFont(f);
 */
 #ifndef _EMOJI_FONT_H_
 #define _EMOJI_FONT_H_
 
 #include "lgi/common/Font.h"
 
-class LEmojiFont : public GFont
+class LEmojiFont : public LFont
 {
 	struct LEmojiFontPriv *priv;
 

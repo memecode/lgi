@@ -108,7 +108,7 @@ bool GRadioGroup::NameW(const char16 *n)
 	return GView::NameW(n);
 }
 
-void GRadioGroup::SetFont(GFont *Fnt, bool OwnIt)
+void GRadioGroup::SetFont(LFont *Fnt, bool OwnIt)
 {
 	GView::SetFont(Fnt);
 }
@@ -201,7 +201,7 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
 {
     auto it = IterateViews();
     const int BORDER_PX = 2;
-    GDisplayString Txt(GetFont(), Name());
+    LDisplayString Txt(GetFont(), Name());
     if (!Inf.Width.Max)
     {
         // Work out the width...
@@ -308,7 +308,7 @@ GRadioButton::GRadioButton(int id, int x, int y, int cx, int cy, const char *nam
 
 	Name(name);
 
-	GDisplayString t(SysFont, name);
+	LDisplayString t(SysFont, name);
 	if (cx < 0) cx = t.X() + 26;
 	if (cy < 0) cy = t.Y() + 4;
 
@@ -417,7 +417,7 @@ void GRadioButton::Value(int64 i)
 
 bool GRadioButton::OnLayout(GViewLayoutInfo &Inf)
 {
-	GDisplayString Txt(GetFont(), Name());
+	LDisplayString Txt(GetFont(), Name());
     if (!Inf.Width.Max)
     {
         Inf.Width.Min =

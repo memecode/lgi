@@ -14,7 +14,7 @@
 #include "Lgi.h"
 #include "GLog.h"
 #include "GScrollBar.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 
 ////////////////////////////////////////////////////////////////////
 RLogEntry::RLogEntry(const char *t, const char *desc, int Len, GColour *Col)
@@ -199,13 +199,13 @@ void RLogView::OnPaint(GSurface *pDC)
 				t.Set(r.x1, r.y2-y+1, r.x1 + SplitPos, r.y2);
 			}
 
-			GDisplayString ds(SysFont, e->Desc);
+			LDisplayString ds(SysFont, e->Desc);
 			ds.Draw(pDC, t.x1, t.y1, &t);
 			t.x1 = t.x2+1;
 			t.x2 = r.x2;
 			if (ValidStr(e->Text))
 			{
-				GDisplayString ds(SysFont, e->Text);
+				LDisplayString ds(SysFont, e->Text);
 				ds.Draw(pDC, t.x1, t.y1, &t);
 			}
 			else

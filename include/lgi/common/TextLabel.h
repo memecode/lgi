@@ -39,7 +39,7 @@ public:
 	/// Set the text with a wide string
 	bool NameW(const char16 *n) override;
 	/// Sets the font used to render the text
-	void SetFont(GFont *Fnt, bool OwnIt = false) override;
+	void SetFont(LFont *Fnt, bool OwnIt = false) override;
 
 	/// Returns the numeric value of the text (atoi)
 	int64 Value() override;

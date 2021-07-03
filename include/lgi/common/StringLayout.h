@@ -21,18 +21,18 @@ struct LLayoutRun : public GCss
 };
 
 /// Display string of a certain style.
-struct LLayoutString : public GDisplayString
+struct LLayoutString : public LDisplayString
 {
 	int Fx, y, Line;
 	GColour Fore, Back;
 	ssize_t Offset;
 	LLayoutRun *Src;
 	
-	LLayoutString(GFont *f,
+	LLayoutString(LFont *f,
 				const char *s,
 				ssize_t l = -1,
 				GSurface *pdc = 0) :
-		GDisplayString(f, s, l, pdc)
+		LDisplayString(f, s, l, pdc)
 	{
 		Offset = 0;
 		Fx = y = 0;
@@ -43,7 +43,7 @@ struct LLayoutString : public GDisplayString
 	LLayoutString(LLayoutString *Ls,
 				const char *s,
 				ssize_t l = -1) :
-		GDisplayString(Ls->GetFont(), s, l)
+		LDisplayString(Ls->GetFont(), s, l)
 	{
 		Fx = Ls->Fx;
 		y = Ls->y;
@@ -58,7 +58,7 @@ struct LLayoutString : public GDisplayString
 };
 
 /// This class lays out a block of text according to the given styles. It
-/// builds upon the GDisplayString class to render sections of text.
+/// builds upon the LDisplayString class to render sections of text.
 class LStringLayout
 {
 protected:
@@ -74,7 +74,7 @@ protected:
 
 	// Array of display strings...
 	GArray<LLayoutRun*> Text;
-	GArray<GDisplayString*> Strs;
+	GArray<LDisplayString*> Strs;
 	LRect Bounds;
 
 public:
@@ -89,16 +89,16 @@ public:
 	void SetWrap(bool b) { Wrap = b; }
 	LPoint GetMin() { return Min; }
 	LPoint GetMax() { return Max; }
-	GArray<GDisplayString*> *GetStrs() { return &Strs; }
+	GArray<LDisplayString*> *GetStrs() { return &Strs; }
 	LRect GetBounds() { return Bounds; }
 
 	/// Adds a run of text with the same style
 	bool Add(const char *Str, GCss *Style);
 	uint32_t NextChar(char *s);
 	uint32_t PrevChar(char *s);
-	GFont *GetBaseFont();
-	void SetBaseFont(GFont *f);
-	GFont *GetFont();
+	LFont *GetBaseFont();
+	void SetBaseFont(LFont *f);
+	LFont *GetFont();
 
 	// Pre-layout min/max calculation
 	void DoPreLayout(int32 &MinX, int32 &MaxX);

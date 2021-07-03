@@ -303,7 +303,7 @@ void GMdiChild::OnPaint(GSurface *pDC)
 	
 	SysFont->Colour(Top ? LC_ACTIVE_TITLE_TEXT : LC_INACTIVE_TITLE_TEXT, Top ? LC_ACTIVE_TITLE : LC_INACTIVE_TITLE);
 	SysFont->Transparent(false);
-	GDisplayString ds(SysFont, n);
+	LDisplayString ds(SysFont, n);
 	ds.Draw(pDC, d->System.x2 + 1, d->Title.y1 + 1, &d->Title);
 	
 	// System button
@@ -681,7 +681,7 @@ void GMdiParent::OnPaint(GSurface *pDC)
 	
 	#if MDI_TAB_STYLE
 	// Draw tabs...
-	GFont *Fnt = GetFont();
+	LFont *Fnt = GetFont();
 	
 	GColour Back(L_LOW), Black(L_BLACK);
 	int Cx = 5;
@@ -703,7 +703,7 @@ void GMdiParent::OnPaint(GSurface *pDC)
 		GMdiChild *c = Views[Idx];
 		bool Active = c == Last;
 		
-		GDisplayString ds(GetFont(), c->Name());
+		LDisplayString ds(GetFont(), c->Name());
 		int BtnWidth = d->Btn ? ds.Y()-4 : 0;
 		c->d->Tab.ZOff(ds.X()+BtnWidth+1, d->Tabs.y2-1);
 		c->d->Tab.Offset(d->Tabs.x1 + Cx, d->Tabs.y1);
@@ -850,7 +850,7 @@ void GMdiParent::OnPosChange()
 {
 	if (!IsAttached())
 		return;
-	GFont *Fnt = GetFont();
+	LFont *Fnt = GetFont();
 	LRect Client = GetClient();
 	LRect Tabs, Content;
 		

@@ -62,7 +62,7 @@ public:
 	const char16 *NameW() override { return GView::NameW(); }
 	bool Name(const char *n) override;
 	bool NameW(const char16 *n) override;
-	void SetFont(GFont *Fnt, bool OwnIt = false) override;
+	void SetFont(LFont *Fnt, bool OwnIt = false) override;
     bool OnLayout(GViewLayoutInfo &Inf) override;
 	int BoxSize();
 

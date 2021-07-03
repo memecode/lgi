@@ -32,7 +32,7 @@ public:
 
 	GItemContainer *Parent;
 	char *cName;
-	GDisplayString *Txt;
+	LDisplayString *Txt;
 	int cWidth;
 	int cType;
 	GSurface *cIcon;
@@ -666,13 +666,13 @@ void GItemColumn::Name(const char *n)
 	DeleteObj(d->Txt);
 	d->cName = NewStr(n);
 	
-	GFont *f =	d->Parent &&
+	LFont *f =	d->Parent &&
 				d->Parent->GetFont() &&
 				d->Parent->GetFont()->Handle() ?
 				d->Parent->GetFont() :
 				SysFont;
 	
-	d->Txt = new GDisplayString(f, (char*)n);
+	d->Txt = new LDisplayString(f, (char*)n);
 	if (d->Parent)
 	{
 		d->Parent->Invalidate(&d->Parent->ColumnHeader);
@@ -859,7 +859,7 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, LRect &r, bool FillBackground)
 		}
 		else if (ValidStr(d->cName) && d->Txt)
 		{
-			GFont *f = d->Txt->GetFont();
+			LFont *f = d->Txt->GetFont();
 			if (!f)
 			{
 				LgiAssert(0);

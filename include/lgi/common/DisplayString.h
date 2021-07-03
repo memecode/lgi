@@ -30,11 +30,11 @@
 /// required to render the characters a separate run is used with a different
 /// font ID. Finally you can measure or paint these runs of text. Also tab characters
 /// are expanded to the current tab size setting.
-class LgiClass GDisplayString
+class LgiClass LDisplayString
 {
 protected:
 	GSurface *pDC;
-	GFont *Font;
+	LFont *Font;
 	uint32_t x, y;
 	int xf, yf;
 	int DrawOffsetF;
@@ -115,10 +115,10 @@ protected:
 
 public:
 	/// Constructor
-	GDisplayString
+	LDisplayString
 	(
 		/// The base font. Must not be destroyed during the lifetime of this object.
-		GFont *f,
+		LFont *f,
 		/// Utf-8 input string
 		const char *s,
 		/// Number of bytes in the input string or -1 for NULL terminated.
@@ -126,10 +126,10 @@ public:
 		GSurface *pdc = 0
 	);
 	/// Constructor
-	GDisplayString
+	LDisplayString
 	(
 		/// The base font. Must not be destroyed during the lifetime of this object.
-		GFont *f,
+		LFont *f,
 		/// A wide character input string
 		const char16 *s,
 		/// The number of characters in the input string (NOT the number of bytes) or -1 for NULL terminated
@@ -138,10 +138,10 @@ public:
 	);
 	#ifdef _MSC_VER
 	/// Constructor
-	GDisplayString
+	LDisplayString
 	(
 		/// The base font. Must not be destroyed during the lifetime of this object.
-		GFont *f,
+		LFont *f,
 		/// A wide character input string
 		const uint32_t *s,
 		/// The number of characters in the input string (NOT the number of bytes) or -1 for NULL terminated
@@ -149,9 +149,9 @@ public:
 		GSurface *pdc = 0
 	);
 	#endif
-	virtual ~GDisplayString();
+	virtual ~LDisplayString();
 	
-	GDisplayString &operator=(const GDisplayString &s)
+	LDisplayString &operator=(const LDisplayString &s)
 	{
 		LgiAssert(0);
 		return *this;
@@ -170,7 +170,7 @@ public:
 	void ShowVisibleTab(bool i);
 
 	/// \returns the font used to create the layout
-	GFont *GetFont() { return Font; };
+	LFont *GetFont() { return Font; };
 
 	/// Fits string into 'width' pixels, truncating with '...' if it's not going to fit
 	void TruncateWithDots

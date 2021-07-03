@@ -45,7 +45,7 @@
 //////////////////////////////////////////////////////////////////////
 GRichTextEdit::GRichTextEdit(	int Id,
 								int x, int y, int cx, int cy,
-								GFontType *FontType)
+								LFontType *FontType)
 	: ResObject(Res_Custom)
 {
 	// init vars
@@ -119,7 +119,7 @@ void GRichTextEdit::SetFixedWidthFont(bool i)
 	{
 		if (i)
 		{
-			GFontType Type;
+			LFontType Type;
 			if (Type.GetSystemFont("Fixed"))
 			{
 				GDocView::SetFixedWidthFont(i);
@@ -180,12 +180,12 @@ void GRichTextEdit::SetWrapType(LDocWrapType i)
 	Invalidate();
 }
 
-GFont *GRichTextEdit::GetFont()
+LFont *GRichTextEdit::GetFont()
 {
 	return d->Font;
 }
 
-void GRichTextEdit::SetFont(GFont *f, bool OwnIt)
+void GRichTextEdit::SetFont(LFont *f, bool OwnIt)
 {
 	if (!f)
 		return;
@@ -194,7 +194,7 @@ void GRichTextEdit::SetFont(GFont *f, bool OwnIt)
 	{
 		d->Font.Reset(f);
 	}
-	else if (d->Font.Reset(new GFont))
+	else if (d->Font.Reset(new LFont))
 	{		
 		*d->Font = *f;
 		d->Font->Create(NULL, 0, 0);
@@ -2941,7 +2941,7 @@ void EmojiMenu::OnPaint(GSurface *pDC)
 			
 			GString s;
 			s.Printf("%i", i);
-			GDisplayString Ds(SysFont, s);
+			LDisplayString Ds(SysFont, s);
 			if (Cur == i)
 			{
 				pDC->Colour(L_LIGHT);
@@ -2962,7 +2962,7 @@ void EmojiMenu::OnPaint(GSurface *pDC)
 	else
 	{
 		LRect c = GetClient();
-		GDisplayString Ds(SysFont, "Loading...");
+		LDisplayString Ds(SysFont, "Loading...");
 		SysFont->Colour(L_TEXT, L_MED);
 		SysFont->Transparent(true);
 		Ds.Draw(pDC, (c.X()-Ds.X())>>1, (c.Y()-Ds.Y())>>1);

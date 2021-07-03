@@ -1,7 +1,7 @@
 #include "Lgi.h"
 #include "GEdit.h"
 #include "GButton.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 #include "GTextLabel.h"
 #include "GCss.h"
 #include "GTableLayout.h"
@@ -142,7 +142,7 @@ public:
 			char s[256];
 			Test *t = a[i];
 			sprintf_s(s, sizeof(s), "%s->%s", GColourSpaceToString(t->Src), GColourSpaceToString(t->Dst));
-			GDisplayString ds(SysFont, s);
+			LDisplayString ds(SysFont, s);
 			ds.Draw(pDC, x, y);
 			y += ds.Y();
 			if (t->Result.Y())

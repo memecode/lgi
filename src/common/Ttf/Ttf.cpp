@@ -1,5 +1,5 @@
 /*hdr
-**	FILE:		GTypeFace.cpp
+**	FILE:		LTypeFace.cpp
 **	AUTHOR:		Matthew Allen
 **	DATE:		5/5/97
 **	DESCRIPTION:	GDC v2.xx True Type Font Support
@@ -86,13 +86,13 @@ int RoundNearest(double n)
 
 /****************************** Classes *************************************************************************************/
 
-GFont::GFont()
+LFont::LFont()
 {
 	hFont = 0;
 	Widths = 0;
 }
 
-GFont::~GFont()
+LFont::~LFont()
 {
 	DeleteArray(Widths);
 	if (hFont)
@@ -101,7 +101,7 @@ GFont::~GFont()
 	}
 }
 
-void GFont::SetWidths()
+void LFont::SetWidths()
 {
 	DeleteArray(Widths);
 	if (hFont)
@@ -132,7 +132,7 @@ void GFont::SetWidths()
 	}
 }
 
-bool GFont::Create(	char *Face,
+bool LFont::Create(	char *Face,
 					int Height,
 					int Width,
 					int Weight,
@@ -180,7 +180,7 @@ bool GFont::Create(	char *Face,
 	return (hFont != 0);
 }
 
-bool GFont::CreateFont(LOGFONT *LogFont)
+bool LFont::CreateFont(LOGFONT *LogFont)
 {
 	if (hFont)
 	{
@@ -197,7 +197,7 @@ bool GFont::CreateFont(LOGFONT *LogFont)
 	return (hFont != 0);
 }
 
-void GFont::Text(GSurface *pDC, int x, int y, char *Str, int Len, LRect *r)
+void LFont::Text(GSurface *pDC, int x, int y, char *Str, int Len, LRect *r)
 {
 	if (pDC AND hFont AND Str)
 	{
@@ -240,7 +240,7 @@ void GFont::Text(GSurface *pDC, int x, int y, char *Str, int Len, LRect *r)
 	}
 }
 
-void GFont::TextW(GSurface *pDC, int x, int y, ushort *Str, int Len, LRect *r)
+void LFont::TextW(GSurface *pDC, int x, int y, ushort *Str, int Len, LRect *r)
 {
 	if (pDC AND hFont AND Str)
 	{
@@ -289,7 +289,7 @@ void GFont::TextW(GSurface *pDC, int x, int y, ushort *Str, int Len, LRect *r)
 	}
 }
 
-void GFont::Size(int *x, int *y, char *Str, int Len, int Flags)
+void LFont::Size(int *x, int *y, char *Str, int Len, int Flags)
 {
 	HDC hDC = CreateCompatibleDC(NULL);
 	HFONT hFnt = (HFONT) SelectObject(hDC, hFont);
@@ -345,7 +345,7 @@ char *strnchr(char *s, char c, int Len)
 	return 0;
 }
 
-int GFont::CharAt(int x, char *Str, int Len)
+int LFont::CharAt(int x, char *Str, int Len)
 {
 	if (x < 0)
 	{

@@ -87,7 +87,7 @@ public:
 		void		_SetClient(LRect *c);
 
 		#ifdef LINUX
-		friend class GFont;
+		friend class LFont;
 		friend class GView;
 		
 		COLOUR		Col;

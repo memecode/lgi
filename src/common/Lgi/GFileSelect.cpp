@@ -459,7 +459,7 @@ class FolderCtrl : public GView
 {
 	struct Part
 	{
-		GAutoPtr<GDisplayString> ds;
+		GAutoPtr<LDisplayString> ds;
 		LRect Arrow;
 		LRect Text;
 	};
@@ -553,7 +553,7 @@ public:
 		for (size_t i=0; i<a.Length(); i++)
 		{
 			Part &n = p.New();
-			n.ds.Reset(new GDisplayString(GetFont(), a[i]));
+			n.ds.Reset(new LDisplayString(GetFont(), a[i]));
 		}
 
 		Cursor = p.Length() - 1;
@@ -566,10 +566,10 @@ public:
 		LRect c = GetClient();
 		LgiThinBorder(pDC, c, EdgeWin7Sunken);
 		
-		GFont *f = GetFont();
+		LFont *f = GetFont();
 		f->Transparent(false);
 		
-		GDisplayString Arrow(f, ">");
+		LDisplayString Arrow(f, ">");
 		for (unsigned i=0; i<p.Length(); i++)
 		{
 			Part *n = p.AddressOf(i);

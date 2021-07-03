@@ -38,7 +38,7 @@ public:
 		return true;
 	}
 
-	bool Layout(GFont *Base, int Px)
+	bool Layout(LFont *Base, int Px)
 	{		
 		if (!Lock(_FL))
 			return false;
@@ -152,7 +152,7 @@ bool GTextLabel::NameW(const char16 *n)
 	return true;
 }
 
-void GTextLabel::SetFont(GFont *Fnt, bool OwnIt)
+void GTextLabel::SetFont(LFont *Fnt, bool OwnIt)
 {
 	GView::SetFont(Fnt, OwnIt);
 	d->Layout(GetFont(), X());

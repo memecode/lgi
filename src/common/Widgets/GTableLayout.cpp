@@ -816,7 +816,7 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 			}
 			else if (Izza(GButton))
 			{
-				GDisplayString ds(v->GetFont(), v->Name());
+				LDisplayString ds(v->GetFont(), v->Name());
 				auto Scale = Table->d->Scale();
 				LPoint Pad((int)(Scale * GButton::Overhead.x + 0.5), (int)(Scale * GButton::Overhead.y + 0.5));
 
@@ -842,13 +842,13 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 			{
 				int PadX = GCombo::Pad.x1 + GCombo::Pad.x2;
 				GCombo *Cbo = Izza(GCombo);
-				GFont *f = Cbo->GetFont();
+				LFont *f = Cbo->GetFont();
 				int min_x = -1, max_x = 0;
 				char *t;
 
 				for (int i=0; i < Cbo->Length() && (t = (*Cbo)[i]); i++)
 				{
-					GDisplayString ds(f, t);
+					LDisplayString ds(f, t);
 					int x = ds.X();
 					min_x = min_x < 0 ? x : MIN(min_x, x);
 					max_x = MAX(x + 4, max_x);
@@ -1082,7 +1082,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		}
 		else if (Izza(GEdit) || Izza(GCombo))
 		{
-			GFont *f = v->GetFont();
+			LFont *f = v->GetFont();
 			int y = (f ? f : SysFont)->GetHeight() + 8;
 			
 			c->r = v->GetPos();
@@ -1876,7 +1876,7 @@ void GTableLayoutPrivate::LayoutVertical(LRect &Client, int *MinY, int *MaxY, Ce
 void GTableLayoutPrivate::LayoutPost(LRect &Client)
 {
 	int Px = 0, Py = 0, Cx, Cy;
-	GFont *Fnt = Ctrl->GetFont();
+	LFont *Fnt = Ctrl->GetFont();
 
 	// Move cells into their final positions
 	#if DEBUG_LAYOUT

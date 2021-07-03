@@ -646,7 +646,7 @@ public:
 	int LastIndex;
 	bool OwnImgList;
 	GImageList *ImgList;
-	GFont *Font;
+	LFont *Font;
 	GToolTip *Tip;
 	
 	// Customization menu
@@ -806,35 +806,35 @@ void GToolButton::Layout()
 		if (t.Length() < 3)
 		{
 			if (t.Length() > 0)
-				Text.Add(new GDisplayString(Par->d->Font, t[0]));
+				Text.Add(new LDisplayString(Par->d->Font, t[0]));
 			if (t.Length() > 1)
-				Text.Add(new GDisplayString(Par->d->Font, t[1]));
+				Text.Add(new LDisplayString(Par->d->Font, t[1]));
 		}
 		else if (t.Length() == 3)
 		{
 			sprintf(Buf, "%s %s", t[0], t[1]);
-			GDisplayString *d1 = new GDisplayString(Par->d->Font, Buf);
+			LDisplayString *d1 = new LDisplayString(Par->d->Font, Buf);
 			sprintf(Buf, "%s %s", t[1], t[2]);
-			GDisplayString *d2 = new GDisplayString(Par->d->Font, Buf);
+			LDisplayString *d2 = new LDisplayString(Par->d->Font, Buf);
 			if (d1 && d2)
 			{
 				if (d1->X() < d2->X())
 				{
 					DeleteObj(d2);
 					Text.Add(d1);
-					Text.Add(new GDisplayString(Par->d->Font, t[2]));
+					Text.Add(new LDisplayString(Par->d->Font, t[2]));
 				}
 				else
 				{
 					DeleteObj(d1);
-					Text.Add(new GDisplayString(Par->d->Font, t[0]));
+					Text.Add(new LDisplayString(Par->d->Font, t[0]));
 					Text.Add(d2);
 				}
 			}
 		}
 		else
 		{
-			//GDisplayString *Cur = new GDisplayString(Par->d->Font, Buf);
+			//LDisplayString *Cur = new LDisplayString(Par->d->Font, Buf);
 		}
 	}
 }
@@ -918,7 +918,7 @@ void GToolButton::OnPaint(GSurface *pDC)
 					Par->d->Font->Colour(a, b);
 					for (int i=0; i<Text.Length(); i++)
 					{
-						GDisplayString *Ds = Text[i];
+						LDisplayString *Ds = Text[i];
 						Ds->Draw(pDC, Off + ((X()-Ds->X())/2), Ty);
 						Ty += Ds->Y();
 					}
@@ -1201,7 +1201,7 @@ GToolBar::GToolBar()
 	Raised(true);
 
 	// Setup tool button font
-	GFontType SysFontType;
+	LFontType SysFontType;
 	if (SysFontType.GetSystemFont("Small"))
 	{
 		d->Font = SysFontType.Create();
@@ -1425,7 +1425,7 @@ void GToolBar::TextLabels(bool i)
 	}
 }
 
-GFont *GToolBar::GetFont()
+LFont *GToolBar::GetFont()
 {
 	return d->Font;
 }
@@ -1606,7 +1606,7 @@ bool GToolBar::Pour(LRegion &r)
 					
 					for (int i=0; i<Btn->Text.Length(); i++)
 					{
-						GDisplayString *Ds = Btn->Text[i];
+						LDisplayString *Ds = Btn->Text[i];
 						Tx = max(Ds->X() + 4, Tx);
 						Ty += Ds->Y();
 					}
@@ -1661,7 +1661,7 @@ bool GToolBar::Pour(LRegion &r)
 
 							// int _x = 0, _y = 0;
 							// d->Font->Size(&_x, &_y, n, l);
-							GDisplayString ds(d->Font, n, len);
+							LDisplayString ds(d->Font, n, len);
 
 							Tx = max(Tx, ds.X());
 							Ty += ds.Y();

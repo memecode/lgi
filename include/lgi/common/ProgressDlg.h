@@ -34,7 +34,7 @@ public:
 	bool SetRange(const GRange &r) override;
 	int64 Value() override { return Progress::Value(); }
 	void Value(int64 v) override;
-	GFont *GetFont() override;
+	LFont *GetFont() override;
 	void UpdateUI();
 
 	GProgressPane &operator++(int);

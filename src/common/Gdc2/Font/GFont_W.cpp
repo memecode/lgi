@@ -22,7 +22,7 @@
 #include "lgi/common/GdiLeak.h"
 
 /////////////////////////////////////////////////////////////////////////////
-void GFont::_Measure(int &x, int &y, OsChar *Str, int Len)
+void LFont::_Measure(int &x, int &y, OsChar *Str, int Len)
 {
 	if (!Handle())
 	{
@@ -50,7 +50,7 @@ void GFont::_Measure(int &x, int &y, OsChar *Str, int Len)
 		DeleteDC(hDC);
 }
 
-int GFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
+int LFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
 {
 	if (!Handle())
 		return -1;
@@ -94,7 +94,7 @@ int GFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
 	return Fit;
 }
 
-void GFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore)
+void LFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore)
 {
 	if (!Handle())
 		return;
@@ -157,16 +157,16 @@ void GFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, G
 
 #else
 
-void GFont::_Measure(int &x, int &y, OsChar *Str, int Len)
+void LFont::_Measure(int &x, int &y, OsChar *Str, int Len)
 {
 }
 
-int GFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
+int LFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
 {
 	return -1;
 }
 
-void GFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore)
+void LFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore)
 {
 }
 

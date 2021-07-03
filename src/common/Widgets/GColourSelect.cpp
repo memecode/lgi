@@ -2,7 +2,7 @@
 
 #include "Lgi.h"
 #include "GColourSelect.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 #include "LgiRes.h"
 #include "GNotifications.h"
 
@@ -35,7 +35,7 @@ public:
 			char s[64];
 			
 			SysFont->Colour(L_BLACK, L_MED);
-			GDisplayString ds(SysFont, (char*)LgiLoadString(L_COLOUR_NONE, "No Colour"));
+			LDisplayString ds(SysFont, (char*)LgiLoadString(L_COLOUR_NONE, "No Colour"));
 			ds.Draw(pDC, r.x1 + 2, r.y1 + 2);
 
 			for (unsigned i=0; i<Colour->Presets.Length(); i++)
@@ -47,7 +47,7 @@ public:
 				pDC->Rectangle(r.x1+1, y+1, r.x1+Ly-1, y+Ly-1);
 				
 				sprintf_s(s, sizeof(s), "%2.2X,%2.2X,%2.2X", p.r(), p.g(), p.b());
-				GDisplayString ds(SysFont, s);
+				LDisplayString ds(SysFont, s);
 				ds.Draw(pDC, r.x1 + Ly + 10, y + 2);
 			}
 		}

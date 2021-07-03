@@ -14,7 +14,7 @@
 // Fwd defs
 class LXmlTag;
 class LMouseHook;
-class GFont;
+class LFont;
 class LRect;
 class LPoint;
 class LRegion;
@@ -450,8 +450,8 @@ public:
     virtual bool SetColour(GColour &c, bool Fore) = 0;
 	virtual GString CssStyles(const char *Set = NULL) { return GString(); }
 	virtual GString::Array *CssClasses() { return NULL; }
-	virtual GFont *GetFont() = 0;
-	virtual void SetFont(GFont *Fnt, bool OwnIt = false) = 0;
+	virtual LFont *GetFont() = 0;
+	virtual void SetFont(LFont *Fnt, bool OwnIt = false) = 0;
 
 	// Name and value
 	virtual bool Name(const char *n) = 0;

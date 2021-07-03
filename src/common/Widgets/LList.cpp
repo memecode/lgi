@@ -92,7 +92,7 @@ public:
 	int ListItem_Image;
 	List<LListItemColumn> Cols;
 	GArray<char*> Str;
-	GArray<GDisplayString*> Display;
+	GArray<LDisplayString*> Display;
 	int16 LayoutColumn;
 
 	LListItemPrivate()
@@ -389,11 +389,11 @@ void LListItem::OnMeasure(LPoint *Info)
 		}
 		else
 		{
-			GDisplayString *s = GetDs(0);
+			LDisplayString *s = GetDs(0);
 			Info->x = 22 + (s ? s->X() : 0);
 		}
 		
-		GFont *f = Parent ? Parent->GetFont() : SysFont;
+		LFont *f = Parent ? Parent->GetFont() : SysFont;
 		Info->y = MAX(16, f->GetHeight() + 2); // the default height
 	}
 }
@@ -415,18 +415,18 @@ void LListItem::OnMouseClick(LMouse &m)
 	}
 }
 
-GDisplayString *LListItem::GetDs(int Col, int FitTo)
+LDisplayString *LListItem::GetDs(int Col, int FitTo)
 {
 	if (!d->Display[Col])
 	{
-		GFont *f = GetFont();
+		LFont *f = GetFont();
 		if (!f && Parent) f = Parent->GetFont();
 		if (!f) f = SysFont;
 
 		const char *Text = d->Str[Col] ? d->Str[Col] : GetText(Col);
 		LgiAssert((NativeInt)Text != 0xcdcdcdcd &&
 				  (NativeInt)Text != 0xfdfdfdfd);
-		d->Display[Col] = new GDisplayString(f, Text?Text:(char*)"");
+		d->Display[Col] = new LDisplayString(f, Text?Text:(char*)"");
 		if (d->Display[Col] && FitTo > 0)
 		{
 			d->Display[Col]->TruncateWithDots(FitTo);
@@ -478,7 +478,7 @@ void LListItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 
 			if (c->Type() == GIC_ASK_TEXT)
 			{
-				GDisplayString *Ds = GetDs(i, Ctx.X());
+				LDisplayString *Ds = GetDs(i, Ctx.X());
 				if (Ds)
 				{
 					Ds->GetFont()->TabSize(0);
@@ -2328,7 +2328,7 @@ void LList::PourAll()
 
 	// Layout all the elements
 	LRect Client = GetClient();
-	GFont *Font = GetFont();
+	LFont *Font = GetFont();
 
 	if (d->Mode == LListDetails)
 	{
@@ -2686,24 +2686,24 @@ int LList::GetContentSize(int Index)
 	for (auto It = Items.begin(); It.In(); It++)
 	{
 		LListItem *i = *It;
-		GDisplayString *s = i->d->Display[Index];
-		GDisplayString *Mem = 0;
+		LDisplayString *s = i->d->Display[Index];
+		LDisplayString *Mem = 0;
 		
 		// If no cached string, create it for the list item
 		if (!s || s->IsTruncated())
 		{
-			GFont *f = i->GetFont();
+			LFont *f = i->GetFont();
 			if (!f) f = GetFont();
 			if (!f) f = SysFont;
 
 			const char *Text = i->d->Str[Index] ? i->d->Str[Index] : i->GetText(Index);
 			if (s && s->IsTruncated())
 			{
-				s = Mem = new GDisplayString(f, Text?Text:(char*)"");
+				s = Mem = new LDisplayString(f, Text?Text:(char*)"");
 			}
 			else
 			{
-				s = i->d->Display[Index] = new GDisplayString(f, Text?Text:(char*)"");
+				s = i->d->Display[Index] = new LDisplayString(f, Text?Text:(char*)"");
 			}
 		}
 
@@ -2718,11 +2718,11 @@ int LList::GetContentSize(int Index)
 	
 	// Measure the heading too
 	GItemColumn *Col = Columns[Index];
-	GFont *f = GetFont();
+	LFont *f = GetFont();
 	LgiAssert(f != 0);
 	if (f)
 	{
-		GDisplayString h(f, Col->Name());
+		LDisplayString h(f, Col->Name());
 		int Hx = h.X() + (Col->Mark() ? 10 : 0);
 		Max = MAX(Max, Hx);
 	}

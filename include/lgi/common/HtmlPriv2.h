@@ -94,7 +94,7 @@ public:
 	GLength &operator =(float val);
 	GCss::LengthType GetUnits();
 	void Set(char *s);
-	float Get(GFlowRegion *Flow, GFont *Font, bool Lock = false);
+	float Get(GFlowRegion *Flow, LFont *Font, bool Lock = false);
 	float GetRaw() { return d; }
 };
 
@@ -144,7 +144,7 @@ public:
 
 	LRect Bounds();
 	LRect *TopRect(LRegion *c);
-	void FlowText(GTag *Tag, GFlowRegion *c, GFont *Font, char16 *Text, GCss::LengthType Align);
+	void FlowText(GTag *Tag, GFlowRegion *c, LFont *Font, char16 *Text, GCss::LengthType Align);
 };
 
 class GCellStore
@@ -197,7 +197,7 @@ protected:
 	void _TraceOpenTags();
 
 	// Private methods
-	GFont *NewFont();
+	LFont *NewFont();
 	int NearestChar(GFlowRect *Fr, int x, int y);
 	GTag *HasOpenTag(char *t);
 	GTag *PrevTag();
@@ -237,12 +237,12 @@ public:
 	bool Attach(GTag *Child, int Idx = -1);
 	void Detach();
 	GTag *GetBlockParent(int *Idx = 0);
-	GFont *GetFont();
+	LFont *GetFont();
 
 	// Style
 	LPoint Pos;
 	LPoint Size;
-	GFont *Font;
+	LFont *Font;
 	
 	// Images
 	GAutoPtr<GSurface> Image;

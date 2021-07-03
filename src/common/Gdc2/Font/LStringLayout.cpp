@@ -137,18 +137,18 @@ uint32_t LStringLayout::PrevChar(char *s)
 	return 0;
 }
 
-GFont *LStringLayout::GetBaseFont()
+LFont *LStringLayout::GetBaseFont()
 {
 	return FontCache && FontCache->GetDefaultFont() ? FontCache->GetDefaultFont() : SysFont;
 }
 
-void LStringLayout::SetBaseFont(GFont *f)
+void LStringLayout::SetBaseFont(LFont *f)
 {
 	if (FontCache)
 		FontCache->SetDefaultFont(f);
 }
 
-GFont *LStringLayout::GetFont()
+LFont *LStringLayout::GetFont()
 {
 	if (Strs.Length() == 0)
 		return NULL;
@@ -163,7 +163,7 @@ void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
 	MinX = 0;
 	MaxX = 0;
 		
-	GFont *f = GetBaseFont();
+	LFont *f = GetBaseFont();
 	if (!Text.Length() || !f)
 		return;
 
@@ -173,7 +173,7 @@ void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
 	for (auto Run: Text)
 	{
 		char *s = Run->Text;
-		GFont *f = FontCache ? FontCache->GetFont(Run) : SysFont;
+		LFont *f = FontCache ? FontCache->GetFont(Run) : SysFont;
 		LgiAssert(f != NULL);
 
 		char *Start = s;
@@ -218,7 +218,7 @@ void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
 			if (e == s)
 				break;
 
-			GDisplayString d(f, s, (int) (e - s));
+			LDisplayString d(f, s, (int) (e - s));
 			MinX = MAX(d.X(), MinX);
 
 			s = e;
@@ -235,7 +235,7 @@ void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
 			Fx += s->FX();
 		}
 
-		int LineX = Fx >> GDisplayString::FShift;
+		int LineX = Fx >> LDisplayString::FShift;
 		MaxX = MAX(MaxX, LineX);
 		Ln.DeleteObjects();
 	}	
@@ -277,7 +277,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 	Strs.DeleteObjects();
 
 	// Param validation
-	GFont *f = GetBaseFont();
+	LFont *f = GetBaseFont();
 	if (!f || !Text.Length() || Width <= 0)
 	{
 		Min.y = Max.y = MAX((f ? f : SysFont)->GetHeight(), MinYSize);
@@ -288,7 +288,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 	int y = 0;
 	int LineFX = 0;
 	int LineHeight = 0;
-	int Shift = GDisplayString::FShift;
+	int Shift = LDisplayString::FShift;
 
 	// By definition these potential break points are all
 	// on the same line. Clear the array on each new line.
@@ -344,7 +344,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 
 			ssize_t Bytes = e - s;
 
-			GFont *Fnt = NULL;
+			LFont *Fnt = NULL;
 			if (FontCache)
 				Fnt = FontCache->GetFont(Run);
 			if (!Fnt)
@@ -521,12 +521,12 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 	Prof.Add("Post");
 	#endif
 
-	Min.x = (Min.x + GDisplayString::FScale - 1) >> GDisplayString::FShift;
+	Min.x = (Min.x + LDisplayString::FScale - 1) >> LDisplayString::FShift;
 	Min.y = LineHeight * MinLines;
 	if (Min.y < MinYSize)
 		Min.y = MinYSize;
 
-	Max.x = (Max.x + GDisplayString::FScale - 1) >> GDisplayString::FShift;
+	Max.x = (Max.x + LDisplayString::FScale - 1) >> LDisplayString::FShift;
 	Max.y = y + LineHeight;
 	if (Max.y < MinYSize)
 		Max.y = MinYSize;
@@ -559,7 +559,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 		pDC->Colour(Back);
 		pDC->Rectangle(&rc);
 	}
-	int Shift = GDisplayString::FShift;
+	int Shift = LDisplayString::FShift;
 	#endif		
 	
 	GColour FocusFore = LColour(L_FOCUS_SEL_FORE);
@@ -568,7 +568,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 	for (auto ds: Strs)
 	{
 		LLayoutString *s = dynamic_cast<LLayoutString*>(ds);
-		GFont *f = s->GetFont();
+		LFont *f = s->GetFont();
 		GColour Bk = s->Back.IsTransparent() ? Back : s->Back;
 
 		#ifdef WINNATIVE

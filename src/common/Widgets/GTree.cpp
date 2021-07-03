@@ -72,7 +72,7 @@ public:
 
 class GTreeItemPrivate
 {
-	GArray<GDisplayString*> Ds;
+	GArray<LDisplayString*> Ds;
 	GArray<uint32_t> ColPx;
 
 public:
@@ -106,12 +106,12 @@ public:
 		Ds.DeleteObjects();
 	}
 
-	GDisplayString *GetDs(int Col, int FixPx)
+	LDisplayString *GetDs(int Col, int FixPx)
 	{
 		if (!Ds[Col])
 		{
-			GFont *f = Item->GetTree() ? Item->GetTree()->GetFont() : SysFont;		
-			Ds[Col] = new GDisplayString(f, Item->GetText(Col));
+			LFont *f = Item->GetTree() ? Item->GetTree()->GetFont() : SysFont;		
+			Ds[Col] = new LDisplayString(f, Item->GetText(Col));
 			if (Ds[Col])
 			{
 				ColPx[Col] = Ds[Col]->X();
@@ -630,7 +630,7 @@ void GTreeItem::_Remove()
 
 void GTreeItem::_PourText(LPoint &Size)
 {
-	GFont *f = Tree ? Tree->GetFont() : SysFont;
+	LFont *f = Tree ? Tree->GetFont() : SysFont;
 	auto *Txt = GetText();
 	
 	#if defined(_WIN64) && defined(_DEBUG)
@@ -641,7 +641,7 @@ void GTreeItem::_PourText(LPoint &Size)
 	}
 	#endif
 	
-	GDisplayString ds(f, Txt);
+	LDisplayString ds(f, Txt);
 	Size.x = ds.X() + 4;
 	Size.y = 0;
 }
@@ -651,8 +651,8 @@ void GTreeItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	const char *Text = GetText();
 	if (Text)
 	{
-		GDisplayString *Ds = d->GetDs(0, d->Text.X());
-		GFont *f = Tree ? Tree->GetFont() : SysFont;
+		LDisplayString *Ds = d->GetDs(0, d->Text.X());
+		LFont *f = Tree ? Tree->GetFont() : SysFont;
 
 		int Tab = f->TabSize();
 		f->TabSize(0);
@@ -696,7 +696,7 @@ void GTreeItem::_Pour(LPoint *Limit, int ColumnPx, int Depth, bool Visible)
 		if (!Height)
 		    Height = 16;
 
-		GDisplayString *Ds = d->GetDs(0, 0);
+		LDisplayString *Ds = d->GetDs(0, 0);
 
 		d->Pos.ZOff(ColumnPx - 1, (Ds ? MAX(Height, Ds->Y()) : Height) - 1);
 		d->Pos.Offset(0, Limit->y);
@@ -1099,10 +1099,10 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 
 void GTreeItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 {
-	GDisplayString *ds = d->GetDs(i, Ctx.ColPx[i]);
+	LDisplayString *ds = d->GetDs(i, Ctx.ColPx[i]);
 	if (ds)
 	{
-		GFont *f = ds->GetFont();
+		LFont *f = ds->GetFont();
 		f->Colour(Ctx.Fore, Ctx.TxtBack);
 		ds->Draw(Ctx.pDC, Ctx.x1 + 2, Ctx.y1 + 1, &Ctx);
 	}
@@ -1828,7 +1828,7 @@ void GTree::OnPaint(GSurface *pDC)
 	#endif
 
 	rItems = GetClient();
-	GFont *f = GetFont();
+	LFont *f = GetFont();
 	if (ShowColumnHeader())
 	{
 		ColumnHeader.ZOff(rItems.X()-1, f->GetHeight() + 4);

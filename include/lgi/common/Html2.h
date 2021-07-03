@@ -63,7 +63,7 @@ protected:
 	// Methods
 	void _New();
 	void _Delete();
-	GFont *DefFont();
+	LFont *DefFont();
 	GTag *GetOpenTag(char *Tag);
 	void CloseTag(GTag *t);
 	void Parse();

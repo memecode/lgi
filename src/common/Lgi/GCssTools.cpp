@@ -413,11 +413,11 @@ void GCssTools::PaintContent(GSurface *pDC, LRect &in, const char *utf8, GSurfac
 
 	if (utf8 || img)
 	{
-		GAutoPtr<GDisplayString> Ds;
+		GAutoPtr<LDisplayString> Ds;
 		auto Fnt = View ? View->GetFont() : SysFont;
 		if (utf8)
 		{
-			Ds.Reset(new GDisplayString(Fnt, utf8));
+			Ds.Reset(new LDisplayString(Fnt, utf8));
 		}
 
 		int Spacer = Ds && img ? 8 : 0;

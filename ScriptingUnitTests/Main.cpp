@@ -1,5 +1,5 @@
 #include "Lgi.h"
-#include "GScripting.h"
+#include "Scripting.h"
 #include "../src/common/Coding/GScriptingPriv.h"
 #include "GStringClass.h"
 #include "LgiRes.h"

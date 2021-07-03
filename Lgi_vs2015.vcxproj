@@ -423,12 +423,10 @@
     <ClCompile Include="src\common\Gdc2\8Bit.cpp" />
     <ClCompile Include="src\common\Gdc2\Alpha.cpp" />
     <ClCompile Include="src\common\Gdc2\Filters\GFilter.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\GDisplayString.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\GFont.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\GFontCodePages.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\GFontSystem.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\GFont_A.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\GFont_W.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\LDisplayString.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\LFont.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\LFontCodePages.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\LFontSystem.cpp" />
     <ClCompile Include="src\common\Gdc2\Font\LStringLayout.cpp" />
     <ClCompile Include="src\common\Gdc2\GColour.cpp" />
     <ClCompile Include="src\common\Gdc2\GdcCommon.cpp" />
@@ -456,7 +454,7 @@
     <ClCompile Include="src\common\Lgi\GDragAndDropCommon.cpp" />
     <ClCompile Include="src\common\Lgi\GDropFiles.cpp" />
     <ClCompile Include="src\common\Lgi\GFindReplace.cpp" />
-    <ClCompile Include="src\common\Lgi\GFontSelect.cpp" />
+    <ClCompile Include="src\common\Lgi\LFontSelect.cpp" />
     <ClCompile Include="src\common\Lgi\GGuiUtils.cpp" />
     <ClCompile Include="src\common\Lgi\GInput.cpp" />
     <ClCompile Include="src\common\Lgi\GLibrary.cpp" />
@@ -674,7 +672,7 @@
     <ClInclude Include="include\lgi\win\LgiOsClasses.h" />
     <ClInclude Include="include\lgi\win\LgiOsDefs.h" />
     <ClInclude Include="private\win\GAppPriv.h" />
-    <ClInclude Include="src\common\Gdc2\Font\GFontPriv.h" />
+    <ClInclude Include="src\common\Gdc2\Font\LFontPriv.h" />
     <ClInclude Include="src\common\Hash\md5\md5.h" />
     <ClInclude Include="src\common\Hash\sha1\sha1.h" />
     <ClInclude Include="src\win\INet\MibAccess.h" />

@@ -8,7 +8,7 @@
 #define EDIT_LEFT_MARGIN	16 // gutter for debug break points
 int DocEdit::LeftMarginPx = EDIT_LEFT_MARGIN;
 GAutoPtr<GDocFindReplaceParams> GlobalFindReplace;
-DocEdit::DocEdit(IdeDoc *d, GFontType *f) :
+DocEdit::DocEdit(IdeDoc *d, LFontType *f) :
 	GTextView3(IDC_EDIT, 0, 0, 100, 100, f),
 	DocEditStyling(this)
 {
@@ -28,10 +28,10 @@ DocEdit::DocEdit(IdeDoc *d, GFontType *f) :
 		
 	if (!f)
 	{
-		GFontType Type;
+		LFontType Type;
 		if (Type.GetSystemFont("Fixed"))
 		{
-			GFont *f = Type.Create();
+			LFont *f = Type.Create();
 			if (f)
 			{
 				#if defined LINUX
@@ -185,7 +185,7 @@ void DocEdit::OnMouseClick(LMouse &m)
 	{
 		// Margin click... work out the line
 		int Y = (VScroll) ? (int)VScroll->Value() : 0;
-		GFont *f = GetFont();
+		LFont *f = GetFont();
 		if (!f) return;
 		GCss::Len PaddingTop = GetCss(true)->PaddingTop();
 		int TopPx = PaddingTop.ToPx(GetClient().Y(), f);

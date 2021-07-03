@@ -833,7 +833,7 @@ public:
 	void Ellipse(		LPointF &c,
 						double x,
 						double y);
-	bool Text(			GFont *Font,
+	bool Text(			LFont *Font,
 						double x,
 						double y,
 						char *Utf8,

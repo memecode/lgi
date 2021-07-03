@@ -504,7 +504,7 @@ public:
 	virtual ~LMenu();
 
 	/// Returns the font used by the menu items
-	static GFont *GetFont();
+	static LFont *GetFont();
 
 	/// Returns the top level window that this menu is attached to
 	GViewI *WindowHandle() { return Window; }

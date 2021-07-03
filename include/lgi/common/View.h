@@ -434,13 +434,13 @@ public:
 	/// \brief Gets the font this control should draw with.
 	///
 	/// The default font is the system font, owned by the GApp object.
-	virtual GFont *GetFont() override;
+	virtual LFont *GetFont() override;
 	
 	/// \brief Sets the font for this control
 	///
 	/// The lifetime of the font passed in is the responsibility of the caller.
 	/// The GView object assumes the pointer will be valid at all times.
-	virtual void SetFont(GFont *Fnt, bool OwnIt = false) override;
+	virtual void SetFont(LFont *Fnt, bool OwnIt = false) override;
 
 	/// Returns the cursor that should be displayed for the given location
 	/// \returns a cursor type. i.e. LCUR_Normal from LgiDefs.h

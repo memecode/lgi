@@ -195,7 +195,7 @@ bool GCheckBox::NameW(const char16 *n)
 	return Status;
 }
 
-void GCheckBox::SetFont(GFont *Fnt, bool OwnIt)
+void GCheckBox::SetFont(LFont *Fnt, bool OwnIt)
 {
 	LgiAssert(Fnt && Fnt->Handle());
 

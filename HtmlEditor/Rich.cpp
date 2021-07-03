@@ -137,7 +137,7 @@ public:
 			s += " ";
 		}
 
-		GDisplayString d(SysFont, s);
+		LDisplayString d(SysFont, s);
 		d.Draw(pDC, 6, 6);
 
 		if (Ok && Install)

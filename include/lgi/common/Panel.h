@@ -21,7 +21,7 @@ protected:
 	int ClosedSize;
 	int OpenSize;
 	LRect ThumbPos;
-	GDisplayString *Ds;
+	LDisplayString *Ds;
 
 	void RePour();
 	void SetChildrenVisibility(bool i);

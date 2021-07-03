@@ -65,7 +65,7 @@ protected:
 	// Methods
 	void _New();
 	void _Delete();
-	GFont *DefFont();
+	LFont *DefFont();
 	void CloseTag(GTag *t);
 	void ParseDocument(const char *Doc);
 	void OnAddStyle(const char *MimeType, const char *Styles);

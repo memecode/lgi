@@ -419,7 +419,7 @@ public:
 	int LastIndex;
 	bool OwnImgList;
 	GImageList *ImgList;
-	GFont *Font;
+	LFont *Font;
 	GToolTip *Tip;
 	
 	// Customization menu
@@ -519,7 +519,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 struct GToolButtonPriv
 {
-	GArray<GDisplayString*> Text;
+	GArray<LDisplayString*> Text;
 };
 
 GToolButton::GToolButton(int Bx, int By)
@@ -575,28 +575,28 @@ void GToolButton::Layout()
 	if (t.Length() < 3)
 	{
 		if (t.Length() > 0)
-			d->Text.Add(new GDisplayString(ToolBar->d->Font, t[0]));
+			d->Text.Add(new LDisplayString(ToolBar->d->Font, t[0]));
 		if (t.Length() > 1)
-			d->Text.Add(new GDisplayString(ToolBar->d->Font, t[1]));
+			d->Text.Add(new LDisplayString(ToolBar->d->Font, t[1]));
 	}
 	else if (t.Length() == 3)
 	{
 		sprintf_s(Buf, sizeof(Buf), "%s %s", t[0], t[1]);
-		GDisplayString *d1 = new GDisplayString(ToolBar->d->Font, Buf);
+		LDisplayString *d1 = new LDisplayString(ToolBar->d->Font, Buf);
 		sprintf_s(Buf, sizeof(Buf), "%s %s", t[1], t[2]);
-		GDisplayString *d2 = new GDisplayString(ToolBar->d->Font, Buf);
+		LDisplayString *d2 = new LDisplayString(ToolBar->d->Font, Buf);
 		if (d1 && d2)
 		{
 			if (d1->X() < d2->X())
 			{
 				DeleteObj(d2);
 				d->Text.Add(d1);
-				d->Text.Add(new GDisplayString(ToolBar->d->Font, t[2]));
+				d->Text.Add(new LDisplayString(ToolBar->d->Font, t[2]));
 			}
 			else
 			{
 				DeleteObj(d1);
-				d->Text.Add(new GDisplayString(ToolBar->d->Font, t[0]));
+				d->Text.Add(new LDisplayString(ToolBar->d->Font, t[0]));
 				d->Text.Add(d2);
 			}
 		}
@@ -729,7 +729,7 @@ void GToolButton::OnPaint(GSurface *pDC)
 					Par->d->Font->Colour(a, b);
 					for (int i=0; i<d->Text.Length(); i++)
 					{
-						GDisplayString *Ds = d->Text[i];
+						LDisplayString *Ds = d->Text[i];
 						Ds->Draw(pDC, Down + ((X()-Ds->X())/2), Ty);
 						Ty += Ds->Y();
 					}
@@ -1004,7 +1004,7 @@ GToolBar::GToolBar()
 	_IsToolBar = 1;
 
 	// Setup tool button font
-	GFontType SysFontType;
+	LFontType SysFontType;
 	if (SysFontType.GetSystemFont("Small"))
 	{
 		d->Font = SysFontType.Create();
@@ -1180,7 +1180,7 @@ void GToolBar::TextLabels(bool i)
 	d->Text = i;
 }
 
-GFont *GToolBar::GetFont()
+LFont *GToolBar::GetFont()
 {
 	return d->Font;
 }
@@ -1239,7 +1239,7 @@ bool GToolBar::Pour(LRegion &r)
 					
 					for (int i=0; i<Btn->d->Text.Length(); i++)
 					{
-						GDisplayString *Ds = Btn->d->Text[i];
+						LDisplayString *Ds = Btn->d->Text[i];
 						Tx = MAX(Ds->X() + 4, Tx);
 						Ty += Ds->Y();
 					}

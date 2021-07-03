@@ -169,7 +169,7 @@ bool GLayout::Pour(LRegion &r)
 		GCss::Len margin = css->Margin();
 		GCss::Len s;
 		GCss::Len zero;
-		GFont *f = GetFont();
+		LFont *f = GetFont();
 		
 		s = css->MarginTop();
 		p.x1 += SelectValid(s, margin, zero).ToPx(r.X(), f);

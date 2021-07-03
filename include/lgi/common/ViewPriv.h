@@ -119,7 +119,7 @@ public:
 	LPoint			MinimumSize;
 	
 	// Font
-	GFont			*Font;
+	LFont			*Font;
 	GViewFontType	FontOwnType;
 	
 	// Style

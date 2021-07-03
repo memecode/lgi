@@ -5,7 +5,7 @@
 #include "GCombo.h"
 #include "GScrollBar.h"
 #include "GClipBoard.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 
 enum HtmlEditIds {
 
@@ -103,7 +103,7 @@ class Btn : public GLayout
 	int HasLeft;
 	int HasRight;
 	bool Toggle;
-	GAutoPtr<GDisplayString> Str;
+	GAutoPtr<LDisplayString> Str;
 
 public:
 	int SpaceAfter;
@@ -135,7 +135,7 @@ public:
 		Toggle = toggle;
 		SpaceAfter = 0;
 		
-		Str.Reset(new GDisplayString(SysBold, Text));
+		Str.Reset(new LDisplayString(SysBold, Text));
 		LRect r(0, 0, Str->X()+16, TOOLBAR_HT);
 		SetPos(r);
 		SetTabStop(TAB_STOP);
@@ -1885,7 +1885,7 @@ public:
 		if (t->BackgroundColor().Type > GCss::ColorInherit)
 			t->BackgroundColor(GCss::ColorDef());
 		
-		GFont *f = t->GetFont();
+		LFont *f = t->GetFont();
 		if (!f) return true;
 		
 		if (f->GetWeight() != FW_NORMAL)
@@ -2299,27 +2299,27 @@ public:
 	}
 
 	#ifdef _DEBUG
-	struct DbgDs : public GDisplayString
+	struct DbgDs : public LDisplayString
 	{
 	public:
 		GColour c;
 
-		DbgDs(GFont *f, const char *s, GColour col) : GDisplayString(f, s)
+		DbgDs(LFont *f, const char *s, GColour col) : LDisplayString(f, s)
 		{
 			c = col;
 		}
 
-		DbgDs(GFont *f, const char *s, LSystemColour col) : GDisplayString(f, s)
+		DbgDs(LFont *f, const char *s, LSystemColour col) : LDisplayString(f, s)
 		{
 			c = LColour(col);
 		}
 
-		DbgDs(GFont *f, const char16 *s, GColour col) : GDisplayString(f, s)
+		DbgDs(LFont *f, const char16 *s, GColour col) : LDisplayString(f, s)
 		{
 			c = col;
 		}
 
-		DbgDs(GFont *f, const char16 *s, LSystemColour col) : GDisplayString(f, s)
+		DbgDs(LFont *f, const char16 *s, LSystemColour col) : LDisplayString(f, s)
 		{
 			c = LColour(col);
 		}
@@ -2443,7 +2443,7 @@ public:
 		}
 		else
 		{
-			GDisplayString s(SysFont, "No cursor.");
+			LDisplayString s(SysFont, "No cursor.");
 			s.Draw(pDC, 6, 6);
 		}
 	}

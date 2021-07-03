@@ -3,17 +3,17 @@
 #include "Lgi.h"
 #include "GEdit.h"
 #include "GClipBoard.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 #include "LgiRes.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Edit
 #include "GTextView3.h"
 
-class _OsFontType : public GFontType
+class _OsFontType : public LFontType
 {
 public:
-	GFont *Create(GSurface *pDC = NULL)
+	LFont *Create(GSurface *pDC = NULL)
 	{
 		return SysFont;
 	}
@@ -57,7 +57,7 @@ GEdit::GEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	_OsFontType Type;
 	d = new GEditPrivate;
 
-	GDisplayString Ds(SysFont, (char*)(name?name:"A"));
+	LDisplayString Ds(SysFont, (char*)(name?name:"A"));
 	if (cx < 0) cx = Ds.X() + 6;
 	if (cy < 0) cy = Ds.Y() + 4;
 
@@ -171,8 +171,8 @@ void GEdit::OnPaint(GSurface *pDC)
 
     if (!ValidStr(Name()) && d->EmptyTxt && !Focus())
     {
-        GFont *f = GetFont();
-        GDisplayString ds(f, d->EmptyTxt);
+        LFont *f = GetFont();
+        LDisplayString ds(f, d->EmptyTxt);
         
         static int diff = -1;
         if (diff < 0)

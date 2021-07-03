@@ -561,7 +561,7 @@ void GRichTextPriv::ImageBlock::SetStyle(GNamedStyle *s)
 {
 	if ((Style = s))
 	{
-		GFont *Fnt = d->GetFont(s);
+		LFont *Fnt = d->GetFont(s);
 		LayoutDirty = true;
 		LgiAssert(Fnt != NULL);
 

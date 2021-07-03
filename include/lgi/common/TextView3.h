@@ -69,7 +69,7 @@ public:
 		/// The length of the styled region
 		ssize_t Len;
 		/// The font to draw the styled text in
-		GFont *Font;
+		LFont *Font;
 		/// The colour to draw with. If transparent, then the default 
 		/// line colour is used.
 		GColour Fore, Back;
@@ -234,11 +234,11 @@ protected:
 	bool CanScrollX;
 
 	// Display
-	GFont *Font;
-	GFont *Bold;		// Bold variant of 'Font'
-	GFont *Underline;	// Underline variant of 'Font'
+	LFont *Font;
+	LFont *Bold;		// Bold variant of 'Font'
+	LFont *Underline;	// Underline variant of 'Font'
 
-	GFont *FixedFont;
+	LFont *FixedFont;
 	int LineY;
 	ssize_t SelStart, SelEnd;
 	int DocOffset;
@@ -278,7 +278,7 @@ protected:
 	List<GTextLine>::I GetTextLineIt(ssize_t Offset, ssize_t *Index = 0);
 	GTextLine *GetTextLine(ssize_t Offset, ssize_t *Index = 0) { return *GetTextLineIt(Offset, Index); }
 	ssize_t SeekLine(ssize_t Offset, GTextViewSeek Where);
-	int TextWidth(GFont *f, char16 *s, int Len, int x, int Origin);
+	int TextWidth(LFont *f, char16 *s, int Len, int x, int Origin);
 	bool ScrollToOffset(size_t Off);
 	int ScrollYLine();
 	int ScrollYPixel();
@@ -316,7 +316,7 @@ public:
 	GTextView3(	int Id,
 				int x = 0, int y = 0,
 				int cx = 100, int cy = 100,
-				GFontType *FontInfo = NULL);
+				LFontType *FontInfo = NULL);
 	~GTextView3();
 
 	const char *GetClass() override { return "GTextView3"; }
@@ -336,9 +336,9 @@ public:
 	void DeleteSelection(char16 **Cut = 0);
 
 	// Font
-	GFont *GetFont() override;
-	GFont *GetBold();
-	void SetFont(GFont *f, bool OwnIt = false) override;
+	LFont *GetFont() override;
+	LFont *GetBold();
+	void SetFont(LFont *f, bool OwnIt = false) override;
 	void SetFixedWidthFont(bool i) override;
 
 	// Options

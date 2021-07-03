@@ -186,24 +186,24 @@ struct GTabPagePriv
 {
 	GTabPage *Tab;
 	bool NonDefaultFont;
-	GAutoPtr<GDisplayString> Ds;
+	GAutoPtr<LDisplayString> Ds;
 
 	GTabPagePriv(GTabPage *t) : Tab(t)
 	{
 		NonDefaultFont = false;
 	}
 
-	GDisplayString *GetDs()
+	LDisplayString *GetDs()
 	{
 		auto Text = Tab->Name();
 		if (Text && !Ds)
 		{
-			GFont *f = NULL;
+			LFont *f = NULL;
 			auto s = Tab->GetCss();
 			NonDefaultFont = s ? s->HasFontStyle() : false;
 			if (NonDefaultFont)
 			{
-				if ((f = new GFont))
+				if ((f = new LFont))
 				{
 					*f = *SysFont;
 
@@ -219,7 +219,7 @@ struct GTabPagePriv
 			}
 		
 			if (f)
-				Ds.Reset(new GDisplayString(f, Text));
+				Ds.Reset(new LDisplayString(f, Text));
 			else
 				LgiAssert(!"no font.");
 		}
@@ -839,7 +839,7 @@ void GTabView::OnPaint(GSurface *pDC)
 		{
 			auto Tab = it[i];
 			auto Foc = Focus();
-			GDisplayString *ds = Tab->d->GetDs();
+			LDisplayString *ds = Tab->d->GetDs();
 			bool First = i == 0;
 			bool Last = i == it.Length() - 1;
 			bool IsCurrent = d->Current == i;
@@ -973,7 +973,7 @@ void GTabView::OnPaint(GSurface *pDC)
 
 			#endif
 			
-			GFont *tf = ds->GetFont();
+			LFont *tf = ds->GetFont();
 			int BaselineOff = (int) (d->TabsBaseline - tf->Ascent());
 			tf->Transparent(true);
 
@@ -1211,7 +1211,7 @@ GTabPage::~GTabPage()
 
 int GTabPage::GetTabPx()
 {
-	GDisplayString *Ds = d->GetDs();
+	LDisplayString *Ds = d->GetDs();
 
 	int Px = TAB_MARGIN_X << 1;
 	if (Ds)
@@ -1350,8 +1350,8 @@ void GTabPage::PaintTab(GSurface *pDC, bool Selected)
 	auto t = Name();
 	if (t)
 	{
-		GFont *f = GetFont();
-		GDisplayString ds(f, t);
+		LFont *f = GetFont();
+		LDisplayString ds(f, t);
 		f->Colour(L_TEXT, L_MED);
 		f->Transparent(true);
 		
@@ -1463,7 +1463,7 @@ void GTabPage::OnStyleChange()
 	GetParent()->Invalidate();
 }
 
-void GTabPage::SetFont(GFont *Font, bool OwnIt)
+void GTabPage::SetFont(LFont *Font, bool OwnIt)
 {
 	d->Ds.Reset();
 	Invalidate();

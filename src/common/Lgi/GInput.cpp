@@ -44,7 +44,7 @@ GInput::GInput(GViewI *parent, const char *InitStr, const char *Msg, const char 
 	GView *Txt;
 	c->Add(Txt = new GTextLabel(-1, 5, 5, -1, -1, Msg));
 
-	GDisplayString MsgDs(SysFont, ValidStr(InitStr)?InitStr:"A");
+	LDisplayString MsgDs(SysFont, ValidStr(InitStr)?InitStr:"A");
 	int Dx = LgiApp->GetMetric(LGI_MET_DECOR_X) + 10;
 	int Dy = LgiApp->GetMetric(LGI_MET_DECOR_Y);
 	

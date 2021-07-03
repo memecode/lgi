@@ -338,7 +338,7 @@ void GTextView3::GStyle::RefreshLayout(size_t Start, ssize_t Len)
 //////////////////////////////////////////////////////////////////////
 GTextView3::GTextView3(	int Id,
 						int x, int y, int cx, int cy,
-						GFontType *FontType)
+						LFontType *FontType)
 	: ResObject(Res_Custom)
 {
 	// init vars
@@ -404,7 +404,7 @@ GTextView3::GTextView3(	int Id,
 	}
 	else
 	{
-		GFontType Type;
+		LFontType Type;
 		if (Type.GetSystemFont("Fixed"))
 			Font = Type.Create();
 		else
@@ -415,7 +415,7 @@ GTextView3::GTextView3(	int Id,
 	{
 		SetTabStop(true);
 
-		Underline = new GFont;
+		Underline = new LFont;
 		if (Underline)
 		{
 			*Underline = *Font;
@@ -424,7 +424,7 @@ GTextView3::GTextView3(	int Id,
 				Underline->Fore(d->UrlColour);
 			Underline->Create();
 		}
-		Bold = new GFont;
+		Bold = new LFont;
 		if (Bold)
 		{
 			*Bold = *Font;
@@ -532,10 +532,10 @@ void GTextView3::SetFixedWidthFont(bool i)
 	{
 		if (i)
 		{
-			GFontType Type;
+			LFontType Type;
 			if (Type.GetSystemFont("Fixed"))
 			{
-				GFont *f = FixedFont;
+				LFont *f = FixedFont;
 				FixedFont = Font;
 				Font = f;
 
@@ -553,7 +553,7 @@ void GTextView3::SetFixedWidthFont(bool i)
 		}
 		else if (FixedFont)
 		{
-			GFont *f = FixedFont;
+			LFont *f = FixedFont;
 			FixedFont = Font;
 			Font = f;
 			GDocView::SetFixedWidthFont(i);
@@ -596,17 +596,17 @@ void GTextView3::SetWrapType(LDocWrapType i)
 	Invalidate();
 }
 
-GFont *GTextView3::GetFont()
+LFont *GTextView3::GetFont()
 {
 	return Font;
 }
 
-GFont *GTextView3::GetBold()
+LFont *GTextView3::GetBold()
 {
 	return Bold;
 }
 
-void GTextView3::SetFont(GFont *f, bool OwnIt)
+void GTextView3::SetFont(LFont *f, bool OwnIt)
 {
 	if (!f)
 		return;
@@ -619,7 +619,7 @@ void GTextView3::SetFont(GFont *f, bool OwnIt)
 	}
 	else if (!Font || Font == SysFont)
 	{
-		Font = new GFont(*f);
+		Font = new LFont(*f);
 	}
 	else
 	{
@@ -629,7 +629,7 @@ void GTextView3::SetFont(GFont *f, bool OwnIt)
 	if (Font)
 	{
 		if (!Underline)
-			Underline = new GFont;
+			Underline = new LFont;
 		if (Underline)
 		{
 			*Underline = *Font;
@@ -640,7 +640,7 @@ void GTextView3::SetFont(GFont *f, bool OwnIt)
 		}
 
 		if (!Bold)
-			Bold = new GFont;
+			Bold = new LFont;
 		if (Bold)
 		{
 			*Bold = *Font;
@@ -667,7 +667,7 @@ void GTextView3::OnFontChange()
 		char Spaces[32];
 		memset(Spaces, 'A', TabSize);
 		Spaces[TabSize] = 0;
-		GDisplayString ds(Font, Spaces);
+		LDisplayString ds(Font, Spaces);
 		Font->TabSize(ds.X());
 
 		// repour doc
@@ -884,7 +884,7 @@ void GTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 	//int LastX = 0;
 	int WrapCol = GetWrapAtCol();
 
-	GDisplayString Sp(Font, " ", 1);
+	LDisplayString Sp(Font, " ", 1);
 	int WidthOfSpace = Sp.X();
 	if (WidthOfSpace < 1)
 	{
@@ -916,7 +916,7 @@ void GTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 
 			if (!l->r.Valid()) // If the layout is not valid...
 			{
-				GDisplayString ds(Font, Text + l->Start, l->Len);
+				LDisplayString ds(Font, Text + l->Start, l->Len);
 
 				l->r.x1 = d->rPadding.x1;
 				l->r.x2 = l->r.x1 + ds.X();
@@ -956,7 +956,7 @@ void GTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 			l->r.y2 = l->r.y1 + LineY - 1;
 			if (l->Len)
 			{
-				GDisplayString ds(Font, Text + l->Start, l->Len);
+				LDisplayString ds(Font, Text + l->Start, l->Len);
 				l->r.x2 = l->r.x1 + ds.X();
 			}
 			else
@@ -1061,7 +1061,7 @@ void GTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 				}
 
 				// Calc the width
-				GDisplayString ds(Font, Text + i, e - i);
+				LDisplayString ds(Font, Text + i, e - i);
 				Width = ds.X();
 			}
 			else
@@ -1076,7 +1076,7 @@ void GTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 						ExitLoop(Text[e]) ||
 						ExtraBreak(Text[e]))
 					{
-						GDisplayString ds(Font, Text + i, e - i);
+						LDisplayString ds(Font, Text + i, e - i);
 						if (ds.X() + Cx > Mx)
 						{
 							if (PrevExitChar > 0)
@@ -3402,7 +3402,7 @@ ssize_t GTextView3::HitText(int x, int y, bool Nearest)
 			int At = x - l->r.x1;
 			ssize_t Char = 0;
 				
-			GDisplayString Ds(Font, MapText(Text + l->Start, l->Len), l->Len, 0);
+			LDisplayString Ds(Font, MapText(Text + l->Start, l->Len), l->Len, 0);
 			Char = Ds.CharAt(At, Nearest ? LgiNearest : LgiTruncate);
 
 			return l->Start + Char;
@@ -4307,10 +4307,10 @@ bool GTextView3::OnKey(LKey &k)
 						if (It != Line.end())
 						{
 							GTextLine *Prev = *It;
-							GDisplayString CurLine(Font, Text + l->Start, Cursor-l->Start);
+							LDisplayString CurLine(Font, Text + l->Start, Cursor-l->Start);
 							int ScreenX = CurLine.X();
 
-							GDisplayString PrevLine(Font, Text + Prev->Start, Prev->Len);
+							LDisplayString PrevLine(Font, Text + Prev->Start, Prev->Len);
 							ssize_t CharX = PrevLine.CharAt(ScreenX);
 
 							SetCaret(Prev->Start + MIN(CharX, Prev->Len), k.Shift());
@@ -4340,10 +4340,10 @@ bool GTextView3::OnKey(LKey &k)
 						if (It != Line.end())
 						{
 							GTextLine *Next = *It;
-							GDisplayString CurLine(Font, Text + l->Start, Cursor-l->Start);
+							LDisplayString CurLine(Font, Text + l->Start, Cursor-l->Start);
 							int ScreenX = CurLine.X();
 							
-							GDisplayString NextLine(Font, Text + Next->Start, Next->Len);
+							LDisplayString NextLine(Font, Text + Next->Start, Next->Len);
 							ssize_t CharX = NextLine.CharAt(ScreenX);
 
 							SetCaret(Next->Start + MIN(CharX, Next->Len), k.Shift());
@@ -4713,7 +4713,7 @@ void GTextView3::OnEnter(LKey &k)
 	}
 }
 
-int GTextView3::TextWidth(GFont *f, char16 *s, int Len, int x, int Origin)
+int GTextView3::TextWidth(LFont *f, char16 *s, int Len, int x, int Origin)
 {
 	int w = x;
 	int Size = f->TabSize();
@@ -4730,7 +4730,7 @@ int GTextView3::TextWidth(GFont *f, char16 *s, int Len, int x, int Origin)
 			char16 *e;
 			for (e = c; SubtractPtr(e, s) < Len && *e != 9; e++);
 			
-			GDisplayString ds(f, c, SubtractPtr(e, c));
+			LDisplayString ds(f, c, SubtractPtr(e, c));
 			w += ds.X();
 			c = e;
 		}
@@ -4935,9 +4935,9 @@ void GTextView3::OnPaint(GSurface *pDC)
 										NextSelection < l->Start + l->Len;
 
 				// Fractional pixels we have moved so far:
-				int MarginF = d->rPadding.x1 << GDisplayString::FShift;
+				int MarginF = d->rPadding.x1 << LDisplayString::FShift;
 				int FX = MarginF;
-				int FY = Tr.y1 << GDisplayString::FShift;
+				int FY = Tr.y1 << LDisplayString::FShift;
 				
 				// loop through all sections of similar text on a line
 				while (Done < l->Len)
@@ -4986,7 +4986,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 						Cur >= NextStyle->Start &&				// && we're inside the styled area
 						Cur < NextStyle->Start+NextStyle->Len)
 					{
-						GFont *Sf = NextStyle->Font ? NextStyle->Font : Font;
+						LFont *Sf = NextStyle->Font ? NextStyle->Font : Font;
 						if (Sf)
 						{
 							// draw styled text
@@ -5003,7 +5003,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 
 							LgiAssert(l->Start + Done >= 0);
 
-							GDisplayString Ds(	Sf,
+							LDisplayString Ds(	Sf,
 												MapText(Text + (l->Start + Done),
 														Block,
 														RtlTrailingSpace != 0),
@@ -5015,7 +5015,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 							if (NextStyle->Decor == GCss::TextDecorSquiggle)
 							{
 								pOut->Colour(NextStyle->DecorColour);
-								int x = FX >> GDisplayString::FShift;
+								int x = FX >> LDisplayString::FShift;
 								int End = x + Ds.X();
 								while (x < End)
 								{
@@ -5037,7 +5037,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 						// draw a block of normal text
 						LgiAssert(l->Start + Done >= 0);
 						
-						GDisplayString Ds(	Font,
+						LDisplayString Ds(	Font,
 											MapText(Text + (l->Start + Done),
 													Block,
 													RtlTrailingSpace != 0),
@@ -5076,7 +5076,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 				
 				} // end block loop
 
-				Tr.x1 = FX >> GDisplayString::FShift;
+				Tr.x1 = FX >> LDisplayString::FShift;
 
 				// eol processing
 				ssize_t EndOfLine = l->Start+l->Len;
@@ -5104,7 +5104,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 
 						ssize_t At = Cursor-l->Start;
 						
-						GDisplayString Ds(Font, MapText(Text+l->Start, At), At);
+						LDisplayString Ds(Font, MapText(Text+l->Start, At), At);
 						Ds.ShowVisibleTab(ShowWhiteSpace);
 						int CursorX = Ds.X();
 						CursorPos.Offset(d->rPadding.x1 + CursorX, Tr.y1);
@@ -5163,7 +5163,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 
 					GString s;
 					s.Printf("%i, %i", Line.IndexOf(l), l->Start);
-					GDisplayString ds(SysFont, s);
+					LDisplayString ds(SysFont, s);
 					SysFont->Transparent(true);
 					ds.Draw(pDC, OldTr.x2 + 2, OldTr.y1);
 				}

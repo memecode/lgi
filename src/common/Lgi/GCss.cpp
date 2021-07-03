@@ -310,7 +310,7 @@ GCss::~GCss()
 	Empty();
 }
 
-int GCss::Len::ToPx(int Box, GFont *Font, int Dpi)
+int GCss::Len::ToPx(int Box, LFont *Font, int Dpi)
 {
 	switch (Type)
 	{

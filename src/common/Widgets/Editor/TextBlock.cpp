@@ -66,7 +66,7 @@ void GRichTextPriv::StyleText::SetStyle(GNamedStyle *s)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-GRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, GSurface *img, GFont *f, const uint32_t *s, ssize_t l) :
+GRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, GSurface *img, LFont *f, const uint32_t *s, ssize_t l) :
 	DisplayStr(src, NULL, s, l)
 {
 	Img = img;
@@ -511,7 +511,7 @@ bool GRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 				{
 					// In the middle somewhere...
 					GAutoPtr<DisplayStr> Tmp = ds->Clone(0, CharOffset);
-					// GDisplayString Tmp(ds->GetFont(), *ds, CharOffset);
+					// LDisplayString Tmp(ds->GetFont(), *ds, CharOffset);
 					if (Tmp)
 						Cursor->Pos.x1 = r.x1 + FixedToInt(FixX + Tmp->FX());
 				}
@@ -648,11 +648,11 @@ bool GRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 void DrawDecor(GSurface *pDC, GRichTextPriv::DisplayStr *Ds, int Fx, int Fy, ssize_t Start, ssize_t Len)
 {
 	// GColour Old = pDC->Colour(GColour::Red);
-	GDisplayString ds1(Ds->GetFont(), (const char16*)(*Ds), Start);
-	GDisplayString ds2(Ds->GetFont(), (const char16*)(*Ds), Start+Len);
+	LDisplayString ds1(Ds->GetFont(), (const char16*)(*Ds), Start);
+	LDisplayString ds2(Ds->GetFont(), (const char16*)(*Ds), Start+Len);
 
-	int x = (Fx >> GDisplayString::FShift);
-	int y = (Fy >> GDisplayString::FShift) + (int)Ds->GetAscent() + 1;
+	int x = (Fx >> LDisplayString::FShift);
+	int y = (Fy >> LDisplayString::FShift) + (int)Ds->GetAscent() + 1;
 	int End = x + ds2.X();
 	x += ds1.X();
 	pDC->Colour(GColour::Red);
@@ -779,7 +779,7 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 		}
 
 		CurY = LinePos.y1;
-		GFont *Fnt = NULL;
+		LFont *Fnt = NULL;
 
 		#if DEBUG_NUMBERED_LAYOUTS
 		GString s;
@@ -790,7 +790,7 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 		for (unsigned n=0; n<Line->Strs.Length(); n++)
 		{
 			DisplayStr *Ds = Line->Strs[n];
-			GFont *DsFnt = Ds->GetFont();
+			LFont *DsFnt = Ds->GetFont();
 			ColourPair &Cols = Ds->Src->Colours;
 			if (DsFnt && DsFnt != Fnt)
 			{
@@ -956,7 +956,7 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 		
 
 		#if DEBUG_NUMBERED_LAYOUTS
-		GDisplayString Ds(SysFont, s);
+		LDisplayString Ds(SysFont, s);
 		SysFont->Colour(GColour::Green, GColour::White);
 		SysFont->Transparent(false);
 		Ds.Draw(Ctx.pDC, LinePos.x1, LinePos.y1);
@@ -1049,7 +1049,7 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 			AvailableX = 1;
 
 		// Get the font for 't'
-		GFont *f = flow.d->GetFont(t->GetStyle());
+		LFont *f = flow.d->GetFont(t->GetStyle());
 		if (!f)
 			return flow.d->Error(_FL, "font creation failed.");
 		GCss::WordWrapType WrapType = tstyle ? tstyle->WordWrap() : GCss::WrapNormal;
@@ -1221,7 +1221,7 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 			
 	if (CurLine && CurLine->Strs.Length() > 0)
 	{
-		GFont *f = d->View ? d->View->GetFont() : SysFont;
+		LFont *f = d->View ? d->View->GetFont() : SysFont;
 		CurLine->LayoutOffsets(f->GetHeight());
 		Pos.y2 = MAX(Pos.y2, Pos.y1 + CurLine->PosOff.y2);
 		LayoutSize += CurLine->Length();

@@ -95,7 +95,7 @@ void EditTray::OnCreate()
 
 int MeasureText(const char *s)
 {
-	GDisplayString Ds(SysFont, s);
+	LDisplayString Ds(SysFont, s);
 	return Ds.X();
 }
 
@@ -143,28 +143,28 @@ void EditTray::OnPaint(GSurface *pDC)
 	GString s;
 	s.Printf("Cursor: %i,%i", Col, Line + 1);
 	{
-		GDisplayString ds(SysFont, s);
+		LDisplayString ds(SysFont, s);
 		ds.Draw(pDC, TextMsg.x1, TextMsg.y1 + ((c.Y()-TextMsg.Y())/2), &TextMsg);
 	}
 
 	LRect f = FileBtn;
 	LgiThinBorder(pDC, f, DefaultRaisedEdge);
 	{
-		GDisplayString ds(SysFont, HEADER_BTN_LABEL);
+		LDisplayString ds(SysFont, HEADER_BTN_LABEL);
 		ds.Draw(pDC, f.x1 + 4, f.y1);
 	}
 
 	f = FuncBtn;
 	LgiThinBorder(pDC, f, DefaultRaisedEdge);
 	{
-		GDisplayString ds(SysFont, FUNCTION_BTN_LABEL);
+		LDisplayString ds(SysFont, FUNCTION_BTN_LABEL);
 		ds.Draw(pDC, f.x1 + 4, f.y1);
 	}
 
 	f = SymBtn;
 	LgiThinBorder(pDC, f, DefaultRaisedEdge);
 	{
-		GDisplayString ds(SysFont, SYMBOL_BTN_LABEL);
+		LDisplayString ds(SysFont, SYMBOL_BTN_LABEL);
 		ds.Draw(pDC, f.x1 + 4, f.y1);
 	}
 }
@@ -812,7 +812,7 @@ IdeDocPrivate::IdeDocPrivate(IdeDoc *d, AppWnd *a, NodeSource *src, const char *
 	Project = 0;
 	FileName = file;
 	
-	GFontType Font, *Use = 0;
+	LFontType Font, *Use = 0;
 	if (Font.Serialize(App->GetOptions(), OPT_EditorFont, false))
 	{
 		Use = &Font;

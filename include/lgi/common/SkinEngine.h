@@ -22,13 +22,13 @@
 // Drawing state
 class GSkinState
 {
-	GArray<GDisplayString*> Tmp;
+	GArray<LDisplayString*> Tmp;
 	
 public:
 	int Size;						// Class size, for version checking
 	GSurface *pScreen;				// Output surface
-	GArray<GDisplayString*> *aText;	// Array of display strings for the view
-	GDisplayString **ptrText;		// Ptr to ptr for display string
+	GArray<LDisplayString*> *aText;	// Array of display strings for the view
+	LDisplayString **ptrText;		// Ptr to ptr for display string
 	LRect Rect;						// Region to paint (if relevant)
 	bool MouseOver;					// TRUE if the mouse is over the view
 	int64 Value;					// Value of the control if available
@@ -62,7 +62,7 @@ public:
 		return 0;
 	}
 	
-	GDisplayString *FirstText()
+	LDisplayString *FirstText()
 	{
 		if (aText)
 		{
@@ -76,7 +76,7 @@ public:
 		return NULL;
 	}
 	
-	GArray<GDisplayString*> *AllText()
+	GArray<LDisplayString*> *AllText()
 	{
 		if (aText)
 			return aText;
@@ -134,7 +134,7 @@ public:
 	virtual void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, GSkinState *State) = 0;
 
 	// Get the default font for a control
-	virtual GFont *GetDefaultFont(char *Class) { return SysFont; }
+	virtual LFont *GetDefaultFont(char *Class) { return SysFont; }
 
 	// Fills an abitary path with the skin's default fill...
 	virtual void FillPath(class GPath *Path, GSurface *pDC, GColour Back, bool Down, bool Enabled = true) {}

@@ -1320,7 +1320,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			}
 			case WM_GETFONT:
 			{
-				GFont *f = GetFont();
+				LFont *f = GetFont();
 				if (!f || f == SysFont)
 					return (GMessage::Result) SysFont->Handle();
 

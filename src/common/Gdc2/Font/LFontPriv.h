@@ -8,7 +8,7 @@ typedef ATSUTextMeasurement OsTextSize;
 typedef double OsTextSize;
 #endif
 
-class GFontPrivate
+class LFontPrivate
 {
 public:
 	#ifdef WINDOWS
@@ -42,7 +42,7 @@ public:
 	Gtk::PangoContext *PangoCtx;
 	#endif
 
-	GFontPrivate()
+	LFontPrivate()
 	{
 		hFont = 0;
 		pSurface = NULL;
@@ -62,7 +62,7 @@ public:
 		WarnOnDelete = false;
 	}
 	
-	~GFontPrivate()
+	~LFontPrivate()
 	{
 		#ifdef __GTK_H__
 		if (PangoCtx)

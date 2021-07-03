@@ -1096,7 +1096,7 @@ void GDropDown::OnPaint(GSurface *pDC)
 	auto Nm = Name();
 	if (Nm && X() >= 32)
 	{
-		GDisplayString Ds(SysFont, Nm);
+		LDisplayString Ds(SysFont, Nm);
 		SysFont->Colour(L_TEXT, L_MED);
 		SysFont->Transparent(true);
 		int Offset = IsOpen() ? 1 : 0;

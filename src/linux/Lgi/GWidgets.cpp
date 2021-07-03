@@ -15,7 +15,7 @@
 #include "GSlider.h"
 #include "GBitmap.h"
 #include "GTableLayout.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 #include "GButton.h"
 
 using namespace Gtk;
@@ -253,7 +253,7 @@ LPoint GControl::SizeOfStr(const char *Str)
 			e = strchr(s, '\n');
 			auto Len = e ? e - s : strlen(s);
 
-			GDisplayString ds(SysFont, s, Len);
+			LDisplayString ds(SysFont, s, Len);
 			Pt.x = MAX(Pt.x, ds.X());
 			Pt.y += y;
 		}

@@ -105,7 +105,7 @@ public:
 		pDC->Rectangle(&Ctx);
 		
 		auto Fnt = GetList()->GetFont();
-		GDisplayString ds(Fnt, LFormatSize(v));
+		LDisplayString ds(Fnt, LFormatSize(v));
 		Fnt->Transparent(true);
 		Fnt->Colour(Ctx.Fore, Ctx.Back);
 		ds.Draw(pDC, Ctx.x1 + 10, Ctx.y1 + ((Ctx.Y() - ds.Y()) >> 1));

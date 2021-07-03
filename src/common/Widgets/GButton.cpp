@@ -6,7 +6,7 @@
 #include "Lgi.h"
 #include "GSkinEngine.h"
 #include "GButton.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 #include "GTableLayout.h"
 #include "LgiRes.h"
 #include "LStringLayout.h"
@@ -196,7 +196,7 @@ bool GButton::NameW(const char16 *n)
 	return Status;
 }
 
-void GButton::SetFont(GFont *Fnt, bool OwnIt)
+void GButton::SetFont(LFont *Fnt, bool OwnIt)
 {
 	LgiAssert(Fnt && Fnt->Handle());
 	GView::SetFont(Fnt, OwnIt);

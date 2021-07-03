@@ -103,7 +103,7 @@ public:
 	{
 		Eng = NULL;
 		
-		GFont *f = new GFont;
+		LFont *f = new LFont;
 		if (f)
 		{
 			f->Face("Times New Roman");
@@ -603,7 +603,7 @@ void FontSz()
 {
 	for (int i=6; i<32; i++)
 	{
-		GFont f;
+		LFont f;
 		if (f.Create("verdana", GCss::Len(GCss::LenPx, i)))
 		{
 			double a = (double) f.GetHeight() / f.Ascent();

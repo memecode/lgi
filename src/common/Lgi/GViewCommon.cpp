@@ -1731,7 +1731,7 @@ bool GView::AttachChildren()
 	return true;
 }
 
-GFont *GView::GetFont()
+LFont *GView::GetFont()
 {
 	// const char *Cls = GetClass();
 	
@@ -1742,7 +1742,7 @@ GFont *GView::GetFont()
 		GFontCache *fc = LgiApp->GetFontCache();
 		if (fc)
 		{
-			GFont *f = fc->GetFont(d->Css);
+			LFont *f = fc->GetFont(d->Css);
 			if (f)
 			{
 				if (d->FontOwnType == GV_FontOwned)
@@ -1756,7 +1756,7 @@ GFont *GView::GetFont()
 	return d->Font ? d->Font : SysFont;
 }
 
-void GView::SetFont(GFont *Font, bool OwnIt)
+void GView::SetFont(LFont *Font, bool OwnIt)
 {
 	bool Change = d->Font != Font;
 	if (Change)

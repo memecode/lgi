@@ -331,7 +331,7 @@ int LDialog::DoModeless()
 		LONG DlgUnits = GetDialogBaseUnits();
 		uint16 old_baseunitX = DlgUnits & 0xffff;
 		uint16 old_baseunitY = DlgUnits >> 16;
-		GDisplayString Bs(SysFont, BaseStr);
+		LDisplayString Bs(SysFont, BaseStr);
 		int baseunitX = (Bs.X() / 26 + 1) / 2;
 		int baseunitY = Bs.Y();
 		
@@ -637,7 +637,7 @@ LPoint GControl::SizeOfStr(const char *Str)
 			const char *e = strchr(s, '\n');
 			if (!e) e = s + strlen(s);
 
-			GDisplayString ds(SysFont, (char*)s, e - s);
+			LDisplayString ds(SysFont, (char*)s, e - s);
 
 			Pt.y += ds.Y();
 			Pt.x = max(Pt.x, ds.X());

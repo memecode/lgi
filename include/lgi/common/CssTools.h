@@ -7,7 +7,7 @@ class LgiClass GCssTools
 {
 	GView *View;
 	GCss *Css;
-	GFont *Font;
+	LFont *Font;
 	
 	GColour Fore, Back;
 	uint8_t ForeInit : 1, BackInit : 1;
@@ -17,7 +17,7 @@ class LgiClass GCssTools
 	bool SetLineStyle(GSurface *pDC, GCss::BorderDef &d);
 	
 public:
-	GCssTools(GCss *css, GFont *font)
+	GCssTools(GCss *css, LFont *font)
 	{
 		View = NULL;
 		Css = css;

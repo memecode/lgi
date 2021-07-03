@@ -1,5 +1,5 @@
 #include "Lgi.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 #include "GDrawListSurface.h"
 
 struct LCmd
@@ -14,7 +14,7 @@ struct GDrawListSurfacePriv : public GArray<LCmd*>
 	int DpiX, DpiY;
 	GColour Fore, Back;
 	GSurface *CreationSurface;
-	GFont *Font;
+	LFont *Font;
 
 	GDrawListSurfacePriv()
 	{
@@ -46,16 +46,16 @@ struct GDrawListSurfacePriv : public GArray<LCmd*>
 struct LCmdTxt : public LCmd
 {
 	LPoint p;
-	GDisplayString *Ds;
+	LDisplayString *Ds;
 
-	LCmdTxt(int x, int y, GDisplayString *ds) : p(x, y)
+	LCmdTxt(int x, int y, LDisplayString *ds) : p(x, y)
 	{
 		Ds = ds;
 	}
 	
 	bool OnPaint(GDrawListSurfacePriv *d, GSurface *pDC)
 	{
-		GFont *f = Ds->GetFont();
+		LFont *f = Ds->GetFont();
 		f->Transparent(!d->Back.IsValid());
 		f->Colour(d->Fore, d->Back);
 		Ds->Draw(pDC, p.x, p.y);		
@@ -204,12 +204,12 @@ bool GDrawListSurface::OnPaint(GSurface *Dest)
 	return d->OnPaint(Dest);
 }
 
-GFont *GDrawListSurface::GetFont()
+LFont *GDrawListSurface::GetFont()
 {
 	return d->Font;
 }
 
-void GDrawListSurface::SetFont(GFont *Font)
+void GDrawListSurface::SetFont(LFont *Font)
 {
 	d->Font = Font;
 }
@@ -226,7 +226,7 @@ GColour GDrawListSurface::Background(GColour c)
 	return Prev;	
 }
 
-GDisplayString *GDrawListSurface::Text(int x, int y, const char *Str, int Len)
+LDisplayString *GDrawListSurface::Text(int x, int y, const char *Str, int Len)
 {
 	if (!d->Font)
 	{
@@ -234,7 +234,7 @@ GDisplayString *GDrawListSurface::Text(int x, int y, const char *Str, int Len)
 		return NULL;
 	}
 	
-	GDisplayString *Ds = new GDisplayString(d->Font, Str, Len, d->CreationSurface);
+	LDisplayString *Ds = new LDisplayString(d->Font, Str, Len, d->CreationSurface);
 	if (!Ds)
 	{
 		LgiAssert(0);

@@ -1,7 +1,7 @@
 #include "Lgi.h"
 #include "GPopup.h"
 #include "GDateTimeCtrls.h"
-#include "GDisplayString.h"
+#include "LDisplayString.h"
 
 GDatePopup::GDatePopup(GView *owner) : GPopup(owner)
 {
@@ -77,7 +77,7 @@ void GDatePopup::OnPaint(GSurface *pDC)
 	{
 		SysFont->Transparent(true);
 		SysFont->Colour(L_TEXT, L_MED);
-		GDisplayString ds(SysFont, Title);
+		LDisplayString ds(SysFont, Title);
 		ds.Draw(pDC, r.x1 + (r.X()-ds.X())/2, r.y1);
 	}
 
@@ -128,7 +128,7 @@ void GDatePopup::OnPaint(GSurface *pDC)
 				}
 			}
 
-			GDisplayString ds(SysFont, Mv.Day());
+			LDisplayString ds(SysFont, Mv.Day());
 			ds.Draw(pDC, r.x1 + Px + 2, r.y1 + Py + 2);
 		}
 	}

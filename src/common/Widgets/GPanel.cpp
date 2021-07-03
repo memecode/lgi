@@ -38,7 +38,7 @@ GPanel::~GPanel()
 int GPanel::CalcWidth()
 {
 	if (!Ds)
-		Ds = new GDisplayString(GetFont(), Name());
+		Ds = new LDisplayString(GetFont(), Name());
 
 	return 30 + (Ds ? Ds->X() : 0);
 }
@@ -221,7 +221,7 @@ void GPanel::OnPaint(GSurface *pDC)
 	{
 		// title
 		if (!Ds)
-			Ds = new GDisplayString(Fnt, Name());
+			Ds = new LDisplayString(Fnt, Name());
 		if (Ds)
 			Ds->Draw(pDC, r.x1 + 20, r.y1 + 1);
 	}

@@ -2,10 +2,10 @@
 class GChar : public LListItem
 {
 	ushort i;
-	GFont *Fnt;
+	LFont *Fnt;
 
 public:
-	GChar(ushort I, GFont *fnt)
+	GChar(ushort I, LFont *fnt)
 	{
 		i = I;
 		Fnt = fnt;

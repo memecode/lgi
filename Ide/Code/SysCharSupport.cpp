@@ -62,7 +62,7 @@ public:
 			sprintf(msg, "%i 0x%x", c, c);
 			Match->GetWindow()->SetCtrlName(IDC_VALUE, msg);
 
-			GFontSystem *s = GFontSystem::Inst();
+			LFontSystem *s = LFontSystem::Inst();
 			if (s)
 			{
 				GString::Array Fonts;
@@ -70,7 +70,7 @@ public:
 				{
 					for (auto &f : Fonts)
 					{
-						GFont *Fnt = new GFont;
+						LFont *Fnt = new LFont;
 						if (Fnt)
 						{
 							Fnt->SubGlyphs(false);
@@ -83,7 +83,7 @@ public:
 								if (pDC)
 								{
 									char16 Str[] = { (char16)c, 0 };
-									GDisplayString d(Fnt, Str);
+									LDisplayString d(Fnt, Str);
 									if (pDC->Create(d.X(), d.Y(), System32BitColourSpace))
 									{
 										pDC->Colour(L_WORKSPACE);

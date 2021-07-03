@@ -161,7 +161,7 @@ void GStatusPane::OnPaint(GSurface *pDC)
 		SysFont->Colour(L_TEXT, L_MED);
 		SysFont->Transparent(false);
 
-		GDisplayString ds(SysFont, t);
+		LDisplayString ds(SysFont, t);
 		ds.Draw(pDC, 1, (r.Y()-ds.Y())/2, &r);
 		
 		SysFont->TabSize(TabSize);

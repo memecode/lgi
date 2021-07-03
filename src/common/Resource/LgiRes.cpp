@@ -699,7 +699,7 @@ public:
         pDC->Colour(GColour(0xff, 0, 0));
         pDC->Line(c.x1, c.y1, c.x2, c.y2);
         pDC->Line(c.x2, c.y1, c.x1, c.y2);
-        GDisplayString ds(SysFont, n);
+        LDisplayString ds(SysFont, n);
         SysFont->Transparent(true);
         SysFont->Fore(LColour(L_TEXT));
         ds.Draw(pDC, 3, 0);

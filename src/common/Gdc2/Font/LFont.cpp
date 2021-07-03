@@ -1,5 +1,5 @@
 /*hdr
-**	FILE:			GFont.cpp
+**	FILE:			LFont.cpp
 **	AUTHOR:			Matthew Allen
 **	DATE:			5/5/97
 **	DESCRIPTION:	Gdc2 Font Support
@@ -178,7 +178,7 @@ public:
 		_TabSize = 32; // px
 		_Transparent = false;
 		_Quality = DEFAULT_QUALITY;
-		_SubGlyphs = GFontSystem::Inst()->GetDefaultGlyphSub();
+		_SubGlyphs = LFontSystem::Inst()->GetDefaultGlyphSub();
 	}
 
 	~GTypeFacePrivate()
@@ -188,17 +188,17 @@ public:
 	}
 };
 
-GTypeFace::GTypeFace()
+LTypeFace::LTypeFace()
 {
 	d = new GTypeFacePrivate;
 }
 
-GTypeFace::~GTypeFace()
+LTypeFace::~LTypeFace()
 {
 	DeleteObj(d);
 }
 
-bool GTypeFace::operator ==(GTypeFace &t)
+bool LTypeFace::operator ==(LTypeFace &t)
 {
 	if ((Face() == 0) ^ (t.Face() == 0))
 		return false;
@@ -216,7 +216,7 @@ bool GTypeFace::operator ==(GTypeFace &t)
 }
 
 // set
-void GTypeFace::Face(const char *s)
+void LTypeFace::Face(const char *s)
 {
 	if (s &&
 		s != d->_Face &&
@@ -229,7 +229,7 @@ void GTypeFace::Face(const char *s)
 	}
 }
 
-void GTypeFace::Size(GCss::Len s)
+void LTypeFace::Size(GCss::Len s)
 {
 	if (d->_Size != s)
 	{
@@ -238,18 +238,18 @@ void GTypeFace::Size(GCss::Len s)
 	}
 }
 
-void GTypeFace::PointSize(int i)
+void LTypeFace::PointSize(int i)
 {
 	Size(GCss::Len(GCss::LenPt, (float)i));
 }
 
-void GTypeFace::TabSize(int i)
+void LTypeFace::TabSize(int i)
 {
 	d->_TabSize = MAX(i, 8);
 	_OnPropChange(false);
 }
 
-void GTypeFace::Quality(int i)
+void LTypeFace::Quality(int i)
 {
 	if (d->_Quality != i)
 	{
@@ -258,7 +258,7 @@ void GTypeFace::Quality(int i)
 	}
 }
 
-GColour GTypeFace::WhitespaceColour()
+GColour LTypeFace::WhitespaceColour()
 {
 	if (d->WhiteSpace.IsValid())
 		return d->WhiteSpace;
@@ -266,37 +266,37 @@ GColour GTypeFace::WhitespaceColour()
 	return d->_Back.Mix(d->_Fore, LGI_WHITESPACE_WEIGHT);
 }
 
-void GTypeFace::WhitespaceColour(GColour c)
+void LTypeFace::WhitespaceColour(GColour c)
 {
 	d->WhiteSpace = c;
 	_OnPropChange(false);
 }
 
-void GTypeFace::Fore(LSystemColour c)
+void LTypeFace::Fore(LSystemColour c)
 {
 	d->_Fore = LColour(c);
 	_OnPropChange(false);
 }
 
-void GTypeFace::Fore(GColour c)
+void LTypeFace::Fore(GColour c)
 {
 	d->_Fore = c;
 	_OnPropChange(false);
 }
 
-void GTypeFace::Back(LSystemColour c)
+void LTypeFace::Back(LSystemColour c)
 {
 	d->_Back = LColour(c);
 	_OnPropChange(false);
 }
 
-void GTypeFace::Back(GColour c)
+void LTypeFace::Back(GColour c)
 {
 	d->_Back = c;
 	_OnPropChange(false);
 }
 
-void GTypeFace::SetWeight(int i)
+void LTypeFace::SetWeight(int i)
 {
 	if (d->_Weight != i)
 	{
@@ -305,7 +305,7 @@ void GTypeFace::SetWeight(int i)
 	}
 }
 
-void GTypeFace::Italic(bool i)
+void LTypeFace::Italic(bool i)
 {
 	if (d->_Italic != i)
 	{
@@ -314,7 +314,7 @@ void GTypeFace::Italic(bool i)
 	}
 }
 
-void GTypeFace::Underline(bool i)
+void LTypeFace::Underline(bool i)
 {
 	if (d->_Underline != i)
 	{
@@ -323,20 +323,20 @@ void GTypeFace::Underline(bool i)
 	}
 }
 
-void GTypeFace::Transparent(bool i)
+void LTypeFace::Transparent(bool i)
 {
 	d->_Transparent = i;
 	_OnPropChange(false);
 }
 
-void GTypeFace::Colour(LSystemColour Fore, LSystemColour Back)
+void LTypeFace::Colour(LSystemColour Fore, LSystemColour Back)
 {
 	d->_Fore = LColour(Fore);
 	d->_Back = LColour(Back);
 	_OnPropChange(false);
 }
 
-void GTypeFace::Colour(GColour Fore, GColour Back)
+void LTypeFace::Colour(GColour Fore, GColour Back)
 {
 	LgiAssert(Fore.IsValid());
 	d->_Fore = Fore;
@@ -345,9 +345,9 @@ void GTypeFace::Colour(GColour Fore, GColour Back)
 	_OnPropChange(false);
 }
 
-void GTypeFace::SubGlyphs(bool i)
+void LTypeFace::SubGlyphs(bool i)
 {
-	if (!i || GFontSystem::Inst()->GetGlyphSubSupport())
+	if (!i || LFontSystem::Inst()->GetGlyphSubSupport())
 	{
 		d->_SubGlyphs = i;
 		_OnPropChange(false);
@@ -356,17 +356,17 @@ void GTypeFace::SubGlyphs(bool i)
 
 ////////////////////////
 // get
-char *GTypeFace::Face()
+char *LTypeFace::Face()
 {
 	return d->_Face;
 }
 
-GCss::Len GTypeFace::Size()
+GCss::Len LTypeFace::Size()
 {
 	return d->_Size;
 }
 
-int GTypeFace::PointSize()
+int LTypeFace::PointSize()
 {
 	if (d->_Size.Type == GCss::LenPt)
 		return (int)d->_Size.Value;
@@ -378,113 +378,113 @@ int GTypeFace::PointSize()
 	return 0;
 }
 
-int GTypeFace::TabSize()
+int LTypeFace::TabSize()
 {
 	return d->_TabSize;
 }
 
-int GTypeFace::Quality()
+int LTypeFace::Quality()
 {
 	return d->_Quality;
 }
 
-GColour GTypeFace::Fore()
+GColour LTypeFace::Fore()
 {
 	return d->_Fore;
 }
 
-GColour GTypeFace::Back()
+GColour LTypeFace::Back()
 {
 	return d->_Back;
 }
 
-int GTypeFace::GetWeight()
+int LTypeFace::GetWeight()
 {
 	return d->_Weight;
 }
 
-bool GTypeFace::Italic()
+bool LTypeFace::Italic()
 {
 	return d->_Italic;
 }
 
-bool GTypeFace::Underline()
+bool LTypeFace::Underline()
 {
 	return d->_Underline;
 }
 
-bool GTypeFace::Transparent()
+bool LTypeFace::Transparent()
 {
 	return d->_Transparent;
 }
 
-bool GTypeFace::SubGlyphs()
+bool LTypeFace::SubGlyphs()
 {
 	return d->_SubGlyphs;
 }
 
-double GTypeFace::Ascent()
+double LTypeFace::Ascent()
 {
 	return d->_Ascent;
 }
 
-double GTypeFace::Descent()
+double LTypeFace::Descent()
 {
 	return d->_Descent;
 }
 
-double GTypeFace::Leading()
+double LTypeFace::Leading()
 {
 	return d->_Leading;
 }
 
 ////////////////////////////////////////////////////////////////////
-// GFont class, the implemention
-#include "GFontPriv.h"
+// LFont class, the implemention
+#include "LFontPriv.h"
 
 #ifdef WINDOWS
-GAutoPtr<GLibrary> GFontPrivate::Gdi32;
+GAutoPtr<GLibrary> LFontPrivate::Gdi32;
 #endif
 
-GFont::GFont(const char *face, GCss::Len size)
+LFont::LFont(const char *face, GCss::Len size)
 {
-	d = new GFontPrivate;
+	d = new LFontPrivate;
 	if (face && size.IsValid())
 	{
 		Create(face, size);
 	}
 }
 
-GFont::GFont(OsFont Handle)
+LFont::LFont(OsFont Handle)
 {
-	d = new GFontPrivate;
-	GFontType Type;
+	d = new LFontPrivate;
+	LFontType Type;
 	if (Type.GetFromRef(Handle))
 	{
 		Create(&Type);
 	}
 }
 
-GFont::GFont(GFontType &Type)
+LFont::LFont(LFontType &Type)
 {
-	d = new GFontPrivate;
+	d = new LFontPrivate;
 	Create(&Type);
 }
 
-GFont::GFont(GFont &Fnt)
+LFont::LFont(LFont &Fnt)
 {
-	d = new GFontPrivate;
+	d = new LFontPrivate;
 	*this = Fnt;
 }
 
-GFont::~GFont()
+LFont::~LFont()
 {
 	LgiAssert(d->WarnOnDelete == false);
 	Destroy();
 	DeleteObj(d);
 }
 
-bool GFont::CreateFromCss(const char *Css)
+bool LFont::CreateFromCss(const char *Css)
 {
 	if (!Css)
 		return false;
@@ -494,7 +494,7 @@ bool GFont::CreateFromCss(const char *Css)
 	return CreateFromCss(&c);
 }
 
-bool GFont::CreateFromCss(GCss *Css)
+bool LFont::CreateFromCss(GCss *Css)
 {
 	if (!Css)
 		return false;
@@ -537,7 +537,7 @@ bool GFont::CreateFromCss(GCss *Css)
 	return Create();
 }
 
-GString GFont::FontToCss()
+GString LFont::FontToCss()
 {
 	GCss c;
 	c.FontFamily(Face());
@@ -550,12 +550,12 @@ GString GFont::FontToCss()
 	return aStr.Get();
 }
 
-void GFont::WarnOnDelete(bool w)
+void LFont::WarnOnDelete(bool w)
 {
 	d->WarnOnDelete = w;
 }
 
-bool GFont::Destroy()
+bool LFont::Destroy()
 {
 	bool Status = true;
 	
@@ -590,23 +590,23 @@ bool GFont::Destroy()
 }
 
 #if USE_CORETEXT
-CFDictionaryRef GFont::GetAttributes()
+CFDictionaryRef LFont::GetAttributes()
 {
 	return d->Attributes;
 }
 #endif
 
-uchar *GFont::GetGlyphMap()
+uchar *LFont::GetGlyphMap()
 {
 	return d->GlyphMap;
 }
 
-bool GFont::GetOwnerUnderline()
+bool LFont::GetOwnerUnderline()
 {
 	return d->OwnerUnderline;
 }
 
-void GFont::_OnPropChange(bool FontChange)
+void LFont::_OnPropChange(bool FontChange)
 {
 	if (FontChange)
 	{
@@ -614,12 +614,12 @@ void GFont::_OnPropChange(bool FontChange)
 	}
 }
 
-OsFont GFont::Handle()
+OsFont LFont::Handle()
 {
 	return d->hFont;
 }
 
-int GFont::GetHeight()
+int LFont::GetHeight()
 {
 	if (!d->hFont)
 	{
@@ -631,7 +631,7 @@ int GFont::GetHeight()
 	return d->Height;
 }
 
-bool GFont::IsValid()
+bool LFont::IsValid()
 {
 	bool Status = false;
 
@@ -811,12 +811,12 @@ type_4_cmap *GetUnicodeTable(HFONT hFont, uint16_t &Length)
 }
 #endif
 
-GSurface *GFont::GetSurface()
+GSurface *LFont::GetSurface()
 {
 	return d->pSurface;
 }
 
-bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
+bool LFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 {
 	bool FaceChanging = false;
 	bool SizeChanging = false;
@@ -834,8 +834,8 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 	
 	if (size.IsValid())
 	{
-		SizeChanging = GTypeFace::d->_Size != size;
-		GTypeFace::d->_Size = size;
+		SizeChanging = LTypeFace::d->_Size != size;
+		LTypeFace::d->_Size = size;
 	}
 	
 	if ((SizeChanging || FaceChanging) && this == SysFont && ValidInitFaceSize)
@@ -915,9 +915,9 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 			}
 			
 			d->Height = (int) (ceil((double)d->hFont->height * PxSize / d->hFont->units_per_EM) + 0.0001);
-			GTypeFace::d->_Ascent = (double)d->hFont->ascender * PxSize / d->hFont->units_per_EM;
-			LgiAssert(d->Height > GTypeFace::d->_Ascent);
-			GTypeFace::d->_Descent = d->Height - GTypeFace::d->_Ascent;
+			LTypeFace::d->_Ascent = (double)d->hFont->ascender * PxSize / d->hFont->units_per_EM;
+			LgiAssert(d->Height > LTypeFace::d->_Ascent);
+			LTypeFace::d->_Descent = d->Height - LTypeFace::d->_Ascent;
 			
 			return true;
 		}
@@ -941,13 +941,13 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 		else
 			LgiAssert(!"What now?");
 	
-		GTypeFace::d->IsSymbol = GTypeFace::d->_Face &&
+		LTypeFace::d->IsSymbol = LTypeFace::d->_Face &&
 									(
-										stristr(GTypeFace::d->_Face, "wingdings") ||
-										stristr(GTypeFace::d->_Face, "symbol")
+										stristr(LTypeFace::d->_Face, "wingdings") ||
+										stristr(LTypeFace::d->_Face, "symbol")
 									);
 		int Cs;
-		if (GTypeFace::d->IsSymbol)
+		if (LTypeFace::d->IsSymbol)
 			Cs = SYMBOL_CHARSET;
 		else
 			Cs = ANSI_CHARSET;
@@ -956,22 +956,22 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 							stricmp(Face(), "Courier New") == 0 &&
 							Size().Type == GCss::LenPt &&
 							(PointSize() == 8 || PointSize() == 9) &&
-							GTypeFace::d->_Underline;
+							LTypeFace::d->_Underline;
 
-		GAutoWString wFace(Utf8ToWide(GTypeFace::d->_Face));
+		GAutoWString wFace(Utf8ToWide(LTypeFace::d->_Face));
 		if (Win32Height)
 			d->hFont = ::CreateFont(Win32Height,
 									0,
 									0,
 									0,
-									GTypeFace::d->_Weight,
-									GTypeFace::d->_Italic,
-									d->OwnerUnderline ? false : GTypeFace::d->_Underline,
+									LTypeFace::d->_Weight,
+									LTypeFace::d->_Italic,
+									d->OwnerUnderline ? false : LTypeFace::d->_Underline,
 									false,
 									Cs,
 									OUT_DEFAULT_PRECIS,
 									CLIP_DEFAULT_PRECIS,
-									GTypeFace::d->_Quality,
+									LTypeFace::d->_Quality,
 									FF_DONTCARE,
 									wFace);
 	
@@ -984,9 +984,9 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 			if (GetTextMetrics(hDC, &tm))
 			{
 				d->Height = tm.tmHeight;
-				GTypeFace::d->_Ascent = tm.tmAscent;
-				GTypeFace::d->_Descent = tm.tmDescent;
-				GTypeFace::d->_Leading = tm.tmInternalLeading;
+				LTypeFace::d->_Ascent = tm.tmAscent;
+				LTypeFace::d->_Descent = tm.tmDescent;
+				LTypeFace::d->_Leading = tm.tmInternalLeading;
 			}
 			else
 			{
@@ -1129,7 +1129,7 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 						}
 					}
 					
-					if (GTypeFace::d->IsSymbol)
+					if (LTypeFace::d->IsSymbol)
 					{
 						// Lies! It's all Lies! Symbol doesn't support non-breaking space.
 						int u = 0xa0;
@@ -1182,7 +1182,7 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 			
 			// Get metrics for this font...
 			Gtk::GtkPrintContext *PrintCtx = pSurface ? pSurface->GetPrintContext() : NULL;
-			Gtk::PangoContext *SysCtx = GFontSystem::Inst()->GetContext();
+			Gtk::PangoContext *SysCtx = LFontSystem::Inst()->GetContext();
 			if (PrintCtx)
 				d->PangoCtx = gtk_print_context_create_pango_context(PrintCtx);
 			auto EffectiveCtx = d->PangoCtx ? d->PangoCtx : SysCtx;
@@ -1191,21 +1191,21 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 				printf("pango_font_get_metrics failed.\n");
 			else
 			{
-				GTypeFace::d->_Ascent = (double)Gtk::pango_font_metrics_get_ascent(m) / PANGO_SCALE;
-				GTypeFace::d->_Descent = (double)Gtk::pango_font_metrics_get_descent(m) / PANGO_SCALE;
-				d->Height = ceil(GTypeFace::d->_Ascent + GTypeFace::d->_Descent + 1/*hack the underscores to work*/);
+				LTypeFace::d->_Ascent = (double)Gtk::pango_font_metrics_get_ascent(m) / PANGO_SCALE;
+				LTypeFace::d->_Descent = (double)Gtk::pango_font_metrics_get_descent(m) / PANGO_SCALE;
+				d->Height = ceil(LTypeFace::d->_Ascent + LTypeFace::d->_Descent + 1/*hack the underscores to work*/);
 				
 				#if 0
 				if (PrintCtx)
 				{
-					LgiTrace("GFont::Create %s,%f (%i,%i,%i) (%.1f,%.1f,%i)\n",
+					LgiTrace("LFont::Create %s,%f (%i,%i,%i) (%.1f,%.1f,%i)\n",
 						Gtk::pango_font_description_get_family(d->hFont),
 						(double)Gtk::pango_font_description_get_size(d->hFont) / PANGO_SCALE,
 						Gtk::pango_font_metrics_get_ascent(m),
 						Gtk::pango_font_metrics_get_descent(m),
 						PANGO_SCALE,
-						GTypeFace::d->_Ascent,
-						GTypeFace::d->_Descent,
+						LTypeFace::d->_Ascent,
+						LTypeFace::d->_Descent,
 						d->Height);
 				}
 				#endif
@@ -1305,24 +1305,24 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 			
 			if (d->hFont)
 			{
-				GTypeFace::d->_Ascent = CTFontGetAscent(d->hFont);
-				GTypeFace::d->_Descent = CTFontGetDescent(d->hFont);
-				GTypeFace::d->_Leading = CTFontGetLeading(d->hFont);
-				d->Height = ceil(GTypeFace::d->_Ascent +
-								 GTypeFace::d->_Descent +
-								 GTypeFace::d->_Leading);
+				LTypeFace::d->_Ascent = CTFontGetAscent(d->hFont);
+				LTypeFace::d->_Descent = CTFontGetDescent(d->hFont);
+				LTypeFace::d->_Leading = CTFontGetLeading(d->hFont);
+				d->Height = ceil(LTypeFace::d->_Ascent +
+								 LTypeFace::d->_Descent +
+								 LTypeFace::d->_Leading);
 				
 				#if 0
 				if (Sz.Type == GCss::LenPx)
 				{
 					GStringPipe p;
 					Sz.ToString(p);
-					LgiTrace("%s:%i - GFont::Create(%s,%s) = %f,%f,%f (%i)\n",
+					LgiTrace("%s:%i - LFont::Create(%s,%s) = %f,%f,%f (%i)\n",
 							_FL,
 							Face(), p.NewGStr().Get(),
-							GTypeFace::d->_Ascent,
-							GTypeFace::d->_Descent,
-							GTypeFace::d->_Leading,
+							LTypeFace::d->_Ascent,
+							LTypeFace::d->_Descent,
+							LTypeFace::d->_Leading,
 							GetHeight());
 				}
 				#endif
@@ -1361,14 +1361,14 @@ bool GFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 	return false;
 }
 
-char16 *GFont::_ToUnicode(char *In, ssize_t &Len)
+char16 *LFont::_ToUnicode(char *In, ssize_t &Len)
 {
 	char16 *WStr = 0;
 	
 	if (In &&
 		Len > 0)
 	{
-		WStr = (char16*)LNewConvertCp(LGI_WideCharset, In, GTypeFace::d->_CodePage, Len);
+		WStr = (char16*)LNewConvertCp(LGI_WideCharset, In, LTypeFace::d->_CodePage, Len);
 		if (WStr)
 		{
 			ssize_t l = StrlenW(WStr);
@@ -1384,7 +1384,7 @@ char16 *GFont::_ToUnicode(char *In, ssize_t &Len)
 
 #if defined WINNATIVE
 
-bool GFont::Create(GFontType *LogFont, GSurface *pSurface)
+bool LFont::Create(LFontType *LogFont, GSurface *pSurface)
 {
 	if (d->hFont)
 	{
@@ -1415,7 +1415,7 @@ bool GFont::Create(GFontType *LogFont, GSurface *pSurface)
 
 #else
 
-bool GFont::Create(GFontType *LogFont, GSurface *pSurface)
+bool LFont::Create(LFontType *LogFont, GSurface *pSurface)
 {
 	if (LogFont)
 	{
@@ -1427,7 +1427,7 @@ bool GFont::Create(GFontType *LogFont, GSurface *pSurface)
 }
 #endif
 
-GFont &GFont::operator =(GFont &f)
+LFont &LFont::operator =(LFont &f)
 {
 	Face(f.Face());
 	Size(f.Size());
@@ -1444,7 +1444,7 @@ GFont &GFont::operator =(GFont &f)
 }
 
 ///////////////////////////////////////////////////////////////////////
-GFontType::GFontType(const char *face, int pointsize)
+LFontType::LFontType(const char *face, int pointsize)
 {
 	#if defined WINNATIVE
 
@@ -1466,11 +1466,11 @@ GFontType::GFontType(const char *face, int pointsize)
 	#endif
 }
 
-GFontType::~GFontType()
+LFontType::~LFontType()
 {
 }
 
-const char *GFontType::GetFace()
+const char *LFontType::GetFace()
 {
 	#ifdef WINNATIVE
 	Buf = Info.lfFaceName;
@@ -1480,7 +1480,7 @@ const char *GFontType::GetFace()
 	#endif
 }
 
-void GFontType::SetFace(const char *Face)
+void LFontType::SetFace(const char *Face)
 {
 	#ifdef WINNATIVE
 	if (Face)
@@ -1496,7 +1496,7 @@ void GFontType::SetFace(const char *Face)
 	#endif
 }
 
-int GFontType::GetPointSize()
+int LFontType::GetPointSize()
 {
 	#ifdef WINNATIVE
 	return WinHeightToPoint(Info.lfHeight);
@@ -1505,7 +1505,7 @@ int GFontType::GetPointSize()
 	#endif
 }
 
-void GFontType::SetPointSize(int PointSize)
+void LFontType::SetPointSize(int PointSize)
 {
 	#ifdef WINNATIVE
 	Info.lfHeight = WinPointToHeight(PointSize);
@@ -1514,7 +1514,7 @@ void GFontType::SetPointSize(int PointSize)
 	#endif
 }
 
-bool GFontType::DoUI(GView *Parent)
+bool LFontType::DoUI(GView *Parent)
 {
 	bool Status = false;
 
@@ -1542,7 +1542,7 @@ bool GFontType::DoUI(GView *Parent)
 	return Status;
 }
 
-bool GFontType::GetDescription(char *Str, int SLen)
+bool LFontType::GetDescription(char *Str, int SLen)
 {
 	if (Str && GetFace())
 	{
@@ -1553,7 +1553,7 @@ bool GFontType::GetDescription(char *Str, int SLen)
 	return false;
 }
 
-bool GFontType::Serialize(GDom *Options, const char *OptName, bool Write)
+bool LFontType::Serialize(GDom *Options, const char *OptName, bool Write)
 {
 	bool Status = false;
 
@@ -1610,7 +1610,7 @@ bool GFontType::Serialize(GDom *Options, const char *OptName, bool Write)
 	return Status;
 }
 
-bool GFontType::GetConfigFont(const char *Tag)
+bool LFontType::GetConfigFont(const char *Tag)
 {
 	bool Status = false;
 
@@ -1683,7 +1683,7 @@ public:
 
 #if defined USE_CORETEXT
 
-bool MacGetSystemFont(GTypeFace &Info, CTFontUIFontType Which)
+bool MacGetSystemFont(LTypeFace &Info, CTFontUIFontType Which)
 {
 	CTFontRef ref = CTFontCreateUIFontForLanguage(Which, 0.0, NULL);
 	if (!ref)
@@ -1710,7 +1710,7 @@ bool MacGetSystemFont(GTypeFace &Info, CTFontUIFontType Which)
 
 #endif
 
-bool GFontType::GetSystemFont(const char *Which)
+bool LFontType::GetSystemFont(const char *Which)
 {
 	bool Status = false;
 
@@ -2172,7 +2172,7 @@ bool GFontType::GetSystemFont(const char *Which)
 	return Status;
 }
 
-bool GFontType::GetFromRef(OsFont Handle)
+bool LFontType::GetFromRef(OsFont Handle)
 {
 	#if defined WIN32
 	return GetObject(Handle, sizeof(Info), &Info) == sizeof(Info);
@@ -2182,9 +2182,9 @@ bool GFontType::GetFromRef(OsFont Handle)
 	#endif
 }
 
-GFont *GFontType::Create(GSurface *pSurface)
+LFont *LFontType::Create(GSurface *pSurface)
 {
-	GFont *New = new GFont;
+	LFont *New = new LFont;
 	if (New)
 	{
 		if (!New->Create(this, pSurface))
@@ -2218,11 +2218,11 @@ char16 WinSymbolToUnicode[256] =
     /* 240 to 255 */ 8680, 8679, 8681, 8660, 8661, 8662, 8663, 8665, 8664, 0, 0, 10007, 10003, 9746, 9745, 0,
 };
 
-GAutoString GFont::ConvertToUnicode(char16 *Input, ssize_t Len)
+GAutoString LFont::ConvertToUnicode(char16 *Input, ssize_t Len)
 {
 	GAutoString a;
 	
-	if (GTypeFace::d->IsSymbol)
+	if (LTypeFace::d->IsSymbol)
 	{
 		// F***ing wingdings.
 		if (Input)

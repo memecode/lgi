@@ -54,7 +54,7 @@ GButton::GButton(int id, int x, int y, int cx, int cy, const char *name) :
 	
 	if ((cx < 0 || cy < 0))
 	{
-		GDisplayString ds(SysFont, ValidStr(name)?name:"1");
+		LDisplayString ds(SysFont, ValidStr(name)?name:"1");
 		if (cx < 0) cx = ds.X() + Overhead.x;
 		if (cy < 0) cy = ds.Y() + Overhead.y;
 	}
@@ -161,7 +161,7 @@ bool GButton::NameW(const char16 *n)
 	return GView::NameW(n);
 }
 
-void GButton::SetFont(GFont *Fnt, bool OwnIt)
+void GButton::SetFont(LFont *Fnt, bool OwnIt)
 {
 	GView::SetFont(Fnt, OwnIt);
 }

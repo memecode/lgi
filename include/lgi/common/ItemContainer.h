@@ -101,7 +101,7 @@ public:
 	/// Gets the position
 	virtual LRect *GetPos(int Col = -1) { return 0; }
 	/// Gets the font for the item
-	virtual GFont *GetFont() { return 0; }
+	virtual LFont *GetFont() { return 0; }
 	
 	/// Reads / writes list item to XML
 	virtual bool XmlIo(class LXmlTag *Tag, bool Write) { return false; }

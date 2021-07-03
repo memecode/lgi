@@ -3,8 +3,8 @@
 
 class GFontCache
 {
-	GFont *DefaultFont;
-	GArray<GFont*> Fonts;
+	LFont *DefaultFont;
+	GArray<LFont*> Fonts;
 	LHashTbl<ConstStrKey<char>, GString> FontName;
 	
 public:
@@ -13,7 +13,7 @@ public:
 	(
 		/// This is an externally owned default font... or optionally 
 		/// NULL if there is no default.
-		GFont *DefFnt = NULL
+		LFont *DefFnt = NULL
 	)
 	{
 		DefaultFont = DefFnt;
@@ -24,12 +24,12 @@ public:
 		Fonts.DeleteObjects();
 	}
 
-	GFont *GetDefaultFont()
+	LFont *GetDefaultFont()
 	{
 		return DefaultFont;
 	}
 
-	void SetDefaultFont(GFont *Def)
+	void SetDefaultFont(LFont *Def)
 	{
 		DefaultFont = Def;
 	}
@@ -44,7 +44,7 @@ public:
 			FontName.Add(Label, GString(FontFace));
 	}
 	
-	GFont *AddFont(	const char *Face,
+	LFont *AddFont(	const char *Face,
 					GCss::Len Size,
 					GCss::FontWeightType Weight,
 					GCss::FontStyleType Style,
@@ -53,7 +53,7 @@ public:
 		// Matching existing fonts...
 		for (unsigned i=0; i<Fonts.Length(); i++)
 		{
-			GFont *f = Fonts[i];
+			LFont *f = Fonts[i];
 			if
 			(
 				f->Face() &&
@@ -68,7 +68,7 @@ public:
 		}
 		
 		// No matching font... create a new one
-		GFont *f = new GFont;
+		LFont *f = new LFont;
 		if (f)
 		{
 			f->Bold(Weight == GCss::FontWeightBold);
@@ -100,7 +100,7 @@ public:
 		return f;
 	}
 
-	GFont *GetFont(GCss *Style)
+	LFont *GetFont(GCss *Style)
 	{
 		if (!Style || !DefaultFont)
 			return DefaultFont;
@@ -135,7 +135,7 @@ public:
 		GCss::FontStyleType FontStyle = Style->FontStyle();
 		GCss::TextDecorType Decor = Style->TextDecoration();
 
-		GFont *f = NULL;
+		LFont *f = NULL;
 		for (unsigned i = 0; !f && i<Fam.Length(); i++)
 		{		
 			f = AddFont(Fam[i],

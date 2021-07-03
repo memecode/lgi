@@ -13,11 +13,11 @@ public:
 	// Calls specific to this class:
 	ssize_t Length();
 	bool OnPaint(GSurface *Dest);
-	GFont *GetFont();
-	void SetFont(GFont *Font);
+	LFont *GetFont();
+	void SetFont(LFont *Font);
 	GColour Background();
 	GColour Background(GColour c);
-	GDisplayString *Text(int x, int y, const char *Str, int Len = -1);
+	LDisplayString *Text(int x, int y, const char *Str, int Len = -1);
 	
 	// Calls that are stored and played back:
 	LRect ClipRgn();

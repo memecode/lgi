@@ -252,7 +252,7 @@ int64 Time = LgiCurrentTime();
 
 	LgiAssert(sizeof(char16) == 2);
 	
-	LgiAssert(GDisplayString::FScale == (1 << GDisplayString::FShift));
+	LgiAssert(LDisplayString::FScale == (1 << LDisplayString::FShift));
 
 DumpTime("start");
 
@@ -336,7 +336,7 @@ DumpTime("exception handler");
 DumpTime("init common ctrls");
 
 	// Setup LGI Sub-systems
-	GFontSystem::Inst();
+	LFontSystem::Inst();
 
 DumpTime("font sys");
 
@@ -355,7 +355,7 @@ DumpTime("gdc");
 DumpTime("vars");
 
 	// System font
-	GFontType SysFontType;
+	LFontType SysFontType;
 	if (SysFontType.GetSystemFont("System"))
 	{
 		SystemNormal = SysFontType.Create();
@@ -427,7 +427,7 @@ GApp::~GApp()
 	TheApp = 0;
 	DeleteObj(SkinEngine);
 
-	DeleteObj(GFontSystem::Me);
+	DeleteObj(LFontSystem::Me);
 	DeleteObj(d->FileSystem);
 	DeleteObj(d->GdcSystem);
 	d->Classes.DeleteObjects();

@@ -375,7 +375,7 @@ public:
 			/// The size of the parent box if known, or -1 if unknown.
 			int Box = 0,
 			/// Any relevant font
-			GFont *Font = 0,
+			LFont *Font = 0,
 			/// The DPI of the relevant device if known, or -1 if unknown
 			int Dpi = -1
 		);

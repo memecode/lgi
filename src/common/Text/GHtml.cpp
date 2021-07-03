@@ -217,7 +217,7 @@ public:
 class GFontCache
 {
 	GHtml *Owner;
-	List<GFont> Fonts;
+	List<LFont> Fonts;
 
 public:
 	GFontCache(GHtml *owner)
@@ -230,12 +230,12 @@ public:
 		Fonts.DeleteObjects();
 	}
 
-	GFont *FontAt(int i)
+	LFont *FontAt(int i)
 	{
 		return Fonts.ItemAt(i);
 	}
 	
-	GFont *FindMatch(GFont *m)
+	LFont *FindMatch(LFont *m)
 	{
 		for (auto f: Fonts)
 		{
@@ -248,12 +248,12 @@ public:
 		return 0;
 	}
 
-	GFont *GetFont(GCss *Style)
+	LFont *GetFont(GCss *Style)
 	{
 		if (!Style)
 			return NULL;
 		
-		GFont *Default = Owner->GetFont();
+		LFont *Default = Owner->GetFont();
 		GCss::StringsDef Face = Style->FontFamily();
 		if (Face.Length() < 1 || !ValidStr(Face[0]))
 		{
@@ -374,8 +374,8 @@ public:
 		}
 		else LgiAssert(!"Not impl.");
 
-		GFont *f;
-		if ((f = new GFont))
+		LFont *f;
+		if ((f = new LFont))
 		{
 			char *ff = ValidStr(Face[0]) ? Face[0] : Default->Face();
 			f->Face(ff);
@@ -391,7 +391,7 @@ public:
 			{
 				// Broken font...
 				f->Face(Default->Face());
-				GFont *DefMatch = FindMatch(f);
+				LFont *DefMatch = FindMatch(f);
 				// printf("Falling back to default face for '%s:%i', DefMatch=%p\n", ff, f->PointSize(), DefMatch);
 				if (DefMatch)
 				{
@@ -629,7 +629,7 @@ public:
 
 	int ResolveX(GCss::Len l, GTag *t, bool IsMargin)
 	{
-		GFont *f = t->GetFont();
+		LFont *f = t->GetFont();
 		switch (l.Type)
 		{
 			default:
@@ -691,7 +691,7 @@ public:
 		return 0;
 	}
 	
-	bool LimitX(int &x, GCss::Len Min, GCss::Len Max, GFont *f)
+	bool LimitX(int &x, GCss::Len Min, GCss::Len Max, LFont *f)
 	{
 		bool Limited = false;
 		if (Min.IsValid())
@@ -717,7 +717,7 @@ public:
 
 	int ResolveY(GCss::Len l, GTag *t, bool IsMargin)
 	{
-		GFont *f = t->GetFont();
+		LFont *f = t->GetFont();
 		switch (l.Type)
 		{
 			case GCss::LenInherit:
@@ -811,7 +811,7 @@ public:
 		return 0;
 	}
 
-	bool LimitY(int &y, GCss::Len Min, GCss::Len Max, GFont *f)
+	bool LimitY(int &y, GCss::Len Min, GCss::Len Max, LFont *f)
 	{
 		bool Limited = false;
 		int TotalY = Html ? Html->Y() : 0;
@@ -973,7 +973,7 @@ void GLength::Set(char *s)
 	}
 }
 
-float GLength::Get(GFlowRegion *Flow, GFont *Font, bool Lock)
+float GLength::Get(GFlowRegion *Flow, LFont *Font, bool Lock)
 {
 	switch (u)
 	{
@@ -1894,19 +1894,19 @@ GAutoString GTag::DescribeElement()
 	return GAutoString(s.NewStr());
 }
 
-GFont *GTag::NewFont()
+LFont *GTag::NewFont()
 {
-	GFont *f = new GFont;
+	LFont *f = new LFont;
 	if (f)
 	{
-		GFont *Cur = GetFont();
+		LFont *Cur = GetFont();
 		if (Cur) *f = *Cur;
 		else *f = *Html->DefFont();
 	}
 	return f;
 }
 
-GFont *GTag::GetFont()
+LFont *GTag::GetFont()
 {
 	if (!Font)
 	{
@@ -2096,7 +2096,7 @@ bool GTag::OnMouseClick(LMouse &m)
 				p.Print("    %s\n", s[i]);
 			
 			p.Print("\nParent tags:\n");
-			GDisplayString Sp(SysFont, " ");
+			LDisplayString Sp(SysFont, " ");
 			for (GTag *t=ToTag(Parent); t && t->Parent; t=ToTag(t->Parent))
 			{
 				GStringPipe Tmp;
@@ -2111,7 +2111,7 @@ bool GTag::OnMouseClick(LMouse &m)
 				}
 				GAutoString Txt(Tmp.NewStr());
 				p.Print("%s", Txt.Get());
-				GDisplayString Ds(SysFont, Txt);
+				LDisplayString Ds(SysFont, Txt);
 				int Px = 170 - Ds.X();
 				int Chars = Px / Sp.X();
 				for (int c=0; c<Chars; c++)
@@ -2295,10 +2295,10 @@ static int IsNearRect(LRect *r, int x, int y)
 
 ssize_t GTag::NearestChar(GFlowRect *Tr, int x, int y)
 {
-	GFont *f = GetFont();
+	LFont *f = GetFont();
 	if (f)
 	{
-		GDisplayString ds(f, Tr->Text, Tr->Len);
+		LDisplayString ds(f, Tr->Text, Tr->Len);
 		ssize_t c = ds.CharAt(x - Tr->x1);
 		
 		if (Tr->Text == PreText())
@@ -3168,7 +3168,7 @@ void GTag::SetStyle()
 			}
 			
 			/*
-			GFont *f = GetFont();
+			LFont *f = GetFont();
 			if (FontSize().Type == LenInherit)
 			{
        		    FontSize(Len(LenPt, (float)f->PointSize()));
@@ -3183,7 +3183,7 @@ void GTag::SetStyle()
 		}
 		case TAG_PRE:
 		{
-			GFontType Type;
+			LFontType Type;
 			if (Type.GetSystemFont("Fixed"))
 			{
 				LgiAssert(ValidStr(Type.GetFace()));
@@ -3402,7 +3402,7 @@ void GTag::SetStyle()
 	
 	if (Ctrl)
 	{
-		GFont *f = GetFont();
+		LFont *f = GetFont();
 		if (f)
 			Ctrl->SetFont(f, false);
 	}
@@ -3727,7 +3727,7 @@ bool GTag::ConvertToText(TextConvertState &State)
 		if (TagId == TAG_LI)
 			State.Write("* ", 2);
 
-		GFont *f = GetFont();
+		LFont *f = GetFont();
 		GAutoString u;
 		if (f)
 			u = f->ConvertToUnicode(Txt);
@@ -3939,7 +3939,7 @@ bool GTag::GetWidthMetrics(GTag *Table, uint16 &Min, uint16 &Max)
 		int MinContent = 0;
 		int MaxContent = 0;
 
-		GFont *f = GetFont();
+		LFont *f = GetFont();
 		if (f)
 		{
 			for (char16 *s = Text(); s && *s; )
@@ -3955,7 +3955,7 @@ bool GTag::GetWidthMetrics(GTag *Table, uint16 &Min, uint16 &Max)
 				ssize_t Len = e - s;
 				if (Len > 0)
 				{
-					GDisplayString ds(f, s, Len);
+					LDisplayString ds(f, s, Len);
 					MinContent = MAX(MinContent, ds.X());
 				}
 				
@@ -3963,7 +3963,7 @@ bool GTag::GetWidthMetrics(GTag *Table, uint16 &Min, uint16 &Max)
 				s = (*e) ? e + 1 : 0;
 			}
 
-			GDisplayString ds(f, Text());
+			LDisplayString ds(f, Text());
 			LineWidth = MaxContent = ds.X();
 		}
 
@@ -4939,7 +4939,7 @@ LRect *GArea::TopRect(LRegion *c)
 	return Top;
 }
 
-void GArea::FlowText(GTag *Tag, GFlowRegion *Flow, GFont *Font, int LineHeight, char16 *Text, GCss::LengthType Align)
+void GArea::FlowText(GTag *Tag, GFlowRegion *Flow, LFont *Font, int LineHeight, char16 *Text, GCss::LengthType Align)
 {
 	if (!Flow || !Text || !Font)
 		return;
@@ -4997,7 +4997,7 @@ void GArea::FlowText(GTag *Tag, GFlowRegion *Flow, GFont *Font, int LineHeight, 
 		
 		Tr->Text = Text;
 
-		GDisplayString ds(Font, Text, MIN(1024, FullLen - (Text-Start)));
+		LDisplayString ds(Font, Text, MIN(1024, FullLen - (Text-Start)));
 		ssize_t Chars = ds.CharAt(Flow->X());
 		bool Wrap = false;
 		if (Text[Chars])
@@ -5045,7 +5045,7 @@ void GArea::FlowText(GTag *Tag, GFlowRegion *Flow, GFont *Font, int LineHeight, 
 			LgiAssert(Tr->Len > 0);
 		}
 
-		GDisplayString ds2(Font, Tr->Text, Tr->Len);
+		LDisplayString ds2(Font, Tr->Text, Tr->Len);
 		Tr->x2 = ds2.X();
 		Tr->y2 = LineHeight > 0 ? LineHeight - 1 : 0;
 		
@@ -5258,7 +5258,7 @@ void GTag::CenterText()
 		ContentPx += fr->X();
 	}
 	
-	GFont *f = GetFont();
+	LFont *f = GetFont();
 	int ParentPx = ToTag(Parent)->Size.x;
 	int AvailPx = Size.x;
 
@@ -5288,7 +5288,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 	if (Disp == DispNone)
 		return;
 
-	GFont *f = GetFont();
+	LFont *f = GetFont();
 	GFlowRegion Local(*Flow);
 	bool Restart = true;
 	int BlockFlowWidth = 0;
@@ -5354,7 +5354,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			// GCss::Len MaxX = MaxWidth();
 			GCss::Len MinY = MinHeight();
 			GCss::Len MaxY = MaxHeight();
-			GAutoPtr<GDisplayString> a;
+			GAutoPtr<LDisplayString> a;
 			int ImgX, ImgY;		
 			if (Image)
 			{
@@ -5363,7 +5363,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			}
 			else if (Get("alt", ImgAltText) && ValidStr(ImgAltText))
 			{
-				GDisplayString a(f, ImgAltText);
+				LDisplayString a(f, ImgAltText);
 				ImgX = a.X() + 4;
 				ImgY = a.Y() + 4;
 			}
@@ -5661,7 +5661,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			if (LineHeightCache < 0)
 			{
 				GCss::Len LineHt;
-				GFont *LineFnt = GetFont();
+				LFont *LineFnt = GetFont();
 
 				for (GTag *t = this; t && !LineHt.IsValid(); t = ToTag(t->Parent))
 				{
@@ -6217,7 +6217,7 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, LRect *BorderP
 	BorderPx->ZOff(0, 0);
 
 	// Get all the border info and work out the pixel sizes.
-	GFont *f = GetFont();
+	LFont *f = GetFont();
 	
 	#define DoEdge(coord, axis, name) \
 		BorderDef name = Border##name(); \
@@ -6582,7 +6582,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 				GColour Red(GColour(255, 0, 0).Mix(Fill, 0.3f));
 				if (Get("alt", Alt) && ValidStr(Alt))
 				{
-					GDisplayString Ds(Html->GetFont(), Alt);
+					LDisplayString Ds(Html->GetFont(), Alt);
 					Html->GetFont()->Colour(Red, Fill);
 					Ds.Draw(pDC, 2, 2, &b);
 				}
@@ -6627,7 +6627,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 
 			PaintBorderAndBackground(pDC, back, NULL);
 
-			GFont *f = GetFont();
+			LFont *f = GetFont();
 			#if DEBUG_TEXT_AREA
 			bool IsEditor = Html ? !Html->GetReadOnly() : false;
 			#else
@@ -6744,7 +6744,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 							}
 
 							// Draw the text run
-							GDisplayString ds(f, Tr->Text + Done, c);
+							LDisplayString ds(f, Tr->Text + Done, c);
 							if (IsEditor)
 							{
 								LRect r(x, Tr->y1, x + ds.X() - 1, Tr->y2);
@@ -6810,7 +6810,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 						ssize_t Pos = (Tr->Text - Text()) - Base;
 
 						LgiAssert(Tr->y2 >= Tr->y1);
-						GDisplayString ds(f, Tr->Text, Tr->Len);
+						LDisplayString ds(f, Tr->Text, Tr->Len);
 						ds.Draw(pDC, Tr->x1, Tr->y1 + LineHtOff, IsEditor ? Tr : NULL);
 
 						if
@@ -6833,7 +6833,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 							LRect c;
 							if (Off)
 							{
-								GDisplayString ds(f, Tr->Text, Off);
+								LDisplayString ds(f, Tr->Text, Off);
 								int x = ds.X();
 								if (x >= Tr->X())
 									x = Tr->X()-1;
@@ -6857,7 +6857,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 					for (unsigned i=0; i<TextPos.Length(); i++)
 					{
 						GFlowRect *Tr = TextPos[i];
-						GDisplayString ds(f, Tr->Text, Tr->Len);
+						LDisplayString ds(f, Tr->Text, Tr->Len);
 						ds.Draw(pDC, Tr->x1, Tr->y1 + LineHtOff, IsEditor ? Tr : NULL);
 					}
 				}
@@ -6949,7 +6949,7 @@ void GHtml::_New()
 	IsHtml = true;
 	
 	#ifdef DefaultFont
-	GFont *Def = new GFont;
+	LFont *Def = new LFont;
 	if (Def)
 	{
 		if (Def->CreateFromCss(DefaultFont))
@@ -6975,7 +6975,7 @@ void GHtml::_Delete()
 	DeleteObj(FontCache);
 }
 
-GFont *GHtml::DefFont()
+LFont *GHtml::DefFont()
 {
 	return GetFont();
 }

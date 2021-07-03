@@ -666,7 +666,7 @@ bool GCharset::IsAvailable()
 		return true;
 
 	#ifndef LGI_STATIC
-	GFontSystem *FontSys = GFontSystem::Inst();
+	LFontSystem *FontSys = LFontSystem::Inst();
 	if (FontSys)
 		return FontSys->HasIconv(true);
 	#endif // LGI_STATIC
@@ -890,7 +890,7 @@ ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *
 				OutInfo->Type == CpIconv)
 			{
 				#ifndef LGI_STATIC
-				GFontSystem *Fs = GFontSystem::Inst();
+				LFontSystem *Fs = LFontSystem::Inst();
 				if (Fs)
 					return Fs->IconvConvert(OutInfo->GetIconvName(), (char*)Out, OutLen, InInfo->GetIconvName(), (const char*&)In, InLen);
 				#else
@@ -1117,7 +1117,7 @@ GString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 		OutInfo->Type == CpIconv)
 	{
 		#ifndef LGI_STATIC
-		GFontSystem *Fs = GFontSystem::Inst();
+		LFontSystem *Fs = LFontSystem::Inst();
 		if (Fs)
 		{
 			auto InCs = InInfo->GetIconvName();
@@ -1212,7 +1212,7 @@ void *LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t
 		OutInfo->Type == CpIconv)
 	{
 		#ifndef LGI_STATIC
-		GFontSystem *Fs = GFontSystem::Inst();
+		LFontSystem *Fs = LFontSystem::Inst();
 		if (Fs)
 		{
 			const char *InCs = InInfo->GetIconvName();

@@ -167,7 +167,7 @@ class DocEdit :
 
 public:
 	static int LeftMarginPx;
-	DocEdit(IdeDoc *d, GFontType *f);
+	DocEdit(IdeDoc *d, LFontType *f);
 	~DocEdit();
 
 	const char *GetClass() override { return "DocEdit"; }

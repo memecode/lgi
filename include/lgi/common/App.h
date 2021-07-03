@@ -151,10 +151,10 @@ public:
 	// public member vars
 	
 	/// The system font
-	GFont *SystemNormal;
+	LFont *SystemNormal;
 	
 	/// The system font in bold
-	GFont *SystemBold;
+	LFont *SystemBold;
 	
 	/// Pointer to the applications main window
 	LWindow *AppWnd;

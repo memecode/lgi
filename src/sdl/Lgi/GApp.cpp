@@ -295,7 +295,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 
 	// System font setup
 	SystemNormal = 0;
-	GFontType SysFontType;
+	LFontType SysFontType;
 
 	if (SysFontType.GetSystemFont("System"))
 	{
@@ -313,9 +313,9 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	}
 	
 	if (!SystemNormal)
-		SystemNormal = new GFont;
+		SystemNormal = new LFont;
 	if (!SystemBold)
-		SystemBold = new GFont;
+		SystemBold = new LFont;
 
 	if (!GetOption("noskin"))
 	{
@@ -334,7 +334,7 @@ GApp::~GApp()
 	DeleteObj(d->FileSystem);
 	DeleteObj(d->GdcSystem);
 	DeleteObj(d->Config);
-	DeleteObj(GFontSystem::Me);
+	DeleteObj(LFontSystem::Me);
 	DeleteObj(d);
 	TheApp = 0;
 

@@ -425,7 +425,7 @@ class GelSkin : public GSkinEngine
 
 		LRegion Rgn;
 		Rgn = rcFill;
-		GArray<GDisplayString*> *Text = State->AllText();
+		GArray<LDisplayString*> *Text = State->AllText();
 		GSurface *pDC = State->pScreen;
 		if (Text && Text->Length() > 0 && rcFill.X() > 3)
 		{
@@ -437,10 +437,10 @@ class GelSkin : public GSkinEngine
 					break;
 				LRect c;
 				c.ZOff(t->X() - 1, t->Y() - 1);
-				c.Offset(x + (t->Fx >> GDisplayString::FShift), y + t->y);
+				c.Offset(x + (t->Fx >> LDisplayString::FShift), y + t->y);
 				Rgn.Subtract(&c);
 				
-				GFont *f = t->GetFont();
+				LFont *f = t->GetFont();
 				if (Enabled)
 				{
 					f->Colour(Fore, Back);
@@ -636,7 +636,7 @@ public:
 		
 		GSurface *Out = &Mem;
 		
-		GArray<GDisplayString*> *Txt = State->AllText();
+		GArray<LDisplayString*> *Txt = State->AllText();
 
 		int ContentX = 0;
 		int SpacingPx = 4;
@@ -666,16 +666,16 @@ public:
 		}
 		if (Txt && Txt->Length() > 0)
 		{
-			GDisplayString *First = (*Txt)[0];
+			LDisplayString *First = (*Txt)[0];
 			int sx = MaxTxt, sy = (int) Txt->Length() * First->Y();
 			int ty = (Ctrl->Y()-sy) >> 1;
 
-			GFont *f = First->GetFont();
+			LFont *f = First->GetFont();
 			f->Transparent(true);
 			
 			for (unsigned i=0; i<Txt->Length(); i++)
 			{
-				GDisplayString *Text = (*Txt)[i];
+				LDisplayString *Text = (*Txt)[i];
 				if (Ctrl->Enabled())
 				{
 					f->Colour(Fore, Back);
@@ -765,7 +765,7 @@ public:
 			
 			if (Ctrl->X() > 32)
 			{
-				GDisplayString *Text = State->FirstText();
+				LDisplayString *Text = State->FirstText();
 				if (Text)
 				{
 					int sx = Text->X(), sy = Text->Y();
@@ -785,7 +785,7 @@ public:
 						Text->TruncateWithDots(Cx - PadX);
 					}
 
-					GFont *f = Text->GetFont();
+					LFont *f = Text->GetFont();
 					f->Transparent(true);
 					if (Ctrl->Enabled())
 					{
@@ -941,7 +941,7 @@ public:
 				int y = 0;
 				if (State->TextObjects())
 				{
-					GDisplayString *ds = State->FirstText();
+					LDisplayString *ds = State->FirstText();
 					if (ds && t.Y() > ds->Y())
 					{
 						y = (t.Y() - ds->Y()) >> 1;
@@ -963,7 +963,7 @@ public:
 		}
 	}
 
-	GFont *GetDefaultFont(char *Class)
+	LFont *GetDefaultFont(char *Class)
 	{
 		if (Class && stricmp(Class, Res_Button) == 0)
 		{

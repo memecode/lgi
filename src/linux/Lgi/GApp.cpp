@@ -301,7 +301,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 
 	// System font setup
 	SystemNormal = 0;
-	GFontType SysFontType;
+	LFontType SysFontType;
 
 	Gtk::PangoFontMap *fm = Gtk::pango_cairo_font_map_get_default();
 	if (fm)
@@ -370,7 +370,7 @@ GApp::~GApp()
 	DeleteObj(MouseHook);
 	DeleteObj(d->FileSystem);
 	DeleteObj(d->GdcSystem);
-	DeleteObj(GFontSystem::Me);
+	DeleteObj(LFontSystem::Me);
 	DeleteObj(d);
 	TheApp = 0;
 }

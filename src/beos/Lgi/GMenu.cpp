@@ -749,7 +749,7 @@ GSubMenu *GMenuItem::Sub()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GFont *GMenu::_Font = 0;
+LFont *GMenu::_Font = 0;
 
 class GMenuPrivate
 {
@@ -788,11 +788,11 @@ LRect GMenu::GetPos()
 	return r;
 }
 
-GFont *GMenu::GetFont()
+LFont *GMenu::GetFont()
 {
 	if (!_Font)
 	{
-		GFontType Type;
+		LFontType Type;
 		if (Type.GetSystemFont("Menu"))
 		{
 			_Font = Type.Create();

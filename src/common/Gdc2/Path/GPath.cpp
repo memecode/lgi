@@ -895,7 +895,7 @@ void GPath::Append(GPath &p)
 	p.Segs.Empty();
 }
 
-bool GPath::Text(	GFont *Font,
+bool GPath::Text(	LFont *Font,
 					double x,
 					double y,
 					char *Utf8,
@@ -909,7 +909,7 @@ bool GPath::Text(	GFont *Font,
 		if (Utf16)
 		{
 			GPath Temp;
-			GDisplayString Sp(Font, " ");
+			LDisplayString Sp(Font, " ");
 
 			#ifdef WIN32
 			double _x = 0, _y = 0;

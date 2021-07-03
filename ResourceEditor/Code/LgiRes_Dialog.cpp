@@ -1023,7 +1023,7 @@ void CtrlDlg::OnNcPaint(GSurface *pDC, LRect &r)
 	pDC->Rectangle(&t);
 	if (GetStr())
 	{
-		GDisplayString ds(SysFont, GetStr()->Get());
+		LDisplayString ds(SysFont, GetStr()->Get());
 		SysFont->Fore(L_ACTIVE_TITLE_TEXT);
 		SysFont->Transparent(true);
 		ds.Draw(pDC, t.x1 + 10, t.y1 + ((t.Y()-ds.Y())/2));
@@ -1079,7 +1079,7 @@ void CtrlText::OnPaint(GSurface *pDC)
 		{
 			if ((*s == '\\' && *(s+1) == 'n') || (*s == 0))
 			{
-				GDisplayString ds(SysFont, Start, s - Start);
+				LDisplayString ds(SysFont, Start, s - Start);
 				ds.Draw(pDC, 0, y, &Client);
 				y += 15;
 				Start = s + 2;
@@ -1123,14 +1123,14 @@ void CtrlEditbox::OnPaint(GSurface *pDC)
 			if (t)
 			{
 				for (char *p = t; *p; p++) *p = '*';
-				GDisplayString ds(SysFont, t);
+				LDisplayString ds(SysFont, t);
 				ds.Draw(pDC, 4, 4);
 				DeleteArray(t);
 			}
 		}
 		else
 		{
-			GDisplayString ds(SysFont, Text);
+			LDisplayString ds(SysFont, Text);
 			ds.Draw(pDC, 4, 4);
 		}
 	}
@@ -1198,7 +1198,7 @@ void CtrlCheckbox::OnPaint(GSurface *pDC)
 	{
 		SysFont->Fore(L_TEXT);
 		SysFont->Transparent(true);
-		GDisplayString ds(SysFont, Text);
+		LDisplayString ds(SysFont, Text);
 		ds.Draw(pDC, r.x2 + 10, r.y1-2);
 	}
 
@@ -1253,7 +1253,7 @@ void CtrlButton::OnPaint(GSurface *pDC)
 		SysFont->Back(L_MED);
 		SysFont->Transparent(false);
 
-		GDisplayString ds(SysFont, Text);
+		LDisplayString ds(SysFont, Text);
 		ds.Draw(pDC, r.x1 + ((r.X()-ds.X())/2), r.y1 + ((r.Y()-ds.Y())/2), &r);
 	}
 	else
@@ -1294,7 +1294,7 @@ void CtrlGroup::OnPaint(GSurface *pDC)
 	SysFont->Back(L_MED);
 	SysFont->Transparent(false);
 	char *Text = GetStr()->Get();
-	GDisplayString ds(SysFont, Text);
+	LDisplayString ds(SysFont, Text);
 	ds.Draw(pDC, r.x1 + 8, r.y1 - 2);
 
 	// Draw children
@@ -1362,7 +1362,7 @@ void CtrlRadio::OnPaint(GSurface *pDC)
 	{
 		SysFont->Fore(L_TEXT);
 		SysFont->Transparent(true);
-		GDisplayString ds(SysFont, Text);
+		LDisplayString ds(SysFont, Text);
 		ds.Draw(pDC, r.x2 + 10, r.y1-2);
 	}
 
@@ -1547,7 +1547,7 @@ void CtrlTabs::OnPaint(GSurface *pDC)
 	for (auto Tab: Tabs)
 	{
 		char *Str = Tab->GetStr() ? Tab->GetStr()->Get() : 0;
-		GDisplayString ds(SysFont, Str);
+		LDisplayString ds(SysFont, Str);
 
 		int Width = 12 + ds.X();
 		LRect t(x, Title.y1 + 2, x + Width - 1, Title.y2 - 1);
@@ -2038,7 +2038,7 @@ void CtrlList::OnPaint(GSurface *pDC)
 
 			const char *Str = c->GetStr()->Get();
 			if (!Str) Str = "";
-			GDisplayString ds(SysFont, Str);
+			LDisplayString ds(SysFont, Str);
 			ds.Draw(pDC, r.x1 + 2, r.y1 + ((r.Y()-ds.Y())/2) - 1, &r);
 		}
 	}
@@ -2101,7 +2101,7 @@ void CtrlComboBox::OnPaint(GSurface *pDC)
 	SysFont->Transparent(true);
 	if (Text)
 	{
-		GDisplayString ds(SysFont, Text);
+		LDisplayString ds(SysFont, Text);
 		ds.Draw(pDC, 4, 4);
 	}
 
@@ -2188,7 +2188,7 @@ void CtrlTree::OnPaint(GSurface *pDC)
 	pDC->Rectangle(&r);
 	SysFont->Colour(L_TEXT, L_WORKSPACE);
 	SysFont->Transparent(true);
-	GDisplayString ds(SysFont, "Tree");
+	LDisplayString ds(SysFont, "Tree");
 	ds.Draw(pDC, r.x1 + 3, r.y1 + 3, &r);
 
 	// Draw any rubber band
@@ -2282,7 +2282,7 @@ void CtrlCustom::OnPaint(GSurface *pDC)
 	}
 
 	SysFont->Colour(L_TEXT, L_WORKSPACE);
-	GDisplayString ds(SysFont, s);
+	LDisplayString ds(SysFont, s);
 	ds.Draw(pDC, r.x1+2, r.y1+1, &r);
 
 	// Draw any rubber band
