@@ -20,6 +20,9 @@
 #include "lgi/common/Token.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/ClipBoard.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/StatusBar.h"
+#include "lgi/common/ToolBar.h"
 #include "resdefs.h"
 
 ////////////////////////////////////////////////////////////////////
@@ -55,7 +58,7 @@ NameMap[] =
 	{UI_COMBO,			"GCombo",		Res_ComboBox,		true},
 	{UI_TREE,			"GTree",		Res_TreeView,		true},
 	{UI_BITMAP,			"GBitmap",		Res_Bitmap,			true},
-	{UI_PROGRESS,		"GProgress",	Res_Progress,		true},
+	{UI_PROGRESS,		"LProgressView",	Res_Progress,		true},
 	{UI_SCROLL_BAR,		"GScrollBar",	Res_ScrollBar,		true},
 	{UI_CUSTOM,			"GCustom",		Res_Custom,			true},
 	{UI_CONTROL_TREE,	"GControlTree", Res_ControlTree,	true},

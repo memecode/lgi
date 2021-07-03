@@ -26,6 +26,9 @@
 #include "lgi/common/Box.h"
 #include "lgi/common/SubProcess.h"
 #include "lgi/common/About.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/ToolBar.h"
+#include "lgi/common/FileSelect.h"
 
 #define IDM_RECENT_FILE			1000
 #define IDM_RECENT_PROJECT		1100

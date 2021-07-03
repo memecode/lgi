@@ -5,6 +5,8 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 #ifdef _MT
+#include "lgi/common/Thread.h"
+
 class GBitmapThread : public LThread
 {
 	GBitmap *Bmp;

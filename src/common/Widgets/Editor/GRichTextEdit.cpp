@@ -20,6 +20,8 @@
 #include "lgi/common/HtmlCommon.h"
 #include "lgi/common/HtmlParser.h"
 #include "lgi/common/LgiRes.h"
+#include "lgi/common/FileSelect.h"
+#include "lgi/common/Menu.h"
 
 #define DefaultCharset              "utf-8"
 

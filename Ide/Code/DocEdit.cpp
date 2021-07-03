@@ -4,6 +4,8 @@
 #include "DocEdit.h"
 #include "IdeDocPrivate.h"
 #include "lgi\common\ScrollBar.h"
+#include "lgi\common\Menu.h"
+
 #define EDIT_TRAY_HEIGHT	(SysFont->GetHeight() + 10)
 #define EDIT_LEFT_MARGIN	16 // gutter for debug break points
 int DocEdit::LeftMarginPx = EDIT_LEFT_MARGIN;

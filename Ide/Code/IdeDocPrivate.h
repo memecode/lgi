@@ -1,6 +1,8 @@
 #ifndef _IdeDocPrivate_h_
 #define _IdeDocPrivate_h_
 
+#include "lgi/common/CheckBox.h"
+
 #define EDIT_CTRL_WIDTH		200
 
 class EditTray : public GLayout

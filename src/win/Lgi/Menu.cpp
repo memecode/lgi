@@ -15,6 +15,8 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Token.h"
 #include "lgi/common/DisplayString.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/ToolBar.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 #define LGI_OWNER_DRAW_MENUS

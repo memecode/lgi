@@ -2,33 +2,34 @@
 /// \author Matthew Allen (fret@memecode.com)
 /// \brief A progress window
 
-#ifndef __GPROGRESSDLG_H
-#define __GPROGRESSDLG_H
+#ifndef __LProgressDlg_H
+#define __LProgressDlg_H
 
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/TableLayout.h"
+#include "lgi/common/ProgressView.h"
 
 /// Progress window pane, tracks one task.
-class GProgressDlg;
-class LgiClass GProgressPane : public Progress, public GLayout
+class LProgressDlg;
+class LgiClass LProgressPane : public Progress, public GLayout
 {
-	friend class GProgressDlg;
+	friend class LProgressDlg;
 
 	Progress *Ref;
-	GProgressDlg *Dlg;
+	LProgressDlg *Dlg;
 
 protected:
 	GTableLayout *t;
 	GTextLabel *Desc;
 	GTextLabel *ValText;
 	GTextLabel *Rate;
-	GProgress *Bar;
+	LProgressView *Bar;
 	GButton *But;
 	bool UiDirty;
 
 public:
-	GProgressPane(GProgressDlg *dlg);
-	~GProgressPane();
+	LProgressPane(LProgressDlg *dlg);
+	~LProgressPane();
 
 	void SetDescription(const char *d) override;
 	bool SetRange(const GRange &r) override;
@@ -37,8 +38,8 @@ public:
 	LFont *GetFont() override;
 	void UpdateUI();
 
-	GProgressPane &operator++(int);
-	GProgressPane &operator--(int);
+	LProgressPane &operator++(int);
+	LProgressPane &operator--(int);
 
 	void OnCreate() override;
 	int OnNotify(LViewI *Ctrl, int Flags) override;
@@ -47,13 +48,13 @@ public:
 };
 
 /// Progress dialog
-class LgiClass GProgressDlg : public LDialog, public Progress
+class LgiClass LProgressDlg : public LDialog, public Progress
 {
-	friend class GProgressPane;
+	friend class LProgressPane;
 
 protected:
 	uint64 Ts, Timeout, YieldTs;
-	GArray<GProgressPane*> Panes;
+	GArray<LProgressPane*> Panes;
 	bool CanCancel;
 
 	void Resize();
@@ -61,21 +62,21 @@ protected:
 
 public:
 	/// Constructor
-	GProgressDlg
+	LProgressDlg
 	(
 		/// The parent window
 		LView *parent = NULL,
 		/// Specify a timeout to become visible (in ms)
 		uint64 timeout = 0
 	);
-	~GProgressDlg();
+	~LProgressDlg();
 
 	/// Adds a pane. By default there is one pane.
-	GProgressPane *Push();
+	LProgressPane *Push();
 	/// Pops off a pane
-	void Pop(GProgressPane *p = 0);
+	void Pop(LProgressPane *p = 0);
 	/// Gets the pane at index 'i'
-	GProgressPane *ItemAt(int i);
+	LProgressPane *ItemAt(int i);
 
 	/// Sets up the Value function to yield every so often
 	/// to update the screen
@@ -106,8 +107,8 @@ public:
 	/// Returns whether the user has cancelled the operation
 	bool IsCancelled() override;
 	
-	GProgressDlg &operator++(int);
-	GProgressDlg &operator--(int);
+	LProgressDlg &operator++(int);
+	LProgressDlg &operator--(int);
 
 	int OnNotify(LViewI *Ctrl, int Flags) override;
 	GMessage::Result OnEvent(GMessage *Msg) override;

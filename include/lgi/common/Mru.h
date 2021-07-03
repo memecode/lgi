@@ -4,6 +4,7 @@
 #ifdef HAS_PROPERTIES
 #include "GProperties.h"
 #endif
+#include "lgi/common/FileSelect.h"
 
 // Message defines
 #define	IDM_OPEN			15000

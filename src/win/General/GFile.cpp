@@ -14,9 +14,6 @@
 #include <shlobj.h>
 #include <fcntl.h>
 #include <Userenv.h>
-
-#include "lgi/common/Lgi.h"
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -25,6 +22,9 @@
 #include <direct.h>
 #include <tchar.h>
 #endif
+
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Thread.h"
 
 /****************************** Defines *************************************************************************************/
 #define FILEDEBUG

@@ -2,13 +2,13 @@
 /// \author Matthew Allen (fret@memecode.com)
 /// /brief A progress control
 
-#ifndef _GPROGRESS_H_
-#define _GPROGRESS_H_
+#ifndef _LProgressView_H_
+#define _LProgressView_H_
 
 #include "lgi/common/Progress.h"
 
 /// Progress bar control
-class LgiClass GProgress
+class LgiClass LProgressView
 	: public GControl
 	, public Progress
 	, public ResObject
@@ -23,10 +23,10 @@ public:
 	static GColour cPaused;
 	static GColour cError;
 
-	GProgress(int id, int x, int y, int cx, int cy, const char *name);
-	virtual ~GProgress();
+	LProgressView(int id, int x, int y, int cx, int cy, const char *name);
+	virtual ~LProgressView();
 
-	const char *GetClass() override { return "GProgress"; }
+	const char *GetClass() override { return "LProgressView"; }
 	bool SetRange(const GRange &r) override;
 	void Value(int64 v) override;
 	int64 Value() override;

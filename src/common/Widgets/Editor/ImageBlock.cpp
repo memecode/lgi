@@ -3,6 +3,7 @@
 #include "GRichTextEditPriv.h"
 #include "lgi/common/GdcTools.h"
 #include "lgi/common/Token.h"
+#include "lgi/common/Menu.h"
 
 #define LOADER_THREAD_LOGGING		1
 #define TIMEOUT_LOAD_PROGRESS		100 // ms

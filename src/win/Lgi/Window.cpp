@@ -11,6 +11,7 @@
 #include "lgi/common/Button.h"
 #include "lgi/common/Notifications.h"
 #include "lgi/common/CssTools.h"
+#include "lgi/common/Menu.h"
 
 #define DEBUG_WINDOW_PLACEMENT				0
 #define DEBUG_HANDLE_VIEW_KEY				0

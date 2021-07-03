@@ -23,6 +23,8 @@
 #include "lgi/common/Variant.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/LgiRes.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/ProgressView.h"
 
 // If it is defined it will use the cross platform 
 // "res" library distributed with the LGI library.
@@ -784,7 +786,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_Progress) == 0)
 		{
-			Wnd = new GProgress(0, 0, 0, -1, -1, "");
+			Wnd = new LProgressView(0, 0, 0, -1, -1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_Slider) == 0)
 		{
@@ -796,7 +798,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_Progress) == 0)
 		{
-			Wnd = new GProgress(0, 0, 0, 1, 1, "");
+			Wnd = new LProgressView(0, 0, 0, 1, 1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_TreeView) == 0)
 		{

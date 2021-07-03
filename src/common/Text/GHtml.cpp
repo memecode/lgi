@@ -25,6 +25,8 @@
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/Base64.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/FindReplaceDlg.h"
 
 #define DEBUG_TABLE_LAYOUT			0
 #define DEBUG_DRAW_TD				0

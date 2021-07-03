@@ -3,6 +3,7 @@
 #include "GRichTextEditPriv.h"
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/CssTools.h"
+#include "lgi/common/Menu.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int WordLen)

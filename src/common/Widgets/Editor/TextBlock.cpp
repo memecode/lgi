@@ -3,6 +3,7 @@
 #include "GRichTextEditPriv.h"
 #include "lgi/common/Emoji.h"
 #include "lgi/common/DocView.h"
+#include "lgi/common/Menu.h"
 
 #define DEBUG_LAYOUT				0
 

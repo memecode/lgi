@@ -7,7 +7,7 @@
 //
 
 #include "lgi/common/Lgi.h"
-
+#include "lgi/common/Menu.h"
 
 bool LSubMenu::GetVariant(const char *Name, LVariant &Value, char *Array)
 {

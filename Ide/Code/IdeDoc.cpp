@@ -20,6 +20,8 @@
 #include "DocEdit.h"
 #include "IdeDocPrivate.h"
 #include "lgi\common\Http.h"
+#include "lgi\common\Menu.h"
+#include "lgi\common\FileSelect.h"
 
 const char *Untitled = "[untitled]";
 // static const char *White = " \r\t\n";

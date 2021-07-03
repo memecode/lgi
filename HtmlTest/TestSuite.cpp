@@ -18,6 +18,7 @@
 #include "lgi/common/Net.h"
 #include "lgi/common/EmojiFont.h"
 #include "lgi/common/Http.h"
+#include "lgi/common/Menu.h"
 
 #define HAS_LOG_VIEW			0
 #define HAS_IMAGE_LOADER		1
@@ -443,7 +444,7 @@ public:
 			{
 				LPoint PageSize(1000, 2000);
 				
-				GProgressDlg Prog(this, true);
+				LProgressDlg Prog(this, true);
 				Prog.SetDescription("Scanning for HTML...");
 				
 				char p[MAX_PATH];

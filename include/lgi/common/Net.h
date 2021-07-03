@@ -55,7 +55,7 @@ typedef int SOCKET;
 
 /// Turn on/off logging. Used with GSocket::SetParameter.
 #define GSocket_Log				"Log"
-/// Set the progress object. Used with GSocket::SetParameter. Value = (GProgress*)Prog
+/// Set the progress object. Used with GSocket::SetParameter. Value = (LProgressView*)Prog
 #define GSocket_Progress		"Progress"
 /// Set the size of the transfer. Used with GSocket::SetParameter. Value = (int)Size
 #define GSocket_TransferSize	"TransferSize"

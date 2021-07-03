@@ -12,6 +12,7 @@
 #define __GPANEL_H
 
 #include "lgi/common/DisplayString.h"
+#include "lgi/common/Layout.h"
 
 class LgiClass GPanel : public GLayout
 {

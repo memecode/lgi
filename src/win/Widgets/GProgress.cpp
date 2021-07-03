@@ -1,10 +1,11 @@
 #include "lgi/common/Lgi.h"
-#include "lgi/common/Progress.h"
+#include "lgi/common/ProgressView.h"
 #include <COMMCTRL.H>
 #include "lgi/common/Css.h"
+#include "lgi/common/Widgets.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GProgress::GProgress(int id, int x, int y, int cx, int cy, const char *name) :
+LProgressView::LProgressView(int id, int x, int y, int cx, int cy, const char *name) :
 	GControl(LGI_PROGRESS),
 	ResObject(Res_Progress)
 {
@@ -22,15 +23,15 @@ GProgress::GProgress(int id, int x, int y, int cx, int cy, const char *name) :
 	}
 }
 
-GProgress::~GProgress()
+LProgressView::~LProgressView()
 {
 }
 
-GColour GProgress::cNormal(0, 222, 0);
-GColour GProgress::cPaused(255, 222, 0);
-GColour GProgress::cError(255, 0, 0);
+GColour LProgressView::cNormal(0, 222, 0);
+GColour LProgressView::cPaused(255, 222, 0);
+GColour LProgressView::cError(255, 0, 0);
 
-bool GProgress::Colour(GColour Col)
+bool LProgressView::Colour(GColour Col)
 {
 	c = Col;
 	if (!_View)
@@ -50,12 +51,12 @@ bool GProgress::Colour(GColour Col)
 	return true;
 }
 
-GColour GProgress::Colour()
+GColour LProgressView::Colour()
 {
 	return c;
 }
 
-bool GProgress::SetRange(const GRange &r)
+bool LProgressView::SetRange(const GRange &r)
 {
 	Low = r.Start;
 	High = r.End();
@@ -76,12 +77,12 @@ bool GProgress::SetRange(const GRange &r)
 	return true;
 }
 
-int64 GProgress::Value()
+int64 LProgressView::Value()
 {
 	return Val;
 }
 
-void GProgress::Value(int64 v)
+void LProgressView::Value(int64 v)
 {
 	Val = v;
 	if (Handle())
@@ -90,7 +91,7 @@ void GProgress::Value(int64 v)
 	}
 }
 
-bool GProgress::Pour(LRegion &r)
+bool LProgressView::Pour(LRegion &r)
 {
 	LRect *l = FindLargest(r);
 	if (l)
@@ -102,7 +103,7 @@ bool GProgress::Pour(LRegion &r)
 	return false;
 }
 
-bool GProgress::OnLayout(LViewLayoutInfo &Inf)
+bool LProgressView::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (!Inf.Width.Max)
 	{
@@ -117,7 +118,7 @@ bool GProgress::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-GMessage::Result GProgress::OnEvent(GMessage *Msg)
+GMessage::Result LProgressView::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -147,7 +148,7 @@ GMessage::Result GProgress::OnEvent(GMessage *Msg)
 	return GControl::OnEvent(Msg);
 }
 
-GString GProgress::CssStyles(const char *CssStyle)
+GString LProgressView::CssStyles(const char *CssStyle)
 {
 	GString Status = GControl::CssStyles(CssStyle);
 	if (Status && GetCss())

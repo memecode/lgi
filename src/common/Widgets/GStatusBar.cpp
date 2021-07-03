@@ -1,6 +1,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/LgiRes.h"
+#include "lgi/common/StatusBar.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 GStatusBar::GStatusBar()

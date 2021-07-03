@@ -1,6 +1,8 @@
 #ifndef _GSPLITTER_H_
 #define _GSPLITTER_H_
 
+#include "lgi/common/Layout.h"
+
 /// Displays 2 views side by side
 class LgiClass GSplitter : public GLayout
 {

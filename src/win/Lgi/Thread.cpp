@@ -1,8 +1,9 @@
 
-#include "lgi/common/Lgi.h"
-
 //////////////////////////////////////////////////////////////////////////////
 #include <process.h>
+
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Thread.h"
 
 const DWORD MS_VC_EXCEPTION = 0x406D1388;
 

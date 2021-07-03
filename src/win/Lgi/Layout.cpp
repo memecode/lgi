@@ -12,6 +12,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Css.h"
+#include "lgi/common/Layout.h"
 
 //////////////////////////////////////////////////////////////////////////////
 GLayout::GLayout() : LView(0)

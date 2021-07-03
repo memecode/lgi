@@ -1,5 +1,4 @@
-#ifndef _GVIEW_H_
-#define _GVIEW_H_
+#pragma once
 
 #if defined(LGI_CARBON)
 LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
@@ -753,4 +752,32 @@ public:
 	}	CLS ## FactoryInst;
 
 
-#endif
+/// Control widget base class
+class LgiClass GControl :
+	public LView
+{
+	friend class LDialog;
+
+protected:
+	#if defined BEOS
+	bigtime_t Sys_LastClick;
+	void MouseClickEvent(bool Down);
+	#elif WINNATIVE
+	bool *SetOnDelete;
+	LWindowsClass *SubClass;
+	#endif
+
+	LPoint SizeOfStr(const char *Str);
+
+public:
+	#if WINNATIVE
+	GControl(char *SubClassName = 0);
+	#else
+	GControl(OsView view = NULL);
+	#endif
+
+	~GControl();
+
+	GMessage::Result OnEvent(GMessage *Msg);
+};
+

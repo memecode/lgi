@@ -2,6 +2,7 @@
 #include "lgi/common/Slider.h"
 #include "lgi/common/Css.h"
 #include <COMMCTRL.H>
+#include "lgi/common/Widgets.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 // Slider control

@@ -14,6 +14,9 @@
 #include "LgiResEdit.h"
 #include "LgiRes_Menu.h"
 #include "lgi/common/ClipBoard.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/ToolBar.h"
+#include "lgi/common/StatusBar.h"
 
 #define IDC_TREE				100
 

@@ -1,9 +1,9 @@
 /// \file
 /// \author Matthew Allen (fret@memecode.com)
 /// \brief A popup window
+#pragma once
 
-#ifndef __GPOPUP_H
-#define __GPOPUP_H
+#include "lgi/common/Layout.h"
 
 #if defined(LGI_CARBON) || defined(__GTK_H__)
 #define LGI_POPUP_LWINDOW	1
@@ -112,7 +112,3 @@ public:
 	#endif
 };
 
-
-
-
-#endif

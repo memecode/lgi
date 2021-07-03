@@ -16,6 +16,7 @@
 #include "lgi/common/GdiLeak.h"
 #include "lgi/common/TableLayout.h"
 #include "lgi/common/LgiRes.h"
+#include "lgi/common/Widgets.h"
 
 #define IDD_FONT					1000
 #define IDC_FONT					1001

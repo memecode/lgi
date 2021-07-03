@@ -36,6 +36,27 @@
 
 class LResources;
 
+/// Resource loader
+class LgiClass LResourceLoad
+{
+public:
+	/// Loading a dialog from the resource collection
+	bool LoadFromResource
+	(
+		/// The resource ID
+		int Resource,
+		/// The target view to populate
+		LViewI *Parent,
+		/// The size of the view in the resource
+		LRect *Pos = 0,
+		/// The name of the window
+		GAutoString *Name = 0,
+		/// [Optional] List of tags to exclude/include items
+		char *TagList = 0
+	);
+};
+
+
 /// A string resource
 /// \ingroup Resources
 class LgiClass LgiStringRes

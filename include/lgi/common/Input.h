@@ -1,5 +1,7 @@
-#ifndef __GINPUT_H
-#define __GINPUT_H
+#pragma once
+
+#include "lgi/common/Dialog.h"
+#include "lgi/common/Edit.h"
 
 /// This callback if supplied to the GInput will create a "..." button, which if clicked
 /// will call the callback.
@@ -40,4 +42,3 @@ public:
 	GString GetStr() { return Str; }
 };
 
-#endif

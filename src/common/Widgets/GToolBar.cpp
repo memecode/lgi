@@ -18,6 +18,9 @@
 #include "lgi/common/Notifications.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/CssTools.h"
+#include "lgi/common/ToolBar.h"
+#include "lgi/common/ToolTip.h"
+#include "lgi/common/Menu.h"
 
 #define ToolBarHilightColour LC_HIGH
 

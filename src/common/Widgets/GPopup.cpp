@@ -3,7 +3,9 @@
 #include "lgi/common/Popup.h"
 #include "lgi/common/SkinEngine.h"
 #include "lgi/common/DisplayString.h"
+#include "lgi/common/Thread.h"
 #include "lgi/common/ThreadEvent.h"
+#include "lgi/common/Menu.h"
 #if LGI_COCOA
 	#include <Cocoa/Cocoa.h>
 #endif

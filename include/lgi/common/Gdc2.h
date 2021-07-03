@@ -13,8 +13,7 @@
 // sub-system headers
 #include "LgiOsDefs.h"				// Platform specific
 #include "lgi/common/LgiInc.h"
-#include "lgi/common/LgiClass.h"
-#include "lgi/common/Progress.h"
+#include "lgi/common/LgiUiBase.h"
 #include "lgi/common/File.h"
 #include "lgi/common/Mem.h"
 #include "Core.h"

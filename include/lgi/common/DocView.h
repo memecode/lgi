@@ -7,6 +7,8 @@
 
 #include "lgi/common/Variant.h"
 #include "lgi/common/Notifications.h"
+#include "lgi/common/Thread.h"
+#include "lgi/common/Layout.h"
 
 // Word wrap
 

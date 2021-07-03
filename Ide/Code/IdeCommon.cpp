@@ -14,7 +14,7 @@ IdeCommon::~IdeCommon()
 	Remove();
 }
 
-bool IdeCommon::OnOpen(GProgressDlg *Prog, LXmlTag *Src)
+bool IdeCommon::OnOpen(LProgressDlg *Prog, LXmlTag *Src)
 {
 	if (Prog)
 		Prog->Value(Prog->Value() + 1);

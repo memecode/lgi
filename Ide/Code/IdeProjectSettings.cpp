@@ -8,6 +8,7 @@
 #include "lgi\common\CheckBox.h"
 #include "lgi\common\Combo.h"
 #include "lgi\common\Button.h"
+#include "lgi\common\FileSelect.h"
 
 const char TagSettings[] = "Settings";
 

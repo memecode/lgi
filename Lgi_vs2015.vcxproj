@@ -618,10 +618,13 @@
     <ClInclude Include="include\lgi\common\HashTable.h" />
     <ClInclude Include="include\lgi\common\ImageList.h" />
     <ClInclude Include="include\lgi\common\ItemContainer.h" />
+    <ClInclude Include="include\lgi\common\LgiUiBase.h" />
     <ClInclude Include="include\lgi\common\Library.h" />
     <ClInclude Include="include\lgi\common\Matrix.h" />
     <ClInclude Include="include\lgi\common\Mem.h" />
     <ClInclude Include="include\lgi\common\Path.h" />
+    <ClInclude Include="include\lgi\common\ProgressDlg.h" />
+    <ClInclude Include="include\lgi\common\ProgressView.h" />
     <ClInclude Include="include\lgi\common\Slider.h" />
     <ClInclude Include="include\lgi\common\View.h" />
     <ClInclude Include="include\lgi\common\Menu.h" />

@@ -12,7 +12,6 @@
 #include <fcntl.h>
 
 #include "lgi/common/Mem.h"
-#include "lgi/common/LgiClass.h"
 #include "lgi/common/Stream.h"
 #include "lgi/common/Array.h"
 #include "lgi/common/RefCount.h"

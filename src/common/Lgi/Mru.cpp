@@ -3,6 +3,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Mru.h"
 #include "lgi/common/Variant.h"
+#include "lgi/common/Menu.h"
 
 ////////////////////////////////////////////////////////////////////
 #define DEBUG_LOG				1

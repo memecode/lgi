@@ -8,6 +8,7 @@
 #include "lgi\common\Edit.h"
 #include "lgi\common\CheckBox.h"
 #include "lgi\common\TextLabel.h"
+#include "lgi\common\FileSelect.h"
 
 #define DEBUG_HIST		0
 

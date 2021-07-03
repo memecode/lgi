@@ -5,6 +5,8 @@
 #ifndef _GRADIO_GROUP_H_
 #define _GRADIO_GROUP_H_
 
+class GRadioButton;
+
 /// A grouping control. All radio buttons that are children of this control will automatically 
 /// have only one option selected. Other controls can be children as well but are ignored in the
 /// calculation of the groups value. The value of the group is the index into a list of radio buttons

@@ -1,6 +1,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Growl.h"
 #include "lgi/common/Net.h"
+#include "lgi/common/Thread.h"
 
 class GGrowlPriv : public LThread, public LMutex
 {
