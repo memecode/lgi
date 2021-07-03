@@ -122,6 +122,7 @@ public:
 					Ext.Add("*.hpp");
 					Ext.Add("*.c");
 					Ext.Add("*.cpp");
+					Ext.Add("*.mm");
 
 					// printf("Recursing '%s'\n", Search[i].Get());
 					LRecursiveFileSearch(Search[i], &Ext, &Files);
@@ -390,4 +391,4 @@ void FixMissingFilesDlg(IdeProject *Proj)
 {
 	MissingFiles Dlg(Proj);
 	Dlg.DoModal();
-}
+}
