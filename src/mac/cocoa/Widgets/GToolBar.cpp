@@ -1037,7 +1037,7 @@ void GToolButton::OnCommand()
 	}
 }
 
-void GToolButton::OnMouseClick(GMouse &m)
+void GToolButton::OnMouseClick(LMouse &m)
 {
 	GToolBar *ToolBar = dynamic_cast<GToolBar*>(GetParent());
 
@@ -1120,7 +1120,7 @@ void GToolButton::OnMouseClick(GMouse &m)
 	}
 }
 
-void GToolButton::OnMouseEnter(GMouse &m)
+void GToolButton::OnMouseEnter(LMouse &m)
 {
 	if (!Separator() && Enabled())
 	{
@@ -1158,7 +1158,7 @@ void GToolButton::SetDown(bool d)
 	Down = d;
 }
 
-void GToolButton::OnMouseMove(GMouse &m)
+void GToolButton::OnMouseMove(LMouse &m)
 {
 	#ifdef BEOS
 	if (GetParent())
@@ -1170,7 +1170,7 @@ void GToolButton::OnMouseMove(GMouse &m)
 	#endif
 }
 
-void GToolButton::OnMouseExit(GMouse &m)
+void GToolButton::OnMouseExit(LMouse &m)
 {
 	if (Over)
 	{
@@ -1285,7 +1285,7 @@ int GToolBar::GetBy()
 	return d->By;
 }
 
-void GToolBar::ContextMenu(GMouse &m)
+void GToolBar::ContextMenu(LMouse &m)
 {
 	if (IsCustomizable())
 	{
@@ -1576,7 +1576,7 @@ void GToolBar::_DrawFromCache(GSurface *pDC, int x, int y, int Index, bool Disab
 	}
 }
 
-bool GToolBar::Pour(GRegion &r)
+bool GToolBar::Pour(LRegion &r)
 {
 	int PosX = BORDER_SPACER;
 	int PosY = BORDER_SPACER;
@@ -1850,11 +1850,11 @@ void GToolBar::OnPaint(GSurface *pDC)
 	pDC->Box(&r);
 }
 
-void GToolBar::OnMouseClick(GMouse &m)
+void GToolBar::OnMouseClick(LMouse &m)
 {
 }
 
-void GToolBar::OnMouseEnter(GMouse &m)
+void GToolBar::OnMouseEnter(LMouse &m)
 {
 	if (!d->Tip)
 	{
@@ -1866,11 +1866,11 @@ void GToolBar::OnMouseEnter(GMouse &m)
 	}
 }
 
-void GToolBar::OnMouseExit(GMouse &m)
+void GToolBar::OnMouseExit(LMouse &m)
 {
 }
 
-void GToolBar::OnMouseMove(GMouse &m)
+void GToolBar::OnMouseMove(LMouse &m)
 {
 }
 

@@ -104,8 +104,8 @@ LONG __stdcall _ExceptionFilter_Redir(LPEXCEPTION_POINTERS e)
 
 /////////////////////////////////////////////////////////////////////////////
 GSkinEngine *GApp::SkinEngine = 0;
-GMouseHook *GApp::MouseHook = 0;
-GMouseHook *GApp::GetMouseHook()
+LMouseHook *GApp::MouseHook = 0;
+LMouseHook *GApp::GetMouseHook()
 {
 	return MouseHook;
 }
@@ -398,7 +398,7 @@ DumpTime("cursor/rand/msg");
 DumpTime("colours");
 
 	// Setup mouse hook
-	MouseHook = new GMouseHook;
+	MouseHook = new LMouseHook;
 
 DumpTime("ms hook");
 

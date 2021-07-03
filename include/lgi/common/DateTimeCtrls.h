@@ -43,7 +43,7 @@ public:
 
 	/// This sets the date source control is the notify control is empty.
 	void SetDate(char *d);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	bool OnLayout(GViewLayoutInfo &Inf);
 	int OnNotify(GViewI *Ctrl, int Flags);
 	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
@@ -72,9 +72,9 @@ public:
 	void OnChange();
 	void Set(LDateTime &Ts);
 	void OnPaint(GSurface *pDC);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	void Move(int Dx, int Dy);
-	bool OnKey(GKey &k);
+	bool OnKey(LKey &k);
 };
 
 /// This class is a little button to pull down a date selection control...
@@ -95,7 +95,7 @@ public:
 	/// to select an appropriate starting point if the Notify control is
 	/// empty.
 	void SetDate(char *d);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	bool OnLayout(GViewLayoutInfo &Inf);
 	int OnNotify(GViewI *Ctrl, int Flags);
 	void OnChildrenChanged(GViewI *Wnd, bool Attaching);

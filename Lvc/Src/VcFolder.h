@@ -283,7 +283,7 @@ public:
 
 	void OnPulse();
 	void OnUpdate(const char *Rev);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	void OnRemove();
 	void OnExpand(bool b);
 	void OnVcsType();
@@ -317,7 +317,7 @@ public:
 	int Compare(VcLeaf *b);
 	bool Select();
 	void Select(bool b);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	void ShowLog();
 };
 

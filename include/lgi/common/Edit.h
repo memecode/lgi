@@ -77,7 +77,7 @@ public:
 
 	void SelectAll() { Select(); }
 
-	bool OnKey(GKey &k);
+	bool OnKey(LKey &k);
 	void KeyProcessed();
 	LgiCursor GetCursor(int x, int y) { return LCUR_Ibeam; }
 
@@ -90,7 +90,7 @@ public:
 	bool NameW(const char16 *s) override;
 	#else
 	bool Paste();
-	void OnEnter(GKey &k);
+	void OnEnter(LKey &k);
 	void SendNotify(int Data = 0);
 	bool OnLayout(GViewLayoutInfo &Inf) { return false; }
     void OnPaint(GSurface *pDC);

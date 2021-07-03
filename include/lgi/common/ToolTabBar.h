@@ -19,10 +19,10 @@ class GToolTab : public GToolButton
 
 	bool SetPos(LRect &r, bool Repaint = false);
 	void OnPaint(GSurface *pDC);
-	void OnMouseClick(GMouse &m) {}
-	void OnMouseMove(GMouse &m) {}
-	void OnMouseEnter(GMouse &m) {}
-	void OnMouseExit(GMouse &m) {}
+	void OnMouseClick(LMouse &m) {}
+	void OnMouseMove(LMouse &m) {}
+	void OnMouseEnter(LMouse &m) {}
+	void OnMouseExit(LMouse &m) {}
 
 public:
 	GToolTab();
@@ -63,13 +63,13 @@ public:
 	bool HasBorder() { return Border; }
 	void HasBorder(bool b) { Border = b; }
 
-	bool Pour(GRegion &r);
+	bool Pour(LRegion &r);
 
 	void OnButtonClick(GToolButton *Btn);
 	void OnChange(GToolButton *Btn);
 	void OnPaint(GSurface *pDC);
 	void OnCreate();
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	int OnNotify(GViewI *c, int f);
 };
 

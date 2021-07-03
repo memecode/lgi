@@ -209,7 +209,7 @@ GMessage::Result GButton::OnEvent(GMessage *Msg)
 	return GView::OnEvent(Msg);
 }
 
-void GButton::OnMouseClick(GMouse &m)
+void GButton::OnMouseClick(LMouse &m)
 {
 	if (!Enabled())
 	{
@@ -261,7 +261,7 @@ void GButton::OnMouseClick(GMouse &m)
 	}
 }
 
-void GButton::OnMouseEnter(GMouse &m)
+void GButton::OnMouseEnter(LMouse &m)
 {
 	DEBUG_LOG("OnMouseEnter\n");
 	d->Over = true;
@@ -276,7 +276,7 @@ void GButton::OnMouseEnter(GMouse &m)
 	}
 }
 
-void GButton::OnMouseExit(GMouse &m)
+void GButton::OnMouseExit(LMouse &m)
 {
 	DEBUG_LOG("OnMouseExit\n");
 	d->Over = false;
@@ -291,7 +291,7 @@ void GButton::OnMouseExit(GMouse &m)
 	}
 }
 
-bool GButton::OnKey(GKey &k)
+bool GButton::OnKey(LKey &k)
 {
 	if (
 		#ifdef WINNATIVE

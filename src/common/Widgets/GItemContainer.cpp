@@ -342,14 +342,14 @@ DeclGArrayCompare(ColInfoCmp, GItemContainer::ColInfo, void)
 	return AGrowPx - BGrowPx;
 }
 
-void GItemContainer::OnColumnClick(int Col, GMouse &m)
+void GItemContainer::OnColumnClick(int Col, LMouse &m)
 {
 	ColClick = Col;
 	ColMouse = m;
 	SendNotify(GNotifyItem_ColumnClicked);
 }
 
-bool GItemContainer::GetColumnClickInfo(int &Col, GMouse &m)
+bool GItemContainer::GetColumnClickInfo(int &Col, LMouse &m)
 {
 	if (ColClick >= 0)
 	{
@@ -527,7 +527,7 @@ GDragColumn::GDragColumn(GItemContainer *list, int col)
 		
 		#endif
 
-		GMouse m;
+		LMouse m;
 		List->GetMouse(m);
 		Offset = m.x - r.x1;
 
@@ -1072,7 +1072,7 @@ public:
 		GEdit::OnFocus(f);
 	}
 
-	bool OnKey(GKey &k)
+	bool OnKey(LKey &k)
 	{
 		/*	This should be handled by GEdit::OnKey now.
 			Which will send a GNotify_EscapeKey or GNotify_ReturnKey
@@ -1258,7 +1258,7 @@ void GItemEdit::Visible(bool i)
 	}
 }
 
-bool GItemEdit::OnKey(GKey &k)
+bool GItemEdit::OnKey(LKey &k)
 {
 	if (d->Edit)
 		return d->Edit->OnKey(k);

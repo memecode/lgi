@@ -3144,7 +3144,7 @@ GXmlTag *IdeProject::Create(char *Tag)
 	return new ProjectNode(this);
 }
 
-void IdeProject::OnMouseClick(GMouse &m)
+void IdeProject::OnMouseClick(LMouse &m)
 {
 	if (m.IsContextMenu())
 	{

@@ -143,7 +143,7 @@ public:
 	~GArea();
 
 	LRect Bounds();
-	LRect *TopRect(GRegion *c);
+	LRect *TopRect(LRegion *c);
 	void FlowText(GTag *Tag, GFlowRegion *c, GFont *Font, char16 *Text, GCss::LengthType Align);
 };
 
@@ -330,7 +330,7 @@ public:
 	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
 
 	// Window
-	bool OnMouseClick(GMouse &m);
+	bool OnMouseClick(LMouse &m);
 	void Invalidate();
 
 	// Positioning

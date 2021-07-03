@@ -495,7 +495,7 @@ enum Msg
     IDC_AVERAGE_SAVE,
 };
 
-void GGraph::OnMouseClick(GMouse &m)
+void GGraph::OnMouseClick(LMouse &m)
 {
     if (m.IsContextMenu())
     {

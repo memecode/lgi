@@ -449,8 +449,8 @@ public:
 		Types.Add("GHashTable", GV_HASHTABLE);
 		Types.Add("GOperator", GV_OPERATOR);
 		Types.Add("GView", GV_GVIEW);
-		Types.Add("GMouse", GV_GMOUSE);
-		Types.Add("GKey", GV_GKEY);
+		Types.Add("LMouse", GV_GMOUSE);
+		Types.Add("LKey", GV_GKEY);
 		Types.Add("GVariant", GV_VARIANT);
 		// Types.Add("binary", GV_BINARY);
 		// Types.Add("List", GV_LIST);

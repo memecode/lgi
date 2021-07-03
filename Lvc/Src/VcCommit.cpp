@@ -446,7 +446,7 @@ void VcCommit::Select(bool b)
 	}
 }
 
-void VcCommit::OnMouseClick(GMouse &m)
+void VcCommit::OnMouseClick(LMouse &m)
 {
 	LListItem::OnMouseClick(m);
 

@@ -95,7 +95,7 @@ void GTimeDropDown::SetDate(char *d)
 	}
 }
 
-void GTimeDropDown::OnMouseClick(GMouse &m)
+void GTimeDropDown::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -132,7 +132,7 @@ public:
 		Key = Mouse = false;
 	}
 	
-	bool OnKey(GKey &k)
+	bool OnKey(LKey &k)
 	{
 		bool b = false;
 		
@@ -153,7 +153,7 @@ public:
 		return b;
 	}
 
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		Mouse = true;
 		LList::OnMouseClick(m);

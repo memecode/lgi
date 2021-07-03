@@ -52,9 +52,9 @@ LPoint lgi_view_offset(GViewI *v, bool Debug = false)
 	return Offset;
 }
 
-GMouse &lgi_adjust_click(GMouse &Info, GViewI *Wnd, bool Capturing, bool Debug)
+LMouse &lgi_adjust_click(LMouse &Info, GViewI *Wnd, bool Capturing, bool Debug)
 {
-	static GMouse Temp;
+	static LMouse Temp;
 	 
 	Temp = Info;
 	if (Wnd)
@@ -357,19 +357,19 @@ void GView::Unlock()
 	// LgiTrace("%s::%p Unlock._InLock=%i\n", GetClass(), this, _InLock);
 }
 
-void GView::OnMouseClick(GMouse &m)
+void GView::OnMouseClick(LMouse &m)
 {
 }
 
-void GView::OnMouseEnter(GMouse &m)
+void GView::OnMouseEnter(LMouse &m)
 {
 }
 
-void GView::OnMouseExit(GMouse &m)
+void GView::OnMouseExit(LMouse &m)
 {
 }
 
-void GView::OnMouseMove(GMouse &m)
+void GView::OnMouseMove(LMouse &m)
 {
 }
 
@@ -378,7 +378,7 @@ bool GView::OnMouseWheel(double Lines)
 	return false;
 }
 
-bool GView::OnKey(GKey &k)
+bool GView::OnKey(LKey &k)
 {
 	return false;
 }
@@ -860,7 +860,7 @@ LRect JoinAdjacent(LRect &a, LRect &b, int Adj)
 	return t;
 }
 
-LRect *GView::FindLargest(GRegion &r)
+LRect *GView::FindLargest(LRegion &r)
 {
 	ThreadCheck();
 
@@ -889,7 +889,7 @@ LRect *GView::FindLargest(GRegion &r)
 		int ThisPixels = Pixels;
 		LRect ThisRgn = Final;
 
-		GRegion TempList;
+		LRegion TempList;
 		for (LRect *i = r.First(); i; i = r.Next())
 		{
 			TempList.Union(i);
@@ -927,7 +927,7 @@ LRect *GView::FindLargest(GRegion &r)
 	return &Final;
 }
 
-LRect *GView::FindSmallestFit(GRegion &r, int Sx, int Sy)
+LRect *GView::FindSmallestFit(LRegion &r, int Sx, int Sy)
 {
 	ThreadCheck();
 
@@ -949,7 +949,7 @@ LRect *GView::FindSmallestFit(GRegion &r, int Sx, int Sy)
 	return Best;
 }
 
-LRect *GView::FindLargestEdge(GRegion &r, int Edge)
+LRect *GView::FindLargestEdge(LRegion &r, int Edge)
 {
 	LRect *Best = 0;
 	ThreadCheck();
@@ -1789,7 +1789,7 @@ void GView::SetFont(GFont *Font, bool OwnIt)
 	}
 }
 
-bool GView::IsOver(GMouse &m)
+bool GView::IsOver(LMouse &m)
 {
 	return	(m.x >= 0) &&
 			(m.y >= 0) &&
@@ -1997,7 +1997,7 @@ bool GView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 	#endif
 }
 
-bool GView::Invalidate(GRegion *r, bool Repaint, bool NonClient)
+bool GView::Invalidate(LRegion *r, bool Repaint, bool NonClient)
 {
 	if (r)
 	{

@@ -657,7 +657,7 @@ void GToolButton::OnPaint(GSurface *pDC)
 				IconPos.Set(0, 0, Par->d->ImgList->TileX()-1, Par->d->ImgList->TileY()-1);
 			else
 				IconPos.ZOff(Par->d->Bx-1, Par->d->By-1);
-			GRegion Unpainted(p);
+			LRegion Unpainted(p);
 			
 			// Center the icon
 			if (IconPos.X() < p.X() - 1)
@@ -851,7 +851,7 @@ void GToolButton::SendCommand()
 	if (t) t->OnButtonClick(this);
 }
 
-void GToolButton::OnMouseClick(GMouse &m)
+void GToolButton::OnMouseClick(LMouse &m)
 {
 	GToolBar *ToolBar = dynamic_cast<GToolBar*>(GetParent());
 
@@ -936,7 +936,7 @@ void GToolButton::OnMouseClick(GMouse &m)
 	}
 }
 
-void GToolButton::OnMouseEnter(GMouse &m)
+void GToolButton::OnMouseEnter(LMouse &m)
 {
 	if (!Separator() && Enabled())
 	{
@@ -971,11 +971,11 @@ void GToolButton::OnMouseEnter(GMouse &m)
 	}
 }
 
-void GToolButton::OnMouseMove(GMouse &m)
+void GToolButton::OnMouseMove(LMouse &m)
 {
 }
 
-void GToolButton::OnMouseExit(GMouse &m)
+void GToolButton::OnMouseExit(LMouse &m)
 {
 	if (Over)
 	{
@@ -1053,7 +1053,7 @@ int GToolBar::GetBy()
 	return d->By;
 }
 
-void GToolBar::ContextMenu(GMouse &m)
+void GToolBar::ContextMenu(LMouse &m)
 {
 	if (IsCustomizable())
 	{
@@ -1190,7 +1190,7 @@ bool GToolBar::OnLayout(GViewLayoutInfo &Inf)
 	if (Inf.Width.Min == 0)
 	{
 		// Calc width
-		GRegion r(0, 0, 10000, 10000);
+		LRegion r(0, 0, 10000, 10000);
 		Pour(r);
 		Inf.Width.Min = X();
 		Inf.Width.Max = X();
@@ -1208,7 +1208,7 @@ bool GToolBar::OnLayout(GViewLayoutInfo &Inf)
 							GetCss()->BorderSpacing().ToPx(X(), GetFont()) : \
 							1
 
-bool GToolBar::Pour(GRegion &r)
+bool GToolBar::Pour(LRegion &r)
 {
 	int BorderSpacing = GetBorderSpacing();
 	int EndX = 0;
@@ -1417,11 +1417,11 @@ void GToolBar::OnPaint(GSurface *pDC)
 	Tools.PaintContent(pDC, c);
 }
 
-void GToolBar::OnMouseClick(GMouse &m)
+void GToolBar::OnMouseClick(LMouse &m)
 {
 }
 
-void GToolBar::OnMouseEnter(GMouse &m)
+void GToolBar::OnMouseEnter(LMouse &m)
 {
 	if (!d->Tip)
 	{
@@ -1433,11 +1433,11 @@ void GToolBar::OnMouseEnter(GMouse &m)
 	}
 }
 
-void GToolBar::OnMouseExit(GMouse &m)
+void GToolBar::OnMouseExit(LMouse &m)
 {
 }
 
-void GToolBar::OnMouseMove(GMouse &m)
+void GToolBar::OnMouseMove(LMouse &m)
 {
 }
 

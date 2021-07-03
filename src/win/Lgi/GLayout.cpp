@@ -153,7 +153,7 @@ GCss::Len &SelectValid(GCss::Len &a, GCss::Len &b, GCss::Len &c)
 	return c;
 }
 
-bool GLayout::Pour(GRegion &r)
+bool GLayout::Pour(LRegion &r)
 {
 	if (!_PourLargest)
 		return false;

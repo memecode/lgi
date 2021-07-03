@@ -3,11 +3,11 @@
 
 class GRegionClipDC : public GSurface
 {
-	GRegion c;
+	LRegion c;
 	GSurface *s;
 	
 public:
-	GRegionClipDC(GSurface *Surface, GRegion *Rgn = NULL)
+	GRegionClipDC(GSurface *Surface, LRegion *Rgn = NULL)
 	{
 		s = Surface;
 		pMem = s->pMem;
@@ -20,7 +20,7 @@ public:
 		pMem = NULL;
 	}
 	
-	void SetClipRegion(GRegion *Rgn)
+	void SetClipRegion(LRegion *Rgn)
 	{
 		if (Rgn)
 			c = *Rgn;

@@ -133,7 +133,7 @@ public:
 		{
 			GDragDropSource Src;
 			GDragData Data;
-			GMouse m;
+			LMouse m;
 			if (!Src.CreateFileDrop(&Data, m, Files))
 			{
 				LgiTrace("%s:%i - CreateFileDrop failed.\n", _FL);
@@ -372,7 +372,7 @@ bool GClipBoard::Files(GString::Array &Paths, bool AutoEmpty)
 {
 	GDragDropSource Src;
 	GDragData Output;
-	GMouse m;
+	LMouse m;
 	if (Owner)
 		Owner->GetMouse(m, true);
 

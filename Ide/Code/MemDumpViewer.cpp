@@ -188,7 +188,7 @@ public:
 					case GNotifyItem_ColumnClicked:
 					{
 						int Col;
-						GMouse m;
+						LMouse m;
 						if (Lst->GetColumnClickInfo(Col, m))
 						{
 							Lst->Sort<NativeInt>(Cmp, Col);

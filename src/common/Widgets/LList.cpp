@@ -403,7 +403,7 @@ bool LListItem::GridLines()
 	return (Parent) ? Parent->GridLines : false;
 }
 
-void LListItem::OnMouseClick(GMouse &m)
+void LListItem::OnMouseClick(LMouse &m)
 {
 	int Col = Parent ? Parent->ColumnAtX(m.x) : -1;
 	for (auto h: d->Cols)
@@ -663,13 +663,13 @@ void LList::SetMode(LListMode m)
 	}
 }
 
-void LList::OnItemClick(LListItem *Item, GMouse &m)
+void LList::OnItemClick(LListItem *Item, LMouse &m)
 {
 	if (Item)
 		Item->OnMouseClick(m);
 }
 
-void LList::OnItemBeginDrag(LListItem *Item, GMouse &m)
+void LList::OnItemBeginDrag(LListItem *Item, LMouse &m)
 {
 	if (Item)
 		Item->OnBeginDrag(m);
@@ -913,7 +913,7 @@ bool LList::OnMouseWheel(double Lines)
 	return true;
 }
 
-bool LList::OnKey(GKey &k)
+bool LList::OnKey(LKey &k)
 {
 	bool Status = false;
 	
@@ -1164,7 +1164,7 @@ bool LList::OnKey(GKey &k)
 						LRect *r = &s->Pos;
 						if (r)
 						{
-							GMouse m;
+							LMouse m;
 							LListItem *FirstVisible = ItemAt((VScroll) ? (int)VScroll->Value() : 0);
 
 							m.x = 32 + ItemsPos.x1;
@@ -1281,7 +1281,7 @@ LgiCursor LList::GetCursor(int x, int y)
 	return LCUR_Normal;
 }
 
-void LList::OnMouseClick(GMouse &m)
+void LList::OnMouseClick(LMouse &m)
 {
 	// m.Trace("LList::OnMouseClick");
 
@@ -1653,7 +1653,7 @@ void LList::OnPulse()
 
 	if (IsCapturing())
 	{
-		GMouse m;
+		LMouse m;
 		bool HasMs = GetMouse(m);
 		// m.Trace("LList::OnPulse");
 
@@ -1754,7 +1754,7 @@ void LList::OnPulse()
 	Unlock();
 }
 
-void LList::OnMouseMove(GMouse &m)
+void LList::OnMouseMove(LMouse &m)
 {
 	if (!Lock(_FL))
 		return;
@@ -1904,7 +1904,7 @@ void LList::OnMouseMove(GMouse &m)
 			{
 				for (auto c: s)
 				{
-					GMouse ms = m;
+					LMouse ms = m;
 					ms.x -= c->Pos.x1;
 					ms.y -= c->Pos.y1;
 					c->OnMouseMove(ms);
@@ -1996,7 +1996,7 @@ LListItem *LList::GetSelected()
 	return n;
 }
 
-bool LList::GetUpdateRegion(LListItem *i, GRegion &r)
+bool LList::GetUpdateRegion(LListItem *i, LRegion &r)
 {
 	r.Empty();
 
@@ -2113,7 +2113,7 @@ bool LList::Remove(LListItem *i)
 	{
 		if (i && i->GetList() == this)
 		{
-			GRegion Up;
+			LRegion Up;
 			bool Visible = GetUpdateRegion(i, Up);
 			bool Selected = i->Select();
 			int Index = (int)Items.IndexOf(i);
@@ -2570,7 +2570,7 @@ void LList::OnPaint(GSurface *pDC)
 	GItem::ItemPaintCtx Ctx;
 	Ctx.pDC = pDC;
 
-	GRegion Rgn(ItemsPos);
+	LRegion Rgn(ItemsPos);
 	if (Items.Length())
 	{
 		for (auto It = Items.begin(n); It != Items.end(); ++It, n++)

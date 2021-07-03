@@ -126,7 +126,7 @@ int GetInputACP()
 	return _wtoi(Str);
 }
 
-GKey::GKey(int v, uint32_t flags)
+LKey::LKey(int v, uint32_t flags)
 {
 	const char *Cp = 0;
 
@@ -927,7 +927,7 @@ bool GView::PointToView(LPoint &p)
 	return true;
 }
 
-bool GView::GetMouse(GMouse &m, bool ScreenCoords)
+bool GView::GetMouse(LMouse &m, bool ScreenCoords)
 {
 	// position
 	POINT p;
@@ -1205,7 +1205,7 @@ void GView::DrawThemeBorder(GSurface *pDC, LRect &r)
 }
 #endif
 
-bool IsKeyChar(GKey &k, int vk)
+bool IsKeyChar(LKey &k, int vk)
 {
 	if (k.Ctrl() || k.Alt() || k.System())
 		return false;
@@ -1645,7 +1645,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			}
 			case M_MOUSEENTER:
 			{
-				GMouse Ms;
+				LMouse Ms;
 				Ms.Target = this;
 				Ms.x = (short) (Msg->b&0xFFFF);
 				Ms.y = (short) (Msg->b>>16);
@@ -1668,7 +1668,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 					{
 						if (_Over)
 						{
-							GMouse m = lgi_adjust_click(Ms, _Over);
+							LMouse m = lgi_adjust_click(Ms, _Over);
 							_Over->OnMouseExit(m);
 
 							#if DEBUG_OVER
@@ -1684,7 +1684,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 							LgiTrace("Enter.GetOver=%p/%s '%-20s'\n", _Over, _Over->GetClass(), _Over->Name());
 							#endif
 
-							GMouse m = lgi_adjust_click(Ms, _Over);
+							LMouse m = lgi_adjust_click(Ms, _Over);
 							_Over->OnMouseEnter(m);
 						}
 					}
@@ -1695,7 +1695,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			{
 				if (_Over)
 				{
-					GMouse Ms;
+					LMouse Ms;
 					Ms.Target = this;
 					Ms.x = (short) (Msg->b&0xFFFF);
 					Ms.y = (short) (Msg->b>>16);
@@ -1722,7 +1722,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 					{
 						if (_Capturing)
 						{
-							GMouse m = lgi_adjust_click(Ms, _Capturing);
+							LMouse m = lgi_adjust_click(Ms, _Capturing);
 							_Capturing->OnMouseExit(m);
 						}
 						else
@@ -1740,7 +1740,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			}
 			case WM_MOUSEMOVE:
 			{
-				GMouse Ms;
+				LMouse Ms;
 				Ms.Target = this;
 				Ms.x = (short) (Msg->b&0xFFFF);
 				Ms.y = (short) (Msg->b>>16);
@@ -1762,7 +1762,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 						LgiTrace("Move.LoseOver=%p/%s '%-20s'\n", _Over, _Over->GetClass(), _Over->Name());
 						#endif
 
-						GMouse m = lgi_adjust_click(Ms, _Over);
+						LMouse m = lgi_adjust_click(Ms, _Over);
 						_Over->OnMouseExit(m);
 					}
 
@@ -1770,7 +1770,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 
 					if (_Over)
 					{
-						GMouse m = lgi_adjust_click(Ms, _Over);
+						LMouse m = lgi_adjust_click(Ms, _Over);
 						_Over->OnMouseEnter(m);
 
 						#if DEBUG_OVER
@@ -1825,7 +1825,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			case WM_LBUTTONDOWN:
 			case WM_LBUTTONUP:
 			{
-				GMouse Ms;
+				LMouse Ms;
 				Ms.x = (short) (Msg->b&0xFFFF);
 				Ms.y = (short) (Msg->b>>16);
 				Ms.Flags = _lgi_get_key_flags() | LGI_EF_LEFT;
@@ -1854,7 +1854,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			case WM_RBUTTONDOWN:
 			case WM_RBUTTONUP:
 			{
-				GMouse Ms;
+				LMouse Ms;
 				Ms.x = (short) (Msg->b&0xFFFF);
 				Ms.y = (short) (Msg->b>>16);
 				Ms.Flags = _lgi_get_key_flags() | LGI_EF_RIGHT;
@@ -1883,7 +1883,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			case WM_MBUTTONDOWN:
 			case WM_MBUTTONUP:
 			{
-				GMouse Ms;
+				LMouse Ms;
 				Ms.x = (short) (Msg->b&0xFFFF);
 				Ms.y = (short) (Msg->b>>16);
 				Ms.Flags = _lgi_get_key_flags() | LGI_EF_MIDDLE;
@@ -1921,7 +1921,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				else
 				{
 					// Key
-					GKey Key((int)Msg->a, (int)Msg->b);
+					LKey Key((int)Msg->a, (int)Msg->b);
 
 					Key.Flags = KeyFlags;
 					Key.Down(IsDown);
@@ -1979,7 +1979,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			#if OLD_WM_CHAR_MODE
 			case WM_CHAR:
 			{
-				GKey Key((int)Msg->a, (int)Msg->b);
+				LKey Key((int)Msg->a, (int)Msg->b);
 				Key.Flags = _lgi_get_key_flags();
 				Key.Down(true);
 				Key.IsChar = true;

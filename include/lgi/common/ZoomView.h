@@ -91,7 +91,7 @@ public:
 	int GetBlockSize();
 
 	// Events and Impl
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	bool OnMouseWheel(double Lines);
 	void OnPulse();
 	void OnPaint(GSurface *pDC);

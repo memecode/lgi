@@ -674,7 +674,7 @@ const char *ResString::GetText(int i)
 	return NULL;
 }
 
-void ResString::OnMouseClick(GMouse &m)
+void ResString::OnMouseClick(LMouse &m)
 {
 	if (m.IsContextMenu())
 	{
@@ -983,7 +983,7 @@ int ResStringCompareFunc(LListItem *a, LListItem *b, ssize_t Data)
 	return -1;
 }
 
-void ResStringGroup::OnColumnClick(int Col, GMouse &m)
+void ResStringGroup::OnColumnClick(int Col, LMouse &m)
 {
 	if (SortCol == Col)
 	{
@@ -1004,7 +1004,7 @@ void ResStringGroup::OnColumnClick(int Col, GMouse &m)
 	}
 }
 
-void ResStringGroup::OnItemClick(LListItem *Item, GMouse &m)
+void ResStringGroup::OnItemClick(LListItem *Item, LMouse &m)
 {
 	LList::OnItemClick(Item, m);
 }
@@ -1561,7 +1561,7 @@ ResStringUi::~ResStringUi()
 
 void ResStringUi::OnPaint(GSurface *pDC)
 {
-	GRegion Client(0, 0, X()-1, Y()-1);
+	LRegion Client(0, 0, X()-1, Y()-1);
 	for (auto w: Children)
 	{
 		LRect r = w->GetPos();
@@ -1577,8 +1577,8 @@ void ResStringUi::OnPaint(GSurface *pDC)
 
 void ResStringUi::PourAll()
 {
-	GRegion Client(GetClient());
-	GRegion Update;
+	LRegion Client(GetClient());
+	LRegion Update;
 
 	for (auto v: Children)
 	{

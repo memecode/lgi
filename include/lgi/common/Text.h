@@ -304,7 +304,7 @@ public:
 
 	virtual bool Open(char *Name);
 	virtual bool Save(char *Name);
-	virtual int ProcessKey(GKey &K);
+	virtual int ProcessKey(LKey &K);
 	virtual int Paint() { return FALSE; }
 	virtual int GetWrapType() { return WrapType; }
 	virtual void SetWrapType(int i) { WrapType = i; }
@@ -314,8 +314,8 @@ public:
 	virtual bool ClearDirty(bool Ask);
 	virtual void OnSave();
 	virtual void OnGotoLine();
-	virtual void OnEscape(GKey &K);
-	virtual void OnEnter(GKey &K);
+	virtual void OnEscape(LKey &K);
+	virtual void OnEnter(LKey &K);
 };
 
 #endif

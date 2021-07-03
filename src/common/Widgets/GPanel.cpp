@@ -106,7 +106,7 @@ bool GPanel::Attach(GViewI *Wnd)
 	return Status;
 }
 
-bool GPanel::Pour(GRegion &r)
+bool GPanel::Pour(LRegion &r)
 {
 	int Sx = CalcWidth();
 	LRect *Best = 0;
@@ -252,7 +252,7 @@ void GPanel::OnPaint(GSurface *pDC)
 	}
 }
 
-void GPanel::OnMouseClick(GMouse &m)
+void GPanel::OnMouseClick(LMouse &m)
 {
 	if (OpenSize > 0 &&
 		m.Left() &&

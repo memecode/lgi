@@ -58,13 +58,13 @@ public:
 
 	GFilterNode GetNode();
 	void SetNode(GFilterNode n);
-	bool OnKey(GKey &k);
-	void OnMouseClick(GMouse &m);
+	bool OnKey(LKey &k);
+	void OnMouseClick(LMouse &m);
 	void OnExpand(bool b);
 	void OptionsMenu();
 
 	// Dnd
-	bool OnBeginDrag(GMouse &m);
+	bool OnBeginDrag(LMouse &m);
 	bool GetFormats(GDragFormats &Formats);
 	bool GetData(GArray<GDragData> &Data);
 };

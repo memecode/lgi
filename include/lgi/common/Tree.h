@@ -103,7 +103,7 @@ protected:
 	void _RePour();
 	void _Pour(LPoint *Limit, int ColumnPx, int Depth, bool Visible);
 	void _Remove();
-	void _MouseClick(GMouse &m);
+	void _MouseClick(LMouse &m);
 	void _SetTreePtr(GTree *t);
 	GTreeItem *_HitTest(int x, int y, bool Debug = false);
 	LRect *_GetRect(GTreeItemRect Which);
@@ -211,22 +211,22 @@ public:
 	const char *GetClass() override { return "GTree"; }
 
 	/// Called when an item is clicked
-	virtual void OnItemClick(GTreeItem *Item, GMouse &m);
+	virtual void OnItemClick(GTreeItem *Item, LMouse &m);
 	/// Called when an item is dragged from it's position
-	virtual void OnItemBeginDrag(GTreeItem *Item, GMouse &m);
+	virtual void OnItemBeginDrag(GTreeItem *Item, LMouse &m);
 	/// Called when an item is expanded/contracted to show or hide it's children
 	virtual void OnItemExpand(GTreeItem *Item, bool Expand);
 	/// Called when an item is selected
 	virtual void OnItemSelect(GTreeItem *Item);
 	
 	// Implementation
-	void OnMouseClick(GMouse &m) override;
-	void OnMouseMove(GMouse &m) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseMove(LMouse &m) override;
 	bool OnMouseWheel(double Lines) override;
 	void OnPaint(GSurface *pDC) override;
 	void OnFocus(bool b) override;
 	void OnPosChange() override;
-	bool OnKey(GKey &k) override;
+	bool OnKey(LKey &k) override;
 	int OnNotify(GViewI *Ctrl, int Flags) override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	void OnPulse() override;

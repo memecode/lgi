@@ -90,7 +90,7 @@ void GProgress::Value(int64 v)
 	}
 }
 
-bool GProgress::Pour(GRegion &r)
+bool GProgress::Pour(LRegion &r)
 {
 	LRect *l = FindLargest(r);
 	if (l)

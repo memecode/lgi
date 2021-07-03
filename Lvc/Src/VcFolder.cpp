@@ -2073,7 +2073,7 @@ void VcFolder::Empty()
 		GetCss(true)->Color(GColour::Blue);
 }
 
-void VcFolder::OnMouseClick(GMouse &m)
+void VcFolder::OnMouseClick(LMouse &m)
 {
 	if (m.IsContextMenu())
 	{
@@ -4099,7 +4099,7 @@ void VcLeaf::ShowLog()
 	}
 }
 
-void VcLeaf::OnMouseClick(GMouse &m)
+void VcLeaf::OnMouseClick(LMouse &m)
 {
 	if (m.IsContextMenu())
 	{

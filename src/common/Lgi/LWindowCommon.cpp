@@ -130,7 +130,7 @@ void LWindow::MoveToCenter()
 
 void LWindow::MoveToMouse()
 {
-	GMouse m;
+	LMouse m;
 	if (GetMouse(m, true))
 	{
 		LRect p = GetPos();

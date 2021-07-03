@@ -145,7 +145,7 @@ public:
 	void ScrollTo() override;
 	
 	// Events;
-	void OnMouseClick(GMouse &m) override;
+	void OnMouseClick(LMouse &m) override;
 	void OnMeasure(LPoint *Info) override;
 	void OnPaint(GSurface *pDC) override { LgiAssert(0); }
 	void OnPaint(GItem::ItemPaintCtx &Ctx) override;
@@ -283,7 +283,7 @@ protected:
 	int CompletelyVisible;
 
 	// Misc
-	bool GetUpdateRegion(LListItem *i, GRegion &r);
+	bool GetUpdateRegion(LListItem *i, LRegion &r);
 	LListItem *HitItem(int x, int y, int *Index = 0);
 	LRect &GetClientRect();
 	void PourAll();
@@ -320,7 +320,7 @@ public:
 		/// The item clicked
 		LListItem *Item,
 		/// The mouse parameters for the click
-		GMouse &m
+		LMouse &m
 	);
 	/// Called when the user selects an item and starts to drag it
 	virtual void OnItemBeginDrag
@@ -328,7 +328,7 @@ public:
 		/// The item being dragged
 		LListItem *Item,
 		/// The mouse parameters at the time
-		GMouse &m
+		LMouse &m
 	);
 	/// Called when the user selects an item. If multiple items are selected
 	/// in one hit this is only called for the first item. Use GetSelection to
@@ -344,7 +344,7 @@ public:
 		/// The column index
 		int Col,
 		/// The mouse parameters at the time
-		GMouse &m
+		LMouse &m
 	) {}
 	/// Called when the column is dropped to a new location
 	/// /return true to have the columns reindexed for you
@@ -367,11 +367,11 @@ public:
 	GMessage::Result OnEvent(GMessage *Msg);
 	// int OnHitTest(int x, int y);
 	LgiCursor GetCursor(int x, int y);
-	void OnMouseClick(GMouse &m);
-	void OnMouseMove(GMouse &m);
+	void OnMouseClick(LMouse &m);
+	void OnMouseMove(LMouse &m);
 	int OnNotify(GViewI *Ctrl, int Flags);
 	void OnPosChange();
-	bool OnKey(GKey &k);
+	bool OnKey(LKey &k);
 	bool OnMouseWheel(double Lines);
 	void OnFocus(bool b);
 	void OnPulse();

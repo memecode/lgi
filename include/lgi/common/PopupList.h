@@ -181,7 +181,7 @@ public:
 			if (Wnd && !Registered)
 			{
 				Registered = true;
-				Wnd->RegisterHook(this, GKeyEvents);
+				Wnd->RegisterHook(this, LKeyEvents);
 			}
 
 			#ifdef WINNATIVE
@@ -225,7 +225,7 @@ public:
 		return 0;
 	}
 
-	bool OnViewKey(GView *v, GKey &k)
+	bool OnViewKey(GView *v, LKey &k)
 	{
 		if (!Visible())
 			return false;

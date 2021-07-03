@@ -184,7 +184,7 @@ void GEdit::OnPaint(GSurface *pDC)
     }
 }
 
-bool GEdit::OnKey(GKey &k)
+bool GEdit::OnKey(LKey &k)
 {
 	d->NotificationProcessed = false;
 	
@@ -238,7 +238,7 @@ bool GEdit::OnKey(GKey &k)
 	return GTextView3::OnKey(k);
 }
 
-void GEdit::OnEnter(GKey &k)
+void GEdit::OnEnter(LKey &k)
 {
 	if (d->Multiline)
 		GTextView3::OnEnter(k);

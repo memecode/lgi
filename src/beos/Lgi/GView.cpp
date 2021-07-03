@@ -161,7 +161,7 @@ const char *GLocker::GetLocker(int Thread)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GKey::GKey(int Vkey, int flags)
+LKey::LKey(int Vkey, int flags)
 {
 	c16 = vkey = Vkey;
 	Flags = flags;
@@ -349,7 +349,7 @@ LgiCursor GView::GetCursor(int x, int y)
 	return LCUR_Normal;
 }
 
-bool GView::GetMouse(GMouse &m, bool ScreenCoords)
+bool GView::GetMouse(LMouse &m, bool ScreenCoords)
 {
 	if (!_View)
 		return false;
@@ -557,7 +557,7 @@ static void SetBeosCursor(LgiCursor c)
 #define DEBUG_MOUSE_CLICK	1
 #define DEBUG_MOUSE_MOVE	1
 
-bool GView::_Mouse(GMouse &m, bool Move)
+bool GView::_Mouse(LMouse &m, bool Move)
 {
 	GWindow *Wnd = GetWindow();
 
@@ -730,7 +730,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 		case LGI_MOUSE_EXIT:
 		{
 			BPoint p;
-			GMouse m;
+			LMouse m;
 			if (Msg->FindPoint("pos", &p) == B_OK &&
 				Msg->FindInt32("flags", (int32*)&m.Flags) == B_OK)
 			{
@@ -778,7 +778,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			GDragDropSource *Source = 0;
 			if (Msg->FindPointer("GDragDropSource", (void**) &Source) == B_OK)
 			{
-				GMouse m;
+				LMouse m;
 				GetMouse(m);
 			
 				GView *TargetView = _lgi_search_children(this, m.x, m.y);
@@ -1031,7 +1031,7 @@ void GView::_Key(const char *bytes, int32 numBytes, bool down)
 
 	for (int i=0; i<numBytes; i++)
 	{
-		GKey k;
+		LKey k;
 		
 		if (bytes[i] == B_FUNCTION_KEY)
 		{
@@ -1213,7 +1213,7 @@ void BViewRedir::MouseDown(BPoint point)
 	BPoint u;
 	GetMouse(&u, &WndBtn);
 
-	GMouse m;
+	LMouse m;
 	m.x = point.x;
 	m.y = point.y;
 	if (WndBtn == B_PRIMARY_MOUSE_BUTTON) m.Left(true);
@@ -1250,7 +1250,7 @@ void BViewRedir::MouseUp(BPoint point)
 	GetMouse(&u, &Btns);
 	int b = Btns ^ WndBtn; // what bits have changed since the down click?
 
-	GMouse m;
+	LMouse m;
 	m.Target = Wnd;
 	m.x = point.x;
 	m.y = point.y;
@@ -1273,7 +1273,7 @@ void BViewRedir::MouseMoved(BPoint point, uint32 transit, const BMessage *messag
 	else
 		Window()->CurrentMessage()->FindInt32("buttons", &Btns);
 
-	GMouse m;
+	LMouse m;
 	m.x = point.x;
 	m.y = point.y;
 	if (Btns == B_PRIMARY_MOUSE_BUTTON) m.Left(true);

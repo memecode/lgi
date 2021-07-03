@@ -43,10 +43,10 @@ public:
 	void Alignment(int i);
 
 	bool Attach(GViewI *Wnd);
-	bool Pour(GRegion &r);
+	bool Pour(LRegion &r);
 	int OnNotify(GViewI *Ctrl, int Flags);
 	void OnPaint(GSurface *pDC);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 };
 
 #endif

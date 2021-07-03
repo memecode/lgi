@@ -314,7 +314,7 @@ void GToolTabBar::OnPaint(GSurface *pScreen)
 	#endif
 }
 
-void GToolTabBar::OnMouseClick(GMouse &m)
+void GToolTabBar::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -336,7 +336,7 @@ void GToolTabBar::OnMouseClick(GMouse &m)
 	}
 }
 
-bool GToolTabBar::Pour(GRegion &r)
+bool GToolTabBar::Pour(LRegion &r)
 {
 	bool Status = false;
 

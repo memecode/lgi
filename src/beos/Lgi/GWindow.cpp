@@ -89,7 +89,7 @@ class GWindowPrivate
 public:
 	GViewI *Focus;
 	GArray<HookInfo> Hooks;
-	GKey LastKey;
+	LKey LastKey;
 
 	GWindowPrivate()
 	{
@@ -403,8 +403,8 @@ void GWindow::Pour()
 	LRect r(Handle()->Frame());
 	r.Offset(-r.x1, -r.y1);
 
-	GRegion Client(r);
-	GRegion Update;
+	LRegion Client(r);
+	LRegion Update;
 
 	if (Menu)
 	{
@@ -577,11 +577,11 @@ int GWindow::OnDrop(char *Format, GVariant *Data, LPoint Pt, int KeyState)
 	return Status;
 }
 
-bool GWindow::HandleViewMouse(GView *v, GMouse &m)
+bool GWindow::HandleViewMouse(GView *v, LMouse &m)
 {
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{
-		if (d->Hooks[i].Flags & GMouseEvents)
+		if (d->Hooks[i].Flags & LMouseEvents)
 		{
 			if (!d->Hooks[i].Target->OnViewMouse(v, m))
 			{
@@ -593,7 +593,7 @@ bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 	return true;
 }
 
-bool GWindow::HandleViewKey(GView *v, GKey &k)
+bool GWindow::HandleViewKey(GView *v, LKey &k)
 {
 	bool Status = false;
 	GViewI *Ctrl = 0;
@@ -645,7 +645,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	// Allow any hooks to see the key...
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{
-		if (d->Hooks[i].Flags & GKeyEvents)
+		if (d->Hooks[i].Flags & LKeyEvents)
 		{
 			if (d->Hooks[i].Target->OnViewKey(v, k))
 			{
@@ -761,7 +761,7 @@ AllDone:
 }
 
 
-bool GWindow::RegisterHook(GView *Target, GWindowHookType EventType, int Priority)
+bool GWindow::RegisterHook(GView *Target, LWindowHookType EventType, int Priority)
 {
 	bool Status = false;
 	
@@ -794,7 +794,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 	return false;
 }
 
-void GWindow::OnTrayClick(GMouse &m)
+void GWindow::OnTrayClick(LMouse &m)
 {
 }
 

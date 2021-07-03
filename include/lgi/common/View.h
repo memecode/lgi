@@ -161,7 +161,7 @@ protected:
 	#if !WINNATIVE
 
 		GView *&PopupChild();
-		virtual bool	_Mouse(GMouse &m, bool Move);
+		virtual bool	_Mouse(LMouse &m, bool Move);
 		void			_Focus(bool f);
 
 	#endif
@@ -174,16 +174,16 @@ protected:
 	// Complex Region searches
 	
 	/// Finds the largest rectangle in the region
-	LRect *FindLargest(GRegion &r);
+	LRect *FindLargest(LRegion &r);
 
 	/// Finds the smallest rectangle that would fit a window 'Sx' by 'Sy'
-	LRect *FindSmallestFit(GRegion &r, int Sx, int Sy);
+	LRect *FindSmallestFit(LRegion &r, int Sx, int Sy);
 
 	/// Finds the largest rectangle on the  specified
 	LRect *FindLargestEdge
 	(
 		/// The region to search
-		GRegion &r,
+		LRegion &r,
 		/// The edge to look at:
 		/// \sa GV_EDGE_TOP, GV_EDGE_RIGHT, GV_EDGE_BOTTOM or GV_EDGE_LEFT
 		int Edge
@@ -194,8 +194,8 @@ protected:
 	bool HandleCapture(GView *Wnd, bool c);
 
 	
-	virtual bool OnViewMouse(GView *v, GMouse &m) override { return true; }
-	virtual bool OnViewKey(GView *v, GKey &k) override { return false; }
+	virtual bool OnViewMouse(GView *v, LMouse &m) override { return true; }
+	virtual bool OnViewKey(GView *v, LKey &k) override { return false; }
 	virtual void OnNcPaint(GSurface *pDC, LRect &r);
 
 	/// List of children views.
@@ -500,7 +500,7 @@ public:
 	bool GetMouse
 	(
 		/// The mouse location information returned
-		GMouse &m,
+		LMouse &m,
 		/// Get the location in screen coordinates
 		bool ScreenCoords = false
 	) override;
@@ -566,7 +566,7 @@ public:
 	bool Invalidate
 	(
 		/// The region of the view to repaint
-		GRegion *r,
+		LRegion *r,
 		/// true if you want to wait for the update to happen
 		bool Repaint = false,
 		/// false to update in client coordinates, true to update the non client region
@@ -574,7 +574,7 @@ public:
 	) override;
 
 	/// true if the mouse event is over the view
-	bool IsOver(GMouse &m) override;
+	bool IsOver(LMouse &m) override;
 	/// returns the sub window located at the point x,y	
 	GViewI *WindowFromPoint(int x, int y, int DebugDepth = 0) override;
 	/// Sets a timer to call the OnPulse() event
@@ -595,32 +595,32 @@ public:
 	virtual bool Pour
 	(
 		/// The available space to lay out the views into
-		GRegion &r
+		LRegion &r
 	) override { return false; }
 
 	/// The mouse was clicked over this view
 	void OnMouseClick
 	(
 		/// The event parameters
-		GMouse &m
+		LMouse &m
 	) override;
 	/// Mouse moves into the area over the control
 	void OnMouseEnter
 	(
 		/// The event parameters
-		GMouse &m
+		LMouse &m
 	) override;
 	/// Mouse leaves the area over the control
 	void OnMouseExit
 	(
 		/// The event parameters
-		GMouse &m
+		LMouse &m
 	) override;
 	/// The mouse moves over the control
 	void OnMouseMove
 	(
 		/// The event parameters
-		GMouse &m
+		LMouse &m
 	) override;
 	/// The mouse wheel was scrolled.
 	bool OnMouseWheel
@@ -629,7 +629,7 @@ public:
 		double Lines
 	) override;
 	/// A key was pressed while this view has focus
-	bool OnKey(GKey &k) override;
+	bool OnKey(LKey &k) override;
 	/// The view is attached
 	void OnCreate() override;
 	/// The view is detached

@@ -21,7 +21,7 @@ extern Gtk::GdkDragAction EffectToDragAction(int Effect);
 class HookInfo
 {
 public:
-	GWindowHookType Flags;
+	LWindowHookType Flags;
 	GView *Target;
 };
 
@@ -38,7 +38,7 @@ class GWindowPrivate
 public:
 	int Sx, Sy;
 	bool Dynamic;
-	GKey LastKey;
+	LKey LastKey;
 	::GArray<HookInfo> Hooks;
 	bool SnapToEdge;
 	::GString Icon;
@@ -90,7 +90,7 @@ public:
 			if (n)
 			{
 				n->Target = Target;
-				n->Flags = GNoEvents;
+				n->Flags = LNoEvents;
 				return Hooks.Length() - 1;
 			}
 		}
@@ -316,7 +316,7 @@ GViewI *GWindow::WindowFromPoint(int x, int y, bool Debug)
 	return GView::WindowFromPoint(x - rpos.x1, y - rpos.y1, Debug);
 }
 
-bool GWindow::TranslateMouse(GMouse &m)
+bool GWindow::TranslateMouse(LMouse &m)
 {
 	m.Target = WindowFromPoint(m.x, m.y, false);
 	if (!m.Target)
@@ -376,7 +376,7 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 			auto e = &event->key;
 			#define KEY(name) GDK_KEY_##name
 
-			GKey k;
+			LKey k;
 			k.Down(e->type == GDK_KEY_PRESS);
 			k.c16 = k.vkey = e->keyval;
 			k.Shift((e->state & ModFlags->Shift) != 0);
@@ -976,7 +976,7 @@ bool GWindow::OnRequestClose(bool OsShuttingDown)
 	return GView::OnRequestClose(OsShuttingDown);
 }
 
-bool GWindow::HandleViewMouse(GView *v, GMouse &m)
+bool GWindow::HandleViewMouse(GView *v, LMouse &m)
 {
 	if (m.Down() && !m.IsMove())
 	{
@@ -1002,7 +1002,7 @@ bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{
-		if (d->Hooks[i].Flags & GMouseEvents)
+		if (d->Hooks[i].Flags & LMouseEvents)
 		{
 			if (!d->Hooks[i].Target->OnViewMouse(v, m))
 			{
@@ -1014,7 +1014,7 @@ bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 	return true;
 }
 
-bool GWindow::HandleViewKey(GView *v, GKey &k)
+bool GWindow::HandleViewKey(GView *v, LKey &k)
 {
 	bool Status = false;
 	GViewI *Ctrl = 0;
@@ -1070,7 +1070,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 		#if DEBUG_HANDLEVIEWKEY
 		// if (Debug) LgiTrace("\tHook[%i]\n", i);
 		#endif
-		if (d->Hooks[i].Flags & GKeyEvents)
+		if (d->Hooks[i].Flags & LKeyEvents)
 		{
 			GView *Target = d->Hooks[i].Target;
 			#if DEBUG_HANDLEVIEWKEY
@@ -1486,16 +1486,16 @@ void GWindow::PourAll()
 	if (c.X() < 20 || c.Y() < 20)
 		return; // IDK, GTK is weird sometimes... filter out low sizes.
 
-	GRegion Client(c);
+	LRegion Client(c);
 	GViewI *MenuView = 0;
 
-	GRegion Update(Client);
+	LRegion Update(Client);
 	bool HasTools = false;
 	GViewI *v;
 	List<GViewI>::I Lst = Children.begin();
 
 	{
-		GRegion Tools;
+		LRegion Tools;
 		
 		for (v = *Lst; v; v = *++Lst)
 		{
@@ -1624,7 +1624,7 @@ GMessage::Param GWindow::OnEvent(GMessage *m)
 	return GView::OnEvent(m);
 }
 
-bool GWindow::RegisterHook(GView *Target, GWindowHookType EventType, int Priority)
+bool GWindow::RegisterHook(GView *Target, LWindowHookType EventType, int Priority)
 {
 	bool Status = false;
 	
@@ -1815,7 +1815,7 @@ bool GWindow::IsAttached()
 			d->AttachState == LAttached;
 }
 
-void GWindow::OnTrayClick(GMouse &m)
+void GWindow::OnTrayClick(LMouse &m)
 {
 	if (m.Down() || m.IsContextMenu())
 	{

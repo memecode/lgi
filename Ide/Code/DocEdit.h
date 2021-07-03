@@ -184,13 +184,13 @@ public:
 	bool AppendItems(LSubMenu *Menu, const char *Param, int Base) override;
 	bool DoGoto() override;
 	void OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour) override;
-	void OnMouseClick(GMouse &m) override;
-	bool OnKey(GKey &k) override;	
+	void OnMouseClick(LMouse &m) override;
+	bool OnKey(LKey &k) override;	
 	bool OnMenu(GDocView *View, int Id, void *Context) override;
 	GMessage::Result OnEvent(GMessage *m) override;
 	void SetCaret(size_t i, bool Select, bool ForceFullUpdate = false) override;
 	void PourStyle(size_t Start, ssize_t EditSize) override;
-	bool Pour(GRegion &r) override;
+	bool Pour(LRegion &r) override;
 	bool Insert(size_t At, const char16 *Data, ssize_t Len) override;
 	bool Delete(size_t At, ssize_t Len) override;
 };

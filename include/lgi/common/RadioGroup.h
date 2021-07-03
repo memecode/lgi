@@ -80,14 +80,14 @@ public:
 	// Events
 	void OnAttach() override;
 	void OnStyleChange();
-	bool OnKey(GKey &k) override;
+	bool OnKey(LKey &k) override;
 	
 	#if WINNATIVE && !XP_BUTTON
 	int SysOnNotify(int Msg, int Code);
 	#else
-	void OnMouseClick(GMouse &m) override;
-	void OnMouseEnter(GMouse &m) override;
-	void OnMouseExit(GMouse &m) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseEnter(LMouse &m) override;
+	void OnMouseExit(LMouse &m) override;
 	void OnFocus(bool f) override;
 	void OnPaint(GSurface *pDC) override;
 	void SetFont(GFont *Fnt, bool OwnIt = false) override;

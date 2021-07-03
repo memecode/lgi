@@ -53,7 +53,7 @@ public:
 		}
 	}
 
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		LRect r = GetClient();
 		r.Size(2, 2);

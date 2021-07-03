@@ -423,7 +423,7 @@ class GelSkin : public GSkinEngine
 			Low = LColour(L_LOW);
 		}
 
-		GRegion Rgn;
+		LRegion Rgn;
 		Rgn = rcFill;
 		GArray<GDisplayString*> *Text = State->AllText();
 		GSurface *pDC = State->pScreen;

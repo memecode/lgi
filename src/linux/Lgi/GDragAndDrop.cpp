@@ -119,7 +119,7 @@ bool GDragDropSource::SetIcon(GSurface *Img, LRect *SubRgn)
 	return false;
 }
 
-bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, ::GString::Array &Files)
+bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, ::GString::Array &Files)
 {
 	if (!OutputData || !Files.First())
 		return false;
@@ -321,7 +321,7 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	}
 	else LgiTrace("%s:%i - No signal window?\n", _FL);
 
-	GMouse m;
+	LMouse m;
 	SourceWnd->GetMouse(m);
 	int btn = 0;
 	if (m.Left()) btn = 1;

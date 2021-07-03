@@ -223,7 +223,7 @@ bool GSubMenu::RemoveItem(GMenuItem *Item)
 	return Status;
 }
 
-GMenuItem *GSubMenu::MatchShortcut(GKey &k)
+GMenuItem *GSubMenu::MatchShortcut(LKey &k)
 {
 	for (GMenuItem *i=Items.First(); i; i=Items.Next())
 	{
@@ -557,7 +557,7 @@ bool GMenuItem::ScanForAccel()
 	return true;
 }
 
-GMenuItem *GMenuItem::MatchShortcut(GKey &k)
+GMenuItem *GMenuItem::MatchShortcut(LKey &k)
 {
 	if (UnsupportedShortcut && k.vkey == ShortcutKey)
 	{
@@ -835,7 +835,7 @@ bool GMenu::Detach()
 	return Status;
 }
 
-bool GMenu::OnKey(GView *v, GKey &k)
+bool GMenu::OnKey(GView *v, LKey &k)
 {
 	GMenuItem *m = MatchShortcut(k);
 	if (m)

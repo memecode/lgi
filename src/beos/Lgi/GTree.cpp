@@ -289,7 +289,7 @@ void GTree::SelectionChanged()
 	}
 }
 
-void GTree::OnMouseClick(GMouse &m)
+void GTree::OnMouseClick(LMouse &m)
 {
 	if (LockLooper())
 	{
@@ -374,7 +374,7 @@ GTreeItem *GTree::Selection()
 	return Item;
 }
 
-void GTree::OnItemClick(GTreeItem *Item, GMouse &m)
+void GTree::OnItemClick(GTreeItem *Item, LMouse &m)
 {
 	if (Item)
 	{
@@ -386,7 +386,7 @@ void GTree::OnItemBeginDrag(GTreeItem *Item, int Flags)
 {
 	if (Item)
 	{
-		GMouse m;
+		LMouse m;
 		ZeroObj(m);
 		m.Flags = Flags;
 		Item->OnBeginDrag(m);

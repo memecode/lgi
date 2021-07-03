@@ -32,11 +32,11 @@ public:
 	void OnCreate() override;
 	void OnPosChange() override;
 	void OnPaint(GSurface *pDC) override;
-	bool Pour(GRegion &r) override;
-	void OnMouseClick(GMouse &m) override;
-	void OnHeaderList(GMouse &m);
-	void OnFunctionList(GMouse &m);
-	void OnSymbolList(GMouse &m);
+	bool Pour(LRegion &r) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnHeaderList(LMouse &m);
+	void OnFunctionList(LMouse &m);
+	void OnSymbolList(LMouse &m);
 };
 
 class IdeDocPrivate : public NodeView, public LMutex

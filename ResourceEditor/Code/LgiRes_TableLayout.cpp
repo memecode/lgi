@@ -266,7 +266,7 @@ public:
 		return true;
 	}
 	
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		if (m.Down() && m.Right())
 		{
@@ -1069,7 +1069,7 @@ void CtrlTable::OnPaint(GSurface *pDC)
 	ResDialogCtrl::OnPaint(pDC);
 }
 
-void CtrlTable::OnMouseMove(GMouse &m)
+void CtrlTable::OnMouseMove(LMouse &m)
 {
 	bool Change = false;
 	for (auto &h: d->Handles)
@@ -1304,7 +1304,7 @@ void CtrlTable::UnMerge(ResTableCell *Cell)
 	}
 }
 
-void CtrlTable::OnMouseClick(GMouse &m)
+void CtrlTable::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{

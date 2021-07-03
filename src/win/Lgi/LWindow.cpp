@@ -449,7 +449,7 @@ bool LWindow::OnRequestClose(bool OsShuttingDown)
 	return true;
 }
 
-bool LWindow::HandleViewMouse(GView *v, GMouse &m)
+bool LWindow::HandleViewMouse(GView *v, LMouse &m)
 {
 	#if DEBUG_HANDLE_VIEW_MOUSE
 	m.Trace("HandleViewMouse");
@@ -457,7 +457,7 @@ bool LWindow::HandleViewMouse(GView *v, GMouse &m)
 	
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{
-		if (d->Hooks[i].Flags & GMouseEvents)
+		if (d->Hooks[i].Flags & LMouseEvents)
 		{
 			GView *t = d->Hooks[i].Target;
 			if (!t->OnViewMouse(v, m))
@@ -478,7 +478,7 @@ bool LWindow::HandleViewMouse(GView *v, GMouse &m)
 	return true;
 }
 
-bool LWindow::HandleViewKey(GView *v, GKey &k)
+bool LWindow::HandleViewKey(GView *v, LKey &k)
 {
 	#if DEBUG_HANDLE_VIEW_KEY
 	char msg[256];
@@ -505,7 +505,7 @@ bool LWindow::HandleViewKey(GView *v, GKey &k)
 	#endif
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{
-		if (d->Hooks[i].Flags & GKeyEvents)
+		if (d->Hooks[i].Flags & LKeyEvents)
 		{
 			if (d->Hooks[i].Target->OnViewKey(v, k))
 			{
@@ -718,12 +718,12 @@ bool LWindow::SetActive()
 
 void LWindow::PourAll()
 {
-	GRegion Client(GetClient());
-	GRegion Update;
+	LRegion Client(GetClient());
+	LRegion Update;
 	bool HasTools = false;
 	
 	{
-		GRegion Tools;
+		LRegion Tools;
 
 		for (auto v: Children)
 		{
@@ -1093,7 +1093,7 @@ GMessage::Result LWindow::OnEvent(GMessage *Msg)
 			// This receives events fired from the GMouseHookPrivate class so that
 			// non-LGI windows create mouse hook events as well.
 			GTempView v((OsView)Msg->B());
-			GMouse m;
+			LMouse m;
 			m.x = LOWORD(Msg->A());
 			m.y = HIWORD(Msg->A());
 			HandleViewMouse(&v, m);
@@ -1369,7 +1369,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 	return true;
 }
 
-void LWindow::OnTrayClick(GMouse &m)
+void LWindow::OnTrayClick(LMouse &m)
 {
 	if (m.Down() || m.IsContextMenu())
 	{

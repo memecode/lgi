@@ -557,7 +557,7 @@ LRect &GTabView::GetTabClient()
 	return d->TabClient;
 }
 
-int GTabView::HitTest(GMouse &m)
+int GTabView::HitTest(LMouse &m)
 {
 	if (d->LeftBtn.Overlap(m.x, m.y))
 	{
@@ -582,7 +582,7 @@ int GTabView::HitTest(GMouse &m)
 	return NoBtn;
 }
 
-void GTabView::OnMouseClick(GMouse &m)
+void GTabView::OnMouseClick(LMouse &m)
 {
 	bool DownLeft = m.Down() || m.Left();
 	int Result = HitTest(m);
@@ -638,7 +638,7 @@ void GTabView::OnMouseClick(GMouse &m)
 		Focus(true);
 }
 
-bool GTabView::OnKey(GKey &k)
+bool GTabView::OnKey(LKey &k)
 {
 	if (k.Down())
 	{
@@ -1133,7 +1133,7 @@ void GTabView::OnPosChange()
 			{
 				LRect r = d->TabClient;
 				r.Offset(-r.x1, -r.y1);
-				GRegion Rgn(r);
+				LRegion Rgn(r);
 
 				for (GViewI *c: p->IterateViews())
 					c->Pour(Rgn);
@@ -1236,13 +1236,13 @@ void GTabPage::HasButton(bool b)
 		GetParent()->Invalidate();
 }
 
-void GTabPage::OnButtonClick(GMouse &m)
+void GTabPage::OnButtonClick(LMouse &m)
 {
 	if (GetId() > 0)
 		SendNotify(GNotifyTabPage_ButtonClick);
 }
 
-void GTabPage::OnTabClick(GMouse &m)
+void GTabPage::OnTabClick(LMouse &m)
 {
 	GViewI *v = GetId() > 0 ? this : GetParent();
 	v->SendNotify(GNotifyItem_Click);
@@ -1487,7 +1487,7 @@ void GTabPage::OnFocus(bool b)
 {
 }
 
-bool GTabPage::OnKey(GKey &k)
+bool GTabPage::OnKey(LKey &k)
 {
 	return false;
 }

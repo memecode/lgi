@@ -718,7 +718,7 @@ public:
 			Scroll->ScrollTo();
 	}
 
-	bool OnKey(GKey &k)
+	bool OnKey(LKey &k)
 	{
 		switch (k.c16)
 		{
@@ -1347,7 +1347,7 @@ public:
 					case GNotifyItem_ColumnClicked:
 					{
 						int Col = -1;
-						GMouse m;
+						LMouse m;
 						if (Files->GetColumnClickInfo(Col, m))
 						{
 							if (Col == 0)
@@ -1380,7 +1380,7 @@ public:
 				{
 					case GNotifyContainer_Click:
 					{
-						GMouse m;
+						LMouse m;
 						c->GetMouse(m);
 						if (m.Right())
 						{
@@ -1519,7 +1519,7 @@ public:
 					case GNotifyItem_ColumnClicked:
 					{
 						int Col = -1;
-						GMouse Ms;
+						LMouse Ms;
 						Commits->GetColumnClickInfo(Col, Ms);
 						Commits->Sort(LstCmp, Col);
 						break;

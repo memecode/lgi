@@ -61,7 +61,7 @@ bool ResMenuItem::OnNew()
 	return true;
 }
 
-void ResMenuItem::OnMouseClick(GMouse &m)
+void ResMenuItem::OnMouseClick(LMouse &m)
 {
 	if (m.IsContextMenu())
 	{
@@ -348,12 +348,12 @@ GView *ResMenu::CreateUI()
 	return Ui = new ResMenuUi(this);
 }
 
-void ResMenu::OnItemClick(GTreeItem *Item, GMouse &m)
+void ResMenu::OnItemClick(GTreeItem *Item, LMouse &m)
 {
 	GTree::OnItemClick(Item, m);
 }
 
-void ResMenu::OnItemBeginDrag(GTreeItem *Item, GMouse &m)
+void ResMenu::OnItemBeginDrag(GTreeItem *Item, LMouse &m)
 {
 	GTree::OnItemBeginDrag(Item, m);
 }
@@ -692,7 +692,7 @@ ResMenuUi::~ResMenuUi()
 
 void ResMenuUi::OnPaint(GSurface *pDC)
 {
-	GRegion Client(0, 0, X()-1, Y()-1);
+	LRegion Client(0, 0, X()-1, Y()-1);
 	for (auto w: Children)
 	{
 		LRect r = w->GetPos();
@@ -708,8 +708,8 @@ void ResMenuUi::OnPaint(GSurface *pDC)
 
 void ResMenuUi::PourAll()
 {
-	GRegion Client(GetClient());
-	GRegion Update;
+	LRegion Client(GetClient());
+	LRegion Update;
 
 	for (auto v: Children)
 	{

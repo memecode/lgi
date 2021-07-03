@@ -13,15 +13,15 @@
 
 // Fwd defs
 class GXmlTag;
-class GMouseHook;
+class LMouseHook;
 class GFont;
 class LRect;
 class LPoint;
-class GRegion;
+class LRegion;
 class GSurface;
 class GViewI;
-class GMouse;
-class GKey;
+class LMouse;
+class LKey;
 class LWindow;
 class GViewFill;
 class GView;
@@ -324,7 +324,7 @@ public:
 	) = 0;
 
 	/// Get the mouse hook instance
-	virtual GMouseHook *GetMouseHook() = 0;
+	virtual LMouseHook *GetMouseHook() = 0;
 
 	/// Returns the number of cpu cores or -1 if unknown.
 	virtual int GetCpuCount() { return -1; }
@@ -353,12 +353,12 @@ public:
 	virtual ~GEventsI() {}
 
 	// Events
-	virtual void OnMouseClick(GMouse &m) = 0;
-	virtual void OnMouseEnter(GMouse &m) = 0;
-	virtual void OnMouseExit(GMouse &m) = 0;
-	virtual void OnMouseMove(GMouse &m) = 0;
+	virtual void OnMouseClick(LMouse &m) = 0;
+	virtual void OnMouseEnter(LMouse &m) = 0;
+	virtual void OnMouseExit(LMouse &m) = 0;
+	virtual void OnMouseMove(LMouse &m) = 0;
 	virtual bool OnMouseWheel(double Lines) = 0;
-	virtual bool OnKey(GKey &k) = 0;
+	virtual bool OnKey(LKey &k) = 0;
 	virtual void OnAttach() = 0;
 	virtual void OnCreate() = 0;
 	virtual void OnDestroy() = 0;
@@ -485,7 +485,7 @@ public:
 	virtual LgiCursor GetCursor(int x, int y) = 0;
 	virtual bool Capture(bool c) = 0;
 	virtual bool IsCapturing() = 0;
-	virtual bool GetMouse(GMouse &m, bool ScreenCoords = false) = 0;
+	virtual bool GetMouse(LMouse &m, bool ScreenCoords = false) = 0;
 
 	// Helper
 	#if LGI_VIEW_HANDLE
@@ -500,7 +500,7 @@ public:
 	virtual void SetCtrlEnabled(int Id, bool Enabled) = 0;
 	virtual bool GetCtrlVisible(int Id) = 0;
 	virtual void SetCtrlVisible(int Id, bool Visible) = 0;
-	virtual bool Pour(GRegion &r) = 0;
+	virtual bool Pour(LRegion &r) = 0;
 
 	template<class T>
 	bool GetViewById(int Id, T *&Ptr)
@@ -520,17 +520,17 @@ public:
 	virtual bool WindowVirtualOffset(LPoint *Offset) = 0;	
 	virtual GViewI *WindowFromPoint(int x, int y, int DebugDepth = 0) = 0;
 	virtual LPoint &GetWindowBorderSize() = 0;
-	virtual bool IsOver(GMouse &m) = 0;
+	virtual bool IsOver(LMouse &m) = 0;
 
 	// Misc
 	virtual bool Invalidate(LRect *r = 0, bool Repaint = false, bool NonClient = false) = 0;
-	virtual bool Invalidate(GRegion *r, bool Repaint = false, bool NonClient = false) = 0;
+	virtual bool Invalidate(LRegion *r, bool Repaint = false, bool NonClient = false) = 0;
 	virtual void SetPulse(int Ms = -1) = 0;
 	virtual bool OnLayout(GViewLayoutInfo &Inf) = 0;
 
 protected:
-	virtual bool OnViewMouse(GView *v, GMouse &m) = 0;
-	virtual bool OnViewKey(GView *v, GKey &k) = 0;
+	virtual bool OnViewMouse(GView *v, LMouse &m) = 0;
+	virtual bool OnViewKey(GView *v, LKey &k) = 0;
 };
 
 class GMemoryPoolI

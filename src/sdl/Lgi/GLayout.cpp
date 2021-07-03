@@ -48,7 +48,7 @@ void GLayout::SetPourLargest(bool i)
 	_PourLargest = i;
 }
 
-bool GLayout::Pour(GRegion &r)
+bool GLayout::Pour(LRegion &r)
 {
 	if (_PourLargest)
 	{

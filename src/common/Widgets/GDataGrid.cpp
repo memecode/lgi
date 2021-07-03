@@ -58,7 +58,7 @@ public:
 		d = data;
 	}
 
-	bool OnKey(GKey &k)
+	bool OnKey(LKey &k)
 	{
 		if (!GEdit::OnKey(k) && k.Down())
 		{
@@ -137,7 +137,7 @@ public:
 		d = priv;
 	}
 	
-	bool OnKey(GKey &k)
+	bool OnKey(LKey &k)
 	{
 		if (!k.IsChar && k.Down())
 		{
@@ -418,7 +418,7 @@ void GDataGrid::OnItemSelect(GArray<LListItem*> &Items)
 	LList::OnItemSelect(Items);
 }
 
-void GDataGrid::OnItemClick(LListItem *Item, GMouse &m)
+void GDataGrid::OnItemClick(LListItem *Item, LMouse &m)
 {
 	if (m.IsContextMenu())
 	{
@@ -637,7 +637,7 @@ int GDataGrid::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 	return DROPEFFECT_NONE;
 }
 
-void GDataGrid::OnItemBeginDrag(LListItem *Item, GMouse &m)
+void GDataGrid::OnItemBeginDrag(LListItem *Item, LMouse &m)
 {
 	Drag(this, m.Event, DROPEFFECT_COPY);
 }

@@ -49,13 +49,13 @@ class ResDialogUi;
 #define DECL_DIALOG_CTRL(id)	 \
 	int GetType() { return id; } \
 	GView *View() { return this; } \
-	void OnMouseClick(GMouse &m); \
-	void OnMouseMove(GMouse &m); \
+	void OnMouseClick(LMouse &m); \
+	void OnMouseMove(LMouse &m); \
 	void OnPaint(GSurface *pDC);
 
 #define IMPL_DIALOG_CTRL(cls)	 \
-	void cls::OnMouseClick(GMouse &m) { ResDialogCtrl::OnMouseClick(m); } \
-	void cls::OnMouseMove(GMouse &m) { ResDialogCtrl::OnMouseMove(m); }
+	void cls::OnMouseClick(LMouse &m) { ResDialogCtrl::OnMouseClick(m); } \
+	void cls::OnMouseMove(LMouse &m) { ResDialogCtrl::OnMouseMove(m); }
 
 enum DlgSelectMode
 {
@@ -96,7 +96,7 @@ protected:
 	GAutoString CssClass;
 	GAutoString CssStyle;
 
-	GMouse MapToDialog(GMouse m);
+	LMouse MapToDialog(LMouse m);
 
 public:
 	ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, GXmlTag *load);
@@ -111,8 +111,8 @@ public:
 
 	bool IsContainer() { return AcceptChildren; }
 	void OnPaint(GSurface *pDC);
-	void OnMouseClick(GMouse &m);
-	void OnMouseMove(GMouse &m);
+	void OnMouseClick(LMouse &m);
+	void OnMouseMove(LMouse &m);
 	bool SetPos(LRect &p, bool Repaint = false);
 	void StrFromRef(int Id);
 	LRect AbsPos();
@@ -220,9 +220,9 @@ public:
 
 	// Methods
 	GView *CreateUI() override;
-	void OnMouseClick(GMouse &m) override;
-	void OnMouseMove(GMouse &m) override;
-	bool OnKey(GKey &k) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseMove(LMouse &m) override;
+	bool OnKey(LKey &k) override;
 	void OnSelect(ResDialogCtrl *Wnd, bool ClearPrev = true);
 	void OnDeselect(ResDialogCtrl *Wnd);
 	void OnRightClick(LSubMenu *RClick) override;

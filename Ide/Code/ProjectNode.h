@@ -78,10 +78,10 @@ public:
 	bool GetData(GArray<GDragData> &Data) override;
 	
 	// Ui events
-	bool OnBeginDrag(GMouse &m) override;
-	bool OnKey(GKey &k) override;
+	bool OnBeginDrag(LMouse &m) override;
+	bool OnKey(LKey &k) override;
 	void OnExpand(bool b) override;
-	void OnMouseClick(GMouse &m) override;
+	void OnMouseClick(LMouse &m) override;
 	void OnProperties();
 
 	// Serialization

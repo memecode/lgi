@@ -9,8 +9,8 @@
 #include <functional>
 
 // Virtual input classes
-class GKey;
-class GMouse;
+class LKey;
+class LMouse;
 
 // General GUI classes
 class GTarget;
@@ -177,7 +177,7 @@ struct GKeyWinBits
 #endif
 
 /// All the information related to a keyboard event
-class LgiClass GKey : public GUiEvent
+class LgiClass LKey : public GUiEvent
 {
 public:
 	/// The virtual code for key
@@ -198,7 +198,7 @@ public:
 	/// True if this is a standard character (ie not a control key)
 	bool IsChar;
 
-	GKey()
+	LKey()
 	{
 		vkey = 0;
 		c16 = 0;
@@ -206,11 +206,11 @@ public:
 		IsChar = 0;
 	}
 
-	GKey(int vkey, uint32_t flags);
+	LKey(int vkey, uint32_t flags);
 
 	void Trace(const char *Msg)
 	{
-		LgiTrace("%s GKey vkey=%i(0x%x) c16=%i(%c) IsChar=%i down=%i ctrl=%i alt=%i sh=%i sys=%i\n",
+		LgiTrace("%s LKey vkey=%i(0x%x) c16=%i(%c) IsChar=%i down=%i ctrl=%i alt=%i sh=%i sys=%i\n",
 			Msg ? Msg : (char*)"",
 			vkey, vkey,
 			c16, c16 >= ' ' && c16 < 127 ? c16 : '.',
@@ -251,7 +251,7 @@ public:
 /// GView::GetMouse() and pass true in the 'ScreenCoords' parameter. Or you can
 /// construct a LPoint out of the x,y fields of this class and use GView::PointToScreen()
 /// to map the point to screen co-ordinates.
-class LgiClass GMouse : public GUiEvent, public LPoint
+class LgiClass LMouse : public GUiEvent, public LPoint
 {
 public:
 	/// Receiving view
@@ -259,23 +259,23 @@ public:
 	/// True if specified in view coordinates, false if in screen coords
 	bool ViewCoords;
 
-	GMouse(GViewI *target = NULL)
+	LMouse(GViewI *target = NULL)
 	{
 		Target = target;
 		ViewCoords = true;
 	}
 
-	GMouse operator -(LPoint p)
+	LMouse operator -(LPoint p)
 	{
-		GMouse m = *this;
+		LMouse m = *this;
 		m.x -= p.x;
 		m.y -= p.y;
 		return m;
 	}
 
-	GMouse operator +(LPoint p)
+	LMouse operator +(LPoint p)
 	{
-		GMouse m = *this;
+		LMouse m = *this;
 		m.x += p.x;
 		m.y += p.y;
 		return m;
@@ -283,7 +283,7 @@ public:
 
 	void Trace(const char *Msg)
 	{
-		LgiTrace("%s GMouse pos=%i,%i view=%i btns=%i/%i/%i dwn=%i dbl=%i "
+		LgiTrace("%s LMouse pos=%i,%i view=%i btns=%i/%i/%i dwn=%i dbl=%i "
 				"ctrl=%i alt=%i sh=%i sys=%i\n",
 			Msg ? Msg : (char*)"", x, y, ViewCoords,
 			Left(), Middle(), Right(),

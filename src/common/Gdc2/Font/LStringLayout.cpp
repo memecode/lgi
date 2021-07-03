@@ -551,7 +551,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 		return;
 
 	#ifdef WINNATIVE
-	GRegion Rgn(rc);
+	LRegion Rgn(rc);
 	#else
 	// Fill the background...
 	if (!Back.IsTransparent())

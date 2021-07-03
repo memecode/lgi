@@ -44,7 +44,7 @@ public:
 	
 	void SetDiff(GString d);
 	void Select(bool b);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 };
 
 #endif

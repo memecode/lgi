@@ -32,7 +32,7 @@ public:
 
 	// Impl
 	void OnItemSelect(GArray<LListItem*> &Items);
-	void OnItemClick(LListItem *Item, GMouse &m);
+	void OnItemClick(LListItem *Item, LMouse &m);
 	void OnCreate();
 	GMessage::Result OnEvent(GMessage *Msg);
 	int OnNotify(GViewI *c, int f);
@@ -44,7 +44,7 @@ public:
 	
 	// D'n'd
 	void SetDndFormats(char *SrcFmt, char *AcceptFmt);
-	void OnItemBeginDrag(LListItem *Item, GMouse &m);
+	void OnItemBeginDrag(LListItem *Item, LMouse &m);
 	bool GetData(GArray<GDragData> &Data);
 	bool GetFormats(GDragFormats &Formats);
 	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState);

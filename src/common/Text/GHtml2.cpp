@@ -1955,7 +1955,7 @@ GTag *GTag::IsAnchor(GAutoString *Uri)
 	return a;
 }
 
-bool GTag::OnMouseClick(GMouse &m)
+bool GTag::OnMouseClick(LMouse &m)
 {
 	bool Processed = false;
 
@@ -5180,7 +5180,7 @@ LRect GArea::Bounds()
 	return LRect(0, 0, -1, -1);
 }
 
-LRect *GArea::TopRect(GRegion *c)
+LRect *GArea::TopRect(LRegion *c)
 {
 	LRect *Top = 0;
 	
@@ -6182,7 +6182,7 @@ void GTag::OnPaint(GSurface *pDC)
 				        Size.y-(int)BorderBottom().Value-1); 
 
 				#if 1
-				GRegion c(r);
+				LRegion c(r);
 				
 				if (Cells)
 				{
@@ -7405,7 +7405,7 @@ bool GHtml2::OnFind(class GFindReplaceCommon *Params)
 	return Status;
 }
 
-bool GHtml2::OnKey(GKey &k)
+bool GHtml2::OnKey(LKey &k)
 {
 	bool Status = false;
 	
@@ -7500,7 +7500,7 @@ int GHtml2::ScrollY()
 	return GetFont()->GetHeight() * (VScroll ? VScroll->Value() : 0);
 }
 
-void GHtml2::OnMouseClick(GMouse &m)
+void GHtml2::OnMouseClick(LMouse &m)
 {
 	Capture(m.Down());
 	SetPulse(m.Down() ? 200 : -1);
@@ -7877,7 +7877,7 @@ LgiCursor GHtml2::GetCursor(int x, int y)
 	return LCUR_Normal;
 }
 
-void GHtml2::OnMouseMove(GMouse &m)
+void GHtml2::OnMouseMove(LMouse &m)
 {
 	int Offset = ScrollY();
 	int Index = -1;
@@ -7983,7 +7983,7 @@ void GHtml2::OnPulse()
 	if (VScroll && IsCapturing())
 	{
 		int Fy = DefFont() ? DefFont()->GetHeight() : 16;
-		GMouse m;
+		LMouse m;
 		if (GetMouse(m, false))
 		{
 			LRect c = GetClient();

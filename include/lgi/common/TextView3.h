@@ -132,7 +132,7 @@ public:
 		/*
 		virtual ~GStyle() {}
 
-		virtual bool OnMouseClick(GMouse *m) { return false; }
+		virtual bool OnMouseClick(LMouse *m) { return false; }
 		virtual bool OnMenu(LSubMenu *m) { return false; }
 		virtual void OnMenuClick(int i) {}
 		virtual CURSOR_CHAR GetCursor()  { return 0; }
@@ -414,14 +414,14 @@ public:
 	void OnSetHidden(int Hidden);
 	void OnPosChange() override;
 	void OnCreate() override;
-	void OnEscape(GKey &K) override;
+	void OnEscape(LKey &K) override;
 	bool OnMouseWheel(double Lines) override;
 
 	// Window Events
 	void OnFocus(bool f) override;
-	void OnMouseClick(GMouse &m) override;
-	void OnMouseMove(GMouse &m) override;
-	bool OnKey(GKey &k) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseMove(LMouse &m) override;
+	bool OnKey(LKey &k) override;
 	void OnPaint(GSurface *pDC) override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	int OnNotify(GViewI *Ctrl, int Flags) override;
@@ -435,10 +435,10 @@ public:
 	// Virtuals
 	virtual bool Insert(size_t At, const char16 *Data, ssize_t Len);
 	virtual bool Delete(size_t At, ssize_t Len);
-	virtual void OnEnter(GKey &k) override;
+	virtual void OnEnter(LKey &k) override;
 	virtual void OnUrl(char *Url) override;
-	virtual void DoContextMenu(GMouse &m);
-	virtual bool OnStyleClick(GStyle *style, GMouse *m);
+	virtual void DoContextMenu(LMouse &m);
+	virtual bool OnStyleClick(GStyle *style, LMouse *m);
 	virtual bool OnStyleMenu(GStyle *style, LSubMenu *m);
 	virtual void OnStyleMenuClick(GStyle *style, int i);
 };

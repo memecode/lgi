@@ -53,7 +53,7 @@ public:
 	int			Id;
 	GToolButton	*ToolButton;
 	LMenuItem	*MenuItem;
-	GKey		*Accelerator;
+	LKey		*Accelerator;
 	char		*TipHelp;
 	
 	GCommand();

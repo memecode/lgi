@@ -455,38 +455,38 @@ LgiFunc void LgiSleep(uint32 i);
 #define MB_SYSTEMMODAL				0x1000
 
 /// The CTRL key is pressed
-/// \sa GKey
+/// \sa LKey
 #define LGI_VKEY_CTRL				0x001
 /// The ALT key is pressed
-/// \sa GKey
+/// \sa LKey
 #define LGI_VKEY_ALT				0x002
 /// The SHIFT key is pressed
-/// \sa GKey
+/// \sa LKey
 #define LGI_VKEY_SHIFT				0x004
 
 /// The left mouse button is pressed
-/// \sa GMouse
+/// \sa LMouse
 #define LGI_VMOUSE_LEFT				0x008
 /// The middle mouse button is pressed
-/// \sa GMouse
+/// \sa LMouse
 #define LGI_VMOUSE_MIDDLE			0x010
 /// The right mouse button is pressed
-/// \sa GMouse
+/// \sa LMouse
 #define LGI_VMOUSE_RIGHT			0x020
 /// The ctrl key is pressed
-/// \sa GMouse
+/// \sa LMouse
 #define LGI_VMOUSE_CTRL				0x040
 /// The alt key is pressed
-/// \sa GMouse
+/// \sa LMouse
 #define LGI_VMOUSE_ALT				0x080
 /// The shift key is pressed
-/// \sa GMouse
+/// \sa LMouse
 #define LGI_VMOUSE_SHIFT			0x100
 /// The mouse event is a down click
-/// \sa GMouse
+/// \sa LMouse
 #define LGI_VMOUSE_DOWN				0x200
 /// The mouse event is a double click
-/// \sa GMouse
+/// \sa LMouse
 #define LGI_VMOUSE_DOUBLE			0x400
 
 // Keys

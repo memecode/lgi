@@ -32,7 +32,7 @@ public:
 
     // Impl
 	void OnPaint(GSurface *pDC);
-	void OnMouseClick(GMouse &m);	
+	void OnMouseClick(LMouse &m);	
 };
 
 #endif

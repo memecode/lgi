@@ -127,11 +127,11 @@ public:
 
 	// Impl
 	void OnPaint(GSurface *pDC);
-	void OnMouseClick(GMouse &m);
-	void OnMouseMove(GMouse &m);
+	void OnMouseClick(LMouse &m);
+	void OnMouseMove(LMouse &m);
 	LgiCursor GetCursor(int x, int y);
 	bool OnMouseWheel(double Lines);
-	bool OnKey(GKey &k);
+	bool OnKey(LKey &k);
 	int OnNotify(GViewI *c, int f);
 	void OnPosChange();
 	void OnPulse();

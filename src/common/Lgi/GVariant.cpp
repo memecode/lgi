@@ -451,7 +451,7 @@ GVariant &GVariant::operator =(GView *p)
 	return *this;
 }
 
-GVariant &GVariant::operator =(GMouse *p)
+GVariant &GVariant::operator =(LMouse *p)
 {
 	Empty();
 	if (p)
@@ -464,7 +464,7 @@ GVariant &GVariant::operator =(GMouse *p)
 	return *this;
 }
 
-GVariant &GVariant::operator =(GKey *p)
+GVariant &GVariant::operator =(LKey *p)
 {
 	Empty();
 	if (p)
@@ -985,9 +985,9 @@ int64 GVariant::Length()
 		case GV_GVIEW:
 			return sizeof(GView);
 		case GV_GMOUSE:
-			return sizeof(GMouse);
+			return sizeof(LMouse);
 		case GV_GKEY:
-			return sizeof(GKey);
+			return sizeof(LKey);
 		case GV_STREAM:
 			return Value.Stream.Ptr->GetSize();
 		default: break;
@@ -2043,9 +2043,9 @@ ssize_t GCustomType::CustomField::Sizeof()
 		case GV_OPERATOR:
 			return sizeof(GOperator);
 		case GV_GMOUSE:
-			return sizeof(GMouse);
+			return sizeof(LMouse);
 		case GV_GKEY:
-			return sizeof(GKey);
+			return sizeof(LKey);
 		case GV_CUSTOM:
 			return Nested->Sizeof();
 		default:

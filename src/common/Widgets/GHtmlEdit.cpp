@@ -240,7 +240,7 @@ public:
 		pDC->Blt(0, 0, &Mem);
 	}
 
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		if (m.Left())
 		{
@@ -258,7 +258,7 @@ public:
 		}
 	}
 
-	void OnMouseMove(GMouse &m)
+	void OnMouseMove(LMouse &m)
 	{
 		if (!Toggle && IsCapturing())
 		{
@@ -1470,7 +1470,7 @@ public:
 		return true;
 	}
 
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		Edit->SetIgnorePulse(true);
 		SetCursorVis(true);
@@ -2037,7 +2037,7 @@ public:
 		return false;
 	}
 
-	bool OnKey(GKey &k)
+	bool OnKey(LKey &k)
 	{
 		if (k.IsChar)
 		{

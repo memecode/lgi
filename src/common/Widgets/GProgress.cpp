@@ -33,7 +33,7 @@ GColour GProgress::Colour()
 	return c;
 }
 
-bool GProgress::Pour(GRegion &r)
+bool GProgress::Pour(LRegion &r)
 {
 	LRect *l = FindLargest(r);
 	if (l)

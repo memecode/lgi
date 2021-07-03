@@ -208,7 +208,7 @@ void GCheckBox::SetFont(GFont *Fnt, bool OwnIt)
 	Invalidate();
 }
 
-void GCheckBox::OnMouseClick(GMouse &m)
+void GCheckBox::OnMouseClick(LMouse &m)
 {
 	if (Enabled())
 	{
@@ -249,7 +249,7 @@ void GCheckBox::OnMouseClick(GMouse &m)
 	}
 }
 
-void GCheckBox::OnMouseEnter(GMouse &m)
+void GCheckBox::OnMouseEnter(LMouse &m)
 {
 	if (IsCapturing())
 	{
@@ -258,7 +258,7 @@ void GCheckBox::OnMouseEnter(GMouse &m)
 	}
 }
 
-void GCheckBox::OnMouseExit(GMouse &m)
+void GCheckBox::OnMouseExit(LMouse &m)
 {
 	if (IsCapturing())
 	{
@@ -267,7 +267,7 @@ void GCheckBox::OnMouseExit(GMouse &m)
 	}
 }
 
-bool GCheckBox::OnKey(GKey &k)
+bool GCheckBox::OnKey(LKey &k)
 {
 	switch (k.vkey)
 	{

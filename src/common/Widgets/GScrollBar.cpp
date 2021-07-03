@@ -566,7 +566,7 @@ void GScrollBar::OnPosChange()
 	d->CalcRegions();
 }
 
-void GScrollBar::OnMouseClick(GMouse &m)
+void GScrollBar::OnMouseClick(LMouse &m)
 {
 	if (d->Max >= d->Min)
 	{
@@ -600,7 +600,7 @@ void GScrollBar::OnMouseClick(GMouse &m)
 	}
 }
 
-void GScrollBar::OnMouseMove(GMouse &m)
+void GScrollBar::OnMouseMove(LMouse &m)
 {
 	if (IsCapturing())
 	{
@@ -630,7 +630,7 @@ void GScrollBar::OnMouseMove(GMouse &m)
 	}
 }
 
-bool GScrollBar::OnKey(GKey &k)
+bool GScrollBar::OnKey(LKey &k)
 {
 	return false;
 }
@@ -726,7 +726,7 @@ void GScrollBar::OnPulse()
 	}
 	else
 	{
-		GMouse m;
+		LMouse m;
 		if (GetMouse(m))
 		{
 			int Hit = d->OnHit(m.x, m.y);

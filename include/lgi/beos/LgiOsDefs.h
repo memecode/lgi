@@ -233,12 +233,12 @@ typedef int OsSocket;
 #define VK_INSERT				B_INSERT
 #define VK_TAB					B_TAB
 
-// GKey flags
+// LKey flags
 #define LGI_VKEY_CTRL			B_CONTROL_KEY	// 0x0004
 #define LGI_VKEY_ALT			B_OPTION_KEY	// 0x0040
 #define LGI_VKEY_SHIFT			B_SHIFT_KEY		// 0x0001
 
-// GMouse flags
+// LMouse flags
 #define LGI_VMOUSE_LEFT			B_PRIMARY_MOUSE_BUTTON		// 0x0001
 #define LGI_VMOUSE_MIDDLE		B_TERTIARY_MOUSE_BUTTON		// 0x0004
 #define LGI_VMOUSE_RIGHT		B_SECONDARY_MOUSE_BUTTON	// 0x0002

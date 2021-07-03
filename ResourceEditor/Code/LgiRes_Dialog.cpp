@@ -645,11 +645,11 @@ void ResDialogCtrl::OnPaint(GSurface *pDC)
 	}
 }
 
-GMouse ResDialogCtrl::MapToDialog(GMouse m)
+LMouse ResDialogCtrl::MapToDialog(LMouse m)
 {
 	// Convert co-ords from out own local space to be relative to 'Dlg'
 	// the parent dialog.
-	GMouse Ms = m;
+	LMouse Ms = m;
 	GViewI *Parent;
 	for (GViewI *i = View(); i && i != (GViewI*)Dlg; i = Parent)
 	{
@@ -668,7 +668,7 @@ GMouse ResDialogCtrl::MapToDialog(GMouse m)
 	return Ms;
 }
 
-void ResDialogCtrl::OnMouseClick(GMouse &m)
+void ResDialogCtrl::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -695,7 +695,7 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 
 				// Convert co-ords from out own local space to be relative to 'Dlg'
 				// the parent dialog.
-				GMouse Ms = MapToDialog(m);
+				LMouse Ms = MapToDialog(m);
 				#if DEBUG_OVERLAY
 				if (DebugOverlay)
 				{
@@ -892,7 +892,7 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 	}
 }
 
-void ResDialogCtrl::OnMouseMove(GMouse &m)
+void ResDialogCtrl::OnMouseMove(LMouse &m)
 {
 	// Drag a rubber band...
 	if (DragCtrl >= 0)
@@ -915,7 +915,7 @@ void ResDialogCtrl::OnMouseMove(GMouse &m)
 
 	if (Dlg)
 	{
-		GMouse Ms = MapToDialog(m);
+		LMouse Ms = MapToDialog(m);
 		Dlg->OnMouseMove(Ms);
 	}
 	
@@ -1445,7 +1445,7 @@ CtrlTabs::~CtrlTabs()
 	Empty();
 }
 
-void CtrlTabs::OnMouseMove(GMouse &m)
+void CtrlTabs::OnMouseMove(LMouse &m)
 {
 	ResDialogCtrl::OnMouseMove(m);
 }
@@ -1635,7 +1635,7 @@ void CtrlTabs::FromTab()
 	}
 }
 
-void CtrlTabs::OnMouseClick(GMouse &m)
+void CtrlTabs::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -1832,7 +1832,7 @@ void CtrlList::Empty()
 	Cols.Empty();
 }
 
-void CtrlList::OnMouseClick(GMouse &m)
+void CtrlList::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -1979,7 +1979,7 @@ void CtrlList::OnMouseClick(GMouse &m)
 	ResDialogCtrl::OnMouseClick(m);
 }
 
-void CtrlList::OnMouseMove(GMouse &m)
+void CtrlList::OnMouseMove(LMouse &m)
 {
 	if (DragCol >= 0)
 	{
@@ -3156,7 +3156,7 @@ void ResDialog::MoveSelection(int Dx, int Dy)
 		Dy = ParentClient.y1 - All.y1;
 
 	// move the ctrls
-	GRegion Update;
+	LRegion Update;
 	for (auto w: Selection)
 	{
 		LRect Old = w->View()->GetPos();
@@ -3570,7 +3570,7 @@ void ResDialog::OnLanguageChange()
 	}
 }
 
-bool ResDialog::OnKey(GKey &k)
+bool ResDialog::OnKey(LKey &k)
 {
 	if (k.Ctrl())
 	{
@@ -3620,7 +3620,7 @@ bool ResDialog::OnKey(GKey &k)
 	return false;
 }
 
-void ResDialog::OnMouseClick(GMouse &m)
+void ResDialog::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{	
@@ -3706,7 +3706,7 @@ void ResDialog::OnMouseClick(GMouse &m)
 	}
 }
 
-void ResDialog::OnMouseMove(GMouse &m)
+void ResDialog::OnMouseMove(LMouse &m)
 {
 	// This code hilights the goober when the mouse is over it.
 	for (auto c: Selection)
@@ -3745,7 +3745,7 @@ void ResDialog::OnMouseMove(GMouse &m)
 		// If that means the dragging control changes then
 		if (New != Old)
 		{
-			GRegion Update;
+			LRegion Update;
 
 			// change everyone else by the same amount
 			for (auto c: Selection)
@@ -4208,7 +4208,7 @@ ResDialogUi::~ResDialogUi()
 
 void ResDialogUi::OnPaint(GSurface *pDC)
 {
-	GRegion Client(0, 0, X()-1, Y()-1);
+	LRegion Client(0, 0, X()-1, Y()-1);
 	for (auto w: Children)
 	{
 		LRect r = w->GetPos();
@@ -4224,8 +4224,8 @@ void ResDialogUi::OnPaint(GSurface *pDC)
 
 void ResDialogUi::PourAll()
 {
-	GRegion Client(GetClient());
-	GRegion Update;
+	LRegion Client(GetClient());
+	LRegion Update;
 
 	for (auto v: Children)
 	{

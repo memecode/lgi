@@ -1184,7 +1184,7 @@ void GRichTextEdit::OnCreate()
 		d->SpellCheck->EnumLanguages(AddDispatch());
 }
 
-void GRichTextEdit::OnEscape(GKey &K)
+void GRichTextEdit::OnEscape(LKey &K)
 {
 }
 
@@ -1245,7 +1245,7 @@ public:
 };
 #endif
 
-void GRichTextEdit::DoContextMenu(GMouse &m)
+void GRichTextEdit::DoContextMenu(LMouse &m)
 {
 	LMenuItem *i;
 	LSubMenu RClick;
@@ -1427,7 +1427,7 @@ void GRichTextEdit::DoContextMenu(GMouse &m)
 	}
 }
 
-void GRichTextEdit::OnMouseClick(GMouse &m)
+void GRichTextEdit::OnMouseClick(LMouse &m)
 {
 	bool Processed = false;
 	RectType Clicked = 	d->PosToButton(m);
@@ -1510,7 +1510,7 @@ int GRichTextEdit::OnHitTest(int x, int y)
 	return GView::OnHitTest(x, y);
 }
 
-void GRichTextEdit::OnMouseMove(GMouse &m)
+void GRichTextEdit::OnMouseMove(LMouse &m)
 {
 	GRichTextEdit::RectType OverBtn = d->PosToButton(m);
 	if (d->OverBtn != OverBtn)
@@ -1590,7 +1590,7 @@ void GRichTextEdit::OnMouseMove(GMouse &m)
 	#endif
 }
 
-bool GRichTextEdit::OnKey(GKey &k)
+bool GRichTextEdit::OnKey(LKey &k)
 {
 	if (k.Down() &&
 		d->Cursor)
@@ -1624,7 +1624,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 	// k.Trace("GRichTextEdit::OnKey");
 	if (k.IsContextMenu())
 	{
-		GMouse m;
+		LMouse m;
 		DoContextMenu(m);
 	}
 	else if (k.IsChar)
@@ -2197,7 +2197,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 							if (k.Down())
 							{
 								// Bold selection
-								GMouse m;
+								LMouse m;
 								GetMouse(m);
 								d->ClickBtn(m, BoldBtn);
 							}
@@ -2210,7 +2210,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 							if (k.Down())
 							{
 								// Underline selection
-								GMouse m;
+								LMouse m;
 								GetMouse(m);
 								d->ClickBtn(m, UnderlineBtn);
 							}
@@ -2223,7 +2223,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 							if (k.Down())
 							{
 								// Italic selection
-								GMouse m;
+								LMouse m;
 								GetMouse(m);
 								d->ClickBtn(m, ItalicBtn);
 							}
@@ -2362,7 +2362,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 	return false;
 }
 
-void GRichTextEdit::OnEnter(GKey &k)
+void GRichTextEdit::OnEnter(LKey &k)
 {
 	AutoTrans Trans(new GRichTextPriv::Transaction);						
 
@@ -2678,7 +2678,7 @@ void GRichTextEdit::OnPulse()
 		// Do autoscroll while the user has clicked and dragged off the control:
 		if (VScroll && IsCapturing() && d->ClickedBtn == GRichTextEdit::ContentArea)
 		{
-			GMouse m;
+			LMouse m;
 			GetMouse(m);
 			
 			// Is the mouse outside the content window
@@ -2809,7 +2809,7 @@ void SelectColour::OnPaint(GSurface *pDC)
 	}
 }
 
-void SelectColour::OnMouseClick(GMouse &m)
+void SelectColour::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -2992,7 +2992,7 @@ bool EmojiMenu::InsertEmoji(uint32_t Ch)
 	return true;
 }
 
-void EmojiMenu::OnMouseClick(GMouse &m)
+void EmojiMenu::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{

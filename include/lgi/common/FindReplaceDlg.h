@@ -6,7 +6,7 @@
 /// Common find/replace window parameters
 class LgiClass GFindReplaceCommon : public LDialog
 {
-	// bool OnViewKey(GView *v, GKey &k);
+	// bool OnViewKey(GView *v, LKey &k);
 
 public:
 	/// The string to find

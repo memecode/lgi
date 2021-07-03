@@ -59,11 +59,11 @@ public:
 	/// Called when the item is selected
 	virtual void OnSelect() {}
 	/// Called when the item is clicked
-	virtual void OnMouseClick(GMouse &m) {}
+	virtual void OnMouseClick(LMouse &m) {}
 	/// Called when the item needs painting
 	virtual void OnPaint(ItemPaintCtx &Ctx) = 0;
 	/// Called when the item is dragged
-	virtual bool OnBeginDrag(GMouse &m) { return false; }
+	virtual bool OnBeginDrag(LMouse &m) { return false; }
 	/// Called when the owning container needs to know the size of the item
 	virtual void OnMeasure(LPoint *Info) {}
 	/// Called when the item is inserted into a new container
@@ -108,11 +108,11 @@ public:
 
 	bool OnScriptEvent(GViewI *Ctrl) { return false; }
 	GMessage::Result OnEvent(GMessage *Msg) { return 0; }
-	void OnMouseEnter(GMouse &m) {}
-	void OnMouseExit(GMouse &m) {}
-	void OnMouseMove(GMouse &m) {}
+	void OnMouseEnter(LMouse &m) {}
+	void OnMouseExit(LMouse &m) {}
+	void OnMouseMove(LMouse &m) {}
 	bool OnMouseWheel(double Lines) { return false; }
-	bool OnKey(GKey &k) { return false; }
+	bool OnKey(LKey &k) { return false; }
 	void OnAttach() {}
 	void OnCreate() {}
 	void OnDestroy() {}
@@ -149,7 +149,7 @@ public:
 	void Visible(bool i);
 	GMessage::Result OnEvent(GMessage *Msg);
 
-	bool OnKey(GKey &k);
+	bool OnKey(LKey &k);
 	void OnFocus(bool f);
 };
 
@@ -284,7 +284,7 @@ protected:
 	bool ColumnHeaders;
 	LRect ColumnHeader;
 	int ColClick;
-	GMouse ColMouse;
+	LMouse ColMouse;
 	GItemEdit *ItemEdit;
 
 	GArray<GItemColumn*> Columns;
@@ -365,7 +365,7 @@ public:
 	void DragColumn(int Index);
 	
 	/// Returns the last column click info
-	bool GetColumnClickInfo(int &Col, GMouse &m);
+	bool GetColumnClickInfo(int &Col, LMouse &m);
 
 	int HitColumn(int x, int y, GItemColumn *&Resize, GItemColumn *&Over);
 
@@ -375,7 +375,7 @@ public:
 		/// The index of the column
 		int Col,
 		/// The mouse parameters at the time
-		GMouse &m
+		LMouse &m
 	);
 
 	virtual void UpdateAllItems() = 0;

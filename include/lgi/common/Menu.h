@@ -90,7 +90,7 @@ class LgiClass LSubMenu :
 	friend class GMouseHookPrivate;
 
 	// This is not called in the GUI thread
-	static void SysMouseClick(GMouse &m);
+	static void SysMouseClick(LMouse &m);
 
 	#if !WINNATIVE && !defined(__GTK_H__)
 		OsSubMenu Info;
@@ -103,7 +103,7 @@ class LgiClass LSubMenu :
 	#if defined(__GTK_H__)
 		GlibWrapper<Gtk::GtkMenuShell> Info;
 		friend void GtkDeactivate(Gtk::GtkMenuShell *widget, LSubMenu *Sub);
-		friend Gtk::gboolean LSubMenuClick(GMouse *m);
+		friend Gtk::gboolean LSubMenuClick(LMouse *m);
 		friend void SubMenuDestroy(LSubMenu *Item);
 
 		int *_ContextMenuId;
@@ -114,7 +114,7 @@ class LgiClass LSubMenu :
 	#elif defined(WINNATIVE)
 		HWND TrackHandle;
 	#else
-		bool OnKey(GKey &k);
+		bool OnKey(LKey &k);
 	#endif
 
 protected:
@@ -269,7 +269,7 @@ public:
 		int Button = BtnRight
 	);
 
-	int Float(GView *Parent, GMouse m)
+	int Float(GView *Parent, LMouse m)
 	{
 		int Btn = 0;
 		if (m.Left())
@@ -425,7 +425,7 @@ public:
 	int GetId() { return Id; }
 
 	/// See if the accelerator matchs a keyboard event
-	bool Match(GKey &k);
+	bool Match(LKey &k);
 };
 
 /** \brief Top level window menu
@@ -533,7 +533,7 @@ public:
 		/// The view that will eventually receive the key event
 		GView *v,
 		/// The keyboard event details
-		GKey &k
+		LKey &k
 	);
 
 	/// This creates copies of the preference and about menu items in the

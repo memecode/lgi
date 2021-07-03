@@ -81,7 +81,7 @@ GApp::GApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : B
 
 	srand(system_time());
 	LgiInitColours();
-	// MouseHook = new GMouseHook;
+	// MouseHook = new LMouseHook;
 	MouseHook = 0;
 	AppWnd = 0;
 	SetAppArgs(OsArgs);
@@ -487,8 +487,8 @@ GAutoString GApp::GetFileMimeType(const char *File)
 	return GAutoString();
 }
 
-GMouseHook *GApp::MouseHook = 0;
-GMouseHook *GApp::GetMouseHook()
+LMouseHook *GApp::MouseHook = 0;
+LMouseHook *GApp::GetMouseHook()
 {
 	return MouseHook;
 }

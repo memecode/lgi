@@ -294,8 +294,8 @@ class CmpZoomView : public GZoomView
 	
 public:
 	CmpZoomView(GZoomViewCallback *callback, CompareView *view);
-	void OnMouseClick(GMouse &m);
-	void OnMouseMove(GMouse &m);
+	void OnMouseClick(LMouse &m);
+	void OnMouseMove(LMouse &m);
 };
 
 class CompareView : public GLayout
@@ -426,7 +426,7 @@ public:
 			AView && BView && CView)
 		{
 			LRect c = GetClient();
-			GRegion rgn;
+			LRegion rgn;
 			rgn = c;
 			if (Status)
 			{
@@ -652,7 +652,7 @@ public:
 
 	*/
 	
-	void UserMouseClick(GMouse &m)
+	void UserMouseClick(LMouse &m)
 	{
 		GZoomView *zv = dynamic_cast<GZoomView*>(m.Target);
 		if (!zv)
@@ -672,7 +672,7 @@ public:
 		}
 	}
 	
-	void UserMouseMove(GMouse &m)
+	void UserMouseMove(LMouse &m)
 	{
 		if (DraggingView)
 		{
@@ -758,14 +758,14 @@ CmpZoomView::CmpZoomView(GZoomViewCallback *callback, CompareView *view) : GZoom
 	View = view;
 }
 
-void CmpZoomView::OnMouseClick(GMouse &m)
+void CmpZoomView::OnMouseClick(LMouse &m)
 {
 	LgiAssert(m.Target == this);
 	GZoomView::OnMouseClick(m);
 	View->UserMouseClick(m);
 }
 
-void CmpZoomView::OnMouseMove(GMouse &m)
+void CmpZoomView::OnMouseMove(LMouse &m)
 {
 	LgiAssert(m.Target == this);
 	GZoomView::OnMouseMove(m);

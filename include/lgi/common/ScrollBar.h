@@ -70,9 +70,9 @@ public:
 	bool Attach(GViewI *p);
 	void OnPaint(GSurface *pDC);
 	void OnPosChange();
-	void OnMouseClick(GMouse &m);
-	void OnMouseMove(GMouse &m);
-	bool OnKey(GKey &k);
+	void OnMouseClick(LMouse &m);
+	void OnMouseMove(LMouse &m);
+	bool OnKey(LKey &k);
 	bool OnMouseWheel(double Lines);
 	void OnPulse();
 	#endif

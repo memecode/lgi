@@ -196,7 +196,7 @@ public:
 	void OnSetHidden(int Hidden);
 	void OnPosChange();
 	void OnCreate();
-	void OnEscape(GKey &K);
+	void OnEscape(LKey &K);
 	bool OnMouseWheel(double Lines);
 
 	// Capability target stuff
@@ -206,9 +206,9 @@ public:
 
 	// Window Events
 	void OnFocus(bool f);
-	void OnMouseClick(GMouse &m);
-	void OnMouseMove(GMouse &m);
-	bool OnKey(GKey &k);
+	void OnMouseClick(LMouse &m);
+	void OnMouseMove(LMouse &m);
+	bool OnKey(LKey &k);
 	void OnPaint(GSurface *pDC);
 	GMessage::Result OnEvent(GMessage *Msg);
 	int OnNotify(GViewI *Ctrl, int Flags);
@@ -223,9 +223,9 @@ public:
 	// Virtuals
 	virtual bool Insert(int At, char16 *Data, int Len);
 	virtual bool Delete(int At, int Len);
-	virtual void OnEnter(GKey &k);
+	virtual void OnEnter(LKey &k);
 	virtual void OnUrl(char *Url);
-	virtual void DoContextMenu(GMouse &m);
+	virtual void DoContextMenu(LMouse &m);
 
 	#if _DEBUG
 	void DumpNodes(GTree *Root);

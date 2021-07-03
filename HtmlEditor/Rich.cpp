@@ -90,7 +90,7 @@ public:
 		Install = new GButton(IDC_INSTALL, 0, 0, -1, -1, "Install");
 	}
 
-	bool Pour(GRegion &r)
+	bool Pour(LRegion &r)
 	{
 		LRect *rc = FindLargestEdge(r, GV_EDGE_TOP);
 		if (!rc)
@@ -264,7 +264,7 @@ public:
 		Cm = cm;
 	}
 
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		if (m.Left() && m.Double())
 		{

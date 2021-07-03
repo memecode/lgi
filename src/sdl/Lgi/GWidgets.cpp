@@ -282,7 +282,7 @@ void GSlider::OnPaint(GSurface *pDC)
 	}
 }
 
-void GSlider::OnMouseClick(GMouse &m)
+void GSlider::OnMouseClick(LMouse &m)
 {
 	Capture(m.Down());
 	if (Thumb.Overlap(m.x, m.y))
@@ -292,7 +292,7 @@ void GSlider::OnMouseClick(GMouse &m)
 	}
 }
 
-void GSlider::OnMouseMove(GMouse &m)
+void GSlider::OnMouseMove(LMouse &m)
 {
 	if (IsCapturing())
 	{
@@ -473,7 +473,7 @@ void GBitmap::OnPaint(GSurface *pScreen)
 	}
 }
 
-void GBitmap::OnMouseClick(GMouse &m)
+void GBitmap::OnMouseClick(LMouse &m)
 {
 	if (!m.Down() && GetParent())
 	{

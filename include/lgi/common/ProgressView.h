@@ -32,7 +32,7 @@ public:
 	int64 Value() override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	bool OnLayout(GViewLayoutInfo &Inf) override;
-	bool Pour(GRegion &r) override;
+	bool Pour(LRegion &r) override;
 	bool Colour(GColour Col);
 	GColour Colour();
 

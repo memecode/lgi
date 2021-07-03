@@ -179,7 +179,7 @@ void GBitmap::OnPaint(GSurface *pScreen)
 	}
 }
 
-void GBitmap::OnMouseClick(GMouse &m)
+void GBitmap::OnMouseClick(LMouse &m)
 {
 	if (!m.Down() && GetParent())
 	{

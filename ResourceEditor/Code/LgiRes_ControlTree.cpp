@@ -95,7 +95,7 @@ public:
 		}
 	}
 
-	bool OnKey(GKey &k)
+	bool OnKey(LKey &k)
 	{
 		switch (k.vkey)
 		{
@@ -124,7 +124,7 @@ public:
 		return false;
 	}
 
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		if (m.IsContextMenu())
 		{
@@ -223,7 +223,7 @@ CtrlControlTree::~CtrlControlTree()
 	delete d;
 }
 
-void CtrlControlTree::OnMouseClick(GMouse &m)
+void CtrlControlTree::OnMouseClick(LMouse &m)
 {
 	GTree::OnMouseClick(m);
 
@@ -234,7 +234,7 @@ void CtrlControlTree::OnMouseClick(GMouse &m)
 	else d->DiscardClick = false;
 }
 
-void CtrlControlTree::OnMouseMove(GMouse &m)
+void CtrlControlTree::OnMouseMove(LMouse &m)
 {
 	GTree::OnMouseMove(m);
 	ResDialogCtrl::OnMouseMove(m);

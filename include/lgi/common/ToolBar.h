@@ -82,10 +82,10 @@ public:
 
 	void OnPaint(GSurface *pDC) override;
 
-	void OnMouseClick(GMouse &m) override;
-	void OnMouseMove(GMouse &m) override;
-	void OnMouseEnter(GMouse &m) override;
-	void OnMouseExit(GMouse &m) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseMove(LMouse &m) override;
+	void OnMouseEnter(LMouse &m) override;
+	void OnMouseExit(LMouse &m) override;
 
 	virtual void SendCommand();
 	virtual bool GetDimension(int &x, int &y) { return false; }
@@ -126,7 +126,7 @@ protected:
 	int GetBy();
 
 	// Overridable
-	virtual void ContextMenu(GMouse &m);	
+	virtual void ContextMenu(LMouse &m);	
 	virtual int PostDescription(GView *Ctrl, const char *Text);
 	
 	#if defined(LGI_CARBON)
@@ -205,11 +205,11 @@ public:
 	// Events
 	GMessage::Result OnEvent(GMessage *Msg);
 	void OnPaint(GSurface *pDC);
-	void OnMouseClick(GMouse &m);
-	void OnMouseEnter(GMouse &m);
-	void OnMouseExit(GMouse &m);
-	void OnMouseMove(GMouse &m);
-	bool Pour(GRegion &r);
+	void OnMouseClick(LMouse &m);
+	void OnMouseEnter(LMouse &m);
+	void OnMouseExit(LMouse &m);
+	void OnMouseMove(LMouse &m);
+	bool Pour(LRegion &r);
 	bool OnLayout(GViewLayoutInfo &Inf);
 	void OnCreate();
 

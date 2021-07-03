@@ -19,8 +19,8 @@ public:
 	int GetOrder();
 	#else
 	void OnPaint(GSurface *pDC);	
-	void OnMouseClick(GMouse &m);
-	void OnMouseMove(GMouse &m);
+	void OnMouseClick(LMouse &m);
+	void OnMouseMove(LMouse &m);
 	LgiCursor GetCursor(int x, int y);
 	LRect &GetClient(bool InClientSpace = true);
 	#endif
@@ -34,8 +34,8 @@ public:
 	
 	virtual void Raise();
 	virtual void Lower();
-	virtual void OnTitleClick(GMouse &m);
-	virtual void OnButtonClick(GMouse &m);
+	virtual void OnTitleClick(LMouse &m);
+	virtual void OnButtonClick(LMouse &m);
 	virtual void OnPaintButton(GSurface *pDC, LRect &rc);
 };
 
@@ -61,8 +61,8 @@ public:
 
 	void OnPaint(GSurface *pDC);
 	bool Attach(GViewI *p);
-	bool OnViewMouse(GView *View, GMouse &m);
-	bool OnViewKey(GView *View, GKey &Key);
+	bool OnViewMouse(GView *View, LMouse &m);
+	bool OnViewKey(GView *View, LKey &Key);
 	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
 	LRect NewPos();
 	GViewI *GetTop();
@@ -92,7 +92,7 @@ public:
 	
 	#if MDI_TAB_STYLE
 	void OnPosChange();
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	bool Detach();
 	#endif
 };

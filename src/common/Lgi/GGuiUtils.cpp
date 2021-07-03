@@ -18,7 +18,7 @@
 	#endif
 #endif
 
-bool GKey::IsContextMenu()
+bool LKey::IsContextMenu()
 {
 	#if WINNATIVE || defined(LINUX)
 	return !IsChar && vkey == LK_CONTEXTKEY;
@@ -28,7 +28,7 @@ bool GKey::IsContextMenu()
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-bool GMouse::IsContextMenu()
+bool LMouse::IsContextMenu()
 {
 	if (Right())
 		return true;
@@ -41,7 +41,7 @@ bool GMouse::IsContextMenu()
 	return false;
 }
 
-bool GMouse::ToScreen()
+bool LMouse::ToScreen()
 {
 	if (ViewCoords)
 	{
@@ -63,7 +63,7 @@ bool GMouse::ToScreen()
 	return true;
 }
 
-bool GMouse::ToView()
+bool LMouse::ToView()
 {
 	if (!ViewCoords)
 	{

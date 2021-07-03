@@ -379,7 +379,7 @@ LgiClass bool operator ==(LRect &a, LRect &b);
 LgiClass bool operator !=(LRect &a, LRect &b);
 
 /// A region is a list of non-overlapping rectangles that can describe any shape
-class LgiClass GRegion : public LRect
+class LgiClass LRegion : public LRect
 {
 	/// Current number of stored rectangles
 	int Size;
@@ -395,18 +395,18 @@ class LgiClass GRegion : public LRect
 	bool Delete(int i);
 
 public:
-	GRegion();
-	GRegion(int X1, int Y1, int X2, int Y2);
-	GRegion(const LRect &r);
-	GRegion(OsRect &r);
-	GRegion(GRegion &c);
-	~GRegion();
+	LRegion();
+	LRegion(int X1, int Y1, int X2, int Y2);
+	LRegion(const LRect &r);
+	LRegion(OsRect &r);
+	LRegion(LRegion &c);
+	~LRegion();
 
 	int X() { return x2 - x1 + 1; }
 	int Y() { return y2 - y1 + 1; }
 	int Length() { return Size; }
 	LRect *operator [](int i) { return (i >= 0 && i < Size) ? a+i : 0; }
-	GRegion &operator =(const LRect &r);	
+	LRegion &operator =(const LRect &r);	
 	LRect *First();
 	LRect *Last();
 	LRect *Next();
@@ -435,8 +435,8 @@ public:
 		bool PerfectlyAlignOnly
 	);
 
-	friend bool operator ==(GRegion &a, GRegion &b);
-	friend bool operator !=(GRegion &a, GRegion &b);
+	friend bool operator ==(LRegion &a, LRegion &b);
+	friend bool operator !=(LRegion &a, LRegion &b);
 };
 
 #endif

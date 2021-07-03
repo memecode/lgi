@@ -113,7 +113,7 @@ public:
 
 	void Empty() { DeleteObjects(); }
 	LRect Bounds();
-	LRect *TopRect(GRegion *c);
+	LRect *TopRect(LRegion *c);
 	void FlowText(GTag *Tag, GFlowRegion *c, GFont *Font, int LineHeight, char16 *Text, GCss::LengthType Align);
 };
 
@@ -418,7 +418,7 @@ public:
 		/// [Optional] The size of the border painted
 		LRect *Px = NULL);
 	/// This fills 'rgn' with all the rectangles making up the inline tags region
-	void GetInlineRegion(GRegion &rgn, int ox = 0, int oy = 0);
+	void GetInlineRegion(LRegion &rgn, int ox = 0, int oy = 0);
 	void OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth);
 	void SetSize(LPoint &s);
 	void SetTag(const char *Tag);
@@ -440,7 +440,7 @@ public:
 	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
 
 	// Window
-	bool OnMouseClick(GMouse &m);
+	bool OnMouseClick(LMouse &m);
 	void Invalidate();
 
 	// Positioning

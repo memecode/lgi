@@ -103,7 +103,7 @@ void VcFile::Select(bool b)
 	}
 }
 
-void VcFile::OnMouseClick(GMouse &m)
+void VcFile::OnMouseClick(LMouse &m)
 {
 	LListItem::OnMouseClick(m);
 

@@ -94,7 +94,7 @@ public:
 			GdkModifierType mask;
 			gdk_display_get_pointer(dsp, &s, &x, &y, &mask);
 			
-			GMouse m;
+			LMouse m;
 			m.x = x;
 			m.y = y;
 			m.SetModifer(mask);
@@ -108,7 +108,7 @@ public:
 	
 		void OnMenu(guint button, guint activate_time)
 		{
-			GMouse m;
+			LMouse m;
 			m.Left(button == 1);
 			m.Middle(button == 2);
 			m.Right(button == 3);
@@ -232,7 +232,7 @@ public:
 
 	- (void)onClick
 	{
-		GMouse m;
+		LMouse m;
 		m.Left(true);
 		m.Down(true);
 		self.parent->OnTrayClick(m);
@@ -596,7 +596,7 @@ GMessage::Result GTrayIcon::OnEvent(GMessage *Message)
 		Message->A() == d->MyId)
 	{
 		// got a notification from the icon
-		GMouse m;
+		LMouse m;
 		ZeroObj(m);
 		switch (Message->B())
 		{

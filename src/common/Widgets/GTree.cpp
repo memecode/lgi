@@ -35,7 +35,7 @@ public:
 	int64			DropSelectTime;
     int8            IconTextGap;
     int				LastLayoutPx;
-	GMouse			*CurrentClick;
+	LMouse			*CurrentClick;
 	GTreeItem		*ScrollTo;
     
     // Visual style
@@ -845,7 +845,7 @@ GTreeItem *GTreeItem::_HitTest(int x, int y, bool Debug)
 	return Status;
 }
 
-void GTreeItem::_MouseClick(GMouse &m)
+void GTreeItem::_MouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -1437,7 +1437,7 @@ GTreeItem *GTree::GetAdjacent(GTreeItem *i, bool Down)
 	return Ret;
 }
 
-bool GTree::OnKey(GKey &k)
+bool GTree::OnKey(LKey &k)
 {
 	if (!Lock(_FL))
 		return false;
@@ -1583,7 +1583,7 @@ bool GTree::OnKey(GKey &k)
 					LRect *r = &s->d->Text;
 					if (r)
 					{
-						GMouse m;
+						LMouse m;
 						m.x = r->x1 + (r->X() >> 1);
 						m.y = r->y1 + (r->Y() >> 1);
 						m.Target = this;
@@ -1651,7 +1651,7 @@ bool GTree::OnMouseWheel(double Lines)
 	return true;
 }
 
-void GTree::OnMouseClick(GMouse &m)
+void GTree::OnMouseClick(LMouse &m)
 {
 	TREELOCK
 
@@ -1745,7 +1745,7 @@ void GTree::OnMouseClick(GMouse &m)
 	d->CurrentClick = NULL;	
 }
 
-void GTree::OnMouseMove(GMouse &m)
+void GTree::OnMouseMove(LMouse &m)
 {
 	if (!IsCapturing())
 		return;
@@ -2068,7 +2068,7 @@ void GTree::OnPulse()
 
 	if (InsideDragOp())
 	{
-		GMouse m;
+		LMouse m;
 		if (GetMouse(m))
 		{
 			if (!m.Left() && !m.Right() && !m.Middle())
@@ -2214,7 +2214,7 @@ bool GTree::ForAllItems(std::function<void(GTreeItem*)> Callback)
 	return ForEach(Callback) > 0;
 }
 
-void GTree::OnItemClick(GTreeItem *Item, GMouse &m)
+void GTree::OnItemClick(GTreeItem *Item, LMouse &m)
 {
 	if (!Item)
 		return;
@@ -2226,7 +2226,7 @@ void GTree::OnItemClick(GTreeItem *Item, GMouse &m)
 		SendNotify(GNotifyItem_Click);
 }
 
-void GTree::OnItemBeginDrag(GTreeItem *Item, GMouse &m)
+void GTree::OnItemBeginDrag(GTreeItem *Item, LMouse &m)
 {
 	if (!Item)
 		return;

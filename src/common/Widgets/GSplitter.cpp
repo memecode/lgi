@@ -264,7 +264,7 @@ void GSplitter::CalcRegions(bool Follow)
 		{
 			if (r.Valid())
 			{
-				GRegion Rgn(r);
+				LRegion Rgn(r);
 				d->ViewA->SetPos(r);
 				d->ViewA->Pour(Rgn);
 			}
@@ -288,7 +288,7 @@ void GSplitter::CalcRegions(bool Follow)
 		{
 			if (r.Valid())
 			{
-				GRegion Rgn(r);
+				LRegion Rgn(r);
 				d->ViewB->SetPos(r);
 				d->ViewB->Pour(Rgn);
 			}
@@ -313,7 +313,7 @@ void GSplitter::CalcRegions(bool Follow)
 	// printf("CalcPos Client=%s Value=%i A=%s B=%s\n", GetClient().GetStr(), (int)Value(), d->PosA.GetStr(), d->PosB.GetStr());
 }
 
-bool GSplitter::Pour(GRegion &r)
+bool GSplitter::Pour(LRegion &r)
 {
 	bool s = GLayout::Pour(r);
 	CalcRegions(true);
@@ -414,7 +414,7 @@ void GSplitter::OnPaint(GSurface *pDC)
 	}
 }
 
-void GSplitter::OnMouseClick(GMouse &m)
+void GSplitter::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -458,11 +458,11 @@ bool GSplitter::OverSplit(int x, int y)
 	}
 }
 
-void GSplitter::OnMouseExit(GMouse &m)
+void GSplitter::OnMouseExit(LMouse &m)
 {
 }
 
-void GSplitter::OnMouseMove(GMouse &m)
+void GSplitter::OnMouseMove(LMouse &m)
 {
 	if (IsCapturing())
 	{

@@ -138,7 +138,7 @@ bool GSubMenu::RemoveItem(GMenuItem *Item)
 	return false;
 }
 
-bool GSubMenu::OnKey(GKey &k)
+bool GSubMenu::OnKey(LKey &k)
 {
 	return false;
 }
@@ -856,7 +856,7 @@ bool GMenu::Detach()
 	return Status;
 }
 
-bool GMenu::OnKey(GView *v, GKey &k)
+bool GMenu::OnKey(GView *v, LKey &k)
 {
 	if (k.Down())
 	{
@@ -933,7 +933,7 @@ GAccelerator::GAccelerator(int flags, int key, int id)
 	Id = id;
 }
 
-bool GAccelerator::Match(GKey &k)
+bool GAccelerator::Match(LKey &k)
 {
 	int Press = (uint) k.vkey;
 	

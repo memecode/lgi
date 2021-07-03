@@ -39,7 +39,7 @@ public:
 	
 	int OnNotify(GViewI *v, int f);
 	void OnCreate();
-	bool OnViewKey(GView *v, GKey &k);
+	bool OnViewKey(GView *v, LKey &k);
 	GMessage::Result OnEvent(GMessage *m);
 };
 
@@ -483,10 +483,10 @@ FindSymbolDlg::~FindSymbolDlg()
 
 void FindSymbolDlg::OnCreate()
 {
-	RegisterHook(this, GKeyEvents);
+	RegisterHook(this, LKeyEvents);
 }
 
-bool FindSymbolDlg::OnViewKey(GView *v, GKey &k)
+bool FindSymbolDlg::OnViewKey(GView *v, LKey &k)
 {
 	switch (k.vkey)
 	{

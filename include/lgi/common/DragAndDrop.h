@@ -216,7 +216,7 @@ public:
 	{ return false; }
 
 	/// Creates a file drop
-	static bool CreateFileDrop(GDragData *OutputData, GMouse &m, GString::Array &Files);
+	static bool CreateFileDrop(GDragData *OutputData, LMouse &m, GString::Array &Files);
 };
 
 /// A drag target class

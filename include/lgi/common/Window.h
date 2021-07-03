@@ -14,13 +14,13 @@ enum LWindowZoom
 
 enum LWindowHookType
 {
-	GNoEvents = 0,
+	LNoEvents = 0,
 	/// \sa GWindow::RegisterHook()
-	GMouseEvents = 1,
+	LMouseEvents = 1,
 	/// \sa GWindow::RegisterHook()
-	GKeyEvents = 2,
+	LKeyEvents = 2,
 	/// \sa GWindow::RegisterHook()
-	GKeyAndMouseEvents = GMouseEvents | GKeyEvents,
+	LKeyAndMouseEvents = LMouseEvents | LKeyEvents,
 };
 
 /// A top level window.
@@ -172,9 +172,9 @@ public:
 		/// The target view.
 		GView *Target,
 		/// Combination of:
-		///     #GMouseEvents - Where Target->OnViewMouse(...) is called for each click.
+		///     #LMouseEvents - Where Target->OnViewMouse(...) is called for each click.
 		/// and
-		///     #GKeyEvents - Where Target->OnViewKey(...) is called for each key.
+		///     #LKeyEvents - Where Target->OnViewKey(...) is called for each key.
 		/// OR'd together.
 		LWindowHookType EventType,
 		/// Not implemented
@@ -210,7 +210,7 @@ public:
 	virtual void OnZoom(LWindowZoom Action) {}
 	
 	/// Called when the tray icon is clicked. (if present)
-	virtual void OnTrayClick(GMouse &m);
+	virtual void OnTrayClick(LMouse &m);
 
 	/// Called when the tray icon menu is about to be displayed.
 	virtual void OnTrayMenu(LSubMenu &m) {}
@@ -227,8 +227,8 @@ public:
 	void OnPosChange() override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	void OnPaint(GSurface *pDC) override;
-	bool HandleViewMouse(GView *v, GMouse &m);
-	bool HandleViewKey(GView *v, GKey &k);
+	bool HandleViewMouse(GView *v, LMouse &m);
+	bool HandleViewKey(GView *v, LKey &k);
 	bool OnRequestClose(bool OsShuttingDown) override;
 	bool Obscured();
 	bool Visible() override;
@@ -273,7 +273,7 @@ public:
 		bool IsAttached();
 		void Quit(bool DontDelete = false);
 		LRect *GetDecorSize();
-		bool TranslateMouse(GMouse &m);
+		bool TranslateMouse(LMouse &m);
 		GViewI *WindowFromPoint(int x, int y, bool Debug);
 		void _SetDynamic(bool b);
 		void _OnViewDelete();

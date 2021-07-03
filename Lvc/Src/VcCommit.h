@@ -86,7 +86,7 @@ public:
 	VcFolder *GetFolder();
 
 	// Events
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	void Select(bool b);
 };
 

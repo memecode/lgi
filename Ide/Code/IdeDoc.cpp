@@ -169,7 +169,7 @@ void EditTray::OnPaint(GSurface *pDC)
 	}
 }
 
-bool EditTray::Pour(GRegion &r)
+bool EditTray::Pour(LRegion &r)
 {
 	LRect *c = FindLargest(r);
 	if (c)
@@ -181,7 +181,7 @@ bool EditTray::Pour(GRegion &r)
 	return false;
 }
 
-void EditTray::OnHeaderList(GMouse &m)
+void EditTray::OnHeaderList(LMouse &m)
 {
 	// Header list button
 	GArray<GString> Paths;
@@ -316,7 +316,7 @@ void EditTray::OnHeaderList(GMouse &m)
 	}
 }
 
-void EditTray::OnFunctionList(GMouse &m)
+void EditTray::OnFunctionList(LMouse &m)
 {
 	GArray<DefnInfo> Funcs;
 
@@ -396,7 +396,7 @@ void EditTray::OnFunctionList(GMouse &m)
 	}
 }
 
-void EditTray::OnSymbolList(GMouse &m)
+void EditTray::OnSymbolList(LMouse &m)
 {
 	GAutoString s(Ctrl->GetSelection());
 	if (s)
@@ -496,7 +496,7 @@ void EditTray::OnSymbolList(GMouse &m)
 	}
 }
 
-void EditTray::OnMouseClick(GMouse &m)
+void EditTray::OnMouseClick(LMouse &m)
 {
 	if (m.Left() && m.Down())
 	{
@@ -1170,7 +1170,7 @@ void IdeDoc::OnMarginClick(int Line)
 	d->App->ToggleBreakpoint(Dn, Line);
 }
 
-void IdeDoc::OnTitleClick(GMouse &m)
+void IdeDoc::OnTitleClick(LMouse &m)
 {
 	GMdiChild::OnTitleClick(m);
 	
@@ -1458,7 +1458,7 @@ void IdeDoc::EscapeSelection(bool ToEscaped)
 
 	if (ToEscaped)
 	{
-		GMouse m;
+		LMouse m;
 		GetMouse(m);
 		GString Delim = "\r\n\\";
 		if (m.Ctrl())

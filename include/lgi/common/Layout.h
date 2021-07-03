@@ -5,16 +5,16 @@
 // Control or View window
 
 /// FindLargestEdge parameter
-/// \sa GView::FindLargest(GRegion &, int)
+/// \sa GView::FindLargest(LRegion &, int)
 #define GV_EDGE_TOP				0x0001
 /// FindLargestEdge parameter
-/// \sa GView::FindLargest(GRegion &, int)
+/// \sa GView::FindLargest(LRegion &, int)
 #define GV_EDGE_RIGHT			0x0002
 /// FindLargestEdge parameter
-/// \sa GView::FindLargest(GRegion &, int)
+/// \sa GView::FindLargest(LRegion &, int)
 #define GV_EDGE_BOTTOM			0x0004
 /// FindLargestEdge parameter
-/// \sa GView::FindLargest(GRegion &, int)
+/// \sa GView::FindLargest(LRegion &, int)
 #define GV_EDGE_LEFT			0x0008
 
 /// Id of the vertical scroll bar in a GLayout control
@@ -107,7 +107,7 @@ public:
 
 	/// Lay out all the children views into the client area according to their
 	/// own internal rules. Space is given in a first come first served basis.
-	bool Pour(GRegion &r) override;
+	bool Pour(LRegion &r) override;
 
 	// Impl
 	#if defined(__GTK_H__) || !defined(WINNATIVE)

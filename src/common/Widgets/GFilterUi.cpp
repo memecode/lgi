@@ -917,7 +917,7 @@ void GFilterItem::OnExpand(bool b)
 	}
 }
 
-bool GFilterItem::OnBeginDrag(GMouse &m)
+bool GFilterItem::OnBeginDrag(LMouse &m)
 {
 	Drag(GetTree(), m.Event, DROPEFFECT_MOVE);
 	return true;
@@ -941,7 +941,7 @@ bool GFilterItem::GetData(GArray<GDragData> &Data)
 	return true;
 }
 
-bool GFilterItem::OnKey(GKey &k)
+bool GFilterItem::OnKey(LKey &k)
 {
 	if (k.IsChar)
 	{
@@ -979,7 +979,7 @@ bool GFilterItem::OnKey(GKey &k)
 	return false;
 }
 
-void GFilterItem::OnMouseClick(GMouse &m)
+void GFilterItem::OnMouseClick(LMouse &m)
 {
 	if (m.Down() && m.Left())
 	{

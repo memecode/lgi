@@ -64,9 +64,9 @@ enum GVariantType
 	GV_GSURFACE,
 	/// Pointer to GView
 	GV_GVIEW,
-	/// Pointer to GMouse
+	/// Pointer to LMouse
 	GV_GMOUSE,
-	/// Pointer to GKey
+	/// Pointer to LKey
 	GV_GKEY,
 	/// Pointer to GStream
 	GV_STREAM,
@@ -272,9 +272,9 @@ public:
 		/// Valid when Type == #GV_GVIEW
 		class GView *View;
 		/// Valid when Type == #GV_GMOUSE
-		class GMouse *Mouse;
+		class LMouse *Mouse;
 		/// Valid when Type == #GV_GKEY
-		class GKey *Key;
+		class LKey *Key;
 	} Value;
 
 	/// Constructor to null
@@ -340,8 +340,8 @@ public:
 	GVariant &operator =(const LDateTime *d);
 
 	GVariant &operator =(class GView *p);
-	GVariant &operator =(class GMouse *p);
-	GVariant &operator =(class GKey *k);
+	GVariant &operator =(class LMouse *p);
+	GVariant &operator =(class LKey *k);
 	GVariant &operator =(class GStream *s);
 
 	bool operator ==(GVariant &v);

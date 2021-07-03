@@ -415,7 +415,7 @@ void GCombo::DoMenu()
 	}
 }
 
-void GCombo::OnMouseClick(GMouse &m)
+void GCombo::OnMouseClick(LMouse &m)
 {
 	if (m.Down() &&
 		Enabled())
@@ -429,7 +429,7 @@ void GCombo::OnMouseClick(GMouse &m)
 	}
 }
 
-bool GCombo::OnKey(GKey &k)
+bool GCombo::OnKey(LKey &k)
 {
 	bool Status = false;
 

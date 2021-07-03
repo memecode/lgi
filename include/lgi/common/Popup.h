@@ -26,7 +26,7 @@ class LgiClass GPopup :
 	friend class _QPopup;
 	friend class LWindow;
 	friend class GDropDown;
-	friend class GMouseHook;
+	friend class LMouseHook;
 	friend class GMouseHookPrivate;
     friend class GView;
 
@@ -83,8 +83,8 @@ public:
 	// Window events
 	void OnFocus(bool f);
 	void OnPaint(GSurface *pDC);
-	bool OnKey(GKey &k);
-	void OnMouseClick(GMouse &m);
+	bool OnKey(LKey &k);
+	void OnMouseClick(LMouse &m);
 	int OnNotify(GViewI *c, int f);
 
 	// Override
@@ -94,17 +94,17 @@ public:
 
 /// Mouse hook grabs mouse events from the OS
 class GPopup;
-class GMouseHook
+class LMouseHook
 {
 	class GMouseHookPrivate *d;
 	
 public:
-	GMouseHook();
-	~GMouseHook();
+	LMouseHook();
+	~LMouseHook();
 
 	void RegisterPopup(GPopup *p);
 	void UnregisterPopup(GPopup *p);
-	bool OnViewKey(GView *v, GKey &k);
+	bool OnViewKey(GView *v, LKey &k);
 	void TrackClick(GView *v);
 
 	#ifdef WIN32

@@ -160,10 +160,10 @@ void GBox::OnCreate()
 	
 	LWindow *Wnd = GetWindow();
 	if (Wnd)
-		Wnd->RegisterHook(this, GMouseEvents);
+		Wnd->RegisterHook(this, LMouseEvents);
 }
 
-bool GBox::OnViewMouse(GView *v, GMouse &m)
+bool GBox::OnViewMouse(GView *v, LMouse &m)
 {
 	// This hook allows the GBox to catch clicks nearby the splits even if the splits are too small
 	// to grab normally. Consider the case of a split that is 1px wide. The active region needs to
@@ -172,7 +172,7 @@ bool GBox::OnViewMouse(GView *v, GMouse &m)
 	if (!m.IsMove() && m.Down())
 	{
 		// Convert click to the local coordinates of this view
-		GMouse Local = m;
+		LMouse Local = m;
 		while (v && v != (GView*)this && v->GetParent())
 		{
 			if (dynamic_cast<GPopup*>(v))
@@ -201,7 +201,7 @@ bool GBox::OnViewMouse(GView *v, GMouse &m)
 	return true;
 }
 
-bool GBox::Pour(GRegion &r)
+bool GBox::Pour(LRegion &r)
 {
 	LRect *p = FindLargest(r);
 	if (!p)
@@ -237,7 +237,7 @@ void GBox::OnPaint(GSurface *pDC)
 		pDC->Colour(GColour(255, 0, 255));
 		pDC->Rectangle(&cli);
 		#endif
-		GRegion Painted(cli);
+		LRegion Painted(cli);
 
 		for (int i=0; i<d->Spacers.Length(); i++)
 		{
@@ -473,7 +473,7 @@ void GBox::OnPosChange()
 	}
 }
 
-void GBox::OnMouseClick(GMouse &m)
+void GBox::OnMouseClick(LMouse &m)
 {
 	#if 0
 	{
@@ -509,7 +509,7 @@ bool IsValidLen(GCss *c, GCss::PropType p)
 	return l->IsValid();
 }
 
-void GBox::OnMouseMove(GMouse &m)
+void GBox::OnMouseMove(LMouse &m)
 {
 	if (!d->Dragging || !IsCapturing())
 		return;

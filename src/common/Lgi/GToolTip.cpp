@@ -76,7 +76,7 @@ public:
 		for (unsigned i=0; i<All.Length(); i++)
 		{
 			NativeTip *t = All[i];
-			GMouse m;
+			LMouse m;
 			if (t->Owner)
 			{
 				auto *Wnd = t->Owner->GetWindow();

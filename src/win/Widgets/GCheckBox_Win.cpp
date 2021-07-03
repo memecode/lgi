@@ -170,19 +170,19 @@ GMessage::Result GCheckBox::OnEvent(GMessage *Msg)
 	return GControl::OnEvent(Msg);
 }
 
-void GCheckBox::OnMouseClick(GMouse &m)
+void GCheckBox::OnMouseClick(LMouse &m)
 {
 }
 
-void GCheckBox::OnMouseEnter(GMouse &m)
+void GCheckBox::OnMouseEnter(LMouse &m)
 {
 }
 
-void GCheckBox::OnMouseExit(GMouse &m)
+void GCheckBox::OnMouseExit(LMouse &m)
 {
 }
 
-bool GCheckBox::OnKey(GKey &k)
+bool GCheckBox::OnKey(LKey &k)
 {
 	return false;
 }

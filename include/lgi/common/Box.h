@@ -35,12 +35,12 @@ public:
 	void OnCreate();
 	void OnPaint(GSurface *pDC);
 	void OnPosChange();
-	void OnMouseClick(GMouse &m);
-	bool OnViewMouse(GView *v, GMouse &m);
-	void OnMouseMove(GMouse &m);
+	void OnMouseClick(LMouse &m);
+	bool OnViewMouse(GView *v, LMouse &m);
+	void OnMouseMove(LMouse &m);
 	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
 	GMessage::Result OnEvent(GMessage *Msg);
-	bool Pour(GRegion &r);
+	bool Pour(LRegion &r);
 	LgiCursor GetCursor(int x, int y);
 	bool OnLayout(GViewLayoutInfo &Inf);
 	int OnNotify(GViewI *Ctrl, int Flags);

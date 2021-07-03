@@ -13,7 +13,7 @@
 class HookInfo
 {
 public:
-	GWindowHookType Flags;
+	LWindowHookType Flags;
 	GView *Target;
 };
 
@@ -22,7 +22,7 @@ class GWindowPrivate
 public:
 	int Sx, Sy;
 	bool Dynamic;
-	GKey LastKey;
+	LKey LastKey;
 	::GArray<HookInfo> Hooks;
 	bool SnapToEdge;
 	::GString Icon;
@@ -61,7 +61,7 @@ public:
 			if (n)
 			{
 				n->Target = Target;
-				n->Flags = GNoEvents;
+				n->Flags = LNoEvents;
 				return Hooks.Length() - 1;
 			}
 		}
@@ -216,11 +216,11 @@ bool GWindow::OnRequestClose(bool OsShuttingDown)
 	return GView::OnRequestClose(OsShuttingDown);
 }
 
-bool GWindow::HandleViewMouse(GView *v, GMouse &m)
+bool GWindow::HandleViewMouse(GView *v, LMouse &m)
 {
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{
-		if (d->Hooks[i].Flags & GMouseEvents)
+		if (d->Hooks[i].Flags & LMouseEvents)
 		{
 			if (!d->Hooks[i].Target->OnViewMouse(v, m))
 			{
@@ -269,7 +269,7 @@ bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 	}
 */
 
-bool GWindow::HandleViewKey(GView *v, GKey &k)
+bool GWindow::HandleViewKey(GView *v, LKey &k)
 {
 	bool Status = false;
 	GViewI *Ctrl = 0;
@@ -321,7 +321,7 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	// Allow any hooks to see the key...
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{
-		if (d->Hooks[i].Flags & GKeyEvents)
+		if (d->Hooks[i].Flags & LKeyEvents)
 		{
 			if (d->Hooks[i].Target->OnViewKey(v, k))
 			{
@@ -660,16 +660,16 @@ void GWindow::PourAll()
 	LRect Cli = GetClient();
 	if (!Cli.Valid())
 		return;
-	GRegion Client(Cli);
+	LRegion Client(Cli);
 	GViewI *MenuView = 0;
 
-	GRegion Update(Client);
+	LRegion Update(Client);
 	bool HasTools = false;
 	GViewI *v;
 	auto Lst = Children.begin();
 
 	{
-		GRegion Tools;
+		LRegion Tools;
 		
 		for (v = *Lst; v; v = *++Lst)
 		{
@@ -869,7 +869,7 @@ void GWindow::OnFrontSwitch(bool b)
 {
 }
 
-bool GWindow::RegisterHook(GView *Target, GWindowHookType EventType, int Priority)
+bool GWindow::RegisterHook(GView *Target, LWindowHookType EventType, int Priority)
 {
 	bool Status = false;
 	
@@ -1056,7 +1056,7 @@ void GWindow::SetDragHandlers(bool On)
 {
 }
 
-void GWindow::OnTrayClick(GMouse &m)
+void GWindow::OnTrayClick(LMouse &m)
 {
 	if (m.Down() || m.IsContextMenu())
 	{

@@ -184,12 +184,12 @@ public:
 	GArray<int> Types;
 	#endif
 	GArray<GViewI*> DeleteLater;
-	GMouse LastMove;
+	LMouse LastMove;
 	GAutoString Name;
 	GAutoPtr<GFontCache> FontCache;
 
 	// Update handling (lock before using)
-	GRegion Dirty;
+	LRegion Dirty;
 	
 	// Mouse capture
 	SDL_TimerID CaptureId;
@@ -247,7 +247,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////
 GSkinEngine *GApp::SkinEngine = 0;
 GApp *TheApp = 0;
-GMouseHook *GApp::MouseHook = 0;
+LMouseHook *GApp::MouseHook = 0;
 
 #ifdef LINUX
 void sighandler(int signum)
@@ -291,7 +291,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	LgiInitColours();
 	AppWnd = 0;
 
-	MouseHook = new GMouseHook;
+	MouseHook = new LMouseHook;
 
 	// System font setup
 	SystemNormal = 0;
@@ -356,7 +356,7 @@ bool GApp::IsOk()
 	return Status;
 }
 
-GMouseHook *GApp::GetMouseHook()
+LMouseHook *GApp::GetMouseHook()
 {
 	return MouseHook;
 }
@@ -436,7 +436,7 @@ struct GtkIdle
 };
 
 template<typename T>
-void SDL_to_Mouse(GMouse &ms, T &ev)
+void SDL_to_Mouse(LMouse &ms, T &ev)
 {
 	ms.x = ev.x;
 	ms.y = ev.y;
@@ -473,7 +473,7 @@ void GApp::OnSDLEvent(GMessage *m)
 		{
 			if (AppWnd)
 			{
-				GMouse ms;
+				LMouse ms;
 				ms.Target = AppWnd;
 				SDL_to_Mouse(ms, m->Event.motion);
 				AppWnd->_Mouse(ms, true);
@@ -486,7 +486,7 @@ void GApp::OnSDLEvent(GMessage *m)
 		{
 			if (AppWnd)
 			{
-				GMouse ms;
+				LMouse ms;
 				SDL_to_Mouse(ms, m->Event.button);
 
 				GViewI *v = AppWnd->WindowFromPoint(ms.x, ms.y);
@@ -534,7 +534,7 @@ void GApp::OnSDLEvent(GMessage *m)
 		}
 		case SDL_KEYUP:
 		{
-			GKey k;
+			LKey k;
 			k.vkey = m->Event.key.keysym.sym;
 			k.c16 = m->Event.key.keysym.unicode;
 			if (m->Event.key.state & (KMOD_LSHIFT|KMOD_RSHIFT))
@@ -587,7 +587,7 @@ void GApp::OnSDLEvent(GMessage *m)
 						GScreenDC Dc(AppWnd, Screen);
 						if (d->Lock(_FL))
 						{
-							GRegion r = d->Dirty;
+							LRegion r = d->Dirty;
 							d->Dirty.Empty();
 							d->Unlock();
 

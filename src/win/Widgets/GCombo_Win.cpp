@@ -452,7 +452,7 @@ void GCombo::Empty()
 	d->Strs.Length(0);
 }
 
-bool GCombo::OnKey(GKey &k)
+bool GCombo::OnKey(LKey &k)
 {
 	switch (k.vkey)
 	{

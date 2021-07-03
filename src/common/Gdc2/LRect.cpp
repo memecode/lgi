@@ -328,14 +328,14 @@ bool operator !=(LRect &a, LRect &b)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-GRegion::GRegion() : LRect(0, 0, 0, 0)
+LRegion::LRegion() : LRect(0, 0, 0, 0)
 {
 	Size = Alloc = 0;
 	a = 0;
 	Current = 0;
 }
 
-GRegion::GRegion(GRegion &c) : LRect(c.x1, c.y1, c.x2, c.y2)
+LRegion::LRegion(LRegion &c) : LRect(c.x1, c.y1, c.x2, c.y2)
 {
 	Size = Alloc = 0;	
 	Current = 0;
@@ -348,7 +348,7 @@ GRegion::GRegion(GRegion &c) : LRect(c.x1, c.y1, c.x2, c.y2)
 	}
 }
 
-GRegion::GRegion(int X1, int Y1, int X2, int Y2) : LRect(X1, Y1, X2, Y2)
+LRegion::LRegion(int X1, int Y1, int X2, int Y2) : LRect(X1, Y1, X2, Y2)
 {
 	Size = Alloc = 0;	
 	Current = 0;
@@ -364,7 +364,7 @@ GRegion::GRegion(int X1, int Y1, int X2, int Y2) : LRect(X1, Y1, X2, Y2)
 	}
 }
 
-GRegion::GRegion(const LRect &r) : LRect(r)
+LRegion::LRegion(const LRect &r) : LRect(r)
 {
 	Size = Alloc = 0;	
 	Current = 0;
@@ -380,7 +380,7 @@ GRegion::GRegion(const LRect &r) : LRect(r)
 	}
 }
 
-GRegion::GRegion(OsRect &r) : LRect(0, 0, 0, 0)
+LRegion::LRegion(OsRect &r) : LRect(0, 0, 0, 0)
 {
 	Size = Alloc = 0;	
 	Current = 0;
@@ -415,12 +415,12 @@ GRegion::GRegion(OsRect &r) : LRect(0, 0, 0, 0)
 	}
 }
 
-GRegion::~GRegion()
+LRegion::~LRegion()
 {
 	Empty();
 }
 
-GRegion &GRegion::operator =(const LRect &r)
+LRegion &LRegion::operator =(const LRect &r)
 {
 	SetSize(1);
 	if (a)
@@ -431,31 +431,31 @@ GRegion &GRegion::operator =(const LRect &r)
 	return *this;
 }
 
-LRect *GRegion::First()
+LRect *LRegion::First()
 {
 	Current = 0;
 	return (Current >= 0 && Current < Size) ? a+Current : 0;
 }
 
-LRect *GRegion::Last()
+LRect *LRegion::Last()
 {
 	Current = Size-1;
 	return (Current >= 0 && Current < Size) ? a+Current : 0;
 }
 
-LRect *GRegion::Next()
+LRect *LRegion::Next()
 {
 	Current++;
 	return (Current >= 0 && Current < Size) ? a+Current : 0;
 }
 
-LRect *GRegion::Prev()
+LRect *LRegion::Prev()
 {
 	Current--;
 	return (Current >= 0 && Current < Size) ? a+Current : 0;
 }
 
-bool GRegion::SetSize(int s)
+bool LRegion::SetSize(int s)
 {
 	bool Status = true;
 
@@ -490,7 +490,7 @@ bool GRegion::SetSize(int s)
 	return Status;
 }
 
-bool GRegion::Delete(int i)
+bool LRegion::Delete(int i)
 {
 	if (i >= 0 && i < Size)
 	{
@@ -504,13 +504,13 @@ bool GRegion::Delete(int i)
 	return false;
 }
 
-void GRegion::Empty()
+void LRegion::Empty()
 {
 	Size = Alloc = 0;
 	DeleteArray(a);
 }
 
-void GRegion::ZOff(int x, int y)
+void LRegion::ZOff(int x, int y)
 {
 	if (SetSize(1))
 	{
@@ -518,7 +518,7 @@ void GRegion::ZOff(int x, int y)
 	}
 }
 
-void GRegion::Normal()
+void LRegion::Normal()
 {
 	for (int i=0; i<Size; i++)
 	{
@@ -526,7 +526,7 @@ void GRegion::Normal()
 	}
 }
 
-bool GRegion::Valid()
+bool LRegion::Valid()
 {
 	bool Status = true;
 
@@ -538,7 +538,7 @@ bool GRegion::Valid()
 	return Status && Size > 0;
 }
 
-void GRegion::Offset(int x, int y)
+void LRegion::Offset(int x, int y)
 {
 	for (int i=0; i<Size; i++)
 	{
@@ -546,7 +546,7 @@ void GRegion::Offset(int x, int y)
 	}
 }
 
-LRect GRegion::Bound()
+LRect LRegion::Bound()
 {
 	static LRect r;
 	
@@ -566,7 +566,7 @@ LRect GRegion::Bound()
 	return r;
 }
 
-void GRegion::Bound(LRect *b)
+void LRegion::Bound(LRect *b)
 {
 	if (b)
 	{
@@ -584,7 +584,7 @@ void GRegion::Bound(LRect *b)
 	}
 }
 
-bool GRegion::Overlap(int x, int y)
+bool LRegion::Overlap(int x, int y)
 {
 	for (int i=0; i<Size; i++)
 	{
@@ -594,7 +594,7 @@ bool GRegion::Overlap(int x, int y)
 	return false;
 }
 
-bool GRegion::Overlap(LRect *b)
+bool LRegion::Overlap(LRect *b)
 {
 	if (b)
 	{
@@ -610,7 +610,7 @@ bool GRegion::Overlap(LRect *b)
 	return false;
 }
 
-void GRegion::Union(LRect *b)
+void LRegion::Union(LRect *b)
 {
 	if (b && b->Valid())
 	{
@@ -621,7 +621,7 @@ void GRegion::Union(LRect *b)
 	}
 }
 
-void GRegion::Intersect(LRect *b)
+void LRegion::Intersect(LRect *b)
 {
 	if (b)
 	{
@@ -639,7 +639,7 @@ void GRegion::Intersect(LRect *b)
 	}
 }
 
-void GRegion::Subtract(LRect *b)
+void LRegion::Subtract(LRect *b)
 {
 	if (b && b->Valid())
 	{
@@ -701,7 +701,7 @@ void GRegion::Subtract(LRect *b)
 	}	
 }
 
-void GRegion::Simplify(bool PerfectlyAlignOnly)
+void LRegion::Simplify(bool PerfectlyAlignOnly)
 {
 	int Merges;
 	
@@ -754,12 +754,12 @@ void GRegion::Simplify(bool PerfectlyAlignOnly)
 	while (Merges > 0);
 }
 
-bool operator ==(GRegion &a, GRegion &b)
+bool operator ==(LRegion &a, LRegion &b)
 {
 	return false;
 }
 
-bool operator !=(GRegion &a, GRegion &b)
+bool operator !=(LRegion &a, LRegion &b)
 {
 	return false;
 }

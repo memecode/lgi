@@ -70,7 +70,7 @@ LSubMenu::~LSubMenu()
 }
 
 // This will be run in the GUI thread..
-gboolean LSubMenuClick(GMouse *m)
+gboolean LSubMenuClick(LMouse *m)
 {
 	if (!m)
 		return false;
@@ -134,9 +134,9 @@ gboolean LSubMenuClick(GMouse *m)
 }
 
 // This is not called in the GUI thread..
-void LSubMenu::SysMouseClick(GMouse &m)
+void LSubMenu::SysMouseClick(LMouse &m)
 {
-	GMouse *ms = new GMouse;
+	LMouse *ms = new LMouse;
 	*ms = m;
 	g_idle_add((GSourceFunc) LSubMenuClick, ms);
 }
@@ -1594,7 +1594,7 @@ bool LMenu::SetPrefAndAboutItems(int a, int b)
 	return false;
 }
 
-bool LMenu::OnKey(GView *v, GKey &k)
+bool LMenu::OnKey(GView *v, LKey &k)
 {
 	if (k.Down())
 	{
@@ -1670,7 +1670,7 @@ GAccelerator::GAccelerator(int flags, int key, int id)
 	Id = id;
 }
 
-bool GAccelerator::Match(GKey &k)
+bool GAccelerator::Match(LKey &k)
 {
 	int Press = (uint) k.vkey;
 	

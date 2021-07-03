@@ -113,7 +113,7 @@ public:
 	// Events/Window/Implementation
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	void OnAttach() override;
-	bool OnKey(GKey &k) override;
+	bool OnKey(LKey &k) override;
 	
 	#if WINNATIVE
 	bool SetPos(LRect &p, bool Repaint = false);
@@ -121,7 +121,7 @@ public:
 	#else
 	void OnFocus(bool f) override;
 	void OnPaint(GSurface *pDC) override;
-	void OnMouseClick(GMouse &m) override;
+	void OnMouseClick(LMouse &m) override;
 	void OnPosChange() override;
 	void SetFont(GFont *Fnt, bool OwnIt = false) override;
 	#endif

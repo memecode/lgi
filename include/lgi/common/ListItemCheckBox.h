@@ -53,7 +53,7 @@ public:
 		}
 	}
 
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		if (m.Down() && m.Left())
 		{

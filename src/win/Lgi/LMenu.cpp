@@ -123,7 +123,7 @@ LSubMenu::~LSubMenu()
 	}
 }
 
-void LSubMenu::SysMouseClick(GMouse &m)
+void LSubMenu::SysMouseClick(LMouse &m)
 {
 }
 
@@ -1102,7 +1102,7 @@ bool LMenu::Detach()
 	return Status;
 }
 
-bool LMenu::OnKey(GView *v, GKey &k)
+bool LMenu::OnKey(GView *v, LKey &k)
 {
 	if (k.Down() && k.vkey != 17)
 	{
@@ -1227,7 +1227,7 @@ GAccelerator::GAccelerator(int flags, int key, int id)
 	Id = id;
 }
 
-bool GAccelerator::Match(GKey &k)
+bool GAccelerator::Match(LKey &k)
 {
 	if (!k.IsChar &&
 		tolower(k.vkey) == tolower(Key))

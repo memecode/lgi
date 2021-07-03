@@ -111,7 +111,7 @@ bool LgiIsKeyDown(int Key)
 	return false;
 }
 
-GKey::GKey(int vkey, uint32_t flags)
+LKey::LKey(int vkey, uint32_t flags)
 {
 }
 
@@ -351,7 +351,7 @@ void LgiToGtkCursor(GViewI *v, LgiCursor c)
 	}
 }
 
-bool GView::_Mouse(GMouse &m, bool Move)
+bool GView::_Mouse(LMouse &m, bool Move)
 {
 	ThreadCheck();
 	
@@ -805,7 +805,7 @@ bool GView::PointToView(LPoint &p)
 	return true;
 }
 
-bool GView::GetMouse(GMouse &m, bool ScreenCoords)
+bool GView::GetMouse(LMouse &m, bool ScreenCoords)
 {
 	bool Status = true;
 	ThreadCheck();

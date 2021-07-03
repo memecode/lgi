@@ -48,7 +48,7 @@ public:
 	bool Read(GXmlTag *t, ResMenuItem *Parent = 0);
 	bool Write(GXmlTag *t, int Tabs);
 
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	bool OnNew();
 };
 
@@ -78,8 +78,8 @@ public:
 	ResStringGroup *GetStringGroup() { return Group; }
 
 	// Tree
-	void OnItemClick(GTreeItem *Item, GMouse &m);
-	void OnItemBeginDrag(GTreeItem *Item, GMouse &m);
+	void OnItemClick(GTreeItem *Item, LMouse &m);
+	void OnItemBeginDrag(GTreeItem *Item, LMouse &m);
 	void OnItemExpand(GTreeItem *Item, bool Expand);
 	void OnItemSelect(GTreeItem *Item);
 

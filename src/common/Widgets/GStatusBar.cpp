@@ -15,7 +15,7 @@ GStatusBar::~GStatusBar()
 {
 }
 
-bool GStatusBar::Pour(GRegion &r)
+bool GStatusBar::Pour(LRegion &r)
 {
 	LRect *Best = FindLargestEdge(r, GV_EDGE_BOTTOM);
 	if (Best)

@@ -2012,7 +2012,7 @@ GTag *GTag::IsAnchor(GString *Uri)
 	return a;
 }
 
-bool GTag::OnMouseClick(GMouse &m)
+bool GTag::OnMouseClick(LMouse &m)
 {
 	bool Processed = false;
 
@@ -4923,7 +4923,7 @@ LRect GArea::Bounds()
 	return n;
 }
 
-LRect *GArea::TopRect(GRegion *c)
+LRect *GArea::TopRect(LRegion *c)
 {
 	LRect *Top = 0;
 	
@@ -6059,7 +6059,7 @@ struct DrawBorder
 	}
 };
 
-void GTag::GetInlineRegion(GRegion &rgn, int ox, int oy)
+void GTag::GetInlineRegion(LRegion &rgn, int ox, int oy)
 {
 	if (TagId == TAG_IMG)
 	{
@@ -6249,7 +6249,7 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, LRect *BorderP
 			}
 			case DispInline:
 			{
-				GRegion rgn;
+				LRegion rgn;
 				GetInlineRegion(rgn);
 				if (BorderPx)
 				{
@@ -7958,7 +7958,7 @@ bool GHtml::DoFind()
 	return Dlg.DoModal();
 }
 
-bool GHtml::OnKey(GKey &k)
+bool GHtml::OnKey(LKey &k)
 {
 	bool Status = false;
 
@@ -8064,7 +8064,7 @@ int GHtml::ScrollY()
 	return GetFont()->GetHeight() * (VScroll ? (int)VScroll->Value() : 0);
 }
 
-void GHtml::OnMouseClick(GMouse &m)
+void GHtml::OnMouseClick(LMouse &m)
 {
 	Capture(m.Down());
 	SetPulse(m.Down() ? 200 : -1);
@@ -8552,7 +8552,7 @@ void GTag::ClearToolTips()
 }
 
 
-void GHtml::OnMouseMove(GMouse &m)
+void GHtml::OnMouseMove(LMouse &m)
 {
 	if (!Tag)
 		return;
@@ -8661,7 +8661,7 @@ void GHtml::OnPulse()
 	if (VScroll && IsCapturing())
 	{
 		int Fy = DefFont() ? DefFont()->GetHeight() : 16;
-		GMouse m;
+		LMouse m;
 		if (GetMouse(m, false))
 		{
 			LRect c = GetClient();

@@ -63,7 +63,7 @@ public:
 	void OnProjectChange();
 	
 	// Impl
-	void OnTitleClick(GMouse &m) override;
+	void OnTitleClick(LMouse &m) override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	int OnNotify(GViewI *v, int f) override;
 	void OnPulse() override;

@@ -193,8 +193,8 @@ bool GMdiChild::PourAll()
 	#if !MDI_TAB_STYLE
 	c.Size(2, 2);
 	#endif
-	GRegion Client(c);
-	GRegion Update;
+	LRegion Client(c);
+	LRegion Update;
 	#if DEBUG_MDI
 	LgiTrace("    GMdiChild::Pour() '%s', cli=%s, vis=%i, children=%i\n",
 		Name(), c.GetStr(), Visible(), Children.Length());
@@ -229,14 +229,14 @@ bool GMdiChild::PourAll()
 	}
 	return true;
 }
-void GMdiChild::OnTitleClick(GMouse &m)
+void GMdiChild::OnTitleClick(LMouse &m)
 {
 	if (!m.IsContextMenu() && m.Down())
 	{
 		Raise();
 	}
 }
-void GMdiChild::OnButtonClick(GMouse &m)
+void GMdiChild::OnButtonClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -353,7 +353,7 @@ void GMdiChild::OnPaint(GSurface *pDC)
 	
 	Pour();
 }
-void GMdiChild::OnMouseClick(GMouse &m)
+void GMdiChild::OnMouseClick(LMouse &m)
 {
 	if (m.Left())
 	{
@@ -498,7 +498,7 @@ LgiCursor GMdiChild::GetCursor(int x, int y)
 	
 	return LCUR_Normal;
 }
-void GMdiChild::OnMouseMove(GMouse &m)
+void GMdiChild::OnMouseMove(LMouse &m)
 {
 	if (IsCapturing())
 	{
@@ -762,7 +762,7 @@ bool GMdiParent::Attach(GViewI *p)
 	bool s = GLayout::Attach(p);
 	if (s)
 	{
-		GetWindow()->RegisterHook(this, GKeyAndMouseEvents);
+		GetWindow()->RegisterHook(this, LKeyAndMouseEvents);
 		OnPosChange();
 	}
 	return s;
@@ -785,7 +785,7 @@ GMdiChild *GMdiParent::IsChild(GViewI *View)
 	
 	return 0;
 }
-bool GMdiParent::OnViewMouse(GView *View, GMouse &m)
+bool GMdiParent::OnViewMouse(GView *View, LMouse &m)
 {
 	if (m.Down())
 	{
@@ -799,7 +799,7 @@ bool GMdiParent::OnViewMouse(GView *View, GMouse &m)
 	
 	return true;
 }
-bool GMdiParent::OnViewKey(GView *View, GKey &Key)
+bool GMdiParent::OnViewKey(GView *View, LKey &Key)
 {
 	if (Key.Down() && Key.Ctrl() && Key.c16 == '\t')
 	{
@@ -825,7 +825,7 @@ bool GMdiParent::OnViewKey(GView *View, GKey &Key)
 	return false;
 }
 #if MDI_TAB_STYLE
-void GMdiParent::OnMouseClick(GMouse &m)
+void GMdiParent::OnMouseClick(LMouse &m)
 {
 	::GArray<GMdiChild*> Views;
 	if (GetChildren(Views))

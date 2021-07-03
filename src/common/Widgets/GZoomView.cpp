@@ -1457,7 +1457,7 @@ bool GZoomView::Convert(LPointF &p, int x, int y)
 	return false;
 }
 
-void GZoomView::OnMouseClick(GMouse &m)
+void GZoomView::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 		Focus(true);
@@ -1465,7 +1465,7 @@ void GZoomView::OnMouseClick(GMouse &m)
 
 bool GZoomView::OnMouseWheel(double Lines)
 {
-	GMouse m;
+	LMouse m;
 	GetMouse(m);
 	
 	if (m.Ctrl())
@@ -1615,7 +1615,7 @@ bool GZoomView::OnMouseWheel(double Lines)
 
 void GZoomView::OnPulse()
 {
-	GMouse m;
+	LMouse m;
 	if (!GetMouse(m))
 	{
 		LgiTrace("%s:%i - GetMouse failed.\n", _FL);
@@ -1711,7 +1711,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 
 
 	LRect c = GetClient();
-	GRegion Rgn(c);
+	LRegion Rgn(c);
 
 	GSurface *Src = d->pDC;
 	if (Src)

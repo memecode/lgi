@@ -62,12 +62,12 @@ public:
 	#endif
 
 	bool Attach(GViewI *p) override;
-	bool Pour(GRegion &r) override;
+	bool Pour(LRegion &r) override;
 	void OnPaint(GSurface *pDC) override;
 	void OnPosChange() override;
-	void OnMouseClick(GMouse &m) override;
-	void OnMouseMove(GMouse &m) override;
-	void OnMouseExit(GMouse &m) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseMove(LMouse &m) override;
+	void OnMouseExit(LMouse &m) override;
 	int OnHitTest(int x, int y) override;
 	void OnChildrenChanged(GViewI *Wnd, bool Attaching) override;
 	LgiCursor GetCursor(int x, int y) override;

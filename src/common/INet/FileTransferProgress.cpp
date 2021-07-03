@@ -76,7 +76,7 @@ public:
 	int OnNotify(GViewI *Ctrl, int Flags);
 	void OnPaint(GSurface *pDC);
 	int64 Value();
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 };
 
 GPaneThrottle::GPaneThrottle(GDom *app)
@@ -173,7 +173,7 @@ int64 GPaneThrottle::Value()
 	return (Slider) ? Slider->Value() : 100;
 }
 
-void GPaneThrottle::OnMouseClick(GMouse &m)
+void GPaneThrottle::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{

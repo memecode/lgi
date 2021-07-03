@@ -25,7 +25,7 @@ public:
 
 	GMessage::Result OnEvent(GMessage *Msg);
 	void OnPaint(GSurface *pDC);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 };
 
 #endif

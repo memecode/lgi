@@ -441,7 +441,7 @@ int GRadioButton::OnNotify(GViewI *Ctrl, int Flags)
 	}
 	return 0;
 }
-bool GRadioButton::OnKey(GKey &k)
+bool GRadioButton::OnKey(LKey &k)
 {
 	bool Status = false;
 	int Move = 0;

@@ -161,7 +161,7 @@ void DocEdit::OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour)
 		}
 	}
 }
-void DocEdit::OnMouseClick(GMouse &m)
+void DocEdit::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -280,7 +280,7 @@ bool DocEdit::GetVisible(GStyle &s)
 	s.Len = b - a + 1;
 	return true;
 }
-bool DocEdit::Pour(GRegion &r)
+bool DocEdit::Pour(LRegion &r)
 {
 	LRect c = r.Bound();
 	c.y2 -= EDIT_TRAY_HEIGHT;
@@ -306,7 +306,7 @@ bool DocEdit::Delete(size_t At, ssize_t Len)
 		Invalidate();
 	return Status;
 }
-bool DocEdit::OnKey(GKey &k)
+bool DocEdit::OnKey(LKey &k)
 {
 	#ifdef MAC
 	if (k.Ctrl())

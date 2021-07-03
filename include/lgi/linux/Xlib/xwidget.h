@@ -65,8 +65,8 @@ public:
 	// Internal
 	void _dump(int i=0);
 	bool _isdebug();
-	void _SetClipRgn(GRegion *c); // int Rects, XRectangle *Rect);
-	GRegion *_GetClipRgn(); // int &Rects, XRectangle *&Rect);
+	void _SetClipRgn(LRegion *c); // int Rects, XRectangle *Rect);
+	LRegion *_GetClipRgn(); // int &Rects, XRectangle *&Rect);
 	virtual void _SetDeleteMe();
 	virtual void _SetWndPtr(void *p) {}
 	static XWidget *GetMouseGrabber() { return MouseGrabber; }

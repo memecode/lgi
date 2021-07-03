@@ -946,7 +946,7 @@ char *TextView::ClipText()
 	return ClipData;
 }
 
-int TextView::ProcessKey(GKey &K)
+int TextView::ProcessKey(LKey &K)
 {
 	Flags &= ~(TVF_GOTO_START | TVF_GOTO_END | TVF_EAT_MOVE);
 
@@ -1552,12 +1552,12 @@ void TextView::OnGotoLine()
 {
 }
 
-void TextView::OnEscape(GKey &K)
+void TextView::OnEscape(LKey &K)
 {
 	LgiCloseApp();
 }
 
-void TextView::OnEnter(GKey &K)
+void TextView::OnEnter(LKey &K)
 {
 	OnInsertText("\n");
 	OnMoveCursor(1, 0, TRUE);

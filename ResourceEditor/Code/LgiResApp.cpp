@@ -346,7 +346,7 @@ void ObjTreeItem::OnSelect()
 	}
 }
 
-void ObjTreeItem::OnMouseClick(GMouse &m)
+void ObjTreeItem::OnMouseClick(LMouse &m)
 {
 	if (!Obj) return;
 	if (m.IsContextMenu())
@@ -595,7 +595,7 @@ public:
 		#endif
 	}
 
-	bool OnKey(GKey &k)
+	bool OnKey(LKey &k)
 	{
 		if (!Multiline && (k.c16 == '\t' || k.c16 == LK_RETURN))
 		{
@@ -4361,7 +4361,7 @@ bool ResFrame::Attach(GViewI *p)
 	return Status;
 }
 
-bool ResFrame::Pour(GRegion &r)
+bool ResFrame::Pour(LRegion &r)
 {
 	LRect *Best = FindLargest(r);
 	if (Best)
@@ -4372,7 +4372,7 @@ bool ResFrame::Pour(GRegion &r)
 	return false;
 }
 
-bool ResFrame::OnKey(GKey &k)
+bool ResFrame::OnKey(LKey &k)
 {
 	bool Status = false;
 	

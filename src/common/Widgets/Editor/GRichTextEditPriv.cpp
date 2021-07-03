@@ -1581,7 +1581,7 @@ bool GRichTextPriv::MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, GString
 	return true;
 }
 
-bool GRichTextPriv::ClickBtn(GMouse &m, GRichTextEdit::RectType t)
+bool GRichTextPriv::ClickBtn(LMouse &m, GRichTextEdit::RectType t)
 {
 	switch (t)
 	{
@@ -2422,7 +2422,7 @@ bool GRichTextPriv::GetSelection(GArray<char16> *Text, GAutoString *Html)
 	return true;
 }
 
-GRichTextEdit::RectType GRichTextPriv::PosToButton(GMouse &m)
+GRichTextEdit::RectType GRichTextPriv::PosToButton(LMouse &m)
 {
 	if (Areas[GRichTextEdit::ToolsArea].Overlap(m.x, m.y)
 		// || Areas[GRichTextEdit::CapabilityArea].Overlap(m.x, m.y)

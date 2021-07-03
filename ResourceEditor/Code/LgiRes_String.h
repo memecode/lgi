@@ -84,7 +84,7 @@ public:
 	// Item
 	int GetCols();
 	const char *GetText(int i);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 
 	// Fields
 	bool GetFields(FieldTree &Fields);
@@ -116,7 +116,7 @@ protected:
 	int SortAscend;
 
 	void UpdateColumns();
-	void OnColumnClick(int Col, GMouse &m);
+	void OnColumnClick(int Col, LMouse &m);
 
 public:
 	ResStringGroup(AppWnd *w, int type = TYPE_STRING);
@@ -163,7 +163,7 @@ public:
 	ResStringGroup *IsStringGroup() { return this; }
 
 	// LList
-	void OnItemClick(LListItem *Item, GMouse &m);
+	void OnItemClick(LListItem *Item, LMouse &m);
 	void OnItemSelect(GArray<LListItem*> &Items);
 };
 

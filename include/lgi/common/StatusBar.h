@@ -14,7 +14,7 @@ public:
 	~GStatusBar();
 
 	const char *GetClass() { return "GStatusBar"; }
-	bool Pour(GRegion &r);
+	bool Pour(LRegion &r);
 	void OnPaint(GSurface *pDC);
 	void OnPosChange();
 

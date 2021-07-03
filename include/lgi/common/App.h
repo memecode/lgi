@@ -138,8 +138,8 @@ protected:
 	
 	#endif
 
-	friend class GMouseHook;
-	static GMouseHook *MouseHook;
+	friend class LMouseHook;
+	static LMouseHook *MouseHook;
 
 public:
 	// Static publics
@@ -277,7 +277,7 @@ public:
 	);
 
 	/// Get the mouse hook instance
-	GMouseHook *GetMouseHook();
+	LMouseHook *GetMouseHook();
 
 	/// Gets the singleton symbol lookup class
 	class GSymLookup *GetSymLookup();

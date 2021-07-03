@@ -69,7 +69,7 @@ public:
 		return 0;
 	}	
 
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		if (App && m.Left() && m.Down())
 			App->GotoObject(Str, Grp, Dialog, Menu, Ctrl);

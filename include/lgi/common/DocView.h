@@ -397,9 +397,9 @@ public:
 	///////////////////////////////////////////////////////////////////////
 
 	/// Called when the user hits the escape key
-	virtual void OnEscape(GKey &K) {}
+	virtual void OnEscape(LKey &K) {}
 	/// Called when the user hits the enter key
-	virtual void OnEnter(GKey &k) {}
+	virtual void OnEnter(LKey &k) {}
 	/// Called when the user clicks a URL
 	virtual void OnUrl(char *Url) {}
 	/// Called to add styling to the document

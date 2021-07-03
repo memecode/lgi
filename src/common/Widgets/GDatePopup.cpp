@@ -150,7 +150,7 @@ void GDatePopup::OnChange()
 
 }
 
-void GDatePopup::OnMouseClick(GMouse &m)
+void GDatePopup::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -196,7 +196,7 @@ void GDatePopup::Move(int Dx, int Dy)
 	Invalidate();
 }
 
-bool GDatePopup::OnKey(GKey &k)
+bool GDatePopup::OnKey(LKey &k)
 {
 	switch (k.vkey)
 	{
@@ -324,7 +324,7 @@ void GDateDropDown::SetDate(char *d)
 	}
 }
 
-void GDateDropDown::OnMouseClick(GMouse &m)
+void GDateDropDown::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{

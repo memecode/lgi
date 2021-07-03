@@ -43,7 +43,7 @@ public:
 	GArray<int> Types;
 	#endif
 	::GArray<GViewI*> DeleteLater;
-	GMouse LastMove;
+	LMouse LastMove;
 	GAutoString Name;
 	::GArray<Gtk::guint> IdleId;
 	

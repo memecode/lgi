@@ -63,11 +63,11 @@ public:
 			if (!GetViewById(IDC_FILES, Lst))
 				return;
 
-			RegisterHook(this, GKeyEvents, 0);
+			RegisterHook(this, LKeyEvents, 0);
 		}
 	}
 
-	bool OnViewKey(GView *v, GKey &k)
+	bool OnViewKey(GView *v, LKey &k)
 	{
 		switch (k.vkey)
 		{

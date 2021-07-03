@@ -294,7 +294,7 @@ void GControl::MouseClickEvent(bool Down)
 {
 	static int LastX = -1, LastY = -1;
 
-	GMouse m;
+	LMouse m;
 	BPoint Pt;
 	uint32 Buttons;
 	
@@ -441,7 +441,7 @@ void GSlider::OnPaint(GSurface *pDC)
 	pDC->Rectangle(&t);
 }
 
-void GSlider::OnMouseClick(GMouse &m)
+void GSlider::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -458,7 +458,7 @@ void GSlider::OnMouseClick(GMouse &m)
 	}
 }
 
-void GSlider::OnMouseMove(GMouse &m)
+void GSlider::OnMouseMove(LMouse &m)
 {
 	if (IsCapturing())
 	{

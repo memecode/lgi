@@ -603,7 +603,7 @@ void GRadioButton::Value(int64 i)
 	}
 }
 
-void GRadioButton::OnMouseClick(GMouse &m)
+void GRadioButton::OnMouseClick(LMouse &m)
 {
 	if (Enabled())
 	{
@@ -627,7 +627,7 @@ void GRadioButton::OnMouseClick(GMouse &m)
 	}
 }
 
-void GRadioButton::OnMouseEnter(GMouse &m)
+void GRadioButton::OnMouseEnter(LMouse &m)
 {
 	if (Enabled() && IsCapturing())
 	{
@@ -636,7 +636,7 @@ void GRadioButton::OnMouseEnter(GMouse &m)
 	}
 }
 
-void GRadioButton::OnMouseExit(GMouse &m)
+void GRadioButton::OnMouseExit(LMouse &m)
 {
 	if (Enabled() && IsCapturing())
 	{
@@ -645,7 +645,7 @@ void GRadioButton::OnMouseExit(GMouse &m)
 	}
 }
 
-bool GRadioButton::OnKey(GKey &k)
+bool GRadioButton::OnKey(LKey &k)
 {
 	bool Status = false;
 	int Move = 0;

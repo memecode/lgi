@@ -128,7 +128,7 @@ public:
 
 	int Main()
 	{
-		GMouse Old;
+		LMouse Old;
 		GView v;
 
 		while (Loop)
@@ -143,7 +143,7 @@ public:
 			}
 			
 			// Now loop for events...
-			GMouse Cur, Prev;
+			LMouse Cur, Prev;
 			Prev.Down(true);
 			do
 			{
@@ -183,7 +183,7 @@ public:
 
 			#else
 			
-			GMouse m;
+			LMouse m;
 			v.GetMouse(m, true);
 
 			if (LockWithTimeout(100, _FL))
@@ -419,18 +419,18 @@ public:
 	}
 };
 
-GMouseHook::GMouseHook()
+LMouseHook::LMouseHook()
 {
 	d = new GMouseHookPrivate;
 }
 
-GMouseHook::~GMouseHook()
+LMouseHook::~LMouseHook()
 {
 	d->Lock(_FL);
 	DeleteObj(d);
 }
 
-void GMouseHook::TrackClick(GView *v)
+void LMouseHook::TrackClick(GView *v)
 {
 	#ifdef MAC
 	if (v)
@@ -450,7 +450,7 @@ void GMouseHook::TrackClick(GView *v)
 	#endif
 }
 
-bool GMouseHook::OnViewKey(GView *v, GKey &k)
+bool LMouseHook::OnViewKey(GView *v, LKey &k)
 {
 	bool Status = false;
 
@@ -473,7 +473,7 @@ bool GMouseHook::OnViewKey(GView *v, GKey &k)
 	return Status;
 }
 
-void GMouseHook::RegisterPopup(GPopup *p)
+void LMouseHook::RegisterPopup(GPopup *p)
 {
 	if (d->Lock(_FL))
 	{
@@ -485,7 +485,7 @@ void GMouseHook::RegisterPopup(GPopup *p)
 	}
 }
 
-void GMouseHook::UnregisterPopup(GPopup *p)
+void LMouseHook::UnregisterPopup(GPopup *p)
 {
 	if (d->Lock(_FL))
 	{
@@ -495,7 +495,7 @@ void GMouseHook::UnregisterPopup(GPopup *p)
 }
 
 #if defined(WIN32)
-LRESULT CALLBACK GMouseHook::MouseProc(int Code, WPARAM a, LPARAM b)
+LRESULT CALLBACK LMouseHook::MouseProc(int Code, WPARAM a, LPARAM b)
 {
 	return 0;
 }
@@ -599,7 +599,7 @@ GPopup::~GPopup()
 		#endif
 	}
 
-	GMouseHook *Hook = LgiApp->GetMouseHook();
+	LMouseHook *Hook = LgiApp->GetMouseHook();
 	if (Hook) Hook->UnregisterPopup(this);
 
 	while (Children.Length())
@@ -886,7 +886,7 @@ void GPopup::Visible(bool i)
 		{
 			Start = LgiCurrentTime();
 
-			GMouseHook *Hook = LgiApp->GetMouseHook();
+			LMouseHook *Hook = LgiApp->GetMouseHook();
 			if (Hook)
 				Hook->RegisterPopup(this);
 
@@ -904,7 +904,7 @@ void GPopup::Visible(bool i)
 		}
 		else
 		{
-			GMouseHook *Hook = LgiApp->GetMouseHook();
+			LMouseHook *Hook = LgiApp->GetMouseHook();
 			if (Hook)
 				Hook->UnregisterPopup(this);
 
@@ -1132,7 +1132,7 @@ void GDropDown::Activate()
 	Invalidate();
 }
 
-bool GDropDown::OnKey(GKey &k)
+bool GDropDown::OnKey(LKey &k)
 {
 	if (k.IsChar && (k.c16 == ' ' || k.vkey == LK_RETURN))
 	{
@@ -1156,7 +1156,7 @@ bool GDropDown::OnKey(GKey &k)
 	return false;
 }
 
-void GDropDown::OnMouseClick(GMouse &m)
+void GDropDown::OnMouseClick(LMouse &m)
 {
 	if (Popup && m.Down())
 	{

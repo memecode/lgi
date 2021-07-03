@@ -50,7 +50,7 @@ bool GDragDropSource::GetData(GArray<GDragData> &DragData)
 	return GetData(v, fmt);
 }
 
-bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::Array &Files)
+bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, GString::Array &Files)
 {
 	if (OutputData && Files.First())
 	{
@@ -70,7 +70,7 @@ int GDragDropSource::Drag(GView *SourceWnd, int Effect)
 		BMessage Msg(M_DRAG_DROP);
 		Msg.AddPointer("GDragDropSource", this);
 
-		GMouse m;
+		LMouse m;
 		SourceWnd->GetMouse(m);
 		BRect r(m.x, m.y, m.x+14, m.y+14);
 

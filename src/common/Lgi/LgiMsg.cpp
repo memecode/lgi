@@ -27,10 +27,10 @@ class GMsgDlg : public LDialog
 public:
 	GMsgDlg()
 	{
-		RegisterHook(this, GKeyEvents);
+		RegisterHook(this, LKeyEvents);
 	}
 
-	bool OnViewKey(GView *v, GKey &k)
+	bool OnViewKey(GView *v, LKey &k)
 	{
 		if (k.Down())
 		{

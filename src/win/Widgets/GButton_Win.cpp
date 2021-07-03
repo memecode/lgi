@@ -296,19 +296,19 @@ GMessage::Result GButton::OnEvent(GMessage *Msg)
 	return r;
 }
 
-void GButton::OnMouseClick(GMouse &m)
+void GButton::OnMouseClick(LMouse &m)
 {
 }
 
-void GButton::OnMouseEnter(GMouse &m)
+void GButton::OnMouseEnter(LMouse &m)
 {
 }
 
-void GButton::OnMouseExit(GMouse &m)
+void GButton::OnMouseExit(LMouse &m)
 {
 }
 
-bool GButton::OnKey(GKey &k)
+bool GButton::OnKey(LKey &k)
 {
 	switch (k.vkey)
 	{

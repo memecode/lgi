@@ -47,8 +47,8 @@ public:
 	
 	#if !WINNATIVE
 	void OnPaint(GSurface *pDC);
-	void OnMouseClick(GMouse &m);
-	void OnMouseMove(GMouse &m);
+	void OnMouseClick(LMouse &m);
+	void OnMouseMove(LMouse &m);
 	#endif
 
 	/// Gets the limits of the slider (use GetRange)

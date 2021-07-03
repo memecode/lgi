@@ -199,7 +199,7 @@ public:
 	// Impl
 	const char *GetText(int Col);
 	int GetImage(int Flags);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 };
 
 class IdeTree : public GTree, public GDragDropTarget

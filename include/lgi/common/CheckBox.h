@@ -66,10 +66,10 @@ public:
     bool OnLayout(GViewLayoutInfo &Inf) override;
 	int BoxSize();
 
-	void OnMouseClick(GMouse &m) override;
-	void OnMouseEnter(GMouse &m) override;
-	void OnMouseExit(GMouse &m) override;
-	bool OnKey(GKey &k) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseEnter(LMouse &m) override;
+	void OnMouseExit(LMouse &m) override;
+	bool OnKey(LKey &k) override;
 	void OnFocus(bool f) override;
 	void OnPosChange() override;
 	void OnPaint(GSurface *pDC) override;

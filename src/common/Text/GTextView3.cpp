@@ -3359,7 +3359,7 @@ void GTextView3::OnCreate()
 	#endif
 }
 
-void GTextView3::OnEscape(GKey &K)
+void GTextView3::OnEscape(LKey &K)
 {
 }
 
@@ -3460,7 +3460,7 @@ void GTextView3::Redo()
 	UndoQue.Redo();
 }
 
-void GTextView3::DoContextMenu(GMouse &m)
+void GTextView3::DoContextMenu(LMouse &m)
 {
 	LSubMenu RClick;
 	GAutoString ClipText;
@@ -3609,7 +3609,7 @@ void GTextView3::DoContextMenu(GMouse &m)
 	}
 }
 
-bool GTextView3::OnStyleClick(GStyle *style, GMouse *m)
+bool GTextView3::OnStyleClick(GStyle *style, LMouse *m)
 {
 	switch (style->Owner)
 	{
@@ -3692,7 +3692,7 @@ void GTextView3::OnStyleMenuClick(GStyle *style, int i)
 	}
 }
 
-void GTextView3::OnMouseClick(GMouse &m)
+void GTextView3::OnMouseClick(LMouse &m)
 {
 	bool Processed = false;
 
@@ -3748,7 +3748,7 @@ int GTextView3::OnHitTest(int x, int y)
 	return GView::OnHitTest(x, y);
 }
 
-void GTextView3::OnMouseMove(GMouse &m)
+void GTextView3::OnMouseMove(LMouse &m)
 {
 	m.x += ScrollX;
 
@@ -3837,7 +3837,7 @@ int GTextView3::SpaceDepth(char16 *Start, char16 *End)
 	return Depth;
 }
 
-bool GTextView3::OnKey(GKey &k)
+bool GTextView3::OnKey(LKey &k)
 {
 	if (k.Down())
 	{
@@ -3848,7 +3848,7 @@ bool GTextView3::OnKey(GKey &k)
 
 	if (k.IsContextMenu())
 	{
-		GMouse m;
+		LMouse m;
 		m.x = CursorPos.x1;
 		m.y = CursorPos.y1 + (CursorPos.Y() >> 1);
 		m.Target = this;
@@ -4683,7 +4683,7 @@ bool GTextView3::OnKey(GKey &k)
 	return false;
 }
 
-void GTextView3::OnEnter(GKey &k)
+void GTextView3::OnEnter(LKey &k)
 {
 	// enter
 	if (SelStart >= 0)

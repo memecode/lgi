@@ -116,7 +116,7 @@ GSubMenu *SubMenuImpl::GetSub()
 	return d->Sub;
 }
 
-bool SubMenuImpl::OnKey(GKey &k)
+bool SubMenuImpl::OnKey(LKey &k)
 {
 	bool Status = false;
 	
@@ -442,7 +442,7 @@ void MenuImpl::OnPaint(GSurface *pDC)
     pDC->Rectangle(&c);
 }
 
-bool MenuImpl::Pour(GRegion &r)
+bool MenuImpl::Pour(LRegion &r)
 {
 	LRect *p = FindLargest(r);
 	if (!p)
@@ -631,7 +631,7 @@ void MenuItemImpl::ShowSub()
 	else printf("%s:%i - No child menu, huh?\n", _FL);
 }
 
-void MenuItemImpl::OnMouseClick(GMouse &m)
+void MenuItemImpl::OnMouseClick(LMouse &m)
 {
 	// m.Trace("MenuItemImpl::OnMouseClick");
 	if (m.Down())
@@ -679,7 +679,7 @@ void MenuItemImpl::OnMouseClick(GMouse &m)
 	}
 }
 
-void MenuItemImpl::OnMouseEnter(GMouse &m)
+void MenuItemImpl::OnMouseEnter(LMouse &m)
 {
 	if (d->Item->Enabled() && !d->Item->Separator())
 	{
@@ -713,7 +713,7 @@ void MenuItemImpl::OnMouseEnter(GMouse &m)
 	}
 }
 
-void MenuItemImpl::OnMouseExit(GMouse &m)
+void MenuItemImpl::OnMouseExit(LMouse &m)
 {
 	/*
 	if (Over)

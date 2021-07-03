@@ -104,9 +104,9 @@ lgi_widget_remove(GtkContainer *wid, GtkWidget *child)
 		gtk_widget_queue_resize(GTK_WIDGET(wid));
 }
 
-GMouse _map_mouse_event(GView *v, int x, int y, bool Motion, bool Debug = false)
+LMouse _map_mouse_event(GView *v, int x, int y, bool Motion, bool Debug = false)
 {
-	GMouse m;
+	LMouse m;
 
 	auto View = v->WindowFromPoint(x, y, Debug);
 	LPoint Offset;
@@ -160,7 +160,7 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 		return false;
 	}
 	
-	GMouse m = _map_mouse_event(v, ev->x, ev->y, false);
+	LMouse m = _map_mouse_event(v, ev->x, ev->y, false);
 	/* This breaks capturing... e.g.
 		If the user clicks something that captures the mouse then drags the mouse off the window,
 		releases the mouse button, then moves back over the window, it would still think the mouse
@@ -208,7 +208,7 @@ gboolean lgi_widget_motion(GtkWidget *widget, GdkEventMotion *ev)
 	if (!v)
 		return false;
 
-	GMouse m = _map_mouse_event(v, ev->x, ev->y, true);
+	LMouse m = _map_mouse_event(v, ev->x, ev->y, true);
 	if (!m.Target)
 		return false;
 
@@ -230,7 +230,7 @@ static gboolean lgi_widget_scroll(GtkWidget *widget, GdkEventScroll *ev)
 	{
 		double Lines = ev->direction == GDK_SCROLL_DOWN ? 3 : -3;
 
-		GMouse m = _map_mouse_event(v, ev->x, ev->y, true);
+		LMouse m = _map_mouse_event(v, ev->x, ev->y, true);
 		if (!m.Target)
 			return false;
 
@@ -245,7 +245,7 @@ static gboolean lgi_widget_mouse_enter_leave(GtkWidget *widget, GdkEventCrossing
 	GView *v = dynamic_cast<GView*>(p->target);
 	if (v)
 	{
-		GMouse m;
+		LMouse m;
 		m.Target = v;
 		m.x = ev->x;
 		m.y = ev->y;
@@ -302,7 +302,7 @@ gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 		printf("%s:%i - No target??\n", _FL);
 	else
 	{
-		GKey k;
+		LKey k;
 		k.Down(e->type == GDK_KEY_PRESS);
 		k.c16 = k.vkey = e->keyval;
 		k.Shift((e->state & 1) != 0);

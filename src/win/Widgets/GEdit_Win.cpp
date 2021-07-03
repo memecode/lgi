@@ -365,7 +365,7 @@ void GEdit::KeyProcessed()
 	d->NotificationProcessed = true;
 }
 
-bool GEdit::OnKey(GKey &k)
+bool GEdit::OnKey(LKey &k)
 {
 	if (k.Down())
 		d->NotificationProcessed = false;

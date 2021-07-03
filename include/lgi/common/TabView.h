@@ -75,11 +75,11 @@ public:
 	GViewI *FindControl(HWND hCtrl);
 	#endif
 
-	int HitTest(GMouse &m);
-	void OnMouseClick(GMouse &m);
+	int HitTest(LMouse &m);
+	void OnMouseClick(LMouse &m);
 	void OnPosChange();
 	void OnPaint(GSurface *pDC);
-	bool OnKey(GKey &k);
+	bool OnKey(LKey &k);
 	void OnFocus(bool f);
 	void OnCreate();
 	void OnAttach();
@@ -114,13 +114,13 @@ class LgiClass GTabPage :
 	LRect BtnPos;
 
 	/// This is called when the user clicks the button
-	virtual void OnButtonClick(GMouse &m);
+	virtual void OnButtonClick(LMouse &m);
 
 	/// This draws the button (should only draw within 'BtnPos')
 	virtual void OnButtonPaint(GSurface *pDC);
 
 	/// This is called when the user clicks the button
-	virtual void OnTabClick(GMouse &m);
+	virtual void OnTabClick(LMouse &m);
 
 public:
 	GTabPage(const char *name);
@@ -139,7 +139,7 @@ public:
 
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	void OnPaint(GSurface *pDC) override;
-	bool OnKey(GKey &k) override;
+	bool OnKey(LKey &k) override;
 	void OnFocus(bool b) override;
 	void OnStyleChange();
 	void SetFont(GFont *Font, bool OwnIt = false) override;

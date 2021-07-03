@@ -241,8 +241,8 @@ public:
 	ResFrame(Resource *child);
 	~ResFrame();
 
-	bool Pour(GRegion &r);
-	bool OnKey(GKey &k);
+	bool Pour(LRegion &r);
+	bool OnKey(LKey &k);
 	void OnPaint(GSurface *pDC);
 	bool Attach(GViewI *p);
 	void OnFocus(bool b);
@@ -261,7 +261,7 @@ public:
 	Resource *GetObj() { return Obj; }
 	const char *GetText(int i=0);
 	void OnSelect();
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 };
 
 class ObjContainer : public GTree

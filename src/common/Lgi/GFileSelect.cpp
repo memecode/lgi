@@ -156,7 +156,7 @@ public:
 	void OnSelect();
 	void OnDelete(bool Ask = true);
 	void OnRename();
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 };
 
 
@@ -330,7 +330,7 @@ public:
 		Invalidate();
 	}
 
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		if (Enabled())
 		{
@@ -348,7 +348,7 @@ public:
 		}
 	}
 
-	void OnMouseEnter(GMouse &m)
+	void OnMouseEnter(LMouse &m)
 	{
 		if (IsCapturing())
 		{
@@ -357,7 +357,7 @@ public:
 		}
 	}
 
-	void OnMouseExit(GMouse &m)
+	void OnMouseExit(LMouse &m)
 	{
 		if (IsCapturing())
 		{
@@ -366,7 +366,7 @@ public:
 		}
 	}
 
-	bool OnKey(GKey &k)
+	bool OnKey(LKey &k)
 	{
 		if (k.c16 == ' ' || k.c16 == LK_RETURN)
 		{
@@ -409,7 +409,7 @@ public:
 	}	
 
 	void OnFolder();
-	bool OnKey(GKey &k);
+	bool OnKey(LKey &k);
 	void SetFilterKey(GString s) { FilterKey = s; OnFolder(); }
 };
 
@@ -633,7 +633,7 @@ public:
 		}
 	}
 
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		if (m.IsContextMenu())
 		{
@@ -676,7 +676,7 @@ public:
 		}
 	}
 
-	void OnMouseMove(GMouse &m)
+	void OnMouseMove(LMouse &m)
 	{
 		Part *o = Over;
 		Over = HitPart(m.x, m.y);
@@ -684,7 +684,7 @@ public:
 			Invalidate();
 	}
 	
-	void OnMouseExit(GMouse &m)
+	void OnMouseExit(LMouse &m)
 	{
 		if (Over)
 		{
@@ -819,7 +819,7 @@ public:
 	void OnFile(char *f);
 	void OnFilter(const char *Key);
 
-	bool OnViewKey(GView *v, GKey &k)
+	bool OnViewKey(GView *v, LKey &k)
 	{
 		if (k.vkey == LK_UP && k.Alt())
 		{
@@ -1039,7 +1039,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	SetPos(d->InitSize);
 	MoveToCenter();
 
-	RegisterHook(this, GKeyEvents);
+	RegisterHook(this, LKeyEvents);
 	FileLst->Focus(true);
 	
 	LgiGetUsersLinks(Links);
@@ -1441,8 +1441,8 @@ public:
 	}
 
 	void OnPath(const char *p);
-	void OnMouseClick(GMouse &m);
-	bool OnKey(GKey &k);
+	void OnMouseClick(LMouse &m);
+	bool OnKey(LKey &k);
 };
 
 #define IDC_TREE 100
@@ -1639,7 +1639,7 @@ void GFileSystemItem::OnPath(const char *p)
 	}
 }
 
-void GFileSystemItem::OnMouseClick(GMouse &m)
+void GFileSystemItem::OnMouseClick(LMouse &m)
 {
 	if (m.Left() && m.Down())
 	{
@@ -1647,7 +1647,7 @@ void GFileSystemItem::OnMouseClick(GMouse &m)
 	}
 }
 
-bool GFileSystemItem::OnKey(GKey &k)
+bool GFileSystemItem::OnKey(LKey &k)
 {
 	if ((k.c16 == ' ' || k.c16 == LK_RETURN))
 	{
@@ -1784,7 +1784,7 @@ void GFolderItem::OnActivate()
 	}
 }
 
-void GFolderItem::OnMouseClick(GMouse &m)
+void GFolderItem::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -1868,7 +1868,7 @@ GFolderList::GFolderList(GFileSelectDlg *dlg, int Id, int x, int y, int cx, int 
 	SetMode(LListColumns);
 }
 
-bool GFolderList::OnKey(GKey &k)
+bool GFolderList::OnKey(LKey &k)
 {
 	bool Status = LList::OnKey(k);
 	

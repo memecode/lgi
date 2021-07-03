@@ -385,7 +385,7 @@ bool ProjectNode::GetData(GArray<GDragData> &Data)
 	return false;
 }
 
-bool ProjectNode::OnBeginDrag(GMouse &m)
+bool ProjectNode::OnBeginDrag(LMouse &m)
 {
 	return Drag(Tree, m.Event, DROPEFFECT_MOVE);
 }
@@ -935,7 +935,7 @@ void ProjectNode::Delete()
 	delete this;
 }
 
-bool ProjectNode::OnKey(GKey &k)
+bool ProjectNode::OnKey(LKey &k)
 {
 	if (k.Down())
 	{
@@ -954,7 +954,7 @@ bool ProjectNode::OnKey(GKey &k)
 	return false;
 }
 
-void ProjectNode::OnMouseClick(GMouse &m)
+void ProjectNode::OnMouseClick(LMouse &m)
 {
 	GTreeItem::OnMouseClick(m);
 	

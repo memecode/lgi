@@ -236,7 +236,7 @@ public:
 	const char *GetClass() { return "SelectColour"; }
 
 	void OnPaint(GSurface *pDC);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	void Visible(bool i);
 };
 
@@ -261,7 +261,7 @@ public:
 	EmojiMenu(GRichTextPriv *priv, LPoint p);
 
 	void OnPaint(GSurface *pDC);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	void Visible(bool i);
 	bool InsertEmoji(uint32_t Ch);
 };
@@ -1252,7 +1252,7 @@ public:
 	bool ChangeSelectionStyle(GCss *Style, bool Add);
 	void PaintBtn(GSurface *pDC, GRichTextEdit::RectType t);
 	bool MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, GString Link);
-	bool ClickBtn(GMouse &m, GRichTextEdit::RectType t);
+	bool ClickBtn(LMouse &m, GRichTextEdit::RectType t);
 	bool InsertHorzRule();
 	void Paint(GSurface *pDC, GScrollBar *&ScrollY);
 	GHtmlElement *CreateElement(GHtmlElement *Parent);
@@ -1260,7 +1260,7 @@ public:
 	LPoint DocToScreen(int x, int y);
 	bool Merge(Transaction *Trans, Block *a, Block *b);
 	bool DeleteSelection(Transaction *t, char16 **Cut);
-	GRichTextEdit::RectType PosToButton(GMouse &m);
+	GRichTextEdit::RectType PosToButton(LMouse &m);
 	void OnComponentInstall(GString Name);
 
 	struct CreateContext

@@ -233,7 +233,7 @@ private:
 /////////////////////////////////////////////////////////////////////////////
 GSkinEngine *GApp::SkinEngine = 0;
 GApp *TheApp = 0;
-GMouseHook *GApp::MouseHook = 0;
+LMouseHook *GApp::MouseHook = 0;
 
 GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
@@ -286,7 +286,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	d->App = gtk_application_new(id, G_APPLICATION_FLAGS_NONE); 
 	LgiAssert(d->App != NULL);
 
-	MouseHook = new GMouseHook;
+	MouseHook = new LMouseHook;
 
 	#if 0
 	// Setup the SIGSEGV signal to call the KDE crash handler
@@ -392,7 +392,7 @@ bool GApp::IsOk()
 	return Status;
 }
 
-GMouseHook *GApp::GetMouseHook()
+LMouseHook *GApp::GetMouseHook()
 {
 	return MouseHook;
 }

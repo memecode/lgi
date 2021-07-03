@@ -59,7 +59,7 @@ int MouseRollMsg = 0;
 #define SetKeyFlag(v, k, f)		if (GetKeyState(k)&0xFF00) { v |= f; }
 
 
-GKey::GKey(int v, int flags)
+LKey::LKey(int v, int flags)
 {
 	const char *Cp = 0;
 
@@ -267,7 +267,7 @@ void GView::PointToView(LPoint &p)
 	}
 }
 
-bool GView::GetMouse(GMouse &m, bool ScreenCoords)
+bool GView::GetMouse(LMouse &m, bool ScreenCoords)
 {
 	Uint8 btn = SDL_GetMouseState(&m.x, &m.y);
 	m.Left((SDL_BUTTON(SDL_BUTTON_LEFT) & btn) != 0);
@@ -371,7 +371,7 @@ void GView::DrawThemeBorder(GSurface *pDC, LRect &r)
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
 }
 
-bool IsKeyChar(GKey &k, int vk)
+bool IsKeyChar(LKey &k, int vk)
 {
 	if (k.Ctrl() || k.Alt() || k.System())
 		return false;
@@ -437,7 +437,7 @@ GView *&GView::PopupChild()
 	return d->Popup;
 }
 
-bool GView::_Mouse(GMouse &m, bool Move)
+bool GView::_Mouse(LMouse &m, bool Move)
 {
 	GWindow *Wnd = GetWindow();
 	if (Wnd && !Wnd->HandleViewMouse(this, m))
@@ -464,7 +464,7 @@ bool GView::_Mouse(GMouse &m, bool Move)
 	{
 		if (Move)
 		{
-			GMouse Local = lgi_adjust_click(m, _Capturing);
+			LMouse Local = lgi_adjust_click(m, _Capturing);
 			_Capturing->OnMouseMove(Local); // This can set _Capturing to NULL
 		}
 		else
