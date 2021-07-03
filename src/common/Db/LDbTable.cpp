@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "LDbTable.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DbTable.h"
 
 ///////////////////////////////////////////////////////////////////
 #define MAGIC(v) LgiSwap32(v)

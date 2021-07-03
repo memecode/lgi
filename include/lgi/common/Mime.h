@@ -2,8 +2,8 @@
 #define _GMIME_H_
 
 #include "LgiNetInc.h"
-#include "GStream.h"
-#include "INetTools.h"
+#include "lgi/common/Stream.h"
+#include "lgi/common/NetTools.h"
 
 extern void CreateMimeBoundary(char *Buf, int BufLen);
 

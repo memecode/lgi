@@ -48,9 +48,9 @@
 
 
 #include "LgiInterfaces.h"
-#include "GMime.h"
-#include "GOptionsFile.h"
-#include "LVariant.h"
+#include "lgi/common/Mime.h"
+#include "lgi/common/OptionsFile.h"
+#include "lgi/common/Variant.h"
 
 class GDataI;
 class GDataFolderI;

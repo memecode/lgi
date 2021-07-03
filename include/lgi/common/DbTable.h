@@ -1,7 +1,7 @@
 #ifndef _DB_TABLE_H_
 #define _DB_TABLE_H_
 
-#include "LVariant.h"
+#include "lgi/common/Variant.h"
 #include "Store3.h"
 
 struct DbTablePriv;
