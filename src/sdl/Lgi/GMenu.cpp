@@ -835,7 +835,7 @@ bool GMenu::Attach(LViewI *p)
 {
 	bool Status = false;
 
-	GWindow *w = dynamic_cast<GWindow*>(p);
+	LWindow *w = dynamic_cast<LWindow*>(p);
 	if (w)
 	{
 		Window = p;

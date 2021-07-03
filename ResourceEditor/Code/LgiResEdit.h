@@ -675,7 +675,7 @@ public:
 	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
-class ShortCutView : public GWindow
+class ShortCutView : public LWindow
 {
 	AppWnd *App;
 	LList *Lst;
@@ -832,7 +832,7 @@ public:
 	GMessage::Result OnEvent(GMessage *Msg);
 };
 
-class Search : public GDialog, public SearchParams
+class Search : public LDialog, public SearchParams
 {
 	AppWnd *App;
 	GAutoPtr<SearchThread> Thread;
@@ -843,7 +843,7 @@ public:
 	int OnNotify(LViewI *c, int f);
 };
 
-class Results : public GWindow
+class Results : public LWindow
 {
 	class ResultsPrivate *d;
 
@@ -856,7 +856,7 @@ public:
 
 };
 
-class ShowLanguagesDlg : public GDialog
+class ShowLanguagesDlg : public LDialog
 {
 	class ShowLanguagesDlgPriv *d;
 

@@ -185,7 +185,7 @@ public:
 	GMessage::Result OnEvent(GMessage *Msg);
 };
 
-class LangDlg : public GDialog
+class LangDlg : public LDialog
 {
 	GCombo *Sel;
 	List<GLanguage> Langs;

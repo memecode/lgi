@@ -74,7 +74,7 @@ GColourSpace RgbColourSpaces[] =
 	CsNone,
 };
 
-class BltTest : public GWindow
+class BltTest : public LWindow
 {
 	struct Test
 	{
@@ -210,7 +210,7 @@ public:
 	}
 };
 
-class App : public GWindow
+class App : public LWindow
 {
 	GOptionsFile Opts;
 	GEdit *e;

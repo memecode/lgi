@@ -384,7 +384,7 @@ public:
 	}
 };
 
-class ToolBar : public GLayout, public GLgiRes
+class ToolBar : public GLayout, public LResourceLoad
 {
 public:
 	ToolBar()
@@ -436,7 +436,7 @@ public:
 	}
 };
 
-class CommitCtrls : public GLayout, public GLgiRes
+class CommitCtrls : public GLayout, public LResourceLoad
 {
 public:
 	CommitCtrls()
@@ -497,7 +497,7 @@ GString::Array GetProgramsInPath(const char *Program)
 	return Bin;
 }
 
-class OptionsDlg : public GDialog, public LXmlTreeUi
+class OptionsDlg : public LDialog, public LXmlTreeUi
 {
 	GOptionsFile &Opts;
 
@@ -601,7 +601,7 @@ public:
 			}
 		}
 
-		return GDialog::OnNotify(Ctrl, Flags);
+		return LDialog::OnNotify(Ctrl, Flags);
 	}
 };
 
@@ -856,7 +856,7 @@ public:
     }
 };
 
-class RemoteFolderDlg : public GDialog
+class RemoteFolderDlg : public LDialog
 {
 	class App *app;
 	GTree *tree;
@@ -961,7 +961,7 @@ public:
 	}
 };
 
-class App : public GWindow, public AppPriv
+class App : public LWindow, public AppPriv
 {
 	GAutoPtr<GImageList> ImgLst;
 	GBox *FoldersBox;
@@ -1153,7 +1153,7 @@ public:
 	{
 		if (Msg->Msg() == M_RESPONSE)
 			SshConnection::HandleMsg(Msg);
-		return GWindow::OnEvent(Msg);
+		return LWindow::OnEvent(Msg);
 	}
 
 	void OnReceiveFiles(GArray<const char*> &Files)

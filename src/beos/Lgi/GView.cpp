@@ -287,9 +287,9 @@ bool LView::Detach()
 
 	if (_Window)
 	{
-		GWindow *Wnd = dynamic_cast<GWindow*>(_Window);
+		LWindow *Wnd = dynamic_cast<LWindow*>(_Window);
 		if (Wnd)
-			Wnd->SetFocus(this, GWindow::ViewDelete);
+			Wnd->SetFocus(this, LWindow::ViewDelete);
 		_Window = NULL;
 	}
 	if (d->GetParent())
@@ -329,7 +329,7 @@ bool LView::IsAttached()
 
 void LView::Quit(bool DontDelete)
 {
-	if (dynamic_cast<GWindow*>(this))
+	if (dynamic_cast<LWindow*>(this))
 	{
 		BWindow *Wnd = WindowHandle();
 		if (Wnd)
@@ -559,7 +559,7 @@ static void SetBeosCursor(LgiCursor c)
 
 bool LView::_Mouse(LMouse &m, bool Move)
 {
-	GWindow *Wnd = GetWindow();
+	LWindow *Wnd = GetWindow();
 
 	#if DEBUG_MOUSE_CLICK
 	if (!Move)
@@ -1009,9 +1009,9 @@ void LView::_Delete()
 		DeleteObj(c);
 	}
 
-	GWindow *w = GetWindow();
+	LWindow *w = GetWindow();
 	if (w)
-		w->SetFocus(this, GWindow::ViewDelete);
+		w->SetFocus(this, LWindow::ViewDelete);
 
 	Detach();	
 	DeleteObj(_View);
@@ -1114,7 +1114,7 @@ void LView::_Key(const char *bytes, int32 numBytes, bool down)
 
 		// k.Trace("sys down");		
 
-		GWindow *w = GetWindow();
+		LWindow *w = GetWindow();
 		if (w)
 			w->HandleViewKey(this, k);
 		else
@@ -1288,7 +1288,7 @@ void BViewRedir::MouseMoved(BPoint point, uint32 transit, const BMessage *messag
 
 bool BViewRedir::QuitRequested()
 {
-	GWindow *App = dynamic_cast<GWindow*>(Wnd);
+	LWindow *App = dynamic_cast<LWindow*>(Wnd);
 	return (App) ? App->QuitRequested() : true;
 }
 

@@ -29,7 +29,7 @@ public:
 	bool Value() { return Inc->Value(); }
 };
 
-class App : public GDialog
+class App : public LDialog
 {
 	LXmlTag *Tree;
 	GList *Inc;

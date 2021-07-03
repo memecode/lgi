@@ -60,12 +60,12 @@ public:
 
 /// \brief A top level dialog window.
 ///
-/// GDialog's can either be modal or modeless. A modal dialog blocks the user from accessing
-/// the parent GWindow until the dialog has been dismissed. A modeless dialog behaves like
+/// LDialog's can either be modal or modeless. A modal dialog blocks the user from accessing
+/// the parent LWindow until the dialog has been dismissed. A modeless dialog behaves like
 /// any other top level window in that it doesn't block the user accessing any other top level
 /// window while it's open.
 ///
-/// GDialog's can be created in two different ways. Firstly you can create code to instantiate
+/// LDialog's can be created in two different ways. Firstly you can create code to instantiate
 /// all the various controls and add them manually to the LView::Children list. Or you can load
 /// all the controls from a resource file. The resource files are in XML format and there is a
 /// graphical tool <a href="http://www.memecode.com/lgires.php">LgiRes</a>.
@@ -74,7 +74,7 @@ public:
 /// \code
 /// #define IDC_STRING			100
 ///
-/// class Example : public GDialog
+/// class Example : public LDialog
 /// {
 /// public:
 ///		char *Str;
@@ -138,7 +138,7 @@ public:
 /// \code
 /// #include "Resdefs.h" // For the dialog defines
 ///
-/// class Example : public GDialog
+/// class Example : public LDialog
 /// {
 /// public:
 ///		char *Str;
@@ -222,7 +222,7 @@ public:
 	/// Destructor
 	~LDialog();
 
-	const char *GetClass() { return "GDialog"; }
+	const char *GetClass() { return "LDialog"; }
 
 	/// Load the dialog from a resource
 	bool LoadFromResource
@@ -251,10 +251,10 @@ public:
 	/// Gets the model status
 	virtual bool IsModal();
 	
-	/// End a modal window. Typically calling in the OnNotify event of the GDialog.
+	/// End a modal window. Typically calling in the OnNotify event of the LDialog.
 	virtual void EndModal(int Code = 0);
 
-	/// End a modeless window. Typically calling in the OnNotify event of the GDialog.
+	/// End a modeless window. Typically calling in the OnNotify event of the LDialog.
 	virtual void EndModeless(int Code = 0);
 
 	GMessage::Result OnEvent(GMessage *Msg);
@@ -264,7 +264,7 @@ public:
 	void Quit(bool DontDelete = false);
 
 	/// By default the dialog will finish when a button is pressed. To override this
-	/// behavior you'll have to subclass GDialog and handle the OnNotify yourself.
+	/// behavior you'll have to subclass LDialog and handle the OnNotify yourself.
 	int OnNotify(LViewI *Ctrl, int Flags);
 
 	/// This returns the ID of the button pressed to close the dialog.

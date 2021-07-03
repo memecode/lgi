@@ -1,6 +1,6 @@
 /// \file
 /// \author Matthew Allen (fret@memecode.com)
-/// \brief Extension to the GWindow class to create a document processing application.
+/// \brief Extension to the LWindow class to create a document processing application.
 #ifndef __GDOCAPP_H
 #define __GDOCAPP_H
 
@@ -30,7 +30,7 @@ enum GDocAppInstallMode
 
 template<typename OptionsFmt>
 class GDocApp :
-	public GWindow,
+	public LWindow,
 	public GMru
 {
 public:

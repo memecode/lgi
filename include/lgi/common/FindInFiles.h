@@ -5,7 +5,7 @@
 #define OPT_SearchFolder	"FIF_Folder"
 #define OPT_SearchPattern	"FIF_Pattern"
 
-class GFindInFiles : public GDialog
+class GFindInFiles : public LDialog
 {
 	struct GFindInFilesPriv *d;
 	

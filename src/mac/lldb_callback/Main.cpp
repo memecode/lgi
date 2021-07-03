@@ -15,7 +15,7 @@ enum LLDBState
 	LRunning,
 };
 
-class App : public GWindow, public LThread
+class App : public LWindow, public LThread
 {
 	GTextLog *Log;
 	bool Loop;
@@ -28,7 +28,7 @@ public:
     {
 		Log = NULL;
 		Loop = true;
-        GWindow::Name(AppName);
+        LWindow::Name(AppName);
         LRect r(0, 0, 1000, 800);
         SetPos(r);
         MoveToCenter();

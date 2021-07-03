@@ -112,10 +112,10 @@ typedef XView<XWidget> DefaultOsView;
 
 class XWindow : public XMainWindow
 {
-	GWindow *Wnd;
+	LWindow *Wnd;
 
 public:
-	XWindow(GWindow *wnd);
+	XWindow(LWindow *wnd);
 	~XWindow();
 
 	void _SetWndPtr(void *p);

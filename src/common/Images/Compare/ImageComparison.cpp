@@ -907,7 +907,7 @@ ImageCompareDlg::ImageCompareDlg(LView *p, const char *OutPath)
 		d->tabs->SetPourLargest(true);
 		GTabPage *First = d->tabs->Append("Select");
 		
-		LgiResources *Res = LgiGetResObj(false, ResFile.GetFull());
+		LResources *Res = LgiGetResObj(false, ResFile.GetFull());
 		LgiAssert(Res);
 		if (Res && Res->LoadDialog(IDD_COMPARE, First))
 		{

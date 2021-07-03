@@ -400,7 +400,7 @@ gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 		k.Trace("lgi_widget_key_event");
 		#endif
 
-		GWindow *w = v->GetWindow();
+		LWindow *w = v->GetWindow();
 		if (w)
 		{
 			if (!w->HandleViewKey(v, k) &&

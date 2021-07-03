@@ -128,7 +128,7 @@ bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages /
 	
 	if (Parent)
 	{
-		GWindow *w = Parent->GetWindow();
+		LWindow *w = Parent->GetWindow();
 		if (w)
 			Wnd = w->WindowHandle();
 	}

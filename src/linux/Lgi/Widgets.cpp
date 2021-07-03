@@ -45,8 +45,8 @@ struct GDialogPriv
 GDialog::GDialog()
 	:
 	#ifdef __GTK_H__
-	// , GWindow(gtk_dialog_new())
-	GWindow(gtk_window_new(GTK_WINDOW_TOPLEVEL)),
+	// , LWindow(gtk_dialog_new())
+	LWindow(gtk_window_new(GTK_WINDOW_TOPLEVEL)),
 	#endif
 	ResObject(Res_Dialog)
 {
@@ -97,7 +97,7 @@ void GDialog::Quit(bool DontDelete)
 
 void GDialog::OnPosChange()
 {
-	GWindow::OnPosChange();
+	LWindow::OnPosChange();
     if (Children.Length() == 1)
     {
         List<LViewI>::I it = Children.begin();
@@ -167,7 +167,7 @@ bool GDialog::SetupDialog(bool Modal)
 	if (!Attach(p))
 		return false;
 
-	GWindow::Visible(true);
+	LWindow::Visible(true);
 
 	return true;
 }

@@ -49,7 +49,7 @@ int VerToYear(double v)
 	return 0;
 }
 
-class App : public GWindow
+class App : public LWindow
 {
 	GTextLog *Log;
 

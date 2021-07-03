@@ -130,13 +130,13 @@ void LView::_Delete()
 		LgiApp->AppWnd = 0;
 	}
 
-	GWindow *Wnd = GetWindow();
+	LWindow *Wnd = GetWindow();
 	if (Wnd)
 	{
-		Wnd->SetFocus(this, GWindow::ViewDelete);
+		Wnd->SetFocus(this, LWindow::ViewDelete);
 	}
 
-	// this should only exist in an ex-GWindow, due to the way
+	// this should only exist in an ex-LWindow, due to the way
 	// C++ deletes objects it needs to be here.
 	DeleteObj(_Lock);
 }
@@ -194,9 +194,9 @@ bool LView::Detach()
 
 	if (_Window)
 	{
-		GWindow *Wnd = dynamic_cast<GWindow*>(_Window);
+		LWindow *Wnd = dynamic_cast<LWindow*>(_Window);
 		if (Wnd)
-			Wnd->SetFocus(this, GWindow::ViewDelete);
+			Wnd->SetFocus(this, LWindow::ViewDelete);
 		_Window = NULL;
 	}
 	if (d->Parent)
@@ -316,7 +316,7 @@ bool LView::Invalidate(LRect *r, bool Repaint, bool Frame)
 		Up.Set(0, 0, Pos.X()-1, Pos.Y()-1);
 	}
 
-	while (p && !dynamic_cast<GWindow*>(p))
+	while (p && !dynamic_cast<LWindow*>(p))
 	{
 		LViewI *Par = p->GetParent();
 		if (Par == p)
@@ -439,7 +439,7 @@ LView *&LView::PopupChild()
 
 bool LView::_Mouse(LMouse &m, bool Move)
 {
-	GWindow *Wnd = GetWindow();
+	LWindow *Wnd = GetWindow();
 	if (Wnd && !Wnd->HandleViewMouse(this, m))
 		return false;
 

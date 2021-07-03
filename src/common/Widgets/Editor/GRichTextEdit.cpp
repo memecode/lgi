@@ -1224,7 +1224,7 @@ void GRichTextEdit::Redo()
 }
 
 #ifdef _DEBUG
-class NodeView : public GWindow
+class NodeView : public LWindow
 {
 public:
 	GTree *Tree;

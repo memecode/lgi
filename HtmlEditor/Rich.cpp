@@ -323,7 +323,7 @@ public:
 	}
 };
 
-class App : public GWindow, public GCapabilityInstallTarget
+class App : public LWindow, public GCapabilityInstallTarget
 {
 	GBox *Split;
 	GTextView3 *Txt;
@@ -638,7 +638,7 @@ public:
 			}
 		}
 
-		return GWindow::OnCommand(Cmd, Event, Wnd);
+		return LWindow::OnCommand(Cmd, Event, Wnd);
 	}
 
 	int OnNotify(LViewI *c, int f)
@@ -716,7 +716,7 @@ public:
 			}
 		}
 
-		return GWindow::OnEvent(m);
+		return LWindow::OnEvent(m);
 	}
 };
 

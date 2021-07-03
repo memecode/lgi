@@ -555,7 +555,7 @@ void MenuItemImpl::Activate()
 	::GMenu *Menu = d->Item->Menu;
 	if (Menu && Menu->Info)
 	{
-		GWindow *w = Menu->Info->View()->GetWindow();
+		LWindow *w = Menu->Info->View()->GetWindow();
 		if (w)
 		{
 			LgiPostEvent(w->Handle(), M_COMMAND, (GMessage::Param) d->Item->Id(), 0);

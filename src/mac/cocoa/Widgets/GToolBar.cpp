@@ -1237,7 +1237,7 @@ GToolBar::~GToolBar()
 
 bool GToolBar::Attach(LViewI *parent)
 {
-	GWindow *Wnd = dynamic_cast<GWindow*>(parent);
+	LWindow *Wnd = dynamic_cast<LWindow*>(parent);
 	if (Wnd)
 	{
 		LRect r = Wnd->GetPos();

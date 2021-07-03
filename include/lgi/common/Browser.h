@@ -7,7 +7,7 @@
 #define _GBROWSER_H_
 
 
-class GBrowser : public GWindow
+class GBrowser : public LWindow
 {
 	class GBrowserPriv *d;
 

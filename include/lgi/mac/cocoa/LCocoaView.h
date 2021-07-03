@@ -12,7 +12,7 @@
 #if defined __OBJC__
 
 class LViewI;
-class GWindow;
+class LWindow;
 class GWindowPrivate;
 
 enum LCloseContext
@@ -49,7 +49,7 @@ LgiExtern LRect LScreenFlip(LRect r);
 - (id)init:(GString)m;
 @end
 
-// This class wraps a Cocoa NSView and redirects all the calls to LGI's GWindow object.
+// This class wraps a Cocoa NSView and redirects all the calls to LGI's LWindow object.
 //
 @interface LCocoaView : NSView
 {
@@ -111,7 +111,7 @@ LgiExtern LRect LScreenFlip(LRect r);
 - (id)init:(GWindowPrivate*)priv Frame:(NSRect)rc;
 - (void)dealloc;
 - (BOOL)canBecomeKeyWindow;
-- (GWindow*)getWindow;
+- (LWindow*)getWindow;
 - (void)onQuit;
 - (void)onDelete:(LCloseContext)ctx;
 

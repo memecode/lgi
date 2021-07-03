@@ -563,7 +563,7 @@ bool VcFolder::ParseBranches(int Result, GString s, ParseParams *Params)
 
 void VcFolder::OnBranchesChange()
 {
-	GWindow *w = d->Tree->GetWindow();
+	auto *w = d->Tree->GetWindow();
 	if (!w || !GTreeItem::Select())
 		return;
 
@@ -681,7 +681,7 @@ void VcFolder::Select(bool b)
 	#endif
 	if (!b)
 	{
-		GWindow *w = d->Tree->GetWindow();
+		auto *w = d->Tree->GetWindow();
 		w->SetCtrlName(IDC_BRANCH, NULL);
 	}
 
@@ -2937,7 +2937,7 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 	{
 		d->ClearFiles();
 
-		GWindow *w = d->Diff ? d->Diff->GetWindow() : NULL;
+		auto *w = d->Diff ? d->Diff->GetWindow() : NULL;
 		if (w)
 			w->SetCtrlName(IDC_MSG, NULL);
 	}
@@ -3932,7 +3932,7 @@ void VcFolder::UncommitedItem::Select(bool b)
 		{
 			d->Msg->Name(NULL);
 
-			GWindow *w = d->Msg->GetWindow();
+			auto *w = d->Msg->GetWindow();
 			if (w)
 			{
 				w->SetCtrlEnabled(IDC_COMMIT, true);

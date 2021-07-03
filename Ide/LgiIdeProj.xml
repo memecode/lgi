@@ -6,13 +6,13 @@
 			<Node File="./Code/GDebugContext.h" Type="3" Platforms="15" />
 			<Node File="./Code/GDebugger.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/GDebugger.h" Type="3" Platforms="15" />
-			<Node File="../src/common/Lgi/GSubProcess.cpp" Type="2" Platforms="15" />
+			<Node File="..\src\common\Lgi\SubProcess.cpp" Type="2" Platforms="15" />
 			<Node File="..\include\lgi\common\SubProcess.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="3">
 			<Node File="./Code/AddFtpFile.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/AddFtpFile.h" Type="3" Platforms="15" />
-			<Node File="../src/common/Lgi/GAbout.cpp" Type="2" Platforms="15" />
+			<Node File="..\src\common\Lgi\About.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/WebFldDlg.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/WebFldDlg.h" Type="3" Platforms="15" />
 		</Node>
@@ -69,7 +69,7 @@
 	</Node>
 	<Node Name="Lgi" Type="1" Platforms="15" Open="1" Id="7">
 		<Node File="..\src\common\Text\GDocView.cpp" Type="2" Platforms="15" />
-		<Node File="..\src\common\Lgi\GMdi.cpp" Type="2" Platforms="15" />
+		<Node File="..\src\common\Lgi\Mdi.cpp" Type="2" Platforms="15" />
 		<Node File="..\src\common\INet\IHttp.cpp" Type="2" Platforms="15" />
 		<Node File="..\src\common\Lgi\LgiMain.cpp" Type="2" Platforms="15" />
 		<Node File="..\include\lgi\common\Mdi.h" Type="3" Platforms="15" />
@@ -129,6 +129,8 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -177,12 +179,14 @@ pthread
 					<Debug>be</Debug>
 					<Release>be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<LibraryPaths>
 				<All>
 					<Debug>..\Debug</Debug>
 					<Release>..\Release</Release>
 				</All>
+				<Windows />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -216,7 +220,10 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<ApplicationIcon>
 				<Haiku>./Code/icon-haiku</Haiku>
 			</ApplicationIcon>
-			<Defines />
+			<Defines>
+				<All />
+				<Windows />
+			</Defines>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -231,16 +238,28 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
-		<Remote />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Windows />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
 		<Debug>
 			<Environment>
 				<All>SOME_TEST=testing</All>
 			</Environment>
-			<Arguments />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
 	</Settings>
 </Project>

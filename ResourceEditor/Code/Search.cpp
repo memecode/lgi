@@ -640,7 +640,7 @@ Results::Results(AppWnd *app, Search *params)
 	d->Running = false;
 	d->Lst = 0;
 	
-	GLgiRes r;
+	LResourceLoad r;
 	LRect p;
 	GAutoString n;
 	if (r.LoadFromResource(IDD_RESULTS, this, &p, &n))

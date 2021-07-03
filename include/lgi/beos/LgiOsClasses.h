@@ -38,7 +38,7 @@ typedef BViewRedir DefaultOsView;
 
 class LgiClass GWnd : public BWindow
 {
-	friend class GWindow;
+	friend class LWindow;
 	
 	LView *Notify;
 

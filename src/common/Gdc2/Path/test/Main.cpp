@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////
 const char *AppName = "GPathTest";
 
-class App : public GWindow
+class App : public LWindow
 {
 	GPath p;
 	LMemDC img;

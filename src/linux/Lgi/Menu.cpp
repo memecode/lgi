@@ -319,7 +319,7 @@ void LSubMenu::OnActivate(bool a)
 int LSubMenu::Float(LView *From, int x, int y, int Button)
 {
 	#ifdef __GTK_H__
-	GWindow *Wnd = From->GetWindow();
+	LWindow *Wnd = From->GetWindow();
 	if (!Wnd)
 		return -1;
 	Wnd->Capture(false);
@@ -1538,7 +1538,7 @@ bool LMenu::Attach(LViewI *p)
 		return false;
 	}
 		
-	GWindow *Wnd = p->GetWindow();
+	LWindow *Wnd = p->GetWindow();
 	if (!Wnd)
 	{
 		LgiAssert(0);

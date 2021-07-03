@@ -345,7 +345,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 		{
 			LgiMsg(0, LgiLoadString(L_ERROR_RES_NO_EXE_PATH,
 									"Fatal error: Couldn't get the path of the running\nexecutable. Can't find resource file."),
-									"LgiResources::LgiResources");
+									"LResources::LResources");
 			LgiTrace("%s:%i - Fatal error: Couldn't get the path of the running\nexecutable. Can't find resource file.", _FL);
 			LgiExitApp();
 		}
@@ -395,7 +395,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 		printf("%s\n", Msg);
 		if (Warn)
 		{
-			LgiMsg(0, Msg, "LgiResources::LgiResources");
+			LgiMsg(0, Msg, "LResources::LResources");
 
 			// Exit
 			LgiExitApp();
@@ -837,7 +837,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		if (!Wnd)
 		{
 			printf(LgiLoadString(L_ERROR_RES_CREATE_OBJECT_FAILED,
-								"LgiResources::CreateObject(%s) failed. (Ctrl=%s)\n"),
+								"LResources::CreateObject(%s) failed. (Ctrl=%s)\n"),
 					t->GetTag(),
 					Control);
 		}
@@ -1450,7 +1450,7 @@ bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, GAutoStrin
 								LgiMsg(	NULL,
 										LgiLoadString(	L_ERROR_RES_RESOURCE_READ_FAILED,
 														"Resource read error, tag: %s"),
-										"LgiResources::LoadDialog",
+										"LResources::LoadDialog",
 										MB_OK,
 										t->GetTag());
 								break;

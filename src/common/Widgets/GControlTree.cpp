@@ -16,7 +16,7 @@
 class GControlTreePriv
 {
 public:
-    LgiResources *Factory;
+    LResources *Factory;
     
     GControlTreePriv()
     {
@@ -558,7 +558,7 @@ bool GControlTree::SetVariant(const char *Name, LVariant &Value, char *Array)
 	}
 	else if (!_stricmp(Name, "LgiFactory"))
 	{
-	    d->Factory = dynamic_cast<LgiResources*>((ResFactory*)Value.CastVoidPtr());
+	    d->Factory = dynamic_cast<LResources*>((ResFactory*)Value.CastVoidPtr());
 	}
 	else return false;
 

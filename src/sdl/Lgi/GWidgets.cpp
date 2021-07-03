@@ -23,7 +23,7 @@ struct GDialogPriv
 	int ModalStatus;
 	bool IsModal;
 	bool Resizable;
-	GWindow *PrevWindow;
+	LWindow *PrevWindow;
 	
 	GDialogPriv()
 	{

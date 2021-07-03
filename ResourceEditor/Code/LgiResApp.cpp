@@ -1195,7 +1195,7 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 			break;
 		}
 	}
-	return GWindow::OnEvent(m);
+	return LWindow::OnEvent(m);
 }
 
 #include "lgi/common/Token.h"
@@ -2003,7 +2003,7 @@ char *TagName(LXmlTag *t)
 	return Buf;
 }
 
-class ResCompare : public GWindow, public GLgiRes
+class ResCompare : public LWindow, public LResourceLoad
 {
 	LList *Lst;
 
@@ -4554,7 +4554,7 @@ int ShortCutView::OnNotify(LViewI *Ctrl, int Flags)
 		}
 	}
 
-	return GWindow::OnNotify(Ctrl, Flags);
+	return LWindow::OnNotify(Ctrl, Flags);
 }
 
 void ShortCutView::OnDialogChange(ResDialog *Dlg)

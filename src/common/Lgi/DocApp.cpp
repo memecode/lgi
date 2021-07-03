@@ -20,7 +20,7 @@ class GDocAppPrivate
 {
 public:
 	// Data
-	GWindow				*App;
+	LWindow				*App;
 	GString				OptionsFile;
 	GString				OptionsParam;
 	char				*AppName;
@@ -28,7 +28,7 @@ public:
 	bool				Dirty;
 	GDocAppInstallMode	Mode;
 
-	GDocAppPrivate(GWindow *app, char *param)
+	GDocAppPrivate(LWindow *app, char *param)
 	{
 		App = app;
 		OptionsParam = param;
@@ -601,7 +601,7 @@ bool GDocApp<OptionsFmt>::OnRequestClose(bool OsShuttingDown)
 {
 	if (SetDirty(false))
 	{
-		return GWindow::OnRequestClose(OsShuttingDown);
+		return LWindow::OnRequestClose(OsShuttingDown);
 	}
 
 	return false;
@@ -664,7 +664,7 @@ GMessage::Result GDocApp<OptionsFmt>::OnEvent(GMessage *m)
 	}
 	*/
 
-	return GWindow::OnEvent(m);
+	return LWindow::OnEvent(m);
 }
 
 template class GDocApp<GOptionsFile>;

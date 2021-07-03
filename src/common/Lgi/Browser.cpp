@@ -622,6 +622,6 @@ GMessage::Result GBrowser::OnEvent(GMessage *m)
 			break;
 		}
 	}
-	return GWindow::OnEvent(m);
+	return LWindow::OnEvent(m);
 }
 

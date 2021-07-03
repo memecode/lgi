@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////
 const char *AppName = "%name%";
 
-class App : public GWindow
+class App : public LWindow
 {
 public:
     App()

@@ -296,9 +296,6 @@
     <ClCompile Include="src\common\Gdc2\Tools\GColourReduce.cpp">
       <Filter>Source Files\Graphics\Colour Reduction</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\GAlert.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Lgi\GFindReplace.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
@@ -356,16 +353,10 @@
     <ClCompile Include="src\common\Widgets\GSlider.cpp">
       <Filter>Source Files\Widgets\Xp</Filter>
     </ClCompile>
-    <ClCompile Include="src\win\Gdc2\Gdc2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\win\Gdc2\GdiLeak.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\win\General\GFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\General\GMem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\win\INet\MibAccess.cpp">
@@ -395,16 +386,10 @@
     <ClCompile Include="src\win\Widgets\GEdit_Win.cpp">
       <Filter>Source Files\Widgets\Native Windows</Filter>
     </ClCompile>
-    <ClCompile Include="src\win\Widgets\LDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Gdc2\Font\LDisplayString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Gdc2\LRect.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\LVariant.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Text\LXmlTree.cpp">
@@ -427,12 +412,6 @@
     </ClCompile>
     <ClCompile Include="src\common\Gdc2\Font\LFont.cpp">
       <Filter>Source Files\Graphics\Font</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\LCss.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\LCssTools.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Gdc2\LSurface.cpp">
       <Filter>Source Files\Graphics</Filter>
@@ -470,12 +449,6 @@
     <ClCompile Include="src\win\Lgi\Printer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\win\Lgi\ScrollBar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Lgi\Thread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Lgi\WindowCommon.cpp">
       <Filter>Source Files\Interface</Filter>
     </ClCompile>
@@ -496,6 +469,33 @@
     </ClCompile>
     <ClCompile Include="src\common\Lgi\MenuCommon.cpp">
       <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Alert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Css.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\CssTools.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\Thread.cpp">
+      <Filter>Source Files\Core\Threads</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Variant.cpp">
+      <Filter>Source Files\Core\Variant</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\ScrollBar.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Widgets\LDialog.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Gdc2\Gdc2.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\General\GMem.cpp">
+      <Filter>Source Files\Core\Memory Subsystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

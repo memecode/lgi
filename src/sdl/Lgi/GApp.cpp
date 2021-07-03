@@ -195,7 +195,7 @@ public:
 	SDL_TimerID CaptureId;
 
 	// Window stack
-	GArray<GWindow*> Stack;
+	GArray<LWindow*> Stack;
 	
 	// Clipboard handling
 	int Clipboard, Utf8, Utf8String;
@@ -1064,7 +1064,7 @@ bool GApp::InvalidateRect(LRect &r)
 	return true;
 }
 
-bool GApp::PushWindow(GWindow *w)
+bool GApp::PushWindow(LWindow *w)
 {
 	if (!w)
 	{
@@ -1088,7 +1088,7 @@ bool GApp::PushWindow(GWindow *w)
 	return true;
 }
 
-GWindow *GApp::PopWindow()
+LWindow *GApp::PopWindow()
 {
 	if (d->Stack.Length() == 0)
 	{

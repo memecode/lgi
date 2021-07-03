@@ -186,8 +186,8 @@
     <ClCompile Include="..\src\common\Gdc2\Filters\Gif.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Filters\Lzw.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
-    <ClCompile Include="..\src\common\Lgi\GAbout.cpp" />
-    <ClCompile Include="..\src\common\Lgi\GDocApp.cpp" />
+    <ClCompile Include="..\src\common\Lgi\About.cpp" />
+    <ClCompile Include="..\src\common\Lgi\DocApp.cpp" />
     <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
     <ClCompile Include="..\src\common\Widgets\GControlTree.cpp" />
     <ClCompile Include="Code\LgiResApp.cpp" />

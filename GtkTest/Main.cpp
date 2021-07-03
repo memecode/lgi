@@ -6,7 +6,7 @@
 
 #define IDM_EXIT 4
 
-class Test : public GDialog
+class Test : public LDialog
 {
 public:
     Test(LViewI *p)
@@ -47,7 +47,7 @@ public:
 	}
 };
 
-class App : public GWindow
+class App : public LWindow
 {
     GImageList *i;
     

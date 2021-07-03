@@ -15,11 +15,11 @@ enum LWindowZoom
 enum LWindowHookType
 {
 	LNoEvents = 0,
-	/// \sa GWindow::RegisterHook()
+	/// \sa LWindow::RegisterHook()
 	LMouseEvents = 1,
-	/// \sa GWindow::RegisterHook()
+	/// \sa LWindow::RegisterHook()
 	LKeyEvents = 2,
-	/// \sa GWindow::RegisterHook()
+	/// \sa LWindow::RegisterHook()
 	LKeyAndMouseEvents = LMouseEvents | LKeyEvents,
 };
 
@@ -106,7 +106,7 @@ public:
 	#endif
 	~LWindow();
 
-	const char *GetClass() override { return "GWindow"; }
+	const char *GetClass() override { return "LWindow"; }
 
 	/// Lays out the child views into the client area.
 	virtual void PourAll();
@@ -126,7 +126,7 @@ public:
 	/// \brief Sets the "quit on close" setting.
 	///
 	/// When this is switched on the application will quit the main message
-	/// loop when this GWindow is closed. This is really useful for your
+	/// loop when this LWindow is closed. This is really useful for your
 	/// main application window. Otherwise the UI will disappear but the
 	/// application is still running.
 	void SetQuitOnClose(bool i) { _QuitOnClose = i; }

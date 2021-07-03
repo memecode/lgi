@@ -252,7 +252,7 @@ public:
 	}
 };
 
-class AppWnd : public GWindow, public GDefaultDocumentEnv
+class AppWnd : public LWindow, public GDefaultDocumentEnv
 {
 	LList *Lst;
     HtmlScriptContext *Html;

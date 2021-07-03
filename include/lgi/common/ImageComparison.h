@@ -1,7 +1,7 @@
 #ifndef _IMAGE_COMPARE_H_
 #define _IMAGE_COMPARE_H_
 
-class ImageCompareDlg : public GWindow
+class ImageCompareDlg : public LWindow
 {
 	struct ImageCompareDlgPriv *d;
 

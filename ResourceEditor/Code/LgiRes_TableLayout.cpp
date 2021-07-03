@@ -1475,7 +1475,7 @@ enum {
     M_FINISHED = M_USER + 1000,
 };
 
-class TableLayoutTest : public GDialog
+class TableLayoutTest : public LDialog
 {
 	GTableLayout *Tbl;
 	LView *Msg;
@@ -1532,10 +1532,10 @@ class Lr8Item : public GTreeItem
 {
     TableLayoutTest *Wnd;
 	GString File;
-	GAutoPtr<LgiResources> Res;
+	GAutoPtr<LResources> Res;
 
 public:
-	Lr8Item(TableLayoutTest *w, GAutoPtr<LgiResources> res, char *file)
+	Lr8Item(TableLayoutTest *w, GAutoPtr<LResources> res, char *file)
 	{
 	    Wnd = w;
 		Res = res;
@@ -1594,8 +1594,8 @@ public:
 		{
 			for (int i=0; i<Files.Length(); i++)
 			{
-            	GAutoPtr<LgiResources> Res;
-    			if (Res.Reset(new LgiResources(Files[i])))
+            	GAutoPtr<LResources> Res;
+    			if (Res.Reset(new LResources(Files[i])))
     			{
 				    List<LgiDialogRes>::I d = Res->GetDialogs();
 				    bool HasTl = false;
@@ -1713,7 +1713,7 @@ int TableLayoutTest::OnNotify(LViewI *Ctrl, int Flags)
 			break;
 	}
 	
-	return GDialog::OnNotify(Ctrl, Flags);
+	return LDialog::OnNotify(Ctrl, Flags);
 }
 
 GMessage::Param TableLayoutTest::OnEvent(GMessage *m)
@@ -1724,7 +1724,7 @@ GMessage::Param TableLayoutTest::OnEvent(GMessage *m)
         Msg->Name("Finished.");
         Worker.Reset();
     }
-    return GDialog::OnEvent(m);
+    return LDialog::OnEvent(m);
 }
 
 void OpenTableLayoutTest(LViewI *p)

@@ -118,7 +118,7 @@ public:
 	}
 };
 
-GWindow::GWindow() :
+LWindow::LWindow() :
 	LView(new BViewRedir(this))
 {
 	d = new GWindowPrivate;
@@ -133,7 +133,7 @@ GWindow::GWindow() :
 	Wnd = new GWnd(this);
 }
 
-GWindow::~GWindow()
+LWindow::~LWindow()
 {
 	DeleteObj(Menu);
 
@@ -154,12 +154,12 @@ GWindow::~GWindow()
 	DeleteObj(d);
 }
 
-LRect &GWindow::GetClient(bool ClientSpace)
+LRect &LWindow::GetClient(bool ClientSpace)
 {
 	return LView::GetClient(ClientSpace);
 }
 
-void GWindow::Raise()
+void LWindow::Raise()
 {
 	if (Wnd && Wnd->Lock())
 	{
@@ -168,7 +168,7 @@ void GWindow::Raise()
 	}
 }
 
-bool GWindow::Attach(LViewI *Parent)
+bool LWindow::Attach(LViewI *Parent)
 {
 	if (!Wnd)
 		return false;
@@ -192,17 +192,17 @@ bool GWindow::Attach(LViewI *Parent)
 	return true;
 }
 
-void GWindow::OnPaint(LSurface *pDC)
+void LWindow::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle();
 }
 
-void GWindow::OnChildrenChanged(LViewI *Wnd, bool Attaching)
+void LWindow::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 }
 
-bool GWindow::OnRequestClose(bool Os)
+bool LWindow::OnRequestClose(bool Os)
 {
 	if (GetQuitOnClose())
 	{
@@ -214,17 +214,17 @@ bool GWindow::OnRequestClose(bool Os)
 	return true;
 }
 
-void GWindow::OnPosChange()
+void LWindow::OnPosChange()
 {
 	GetPos();
 	Pour();
 }
 
-void GWindow::OnCreate()
+void LWindow::OnCreate()
 {
 }
 
-bool GWindow::Visible()
+bool LWindow::Visible()
 {
 	bool Status = FALSE;
 	if (Wnd)
@@ -238,7 +238,7 @@ bool GWindow::Visible()
 	return Status;
 }
 
-void GWindow::Visible(bool v)
+void LWindow::Visible(bool v)
 {
 	if (Wnd)
 	{
@@ -249,7 +249,7 @@ void GWindow::Visible(bool v)
 				if (Wnd->IsHidden())
 				{
 					// Add BView here, to make sure "OnCreate" is called at the end
-					// of a GWindow constructor not at the beginning, where it's not
+					// of a LWindow constructor not at the beginning, where it's not
 					// useful.
 					/*
 					if (!Handle()->Parent())
@@ -285,7 +285,7 @@ void GWindow::Visible(bool v)
 	}
 }
 
-bool GWindow::Name(const char *n)
+bool LWindow::Name(const char *n)
 {
 	bool Status = LBase::Name(n);
 	if (Wnd)
@@ -297,12 +297,12 @@ bool GWindow::Name(const char *n)
 	return Status;
 }
 
-char *GWindow::Name()
+char *LWindow::Name()
 {
 	return LBase::Name();
 }
 
-LRect &GWindow::GetPos()
+LRect &LWindow::GetPos()
 {
 	static LRect r;
 	
@@ -324,7 +324,7 @@ LRect &GWindow::GetPos()
 	return r;
 }
 
-bool GWindow::SetPos(LRect &p, bool Repaint)
+bool LWindow::SetPos(LRect &p, bool Repaint)
 {
 	if (Wnd)
 	{
@@ -356,7 +356,7 @@ bool GWindow::SetPos(LRect &p, bool Repaint)
 	return false;
 }
 
-void GWindow::Pour()
+void LWindow::Pour()
 {
 	bool SafeToLock = false;
 
@@ -441,7 +441,7 @@ void GWindow::Pour()
 	if (Lock) Wnd->Unlock();
 }
 
-GMessage::Result GWindow::OnEvent(GMessage *Msg)
+GMessage::Result LWindow::OnEvent(GMessage *Msg)
 {
 	switch (MsgCode(Msg))
 	{
@@ -492,7 +492,7 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 	return LView::OnEvent(Msg);
 }
 
-int GWindow::WillAccept(List<char> &Formats, LPoint Pt, int KeyState)
+int LWindow::WillAccept(List<char> &Formats, LPoint Pt, int KeyState)
 {
 	int Status = DROPEFFECT_NONE;
 	
@@ -514,12 +514,12 @@ int GWindow::WillAccept(List<char> &Formats, LPoint Pt, int KeyState)
 	return Status;
 }
 
-bool GWindow::SetIcon(char const *IcoFile)
+bool LWindow::SetIcon(char const *IcoFile)
 {
 	return false;
 }
 
-int GWindow::OnDrop(char *Format, LVariant *Data, LPoint Pt, int KeyState)
+int LWindow::OnDrop(char *Format, LVariant *Data, LPoint Pt, int KeyState)
 {
 	int Status = DROPEFFECT_NONE;
 
@@ -577,7 +577,7 @@ int GWindow::OnDrop(char *Format, LVariant *Data, LPoint Pt, int KeyState)
 	return Status;
 }
 
-bool GWindow::HandleViewMouse(LView *v, LMouse &m)
+bool LWindow::HandleViewMouse(LView *v, LMouse &m)
 {
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{
@@ -593,7 +593,7 @@ bool GWindow::HandleViewMouse(LView *v, LMouse &m)
 	return true;
 }
 
-bool GWindow::HandleViewKey(LView *v, LKey &k)
+bool LWindow::HandleViewKey(LView *v, LKey &k)
 {
 	bool Status = false;
 	LViewI *Ctrl = 0;
@@ -761,7 +761,7 @@ AllDone:
 }
 
 
-bool GWindow::RegisterHook(LView *Target, LWindowHookType EventType, int Priority)
+bool LWindow::RegisterHook(LView *Target, LWindowHookType EventType, int Priority)
 {
 	bool Status = false;
 	
@@ -778,7 +778,7 @@ bool GWindow::RegisterHook(LView *Target, LWindowHookType EventType, int Priorit
 	return Status;
 }
 
-bool GWindow::UnregisterHook(LView *Target)
+bool LWindow::UnregisterHook(LView *Target)
 {
 	int i = d->GetHookIndex(Target);
 	if (i >= 0)
@@ -789,26 +789,26 @@ bool GWindow::UnregisterHook(LView *Target)
 	return false;
 }
 
-bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
+bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 {
 	return false;
 }
 
-void GWindow::OnTrayClick(LMouse &m)
+void LWindow::OnTrayClick(LMouse &m)
 {
 }
 
-bool GWindow::IsActive()
+bool LWindow::IsActive()
 {
 	return Wnd ? Wnd->IsActive() : false;
 }
 
-LViewI *GWindow::GetFocus()
+LViewI *LWindow::GetFocus()
 {
 	return d->Focus;
 }
 
-void GWindow::OnFrontSwitch(bool b)
+void LWindow::OnFrontSwitch(bool b)
 {
 }
 
@@ -834,7 +834,7 @@ static GAutoString DescribeView(LViewI *v)
 }
 #endif
 
-void GWindow::SetFocus(LViewI *ctrl, FocusType type)
+void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 {
 	#if DEBUG_SETFOCUS
 	const char *TypeName = NULL;
@@ -890,7 +890,7 @@ void GWindow::SetFocus(LViewI *ctrl, FocusType type)
 				{
 					#if DEBUG_SETFOCUS
 					GAutoString _set = DescribeView(d->Focus);
-					LgiTrace("GWindow::SetFocus(%s, %s) focusing LView %p\n",
+					LgiTrace("LWindow::SetFocus(%s, %s) focusing LView %p\n",
 						_set.Get(),
 						TypeName,
 						d->Focus->Handle());
@@ -902,7 +902,7 @@ void GWindow::SetFocus(LViewI *ctrl, FocusType type)
 				{			
 					#if DEBUG_SETFOCUS
 					GAutoString _set = DescribeView(d->Focus);
-					LgiTrace("GWindow::SetFocus(%s, %s) focusing nonGView %p (active=%i)\n",
+					LgiTrace("LWindow::SetFocus(%s, %s) focusing nonGView %p (active=%i)\n",
 						_set.Get(),
 						TypeName,
 						d->Focus->Handle(),
@@ -920,7 +920,7 @@ void GWindow::SetFocus(LViewI *ctrl, FocusType type)
 			#if DEBUG_SETFOCUS
 			GAutoString _Ctrl = DescribeView(d->Focus);
 			GAutoString _Focus = DescribeView(d->Focus);
-			LgiTrace("GWindow::SetFocus(%s, %s) d->Focus=%s\n",
+			LgiTrace("LWindow::SetFocus(%s, %s) d->Focus=%s\n",
 				_Ctrl.Get(),
 				TypeName,
 				_Focus.Get());
@@ -937,7 +937,7 @@ void GWindow::SetFocus(LViewI *ctrl, FocusType type)
 			{
 				#if DEBUG_SETFOCUS
 				GAutoString _Ctrl = DescribeView(d->Focus);
-				LgiTrace("GWindow::SetFocus(%s, %s) on delete\n",
+				LgiTrace("LWindow::SetFocus(%s, %s) on delete\n",
 					_Ctrl.Get(),
 					TypeName);
 				#endif
@@ -948,24 +948,24 @@ void GWindow::SetFocus(LViewI *ctrl, FocusType type)
 	}
 }
 
-bool GWindow::GetSnapToEdge()
+bool LWindow::GetSnapToEdge()
 {
 	return false;
 }
 
-void GWindow::SetSnapToEdge(bool b)
+void LWindow::SetSnapToEdge(bool b)
 {
 }
 
-GWindowZoom GWindow::GetZoom()
+GWindowZoom LWindow::GetZoom()
 {
 }
 	
-void GWindow::SetZoom(GWindowZoom i)
+void LWindow::SetZoom(GWindowZoom i)
 {
 }
 
-bool GWindow::Obscured()
+bool LWindow::Obscured()
 {
 	return false;
 }

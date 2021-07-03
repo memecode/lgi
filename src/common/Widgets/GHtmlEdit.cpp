@@ -2467,7 +2467,7 @@ public:
 	Btn *MakeLink;
 	Btn *ClearFmt;
 	#ifdef _DEBUG
-	GWindow *DebugWnd;
+	LWindow *DebugWnd;
 	#endif
 
 	GHtmlEditPriv()
@@ -2540,7 +2540,7 @@ public:
 };
 
 #ifdef _DEBUG
-class DebugWnd : public GWindow
+class DebugWnd : public LWindow
 {
 	GHtmlEditPriv *d;
 

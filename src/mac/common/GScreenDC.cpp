@@ -9,7 +9,7 @@ class GScreenPrivate
 {
 public:
 	CGContextRef Ctx;
-	GWindow *Wnd;
+	LWindow *Wnd;
 	LView *View;
 	LRect Rc;
 	GArray<LRect> Stack;
@@ -50,7 +50,7 @@ public:
 		Init();
 	}
 	
-	GScreenPrivate(GWindow *w, void *param = NULL)
+	GScreenPrivate(LWindow *w, void *param = NULL)
 	{
 		Init();
 		Wnd = w;
@@ -139,7 +139,7 @@ LScreenDC::LScreenDC(GPrintDcParams *Params)
 	#endif
 }
 
-LScreenDC::LScreenDC(GWindow *w, void *param)
+LScreenDC::LScreenDC(LWindow *w, void *param)
 {
 	d = new GScreenPrivate(w, param);
 	d->Wnd = w;

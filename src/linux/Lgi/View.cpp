@@ -923,7 +923,7 @@ bool LView::Detach()
 	// Detach view
 	if (_Window)
 	{
-		auto *Wnd = dynamic_cast<GWindow*>(_Window);
+		auto *Wnd = dynamic_cast<LWindow*>(_Window);
 		if (Wnd)
 			Wnd->SetFocus(this, LWindow::ViewDelete);
 		_Window = NULL;

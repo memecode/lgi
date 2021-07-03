@@ -6,7 +6,7 @@
 #ifdef WINDOWS
 
 #define M_MIDI_IN	(M_USER + 2000)
-class GMidiNotifyWnd : public GWindow
+class GMidiNotifyWnd : public LWindow
 {
 	GMidi *m;
 	

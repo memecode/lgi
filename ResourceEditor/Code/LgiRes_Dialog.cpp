@@ -40,7 +40,7 @@ public:
 NameMap[] =
 {
 	// ID				Lgi's name		Resource editor name
-	{UI_DIALOG,			"GDialog",		Res_Dialog,			false},
+	{UI_DIALOG,			"LDialog",		Res_Dialog,			false},
 	{UI_TABLE,			"GTableLayout",	Res_Table,			true},
 	{UI_TEXT,			"GText",		Res_StaticText,		true},
 	{UI_EDITBOX,		"GEdit",		Res_EditBox,		true},
@@ -98,7 +98,7 @@ public:
 	}
 };
 
-class TabOrder : public GDialog
+class TabOrder : public LDialog
 {
 	ResDialogCtrl *Top;
 	LList *Lst;
@@ -1298,7 +1298,7 @@ void CtrlGroup::OnPaint(LSurface *pDC)
 	ds.Draw(pDC, r.x1 + 8, r.y1 - 2);
 
 	// Draw children
-	//GWindow::OnPaint(pDC);
+	//LWindow::OnPaint(pDC);
 
 	// Draw any rubber band
 	ResDialogCtrl::OnPaint(pDC);
@@ -1590,7 +1590,7 @@ void CtrlTabs::OnPaint(LSurface *pDC)
 	}
 
 	// Draw children
-	//GWindow::OnPaint(pDC);
+	//LWindow::OnPaint(pDC);
 
 	// Draw any rubber band
 	ResDialogCtrl::OnPaint(pDC);
@@ -3879,7 +3879,7 @@ const char *TypeOfRes(ResDialogCtrl *Ctrl)
 {
 
 	// the default
-	return "GWindow";
+	return "LWindow";
 }
 
 const char *TextOfCtrl(ResDialogCtrl *Ctrl)
@@ -3944,7 +3944,7 @@ void OutputCtrl(GStringPipe &Def,
 		}
 	}
 
-	if (stricmp(Type, "GDialog"))
+	if (stricmp(Type, "LDialog"))
 	{
 		if (ValidStr(Ctrl->GetStr()->GetDefine()) &&
 			stricmp(Ctrl->GetStr()->GetDefine(), "IDOK") &&
@@ -4022,7 +4022,7 @@ void ResDialog::OnCommand(int Cmd)
 				}
 
 				// Class def
-				Buf.Push(	"\nclass Dlg : public GDialog\n"
+				Buf.Push(	"\nclass Dlg : public LDialog\n"
 							"{\n");
 
 				// Variables

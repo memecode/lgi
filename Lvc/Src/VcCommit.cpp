@@ -435,7 +435,7 @@ void VcCommit::Select(bool b)
 		{
 			d->Msg->Name(Msg);
 			
-			GWindow *w = d->Msg->GetWindow();
+			auto *w = d->Msg->GetWindow();
 			if (w)
 			{
 				w->SetCtrlEnabled(IDC_COMMIT, false);

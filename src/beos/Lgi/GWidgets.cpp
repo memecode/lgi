@@ -22,14 +22,14 @@
 #define DefaultViewColour()					SetViewColor(B_TRANSPARENT_COLOR); SetFlags(Flags() & ~B_FULL_UPDATE_ON_RESIZE)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-struct GDialogPriv
+struct LDialogPriv
 {
-	GDialog *Dlg;
+	LDialog *Dlg;
 	bool IsModal;
 	int ModalRet;
 	sem_id ModalSem;
 	
-	GDialogPriv(GDialog *dlg)
+	LDialogPriv(LDialog *dlg)
 	{
 		Dlg = dlg;
 		IsModal = true;
@@ -60,19 +60,19 @@ struct GDialogPriv
 	}
 };
 
-GDialog::GDialog() : ResObject(Res_Dialog)
+LDialog::LDialog() : ResObject(Res_Dialog)
 {
-	d = new GDialogPriv(this);
+	d = new LDialogPriv(this);
 	Name("Dialog");
 }
 
-GDialog::~GDialog()
+LDialog::~LDialog()
 {
 	SetParent(0);
 	DeleteObj(d);
 }
 
-void GDialog::Quit(bool DontDelete)
+void LDialog::Quit(bool DontDelete)
 {
 	if (d->IsModal)
 	{
@@ -84,7 +84,7 @@ void GDialog::Quit(bool DontDelete)
 	}	
 }
 
-void GDialog::OnPosChange()
+void LDialog::OnPosChange()
 {
     if (Children.Length() == 1)
     {
@@ -98,10 +98,10 @@ void GDialog::OnPosChange()
         }
     }
     
-    GWindow::OnPosChange();
+    LWindow::OnPosChange();
 }
 
-bool GDialog::LoadFromResource(int Resource, char *Param)
+bool LDialog::LoadFromResource(int Resource, char *Param)
 {
 	GAutoString n;
 	LRect p;
@@ -114,7 +114,7 @@ bool GDialog::LoadFromResource(int Resource, char *Param)
 	return Status;
 }
 
-bool GDialog::OnRequestClose(bool OsClose)
+bool LDialog::OnRequestClose(bool OsClose)
 {
 	if (d->IsModal)
 		EndModal(0);
@@ -124,7 +124,7 @@ bool GDialog::OnRequestClose(bool OsClose)
 	return false;
 }
 
-int GDialog::DoModal(OsView ParentHnd)
+int LDialog::DoModal(OsView ParentHnd)
 {
 	d->IsModal = true;
 	d->ModalRet = 0;
@@ -203,7 +203,7 @@ int GDialog::DoModal(OsView ParentHnd)
 	return d->ModalRet;
 }
 
-int GDialog::DoModeless()
+int LDialog::DoModeless()
 {
 	d->IsModal = false;
 	
@@ -233,24 +233,24 @@ int GDialog::DoModeless()
 	return false;
 }
 
-GMessage::Result GDialog::OnEvent(GMessage *Msg)
+GMessage::Result LDialog::OnEvent(GMessage *Msg)
 {
-	return GWindow::OnEvent(Msg);
+	return LWindow::OnEvent(Msg);
 }
 
-bool GDialog::IsModal()
+bool LDialog::IsModal()
 {
 	return d->IsModal;
 }
 
 
-void GDialog::EndModal(int Code)
+void LDialog::EndModal(int Code)
 {
 	d->ModalRet = Code;
 	delete_sem(d->ModalSem); // causes DoModal to unblock
 }
 
-void GDialog::EndModeless(int Code)
+void LDialog::EndModeless(int Code)
 {
 	if (Wnd->Lock())
 	{
@@ -270,7 +270,7 @@ void GDialog::EndModeless(int Code)
 		}
 	}
 	
-	LgiTrace("GDialog::EndModeless Lock failed..\n");
+	LgiTrace("LDialog::EndModeless Lock failed..\n");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

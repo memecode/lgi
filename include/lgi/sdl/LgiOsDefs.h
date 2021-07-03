@@ -110,7 +110,7 @@ typedef int								OsProcess;
 #endif
 typedef int								OsProcessId;
 typedef class LView						*OsView;
-typedef class GWindow					*OsWindow;
+typedef class LWindow					*OsWindow;
 typedef uint32							OsChar;
 typedef SDL_Surface						*OsPainter;
 typedef FT_Face							OsFont;

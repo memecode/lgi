@@ -199,7 +199,7 @@ public:
 	static bool HandleMsg(GMessage *m);
 };
 
-class BlameUi : public GWindow
+class BlameUi : public LWindow
 {
 	struct BlameUiPriv *d;
 
