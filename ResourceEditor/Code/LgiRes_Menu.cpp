@@ -690,7 +690,7 @@ ResMenuUi::~ResMenuUi()
 	}
 }
 
-void ResMenuUi::OnPaint(GSurface *pDC)
+void ResMenuUi::OnPaint(LSurface *pDC)
 {
 	LRegion Client(0, 0, X()-1, Y()-1);
 	for (auto w: Children)

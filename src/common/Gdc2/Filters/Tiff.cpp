@@ -85,8 +85,8 @@ class GdcTiff : public TiffIo
 	Lzw Lib;
 	#endif
 
-	IoStatus ProcessRead(GSurface *pDC);
-	IoStatus ProcessWrite(GSurface *pDC);
+	IoStatus ProcessRead(LSurface *pDC);
+	IoStatus ProcessWrite(LSurface *pDC);
 
 public:
 	GView *Parent;
@@ -96,8 +96,8 @@ public:
 	~GdcTiff();
 
 	int GetCapabilites() { return FILTER_CAP_READ; }
-	IoStatus ReadImage(GSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, GSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, GStream *In);
+	IoStatus WriteImage(GStream *Out, LSurface *pDC);
 
 	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
@@ -491,7 +491,7 @@ public:
 	}
 };
 
-GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
+GFilter::IoStatus GdcTiff::ProcessRead(LSurface *pDC)
 {
 	GFilter::IoStatus Status = IoError;
 	bool Error = false;
@@ -992,7 +992,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
 	return Status;
 }
 
-GFilter::IoStatus GdcTiff::ReadImage(GSurface *pDC, GStream *In)
+GFilter::IoStatus GdcTiff::ReadImage(LSurface *pDC, GStream *In)
 {
 	GFilter::IoStatus Status = IoError;
 	ushort n16;
@@ -1073,12 +1073,12 @@ GFilter::IoStatus GdcTiff::ReadImage(GSurface *pDC, GStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcTiff::ProcessWrite(GSurface *pDC)
+GFilter::IoStatus GdcTiff::ProcessWrite(LSurface *pDC)
 {
 	return IoUnsupportedFormat;
 }
 
-GFilter::IoStatus GdcTiff::WriteImage(GStream *Out, GSurface *pDC)
+GFilter::IoStatus GdcTiff::WriteImage(GStream *Out, LSurface *pDC)
 {
 	return ProcessWrite(pDC);
 }

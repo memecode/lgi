@@ -13,7 +13,7 @@
 class _OsFontType : public LFontType
 {
 public:
-	LFont *Create(GSurface *pDC = NULL)
+	LFont *Create(LSurface *pDC = NULL)
 	{
 		return SysFont;
 	}
@@ -165,7 +165,7 @@ bool GEdit::SetScrollBars(bool x, bool y)
 	return GTextView3::SetScrollBars(x, y && d->Multiline);
 }
 
-void GEdit::OnPaint(GSurface *pDC)
+void GEdit::OnPaint(LSurface *pDC)
 {
     GTextView3::OnPaint(pDC);
 

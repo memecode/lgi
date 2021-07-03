@@ -35,7 +35,7 @@ public:
 	LDisplayString *Txt;
 	int cWidth;
 	int cType;
-	GSurface *cIcon;
+	LSurface *cIcon;
 	int cImage;
 	int cMark;
 	bool OwnIcon;
@@ -115,17 +115,17 @@ GItemContainer::~GItemContainer()
 	Columns.DeleteObjects();
 }
 
-void GItemContainer::PaintColumnHeadings(GSurface *pDC)
+void GItemContainer::PaintColumnHeadings(LSurface *pDC)
 {
 	// Draw column headings
 	if (!ColumnHeaders || !ColumnHeader.Valid())
 		return;
 
-	GSurface *ColDC = pDC;
+	LSurface *ColDC = pDC;
 	LRect cr;
 
 	#if DOUBLE_BUFFER_COLUMN_DRAWING
-	GMemDC Bmp;
+	LMemDC Bmp;
 	if (!pDC->SupportsAlphaCompositing() &&
 		Bmp.Create(ColumnHeader.X(), ColumnHeader.Y(), System32BitColourSpace))
 	{
@@ -558,13 +558,13 @@ void GDragColumn::OnPosChange()
 }
 #endif
 
-void GDragColumn::OnPaint(GSurface *pScreen)
+void GDragColumn::OnPaint(LSurface *pScreen)
 {
 	#if LINUX_TRANS_COL
-	GSurface *Buf = new GMemDC(X(), Y(), GdcD->GetBits());
-	GSurface *pDC = new GMemDC(X(), Y(), GdcD->GetBits());
+	LSurface *Buf = new LMemDC(X(), Y(), GdcD->GetBits());
+	LSurface *pDC = new LMemDC(X(), Y(), GdcD->GetBits());
 	#else
-	GSurface *pDC = pScreen;
+	LSurface *pDC = pScreen;
 	#endif
 	
 	pDC->SetOrigin(Col->d->Pos.x1, 0);
@@ -766,7 +766,7 @@ int GItemColumn::Type()
 	return d->cType;
 }
 
-void GItemColumn::Icon(GSurface *i, bool Own)
+void GItemColumn::Icon(LSurface *i, bool Own)
 {
 	if (d->OwnIcon)
 	{
@@ -781,7 +781,7 @@ void GItemColumn::Icon(GSurface *i, bool Own)
 	}
 }
 
-GSurface *GItemColumn::Icon()
+LSurface *GItemColumn::Icon()
 {
 	return d->cIcon;
 }
@@ -796,7 +796,7 @@ void GItemColumn::Value(bool i)
 	d->Down = i;
 }
 
-void GItemColumn::OnPaint_Content(GSurface *pDC, LRect &r, bool FillBackground)
+void GItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 {
 	if (!d->Drag)
 	{
@@ -925,12 +925,12 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, LRect &r, bool FillBackground)
 	}
 }
 
-void ColumnPaint(void *UserData, GSurface *pDC, LRect &r, bool FillBackground)
+void ColumnPaint(void *UserData, LSurface *pDC, LRect &r, bool FillBackground)
 {
 	((GItemColumn*)UserData)->OnPaint_Content(pDC, r, FillBackground);
 }
 
-void GItemColumn::OnPaint(GSurface *pDC, LRect &Rgn)
+void GItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 {
 	LRect r = Rgn;
 
@@ -1210,7 +1210,7 @@ GItem *GItemEdit::GetItem()
 	return d->Item;
 }
 
-void GItemEdit::OnPaint(GSurface *pDC)
+void GItemEdit::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_BLACK);
 	pDC->Rectangle();

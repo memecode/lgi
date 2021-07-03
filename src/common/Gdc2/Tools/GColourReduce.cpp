@@ -202,7 +202,7 @@ class GPaletteReduce
 	unsigned DestSize;
 	
 public:
-	GPaletteReduce(GPalette *Out, GSurface *In, unsigned destSize)
+	GPaletteReduce(GPalette *Out, LSurface *In, unsigned destSize)
 	{
 		TableSize = TABLE_SIZE;
 		ColUsed = 0;
@@ -223,7 +223,7 @@ public:
 	}
 
 	template<typename Px>
-	void Scan16(GSurface *In, int y)
+	void Scan16(LSurface *In, int y)
 	{
 		bool fuzzy = ColUsed > DestSize;
 		Px *in, *end;
@@ -270,7 +270,7 @@ public:
 	}
 
 	template<typename Px>
-	void Scan24(GSurface *In, int y)
+	void Scan24(LSurface *In, int y)
 	{
 		bool fuzzy = ColUsed > DestSize;
 		Px *in, *end;
@@ -316,7 +316,7 @@ public:
 		}
 	}
 
-	void Scan(GSurface *In)
+	void Scan(LSurface *In)
 	{
 		for (int y=0; y<In->Y(); y++)
 		{
@@ -502,7 +502,7 @@ public:
 	}
 };
 
-bool CreatePalette(GPalette *Out, GSurface *In, int DestSize)
+bool CreatePalette(GPalette *Out, LSurface *In, int DestSize)
 {
 	if (!Out || !In || In->GetBits() <= 8)
 		return false;
@@ -514,11 +514,11 @@ bool CreatePalette(GPalette *Out, GSurface *In, int DestSize)
 	return true;
 }
 
-bool GReduceBitDepth(GSurface *pDC, int Bits, GPalette *Pal, GReduceOptions *Reduce)
+bool GReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal, GReduceOptions *Reduce)
 {
 	bool Status = false;
 
-	GSurface *pTemp = new GMemDC;
+	LSurface *pTemp = new LMemDC;
 	if (pDC &&
 		pTemp &&
 		pTemp->Create(pDC->X(), pDC->Y(), GBitsToColourSpace(Bits)))

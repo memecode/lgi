@@ -327,7 +327,7 @@ class GdcPng : public GFilter
 	#endif
 	int Pos;
 	uchar *PrevScanLine;
-	GSurface *pDC;
+	LSurface *pDC;
 	GMemQueue DataPipe;
 
 	GView *Parent;
@@ -346,8 +346,8 @@ public:
 	Format GetFormat() { return FmtPng; }
 	void SetMeter(int i) { if (Meter) Meter->Value(i); }
 	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
-	IoStatus ReadImage(GSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, GSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, GStream *In);
+	IoStatus WriteImage(GStream *Out, LSurface *pDC);
 
 	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
@@ -667,7 +667,7 @@ void ReadAlpha64_32(Out *o, In *i, int Len)
 	}
 }
 
-GFilter::IoStatus GdcPng::ReadImage(GSurface *pDeviceContext, GStream *In)
+GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, GStream *In)
 {
 	GFilter::IoStatus Status = IoError;
 
@@ -754,9 +754,9 @@ GFilter::IoStatus GdcPng::ReadImage(GSurface *pDeviceContext, GStream *In)
 				if (!pDC->Create(	LIBPNG png_get_image_width(png_ptr, info_ptr),
 									LIBPNG png_get_image_height(png_ptr, info_ptr),
 									InCs,
-									GSurface::SurfaceRequireExactCs))
+									LSurface::SurfaceRequireExactCs))
 				{
-					printf("%s:%i - GMemDC::Create(%i, %i, %i) failed.\n",
+					printf("%s:%i - LMemDC::Create(%i, %i, %i) failed.\n",
 							_FL,
 							LIBPNG png_get_image_width(png_ptr, info_ptr),
 							LIBPNG png_get_image_height(png_ptr, info_ptr),
@@ -985,7 +985,7 @@ GFilter::IoStatus GdcPng::ReadImage(GSurface *pDeviceContext, GStream *In)
                             if (LIBPNG png_get_tRNS(png_ptr, info_ptr, &trans_alpha, &num_trans, &trans_color))
 							{
 								pDC->HasAlpha(true);
-								GSurface *Alpha = pDC->AlphaDC();
+								LSurface *Alpha = pDC->AlphaDC();
 								if (Alpha)
 								{
 									if (trans_alpha)
@@ -1057,7 +1057,7 @@ GFilter::IoStatus GdcPng::ReadImage(GSurface *pDeviceContext, GStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
+GFilter::IoStatus GdcPng::WriteImage(GStream *Out, LSurface *pDC)
 {
 	GFilter::IoStatus Status = IoError;
 	
@@ -1105,7 +1105,7 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 	}
 	else if (pDC->AlphaDC())
 	{
-		GSurface *a = pDC->AlphaDC();
+		LSurface *a = pDC->AlphaDC();
 		if (a)
 		{
 			for (int y=0; y<a->Y() && !HasTransparency; y++)
@@ -1187,10 +1187,10 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 				bool KeyAlpha = false;
 				bool ChannelAlpha = false;
 				
-				GMemDC *pTemp = 0;
+				LMemDC *pTemp = 0;
 				if (pDC->AlphaDC() && HasTransparency)
 				{
-					pTemp = new GMemDC(pDC->X(), pDC->Y(), System32BitColourSpace);
+					pTemp = new LMemDC(pDC->X(), pDC->Y(), System32BitColourSpace);
 					if (pTemp)
 					{
 						pTemp->Colour(0);

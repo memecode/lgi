@@ -40,7 +40,7 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////////////
-GPrintDC::GPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName)
+LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName)
 {
 	d = new GPrintDCPrivate((Gtk::GtkPrintContext*)Handle);
 	d->PrintJobName = PrintJobName;
@@ -50,42 +50,42 @@ GPrintDC::GPrintDC(void *Handle, const char *PrintJobName, const char *PrinterNa
 	d->Clip = Bounds();
 }
 
-GPrintDC::~GPrintDC()
+LPrintDC::~LPrintDC()
 {
 	DeleteObj(d);
 }
 
-Gtk::GtkPrintContext *GPrintDC::GetPrintContext()
+Gtk::GtkPrintContext *LPrintDC::GetPrintContext()
 {
 	return d->Handle;
 }
 
-int GPrintDC::X()
+int LPrintDC::X()
 {
 	return gtk_print_context_get_width(d->Handle);
 }
 
-int GPrintDC::Y()
+int LPrintDC::Y()
 {
 	return gtk_print_context_get_height(d->Handle);
 }
 
-int GPrintDC::GetBits()
+int LPrintDC::GetBits()
 {
 	return 24;
 }
 
-int GPrintDC::DpiX()
+int LPrintDC::DpiX()
 {
 	return Gtk::gtk_print_context_get_dpi_x(d->Handle);
 }
 
-int GPrintDC::DpiY()
+int LPrintDC::DpiY()
 {
 	return Gtk::gtk_print_context_get_dpi_y(d->Handle);
 }
 
-LRect GPrintDC::ClipRgn(LRect *Rgn)
+LRect LPrintDC::ClipRgn(LRect *Rgn)
 {
 	LRect Prev = d->Clip;
 	if (Rgn)
@@ -95,23 +95,23 @@ LRect GPrintDC::ClipRgn(LRect *Rgn)
 	return Prev;
 }
 
-LRect GPrintDC::ClipRgn()
+LRect LPrintDC::ClipRgn()
 {
 	return d->Clip;
 }
 
-COLOUR GPrintDC::Colour()
+COLOUR LPrintDC::Colour()
 {
 	return d->c.c24();
 }
 
-COLOUR GPrintDC::Colour(COLOUR c, int Bits)
+COLOUR LPrintDC::Colour(COLOUR c, int Bits)
 {
 	GColour col(c, Bits);
 	return Colour(col).c24();
 }
 
-GColour GPrintDC::Colour(GColour c)
+GColour LPrintDC::Colour(GColour c)
 {
 	GColour Prev = d->c;
 	d->c = c;
@@ -123,7 +123,7 @@ GColour GPrintDC::Colour(GColour c)
 	return Prev;
 }
 
-void GPrintDC::Set(int x, int y)
+void LPrintDC::Set(int x, int y)
 {
 	if (d->cr)
 	{
@@ -133,17 +133,17 @@ void GPrintDC::Set(int x, int y)
 	}
 }
 
-void GPrintDC::HLine(int x1, int x2, int y)
+void LPrintDC::HLine(int x1, int x2, int y)
 {
 	Line(x1, y, x2, y);
 }
 
-void GPrintDC::VLine(int x, int y1, int y2)
+void LPrintDC::VLine(int x, int y1, int y2)
 {
 	Line(x, y1, x, y2);
 }
 
-void GPrintDC::Line(int x1, int y1, int x2, int y2)
+void LPrintDC::Line(int x1, int y1, int x2, int y2)
 {
 	if (d->cr)
 	{
@@ -155,43 +155,43 @@ void GPrintDC::Line(int x1, int y1, int x2, int y2)
 	}
 }
 
-void GPrintDC::Circle(double cx, double cy, double radius)
+void LPrintDC::Circle(double cx, double cy, double radius)
 {
 	LgiAssert(!"Not impl.");
 }
 
-void GPrintDC::FilledCircle(double cx, double cy, double radius)
+void LPrintDC::FilledCircle(double cx, double cy, double radius)
 {
 	LgiAssert(!"Not impl.");
 }
 
-void GPrintDC::Arc(double cx, double cy, double radius, double start, double end)
+void LPrintDC::Arc(double cx, double cy, double radius, double start, double end)
 {
 	LgiAssert(!"Not impl.");
 }
 
-void GPrintDC::FilledArc(double cx, double cy, double radius, double start, double end)
+void LPrintDC::FilledArc(double cx, double cy, double radius, double start, double end)
 {
 	LgiAssert(!"Not impl.");
 }
 
-void GPrintDC::Ellipse(double cx, double cy, double x, double y)
+void LPrintDC::Ellipse(double cx, double cy, double x, double y)
 {
 	LgiAssert(!"Not impl.");
 }
 
-void GPrintDC::FilledEllipse(double cx, double cy, double x, double y)
+void LPrintDC::FilledEllipse(double cx, double cy, double x, double y)
 {
 	LgiAssert(!"Not impl.");
 }
 
-void GPrintDC::Box(int x1, int y1, int x2, int y2)
+void LPrintDC::Box(int x1, int y1, int x2, int y2)
 {
 	LRect r(x1, y1, x2, y2);
 	Box(&r);
 }
 
-void GPrintDC::Box(LRect *a)
+void LPrintDC::Box(LRect *a)
 {
 	LRect r;
 	if (a)
@@ -212,13 +212,13 @@ void GPrintDC::Box(LRect *a)
 	}
 }
 
-void GPrintDC::Rectangle(int x1, int y1, int x2, int y2)
+void LPrintDC::Rectangle(int x1, int y1, int x2, int y2)
 {
 	LRect r(x1, y1, x2, y2);
 	Rectangle(&r);
 }
 
-void GPrintDC::Rectangle(LRect *a)
+void LPrintDC::Rectangle(LRect *a)
 {
 	LRect r;
 	if (a)
@@ -233,7 +233,7 @@ void GPrintDC::Rectangle(LRect *a)
 	}
 }
 
-void GPrintDC::Blt(int x, int y, GSurface *Src, LRect *SrcClip)
+void LPrintDC::Blt(int x, int y, LSurface *Src, LRect *SrcClip)
 {
 	LRect s = SrcClip ? *SrcClip : Src->Bounds();
 	LRect d = s;
@@ -241,7 +241,7 @@ void GPrintDC::Blt(int x, int y, GSurface *Src, LRect *SrcClip)
 	StretchBlt(&d, Src, &s);
 }
 
-void GPrintDC::StretchBlt(LRect *rc, GSurface *Src, LRect *s)
+void LPrintDC::StretchBlt(LRect *rc, LSurface *Src, LRect *s)
 {
 	if (!d->cr)
 	{
@@ -310,12 +310,12 @@ void GPrintDC::StretchBlt(LRect *rc, GSurface *Src, LRect *s)
 	cairo_surface_destroy(Img);
 }
 
-void GPrintDC::Polygon(int Points, LPoint *Data)
+void LPrintDC::Polygon(int Points, LPoint *Data)
 {
 	LgiAssert(!"Not impl.");
 }
 
-void GPrintDC::Bezier(int Threshold, LPoint *Pt)
+void LPrintDC::Bezier(int Threshold, LPoint *Pt)
 {
 	LgiAssert(!"Not impl.");
 }

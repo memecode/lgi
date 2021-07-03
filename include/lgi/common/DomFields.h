@@ -49,7 +49,7 @@ _(StrUpper, "Upper")
 _(StrStrip, "Strip")
 _(StrSub, "Sub")
 	
-// GSurface
+// LSurface
 _(SurfaceX, "X")
 _(SurfaceY, "Y")
 _(SurfaceBits, "Bits")

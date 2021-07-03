@@ -46,11 +46,11 @@ public:
 	}
 };
 
-/// \brief An implemenation of GSurface to draw into a memory bitmap.
+/// \brief An implemenation of LSurface to draw into a memory bitmap.
 ///
 /// This class uses a block of memory to represent an image. You have direct
 /// pixel access as well as higher level functions to manipulate the bits.
-class LCairoSurface : public GSurface
+class LCairoSurface : public LSurface
 {
 protected:
 	class LCairoSurfacePriv *d;
@@ -78,7 +78,7 @@ public:
 		/// Optional creation flags
 		int Flags = SurfaceCreateNone
 	);
-	LCairoSurface(GSurface *pDC);
+	LCairoSurface(LSurface *pDC);
 	virtual ~LCairoSurface();
 
 	#if WINNATIVE
@@ -148,8 +148,8 @@ public:
 	bool SwapRedAndBlue();
 	
 	bool Create(int x, int y, GColourSpace Cs, int Flags = SurfaceCreateNone);
-	void Blt(int x, int y, GSurface *Src, LRect *a = NULL);
-	void StretchBlt(LRect *d, GSurface *Src, LRect *s = NULL);
+	void Blt(int x, int y, LSurface *Src, LRect *a = NULL);
+	void StretchBlt(LRect *d, LSurface *Src, LRect *s = NULL);
 
 	void HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b);
 	void VertLine(int x, int y1, int y2, COLOUR a, COLOUR b);

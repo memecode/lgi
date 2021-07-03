@@ -1,5 +1,5 @@
 /*hdr
-**	FILE:			GMemDC.h
+**	FILE:			LMemDC.h
 **	AUTHOR:			Matthew Allen
 **	DATE:			27/11/2001
 **	DESCRIPTION:	GDC v2.xx header
@@ -62,7 +62,7 @@ void ReleaseCGImg(void *info, const void *data, size_t size)
 {
 }
 
-CGImg::CGImg(GSurface *pDC)
+CGImg::CGImg(LSurface *pDC)
 {
 	d = new CGImgPriv;
 	if (pDC)
@@ -192,7 +192,7 @@ CGImg::operator CGImageRef()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-class GMemDCPrivate
+class LMemDCPrivate
 {
 public:
 	uchar *Data;
@@ -201,14 +201,14 @@ public:
 	GArray<LRect> Client;
 	GAutoPtr<uchar, true> BitsMem;
 
-	GMemDCPrivate()
+	LMemDCPrivate()
 	{
 		Cs = NULL;
 		Data = NULL;
 		Bmp = NULL;
 	}
 	
-	~GMemDCPrivate()
+	~LMemDCPrivate()
 	{
 		Empty();
 	}
@@ -232,9 +232,9 @@ public:
 	}
 };
 
-GMemDC::GMemDC(int x, int y, GColourSpace cs, int flags)
+LMemDC::LMemDC(int x, int y, GColourSpace cs, int flags)
 {
-	d = new GMemDCPrivate;
+	d = new LMemDCPrivate;
 	pMem = 0;
 
 	if (x && y && cs)
@@ -243,9 +243,9 @@ GMemDC::GMemDC(int x, int y, GColourSpace cs, int flags)
 	}
 }
 
-GMemDC::GMemDC(GSurface *pDC)
+LMemDC::LMemDC(LSurface *pDC)
 {
-	d = new GMemDCPrivate;
+	d = new LMemDCPrivate;
 	pMem = 0;
 
 	if (pDC &&
@@ -266,7 +266,7 @@ GMemDC::GMemDC(GSurface *pDC)
 	}
 }
 
-GMemDC::~GMemDC()
+LMemDC::~LMemDC()
 {
 	Empty();
 	DeleteObj(d);
@@ -279,9 +279,9 @@ void MemRelease(void * __nullable info, const void *  data, size_t size)
 }
 
 #if LGI_COCOA
-GMemDC::GMemDC(NSImage *img)
+LMemDC::LMemDC(NSImage *img)
 {
-	d = new GMemDCPrivate;
+	d = new LMemDCPrivate;
 	pMem = 0;
 
 	if (img &&
@@ -297,7 +297,7 @@ GMemDC::GMemDC(NSImage *img)
 	}
 }
 
-NSImage *GMemDC::NsImage(LRect *rc)
+NSImage *LMemDC::NsImage(LRect *rc)
 {
 	if (!pMem || !pMem->Base)
 		return nil;
@@ -314,7 +314,7 @@ NSImage *GMemDC::NsImage(LRect *rc)
 	CGDataProviderRef provider = nil;
 	
 	GArray<uint8_t> Mem;
-	GAutoPtr<GSurface> Sub(SubImage(r));
+	GAutoPtr<LSurface> Sub(SubImage(r));
 	if (!Sub)
 		return nil;
 	auto p = Sub->pMem;
@@ -359,17 +359,17 @@ NSImage *GMemDC::NsImage(LRect *rc)
 }
 #endif
 
-void GMemDC::Empty()
+void LMemDC::Empty()
 {
 	DeleteObj(pMem);
 }
 
-bool GMemDC::SupportsAlphaCompositing()
+bool LMemDC::SupportsAlphaCompositing()
 {
 	return true;
 }
 
-LRect GMemDC::ClipRgn(LRect *Rgn)
+LRect LMemDC::ClipRgn(LRect *Rgn)
 {
 	LRect Old = Clip;
 	
@@ -389,7 +389,7 @@ LRect GMemDC::ClipRgn(LRect *Rgn)
 	return Old;
 }
 
-CGImg *GMemDC::GetImg(LRect *Sub, int Debug)
+CGImg *LMemDC::GetImg(LRect *Sub, int Debug)
 {
 	if (!pMem)
 		return 0;
@@ -409,27 +409,27 @@ CGImg *GMemDC::GetImg(LRect *Sub, int Debug)
 				);
 }
 
-OsBitmap GMemDC::GetBitmap()
+OsBitmap LMemDC::GetBitmap()
 {
 	return 0;
 }
 
-OsPainter GMemDC::Handle()
+OsPainter LMemDC::Handle()
 {
 	return d->Bmp;
 }
 
-bool GMemDC::Lock()
+bool LMemDC::Lock()
 {
 	return true;
 }
 
-bool GMemDC::Unlock()
+bool LMemDC::Unlock()
 {
 	return true;
 }
 
-bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
+bool LMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 {
 	bool Status = false;
 
@@ -512,7 +512,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 				}
 				
 				if (pMem->Cs != Cs &&
-					Flags == GSurface::SurfaceRequireExactCs)
+					Flags == LSurface::SurfaceRequireExactCs)
 				{
 					// Surface type mismatch... throw away the system bitmap and allocate
 					// the exact type just in our memory.
@@ -565,12 +565,12 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	return Status;
 }
 
-CGColorSpaceRef GMemDC::GetColourSpaceRef()
+CGColorSpaceRef LMemDC::GetColourSpaceRef()
 {
 	return d->Cs;
 }
 
-void GMemDC::Blt(int x, int y, GSurface *Src, LRect *a)
+void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
 	if (!Src)
 		return;
@@ -621,11 +621,11 @@ void GMemDC::Blt(int x, int y, GSurface *Src, LRect *a)
 	}
 	else
 	{
-		GSurface::Blt(x, y, Src, a);
+		LSurface::Blt(x, y, Src, a);
 	}
 }
 
-void GMemDC::StretchBlt(LRect *d, GSurface *Src, LRect *s)
+void LMemDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 {
 	if (Src)
 	{
@@ -652,7 +652,7 @@ void GMemDC::StretchBlt(LRect *d, GSurface *Src, LRect *s)
 	}
 }
 
-void GMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
+void LMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 {
 	if (x1 > x2) LgiSwap(x1, x2);
 
@@ -684,7 +684,7 @@ void GMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 	}
 }
 
-void GMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
+void LMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 {
 	if (y1 > y2) LgiSwap(y1, y2);
 	
@@ -716,12 +716,12 @@ void GMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 	}
 }
 
-void GMemDC::SetOrigin(int x, int y)
+void LMemDC::SetOrigin(int x, int y)
 {
-	GSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(x, y);
 }
 
-void GMemDC::SetClient(LRect *c)
+void LMemDC::SetClient(LRect *c)
 {
 	if (c)
 	{

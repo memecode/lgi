@@ -165,7 +165,7 @@ public:
 	(
 		/// The image to show. The caller should retain the object in memory
 		/// until after the drag.
-		GSurface *Img,
+		LSurface *Img,
 		/// If only a portion of the image is needed set this to the part to
 		/// use. Otherwise NULL means use the whole image.
 		LRect *SubRgn = NULL
@@ -173,7 +173,7 @@ public:
 
 	/// Start a drag operation
 	/// \returns The operation that took effect: #DROPEFFECT_NONE, #DROPEFFECT_COPY etc. 
-	int Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface *Icon = NULL);
+	int Drag(GView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon = NULL);
 
 	/// Called when window is registered
 	virtual void OnRegister(bool Suc) {}

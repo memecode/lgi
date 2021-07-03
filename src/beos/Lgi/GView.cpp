@@ -1179,7 +1179,7 @@ void BViewRedir::DetachedFromWindow()
 
 void BViewRedir::Draw(BRect UpdateRect)
 {
-	GScreenDC DC(this);
+	LScreenDC DC(this);
 	Wnd->_Paint(&DC);
 }
 

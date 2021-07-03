@@ -63,7 +63,7 @@ public:
 
 	bool Attach(GViewI *p) override;
 	bool Pour(LRegion &r) override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	void OnPosChange() override;
 	void OnMouseClick(LMouse &m) override;
 	void OnMouseMove(LMouse &m) override;

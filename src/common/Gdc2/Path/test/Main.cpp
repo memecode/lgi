@@ -8,7 +8,7 @@ const char *AppName = "GPathTest";
 class App : public GWindow
 {
 	GPath p;
-	GMemDC img;
+	LMemDC img;
 
 public:
     App()
@@ -49,7 +49,7 @@ public:
 		img.ConvertPreMulAlpha(true);
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(L_MED);
 		pDC->Rectangle();

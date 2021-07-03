@@ -62,13 +62,13 @@ char16 *GClipBoard::TextW()
     return Utf8ToWide(u);
 }
 
-bool GClipBoard::Bitmap(GSurface *pDC, bool AutoEmpty)
+bool GClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 {
 	bool Status = false;
 	return Status;
 }
 
-GSurface *GClipBoard::Bitmap()
+LSurface *GClipBoard::Bitmap()
 {
 	return pDC;
 }

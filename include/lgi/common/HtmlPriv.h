@@ -327,11 +327,11 @@ public:
 	
 	// Images
 	bool ImageResized;
-	GAutoPtr<GSurface> Image;
-	void SetImage(const char *uri, GSurface *i);
+	GAutoPtr<LSurface> Image;
+	void SetImage(const char *uri, LSurface *i);
 	void LoadImage(const char *Uri); // Load just this URI
 	void LoadImages(); // Recursive load all image URI's
-	void ImageLoaded(char *uri, GSurface *img, int &Used);
+	void ImageLoaded(char *uri, LSurface *img, int &Used);
 	void ClearToolTips();
 
 	// Table stuff
@@ -412,14 +412,14 @@ public:
 	/// Paints the border and background of the tag
 	void PaintBorderAndBackground(
 		/// The surface to paint on
-		GSurface *pDC,
+		LSurface *pDC,
 		/// The background colour (transparent is OK)
 		GColour &Back,
 		/// [Optional] The size of the border painted
 		LRect *Px = NULL);
 	/// This fills 'rgn' with all the rectangles making up the inline tags region
 	void GetInlineRegion(LRegion &rgn, int ox = 0, int oy = 0);
-	void OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth);
+	void OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth);
 	void SetSize(LPoint &s);
 	void SetTag(const char *Tag);
 	void GetTagByPos(GTagHit &TagHit, int x, int y, int Depth, bool InBody, bool DebugLog = false);

@@ -132,7 +132,7 @@ void EditTray::OnPosChange()
 	c.Remaining(TextMsg);
 }
 	
-void EditTray::OnPaint(GSurface *pDC)
+void EditTray::OnPaint(LSurface *pDC)
 {
 	LRect c = GetClient();
 	pDC->Colour(L_MED);
@@ -1853,7 +1853,7 @@ bool IdeDoc::SetClean()
 	return Status;
 }
 
-void IdeDoc::OnPaint(GSurface *pDC)
+void IdeDoc::OnPaint(LSurface *pDC)
 {
 	GMdiChild::OnPaint(pDC);
 	

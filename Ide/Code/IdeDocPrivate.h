@@ -31,7 +31,7 @@ public:
 	void GotoSearch(int CtrlId, char *InitialText = NULL);	
 	void OnCreate() override;
 	void OnPosChange() override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	bool Pour(LRegion &r) override;
 	void OnMouseClick(LMouse &m) override;
 	void OnHeaderList(LMouse &m);

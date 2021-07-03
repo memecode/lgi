@@ -333,7 +333,7 @@ void ClipDC(HDC hDC, RECT rc)
 }
 #endif
 
-void GSplitter::OnPaint(GSurface *pDC)
+void GSplitter::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
 	GCssTools Tools(this);

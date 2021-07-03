@@ -93,7 +93,7 @@ public:
 		ResSelectedFocused,
 		ResMax
 	};
-	GAutoPtr<GSurface> Corners[ResMax];
+	GAutoPtr<LSurface> Corners[ResMax];
 	GColour cBack, cBorder, cFill, cSelUnfoc, cTopEdge, cBottomEdge;
 	
 	// Scrolling
@@ -135,14 +135,14 @@ public:
 		return c;
 	}
 
-	bool DrawCircle(GAutoPtr<GSurface> &Dc, GColour c)
+	bool DrawCircle(GAutoPtr<LSurface> &Dc, GColour c)
 	{
 		if (Dc)
 			return true;
 
 		double r = 7.0;
 		int x = (int)(r * 2.0);
-		if (!Dc.Reset(new GMemDC(x, x, System32BitColourSpace)))
+		if (!Dc.Reset(new LMemDC(x, x, System32BitColourSpace)))
 			return false;
 
 		Dc->Colour(0, 32);
@@ -172,9 +172,9 @@ public:
 
 	void CreateCorners()
 	{
-		GAutoPtr<GSurface> &White = Corners[ResWorkspace];
-		GAutoPtr<GSurface> &Unfoc = Corners[ResSelectedUnfocused];
-		GAutoPtr<GSurface> &Sel = Corners[ResSelectedFocused];
+		GAutoPtr<LSurface> &White = Corners[ResWorkspace];
+		GAutoPtr<LSurface> &Unfoc = Corners[ResSelectedUnfocused];
+		GAutoPtr<LSurface> &Sel = Corners[ResSelectedFocused];
 
 		DrawCircle(White, LColour(L_WORKSPACE));
 		DrawCircle(Unfoc, cSelUnfoc);
@@ -781,7 +781,7 @@ void GTabView::OnStyleChange()
 	Invalidate();
 }
 
-void GTabView::OnPaint(GSurface *pDC)
+void GTabView::OnPaint(LSurface *pDC)
 {
 	if (!d->cBack.IsValid())
 		OnStyleChange();
@@ -833,7 +833,7 @@ void GTabView::OnPaint(GSurface *pDC)
 
 		int x = d->Tabs.x1, y = d->Tabs.y1;
 		#ifndef LGI_CARBON
-		GSurface *pScreen = pDC;
+		LSurface *pScreen = pDC;
 		#endif
 		for (unsigned i = 0; i < it.Length(); i++)
 		{
@@ -879,7 +879,7 @@ void GTabView::OnPaint(GSurface *pDC)
 				LRect b = r;
 
 				#if MAC_DBL_BUF
-				GMemDC Mem;
+				LMemDC Mem;
 				if (First || Last)
 				{
 					if (Mem.Create(r.X(), r.Y(), System32BitColourSpace))
@@ -1248,7 +1248,7 @@ void GTabPage::OnTabClick(LMouse &m)
 	v->SendNotify(GNotifyItem_Click);
 }
 
-void GTabPage::OnButtonPaint(GSurface *pDC)
+void GTabPage::OnButtonPaint(LSurface *pDC)
 {
 	#if MAC_PAINT
 	
@@ -1300,7 +1300,7 @@ bool GTabPage::Name(const char *name)
 	return Status;
 }
 
-void GTabPage::PaintTab(GSurface *pDC, bool Selected)
+void GTabPage::PaintTab(LSurface *pDC, bool Selected)
 {
 	#if MAC_PAINT
 
@@ -1470,7 +1470,7 @@ void GTabPage::SetFont(LFont *Font, bool OwnIt)
 	return GView::SetFont(Font, OwnIt);
 }
 
-void GTabPage::OnPaint(GSurface *pDC)
+void GTabPage::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 	GColour Bk = StyleColour(LCss::PropBackgroundColor, TabCtrl ? TabCtrl->d->cFill : LColour(L_MED), 1);

@@ -30,7 +30,7 @@ public:
 	void SetDirty();
 	bool OnRequestClose(bool OsShuttingDown) override;
 	void OnPosChange() override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	bool IsFile(const char *File);
 	bool AddBreakPoint(ssize_t Line, bool Add);
 	

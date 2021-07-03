@@ -24,8 +24,8 @@ public:
 	);
 	*/
 
-	virtual int OnBeginPrint(GPrintDC *pDC) { return 1; }
-	virtual bool OnPrintPage(GPrintDC *pDC, int PageIndex) = 0;
+	virtual int OnBeginPrint(LPrintDC *pDC) { return 1; }
+	virtual bool OnPrintPage(LPrintDC *pDC, int PageIndex) = 0;
 };
 
 /// Class to connect to a printer and start printing pages.

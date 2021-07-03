@@ -366,7 +366,7 @@ void GView::SetPulse(int Length)
 	}
 }
 
-void GView::DrawThemeBorder(GSurface *pDC, LRect &r)
+void GView::DrawThemeBorder(LSurface *pDC, LRect &r)
 {
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
 }

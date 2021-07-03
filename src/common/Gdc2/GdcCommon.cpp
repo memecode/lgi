@@ -59,7 +59,7 @@ void MemOr(void *d, void *s, uint l)
 }
 
 //////////////////////////////////////////////////////////////////////
-bool LgiFindBounds(GSurface *pDC, LRect *rc)
+bool LgiFindBounds(LSurface *pDC, LRect *rc)
 {
 	if (!pDC || ! rc)
 		return false;
@@ -145,7 +145,7 @@ bool LgiFindBounds(GSurface *pDC, LRect *rc)
 
 //////////////////////////////////////////////////////////////////////
 // Drawing functions
-void LgiDrawBox(GSurface *pDC, LRect &r, bool Sunken, bool Fill)
+void LgiDrawBox(LSurface *pDC, LRect &r, bool Sunken, bool Fill)
 {
 	if (Fill)
 	{
@@ -162,7 +162,7 @@ void LgiDrawBox(GSurface *pDC, LRect &r, bool Sunken, bool Fill)
 	pDC->Line(r.x1, r.y1, r.x2, r.y1);
 }
 
-void LgiWideBorder(GSurface *pDC, LRect &r, LgiEdge Type)
+void LgiWideBorder(LSurface *pDC, LRect &r, LgiEdge Type)
 {
 	if (!pDC) return;
 	COLOUR Old = pDC->Colour();
@@ -289,7 +289,7 @@ void LgiWideBorder(GSurface *pDC, LRect &r, LgiEdge Type)
 	pDC->Colour(Old);
 }
 
-void LgiThinBorder(GSurface *pDC, LRect &r, LgiEdge Type)
+void LgiThinBorder(LSurface *pDC, LRect &r, LgiEdge Type)
 {
 	if (!pDC) return;
 	COLOUR Old = pDC->Colour();
@@ -334,7 +334,7 @@ void LgiThinBorder(GSurface *pDC, LRect &r, LgiEdge Type)
 	pDC->Colour(Old);
 }
 
-void LgiFlatBorder(GSurface *pDC, LRect &r, int Width)
+void LgiFlatBorder(LSurface *pDC, LRect &r, int Width)
 {
 	pDC->Colour(LColour(L_MED));
 	if (Width < 1 || r.X() < (2 * Width) || r.Y() < (2 * Width))
@@ -352,7 +352,7 @@ void LgiFlatBorder(GSurface *pDC, LRect &r, int Width)
 	}
 }
 
-void LgiFillGradient(GSurface *pDC, LRect &r, bool Vert, GArray<GColourStop> &Stops)
+void LgiFillGradient(LSurface *pDC, LRect &r, bool Vert, GArray<GColourStop> &Stops)
 {
 	int CurStop = 0;
 	GColourStop *This = Stops.Length() > CurStop ? &Stops[CurStop] : 0;
@@ -404,9 +404,9 @@ void LgiFillGradient(GSurface *pDC, LRect &r, bool Vert, GArray<GColourStop> &St
 
 //////////////////////////////////////////////////////////////////////////////////
 // Other Gdc Stuff
-GSurface *ConvertDC(GSurface *pDC, int Bits)
+LSurface *ConvertDC(LSurface *pDC, int Bits)
 {
-	GSurface *pNew = new GMemDC;
+	LSurface *pNew = new LMemDC;
 	if (pNew && pNew->Create(pDC->X(), pDC->Y(), GBitsToColourSpace(Bits)))
 	{
 		pNew->Blt(0, 0, pDC);
@@ -939,10 +939,10 @@ bool GColourSpaceTest()
 }
 
 ////////////////////////////////////////////////////////////////////////
-GSurface *GInlineBmp::Create(uint32_t TransparentPx)
+LSurface *GInlineBmp::Create(uint32_t TransparentPx)
 {
-	GSurface *pDC = new GMemDC;
-	if (pDC->Create(X, Y, System32BitColourSpace, GSurface::SurfaceRequireExactCs))
+	LSurface *pDC = new LMemDC;
+	if (pDC->Create(X, Y, System32BitColourSpace, LSurface::SurfaceRequireExactCs))
 	{
 		GBmpMem Src, Dst;
 		
@@ -1138,7 +1138,7 @@ int LgiScreenDpi()
 	#endif
 }
 
-bool GMemDC::SwapRedAndBlue()
+bool LMemDC::SwapRedAndBlue()
 {
 	switch (GetColourSpace())
 	{

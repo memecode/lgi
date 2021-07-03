@@ -24,7 +24,7 @@
 #define LGI_RAD					(360/(2*LGI_PI))
 
 /****************************** Helper Functions ****************************************************************************/
-void LgiDrawIcon(GSurface *pDC, int Dx, int Dy, HICON ico)
+void LgiDrawIcon(LSurface *pDC, int Dx, int Dy, HICON ico)
 {
 	ICONINFO iconinfo;
 	GetIconInfo(ico, &iconinfo);
@@ -557,7 +557,7 @@ class GGlobalColourPrivate
 public:
 	GlobalColourEntry c[256];
 	GPalette *Global;
-	List<GSurface> Cache;
+	List<LSurface> Cache;
 	int FirstUnused;
 	
 	int FreeColours()
@@ -646,11 +646,11 @@ COLOUR GGlobalColour::AddColour(COLOUR c24)
 	return c24;
 }
 
-bool GGlobalColour::AddBitmap(GSurface *pDC)
+bool GGlobalColour::AddBitmap(LSurface *pDC)
 {
 	if (pDC)
 	{
-		GSurface *s = new GMemDC(pDC);
+		LSurface *s = new LMemDC(pDC);
 		if (s)
 		{
 			d->Cache.Insert(s);
@@ -661,7 +661,7 @@ bool GGlobalColour::AddBitmap(GSurface *pDC)
 	return false;
 }
 
-void KeyBlt(GSurface *To, GSurface *From, COLOUR Key)
+void KeyBlt(LSurface *To, LSurface *From, COLOUR Key)
 {
 	int Bits = From->GetBits();
 	GPalette *Pal = From->Palette();
@@ -684,14 +684,14 @@ bool GGlobalColour::AddBitmap(GImageList *il)
 {
 	if (il)
 	{
-		GSurface *s = new GMemDC(il);
+		LSurface *s = new LMemDC(il);
 		if (s)
 		{
 			// Cache the full colour bitmap
 			d->Cache.Insert(s);
 
 			// Cache the disabled alpha blending bitmap
-			s = new GMemDC(il->X(), il->Y(), System24BitColourSpace);
+			s = new LMemDC(il->X(), il->Y(), System24BitColourSpace);
 			if (s)
 			{
 				s->Op(GDC_ALPHA);
@@ -782,7 +782,7 @@ COLOUR GGlobalColour::GetColour(COLOUR c24)
 	return c24;
 }
 
-bool GGlobalColour::RemapBitmap(GSurface *pDC)
+bool GGlobalColour::RemapBitmap(LSurface *pDC)
 {
 	return false;
 }
@@ -1096,7 +1096,7 @@ void GdcDevice::SetColourPaletteType(int Type)
 	*/
 }
 
-COLOUR GdcDevice::GetColour(COLOUR Rgb24, GSurface *pDC)
+COLOUR GdcDevice::GetColour(COLOUR Rgb24, LSurface *pDC)
 {
 	int Bits = (pDC) ? pDC->GetBits() : GetBits();
 	COLOUR C;

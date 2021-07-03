@@ -4755,13 +4755,13 @@ LRect GTextView3::DocToScreen(LRect r)
 	return r;
 }
 
-void GTextView3::OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour)
+void GTextView3::OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour)
 {
 	pDC->Colour(colour);
 	pDC->Rectangle(&r);
 }
 
-void GTextView3::OnPaint(GSurface *pDC)
+void GTextView3::OnPaint(LSurface *pDC)
 {
 	#if LGI_EXCEPTIONS
 	try
@@ -4805,7 +4805,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 		pDC->Rectangle();
 		#endif
 
-		GSurface *pOut = pDC;
+		LSurface *pOut = pDC;
 		bool DrawSel = false;
 		
 		bool HasFocus = Focus();
@@ -4838,7 +4838,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 		}
 
 		#ifdef DOUBLE_BUFFER_PAINT
-		GMemDC *pMem = new GMemDC;
+		LMemDC *pMem = new LMemDC;
 		pOut = pMem;
 		#endif
 		if (Text &&
@@ -5155,7 +5155,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 
 				#if DRAW_LINE_BOXES
 				{
-					uint Style = pDC->LineStyle(GSurface::LineAlternate);
+					uint Style = pDC->LineStyle(LSurface::LineAlternate);
 					GColour Old = pDC->Colour(GColour::Red);
 					pDC->Box(&OldTr);
 					pDC->Colour(Old);

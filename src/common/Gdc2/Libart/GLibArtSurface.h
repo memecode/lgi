@@ -74,7 +74,7 @@ public:
 	void AddLine(double x1, double y1, double x2, double y2);
 };
 
-class GLibArtSurface : public GMemDC
+class GLibArtSurface : public LMemDC
 {
 	ArtRender * Ar;
 

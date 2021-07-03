@@ -25,11 +25,11 @@ const char *LVariant::TypeToString(LVariantType t)
 		case GV_OPERATOR:	return "Operator";
 		case GV_CUSTOM:		return "Custom";
 		case GV_WSTRING:	return "WString";
-		case GV_GSURFACE:	return "Surface";
 		case GV_GVIEW:		return "View";
+		case GV_STREAM:		return "Stream";
+		case GV_LSURFACE:	return "Surface";
 		case GV_LMOUSE:		return "MouseEvent";
 		case GV_LKEY:		return "KeyboardEvent";
-		case GV_STREAM:		return "Stream";
 		default:			return "Unknown";
 	}
 	
@@ -257,7 +257,7 @@ bool LVariant::operator ==(LVariant &v)
 			return Value.Op == v.Value.Op;
 		case GV_CUSTOM:
 			return Value.Custom == v.Value.Custom;
-		case GV_GSURFACE:
+		case GV_LSURFACE:
 			return Value.Surface.Ptr == v.Value.Surface.Ptr;
 		case GV_GVIEW:
 			return Value.View == v.Value.View;
@@ -589,7 +589,7 @@ LVariant &LVariant::operator =(LVariant const &i)
 			Value.Custom.Dom = i.Value.Custom.Dom;
 			break;
 		}
-		case GV_GSURFACE:
+		case GV_LSURFACE:
 		{
 			Value.Surface = i.Value.Surface;
 			if (Value.Surface.Own &&
@@ -712,13 +712,13 @@ bool LVariant::SetHashTable(LHash *Table, bool Copy)
 	return Value.Hash != 0;
 }
 
-bool LVariant::SetSurface(class GSurface *Ptr, bool Own)
+bool LVariant::SetSurface(class LSurface *Ptr, bool Own)
 {
     Empty();
     if (!Ptr)
 		return false;
 
-    Type = GV_GSURFACE;
+    Type = GV_LSURFACE;
     Value.Surface.Ptr = Ptr;
     if ((Value.Surface.Own = Own))
         Value.Surface.Ptr->AddRef();
@@ -877,7 +877,7 @@ void LVariant::Empty()
 			}
 			break;
 		}
-		case GV_GSURFACE:
+		case GV_LSURFACE:
 		{
 		    if (Value.Surface.Own &&
 		        Value.Surface.Ptr)
@@ -971,7 +971,7 @@ int64 LVariant::Length()
 			break;
 		case GV_WSTRING:
 			return Value.WString ? StrlenW(Value.WString) * sizeof(char16) : 0;
-		case GV_GSURFACE:
+		case GV_LSURFACE:
 		{
 			int64 Sz = 0;
 			if (Value.Surface.Ptr)
@@ -1141,7 +1141,7 @@ void *LVariant::CastVoidPtr()
 			return Value.Custom.Data;
 		case GV_WSTRING:
 			return Value.WString;
-		case GV_GSURFACE:
+		case GV_LSURFACE:
 			return Value.Surface.Ptr;
 		case GV_GVIEW:
 			return Value.View;
@@ -1166,7 +1166,7 @@ GDom *LVariant::CastDom()
 			return Value.DomRef.Dom;
 		case GV_STREAM:
 			return dynamic_cast<GDom*>(Value.Stream.Ptr);
-		case GV_GSURFACE:
+		case GV_LSURFACE:
 			return Value.Surface.Ptr;
 		case GV_CUSTOM:
 			return Value.Custom.Dom;
@@ -1314,7 +1314,7 @@ int32 LVariant::CastInt32()
 			return Value.Lst != NULL;
 		case GV_HASHTABLE:
 			return Value.Hash != NULL;
-		case GV_GSURFACE:
+		case GV_LSURFACE:
 			return Value.Surface.Ptr != NULL;
 		case GV_GVIEW:
 			return Value.View != NULL;
@@ -1831,7 +1831,7 @@ GString LVariant::ToString()
 		case GV_WSTRING:
 			s.Printf("(wstring)\"%S\"", Value.WString);
 			break;
-		case GV_GSURFACE:
+		case GV_LSURFACE:
 			s.Printf("(gsurface)%p", Value.Surface.Ptr);
 			break;
 		case GV_GVIEW:

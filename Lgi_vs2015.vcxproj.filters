@@ -200,12 +200,6 @@
     <ClCompile Include="src\common\Widgets\GToolBar.cpp">
       <Filter>Source Files\Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\GCss.cpp">
-      <Filter>Source Files\Widgets\Css</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GCssTools.cpp">
-      <Filter>Source Files\Widgets\Css</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Widgets\GBox.cpp">
       <Filter>Source Files\Widgets\Layout</Filter>
     </ClCompile>
@@ -298,9 +292,6 @@
     </ClCompile>
     <ClCompile Include="src\common\Gdc2\Filters\GFilter.cpp">
       <Filter>Source Files\Graphics\Filters</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\GSurface.cpp">
-      <Filter>Source Files\Graphics\Surfaces</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Gdc2\Tools\GColourReduce.cpp">
       <Filter>Source Files\Graphics\Colour Reduction</Filter>
@@ -496,6 +487,15 @@
     </ClCompile>
     <ClCompile Include="src\common\Gdc2\Font\LFont.cpp">
       <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\LCss.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\LCssTools.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\LSurface.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

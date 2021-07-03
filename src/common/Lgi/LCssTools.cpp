@@ -5,10 +5,10 @@
 
 struct CssImageCache
 {
-	GArray<GAutoPtr<GSurface>> Store;
-	LHashTbl<ConstStrKey<char, false>, GSurface*> Map;
+	GArray<GAutoPtr<LSurface>> Store;
+	LHashTbl<ConstStrKey<char, false>, LSurface*> Map;
 
-	GSurface *Get(const char *uri)
+	LSurface *Get(const char *uri)
 	{
 		auto Uri = GString(uri).Strip("\'\"");
 		auto i = Map.Find(Uri);
@@ -33,7 +33,7 @@ struct CssImageCache
 		if (!File)
 			return NULL;
 
-		GAutoPtr<GSurface> img(GdcD->Load(File));
+		GAutoPtr<LSurface> img(GdcD->Load(File));
 		if (!img)
 			return NULL;
 
@@ -197,7 +197,7 @@ LRect GCssTools::ApplyPadding(LRect &in)
 				 in.y2 - pad.y2);
 }
 
-bool GCssTools::SetLineStyle(GSurface *pDC, LCss::BorderDef &b)
+bool GCssTools::SetLineStyle(LSurface *pDC, LCss::BorderDef &b)
 {
 	if (b.Color.Type == LCss::ColorRgb)
 	{
@@ -207,13 +207,13 @@ bool GCssTools::SetLineStyle(GSurface *pDC, LCss::BorderDef &b)
 			case LCss::BorderHidden:
 				return false;
 			case LCss::BorderDotted:
-				pDC->LineStyle(GSurface::LineDot);
+				pDC->LineStyle(LSurface::LineDot);
 				break;
 			case LCss::BorderDashed:
-				pDC->LineStyle(GSurface::LineDash);
+				pDC->LineStyle(LSurface::LineDash);
 				break;
 			default:
-				pDC->LineStyle(GSurface::LineSolid);
+				pDC->LineStyle(LSurface::LineSolid);
 				break;
 		}
 	}
@@ -221,7 +221,7 @@ bool GCssTools::SetLineStyle(GSurface *pDC, LCss::BorderDef &b)
 	return true;
 }
 
-LRect GCssTools::PaintBorder(GSurface *pDC, LRect &in)
+LRect GCssTools::PaintBorder(LSurface *pDC, LRect &in)
 {
 	LRect Content = in;
 	if (!Css)
@@ -321,13 +321,13 @@ LRect GCssTools::PaintBorder(GSurface *pDC, LRect &in)
 				pDC->VLine(Content.x2--, Content.y1, Content.y2);
 		}
 		
-		pDC->LineStyle(GSurface::LineSolid);
+		pDC->LineStyle(LSurface::LineSolid);
 	}
 
 	return Content;
 }
 
-LRect GCssTools::PaintPadding(GSurface *pDC, LRect &in)
+LRect GCssTools::PaintPadding(LSurface *pDC, LRect &in)
 {
 	LRect Content = in;
 	if (!Css)
@@ -356,12 +356,12 @@ LRect GCssTools::PaintPadding(GSurface *pDC, LRect &in)
 	return Content;
 }
 
-GSurface *GCssTools::GetCachedImage(const char *Uri)
+LSurface *GCssTools::GetCachedImage(const char *Uri)
 {
 	return Cache.Get(Uri);
 }
 
-bool GCssTools::Tile(GSurface *pDC, LRect in, GSurface *Img, int Ox, int Oy)
+bool GCssTools::Tile(LSurface *pDC, LRect in, LSurface *Img, int Ox, int Oy)
 {
 	if (!pDC || !Img)
 		return false;
@@ -373,7 +373,7 @@ bool GCssTools::Tile(GSurface *pDC, LRect in, GSurface *Img, int Ox, int Oy)
 	return true;
 }
 
-GSurface *GCssTools::GetBackImage()
+LSurface *GCssTools::GetBackImage()
 {
 	LCss::ImageDef BackDef;
 	auto Parent = View ? View->GetParent() : NULL;
@@ -394,7 +394,7 @@ GSurface *GCssTools::GetBackImage()
 	return BackImg;
 }
 
-void GCssTools::PaintContent(GSurface *pDC, LRect &in, const char *utf8, GSurface *img)
+void GCssTools::PaintContent(LSurface *pDC, LRect &in, const char *utf8, LSurface *img)
 {
 	bool BackgroundDrawn = false;
 	auto BkImg = GetBackImage();

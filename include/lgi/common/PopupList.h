@@ -149,7 +149,7 @@ public:
 		return true;
 	}
 	
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		// Draw the CSS border... (the default value is set in the constructor)
 		GCssTools t(GetCss(true), GetFont());

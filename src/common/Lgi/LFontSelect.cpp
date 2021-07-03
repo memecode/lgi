@@ -181,7 +181,7 @@ void LFontSelect::UpdatePreview()
 	f.Italic(Italic);
 	if (f.Create(Face, LCss::Len(LCss::LenPt, (float)Size)))
 	{
-		GMemDC *Dc = new GMemDC;
+		LMemDC *Dc = new LMemDC;
 		if (Dc->Create(263, 65, GdcD->GetColourSpace()))
 		{
 			Dc->Colour(LColour(L_WORKSPACE));

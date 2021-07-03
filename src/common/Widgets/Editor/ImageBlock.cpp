@@ -13,7 +13,7 @@ class ImageLoader : public GEventTargetThread, public Progress
 {
 	GString File;
 	GEventSinkI *Sink;
-	GSurface *Img;
+	LSurface *Img;
 	GAutoPtr<GFilter> Filter;
 	bool SurfaceSent;
 	int64 Ts;
@@ -97,7 +97,7 @@ public:
 					return PostSink(M_IMAGE_ERROR);
 				}
 
-				if (!(Img = new GMemDC))
+				if (!(Img = new LMemDC))
 				{
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): alloc err\n", _FL);
@@ -163,7 +163,7 @@ public:
 					return PostSink(M_IMAGE_ERROR);
 				}
 
-				if (!(Img = new GMemDC))
+				if (!(Img = new LMemDC))
 				{
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): alloc err\n", _FL);
@@ -208,8 +208,8 @@ public:
 			}
 			case M_IMAGE_RESAMPLE:
 			{
-				GSurface *Dst = (GSurface*) Msg->A();
-				GSurface *Src = (GSurface*) Msg->B();
+				LSurface *Dst = (LSurface*) Msg->A();
+				LSurface *Src = (LSurface*) Msg->B();
 				#if LOADER_THREAD_LOGGING
 				LgiTrace("%s:%i - Thread.Receive(M_IMAGE_RESAMPLE)\n", _FL);
 				#endif
@@ -235,7 +235,7 @@ public:
 			}
 			case M_IMAGE_COMPRESS:
 			{
-				GSurface *img = (GSurface*)Msg->A();
+				LSurface *img = (LSurface*)Msg->A();
 				GRichTextPriv::ImageBlock::ScaleInf *si = (GRichTextPriv::ImageBlock::ScaleInf*)Msg->B();
 				#if LOADER_THREAD_LOGGING
 				LgiTrace("%s:%i - Thread.Receive(M_IMAGE_COMPRESS)\n", _FL);
@@ -259,11 +259,11 @@ public:
 					break;
 				}
 
-				GAutoPtr<GSurface> scaled;
+				GAutoPtr<LSurface> scaled;
 				if (img->X() != si->Sz.x ||
 					img->Y() != si->Sz.y)
 				{
-					if (!scaled.Reset(new GMemDC(si->Sz.x, si->Sz.y, img->GetColourSpace())))
+					if (!scaled.Reset(new LMemDC(si->Sz.x, si->Sz.y, img->GetColourSpace())))
 						break;
 					ResampleDC(scaled, img, NULL, NULL);
 					img = scaled;
@@ -294,7 +294,7 @@ public:
 				#if LOADER_THREAD_LOGGING
 				LgiTrace("%s:%i - Thread.Receive(M_IMAGE_ROTATE)\n", _FL);
 				#endif
-				GSurface *Img = (GSurface*)Msg->A();
+				LSurface *Img = (LSurface*)Msg->A();
 				if (!Img)
 				{
 					LgiAssert(!"No image.");
@@ -313,7 +313,7 @@ public:
 				#if LOADER_THREAD_LOGGING
 				LgiTrace("%s:%i - Thread.Receive(M_IMAGE_FLIP)\n", _FL);
 				#endif
-				GSurface *Img = (GSurface*)Msg->A();
+				LSurface *Img = (LSurface*)Msg->A();
 				if (!Img)
 				{
 					LgiAssert(!"No image.");
@@ -368,7 +368,7 @@ GRichTextPriv::ImageBlock::ImageBlock(const ImageBlock *Copy) : Block(Copy->d)
 	ThreadHnd = 0;
 	ThreadBusy = 0;
 	LayoutDirty = true;
-	SourceImg.Reset(new GMemDC(Copy->SourceImg));
+	SourceImg.Reset(new LMemDC(Copy->SourceImg));
 	Size = Copy->Size;
 	IsDeleted = false;
 
@@ -395,7 +395,7 @@ bool GRichTextPriv::ImageBlock::IsBusy(bool Stop)
 	return ThreadBusy != 0;
 }
 
-bool GRichTextPriv::ImageBlock::SetImage(GAutoPtr<GSurface> Img)
+bool GRichTextPriv::ImageBlock::SetImage(GAutoPtr<LSurface> Img)
 {
 	SourceImg = Img;
 	if (!SourceImg)
@@ -753,7 +753,7 @@ void GRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 		UpdateDisplayImg();
 	}
 
-	GSurface *Src = DisplayImg ? DisplayImg : SourceImg;
+	LSurface *Src = DisplayImg ? DisplayImg : SourceImg;
 	if (Src)
 	{
 		if (SourceValid.Valid())
@@ -775,7 +775,7 @@ void GRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 			if (Ctx.Type == GRichTextPriv::Selected)
 			{
 				if (!SelectImg &&
-					SelectImg.Reset(new GMemDC(Src->X(), Src->Y(), System32BitColourSpace)))
+					SelectImg.Reset(new LMemDC(Src->X(), Src->Y(), System32BitColourSpace)))
 				{
 					SelectImg->Blt(0, 0, Src);
 
@@ -804,7 +804,7 @@ void GRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 		Ctx.pDC->Rectangle(&r);
 
 		Ctx.pDC->Colour(L_LOW);
-		uint Ls = Ctx.pDC->LineStyle(GSurface::LineAlternate);
+		uint Ls = Ctx.pDC->LineStyle(LSurface::LineAlternate);
 		Ctx.pDC->Box(&r);
 		Ctx.pDC->LineStyle(Ls);
 
@@ -1030,8 +1030,8 @@ void GRichTextPriv::ImageBlock::UpdateDisplay(int yy)
 
 		// Do a quick and dirty nearest neighbor scale to 
 		// show the user some feed back.
-		GSurface *Src = SourceImg;
-		GSurface *Dst = DisplayImg;
+		LSurface *Src = SourceImg;
+		LSurface *Dst = DisplayImg;
 		for (int y=d.y1; y<=d.y2; y++)
 		{
 			int sy = y * Scale;
@@ -1080,7 +1080,7 @@ void GRichTextPriv::ImageBlock::UpdateDisplayImg()
 
 			Size.x = (int)ceil((double)SourceImg->X() / Scale);
 			Size.y = (int)ceil((double)SourceImg->Y() / Scale);
-			if (DisplayImg.Reset(new GMemDC(Size.x, Size.y, SourceImg->GetColourSpace())))
+			if (DisplayImg.Reset(new LMemDC(Size.x, Size.y, SourceImg->GetColourSpace())))
 			{
 				DisplayImg->Colour(L_MED);
 				DisplayImg->Rectangle();
@@ -1225,7 +1225,7 @@ GMessage::Result GRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 			LgiTrace("%s:%i - Received M_IMAGE_SET_SURFACE\n", _FL);
 			#endif
 
-			if (SourceImg.Reset((GSurface*)Msg->A()))
+			if (SourceImg.Reset((LSurface*)Msg->A()))
 			{
 				Scales.Length(CountOf(ImgScales));
 				for (int i=0; i<CountOf(ImgScales); i++)
@@ -1304,7 +1304,7 @@ GMessage::Result GRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 			LgiTrace("%s:%i - Received %s\n", _FL, Msg->Msg()==M_IMAGE_ROTATE?"M_IMAGE_ROTATE":"M_IMAGE_FLIP");
 			#endif
 
-			GAutoPtr<GSurface> Img = SourceImg;
+			GAutoPtr<LSurface> Img = SourceImg;
 			UpdateThreadBusy(_FL, -1);
 			SetImage(Img);
 			break;

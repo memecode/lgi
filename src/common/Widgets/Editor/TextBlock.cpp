@@ -66,7 +66,7 @@ void GRichTextPriv::StyleText::SetStyle(GNamedStyle *s)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-GRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, GSurface *img, LFont *f, const uint32_t *s, ssize_t l) :
+GRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, LSurface *img, LFont *f, const uint32_t *s, ssize_t l) :
 	DisplayStr(src, NULL, s, l)
 {
 	Img = img;
@@ -118,7 +118,7 @@ GAutoPtr<GRichTextPriv::DisplayStr> GRichTextPriv::EmojiDisplayStr::Clone(ssize_
 	return s;
 }
 
-void GRichTextPriv::EmojiDisplayStr::Paint(GSurface *pDC, int &FixX, int FixY, GColour &Back)
+void GRichTextPriv::EmojiDisplayStr::Paint(LSurface *pDC, int &FixX, int FixY, GColour &Back)
 {
 	LRect f(0, 0, x-1, y-1);
 	f.Offset(FixedToInt(FixX), FixedToInt(FixY));
@@ -645,7 +645,7 @@ bool GRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 	return false;
 }
 
-void DrawDecor(GSurface *pDC, GRichTextPriv::DisplayStr *Ds, int Fx, int Fy, ssize_t Start, ssize_t Len)
+void DrawDecor(LSurface *pDC, GRichTextPriv::DisplayStr *Ds, int Fx, int Fy, ssize_t Start, ssize_t Len)
 {
 	// GColour Old = pDC->Colour(GColour::Red);
 	LDisplayString ds1(Ds->GetFont(), (const char16*)(*Ds), Start);
@@ -674,7 +674,7 @@ bool Overlap(GSpellCheck::SpellingError *e, int start, ssize_t len)
 	return true;
 }
 
-void GRichTextPriv::TextBlock::DrawDisplayString(GSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, GColour &Bk, int &Pos)
+void GRichTextPriv::TextBlock::DrawDisplayString(LSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, GColour &Bk, int &Pos)
 {
 	int OldX = FixX;
 
@@ -925,9 +925,9 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 			if (r.Valid())
 			{
 				Ctx.pDC->Colour(GColour(192, 192, 192));
-				Ctx.pDC->LineStyle(GSurface::LineDot);
+				Ctx.pDC->LineStyle(LSurface::LineDot);
 				Ctx.pDC->Box(&r);
-				Ctx.pDC->LineStyle(GSurface::LineSolid);
+				Ctx.pDC->LineStyle(LSurface::LineSolid);
 			}
 			#endif
 

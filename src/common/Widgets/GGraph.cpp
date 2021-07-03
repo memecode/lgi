@@ -211,7 +211,7 @@ struct GGraphPriv
 		return 0;
 	}
 
-	void DrawAxis(GSurface *pDC, LRect &r, int xaxis, LVariant &min, LVariant &max)
+	void DrawAxis(LSurface *pDC, LRect &r, int xaxis, LVariant &min, LVariant &max)
 	{
 		LVariant v = min;
 		bool First = true;
@@ -596,7 +596,7 @@ GArray<GGraph::GGraphPair*> *GGraph::GetSelection()
     return &d->Selection;
 }
 
-void GGraph::OnPaint(GSurface *pDC)
+void GGraph::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle();

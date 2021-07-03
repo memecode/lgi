@@ -81,7 +81,7 @@ public:
 	Atom GetClipboard() { return XA_Clipboard; }
 	void EmptyClip();
 	void SetClipText(XWidget *w, char *s);
-	void SetClipImage(XWidget *w, class GSurface *pDC);
+	void SetClipImage(XWidget *w, class LSurface *pDC);
 	void SetSelectionSink(XEventSink *s);
 	bool GetSelection(Window w, Atom Selection, Atom Format, uchar *&Data, ulong &Len);
 	

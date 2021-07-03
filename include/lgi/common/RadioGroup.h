@@ -35,7 +35,7 @@ public:
 
 	// Impl
 	int OnNotify(GViewI *Ctrl, int Flags) override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	void OnAttach() override;
 	GMessage::Result OnEvent(GMessage *m) override;
 	bool OnLayout(GViewLayoutInfo &Inf) override;
@@ -89,7 +89,7 @@ public:
 	void OnMouseEnter(LMouse &m) override;
 	void OnMouseExit(LMouse &m) override;
 	void OnFocus(bool f) override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	void SetFont(LFont *Fnt, bool OwnIt = false) override;
 	#endif
 };

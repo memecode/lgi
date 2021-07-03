@@ -7,10 +7,10 @@
 
 class CharItem : public LListItem
 {
-	GSurface *pDC;
+	LSurface *pDC;
 
 public:
-	CharItem(GSurface *pdc)
+	CharItem(LSurface *pdc)
 	{
 		pDC = pdc;
 	}
@@ -79,7 +79,7 @@ public:
 							{
 								LList *m = _HasUnicodeGlyph(Fnt->GetGlyphMap(), c) ? Match : NonMatch;
 
-								GMemDC *pDC = new GMemDC;
+								LMemDC *pDC = new LMemDC;
 								if (pDC)
 								{
 									char16 Str[] = { (char16)c, 0 };

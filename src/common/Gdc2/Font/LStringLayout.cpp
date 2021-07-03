@@ -540,7 +540,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 	return true;
 }
 	
-void LStringLayout::Paint(	GSurface *pDC,
+void LStringLayout::Paint(	LSurface *pDC,
 							LPoint pt,
 							GColour Back,
 							LRect &rc,

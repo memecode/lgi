@@ -331,7 +331,7 @@ int GCheckBox::BoxSize()
 	return Px;
 }
 
-void GCheckBox::OnPaint(GSurface *pDC)
+void GCheckBox::OnPaint(LSurface *pDC)
 {
 	#if 0
 	pDC->Colour(GColour(255, 0, 255));

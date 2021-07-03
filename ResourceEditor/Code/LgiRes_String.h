@@ -178,7 +178,7 @@ public:
 	ResStringUi(ResStringGroup *Res);
 	~ResStringUi();
 
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void PourAll();
 	void OnPosChange();
 	void OnCreate();

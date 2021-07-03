@@ -132,10 +132,10 @@ public:
 //////////////////////////////////////////////////////////
 
 // Graphics
-LgiFunc void LgiDrawBox(GSurface *pDC, LRect &r, bool Sunken, bool Fill);
-LgiFunc void LgiWideBorder(GSurface *pDC, LRect &r, LgiEdge Type);
-LgiFunc void LgiThinBorder(GSurface *pDC, LRect &r, LgiEdge Type);
-LgiFunc void LgiFlatBorder(GSurface *pDC, LRect &r, int Width = -1);
+LgiFunc void LgiDrawBox(LSurface *pDC, LRect &r, bool Sunken, bool Fill);
+LgiFunc void LgiWideBorder(LSurface *pDC, LRect &r, LgiEdge Type);
+LgiFunc void LgiThinBorder(LSurface *pDC, LRect &r, LgiEdge Type);
+LgiFunc void LgiFlatBorder(LSurface *pDC, LRect &r, int Width = -1);
 
 // Helpers
 #ifdef __GTK_H__

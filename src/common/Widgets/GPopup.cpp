@@ -997,7 +997,7 @@ bool GDropDown::IsOpen()
 	return Popup && Popup->Visible();
 }
 
-void GDropDown::OnPaint(GSurface *pDC)
+void GDropDown::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
 	r.Offset(-r.x1, -r.y1);
@@ -1045,7 +1045,7 @@ void GDropDown::OnPaint(GSurface *pDC)
 	if (GApp::SkinEngine &&
 		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_BUTTON))
 	{
-		GMemDC Mem(r.X(), r.Y(), System24BitColourSpace);
+		LMemDC Mem(r.X(), r.Y(), System24BitColourSpace);
 
 		LCss::ColorDef f;
 		if (GetCss())

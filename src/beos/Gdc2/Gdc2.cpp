@@ -958,7 +958,7 @@ void GdcDevice::SetColourPaletteType(int Type)
 {
 }
 
-COLOUR GdcDevice::GetColour(COLOUR Rgb24, GSurface *pDC)
+COLOUR GdcDevice::GetColour(COLOUR Rgb24, LSurface *pDC)
 {
 	int Bits = (pDC) ? pDC->GetBits() : GetBits();
 	COLOUR C;
@@ -1051,7 +1051,7 @@ class GGlobalColourPrivate
 public:
 	GlobalColourEntry c[256];
 	GPalette *Global;
-	List<GSurface> Cache;
+	List<LSurface> Cache;
 	int FirstUnused;
 	
 	int FreeColours()
@@ -1094,7 +1094,7 @@ COLOUR GGlobalColour::AddColour(COLOUR c24)
 	return c24;
 }
 
-bool GGlobalColour::AddBitmap(GSurface *pDC)
+bool GGlobalColour::AddBitmap(LSurface *pDC)
 {
 	return false;
 }
@@ -1119,7 +1119,7 @@ COLOUR GGlobalColour::GetColour(COLOUR c24)
 	return c24;
 }
 
-bool GGlobalColour::RemapBitmap(GSurface *pDC)
+bool GGlobalColour::RemapBitmap(LSurface *pDC)
 {
 	return false;
 }

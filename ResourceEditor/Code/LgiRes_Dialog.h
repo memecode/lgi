@@ -51,7 +51,7 @@ class ResDialogUi;
 	GView *View() { return this; } \
 	void OnMouseClick(LMouse &m); \
 	void OnMouseMove(LMouse &m); \
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 
 #define IMPL_DIALOG_CTRL(cls)	 \
 	void cls::OnMouseClick(LMouse &m) { ResDialogCtrl::OnMouseClick(m); } \
@@ -110,7 +110,7 @@ public:
 	bool SetStr(ResString *s);
 
 	bool IsContainer() { return AcceptChildren; }
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
 	void OnMouseMove(LMouse &m);
 	bool SetPos(LRect &p, bool Repaint = false);
@@ -160,10 +160,10 @@ protected:
 	int DragOx, DragOy;
 	LRect DragRgn;
 	ResDialogCtrl *DragCtrl;
-	void DrawSelection(GSurface *pDC);
+	void DrawSelection(LSurface *pDC);
 
 public:
-	GAutoPtr<GSurface> DebugOverlay;
+	GAutoPtr<LSurface> DebugOverlay;
 
 	ResDialog(AppWnd *w, int type = TYPE_DIALOG);
 	~ResDialog();
@@ -230,8 +230,8 @@ public:
 	int OnCommand(int Cmd, int Event, OsView hWnd) override;
 	void OnLanguageChange();
 
-	void _Paint(GSurface *pDC = NULL, LPoint *Offset = NULL, LRect *Update = NULL) override;
-	void OnPaint(GSurface *pDC) override;
+	void _Paint(LSurface *pDC = NULL, LPoint *Offset = NULL, LRect *Update = NULL) override;
+	void OnPaint(LSurface *pDC) override;
 
 	bool Test(ErrorCollection *e) override;
 	bool Read(LXmlTag *Tag, SerialiseContext &Ctx) override;
@@ -252,7 +252,7 @@ public:
 	~ResDialogUi();
 
 	const char *GetClass() { return "ResDialogUi"; }
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void PourAll();
 	void OnPosChange();
 	void OnCreate();
@@ -273,8 +273,8 @@ public:
 
 	LRect &GetClient(bool InClientSpace = true);
 	
-	// void _Paint(GSurface *pDC = NULL, LPoint *Offset = NULL, LRect *Update = NULL);
-	void OnNcPaint(GSurface *pDC, LRect &r);
+	// void _Paint(LSurface *pDC = NULL, LPoint *Offset = NULL, LRect *Update = NULL);
+	void OnNcPaint(LSurface *pDC, LRect &r);
 };
 
 class CtrlTable : public ResDialogCtrl, public GDom, public GView
@@ -366,7 +366,7 @@ public:
 
 class CtrlRadio : public ResDialogCtrl, public GView
 {
-	GSurface *Bmp;
+	LSurface *Bmp;
 
 public:
 	CtrlRadio(ResDialog *dlg, LXmlTag *load);

@@ -78,7 +78,7 @@ public:
 	int HitTest(LMouse &m);
 	void OnMouseClick(LMouse &m);
 	void OnPosChange();
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	bool OnKey(LKey &k);
 	void OnFocus(bool f);
 	void OnCreate();
@@ -102,7 +102,7 @@ class LgiClass GTabPage :
 	LRect TabPos;
 
 	/// Draws the tab part of the control (in the parent's context)
-	void PaintTab(GSurface *pDC, bool Selected);
+	void PaintTab(LSurface *pDC, bool Selected);
 	
 	/// Gets the width of the content in the tab
 	virtual int GetTabPx();
@@ -117,7 +117,7 @@ class LgiClass GTabPage :
 	virtual void OnButtonClick(LMouse &m);
 
 	/// This draws the button (should only draw within 'BtnPos')
-	virtual void OnButtonPaint(GSurface *pDC);
+	virtual void OnButtonPaint(LSurface *pDC);
 
 	/// This is called when the user clicks the button
 	virtual void OnTabClick(LMouse &m);
@@ -138,7 +138,7 @@ public:
 	GTabView *GetTabControl() { return TabCtrl; }
 
 	GMessage::Result OnEvent(GMessage *Msg) override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	bool OnKey(LKey &k) override;
 	void OnFocus(bool b) override;
 	void OnStyleChange();

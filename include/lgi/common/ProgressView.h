@@ -39,7 +39,7 @@ public:
 	#if WINNATIVE
 	GString CssStyles(const char *CssStyle = NULL);
 	#else
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	#endif
 };
 

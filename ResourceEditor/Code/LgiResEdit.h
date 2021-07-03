@@ -243,7 +243,7 @@ public:
 
 	bool Pour(LRegion &r);
 	bool OnKey(LKey &k);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	bool Attach(GViewI *p);
 	void OnFocus(bool b);
 };
@@ -671,7 +671,7 @@ public:
 	void OnSelect(FieldSource *s);
 	void OnDelete(FieldSource *s);
 	GMessage::Result OnEvent(GMessage *m);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	int OnNotify(GViewI *Ctrl, int Flags);
 };
 

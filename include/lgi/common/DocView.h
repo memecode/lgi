@@ -117,7 +117,7 @@ public:
 
 		// Output data
 		GAutoPtr<GStreamI> Stream;
-		GAutoPtr<GSurface> pDC;
+		GAutoPtr<LSurface> pDC;
 		GString Filename;
 		GString Error;
 		JobStatus Status;

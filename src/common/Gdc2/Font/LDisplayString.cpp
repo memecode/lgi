@@ -280,7 +280,7 @@ bool StringConvert(Out *&out, ssize_t &OutWords, const In *in, ssize_t InLen)
 	}
 #endif
 
-LDisplayString::LDisplayString(LFont *f, const char *s, ssize_t l, GSurface *pdc)
+LDisplayString::LDisplayString(LFont *f, const char *s, ssize_t l, LSurface *pdc)
 {
 	pDC = pdc;
 	Font = f;
@@ -326,7 +326,7 @@ LDisplayString::LDisplayString(LFont *f, const char *s, ssize_t l, GSurface *pdc
 	#endif
 }
 
-LDisplayString::LDisplayString(LFont *f, const char16 *s, ssize_t l, GSurface *pdc)
+LDisplayString::LDisplayString(LFont *f, const char16 *s, ssize_t l, LSurface *pdc)
 {
 	pDC = pdc;
 	Font = f;
@@ -370,7 +370,7 @@ LDisplayString::LDisplayString(LFont *f, const char16 *s, ssize_t l, GSurface *p
 }
 
 #ifdef _MSC_VER
-LDisplayString::LDisplayString(LFont *f, const uint32_t *s, ssize_t l, GSurface *pdc)
+LDisplayString::LDisplayString(LFont *f, const uint32_t *s, ssize_t l, LSurface *pdc)
 {
 	pDC = pdc;
 	Font = f;
@@ -435,7 +435,7 @@ LDisplayString::~LDisplayString()
 	#endif
 }
 
-void LDisplayString::DrawWhiteSpace(GSurface *pDC, char Ch, LRect &r)
+void LDisplayString::DrawWhiteSpace(LSurface *pDC, char Ch, LRect &r)
 {
 	if (Ch == '\t')
 	{
@@ -502,7 +502,7 @@ void LDisplayString::Layout(bool Debug)
 		yf = FontHt << FShift;
 		y = FontHt; // ((Sz.y + FScale - 1) >> FShift) + 1;
 		
-		if (Img.Reset(new GMemDC(x, y, CsIndex8)))
+		if (Img.Reset(new LMemDC(x, y, CsIndex8)))
 		{
 			// Clear the context to black
 			Img->Colour(0);
@@ -1318,7 +1318,7 @@ LPoint LDisplayString::Size()
 #if defined LGI_SDL
 
 template<typename OutPx>
-bool CompositeText8Alpha(GSurface *Out, GSurface *In, LFont *Font, int px, int py, GBlitRegions &Clip)
+bool CompositeText8Alpha(LSurface *Out, LSurface *In, LFont *Font, int px, int py, GBlitRegions &Clip)
 {
 	OutPx map[256];
 
@@ -1420,7 +1420,7 @@ bool CompositeText8Alpha(GSurface *Out, GSurface *In, LFont *Font, int px, int p
 }
 
 template<typename OutPx>
-bool CompositeText8NoAlpha(GSurface *Out, GSurface *In, LFont *Font, int px, int py, GBlitRegions &Clip)
+bool CompositeText8NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int py, GBlitRegions &Clip)
 {
 	GRgba32 map[256];
 
@@ -1530,7 +1530,7 @@ bool CompositeText8NoAlpha(GSurface *Out, GSurface *In, LFont *Font, int px, int
 }
 
 template<typename OutPx>
-bool CompositeText5NoAlpha(GSurface *Out, GSurface *In, LFont *Font, int px, int py, GBlitRegions &Clip)
+bool CompositeText5NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int py, GBlitRegions &Clip)
 {
 	OutPx map[256];
 
@@ -1654,7 +1654,7 @@ bool CompositeText5NoAlpha(GSurface *Out, GSurface *In, LFont *Font, int px, int
 
 #endif
 
-void LDisplayString::Draw(GSurface *pDC, int px, int py, LRect *r, bool Debug)
+void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 {
 	Layout();
 
@@ -1907,7 +1907,7 @@ LPoint LDisplayString::FSize()
 	return LPoint(xf, yf);
 }
 
-void LDisplayString::FDraw(GSurface *pDC, int fx, int fy, LRect *frc, bool Debug)
+void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug)
 {
 	Layout(Debug);
 

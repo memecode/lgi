@@ -2364,7 +2364,7 @@ void GTag::Find(int TagType, GArray<GTag*> &Out)
 	}
 }
 
-void GTag::SetImage(const char *Uri, GSurface *Img)
+void GTag::SetImage(const char *Uri, LSurface *Img)
 {
 	if (Img)
 	{
@@ -2385,7 +2385,7 @@ void GTag::SetImage(const char *Uri, GSurface *Img)
 			LRect r = XSubRect();
 			if (r.Valid())
 			{
-				GAutoPtr<GSurface> t(new GMemDC(r.X(), r.Y(), Image->GetBits()));
+				GAutoPtr<LSurface> t(new LMemDC(r.X(), r.Y(), Image->GetBits()));
 				if (t)
 				{
 					t->Blt(0, 0, Image, &r);
@@ -2444,7 +2444,7 @@ void GTag::LoadImages()
 	}
 }
 
-void GTag::ImageLoaded(char *uri, GSurface *Img, int &Used)
+void GTag::ImageLoaded(char *uri, LSurface *Img, int &Used)
 {
 	const char *Uri = 0;
 	if (!Image &&
@@ -2458,7 +2458,7 @@ void GTag::ImageLoaded(char *uri, GSurface *Img, int &Used)
 			}
 			else
 			{
-				SetImage(Uri, new GMemDC(Img));
+				SetImage(Uri, new LMemDC(Img));
 			}
 			Used++;
 		}
@@ -5825,12 +5825,12 @@ void GTag::BoundParents()
 
 struct DrawBorder
 {
-	GSurface *pDC;
+	LSurface *pDC;
 	uint32 LineStyle;
 	uint32 LineReset;
 	uint32 OldStyle;
 
-	DrawBorder(GSurface *pdc, LCss::BorderDef &d)
+	DrawBorder(LSurface *pdc, LCss::BorderDef &d)
 	{
 		LineStyle = 0xffffffff;
 		LineReset = 0x80000000;
@@ -5902,7 +5902,7 @@ struct DrawBorder
 	}
 };
 
-void GTag::OnPaintBorder(GSurface *pDC, LRect *Px)
+void GTag::OnPaintBorder(LSurface *pDC, LRect *Px)
 {
 	GArray<LRect> r;
 
@@ -5983,7 +5983,7 @@ void GTag::OnPaintBorder(GSurface *pDC, LRect *Px)
 	}
 }
 
-void FillRectWithImage(GSurface *pDC, LRect *r, GSurface *Image, LCss::RepeatType Repeat)
+void FillRectWithImage(LSurface *pDC, LRect *r, LSurface *Image, LCss::RepeatType Repeat)
 {
 	int Px = 0, Py = 0;
 	int Old = pDC->Op(GDC_ALPHA);
@@ -6028,7 +6028,7 @@ void FillRectWithImage(GSurface *pDC, LRect *r, GSurface *Image, LCss::RepeatTyp
 	pDC->Op(Old);
 }
 
-void GTag::OnPaint(GSurface *pDC)
+void GTag::OnPaint(LSurface *pDC)
 {
 	if (Display() == DispNone) return;
 
@@ -6923,7 +6923,7 @@ LPoint GHtml2::Layout()
 	return d->Content;
 }
 
-void GHtml2::OnPaint(GSurface *ScreenDC)
+void GHtml2::OnPaint(LSurface *ScreenDC)
 {
 	#if LGI_EXCEPTIONS
 	try
@@ -6937,7 +6937,7 @@ void GHtml2::OnPaint(GSurface *ScreenDC)
 			(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
 		{
 			DeleteObj(MemDC);
-			MemDC = new GMemDC;
+			MemDC = new LMemDC;
 			if (MemDC && !MemDC->Create(Client.X() + 10, Client.Y() + 10, 32)) // GdcD->GetBits()
 			{
 				DeleteObj(MemDC);
@@ -6945,7 +6945,7 @@ void GHtml2::OnPaint(GSurface *ScreenDC)
 		}
 		#endif
 
-		GSurface *pDC = MemDC ? MemDC : ScreenDC;
+		LSurface *pDC = MemDC ? MemDC : ScreenDC;
 
 		COLOUR Back = GetBackColour();
 		pDC->Colour(Back, 32);

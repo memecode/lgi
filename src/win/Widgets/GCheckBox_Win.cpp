@@ -149,7 +149,7 @@ GMessage::Result GCheckBox::OnEvent(GMessage *Msg)
 		}
 		case WM_ERASEBKGND:
 		{
-			GScreenDC Dc((HDC)Msg->A(), _View);
+			LScreenDC Dc((HDC)Msg->A(), _View);
 			GCssTools Tools(this);
 			Dc.Colour(Tools.GetBack());
 			Dc.Rectangle();
@@ -191,7 +191,7 @@ void GCheckBox::OnFocus(bool f)
 {
 }
 
-void GCheckBox::OnPaint(GSurface *pDC)
+void GCheckBox::OnPaint(LSurface *pDC)
 {
 }
 

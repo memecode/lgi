@@ -589,7 +589,7 @@ GString GClipBoard::Html()
 
 
 // Bitmap
-bool GClipBoard::Bitmap(GSurface *pDC, bool AutoEmpty)
+bool GClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 {
 	bool Status = FALSE;
 
@@ -712,15 +712,15 @@ bool GClipBoard::Bitmap(GSurface *pDC, bool AutoEmpty)
 	return Status;
 }
 
-GSurface *GClipBoard::ConvertFromPtr(void *Ptr)
+LSurface *GClipBoard::ConvertFromPtr(void *Ptr)
 {
-	GSurface *pDC = NULL;
+	LSurface *pDC = NULL;
 	if (Ptr)
 	{
 		BITMAPINFO *Info = (BITMAPINFO*) Ptr;
 		if (Info)
 		{
-			pDC = new GMemDC;
+			pDC = new LMemDC;
 			if (pDC &&
 				(Info->bmiHeader.biCompression == BI_RGB ||
 				Info->bmiHeader.biCompression == BI_BITFIELDS))
@@ -787,11 +787,11 @@ GSurface *GClipBoard::ConvertFromPtr(void *Ptr)
 	return pDC;
 }
 
-GSurface *GClipBoard::Bitmap()
+LSurface *GClipBoard::Bitmap()
 {
 	HGLOBAL hMem = GetClipboardData(CF_DIB);
 	void *Ptr = GlobalLock(hMem);
-	GSurface *pDC = 0;
+	LSurface *pDC = 0;
 	if (Ptr)
 	{
 		#if 0

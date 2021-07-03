@@ -106,7 +106,7 @@ public:
 	ResMenuUi(ResMenu *Res);
 	~ResMenuUi();
 
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void PourAll();
 	void OnPosChange();
 	void OnCreate();

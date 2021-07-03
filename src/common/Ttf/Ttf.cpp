@@ -27,7 +27,7 @@
 
 /****************************** Locals **************************************************************************************/
 
-GSurface *pTest = 0;
+LSurface *pTest = 0;
 int CapA = 0;
 
 /****************************** Inline Assembler Routines *******************************************************************/
@@ -197,7 +197,7 @@ bool LFont::CreateFont(LOGFONT *LogFont)
 	return (hFont != 0);
 }
 
-void LFont::Text(GSurface *pDC, int x, int y, char *Str, int Len, LRect *r)
+void LFont::Text(LSurface *pDC, int x, int y, char *Str, int Len, LRect *r)
 {
 	if (pDC AND hFont AND Str)
 	{
@@ -240,7 +240,7 @@ void LFont::Text(GSurface *pDC, int x, int y, char *Str, int Len, LRect *r)
 	}
 }
 
-void LFont::TextW(GSurface *pDC, int x, int y, ushort *Str, int Len, LRect *r)
+void LFont::TextW(LSurface *pDC, int x, int y, ushort *Str, int Len, LRect *r)
 {
 	if (pDC AND hFont AND Str)
 	{
@@ -943,7 +943,7 @@ void TtfGlyph::Dump()
 	printf("\n");
 }
 
-void TtfGlyph::Draw(GSurface *pDC, int x, int y, int MaxSize)
+void TtfGlyph::Draw(LSurface *pDC, int x, int y, int MaxSize)
 {
 	int XSize = xMax - xMin;
 	int YSize = yMax - yMin;
@@ -959,7 +959,7 @@ void TtfGlyph::Draw(GSurface *pDC, int x, int y, int MaxSize)
 	}
 }
 
-int TtfGlyph::DrawEm(GSurface *pDC, int x, int y, int EmUnits, double PixelsPerEm)
+int TtfGlyph::DrawEm(LSurface *pDC, int x, int y, int EmUnits, double PixelsPerEm)
 {
 	int XSize = xMax - xMin + 1;
 	int YSize = yMax - yMin + 1;
@@ -1274,7 +1274,7 @@ bool TtfContour::Create(int Pts, double XScale, double YScale)
 	return Status;
 }
 
-void TtfContour::DebugDraw(GSurface *pDC, int Sx, int Sy)
+void TtfContour::DebugDraw(LSurface *pDC, int Sx, int Sy)
 {
 	if (pDC)
 	{
@@ -1463,7 +1463,7 @@ Rule 4
 #define GRID_X			5
 #define GRID_Y			5
 
-bool TtfGlyph::Rasterize(GSurface *pDC, LRect *pDest, double xppem, double yppem, int BaseLine)
+bool TtfGlyph::Rasterize(LSurface *pDC, LRect *pDest, double xppem, double yppem, int BaseLine)
 {
 	bool Status = FALSE;
 	TtfHeader *Header = (TtfHeader*) FindTag("head");
@@ -1907,9 +1907,9 @@ TtfRaster::~TtfRaster()
 	DeleteObj(pDC);
 }
 
-class TtfResizeDC : public GSurface {
+class TtfResizeDC : public LSurface {
 public:
-	bool ResizeTo(GSurface *pDC)
+	bool ResizeTo(LSurface *pDC)
 	{
 		bool Status = FALSE;
 		if (pDC AND pDC->GetBits() == 8 AND GetBits() == 8)
@@ -2030,7 +2030,7 @@ bool TtfRaster::Rasterize(double xPPEm, double yPPEm, int OverSample)
 				}
 			}
 
-			pDC = new GSurface;
+			pDC = new LSurface;
 			if (pDC AND pDC->Create(MaxX, TotalY, 8))
 			{
 				if (OverSample > 1)
@@ -2050,7 +2050,7 @@ bool TtfRaster::Rasterize(double xPPEm, double yPPEm, int OverSample)
 	return Status;
 }
 
-void GdcTtf::Test(GSurface *pDC)
+void GdcTtf::Test(LSurface *pDC)
 {
 	if (pDC)
 	{
@@ -2300,7 +2300,7 @@ bool GdcTtf::Rasterize(int Point, int StyleFlags, int OverSample, int XDpi, int 
 {
 	bool Status = FALSE;
 
-	pTest = new GSurface;
+	pTest = new LSurface;
 	if (pTest)
 	{
 		pTest->Create(600, 800, 24);
@@ -2407,10 +2407,10 @@ int GdcTtf::Y(char *Str, int Len, int Flags)
 }
 
 
-void StretchBlt(	GSurface *pDest,
+void StretchBlt(	LSurface *pDest,
 			int X,
 			int Y,
-			GSurface *pSrc,
+			LSurface *pSrc,
 			LRect *SRgn,
 			int Scale)
 {
@@ -2550,7 +2550,7 @@ public:
 	}
 };
 
-void GdcTtf::Text(GSurface *pDC, int x, int y, char *Str, int Len)
+void GdcTtf::Text(LSurface *pDC, int x, int y, char *Str, int Len)
 {
 	if (pDC AND Str)
 	{

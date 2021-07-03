@@ -208,8 +208,8 @@ public:
 			BtnIcons = new GImageList(16, 16, FileSelectIcons.Create(0xF81F));
 		if (!TreeIcons)
 		{
-			GAutoPtr<GSurface> a(TreeIconsImg.Create(0xF81F));
-			GAutoPtr<GMemDC> m(new GMemDC(a->X(), a->Y(), System32BitColourSpace));
+			GAutoPtr<LSurface> a(TreeIconsImg.Create(0xF81F));
+			GAutoPtr<LMemDC> m(new LMemDC(a->X(), a->Y(), System32BitColourSpace));
 			if (a && m)
 			{
 				GColour fore(128, 128, 128);
@@ -302,7 +302,7 @@ public:
 		SetTabStop(true);
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		LRect c = GetClient();
 		GColour Background(L_MED);
@@ -561,7 +561,7 @@ public:
 		return b;
 	}
 	
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		LRect c = GetClient();
 		LgiThinBorder(pDC, c, EdgeWin7Sunken);
@@ -1488,7 +1488,7 @@ public:
 		GPopup::Visible(i);
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		// Draw border
 		LRect c = GetClient();

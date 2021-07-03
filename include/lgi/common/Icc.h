@@ -25,7 +25,7 @@ public:
 
 	// Conversion
 	bool Convert(COLOUR *Out32, COLOUR In32, GIccProfile *Profile = 0);
-	bool Convert(GSurface *Dest, GSurface *Src, GIccProfile *Profile = 0);
+	bool Convert(LSurface *Dest, LSurface *Src, GIccProfile *Profile = 0);
 
 	// Dom
 	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);

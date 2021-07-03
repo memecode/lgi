@@ -82,7 +82,7 @@ public:
 
 	// Window events
 	void OnFocus(bool f);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	bool OnKey(LKey &k);
 	void OnMouseClick(LMouse &m);
 	int OnNotify(GViewI *c, int f);

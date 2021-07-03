@@ -11,10 +11,10 @@ class LgiClass GCssTools
 	
 	GColour Fore, Back;
 	uint8_t ForeInit : 1, BackInit : 1;
-	GSurface *BackImg;
+	LSurface *BackImg;
 	LRect BackPos;
 	
-	bool SetLineStyle(GSurface *pDC, LCss::BorderDef &d);
+	bool SetLineStyle(LSurface *pDC, LCss::BorderDef &d);
 	
 public:
 	GCssTools(LCss *css, LFont *font)
@@ -45,7 +45,7 @@ public:
 	GColour &GetBack(GColour *Default = NULL, int Depth = -1);
 
 	/// Gets the background image for filling
-	GSurface *GetBackImage();
+	LSurface *GetBackImage();
 
 	/// Applies the margin to a rectangle
 	LRect ApplyMargin(LRect &in);
@@ -64,13 +64,13 @@ public:
 
 	/// Paint the CSS border
 	/// \returns the content area within the borders
-	LRect PaintBorder(GSurface *pDC, LRect &in);
+	LRect PaintBorder(LSurface *pDC, LRect &in);
 
 	/// Paint the CSS padding
 	/// \returns the content area within the padding
-	LRect PaintPadding(GSurface *pDC, LRect &in);
+	LRect PaintPadding(LSurface *pDC, LRect &in);
 	
-	LRect PaintBorderAndPadding(GSurface *pDC, LRect &in)
+	LRect PaintBorderAndPadding(LSurface *pDC, LRect &in)
 	{
 		LRect r = PaintBorder(pDC, in);
 		r = PaintPadding(pDC, r);
@@ -78,13 +78,13 @@ public:
 	}
 	
 	/// Paint the content area
-	void PaintContent(GSurface *pDC, LRect &in, const char *utf8 = NULL, GSurface *img = NULL);
+	void PaintContent(LSurface *pDC, LRect &in, const char *utf8 = NULL, LSurface *img = NULL);
 
 	/// Tiles an image in the space 'in'
-	bool Tile(GSurface *pDC, LRect in, GSurface *Img, int Ox = 0, int Oy = 0);
+	bool Tile(LSurface *pDC, LRect in, LSurface *Img, int Ox = 0, int Oy = 0);
 
 	/// Get cached image
-	GSurface *GetCachedImage(const char *Uri);
+	LSurface *GetCachedImage(const char *Uri);
 };
 
 #endif

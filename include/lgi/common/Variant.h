@@ -60,8 +60,8 @@ enum LVariantType
 	GV_CUSTOM,
 	// Wide string
 	GV_WSTRING,
-	// GSurface ptr
-	GV_GSURFACE,
+	// LSurface ptr
+	GV_LSURFACE,
 	/// Pointer to GView
 	GV_GVIEW,
 	/// Pointer to LMouse
@@ -243,12 +243,12 @@ public:
 		} DomRef;
 		/// Valid when Type == #GV_OPERATOR
 		GOperator Op;		
-		/// Valid when Type == #GV_GSURFACE
+		/// Valid when Type == #GV_LSURFACE
 		struct
 		{
-		    class GSurface *Ptr;
+		    class LSurface *Ptr;
 		    bool Own;
-			GSurface *Release()
+			LSurface *Release()
 			{
 				auto p = Ptr;
 				Ptr = NULL;
@@ -356,7 +356,7 @@ public:
 	/// Sets the value to a hashtable
 	bool SetHashTable(LHash *Table = 0, bool Copy = true);
 	/// Set the value to a surface
-	bool SetSurface(class GSurface *Ptr, bool Own);
+	bool SetSurface(class LSurface *Ptr, bool Own);
 	/// Set the value to a stream
 	bool SetStream(class GStreamI *Ptr, bool Own);
 

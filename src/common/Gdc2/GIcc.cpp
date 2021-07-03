@@ -1066,7 +1066,7 @@ bool GIccProfile::Convert(COLOUR *Out32, COLOUR In32, GIccProfile *Profile)
 	return false;
 }
 
-bool GIccProfile::Convert(GSurface *Dest, GSurface *Src, GIccProfile *Profile)
+bool GIccProfile::Convert(LSurface *Dest, LSurface *Src, GIccProfile *Profile)
 {
 	#if USE_LCMS
 	if (!Dest || !Src || !Profile)

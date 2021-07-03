@@ -101,8 +101,8 @@ public:
 	Format GetFormat() { return FmtTiff; }
 	bool IsOk() { return Lib ? Lib->IsLoaded() : false; }
 
-	IoStatus ReadImage(GSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, GSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, GStream *In);
+	IoStatus WriteImage(GStream *Out, LSurface *pDC);
 
 	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
@@ -211,7 +211,7 @@ GdcLibTiff::~GdcLibTiff()
 /// This swaps the R and B components as well as flips the image on the Y
 /// axis. Which is the required format to read and write TIFF's. Use it a
 /// 2nd time to restore the image to it's original state.
-void SwapRBandY(GSurface *pDC)
+void SwapRBandY(LSurface *pDC)
 {
 	for (int y1=0, y2 = pDC->Y()-1; y1<=y2; y1++, y2--)
 	{
@@ -304,7 +304,7 @@ void SwapRBandY(GSurface *pDC)
 	}
 }
 
-void SwapRB(GSurface *pDC)
+void SwapRB(LSurface *pDC)
 {
 	for (int y1=0; y1<pDC->Y(); y1++)
 	{
@@ -443,7 +443,7 @@ void CmykToRgb32(D *d, S *s, int width)
 	}
 }
 
-GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
+GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, GStream *In)
 {
 	LVariant v;
 	if (!pDC || !In)
@@ -799,7 +799,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcLibTiff::WriteImage(GStream *Out, GSurface *pDC)
+GFilter::IoStatus GdcLibTiff::WriteImage(GStream *Out, LSurface *pDC)
 {
 	LVariant v;
 	if (!pDC || !Out)

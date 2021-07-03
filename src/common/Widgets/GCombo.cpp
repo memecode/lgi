@@ -530,7 +530,7 @@ void GCombo::OnPosChange()
 		d->SetText(NULL, _FL);
 }
 
-void GCombo::OnPaint(GSurface *pDC)
+void GCombo::OnPaint(LSurface *pDC)
 {
 	if (d->LayoutDirty)
 	{

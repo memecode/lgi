@@ -384,7 +384,7 @@ void GMenuItem::_Measure(LPoint &Size)
 
 #define Time(a, b) ((double)(b - a) / 1000)
 
-void GMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
+void GMenuItem::_PaintText(LSurface *pDC, int x, int y, int Width)
 {
 	char *n = Name();
 	if (n)
@@ -463,7 +463,7 @@ void GMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 
 }
 
-void GMenuItem::_Paint(GSurface *pDC, int Flags)
+void GMenuItem::_Paint(LSurface *pDC, int Flags)
 {
 	bool BaseMenu = Parent == Menu;
 	int IconX = BaseMenu ? 5 : 20;

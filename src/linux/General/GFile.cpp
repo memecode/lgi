@@ -725,7 +725,7 @@ uint64 GVolume::Free()
     return d->_Free;
 }
 
-GSurface *GVolume::Icon()
+LSurface *GVolume::Icon()
 {
     return NULL;
 }

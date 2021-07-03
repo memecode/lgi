@@ -193,7 +193,7 @@ protected:
 
 	virtual void _Measure(int &x, int &y, OsChar *Str, int Len);
 	virtual int _CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type);
-	virtual void _Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore);
+	virtual void _Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore);
 
 public:
 	/// Construct from face/pt size.
@@ -220,11 +220,11 @@ public:
 		/// The pt size
 		LCss::Len Size = LCss::LenInherit,
 		/// Creating a font for a particular surface (e.g. printing).
-		GSurface *pSurface = 0
+		LSurface *pSurface = 0
 	);
 
 	/// Creates a new font from type infomation
-	bool Create(LFontType *Type, GSurface *pSurface = NULL);
+	bool Create(LFontType *Type, LSurface *pSurface = NULL);
 
 	/// Creates the font from CSS defs.
 	bool CreateFromCss(const char *Css);
@@ -249,7 +249,7 @@ public:
 	virtual int GetHeight();
 
 	/// Gets the creation parameter passed in (0 by default).
-	GSurface *GetSurface();
+	LSurface *GetSurface();
 
 	/// Get supported glyphs
 	uchar *GetGlyphMap();
@@ -319,7 +319,7 @@ public:
 	bool GetFromRef(OsFont Handle);
 
 	/// Create a font based on this font def
-	virtual LFont *Create(GSurface *pSurface = NULL);
+	virtual LFont *Create(LSurface *pSurface = NULL);
 };
 
 /// Charset definitions

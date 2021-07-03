@@ -395,7 +395,7 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 #define SLIDER_THUMB_WIDTH		10
 #define SLIDER_THUMB_HEIGHT		6
 
-void GSlider::OnPaint(GSurface *pDC)
+void GSlider::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 

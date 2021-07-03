@@ -42,7 +42,7 @@ protected:
 		GColourSpace Cs;
 		int BytesPerPixel;
 
-		GSurface *pDC;
+		LSurface *pDC;
 	};
 
 	virtual bool Start(GRopArgs &a) { return true; }
@@ -859,11 +859,11 @@ public:
 	void DeleteSeg(int i);
 
 	// Colouring (windows: need to call ConvertPreMulAlpha(true) on the pDC after using these)
-	void Fill(GSurface *pDC, GBrush &Brush);
-	void Stroke(GSurface *pDC, GBrush &Brush, double Width);
+	void Fill(LSurface *pDC, GBrush &Brush);
+	void Stroke(LSurface *pDC, GBrush &Brush, double Width);
 
 	#if GPATH_DBG
-	GMemDC DbgDsp;
+	LMemDC DbgDsp;
 	#endif
 };
 

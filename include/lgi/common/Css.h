@@ -525,7 +525,7 @@ public:
 	{
 		ImageType Type;
 		GString Uri;
-		GSurface *Img;
+		LSurface *Img;
 
 		ImageDef(const char *Init = NULL)
 		{

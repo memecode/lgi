@@ -92,7 +92,7 @@ protected:
 
 public:
 	#ifdef _DEBUG
-	GMemDC DebugDC;
+	LMemDC DebugDC;
 	#endif
 
 	#ifdef __GTK_H__
@@ -226,7 +226,7 @@ public:
 	///////////////// Implementation ////////////////////////////
 	void OnPosChange() override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	bool HandleViewMouse(GView *v, LMouse &m);
 	bool HandleViewKey(GView *v, LKey &k);
 	bool OnRequestClose(bool OsShuttingDown) override;

@@ -16,7 +16,7 @@
 
 #define AttachButton(b) b->Attach(this);
 
-COLOUR Map(GSurface *pDC, COLOUR c);
+COLOUR Map(LSurface *pDC, COLOUR c);
 
 ////////////////////////////////////////////////////////////////////////
 GImageList *LgiLoadImageList(char *File, int x, int y)
@@ -25,7 +25,7 @@ GImageList *LgiLoadImageList(char *File, int x, int y)
 	char *Path = FileExists(File) ? NewStr(File) : LgiFindFile(File);
 	if (Path)
 	{
-		GSurface *pDC = LoadDC(Path);
+		LSurface *pDC = LoadDC(Path);
 		if (pDC)
 		{
 			ImgList = new GImageList(x, y, pDC);
@@ -86,7 +86,7 @@ class GImageListPriv
 {
 public:
 	#if defined BEOS
-	GSurface *Mask;
+	LSurface *Mask;
 	#endif
 
 	int Sx, Sy;
@@ -105,7 +105,7 @@ public:
 	}
 };
 
-GImageList::GImageList(int x, int y, GSurface *pDC)
+GImageList::GImageList(int x, int y, LSurface *pDC)
 {
 	d = new GImageListPriv;
 	d->Sx = x;
@@ -319,7 +319,7 @@ GImageList::GImageList(int x, int y, GSurface *pDC)
 
 		#if 0
 		IsAlpha(true);
-		GSurface *Alpha = AlphaDC();
+		LSurface *Alpha = AlphaDC();
 		if (Alpha)
 		{
 			COLOUR Key = Get(0, 0);
@@ -393,7 +393,7 @@ GImageList::~GImageList()
 	DeleteObj(d);
 }
 
-void GImageList::Draw(GSurface *pDest, int Dx, int Dy, int Image, int Flags)
+void GImageList::Draw(LSurface *pDest, int Dx, int Dy, int Image, int Flags)
 {
 	if (pDest)
 	{
@@ -480,7 +480,7 @@ void GImageList::Draw(GSurface *pDest, int Dx, int Dy, int Image, int Flags)
 
 				#elif defined BEOS
 
-				GScreenDC *pViewDC = dynamic_cast<GScreenDC*>(pDest);
+				LScreenDC *pViewDC = dynamic_cast<LScreenDC*>(pDest);
 				if (pDest->IsScreen() && pViewDC)
 				{
 					BView *owner = pViewDC->Handle();
@@ -503,8 +503,8 @@ void GImageList::Draw(GSurface *pDest, int Dx, int Dy, int Image, int Flags)
 				#elif defined LINUX
 
 				/*
-				GMemDC Buf(r.X(), r.Y(), GdcD->GetBits());
-				GSurface *Screen = pDest;
+				LMemDC Buf(r.X(), r.Y(), GdcD->GetBits());
+				LSurface *Screen = pDest;
 				LRect Src;
 				Src.ZOff(r.X()-1, r.Y()-1);
 				Src.Offset(Dx, Dy);
@@ -654,8 +654,8 @@ public:
 	char *CustomProp;
 
 	// bitmap cache
-	GMemDC *pColour;
-	GMemDC *pDisabled;
+	LMemDC *pColour;
+	LMemDC *pDisabled;
 
 	GToolBarPrivate()
 	{
@@ -839,7 +839,7 @@ void GToolButton::Layout()
 	}
 }
 
-void GToolButton::OnPaint(GSurface *pDC)
+void GToolButton::OnPaint(LSurface *pDC)
 {
 	GToolBar *Par = dynamic_cast<GToolBar*>(GetParent());
 	bool e = Enabled();
@@ -1444,7 +1444,7 @@ void GToolBar::_BuildCache(GImageList *From)
 			// Generate global palette for the full colour and
 			// alpha blended versions of the icons by colour reducing
 			// them both on the same DC.
-			GSurface *r = new GMemDC(From->X(), From->Y() * 2, 24);
+			LSurface *r = new LMemDC(From->X(), From->Y() * 2, 24);
 			if (r)
 			{
 				// Background
@@ -1472,7 +1472,7 @@ void GToolBar::_BuildCache(GImageList *From)
 				}
 
 				// Put the full colour icons in their DC
-				d->pColour = new GMemDC;
+				d->pColour = new LMemDC;
 				if (d->pColour &&
 					d->pColour->Create(From->X(), From->Y(), Bits))
 				{
@@ -1489,7 +1489,7 @@ void GToolBar::_BuildCache(GImageList *From)
 				// Because the colour and alpha icons have the same palette
 				// they should appear fine together on the screen, as the 2
 				// palettes are the same.
-				d->pDisabled = new GMemDC;
+				d->pDisabled = new LMemDC;
 				if (d->pDisabled &&
 					d->pDisabled->Create(From->X(), From->Y(), Bits))
 				{
@@ -1511,7 +1511,7 @@ void GToolBar::_BuildCache(GImageList *From)
 			From->Lock();
 			
 			// True colour screen
-			d->pColour = new GMemDC;
+			d->pColour = new LMemDC;
 			if (d->pColour &&
 				d->pColour->Create(From->X(), From->Y(), Bits))
 			{
@@ -1532,7 +1532,7 @@ void GToolBar::_BuildCache(GImageList *From)
 				}
 			}
 
-			d->pDisabled = new GMemDC;
+			d->pDisabled = new LMemDC;
 			if (d->pDisabled &&
 				d->pDisabled->Create(From->X(), From->Y(), Bits == 8 ? 24 : Bits))
 			{
@@ -1560,7 +1560,7 @@ void GToolBar::_BuildCache(GImageList *From)
 	}
 }
 
-void GToolBar::_DrawFromCache(GSurface *pDC, int x, int y, int Index, bool Disabled)
+void GToolBar::_DrawFromCache(LSurface *pDC, int x, int y, int Index, bool Disabled)
 {
 	if (pDC &&
 		d->pDisabled &&
@@ -1842,7 +1842,7 @@ int GToolBar::OnEvent(GMessage *Msg)
 	return GView::OnEvent(Msg);
 }
 
-void GToolBar::OnPaint(GSurface *pDC)
+void GToolBar::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
 
@@ -1878,7 +1878,7 @@ bool GToolBar::SetBitmap(char *File, int bx, int by)
 {
 	bool Status = false;
 
-	GSurface *pDC = LoadDC(File);
+	LSurface *pDC = LoadDC(File);
 	if (pDC)
 	{
 		Status = SetDC(pDC, bx, by);
@@ -1888,7 +1888,7 @@ bool GToolBar::SetBitmap(char *File, int bx, int by)
 	return Status;
 }
 
-bool GToolBar::SetDC(GSurface *pNewDC, int bx, int by)
+bool GToolBar::SetDC(LSurface *pNewDC, int bx, int by)
 {
 	if (d->OwnImgList)
 	{
@@ -2240,7 +2240,7 @@ void GToolBar::Empty()
 }
 
 ///////////////////////////////////////////////////////////////////////
-COLOUR Map(GSurface *pDC, COLOUR c)
+COLOUR Map(LSurface *pDC, COLOUR c)
 {
 	if (pDC && pDC->GetBits() <= 8)
 	{

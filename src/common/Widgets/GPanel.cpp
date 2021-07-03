@@ -204,7 +204,7 @@ int GPanel::OnNotify(GViewI *Ctrl, int Flags)
 	return 0;
 }
 
-void GPanel::OnPaint(GSurface *pDC)
+void GPanel::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
 	GCssTools Tools(this);

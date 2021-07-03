@@ -27,7 +27,7 @@ GToolTab::~GToolTab()
 {
 }
 
-void GToolTab::OnPaint(GSurface *pDC)
+void GToolTab::OnPaint(LSurface *pDC)
 {
 	#if 1
 	pDC->Colour(L_MED);
@@ -161,7 +161,7 @@ void GToolTabBar::OnChange(GToolButton *Btn)
 	InOnChangeEvent = false;
 }
 
-void GToolTabBar::_PaintTab(GSurface *pDC, GToolTab *Tab)
+void GToolTabBar::_PaintTab(LSurface *pDC, GToolTab *Tab)
 {
 	LRect t = Tab->TabPos;
 	GColour Background(L_MED);
@@ -233,15 +233,15 @@ void GToolTabBar::_PaintTab(GSurface *pDC, GToolTab *Tab)
 		GetImageList()->Draw(pDC, t.x1 + Off, t.y1 + Off, Tab->Image(), Background);
 }
 
-void GToolTabBar::OnPaint(GSurface *pScreen)
+void GToolTabBar::OnPaint(LSurface *pScreen)
 {
 	LRect r = GetClient();
 
 	#ifdef WIN32
-	GMemDC Mem(r.X(), r.Y(), GdcD->GetColourSpace());
-	GSurface *pDC = &Mem;
+	LMemDC Mem(r.X(), r.Y(), GdcD->GetColourSpace());
+	LSurface *pDC = &Mem;
 	#else
-	GSurface *pDC = pScreen;
+	LSurface *pDC = pScreen;
 	#endif
 
 	int Off = 4 + ((Border) ? 6 : 0);

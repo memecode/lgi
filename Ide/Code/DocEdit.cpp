@@ -125,7 +125,7 @@ void DocEdit::InvalidateLine(int Idx)
 	}
 }
 	
-void DocEdit::OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour)
+void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour)
 {
 	GColour GutterColour(0xfa, 0xfa, 0xfa);
 	GTextView3::OnPaintLeftMargin(pDC, r, GutterColour);

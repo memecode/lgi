@@ -16,7 +16,7 @@ public:
 
 	const char *GetClass() { return "GHtmlEdit"; }
 	const char *GetMimeType() { return "text/html"; }
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnCreate();
 	void OnPosChange();
 	void OnPulse();

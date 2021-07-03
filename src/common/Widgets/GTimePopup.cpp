@@ -250,7 +250,7 @@ void GTimePopup::OnCreate()
 	Times->Attach(this);
 }
 
-void GTimePopup::OnPaint(GSurface *pDC)
+void GTimePopup::OnPaint(LSurface *pDC)
 {
 	// 1px black border
 	LRect r = GetClient();

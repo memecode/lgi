@@ -37,7 +37,7 @@ public:
 	{
 		if (Bmp)
 		{
-			GSurface *pDC = GdcD->Load(File);
+			LSurface *pDC = GdcD->Load(File);
 			if (pDC)
 			{
 				Bmp->SetDC(pDC);
@@ -112,12 +112,12 @@ GBitmap::~GBitmap()
 	DeleteObj(pDC);
 }
 
-void GBitmap::SetDC(GSurface *pNewDC)
+void GBitmap::SetDC(LSurface *pNewDC)
 {
 	DeleteObj(pDC);
 	if (pNewDC)
 	{
-		pDC = new GMemDC;
+		pDC = new LMemDC;
 		if (pDC && pDC->Create(pNewDC->X(), pNewDC->Y(), GdcD->GetColourSpace()))
 		{
 			GColour Bk = LColour(L_WORKSPACE);
@@ -154,7 +154,7 @@ void GBitmap::SetDC(GSurface *pNewDC)
 	}
 }
 
-GSurface *GBitmap::GetSurface()
+LSurface *GBitmap::GetSurface()
 {
 	return pDC;
 }
@@ -164,7 +164,7 @@ GMessage::Result GBitmap::OnEvent(GMessage *Msg)
 	return GView::OnEvent(Msg);
 }
 
-void GBitmap::OnPaint(GSurface *pScreen)
+void GBitmap::OnPaint(LSurface *pScreen)
 {
 	GColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 

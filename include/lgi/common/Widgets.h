@@ -277,7 +277,7 @@ public:
 	// Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
 	bool SetupDialog(bool Modal);
 	#elif defined(LGI_CARBON)
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	#endif
 };
 
@@ -336,7 +336,7 @@ public:
 struct GLabelData
 {
 	GView *Ctrl;
-	GSurface *pDC;
+	LSurface *pDC;
 	LRect r;
 	int Justification;
 	

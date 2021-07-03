@@ -968,7 +968,7 @@ case IDomGet:
 		{
 			case GV_DOM:
 			case GV_STREAM:
-			case GV_GSURFACE:
+			case GV_LSURFACE:
 			{
 				GDom *dom = Dom->CastDom();
 				CheckParam(dom != NULL);
@@ -1164,7 +1164,7 @@ case IDomSet:
 		case GV_DOM:
 		// case GV_GFILE:
 		case GV_STREAM:
-		case GV_GSURFACE:
+		case GV_LSURFACE:
 		{
 			GDom *dom = Dom->CastDom();
 			CheckParam(dom != NULL);
@@ -1371,7 +1371,7 @@ case IDomCall:
 	{
 		case GV_DOM:
 		case GV_STREAM:
-		case GV_GSURFACE:
+		case GV_LSURFACE:
 		{
 			GDom *dom = Dom->CastDom();
 			CheckParam(dom);

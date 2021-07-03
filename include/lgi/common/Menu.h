@@ -335,7 +335,7 @@ protected:
 
 	#if defined(__GTK_H__)
 		bool InSetCheck;
-		GAutoPtr<GMemDC> IconImg;
+		GAutoPtr<LMemDC> IconImg;
 		bool Replace(Gtk::GtkWidget *newWid);
 	public:
 		void Handle(Gtk::GtkMenuItem *mi);
@@ -344,8 +344,8 @@ protected:
 	protected:
 	#else
 		virtual void _Measure(LPoint &Size);
-		virtual void _Paint(GSurface *pDC, int Flags);
-		virtual void _PaintText(GSurface *pDC, int x, int y, int Width);
+		virtual void _Paint(LSurface *pDC, int Flags);
+		virtual void _PaintText(LSurface *pDC, int x, int y, int Width);
 	#endif
 
 	void OnAttach(bool Attach);

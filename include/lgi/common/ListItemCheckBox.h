@@ -27,7 +27,7 @@ public:
 
 	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *Col)
 	{
-		GSurface *pDC = Ctx.pDC;
+		LSurface *pDC = Ctx.pDC;
 		LRect c(0, 0, 10, 10);
 		c.Offset(Ctx.x1 + ((Ctx.X()-c.X())/2), Ctx.y1 + ((Ctx.Y()-c.Y())/2));
 

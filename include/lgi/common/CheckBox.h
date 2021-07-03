@@ -72,7 +72,7 @@ public:
 	bool OnKey(LKey &k) override;
 	void OnFocus(bool f) override;
 	void OnPosChange() override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	void OnAttach() override;
 	void OnStyleChange();
 	GMessage::Result OnEvent(GMessage *Msg) override;

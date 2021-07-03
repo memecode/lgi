@@ -395,7 +395,7 @@ struct GVolumePriv
 	int64 Size;
 	int64 Free;
 	LgiSystemPath SysPath;
-	GAutoPtr<GSurface> Icon;
+	GAutoPtr<LSurface> Icon;
 	List<GVolume> Sub;
 	List<GVolume>::I It;
 
@@ -521,7 +521,7 @@ int GVolume::Type() { return d->Type; } // VT_??
 int GVolume::Flags() { return d->Flags; }
 uint64 GVolume::Size() { return d->Size; }
 uint64 GVolume::Free() { return d->Free; }
-GSurface *GVolume::Icon() { return d->Icon; }
+LSurface *GVolume::Icon() { return d->Icon; }
 
 bool GVolume::IsMounted()
 {

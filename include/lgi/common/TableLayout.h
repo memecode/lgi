@@ -66,7 +66,7 @@ public:
 	void OnFocus(bool b);
 	void OnCreate();
 	void OnPosChange();
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 	void OnChildrenChanged(GViewI *Wnd, bool Attaching);

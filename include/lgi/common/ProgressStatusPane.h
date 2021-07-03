@@ -9,7 +9,7 @@ public:
 	GProgressStatusPane();
 	~GProgressStatusPane();
 
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	int64 Value();
 	void Value(int64 v);
 };

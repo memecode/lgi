@@ -8,7 +8,7 @@ class LgiClass GClipBoard
 	class GClipBoardPriv *d;
 	GView *Owner;
 	bool Open;
-	GAutoPtr<GSurface> pDC;
+	GAutoPtr<LSurface> pDC;
 
 	#if LGI_COCOA
 	GString Txt;
@@ -46,10 +46,10 @@ public:
 	GString Html();
 
 	// Bitmap
-	bool Bitmap(GSurface *pDC, bool AutoEmpty = true);
-	GSurface *Bitmap();
+	bool Bitmap(LSurface *pDC, bool AutoEmpty = true);
+	LSurface *Bitmap();
 	#if WINNATIVE
-	GSurface *ConvertFromPtr(void *Ptr);
+	LSurface *ConvertFromPtr(void *Ptr);
 	#endif
 
 	// Files

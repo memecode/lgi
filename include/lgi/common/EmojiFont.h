@@ -15,13 +15,13 @@ class LEmojiFont : public LFont
 
 	void _Measure(int &x, int &y, OsChar *Str, int Len) override;
 	int _CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type) override;
-	void _Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore) override;
+	void _Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore) override;
 
 public:
 	LEmojiFont();
 	~LEmojiFont();
 
-	bool Create(const char *Face = NULL, LCss::Len Size = LCss::LenInherit, GSurface *pSurface = NULL) override;
+	bool Create(const char *Face = NULL, LCss::Len Size = LCss::LenInherit, LSurface *pSurface = NULL) override;
 	int GetHeight() override;
 };
 

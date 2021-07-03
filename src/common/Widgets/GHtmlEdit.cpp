@@ -152,7 +152,7 @@ public:
 		Invalidate();
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		if (HasLeft < 0 || HasRight < 0)
 		{
@@ -191,7 +191,7 @@ public:
 			Back.x2 += 40;
 		}
 		
-		GMemDC Mem(X(), Y(), System32BitColourSpace);
+		LMemDC Mem(X(), Y(), System32BitColourSpace);
 		GColour MemBackground(LC_MED, 24);
 		Mem.Colour(MemBackground);
 		Mem.Rectangle();
@@ -457,7 +457,7 @@ public:
 	}
 
 	// Draw a red box around the cursor for debugging.
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		GHtml::OnPaint(pDC);
 
@@ -2340,7 +2340,7 @@ public:
 		}
 	};
 
-	void OnDebug(GSurface *pDC)
+	void OnDebug(LSurface *pDC)
 	{
 		GArray<DbgInf*> Inf;
 
@@ -2562,7 +2562,7 @@ public:
 		d->DebugWnd = 0;
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		d->e->OnDebug(pDC);
 	}
@@ -2771,7 +2771,7 @@ void GHtmlEdit::OnPosChange()
 	}
 }
 
-void GHtmlEdit::OnPaint(GSurface *pDC)
+void GHtmlEdit::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle();

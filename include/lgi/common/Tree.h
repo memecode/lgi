@@ -167,7 +167,7 @@ public:
 
 	/// Paints the item
 	void OnPaint(ItemPaintCtx &Ctx) override;
-	void OnPaint(GSurface *pDC) override { LgiAssert(0); }
+	void OnPaint(LSurface *pDC) override { LgiAssert(0); }
 };
 
 /// A tree control.
@@ -223,7 +223,7 @@ public:
 	void OnMouseClick(LMouse &m) override;
 	void OnMouseMove(LMouse &m) override;
 	bool OnMouseWheel(double Lines) override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	void OnFocus(bool b) override;
 	void OnPosChange() override;
 	bool OnKey(LKey &k) override;

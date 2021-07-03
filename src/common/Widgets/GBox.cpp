@@ -211,7 +211,7 @@ bool GBox::Pour(LRegion &r)
 	return true;
 }
 
-void GBox::OnPaint(GSurface *pDC)
+void GBox::OnPaint(LSurface *pDC)
 {
 	if (d->Dirty)
 	{

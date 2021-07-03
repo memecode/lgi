@@ -26,7 +26,7 @@ class GSkinState
 	
 public:
 	int Size;						// Class size, for version checking
-	GSurface *pScreen;				// Output surface
+	LSurface *pScreen;				// Output surface
 	GArray<LDisplayString*> *aText;	// Array of display strings for the view
 	LDisplayString **ptrText;		// Ptr to ptr for display string
 	LRect Rect;						// Region to paint (if relevant)
@@ -35,7 +35,7 @@ public:
 	bool Enabled;					// TRUE if the control is enabled
 	bool Focus;						// TRUE if the control has focus
 	bool ForceUpdate;				// TRUE if cached info should be discarded
-	GSurface *Image;				// Any icon that needs displaying
+	LSurface *Image;				// Any icon that needs displaying
 	GView *View;
 
 	GSkinState()
@@ -91,7 +91,7 @@ public:
 	}
 };
 
-typedef void (*ProcColumnPaint)(void *UserData, GSurface *pDC, LRect &r, bool FillBackground);
+typedef void (*ProcColumnPaint)(void *UserData, LSurface *pDC, LRect &r, bool FillBackground);
 
 // Engine class
 class GSkinEngine
@@ -137,10 +137,10 @@ public:
 	virtual LFont *GetDefaultFont(char *Class) { return SysFont; }
 
 	// Fills an abitary path with the skin's default fill...
-	virtual void FillPath(class GPath *Path, GSurface *pDC, GColour Back, bool Down, bool Enabled = true) {}
+	virtual void FillPath(class GPath *Path, LSurface *pDC, GColour Back, bool Down, bool Enabled = true) {}
 
 	// Draws a button
-	virtual void DrawBtn(GSurface *pDC, LRect &r, GColour Back, bool Down, bool Enabled, bool Default = false) = 0;
+	virtual void DrawBtn(LSurface *pDC, LRect &r, GColour Back, bool Down, bool Enabled, bool Default = false) = 0;
 
 	///////////////////////////////////////////////////////////////////////////////
 	// Add new features down here with an associated feature flag defined above. //

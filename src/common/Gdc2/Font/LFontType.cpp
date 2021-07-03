@@ -739,7 +739,7 @@ bool LFontType::GetFromRef(OsFont Handle)
 	#endif
 }
 
-LFont *LFontType::Create(GSurface *pSurface)
+LFont *LFontType::Create(LSurface *pSurface)
 {
 	LFont *New = new LFont;
 	if (New)

@@ -337,7 +337,7 @@ public:
 	void Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags);
 	/// Called after the layout has been done to move the controls into place
 	void PostLayout();
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnChange(PropType Prop);
 };
 
@@ -862,7 +862,7 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 			else if (Izza(GBitmap))
 			{
 				GBitmap *b = Izza(GBitmap);
-				GSurface *Dc = b->GetSurface();
+				LSurface *Dc = b->GetSurface();
 				if (Dc)
 				{
 					Min = MAX(Min, Dc->X() + 4);
@@ -1116,7 +1116,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		else if (Izza(GBitmap))
 		{
 			GBitmap *b = Izza(GBitmap);
-			GSurface *Dc = b->GetSurface();
+			LSurface *Dc = b->GetSurface();
 			if (Dc)
 			{
 				MaxY = MAX(MaxY, Dc->Y() + 4);
@@ -1349,7 +1349,7 @@ void TableCell::PostLayout()
 	}
 }
 
-void TableCell::OnPaint(GSurface *pDC)
+void TableCell::OnPaint(LSurface *pDC)
 {
 	GCssTools t(this, Table->GetFont());
 	LRect r = Pos;	
@@ -2141,7 +2141,7 @@ GMessage::Result GTableLayout::OnEvent(GMessage *m)
 	return GLayout::OnEvent(m);
 }
 
-void GTableLayout::OnPaint(GSurface *pDC)
+void GTableLayout::OnPaint(LSurface *pDC)
 {
 	if (SizeChanged() || d->LayoutDirty)
 	{
@@ -2178,7 +2178,7 @@ void GTableLayout::OnPaint(GSurface *pDC)
 	if (GetId() == DEBUG_LAYOUT)
 	#endif
 	{
-		pDC->LineStyle(GSurface::LineDot);
+		pDC->LineStyle(LSurface::LineDot);
 		for (int i=0; i<d->Cells.Length(); i++)
 		{
 			TableCell *c = d->Cells[i];
@@ -2188,7 +2188,7 @@ void GTableLayout::OnPaint(GSurface *pDC)
 			pDC->Line(r.x1, r.y1, r.x2, r.y2);
 			pDC->Line(r.x2, r.y1, r.x1, r.y2);
 		}
-		pDC->LineStyle(GSurface::LineSolid);
+		pDC->LineStyle(LSurface::LineSolid);
 	}
 	#endif
 }

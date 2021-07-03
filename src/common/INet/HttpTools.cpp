@@ -1088,9 +1088,9 @@ char *HtmlTidy(char *Html)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-GSurface *GetHttpImage(char *Uri)
+LSurface *GetHttpImage(char *Uri)
 {
-	GSurface *Img = 0;
+	LSurface *Img = 0;
 
 	if (Uri)
 	{

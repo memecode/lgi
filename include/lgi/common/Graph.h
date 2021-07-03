@@ -31,7 +31,7 @@ public:
 	GArray<GGraphPair*> *GetSelection();
 
     // Impl
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);	
 };
 

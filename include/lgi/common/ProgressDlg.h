@@ -42,7 +42,7 @@ public:
 
 	void OnCreate() override;
 	int OnNotify(GViewI *Ctrl, int Flags) override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	void OnPosChange() override;
 };
 
@@ -111,7 +111,7 @@ public:
 
 	int OnNotify(GViewI *Ctrl, int Flags) override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	void OnCreate() override;
 	void OnPosChange() override;
 	bool OnRequestClose(bool OsClose) override;

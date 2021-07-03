@@ -58,14 +58,14 @@ public:
 	
 	#elif LGI_COCOA
 	
-		typedef GSurface *IconRef;
+		typedef LSurface *IconRef;
 		NSStatusItem *StatusItem;
 		GArray<NSImage*> Icon;
 		LStatusItem *Handler;
 
 	#elif defined(__GTK_H__)
 	
-		::GArray<GSurface*> Images;
+		::GArray<LSurface*> Images;
 		#if USE_APPINDICATOR
 			AppIndicator *appind;
 		#else
@@ -119,7 +119,7 @@ public:
 
 	#else
 
-		typedef GSurface *IconRef;
+		typedef LSurface *IconRef;
 		::GArray<IconRef> Icon;
 
 	#endif
@@ -291,7 +291,7 @@ bool GTrayIcon::Load(const TCHAR *Str)
 			return false;
 		}
 
-		GAutoPtr<GSurface> Ico(GdcD->Load(File));
+		GAutoPtr<LSurface> Ico(GdcD->Load(File));
 		if (!Ico)
 		{
 			LgiTrace("%s:%i - Failed to load '%s'\n", _FL, sStr.Get());
@@ -313,12 +313,12 @@ bool GTrayIcon::Load(const TCHAR *Str)
 		GAutoString File(LgiFindFile(Str));
 		if (File)
 		{
-			GSurface *i = GdcD->Load(File);
+			LSurface *i = GdcD->Load(File);
 			if (i)
 			{
 				if (GdcD->GetBits() != i->GetBits())
 				{
-					GSurface *n = new GMemDC(i->X(), i->Y(), GdcD->GetColourSpace());
+					LSurface *n = new LMemDC(i->X(), i->Y(), GdcD->GetColourSpace());
 					if (n)
 					{
 						n->Colour(0);
@@ -537,7 +537,7 @@ void GTrayIcon::Value(int64 v)
 		
 		#elif LGI_CARBON
 		
-		GSurface *t = d->Val >= 0 ? d->Icon[d->Val] : NULL;
+		LSurface *t = d->Val >= 0 ? d->Icon[d->Val] : NULL;
 		if (t)
 		{
 			CGContextRef c = BeginCGContextForApplicationDockTile();
@@ -546,8 +546,8 @@ void GTrayIcon::Value(int64 v)
 				// CGContextTranslateCTM(c, 0, 128); 
 				// CGContextScaleCTM(c, 1.0, -1.0); 
 
-				GScreenDC Dc((GView*)0, c);
-				GMemDC m;
+				LScreenDC Dc((GView*)0, c);
+				LMemDC m;
 				if (m.Create(t->X()*4, t->Y()*4, System32BitColourSpace))
 				{
 					double Sx = (double) t->X() / m.X();

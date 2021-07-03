@@ -7,7 +7,7 @@ extern LXmlTag *ExtractForms(char *Html, GStream *Log);
 extern void XmlToStream(GStream *s, LXmlTag *x, char *Css = 0);
 extern LXmlTag *GetFormField(LXmlTag *Form, char *Field);
 extern char *HtmlTidy(char *Html);
-extern GSurface *GetHttpImage(char *Uri);
+extern LSurface *GetHttpImage(char *Uri);
 extern void StrFormEncode(GStream &p, char *s, bool InValue);
 
 struct WebPage

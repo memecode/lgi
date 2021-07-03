@@ -691,7 +691,7 @@ public:
         n.Reset(NewStr(name));
     }    
 
-    void OnPaint(GSurface *pDC)
+    void OnPaint(LSurface *pDC)
     {
         LRect c = GetClient();
         pDC->Colour(GColour(0xcc, 0xcc, 0xcc));

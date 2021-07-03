@@ -258,7 +258,7 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 	return 0;
 }
 
-void GSlider::OnPaint(GSurface *pDC)
+void GSlider::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle();
@@ -345,7 +345,7 @@ public:
 	{
 		if (Bmp)
 		{
-			GSurface *pDC = LoadDC(File);
+			LSurface *pDC = LoadDC(File);
 			if (pDC)
 			{
 				Bmp->SetDC(pDC);
@@ -423,7 +423,7 @@ GBitmap::~GBitmap()
 	DeleteObj(pDC);
 }
 
-void GBitmap::SetDC(GSurface *pNewDC)
+void GBitmap::SetDC(LSurface *pNewDC)
 {
 	DeleteObj(pDC);
 	pDC = pNewDC;
@@ -439,7 +439,7 @@ void GBitmap::SetDC(GSurface *pNewDC)
 	Invalidate();
 }
 
-GSurface *GBitmap::GetSurface()
+LSurface *GBitmap::GetSurface()
 {
 	return pDC;
 }
@@ -449,7 +449,7 @@ GMessage::Param GBitmap::OnEvent(GMessage *Msg)
 	return GView::OnEvent(Msg);
 }
 
-void GBitmap::OnPaint(GSurface *pScreen)
+void GBitmap::OnPaint(LSurface *pScreen)
 {
 	LRect a(0, 0, X()-1, Y()-1);
 	if (pDC)

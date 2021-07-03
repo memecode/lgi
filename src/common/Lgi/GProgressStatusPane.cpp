@@ -24,7 +24,7 @@ GProgressStatusPane::~GProgressStatusPane()
 {
 }
 
-void GProgressStatusPane::OnPaint(GSurface *pDC)
+void GProgressStatusPane::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
 

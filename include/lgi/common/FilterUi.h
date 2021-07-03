@@ -85,7 +85,7 @@ public:
 	GFilterItem *Create(GFilterNode Node = LNODE_NEW);
 	GTreeNode *GetRootNode();
 
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnPosChange();
 	void OnCreate();
 };

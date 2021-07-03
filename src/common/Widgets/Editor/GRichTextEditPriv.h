@@ -235,7 +235,7 @@ public:
 	
 	const char *GetClass() { return "SelectColour"; }
 
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
 	void Visible(bool i);
 };
@@ -260,7 +260,7 @@ class EmojiMenu : public GPopup
 public:
 	EmojiMenu(GRichTextPriv *priv, LPoint p);
 
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
 	void Visible(bool i);
 	bool InsertEmoji(uint32_t Ch);
@@ -289,10 +289,10 @@ extern bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int Len);
 
 class GEmojiContext
 {
-	GAutoPtr<GSurface> EmojiImg;
+	GAutoPtr<LSurface> EmojiImg;
 
 public:
-	GSurface *GetEmojiImage();
+	LSurface *GetEmojiImage();
 };
 
 class GRichTextPriv :
@@ -391,7 +391,7 @@ public:
 	struct Flow
 	{
 		GRichTextPriv *d;
-		GSurface *pDC;	// Used for printing.
+		LSurface *pDC;	// Used for printing.
 
 		int Left, Right;// Left and right margin positions as measured in px
 						// from the left of the page (controls client area).
@@ -457,7 +457,7 @@ public:
 	struct PaintContext
 	{
 		int Index;
-		GSurface *pDC;
+		LSurface *pDC;
 		SelectModeType Type;
 		ColourPair Colours[2];
 		BlockCursor *Cursor, *Select;
@@ -867,7 +867,7 @@ public:
 						// is using UTF-16 (i.e. Windows).
 		int OffsetY;	// Offset of this string from the TextLine's box in the Y axis
 		
-		DisplayStr(StyleText *src, LFont *f, const uint32_t *s, ssize_t l = -1, GSurface *pdc = NULL) :
+		DisplayStr(StyleText *src, LFont *f, const uint32_t *s, ssize_t l = -1, LSurface *pdc = NULL) :
 			LDisplayString(f,
 				#ifndef WINDOWS
 				(char16*)
@@ -951,7 +951,7 @@ public:
 			return c;
 		}
 
-		virtual void Paint(GSurface *pDC, int &FixX, int FixY, GColour &Back)
+		virtual void Paint(LSurface *pDC, int &FixX, int FixY, GColour &Back)
 		{
 			FDraw(pDC, FixX, FixY);
 			FixX += FX();
@@ -971,14 +971,14 @@ public:
 	struct EmojiDisplayStr : public DisplayStr
 	{
 		GArray<LRect> SrcRect;
-		GSurface *Img;
+		LSurface *Img;
 		#if defined(_MSC_VER)
 		GArray<uint32_t> Utf32;
 		#endif
 
-		EmojiDisplayStr(StyleText *src, GSurface *img, LFont *f, const uint32_t *s, ssize_t l = -1);
+		EmojiDisplayStr(StyleText *src, LSurface *img, LFont *f, const uint32_t *s, ssize_t l = -1);
 		GAutoPtr<DisplayStr> Clone(ssize_t Start, ssize_t Len = -1);
-		void Paint(GSurface *pDC, int &FixX, int FixY, GColour &Back);
+		void Paint(LSurface *pDC, int &FixX, int FixY, GColour &Back);
 		double GetAscent();
 		ssize_t PosToIndex(int XPos, bool Nearest);
 	};
@@ -1013,7 +1013,7 @@ public:
 		GSpellCheck::SpellingError *SpErr;
 
 		bool PreEdit(Transaction *Trans);
-		void DrawDisplayString(GSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, GColour &Bk, int &Pos);
+		void DrawDisplayString(LSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, GColour &Bk, int &Pos);
 	
 	public:
 		// Runs of characters in the same style: pre-layout.
@@ -1174,7 +1174,7 @@ public:
 		
 
 	public:
-		GAutoPtr<GSurface> SourceImg, DisplayImg, SelectImg;
+		GAutoPtr<LSurface> SourceImg, DisplayImg, SelectImg;
 		LRect Margin, Border, Padding;
 		GString Source;
 		LPoint Size;
@@ -1190,7 +1190,7 @@ public:
 		bool IsValid();
 		bool IsBusy(bool Stop = false);
 		bool Load(const char *Src = NULL);
-		bool SetImage(GAutoPtr<GSurface> Img);
+		bool SetImage(GAutoPtr<LSurface> Img);
 
 		// No state change methods
 		int GetLines();
@@ -1250,11 +1250,11 @@ public:
 	bool Layout(GScrollBar *&ScrollY);
 	void OnStyleChange(GRichTextEdit::RectType t);
 	bool ChangeSelectionStyle(LCss *Style, bool Add);
-	void PaintBtn(GSurface *pDC, GRichTextEdit::RectType t);
+	void PaintBtn(LSurface *pDC, GRichTextEdit::RectType t);
 	bool MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, GString Link);
 	bool ClickBtn(LMouse &m, GRichTextEdit::RectType t);
 	bool InsertHorzRule();
-	void Paint(GSurface *pDC, GScrollBar *&ScrollY);
+	void Paint(LSurface *pDC, GScrollBar *&ScrollY);
 	GHtmlElement *CreateElement(GHtmlElement *Parent);
 	LPoint ScreenToDoc(int x, int y);
 	LPoint DocToScreen(int x, int y);

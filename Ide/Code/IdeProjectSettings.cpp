@@ -297,7 +297,7 @@ public:
 		AttachChildren();
 	}
 	
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(L_MED);
 		pDC->Rectangle();

@@ -52,7 +52,7 @@ protected:
 	LHashTbl<ConstStrKey<char,false>, bool> CssHref;
 	
 	// Display
-	GAutoPtr<GSurface>	MemDC;
+	GAutoPtr<LSurface>	MemDC;
 
 	// This lock is separate from the window lock to avoid deadlocks.
 	struct GJobSem : public LMutex
@@ -131,7 +131,7 @@ public:
 	const char16 *NameW();
 
 	// Impl
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
 	void OnMouseMove(LMouse &m);
 	LgiCursor GetCursor(int x, int y);

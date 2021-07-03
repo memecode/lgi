@@ -99,11 +99,11 @@
 
 // Flood fill types
 
-/// GSurface::FloodFill to a different colour
+/// LSurface::FloodFill to a different colour
 #define GDC_FILL_TO_DIFFERENT		0
-/// GSurface::FloodFill to a certain colour
+/// LSurface::FloodFill to a certain colour
 #define GDC_FILL_TO_BORDER			1
-/// GSurface::FloodFill while colour is near to the seed colour
+/// LSurface::FloodFill while colour is near to the seed colour
 #define GDC_FILL_NEAR				2
 
 // Gdc options
@@ -134,7 +134,7 @@
 #define GDC_PROMOTE_ON_LOAD			3
 #define GDC_MAX_OPTION				4
 
-// GSurface Flags
+// LSurface Flags
 #define GDC_ON_SCREEN				0x0002
 #define GDC_ALPHA_CHANNEL			0x0004
 #define GDC_UPDATED_PALETTE			0x0008
@@ -173,7 +173,7 @@
 
 //				Classes
 class GFilter;
-class GSurface;
+class LSurface;
 
 #include "lgi/common/Rect.h"
 #include "lgi/common/Point.h"
@@ -387,14 +387,14 @@ public:
 #define OrgRgn(r)		r.Offset(-OriginX, -OriginY)
 
 /// Base class API for graphics operations
-class LgiClass GSurface : public GRefCount, public GDom
+class LgiClass LSurface : public GRefCount, public GDom
 {
 	friend class GFilter;
 	friend class GView;
 	friend class LWindow;
 	friend class LVariant;
 	friend class GRegionClipDC;
-	friend class GMemDC;
+	friend class LMemDC;
 
 	void Init();
 	
@@ -404,7 +404,7 @@ protected:
 	LRect			Clip;
 	GColourSpace	ColourSpace;
 	GBmpMem			*pMem;
-	GSurface		*pAlphaDC;
+	LSurface		*pAlphaDC;
 	GPalette		*pPalette;
 	GApplicator		*pApp;
 	GApplicator		*pAppCache[GDC_CACHE_SIZE];
@@ -422,9 +422,9 @@ protected:
 	#endif
 
 public:
-	GSurface();
-	GSurface(GSurface *pDC);
-	virtual ~GSurface();
+	LSurface();
+	LSurface(LSurface *pDC);
+	virtual ~LSurface();
 
 	// Win32
 	#if defined(__GTK_H__)
@@ -473,15 +473,15 @@ public:
 	/// True if you want to edit the alpha channel rather than the colour bits
 	bool DrawOnAlpha(bool Draw);
 	/// Returns the surface of the alpha channel.
-	GSurface *AlphaDC() { return pAlphaDC; }
+	LSurface *AlphaDC() { return pAlphaDC; }
 
 	/// Lowers the alpha of the whole image to Alpha/255.0.
 	/// Only works on bitmaps with an alpha channel (i.e. CsRgba32 or it's variants)
 	bool SetConstantAlpha(uint8_t Alpha);
 
 	// Create sub-images (that reference the memory of this object)
-	GSurface *SubImage(LRect r);
-	GSurface *SubImage(int x1, int y1, int x2, int y2)
+	LSurface *SubImage(LRect r);
+	LSurface *SubImage(int x1, int y1, int x2, int y2)
 	{
 		LRect r(x1, y1, x2, y2);
 		return SubImage(r);
@@ -541,7 +541,7 @@ public:
 	/// Gets any flags associated with the surface
 	virtual int GetFlags() { return Flags; }
 	/// Returns true if the surface is on the screen
-	virtual class GScreenDC *IsScreen() { return 0; }
+	virtual class LScreenDC *IsScreen() { return 0; }
 	/// Returns true if the surface is for printing
 	virtual bool IsPrint() { return false; }
 	/// Returns a pointer to the start of a scanline, or NULL if not available
@@ -565,7 +565,7 @@ public:
 	
 	/// Sets a pixel with the current colour
 	virtual void Set(int x, int y);
-	/// Gets a pixel (doesn't work on some types of image, i.e. GScreenDC)
+	/// Gets a pixel (doesn't work on some types of image, i.e. LScreenDC)
 	virtual COLOUR Get(int x, int y);
 
 	// Line
@@ -639,13 +639,13 @@ public:
 		/// The destination y coord
 		int y,
 		/// The source surface
-		GSurface *Src,
+		LSurface *Src,
 		/// The optional area of the source to use, if not specified the whole source is used
 		LRect *a = NULL
 	);
-	void Blt(int x, int y, GSurface *Src, LRect a) { Blt(x, y, Src, &a); }
+	void Blt(int x, int y, LSurface *Src, LRect a) { Blt(x, y, Src, &a); }
 	/// Not implemented
-	virtual void StretchBlt(LRect *d, GSurface *Src, LRect *s);
+	virtual void StretchBlt(LRect *d, LSurface *Src, LRect *s);
 
 	// Other
 
@@ -653,7 +653,7 @@ public:
 	virtual void Polygon(int Points, LPoint *Data);
 	/// Stroke a bezier in the current colour
 	virtual void Bezier(int Threshold, LPoint *Pt);
-	/// Flood fill in the current colour (doesn't work on a GScreenDC)
+	/// Flood fill in the current colour (doesn't work on a LScreenDC)
 	virtual void FloodFill
 	(
 		/// Start x coordinate
@@ -695,25 +695,25 @@ struct GPrintDcParams
 	typedef Gtk::GdkWindow OsDrawable;
 #endif
 
-/// \brief An implemenation of GSurface to draw onto the screen.
+/// \brief An implemenation of LSurface to draw onto the screen.
 ///
 /// This is the class given to GView::OnPaint() most of the time. Which most of
 /// the time doesn't matter unless your doing something unusual.
-class LgiClass GScreenDC : public GSurface
+class LgiClass LScreenDC : public LSurface
 {
 	class GScreenPrivate *d;
 
 public:
-	GScreenDC();
-	virtual ~GScreenDC();
+	LScreenDC();
+	virtual ~LScreenDC();
 
 	// OS Sepcific
 	#if WINNATIVE
 
-		GScreenDC(GViewI *view);
-		GScreenDC(HWND hwnd);
-		GScreenDC(HDC hdc, HWND hwnd, bool Release = false);
-		GScreenDC(HBITMAP hBmp, int Sx, int Sy);
+		LScreenDC(GViewI *view);
+		LScreenDC(HWND hwnd);
+		LScreenDC(HDC hdc, HWND hwnd, bool Release = false);
+		LScreenDC(HBITMAP hBmp, int Sx, int Sy);
 
 		bool CreateFromHandle(HDC hdc);
 		void SetSize(int x, int y);
@@ -721,25 +721,25 @@ public:
 	#else
 
 		/// Construct a wrapper to draw on a window
-		GScreenDC(GView *view, void *Param = 0);
+		LScreenDC(GView *view, void *Param = 0);
 	
 		#if defined(LGI_SDL)
 		#elif defined(__GTK_H__)
 		
 			/// Constructs a server size pixmap
-			GScreenDC(int x, int y, int bits);		
+			LScreenDC(int x, int y, int bits);		
 			/// Constructs a wrapper around a drawable
-			GScreenDC(OsDrawable *Drawable);
+			LScreenDC(OsDrawable *Drawable);
 			/// Constructs a DC for drawing on a cairo context
-			GScreenDC(Gtk::cairo_t *cr, int x, int y);
+			LScreenDC(Gtk::cairo_t *cr, int x, int y);
 			
 			// Gtk::cairo_surface_t *GetSurface(bool Render);
 			LPoint GetSize();
 		
 		#elif defined(MAC)
 	
-			GScreenDC(LWindow *wnd, void *Param = 0);
-			GScreenDC(GPrintDcParams *Params); // Used by GPrintDC
+			LScreenDC(LWindow *wnd, void *Param = 0);
+			LScreenDC(GPrintDcParams *Params); // Used by LPrintDC
 			LRect GetPos();
 			void PushState();
 			void PopState();
@@ -767,7 +767,7 @@ public:
 	uint LineStyle(uint Bits, uint32_t Reset = 0x80000000);
 
 	int GetBits();
-	GScreenDC *IsScreen() { return this; }
+	LScreenDC *IsScreen() { return this; }
 	bool SupportsAlphaCompositing();
 
 	#ifndef LGI_SDL
@@ -801,8 +801,8 @@ public:
 	void Box(LRect *a);
 	void Rectangle(int x1, int y1, int x2, int y2);
 	void Rectangle(LRect *a = NULL);
-	void Blt(int x, int y, GSurface *Src, LRect *a = NULL);
-	void StretchBlt(LRect *d, GSurface *Src, LRect *s = NULL);
+	void Blt(int x, int y, LSurface *Src, LRect *a = NULL);
+	void StretchBlt(LRect *d, LSurface *Src, LRect *s = NULL);
 	void Polygon(int Points, LPoint *Data);
 	void Bezier(int Threshold, LPoint *Pt);
 	void FloodFill(int x, int y, int Mode, COLOUR Border = 0, LRect *Bounds = NULL);
@@ -831,13 +831,13 @@ public:
 	GBlitRegions
 	(
 		/// Destination surface
-		GSurface *Dst,
+		LSurface *Dst,
 		/// Destination blt x offset
 		int x1,
 		/// Destination blt y offset
 		int y1,
 		/// Source surface
-		GSurface *Src,
+		LSurface *Src,
 		/// [Optional] Crop the source surface first, else whole surface is blt
 		LRect *SrcRc = 0
 	)
@@ -905,7 +905,7 @@ class CGImg
 
 public:
 	CGImg(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, LRect *r, int Debug = 0);
-	CGImg(GSurface *pDC);
+	CGImg(LSurface *pDC);
 	~CGImg();
 	
 	operator CGImageRef();
@@ -916,27 +916,27 @@ public:
 #include "LCairoSurface.h"
 #endif
 
-/// \brief An implemenation of GSurface to draw into a memory bitmap.
+/// \brief An implemenation of LSurface to draw into a memory bitmap.
 ///
 /// This class uses a block of memory to represent an image. You have direct
 /// pixel access as well as higher level functions to manipulate the bits.
-class LgiClass GMemDC : public GSurface
+class LgiClass LMemDC : public LSurface
 {
 protected:
-	class GMemDCPrivate *d;
+	class LMemDCPrivate *d;
 
 	#if defined WINNATIVE
 	PBITMAPINFO	GetInfo();
 	#endif
 	
 	// This is called between capturing the screen and overlaying the
-	// cursor in GMemDC::Blt(x, y, ScreenDC, Src). It can be used to
+	// cursor in LMemDC::Blt(x, y, ScreenDC, Src). It can be used to
 	// overlay effects between the screen and cursor layers.
 	virtual void OnCaptureScreen() {}
 
 public:
 	/// Creates a memory bitmap
-	GMemDC
+	LMemDC
 	(
 		/// The width
 		int x = 0,
@@ -948,8 +948,8 @@ public:
 		/// Optional creation flags
 		int Flags = SurfaceCreateNone
 	);
-	GMemDC(GSurface *pDC);
-	virtual ~GMemDC();
+	LMemDC(LSurface *pDC);
+	virtual ~LMemDC();
 
 	#if WINNATIVE
 	
@@ -966,7 +966,7 @@ public:
 
 			LPoint GetSize();
 
-			/// This returns the surface owned by the GMemDC
+			/// This returns the surface owned by the LMemDC
 			Gtk::cairo_surface_t *GetSurface();
 
 			/// This returns a sub-image, caller is responsible to free via
@@ -981,7 +981,7 @@ public:
 			OsBitmap GetBitmap();
 	
 			#if LGI_COCOA && defined(__OBJC__)
-			GMemDC(NSImage *img);
+			LMemDC(NSImage *img);
 			NSImage *NsImage(LRect *rc = NULL);
 			#endif
 	
@@ -1005,7 +1005,7 @@ public:
 
 	void SetClient(LRect *c);
 
-	/// Locks the bits for access. GMemDC's start in the locked state.
+	/// Locks the bits for access. LMemDC's start in the locked state.
 	bool Lock();
 	/// Unlocks the bits to optimize for display. While the bitmap is unlocked you
 	/// can't access the data for read or write. On linux this converts the XImage
@@ -1022,30 +1022,30 @@ public:
 	bool SwapRedAndBlue();
 	
 	bool Create(int x, int y, GColourSpace Cs, int Flags = SurfaceCreateNone);
-	void Blt(int x, int y, GSurface *Src, LRect *a = NULL);
-	void StretchBlt(LRect *d, GSurface *Src, LRect *s = NULL);
+	void Blt(int x, int y, LSurface *Src, LRect *a = NULL);
+	void StretchBlt(LRect *d, LSurface *Src, LRect *s = NULL);
 
 	void HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b);
 	void VertLine(int x, int y1, int y2, COLOUR a, COLOUR b);
 };
 
-/// \brief An implemenation of GSurface to print to a printer.
+/// \brief An implemenation of LSurface to print to a printer.
 ///
 /// This class redirects standard graphics calls to print a page.
 ///
 /// \sa GPrinter
-class LgiClass GPrintDC
+class LgiClass LPrintDC
 #if defined(WIN32) || defined(MAC)
-	: public GScreenDC
+	: public LScreenDC
 #else
-	: public GSurface
+	: public LSurface
 #endif
 {
 	class GPrintDCPrivate *d;
 
 public:
-	GPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName = NULL);
-	~GPrintDC();
+	LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName = NULL);
+	~LPrintDC();
 
 	bool IsPrint() { return true; }
 	const char *GetOutputFileName();
@@ -1088,8 +1088,8 @@ public:
 	void Box(LRect *a = NULL);
 	void Rectangle(int x1, int y1, int x2, int y2);
 	void Rectangle(LRect *a = NULL);
-	void Blt(int x, int y, GSurface *Src, LRect *a = NULL);
-	void StretchBlt(LRect *d, GSurface *Src, LRect *s);
+	void Blt(int x, int y, LSurface *Src, LRect *a = NULL);
+	void StretchBlt(LRect *d, LSurface *Src, LRect *s);
 
 	void Polygon(int Points, LPoint *Data);
 	void Bezier(int Threshold, LPoint *Pt);
@@ -1108,7 +1108,7 @@ public:
 
 	// Add all the colours first
 	COLOUR AddColour(COLOUR c24);
-	bool AddBitmap(GSurface *pDC);
+	bool AddBitmap(LSurface *pDC);
 	bool AddBitmap(GImageList *il);
 
 	// Then call this
@@ -1120,20 +1120,20 @@ public:
 
 	// Convert a bitmap to the global palette
 	COLOUR GetColour(COLOUR c24);
-	bool RemapBitmap(GSurface *pDC);
+	bool RemapBitmap(LSurface *pDC);
 };
 
 /// This class is useful for double buffering in an OnPaint handler...
 class GDoubleBuffer
 {
-	GSurface **In;
-	GSurface *Screen;
-	GMemDC Mem;
+	LSurface **In;
+	LSurface *Screen;
+	LMemDC Mem;
 	LRect Rgn;
 	bool Valid;
 
 public:
-	GDoubleBuffer(GSurface *&pDC, LRect *Sub = NULL) : In(&pDC)
+	GDoubleBuffer(LSurface *&pDC, LRect *Sub = NULL) : In(&pDC)
 	{
 		Rgn = Sub ? *Sub : pDC->Bounds();
 		Screen = pDC;
@@ -1159,7 +1159,7 @@ public:
 		*In = Screen;
 	}
 
-	GMemDC *GetMem()
+	LMemDC *GetMem()
 	{
 		return &Mem;
 	}
@@ -1172,8 +1172,8 @@ typedef int (__stdcall *MsImg32_AlphaBlend)(HDC,int,int,int,int,HDC,int,int,int,
 /// Main singleton graphics device class. Holds all global data for graphics rendering.
 class LgiClass GdcDevice : public GCapabilityClient
 {
-	friend class GScreenDC;
-	friend class GMemDC;
+	friend class LScreenDC;
+	friend class LMemDC;
 	friend class GImageList;
 
 	static GdcDevice *pInstance;
@@ -1219,7 +1219,7 @@ public:
 	void SetSystemPalette(int Start, int Size, GPalette *Pal);
 	GPalette *GetSystemPalette();
 	void SetColourPaletteType(int Type);	// Type = PALTYPE_xxx define
-	COLOUR GetColour(COLOUR Rgb24, GSurface *pDC = NULL);
+	COLOUR GetColour(COLOUR Rgb24, LSurface *pDC = NULL);
 
     // File I/O
     
@@ -1238,7 +1238,7 @@ public:
     ///  <li> PNG: GdcPng (Png.cpp + <a href='http://www.memecode.com/scribe/extras.php'>libpng</a> library)
     /// </ul>
     /// 
-    GSurface *Load
+    LSurface *Load
     (
         /// The full path of the file
         const char *FileName,
@@ -1247,7 +1247,7 @@ public:
     );
 
 	/// The stream version of the file loader...
-    GSurface *Load
+    LSurface *Load
     (
         /// The full path of the file
         GStream *In,
@@ -1263,7 +1263,7 @@ public:
         /// The file to write to
         GStream *Out,
         /// The pixels to store
-        GSurface *In,
+        LSurface *In,
 		/// Dummy file name to determine the file type, eg: "img.jpg"
 		const char *FileType
     );
@@ -1274,7 +1274,7 @@ public:
         /// The file to write to
         const char *Name,
         /// The pixels to store
-        GSurface *pDC
+        LSurface *pDC
     );
     
     #if LGI_SDL
@@ -1306,7 +1306,7 @@ public:
 	uint32_t *Data;
 
 	/// Creates a memory DC of the image.
-	GSurface *Create(uint32_t TransparentPx = 0xffffffff);
+	LSurface *Create(uint32_t TransparentPx = 0xffffffff);
 };
 
 // file filter support
@@ -1316,10 +1316,10 @@ public:
 #define GdcD			GdcDevice::GetInst()
 
 /// Converts a context to a different bit depth
-LgiFunc GSurface *ConvertDC
+LgiFunc LSurface *ConvertDC
 (
 	/// The source image
-	GSurface *pDC,
+	LSurface *pDC,
 	/// The destination bit depth
 	int Bits
 );
@@ -1376,7 +1376,7 @@ public:
 };
 
 /// Reduces a images colour depth
-LgiFunc bool GReduceBitDepth(GSurface *pDC, int Bits, GPalette *Pal = 0, GReduceOptions *Reduce = 0);
+LgiFunc bool GReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal = 0, GReduceOptions *Reduce = 0);
 
 struct GColourStop
 {
@@ -1391,11 +1391,11 @@ struct GColourStop
 };
 
 /// Draws a horizontal or vertical gradient
-LgiFunc void LgiFillGradient(GSurface *pDC, LRect &r, bool Vert, GArray<GColourStop> &Stops);
+LgiFunc void LgiFillGradient(LSurface *pDC, LRect &r, bool Vert, GArray<GColourStop> &Stops);
 
 #ifdef WIN32
 /// Draws a windows HICON onto a surface at Dx, Dy
-LgiFunc void LgiDrawIcon(GSurface *pDC, int Dx, int Dy, HICON ico);
+LgiFunc void LgiDrawIcon(LSurface *pDC, int Dx, int Dy, HICON ico);
 #endif
 
 /// Row copy operator for full RGB (8 bit components)
@@ -1426,7 +1426,7 @@ LgiFunc int LgiScreenDpi();
 LgiFunc bool LgiFindBounds
 (
 	/// [in] The image
-	GSurface *pDC,
+	LSurface *pDC,
 	/// [in/out] Starts off as the initial bounds to search.
 	/// Returns the non-background area.
 	LRect *rc

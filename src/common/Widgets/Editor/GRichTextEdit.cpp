@@ -655,7 +655,7 @@ bool GRichTextEdit::Paste()
 {
 	GString Html;
 	GAutoWString Text;
-	GAutoPtr<GSurface> Img;
+	GAutoPtr<LSurface> Img;
 
 	{
 		GClipBoard Cb(this);	
@@ -2431,13 +2431,13 @@ void GRichTextEdit::OnEnter(LKey &k)
 	}
 }
 
-void GRichTextEdit::OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour)
+void GRichTextEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour)
 {
 	pDC->Colour(colour);
 	pDC->Rectangle(&r);
 }
 
-void GRichTextEdit::OnPaint(GSurface *pDC)
+void GRichTextEdit::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
 	if (!r.Valid())
@@ -2798,7 +2798,7 @@ SelectColour::SelectColour(GRichTextPriv *priv, LPoint p, GRichTextEdit::RectTyp
 	Visible(true);
 }
 
-void SelectColour::OnPaint(GSurface *pDC)
+void SelectColour::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_MED);
 	pDC->Rectangle();
@@ -2921,7 +2921,7 @@ EmojiMenu::EmojiMenu(GRichTextPriv *priv, LPoint p) : GPopup(priv->View)
 	Visible(true);
 }
 
-void EmojiMenu::OnPaint(GSurface *pDC)
+void EmojiMenu::OnPaint(LSurface *pDC)
 {
 	GAutoPtr<GDoubleBuffer> DblBuf;
 	if (!pDC->SupportsAlphaCompositing())
@@ -2930,7 +2930,7 @@ void EmojiMenu::OnPaint(GSurface *pDC)
 	pDC->Colour(L_MED);
 	pDC->Rectangle();
 
-	GSurface *EmojiImg = d->GetEmojiImage();
+	LSurface *EmojiImg = d->GetEmojiImage();
 	if (EmojiImg)
 	{
 		pDC->Op(GDC_ALPHA);

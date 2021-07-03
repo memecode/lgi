@@ -585,7 +585,7 @@ bool LWindow::HandleViewKey(GView *v, LKey &k)
 	return false;
 }
 
-void LWindow::OnPaint(GSurface *pDC)
+void LWindow::OnPaint(LSurface *pDC)
 {
 	auto c = GetClient();
 	GCssTools Tools(this);

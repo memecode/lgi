@@ -204,7 +204,7 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////
-void DrawGoobers(GSurface *pDC, LRect &r, LRect *Goobers, GColour c, int OverIdx)
+void DrawGoobers(LSurface *pDC, LRect &r, LRect *Goobers, GColour c, int OverIdx)
 {
 	int Mx = (r.x2 + r.x1) / 2 - (GOOBER_SIZE / 2);
 	int My = (r.y2 + r.y1) / 2 - (GOOBER_SIZE / 2);
@@ -634,7 +634,7 @@ bool ResDialogCtrl::AttachCtrl(ResDialogCtrl *Ctrl, LRect *r)
 	return Status;
 }
 
-void ResDialogCtrl::OnPaint(GSurface *pDC)
+void ResDialogCtrl::OnPaint(LSurface *pDC)
 {
 	if (DragCtrl >= 0)
 	{
@@ -682,7 +682,7 @@ void ResDialogCtrl::OnMouseClick(LMouse &m)
 				auto &DebugOverlay = Dlg->DebugOverlay;
 				if (!DebugOverlay)
 				{
-					DebugOverlay.Reset(new GMemDC(Dlg->X(), Dlg->Y(), System32BitColourSpace));
+					DebugOverlay.Reset(new LMemDC(Dlg->X(), Dlg->Y(), System32BitColourSpace));
 					DebugOverlay->Colour(0, 32);
 					DebugOverlay->Rectangle();
 					DebugOverlay->Colour(GColour(64, 192, 64));
@@ -1010,7 +1010,7 @@ LRect &CtrlDlg::GetClient(bool InClientSpace)
 	return r;
 }
 
-void CtrlDlg::OnNcPaint(GSurface *pDC, LRect &r)
+void CtrlDlg::OnNcPaint(LSurface *pDC, LRect &r)
 {
 	// Draw the border
 	LgiWideBorder(pDC, r, DefaultRaisedEdge);
@@ -1032,7 +1032,7 @@ void CtrlDlg::OnNcPaint(GSurface *pDC, LRect &r)
 	r.y1 = t.y2 + 1;
 }
 
-void CtrlDlg::OnPaint(GSurface *pDC)
+void CtrlDlg::OnPaint(LSurface *pDC)
 {
 	Client = GetClient();
 
@@ -1062,7 +1062,7 @@ CtrlText::CtrlText(ResDialog *dlg, LXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlText)
 
-void CtrlText::OnPaint(GSurface *pDC)
+void CtrlText::OnPaint(LSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
 	char *Text = GetStr()->Get();
@@ -1102,7 +1102,7 @@ CtrlEditbox::CtrlEditbox(ResDialog *dlg, LXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlEditbox)
 
-void CtrlEditbox::OnPaint(GSurface *pDC)
+void CtrlEditbox::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
@@ -1172,7 +1172,7 @@ CtrlCheckbox::CtrlCheckbox(ResDialog *dlg, LXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlCheckbox)
 
-void CtrlCheckbox::OnPaint(GSurface *pDC)
+void CtrlCheckbox::OnPaint(LSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
 	LRect r(0, 0, 12, 12);
@@ -1238,7 +1238,7 @@ bool CtrlButton::Serialize(FieldTree &Fields)
 	return Status;
 }
 
-void CtrlButton::OnPaint(GSurface *pDC)
+void CtrlButton::OnPaint(LSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
 	LRect r = Client;
@@ -1281,7 +1281,7 @@ CtrlGroup::CtrlGroup(ResDialog *dlg, LXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlGroup)
 
-void CtrlGroup::OnPaint(GSurface *pDC)
+void CtrlGroup::OnPaint(LSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
 	LRect r = Client;
@@ -1325,7 +1325,7 @@ uint32_t RadioBmp[] = {
 CtrlRadio::CtrlRadio(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_RadioBox, load)
 {
-	Bmp = new GMemDC;
+	Bmp = new LMemDC;
 	if (Bmp && Bmp->Create(12, 12, GdcD->GetColourSpace()))
 	{
 		int Len = ((Bmp->X()*24)+31)/32*4;
@@ -1348,7 +1348,7 @@ CtrlRadio::~CtrlRadio()
 
 IMPL_DIALOG_CTRL(CtrlRadio)
 
-void CtrlRadio::OnPaint(GSurface *pDC)
+void CtrlRadio::OnPaint(LSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
 	LRect r(0, 0, 12, 12);
@@ -1380,7 +1380,7 @@ CtrlTab::CtrlTab(ResDialog *dlg, LXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlTab)
 
-void CtrlTab::OnPaint(GSurface *pDC)
+void CtrlTab::OnPaint(LSurface *pDC)
 {
 }
 
@@ -1532,7 +1532,7 @@ void CtrlTabs::Empty()
 	Tabs.DeleteObjects();
 }
 
-void CtrlTabs::OnPaint(GSurface *pDC)
+void CtrlTabs::OnPaint(LSurface *pDC)
 {
 	// Draw the ctrl
 	Title.ZOff(X()-1, 17);
@@ -1790,7 +1790,7 @@ ListCol::ListCol(ResDialog *dlg, LXmlTag *load, char *s, int Width) :
 }
 
 IMPL_DIALOG_CTRL(ListCol)
-void ListCol::OnPaint(GSurface *pDC)
+void ListCol::OnPaint(LSurface *pDC)
 {
 }
 
@@ -2006,7 +2006,7 @@ void CtrlList::OnMouseMove(LMouse &m)
 	ResDialogCtrl::OnMouseMove(m);
 }
 
-void CtrlList::OnPaint(GSurface *pDC)
+void CtrlList::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 
@@ -2063,7 +2063,7 @@ CtrlComboBox::CtrlComboBox(ResDialog *dlg, LXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlComboBox)
 
-void CtrlComboBox::OnPaint(GSurface *pDC)
+void CtrlComboBox::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
@@ -2117,7 +2117,7 @@ CtrlScrollBar::CtrlScrollBar(ResDialog *dlg, LXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlScrollBar)
 
-void CtrlScrollBar::OnPaint(GSurface *pDC)
+void CtrlScrollBar::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
@@ -2178,7 +2178,7 @@ CtrlTree::CtrlTree(ResDialog *dlg, LXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlTree)
 
-void CtrlTree::OnPaint(GSurface *pDC)
+void CtrlTree::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
@@ -2203,7 +2203,7 @@ CtrlBitmap::CtrlBitmap(ResDialog *dlg, LXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlBitmap)
 
-void CtrlBitmap::OnPaint(GSurface *pDC)
+void CtrlBitmap::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
@@ -2227,7 +2227,7 @@ CtrlProgress::CtrlProgress(ResDialog *dlg, LXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlProgress)
 
-void CtrlProgress::OnPaint(GSurface *pDC)
+void CtrlProgress::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
@@ -2263,7 +2263,7 @@ CtrlCustom::~CtrlCustom()
 	DeleteArray(Control);
 }
 
-void CtrlCustom::OnPaint(GSurface *pDC)
+void CtrlCustom::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
@@ -3488,7 +3488,7 @@ GView *ResDialog::CreateUI()
 	return Ui = new ResDialogUi(this);
 }
 
-void ResDialog::DrawSelection(GSurface *pDC)
+void ResDialog::DrawSelection(LSurface *pDC)
 {
     if (Selection.Length() == 0)
         return;
@@ -3509,13 +3509,13 @@ void ResDialog::DrawSelection(GSurface *pDC)
 #define USE_MEM_DC		0
 #endif
 
-void ResDialog::_Paint(GSurface *pDC, LPoint *Offset, LRect *Update)
+void ResDialog::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 {
 	// Create temp DC if needed...
-	GAutoPtr<GSurface> Local;
+	GAutoPtr<LSurface> Local;
 	if (!pDC)
 	{
-		if (!Local.Reset(new GScreenDC(this))) return;
+		if (!Local.Reset(new LScreenDC(this))) return;
 		pDC = Local;
 	}
 
@@ -3546,7 +3546,7 @@ void ResDialog::_Paint(GSurface *pDC, LPoint *Offset, LRect *Update)
 	}
 }
 
-void ResDialog::OnPaint(GSurface *pDC)
+void ResDialog::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle();
@@ -4206,7 +4206,7 @@ ResDialogUi::~ResDialogUi()
 	}
 }
 
-void ResDialogUi::OnPaint(GSurface *pDC)
+void ResDialogUi::OnPaint(LSurface *pDC)
 {
 	LRegion Client(0, 0, X()-1, Y()-1);
 	for (auto w: Children)

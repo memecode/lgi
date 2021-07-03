@@ -30,7 +30,7 @@ static float ZoomToScale(int Zoom)
 	return 1.0f;
 }
 
-struct ZoomTile : public GMemDC
+struct ZoomTile : public LMemDC
 {
 	bool Dirty;
 	
@@ -53,7 +53,7 @@ struct ZoomTile : public GMemDC
 		return Cs;
 	}
 	
-	ZoomTile(int Size, int Bits) : GMemDC(Size, Size, MapBits(Bits))
+	ZoomTile(int Size, int Bits) : LMemDC(Size, Size, MapBits(Bits))
 	{
 		Dirty = true;
 	}
@@ -64,14 +64,14 @@ typedef ZoomTile *SuperTilePtr;
 class GZoomViewPriv // : public LThread, public LMutex
 {
 	int Zoom;
-	GAutoPtr<GMemDC> TileCache;
+	GAutoPtr<LMemDC> TileCache;
 
 public:
 	/// If this is true, then we own the pDC object.
 	bool OwnDC;
 	
 	/// The image surface we are displaying
-	GSurface *pDC;
+	LSurface *pDC;
 
 	/// The parent view that owns us
 	GZoomView *View;
@@ -449,7 +449,7 @@ public:
 		}
 	}
 	
-	void ScaleDown(GSurface *Dst, GSurface *Src, int Sx, int Sy, int Factor)
+	void ScaleDown(LSurface *Dst, LSurface *Src, int Sx, int Sy, int Factor)
 	{
 		// ImageViewTarget *App = View->GetApp();
 		uchar *DivLut = Div255Lut;
@@ -715,9 +715,9 @@ public:
 	void ScaleUp
 	(
 		/// The tile to write to
-		GSurface *Dst,
+		LSurface *Dst,
 		/// The source bitmap we are displaying
-		GSurface *Src,
+		LSurface *Src,
 		/// X offset into source for tile's data
 		int Sx,
 		/// Y offset into source
@@ -772,7 +772,7 @@ public:
 			{
 				if (Callback && (!TileCache || TileCache->X() != TileSize || TileCache->Y() != TileSize))
 				{
-					TileCache.Reset(new GMemDC(TileSize, TileSize, System32BitColourSpace));
+					TileCache.Reset(new LMemDC(TileSize, TileSize, System32BitColourSpace));
 				}
 				
 				if (TileCache)
@@ -1017,7 +1017,7 @@ public:
 								src++;
 							}
 							
-							((GMemDC*)Dst)->HorzLine(0, Dst->X(), DstY+f, Light, Dark);
+							((LMemDC*)Dst)->HorzLine(0, Dst->X(), DstY+f, Light, Dark);
 						}
 					}
 					else
@@ -1040,7 +1040,7 @@ public:
 			}
 		}
 		
-		GMemDC *Mem = dynamic_cast<GMemDC*>(Dst);
+		LMemDC *Mem = dynamic_cast<LMemDC*>(Dst);
 		if (Mem && Factor > 3)
 		{
 			if (HasGrid)
@@ -1105,7 +1105,7 @@ public:
 		LgiAssert(x >= 0 && x < Tiles.x);
 		LgiAssert(y >= 0 && y < Tiles.y);
 		ZoomTile *Dst = Tile[x][y];
-		GSurface *Src = pDC;
+		LSurface *Src = pDC;
 		if (Dst && Src)
 		{
 			// Draw background
@@ -1207,7 +1207,7 @@ bool GZoomView::OnLayout(GViewLayoutInfo &Inf)
 
 void GZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 {
-	GSurface *Src = d->pDC;
+	LSurface *Src = d->pDC;
 	if (!Src)
 	{
 		SetScrollBars(false, false);
@@ -1253,7 +1253,7 @@ void GZoomView::OnPosChange()
 	UpdateScrollBars();
 }
 
-void GZoomView::SetSurface(GSurface *dc, bool own)
+void GZoomView::SetSurface(LSurface *dc, bool own)
 {
 	if (d->OwnDC)
 		DeleteObj(d->pDC);
@@ -1264,7 +1264,7 @@ void GZoomView::SetSurface(GSurface *dc, bool own)
 	Reset();
 }
 
-GSurface *GZoomView::GetSurface()
+LSurface *GZoomView::GetSurface()
 {
 	return d->pDC;
 }
@@ -1388,7 +1388,7 @@ void GZoomView::SetViewport(ViewportInfo i)
 	if (!d->Tile)
 		d->ResetTiles();
 
-	GSurface *Src = d->pDC;
+	LSurface *Src = d->pDC;
 	if (Src)
 	{
 		LPoint MaxScroll;
@@ -1444,7 +1444,7 @@ bool GZoomView::Convert(LPointF &p, int x, int y)
 		p.y = (double)Sy + y;
 	}
 	
-	GSurface *Src = d->pDC;
+	LSurface *Src = d->pDC;
 	if (Src &&
 		p.x >= 0 &&
 		p.x <= Src->X() &&
@@ -1499,7 +1499,7 @@ bool GZoomView::OnMouseWheel(double Lines)
 		// Is the cursor over the image???
 		if (In)
 		{
-			GSurface *Src = d->pDC;
+			LSurface *Src = d->pDC;
 			if (Src)
 			{
 				LRect c = GetClient();
@@ -1701,7 +1701,7 @@ int GZoomView::OnNotify(GViewI *v, int f)
 	return 0;
 }
 
-void GZoomView::OnPaint(GSurface *pDC)
+void GZoomView::OnPaint(LSurface *pDC)
 {
 	#if 0
 	// coverage test
@@ -1713,7 +1713,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 	LRect c = GetClient();
 	LRegion Rgn(c);
 
-	GSurface *Src = d->pDC;
+	LSurface *Src = d->pDC;
 	if (Src)
 	{
 		if (!d->Tile)
@@ -1803,7 +1803,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 						screen_source.Offset(px, py);
 						
 						// Blt the tile image pixels to the screen
-						GSurface *pTile = d->Tile[x][y];
+						LSurface *pTile = d->Tile[x][y];
 						pDC->Blt(px, py, pTile, &tile_source);
 						
 						#if 0
@@ -1815,7 +1815,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 						#endif
 
 						#if DEBUG_TILE_BOUNDARIES
-						uint32_t old = pDC->LineStyle(GSurface::LineAlternate);
+						uint32_t old = pDC->LineStyle(LSurface::LineAlternate);
 						pDC->Colour(GColour(0, 0, 255));
 						pDC->Box(&screen_source);
 						pDC->LineStyle(old);

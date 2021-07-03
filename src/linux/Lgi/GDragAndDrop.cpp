@@ -57,7 +57,7 @@ class GDndSourcePriv
 public:
 	GAutoString CurrentFormat;
 	Gtk::GdkDragContext *Ctx;
-	GAutoPtr<GSurface> Ico;
+	GAutoPtr<LSurface> Ico;
 
 	OsView SignalWnd;
 	
@@ -114,7 +114,7 @@ GDragDropSource::~GDragDropSource()
 	DeleteObj(d);
 }
 
-bool GDragDropSource::SetIcon(GSurface *Img, LRect *SubRgn)
+bool GDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 {
 	return false;
 }
@@ -256,7 +256,7 @@ uint32_t DefaultIcon[] = {
 };
 GInlineBmp DefIcon = { 32, 32, 32, DefaultIcon };
 
-int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface *Icon)
+int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
 {
 	LgiAssert(SourceWnd);
 	if (!SourceWnd)
@@ -332,7 +332,7 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	#if 0 // Not working, who the fuck knows why. GTK is suck.
 	if (!d->Ico && !Icon)
 		d->Ico.Reset(DefIcon.Create());
-	auto MemIco = dynamic_cast<GMemDC*>(Icon ? Icon : d->Ico.Get());
+	auto MemIco = dynamic_cast<LMemDC*>(Icon ? Icon : d->Ico.Get());
 	if (MemIco)
 	{
 		MemIco->Colour(GColour::Red);

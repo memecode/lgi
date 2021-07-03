@@ -47,9 +47,9 @@ class LgiClass GFilter : public GDom
 	GArray<uint8_t> Buf;
 
 protected:
-	GBmpMem *GetSurface(GSurface *pDC) { return pDC->pMem; }
-	LRect *GetClip(GSurface *pDC) { return &pDC->Clip; }
-	ssize_t GetLineLength(GSurface *pDC) { return (pDC->pMem) ? pDC->pMem->Line : 0; }
+	GBmpMem *GetSurface(LSurface *pDC) { return pDC->pMem; }
+	LRect *GetClip(LSurface *pDC) { return &pDC->Clip; }
+	ssize_t GetLineLength(LSurface *pDC) { return (pDC->pMem) ? pDC->pMem->Line : 0; }
 
 	Progress *Meter;
 
@@ -137,10 +137,10 @@ public:
 	virtual int GetImages() { return 1; }
 	/// Reads an image into the specified surface. Override to implement reading an image.
 	/// Also you need to return FILTER_CAP_READ from GetCapabilites if implemented.
-	virtual IoStatus ReadImage(GSurface *Out, GStream *In) = 0;
+	virtual IoStatus ReadImage(LSurface *Out, GStream *In) = 0;
 	/// Writes an image from the specified surface. Override to implement writing an image.
 	/// Also you need to return FILTER_CAP_WRITE from GetCapabilites if implemented.
-	virtual IoStatus WriteImage(GStream *Out, GSurface *In) = 0;
+	virtual IoStatus WriteImage(GStream *Out, LSurface *In) = 0;
     /// Returns the name of the external component needed to read/write images.
     virtual const char *GetComponentName() { return NULL; }
 };

@@ -25,7 +25,7 @@
 
 class GdcGif : public GFilter
 {
-	GSurface *pDC;
+	LSurface *pDC;
 	GStream *s;
 	int ProcessedScanlines;
 
@@ -60,8 +60,8 @@ public:
 
 	Format GetFormat() { return FmtGif; }
 	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
-	IoStatus ReadImage(GSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, GSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, GStream *In);
+	IoStatus WriteImage(GStream *Out, LSurface *pDC);
 
 	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
@@ -614,7 +614,7 @@ union GfxCtrlExtBits
 	};
 };
 
-bool GifLoadPalette(GStream *s, GSurface *pDC, int TableBits)
+bool GifLoadPalette(GStream *s, LSurface *pDC, int TableBits)
 {
 	GRgb24 Rgb[256];
 
@@ -632,7 +632,7 @@ bool GifLoadPalette(GStream *s, GSurface *pDC, int TableBits)
 	return true;
 }
 
-GFilter::IoStatus GdcGif::ReadImage(GSurface *pdc, GStream *in)
+GFilter::IoStatus GdcGif::ReadImage(LSurface *pdc, GStream *in)
 {
 	GFilter::IoStatus Status = IoError;
 	pDC = pdc;
@@ -730,7 +730,7 @@ GFilter::IoStatus GdcGif::ReadImage(GSurface *pdc, GStream *in)
 							{
 								// Setup alpha channel
 								pDC->HasAlpha(true);
-								GSurface *Alpha = pDC->AlphaDC();
+								LSurface *Alpha = pDC->AlphaDC();
 								if (Alpha)
 								{
 									for (int y=0; y<pDC->Y(); y++)
@@ -814,7 +814,7 @@ GFilter::IoStatus GdcGif::ReadImage(GSurface *pdc, GStream *in)
 	return Status;
 }
 
-GFilter::IoStatus GdcGif::WriteImage(GStream *Out, GSurface *pDC)
+GFilter::IoStatus GdcGif::WriteImage(GStream *Out, LSurface *pDC)
 {
 	LVariant Transparent;
 	int Back = -1;

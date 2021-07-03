@@ -2533,7 +2533,7 @@ void GTag::Find(int TagType, GArray<GTag*> &Out)
 	}
 }
 
-void GTag::SetImage(const char *Uri, GSurface *Img)
+void GTag::SetImage(const char *Uri, LSurface *Img)
 {
 	if (Img)
 	{
@@ -2551,7 +2551,7 @@ void GTag::SetImage(const char *Uri, GSurface *Img)
 		{
 			if (Img->GetColourSpace() == CsIndex8)
 			{
-				if (Image.Reset(new GMemDC(Img->X(), Img->Y(), System32BitColourSpace)))
+				if (Image.Reset(new LMemDC(Img->X(), Img->Y(), System32BitColourSpace)))
 				{
 					Image->Colour(0, 32);
 					Image->Rectangle();
@@ -2564,7 +2564,7 @@ void GTag::SetImage(const char *Uri, GSurface *Img)
 			LRect r = XSubRect();
 			if (r.Valid())
 			{
-				GAutoPtr<GSurface> t(new GMemDC(r.X(), r.Y(), Image->GetColourSpace()));
+				GAutoPtr<LSurface> t(new LMemDC(r.X(), r.Y(), Image->GetColourSpace()));
 				if (t)
 				{
 					t->Blt(0, 0, Image, &r);
@@ -2634,7 +2634,7 @@ void GTag::LoadImage(const char *Uri)
 		ConvertBase64ToBinary((uint8_t*)bin.GetBasePtr(), blen, s, slen);
 		
 		bin.SetPos(0);
-		if (!Image.Reset(new GMemDC))
+		if (!Image.Reset(new LMemDC))
 			return;
 		auto result = Filter->ReadImage(Image, &bin);
 		if (result != GFilter::IoSuccess)
@@ -2686,7 +2686,7 @@ void GTag::LoadImages()
 	}
 }
 
-void GTag::ImageLoaded(char *uri, GSurface *Img, int &Used)
+void GTag::ImageLoaded(char *uri, LSurface *Img, int &Used)
 {
 	const char *Uri = 0;
 	if (!Image &&
@@ -2700,7 +2700,7 @@ void GTag::ImageLoaded(char *uri, GSurface *Img, int &Used)
 			}
 			else
 			{
-				SetImage(Uri, new GMemDC(Img));
+				SetImage(Uri, new LMemDC(Img));
 			}
 			Used++;
 		}
@@ -5982,12 +5982,12 @@ void GTag::BoundParents()
 
 struct DrawBorder
 {
-	GSurface *pDC;
+	LSurface *pDC;
 	uint32_t LineStyle;
 	uint32_t LineReset;
 	uint32_t OldStyle;
 
-	DrawBorder(GSurface *pdc, LCss::BorderDef &d)
+	DrawBorder(LSurface *pdc, LCss::BorderDef &d)
 	{
 		LineStyle = 0xffffffff;
 		LineReset = 0x80000000;
@@ -6084,7 +6084,7 @@ void GTag::GetInlineRegion(LRegion &rgn, int ox, int oy)
 	}
 }
 
-class CornersImg : public GMemDC
+class CornersImg : public LMemDC
 {
 public:
 	int Px, Px2;
@@ -6199,7 +6199,7 @@ public:
 	}
 };
 
-void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, LRect *BorderPx)
+void GTag::PaintBorderAndBackground(LSurface *pDC, GColour &Back, LRect *BorderPx)
 {
 	GArray<LRect> r;
 	LRect BorderPxRc;
@@ -6383,7 +6383,7 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, LRect *BorderP
 	}
 }
 
-static void FillRectWithImage(GSurface *pDC, LRect *r, GSurface *Image, LCss::RepeatType Repeat)
+static void FillRectWithImage(LSurface *pDC, LRect *r, LSurface *Image, LCss::RepeatType Repeat)
 {
 	int Px = 0, Py = 0;
 	int Old = pDC->Op(GDC_ALPHA);
@@ -6431,7 +6431,7 @@ static void FillRectWithImage(GSurface *pDC, LRect *r, GSurface *Image, LCss::Re
 	pDC->Op(Old);
 }
 
-void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
+void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 {
 	if (Depth >= MAX_RECURSION_DEPTH ||
 		Display() == DispNone ||
@@ -6548,7 +6548,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 						Image->AlphaDC())
 						Cs = System32BitColourSpace;
 					
-					GAutoPtr<GSurface> r(new GMemDC(Size.x, Size.y, Cs));
+					GAutoPtr<LSurface> r(new LMemDC(Size.x, Size.y, Cs));
 					if (r)
 					{
 						if (Cs == CsIndex8)
@@ -6896,7 +6896,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 			Tbl = ToTag(Tbl->Parent);
 		if (Tbl && Tbl->Debug)
 		{
-			int Ls = pDC->LineStyle(GSurface::LineDot);
+			int Ls = pDC->LineStyle(LSurface::LineDot);
 			pDC->Colour(GColour::Blue);
 			pDC->Box(0, 0, Size.x-1, Size.y-1);
 			pDC->LineStyle(Ls);
@@ -7286,7 +7286,7 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 								}
 								else if (j->Stream)
 								{
-									GAutoPtr<GSurface> pDC(GdcD->Load(dynamic_cast<GStream*>(j->Stream.Get())));
+									GAutoPtr<LSurface> pDC(GdcD->Load(dynamic_cast<GStream*>(j->Stream.Get())));
 									if (pDC)
 									{
 										r->SetImage(j->Uri, pDC.Release());
@@ -7458,7 +7458,7 @@ LPointF GHtml::GetDpiScale()
 	return Scale;
 }
 
-void GHtml::OnPaint(GSurface *ScreenDC)
+void GHtml::OnPaint(LSurface *ScreenDC)
 {
 	// GProfile Prof("GHtml::OnPaint");
 
@@ -7467,7 +7467,7 @@ void GHtml::OnPaint(GSurface *ScreenDC)
 	if (!MemDC ||
 		(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
 	{
-		if (MemDC.Reset(new GMemDC))
+		if (MemDC.Reset(new LMemDC))
 		{
 			int Sx = Client.X() + 10;
 			int Sy = Client.Y() + 10;
@@ -7487,7 +7487,7 @@ void GHtml::OnPaint(GSurface *ScreenDC)
 	}
 	#endif
 
-	GSurface *pDC = MemDC ? MemDC : ScreenDC;
+	LSurface *pDC = MemDC ? MemDC : ScreenDC;
 
 	#if 0
 	Gtk::cairo_matrix_t mx;

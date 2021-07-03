@@ -245,11 +245,11 @@ public:
 	LFont *Font;
 	
 	// Images
-	GAutoPtr<GSurface> Image;
-	void SetImage(const char *uri, GSurface *i);
+	GAutoPtr<LSurface> Image;
+	void SetImage(const char *uri, LSurface *i);
 	void LoadImage(const char *Uri); // Load just this URI
 	void LoadImages(); // Recursive load all image URI's
-	void ImageLoaded(char *uri, GSurface *img, int &Used);
+	void ImageLoaded(char *uri, LSurface *img, int &Used);
 
 	// Table stuff
 	LPoint Cell;
@@ -306,10 +306,10 @@ public:
 	/// Paints the border of the tag
 	void OnPaintBorder(
 		/// The surface to paint on
-		GSurface *pDC,
+		LSurface *pDC,
 		/// [Optional] The size of the border painted
 		LRect *Px = NULL);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void SetSize(LPoint &s);
 	void SetTag(const char *Tag);
 	void GetTagByPos(GTagHit &hit, int x, int y);

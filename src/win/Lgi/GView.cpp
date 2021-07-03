@@ -1135,7 +1135,7 @@ bool SysOnKey(GView *w, GMessage *m)
 #ifdef _MSC_VER
 #include "vsstyle.h"
 
-void GView::DrawThemeBorder(GSurface *pDC, LRect &r)
+void GView::DrawThemeBorder(LSurface *pDC, LRect &r)
 {
 	if (!d->hTheme)
 		d->hTheme = OpenThemeData(_View, VSCLASS_EDIT);
@@ -1199,7 +1199,7 @@ void GView::DrawThemeBorder(GSurface *pDC, LRect &r)
 	}
 }
 #else
-void GView::DrawThemeBorder(GSurface *pDC, LRect &r)
+void GView::DrawThemeBorder(LSurface *pDC, LRect &r)
 {
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
 }
@@ -1349,13 +1349,13 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 						if (CastHwnd(b, di->hwndItem) &&
 							b->GetCss())
 						{
-							GScreenDC dc(di->hDC, di->hwndItem);
+							LScreenDC dc(di->hDC, di->hwndItem);
 							switch (di->itemAction)
 							{
 								case ODA_DRAWENTIRE:
 								{
 									LRect c = di->rcItem;
-									GMemDC m(c.X(), c.Y(), GdcD->GetColourSpace());
+									LMemDC m(c.X(), c.Y(), GdcD->GetColourSpace());
 									HDC hdc = m.StartDC();
 									m.Colour(GColour(255, 0, 255));
 									m.Line(0, 0, m.X()-1, m.Y()-1);
@@ -2033,7 +2033,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 					!TestFlag(WndFlags, GWF_SYS_BORDER))
 				{
 					HDC hDC = GetWindowDC(_View);
-					GScreenDC Dc(hDC, _View, true);
+					LScreenDC Dc(hDC, _View, true);
 					LRect p(0, 0, Dc.X()-1, Dc.Y()-1);
 					OnNcPaint(&Dc, p);
 				}

@@ -504,12 +504,12 @@ type_4_cmap *GetUnicodeTable(HFONT hFont, uint16_t &Length)
 }
 #endif
 
-GSurface *LFont::GetSurface()
+LSurface *LFont::GetSurface()
 {
 	return d->pSurface;
 }
 
-bool LFont::Create(const char *face, LCss::Len size, GSurface *pSurface)
+bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 {
 	bool FaceChanging = false;
 	bool SizeChanging = false;
@@ -1077,7 +1077,7 @@ char16 *LFont::_ToUnicode(char *In, ssize_t &Len)
 
 #if defined WINNATIVE
 
-bool LFont::Create(LFontType *LogFont, GSurface *pSurface)
+bool LFont::Create(LFontType *LogFont, LSurface *pSurface)
 {
 	if (d->hFont)
 	{
@@ -1108,7 +1108,7 @@ bool LFont::Create(LFontType *LogFont, GSurface *pSurface)
 
 #else
 
-bool LFont::Create(LFontType *LogFont, GSurface *pSurface)
+bool LFont::Create(LFontType *LogFont, LSurface *pSurface)
 {
 	if (LogFont)
 	{
@@ -1272,7 +1272,7 @@ int LFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
 	return Fit;
 }
 
-void LFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore)
+void LFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore)
 {
 	if (!Handle())
 		return;
@@ -1344,7 +1344,7 @@ int LFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
 	return -1;
 }
 
-void LFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore)
+void LFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore)
 {
 }
 

@@ -50,8 +50,8 @@ class GelSkin : public GSkinEngine
 	GColour c232;
 	GColour c253;
 	GColour c255;
-	GMemDC *CheckBox[Btn_Max];
-	GMemDC *RadioBtn[Btn_Max];
+	LMemDC *CheckBox[Btn_Max];
+	LMemDC *RadioBtn[Btn_Max];
 
 	/*
 	COLOUR LgiLighten(COLOUR c32, int Amount)
@@ -82,7 +82,7 @@ class GelSkin : public GSkinEngine
 		return back.Mix(Mixer, (float)(1.0f - amt));
 	}
 
-	void FillPath(GPath *Path, GSurface *pDC, GColour Back, bool Down, bool Enabled = true)
+	void FillPath(GPath *Path, LSurface *pDC, GColour Back, bool Down, bool Enabled = true)
 	{
 		if (pDC)
 		{
@@ -141,7 +141,7 @@ class GelSkin : public GSkinEngine
 		}
 	}
 	
-	void DrawBtn(GSurface *pDC, LRect &r, GColour Back, bool Down, bool Enabled, bool Default = false)
+	void DrawBtn(LSurface *pDC, LRect &r, GColour Back, bool Down, bool Enabled, bool Default = false)
 	{
 		if (!pDC)
 			return;
@@ -255,9 +255,9 @@ class GelSkin : public GSkinEngine
 		#endif
 	}
 
-	GMemDC *DrawCtrl(GViewI *Ctrl, LRect *Sz, int Flags, bool Round)
+	LMemDC *DrawCtrl(GViewI *Ctrl, LRect *Sz, int Flags, bool Round)
 	{
-		GMemDC *Mem = new GMemDC;
+		LMemDC *Mem = new LMemDC;
 		if (Mem && Mem->Create(Sz ? Sz->X() : 14, Sz ? Sz->Y() : 14, OsDefaultCs))
 		{
 			// blank out background
@@ -426,7 +426,7 @@ class GelSkin : public GSkinEngine
 		LRegion Rgn;
 		Rgn = rcFill;
 		GArray<LDisplayString*> *Text = State->AllText();
-		GSurface *pDC = State->pScreen;
+		LSurface *pDC = State->pScreen;
 		if (Text && Text->Length() > 0 && rcFill.X() > 3)
 		{
 			LRect Bounds;
@@ -586,7 +586,7 @@ public:
 	
 	void OnPaint_GButton(GButton *Ctrl, GSkinState *State)
 	{
-		GMemDC Mem;
+		LMemDC Mem;
 		if (!Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
 		{
 			State->pScreen->Colour(Rgb24(255, 0, 255), 24);
@@ -634,7 +634,7 @@ public:
 				Ctrl->Enabled(),
 				Ctrl->Default());
 		
-		GSurface *Out = &Mem;
+		LSurface *Out = &Mem;
 		
 		GArray<LDisplayString*> *Txt = State->AllText();
 
@@ -710,7 +710,7 @@ public:
 	{
 		// Setup memory context
 		LRect r = State->Rect;
-		GMemDC Mem(r.X(), r.Y(), OsDefaultCs);
+		LMemDC Mem(r.X(), r.Y(), OsDefaultCs);
 		if (!Mem[0])
 			return;
 
@@ -741,7 +741,7 @@ public:
 
 	void OnPaint_GCombo(GCombo *Ctrl, GSkinState *State)
 	{
-		GMemDC Mem;
+		LMemDC Mem;
 		if (Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
 		{
 			// Font
@@ -843,8 +843,8 @@ public:
 		GCssTools Tools(Ctrl);
 		GColour &Back = Tools.GetBack();
 
-		GMemDC *Temp = 0;
-		GMemDC *&Mem = Back.IsValid() ? Temp : CheckBox[Flags];
+		LMemDC *Temp = 0;
+		LMemDC *&Mem = Back.IsValid() ? Temp : CheckBox[Flags];
 		
 		if (Mem && (Mem->X() != State->Rect.X() || Mem->Y() != State->Rect.Y()))
 			DeleteObj(Mem);
@@ -906,7 +906,7 @@ public:
 					(Ctrl->Enabled() ? Btn_Enabled : 0);
 		
 		// Create the bitmaps in cache if not already there
-		GMemDC *&Mem = RadioBtn[Flags];
+		LMemDC *&Mem = RadioBtn[Flags];
 		if (!Mem || State->ForceUpdate)
 		{
 			DeleteObj(Mem);

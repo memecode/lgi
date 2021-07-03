@@ -47,7 +47,7 @@ public:
 	bool Visible() { return GPopup::Visible(); }
 	void Visible(bool b);
 	void Layout(int x, int y);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	bool OnKey(LKey &k);
 	
 	GView *View() { return this; }
@@ -65,7 +65,7 @@ public:
 	
 	const char *GetClass() { return "MenuImpl"; }
 	bool Pour(LRegion &r);
-    void OnPaint(GSurface *pDC);
+    void OnPaint(LSurface *pDC);
 	bool HasSubOpen();
     
 	GView *View() { return this; }
@@ -86,7 +86,7 @@ public:
 	void HideSub(bool SetClick = false);
 	void Activate();
 	bool IsOnSubMenu();
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
     void OnMouseClick(LMouse &m);
 	void OnMouseEnter(LMouse &m);
 	void OnMouseExit(LMouse &m);

@@ -810,7 +810,7 @@ lgi_widget_draw(GtkWidget *widget, cairo_t *cr)
 	}
 
 	auto Pos = GtkGetPos(widget);
-	GScreenDC Dc(cr, Pos.X(), Pos.Y());
+	LScreenDC Dc(cr, Pos.X(), Pos.Y());
 
 	#if 0
 	{

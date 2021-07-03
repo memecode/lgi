@@ -1,5 +1,5 @@
 /*hdr
-**	FILE:			GMemDC.h
+**	FILE:			LMemDC.h
 **	AUTHOR:			Matthew Allen
 **	DATE:			27/11/2001
 **	DESCRIPTION:	GDC v2.xx header
@@ -16,7 +16,7 @@
 #include "lgi/common/Palette.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-class GMemDCPrivate
+class LMemDCPrivate
 {
 public:
 	void		*pBits;
@@ -26,7 +26,7 @@ public:
 	LRect		Client;
 	int			ConstAlpha;
 
-	GMemDCPrivate()
+	LMemDCPrivate()
 	{
 		pBits = 0;
 		Info = 0;
@@ -36,15 +36,15 @@ public:
 		ConstAlpha = 255;
 	}
 	
-	~GMemDCPrivate()
+	~LMemDCPrivate()
 	{
 		DeleteArray(((char*&)Info));
 	}
 };
 
-GMemDC::GMemDC(int x, int y, GColourSpace cs, int Flags)
+LMemDC::LMemDC(int x, int y, GColourSpace cs, int Flags)
 {
-	d = new GMemDCPrivate;
+	d = new LMemDCPrivate;
 	ColourSpace = CsNone;
 	hBmp = 0;
 	hDC = 0;
@@ -56,9 +56,9 @@ GMemDC::GMemDC(int x, int y, GColourSpace cs, int Flags)
 	}
 }
 
-GMemDC::GMemDC(GSurface *pDC)
+LMemDC::LMemDC(LSurface *pDC)
 {
-	d = new GMemDCPrivate;
+	d = new LMemDCPrivate;
 	ColourSpace = CsNone;
 	hBmp = 0;
 	hDC = 0;
@@ -82,13 +82,13 @@ GMemDC::GMemDC(GSurface *pDC)
 	}
 }
 
-GMemDC::~GMemDC()
+LMemDC::~LMemDC()
 {
 	Empty();
 	DeleteObj(d);
 }
 
-void GMemDC::SetClient(LRect *c)
+void LMemDC::SetClient(LRect *c)
 {
 	if (c)
 	{
@@ -133,27 +133,27 @@ void GMemDC::SetClient(LRect *c)
 	}
 }
 
-void GMemDC::UpsideDown(bool upsidedown)
+void LMemDC::UpsideDown(bool upsidedown)
 {
 	d->UpsideDown = upsidedown;
 }
 
-bool GMemDC::Lock()
+bool LMemDC::Lock()
 {
 	return true;
 }
 
-bool GMemDC::Unlock()
+bool LMemDC::Unlock()
 {
 	return true;
 }
 
-PBITMAPINFO	GMemDC::GetInfo()
+PBITMAPINFO	LMemDC::GetInfo()
 {
 	return d->Info;
 }
 
-void GMemDC::Update(int Flags)
+void LMemDC::Update(int Flags)
 {
 	if (d->Info && pPalette && (Flags & GDC_PAL_CHANGE))
 	{
@@ -176,7 +176,7 @@ void GMemDC::Update(int Flags)
 
 }
 
-HDC GMemDC::StartDC()
+HDC LMemDC::StartDC()
 {
 	if (!hBmp)
 		return NULL;
@@ -191,7 +191,7 @@ HDC GMemDC::StartDC()
 	return hDC;
 }
 
-void GMemDC::EndDC()
+void LMemDC::EndDC()
 {
 	if (hDC)
 	{
@@ -201,7 +201,7 @@ void GMemDC::EndDC()
 	}
 }
 
-LRect GMemDC::ClipRgn(LRect *Rgn)
+LRect LMemDC::ClipRgn(LRect *Rgn)
 {
 	LRect Prev = Clip;
 
@@ -241,7 +241,7 @@ LRect GMemDC::ClipRgn(LRect *Rgn)
 	return Prev;
 }
 
-bool GMemDC::SupportsAlphaCompositing()
+bool LMemDC::SupportsAlphaCompositing()
 {
 	return true;
 }
@@ -254,7 +254,7 @@ enum BmpComp
 	BmpAlp	
 };
 
-bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
+bool LMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 {
 	bool Status = FALSE;
 	HBITMAP hOldBmp = hBmp;
@@ -516,7 +516,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	return Status;
 }
 
-void GMemDC::Empty()
+void LMemDC::Empty()
 {
 	if (hBmp)
 	{
@@ -526,7 +526,7 @@ void GMemDC::Empty()
 	DeleteObj(pMem);
 }
 
-void GMemDC::Blt(int x, int y, GSurface *Src, LRect *a)
+void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
     LgiAssert(Src != 0);
     if (!Src)
@@ -615,11 +615,11 @@ void GMemDC::Blt(int x, int y, GSurface *Src, LRect *a)
 	}
 	else
 	{
-		GSurface::Blt(x, y, Src, a);
+		LSurface::Blt(x, y, Src, a);
 	}
 }
 
-void GMemDC::StretchBlt(LRect *Dest, GSurface *Src, LRect *s)
+void LMemDC::StretchBlt(LRect *Dest, LSurface *Src, LRect *s)
 {
 	if (Src)
 	{
@@ -718,7 +718,7 @@ void GMemDC::StretchBlt(LRect *Dest, GSurface *Src, LRect *s)
 	}
 }
 
-void GMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
+void LMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 {
 	if (x1 > x2) LgiSwap(x1, x2);
 
@@ -750,7 +750,7 @@ void GMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 	}
 }
 
-void GMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
+void LMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 {
 	if (y1 > y2) LgiSwap(y1, y2);
 	
@@ -782,9 +782,9 @@ void GMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 	}
 }
 
-void GMemDC::SetOrigin(int x, int y)
+void LMemDC::SetOrigin(int x, int y)
 {
-	GSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(x, y);
 	if (hDC)
 	{
 		SetWindowOrgEx(hDC, OriginX, OriginY, NULL);

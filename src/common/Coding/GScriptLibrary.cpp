@@ -623,8 +623,8 @@ bool SystemFunctions::New(LScriptArguments &Args)
 		case TypeSurface:
 		{
 			Ret->Empty();
-			Ret->Type = GV_GSURFACE;
-			if ((Ret->Value.Surface.Ptr = new GMemDC))
+			Ret->Type = GV_LSURFACE;
+			if ((Ret->Value.Surface.Ptr = new LMemDC))
 			{
 				Ret->Value.Surface.Ptr->AddRef();
 				Ret->Value.Surface.Own = true;
@@ -866,9 +866,9 @@ bool SystemFunctions::CreateSurface(LScriptArguments &Args)
 	if (!Cs) // Catch all error cases and make it the default screen depth.
 		Cs = GdcD->GetColourSpace();
 
-	if ((Args.GetReturn()->Value.Surface.Ptr = new GMemDC(x, y, Cs)))
+	if ((Args.GetReturn()->Value.Surface.Ptr = new LMemDC(x, y, Cs)))
 	{
-		Args.GetReturn()->Type = GV_GSURFACE;
+		Args.GetReturn()->Type = GV_LSURFACE;
 		Args.GetReturn()->Value.Surface.Own = true;
 		Args.GetReturn()->Value.Surface.Ptr->AddRef();
 	}

@@ -55,31 +55,31 @@ public:
 };
 
 // remap dc to new palette
-extern bool RemapDC(GSurface *pDC, GPalette *DestPal);
+extern bool RemapDC(LSurface *pDC, GPalette *DestPal);
 
 // flip dc
 #define		FLIP_X					1
 #define		FLIP_Y					2
 
-extern bool FlipDC(GSurface *pDC, int Dir);
+extern bool FlipDC(LSurface *pDC, int Dir);
 
 // return true if dc is greyscale
-extern bool IsGreyScale(GSurface *pDC);
+extern bool IsGreyScale(LSurface *pDC);
 
 // convert dc to greyscale
-extern bool GreyScaleDC(GSurface *pDest, GSurface *pSrc);
+extern bool GreyScaleDC(LSurface *pDest, LSurface *pSrc);
 
 // invert the dc
-extern bool InvertDC(GSurface *pDC);
+extern bool InvertDC(LSurface *pDC);
 
 // rotate dc
-extern bool RotateDC(GSurface *pDC, double Angle, Progress *Prog = NULL);
+extern bool RotateDC(LSurface *pDC, double Angle, Progress *Prog = NULL);
 
 // flip dc
-extern bool FlipXDC(GSurface *pDC, Progress *Prog = NULL);
-extern bool FlipYDC(GSurface *pDC, Progress *Prog = NULL);
+extern bool FlipXDC(LSurface *pDC, Progress *Prog = NULL);
+extern bool FlipYDC(LSurface *pDC, Progress *Prog = NULL);
 
 // resample the dc
-extern bool ResampleDC(GSurface *pTo, GSurface *pFrom, LRect *FromRgn = 0, Progress *Prog = NULL);
+extern bool ResampleDC(LSurface *pTo, LSurface *pFrom, LRect *FromRgn = 0, Progress *Prog = NULL);
 
 #endif

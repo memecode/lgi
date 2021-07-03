@@ -280,7 +280,7 @@ public:
 	bool RasterX(int Size, DataList *List);
 	bool RasterY(int Size, DataList *List);
 
-	void DebugDraw(GSurface *pDC, int Sx, int Sy);
+	void DebugDraw(LSurface *pDC, int Sx, int Sy);
 };
 
 class LgiClass TtfGlyph : public TtfObj {
@@ -316,9 +316,9 @@ public:
 	bool Read(GFile &F);
 	bool Write(GFile &F);
 	void Dump();
-	void Draw(GSurface *pDC, int x, int y, int Scale);
-	int DrawEm(GSurface *pDC, int X, int Y, int EmUnits, double PixelsPerEm);
-	bool Rasterize(	GSurface *pDC,
+	void Draw(LSurface *pDC, int x, int y, int Scale);
+	int DrawEm(LSurface *pDC, int X, int Y, int EmUnits, double PixelsPerEm);
+	bool Rasterize(	LSurface *pDC,
 			LRect *pDest,
 			double xppem,
 			double yppem,
@@ -439,7 +439,7 @@ public:
 
 class LgiClass TtfRaster : public TtfObj {
 
-	friend class GSurface;
+	friend class LSurface;
 
 	int XPixelsPerEm;
 	int YPixelsPerEm;
@@ -448,7 +448,7 @@ class LgiClass TtfRaster : public TtfObj {
 public:
 	int *BaseLine;			// pixels down to baseline in bitmap
 	LRect *pSource;		// where glyph is stored in the bitmap
-	GSurface *pDC;		// the bitmap
+	LSurface *pDC;		// the bitmap
 
 	TtfRaster();
 	~TtfRaster();
@@ -456,7 +456,7 @@ public:
 	double GetXPixelsPerEm() { return XPixelsPerEm; }
 	double GetYPixelsPerEm() { return YPixelsPerEm; }
 	bool Rasterize(double xPPEm, double yPPEm, int OverSample);
-	int DrawChar(GSurface *pDC, int x, int y, int Char);
+	int DrawChar(LSurface *pDC, int x, int y, int Char);
 };
 
 class LgiClass GdcTtf : public LTypeFace {
@@ -491,14 +491,14 @@ public:
 							int XDpi = 96,
 							int YDpi = -1);
 
-	void Test(GSurface *pDC);
+	void Test(LSurface *pDC);
 	virtual void Size(int *x, int *y, char *Str, int Len = -1, int Flags = 0);
 	int X(char *Str, int Len = -1, int Flags = 0);
 	int Y(char *Str, int Len = -1, int Flags = 0);
 
 	// Text drawing functions
 	virtual bool SelectPoint(int Pt) { return FALSE; }
-	virtual void Text(GSurface *pDC, int x, int y, char *Str, int Len = -1);
+	virtual void Text(LSurface *pDC, int x, int y, char *Str, int Len = -1);
 };
 
 #define LFONT_LIGHT					FW_LIGHT
@@ -538,7 +538,7 @@ public:
 
 	bool CreateFont(LOGFONT *LogFont);
 
-	void Text(	GSurface *pDC,
+	void Text(	LSurface *pDC,
 				int x, int y,
 				char *Str,
 				int Len = -1,

@@ -17,7 +17,7 @@ public:
 	::GString PrinterName;
 	GPrintEvents *Events;
 	
-	GAutoPtr<GPrintDC> PrintDC;
+	GAutoPtr<LPrintDC> PrintDC;
 	
 	GPrinterPrivate()
 	{
@@ -81,7 +81,7 @@ GtkPrintBegin(	GtkPrintOperation	*operation,
 		d->PrinterName = gtk_print_settings_get_printer(settings);
 	}
 
-	if (d->PrintDC.Reset(new GPrintDC(context, d->JobName, d->PrinterName)))
+	if (d->PrintDC.Reset(new LPrintDC(context, d->JobName, d->PrinterName)))
 	{
 		int Pages = d->Events->OnBeginPrint(d->PrintDC);
 		if (Pages > 0)

@@ -1559,7 +1559,7 @@ ResStringUi::~ResStringUi()
 	}
 }
 
-void ResStringUi::OnPaint(GSurface *pDC)
+void ResStringUi::OnPaint(LSurface *pDC)
 {
 	LRegion Client(0, 0, X()-1, Y()-1);
 	for (auto w: Children)

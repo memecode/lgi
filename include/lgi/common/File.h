@@ -222,7 +222,7 @@ public:
 	int Flags();
 	uint64 Size();
 	uint64 Free();
-	GSurface *Icon();
+	LSurface *Icon();
 
 	virtual bool IsMounted();
 	virtual bool SetMounted(bool Mount);

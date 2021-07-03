@@ -57,7 +57,7 @@ public:
 		return Over ? Clicked : BTN_NONE;
 	}
 
-	void DrawIcon(GSurface *pDC, LRect &r, bool Add, LSystemColour c)
+	void DrawIcon(LSurface *pDC, LRect &r, bool Add, LSystemColour c)
 	{
 		pDC->Colour(c);
 		int IconSize = MAX(r.X(), r.Y()) * 2 / 6;
@@ -117,7 +117,7 @@ public:
 		}
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		GColour SlideCol(L_MED);
 		SlideCol.Rgb(	(255 + SlideCol.r()) >> 1,
@@ -523,7 +523,7 @@ bool GScrollBar::Attach(GViewI *p)
 	return Status;
 }
 
-void GScrollBar::OnPaint(GSurface *pDC)
+void GScrollBar::OnPaint(LSurface *pDC)
 {
 	#if MAC_SKIN
 

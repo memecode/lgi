@@ -18,7 +18,7 @@ public:
 	#if MDI_TAB_STYLE
 	int GetOrder();
 	#else
-	void OnPaint(GSurface *pDC);	
+	void OnPaint(LSurface *pDC);	
 	void OnMouseClick(LMouse &m);
 	void OnMouseMove(LMouse &m);
 	LgiCursor GetCursor(int x, int y);
@@ -36,7 +36,7 @@ public:
 	virtual void Lower();
 	virtual void OnTitleClick(LMouse &m);
 	virtual void OnButtonClick(LMouse &m);
-	virtual void OnPaintButton(GSurface *pDC, LRect &rc);
+	virtual void OnPaintButton(LSurface *pDC, LRect &rc);
 };
 
 class GMdiParent : public GLayout
@@ -59,7 +59,7 @@ public:
 	bool HasButton();
 	void HasButton(bool b);
 
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	bool Attach(GViewI *p);
 	bool OnViewMouse(GView *View, LMouse &m);
 	bool OnViewKey(GView *View, LKey &Key);

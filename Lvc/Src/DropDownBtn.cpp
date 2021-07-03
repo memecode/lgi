@@ -49,7 +49,7 @@ public:
 			Lst->SetPos(c);
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(GColour::Black);
 		pDC->Box();

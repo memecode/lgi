@@ -1,13 +1,13 @@
 #ifndef _GREGION_CLIP_H_
 #define _GREGION_CLIP_H_
 
-class GRegionClipDC : public GSurface
+class GRegionClipDC : public LSurface
 {
 	LRegion c;
-	GSurface *s;
+	LSurface *s;
 	
 public:
-	GRegionClipDC(GSurface *Surface, LRegion *Rgn = NULL)
+	GRegionClipDC(LSurface *Surface, LRegion *Rgn = NULL)
 	{
 		s = Surface;
 		pMem = s->pMem;

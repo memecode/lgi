@@ -464,7 +464,7 @@ void GApp::OnSDLEvent(GMessage *m)
 		{
 			if (AppWnd)
 			{
-				GScreenDC Dc(AppWnd, GdcD->Handle());
+				LScreenDC Dc(AppWnd, GdcD->Handle());
 				AppWnd->_Paint(&Dc);
 			}
 			break;
@@ -584,7 +584,7 @@ void GApp::OnSDLEvent(GMessage *m)
 					if (AppWnd != NULL &&
 						Screen != NULL)
 					{
-						GScreenDC Dc(AppWnd, Screen);
+						LScreenDC Dc(AppWnd, Screen);
 						if (d->Lock(_FL))
 						{
 							LRegion r = d->Dirty;

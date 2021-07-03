@@ -37,13 +37,13 @@ ArtRender *GLibArtSurface::RenderNew(int x, int y)
 
 COLOUR GLibArtSurface::Colour(COLOUR c, int Bits)
 {
-	COLOUR Old = GSurface::Colour(c, Bits);
+	COLOUR Old = LSurface::Colour(c, Bits);
 
 	if (Ar)
 	{
 		Ar->opacity = (c & 0xff000000) >> 16;
 		
-		c = GSurface::Colour();
+		c = LSurface::Colour();
 		
 		ArtPixMaxDepth Col[] = { B32(c), G32(c), R32(c) };
 

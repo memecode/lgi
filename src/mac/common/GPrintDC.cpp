@@ -21,8 +21,8 @@ public:
 	}
 };
 
-GPrintDC::GPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName) :
-	GScreenDC((GPrintDcParams*)Handle)
+LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName) :
+	LScreenDC((GPrintDcParams*)Handle)
 {
 	d = new GPrintDCPrivate;
 	d->PrintJobName = PrintJobName;
@@ -56,32 +56,32 @@ GPrintDC::GPrintDC(void *Handle, const char *PrintJobName, const char *PrinterNa
 	}
 }
 
-GPrintDC::~GPrintDC()
+LPrintDC::~LPrintDC()
 {
 	DeleteObj(d);
 }
 
-int GPrintDC::X()
+int LPrintDC::X()
 {
 	return d->x;
 }
 
-int GPrintDC::Y()
+int LPrintDC::Y()
 {
 	return d->y;
 }
 
-int GPrintDC::GetBits()
+int LPrintDC::GetBits()
 {
 	return 24;
 }
 
-int GPrintDC::DpiX()
+int LPrintDC::DpiX()
 {
 	return d->Dpi.x;
 }
 
-int GPrintDC::DpiY()
+int LPrintDC::DpiY()
 {
 	return d->Dpi.y;
 }

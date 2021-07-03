@@ -1,5 +1,5 @@
 /*hdr
-**	FILE:			GMemDC.h
+**	FILE:			LMemDC.h
 **	AUTHOR:			Matthew Allen
 **	DATE:			16/2/2016
 **	DESCRIPTION:	Haiku memory bitmap handling.
@@ -133,36 +133,36 @@ GColourSpace BeosColourSpaceToLgi(color_space cs)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-class GMemDCPrivate
+class LMemDCPrivate
 {
 public:
 	OsBitmap	Bmp;
 	OsPainter	View;
 
-	GMemDCPrivate()
+	LMemDCPrivate()
 	{
 		Bmp = 0;
 		View = 0;
 	}
 	
-	~GMemDCPrivate()
+	~LMemDCPrivate()
 	{
 		DeleteObj(Bmp);
 	}
 };
 
-GMemDC::GMemDC(int x, int y, GColourSpace cs)
+LMemDC::LMemDC(int x, int y, GColourSpace cs)
 {
-	d = new GMemDCPrivate;
+	d = new LMemDCPrivate;
 	if (x && y && cs)
 	{
 		Create(x, y, cs);
 	}
 }
 
-GMemDC::GMemDC(GSurface *pDC)
+LMemDC::LMemDC(LSurface *pDC)
 {
-	d = new GMemDCPrivate;
+	d = new LMemDCPrivate;
 	if (pDC && Create(pDC->X(), pDC->Y(), pDC->GetBits()))
 	{
 		Blt(0, 0, pDC);
@@ -177,36 +177,36 @@ GMemDC::GMemDC(GSurface *pDC)
 	}
 }
 
-GMemDC::~GMemDC()
+LMemDC::~LMemDC()
 {
 	DeleteObj(d);
 }
 
-OsPainter GMemDC::Handle()
+OsPainter LMemDC::Handle()
 {
 	return d->View;
 }
 
-OsBitmap GMemDC::GetBitmap()
+OsBitmap LMemDC::GetBitmap()
 {
 	return d->Bmp;
 }
 
-void GMemDC::SetClient(LRect *c)
+void LMemDC::SetClient(LRect *c)
 {
 }
 
-bool GMemDC::SupportsAlphaCompositing()
+bool LMemDC::SupportsAlphaCompositing()
 {
 	return true;
 }
 
-void GMemDC::SetOrigin(int x, int y)
+void LMemDC::SetOrigin(int x, int y)
 {
-	GSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(x, y);
 }
 
-bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
+bool LMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 {
 	bool Status = FALSE;
 	
@@ -262,7 +262,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	d->Bmp = new BBitmap(r, Mode, true, true);
 	if (d->Bmp)
 	{
-		d->View = new BView(r, "GMemDC", B_FOLLOW_ALL_SIDES, B_WILL_DRAW);
+		d->View = new BView(r, "LMemDC", B_FOLLOW_ALL_SIDES, B_WILL_DRAW);
 		if (d->View)
 		{
 			d->Bmp->AddChild(d->View);
@@ -320,7 +320,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	return Status;
 }
 
-void GMemDC::Blt(int x, int y, GSurface *Src, LRect *a)
+void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
 	if (!Src)
 	{
@@ -336,16 +336,16 @@ void GMemDC::Blt(int x, int y, GSurface *Src, LRect *a)
 	else
 	{
 		// memory to memory Blt
-		GSurface::Blt(x, y, Src, a);
+		LSurface::Blt(x, y, Src, a);
 	}
 }
 
-void GMemDC::StretchBlt(LRect *d, GSurface *Src, LRect *s)
+void LMemDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 {
 	LgiAssert(!"Impl me.");
 }
 
-void GMemDC::HLine(int x1, int x2, int y, COLOUR a, COLOUR b)
+void LMemDC::HLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 {
 	if (x1 > x2) LgiSwap(x1, x2);
 
@@ -377,7 +377,7 @@ void GMemDC::HLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 	}
 }
 
-void GMemDC::VLine(int x, int y1, int y2, COLOUR a, COLOUR b)
+void LMemDC::VLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 {
 	if (y1 > y2) LgiSwap(y1, y2);
 	
@@ -409,17 +409,17 @@ void GMemDC::VLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 	}
 }
 
-bool GMemDC::Lock()
+bool LMemDC::Lock()
 {
 	return true;
 }
 
-bool GMemDC::Unlock()
+bool LMemDC::Unlock()
 {
 	return true;
 }
 
-LRect GMemDC::ClipRgn(LRect *Rgn)
+LRect LMemDC::ClipRgn(LRect *Rgn)
 {
 	LRect Old = Clip;
 	

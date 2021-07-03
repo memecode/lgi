@@ -189,7 +189,7 @@ public:
 	GAutoPtr<GFilterTree> Tree;
 	bool ShowLegend;
 	LRect Info;
-	GArray<GSurface*> Icons;
+	GArray<LSurface*> Icons;
 	FilterUi_Menu Callback;
 	void *CallbackData;
 	GAutoPtr<LDisplayString> dsNot;
@@ -215,7 +215,7 @@ public:
 
 		for (int i=0; i<IconMax; i++)
 		{
-			Icons[i] = new GMemDC;
+			Icons[i] = new LMemDC;
 			if (Icons[i] && Icons[i]->Create(IconSize, IconSize, System32BitColourSpace))
 			{
 				Draw(Icons[i], IconColour[i], (FilterIcon)i);
@@ -229,7 +229,7 @@ public:
 		OpNames.DeleteArrays();
 	}
 
-	void Draw(GSurface *pDC, GColour c, FilterIcon Icon)
+	void Draw(LSurface *pDC, GColour c, FilterIcon Icon)
 	{
 		// Clear to transparent black
 		pDC->Colour(TransparentBlk);
@@ -632,7 +632,7 @@ void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	LRect *Pos = _GetRect(TreeItemText);
 
 	// Create a memory context
-	GMemDC Buf(Pos->X(), Pos->Y(), System32BitColourSpace);
+	LMemDC Buf(Pos->X(), Pos->Y(), System32BitColourSpace);
 	Buf.Colour(L_WORKSPACE);
 	Buf.Rectangle(0);
 
@@ -1234,13 +1234,13 @@ LRect &GFilterView::GetClient(bool ClientCoods)
 }
 */
 
-void GFilterView::OnPaint(GSurface *pDC)
+void GFilterView::OnPaint(LSurface *pDC)
 {
 	GLayout::OnPaint(pDC);
 
 	if (d->ShowLegend)
 	{
-		GMemDC Buf(d->Info.X(), d->Info.Y(), System32BitColourSpace);
+		LMemDC Buf(d->Info.X(), d->Info.Y(), System32BitColourSpace);
 
 		Buf.Colour(L_MED);
 		Buf.Rectangle(0, 0, Buf.X()-1, Buf.Y()-2);

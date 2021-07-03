@@ -240,7 +240,7 @@ void CtrlControlTree::OnMouseMove(LMouse &m)
 	ResDialogCtrl::OnMouseMove(m);
 }
 
-void CtrlControlTree::OnPaint(GSurface *pDC)
+void CtrlControlTree::OnPaint(LSurface *pDC)
 {
 	if (Dlg->App()->GetCurLang()->Id != d->CurLang)
 	{

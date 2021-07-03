@@ -519,7 +519,7 @@ void CmykToRgb32(D *d, S *s, int width)
 	}
 }
 
-GFilter::IoStatus GdcJpeg::ReadImage(GSurface *pDC, GStream *In)
+GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, GStream *In)
 {
 	GFilter::IoStatus Status = IoError;
 	LVariant v;
@@ -869,7 +869,7 @@ void j_term_destination(j_compress_ptr cinfo)
 		LgiAssert(!"Write failed.");
 }
 
-GFilter::IoStatus GdcJpeg::WriteImage(GStream *Out, GSurface *pDC)
+GFilter::IoStatus GdcJpeg::WriteImage(GStream *Out, LSurface *pDC)
 {
 	LVariant v;
 	#if LIBJPEG_SHARED
@@ -927,7 +927,7 @@ void Rop24(GRgb24 *dst, I *p, int x)
 	}
 }
 
-GFilter::IoStatus GdcJpeg::_Write(GStream *Out, GSurface *pDC, int Quality, SubSampleMode SubSample, LPoint Dpi)
+GFilter::IoStatus GdcJpeg::_Write(GStream *Out, LSurface *pDC, int Quality, SubSampleMode SubSample, LPoint Dpi)
 {
 	struct jpeg_compress_struct cinfo;
 	struct my_error_mgr jerr;

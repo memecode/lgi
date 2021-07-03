@@ -58,7 +58,7 @@ LCairoSurface::LCairoSurface(int x, int y, GColourSpace cs, int flags)
 		Create(x, y, cs, flags);
 }
 
-LCairoSurface::LCairoSurface(GSurface *pDC)
+LCairoSurface::LCairoSurface(LSurface *pDC)
 {
 	d = new LCairoSurfacePriv;
 	
@@ -250,13 +250,13 @@ bool LCairoSurface::Unlock()
 
 void LCairoSurface::GetOrigin(int &x, int &y)
 {
-	GSurface::GetOrigin(x, y);
+	LSurface::GetOrigin(x, y);
 }
 
 void LCairoSurface::SetOrigin(int x, int y)
 {
 	Handle();
-	GSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(x, y);
 
 	if (d->cr)
 	{		
@@ -400,7 +400,7 @@ bool LCairoSurface::Create(int x, int y, GColourSpace Cs, int Flags)
 	return true;
 }
 
-void LCairoSurface::Blt(int x, int y, GSurface *Src, LRect *a)
+void LCairoSurface::Blt(int x, int y, LSurface *Src, LRect *a)
 {
 	if (!Src)
 		return;
@@ -410,7 +410,7 @@ void LCairoSurface::Blt(int x, int y, GSurface *Src, LRect *a)
 	if (!br.Valid())
 		return;
 
-	GScreenDC *Screen;
+	LScreenDC *Screen;
 	if ((Screen = Src->IsScreen()))
 	{
 		if (pMem->Base)
@@ -462,11 +462,11 @@ void LCairoSurface::Blt(int x, int y, GSurface *Src, LRect *a)
 	else if ((*Src)[0])
 	{
 		// Memory -> Memory (Source alpha used)
-		GSurface::Blt(x, y, Src, a);
+		LSurface::Blt(x, y, Src, a);
 	}
 }
 
-void LCairoSurface::StretchBlt(LRect *d, GSurface *Src, LRect *s)
+void LCairoSurface::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 {
     LgiAssert(!"Not implemented");
 }

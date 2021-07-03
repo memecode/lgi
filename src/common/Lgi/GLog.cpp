@@ -150,7 +150,7 @@ void RLogView::UpdateScrollBar()
 	}
 }
 
-void RLogView::OnPaint(GSurface *pDC)
+void RLogView::OnPaint(LSurface *pDC)
 {
 	LRect r(GetClient());
 	r.Offset(-r.x1, -r.y1);
@@ -235,7 +235,7 @@ void RLogView::OnPaint(GSurface *pDC)
 }
 
 /*
-void RLogView::OnNcPaint(GSurface *pDC, LRect &r)
+void RLogView::OnNcPaint(LSurface *pDC, LRect &r)
 {
 	// LRect r(0, 0, X()-1, Y()-1);
 	if (r.Valid())

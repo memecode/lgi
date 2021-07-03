@@ -37,7 +37,7 @@ public:
 	
 	class NullObjects
 	{
-		friend class GScreenDC;
+		friend class LScreenDC;
 		HPEN Pen;
 		HBRUSH Brush;
 
@@ -102,13 +102,13 @@ GPalette *GScreenPrivate::LastRealized = 0;
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-GScreenDC::GScreenDC()
+LScreenDC::LScreenDC()
 {
 	d = new GScreenPrivate;
 	ColourSpace = CsNone;
 }
 
-GScreenDC::GScreenDC(GViewI *view)
+LScreenDC::LScreenDC(GViewI *view)
 {
 	d = new GScreenPrivate;
 	ColourSpace = GdcD->GetColourSpace();
@@ -122,7 +122,7 @@ GScreenDC::GScreenDC(GViewI *view)
 	SetSize(rc.right-rc.left, rc.bottom-rc.top);
 }
 
-GScreenDC::GScreenDC(HWND hWindow)
+LScreenDC::LScreenDC(HWND hWindow)
 {
 	d = new GScreenPrivate;
 	ColourSpace = GdcD->GetColourSpace();
@@ -136,7 +136,7 @@ GScreenDC::GScreenDC(HWND hWindow)
 	SetSize(rc.right-rc.left, rc.bottom-rc.top);
 }
 
-GScreenDC::GScreenDC(HDC hdc, HWND hwnd, bool Release)
+LScreenDC::LScreenDC(HDC hdc, HWND hwnd, bool Release)
 {
 	d = new GScreenPrivate;
 	ColourSpace = GdcD->GetColourSpace();
@@ -153,7 +153,7 @@ GScreenDC::GScreenDC(HDC hdc, HWND hwnd, bool Release)
 	}
 }
 
-GScreenDC::GScreenDC(HBITMAP hbmp, int Sx, int Sy)
+LScreenDC::LScreenDC(HBITMAP hbmp, int Sx, int Sy)
 {
 	d = new GScreenPrivate;
 	ColourSpace = GdcD->GetColourSpace();
@@ -164,7 +164,7 @@ GScreenDC::GScreenDC(HBITMAP hbmp, int Sx, int Sy)
 	SetSize(Sx, Sy);
 }
 
-GScreenDC::~GScreenDC()
+LScreenDC::~LScreenDC()
 {
 	if (hDC)
 	{
@@ -205,14 +205,14 @@ GScreenDC::~GScreenDC()
 	DeleteObj(d);
 }
 
-bool GScreenDC::GetClient(LRect *c)
+bool LScreenDC::GetClient(LRect *c)
 {
 	if (!c) return false;
 	*c = d->Client;
 	return true;
 }
 
-void GScreenDC::SetClient(LRect *c)
+void LScreenDC::SetClient(LRect *c)
 {
 	if (c)
 	{
@@ -237,14 +237,14 @@ void GScreenDC::SetClient(LRect *c)
 	}
 }
 
-void GScreenDC::SetSize(int x, int y)
+void LScreenDC::SetSize(int x, int y)
 {
 	d->Sx = x;
 	d->Sy = y;
 	Clip.ZOff(d->Sx-1, d->Sy-1);
 }
 
-bool GScreenDC::CreateFromHandle(HDC hdc)
+bool LScreenDC::CreateFromHandle(HDC hdc)
 {
 	bool Status = FALSE;
 
@@ -278,7 +278,7 @@ bool GScreenDC::CreateFromHandle(HDC hdc)
 	return Status;
 }
 
-void GScreenDC::GetOrigin(int &x, int &y)
+void LScreenDC::GetOrigin(int &x, int &y)
 {
 	POINT pt;
 	if (GetWindowOrgEx(hDC, &pt))
@@ -292,26 +292,26 @@ void GScreenDC::GetOrigin(int &x, int &y)
 	}
 }
 
-void GScreenDC::SetOrigin(int x, int y)
+void LScreenDC::SetOrigin(int x, int y)
 {
-	GSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(x, y);
 	if (hDC)
 	{
 		SetWindowOrgEx(hDC, x, y, NULL);
 	}
 }
 
-GPalette *GScreenDC::Palette()
+GPalette *LScreenDC::Palette()
 {
-	return GSurface::Palette();
+	return LSurface::Palette();
 }
 
-void GScreenDC::Palette(GPalette *pPal, bool bOwnIt)
+void LScreenDC::Palette(GPalette *pPal, bool bOwnIt)
 {
-	GSurface::Palette(pPal, bOwnIt);
+	LSurface::Palette(pPal, bOwnIt);
 }
 
-LRect GScreenDC::ClipRgn(LRect *Rgn)
+LRect LScreenDC::ClipRgn(LRect *Rgn)
 {
 	LRect Prev = Clip;
 
@@ -347,12 +347,12 @@ LRect GScreenDC::ClipRgn(LRect *Rgn)
 	return Prev;
 }
 
-LRect GScreenDC::ClipRgn()
+LRect LScreenDC::ClipRgn()
 {
 	return Clip;
 }
 
-COLOUR GScreenDC::Colour(COLOUR c, int Bits)
+COLOUR LScreenDC::Colour(COLOUR c, int Bits)
 {
 	COLOUR Prev = d->Col;
 
@@ -425,21 +425,21 @@ COLOUR GScreenDC::Colour(COLOUR c, int Bits)
 	return Prev;
 }
 
-GColour GScreenDC::Colour(GColour c)
+GColour LScreenDC::Colour(GColour c)
 {
 	GColour cPrev(d->Col, GetBits());
 	Colour(c.c32(), 32);
 	return cPrev;
 }
 
-GString GScreenDC::Dump()
+GString LScreenDC::Dump()
 {
 	GString s;
-	s.Printf("GScreenDC hnd=%p size=%i,%i\n", hDC, d->Sx, d->Sy);
+	s.Printf("LScreenDC hnd=%p size=%i,%i\n", hDC, d->Sx, d->Sy);
 	return s;
 }
 
-int GScreenDC::Op(int Op, NativeInt Param)
+int LScreenDC::Op(int Op, NativeInt Param)
 {
 	int Prev = d->Mode;
 	int Rop;
@@ -480,17 +480,17 @@ int GScreenDC::Op(int Op, NativeInt Param)
 	return Prev;
 }
 
-COLOUR GScreenDC::Colour()
+COLOUR LScreenDC::Colour()
 {
 	return d->Col;
 }
 
-int GScreenDC::Op()
+int LScreenDC::Op()
 {
 	return d->Mode;
 }
 
-int GScreenDC::X()
+int LScreenDC::X()
 {
 	if (d->Client.Valid())
 		return d->Client.X();
@@ -498,7 +498,7 @@ int GScreenDC::X()
 	return d->Sx;
 }
 
-int GScreenDC::Y()
+int LScreenDC::Y()
 {
 	if (d->Client.Valid())
 		return d->Client.Y();
@@ -506,41 +506,41 @@ int GScreenDC::Y()
 	return d->Sy;
 }
 
-int GScreenDC::GetBits()
+int LScreenDC::GetBits()
 {
 	return GetDeviceCaps(hDC, BITSPIXEL) * GetDeviceCaps(hDC, PLANES);
 }
 
-bool GScreenDC::SupportsAlphaCompositing()
+bool LScreenDC::SupportsAlphaCompositing()
 {
 	// Windows does support blending screen content with bitmaps that have alpha
 	return true;
 }
 
-void GScreenDC::Set(int x, int y)
+void LScreenDC::Set(int x, int y)
 {
 	uint32_t WinCol = RGB( R24(d->Col), G24(d->Col), B24(d->Col) );
 	SetPixel(hDC, x, y, WinCol);
 }
 
-COLOUR GScreenDC::Get(int x, int y)
+COLOUR LScreenDC::Get(int x, int y)
 {
 	return GetPixel(hDC, x, y);
 }
 
-uint GScreenDC::LineStyle(uint32_t Bits, uint32_t Reset)
+uint LScreenDC::LineStyle(uint32_t Bits, uint32_t Reset)
 {
 	uint Old = LineBits;
 	LineBits = Bits;
 	return Old;
 }
 
-uint GScreenDC::LineStyle()
+uint LScreenDC::LineStyle()
 {
 	return LineBits;
 }
 
-void GScreenDC::HLine(int x1, int x2, int y)
+void LScreenDC::HLine(int x1, int x2, int y)
 {
 	if (x1 > x2)
 	{
@@ -552,7 +552,7 @@ void GScreenDC::HLine(int x1, int x2, int y)
 	LineTo(hDC, x2 + 1, y);
 }
 
-void GScreenDC::VLine(int x, int y1, int y2)
+void LScreenDC::VLine(int x, int y1, int y2)
 {
 	if (y1 > y2)
 	{
@@ -564,7 +564,7 @@ void GScreenDC::VLine(int x, int y1, int y2)
 	LineTo(hDC, x, y2 + 1);
 }
 
-void GScreenDC::Line(int x1, int y1, int x2, int y2)
+void LScreenDC::Line(int x1, int y1, int x2, int y2)
 {
 	MoveToEx(hDC, x1, y1, NULL);
 	LineTo(hDC, x2, y2);
@@ -572,7 +572,7 @@ void GScreenDC::Line(int x1, int y1, int x2, int y2)
 	SetPixel(hDC, x2, y2, WinCol);
 }
 
-void GScreenDC::Circle(double cx, double cy, double radius)
+void LScreenDC::Circle(double cx, double cy, double radius)
 {
 	HBRUSH hTemp = (HBRUSH) SelectObject(hDC, d->Null.Brush);
 	::Ellipse(	hDC,
@@ -583,7 +583,7 @@ void GScreenDC::Circle(double cx, double cy, double radius)
 	SelectObject(hDC, hTemp);
 }
 
-void GScreenDC::FilledCircle(double cx, double cy, double radius)
+void LScreenDC::FilledCircle(double cx, double cy, double radius)
 {
 	::Ellipse(	hDC,
 				(int)floor(cx - radius),
@@ -592,7 +592,7 @@ void GScreenDC::FilledCircle(double cx, double cy, double radius)
 				(int)ceil(cy + radius));
 }
 
-void GScreenDC::Arc(double cx, double cy, double radius, double start, double end)
+void LScreenDC::Arc(double cx, double cy, double radius, double start, double end)
 {
 	int StartX = (int)(cx + (cos(start) * radius));
 	int StartY = (int)(cy + (int)(sin(start) * radius));
@@ -608,7 +608,7 @@ void GScreenDC::Arc(double cx, double cy, double radius, double start, double en
 			EndX, EndY);
 }
 
-void GScreenDC::FilledArc(double cx, double cy, double radius, double start, double end)
+void LScreenDC::FilledArc(double cx, double cy, double radius, double start, double end)
 {
 	int StartX = (int)(cx + (cos(start) * radius));
 	int StartY = (int)(cy + (int)(sin(start) * radius));
@@ -624,7 +624,7 @@ void GScreenDC::FilledArc(double cx, double cy, double radius, double start, dou
 			EndX, EndY);
 }
 
-void GScreenDC::Ellipse(double cx, double cy, double x, double y)
+void LScreenDC::Ellipse(double cx, double cy, double x, double y)
 {
 	HBRUSH hTemp = (HBRUSH) SelectObject(hDC, d->Null.Brush);
 	::Ellipse(	hDC,
@@ -636,7 +636,7 @@ void GScreenDC::Ellipse(double cx, double cy, double x, double y)
 	SelectObject(hDC, hTemp);
 }
 
-void GScreenDC::FilledEllipse(double cx, double cy, double x, double y)
+void LScreenDC::FilledEllipse(double cx, double cy, double x, double y)
 {
 	::Ellipse(	hDC,
 				(int)floor(cx - x),
@@ -646,14 +646,14 @@ void GScreenDC::FilledEllipse(double cx, double cy, double x, double y)
 				);
 }
 
-void GScreenDC::Box(int x1, int y1, int x2, int y2)
+void LScreenDC::Box(int x1, int y1, int x2, int y2)
 {
 	HBRUSH hTemp = (HBRUSH) SelectObject(hDC, d->Null.Brush);
 	::Rectangle(hDC, x1, y1, x2+1, y2+1);
 	SelectObject(hDC, hTemp);
 }
 
-void GScreenDC::Box(LRect *a)
+void LScreenDC::Box(LRect *a)
 {
 	HBRUSH hTemp = (HBRUSH) SelectObject(hDC, d->Null.Brush);
 	if (a)
@@ -663,12 +663,12 @@ void GScreenDC::Box(LRect *a)
 	SelectObject(hDC, hTemp);
 }
 
-void GScreenDC::Rectangle(int x1, int y1, int x2, int y2)
+void LScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 {
 	::Rectangle(hDC, x1, y1, x2+1, y2+1);
 }
 
-void GScreenDC::Rectangle(LRect *a)
+void LScreenDC::Rectangle(LRect *a)
 {
 	LRect b;
 	if (a)
@@ -679,7 +679,7 @@ void GScreenDC::Rectangle(LRect *a)
 	::Rectangle(hDC, b.x1, b.y1, b.x2+1, b.y2+1);
 }
 
-void GScreenDC::Blt(int x, int y, GSurface *Src, LRect *a)
+void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
 	if (Src)
 	{
@@ -761,7 +761,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, LRect *a)
 
 		HDC hDestDC = StartDC();
 		HDC hSrcDC = Src->StartDC();
-		GMemDC Tmp;
+		LMemDC Tmp;
 		if (!hSrcDC)
 		{
 			GColourSpace Cs = GdcD->GetColourSpace();
@@ -805,7 +805,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, LRect *a)
 	}
 }
 
-void GScreenDC::StretchBlt(LRect *dst, GSurface *Src, LRect *s)
+void LScreenDC::StretchBlt(LRect *dst, LSurface *Src, LRect *s)
 {
 	if (Src)
 	{
@@ -867,7 +867,7 @@ void GScreenDC::StretchBlt(LRect *dst, GSurface *Src, LRect *s)
 	}
 }
 
-void GScreenDC::Polygon(int Points, LPoint *Data)
+void LScreenDC::Polygon(int Points, LPoint *Data)
 {
 	if (Points > 0 && Data)
 	{
@@ -888,11 +888,11 @@ void GScreenDC::Polygon(int Points, LPoint *Data)
 	}
 }
 
-void GScreenDC::Bezier(int Threshold, LPoint *Pt)
+void LScreenDC::Bezier(int Threshold, LPoint *Pt)
 {
 }
 
-void GScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *r)
+void LScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *r)
 {
 	::FloodFill(hDC, x, y, d->Col);
 }

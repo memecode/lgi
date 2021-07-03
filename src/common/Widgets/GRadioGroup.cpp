@@ -317,7 +317,7 @@ int GRadioGroup::OnNotify(GViewI *Ctrl, int Flags)
 	return 0;
 }
 
-void GRadioGroup::OnPaint(GSurface *pDC)
+void GRadioGroup::OnPaint(LSurface *pDC)
 {
 	if (GApp::SkinEngine &&
 		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_GROUP))
@@ -712,7 +712,7 @@ void GRadioButton::OnFocus(bool f)
 	Invalidate();
 }
 
-void GRadioButton::OnPaint(GSurface *pDC)
+void GRadioButton::OnPaint(LSurface *pDC)
 {
 	if (GApp::SkinEngine &&
 		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_RADIO))

@@ -449,7 +449,7 @@ void LListItem::ClearDs(int Col)
 
 void LListItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 {
-	GSurface *&pDC = Ctx.pDC;
+	LSurface *&pDC = Ctx.pDC;
 	if (pDC && c)
 	{
 		LRect ng = Ctx; // non-grid area
@@ -2509,7 +2509,7 @@ static GColour Tint(GColour back, double amt)
 	return back.Mix(Mixer, (float)(1.0f - amt));
 }
 
-void LList::OnPaint(GSurface *pDC)
+void LList::OnPaint(LSurface *pDC)
 {
 	#if LList_ONPAINT_PROFILE
 	int Start = LgiCurrentTime(), t1, t2, t3, t4, t5;
@@ -2559,7 +2559,7 @@ void LList::OnPaint(GSurface *pDC)
 
 	// Draw items
 	if (!Buf)
-		Buf = new GMemDC;
+		Buf = new LMemDC;
 	
 	LRect r = ItemsPos;
 	int n = FirstVisible;

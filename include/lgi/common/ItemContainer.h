@@ -20,7 +20,7 @@ public:
 	struct ItemPaintCtx : public LRect
 	{
 		/// The surface to draw on
-		GSurface *pDC;
+		LSurface *pDC;
 
 		/// Current foreground colour
 		GColour Fore;
@@ -124,7 +124,7 @@ public:
 	void OnChildrenChanged(GViewI *Wnd, bool Attaching) {}
 	int OnNotify(GViewI *Ctrl, int Flags) { return 0; }
 	int OnCommand(int Cmd, int Event, OsView Wnd) { return 0; }
-	void OnPaint(GSurface *pDC) { LgiAssert(0); }
+	void OnPaint(LSurface *pDC) { LgiAssert(0); }
 
 	// Style access
 	LCss *GetCss(bool Create = false)
@@ -144,7 +144,7 @@ public:
 	~GItemEdit();
 	
 	GItem *GetItem();
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	int OnNotify(GViewI *v, int f);
 	void Visible(bool i);
 	GMessage::Result OnEvent(GMessage *Msg);
@@ -202,9 +202,9 @@ public:
 	/// Gets the marking, one of #GLI_MARK_NONE, #GLI_MARK_UP_ARROW or #GLI_MARK_DOWN_ARROW
 	int Mark();
 	/// Sets the icon to display
-	void Icon(GSurface *i, bool Own = true);
+	void Icon(LSurface *i, bool Own = true);
 	/// Gets the icon displayed
-	GSurface *Icon();
+	LSurface *Icon();
 	/// True if clicked
 	bool Value();
 	/// Set clicked
@@ -227,10 +227,10 @@ public:
 	GItemContainer *GetList();
 
 	/// Paint the column header.
-	void OnPaint(GSurface *pDC, LRect &r);
+	void OnPaint(LSurface *pDC, LRect &r);
 
 	/// Draws the just the icon, text and mark.
-	void OnPaint_Content(GSurface *pDC, LRect &r, bool FillBackground); 
+	void OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground); 
 };
 
 /// Client draws the content.
@@ -295,7 +295,7 @@ protected:
 	void GetColumnSizes(ColSizes &cs);
 	
 	/// Paints all the column headings
-	void PaintColumnHeadings(GSurface *pDC);
+	void PaintColumnHeadings(LSurface *pDC);
 	
 	/// This clears all the display string cache for a given column
 	virtual void ClearDs(int Col) = 0;
@@ -406,7 +406,7 @@ class GDragColumn : public LWindow
 	LPoint ListScrPos;
 	
 	#ifdef LINUX
-	GSurface *Back;
+	LSurface *Back;
 	#endif
 
 public:
@@ -417,7 +417,7 @@ public:
 	GDragColumn(GItemContainer *list, int col);
 	~GDragColumn();
 
-	void OnPaint(GSurface *pScreen);
+	void OnPaint(LSurface *pScreen);
 };
 
 

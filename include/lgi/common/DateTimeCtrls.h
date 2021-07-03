@@ -23,7 +23,7 @@ public:
 	GString GetTime();
 
 	void OnCreate();
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	int OnNotify(GViewI *c, int f);
 };
 
@@ -71,7 +71,7 @@ public:
 	LDateTime Get();
 	void OnChange();
 	void Set(LDateTime &Ts);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
 	void Move(int Dx, int Dy);
 	bool OnKey(LKey &k);

@@ -15,7 +15,7 @@ public:
 
 	const char *GetClass() { return "GStatusBar"; }
 	bool Pour(LRegion &r);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnPosChange();
 
 	GStatusPane *AppendPane(const char *Text, int Width);
@@ -30,7 +30,7 @@ class LgiClass GStatusPane :
 protected:
 	int		Flags;
 	int		Width;
-	GSurface *pDC;
+	LSurface *pDC;
 
 public:
 	GStatusPane();
@@ -39,14 +39,14 @@ public:
 	const char *GetClass() { return "GStatusPane"; }
 	const char *Name() { return GBase::Name(); }
 	bool Name(const char *n);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 
 	int GetWidth();
 	void SetWidth(int x);
 	bool Sunken();
 	void Sunken(bool i);
-	GSurface *Bitmap();
-	void Bitmap(GSurface *pdc);
+	LSurface *Bitmap();
+	void Bitmap(LSurface *pdc);
 };
 
 #endif

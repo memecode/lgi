@@ -32,7 +32,7 @@ public:
 	int64 Value();
 	void Value(int64 i);
 	void Value(GColour c);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	bool OnLayout(GViewLayoutInfo &Inf);
 };
 

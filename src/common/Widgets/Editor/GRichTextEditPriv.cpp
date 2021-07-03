@@ -1172,7 +1172,7 @@ bool GRichTextPriv::Merge(Transaction *Trans, Block *a, Block *b)
 	return true;
 }
 
-GSurface *GEmojiContext::GetEmojiImage()
+LSurface *GEmojiContext::GetEmojiImage()
 {
 	if (!EmojiImg)
 	{
@@ -1469,7 +1469,7 @@ bool GRichTextPriv::ChangeSelectionStyle(LCss *Style, bool Add)
 	return true;
 }
 
-void GRichTextPriv::PaintBtn(GSurface *pDC, GRichTextEdit::RectType t)
+void GRichTextPriv::PaintBtn(LSurface *pDC, GRichTextEdit::RectType t)
 {
 	LRect r = Areas[t];
 	LVariant &v = Values[t];
@@ -1827,7 +1827,7 @@ bool GRichTextPriv::InsertHorzRule()
 	return SetCursor(c);
 }
 	
-void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
+void GRichTextPriv::Paint(LSurface *pDC, GScrollBar *&ScrollY)
 {
 	if (Areas[GRichTextEdit::ToolsArea].Valid())
 	{
@@ -1883,13 +1883,13 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 	
 	LRect r = Areas[GRichTextEdit::ContentArea];
 	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
-	GMemDC Mem;
+	LMemDC Mem;
 	if (!Mem.Create(r.X(), r.Y(), pDC->GetColourSpace()))
 	{
 		LgiAssert(!"MemDC creation failed.");
 		return;
 	}
-	GSurface *pScreen = pDC;
+	LSurface *pScreen = pDC;
 	pDC = &Mem;
 	r.Offset(-r.x1, -r.y1);
 	#else
@@ -1946,9 +1946,9 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 			b->OnPaint(Ctx);
 			#if DEBUG_OUTLINE_BLOCKS
 			pDC->Colour(GColour(192, 192, 192));
-			pDC->LineStyle(GSurface::LineDot);
+			pDC->LineStyle(LSurface::LineDot);
 			pDC->Box(&b->GetPos());
-			pDC->LineStyle(GSurface::LineSolid);
+			pDC->LineStyle(LSurface::LineSolid);
 			#endif
 		}
 	}
@@ -1965,7 +1965,7 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 	if (Cursor)
 	{
 		pDC->Colour(GColour::Blue);
-		pDC->LineStyle(GSurface::LineDot);
+		pDC->LineStyle(LSurface::LineDot);
 		pDC->Box(&Cursor->Line);
 	}
 	#endif

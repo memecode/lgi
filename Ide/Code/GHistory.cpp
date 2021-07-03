@@ -26,7 +26,7 @@ public:
 		}
 	}
 	
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		if (Lst)
 		{

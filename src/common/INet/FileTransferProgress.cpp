@@ -74,7 +74,7 @@ public:
 	GPaneThrottle(GDom *app);
 
 	int OnNotify(GViewI *Ctrl, int Flags);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	int64 Value();
 	void OnMouseClick(LMouse &m);
 };
@@ -97,7 +97,7 @@ int GPaneThrottle::OnNotify(GViewI *Ctrl, int Flags)
 	return 0;
 }
 
-void GPaneThrottle::OnPaint(GSurface *pDC)
+void GPaneThrottle::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 
@@ -224,7 +224,7 @@ class GPaneHistory : public GStatusPane
 	uint64 Last; // Last time value changed
 	int64 Bytes[MAX_SAMPLE];
 
-	GSurface *pMemDC;
+	LSurface *pMemDC;
 
 	void Push()
 	{
@@ -247,7 +247,7 @@ public:
 	GPaneHistory(GDom *app);
 	~GPaneHistory();
 
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void Value(int64 i);
 };
 
@@ -267,7 +267,7 @@ GPaneHistory::~GPaneHistory()
 	DeleteObj(pMemDC);
 }
 
-void GPaneHistory::OnPaint(GSurface *pDC)
+void GPaneHistory::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 
@@ -287,7 +287,7 @@ void GPaneHistory::OnPaint(GSurface *pDC)
 		(r.X() != pMemDC->X()))
 	{
 		DeleteObj(pMemDC);
-		pMemDC = new GMemDC;
+		pMemDC = new LMemDC;
 		if (pMemDC)
 		{
 			if (pMemDC->Create(r.X(), r.Y(), GdcD->GetColourSpace()))

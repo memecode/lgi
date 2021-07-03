@@ -88,7 +88,7 @@ GMessage::Result GProgress::OnEvent(GMessage *Msg)
 	return GView::OnEvent(Msg);
 }
 
-void GProgress::OnPaint(GSurface *pDC)
+void GProgress::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 	LgiThinBorder(pDC, r, DefaultSunkenEdge);

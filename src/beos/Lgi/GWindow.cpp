@@ -192,7 +192,7 @@ bool GWindow::Attach(GViewI *Parent)
 	return true;
 }
 
-void GWindow::OnPaint(GSurface *pDC)
+void GWindow::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle();

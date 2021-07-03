@@ -30,7 +30,7 @@ public:
 	LPoint			LastClick;
 	LPoint			DragStart;
 	int				DragData;
-	GMemDC			*IconCache;
+	LMemDC			*IconCache;
 	bool			InPour;
 	int64			DropSelectTime;
     int8            IconTextGap;
@@ -878,7 +878,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	LgiAssert(Tree != NULL);
 
 	// background up to text
-	GSurface *&pDC = Ctx.pDC;
+	LSurface *&pDC = Ctx.pDC;
 	pDC->Colour(Ctx.Back);
 	pDC->Rectangle(0, d->Pos.y1, (d->Depth*TREE_BLOCK)+TREE_BLOCK, d->Pos.y2);
 
@@ -1817,7 +1817,7 @@ void GTree::OnPosChange()
 	_UpdateScrollBars();
 }
 
-void GTree::OnPaint(GSurface *pDC)
+void GTree::OnPaint(LSurface *pDC)
 {
 	TREELOCK
 	GCssTools Tools(this);
@@ -1852,7 +1852,7 @@ void GTree::OnPaint(GSurface *pDC)
 	{
 		int CacheHeight = MAX(SysFont->GetHeight(), GetImageList()->Y());
 		
-		d->IconCache = new GMemDC;
+		d->IconCache = new LMemDC;
 		if (d->IconCache &&
 			d->IconCache->Create(GetImageList()->X(), CacheHeight, GdcD->GetColourSpace()))
 		{

@@ -44,7 +44,7 @@ public:
 	::GString Icon;
 	LRect Decor;
 	gulong DestroySig;
-	GAutoPtr<GSurface> IconImg;
+	GAutoPtr<LSurface> IconImg;
 	LAttachState AttachState;
 	
 	// State
@@ -153,7 +153,7 @@ GWindow::~GWindow()
 }
 
 /*
-static void PixbufDestroyNotify(guchar *pixels, GSurface *data)
+static void PixbufDestroyNotify(guchar *pixels, LSurface *data)
 {
 	delete data;
 }
@@ -1450,7 +1450,7 @@ void GWindow::OnCreate()
 	AttachChildren();
 }
 
-void GWindow::OnPaint(GSurface *pDC)
+void GWindow::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_MED);
 	pDC->Rectangle();

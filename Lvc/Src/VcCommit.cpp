@@ -97,7 +97,7 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 		double Half = 5.5;
 		#define MAP(col) ((col) * Px + Half)
 
-		GMemDC Mem(Ctx.X(), Ctx.Y(), System32BitColourSpace);
+		LMemDC Mem(Ctx.X(), Ctx.Y(), System32BitColourSpace);
 
 		#ifdef LINUX
 		{

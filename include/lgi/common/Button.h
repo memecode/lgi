@@ -69,11 +69,11 @@ public:
 	void SetIsToggle(bool toggle);
 
 	/// Returns the icon
-	GSurface *GetImage();
+	LSurface *GetImage();
 	/// Sets the icon using a filename
 	bool SetImage(const char *FileName);
 	/// Sets the icon
-	bool SetImage(GSurface *Img, bool OwnIt);
+	bool SetImage(LSurface *Img, bool OwnIt);
 
     /// Sets the control to it's preferred size for it's text &| image
     void SetPreferredSize(int x = -1, int y = -1);
@@ -85,7 +85,7 @@ public:
 	void OnMouseExit(LMouse &m) override;
 	bool OnKey(LKey &k) override;
 	void OnFocus(bool f) override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	void OnCreate() override;
 	void OnAttach() override;
 	void OnStyleChange();

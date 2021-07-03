@@ -68,7 +68,7 @@ public:
 	bool Invalidate(LRect *r = NULL, bool Repaint = false, bool NonClient = false);
 	#else
 	bool Attach(GViewI *p);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnPosChange();
 	void OnMouseClick(LMouse &m);
 	void OnMouseMove(LMouse &m);

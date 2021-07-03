@@ -235,7 +235,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////////////
 class PrintPainter
 {
-	GPrintDC *pDC;
+	LPrintDC *pDC;
 	int Fore, Back;
 	List<LRect> Clip;
 	int Ox, Oy;
@@ -245,7 +245,7 @@ class PrintPainter
 	int Ascent;
 
 public:
-	PrintPainter(GPrintDC *dc)
+	PrintPainter(LPrintDC *dc)
 	{
 		Face[0] = 0;
 		pDC = dc;
@@ -445,14 +445,14 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////////////
-GPrintDC::GPrintDC(void *Handle, const char *PrintJobName)
+LPrintDC::LPrintDC(void *Handle, const char *PrintJobName)
 {
 	d = new GPrintDCPrivate;
 	d->Handle = Handle;
 	d->PrintJobName = NewStr(PrintJobName);
 }
 
-GPrintDC::~GPrintDC()
+LPrintDC::~LPrintDC()
 {
 	EndPage();
 	
@@ -501,55 +501,55 @@ GPrintDC::~GPrintDC()
 	DeleteObj(d);
 }
 
-double GPrintDC::Xc(int x)
+double LPrintDC::Xc(int x)
 {
 	return (double) x / PS_SCALE;
 }
 
-double GPrintDC::Yc(int y)
+double LPrintDC::Yc(int y)
 {
 	return (double) -y / PS_SCALE;
 }
 
-OsPainter GPrintDC::Handle()
+OsPainter LPrintDC::Handle()
 {
 	return Cairo;
 }
 
-void GPrintDC::Handle(OsPainter Set)
+void LPrintDC::Handle(OsPainter Set)
 {
 	Cairo = Set;
 }
 
-int GPrintDC::X()
+int LPrintDC::X()
 {
 	return (int) (8.26 * (double)DpiX());
 }
 
-int GPrintDC::Y()
+int LPrintDC::Y()
 {
 	return (int) (10.27 * (double)DpiY()); // 11.69
 }
 
 // This is arbitary, chosen because it's easy to use.
-int GPrintDC::GetBits()
+int LPrintDC::GetBits()
 {
 	return 24;
 }
 
 // This resolution is chosen to match postscripts internal
 // user space in pt's.
-int GPrintDC::DpiX()
+int LPrintDC::DpiX()
 {
 	return 72 * PS_SCALE;
 }
 
-int GPrintDC::DpiY()
+int LPrintDC::DpiY()
 {
 	return 72 * PS_SCALE;
 }
 
-bool GPrintDC::StartPage()
+bool LPrintDC::StartPage()
 {
 	bool Status = false;
 	
@@ -566,7 +566,7 @@ bool GPrintDC::StartPage()
 	return Status;
 }
 
-void GPrintDC::EndPage()
+void LPrintDC::EndPage()
 {
 	if (d->IsOk() &&
 		d->PageOpen)
@@ -578,12 +578,12 @@ void GPrintDC::EndPage()
 
 ///////////////////////////////////////////////////////////////////////////////
 // Print primitives
-COLOUR GPrintDC::Colour()
+COLOUR LPrintDC::Colour()
 {
 	return d->c;
 }
 
-GColour GPrintDC::Colour(GColour c)
+GColour LPrintDC::Colour(GColour c)
 {
 	GColour Prev(d->c, 24);
 	COLOUR c24 = c.c24();
@@ -602,7 +602,7 @@ GColour GPrintDC::Colour(GColour c)
 	return Prev;
 }
 
-COLOUR GPrintDC::Colour(COLOUR c, int Bits)
+COLOUR LPrintDC::Colour(COLOUR c, int Bits)
 {
 	COLOUR c24 = CBit(24, c, Bits?Bits:24);
 	if (c24 != d->c)
@@ -620,7 +620,7 @@ COLOUR GPrintDC::Colour(COLOUR c, int Bits)
 	return c;
 }
 
-void GPrintDC::Set(int x, int y)
+void LPrintDC::Set(int x, int y)
 {
 	if (d->Ps.IsOpen())
 	{
@@ -633,12 +633,12 @@ void GPrintDC::Set(int x, int y)
 	}
 }
 
-COLOUR GPrintDC::Get(int x, int y)
+COLOUR LPrintDC::Get(int x, int y)
 {
     return -1;
 }
 
-void GPrintDC::HLine(int x1, int x2, int y)
+void LPrintDC::HLine(int x1, int x2, int y)
 {
 	if (d->Ps.IsOpen())
 	{
@@ -651,7 +651,7 @@ void GPrintDC::HLine(int x1, int x2, int y)
 	}
 }
 
-void GPrintDC::VLine(int x, int y1, int y2)
+void LPrintDC::VLine(int x, int y1, int y2)
 {
 	if (d->Ps.IsOpen())
 	{
@@ -664,7 +664,7 @@ void GPrintDC::VLine(int x, int y1, int y2)
 	}
 }
 
-void GPrintDC::Line(int x1, int y1, int x2, int y2)
+void LPrintDC::Line(int x1, int y1, int x2, int y2)
 {
 	if (d->Ps.IsOpen())
 	{
@@ -677,37 +677,37 @@ void GPrintDC::Line(int x1, int y1, int x2, int y2)
 	}
 }
 
-void GPrintDC::Circle(double cx, double cy, double radius)
+void LPrintDC::Circle(double cx, double cy, double radius)
 {
 }
 
-void GPrintDC::FilledCircle(double cx, double cy, double radius)
+void LPrintDC::FilledCircle(double cx, double cy, double radius)
 {
 }
 
-void GPrintDC::Arc(double cx, double cy, double radius, double start, double end)
+void LPrintDC::Arc(double cx, double cy, double radius, double start, double end)
 {
 }
 
-void GPrintDC::FilledArc(double cx, double cy, double radius, double start, double end)
+void LPrintDC::FilledArc(double cx, double cy, double radius, double start, double end)
 {
 }
 
-void GPrintDC::Ellipse(double cx, double cy, double x, double y)
+void LPrintDC::Ellipse(double cx, double cy, double x, double y)
 {
 }
 
-void GPrintDC::FilledEllipse(double cx, double cy, double x, double y)
+void LPrintDC::FilledEllipse(double cx, double cy, double x, double y)
 {
 }
 
-void GPrintDC::Box(int x1, int y1, int x2, int y2)
+void LPrintDC::Box(int x1, int y1, int x2, int y2)
 {
 	LRect a(x1, y1, x2, y2);
 	Box(&a);
 }
 
-void GPrintDC::Box(LRect *a)
+void LPrintDC::Box(LRect *a)
 {
 	LRect r;
 	if (a) r = *a;
@@ -729,13 +729,13 @@ void GPrintDC::Box(LRect *a)
 	}
 }
 
-void GPrintDC::Rectangle(int x1, int y1, int x2, int y2)
+void LPrintDC::Rectangle(int x1, int y1, int x2, int y2)
 {
 	LRect a(x1, y1, x2, y2);
 	Rectangle(&a);
 }
 
-void GPrintDC::Rectangle(LRect *a)
+void LPrintDC::Rectangle(LRect *a)
 {
 	LRect r;
 	if (a) r = *a;
@@ -757,23 +757,23 @@ void GPrintDC::Rectangle(LRect *a)
 	}
 }
 
-void GPrintDC::Blt(int x, int y, GSurface *Src, LRect *a)
+void LPrintDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
 }
 
-void GPrintDC::StretchBlt(LRect *d, GSurface *Src, LRect *s)
+void LPrintDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 {
 }
 
-void GPrintDC::Polygon(int Points, LPoint *Data)
+void LPrintDC::Polygon(int Points, LPoint *Data)
 {
 }
 
-void GPrintDC::Bezier(int Threshold, LPoint *Pt)
+void LPrintDC::Bezier(int Threshold, LPoint *Pt)
 {
 }
 
-void GPrintDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
+void LPrintDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
 }
 

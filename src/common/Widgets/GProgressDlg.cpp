@@ -305,7 +305,7 @@ int GProgressPane::OnNotify(GViewI *Ctrl, int Flags)
 	return 0;
 }
 
-void GProgressPane::OnPaint(GSurface *pDC)
+void GProgressPane::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
 	LgiThinBorder(pDC, r, DefaultRaisedEdge);
@@ -640,7 +640,7 @@ bool GProgressDlg::IsCancelled()
 	return false;
 }
 
-void GProgressDlg::OnPaint(GSurface *pDC)
+void GProgressDlg::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_MED);
 	pDC->Rectangle();

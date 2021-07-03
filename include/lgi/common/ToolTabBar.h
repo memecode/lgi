@@ -18,7 +18,7 @@ class GToolTab : public GToolButton
 	bool First;
 
 	bool SetPos(LRect &r, bool Repaint = false);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m) {}
 	void OnMouseMove(LMouse &m) {}
 	void OnMouseEnter(LMouse &m) {}
@@ -45,7 +45,7 @@ class GToolTabBar : public GToolBar
 	bool Border;
 	bool InOnChangeEvent;
 
-	void _PaintTab(GSurface *pDC, GToolTab *Tab);
+	void _PaintTab(LSurface *pDC, GToolTab *Tab);
 
 public:
 	GToolTabBar(int Id = -1);
@@ -67,7 +67,7 @@ public:
 
 	void OnButtonClick(GToolButton *Btn);
 	void OnChange(GToolButton *Btn);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnCreate();
 	void OnMouseClick(LMouse &m);
 	int OnNotify(GViewI *c, int f);

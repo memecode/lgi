@@ -18,7 +18,7 @@ private:
 	class LibJpeg *d;
 	#endif
 
-	GFilter::IoStatus _Write(GStream *Out, GSurface *pDC, int Quality, SubSampleMode SubSample, LPoint Dpi);
+	GFilter::IoStatus _Write(GStream *Out, LSurface *pDC, int Quality, SubSampleMode SubSample, LPoint Dpi);
 
 public:
 	GdcJpeg();
@@ -26,8 +26,8 @@ public:
     const char *GetComponentName() { return "libjpeg"; }
 	Format GetFormat() { return FmtJpeg; }
 	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
-	IoStatus ReadImage(GSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, GSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, GStream *In);
+	IoStatus WriteImage(GStream *Out, LSurface *pDC);
 
 	bool GetVariant(const char *n, LVariant &v, char *a)
 	{

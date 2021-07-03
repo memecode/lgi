@@ -1,18 +1,18 @@
 #ifndef _GDRAW_LIST_SURFACE_H_
 #define _GDRAW_LIST_SURFACE_H_
 
-class GDrawListSurface : public GSurface
+class GDrawListSurface : public LSurface
 {
 	struct GDrawListSurfacePriv *d;
 
 public:
 	GDrawListSurface(int Width, int Height, GColourSpace Cs = CsRgba32);
-	GDrawListSurface(GSurface *FromSurface);
+	GDrawListSurface(LSurface *FromSurface);
 	~GDrawListSurface();
 
 	// Calls specific to this class:
 	ssize_t Length();
-	bool OnPaint(GSurface *Dest);
+	bool OnPaint(LSurface *Dest);
 	LFont *GetFont();
 	void SetFont(LFont *Font);
 	GColour Background();
@@ -54,8 +54,8 @@ public:
 	void Box(LRect *a = NULL);
 	void Rectangle(int x1, int y1, int x2, int y2);
 	void Rectangle(LRect *a = NULL);
-	void Blt(int x, int y, GSurface *Src, LRect *a = NULL);
-	void StretchBlt(LRect *d, GSurface *Src, LRect *s);
+	void Blt(int x, int y, LSurface *Src, LRect *a = NULL);
+	void StretchBlt(LRect *d, LSurface *Src, LRect *s);
 	void Polygon(int Points, LPoint *Data);
 	void Bezier(int Threshold, LPoint *Pt);
 	void FloodFill(int x, int y, int Mode, COLOUR Border = 0, LRect *Bounds = NULL);	

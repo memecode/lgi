@@ -30,13 +30,13 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-GScreenDC::GScreenDC()
+LScreenDC::LScreenDC()
 {
 	d = new GScreenPrivate;
 	ColourSpace = CsNone;
 }
 
-GScreenDC::GScreenDC(GView *view, void *Param)
+LScreenDC::LScreenDC(GView *view, void *Param)
 {
 	d = new GScreenPrivate;
 	ColourSpace = CsNone;
@@ -67,7 +67,7 @@ GScreenDC::GScreenDC(GView *view, void *Param)
 	}
 }
 
-GScreenDC::~GScreenDC()
+LScreenDC::~LScreenDC()
 {
 	if (d->Screen)
 	{
@@ -86,24 +86,24 @@ GScreenDC::~GScreenDC()
 	DeleteObj(d);
 }
 
-OsPainter GScreenDC::Handle()
+OsPainter LScreenDC::Handle()
 {
 	return d->Screen;
 }
 
-int GScreenDC::GetFlags()
+int LScreenDC::GetFlags()
 {
 	return 0;
 }
 
-bool GScreenDC::GetClient(LRect *c)
+bool LScreenDC::GetClient(LRect *c)
 {
 	if (!c) return false;
 	*c = d->Client;
 	return true;
 }
 
-void GScreenDC::SetClient(LRect *c)
+void LScreenDC::SetClient(LRect *c)
 {
 	if (c)
 	{
@@ -124,17 +124,17 @@ void GScreenDC::SetClient(LRect *c)
 	}
 }
 
-GPalette *GScreenDC::Palette()
+GPalette *LScreenDC::Palette()
 {
-	return GSurface::Palette();
+	return LSurface::Palette();
 }
 
-void GScreenDC::Palette(GPalette *pPal, bool bOwnIt)
+void LScreenDC::Palette(GPalette *pPal, bool bOwnIt)
 {
-	GSurface::Palette(pPal, bOwnIt);
+	LSurface::Palette(pPal, bOwnIt);
 }
 
-int GScreenDC::X()
+int LScreenDC::X()
 {
 	if (d->Client.Valid())
 		return d->Client.X();
@@ -142,7 +142,7 @@ int GScreenDC::X()
 	return d->Screen->w;
 }
 
-int GScreenDC::Y()
+int LScreenDC::Y()
 {
 	if (d->Client.Valid())
 		return d->Client.Y();
@@ -150,23 +150,23 @@ int GScreenDC::Y()
 	return d->Screen->h;
 }
 
-int GScreenDC::GetBits()
+int LScreenDC::GetBits()
 {
 	return d->Screen ? d->Screen->format->BitsPerPixel : 0;
 }
 
-bool GScreenDC::SupportsAlphaCompositing()
+bool LScreenDC::SupportsAlphaCompositing()
 {
 	// Windows does support blending screen content with bitmaps that have alpha
 	return true;
 }
 
-uint GScreenDC::LineStyle(uint32 Bits, uint32 Reset)
+uint LScreenDC::LineStyle(uint32 Bits, uint32 Reset)
 {
 	return LineBits = Bits;
 }
 
-uint GScreenDC::LineStyle()
+uint LScreenDC::LineStyle()
 {
 	return LineBits;
 }

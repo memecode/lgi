@@ -28,7 +28,7 @@ public:
 	BOOL CreateInfo(int x, int y, int Bits);
 
 	void Update(int Flags);
-	void Draw(GSurface *Dest, int x, int y);
+	void Draw(LSurface *Dest, int x, int y);
 	BOOL Read(GFile &F);
 	BOOL Write(GFile &F);
 };

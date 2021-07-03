@@ -267,7 +267,7 @@ int GTextLabel::OnNotify(GViewI *Ctrl, int Flags)
 	return 0;
 }
 
-void GTextLabel::OnPaint(GSurface *pDC)
+void GTextLabel::OnPaint(LSurface *pDC)
 {
 	GCssTools Tools(this);
 	GColour Back = Tools.GetBack();

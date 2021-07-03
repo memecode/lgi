@@ -5,7 +5,7 @@
 /// \brief A list of images/icons all the same size
 ///
 /// Currently the image list treats the pixel at (0,0) as the transparent colour key.
-class LgiClass GImageList : public GMemDC
+class LgiClass GImageList : public LMemDC
 {
 	class GImageListPriv *d;
 
@@ -18,7 +18,7 @@ public:
 		/// The height of each tile
 		int TileY,
 		/// Initial data for the images
-		GSurface *pDC = NULL
+		LSurface *pDC = NULL
 	);
 	
 	~GImageList();
@@ -45,7 +45,7 @@ public:
 	void Draw
 	(
 		/// The output surface
-		GSurface *pDest,
+		LSurface *pDest,
 		/// The x coord to draw the top-left corner
 		int x,
 		/// The y coord to draw the top-left corner
@@ -93,7 +93,7 @@ public:
 	
 	bool LoadImageList(char *File, int x, int y)
 	{
-		GSurface *pDC = GdcD->Load(File);
+		LSurface *pDC = GdcD->Load(File);
 		if (pDC)
 		{
 			ImageList = new GImageList(x, y, pDC);

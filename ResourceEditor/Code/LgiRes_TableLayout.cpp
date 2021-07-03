@@ -362,7 +362,7 @@ struct OpHandle : public LRect
 		return *this;
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		#define OFF			1
 		int cx = X() >> 1;
@@ -1013,7 +1013,7 @@ void CtrlTable::OnPosChange()
 	Layout();
 }
 
-void CtrlTable::OnPaint(GSurface *pDC)
+void CtrlTable::OnPaint(LSurface *pDC)
 {
 	int i;
 	Client.Set(0, 0, X()-1, Y()-1);
@@ -1638,7 +1638,7 @@ public:
         SetPos(Size);
     }
     
-    void OnPaint(GSurface *pDC)
+    void OnPaint(LSurface *pDC)
     {
         pDC->Colour(L_WORKSPACE);
         pDC->Rectangle();

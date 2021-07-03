@@ -226,7 +226,7 @@ LRect &GLayout::GetClient(bool ClientSpace)
 	return r;
 }
 
-void GLayout::OnNcPaint(GSurface *pDC, LRect &r)
+void GLayout::OnNcPaint(LSurface *pDC, LRect &r)
 {
 	GView::OnNcPaint(pDC, r);
 }

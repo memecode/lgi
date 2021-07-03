@@ -33,7 +33,7 @@ public:
 	void Value(int64 i);
 	
 	void OnCreate();
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnPosChange();
 	void OnMouseClick(LMouse &m);
 	bool OnViewMouse(GView *v, LMouse &m);

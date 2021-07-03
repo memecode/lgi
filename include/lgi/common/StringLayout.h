@@ -31,7 +31,7 @@ struct LLayoutString : public LDisplayString
 	LLayoutString(LFont *f,
 				const char *s,
 				ssize_t l = -1,
-				GSurface *pdc = 0) :
+				LSurface *pdc = 0) :
 		LDisplayString(f, s, l, pdc)
 	{
 		Offset = 0;
@@ -107,7 +107,7 @@ public:
 	bool DoLayout(int Width, int MinYSize = 0, bool Debug = false);
 	
 	/// Paints the laid out strings at 'pt'.
-	void Paint(	GSurface *pDC,
+	void Paint(	LSurface *pDC,
 				LPoint pt,
 				GColour Back,
 				LRect &rc,

@@ -21,7 +21,7 @@ BOOL CALLBACK LgiAbortProc(HDC hdc, int iError)
 	return true;
 }
 
-GPrintDC::GPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName)
+LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName)
 {
 	d = new GPrintDCPrivate;
 	hDC = (HDC) Handle;
@@ -76,7 +76,7 @@ GPrintDC::GPrintDC(void *Handle, const char *PrintJobName, const char *PrinterNa
 	}
 }
 
-GPrintDC::~GPrintDC()
+LPrintDC::~LPrintDC()
 {
 	// EndPage();
 
@@ -92,38 +92,38 @@ GPrintDC::~GPrintDC()
     }
 }
 
-const char *GPrintDC::GetOutputFileName()
+const char *LPrintDC::GetOutputFileName()
 {
 	return d->OutputFileName;
 }
 
-int GPrintDC::X()
+int LPrintDC::X()
 {
 	return GetDeviceCaps(hDC, HORZRES);
 }
 
-int GPrintDC::Y()
+int LPrintDC::Y()
 {
 	return GetDeviceCaps(hDC, VERTRES);
 }
 
-int GPrintDC::GetBits()
+int LPrintDC::GetBits()
 {
 	return GetDeviceCaps(hDC, BITSPIXEL);
 }
 
-int GPrintDC::DpiX()
+int LPrintDC::DpiX()
 {
 	return GetDeviceCaps(hDC, LOGPIXELSX); 
 }
 
-int GPrintDC::DpiY()
+int LPrintDC::DpiY()
 {
 	return GetDeviceCaps(hDC, LOGPIXELSY);
 }
 
 /*
-bool GPrintDC::StartPage()
+bool LPrintDC::StartPage()
 {
 	bool Status = false;
 	if (hDC && d->DocOpen)
@@ -135,7 +135,7 @@ bool GPrintDC::StartPage()
 	return Status;
 }
 
-void GPrintDC::EndPage()
+void LPrintDC::EndPage()
 {
 	if (hDC && d->PageOpen)
 	{

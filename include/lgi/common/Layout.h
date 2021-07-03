@@ -128,7 +128,7 @@ public:
 	
 	void OnPosChange() override;
 	int OnNotify(GViewI *c, int f) override;
-	void OnNcPaint(GSurface *pDC, LRect &r) override;
+	void OnNcPaint(LSurface *pDC, LRect &r) override;
 
 	#endif
 	#endif

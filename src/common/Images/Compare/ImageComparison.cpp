@@ -37,7 +37,7 @@ GArray<uint32> RDiff, GDiff, BDiff;
 #endif
 
 template<typename Px>
-void CompareRgb(GSurface *A, GSurface *B, uint8_t *c, LPoint size, int threshold)
+void CompareRgb(LSurface *A, LSurface *B, uint8_t *c, LPoint size, int threshold)
 {
 	if (!A || !B || !c)
 		return;
@@ -77,7 +77,7 @@ void CompareRgb(GSurface *A, GSurface *B, uint8_t *c, LPoint size, int threshold
 }
 
 template<typename Px>
-void CompareRgba(GSurface *A, GSurface *B, uint8_t *c, LPoint size, int threshold)
+void CompareRgba(LSurface *A, LSurface *B, uint8_t *c, LPoint size, int threshold)
 {
 	Px *a = (Px*) (*A)[size.y];
 	Px *b = (Px*) (*B)[size.y];
@@ -117,9 +117,9 @@ void CompareRgba(GSurface *A, GSurface *B, uint8_t *c, LPoint size, int threshol
 	}
 }
 
-GAutoPtr<GMemDC> CreateDiff(GViewI *Parent, GSurface *A, GSurface *B)
+GAutoPtr<LMemDC> CreateDiff(GViewI *Parent, LSurface *A, LSurface *B)
 {
-	GAutoPtr<GMemDC> C;
+	GAutoPtr<LMemDC> C;
 	int Cx = MIN(A->X(), B->X()), Cy = MIN(A->Y(), B->Y());
 	if (A->GetColourSpace() != B->GetColourSpace())
 	{
@@ -129,7 +129,7 @@ GAutoPtr<GMemDC> CreateDiff(GViewI *Parent, GSurface *A, GSurface *B)
 		GAutoString a(p.NewStr());
 		LgiMsg(Parent, "%s", "Image Compare", MB_OK, a.Get());
 	}
-	else if (C.Reset(new GMemDC(Cx, Cy, CsIndex8)) &&
+	else if (C.Reset(new LMemDC(Cx, Cy, CsIndex8)) &&
 			(*C)[0])
 	{
 		uchar Pal[] = {0, 0, 0, 0xc0, 0xc0, 0xc0, 0xff, 0, 0};
@@ -242,7 +242,7 @@ class ThreadLoader : public LThread
 	GAutoString File;
 	
 public:
-	GAutoPtr<GSurface> Img;
+	GAutoPtr<LSurface> Img;
 	GMessage::Param Param;
 
 	ThreadLoader(GView *owner, GAutoString file, GMessage::Param param) : LThread("ThreadLoader")
@@ -302,7 +302,7 @@ class CompareView : public GLayout
 {
 	GZoomViewCallback *Callback;
 	GEdit *AName, *BName, *CName;
-	GAutoPtr<GSurface> A, B, C;
+	GAutoPtr<LSurface> A, B, C;
 	CmpZoomView *AView, *BView, *CView;
 	GArray<ThreadLoader*> Threads;
 	GStatusBar *Status;
@@ -367,7 +367,7 @@ public:
 		AttachChildren();
 	}
 	
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(L_MED);
 		pDC->Rectangle();
@@ -400,7 +400,7 @@ public:
 				if (A &&
 					B)
 				{
-					GAutoPtr<GMemDC> pDC = CreateDiff(this, A, B);
+					GAutoPtr<LMemDC> pDC = CreateDiff(this, A, B);
 					if (pDC)
 					{
 						if (C.Reset(pDC.Release()))
@@ -573,7 +573,7 @@ public:
 		Diff->a = p->a;
 	}
 
-	GAutoString DescribePixel(GSurface *pDC, LPoint Pos, GRgba64 *Diff)
+	GAutoString DescribePixel(LSurface *pDC, LPoint Pos, GRgba64 *Diff)
 	{
 		char s[256] = "No Data";
 		int ch = 0;
@@ -706,8 +706,8 @@ public:
 	
 		if (AView && BView)
 		{
-			GSurface *a = AView->GetSurface();
-			GSurface *b = BView->GetSurface();
+			LSurface *a = AView->GetSurface();
+			LSurface *b = BView->GetSurface();
 			if (a && b)
 			{
 				GRgba64 ap, bp;
@@ -805,8 +805,8 @@ struct CompareThread : public LThread
 			{
 				const char *left = i->GetText(0);
 				const char *right = i->GetText(1);
-				GAutoPtr<GSurface> left_img(GdcD->Load(left));
-				GAutoPtr<GSurface> right_img(GdcD->Load(right));
+				GAutoPtr<LSurface> left_img(GdcD->Load(left));
+				GAutoPtr<LSurface> right_img(GdcD->Load(right));
 				if (left_img && right_img)
 				{
 					if (left_img->X() == right_img->X() &&
@@ -861,13 +861,13 @@ struct ImageCompareDlgPriv : public GZoomViewCallback
 		tabs = NULL;
 	}
 
-	void DrawBackground(GZoomView *View, GSurface *Dst, LPoint Offset, LRect *Where)
+	void DrawBackground(GZoomView *View, LSurface *Dst, LPoint Offset, LRect *Where)
 	{
 		Dst->Colour(L_WORKSPACE, 24);
 		Dst->Rectangle(Where);
 	}
 	
-	void DrawForeground(GZoomView *View, GSurface *Dst, LPoint Offset, LRect *Where)
+	void DrawForeground(GZoomView *View, LSurface *Dst, LPoint Offset, LRect *Where)
 	{
 	}
 

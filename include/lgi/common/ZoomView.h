@@ -24,8 +24,8 @@ public:
 	
 	#undef DefOption
 	
-	virtual void DrawBackground(GZoomView *View, GSurface *Dst, LPoint TileIdx, LRect *Where = NULL) = 0;
-	virtual void DrawForeground(GZoomView *View, GSurface *Dst, LPoint TileIdx, LRect *Where = NULL) = 0;
+	virtual void DrawBackground(GZoomView *View, LSurface *Dst, LPoint TileIdx, LRect *Where = NULL) = 0;
+	virtual void DrawForeground(GZoomView *View, LSurface *Dst, LPoint TileIdx, LRect *Where = NULL) = 0;
 	virtual void SetStatusText(const char *Msg, int Pane = 0) {}
 };
 
@@ -84,8 +84,8 @@ public:
 	void ScrollToPoint(LPoint DocCoord);
 
 	// Subclass
-	void SetSurface(GSurface *dc, bool own);
-	GSurface *GetSurface();
+	void SetSurface(LSurface *dc, bool own);
+	LSurface *GetSurface();
 	void Update(LRect *Where = NULL);
 	void Reset();
 	int GetBlockSize();
@@ -94,7 +94,7 @@ public:
 	void OnMouseClick(LMouse &m);
 	bool OnMouseWheel(double Lines);
 	void OnPulse();
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	int OnNotify(GViewI *v, int f);
 	GMessage::Param OnEvent(GMessage *m);
 	bool OnLayout(GViewLayoutInfo &Inf);

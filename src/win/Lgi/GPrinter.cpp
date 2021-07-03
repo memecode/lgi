@@ -94,7 +94,7 @@ bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages, 
 		}
 	}
 
-	GPrintDC dc(d->Info.hDC, PrintJobName, PrinterName);
+	LPrintDC dc(d->Info.hDC, PrintJobName, PrinterName);
 	if (!dc.Handle())
 	{
 		d->Err.Printf("%s:%i - StartDoc failed.\n", _FL);

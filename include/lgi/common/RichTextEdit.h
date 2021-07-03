@@ -64,7 +64,7 @@ protected:
 	virtual void PourText(ssize_t Start, ssize_t Length);
 	virtual void PourStyle(ssize_t Start, ssize_t Length);
 	virtual void OnFontChange();
-	virtual void OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour);
+	virtual void OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour);
 
 public:
 	// Construction
@@ -209,7 +209,7 @@ public:
 	void OnMouseClick(LMouse &m);
 	void OnMouseMove(LMouse &m);
 	bool OnKey(LKey &k);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	GMessage::Result OnEvent(GMessage *Msg);
 	int OnNotify(GViewI *Ctrl, int Flags);
 	void OnPulse();

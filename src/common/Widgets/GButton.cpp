@@ -44,7 +44,7 @@ public:
 	bool Toggle;
 	
 	LRect TxtSz;
-	GSurface *Image;
+	LSurface *Image;
 	bool OwnImage;
 	
 	GButtonPrivate() : LStringLayout(LgiApp->GetFontCache())
@@ -153,7 +153,7 @@ void GButton::SetIsToggle(bool toggle)
 	d->Toggle = toggle;
 }
 
-GSurface *GButton::GetImage()
+LSurface *GButton::GetImage()
 {
 	return d->Image;
 }
@@ -167,7 +167,7 @@ bool GButton::SetImage(const char *FileName)
 	return d->OwnImage = d->Image != NULL;
 }
 
-bool GButton::SetImage(GSurface *Img, bool OwnIt)
+bool GButton::SetImage(LSurface *Img, bool OwnIt)
 {
 	if (d->OwnImage)
 		DeleteObj(d->Image);
@@ -383,7 +383,7 @@ void GButton::OnFocus(bool f)
 	Invalidate();
 }
 
-void GButton::OnPaint(GSurface *pDC)
+void GButton::OnPaint(LSurface *pDC)
 {
 	#if defined LGI_CARBON
 
@@ -448,7 +448,7 @@ void GButton::OnPaint(GSurface *pDC)
 				LRect r = GetClient();
 				r.Size(5, 3);
 				pDC->Colour(GColour(180, 180, 180));
-				pDC->LineStyle(GSurface::LineAlternate);
+				pDC->LineStyle(LSurface::LineAlternate);
 				pDC->Box(&r);
 			}
 		}

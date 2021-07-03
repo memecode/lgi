@@ -13,7 +13,7 @@
 #include "lgi/common/GdcTools.h"
 #include "lgi/common/Palette.h"
 
-bool IsGreyScale(GSurface *pDC)
+bool IsGreyScale(LSurface *pDC)
 {
 	bool Status = false;
 	if (pDC)
@@ -45,7 +45,7 @@ bool IsGreyScale(GSurface *pDC)
 #define FP_GREEN_TO_GREY	38469	// 0.587 * 65536
 #define FP_BLUE_TO_GREY		7471	// 0.114 * 65536
 
-bool GreyScaleDC(GSurface *pDest, GSurface *pSrc)
+bool GreyScaleDC(LSurface *pDest, LSurface *pSrc)
 {
 	bool Status = false;
 
@@ -186,7 +186,7 @@ bool GreyScaleDC(GSurface *pDest, GSurface *pSrc)
 	return Status;
 }
 
-bool InvertDC(GSurface *pDC)
+bool InvertDC(LSurface *pDC)
 {
 	bool Status = true;
 
@@ -289,7 +289,7 @@ bool InvertDC(GSurface *pDC)
 	return Status;
 }
 
-bool FlipDC(GSurface *pDC, int Dir)
+bool FlipDC(LSurface *pDC, int Dir)
 {
 	bool Status = false;
 
@@ -338,18 +338,18 @@ bool FlipDC(GSurface *pDC, int Dir)
 	return Status;
 }
 
-bool RotateDC(GSurface *pDC, double Angle, Progress *Prog)
+bool RotateDC(LSurface *pDC, double Angle, Progress *Prog)
 {
 	if (!pDC)
 		return false;
 
-	GAutoPtr<GSurface> pOld(new GMemDC(pDC));
+	GAutoPtr<LSurface> pOld(new LMemDC(pDC));
 
 	// do the rotation
 	if (Angle == 180)
 	{
-		GSurface *pOldAlpha = pOld->AlphaDC();
-		GSurface *pAlpha = pDC->AlphaDC();
+		LSurface *pOldAlpha = pOld->AlphaDC();
+		LSurface *pAlpha = pDC->AlphaDC();
 
 		for (int y=0; y<pOld->Y() && (!Prog || !Prog->IsCancelled()); y++)
 		{
@@ -371,13 +371,13 @@ bool RotateDC(GSurface *pDC, double Angle, Progress *Prog)
 		if (!pDC->Create(pOld->Y(), pOld->X(), pOld->GetColourSpace()))
 			return false;
 
-		GSurface *pOldAlpha = pOld->AlphaDC();
+		LSurface *pOldAlpha = pOld->AlphaDC();
 		if (pOldAlpha)
 		{
 			pDC->HasAlpha(true);
 		}
 
-		GSurface *pAlpha = pDC->AlphaDC();
+		LSurface *pAlpha = pDC->AlphaDC();
 		if (Angle == 90)
 		{
 			for (int y=0; y<pOld->Y() && (!Prog || !Prog->IsCancelled()); y++)
@@ -423,7 +423,7 @@ bool RotateDC(GSurface *pDC, double Angle, Progress *Prog)
 	return true;
 }
 
-bool FlipXDC(GSurface *pDC, Progress *Prog)
+bool FlipXDC(LSurface *pDC, Progress *Prog)
 {
 	bool Status = false;
 	if (pDC)
@@ -446,7 +446,7 @@ bool FlipXDC(GSurface *pDC, Progress *Prog)
 	return Status;
 }
 
-bool FlipYDC(GSurface *pDC, Progress *Prog)
+bool FlipYDC(LSurface *pDC, Progress *Prog)
 {
 	bool Status = false;
 	if (pDC)
@@ -470,7 +470,7 @@ bool FlipYDC(GSurface *pDC, Progress *Prog)
 }
 
 // Remaps DC to new palette
-bool RemapDC(GSurface *pDC, GPalette *DestPal)
+bool RemapDC(LSurface *pDC, GPalette *DestPal)
 {
 	bool Status = false;
 	if (pDC && pDC->GetBits() <= 8 && DestPal)
@@ -532,7 +532,7 @@ float blerp(float c00, float c10, float c01, float c11, float tx, float ty)
     return lerp(lerp(c00, c10, tx), lerp(c01, c11, tx), ty);
 }
 
-bool ResampleDC(GSurface *dst, GSurface *src, LRect *FromRgn, Progress *Prog)
+bool ResampleDC(LSurface *dst, LSurface *src, LRect *FromRgn, Progress *Prog)
 {
 	// void scale(image_t *src, image_t *dst, float scalex, float scaley){
     int newWidth = dst->X();
@@ -585,7 +585,7 @@ bool ResampleDC(GSurface *dst, GSurface *src, LRect *FromRgn, Progress *Prog)
 
 #else
 
-bool ResampleDC(GSurface *pDest, GSurface *pSrc, LRect *FromRgn, Progress *Prog)
+bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 {
 	if (!pDest || !pSrc)
 		return false;
@@ -646,7 +646,7 @@ bool ResampleDC(GSurface *pDest, GSurface *pSrc, LRect *FromRgn, Progress *Prog)
 	}
 
 	// For each destination pixel
-	GSurface *pAlpha = pSrc->AlphaDC();
+	LSurface *pAlpha = pSrc->AlphaDC();
 	GColourSpace SrcCs = pSrc->GetColourSpace();
 	GColourSpace DstCs = pDest->GetColourSpace();
 	bool HasSrcAlpha = GColourSpaceHasAlpha(SrcCs);

@@ -505,7 +505,7 @@ void LMenuItem::_Measure(LPoint &Size)
 	}
 }
 
-void LMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
+void LMenuItem::_PaintText(LSurface *pDC, int x, int y, int Width)
 {
 	bool Underline = d->StartUnderline;
 	LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
@@ -536,7 +536,7 @@ void LMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 	}
 }
 
-void LMenuItem::_Paint(GSurface *pDC, int Flags)
+void LMenuItem::_Paint(LSurface *pDC, int Flags)
 {
 	bool BaseMenu = Parent == Menu;
 	int IconX = BaseMenu ? 5 : 20;
@@ -1187,7 +1187,7 @@ int LMenu::_OnEvent(GMessage *Msg)
 			{
 				LRect r = Item->rcItem;
 
-				GScreenDC Dc(Item->hDC, Item->hwndItem);
+				LScreenDC Dc(Item->hDC, Item->hwndItem);
 				
 				// Get the original origin. We need to do this because when
 				// "animated menus" are on the offset starts at -3,-3 and throws

@@ -10,7 +10,7 @@
 struct LEmojiFontPriv
 {
 	GString Fn;
-	GAutoPtr<GSurface> Img, Scaled;
+	GAutoPtr<LSurface> Img, Scaled;
 	GArray<bool> Resampled;
 	int Cell;
 
@@ -77,7 +77,7 @@ int LEmojiFont::_CharAt(int xPos, OsChar *Str, int len, LgiPxToIndexType Type)
 	return -1;
 }
 
-void LEmojiFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int len, LRect *r, GColour &fore)
+void LEmojiFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int len, LRect *r, GColour &fore)
 {
 	if (!priv->Img)
 		return;
@@ -93,7 +93,7 @@ void LEmojiFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int len, LRect 
 		if (!u32)
 			break;
 
-		GSurface *Src = priv->Scaled ? priv->Scaled : priv->Img;
+		LSurface *Src = priv->Scaled ? priv->Scaled : priv->Img;
 
 		auto Idx = EmojiToIconIndex(&u32, 1);
 		if (Idx >= 0)
@@ -115,7 +115,7 @@ void LEmojiFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int len, LRect 
 			if (priv->Scaled && !priv->Resampled[Idx])
 			{
 				priv->Resampled[Idx] = true;			
-				GAutoPtr<GSurface> s(priv->Scaled->SubImage(Icon));
+				GAutoPtr<LSurface> s(priv->Scaled->SubImage(Icon));
 				LRect Src(0, 0, EMOJI_CELL_SIZE-1, EMOJI_CELL_SIZE-1);
 				Src.Offset(Cx * EMOJI_CELL_SIZE, Cy * EMOJI_CELL_SIZE);
 				ResampleDC(s, priv->Img.Get(), &Src);
@@ -138,7 +138,7 @@ int LEmojiFont::GetHeight()
 	return priv->Cell;
 }
 
-bool LEmojiFont::Create(const char *Face, LCss::Len Sz, GSurface *pSurface)
+bool LEmojiFont::Create(const char *Face, LCss::Len Sz, LSurface *pSurface)
 {
 	if (Sz.IsValid())
 		Size(Sz);
@@ -201,7 +201,7 @@ bool LEmojiFont::Create(const char *Face, LCss::Len Sz, GSurface *pSurface)
 		(
 			NewCell != EMOJI_CELL_SIZE &&
 			!priv->Scaled &&
-			priv->Scaled.Reset(new GMemDC(Nx, Ny, priv->Img->GetColourSpace()))
+			priv->Scaled.Reset(new LMemDC(Nx, Ny, priv->Img->GetColourSpace()))
 		)
 		{
 			priv->Scaled->Colour(0, 32);

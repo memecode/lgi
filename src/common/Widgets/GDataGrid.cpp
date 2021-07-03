@@ -528,7 +528,7 @@ bool GDataGrid::OnMouseWheel(double Lines)
 	return true;
 }
 
-void GDataGrid::OnPaint(GSurface *pDC)
+void GDataGrid::OnPaint(LSurface *pDC)
 {
 	LList::OnPaint(pDC);
 

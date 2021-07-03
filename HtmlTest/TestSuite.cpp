@@ -222,7 +222,7 @@ public:
 						GAutoPtr<GFilter> Filter(GFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint));
 						if (Filter)
 						{
-							GAutoPtr<GSurface> Img(new GMemDC);
+							GAutoPtr<LSurface> Img(new LMemDC);
 							GFilter::IoStatus Rd = Filter->ReadImage(Img, &p);
 							if (Rd == GFilter::IoSuccess)
 							{
@@ -496,7 +496,7 @@ public:
 
 						Html1::GHtml Html(100, 0, 0, PageSize.x, PageSize.y, this);
 						Html.Name(Content);
-						GMemDC Screen(PageSize.x, PageSize.y, System24BitColourSpace);
+						LMemDC Screen(PageSize.x, PageSize.y, System24BitColourSpace);
 						Screen.Colour(GColour(255, 255, 255));
 						Screen.Rectangle();
 						Html.OnPaint(&Screen);

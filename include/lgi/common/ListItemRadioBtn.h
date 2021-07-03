@@ -35,7 +35,7 @@ public:
 
 	void OnPaintColumn(ItemPaintCtx &r, int i, GItemColumn *Col)
 	{
-		GSurface *pDC = r.pDC;
+		LSurface *pDC = r.pDC;
 		LRect c(0, 0, 10, 10);
 		c.Offset(r.x1 + ((r.X()-c.X())/2), r.y1 + ((r.Y()-c.Y())/2));
 

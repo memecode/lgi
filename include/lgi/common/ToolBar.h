@@ -80,7 +80,7 @@ public:
 	bool GetNeedsRightClick() { return NeedsRightClick; }
 	void SetNeedsRightClick(bool b) { NeedsRightClick = b; }
 
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 
 	void OnMouseClick(LMouse &m) override;
 	void OnMouseMove(LMouse &m) override;
@@ -163,7 +163,7 @@ public:
 	/// Sets the image list to use via a file
 	bool SetBitmap(char *File, int Bx, int By);
 	/// Sets the image list to use via a memory surface
-	bool SetDC(GSurface *pDC, int Bx, int By);
+	bool SetDC(LSurface *pDC, int Bx, int By);
 	/// Gets the image list
 	GImageList *GetImageList();
 	/// Sets the image list to use
@@ -204,7 +204,7 @@ public:
 
 	// Events
 	GMessage::Result OnEvent(GMessage *Msg);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
 	void OnMouseEnter(LMouse &m);
 	void OnMouseExit(LMouse &m);

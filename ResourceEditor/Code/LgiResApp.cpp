@@ -615,7 +615,7 @@ public:
 		SetPos(r);
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		LRect c = GetClient();
 		LgiThinBorder(pDC, c, DefaultSunkenEdge);
@@ -849,7 +849,7 @@ int FieldView::OnNotify(GViewI *Ctrl, int Flags)
 	return 0;
 }
 
-void FieldView::OnPaint(GSurface *pDC)
+void FieldView::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_MED);
 	pDC->Rectangle();
@@ -1168,7 +1168,7 @@ public:
 		Sunken(true);
 	}
 	
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(c, 24);
 		pDC->Rectangle();
@@ -4442,7 +4442,7 @@ bool ResFrame::OnKey(LKey &k)
 	return Child->Wnd()->OnKey(k) || Status;
 }
 
-void ResFrame::OnPaint(GSurface *pDC)
+void ResFrame::OnPaint(LSurface *pDC)
 {
 	// Draw nice frame
 	LRect r(0, 0, X()-1, Y()-1);

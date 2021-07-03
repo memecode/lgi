@@ -1314,7 +1314,7 @@ void LMenuItem::PaintIcon(Gtk::cairo_t *cr)
 											gtk_widget_get_state_flags(wid),
 											&bk);
 
-	GScreenDC Dc(cr, a.width, a.height);
+	LScreenDC Dc(cr, a.width, a.height);
 	il->Draw(&Dc, 7, 5, _Icon, bk.alpha ? GColour(bk) : GColour::White);
 }
 

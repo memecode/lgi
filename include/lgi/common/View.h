@@ -196,7 +196,7 @@ protected:
 	
 	virtual bool OnViewMouse(GView *v, LMouse &m) override { return true; }
 	virtual bool OnViewKey(GView *v, LKey &k) override { return false; }
-	virtual void OnNcPaint(GSurface *pDC, LRect &r);
+	virtual void OnNcPaint(LSurface *pDC, LRect &r);
 
 	/// List of children views.
 	friend class GViewIter;
@@ -205,7 +205,7 @@ protected:
 #if defined(LGI_SDL) || defined(LGI_COCOA)
 public:
 #endif
-	virtual void	_Paint(GSurface *pDC = NULL, LPoint *Offset = NULL, LRect *Update = NULL);
+	virtual void	_Paint(LSurface *pDC = NULL, LPoint *Offset = NULL, LRect *Update = NULL);
 
 public:
 	/// \brief Creates a view/window.
@@ -383,7 +383,7 @@ public:
 	void Raised(bool i) override;
 
 	/// Draws an OS themed border
-	void DrawThemeBorder(GSurface *pDC, LRect &r);
+	void DrawThemeBorder(LSurface *pDC, LRect &r);
 
 	/// \brief true if the control is currently executing in the GUI thread
 	///
@@ -664,7 +664,7 @@ public:
 	/// Called when the contents of the Children list have changed.
 	void OnChildrenChanged(GViewI *Wnd, bool Attaching) override;
 	/// Called to paint the onscreen representation of the view
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	/// \brief Called when a child view or view with it's SetNotify() set to this window changes.
 	///
 	/// The event by default will bubble up to the LWindow at the top of the window heirarchy visiting

@@ -129,7 +129,7 @@ public:
 		return Status;
 	}
 	
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		LRect c = GetClient();
 		auto b = L_TOOL_TIP;

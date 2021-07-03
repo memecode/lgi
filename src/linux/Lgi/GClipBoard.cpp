@@ -131,12 +131,12 @@ char16 *GClipBoard::TextW()
 	return Utf8ToWide(u);
 }
 
-bool GClipBoard::Bitmap(GSurface *pDC, bool AutoEmpty)
+bool GClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 {
 	bool Status = false;
 	if (pDC && d->c)
 	{
-		GMemDC *Mem = dynamic_cast<GMemDC*>(pDC);
+		LMemDC *Mem = dynamic_cast<LMemDC*>(pDC);
 		if (Mem)
 		{
 			/*
@@ -156,7 +156,7 @@ bool GClipBoard::Bitmap(GSurface *pDC, bool AutoEmpty)
 	return Status;
 }
 
-void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, GAutoPtr<GSurface> *Out)
+void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, GAutoPtr<LSurface> *Out)
 {
 	auto chan = gdk_pixbuf_get_n_channels(Img);
 	auto alpha = gdk_pixbuf_get_has_alpha(Img);
@@ -178,7 +178,7 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, GAutoPtr<GS
 	}
 
 	auto x = gdk_pixbuf_get_width(Img), y = gdk_pixbuf_get_height(Img);
-	GAutoPtr<GMemDC> m(new GMemDC(x, y, cs));
+	GAutoPtr<LMemDC> m(new LMemDC(x, y, cs));
 	if (m)
 	{
 		auto px = gdk_pixbuf_get_pixels(Img);
@@ -233,7 +233,7 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, GAutoPtr<GS
 	}
 }
 
-GSurface *GClipBoard::Bitmap()
+LSurface *GClipBoard::Bitmap()
 {
 	pDC.Reset();
 	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, &pDC);

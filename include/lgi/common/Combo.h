@@ -120,7 +120,7 @@ public:
 	int SysOnNotify(int Msg, int Code);
 	#else
 	void OnFocus(bool f) override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	void OnMouseClick(LMouse &m) override;
 	void OnPosChange() override;
 	void SetFont(LFont *Fnt, bool OwnIt = false) override;

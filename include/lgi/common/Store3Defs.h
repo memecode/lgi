@@ -362,7 +362,7 @@ enum Store3Fields
 	FIELD_CONTACT_CUST_FLD4 = 106,		// (char*)
 	FIELD_CONTACT_CUST_VAL4 = 107,		// (char*)
 	*/
-	FIELD_CONTACT_IMAGE	= 108,			// (GSurface*)
+	FIELD_CONTACT_IMAGE	= 108,			// (LSurface*)
 	FIELD_CONTACT_JSON = 109,			// (char*)
 
 	// Misc additional fields

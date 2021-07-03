@@ -79,7 +79,7 @@ class BltTest : public GWindow
 	struct Test
 	{
 		GColourSpace Src, Dst;
-		GMemDC Result;
+		LMemDC Result;
 		
 		void Create()
 		{
@@ -94,7 +94,7 @@ class BltTest : public GWindow
 				}
 			}
 			
-			GMemDC SrcDC;
+			LMemDC SrcDC;
 			if (!SrcDC.Create(16, 16, Src))
 				return;
 			
@@ -130,7 +130,7 @@ public:
 		}
 	}
 	
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(L_WORKSPACE);
 		pDC->Rectangle();
@@ -294,7 +294,7 @@ public:
 		Opts.SerializeFile(true);
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		auto c = GetClient();
 		

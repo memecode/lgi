@@ -93,7 +93,7 @@ public:
 	void OnEnter(LKey &k);
 	void SendNotify(int Data = 0);
 	bool OnLayout(GViewLayoutInfo &Inf) { return false; }
-    void OnPaint(GSurface *pDC);
+    void OnPaint(LSurface *pDC);
 	bool SetScrollBars(bool x, bool y);
 	#endif
 };

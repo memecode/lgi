@@ -433,7 +433,7 @@
     <ClCompile Include="src\common\Gdc2\GColour.cpp" />
     <ClCompile Include="src\common\Gdc2\GdcCommon.cpp" />
     <ClCompile Include="src\common\Gdc2\LRect.cpp" />
-    <ClCompile Include="src\common\Gdc2\GSurface.cpp" />
+    <ClCompile Include="src\common\Gdc2\LSurface.cpp" />
     <ClCompile Include="src\common\Gdc2\Path\GPath.cpp" />
     <ClCompile Include="src\common\Gdc2\Tools\GColourReduce.cpp" />
     <ClCompile Include="src\common\General\GContainers.cpp" />
@@ -553,9 +553,9 @@
     <ClCompile Include="src\common\Widgets\LList.cpp" />
     <ClCompile Include="src\win\Gdc2\Gdc2.cpp" />
     <ClCompile Include="src\win\Gdc2\GdiLeak.cpp" />
-    <ClCompile Include="src\win\Gdc2\GMemDC.cpp" />
-    <ClCompile Include="src\win\Gdc2\GPrintDC.cpp" />
-    <ClCompile Include="src\win\Gdc2\GScreenDC.cpp" />
+    <ClCompile Include="src\win\Gdc2\LMemDC.cpp" />
+    <ClCompile Include="src\win\Gdc2\LPrintDC.cpp" />
+    <ClCompile Include="src\win\Gdc2\LScreenDC.cpp" />
     <ClCompile Include="src\win\General\GFile.cpp" />
     <ClCompile Include="src\win\General\GMem.cpp" />
     <ClCompile Include="src\win\General\ShowFileProp_Win.cpp" />

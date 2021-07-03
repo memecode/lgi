@@ -22,7 +22,7 @@ public:
 	
 	const char *GetClass() { return "GColourSelectPopup"; }
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		LRect r = GetClient();
 		LgiWideBorder(pDC, r, DefaultRaisedEdge);
@@ -135,7 +135,7 @@ void GColourSelect::Value(int64 i)
 	}
 }
 
-void GColourSelect::OnPaint(GSurface *pDC)
+void GColourSelect::OnPaint(LSurface *pDC)
 {
 	GDropDown::OnPaint(pDC);
 

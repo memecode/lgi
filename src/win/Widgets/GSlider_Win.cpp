@@ -98,7 +98,7 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 				if (f.Type == LCss::ColorRgb)
 				{
 					HDC hDC = (HDC)Msg->A();
-					GScreenDC dc(hDC, Handle());
+					LScreenDC dc(hDC, Handle());
 					dc.Colour(f.Rgb32, 32);
 					dc.Rectangle();
 					return 1;
@@ -113,7 +113,7 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 				LCss::ColorDef f = GetCss()->BackgroundColor();
 				if (f.Type == LCss::ColorRgb)
 				{
-					GScreenDC dc(Handle());
+					LScreenDC dc(Handle());
 					dc.Colour(f.Rgb32, 32);
 					dc.Rectangle();
 					

@@ -81,7 +81,7 @@ GMessage::Result GRadioGroup::OnEvent(GMessage *Msg)
 	{
 		case WM_ERASEBKGND:
 		{
-			GScreenDC Dc((HDC)Msg->A(), _View);
+			LScreenDC Dc((HDC)Msg->A(), _View);
 			GColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 			Dc.Colour(cBack);
 			Dc.Rectangle();
@@ -182,7 +182,7 @@ int GRadioGroup::OnNotify(GViewI *Ctrl, int Flags)
 	return 0;
 }
 
-void GRadioGroup::OnPaint(GSurface *pDC)
+void GRadioGroup::OnPaint(LSurface *pDC)
 {
 }
 

@@ -106,7 +106,7 @@ char *GClipBoard::Text()
 	return Status;
 }
 
-bool GClipBoard::Bitmap(GSurface *pDC, bool AutoEmpty)
+bool GClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 {
 	bool Status = FALSE;
 	if (pDC)
@@ -115,7 +115,7 @@ bool GClipBoard::Bitmap(GSurface *pDC, bool AutoEmpty)
 	return Status;
 }
 
-GSurface *GClipBoard::Bitmap()
+LSurface *GClipBoard::Bitmap()
 {
 	return 0;
 }

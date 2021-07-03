@@ -90,7 +90,7 @@ GMessage::Param GSlider::OnEvent(GMessage *Msg)
 	return GControl::OnEvent(Msg);
 }
 
-void GSlider::OnPaint(GSurface *pDC)
+void GSlider::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_MED);
 	pDC->Rectangle();

@@ -10,7 +10,7 @@ class LgiClass GBitmap :
 	public GControl,
 	public ResObject
 {
-	GSurface *pDC;
+	LSurface *pDC;
 	class LThread *pThread;
 
 public:
@@ -19,12 +19,12 @@ public:
 	~GBitmap();
 
 	/// Sets the surface to display in the control
-	virtual void SetDC(GSurface *pDC = 0);
+	virtual void SetDC(LSurface *pDC = 0);
 	/// Gets the surface being displayed
-	virtual GSurface *GetSurface();
+	virtual LSurface *GetSurface();
 
 	GMessage::Result OnEvent(GMessage *Msg);
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
 };
 

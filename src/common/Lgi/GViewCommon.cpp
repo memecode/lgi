@@ -456,7 +456,7 @@ void GView::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 {
 }
 
-void GView::OnPaint(GSurface *pDC)
+void GView::OnPaint(LSurface *pDC)
 {
 	auto c = GetClient();
 	GCssTools Tools(this);
@@ -488,7 +488,7 @@ int GView::OnCommand(int Cmd, int Event, OsView Wnd)
 	return 0;
 }
 
-void GView::OnNcPaint(GSurface *pDC, LRect &r)
+void GView::OnNcPaint(LSurface *pDC, LRect &r)
 {
 	int Border = Sunken() || Raised() ? _BorderSize : 0;
 	if (Border == 2)
@@ -519,7 +519,7 @@ uint64 nPaint = 0;
 uint64 PaintTime = 0;
 */
 
-void GView::_Paint(GSurface *pDC, LPoint *Offset, LRect *Update)
+void GView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 {
 	/*
 	uint64 StartTs = Update ? LgiCurrentTime() : 0;
@@ -527,10 +527,10 @@ void GView::_Paint(GSurface *pDC, LPoint *Offset, LRect *Update)
 	*/
 
 	// Create temp DC if needed...
-	GAutoPtr<GSurface> Local;
+	GAutoPtr<LSurface> Local;
 	if (!pDC)
 	{
-		if (!Local.Reset(new GScreenDC(this)))
+		if (!Local.Reset(new LScreenDC(this)))
 			return;
 		pDC = Local;
 	}
@@ -619,13 +619,13 @@ void GView::_Paint(GSurface *pDC, LPoint *Offset, LRect *Update)
 	}
 }
 #else
-void GView::_Paint(GSurface *pDC, LPoint *Offset, LRect *Update)
+void GView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 {
 	// Create temp DC if needed...
-	GAutoPtr<GSurface> Local;
+	GAutoPtr<LSurface> Local;
 	if (!pDC)
 	{
-		Local.Reset(new GScreenDC(this));
+		Local.Reset(new LScreenDC(this));
 		pDC = Local;
 	}
 	if (!pDC)

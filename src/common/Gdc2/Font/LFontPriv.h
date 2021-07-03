@@ -71,7 +71,7 @@ public:
 	int				Height;
 	bool			Dirty;
 	char			*Cp;
-	GSurface		*pSurface;
+	LSurface		*pSurface;
 	bool			OwnerUnderline;
 	bool			WarnOnDelete;
 

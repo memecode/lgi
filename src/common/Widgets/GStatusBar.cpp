@@ -31,7 +31,7 @@ bool GStatusBar::Pour(LRegion &r)
 	return false;
 }
 
-void GStatusBar::OnPaint(GSurface *pDC)
+void GStatusBar::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_MED);
 	pDC->Rectangle();
@@ -143,7 +143,7 @@ bool GStatusPane::Name(const char *n)
 	return Status;
 }
 
-void GStatusPane::OnPaint(GSurface *pDC)
+void GStatusPane::OnPaint(LSurface *pDC)
 {
 	GAutoString t;
 	if (Lock(_FL))
@@ -205,17 +205,17 @@ void GStatusPane::Sunken(bool s)
 	}
 }
 
-GSurface *GStatusPane::Bitmap()
+LSurface *GStatusPane::Bitmap()
 {
 	return pDC;
 }
 
-void GStatusPane::Bitmap(GSurface *pNewDC)
+void GStatusPane::Bitmap(LSurface *pNewDC)
 {
 	DeleteObj(pDC);
 	if (pNewDC)
 	{
-		pDC = new GMemDC;
+		pDC = new LMemDC;
 		if (pDC)
 		{
 			if (pDC->Create(pNewDC->X(), pNewDC->Y(), pNewDC->GetColourSpace()))

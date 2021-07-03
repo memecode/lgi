@@ -69,7 +69,7 @@ void LgiMenuItem::DrawContent()
 	
 	if (i)
 	{
-		GScreenDC DC(Menu());
+		LScreenDC DC(Menu());
 		BPoint p = ContentLocation();
 		DC.SetOrigin(-p.x, -p.y);
 		i->_Paint(&DC, 0);
@@ -584,7 +584,7 @@ void GMenuItem::_Measure(LPoint &Size)
 {
 }
 
-void GMenuItem::_Paint(GSurface *pDC, int Flags)
+void GMenuItem::_Paint(LSurface *pDC, int Flags)
 {
 	if (_Icon >= 0)
 	{
@@ -597,7 +597,7 @@ void GMenuItem::_Paint(GSurface *pDC, int Flags)
 	}
 }
 
-void GMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
+void GMenuItem::_PaintText(LSurface *pDC, int x, int y, int Width)
 {
 }
 

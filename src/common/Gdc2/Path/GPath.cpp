@@ -1392,7 +1392,7 @@ void GPath::Unflatten()
 	Vecs.DeleteObjects();
 }
 
-void GPath::Fill(GSurface *pDC, GBrush &c)
+void GPath::Fill(LSurface *pDC, GBrush &c)
 {
 	if (!GdcD || !pDC || !(*pDC)[0])
 	{
@@ -1922,7 +1922,7 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 	}
 }
 
-void GPath::Stroke(GSurface *pDC, GBrush &Brush, double Width)
+void GPath::Stroke(LSurface *pDC, GBrush &Brush, double Width)
 {
 	if (!Point)
 	{

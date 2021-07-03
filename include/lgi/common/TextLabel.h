@@ -57,7 +57,7 @@ public:
 	// Events
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	int OnNotify(GViewI *Ctrl, int Flags) override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	void OnPosChange() override;
 	void OnAttach() override;
 	bool OnLayout(GViewLayoutInfo &Inf) override;

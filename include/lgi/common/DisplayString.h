@@ -33,7 +33,7 @@
 class LgiClass LDisplayString
 {
 protected:
-	GSurface *pDC;
+	LSurface *pDC;
 	LFont *Font;
 	uint32_t x, y;
 	int xf, yf;
@@ -60,7 +60,7 @@ protected:
 	
 	#if defined(LGI_SDL)
 	
-	GAutoPtr<GMemDC> Img;
+	GAutoPtr<LMemDC> Img;
 	
 	#elif defined(__GTK_H__)
 
@@ -111,7 +111,7 @@ protected:
 	#endif
 
 	void Layout(bool Debug = false);
-	void DrawWhiteSpace(GSurface *pDC, char Ch, LRect &r);
+	void DrawWhiteSpace(LSurface *pDC, char Ch, LRect &r);
 
 public:
 	/// Constructor
@@ -123,7 +123,7 @@ public:
 		const char *s,
 		/// Number of bytes in the input string or -1 for NULL terminated.
 		ssize_t l = -1,
-		GSurface *pdc = 0
+		LSurface *pdc = 0
 	);
 	/// Constructor
 	LDisplayString
@@ -134,7 +134,7 @@ public:
 		const char16 *s,
 		/// The number of characters in the input string (NOT the number of bytes) or -1 for NULL terminated
 		ssize_t l = -1,
-		GSurface *pdc = 0
+		LSurface *pdc = 0
 	);
 	#ifdef _MSC_VER
 	/// Constructor
@@ -146,7 +146,7 @@ public:
 		const uint32_t *s,
 		/// The number of characters in the input string (NOT the number of bytes) or -1 for NULL terminated
 		ssize_t l = -1,
-		GSurface *pdc = 0
+		LSurface *pdc = 0
 	);
 	#endif
 	virtual ~LDisplayString();
@@ -224,7 +224,7 @@ public:
 		void Draw
 		(
 			/// The output device
-			GSurface *pDC,
+			LSurface *pDC,
 			/// The x coordinate of the top left corner of the output box
 			int x,
 			/// The y coordinate of the top left corner of the output box
@@ -239,7 +239,7 @@ public:
 		void DrawCenter
 		(
 			/// The output device
-			GSurface *pDC,
+			LSurface *pDC,
 			/// An rectangle to center in. If the font is not transparent this rectangle will be filled with the background colour.
 			LRect *r
 		)
@@ -287,7 +287,7 @@ public:
 		void FDraw
 		(
 			/// The output device
-			GSurface *pDC,
+			LSurface *pDC,
 			/// The fractional x coordinate of the top left corner of the output box
 			int fx,
 			/// The fractional y coordinate of the top left corner of the output box

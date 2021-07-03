@@ -40,7 +40,7 @@ void GDatePopup::Set(LDateTime &Ts)
 	Mv.Set(&Ts);
 }
 
-void GDatePopup::OnPaint(GSurface *pDC)
+void GDatePopup::OnPaint(LSurface *pDC)
 {
 	if (FirstPaint)
 	{

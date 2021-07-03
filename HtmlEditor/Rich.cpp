@@ -120,7 +120,7 @@ public:
 		return 0;
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(GColour::Red);
 		pDC->Rectangle();

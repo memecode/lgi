@@ -26,7 +26,7 @@ public:
 	bool WantsDefault;
 	int64 Value;
 	
-	GSurface *Img;
+	LSurface *Img;
 	bool ImgOwned;
 
 	GButtonPrivate()
@@ -246,14 +246,14 @@ GMessage::Result GButton::OnEvent(GMessage *Msg)
 				break;
 
 			// Then create a screen device context for painting
-			GScreenDC dc(this);
+			LScreenDC dc(this);
 			
 			// Get the control to draw itself into a bitmap
 			LRect c = GetPos();
 			
 			// Create a HBITMAP in the same size as the control 
 			// and the same bit depth as the screen
-			GMemDC m(c.X(), c.Y(), GdcD->GetColourSpace());
+			LMemDC m(c.X(), c.Y(), GdcD->GetColourSpace());
 			// Create a HDC for the bitmap
 			HDC hdc = m.StartDC();					
 			// Ask the control to draw itself into the memory bitmap
@@ -333,7 +333,7 @@ void GButton::OnFocus(bool f)
 {
 }
 
-void GButton::OnPaint(GSurface *pDC)
+void GButton::OnPaint(LSurface *pDC)
 {
 	if (!_View)
 	{
@@ -404,7 +404,7 @@ bool GButton::SetImage(const char *FileName)
 	return false;
 }
 
-bool GButton::SetImage(GSurface *Img, bool OwnIt)
+bool GButton::SetImage(LSurface *Img, bool OwnIt)
 {
 	if (d->ImgOwned)
 		DeleteObj(d->Img);

@@ -429,7 +429,7 @@ public:
 		else LgiAssert(!"Missing table ctrl");
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(LColour(L_MED));
 		pDC->Rectangle();

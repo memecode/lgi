@@ -27,7 +27,7 @@
 #define REGISTER register
 #endif
 
-void GSurface::Init()
+void LSurface::Init()
 {
 	OriginX = OriginY = 0;
 	pMem = NULL;
@@ -47,12 +47,12 @@ void GSurface::Init()
 	LineMask = LineReset = 0x80000000;
 }
 
-GSurface::GSurface()
+LSurface::LSurface()
 {
 	Init();
 }
 
-GSurface::GSurface(GSurface *pDC)
+LSurface::LSurface(LSurface *pDC)
 {
 	Init();
 	if (pDC && Create(pDC->X(), pDC->Y(), pDC->GetColourSpace()))
@@ -69,7 +69,7 @@ GSurface::GSurface(GSurface *pDC)
 	}
 }
 
-GSurface::~GSurface()
+LSurface::~LSurface()
 {
 	#if defined(LINUX) && !defined(LGI_SDL)
 	/*
@@ -103,7 +103,7 @@ GSurface::~GSurface()
 	}
 }
 
-GString GSurface::GetStr()
+GString LSurface::GetStr()
 {
 	GString::Array s;
 	s.SetFixedLength(false);
@@ -120,7 +120,7 @@ GString GSurface::GetStr()
 	return GString(" ").Join(s);
 }
 
-GSurface *GSurface::SubImage(LRect r)
+LSurface *LSurface::SubImage(LRect r)
 {
 	if (!pMem || !pMem->Base)
 		return NULL;
@@ -131,7 +131,7 @@ GSurface *GSurface::SubImage(LRect r)
 	if (!clip.Valid())
 		return NULL;
 
-	GAutoPtr<GSurface> s(new GSurface);
+	GAutoPtr<LSurface> s(new LSurface);
 	if (!s)
 		return NULL;
 	
@@ -180,7 +180,7 @@ void SetAlphaNpm(Px *src, int x, uint8_t a)
 	}
 }
 
-bool GSurface::SetConstantAlpha(uint8_t Alpha)
+bool LSurface::SetConstantAlpha(uint8_t Alpha)
 {
 	bool HasAlpha = GColourSpaceHasAlpha(GetColourSpace());
 	if (!HasAlpha)
@@ -229,7 +229,7 @@ bool GSurface::SetConstantAlpha(uint8_t Alpha)
 	return true;	
 }
 
-OsBitmap GSurface::GetBitmap()
+OsBitmap LSurface::GetBitmap()
 {
 	#if WINNATIVE
 	return hBmp;
@@ -238,7 +238,7 @@ OsBitmap GSurface::GetBitmap()
 	#endif
 }
 
-OsPainter GSurface::Handle()
+OsPainter LSurface::Handle()
 {
 	#if WINNATIVE
 	return hDC;
@@ -249,7 +249,7 @@ OsPainter GSurface::Handle()
 	#endif
 }
 
-uchar *GSurface::operator[](int y)
+uchar *LSurface::operator[](int y)
 {
 	if (pMem &&
 		pMem->Base &&
@@ -262,7 +262,7 @@ uchar *GSurface::operator[](int y)
 	return 0;
 }
 
-void GSurface::Set(int x, int y)
+void LSurface::Set(int x, int y)
 {
 	OrgXy(x, y);
 	if (x >= Clip.x1 &&
@@ -276,7 +276,7 @@ void GSurface::Set(int x, int y)
 	}
 }
 
-COLOUR GSurface::Get(int x, int y)
+COLOUR LSurface::Get(int x, int y)
 {
 	OrgXy(x, y);
 
@@ -291,7 +291,7 @@ COLOUR GSurface::Get(int x, int y)
 	return (COLOUR)-1;
 }
 
-void GSurface::HLine(int x1, int x2, int y)
+void LSurface::HLine(int x1, int x2, int y)
 {
 	OrgXy(x1, y);
 	OrgX(x2);
@@ -328,7 +328,7 @@ void GSurface::HLine(int x1, int x2, int y)
 	}
 }
 
-void GSurface::VLine(int x, int y1, int y2)
+void LSurface::VLine(int x, int y1, int y2)
 {
 	OrgXy(x, y1);
 	OrgY(y2);
@@ -364,7 +364,7 @@ void GSurface::VLine(int x, int y1, int y2)
 	}
 }
 
-void GSurface::Line(int x1, int y1, int x2, int y2)
+void LSurface::Line(int x1, int y1, int x2, int y2)
 {
 	if (x1 == x2)
 	{
@@ -569,7 +569,7 @@ void GSurface::Line(int x1, int y1, int x2, int y2)
 	}
 }
 
-void GSurface::Circle(double Cx, double Cy, double radius)
+void LSurface::Circle(double Cx, double Cy, double radius)
 {
 	int cx = (int)Cx;
 	int cy = (int)Cy;
@@ -629,7 +629,7 @@ void GSurface::Circle(double Cx, double Cy, double radius)
 	Update(GDC_BITS_CHANGE);
 }
 
-void GSurface::FilledCircle(double Cx, double Cy, double radius)
+void LSurface::FilledCircle(double Cx, double Cy, double radius)
 {
 	int cx = (int)Cx;
 	int cy = (int)Cy;
@@ -679,7 +679,7 @@ void GSurface::FilledCircle(double Cx, double Cy, double radius)
 	Update(GDC_BITS_CHANGE);
 }
 
-void GSurface::Box(LRect *a)
+void LSurface::Box(LRect *a)
 {
 	if (a)
 	{
@@ -708,13 +708,13 @@ void GSurface::Box(LRect *a)
 	}
 }
 
-void GSurface::Box(int x1, int y1, int x2, int y2)
+void LSurface::Box(int x1, int y1, int x2, int y2)
 {
 	LRect a(x1, y1, x2, y2);
 	Box(&a);
 }
 
-void GSurface::Rectangle(LRect *a)
+void LSurface::Rectangle(LRect *a)
 {
 	LRect b;
 	if (a)
@@ -734,13 +734,13 @@ void GSurface::Rectangle(LRect *a)
 	}
 }
 
-void GSurface::Rectangle(int x1, int y1, int x2, int y2)
+void LSurface::Rectangle(int x1, int y1, int x2, int y2)
 {
 	LRect a(x1, y1, x2, y2);
 	Rectangle(&a);
 }
 
-void GSurface::Ellipse(double Cx, double Cy, double A, double B)
+void LSurface::Ellipse(double Cx, double Cy, double A, double B)
 {
 	#define incx() x++, dxt += d2xt, t += dxt
 	#define incy() y--, dyt += d2yt, t += dyt
@@ -810,7 +810,7 @@ void GSurface::Ellipse(double Cx, double Cy, double A, double B)
 	Update(GDC_BITS_CHANGE);
 }
 
-void GSurface::FilledEllipse(double Cx, double Cy, double Width, double Height)
+void LSurface::FilledEllipse(double Cx, double Cy, double Width, double Height)
 {
 	#if 0
 	
@@ -912,7 +912,7 @@ struct EDGE {
 
 int nActive, nNextEdge;
 
-void GSurface::Polygon(int nPoints, LPoint *aPoints)
+void LSurface::Polygon(int nPoints, LPoint *aPoints)
 {
 	LPoint p0, p1;
 	int i, j, gap, x0, x1, y, nEdges;
@@ -1064,7 +1064,7 @@ void GSurface::Polygon(int nPoints, LPoint *aPoints)
 	DeleteArray(AET);
 }
 
-void GSurface::Blt(int x, int y, GSurface *Src, LRect *a)
+void LSurface::Blt(int x, int y, LSurface *Src, LRect *a)
 {
 	OrgXy(x, y);
 
@@ -1140,7 +1140,7 @@ public:
 
 typedef FPt2 BPt;
 
-void GSurface::Bezier(int Threshold, LPoint *Pt)
+void LSurface::Bezier(int Threshold, LPoint *Pt)
 {
 	if (Pt)
 	{
@@ -1307,7 +1307,7 @@ bool FillMatch_Near(COLOUR Seed, COLOUR Pixel, COLOUR Border, int Bits)
 			((unsigned)abs(Db) < Border);
 }
 
-void GSurface::FloodFill(int StartX, int StartY, int Mode, COLOUR Border, LRect *FillBounds)
+void LSurface::FloodFill(int StartX, int StartY, int Mode, COLOUR Border, LRect *FillBounds)
 {
 	COLOUR Seed = Get(StartX, StartY);
 	if (Seed == 0xffffffff) return; // Doesn't support get pixel
@@ -1468,11 +1468,11 @@ void GSurface::FloodFill(int StartX, int StartY, int Mode, COLOUR Border, LRect 
 	Update(GDC_BITS_CHANGE);
 }
 
-void GSurface::Arc(double cx, double cy, double radius, double start, double end) {}
-void GSurface::FilledArc(double cx, double cy, double radius, double start, double end) {}
-void GSurface::StretchBlt(LRect *d, GSurface *Src, LRect *s) {}
+void LSurface::Arc(double cx, double cy, double radius, double start, double end) {}
+void LSurface::FilledArc(double cx, double cy, double radius, double start, double end) {}
+void LSurface::StretchBlt(LRect *d, LSurface *Src, LRect *s) {}
 
-bool GSurface::HasAlpha(bool b)
+bool LSurface::HasAlpha(bool b)
 {
 	DrawOnAlpha(false);
 
@@ -1480,7 +1480,7 @@ bool GSurface::HasAlpha(bool b)
 	{
 		if (!pAlphaDC)
 		{
-			pAlphaDC = new GMemDC;
+			pAlphaDC = new LMemDC;
 		}
 
 		if (pAlphaDC && pMem)
@@ -1503,7 +1503,7 @@ bool GSurface::HasAlpha(bool b)
 	return (b == HasAlpha());
 }
 
-bool GSurface::DrawOnAlpha(bool Draw)
+bool LSurface::DrawOnAlpha(bool Draw)
 {
 	bool Prev = DrawOnAlpha();
     bool Swap = false;
@@ -1546,7 +1546,7 @@ bool GSurface::DrawOnAlpha(bool Draw)
 	return Prev;
 }
 
-GApplicator *GSurface::CreateApplicator(int Op, GColourSpace Cs)
+GApplicator *LSurface::CreateApplicator(int Op, GColourSpace Cs)
 {
 	GApplicator *pA = NULL;
 
@@ -1601,7 +1601,7 @@ GApplicator *GSurface::CreateApplicator(int Op, GColourSpace Cs)
 	return pA;
 }
 
-bool GSurface::Applicator(GApplicator *pApplicator)
+bool LSurface::Applicator(GApplicator *pApplicator)
 {
 	bool Status = false;
 
@@ -1632,12 +1632,12 @@ bool GSurface::Applicator(GApplicator *pApplicator)
 	return Status;
 }
 
-GApplicator *GSurface::Applicator()
+GApplicator *LSurface::Applicator()
 {
 	return pApp;
 }
 
-LRect GSurface::ClipRgn(LRect *Rgn)
+LRect LSurface::ClipRgn(LRect *Rgn)
 {
 	LRect Old = Clip;
 	
@@ -1659,17 +1659,17 @@ LRect GSurface::ClipRgn(LRect *Rgn)
 	return Old;
 }
 
-LRect GSurface::ClipRgn()
+LRect LSurface::ClipRgn()
 {
 	return Clip;
 }
 
-GColour GSurface::Colour(LSystemColour SysCol)
+GColour LSurface::Colour(LSystemColour SysCol)
 {
 	return Colour(LColour(SysCol));
 }
 
-GColour GSurface::Colour(GColour c)
+GColour LSurface::Colour(GColour c)
 {
 	LgiAssert(pApp != NULL);
 	GColour cPrev;
@@ -1767,7 +1767,7 @@ GColour GSurface::Colour(GColour c)
 	return cPrev;
 }
 
-COLOUR GSurface::Colour(COLOUR c, int Bits)
+COLOUR LSurface::Colour(COLOUR c, int Bits)
 {
 	GColour n(c, Bits ? Bits : GetBits());
 	GColour Prev = Colour(n);
@@ -1783,7 +1783,7 @@ COLOUR GSurface::Colour(COLOUR c, int Bits)
 	return Prev.c32();
 }
 
-int GSurface::Op(int NewOp, NativeInt Param)
+int LSurface::Op(int NewOp, NativeInt Param)
 {
 	int PrevOp = (pApp) ? pApp->GetOp() : GDC_SET;
 	if (!pApp || PrevOp != NewOp)
@@ -1824,7 +1824,7 @@ int GSurface::Op(int NewOp, NativeInt Param)
 	return PrevOp;
 }
 
-GPalette *GSurface::Palette()
+GPalette *LSurface::Palette()
 {
 	if (!pPalette && pMem && (pMem->Flags & GDC_ON_SCREEN) && pMem->Cs == CsIndex8)
 	{
@@ -1839,7 +1839,7 @@ GPalette *GSurface::Palette()
 	return pPalette;
 }
 
-void GSurface::Palette(GPalette *pPal, bool bOwnIt)
+void LSurface::Palette(GPalette *pPal, bool bOwnIt)
 {
 	if (pPal == pPalette)
 	{
@@ -1847,7 +1847,7 @@ void GSurface::Palette(GPalette *pPal, bool bOwnIt)
 		return;
 	}
 
-	// printf("GSurface::Palette %p %i\n", pPal, bOwnIt);
+	// printf("LSurface::Palette %p %i\n", pPal, bOwnIt);
 	if (pPalette && (Flags & GDC_OWN_PALETTE) != 0)
 	{
 		// printf("\tdel=%p\n", pPalette);
@@ -1873,7 +1873,7 @@ void GSurface::Palette(GPalette *pPal, bool bOwnIt)
 	}
 }
 
-bool GSurface::GetVariant(const char *Name, LVariant &Dst, char *Array)
+bool LSurface::GetVariant(const char *Name, LVariant &Dst, char *Array)
 {
 	switch (LgiStringToDomProp(Name))
 	{
@@ -1911,7 +1911,7 @@ bool GSurface::GetVariant(const char *Name, LVariant &Dst, char *Array)
 	return true;
 }
 
-bool GSurface::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LSurface::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	switch (LgiStringToDomProp(Name))
 	{
@@ -1930,12 +1930,12 @@ bool GSurface::SetVariant(const char *Name, LVariant &Value, char *Array)
 	return false;
 }
 
-bool GSurface::CallMethod(const char *Name, LVariant *ReturnValue, GArray<LVariant*> &Args)
+bool LSurface::CallMethod(const char *Name, LVariant *ReturnValue, GArray<LVariant*> &Args)
 {
 	return false;
 }
 
-bool GSurface::IsPreMultipliedAlpha()
+bool LSurface::IsPreMultipliedAlpha()
 {
 	return pMem ? pMem->PreMul() : false;
 }
@@ -1973,7 +1973,7 @@ void ConvertFromPreMul(Px *src, int x)
 	}
 }
 
-bool GSurface::ConvertPreMulAlpha(bool ToPreMul)
+bool LSurface::ConvertPreMulAlpha(bool ToPreMul)
 {
 	if (!pMem || !pMem->Base)
 		return false;
@@ -2041,7 +2041,7 @@ void MakeOpaqueRop64(Px *in, int len)
 	}
 }
 
-bool GSurface::MakeOpaque()
+bool LSurface::MakeOpaque()
 {
 	if (!pMem || !pMem->Base)
 		return false;

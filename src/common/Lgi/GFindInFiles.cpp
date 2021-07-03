@@ -35,7 +35,7 @@ class GHistoryPopup : public GPopup
 public:
 	GHistoryPopup(GHistory *h);
 	
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(GColour(0, 0, 0));
 		pDC->Rectangle();

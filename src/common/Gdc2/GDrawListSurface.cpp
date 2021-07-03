@@ -5,7 +5,7 @@
 struct LCmd
 {
 	virtual ~LCmd() {}
-	virtual bool OnPaint(GDrawListSurfacePriv *d, GSurface *pDC) = 0;
+	virtual bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC) = 0;
 };
 
 struct GDrawListSurfacePriv : public GArray<LCmd*>
@@ -13,7 +13,7 @@ struct GDrawListSurfacePriv : public GArray<LCmd*>
 	int x, y, Bits;
 	int DpiX, DpiY;
 	GColour Fore, Back;
-	GSurface *CreationSurface;
+	LSurface *CreationSurface;
 	LFont *Font;
 
 	GDrawListSurfacePriv()
@@ -28,7 +28,7 @@ struct GDrawListSurfacePriv : public GArray<LCmd*>
 		DeleteObjects();
 	}
 	
-	bool OnPaint(GSurface *pDC)
+	bool OnPaint(LSurface *pDC)
 	{
 		for (unsigned i=0; i<Length(); i++)
 		{
@@ -53,7 +53,7 @@ struct LCmdTxt : public LCmd
 		Ds = ds;
 	}
 	
-	bool OnPaint(GDrawListSurfacePriv *d, GSurface *pDC)
+	bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC)
 	{
 		LFont *f = Ds->GetFont();
 		f->Transparent(!d->Back.IsValid());
@@ -66,12 +66,12 @@ struct LCmdTxt : public LCmd
 struct LCmdBlt : public LCmd
 {
 	LPoint p;
-	GSurface *Img;
+	LSurface *Img;
 	LRect Dst;
 	LRect Src;
 	bool Stretch;
 
-	LCmdBlt(int X, int Y, GSurface *img, LRect *dst, LRect *src, bool stretch = false) :
+	LCmdBlt(int X, int Y, LSurface *img, LRect *dst, LRect *src, bool stretch = false) :
 		p(X, Y)
 	{
 		Img = img;
@@ -88,7 +88,7 @@ struct LCmdBlt : public LCmd
 			LgiAssert(Src.Valid() && Dst.Valid());
 	}
 	
-	bool OnPaint(GDrawListSurfacePriv *d, GSurface *pDC)
+	bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC)
 	{
 		if (Stretch)
 			pDC->StretchBlt(&Dst, Img, &Src);
@@ -109,7 +109,7 @@ struct LCmdRect : public LCmd
 		Filled = filled;
 	}
 
-	bool OnPaint(GDrawListSurfacePriv *d, GSurface *pDC)
+	bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC)
 	{
 		if (Filled)
 			pDC->Rectangle(&r);
@@ -127,7 +127,7 @@ struct LCmdPixel : public LCmd
 	{
 	}
 
-	bool OnPaint(GDrawListSurfacePriv *d, GSurface *pDC)
+	bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC)
 	{
 		pDC->Set(p.x, p.y);
 		return true;
@@ -143,7 +143,7 @@ struct LCmdColour : public LCmd
 		c = col;
 	}
 
-	bool OnPaint(GDrawListSurfacePriv *d, GSurface *pDC)
+	bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC)
 	{
 		pDC->Colour(c);
 		return true;
@@ -158,7 +158,7 @@ struct LCmdLine : public LCmd
 	{
 	}
 
-	bool OnPaint(GDrawListSurfacePriv *d, GSurface *pDC)
+	bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC)
 	{
 		pDC->Line(s.x, s.y, e.x, e.y);
 		return true;
@@ -176,7 +176,7 @@ GDrawListSurface::GDrawListSurface(int Width, int Height, GColourSpace Cs)
 	ColourSpace = Cs;
 }
 
-GDrawListSurface::GDrawListSurface(GSurface *FromSurface)
+GDrawListSurface::GDrawListSurface(LSurface *FromSurface)
 {
 	d = new GDrawListSurfacePriv;
 	d->x = FromSurface->X();
@@ -199,7 +199,7 @@ ssize_t GDrawListSurface::Length()
 	return d->Length();
 }
 
-bool GDrawListSurface::OnPaint(GSurface *Dest)
+bool GDrawListSurface::OnPaint(LSurface *Dest)
 {
 	return d->OnPaint(Dest);
 }
@@ -342,7 +342,7 @@ int GDrawListSurface::GetBits()
 
 void GDrawListSurface::SetOrigin(int x, int y)
 {
-	GSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(x, y);
 }
 
 void GDrawListSurface::Set(int x, int y)
@@ -457,7 +457,7 @@ void GDrawListSurface::Rectangle(LRect *r)
 		LgiAssert(0);
 }
 
-void GDrawListSurface::Blt(int x, int y, GSurface *Src, LRect *SrcRc)
+void GDrawListSurface::Blt(int x, int y, LSurface *Src, LRect *SrcRc)
 {
 	if (!Src)
 	{
@@ -472,7 +472,7 @@ void GDrawListSurface::Blt(int x, int y, GSurface *Src, LRect *SrcRc)
 		LgiAssert(0);	
 }
 
-void GDrawListSurface::StretchBlt(LRect *drc, GSurface *Src, LRect *s)
+void GDrawListSurface::StretchBlt(LRect *drc, LSurface *Src, LRect *s)
 {
 	if (!d || !Src || !s)
 	{

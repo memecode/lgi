@@ -60,7 +60,7 @@ class GdcPng : public GFilter, public ZLib
 
 	int Pos;
 	uchar *PrevScanLine;
-	GSurface *pDC;
+	LSurface *pDC;
 	GBytePipe DataPipe;
 
 	bool ProcessData();
@@ -72,8 +72,8 @@ public:
 	~GdcPng();
 
 	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
-	bool ReadImage(GSurface *pDC);
-	bool WriteImage(GSurface *pDC);
+	bool ReadImage(LSurface *pDC);
+	bool WriteImage(LSurface *pDC);
 };
 
 // Object Factory
@@ -366,7 +366,7 @@ bool GdcPng::ProcessData()
 	return TRUE;
 }
 
-bool GdcPng::ReadImage(GSurface *pDeviceContext)
+bool GdcPng::ReadImage(LSurface *pDeviceContext)
 {
 	char PngSig[] = {137, 80, 78, 71, 13, 10, 26, 10, 0};
 	z_stream Stream;
@@ -554,7 +554,7 @@ bool GdcPng::WriteObject(ulong ChunkId, uchar *Ptr, int Len)
 	return FALSE;
 }
 
-bool GdcPng::WriteImage(GSurface *pDC)
+bool GdcPng::WriteImage(LSurface *pDC)
 {
 	bool Status = FALSE;
 	bool Error = FALSE;

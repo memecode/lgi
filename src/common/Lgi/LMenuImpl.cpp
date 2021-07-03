@@ -252,7 +252,7 @@ bool SubMenuImpl::OnKey(LKey &k)
 	return Status;
 }
 
-void SubMenuImpl::OnPaint(GSurface *pDC)
+void SubMenuImpl::OnPaint(LSurface *pDC)
 {
 	LRect c = GetClient();
     LgiWideBorder(pDC, c, EdgeXpRaised);
@@ -433,7 +433,7 @@ bool MenuImpl::HasSubOpen()
 	return false;
 }
 
-void MenuImpl::OnPaint(GSurface *pDC)
+void MenuImpl::OnPaint(LSurface *pDC)
 {
 	LRect c = GetClient();
 	
@@ -533,7 +533,7 @@ MenuItemImpl::~MenuItemImpl()
 	return d->Item;
 }
 
-void MenuItemImpl::OnPaint(GSurface *pDC)
+void MenuItemImpl::OnPaint(LSurface *pDC)
 {
 	int Flags = (d->Item->Enabled() ? 0 : ODS_DISABLED) |
 				(Over == this		? ODS_SELECTED : 0) | 

@@ -43,7 +43,7 @@ enum IconCacheType
 	IconDisabled
 };
 
-COLOUR Map(GSurface *pDC, COLOUR c);
+COLOUR Map(LSurface *pDC, COLOUR c);
 
 ////////////////////////////////////////////////////////////////////////
 GImageList *LgiLoadImageList(const char *File, int x, int y)
@@ -79,7 +79,7 @@ GImageList *LgiLoadImageList(const char *File, int x, int y)
 		return NULL;
 	}
 
-	GAutoPtr<GSurface> pDC(GdcD->Load(Path));
+	GAutoPtr<LSurface> pDC(GdcD->Load(Path));
 	if (!pDC)
 	{
 		LgiTrace("%s:%i - Couldn't load '%s'\n", _FL, Path.Get());
@@ -133,7 +133,7 @@ public:
 	int Sx, Sy;
 	uint8_t DisabledAlpha;
 
-	struct CacheDC : public GMemDC
+	struct CacheDC : public LMemDC
 	{
 		bool Disabled;
 		GColour Back;
@@ -170,7 +170,7 @@ public:
 				
 				if (Disabled)
 				{
-					GMemDC tmp(ImgLst->X(), ImgLst->Y(), System32BitColourSpace, GSurface::SurfaceRequireExactCs);
+					LMemDC tmp(ImgLst->X(), ImgLst->Y(), System32BitColourSpace, LSurface::SurfaceRequireExactCs);
 					tmp.Colour(0, 32);
 					tmp.Rectangle();
 					tmp.Op(GDC_ALPHA);
@@ -220,14 +220,14 @@ static bool HasPad(GColourSpace cs)
 	return false;
 }
 
-GImageList::GImageList(int x, int y, GSurface *pDC)
+GImageList::GImageList(int x, int y, LSurface *pDC)
 {
 	d = new GImageListPriv(this, x, y);
 
 	uint32_t Transparent = 0;
 
 	if (pDC &&
-		Create(pDC->X(), pDC->Y(), System32BitColourSpace, GSurface::SurfaceRequireExactCs))
+		Create(pDC->X(), pDC->Y(), System32BitColourSpace, LSurface::SurfaceRequireExactCs))
 	{
 		Colour(Transparent, 32);
 		Rectangle();
@@ -307,7 +307,7 @@ GImageList::~GImageList()
 	DeleteObj(d);
 }
 
-void GImageList::Draw(GSurface *pDC, int Dx, int Dy, int Image, GColour Background, bool Disabled)
+void GImageList::Draw(LSurface *pDC, int Dx, int Dy, int Image, GColour Background, bool Disabled)
 {
 	if (!pDC)
 		return;
@@ -427,7 +427,7 @@ public:
 	const char *CustomProp;
 
 	// bitmap cache
-	GAutoPtr<GMemDC> IconCache;
+	GAutoPtr<LMemDC> IconCache;
 
 	GToolBarPrivate()
 	{
@@ -603,7 +603,7 @@ void GToolButton::Layout()
 	}
 }
 
-void GToolButton::OnPaint(GSurface *pDC)
+void GToolButton::OnPaint(LSurface *pDC)
 {
 	GToolBar *Par = dynamic_cast<GToolBar*>(GetParent());
 	bool e = Enabled();
@@ -1408,7 +1408,7 @@ GMessage::Result GToolBar::OnEvent(GMessage *Msg)
 	return GView::OnEvent(Msg);
 }
 
-void GToolBar::OnPaint(GSurface *pDC)
+void GToolBar::OnPaint(LSurface *pDC)
 {
 	LRect c = GetClient();
 	GCssTools Tools(this);
@@ -1445,7 +1445,7 @@ bool GToolBar::SetBitmap(char *File, int bx, int by)
 {
 	bool Status = false;
 
-	GSurface *pDC = GdcD->Load(File);
+	LSurface *pDC = GdcD->Load(File);
 	if (pDC)
 	{
 		Status = SetDC(pDC, bx, by);
@@ -1455,7 +1455,7 @@ bool GToolBar::SetBitmap(char *File, int bx, int by)
 	return Status;
 }
 
-bool GToolBar::SetDC(GSurface *pNewDC, int bx, int by)
+bool GToolBar::SetDC(LSurface *pNewDC, int bx, int by)
 {
 	if (d->OwnImgList)
 	{
@@ -1579,7 +1579,7 @@ bool GToolBar::Attach(GViewI *parent)
 #endif
 
 ///////////////////////////////////////////////////////////////////////
-COLOUR Map(GSurface *pDC, COLOUR c)
+COLOUR Map(LSurface *pDC, COLOUR c)
 {
 	if (pDC && pDC->GetBits() <= 8)
 	{

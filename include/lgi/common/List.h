@@ -147,7 +147,7 @@ public:
 	// Events;
 	void OnMouseClick(LMouse &m) override;
 	void OnMeasure(LPoint *Info) override;
-	void OnPaint(GSurface *pDC) override { LgiAssert(0); }
+	void OnPaint(LSurface *pDC) override { LgiAssert(0); }
 	void OnPaint(GItem::ItemPaintCtx &Ctx) override;
 	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c) override;
 
@@ -273,7 +273,7 @@ protected:
 	bool GridLines;
 
 	// Double buffered
-	GSurface *Buf;
+	LSurface *Buf;
 
 	// Drawing locations
 	LRect ItemsPos;
@@ -363,7 +363,7 @@ public:
 	
 	// Events
 	
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	GMessage::Result OnEvent(GMessage *Msg);
 	// int OnHitTest(int x, int y);
 	LgiCursor GetCursor(int x, int y);

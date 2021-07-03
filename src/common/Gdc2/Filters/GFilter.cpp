@@ -75,10 +75,10 @@ public:
 	Format GetFormat() { return FmtBmp; }
 
 	/// Reads a BMP file
-	IoStatus ReadImage(GSurface *Out, GStream *In);
+	IoStatus ReadImage(LSurface *Out, GStream *In);
 	
 	/// Writes a Windows BMP file
-	IoStatus WriteImage(GStream *Out, GSurface *In);
+	IoStatus WriteImage(GStream *Out, LSurface *In);
 
 	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
@@ -278,7 +278,7 @@ int DownSort(MaskComp *a, MaskComp *b)
 	return b->Mask > a->Mask ? 1 : -1;
 }
 
-GFilter::IoStatus GdcBmp::ReadImage(GSurface *pDC, GStream *In)
+GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, GStream *In)
 {
 	if (!pDC || !In)
 		return GFilter::IoError;
@@ -613,7 +613,7 @@ ssize_t SwapWrite(GStream *Out, T v)
 	return Out->Write(&v, sizeof(v));
 }
 
-GFilter::IoStatus GdcBmp::WriteImage(GStream *Out, GSurface *pDC)
+GFilter::IoStatus GdcBmp::WriteImage(GStream *Out, LSurface *pDC)
 {
     GFilter::IoStatus Status = IoError;
 	
@@ -859,8 +859,8 @@ public:
 	Format GetFormat() { return FmtIco; }
 	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
 	int GetImages() { return 1; }
-	IoStatus ReadImage(GSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, GSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, GStream *In);
+	IoStatus WriteImage(GStream *Out, LSurface *pDC);
 	bool GetVariant(const char *n, LVariant &v, char *a);
 };
 
@@ -897,7 +897,7 @@ bool GdcIco::GetVariant(const char *n, LVariant &v, char *a)
 	return true;
 }
 
-GFilter::IoStatus GdcIco::ReadImage(GSurface *pDC, GStream *In)
+GFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, GStream *In)
 {
 	GFilter::IoStatus Status = IoError;
 	int MyBits = 0;
@@ -1027,7 +1027,7 @@ GFilter::IoStatus GdcIco::ReadImage(GSurface *pDC, GStream *In)
 				pDC->HasAlpha(true);
 			}			
 
-			GSurface *pAlpha = pDC->AlphaDC();
+			LSurface *pAlpha = pDC->AlphaDC();
 			int XorLine = XorSize / Height;
 			int AndLine = AndSize / Height;
 			for (int y=0; y<Height; y++)
@@ -1119,7 +1119,7 @@ GFilter::IoStatus GdcIco::ReadImage(GSurface *pDC, GStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcIco::WriteImage(GStream *Out, GSurface *pDC)
+GFilter::IoStatus GdcIco::WriteImage(GStream *Out, LSurface *pDC)
 {
 	GFilter::IoStatus Status = IoError;
 
@@ -1369,12 +1369,12 @@ int GFilterFactory::GetItems()
 //////////////////////////////////////////////////////////////////////////
 
 /// Legacy wrapper that calls the new method
-GSurface *LoadDC(const char *Name, bool UseOSLoader)
+LSurface *LoadDC(const char *Name, bool UseOSLoader)
 {
     return GdcD->Load(Name, UseOSLoader);
 }
 
-GSurface *GdcDevice::Load(const char *Name, bool UseOSLoader)
+LSurface *GdcDevice::Load(const char *Name, bool UseOSLoader)
 {
 	if (!LFileExists(Name))
 	{
@@ -1393,7 +1393,7 @@ GSurface *GdcDevice::Load(const char *Name, bool UseOSLoader)
 				if (Ptr)
 				{
 					GClipBoard Clip(NULL);
-					GSurface *pDC = Clip.ConvertFromPtr(Ptr);
+					LSurface *pDC = Clip.ConvertFromPtr(Ptr);
 					GlobalUnlock(hMem);
 					return pDC;
 				}
@@ -1413,7 +1413,7 @@ GSurface *GdcDevice::Load(const char *Name, bool UseOSLoader)
 	return Load(&File, Name, UseOSLoader);
 }
 
-GSurface *GdcDevice::Load(GStream *In, const char *Name, bool UseOSLoader)
+LSurface *GdcDevice::Load(GStream *In, const char *Name, bool UseOSLoader)
 {
 	if (!In)
 		return NULL;
@@ -1442,9 +1442,9 @@ GSurface *GdcDevice::Load(GStream *In, const char *Name, bool UseOSLoader)
 
 	LXmlTag Props;
 	GAutoPtr<GFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, Hint));
-	GAutoPtr<GSurface> pDC;
+	GAutoPtr<LSurface> pDC;
 	if (Filter &&
-		pDC.Reset(new GMemDC))
+		pDC.Reset(new LMemDC))
 	{
 		Filter->Props = &Props;
 		FilterStatus = Filter->ReadImage(pDC, In);
@@ -1512,7 +1512,7 @@ GSurface *GdcDevice::Load(GStream *In, const char *Name, bool UseOSLoader)
 			size_t y = CGImageGetHeight(Img);
 			// size_t bits = CGImageGetBitsPerPixel(Img);
 			
-			if (pDC.Reset(new GMemDC) &&
+			if (pDC.Reset(new LMemDC) &&
 				pDC->Create(x, y, System32BitColourSpace))
 			{
 				pDC->Colour(0);
@@ -1567,7 +1567,7 @@ GSurface *GdcDevice::Load(GStream *In, const char *Name, bool UseOSLoader)
 
 					if (Size.cx > 0 &&
 						Size.cy > 0 &&
-						pDC.Reset(new GMemDC))
+						pDC.Reset(new LMemDC))
 					{
 						if (pDC->Create(Size.cx, Size.cy, System24BitColourSpace))
 						{
@@ -1617,12 +1617,12 @@ GSurface *GdcDevice::Load(GStream *In, const char *Name, bool UseOSLoader)
 	return pDC.Release();
 }
 
-bool WriteDC(const char *Name, GSurface *pDC)
+bool WriteDC(const char *Name, LSurface *pDC)
 {
     return GdcD->Save(Name, pDC);
 }
 
-bool GdcDevice::Save(GStream *Out, GSurface *In, const char *FileType)
+bool GdcDevice::Save(GStream *Out, LSurface *In, const char *FileType)
 {
 	if (!Out || !In || !FileType)
 		return false;
@@ -1637,7 +1637,7 @@ bool GdcDevice::Save(GStream *Out, GSurface *In, const char *FileType)
 	return F->WriteImage(Out, In) == GFilter::IoSuccess;
 }
 
-bool GdcDevice::Save(const char *Name, GSurface *pDC)
+bool GdcDevice::Save(const char *Name, LSurface *pDC)
 {
 	if (!Name || !pDC)
 		return false;

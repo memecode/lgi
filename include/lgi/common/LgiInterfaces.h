@@ -18,7 +18,7 @@ class LFont;
 class LRect;
 class LPoint;
 class LRegion;
-class GSurface;
+class LSurface;
 class GViewI;
 class LMouse;
 class LKey;
@@ -367,7 +367,7 @@ public:
 	virtual bool OnRequestClose(bool OsShuttingDown) = 0;
 	virtual int OnHitTest(int x, int y) = 0;
 	virtual void OnChildrenChanged(GViewI *Wnd, bool Attaching) = 0;
-	virtual void OnPaint(GSurface *pDC) = 0;
+	virtual void OnPaint(LSurface *pDC) = 0;
 	virtual int OnNotify(GViewI *Ctrl, int Flags) = 0;
 	virtual int OnCommand(int Cmd, int Event, OsView Wnd) = 0;
 };

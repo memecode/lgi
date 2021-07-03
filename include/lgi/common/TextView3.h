@@ -298,7 +298,7 @@ protected:
 	virtual void PourText(size_t Start, ssize_t Length);
 	virtual void PourStyle(size_t Start, ssize_t Length);
 	virtual void OnFontChange();
-	virtual void OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour);
+	virtual void OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour);
 	virtual char16 *MapText(char16 *Str, ssize_t Len, bool RtlTrailingSpace = false);
 
 	#ifdef _DEBUG
@@ -422,7 +422,7 @@ public:
 	void OnMouseClick(LMouse &m) override;
 	void OnMouseMove(LMouse &m) override;
 	bool OnKey(LKey &k) override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	int OnNotify(GViewI *Ctrl, int Flags) override;
 	void OnPulse() override;

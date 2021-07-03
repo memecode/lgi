@@ -246,7 +246,7 @@ void GMdiChild::OnButtonClick(LMouse &m)
 		}
 	}
 }
-void GMdiChild::OnPaintButton(GSurface *pDC, LRect &rc)
+void GMdiChild::OnPaintButton(LSurface *pDC, LRect &rc)
 {
 	// Default: Draw little 'x' for closing the MDI child
 	LRect r = rc;
@@ -277,7 +277,7 @@ LRect &GMdiChild::GetClient(bool ClientSpace)
 	
 	return r;
 }
-void GMdiChild::OnPaint(GSurface *pDC)
+void GMdiChild::OnPaint(LSurface *pDC)
 {
 	LRect p = GLayout::GetClient();
 	// Border
@@ -668,7 +668,7 @@ int ViewCmp(GMdiChild **a, GMdiChild **b)
 }
 #endif
 */
-void GMdiParent::OnPaint(GSurface *pDC)
+void GMdiParent::OnPaint(LSurface *pDC)
 {
 	#if MDI_TAB_STYLE
 	if (d->Children.Length() == 0)
