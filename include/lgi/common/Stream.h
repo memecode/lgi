@@ -17,11 +17,11 @@
 
 /// Stream printf
 LgiExtern ssize_t LgiPrintf(GAutoString &Str, const char *Format, va_list &Arg);
-LgiFunc ssize_t GStreamPrintf(GStreamI *s, int flags, const char *Format, va_list &Arg);
-LgiFunc ssize_t GStreamPrint(GStreamI *s, const char *fmt, ...);
+LgiFunc ssize_t GStreamPrintf(LStreamI *s, int flags, const char *Format, va_list &Arg);
+LgiFunc ssize_t GStreamPrint(LStreamI *s, const char *fmt, ...);
 
 /// \brief Virtual base class for a data source or sink.
-class LgiClass GStream : virtual public GStreamI, virtual public GDom
+class LgiClass GStream : virtual public LStreamI, virtual public GDom
 {
 public:
 	virtual ~GStream() {}
@@ -113,14 +113,14 @@ public:
 class LgiClass GPullStreamer : public GStreamOp
 {
 public:
-	virtual ssize_t Pull(GStreamI *Source, GStreamEnd *End = 0) = 0;
+	virtual ssize_t Pull(LStreamI *Source, GStreamEnd *End = 0) = 0;
 };
 
 /// API to writes to a destination
 class LgiClass GPushStreamer : public GStreamOp
 {
 public:
-	virtual ssize_t Push(GStreamI *Dest, GStreamEnd *End = 0) = 0;
+	virtual ssize_t Push(LStreamI *Dest, GStreamEnd *End = 0) = 0;
 };
 
 /// API to read from source and then write to a destination
@@ -128,7 +128,7 @@ class LgiClass GCopyStreamer : public GStreamOp
 {
 public:
 	GCopyStreamer(int64 BufSz = -1) : GStreamOp(BufSz) {}
-	virtual ssize_t Copy(GStreamI *Source, GStreamI *Dest, GStreamEnd *End = 0);
+	virtual ssize_t Copy(LStreamI *Source, LStreamI *Dest, GStreamEnd *End = 0);
 };
 
 /// In memory stream for storing sub-streams or memory blocks
@@ -148,7 +148,7 @@ public:
 	GMemStream
 	(
 		/// The source stream
-		GStreamI *Src,
+		LStreamI *Src,
 		/// The starting position in the stream, or -1 for the current position. Use -1 for non-seekable streams like sockets
 		int64 Start,
 		/// The length of the sub-stream, or -1 to read all the data to the end
@@ -190,18 +190,18 @@ public:
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override;
 	ssize_t Write(GStream *Out, ssize_t Size);
 	char *GetBase() { return Mem; }
-	GStreamI *Clone() override;
+	LStreamI *Clone() override;
 };
 
-/// Wraps another stream in a GStreamI interface. Useful for
+/// Wraps another stream in a LStreamI interface. Useful for
 /// giving objects to downstream consumers that they can delete.
-class LgiClass GProxyStream : public GStreamI
+class LgiClass GProxyStream : public LStreamI
 {
 protected:
-	GStreamI *s;
+	LStreamI *s;
 
 public:
-	GProxyStream(GStreamI *p)
+	GProxyStream(LStreamI *p)
 	{
 		s = p;
 	}
@@ -218,7 +218,7 @@ public:
 	bool GetValue(const char *n, LVariant &v) override { return s->GetValue(n, v); }
 	bool SetValue(const char *n, LVariant &v) override { return s->SetValue(n, v); }
 
-	GStreamI *Clone() override { return new GProxyStream(s); }
+	LStreamI *Clone() override { return new GProxyStream(s); }
 };
 
 /// A temporary FIFO stream that stores data in memory up until you

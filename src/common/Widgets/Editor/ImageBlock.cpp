@@ -12,7 +12,7 @@ int ImgScales[] = { 15, 25, 50, 75, 100 };
 class ImageLoader : public GEventTargetThread, public Progress
 {
 	GString File;
-	GEventSinkI *Sink;
+	LEventSinkI *Sink;
 	LSurface *Img;
 	GAutoPtr<GFilter> Filter;
 	bool SurfaceSent;
@@ -20,7 +20,7 @@ class ImageLoader : public GEventTargetThread, public Progress
 	GAutoPtr<GStream> In;
 
 public:
-	ImageLoader(GEventSinkI *s) : GEventTargetThread("ImageLoader")
+	ImageLoader(LEventSinkI *s) : GEventTargetThread("ImageLoader")
 	{
 		Sink = s;
 		Img = NULL;
@@ -142,7 +142,7 @@ public:
 			}
 			case M_IMAGE_LOAD_STREAM:
 			{
-				GAutoPtr<GStreamI> Stream((GStreamI*)Msg->A());
+				GAutoPtr<LStreamI> Stream((LStreamI*)Msg->A());
 				GAutoPtr<GString> FileName((GString*)Msg->B());
 				#if LOADER_THREAD_LOGGING
 				LgiTrace("%s:%i - Thread.Receive(M_IMAGE_LOAD_STREAM)\n", _FL);
@@ -448,7 +448,7 @@ bool GRichTextPriv::ImageBlock::Load(const char *Src)
 	if (Src)
 		Source = Src;
 
-	GAutoPtr<GStreamI> Stream;
+	GAutoPtr<LStreamI> Stream;
 	
 	GString::Array a = Source.Strip().Split(":", 1);
 	if (a.Length() > 1 &&

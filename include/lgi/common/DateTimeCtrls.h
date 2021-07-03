@@ -9,12 +9,12 @@
 /// This is a popup window to select a time.
 class GTimePopup : public GPopup
 {
-	GView *Owner;
+	LView *Owner;
 	class TimeList *Times;
 	bool Ignore;
 
 public:
-	GTimePopup(GView *owner);
+	GTimePopup(LView *owner);
 	~GTimePopup();
 
 	const char *GetClass() { return "GTimePopup"; }
@@ -24,14 +24,14 @@ public:
 
 	void OnCreate();
 	void OnPaint(LSurface *pDC);
-	int OnNotify(GViewI *c, int f);
+	int OnNotify(LViewI *c, int f);
 };
 
 /// This class is a little button to pull down the list of times...
 /// You use it by creating a custom control in LgiRes and using the control
 /// name "GTimePopup". Then at runtime bind it to an editbox by getting the
-/// GView handle using GView::FindControl then give it the pointer to the
-/// edit box using GView::SetNotify.
+/// LView handle using LView::FindControl then give it the pointer to the
+/// edit box using LView::SetNotify.
 class GTimeDropDown :
 	public GDropDown,
 	public ResObject
@@ -44,15 +44,15 @@ public:
 	/// This sets the date source control is the notify control is empty.
 	void SetDate(char *d);
 	void OnMouseClick(LMouse &m);
-	bool OnLayout(GViewLayoutInfo &Inf);
-	int OnNotify(GViewI *Ctrl, int Flags);
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
+	bool OnLayout(LViewLayoutInfo &Inf);
+	int OnNotify(LViewI *Ctrl, int Flags);
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
 };
 
 /// Popup window used to select a date.
 class GDatePopup : public GPopup
 {
-	GView *Owner;
+	LView *Owner;
 	LRect Caption;
 	LRect Date;
 	LRect Prev;
@@ -63,7 +63,7 @@ class GDatePopup : public GPopup
 	bool FirstPaint;
 	
 public:
-	GDatePopup(GView *owner);
+	GDatePopup(LView *owner);
 	~GDatePopup();
 
 	const char *GetClass() { return "GDatePopup"; }
@@ -80,8 +80,8 @@ public:
 /// This class is a little button to pull down a date selection control...
 /// You use it by creating a custom control in LgiRes and using the control
 /// name "GDatePopup". Then at runtime bind it to an editbox by getting the
-/// GView handle using GView::FindControl then give it the pointer to the
-/// edit box using GView::SetNotify.
+/// LView handle using LView::FindControl then give it the pointer to the
+/// edit box using LView::SetNotify.
 class GDateDropDown :
 	public GDropDown,
 	public ResObject
@@ -96,9 +96,9 @@ public:
 	/// empty.
 	void SetDate(char *d);
 	void OnMouseClick(LMouse &m);
-	bool OnLayout(GViewLayoutInfo &Inf);
-	int OnNotify(GViewI *Ctrl, int Flags);
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
+	bool OnLayout(LViewLayoutInfo &Inf);
+	int OnNotify(LViewI *Ctrl, int Flags);
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
 };
 
 #endif

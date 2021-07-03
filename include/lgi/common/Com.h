@@ -258,7 +258,7 @@ public:
 		return SUCCEEDED(res) ? Wr : 0;
 	}
 
-	GStreamI *Clone() override
+	LStreamI *Clone() override
 	{
 		return new IStreamWrap(s);
 	}
@@ -269,10 +269,10 @@ class GStreamWrap : public GUnknownImpl<IStream>
 {
 	bool Own;
 	GString FileName;
-	GStreamI *s;
+	LStreamI *s;
 
 public:
-	GStreamWrap(GString fileName, GStreamI *src, bool own = true)
+	GStreamWrap(GString fileName, LStreamI *src, bool own = true)
 	{
 		FileName = fileName;
 		s = src;

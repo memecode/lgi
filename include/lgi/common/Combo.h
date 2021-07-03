@@ -10,7 +10,7 @@ class LgiClass GCombo :
 	#ifdef WINNATIVE
 	public GControl,
 	#else
-	public GView,
+	public LView,
 	#endif
 	public ResObject	
 {

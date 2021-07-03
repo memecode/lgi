@@ -137,7 +137,7 @@ public:
 	LgiCursor GetCursor(int x, int y);
 	bool OnMouseWheel(double Lines);
 	bool OnKey(LKey &k);
-	int OnNotify(GViewI *c, int f);
+	int OnNotify(LViewI *c, int f);
 	void OnPosChange();
 	void OnPulse();
 	GMessage::Result OnEvent(GMessage *Msg);

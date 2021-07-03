@@ -104,7 +104,7 @@ public:
 	int64 GetPos();
 	int64 SetPos(int64 pos);
 	int64 Seek(int64 To, int Whence);
-	GStreamI *Clone();
+	LStreamI *Clone();
 	bool Eof();
 	bool GetStatus();
 	void SetStatus(bool s);

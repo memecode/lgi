@@ -342,7 +342,7 @@ GTextView3::GTextView3(	int Id,
 	: ResObject(Res_Custom)
 {
 	// init vars
-	GView::d->Css.Reset(d = new GTextView3Private(this));
+	LView::d->Css.Reset(d = new GTextView3Private(this));
 	
 	PourEnabled = true;
 	PartialPour = false;
@@ -465,7 +465,7 @@ GTextView3::~GTextView3()
 	DeleteObj(FixedFont);
 	DeleteObj(Underline);
 	DeleteObj(Bold);
-	// 'd' is owned by the GView::Css auto ptr
+	// 'd' is owned by the LView::Css auto ptr
 }
 
 char16 *GTextView3::MapText(char16 *Str, ssize_t Len, bool RtlTrailingSpace)
@@ -3330,7 +3330,7 @@ int GTextView3::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 		else if (dd.IsFileDrop())
 		{
 			// We don't directly handle file drops... pass up to the parent
-			for (GViewI *p = GetParent(); p; p = p->GetParent())
+			for (LViewI *p = GetParent(); p; p = p->GetParent())
 			{
 				GDragDropTarget *t = p->DropTarget();
 				if (t)
@@ -3745,7 +3745,7 @@ int GTextView3::OnHitTest(int x, int y)
 		return HTCLIENT;
 	}
 	#endif
-	return GView::OnHitTest(x, y);
+	return LView::OnHitTest(x, y);
 }
 
 void GTextView3::OnMouseMove(LMouse &m)
@@ -5321,7 +5321,7 @@ GMessage::Result GTextView3::OnEvent(GMessage *Msg)
 	return GLayout::OnEvent(Msg);
 }
 
-int GTextView3::OnNotify(GViewI *Ctrl, int Flags)
+int GTextView3::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl->GetId() == IDC_VSCROLL && VScroll)
 	{
@@ -5385,7 +5385,7 @@ void GTextView3::OnUrl(char *Url)
 	}
 }
 
-bool GTextView3::OnLayout(GViewLayoutInfo &Inf)
+bool GTextView3::OnLayout(LViewLayoutInfo &Inf)
 {
 	Inf.Width.Min = 32;
 	Inf.Width.Max = -1;
@@ -5399,7 +5399,7 @@ bool GTextView3::OnLayout(GViewLayoutInfo &Inf)
 ///////////////////////////////////////////////////////////////////////////////
 class GTextView3_Factory : public GViewFactory
 {
-	GView *NewView(const char *Class, LRect *Pos, const char *Text)
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (_stricmp(Class, "GTextView3") == 0)
 		{

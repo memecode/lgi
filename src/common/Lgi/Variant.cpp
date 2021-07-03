@@ -438,7 +438,7 @@ LVariant &LVariant::operator =(GDom *p)
 	return *this;
 }
 
-LVariant &LVariant::operator =(GView *p)
+LVariant &LVariant::operator =(LView *p)
 {
 	Empty();
 	if (p)
@@ -726,7 +726,7 @@ bool LVariant::SetSurface(class LSurface *Ptr, bool Own)
     return true;
 }
 
-bool LVariant::SetStream(class GStreamI *Ptr, bool Own)
+bool LVariant::SetStream(class LStreamI *Ptr, bool Own)
 {
     Empty();
     if (!Ptr)
@@ -983,7 +983,7 @@ int64 LVariant::Length()
 			return Sz;
 		}
 		case GV_GVIEW:
-			return sizeof(GView);
+			return sizeof(LView);
 		case GV_LMOUSE:
 			return sizeof(LMouse);
 		case GV_LKEY:

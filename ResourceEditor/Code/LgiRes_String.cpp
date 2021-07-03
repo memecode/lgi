@@ -22,7 +22,7 @@
 #include "resdefs.h"
 
 ////////////////////////////////////////////////////////////////////////////
-LangDlg::LangDlg(GView *parent, List<GLanguage> &l, int Init)
+LangDlg::LangDlg(LView *parent, List<GLanguage> &l, int Init)
 {
 	Lang = 0;
 	SetParent((parent) ? parent : MainWnd);
@@ -56,7 +56,7 @@ LangDlg::LangDlg(GView *parent, List<GLanguage> &l, int Init)
 	Children.Insert(new GButton(IDCANCEL, 180, 30, 60, 20, "Cancel"));
 }
 
-int LangDlg::OnNotify(GViewI *Ctrl, int Flags)
+int LangDlg::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{
@@ -1353,7 +1353,7 @@ void ResStringGroup::Paste()
 {
 }
 
-GView *ResStringGroup::CreateUI()
+LView *ResStringGroup::CreateUI()
 {
 	return Ui = new ResStringUi(this);
 }
@@ -1676,5 +1676,5 @@ GMessage::Result ResStringUi::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }

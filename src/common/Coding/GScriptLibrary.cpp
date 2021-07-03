@@ -402,13 +402,13 @@ bool SystemFunctions::WriteTextFile(LScriptArguments &Args)
 	return false;
 }
 
-GView *SystemFunctions::CastGView(LVariant &v)
+LView *SystemFunctions::CastGView(LVariant &v)
 {
 	switch (v.Type)
 	{
 		default: break;
 		case GV_DOM:
-			return dynamic_cast<GView*>(v.Value.Dom);
+			return dynamic_cast<LView*>(v.Value.Dom);
 		case GV_GVIEW:
 			return v.Value.View;
 	}
@@ -881,7 +881,7 @@ bool SystemFunctions::MessageDlg(LScriptArguments &Args)
 	if (Args.Length() < 4)
 		return false;
 
-	GViewI *Parent = CastGView(*Args[0]);
+	LViewI *Parent = CastGView(*Args[0]);
 	char *Msg = Args[1]->Str();
 	char *Title = Args[2]->Str();
 	uint32_t Btns = Args[3]->CastInt32();
@@ -897,7 +897,7 @@ bool SystemFunctions::GetInputDlg(LScriptArguments &Args)
 	if (Args.Length() < 4)
 		return false;
 
-	GViewI *Parent = CastGView(*Args[0]);
+	LViewI *Parent = CastGView(*Args[0]);
 	char *InitVal = Args[1]->Str();
 	char *Msg = Args[2]->Str();
 	char *Title = Args[3]->Str();
@@ -918,7 +918,7 @@ bool SystemFunctions::GetViewById(LScriptArguments &Args)
 	if (Args.Length() < 2)
 		return false;
 
-	GViewI *Parent = CastGView(*Args[0]);
+	LViewI *Parent = CastGView(*Args[0]);
 	int Id = Args[1]->CastInt32();
 	if (!Parent || Id <= 0)
 		return false;
@@ -1049,4 +1049,4 @@ GHostFunc *SystemFunctions::GetCommands()
 {
 	return SystemLibrary;
 }
-
+

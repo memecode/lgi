@@ -88,7 +88,7 @@ public:
 
 		#ifdef LINUX
 		friend class LFont;
-		friend class GView;
+		friend class LView;
 		
 		COLOUR		Col;
 		QPainter	p;
@@ -108,7 +108,7 @@ LScreenDC::LScreenDC()
 	ColourSpace = CsNone;
 }
 
-LScreenDC::LScreenDC(GViewI *view)
+LScreenDC::LScreenDC(LViewI *view)
 {
 	d = new GScreenPrivate;
 	ColourSpace = GdcD->GetColourSpace();

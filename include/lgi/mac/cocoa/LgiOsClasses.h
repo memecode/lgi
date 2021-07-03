@@ -20,7 +20,7 @@ public:
 	const char **GetArg() { return Arg; }
 };
 
-extern OsView DefaultOsView(class GView *v);
+extern OsView DefaultOsView(class LView *v);
 
 #ifdef __OBJC__
 

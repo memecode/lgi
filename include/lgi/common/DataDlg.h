@@ -54,13 +54,13 @@ class DataDlgTools
 {
 protected:
 	bool DeleteEmptyStrings;
-	GView *Dlg;
+	LView *Dlg;
 	ObjProperties *Options;
 
 public:
 	DataDlgTools();
 
-	void Set(GView *Dlg, ObjProperties *Options);
+	void Set(LView *Dlg, ObjProperties *Options);
 	ObjProperties *GetOptions();
 
 	bool ProcessField(DataDlgField *f, bool Write, char *OptionOverride = 0);
@@ -96,7 +96,7 @@ protected:
 public:
 	char *RecordStringTemplate;
 
-	DRecordSetCtrls(	GView *window,
+	DRecordSetCtrls(	LView *window,
 						DataDlgFieldList *fields,
 						Lst *records,
 						int DescId,
@@ -172,7 +172,7 @@ public:
 			// Set controls enabled flag correctly
 			for (auto f: Fields)
 			{
-				GView *Ctrl = dynamic_cast<GView*>(Dlg->FindControl(f->GetCtrl()));
+				LView *Ctrl = dynamic_cast<LView*>(Dlg->FindControl(f->GetCtrl()));
 				if (Ctrl)
 				{
 					if (!Current)
@@ -202,7 +202,7 @@ public:
 		}
 	}
 
-	int OnNotify(GViewI *Col, int Flags)
+	int OnNotify(LViewI *Col, int Flags)
 	{
 		if (Fields && Dlg && Records)
 		{
@@ -251,11 +251,11 @@ template <class Record, class Lst>
 class DRecordSet : public DRecordSetCtrls<Record, Lst>
 {
 public:
-	typedef Record *(*Allocator)(GView *);
+	typedef Record *(*Allocator)(LView *);
 
 	DRecordSet
 	(
-		GView *window,
+		LView *window,
 		DataDlgFieldList *fields,
 		Lst *records,
 		int DescId,

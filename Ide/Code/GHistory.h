@@ -28,7 +28,7 @@ public:
 	int Add(const char *s);
 	
 	// Impl
-	bool OnLayout(GViewLayoutInfo &Inf);
+	bool OnLayout(LViewLayoutInfo &Inf);
 };
 
 #endif

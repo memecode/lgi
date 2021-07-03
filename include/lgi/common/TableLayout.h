@@ -17,9 +17,9 @@ public:
 	virtual ~GLayoutCell() {}
 
 	virtual class GTableLayout *GetTable() = 0;
-	virtual bool Add(GView *v) = 0;
-	virtual bool Remove(GView *v) = 0;
-	virtual GArray<GView*> GetChildren() = 0;
+	virtual bool Add(LView *v) = 0;
+	virtual bool Remove(LView *v) = 0;
+	virtual GArray<LView*> GetChildren() = 0;
 };
 
 /// A table layout control. This uses techniques similar to HTML table layout to set the position
@@ -69,10 +69,10 @@ public:
 	void OnPaint(LSurface *pDC);
 	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
 	int64 Value();
 	void Value(int64 v);
-	int OnNotify(GViewI *c, int f);
+	int OnNotify(LViewI *c, int f);
 	GMessage::Result OnEvent(GMessage *m);
 };
 
@@ -83,7 +83,7 @@ class GLayoutRect : public LRect
 	int Spacing;
 
 public:
-	GLayoutRect(GViewI *c, int spacing = GTableLayout::CellSpacing)
+	GLayoutRect(LViewI *c, int spacing = GTableLayout::CellSpacing)
 	{
 		Spacing = spacing;
 		((LRect&)*this) = c->GetClient();
@@ -106,7 +106,7 @@ public:
 			return *this;
 		}
 
-		GLayoutRect Left(GViewI *v, int Px)
+		GLayoutRect Left(LViewI *v, int Px)
 		{
 			LRect r;
 			Left(r, Px);
@@ -124,7 +124,7 @@ public:
 			return *this;
 		}
 
-		GLayoutRect Right(GViewI *v, int Px)
+		GLayoutRect Right(LViewI *v, int Px)
 		{
 			LRect r;
 			Right(r, Px);
@@ -142,7 +142,7 @@ public:
 			return *this;
 		}
 
-		GLayoutRect Top(GViewI *v, int Px)
+		GLayoutRect Top(LViewI *v, int Px)
 		{
 			LRect r;
 			Top(r, Px);
@@ -160,7 +160,7 @@ public:
 			return *this;
 		}
 
-		GLayoutRect Bottom(GViewI *v, int Px)
+		GLayoutRect Bottom(LViewI *v, int Px)
 		{
 			LRect r;
 			Bottom(r, Px);
@@ -176,7 +176,7 @@ public:
 		ZOff(-1, -1);
 	}
 
-	void Remaining(GViewI *v)
+	void Remaining(LViewI *v)
 	{
 		if (v)
 			v->SetPos(*this);

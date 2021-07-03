@@ -108,7 +108,7 @@ class TabOrder : public GDialog
 	GButton *Down;
 
 public:
-	TabOrder(GView *Parent, ResDialogCtrl *top)
+	TabOrder(LView *Parent, ResDialogCtrl *top)
 	{
 		Top = top;
 		SetParent(Parent);
@@ -146,7 +146,7 @@ public:
 		}
 	}
 
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		int MoveDir = 1;
 		switch (Ctrl->GetId())
@@ -343,7 +343,7 @@ char *ResDialogCtrl::GetRefText()
 
 void ResDialogCtrl::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 {
-	for (GViewI *w: View()->IterateViews())
+	for (LViewI *w: View()->IterateViews())
 	{
 		ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(w);
 		LgiAssert(c);
@@ -366,7 +366,7 @@ LRect ResDialogCtrl::GetMinSize()
 	{
 		LRect cli = View()->GetClient(false);
 
-		for (GViewI *c: View()->IterateViews())
+		for (LViewI *c: View()->IterateViews())
 		{
 			LRect cpos = c->GetPos();
 			cpos.Offset(cli.x1, cli.y1);
@@ -475,7 +475,7 @@ void ResDialogCtrl::TabString(char *Str)
 
 LRect ResDialogCtrl::AbsPos()
 {
-	GViewI *w = View();
+	LViewI *w = View();
 	LRect r = w->GetPos();
 	r.Offset(-r.x1, -r.y1);
 
@@ -484,7 +484,7 @@ LRect ResDialogCtrl::AbsPos()
 		LRect pos = w->GetPos();
 		if (w->GetParent())
 		{
-			// GView *Ctrl = w->GetParent()->GetGView();
+			// LView *Ctrl = w->GetParent()->GetGView();
 
 			LRect client = w->GetParent()->GetClient(false);
 			r.Offset(pos.x1 + client.x1, pos.y1 + client.y1);
@@ -650,8 +650,8 @@ LMouse ResDialogCtrl::MapToDialog(LMouse m)
 	// Convert co-ords from out own local space to be relative to 'Dlg'
 	// the parent dialog.
 	LMouse Ms = m;
-	GViewI *Parent;
-	for (GViewI *i = View(); i && i != (GViewI*)Dlg; i = Parent)
+	LViewI *Parent;
+	for (LViewI *i = View(); i && i != (LViewI*)Dlg; i = Parent)
 	{
 		Parent = i->GetParent();
 		LRect Pos = i->GetPos(), Cli = i->GetClient(false);
@@ -1393,7 +1393,7 @@ void CtrlTab::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 	auto MyIndex = Par->Tabs.IndexOf(this);
 	LgiAssert(MyIndex >= 0);
 
-	List<GViewI> *CList = (Par->Current == MyIndex) ? &Par->Children : &Children;
+	List<LViewI> *CList = (Par->Current == MyIndex) ? &Par->Children : &Children;
 	for (auto w: *CList)
 	{
 		ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(w);
@@ -1512,8 +1512,8 @@ void CtrlTabs::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 	{
 	    l.Add(t);
 	    
-		auto It = (Current == n ? (GViewI*)this : (GViewI*)t)->IterateViews();
-		for (GViewI *w: It)
+		auto It = (Current == n ? (LViewI*)this : (LViewI*)t)->IterateViews();
+		for (LViewI *w: It)
 		{
 			ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(w);
 			if (c)
@@ -2329,7 +2329,7 @@ void ResDialogCtrl::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 {
 	Ctrls.Insert(this);
 
-	for (GViewI *c: View()->IterateViews())
+	for (LViewI *c: View()->IterateViews())
 	{
 		ResDialogCtrl *dc = dynamic_cast<ResDialogCtrl*>(c);
 		LgiAssert(dc);
@@ -2417,14 +2417,14 @@ void ResDialog::OnShowLanguages()
 	OnLanguageChange();
 }
 
-void ResDialog::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+void ResDialog::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	printf("ResDialog::OnChildrenChanged %p, %i\n", Wnd, Attaching);
 }
 
 const char *ResDialog::Name()
 {
-	GViewI *v = Children[0];
+	LViewI *v = Children[0];
 	
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(v);
 	if (!Ctrl)
@@ -2710,7 +2710,7 @@ void ResDialog::Delete()
 	}
 
 	// Repaint
-	GView::Invalidate();
+	LView::Invalidate();
 }
 
 bool IsChild(ResDialogCtrl *Parent, ResDialogCtrl *Child)
@@ -2854,7 +2854,7 @@ void ResDialog::Copy(bool Delete)
 		}
 
 		// Repaint
-		GView::Invalidate();
+		LView::Invalidate();
 	}
 }
 
@@ -3059,7 +3059,7 @@ void ResDialog::Paste()
 			}
 
 			// Repaint
-			GView::Invalidate();
+			LView::Invalidate();
 		}
 	}
 	DeleteArray(Mem);
@@ -3072,10 +3072,10 @@ void ResDialog::SnapPoint(LPoint *p, ResDialogCtrl *From)
 	{
 		int Ox = 0; // -Ctrl->Client.x1;
 		int Oy = 0; // -Ctrl->Client.y1;
-		GView *Parent = dynamic_cast<GView*>(Ctrl);
+		LView *Parent = dynamic_cast<LView*>(Ctrl);
 		if (From)
 		{
-			for (GViewI *w = From->View(); w && w != Parent; w = w->GetParent())
+			for (LViewI *w = From->View(); w && w != Parent; w = w->GetParent())
 			{
 				Ox += w->GetPos().x1;
 				Oy += w->GetPos().y1;
@@ -3100,8 +3100,8 @@ void ResDialog::SnapRect(LRect *r, ResDialogCtrl *From)
 	{
 		int Ox = 0; // -Ctrl->Client.x1;
 		int Oy = 0; // -Ctrl->Client.y1;
-		GView *Parent = dynamic_cast<GView*>(Ctrl);
-		for (GViewI *w = From->View(); w && w != Parent; w = w->GetParent())
+		LView *Parent = dynamic_cast<LView*>(Ctrl);
+		for (LViewI *w = From->View(); w && w != Parent; w = w->GetParent())
 		{
 			Ox += w->GetPos().x1;
 			Oy += w->GetPos().y1;
@@ -3198,9 +3198,9 @@ void ResDialog::SelectCtrl(ResDialogCtrl *c)
 	{
 		bool IsMine = false;
 		
-		for (GViewI *p = c->View(); p; p = p->GetParent())
+		for (LViewI *p = c->View(); p; p = p->GetParent())
 		{
-			if ((GViewI*)this == p)
+			if ((LViewI*)this == p)
 			{
 				IsMine = true;
 				break;
@@ -3213,7 +3213,7 @@ void ResDialog::SelectCtrl(ResDialogCtrl *c)
 			
 			// int TabIdx = -1;
 			ResDialogCtrl *Prev = 0;
-			for (GViewI *p = c->View()->GetParent(); p; p = p->GetParent())
+			for (LViewI *p = c->View()->GetParent(); p; p = p->GetParent())
 			{
 				ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(p);
 				if (c)
@@ -3253,7 +3253,7 @@ void ResDialog::SelectRect(ResDialogCtrl *Parent, LRect *r, bool ClearPrev)
 
 	if (Parent && r)
 	{
-		for (GViewI *c: Parent->View()->IterateViews())
+		for (LViewI *c: Parent->View()->IterateViews())
 		{
 			if (c->GetPos().Overlap(r))
 			{
@@ -3483,7 +3483,7 @@ ResDialogCtrl *ResDialog::CreateCtrl(int Tool, LXmlTag *load)
 	return Ctrl;
 }
 
-GView *ResDialog::CreateUI()
+LView *ResDialog::CreateUI()
 {
 	return Ui = new ResDialogUi(this);
 }
@@ -3523,7 +3523,7 @@ void ResDialog::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 	GDoubleBuffer DblBuf(pDC);
 	#endif
 	
-	GView::_Paint(pDC, Offset, Update);
+	LView::_Paint(pDC, Offset, Update);
 
 	if (GetParent())
 	{
@@ -3933,7 +3933,7 @@ void OutputCtrl(GStringPipe &Def,
 				int &Index)
 {
 	char Str[256];
-	const char *Type = "GView";
+	const char *Type = "LView";
 
 	for (LgiObjectName *on=NameMap; on->Type; on++)
 	{
@@ -4036,15 +4036,15 @@ void ResDialog::OnCommand(int Cmd)
 				// Member functions
 				Buf.Push(	"\n"
 							"public:\n"
-							"\tDlg(GView *Parent);\n"
+							"\tDlg(LView *Parent);\n"
 							"\t~Dlg();\n"
 							"\n"
-							"\tint OnNotify(GViewI *Ctrl, int Flags);\n"
+							"\tint OnNotify(LViewI *Ctrl, int Flags);\n"
 							"};\n"
 							"\n");
 
 				// Class impl
-				Buf.Push(	"Dlg::Dlg(GView *Parent)\n"
+				Buf.Push(	"Dlg::Dlg(LView *Parent)\n"
 							"{\n"
 							"\tSetParent(Parent);\n");
 
@@ -4076,7 +4076,7 @@ void ResDialog::OnCommand(int Cmd)
 							"\n");
 
 				// ::OnNotify
-				Buf.Push(	"int Dlg::OnNotify(GViewI *Ctrl, int Flags)\n"
+				Buf.Push(	"int Dlg::OnNotify(LViewI *Ctrl, int Flags)\n"
 							"{\n"
 							"\tswitch (Ctrl->GetId())\n"
 							"\t{\n"
@@ -4333,7 +4333,7 @@ void ResDialogUi::SelectTool(int i)
 	if (Tools)
 	{
 		auto It = Tools->IterateViews();
-		GViewI *w = It[i];
+		LViewI *w = It[i];
 		if (w)
 		{
 			GToolButton *But = dynamic_cast<GToolButton*>(w);
@@ -4363,5 +4363,5 @@ GMessage::Result ResDialogUi::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }

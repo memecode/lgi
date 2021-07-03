@@ -75,7 +75,7 @@ public:
 	virtual void StartInstall(CapsHash *Caps) = 0;
 };
 
-class CapsBar : public GView
+class CapsBar : public LView
 {
 	GCapabilityInstallTarget *App;
 	GCapabilityTarget::CapsHash *Caps;
@@ -102,7 +102,7 @@ public:
 		return true;	
 	}
 
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		switch (Ctrl->GetId())
 		{
@@ -641,7 +641,7 @@ public:
 		return GWindow::OnCommand(Cmd, Event, Wnd);
 	}
 
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{

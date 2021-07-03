@@ -143,13 +143,13 @@ LRESULT CALLBACK DlgRedir(HWND hWnd, UINT m, WPARAM a, LPARAM b)
 		LDialog *NewWnd = (LDialog*) b;
 		NewWnd->_View = hWnd;
 		#if _MSC_VER >= _MSC_VER_VS2005
-        SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)(GViewI*)NewWnd);
+        SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)(LViewI*)NewWnd);
 		#else
-        SetWindowLong(hWnd, GWL_USERDATA, (LONG)(GViewI*)NewWnd);
+        SetWindowLong(hWnd, GWL_USERDATA, (LONG)(LViewI*)NewWnd);
 		#endif
 	}
 
-	GViewI *Wnd = (GViewI*)
+	LViewI *Wnd = (LViewI*)
 		#if _MSC_VER >= _MSC_VER_VS2005
 		#pragma warning(disable : 4312)
 		GetWindowLongPtr(hWnd, GWLP_USERDATA);
@@ -225,7 +225,7 @@ int LDialog::DoModal(OsView ParentHnd)
 			A = DlgStrCopy(A, SysFont->Face());
 			A = DlgPadToDWord(A);
 
-			GViewI *p = GetParent();
+			LViewI *p = GetParent();
 			while (	p &&
 					!p->Handle() &&
 					p->GetParent())
@@ -255,7 +255,7 @@ int LDialog::DoModal(OsView ParentHnd)
 	
 	#else
 
-    GViewI *p = GetParent();
+    LViewI *p = GetParent();
     if (p && p->GetWindow() != p)
         p = p->GetWindow();
     
@@ -374,7 +374,7 @@ int LDialog::DoModeless()
 			A = DlgStrCopy(A, SysFont->Face());
 			A = DlgPadToDWord(A);
 
-			GViewI *p = GetParent();
+			LViewI *p = GetParent();
 			while (	p &&
 					!p->Handle() &&
 					p->GetParent())
@@ -394,7 +394,7 @@ int LDialog::DoModeless()
 
 	#else
 
-    GViewI *p = GetParent();
+    LViewI *p = GetParent();
     if (p && p->GetWindow() != p)
         p = p->GetWindow();
     
@@ -460,7 +460,7 @@ GMessage::Result LDialog::OnEvent(GMessage *Msg)
 			OnCreate();
 
     		#if USE_DIALOGBOXINDIRECTPARAM
-			GViewI *v = LgiApp->GetFocus();
+			LViewI *v = LgiApp->GetFocus();
 			LWindow *w = v ? v->GetWindow() : NULL;
 			if (v && (w != v) && (w == this))
 			{
@@ -488,7 +488,7 @@ int LDialog::GetButtonId()
 	return d->BtnId;
 }
 
-int LDialog::OnNotify(GViewI *Ctrl, int Flags)
+int LDialog::OnNotify(LViewI *Ctrl, int Flags)
 {
 	GButton *b = dynamic_cast<GButton*>(Ctrl);
 	if (b)
@@ -509,15 +509,15 @@ void LDialog::Quit(bool DontDelete)
 	if (d->IsModal)
 		EndModal(0);
 	else
-		GView::Quit(DontDelete);
+		LView::Quit(DontDelete);
 }
 
 void LDialog::OnPosChange()
 {
     if (Children.Length() == 1)
     {
-        List<GViewI>::I it = Children.begin();
-        GLayout *t = dynamic_cast<GLayout*>((GViewI*)it);
+        List<LViewI>::I it = Children.begin();
+        GLayout *t = dynamic_cast<GLayout*>((LViewI*)it);
         if (t)
         {
             LRect r = GetClient();
@@ -550,7 +550,7 @@ void LDialog::EndModeless(int Code)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GControl::GControl(char *SubClassName) : GView(0)
+GControl::GControl(char *SubClassName) : LView(0)
 {
 	SubClass = 0;
 	SetOnDelete = NULL;
@@ -599,7 +599,7 @@ GMessage::Result GControl::OnEvent(GMessage *Msg)
 		{
 			bool Deleted = false;
 			SetOnDelete = &Deleted;
-			Status = GView::OnEvent(Msg);
+			Status = LView::OnEvent(Msg);
 			if (Deleted)
 				return Status;
 			
@@ -610,12 +610,12 @@ GMessage::Result GControl::OnEvent(GMessage *Msg)
 		case WM_CTLCOLORSTATIC:
 		{
 			// These should never be called.. but just in case.
-			return GView::OnEvent(Msg);
+			return LView::OnEvent(Msg);
 			break;
 		}
 		case WM_NCDESTROY:
 		{
-			Status = GView::OnEvent(Msg);
+			Status = LView::OnEvent(Msg);
 			break;
 		}
 	}

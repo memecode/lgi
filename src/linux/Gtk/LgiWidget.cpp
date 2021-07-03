@@ -15,7 +15,7 @@ struct _LgiWidget
 	GtkContainer widget;
 	GdkWindow *window;
 
-	GViewI *target;
+	LViewI *target;
 	bool pour_largest;
 	bool drag_over_widget;
 	char *drop_format;
@@ -54,7 +54,7 @@ GType lgi_widget_child_type(GtkContainer   *container)
 
 G_DEFINE_TYPE(LgiWidget, lgi_widget, GTK_TYPE_CONTAINER)
 
-GtkWidget *lgi_widget_new(GViewI *target, bool pour_largest)
+GtkWidget *lgi_widget_new(LViewI *target, bool pour_largest)
 {
 	LgiWidget *p = LGI_WIDGET(g_object_new(lgi_widget_get_type(), NULL));
 	if (p)
@@ -62,7 +62,7 @@ GtkWidget *lgi_widget_new(GViewI *target, bool pour_largest)
 		p->target = target;
 		p->pour_largest = pour_largest;
 		
-		g_object_set_data(G_OBJECT(p), "GViewI", target);
+		g_object_set_data(G_OBJECT(p), "LViewI", target);
 
 		if (target->GetTabStop())
 		{
@@ -104,7 +104,7 @@ lgi_widget_remove(GtkContainer *wid, GtkWidget *child)
 		gtk_widget_queue_resize(GTK_WIDGET(wid));
 }
 
-LMouse _map_mouse_event(GView *v, int x, int y, bool Motion, bool Debug = false)
+LMouse _map_mouse_event(LView *v, int x, int y, bool Motion, bool Debug = false)
 {
 	LMouse m;
 
@@ -153,7 +153,7 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 		return false;
 	}
 	
-	GView *v = dynamic_cast<GView*>(p->target);
+	LView *v = dynamic_cast<LView*>(p->target);
 	if (!v)
 	{
 		printf("%s:%i - no view\n", _FL);
@@ -204,7 +204,7 @@ gboolean lgi_widget_motion(GtkWidget *widget, GdkEventMotion *ev)
 	if (!p)
 		return false;
 
-	GView *v = dynamic_cast<GView*>(p->target);
+	LView *v = dynamic_cast<LView*>(p->target);
 	if (!v)
 		return false;
 
@@ -225,7 +225,7 @@ gboolean lgi_widget_motion(GtkWidget *widget, GdkEventMotion *ev)
 static gboolean lgi_widget_scroll(GtkWidget *widget, GdkEventScroll *ev)
 {
 	LgiWidget *p = LGI_WIDGET(widget);
-	GView *v = dynamic_cast<GView*>(p->target);
+	LView *v = dynamic_cast<LView*>(p->target);
 	if (v)
 	{
 		double Lines = ev->direction == GDK_SCROLL_DOWN ? 3 : -3;
@@ -242,7 +242,7 @@ static gboolean lgi_widget_scroll(GtkWidget *widget, GdkEventScroll *ev)
 static gboolean lgi_widget_mouse_enter_leave(GtkWidget *widget, GdkEventCrossing *ev)
 {
 	LgiWidget *p = LGI_WIDGET(widget);
-	GView *v = dynamic_cast<GView*>(p->target);
+	LView *v = dynamic_cast<LView*>(p->target);
 	if (v)
 	{
 		LMouse m;
@@ -264,14 +264,14 @@ static gboolean lgi_widget_mouse_enter_leave(GtkWidget *widget, GdkEventCrossing
 	return TRUE;
 }
 
-void BuildTabStops(GViewI *v, ::GArray<GViewI*> &a)
+void BuildTabStops(LViewI *v, ::GArray<LViewI*> &a)
 {
 	if (v->Enabled() &&
 		v->Visible() &&
 		v->GetTabStop())
 		a.Add(v);
 	
-	for (GViewI *c: v->IterateViews())
+	for (LViewI *c: v->IterateViews())
 	{
 		if (c->Enabled() &&
 			c->Visible())
@@ -297,7 +297,7 @@ gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 	#endif
 
 	LgiWidget *p = LGI_WIDGET(wid);
-	GView *v = dynamic_cast<GView*>(p->target);
+	LView *v = dynamic_cast<LView*>(p->target);
 	if (!v)
 		printf("%s:%i - No target??\n", _FL);
 	else
@@ -408,14 +408,14 @@ gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 				k.Down())
 			{
 				// Do tab between controls
-				::GArray<GViewI*> a;
+				::GArray<LViewI*> a;
 				BuildTabStops(w, a);
-				int idx = a.IndexOf((GViewI*)v);
+				int idx = a.IndexOf((LViewI*)v);
 				if (idx >= 0)
 				{
 					idx += k.Shift() ? -1 : 1;
 					int next_idx = idx == 0 ? a.Length() -1 : idx % a.Length();                    
-					GViewI *next = a[next_idx];
+					LViewI *next = a[next_idx];
 					if (next)
 					{
 						// LgiTrace("Setting focus to %i of %i: %s, %s, %i\n", next_idx, a.Length(), next->GetClass(), next->GetPos().GetStr(), next->GetId());
@@ -496,7 +496,7 @@ lgi_widget_drag_motion(GtkWidget	   *widget,
 		return false;
 	}
 	
-	GViewI *view = v->target;
+	LViewI *view = v->target;
 	#if DEBUG_DND
 	printf("%s:%i - DragMotion %s\n", _FL, view->GetClass());
 	#endif
@@ -574,7 +574,7 @@ lgi_widget_drag_drop(GtkWidget	       *widget,
 		return false;
 	}
 	
-	GViewI *view = v->target;
+	LViewI *view = v->target;
 	GDragDropTarget *Target = view->DropTarget();
 	while (view && !Target)
 	{
@@ -640,7 +640,7 @@ lgi_widget_drag_data_received(	GtkWidget			*widget,
 		return;
 	}
 	
-	GViewI *view = v->target;
+	LViewI *view = v->target;
 	GDragDropTarget *Target = view->DropTarget();
 	while (view && !Target)
 	{
@@ -829,7 +829,7 @@ lgi_widget_draw(GtkWidget *widget, cairo_t *cr)
 	}
 	#endif
 
-	GView *v = dynamic_cast<GView*>(p->target);
+	LView *v = dynamic_cast<LView*>(p->target);
 	if (v)
 	{
 		GdkRectangle GtkUp;

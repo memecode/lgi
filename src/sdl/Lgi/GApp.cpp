@@ -29,7 +29,7 @@
 #define DEBUG_HND_WARNINGS			0
 #define MOUSE_CAPTURE_POLL			100
 
-extern LHashTbl<PtrKey<GView*>,bool> ViewMap;
+extern LHashTbl<PtrKey<LView*>,bool> ViewMap;
 
 ////////////////////////////////////////////////////////////////
 struct OsAppArgumentsPriv
@@ -175,7 +175,7 @@ public:
 	#if HAS_SHARED_MIME
 	GSharedMime *Sm;
 	#endif
-	LHashTbl<IntKey<int>, GView*> Handles;
+	LHashTbl<IntKey<int>, LView*> Handles;
 	OsThread GuiThread;
 	OsThreadId GuiThreadId;
 	int MessageLoopDepth;
@@ -183,7 +183,7 @@ public:
 	#if DEBUG_MSG_TYPES
 	GArray<int> Types;
 	#endif
-	GArray<GViewI*> DeleteLater;
+	GArray<LViewI*> DeleteLater;
 	LMouse LastMove;
 	GAutoString Name;
 	GAutoPtr<GFontCache> FontCache;
@@ -387,7 +387,7 @@ int GApp::GetMetric(LgiSystemMetric Metric)
 	return 0;
 }
 
-GViewI *GApp::GetFocus()
+LViewI *GApp::GetFocus()
 {
 	return 0;
 }
@@ -431,7 +431,7 @@ void GApp::SetAppArgs(OsAppArguments &AppArgs)
 
 struct GtkIdle
 {
-	GAppI::OnIdleProc cb;
+	LAppI::OnIdleProc cb;
 	void *param;
 };
 
@@ -443,7 +443,7 @@ void SDL_to_Mouse(LMouse &ms, T &ev)
 	ms.Down(ev.state == SDL_PRESSED);
 
 	/*
-	GViewI *Over = ms.Target->WindowFromPoint(ms.x, ms.y);
+	LViewI *Over = ms.Target->WindowFromPoint(ms.x, ms.y);
 	if (Over != ms.Target)
 	{
 		LPoint p;
@@ -489,7 +489,7 @@ void GApp::OnSDLEvent(GMessage *m)
 				LMouse ms;
 				SDL_to_Mouse(ms, m->Event.button);
 
-				GViewI *v = AppWnd->WindowFromPoint(ms.x, ms.y);
+				LViewI *v = AppWnd->WindowFromPoint(ms.x, ms.y);
 				if (v)
 				{
 					LPoint p(ms.x, ms.y);
@@ -508,7 +508,7 @@ void GApp::OnSDLEvent(GMessage *m)
 				ms.Middle(m->Event.button.button == SDL_BUTTON_MIDDLE);
 				ms.Down(m->Event.type == SDL_MOUSEBUTTONDOWN);
 
-				GView *gv = ms.Target->GetGView();
+				LView *gv = ms.Target->GetGView();
 				/*
 				if (gv)
 					printf("AppWnd=%s/%p Target=%s/%p\n", AppWnd->GetClass(), AppWnd, ms.Target->GetClass(), ms.Target);
@@ -547,7 +547,7 @@ void GApp::OnSDLEvent(GMessage *m)
 				
 			if (AppWnd)
 			{
-				GViewI *f = AppWnd->GetFocus();
+				LViewI *f = AppWnd->GetFocus();
 				AppWnd->HandleViewKey(f ? f->GetGView() : NULL, k);
 			}
 			break;
@@ -571,7 +571,7 @@ void GApp::OnSDLEvent(GMessage *m)
 			{
 				case M_PULSE:
 				{
-					GView *v = (GView*)m->Event.user.data1;
+					LView *v = (LView*)m->Event.user.data1;
 					if (v && ViewMap.Find(v))
 					{
 						v->OnPulse();
@@ -610,7 +610,7 @@ void GApp::OnSDLEvent(GMessage *m)
 				}
 				case M_CHANGE:
 				{
-					GView *v = (GView*)m->Event.user.data1;
+					LView *v = (LView*)m->Event.user.data1;
 					GAutoPtr<GMessage::EventParams> p((GMessage::EventParams*)m->Event.user.data2);
 					
 					if (!ViewMap.Find(v))
@@ -618,7 +618,7 @@ void GApp::OnSDLEvent(GMessage *m)
 					
 					if (p && AppWnd && v)
 					{
-						GViewI *Ctrl;
+						LViewI *Ctrl;
 						if (AppWnd->GetViewById((int)p->a, Ctrl))
 							v->OnNotify(Ctrl, (int)p->b);
 						else
@@ -629,7 +629,7 @@ void GApp::OnSDLEvent(GMessage *m)
 				}
 				default:
 				{
-					GView *v = (GView*)m->Event.user.data1;
+					LView *v = (LView*)m->Event.user.data1;
 					GAutoPtr<GMessage::EventParams> p((GMessage::EventParams*)m->Event.user.data2);
 
 					if (!ViewMap.Find(v))
@@ -1106,7 +1106,7 @@ GWindow *GApp::PopWindow()
 	return AppWnd;
 }
 
-Uint32 SDL_MouseCapture(Uint32 interval, GView *v)
+Uint32 SDL_MouseCapture(Uint32 interval, LView *v)
 {
 	SDL_Event e;
 	e.type = SDL_USEREVENT;
@@ -1171,7 +1171,7 @@ void GMessage::Set(int m, Param pa, Param pb)
 		Event.user.data2 = NULL;
 }
 
-bool GMessage::Send(GViewI *Wnd)
+bool GMessage::Send(LViewI *Wnd)
 {
 	bool Status = false;
 	LgiAssert(!"Not impl.");

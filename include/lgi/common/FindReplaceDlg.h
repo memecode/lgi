@@ -6,7 +6,7 @@
 /// Common find/replace window parameters
 class LgiClass GFindReplaceCommon : public LDialog
 {
-	// bool OnViewKey(GView *v, LKey &k);
+	// bool OnViewKey(LView *v, LKey &k);
 
 public:
 	/// The string to find
@@ -35,7 +35,7 @@ public:
 	GFindDlg
 	(
 		/// The parent window
-		GView *Parent,
+		LView *Parent,
 		/// The initial string for the find argument
 		char *Init = 0,
 		/// Callback
@@ -47,7 +47,7 @@ public:
 
 	void OnCreate();
 	void OnPosChange();
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
 /// The find command on the Replace dialog
@@ -67,7 +67,7 @@ public:
 	GReplaceDlg
 	(
 		/// The parent window
-		GView *Parent,
+		LView *Parent,
 		/// The initial value to find
 		char *InitFind = 0,
 		/// The initial value to replace with
@@ -84,7 +84,7 @@ public:
 
 	/// \returns DoModal will return one of #IDC_FR_FIND,
 	/// #IDC_FR_REPLACE, #IDCANCEL or #IDOK (which means 'Replace All', the default action)
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
 

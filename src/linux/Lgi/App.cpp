@@ -188,11 +188,11 @@ void LgiCrashHandler(int Sig)
 
 struct Msg
 {
-	GViewI *v;
+	LViewI *v;
 	int m;
 	GMessage::Param a, b;
 	
-	void Set(GViewI *V, int M, GMessage::Param A, GMessage::Param B)
+	void Set(LViewI *V, int M, GMessage::Param A, GMessage::Param B)
 	{
 		v = V;
 		m = M;
@@ -414,7 +414,7 @@ int GApp::GetMetric(LgiSystemMetric Metric)
 	return 0;
 }
 
-GViewI *GApp::GetFocus()
+LViewI *GApp::GetFocus()
 {
 	// GtkWidget *w = gtk_window_get_focus(GtkWindow *window);
 	return NULL;
@@ -463,7 +463,7 @@ bool GApp::InThread()
 struct GtkIdle
 {
 	GAppPrivate *d;
-	GAppI::OnIdleProc cb;
+	LAppI::OnIdleProc cb;
 	void *param;
 };
 
@@ -503,7 +503,7 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 		
 		for (auto m : q)
 		{
-			if (!GView::LockHandler(m.v, GView::OpExists))
+			if (!LView::LockHandler(m.v, LView::OpExists))
 			{
 				// LgiTrace("%s:%i - Invalid view: %p.\n", _FL, m.v);
 			}
@@ -580,7 +580,7 @@ void GApp::Exit(int Code)
 	}
 }
 
-bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param a, GMessage::Param b)
+bool GApp::PostEvent(LViewI *View, int Msg, GMessage::Param a, GMessage::Param b)
 {
 	LMessageQue::MsgArray *q = MsgQue.Lock(_FL);
 	if (!q)
@@ -1050,7 +1050,7 @@ GLibrary *GApp::GetWindowManagerLib()
 	return d->WmLib && d->WmLib->IsLoaded() ? d->WmLib : 0;
 }
 
-void GApp::DeleteMeLater(GViewI *v)
+void GApp::DeleteMeLater(LViewI *v)
 {
 	d->DeleteLater.Add(v);
 }
@@ -1385,7 +1385,7 @@ bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth)
 	return false;
 }
 
-void GApp::OnDetach(GViewI *View)
+void GApp::OnDetach(LViewI *View)
 {
 	LMessageQue::MsgArray *q = MsgQue.Lock(_FL);
 	if (!q)
@@ -1397,7 +1397,7 @@ void GApp::OnDetach(GViewI *View)
 	MsgQue.Unlock();
 }
 
-bool GMessage::Send(GViewI *View)
+bool GMessage::Send(LViewI *View)
 {
 	if (!View)
 	{

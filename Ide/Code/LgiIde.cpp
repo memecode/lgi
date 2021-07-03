@@ -57,7 +57,7 @@ public:
 		{
 			MoveSameScreen(App);
 
-			GViewI *v;
+			LViewI *v;
 			if (GetViewById(IDC_TEXT, v))
 				v->Focus(true);
 			if (!GetViewById(IDC_FILES, Lst))
@@ -67,7 +67,7 @@ public:
 		}
 	}
 
-	bool OnViewKey(GView *v, LKey &k)
+	bool OnViewKey(LView *v, LKey &k)
 	{
 		switch (k.vkey)
 		{
@@ -144,7 +144,7 @@ public:
 		Lst->ResizeColumnsToContent();
 	}
 
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -344,7 +344,7 @@ class Depends : public LDialog
 	Dependency *Root;
 
 public:
-	Depends(GView *Parent, const char *File)
+	Depends(LView *Parent, const char *File)
 	{
 		Root = 0;
 		SetParent(Parent);
@@ -366,15 +366,15 @@ public:
 			}
 			
 			Children.Insert(t);
-			Children.Insert(new GButton(IDC_COPY, 10, t->GView::GetPos().y2 + 10, 60, 20, "Copy"));
-			Children.Insert(new GButton(IDOK, 80, t->GView::GetPos().y2 + 10, 60, 20, "Ok"));
+			Children.Insert(new GButton(IDC_COPY, 10, t->LView::GetPos().y2 + 10, 60, 20, "Copy"));
+			Children.Insert(new GButton(IDOK, 80, t->LView::GetPos().y2 + 10, 60, 20, "Ok"));
 		}
 		
 		
 		DoModal();
 	}
 	
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -474,7 +474,7 @@ bool WatchItem::SetText(const char *s, int i)
 
 		if (i == 0 && Tree && Tree->GetWindow())
 		{
-			GViewI *Tabs = Tree->GetWindow()->FindControl(IDC_DEBUG_TAB);
+			LViewI *Tabs = Tree->GetWindow()->FindControl(IDC_DEBUG_TAB);
 			if (Tabs)
 				Tabs->SendNotify(GNotifyValueChanged);
 		}
@@ -2500,7 +2500,7 @@ IdeDoc *AppWnd::NewDocWnd(const char *FileName, NodeSource *Src)
 		d->Docs.Insert(Doc);
 
 		LRect p = d->Mdi->NewPos();
-		Doc->GView::SetPos(p);
+		Doc->LView::SetPos(p);
 		Doc->Attach(d->Mdi);
 		Doc->Focus(true);
 		Doc->Raise();
@@ -2639,7 +2639,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 			Doc->OpenFile(File);
 
 			LRect p = d->Mdi->NewPos();
-			Doc->GView::SetPos(p);
+			Doc->LView::SetPos(p);
 			d->Docs.Insert(Doc);
 			d->OnFile(File);
 		}
@@ -2897,7 +2897,7 @@ public:
 		}
 	}
 	
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -2942,7 +2942,7 @@ void AppWnd::UpdateMemoryDump()
 	}
 }
 
-int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
+int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{
@@ -3212,7 +3212,7 @@ public:
 		}
 	}
 
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -3291,7 +3291,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (Doc && d->Mdi)
 			{
 				LRect p = d->Mdi->NewPos();
-				Doc->GView::SetPos(p);
+				Doc->LView::SetPos(p);
 				Doc->Attach(d->Mdi);
 				Doc->Focus(true);
 			}
@@ -3470,7 +3470,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 
 				FindInFiles Dlg(this, d->FindParameters);
 
-				GViewI *Focus = GetFocus();
+				LViewI *Focus = GetFocus();
 				if (Focus)
 				{
 					GTextView3 *Edit = dynamic_cast<GTextView3*>(Focus);
@@ -3563,7 +3563,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_FIND_REFERENCES:
 		{
-			GViewI *f = LgiApp->GetFocus();
+			LViewI *f = LgiApp->GetFocus();
 			GDocView *doc = dynamic_cast<GDocView*>(f);
 			if (!doc)
 				break;
@@ -4022,7 +4022,7 @@ IdeDoc *AppWnd::FocusDoc()
 		}
 		else
 		{
-			GViewI *f = GetFocus();
+			LViewI *f = GetFocus();
 			LgiTrace("%s:%i - Edit doesn't have focus, f=%p %s doc.edit=%s\n",
 				_FL, f, f ? f->GetClass() : 0,
 				Doc->Name());

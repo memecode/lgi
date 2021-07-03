@@ -14,7 +14,7 @@
 #include "lgi/common/Css.h"
 
 //////////////////////////////////////////////////////////////////////////////
-GLayout::GLayout() : GView(0)
+GLayout::GLayout() : LView(0)
 {
 	_SettingScrollBars = 0;
 	_PourLargest = 0;
@@ -32,14 +32,14 @@ GLayout::~GLayout()
 	DeleteObj(HScroll);
 }
 
-GViewI *GLayout::FindControl(int Id)
+LViewI *GLayout::FindControl(int Id)
 {
 	if (VScroll && VScroll->GetId() == Id)
 		return VScroll;
 	if (HScroll && HScroll->GetId() == Id)
 		return HScroll;
 
-	return GView::FindControl(Id);
+	return LView::FindControl(Id);
 }
 
 void GLayout::GetScrollPos(int64 &x, int64 &y)
@@ -206,7 +206,7 @@ GMessage::Result GLayout::OnEvent(GMessage *Msg)
 {
 	if (VScroll) VScroll->OnEvent(Msg);
 	if (HScroll) HScroll->OnEvent(Msg);
-	GMessage::Result Status = GView::OnEvent(Msg);
+	GMessage::Result Status = LView::OnEvent(Msg);
 	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&
 		GetParent())

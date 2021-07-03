@@ -58,18 +58,18 @@ class AddFilesProgress : public LDialog
 {
 	uint64 Ts;
 	uint64 v;
-	GView *Msg;
+	LView *Msg;
 
 public:
 	bool Cancel;
 	static const char *DefaultExt;
 	LHashTbl<ConstStrKey<char,false>, bool> Exts;
 
-	AddFilesProgress(GViewI *par);
+	AddFilesProgress(LViewI *par);
 
 	int64 Value();
 	void Value(int64 val);
-	int OnNotify(GViewI *c, int f);
+	int OnNotify(LViewI *c, int f);
 };
 
 extern IdePlatform GetCurrentPlatform();

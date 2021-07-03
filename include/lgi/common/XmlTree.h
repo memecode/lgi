@@ -219,7 +219,7 @@ public:
 		/// The root tag to create children from.
 		LXmlTag *Root,
 		/// The stream to read from.
-		GStreamI *File,
+		LStreamI *File,
 		/// [Optional] The factory to create LXmlTag type objects. If not specified
 		/// vanilla LXmlTag objects will be created.
 		LXmlFactory *Factory = 0
@@ -230,7 +230,7 @@ public:
 		/// The DOM tree.
 		LXmlTag *Root,
 		/// The output stream.
-		GStreamI *File,
+		LStreamI *File,
 		/// [Optional] Progress reporting.
 		Progress *Prog = NULL
 	);
@@ -250,7 +250,7 @@ public:
 	/// Encode a string to use entities
 	char *EncodeEntities(const char *s, ssize_t len = -1, const char *extra_characters = 0);
 	/// Encode a string to use entities
-	bool EncodeEntities(GStreamI *out, const char *s, ssize_t len, const char *extra_characters = 0);
+	bool EncodeEntities(LStreamI *out, const char *s, ssize_t len, const char *extra_characters = 0);
 };
 
 #endif

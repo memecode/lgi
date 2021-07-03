@@ -5,14 +5,14 @@
 
 /// This class concatenates several streams into one large logical stream
 /// Note: currently only reading is implemented...
-class GStreamConcat : public GStreamI
+class GStreamConcat : public LStreamI
 {
 	struct StreamBlock
 	{
 		int64 Start;
 		int64 End;
 		bool Own;
-		GStreamI *Stream;
+		LStreamI *Stream;
 	};
 
 	unsigned Cur;
@@ -44,7 +44,7 @@ public:
 		}
 	}
 	
-	bool Add(GStreamI *s, bool Own = true)
+	bool Add(LStreamI *s, bool Own = true)
 	{
 		if (!s)
 		{
@@ -159,7 +159,7 @@ public:
 		return Wr;
 	}
 	
-	GStreamI *Clone()
+	LStreamI *Clone()
 	{
 		return new GStreamConcat(*this);
 	}

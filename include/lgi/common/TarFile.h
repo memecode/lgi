@@ -79,7 +79,7 @@ protected:
 
 	/// Called every time a file is parsed
 	/// \returns true if this function consumes the body of the file
-	virtual bool Process(GTarFile &f, GStreamI *s, bool &SkipOverFile)
+	virtual bool Process(GTarFile &f, LStreamI *s, bool &SkipOverFile)
 	{
 		if (Files)
 		{
@@ -137,7 +137,7 @@ protected:
 	}
 
 	/// Main parsing loop
-	bool Parse(GStreamI *File, int Mode)
+	bool Parse(LStreamI *File, int Mode)
 	{
 		if (!File)
 			return false;
@@ -204,7 +204,7 @@ public:
 	}
 
 	/// Get a directory listing of the tar file
-	bool DirList(GStreamI *File, GArray<GTarFile> &Out)
+	bool DirList(LStreamI *File, GArray<GTarFile> &Out)
 	{
 		bool Status = false;
 		
@@ -216,7 +216,7 @@ public:
 	}
 
 	/// Extract all the tar file contents to a folder
-	bool Extract(GStreamI *File, char *OutFolder)
+	bool Extract(LStreamI *File, char *OutFolder)
 	{
 		if (!OutFolder)
 			return false;

@@ -30,7 +30,7 @@ public:
 		return Clicked;
 	}
 	
-	virtual GView *View() { return 0; }
+	virtual LView *View() { return 0; }
 	virtual SubMenuImpl *IsSub() { return 0; }
 	virtual MenuImpl *IsMenu() { return 0; }
 };
@@ -50,12 +50,12 @@ public:
 	void OnPaint(LSurface *pDC);
 	bool OnKey(LKey &k);
 	
-	GView *View() { return this; }
+	LView *View() { return this; }
 	SubMenuImpl *IsSub() { return this; }
 	GSubMenu *GetSub();
 };
 
-class MenuImpl : public GView, public MenuClickImpl
+class MenuImpl : public LView, public MenuClickImpl
 {
 	class MenuImplPrivate *d;
 
@@ -68,11 +68,11 @@ public:
     void OnPaint(LSurface *pDC);
 	bool HasSubOpen();
     
-	GView *View() { return this; }
+	LView *View() { return this; }
 	MenuImpl *IsMenu() { return this; }
 };
 
-class MenuItemImpl : public GView
+class MenuItemImpl : public LView
 {
 	class MenuItemImplPrivate *d;
 

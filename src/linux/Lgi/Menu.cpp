@@ -316,7 +316,7 @@ void LSubMenu::OnActivate(bool a)
 	}
 }
 
-int LSubMenu::Float(GView *From, int x, int y, int Button)
+int LSubMenu::Float(LView *From, int x, int y, int Button)
 {
 	#ifdef __GTK_H__
 	GWindow *Wnd = From->GetWindow();
@@ -326,7 +326,7 @@ int LSubMenu::Float(GView *From, int x, int y, int Button)
 	#else
 	while (From && !From->Handle())
 	{
-		From = dynamic_cast<GView*>(From->GetParent());
+		From = dynamic_cast<LView*>(From->GetParent());
 	}		
 	
 	if (!From || !From->Handle())
@@ -543,7 +543,7 @@ void LMenuItem::OnGtkEvent(::GString Event)
 				if (m)
 				{
 					// Attached to a menu, so send an event to the window
-					GViewI *w = m->WindowHandle();
+					LViewI *w = m->WindowHandle();
 					if (w)
 						w->PostEvent(M_COMMAND, Id());
 					else
@@ -1530,7 +1530,7 @@ LFont *LMenu::GetFont()
 	return MenuFont.f ? MenuFont.f : SysFont;
 }
 
-bool LMenu::Attach(GViewI *p)
+bool LMenu::Attach(LViewI *p)
 {
 	if (!p)
 	{
@@ -1594,7 +1594,7 @@ bool LMenu::SetPrefAndAboutItems(int a, int b)
 	return false;
 }
 
-bool LMenu::OnKey(GView *v, LKey &k)
+bool LMenu::OnKey(LView *v, LKey &k)
 {
 	if (k.Down())
 	{

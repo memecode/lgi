@@ -47,7 +47,7 @@ class HookInfo
 {
 public:
 	int Flags;
-	GView *Target;
+	LView *Target;
 };
 
 class LWindowPrivate
@@ -62,7 +62,7 @@ public:
 	LPoint Dpi;
 
 	// Focus stuff
-	GViewI *Focus;
+	LViewI *Focus;
 
 	LWindowPrivate()
 	{
@@ -77,7 +77,7 @@ public:
 	{
 	}
 	
-	ssize_t GetHookIndex(GView *Target, bool Create = false)
+	ssize_t GetHookIndex(LView *Target, bool Create = false)
 	{
 		for (int i=0; i<Hooks.Length(); i++)
 		{
@@ -100,7 +100,7 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-LWindow::LWindow() : GView(0)
+LWindow::LWindow() : LView(0)
 {
 	_Window = this;
 	d = new LWindowPrivate;
@@ -145,20 +145,20 @@ bool LWindow::SetIcon(const char *Icon)
 	return CreateClassW32(LgiApp->Name(), LoadIcon(LgiProcessInst(), (LPCWSTR)Icon)) != 0;
 }
 
-GViewI *LWindow::GetFocus()
+LViewI *LWindow::GetFocus()
 {
 	return d->Focus;
 }
 
-static GAutoString DescribeView(GViewI *v)
+static GAutoString DescribeView(LViewI *v)
 {
 	if (!v)
 		return GAutoString(NewStr("NULL"));
 
 	char s[512];
 	int ch = 0;
-	::GArray<GViewI*> p;
-	for (GViewI *i = v; i; i = i->GetParent())
+	::GArray<LViewI*> p;
+	for (LViewI *i = v; i; i = i->GetParent())
 	{
 		p.Add(i);
 	}
@@ -170,7 +170,7 @@ static GAutoString DescribeView(GViewI *v)
 	return GAutoString(NewStr(s));
 }
 
-static bool HasParentPopup(GViewI *v)
+static bool HasParentPopup(LViewI *v)
 {
 	for (; v; v = v->GetParent())
 	{
@@ -180,7 +180,7 @@ static bool HasParentPopup(GViewI *v)
 	return false;
 }
 
-void LWindow::SetFocus(GViewI *ctrl, FocusType type)
+void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 {
 	const char *TypeName = NULL;
 	switch (type)
@@ -194,12 +194,12 @@ void LWindow::SetFocus(GViewI *ctrl, FocusType type)
 	{
 		case GainFocus:
 		{
-			GViewI *This = this;
+			LViewI *This = this;
 			if (ctrl == This && d->Focus)
 			{
 				// The main LWindow is getting focus.
 				// Check if we can re-focus the previous child focus...
-				GView *v = d->Focus->GetGView();
+				LView *v = d->Focus->GetGView();
 				if (v && !HasParentPopup(v))
 				{
 					// We should never return focus to a popup, or it's child.
@@ -236,7 +236,7 @@ void LWindow::SetFocus(GViewI *ctrl, FocusType type)
 					
 			if (d->Focus)
 			{
-				GView *v = d->Focus->GetGView();
+				LView *v = d->Focus->GetGView();
 				if (v) v->WndFlags &= ~GWF_FOCUS;
 				d->Focus->OnFocus(false);
 				d->Focus->Invalidate();
@@ -252,7 +252,7 @@ void LWindow::SetFocus(GViewI *ctrl, FocusType type)
 
 			if (d->Focus)
 			{
-				GView *v = d->Focus->GetGView();
+				LView *v = d->Focus->GetGView();
 				if (v) v->WndFlags |= GWF_FOCUS;
 				d->Focus->OnFocus(true);
 				d->Focus->Invalidate();
@@ -270,7 +270,7 @@ void LWindow::SetFocus(GViewI *ctrl, FocusType type)
 		{
 			if (ctrl == d->Focus)
 			{
-				GView *v = d->Focus->GetGView();
+				LView *v = d->Focus->GetGView();
 				if (v)
 				{
 					if (v->WndFlags & GWF_FOCUS)
@@ -294,7 +294,7 @@ void LWindow::SetFocus(GViewI *ctrl, FocusType type)
 				}
 				else
 				{
-					// Non GView handler	
+					// Non LView handler	
 					d->Focus->OnFocus(false);
 					d->Focus->Invalidate();
 					d->Focus = NULL;
@@ -449,7 +449,7 @@ bool LWindow::OnRequestClose(bool OsShuttingDown)
 	return true;
 }
 
-bool LWindow::HandleViewMouse(GView *v, LMouse &m)
+bool LWindow::HandleViewMouse(LView *v, LMouse &m)
 {
 	#if DEBUG_HANDLE_VIEW_MOUSE
 	m.Trace("HandleViewMouse");
@@ -459,7 +459,7 @@ bool LWindow::HandleViewMouse(GView *v, LMouse &m)
 	{
 		if (d->Hooks[i].Flags & LMouseEvents)
 		{
-			GView *t = d->Hooks[i].Target;
+			LView *t = d->Hooks[i].Target;
 			if (!t->OnViewMouse(v, m))
 			{
 				#if DEBUG_HANDLE_VIEW_MOUSE
@@ -478,7 +478,7 @@ bool LWindow::HandleViewMouse(GView *v, LMouse &m)
 	return true;
 }
 
-bool LWindow::HandleViewKey(GView *v, LKey &k)
+bool LWindow::HandleViewKey(LView *v, LKey &k)
 {
 	#if DEBUG_HANDLE_VIEW_KEY
 	char msg[256];
@@ -487,7 +487,7 @@ bool LWindow::HandleViewKey(GView *v, LKey &k)
 	#endif
 
 	// Any window in a pop up always gets the key...
-	GViewI *p;
+	LViewI *p;
 	for (p = v->GetParent(); p; p = p->GetParent())
 	{
 		if (dynamic_cast<GPopup*>(p))
@@ -571,7 +571,7 @@ bool LWindow::HandleViewKey(GView *v, LKey &k)
 	{
 		ShortcutMap Map;
 		BuildShortcuts(Map);
-		GViewI *c = Map.Find(ToUpper(k.c16));
+		LViewI *c = Map.Find(ToUpper(k.c16));
 		if (c)
 		{
 			c->OnNotify(c, GNotify_Activate);
@@ -624,7 +624,7 @@ bool LWindow::Obscured()
 
 bool LWindow::Visible()
 {
-	return GView::Visible();
+	return LView::Visible();
 }
 
 void LWindow::Visible(bool v)
@@ -682,7 +682,7 @@ void LWindow::Visible(bool v)
 		#if DEBUG_WINDOW_PLACEMENT
 		LgiTrace("%s:%i - Visible(%i)\n", __FILE__, __LINE__, v);
 		#endif
-		GView::Visible(v);
+		LView::Visible(v);
 	}
 
 	if (v)
@@ -727,7 +727,7 @@ void LWindow::PourAll()
 
 		for (auto v: Children)
 		{
-			GView *k = dynamic_cast<GView*>(v);
+			LView *k = dynamic_cast<LView*>(v);
 			if (k && k->_IsToolBar)
 			{
 				LRect OldPos = v->GetPos();
@@ -797,7 +797,7 @@ void LWindow::PourAll()
 	// LgiTrace("Client=%s\n", Client.Bound().GetStr());
 	for (auto v: Children)
 	{
-		GView *k = dynamic_cast<GView*>(v);
+		LView *k = dynamic_cast<LView*>(v);
 		if (!(k && k->_IsToolBar))
 		{
 			LRect OldPos = v->GetPos();
@@ -833,7 +833,7 @@ void LWindow::PourAll()
 	}
 }
 
-class GTempView : public GView
+class GTempView : public LView
 {
 public:
 	GTempView(OsView v)
@@ -882,7 +882,7 @@ GMessage::Result LWindow::OnEvent(GMessage *Msg)
 
 			LRect r = d->Wp->rcNormalPosition;
 
-			if (!GView::Visible())
+			if (!LView::Visible())
 				d->Wp->showCmd = SW_HIDE;
 
 			#if DEBUG_WINDOW_PLACEMENT
@@ -998,7 +998,7 @@ GMessage::Result LWindow::OnEvent(GMessage *Msg)
 				}
 			}
 
-			Status = GView::OnEvent(Msg) != 0;
+			Status = LView::OnEvent(Msg) != 0;
 			break;
 		}		
 		case WM_CREATE:
@@ -1025,7 +1025,7 @@ GMessage::Result LWindow::OnEvent(GMessage *Msg)
 		case WM_WINDOWPOSCHANGED:
 		{
 			d->Wp.Reset();
-			Status = GView::OnEvent(Msg) != 0;
+			Status = LView::OnEvent(Msg) != 0;
 			break;
 		}
 		case WM_QUERYENDSESSION:
@@ -1060,7 +1060,7 @@ GMessage::Result LWindow::OnEvent(GMessage *Msg)
 		    }
 		    else
 		    {
-			    Status = GView::OnEvent(Msg) != 0;
+			    Status = LView::OnEvent(Msg) != 0;
 			}
 		    break;
 		}
@@ -1112,11 +1112,11 @@ GMessage::Result LWindow::OnEvent(GMessage *Msg)
 				// The window was deleted so break out now
 				break;
 			}
-			// otherwise fall thru to the GView handler
+			// otherwise fall thru to the LView handler
 		}
 		default:
 		{
-			Status = (int) GView::OnEvent(Msg);
+			Status = (int) LView::OnEvent(Msg);
 			break;
 		}
 	}
@@ -1158,7 +1158,7 @@ void LWindow::OnPosChange()
 	PourAll();
 }
 
-bool LWindow::RegisterHook(GView *Target, LWindowHookType EventType, int Priority)
+bool LWindow::RegisterHook(LView *Target, LWindowHookType EventType, int Priority)
 {
 	bool Status = false;
 	
@@ -1175,12 +1175,12 @@ bool LWindow::RegisterHook(GView *Target, LWindowHookType EventType, int Priorit
 	return Status;
 }
 
-GViewI *LWindow::GetDefault()
+LViewI *LWindow::GetDefault()
 {
 	return _Default;
 }
 
-void LWindow::SetDefault(GViewI *v)
+void LWindow::SetDefault(LViewI *v)
 {
 	#if WINNATIVE
 	GButton *Btn;
@@ -1194,7 +1194,7 @@ void LWindow::SetDefault(GViewI *v)
 	#endif
 }
 
-bool LWindow::UnregisterHook(GView *Target)
+bool LWindow::UnregisterHook(LView *Target)
 {
 	auto i = d->GetHookIndex(Target);
 	if (i >= 0)

@@ -95,9 +95,9 @@ public:
 	bool OnMouseWheel(double Lines);
 	void OnPulse();
 	void OnPaint(LSurface *pDC);
-	int OnNotify(GViewI *v, int f);
+	int OnNotify(LViewI *v, int f);
 	GMessage::Param OnEvent(GMessage *m);
-	bool OnLayout(GViewLayoutInfo &Inf);
+	bool OnLayout(LViewLayoutInfo &Inf);
 	void UpdateScrollBars(LPoint *MaxScroll = NULL, bool ResetPos = false);
 	void OnPosChange();
 };

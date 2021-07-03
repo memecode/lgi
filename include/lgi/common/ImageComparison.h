@@ -6,10 +6,10 @@ class ImageCompareDlg : public GWindow
 	struct ImageCompareDlgPriv *d;
 
 public:
-	ImageCompareDlg(GView *p, const char *OutPath);
+	ImageCompareDlg(LView *p, const char *OutPath);
 	~ImageCompareDlg();
 	
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
 #endif

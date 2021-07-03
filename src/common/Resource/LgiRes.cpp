@@ -28,7 +28,7 @@
 // "res" library distributed with the LGI library.
 
 #define DEBUG_RES_FILE						0
-#define CastToGWnd(RObj)					((RObj != 0) ? dynamic_cast<GView*>(RObj) : 0)
+#define CastToGWnd(RObj)					((RObj != 0) ? dynamic_cast<LView*>(RObj) : 0)
 
 class TagHash : public LHashTbl<StrKey<char>,bool>, public ResReadCtx
 {
@@ -440,7 +440,7 @@ void LResources::SetThemeFolder(const char *f)
 	}		
 }
 
-bool LResources::StyleElement(GViewI *v)
+bool LResources::StyleElement(LViewI *v)
 {
 	if (!v) return false;
 	if (!LoadStyles) return true;
@@ -804,7 +804,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_ControlTree) == 0)
 		{
-			GView *v = GViewFactory::Create("GControlTree");
+			LView *v = GViewFactory::Create("GControlTree");
 			if (!(Wnd = dynamic_cast<ResObject*>(v)))
 			{
 				DeleteObj(v);
@@ -813,7 +813,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		else if (stricmp(t->GetTag(), Res_Custom) == 0)
 		{
 			Control = t->GetAttr("ctrl");
-			GView *v = GViewFactory::Create(Control);
+			LView *v = GViewFactory::Create(Control);
 
 			if (!v)
 			    v = new GMissingCtrl(Control);
@@ -856,7 +856,7 @@ void LResources::Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2)
 	}
 	else
 	{
-		GView *w = CastToGWnd(Obj);
+		LView *w = CastToGWnd(Obj);
 		if (w)
 		{
 			LRect n(x1, y1, x2, y2);
@@ -927,7 +927,7 @@ struct ResObjectCallback : public LCss::ElementCallback<ResObject>
 
 bool LResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 {
-	GView *v = dynamic_cast<GView*>(Obj);
+	LView *v = dynamic_cast<LView*>(Obj);
 	if (!v || !Props)
 		return false;
 
@@ -976,7 +976,7 @@ bool LResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 
 LRect LResources::Res_GetPos(ResObject *Obj)
 {
-	GView *w = CastToGWnd(Obj);
+	LView *w = CastToGWnd(Obj);
 	if (w)
 	{
 		return w->GetPos();
@@ -999,7 +999,7 @@ bool LResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 	if (Ctx && !Ctx->Check(s->Tag))
 		return false;
 
-	GView *w = CastToGWnd(Obj);
+	LView *w = CastToGWnd(Obj);
 	if (w)
 	{
 		w->SetId(s->Id);
@@ -1030,8 +1030,8 @@ bool LResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 
 void LResources::Res_Attach(ResObject *Obj, ResObject *Parent)
 {
-	GView *o = CastToGWnd(Obj);
-	GView *p = CastToGWnd(Parent);
+	LView *o = CastToGWnd(Obj);
+	LView *p = CastToGWnd(Parent);
 	GTabPage *Tab = dynamic_cast<GTabPage*>(Parent);
 	if (o)
 	{
@@ -1064,10 +1064,10 @@ void LResources::Res_Attach(ResObject *Obj, ResObject *Parent)
 
 bool LResources::Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep)
 {
-	GView *o = CastToGWnd(Obj);
+	LView *o = CastToGWnd(Obj);
 	if (o && l)
 	{
-		for (GViewI *w: o->IterateViews())
+		for (LViewI *w: o->IterateViews())
 		{
 			ResObject *n = dynamic_cast<ResObject*>(w);
 			if (n)
@@ -1222,7 +1222,7 @@ bool LgiMenuRes::Read(LXmlTag *t, ResFileFormat Format)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Dialog
-bool LResourceLoad::LoadFromResource(int Resource, GViewI *Parent, LRect *Pos, GAutoString *Name, char *TagList)
+bool LResourceLoad::LoadFromResource(int Resource, LViewI *Parent, LRect *Pos, GAutoString *Name, char *TagList)
 {
 	LgiGetResObj();
 
@@ -1364,7 +1364,7 @@ const char *LgiLoadString(int Res, const char *Default)
 	return Default;
 }
 
-bool LResources::LoadDialog(int Resource, GViewI *Parent, LRect *Pos, GAutoString *Name, GEventsI *Engine, char *TagList)
+bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, GAutoString *Name, LEventsI *Engine, char *TagList)
 {
 	bool Status = false;
 
@@ -1441,7 +1441,7 @@ bool LResources::LoadDialog(int Resource, GViewI *Parent, LRect *Pos, GAutoStrin
 						{
 							if (Res_Read(Obj, t, Tags))
 							{
-								GView *w = dynamic_cast<GView*>(Obj);
+								LView *w = dynamic_cast<LView*>(Obj);
 								if (w)
 									Parent->AddView(w);
 							}
@@ -1582,7 +1582,7 @@ bool LMenuLoader::Load(LgiMenuRes *MenuRes, LXmlTag *Tag, ResFileFormat Format, 
 	return Status;
 }
 
-bool LMenu::Load(GView *w, const char *Res, const char *TagList)
+bool LMenu::Load(LView *w, const char *Res, const char *TagList)
 {
 	bool Status = false;
 

@@ -42,9 +42,9 @@ public:
 	int Alignment(); // GV_EDGE_TOP | GV_EDGE_RIGHT | GV_EDGE_BOTTOM | GV_EDGE_LEFT
 	void Alignment(int i);
 
-	bool Attach(GViewI *Wnd);
+	bool Attach(LViewI *Wnd);
 	bool Pour(LRegion &r);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
 };

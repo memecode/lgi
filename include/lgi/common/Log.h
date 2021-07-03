@@ -52,7 +52,7 @@ public:
 	// void OnNcCalcClient(long &x1, long &y1, long & x2, long &y2);
 	GMessage::Result OnEvent(GMessage *Msg);
 	void OnPosChange();
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 
 	bool Border() { return HasBorder; }
 	void Border(bool i) { HasBorder = i; }

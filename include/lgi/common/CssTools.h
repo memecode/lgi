@@ -5,7 +5,7 @@
 
 class LgiClass GCssTools
 {
-	GView *View;
+	LView *View;
 	LCss *Css;
 	LFont *Font;
 	
@@ -27,7 +27,7 @@ public:
 		BackImg = NULL;
 	}
 	
-	GCssTools(GView *view)
+	GCssTools(LView *view)
 	{
 		LgiAssert(view != NULL);
 		View = view;

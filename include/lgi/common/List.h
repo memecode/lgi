@@ -369,7 +369,7 @@ public:
 	LgiCursor GetCursor(int x, int y);
 	void OnMouseClick(LMouse &m);
 	void OnMouseMove(LMouse &m);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 	void OnPosChange();
 	bool OnKey(LKey &k);
 	bool OnMouseWheel(double Lines);

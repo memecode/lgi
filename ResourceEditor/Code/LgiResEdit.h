@@ -191,8 +191,8 @@ public:
 	void SystemObject(bool i) { SysObject = i; }
 	bool IsSelected();
 
-	virtual GView *Wnd() { return NULL; }
-	virtual bool Attach(GViewI *Parent);
+	virtual LView *Wnd() { return NULL; }
+	virtual bool Attach(LViewI *Parent);
 	virtual int Type() { return ResType; }
 	virtual void Type(int i) { ResType = i; }
 	virtual void Create(LXmlTag *load, SerialiseContext *ctx) = 0; // called when users creates
@@ -215,17 +215,17 @@ public:
 	virtual void Paste() {}
 
 	// UI
-	virtual GView *CreateUI() { return 0; }
+	virtual LView *CreateUI() { return 0; }
 	virtual void OnRightClick(LSubMenu *RClick) {}
 	virtual void OnCommand(int Cmd) {}
 	virtual void OnShowLanguages() {}
 };
 
-class ResFolder : public Resource, public GView
+class ResFolder : public Resource, public LView
 {
 public:
 	ResFolder(AppWnd *w, int t, bool enabled = true);
-	GView *Wnd() { return dynamic_cast<GView*>(this); }
+	LView *Wnd() { return dynamic_cast<LView*>(this); }
 
 	void Create(LXmlTag *load, SerialiseContext *ctx) { LgiAssert(0); }
 	bool Test(ErrorCollection *e) { return false; }
@@ -244,7 +244,7 @@ public:
 	bool Pour(LRegion &r);
 	bool OnKey(LKey &k);
 	void OnPaint(LSurface *pDC);
-	bool Attach(GViewI *p);
+	bool Attach(LViewI *p);
 	void OnFocus(bool b);
 };
 
@@ -324,7 +324,7 @@ public:
 protected:
 	int &NextId;
 	FieldMode Mode;
-	GViewI *View;
+	LViewI *View;
 	GDom *Store;
 	bool Deep;
 
@@ -388,7 +388,7 @@ public:
 		Mode = m;
 	}
 
-	void SetView(GViewI *v)
+	void SetView(LViewI *v)
 	{
 		View = v;
 	}
@@ -672,7 +672,7 @@ public:
 	void OnDelete(FieldSource *s);
 	GMessage::Result OnEvent(GMessage *m);
 	void OnPaint(LSurface *pDC);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
 class ShortCutView : public GWindow
@@ -685,7 +685,7 @@ public:
 	~ShortCutView();
 
 	void OnDialogChange(ResDialog *Dlg);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
 #include "LgiRes_String.h"
@@ -696,7 +696,7 @@ protected:
 	// UI
 	GBox			*HBox;
 	GBox			*VBox;
-	GView			*ContentView;
+	LView			*ContentView;
 
 	LSubMenu		*Edit;
 	LSubMenu		*Help;
@@ -776,7 +776,7 @@ public:
 
 	// ---------------------------------------------------------------------
 	// Window
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 	GMessage::Result OnEvent(GMessage *m);
 	int OnCommand(int Cmd, int Event, OsView Handle);
 	void OnReceiveFiles(GArray<const char*> &Files);
@@ -840,7 +840,7 @@ class Search : public GDialog, public SearchParams
 
 public:
 	Search(AppWnd *app);
-	int OnNotify(GViewI *c, int f);
+	int OnNotify(LViewI *c, int f);
 };
 
 class Results : public GWindow
@@ -852,7 +852,7 @@ public:
 	~Results();
 
 	void OnPosChange();
-	int OnNotify(GViewI *v, int f);
+	int OnNotify(LViewI *v, int f);
 
 };
 
@@ -864,7 +864,7 @@ public:
 	ShowLanguagesDlg(AppWnd *app);
 	~ShowLanguagesDlg();
 
-	int OnNotify(GViewI *n, int f);
+	int OnNotify(LViewI *n, int f);
 };
 
 class ResCss : public Resource, public GLayout
@@ -880,11 +880,11 @@ public:
 	~ResCss();
 
 	void Create(LXmlTag *Load, SerialiseContext *Ctx);
-	GView *Wnd() { return dynamic_cast<GView*>(this); }
+	LView *Wnd() { return dynamic_cast<LView*>(this); }
 	void OnShowLanguages();
 
 	// Resource
-	GView *CreateUI();
+	LView *CreateUI();
 	void OnRightClick(LSubMenu *RClick);
 	void OnCommand(int Cmd);
 	int OnCommand(int Cmd, int Event, OsView hWnd);
@@ -895,4 +895,4 @@ public:
 	bool Write(LXmlTag *t, SerialiseContext &Ctx);
 };
 
-extern void OpenTableLayoutTest(GViewI *p);
+extern void OpenTableLayoutTest(LViewI *p);

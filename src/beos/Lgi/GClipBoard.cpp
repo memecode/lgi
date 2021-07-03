@@ -4,7 +4,7 @@
 #include "Clipboard.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GClipBoard::GClipBoard(GView *o)
+GClipBoard::GClipBoard(LView *o)
 {
 	Owner = o;
 	Open = be_clipboard != 0;

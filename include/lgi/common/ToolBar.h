@@ -35,7 +35,7 @@
 
 /// Button on a GToolBar
 class LgiClass GToolButton :
-	public GView
+	public LView
 {
 	friend class GToolBar;
 
@@ -65,7 +65,7 @@ public:
 	int64 Value() override { return Down; }
 	void Value(int64 i) override;
 
-	const char *Name() override { return GView::Name(); }
+	const char *Name() override { return LView::Name(); }
 	bool Name(const char *n) override;
 
 	/// Gets the icon index into the parent GToolBar's image list
@@ -127,7 +127,7 @@ protected:
 
 	// Overridable
 	virtual void ContextMenu(LMouse &m);	
-	virtual int PostDescription(GView *Ctrl, const char *Text);
+	virtual int PostDescription(LView *Ctrl, const char *Text);
 	
 	#if defined(LGI_CARBON)
 	HIToolbarRef ToolbarRef;
@@ -188,7 +188,7 @@ public:
 	);
 	
 	/// Appends any old control
-	bool AppendControl(GView *Ctrl);
+	bool AppendControl(LView *Ctrl);
 	
 	/// Append a separator
 	bool AppendSeparator();
@@ -210,13 +210,13 @@ public:
 	void OnMouseExit(LMouse &m);
 	void OnMouseMove(LMouse &m);
 	bool Pour(LRegion &r);
-	bool OnLayout(GViewLayoutInfo &Inf);
+	bool OnLayout(LViewLayoutInfo &Inf);
 	void OnCreate();
 
 	#ifdef MAC
-	bool Attach(GViewI *parent);
+	bool Attach(LViewI *parent);
 	
-	class Custom : public GView
+	class Custom : public LView
 	{
 	public:
 		Custom();
@@ -229,7 +229,7 @@ public:
 LgiFunc GToolBar *LgiLoadToolbar
 (
 	/// A parent window for error message boxes
-	GViewI *Parent,
+	LViewI *Parent,
 	/// The graphics file to load as the image list
 	const char *File,
 	/// The width of the icons

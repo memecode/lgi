@@ -82,7 +82,7 @@ LgiNetFunc void MDStringToDigest
 
 /// Implementation of a network socket
 class LgiNetClass GSocket :
-	public GSocketI,
+	public LSocketI,
 	public GStream
 {
 protected:
@@ -96,7 +96,7 @@ public:
 	ssize_t	BytesRead, BytesWritten;
 
 	/// Creates the class
-	GSocket(GStreamI *logger = 0, void *unused_param = 0);
+	GSocket(LStreamI *logger = 0, void *unused_param = 0);
 	
 	/// Destroys the class
 	~GSocket();
@@ -179,7 +179,7 @@ public:
 	bool Accept
 	(
 		/// The socket to handle the connection.
-		GSocketI *c
+		LSocketI *c
 	);
 
 	/// \brief Sends data to the remote host.
@@ -263,7 +263,7 @@ public:
 	bool SetMulticastInterface(uint32_t Interface);
 
 	// Impl
-	GStreamI *Clone()
+	LStreamI *Clone()
 	{
 		GSocket *s = new GSocket;
 		if (s)

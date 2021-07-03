@@ -13,7 +13,7 @@ class LgiClass GRadioGroup :
 	#ifdef WINNATIVE
 	public GControl,
 	#else
-	public GView,
+	public LView,
 	#endif
 	public ResObject
 {
@@ -34,15 +34,15 @@ public:
 	GRadioButton *Append(int x, int y, const char *name);
 
 	// Impl
-	int OnNotify(GViewI *Ctrl, int Flags) override;
+	int OnNotify(LViewI *Ctrl, int Flags) override;
 	void OnPaint(LSurface *pDC) override;
 	void OnAttach() override;
 	GMessage::Result OnEvent(GMessage *m) override;
-	bool OnLayout(GViewLayoutInfo &Inf) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 	void OnStyleChange();
 
-	const char *Name() override { return GView::Name(); }
-	const char16 *NameW() override { return GView::NameW(); }
+	const char *Name() override { return LView::Name(); }
+	const char16 *NameW() override { return LView::NameW(); }
 	bool Name(const char *n) override;
 	bool NameW(const char16 *n) override;
 	void SetFont(LFont *Fnt, bool OwnIt = false) override;
@@ -54,7 +54,7 @@ class LgiClass GRadioButton :
 	#if WINNATIVE && !XP_BUTTON
 	public GControl,
 	#else
-	public GView,
+	public LView,
 	#endif
 	public ResObject
 {
@@ -68,14 +68,14 @@ public:
 	const char *GetClass() override { return "GRadioButton"; }
 
 	// Impl
-	const char *Name() override { return GView::Name(); }
-	const char16 *NameW() override { return GView::NameW(); }
+	const char *Name() override { return LView::Name(); }
+	const char16 *NameW() override { return LView::NameW(); }
 	bool Name(const char *n) override;
 	bool NameW(const char16 *n) override;
 	int64 Value() override;
 	void Value(int64 i) override;
-	bool OnLayout(GViewLayoutInfo &Inf) override;
-	int OnNotify(GViewI *Ctrl, int Flags) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
+	int OnNotify(LViewI *Ctrl, int Flags) override;
 
 	// Events
 	void OnAttach() override;

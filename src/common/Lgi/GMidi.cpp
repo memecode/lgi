@@ -24,7 +24,7 @@ public:
 			m->ParseMidi();
 		}
 		
-		return GView::OnEvent(Msg);
+		return LView::OnEvent(Msg);
 	}
 };
 

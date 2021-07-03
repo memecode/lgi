@@ -27,7 +27,7 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GClipBoard::GClipBoard(GView *o)
+GClipBoard::GClipBoard(LView *o)
 {
 	d = new GClipBoardPriv;
 	Owner = o;

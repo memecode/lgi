@@ -429,7 +429,7 @@ GClipBoard::FormatType GClipBoard::StrToFmt(GString Fmt)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GClipBoard::GClipBoard(GView *o)
+GClipBoard::GClipBoard(LView *o)
 {
     d = new GClipBoardPriv;
 	Open = false;

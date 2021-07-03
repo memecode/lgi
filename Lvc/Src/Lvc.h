@@ -219,7 +219,7 @@ public:
 
 	GString::Array GetList();
 	bool SetList(int EditCtrl, GString::Array a);
-	bool OnLayout(GViewLayoutInfo &Inf);
+	bool OnLayout(LViewLayoutInfo &Inf);
 };
 
 extern bool ConvertEol(const char *Path, bool Cr);

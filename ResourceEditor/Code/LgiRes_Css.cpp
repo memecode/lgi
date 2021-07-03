@@ -82,7 +82,7 @@ void ResCss::OnShowLanguages()
 {
 }
 
-GView *ResCss::CreateUI()
+LView *ResCss::CreateUI()
 {
     return Ui = new ResCssUi(this);
 }

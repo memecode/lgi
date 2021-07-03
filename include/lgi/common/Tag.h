@@ -35,7 +35,7 @@ public:
 	void Write(GFile &f);
 	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
-	void SerializeUI(GView *Dlg, GMap<char*,int> &Fields, bool To);
+	void SerializeUI(LView *Dlg, GMap<char*,int> &Fields, bool To);
 };
 
 #endif

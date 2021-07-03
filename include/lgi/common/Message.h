@@ -145,7 +145,7 @@ enum LgiMessages
 		M_GTHREADWORK_COMPELTE,
 		M_TEXT_UPDATE_NAME,
 		M_SET_VISIBLE,
-		M_SETPOS, // A=(LRect*)Rectangle, B=(GView*)this
+		M_SETPOS, // A=(LRect*)Rectangle, B=(LView*)this
 		M_ASSERT_DLG,
 		M_QUIT,
 		M_ABOUT,
@@ -165,7 +165,7 @@ enum LgiMessages
 	M_URL,
 	M_LOG_TEXT,
 	M_ASSERT_UI,
-	M_INVALIDATE, // A=(LRect*)Rectangle, B=(GView*)this
+	M_INVALIDATE, // A=(LRect*)Rectangle, B=(LView*)this
 	M_RESIZE_TO_CONTENT, // GItemContainer
 	M_SCROLL_TO, // GTreeItem->GTree
 
@@ -274,7 +274,7 @@ public:
 		#endif
 	#endif
 	void Set(int m, Param a, Param b);
-	bool Send(class GViewI *View);
+	bool Send(class LViewI *View);
 };
 
 #ifdef LINUX

@@ -607,7 +607,7 @@ void VcFolder::OnBranchesChange()
 
 	if (Branches.Length() > 0)
 	{
-		GViewI *b;
+		LViewI *b;
 		if (w->GetViewById(IDC_BRANCH, b))
 		{
 			if (!ValidStr(b->Name()))

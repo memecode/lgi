@@ -93,7 +93,7 @@ public:
 	GDataPropI *GetObj(int id);
 	Store3Status SetObj(int id, GDataPropI *i);
 	GDataIt GetList(int id);
-	Store3Status SetRfc822(GStreamI *Rfc822Msg);
+	Store3Status SetRfc822(LStreamI *Rfc822Msg);
 };
 
 class DbIndex

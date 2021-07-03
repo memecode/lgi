@@ -1218,7 +1218,7 @@ LRect &GFilterView::GetClient(bool ClientCoods)
 {
 	static LRect c;
 
-	c = GView::GetClient(ClientCoods);
+	c = LView::GetClient(ClientCoods);
 	if (d->ShowLegend)
 	{
 		d->Info = c;

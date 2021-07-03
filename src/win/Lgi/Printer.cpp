@@ -34,7 +34,7 @@ GString GPrinter::GetErrorMsg()
 	return d->Err;
 }
 
-bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages, GView *Parent)
+bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages, LView *Parent)
 {
 	if (!Events)
 		return false;
@@ -138,7 +138,7 @@ bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages, 
 	return Status;
 }
 
-bool GPrinter::Browse(GView *Parent)
+bool GPrinter::Browse(LView *Parent)
 {
 	d->Info.hwndOwner = (Parent) ? Parent->Handle() : 0;
 	d->Info.Flags = PD_PRINTSETUP | PD_PAGENUMS;

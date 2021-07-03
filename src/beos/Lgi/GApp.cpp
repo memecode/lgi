@@ -152,7 +152,7 @@ bool GApp::IsOk()
 	return true;
 }
 
-GViewI *GApp::GetFocus()
+LViewI *GApp::GetFocus()
 {
 	for (int i=0; i<CountWindows(); i++)
 	{

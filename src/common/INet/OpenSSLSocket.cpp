@@ -546,7 +546,7 @@ struct SslSocketPriv : public LCancel
 	LCancel *Cancel;
 
 	// This is just for the UI.
-	GStreamI *Logger;
+	LStreamI *Logger;
 
 	// This is for the connection logging.
 	GAutoString LogFile;
@@ -568,7 +568,7 @@ struct SslSocketPriv : public LCancel
 
 bool SslSocket::DebugLogging = false;
 
-SslSocket::SslSocket(GStreamI *logger, GCapabilityClient *caps, bool sslonconnect, bool RawLFCheck)
+SslSocket::SslSocket(LStreamI *logger, GCapabilityClient *caps, bool sslonconnect, bool RawLFCheck)
 {
 	d = new SslSocketPriv;
 	Bio = 0;
@@ -623,7 +623,7 @@ SslSocket::~SslSocket()
 	DeleteObj(d);
 }
 
-GStreamI *SslSocket::Clone()
+LStreamI *SslSocket::Clone()
 {
 	return new SslSocket(d->Logger, d->Caps, true);
 }
@@ -648,12 +648,12 @@ void SslSocket::SetTimeout(int ms)
 	d->Timeout = ms;
 }
 
-void SslSocket::SetLogger(GStreamI *logger)
+void SslSocket::SetLogger(LStreamI *logger)
 {
 	d->Logger = logger;
 }
 
-GStreamI *SslSocket::GetLog()
+LStreamI *SslSocket::GetLog()
 {
 	return d->Logger;
 }
@@ -1476,4 +1476,4 @@ GString SslSocket::Random(int Len)
 	s.Length(Len);
 	auto r = Library ? Library->RAND_bytes((uint8_t*) s.Get(), Len) : 0;
 	return r ? s : NULL;
-}
+}

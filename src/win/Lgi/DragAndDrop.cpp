@@ -351,7 +351,7 @@ bool GDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 	return false;
 }
 
-int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
+int GDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
 {
 	LgiAssert(SourceWnd != 0);
 	if (!SourceWnd)
@@ -550,7 +550,7 @@ GDragDropTarget::~GDragDropTarget()
 {
 }
 
-void GDragDropTarget::SetWindow(GView *to)
+void GDragDropTarget::SetWindow(LView *to)
 {
 	bool Status = false;
 	To = to;

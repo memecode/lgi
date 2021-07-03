@@ -211,10 +211,10 @@ public:
 	bool OnKey(LKey &k);
 	void OnPaint(LSurface *pDC);
 	GMessage::Result OnEvent(GMessage *Msg);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 	void OnPulse();
 	int OnHitTest(int x, int y);
-	bool OnLayout(GViewLayoutInfo &Inf);
+	bool OnLayout(LViewLayoutInfo &Inf);
 
 	// D'n'd target
 	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState);

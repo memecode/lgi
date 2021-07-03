@@ -671,7 +671,7 @@ HttpTools::~HttpTools()
 {
 }
 
-void HttpTools::DumpView(GViewI *v, char *p)
+void HttpTools::DumpView(LViewI *v, char *p)
 {
 	if (v && p)
 	{
@@ -689,7 +689,7 @@ void HttpTools::DumpView(GViewI *v, char *p)
 	}
 }
 
-char *HttpTools::Fetch(char *uri, GStream *Log, GViewI *Dump, CookieJar *Cookies)
+char *HttpTools::Fetch(char *uri, GStream *Log, LViewI *Dump, CookieJar *Cookies)
 {
 	char *Page = 0;
 
@@ -710,7 +710,7 @@ char *HttpTools::Fetch(char *uri, GStream *Log, GViewI *Dump, CookieJar *Cookies
 		if (!u.Port)
 			u.Port = HTTP_PORT;
 
-		GAutoPtr<GSocketI> Sock(new GSocket);
+		GAutoPtr<LSocketI> Sock(new GSocket);
 		if (h.Open(Sock, u.sHost))
 		{
 			int ProtocolStatus = 0;
@@ -791,7 +791,7 @@ char *HttpTools::Fetch(char *uri, GStream *Log, GViewI *Dump, CookieJar *Cookies
 	return Page;
 }
 
-char *HttpTools::Post(char *uri, char *headers, char *body, GStream *Log, GViewI *Dump)
+char *HttpTools::Post(char *uri, char *headers, char *body, GStream *Log, LViewI *Dump)
 {
 	if (uri && headers && body)
 	{
@@ -1101,7 +1101,7 @@ LSurface *GetHttpImage(char *Uri)
 			Http.SetProxy(p.sHost, p.Port);
 
 		GUri u(Uri);
-		GAutoPtr<GSocketI> Sock(new GSocket);
+		GAutoPtr<LSocketI> Sock(new GSocket);
 		if (Http.Open(Sock, u.sHost))
 		{
 			GStringPipe Data;

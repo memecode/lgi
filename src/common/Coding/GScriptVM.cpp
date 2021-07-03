@@ -1332,7 +1332,7 @@ struct LScriptVmDebuggerPriv
 
 	// Ui
 	bool RunLoop;
-	GView *Parent;
+	LView *Parent;
 	GBox *Main;
 	GBox *Sub;
 	LList *SourceLst;
@@ -1535,7 +1535,7 @@ void GDebugView::PourText(size_t Start, ssize_t Len)
 	}
 }
 
-LVmDebuggerWnd::LVmDebuggerWnd(GView *Parent, LVmDebuggerCallback *Callback, LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly)
+LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly)
 {
 	d = new LScriptVmDebuggerPriv;
 	d->Parent = Parent;
@@ -2050,7 +2050,7 @@ int LVmDebuggerWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 	return LWindow::OnCommand(Cmd, Event, Wnd);
 }
 
-int LVmDebuggerWnd::OnNotify(GViewI *Ctrl, int Flags)
+int LVmDebuggerWnd::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (!d->AcceptNotify)
 		return 0;
@@ -2155,4 +2155,4 @@ bool LScriptArguments::Throw(const char *File, int Line, const char *Msg, ...)
 	
 	Vm->d->OnException(File, Line, -1, s);
 	return true;
-}
+}

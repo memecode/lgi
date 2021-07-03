@@ -227,7 +227,7 @@ public:
 	void OnFocus(bool b) override;
 	void OnPosChange() override;
 	bool OnKey(LKey &k) override;
-	int OnNotify(GViewI *Ctrl, int Flags) override;
+	int OnNotify(LViewI *Ctrl, int Flags) override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	void OnPulse() override;
 	int GetContentSize(int ColumnIdx) override;

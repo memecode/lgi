@@ -25,7 +25,7 @@ public:
 	static int NextId;
 	int Val;
 	int MaxLayoutWidth;
-	LHashTbl<PtrKey<GViewI*>,GViewLayoutInfo*> Info;
+	LHashTbl<PtrKey<LViewI*>,LViewLayoutInfo*> Info;
 
 	GRadioGroupPrivate(GRadioGroup *g) :
 		LMutex("GRadioGroupPrivate"),
@@ -88,14 +88,14 @@ void GRadioGroup::OnStyleChange()
 	if (d->Lock(_FL))
 	{
 		d->Empty();
-		d->Add(GView::Name(), GetCss());
+		d->Add(LView::Name(), GetCss());
 		d->DoLayout(X());
 		d->Unlock();
 		Invalidate();
 	}
 }
 
-bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
+bool GRadioGroup::OnLayout(LViewLayoutInfo &Inf)
 {
 	auto children = IterateViews();
 	const int BORDER_PX = 2;
@@ -113,9 +113,9 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
 		// Inf.Width.Min = 16 + TextPx;
 		// Inf.Width.Max = RADIO_GRID + BORDER_PX * 2;
 		
-		for (GViewI *w: children)
+		for (LViewI *w: children)
 		{
-			GAutoPtr<GViewLayoutInfo> c(new GViewLayoutInfo);
+			GAutoPtr<LViewLayoutInfo> c(new LViewLayoutInfo);
 			if (w->OnLayout(*c))
 			{
 				// Layout enabled control
@@ -148,9 +148,9 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
 		bool Horiz = d->MaxLayoutWidth <= Inf.Width.Max;
 		int Cx = BORDER_PX + RADIO_GRID, Cy = d->GetMin().y;
 		int LastY = 0;
-		for (GViewI *w: children)
+		for (LViewI *w: children)
 		{
-			GViewLayoutInfo *c = d->Info.Find(w);
+			LViewLayoutInfo *c = d->Info.Find(w);
 			if (c)
 			{
 				if (w->OnLayout(*c))
@@ -197,12 +197,12 @@ void GRadioGroup::OnAttach()
 {
 	LResources::StyleElement(this);
 	OnStyleChange();
-	GView::OnAttach();
+	LView::OnAttach();
 }
 
 GMessage::Result GRadioGroup::OnEvent(GMessage *m)
 {
-	return GView::OnEvent(m);
+	return LView::OnEvent(m);
 }
 
 bool GRadioGroup::Name(const char *n)
@@ -210,7 +210,7 @@ bool GRadioGroup::Name(const char *n)
 	bool Status = false;
 	if (d->Lock(_FL))
 	{
-		Status = GView::Name(n);
+		Status = LView::Name(n);
 
 		d->Empty();
 		d->Add(n, GetCss());
@@ -228,7 +228,7 @@ bool GRadioGroup::NameW(const char16 *n)
 	bool Status = false;
 	if (d->Lock(_FL))
 	{
-		Status = GView::NameW(n);
+		Status = LView::NameW(n);
 
 		d->Empty();
 		d->Add(LBase::Name(), GetCss());
@@ -247,7 +247,7 @@ void GRadioGroup::SetFont(LFont *Fnt, bool OwnIt)
 
 	if (d->Lock(_FL))
 	{
-		GView::SetFont(Fnt, OwnIt);
+		LView::SetFont(Fnt, OwnIt);
 		d->Unlock();
 	}
 	d->Layout(X());
@@ -300,9 +300,9 @@ void GRadioGroup::Value(int64 Which)
 	}
 }
 
-int GRadioGroup::OnNotify(GViewI *Ctrl, int Flags)
+int GRadioGroup::OnNotify(LViewI *Ctrl, int Flags)
 {
-	GViewI *n = GetNotify() ? GetNotify() : GetParent();
+	LViewI *n = GetNotify() ? GetNotify() : GetParent();
 	if (n)
 	{
 		if (dynamic_cast<GRadioButton*>(Ctrl))
@@ -465,7 +465,7 @@ void GRadioButton::OnAttach()
 {
 	LResources::StyleElement(this);
 	OnStyleChange();
-	GView::OnAttach();
+	LView::OnAttach();
 }
 
 void GRadioButton::OnStyleChange()
@@ -473,7 +473,7 @@ void GRadioButton::OnStyleChange()
 	if (d->Lock(_FL))
 	{
 		d->Empty();
-		d->Add(GView::Name(), GetCss());
+		d->Add(LView::Name(), GetCss());
 		d->DoLayout(X());
 		d->Unlock();
 		Invalidate();
@@ -485,7 +485,7 @@ bool GRadioButton::Name(const char *n)
 	bool Status = false;
 	if (d->Lock(_FL))
 	{
-		Status = GView::Name(n);
+		Status = LView::Name(n);
 
 		d->Empty();
 		d->Add(n, GetCss());
@@ -503,7 +503,7 @@ bool GRadioButton::NameW(const char16 *n)
 	bool Status = false;
 	if (d->Lock(_FL))
 	{
-		Status = GView::NameW(n);
+		Status = LView::NameW(n);
 
 		d->Empty();
 		d->Add(LBase::Name(), GetCss());
@@ -522,14 +522,14 @@ void GRadioButton::SetFont(LFont *Fnt, bool OwnIt)
 
 	if (d->Lock(_FL))
 	{
-		GView::SetFont(Fnt, OwnIt);
+		LView::SetFont(Fnt, OwnIt);
 		d->Unlock();
 	}
 	d->Layout(X());
 	Invalidate();
 }
 
-bool GRadioButton::OnLayout(GViewLayoutInfo &Inf)
+bool GRadioButton::OnLayout(LViewLayoutInfo &Inf)
 {
 	auto Btn = d->GetBtn();
 	int Pad = Btn.X() + 4;
@@ -553,9 +553,9 @@ bool GRadioButton::OnLayout(GViewLayoutInfo &Inf)
 	return true;	
 }
 
-int GRadioButton::OnNotify(GViewI *Ctrl, int Flags)
+int GRadioButton::OnNotify(LViewI *Ctrl, int Flags)
 {
-	if (Ctrl == (GViewI*)this && Flags == GNotify_Activate)
+	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
 	{
 		Value(true);
 	}
@@ -575,10 +575,10 @@ void GRadioButton::Value(int64 i)
 		if (i)
 		{
 			// remove the value from the currenly selected radio value
-			GViewI *p = GetParent();
+			LViewI *p = GetParent();
 			if (p)
 			{
-				for (GViewI *c: p->IterateViews())
+				for (LViewI *c: p->IterateViews())
 				{
 					if (c != this)
 					{
@@ -685,7 +685,7 @@ bool GRadioButton::OnKey(LKey &k)
 	if (Move)
 	{
 		List<GRadioButton> Btns;
-		for (GViewI *c: GetParent()->IterateViews())
+		for (LViewI *c: GetParent()->IterateViews())
 		{
 			GRadioButton *b = dynamic_cast<GRadioButton*>(c);
 			if (b) Btns.Insert(b);
@@ -745,7 +745,7 @@ void GRadioButton::OnPaint(LSurface *pDC)
 		#if defined LGI_CARBON
 
 		LRect cli = GetClient();
-		for (GViewI *v = this; v && !v->Handle(); v = v->GetParent())
+		for (LViewI *v = this; v && !v->Handle(); v = v->GetParent())
 		{
 			LRect p = v->GetPos();
 			cli.Offset(p.x1, p.y1);

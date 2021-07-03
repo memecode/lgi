@@ -113,7 +113,7 @@ void GColourSelect::Value(GColour set)
 		c = set;
 		Invalidate();
 
-		GViewI *n = GetNotify() ? GetNotify() : GetParent();
+		LViewI *n = GetNotify() ? GetNotify() : GetParent();
 		if (n)
 			n->OnNotify(this, GNotifyValueChanged);
 	}
@@ -129,7 +129,7 @@ void GColourSelect::Value(int64 i)
 			c.Empty();
 		Invalidate();
 
-		GViewI *n = GetNotify() ? GetNotify() : GetParent();
+		LViewI *n = GetNotify() ? GetNotify() : GetParent();
 		if (n)
 			n->OnNotify(this, 0);
 	}
@@ -162,7 +162,7 @@ void GColourSelect::OnPaint(LSurface *pDC)
 	}
 }
 
-bool GColourSelect::OnLayout(GViewLayoutInfo &Inf)
+bool GColourSelect::OnLayout(LViewLayoutInfo &Inf)
 {
     Inf.Width.Min = Inf.Width.Max = 80;
     Inf.Height.Min = Inf.Height.Max = SysFont->GetHeight() + 6;
@@ -171,7 +171,7 @@ bool GColourSelect::OnLayout(GViewLayoutInfo &Inf)
 
 class GColourFactory : public GViewFactory
 {
-	GView *NewView(const char *Class, LRect *Pos, const char *Text)
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (Class &&
 			_stricmp(Class, "GColourSelect") == 0)

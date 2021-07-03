@@ -12,7 +12,7 @@
 class LgiClass GEventSinkMap : public LMutex
 {
 protected:
-	LHashTbl<IntKey<int>,GEventSinkI*> ToPtr;
+	LHashTbl<IntKey<int>,LEventSinkI*> ToPtr;
 	LHashTbl<PtrKey<void*>,int> ToHnd;
 
 public:
@@ -28,7 +28,7 @@ public:
 	{
 	}
 
-	int AddSink(GEventSinkI *s)
+	int AddSink(LEventSinkI *s)
 	{
 		if (!s || !Lock(_FL))
 			return ToPtr.GetNullKey();
@@ -47,7 +47,7 @@ public:
 		return Hnd;
 	}
 
-	bool RemoveSink(GEventSinkI *s)
+	bool RemoveSink(LEventSinkI *s)
 	{
 		if (!s || !Lock(_FL))
 			return false;
@@ -92,7 +92,7 @@ public:
 		if (!Lock(_FL))
 			return false;
 
-		GEventSinkI *s = (GEventSinkI*)ToPtr.Find(Hnd);
+		LEventSinkI *s = (LEventSinkI*)ToPtr.Find(Hnd);
 		bool Status = false;
 		if (s)
 			Status = s->PostEvent(Cmd, a, b);
@@ -114,7 +114,7 @@ public:
 		if (!Lock(_FL))
 			return false;
 		
-		GEventSinkI *s = (GEventSinkI*)ToPtr.Find(Hnd);
+		LEventSinkI *s = (LEventSinkI*)ToPtr.Find(Hnd);
 		bool Status = false;
 		if (s)
 		{
@@ -125,7 +125,7 @@ public:
 			}
 			else
 			{
-				LgiTrace("%s:%i - GEventSinkI is not an LCancel object.\n", _FL);
+				LgiTrace("%s:%i - LEventSinkI is not an LCancel object.\n", _FL);
 			}
 		}
 		
@@ -134,7 +134,7 @@ public:
 	}
 };
 
-class LgiClass GMappedEventSink : public GEventSinkI
+class LgiClass GMappedEventSink : public LEventSinkI
 {
 protected:
 	int Handle;
@@ -177,13 +177,13 @@ public:
 	}
 };
 
-/// This class is a worker thread that accepts messages on it's GEventSinkI interface.
+/// This class is a worker thread that accepts messages on it's LEventSinkI interface.
 /// To use, sub class and implement the OnEvent handler.
 class LgiClass GEventTargetThread :
 	public LThread,
 	public LMutex,
 	public GMappedEventSink,
-	public GEventTargetI // Sub-class has to implement OnEvent
+	public LEventTargetI // Sub-class has to implement OnEvent
 {
 	GArray<GMessage*> Msgs;
 	LThreadEvent Event;

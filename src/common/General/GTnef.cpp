@@ -88,7 +88,7 @@ public:
 		return StreamPos + 8;
 	}
 
-	bool Read(GStreamI *s)
+	bool Read(LStreamI *s)
 	{
 		StreamPos = s->GetPos();
 
@@ -180,7 +180,7 @@ public:
 	}
 };
 
-bool TnefReadIndex(GStreamI *Tnef, GArray<TnefFileInfo*> &Index)
+bool TnefReadIndex(LStreamI *Tnef, GArray<TnefFileInfo*> &Index)
 {
 	bool Status = false;
 
@@ -332,7 +332,7 @@ bool TnefReadIndex(GStreamI *Tnef, GArray<TnefFileInfo*> &Index)
 	return Status;
 }
 
-bool TnefExtract(GStreamI *Tnef, GStream *Out, TnefFileInfo *File)
+bool TnefExtract(LStreamI *Tnef, GStream *Out, TnefFileInfo *File)
 {
 	bool Status = false;
 

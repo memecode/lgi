@@ -95,7 +95,7 @@ struct GSoftwareUpdatePriv
 				
 				GStringPipe RawXml;
 				int ProtocolStatus = 0;
-				GAutoPtr<GSocketI> s(new GSocket);
+				GAutoPtr<LSocketI> s(new GSocket);
 				if (Http.Open(s, Uri.sHost, Uri.Port))
 				{
 					IHttp::ContentEncoding Enc;
@@ -155,7 +155,7 @@ struct GSoftwareUpdatePriv
 		UpdateThread *Watch;
 
 	public:
-		Spinner(GViewI *par, UpdateThread *watch)
+		Spinner(LViewI *par, UpdateThread *watch)
 		{
 			Watch = watch;
 			SetParent(par);
@@ -202,7 +202,7 @@ struct GSoftwareUpdatePriv
 			}
 		}
 
-		int OnNotify(GViewI *c, int f)
+		int OnNotify(LViewI *c, int f)
 		{
 			switch (c->GetId())
 			{
@@ -266,7 +266,7 @@ struct GSoftwareUpdatePriv
 			if (Proxy->sHost)
 				Http.SetProxy(Proxy->sHost, Proxy->Port?Proxy->Port:HTTP_PORT);
 
-			GAutoPtr<GSocketI> s(new GSocket);
+			GAutoPtr<LSocketI> s(new GSocket);
 			IHttp::ContentEncoding Enc;
 			if (!Http.Open(s, Uri->sHost, Uri->Port))
 			{
@@ -299,7 +299,7 @@ GSoftwareUpdate::~GSoftwareUpdate()
 	DeleteObj(d);
 }
 
-bool GSoftwareUpdate::CheckForUpdate(UpdateInfo &Info, GViewI *WithUi, bool IncBetas)
+bool GSoftwareUpdate::CheckForUpdate(UpdateInfo &Info, LViewI *WithUi, bool IncBetas)
 {
 	GSoftwareUpdatePriv::UpdateThread Update(d, &Info, IncBetas);
 	
@@ -319,7 +319,7 @@ bool GSoftwareUpdate::CheckForUpdate(UpdateInfo &Info, GViewI *WithUi, bool IncB
 	return Update.Status;
 }
 
-bool GSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, GViewI *WithUi)
+bool GSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *WithUi)
 {
 	if (!Info.Uri)
 	{

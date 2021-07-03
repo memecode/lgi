@@ -4,7 +4,7 @@
 #include <gl/gl.h>
 #include <gl/glu.h>
 
-class GOpenGL : public GView
+class GOpenGL : public LView
 {
 	struct GOpenGLPriv *d;
 

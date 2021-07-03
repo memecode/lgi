@@ -17,8 +17,8 @@ struct GDataGridPriv
 {
 	GDataGrid *This;
 	int Col;
-	GView *e;
-	GView *DeleteLater;
+	LView *e;
+	LView *DeleteLater;
 	LListItem *Cur;
 	bool Dirty, PosDirty;
 	GArray<GDataGrid::GDataGridFlags> Flags;
@@ -495,7 +495,7 @@ GMessage::Result GDataGrid::OnEvent(GMessage *Msg)
 	return LList::OnEvent(Msg);
 }
 
-int GDataGrid::OnNotify(GViewI *c, int f)
+int GDataGrid::OnNotify(LViewI *c, int f)
 {
 	switch (c->GetId())
 	{
@@ -542,7 +542,7 @@ void GDataGrid::OnPaint(LSurface *pDC)
 	}
 }
 
-bool GDataGrid::OnLayout(GViewLayoutInfo &Inf)
+bool GDataGrid::OnLayout(LViewLayoutInfo &Inf)
 {
 	Inf.Width.Min = 16;
 	for (int i=0; i<GetColumns(); i++)
@@ -677,7 +677,7 @@ bool GDataGrid::GetData(GArray<GDragData> &Data)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 class GDataGridFactory : public GViewFactory
 {
-	GView *NewView(const char *Class, LRect *Pos, const char *Text)
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (Class &&
 			stricmp(Class, "GDataGrid") == 0)

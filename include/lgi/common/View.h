@@ -16,9 +16,9 @@ LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
 ///
 /// To create a top level window see LWindow or LDialog.
 ///
-/// For a GView with scroll bars use GLayout.
+/// For a LView with scroll bars use GLayout.
 ///
-class LgiClass GView : virtual public GViewI, virtual public LBase
+class LgiClass LView : virtual public LViewI, virtual public LBase
 {
 	friend		class LWindow;
 	friend		class GLayout;
@@ -33,16 +33,16 @@ class LgiClass GView : virtual public GViewI, virtual public LBase
 	friend		class GPopup;
 	friend		class LWindowPrivate;
 
-	friend		bool SysOnKey(GView *w, GMessage *m);
+	friend		bool SysOnKey(LView *w, GMessage *m);
 
 	#if defined(__GTK_H__)
 
 		friend Gtk::gboolean lgi_widget_draw(Gtk::GtkWidget *widget, Gtk::cairo_t *cr);
 		friend Gtk::gboolean lgi_widget_click(Gtk::GtkWidget *widget, Gtk::GdkEventButton *ev);
 		friend Gtk::gboolean lgi_widget_motion(Gtk::GtkWidget *widget, Gtk::GdkEventMotion *ev);
-		friend Gtk::gboolean GViewCallback(Gtk::GtkWidget *widget, Gtk::GdkEvent  *event, GView *view);
+		friend Gtk::gboolean GViewCallback(Gtk::GtkWidget *widget, Gtk::GdkEvent  *event, LView *view);
 		friend Gtk::gboolean PopupEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event, class GPopup *This);
-		friend Gtk::gboolean GtkViewCallback(Gtk::GtkWidget *widget, Gtk::GdkEvent *event, GView *This);
+		friend Gtk::gboolean GtkViewCallback(Gtk::GtkWidget *widget, Gtk::GdkEvent *event, LView *This);
 	
 		virtual Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
 public:
@@ -77,7 +77,7 @@ private:
 
 	#if defined(LGI_SDL)
 
-		friend Uint32 SDL_PulseCallback(Uint32 interval, GView *v);
+		friend Uint32 SDL_PulseCallback(Uint32 interval, LView *v);
 		friend class GApp;
 
 	#endif
@@ -93,14 +93,14 @@ protected:
 	OsView				_View; // OS specific handle to view object
 	#endif
 
-	GView				*_Window;
+	LView				*_Window;
 	LMutex				*_Lock;
 	uint16				_BorderSize;
 	uint16				_IsToolBar;
 	int					WndFlags;
 
-	static GViewI		*_Capturing;
-	static GViewI		*_Over;
+	static LViewI		*_Capturing;
+	static LViewI		*_Over;
 	
 	#ifndef LGI_VIEW_HASH
 	#error "Define LGI_VIEW_HASH to 0 or 1"
@@ -115,7 +115,7 @@ public:
 		OpExists,
 	};
 
-	static bool LockHandler(GViewI *v, LockOp Op);
+	static bool LockHandler(LViewI *v, LockOp Op);
 
 	#endif
 
@@ -143,7 +143,7 @@ protected:
 	
 	#elif defined MAC
 	
-		bool _Attach(GViewI *parent);
+		bool _Attach(LViewI *parent);
 		#if LGI_COCOA
 		public:
 			LPoint Flip(LPoint p);
@@ -160,7 +160,7 @@ protected:
 
 	#if !WINNATIVE
 
-		GView *&PopupChild();
+		LView *&PopupChild();
 		virtual bool	_Mouse(LMouse &m, bool Move);
 		void			_Focus(bool f);
 
@@ -190,17 +190,17 @@ protected:
 	);
 
 	virtual void _Delete();
-	GViewI *FindReal(LPoint *Offset = 0);
-	bool HandleCapture(GView *Wnd, bool c);
+	LViewI *FindReal(LPoint *Offset = 0);
+	bool HandleCapture(LView *Wnd, bool c);
 
 	
-	virtual bool OnViewMouse(GView *v, LMouse &m) override { return true; }
-	virtual bool OnViewKey(GView *v, LKey &k) override { return false; }
+	virtual bool OnViewMouse(LView *v, LMouse &m) override { return true; }
+	virtual bool OnViewKey(LView *v, LKey &k) override { return false; }
 	virtual void OnNcPaint(LSurface *pDC, LRect &r);
 
 	/// List of children views.
 	friend class GViewIter;
-	List<GViewI>	Children;
+	List<LViewI>	Children;
 
 #if defined(LGI_SDL) || defined(LGI_COCOA)
 public:
@@ -211,41 +211,41 @@ public:
 	/// \brief Creates a view/window.
 	///
 	/// On non-Win32 platforms the default argument is the class that redirects the
-	/// C++ virtual event handlers to the GView handlers. Which is usually the
+	/// C++ virtual event handlers to the LView handlers. Which is usually the
 	/// 'DefaultOsView' class. If you pass NULL in a DefaultOsView will be created to
 	/// do the job.
-	GView
+	LView
 	(
 		/// The handle that the OS knows the window by
 		OsView wnd = NULL
 	);
 
 	/// Destructor
-	virtual ~GView();
+	virtual ~LView();
 
 	/// Returns the OS handle of the view
 	#if LGI_VIEW_HANDLE
 	OsView Handle() const { return _View; }
 	#endif
 
-	/// Returns the ptr to a GView
-	GView *GetGView() override { return this; }
+	/// Returns the ptr to a LView
+	LView *GetGView() override { return this; }
 	
 	/// Returns the OS handle of the top level window
 	OsWindow WindowHandle() override;
 
 	// Attaching windows / heirarchy
-	bool AddView(GViewI *v, int Where = -1) override;
-	bool DelView(GViewI *v) override;
-	bool HasView(GViewI *v) override;
-	GArray<GViewI*> IterateViews() override;
+	bool AddView(LViewI *v, int Where = -1) override;
+	bool DelView(LViewI *v) override;
+	bool HasView(LViewI *v) override;
+	GArray<LViewI*> IterateViews() override;
 	
 	/// \brief Attaches the view to a parent view.
 	///
-	/// Each GView starts in an un-attached state. When you attach it to a Parent GView
+	/// Each LView starts in an un-attached state. When you attach it to a Parent LView
 	/// the view gains a OS-specific handle and becomes visible on the screen (if the
 	/// Visible() property is TRUE). However if a view is inserted into the Children list
-	/// of a GView and it's parent pointer is set correctly it will still paint on the
+	/// of a LView and it's parent pointer is set correctly it will still paint on the
 	/// screen without the OS knowing about it. This is known in Lgi as a "virtual window"
 	/// and is primarily used to cut down on windowing resources. Mouse clicks are handled
 	/// by the parent window and passed down to the virtual children. Virtual children
@@ -254,7 +254,7 @@ public:
 	virtual bool Attach
 	(
 		/// The parent view or NULL for a top level window
-		GViewI *p
+		LViewI *p
 	) override;
 	
 	/// Attachs all the views in the Children list if not already attached.
@@ -275,24 +275,24 @@ public:
 	LWindow *GetWindow() override;
 	
 	/// Gets the parent view.
-	GViewI *GetParent() override;
+	LViewI *GetParent() override;
 
 	/// \brief Sets the parent view.
 	///
-	/// This doesn't attach the window so that it will display. You should use GView::Attach for that.
-	virtual void SetParent(GViewI *p) override;
+	/// This doesn't attach the window so that it will display. You should use LView::Attach for that.
+	virtual void SetParent(LViewI *p) override;
 
 	/// Sends a notification to the notify target or the parent chain
 	void SendNotify(int Data = 0) override;
 	
 	/// Gets the window that receives event notifications
-	GViewI *GetNotify() override;
+	LViewI *GetNotify() override;
 
 	/// \brief Sets the view to receive event notifications.
 	///
 	/// The notify window will receive events when this view changes. By
 	/// default the parent view receives the events.
-	virtual void SetNotify(GViewI *n) override;
+	virtual void SetNotify(LViewI *n) override;
 
 	/// \brief Each top level window (LWindow) has a lock. By calling this function
 	/// you lock the whole LWindow and all it's children.
@@ -439,7 +439,7 @@ public:
 	/// \brief Sets the font for this control
 	///
 	/// The lifetime of the font passed in is the responsibility of the caller.
-	/// The GView object assumes the pointer will be valid at all times.
+	/// The LView object assumes the pointer will be valid at all times.
 	virtual void SetFont(LFont *Fnt, bool OwnIt = false) override;
 
 	/// Returns the cursor that should be displayed for the given location
@@ -478,7 +478,7 @@ public:
 	/// The class' name. Should be overriden in child classes to return the
 	/// right class name. Mostly used for debugging, but in the win32 port it
 	/// is also the default WIN32 class name passed to RegisterClass() in 
-	/// GView::CreateClass().
+	/// LView::CreateClass().
 	///
 	/// \returns the Class' name for debugging
 	const char *GetClass() override;
@@ -525,10 +525,10 @@ public:
 	virtual void Value(int64 i) override {}
 	#if LGI_VIEW_HANDLE
 	/// Find a view by it's os handle
-	virtual GViewI *FindControl(OsView hnd);
+	virtual LViewI *FindControl(OsView hnd);
 	#endif
 	/// Returns the view by it's ID
-	virtual GViewI *FindControl
+	virtual LViewI *FindControl
 	(
 		// The ID to look for
 		int Id
@@ -576,7 +576,7 @@ public:
 	/// true if the mouse event is over the view
 	bool IsOver(LMouse &m) override;
 	/// returns the sub window located at the point x,y	
-	GViewI *WindowFromPoint(int x, int y, int DebugDepth = 0) override;
+	LViewI *WindowFromPoint(int x, int y, int DebugDepth = 0) override;
 	/// Sets a timer to call the OnPulse() event
 	void SetPulse
 	(
@@ -662,15 +662,15 @@ public:
 		int y
 	) override;
 	/// Called when the contents of the Children list have changed.
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching) override;
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching) override;
 	/// Called to paint the onscreen representation of the view
 	void OnPaint(LSurface *pDC) override;
 	/// \brief Called when a child view or view with it's SetNotify() set to this window changes.
 	///
 	/// The event by default will bubble up to the LWindow at the top of the window heirarchy visiting
-	/// each GView on the way. If it reaches a GView that processes it then the event stops propergating
+	/// each LView on the way. If it reaches a LView that processes it then the event stops propergating
 	/// up the heirarchy.
-	int OnNotify(GViewI *Ctrl, int Flags) override;
+	int OnNotify(LViewI *Ctrl, int Flags) override;
 	/// Called when a menu command is activated by the user.
 	int OnCommand(int Cmd, int Event, OsView Wnd) override;
 	/// Called after the view is attached to a new parent
@@ -690,7 +690,7 @@ public:
 	///		Min height currently not used.
 	/// 3) PostLayout: Called to position view in cell.
 	///		Not called.
-	bool OnLayout(GViewLayoutInfo &Inf) override { return false; }
+	bool OnLayout(LViewLayoutInfo &Inf) override { return false; }
 
 	#if defined(_DEBUG)
 	bool _Debug;
@@ -714,7 +714,7 @@ class LgiClass GViewFactory
 		}
 		\endcode
 	*/
-	virtual GView *NewView
+	virtual LView *NewView
 	(
 		/// The name of the class to create
 		const char *Class,
@@ -729,13 +729,13 @@ public:
 	virtual ~GViewFactory();
 
 	/// Create a view by name.
-	static GView *Create(const char *Class, LRect *Pos = 0, const char *Text = 0);
+	static LView *Create(const char *Class, LRect *Pos = 0, const char *Text = 0);
 };
 
 #define DeclFactory(CLS) \
 	class CLS ## Factory : public GViewFactory \
 	{ \
-		GView *NewView(const char *Name, LRect *Pos, const char *Text) \
+		LView *NewView(const char *Name, LRect *Pos, const char *Text) \
 		{ \
 			if (!_stricmp(Name, #CLS)) return new CLS; \
 			return NULL; \
@@ -745,7 +745,7 @@ public:
 #define DeclFactoryParam1(CLS, Param1) \
 	class CLS ## Factory : public GViewFactory \
 	{ \
-		GView *NewView(const char *Name, LRect *Pos, const char *Text) \
+		LView *NewView(const char *Name, LRect *Pos, const char *Text) \
 		{ \
 			if (!_stricmp(Name, #CLS)) return new CLS(Param1); \
 			return NULL; \

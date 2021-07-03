@@ -116,7 +116,7 @@ public:
 		GAutoString PostData;
 
 		// Output data
-		GAutoPtr<GStreamI> Stream;
+		GAutoPtr<LStreamI> Stream;
 		GAutoPtr<LSurface> pDC;
 		GString Filename;
 		GString Error;
@@ -132,7 +132,7 @@ public:
 			Status = JobInit;
 		}
 		
-		GStreamI *GetStream()
+		LStreamI *GetStream()
 		{
 			if (!Stream && Filename)
 			{
@@ -413,7 +413,7 @@ public:
 		GString FileName;
 		GString MimeType;
 		LVariant Data;
-		GAutoPtr<GStreamI> Stream;
+		GAutoPtr<LStreamI> Stream;
 
 		bool Valid()
 		{

@@ -4,7 +4,7 @@
 #include "lgi\common\Net.h"
 
 //////////////////////////////////////////////////////////////////////////////////
-WebFldDlg::WebFldDlg(GViewI *p, char *name, char *ftp, char *www)
+WebFldDlg::WebFldDlg(LViewI *p, char *name, char *ftp, char *www)
 {
 	Name = 0;
 	Www = 0;
@@ -31,7 +31,7 @@ WebFldDlg::~WebFldDlg()
 	DeleteArray(Www);
 }
 
-int WebFldDlg::OnNotify(GViewI *v, int f)
+int WebFldDlg::OnNotify(LViewI *v, int f)
 {
 	switch (v->GetId())
 	{

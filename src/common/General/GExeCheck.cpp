@@ -43,7 +43,7 @@ class GExecuteCheck
 {
 	char *Name;
 	bool OwnFile;
-	GStreamI *File;
+	LStreamI *File;
 	int64 Start, Len;
 
 	int64 GetPos()
@@ -222,7 +222,7 @@ public:
 		}
 	}
 
-	GExecuteCheck(const char *name, GStreamI *f, int64 start, int64 len)
+	GExecuteCheck(const char *name, LStreamI *f, int64 start, int64 len)
 	{
 		Name = NewStr(name);
 		OwnFile = false;
@@ -254,7 +254,7 @@ LgiFunc bool LgiIsFileNameExecutable(const char *Str)
 	return c.IsExecutable();
 }
 
-LgiFunc bool LgiIsFileExecutable(const char *name, GStreamI *f, int64 Start, int64 Len)
+LgiFunc bool LgiIsFileExecutable(const char *name, LStreamI *f, int64 Start, int64 Len)
 {
 	GExecuteCheck c(name, f, Start, Len);
 	return c.IsExecutable();

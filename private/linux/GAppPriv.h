@@ -34,7 +34,7 @@ public:
 	GSharedMime *Sm;
 	#endif
 	GLibrary *WmLib;
-	LHashTbl<IntKey<int>, GView*> Handles;
+	LHashTbl<IntKey<int>, LView*> Handles;
 	OsThread GuiThread;
 	OsThreadId GuiThreadId;
 	int MessageLoopDepth;
@@ -42,7 +42,7 @@ public:
 	#if DEBUG_MSG_TYPES
 	GArray<int> Types;
 	#endif
-	::GArray<GViewI*> DeleteLater;
+	::GArray<LViewI*> DeleteLater;
 	LMouse LastMove;
 	GAutoString Name;
 	::GArray<Gtk::guint> IdleId;

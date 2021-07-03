@@ -112,7 +112,7 @@ public:
 	
 	bool SetIncludePaths(GString::Array &Paths);
 	bool OnFile(const char *Path, SymAction Action, int Platforms);
-	FindSymResult OpenSearchDlg(GViewI *Parent);
+	FindSymResult OpenSearchDlg(LViewI *Parent);
 	
 	/// This function searches the database for symbols and returns
 	/// the results as a M_FIND_SYM_REQUEST message.

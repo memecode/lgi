@@ -23,7 +23,7 @@
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs
 LgiFunc bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a = 0, GMessage::Param b = 0);
-LgiFunc GViewI *GetNextTabStop(GViewI *v, bool Back);
+LgiFunc LViewI *GetNextTabStop(LViewI *v, bool Back);
 
 /// Converts an OS error code into a text string
 LgiClass GString LErrorCodeToString(uint32_t ErrorCode);
@@ -86,7 +86,7 @@ public:
 	LAlert
 	(
 		/// The parent view
-		GViewI *parent,
+		LViewI *parent,
 		/// The dialog title
 		const char *Title,
 		/// The body of the message
@@ -100,7 +100,7 @@ public:
 	);
 
     void SetAppModal();
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 #endif
 
@@ -139,12 +139,12 @@ LgiFunc void LFlatBorder(LSurface *pDC, LRect &r, int Width = -1);
 
 // Helpers
 #ifdef __GTK_H__
-extern Gtk::gboolean GtkViewCallback(Gtk::GtkWidget *widget, Gtk::GdkEvent *event, GView *This);
+extern Gtk::gboolean GtkViewCallback(Gtk::GtkWidget *widget, Gtk::GdkEvent *event, LView *This);
 #endif
 
 #ifdef LINUX
 /// Ends a x windows startup session
-LgiFunc void LFinishXWindowsStartup(class GViewI *Wnd);
+LgiFunc void LFinishXWindowsStartup(class LViewI *Wnd);
 #endif
 
 /// \brief Displays a message box
@@ -152,7 +152,7 @@ LgiFunc void LFinishXWindowsStartup(class GViewI *Wnd);
 LgiFunc int LgiMsg
 (
 	/// The parent view or NULL if none available
-	GViewI *Parent,
+	LViewI *Parent,
 	/// The message's text. This is a printf format string that you can pass arguments to
 	const char *Msg,
 	/// The title of the message box window
@@ -164,7 +164,7 @@ LgiFunc int LgiMsg
 );
 
 /// This is like LgiMsg but displays the text in a scrollable view.
-LgiFunc void LDialogTextMsg(GViewI *Parent, const char *Title, GString Txt);
+LgiFunc void LDialogTextMsg(LViewI *Parent, const char *Title, GString Txt);
 
 /// Contains all the information about a display/monitor attached to the system.
 /// \sa LGetDisplays

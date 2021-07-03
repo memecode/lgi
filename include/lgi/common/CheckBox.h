@@ -11,7 +11,7 @@ class LgiClass GCheckBox :
 	#ifdef WINNATIVE
 	public GControl,
 	#else
-	public GView,
+	public LView,
 	#endif
 	public ResObject
 {
@@ -58,12 +58,12 @@ public:
 	void Value(int64 b) override;
 
 	// Impl
-	const char *Name() override { return GView::Name(); }
-	const char16 *NameW() override { return GView::NameW(); }
+	const char *Name() override { return LView::Name(); }
+	const char16 *NameW() override { return LView::NameW(); }
 	bool Name(const char *n) override;
 	bool NameW(const char16 *n) override;
 	void SetFont(LFont *Fnt, bool OwnIt = false) override;
-    bool OnLayout(GViewLayoutInfo &Inf) override;
+    bool OnLayout(LViewLayoutInfo &Inf) override;
 	int BoxSize();
 
 	void OnMouseClick(LMouse &m) override;
@@ -76,7 +76,7 @@ public:
 	void OnAttach() override;
 	void OnStyleChange();
 	GMessage::Result OnEvent(GMessage *Msg) override;
-	int OnNotify(GViewI *Ctrl, int Flags) override;
+	int OnNotify(LViewI *Ctrl, int Flags) override;
 
 	#ifdef WINNATIVE
 	int SysOnNotify(int Msg, int Code);

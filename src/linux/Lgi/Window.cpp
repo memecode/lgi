@@ -22,7 +22,7 @@ class HookInfo
 {
 public:
 	LWindowHookType Flags;
-	GView *Target;
+	LView *Target;
 };
 
 enum LAttachState
@@ -53,7 +53,7 @@ public:
 	
 	// Focus stuff
 	OsView FirstFocus;
-	GViewI *Focus;
+	LViewI *Focus;
 	bool Active;
 
 	GWindowPrivate()
@@ -77,7 +77,7 @@ public:
 		LastKey.IsChar = 0;
 	}
 	
-	int GetHookIndex(GView *Target, bool Create = false)
+	int GetHookIndex(LView *Target, bool Create = false)
 	{
 		for (int i=0; i<Hooks.Length(); i++)
 		{
@@ -102,14 +102,14 @@ public:
 ///////////////////////////////////////////////////////////////////////
 #define GWND_CREATE		0x0010000
 
-GWindow::GWindow(GtkWidget *w) : GView(0)
+GWindow::GWindow(GtkWidget *w) : LView(0)
 {
 	d = new GWindowPrivate;
 	_QuitOnClose = false;
 	Menu = NULL;
 	Wnd = GTK_WINDOW(w);
 	if (Wnd)
-		g_object_set_data(G_OBJECT(Wnd), "GViewI", (GViewI*)this);
+		g_object_set_data(G_OBJECT(Wnd), "LViewI", (LViewI*)this);
 	
 	_Root = NULL;
 	_MenuBar = NULL;
@@ -224,7 +224,7 @@ bool GWindow::SetActive()
 
 bool GWindow::Visible()
 {
-	return GView::Visible();
+	return LView::Visible();
 }
 
 void GWindow::Visible(bool i)
@@ -260,7 +260,7 @@ void GWindow::_OnViewDelete()
 void GWindow::OnGtkRealize()
 {
 	d->AttachState = LAttached;
-	GView::OnGtkRealize();
+	LView::OnGtkRealize();
 }
 
 void GWindow::OnGtkDelete()
@@ -271,14 +271,14 @@ void GWindow::OnGtkDelete()
 	#if 0
 	while (Children.Length())
 	{
-		GViewI *c = Children.First();
+		LViewI *c = Children.First();
 		c->Detach();
 	}
 	#else
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GViewI *c = Children[i];
-		GView *v = c->GetGView();
+		LViewI *c = Children[i];
+		LView *v = c->GetGView();
 		if (v)
 			v->OnGtkDelete();
 	}
@@ -304,7 +304,7 @@ void GWindow::SetDecor(bool Visible)
 		LgiTrace("%s:%i - No window to set decor.\n", _FL);
 }
 
-GViewI *GWindow::WindowFromPoint(int x, int y, bool Debug)
+LViewI *GWindow::WindowFromPoint(int x, int y, bool Debug)
 {
 	if (!_Root)
 		return NULL;
@@ -313,7 +313,7 @@ GViewI *GWindow::WindowFromPoint(int x, int y, bool Debug)
 	if (!rpos.Overlap(x, y))
 		return NULL;
 
-	return GView::WindowFromPoint(x - rpos.x1, y - rpos.y1, Debug);
+	return LView::WindowFromPoint(x - rpos.x1, y - rpos.y1, Debug);
 }
 
 bool GWindow::TranslateMouse(LMouse &m)
@@ -322,7 +322,7 @@ bool GWindow::TranslateMouse(LMouse &m)
 	if (!m.Target)
 		return false;
 
-	GViewI *w = this;
+	LViewI *w = this;
 	for (auto p = m.Target; p; p = p->GetParent())
 	{
 		if (p == w)
@@ -503,14 +503,14 @@ gboolean GWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 				if (k.vkey == LK_TAB || k.vkey == KEY(ISO_Left_Tab))
 				{
 					// Do tab between controls
-					::GArray<GViewI*> a;
+					::GArray<LViewI*> a;
 					BuildTabStops(this, a);
-					int idx = a.IndexOf((GViewI*)v);
+					int idx = a.IndexOf((LViewI*)v);
 					if (idx >= 0)
 					{
 						idx += k.Shift() ? -1 : 1;
 						int next_idx = idx == 0 ? a.Length() -1 : idx % a.Length();                    
-						GViewI *next = a[next_idx];
+						LViewI *next = a[next_idx];
 						if (next)
 						{
 							// LgiTrace("Setting focus to %i of %i: %s, %s, %i\n", next_idx, a.Length(), next->GetClass(), next->GetPos().GetStr(), next->GetId());
@@ -661,7 +661,7 @@ GtkWindowRealize(GtkWidget *widget, GWindow *This)
 
 static
 void
-GtkRootResize(GtkWidget *widget, GdkRectangle *alloc, GView *This)
+GtkRootResize(GtkWidget *widget, GdkRectangle *alloc, LView *This)
 {
 	GWindow *w = This->GetWindow();
 	if (w)
@@ -674,7 +674,7 @@ GWindowUnrealize(GtkWidget *widget, GWindow *wnd)
 	// printf("%s:%i - GWindowUnrealize %s\n", _FL, wnd->GetClass());
 }
 
-bool DndPointMap(GViewI *&v, LPoint &p, GDragDropTarget *&t, GWindow *Wnd, int x, int y)
+bool DndPointMap(LViewI *&v, LPoint &p, GDragDropTarget *&t, GWindow *Wnd, int x, int y)
 {
 	LRect cli = Wnd->GetClient();
 	t = NULL;
@@ -689,7 +689,7 @@ bool DndPointMap(GViewI *&v, LPoint &p, GDragDropTarget *&t, GWindow *Wnd, int x
 	p.x = x - p.x;
 	p.y = y - p.y;
 
-	for (GViewI *view = v; !t && view; view = view->GetParent())
+	for (LViewI *view = v; !t && view; view = view->GetParent())
 		t = view->DropTarget();
 	if (t)
 		return true;
@@ -720,7 +720,7 @@ void
 GWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint y, GtkSelectionData *data, guint info, guint time, GWindow *Wnd)
 {
 	LPoint p;
-	GViewI *v;
+	LViewI *v;
 	GDragDropTarget *t;
 	if (!DndPointMap(v, p, t, Wnd, x, y))
 		return;
@@ -772,7 +772,7 @@ GWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, 
 {
 	// Map the point to a view...
 	LPoint p;
-	GViewI *v;
+	LViewI *v;
 	GDragDropTarget *t;
 	if (!DndPointMap(v, p, t, Wnd, x, y))
 		return false;
@@ -831,7 +831,7 @@ gboolean
 GWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, GWindow *Wnd)
 {
 	LPoint p;
-	GViewI *v;
+	LViewI *v;
 	GDragDropTarget *t;
 	if (!DndPointMap(v, p, t, Wnd, x, y))
 		return false;
@@ -845,7 +845,7 @@ GWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, gu
 	return Flags != DROPEFFECT_NONE;
 }
 
-bool GWindow::Attach(GViewI *p)
+bool GWindow::Attach(LViewI *p)
 {
 	bool Status = false;
 
@@ -862,13 +862,13 @@ bool GWindow::Attach(GViewI *p)
 	if (Wnd)
 	{
 		auto Widget = GTK_WIDGET(Wnd);
-		GView *i = this;
+		LView *i = this;
 		if (Pos.X() > 0 && Pos.Y() > 0)
 			gtk_window_resize(Wnd, Pos.X(), Pos.Y());
 		gtk_window_move(Wnd, Pos.x1, Pos.y1);
 		
 		auto Obj = G_OBJECT(Wnd);
-		g_object_set_data(Obj, "GViewI", (GViewI*)this);
+		g_object_set_data(Obj, "LViewI", (LViewI*)this);
 
 		d->DestroySig = g_signal_connect(Obj, "destroy", G_CALLBACK(GtkWindowDestroy), this);
 		g_signal_connect(Obj, "delete_event",			G_CALLBACK(GtkViewCallback), i);
@@ -973,15 +973,15 @@ bool GWindow::OnRequestClose(bool OsShuttingDown)
 		LgiCloseApp();
 	}
 
-	return GView::OnRequestClose(OsShuttingDown);
+	return LView::OnRequestClose(OsShuttingDown);
 }
 
-bool GWindow::HandleViewMouse(GView *v, LMouse &m)
+bool GWindow::HandleViewMouse(LView *v, LMouse &m)
 {
 	if (m.Down() && !m.IsMove())
 	{
 		bool InPopup = false;
-		for (GViewI *p = v; p; p = p->GetParent())
+		for (LViewI *p = v; p; p = p->GetParent())
 		{
 			if (dynamic_cast<GPopup*>(p))
 			{
@@ -1014,10 +1014,10 @@ bool GWindow::HandleViewMouse(GView *v, LMouse &m)
 	return true;
 }
 
-bool GWindow::HandleViewKey(GView *v, LKey &k)
+bool GWindow::HandleViewKey(LView *v, LKey &k)
 {
 	bool Status = false;
-	GViewI *Ctrl = 0;
+	LViewI *Ctrl = 0;
 	
 	#if DEBUG_HANDLEVIEWKEY
 	bool Debug = 1; // k.vkey == LK_RETURN;
@@ -1038,7 +1038,7 @@ bool GWindow::HandleViewKey(GView *v, LKey &k)
 	#endif
 
 	// Any window in a popup always gets the key...
-	GViewI *p;
+	LViewI *p;
 	for (p = v->GetParent(); p; p = p->GetParent())
 	{
 		if (dynamic_cast<GPopup*>(p))
@@ -1072,7 +1072,7 @@ bool GWindow::HandleViewKey(GView *v, LKey &k)
 		#endif
 		if (d->Hooks[i].Flags & LKeyEvents)
 		{
-			GView *Target = d->Hooks[i].Target;
+			LView *Target = d->Hooks[i].Target;
 			#if DEBUG_HANDLEVIEWKEY
 			if (Debug)
 				LgiTrace("\tHook[%i].Target=%p %s\n", i, Target, Target->GetClass());
@@ -1168,7 +1168,7 @@ bool GWindow::HandleViewKey(GView *v, LKey &k)
 	// Tab through controls
 	if (k.vkey == LK_TAB && k.Down() && !k.IsChar)
 	{
-		GViewI *Wnd = GetNextTabStop(v, k.Shift());
+		LViewI *Wnd = GetNextTabStop(v, k.Shift());
 		#if DEBUG_HANDLEVIEWKEY
 		if (Debug)
 			LgiTrace("\tTab moving focus shift=%i Wnd=%p\n", k.Shift(), Wnd);
@@ -1182,7 +1182,7 @@ bool GWindow::HandleViewKey(GView *v, LKey &k)
 	{
 		ShortcutMap Map;
 		BuildShortcuts(Map);
-		GViewI *c = Map.Find(ToUpper(k.c16));
+		LViewI *c = Map.Find(ToUpper(k.c16));
 		if (c)
 		{
 			c->OnNotify(c, GNotify_Activate);
@@ -1257,19 +1257,19 @@ void GWindow::SetZoom(GWindowZoom i)
 	}
 }
 
-GViewI *GWindow::GetDefault()
+LViewI *GWindow::GetDefault()
 {
 	return _Default;
 }
 
-void GWindow::SetDefault(GViewI *v)
+void GWindow::SetDefault(LViewI *v)
 {
 	if (v &&
 		v->GetWindow() == this)
 	{
 		if (_Default != v)
 		{
-			GViewI *Old = _Default;
+			LViewI *Old = _Default;
 			_Default = v;
 
 			if (Old) Old->Invalidate();
@@ -1344,7 +1344,7 @@ LPointF GWindow::GetDpiScale()
 LRect &GWindow::GetClient(bool ClientSpace)
 {
 	static LRect r;
-	r = GView::GetClient(ClientSpace);
+	r = LView::GetClient(ClientSpace);
 
 	if (Wnd)
 	{
@@ -1439,7 +1439,7 @@ bool GWindow::SetPos(LRect &p, bool Repaint)
 	return true;
 }
 
-void GWindow::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+void GWindow::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	// Force repour
 	d->Sx = d->Sy = -1;
@@ -1458,7 +1458,7 @@ void GWindow::OnPaint(LSurface *pDC)
 
 void GWindow::OnPosChange()
 {
-	GView::OnPosChange();
+	LView::OnPosChange();
 
 	if (d->Sx != X() ||	d->Sy != Y())
 	{
@@ -1470,9 +1470,9 @@ void GWindow::OnPosChange()
 
 #define IsTool(v) \
 	( \
-		dynamic_cast<GView*>(v) \
+		dynamic_cast<LView*>(v) \
 		&& \
-		dynamic_cast<GView*>(v)->_IsToolBar \
+		dynamic_cast<LView*>(v)->_IsToolBar \
 	)
 
 void GWindow::PourAll()
@@ -1487,12 +1487,12 @@ void GWindow::PourAll()
 		return; // IDK, GTK is weird sometimes... filter out low sizes.
 
 	LRegion Client(c);
-	GViewI *MenuView = 0;
+	LViewI *MenuView = 0;
 
 	LRegion Update(Client);
 	bool HasTools = false;
-	GViewI *v;
-	List<GViewI>::I Lst = Children.begin();
+	LViewI *v;
+	List<LViewI>::I Lst = Children.begin();
 
 	{
 		LRegion Tools;
@@ -1570,7 +1570,7 @@ void GWindow::PourAll()
 	}
 
 	Lst = Children.begin();
-	for (GViewI *v = *Lst; v; v = *++Lst)
+	for (LViewI *v = *Lst; v; v = *++Lst)
 	{
 		bool IsMenu = MenuView == v;
 		if (!IsMenu && !IsTool(v))
@@ -1621,10 +1621,10 @@ GMessage::Param GWindow::OnEvent(GMessage *m)
 		}
 	}
 
-	return GView::OnEvent(m);
+	return LView::OnEvent(m);
 }
 
-bool GWindow::RegisterHook(GView *Target, LWindowHookType EventType, int Priority)
+bool GWindow::RegisterHook(LView *Target, LWindowHookType EventType, int Priority)
 {
 	bool Status = false;
 	
@@ -1641,7 +1641,7 @@ bool GWindow::RegisterHook(GView *Target, LWindowHookType EventType, int Priorit
 	return Status;
 }
 
-bool GWindow::UnregisterHook(GView *Target)
+bool GWindow::UnregisterHook(LView *Target)
 {
 	int i = d->GetHookIndex(Target);
 	if (i >= 0)
@@ -1656,21 +1656,21 @@ void GWindow::OnFrontSwitch(bool b)
 {
 }
 
-GViewI *GWindow::GetFocus()
+LViewI *GWindow::GetFocus()
 {
 	return d->Focus;
 }
 
 #if DEBUG_SETFOCUS
-static GAutoString DescribeView(GViewI *v)
+static GAutoString DescribeView(LViewI *v)
 {
 	if (!v)
 		return GAutoString(NewStr("NULL"));
 
 	char s[512];
 	int ch = 0;
-	::GArray<GViewI*> p;
-	for (GViewI *i = v; i; i = i->GetParent())
+	::GArray<LViewI*> p;
+	for (LViewI *i = v; i; i = i->GetParent())
 	{
 		p.Add(i);
 	}
@@ -1687,7 +1687,7 @@ static GAutoString DescribeView(GViewI *v)
 }
 #endif
 
-void GWindow::SetFocus(GViewI *ctrl, FocusType type)
+void GWindow::SetFocus(LViewI *ctrl, FocusType type)
 {
 	#if DEBUG_SETFOCUS
 	const char *TypeName = NULL;
@@ -1714,12 +1714,12 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 
 			if (d->Focus)
 			{
-				GView *gv = d->Focus->GetGView();
+				LView *gv = d->Focus->GetGView();
 				if (gv)
 				{
 					#if DEBUG_SETFOCUS
 					GAutoString _foc = DescribeView(d->Focus);
-					LgiTrace(".....defocus GView: %s\n", _foc.Get());
+					LgiTrace(".....defocus LView: %s\n", _foc.Get());
 					#endif
 					gv->_Focus(false);
 				}
@@ -1742,12 +1742,12 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 				static int Count = 0;
 				#endif
 				
-				GView *gv = d->Focus->GetGView();
+				LView *gv = d->Focus->GetGView();
 				if (gv)
 				{
 					#if DEBUG_SETFOCUS
 					GAutoString _set = DescribeView(d->Focus);
-					LgiTrace("GWindow::SetFocus(%s, %s) %i focusing GView\n",
+					LgiTrace("GWindow::SetFocus(%s, %s) %i focusing LView\n",
 						_set.Get(),
 						TypeName,
 						Count++);

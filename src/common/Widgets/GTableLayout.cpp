@@ -303,8 +303,8 @@ class TableCell : public GLayoutCell
 public:
 	struct Child
 	{
-		GViewLayoutInfo Inf;
-		GView *View;
+		LViewLayoutInfo Inf;
+		LView *View;
 		LRect r;
 		bool IsLayout;
 		bool Debug;
@@ -320,11 +320,11 @@ public:
 
 	TableCell(GTableLayout *t, int Cx, int Cy);
 	GTableLayout *GetTable() { return Table; }
-	bool Add(GView *v);	
-	bool Remove(GView *v);
-	GArray<GView*> GetChildren();
+	bool Add(LView *v);	
+	bool Remove(LView *v);
+	GArray<LView*> GetChildren();
 	bool RemoveAll();
-	Child *HasView(GView *v);
+	Child *HasView(LView *v);
 
 	bool IsSpanned();
 	bool GetVariant(const char *Name, LVariant &Value, char *Array);
@@ -423,7 +423,7 @@ void TableCell::OnChange(PropType Prop)
 	}
 }
 
-TableCell::Child *TableCell::HasView(GView *v)
+TableCell::Child *TableCell::HasView(LView *v)
 {
 	size_t Len = Children.Length();
 	if (!Len)
@@ -440,15 +440,15 @@ TableCell::Child *TableCell::HasView(GView *v)
 	return NULL;
 }
 
-GArray<GView*> TableCell::GetChildren()
+GArray<LView*> TableCell::GetChildren()
 {
-	GArray<GView*> a;
+	GArray<LView*> a;
 	for (auto &c: Children)
 		a.Add(c.View);
 	return a;
 }
 
-bool TableCell::Add(GView *v)
+bool TableCell::Add(LView *v)
 {
 	if (!v || HasView(v))
 		return false;
@@ -465,7 +465,7 @@ bool TableCell::Add(GView *v)
 	return true;
 }
 
-bool TableCell::Remove(GView *v)
+bool TableCell::Remove(LView *v)
 {
 	Child *c = HasView(v);
 	if (!c)
@@ -501,7 +501,7 @@ bool TableCell::GetVariant(const char *Name, LVariant &Value, char *Array)
 	GDomProperty Fld = LgiStringToDomProp(Name);
 	switch (Fld)
 	{
-		case ContainerChildren: // Type: GView[]
+		case ContainerChildren: // Type: LView[]
 		{
 			if (!Value.SetList())
 				return false;
@@ -569,7 +569,7 @@ bool TableCell::SetVariant(const char *Name, LVariant &Value, char *Array)
 	GDomProperty Fld = LgiStringToDomProp(Name);
 	switch (Fld)
 	{
-		case ContainerChildren: // Type: GView[]
+		case ContainerChildren: // Type: LView[]
 		{
 			if (Value.Type != GV_LIST)
 			{
@@ -587,7 +587,7 @@ bool TableCell::SetVariant(const char *Name, LVariant &Value, char *Array)
 				if (!o)
 					continue;
 
-				GView *gv = dynamic_cast<GView*>(o);
+				LView *gv = dynamic_cast<LView*>(o);
 				if (!gv)
 					continue;
 
@@ -765,7 +765,7 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 		Child *c = Children.AddressOf();
 		for (int i=0; i<Children.Length(); i++, c++)
 		{
-			GView *v = c->View;
+			LView *v = c->View;
 			if (!v)
 				continue;
 
@@ -975,7 +975,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 	Child *c = Children.AddressOf();
 	for (int i=0; i<Children.Length(); i++, c++)
 	{
-		GView *v = c->View;
+		LView *v = c->View;
 		if (!v)
 			continue;
 
@@ -1172,7 +1172,7 @@ void TableCell::PostLayout()
 	Child *c = Children.AddressOf();
 	for (int i=0; i<Children.Length(); i++, c++)
 	{
-		GView *v = c->View;
+		LView *v = c->View;
 		if (!v)
 			continue;
 			
@@ -1384,7 +1384,7 @@ GTableLayoutPrivate::~GTableLayoutPrivate()
 
 bool GTableLayoutPrivate::CollectRadioButtons(GArray<GRadioButton*> &Btns)
 {
-    for (GViewI *i: Ctrl->IterateViews())
+    for (LViewI *i: Ctrl->IterateViews())
     {
         GRadioButton *b = dynamic_cast<GRadioButton*>(i);
         if (b) Btns.Add(b);
@@ -2034,7 +2034,7 @@ void GTableLayout::OnFocus(bool b)
 {
 	if (b)
 	{
-		GViewI *v = GetNextTabStop(this, false);
+		LViewI *v = GetNextTabStop(this, false);
 		if (v)
 			v->Focus(true);
 	}
@@ -2256,7 +2256,7 @@ bool GTableLayout::SetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-void GTableLayout::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+void GTableLayout::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	d->LayoutDirty = true;
 	if (Attaching)
@@ -2276,7 +2276,7 @@ void GTableLayout::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 	}
 }
 
-int GTableLayout::OnNotify(GViewI *c, int f)
+int GTableLayout::OnNotify(LViewI *c, int f)
 {
     if (f == GNotifyTableLayout_Refresh)
     {

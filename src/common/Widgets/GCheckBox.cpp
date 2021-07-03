@@ -99,7 +99,7 @@ void GCheckBox::OnAttach()
 {
 	LResources::StyleElement(this);
 	OnStyleChange();
-	GView::OnAttach();
+	LView::OnAttach();
 }
 
 void GCheckBox::OnStyleChange()
@@ -107,16 +107,16 @@ void GCheckBox::OnStyleChange()
 	if (d->Lock(_FL))
 	{
 		d->Empty();
-		d->Add(GView::Name(), GetCss());
+		d->Add(LView::Name(), GetCss());
 		d->DoLayout(X());
 		d->Unlock();
 		Invalidate();
 	}
 }
 
-int GCheckBox::OnNotify(GViewI *Ctrl, int Flags)
+int GCheckBox::OnNotify(LViewI *Ctrl, int Flags)
 {
-	if (Ctrl == (GViewI*)this && Flags == GNotify_Activate)
+	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
 	{
 		Value(!Value());
 	}
@@ -126,7 +126,7 @@ int GCheckBox::OnNotify(GViewI *Ctrl, int Flags)
 
 GMessage::Result GCheckBox::OnEvent(GMessage *m)
 {
-	return GView::OnEvent(m);
+	return LView::OnEvent(m);
 }
 
 bool GCheckBox::ThreeState()
@@ -160,7 +160,7 @@ bool GCheckBox::Name(const char *n)
 	bool Status = false;
 	if (d->Lock(_FL))
 	{
-		Status = GView::Name(n);
+		Status = LView::Name(n);
 		
 		d->Empty();
 		d->Add(n, GetCss());
@@ -180,7 +180,7 @@ bool GCheckBox::NameW(const char16 *n)
 	bool Status = false;
 	if (d->Lock(_FL))
 	{
-		Status = GView::NameW(n);
+		Status = LView::NameW(n);
 
 		d->Empty();
 		d->Add(LBase::Name(), GetCss());
@@ -201,7 +201,7 @@ void GCheckBox::SetFont(LFont *Fnt, bool OwnIt)
 
 	if (d->Lock(_FL))
 	{
-		GView::SetFont(Fnt, OwnIt);
+		LView::SetFont(Fnt, OwnIt);
 		d->Unlock();
 	}
 	d->Layout(X());
@@ -293,7 +293,7 @@ void GCheckBox::OnPosChange()
 	d->Layout(X());
 }
 
-bool GCheckBox::OnLayout(GViewLayoutInfo &Inf)
+bool GCheckBox::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (!Inf.Width.Min)
 	{
@@ -400,7 +400,7 @@ void GCheckBox::OnPaint(LSurface *pDC)
 			pDC->Line(c.x2, c.y1, c.x1, c.y2);
 			#endif
 
-			for (GViewI *v = this; v && !v->Handle(); v = v->GetParent())
+			for (LViewI *v = this; v && !v->Handle(); v = v->GetParent())
 			{
 				LRect p = v->GetPos();
 				c.Offset(p.x1, p.y1);

@@ -1926,7 +1926,7 @@ void GTree::OnPaint(LSurface *pDC)
 	}
 }
 
-int GTree::OnNotify(GViewI *Ctrl, int Flags)
+int GTree::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{

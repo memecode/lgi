@@ -111,12 +111,12 @@ GBox::Spacer *GBox::GetSpacer(int idx)
 	return idx >= 0 && idx < d->Spacers.Length() ? &d->Spacers[idx] : NULL;
 }
 
-GViewI *GBox::GetViewAt(int i)
+LViewI *GBox::GetViewAt(int i)
 {
 	return Children[i];
 }
 
-bool GBox::SetViewAt(uint32_t i, GViewI *v)
+bool GBox::SetViewAt(uint32_t i, LViewI *v)
 {
 	if (!v || i > Children.Length())
 	{
@@ -132,7 +132,7 @@ bool GBox::SetViewAt(uint32_t i, GViewI *v)
 	if (i < Children.Length())
 	{
 		// Remove existing view..
-		GViewI *existing = Children[i];
+		LViewI *existing = Children[i];
 		if (existing == v)
 			return true;
 		if (existing)
@@ -163,7 +163,7 @@ void GBox::OnCreate()
 		Wnd->RegisterHook(this, LMouseEvents);
 }
 
-bool GBox::OnViewMouse(GView *v, LMouse &m)
+bool GBox::OnViewMouse(LView *v, LMouse &m)
 {
 	// This hook allows the GBox to catch clicks nearby the splits even if the splits are too small
 	// to grab normally. Consider the case of a split that is 1px wide. The active region needs to
@@ -173,7 +173,7 @@ bool GBox::OnViewMouse(GView *v, LMouse &m)
 	{
 		// Convert click to the local coordinates of this view
 		LMouse Local = m;
-		while (v && v != (GView*)this && v->GetParent())
+		while (v && v != (LView*)this && v->GetParent())
 		{
 			if (dynamic_cast<GPopup*>(v))
 				return true;
@@ -181,11 +181,11 @@ bool GBox::OnViewMouse(GView *v, LMouse &m)
 			LRect p = v->GetPos();
 			Local.x += p.x1;
 			Local.y += p.y1;
-			GViewI *vi = v->GetParent();
+			LViewI *vi = v->GetParent();
 			v = vi ? vi->GetGView() : NULL;
 		}
 		
-		if (v == (GView*)this)
+		if (v == (LView*)this)
 		{
 			// Is the click over our spacers?
 			Spacer *s = d->HitTest(Local.x, Local.y);
@@ -265,7 +265,7 @@ struct BoxRange
 {
 	int Min, Max;
 	LCss::Len Size;
-	GViewI *View;
+	LViewI *View;
 	
 	BoxRange()
 	{
@@ -314,7 +314,7 @@ void GBox::OnPosChange()
 	#endif
 
 	// Do first pass over children and find their sizes
-	for (GViewI *c: views)
+	for (LViewI *c: views)
 	{
 		LCss *css = c->GetCss();
 		BoxRange &box = Sizes.New();
@@ -478,7 +478,7 @@ void GBox::OnMouseClick(LMouse &m)
 	#if 0
 	{
 		GString::Array a;
-		for (GViewI *p = this; p; p = p->GetParent())
+		for (LViewI *p = this; p; p = p->GetParent())
 			a.New() = p->GetClass();
 		m.Trace(GString("GBox::OnMouseClick-") + GString(".").Join(a));
 	}
@@ -517,7 +517,7 @@ void GBox::OnMouseMove(LMouse &m)
 	#if 0
 	{
 		GString::Array a;
-		for (GViewI *p = this; p; p = p->GetParent())
+		for (LViewI *p = this; p; p = p->GetParent())
 			a.New().Printf("%s/%p", p->GetClass(), p);
 		m.Trace(GString("GBox::OnMouseMove-") + GString(".").Join(a));
 	}
@@ -537,14 +537,14 @@ void GBox::OnMouseMove(LMouse &m)
 		return;
 	}
 
-	GViewI *Prev = Children[DragIndex];
+	LViewI *Prev = Children[DragIndex];
 	if (!Prev)
 	{
 		LgiAssert(0);
 		return;
 	}
 
-	GViewI *Next = DragIndex < Children.Length() ? Children[DragIndex+1] : NULL;
+	LViewI *Next = DragIndex < Children.Length() ? Children[DragIndex+1] : NULL;
 
 	GCssTools tools(GetCss(), GetFont());
 	LRect Content = tools.ApplyMargin(GetClient());
@@ -555,7 +555,7 @@ void GBox::OnMouseMove(LMouse &m)
 	LCss *PrevStyle = Prev->GetCss();
 	LCss::PropType Style = d->Vertical ? LCss::PropHeight : LCss::PropWidth;
 	bool EditPrev = !Next || IsValidLen(PrevStyle, Style);
-	GViewI *Edit = EditPrev ? Prev : Next;
+	LViewI *Edit = EditPrev ? Prev : Next;
 	LgiAssert(Edit != NULL);
 	LRect ViewPos = Edit->GetPos();
 	auto *EditCss = Edit->GetCss(true);
@@ -675,7 +675,7 @@ void GBox::OnMouseMove(LMouse &m)
 	Invalidate((LRect*)NULL, true);
 }
 
-int GBox::OnNotify(GViewI *Ctrl, int Flags)
+int GBox::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Flags == GNotifyTableLayout_Refresh)
 	{
@@ -687,10 +687,10 @@ int GBox::OnNotify(GViewI *Ctrl, int Flags)
 			PostEvent(M_CHILDREN_CHANGED);
 	}
 		
-	return GView::OnNotify(Ctrl, Flags);
+	return LView::OnNotify(Ctrl, Flags);
 }
 
-void GBox::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+void GBox::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	#if 0
 	LgiTrace("GBox(%s)::OnChildrenChanged(%s, %i)\n", Name(), Wnd ? Wnd->GetClass() : NULL, Attaching);
@@ -707,7 +707,7 @@ void GBox::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 
 int64 GBox::Value()
 {
-	GViewI *v = Children.Length() ? Children[0] : NULL;
+	LViewI *v = Children.Length() ? Children[0] : NULL;
 	if (!v) return 0;
 
 	LCss *css = v->GetCss();
@@ -722,7 +722,7 @@ int64 GBox::Value()
 
 void GBox::Value(int64 i)
 {
-	GViewI *v = Children.Length() ? Children[0] : NULL;
+	LViewI *v = Children.Length() ? Children[0] : NULL;
 	if (!v) return;
 
 	LCss *css = v->GetCss(true);
@@ -744,7 +744,7 @@ LgiCursor GBox::GetCursor(int x, int y)
 		return LCUR_Normal;
 }
 
-bool GBox::OnLayout(GViewLayoutInfo &Inf)
+bool GBox::OnLayout(LViewLayoutInfo &Inf)
 {
 	Inf.Width.Min = -1;
 	Inf.Width.Max = -1;
@@ -769,7 +769,7 @@ bool GBox::Serialize(GDom *Dom, const char *OptName, bool Write)
 
 bool GBox::SetSize(int ViewIndex, LCss::Len Size)
 {
-	GViewI *v = Children[ViewIndex];
+	LViewI *v = Children[ViewIndex];
 	if (!v)
 		return false;
 
@@ -792,5 +792,5 @@ GMessage::Result GBox::OnEvent(GMessage *Msg)
 		}
 	}
 	
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }

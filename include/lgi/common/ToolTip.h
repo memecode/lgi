@@ -2,7 +2,7 @@
 #define _GTOOLTIP_H_
 
 /// Puts a tool tip on screen when the mouse wanders over a region.
-class LgiClass GToolTip : public GView
+class LgiClass GToolTip : public LView
 {
 	class GToolTipPrivate *d;
 
@@ -23,7 +23,7 @@ public:
 	/// Delete the tip.
 	void DeleteTip(int Id);
 
-	bool Attach(GViewI *p);
+	bool Attach(LViewI *p);
 };
 
 #endif

@@ -21,7 +21,7 @@ protected:
 	class GScrollBarPrivate *d;
 
 	#if WINNATIVE
-	GViewI *GetMyView();
+	LViewI *GetMyView();
 	void Update();
 	void SetParentFlag(bool Bool);
 	#endif
@@ -64,10 +64,10 @@ public:
 
 	#if WINNATIVE
 	bool SetPos(LRect &p, bool Repaint = false);
-	void SetParent(GViewI *p);
+	void SetParent(LViewI *p);
 	bool Invalidate(LRect *r = NULL, bool Repaint = false, bool NonClient = false);
 	#else
-	bool Attach(GViewI *p);
+	bool Attach(LViewI *p);
 	void OnPaint(LSurface *pDC);
 	void OnPosChange();
 	void OnMouseClick(LMouse &m);

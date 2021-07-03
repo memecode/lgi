@@ -89,7 +89,7 @@ class GdcTiff : public TiffIo
 	IoStatus ProcessWrite(LSurface *pDC);
 
 public:
-	GView *Parent;
+	LView *Parent;
 	OsView Handle();
 
 	GdcTiff();

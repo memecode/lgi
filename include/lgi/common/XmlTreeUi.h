@@ -30,11 +30,11 @@ public:
 	/// Clear all mappings
 	void EmptyMaps();
 	/// Convert data to/from an XML tag
-	virtual bool Convert(GDom *Tag, GViewI *ui, bool ToUI);
+	virtual bool Convert(GDom *Tag, LViewI *ui, bool ToUI);
 	/// Disable/enable all control
-	void EnableAll(GViewI *ui, bool Enable);
+	void EnableAll(LViewI *ui, bool Enable);
 	/// Empty all controls of text / value
-	void EmptyAll(GViewI *ui);
+	void EmptyAll(LViewI *ui);
 	/// Returns true if the attribute is mapped
 	bool IsMapped(const char *Attr);
 };

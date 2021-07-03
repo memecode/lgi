@@ -13,7 +13,7 @@ class LgiClass GCombo :
 	#if defined WIN32
 	static LWindowsClass WndClass;
 	char *Class() { return LGI_COMBO; }
-	uint32 GetStyle() { return WS_VISIBLE | WS_VSCROLL | CBS_DISABLENOSCROLL | CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_CHILD | WS_TABSTOP | ((SortItems) ? CBS_SORT : 0) | GView::GetStyle(); }
+	uint32 GetStyle() { return WS_VISIBLE | WS_VSCROLL | CBS_DISABLENOSCROLL | CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_CHILD | WS_TABSTOP | ((SortItems) ? CBS_SORT : 0) | LView::GetStyle(); }
 	int SysOnNotify(int Code);
 	#elif defined BEOS
 	BMenuItem *CurItem;

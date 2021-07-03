@@ -11,9 +11,9 @@ class LWebdav
 protected:
 	GString EndPoint, EndPointPath, User, Pass;
 
-	GAutoPtr<GSocketI> GetSocket()
+	GAutoPtr<LSocketI> GetSocket()
 	{
-		GAutoPtr<GSocketI> s;
+		GAutoPtr<LSocketI> s;
 
 		SslSocket *ssl = new SslSocket();
 		if (ssl)

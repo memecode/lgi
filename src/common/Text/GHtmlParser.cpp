@@ -963,7 +963,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								GDocumentEnv::LoadType Result = View->GetEnv()->GetContent(j);
 								if (Result == GDocumentEnv::LoadImmediate)
 								{
-									GStreamI *s = j->GetStream();
+									LStreamI *s = j->GetStream();
 									if (s)
 									{
 										uint64 Len = s->GetSize();

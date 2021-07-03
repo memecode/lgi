@@ -448,7 +448,7 @@ public:
 		Types.Add("LDateTime", GV_DATETIME);
 		Types.Add("GHashTable", GV_HASHTABLE);
 		Types.Add("GOperator", GV_OPERATOR);
-		Types.Add("GView", GV_GVIEW);
+		Types.Add("LView", GV_GVIEW);
 		Types.Add("LMouse", GV_LMOUSE);
 		Types.Add("LKey", GV_LKEY);
 		Types.Add("LVariant", GV_VARIANT);
@@ -3594,7 +3594,7 @@ bool GCompiler::Compile
 class LScriptEnginePrivate
 {
 public:
-	GViewI *Parent;
+	LViewI *Parent;
 	SystemFunctions SysContext;
 	LScriptContext *UserContext;
 	LCompiledCode *Code;
@@ -3610,7 +3610,7 @@ public:
 	}
 };
 
-LScriptEngine::LScriptEngine(GViewI *parent, LScriptContext *UserContext, LVmDebuggerCallback *Callback)
+LScriptEngine::LScriptEngine(LViewI *parent, LScriptContext *UserContext, LVmDebuggerCallback *Callback)
 {
 	d = new LScriptEnginePrivate;
 	d->Parent = parent;
@@ -3762,4 +3762,4 @@ bool LScriptEngine::CallMethod(LCompiledCode *Obj, const char *Method, LScriptAr
 LScriptContext *LScriptEngine::GetSystemContext()
 {
 	return &d->SysContext;
-}
+}

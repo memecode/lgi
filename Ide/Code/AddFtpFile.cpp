@@ -3,7 +3,7 @@
 #include "resdefs.h"
 #include "FtpFile.h"
 
-AddFtpFile::AddFtpFile(GViewI *p, char *ftp)
+AddFtpFile::AddFtpFile(LViewI *p, char *ftp)
 {
 	SetParent(p);
 	Base = new GUri(ftp);
@@ -59,7 +59,7 @@ void AddFtpFile::OnCmdComplete(FtpCmd *Cmd)
 	}
 }
 
-int AddFtpFile::OnNotify(GViewI *c, int f)
+int AddFtpFile::OnNotify(LViewI *c, int f)
 {
 	switch (c->GetId())
 	{

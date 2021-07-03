@@ -41,7 +41,7 @@ struct GDialogPriv
 	{
 		if (!Dlg->_Default)
 		{
-			GViewI *c = Dlg->FindControl(IDOK);
+			LViewI *c = Dlg->FindControl(IDOK);
 			GButton *Def = c ? dynamic_cast<GButton*>(c) : 0;
 			if (Def)
 			{
@@ -88,8 +88,8 @@ void GDialog::OnPosChange()
 {
     if (Children.Length() == 1)
     {
-        List<GViewI>::I it = Children.Start();
-        GTableLayout *t = dynamic_cast<GTableLayout*>((GViewI*)it.First());
+        List<LViewI>::I it = Children.Start();
+        GTableLayout *t = dynamic_cast<GTableLayout*>((LViewI*)it.First());
         if (t)
         {
             LRect r = GetClient();
@@ -274,7 +274,7 @@ void GDialog::EndModeless(int Code)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GControl::GControl(BView *view) : GView(view)
+GControl::GControl(BView *view) : LView(view)
 {
 	Pos.ZOff(10, 10);
 	SetId(0);
@@ -388,7 +388,7 @@ void GSlider::SetLimits(int64 min, int64 max)
 
 GMessage::Result GSlider::OnEvent(GMessage *Msg)
 {
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 #define SLIDER_BAR_SIZE			2

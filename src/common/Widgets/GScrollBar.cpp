@@ -466,7 +466,7 @@ public:
 			CalcRegions();
 			Widget->Invalidate();
 			
-			GViewI *n = Widget->GetNotify() ? Widget->GetNotify() : Widget->GetParent();
+			LViewI *n = Widget->GetNotify() ? Widget->GetNotify() : Widget->GetParent();
 			if (n) n->OnNotify(Widget, (int)Value);
 		}
 	}
@@ -508,7 +508,7 @@ int GScrollBar::GetScrollSize()
 	return SCROLL_BAR_SIZE;
 }
 
-bool GScrollBar::Attach(GViewI *p)
+bool GScrollBar::Attach(LViewI *p)
 {
 	bool Status = GControl::Attach(p);
 	
@@ -715,7 +715,7 @@ void GScrollBar::SetPage(int64 i)
 
 GMessage::Result GScrollBar::OnEvent(GMessage *Msg)
 {
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 void GScrollBar::OnPulse()

@@ -30,7 +30,7 @@ public:
 		RegisterHook(this, LKeyEvents);
 	}
 
-	bool OnViewKey(GView *v, LKey &k)
+	bool OnViewKey(LView *v, LKey &k)
 	{
 		if (k.Down())
 		{
@@ -65,7 +65,7 @@ public:
 			
 			if (Id >= 0)
 			{
-				GViewI *c = FindControl(Id);
+				LViewI *c = FindControl(Id);
 				if (c)
 				{
 					EndModal(c->GetId());
@@ -76,7 +76,7 @@ public:
 		return LDialog::OnViewKey(v, k);
 	}
 	
-	int OnNotify(GViewI *Ctrl, int f)
+	int OnNotify(LViewI *Ctrl, int f)
 	{
 		switch (Ctrl->GetId())
 		{
@@ -94,7 +94,7 @@ public:
 };
 #endif
 
-int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
+int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 {
 	int Res = 0;
 	va_list Arg;
@@ -425,7 +425,7 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 }
 
 #if !LGI_STATIC
-void LDialogTextMsg(GViewI *Parent, const char *Title, GString Txt)
+void LDialogTextMsg(LViewI *Parent, const char *Title, GString Txt)
 {
 	GAutoPtr<LDialog> d(new LDialog);
 	if (d)

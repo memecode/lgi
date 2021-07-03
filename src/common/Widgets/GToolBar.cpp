@@ -89,7 +89,7 @@ GImageList *LgiLoadImageList(const char *File, int x, int y)
 	return new GImageList(x, y, pDC);
 }
 
-GToolBar *LgiLoadToolbar(GViewI *Parent, const char *File, int x, int y)
+GToolBar *LgiLoadToolbar(LViewI *Parent, const char *File, int x, int y)
 {
 	GToolBar *Toolbar = new GToolBar;
 	if (Toolbar)
@@ -452,7 +452,7 @@ public:
 		// all the buttons between them are switched off.
 		GToolButton *Last = 0;
 		bool HasVis = false;
-		for (GViewI *v: Tb->IterateViews())
+		for (LViewI *v: Tb->IterateViews())
 		{
 			GToolButton *Btn = dynamic_cast<GToolButton*>(v);
 			if (Btn)
@@ -550,7 +550,7 @@ GToolButton::~GToolButton()
 
 bool GToolButton::Name(const char *n)
 {
-	bool s = GView::Name(n);
+	bool s = LView::Name(n);
 	d->Text.DeleteObjects();
 	return s;
 }
@@ -1063,7 +1063,7 @@ void GToolBar::ContextMenu(LMouse &m)
 			int n = 1;
 			for (auto it = Children.begin(); it != Children.end(); it++, n++)
 			{
-				GViewI *v = *it;
+				LViewI *v = *it;
 
 				GToolButton *Btn = dynamic_cast<GToolButton*>(v);
 				if (Btn && Btn->Separator())
@@ -1096,7 +1096,7 @@ void GToolBar::ContextMenu(LMouse &m)
 				}
 				default:
 				{
-					GViewI *Ctrl = Children[Pick - 1];
+					LViewI *Ctrl = Children[Pick - 1];
 					if (Ctrl)
 					{
 						Ctrl->Visible(!Ctrl->Visible());
@@ -1185,7 +1185,7 @@ LFont *GToolBar::GetFont()
 	return d->Font;
 }
 
-bool GToolBar::OnLayout(GViewLayoutInfo &Inf)
+bool GToolBar::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (Inf.Width.Min == 0)
 	{
@@ -1370,7 +1370,7 @@ bool GToolBar::Pour(LRegion &r)
 
 void GToolBar::OnButtonClick(GToolButton *Btn)
 {
-	GViewI *w = (GetNotify()) ? GetNotify() : GetParent();
+	LViewI *w = (GetNotify()) ? GetNotify() : GetParent();
 	if (w && Btn)
 	{
 		int Id = Btn->GetId();
@@ -1384,7 +1384,7 @@ void GToolBar::OnButtonClick(GToolButton *Btn)
 	}
 }
 
-int GToolBar::PostDescription(GView *Ctrl, const char *Text)
+int GToolBar::PostDescription(LView *Ctrl, const char *Text)
 {
 	if (GetParent())
 	{
@@ -1405,7 +1405,7 @@ GMessage::Result GToolBar::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 void GToolBar::OnPaint(LSurface *pDC)
@@ -1551,7 +1551,7 @@ bool GToolBar::AppendBreak()
 	return false;
 }
 
-bool GToolBar::AppendControl(GView *Ctrl)
+bool GToolBar::AppendControl(LView *Ctrl)
 {
 	bool Status = false;
 	if (Ctrl)
@@ -1572,7 +1572,7 @@ void GToolBar::Empty()
 }
 
 #ifdef MAC
-bool GToolBar::Attach(GViewI *parent)
+bool GToolBar::Attach(LViewI *parent)
 {
 	return GLayout::Attach(parent);
 }

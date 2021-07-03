@@ -2876,7 +2876,7 @@ void GTag::SetStyle()
 					GDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
 					if (Result == GDocumentEnv::LoadImmediate)
 					{
-						GStreamI *s = j->GetStream();							
+						LStreamI *s = j->GetStream();							
 						if (s)
 						{
 							int Len = (int)s->GetSize();
@@ -7302,7 +7302,7 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 							{
 								if (!CssHref.Find(j->Uri))
 								{
-									GStreamI *s = j->GetStream();
+									LStreamI *s = j->GetStream();
 									if (s)
 									{
 										s->ChangeThread();
@@ -7364,7 +7364,7 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 	return GDocView::OnEvent(Msg);
 }
 
-int GHtml::OnNotify(GViewI *c, int f)
+int GHtml::OnNotify(LViewI *c, int f)
 {
 	switch (c->GetId())
 	{
@@ -8937,7 +8937,7 @@ void GHtml::SetEmoji(bool i)
 ////////////////////////////////////////////////////////////////////////
 class GHtml_Factory : public GViewFactory
 {
-	GView *NewView(const char *Class, LRect *Pos, const char *Text)
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (_stricmp(Class, "GHtml") == 0)
 		{

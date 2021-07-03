@@ -25,7 +25,7 @@ public:
 	LRect &GetClient(bool InClientSpace = true);
 	#endif
 
-	bool Attach(GViewI *p);
+	bool Attach(LViewI *p);
 	bool Detach();
 
 	bool PourAll();
@@ -47,7 +47,7 @@ class GMdiParent : public GLayout
 	#if MDI_TAB_STYLE
 	int GetNextOrder();
 	#endif
-	GMdiChild *IsChild(GViewI *v);
+	GMdiChild *IsChild(LViewI *v);
 	::GArray<GMdiChild*> &PrivChildren();
 
 public:
@@ -60,12 +60,12 @@ public:
 	void HasButton(bool b);
 
 	void OnPaint(LSurface *pDC);
-	bool Attach(GViewI *p);
-	bool OnViewMouse(GView *View, LMouse &m);
-	bool OnViewKey(GView *View, LKey &Key);
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
+	bool Attach(LViewI *p);
+	bool OnViewMouse(LView *View, LMouse &m);
+	bool OnViewKey(LView *View, LKey &Key);
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
 	LRect NewPos();
-	GViewI *GetTop();
+	LViewI *GetTop();
 
 	template<typename T>
 	bool GetChildren(::GArray<T*> &Views)

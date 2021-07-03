@@ -28,12 +28,12 @@ public:
 	// Methods
 	void SetColourList(GArray<GColour> *c32 = 0);
 
-	// GView
+	// LView
 	int64 Value();
 	void Value(int64 i);
 	void Value(GColour c);
 	void OnPaint(LSurface *pDC);
-	bool OnLayout(GViewLayoutInfo &Inf);
+	bool OnLayout(LViewLayoutInfo &Inf);
 };
 
 #endif

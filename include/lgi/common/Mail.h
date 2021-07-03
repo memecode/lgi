@@ -115,7 +115,7 @@ protected:
 
 	// Read from file
 	GFile File;
-	GStreamI *Embeded;
+	LStreamI *Embeded;
 	bool OwnEmbeded;
 	int64 Offset;
 	LMutex *Lock;
@@ -125,7 +125,7 @@ protected:
 	GAutoPtr<GStream> DataStream;
 
 public:
-	FileDescriptor(GStreamI *embed, int64 Offset, int64 Size, char *Name);
+	FileDescriptor(LStreamI *embed, int64 Offset, int64 Size, char *Name);
 	FileDescriptor(char *name);
 	FileDescriptor(char *data, int64 len);
 	FileDescriptor();
@@ -136,7 +136,7 @@ public:
 	void SetOwnEmbeded(bool i);
 
 	// Access functions
-	GStreamI *GotoObject();		// Get data to read
+	LStreamI *GotoObject();		// Get data to read
 	uchar *GetData();			// Get data from write
 	int Sizeof();
 	char *GetMimeType() { return MimeType; }
@@ -198,7 +198,7 @@ class MailProtocol
 protected:
 	char Buffer[4<<10];
 	LMutex SocketLock;
-	GAutoPtr<GSocketI> Socket;
+	GAutoPtr<LSocketI> Socket;
 	LOAuth2::Params OAuth2;
 	GDom *SettingStore;
 
@@ -210,8 +210,8 @@ protected:
 
 public:
 	// Logging
-	GStreamI *Logger;
-	void Log(const char *Str, GSocketI::SocketMsgType type);
+	LStreamI *Logger;
+	void Log(const char *Str, LSocketI::SocketMsgType type);
 
 	// Task Progress
 	MailProtocolProgress *Items;
@@ -283,7 +283,7 @@ public:
 	virtual bool Open
 	(
 		/// The transport layer to use
-		GSocketI *S,
+		LSocketI *S,
 		/// The host to connect to
 		const char *RemoteHost,
 		/// The local domain
@@ -433,7 +433,7 @@ public:
 	bool Oversize;
 
 	/// The mail protocol handler writes the email to this stream
-	GStreamI *Stream;
+	LStreamI *Stream;
 
 	/// Flags used on the IMAP protocolf
 	ImapMailFlags Imap;
@@ -513,7 +513,7 @@ public:
 	virtual bool Open
 	(
 		/// The transport socket
-		GSocketI *S,
+		LSocketI *S,
 		/// The hostname or IP of the server
 		const char *RemoteHost,
 		/// The port on the host to connect to
@@ -570,7 +570,7 @@ public:
 	MailSmtp();
 	~MailSmtp();
 
-	bool Open(GSocketI *S, const char *RemoteHost, const char *LocalDomain, const char *UserName, const char *Password, int Port = 0, int Flags = 0);
+	bool Open(LSocketI *S, const char *RemoteHost, const char *LocalDomain, const char *UserName, const char *Password, int Port = 0, int Flags = 0);
 	bool Close();
 
 	bool SendToFrom(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = 0);
@@ -590,7 +590,7 @@ public:
 	MailSendFolder(char *Path);
 	~MailSendFolder();
 
-	bool Open(GSocketI *S, const char *RemoteHost, const char *LocalDomain, const char *UserName, const char *Password, int Port = 0, int Flags = 0);
+	bool Open(LSocketI *S, const char *RemoteHost, const char *LocalDomain, const char *UserName, const char *Password, int Port = 0, int Flags = 0);
 	bool Close();
 
 	GStringPipe *SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = 0);
@@ -615,7 +615,7 @@ public:
 	~MailPop3();
 
 	// Connection
-	bool Open(GSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags = 0);
+	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags = 0);
 	bool Close();
 
 	// Commands available while connected
@@ -639,7 +639,7 @@ public:
 	~MailReceiveFolder();
 
 	// Connection
-	bool Open(GSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags = 0);
+	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags = 0);
 	bool Close();
 
 	// Commands available while connected
@@ -657,14 +657,14 @@ class MailPhp : public MailSource
 protected:
 	class MailPhpPrivate *d;
 
-	bool Get(GSocketI *S, char *Uri, GStream &Out, bool ChopDot);
+	bool Get(LSocketI *S, char *Uri, GStream &Out, bool ChopDot);
 
 public:
 	MailPhp();
 	~MailPhp();
 
 	// Connection
-	bool Open(GSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags = 0);
+	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags = 0);
 	bool Close();
 
 	// Commands available while connected
@@ -722,7 +722,7 @@ protected:
 	bool FillUidList();
 	bool WriteBuf(bool ObsurePass = false, const char *Buffer = 0, bool Continuation = false);
 	bool ReadResponse(int Cmd = -1, bool Plus = false);
-	bool Read(GStreamI *Out = 0, int Timeout = -1);
+	bool Read(LStreamI *Out = 0, int Timeout = -1);
 	bool ReadLine();
 	bool IsResponse(const char *Buf, int Cmd, bool &Ok);
 	void CommandFinished();
@@ -783,12 +783,12 @@ public:
 	bool ServerOption(char *Opt);
 	bool IsOnline();
 	const char *GetWebLoginUri();
-	void SetParentWindow(GViewI *wnd);
+	void SetParentWindow(LViewI *wnd);
 	void SetCancel(LCancel *Cancel);
 	ssize_t ParseImapResponse(char *Buffer, ssize_t BufferLen, GArray<StrRange> &Ranges, int Names);
 
 	// Connection
-	bool Open(GSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags = 0);
+	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags = 0);
 	bool Close(); // Non-threadsafe soft close (normal operation)
 	bool GetCapabilities(GArray<char*> &s);
 
@@ -821,7 +821,7 @@ public:
 		/// A user defined param to pass back to the 'Callback' function.
 		void *UserData,
 		/// [Optional] The raw data received will be written to this stream if provided, else NULL.
-		GStreamI *RawCopy = 0,
+		LStreamI *RawCopy = 0,
 		/// [Optional] The rough size of the fetch... used to pre-allocate a buffer to receive data.
 		int64 SizeHint = -1
 	);
@@ -866,7 +866,7 @@ public:
 	bool Search(bool Uids, GArray<GString> &SeqNumbers, const char *Filter);
 
 	// Utility
-	static bool Http(GSocketI *S,
+	static bool Http(LSocketI *S,
 					GAutoString *OutHeaders,
 					GAutoString *OutBody,
 					int *StatusCode,

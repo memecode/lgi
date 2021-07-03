@@ -14,7 +14,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 GLayout::GLayout() :
-	GView(new BViewRedir(this))
+	LView(new BViewRedir(this))
 {
 	_PourLargest = false;
 	VScroll = 0;
@@ -90,9 +90,9 @@ void GLayout::SetScrollPos(int x, int y)
 	}
 }
 
-bool GLayout::Attach(GViewI *p)
+bool GLayout::Attach(LViewI *p)
 {
-	bool Status = GView::Attach(p);
+	bool Status = LView::Attach(p);
 	
 	if (_View)
 	{
@@ -126,7 +126,7 @@ bool GLayout::Attach(GViewI *p)
 
 bool GLayout::Detach()
 {
-	return GView::Detach();
+	return LView::Detach();
 }
 
 bool GLayout::SetScrollBars(bool x, bool y)
@@ -182,7 +182,7 @@ bool GLayout::SetScrollBars(bool x, bool y)
 
 void GLayout::OnPosChange()
 {
-	LRect r = GView::GetClient();	
+	LRect r = LView::GetClient();	
 	LRect v(r.x2-B_V_SCROLL_BAR_WIDTH+1, r.y1, r.x2, r.y2);
 	LRect h(r.x1, r.y2-B_H_SCROLL_BAR_HEIGHT+1, r.x2, r.y2);
 
@@ -211,7 +211,7 @@ LRect &GLayout::GetClient(bool ClientSpace)
 {
 	static LRect r;
 
-	r = GView::GetClient(ClientSpace);
+	r = LView::GetClient(ClientSpace);
 	
 	if (VScroll)
 	{
@@ -228,12 +228,12 @@ LRect &GLayout::GetClient(bool ClientSpace)
 
 void GLayout::OnNcPaint(LSurface *pDC, LRect &r)
 {
-	GView::OnNcPaint(pDC, r);
+	LView::OnNcPaint(pDC, r);
 }
 
-int GLayout::OnNotify(GViewI *v, int f)
+int GLayout::OnNotify(LViewI *v, int f)
 {
-	return GView::OnNotify(v, f);
+	return LView::OnNotify(v, f);
 }
 
 GMessage::Result GLayout::OnEvent(GMessage *Msg)
@@ -260,16 +260,16 @@ GMessage::Result GLayout::OnEvent(GMessage *Msg)
 	
 	if (VScroll) VScroll->OnEvent(Msg);
 	if (HScroll) HScroll->OnEvent(Msg);
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
-GViewI *GLayout::FindControl(int Id)
+LViewI *GLayout::FindControl(int Id)
 {
 	if (VScroll && VScroll->GetId() == Id)
 		return VScroll;
 	if (HScroll && HScroll->GetId() == Id)
 		return HScroll;
 
-	return GView::FindControl(Id);
+	return LView::FindControl(Id);
 }
 

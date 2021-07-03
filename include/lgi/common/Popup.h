@@ -20,7 +20,7 @@ class LgiClass GPopup :
 	#if LGI_POPUP_LWINDOW
 	public LWindow
 	#else
-	public GView
+	public LView
 	#endif
 {
 	friend class _QPopup;
@@ -28,14 +28,14 @@ class LgiClass GPopup :
 	friend class GDropDown;
 	friend class LMouseHook;
 	friend class LMouseHookPrivate;
-    friend class GView;
+    friend class LView;
 
     static GArray<GPopup*> CurrentPopups;
 
 protected:
 	class GPopupPrivate *d;
 	bool Cancelled;
-	GView *Owner;
+	LView *Owner;
 	uint64 Start;
 	LRect ScreenPos;
 	
@@ -44,7 +44,7 @@ protected:
 	#endif
 
 public:
-	GPopup(GView *owner);
+	GPopup(LView *owner);
 	~GPopup();
 
 	#if LGI_COCOA
@@ -58,7 +58,7 @@ public:
 	void TakeFocus(bool Take);
 	const char *GetClass() override { return "GPopup"; }
 	bool GetCancelled() { return Cancelled; }
-	bool Attach(GViewI *p) override;
+	bool Attach(LViewI *p) override;
 	void Visible(bool i) override;
 	bool Visible() override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
@@ -85,7 +85,7 @@ public:
 	void OnPaint(LSurface *pDC);
 	bool OnKey(LKey &k);
 	void OnMouseClick(LMouse &m);
-	int OnNotify(GViewI *c, int f);
+	int OnNotify(LViewI *c, int f);
 
 	// Override
 	virtual void Activate();
@@ -104,8 +104,8 @@ public:
 
 	void RegisterPopup(GPopup *p);
 	void UnregisterPopup(GPopup *p);
-	bool OnViewKey(GView *v, LKey &k);
-	void TrackClick(GView *v);
+	bool OnViewKey(LView *v, LKey &k);
+	void TrackClick(LView *v);
 
 	#ifdef WIN32
 	static LRESULT CALLBACK MouseProc(int Code, WPARAM a, LPARAM b);

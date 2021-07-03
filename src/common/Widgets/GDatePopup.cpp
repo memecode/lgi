@@ -3,7 +3,7 @@
 #include "GDateTimeCtrls.h"
 #include "LDisplayString.h"
 
-GDatePopup::GDatePopup(GView *owner) : GPopup(owner)
+GDatePopup::GDatePopup(LView *owner) : GPopup(owner)
 {
 	FirstPaint = true;
 	SetNotify(owner);
@@ -136,7 +136,7 @@ void GDatePopup::OnPaint(LSurface *pDC)
 
 void GDatePopup::OnChange()
 {
-	GViewI *n = GetNotify() ? GetNotify() : GetParent();
+	LViewI *n = GetNotify() ? GetNotify() : GetParent();
 	if (n)
 	{
 		char s[64];
@@ -257,9 +257,9 @@ GDateDropDown::GDateDropDown() :
 	SetPopup(Drop = new GDatePopup(this));
 }
 
-int GDateDropDown::OnNotify(GViewI *Wnd, int Flags)
+int GDateDropDown::OnNotify(LViewI *Wnd, int Flags)
 {
-	if (Wnd == (GViewI*)Drop)
+	if (Wnd == (LViewI*)Drop)
 	{
 		char s[256];
 		LDateTime Ts = Drop->Get();
@@ -270,15 +270,15 @@ int GDateDropDown::OnNotify(GViewI *Wnd, int Flags)
 	return GDropDown::OnNotify(Wnd, Flags);
 }
 
-void GDateDropDown::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+void GDateDropDown::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
-	if (Wnd == (GViewI*)Drop && !Attaching)
+	if (Wnd == (LViewI*)Drop && !Attaching)
 	{
 		Drop = NULL;
 	}
 }
 
-bool GDateDropDown::OnLayout(GViewLayoutInfo &Inf)
+bool GDateDropDown::OnLayout(LViewLayoutInfo &Inf)
 {
     if (!Inf.Width.Max)
     {
@@ -295,7 +295,7 @@ bool GDateDropDown::OnLayout(GViewLayoutInfo &Inf)
 
 void GDateDropDown::SetDate(char *d)
 {
-	GViewI *n = GetNotify();
+	LViewI *n = GetNotify();
 	if (n && d)
 	{
 		LDateTime New;
@@ -316,7 +316,7 @@ void GDateDropDown::SetDate(char *d)
 
 		n->Name(Buf);
 
-		GViewI *Nn = n->GetNotify() ? n->GetNotify() : n->GetParent();
+		LViewI *Nn = n->GetNotify() ? n->GetNotify() : n->GetParent();
 		if (Nn)
 		{
 			Nn->OnNotify(n, 0);
@@ -331,12 +331,12 @@ void GDateDropDown::OnMouseClick(LMouse &m)
 		if (Drop)
 		{
 			// Set it's date from our current value
-			GViewI *n = GetNotify();
+			LViewI *n = GetNotify();
 			if (n)
 			{
 				LDateTime New;
 				const char *Old = n->Name();
-				GViewI *DateSrc = GetNotify();
+				LViewI *DateSrc = GetNotify();
 				
 				if (!ValidStr(Old) && DateSrc)
 				{
@@ -356,7 +356,7 @@ void GDateDropDown::OnMouseClick(LMouse &m)
 
 class GDatePopupFactory : public GViewFactory
 {
-	GView *NewView(const char *Class, LRect *Pos, const char *Text)
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (Class &&
 			_stricmp(Class, "GDateDropDown") == 0)

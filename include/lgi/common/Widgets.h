@@ -48,7 +48,7 @@ public:
 		/// The resource ID
 		int Resource,
 		/// The target view to populate
-		GViewI *Parent,
+		LViewI *Parent,
 		/// The size of the view in the resource
 		LRect *Pos = 0,
 		/// The name of the window
@@ -66,7 +66,7 @@ public:
 /// window while it's open.
 ///
 /// GDialog's can be created in two different ways. Firstly you can create code to instantiate
-/// all the various controls and add them manually to the GView::Children list. Or you can load
+/// all the various controls and add them manually to the LView::Children list. Or you can load
 /// all the controls from a resource file. The resource files are in XML format and there is a
 /// graphical tool <a href="http://www.memecode.com/lgires.php">LgiRes</a>.
 ///
@@ -79,7 +79,7 @@ public:
 /// public:
 ///		char *Str;
 ///
-/// 	Example(GView *p)
+/// 	Example(LView *p)
 /// 	{
 ///			Str = 0;
 /// 		SetParent(p);
@@ -97,7 +97,7 @@ public:
 ///			DeleteArray(Str);
 ///		}
 /// 		
-/// 	int OnNotify(GViewI *c, int Flags)
+/// 	int OnNotify(LViewI *c, int Flags)
 /// 	{
 /// 		switch (c->GetId())
 /// 		{
@@ -143,7 +143,7 @@ public:
 /// public:
 ///		char *Str;
 ///
-/// 	Example(GView *p)
+/// 	Example(LView *p)
 /// 	{
 ///			Str = 0;
 /// 		SetParent(p);
@@ -158,7 +158,7 @@ public:
 ///			DeleteArray(Str);
 ///		}
 /// 		
-/// 	int OnNotify(GViewI *c, int Flags)
+/// 	int OnNotify(LViewI *c, int Flags)
 /// 	{
 /// 		switch (c->GetId())
 /// 		{
@@ -265,7 +265,7 @@ public:
 
 	/// By default the dialog will finish when a button is pressed. To override this
 	/// behavior you'll have to subclass GDialog and handle the OnNotify yourself.
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 
 	/// This returns the ID of the button pressed to close the dialog.
 	int GetButtonId();
@@ -283,7 +283,7 @@ public:
 
 /// Implementation class
 class LgiClass GControl :
-	public GView
+	public LView
 {
 	friend class LDialog;
 
@@ -335,7 +335,7 @@ public:
 
 struct GLabelData
 {
-	GView *Ctrl;
+	LView *Ctrl;
 	LSurface *pDC;
 	LRect r;
 	int Justification;

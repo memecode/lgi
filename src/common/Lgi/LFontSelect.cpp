@@ -46,7 +46,7 @@ struct GFontSelectPriv
 	}
 };
 
-LFontSelect::LFontSelect(GView *Parent, void *Init, int InitLen)
+LFontSelect::LFontSelect(LView *Parent, void *Init, int InitLen)
 {
 	// Initialize
 	d = new GFontSelectPriv;
@@ -341,7 +341,7 @@ bool LFontSelect::Serialize(void *Data, int DataLen, bool Write)
 	return true;
 }
 
-int LFontSelect::OnNotify(GViewI *Ctrl, int Flags)
+int LFontSelect::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{

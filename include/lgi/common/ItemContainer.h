@@ -9,7 +9,7 @@ class GItemContainer;
 #define DragColumnColour				LColour(L_LOW)
 
 /// Base class for items in widget containers
-class LgiClass GItem : virtual public GEventsI
+class LgiClass GItem : virtual public LEventsI
 {
 protected:
     GAutoPtr<LCss> Css;
@@ -78,7 +78,7 @@ public:
 	/// Moves the item onscreen
 	virtual void ScrollTo() {}
 	/// Shows a editable label above the item allowing the user to change the value associated with the column 'Col'
-	virtual GView *EditLabel(int Col = -1);
+	virtual LView *EditLabel(int Col = -1);
 	/// Event called when the edit label ends
 	virtual void OnEditLabelEnd();
 	/// Sets the default selection of text when editing a label
@@ -106,7 +106,7 @@ public:
 	/// Reads / writes list item to XML
 	virtual bool XmlIo(class LXmlTag *Tag, bool Write) { return false; }
 
-	bool OnScriptEvent(GViewI *Ctrl) { return false; }
+	bool OnScriptEvent(LViewI *Ctrl) { return false; }
 	GMessage::Result OnEvent(GMessage *Msg) { return 0; }
 	void OnMouseEnter(LMouse &m) {}
 	void OnMouseExit(LMouse &m) {}
@@ -121,8 +121,8 @@ public:
 	void OnPosChange() {}
 	bool OnRequestClose(bool OsShuttingDown) { return false; }
 	int OnHitTest(int x, int y) { return 0; }
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching) {}
-	int OnNotify(GViewI *Ctrl, int Flags) { return 0; }
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching) {}
+	int OnNotify(LViewI *Ctrl, int Flags) { return 0; }
 	int OnCommand(int Cmd, int Event, OsView Wnd) { return 0; }
 	void OnPaint(LSurface *pDC) { LgiAssert(0); }
 
@@ -140,12 +140,12 @@ class GItemEdit : public GPopup
 	class GItemEditPrivate *d;
 
 public:
-	GItemEdit(GView *parent, GItem *item, int index, int selstart, int selend);
+	GItemEdit(LView *parent, GItem *item, int index, int selstart, int selend);
 	~GItemEdit();
 	
 	GItem *GetItem();
 	void OnPaint(LSurface *pDC);
-	int OnNotify(GViewI *v, int f);
+	int OnNotify(LViewI *v, int f);
 	void Visible(bool i);
 	GMessage::Result OnEvent(GMessage *Msg);
 

@@ -102,7 +102,7 @@ bool GProgress::Pour(LRegion &r)
 	return false;
 }
 
-bool GProgress::OnLayout(GViewLayoutInfo &Inf)
+bool GProgress::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (!Inf.Width.Max)
 	{

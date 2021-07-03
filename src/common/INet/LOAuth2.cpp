@@ -11,7 +11,7 @@
 #define OPT_AccessToken		"AccessToken"
 #define OPT_RefreshToken	"RefreshToken"
 
-static GString GetHeaders(GSocketI *s)
+static GString GetHeaders(LSocketI *s)
 {
 	char Buf[256];
 	ssize_t Rd;
@@ -51,7 +51,7 @@ ssize_t ChunkSize(ssize_t &Pos, GString &Buf, GString &Body)
 	return -1;
 }
 
-static bool GetHttp(GSocketI *s, GString &Hdrs, GString &Body, bool IsResponse)
+static bool GetHttp(LSocketI *s, GString &Hdrs, GString &Body, bool IsResponse)
 {
 	GString Resp = GetHeaders(s);
 
@@ -127,7 +127,7 @@ static GString UrlFromHeaders(GString Hdrs)
 	return p[1];
 }
 
-static bool Write(GSocketI *s, GString b)
+static bool Write(LSocketI *s, GString b)
 {
 	for (size_t i = 0; i < b.Length(); )
 	{

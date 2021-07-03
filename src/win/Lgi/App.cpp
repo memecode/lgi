@@ -700,7 +700,7 @@ int32 GApp::GetMetric(LgiSystemMetric Metric)
 	return Status;
 }
 
-GViewI *GApp::GetFocus()
+LViewI *GApp::GetFocus()
 {
 	HWND h = ::GetFocus();
 	if (h)

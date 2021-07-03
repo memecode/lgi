@@ -27,8 +27,8 @@ public:
 	GSoftwareUpdate(const char *SoftwareName, const char *UpdateUri, const char *ProxyUri, const char *OptionalTempPath = 0);
 	virtual ~GSoftwareUpdate();
 
-	bool CheckForUpdate(UpdateInfo &Info, GViewI *WithUi, bool IncBetas);
-	bool ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, GViewI *WithUi);
+	bool CheckForUpdate(UpdateInfo &Info, LViewI *WithUi, bool IncBetas);
+	bool ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *WithUi);
 	char *GetErrorMessage();
 };
 

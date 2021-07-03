@@ -25,7 +25,7 @@ class GFileSelectPrivate
 	char			*TitleStr;
 	bool			WaitForMessage;
 	int				SelectedType;
-	GViewI			*ParentWnd;
+	LViewI			*ParentWnd;
 	List<GFileType> TypeList;
 	List<char>		Files;
 	bool			ShowReadOnly;
@@ -269,12 +269,12 @@ bool GFileSelect::Type(const char *Description, const char *Extension, int Data)
 	return Type != 0;
 }
 
-GViewI *GFileSelect::Parent()
+LViewI *GFileSelect::Parent()
 {
 	return d->ParentWnd;
 }
 
-void GFileSelect::Parent(GViewI *Window)
+void GFileSelect::Parent(LViewI *Window)
 {
 	d->ParentWnd = Window;
 }

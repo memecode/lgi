@@ -890,7 +890,7 @@ GFilter::IoStatus GdcGif::WriteImage(GStream *Out, LSurface *pDC)
 		    else
 		    {
 			    // put up a dialog to ask about transparent colour
-			    GTransparentDlg Dlg((GView*)Parent.Value.Ptr, &Transparent);
+			    GTransparentDlg Dlg((LView*)Parent.Value.Ptr, &Transparent);
 			    if (!Dlg.DoModal())
 			    {
 				    Props->SetValue("Cancel", v = 1);

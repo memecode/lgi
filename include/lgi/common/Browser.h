@@ -20,7 +20,7 @@ public:
 		virtual bool OnSearch(GBrowser *br, const char *txt) { return false; }
 	};
 	
-	GBrowser(GViewI *owner, const char *Title, char *Uri = 0);
+	GBrowser(LViewI *owner, const char *Title, char *Uri = 0);
 	~GBrowser();
 
 	void SetEvents(GBrowserEvents *Events);
@@ -28,7 +28,7 @@ public:
 	bool SetHtml(char *Html);
 
 	void OnPosChange();
-	int OnNotify(GViewI *c, int f);
+	int OnNotify(LViewI *c, int f);
 	GMessage::Result OnEvent(GMessage *m);
 };
 

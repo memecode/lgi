@@ -4,7 +4,7 @@
 #include "GArray.h"
 #include "LgiInterfaces.h"
 
-class GMemoryPool : public GMemoryPoolI
+class GMemoryPool : public LMemoryPoolI
 {
 	struct Block
 	{

@@ -133,14 +133,14 @@
 		<li> GTree
 		<li> etc...
 	</ul>
-	A LWindow will layout controls automatically according to the order you attach (GView::Attach) them.
+	A LWindow will layout controls automatically according to the order you attach (LView::Attach) them.
 	The first window gets to lay itself out anywhere in the client area, and once it's positioned itself,
 	the second window gets the area left over. And so on until the window is filled. There are a number of
 	helper functions for layout:
 	<ul>
-		<li> GView::FindLargest
-		<li> GView::FindSmallestFit
-		<li> GView::FindLargestEdge
+		<li> LView::FindLargest
+		<li> LView::FindSmallestFit
+		<li> LView::FindLargestEdge
 	</ul>
 	Usually you attach a GToolBar first, as it will automatically slide in below the menu (if any). Then a
 	GStatusBar, if your going to need one. And finally a GSplitter or LList to fill out the rest of the space.
@@ -155,7 +155,7 @@
 		s->SetViewB(new MyChildWindow2, false);
 	}
 	\endcode
-	Where MyChildWindow1 and MyChildWindow2 are GView based classes.
+	Where MyChildWindow1 and MyChildWindow2 are LView based classes.
 	
 	\section dialogs Dialogs
 	At some point you may want to put a dialog on the screen to get input from the user or provide the user
@@ -196,8 +196,8 @@
 		<li> GHtml
 		<li> GScrollBar
 	</ul>
-	However it's fairly easy to write custom controls by inheriting from GLayout (or GView for the hardcore) and implementing 
-	the required functionality by override various events like GView::OnPaint and GView::OnMouseClick.
+	However it's fairly easy to write custom controls by inheriting from GLayout (or LView for the hardcore) and implementing 
+	the required functionality by override various events like LView::OnPaint and LView::OnMouseClick.
 */
 
 #ifndef __LGI_H

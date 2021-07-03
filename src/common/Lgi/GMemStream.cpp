@@ -19,7 +19,7 @@ GMemStream::GMemStream()
 	_Init();
 }
 
-GMemStream::GMemStream(GStreamI *Src, int64 Start, int64 len)
+GMemStream::GMemStream(LStreamI *Src, int64 Start, int64 len)
 {
 	_Init();
 
@@ -238,7 +238,7 @@ ssize_t GMemStream::Write(const void *Buffer, ssize_t Size, int Flags)
 	return Bytes;
 }
 
-GStreamI *GMemStream::Clone()
+LStreamI *GMemStream::Clone()
 {
 	return new GMemStream(Mem, Len, true);
 }
@@ -276,7 +276,7 @@ GTempStream::~GTempStream()
 
 int64 GTempStream::GetSize()
 {
-	if (s == (GStreamI*)&Null)
+	if (s == (LStreamI*)&Null)
 		return 0;
 	
 	return s->GetSize();

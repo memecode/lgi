@@ -24,8 +24,8 @@ public:
 	bool SplitFollow;
 	LRect	PosA;
 	LRect	PosB;
-	GView *ViewA;
-	GView *ViewB;
+	LView *ViewA;
+	LView *ViewB;
 	bool BorderA;
 	bool BorderB;
 	int BarSize;
@@ -85,8 +85,8 @@ void GSplitter::BarSize(int i) { d->BarSize = i; CalcRegions(); }
 bool GSplitter::IsVertical() { return d->Vertical; }
 bool GSplitter::DoesSplitFollow() { return d->SplitFollow; }
 void GSplitter::DoesSplitFollow(bool i) { d->SplitFollow = i; }
-GView *GSplitter::GetViewA() { return d->ViewA; }
-GView *GSplitter::GetViewB() { return d->ViewB; }
+LView *GSplitter::GetViewA() { return d->ViewA; }
+LView *GSplitter::GetViewB() { return d->ViewB; }
 
 void GSplitter::IsVertical(bool v)
 {
@@ -100,7 +100,7 @@ void GSplitter::IsVertical(bool v)
 	#endif
 }
 
-void GSplitter::SetViewA(GView *a, bool Border)
+void GSplitter::SetViewA(LView *a, bool Border)
 {
 	if (a != d->ViewA)
 	{
@@ -141,7 +141,7 @@ void GSplitter::DetachViewA()
 	}
 }
 
-void GSplitter::SetViewB(GView *b, bool Border)
+void GSplitter::SetViewB(LView *b, bool Border)
 {
 	if (b != d->ViewB)
 	{
@@ -204,9 +204,9 @@ void GSplitter::Value(int64 s)
 }
 
 #if LGI_VIEW_HANDLE
-GViewI *GSplitter::FindControl(OsView hCtrl)
+LViewI *GSplitter::FindControl(OsView hCtrl)
 {
-	GViewI *c = 0;
+	LViewI *c = 0;
 	if (d->ViewA) c = d->ViewA->FindControl(hCtrl);
 	if (c) return c;
 
@@ -507,7 +507,7 @@ int GSplitter::OnHitTest(int x, int y)
 	return -1;
 }
 
-bool GSplitter::Attach(GViewI *p)
+bool GSplitter::Attach(LViewI *p)
 {
 	bool Status = GLayout::Attach(p);
 	if (Status)
@@ -528,7 +528,7 @@ bool GSplitter::Attach(GViewI *p)
 	return Status;
 }
 
-void GSplitter::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+void GSplitter::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	if (!Attaching)
 	{

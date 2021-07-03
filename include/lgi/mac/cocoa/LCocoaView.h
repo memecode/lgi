@@ -11,7 +11,7 @@
 
 #if defined __OBJC__
 
-class GViewI;
+class LViewI;
 class GWindow;
 class GWindowPrivate;
 
@@ -34,11 +34,11 @@ LgiExtern LRect LScreenFlip(LRect r);
 @interface LCocoaMsg : NSObject
 {
 }
-@property GViewI *v;
+@property LViewI *v;
 @property int m;
 @property GMessage::Param a;
 @property GMessage::Param b;
-- (id)init:(GViewI*)view msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B;
+- (id)init:(LViewI*)view msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B;
 @end
 
 @interface LCocoaAssert : NSObject
@@ -55,11 +55,11 @@ LgiExtern LRect LScreenFlip(LRect r);
 {
 	struct DndEvent *dnd;
 }
-@property GView *w;
+@property LView *w;
 @property GString WndClass;
 
 // Object life time
-- (id)init:(GView*)wnd;
+- (id)init:(LView*)wnd;
 - (void)dealloc;
 
 // Painting

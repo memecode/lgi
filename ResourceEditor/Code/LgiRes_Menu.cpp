@@ -343,7 +343,7 @@ void ResMenu::Create(LXmlTag *load, SerialiseContext *Ctx)
 	Visible(true);
 }
 
-GView *ResMenu::CreateUI()
+LView *ResMenu::CreateUI()
 {
 	return Ui = new ResMenuUi(this);
 }
@@ -810,7 +810,7 @@ GMessage::Result ResMenuUi::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 int ResMenuUi::CurrentTool()

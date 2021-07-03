@@ -14,7 +14,7 @@ public:
 	GAbout
 	(
 		/// The parent window
-		GView *parent,
+		LView *parent,
 		/// The application name
 		const char *AppName,
 		/// The version
@@ -29,7 +29,7 @@ public:
 		const char *Email
 	);
 
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
 #endif

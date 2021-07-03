@@ -924,7 +924,7 @@ LRect *CtrlTable::GetChildArea(ResDialogCtrl *Ctrl)
 	return NULL;
 }
 
-void CtrlTable::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+void CtrlTable::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	if (Attaching)
 		return;
@@ -1478,18 +1478,18 @@ enum {
 class TableLayoutTest : public GDialog
 {
 	GTableLayout *Tbl;
-	GView *Msg;
+	LView *Msg;
 	GTree *Tree;
 	class DlgContainer *View;
 	GAutoPtr<LThread> Worker;
 	GAutoString Base;
 	
 public:
-	TableLayoutTest(GViewI *par);
+	TableLayoutTest(LViewI *par);
 	~TableLayoutTest();
 	
 	void OnDialog(LgiDialogRes *Dlg);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
     GMessage::Param OnEvent(GMessage *m);
 };
 
@@ -1664,7 +1664,7 @@ public:
     }
 };
 
-TableLayoutTest::TableLayoutTest(GViewI *par)
+TableLayoutTest::TableLayoutTest(LViewI *par)
 {
 	LRect r(0, 0, 1000, 800);
 	SetPos(r);
@@ -1704,7 +1704,7 @@ void TableLayoutTest::OnDialog(LgiDialogRes *Dlg)
         View->OnDialog(Dlg);
 }
 
-int TableLayoutTest::OnNotify(GViewI *Ctrl, int Flags)
+int TableLayoutTest::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{
@@ -1727,7 +1727,7 @@ GMessage::Param TableLayoutTest::OnEvent(GMessage *m)
     return GDialog::OnEvent(m);
 }
 
-void OpenTableLayoutTest(GViewI *p)
+void OpenTableLayoutTest(LViewI *p)
 {
 	TableLayoutTest Dlg(p);
 	Dlg.DoModal();

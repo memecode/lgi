@@ -133,14 +133,14 @@ bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 	#elif defined(__GTK_H__)
 
 		LgiAssert(Wnd);
-		GViewI *View = (GViewI*) g_object_get_data(GtkCast(Wnd, g_object, GObject), "GViewI");
+		LViewI *View = (LViewI*) g_object_get_data(GtkCast(Wnd, g_object, GObject), "LViewI");
 		if (View)
 		{
 			GMessage m(0);
 			m.Set(Event, a, b);
 			return m.Send(View);
 		}
-		else printf("%s:%i - Error: LgiPostEvent can't cast OsView to GViewI\n", _FL);
+		else printf("%s:%i - Error: LgiPostEvent can't cast OsView to LViewI\n", _FL);
 
 	#elif defined(MAC) && !LGI_COCOA
 	
@@ -471,9 +471,9 @@ bool LRecursiveFileSearch(const char *Root,
 #define _vsnprintf vsnprintf
 #endif
 
-static GStreamI *_LgiTraceStream = NULL;
+static LStreamI *_LgiTraceStream = NULL;
 
-void LgiTraceSetStream(GStreamI *stream)
+void LgiTraceSetStream(LStreamI *stream)
 {
 	_LgiTraceStream = stream;
 }
@@ -578,7 +578,7 @@ void LgiTrace(const char *Msg, ...)
 	va_end(Arg);
 
 	#ifdef LGI_TRACE_TO_FILE
-		GStreamI *Output = NULL;
+		LStreamI *Output = NULL;
 		if (_LgiTraceStream)
 			Output = _LgiTraceStream;
 		else

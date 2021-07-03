@@ -207,7 +207,7 @@ bool LGetDisplays(::GArray<GDisplayInfo*> &Displays, LRect *AllDisplays)
 	return Displays.Length() > 0;
 }
 
-void GetChildrenList(GViewI *w, List<GViewI> &l)
+void GetChildrenList(LViewI *w, List<LViewI> &l)
 {
 	if (!w)
 		return;
@@ -241,14 +241,14 @@ void GetChildrenList(GViewI *w, List<GViewI> &l)
 }
 
 
-GViewI *GetNextTabStop(GViewI *v, bool Back)
+LViewI *GetNextTabStop(LViewI *v, bool Back)
 {
 	if (v)
 	{
 		LWindow *Wnd = v->GetWindow();
 		if (Wnd)
 		{
-			List<GViewI> All;
+			List<LViewI> All;
 			GetChildrenList(Wnd, All);
 
 			ssize_t MyIndex = All.IndexOf(v);

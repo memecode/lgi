@@ -72,7 +72,7 @@ bool GScrollBar::SetPos(LRect &p, bool Repaint)
 		SetVertical(p.Y() > p.X());
 	}
 
-	return GView::SetPos(p, Repaint);
+	return LView::SetPos(p, Repaint);
 }
 
 bool GScrollBar::Vertical()
@@ -159,7 +159,7 @@ void GScrollBar::SetParentFlag(bool Set)
 	}
 }
 
-GViewI *GScrollBar::GetMyView()
+LViewI *GScrollBar::GetMyView()
 {
 	if (Handle())
 	{
@@ -208,9 +208,9 @@ void GScrollBar::Update()
 	}
 }
 
-void GScrollBar::SetParent(GViewI *p)
+void GScrollBar::SetParent(LViewI *p)
 {
-	GView::SetParent(p);
+	LView::SetParent(p);
 	SetParentFlag(true);
 }
 
@@ -322,7 +322,7 @@ GMessage::Result GScrollBar::OnEvent(GMessage *Msg)
 		Si.cbSize = sizeof(Si);
 		Si.fMask = SIF_ALL;
 
-		GViewI *Hnd = GetMyView();
+		LViewI *Hnd = GetMyView();
 		if (Hnd &&
 			GetScrollInfo(Hnd->Handle(), d->Type, &Si))
 		{
@@ -399,7 +399,7 @@ GMessage::Result GScrollBar::OnEvent(GMessage *Msg)
 		{
 			int CurX = (Msg->b&0xFFFF), CurY = (Msg->b>>16);
 			LgiCursor Cursor = LCUR_Normal;
-			for (GViewI *c = this; Cursor == LCUR_Normal && c->GetParent(); c = c->GetParent())
+			for (LViewI *c = this; Cursor == LCUR_Normal && c->GetParent(); c = c->GetParent())
 			{
 				LRect CPos = c->GetPos();
 				Cursor = c->GetCursor(CurX, CurY);

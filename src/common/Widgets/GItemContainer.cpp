@@ -1002,7 +1002,7 @@ GItem::~GItem()
 {
 }
 
-GView *GItem::EditLabel(int Col)
+LView *GItem::EditLabel(int Col)
 {
 	GItemContainer *c = GetContainer();
 	if (!c)
@@ -1116,7 +1116,7 @@ public:
 	}
 };
 
-GItemEdit::GItemEdit(GView *parent, GItem *item, int index, int SelStart, int SelEnd)
+GItemEdit::GItemEdit(LView *parent, GItem *item, int index, int SelStart, int SelEnd)
 	: GPopup(parent)
 {
 	d = new GItemEditPrivate;
@@ -1216,7 +1216,7 @@ void GItemEdit::OnPaint(LSurface *pDC)
 	pDC->Rectangle();
 }
 
-int GItemEdit::OnNotify(GViewI *v, int f)
+int GItemEdit::OnNotify(LViewI *v, int f)
 {
 	switch (v->GetId())
 	{

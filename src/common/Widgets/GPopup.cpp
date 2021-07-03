@@ -129,7 +129,7 @@ public:
 	int Main()
 	{
 		LMouse Old;
-		GView v;
+		LView v;
 
 		while (Loop)
 		{
@@ -264,7 +264,7 @@ public:
 
 							#elif defined LINUX
 							/*
-							for (GViewI *v = Over; v; )
+							for (LViewI *v = Over; v; )
 							{
 								SubMenuImpl *Sub = dynamic_cast<SubMenuImpl*>(v);
 								if (Sub)
@@ -391,7 +391,7 @@ public:
 
 					// First find the parent LGI window
 					HWND hWnd = hMouseOver;
-					GViewI *v = 0;
+					LViewI *v = 0;
 					while (hWnd && !(v = LWindowFromHandle(hMouseOver)))
 					{
 						HWND w = ::GetParent(hWnd);
@@ -430,7 +430,7 @@ LMouseHook::~LMouseHook()
 	DeleteObj(d);
 }
 
-void LMouseHook::TrackClick(GView *v)
+void LMouseHook::TrackClick(LView *v)
 {
 	#ifdef MAC
 	if (v)
@@ -450,7 +450,7 @@ void LMouseHook::TrackClick(GView *v)
 	#endif
 }
 
-bool LMouseHook::OnViewKey(GView *v, LKey &k)
+bool LMouseHook::OnViewKey(LView *v, LKey &k)
 {
 	bool Status = false;
 
@@ -459,7 +459,7 @@ bool LMouseHook::OnViewKey(GView *v, LKey &k)
 		auto It = d->Popups.rbegin();		
 		if (It != d->Popups.end())
 		{
-			GView *l = *It;
+			LView *l = *It;
 			if (l->Visible() &&
 				l->OnKey(k))
 			{
@@ -542,7 +542,7 @@ public:
 
 ::GArray<GPopup*> GPopup::CurrentPopups;
 
-GPopup::GPopup(GView *owner)
+GPopup::GPopup(LView *owner)
 	#if LGI_CARBON
 	: LWindow(CreateBorderlessWindow())
 	#elif defined(__GTK_H__)
@@ -578,7 +578,7 @@ GPopup::GPopup(GView *owner)
 		SetNotify(Owner);
 	}
 	
-	GView::Visible(false);
+	LView::Visible(false);
 }
 
 GPopup::~GPopup()
@@ -676,7 +676,7 @@ GMessage::Result GPopup::OnEvent(GMessage *Msg)
 		}
 	}
 	
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 void GPopup::TakeFocus(bool Take)
@@ -684,7 +684,7 @@ void GPopup::TakeFocus(bool Take)
 	d->TakeFocus = Take;
 }
 
-bool GPopup::Attach(GViewI *p)
+bool GPopup::Attach(LViewI *p)
 {
 	#if defined(LGI_CARBON)
 	
@@ -698,7 +698,7 @@ bool GPopup::Attach(GViewI *p)
 	#if WINNATIVE
 
 	SetStyle(WS_POPUP);
-	GView::Attach(p);
+	LView::Attach(p);
 	AttachChildren();
 
 	#elif defined __GTK_H__
@@ -752,8 +752,8 @@ void GPopup::Visible(bool i)
 			bool HaveFocus = false;
 			for (auto Foc = Wnd->GetFocus(); Foc; Foc = Foc->GetParent())
 			{
-				// printf("%p::HidePopup %p (%s)\n", (GViewI*)this, Foc, Foc->GetClass());
-				if (Foc == (GViewI*)this)
+				// printf("%p::HidePopup %p (%s)\n", (LViewI*)this, Foc, Foc->GetClass());
+				if (Foc == (LViewI*)this)
 				{
 					HaveFocus = true;
 					break;
@@ -783,7 +783,7 @@ void GPopup::Visible(bool i)
 			}
 		}
 		
-		GView::Visible(i);
+		LView::Visible(i);
 	    if (Wnd)
 	    {
 		    if (i)
@@ -845,7 +845,7 @@ void GPopup::Visible(bool i)
 			}
 			
 			if (d->TakeFocus || !i)
-				GView::Visible(i);
+				LView::Visible(i);
 			else
 				ShowWindow(Handle(), SW_SHOWNA);
 	
@@ -870,11 +870,11 @@ void GPopup::Visible(bool i)
 				else
 					[Panel.p orderOut:Panel.p];
 			}
-			GView::Visible(i);
+			LView::Visible(i);
 	
 		#else
 		
-			GView::Visible(i);
+			LView::Visible(i);
 	
 		#endif
 
@@ -940,7 +940,7 @@ bool GPopup::Visible()
     
 	    if (Wnd)
 	    {
-			GView::Visible(
+			LView::Visible(
 							#if GtkVer(2, 18)
 							gtk_widget_get_visible(GTK_WIDGET(WindowHandle()))
 							#else
@@ -954,7 +954,7 @@ bool GPopup::Visible()
 	#if LGI_POPUP_LWINDOW
 	bool v = LWindow::Visible();
 	#else
-	bool v = GView::Visible();
+	bool v = LView::Visible();
 	#endif
 	return v;
 }
@@ -1165,9 +1165,9 @@ void GDropDown::OnMouseClick(LMouse &m)
 	}
 }
 
-int GDropDown::OnNotify(GViewI *c, int f)
+int GDropDown::OnNotify(LViewI *c, int f)
 {
-	if (c == (GViewI*)Popup)
+	if (c == (LViewI*)Popup)
 	{
 		switch (f)
 		{

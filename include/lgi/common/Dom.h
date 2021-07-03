@@ -14,7 +14,7 @@ class LVariant;
 #include "lgi/common/Array.h"
 
 /// API for reading and writing properties in objects.
-class LgiClass GDom : virtual public GDomI
+class LgiClass GDom : virtual public LDomI
 {
 	friend class LScriptEnginePrivate;
 	friend struct GDomRef;

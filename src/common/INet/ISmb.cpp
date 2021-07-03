@@ -10,7 +10,7 @@
 class SmbUtils
 {
 protected:
-	GSocketI *Conn;
+	LSocketI *Conn;
 
 public:
 	// Read
@@ -101,7 +101,7 @@ public:
 	ushort ByteCount;                 // Count of bytes
 	uchar  *Buffer;                   // The bytes
 
-	SmbHeader(GSocketI *c)
+	SmbHeader(LSocketI *c)
 	{
 		ParameterWords = 0;
 		Conn = c;
@@ -174,12 +174,12 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////
-class ILogProxy : public GSocketI
+class ILogProxy : public LSocketI
 {
-	GSocketI *Dest;
+	LSocketI *Dest;
 
 public:
-	ILogProxy(GSocketI *dest)
+	ILogProxy(LSocketI *dest)
 	{
 		Dest = dest;
 	}
@@ -226,7 +226,7 @@ ISmb::~ISmb()
 	Close();
 }
 
-bool ISmb::Open(GSocketI *S, char *RemoteHost, int Port)
+bool ISmb::Open(LSocketI *S, char *RemoteHost, int Port)
 {
 	Close();
 	Socket = S;

@@ -59,18 +59,18 @@ public:
 
 class HttpTools
 {
-	void DumpView(GViewI *v, char *p);
+	void DumpView(LViewI *v, char *p);
 
 protected:
-	GViewI *Wnd;
+	LViewI *Wnd;
 
 public:
 	HttpTools();
 	~HttpTools();
 
-	void SetWnd(GViewI *i) { Wnd = i; }
-	char *Fetch(char *uri, GStream *Log, GViewI *Dump, CookieJar *Cookies = 0);
-	char *Post(char *uri, char *headers, char *body, GStream *Log = 0, GViewI *Dump = 0);
+	void SetWnd(LViewI *i) { Wnd = i; }
+	char *Fetch(char *uri, GStream *Log, LViewI *Dump, CookieJar *Cookies = 0);
+	char *Post(char *uri, char *headers, char *body, GStream *Log = 0, LViewI *Dump = 0);
 };
 
 #endif

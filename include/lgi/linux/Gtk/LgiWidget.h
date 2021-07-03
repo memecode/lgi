@@ -4,7 +4,7 @@
 G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE(LgiWidget, lgi_widget, LGI, WIDGET, GtkContainer)
-GtkWidget *lgi_widget_new(GViewI *target, bool pour_largest);
+GtkWidget *lgi_widget_new(LViewI *target, bool pour_largest);
 void lgi_widget_detach(GtkWidget *widget);
 
 // Children management
@@ -13,7 +13,7 @@ void lgi_widget_remove(GtkContainer *wid, GtkWidget *child);
 
 // Other widget methods
 void lgi_widget_setpos(GtkWidget *wid, LRect rc);
-void BuildTabStops(GViewI *v, ::GArray<GViewI*> &a);
+void BuildTabStops(LViewI *v, ::GArray<LViewI*> &a);
 
 G_END_DECLS
 

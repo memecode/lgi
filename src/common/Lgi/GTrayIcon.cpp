@@ -546,7 +546,7 @@ void GTrayIcon::Value(int64 v)
 				// CGContextTranslateCTM(c, 0, 128); 
 				// CGContextScaleCTM(c, 1.0, -1.0); 
 
-				LScreenDC Dc((GView*)0, c);
+				LScreenDC Dc((LView*)0, c);
 				LMemDC m;
 				if (m.Create(t->X()*4, t->Y()*4, System32BitColourSpace))
 				{

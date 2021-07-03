@@ -42,7 +42,7 @@ GImageList *LgiLoadImageList(char *File, int x, int y)
 	return ImgList;
 }
 
-GToolBar *LgiLoadToolbar(GViewI *Parent, char *File, int x, int y)
+GToolBar *LgiLoadToolbar(LViewI *Parent, char *File, int x, int y)
 {
 	GToolBar *Toolbar = new GToolBar;
 	if (Toolbar)
@@ -676,7 +676,7 @@ public:
 		GToolButton *Last = 0;
 		bool HasVis = false;
 		GAutoPtr<GViewIterator> It(Tb->IterateViews());
-		for (GViewI *v = It->First(); v; v = It->Next())
+		for (LViewI *v = It->First(); v; v = It->Next())
 		{
 			GToolButton *Btn = dynamic_cast<GToolButton*>(v);
 			if (Btn)
@@ -720,7 +720,7 @@ public:
 				Text = stricmp(t[0], "text") == 0;
 				
 				// Make all controls not visible.
-				GViewI *v;
+				LViewI *v;
 				GAutoPtr<GViewIterator> It(Tb->IterateViews());
 				for (v = It->First(); v; v = It->Next())
 				{
@@ -769,10 +769,10 @@ GToolButton::~GToolButton()
 
 bool GToolButton::Name(char *n)
 {
-	bool s = GView::Name(n);
+	bool s = LView::Name(n);
 
 	/*
-	char *i = GView::Name();
+	char *i = LView::Name();
 	char *o = i;
 	while (*i)
 	{
@@ -1235,7 +1235,7 @@ GToolBar::~GToolBar()
 	DeleteObj(d);
 }
 
-bool GToolBar::Attach(GViewI *parent)
+bool GToolBar::Attach(LViewI *parent)
 {
 	GWindow *Wnd = dynamic_cast<GWindow*>(parent);
 	if (Wnd)
@@ -1293,7 +1293,7 @@ void GToolBar::ContextMenu(LMouse &m)
 		if (Sub)
 		{
 			int n = 1;
-			GViewI *v;
+			LViewI *v;
 			for (v = Children.First(); v; v = Children.Next(), n++)
 			{
 				GToolButton *Btn = dynamic_cast<GToolButton*>(v);
@@ -1326,7 +1326,7 @@ void GToolBar::ContextMenu(LMouse &m)
 				}
 				default:
 				{
-					GViewI *Ctrl = Children[Pick - 1];
+					LViewI *Ctrl = Children[Pick - 1];
 					if (Ctrl)
 					{
 						Ctrl->Visible(!Ctrl->Visible());
@@ -1362,7 +1362,7 @@ void GToolBar::ContextMenu(LMouse &m)
 				
 				d->FixSeparators(this);
 
-				for (GViewI *v = Children.First(); v; v = Children.Next())
+				for (LViewI *v = Children.First(); v; v = Children.Next())
 				{
 					GToolButton *b = dynamic_cast<GToolButton*>(v);
 					if (b && b->TipId >= 0)
@@ -1587,7 +1587,7 @@ bool GToolBar::Pour(LRegion &r)
 	int MaxDim = 0;
 
 	LRect ButPos;
-	GViewI *But = Children.First();
+	LViewI *But = Children.First();
 	while (But)
 	{
 		if (But->Visible())
@@ -1759,7 +1759,7 @@ bool GToolBar::Pour(LRegion &r)
 		But = Children.Next();
 	}
 
-	for (GViewI *w = Children.First(); w; w = Children.Next())
+	for (LViewI *w = Children.First(); w; w = Children.Next())
 	{
 		LRect p = w->GetPos();
 
@@ -1808,7 +1808,7 @@ bool GToolBar::Pour(LRegion &r)
 
 void GToolBar::OnButtonClick(GToolButton *Btn)
 {
-	GViewI *w = (GetNotify()) ? GetNotify() : GetParent();
+	LViewI *w = (GetNotify()) ? GetNotify() : GetParent();
 	if (w && Btn)
 	{
 		int Id = Btn->GetId();
@@ -1816,7 +1816,7 @@ void GToolBar::OnButtonClick(GToolButton *Btn)
 	}
 }
 
-int GToolBar::PostDescription(GView *Ctrl, char *Text)
+int GToolBar::PostDescription(LView *Ctrl, char *Text)
 {
 	if (GetParent())
 	{
@@ -1839,7 +1839,7 @@ int GToolBar::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 void GToolBar::OnPaint(LSurface *pDC)
@@ -2189,7 +2189,7 @@ GToolBar::Custom::Custom()
 		printf("%s:%i - CreateEvent failed %i\n", _FL, err);
 	else
 	{
-		GView *Myself = this;
+		LView *Myself = this;
 		err = SetEventParameter(event, GViewThisPtr, typeVoidPtr, sizeof(Myself), &Myself); 
 
 		UInt32 options = 0;
@@ -2209,7 +2209,7 @@ GToolBar::Custom::~Custom()
 {
 }
 
-bool GToolBar::AppendControl(GView *Ctrl)
+bool GToolBar::AppendControl(LView *Ctrl)
 {
 	bool Status = false;
 	if (Ctrl)
@@ -2233,7 +2233,7 @@ bool GToolBar::AppendControl(GView *Ctrl)
 
 void GToolBar::Empty()
 {
-	for (GViewI *But = Children.First(); But; But = Children.Next())
+	for (LViewI *But = Children.First(); But; But = Children.Next())
 	{
 		DeleteObj(But);
 	}

@@ -82,7 +82,7 @@ MailPhp::~MailPhp()
 
 class MailSocket : public GSocket
 {
-	GSocketI *S;
+	LSocketI *S;
 	MailProtocolProgress *T;
 	MailProtocol *Log;
 	GStringPipe ReadBuf, WriteBuf;
@@ -92,7 +92,7 @@ class MailSocket : public GSocket
 	bool OwnSocket;
 
 public:
-	MailSocket(GSocketI *s, MailProtocolProgress *t, MailProtocol *l)
+	MailSocket(LSocketI *s, MailProtocolProgress *t, MailProtocol *l)
 	{
 		if (s)
 		{
@@ -129,7 +129,7 @@ public:
 	int64 SetSize(int64 Size) { return S->SetSize(Size); }
 	int64 GetPos() { return S->GetPos(); }
 	int64 SetPos(int64 Pos) { return S->SetPos(Pos); }
-	GStreamI *Clone() { return S->Clone(); }
+	LStreamI *Clone() { return S->Clone(); }
 
 	// Socket
 	OsSocket Handle(OsSocket Set) { return S->Handle(Set); }
@@ -139,7 +139,7 @@ public:
 	int GetRemotePort() { return S->GetRemotePort(); }
 	bool IsReadable(int TimeoutMs = 0) { return S->IsReadable(); }
 	bool Listen(int Port = 0) { return S->Listen(Port = 0); }
-	bool Accept(GSocketI *c) { return S->Accept(c); }
+	bool Accept(LSocketI *c) { return S->Accept(c); }
 	int Error(void *param) { return S->Error(param); }
 	void OnDisconnect() { S->OnDisconnect(); }
 	void OnError(int ErrorCode, const char *ErrorDescription) { S->OnError(ErrorCode, ErrorDescription); }
@@ -167,7 +167,7 @@ public:
 				}
 				else
 				{
-					Log->Log(Buf, GSocketI::SocketMsgReceive);
+					Log->Log(Buf, LSocketI::SocketMsgReceive);
 				}
 			}
 		}
@@ -197,7 +197,7 @@ public:
 		{
 			if (!strchr("\r\n", Buf[0]))
 			{
-				Log->Log(Buf, GSocketI::SocketMsgSend);
+				Log->Log(Buf, LSocketI::SocketMsgSend);
 			}
 		}
 	}
@@ -246,7 +246,7 @@ void MailPhp::SetProxy(char *Server, int Port)
 	d->ProxyPort = Port;
 }
 
-bool MailPhp::Get(GSocketI *S, char *Uri, GStream &Out, bool MailTransfer)
+bool MailPhp::Get(LSocketI *S, char *Uri, GStream &Out, bool MailTransfer)
 {
 	bool Status = false;
 
@@ -271,7 +271,7 @@ bool MailPhp::Get(GSocketI *S, char *Uri, GStream &Out, bool MailTransfer)
 				Http.SetProxy(d->ProxyServer, d->ProxyPort);
 			}
 			
-			GAutoPtr<GSocketI> s(new MailSocket(S, MailTransfer ? Transfer : 0, this));
+			GAutoPtr<LSocketI> s(new MailSocket(S, MailTransfer ? Transfer : 0, this));
 			if (Http.Open(s, Base))
 			{
 				GStringPipe Buf;
@@ -306,7 +306,7 @@ int MailPhp::GetMessages()
 	return d->Messages;
 }
 
-bool MailPhp::Open(GSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags)
+bool MailPhp::Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags)
 {
 	if (S &&
 		RemoteHost)
@@ -342,7 +342,7 @@ bool MailPhp::Open(GSocketI *S, const char *RemoteHost, int Port, const char *Us
 			{
 				for (unsigned Line=0; Line<Lines.Length(); Line++)
 				{
-					Log(Lines[Line] + 7, GSocketI::SocketMsgError);
+					Log(Lines[Line] + 7, LSocketI::SocketMsgError);
 				}
 			}
 			else if (Lines.Length() > 1)
@@ -392,26 +392,26 @@ bool MailPhp::Open(GSocketI *S, const char *RemoteHost, int Port, const char *Us
 					}
 				}
 			}
-			else Log("Empty index page returned.", GSocketI::SocketMsgError);
+			else Log("Empty index page returned.", LSocketI::SocketMsgError);
 
 			DeleteArray(m);
 			
 			if (!PopOverHttp)
 			{
-				Log("Page is not a PopOverHttp index.", GSocketI::SocketMsgError);
+				Log("Page is not a PopOverHttp index.", LSocketI::SocketMsgError);
 			}
 			if (!GotToken)
 			{
-				Log("Missing or invalid token. Is your PopOverHttp page broken?", GSocketI::SocketMsgError);
+				Log("Missing or invalid token. Is your PopOverHttp page broken?", LSocketI::SocketMsgError);
 			}
 
 			return	PopOverHttp &&
 					GotToken &&
 					d->Messages == d->Msgs.Length();
 		}
-		else Log("No PopOverHttp index page.", GSocketI::SocketMsgError);
+		else Log("No PopOverHttp index page.", LSocketI::SocketMsgError);
 	}
-	else Log("No remote host.", GSocketI::SocketMsgError);
+	else Log("No remote host.", LSocketI::SocketMsgError);
 
 	return false;
 }
@@ -436,7 +436,7 @@ bool MailPhp::Close()
 		}
 		
 		bool Status = false;
-		GSocketI *S = new MailSocket(Socket, 0, this);
+		LSocketI *S = new MailSocket(Socket, 0, this);
 		if (S)
 		{
 			GStringPipe Out;
@@ -477,7 +477,7 @@ bool MailPhp::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks)
 	}
 
 	bool Status = false;
-	GSocketI *S = new MailSocket(Socket, 0, this);
+	LSocketI *S = new MailSocket(Socket, 0, this);
 	if (S)
 	{
 		// Download all the messages

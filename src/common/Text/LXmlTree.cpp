@@ -130,7 +130,7 @@ class LXmlTreePrivate
 public:
 	LXmlFactory *Factory;
 	LXmlTag *Current;
-	GStreamI *File;
+	LStreamI *File;
 	GString Error;
 	int Flags;
 	LHashTbl<ConstStrKey<char,false>,char16> Entities;
@@ -185,7 +185,7 @@ char *LXmlTree::EncodeEntities(const char *s, ssize_t len, const char *extra_cha
 	return 0;
 }
 
-bool LXmlTree::EncodeEntities(GStreamI *to, const char *start, ssize_t len, const char *extra_characters)
+bool LXmlTree::EncodeEntities(LStreamI *to, const char *start, ssize_t len, const char *extra_characters)
 {
 	if (!start || !to)
 		return 0;
@@ -1369,7 +1369,7 @@ ParsingStart:
 	return Tag;
 }
 
-bool LXmlTree::Read(LXmlTag *Root, GStreamI *File, LXmlFactory *Factory)
+bool LXmlTree::Read(LXmlTag *Root, LStreamI *File, LXmlFactory *Factory)
 {
 	if (!Root)
 	{
@@ -1604,7 +1604,7 @@ void LXmlTree::Output(LXmlTag *t, int Depth)
 	#undef Tabs
 }
 
-bool LXmlTree::Write(LXmlTag *Root, GStreamI *File, Progress *Prog)
+bool LXmlTree::Write(LXmlTag *Root, LStreamI *File, Progress *Prog)
 {
 	bool Status = false;
 	

@@ -1,8 +1,8 @@
 /*hdr
-**      FILE:           GView.cpp
+**      FILE:           LView.cpp
 **      AUTHOR:         Matthew Allen
 **      DATE:           23/4/98
-**      DESCRIPTION:    Linux GView Implementation
+**      DESCRIPTION:    Linux LView Implementation
 **
 **      Copyright (C) 1998-2003, Matthew Allen
 **              fret@memecode.com
@@ -145,7 +145,7 @@ GViewPrivate::~GViewPrivate()
 		DeleteObj(Font);
 }
 
-void GView::OnGtkRealize()
+void LView::OnGtkRealize()
 {
 	if (!d->GotOnCreate)
 	{
@@ -169,7 +169,7 @@ void GView::OnGtkRealize()
 	}
 }
 
-void GView::_Focus(bool f)
+void LView::_Focus(bool f)
 {
 	ThreadCheck();
 	
@@ -191,7 +191,7 @@ void GView::_Focus(bool f)
 	}
 }
 
-void GView::_Delete()
+void LView::_Delete()
 {
 	ThreadCheck();
 	SetPulse();
@@ -203,7 +203,7 @@ void GView::_Delete()
 		_Capturing = 0;
 	
 	auto *Wnd = GetWindow();
-	if (Wnd && Wnd->GetFocus() == static_cast<GViewI*>(this))
+	if (Wnd && Wnd->GetFocus() == static_cast<LViewI*>(this))
 		Wnd->SetFocus(this, LWindow::ViewDelete);
 
 	if (LgiApp && LgiApp->AppWnd == this)
@@ -212,12 +212,12 @@ void GView::_Delete()
 	}
 
 	// Hierarchy
-	GViewI *c;
+	LViewI *c;
 	while ((c = Children[0]))
 	{
-		if (c->GetParent() != (GViewI*)this)
+		if (c->GetParent() != (LViewI*)this)
 		{
-			printf("%s:%i - ~GView error, %s not attached correctly: %p(%s) Parent: %p(%s)\n",
+			printf("%s:%i - ~LView error, %s not attached correctly: %p(%s) Parent: %p(%s)\n",
 				_FL, c->GetClass(), c, c->Name(), c->GetParent(), c->GetParent() ? c->GetParent()->Name() : "");
 			Children.Delete(c);
 		}
@@ -231,12 +231,12 @@ void GView::_Delete()
 	Pos.ZOff(-1, -1);
 }
 
-GView *&GView::PopupChild()
+LView *&LView::PopupChild()
 {
 	return d->Popup;
 }
 
-void LgiToGtkCursor(GViewI *v, LgiCursor c)
+void LgiToGtkCursor(LViewI *v, LgiCursor c)
 {
 	static LgiCursor CurrentCursor = LCUR_Normal;
 
@@ -351,7 +351,7 @@ void LgiToGtkCursor(GViewI *v, LgiCursor c)
 	}
 }
 
-bool GView::_Mouse(LMouse &m, bool Move)
+bool LView::_Mouse(LMouse &m, bool Move)
 {
 	ThreadCheck();
 	
@@ -359,14 +359,14 @@ bool GView::_Mouse(LMouse &m, bool Move)
 	if (!Move)
 	{
 		m.Trace("_Mouse");
-		::GArray<GViewI*> _m;
-		for (GViewI *i=this; i; i=i->GetParent())
+		::GArray<LViewI*> _m;
+		for (LViewI *i=this; i; i=i->GetParent())
 		{
 			_m.Add(i);
 		}
 		for (int n=0; n<_m.Length(); n++)
 		{
-			GViewI *i=_m[_m.Length()-1-n];
+			LViewI *i=_m[_m.Length()-1-n];
 			char s[256];
 			ZeroObj(s);
 			memset(s, ' ', (n+1)*2);
@@ -422,15 +422,15 @@ bool GView::_Mouse(LMouse &m, bool Move)
 		}
 	}
 		
-	GView *Target = NULL;
+	LView *Target = NULL;
 	if (_Capturing)
-		Target = dynamic_cast<GView*>(_Capturing);
+		Target = dynamic_cast<LView*>(_Capturing);
 	else
-		Target = dynamic_cast<GView*>(_Over ? _Over : this);
+		Target = dynamic_cast<LView*>(_Over ? _Over : this);
 	if (!Target)
 		return false;
 
-	LRect Client = Target->GView::GetClient(false);
+	LRect Client = Target->LView::GetClient(false);
 	
 	m = lgi_adjust_click(m, Target, !Move);
 	if (!Client.Valid() || Client.Overlap(m.x, m.y) || _Capturing)
@@ -529,7 +529,7 @@ const char *EventTypeToString(int i)
 	return "#error";
 }
 
-gboolean GtkViewCallback(GtkWidget *widget, GdkEvent *event, GView *This)
+gboolean GtkViewCallback(GtkWidget *widget, GdkEvent *event, LView *This)
 {
 	#if 0
 	LgiTrace("GtkViewCallback, Event=%s, This=%p(%s\"%s\")\n",
@@ -546,13 +546,13 @@ gboolean GtkViewCallback(GtkWidget *widget, GdkEvent *event, GView *This)
 	return This->OnGtkEvent(widget, event);
 }
 
-gboolean GView::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
+gboolean LView::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 {
-	printf("GView::OnGtkEvent ?????\n");
+	printf("LView::OnGtkEvent ?????\n");
 	return false;
 }
 
-LRect &GView::GetClient(bool ClientSpace)
+LRect &LView::GetClient(bool ClientSpace)
 {
 	int Edge = (Sunken() || Raised()) ? _BorderSize : 0;
 
@@ -570,7 +570,7 @@ LRect &GView::GetClient(bool ClientSpace)
 	return c;
 }
 
-void GView::Quit(bool DontDelete)
+void LView::Quit(bool DontDelete)
 {
 	ThreadCheck();
 	
@@ -584,7 +584,7 @@ void GView::Quit(bool DontDelete)
 	}
 }
 
-bool GView::SetPos(LRect &p, bool Repaint)
+bool LView::SetPos(LRect &p, bool Repaint)
 {
 	if (Pos != p)
 	{
@@ -602,7 +602,7 @@ LRect GtkGetPos(GtkWidget *w)
 	return a;
 }
 
-bool GView::Invalidate(LRect *rc, bool Repaint, bool Frame)
+bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 {
 	auto *ParWnd = GetWindow();
 	if (!ParWnd)
@@ -673,7 +673,7 @@ bool GView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 	return true;
 }
 
-void GView::SetPulse(int Length)
+void LView::SetPulse(int Length)
 {
 	ThreadCheck();
 
@@ -688,7 +688,7 @@ void GView::SetPulse(int Length)
 	}
 }
 
-GMessage::Param GView::OnEvent(GMessage *Msg)
+GMessage::Param LView::OnEvent(GMessage *Msg)
 {
 	ThreadCheck();
 	
@@ -697,7 +697,7 @@ GMessage::Param GView::OnEvent(GMessage *Msg)
 	{
 		case M_INVALIDATE:
 		{
-			if ((GView*)this == (GView*)Msg->B())
+			if ((LView*)this == (LView*)Msg->B())
 			{
 				GAutoPtr<LRect> r((LRect*)Msg->A());
 				Invalidate(r);
@@ -711,7 +711,7 @@ GMessage::Param GView::OnEvent(GMessage *Msg)
 		}
 		case M_CHANGE:
 		{
-			GViewI *Ctrl;
+			LViewI *Ctrl;
 			if (GetViewById(Msg->A(), Ctrl))
 				return OnNotify(Ctrl, Msg->B());
 			break;
@@ -753,7 +753,7 @@ LPoint GtkGetOrigin(LWindow *w)
 	return LPoint();
 }
 
-bool GView::PointToScreen(LPoint &p)
+bool LView::PointToScreen(LPoint &p)
 {
 	ThreadCheck();
 
@@ -779,7 +779,7 @@ bool GView::PointToScreen(LPoint &p)
 	return true;
 }
 
-bool GView::PointToView(LPoint &p)
+bool LView::PointToView(LPoint &p)
 {
 	ThreadCheck();
 
@@ -805,7 +805,7 @@ bool GView::PointToView(LPoint &p)
 	return true;
 }
 
-bool GView::GetMouse(LMouse &m, bool ScreenCoords)
+bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 {
 	bool Status = true;
 	ThreadCheck();
@@ -857,7 +857,7 @@ bool GView::GetMouse(LMouse &m, bool ScreenCoords)
 	return Status;
 }
 
-bool GView::IsAttached()
+bool LView::IsAttached()
 {
 	auto w = GetWindow();
 	if (!w)
@@ -873,18 +873,18 @@ bool GView::IsAttached()
 	return w->IsAttached();
 }
 
-const char *GView::GetClass()
+const char *LView::GetClass()
 {
-	return "GView";
+	return "LView";
 }
 
-bool GView::Attach(GViewI *parent)
+bool LView::Attach(LViewI *parent)
 {
 	ThreadCheck();
 	
 	bool Status = false;
 
-	GView *Parent = d->GetParent();
+	LView *Parent = d->GetParent();
 	LgiAssert(Parent == NULL || Parent == parent);
 
 	SetParent(parent);
@@ -916,7 +916,7 @@ bool GView::Attach(GViewI *parent)
 	return Status;
 }
 
-bool GView::Detach()
+bool LView::Detach()
 {
 	ThreadCheck();
 	
@@ -929,7 +929,7 @@ bool GView::Detach()
 		_Window = NULL;
 	}
 
-	GViewI *Par = GetParent();
+	LViewI *Par = GetParent();
 	if (Par)
 	{
 		// Events
@@ -947,7 +947,7 @@ bool GView::Detach()
 		if (Count)
 		{
 			int Detached = 0;
-			GViewI *c, *prev = NULL;
+			LViewI *c, *prev = NULL;
 
 			while ((c = Children[0]))
 			{
@@ -967,17 +967,17 @@ bool GView::Detach()
 	return true;
 }
 
-LgiCursor GView::GetCursor(int x, int y)
+LgiCursor LView::GetCursor(int x, int y)
 {
 	return LCUR_Normal;
 }
 
-void GView::OnGtkDelete()
+void LView::OnGtkDelete()
 {
-	List<GViewI>::I it = Children.begin();
-	for (GViewI *c = *it; c; c = *++it)
+	List<LViewI>::I it = Children.begin();
+	for (LViewI *c = *it; c; c = *++it)
 	{
-		GView *v = c->GetGView();
+		LView *v = c->GetGView();
 		if (v)
 			v->OnGtkDelete();
 	}

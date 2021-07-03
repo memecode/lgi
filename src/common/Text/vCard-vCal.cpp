@@ -226,7 +226,7 @@ bool VIo::ParseDuration(LDateTime &Out, int &Sign, char *In)
 	return Status;
 }
 
-void VIo::Fold(GStreamI &o, const char *i, int pre_chars)
+void VIo::Fold(LStreamI &o, const char *i, int pre_chars)
 {
 	int x = pre_chars;
 	for (const char *s=i; s && *s;)
@@ -329,7 +329,7 @@ char *VIo::UnMultiLine(char *In)
 
 /////////////////////////////////////////////////////////////
 // VCard class
-bool VCard::Import(GDataPropI *c, GStreamI *s)
+bool VCard::Import(GDataPropI *c, LStreamI *s)
 {
 	bool Status = false;
 
@@ -543,7 +543,7 @@ bool VCard::Import(GDataPropI *c, GStreamI *s)
 	return Status;
 }
 
-bool VIo::ReadField(GStreamI &s, GString &Name, ParamArray *Params, GString &Data)
+bool VIo::ReadField(LStreamI &s, GString &Name, ParamArray *Params, GString &Data)
 {
 	bool Status = false;
 	ParamArray LocalParams;
@@ -692,7 +692,7 @@ bool VIo::ReadField(GStreamI &s, GString &Name, ParamArray *Params, GString &Dat
 	return Status;
 }
 
-void VIo::WriteField(GStreamI &s, const char *Name, ParamArray *Params, const char *Data)
+void VIo::WriteField(LStreamI &s, const char *Name, ParamArray *Params, const char *Data)
 {
 	if (Name && Data)
 	{
@@ -733,7 +733,7 @@ void VIo::WriteField(GStreamI &s, const char *Name, ParamArray *Params, const ch
 	}	
 }
 
-bool VCard::Export(GDataPropI *c, GStreamI *o)
+bool VCard::Export(GDataPropI *c, LStreamI *o)
 {
 	if (!c || !o)
 		return false;
@@ -1023,7 +1023,7 @@ struct LAlarm
 	}
 };
 
-bool VCal::Import(GDataPropI *c, GStreamI *In)
+bool VCal::Import(GDataPropI *c, LStreamI *In)
 {
 	bool Status = false;
 
@@ -1365,7 +1365,7 @@ GString ToString(LDateTime &dt)
 	return s;
 }
 
-bool VCal::Export(GDataPropI *c, GStreamI *o)
+bool VCal::Export(GDataPropI *c, LStreamI *o)
 {
 	if (!c || !o)
 		return false;

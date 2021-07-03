@@ -17,7 +17,7 @@
 #define SslSocket_LogFormat				"LogFmt"
 
 class SslSocket :
-	public GSocketI,
+	public LSocketI,
 	virtual public GDom
 {
 	friend class OpenSSL;
@@ -38,11 +38,11 @@ public:
 	static bool DebugLogging;
 	static GString Random(int Len);
 
-	SslSocket(GStreamI *logger = NULL, GCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false);
+	SslSocket(LStreamI *logger = NULL, GCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false);
 	~SslSocket();
 
-	void SetLogger(GStreamI *logger);
-	GStreamI *GetLog();
+	void SetLogger(LStreamI *logger);
+	LStreamI *GetLog();
 	void SetSslOnConnect(bool b);
 	LCancel *GetCancel();
 	void SetCancel(LCancel *c);
@@ -71,11 +71,11 @@ public:
 	bool SetVariant(const char *Name, LVariant &Val, char *Arr = NULL);
 	bool GetVariant(const char *Name, LVariant &Val, char *Arr = NULL);
 
-	GStreamI *Clone();
+	LStreamI *Clone();
 	const char *GetErrorString();
 };
 
 extern bool StartSSL(GAutoString &ErrorMsg, SslSocket *Sock);
 extern void EndSSL();
 
-#endif
+#endif

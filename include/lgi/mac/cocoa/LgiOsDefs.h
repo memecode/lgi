@@ -76,7 +76,7 @@ public:
 #define LGI_COCOA					1
 #define LGI_64BIT					1
 #define LGI_VIEW_HANDLE				0 // GViews DON'T have individual OsView handles
-#define LGI_VIEW_HASH				1 // GView DO have a hash table for validity
+#define LGI_VIEW_HASH				1 // LView DO have a hash table for validity
 
 // Process
 typedef int							OsProcess;
@@ -296,7 +296,7 @@ LgiFunc const char *LVirtualKeyToString(LVirtualKeys c);
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs
-LgiFunc GView *GWindowFromHandle(OsView hWnd);
+LgiFunc LView *GWindowFromHandle(OsView hWnd);
 LgiFunc int GetMouseWheelLines();
 LgiFunc int WinPointToHeight(int Pt);
 LgiFunc int WinHeightToPoint(int Ht);

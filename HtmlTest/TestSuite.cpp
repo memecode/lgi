@@ -163,9 +163,9 @@ public:
 		}
 	}
 	
-	GAutoPtr<GSocketI> CreateSock(const char *Proto)
+	GAutoPtr<LSocketI> CreateSock(const char *Proto)
 	{
-		GAutoPtr<GSocketI> s;
+		GAutoPtr<LSocketI> s;
 		if (Proto && !_stricmp(Proto, "https"))
 		{
 			SslSocket *ss;
@@ -535,7 +535,7 @@ public:
 		return 0;
 	}
 	
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{

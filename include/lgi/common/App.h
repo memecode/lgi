@@ -97,11 +97,11 @@ ObjCWrapper(LNsApplication, OsApp)
 /// operating system. And once your initialization is complete the 'Run' method
 /// is called to enter the main application loop that processes messages for the
 /// life time of the application.
-class LgiClass GApp : virtual public GAppI,
+class LgiClass GApp : virtual public LAppI,
 	public LBase,
 	public OsApplication
 {
-	friend class GView;
+	friend class LView;
 	friend class LWindow;
 
 public:
@@ -132,7 +132,7 @@ protected:
 	friend class GClipBoard;
 	
 	// virtual void OnEvents();
-	void DeleteMeLater(GViewI *v);
+	void DeleteMeLater(LViewI *v);
 	void SetClipBoardContent(OsView Hnd, LVariant &v);
 	bool GetClipBoardContent(OsView Hnd, LVariant &v, GArray<char*> &Types);
 	
@@ -256,7 +256,7 @@ public:
 	void SetConfig(const char *Variable, const char *Value);
 
 	/// Gets the control with the keyboard focus
-	GViewI *GetFocus();
+	LViewI *GetFocus();
 	
 	/// Gets the MIME type of a file
 	/// \returns the mime type or NULL if unknown.
@@ -399,13 +399,13 @@ public:
 		};	
 		
 		KeyModFlags *GetKeyModFlags();
-		void OnDetach(GViewI *View);
+		void OnDetach(LViewI *View);
 	
 	
 	#endif
 	
 	#if !LGI_VIEW_HANDLE
-		bool PostEvent(GViewI *View, int Msg, GMessage::Param a = 0, GMessage::Param b = 0);
+		bool PostEvent(LViewI *View, int Msg, GMessage::Param a = 0, GMessage::Param b = 0);
 	#endif
 };
 

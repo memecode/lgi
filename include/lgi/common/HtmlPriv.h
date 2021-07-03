@@ -275,7 +275,7 @@ protected:
 	LHashTbl<ConstStrKey<char,false>, char*> Attr;
 
 	// Forms
-	GViewI *Ctrl;
+	LViewI *Ctrl;
 	LVariant CtrlValue;
 	HtmlControlType CtrlType;
 

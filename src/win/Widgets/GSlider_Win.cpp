@@ -155,7 +155,7 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 	return Status;
 }
 
-bool GSlider::OnLayout(GViewLayoutInfo &Inf)
+bool GSlider::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (Inf.Width.Min)
 	{
@@ -176,7 +176,7 @@ bool GSlider::OnLayout(GViewLayoutInfo &Inf)
 ////////////////////////////////////////////////////////////////////////
 class GSlider_Factory : public GViewFactory
 {
-	GView *NewView(const char *Class, LRect *Pos, const char *Text)
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (stricmp(Class, "GSlider") == 0)
 		{
@@ -186,4 +186,4 @@ class GSlider_Factory : public GViewFactory
 		return 0;
 	}
 
-} GSliderFactory;
+} GSliderFactory;

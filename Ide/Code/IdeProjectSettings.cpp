@@ -303,7 +303,7 @@ public:
 		pDC->Rectangle();
 	}
 	
-	bool OnLayout(GViewLayoutInfo &Inf)
+	bool OnLayout(LViewLayoutInfo &Inf)
 	{
 		Inf.Width.Min = -1;
 		Inf.Width.Max = -1;
@@ -463,7 +463,7 @@ public:
 
 class GSettingDetailFactory : public GViewFactory
 {
-	GView *NewView
+	LView *NewView
 	(
 		const char *Class,
 		LRect *Pos,
@@ -503,7 +503,7 @@ class ProjectSettingsDlg : public LDialog
 	uint64 DefLockOut;
 
 public:
-	ProjectSettingsDlg(GViewI *parent, IdeProjectSettingsPriv *priv)
+	ProjectSettingsDlg(LViewI *parent, IdeProjectSettingsPriv *priv)
 	{
 		Tree = NULL;
 		Detail = NULL;
@@ -560,7 +560,7 @@ public:
 				Detail->SetPriv(d);
 			}
 			
-			GView *Search;
+			LView *Search;
 			if (GetViewById(IDC_SEARCH, Search))
 				Search->Focus(true);
 		}
@@ -598,7 +598,7 @@ public:
 		}
 	}
 	
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		switch (Ctrl->GetId())
 		{
@@ -868,7 +868,7 @@ void IdeProjectSettings::InitAllSettings(bool ClearCurrent)
 	}
 }
 
-bool IdeProjectSettings::Edit(GViewI *parent)
+bool IdeProjectSettings::Edit(LViewI *parent)
 {
 	// Copy all the settings to the edit tag...
 	d->Editing.Copy(d->Active, true);
@@ -1017,4 +1017,4 @@ bool IdeProjectSettings::Set(ProjSetting Setting, int Value, IdePlatform Platfor
 	else LgiTrace("%s:%i - Warning: missing setting tag '%s'\n", _FL, path);
 
 	return Status;
-}
+}

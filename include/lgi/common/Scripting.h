@@ -355,7 +355,7 @@ class LScriptEngine
 	class LScriptEnginePrivate *d;
 
 public:
-	LScriptEngine(GViewI *parent, LScriptContext *UserContext, LVmDebuggerCallback *Callback);
+	LScriptEngine(LViewI *parent, LScriptContext *UserContext, LVmDebuggerCallback *Callback);
 	~LScriptEngine();
 
 	GStream *GetConsole();
@@ -416,7 +416,7 @@ class LVmDebuggerWnd : public LWindow, public LVmDebugger
 	void UpdateVariables(LList *Lst, LVariant *Arr, ssize_t Len, char Prefix);
 
 public:
-	LVmDebuggerWnd(GView *Parent, LVmDebuggerCallback *Callback, LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly);
+	LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly);
 	~LVmDebuggerWnd();
 
 	void OwnVm(bool Own);
@@ -424,7 +424,7 @@ public:
 	void OnError(const char *Msg);
 	void OnRun(bool Running);
 	void SetSource(const char *Mixed);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 	int OnCommand(int Cmd, int Event, OsView Wnd);
 	bool OnRequestClose(bool OsShuttingDown);
 	GMessage::Param OnEvent(GMessage *Msg);
@@ -437,4 +437,4 @@ public:
 };
 
 #endif
-
+

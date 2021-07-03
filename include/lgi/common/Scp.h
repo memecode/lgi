@@ -63,8 +63,8 @@ protected:
 	GUri Host;
 	GStringPipe Info;
 
-	bool WriteData(GSocketI *&s, IScpData *d);
-	bool ReadData(GSocketI *&s, IScpData *&d, int *HttpErr = 0);
+	bool WriteData(LSocketI *&s, IScpData *d);
+	bool ReadData(LSocketI *&s, IScpData *&d, int *HttpErr = 0);
 
 public:
 	IScp(bool server);
@@ -121,10 +121,10 @@ public:
 
 class IScpClient : public IScp
 {
-	GSocketI *s;
+	LSocketI *s;
 	int Session;
 
-	GSocketI *&Socket(bool Open = true);
+	LSocketI *&Socket(bool Open = true);
 	bool Request(IScpData *out, IScpData *&in);
 
 public:
@@ -133,7 +133,7 @@ public:
 	IScpClient();
 	~IScpClient();
 
-	bool Connect(GSocketI *sock, char *Server, char *User, char *Pass);
+	bool Connect(LSocketI *sock, char *Server, char *User, char *Pass);
 	bool Quit();
 	bool Search(IScpSearch *Search, IScpData *&Results);
 	bool Load(int Uid, IScpData *Data);
@@ -149,13 +149,13 @@ class IScpServer : public IScp
 protected:
 	virtual bool LoggedIn(int SeshId) { return false; }
 
-	bool Respond(GSocketI *s, int Code);
+	bool Respond(LSocketI *s, int Code);
 
 public:
 	IScpServer(IScpUsage *usage = 0);
 	~IScpServer();
 
-	bool OnIdle(GSocketI *s);
+	bool OnIdle(LSocketI *s);
 
 	virtual bool OnLogin(char *User, char *Pass, int Session) { return false; }
 	virtual void OnQuit() { }

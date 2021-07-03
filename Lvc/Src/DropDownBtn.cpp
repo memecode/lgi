@@ -12,9 +12,9 @@ struct DropDownBtnPriv
 		EditId = -1;
 	}
 
-	GViewI *GetEdit()
+	LViewI *GetEdit()
 	{
-		GViewI *e = NULL;
+		LViewI *e = NULL;
 		if (View && View->GetParent())
 			View->GetParent()->GetViewById(EditId, e);
 		LgiAssert(e != 0);
@@ -28,7 +28,7 @@ public:
 	DropDownBtnPriv *d;
 	LList *Lst;
 
-	DropLst(DropDownBtnPriv *priv, GView *owner) : Lst(NULL), GPopup(owner)
+	DropLst(DropDownBtnPriv *priv, LView *owner) : Lst(NULL), GPopup(owner)
 	{
 		d = priv;
 
@@ -55,13 +55,13 @@ public:
 		pDC->Box();
 	}
 
-	int OnNotify(GViewI *c, int flag)
+	int OnNotify(LViewI *c, int flag)
 	{
 		if (c->GetId() == 10 &&
 			flag == GNotifyItem_Click)
 		{
 			LListItem *i = Lst->GetSelected();
-			GViewI *e = d->GetEdit();
+			LViewI *e = d->GetEdit();
 			if (e && i)
 			{
 				e->Name(i->GetText(0));
@@ -101,7 +101,7 @@ GString::Array DropDownBtn::GetList()
 	return a;
 }
 
-bool DropDownBtn::OnLayout(GViewLayoutInfo &Inf)
+bool DropDownBtn::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (Inf.Width.Min)
 	{
@@ -134,7 +134,7 @@ bool DropDownBtn::SetList(int EditCtrl, GString::Array a)
 
 class DropDownBtnFactory : public GViewFactory
 {
-	GView *NewView(const char *Class, LRect *Pos, const char *Text)
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (!stricmp(Class, "DropDownBtn"))
 			return new DropDownBtn;

@@ -48,7 +48,7 @@ class ResDialogUi;
 ////////////////////////////////////////////////////////////////
 #define DECL_DIALOG_CTRL(id)	 \
 	int GetType() { return id; } \
-	GView *View() { return this; } \
+	LView *View() { return this; } \
 	void OnMouseClick(LMouse &m); \
 	void OnMouseMove(LMouse &m); \
 	void OnPaint(LSurface *pDC);
@@ -103,7 +103,7 @@ public:
 	~ResDialogCtrl();
 
 	const char *GetClass() { return "ResDialogCtrl"; }
-	virtual GView *View() = 0;
+	virtual LView *View() = 0;
 	ResDialogCtrl *ParentCtrl() { return dynamic_cast<ResDialogCtrl*>(View()->GetParent()); }
 	ResDialog *GetDlg() { return Dlg; }
 	ResString *GetStr() { return _Str; }
@@ -170,11 +170,11 @@ public:
 	void Create(LXmlTag *load, SerialiseContext *Ctx) override;
 
 	const char *GetClass() override { return "ResDialog"; }
-	GView *Wnd() override { return dynamic_cast<GView*>(this); }
+	LView *Wnd() override { return dynamic_cast<LView*>(this); }
 	static void AddLanguage(GLanguageId Id);
 	ResDialog *IsDialog() override { return this; }
 	void EnumCtrls(List<ResDialogCtrl> &Ctrls);
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching) override;
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching) override;
 
 	// GObj overrides
 	const char *Name() override;
@@ -219,7 +219,7 @@ public:
 	void Paste() override;
 
 	// Methods
-	GView *CreateUI() override;
+	LView *CreateUI() override;
 	void OnMouseClick(LMouse &m) override;
 	void OnMouseMove(LMouse &m) override;
 	bool OnKey(LKey &k) override;
@@ -263,7 +263,7 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////
-class CtrlDlg : public ResDialogCtrl, public GView
+class CtrlDlg : public ResDialogCtrl, public LView
 {
 public:
 	CtrlDlg(ResDialog *dlg, LXmlTag *load);
@@ -277,7 +277,7 @@ public:
 	void OnNcPaint(LSurface *pDC, LRect &r);
 };
 
-class CtrlTable : public ResDialogCtrl, public GDom, public GView
+class CtrlTable : public ResDialogCtrl, public GDom, public LView
 {
 	class CtrlTablePrivate *d;
 
@@ -293,7 +293,7 @@ public:
 
 	void SetAttachCell(class ResTableCell *c);
 	bool AttachCtrl(ResDialogCtrl *Ctrl, LRect *r = 0);
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
 	LRect *GetPasteArea();
 	LRect *GetChildArea(ResDialogCtrl *Ctrl);
 	void Layout();
@@ -308,7 +308,7 @@ public:
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 };
 
-class CtrlText : public ResDialogCtrl, public GView
+class CtrlText : public ResDialogCtrl, public LView
 {
 public:
 	CtrlText(ResDialog *dlg, LXmlTag *load);
@@ -317,7 +317,7 @@ public:
 	const char *GetClass() { return "CtrlText"; }
 };
 
-class CtrlEditbox : public ResDialogCtrl, public GView
+class CtrlEditbox : public ResDialogCtrl, public LView
 {
 	bool Password;
 	bool MultiLine;
@@ -332,7 +332,7 @@ public:
 	bool Serialize(FieldTree &Fields);
 };
 
-class CtrlCheckbox : public ResDialogCtrl, public GView
+class CtrlCheckbox : public ResDialogCtrl, public LView
 {
 public:
 	CtrlCheckbox(ResDialog *dlg, LXmlTag *load);
@@ -341,7 +341,7 @@ public:
 	const char *GetClass() { return "CtrlCheckbox"; }
 };
 
-class CtrlButton : public ResDialogCtrl, public GView
+class CtrlButton : public ResDialogCtrl, public LView
 {
 	GString Image;
 	bool IsToggle;
@@ -355,7 +355,7 @@ public:
 	bool Serialize(FieldTree &Fields);
 };
 
-class CtrlGroup : public ResDialogCtrl, public GView
+class CtrlGroup : public ResDialogCtrl, public LView
 {
 public:
 	CtrlGroup(ResDialog *dlg, LXmlTag *load);
@@ -364,7 +364,7 @@ public:
 	const char *GetClass() { return "CtrlGroup"; }
 };
 
-class CtrlRadio : public ResDialogCtrl, public GView
+class CtrlRadio : public ResDialogCtrl, public LView
 {
 	LSurface *Bmp;
 
@@ -376,7 +376,7 @@ public:
 	const char *GetClass() { return "CtrlRadio"; }
 };
 
-class CtrlTab : public ResDialogCtrl, public GView
+class CtrlTab : public ResDialogCtrl, public LView
 {
 public:
 	CtrlTab(ResDialog *dlg, LXmlTag *load);
@@ -387,7 +387,7 @@ public:
 	void ListChildren(List<ResDialogCtrl> &l, bool Deep);
 };
 
-class CtrlTabs : public ResDialogCtrl, public GView
+class CtrlTabs : public ResDialogCtrl, public LView
 {
 	friend class CtrlTab;
 
@@ -412,7 +412,7 @@ public:
 	void ShowMe(ResDialogCtrl *Child);
 };
 
-class ListCol : public ResDialogCtrl, public GView
+class ListCol : public ResDialogCtrl, public LView
 {
 public:
 	LRect &r() { return GetPos(); }
@@ -423,7 +423,7 @@ public:
 	ListCol(ResDialog *dlg, LXmlTag *load, char *Str = 0, int Width = 50);
 };
 
-class CtrlList : public ResDialogCtrl, public GView
+class CtrlList : public ResDialogCtrl, public LView
 {
 	ssize_t DragCol;
 
@@ -440,7 +440,7 @@ public:
 	void Empty();
 };
 
-class CtrlComboBox : public ResDialogCtrl, public GView
+class CtrlComboBox : public ResDialogCtrl, public LView
 {
 public:
 	CtrlComboBox(ResDialog *dlg, LXmlTag *load);
@@ -449,7 +449,7 @@ public:
 	const char *GetClass() { return "CtrlComboBox"; }
 };
 
-class CtrlScrollBar : public ResDialogCtrl, public GView
+class CtrlScrollBar : public ResDialogCtrl, public LView
 {
 public:
 	CtrlScrollBar(ResDialog *dlg, LXmlTag *load);
@@ -458,7 +458,7 @@ public:
 	const char *GetClass() { return "CtrlScrollBar"; }
 };
 
-class CtrlTree : public ResDialogCtrl, public GView
+class CtrlTree : public ResDialogCtrl, public LView
 {
 public:
 	CtrlTree(ResDialog *dlg, LXmlTag *load);
@@ -467,7 +467,7 @@ public:
 	const char *GetClass() { return "CtrlTree"; }
 };
 
-class CtrlBitmap : public ResDialogCtrl, public GView
+class CtrlBitmap : public ResDialogCtrl, public LView
 {
 public:
 	CtrlBitmap(ResDialog *dlg, LXmlTag *load);
@@ -476,7 +476,7 @@ public:
 	const char *GetClass() { return "CtrlBitmap"; }
 };
 
-class CtrlProgress : public ResDialogCtrl, public GView
+class CtrlProgress : public ResDialogCtrl, public LView
 {
 public:
 	CtrlProgress(ResDialog *dlg, LXmlTag *load);
@@ -485,7 +485,7 @@ public:
 	const char *GetClass() { return "CtrlProgress"; }
 };
 
-class CtrlCustom : public ResDialogCtrl, public GView
+class CtrlCustom : public ResDialogCtrl, public LView
 {
 	char *Control;
 

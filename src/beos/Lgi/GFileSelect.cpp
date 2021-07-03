@@ -28,7 +28,7 @@ public:
 	bool MultiSel;
 	BFilePanel *Panel;
 	List<GFileType> TypeList;
-	GView *ParentWnd;
+	LView *ParentWnd;
 	bool WaitForMessage;
 	BMessenger *Messenger;
 	
@@ -263,12 +263,12 @@ int GFileSelect::SelectedType()
 	return -1;
 }
 
-GView *GFileSelect::Parent()
+LView *GFileSelect::Parent()
 {
 	return d->ParentWnd;
 }
 
-void GFileSelect::Parent(GView *Window)
+void GFileSelect::Parent(LView *Window)
 {
 	d->ParentWnd = Window;
 }

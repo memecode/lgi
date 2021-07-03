@@ -29,7 +29,7 @@ public:
 		GAutoString Opt;
 		LVariantType Type;
 		LVariant Value;
-		GViewI *Ctrl;
+		LViewI *Ctrl;
 		GButton *Browse;
 		GAutoPtr<EnumArr> Enum;
 
@@ -72,7 +72,7 @@ public:
 	GTreeItem *Insert(const char *DomPath, int CtrlId, LVariantType Type, LVariant *Value = 0, GArray<EnumValue> *Enum = 0);
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 	bool Serialize(GDom *Store, bool Write);
-	int OnNotify(GViewI *c, int f);
+	int OnNotify(LViewI *c, int f);
 };
 
 #endif

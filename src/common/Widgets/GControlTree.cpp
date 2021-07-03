@@ -565,7 +565,7 @@ bool GControlTree::SetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-int GControlTree::OnNotify(GViewI *c, int f)
+int GControlTree::OnNotify(LViewI *c, int f)
 {
 	switch (c->GetId())
 	{
@@ -592,7 +592,7 @@ int GControlTree::OnNotify(GViewI *c, int f)
 ///////////////////////////////////////////////////////////////////////////////
 class GControlTree_Factory : public GViewFactory
 {
-	GView *NewView(const char *Class, LRect *Pos, const char *Text)
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (_stricmp(Class, "GControlTree") == 0)
 		{

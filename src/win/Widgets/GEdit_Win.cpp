@@ -223,7 +223,7 @@ GMessage::Result GEdit::OnEvent(GMessage *Msg)
 			if (!MultiLine() &&
 				(Msg->a == VK_UP || Msg->a == VK_DOWN))
 			{
-				GView::OnEvent(Msg);
+				LView::OnEvent(Msg);
 				return 1;
 			}
 
@@ -244,7 +244,7 @@ GMessage::Result GEdit::OnEvent(GMessage *Msg)
 					Msg->a == VK_RETURN
 				))
 			{
-				GView::OnEvent(Msg);
+				LView::OnEvent(Msg);
 				return 1;				
 			}
 
@@ -339,7 +339,7 @@ GMessage::Result GEdit::OnEvent(GMessage *Msg)
 		case WM_KILLFOCUS:
 		case WM_MOUSEMOVE:
 		{
-			GView::OnEvent(Msg);
+			LView::OnEvent(Msg);
 			break;
 		}
 	}

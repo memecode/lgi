@@ -23,7 +23,7 @@ class LgiClass GButton :
 	#if WINNATIVE && !XP_BUTTON
 	public GControl,
 	#else
-	public GView,
+	public LView,
 	#endif
 	public ResObject
 {
@@ -92,17 +92,17 @@ public:
 	virtual void OnClick();
 
 	// Impl
-	const char *Name() override { return GView::Name(); }
-	const char16 *NameW() override { return GView::NameW(); }
+	const char *Name() override { return LView::Name(); }
+	const char16 *NameW() override { return LView::NameW(); }
 	bool Name(const char *n) override;
 	bool NameW(const char16 *n) override;
 	void SetFont(LFont *Fnt, bool OwnIt = false) override;
-	int OnNotify(GViewI *Ctrl, int Flags) override;
+	int OnNotify(LViewI *Ctrl, int Flags) override;
 
 	#if WINNATIVE && !XP_BUTTON
 	int SysOnNotify(int Msg, int Code);
 	#else
-	bool OnLayout(GViewLayoutInfo &Inf) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 	#endif
 };
 

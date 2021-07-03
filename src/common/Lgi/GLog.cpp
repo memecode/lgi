@@ -94,9 +94,9 @@ void RLogView::OnPosChange()
 	UpdateScrollBar();
 }
 
-int RLogView::OnNotify(GViewI *Ctrl, int Flags)
+int RLogView::OnNotify(LViewI *Ctrl, int Flags)
 {
-	if (Ctrl == (GViewI*)this)
+	if (Ctrl == (LViewI*)this)
 	{
 		UpdateScrollBar();
 		if (VScroll)

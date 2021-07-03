@@ -54,7 +54,7 @@ void SerializeHistory(GHistory *h, const char *opt, GOptionsFile *p, bool Write)
 	{
 		GString last;
 		last.Printf("%sSelect", opt);
-		GViewI *Edit = NULL;
+		LViewI *Edit = NULL;
 		h->GetWindow()->GetViewById(h->GetTargetId(), Edit);
 		
 		#if DEBUG_HIST
@@ -153,7 +153,7 @@ void FindInFiles::OnCreate()
 	}
 }
 
-int FindInFiles::OnNotify(GViewI *v, int f)
+int FindInFiles::OnNotify(LViewI *v, int f)
 {
 	switch (v->GetId())
 	{

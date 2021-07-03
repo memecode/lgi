@@ -49,7 +49,7 @@ GRichTextEdit::GRichTextEdit(	int Id,
 	: ResObject(Res_Custom)
 {
 	// init vars
-	GView::d->Css.Reset(new GRichTextPriv(this, &d));
+	LView::d->Css.Reset(new GRichTextPriv(this, &d));
 
 	// setup window
 	SetId(Id);
@@ -84,7 +84,7 @@ GRichTextEdit::GRichTextEdit(	int Id,
 
 GRichTextEdit::~GRichTextEdit()
 {
-	// 'd' is owned by the GView CSS autoptr.
+	// 'd' is owned by the LView CSS autoptr.
 }
 
 bool GRichTextEdit::SetSpellCheck(GSpellCheck *sp)
@@ -1229,7 +1229,7 @@ class NodeView : public GWindow
 public:
 	GTree *Tree;
 	
-	NodeView(GViewI *w)
+	NodeView(LViewI *w)
 	{
 		LRect r(0, 0, 500, 600);
 		SetPos(r);
@@ -1507,7 +1507,7 @@ int GRichTextEdit::OnHitTest(int x, int y)
 		return HTCLIENT;
 	}
 	#endif
-	return GView::OnHitTest(x, y);
+	return LView::OnHitTest(x, y);
 }
 
 void GRichTextEdit::OnMouseMove(LMouse &m)
@@ -2653,7 +2653,7 @@ GMessage::Result GRichTextEdit::OnEvent(GMessage *Msg)
 	return GLayout::OnEvent(Msg);
 }
 
-int GRichTextEdit::OnNotify(GViewI *Ctrl, int Flags)
+int GRichTextEdit::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl->GetId() == IDC_VSCROLL && VScroll)
 	{
@@ -2710,7 +2710,7 @@ void GRichTextEdit::OnUrl(char *Url)
 	}
 }
 
-bool GRichTextEdit::OnLayout(GViewLayoutInfo &Inf)
+bool GRichTextEdit::OnLayout(LViewLayoutInfo &Inf)
 {
 	Inf.Width.Min = 32;
 	Inf.Width.Max = -1;
@@ -3034,7 +3034,7 @@ void EmojiMenu::Visible(bool i)
 ///////////////////////////////////////////////////////////////////////////////
 class GRichTextEdit_Factory : public GViewFactory
 {
-	GView *NewView(const char *Class, LRect *Pos, const char *Text)
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (_stricmp(Class, "GRichTextEdit") == 0)
 		{

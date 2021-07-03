@@ -71,7 +71,7 @@ void LFontType::SetPointSize(int PointSize)
 	#endif
 }
 
-bool LFontType::DoUI(GView *Parent)
+bool LFontType::DoUI(LView *Parent)
 {
 	bool Status = false;
 

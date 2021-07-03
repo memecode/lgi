@@ -81,7 +81,7 @@ void GTextLabel::OnAttach()
 {
 	LResources::StyleElement(this);
 	OnStyleChange();
-	GView::OnAttach();
+	LView::OnAttach();
 }
 
 bool GTextLabel::SetVariant(const char *Name, LVariant &Value, char *Array)
@@ -118,7 +118,7 @@ bool GTextLabel::Name(const char *n)
 
 	if (InThread())
 	{
-		GView::Name(n);
+		LView::Name(n);
 		OnStyleChange();
 		SendNotify(GNotifyTableLayout_Refresh);
 	}
@@ -139,7 +139,7 @@ bool GTextLabel::NameW(const char16 *n)
 
 	if (InThread())
 	{
-		GView::NameW(n);
+		LView::NameW(n);
 		OnStyleChange();
 		SendNotify(GNotifyTableLayout_Refresh);
 	}
@@ -154,7 +154,7 @@ bool GTextLabel::NameW(const char16 *n)
 
 void GTextLabel::SetFont(LFont *Fnt, bool OwnIt)
 {
-	GView::SetFont(Fnt, OwnIt);
+	LView::SetFont(Fnt, OwnIt);
 	d->Layout(GetFont(), X());
 	Invalidate();
 }
@@ -181,7 +181,7 @@ void GTextLabel::OnStyleChange()
 			oldsz = d->GetFont()->Size();
 
 		d->Empty();
-		d->Add(GView::Name(), GetCss());
+		d->Add(LView::Name(), GetCss());
 		d->DoLayout(X());
 		d->Unlock();
 		Invalidate();
@@ -203,7 +203,7 @@ void GTextLabel::OnPosChange()
 		LgiTrace("No Layout %i, %i\n", d->PrevX, X());
 }
 
-bool GTextLabel::OnLayout(GViewLayoutInfo &Inf)
+bool GTextLabel::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (!Inf.Width.Min)
 	{
@@ -248,18 +248,18 @@ GMessage::Result GTextLabel::OnEvent(GMessage *Msg)
 		}
 	}
 	
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
-int GTextLabel::OnNotify(GViewI *Ctrl, int Flags)
+int GTextLabel::OnNotify(LViewI *Ctrl, int Flags)
 {
-	if (Ctrl == (GViewI*)this &&
+	if (Ctrl == (LViewI*)this &&
 		Flags == GNotify_Activate &&
 		GetParent())
 	{
 		auto c = GetParent()->IterateViews();
 		ssize_t Idx = c.IndexOf(this);
-		GViewI *n = c[++Idx];
+		LViewI *n = c[++Idx];
 		if (n)
 			n->OnNotify(n, Flags);
 	}

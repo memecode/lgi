@@ -70,7 +70,7 @@ public:
 	void OnPaint(LSurface *pDC);
 	void OnCreate();
 	void OnMouseClick(LMouse &m);
-	int OnNotify(GViewI *c, int f);
+	int OnNotify(LViewI *c, int f);
 };
 
 #endif

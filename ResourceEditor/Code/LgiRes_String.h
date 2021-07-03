@@ -59,7 +59,7 @@ public:
 	char *Tag;			// Optional component tag, for turning off features.
 	List<StrLang> Items;
 	GArray<class ResDialogCtrl*> Refs;
-	GView *UpdateWnd;
+	LView *UpdateWnd;
 
 	ResString(ResStringGroup *group, int init_ref = -1);
 	~ResString();
@@ -122,8 +122,8 @@ public:
 	ResStringGroup(AppWnd *w, int type = TYPE_STRING);
 	~ResStringGroup();
 
-	GView *Wnd() { return dynamic_cast<GView*>(this); }
-	bool Attach(GViewI *Parent) { return LList::Attach(Parent); }
+	LView *Wnd() { return dynamic_cast<LView*>(this); }
+	bool Attach(LViewI *Parent) { return LList::Attach(Parent); }
 	ResStringGroup *GetStringGroup() { return this; }
 
 	// Methods
@@ -154,7 +154,7 @@ public:
 	void Paste();
 
 	// Resource
-	GView *CreateUI();
+	LView *CreateUI();
 	void OnRightClick(LSubMenu *RClick);
 	void OnCommand(int Cmd);
 	bool Test(ErrorCollection *e);
@@ -193,8 +193,8 @@ class LangDlg : public GDialog
 public:
 	GLanguage *Lang;
 
-	LangDlg(GView *parent, List<GLanguage> &l, int Init = -1);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	LangDlg(LView *parent, List<GLanguage> &l, int Init = -1);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
 ////////////////////////////////////////////////////////////////

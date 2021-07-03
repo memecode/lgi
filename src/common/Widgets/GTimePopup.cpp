@@ -18,10 +18,10 @@ GTimeDropDown::GTimeDropDown() :
 	SetPopup(Drop = new GTimePopup(this));
 }
 
-int GTimeDropDown::OnNotify(GViewI *Ctrl, int Flags)
+int GTimeDropDown::OnNotify(LViewI *Ctrl, int Flags)
 {
-	GViewI *DateSrc = GetNotify();
-	if (Ctrl == (GViewI*)Drop && DateSrc)
+	LViewI *DateSrc = GetNotify();
+	if (Ctrl == (LViewI*)Drop && DateSrc)
 	{
 		auto a = Drop->GetTime();
 		
@@ -37,15 +37,15 @@ int GTimeDropDown::OnNotify(GViewI *Ctrl, int Flags)
 	return GDropDown::OnNotify(Ctrl, Flags);
 }
 
-void GTimeDropDown::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+void GTimeDropDown::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
-	if (Wnd == (GViewI*)Drop && !Attaching)
+	if (Wnd == (LViewI*)Drop && !Attaching)
 	{
 		Drop = NULL;
 	}	
 }
 
-bool GTimeDropDown::OnLayout(GViewLayoutInfo &Inf)
+bool GTimeDropDown::OnLayout(LViewLayoutInfo &Inf)
 {
     if (!Inf.Width.Max)
     {
@@ -62,7 +62,7 @@ bool GTimeDropDown::OnLayout(GViewLayoutInfo &Inf)
 
 void GTimeDropDown::SetDate(char *d)
 {
-	GViewI *n = GetNotify();
+	LViewI *n = GetNotify();
 	if (n && d)
 	{
 		LDateTime New;
@@ -87,7 +87,7 @@ void GTimeDropDown::SetDate(char *d)
 
 		n->Name(Buf);
 
-		GViewI *Nn = n->GetNotify() ? n->GetNotify() : n->GetParent();
+		LViewI *Nn = n->GetNotify() ? n->GetNotify() : n->GetParent();
 		if (Nn)
 		{
 			Nn->OnNotify(n, 0);
@@ -102,7 +102,7 @@ void GTimeDropDown::OnMouseClick(LMouse &m)
 		if (Drop)
 		{
 			// Set it's time from our current value
-			GViewI *n = GetNotify();
+			LViewI *n = GetNotify();
 			if (n)
 			{
 				LDateTime New;
@@ -121,12 +121,12 @@ void GTimeDropDown::OnMouseClick(LMouse &m)
 
 class TimeList : public LList
 {
-	GView *Owner;
+	LView *Owner;
 
 public:
 	bool Key, Mouse;
 	
-	TimeList(GView *owner) : LList(100, 1, 1, 50, 50, "TimeList")
+	TimeList(LView *owner) : LList(100, 1, 1, 50, 50, "TimeList")
 	{
 		Owner = owner;
 		Key = Mouse = false;
@@ -161,7 +161,7 @@ public:
 	}
 };
 
-GTimePopup::GTimePopup(GView *owner) : GPopup(owner)
+GTimePopup::GTimePopup(LView *owner) : GPopup(owner)
 {
 	SetParent(owner);
 	SetNotify(owner);
@@ -269,7 +269,7 @@ void GTimePopup::OnPaint(LSurface *pDC)
 	}
 }
 
-int GTimePopup::OnNotify(GViewI *c, int f)
+int GTimePopup::OnNotify(LViewI *c, int f)
 {
 	if (c->GetId() == 100 && !Ignore)
 	{
@@ -282,7 +282,7 @@ int GTimePopup::OnNotify(GViewI *c, int f)
 				const char *t = Sel->GetText(0);
 				if (t)
 				{
-					GViewI *n = GetNotify();
+					LViewI *n = GetNotify();
 					if (n)
 					{
 						n->Name(t);
@@ -299,7 +299,7 @@ int GTimePopup::OnNotify(GViewI *c, int f)
 		}
 		else if (Type == GNotify_EscapeKey)
 		{
-			GViewI *n = GetNotify();
+			LViewI *n = GetNotify();
 			if (n)
 				n->Focus(true);			
 			Visible(false);
@@ -351,7 +351,7 @@ void GTimePopup::SetTime(LDateTime *t)
 
 class GTimePopupFactory : public GViewFactory
 {
-	GView *NewView(const char *Class, LRect *Pos, const char *Text)
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (Class &&
 			_stricmp(Class, "GTimeDropDown") == 0)

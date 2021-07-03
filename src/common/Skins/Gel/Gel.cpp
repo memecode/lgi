@@ -255,7 +255,7 @@ class GelSkin : public GSkinEngine
 		#endif
 	}
 
-	LMemDC *DrawCtrl(GViewI *Ctrl, LRect *Sz, int Flags, bool Round)
+	LMemDC *DrawCtrl(LViewI *Ctrl, LRect *Sz, int Flags, bool Round)
 	{
 		LMemDC *Mem = new LMemDC;
 		if (Mem && Mem->Create(Sz ? Sz->X() : 14, Sz ? Sz->Y() : 14, OsDefaultCs))
@@ -412,7 +412,7 @@ class GelSkin : public GSkinEngine
 		return Mem;
 	}
 
-	void DrawText(GSkinState *State, int x, int y, LRect &rcFill, bool Enabled, GView *Ctrl, GCssTools &Tools)
+	void DrawText(GSkinState *State, int x, int y, LRect &rcFill, bool Enabled, LView *Ctrl, GCssTools &Tools)
 	{
 		LCss::ColorDef CssFore, CssBack;
 		GColour Fore = Tools.GetFore(), Back = Tools.GetBack(), Light, Low;

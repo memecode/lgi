@@ -59,7 +59,7 @@ void GDialog::Quit(bool DontDelete)
 	if (d->IsModal)
 		EndModal(0);
 	else
-		GView::Quit(DontDelete);
+		LView::Quit(DontDelete);
 }
 
 void GDialog::OnPosChange()
@@ -67,7 +67,7 @@ void GDialog::OnPosChange()
     if (Children.Length() == 1)
     {
         auto it = Children.begin();
-        GTableLayout *t = dynamic_cast<GTableLayout*>((GViewI*)it);
+        GTableLayout *t = dynamic_cast<GTableLayout*>((LViewI*)it);
         if (t)
         {
             LRect r = GetClient();
@@ -154,12 +154,12 @@ GMessage::Result GDialog::OnEvent(GMessage *Msg)
 	{
 	}
 
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GControl::GControl(OsView view) : GView(view)
+GControl::GControl(OsView view) : LView(view)
 {
 	Pos.ZOff(10, 10);
 }
@@ -226,7 +226,7 @@ void GSlider::Value(int64 i)
 	{
 		Val = i;
 
-		GViewI *n = GetNotify() ? GetNotify() : GetParent();
+		LViewI *n = GetNotify() ? GetNotify() : GetParent();
 		if (n)
 		{
 			n->OnNotify(this, Val);
@@ -354,7 +354,7 @@ public:
 				Bmp->SetPos(r);
 				Bmp->Invalidate();
 				
-				GViewI *n = Bmp->GetNotify() ? Bmp->GetNotify() : Bmp->GetParent();
+				LViewI *n = Bmp->GetNotify() ? Bmp->GetNotify() : Bmp->GetParent();
 				if (n)
 				{
 					int Start = LgiCurrentTime();
@@ -446,7 +446,7 @@ LSurface *GBitmap::GetSurface()
 
 GMessage::Param GBitmap::OnEvent(GMessage *Msg)
 {
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 void GBitmap::OnPaint(LSurface *pScreen)

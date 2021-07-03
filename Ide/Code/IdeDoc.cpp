@@ -124,7 +124,7 @@ void EditTray::OnPosChange()
 
 	if (AllPlatforms)
 	{
-		GViewLayoutInfo Inf;
+		LViewLayoutInfo Inf;
 		AllPlatforms->OnLayout(Inf);
 		c.Left(AllPlatforms, Inf.Width.Max);
 	}
@@ -522,7 +522,7 @@ class ProjMethodPopup : public GPopupList<DefnInfo>
 public:
 	GArray<DefnInfo> All;
 
-	ProjMethodPopup(AppWnd *app, GViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
+	ProjMethodPopup(AppWnd *app, LViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
 	{
 		App = app;
 	}
@@ -564,7 +564,7 @@ public:
 		return SetItems(Matching);
 	}
 	
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		if (Lst &&
 			Ctrl == Edit &&
@@ -586,7 +586,7 @@ class ProjSymPopup : public GPopupList<FindSymResult>
 public:
 	GArray<FindSymResult*> All;
 
-	ProjSymPopup(AppWnd *app, IdeDoc *doc, GViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
+	ProjSymPopup(AppWnd *app, IdeDoc *doc, LViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
 	{
 		App = app;
 		Doc = doc;
@@ -646,7 +646,7 @@ public:
 		App->GotoReference(Obj->File, Obj->Line, false);
 	}
 	
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		if (Lst &&
 			Ctrl == Edit &&
@@ -734,7 +734,7 @@ class ProjFilePopup : public GPopupList<ProjectNode>
 public:
 	GArray<ProjectNode*> Nodes;
 
-	ProjFilePopup(AppWnd *app, GViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
+	ProjFilePopup(AppWnd *app, LViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
 	{
 		App = app;
 	}
@@ -768,7 +768,7 @@ public:
 		SetItems(Matches);
 	}
 	
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		if (Lst &&
 			Ctrl == Edit &&
@@ -1576,7 +1576,7 @@ GMessage::Result IdeDoc::OnEvent(GMessage *Msg)
 			GAutoPtr<FindSymRequest> Resp((FindSymRequest*)Msg->A());
 			if (Resp && d->SymPopup)
 			{
-				GViewI *SymEd;
+				LViewI *SymEd;
 				if (GetViewById(IDC_SYMBOL_SEARCH, SymEd))
 				{
 					GString Input = SymEd->Name();
@@ -1658,7 +1658,7 @@ void IdeDoc::OnProjectChange()
 	DeleteObj(d->SymPopup);
 }
 
-int IdeDoc::OnNotify(GViewI *v, int f)
+int IdeDoc::OnNotify(LViewI *v, int f)
 {
 	// printf("IdeDoc::OnNotify(%i, %i)\n", v->GetId(), f);
 	
@@ -2072,4 +2072,4 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 	#endif
 	
 	return Matches.Length() > 0;
-}
+}

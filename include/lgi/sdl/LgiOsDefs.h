@@ -109,7 +109,7 @@ typedef HANDLE							OsProcess;
 typedef int								OsProcess;
 #endif
 typedef int								OsProcessId;
-typedef class GView						*OsView;
+typedef class LView						*OsView;
 typedef class GWindow					*OsWindow;
 typedef uint32							OsChar;
 typedef SDL_Surface						*OsPainter;
@@ -540,7 +540,7 @@ LgiFunc int stricmp(const char *a, const char *b);
 #define _stricmp strcasecmp // LgiFunc int _stricmp(const char *a, const char *b);
 #define sprintf_s snprintf
 #else
-LgiFunc class GViewI *GWindowFromHandle(OsView hWnd);
+LgiFunc class LViewI *GWindowFromHandle(OsView hWnd);
 LgiFunc int GetMouseWheelLines();
 #ifdef WINNATIVE
 LgiFunc int WinPointToHeight(int Pt, HDC hDC = NULL);

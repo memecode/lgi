@@ -62,7 +62,7 @@ enum LVariantType
 	GV_WSTRING,
 	// LSurface ptr
 	GV_LSURFACE,
-	/// Pointer to GView
+	/// Pointer to LView
 	GV_GVIEW,
 	/// Pointer to LMouse
 	GV_LMOUSE,
@@ -259,9 +259,9 @@ public:
 		/// Valid when Type == #GV_STREAM
 		struct
 		{
-			class GStreamI *Ptr;
+			class LStreamI *Ptr;
 			bool Own;
-			GStreamI *Release()
+			LStreamI *Release()
 			{
 				auto p = Ptr;
 				Ptr = NULL;
@@ -270,7 +270,7 @@ public:
 			}
 		} Stream;
 		/// Valid when Type == #GV_GVIEW
-		class GView *View;
+		class LView *View;
 		/// Valid when Type == #GV_LMOUSE
 		class LMouse *Mouse;
 		/// Valid when Type == #GV_LKEY
@@ -339,7 +339,7 @@ public:
 	/// Assign value to be a date/time
 	LVariant &operator =(const LDateTime *d);
 
-	LVariant &operator =(class GView *p);
+	LVariant &operator =(class LView *p);
 	LVariant &operator =(class LMouse *p);
 	LVariant &operator =(class LKey *k);
 	LVariant &operator =(class GStream *s);
@@ -358,7 +358,7 @@ public:
 	/// Set the value to a surface
 	bool SetSurface(class LSurface *Ptr, bool Own);
 	/// Set the value to a stream
-	bool SetStream(class GStreamI *Ptr, bool Own);
+	bool SetStream(class LStreamI *Ptr, bool Own);
 
 	/// Returns the string if valid (will convert a GV_WSTRING to utf)
 	char *Str();
@@ -418,8 +418,8 @@ public:
 	bool CastBool();
 	/// Returns the pointer if available.
 	void *CastVoidPtr();
-	/// Returns a GView
-	GView *CastView() { return Type == GV_GVIEW ? Value.View : NULL; }
+	/// Returns a LView
+	LView *CastView() { return Type == GV_GVIEW ? Value.View : NULL; }
 
 	/// List insert
 	bool Add(LVariant *v, int Where = -1);	

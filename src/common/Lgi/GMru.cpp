@@ -321,7 +321,7 @@ bool GMru::OnCommand(int Cmd)
 {
 	bool Status = false;
 
-	GViewI *Wnd = d->Parent->GetMenu() ? d->Parent->GetMenu()->WindowHandle() : 0;
+	LViewI *Wnd = d->Parent->GetMenu() ? d->Parent->GetMenu()->WindowHandle() : 0;
 	if (Wnd)
 	{
 		GFileSelect Select;

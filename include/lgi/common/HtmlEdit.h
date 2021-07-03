@@ -20,7 +20,7 @@ public:
 	void OnCreate();
 	void OnPosChange();
 	void OnPulse();
-	int OnNotify(GViewI * c, int f);
+	int OnNotify(LViewI * c, int f);
 
 	char *Name();
 	bool Name(const char *s);

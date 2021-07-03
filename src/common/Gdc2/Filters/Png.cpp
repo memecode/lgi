@@ -330,7 +330,7 @@ class GdcPng : public GFilter
 	LSurface *pDC;
 	GMemQueue DataPipe;
 
-	GView *Parent;
+	LView *Parent;
 	jmp_buf Here;
 
 public:
@@ -680,7 +680,7 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, GStream *In)
 		Props->GetValue(LGI_FILTER_PARENT_WND, v) &&
 		v.Type == GV_GVIEW)
 	{
-		Parent = (GView*)v.Value.Ptr;
+		Parent = (LView*)v.Value.Ptr;
 	}
 
 	#if LIBPNG_SHARED
@@ -1131,7 +1131,7 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, LSurface *pDC)
 		if (Props->GetValue(LGI_FILTER_PARENT_WND, v) &&
 			v.Type == GV_GVIEW)
 		{
-			Parent = (GView*)v.Value.Ptr;
+			Parent = (LView*)v.Value.Ptr;
 		}
 		
 		if (Props->GetValue(LGI_FILTER_BACKGROUND, v))

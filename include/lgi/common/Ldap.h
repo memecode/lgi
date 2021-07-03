@@ -21,7 +21,7 @@
 #define LDAP_ENTRY_PERSON			0x0001
 #define LDAP_ENTRY_GROUP			0x0002
 
-class ILdapEntry : public GDomI
+class ILdapEntry : public LDomI
 {
 public:
 	char *Name;

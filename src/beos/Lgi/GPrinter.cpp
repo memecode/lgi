@@ -18,7 +18,7 @@ GPrinter::~GPrinter()
 	DeleteObj(d);
 }
 
-bool GPrinter::Browse(GView *Parent)
+bool GPrinter::Browse(LView *Parent)
 {
 	return false;
 }
@@ -44,7 +44,7 @@ GString GPrinter::GetErrorMsg()
 	return d->Err;
 }
 
-bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages, GView *Parent)
+bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages, LView *Parent)
 {
 	return false;
 }

@@ -158,7 +158,7 @@ public:
 		return Status;
 	}
 
-	bool Convert(GView *Parent)
+	bool Convert(LView *Parent)
 	{
 		bool Status = false;
 		GProgressDlg Dlg(Parent);
@@ -221,7 +221,7 @@ public:
 	}
 };
 
-bool ConvertStorage1To2(GView *Parent, char *InFile, char *OutFile)
+bool ConvertStorage1To2(LView *Parent, char *InFile, char *OutFile)
 {
 	GFileSelect In;
 	In.Parent(Parent);

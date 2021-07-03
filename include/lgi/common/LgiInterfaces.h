@@ -25,14 +25,14 @@ class LWindow;
 class LVariant;
 class LCss;
 
-class GViewI;
-class GView;
+class LViewI;
+class LView;
 
 // Classes
-class GDomI
+class LDomI
 {
 public:
-	virtual ~GDomI() {}
+	virtual ~LDomI() {}
 
 	virtual bool GetValue(const char *Var, LVariant &Value) { return false; }
 	virtual bool SetValue(const char *Var, LVariant &Value) { return false; }
@@ -47,7 +47,7 @@ public:
 /// Typically this means being able to swap files with sockets or data
 /// buffers etc.
 /// 
-class LgiClass GStreamI : virtual public GDomI
+class LgiClass LStreamI : virtual public LDomI
 {
 public:
 	/// Open a connection
@@ -95,13 +95,13 @@ public:
 	/// \brief Creates a dynamically allocated copy of the same type of stream.
 	/// This new stream is not connected to anything.
 	/// \return The new stream or NULL on error.
-	virtual GStreamI *Clone() { return 0; }
+	virtual LStreamI *Clone() { return 0; }
 
 	virtual void ChangeThread() {}
 };
 
 /// Socket logging types..
-enum GSocketLogTypes
+enum LSocketLogTypes
 {
 	/// Do no logging
 	NET_LOG_NONE = 0,
@@ -113,8 +113,8 @@ enum GSocketLogTypes
 
 /// Virtual base class for a socket. See the documentation for GSocket for a more
 /// through treatment of this object's API.
-class GSocketI :
-	virtual public GStreamI
+class LSocketI :
+	virtual public LStreamI
 {
 public:
 	enum SocketMsgType
@@ -127,7 +127,7 @@ public:
 		SocketMsgError,
 	};
 
-	virtual ~GSocketI() {}
+	virtual ~LSocketI() {}
 
 	/// Returns the actual socket (as defined by the OS)
 	virtual OsSocket Handle(OsSocket Set = INVALID_SOCKET) { return INVALID_SOCKET; }
@@ -137,7 +137,7 @@ public:
 	virtual void SetCancel(LCancel *c) { }
 
 	// Logging
-	virtual class GStreamI *GetLog() { return NULL; }
+	virtual class LStreamI *GetLog() { return NULL; }
 
 	// Host/Port meta data
 		/// Returns the IP at this end of the socket
@@ -194,7 +194,7 @@ public:
 	/// Listens on a given port for an incoming connection.
 	virtual bool Listen(int Port = 0) { return false; }
 	/// Accepts an incoming connection and connects the socket you pass in to the remote host.
-	virtual bool Accept(GSocketI *c) { return false; }
+	virtual bool Accept(LSocketI *c) { return false; }
 
 
 // Event call backs
@@ -221,7 +221,7 @@ public:
 	}
 };
 
-class GAppI
+class LAppI
 {
 public:
 	/// The idle function should return false to wait for more
@@ -230,7 +230,7 @@ public:
 	typedef bool (*OnIdleProc)(void *Param);
 
 	/// Destroys the object
-	virtual ~GAppI() {}
+	virtual ~LAppI() {}
 
 	virtual bool IsOk() = 0;
 	
@@ -307,7 +307,7 @@ public:
 	virtual void SetConfig(const char *Var, const char *Val) = 0;
 	
 	/// Gets the control with the keyboard focus
-	virtual GViewI *GetFocus() = 0;
+	virtual LViewI *GetFocus() = 0;
 	
 	/// Gets the MIME type of a file
 	virtual GString GetFileMimeType
@@ -333,24 +333,24 @@ public:
 	virtual class GFontCache *GetFontCache() = 0;
 };
 
-class GEventSinkI
+class LEventSinkI
 {
 public:
-	virtual ~GEventSinkI() {}
+	virtual ~LEventSinkI() {}
 	virtual bool PostEvent(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0) = 0;
 };
 
-class GEventTargetI
+class LEventTargetI
 {
 public:
-	virtual ~GEventTargetI() {}
+	virtual ~LEventTargetI() {}
 	virtual GMessage::Result OnEvent(GMessage *Msg) = 0;
 };
 
-class GEventsI : public GEventTargetI
+class LEventsI : public LEventTargetI
 {
 public:
-	virtual ~GEventsI() {}
+	virtual ~LEventsI() {}
 
 	// Events
 	virtual void OnMouseClick(LMouse &m) = 0;
@@ -367,13 +367,13 @@ public:
 	virtual void OnPosChange() = 0;
 	virtual bool OnRequestClose(bool OsShuttingDown) = 0;
 	virtual int OnHitTest(int x, int y) = 0;
-	virtual void OnChildrenChanged(GViewI *Wnd, bool Attaching) = 0;
+	virtual void OnChildrenChanged(LViewI *Wnd, bool Attaching) = 0;
 	virtual void OnPaint(LSurface *pDC) = 0;
-	virtual int OnNotify(GViewI *Ctrl, int Flags) = 0;
+	virtual int OnNotify(LViewI *Ctrl, int Flags) = 0;
 	virtual int OnCommand(int Cmd, int Event, OsView Wnd) = 0;
 };
 
-class GViewLayoutInfo
+class LViewLayoutInfo
 {
 public:
 	struct Range
@@ -391,12 +391,12 @@ public:
 	Range Height;
 };
 
-class LgiClass GViewI :
-	public GEventsI,
-	public GEventSinkI,
-	public virtual GDomI
+class LgiClass LViewI :
+	public LEventsI,
+	public LEventSinkI,
+	public virtual LDomI
 {
-	friend class GView;
+	friend class LView;
 
 public:
 	// Handles
@@ -405,21 +405,21 @@ public:
 	#endif
 	virtual int AddDispatch() = 0;
 	virtual OsWindow WindowHandle() = 0;
-	virtual GView *GetGView() { return NULL; }
+	virtual LView *GetGView() { return NULL; }
 
 	// Heirarchy
-	virtual bool Attach(GViewI *p) = 0;
+	virtual bool Attach(LViewI *p) = 0;
 	virtual bool AttachChildren() = 0;
 	virtual bool Detach() = 0;
 	virtual bool IsAttached() = 0;
 	virtual LWindow *GetWindow() = 0;
-	virtual GViewI *GetParent() = 0;
-	virtual void SetParent(GViewI *p) = 0;
+	virtual LViewI *GetParent() = 0;
+	virtual void SetParent(LViewI *p) = 0;
 	virtual void Quit(bool DontDelete = false) = 0;
-	virtual bool AddView(GViewI *v, int Where = -1) = 0;
-	virtual bool DelView(GViewI *v) = 0;
-	virtual bool HasView(GViewI *v) = 0;
-	virtual GArray<GViewI*> IterateViews() = 0;
+	virtual bool AddView(LViewI *v, int Where = -1) = 0;
+	virtual bool DelView(LViewI *v) = 0;
+	virtual bool HasView(LViewI *v) = 0;
+	virtual GArray<LViewI*> IterateViews() = 0;
 
 	// Threading
 	virtual bool Lock(const char *file, int line, int TimeOut = -1) = 0;
@@ -461,7 +461,7 @@ public:
 	virtual const char16 *NameW() = 0;
 	virtual int64 Value() = 0;
 	virtual void Value(int64 i) = 0;
-	virtual const char *GetClass() { return "GViewI"; } // mainly for debugging
+	virtual const char *GetClass() { return "LViewI"; } // mainly for debugging
 
 	// Size and position	
 	virtual LRect &GetPos() = 0;
@@ -478,8 +478,8 @@ public:
 
 	// Events and notification
 	virtual void SendNotify(int Data = 0) = 0;
-	virtual GViewI *GetNotify() = 0;
-	virtual void SetNotify(GViewI *n) = 0;
+	virtual LViewI *GetNotify() = 0;
+	virtual void SetNotify(LViewI *n) = 0;
 
 	// Mouse
 	virtual LgiCursor GetCursor(int x, int y) = 0;
@@ -489,9 +489,9 @@ public:
 
 	// Helper
 	#if LGI_VIEW_HANDLE
-	virtual GViewI *FindControl(OsView hnd) = 0;
+	virtual LViewI *FindControl(OsView hnd) = 0;
 	#endif
-	virtual GViewI *FindControl(int Id) = 0;
+	virtual LViewI *FindControl(int Id) = 0;
 	virtual int64 GetCtrlValue(int Id) = 0;
 	virtual void SetCtrlValue(int Id, int64 i) = 0;
 	virtual const char *GetCtrlName(int Id) = 0;
@@ -505,7 +505,7 @@ public:
 	template<class T>
 	bool GetViewById(int Id, T *&Ptr)
 	{
-		GViewI *Ctrl = FindControl(Id);
+		LViewI *Ctrl = FindControl(Id);
 		Ptr = dynamic_cast<T*>(Ctrl);
 		#ifdef _DEBUG
 		if (Ctrl != NULL && Ptr == NULL)
@@ -518,7 +518,7 @@ public:
 	virtual bool PointToScreen(LPoint &p) = 0;
 	virtual bool PointToView(LPoint &p) = 0;
 	virtual bool WindowVirtualOffset(LPoint *Offset) = 0;	
-	virtual GViewI *WindowFromPoint(int x, int y, int DebugDepth = 0) = 0;
+	virtual LViewI *WindowFromPoint(int x, int y, int DebugDepth = 0) = 0;
 	virtual LPoint &GetWindowBorderSize() = 0;
 	virtual bool IsOver(LMouse &m) = 0;
 
@@ -526,17 +526,17 @@ public:
 	virtual bool Invalidate(LRect *r = 0, bool Repaint = false, bool NonClient = false) = 0;
 	virtual bool Invalidate(LRegion *r, bool Repaint = false, bool NonClient = false) = 0;
 	virtual void SetPulse(int Ms = -1) = 0;
-	virtual bool OnLayout(GViewLayoutInfo &Inf) = 0;
+	virtual bool OnLayout(LViewLayoutInfo &Inf) = 0;
 
 protected:
-	virtual bool OnViewMouse(GView *v, LMouse &m) = 0;
-	virtual bool OnViewKey(GView *v, LKey &k) = 0;
+	virtual bool OnViewMouse(LView *v, LMouse &m) = 0;
+	virtual bool OnViewKey(LView *v, LKey &k) = 0;
 };
 
-class GMemoryPoolI
+class LMemoryPoolI
 {
 public:
-	virtual ~GMemoryPoolI() {}
+	virtual ~LMemoryPoolI() {}
 
 	virtual void *Alloc(size_t Size) = 0;
 	virtual void Free(void *Ptr) = 0;

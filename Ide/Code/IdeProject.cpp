@@ -4034,7 +4034,7 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, LPoint p, int KeyState)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-AddFilesProgress::AddFilesProgress(GViewI *par)
+AddFilesProgress::AddFilesProgress(LViewI *par)
 {
 	v = 0;
 	Cancel = false;
@@ -4096,7 +4096,7 @@ void AddFilesProgress::Value(int64 val)
 	}
 }
 
-int AddFilesProgress::OnNotify(GViewI *c, int f)
+int AddFilesProgress::OnNotify(LViewI *c, int f)
 {
 	if (c->GetId() == IDCANCEL)
 		Cancel = true;

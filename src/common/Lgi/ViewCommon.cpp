@@ -23,11 +23,11 @@
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Helper
-LPoint lgi_view_offset(GViewI *v, bool Debug = false)
+LPoint lgi_view_offset(LViewI *v, bool Debug = false)
 {
 	LPoint Offset;
 	
-	for (GViewI *p = v; p; p = p->GetParent())
+	for (LViewI *p = v; p; p = p->GetParent())
 	{
 		if (dynamic_cast<LWindow*>(p))
 			break;
@@ -52,7 +52,7 @@ LPoint lgi_view_offset(GViewI *v, bool Debug = false)
 	return Offset;
 }
 
-LMouse &lgi_adjust_click(LMouse &Info, GViewI *Wnd, bool Capturing, bool Debug)
+LMouse &lgi_adjust_click(LMouse &Info, LViewI *Wnd, bool Capturing, bool Debug)
 {
 	static LMouse Temp;
 	 
@@ -116,15 +116,15 @@ LMouse &lgi_adjust_click(LMouse &Info, GViewI *Wnd, bool Capturing, bool Debug)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-// GView class methods
-GViewI *GView::_Capturing = 0;
-GViewI *GView::_Over = 0;
+// LView class methods
+LViewI *LView::_Capturing = 0;
+LViewI *LView::_Over = 0;
 
 #if LGI_VIEW_HASH
 
 struct ViewTbl : public LMutex
 {
-	typedef LHashTbl<PtrKey<GViewI*>, int> T;
+	typedef LHashTbl<PtrKey<LViewI*>, int> T;
 	
 private:
 	T Map;
@@ -142,7 +142,7 @@ public:
 	}
 }	ViewTblInst;
 
-bool GView::LockHandler(GViewI *v, GView::LockOp Op)
+bool LView::LockHandler(LViewI *v, LView::LockOp Op)
 {
 	ViewTbl::T *m = ViewTblInst.Lock();
 	if (!m)
@@ -179,7 +179,7 @@ bool GView::LockHandler(GViewI *v, GView::LockOp Op)
 
 #endif
 
-GView::GView(OsView view)
+LView::LView(OsView view)
 {
 	#ifdef _DEBUG
     _Debug = false;
@@ -203,11 +203,11 @@ GView::GView(OsView view)
         #error "LGI_VIEW_HASH needs to be defined"
     #elif LGI_VIEW_HASH
 	    LockHandler(this, OpCreate);
-	    // printf("Adding %p to hash\n", (GViewI*)this);
+	    // printf("Adding %p to hash\n", (LViewI*)this);
 	#endif
 }
 
-GView::~GView()
+LView::~LView()
 {
 	if (d->SinkHnd >= 0)
 	{
@@ -233,14 +233,14 @@ GView::~GView()
 	DeleteObj(d);
 }
 
-int GView::AddDispatch()
+int LView::AddDispatch()
 {
 	if (d->SinkHnd < 0)
 		d->SinkHnd = GEventSinkMap::Dispatch.AddSink(this);
 	return d->SinkHnd;
 }
 
-GString GView::CssStyles(const char *Set)
+GString LView::CssStyles(const char *Set)
 {
 	if (Set)
 	{
@@ -250,26 +250,26 @@ GString GView::CssStyles(const char *Set)
 	return d->Styles;
 }
 
-GString::Array *GView::CssClasses()
+GString::Array *LView::CssClasses()
 {
 	return &d->Classes;
 }
 
-GArray<GViewI*> GView::IterateViews()
+GArray<LViewI*> LView::IterateViews()
 {
-	GArray<GViewI*> a;
+	GArray<LViewI*> a;
 	for (auto c: Children)
 		a.Add(c);
 	return a;
 }
 
-bool GView::AddView(GViewI *v, int Where)
+bool LView::AddView(LViewI *v, int Where)
 {
 	LgiAssert(!Children.HasItem(v));
 	bool Add = Children.Insert(v, Where);
 	if (Add)
 	{
-		GView *gv = v->GetGView();
+		LView *gv = v->GetGView();
 		if (gv && gv->_Window != _Window)
 		{
 			LgiAssert(!_InLock);
@@ -282,7 +282,7 @@ bool GView::AddView(GViewI *v, int Where)
 	return Add;
 }
 
-bool GView::DelView(GViewI *v)
+bool LView::DelView(LViewI *v)
 {
 	bool Has = Children.HasItem(v);
 	bool b = Children.Delete(v);
@@ -293,18 +293,18 @@ bool GView::DelView(GViewI *v)
 	return b;
 }
 
-bool GView::HasView(GViewI *v)
+bool LView::HasView(LViewI *v)
 {
 	return Children.HasItem(v);
 }
 
-OsWindow GView::WindowHandle()
+OsWindow LView::WindowHandle()
 {
 	auto *w = GetWindow();
 	return (w) ? w->WindowHandle() : OsWindow();
 }
 
-LWindow *GView::GetWindow()
+LWindow *LView::GetWindow()
 {
 	if (!_Window)
 	{
@@ -324,7 +324,7 @@ LWindow *GView::GetWindow()
 	return dynamic_cast<LWindow*>(_Window);
 }
 
-bool GView::Lock(const char *file, int line, int TimeOut)
+bool LView::Lock(const char *file, int line, int TimeOut)
 {
 	if (!_Window)
 		GetWindow();
@@ -346,7 +346,7 @@ bool GView::Lock(const char *file, int line, int TimeOut)
 	return true;
 }
 
-void GView::Unlock()
+void LView::Unlock()
 {
 	if (_Window &&
 		_Window->_Lock)
@@ -357,36 +357,36 @@ void GView::Unlock()
 	// LgiTrace("%s::%p Unlock._InLock=%i\n", GetClass(), this, _InLock);
 }
 
-void GView::OnMouseClick(LMouse &m)
+void LView::OnMouseClick(LMouse &m)
 {
 }
 
-void GView::OnMouseEnter(LMouse &m)
+void LView::OnMouseEnter(LMouse &m)
 {
 }
 
-void GView::OnMouseExit(LMouse &m)
+void LView::OnMouseExit(LMouse &m)
 {
 }
 
-void GView::OnMouseMove(LMouse &m)
+void LView::OnMouseMove(LMouse &m)
 {
 }
 
-bool GView::OnMouseWheel(double Lines)
+bool LView::OnMouseWheel(double Lines)
 {
 	return false;
 }
 
-bool GView::OnKey(LKey &k)
+bool LView::OnKey(LKey &k)
 {
 	return false;
 }
 
-void GView::OnAttach()
+void LView::OnAttach()
 {
-	List<GViewI>::I it = Children.begin();
-	for (GViewI *v = *it; v; v = *++it)
+	List<LViewI>::I it = Children.begin();
+	for (LViewI *v = *it; v; v = *++it)
 	{
 		if (!v->GetParent())
 			v->SetParent(this);
@@ -396,7 +396,7 @@ void GView::OnAttach()
 	if (_View && !DropTarget())
 	{
 		// If one of our parents is drop capable we need to set a dest here
-		GViewI *p;
+		LViewI *p;
 		for (p = GetParent(); p; p = p->GetParent())
 		{
 			if (p->DropTarget())
@@ -422,53 +422,53 @@ void GView::OnAttach()
 	#endif
 }
 
-void GView::OnCreate()
+void LView::OnCreate()
 {
 }
 
-void GView::OnDestroy()
+void LView::OnDestroy()
 {
 }
 
-void GView::OnFocus(bool f)
+void LView::OnFocus(bool f)
 {
 }
 
-void GView::OnPulse()
+void LView::OnPulse()
 {
 }
 
-void GView::OnPosChange()
+void LView::OnPosChange()
 {
 }
 
-bool GView::OnRequestClose(bool OsShuttingDown)
+bool LView::OnRequestClose(bool OsShuttingDown)
 {
 	return true;
 }
 
-int GView::OnHitTest(int x, int y)
+int LView::OnHitTest(int x, int y)
 {
 	return -1;
 }
 
-void GView::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+void LView::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 }
 
-void GView::OnPaint(LSurface *pDC)
+void LView::OnPaint(LSurface *pDC)
 {
 	auto c = GetClient();
 	GCssTools Tools(this);
 	Tools.PaintContent(pDC, c);
 }
 
-int GView::OnNotify(GViewI *Ctrl, int Flags)
+int LView::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (!Ctrl)
 		return 0;
 
-	if (Ctrl == (GViewI*)this && Flags == GNotify_Activate)
+	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
 	{
 		// Default activation is to focus the current control.
 		Focus(true);
@@ -483,12 +483,12 @@ int GView::OnNotify(GViewI *Ctrl, int Flags)
 	return 0;
 }
 
-int GView::OnCommand(int Cmd, int Event, OsView Wnd)
+int LView::OnCommand(int Cmd, int Event, OsView Wnd)
 {
 	return 0;
 }
 
-void GView::OnNcPaint(LSurface *pDC, LRect &r)
+void LView::OnNcPaint(LSurface *pDC, LRect &r)
 {
 	int Border = Sunken() || Raised() ? _BorderSize : 0;
 	if (Border == 2)
@@ -519,7 +519,7 @@ uint64 nPaint = 0;
 uint64 PaintTime = 0;
 */
 
-void GView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
+void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 {
 	/*
 	uint64 StartTs = Update ? LgiCurrentTime() : 0;
@@ -604,7 +604,7 @@ void GView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 	// Paint all the children...
 	for (auto i : Children)
 	{
-		GView *w = i->GetGView();
+		LView *w = i->GetGView();
 		if (w && w->Visible())
 		{
 			if (!w->Pos.Valid())
@@ -619,7 +619,7 @@ void GView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 	}
 }
 #else
-void GView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
+void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 {
 	// Create temp DC if needed...
 	GAutoPtr<LSurface> Local;
@@ -680,7 +680,7 @@ void GView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 	// Paint any virtual children
 	for (auto i : Children)
 	{
-		GView *w = i->GetGView();
+		LView *w = i->GetGView();
 		if (w && w->Visible())
 		{
 			#if LGI_VIEW_HANDLE
@@ -707,22 +707,22 @@ void GView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 }
 #endif
 
-GViewI *GView::GetParent()
+LViewI *LView::GetParent()
 {
 	ThreadCheck();
 	return d ? d->Parent : NULL;
 }
 
-void GView::SetParent(GViewI *p)
+void LView::SetParent(LViewI *p)
 {
 	ThreadCheck();
 	d->Parent = p ? p->GetGView() : NULL;
 	d->ParentI = p;
 }
 
-void GView::SendNotify(int Data)
+void LView::SendNotify(int Data)
 {
-	GViewI *n = d->Notify ? d->Notify : d->Parent;
+	LViewI *n = d->Notify ? d->Notify : d->Parent;
 	if (n)
 	{
 		if (
@@ -744,7 +744,7 @@ void GView::SendNotify(int Data)
 				// instead of sending a pointer to the object, is that the object 
 				// _could_ be deleted between the message being sent and being received.
 				// Which would result in an invalid memory access on that object.
-				GViewI *p = GetWindow();
+				LViewI *p = GetWindow();
 				if (!p)
 				{
 					// No window? Find the top most parent we can...
@@ -785,13 +785,13 @@ void GView::SendNotify(int Data)
 	}
 }
 
-GViewI *GView::GetNotify()
+LViewI *LView::GetNotify()
 {
 	ThreadCheck();
 	return d->Notify;
 }
 
-void GView::SetNotify(GViewI *p)
+void LView::SetNotify(LViewI *p)
 {
 	ThreadCheck();
 	d->Notify = p;
@@ -860,7 +860,7 @@ LRect JoinAdjacent(LRect &a, LRect &b, int Adj)
 	return t;
 }
 
-LRect *GView::FindLargest(LRegion &r)
+LRect *LView::FindLargest(LRegion &r)
 {
 	ThreadCheck();
 
@@ -927,7 +927,7 @@ LRect *GView::FindLargest(LRegion &r)
 	return &Final;
 }
 
-LRect *GView::FindSmallestFit(LRegion &r, int Sx, int Sy)
+LRect *LView::FindSmallestFit(LRegion &r, int Sx, int Sy)
 {
 	ThreadCheck();
 
@@ -949,7 +949,7 @@ LRect *GView::FindSmallestFit(LRegion &r, int Sx, int Sy)
 	return Best;
 }
 
-LRect *GView::FindLargestEdge(LRegion &r, int Edge)
+LRect *LView::FindLargestEdge(LRegion &r, int Edge)
 {
 	LRect *Best = 0;
 	ThreadCheck();
@@ -1011,7 +1011,7 @@ LRect *GView::FindLargestEdge(LRegion &r, int Edge)
 	return Best;
 }
 
-GViewI *GView::FindReal(LPoint *Offset)
+LViewI *LView::FindReal(LPoint *Offset)
 {
 	ThreadCheck();
 
@@ -1022,9 +1022,9 @@ GViewI *GView::FindReal(LPoint *Offset)
 	}
 
 	#if !LGI_VIEW_HANDLE
-	GViewI *w = GetWindow();
+	LViewI *w = GetWindow();
 	#endif
-	GViewI *p = d->Parent;
+	LViewI *p = d->Parent;
 	while (p &&
 		#if !LGI_VIEW_HANDLE
 		p != w
@@ -1056,7 +1056,7 @@ GViewI *GView::FindReal(LPoint *Offset)
 	return NULL;
 }
 
-bool GView::HandleCapture(GView *Wnd, bool c)
+bool LView::HandleCapture(LView *Wnd, bool c)
 {
 	ThreadCheck();
 	
@@ -1074,7 +1074,7 @@ bool GView::HandleCapture(GView *Wnd, bool c)
 			
 			#if WINNATIVE
 				LPoint Offset;
-				GViewI *v = _Capturing->Handle() ? _Capturing : FindReal(&Offset);
+				LViewI *v = _Capturing->Handle() ? _Capturing : FindReal(&Offset);
 				HWND h = v ? v->Handle() : NULL;
 				if (h)
 					SetCapture(h);
@@ -1109,7 +1109,7 @@ bool GView::HandleCapture(GView *Wnd, bool c)
 	return true;
 }
 
-bool GView::IsCapturing()
+bool LView::IsCapturing()
 {
 	ThreadCheck();
 	
@@ -1117,7 +1117,7 @@ bool GView::IsCapturing()
 	return _Capturing == this;
 }
 
-bool GView::Capture(bool c)
+bool LView::Capture(bool c)
 {
 	ThreadCheck();
 
@@ -1125,7 +1125,7 @@ bool GView::Capture(bool c)
 	return HandleCapture(this, c);
 }
 
-bool GView::Enabled()
+bool LView::Enabled()
 {
 	ThreadCheck();
 
@@ -1137,7 +1137,7 @@ bool GView::Enabled()
 	return !TestFlag(GViewFlags, GWF_DISABLED);
 }
 
-void GView::Enabled(bool i)
+void LView::Enabled(bool i)
 {
 	ThreadCheck();
 
@@ -1167,7 +1167,7 @@ void GView::Enabled(bool i)
 	Invalidate();
 }
 
-bool GView::Visible()
+bool LView::Visible()
 {
 	// This is a read only operation... which is kinda thread-safe...
 	// ThreadCheck();
@@ -1189,7 +1189,7 @@ bool GView::Visible()
 	return TestFlag(GViewFlags, GWF_VISIBLE);
 }
 
-void GView::Visible(bool v)
+void LView::Visible(bool v)
 {
 	ThreadCheck();
 	
@@ -1227,7 +1227,7 @@ void GView::Visible(bool v)
 	}
 }
 
-bool GView::Focus()
+bool LView::Focus()
 {
 	ThreadCheck();
 
@@ -1239,7 +1239,7 @@ bool GView::Focus()
 	{
 		bool Active = w->IsActive();
 		if (Active)
-			Has = w->GetFocus() == static_cast<GViewI*>(this);
+			Has = w->GetFocus() == static_cast<LViewI*>(this);
 	}
 	#elif defined(WINNATIVE)
 	if (_View)
@@ -1272,7 +1272,7 @@ bool GView::Focus()
 	return Has;
 }
 
-void GView::Focus(bool i)
+void LView::Focus(bool i)
 {
 	ThreadCheck();
 
@@ -1323,7 +1323,7 @@ void GView::Focus(bool i)
 
 		#elif defined LGI_CARBON
 		
-			GViewI *Wnd = GetWindow();
+			LViewI *Wnd = GetWindow();
 			if (Wnd && i)
 			{
 				OSErr e = SetKeyboardFocus(Wnd->WindowHandle(), _View, 1);
@@ -1345,7 +1345,7 @@ void GView::Focus(bool i)
 	}
 }
 
-GDragDropSource *GView::DropSource(GDragDropSource *Set)
+GDragDropSource *LView::DropSource(GDragDropSource *Set)
 {
 	if (Set)
 		d->DropSource = Set;
@@ -1353,7 +1353,7 @@ GDragDropSource *GView::DropSource(GDragDropSource *Set)
 	return d->DropSource;
 }
 
-GDragDropTarget *GView::DropTarget(GDragDropTarget *Set)
+GDragDropTarget *LView::DropTarget(GDragDropTarget *Set)
 {
 	if (Set)
 		d->DropTarget = Set;
@@ -1367,7 +1367,7 @@ extern pascal OSStatus LgiViewDndHandler(EventHandlerCallRef inHandlerCallRef, E
 
 #if defined __GTK_H__
 // Recursively add drag dest to all view and all children
-bool GtkAddDragDest(GViewI *v, bool IsTarget)
+bool GtkAddDragDest(LViewI *v, bool IsTarget)
 {
 	if (!v) return false;
 	LWindow *w = v->GetWindow();
@@ -1387,14 +1387,14 @@ bool GtkAddDragDest(GViewI *v, bool IsTarget)
 		Gtk::gtk_drag_dest_unset(wid);
 	}
 	
-	for (GViewI *c: v->IterateViews())
+	for (LViewI *c: v->IterateViews())
 		GtkAddDragDest(c, IsTarget);
 	
 	return true;
 }
 #endif
 
-bool GView::DropTarget(bool t)
+bool LView::DropTarget(bool t)
 {
 	ThreadCheck();
 
@@ -1491,7 +1491,7 @@ bool GView::DropTarget(bool t)
 	return Status;
 }
 
-bool GView::Sunken()
+bool LView::Sunken()
 {
 	// ThreadCheck();
 
@@ -1502,7 +1502,7 @@ bool GView::Sunken()
 	#endif
 }
 
-void GView::Sunken(bool i)
+void LView::Sunken(bool i)
 {
 	ThreadCheck();
 
@@ -1524,7 +1524,7 @@ void GView::Sunken(bool i)
 	else _BorderSize = 0;
 }
 
-bool GView::Flat()
+bool LView::Flat()
 {
 	// ThreadCheck();
 
@@ -1537,7 +1537,7 @@ bool GView::Flat()
 	#endif
 }
 
-void GView::Flat(bool i)
+void LView::Flat(bool i)
 {
 	ThreadCheck();
 	
@@ -1548,7 +1548,7 @@ void GView::Flat(bool i)
 	#endif
 }
 
-bool GView::Raised()
+bool LView::Raised()
 {
 	// ThreadCheck();
 	
@@ -1559,7 +1559,7 @@ bool GView::Raised()
 	#endif
 }
 
-void GView::Raised(bool i)
+void LView::Raised(bool i)
 {
 	ThreadCheck();
 
@@ -1579,14 +1579,14 @@ void GView::Raised(bool i)
 	else _BorderSize = 0;
 }
 
-int GView::GetId()
+int LView::GetId()
 {
 	// This is needed by SendNotify function which is thread safe.
 	// So no thread safety check here.
 	return d->CtrlId;
 }
 
-void GView::SetId(int i)
+void LView::SetId(int i)
 {
 	// This is needed by SendNotify function which is thread safe.
 	// So no thread safety check here.
@@ -1600,7 +1600,7 @@ void GView::SetId(int i)
 	#endif
 }
 
-bool GView::GetTabStop()
+bool LView::GetTabStop()
 {
 	ThreadCheck();
 
@@ -1611,7 +1611,7 @@ bool GView::GetTabStop()
 	#endif
 }
 
-void GView::SetTabStop(bool b)
+void LView::SetTabStop(bool b)
 {
 	ThreadCheck();
 
@@ -1636,83 +1636,83 @@ void GView::SetTabStop(bool b)
 	#endif
 }
 
-int64 GView::GetCtrlValue(int Id)
+int64 LView::GetCtrlValue(int Id)
 {
 	ThreadCheck();
 
-	GViewI *w = FindControl(Id);
+	LViewI *w = FindControl(Id);
 	if (!w)
 		printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	return (w) ? w->Value() : 0;
 }
 
-void GView::SetCtrlValue(int Id, int64 i)
+void LView::SetCtrlValue(int Id, int64 i)
 {
 	ThreadCheck();
 
-	GViewI *w = FindControl(Id);
+	LViewI *w = FindControl(Id);
 	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	if (w) w->Value(i);
 }
 
-const char *GView::GetCtrlName(int Id)
+const char *LView::GetCtrlName(int Id)
 {
 	ThreadCheck();
 
-	GViewI *w = FindControl(Id);
+	LViewI *w = FindControl(Id);
 	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	return (w) ? w->Name() : 0;
 }
 
-void GView::SetCtrlName(int Id, const char *s)
+void LView::SetCtrlName(int Id, const char *s)
 {
 	ThreadCheck();
 	
-	GViewI *w = FindControl(Id);
+	LViewI *w = FindControl(Id);
 	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	if (w) w->Name(s);
 }
 
-bool GView::GetCtrlEnabled(int Id)
+bool LView::GetCtrlEnabled(int Id)
 {
 	ThreadCheck();
 
-	GViewI *w = FindControl(Id);
+	LViewI *w = FindControl(Id);
 	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	return (w) ? w->Enabled() : 0;
 }
 
-void GView::SetCtrlEnabled(int Id, bool Enabled)
+void LView::SetCtrlEnabled(int Id, bool Enabled)
 {
 	ThreadCheck();
 
-	GViewI *w = FindControl(Id);
+	LViewI *w = FindControl(Id);
 	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	if (w) w->Enabled(Enabled);
 }
 
-bool GView::GetCtrlVisible(int Id)
+bool LView::GetCtrlVisible(int Id)
 {
 	ThreadCheck();
 
-	GViewI *w = FindControl(Id);
+	LViewI *w = FindControl(Id);
 	if (!w)
 		LgiTrace("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	return (w) ? w->Visible() : 0;
 }
 
-void GView::SetCtrlVisible(int Id, bool v)
+void LView::SetCtrlVisible(int Id, bool v)
 {
 	ThreadCheck();
 
-	GViewI *w = FindControl(Id);
+	LViewI *w = FindControl(Id);
 	if (!w)
 		LgiTrace("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	else
 		w->Visible(v);
 }
 
-bool GView::AttachChildren()
+bool LView::AttachChildren()
 {
 	for (auto c : Children)
 	{
@@ -1731,7 +1731,7 @@ bool GView::AttachChildren()
 	return true;
 }
 
-LFont *GView::GetFont()
+LFont *LView::GetFont()
 {
 	// const char *Cls = GetClass();
 	
@@ -1756,7 +1756,7 @@ LFont *GView::GetFont()
 	return d->Font ? d->Font : SysFont;
 }
 
-void GView::SetFont(LFont *Font, bool OwnIt)
+void LView::SetFont(LFont *Font, bool OwnIt)
 {
 	bool Change = d->Font != Font;
 	if (Change)
@@ -1775,7 +1775,7 @@ void GView::SetFont(LFont *Font, bool OwnIt)
 			SendMessage(_View, WM_SETFONT, (WPARAM) (Font ? Font->Handle() : 0), 0);
 		#endif
 
-		for (GViewI *p = GetParent(); p; p = p->GetParent())
+		for (LViewI *p = GetParent(); p; p = p->GetParent())
 		{
 			GTableLayout *Tl = dynamic_cast<GTableLayout*>(p);
 			if (Tl)
@@ -1789,7 +1789,7 @@ void GView::SetFont(LFont *Font, bool OwnIt)
 	}
 }
 
-bool GView::IsOver(LMouse &m)
+bool LView::IsOver(LMouse &m)
 {
 	return	(m.x >= 0) &&
 			(m.y >= 0) &&
@@ -1797,7 +1797,7 @@ bool GView::IsOver(LMouse &m)
 			(m.y < Pos.Y());
 }
 
-bool GView::WindowVirtualOffset(LPoint *Offset)
+bool LView::WindowVirtualOffset(LPoint *Offset)
 {
 	bool Status = false;
 
@@ -1806,7 +1806,7 @@ bool GView::WindowVirtualOffset(LPoint *Offset)
 		Offset->x = 0;
 		Offset->y = 0;
 		
-		for (GViewI *Wnd = this; Wnd; Wnd = Wnd->GetParent())
+		for (LViewI *Wnd = this; Wnd; Wnd = Wnd->GetParent())
 		{
 			#if !LGI_VIEW_HANDLE
 			auto IsWnd = dynamic_cast<LWindow*>(Wnd);
@@ -1816,7 +1816,7 @@ bool GView::WindowVirtualOffset(LPoint *Offset)
 			#endif
 			{
 				LRect r = Wnd->GetPos();
-				GViewI *Par = Wnd->GetParent();
+				LViewI *Par = Wnd->GetParent();
 				if (Par)
 				{
 					LRect c = Par->GetClient(false);
@@ -1838,14 +1838,14 @@ bool GView::WindowVirtualOffset(LPoint *Offset)
 	return Status;
 }
 
-GString _ViewDesc(GViewI *v)
+GString _ViewDesc(LViewI *v)
 {
 	GString s;
 	s.Printf("%s/%s/%i", v->GetClass(), v->Name(), v->GetId());
 	return s;
 }
 
-GViewI *GView::WindowFromPoint(int x, int y, int DebugDepth)
+LViewI *LView::WindowFromPoint(int x, int y, int DebugDepth)
 {
 	char Tabs[64];
 	if (DebugDepth)
@@ -1860,7 +1860,7 @@ GViewI *GView::WindowFromPoint(int x, int y, int DebugDepth)
 	// before the the lower windows.
 	auto it = Children.rbegin();
 	int n = (int)Children.Length() - 1;
-	for (GViewI *c = *it; c; c = *--it)
+	for (LViewI *c = *it; c; c = *--it)
 	{
 		LRect CPos = c->GetPos();
 		
@@ -1882,7 +1882,7 @@ GViewI *GView::WindowFromPoint(int x, int y, int DebugDepth)
 						x - Ox, y - Oy);
 			}
 
-			GViewI *Child = c->WindowFromPoint(x - Ox, y - Oy, DebugDepth ? DebugDepth  + 1 : 0);
+			LViewI *Child = c->WindowFromPoint(x - Ox, y - Oy, DebugDepth ? DebugDepth  + 1 : 0);
 			if (Child)
 				return Child;
 		}
@@ -1900,13 +1900,13 @@ GViewI *GView::WindowFromPoint(int x, int y, int DebugDepth)
 	return NULL;
 }
 
-GColour GView::StyleColour(int CssPropType, GColour Default, int Depth)
+GColour LView::StyleColour(int CssPropType, GColour Default, int Depth)
 {
 	GColour c = Default;
 
 	if ((CssPropType >> 8) == LCss::TypeColor)
 	{
-		GViewI *v = this;
+		LViewI *v = this;
 		for (int i=0; v && i<Depth; i++, v = v->GetParent())
 		{
 			auto Style = v->GetCss();
@@ -1937,12 +1937,12 @@ GColour GView::StyleColour(int CssPropType, GColour Default, int Depth)
 	return c;
 }
 
-bool GView::InThread()
+bool LView::InThread()
 {
 	#if WINNATIVE
 
 		HWND Hnd = _View;
-		for (GViewI *p = GetParent(); p && !Hnd; p = p->GetParent())
+		for (LViewI *p = GetParent(); p && !Hnd; p = p->GetParent())
 		{
 			Hnd = p->Handle();
 		}
@@ -1973,7 +1973,7 @@ bool GView::InThread()
 	#endif
 }
 
-bool GView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
+bool LView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 {
 	#ifdef LGI_SDL
 		return LgiPostEvent(this, Cmd, a, b);
@@ -1997,7 +1997,7 @@ bool GView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 	#endif
 }
 
-bool GView::Invalidate(LRegion *r, bool Repaint, bool NonClient)
+bool LView::Invalidate(LRegion *r, bool Repaint, bool NonClient)
 {
 	if (r)
 	{
@@ -2013,7 +2013,7 @@ bool GView::Invalidate(LRegion *r, bool Repaint, bool NonClient)
 	return false;
 }
 
-GButton *FindDefault(GViewI *w)
+GButton *FindDefault(LViewI *w)
 {
 	GButton *But = 0;
 
@@ -2035,7 +2035,7 @@ GButton *FindDefault(GViewI *w)
 	return But;
 }
 
-bool GView::Name(const char *n)
+bool LView::Name(const char *n)
 {
 	LBase::Name(n);
 
@@ -2056,19 +2056,19 @@ bool GView::Name(const char *n)
 	return true;
 }
 
-const char *GView::Name()
+const char *LView::Name()
 {
 	#if WINNATIVE
 	if (_View)
 	{
-		GView::NameW();
+		LView::NameW();
 	}
 	#endif
 
 	return LBase::Name();
 }
 
-bool GView::NameW(const char16 *n)
+bool LView::NameW(const char16 *n)
 {
 	LBase::NameW(n);
 
@@ -2084,7 +2084,7 @@ bool GView::NameW(const char16 *n)
 	return true;
 }
 
-const char16 *GView::NameW()
+const char16 *LView::NameW()
 {
 	#if WINNATIVE
 	if (_View)
@@ -2112,7 +2112,7 @@ const char16 *GView::NameW()
 	return LBase::NameW();
 }
 
-GViewI *GView::FindControl(int Id)
+LViewI *LView::FindControl(int Id)
 {
 	LgiAssert(Id != -1);
 
@@ -2123,7 +2123,7 @@ GViewI *GView::FindControl(int Id)
 
 	for (auto c : Children)
 	{
-		GViewI *Ctrl = c->FindControl(Id);
+		LViewI *Ctrl = c->FindControl(Id);
 		if (Ctrl)
 		{
 			return Ctrl;
@@ -2132,12 +2132,12 @@ GViewI *GView::FindControl(int Id)
 	return 0;
 }
 
-LPoint GView::GetMinimumSize()
+LPoint LView::GetMinimumSize()
 {
 	return d->MinimumSize;
 }
 
-void GView::SetMinimumSize(LPoint Size)
+void LView::SetMinimumSize(LPoint Size)
 {
 	d->MinimumSize = Size;
 
@@ -2159,7 +2159,7 @@ void GView::SetMinimumSize(LPoint Size)
 	}
 }
 
-bool GView::SetColour(GColour &c, bool Fore)
+bool LView::SetColour(GColour &c, bool Fore)
 {
 	LCss *css = GetCss(true);
 	if (!css)
@@ -2185,7 +2185,7 @@ bool GView::SetColour(GColour &c, bool Fore)
 
 
 /*
-bool GView::SetCssStyle(const char *CssStyle)
+bool LView::SetCssStyle(const char *CssStyle)
 {
     if (!d->Css && !d->Css.Reset(new LCss))
 		return false;
@@ -2202,12 +2202,12 @@ bool GView::SetCssStyle(const char *CssStyle)
 }
 */
 
-void GView::SetCss(LCss *css)
+void LView::SetCss(LCss *css)
 {
 	d->Css.Reset(css);
 }
 
-LCss *GView::GetCss(bool Create)
+LCss *LView::GetCss(bool Create)
 {
     if (Create && !d->Css)
         d->Css.Reset(new LCss);
@@ -2222,7 +2222,7 @@ LCss *GView::GetCss(bool Create)
     return d->Css;
 }
 
-LPoint &GView::GetWindowBorderSize()
+LPoint &LView::GetWindowBorderSize()
 {
 	static LPoint s;
 
@@ -2293,7 +2293,7 @@ void DumpGtk(Gtk::GtkWidget *w, Gtk::gpointer Depth = NULL)
 		memset(Sp, ' ', *((int*)Depth)*2);
 
 	auto *Obj = G_OBJECT(w);
-	GViewI *View = (GViewI*) g_object_get_data(Obj, "GViewI");
+	LViewI *View = (LViewI*) g_object_get_data(Obj, "LViewI");
 
 	GtkAllocation a;
 	gtk_widget_get_allocation(w, &a);
@@ -2311,7 +2311,7 @@ void DumpGtk(Gtk::GtkWidget *w, Gtk::gpointer Depth = NULL)
 }
 #endif
 
-void GView::_Dump(int Depth)
+void LView::_Dump(int Depth)
 {
 	char Sp[65] = {0};
 	memset(Sp, ' ', Depth*2);
@@ -2321,10 +2321,10 @@ void GView::_Dump(int Depth)
 		char s[256];
 		sprintf_s(s, sizeof(s), "%s%p::%s %s (_View=%p)\n", Sp, this, GetClass(), GetPos().GetStr(), _View);
 		LgiTrace(s);
-		List<GViewI>::I i = Children.Start();
-		for (GViewI *c = *i; c; c = *++i)
+		List<LViewI>::I i = Children.Start();
+		for (LViewI *c = *i; c; c = *++i)
 		{
-			GView *v = c->GetGView();
+			LView *v = c->GetGView();
 			if (v)
 				v->_Dump(Depth+1);
 		}
@@ -2392,13 +2392,13 @@ GViewFactory::~GViewFactory()
 	}
 }
 
-GView *GViewFactory::Create(const char *Class, LRect *Pos, const char *Text)
+LView *GViewFactory::Create(const char *Class, LRect *Pos, const char *Text)
 {
 	if (ValidStr(Class) && AllFactories)
 	{
 		for (int i=0; i<AllFactories->Length(); i++)
 		{
-			GView *v = (*AllFactories)[i]->NewView(Class, Pos, Text);
+			LView *v = (*AllFactories)[i]->NewView(Class, Pos, Text);
 			if (v)
 			{
 				return v;
@@ -2416,7 +2416,7 @@ using namespace Gtk;
 #include "LgiWidget.h"
 #endif
 
-void GView::Debug()
+void LView::Debug()
 {
     _Debug = true;
 

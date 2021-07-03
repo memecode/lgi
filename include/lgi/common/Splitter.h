@@ -34,22 +34,22 @@ public:
 	void DoesSplitFollow(bool i);
 
 	/// Return the left/top view
-	GView *GetViewA();
+	LView *GetViewA();
 
 	/// Detach the left/top view
 	void DetachViewA();
 
 	/// Sets the left/top view
-	void SetViewA(GView *a, bool Border = true);
+	void SetViewA(LView *a, bool Border = true);
 
 	/// Return the right/bottom view
-	GView *GetViewB();
+	LView *GetViewB();
 
 	/// Detach the right/bottom view
 	void DetachViewB();
 
 	/// Sets the right/bottom view
-	void SetViewB(GView *b, bool Border = true);
+	void SetViewB(LView *b, bool Border = true);
 
 	/// Get the size of the bar that splits the views
 	int BarSize();
@@ -58,10 +58,10 @@ public:
 	void BarSize(int i);
 
 	#if LGI_VIEW_HANDLE
-	GViewI *FindControl(OsView hCtrl) override;
+	LViewI *FindControl(OsView hCtrl) override;
 	#endif
 
-	bool Attach(GViewI *p) override;
+	bool Attach(LViewI *p) override;
 	bool Pour(LRegion &r) override;
 	void OnPaint(LSurface *pDC) override;
 	void OnPosChange() override;
@@ -69,7 +69,7 @@ public:
 	void OnMouseMove(LMouse &m) override;
 	void OnMouseExit(LMouse &m) override;
 	int OnHitTest(int x, int y) override;
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching) override;
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching) override;
 	LgiCursor GetCursor(int x, int y) override;
 };
 

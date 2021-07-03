@@ -34,7 +34,7 @@ public:
 	GAutoString Type;
 	GAutoString Tag;
 
-	CtNode(CtrlControlTreePriv *priv, GView *update, int StringRef)
+	CtNode(CtrlControlTreePriv *priv, LView *update, int StringRef)
 	{
 		d = priv;
 		Str = 0;
@@ -319,7 +319,7 @@ bool CtrlControlTree::GetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-void ReadTree(LXmlTag *t, GTreeNode *n, CtrlControlTreePriv *d, GView *v)
+void ReadTree(LXmlTag *t, GTreeNode *n, CtrlControlTreePriv *d, LView *v)
 {
 	CtNode *ct = dynamic_cast<CtNode*>(n);
 	if (ct && ct->Str)

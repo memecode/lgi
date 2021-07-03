@@ -39,7 +39,7 @@ public:
 
 protected:
 	LList *Lst;
-	GViewI *Edit;
+	LViewI *Edit;
 	bool Registered;
 	PositionType PosType;
 
@@ -53,7 +53,7 @@ protected:
 	}
 
 public:
-	GPopupList(GViewI *edit, PositionType pos, int width = 200, int height = 300) : GPopup(edit->GetGView())
+	GPopupList(LViewI *edit, PositionType pos, int width = 200, int height = 300) : GPopup(edit->GetGView())
 	{
 		Registered = false;
 		PosType = pos;
@@ -192,7 +192,7 @@ public:
 		}
 	}
 	
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		if (Lst &&
 			Ctrl == Edit &&
@@ -225,7 +225,7 @@ public:
 		return 0;
 	}
 
-	bool OnViewKey(GView *v, LKey &k)
+	bool OnViewKey(LView *v, LKey &k)
 	{
 		if (!Visible())
 			return false;

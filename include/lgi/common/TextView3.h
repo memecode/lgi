@@ -424,10 +424,10 @@ public:
 	bool OnKey(LKey &k) override;
 	void OnPaint(LSurface *pDC) override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
-	int OnNotify(GViewI *Ctrl, int Flags) override;
+	int OnNotify(LViewI *Ctrl, int Flags) override;
 	void OnPulse() override;
 	int OnHitTest(int x, int y) override;
-	bool OnLayout(GViewLayoutInfo &Inf) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState) override;
 	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState) override;
 	LgiCursor GetCursor(int x, int y) override;

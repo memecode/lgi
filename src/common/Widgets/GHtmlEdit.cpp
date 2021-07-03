@@ -164,7 +164,7 @@ public:
 
 				LRect Pos = GetPos();
 
-				for (GViewI *c = i->First(); c; c = i->Next())
+				for (LViewI *c = i->First(); c; c = i->Next())
 				{
 					LRect CPos = c->GetPos();
 					if (CPos.x2 == Pos.x1 - 1)
@@ -2640,7 +2640,7 @@ GHtmlEdit::~GHtmlEdit()
 	DeleteObj(d);
 }
 
-int GHtmlEdit::OnNotify(GViewI *c, int f)
+int GHtmlEdit::OnNotify(LViewI *c, int f)
 {
 	switch (c->GetId())
 	{
@@ -2735,7 +2735,7 @@ void GHtmlEdit::OnPosChange()
 		Btn *btn;
 		for (auto c: Children)
 		{
-			if (c != (GView*)d->e)
+			if (c != (LView*)d->e)
 			{
 				LRect p = c->GetPos();
 				p.Offset(x - p.x1, y - p.y1);
@@ -2910,7 +2910,7 @@ void GHtmlEdit::DumpNodes(GTree *Out)
 /////////////////////////////////////////////////////////////////////////////////////
 class GHtmlEdit_Factory : public GViewFactory
 {
-	GView *NewView(const char *Class, LRect *Pos, const char *Text)
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (_stricmp(Class, "GHtmlEdit") == 0)
 		{

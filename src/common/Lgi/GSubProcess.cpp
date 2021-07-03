@@ -977,7 +977,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 	return Status;
 }
 
-int32 GSubProcess::Communicate(GStreamI *Out, GStreamI *In, LCancel *Cancel)
+int32 GSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
 {
 	char Buf[1024];
 	ssize_t r;

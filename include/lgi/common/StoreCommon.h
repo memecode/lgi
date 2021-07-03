@@ -108,7 +108,7 @@ public:
 	int64 GetPos();
 	int64 SetPos(int64 pos);
 	int64 Seek(int64 To, int Whence);
-	GStreamI *Clone();
+	LStreamI *Clone();
 	bool Eof();
 	bool GetStatus();
 	void SetStatus(bool s);
@@ -184,7 +184,7 @@ public:
 class StorageValidator
 {
 public:
-	virtual bool CompactValidate(GView *Parent, StorageItem *Item) = 0;
+	virtual bool CompactValidate(LView *Parent, StorageItem *Item) = 0;
 	virtual void CompactDone(StorageItem *Item) = 0;
 };
 

@@ -215,7 +215,7 @@ int64 GCombo::Value()
 
 GMessage::Result GCombo::OnEvent(GMessage *Msg)
 {
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 void GCombo::Empty()
@@ -518,7 +518,7 @@ void GCombo::OnFocus(bool f)
 
 void GCombo::SetFont(LFont *Fnt, bool OwnIt)
 {
-	GView::SetFont(Fnt, OwnIt);
+	LView::SetFont(Fnt, OwnIt);
 	d->SetText(new LDisplayString(GetFont(), Name()), _FL);
 	Invalidate();
 }

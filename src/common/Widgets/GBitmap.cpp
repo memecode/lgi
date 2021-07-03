@@ -139,7 +139,7 @@ void GBitmap::SetDC(LSurface *pNewDC)
 			SetPos(r);
 			Invalidate();
 
-			for (GViewI *p = GetParent(); p; p = p->GetParent())
+			for (LViewI *p = GetParent(); p; p = p->GetParent())
 			{
 				GTableLayout *Tl = dynamic_cast<GTableLayout*>(p);
 				if (Tl)
@@ -161,7 +161,7 @@ LSurface *GBitmap::GetSurface()
 
 GMessage::Result GBitmap::OnEvent(GMessage *Msg)
 {
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 void GBitmap::OnPaint(LSurface *pScreen)

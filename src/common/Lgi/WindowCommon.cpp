@@ -9,7 +9,7 @@
 #include "lgi/common/Net.h"
 #include "lgi/common/DropFiles.h"
 
-void LWindow::BuildShortcuts(ShortcutMap &Map, GViewI *v)
+void LWindow::BuildShortcuts(ShortcutMap &Map, LViewI *v)
 {
 	if (!v) v = this;
 
@@ -143,7 +143,7 @@ void LWindow::MoveToMouse()
 	}
 }
 
-bool LWindow::MoveSameScreen(GViewI *View)
+bool LWindow::MoveSameScreen(LViewI *View)
 {
 	if (!View)
 	{

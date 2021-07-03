@@ -98,7 +98,7 @@ void GToolTabBar::OnButtonClick(GToolButton *Btn)
 		OnChange(Btn);
 }
 
-int GToolTabBar::OnNotify(GViewI *c, int f)
+int GToolTabBar::OnNotify(LViewI *c, int f)
 {
 	if (f == GNotifyValueChanged)
 	{
@@ -113,7 +113,7 @@ int GToolTabBar::OnNotify(GViewI *c, int f)
 bool GToolTabBar::IsOk()
 {
 	int Count[2] = {0, 0};
-	for (GViewI *c: IterateViews())
+	for (LViewI *c: IterateViews())
 	{
 		GToolTab *tt = dynamic_cast<GToolTab*>(c);
 		if (tt && tt->GetId() > 0)

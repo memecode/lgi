@@ -65,7 +65,7 @@ public:
 	// Impl
 	void OnTitleClick(LMouse &m) override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
-	int OnNotify(GViewI *v, int f) override;
+	int OnNotify(LViewI *v, int f) override;
 	void OnPulse() override;
 	GString Read();
 	ssize_t Read(void *Ptr, ssize_t Size, int Flags = 0) override { return 0; }

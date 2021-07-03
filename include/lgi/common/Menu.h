@@ -123,7 +123,7 @@ protected:
 	/// The top level window this sub menu belongs to or NULL
 	LMenu			*Menu;
 	/// The window that the menu belongs to or NULL.
-	GViewI			*Window;
+	LViewI			*Window;
 	
 	void OnAttach(bool Attach);
 	void ClearHandle();
@@ -260,7 +260,7 @@ public:
 	int Float
 	(
 		/// The parent view
-		GView *Parent,
+		LView *Parent,
 		/// The x coord of the top-left corner
 		int x,
 		/// The y coord of the top-left corner
@@ -269,7 +269,7 @@ public:
 		int Button = BtnRight
 	);
 
-	int Float(GView *Parent, LMouse m)
+	int Float(LView *Parent, LMouse m)
 	{
 		int Btn = 0;
 		if (m.Left())
@@ -301,7 +301,7 @@ class LgiClass LMenuItem :
 {
 	friend class LSubMenu;
 	friend class LMenu;
-	friend class GView;
+	friend class LView;
 	friend class SubMenuImpl;
 	friend class MenuItemImpl;
 	friend class MenuImpl;
@@ -507,10 +507,10 @@ public:
 	static LFont *GetFont();
 
 	/// Returns the top level window that this menu is attached to
-	GViewI *WindowHandle() { return Window; }
+	LViewI *WindowHandle() { return Window; }
 	
 	/// Attach the menu to a window
-	bool Attach(GViewI *p);
+	bool Attach(LViewI *p);
 	
 	/// Detact the menu from the window
 	bool Detach();
@@ -519,7 +519,7 @@ public:
 	bool Load
 	(
 		/// The parent view for any error message boxes
-		GView *p,
+		LView *p,
 		/// The resource to load. Will probably change to an int sometime.
 		const char *Res,
 		/// Optional list of comma or space separated tags
@@ -531,7 +531,7 @@ public:
 	bool OnKey
 	(
 		/// The view that will eventually receive the key event
-		GView *v,
+		LView *v,
 		/// The keyboard event details
 		LKey &k
 	);

@@ -150,10 +150,10 @@ public:
 	virtual bool GetAuthed() = 0;
 
 	// Data
-	virtual GSocketI *Handle() = 0;
+	virtual LSocketI *Handle() = 0;
 	
 	// Connection
-	virtual FtpOpenStatus Open(GSocketI *S, char *RemoteHost, int Port, char *User, char *Password) = 0;
+	virtual FtpOpenStatus Open(LSocketI *S, char *RemoteHost, int Port, char *User, char *Password) = 0;
 	virtual bool Close() = 0;
 	virtual bool IsOpen() = 0;
 	virtual void Noop() = 0;
@@ -184,7 +184,7 @@ protected:
 	class IFtpPrivate *d;
 
 	/// The command connection
-	GAutoPtr<GSocketI> Socket;	// commands
+	GAutoPtr<LSocketI> Socket;	// commands
 
 	ssize_t WriteLine(char *Msg = 0);
 	ssize_t ReadLine(char *Msg = 0, ssize_t MsgSize = 0);
@@ -236,10 +236,10 @@ public:
 	const char *GetError();
 
 	/// Returns the socket used for the command connection.
-	GSocketI *Handle() { return Socket; }
+	LSocketI *Handle() { return Socket; }
 	
 	/// Opens a new command connection to a remote server
-	FtpOpenStatus Open(GSocketI *S, char *RemoteHost, int Port, char *User, char *Password);
+	FtpOpenStatus Open(LSocketI *S, char *RemoteHost, int Port, char *User, char *Password);
 	/// Returns the host and port
 	void GetHost(GString *Host, int *Port);
 	/// Closes the currently active connection

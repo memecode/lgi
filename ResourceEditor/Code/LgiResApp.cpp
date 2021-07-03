@@ -274,9 +274,9 @@ bool Resource::IsSelected()
 	return Item?Item->Select():false;
 }
 
-bool Resource::Attach(GViewI *Parent)
+bool Resource::Attach(LViewI *Parent)
 {
-	GView *w = Wnd();
+	LView *w = Wnd();
 	if (w)
 	{
 		return w->Attach(Parent);
@@ -496,7 +496,7 @@ void FieldView::Serialize(bool Write)
 	/*
 	for (DataDlgField *f=Fields.First(); f; f=Fields.Next())
 	{
-		GViewI *v;
+		LViewI *v;
 		if (GetViewById(f->GetCtrl(), v))
 		{
 			switch (f->GetType())
@@ -606,7 +606,7 @@ public:
 	}
 };
 
-class Hr : public GView
+class Hr : public LView
 {
 public:
 	Hr(int x1, int y, int x2)
@@ -621,7 +621,7 @@ public:
 		LThinBorder(pDC, c, DefaultSunkenEdge);
 	}
 
-	bool OnLayout(GViewLayoutInfo &Inf)
+	bool OnLayout(LViewLayoutInfo &Inf)
 	{
 		if (Inf.Width.Min)
 			Inf.Height.Min = Inf.Height.Max = 2;
@@ -640,7 +640,7 @@ void FieldView::OnDelete(FieldSource *s)
 		Fields.Empty();
 
 		// remove all children
-		GViewI *c;
+		LViewI *c;
 		while ((c = Children[0]))
 		{
 			c->Detach();
@@ -664,7 +664,7 @@ void FieldView::OnSelect(FieldSource *s)
 		Fields.Empty();
 
 		// remove all children
-		GViewI *c;
+		LViewI *c;
 		while ((c = Children[0]))
 		{
 			c->Detach();
@@ -763,7 +763,7 @@ void FieldView::OnPosChange()
 	LRect c = GetClient();
 	c.Size(6, 6);
 
-	GViewI *v;
+	LViewI *v;
 	if (GetViewById(IDC_TABLE, v))
 		v->SetPos(c);
 }
@@ -789,7 +789,7 @@ GMessage::Result FieldView::OnEvent(GMessage *m)
 	return GLayout::OnEvent(m);
 }
 
-int FieldView::OnNotify(GViewI *Ctrl, int Flags)
+int FieldView::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (!Ignore)
 	{
@@ -1154,7 +1154,7 @@ GArray<GLanguage*> *AppWnd::GetLanguages()
 	return &Languages;
 }
 
-class Test : public GView
+class Test : public LView
 {
 	COLOUR c;
 
@@ -1183,7 +1183,7 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 	{
 		case M_CHANGE:
 		{
-			return OnNotify((GViewI*) m->A(), (int)m->B());
+			return OnNotify((LViewI*) m->A(), (int)m->B());
 		}
 		case M_DESCRIBE:
 		{
@@ -1482,7 +1482,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 	return GDocApp<GOptionsFile>::OnCommand(Cmd, Event, Handle);
 }
 
-int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
+int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{
@@ -3962,7 +3962,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 								for (auto d: DlLList)
 								{
 									auto It = d->IterateViews();
-									GViewI *Wnd = It[0];
+									LViewI *Wnd = It[0];
 									if (Wnd)
 									{
 										CtrlDlg *Obj = dynamic_cast<CtrlDlg*>(Wnd);
@@ -4350,7 +4350,7 @@ void ResFrame::OnFocus(bool b)
 	Child->Wnd()->Invalidate();
 }
 
-bool ResFrame::Attach(GViewI *p)
+bool ResFrame::Attach(LViewI *p)
 {
 	bool Status = GLayout::Attach(p);
 	if (Status && Child)
@@ -4455,7 +4455,7 @@ void ResFrame::OnPaint(LSurface *pDC)
 	Child->Wnd()->SetPos(r);
 
 	// Draw the dialog & controls
-	GView::OnPaint(pDC);
+	LView::OnPaint(pDC);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -4473,8 +4473,8 @@ public:
 		TextAlign(AlignLeft);
 	}
 
-	bool Add(GView *v) { return false; }
-	bool Remove(GView *v) { return false; }
+	bool Add(LView *v) { return false; }
+	bool Remove(LView *v) { return false; }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -4503,9 +4503,9 @@ ShortCutView::~ShortCutView()
 	App->OnCloseView(this);
 }
 
-void FindShortCuts(LList *Out, GViewI *In)
+void FindShortCuts(LList *Out, LViewI *In)
 {
-	for (GViewI *c: In->IterateViews())
+	for (LViewI *c: In->IterateViews())
 	{
 		ResDialogCtrl *rdc = dynamic_cast<ResDialogCtrl*>(c);
 		if (!rdc || !rdc->GetStr())
@@ -4533,7 +4533,7 @@ void FindShortCuts(LList *Out, GViewI *In)
 	}
 }
 
-int ShortCutView::OnNotify(GViewI *Ctrl, int Flags)
+int ShortCutView::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl->GetId() == Lst->GetId())
 	{

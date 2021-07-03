@@ -68,7 +68,7 @@ public:
 		Strs.New() = s;
 	}
 	
-	bool OnLayout(GViewLayoutInfo &Inf)
+	bool OnLayout(LViewLayoutInfo &Inf)
 	{
 	    if (!Inf.Width.Max)
 	    {
@@ -147,7 +147,7 @@ struct GFindInFilesPriv : public LXmlTreeUi
 	}
 };
 	
-GFindInFiles::GFindInFiles(GViewI *Parent, GAutoString Search, GDom *Store)
+GFindInFiles::GFindInFiles(LViewI *Parent, GAutoString Search, GDom *Store)
 {
 	d = new GFindInFilesPriv;
 	d->Search = Search;
@@ -160,7 +160,7 @@ GFindInFiles::GFindInFiles(GViewI *Parent, GAutoString Search, GDom *Store)
 
 	int y = 0;
 	int cols = 3;
-	GView *v;
+	LView *v;
 
 	Name("Find In Files");
 	
@@ -217,7 +217,7 @@ GFindInFiles::~GFindInFiles()
 	DeleteObj(d);
 }
 
-int GFindInFiles::OnNotify(GViewI *Ctrl, int Flags)
+int GFindInFiles::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{

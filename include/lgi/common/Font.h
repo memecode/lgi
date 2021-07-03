@@ -299,7 +299,7 @@ public:
 	void SetPointSize(int PointSize);
 
 	/// Put a user interface for the user to edit the font def
-	bool DoUI(GView *Parent);
+	bool DoUI(LView *Parent);
 	
 	/// Describe the font to the user as a string
 	bool GetDescription(char *Str, int SLen);
@@ -457,7 +457,7 @@ public:
 	/// Converts a string into a buffer using iconv
 	ssize_t IconvConvert(const char *OutCs, char *Out, ssize_t OutLen, const char *InCs, const char *&In, ssize_t InLen);
 	/// Converts a string into a stream using iconv
-	ssize_t IconvConvert(const char *OutCs, GStreamI *Out, const char *InCs, const char *&In, ssize_t InLen);
+	ssize_t IconvConvert(const char *OutCs, LStreamI *Out, const char *InCs, const char *&In, ssize_t InLen);
 };
 #endif
 

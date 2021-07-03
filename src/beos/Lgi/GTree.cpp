@@ -236,7 +236,7 @@ bool GTree::SetPos(LRect &p, bool Repaint)
 	return TRUE;
 }
 
-bool GTree::Attach(GViewI *parent)
+bool GTree::Attach(LViewI *parent)
 {
 	SetParent(parent);
 	if (GetParent())
@@ -309,7 +309,7 @@ void GTree::OnMouseClick(LMouse &m)
 
 int GTree::OnEvent(BMessage *Msg)
 {
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 GTreeItem *GTree::Insert(GTreeItem *Obj, int Pos)

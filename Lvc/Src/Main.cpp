@@ -502,7 +502,7 @@ class OptionsDlg : public GDialog, public LXmlTreeUi
 	GOptionsFile &Opts;
 
 public:
-	OptionsDlg(GViewI *Parent, GOptionsFile &opts) : Opts(opts)
+	OptionsDlg(LViewI *Parent, GOptionsFile &opts) : Opts(opts)
 	{
 		SetParent(Parent);
 
@@ -535,7 +535,7 @@ public:
 		}
 	}
 
-	void BrowseFiles(GViewI *Ctrl, const char *Bin, int EditId)
+	void BrowseFiles(LViewI *Ctrl, const char *Bin, int EditId)
 	{
 		LRect Pos = Ctrl->GetPos();
 		LPoint Pt(Pos.x1, Pos.y2 + 1);
@@ -575,7 +575,7 @@ public:
 		}
 	}
 
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		switch (Ctrl->GetId())
 		{
@@ -869,7 +869,7 @@ public:
 	RemoteFolderDlg(App *application);
 	~RemoteFolderDlg();
 
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
 class VcDiffFile : public GTreeItem
@@ -1336,7 +1336,7 @@ public:
 		Tree->Insert(new VcDiffFile(this, File));
 	}
 
-	int OnNotify(GViewI *c, int flag)
+	int OnNotify(LViewI *c, int flag)
 	{
 		switch (c->GetId())
 		{
@@ -1597,7 +1597,7 @@ RemoteFolderDlg::RemoteFolderDlg(App *application) : app(application), root(NULL
 	}
 	else return;
 	
-	GViewI *v;
+	LViewI *v;
 	if (GetViewById(IDC_HOSTNAME, v))
 		v->Focus(true);
 
@@ -1625,7 +1625,7 @@ RemoteFolderDlg::~RemoteFolderDlg()
 {
 }
 
-int RemoteFolderDlg::OnNotify(GViewI *Ctrl, int Flags)
+int RemoteFolderDlg::OnNotify(LViewI *Ctrl, int Flags)
 {
 	SshHost *cur = tree ? dynamic_cast<SshHost*>(tree->Selection()) : NULL;
 

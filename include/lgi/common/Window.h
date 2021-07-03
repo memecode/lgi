@@ -25,7 +25,7 @@ enum LWindowHookType
 
 /// A top level window.
 class LgiClass LWindow :
-	public GView,
+	public LView,
 	// This needs to be second otherwise is causes v-table problems.
 	#ifndef LGI_SDL
 	virtual
@@ -34,7 +34,7 @@ class LgiClass LWindow :
 {
 	friend class BViewRedir;
 	friend class GApp;
-	friend class GView;
+	friend class LView;
 	friend class GButton;
 	friend class LDialog;
 	friend class LWindowPrivate;
@@ -82,7 +82,7 @@ protected:
 	#endif
 
 	/// The default button
-	GViewI *_Default;
+	LViewI *_Default;
 
 	/// The menu on the window
 	LMenu *Menu;
@@ -153,24 +153,24 @@ public:
 	/// Moves a top level window to where the mouse is
 	void MoveToMouse();
 	/// Moves the window to somewhere on the same screen as 'wnd'
-	bool MoveSameScreen(GViewI *wnd);
+	bool MoveSameScreen(LViewI *wnd);
 
 	// Focus setting
-	GViewI *GetFocus();
+	LViewI *GetFocus();
 	enum FocusType
 	{
 		GainFocus,
 		LoseFocus,
 		ViewDelete
 	};
-	void SetFocus(GViewI *ctrl, FocusType type);
+	void SetFocus(LViewI *ctrl, FocusType type);
 	
 	/// Registers a watcher to receive OnView... messages before they
 	/// are passed through to the intended recipient.
 	bool RegisterHook
 	(
 		/// The target view.
-		GView *Target,
+		LView *Target,
 		/// Combination of:
 		///     #LMouseEvents - Where Target->OnViewMouse(...) is called for each click.
 		/// and
@@ -182,12 +182,12 @@ public:
 	);
 
 	/// Unregisters a hook target
-	bool UnregisterHook(GView *Target);
+	bool UnregisterHook(LView *Target);
 
 	/// Gets the default view
-	GViewI *GetDefault();
+	LViewI *GetDefault();
 	/// Sets the default view
-	void SetDefault(GViewI *v);
+	void SetDefault(LViewI *v);
 
 	/// Saves/loads the window's state, e.g. position, minimized/maximized etc
 	bool SerializeState
@@ -201,8 +201,8 @@ public:
 	);
 
 	/// Builds a map of keyboard short cuts.
-	typedef LHashTbl<IntKey<int>,GViewI*> ShortcutMap;
-	void BuildShortcuts(ShortcutMap &Map, GViewI *v = NULL);
+	typedef LHashTbl<IntKey<int>,LViewI*> ShortcutMap;
+	void BuildShortcuts(ShortcutMap &Map, LViewI *v = NULL);
 
 	////////////////////// Events ///////////////////////////////
 	
@@ -227,8 +227,8 @@ public:
 	void OnPosChange() override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	void OnPaint(LSurface *pDC) override;
-	bool HandleViewMouse(GView *v, LMouse &m);
-	bool HandleViewKey(GView *v, LKey &k);
+	bool HandleViewMouse(LView *v, LMouse &m);
+	bool HandleViewKey(LView *v, LKey &k);
 	bool OnRequestClose(bool OsShuttingDown) override;
 	bool Obscured();
 	bool Visible() override;
@@ -246,7 +246,7 @@ public:
 
 	#if !WINNATIVE
 	
-		bool Attach(GViewI *p) override;
+		bool Attach(LViewI *p) override;
 
 		// Props
 		OsWindow WindowHandle() override { return Wnd; }
@@ -256,7 +256,7 @@ public:
 		LRect &GetClient(bool InClientSpace = true) override;
 	
 		// Events
-		void OnChildrenChanged(GViewI *Wnd, bool Attaching) override;
+		void OnChildrenChanged(LViewI *Wnd, bool Attaching) override;
 		void OnCreate() override;
 		virtual void OnFrontSwitch(bool b);
 
@@ -274,7 +274,7 @@ public:
 		void Quit(bool DontDelete = false);
 		LRect *GetDecorSize();
 		bool TranslateMouse(LMouse &m);
-		GViewI *WindowFromPoint(int x, int y, bool Debug);
+		LViewI *WindowFromPoint(int x, int y, bool Debug);
 		void _SetDynamic(bool b);
 		void _OnViewDelete();
 	
@@ -283,7 +283,7 @@ public:
 		bool PostEvent(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0) override;
 		void Quit(bool DontDelete = false) override;
 		int OnCommand(int Cmd, int Event, OsView Wnd) override;
-		GViewI *WindowFromPoint(int x, int y, int DebugDebug = 0) override;
+		LViewI *WindowFromPoint(int x, int y, int DebugDebug = 0) override;
 		
 		#if defined(LGI_CARBON)
 			OSErr HandlerCallback(DragTrackingMessage *tracking, DragRef theDrag);

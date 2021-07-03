@@ -37,7 +37,7 @@ public:
 	
 	const char *GetClass() { return "NativeTip"; }
 
-	NativeTip(int id, GView *p) : GPopup(p)
+	NativeTip(int id, LView *p) : GPopup(p)
 	{
 		All.Add(this);
 		Id = id;
@@ -89,7 +89,7 @@ public:
 					LRect w = t->Watch;
 					bool Vis = w.Overlap(m.x, m.y);					
 					
-					LOG("Tip %s, in=%i, act=%i\n", t->GView::Name(), Vis, Active);
+					LOG("Tip %s, in=%i, act=%i\n", t->LView::Name(), Vis, Active);
 					
 					Vis = Vis && Active;
 					
@@ -119,8 +119,8 @@ public:
 	
 	bool Name(const char *n)
 	{
-		bool Status = GView::Name(n);
-		if (s.Reset(new LDisplayString(SysFont, GView::Name())))
+		bool Status = LView::Name(n);
+		if (s.Reset(new LDisplayString(SysFont, LView::Name())))
 		{
 			LRect r = GetPos();
 			r.Dimension(s->X()+NativeTip::Padding.x, s->Y()+NativeTip::Padding.y);
@@ -183,7 +183,7 @@ public:
 	int NextUid;
 
 	#if LGI_NATIVE_TIPS
-	GView *Parent;
+	LView *Parent;
 	LHashTbl<IntKey<int>, NativeTip*> Tips;
 	#elif defined(LGI_CARBON)
 	HMHelpContentRec Tag;
@@ -209,7 +209,7 @@ public:
 	}
 };
 
-GToolTip::GToolTip() : GView(NULL)
+GToolTip::GToolTip() : LView(NULL)
 {
 	d = new GToolTipPrivate;
 }
@@ -322,7 +322,7 @@ void GToolTip::DeleteTip(int Id)
 	#endif
 }
 
-bool GToolTip::Attach(GViewI *p)
+bool GToolTip::Attach(LViewI *p)
 {
 	#if LGI_NATIVE_TIPS
 	
@@ -349,7 +349,7 @@ bool GToolTip::Attach(GViewI *p)
 
 	if (!_View)
 		return false;
-	SetWindowLongPtr(	_View, GWLP_USERDATA, (LONG_PTR)(GViewI*)this);
+	SetWindowLongPtr(	_View, GWLP_USERDATA, (LONG_PTR)(LViewI*)this);
 	SetWindowLong(		_View, GWL_LGI_MAGIC, LGI_GViewMagic);			
 	SetWindowPos(		_View,
 						HWND_TOPMOST,

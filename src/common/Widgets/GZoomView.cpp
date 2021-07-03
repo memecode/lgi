@@ -1195,7 +1195,7 @@ GZoomView::~GZoomView()
 	DeleteObj(d);
 }
 
-bool GZoomView::OnLayout(GViewLayoutInfo &Inf)
+bool GZoomView::OnLayout(LViewLayoutInfo &Inf)
 {
 	Inf.Width.Min = -1;
 	Inf.Width.Max = -1;
@@ -1682,7 +1682,7 @@ GMessage::Param GZoomView::OnEvent(GMessage *m)
 	return GLayout::OnEvent(m);
 }
 
-int GZoomView::OnNotify(GViewI *v, int f)
+int GZoomView::OnNotify(LViewI *v, int f)
 {
 	switch (v->GetId())
 	{
@@ -1858,7 +1858,7 @@ void GZoomView::OnPaint(LSurface *pDC)
 class GZoomViewFactory : public GViewFactory
 {
 public:
-	GView *NewView(const char *Class, LRect *Pos, const char *Text)
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (!_stricmp(Class, "GZoomView"))
 			return new GZoomView(NULL);

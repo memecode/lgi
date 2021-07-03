@@ -178,13 +178,13 @@ bool IsOverMenu(XEvent *e)
 }
 #endif
 
-int GSubMenu::Float(GView *From, int x, int y, int Btns)
+int GSubMenu::Float(LView *From, int x, int y, int Btns)
 {
 	static int Depth = 0;
 
 	while (From && !From->Handle())
 	{
-		From = dynamic_cast<GView*>(From->GetParent());
+		From = dynamic_cast<LView*>(From->GetParent());
 	}		
 	
 	if (!From || !From->Handle())
@@ -831,7 +831,7 @@ LFont *GMenu::GetFont()
 	return _Font ? _Font : SysFont;
 }
 
-bool GMenu::Attach(GViewI *p)
+bool GMenu::Attach(LViewI *p)
 {
 	bool Status = false;
 
@@ -856,7 +856,7 @@ bool GMenu::Detach()
 	return Status;
 }
 
-bool GMenu::OnKey(GView *v, LKey &k)
+bool GMenu::OnKey(LView *v, LKey &k)
 {
 	if (k.Down())
 	{

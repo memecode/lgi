@@ -180,11 +180,11 @@ typedef int OsSocket;
 #define M_MOUSEENTER			(M_USER+0x100)
 #define M_MOUSEEXIT				(M_USER+0x101)
 
-// wParam = (GView*) Wnd;
+// wParam = (LView*) Wnd;
 // lParam = (int) Flags;
 #define M_CHANGE				(M_USER+0x102)
 
-// wParam = (GView*) Wnd;
+// wParam = (LView*) Wnd;
 // lParam = (char*) Text; // description from window
 #define M_DESCRIBE				(M_USER+0x103)
 

@@ -14,12 +14,12 @@
 #define DEBUG_LOGGING		0
 
 ///////////////////////////////////////////////////////////////////
-class ILogProxy : public GSocketI
+class ILogProxy : public LSocketI
 {
-	GSocketI *Dest;
+	LSocketI *Dest;
 
 public:
-	ILogProxy(GSocketI *dest)
+	ILogProxy(LSocketI *dest)
 	{
 		Dest = dest;
 	}
@@ -87,7 +87,7 @@ void IHttp::SetAuth(char *User, char *Pass)
 	AuthPassword = Pass;
 }
 
-bool IHttp::Open(GAutoPtr<GSocketI> S, const char *RemoteHost, int Port)
+bool IHttp::Open(GAutoPtr<LSocketI> S, const char *RemoteHost, int Port)
 {
 	Close();
 	Socket = S;
@@ -376,9 +376,9 @@ bool IHttp::Request
 	const char *Uri,
 	int *ProtocolStatus,
 	const char *InHeaders,
-	GStreamI *InBody,
-	GStreamI *Out,
-	GStreamI *OutHeaders,
+	LStreamI *InBody,
+	LStreamI *Out,
+	LStreamI *OutHeaders,
 	ContentEncoding *OutEncoding
 )
 {
@@ -794,10 +794,10 @@ bool IHttp::Post
 (
 	char *File,
 	const char *ContentType,
-	GStreamI *In,
+	LStreamI *In,
 	int *ProtocolStatus,
-	GStreamI *Out,
-	GStreamI *OutHeaders,
+	LStreamI *Out,
+	LStreamI *OutHeaders,
 	char *InHeaders
 )
 {
@@ -956,7 +956,7 @@ void ZLibFree(voidpf opaque, voidpf address)
 	// Do nothing... the memory is owned by an autoptr
 }
 
-bool LgiGetUri(LCancel *Cancel, GStreamI *Out, GString *OutError, const char *InUri, const char *InHeaders, GUri *InProxy)
+bool LgiGetUri(LCancel *Cancel, LStreamI *Out, GString *OutError, const char *InUri, const char *InHeaders, GUri *InProxy)
 {
 	if (!InUri || !Out)
 	{
@@ -981,7 +981,7 @@ bool LgiGetUri(LCancel *Cancel, GStreamI *Out, GString *OutError, const char *In
 		if (InProxy)
 			Http.SetProxy(InProxy->sHost, InProxy->Port ? InProxy->Port : DefaultPort);
 
-		GAutoPtr<GSocketI> s;
+		GAutoPtr<LSocketI> s;
 		
 		if (IsHTTPS)
 		{

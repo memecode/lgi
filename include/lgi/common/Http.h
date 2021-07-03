@@ -14,7 +14,7 @@ class IHttp
 	int BufferLen;
 	char *Buffer;
 	
-	GAutoPtr<GSocketI> Socket;	// commands
+	GAutoPtr<LSocketI> Socket;	// commands
 	size_t ResumeFrom;
 	GAutoString FileLocation;
 	char *Headers;
@@ -41,15 +41,15 @@ public:
 	void SetAuth(char *User = 0, char *Pass = 0);
 
 	// Data
-	GSocketI *Handle() { return Socket; }
+	LSocketI *Handle() { return Socket; }
 	char *AlternateLocation() { return FileLocation; }
 	char *GetHeaders() { return Headers; }
 	
 	// Connection
-	bool Open(GAutoPtr<GSocketI> S, const char *RemoteHost, int Port = 0);
+	bool Open(GAutoPtr<LSocketI> S, const char *RemoteHost, int Port = 0);
 	bool Close();
 	bool IsOpen();
-	GSocketI *GetSocket() { return Socket; }
+	LSocketI *GetSocket() { return Socket; }
 	GString GetErrorString() { return ErrorMsg; }
 
 	// General
@@ -57,17 +57,17 @@ public:
 					const char *Uri,
 					int *ProtocolStatus,
 					const char *InHeaders,
-					GStreamI *InBody,
-					GStreamI *Out,
-					GStreamI *OutHeaders,
+					LStreamI *InBody,
+					LStreamI *Out,
+					LStreamI *OutHeaders,
 					ContentEncoding *OutEncoding);
 
 	bool Get(		const char *Uri,
 					const char *InHeaders,
 					int *ProtocolStatus,
-					GStreamI *Out,
+					LStreamI *Out,
 					ContentEncoding *OutEncoding,
-					GStreamI *OutHeaders = 0)
+					LStreamI *OutHeaders = 0)
 	{
 		return Request("GET",
 						Uri,
@@ -81,10 +81,10 @@ public:
 	
 
 	bool Post(		char *Uri,
-					GStreamI *In,
+					LStreamI *In,
 					int *ProtocolStatus,
-					GStreamI *Out,
-					GStreamI *OutHeaders = 0,
+					LStreamI *Out,
+					LStreamI *OutHeaders = 0,
 					const char *InHeaders = 0)
 	{
 		return Request("POST",
@@ -104,7 +104,7 @@ bool LgiGetUri
 	/// Method for cancelling the call...
 	LCancel *Cancel,
 	/// The output stream to put the data
-	GStreamI *Out,
+	LStreamI *Out,
 	/// Any error message
 	GString *OutError,
 	/// The input URI to retreive

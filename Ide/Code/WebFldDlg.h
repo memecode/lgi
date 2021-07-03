@@ -9,9 +9,9 @@ public:
 	GString Ftp;
 	char *Www;
 
-	WebFldDlg(GViewI *p, char *name, char *ftp, char *www);
+	WebFldDlg(LViewI *p, char *name, char *ftp, char *www);
 	~WebFldDlg();
-	int OnNotify(GViewI *v, int f);
+	int OnNotify(LViewI *v, int f);
 };
 
 #endif

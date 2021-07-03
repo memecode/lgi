@@ -26,7 +26,7 @@ public:
 
 class ILdapServer : public LThread
 {
-	GView *Parent;
+	LView *Parent;
 	ILdapServerDb *Db;
 	GFile Log;
 	GSocket Socket;
@@ -44,7 +44,7 @@ class ILdapServer : public LThread
 	void HexDump(char *Title, GBytePipe &Data);
 
 public:
-	ILdapServer(GView *p, ILdapServerDb *db);
+	ILdapServer(LView *p, ILdapServerDb *db);
 	~ILdapServer();
 
 	int Main();

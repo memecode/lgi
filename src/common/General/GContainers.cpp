@@ -242,7 +242,7 @@ int GMemQueue::Find(char *Str)
 	return -1;
 }
 
-int64 GMemQueue::Peek(GStreamI *Str, int Size)
+int64 GMemQueue::Peek(LStreamI *Str, int Size)
 {
 	int64 Status = 0;
 

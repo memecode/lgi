@@ -44,7 +44,7 @@ GPrinter::~GPrinter()
 	DeleteObj(d);
 }
 
-bool GPrinter::Browse(GView *Parent)
+bool GPrinter::Browse(LView *Parent)
 {
 	if (d->Settings != NULL)
 		Gtk::gtk_print_operation_set_print_settings(d->Op, d->Settings);
@@ -107,7 +107,7 @@ GtkPrintDrawPage(	GtkPrintOperation	*operation,
 	d->Events->OnPrintPage(d->PrintDC, page_number);
 }
 
-bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages /* = -1 */, GView *Parent /* = 0 */)
+bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages /* = -1 */, LView *Parent /* = 0 */)
 {
 	if (!Events)
 	{

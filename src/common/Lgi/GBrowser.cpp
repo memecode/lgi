@@ -365,7 +365,7 @@ int GBrowserThread::Main()
 				if (Proxy.sHost)
 					d->Http.SetProxy(Proxy.sHost, Proxy.Port);
 
-				GAutoPtr<GSocketI> Sock(new GSocket);
+				GAutoPtr<LSocketI> Sock(new GSocket);
 				if (d->Http.Open(Sock, u.sHost, u.Port))
 				{
 					IHttp::ContentEncoding Enc;
@@ -386,7 +386,7 @@ int GBrowserThread::Main()
 	return false;
 }
 
-GBrowser::GBrowser(GViewI *owner, const char *Title, char *Uri)
+GBrowser::GBrowser(LViewI *owner, const char *Title, char *Uri)
 {
 	d = new GBrowserPriv(this);
 	d->Back = 0;
@@ -529,7 +529,7 @@ bool GBrowser::SetHtml(char *Html)
 	return true;
 }
 
-int GBrowser::OnNotify(GViewI *c, int f)
+int GBrowser::OnNotify(LViewI *c, int f)
 {
 	switch (c->GetId())
 	{

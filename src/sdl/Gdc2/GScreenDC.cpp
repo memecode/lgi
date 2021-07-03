@@ -36,7 +36,7 @@ LScreenDC::LScreenDC()
 	ColourSpace = CsNone;
 }
 
-LScreenDC::LScreenDC(GView *view, void *Param)
+LScreenDC::LScreenDC(LView *view, void *Param)
 {
 	d = new GScreenPrivate;
 	ColourSpace = CsNone;

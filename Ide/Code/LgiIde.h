@@ -284,7 +284,7 @@ public:
 	void OnProjectChange();
 	void OnFile(char *File, bool IsProject = false);
 	bool OnRequestClose(bool IsClose) override;
-	int OnNotify(GViewI *Ctrl, int Flags) override;
+	int OnNotify(LViewI *Ctrl, int Flags) override;
 	GMessage::Result OnEvent(GMessage *m) override;
 	bool OnNode(const char *Path, class ProjectNode *Node, FindSymbolSystem::SymAction Action);
 	void OnPulse() override;
@@ -303,7 +303,7 @@ public:
 #include "FindInFiles.h"
 
 extern void NewMemDumpViewer(AppWnd *App, const char *file = 0);
-extern void NewProjectFromTemplate(GViewI *parent);
+extern void NewProjectFromTemplate(LViewI *parent);
 
 class SysCharSupport : public LWindow
 {
@@ -313,7 +313,7 @@ public:
 	SysCharSupport(AppWnd *app);
 	~SysCharSupport();
 
-	int OnNotify(GViewI *v, int f);
+	int OnNotify(LViewI *v, int f);
 	void OnPosChange();
 };
 

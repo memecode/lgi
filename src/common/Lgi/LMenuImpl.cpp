@@ -103,7 +103,7 @@ SubMenuImpl::SubMenuImpl(GSubMenu *Sub) : GPopup(0)
 {
 	d = new SubMenuImplPrivate;
 	d->Sub = Sub;
-	GView::Visible(false);
+	LView::Visible(false);
 }
 
 SubMenuImpl::~SubMenuImpl()
@@ -350,7 +350,7 @@ void SubMenuImpl::Visible(bool b)
 				if (i->Child &&
 					i->Child->Info != this)
 				{
-					GView *v = i->Child->Info->View();
+					LView *v = i->Child->Info->View();
 					if (v)
 					{
 						if (v->Visible())
@@ -372,7 +372,7 @@ void SubMenuImpl::Visible(bool b)
 				if (i->Child &&
 					i->Child->Info != this)
 				{
-					GView *v = i->Child->Info->View();
+					LView *v = i->Child->Info->View();
 					if (v)
 					{
 						v->Visible(false);
@@ -609,7 +609,7 @@ void MenuItemImpl::ShowSub()
 
 		PointToScreen(p);
 
-		GView *v = d->Item->Child->Info ? d->Item->Child->Info->View() : 0;
+		LView *v = d->Item->Child->Info ? d->Item->Child->Info->View() : 0;
 		if (v)
 		{
 			d->Item->Child->Info->IsSub()->Layout(p.x, p.y);

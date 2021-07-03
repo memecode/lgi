@@ -21,7 +21,7 @@ class LMouse;
 class GApp;
 class LWindow;
 class LWindowsClass;
-class GView;
+class LView;
 class GLayout;
 class GFileSelect;
 class GFindReplace;
@@ -60,7 +60,7 @@ public:
 /// is to <app_name>.txt in the executables folder or $LSP_APP_ROOT\<app_name>.txt if
 /// that is not writable. If the stream is set to something then normal file output is
 /// directed to the specified stream instead.
-LgiFunc void LgiTraceSetStream(class GStreamI *stream);
+LgiFunc void LgiTraceSetStream(class LStreamI *stream);
 
 /// Gets the log file path
 LgiFunc bool LgiTraceGetFilePath(char *LogPath, int BufLen);
@@ -247,18 +247,18 @@ public:
 /// keys were pressed at the time the event occurred.
 ///
 /// To get the position of the mouse in screen co-ordinates you can either use
-/// GView::GetMouse() and pass true in the 'ScreenCoords' parameter. Or you can
-/// construct a LPoint out of the x,y fields of this class and use GView::PointToScreen()
+/// LView::GetMouse() and pass true in the 'ScreenCoords' parameter. Or you can
+/// construct a LPoint out of the x,y fields of this class and use LView::PointToScreen()
 /// to map the point to screen co-ordinates.
 class LgiClass LMouse : public LUiEvent, public LPoint
 {
 public:
 	/// Receiving view
-	class GViewI *Target;
+	class LViewI *Target;
 	/// True if specified in view coordinates, false if in screen coords
 	bool ViewCoords;
 
-	LMouse(GViewI *target = NULL)
+	LMouse(LViewI *target = NULL)
 	{
 		Target = target;
 		ViewCoords = true;

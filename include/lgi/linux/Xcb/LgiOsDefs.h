@@ -333,15 +333,15 @@ LgiFunc void LgiSleep(uint32 i);
 /// b = MAKELONG(x, y); // mouse location
 #define M_MOUSEEXIT					(M_USER+101)
 
-/// \brief GView change notification
+/// \brief LView change notification
 ///
-/// a = (GView*) Wnd;\n
-/// b = (int) Flags; // Specific to each GView
+/// a = (LView*) Wnd;\n
+/// b = (int) Flags; // Specific to each LView
 #define M_CHANGE					(M_USER+102)
 
 /// \brief Pass a text message up to the UI to descibe whats happening
 ///
-/// a = (GView*) Wnd;\n
+/// a = (LView*) Wnd;\n
 /// b = (char*) Text; // description from window
 #define M_DESCRIBE					(M_USER+103)
 

@@ -32,7 +32,7 @@ public:
 	GString Charset;
 	int Platforms;
 
-	FileProps(GView *p, char *m, NodeType t, int plat, const char *charset)
+	FileProps(LView *p, char *m, NodeType t, int plat, const char *charset)
 	{
 		Platforms = plat;
 		Type = t;
@@ -91,7 +91,7 @@ public:
 		}
 	}
 	
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -1432,4 +1432,4 @@ void ProjectNode::OnProperties()
 			}
 		}
 	}
-}
+}

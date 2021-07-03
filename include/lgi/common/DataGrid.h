@@ -35,10 +35,10 @@ public:
 	void OnItemClick(LListItem *Item, LMouse &m);
 	void OnCreate();
 	GMessage::Result OnEvent(GMessage *Msg);
-	int OnNotify(GViewI *c, int f);
+	int OnNotify(LViewI *c, int f);
 	bool OnMouseWheel(double Lines);
 	void OnPaint(LSurface *pDC);
-	bool OnLayout(GViewLayoutInfo &Inf);
+	bool OnLayout(LViewLayoutInfo &Inf);
 	bool Remove(LListItem *Obj);
 	void Empty();
 	

@@ -67,7 +67,7 @@ public:
 	~ResMenu();
 
 	void Create(LXmlTag *load, SerialiseContext *Ctx);
-	GView *Wnd() { return dynamic_cast<GView*>(this); }
+	LView *Wnd() { return dynamic_cast<LView*>(this); }
 	void SetLanguages() { if (Group) Group->SetLanguages(); }
 	List<ResString> *GetStrs() { return (Group)?Group->GetStrs():0; }
 	ResString *GetStringByRef(int Ref);
@@ -84,7 +84,7 @@ public:
 	void OnItemSelect(GTreeItem *Item);
 
 	// Resource
-	GView *CreateUI();
+	LView *CreateUI();
 	void OnRightClick(LSubMenu *RClick);
 	void OnCommand(int Cmd);
 	int OnCommand(int Cmd, int Event, OsView hWnd);

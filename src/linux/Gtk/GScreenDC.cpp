@@ -22,7 +22,7 @@ public:
 	GColour Col;
 	LRect Client;
 
-	GView *View;
+	LView *View;
 	OsView v;
 	OsDrawable *d;
 	cairo_t *cr;
@@ -80,7 +80,7 @@ LScreenDC::LScreenDC(OsDrawable *Drawable)
 	d->d = Drawable;
 }
 
-LScreenDC::LScreenDC(GView *view, void *param)
+LScreenDC::LScreenDC(LView *view, void *param)
 {
 	d = new GScreenPrivate;
 	d->View = view;

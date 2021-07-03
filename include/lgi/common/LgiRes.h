@@ -110,7 +110,7 @@ class LgiClass LResources : public ResFactory
 	class LgiResourcesPrivate *d;
 	List<LgiDialogRes> Dialogs;
 	List<LgiMenuRes> Menus;
-	GEventsI *ScriptEngine;
+	LEventsI *ScriptEngine;
 
 	/// Array of languages available in the loaded file.
 	GArray<GLanguageId> Languages; 
@@ -137,7 +137,7 @@ public:
 	static void SetLoadStyles(bool ls) { LoadStyles = ls; }
 
 	/// This is called by UI elements to load styles if necessary.
-	static bool StyleElement(GViewI *v);
+	static bool StyleElement(LViewI *v);
 	
 	const char *GetThemeFolder();
 	void SetThemeFolder(const char *f);
@@ -161,13 +161,13 @@ public:
 		/// The ID of the resource
 		int Resource,
 		/// The view to contain all the new controls.
-		GViewI *Parent,
+		LViewI *Parent,
 		/// [Optional] The size of the dialog if needed
 		LRect *Pos = NULL,
 		/// [Optional] The name of the window.
 		GAutoString *Name = NULL,
 		/// [Optional] A scripting engine interface
-		GEventsI *ScriptEngine = NULL,
+		LEventsI *ScriptEngine = NULL,
 		/// [Optional] The current tags list for optional 
 		/// inclusion / exclusion of controls.
 		char *Tags = 0
@@ -257,21 +257,21 @@ public:
 /// \ingroup Resources
 LgiExtern LResources *LgiGetResObj(bool Warn = false, const char *filename = 0, bool LoadOnDemand = true);
 
-/// This class is used to style GView controls with CSS
-class LgiClass GViewCssCb : public LCss::ElementCallback<GViewI>
+/// This class is used to style LView controls with CSS
+class LgiClass GViewCssCb : public LCss::ElementCallback<LViewI>
 {
 public:
-	const char *GetElement(GViewI *obj)
+	const char *GetElement(LViewI *obj)
 	{
 		return obj->GetClass();
 	}
 	
-	const char *GetAttr(GViewI *obj, const char *Attr)
+	const char *GetAttr(LViewI *obj, const char *Attr)
 	{
 		return NULL;
 	}
 	
-	bool GetClasses(GString::Array &Classes, GViewI *obj)
+	bool GetClasses(GString::Array &Classes, LViewI *obj)
 	{
 		GString::Array *a = obj->CssClasses();
 		if (!a)
@@ -280,12 +280,12 @@ public:
 		return true;
 	}
 	
-	GViewI *GetParent(GViewI *obj)
+	LViewI *GetParent(LViewI *obj)
 	{
 		return obj->GetParent();
 	}
 	
-	GArray<GViewI*> GetChildren(GViewI *obj)
+	GArray<LViewI*> GetChildren(LViewI *obj)
 	{
 		return obj->IterateViews();
 	}

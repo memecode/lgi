@@ -552,7 +552,7 @@ WindowManager LGetWindowManager()
 	return Status;
 }
 
-void LFinishXWindowsStartup(GViewI *Wnd)
+void LFinishXWindowsStartup(LViewI *Wnd)
 {
 	// Get the startup ID
 	const char *EnvStartId = "DESKTOP_STARTUP_ID";

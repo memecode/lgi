@@ -26,7 +26,7 @@ enum InputCtrls
 };
 
 //////////////////////////////////////////////////////////////////////////////
-GInput::GInput(GViewI *parent, const char *InitStr, const char *Msg, const char *Title, bool Password, GInputCallback callback, void *callbackparam)
+GInput::GInput(LViewI *parent, const char *InitStr, const char *Msg, const char *Title, bool Password, GInputCallback callback, void *callbackparam)
 {
 	Callback = callback;
 	CallbackParam = callbackparam;
@@ -41,7 +41,7 @@ GInput::GInput(GViewI *parent, const char *InitStr, const char *Msg, const char 
 
 	int Cy = 0;
 	GLayoutCell *c = Tbl->GetCell(0, Cy++);
-	GView *Txt;
+	LView *Txt;
 	c->Add(Txt = new GTextLabel(-1, 5, 5, -1, -1, Msg));
 
 	LDisplayString MsgDs(SysFont, ValidStr(InitStr)?InitStr:"A");
@@ -82,7 +82,7 @@ GInput::GInput(GViewI *parent, const char *InitStr, const char *Msg, const char 
 	MoveToCenter();
 }
 
-int GInput::OnNotify(GViewI *Ctrl, int Flags)
+int GInput::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{

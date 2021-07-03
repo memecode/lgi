@@ -231,7 +231,7 @@ struct GTabPagePriv
 class TabIterator : public GArray<GTabPage*>
 {
 public:
-	TabIterator(List<GViewI> &l)
+	TabIterator(List<LViewI> &l)
 	{
 		for (auto c : l)
 		{
@@ -301,7 +301,7 @@ int GTabView::TabY()
 	return d->TabsHeight + (TAB_TXT_PAD << 1);
 }
 
-void GTabView::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+void GTabView::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	if (!Attaching)
 	{
@@ -317,9 +317,9 @@ void GTabView::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 }
 
 #if defined(WINNATIVE)
-GViewI *GTabView::FindControl(HWND hCtrl)
+LViewI *GTabView::FindControl(HWND hCtrl)
 {
-	GViewI *Ctrl = 0;
+	LViewI *Ctrl = 0;
 
 	if (hCtrl == Handle())
 	{
@@ -337,14 +337,14 @@ GViewI *GTabView::FindControl(HWND hCtrl)
 }
 #endif
 
-GViewI *GTabView::FindControl(int Id)
+LViewI *GTabView::FindControl(int Id)
 {
 	if (GetId() == Id)
 	{
 		return this;
 	}
 
-	GViewI *Ctrl;
+	LViewI *Ctrl;
 	TabIterator it(Children);
 	for (int i=0; i<it.Length(); i++)
 	{
@@ -355,9 +355,9 @@ GViewI *GTabView::FindControl(int Id)
 	return 0;
 }
 
-bool GTabView::Attach(GViewI *parent)
+bool GTabView::Attach(LViewI *parent)
 {
-	bool Status = GView::Attach(parent);
+	bool Status = LView::Attach(parent);
 	if (Status)
 	{
 		TabIterator it(Children);
@@ -387,10 +387,10 @@ void GTabView::OnCreate()
 	LResources::StyleElement(this);			
 
 	d->Depth = 0;
-	GViewI *p = this;
+	LViewI *p = this;
 	while ((p = p->GetParent()))
 	{
-		if (p == (GViewI*)GetWindow())
+		if (p == (LViewI*)GetWindow())
 			break;
 		GTabView *tv = dynamic_cast<GTabView*>(p);
 		if (tv)
@@ -438,10 +438,10 @@ void GTabView::Value(int64 i)
 
 GMessage::Result GTabView::OnEvent(GMessage *Msg)
 {
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
-int GTabView::OnNotify(GViewI *Ctrl, int Flags)
+int GTabView::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (GetParent())
 	{
@@ -547,7 +547,7 @@ LRect &GTabView::GetTabClient()
 	}
 	else
 	{
-		d->TabClient = GView::GetClient();
+		d->TabClient = LView::GetClient();
 		d->TabClient.Offset(-d->TabClient.x1, -d->TabClient.y1);
 		d->TabClient.Size(2, 2);
 		d->TabClient.y1 += TabY();
@@ -795,7 +795,7 @@ void GTabView::OnPaint(LSurface *pDC)
 	{
 		CalcInset();
 
-		GView *Pv = GetParent() ? GetParent()->GetGView() : NULL;
+		LView *Pv = GetParent() ? GetParent()->GetGView() : NULL;
 		GColour NoPaint = (Pv ? Pv : this)->StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 		if (!NoPaint.IsTransparent())
 		{
@@ -1135,7 +1135,7 @@ void GTabView::OnPosChange()
 				r.Offset(-r.x1, -r.y1);
 				LRegion Rgn(r);
 
-				for (GViewI *c: p->IterateViews())
+				for (LViewI *c: p->IterateViews())
 					c->Pour(Rgn);
 			}
 			else
@@ -1157,21 +1157,21 @@ void GTabView::OnPosChange()
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-char *_lgi_gview_cmp(GView *a, GView *b)
+char *_lgi_gview_cmp(LView *a, LView *b)
 {
 	static char Str[256];
 	if (a && b)
 	{
 		#if !LGI_VIEW_HANDLE
 		sprintf_s(Str, sizeof(Str),
-				"GView: %p,%p",
-				dynamic_cast<GView*>(a),
-				dynamic_cast<GView*>(b));
+				"LView: %p,%p",
+				dynamic_cast<LView*>(a),
+				dynamic_cast<LView*>(b));
 		#else
 		sprintf_s(Str, sizeof(Str),
-				"GView: %p,%p Hnd: %p,%p",
-				dynamic_cast<GView*>(a),
-				dynamic_cast<GView*>(b),
+				"LView: %p,%p Hnd: %p,%p",
+				dynamic_cast<LView*>(a),
+				dynamic_cast<LView*>(b),
 				(void*)a->Handle(),
 				(void*)b->Handle());
 		#endif
@@ -1244,7 +1244,7 @@ void GTabPage::OnButtonClick(LMouse &m)
 
 void GTabPage::OnTabClick(LMouse &m)
 {
-	GViewI *v = GetId() > 0 ? this : GetParent();
+	LViewI *v = GetId() > 0 ? this : GetParent();
 	v->SendNotify(GNotifyItem_Click);
 }
 
@@ -1293,7 +1293,7 @@ const char *GTabPage::Name()
 
 bool GTabPage::Name(const char *name)
 {
-	bool Status = GView::Name(name);
+	bool Status = LView::Name(name);
 	d->Ds.Reset();
 	if (GetParent())
 		GetParent()->Invalidate();
@@ -1381,7 +1381,7 @@ void GTabPage::PaintTab(LSurface *pDC, bool Selected)
 	#endif
 }
 
-bool GTabPage::Attach(GViewI *parent)
+bool GTabPage::Attach(LViewI *parent)
 {
 	bool Status = false;
 
@@ -1389,7 +1389,7 @@ bool GTabPage::Attach(GViewI *parent)
 	{
 		if (!IsAttached())
 		{
-			Status = GView::Attach(parent);
+			Status = LView::Attach(parent);
 		}
 		else
 		{
@@ -1411,10 +1411,10 @@ bool GTabPage::Attach(GViewI *parent)
 
 GMessage::Result GTabPage::OnEvent(GMessage *Msg)
 {
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
-void GTabPage::Append(GViewI *Wnd)
+void GTabPage::Append(LViewI *Wnd)
 {
 	if (Wnd)
 	{
@@ -1438,7 +1438,7 @@ void GTabPage::Append(GViewI *Wnd)
 	}
 }
 
-bool GTabPage::Remove(GViewI *Wnd)
+bool GTabPage::Remove(LViewI *Wnd)
 {
 	if (Wnd)
 	{
@@ -1467,7 +1467,7 @@ void GTabPage::SetFont(LFont *Font, bool OwnIt)
 {
 	d->Ds.Reset();
 	Invalidate();
-	return GView::SetFont(Font, OwnIt);
+	return LView::SetFont(Font, OwnIt);
 }
 
 void GTabPage::OnPaint(LSurface *pDC)
@@ -1497,7 +1497,7 @@ bool GTabPage::LoadFromResource(int Res)
 	GAutoString n;
 
 	auto ch = IterateViews();
-	GViewI *v;
+	LViewI *v;
 	while ((v = ch[0]))
 	{
 		v->Detach();

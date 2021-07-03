@@ -27,7 +27,7 @@ public:
 	List<char> In;
 	FtpTransferMode CurMode;
 	GAutoPtr<GSocket> Listen;	// listen for data
-	GAutoPtr<GSocketI> Data;	// get data
+	GAutoPtr<LSocketI> Data;	// get data
 	GFile *F;
 	char *Charset;
 	GString ErrBuf;
@@ -439,7 +439,7 @@ void IFtp::GetHost(GString *Host, int *Port)
 	*Port = d->Port;
 }
 
-FtpOpenStatus IFtp::Open(GSocketI *S, char *RemoteHost, int Port, char *User, char *Password)
+FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, char *Password)
 {
 	FtpOpenStatus Status = FO_ConnectFailed;
 
@@ -1143,7 +1143,7 @@ bool IFtp::SetupData(bool Binary)
 		{
 			if (Socket)
 			{
-				GStreamI *nstream = Socket->Clone();
+				LStreamI *nstream = Socket->Clone();
 				GSocket *nsock = dynamic_cast<GSocket*>(nstream);
 				LgiAssert(nsock != NULL);
 				d->Data.Reset(nsock);

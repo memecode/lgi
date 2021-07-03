@@ -84,7 +84,7 @@ ShowLanguagesDlg::~ShowLanguagesDlg()
 	DeleteObj(d);
 }
 
-int ShowLanguagesDlg::OnNotify(GViewI *n, int f)
+int ShowLanguagesDlg::OnNotify(LViewI *n, int f)
 {
 	switch (n->GetId())
 	{

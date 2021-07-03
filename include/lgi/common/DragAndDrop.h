@@ -71,7 +71,7 @@ struct LgiClass GDragData
 		return IsFormat(LGI_StreamDropFormat);
 	}
 	
-	bool AddFileStream(const char *LeafName, const char *MimeType, GAutoPtr<GStreamI> Stream)
+	bool AddFileStream(const char *LeafName, const char *MimeType, GAutoPtr<LStreamI> Stream)
 	{
 		if (!LeafName || !MimeType || !Stream)
 			return false;
@@ -173,7 +173,7 @@ public:
 
 	/// Start a drag operation
 	/// \returns The operation that took effect: #DROPEFFECT_NONE, #DROPEFFECT_COPY etc. 
-	int Drag(GView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon = NULL);
+	int Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon = NULL);
 
 	/// Called when window is registered
 	virtual void OnRegister(bool Suc) {}
@@ -226,7 +226,7 @@ class LgiClass GDragDropTarget
 #endif
 {
 private:
-	GView *To;
+	LView *To;
 	GDragFormats Formats;
 
 	#ifdef __GTK_H__
@@ -266,7 +266,7 @@ public:
 	~GDragDropTarget();
 
 	/// call this when you have a operating system view handle (e.g. HWND/Window/HIViewRef)
-	void SetWindow(GView *To);
+	void SetWindow(LView *To);
 
 	// Override these
 
@@ -313,8 +313,8 @@ public:
 	#ifdef MAC
 		#if LGI_COCOA
 		#elif LGI_CARBON
-		OSStatus OnDragWithin(GView *v, DragRef Drag);
-		OSStatus OnDragReceive(GView *v, DragRef Drag);
+		OSStatus OnDragWithin(LView *v, DragRef Drag);
+		OSStatus OnDragReceive(LView *v, DragRef Drag);
 		#endif
 	#endif
 };

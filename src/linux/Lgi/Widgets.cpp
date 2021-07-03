@@ -70,7 +70,7 @@ int GDialog::GetButtonId()
 	return d->BtnId;
 }
 
-int GDialog::OnNotify(GViewI *Ctrl, int Flags)
+int GDialog::OnNotify(LViewI *Ctrl, int Flags)
 {
 	GButton *b = dynamic_cast<GButton*>(Ctrl);
 	if (b)
@@ -92,7 +92,7 @@ void GDialog::Quit(bool DontDelete)
 	if (d->IsModal)
 		EndModal(0);
 	else
-		GView::Quit(DontDelete);
+		LView::Quit(DontDelete);
 }
 
 void GDialog::OnPosChange()
@@ -100,8 +100,8 @@ void GDialog::OnPosChange()
 	GWindow::OnPosChange();
     if (Children.Length() == 1)
     {
-        List<GViewI>::I it = Children.begin();
-        GTableLayout *t = dynamic_cast<GTableLayout*>((GViewI*)it);
+        List<LViewI>::I it = Children.begin();
+        GTableLayout *t = dynamic_cast<GTableLayout*>((LViewI*)it);
         if (t)
         {
             LRect r = GetClient();
@@ -218,15 +218,15 @@ void GDialog::EndModeless(int Code)
 	Quit(Code);
 }
 
-extern GButton *FindDefault(GView *w);
+extern GButton *FindDefault(LView *w);
 
 GMessage::Param GDialog::OnEvent(GMessage *Msg)
 {
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GControl::GControl(OsView view) : GView(view)
+GControl::GControl(OsView view) : LView(view)
 {
 	Pos.ZOff(10, 10);
 }

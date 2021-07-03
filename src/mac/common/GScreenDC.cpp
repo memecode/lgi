@@ -10,7 +10,7 @@ class GScreenPrivate
 public:
 	CGContextRef Ctx;
 	GWindow *Wnd;
-	GView *View;
+	LView *View;
 	LRect Rc;
 	GArray<LRect> Stack;
 	GColour c;
@@ -33,7 +33,7 @@ public:
 	}
 
 	#if LGI_COCOA
-	void SetContext(GView *v)
+	void SetContext(LView *v)
 	{
 		Rc = v->GetClient();
 		Ctx = [NSGraphicsContext currentContext].CGContext;
@@ -79,7 +79,7 @@ public:
 		#endif
 	}
 
-	GScreenPrivate(GView *v, void *param = NULL)
+	GScreenPrivate(LView *v, void *param = NULL)
 	{
 		Init();
 		View = v;
@@ -145,7 +145,7 @@ LScreenDC::LScreenDC(GWindow *w, void *param)
 	d->Wnd = w;
 }
 
-LScreenDC::LScreenDC(GView *v, void *param)
+LScreenDC::LScreenDC(LView *v, void *param)
 {
 	d = new GScreenPrivate(v, param);
 }
@@ -172,7 +172,7 @@ bool LScreenDC::SupportsAlphaCompositing()
 	return true;
 }
 
-GView *LScreenDC::GetView()
+LView *LScreenDC::GetView()
 {
 	return d->View;
 }

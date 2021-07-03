@@ -5,7 +5,7 @@
 
 /// This is a vertical or horizontal layout box, similar to the
 /// old GSplitter control except it can handle any number of children
-class LgiClass GBox : public GView
+class LgiClass GBox : public LView
 {
 	struct GBoxPriv *d;
 
@@ -27,8 +27,8 @@ public:
 	bool IsVertical();
 	void SetVertical(bool v);
 	Spacer *GetSpacer(int i);
-	GViewI *GetViewAt(int i);
-	bool SetViewAt(uint32_t i, GViewI *v);
+	LViewI *GetViewAt(int i);
+	bool SetViewAt(uint32_t i, LViewI *v);
 	int64 Value();
 	void Value(int64 i);
 	
@@ -36,14 +36,14 @@ public:
 	void OnPaint(LSurface *pDC);
 	void OnPosChange();
 	void OnMouseClick(LMouse &m);
-	bool OnViewMouse(GView *v, LMouse &m);
+	bool OnViewMouse(LView *v, LMouse &m);
 	void OnMouseMove(LMouse &m);
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
 	GMessage::Result OnEvent(GMessage *Msg);
 	bool Pour(LRegion &r);
 	LgiCursor GetCursor(int x, int y);
-	bool OnLayout(GViewLayoutInfo &Inf);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	bool OnLayout(LViewLayoutInfo &Inf);
+	int OnNotify(LViewI *Ctrl, int Flags);
 
 	bool Serialize(GDom *Dom, const char *OptName, bool Write);	
 	bool SetSize(int ViewIndex, LCss::Len Size);

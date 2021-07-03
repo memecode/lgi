@@ -18,7 +18,7 @@ class LSsh : public LCancel
 protected:
 	GTextLog *Log;
 	ssh_session Ssh;
-	GViewI *TxtLabel;
+	LViewI *TxtLabel;
 	GProgress *Prog;
 	bool Connected;
 

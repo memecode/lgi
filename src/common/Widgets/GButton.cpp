@@ -109,9 +109,9 @@ GButton::~GButton()
 	DeleteObj(d);
 }
 
-int GButton::OnNotify(GViewI *Ctrl, int Flags)
+int GButton::OnNotify(LViewI *Ctrl, int Flags)
 {
-	if (Ctrl == (GViewI*)this && Flags == GNotify_Activate)
+	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
 	{
 		OnClick();
 	}
@@ -184,14 +184,14 @@ void GButton::OnStyleChange()
 
 bool GButton::Name(const char *n)
 {
-	bool Status = GView::Name(n);
+	bool Status = LView::Name(n);
 	OnStyleChange();
 	return Status;
 }
 
 bool GButton::NameW(const char16 *n)
 {
-	bool Status = GView::NameW(n);
+	bool Status = LView::NameW(n);
 	OnStyleChange();
 	return Status;
 }
@@ -199,14 +199,14 @@ bool GButton::NameW(const char16 *n)
 void GButton::SetFont(LFont *Fnt, bool OwnIt)
 {
 	LgiAssert(Fnt && Fnt->Handle());
-	GView::SetFont(Fnt, OwnIt);
+	LView::SetFont(Fnt, OwnIt);
 	OnStyleChange();
 	Invalidate();
 }
 
 GMessage::Result GButton::OnEvent(GMessage *Msg)
 {
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 void GButton::OnMouseClick(LMouse &m)
@@ -351,9 +351,9 @@ void GButton::OnClick()
 	int Id = GetId();
 	if (Id)
 	{
-		GViewI *n = GetNotify();
-		GViewI *p = GetParent();
-		GViewI *target = n ? n : p;
+		LViewI *n = GetNotify();
+		LViewI *p = GetParent();
+		LViewI *target = n ? n : p;
 		if (target)
 		{
 			#if LGI_VIEW_HANDLE
@@ -492,7 +492,7 @@ void GButton::OnAttach()
 {
 	LResources::StyleElement(this);
 	OnStyleChange();
-	GView::OnAttach();
+	LView::OnAttach();
 
 	if (d->WantsDefault)
 	{
@@ -517,7 +517,7 @@ void GButton::SetPreferredSize(int x, int y)
 	SetPos(r);
 }
 
-bool GButton::OnLayout(GViewLayoutInfo &Inf)
+bool GButton::OnLayout(LViewLayoutInfo &Inf)
 {
 	LPoint Dpi(96, 96);
 	auto Css = GetCss();

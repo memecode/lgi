@@ -13,7 +13,7 @@
 #define BTN_SCALE		1.0f
 #endif
 
-LAlert::LAlert(	GViewI *parent,
+LAlert::LAlert(	LViewI *parent,
 				const char *Title,
 				const char *Text,
 				const char *Btn1,
@@ -77,7 +77,7 @@ void LAlert::SetAppModal()
     #endif
 }
 
-int LAlert::OnNotify(GViewI *Ctrl, int Flags)
+int LAlert::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{

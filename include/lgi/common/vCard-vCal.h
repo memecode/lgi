@@ -74,12 +74,12 @@ protected:
 	bool ParseDate(LDateTime &out, char *in);
 	bool ParseDuration(LDateTime &Out, int &Sign, char *In);
 
-	void Fold(GStreamI &o, const char *i, int pre_chars = 0);
+	void Fold(LStreamI &o, const char *i, int pre_chars = 0);
 	char *Unfold(char *In);
 	char *UnMultiLine(char *In);
 
-	bool ReadField(GStreamI &s, GString &Name, ParamArray *Type, GString &Data);
-	void WriteField(GStreamI &s, const char *Name, ParamArray *Type, const char *Data);
+	bool ReadField(LStreamI &s, GString &Name, ParamArray *Type, GString &Data);
+	void WriteField(LStreamI &s, const char *Name, ParamArray *Type, const char *Data);
 
 public:
 	VIo();
@@ -89,8 +89,8 @@ public:
 class VCard : public VIo
 {
 public:
-	bool Import(GDataPropI *c, GStreamI *s);
-	bool Export(GDataPropI *c, GStreamI *s);
+	bool Import(GDataPropI *c, LStreamI *s);
+	bool Export(GDataPropI *c, LStreamI *s);
 };
 
 class VCal : public VIo
@@ -103,8 +103,8 @@ public:
         IsCal = false;
     }
 
-	bool Import(GDataPropI *c, GStreamI *s);
-	bool Export(GDataPropI *c, GStreamI *s);
+	bool Import(GDataPropI *c, LStreamI *s);
+	bool Export(GDataPropI *c, LStreamI *s);
 };
 
 #endif

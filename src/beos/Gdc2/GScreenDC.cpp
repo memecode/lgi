@@ -33,7 +33,7 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-LScreenDC::LScreenDC(GView *view, void *Param)
+LScreenDC::LScreenDC(LView *view, void *Param)
 {
 	LgiAssert(view);
 

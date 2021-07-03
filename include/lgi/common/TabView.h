@@ -64,15 +64,15 @@ public:
 	size_t GetTabs();
 	
 	// Impl
-	bool Attach(GViewI *parent);
+	bool Attach(LViewI *parent);
 	GMessage::Result OnEvent(GMessage *Msg);
-	GViewI *FindControl(int Id);
-	int OnNotify(GViewI *Ctrl, int Flags);
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
+	LViewI *FindControl(int Id);
+	int OnNotify(LViewI *Ctrl, int Flags);
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
 	LRect &GetTabClient();
 
 	#if defined(WINNATIVE) && !defined(LGI_SDL)
-	GViewI *FindControl(HWND hCtrl);
+	LViewI *FindControl(HWND hCtrl);
 	#endif
 
 	int HitTest(LMouse &m);
@@ -87,13 +87,13 @@ public:
 };
 
 class LgiClass GTabPage :
-	public GView,
+	public LView,
 	public LResourceLoad,
 	public ResObject
 {
 	friend class GTabView;
 	struct GTabPagePriv *d;
-	bool Attach(GViewI *parent) override;
+	bool Attach(LViewI *parent) override;
 
 	// Vars
 	GTabView *TabCtrl;
@@ -144,8 +144,8 @@ public:
 	void OnStyleChange();
 	void SetFont(LFont *Font, bool OwnIt = false) override;
 
-	void Append(GViewI *Wnd);
-	bool Remove(GViewI *Wnd);
+	void Append(LViewI *Wnd);
+	bool Remove(LViewI *Wnd);
 	bool LoadFromResource(int Resource);
 	void Select();
 };

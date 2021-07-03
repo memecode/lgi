@@ -7,7 +7,7 @@ typedef BApplication		OsApplication;
 typedef BView				*OsPainter;
 typedef BMenuItem			*OsMenuItem;
 
-class GView;
+class LView;
 
 class LgiClass BViewRedir : public BView
 {
@@ -24,14 +24,14 @@ class LgiClass BViewRedir : public BView
 	void MouseMoved(BPoint point, uint32 transit, const BMessage *message);
 	bool QuitRequested();
 
-	GView *Wnd;
+	LView *Wnd;
 	uint32 WndBtn;
 	
 public:
-	BViewRedir(GView *Wnd, uint32 Resize = B_FOLLOW_LEFT | B_FOLLOW_TOP);
+	BViewRedir(LView *Wnd, uint32 Resize = B_FOLLOW_LEFT | B_FOLLOW_TOP);
 	~BViewRedir();
 	
-	GView *WindowHandle() { return Wnd; }
+	LView *WindowHandle() { return Wnd; }
 };
 
 typedef BViewRedir DefaultOsView;
@@ -40,11 +40,11 @@ class LgiClass GWnd : public BWindow
 {
 	friend class GWindow;
 	
-	GView *Notify;
+	LView *Notify;
 
 public:
-	GWnd(GView *notify);
-	GWnd(GView *notify, BRect frame, char *title, window_type type, uint32 flags, uint32 workspaces = B_CURRENT_WORKSPACE);
+	GWnd(LView *notify);
+	GWnd(LView *notify, BRect frame, char *title, window_type type, uint32 flags, uint32 workspaces = B_CURRENT_WORKSPACE);
 	~GWnd();
 	
 	bool QuitRequested();

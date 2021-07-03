@@ -38,7 +38,7 @@ public:
 	virtual ~GPrinter();
 
 	/// Browse to a printer
-	bool Browse(GView *Parent);
+	bool Browse(LView *Parent);
 
 	/// Start a print job
 	bool Print
@@ -50,7 +50,7 @@ public:
 		/// [Optional] The maximum number of pages to print
 		int Pages = -1,
 		/// [Optional] The parent window for the printer selection dialog
-		GView *Parent = NULL
+		LView *Parent = NULL
 	);
 	
 	/// Gets any available error message...

@@ -51,7 +51,7 @@ public:
 		}
 	}
 	
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		if (Lst && Ctrl->GetId() == 1)
 		{
@@ -103,7 +103,7 @@ GHistory::~GHistory()
 	DeleteObj(d);
 	DeleteArrays();
 }
-bool GHistory::OnLayout(GViewLayoutInfo &Inf)
+bool GHistory::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (!Inf.Width.Min)
 		Inf.Width.Min = Inf.Width.Max = 24;
@@ -207,7 +207,7 @@ void GHistory::OnPopupClose()
 class GHistoryFactory : public GViewFactory
 {
 public:
-	virtual GView *NewView
+	virtual LView *NewView
 	(
 		const char *Class,
 		LRect *Pos,

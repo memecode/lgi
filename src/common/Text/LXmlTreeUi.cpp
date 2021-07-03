@@ -84,7 +84,7 @@ LXmlTreeUi::~LXmlTreeUi()
 	DeleteObj(d);
 }
 
-void LXmlTreeUi::EmptyAll(GViewI *Ui)
+void LXmlTreeUi::EmptyAll(LViewI *Ui)
 {
 	if (Ui)
 	{
@@ -97,7 +97,7 @@ void LXmlTreeUi::EmptyAll(GViewI *Ui)
 	}
 }
 
-void LXmlTreeUi::EnableAll(GViewI *Ui, bool Enable)
+void LXmlTreeUi::EnableAll(LViewI *Ui, bool Enable)
 {
 	if (Ui)
 	{
@@ -186,7 +186,7 @@ void LXmlTreeUi::EmptyMaps()
 	d->Maps.DeleteObjects();
 }
 
-int GetCtrlType(GViewI *v)
+int GetCtrlType(LViewI *v)
 {
 	if (v)
 	{
@@ -248,7 +248,7 @@ int GetDataType(char *str)
 	return GV_NULL;
 }
 
-bool LXmlTreeUi::Convert(GDom *Tag, GViewI *Ui, bool ToUI)
+bool LXmlTreeUi::Convert(GDom *Tag, LViewI *Ui, bool ToUI)
 {
 	bool Status = false;
 
@@ -336,7 +336,7 @@ bool LXmlTreeUi::Convert(GDom *Tag, GViewI *Ui, bool ToUI)
 			// for (Mapping *Map = d->Maps.First(&Attr); Map; Map = d->Maps.Next(&Attr))
 			for (auto Map : d->Maps)
 			{
-				GViewI *c = Ui->FindControl(Map.value->Id);
+				LViewI *c = Ui->FindControl(Map.value->Id);
 				if (c)
 				{
 					int Type = Map.value->Hint ? Map.value->Hint : GetCtrlType(c);

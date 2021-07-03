@@ -10,10 +10,10 @@ class GFindInFiles : public GDialog
 	struct GFindInFilesPriv *d;
 	
 public:
-	GFindInFiles(GViewI *Parent, GAutoString Search, GDom *Store);
+	GFindInFiles(LViewI *Parent, GAutoString Search, GDom *Store);
 	~GFindInFiles();
 	
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
 #endif

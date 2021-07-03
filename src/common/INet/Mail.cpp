@@ -488,7 +488,7 @@ FileDescriptor::FileDescriptor()
 	OwnEmbeded = false;
 }
 
-FileDescriptor::FileDescriptor(GStreamI *embed, int64 offset, int64 size, char *name)
+FileDescriptor::FileDescriptor(LStreamI *embed, int64 offset, int64 size, char *name)
 {
 	Embeded = embed;
 	Offset = offset;
@@ -571,7 +571,7 @@ LMutex *FileDescriptor::GetLock()
 	return Lock;
 }
 
-GStreamI *FileDescriptor::GotoObject()
+LStreamI *FileDescriptor::GotoObject()
 {
 	if (Embeded)
 	{
@@ -815,7 +815,7 @@ MailProtocol::~MailProtocol()
 	CharsetPrefs.DeleteArrays();
 }
 
-void MailProtocol::Log(const char *Str, GSocketI::SocketMsgType type)
+void MailProtocol::Log(const char *Str, LSocketI::SocketMsgType type)
 {
 	if (Logger && Str)
 	{
@@ -844,7 +844,7 @@ bool MailProtocol::Error(const char *file, int line, const char *msg, ...)
 	vsprintf_s(s, sizeof(s), msg, a);
 	va_end(a);
 
-	Log(s, GSocketI::SocketMsgError);
+	Log(s, LSocketI::SocketMsgError);
 	LgiTrace("%s:%i - Error: %s", file, line, s);
 	return false;
 }
@@ -869,7 +869,7 @@ bool MailProtocol::Write(const char *Buf, bool LogWrite)
 		
 		if (LogWrite)
 		{
-			Log(p, GSocketI::SocketMsgSend);
+			Log(p, LSocketI::SocketMsgSend);
 		}
 	}
 	return Status;
@@ -917,7 +917,7 @@ MailSmtp::~MailSmtp()
 {
 }
 
-bool MailSmtp::Open(GSocketI *S,
+bool MailSmtp::Open(LSocketI *S,
 					const char *RemoteHost,
 					const char *LocalDomain,
 					const char *UserName,
@@ -961,7 +961,7 @@ bool MailSmtp::Open(GSocketI *S,
 
 			char Msg[256];
 			sprintf_s(Msg, sizeof(Msg), "Connecting to %s:%i...", Server.Get(), Port);
-			Log(Msg, GSocketI::SocketMsgInfo);
+			Log(Msg, LSocketI::SocketMsgInfo);
 	
 			if (!Socket->Open(Server, Port))
 				Error(_FL, "Failed to connect socket to %s:%i\n", Server.Get(), Port);
@@ -1364,13 +1364,13 @@ char *CreateAddressTag(List<AddressDescriptor> &l, int Type, List<char> *Charset
 // This class implements a pipe that writes to a socket
 class SocketPipe : public GStringPipe
 {
-	GSocketI *s;
+	LSocketI *s;
 	MailProtocolProgress *p;
 
 public:
 	bool Status;
 
-	SocketPipe(GSocketI *socket, MailProtocolProgress *progress)
+	SocketPipe(LSocketI *socket, MailProtocolProgress *progress)
 	{
 		s = socket;
 		p = progress;
@@ -1602,7 +1602,7 @@ bool MailSmtp::ReadReply(const char *Str, GStringPipe *Pipe, MailProtocolError *
 						}
 
 						// Log
-						Log(Start, atoi(Start) >= 400 ? GSocketI::SocketMsgError : GSocketI::SocketMsgReceive);
+						Log(Start, atoi(Start) >= 400 ? LSocketI::SocketMsgError : LSocketI::SocketMsgReceive);
 
 						// exit loop
 						Pos = sizeof(Buffer);
@@ -1610,7 +1610,7 @@ bool MailSmtp::ReadReply(const char *Str, GStringPipe *Pipe, MailProtocolError *
 					}
 					else
 					{
-						Log(Start, GSocketI::SocketMsgReceive);
+						Log(Start, LSocketI::SocketMsgReceive);
 
 						// more lines follow
 						Start = Eol;
@@ -1712,7 +1712,7 @@ MailSendFolder::~MailSendFolder()
 	DeleteObj(d);
 }
 
-bool MailSendFolder::Open(GSocketI *S, const char *RemoteHost, const char *LocalDomain, const char *UserName, const char *Password, int Port, int Flags)
+bool MailSendFolder::Open(LSocketI *S, const char *RemoteHost, const char *LocalDomain, const char *UserName, const char *Password, int Port, int Flags)
 {
 	return LDirExists(d->Path);
 }
@@ -1794,7 +1794,7 @@ MailReceiveFolder::~MailReceiveFolder()
 	DeleteObj(d);
 }
 
-bool MailReceiveFolder::Open(GSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags)
+bool MailReceiveFolder::Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags)
 {
 	// We don't use the socket so just free it here...
 	DeleteObj(S);
@@ -2035,7 +2035,7 @@ bool MailPop3::ReadReply()
 		char *Cr = strchr(Buffer, '\r');
 		if (Cr) *Cr = 0;
 		if (ValidStr(Buffer))
-			Log(Buffer, (Status) ? GSocketI::SocketMsgReceive : GSocketI::SocketMsgError);
+			Log(Buffer, (Status) ? LSocketI::SocketMsgReceive : LSocketI::SocketMsgError);
 		if (Cr) *Cr = '\r';
 
 		if (!Status)
@@ -2076,7 +2076,7 @@ bool MailPop3::ListCmd(const char *Cmd, LHashTbl<ConstStrKey<char,false>, bool> 
 
 #define OPT_Pop3NoApop		"NoAPOP"
 
-bool MailPop3::Open(GSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags)
+bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags)
 {
 	bool Status = false;
 	// bool RemoveMail = false;
@@ -2229,7 +2229,7 @@ bool MailPop3::Open(GSocketI *S, const char *RemoteHost, int Port, const char *U
 
 						sprintf_s(Buffer, sizeof(Buffer), "PASS %s\r\n", pass);
 						VERIFY_ONERR(Write(0, false));
-						Log("PASS *******", GSocketI::SocketMsgSend);
+						Log("PASS *******", LSocketI::SocketMsgSend);
 
 						Authed = ReadReply();
 					}
@@ -2297,7 +2297,7 @@ bool MailPop3::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 		for (unsigned n = 0; n<Trans.Length(); n++)
 		{
 			int Message = Trans[n]->Index;
-			GStreamI *Msg = Trans[n]->Stream;
+			LStreamI *Msg = Trans[n]->Stream;
 			if (Msg)
 			{
 				int Size = 0;
@@ -2382,7 +2382,7 @@ bool MailPop3::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 								Ok = Buffer[0] == '+';
 								if (Ok)
 								{
-									// Log(Buffer, GSocketI::SocketMsgReceive);
+									// Log(Buffer, LSocketI::SocketMsgReceive);
 
 									// The Buffer was zero'd at the beginning garrenteeing
 									// NULL termination
@@ -2402,7 +2402,7 @@ bool MailPop3::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 								}
 								else
 								{
-									Log(Buffer, GSocketI::SocketMsgError);
+									Log(Buffer, LSocketI::SocketMsgError);
 									Finished = true;								
 								}
 								break;

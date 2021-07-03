@@ -7,7 +7,7 @@
 #include "LgiRes_Dialog.h"
 #include "LgiRes_Menu.h"
 
-#define SetCtrlFocus(id)	{ GViewI *v = FindControl(id); if (v) v->Focus(true); }
+#define SetCtrlFocus(id)	{ LViewI *v = FindControl(id); if (v) v->Focus(true); }
 enum Msgs
 {
 	M_SEARCH = M_USER + 100,
@@ -268,7 +268,7 @@ GMessage::Result SearchThread::OnEvent(GMessage *Msg)
 ////////////////////////////////////////////////////////////////////////////////////
 // Search window
 
-void FillLangs(GViewI *v, int id, List<GLanguage> &l)
+void FillLangs(LViewI *v, int id, List<GLanguage> &l)
 {
 	GCombo *c;
 	if (!v->GetViewById(id, c))
@@ -352,7 +352,7 @@ void Search::OnCheck()
 	#endif
 }
 
-int Search::OnNotify(GViewI *c, int f)
+int Search::OnNotify(LViewI *c, int f)
 {
 	switch (c->GetId())
 	{
@@ -737,7 +737,7 @@ void Results::OnPosChange()
 {
 	LRect Client = GetClient();
 
-	GViewI *v;
+	LViewI *v;
 	if (GetViewById(IDC_LIST, v))
 	{
 		LRect r = v->GetPos();
@@ -755,7 +755,7 @@ void Results::OnPosChange()
 	}
 }
 
-int Results::OnNotify(GViewI *v, int f)
+int Results::OnNotify(LViewI *v, int f)
 {
 	switch (v->GetId())
 	{

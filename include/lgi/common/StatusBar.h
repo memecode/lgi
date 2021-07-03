@@ -23,7 +23,7 @@ public:
 };
 
 class LgiClass GStatusPane :
-	public GView
+	public LView
 {
 	friend class GStatusBar;
 

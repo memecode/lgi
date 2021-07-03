@@ -80,12 +80,12 @@ void LgiMenuItem::DrawContent()
 status_t LgiMenuItem::Invoke(BMessage *message)
 {
 	GMenu *m = i->Menu;
-	GViewI *p = (m) ? m->WindowHandle() : 0;
+	LViewI *p = (m) ? m->WindowHandle() : 0;
 	BView *v = (p) ? p->Handle() : 0;
 	if (v)
 	{
 		SetTarget(v);
-		// printf("LgiMenuItem::Invoke Handler=%p, Looper=%p Menu=%p GView=%p BView=%p\n", h, l, m, p, v);
+		// printf("LgiMenuItem::Invoke Handler=%p, Looper=%p Menu=%p LView=%p BView=%p\n", h, l, m, p, v);
 	}
 
 	BMenuItem::Invoke(message);
@@ -283,7 +283,7 @@ void GSubMenu::_CopyMenu(BMenu *To, GSubMenu *From)
 	}
 }
 
-int GSubMenu::Float(GView *Parent, int x, int y, bool Left)
+int GSubMenu::Float(LView *Parent, int x, int y, bool Left)
 {
 	if (Info)
 	{
@@ -802,7 +802,7 @@ LFont *GMenu::GetFont()
 	return _Font ? _Font : SysFont;
 }
 
-bool GMenu::Attach(GViewI *p)
+bool GMenu::Attach(LViewI *p)
 {
 	bool Status = false;
 	Window = p;
@@ -835,7 +835,7 @@ bool GMenu::Detach()
 	return Status;
 }
 
-bool GMenu::OnKey(GView *v, LKey &k)
+bool GMenu::OnKey(LView *v, LKey &k)
 {
 	GMenuItem *m = MatchShortcut(k);
 	if (m)

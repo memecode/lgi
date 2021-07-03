@@ -71,7 +71,7 @@ void GCheckBox::OnAttach()
 {
 	LResources::StyleElement(this);
 	OnStyleChange();
-	GView::OnAttach();
+	LView::OnAttach();
 
 	SetFont(SysFont);
 	Value(d->InitState);
@@ -98,17 +98,17 @@ void GCheckBox::ThreeState(bool t)
 
 bool GCheckBox::Name(const char *n)
 {
-	return GView::Name(n);
+	return LView::Name(n);
 }
 
 bool GCheckBox::NameW(const char16 *n)
 {
-	return GView::NameW(n);
+	return LView::NameW(n);
 }
 
 void GCheckBox::SetFont(LFont *Fnt, bool OwnIt)
 {
-	GView::SetFont(Fnt, OwnIt);
+	LView::SetFont(Fnt, OwnIt);
 }
 
 int GCheckBox::SysOnNotify(int Msg, int Code)
@@ -122,9 +122,9 @@ int GCheckBox::SysOnNotify(int Msg, int Code)
 	return 0;
 }
 
-int GCheckBox::OnNotify(GViewI *Ctrl, int Flags)
+int GCheckBox::OnNotify(LViewI *Ctrl, int Flags)
 {
-	if (Ctrl == (GViewI*)this && Flags == GNotify_Activate)
+	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
 	{
 		Value(!Value());
 	}
@@ -217,7 +217,7 @@ void GCheckBox::Value(int64 i)
 	}
 }
 
-bool GCheckBox::OnLayout(GViewLayoutInfo &Inf)
+bool GCheckBox::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (Inf.Width.Max)
 	{

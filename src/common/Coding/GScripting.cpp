@@ -407,7 +407,7 @@ class LScriptEnginePrivate : public LScriptUtils, public GCompileTools
 public:
 	GScriptEngine1 *Engine;
 	GStringPipe Term;
-	GViewI *Parent;
+	LViewI *Parent;
 	char16 *Script;
 	GArray<StackFrame*> Stack;
 	LScriptContext *Context;
@@ -936,7 +936,7 @@ bool GDomRef::Set(LScriptEnginePrivate *Priv, LVariant &v)
 #define CompToInt(v) \
 	(v[0] == '0' && v[1] == 'x') ? htoi(v + 2) : atoi(v);
 
-GScriptEngine1::GScriptEngine1(GViewI *parent, LScriptContext *context)
+GScriptEngine1::GScriptEngine1(LViewI *parent, LScriptContext *context)
 {
 	d = new LScriptEnginePrivate(this);
 	d->Parent = parent;

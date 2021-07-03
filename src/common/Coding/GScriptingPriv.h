@@ -450,7 +450,7 @@ class SystemFunctions : public LScriptContext
 	HANDLE Brk;
 	#endif
 
-	GView *CastGView(LVariant &v);
+	LView *CastGView(LVariant &v);
 
 public:
 	SystemFunctions();
@@ -494,12 +494,12 @@ public:
 		bool WriteTextFile(LScriptArguments &Args);
 		/// \brief Opens a file open dialog to select files.
 		///
-		/// Args: GView *Parent, char *Patterns, 
+		/// Args: LView *Parent, char *Patterns, 
 		///		  char *InitFolder, bool Multiselect
 		bool SelectFiles(LScriptArguments &Args);
 		/// Open a folder select dialog
 		///
-		/// Args: GView *Parent, char *InitFolder
+		/// Args: LView *Parent, char *InitFolder
 		bool SelectFolder(LScriptArguments &Args);
 		/// Lists file in folder
 		///
@@ -555,4 +555,4 @@ public:
 		bool OsVersion(LScriptArguments &Args);
 };
 
-#endif
+#endif

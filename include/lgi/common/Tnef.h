@@ -20,7 +20,7 @@ public:
 	}
 };
 
-bool TnefReadIndex(GStreamI *Tnef, GArray<TnefFileInfo*> &Index);
-bool TnefExtract(GStreamI *Tnef, GStream *Out, TnefFileInfo *File);
+bool TnefReadIndex(LStreamI *Tnef, GArray<TnefFileInfo*> &Index);
+bool TnefExtract(LStreamI *Tnef, GStream *Out, TnefFileInfo *File);
 
 #endif

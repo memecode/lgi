@@ -55,7 +55,7 @@ class GPaneThrottle : public GStatusPane
 	void Set()
 	{
 		LRect r(0, 0, THROTTLE_TEXT_WIDTH, Y()-1);
-		GView::Invalidate(&r);
+		LView::Invalidate(&r);
 
 		if (App)
 		{
@@ -73,7 +73,7 @@ class GPaneThrottle : public GStatusPane
 public:
 	GPaneThrottle(GDom *app);
 
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 	void OnPaint(LSurface *pDC);
 	int64 Value();
 	void OnMouseClick(LMouse &m);
@@ -87,7 +87,7 @@ GPaneThrottle::GPaneThrottle(GDom *app)
 	Slider = new GSlider(SLIDER_ID, 0, 0, 100, 20, "Throttle", false);
 }
 
-int GPaneThrottle::OnNotify(GViewI *Ctrl, int Flags)
+int GPaneThrottle::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl && Ctrl->GetId() == SLIDER_ID)
 	{
@@ -388,7 +388,7 @@ void GPaneHistory::Value(int64 i)
 		}
 	}
 
-	GView::Invalidate();
+	LView::Invalidate();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

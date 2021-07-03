@@ -12,7 +12,7 @@
 #include "GRadioGroup.h"
 #include "GButton.h"
 
-GTransparentDlg::GTransparentDlg(GView *parent, LVariant *trans)
+GTransparentDlg::GTransparentDlg(LView *parent, LVariant *trans)
 {
 	Trans = trans;
 	SetParent(parent);
@@ -33,7 +33,7 @@ GTransparentDlg::GTransparentDlg(GView *parent, LVariant *trans)
 	Children.Insert(new GButton(IDOK, 65, 82, 60, 20, "Ok"));
 }
 
-int GTransparentDlg::OnNotify(GViewI *Ctrl, int Flags)
+int GTransparentDlg::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{

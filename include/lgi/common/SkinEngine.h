@@ -36,7 +36,7 @@ public:
 	bool Focus;						// TRUE if the control has focus
 	bool ForceUpdate;				// TRUE if cached info should be discarded
 	LSurface *Image;				// Any icon that needs displaying
-	GView *View;
+	LView *View;
 
 	GSkinState()
 	{

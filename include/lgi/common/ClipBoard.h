@@ -6,7 +6,7 @@
 class LgiClass GClipBoard
 {
 	class GClipBoardPriv *d;
-	GView *Owner;
+	LView *Owner;
 	bool Open;
 	GAutoPtr<LSurface> pDC;
 
@@ -24,7 +24,7 @@ public:
 	static FormatType StrToFmt(GString Fmt);
 
 	/// Creates the clipboard access object.
-	GClipBoard(GView *o);
+	GClipBoard(LView *o);
 	~GClipBoard();
 
 	bool IsOpen() { return Open; }

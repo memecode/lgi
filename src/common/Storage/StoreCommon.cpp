@@ -152,7 +152,7 @@ int64 GSubFilePtr::Seek(int64 To, int Whence)
 	return GetPos();
 }
 
-GStreamI *GSubFilePtr::Clone()
+LStreamI *GSubFilePtr::Clone()
 {
 	LgiAssert(0);
 	return 0;

@@ -9,7 +9,7 @@
 class Test : public GDialog
 {
 public:
-    Test(GViewI *p)
+    Test(LViewI *p)
     {
         SetParent(p);
         SetPos(LRect(0, 0, 300, 300));
@@ -33,7 +33,7 @@ public:
         DoModal();
     }
     
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -125,7 +125,7 @@ public:
 		return 0;
 	}
 	
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{

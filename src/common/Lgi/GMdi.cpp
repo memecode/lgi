@@ -129,7 +129,7 @@ GMdiChild::~GMdiChild()
 	Detach();
 	DeleteObj(d);
 }
-bool GMdiChild::Attach(GViewI *p)
+bool GMdiChild::Attach(LViewI *p)
 {
 	#if MDI_TAB_STYLE
 	GMdiParent *par = dynamic_cast<GMdiParent*>(p);
@@ -172,11 +172,11 @@ bool GMdiChild::Detach()
 }
 const char *GMdiChild::Name()
 {
-	return GView::Name();
+	return LView::Name();
 }
 bool GMdiChild::Name(const char *n)
 {
-	bool s = GView::Name(n);
+	bool s = LView::Name(n);
 	
 	#if MDI_TAB_STYLE
 	if (GetParent())
@@ -297,7 +297,7 @@ void GMdiChild::OnPaint(LSurface *pDC)
 	if (GetParent())
 	{
 		GViewIterator *it = GetParent()->IterateViews();
-		Top = it->Last() == (GViewI*)this;
+		Top = it->Last() == (LViewI*)this;
 		DeleteObj(it);
 	}
 	
@@ -757,7 +757,7 @@ void GMdiParent::OnPaint(LSurface *pDC)
 	pDC->Rectangle(d->Tabs.x1 + Cx, d->Tabs.y1, d->Tabs.x2, d->Tabs.y2 - 1);
 	#endif
 }
-bool GMdiParent::Attach(GViewI *p)
+bool GMdiParent::Attach(LViewI *p)
 {
 	bool s = GLayout::Attach(p);
 	if (s)
@@ -767,9 +767,9 @@ bool GMdiParent::Attach(GViewI *p)
 	}
 	return s;
 }
-GMdiChild *GMdiParent::IsChild(GViewI *View)
+GMdiChild *GMdiParent::IsChild(LViewI *View)
 {
-	for (GViewI *v=View; v; v=v->GetParent())
+	for (LViewI *v=View; v; v=v->GetParent())
 	{
 		if (v->GetParent() == this)
 		{
@@ -785,7 +785,7 @@ GMdiChild *GMdiParent::IsChild(GViewI *View)
 	
 	return 0;
 }
-bool GMdiParent::OnViewMouse(GView *View, LMouse &m)
+bool GMdiParent::OnViewMouse(LView *View, LMouse &m)
 {
 	if (m.Down())
 	{
@@ -799,7 +799,7 @@ bool GMdiParent::OnViewMouse(GView *View, LMouse &m)
 	
 	return true;
 }
-bool GMdiParent::OnViewKey(GView *View, LKey &Key)
+bool GMdiParent::OnViewKey(LView *View, LKey &Key)
 {
 	if (Key.Down() && Key.Ctrl() && Key.c16 == '\t')
 	{
@@ -950,7 +950,7 @@ bool GMdiParent::Detach()
 	d->InOnPosChange = true;
 	return GLayout::Detach();
 }
-void GMdiParent::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+void GMdiParent::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	#if MDI_TAB_STYLE
 	if (!d->InOnPosChange /*&& Attaching*/)
@@ -960,7 +960,7 @@ void GMdiParent::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 		Invalidate();
 	}
 	#else
-	for (GViewI *v=Children.First(); v; )
+	for (LViewI *v=Children.First(); v; )
 	{
 		GMdiChild *c = dynamic_cast<GMdiChild*>(v);
 		v = Children.Next();
@@ -970,7 +970,7 @@ void GMdiParent::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 			
 			if (!v)
 			{
-				GViewI *n = c->Children.First();
+				LViewI *n = c->Children.First();
 				if (n)
 				{
 					n->Focus(true);
@@ -980,7 +980,7 @@ void GMdiParent::OnChildrenChanged(GViewI *Wnd, bool Attaching)
 	}
 	#endif
 }
-GViewI *GMdiParent::GetTop()
+LViewI *GMdiParent::GetTop()
 {
 	return d->Children.Length() > 0 ? d->Children.Last() : NULL;
 }

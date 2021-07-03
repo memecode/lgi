@@ -45,7 +45,7 @@ bool GProgress::Pour(LRegion &r)
 	return false;
 }
 
-bool GProgress::OnLayout(GViewLayoutInfo &Inf)
+bool GProgress::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (!Inf.Width.Max)
 	{
@@ -85,7 +85,7 @@ int64 GProgress::Value()
 
 GMessage::Result GProgress::OnEvent(GMessage *Msg)
 {
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 void GProgress::OnPaint(LSurface *pDC)

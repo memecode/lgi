@@ -247,7 +247,7 @@ ssize_t MailIMap::ParseImapResponse(char *Buffer, ssize_t BufferLen, GArray<StrR
 }
 
 ////////////////////////////////////////////////////////////////////////////
-bool MailIMap::Http(GSocketI *S,
+bool MailIMap::Http(LSocketI *S,
 					GAutoString *OutHeaders,
 					GAutoString *OutBody,
 					int *StatusCode,
@@ -664,7 +664,7 @@ public:
 	char *Flags;
 	LHashTbl<StrKey<char,false>,bool> Capability;
 	GString WebLoginUri;
-	GViewI *ParentWnd;
+	LViewI *ParentWnd;
 	LCancel *Cancel;
 	OsThread InCommand;
 	GString LastWrite;
@@ -732,7 +732,7 @@ void MailIMap::SetCancel(LCancel *Cancel)
 	d->Cancel = Cancel;
 }
 
-void MailIMap::SetParentWindow(GViewI *wnd)
+void MailIMap::SetParentWindow(LViewI *wnd)
 {
 	d->ParentWnd = wnd;
 }
@@ -822,23 +822,23 @@ bool MailIMap::WriteBuf(bool ObsurePass, const char *Buffer, bool Continuation)
 					Sp++;
 					GString s;
 					s.Printf("%.*s********\r\n", Sp - Buffer, Buffer);
-					Log(s.Get(), GSocketI::SocketMsgSend);
+					Log(s.Get(), LSocketI::SocketMsgSend);
 				}
 			}
-			else Log(Buffer, GSocketI::SocketMsgSend);
+			else Log(Buffer, LSocketI::SocketMsgSend);
 			
 			d->InCommand = LgiGetCurrentThread();
 
 			return true;
 		}
-		// else Log("Failed to write data to socket.", GSocketI::SocketMsgError);
+		// else Log("Failed to write data to socket.", LSocketI::SocketMsgError);
 	}
-	else Log("Not connected.", GSocketI::SocketMsgError);
+	else Log("Not connected.", LSocketI::SocketMsgError);
 
 	return false;
 }
 
-bool MailIMap::Read(GStreamI *Out, int Timeout)
+bool MailIMap::Read(LStreamI *Out, int Timeout)
 {
 	int Lines = 0;
 
@@ -946,7 +946,7 @@ bool MailIMap::ReadResponse(int Cmd, bool Plus)
 					if (d->Logging)
 					{
 						bool Good = strchr("*+", *Dlg) != NULL || Status;
-						Log(Dlg, Good ? GSocketI::SocketMsgReceive : GSocketI::SocketMsgError);
+						Log(Dlg, Good ? LSocketI::SocketMsgReceive : LSocketI::SocketMsgError);
 					}
 				}
 			}
@@ -999,7 +999,7 @@ bool MailIMap::ReadLine()
 	}
 	while (!stristr(Buf, "\r\n"));
 
-	Log(Buf, GSocketI::SocketMsgReceive);
+	Log(Buf, LSocketI::SocketMsgReceive);
 	return true;
 }
 
@@ -1182,7 +1182,7 @@ void MailIMap::CommandFinished()
 	d->LastWrite.Empty();
 }
 
-bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *settingStore, int Flags)
+bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *settingStore, int Flags)
 {
 	bool Status = false;
 	
@@ -1270,12 +1270,12 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 
 					ClearDialog();
 				}
-				else Log("Read CAPABILITY response failed", GSocketI::SocketMsgError);
+				else Log("Read CAPABILITY response failed", LSocketI::SocketMsgError);
 			}
-			else Log("Write CAPABILITY cmd failed", GSocketI::SocketMsgError);
+			else Log("Write CAPABILITY cmd failed", LSocketI::SocketMsgError);
 
 			if (!IMAP4Server)
-				Log("CAPABILITY says not an IMAP4Server", GSocketI::SocketMsgError);
+				Log("CAPABILITY says not an IMAP4Server", LSocketI::SocketMsgError);
 			else
 			{
 				GString DefaultAuthType;
@@ -1336,7 +1336,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 					else LgiAssert(0);
 					if (TlsError)
 					{
-						Log("STARTTLS failed", GSocketI::SocketMsgError);
+						Log("STARTTLS failed", LSocketI::SocketMsgError);
 					}
 				}
 
@@ -1379,15 +1379,15 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 								rc = gsasl_client_start(ctx, AuthType, &sess);
 								if (rc != GSASL_OK)
 								{
-									Log("gsasl_client_start failed", GSocketI::SocketMsgError);
+									Log("gsasl_client_start failed", LSocketI::SocketMsgError);
 								}
 
 								// gsasl_step(ctx, 
 								gsasl_done(ctx);
 							}
-							else Log("gsasl_init failed", GSocketI::SocketMsgError);
+							else Log("gsasl_init failed", LSocketI::SocketMsgError);
 						}						
-						else Log("AUTHENTICATE GSSAPI failed", GSocketI::SocketMsgError);
+						else Log("AUTHENTICATE GSSAPI failed", LSocketI::SocketMsgError);
 					}
 					else
 					#endif
@@ -1469,7 +1469,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 						if (!GetVersionEx(&ver))
 						{
 							DWORD err = GetLastError();
-							Log("Couldn't get OS version", GSocketI::SocketMsgError);
+							Log("Couldn't get OS version", LSocketI::SocketMsgError);
 						}
 						else
 						{
@@ -1715,7 +1715,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 											{
 												if (Dlg[0] == '+' && Dlg[1] == ' ')
 												{
-													Log(Dlg, GSocketI::SocketMsgReceive);
+													Log(Dlg, LSocketI::SocketMsgReceive);
 													strcpy_s(Buf, sizeof(Buf), "\r\n");
 													if (WriteBuf(false, NULL, true))
 													{
@@ -1724,7 +1724,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 												}
 												else
 												{
-													Log(Dlg, GSocketI::SocketMsgError);
+													Log(Dlg, LSocketI::SocketMsgError);
 													break;
 												}
 											}
@@ -1742,15 +1742,15 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 					{
 						if (stristr(RemoteHost, "office365.com"))
 						{
-							Log("office365.com doesn't support OAUTH2:", GSocketI::SocketMsgInfo);
-							Log("\thttps://stackoverflow.com/questions/29747477/imap-auth-in-office-365-using-oauth2", GSocketI::SocketMsgInfo);
-							Log("\tSo why does it report support in the CAPABILITY response? Don't ask me - fret", GSocketI::SocketMsgInfo);
+							Log("office365.com doesn't support OAUTH2:", LSocketI::SocketMsgInfo);
+							Log("\thttps://stackoverflow.com/questions/29747477/imap-auth-in-office-365-using-oauth2", LSocketI::SocketMsgInfo);
+							Log("\tSo why does it report support in the CAPABILITY response? Don't ask me - fret", LSocketI::SocketMsgInfo);
 							continue;
 						}
 						else if (!OAuth2.IsValid())
 						{
 							sprintf_s(Buf, sizeof(Buf), "Error: Unknown OAUTH2 server '%s' (ask fret@memecode.com to add)", RemoteHost);
-							Log(Buf, GSocketI::SocketMsgError);
+							Log(Buf, LSocketI::SocketMsgError);
 							continue;
 						}
 
@@ -1764,7 +1764,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 							#if DEBUG_OAUTH2
 							LgiTrace("%s:%i - %s.\n", _FL, Buf);
 							#endif
-							Log(Buf, GSocketI::SocketMsgWarning);
+							Log(Buf, LSocketI::SocketMsgWarning);
 							break;
 						}
 
@@ -1794,7 +1794,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 											l++;
 										s = l;
 										UnBase64Str(s);
-										Log(s, GSocketI::SocketMsgError);
+										Log(s, LSocketI::SocketMsgError);
 				
 										LJson t;
 										t.SetJson(s);
@@ -1819,14 +1819,14 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 									}
 									else if (*l == '*')
 									{
-										Log(l, GSocketI::SocketMsgReceive);
+										Log(l, LSocketI::SocketMsgReceive);
 									}
 									else
 									{
 										if (IsResponse(l, AuthCmd, LoggedIn) &&
 											LoggedIn)
 										{
-											Log(l, GSocketI::SocketMsgReceive);
+											Log(l, LSocketI::SocketMsgReceive);
 
 											if (SettingStore)
 											{
@@ -1835,14 +1835,14 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 												bool b = SettingStore->SetValue(OPT_ImapOAuth2AccessToken, v);
 												if (!b)
 												{
-													Log("Couldn't store access token.", GSocketI::SocketMsgWarning);
+													Log("Couldn't store access token.", LSocketI::SocketMsgWarning);
 												}
 											}
 											break;
 										}
 										else
 										{
-											Log(l, GSocketI::SocketMsgError);
+											Log(l, LSocketI::SocketMsgError);
 										}
 									}
 								}
@@ -1854,7 +1854,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 					{
 						char s[256];
 						sprintf_s(s, sizeof(s), "Warning: Unsupported authentication type '%s'", AuthType);
-						Log(s, GSocketI::SocketMsgWarning);
+						Log(s, LSocketI::SocketMsgWarning);
 					}
 				}
 
@@ -2134,7 +2134,7 @@ int MailIMap::Fetch(bool ByUid,
 					const char *Parts,
 					FetchCallback Callback,
 					void *UserData,
-					GStreamI *RawCopy,
+					LStreamI *RawCopy,
 					int64 SizeHint)
 {
 	if (!Parts || !Callback || !Seq)
@@ -2330,14 +2330,14 @@ int MailIMap::Fetch(bool ByUid,
 						{
 							bool IsOk = !_stricmp(t[1], "Ok");
 							int Response = atoi(r + 1);
-							Log(Line, IsOk ? GSocketI::SocketMsgReceive : GSocketI::SocketMsgError);
+							Log(Line, IsOk ? LSocketI::SocketMsgReceive : LSocketI::SocketMsgError);
 							if (Response == Cmd)
 							{
 								Done = true;
 								break;
 							}
 						}
-						else Log(&Buf[0], GSocketI::SocketMsgError);
+						else Log(&Buf[0], LSocketI::SocketMsgError);
 					}
 					else
 					{
@@ -3245,7 +3245,7 @@ bool MailIMap::OnIdle(int Timeout, GString::Array &Resp)
 		while ((Dlg = Dialog[0]))
 		{
 			Dialog.Delete(Dlg);
-			Log(Dlg, GSocketI::SocketMsgReceive);
+			Log(Dlg, LSocketI::SocketMsgReceive);
 
 			if (Dlg[0] == '*' &&
 				Dlg[1] == ' ')

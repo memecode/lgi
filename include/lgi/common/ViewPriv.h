@@ -22,7 +22,7 @@ extern OsThread LgiThreadInPaint;
 
 extern bool In_SetWindowPos;
 extern LMouse &lgi_adjust_click(LMouse &Info,
-								GViewI *Wnd,
+								LViewI *Wnd,
 								bool Capturing = false,
 								bool Debug = false);
 #ifdef __GTK_H__
@@ -35,14 +35,14 @@ extern LRect GtkGetPos(Gtk::GtkWidget *w);
 
 class GPulseThread : public LThread
 {
-	GView *View;
+	LView *View;
 	int Length;
 	LThreadEvent Event;
 
 public:
 	bool Loop;
 
-	GPulseThread(GView *view, int len) : LThread("GPulseThread"), Event("GPulseThread")
+	GPulseThread(LView *view, int len) : LThread("GPulseThread"), Event("GPulseThread")
 	{
 		LgiAssert(view);
 		
@@ -91,12 +91,12 @@ public:
 
 enum GViewFontType
 {
-	/// The GView has a pointer to an externally owned font.
+	/// The LView has a pointer to an externally owned font.
 	GV_FontPtr,
-	/// The GView owns the font object, and must free it.
+	/// The LView owns the font object, and must free it.
 	GV_FontOwned,
 	/// The GApp's font cache owns the object. In this case,
-	/// calling GetCssStyle on the GView will invalidate the
+	/// calling GetCssStyle on the LView will invalidate the
 	/// font ptr causing it to be re-calculated.
 	GV_FontCached,
 };
@@ -111,9 +111,9 @@ public:
 	bool			IsThemed;
 
 	// Heirarchy
-	GViewI			*ParentI;
-	GView			*Parent;
-	GViewI			*Notify;
+	LViewI			*ParentI;
+	LView			*Parent;
+	LViewI			*Notify;
 
 	// Size
 	LPoint			MinimumSize;
@@ -149,7 +149,7 @@ public:
 
 		// Cursor
 		GPulseThread	*Pulse;
-		GView			*Popup;
+		LView			*Popup;
 		bool			TabStop;
 		bool			WantsFocus;
 		int				WantsPulse;
@@ -181,7 +181,7 @@ public:
 	GViewPrivate();
 	~GViewPrivate();
 	
-	GView *GetParent()
+	LView *GetParent()
 	{
 		if (Parent)
 			return Parent;

@@ -66,10 +66,10 @@ extern GMessage CreateMsg(int m, int a, int b);
 template <class q>
 class XView : public q
 {
-	friend class GView;
+	friend class LView;
 
 protected:
-	GView *v;
+	LView *v;
 	bool _Paint;
 
 	void OnClick(XlibEvent *e, bool down, bool dbl, bool move);
@@ -77,8 +77,8 @@ protected:
 	void setBackgroundMode(ViewBackground b) {}
 
 public:
-	XView(GView *view, bool p = true);
-	XView(GView *view, Window Existing);
+	XView(LView *view, bool p = true);
+	XView(LView *view, Window Existing);
 	~XView();
 
 	void _SetWndPtr(void *p);

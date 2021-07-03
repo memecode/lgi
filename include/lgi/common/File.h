@@ -700,7 +700,7 @@ LgiClass GAutoString LgiMakeRelativePath(const char *Base, const char *Path);
 LgiFunc bool LgiMakePath(char *Str, int StrBufLen, const char *Dir, const char *File);
 LgiFunc char *LgiGetExtension(const char *File);
 LgiFunc bool LgiIsFileNameExecutable(const char *FileName);
-LgiFunc bool LgiIsFileExecutable(const char *FileName, GStreamI *f, int64 Start, int64 Len);
+LgiFunc bool LgiIsFileExecutable(const char *FileName, LStreamI *f, int64 Start, int64 Len);
 
 /// Get information about the disk that a file resides on.
 LgiFunc bool LgiGetDriveInfo(char *Path, uint64 *Free, uint64 *Size = 0, uint64 *Available = 0);

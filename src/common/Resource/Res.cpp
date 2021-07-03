@@ -1438,7 +1438,7 @@ ResObjectImpl::SStatus ResDialogObj::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 		{
 			if (!OffsetType)
 			{
-				GViewI *v = dynamic_cast<GViewI*>(Ctrl->Object);
+				LViewI *v = dynamic_cast<LViewI*>(Ctrl->Object);
 				if (v)
 				{
 					LRect r = v->GetPos();

@@ -38,11 +38,11 @@ public:
 class GMimeBuf : public GStringPipe
 {
 	int Total;
-	GStreamI *Src;
+	LStreamI *Src;
 	GStreamEnd *End;
 
 public:
-	GMimeBuf(GStreamI *src, GStreamEnd *end);
+	GMimeBuf(LStreamI *src, GStreamEnd *end);
 
 	ssize_t Pop(GArray<char> &Buf) override;
 	ssize_t Pop(char *Str, ssize_t BufSize) override;
@@ -57,7 +57,7 @@ class GMime
 	ssize_t DataPos;
 	ssize_t DataSize;
 	LMutex *DataLock;
-	GStreamI *DataStore;
+	LStreamI *DataStore;
 	bool OwnDataStore;
 
 	// Other info
@@ -92,8 +92,8 @@ public:
 	bool SetHeaders(const char *h);
 	char *GetHeaders() { return Headers; }
 	ssize_t GetLength() { return DataSize; }
-	GStreamI *GetData(bool Detach = false);
-	bool SetData(bool OwnStream, GStreamI *Input, int RdPos = 0, int RdSize = -1, LMutex *Lock = 0);
+	LStreamI *GetData(bool Detach = false);
+	bool SetData(bool OwnStream, LStreamI *Input, int RdPos = 0, int RdSize = -1, LMutex *Lock = 0);
 	bool SetData(char *Str, int Len);
 
 	// Simple Header Management
@@ -121,7 +121,7 @@ public:
 		class GMimeDecode : public GPullStreamer, public GMimeAction
 		{
 		public:
-			ssize_t Pull(GStreamI *Source, GStreamEnd *End = 0);
+			ssize_t Pull(LStreamI *Source, GStreamEnd *End = 0);
 			int Parse(GStringPipe *Source, class ParentState *State = 0);
 			void Empty();
 		} Decode;
@@ -129,7 +129,7 @@ public:
 		class GMimeEncode : public GPushStreamer, public GMimeAction
 		{
 		public:
-			ssize_t Push(GStreamI *Dest, GStreamEnd *End = 0);
+			ssize_t Push(LStreamI *Dest, GStreamEnd *End = 0);
 			void Empty();
 		} Encode;
 
@@ -144,7 +144,7 @@ public:
 		class GMimeRead : public GPullStreamer, public GMimeAction
 		{
 		public:
-			ssize_t Pull(GStreamI *Source, GStreamEnd *End = 0);
+			ssize_t Pull(LStreamI *Source, GStreamEnd *End = 0);
 			void Empty();
 		} Read;
 
@@ -152,7 +152,7 @@ public:
 		{
 		public:
 			int64 GetSize();
-			ssize_t Push(GStreamI *Dest, GStreamEnd *End = 0);
+			ssize_t Push(LStreamI *Dest, GStreamEnd *End = 0);
 			void Empty();
 		} Write;
 

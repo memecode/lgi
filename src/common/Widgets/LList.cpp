@@ -754,7 +754,7 @@ GMessage::Result LList::OnEvent(GMessage *Msg)
 	return GLayout::OnEvent(Msg);
 }
 
-int LList::OnNotify(GViewI *Ctrl, int Flags)
+int LList::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if
 	(
@@ -1359,7 +1359,7 @@ void LList::OnMouseClick(LMouse &m)
 				bool HandlerHung = false;
 				int ItemIndex = -1;
 				LListItem *Item = HitItem(m.x, m.y, &ItemIndex);
-				// GViewI *Notify = Item ? (GetNotify()) ? GetNotify() : GetParent() : 0;
+				// LViewI *Notify = Item ? (GetNotify()) ? GetNotify() : GetParent() : 0;
 				d->DragData = ItemIndex;
 
 				if (Item && Item->Select())
@@ -2138,7 +2138,7 @@ bool LList::Remove(LListItem *i)
 			}
 
 			// Notify
-			GViewI *Note = (GetNotify())?GetNotify():GetParent();
+			LViewI *Note = (GetNotify())?GetNotify():GetParent();
 			if (Note)
 			{
 				if (Selected)

@@ -5,16 +5,16 @@
 // Control or View window
 
 /// FindLargestEdge parameter
-/// \sa GView::FindLargest(LRegion &, int)
+/// \sa LView::FindLargest(LRegion &, int)
 #define GV_EDGE_TOP				0x0001
 /// FindLargestEdge parameter
-/// \sa GView::FindLargest(LRegion &, int)
+/// \sa LView::FindLargest(LRegion &, int)
 #define GV_EDGE_RIGHT			0x0002
 /// FindLargestEdge parameter
-/// \sa GView::FindLargest(LRegion &, int)
+/// \sa LView::FindLargest(LRegion &, int)
 #define GV_EDGE_BOTTOM			0x0004
 /// FindLargestEdge parameter
-/// \sa GView::FindLargest(LRegion &, int)
+/// \sa LView::FindLargest(LRegion &, int)
 #define GV_EDGE_LEFT			0x0008
 
 /// Id of the vertical scroll bar in a GLayout control
@@ -28,18 +28,18 @@
 #define XPLATFORM_GLAYOUT		0
 #endif
 
-/// \brief A GView with scroll bars
+/// \brief A LView with scroll bars
 ///
-/// This class adds scroll bars to the standard GView base class. The scroll bars can be
+/// This class adds scroll bars to the standard LView base class. The scroll bars can be
 /// directly accessed using the VScroll and HScroll member variables. Although you should
 /// always do a NULL check on the pointer before using, if the scroll bar is not activated
 /// using GLayout::SetScrollBars then VScroll and/or HScroll will by NULL. When the scroll
-/// bar is used to scroll the GLayout control you will receive an event on GView::OnNotify
+/// bar is used to scroll the GLayout control you will receive an event on LView::OnNotify
 /// with the control ID of the scrollbar, which is either #IDC_VSCROLL or #IDC_HSCROLL.
-class LgiClass GLayout : public GView
+class LgiClass GLayout : public LView
 {
 	friend class GScroll;
-	friend class GView;
+	friend class LView;
 
 	// Private variables
 	bool			_SettingScrollBars;
@@ -98,7 +98,7 @@ public:
 	///
 	/// When "pour largest" is switched on the pour function automatically
 	/// lays the control into the largest rectangle available. This is useful
-	/// for putting a single GView into a splitter pane or a tab view and having
+	/// for putting a single LView into a splitter pane or a tab view and having
 	/// it just take up all the space.
 	void SetPourLargest(bool i);
 
@@ -112,7 +112,7 @@ public:
 	// Impl
 	#if defined(__GTK_H__) || !defined(WINNATIVE)
 
-	bool Attach(GViewI *p) override;
+	bool Attach(LViewI *p) override;
 	bool Detach() override;
 	LRect &GetClient(bool InClientSpace = true) override;
 	void OnCreate() override;
@@ -127,15 +127,15 @@ public:
 	#else
 	
 	void OnPosChange() override;
-	int OnNotify(GViewI *c, int f) override;
+	int OnNotify(LViewI *c, int f) override;
 	void OnNcPaint(LSurface *pDC, LRect &r) override;
 
 	#endif
 	#endif
 	
-	GViewI *FindControl(int Id) override;
+	LViewI *FindControl(int Id) override;
 	#if LGI_VIEW_HANDLE
-	GViewI *FindControl(OsView hnd) override { return GView::FindControl(hnd); }
+	LViewI *FindControl(OsView hnd) override { return LView::FindControl(hnd); }
 	#endif
 };
 

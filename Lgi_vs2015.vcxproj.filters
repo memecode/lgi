@@ -320,9 +320,6 @@
     <ClCompile Include="src\common\INet\MDStringToDigest.cpp">
       <Filter>Source Files\Network</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\GViewCommon.cpp">
-      <Filter>Source Files\Interface</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Lgi\LMutex.cpp">
       <Filter>Source Files\Core\Mutex</Filter>
     </ClCompile>
@@ -341,9 +338,6 @@
     <ClCompile Include="src\common\Gdc2\Font\LStringLayout.cpp">
       <Filter>Source Files\Graphics\Font</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\LMenuCommon.cpp">
-      <Filter>Source Files\Core\Menus</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Lgi\LgiCommon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -359,28 +353,13 @@
     <ClCompile Include="src\common\Lgi\GDragAndDropCommon.cpp">
       <Filter>Source Files\Core\Drag and Drop</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\GAppCommon.cpp">
-      <Filter>Source Files\Interface</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Widgets\GSlider.cpp">
       <Filter>Source Files\Widgets\Xp</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\LWindowCommon.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\win\Gdc2\Gdc2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\win\Gdc2\GdiLeak.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Gdc2\GMemDC.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Gdc2\GPrintDC.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Gdc2\GScreenDC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\win\General\GFile.cpp">
@@ -389,49 +368,10 @@
     <ClCompile Include="src\win\General\GMem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\win\General\ShowFileProp_Win.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\win\INet\MibAccess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\win\Lgi\GApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Lgi\GClipBoard.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Lgi\GDragAndDrop.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Lgi\GFileSelect.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Lgi\GGeneral.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Lgi\GLayout.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Lgi\LMenu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Lgi\GPrinter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Lgi\GScrollBar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Lgi\GView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Lgi\LWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\win\Lgi\LgiException.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Lgi\LThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\win\Widgets\GProgress.cpp">
@@ -496,6 +436,66 @@
     </ClCompile>
     <ClCompile Include="src\common\Gdc2\LSurface.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\AppCommon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Gdc2\LMemDC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Gdc2\LPrintDC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Gdc2\LScreenDC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\App.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\ClipBoard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\DragAndDrop.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\FileSelect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\General.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\Layout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\Printer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\ScrollBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\Thread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\WindowCommon.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\Window.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\ViewCommon.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\View.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\General\ShowFileProp_Win.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\Menu.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\MenuCommon.cpp">
+      <Filter>Source Files\Interface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,7 @@
 
 /// This callback if supplied to the GInput will create a "..." button, which if clicked
 /// will call the callback.
-typedef void (*GInputCallback)(class GInput *Dlg, GViewI *EditCtrl, void *Param);
+typedef void (*GInputCallback)(class GInput *Dlg, LViewI *EditCtrl, void *Param);
 
 /// This class displays a window with a message and an edit box to enter a string.
 /// Once constructed, use the GDialog::DoModal() call to run the input window, it
@@ -20,7 +20,7 @@ public:
 	GInput
 	(
 		/// The parent view
-		GViewI *parent,
+		LViewI *parent,
 		/// The initial value in the edit box
 		const char *InitStr = "",
 		/// The message to display in the text box
@@ -36,7 +36,7 @@ public:
 		void *CallbackParam = 0
 	);
 	
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 	GString GetStr() { return Str; }
 };
 

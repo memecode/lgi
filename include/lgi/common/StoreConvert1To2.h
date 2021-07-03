@@ -14,4 +14,4 @@
 //		the v2 folder file to.
 //		If NULL then the user is asked for a filename and the new file is
 //		not returned.
-extern bool ConvertStorage1To2(GView *Parent, char *InFile = 0, char *OutFile = 0);
+extern bool ConvertStorage1To2(LView *Parent, char *InFile = 0, char *OutFile = 0);

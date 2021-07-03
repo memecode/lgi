@@ -31,7 +31,7 @@ public:
 	void Value(int64 v) override;
 	int64 Value() override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
-	bool OnLayout(GViewLayoutInfo &Inf) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 	bool Pour(LRegion &r) override;
 	bool Colour(GColour Col);
 	GColour Colour();

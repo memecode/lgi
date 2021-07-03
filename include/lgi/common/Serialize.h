@@ -101,7 +101,7 @@ class LSerialize
 
 	uint16 ObjectId;
 	bool ToStream;
-	GStreamI *Stream;
+	LStreamI *Stream;
 	GArray<char> FieldMem;
 	LHashTbl<IntKey<int>, ssize_t> Fields;
 	uint32_t Bytes;

@@ -7,7 +7,7 @@
 
 /// A static text label widget
 class LgiClass GTextLabel :
-	public GView,
+	public LView,
 	public ResObject,
 	public GDom
 {
@@ -46,9 +46,9 @@ public:
 	/// Sets the text to a number
 	void Value(int64 i) override;
 	/// Gets the text
-	const char *Name() override { return GView::Name(); }
+	const char *Name() override { return LView::Name(); }
 	/// Gets the text as a wide string
-	const char16 *NameW() override { return GView::NameW(); }
+	const char16 *NameW() override { return LView::NameW(); }
 	/// Word wrap
 	bool GetWrap();
 	/// Sets the use of word wrap
@@ -56,11 +56,11 @@ public:
 	
 	// Events
 	GMessage::Result OnEvent(GMessage *Msg) override;
-	int OnNotify(GViewI *Ctrl, int Flags) override;
+	int OnNotify(LViewI *Ctrl, int Flags) override;
 	void OnPaint(LSurface *pDC) override;
 	void OnPosChange() override;
 	void OnAttach() override;
-	bool OnLayout(GViewLayoutInfo &Inf) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 	void OnStyleChange();
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL) override;
 	void OnCreate() override;

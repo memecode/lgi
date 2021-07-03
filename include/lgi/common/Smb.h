@@ -94,7 +94,7 @@
 class ISmb
 {
 	char Buffer[1024];
-	GSocketI *Socket;	// commands
+	LSocketI *Socket;	// commands
 	int ResumeFrom;
 
 public:
@@ -104,10 +104,10 @@ public:
 	virtual ~ISmb();
 
 	// Data
-	GSocketI *Handle() { return Socket; }
+	LSocketI *Handle() { return Socket; }
 	
 	// Connection
-	bool Open(GSocketI *S, char *RemoteHost, int Port = 0);
+	bool Open(LSocketI *S, char *RemoteHost, int Port = 0);
 	bool Close();
 	bool IsOpen();
 

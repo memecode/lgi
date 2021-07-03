@@ -67,9 +67,9 @@ public:
 	/// Returns the number of file names selected
 	size_t Length();
 	/// Returns the parent window
-	GViewI *Parent();
+	LViewI *Parent();
 	/// Sets the parent window
-	void Parent(GViewI *Window);
+	void Parent(LViewI *Window);
 	/// Returns whether the use can select multiple files
 	bool MultiSelect();
 	/// Sets whether the use can select multiple files

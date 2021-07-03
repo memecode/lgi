@@ -17,7 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////
 int FontSizes[] = { 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 48, 72, 100, 0 };
 
-GSelectFont::GSelectFont(GView *parent, char *Face)
+GSelectFont::GSelectFont(LView *parent, char *Face)
 {
 	Font[0] = 0;
 	Size = 0;
@@ -106,7 +106,7 @@ GSelectFont::~GSelectFont()
 {
 }
 
-int GSelectFont::OnNotify(GViewI *Ctrl, int Flags)
+int GSelectFont::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{

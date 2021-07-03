@@ -48,7 +48,7 @@ ssize_t LgiPrintf(GAutoString &Str, const char *Format, va_list &Arg)
 	return Bytes;
 }
 
-ssize_t GStreamPrintf(GStreamI *Stream, int Flags, const char *Format, va_list &Arg)
+ssize_t GStreamPrintf(LStreamI *Stream, int Flags, const char *Format, va_list &Arg)
 {
 	if (!Stream || !Format)
 		return 0;
@@ -61,7 +61,7 @@ ssize_t GStreamPrintf(GStreamI *Stream, int Flags, const char *Format, va_list &
 	return Stream->Write(a, Bytes, Flags);
 }
 
-ssize_t GStreamPrint(GStreamI *s, const char *fmt, ...)
+ssize_t GStreamPrint(LStreamI *s, const char *fmt, ...)
 {
 	va_list Arg;
 	va_start(Arg, fmt);
@@ -186,7 +186,7 @@ ssize_t GEndOfLine::IsEnd(void *s, ssize_t Len)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-ssize_t GCopyStreamer::Copy(GStreamI *Source, GStreamI *Dest, GStreamEnd *End)
+ssize_t GCopyStreamer::Copy(LStreamI *Source, LStreamI *Dest, GStreamEnd *End)
 {
 	if (!Source || !Dest)
 		return -1;

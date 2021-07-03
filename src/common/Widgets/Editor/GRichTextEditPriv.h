@@ -654,8 +654,8 @@ public:
 	// A Block is like a DIV in HTML, it's as wide as the page and
 	// always starts and ends on a whole line.
 	class Block :
-		public GEventSinkI,
-		public GEventTargetI
+		public LEventSinkI,
+		public LEventTargetI
 	{
 	protected:
 		int BlockUid;
@@ -1141,7 +1141,7 @@ public:
 		{
 			LPoint Sz;
 			GString MimeType;
-			GAutoPtr<GStreamI> Compressed;
+			GAutoPtr<LStreamI> Compressed;
 			int Percent;
 
 			ScaleInf()

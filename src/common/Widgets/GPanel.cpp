@@ -96,7 +96,7 @@ void GPanel::SetOpenSize(int i)
 	OpenSize = i;
 }
 
-bool GPanel::Attach(GViewI *Wnd)
+bool GPanel::Attach(LViewI *Wnd)
 {
 	bool Status = GLayout::Attach(Wnd);
 	SetChildrenVisibility(IsOpen);
@@ -194,7 +194,7 @@ bool GPanel::Pour(LRegion &r)
 	return false;
 }
 
-int GPanel::OnNotify(GViewI *Ctrl, int Flags)
+int GPanel::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (GetParent())
 	{

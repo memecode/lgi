@@ -34,12 +34,12 @@ class FindSymbolDlg : public LDialog
 public:
 	FindSymResult Result;
 
-	FindSymbolDlg(GViewI *parent, FindSymbolSystem *sys);
+	FindSymbolDlg(LViewI *parent, FindSymbolSystem *sys);
 	~FindSymbolDlg();
 	
-	int OnNotify(GViewI *v, int f);
+	int OnNotify(LViewI *v, int f);
 	void OnCreate();
-	bool OnViewKey(GView *v, LKey &k);
+	bool OnViewKey(LView *v, LKey &k);
 	GMessage::Result OnEvent(GMessage *m);
 };
 
@@ -461,7 +461,7 @@ int AlphaCmp(LListItem *a, LListItem *b, NativeInt d)
 	return stricmp(a->GetText(0), b->GetText(0));
 }
 
-FindSymbolDlg::FindSymbolDlg(GViewI *parent, FindSymbolSystem *sys)
+FindSymbolDlg::FindSymbolDlg(LViewI *parent, FindSymbolSystem *sys)
 {
 	Lst = NULL;
 	Sys = sys;
@@ -470,7 +470,7 @@ FindSymbolDlg::FindSymbolDlg(GViewI *parent, FindSymbolSystem *sys)
 	{
 		MoveToCenter();
 
-		GViewI *f;
+		LViewI *f;
 		if (GetViewById(IDC_STR, f))
 			f->Focus(true);
 		GetViewById(IDC_RESULTS, Lst);
@@ -486,7 +486,7 @@ void FindSymbolDlg::OnCreate()
 	RegisterHook(this, LKeyEvents);
 }
 
-bool FindSymbolDlg::OnViewKey(GView *v, LKey &k)
+bool FindSymbolDlg::OnViewKey(LView *v, LKey &k)
 {
 	switch (k.vkey)
 	{
@@ -578,7 +578,7 @@ GMessage::Result FindSymbolDlg::OnEvent(GMessage *m)
 	return LDialog::OnEvent(m);
 }
 
-int FindSymbolDlg::OnNotify(GViewI *v, int f)
+int FindSymbolDlg::OnNotify(LViewI *v, int f)
 {
 	switch (v->GetId())
 	{
@@ -639,7 +639,7 @@ FindSymbolSystem::~FindSymbolSystem()
 	delete d;
 }
 
-FindSymResult FindSymbolSystem::OpenSearchDlg(GViewI *Parent)
+FindSymResult FindSymbolSystem::OpenSearchDlg(LViewI *Parent)
 {
 	FindSymbolDlg Dlg(Parent, this);
 	Dlg.DoModal();
@@ -681,4 +681,4 @@ void FindSymbolSystem::Search(int ResultsSinkHnd, const char *SearchStr, bool Al
 		Req->Str = SearchStr;
 		d->PostEvent(M_FIND_SYM_REQUEST, (GMessage::Param)Req, (GMessage::Param)AllPlat);
 	}
-}
+}

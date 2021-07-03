@@ -9,7 +9,7 @@
 #define DEBUG_HANDLEVIEWKEY		0
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GWnd::GWnd(GView *notify) :
+GWnd::GWnd(LView *notify) :
 	BWindow(BRect(10, 10, 100, 100),
 			"",
 			B_TITLED_WINDOW,
@@ -19,7 +19,7 @@ GWnd::GWnd(GView *notify) :
 	Notify = notify;
 }
 
-GWnd::GWnd(	GView *notify,
+GWnd::GWnd(	LView *notify,
 			BRect frame,
 			char *title,
 			window_type type,
@@ -81,13 +81,13 @@ class HookInfo
 {
 public:
 	int Flags;
-	GView *Target;
+	LView *Target;
 };
 
 class GWindowPrivate
 {
 public:
-	GViewI *Focus;
+	LViewI *Focus;
 	GArray<HookInfo> Hooks;
 	LKey LastKey;
 
@@ -96,7 +96,7 @@ public:
 		Focus = NULL;
 	}
 
-	int GetHookIndex(GView *Target, bool Create = false)
+	int GetHookIndex(LView *Target, bool Create = false)
 	{
 		for (int i=0; i<Hooks.Length(); i++)
 		{
@@ -119,7 +119,7 @@ public:
 };
 
 GWindow::GWindow() :
-	GView(new BViewRedir(this))
+	LView(new BViewRedir(this))
 {
 	d = new GWindowPrivate;
 	_Window = this;
@@ -156,7 +156,7 @@ GWindow::~GWindow()
 
 LRect &GWindow::GetClient(bool ClientSpace)
 {
-	return GView::GetClient(ClientSpace);
+	return LView::GetClient(ClientSpace);
 }
 
 void GWindow::Raise()
@@ -168,7 +168,7 @@ void GWindow::Raise()
 	}
 }
 
-bool GWindow::Attach(GViewI *Parent)
+bool GWindow::Attach(LViewI *Parent)
 {
 	if (!Wnd)
 		return false;
@@ -198,7 +198,7 @@ void GWindow::OnPaint(LSurface *pDC)
 	pDC->Rectangle();
 }
 
-void GWindow::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+void GWindow::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 }
 
@@ -413,7 +413,7 @@ void GWindow::Pour()
 		Client.Subtract(&Mp);
 	}
 
-	for (GViewI *w = Children.First(); w; w = Children.Next())
+	for (LViewI *w = Children.First(); w; w = Children.Next())
 	{
 		LRect OldPos = w->GetPos();
 		Update.Union(&OldPos);
@@ -489,7 +489,7 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 int GWindow::WillAccept(List<char> &Formats, LPoint Pt, int KeyState)
@@ -577,7 +577,7 @@ int GWindow::OnDrop(char *Format, LVariant *Data, LPoint Pt, int KeyState)
 	return Status;
 }
 
-bool GWindow::HandleViewMouse(GView *v, LMouse &m)
+bool GWindow::HandleViewMouse(LView *v, LMouse &m)
 {
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{
@@ -593,10 +593,10 @@ bool GWindow::HandleViewMouse(GView *v, LMouse &m)
 	return true;
 }
 
-bool GWindow::HandleViewKey(GView *v, LKey &k)
+bool GWindow::HandleViewKey(LView *v, LKey &k)
 {
 	bool Status = false;
-	GViewI *Ctrl = 0;
+	LViewI *Ctrl = 0;
 	
 	#if DEBUG_HANDLEVIEWKEY
 	bool Debug = 1; // k.vkey == VK_RETURN;
@@ -616,7 +616,7 @@ bool GWindow::HandleViewKey(GView *v, LKey &k)
 	#endif
 
 	// Any window in a popup always gets the key...
-	GViewI *p;
+	LViewI *p;
 	for (p = v->GetParent(); p; p = p->GetParent())
 	{
 		if (dynamic_cast<GPopup*>(p))
@@ -745,7 +745,7 @@ bool GWindow::HandleViewKey(GView *v, LKey &k)
 	// Tab through controls
 	if (k.vkey == VK_TAB && k.Down() /*&& !k.IsChar*/)
 	{
-		GViewI *Wnd = GetNextTabStop(v, k.Shift());
+		LViewI *Wnd = GetNextTabStop(v, k.Shift());
 		#if DEBUG_HANDLEVIEWKEY
 		if (Debug)
 			printf("Tab moving focus shift=%i Wnd=%p\n", k.Shift(), Wnd);
@@ -761,7 +761,7 @@ AllDone:
 }
 
 
-bool GWindow::RegisterHook(GView *Target, LWindowHookType EventType, int Priority)
+bool GWindow::RegisterHook(LView *Target, LWindowHookType EventType, int Priority)
 {
 	bool Status = false;
 	
@@ -778,7 +778,7 @@ bool GWindow::RegisterHook(GView *Target, LWindowHookType EventType, int Priorit
 	return Status;
 }
 
-bool GWindow::UnregisterHook(GView *Target)
+bool GWindow::UnregisterHook(LView *Target)
 {
 	int i = d->GetHookIndex(Target);
 	if (i >= 0)
@@ -803,7 +803,7 @@ bool GWindow::IsActive()
 	return Wnd ? Wnd->IsActive() : false;
 }
 
-GViewI *GWindow::GetFocus()
+LViewI *GWindow::GetFocus()
 {
 	return d->Focus;
 }
@@ -813,15 +813,15 @@ void GWindow::OnFrontSwitch(bool b)
 }
 
 #if DEBUG_SETFOCUS
-static GAutoString DescribeView(GViewI *v)
+static GAutoString DescribeView(LViewI *v)
 {
 	if (!v)
 		return GAutoString(NewStr("NULL"));
 
 	char s[512];
 	int ch = 0;
-	::GArray<GViewI*> p;
-	for (GViewI *i = v; i; i = i->GetParent())
+	::GArray<LViewI*> p;
+	for (LViewI *i = v; i; i = i->GetParent())
 	{
 		p.Add(i);
 	}
@@ -834,7 +834,7 @@ static GAutoString DescribeView(GViewI *v)
 }
 #endif
 
-void GWindow::SetFocus(GViewI *ctrl, FocusType type)
+void GWindow::SetFocus(LViewI *ctrl, FocusType type)
 {
 	#if DEBUG_SETFOCUS
 	const char *TypeName = NULL;
@@ -861,12 +861,12 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 
 			if (d->Focus)
 			{
-				GView *gv = d->Focus->GetGView();
+				LView *gv = d->Focus->GetGView();
 				if (gv)
 				{
 					#if DEBUG_SETFOCUS
 					GAutoString _foc = DescribeView(d->Focus);
-					LgiTrace(".....defocus GView: %s\n", _foc.Get());
+					LgiTrace(".....defocus LView: %s\n", _foc.Get());
 					#endif
 					gv->_Focus(false);
 				}
@@ -885,12 +885,12 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 
 			if (d->Focus)
 			{
-				GView *gv = d->Focus->GetGView();
+				LView *gv = d->Focus->GetGView();
 				if (gv)
 				{
 					#if DEBUG_SETFOCUS
 					GAutoString _set = DescribeView(d->Focus);
-					LgiTrace("GWindow::SetFocus(%s, %s) focusing GView %p\n",
+					LgiTrace("GWindow::SetFocus(%s, %s) focusing LView %p\n",
 						_set.Get(),
 						TypeName,
 						d->Focus->Handle());

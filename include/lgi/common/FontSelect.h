@@ -47,7 +47,7 @@ public:
 	LFontSelect
 	(
 		/// The parent window
-		GView *Parent,
+		LView *Parent,
 		/// The initial font information, or NULL if not available
 		void *Init = NULL,
 		/// Buffer length of Init
@@ -55,7 +55,7 @@ public:
 	);
 	~LFontSelect();
 
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 
 	/// Read/Write the font information to a OS specific structure
 	///

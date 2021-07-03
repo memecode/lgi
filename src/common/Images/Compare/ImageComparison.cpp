@@ -117,7 +117,7 @@ void CompareRgba(LSurface *A, LSurface *B, uint8_t *c, LPoint size, int threshol
 	}
 }
 
-GAutoPtr<LMemDC> CreateDiff(GViewI *Parent, LSurface *A, LSurface *B)
+GAutoPtr<LMemDC> CreateDiff(LViewI *Parent, LSurface *A, LSurface *B)
 {
 	GAutoPtr<LMemDC> C;
 	int Cx = MIN(A->X(), B->X()), Cy = MIN(A->Y(), B->Y());
@@ -238,14 +238,14 @@ GAutoPtr<LMemDC> CreateDiff(GViewI *Parent, LSurface *A, LSurface *B)
 
 class ThreadLoader : public LThread
 {
-	GView *Owner;
+	LView *Owner;
 	GAutoString File;
 	
 public:
 	GAutoPtr<LSurface> Img;
 	GMessage::Param Param;
 
-	ThreadLoader(GView *owner, GAutoString file, GMessage::Param param) : LThread("ThreadLoader")
+	ThreadLoader(LView *owner, GAutoString file, GMessage::Param param) : LThread("ThreadLoader")
 	{
 		Owner = owner;
 		File = file;
@@ -487,7 +487,7 @@ public:
 		}
 	}
 	
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		switch (Ctrl->GetId())
 		{
@@ -876,7 +876,7 @@ struct ImageCompareDlgPriv : public GZoomViewCallback
 	}
 };
 
-ImageCompareDlg::ImageCompareDlg(GView *p, const char *OutPath)
+ImageCompareDlg::ImageCompareDlg(LView *p, const char *OutPath)
 {
 	d = new ImageCompareDlgPriv();
 	SetParent(p);
@@ -952,7 +952,7 @@ ImageCompareDlg::~ImageCompareDlg()
 	DeleteObj(d);
 }
 
-int ImageCompareDlg::OnNotify(GViewI *Ctrl, int Flags)
+int ImageCompareDlg::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{

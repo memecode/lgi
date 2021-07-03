@@ -209,7 +209,7 @@ public:
 	}
 };
 
-class GDropStreams : public GArray<GStreamI*>
+class GDropStreams : public GArray<LStreamI*>
 {
 public:
 	GDropStreams(GDragData &dd)

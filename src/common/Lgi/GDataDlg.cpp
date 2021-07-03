@@ -38,7 +38,7 @@ DataDlgTools::DataDlgTools()
 	Options = 0;
 }
 
-void DataDlgTools::Set(GView *dlg, ObjProperties *options)
+void DataDlgTools::Set(LView *dlg, ObjProperties *options)
 {
 	Dlg = dlg;
 	Options = options;
@@ -52,7 +52,7 @@ ObjProperties *DataDlgTools::GetOptions()
 bool DataDlgTools::ProcessField(DataDlgField *f, bool Write, char *OptionOverride)
 {
 	char *Opt = (OptionOverride) ? OptionOverride : f->Option;
-	GViewI *v = Dlg->FindControl(f->CtrlId);
+	LViewI *v = Dlg->FindControl(f->CtrlId);
 	if (Options && Dlg && Opt && v)
 	{
 		char OsOpt[256] = "";

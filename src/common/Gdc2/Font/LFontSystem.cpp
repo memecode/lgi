@@ -332,7 +332,7 @@ bool LFontSystem::HasIconv(bool Quiet)
 	}
 #endif
 
-ssize_t LFontSystem::IconvConvert(const char *OutCs, GStreamI *Out, const char *InCs, const char *&In, ssize_t InLen)
+ssize_t LFontSystem::IconvConvert(const char *OutCs, LStreamI *Out, const char *InCs, const char *&In, ssize_t InLen)
 {
 	LgiAssert(InLen > 0);
 

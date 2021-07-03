@@ -18,7 +18,7 @@ enum Ctrls
 	IDC_MESSAGE,
 };
 
-GAbout::GAbout(	GView *parent,
+GAbout::GAbout(	LView *parent,
 				const char *AppName,
 				const char *Ver,
 				const char *Text,
@@ -76,7 +76,7 @@ GAbout::GAbout(	GView *parent,
 		}
 	}
 
-	GView *Ctrl = GViewFactory::Create("GTextView3");
+	LView *Ctrl = GViewFactory::Create("GTextView3");
 	if (Ctrl)
 	{
 		auto c = Tbl->GetCell(x++, 0, true);
@@ -99,7 +99,7 @@ GAbout::GAbout(	GView *parent,
 	DoModal();
 }
 
-int GAbout::OnNotify(GViewI *Ctrl, int Flags)
+int GAbout::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (!Ctrl) return 0;
 	

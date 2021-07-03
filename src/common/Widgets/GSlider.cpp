@@ -29,7 +29,7 @@ void GSlider::Value(int64 i)
 	{
 		Val = i;
 
-		GViewI *n = GetNotify() ? GetNotify() : GetParent();
+		LViewI *n = GetNotify() ? GetNotify() : GetParent();
 		if (n)
 		{
 			n->OnNotify(this, Val);
@@ -67,7 +67,7 @@ void GSlider::SetLimits(int64 min, int64 max)
 	Max = max;
 }
 
-bool GSlider::OnLayout(GViewLayoutInfo &Inf)
+bool GSlider::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (Inf.Width.Min)
 	{
@@ -140,7 +140,7 @@ void GSlider::OnMouseMove(LMouse &m)
 
 class GSlider_Factory : public GViewFactory
 {
-	GView *NewView(const char *Class, LRect *Pos, const char *Text)
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (stricmp(Class, "GSlider") == 0)
 		{

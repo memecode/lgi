@@ -1,8 +1,8 @@
 /*hdr
-**      FILE:           GView.cpp
+**      FILE:           LView.cpp
 **      AUTHOR:         Matthew Allen
 **      DATE:           23/4/98
-**      DESCRIPTION:    Win32 GView Implementation
+**      DESCRIPTION:    Win32 LView Implementation
 **
 **      Copyright (C) 1998-2003, Matthew Allen
 **              fret@memecode.com
@@ -185,7 +185,7 @@ bool CastHwnd(T *&Ptr, HWND hWnd)
 		// LgiTrace("%s:%i - Error: hWnd=%p/%s, GWL_LGI_MAGIC=%i\n", _FL, hWnd, Cls.Get(), magic);
 		return false;
 	}
-	Ptr = dynamic_cast<T*>((GViewI*)user);
+	Ptr = dynamic_cast<T*>((LViewI*)user);
 	return Ptr != NULL;
 }
 
@@ -212,10 +212,10 @@ LRESULT CALLBACK LWindowsClass::Redir(HWND hWnd, UINT m, WPARAM a, LPARAM b)
 	{
 		LPCREATESTRUCT Info = (LPCREATESTRUCT) b;
 		
-		GViewI *ViewI = (GViewI*) Info->lpCreateParams;
+		LViewI *ViewI = (LViewI*) Info->lpCreateParams;
 		if (ViewI)
 		{
-			GView *View = ViewI->GetGView();
+			LView *View = ViewI->GetGView();
 			if (View) View->_View = hWnd;
 
 			#if _MSC_VER >= _MSC_VER_VS2005
@@ -227,7 +227,7 @@ LRESULT CALLBACK LWindowsClass::Redir(HWND hWnd, UINT m, WPARAM a, LPARAM b)
 		}
 	}
 
-	GViewI *Wnd = (GViewI*)
+	LViewI *Wnd = (LViewI*)
 		#if _MSC_VER >= _MSC_VER_VS2005
 		GetWindowLongPtr(hWnd, GWLP_USERDATA);
 		#else
@@ -248,12 +248,12 @@ LRESULT CALLBACK LWindowsClass::SubClassRedir(HWND hWnd, UINT m, WPARAM a, LPARA
 	if (m == WM_NCCREATE)
 	{
 		LPCREATESTRUCT Info = (LPCREATESTRUCT) b;
-		GViewI *ViewI = 0;
+		LViewI *ViewI = 0;
 		if (Info->lpCreateParams)
 		{
-			if (ViewI = (GViewI*) Info->lpCreateParams)
+			if (ViewI = (LViewI*) Info->lpCreateParams)
 			{
-				GView *View = ViewI->GetGView();
+				LView *View = ViewI->GetGView();
 				if (View)
 					View->_View = hWnd;
 			}
@@ -266,7 +266,7 @@ LRESULT CALLBACK LWindowsClass::SubClassRedir(HWND hWnd, UINT m, WPARAM a, LPARA
 		SetLgiMagic(hWnd);
 	}
 
-	GViewI *Wnd = (GViewI*)
+	LViewI *Wnd = (LViewI*)
 		#if _MSC_VER >= _MSC_VER_VS2005
 		GetWindowLongPtr(hWnd, GWLP_USERDATA);
 		#else
@@ -422,7 +422,7 @@ LRESULT CALLBACK LWindowsClass::CallParent(HWND hWnd, UINT m, WPARAM a, LPARAM b
 }
 
 //////////////////////////////////////////////////////////////////////////////
-GViewI *LWindowFromHandle(HWND hWnd)
+LViewI *LWindowFromHandle(HWND hWnd)
 {
 	if (hWnd)
 	{
@@ -451,7 +451,7 @@ GViewI *LWindowFromHandle(HWND hWnd)
 
 		if (m == LGI_GViewMagic)
 		{
-			return (GViewI*)
+			return (LViewI*)
 				#if _MSC_VER >= _MSC_VER_VS2005
 				GetWindowLongPtr(hWnd, GWLP_USERDATA);
 				#else
@@ -463,12 +463,12 @@ GViewI *LWindowFromHandle(HWND hWnd)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-const char *GView::GetClass()
+const char *LView::GetClass()
 {
-	return "GView";
+	return "LView";
 }
 
-void GView::_Delete()
+void LView::_Delete()
 {
 	if (_View && d->DropTarget)
 	{
@@ -477,12 +477,12 @@ void GView::_Delete()
 
 	#ifdef _DEBUG
 	// Sanity check..
-	// GArray<GViewI*> HasView;
+	// GArray<LViewI*> HasView;
 	for (auto c: Children)
 	{
 		// LgiAssert(!HasView.HasItem(c));
 		// HasView.Add(c);
-		LgiAssert(((GViewI*)c->GetParent()) == this || c->GetParent() == 0);
+		LgiAssert(((LViewI*)c->GetParent()) == this || c->GetParent() == 0);
 	}
 	#endif
 
@@ -496,7 +496,7 @@ void GView::_Delete()
 	}
 
 	// Delete all children
-	GViewI *c;
+	LViewI *c;
 	while (c = Children[0])
 	{
 		// If it has no parent, remove the pointer from the child list,
@@ -540,7 +540,7 @@ void GView::_Delete()
 	DeleteObj(_Lock);
 }
 
-void GView::Quit(bool DontDelete)
+void LView::Quit(bool DontDelete)
 {
 	if (_View)
 	{
@@ -553,47 +553,47 @@ void GView::Quit(bool DontDelete)
 	}
 }
 
-uint32_t GView::GetDlgCode()
+uint32_t LView::GetDlgCode()
 {
 	return d->WndDlgCode;
 }
 
-void GView::SetDlgCode(uint32_t i)
+void LView::SetDlgCode(uint32_t i)
 {
 	d->WndDlgCode = i;
 }
 
-uint32_t GView::GetStyle()
+uint32_t LView::GetStyle()
 {
 	return d->WndStyle;
 }
 
-void GView::SetStyle(uint32_t i)
+void LView::SetStyle(uint32_t i)
 {
 	d->WndStyle = i;
 }
 
-uint32_t GView::GetExStyle()
+uint32_t LView::GetExStyle()
 {
 	return d->WndExStyle;
 }
 
-void GView::SetExStyle(uint32_t i)
+void LView::SetExStyle(uint32_t i)
 {
 	d->WndExStyle = i;
 }
 
-const char *GView::GetClassW32()
+const char *LView::GetClassW32()
 {
 	return d->WndClass;
 }
 
-void GView::SetClassW32(const char *c)
+void LView::SetClassW32(const char *c)
 {
 	d->WndClass = c;
 }
 
-LWindowsClass *GView::CreateClassW32(const char *Class, HICON Icon, int AddStyles)
+LWindowsClass *LView::CreateClassW32(const char *Class, HICON Icon, int AddStyles)
 {
 	if (Class)
 	{
@@ -623,17 +623,17 @@ LWindowsClass *GView::CreateClassW32(const char *Class, HICON Icon, int AddStyle
 	return 0;
 }
 
-bool GView::IsAttached()
+bool LView::IsAttached()
 {
 	return _View && IsWindow(_View);
 }
 
-bool GView::Attach(GViewI *p)
+bool LView::Attach(LViewI *p)
 {
 	bool Status = false;
 
 	SetParent(p);
-	GView *Parent = d->GetParent();
+	LView *Parent = d->GetParent();
 	if (Parent && !_Window)
 		_Window = Parent->_Window;
 
@@ -679,7 +679,7 @@ bool GView::Attach(GViewI *p)
 								Parent ? Parent->Handle() : 0,
 								NULL,
 								LgiProcessInst(),
-								(GViewI*) this);
+								(LViewI*) this);
 
 		#ifdef _DEBUG
 		if (!_View)
@@ -731,7 +731,7 @@ bool GView::Attach(GViewI *p)
 	return Status;
 }
 
-bool GView::Detach()
+bool LView::Detach()
 {
 	bool Status = false;
 
@@ -772,7 +772,7 @@ bool GView::Detach()
 	return Status;
 }
 
-LRect &GView::GetClient(bool InClientSpace)
+LRect &LView::GetClient(bool InClientSpace)
 {
 	static LRect Client;
 
@@ -807,7 +807,7 @@ LRect &GView::GetClient(bool InClientSpace)
 	return Client;
 }
 
-LgiCursor GView::GetCursor(int x, int y)
+LgiCursor LView::GetCursor(int x, int y)
 {
 	return LCUR_Normal;
 }
@@ -891,10 +891,10 @@ bool LgiToWindowsCursor(OsView Hnd, LgiCursor Cursor)
 	return true;
 }
 
-bool GView::PointToScreen(LPoint &p)
+bool LView::PointToScreen(LPoint &p)
 {
 	POINT pt = {p.x, p.y};
-	GViewI *t = this;
+	LViewI *t = this;
 	while (	t &&
 			t->GetParent() &&
 			!t->Handle())
@@ -909,10 +909,10 @@ bool GView::PointToScreen(LPoint &p)
 	return true;
 }
 
-bool GView::PointToView(LPoint &p)
+bool LView::PointToView(LPoint &p)
 {
 	POINT pt = {p.x, p.y};
-	GViewI *t = this;
+	LViewI *t = this;
 	while (	t &&
 			t->GetParent() &&
 			!t->Handle())
@@ -927,7 +927,7 @@ bool GView::PointToView(LPoint &p)
 	return true;
 }
 
-bool GView::GetMouse(LMouse &m, bool ScreenCoords)
+bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 {
 	// position
 	POINT p;
@@ -956,7 +956,7 @@ bool GView::GetMouse(LMouse &m, bool ScreenCoords)
 	return true;
 }
 
-bool GView::SetPos(LRect &p, bool Repaint)
+bool LView::SetPos(LRect &p, bool Repaint)
 {
 	bool Status = true;
 	LRect OldPos = Pos;
@@ -994,7 +994,7 @@ bool GView::SetPos(LRect &p, bool Repaint)
 	return Status;
 }
 
-bool GView::Invalidate(LRect *r, bool Repaint, bool Frame)
+bool LView::Invalidate(LRect *r, bool Repaint, bool Frame)
 {
 	if (_View)
 	{
@@ -1033,7 +1033,7 @@ bool GView::Invalidate(LRect *r, bool Repaint, bool Frame)
 	else
 	{
 		LRect Up;
-		GViewI *p = this;
+		LViewI *p = this;
 
 		if (r)
 		{
@@ -1049,8 +1049,8 @@ bool GView::Invalidate(LRect *r, bool Repaint, bool Frame)
 
 		while (p && !p->Handle())
 		{
-			GViewI *Par = p->GetParent();
-			GView *VPar = Par?Par->GetGView():0;
+			LViewI *Par = p->GetParent();
+			LView *VPar = Par?Par->GetGView():0;
 			LRect w = p->GetPos();
 			LRect c = p->GetClient(false);
 			if (Frame && p == this)
@@ -1071,16 +1071,16 @@ bool GView::Invalidate(LRect *r, bool Repaint, bool Frame)
 
 void
 CALLBACK
-GView::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, uint32_t dwTime)
+LView::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, uint32_t dwTime)
 {
-	GView *View = (GView*) idEvent;
+	LView *View = (LView*) idEvent;
 	if (View)
 	{
 		View->OnPulse();
 	}
 }
 
-void GView::SetPulse(int Length)
+void LView::SetPulse(int Length)
 {
 	if (_View)
 	{
@@ -1102,7 +1102,7 @@ void GView::SetPulse(int Length)
 
 static int ConsumeTabKey = 0;
 
-bool SysOnKey(GView *w, GMessage *m)
+bool SysOnKey(LView *w, GMessage *m)
 {
 	if (m->a == VK_TAB &&
 		(m->m == WM_KEYDOWN ||
@@ -1113,7 +1113,7 @@ bool SysOnKey(GView *w, GMessage *m)
 		{
 			// push the focus to the next control
 			bool Shifted = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
-			GViewI *Wnd = GetNextTabStop(w, Shifted);
+			LViewI *Wnd = GetNextTabStop(w, Shifted);
 			if (Wnd)
 			{
 				if (In_SetWindowPos)
@@ -1135,7 +1135,7 @@ bool SysOnKey(GView *w, GMessage *m)
 #ifdef _MSC_VER
 #include "vsstyle.h"
 
-void GView::DrawThemeBorder(LSurface *pDC, LRect &r)
+void LView::DrawThemeBorder(LSurface *pDC, LRect &r)
 {
 	if (!d->hTheme)
 		d->hTheme = OpenThemeData(_View, VSCLASS_EDIT);
@@ -1199,7 +1199,7 @@ void GView::DrawThemeBorder(LSurface *pDC, LRect &r)
 	}
 }
 #else
-void GView::DrawThemeBorder(LSurface *pDC, LRect &r)
+void LView::DrawThemeBorder(LSurface *pDC, LRect &r)
 {
 	LWideBorder(pDC, r, DefaultSunkenEdge);
 }
@@ -1247,7 +1247,7 @@ bool IsKeyChar(LKey &k, int vk)
 
 #define KEY_FLAGS		(~(MK_LBUTTON | MK_MBUTTON | MK_RBUTTON))
 
-GMessage::Result GView::OnEvent(GMessage *Msg)
+GMessage::Result LView::OnEvent(GMessage *Msg)
 {
 	int Status = 0;
 
@@ -1276,8 +1276,8 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				HDC hdc = (HDC)Msg->A();
 				HWND hwnd = (HWND)Msg->B();
 
-				GViewI *v = FindControl(hwnd);
-				GView *gv = v ? v->GetGView() : NULL;
+				LViewI *v = FindControl(hwnd);
+				LView *gv = v ? v->GetGView() : NULL;
 				if (gv)
 				{
 					int Depth = dynamic_cast<GEdit*>(gv) ? 1 : 10;
@@ -1345,7 +1345,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 					/*
 					else if (di->CtlType == ODT_BUTTON)
 					{
-						GView *b;
+						LView *b;
 						if (CastHwnd(b, di->hwndItem) &&
 							b->GetCss())
 						{
@@ -1398,7 +1398,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			case WM_HSCROLL:
 			case WM_VSCROLL:
 			{
-				GViewI *Wnd = FindControl((HWND) Msg->b);
+				LViewI *Wnd = FindControl((HWND) Msg->b);
 				if (Wnd)
 				{
 					Wnd->OnEvent(Msg);
@@ -1443,7 +1443,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			case M_CHANGE:
 			{
 				LWindow *w = GetWindow();
-				GViewI *Ctrl = w ? w->FindControl((int)Msg->a) : 0;
+				LViewI *Ctrl = w ? w->FindControl((int)Msg->a) : 0;
 				if (Ctrl)
 				{
 					return OnNotify(Ctrl, (int)Msg->b);
@@ -1456,9 +1456,9 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			}
 			case M_COMMAND:
 			{
-				// GViewI *Ci = FindControl((HWND) Msg->b);
-				// GView *Ctrl = Ci ? Ci->GetGView() : 0;
-				GView *Ctrl;
+				// LViewI *Ci = FindControl((HWND) Msg->b);
+				// LView *Ctrl = Ci ? Ci->GetGView() : 0;
+				LView *Ctrl;
 				if (Msg->b &&
 					CastHwnd(Ctrl, (HWND)Msg->b))
 				{
@@ -1617,7 +1617,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			}
 			case WM_CAPTURECHANGED:
 			{
-				GViewI *Wnd;
+				LViewI *Wnd;
 				if (Msg->B() &&
 					CastHwnd(Wnd, (HWND)Msg->B()))
 				{
@@ -1651,7 +1651,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				Ms.y = (short) (Msg->b>>16);
 				Ms.Flags = 0;
 
-				GViewI *MouseOver = WindowFromPoint(Ms.x, Ms.y);
+				LViewI *MouseOver = WindowFromPoint(Ms.x, Ms.y);
 				if (MouseOver &&
 					_Over != MouseOver &&
 					!(MouseOver == this || MouseOver->Handle() == 0))
@@ -1708,7 +1708,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 					}
 					else
 					{
-						for (GViewI *o = _Capturing ? _Capturing : _Over; o; o = o->GetParent())
+						for (LViewI *o = _Capturing ? _Capturing : _Over; o; o = o->GetParent())
 						{
 							if (o == this)
 							{
@@ -1753,7 +1753,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				SetKeyFlag(Ms.Flags, VK_MENU, MK_ALT);
 				Ms.Down((Msg->a & (MK_LBUTTON|MK_MBUTTON|MK_RBUTTON)) != 0);
 
-				GViewI *MouseOver = WindowFromPoint(Ms.x, Ms.y);
+				LViewI *MouseOver = WindowFromPoint(Ms.x, Ms.y);
 				if (_Over != MouseOver)
 				{
 					if (_Over)
@@ -1799,7 +1799,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 					return 0;
 
 				LWindow *Wnd = GetWindow();
-				if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(Ms.Target), Ms))
+				if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<LView*>(Ms.Target), Ms))
 				{
 					Ms.Target->OnMouseMove(Ms);
 				}
@@ -1846,7 +1846,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				#endif
 
 				LWindow *Wnd = GetWindow();
-				if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(Ms.Target), Ms))
+				if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<LView*>(Ms.Target), Ms))
 					Ms.Target->OnMouseClick(Ms);
 				break;
 			}
@@ -1875,7 +1875,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				#endif
 
 				LWindow *Wnd = GetWindow();
-				if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(Ms.Target), Ms))
+				if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<LView*>(Ms.Target), Ms))
 					Ms.Target->OnMouseClick(Ms);
 				break;
 			}
@@ -1898,7 +1898,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 					Ms.Target = this;
 
 				LWindow *Wnd = GetWindow();
-				if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(Ms.Target), Ms))
+				if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<LView*>(Ms.Target), Ms))
 					Ms.Target->OnMouseClick(Ms);
 				break;
 			}
@@ -2077,7 +2077,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				NMHDR *Hdr = (NMHDR*)Msg->B();
 				if (Hdr)
 				{
-					GView *Wnd;
+					LView *Wnd;
 					if (CastHwnd(Wnd, Hdr->hwndFrom))
 						Wnd->SysOnNotify(Msg->Msg(), Hdr->code);
 				}
@@ -2110,16 +2110,16 @@ ReturnDefaultProc:
 	return r;
 }
 
-GViewI *GView::FindControl(OsView hCtrl)
+LViewI *LView::FindControl(OsView hCtrl)
 {
 	if (_View == hCtrl)
 	{
 		return this;
 	}
 
-	for (List<GViewI>::I i = Children.begin(); i.In(); i++)
+	for (List<LViewI>::I i = Children.begin(); i.In(); i++)
 	{
-		GViewI *Ctrl = (*i)->FindControl(hCtrl);
+		LViewI *Ctrl = (*i)->FindControl(hCtrl);
 		if (Ctrl)
 			return Ctrl;
 	}

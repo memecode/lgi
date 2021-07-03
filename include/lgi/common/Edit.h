@@ -92,7 +92,7 @@ public:
 	bool Paste();
 	void OnEnter(LKey &k);
 	void SendNotify(int Data = 0);
-	bool OnLayout(GViewLayoutInfo &Inf) { return false; }
+	bool OnLayout(LViewLayoutInfo &Inf) { return false; }
     void OnPaint(LSurface *pDC);
 	bool SetScrollBars(bool x, bool y);
 	#endif

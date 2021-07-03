@@ -50,7 +50,7 @@ public:
 	bool DeleteConfig(const char *Config);
 	
 	// UI
-	bool Edit(GViewI *parent);
+	bool Edit(LViewI *parent);
 
 	// Serialization
 	bool Serialize(LXmlTag *Parent, bool Write);

@@ -7,7 +7,7 @@ static GString TemplatesPath;
 class NewProjFromTemplate : public LDialog
 {
 public:
-	NewProjFromTemplate(GViewI *parent)
+	NewProjFromTemplate(LViewI *parent)
 	{
 		SetParent(parent);
 		if (LoadFromResource(IDD_NEW_PROJ_FROM_TEMPLATE))
@@ -38,7 +38,7 @@ public:
 		}
 	}
 	
-	int OnNotify(GViewI *c, int flags)
+	int OnNotify(LViewI *c, int flags)
 	{
 		switch (c->GetId())
 		{
@@ -132,7 +132,7 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 	FileDev->Delete(ScriptOut);
 	return true;
 }
-void NewProjectFromTemplate(GViewI *parent)
+void NewProjectFromTemplate(LViewI *parent)
 {
 	GFile::Path p(LSP_APP_INSTALL);
 	p +=

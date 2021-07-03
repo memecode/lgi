@@ -49,7 +49,7 @@ IScp::~IScp()
 {
 }
 
-bool IScp::WriteData(GSocketI *&s, IScpData *d)
+bool IScp::WriteData(LSocketI *&s, IScpData *d)
 {
 	bool Status = false;
 
@@ -184,7 +184,7 @@ bool IsHttpEnd(GStringPipe &p)
 	return Status;
 }
 
-bool IScp::ReadData(GSocketI *&s, IScpData *&d, int *HttpErr)
+bool IScp::ReadData(LSocketI *&s, IScpData *&d, int *HttpErr)
 {
 	bool Status = false;
 
@@ -535,7 +535,7 @@ IScpClient::~IScpClient()
 {
 }
 
-GSocketI *&IScpClient::Socket(bool Op)
+LSocketI *&IScpClient::Socket(bool Op)
 {
 	if (!s)
 	{
@@ -588,7 +588,7 @@ bool IScpClient::Request(IScpData *out, IScpData *&in)
 	return Status;
 }
 
-bool IScpClient::Connect(GSocketI *sock, char *Server, char *User, char *Pass)
+bool IScpClient::Connect(LSocketI *sock, char *Server, char *User, char *Pass)
 {
 	bool Status = false;
 
@@ -825,7 +825,7 @@ IScpServer::~IScpServer()
 {
 }
 
-bool IScpServer::Respond(GSocketI *s, int Code)
+bool IScpServer::Respond(LSocketI *s, int Code)
 {
 	IScpData r(SCP_RESPONSE);
 
@@ -836,7 +836,7 @@ bool IScpServer::Respond(GSocketI *s, int Code)
 	return WriteData(s, &r);
 }
 
-bool IScpServer::OnIdle(GSocketI *s)
+bool IScpServer::OnIdle(LSocketI *s)
 {
 	if (s)
 	{

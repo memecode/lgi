@@ -390,7 +390,7 @@ public:
 class LgiClass LSurface : public GRefCount, public GDom
 {
 	friend class GFilter;
-	friend class GView;
+	friend class LView;
 	friend class LWindow;
 	friend class LVariant;
 	friend class GRegionClipDC;
@@ -697,7 +697,7 @@ struct GPrintDcParams
 
 /// \brief An implemenation of LSurface to draw onto the screen.
 ///
-/// This is the class given to GView::OnPaint() most of the time. Which most of
+/// This is the class given to LView::OnPaint() most of the time. Which most of
 /// the time doesn't matter unless your doing something unusual.
 class LgiClass LScreenDC : public LSurface
 {
@@ -710,7 +710,7 @@ public:
 	// OS Sepcific
 	#if WINNATIVE
 
-		LScreenDC(GViewI *view);
+		LScreenDC(LViewI *view);
 		LScreenDC(HWND hwnd);
 		LScreenDC(HDC hdc, HWND hwnd, bool Release = false);
 		LScreenDC(HBITMAP hBmp, int Sx, int Sy);
@@ -721,7 +721,7 @@ public:
 	#else
 
 		/// Construct a wrapper to draw on a window
-		LScreenDC(GView *view, void *Param = 0);
+		LScreenDC(LView *view, void *Param = 0);
 	
 		#if defined(LGI_SDL)
 		#elif defined(__GTK_H__)
@@ -747,7 +747,7 @@ public:
 		#endif
 
 		OsPainter Handle();
-		GView *GetView();
+		LView *GetView();
 		int GetFlags();
 		LRect *GetClient();
 

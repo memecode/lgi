@@ -41,7 +41,7 @@ public:
 	GProgressPane &operator--(int);
 
 	void OnCreate() override;
-	int OnNotify(GViewI *Ctrl, int Flags) override;
+	int OnNotify(LViewI *Ctrl, int Flags) override;
 	void OnPaint(LSurface *pDC) override;
 	void OnPosChange() override;
 };
@@ -64,7 +64,7 @@ public:
 	GProgressDlg
 	(
 		/// The parent window
-		GView *parent = NULL,
+		LView *parent = NULL,
 		/// Specify a timeout to become visible (in ms)
 		uint64 timeout = 0
 	);
@@ -109,7 +109,7 @@ public:
 	GProgressDlg &operator++(int);
 	GProgressDlg &operator--(int);
 
-	int OnNotify(GViewI *Ctrl, int Flags) override;
+	int OnNotify(LViewI *Ctrl, int Flags) override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	void OnPaint(LSurface *pDC) override;
 	void OnCreate() override;

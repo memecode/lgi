@@ -45,7 +45,7 @@ public:
 	void *CallbackData;
 };
 
-GFindDlg::GFindDlg(GView *Parent, char *Init, GFrCallback Callback, void *UserData)
+GFindDlg::GFindDlg(LView *Parent, char *Init, GFrCallback Callback, void *UserData)
 {
 	d = new GFindDlgPrivate;
 	if (Init)
@@ -136,7 +136,7 @@ void GFindDlg::OnCreate()
 	}
 }
 
-int GFindDlg::OnNotify(GViewI *Ctrl, int Flags)
+int GFindDlg::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{
@@ -185,7 +185,7 @@ public:
 	void *CallbackData;
 };
 
-GReplaceDlg::GReplaceDlg(GView *Parent, char *InitFind, char *InitReplace, GFrCallback Callback, void *UserData)
+GReplaceDlg::GReplaceDlg(LView *Parent, char *InitFind, char *InitReplace, GFrCallback Callback, void *UserData)
 {
 	d = new GReplaceDlgPrivate;
 	d->Callback = Callback;
@@ -199,7 +199,7 @@ GReplaceDlg::GReplaceDlg(GView *Parent, char *InitFind, char *InitReplace, GFrCa
 	SetParent(Parent);
 	Name(LgiLoadString(L_FR_REPLACE, "Replace"));
 
-	GView *f = 0;
+	LView *f = 0;
 	
 	LRect r(0, 0, 450, 300);
 	SetPos(r);
@@ -274,7 +274,7 @@ void GReplaceDlg::OnCreate()
 	SetCtrlValue(IDC_SEARCH_UP, SearchUpwards);
 }
 
-int GReplaceDlg::OnNotify(GViewI *Ctrl, int Flags)
+int GReplaceDlg::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{

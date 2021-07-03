@@ -220,13 +220,13 @@ bool LSubMenu::RemoveItem(LMenuItem *Item)
 	return false;
 }
 
-int LSubMenu::Float(GView *From, int x, int y, int Button)
+int LSubMenu::Float(LView *From, int x, int y, int Button)
 {
 	int Cmd = 0;
 
 	if (From && Info)
 	{
-		GViewI *Wnd = From;
+		LViewI *Wnd = From;
 		while (Wnd && !Wnd->Handle())
 		{
 			Wnd = Wnd->GetParent();
@@ -1075,7 +1075,7 @@ LFont *LMenu::GetFont()
 	return MenuFont.f ? MenuFont.f : SysFont;
 }
 
-bool LMenu::Attach(GViewI *p)
+bool LMenu::Attach(LViewI *p)
 {
 	Window = p;
 
@@ -1102,7 +1102,7 @@ bool LMenu::Detach()
 	return Status;
 }
 
-bool LMenu::OnKey(GView *v, LKey &k)
+bool LMenu::OnKey(LView *v, LKey &k)
 {
 	if (k.Down() && k.vkey != 17)
 	{

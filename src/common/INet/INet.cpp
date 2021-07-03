@@ -262,7 +262,7 @@ public:
 	}
 };
 
-GSocket::GSocket(GStreamI *logger, void *unused_param)
+GSocket::GSocket(LStreamI *logger, void *unused_param)
 {
 	StartNetworkStack();
 	BytesWritten = 0;
@@ -907,7 +907,7 @@ bool GSocket::Listen(int Port)
 	return false;
 }
 
-bool GSocket::Accept(GSocketI *c)
+bool GSocket::Accept(LSocketI *c)
 {
 	if (!c)
 	{

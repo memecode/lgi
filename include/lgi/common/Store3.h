@@ -56,7 +56,7 @@ class GDataI;
 class GDataFolderI;
 class GDataStoreI;
 class GDataPropI;
-typedef GAutoPtr<GStreamI> GAutoStreamI;
+typedef GAutoPtr<LStreamI> GAutoStreamI;
 void ParseIdList(char *In, List<char> &Out);
 extern const char *Store3ItemTypeToMime(Store3ItemTypes type);
 
@@ -178,7 +178,7 @@ public:
 	/// Gets an iterator interface to a list of sub-objects.
 	virtual GDataIt GetList(int id) { EmptyVirtual(NULL); }
 	/// Set the mime segments
-	virtual Store3Status SetRfc822(GStreamI *Rfc822Msg) { LgiAssert(!"Pretty sure you should be implementing this"); return Store3Error; }
+	virtual Store3Status SetRfc822(LStreamI *Rfc822Msg) { LgiAssert(!"Pretty sure you should be implementing this"); return Store3Error; }
 };
 
 #pragma warning(default:4263)
@@ -306,7 +306,7 @@ public:
 	/// Notifcation of property change
 	virtual void OnPropChange(GDataStoreI *Store, int Prop, LVariantType Type) {}
 	/// Get the logging stream
-	virtual GStreamI *GetLogger(GDataStoreI *store) { return 0; }
+	virtual LStreamI *GetLogger(GDataStoreI *store) { return 0; }
 	/// Search for a object by type and name
 	virtual bool Match(GDataStoreI *store, GDataPropI *Addr, int ObjectType, GArray<GDom*> &Matches) { return 0; }
 };
@@ -447,7 +447,7 @@ public:
 	virtual bool Compact
 	(
 		/// The parent window of the UI
-		GViewI *Parent,
+		LViewI *Parent,
 		/// The store should pass information up to the UI via setting various parameters from Store3UiFields
 		GDataPropI *Props
 	) = 0;
@@ -457,7 +457,7 @@ public:
 	virtual bool Upgrade
 	(
 		/// The parent window of the UI
-		GViewI *Parent,
+		LViewI *Parent,
 		/// The store should pass information up to the UI via setting various parameters from Store3UiFields
 		GDataPropI *Props
 	) { return false; }
@@ -466,7 +466,7 @@ public:
 	virtual bool Repair
 	(
 		/// The parent window of the UI
-		GViewI *Parent,
+		LViewI *Parent,
 		/// The store should pass information up to the UI via setting various parameters from Store3UiFields
 		GDataPropI *Props
 	) { return false; }
@@ -475,7 +475,7 @@ public:
 	virtual bool SetFormat
 	(
 		/// The parent window of the UI
-		GViewI *Parent,
+		LViewI *Parent,
 		/// The store should pass information up to the UI via setting various parameters from Store3UiFields
 		GDataPropI *Props
 	) { return false; }

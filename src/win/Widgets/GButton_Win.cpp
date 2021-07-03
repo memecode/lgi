@@ -76,7 +76,7 @@ GButton::GButton(int id, int x, int y, int cx, int cy, const char *name) :
 GButton::~GButton()
 {
 	LWindow *w = GetWindow();
-	if (w && w->GetDefault() == (GViewI*)this)
+	if (w && w->GetDefault() == (LViewI*)this)
 	{
 		w->SetDefault(NULL);
 	}
@@ -153,22 +153,22 @@ void GButton::Default(bool b)
 
 bool GButton::Name(const char *n)
 {
-	return GView::Name(n);
+	return LView::Name(n);
 }
 
 bool GButton::NameW(const char16 *n)
 {
-	return GView::NameW(n);
+	return LView::NameW(n);
 }
 
 void GButton::SetFont(LFont *Fnt, bool OwnIt)
 {
-	GView::SetFont(Fnt, OwnIt);
+	LView::SetFont(Fnt, OwnIt);
 }
 
-int GButton::OnNotify(GViewI *Ctrl, int Flags)
+int GButton::OnNotify(LViewI *Ctrl, int Flags)
 {
-	if (Ctrl == (GViewI*)this && Flags == GNotify_Activate)
+	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
 	{
 		OnClick();
 	}
@@ -376,9 +376,9 @@ void GButton::OnClick()
 	int Id = GetId();
 	if (Id)
 	{
-		GViewI *n = GetNotify();
-		GViewI *p = GetParent();
-		GViewI *target = n ? n : p;
+		LViewI *n = GetNotify();
+		LViewI *p = GetParent();
+		LViewI *target = n ? n : p;
 		if (target)
 		{
 			if (Handle())

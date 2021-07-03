@@ -59,7 +59,7 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, GString::
 	return false;
 }
 
-int GDragDropSource::Drag(GView *SourceWnd, int Effect)
+int GDragDropSource::Drag(LView *SourceWnd, int Effect)
 {
 	LgiAssert(SourceWnd);
 	if (!SourceWnd)
@@ -93,7 +93,7 @@ GDragDropTarget::~GDragDropTarget()
 	Formats.DeleteArrays();
 }
 
-void GDragDropTarget::SetWindow(GView *to)
+void GDragDropTarget::SetWindow(LView *to)
 {
 	bool Status = false;
 	To = to;

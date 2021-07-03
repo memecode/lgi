@@ -268,7 +268,7 @@ GProgressPane &GProgressPane::operator--(int)
 	return *this;
 }
 
-int GProgressPane::OnNotify(GViewI *Ctrl, int Flags)
+int GProgressPane::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{
@@ -349,7 +349,7 @@ void GProgressPane::SetDescription(const char *d)
 #define DefY		LgiApp->GetMetric(LGI_MET_DECOR_Y)
 // #endif
 
-GProgressDlg::GProgressDlg(GView *parent, uint64 timeout)
+GProgressDlg::GProgressDlg(LView *parent, uint64 timeout)
 {
 	Ts = LgiCurrentTime();
 	YieldTs = 0;
@@ -441,7 +441,7 @@ void GProgressDlg::OnPosChange()
 	}
 }
 
-int GProgressDlg::OnNotify(GViewI *Ctrl, int Flags)
+int GProgressDlg::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl->GetId() == IDC_PANE &&
 		Flags == GNotifyTableLayout_LayoutChanged)
@@ -514,7 +514,7 @@ void GProgressDlg::Pop(GProgressPane *p)
 	{
 		Pane->Detach();
 		Panes.Delete(Pane);
-		GView::Invalidate();
+		LView::Invalidate();
 		DeleteObj(Pane);
 		Resize();
 	}

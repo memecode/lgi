@@ -6859,7 +6859,7 @@ GMessage::Result GHtml2::OnEvent(GMessage *Msg)
 	return GDocView::OnEvent(Msg);
 }
 
-int GHtml2::OnNotify(GViewI *c, int f)
+int GHtml2::OnNotify(LViewI *c, int f)
 {
 	switch (c->GetId())
 	{
@@ -8181,7 +8181,7 @@ void GHtml2::SetEmoji(bool i)
 ////////////////////////////////////////////////////////////////////////
 class GHtml_Factory2 : public GViewFactory
 {
-	GView *NewView(const char *Class, LRect *Pos, const char *Text)
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (stricmp(Class, "GHtml2") == 0)
 		{

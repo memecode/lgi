@@ -12,8 +12,8 @@ class GTransparentDlg : public GDialog
 	LVariant *Trans;
 
 public:
-	GTransparentDlg(GView *parent, LVariant *trans);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	GTransparentDlg(LView *parent, LVariant *trans);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 #endif
 

@@ -1345,7 +1345,7 @@ namespace Storage2
 			{
 				for (StorageItemImpl *Item = s; Item; )
 				{
-					bool Insert = (Validator) ? Validator->CompactValidate(dynamic_cast<GView*>(_Ui), Item) : true;
+					bool Insert = (Validator) ? Validator->CompactValidate(dynamic_cast<LView*>(_Ui), Item) : true;
 					if (Insert)
 					{
 						if (Item->Header->DirLoc)
@@ -1422,7 +1422,7 @@ namespace Storage2
 			{
 				for (StorageItemImpl *Item = s; Item; )
 				{
-					bool Insert = (Validator) ? Validator->CompactValidate(dynamic_cast<GView*>(_Ui), Item) : true;
+					bool Insert = (Validator) ? Validator->CompactValidate(dynamic_cast<LView*>(_Ui), Item) : true;
 					if (Insert)
 					{
 						if (Item->Header->DirLoc)
@@ -2028,7 +2028,7 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 		// tell the user what happened
 		if (Interactive)
 		{
-			LgiMsg(dynamic_cast<GView*>(d->_Ui), Msg, Status?(char*)"Compact Successful":(char*)"Compact Error", MB_OK);
+			LgiMsg(dynamic_cast<LView*>(d->_Ui), Msg, Status?(char*)"Compact Successful":(char*)"Compact Error", MB_OK);
 		}
 
 		// clean up

@@ -169,7 +169,7 @@ class GFileSelectPrivate
 	friend class GFileSelectDlg;
 	friend class GFolderList;
 
-	GView *Parent;
+	LView *Parent;
 	GFileSelect *Select;
 
 	DlgType Type;
@@ -276,7 +276,7 @@ public:
 
 	void OnFolder();
 
-	bool OnLayout(GViewLayoutInfo &Inf)
+	bool OnLayout(LViewLayoutInfo &Inf)
 	{
 		Inf.Width.Min = 
 			Inf.Width.Max = 18;
@@ -342,7 +342,7 @@ public:
 
 			if (Trigger)
 			{
-				GViewI *n=GetNotify()?GetNotify():GetParent();
+				LViewI *n=GetNotify()?GetNotify():GetParent();
 				if (n) n->OnNotify(this, 0);
 			}
 		}
@@ -377,7 +377,7 @@ public:
 
 				if (!Down)
 				{
-					GViewI *n=GetNotify()?GetNotify():GetParent();
+					LViewI *n=GetNotify()?GetNotify():GetParent();
 					if (n) n->OnNotify(this, 0);
 				}
 			}
@@ -388,7 +388,7 @@ public:
 		return false;
 	}
 	
-	bool OnLayout(GViewLayoutInfo &Inf)
+	bool OnLayout(LViewLayoutInfo &Inf)
 	{
 		Inf.Width.Min = Inf.Width.Max = Icons->TileX() + 4;
 		Inf.Width.Max += 4;
@@ -455,7 +455,7 @@ public:
 	}
 };
 
-class FolderCtrl : public GView
+class FolderCtrl : public LView
 {
 	struct Part
 	{
@@ -502,7 +502,7 @@ public:
 	
 	const char *GetClass() { return "FolderCtrl"; }
 	
-	bool OnLayout(GViewLayoutInfo &Inf)
+	bool OnLayout(LViewLayoutInfo &Inf)
 	{
 		if (Inf.Width.Min == 0)
 		{
@@ -541,10 +541,10 @@ public:
 	
 	bool Name(const char *n)
 	{
-		if (n && GView::Name() && !strcmp(n, GView::Name()))
+		if (n && LView::Name() && !strcmp(n, LView::Name()))
 			return true;
 
-		bool b = GView::Name(n);
+		bool b = LView::Name(n);
 		
 		Over = NULL;
 		GString Nm(n);
@@ -693,7 +693,7 @@ public:
 		}
 	}
 
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		if (e != NULL &&
 			c->GetId() == e->GetId())
@@ -728,7 +728,7 @@ public:
 			}
 		}
 
-		return GView::OnEvent(m);
+		return LView::OnEvent(m);
 	}
 
 	virtual bool ShowMenu(ssize_t Level)
@@ -812,14 +812,14 @@ public:
 	GFileSelectDlg(GFileSelectPrivate *Select);
 	~GFileSelectDlg();
 
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 	void OnUpFolder();
 	void SetFolder(char *f);
 	void OnFolder();
 	void OnFile(char *f);
 	void OnFilter(const char *Key);
 
-	bool OnViewKey(GView *v, LKey &k)
+	bool OnViewKey(LView *v, LKey &k)
 	{
 		if (k.vkey == LK_UP && k.Alt())
 		{
@@ -1138,7 +1138,7 @@ void GFileSelectDlg::OnFilter(const char *Key)
 		FileLst->SetFilterKey(Key);
 }
 
-int GFileSelectDlg::OnNotify(GViewI *Ctrl, int Flags)
+int GFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{
@@ -1455,7 +1455,7 @@ class GFileSystemPopup : public GPopup
 	GFileSystemItem *Root;
 
 public:
-	GFileSystemPopup(GView *owner, GFileSelectDlg *dlg, int x) : GPopup(owner)
+	GFileSystemPopup(LView *owner, GFileSelectDlg *dlg, int x) : GPopup(owner)
 	{
 		Dlg = dlg;
 		LRect r(0, 0, x, 150);
@@ -1879,7 +1879,7 @@ bool GFolderList::OnKey(LKey &k)
 			if (k.Down() && GetWindow())
 			{
 				// Go up a directory
-				GViewI *v = GetWindow()->FindControl(IDC_UP);
+				LViewI *v = GetWindow()->FindControl(IDC_UP);
 				if (v)
 				{
 					GetWindow()->OnNotify(v, 0);
@@ -1914,7 +1914,7 @@ bool GFolderList::OnKey(LKey &k)
 					}
 					else
 					{
-						GViewI *Ok = GetWindow()->FindControl(IDOK);
+						LViewI *Ok = GetWindow()->FindControl(IDOK);
 						if (Ok)
 						{
 							GetWindow()->SetCtrlName(IDC_FILE, Sel->GetText(0));
@@ -2116,14 +2116,14 @@ ssize_t GFileSelect::SelectedType()
 	return d->CurrentType;
 }
 
-GViewI *GFileSelect::Parent()
+LViewI *GFileSelect::Parent()
 {
 	return d->Parent;
 }
 
-void GFileSelect::Parent(GViewI *Window)
+void GFileSelect::Parent(LViewI *Window)
 {
-	d->Parent = dynamic_cast<GView*>(Window);
+	d->Parent = dynamic_cast<LView*>(Window);
 }
 
 bool GFileSelect::MultiSelect()

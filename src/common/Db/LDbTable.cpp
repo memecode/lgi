@@ -774,7 +774,7 @@ GDataIt LDbRow::GetList(int id)
 	return NULL;
 }
 
-Store3Status LDbRow::SetRfc822(GStreamI *Rfc822Msg)
+Store3Status LDbRow::SetRfc822(LStreamI *Rfc822Msg)
 {
 	LgiAssert(0);
 	return Store3Error;
