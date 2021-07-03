@@ -586,7 +586,7 @@ public:
 				if (!c)
 					break;
 				
-				if (c->Display() == GCss::DispBlock ||
+				if (c->Display() == LCss::DispBlock ||
 					c->TagId == TAG_BR)
 				{
 					Changed |= OptimizeLine(Line, Deletes);
@@ -618,7 +618,7 @@ public:
 	}
 
 	template <typename T>
-	bool HasStyle(GCss::PropType s, GArray<T> &Values)
+	bool HasStyle(LCss::PropType s, GArray<T> &Values)
 	{
 		bool CursorFirst = IsCursorFirst();
 
@@ -688,7 +688,7 @@ public:
 		return out ? out->Length() > 0 : false;
 	}
 
-	bool StylizeSelection(GCss &Style, GArray<GTag*> *NewTags = 0, const char *NewElement = "span")
+	bool StylizeSelection(LCss &Style, GArray<GTag*> *NewTags = 0, const char *NewElement = "span")
 	{
 		if (!Cursor || !Selection)
 			return false;
@@ -801,13 +801,13 @@ public:
 
 	bool HasBold()
 	{
-		GArray<GCss::FontWeightType> Types;
-		HasStyle(GCss::PropFontWeight, Types);
+		GArray<LCss::FontWeightType> Types;
+		HasStyle(LCss::PropFontWeight, Types);
 		for (unsigned i=0; i<Types.Length(); i++)
 		{
-			if (Types[i] != GCss::FontWeightNormal &&
-				Types[i] != GCss::FontWeightInherit &&
-				Types[i] != GCss::FontWeightLighter)
+			if (Types[i] != LCss::FontWeightNormal &&
+				Types[i] != LCss::FontWeightInherit &&
+				Types[i] != LCss::FontWeightLighter)
 			{
 				return true;
 			}
@@ -818,11 +818,11 @@ public:
 
 	bool HasItalic()
 	{
-		GArray<GCss::FontStyleType> Types;
-		HasStyle(GCss::PropFontStyle, Types);
+		GArray<LCss::FontStyleType> Types;
+		HasStyle(LCss::PropFontStyle, Types);
 		for (unsigned i=0; i<Types.Length(); i++)
 		{
-			if (Types[i] == GCss::FontStyleItalic)
+			if (Types[i] == LCss::FontStyleItalic)
 				return true;
 		}
 
@@ -831,11 +831,11 @@ public:
 
 	bool HasUnderline()
 	{
-		GArray<GCss::TextDecorType> Types;
-		HasStyle(GCss::PropTextDecoration, Types);
+		GArray<LCss::TextDecorType> Types;
+		HasStyle(LCss::PropTextDecoration, Types);
 		for (unsigned i=0; i<Types.Length(); i++)
 		{
-			if (Types[i] == GCss::TextDecorUnderline)
+			if (Types[i] == LCss::TextDecorUnderline)
 				return true;
 		}
 
@@ -853,7 +853,7 @@ public:
 
 			if (Selection)
 			{
-				GCss s;
+				LCss s;
 				GArray<GTag*> Tags;
 				DoUpdate = StylizeSelection(s, &Tags, "a");
 				for (unsigned i=0; i<Tags.Length(); i++)
@@ -923,8 +923,8 @@ public:
 
 			if (Selection)
 			{
-				GCss s;
-				s.FontWeight(HasBold() ? GCss::FontWeightNormal : GCss::FontWeightBold);
+				LCss s;
+				s.FontWeight(HasBold() ? LCss::FontWeightNormal : LCss::FontWeightBold);
 				DoUpdate = StylizeSelection(s);
 			}
 
@@ -952,8 +952,8 @@ public:
 
 			if (Selection)
 			{
-				GCss s;
-				s.FontStyle(HasItalic() ? GCss::FontStyleNormal : GCss::FontStyleItalic);
+				LCss s;
+				s.FontStyle(HasItalic() ? LCss::FontStyleNormal : LCss::FontStyleItalic);
 				DoUpdate = StylizeSelection(s);
 			}
 
@@ -981,8 +981,8 @@ public:
 
 			if (Selection)
 			{
-				GCss s;
-				s.TextDecoration(HasUnderline() ? GCss::TextDecorNone : GCss::TextDecorUnderline);
+				LCss s;
+				s.TextDecoration(HasUnderline() ? LCss::TextDecorNone : LCss::TextDecorUnderline);
 				DoUpdate = StylizeSelection(s);
 			}
 
@@ -1235,14 +1235,14 @@ public:
 		do
 		{
 			// Are we entering a block tag?
-			bool PrevBlock = n->Display() == GCss::DispBlock;
+			bool PrevBlock = n->Display() == LCss::DispBlock;
 			
 			// Move to the next tag
 			n = NextTag(n);
 			if (!n)
 				break;
 
-			bool ThisBlock = n->Display() == GCss::DispBlock;
+			bool ThisBlock = n->Display() == LCss::DispBlock;
 
 			if ((!PrevBlock && ThisBlock) ||
 				n->TagId == TAG_BR ||
@@ -1847,10 +1847,10 @@ public:
 			return false;
 		
 		if (t->TagId == TAG_LINK ||
-			t->Color().Type > GCss::ColorTransparent ||
-			t->FontWeight() > GCss::FontWeightNormal ||
-			t->TextDecoration() > GCss::TextDecorNone ||
-			t->FontStyle() > GCss::FontStyleNormal)
+			t->Color().Type > LCss::ColorTransparent ||
+			t->FontWeight() > LCss::FontWeightNormal ||
+			t->TextDecoration() > LCss::TextDecorNone ||
+			t->FontStyle() > LCss::FontStyleNormal)
 			return true;
 		
 		return false;
@@ -1880,22 +1880,22 @@ public:
 		
 		GColour c = t->_Colour(true);
 		if (c.IsValid())
-			t->Color(GCss::ColorDef(DefaultTextColour));
+			t->Color(LCss::ColorDef(DefaultTextColour));
 
-		if (t->BackgroundColor().Type > GCss::ColorInherit)
-			t->BackgroundColor(GCss::ColorDef());
+		if (t->BackgroundColor().Type > LCss::ColorInherit)
+			t->BackgroundColor(LCss::ColorDef());
 		
 		LFont *f = t->GetFont();
 		if (!f) return true;
 		
 		if (f->GetWeight() != FW_NORMAL)
-			t->FontWeight(GCss::FontWeightNormal);
+			t->FontWeight(LCss::FontWeightNormal);
 		
 		if (f->Underline())
-			t->TextDecoration(GCss::TextDecorNone);
+			t->TextDecoration(LCss::TextDecorNone);
 		
 		if (f->Italic())
-			t->FontStyle(GCss::FontStyleNormal);
+			t->FontStyle(LCss::FontStyleNormal);
 		
 		t->Font = NULL; // Force the display code to work out the font style again
 		return true;

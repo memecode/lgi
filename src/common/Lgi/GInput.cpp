@@ -71,7 +71,7 @@ GInput::GInput(GViewI *parent, const char *InitStr, const char *Msg, const char 
 	}
 
 	c = Tbl->GetCell(0, Cy++);
-	c->TextAlign(GCss::AlignRight);
+	c->TextAlign(LCss::AlignRight);
 
 	GButton *Ok;
 	c->Add(Ok = new GButton(IDOK, 0, 0, -1, -1, LgiLoadString(L_BTN_OK, "Ok")));

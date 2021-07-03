@@ -128,14 +128,14 @@ GMessage::Result GProgress::OnEvent(GMessage *Msg)
 
 			if (GetCss())
 			{
-				GCss::ColorDef f = GetCss()->Color();
-				if (f.Type == GCss::ColorRgb)
+				LCss::ColorDef f = GetCss()->Color();
+				if (f.Type == LCss::ColorRgb)
 				{
 					PostMessage(_View, PBM_SETBARCOLOR, 0, Rgb32To24(f.Rgb32));
 				}
 				
 				f = GetCss()->BackgroundColor();
-				if (f.Type == GCss::ColorRgb)
+				if (f.Type == LCss::ColorRgb)
 				{
 					PostMessage(_View, PBM_SETBKCOLOR, 0, Rgb32To24(f.Rgb32));
 				}
@@ -152,14 +152,14 @@ GString GProgress::CssStyles(const char *CssStyle)
 	GString Status = GControl::CssStyles(CssStyle);
 	if (Status && GetCss())
 	{
-		GCss::ColorDef f = GetCss()->Color();
-		if (f.Type == GCss::ColorRgb)
+		LCss::ColorDef f = GetCss()->Color();
+		if (f.Type == LCss::ColorRgb)
 			SendMessage(_View, PBM_SETBARCOLOR, 0, Rgb32To24(f.Rgb32));
 		else
 			SendMessage(_View, PBM_SETBARCOLOR, 0, CLR_DEFAULT);
 		
 		f = GetCss()->BackgroundColor();
-		if (f.Type == GCss::ColorRgb)
+		if (f.Type == LCss::ColorRgb)
 			SendMessage(_View, PBM_SETBKCOLOR, 0, Rgb32To24(f.Rgb32));
 		else
 			SendMessage(_View, PBM_SETBKCOLOR, 0, CLR_DEFAULT);

@@ -919,7 +919,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	// Top Row
 	GLayoutCell *c = Tbl->GetCell(x++, y);
 	c->Add(Ctrl1 = new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Look in:"));
-	c->VerticalAlign(GCss::Len(GCss::VerticalMiddle));
+	c->VerticalAlign(LCss::Len(LCss::VerticalMiddle));
 	c = Tbl->GetCell(x++, y);
 	#if USE_FOLDER_CTRL
 	c->Add(Ctrl2 = new FolderCtrl(IDC_PATH));
@@ -940,7 +940,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	c = Tbl->GetCell(x, y, true, 6, 1);
 	c->Add(Sub = new GBox(IDC_SUB_TBL));
 	Sub->AddView(Bookmarks = new GTree(IDC_BOOKMARKS, 0, 0, -1, -1));
-	Bookmarks->GetCss(true)->Width(GCss::Len(GCss::LenPx, 150.0f));
+	Bookmarks->GetCss(true)->Width(LCss::Len(LCss::LenPx, 150.0f));
 	Bookmarks->SetImageList(d->TreeIcons, false);
 	
 	GTableLayout *t;
@@ -949,7 +949,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	// Filter / search row
 	c = t->GetCell(0, 0);
 	c->Add(new GCheckBox(IDC_FILTER_CLEAR, 0, 0, -1, -1, "Filter items:"));
-	c->VerticalAlign(GCss::Len(GCss::VerticalMiddle));
+	c->VerticalAlign(LCss::Len(LCss::VerticalMiddle));
 	c = t->GetCell(1, 0);
 	c->Add(FilterEdit = new GEdit(IDC_FILTER, 0, 0, 60, 20));
 	c = t->GetCell(0, 1, true, 2);

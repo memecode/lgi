@@ -1039,7 +1039,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	GColour Fore = Ctx.Fore;
 	GColour TxtBack = Ctx.TxtBack;
 	auto Css = GetCss();
-	GCss::ColorDef f, b;
+	LCss::ColorDef f, b;
 	if (Css)
 	{
 		f = Css->Color();
@@ -1047,8 +1047,8 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	}
 
 	// text: first column
-	Ctx.Fore = f.Type == GCss::ColorRgb ? (GColour)f : (IsSelected ? SelFore : Fore);
-	Ctx.TxtBack = b.Type == GCss::ColorRgb ? (GColour)b : (IsSelected ? SelBack : Ctx.Back);
+	Ctx.Fore = f.Type == LCss::ColorRgb ? (GColour)f : (IsSelected ? SelFore : Fore);
+	Ctx.TxtBack = b.Type == LCss::ColorRgb ? (GColour)b : (IsSelected ? SelBack : Ctx.Back);
 
 	auto ColourDiff = abs(Ctx.Fore.GetGray() - Ctx.TxtBack.GetGray());
 	if (ColourDiff < 32) // Check if the colours are too similar and then disambiguate...
@@ -1067,8 +1067,8 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	x = Pos.x2 + 1;
 
 	// text: other columns
-	Ctx.Fore = f.Type == GCss::ColorRgb ? (GColour)f : Fore;
-	Ctx.TxtBack = b.Type == GCss::ColorRgb ? (GColour)b : Ctx.Back;
+	Ctx.Fore = f.Type == LCss::ColorRgb ? (GColour)f : Fore;
+	Ctx.TxtBack = b.Type == LCss::ColorRgb ? (GColour)b : Ctx.Back;
 	for (int i=1; i<Ctx.Columns; i++)
 	{
 		Ctx.Set(x, Pos.y1, x + Ctx.ColPx[i] - 1, Pos.y2);

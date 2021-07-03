@@ -1530,7 +1530,7 @@ void VcFolder::OnCmdError(GString Output, const char *Msg)
 
 void VcFolder::ClearError()
 {
-	GetCss(true)->Color(GCss::ColorInherit);
+	GetCss(true)->Color(LCss::ColorInherit);
 }
 
 bool VcFolder::ParseInfo(int Result, GString s, ParseParams *Params)
@@ -2663,7 +2663,7 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 	}
 	else if (Unpulled == 0)
 	{
-		GetCss(true)->Color(GCss::ColorInherit);
+		GetCss(true)->Color(LCss::ColorInherit);
 	}
 
 	Update();
@@ -3269,7 +3269,7 @@ bool VcFolder::ParsePull(int Result, GString s, ParseParams *Params)
 			if (HasUpdates)
 				GetCss(true)->Color(GColour::Green);
 			else
-				GetCss(true)->Color(GCss::ColorInherit);
+				GetCss(true)->Color(LCss::ColorInherit);
 			break;
 		}
 		case VcSvn:
@@ -3388,7 +3388,7 @@ bool VcFolder::ParseClean(int Result, GString s, ParseParams *Params)
 	{
 		case VcSvn:
 			if (Result == 0)
-				GetCss(true)->Color(GCss::ColorInherit);
+				GetCss(true)->Color(LCss::ColorInherit);
 			break;
 		default:
 			LgiAssert(!"Impl me.");

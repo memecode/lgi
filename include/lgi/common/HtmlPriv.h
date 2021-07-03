@@ -50,7 +50,7 @@ class GLength
 protected:
 	float d;
 	float PrevAbs;
-	GCss::LengthType u;
+	LCss::LengthType u;
 
 public:
 	GLength();
@@ -61,7 +61,7 @@ public:
 	float GetPrevAbs() { return PrevAbs; }
 	operator float();
 	GLength &operator =(float val);
-	GCss::LengthType GetUnits();
+	LCss::LengthType GetUnits();
 	void Set(char *s);
 	float Get(GFlowRegion *Flow, LFont *Font, bool Lock = false);
 	float GetRaw() { return d; }
@@ -72,7 +72,7 @@ class GLine : public GLength
 public:
 	int LineStyle;
 	int LineReset;
-	GCss::ColorDef Colour;
+	LCss::ColorDef Colour;
 
 	GLine();
 	~GLine();
@@ -114,7 +114,7 @@ public:
 	void Empty() { DeleteObjects(); }
 	LRect Bounds();
 	LRect *TopRect(LRegion *c);
-	void FlowText(GTag *Tag, GFlowRegion *c, LFont *Font, int LineHeight, char16 *Text, GCss::LengthType Align);
+	void FlowText(GTag *Tag, GFlowRegion *c, LFont *Font, int LineHeight, char16 *Text, LCss::LengthType Align);
 };
 
 struct GHtmlTableLayout
@@ -123,7 +123,7 @@ struct GHtmlTableLayout
 	GArray<CellArray> c;
 	GTag *Table;
 	LPoint s;
-	GCss::Len TableWidth;
+	LCss::Len TableWidth;
 	
 	// Various pixels sizes
 	int AvailableX;
@@ -133,7 +133,7 @@ struct GHtmlTableLayout
 
 	// The col and row sizes
 	GArray<int> MinCol, MaxCol, MaxRow;
-	GArray<GCss::Len> SizeCol;
+	GArray<LCss::Len> SizeCol;
 
 	GHtmlTableLayout(GTag *table);
 
@@ -299,7 +299,7 @@ protected:
 	GTag *GetTable();
 	char *NextTag(char *s);
 	void ZeroTableElements();
-	bool OnUnhandledColor(GCss::ColorDef *def, const char *&s);
+	bool OnUnhandledColor(LCss::ColorDef *def, const char *&s);
 	void CenterText();
 	bool Serialize(LXmlTag *t, bool Write);
 	GColour _Colour(bool Fore);
@@ -314,7 +314,7 @@ public:
 
 	// Heirarchy
 	GHtml *Html;
-	bool IsBlock() { return Display() == GCss::DispBlock; }
+	bool IsBlock() { return Display() == LCss::DispBlock; }
 	GTag *GetBlockParent(ssize_t *Idx = 0);
 	LFont *GetFont();
 
@@ -342,7 +342,7 @@ public:
 		LRect BorderPx;
 		LRect PaddingPx;
 		uint16 MinContent, MaxContent;
-		GCss::LengthType XAlign;
+		LCss::LengthType XAlign;
 		GHtmlTableLayout *Cells;
 		
 		TblCell()
@@ -350,7 +350,7 @@ public:
 			Cells = NULL;
 			MinContent = 0;
 			MaxContent = 0;
-			XAlign = GCss::LenInherit;
+			XAlign = LCss::LenInherit;
 			BorderPx.ZOff(0, 0);
 			PaddingPx.ZOff(0, 0);
 		}
@@ -450,7 +450,7 @@ public:
 	inline int AbsX() { return AbsolutePos().x; }
 	inline int AbsY() { return AbsolutePos().y; }
 	LRect GetRect(bool Client = true);
-	GCss::LengthType GetAlign(bool x);
+	LCss::LengthType GetAlign(bool x);
 
 	// Tables
 	GTag *GetTableCell(int x, int y);

@@ -123,7 +123,7 @@ void GBitmap::SetDC(GSurface *pNewDC)
 			GColour Bk = LColour(L_WORKSPACE);
 			if (GetCss())
 			{
-				GCss::ColorDef b = GetCss()->BackgroundColor();
+				LCss::ColorDef b = GetCss()->BackgroundColor();
 				if (b.IsValid())
 					Bk = b;
 			}
@@ -166,7 +166,7 @@ GMessage::Result GBitmap::OnEvent(GMessage *Msg)
 
 void GBitmap::OnPaint(GSurface *pScreen)
 {
-	GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
+	GColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 
 	LRect a = GetClient();
 	pScreen->Colour(cBack);

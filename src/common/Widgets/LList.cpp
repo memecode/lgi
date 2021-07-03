@@ -487,10 +487,10 @@ void LListItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 					
 					switch (Ctx.Align.Type)
 					{
-						case GCss::AlignCenter:
+						case LCss::AlignCenter:
 							Ds->Draw(pDC, ng.x1+((ng.X()-Ds->X())/2), ng.y1+1, &ng);
 							break;
-						case GCss::AlignRight:
+						case LCss::AlignRight:
 							Ds->Draw(pDC, ng.x2-Ds->X()-1, ng.y1+1, &ng);
 							break;
 						default: // Left or inherit
@@ -543,14 +543,14 @@ void LListItem::OnPaint(GItem::ItemPaintCtx &Ctx)
 	if (GetCss())
 	{
 		Prev.Reset(new ItemPaintCtx(Ctx));
-		GCss::ColorDef Fill = GetCss()->Color();
-		if (Fill.Type == GCss::ColorRgb)
+		LCss::ColorDef Fill = GetCss()->Color();
+		if (Fill.Type == LCss::ColorRgb)
 			Ctx.Fore.Set(Fill.Rgb32, 32);
 		
 		if (!Select())
 		{
 			Fill = GetCss()->BackgroundColor();
-			if (Fill.Type == GCss::ColorRgb)
+			if (Fill.Type == LCss::ColorRgb)
 				Ctx.Back.Set(Fill.Rgb32, 32);
 		}
 	}
@@ -2564,7 +2564,7 @@ void LList::OnPaint(GSurface *pDC)
 	LRect r = ItemsPos;
 	int n = FirstVisible;
 	int LastY = r.y1;
-	GCss::ColorDef Fill;
+	LCss::ColorDef Fill;
 	int LastSelected = -1;
 
 	GItem::ItemPaintCtx Ctx;

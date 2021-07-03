@@ -1,7 +1,7 @@
 #ifndef _GHTML2_PRIV_H_
 #define _GHTML2_PRIV_H_
 
-#include "GCss.h"
+#include "LCss.h"
 #include "GToken.h"
 
 namespace Html2
@@ -81,7 +81,7 @@ class GLength
 protected:
 	float d;
 	float PrevAbs;
-	GCss::LengthType u;
+	LCss::LengthType u;
 
 public:
 	GLength();
@@ -92,7 +92,7 @@ public:
 	float GetPrevAbs() { return PrevAbs; }
 	operator float();
 	GLength &operator =(float val);
-	GCss::LengthType GetUnits();
+	LCss::LengthType GetUnits();
 	void Set(char *s);
 	float Get(GFlowRegion *Flow, LFont *Font, bool Lock = false);
 	float GetRaw() { return d; }
@@ -103,7 +103,7 @@ class GLine : public GLength
 public:
 	int LineStyle;
 	int LineReset;
-	GCss::ColorDef Colour;
+	LCss::ColorDef Colour;
 
 	GLine();
 	~GLine();
@@ -144,7 +144,7 @@ public:
 
 	LRect Bounds();
 	LRect *TopRect(LRegion *c);
-	void FlowText(GTag *Tag, GFlowRegion *c, LFont *Font, char16 *Text, GCss::LengthType Align);
+	void FlowText(GTag *Tag, GFlowRegion *c, LFont *Font, char16 *Text, LCss::LengthType Align);
 };
 
 class GCellStore
@@ -163,7 +163,7 @@ public:
 	void Dump();
 };
 
-class GTag : public GDom, public GCss
+class GTag : public GDom, public LCss
 {
 public:
 	enum HtmlControlType
@@ -209,7 +209,7 @@ protected:
 	GTag *GetTable();
 	char *NextTag(char *s);
 	void ZeroTableElements();
-	bool OnUnhandledColor(GCss::ColorDef *def, const char *&s);
+	bool OnUnhandledColor(LCss::ColorDef *def, const char *&s);
 	
 	COLOUR _Colour(bool Fore);
 	COLOUR GetFore() { return _Colour(true); }
@@ -255,7 +255,7 @@ public:
 	LPoint Cell;
 	LPoint Span;
 	uint16 MinContent, MaxContent;
-	GCss::LengthType XAlign;
+	LCss::LengthType XAlign;
 	GCellStore *Cells;
 	#ifdef _DEBUG
 	int Debug;
@@ -294,9 +294,9 @@ public:
 	/// Called to apply CSS selectors on initialization and also when properties change at runtime.
 	void Restyle();
 	/// Match a simple CSS selector against the current object
-	bool MatchSimpleSelector(GCss::Selector *Sel, int PartIdx);
+	bool MatchSimpleSelector(LCss::Selector *Sel, int PartIdx);
 	/// Match all the CSS selectors against the current object (calls MatchSimpleSelector one or more times)
-	bool MatchFullSelector(GCss::Selector *Sel);
+	bool MatchFullSelector(LCss::Selector *Sel);
 	
 	/// Takes the CSS styles, parses and stores them in the current object,
 	//// overwriting any duplicate properties.
@@ -339,7 +339,7 @@ public:
 	int AbsX();
 	int AbsY();
 	LRect GetRect(bool Client = true);
-	GCss::LengthType GetAlign(bool x);
+	LCss::LengthType GetAlign(bool x);
 
 	// Tables
 	GTag *GetTableCell(int x, int y);

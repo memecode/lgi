@@ -18,7 +18,7 @@
 #include "GDragAndDrop.h"
 #include "GDropFiles.h"
 #include "GViewPriv.h"
-#include "GCss.h"
+#include "LCss.h"
 
 /// This hash contains all the GView* that exist.
 /// It's used by GApp::OnSDLEvent to

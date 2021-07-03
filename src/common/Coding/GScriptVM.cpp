@@ -1368,7 +1368,7 @@ GDebugView::GDebugView(LScriptVmDebuggerPriv *priv) : GTextView3(IDC_TEXT, 0, 0,
 	d = priv;
 	ErrorLine = -1;
 	SetWrapType(TEXTED_WRAP_NONE);
-	GetCss(true)->PaddingLeft(GCss::Len(GCss::LenPx, 18));
+	GetCss(true)->PaddingLeft(LCss::Len(LCss::LenPx, 18));
 }
 
 GDebugView::~GDebugView()
@@ -1599,12 +1599,12 @@ LVmDebuggerWnd::LVmDebuggerWnd(GView *Parent, LVmDebuggerCallback *Callback, LVi
 		d->Sub->SetVertical(false);
 		
 		d->Sub->AddView(d->SourceLst = new LList(IDC_SOURCE_LST, 0, 0, 100, 100));
-		d->SourceLst->GetCss(true)->Width(GCss::Len("200px"));
+		d->SourceLst->GetCss(true)->Width(LCss::Len("200px"));
 		d->SourceLst->AddColumn("Source", 200);
 		d->Sub->AddView(d->Text = new GDebugView(d));
 		
 		d->Main->AddView(d->Tabs = new GTabView(IDC_TABS));
-		d->Tabs->GetCss(true)->Height(GCss::Len("250px"));
+		d->Tabs->GetCss(true)->Height(LCss::Len("250px"));
 		
 		GTabPage *p = d->Tabs->Append("Variables");
 		p->Append(d->VarsTbl = new GTableLayout(IDC_VARS_TBL));		

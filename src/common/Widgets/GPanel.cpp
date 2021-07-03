@@ -176,8 +176,8 @@ bool GPanel::Pour(LRegion &r)
 			{
 				auto css = v->GetCss();
 				if (css &&
-					css->Width() == GCss::LenAuto &&
-					css->Height() == GCss::LenAuto)
+					css->Width() == LCss::LenAuto &&
+					css->Height() == LCss::LenAuto)
 				{
 					LRect c = GetClient();
 					GCssTools tools(css, v->GetFont());

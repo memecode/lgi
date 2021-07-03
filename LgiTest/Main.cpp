@@ -3,7 +3,7 @@
 #include "GButton.h"
 #include "LDisplayString.h"
 #include "GTextLabel.h"
-#include "GCss.h"
+#include "LCss.h"
 #include "GTableLayout.h"
 #include "LDbTable.h"
 #include "LXmlTree.h"
@@ -244,7 +244,7 @@ public:
 			t->GetCss(true)->Padding("6px");
 
 			auto *tab = t->Append("First");
-			tab->GetCss(true)->FontStyle(GCss::FontStyleItalic);
+			tab->GetCss(true)->FontStyle(LCss::FontStyleItalic);
 			tab->Append(new DnDtarget());
 			
 			tab = t->Append("Second");
@@ -262,10 +262,10 @@ public:
 			c->Add(Txt = new GTextLabel(IDC_TXT, 0, 0, -1, -1, "This is a test string. &For like\ntesting and stuff. "
 																"It has multiple\nlines to test wrapping."));
 			Txt->SetWrap(true);
-			//Txt->GetCss(true)->Color(GCss::ColorDef(GColour::Red));
-			// Txt->GetCss(true)->FontWeight(GCss::FontWeightBold);
-			// Txt->GetCss(true)->FontStyle(GCss::FontStyleItalic);
-			Txt->GetCss(true)->FontSize(GCss::Len("22pt"));
+			//Txt->GetCss(true)->Color(LCss::ColorDef(GColour::Red));
+			// Txt->GetCss(true)->FontWeight(LCss::FontWeightBold);
+			// Txt->GetCss(true)->FontStyle(LCss::FontStyleItalic);
+			Txt->GetCss(true)->FontSize(LCss::Len("22pt"));
 			Txt->OnStyleChange();
 
 			c = Tbl->GetCell(1, 0);

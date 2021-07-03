@@ -604,7 +604,7 @@ void FontSz()
 	for (int i=6; i<32; i++)
 	{
 		LFont f;
-		if (f.Create("verdana", GCss::Len(GCss::LenPx, i)))
+		if (f.Create("verdana", LCss::Len(LCss::LenPx, i)))
 		{
 			double a = (double) f.GetHeight() / f.Ascent();
 			LgiTrace("%i: %i, ascent=%f, a=%f\n", i, f.GetHeight(), f.Ascent(), a);

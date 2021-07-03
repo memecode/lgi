@@ -60,11 +60,11 @@ public:
 	{
 		if (GetCss(true))
 		{
-			GCss::ColorDef c;
+			LCss::ColorDef c;
 			if (!Str || !Str->Get())
-				GetCss()->Color(GCss::ColorDef(GCss::ColorRgb, Rgb32(0xbb, 0xbb, 0xbb)));
+				GetCss()->Color(LCss::ColorDef(LCss::ColorRgb, Rgb32(0xbb, 0xbb, 0xbb)));
 			else
-				GetCss()->DeleteProp(GCss::PropColor);
+				GetCss()->DeleteProp(LCss::PropColor);
 		}
 
 		if (!Str)

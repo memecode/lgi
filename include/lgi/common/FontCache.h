@@ -45,10 +45,10 @@ public:
 	}
 	
 	LFont *AddFont(	const char *Face,
-					GCss::Len Size,
-					GCss::FontWeightType Weight,
-					GCss::FontStyleType Style,
-					GCss::TextDecorType Decor)
+					LCss::Len Size,
+					LCss::FontWeightType Weight,
+					LCss::FontStyleType Style,
+					LCss::TextDecorType Decor)
 	{
 		// Matching existing fonts...
 		for (unsigned i=0; i<Fonts.Length(); i++)
@@ -60,9 +60,9 @@ public:
 				Face &&
 				!_stricmp(f->Face(), Face) &&
 				f->Size() == Size &&
-				f->Bold() == (Weight == GCss::FontWeightBold) &&
-				f->Italic() == (Style == GCss::FontStyleItalic) &&
-				f->Underline() == (Decor == GCss::TextDecorUnderline)
+				f->Bold() == (Weight == LCss::FontWeightBold) &&
+				f->Italic() == (Style == LCss::FontStyleItalic) &&
+				f->Underline() == (Decor == LCss::TextDecorUnderline)
 			)
 				return f;
 		}
@@ -71,17 +71,17 @@ public:
 		LFont *f = new LFont;
 		if (f)
 		{
-			f->Bold(Weight == GCss::FontWeightBold);
-			f->Italic(Style == GCss::FontStyleItalic);
-			f->Underline(Decor == GCss::TextDecorUnderline);
+			f->Bold(Weight == LCss::FontWeightBold);
+			f->Italic(Style == LCss::FontStyleItalic);
+			f->Underline(Decor == LCss::TextDecorUnderline);
 			
 			auto Sz = Size;
-			if (Sz.Type == GCss::SizeLarger)
+			if (Sz.Type == LCss::SizeLarger)
 			{
 				Sz = SysFont->Size();
 				Sz.Value++;
 			}
-			else if (Sz.Type == GCss::SizeSmaller)
+			else if (Sz.Type == LCss::SizeSmaller)
 			{
 				Sz = SysFont->Size();
 				Sz.Value--;
@@ -100,12 +100,12 @@ public:
 		return f;
 	}
 
-	LFont *GetFont(GCss *Style)
+	LFont *GetFont(LCss *Style)
 	{
 		if (!Style || !DefaultFont)
 			return DefaultFont;
 		
-		GCss::StringsDef Fam = Style->FontFamily();
+		LCss::StringsDef Fam = Style->FontFamily();
 		bool FamHasDefFace = false;
 		for (unsigned i=0; i<Fam.Length(); i++)
 		{
@@ -125,24 +125,24 @@ public:
 		if (!FamHasDefFace)
 			Fam.Add(NewStr(DefaultFont->Face()));
 		
-		GCss::Len Sz = Style->FontSize();
+		LCss::Len Sz = Style->FontSize();
 		if (!Sz.IsValid())
 			Sz = DefaultFont->Size();
-		GCss::FontWeightType Weight = Style->FontWeight();
-		GCss::FontWeightType DefaultWeight = DefaultFont && DefaultFont->Bold() ?
-											GCss::FontWeightBold :
-											GCss::FontWeightNormal;
-		GCss::FontStyleType FontStyle = Style->FontStyle();
-		GCss::TextDecorType Decor = Style->TextDecoration();
+		LCss::FontWeightType Weight = Style->FontWeight();
+		LCss::FontWeightType DefaultWeight = DefaultFont && DefaultFont->Bold() ?
+											LCss::FontWeightBold :
+											LCss::FontWeightNormal;
+		LCss::FontStyleType FontStyle = Style->FontStyle();
+		LCss::TextDecorType Decor = Style->TextDecoration();
 
 		LFont *f = NULL;
 		for (unsigned i = 0; !f && i<Fam.Length(); i++)
 		{		
 			f = AddFont(Fam[i],
 						Sz,
-						Weight != GCss::FontWeightInherit ? Weight : DefaultWeight,
-						FontStyle != GCss::FontStyleInherit ? FontStyle : GCss::FontStyleNormal,
-						Decor != GCss::TextDecorInherit ? Decor : GCss::TextDecorNone);
+						Weight != LCss::FontWeightInherit ? Weight : DefaultWeight,
+						FontStyle != LCss::FontStyleInherit ? FontStyle : LCss::FontStyleNormal,
+						Decor != LCss::TextDecorInherit ? Decor : LCss::TextDecorNone);
 		}
 
 		return f;

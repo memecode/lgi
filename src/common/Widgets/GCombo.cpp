@@ -545,7 +545,7 @@ void GCombo::OnPaint(GSurface *pDC)
 			d->SetText(new LDisplayString(GetFont(), n), _FL);
 	}
 
-	GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
+	GColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 
 	#if defined LGI_CARBON
 

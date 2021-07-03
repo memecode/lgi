@@ -123,34 +123,34 @@ GProgressPane::GProgressPane(GProgressDlg *dlg) : Dlg(dlg)
 		int Row = 0;
 		GLayoutCell *c = t->GetCell(0, Row++, true, 2, 1);
 		#ifdef PAD
-		c->Padding(GCss::Len(GCss::LenPx, PAD));
+		c->Padding(LCss::Len(LCss::LenPx, PAD));
 		#endif
 		c->Height("1.1em"); // This stops the layout flickering
 		c->Add(Desc = new GTextLabel(IDC_DESCRIPTION, 0, 0, -1, -1, "##"));
 
 		c = t->GetCell(0, Row);
 		#ifdef PAD
-		c->Padding(GCss::Len(GCss::LenPx, PAD));
+		c->Padding(LCss::Len(LCss::LenPx, PAD));
 		#endif
 		c->Add(ValText = new GTextLabel(IDC_VALUE, 0, 0, -1, -1, "##"));
 
 		c = t->GetCell(1, Row++);
 		#ifdef PAD
-		c->Padding(GCss::Len(GCss::LenPx, PAD));
+		c->Padding(LCss::Len(LCss::LenPx, PAD));
 		#endif
 		c->Add(Rate = new GTextLabel(IDC_RATE, 0, 0, -1, -1, "##"));
 
 		c = t->GetCell(0, Row++, true, 2, 1);
 		#ifdef PAD
-		c->Padding(GCss::Len(GCss::LenPx, PAD));
+		c->Padding(LCss::Len(LCss::LenPx, PAD));
 		#endif
 		c->Add(Bar = new GProgress(IDC_PROGRESS, 0, 0, PANE_X - 14, 10, "Progress"));
 
 		c = t->GetCell(0, Row++, true, 2, 1);
 		#ifdef PAD
-		c->Padding(GCss::Len(GCss::LenPx, PAD));
+		c->Padding(LCss::Len(LCss::LenPx, PAD));
 		#endif
-		c->TextAlign(GCss::Len(GCss::AlignCenter));
+		c->TextAlign(LCss::Len(LCss::AlignCenter));
 		c->Add(But = new GButton(IDC_BUTTON, 0, 0, -1, -1, LgiLoadString(L_PROGRESSDLG_REQ_ABORT, "Request Abort")));
 	}
 }

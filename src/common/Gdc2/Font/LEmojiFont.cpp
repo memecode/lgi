@@ -138,7 +138,7 @@ int LEmojiFont::GetHeight()
 	return priv->Cell;
 }
 
-bool LEmojiFont::Create(const char *Face, GCss::Len Sz, GSurface *pSurface)
+bool LEmojiFont::Create(const char *Face, LCss::Len Sz, GSurface *pSurface)
 {
 	if (Sz.IsValid())
 		Size(Sz);

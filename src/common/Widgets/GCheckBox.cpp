@@ -372,8 +372,8 @@ void GCheckBox::OnPaint(GSurface *pDC)
 
 		LRect t = r;
 		t.x1 = d->ValuePos.x2 + 1;
-		// GColour cFore = StyleColour(GCss::PropColor, LC_TEXT);
-		GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
+		// GColour cFore = StyleColour(LCss::PropColor, LC_TEXT);
+		GColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 
 		if (d->Lock(_FL))
 		{

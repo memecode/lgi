@@ -1,6 +1,6 @@
 #include "Lgi.h"
 #include "GProgress.h"
-#include "GCss.h"
+#include "LCss.h"
 
 GColour GProgress::cNormal(50, 150, 255);
 GColour GProgress::cPaused(222, 160, 0);
@@ -117,10 +117,10 @@ void GProgress::OnPaint(GSurface *pDC)
 
 			p.Size(1, 1);
 
-			GCss::ColorDef f;
+			LCss::ColorDef f;
 			if (GetCss())
 				f = GetCss()->BackgroundColor();
-			if (f.Type == GCss::ColorRgb)
+			if (f.Type == LCss::ColorRgb)
 				pDC->Colour(f.Rgb32, 32);
 			else
 				pDC->Colour(c);

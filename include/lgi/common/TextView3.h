@@ -76,7 +76,7 @@ public:
 		/// Cursor
 		LgiCursor Cursor;		
 		/// Optional extra decor not supported by the fonts
-		GCss::TextDecorType Decor;
+		LCss::TextDecorType Decor;
 		/// Colour for the optional decor.
 		GColour DecorColour;
 
@@ -90,7 +90,7 @@ public:
 			Font = NULL;
 			Empty();
 			Cursor = LCUR_Normal;
-			Decor = GCss::TextDecorNone;
+			Decor = LCss::TextDecorNone;
 		}
 
 		GStyle(const GStyle &s)
@@ -114,7 +114,7 @@ public:
 			Font = NULL;
 			Empty();
 			Cursor = LCUR_Normal;
-			Decor = GCss::TextDecorNone;
+			Decor = LCss::TextDecorNone;
 			return *this;
 		}
 

@@ -222,7 +222,7 @@ bool GRichTextPriv::HorzRuleBlock::AddText(Transaction *Trans, ssize_t AtOffset,
 	return false;
 }
 
-bool GRichTextPriv::HorzRuleBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, GCss *Style, bool Add)
+bool GRichTextPriv::HorzRuleBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add)
 {
 	return false;
 }

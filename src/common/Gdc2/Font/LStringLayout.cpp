@@ -15,14 +15,14 @@ void LLayoutString::Set(int LineIdx, int FixX, int YPx, LLayoutRun *Lr, ssize_t 
 	y = YPx;
 	Offset = Start;
 
-	GCss::ColorDef Fill = Src->Color();
-	if (Fill.Type == GCss::ColorRgb)
+	LCss::ColorDef Fill = Src->Color();
+	if (Fill.Type == LCss::ColorRgb)
 		Fore.Set(Fill.Rgb32, 32);
-	else if (Fill.Type != GCss::ColorTransparent)
+	else if (Fill.Type != LCss::ColorTransparent)
 		Fore = LColour(L_TEXT);
 	
 	Fill = Src->BackgroundColor();
-	if (Fill.Type == GCss::ColorRgb)
+	if (Fill.Type == LCss::ColorRgb)
 		Back.Set(Fill.Rgb32, 32);
 }
 
@@ -51,7 +51,7 @@ void LStringLayout::Empty()
 	Text.DeleteObjects();
 }
 
-bool LStringLayout::Add(const char *Str, GCss *Style)
+bool LStringLayout::Add(const char *Str, LCss *Style)
 {
 	if (!Str)
 		return false;
@@ -94,7 +94,7 @@ bool LStringLayout::Add(const char *Str, GCss *Style)
 			{
 				// Add '&'ed char
 				r = new LLayoutRun(Style);
-				r->TextDecoration(GCss::TextDecorUnderline);
+				r->TextDecoration(LCss::TextDecorUnderline);
 				s = e + 1; // Skip the '&' itself
 				GUtf8Ptr p(s); // Find the end of the next unicode char
 				p++;

@@ -94,7 +94,7 @@ LFontSelect::LFontSelect(GView *Parent, void *Init, int InitLen)
 		c->Add(d->Bmp = new GBitmap(IDC_PREVIEW, 14, 182, 0));
 	
 	c = d->Tbl->GetCell(0, 4, true, 2, 1);
-		c->TextAlign(GCss::Len(GCss::AlignRight));
+		c->TextAlign(LCss::Len(LCss::AlignRight));
 		c->Add(new GButton(IDOK, 175, 259, 49, 21, LgiLoadString(L_BTN_OK, "Ok")));
 		c->Add(new GButton(IDCANCEL, 231, 259, 49, 21, LgiLoadString(L_BTN_CANCEL, "Cancel")));
 
@@ -179,7 +179,7 @@ void LFontSelect::UpdatePreview()
 	f.Bold(Bold);
 	f.Underline(Underline);
 	f.Italic(Italic);
-	if (f.Create(Face, GCss::Len(GCss::LenPt, (float)Size)))
+	if (f.Create(Face, LCss::Len(LCss::LenPt, (float)Size)))
 	{
 		GMemDC *Dc = new GMemDC;
 		if (Dc->Create(263, 65, GdcD->GetColourSpace()))

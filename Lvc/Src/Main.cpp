@@ -418,7 +418,7 @@ public:
 				r.Set(0, 0, 30, 30);
 			
 			// printf("Used = %s\n", r.GetStr());
-			GCss::Len NewSz(GCss::LenPx, (float)r.Y()+3);
+			LCss::Len NewSz(LCss::LenPx, (float)r.Y()+3);
 			auto OldSz = GetCss(true)->Height();
 			if (OldSz != NewSz)
 			{
@@ -458,7 +458,7 @@ public:
 				r = v->GetUsedArea();
 				if (r.Y() <= 1)
 					r.Set(0, 0, 30, 30);
-				GetCss(true)->Height(GCss::Len(GCss::LenPx, (float)r.Y()));
+				GetCss(true)->Height(LCss::Len(LCss::LenPx, (float)r.Y()));
 			}
 			else LgiAssert(!"Missing table ctrl");
 		}
@@ -1022,7 +1022,7 @@ public:
 			FoldersBox->Attach(ToolsBox);
 
 			Tree = new GTree(IDC_TREE, 0, 0, 320, 200);
-			// Tree->GetCss(true)->Width(GCss::Len("320px"));
+			// Tree->GetCss(true)->Width(LCss::Len("320px"));
 			Tree->ShowColumnHeader(true);
 			Tree->AddColumn("Folder", 250);
 			Tree->AddColumn("Counts", 50);

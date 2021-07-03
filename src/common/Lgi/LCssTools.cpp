@@ -56,14 +56,14 @@ GColour &GCssTools::GetFore(GColour *Default)
 
 		if (View)
 		{
-			Fore = View->StyleColour(GCss::PropColor, Fore);
+			Fore = View->StyleColour(LCss::PropColor, Fore);
 		}
 		else if (Css)
 		{
-			GCss::ColorDef Fill = Css->Color();
-			if (Fill.Type == GCss::ColorRgb)
+			LCss::ColorDef Fill = Css->Color();
+			if (Fill.Type == LCss::ColorRgb)
 				Fore.Set(Fill.Rgb32, 32);
-			else if (Fill.Type == GCss::ColorTransparent)
+			else if (Fill.Type == LCss::ColorTransparent)
 				Fore.Empty();
 		}
 	}
@@ -84,14 +84,14 @@ GColour &GCssTools::GetBack(GColour *Default, int Depth)
 
 		if (View)
 		{
-			Back = View->StyleColour(GCss::PropBackgroundColor, Back, Depth >= 0 ? Depth : 6);
+			Back = View->StyleColour(LCss::PropBackgroundColor, Back, Depth >= 0 ? Depth : 6);
 		}
 		else if (Css)
 		{
-			GCss::ColorDef Fill = Css->BackgroundColor();
-			if (Fill.Type == GCss::ColorRgb)
+			LCss::ColorDef Fill = Css->BackgroundColor();
+			if (Fill.Type == LCss::ColorRgb)
 				Back.Set(Fill.Rgb32, 32);
-			else if (Fill.Type == GCss::ColorTransparent)
+			else if (Fill.Type == LCss::ColorTransparent)
 				Back.Empty();
 		}
 	}
@@ -107,9 +107,9 @@ LRect GCssTools::ApplyMargin(LRect &in)
 	LRect r = in;
 	
 	// Insert by the margin
-	GCss::Len margin = Css->Margin();
+	LCss::Len margin = Css->Margin();
 	#define DoMargin(name, edge, box, sign) \
-		{ GCss::Len m = Css->Margin##name(); \
+		{ LCss::Len m = Css->Margin##name(); \
 		r.edge sign (m.IsValid() ? &m : &margin)->ToPx(in.box(), Font); }
 	DoMargin(Left, x1, X, +=)
 	DoMargin(Top, y1, Y, +=)
@@ -124,10 +124,10 @@ LRect GCssTools::GetPadding(LRect &box, LRect *def)
 	LRect r(0, 0, 0, 0);
 	if (Css)
 	{
-		GCss::Len padding = Css->Padding();
+		LCss::Len padding = Css->Padding();
 		#define DoPadding(name, edge, dim) \
 			{ \
-				GCss::Len p = Css->Padding##name(); \
+				LCss::Len p = Css->Padding##name(); \
 				auto v = p.IsValid() ? &p : &padding; \
 				r.edge = v->IsValid() ? v->ToPx(box.dim(), Font) : (def ? def->edge : 0); \
 			}
@@ -150,10 +150,10 @@ LRect GCssTools::GetBorder(LRect &box, LRect *def)
 	LRect r(0, 0, 0, 0);
 	if (Css)
 	{
-		GCss::Len border = Css->Border();
+		LCss::Len border = Css->Border();
 		#define _(name, edge, dim) \
 			{ \
-				GCss::Len p = Css->Border##name(); \
+				LCss::Len p = Css->Border##name(); \
 				auto v = p.IsValid() ? &p : &border; \
 				r.edge = v->IsValid() ? v->ToPx(box.dim(), Font) : (def ? def->edge : 0); \
 			}
@@ -197,19 +197,19 @@ LRect GCssTools::ApplyPadding(LRect &in)
 				 in.y2 - pad.y2);
 }
 
-bool GCssTools::SetLineStyle(GSurface *pDC, GCss::BorderDef &b)
+bool GCssTools::SetLineStyle(GSurface *pDC, LCss::BorderDef &b)
 {
-	if (b.Color.Type == GCss::ColorRgb)
+	if (b.Color.Type == LCss::ColorRgb)
 	{
 		pDC->Colour(b.Color.Rgb32, 32);
 		switch (b.Style)
 		{
-			case GCss::BorderHidden:
+			case LCss::BorderHidden:
 				return false;
-			case GCss::BorderDotted:
+			case LCss::BorderDotted:
 				pDC->LineStyle(GSurface::LineDot);
 				break;
-			case GCss::BorderDashed:
+			case LCss::BorderDashed:
 				pDC->LineStyle(GSurface::LineDash);
 				break;
 			default:
@@ -228,16 +228,16 @@ LRect GCssTools::PaintBorder(GSurface *pDC, LRect &in)
 		return Content;
 
 	// Draw the border
-	GCss::BorderDef b = Css->Border();
+	LCss::BorderDef b = Css->Border();
 	bool Drawn = false;
 	switch (b.Style)
 	{
 		default:
-		case GCss::BorderNone:
-		case GCss::BorderHidden:
+		case LCss::BorderNone:
+		case LCss::BorderHidden:
 			// Do nothing
 			break;
-		case GCss::BorderInset: // Sunken
+		case LCss::BorderInset: // Sunken
 		{
 			int Px = b.ToPx(Content.X(), Font);
 			Drawn = true;
@@ -249,7 +249,7 @@ LRect GCssTools::PaintBorder(GSurface *pDC, LRect &in)
 				LgiAssert(!"Unsupported sunken border width");
 			break;
 		}
-		case GCss::BorderOutset: // Raised
+		case LCss::BorderOutset: // Raised
 		{
 			int Px = b.ToPx(Content.X(), Font);
 			Drawn = true;
@@ -261,7 +261,7 @@ LRect GCssTools::PaintBorder(GSurface *pDC, LRect &in)
 				LgiAssert(!"Unsupported raised border width");
 			break;
 		}
-		case GCss::BorderSolid:
+		case LCss::BorderSolid:
 		{
 			int Px = b.ToPx(Content.X(), Font);
 			if (SetLineStyle(pDC, b))
@@ -292,28 +292,28 @@ LRect GCssTools::PaintBorder(GSurface *pDC, LRect &in)
 	if (!Drawn)
 	{
 		// Check for individual borders of different styles...
-		GCss::BorderDef Top = Css->BorderTop();
+		LCss::BorderDef Top = Css->BorderTop();
 		if (SetLineStyle(pDC, Top))
 		{
 			int Px = Top.ToPx(Content.Y(), Font);
 			for (int i=0; i<Px; i++)
 				pDC->HLine(Content.x1, Content.x2, Content.y1++);
 		}
-		GCss::BorderDef Bottom = Css->BorderBottom();
+		LCss::BorderDef Bottom = Css->BorderBottom();
 		if (SetLineStyle(pDC, Bottom))
 		{
 			int Px = Bottom.ToPx(Content.Y(), Font);
 			for (int i=0; i<Px; i++)
 				pDC->HLine(Content.x1, Content.x2, Content.y2--);
 		}
-		GCss::BorderDef Left = Css->BorderLeft();
+		LCss::BorderDef Left = Css->BorderLeft();
 		if (SetLineStyle(pDC, Left))
 		{
 			int Px = Left.ToPx(Content.X(), Font);
 			for (int i=0; i<Px; i++)
 				pDC->VLine(Content.x1++, Content.y1, Content.y2);
 		}
-		GCss::BorderDef Right = Css->BorderRight();
+		LCss::BorderDef Right = Css->BorderRight();
 		if (SetLineStyle(pDC, Right))
 		{
 			int Px = Right.ToPx(Content.X(), Font);
@@ -375,7 +375,7 @@ bool GCssTools::Tile(GSurface *pDC, LRect in, GSurface *Img, int Ox, int Oy)
 
 GSurface *GCssTools::GetBackImage()
 {
-	GCss::ImageDef BackDef;
+	LCss::ImageDef BackDef;
 	auto Parent = View ? View->GetParent() : NULL;
 
 	if (Css)
@@ -438,7 +438,7 @@ void GCssTools::PaintContent(GSurface *pDC, LRect &in, const char *utf8, GSurfac
 		if (Ds)
 		{
 			int y = in.y1 + ((in.Y() - Ds->Y()) >> 1);
-			GCss::ColorDef Fore;
+			LCss::ColorDef Fore;
 			if (Css)
 				Fore = Css->Color();
 			GColour ForeCol(L_TEXT);

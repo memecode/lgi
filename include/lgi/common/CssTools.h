@@ -6,7 +6,7 @@
 class LgiClass GCssTools
 {
 	GView *View;
-	GCss *Css;
+	LCss *Css;
 	LFont *Font;
 	
 	GColour Fore, Back;
@@ -14,10 +14,10 @@ class LgiClass GCssTools
 	GSurface *BackImg;
 	LRect BackPos;
 	
-	bool SetLineStyle(GSurface *pDC, GCss::BorderDef &d);
+	bool SetLineStyle(GSurface *pDC, LCss::BorderDef &d);
 	
 public:
-	GCssTools(GCss *css, LFont *font)
+	GCssTools(LCss *css, LFont *font)
 	{
 		View = NULL;
 		Css = css;

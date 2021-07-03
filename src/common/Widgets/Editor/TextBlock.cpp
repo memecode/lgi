@@ -55,11 +55,11 @@ void GRichTextPriv::StyleText::SetStyle(GNamedStyle *s)
 				
 		if (Style)
 		{			
-			GCss::ColorDef c = Style->Color();
-			if (c.Type == GCss::ColorRgb)
+			LCss::ColorDef c = Style->Color();
+			if (c.Type == LCss::ColorRgb)
 				Colours.Fore.Set(c.Rgb32, 32);
 			c = Style->BackgroundColor();
-			if (c.Type == GCss::ColorRgb)
+			if (c.Type == LCss::ColorRgb)
 				Colours.Back.Set(c.Rgb32, 32);
 		}				
 	}
@@ -305,37 +305,37 @@ ssize_t GRichTextPriv::TextBlock::Length()
 	return Len;
 }
 
-HtmlTag IsDefaultStyle(HtmlTag Id, GCss *Css)
+HtmlTag IsDefaultStyle(HtmlTag Id, LCss *Css)
 {
 	if (!Css)
 		return CONTENT;
 
 	if (Css->Length() == 2)
 	{
-		GCss::ColorDef c = Css->Color();
+		LCss::ColorDef c = Css->Color();
 		if ((GColour)c != GColour::Blue)
 			return CONTENT;
 				
-		GCss::TextDecorType td = Css->TextDecoration();
-		if (td != GCss::TextDecorUnderline)
+		LCss::TextDecorType td = Css->TextDecoration();
+		if (td != LCss::TextDecorUnderline)
 			return CONTENT;
 
 		return TAG_A;
 	}
 	else if (Css->Length() == 1)
 	{
-		GCss::FontWeightType fw = Css->FontWeight();
-		if (fw == GCss::FontWeightBold ||
-			fw == GCss::FontWeightBolder ||
-			fw >= GCss::FontWeight700)
+		LCss::FontWeightType fw = Css->FontWeight();
+		if (fw == LCss::FontWeightBold ||
+			fw == LCss::FontWeightBolder ||
+			fw >= LCss::FontWeight700)
 			return TAG_B;
 
-		GCss::TextDecorType td = Css->TextDecoration();
-		if (td == GCss::TextDecorUnderline)
+		LCss::TextDecorType td = Css->TextDecoration();
+		if (td == LCss::TextDecorUnderline)
 			return TAG_U;
 
-		GCss::FontStyleType fs = Css->FontStyle();
-		if (fs == GCss::FontStyleItalic)
+		LCss::FontStyleType fs = Css->FontStyle();
+		if (fs == LCss::FontStyleItalic)
 			return TAG_I;
 	}
 
@@ -742,11 +742,11 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 	r.y1 -= Margin.y1;
 	r.x2 -= Margin.x2;
 	r.y2 -= Margin.y2;
-	GCss::ColorDef BorderStyle;
+	LCss::ColorDef BorderStyle;
 	if (Style)
 		BorderStyle = Style->BorderLeft().Color;
 	GColour BorderCol(222, 222, 222);
-	if (BorderStyle.Type == GCss::ColorRgb)
+	if (BorderStyle.Type == LCss::ColorRgb)
 		BorderCol.Set(BorderStyle.Rgb32, 32);
 
 	Ctx.DrawBox(r, Margin, Ctx.Colours[Unselected].Back);
@@ -1052,7 +1052,7 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 		LFont *f = flow.d->GetFont(t->GetStyle());
 		if (!f)
 			return flow.d->Error(_FL, "font creation failed.");
-		GCss::WordWrapType WrapType = tstyle ? tstyle->WordWrap() : GCss::WrapNormal;
+		LCss::WordWrapType WrapType = tstyle ? tstyle->WordWrap() : LCss::WrapNormal;
 		
 		uint32_t *sStart = t->At(0);
 		uint32_t *sEnd = sStart + t->Length();
@@ -1116,7 +1116,7 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 			if (!Ds)
 				return flow.d->Error(_FL, "display str creation failed.");
 
-			if (WrapType != GCss::WrapNone &&
+			if (WrapType != LCss::WrapNone &&
 				FixX + Ds->FX() > IntToFixed(AvailableX))
 			{
 				#if DEBUG_LAYOUT
@@ -1889,7 +1889,7 @@ void GRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange
 			// Also unlink any of the word after the URL
 			if (w.End() < Words[i].End())
 			{
-				GCss Style;
+				LCss Style;
 				ChangeStyle(Trans, w.End(), Words[i].End() - w.End(), &Style, false);
 			}
 		}
@@ -2179,7 +2179,7 @@ void GRichTextPriv::TextBlock::IncAllStyleRefs()
 	}
 }
 
-bool GRichTextPriv::TextBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, GCss *Style, bool Add)
+bool GRichTextPriv::TextBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add)
 {
 	if (!Style)
 		return d->Error(_FL, "No style.");
@@ -2212,7 +2212,7 @@ bool GRichTextPriv::TextBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, s
 			LgiAssert(Inside >= 0);
 
 
-			GAutoPtr<GCss> TmpStyle(new GCss);
+			GAutoPtr<LCss> TmpStyle(new LCss);
 			if (Add)
 			{
 				if (t->GetStyle())

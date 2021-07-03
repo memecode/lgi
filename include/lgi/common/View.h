@@ -464,14 +464,14 @@ public:
 	void SetMinimumSize(LPoint Size) override;
 
     /// Gets the style of the control
-    class GCss *GetCss(bool Create = false) override;
+    class LCss *GetCss(bool Create = false) override;
 
 	/// Resolve a CSS colour, e.g.:
-	/// auto Back = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
+	/// auto Back = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 	GColour StyleColour(int CssPropType, GColour Default, int Depth = 5);
 
     /// Sets the style of the control (will take ownership of 'css')
-    void SetCss(GCss *css) override;
+    void SetCss(LCss *css) override;
     /// Sets the CSS foreground or background colour
 	bool SetColour(GColour &c, bool Fore) override;
 

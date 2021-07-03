@@ -441,7 +441,7 @@ public:
 						b->AddView(Txt = new GTextView3(IDC_HTML, 0, 0, 100, 100));
 						Txt->SetPourLargest(true);
 						b->AddView(Imgs = new LList(IDC_IMAGES));
-						Imgs->GetCss(true)->Height(GCss::Len("150px"));
+						Imgs->GetCss(true)->Height(LCss::Len("150px"));
 						Imgs->AddColumn("Filename", 200);
 						Imgs->AddColumn("Size", 100);
 						Imgs->AddColumn("MimeType", 100);

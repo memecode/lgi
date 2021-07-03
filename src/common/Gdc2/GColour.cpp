@@ -915,8 +915,8 @@ bool LColourLoad(const char *Json)
 			auto c = Map.Find(p.key);
 			if (c > L_TRANSPARENT && c < L_MAXIMUM)
 			{
-				GCss::ColorDef cd(p.value);
-				if (cd.Type == GCss::ColorRgb)
+				LCss::ColorDef cd(p.value);
+				if (cd.Type == LCss::ColorRgb)
 					_LgiColours[c].Set(cd.Rgb32, 32);
 				else
 					LgiAssert(!"Invalid colour type.");

@@ -261,7 +261,7 @@ class GelSkin : public GSkinEngine
 		if (Mem && Mem->Create(Sz ? Sz->X() : 14, Sz ? Sz->Y() : 14, OsDefaultCs))
 		{
 			// blank out background
-			GColour Back = Ctrl->GetGView()->StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
+			GColour Back = Ctrl->GetGView()->StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 			Mem->Colour(Back);
 			Mem->Rectangle();
 			
@@ -414,7 +414,7 @@ class GelSkin : public GSkinEngine
 
 	void DrawText(GSkinState *State, int x, int y, LRect &rcFill, bool Enabled, GView *Ctrl, GCssTools &Tools)
 	{
-		GCss::ColorDef CssFore, CssBack;
+		LCss::ColorDef CssFore, CssBack;
 		GColour Fore = Tools.GetFore(), Back = Tools.GetBack(), Light, Low;
 
 		if (!Enabled)
@@ -605,8 +605,8 @@ public:
 		GColour NoPaint(LColour(L_MED));
 		if (Ctrl->GetCss())
 		{
-			GCss::ColorDef np = Ctrl->GetCss()->NoPaintColor();
-			if (np.Type == GCss::ColorRgb)
+			LCss::ColorDef np = Ctrl->GetCss()->NoPaintColor();
+			if (np.Type == LCss::ColorRgb)
 				NoPaint.Set(np.Rgb32, 32);
 			else
 				NoPaint.Empty();
@@ -618,7 +618,7 @@ public:
 			auto p = Ctrl->GetParent();
 			NoPaint = LColour(L_MED);
 			if (p) // Use the parent's background?
-				NoPaint = p->GetGView()->StyleColour(GCss::PropBackgroundColor, NoPaint);
+				NoPaint = p->GetGView()->StyleColour(LCss::PropBackgroundColor, NoPaint);
 		}
 		#endif
 		if (NoPaint.IsValid())

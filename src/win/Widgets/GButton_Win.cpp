@@ -239,7 +239,7 @@ GMessage::Result GButton::OnEvent(GMessage *Msg)
 				break;
 
 			// This is the effective background of the parent window:
-			GCss::ColorDef bk = GetCss()->NoPaintColor();
+			LCss::ColorDef bk = GetCss()->NoPaintColor();
 		
 			// If it's not the default...
 			if (!bk.IsValid())

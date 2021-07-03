@@ -184,7 +184,7 @@ GFindInFiles::GFindInFiles(GViewI *Parent, GAutoString Search, GDom *Store)
 	c->Add(d->WhereHistory = new GHistory(IDC_WHERE_HISTORY));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
-	c->PaddingTop(GCss::Len("0.5em"));
+	c->PaddingTop(LCss::Len("0.5em"));
 	c->Add(new GCheckBox(IDC_INC_SUB_FOLDERS, 0, 0, -1, -1, "Include sub-folders"));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
@@ -194,7 +194,7 @@ GFindInFiles::GFindInFiles(GViewI *Parent, GAutoString Search, GDom *Store)
 	c->Add(new GCheckBox(IDC_MATCH_WHOLE_WORD, 0, 0, -1, -1, "Match whole word"));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
-	c->PaddingTop(GCss::Len("1em"));
+	c->PaddingTop(LCss::Len("1em"));
 	c->Add(new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Look in these file types:"));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols-1);
@@ -203,7 +203,7 @@ GFindInFiles::GFindInFiles(GViewI *Parent, GAutoString Search, GDom *Store)
 	c->Add(d->TypesHistory = new GHistory(IDC_TYPES_HISTORY));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
-	c->TextAlign(GCss::AlignRight);
+	c->TextAlign(LCss::AlignRight);
 	c->Add(new GButton(IDOK, 0, 0, 60, 20, "Search"));
 	c->Add(new GButton(IDCANCEL, 0, 0, 60, 20, "Cancel"));
 

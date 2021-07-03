@@ -98,7 +98,7 @@ public:
 	/// Sets the font face name
 	void Face(const char *s);
 	/// Sets the font size
-	void Size(GCss::Len);
+	void Size(LCss::Len);
 	/// Sets the point size
 	void PointSize(int i);
 	/// Sets the tab size in device units (pixels)
@@ -136,7 +136,7 @@ public:
 	/// \returns the point size (avoid, use 'Size' instead)
 	int PointSize();
 	/// \returns the size
-	GCss::Len Size();
+	LCss::Len Size();
 	/// \returns the tabsize in pixels
 	int TabSize();
 	/// \returns the quality setting
@@ -202,7 +202,7 @@ public:
 		/// Font face name
 		const char *face = 0,
 		/// Size of the font
-		GCss::Len size = GCss::LenInherit
+		LCss::Len size = LCss::LenInherit
 	);
 	/// Construct from OS font handle
 	LFont(OsFont Handle);
@@ -218,7 +218,7 @@ public:
 		/// The new font face
 		const char *Face = 0,
 		/// The pt size
-		GCss::Len Size = GCss::LenInherit,
+		LCss::Len Size = LCss::LenInherit,
 		/// Creating a font for a particular surface (e.g. printing).
 		GSurface *pSurface = 0
 	);
@@ -230,7 +230,7 @@ public:
 	bool CreateFromCss(const char *Css);
 	
 	/// Creates the font from a CSS object.
-	bool CreateFromCss(GCss *Css);
+	bool CreateFromCss(LCss *Css);
 
 	/// Returns CSS styles to describe font
 	GString FontToCss();

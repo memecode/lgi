@@ -24,7 +24,7 @@ DocEdit::DocEdit(IdeDoc *d, LFontType *f) :
 	SetFindReplaceParams(GlobalFindReplace);
 		
 	CanScrollX = true;
-	GetCss(true)->PaddingLeft(GCss::Len(GCss::LenPx, (float)(LeftMarginPx + 2)));
+	GetCss(true)->PaddingLeft(LCss::Len(LCss::LenPx, (float)(LeftMarginPx + 2)));
 		
 	if (!f)
 	{
@@ -187,7 +187,7 @@ void DocEdit::OnMouseClick(LMouse &m)
 		int Y = (VScroll) ? (int)VScroll->Value() : 0;
 		LFont *f = GetFont();
 		if (!f) return;
-		GCss::Len PaddingTop = GetCss(true)->PaddingTop();
+		LCss::Len PaddingTop = GetCss(true)->PaddingTop();
 		int TopPx = PaddingTop.ToPx(GetClient().Y(), f);
 		int Idx = ((m.y - TopPx) / f->GetHeight()) + Y + 1;
 		if (Idx > 0 && Idx <= GTextView3::Line.Length())

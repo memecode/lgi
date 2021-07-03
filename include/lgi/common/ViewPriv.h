@@ -123,7 +123,7 @@ public:
 	GViewFontType	FontOwnType;
 	
 	// Style
-	GAutoPtr<GCss>  Css;
+	GAutoPtr<LCss>  Css;
 	bool CssDirty;			// This is set when 'Styles' changes, the next call to GetCss(...) parses
 							// the styles into the 'Css' object.
 	GString			Styles; // Somewhat temporary object to store unparsed styles particular to

@@ -80,7 +80,7 @@
 
 #define IsTableCell(id)				( ((id) == TAG_TD) || ((id) == TAG_TH) )
 #define IsTableTag()				(TagId == TAG_TABLE || TagId == TAG_TR || TagId == TAG_TD || TagId == TAG_TH)
-#define GetCssLen(a, b)				a().Type == GCss::LenInherit ? b() : a()
+#define GetCssLen(a, b)				a().Type == LCss::LenInherit ? b() : a()
 
 static char WordDelim[]	=			".,<>/?[]{}()*&^%$#@!+|\'\"";
 static char16 WhiteW[] =			{' ', '\t', '\r', '\n', 0};
@@ -248,13 +248,13 @@ public:
 		return 0;
 	}
 
-	LFont *GetFont(GCss *Style)
+	LFont *GetFont(LCss *Style)
 	{
 		if (!Style)
 			return NULL;
 		
 		LFont *Default = Owner->GetFont();
-		GCss::StringsDef Face = Style->FontFamily();
+		LCss::StringsDef Face = Style->FontFamily();
 		if (Face.Length() < 1 || !ValidStr(Face[0]))
 		{
 			Face.Empty();
@@ -263,23 +263,23 @@ public:
 			Face.Add(NewStr(DefFace));
 		}
 		LgiAssert(ValidStr(Face[0]));
-		GCss::Len Size = Style->FontSize();
-		GCss::FontWeightType Weight = Style->FontWeight();
-		bool IsBold =	Weight == GCss::FontWeightBold ||
-						Weight == GCss::FontWeightBolder ||
-						Weight > GCss::FontWeight400;
-		bool IsItalic = Style->FontStyle() == GCss::FontStyleItalic;
-		bool IsUnderline = Style->TextDecoration() == GCss::TextDecorUnderline;
+		LCss::Len Size = Style->FontSize();
+		LCss::FontWeightType Weight = Style->FontWeight();
+		bool IsBold =	Weight == LCss::FontWeightBold ||
+						Weight == LCss::FontWeightBolder ||
+						Weight > LCss::FontWeight400;
+		bool IsItalic = Style->FontStyle() == LCss::FontStyleItalic;
+		bool IsUnderline = Style->TextDecoration() == LCss::TextDecorUnderline;
 
-		if (Size.Type == GCss::LenInherit ||
-			Size.Type == GCss::LenNormal)
+		if (Size.Type == LCss::LenInherit ||
+			Size.Type == LCss::LenNormal)
 		{
-			Size.Type = GCss::LenPt;
+			Size.Type = LCss::LenPt;
 			Size.Value = (float)Default->PointSize();
 		}
 
 		auto Scale = Owner->GetDpiScale();
-		if (Size.Type == GCss::LenPx)
+		if (Size.Type == LCss::LenPx)
 		{
 			Size.Value *= Scale.y;
 		    int RequestPx = (int) Size.Value;
@@ -300,7 +300,7 @@ public:
 				}
 			}
 		}
-		else if (Size.Type == GCss::LenPt)
+		else if (Size.Type == LCss::LenPt)
 		{
 			double Pt = Size.Value;
 			for (auto f: Fonts)
@@ -314,7 +314,7 @@ public:
 				auto FntSz = f->Size();
 				if (f->Face() &&
 					_stricmp(f->Face(), Face[0]) == 0 &&
-					FntSz.Type == GCss::LenPt &&
+					FntSz.Type == LCss::LenPt &&
 					std::abs(FntSz.Value - Pt) < FLOAT_TOLERANCE &&
 					f->Bold() == IsBold &&
 					f->Italic() == IsItalic &&
@@ -325,51 +325,51 @@ public:
 				}
 			}
 		}
-		else if (Size.Type == GCss::LenPercent)
+		else if (Size.Type == LCss::LenPercent)
 		{
 			// Most of the percentages will be resolved in the "Apply" stage
 			// of the CSS calculations, any that appear here have no "font-size"
 			// in their parent tree, so we just use the default font size times
 			// the requested percent
-			Size.Type = GCss::LenPt;
+			Size.Type = LCss::LenPt;
 			Size.Value *= Default->PointSize() / 100.0;
 			if (Size.Value < MinimumPointSize)
 				Size.Value = MinimumPointSize;
 		}
-		else if (Size.Type == GCss::LenEm)
+		else if (Size.Type == LCss::LenEm)
 		{
 			// Most of the relative sizes will be resolved in the "Apply" stage
 			// of the CSS calculations, any that appear here have no "font-size"
 			// in their parent tree, so we just use the default font size times
 			// the requested percent
-			Size.Type = GCss::LenPt;
+			Size.Type = LCss::LenPt;
 			Size.Value *= Default->PointSize();
 			if (Size.Value < MinimumPointSize)
 				Size.Value = MinimumPointSize;
 		}
-		else if (Size.Type == GCss::SizeXXSmall ||
-				Size.Type == GCss::SizeXSmall ||
-				Size.Type == GCss::SizeSmall ||
-				Size.Type == GCss::SizeMedium ||
-				Size.Type == GCss::SizeLarge ||
-				Size.Type == GCss::SizeXLarge ||
-				Size.Type == GCss::SizeXXLarge)
+		else if (Size.Type == LCss::SizeXXSmall ||
+				Size.Type == LCss::SizeXSmall ||
+				Size.Type == LCss::SizeSmall ||
+				Size.Type == LCss::SizeMedium ||
+				Size.Type == LCss::SizeLarge ||
+				Size.Type == LCss::SizeXLarge ||
+				Size.Type == LCss::SizeXXLarge)
 		{
-			int Idx = Size.Type-GCss::SizeXXSmall;
-			LgiAssert(Idx >= 0 && Idx < CountOf(GCss::FontSizeTable));
-			Size.Type = GCss::LenPt;
-			Size.Value = Default->PointSize() * GCss::FontSizeTable[Idx];
+			int Idx = Size.Type-LCss::SizeXXSmall;
+			LgiAssert(Idx >= 0 && Idx < CountOf(LCss::FontSizeTable));
+			Size.Type = LCss::LenPt;
+			Size.Value = Default->PointSize() * LCss::FontSizeTable[Idx];
 			if (Size.Value < MinimumPointSize)
 				Size.Value = MinimumPointSize;
 		}
-		else if (Size.Type == GCss::SizeSmaller)
+		else if (Size.Type == LCss::SizeSmaller)
 		{
-			Size.Type = GCss::LenPt;
+			Size.Type = LCss::LenPt;
 			Size.Value = (float)(Default->PointSize() - 1);
 		}
-		else if (Size.Type == GCss::SizeLarger)
+		else if (Size.Type == LCss::SizeLarger)
 		{
-			Size.Type = GCss::LenPt;
+			Size.Type = LCss::LenPt;
 			Size.Value = (float)(Default->PointSize() + 1);
 		}
 		else LgiAssert(!"Not impl.");
@@ -527,16 +527,16 @@ public:
 		return *this;
 	}
 	
-	void FinishLine(GCss::LengthType Align, bool Margin = false);
-	void EndBlock(GCss::LengthType Align);
+	void FinishLine(LCss::LengthType Align, bool Margin = false);
+	void EndBlock(LCss::LengthType Align);
 	void Insert(GFlowRect *Tr);
 	LRect *LineBounds();
 
 	void Indent(GTag *Tag,
-				GCss::Len Left,
-				GCss::Len Top,
-				GCss::Len Right,
-				GCss::Len Bottom,
+				LCss::Len Left,
+				LCss::Len Top,
+				LCss::Len Right,
+				LCss::Len Bottom,
 				bool IsMargin)
 	{
 		GFlowRegion This(*this);
@@ -600,10 +600,10 @@ public:
 	}
 
 	void Outdent(GTag *Tag,
-				GCss::Len Left,
-				GCss::Len Top,
-				GCss::Len Right,
-				GCss::Len Bottom,
+				LCss::Len Left,
+				LCss::Len Top,
+				LCss::Len Right,
+				LCss::Len Bottom,
 				bool IsMargin)
 	{
 		GFlowRegion This = *this;
@@ -627,22 +627,22 @@ public:
 		else LgiAssert(!"Nothing to pop.");
 	}
 
-	int ResolveX(GCss::Len l, GTag *t, bool IsMargin)
+	int ResolveX(LCss::Len l, GTag *t, bool IsMargin)
 	{
 		LFont *f = t->GetFont();
 		switch (l.Type)
 		{
 			default:
-			case GCss::LenInherit:
+			case LCss::LenInherit:
 				return IsMargin ? 0 : X();
-			case GCss::LenPx:
+			case LCss::LenPx:
 				// return MIN((int)l.Value, X());
 				return (int)l.Value;
-			case GCss::LenPt:
+			case LCss::LenPt:
 				return (int) (l.Value * LgiScreenDpi() / 72.0);
-			case GCss::LenCm:
+			case LCss::LenCm:
 				return (int) (l.Value * LgiScreenDpi() / 2.54);
-			case GCss::LenEm:
+			case LCss::LenEm:
 			{
 				if (!f)
 				{
@@ -651,7 +651,7 @@ public:
 				}
 				return (int)(l.Value * f->GetHeight());
 			}
-			case GCss::LenEx:
+			case LCss::LenEx:
 			{
 				if (!f)
 				{
@@ -660,13 +660,13 @@ public:
 				}
 				return (int) (l.Value * f->GetHeight() / 2); // More haha, who uses 'ex' anyway?
 			}
-			case GCss::LenPercent:
+			case LCss::LenPercent:
 			{
 				int my_x = X();
 				int px = (int) (l.Value * my_x / 100.0);
 				return px;
 			}
-			case GCss::LenAuto:
+			case LCss::LenAuto:
 			{
 				if (IsMargin)
 					return 0;
@@ -674,15 +674,15 @@ public:
 					return X();
 				break;
 			}
-			case GCss::SizeSmall:
+			case LCss::SizeSmall:
 			{
 				return 1; // px
 			}
-			case GCss::SizeMedium:
+			case LCss::SizeMedium:
 			{
 				return 2; // px
 			}
-			case GCss::SizeLarge:
+			case LCss::SizeLarge:
 			{
 				return 3; // px
 			}
@@ -691,7 +691,7 @@ public:
 		return 0;
 	}
 	
-	bool LimitX(int &x, GCss::Len Min, GCss::Len Max, LFont *f)
+	bool LimitX(int &x, LCss::Len Min, LCss::Len Max, LFont *f)
 	{
 		bool Limited = false;
 		if (Min.IsValid())
@@ -715,22 +715,22 @@ public:
 		return Limited;
 	}
 
-	int ResolveY(GCss::Len l, GTag *t, bool IsMargin)
+	int ResolveY(LCss::Len l, GTag *t, bool IsMargin)
 	{
 		LFont *f = t->GetFont();
 		switch (l.Type)
 		{
-			case GCss::LenInherit:
-			case GCss::LenAuto:
-			case GCss::LenNormal:
-			case GCss::LenPx:
+			case LCss::LenInherit:
+			case LCss::LenAuto:
+			case LCss::LenNormal:
+			case LCss::LenPx:
 				return (int)l.Value;
-			case GCss::LenPt:
+			case LCss::LenPt:
 				return (int) (l.Value * LgiScreenDpi() / 72.0);
-			case GCss::LenCm:
+			case LCss::LenCm:
 				return (int) (l.Value * LgiScreenDpi() / 2.54);
 
-			case GCss::LenEm:
+			case LCss::LenEm:
 			{
 				if (!f)
 				{
@@ -739,7 +739,7 @@ public:
 				}
 				return (int) (l.Value * f->GetHeight());
 			}
-			case GCss::LenEx:
+			case LCss::LenEx:
 			{
 				if (!f)
 				{
@@ -748,10 +748,10 @@ public:
 				}
 				return (int) (l.Value * f->GetHeight() / 2); // More haha, who uses 'ex' anyway?
 			}
-			case GCss::LenPercent:
+			case LCss::LenPercent:
 			{
 				// Walk up tree of tags to find an absolute size...
-				GCss::Len Ab;
+				LCss::Len Ab;
 				for (GTag *p = ToTag(t->Parent); p; p = ToTag(p->Parent))
 				{
 					auto h = p->Height();
@@ -765,38 +765,38 @@ public:
 				if (!Ab.IsValid())
 				{
 					LgiAssert(Html != NULL);
-					Ab.Type = GCss::LenPx;
+					Ab.Type = LCss::LenPx;
 					Ab.Value = (float)Html->Y();
 				}
 
-				GCss::Len m = Ab * l;
+				LCss::Len m = Ab * l;
 				
 				return (int)m.ToPx(0, f);;
 			}
-			case GCss::SizeSmall:
+			case LCss::SizeSmall:
 			{
 				return 1; // px
 			}
-			case GCss::SizeMedium:
+			case LCss::SizeMedium:
 			{
 				return 2; // px
 			}
-			case GCss::SizeLarge:
+			case LCss::SizeLarge:
 			{
 				return 3; // px
 			}
-			case GCss::AlignLeft:
-			case GCss::AlignRight:
-			case GCss::AlignCenter:
-			case GCss::AlignJustify:
-			case GCss::VerticalBaseline:
-			case GCss::VerticalSub:
-			case GCss::VerticalSuper:
-			case GCss::VerticalTop:
-			case GCss::VerticalTextTop:
-			case GCss::VerticalMiddle:
-			case GCss::VerticalBottom:
-			case GCss::VerticalTextBottom:
+			case LCss::AlignLeft:
+			case LCss::AlignRight:
+			case LCss::AlignCenter:
+			case LCss::AlignJustify:
+			case LCss::VerticalBaseline:
+			case LCss::VerticalSub:
+			case LCss::VerticalSuper:
+			case LCss::VerticalTop:
+			case LCss::VerticalTextTop:
+			case LCss::VerticalMiddle:
+			case LCss::VerticalBottom:
+			case LCss::VerticalTextBottom:
 			{
 				// Meaningless in this context
 				break;
@@ -811,7 +811,7 @@ public:
 		return 0;
 	}
 
-	bool LimitY(int &y, GCss::Len Min, GCss::Len Max, LFont *f)
+	bool LimitY(int &y, LCss::Len Min, LCss::Len Max, LFont *f)
 	{
 		bool Limited = false;
 		int TotalY = Html ? Html->Y() : 0;
@@ -836,7 +836,7 @@ public:
 		return Limited;
 	}
 
-	LRect ResolveMargin(GCss *Src, GTag *Tag)
+	LRect ResolveMargin(LCss *Src, GTag *Tag)
 	{
 		LRect r;
 		r.x1 = ResolveX(Src->MarginLeft(), Tag, true);
@@ -846,7 +846,7 @@ public:
 		return r;
 	}
 
-	LRect ResolveBorder(GCss *Src, GTag *Tag)
+	LRect ResolveBorder(LCss *Src, GTag *Tag)
 	{
 		LRect r;
 		r.x1 = ResolveX(Src->BorderLeft(), Tag, true);
@@ -856,7 +856,7 @@ public:
 		return r;
 	}
 
-	LRect ResolvePadding(GCss *Src, GTag *Tag)
+	LRect ResolvePadding(LCss *Src, GTag *Tag)
 	{
 		LRect r;
 		r.x1 = ResolveX(Src->PaddingLeft(), Tag, true);
@@ -900,7 +900,7 @@ GLength::GLength()
 {
 	d = 0;
 	PrevAbs = 0;
-	u = GCss::LenInherit;
+	u = LCss::LenInherit;
 }
 
 GLength::GLength(char *s)
@@ -910,12 +910,12 @@ GLength::GLength(char *s)
 
 bool GLength::IsValid()
 {
-	return u != GCss::LenInherit;
+	return u != LCss::LenInherit;
 }
 
 bool GLength::IsDynamic()
 {
-	return u == GCss::LenPercent || d == 0.0;
+	return u == LCss::LenPercent || d == 0.0;
 }
 
 GLength::operator float ()
@@ -926,11 +926,11 @@ GLength::operator float ()
 GLength &GLength::operator =(float val)
 {
 	d = val;
-	u = GCss::LenPx;
+	u = LCss::LenPx;
 	return *this;
 }
 
-GCss::LengthType GLength::GetUnits()
+LCss::LengthType GLength::GetUnits()
 {
 	return u;
 }
@@ -946,28 +946,28 @@ void GLength::Set(char *s)
 			{
 				if (strchr(Units, '%'))
 				{
-					u = GCss::LenPercent;
+					u = LCss::LenPercent;
 				}
 				else if (stristr(Units, "pt"))
 				{
-					u = GCss::LenPt;
+					u = LCss::LenPt;
 				}
 				else if (stristr(Units, "em"))
 				{
-					u = GCss::LenEm;
+					u = LCss::LenEm;
 				}
 				else if (stristr(Units, "ex"))
 				{
-					u = GCss::LenEx;
+					u = LCss::LenEx;
 				}
 				else
 				{
-					u = GCss::LenPx;
+					u = LCss::LenPx;
 				}
 			}
 			else
 			{
-				u = GCss::LenPx;
+				u = LCss::LenPx;
 			}
 		}
 	}
@@ -978,17 +978,17 @@ float GLength::Get(GFlowRegion *Flow, LFont *Font, bool Lock)
 	switch (u)
 	{
 		default: break;
-		case GCss::LenEm:
+		case LCss::LenEm:
 		{
 			return PrevAbs = d * (Font ? Font->GetHeight() : 14);
 			break;
 		}
-		case GCss::LenEx:
+		case LCss::LenEx:
 		{
 			return PrevAbs = (Font ? Font->GetHeight() * d : 14) / 2;
 			break;
 		}
-		case GCss::LenPercent:
+		case LCss::LenPercent:
 		{
 			if (Lock || PrevAbs == 0.0)
 			{
@@ -1149,11 +1149,11 @@ LRect GTag::GetRect(bool Client)
 	return r;
 }
 
-GCss::LengthType GTag::GetAlign(bool x)
+LCss::LengthType GTag::GetAlign(bool x)
 {
 	for (GTag *t = this; t; t = ToTag(t->Parent))
 	{
-		GCss::Len l;
+		LCss::Len l;
 		
 		if (x)
 		{
@@ -1180,7 +1180,7 @@ GCss::LengthType GTag::GetAlign(bool x)
 }
 
 //////////////////////////////////////////////////////////////////////
-void GFlowRegion::EndBlock(GCss::LengthType Align)
+void GFlowRegion::EndBlock(LCss::LengthType Align)
 {
 	if (cx > x1)
 	{
@@ -1188,9 +1188,9 @@ void GFlowRegion::EndBlock(GCss::LengthType Align)
 	}
 }
 
-void GFlowRegion::FinishLine(GCss::LengthType Align, bool Margin)
+void GFlowRegion::FinishLine(LCss::LengthType Align, bool Margin)
 {
-	if (Align != GCss::AlignLeft)
+	if (Align != LCss::AlignLeft)
 	{
 		int Used = 0;
 		for (auto l : Line)
@@ -1199,14 +1199,14 @@ void GFlowRegion::FinishLine(GCss::LengthType Align, bool Margin)
 		if (Used < Total)
 		{
 			int Offset = 0;
-			if (Align == GCss::AlignCenter)
+			if (Align == LCss::AlignCenter)
 				Offset = (Total - Used) / 2;
-			else if (Align == GCss::AlignRight)
+			else if (Align == LCss::AlignRight)
 				Offset = Total - Used;
 			if (Offset)
 				for (auto l : Line)
 				{
-					if (l->Tag->Display() != GCss::DispInlineBlock)
+					if (l->Tag->Display() != LCss::DispInlineBlock)
 						l->Offset(Offset, 0);
 				}
 		}
@@ -1537,8 +1537,8 @@ bool GTag::CreateSource(GStringPipe &p, int Depth, bool LastWasBlock)
 		}
 		if (Props.Length())
 		{
-			GCss *Css = this;
-			GCss Tmp;
+			LCss *Css = this;
+			LCss Tmp;
 			#define DelProp(p) \
 				if (Css == this) { Tmp = *Css; Css = &Tmp; } \
 				Css->DeleteProp(p);
@@ -1563,16 +1563,16 @@ bool GTag::CreateSource(GStringPipe &p, int Depth, bool LastWasBlock)
 						break;
 					case TAG_A:
 					{
-						GCss::ColorDef Blue(GCss::ColorRgb, Rgb32(0, 0, 255));
+						LCss::ColorDef Blue(LCss::ColorRgb, Rgb32(0, 0, 255));
 						if (Props.Find(PropColor) && Color() == Blue)
 							DelProp(PropColor);
-						if (Props.Find(PropTextDecoration) && TextDecoration() == GCss::TextDecorUnderline)
+						if (Props.Find(PropTextDecoration) && TextDecoration() == LCss::TextDecorUnderline)
 							DelProp(PropTextDecoration)
 						break;
 					}
 					case TAG_BODY:
 					{
-						GCss::Len FivePx(GCss::LenPx, 5.0f);
+						LCss::Len FivePx(LCss::LenPx, 5.0f);
 						if (Props.Find(PropPaddingLeft) && PaddingLeft() == FivePx)
 							DelProp(PropPaddingLeft)
 						if (Props.Find(PropPaddingTop) && PaddingTop() == FivePx)
@@ -1583,19 +1583,19 @@ bool GTag::CreateSource(GStringPipe &p, int Depth, bool LastWasBlock)
 					}
 					case TAG_B:
 					{
-						if (Props.Find(PropFontWeight) && FontWeight() == GCss::FontWeightBold)
+						if (Props.Find(PropFontWeight) && FontWeight() == LCss::FontWeightBold)
 							DelProp(PropFontWeight);
 						break;
 					}
 					case TAG_U:
 					{
-						if (Props.Find(PropTextDecoration) && TextDecoration() == GCss::TextDecorUnderline)
+						if (Props.Find(PropTextDecoration) && TextDecoration() == LCss::TextDecorUnderline)
 							DelProp(PropTextDecoration);
 						break;
 					}
 					case TAG_I:
 					{
-						if (Props.Find(PropFontStyle) && FontStyle() == GCss::FontStyleItalic)
+						if (Props.Find(PropFontStyle) && FontStyle() == LCss::FontStyleItalic)
 							DelProp(PropFontStyle);
 						break;
 					}
@@ -1677,7 +1677,7 @@ void GTag::SetTag(const char *NewTag)
 		if (Info)
 		{
 			TagId = Info->Id;
-			Display(Info->Flags & GHtmlElemInfo::TI_BLOCK ? GCss::DispBlock : GCss::DispInline);
+			Display(Info->Flags & GHtmlElemInfo::TI_BLOCK ? LCss::DispBlock : LCss::DispInline);
 		}
 	}
 	else
@@ -1792,7 +1792,7 @@ void GTag::CopyClipboard(GMemQueue &p, bool &InSelection)
 
 static
 char*
-_DumpColour(GCss::ColorDef c)
+_DumpColour(LCss::ColorDef c)
 {
 	static char Buf[4][32];
 	#ifdef _MSC_VER
@@ -1804,7 +1804,7 @@ _DumpColour(GCss::ColorDef c)
 	#endif
 	char *b = Buf[Idx % 4];
 	
-	if (c.Type == GCss::ColorInherit)
+	if (c.Type == LCss::ColorInherit)
 		strcpy_s(b, 32, "Inherit");
 	else
 		sprintf_s(b, 32, "%2.2x,%2.2x,%2.2x(%2.2x)", R32(c.Rgb32),G32(c.Rgb32),B32(c.Rgb32),A32(c.Rgb32));
@@ -1917,15 +1917,15 @@ LFont *GTag::GetFont()
 			FontWeight()                != FontWeightInherit    ||
 			TextDecoration()            != TextDecorInherit)
 		{
-			GCss c;
+			LCss c;
 			
-            GCss::PropMap Map;
-            Map.Add(PropFontFamily, new GCss::PropArray);
-			Map.Add(PropFontSize, new GCss::PropArray);
-			Map.Add(PropFontStyle, new GCss::PropArray);
-			Map.Add(PropFontVariant, new GCss::PropArray);
-			Map.Add(PropFontWeight, new GCss::PropArray);
-			Map.Add(PropTextDecoration, new GCss::PropArray);
+            LCss::PropMap Map;
+            Map.Add(PropFontFamily, new LCss::PropArray);
+			Map.Add(PropFontSize, new LCss::PropArray);
+			Map.Add(PropFontStyle, new LCss::PropArray);
+			Map.Add(PropFontVariant, new LCss::PropArray);
+			Map.Add(PropFontWeight, new LCss::PropArray);
+			Map.Add(PropTextDecoration, new LCss::PropArray);
 
 			for (GTag *t = this; t; t = ToTag(t->Parent))
 			{
@@ -2539,7 +2539,7 @@ void GTag::SetImage(const char *Uri, GSurface *Img)
 	{
 		if (TagId != TAG_IMG)
 		{
-			ImageDef *Def = (ImageDef*)GCss::Props.Find(PropBackgroundImage);
+			ImageDef *Def = (ImageDef*)LCss::Props.Find(PropBackgroundImage);
 			if (Def)
 			{
 				Def->Type = ImageOwn;
@@ -2713,7 +2713,7 @@ void GTag::ImageLoaded(char *uri, GSurface *Img, int &Used)
 	}
 }
 
-struct GTagElementCallback : public GCss::ElementCallback<GTag>
+struct GTagElementCallback : public LCss::ElementCallback<GTag>
 {
 	const char *Val;
 
@@ -2765,14 +2765,14 @@ void GTag::RestyleAll()
 // that match the current tag.
 void GTag::Restyle()
 {
-	// Use the matching built into the GCss Store.
-	GCss::SelArray Styles;
+	// Use the matching built into the LCss Store.
+	LCss::SelArray Styles;
 	GTagElementCallback Context;
 	if (Html->CssStore.Match(Styles, &Context, this))
 	{
 		for (unsigned i=0; i<Styles.Length(); i++)
 		{
-			GCss::Selector *s = Styles[i];
+			LCss::Selector *s = Styles[i];
 			if (s)
 				SetCssStyle(s->Style);
 		}
@@ -2835,7 +2835,7 @@ void GTag::SetStyle()
 		}
 		else
 		{
-			GCss::ImageDef Img;
+			LCss::ImageDef Img;
 			
 			Img.Type = ImageUri;
 			Img.Uri = s;
@@ -2850,7 +2850,7 @@ void GTag::SetStyle()
 		default:
 		{
 			if (!Stricmp(Tag.Get(), "o:p"))
-				Display(GCss::DispNone);
+				Display(LCss::DispNone);
 			break;
 		}
 		case TAG_LINK:
@@ -2968,7 +2968,7 @@ void GTag::SetStyle()
 			}
 			else
 			{
-				// BorderSpacing(GCss::Len(GCss::LenPx, 2.0f));
+				// BorderSpacing(LCss::Len(LCss::LenPx, 2.0f));
 			}
 
 			if (Get("cellpadding", s) &&
@@ -2997,7 +2997,7 @@ void GTag::SetStyle()
 				Len l = Table->_CellPadding();
 				if (!l.IsValid())
 				{
-					l.Type = GCss::LenPx;
+					l.Type = LCss::LenPx;
 					l.Value = DefaultCellPadding;
 				}
 				PaddingLeft(l);
@@ -3007,7 +3007,7 @@ void GTag::SetStyle()
 			}
 			
 			if (TagId == TAG_TH)
-				FontWeight(GCss::FontWeightBold);
+				FontWeight(LCss::FontWeightBold);
 			break;
 		}
 		case TAG_BODY:
@@ -3062,7 +3062,7 @@ void GTag::SetStyle()
 		}
 		case TAG_TITLE:
 		{
-			Display(GCss::DispNone);
+			Display(LCss::DispNone);
 			break;
 		}
 	}
@@ -3108,7 +3108,7 @@ void GTag::SetStyle()
 		default: break;
 	    case TAG_BIG:
 	    {
-            GCss::Len l;
+            LCss::Len l;
             l.Type = SizeLarger;
 	        FontSize(l);
 	        break;
@@ -3160,7 +3160,7 @@ void GTag::SetStyle()
 		*/
 		case TAG_BODY:
 		{
-			GCss::ColorDef Bk = BackgroundColor();
+			LCss::ColorDef Bk = BackgroundColor();
 			if (Bk.Type != ColorInherit)
 			{
 				// Copy the background up to the GHtml wrapper
@@ -3312,13 +3312,13 @@ void GTag::SetStyle()
 					auto Sz = atoi(s);
 					switch (Sz)
 					{
-						case 1: FontSize(Len(GCss::LenEm, 0.63f)); break;
-						case 2: FontSize(Len(GCss::LenEm, 0.82f)); break;
-						case 3: FontSize(Len(GCss::LenEm, 1.0f)); break;
-						case 4: FontSize(Len(GCss::LenEm, 1.13f)); break;
-						case 5: FontSize(Len(GCss::LenEm, 1.5f)); break;
-						case 6: FontSize(Len(GCss::LenEm, 2.0f)); break;
-						case 7: FontSize(Len(GCss::LenEm, 3.0f)); break;
+						case 1: FontSize(Len(LCss::LenEm, 0.63f)); break;
+						case 2: FontSize(Len(LCss::LenEm, 0.82f)); break;
+						case 3: FontSize(Len(LCss::LenEm, 1.0f)); break;
+						case 4: FontSize(Len(LCss::LenEm, 1.13f)); break;
+						case 5: FontSize(Len(LCss::LenEm, 1.5f)); break;
+						case 6: FontSize(Len(LCss::LenEm, 2.0f)); break;
+						case 7: FontSize(Len(LCss::LenEm, 3.0f)); break;
 					}
 				}
 				else
@@ -3392,8 +3392,8 @@ void GTag::SetStyle()
 
 	if (IsBlock())
 	{
-		GCss::ImageDef bk = BackgroundImage();
-		if (bk.Type == GCss::ImageUri &&
+		LCss::ImageDef bk = BackgroundImage();
+		if (bk.Type == LCss::ImageUri &&
 			ValidStr(bk.Uri))
 		{
 			LoadImage(bk.Uri);
@@ -3409,7 +3409,7 @@ void GTag::SetStyle()
 
 	if (Display() == DispBlock && Html->Environment)
 	{
-		GCss::ImageDef Img = BackgroundImage();
+		LCss::ImageDef Img = BackgroundImage();
 		if (Img.Type == ImageUri)
 		{
 			LoadImage(Img.Uri);
@@ -3443,7 +3443,7 @@ void GTag::SetCssStyle(const char *Style)
 
 		// Parse CSS
 		const char *Ptr = Style;
-		GCss::Parse(Ptr, GCss::ParseRelaxed);
+		LCss::Parse(Ptr, LCss::ParseRelaxed);
 	}
 }
 
@@ -3831,7 +3831,7 @@ void GHtml::CloseTag(GTag *t)
 	OpenTags.Delete(t);
 }
 
-bool GTag::OnUnhandledColor(GCss::ColorDef *def, const char *&s)
+bool GTag::OnUnhandledColor(LCss::ColorDef *def, const char *&s)
 {
 	const char *e = s;
 	while (*e && (IsText(*e) || *e == '_'))
@@ -3846,7 +3846,7 @@ bool GTag::OnUnhandledColor(GCss::ColorDef *def, const char *&s)
 
 	if (m >= 0)
 	{
-		def->Type = GCss::ColorRgb;
+		def->Type = LCss::ColorRgb;
 		def->Rgb32 = Rgb24To32(m);
 		return true;
 	}
@@ -3930,7 +3930,7 @@ bool GTag::GetWidthMetrics(GTag *Table, uint16 &Min, uint16 &Max)
 	int MarginPx = 0;
 	int LineWidth = 0;
 
-	if (Display() == GCss::DispNone)
+	if (Display() == LCss::DispNone)
 		return true;
 
 	// Break the text into words and measure...
@@ -4031,16 +4031,16 @@ bool GTag::GetWidthMetrics(GTag *Table, uint16 &Min, uint16 &Max)
 			}
 			else
 			{
-				GCss::BorderDef BLeft = BorderLeft();
-				GCss::BorderDef BRight = BorderRight();
-				GCss::Len PLeft = PaddingLeft();
-				GCss::Len PRight = PaddingRight();
+				LCss::BorderDef BLeft = BorderLeft();
+				LCss::BorderDef BRight = BorderRight();
+				LCss::Len PLeft = PaddingLeft();
+				LCss::Len PRight = PaddingRight();
 				
 				MarginPx = (int)(PLeft.ToPx()  +
 								PRight.ToPx()  + 
 								BLeft.ToPx());
 				
-				if (Table->BorderCollapse() == GCss::CollapseCollapse)
+				if (Table->BorderCollapse() == LCss::CollapseCollapse)
 					MarginPx += BRight.ToPx();
 			}
 			break;
@@ -4209,7 +4209,7 @@ void GHtmlTableLayout::AllocatePx(int StartCol, int Cols, int MinPx, bool HasToF
 			// Growable.Add(x);
 		}
 		
-		if (SizeCol[x].Type == GCss::LenInherit)
+		if (SizeCol[x].Type == LCss::LenInherit)
 			SizeInherit.Add(x);
 	}
 	if (GrowablePx < RemainingPx && HasToFillAllAvailable)
@@ -4221,8 +4221,8 @@ void GHtmlTableLayout::AllocatePx(int StartCol, int Cols, int MinPx, bool HasToF
 			{
 				int Col = NonGrowable[i];
 				
-				GCss::Len c = SizeCol[Col];
-				if (c.Type != GCss::LenPercent && c.IsDynamic())
+				LCss::Len c = SizeCol[Col];
+				if (c.Type != LCss::LenPercent && c.IsDynamic())
 					Growable.Add(Col);
 			}
 		}
@@ -4391,7 +4391,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 	MaxRow.Length(0);
 	SizeCol.Length(0);
 	
-	GCss::Len BdrSpacing = Table->BorderSpacing();
+	LCss::Len BdrSpacing = Table->BorderSpacing();
 	CellSpacing = BdrSpacing.IsValid() ? (int)BdrSpacing.Value : 0;
 
 	// Resolve total table width.
@@ -4401,7 +4401,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 	else
 		AvailableX = f->X();
 
-	GCss::Len MaxWidth = Table->MaxWidth();
+	LCss::Len MaxWidth = Table->MaxWidth();
 	if (MaxWidth.IsValid())
 	{
 	    int Px = f->ResolveX(MaxWidth, Table, false);
@@ -4410,7 +4410,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 	}
 	
 	TableBorder = f->ResolveBorder(Table, Table);
-	if (Table->BorderCollapse() != GCss::CollapseCollapse)
+	if (Table->BorderCollapse() != LCss::CollapseCollapse)
 		TablePadding = f->ResolvePadding(Table, Table);
 	else
 		TablePadding.ZOff(0, 0);
@@ -4446,11 +4446,11 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 
 				if (t->Cell->Pos.x == x && t->Cell->Pos.y == y)
 				{
-					GCss::DisplayType Disp = t->Display();
-					if (Disp == GCss::DispNone)
+					LCss::DisplayType Disp = t->Display();
+					if (Disp == LCss::DispNone)
 						continue;
 
-					GCss::Len Content = t->Width();
+					LCss::Len Content = t->Width();
 					if (Content.IsValid() && t->Cell->Span.x == 1)
 					{
 						if (SizeCol[x].IsValid())
@@ -4551,7 +4551,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 						ColMax += MaxCol[x + i] + CellSpacing;
 					}
 					
-					GCss::Len Width = t->Width();
+					LCss::Len Width = t->Width();
 					if (Width.IsValid())
 					{
 						int Px = f->ResolveX(Width, t, false);
@@ -4584,7 +4584,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 	float PercentSum = 0.0f;
 	for (int i=0; i<s.x; i++)
 	{
-		if (SizeCol[i].Type == GCss::LenPercent)
+		if (SizeCol[i].Type == LCss::LenPercent)
 			PercentSum += SizeCol[i].Value;
 	}	
 	if (PercentSum > 100.0)
@@ -4592,7 +4592,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 		float Ratio = PercentSum / 100.0f;
 		for (int i=0; i<s.x; i++)
 		{
-			if (SizeCol[i].Type == GCss::LenPercent)
+			if (SizeCol[i].Type == LCss::LenPercent)
 				SizeCol[i].Value /= Ratio;
 		}
 	}
@@ -4602,12 +4602,12 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 	{
 		for (int x=0; x<s.x; x++)
 		{
-			GCss::Len w = SizeCol[x];
+			LCss::Len w = SizeCol[x];
 			if (w.IsValid())
 			{
 				int Px = f->ResolveX(w, Table, false);
 				
-				if (w.Type == GCss::LenPercent)
+				if (w.Type == LCss::LenPercent)
 				{
 					MaxCol[x] = Px;
 				}
@@ -4689,7 +4689,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 						Box.x2 += ColSize;
 					}
 					
-					GCss::Len Ht = t->Height();
+					LCss::Len Ht = t->Height();
 					GFlowRegion r(Table->Html, Box, true);
 
 					t->OnFlow(&r, Depth+1);
@@ -4701,7 +4701,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 
 					
 					if (Ht.IsValid() &&
-						Ht.Type != GCss::LenPercent)
+						Ht.Type != LCss::LenPercent)
 					{
 						int h = f->ResolveY(Ht, t, false);
 						t->Size.y = MAX(h, t->Size.y);
@@ -4737,8 +4737,8 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 			{
 				if (t->Cell->Pos.x == x && t->Cell->Pos.y == y)
 				{
-					GCss::Len Ht = t->Height();
-					if (!(Ht.IsValid() && Ht.Type != GCss::LenPercent))
+					LCss::Len Ht = t->Height();
+					if (!(Ht.IsValid() && Ht.Type != LCss::LenPercent))
 					{
 						DistributeSize(MaxRow, y, t->Cell->Span.y, t->Size.y, CellSpacing);
 					}
@@ -4779,7 +4779,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 							t->Cell->Span.x = 1;
 							t->Cell->Span.y = 1;
 						}
-						t->BackgroundColor(GCss::ColorDef(GCss::ColorRgb, DefaultMissingCellColour));
+						t->BackgroundColor(LCss::ColorDef(LCss::ColorRgb, DefaultMissingCellColour));
 
 						Set(Table);
 					}
@@ -4840,14 +4840,14 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 
 	switch (Table->Cell->XAlign ? Table->Cell->XAlign : ToTag(Table->Parent)->GetAlign(true))
 	{
-		case GCss::AlignCenter:
+		case LCss::AlignCenter:
 		{
 			int fx = f->X();
 			int Ox = (fx-Table->Size.x) >> 1;
 			Table->Pos.x = f->x1 + MAX(Ox, 0);
 			break;
 		}
-		case GCss::AlignRight:
+		case LCss::AlignRight:
 		{
 			Table->Pos.x = f->x2 - Table->Size.x;
 			break;
@@ -4939,7 +4939,7 @@ LRect *GArea::TopRect(LRegion *c)
 	return Top;
 }
 
-void GArea::FlowText(GTag *Tag, GFlowRegion *Flow, LFont *Font, int LineHeight, char16 *Text, GCss::LengthType Align)
+void GArea::FlowText(GTag *Tag, GFlowRegion *Flow, LFont *Font, int LineHeight, char16 *Text, LCss::LengthType Align)
 {
 	if (!Flow || !Text || !Font)
 		return;
@@ -5348,12 +5348,12 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		{
 			Size.x = Size.y = 0;
 			
-			GCss::Len w    = Width();
-			GCss::Len h    = Height();
-			// GCss::Len MinX = MinWidth();
-			// GCss::Len MaxX = MaxWidth();
-			GCss::Len MinY = MinHeight();
-			GCss::Len MaxY = MaxHeight();
+			LCss::Len w    = Width();
+			LCss::Len h    = Height();
+			// LCss::Len MinX = MinWidth();
+			// LCss::Len MaxX = MaxWidth();
+			LCss::Len MinY = MinHeight();
+			LCss::Len MaxY = MaxHeight();
 			GAutoPtr<LDisplayString> a;
 			int ImgX, ImgY;		
 			if (Image)
@@ -5452,7 +5452,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 				Pos.y = Flow->y1;
 				Flow->y2 = MAX(Flow->y1, Pos.y + Size.y - 1);
 
-				GCss::LengthType a = GetAlign(true);
+				LCss::LengthType a = GetAlign(true);
 				switch (a)
 				{
 					case AlignCenter:
@@ -5495,10 +5495,10 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		{
 			Flow->EndBlock(GetAlign(true));
 			
-			GCss::Len left = GetCssLen(MarginLeft, Margin);
-			GCss::Len top = GetCssLen(MarginTop, Margin);
-			GCss::Len right = GetCssLen(MarginRight, Margin);
-			GCss::Len bottom = GetCssLen(MarginBottom, Margin);
+			LCss::Len left = GetCssLen(MarginLeft, Margin);
+			LCss::Len top = GetCssLen(MarginTop, Margin);
+			LCss::Len right = GetCssLen(MarginRight, Margin);
+			LCss::Len bottom = GetCssLen(MarginBottom, Margin);
 			Flow->Indent(this, left, top, right, bottom, true);
 
 			LayoutTable(Flow, Depth + 1);
@@ -5531,14 +5531,14 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		BlockFlowWidth = Flow->X();
 		
 		// Indent the margin...
-		GCss::Len left = GetCssLen(MarginLeft, Margin);
-		GCss::Len top = GetCssLen(MarginTop, Margin);
-		GCss::Len right = GetCssLen(MarginRight, Margin);
-		GCss::Len bottom = GetCssLen(MarginBottom, Margin);
+		LCss::Len left = GetCssLen(MarginLeft, Margin);
+		LCss::Len top = GetCssLen(MarginTop, Margin);
+		LCss::Len right = GetCssLen(MarginRight, Margin);
+		LCss::Len bottom = GetCssLen(MarginBottom, Margin);
 		Flow->Indent(this, left, top, right, bottom, true);
 
 		// Set the width if any
-		GCss::Len Wid = Width();
+		LCss::Len Wid = Width();
 		if (!IsTableCell(TagId) && Wid.IsValid())
 			Size.x = Flow->ResolveX(Wid, this, false);
 		else if (TagId != TAG_IMG)
@@ -5576,7 +5576,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			Flow->x2 = Flow->x1 + Size.x;
 			Flow->cx -= Pos.x;
 
-			Flow->Indent(this, GCss::BorderLeft(), GCss::BorderTop(), GCss::BorderRight(), GCss::BorderBottom(), false);
+			Flow->Indent(this, LCss::BorderLeft(), LCss::BorderTop(), LCss::BorderRight(), LCss::BorderBottom(), false);
 			Flow->Indent(PadPx, false);
 		}
 		else
@@ -5612,7 +5612,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 				// Insert the list marker
 				if (!PreText())
 				{
-					GCss::ListStyleTypes s = Parent->ListStyleType();
+					LCss::ListStyleTypes s = Parent->ListStyleType();
 					if (s == ListInherit)
 					{
 						if (Parent->TagId == TAG_OL)
@@ -5660,7 +5660,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			// Setup the line height cache
 			if (LineHeightCache < 0)
 			{
-				GCss::Len LineHt;
+				LCss::Len LineHt;
 				LFont *LineFnt = GetFont();
 
 				for (GTag *t = this; t && !LineHt.IsValid(); t = ToTag(t->Parent))
@@ -5675,13 +5675,13 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 					int FontPx = LineFnt->GetHeight();
 					
 					if (!LineHt.IsValid() ||
-						LineHt.Type == GCss::LenAuto ||
-						LineHt.Type == GCss::LenNormal)
+						LineHt.Type == LCss::LenAuto ||
+						LineHt.Type == LCss::LenNormal)
 					{
 						LineHeightCache = FontPx;
 						// LgiTrace("LineHeight FontPx=%i Px=%i Auto\n", FontPx, LineHeightCache);
 					}
-					else if (LineHt.Type == GCss::LenPx)
+					else if (LineHt.Type == LCss::LenPx)
 					{
 						auto Scale = Html->GetDpiScale().y;
 						LineHt.Value *= Scale;
@@ -5698,7 +5698,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 
 			// Flow in the rest of the text...
 			char16 *Txt = Text();
-			GCss::LengthType Align = GetAlign(true);
+			LCss::LengthType Align = GetAlign(true);
 			TextPos.FlowText(this, Flow, f, LineHeightCache, Txt, Align);
 		}
 	}
@@ -5740,18 +5740,18 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		}
 	}
 
-	GCss::LengthType XAlign = GetAlign(true);
+	LCss::LengthType XAlign = GetAlign(true);
 	int FlowSz = Flow->Width();
 	if (Disp == DispBlock || Disp == DispInlineBlock)
 	{		
-		GCss::Len Ht = Height();
-		GCss::Len MaxHt = MaxHeight();
+		LCss::Len Ht = Height();
+		LCss::Len MaxHt = MaxHeight();
 
 		// I dunno, there should be a better way... :-(
 		if (MarginLeft().Type == LenAuto &&
 			MarginRight().Type == LenAuto)
 		{
-			XAlign = GCss::AlignCenter;
+			XAlign = LCss::AlignCenter;
 		}
 
 		bool AcceptHt = !IsTableCell(TagId) && Ht.Type != LenPercent;
@@ -5780,7 +5780,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 
 			int OldFlowSize = Flow->x2 - Flow->x1 + 1;
 			Flow->Outdent(this, PaddingLeft(), PaddingTop(), PaddingRight(), PaddingBottom(), false);
-			Flow->Outdent(this, GCss::BorderLeft(), GCss::BorderTop(), GCss::BorderRight(), GCss::BorderBottom(), false);
+			Flow->Outdent(this, LCss::BorderLeft(), LCss::BorderTop(), LCss::BorderRight(), LCss::BorderBottom(), false);
 
 			Size.y = Flow->y2 > 0 ? Flow->y2 : 0;
 
@@ -5796,7 +5796,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		}
 		else
 		{
-			GCss::Len Wid = Width();
+			LCss::Len Wid = Width();
 			int WidPx = Wid.IsValid() ? Flow->ResolveX(Wid, this, true) : 0;
 			
 			Size.x = MAX(WidPx, Size.x);
@@ -5907,7 +5907,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 
 	if (Disp == DispBlock || Disp == DispInlineBlock)
 	{
-		if (XAlign == GCss::AlignCenter)
+		if (XAlign == LCss::AlignCenter)
 		{
 			int OffX = (FlowSz - Size.x) >> 1;
 			if (OffX > 0)
@@ -5915,7 +5915,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 				Pos.x += OffX;
 			}
 		}
-		else if (XAlign == GCss::AlignRight)
+		else if (XAlign == LCss::AlignRight)
 		{
 			int OffX = FlowSz - Size.x;
 			if (OffX > 0)
@@ -5987,12 +5987,12 @@ struct DrawBorder
 	uint32_t LineReset;
 	uint32_t OldStyle;
 
-	DrawBorder(GSurface *pdc, GCss::BorderDef &d)
+	DrawBorder(GSurface *pdc, LCss::BorderDef &d)
 	{
 		LineStyle = 0xffffffff;
 		LineReset = 0x80000000;
 
-		if (d.Style == GCss::BorderDotted)
+		if (d.Style == LCss::BorderDotted)
 		{
 			switch ((int)d.Value)
 			{
@@ -6091,14 +6091,14 @@ public:
 
 	CornersImg(	float RadPx,
 				LRect *BorderPx,
-				GCss::BorderDef **defs,
+				LCss::BorderDef **defs,
 				GColour &Back,
 				bool DrawBackground)
 	{
 		Px = 0;
 		Px2 = 0;
 
-		//Radius.Type != GCss::LenInherit &&			
+		//Radius.Type != LCss::LenInherit &&			
 		if (RadPx > 0.0f)
 		{
 			Px = (int)ceil(RadPx);
@@ -6221,16 +6221,16 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, LRect *BorderP
 	
 	#define DoEdge(coord, axis, name) \
 		BorderDef name = Border##name(); \
-		BorderPx->coord = name.Style != GCss::BorderNone ? name.ToPx(Size.axis, f) : 0;
+		BorderPx->coord = name.Style != LCss::BorderNone ? name.ToPx(Size.axis, f) : 0;
 	#define BorderValid(name) \
-		((name).IsValid() && (name).Style != GCss::BorderNone)
+		((name).IsValid() && (name).Style != LCss::BorderNone)
 	
 	DoEdge(x1, x, Left);
 	DoEdge(y1, y, Top);
 	DoEdge(x2, x, Right);
 	DoEdge(y2, y, Bottom);
 	
-	GCss::BorderDef *defs[4] = {&Left, &Top, &Right, &Bottom};
+	LCss::BorderDef *defs[4] = {&Left, &Top, &Right, &Bottom};
 
 	if (BorderValid(Left) ||
 		BorderValid(Right) ||
@@ -6276,9 +6276,9 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, LRect *BorderP
 		// If we are drawing rounded corners, draw them into a memory context
 		GAutoPtr<CornersImg> Corners;
 		int Px = 0, Px2 = 0;
-		GCss::Len Radius = BorderRadius();
-		float RadPx = Radius.Type == GCss::LenPx ? Radius.Value : Radius.ToPx(Size.x, GetFont());
-		bool HasRadius = Radius.Type != GCss::LenInherit && RadPx > 0.0f;
+		LCss::Len Radius = BorderRadius();
+		float RadPx = Radius.Type == LCss::LenPx ? Radius.Value : Radius.ToPx(Size.x, GetFont());
+		bool HasRadius = Radius.Type != LCss::LenInherit && RadPx > 0.0f;
 
 		// Loop over the rectangles and draw everything
 		int Op = pDC->Op(GDC_ALPHA);
@@ -6336,7 +6336,7 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, LRect *BorderP
 				pDC->Rectangle(&rc);
 			}
 
-			GCss::BorderDef *b;
+			LCss::BorderDef *b;
 			if ((b = &Left) && BorderValid(*b))
 			{
 				pDC->Colour(b->Color.Rgb32, 32);
@@ -6383,7 +6383,7 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, LRect *BorderP
 	}
 }
 
-static void FillRectWithImage(GSurface *pDC, LRect *r, GSurface *Image, GCss::RepeatType Repeat)
+static void FillRectWithImage(GSurface *pDC, LRect *r, GSurface *Image, LCss::RepeatType Repeat)
 {
 	int Px = 0, Py = 0;
 	int Old = pDC->Op(GDC_ALPHA);
@@ -6394,7 +6394,7 @@ static void FillRectWithImage(GSurface *pDC, LRect *r, GSurface *Image, GCss::Re
 	switch (Repeat)
 	{
 		default:
-		case GCss::RepeatBoth:
+		case LCss::RepeatBoth:
 		{
 			for (int y=0; y<r->Y(); y += Image->Y())
 			{
@@ -6405,7 +6405,7 @@ static void FillRectWithImage(GSurface *pDC, LRect *r, GSurface *Image, GCss::Re
 			}
 			break;
 		}
-		case GCss::RepeatX:
+		case LCss::RepeatX:
 		{
 			for (int x=0; x<r->X(); x += Image->X())
 			{
@@ -6413,7 +6413,7 @@ static void FillRectWithImage(GSurface *pDC, LRect *r, GSurface *Image, GCss::Re
 			}
 			break;
 		}
-		case GCss::RepeatY:
+		case LCss::RepeatY:
 		{
 			for (int y=0; y<r->Y(); y += Image->Y())
 			{
@@ -6421,7 +6421,7 @@ static void FillRectWithImage(GSurface *pDC, LRect *r, GSurface *Image, GCss::Re
 			}
 			break;
 		}
-		case GCss::RepeatNone:
+		case LCss::RepeatNone:
 		{
 			pDC->Blt(Px, Py, Image);
 			break;
@@ -6613,7 +6613,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 
 			if (Display() == DispBlock && Html->Environment)
 			{
-				GCss::ImageDef Img = BackgroundImage();
+				LCss::ImageDef Img = BackgroundImage();
 				if (Img.Img)
 				{
 					LRect Clip(0, 0, Size.x-1, Size.y-1);
@@ -7032,7 +7032,7 @@ void GHtml::ParseDocument(const char *Doc)
 	}
 
 	if (GetCss())
-		GetCss()->DeleteProp(GCss::PropBackgroundColor);
+		GetCss()->DeleteProp(LCss::PropBackgroundColor);
 	if (Tag)
 	{
 		Tag->TagId = ROOT;
@@ -7502,8 +7502,8 @@ void GHtml::OnPaint(GSurface *ScreenDC)
 	GColour cBack;
 	if (GetCss())
 	{
-		GCss::ColorDef Bk = GetCss()->BackgroundColor();
-		if (Bk.Type == GCss::ColorRgb)
+		LCss::ColorDef Bk = GetCss()->BackgroundColor();
+		if (Bk.Type == LCss::ColorRgb)
 			cBack = Bk;
 	}
 	if (!cBack.IsValid())
@@ -9093,7 +9093,7 @@ GHtmlTableLayout::GHtmlTableLayout(GTag *table)
 	for (size_t i=0; i<Table->Children.Length(); i++)
 	{
 		r = ToTag(Table->Children[i]);
-		if (r->Display() == GCss::DispNone)
+		if (r->Display() == LCss::DispNone)
 			continue;
 			
 		if (r->TagId == TAG_TR)
@@ -9212,7 +9212,7 @@ GHtmlTableLayout::GHtmlTableLayout(GTag *table)
 				
 				if (IsTableCell(cell->TagId))
 				{
-					if (cell->Display() == GCss::DispNone)
+					if (cell->Display() == LCss::DispNone)
 						continue;
 						
 					while (Get(x, y))

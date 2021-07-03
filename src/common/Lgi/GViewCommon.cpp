@@ -1904,7 +1904,7 @@ GColour GView::StyleColour(int CssPropType, GColour Default, int Depth)
 {
 	GColour c = Default;
 
-	if ((CssPropType >> 8) == GCss::TypeColor)
+	if ((CssPropType >> 8) == LCss::TypeColor)
 	{
 		GViewI *v = this;
 		for (int i=0; v && i<Depth; i++, v = v->GetParent())
@@ -1912,15 +1912,15 @@ GColour GView::StyleColour(int CssPropType, GColour Default, int Depth)
 			auto Style = v->GetCss();
 			if (Style)
 			{
-				auto Colour = (GCss::ColorDef*) Style->PropAddress((GCss::PropType)CssPropType);
+				auto Colour = (LCss::ColorDef*) Style->PropAddress((LCss::PropType)CssPropType);
 				if (Colour)
 				{
-					if (Colour->Type == GCss::ColorRgb)
+					if (Colour->Type == LCss::ColorRgb)
 					{
 						c.Set(Colour->Rgb32, 32);
 						break;
 					}
-					else if (Colour->Type == GCss::ColorTransparent)
+					else if (Colour->Type == LCss::ColorTransparent)
 					{
 						c.Empty();
 						break;
@@ -2161,23 +2161,23 @@ void GView::SetMinimumSize(LPoint Size)
 
 bool GView::SetColour(GColour &c, bool Fore)
 {
-	GCss *css = GetCss(true);
+	LCss *css = GetCss(true);
 	if (!css)
 		return false;
 	
 	if (Fore)
 	{
 		if (c.IsValid())
-			css->Color(GCss::ColorDef(GCss::ColorRgb, c.c32()));
+			css->Color(LCss::ColorDef(LCss::ColorRgb, c.c32()));
 		else
-			css->DeleteProp(GCss::PropColor);
+			css->DeleteProp(LCss::PropColor);
 	}
 	else
 	{
 		if (c.IsValid())
-			css->BackgroundColor(GCss::ColorDef(GCss::ColorRgb, c.c32()));
+			css->BackgroundColor(LCss::ColorDef(LCss::ColorRgb, c.c32()));
 		else
-			css->DeleteProp(GCss::PropBackgroundColor);
+			css->DeleteProp(LCss::PropBackgroundColor);
 	}
 	
 	return true;
@@ -2187,11 +2187,11 @@ bool GView::SetColour(GColour &c, bool Fore)
 /*
 bool GView::SetCssStyle(const char *CssStyle)
 {
-    if (!d->Css && !d->Css.Reset(new GCss))
+    if (!d->Css && !d->Css.Reset(new LCss))
 		return false;
     
     const char *Defs = CssStyle;
-    bool b = d->Css->Parse(Defs, GCss::ParseRelaxed);
+    bool b = d->Css->Parse(Defs, LCss::ParseRelaxed);
     if (b && d->FontOwnType == GV_FontCached)
     {
 		d->Font = NULL;
@@ -2202,20 +2202,20 @@ bool GView::SetCssStyle(const char *CssStyle)
 }
 */
 
-void GView::SetCss(GCss *css)
+void GView::SetCss(LCss *css)
 {
 	d->Css.Reset(css);
 }
 
-GCss *GView::GetCss(bool Create)
+LCss *GView::GetCss(bool Create)
 {
     if (Create && !d->Css)
-        d->Css.Reset(new GCss);
+        d->Css.Reset(new LCss);
 
 	if (d->CssDirty && d->Css)
 	{
 		const char *Defs = d->Styles;
-		if (d->Css->Parse(Defs, GCss::ParseRelaxed))
+		if (d->Css->Parse(Defs, LCss::ParseRelaxed))
 			d->CssDirty = false;
 	}
 

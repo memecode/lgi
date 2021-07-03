@@ -735,11 +735,11 @@ void GRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 	r.y1 -= Margin.y1;
 	r.x2 -= Margin.x2;
 	r.y2 -= Margin.y2;
-	GCss::ColorDef BorderStyle;
+	LCss::ColorDef BorderStyle;
 	if (Style)
 		BorderStyle = Style->BorderLeft().Color;
 	GColour BorderCol(222, 222, 222);
-	if (BorderStyle.Type == GCss::ColorRgb)
+	if (BorderStyle.Type == LCss::ColorRgb)
 		BorderCol.Set(BorderStyle.Rgb32, 32);
 
 	Ctx.DrawBox(r, Margin, Ctx.Colours[Unselected].Back);
@@ -1322,7 +1322,7 @@ bool GRichTextPriv::ImageBlock::AddText(Transaction *Trans, ssize_t AtOffset, co
 	return false;
 }
 
-bool GRichTextPriv::ImageBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, GCss *Style, bool Add)
+bool GRichTextPriv::ImageBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add)
 {
 	// No styles to change...
 	return false;

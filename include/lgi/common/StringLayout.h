@@ -6,15 +6,15 @@
 #include "lgi/common/FontCache.h"
 
 /// Section of text with the same style.
-struct LLayoutRun : public GCss
+struct LLayoutRun : public LCss
 {
 	GString Text;
 
-	LLayoutRun(GCss *Style)
+	LLayoutRun(LCss *Style)
 	{
 		if (Style)
 		{
-			GCss *This = this;
+			LCss *This = this;
 			*This = *Style;
 		}
 	}
@@ -93,7 +93,7 @@ public:
 	LRect GetBounds() { return Bounds; }
 
 	/// Adds a run of text with the same style
-	bool Add(const char *Str, GCss *Style);
+	bool Add(const char *Str, LCss *Style);
 	uint32_t NextChar(char *s);
 	uint32_t PrevChar(char *s);
 	LFont *GetBaseFont();

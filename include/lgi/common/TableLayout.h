@@ -8,7 +8,7 @@
 #include "lgi/common/Notifications.h"
 
 /// A layout cell, not currently implemened.
-class GLayoutCell : public GDom, public GCss
+class GLayoutCell : public GDom, public LCss
 {
 public:
 	bool Debug;

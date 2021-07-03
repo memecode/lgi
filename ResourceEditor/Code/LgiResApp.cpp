@@ -707,7 +707,7 @@ void FieldView::OnSelect(FieldSource *s)
 						case DATA_FILENAME:
 						{
 							Cell = t->GetCell(0, Row);
-							Cell->VerticalAlign(GCss::VerticalMiddle);
+							Cell->VerticalAlign(LCss::VerticalMiddle);
 							Cell->Add(new GTextLabel(-1, 0, 0, -1, -1, c->Label));
 
 							TextViewEdit *Tv;
@@ -716,7 +716,7 @@ void FieldView::OnSelect(FieldSource *s)
 							if (Tv)
 							{
 								Tv->Multiline = c->Multiline;
-								Tv->GetCss(true)->Height(GCss::Len(GCss::LenPx, c->Multiline ? SysFont->GetHeight() * 8 : SysFont->GetHeight() + 8));
+								Tv->GetCss(true)->Height(LCss::Len(LCss::LenPx, c->Multiline ? SysFont->GetHeight() * 8 : SysFont->GetHeight() + 8));
 								Tv->SetWrapType(TEXTED_WRAP_NONE);
 								Tv->Sunken(true);
 							}
@@ -4592,7 +4592,7 @@ void TestFunc()
 		printf("[%i]=%p\n", i, p[i]);
 	}
 
-	c.OnChange(GCss::PropBackground);
+	c.OnChange(LCss::PropBackground);
 	*/
 }
 

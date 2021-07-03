@@ -445,26 +445,26 @@ bool LResources::StyleElement(GViewI *v)
 	if (!v) return false;
 	if (!LoadStyles) return true;
 
-	GCss::SelArray Selectors;
+	LCss::SelArray Selectors;
 	for (auto r: ResourceOwner)
 	{
 		GViewCssCb Ctx;
 		r->CssStore.Match(Selectors, &Ctx, v);
 	}
 	
-	GCss *Css = v->GetCss(true);
+	LCss *Css = v->GetCss(true);
 	for (auto *Sel: Selectors)
 	{
 		const char *Defs = Sel->Style;
 		if (Css && Defs)
-			Css->Parse(Defs, GCss::ParseRelaxed);
+			Css->Parse(Defs, LCss::ParseRelaxed);
 	}
 
 	auto ElemStyles = v->CssStyles();
 	if (ElemStyles)
 	{
 		const char *Defs = ElemStyles;
-		Css->Parse(Defs, GCss::ParseRelaxed);
+		Css->Parse(Defs, LCss::ParseRelaxed);
 	}
 	
 	return true;
@@ -883,7 +883,7 @@ bool LResources::Res_GetProperties(ResObject *Obj, GDom *Props)
 	return false;
 }
 
-struct ResObjectCallback : public GCss::ElementCallback<ResObject>
+struct ResObjectCallback : public LCss::ElementCallback<ResObject>
 {
 	GDom *Props;
 	LVariant v;
@@ -949,7 +949,7 @@ bool LResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 	}
 
 	if (Props->GetValue("image", i))
-		v->GetCss(true)->BackgroundImage(GCss::ImageDef(i.Str()));
+		v->GetCss(true)->BackgroundImage(LCss::ImageDef(i.Str()));
 
 	auto e = dynamic_cast<GEdit*>(v);
 	if (e)
@@ -965,7 +965,7 @@ bool LResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 	if (b)
 	{
 		if (Props->GetValue("image", i))
-			b->GetCss(true)->BackgroundImage(GCss::ImageDef(i.Str()));
+			b->GetCss(true)->BackgroundImage(LCss::ImageDef(i.Str()));
 
 		if (Props->GetValue("toggle", i))
 			b->SetIsToggle(i.CastInt32()!=0);

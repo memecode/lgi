@@ -6,7 +6,7 @@
 #include "lgi/common/Unicode.h"
 
 #define FEATURE_REATTACH_ELEMENTS		1
-#define IsBlock(d)						((d) == GCss::DispBlock)
+#define IsBlock(d)						((d) == LCss::DispBlock)
 
 char *GHtmlParser::NextTag(char *s)
 {
@@ -524,9 +524,9 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 					Elem->Info = GetTagInfo(Elem->Tag);
 					
 					if (!EvaluateCondition(Elem->Condition))
-						Elem->Display(GCss::DispNone);
+						Elem->Display(LCss::DispNone);
 					else
-						Elem->Display(GCss::DispInline);
+						Elem->Display(LCss::DispInline);
 					
 					OpenTags.Add(Elem);
 				}
@@ -648,9 +648,9 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								Elem->Tag[0] == '!'
 							)
 							?
-							GCss::DispBlock
+							LCss::DispBlock
 							:
-							GCss::DispInline;
+							LCss::DispInline;
 						
 						Elem->Display(Dsp);
 						if (Elem->TagId == TAG_PRE)
@@ -1465,7 +1465,7 @@ void GHtmlParser::_TraceOpenTags()
 	}
 }
 
-bool GHtmlParser::ParseColour(const char *s, GCss::ColorDef &c)
+bool GHtmlParser::ParseColour(const char *s, LCss::ColorDef &c)
 {
 	if (s)
 	{
@@ -1484,7 +1484,7 @@ bool GHtmlParser::ParseColour(const char *s, GCss::ColorDef &c)
 				int g = (i >> 4) & 0xf;
 				int b = i & 0xf;
 
-				c.Type = GCss::ColorRgb;
+				c.Type = LCss::ColorRgb;
 				c.Rgb32 = Rgb32(r | (r<<4), g | (g << 4), b | (b << 4));
 			}
 			else if (l == 4)
@@ -1493,7 +1493,7 @@ bool GHtmlParser::ParseColour(const char *s, GCss::ColorDef &c)
 				int g = (i >> 8) & 0xf;
 				int b = (i >> 4) & 0xf;
 				int a = i & 0xf;
-				c.Type = GCss::ColorRgb;
+				c.Type = LCss::ColorRgb;
 				c.Rgb32 = Rgba32(	r | (r <<4 ),
 									g | (g << 4),
 									b | (b << 4),
@@ -1501,12 +1501,12 @@ bool GHtmlParser::ParseColour(const char *s, GCss::ColorDef &c)
 			}
 			else if (l == 6)
 			{
-				c.Type = GCss::ColorRgb;
+				c.Type = LCss::ColorRgb;
 				c.Rgb32 = Rgb32(i >> 16, (i >> 8) & 0xff, i & 0xff);
 			}
 			else if (l == 8)
 			{
-				c.Type = GCss::ColorRgb;
+				c.Type = LCss::ColorRgb;
 				c.Rgb32 = Rgba32(i >> 24, (i >> 16) & 0xff, (i >> 8) & 0xff, i & 0xff);
 			}
 			else
@@ -1518,7 +1518,7 @@ bool GHtmlParser::ParseColour(const char *s, GCss::ColorDef &c)
 		}
 		else if ((m = GHtmlStatic::Inst->ColourMap.Find(s)) >= 0)
 		{
-			c.Type = GCss::ColorRgb;
+			c.Type = LCss::ColorRgb;
 			c.Rgb32 = Rgb24To32(m);
 			return true;
 		}
@@ -1546,7 +1546,7 @@ bool GHtmlParser::ParseColour(const char *s, GCss::ColorDef &c)
 				SkipWhiteSpace(s);
 				if (*s == ')' && Col.Length() == 3)
 				{
-					c.Type = GCss::ColorRgb;
+					c.Type = LCss::ColorRgb;
 					c.Rgb32 = Rgb32(Col[0], Col[1], Col[2]);
 					return true;
 				}

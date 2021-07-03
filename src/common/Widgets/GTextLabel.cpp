@@ -91,7 +91,7 @@ bool GTextLabel::SetVariant(const char *Name, LVariant &Value, char *Array)
 	{
 		const char *Style = Value.Str();
 		if (Style)
-			GetCss(true)->Parse(Style, GCss::ParseRelaxed);
+			GetCss(true)->Parse(Style, LCss::ParseRelaxed);
 		return true;
 	}
 	
@@ -176,7 +176,7 @@ void GTextLabel::OnStyleChange()
 {
 	if (d->Lock(_FL))
 	{
-		GCss::Len oldsz, newsz;
+		LCss::Len oldsz, newsz;
 		if (d->GetFont())
 			oldsz = d->GetFont()->Size();
 

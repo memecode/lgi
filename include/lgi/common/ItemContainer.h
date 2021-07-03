@@ -12,7 +12,7 @@ class GItemContainer;
 class LgiClass GItem : virtual public GEventsI
 {
 protected:
-    GAutoPtr<GCss> Css;
+    GAutoPtr<LCss> Css;
 	int SelectionStart, SelectionEnd;
     
 public:
@@ -28,7 +28,7 @@ public:
 		GColour TxtBack, Back;
 		
 		// Horizontal alignment of content
-		GCss::Len Align;
+		LCss::Len Align;
 		
 		/// Number of columns
 		int Columns;
@@ -43,7 +43,7 @@ public:
     {
 		if (i.GetCss())
 		{
-			GCss *c = GetCss(true);
+			LCss *c = GetCss(true);
 			if (c)
 			{
 				*c = *i.GetCss();
@@ -127,9 +127,9 @@ public:
 	void OnPaint(GSurface *pDC) { LgiAssert(0); }
 
 	// Style access
-	GCss *GetCss(bool Create = false)
+	LCss *GetCss(bool Create = false)
 	{
-		if (!Css && Create) Css.Reset(new GCss);
+		if (!Css && Create) Css.Reset(new LCss);
 		return Css;
 	}
 };
@@ -167,7 +167,7 @@ public:
 /// Item container column
 class LgiClass GItemColumn :
 	public ResObject,
-	public GCss
+	public LCss
 {
 	class GItemColumnPrivate *d;
 	friend class GDragColumn;

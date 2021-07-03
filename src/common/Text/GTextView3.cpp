@@ -124,7 +124,7 @@ public:
 	}
 };
 
-class GTextView3Private : public GCss, public LMutex
+class GTextView3Private : public LCss, public LMutex
 {
 public:
 	GTextView3 *View;
@@ -199,11 +199,11 @@ public:
 
 	void OnChange(PropType Prop)
 	{
-		if (Prop == GCss::PropPadding ||
-			Prop == GCss::PropPaddingLeft ||
-			Prop == GCss::PropPaddingRight ||
-			Prop == GCss::PropPaddingTop ||
-			Prop == GCss::PropPaddingBottom)
+		if (Prop == LCss::PropPadding ||
+			Prop == LCss::PropPaddingLeft ||
+			Prop == LCss::PropPaddingRight ||
+			Prop == LCss::PropPaddingTop ||
+			Prop == LCss::PropPaddingBottom)
 		{
 			GCssTools t(this, View->GetFont());
 			rPadding.ZOff(0, 0);
@@ -377,7 +377,7 @@ GTextView3::GTextView3(	int Id,
 	#endif
 	Underline = NULL;
 	Bold = NULL;
-	d->Padding(GCss::Len(GCss::LenPx, 2));
+	d->Padding(LCss::Len(LCss::LenPx, 2));
 
 	#ifdef _DEBUG
 	// debug times
@@ -4813,17 +4813,17 @@ void GTextView3::OnPaint(GSurface *pDC)
 		GColour SelectedText(HasFocus ? LColour(L_FOCUS_SEL_FORE) : LColour(L_NON_FOCUS_SEL_FORE));
 		GColour SelectedBack(HasFocus ? LColour(L_FOCUS_SEL_BACK) : LColour(L_NON_FOCUS_SEL_BACK));
 
-		GCss::ColorDef ForeDef, BkDef;
+		LCss::ColorDef ForeDef, BkDef;
 		if (GetCss())
 		{
 			ForeDef = GetCss()->Color();
 			BkDef = GetCss()->BackgroundColor();
 		}
 		
-		GColour Fore(ForeDef.Type ==  GCss::ColorRgb ? GColour(ForeDef.Rgb32, 32) : LColour(L_TEXT));
+		GColour Fore(ForeDef.Type ==  LCss::ColorRgb ? GColour(ForeDef.Rgb32, 32) : LColour(L_TEXT));
 		GColour Back
 		(
-			/*!ReadOnly &&*/ BkDef.Type == GCss::ColorRgb
+			/*!ReadOnly &&*/ BkDef.Type == LCss::ColorRgb
 			?
 			GColour(BkDef.Rgb32, 32)
 			:
@@ -5012,7 +5012,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 							Ds.ShowVisibleTab(ShowWhiteSpace);
 							Ds.FDraw(pOut, FX, FY, 0, LineHasSelection);
 
-							if (NextStyle->Decor == GCss::TextDecorSquiggle)
+							if (NextStyle->Decor == LCss::TextDecorSquiggle)
 							{
 								pOut->Colour(NextStyle->DecorColour);
 								int x = FX >> LDisplayString::FShift;

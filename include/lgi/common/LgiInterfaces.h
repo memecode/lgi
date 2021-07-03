@@ -25,7 +25,7 @@ class LKey;
 class LWindow;
 class GView;
 class LVariant;
-class GCss;
+class LCss;
 
 // Classes
 class GDomI
@@ -445,8 +445,8 @@ public:
 	virtual void SetTabStop(bool b) = 0;
 
 	// Style
-    virtual GCss *GetCss(bool Create = false) = 0;
-    virtual void SetCss(GCss *css) = 0;
+    virtual LCss *GetCss(bool Create = false) = 0;
+    virtual void SetCss(LCss *css) = 0;
     virtual bool SetColour(GColour &c, bool Fore) = 0;
 	virtual GString CssStyles(const char *Set = NULL) { return GString(); }
 	virtual GString::Array *CssClasses() { return NULL; }

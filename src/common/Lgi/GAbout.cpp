@@ -89,7 +89,7 @@ GAbout::GAbout(	GView *parent,
 	}
 
 	auto c = Tbl->GetCell(0, 1, true, x);
-	c->TextAlign(GCss::AlignRight);
+	c->TextAlign(LCss::AlignRight);
 	c->Add(new GButton(IDOK, 0, 0, -1, -1, "Ok"));
 
 	LRect r(0, 0, 400, 260);

@@ -4062,7 +4062,7 @@ AddFilesProgress::AddFilesProgress(GViewI *par)
 	c->Add(Msg = new GTextLabel(-1, 0, 0, -1, -1, "..."));
 		
 	c = t->GetCell(0, 1, true, 2);
-	c->TextAlign(GCss::Len(GCss::AlignRight));
+	c->TextAlign(LCss::Len(LCss::AlignRight));
 	c->Add(new GButton(IDCANCEL, 0, 0, -1, -1, "Cancel"));
 }
 

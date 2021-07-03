@@ -538,7 +538,7 @@ LRect &GTabView::GetTabClient()
 		if (p && p->GetCss())
 		{
 			// Inset by any padding
-			GCss::Len l;
+			LCss::Len l;
 			d->TabClient.x1 += (l = p->GetCss()->PaddingLeft()).IsValid()   ? l.ToPx(d->TabClient.X(), GetFont()) : 0;
 			d->TabClient.y1 += (l = p->GetCss()->PaddingTop()).IsValid()    ? l.ToPx(d->TabClient.Y(), GetFont()) : 0;
 			d->TabClient.x2 -= (l = p->GetCss()->PaddingRight()).IsValid()  ? l.ToPx(d->TabClient.X(), GetFont()) : 0;
@@ -711,7 +711,7 @@ LRect &GTabView::CalcInset()
 	auto f = GetFont();
 	if (GetCss())
 	{
-		GCss::Len l;
+		LCss::Len l;
 		if ((l = GetCss()->PaddingLeft()).IsValid())   Padding.x1 = l.ToPx(d->Inset.X(), f);
 		if ((l = GetCss()->PaddingTop()).IsValid())    Padding.y1 = l.ToPx(d->Inset.Y(), f);
 		if ((l = GetCss()->PaddingRight()).IsValid())  Padding.x2 = l.ToPx(d->Inset.X(), f);
@@ -768,7 +768,7 @@ void GTabView::OnStyleChange()
 		if (Css)
 		{
 			if (!Css->BackgroundColor().IsValid())
-				Css->BackgroundColor(GCss::ColorDef(d->cFill));
+				Css->BackgroundColor(LCss::ColorDef(d->cFill));
 		}
 
 		d->CreateCorners();
@@ -796,7 +796,7 @@ void GTabView::OnPaint(GSurface *pDC)
 		CalcInset();
 
 		GView *Pv = GetParent() ? GetParent()->GetGView() : NULL;
-		GColour NoPaint = (Pv ? Pv : this)->StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
+		GColour NoPaint = (Pv ? Pv : this)->StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 		if (!NoPaint.IsTransparent())
 		{
 			pDC->Colour(NoPaint);
@@ -977,7 +977,7 @@ void GTabView::OnPaint(GSurface *pDC)
 			int BaselineOff = (int) (d->TabsBaseline - tf->Ascent());
 			tf->Transparent(true);
 
-			GCss::ColorDef Fore;
+			LCss::ColorDef Fore;
 			if (Tab->GetCss())
 				Fore = Tab->GetCss()->Color();
 			tf->Fore(Fore.IsValid() ? (GColour)Fore : 
@@ -1473,7 +1473,7 @@ void GTabPage::SetFont(LFont *Font, bool OwnIt)
 void GTabPage::OnPaint(GSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
-	GColour Bk = StyleColour(GCss::PropBackgroundColor, TabCtrl ? TabCtrl->d->cFill : LColour(L_MED), 1);
+	GColour Bk = StyleColour(LCss::PropBackgroundColor, TabCtrl ? TabCtrl->d->cFill : LColour(L_MED), 1);
 	pDC->Colour(Bk);
 	pDC->Rectangle(&r);
 	
@@ -1513,7 +1513,7 @@ bool GTabPage::LoadFromResource(int Res)
 	if (TabCtrl && TabCtrl->d->Style == TvMac)
 		// Sigh
 		for (auto c : Children)
-			c->GetCss(true)->BackgroundColor(GCss::ColorDef(GetBackground()));
+			c->GetCss(true)->BackgroundColor(LCss::ColorDef(GetBackground()));
 	*/
 
 	if (IsAttached())

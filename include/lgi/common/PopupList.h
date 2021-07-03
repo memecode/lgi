@@ -68,10 +68,10 @@ public:
 		Lst->MultiSelect(false);
 		
 		// Set default border style...
-		GCss *Css = GetCss(true);
+		LCss *Css = GetCss(true);
 		if (Css)
 		{
-			GCss::BorderDef b(Css, "1px solid #888;");
+			LCss::BorderDef b(Css, "1px solid #888;");
 			Css->Border(b);
 		}
 

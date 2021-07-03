@@ -1,9 +1,8 @@
 /// \file
 /// \author Matthew Allen <fret@memecode.com>
-#ifndef _G_CSS_H_
-#define _G_CSS_H_
+#pragma once
 
-/// I've using the american spelling for 'color' as opposed to the english 'colour'
+/// I've using the American spelling for 'color' as opposed to the English 'colour'
 /// because the CSS spec is written with 'color' as the spelling.
 
 #include "LgiInc.h"
@@ -19,7 +18,7 @@
 #endif
 
 /// Css property container
-class LgiClass GCss
+class LgiClass LCss
 {
 	bool ReadOnly;
 
@@ -480,7 +479,7 @@ public:
 		BorderStyle Style;
 		bool Important;
 
-		BorderDef(GCss *css = 0, const char *init = 0)
+		BorderDef(LCss *css = 0, const char *init = 0)
 		{
 			Style = BorderNone;
 			Important = true;
@@ -500,7 +499,7 @@ public:
 			Parse(NULL, Init);
 		}
 		
-		bool Parse(GCss *Css, const char *&s);
+		bool Parse(LCss *Css, const char *&s);
 		bool ParseStyle(const char *&s);
 		
 		BorderDef &operator =(const BorderDef &b)
@@ -672,7 +671,7 @@ public:
 
 	/// This class parses and stores a selector. The job of matching selectors and
 	/// hashing them is still the responsibility of the calling library. If an application
-	/// needs some code to do that it can optionally use GCss::Store to do that.
+	/// needs some code to do that it can optionally use LCss::Store to do that.
 	class LgiClass Selector
 	{
 	public:
@@ -765,7 +764,7 @@ public:
 	};
 
 	/// This hash table stores arrays of selectors by name.
-	typedef GArray<GCss::Selector*> SelArray;
+	typedef GArray<LCss::Selector*> SelArray;
 	typedef LHashTbl<ConstStrKey<char,false>,SelArray*> SelMap;
 	class SelectorMap : public SelMap
 	{
@@ -818,7 +817,7 @@ public:
 		bool MatchSimpleSelector
 		(
 			/// The full selector.
-			GCss::Selector *Sel,
+			LCss::Selector *Sel,
 			/// The start index of the simple selector parts. Stop at the first comb operator or the end of the parts.
 			ssize_t PartIdx,
 			/// Our context callback to get properties of the object
@@ -831,22 +830,22 @@ public:
 			
 			for (size_t n = PartIdx; n<Sel->Parts.Length(); n++)
 			{
-				GCss::Selector::Part &p = Sel->Parts[n];
+				LCss::Selector::Part &p = Sel->Parts[n];
 				switch (p.Type)
 				{
-					case GCss::Selector::SelType:
+					case LCss::Selector::SelType:
 					{
 						const char *Tag = Context->GetElement(Obj);
 						if (!Tag || _stricmp(Tag, p.Value))
 							return false;
 						break;
 					}
-					case GCss::Selector::SelUniversal:
+					case LCss::Selector::SelUniversal:
 					{
 						// Match everything
 						break;
 					}
-					case GCss::Selector::SelAttrib:
+					case LCss::Selector::SelAttrib:
 					{
 						if (!p.Value)
 							return false;
@@ -865,7 +864,7 @@ public:
 							return false;
 						break;
 					}
-					case GCss::Selector::SelClass:
+					case LCss::Selector::SelClass:
 					{
 						// Check the class matches
 						GString::Array Class;
@@ -888,25 +887,25 @@ public:
 							return false;
 						break;
 					}
-					case GCss::Selector::SelMedia:
-					case GCss::Selector::SelFontFace:
-					case GCss::Selector::SelPage:
-					case GCss::Selector::SelList:
-					case GCss::Selector::SelImport:
-					case GCss::Selector::SelKeyFrames:
-					case GCss::Selector::SelIgnored:
+					case LCss::Selector::SelMedia:
+					case LCss::Selector::SelFontFace:
+					case LCss::Selector::SelPage:
+					case LCss::Selector::SelList:
+					case LCss::Selector::SelImport:
+					case LCss::Selector::SelKeyFrames:
+					case LCss::Selector::SelIgnored:
 					{
 						return false;
 						break;
 					}
-					case GCss::Selector::SelID:
+					case LCss::Selector::SelID:
 					{
 						const char *Id = Context->GetAttr(Obj, "id");
 						if (!Id || _stricmp(Id, p.Value))
 							return false;
 						break;
 					}
-					case GCss::Selector::SelPseudo:
+					case LCss::Selector::SelPseudo:
 					{
 						const char *Href = NULL;
 						if
@@ -945,7 +944,7 @@ public:
 		
 		/// This code matches a all the parts of a selector.
 		template<typename T>
-		bool MatchFullSelector(GCss::Selector *Sel, ElementCallback<T> *Context, T *Obj)
+		bool MatchFullSelector(LCss::Selector *Sel, ElementCallback<T> *Context, T *Obj)
 		{
 			bool Complex = Sel->Combs.Length() > 0;
 			ssize_t CombIdx = Complex ? (ssize_t)Sel->Combs.Length() - 1 : 0;
@@ -970,22 +969,22 @@ public:
 					if (StartIdx >= (ssize_t)Sel->Parts.Length())
 						break;
 					
-					GCss::Selector::Part &p = Sel->Parts[StartIdx];
+					LCss::Selector::Part &p = Sel->Parts[StartIdx];
 					switch (p.Type)
 					{
-						case GCss::Selector::CombChild:
+						case LCss::Selector::CombChild:
 						{
 							// LgiAssert(!"Not impl.");
 							return false;
 							break;
 						}
-						case GCss::Selector::CombAdjacent:
+						case LCss::Selector::CombAdjacent:
 						{
 							// LgiAssert(!"Not impl.");
 							return false;
 							break;
 						}
-						case GCss::Selector::CombDesc:
+						case LCss::Selector::CombDesc:
 						{
 							// Does the parent match the previous simple selector
 							ssize_t PrevIdx = StartIdx - 1;
@@ -1020,7 +1019,7 @@ public:
 		GArray<char*> Styles;
 		
 		// Sort the styles into less specific to more specific order
-		void SortStyles(GCss::SelArray &Styles);
+		void SortStyles(LCss::SelArray &Styles);
 		
 	public:
 		SelectorMap TypeMap, ClassMap, IdMap;
@@ -1052,7 +1051,7 @@ public:
 
 		/// Use to finding matching selectors for an element.
 		template<typename T>
-		bool Match(GCss::SelArray &Styles, ElementCallback<T> *Context, T *Obj)
+		bool Match(LCss::SelArray &Styles, ElementCallback<T> *Context, T *Obj)
 		{
 			SelArray *s;
 
@@ -1089,10 +1088,10 @@ public:
 			// Now from the list of possibles, do the actual checking of selectors...
 			for (unsigned i=0; i<Maps.Length(); i++)
 			{
-				GCss::SelArray *s = Maps[i];
+				LCss::SelArray *s = Maps[i];
 				for (unsigned i=0; i<s->Length(); i++)
 				{
-					GCss::Selector *Sel = (*s)[i];
+					LCss::Selector *Sel = (*s)[i];
 					
 					if (!Styles.HasItem(Sel) &&
 						MatchFullSelector(Sel, Context, Obj))
@@ -1114,10 +1113,10 @@ public:
 	};
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
-	GCss();
-	GCss(const GCss &c);
+	LCss();
+	LCss(const LCss &c);
 	void Init();
-	virtual ~GCss();
+	virtual ~LCss();
 
 	#define Accessor(PropName, Type, Default, BaseProp) \
 		Type PropName() { Type *Member = (Type*)Props.Find(Prop##PropName); \
@@ -1205,12 +1204,12 @@ public:
 	void DeleteProp(PropType p);
 	size_t Length() { return Props.Length(); }
 	virtual void OnChange(PropType Prop);
-	bool CopyStyle(const GCss &c);
-	bool operator ==(GCss &c);
-	bool operator !=(GCss &c) { return !(*this == c); }
-	GCss &operator =(const GCss &c) { Empty(); CopyStyle(c); return *this; }
-	GCss &operator +=(const GCss &c) { CopyStyle(c); return *this; }
-	GCss &operator -=(const GCss &c);
+	bool CopyStyle(const LCss &c);
+	bool operator ==(LCss &c);
+	bool operator !=(LCss &c) { return !(*this == c); }
+	LCss &operator =(const LCss &c) { Empty(); CopyStyle(c); return *this; }
+	LCss &operator +=(const LCss &c) { CopyStyle(c); return *this; }
+	LCss &operator -=(const LCss &c);
 	void *PropAddress(PropType p) { return Props.Find(p); }
 	GAutoString ToString();
 	const char *ToString(DisplayType dt);
@@ -1241,21 +1240,21 @@ public:
 	
 	/// Copies valid properties from the node 'c' into the property collection 'Contrib'.
 	/// Usually called for each node up the parent chain until the function returns false;
-	bool InheritCollect(GCss &c, PropMap &Contrib);
+	bool InheritCollect(LCss &c, PropMap &Contrib);
 	/// After calling InheritCollect on all the parent nodes, this method works out the final
 	/// value of each property. e.g. multiplying percentages together etc.
     bool InheritResolve(PropMap &Map);
     /* Code sample:
-    GCss::PropMap Map;
-    Map.Add(PropFontFamily, new GCss::PropArray);
-	Map.Add(PropFontSize, new GCss::PropArray);
-	Map.Add(PropFontStyle, new GCss::PropArray);
+    LCss::PropMap Map;
+    Map.Add(PropFontFamily, new LCss::PropArray);
+	Map.Add(PropFontSize, new LCss::PropArray);
+	Map.Add(PropFontStyle, new LCss::PropArray);
 	for (GTag *t = Parent; t; t = t->Parent)
 	{
 		if (!c.InheritCollect(*t, Map))
 			break;
 	}	
-	GCss c; // Container for final values
+	LCss c; // Container for final values
 	c.InheritResolve(Map);	
 	Map.DeleteObjects();
 	*/
@@ -1294,6 +1293,4 @@ protected:
 
 #ifndef LINUX
 #pragma pack(pop)
-#endif
-
 #endif

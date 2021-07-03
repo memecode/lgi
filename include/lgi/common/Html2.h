@@ -47,7 +47,7 @@ protected:
 	int					ViewWidth;
 	GToolTip			Tip;
 	GTag				*PrevTip;
-	GCss::Store			CssStore;
+	LCss::Store			CssStore;
 	
 	// Display
 	GSurface			*MemDC;

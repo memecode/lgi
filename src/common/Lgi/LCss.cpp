@@ -39,10 +39,10 @@
 	}
 
 
-LHashTbl<ConstStrKey<char,false>, GCss::PropType> GCss::Lut;
-LHashTbl<IntKey<int>, GCss::PropType> GCss::ParentProp;
+LHashTbl<ConstStrKey<char,false>, LCss::PropType> LCss::Lut;
+LHashTbl<IntKey<int>, LCss::PropType> LCss::ParentProp;
 
-const char *GCss::PropName(PropType p)
+const char *LCss::PropName(PropType p)
 {
 	// const char *s;
 	// for (PropType t = Lut.First(&s); t; t = Lut.Next(&s))
@@ -56,7 +56,7 @@ const char *GCss::PropName(PropType p)
 	return 0;
 }
 
-double GCss::FontSizeTable[7] =
+double LCss::FontSizeTable[7] =
 {
 	0.6, // SizeXXSmall
 	0.75, // SizeXSmall
@@ -173,7 +173,7 @@ static char *ParseString(const char *&s)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-void GCss::Init()
+void LCss::Init()
 {
 	ReadOnly = false;
 	if (Lut.Length() == 0)
@@ -294,23 +294,23 @@ void GCss::Init()
 	}
 }
 
-GCss::GCss() : Props(32)
+LCss::LCss() : Props(32)
 {
 	Init();
 }
 
-GCss::GCss(const GCss &c)
+LCss::LCss(const LCss &c)
 {
 	Init();
 	*this = c;
 }
 
-GCss::~GCss()
+LCss::~LCss()
 {
 	Empty();
 }
 
-int GCss::Len::ToPx(int Box, LFont *Font, int Dpi)
+int LCss::Len::ToPx(int Box, LFont *Font, int Dpi)
 {
 	switch (Type)
 	{
@@ -355,11 +355,11 @@ int GCss::Len::ToPx(int Box, LFont *Font, int Dpi)
 	}
 }
 
-GCss::Len GCss::Len::operator *(const Len &b) const
+LCss::Len LCss::Len::operator *(const Len &b) const
 {
 	if (b.IsDynamic())
 	{
-		GCss::Len a;
+		LCss::Len a;
 		switch (b.Type)
 		{
 			case LenPercent:
@@ -381,7 +381,7 @@ GCss::Len GCss::Len::operator *(const Len &b) const
 	return b;
 }
 
-bool GCss::Len::ToString(GStream &p) const
+bool LCss::Len::ToString(GStream &p) const
 {
 	const char *Unit = 0;
 	switch (Type)
@@ -429,7 +429,7 @@ bool GCss::Len::ToString(GStream &p) const
 	return p.Print("%s", Unit) > 0;
 }
 
-bool GCss::ColorDef::ToString(GStream &p)
+bool LCss::ColorDef::ToString(GStream &p)
 {
 	switch (Type)
 	{
@@ -458,7 +458,7 @@ bool GCss::ColorDef::ToString(GStream &p)
 	return true;
 }
 
-const char *GCss::ToString(DisplayType dt)
+const char *LCss::ToString(DisplayType dt)
 {
 	switch (dt)
 	{
@@ -472,7 +472,7 @@ const char *GCss::ToString(DisplayType dt)
 	}
 }
 
-GAutoString GCss::ToString()
+GAutoString LCss::ToString()
 {
 	GStringPipe p;
 
@@ -775,7 +775,7 @@ GAutoString GCss::ToString()
 	return GAutoString(p.NewStr());
 }
 
-bool GCss::InheritCollect(GCss &c, PropMap &Contrib)
+bool LCss::InheritCollect(LCss &c, PropMap &Contrib)
 {
 	int StillInherit = 0;
 
@@ -895,7 +895,7 @@ bool GCss::InheritCollect(GCss &c, PropMap &Contrib)
 	return StillInherit > 0;
 }
 
-bool GCss::InheritResolve(PropMap &Contrib)
+bool LCss::InheritResolve(PropMap &Contrib)
 {
     // int p;
 	// for (PropArray *a = Contrib.First(&p); a; a = Contrib.Next(&p))
@@ -1114,10 +1114,10 @@ bool GCss::InheritResolve(PropMap &Contrib)
     return false;
 }
 
-GCss &GCss::operator -=(const GCss &c)
+LCss &LCss::operator -=(const LCss &c)
 {
 	// Removes all props in 'cc' from this Css store...
-	GCss &cc = (GCss&)c;
+	LCss &cc = (LCss&)c;
 	// int Prop;
 	// for (void *p=cc.Props.First(&Prop); p; p=cc.Props.Next(&Prop))
 	for (auto p : cc.Props)
@@ -1128,9 +1128,9 @@ GCss &GCss::operator -=(const GCss &c)
 	return *this;
 }
 
-bool GCss::CopyStyle(const GCss &c)
+bool LCss::CopyStyle(const LCss &c)
 {
-	GCss &cc = (GCss&)c;
+	LCss &cc = (LCss&)c;
 	// int Prop;
 	// for (void *p=cc.Props.First(&Prop); p; p=cc.Props.Next(&Prop))
 	for (auto p : cc.Props)
@@ -1171,7 +1171,7 @@ bool GCss::CopyStyle(const GCss &c)
 	return true;
 }
 
-bool GCss::operator ==(GCss &c)
+bool LCss::operator ==(LCss &c)
 {
 	if (Props.Length() != c.Props.Length())
 		return false;
@@ -1212,7 +1212,7 @@ bool GCss::operator ==(GCss &c)
 	return Eq;
 }
 
-void GCss::DeleteProp(PropType p)
+void LCss::DeleteProp(PropType p)
 {
 	void *Data = Props.Find(p);
 	if (Data)
@@ -1222,7 +1222,7 @@ void GCss::DeleteProp(PropType p)
 	}
 }
 
-void GCss::DeleteProp(PropType Prop, void *Data)
+void LCss::DeleteProp(PropType Prop, void *Data)
 {
 	if (!Data)
 		return;
@@ -1257,7 +1257,7 @@ void GCss::DeleteProp(PropType Prop, void *Data)
 	}
 }
 
-void GCss::Empty()
+void LCss::Empty()
 {
 	// int Prop;
 	// for (void *Data=Props.First(&Prop); Data; Data=Props.Next(&Prop))
@@ -1270,7 +1270,7 @@ void GCss::Empty()
 
 /// This returns true if there is a non default font style. Useful for checking if you
 /// need to create a font...
-bool GCss::HasFontStyle()
+bool LCss::HasFontStyle()
 {
 	auto Fam = FontFamily();
 	if (Fam.Length() > 0)
@@ -1294,11 +1294,11 @@ bool GCss::HasFontStyle()
 	return false;
 }
 
-void GCss::OnChange(PropType Prop)
+void LCss::OnChange(PropType Prop)
 {
 }
 
-bool GCss::ParseFontStyle(PropType PropId, const char *&s)
+bool LCss::ParseFontStyle(PropType PropId, const char *&s)
 {
 	FontStyleType *w = (FontStyleType*)Props.Find(PropId);
 	if (!w) Props.Add(PropId, w = new FontStyleType);
@@ -1317,7 +1317,7 @@ bool GCss::ParseFontStyle(PropType PropId, const char *&s)
 	return true;
 }
 
-bool GCss::ParseFontVariant(PropType PropId, const char *&s)
+bool LCss::ParseFontVariant(PropType PropId, const char *&s)
 {
 	FontVariantType *w = (FontVariantType*)Props.Find(PropId);
 	if (!w) Props.Add(PropId, w = new FontVariantType);
@@ -1334,7 +1334,7 @@ bool GCss::ParseFontVariant(PropType PropId, const char *&s)
 	return true;
 }
 
-bool GCss::ParseFontWeight(PropType PropId, const char *&s)
+bool LCss::ParseFontWeight(PropType PropId, const char *&s)
 {
 	FontWeightType *w = (FontWeightType*)Props.Find(PropId);
 	if (!w) Props.Add(PropId, w = new FontWeightType);
@@ -1362,7 +1362,7 @@ bool GCss::ParseFontWeight(PropType PropId, const char *&s)
 	return true;
 }
 
-bool GCss::ParseBackgroundRepeat(const char *&s)
+bool LCss::ParseBackgroundRepeat(const char *&s)
 {
 	RepeatType *w = (RepeatType*)Props.Find(PropBackgroundRepeat);
 	if (!w) Props.Add(PropBackgroundRepeat, w = new RepeatType);
@@ -1377,7 +1377,7 @@ bool GCss::ParseBackgroundRepeat(const char *&s)
 	return true;
 }
 
-bool GCss::ParseDisplayType(const char *&s)
+bool LCss::ParseDisplayType(const char *&s)
 {
 	DisplayType *t = (DisplayType*)Props.Find(PropDisplay);
 	if (!t) Props.Add(PropDisplay, t = new DisplayType);
@@ -1395,7 +1395,7 @@ bool GCss::ParseDisplayType(const char *&s)
 	return true;
 }
 
-void GCss::ParsePositionType(const char *&s)
+void LCss::ParsePositionType(const char *&s)
 {
 	PositionType *t = (PositionType*)Props.Find(PropPosition);
 	if (!t) Props.Add(PropPosition, t = new PositionType);
@@ -1407,7 +1407,7 @@ void GCss::ParsePositionType(const char *&s)
 	else *t = PosInherit;
 }
 
-bool GCss::Parse(const char *&s, ParsingStyle Type)
+bool LCss::Parse(const char *&s, ParsingStyle Type)
 {
 	if (!s) return false;
 
@@ -1582,7 +1582,7 @@ bool GCss::Parse(const char *&s, ParsingStyle Type)
 					case PropBorderBottomStyle:
 					case PropBorderLeftStyle:
 					{
-						GCss::PropType Parent = ParentProp.Find(PropId);
+						LCss::PropType Parent = ParentProp.Find(PropId);
 						if (Parent)
 						{
 							BorderDef *b = (BorderDef*) Props.Find(Parent);
@@ -1689,7 +1689,7 @@ bool GCss::Parse(const char *&s, ParsingStyle Type)
 					case PropBorderBottomWidth:
 					case PropBorderLeftWidth:
 					{
-						GCss::PropType Parent = ParentProp.Find(PropId);
+						LCss::PropType Parent = ParentProp.Find(PropId);
 						if (Parent)
 						{
 							BorderDef *b = (BorderDef*) Props.Find(Parent);
@@ -1698,7 +1698,7 @@ bool GCss::Parse(const char *&s, ParsingStyle Type)
 							
 							if (b && Lengths.Length() == 1)
 							{
-								*((GCss::Len*&)b) = *Lengths[0];
+								*((LCss::Len*&)b) = *Lengths[0];
 							}
 							else if (Type == ParseStrict)
 							{
@@ -1859,7 +1859,7 @@ bool GCss::Parse(const char *&s, ParsingStyle Type)
 						case PropBorderBottomColor:
 						case PropBorderLeftColor:
 						{
-							GCss::PropType Parent = ParentProp.Find(PropId);
+							LCss::PropType Parent = ParentProp.Find(PropId);
 							if (Parent)
 							{
 								BorderDef *b = (BorderDef*) Props.Find(Parent);
@@ -1902,10 +1902,10 @@ bool GCss::Parse(const char *&s, ParsingStyle Type)
 			{
 				if (PropId == PropBorderStyle)
 				{
-					GCss::BorderDef b;
+					LCss::BorderDef b;
 					if (b.ParseStyle(s))
 					{
-						GCss::BorderDef *db;
+						LCss::BorderDef *db;
 						GetOrCreate(db, PropBorderLeft)->Style = b.Style;
 						GetOrCreate(db, PropBorderRight)->Style = b.Style;
 						GetOrCreate(db, PropBorderTop)->Style = b.Style;
@@ -1917,7 +1917,7 @@ bool GCss::Parse(const char *&s, ParsingStyle Type)
 					ColorDef c;
 					if (c.Parse(s))
 					{
-						GCss::BorderDef *db;
+						LCss::BorderDef *db;
 						GetOrCreate(db, PropBorderLeft)->Color = c;
 						GetOrCreate(db, PropBorderRight)->Color = c;
 						GetOrCreate(db, PropBorderTop)->Color = c;
@@ -2004,7 +2004,7 @@ bool GCss::Parse(const char *&s, ParsingStyle Type)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-bool GCss::Len::Parse(const char *&s, PropType Prop, ParsingStyle ParseType)
+bool LCss::Len::Parse(const char *&s, PropType Prop, ParsingStyle ParseType)
 {
 	if (!s) return false;
 	
@@ -2079,7 +2079,7 @@ bool GCss::Len::Parse(const char *&s, PropType Prop, ParsingStyle ParseType)
 	return true;
 }
 
-bool GCss::ColorDef::Parse(const char *&s)
+bool LCss::ColorDef::Parse(const char *&s)
 {
 	if (!s) return false;
 
@@ -2239,13 +2239,13 @@ bool GCss::ColorDef::Parse(const char *&s)
 	return true;
 }
 
-GCss::ImageDef::~ImageDef()
+LCss::ImageDef::~ImageDef()
 {
 	if (Type == ImageOwn)
 		DeleteObj(Img);
 }
 
-bool GCss::ImageDef::IsValid()
+bool LCss::ImageDef::IsValid()
 {
 	if (Type == ImageUri)
 		return Uri.Get() != NULL;
@@ -2254,7 +2254,7 @@ bool GCss::ImageDef::IsValid()
 	return false;
 }
 
-bool GCss::ImageDef::Parse(const char *&s)
+bool LCss::ImageDef::Parse(const char *&s)
 {
 	SkipWhite(s);
 
@@ -2288,7 +2288,7 @@ bool GCss::ImageDef::Parse(const char *&s)
 }
 
 
-bool GCss::ImageDef::operator !=(const ImageDef &i)
+bool LCss::ImageDef::operator !=(const ImageDef &i)
 {
 	if (Type != i.Type)
 		return false;
@@ -2297,7 +2297,7 @@ bool GCss::ImageDef::operator !=(const ImageDef &i)
 	return true;
 }
 
-GCss::ImageDef &GCss::ImageDef::operator =(const ImageDef &o)
+LCss::ImageDef &LCss::ImageDef::operator =(const ImageDef &o)
 {
 	if (Type == ImageOwn)
 		DeleteObj(Img);
@@ -2315,7 +2315,7 @@ GCss::ImageDef &GCss::ImageDef::operator =(const ImageDef &o)
 	return *this;
 }
 
-bool GCss::BorderDef::Parse(GCss *Css, const char *&s)
+bool LCss::BorderDef::Parse(LCss *Css, const char *&s)
 {
 	if (!s)
 		return false;
@@ -2354,7 +2354,7 @@ bool GCss::BorderDef::Parse(GCss *Css, const char *&s)
 	return true;
 }
 
-bool GCss::BorderDef::ParseStyle(const char *&s)
+bool LCss::BorderDef::ParseStyle(const char *&s)
 {
 	if (ParseWord(s, "Hidden")) Style = BorderHidden;
 	else if (ParseWord(s, "Solid")) Style = BorderSolid;
@@ -2373,18 +2373,18 @@ bool GCss::BorderDef::ParseStyle(const char *&s)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-GCss::Selector &GCss::Selector::operator =(const GCss::Selector &s)
+LCss::Selector &LCss::Selector::operator =(const LCss::Selector &s)
 {
 	Parts.Length(0);
 	for (int i=0; i<s.Parts.Length(); i++)
 	{
 		Part &n = Parts.New();
-		n = ((GCss::Selector&)s).Parts[i];
+		n = ((LCss::Selector&)s).Parts[i];
 	}
 	return *this;
 }
 
-bool GCss::Selector::TokString(GAutoString &a, const char *&s)
+bool LCss::Selector::TokString(GAutoString &a, const char *&s)
 {
 	// const char *Init = s;
 	const char *e = s;
@@ -2417,7 +2417,7 @@ bool GCss::Selector::TokString(GAutoString &a, const char *&s)
 	return true;
 }
 
-const char *GCss::Selector::PartTypeToString(PartType p)
+const char *LCss::Selector::PartTypeToString(PartType p)
 {
 	switch (p)
 	{
@@ -2438,7 +2438,7 @@ const char *GCss::Selector::PartTypeToString(PartType p)
 	return "<error>";
 };
 
-GAutoString GCss::Selector::Print()
+GAutoString LCss::Selector::Print()
 {
 	GStringPipe p;
 	for (int i=0; i<Parts.Length(); i++)
@@ -2449,7 +2449,7 @@ GAutoString GCss::Selector::Print()
 	return GAutoString(p.NewStr());
 }
 
-bool GCss::Selector::IsAtMedia()
+bool LCss::Selector::IsAtMedia()
 {
 	if (Parts.Length() <= 0)
 		return false;
@@ -2458,7 +2458,7 @@ bool GCss::Selector::IsAtMedia()
 	return p.Type == SelMedia;
 }
 
-uint32_t GCss::Selector::GetSpecificity()
+uint32_t LCss::Selector::GetSpecificity()
 {
 	uint8_t s[4] = {0};
 	
@@ -2494,7 +2494,7 @@ uint32_t GCss::Selector::GetSpecificity()
 			((uint32_t)s[0]);
 }
 
-bool GCss::Selector::ToString(GStream &p)
+bool LCss::Selector::ToString(GStream &p)
 {
 	// Output the selector parts...
 	for (unsigned i=0; i<Parts.Length(); i++)
@@ -2544,7 +2544,7 @@ bool GCss::Selector::ToString(GStream &p)
 	return true;
 }
 
-bool GCss::Selector::Parse(const char *&s)
+bool LCss::Selector::Parse(const char *&s)
 {
 	if (!s)
 		return false;
@@ -2794,7 +2794,7 @@ static const char *SkipComment(const char *c)
 	return c;
 }
 
-bool GCss::Store::Dump(GStream &out)
+bool LCss::Store::Dump(GStream &out)
 {
 	const char *MapNames[] = {"TypeMap", "ClassMap", "IdMap", NULL};
 	SelectorMap *Maps[] = {&TypeMap, &ClassMap, &IdMap, NULL};
@@ -2810,7 +2810,7 @@ bool GCss::Store::Dump(GStream &out)
 			out.Print("\t'%s' -> ", a.key);
 			for (int n=0; n<a.value->Length(); n++)
 			{
-				GCss::Selector *sel = (*a.value)[n];
+				LCss::Selector *sel = (*a.value)[n];
 				if (n) out.Print("\t\t");
 				out.Print("%i of %i: %s\n", n, a.value->Length(), sel->Raw.Get());
 				// out.Print("\t\t{ %s }\n", sel->Style);
@@ -2823,7 +2823,7 @@ bool GCss::Store::Dump(GStream &out)
 
 
 
-int GCssSelectorCmp(class GCss::Selector **a, GCss::Selector **b)
+int GCssSelectorCmp(class LCss::Selector **a, LCss::Selector **b)
 {
 	uint32_t as = (*a)->GetSpecificity();
 	uint32_t bs = (*b)->GetSpecificity();
@@ -2832,13 +2832,13 @@ int GCssSelectorCmp(class GCss::Selector **a, GCss::Selector **b)
 	return as - bs;
 }
 
-void GCss::Store::SortStyles(GCss::SelArray &Styles)
+void LCss::Store::SortStyles(LCss::SelArray &Styles)
 {
 	if (Styles.Length() > 1)
 		Styles.Sort(GCssSelectorCmp);
 }
 
-bool GCss::Store::ToString(GStream &p)
+bool LCss::Store::ToString(GStream &p)
 {
 	SelectorMap *Maps[] = {&TypeMap, &ClassMap, &IdMap, NULL};
 	for (int i=0; Maps[i]; i++)
@@ -2849,7 +2849,7 @@ bool GCss::Store::ToString(GStream &p)
 		{
 			for (unsigned n=0; n<a.value->Length(); n++)
 			{
-				GCss::Selector *sel = (*a.value)[n];
+				LCss::Selector *sel = (*a.value)[n];
 				if (!sel->ToString(p))
 					return false;
 			}
@@ -2859,7 +2859,7 @@ bool GCss::Store::ToString(GStream &p)
 	// Output all the other styles not in the maps...
 	for (unsigned n=0; n<Other.Length(); n++)
 	{
-		GCss::Selector *sel = Other[n];
+		LCss::Selector *sel = Other[n];
 		if (!sel->ToString(p))
 			return false;
 	}
@@ -2867,7 +2867,7 @@ bool GCss::Store::ToString(GStream &p)
 	return true;
 }
 
-bool GCss::Store::Parse(const char *&c, int Depth)
+bool LCss::Store::Parse(const char *&c, int Depth)
 {
 	int SelectorIndex = 1;
 	
@@ -2896,8 +2896,8 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 		}
 
 		// read selector
-		GArray<GAutoPtr<GCss::Selector>> Selectors;
-		GCss::Selector *Cur = new GCss::Selector;
+		GArray<GAutoPtr<LCss::Selector>> Selectors;
+		LCss::Selector *Cur = new LCss::Selector;
 
 		if (Cur->Parse(c))
 		{
@@ -2917,7 +2917,7 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 			if (*c == ',')
 			{
 				c++;
-				Cur = new GCss::Selector;
+				Cur = new LCss::Selector;
 				if (Cur && Cur->Parse(c))
 				{
 					Cur->SourceIndex = SelectorIndex++;
@@ -2950,7 +2950,7 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 			if (Cur && Cur->IsAtMedia())
 			{
 				// At media rules, so create a child store and put all the rules in there...
-				if (Cur->Children.Reset(new GCss::Store))
+				if (Cur->Children.Reset(new LCss::Store))
 				{
 					if (!Cur->Children->Parse(c, Depth + 1))
 						return false;
@@ -2977,11 +2977,11 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 						LgiAssert(!"Part index too high.");
 						return false;
 					}
-					GCss::Selector::Part &p = s->Parts[n];
+					LCss::Selector::Part &p = s->Parts[n];
 					
 					switch (p.Type)
 					{
-						case GCss::Selector::SelType:
+						case LCss::Selector::SelType:
 						{
 							if (p.Value)
 							{
@@ -2990,7 +2990,7 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 							}
 							break;
 						}
-						case GCss::Selector::SelClass:
+						case LCss::Selector::SelClass:
 						{
 							if (p.Value)
 							{
@@ -2999,7 +2999,7 @@ bool GCss::Store::Parse(const char *&c, int Depth)
 							}
 							break;
 						}
-						case GCss::Selector::SelID:
+						case LCss::Selector::SelID:
 						{
 							if (p.Value)
 							{

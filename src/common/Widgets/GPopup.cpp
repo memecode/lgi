@@ -1008,10 +1008,10 @@ void GDropDown::OnPaint(GSurface *pDC)
 	GColour NoPaintColour(L_MED);
 	if (GetCss())
 	{
-		GCss::ColorDef NoPaint = GetCss()->NoPaintColor();
-		if (NoPaint.Type == GCss::ColorRgb)
+		LCss::ColorDef NoPaint = GetCss()->NoPaintColor();
+		if (NoPaint.Type == LCss::ColorRgb)
 			NoPaintColour.Set(NoPaint.Rgb32, 32);
-		else if (NoPaint.Type == GCss::ColorTransparent)
+		else if (NoPaint.Type == LCss::ColorTransparent)
 			NoPaintColour.Empty();
 	}
 	if (!NoPaintColour.IsTransparent())
@@ -1047,10 +1047,10 @@ void GDropDown::OnPaint(GSurface *pDC)
 	{
 		GMemDC Mem(r.X(), r.Y(), System24BitColourSpace);
 
-		GCss::ColorDef f;
+		LCss::ColorDef f;
 		if (GetCss())
 			f = GetCss()->BackgroundColor();
-		if (f.Type == GCss::ColorRgb)
+		if (f.Type == LCss::ColorRgb)
 			Mem.Colour(f.Rgb32, 32);
 		else
 			Mem.Colour(L_MED);

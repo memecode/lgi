@@ -13,7 +13,7 @@ class LTypeFacePrivate
 public:
 	// Type
 	char *_Face;			// type face
-	GCss::Len _Size;		// size
+	LCss::Len _Size;		// size
 	int _Weight;
 	bool _Italic;
 	bool _Underline;
@@ -39,7 +39,7 @@ public:
 		IsSymbol = false;
 		_Ascent = _Descent = _Leading = 0.0;
 		_Face = 0;
-		_Size = GCss::Len(GCss::LenPt, 8.0f);
+		_Size = LCss::Len(LCss::LenPt, 8.0f);
 		_Weight = FW_NORMAL;
 		_Italic = false;
 		_Underline = false;

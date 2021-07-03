@@ -139,7 +139,7 @@
 GAutoPtr<GLibrary> LFontPrivate::Gdi32;
 #endif
 
-LFont::LFont(const char *face, GCss::Len size)
+LFont::LFont(const char *face, LCss::Len size)
 {
 	d = new LFontPrivate;
 	if (face && size.IsValid())
@@ -182,32 +182,32 @@ bool LFont::CreateFromCss(const char *Css)
 	if (!Css)
 		return false;
 	
-	GCss c;
+	LCss c;
 	c.Parse(Css);
 	return CreateFromCss(&c);
 }
 
-bool LFont::CreateFromCss(GCss *Css)
+bool LFont::CreateFromCss(LCss *Css)
 {
 	if (!Css)
 		return false;
 	
-	GCss::StringsDef Fam = Css->FontFamily();
+	LCss::StringsDef Fam = Css->FontFamily();
 	if (Fam.Length())
 		Face(Fam[0]);
 	else
 		Face(SysFont->Face());
 
-	GCss::Len Sz = Css->FontSize();
+	LCss::Len Sz = Css->FontSize();
 	switch (Sz.Type)
 	{
-		case GCss::SizeSmaller:
-			Size(GCss::Len(GCss::LenPt, (float)SysFont->PointSize()-1));
+		case LCss::SizeSmaller:
+			Size(LCss::Len(LCss::LenPt, (float)SysFont->PointSize()-1));
 			break;
-		case GCss::SizeLarger:
-			Size(GCss::Len(GCss::LenPt, (float)SysFont->PointSize()+1));
+		case LCss::SizeLarger:
+			Size(LCss::Len(LCss::LenPt, (float)SysFont->PointSize()+1));
 			break;
-		case GCss::LenInherit:
+		case LCss::LenInherit:
 			Size(SysFont->Size());
 			break;
 		default:
@@ -215,16 +215,16 @@ bool LFont::CreateFromCss(GCss *Css)
 			break;
 	}
 
-	GCss::FontWeightType w = Css->FontWeight();
-	if (w == GCss::FontWeightBold)
+	LCss::FontWeightType w = Css->FontWeight();
+	if (w == LCss::FontWeightBold)
 		Bold(true);
 	
-	GCss::FontStyleType s = Css->FontStyle();
-	if (s == GCss::FontStyleItalic)
+	LCss::FontStyleType s = Css->FontStyle();
+	if (s == LCss::FontStyleItalic)
 		Italic(true);
 
-	GCss::TextDecorType dec = Css->TextDecoration();
-	if (dec == GCss::TextDecorUnderline)
+	LCss::TextDecorType dec = Css->TextDecoration();
+	if (dec == LCss::TextDecorUnderline)
 		Underline(true);
 
 	return Create();
@@ -232,13 +232,13 @@ bool LFont::CreateFromCss(GCss *Css)
 
 GString LFont::FontToCss()
 {
-	GCss c;
+	LCss c;
 	c.FontFamily(Face());
 	c.FontSize(Size());
 	if (Bold())
-		c.FontWeight(GCss::FontWeightBold);
+		c.FontWeight(LCss::FontWeightBold);
 	if (Italic())
-		c.FontStyle(GCss::FontStyleItalic);
+		c.FontStyle(LCss::FontStyleItalic);
 	auto aStr = c.ToString();
 	return aStr.Get();
 }
@@ -509,7 +509,7 @@ GSurface *LFont::GetSurface()
 	return d->pSurface;
 }
 
-bool LFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
+bool LFont::Create(const char *face, LCss::Len size, GSurface *pSurface)
 {
 	bool FaceChanging = false;
 	bool SizeChanging = false;
@@ -627,9 +627,9 @@ bool LFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 		HDC hDC = pSurface ? pSurface->Handle() : GetDC(0);
 		auto Sz = Size();
 		int Win32Height = 0;
-		if (Sz.Type == GCss::LenPt)
+		if (Sz.Type == LCss::LenPt)
 			Win32Height = WinPointToHeight((int)Sz.Value, hDC);
-		else if (Sz.Type == GCss::LenPx)
+		else if (Sz.Type == LCss::LenPx)
 			Win32Height = (int)(Sz.Value * 1.2);
 		else
 			LgiAssert(!"What now?");
@@ -647,7 +647,7 @@ bool LFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 
 		d->OwnerUnderline = Face() &&
 							stricmp(Face(), "Courier New") == 0 &&
-							Size().Type == GCss::LenPt &&
+							Size().Type == LCss::LenPt &&
 							(PointSize() == 8 || PointSize() == 9) &&
 							LTypeFace::d->_Underline;
 
@@ -860,9 +860,9 @@ bool LFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 			auto Sz = Size();
 			GString sFace = Face();
 			Gtk::pango_font_description_set_family(d->hFont, sFace);
-			if (Sz.Type == GCss::LenPt)
+			if (Sz.Type == LCss::LenPt)
 				Gtk::pango_font_description_set_size(d->hFont, Sz.Value * PANGO_SCALE);
-			else if (Sz.Type == GCss::LenPx)
+			else if (Sz.Type == LCss::LenPx)
 				Gtk::pango_font_description_set_absolute_size(d->hFont, Sz.Value * PANGO_SCALE);
 			else
 			{
@@ -974,9 +974,9 @@ bool LFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 				if (descriptor)
 				{
 					float PtSz = 0.0;
-					if (Sz.Type == GCss::LenPt)
+					if (Sz.Type == LCss::LenPt)
 						PtSz = Sz.Value;
-					else if (Sz.Type == GCss::LenPx)
+					else if (Sz.Type == LCss::LenPx)
 // This seems to give fonts that are too small:
 //						PtSz = Sz.Value * 72.0f / LgiScreenDpi();
 						PtSz = Sz.Value;
@@ -1006,7 +1006,7 @@ bool LFont::Create(const char *face, GCss::Len size, GSurface *pSurface)
 								 LTypeFace::d->_Leading);
 				
 				#if 0
-				if (Sz.Type == GCss::LenPx)
+				if (Sz.Type == LCss::LenPx)
 				{
 					GStringPipe p;
 					Sz.ToString(p);
@@ -1112,7 +1112,7 @@ bool LFont::Create(LFontType *LogFont, GSurface *pSurface)
 {
 	if (LogFont)
 	{
-		GCss::Len Sz(GCss::LenPt, (float)LogFont->GetPointSize());
+		LCss::Len Sz(LCss::LenPt, (float)LogFont->GetPointSize());
 		return Create(LogFont->GetFace(), Sz, pSurface);
 	}
 

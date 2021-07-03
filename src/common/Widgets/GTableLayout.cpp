@@ -285,17 +285,17 @@ DistributeSize(	GArray<int> &a,
 	}
 }
 
-GCss::LengthType ConvertAlign(char *s, bool x_axis)
+LCss::LengthType ConvertAlign(char *s, bool x_axis)
 {
 	if (s)
 	{
 		if (stricmp(s, "Center") == 0)
-			return x_axis ? GCss::AlignCenter : GCss::VerticalMiddle;
+			return x_axis ? LCss::AlignCenter : LCss::VerticalMiddle;
 		if (stricmp(s, "Max") == 0)
-			return x_axis ? GCss::AlignRight : GCss::VerticalBottom;
+			return x_axis ? LCss::AlignRight : LCss::VerticalBottom;
 	}
 
-	return x_axis ? GCss::AlignLeft : GCss::VerticalTop;
+	return x_axis ? LCss::AlignLeft : LCss::VerticalTop;
 }
 
 class TableCell : public GLayoutCell
@@ -315,7 +315,7 @@ public:
 	LRect Pos;		// Pixel position
 	LRect Padding;	// Cell padding from CSS styles
 	GArray<Child> Children;
-	GCss::DisplayType Disp;
+	LCss::DisplayType Disp;
 	GString ClassName;
 
 	TableCell(GTableLayout *t, int Cx, int Cy);
@@ -408,7 +408,7 @@ TableCell::TableCell(GTableLayout *t, int Cx, int Cy)
 	Cell.ZOff(0, 0);
 	Cell.Offset(Cx, Cy);
 	Padding.ZOff(0, 0);
-	Disp = GCss::DispBlock;
+	Disp = LCss::DispBlock;
 
 	Children.SetFixedLength(true);
 }
@@ -417,7 +417,7 @@ void TableCell::OnChange(PropType Prop)
 {
 	if (Prop == PropDisplay)
 	{
-		bool Vis = Display() != GCss::DispNone;
+		bool Vis = Display() != LCss::DispNone;
 		for (auto c: Children)
 			c.View->Visible(Vis);
 	}
@@ -647,12 +647,12 @@ bool TableCell::SetVariant(const char *Name, LVariant &Value, char *Array)
 			LResources *r = LgiGetResObj();
 			if (r)
 			{	
-				GCss::SelArray *a = r->CssStore.ClassMap.Find(ClassName);
+				LCss::SelArray *a = r->CssStore.ClassMap.Find(ClassName);
 				if (a)
 				{
 					for (int i=0; i<a->Length(); i++)
 					{
-						GCss::Selector *s = (*a)[i];
+						LCss::Selector *s = (*a)[i];
 						
 						// This is not exactly a smart matching algorithm.
 						if (s && s->Parts.Length() == 1)
@@ -709,7 +709,7 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 	#define CalcCssPadding(Prop, Axis, Edge) \
 	{ \
 		Len l = Prop(); \
-		if (l.Type == GCss::LenInherit) l = GCss::Padding(); \
+		if (l.Type == LCss::LenInherit) l = LCss::Padding(); \
 		if (l.Type) \
 			Padding.Edge = l.ToPx(Table->Axis(), Table->GetFont()); \
 		else \
@@ -730,7 +730,7 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 	{
 		int Tx = Table->X();
 		
-		if (Wid.Type == GCss::LenAuto)
+		if (Wid.Type == LCss::LenAuto)
 			Flag = SizeFill;
 		else
 		{
@@ -772,8 +772,8 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 			ZeroObj(c->Inf);
 			c->r = v->GetPos();
 			
-			GCss *Css = v->GetCss();
-			GCss::Len ChildWid;
+			LCss *Css = v->GetCss();
+			LCss::Len ChildWid;
 			if (Css)
 				ChildWid = Css->Width();
 
@@ -968,7 +968,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 	LPoint Cur(Pos.x1, Pos.y1);
 	int NextY = Pos.y1;
 	
-	GCss::Len CssWidth = GCss::Width();
+	LCss::Len CssWidth = LCss::Width();
 	Width -= Padding.x1 + Padding.x2;
 	LgiAssert(Width >= 0);
 	
@@ -1003,8 +1003,8 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		
 		GTableLayout *Tbl = NULL;
 
-		GCss *Css = v->GetCss();
-		GCss::Len Ht;
+		LCss *Css = v->GetCss();
+		LCss::Len Ht;
 		if (Css)
 			Ht = Css->Height();
 
@@ -1294,7 +1294,7 @@ void TableCell::PostLayout()
 	}
 
 	int OffsetY = 0;
-	GCss::Len VAlign = VerticalAlign();
+	LCss::Len VAlign = VerticalAlign();
 
 	#ifdef DEBUG_CTRL_ID
 	if (HasDebugCtrl)
@@ -1532,8 +1532,8 @@ void GTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, 
 
 					if (c->Width().IsValid())
 					{
-						GCss::Len l = c->Width();
-						if (l.Type == GCss::LenAuto)
+						LCss::Len l = c->Width();
+						if (l.Type == LCss::LenAuto)
 						{
 							for (int i=c->Cell.x1; i<=c->Cell.x2; i++)
 							{
@@ -1894,7 +1894,7 @@ void GTableLayoutPrivate::LayoutPost(LRect &Client)
 				if (c->Cell.x1 == Cx &&
 					c->Cell.y1 == Cy)
 				{
-					GCss::PositionType PosType = c->Position();
+					LCss::PositionType PosType = c->Position();
 					int x = CountRange<int>(MinCol, c->Cell.x1, c->Cell.x2) + ((c->Cell.X() - 1) * BorderSpacing);
 					int y = CountRange<int>(MinRow, c->Cell.y1, c->Cell.y2) + ((c->Cell.Y() - 1) * BorderSpacing);
 
@@ -1902,11 +1902,11 @@ void GTableLayoutPrivate::LayoutPost(LRect &Client)
 					c->Pos.x2 = c->Pos.x1 + x - 1;
 					c->Pos.y2 = c->Pos.y1 + y - 1;
 					
-					if (PosType == GCss::PosAbsolute)
+					if (PosType == LCss::PosAbsolute)
 					{
 						// Hmm this is a bit of a hack... we'll see
-						GCss::Len Left = c->Left();
-						GCss::Len Top = c->Top();
+						LCss::Len Left = c->Left();
+						LCss::Len Top = c->Top();
 						
 						int LeftPx = Left.IsValid() ? Left.ToPx(Client.X(), Fnt) : Px;
 						int TopPx = Top.IsValid() ? Top.ToPx(Client.Y(), Fnt) : Py;
@@ -1951,8 +1951,8 @@ void GTableLayoutPrivate::InitBorderSpacing()
 	BorderSpacing = GTableLayout::CellSpacing;
 	if (Ctrl->GetCss())
 	{
-		GCss::Len bs = Ctrl->GetCss()->BorderSpacing();
-		if (bs.Type != GCss::LenInherit)
+		LCss::Len bs = Ctrl->GetCss()->BorderSpacing();
+		if (bs.Type != LCss::LenInherit)
 			BorderSpacing = bs.ToPx(Ctrl->X(), Ctrl->GetFont());
 	}
 }
@@ -2221,7 +2221,7 @@ bool GTableLayout::SetVariant(const char *Name, LVariant &Value, char *Array)
 		{
 			const char *Defs = Value.Str();
 			if (Defs)
-				GetCss(true)->Parse(Defs, GCss::ParseRelaxed);
+				GetCss(true)->Parse(Defs, LCss::ParseRelaxed);
 			break;
 		}
 		case TableLayoutCell:

@@ -149,7 +149,7 @@ public:
 	}
 };
 
-struct GRichEditElemContext : public GCss::ElementCallback<GRichEditElem>
+struct GRichEditElemContext : public LCss::ElementCallback<GRichEditElem>
 {
 	/// Returns the element name
 	const char *GetElement(GRichEditElem *obj);
@@ -189,7 +189,7 @@ public:
 	}
 };
 
-struct GNamedStyle : public GCss
+struct GNamedStyle : public LCss
 {
 	int RefCount;
 	GString Name;
@@ -214,7 +214,7 @@ public:
 	uint32_t GetStyles();
 	void ZeroRefCounts();
 	bool OutputStyles(GStream &s, int TabDepth);
-	GNamedStyle *AddStyleToCache(GAutoPtr<GCss> &s);
+	GNamedStyle *AddStyleToCache(GAutoPtr<LCss> &s);
 };
 
 class GRichTextPriv;
@@ -296,7 +296,7 @@ public:
 };
 
 class GRichTextPriv :
-	public GCss,
+	public LCss,
 	public GHtmlParser,
 	public GHtmlStaticInst,
 	public GCssCache,
@@ -786,7 +786,7 @@ public:
 				Transaction *Trans,
 				ssize_t Offset,
 				ssize_t Chars,
-				GCss *Style,
+				LCss *Style,
 				bool Add
 			)	{ return false; }
 
@@ -1076,7 +1076,7 @@ public:
 
 		// Transactional changes
 		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, GNamedStyle *Style = NULL);
-		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, GCss *Style, bool Add);
+		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add);
 		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText = NULL);
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
 		Block *Split(Transaction *Trans, ssize_t AtOffset);
@@ -1127,7 +1127,7 @@ public:
 
 		// Transactional changes
 		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, GNamedStyle *Style = NULL);
-		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, GCss *Style, bool Add);
+		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add);
 		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText = NULL);
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
 		Block *Split(Transaction *Trans, ssize_t AtOffset);
@@ -1223,7 +1223,7 @@ public:
 
 		// Transactional changes
 		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, GNamedStyle *Style = NULL);
-		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, GCss *Style, bool Add);
+		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add);
 		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText = NULL);
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
 	};
@@ -1249,7 +1249,7 @@ public:
 	Block *GetBlockByIndex(ssize_t Index, ssize_t *Offset = NULL, int *BlockIdx = NULL, int *LineCount = NULL);
 	bool Layout(GScrollBar *&ScrollY);
 	void OnStyleChange(GRichTextEdit::RectType t);
-	bool ChangeSelectionStyle(GCss *Style, bool Add);
+	bool ChangeSelectionStyle(LCss *Style, bool Add);
 	void PaintBtn(GSurface *pDC, GRichTextEdit::RectType t);
 	bool MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, GString Link);
 	bool ClickBtn(LMouse &m, GRichTextEdit::RectType t);
@@ -1271,7 +1271,7 @@ public:
 		GArray<uint32_t> Buf;
 		uint32_t LastChar;
 		GFontCache *FontCache;
-		GCss::Store StyleStore;
+		LCss::Store StyleStore;
 		bool StartOfLine;
 		
 		CreateContext(GFontCache *fc)
@@ -1340,7 +1340,7 @@ public:
 
 	bool ToHtml(GArray<GDocView::ContentMedia> *Media = NULL, BlockCursor *From = NULL, BlockCursor *To = NULL);
 	void DumpBlocks();
-	bool FromHtml(GHtmlElement *e, CreateContext &ctx, GCss *ParentStyle = NULL, int Depth = 0);
+	bool FromHtml(GHtmlElement *e, CreateContext &ctx, LCss *ParentStyle = NULL, int Depth = 0);
 
 	#ifdef _DEBUG
 	void DumpNodes(GTree *Root);

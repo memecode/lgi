@@ -44,7 +44,7 @@ public:
 	
 	// Tool methods
 	GHtmlElemInfo *GetTagInfo(const char *Tag);
-	static bool ParseColour(const char *s, GCss::ColorDef &c);
+	static bool ParseColour(const char *s, LCss::ColorDef &c);
 	static bool Is8Bit(char *s);
 	char *ParsePropValue(char *s, char16 *&Value);
 	char *ParseName(char *s, GAutoString &Name);

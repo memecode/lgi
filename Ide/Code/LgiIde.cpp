@@ -704,21 +704,21 @@ public:
 							GLayoutCell *c = MemTable->GetCell(x++, y);
 							if (c)
 							{
-								c->VerticalAlign(GCss::VerticalMiddle);
+								c->VerticalAlign(LCss::VerticalMiddle);
 								c->Add(txt = new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Address:"));
 								txt->SetFont(&Small);
 							}
 							c = MemTable->GetCell(x++, y);
 							if (c)
 							{
-								c->PaddingRight(GCss::Len("1em"));
+								c->PaddingRight(LCss::Len("1em"));
 								c->Add(ed = new GEdit(IDC_MEM_ADDR, 0, 0, 60, 20));
 								ed->SetFont(&Small);
 							}								
 							c = MemTable->GetCell(x++, y);
 							if (c)
 							{
-								c->PaddingRight(GCss::Len("1em"));
+								c->PaddingRight(LCss::Len("1em"));
 								c->Add(cbo = new GCombo(IDC_MEM_SIZE, 0, 0, 60, 20));
 								cbo->SetFont(&Small);
 								cbo->Insert("1 byte");
@@ -729,21 +729,21 @@ public:
 							c = MemTable->GetCell(x++, y);
 							if (c)
 							{
-								c->VerticalAlign(GCss::VerticalMiddle);
+								c->VerticalAlign(LCss::VerticalMiddle);
 								c->Add(txt = new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Page width:"));
 								txt->SetFont(&Small);
 							}
 							c = MemTable->GetCell(x++, y);
 							if (c)
 							{
-								c->PaddingRight(GCss::Len("1em"));
+								c->PaddingRight(LCss::Len("1em"));
 								c->Add(ed = new GEdit(IDC_MEM_ROW_LEN, 0, 0, 60, 20));
 								ed->SetFont(&Small);
 							}
 							c = MemTable->GetCell(x++, y);								
 							if (c)
 							{
-								c->VerticalAlign(GCss::VerticalMiddle);
+								c->VerticalAlign(LCss::VerticalMiddle);
 								c->Add(chk = new GCheckBox(IDC_MEM_HEX, 0, 0, -1, -1, "Show Hex"));
 								chk->SetFont(&Small);
 								chk->Value(true);
@@ -810,7 +810,7 @@ public:
 					DebugLog->AddView(DebuggerLog = new DebugTextLog(IDC_DEBUGGER_LOG));
 					DebuggerLog->SetFont(&Small);
 					DebugLog->AddView(DebugEdit = new GEdit(IDC_DEBUG_EDIT, 0, 0, 60, 20));
-					DebugEdit->GetCss(true)->Height(GCss::Len(GCss::LenPx, (float)(SysFont->GetHeight() + 8)));
+					DebugEdit->GetCss(true)->Height(LCss::Len(LCss::LenPx, (float)(SysFont->GetHeight() + 8)));
 				}
 			}
 		}
@@ -1676,7 +1676,7 @@ Chk;
 		if (c.Y() > OutPx.CastInt32())
 		{
 			auto Px = OutPx.CastInt32();
-			GCss::Len y(GCss::LenPx, (float)MAX(Px, 120));
+			LCss::Len y(LCss::LenPx, (float)MAX(Px, 120));
 			d->Output->GetCss(true)->Height(y);
 		}
 		#endif

@@ -223,7 +223,7 @@ void GBox::OnPaint(GSurface *pDC)
 	GCssTools tools(GetCss(), GetFont());
 	cli = tools.PaintBorderAndPadding(pDC, cli);
 
-	GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
+	GColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 
 	size_t ChildViews = Children.Length();
 	if (ChildViews == 0)
@@ -264,7 +264,7 @@ void GBox::OnPaint(GSurface *pDC)
 struct BoxRange
 {
 	int Min, Max;
-	GCss::Len Size;
+	LCss::Len Size;
 	GViewI *View;
 	
 	BoxRange()
@@ -316,7 +316,7 @@ void GBox::OnPosChange()
 	// Do first pass over children and find their sizes
 	for (GViewI *c: views)
 	{
-		GCss *css = c->GetCss();
+		LCss *css = c->GetCss();
 		BoxRange &box = Sizes.New();
 		
 		box.View = c;
@@ -333,7 +333,7 @@ void GBox::OnPosChange()
 		// Work out some min and max values		
 		if (box.Size.IsValid())
 		{
-			if (box.Size.Type == GCss::LenPercent)
+			if (box.Size.Type == LCss::LenPercent)
 			{
 				box.Max = box.Size.ToPx(AvailablePx, GetFont());
 				PercentPx += box.Max;
@@ -371,7 +371,7 @@ void GBox::OnPosChange()
 	for (int i=0; i<Sizes.Length(); i++)
 	{
 		BoxRange &box = Sizes[i];
-		if (box.Size.Type == GCss::LenPercent)
+		if (box.Size.Type == LCss::LenPercent)
 		{
 			if (PercentPx > RemainingPx)
 			{
@@ -381,21 +381,21 @@ void GBox::OnPosChange()
 					int AutoPx = 16 * AutoChildren;
 					float Ratio = ((float)RemainingPx - AutoPx) / PercentPx;
 					int Px = (int) (box.Max * Ratio);
-					box.Size.Type = GCss::LenPx;
+					box.Size.Type = LCss::LenPx;
 					box.Size.Value = (float) Px;
 					RemainingPx -= Px;
 				}
 				else
 				{
 					// We can just take all the space...
-					box.Size.Type = GCss::LenPx;
+					box.Size.Type = LCss::LenPx;
 					box.Size.Value = (float) RemainingPx;
 					RemainingPx = 0;
 				}
 			}
 			else
 			{
-				box.Size.Type = GCss::LenPx;
+				box.Size.Type = LCss::LenPx;
 				box.Size.Value = (float) box.Max;
 				RemainingPx -= box.Max;
 			}
@@ -407,9 +407,9 @@ void GBox::OnPosChange()
 	for (int i=0; i<Sizes.Length(); i++)
 	{
 		BoxRange &box = Sizes[i];
-		if (box.Size.Type != GCss::LenPx)
+		if (box.Size.Type != LCss::LenPx)
 		{
-			box.Size.Type = GCss::LenPx;
+			box.Size.Type = LCss::LenPx;
 			if (AutoChildren > 1)
 			{
 				box.Size.Value = (float) AutoPx;
@@ -427,7 +427,7 @@ void GBox::OnPosChange()
 	for (int i=0; i<Sizes.Length(); i++)
 	{
 		BoxRange &box = Sizes[i];
-		LgiAssert(box.Size.Type == GCss::LenPx);
+		LgiAssert(box.Size.Type == LCss::LenPx);
 		int Px = (int) (box.Size.Value + 0.01);
 
 		// Allocate space for view
@@ -501,10 +501,10 @@ void GBox::OnMouseClick(LMouse &m)
 	}
 }
 
-bool IsValidLen(GCss *c, GCss::PropType p)
+bool IsValidLen(LCss *c, LCss::PropType p)
 {
-	if (!c || c->GetType(p) != GCss::TypeLen) return false;
-	GCss::Len *l = (GCss::Len*)c->PropAddress(p);
+	if (!c || c->GetType(p) != LCss::TypeLen) return false;
+	LCss::Len *l = (LCss::Len*)c->PropAddress(p);
 	if (!l) return false;
 	return l->IsValid();
 }
@@ -552,8 +552,8 @@ void GBox::OnMouseMove(LMouse &m)
 
 	LRect SplitPos = d->Dragging->Pos;
 
-	GCss *PrevStyle = Prev->GetCss();
-	GCss::PropType Style = d->Vertical ? GCss::PropHeight : GCss::PropWidth;
+	LCss *PrevStyle = Prev->GetCss();
+	LCss::PropType Style = d->Vertical ? LCss::PropHeight : LCss::PropWidth;
 	bool EditPrev = !Next || IsValidLen(PrevStyle, Style);
 	GViewI *Edit = EditPrev ? Prev : Next;
 	LgiAssert(Edit != NULL);
@@ -563,7 +563,7 @@ void GBox::OnMouseMove(LMouse &m)
 	if (d->Vertical)
 	{
 		// Work out the minimum height of the view
-		GCss::Len MinHeight = EditCss->MinHeight();
+		LCss::Len MinHeight = EditCss->MinHeight();
 		int MinPx = MinHeight.IsValid() ? MinHeight.ToPx(ViewPos.Y(), Edit->GetFont()) : DEFAULT_MINIMUM_SIZE_PX;
 
 		int Offset = m.y - d->DragOffset.y - SplitPos.y1;
@@ -599,14 +599,14 @@ void GBox::OnMouseMove(LMouse &m)
 				SplitPos.Offset(0, Offset);
 		
 				// Save the new height of the view
-				GCss::Len Ht = EditCss->Height();
-				if (Ht.Type == GCss::LenPercent && ContentPx > 0)
+				LCss::Len Ht = EditCss->Height();
+				if (Ht.Type == LCss::LenPercent && ContentPx > 0)
 				{
 					Ht.Value = (float)r.Y() * 100 / ContentPx;
 				}
 				else
 				{
-					Ht.Type = GCss::LenPx;
+					Ht.Type = LCss::LenPx;
 					Ht.Value = (float)r.Y();
 				}
 
@@ -617,7 +617,7 @@ void GBox::OnMouseMove(LMouse &m)
 	else
 	{
 		// Work out the minimum width of the view
-		GCss::Len MinWidth = EditCss->MinWidth();
+		LCss::Len MinWidth = EditCss->MinWidth();
 		int MinPx = MinWidth.IsValid() ? MinWidth.ToPx(ViewPos.X(), Edit->GetFont()) : DEFAULT_MINIMUM_SIZE_PX;
 
 		int Offset = m.x - d->DragOffset.x - SplitPos.x1;
@@ -655,14 +655,14 @@ void GBox::OnMouseMove(LMouse &m)
 				SplitPos.Offset(Offset, 0);
 		
 				// Save the new height of the view
-				GCss::Len Wid = EditCss->Width();
-				if (Wid.Type == GCss::LenPercent && ContentPx > 0)
+				LCss::Len Wid = EditCss->Width();
+				if (Wid.Type == LCss::LenPercent && ContentPx > 0)
 				{
 					Wid.Value = (float)r.X() * 100 / ContentPx;
 				}
 				else
 				{
-					Wid.Type = GCss::LenPx;
+					Wid.Type = LCss::LenPx;
 					Wid.Value = (float)r.X();
 				}
 
@@ -710,11 +710,11 @@ int64 GBox::Value()
 	GViewI *v = Children.Length() ? Children[0] : NULL;
 	if (!v) return 0;
 
-	GCss *css = v->GetCss();
+	LCss *css = v->GetCss();
 	if (!css) return 0;
 
-	GCss::Len l = d->Vertical ? css->Height() : css->Width();
-	if (l.Type != GCss::LenPx)
+	LCss::Len l = d->Vertical ? css->Height() : css->Width();
+	if (l.Type != LCss::LenPx)
 		return 0;
 
 	return (int64)l.Value;
@@ -725,13 +725,13 @@ void GBox::Value(int64 i)
 	GViewI *v = Children.Length() ? Children[0] : NULL;
 	if (!v) return;
 
-	GCss *css = v->GetCss(true);
+	LCss *css = v->GetCss(true);
 	if (!css) return;
 
 	if (d->Vertical)
-		css->Height(GCss::Len(GCss::LenPx, (float)i));
+		css->Height(LCss::Len(LCss::LenPx, (float)i));
 	else
-		css->Width(GCss::Len(GCss::LenPx, (float)i));
+		css->Width(LCss::Len(LCss::LenPx, (float)i));
 	OnPosChange();
 }
 
@@ -767,13 +767,13 @@ bool GBox::Serialize(GDom *Dom, const char *OptName, bool Write)
 	return false;
 }
 
-bool GBox::SetSize(int ViewIndex, GCss::Len Size)
+bool GBox::SetSize(int ViewIndex, LCss::Len Size)
 {
 	GViewI *v = Children[ViewIndex];
 	if (!v)
 		return false;
 
-	GCss *c = v->GetCss(true);
+	LCss *c = v->GetCss(true);
 	if (!c)
 		return false;
 	

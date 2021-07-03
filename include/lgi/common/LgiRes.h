@@ -128,7 +128,7 @@ public:
 	LHashTbl<ConstStrKey<char>, char*> LanguageNames;
 	
 	/// This is all the CSS loaded from the lr8 file (and possibly other sources as well)
-	GCss::Store CssStore;
+	LCss::Store CssStore;
 
 	/// Get the load styles setting (enable 'StyleElement' to do something)
 	static bool GetLoadStyles() { return LoadStyles; }
@@ -258,7 +258,7 @@ public:
 LgiExtern LResources *LgiGetResObj(bool Warn = false, const char *filename = 0, bool LoadOnDemand = true);
 
 /// This class is used to style GView controls with CSS
-class LgiClass GViewCssCb : public GCss::ElementCallback<GViewI>
+class LgiClass GViewCssCb : public LCss::ElementCallback<GViewI>
 {
 public:
 	const char *GetElement(GViewI *obj)

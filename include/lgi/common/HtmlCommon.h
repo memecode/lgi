@@ -101,7 +101,7 @@ public:
 
 	int Refs;
 	LHashTbl<StrKey<char16,true>,uint32_t>				VarMap;
-	LHashTbl<ConstStrKey<char,false>,GCss::PropType>	StyleMap;
+	LHashTbl<ConstStrKey<char,false>,LCss::PropType>	StyleMap;
 	LHashTbl<ConstStrKey<char,false>,int>				ColourMap;
 
 	GHtmlStatic();
@@ -147,7 +147,7 @@ public:
 class GCssStyle : public GDom
 {
 public:
-	GCss *Css;
+	LCss *Css;
 
 	GCssStyle()
 	{
@@ -159,7 +159,7 @@ public:
 };
 
 /// Common base class for a HTML element
-class GHtmlElement : public GDom, public GCss
+class GHtmlElement : public GDom, public LCss
 {
 	friend class GHtmlParser;
 	friend class HtmlEdit;

@@ -35,12 +35,12 @@ GAlert::GAlert(	GViewI *parent,
 
 	GLayoutCell *c = Tbl->GetCell(0, 0, true);
 	c->Add(new GTextLabel(-1, 8, 8, -1, -1, Text));
-	c->PaddingBottom(GCss::Len("10px"));
+	c->PaddingBottom(LCss::Len("10px"));
 
 	c = Tbl->GetCell(0, 1, true);
 	for (unsigned i=0; i<Names.Length(); i++)
 	{
-		c->TextAlign(GCss::Len(GCss::AlignCenter));
+		c->TextAlign(LCss::Len(LCss::AlignCenter));
 		c->Add(new GButton(CMD_BASE + i,
 							0, 0, -1, -1,
 							Names[i]));

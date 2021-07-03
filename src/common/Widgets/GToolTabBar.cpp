@@ -12,7 +12,7 @@
 #include "Lgi.h"
 #include "GToolTabBar.h"
 #include "GNotifications.h"
-#include "GCss.h"
+#include "LCss.h"
 
 /////////////////////////////////////////////////////////////////////////
 GToolTab::GToolTab() : GToolButton(16, 16)
@@ -168,12 +168,12 @@ void GToolTabBar::_PaintTab(GSurface *pDC, GToolTab *Tab)
 
 	if (Tab->Value())
 	{
-		GCss::ColorDef c;
+		LCss::ColorDef c;
 		if (Tab->GetCss())
 			c = Tab->GetCss()->Color();
 		if (!c.IsValid())
 		{
-			c.Type = GCss::ColorRgb;
+			c.Type = LCss::ColorRgb;
 			c.Rgb32 = Background.c32();
 		}
 		
@@ -305,7 +305,7 @@ void GToolTabBar::OnPaint(GSurface *pScreen)
 		c.Rgb(255, 255, 255);
 	for (unsigned i=0; i<Down.Length(); i++)
 	{
-		Down[i]->GetCss(true)->Color(GCss::ColorDef(GCss::ColorRgb, c.c32()));
+		Down[i]->GetCss(true)->Color(LCss::ColorDef(LCss::ColorRgb, c.c32()));
 		_PaintTab(pDC, Down[i]);
 	}
 

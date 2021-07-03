@@ -66,12 +66,12 @@ public:
 			DeleteObj(Image);
 	}
 
-	void Layout(GCss *css, const char *s)
+	void Layout(LCss *css, const char *s)
 	{
 		Empty();
 
-		GCss c(*css);
-		c.FontWeight(GCss::FontWeightBold);
+		LCss c(*css);
+		c.FontWeight(LCss::FontWeightBold);
 		
 		Add(s, &c);
 
@@ -387,7 +387,7 @@ void GButton::OnPaint(GSurface *pDC)
 {
 	#if defined LGI_CARBON
 
-		GColour NoPaintColour = StyleColour(GCss::PropBackgroundColor, GColour(L_MED));
+		GColour NoPaintColour = StyleColour(LCss::PropBackgroundColor, GColour(L_MED));
 		if (!NoPaintColour.IsTransparent())
 		{
 			pDC->Colour(NoPaintColour);
@@ -539,7 +539,7 @@ bool GButton::OnLayout(GViewLayoutInfo &Inf)
 	{
 		int BaseX = Pad.x1 + Pad.x2 + Border.x1 + Border.x2;
 		int ImgX = d->Image ? d->Image->X() + 4/*img->text spacer*/ : 0;
-		GCss::Len MinX, MaxX;
+		LCss::Len MinX, MaxX;
 		if (Css)
 		{
 			MinX = Css->MinWidth();
@@ -561,7 +561,7 @@ bool GButton::OnLayout(GViewLayoutInfo &Inf)
 	{
 		int BaseY = Pad.y1 + Pad.y2 + Border.y1 + Border.y2;
 		int ImgY = d->Image ? d->Image->Y() : 0;
-		GCss::Len MinY, MaxY;
+		LCss::Len MinY, MaxY;
 		if (Css)
 		{
 			MinY = Css->MinHeight();

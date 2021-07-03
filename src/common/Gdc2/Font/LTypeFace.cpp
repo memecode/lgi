@@ -42,7 +42,7 @@ void LTypeFace::Face(const char *s)
 	}
 }
 
-void LTypeFace::Size(GCss::Len s)
+void LTypeFace::Size(LCss::Len s)
 {
 	if (d->_Size != s)
 	{
@@ -53,7 +53,7 @@ void LTypeFace::Size(GCss::Len s)
 
 void LTypeFace::PointSize(int i)
 {
-	Size(GCss::Len(GCss::LenPt, (float)i));
+	Size(LCss::Len(LCss::LenPt, (float)i));
 }
 
 void LTypeFace::TabSize(int i)
@@ -174,17 +174,17 @@ char *LTypeFace::Face()
 	return d->_Face;
 }
 
-GCss::Len LTypeFace::Size()
+LCss::Len LTypeFace::Size()
 {
 	return d->_Size;
 }
 
 int LTypeFace::PointSize()
 {
-	if (d->_Size.Type == GCss::LenPt)
+	if (d->_Size.Type == LCss::LenPt)
 		return (int)d->_Size.Value;
 	
-	if (d->_Size.Type == GCss::LenPx)
+	if (d->_Size.Type == LCss::LenPx)
 		return (int) (d->_Size.Value * 72 / LgiScreenDpi());
 
 	LgiAssert(!"What now?");

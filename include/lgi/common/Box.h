@@ -46,7 +46,7 @@ public:
 	int OnNotify(GViewI *Ctrl, int Flags);
 
 	bool Serialize(GDom *Dom, const char *OptName, bool Write);	
-	bool SetSize(int ViewIndex, GCss::Len Size);
+	bool SetSize(int ViewIndex, LCss::Len Size);
 };
 
 #endif

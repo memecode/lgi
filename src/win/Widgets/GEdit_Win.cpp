@@ -56,7 +56,7 @@ public:
 	bool IgnoreNotify;
 	bool NotificationProcessed;
 	bool InEmptyMode;
-	GCss::ColorDef NonEmptyColor;
+	LCss::ColorDef NonEmptyColor;
 	GAutoWString EmptyText;
 
 	GEditPrivate()
@@ -582,7 +582,7 @@ bool GEdit::SysEmptyText()
 			d->NonEmptyColor = GetCss(true)->Color();
 			d->InEmptyMode = true;
 		}
-		GetCss()->Color(GCss::ColorDef(GCss::ColorRgb, c.c32()));
+		GetCss()->Color(LCss::ColorDef(LCss::ColorRgb, c.c32()));
 		
 		bool Old = d->IgnoreNotify;
 		d->IgnoreNotify = true;

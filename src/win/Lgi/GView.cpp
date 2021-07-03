@@ -1281,8 +1281,8 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				if (gv)
 				{
 					int Depth = dynamic_cast<GEdit*>(gv) ? 1 : 10;
-					GColour Fore = gv->StyleColour(GCss::PropColor, GColour(), Depth);
-					GColour Back = gv->StyleColour(GCss::PropBackgroundColor, GColour(), Depth);
+					GColour Fore = gv->StyleColour(LCss::PropColor, GColour(), Depth);
+					GColour Back = gv->StyleColour(LCss::PropBackgroundColor, GColour(), Depth);
 						
 					if (Fore.IsValid())
 					{

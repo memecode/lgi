@@ -62,10 +62,10 @@ GRichTextEdit::GRichTextEdit(	int Id,
 	#else
 	CrLf = false;
 	#endif
-	d->Padding(GCss::Len(GCss::LenPx, 4));
+	d->Padding(LCss::Len(LCss::LenPx, 4));
 	
 	#if 0
-	d->BackgroundColor(GCss::ColorDef(GColour::Green));
+	d->BackgroundColor(LCss::ColorDef(GColour::Green));
 	#else
 	d->BackgroundColor(LColour(L_WORKSPACE));
 	#endif
@@ -1658,7 +1658,7 @@ bool GRichTextEdit::OnKey(LKey &k)
 						GNamedStyle *AddStyle = NULL;
 						if (d->StyleDirty.Length() > 0)
 						{
-							GAutoPtr<GCss> Mod(new GCss);
+							GAutoPtr<LCss> Mod(new LCss);
 							if (Mod)
 							{
 								// Get base styles at the cursor..
@@ -1668,19 +1668,19 @@ bool GRichTextEdit::OnKey(LKey &k)
 
 								// Apply dirty toolbar styles...
 								if (d->StyleDirty.HasItem(FontFamilyBtn))
-									Mod->FontFamily(GCss::StringsDef(d->Values[FontFamilyBtn].Str()));
+									Mod->FontFamily(LCss::StringsDef(d->Values[FontFamilyBtn].Str()));
 								if (d->StyleDirty.HasItem(FontSizeBtn))
-									Mod->FontSize(GCss::Len(GCss::LenPt, (float) d->Values[FontSizeBtn].CastDouble()));
+									Mod->FontSize(LCss::Len(LCss::LenPt, (float) d->Values[FontSizeBtn].CastDouble()));
 								if (d->StyleDirty.HasItem(BoldBtn))
-									Mod->FontWeight(d->Values[BoldBtn].CastInt32() ? GCss::FontWeightBold : GCss::FontWeightNormal);
+									Mod->FontWeight(d->Values[BoldBtn].CastInt32() ? LCss::FontWeightBold : LCss::FontWeightNormal);
 								if (d->StyleDirty.HasItem(ItalicBtn))
-									Mod->FontStyle(d->Values[ItalicBtn].CastInt32() ? GCss::FontStyleItalic : GCss::FontStyleNormal);
+									Mod->FontStyle(d->Values[ItalicBtn].CastInt32() ? LCss::FontStyleItalic : LCss::FontStyleNormal);
 								if (d->StyleDirty.HasItem(UnderlineBtn))
-									Mod->TextDecoration(d->Values[UnderlineBtn].CastInt32() ? GCss::TextDecorUnderline : GCss::TextDecorNone);
+									Mod->TextDecoration(d->Values[UnderlineBtn].CastInt32() ? LCss::TextDecorUnderline : LCss::TextDecorNone);
 								if (d->StyleDirty.HasItem(ForegroundColourBtn))
-									Mod->Color(GCss::ColorDef(GCss::ColorRgb, (uint32_t)d->Values[ForegroundColourBtn].CastInt64()));
+									Mod->Color(LCss::ColorDef(LCss::ColorRgb, (uint32_t)d->Values[ForegroundColourBtn].CastInt64()));
 								if (d->StyleDirty.HasItem(BackgroundColourBtn))
-									Mod->BackgroundColor(GCss::ColorDef(GCss::ColorRgb, (uint32_t)d->Values[BackgroundColourBtn].CastInt64()));
+									Mod->BackgroundColor(LCss::ColorDef(LCss::ColorRgb, (uint32_t)d->Values[BackgroundColourBtn].CastInt64()));
 							
 								AddStyle = d->AddStyleToCache(Mod);
 							}
@@ -1690,20 +1690,20 @@ bool GRichTextEdit::OnKey(LKey &k)
 						else if (b->Length() == 0)
 						{
 							// We have no existing style to modify, so create one from scratch.
-							GAutoPtr<GCss> Mod(new GCss);
+							GAutoPtr<LCss> Mod(new LCss);
 							if (Mod)
 							{
 								// Apply dirty toolbar styles...
-								Mod->FontFamily(GCss::StringsDef(d->Values[FontFamilyBtn].Str()));
-								Mod->FontSize(GCss::Len(GCss::LenPt, (float)d->Values[FontSizeBtn].CastDouble()));
-								Mod->FontWeight(d->Values[BoldBtn].CastInt32() ? GCss::FontWeightBold : GCss::FontWeightNormal);
-								Mod->FontStyle(d->Values[ItalicBtn].CastInt32() ? GCss::FontStyleItalic : GCss::FontStyleNormal);
-								Mod->TextDecoration(d->Values[UnderlineBtn].CastInt32() ? GCss::TextDecorUnderline : GCss::TextDecorNone);
-								Mod->Color(GCss::ColorDef(GCss::ColorRgb, (uint32_t)d->Values[ForegroundColourBtn].CastInt64()));
+								Mod->FontFamily(LCss::StringsDef(d->Values[FontFamilyBtn].Str()));
+								Mod->FontSize(LCss::Len(LCss::LenPt, (float)d->Values[FontSizeBtn].CastDouble()));
+								Mod->FontWeight(d->Values[BoldBtn].CastInt32() ? LCss::FontWeightBold : LCss::FontWeightNormal);
+								Mod->FontStyle(d->Values[ItalicBtn].CastInt32() ? LCss::FontStyleItalic : LCss::FontStyleNormal);
+								Mod->TextDecoration(d->Values[UnderlineBtn].CastInt32() ? LCss::TextDecorUnderline : LCss::TextDecorNone);
+								Mod->Color(LCss::ColorDef(LCss::ColorRgb, (uint32_t)d->Values[ForegroundColourBtn].CastInt64()));
 								
 								auto Bk = d->Values[BackgroundColourBtn].CastInt64();
 								if (Bk > 0)
-									Mod->BackgroundColor(GCss::ColorDef(GCss::ColorRgb, (uint32_t)Bk));
+									Mod->BackgroundColor(LCss::ColorDef(LCss::ColorRgb, (uint32_t)Bk));
 							
 								AddStyle = d->AddStyleToCache(Mod);
 							}

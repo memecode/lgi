@@ -146,7 +146,7 @@ void GLayout::SetPourLargest(bool i)
 	_PourLargest = i;
 }
 
-GCss::Len &SelectValid(GCss::Len &a, GCss::Len &b, GCss::Len &c)
+LCss::Len &SelectValid(LCss::Len &a, LCss::Len &b, LCss::Len &c)
 {
 	if (a.IsValid()) return a;
 	if (b.IsValid()) return b;
@@ -163,12 +163,12 @@ bool GLayout::Pour(LRegion &r)
 		return false;
 
 	LRect p = *Largest;
-	GCss *css = GetCss();
+	LCss *css = GetCss();
 	if (css)
 	{
-		GCss::Len margin = css->Margin();
-		GCss::Len s;
-		GCss::Len zero;
+		LCss::Len margin = css->Margin();
+		LCss::Len s;
+		LCss::Len zero;
 		LFont *f = GetFont();
 		
 		s = css->MarginTop();

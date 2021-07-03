@@ -443,7 +443,7 @@ void LDialogTextMsg(GViewI *Parent, const char *Title, GString Txt)
 		Log->Name(Txt);
 		c = t->GetCell(0, 1);
 		c->Add(new GButton(IDOK, 0, 0, -1, -1, "Ok"));
-		c->TextAlign(GCss::AlignCenter);
+		c->TextAlign(LCss::AlignCenter);
 		
 		d->AddView(t);
 		d->DoModal();
