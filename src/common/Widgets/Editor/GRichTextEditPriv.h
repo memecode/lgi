@@ -22,14 +22,14 @@
 #ifndef _RICH_TEXT_EDIT_PRIV_H_
 #define _RICH_TEXT_EDIT_PRIV_H_
 
-#include "GHtmlCommon.h"
-#include "GHtmlParser.h"
-#include "GFontCache.h"
-#include "GDisplayString.h"
-#include "GColourSpace.h"
-#include "GPopup.h"
-#include "Emoji.h"
-#include "LgiSpellCheck.h"
+#include "lgi/common/HtmlCommon.h"
+#include "lgi/common/HtmlParser.h"
+#include "lgi/common/FontCache.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/ColourSpace.h"
+#include "lgi/common/Popup.h"
+#include "lgi/common/Emoji.h"
+#include "lgi/common/SpellCheck.h"
 
 #define DEBUG_LOG_CURSOR_COUNT			0
 #define DEBUG_OUTLINE_CUR_DISPLAY_STR	0
@@ -112,7 +112,7 @@ enum RteCommands
 #define TextColour						GColour::Black
 
 //////////////////////////////////////////////////////////////////////
-#include "GRange.h"
+#include "lgi/common/Range.h"
 
 class GRichEditElem : public GHtmlElement
 {

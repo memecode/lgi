@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "GRichTextEdit.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/RichTextEdit.h"
 #include "GRichTextEditPriv.h"
 
 GRichTextPriv::BlockCursor::BlockCursor(const BlockCursor &c)

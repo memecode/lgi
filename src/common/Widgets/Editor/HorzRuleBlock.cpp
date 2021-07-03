@@ -1,7 +1,7 @@
-#include "Lgi.h"
-#include "GRichTextEdit.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/RichTextEdit.h"
 #include "GRichTextEditPriv.h"
-#include "GDocView.h"
+#include "lgi/common/DocView.h"
 
 GRichTextPriv::HorzRuleBlock::HorzRuleBlock(GRichTextPriv *priv) : Block(priv)
 {

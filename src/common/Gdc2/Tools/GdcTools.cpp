@@ -9,9 +9,9 @@
 */
 
 #include <math.h>
-#include "Gdc2.h"
-#include "GdcTools.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/GdcTools.h"
+#include "lgi/common/Palette.h"
 
 bool IsGreyScale(GSurface *pDC)
 {

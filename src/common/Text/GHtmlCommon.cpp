@@ -1,6 +1,6 @@
-#include "Lgi.h"
-#include "GHtmlCommon.h"
-#include "GDocView.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/HtmlCommon.h"
+#include "lgi/common/DocView.h"
 
 static GHtmlElemInfo TagInfo[] =
 {

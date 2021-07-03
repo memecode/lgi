@@ -1,9 +1,9 @@
-#include "Lgi.h"
-#include "GDocView.h"
-#include "GToken.h"
-#include "GHtmlCommon.h"
-#include "GHtmlParser.h"
-#include "GUnicode.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DocView.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/HtmlCommon.h"
+#include "lgi/common/HtmlParser.h"
+#include "lgi/common/Unicode.h"
 
 #define FEATURE_REATTACH_ELEMENTS		1
 #define IsBlock(d)						((d) == GCss::DispBlock)

@@ -3,10 +3,10 @@
 #ifndef _GHTML_H
 #define _GHTML_H
 
-#include "GDocView.h"
-#include "GHtmlCommon.h"
-#include "GHtmlParser.h"
-#include "GCapabilities.h"
+#include "lgi/common/DocView.h"
+#include "lgi/common/HtmlCommon.h"
+#include "lgi/common/HtmlParser.h"
+#include "lgi/common/Capabilities.h"
 
 namespace Html1
 {

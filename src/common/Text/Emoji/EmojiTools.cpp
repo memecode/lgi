@@ -1,10 +1,10 @@
 // http://code.iamcal.com/php/emoji/
 #include <wchar.h>
 
-#include "Lgi.h"
-#include "Emoji.h"
-#include "GVariant.h"
-#include "GDocView.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Emoji.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/DocView.h"
 
 #ifdef WIN32
 typedef uint32_t WChar;

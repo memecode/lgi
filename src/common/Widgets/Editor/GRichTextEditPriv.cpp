@@ -1,8 +1,8 @@
-#include "Lgi.h"
-#include "GRichTextEdit.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/RichTextEdit.h"
 #include "GRichTextEditPriv.h"
-#include "GScrollBar.h"
-#include "GCssTools.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/CssTools.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int WordLen)

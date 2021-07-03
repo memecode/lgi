@@ -5,12 +5,12 @@
 #ifndef _RICH_TEXT_EDIT_H_
 #define _RICH_TEXT_EDIT_H_
 
-#include "GDocView.h"
-#include "GUndo.h"
-#include "GDragAndDrop.h"
-#include "GCapabilities.h"
+#include "lgi/common/DocView.h"
+#include "lgi/common/Undo.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/Capabilities.h"
 #if _DEBUG
-#include "GTree.h"
+#include "lgi/common/Tree.h"
 #endif
 
 enum RichEditMsgs

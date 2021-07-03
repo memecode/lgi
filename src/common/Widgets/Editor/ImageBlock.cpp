@@ -1,8 +1,8 @@
-#include "Lgi.h"
-#include "GRichTextEdit.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/RichTextEdit.h"
 #include "GRichTextEditPriv.h"
-#include "GdcTools.h"
-#include "GToken.h"
+#include "lgi/common/GdcTools.h"
+#include "lgi/common/Token.h"
 
 #define LOADER_THREAD_LOGGING		1
 #define TIMEOUT_LOAD_PROGRESS		100 // ms

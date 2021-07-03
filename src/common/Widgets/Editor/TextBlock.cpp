@@ -1,8 +1,8 @@
-#include "Lgi.h"
-#include "GRichTextEdit.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/RichTextEdit.h"
 #include "GRichTextEditPriv.h"
-#include "Emoji.h"
-#include "GDocView.h"
+#include "lgi/common/Emoji.h"
+#include "lgi/common/DocView.h"
 
 #define DEBUG_LAYOUT				0
 

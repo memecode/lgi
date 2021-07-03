@@ -1,9 +1,9 @@
 #ifndef _GHTML1_PRIV_H_
 #define _GHTML1_PRIV_H_
 
-#include "GCss.h"
-#include "GToken.h"
-#include "GHtmlParser.h"
+#include "lgi/common/Css.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/HtmlParser.h"
 
 class HtmlEdit;
 

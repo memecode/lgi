@@ -9,8 +9,8 @@
 */
 
 #include <math.h>
-#include "Lgi.h"
-#include "GPalette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Palette.h"
 #if HAS_LIBJPEG
 
 #define XMD_H
@@ -23,7 +23,7 @@
 // sudo apt-get install libjpeg-dev
 #include "jpeglib.h"
 #include <setjmp.h>
-#include "GLibraryUtils.h"
+#include "lgi/common/LibraryUtils.h"
 
 #if LIBJPEG_SHARED
 	#define JPEGLIB d->
@@ -96,10 +96,10 @@ GAutoPtr<LibJpeg> JpegLibrary;
 #include <stdio.h>
 #include <string.h>
 
-#include "GLibraryUtils.h"
-#include "GScrollBar.h"
-#include "GVariant.h"
-#include "GJpeg.h"
+#include "lgi/common/LibraryUtils.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Jpeg.h"
 
 #define IJG_JPEG_ICC_MARKER             JPEG_APP0 + 2
 #define IJG_JPEG_APP_ICC_PROFILE_LEN    0xFFFF

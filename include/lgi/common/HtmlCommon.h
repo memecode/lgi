@@ -1,8 +1,8 @@
 #ifndef _GHTMLSTATIC_H_
 #define _GHTMLSTATIC_H_
 
-#include "GCss.h"
-#include "GHashTable.h"
+#include "lgi/common/Css.h"
+#include "lgi/common/HashTable.h"
 
 extern char16 GHtmlListItem[];
 

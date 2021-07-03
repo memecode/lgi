@@ -2,24 +2,24 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "Lgi.h"
-#include "GRichTextEdit.h"
-#include "GInput.h"
-#include "GScrollBar.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/RichTextEdit.h"
+#include "lgi/common/Input.h"
+#include "lgi/common/ScrollBar.h"
 #ifdef WIN32
 #include <imm.h>
 #endif
-#include "GClipBoard.h"
-#include "GDisplayString.h"
-#include "GViewPriv.h"
-#include "GCssTools.h"
-#include "GFontCache.h"
-#include "GUnicode.h"
-#include "GDropFiles.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/ViewPriv.h"
+#include "lgi/common/CssTools.h"
+#include "lgi/common/FontCache.h"
+#include "lgi/common/Unicode.h"
+#include "lgi/common/DropFiles.h"
 
-#include "GHtmlCommon.h"
-#include "GHtmlParser.h"
-#include "LgiRes.h"
+#include "lgi/common/HtmlCommon.h"
+#include "lgi/common/HtmlParser.h"
+#include "lgi/common/LgiRes.h"
 
 #define DefaultCharset              "utf-8"
 
@@ -2839,7 +2839,7 @@ void SelectColour::Visible(bool i)
 
 ///////////////////////////////////////////////////////////////////////////////
 #define EMOJI_PAD	2
-#include "Emoji.h"
+#include "lgi/common/Emoji.h"
 int EmojiMenu::Cur = 0;
 
 EmojiMenu::EmojiMenu(GRichTextPriv *priv, LPoint p) : GPopup(priv->View)
