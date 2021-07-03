@@ -26,7 +26,7 @@ LangDlg::LangDlg(GView *parent, List<GLanguage> &l, int Init)
 {
 	Lang = 0;
 	SetParent((parent) ? parent : MainWnd);
-	GRect r(0, 0, 260, 90);
+	LRect r(0, 0, 260, 90);
 	SetPos(r);
 	MoveToCenter();
 	Name("Language");
@@ -1564,12 +1564,12 @@ void ResStringUi::OnPaint(GSurface *pDC)
 	GRegion Client(0, 0, X()-1, Y()-1);
 	for (auto w: Children)
 	{
-		GRect r = w->GetPos();
+		LRect r = w->GetPos();
 		Client.Subtract(&r);
 	}
 
 	pDC->Colour(L_MED);
-	for (GRect *r = Client.First(); r; r = Client.Next())
+	for (LRect *r = Client.First(); r; r = Client.Next())
 	{
 		pDC->Rectangle(r);
 	}
@@ -1582,7 +1582,7 @@ void ResStringUi::PourAll()
 
 	for (auto v: Children)
 	{
-		GRect OldPos = v->GetPos();
+		LRect OldPos = v->GetPos();
 		Update.Union(&OldPos);
 
 		if (v->Pour(Client))

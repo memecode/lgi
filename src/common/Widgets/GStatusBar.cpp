@@ -17,10 +17,10 @@ GStatusBar::~GStatusBar()
 
 bool GStatusBar::Pour(GRegion &r)
 {
-	GRect *Best = FindLargestEdge(r, GV_EDGE_BOTTOM);
+	LRect *Best = FindLargestEdge(r, GV_EDGE_BOTTOM);
 	if (Best)
 	{
-		GRect Take = *Best;
+		LRect Take = *Best;
 		if (Take.Y() > 21)
 		{
 			Take.y1 = MAX((Take.y2 - 21), Take.y1);
@@ -59,7 +59,7 @@ void GStatusBar::OnPosChange()
 				// not first
 				x -= Pane->Width; 
 
-				GRect r;
+				LRect r;
 				r.ZOff(Pane->Width, c.Y()-1);
 				r.Offset(x, 2);
 				Pane->SetPos(r);
@@ -68,7 +68,7 @@ void GStatusBar::OnPosChange()
 			else
 			{
 				// first
-				GRect r;
+				LRect r;
 				r.ZOff(x-2, c.Y()-1);
 				r.Offset(2, 2);
 				Pane->SetPos(r);
@@ -110,7 +110,7 @@ GStatusPane::GStatusPane()
 	SetParent(0);
 	Flags = 0;
 	Width = 32;
-	GRect r(0, 0, Width-1, 20);
+	LRect r(0, 0, Width-1, 20);
 	SetPos(r);
 	pDC = 0;
 	_BorderSize = 1;
@@ -133,7 +133,7 @@ bool GStatusPane::Name(const char *n)
 			strcmp(l, n) != 0)
 		{
 			Status = GBase::Name(n);
-			GRect p(0, 0, X()-1, Y()-1);
+			LRect p(0, 0, X()-1, Y()-1);
 			p.Size(1, 1);
 			Invalidate(&p);
 		}
@@ -152,7 +152,7 @@ void GStatusPane::OnPaint(GSurface *pDC)
 		Unlock();
 	}
 
-	GRect r = GetClient();
+	LRect r = GetClient();
 	if (ValidStr(t))
 	{
 		int TabSize = SysFont->TabSize();

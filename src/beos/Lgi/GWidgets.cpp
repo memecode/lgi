@@ -92,7 +92,7 @@ void GDialog::OnPosChange()
         GTableLayout *t = dynamic_cast<GTableLayout*>((GViewI*)it.First());
         if (t)
         {
-            GRect r = GetClient();
+            LRect r = GetClient();
             r.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
             t->SetPos(r);
         }
@@ -104,7 +104,7 @@ void GDialog::OnPosChange()
 bool GDialog::LoadFromResource(int Resource, char *Param)
 {
 	GAutoString n;
-	GRect p;
+	LRect p;
 	bool Status = GLgiRes::LoadFromResource(Resource, this, &p, &n);
 	if (Status)
 	{
@@ -339,12 +339,12 @@ GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool ve
 	
 	if (vert)
 	{
-		GRect r(x, y, x+13, y+cy);
+		LRect r(x, y, x+13, y+cy);
 		SetPos(r);
 	}
 	else
 	{
-		GRect r(x, y, x+cx, y+13);
+		LRect r(x, y, x+cx, y+13);
 		SetPos(r);
 	}
 	
@@ -397,7 +397,7 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 
 void GSlider::OnPaint(GSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 
 	// fill area
 	pDC->Colour(LC_MED, 24);
@@ -405,7 +405,7 @@ void GSlider::OnPaint(GSurface *pDC)
 
 	// draw tray
 	int Mid = (Vertical) ? r.X()/2 : r.Y()/2;
-	GRect Bar;
+	LRect Bar;
 	if (Vertical)
 	{
 		Bar.ZOff(SLIDER_BAR_SIZE, Y()-1);
@@ -435,7 +435,7 @@ void GSlider::OnPaint(GSurface *pDC)
 		Thumb.Offset(Pos, Mid - (Thumb.Y()/2));
 	}
 	
-	GRect t = Thumb;
+	LRect t = Thumb;
 	LgiWideBorder(pDC, t, RAISED);
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle(&t);

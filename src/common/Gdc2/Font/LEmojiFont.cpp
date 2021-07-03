@@ -77,7 +77,7 @@ int LEmojiFont::_CharAt(int xPos, OsChar *Str, int len, LgiPxToIndexType Type)
 	return -1;
 }
 
-void LEmojiFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int len, GRect *r, GColour &fore)
+void LEmojiFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int len, LRect *r, GColour &fore)
 {
 	if (!priv->Img)
 		return;
@@ -101,7 +101,7 @@ void LEmojiFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int len, GRect 
 			int Cx = Idx % EMOJI_GROUP_X;
 			int Cy = Idx / EMOJI_GROUP_X;
 
-			GRect Icon(0, 0, priv->Cell-1, priv->Cell-1);
+			LRect Icon(0, 0, priv->Cell-1, priv->Cell-1);
 			Icon.Offset(Cx * priv->Cell, Cy * priv->Cell);
 
 			if (!Transparent())
@@ -116,7 +116,7 @@ void LEmojiFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int len, GRect 
 			{
 				priv->Resampled[Idx] = true;			
 				GAutoPtr<GSurface> s(priv->Scaled->SubImage(Icon));
-				GRect Src(0, 0, EMOJI_CELL_SIZE-1, EMOJI_CELL_SIZE-1);
+				LRect Src(0, 0, EMOJI_CELL_SIZE-1, EMOJI_CELL_SIZE-1);
 				Src.Offset(Cx * EMOJI_CELL_SIZE, Cy * EMOJI_CELL_SIZE);
 				ResampleDC(s, priv->Img.Get(), &Src);
 			}

@@ -18,7 +18,7 @@ private:
 	class GComboPrivate *d;
 
 public:
-	static GRect Pad;
+	static LRect Pad;
 
 	/// Constructor
 	GCombo
@@ -116,7 +116,7 @@ public:
 	bool OnKey(GKey &k) override;
 	
 	#if WINNATIVE
-	bool SetPos(GRect &p, bool Repaint = false);
+	bool SetPos(LRect &p, bool Repaint = false);
 	int SysOnNotify(int Msg, int Code);
 	#else
 	void OnFocus(bool f) override;

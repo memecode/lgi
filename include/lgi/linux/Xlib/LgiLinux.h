@@ -10,7 +10,7 @@
 
 #include "GMem.h"
 #include "GToken.h"
-#include "GRect.h"
+#include "LRect.h"
 
 #undef Status
 #undef Success

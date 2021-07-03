@@ -81,7 +81,7 @@ public:
 	virtual int height();
 	virtual int width();
 	virtual void setGeometry(int x, int y, int w, int h);
-	virtual GRect &geometry();
+	virtual LRect &geometry();
 	virtual void setBackgroundMode(ViewBackground b);
 	virtual void repaint();
 	virtual void repaint(int x, int y, int w, int h);

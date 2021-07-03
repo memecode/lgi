@@ -118,14 +118,14 @@ void DocEdit::InvalidateLine(int Idx)
 	if (Ln)
 	{
 		int PadPx = GetTopPaddingPx();
-		GRect r = Ln->r;
+		LRect r = Ln->r;
 		r.Offset(0, -ScrollYPixel() + PadPx);
 		// LgiTrace("%s:%i - r=%s\n", _FL, r.GetStr());
 		Invalidate(&r);
 	}
 }
 	
-void DocEdit::OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour)
+void DocEdit::OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour)
 {
 	GColour GutterColour(0xfa, 0xfa, 0xfa);
 	GTextView3::OnPaintLeftMargin(pDC, r, GutterColour);
@@ -273,7 +273,7 @@ char *DocEdit::TemplateMerge(const char *Template, const char *Name, List<char> 
 }
 bool DocEdit::GetVisible(GStyle &s)
 {
-	GRect c = GetClient();
+	LRect c = GetClient();
 	auto a = HitText(c.x1, c.y1, false);
 	auto b = HitText(c.x2, c.y2, false);
 	s.Start = a;
@@ -282,7 +282,7 @@ bool DocEdit::GetVisible(GStyle &s)
 }
 bool DocEdit::Pour(GRegion &r)
 {
-	GRect c = r.Bound();
+	LRect c = r.Bound();
 	c.y2 -= EDIT_TRAY_HEIGHT;
 	SetPos(c);
 		

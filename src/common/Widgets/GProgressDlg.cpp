@@ -108,7 +108,7 @@ GProgressPane::GProgressPane(GProgressDlg *dlg) : Dlg(dlg)
 {
 	t = NULL;
 	UiDirty = false;
-	GRect r(0, 0, PANE_X-1, PANE_Y-1);
+	LRect r(0, 0, PANE_X-1, PANE_Y-1);
 	SetPos(r);
 	Name(LgiLoadString(L_PROGRESSDLG_PROGRESS, "Progress"));
 	SetId(IDC_PANE);
@@ -276,9 +276,9 @@ int GProgressPane::OnNotify(GViewI *Ctrl, int Flags)
 		{
 			if (Flags == GNotifyTableLayout_LayoutChanged)
 			{
-				GRect p = GetPos();
-				GRect tbl_pos = t->GetPos();
-				GRect tbl_req = t->GetUsedArea();
+				LRect p = GetPos();
+				LRect tbl_pos = t->GetPos();
+				LRect tbl_req = t->GetUsedArea();
 				if (tbl_req.Valid() &&
 					tbl_req.Y() > tbl_pos.Y())
 				{
@@ -307,7 +307,7 @@ int GProgressPane::OnNotify(GViewI *Ctrl, int Flags)
 
 void GProgressPane::OnPaint(GSurface *pDC)
 {
-	GRect r = GetClient();
+	LRect r = GetClient();
 	LgiThinBorder(pDC, r, DefaultRaisedEdge);
 	pDC->Colour(L_MED);
 	pDC->Rectangle(&r);
@@ -317,7 +317,7 @@ void GProgressPane::OnPosChange()
 {
 	if (t)
 	{
-		GRect cr = GetClient();
+		LRect cr = GetClient();
 		cr.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
 		t->SetPos(cr);
 	}
@@ -386,7 +386,7 @@ bool GProgressDlg::OnRequestClose(bool OsClose)
 
 void GProgressDlg::Resize()
 {
-	GRect r, c = GetPos();
+	LRect r, c = GetPos();
 	int DecorX = LgiApp->GetMetric(LGI_MET_DECOR_X);
 	int DecorY = LgiApp->GetMetric(LGI_MET_DECOR_Y);
 
@@ -402,7 +402,7 @@ void GProgressDlg::Resize()
 	int y = 0;
 	for (auto p: Panes)
 	{
-		GRect r(0, y, PANE_X - 1, y + PANE_Y - 1);
+		LRect r(0, y, PANE_X - 1, y + PANE_Y - 1);
 		p->SetPos(r);
 		p->Visible(true);
 		y = r.y2 + 1;
@@ -424,13 +424,13 @@ void GProgressDlg::OnPulse()
 
 void GProgressDlg::OnPosChange()
 {
-	GRect c = GetClient();
+	LRect c = GetClient();
 	
 	// Layout all the panes...
 	int y = 0;
 	for (auto p: Panes)
 	{
-		GRect r = p->GetPos();
+		LRect r = p->GetPos();
 		r.Offset(0, y-r.y1);
 		r.x2 = c.x2;
 			
@@ -448,10 +448,10 @@ int GProgressDlg::OnNotify(GViewI *Ctrl, int Flags)
 	{
 		// This code recalculates the size needed by all the progress panes
 		// and then resizes the window to contain them all.
-		GRect u(0, 0, -1, -1);
+		LRect u(0, 0, -1, -1);
 		for (auto p: Panes)
 		{
-			GRect r = p->GetPos();
+			LRect r = p->GetPos();
 			if (u.Valid()) u.Union(&r);
 			else u = r;
 		}
@@ -460,7 +460,7 @@ int GProgressDlg::OnNotify(GViewI *Ctrl, int Flags)
 		{		
 			int x = u.X();
 			int y = u.Y();
-			GRect p = GetPos();
+			LRect p = GetPos();
 			p.Dimension(x + LgiApp->GetMetric(LGI_MET_DECOR_X),
 						y + LgiApp->GetMetric(LGI_MET_DECOR_Y));
 			SetPos(p);

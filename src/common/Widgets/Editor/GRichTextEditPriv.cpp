@@ -665,9 +665,9 @@ void GRichTextPriv::UpdateStyleUI()
 		View->Invalidate(Areas + GRichTextEdit::ToolsArea);
 }
 
-void GRichTextPriv::ScrollTo(GRect r)
+void GRichTextPriv::ScrollTo(LRect r)
 {
-	GRect Content = Areas[GRichTextEdit::ContentArea];
+	LRect Content = Areas[GRichTextEdit::ContentArea];
 	Content.Offset(-Content.x1, ScrollOffsetPx-Content.y1);
 
 	if (ScrollLinePx > 0)
@@ -687,13 +687,13 @@ void GRichTextPriv::ScrollTo(GRect r)
 	}
 }
 
-void GRichTextPriv::InvalidateDoc(GRect *r)
+void GRichTextPriv::InvalidateDoc(LRect *r)
 {
 	// Transform the coordinates from doc to screen space
-	GRect &c = Areas[GRichTextEdit::ContentArea];
+	LRect &c = Areas[GRichTextEdit::ContentArea];
 	if (r)
 	{
-		GRect t = *r;
+		LRect t = *r;
 		t.Offset(c.x1, c.y1 - ScrollOffsetPx);
 		View->Invalidate(&t);
 	}
@@ -958,7 +958,7 @@ bool GRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 		}
 		case SkUpPage:
 		{
-			GRect &Content = Areas[GRichTextEdit::ContentArea];
+			LRect &Content = Areas[GRichTextEdit::ContentArea];
 			int LineHint = -1;
 			int TargetY = In->Pos.y1 - Content.Y();
 			ssize_t Idx = HitTest(In->Pos.x1, MAX(TargetY, 0), LineHint);
@@ -978,7 +978,7 @@ bool GRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 		}
 		case SkDownPage:
 		{
-			GRect &Content = Areas[GRichTextEdit::ContentArea];
+			LRect &Content = Areas[GRichTextEdit::ContentArea];
 			int LineHint = -1;
 			int TargetY = In->Pos.y1 + Content.Y();
 			ssize_t Idx = HitTest(In->Pos.x1, MIN(TargetY, DocumentExtent.y-1), LineHint);
@@ -1034,7 +1034,7 @@ bool GRichTextPriv::CursorFirst()
 	
 bool GRichTextPriv::SetCursor(GAutoPtr<BlockCursor> c, bool Select)
 {
-	GRect InvalidRc(0, 0, -1, -1);
+	LRect InvalidRc(0, 0, -1, -1);
 
 	if (!c || !c->Blk)
 		return Error(_FL, "Invalid cursor.");
@@ -1050,7 +1050,7 @@ bool GRichTextPriv::SetCursor(GAutoPtr<BlockCursor> c, bool Select)
 	{
 		// Selection ending... invalidate selection region and delete 
 		// selection end point
-		GRect r = SelectionRect();
+		LRect r = SelectionRect();
 		InvalidateDoc(&r);
 		Selection.Reset();
 
@@ -1105,9 +1105,9 @@ bool GRichTextPriv::SetCursor(GAutoPtr<BlockCursor> c, bool Select)
 	return true;
 }
 
-GRect GRichTextPriv::SelectionRect()
+LRect GRichTextPriv::SelectionRect()
 {
-	GRect SelRc;
+	LRect SelRc;
 	if (Cursor)
 	{
 		SelRc = Cursor->Line;
@@ -1144,13 +1144,13 @@ ssize_t GRichTextPriv::IndexOfCursor(BlockCursor *c)
 
 LPoint GRichTextPriv::ScreenToDoc(int x, int y)
 {
-	GRect &Content = Areas[GRichTextEdit::ContentArea];
+	LRect &Content = Areas[GRichTextEdit::ContentArea];
 	return LPoint(x - Content.x1, y - Content.y1 + ScrollOffsetPx);
 }
 
 LPoint GRichTextPriv::DocToScreen(int x, int y)
 {
-	GRect &Content = Areas[GRichTextEdit::ContentArea];
+	LRect &Content = Areas[GRichTextEdit::ContentArea];
 	return LPoint(x + Content.x1, y + Content.y1 - ScrollOffsetPx);
 }
 
@@ -1208,7 +1208,7 @@ ssize_t GRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk)
 	}
 
 	Block *b = Blocks.First();
-	GRect rc = b->GetPos();
+	LRect rc = b->GetPos();
 	if (y < rc.y1)
 	{
 		if (Blk) *Blk = b;
@@ -1218,7 +1218,7 @@ ssize_t GRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk)
 	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
 		b = Blocks[i];
-		GRect p = b->GetPos();
+		LRect p = b->GetPos();
 		bool Over = y >= p.y1 && y <= p.y2;
 		if (b->HitTest(r))
 		{
@@ -1314,12 +1314,12 @@ bool GRichTextPriv::Layout(GScrollBar *&ScrollY)
 	if (ScrollLinePx <= 0)
 		ScrollLinePx = 16;
 
-	GRect Client = Areas[GRichTextEdit::ContentArea];
+	LRect Client = Areas[GRichTextEdit::ContentArea];
 	Client.Offset(-Client.x1, -Client.y1);
 	DocumentExtent.x = Client.X();
 
 	GCssTools Ct(this, Font);
-	GRect Content = Ct.ApplyPadding(Client);
+	LRect Content = Ct.ApplyPadding(Client);
 	f.Left = Content.x1;
 	f.Right = Content.x2;
 	f.Top = f.CurY = Content.y1;
@@ -1471,7 +1471,7 @@ bool GRichTextPriv::ChangeSelectionStyle(GCss *Style, bool Add)
 
 void GRichTextPriv::PaintBtn(GSurface *pDC, GRichTextEdit::RectType t)
 {
-	GRect r = Areas[t];
+	LRect r = Areas[t];
 	GVariant &v = Values[t];
 	bool Down = (v.Type == GV_BOOL && v.Value.Bool) ||
 				(BtnState[t].IsPress && BtnState[t].Pressed && BtnState[t].MouseOver);
@@ -1832,7 +1832,7 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 	if (Areas[GRichTextEdit::ToolsArea].Valid())
 	{
 		// Draw tools area...
-		GRect &t = Areas[GRichTextEdit::ToolsArea];
+		LRect &t = Areas[GRichTextEdit::ToolsArea];
 		#ifdef WIN32
 		GDoubleBuffer Buf(pDC, &t);
 		#endif
@@ -1840,10 +1840,10 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 		pDC->Colour(ToolBar);
 		pDC->Rectangle(&t);
 
-		GRect r = t;
+		LRect r = t;
 		r.Size(3, 3);
 		#define AllocPx(sz, border) \
-			GRect(r.x1, r.y1, r.x1 + (int)(sz) - 1, r.y2); r.x1 += (int)(sz) + border
+			LRect(r.x1, r.y1, r.x1 + (int)(sz) - 1, r.y2); r.x1 += (int)(sz) + border
 
 		Areas[GRichTextEdit::FontFamilyBtn] = AllocPx(130, 6);
 		Areas[GRichTextEdit::FontSizeBtn] = AllocPx(40, 6);
@@ -1881,7 +1881,7 @@ void GRichTextPriv::Paint(GSurface *pDC, GScrollBar *&ScrollY)
 
 	LPoint Origin;
 	
-	GRect r = Areas[GRichTextEdit::ContentArea];
+	LRect r = Areas[GRichTextEdit::ContentArea];
 	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
 	GMemDC Mem;
 	if (!Mem.Create(r.X(), r.Y(), pDC->GetColourSpace()))

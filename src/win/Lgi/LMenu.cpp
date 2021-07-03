@@ -543,7 +543,7 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 	bool Selected = TestFlag(Flags, ODS_SELECTED);
 	bool Disabled = TestFlag(Flags, ODS_DISABLED);
 	bool Checked = TestFlag(Flags, ODS_CHECKED);
-	GRect r(0, 0, pDC->X()-1, pDC->Y()-1);
+	LRect r(0, 0, pDC->X()-1, pDC->Y()-1);
 	auto Text = Name();
 
 	if (Separator())
@@ -573,7 +573,7 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 		if (BaseMenu)
 		{
 			// for a menu, sunken on selected
-			GRect rgn = r;
+			LRect rgn = r;
 			if (Selected)
 			{
 				LgiThinBorder(pDC, rgn, DefaultSunkenEdge);
@@ -1185,7 +1185,7 @@ int LMenu::_OnEvent(GMessage *Msg)
 			if (Item &&
 				Item->CtlType == ODT_MENU)
 			{
-				GRect r = Item->rcItem;
+				LRect r = Item->rcItem;
 
 				GScreenDC Dc(Item->hDC, Item->hwndItem);
 				

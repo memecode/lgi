@@ -20,7 +20,7 @@ public:
 		y = p.y;
 	}
 
-	bool Inside(class GRect &r);
+	bool Inside(class LRect &r);
 	
 	LPoint operator +(const LPoint &p)
 	{

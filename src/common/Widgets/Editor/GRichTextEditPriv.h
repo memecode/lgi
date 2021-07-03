@@ -225,7 +225,7 @@ class SelectColour : public GPopup
 
 	struct Entry
 	{
-		GRect r;
+		LRect r;
 		GColour c;
 	};
 	GArray<Entry> e;
@@ -246,12 +246,12 @@ class EmojiMenu : public GPopup
 
 	struct Emoji
 	{
-		GRect Src, Dst;
+		LRect Src, Dst;
 		uint32_t u;
 	};
 	struct Pane
 	{
-		GRect Btn;
+		LRect Btn;
 		GArray<Emoji> e;
 	};
 	GArray<Pane> Panes;
@@ -367,7 +367,7 @@ public:
 	bool ShowTools;
 	GRichTextEdit::RectType ClickedBtn, OverBtn;
 	ButtonState BtnState[GRichTextEdit::MaxArea];
-	GRect Areas[GRichTextEdit::MaxArea];
+	LRect Areas[GRichTextEdit::MaxArea];
 	GVariant Values[GRichTextEdit::MaxArea];
 
 	// Scrolling
@@ -379,7 +379,7 @@ public:
 	GArray<uint32_t> EatVkeys;
 
 	// Debug stuff
-	GArray<GRect> DebugRects;
+	GArray<LRect> DebugRects;
 
 	// Constructor
 	GRichTextPriv(GRichTextEdit *view, GRichTextPriv **Ptr);
@@ -486,7 +486,7 @@ public:
 			return Colours[Type].Back;
 		}
 
-		void DrawBox(GRect &r, GRect &Edge, GColour &c)
+		void DrawBox(LRect &r, LRect &Edge, GColour &c)
 		{
 			if (Edge.x1 > 0 ||
 				Edge.x2 > 0 ||
@@ -714,7 +714,7 @@ public:
 		 * Get state methods, do not modify the block   *
 		 ***********************************************/
 			virtual const char *GetClass() { return "Block"; }
-			virtual GRect GetPos() = 0;
+			virtual LRect GetPos() = 0;
 			virtual ssize_t Length() = 0;
 			virtual bool HitTest(HitTestResult &htr) = 0;
 			virtual bool GetPosFromIndex(BlockCursor *Cursor) = 0;
@@ -829,11 +829,11 @@ public:
 		int LineHint;
 		
 		// This is the position on the screen in doc coords.
-		GRect Pos;
+		LRect Pos;
 		
 		// This is the position line that the cursor is on. This is
 		// used to calculate the bounds for screen updates.
-		GRect Line;
+		LRect Line;
 
 		// Cursor is currently blinking on
 		bool Blink;
@@ -970,7 +970,7 @@ public:
 	
 	struct EmojiDisplayStr : public DisplayStr
 	{
-		GArray<GRect> SrcRect;
+		GArray<LRect> SrcRect;
 		GSurface *Img;
 		#if defined(_MSC_VER)
 		GArray<uint32_t> Utf32;
@@ -988,7 +988,7 @@ public:
 	struct TextLine
 	{
 		/// This is a position relative to the parent Block
-		GRect PosOff;
+		LRect PosOff;
 
 		/// The array of display strings
 		GArray<DisplayStr*> Strs;
@@ -1025,7 +1025,7 @@ public:
 		bool LayoutDirty;
 
 		// Size of the edges
-		GRect Margin, Border, Padding;
+		LRect Margin, Border, Padding;
 		
 		// Default font for the block
 		GFont *Fnt;
@@ -1034,7 +1034,7 @@ public:
 		ssize_t Len;
 		
 		// Position in document co-ordinates
-		GRect Pos;
+		LRect Pos;
 		
 		TextBlock(GRichTextPriv *priv);
 		TextBlock(const TextBlock *Copy);
@@ -1047,7 +1047,7 @@ public:
 		int GetLines();
 		bool OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY);
 		int LineToOffset(int Line);
-		GRect GetPos() { return Pos; }
+		LRect GetPos() { return Pos; }
 		void Dump();
 		GNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(GNamedStyle *s);
@@ -1086,7 +1086,7 @@ public:
 
 	class HorzRuleBlock : public Block
 	{
-		GRect Pos;
+		LRect Pos;
 		bool IsDeleted;
 
 	public:
@@ -1101,7 +1101,7 @@ public:
 		int GetLines();
 		bool OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY);
 		int LineToOffset(int Line);
-		GRect GetPos() { return Pos; }
+		LRect GetPos() { return Pos; }
 		void Dump();
 		GNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(GNamedStyle *s);
@@ -1156,7 +1156,7 @@ public:
 	protected:
 		GNamedStyle *Style;
 		int Scale;
-		GRect SourceValid;
+		LRect SourceValid;
 		GString FileName;
 		GString ContentId;
 		GString StreamMimeType;
@@ -1175,13 +1175,13 @@ public:
 
 	public:
 		GAutoPtr<GSurface> SourceImg, DisplayImg, SelectImg;
-		GRect Margin, Border, Padding;
+		LRect Margin, Border, Padding;
 		GString Source;
 		LPoint Size;
 		
 		bool LayoutDirty;
-		GRect Pos; // position in document co-ordinates
-		GRect ImgPos;
+		LRect Pos; // position in document co-ordinates
+		LRect ImgPos;
 		
 		ImageBlock(GRichTextPriv *priv);
 		ImageBlock(const ImageBlock *Copy);
@@ -1196,7 +1196,7 @@ public:
 		int GetLines();
 		bool OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY);
 		int LineToOffset(int Line);
-		GRect GetPos() { return Pos; }
+		LRect GetPos() { return Pos; }
 		void Dump();
 		GNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(GNamedStyle *s);
@@ -1232,8 +1232,8 @@ public:
 	Block *Next(Block *b);
 	Block *Prev(Block *b);
 
-	void InvalidateDoc(GRect *r);
-	void ScrollTo(GRect r);
+	void InvalidateDoc(LRect *r);
+	void ScrollTo(LRect r);
 	void UpdateStyleUI();
 
 	void EmptyDoc();	
@@ -1241,7 +1241,7 @@ public:
 	bool Seek(BlockCursor *In, SeekType Dir, bool Select);
 	bool CursorFirst();
 	bool SetCursor(GAutoPtr<BlockCursor> c, bool Select = false);
-	GRect SelectionRect();
+	LRect SelectionRect();
 	bool GetSelection(GArray<char16> *Text, GAutoString *Html);
 	ssize_t IndexOfCursor(BlockCursor *c);
 	ssize_t HitTest(int x, int y, int &LineHint, Block **Blk = NULL);

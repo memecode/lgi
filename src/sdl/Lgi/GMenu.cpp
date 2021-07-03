@@ -163,7 +163,7 @@ bool IsOverMenu(XEvent *e)
 			
 			if (m)
 			{
-				GRect gr = m->geometry();
+				LRect gr = m->geometry();
 				
 				return gr.Overlap
 					(
@@ -208,7 +208,7 @@ int GSubMenu::Float(GView *From, int x, int y, int Btns)
 		if (Depth == 1)
 		{
 			// Show the menu
-			GRect r = m->GetPos();
+			LRect r = m->GetPos();
 			r.Offset(x - r.x1, y - r.y1);
 			m->SetPos(r);
 			m->SetParent(From);			
@@ -472,9 +472,9 @@ void GMenuItem::_Paint(GSurface *pDC, int Flags)
 	bool Checked = TestFlag(Flags, ODS_CHECKED);
 	
 	#ifdef WIN32
-	GRect r(0, 0, pDC->X()-1, pDC->Y()-1);
+	LRect r(0, 0, pDC->X()-1, pDC->Y()-1);
 	#else
-	GRect r = Info->GetClient();
+	LRect r = Info->GetClient();
 	#endif
 	char *Text = Name();
 

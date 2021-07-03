@@ -57,7 +57,7 @@ public:
     App()
     {
         Name(AppName);
-        GRect r(0, 0, 500, 300);
+        LRect r(0, 0, 500, 300);
         SetPos(r);
         MoveToCenter();
         SetQuitOnClose(true);

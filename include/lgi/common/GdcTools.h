@@ -80,6 +80,6 @@ extern bool FlipXDC(GSurface *pDC, Progress *Prog = NULL);
 extern bool FlipYDC(GSurface *pDC, Progress *Prog = NULL);
 
 // resample the dc
-extern bool ResampleDC(GSurface *pTo, GSurface *pFrom, GRect *FromRgn = 0, Progress *Prog = NULL);
+extern bool ResampleDC(GSurface *pTo, GSurface *pFrom, LRect *FromRgn = 0, Progress *Prog = NULL);
 
 #endif

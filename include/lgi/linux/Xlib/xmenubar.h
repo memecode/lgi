@@ -2,7 +2,7 @@
 #ifndef __QMenuBar_h
 #define __QMenuBar_h
 
-#include "GRect.h"
+#include "LRect.h"
 #include "qwidget.h"
 
 /*
@@ -86,7 +86,7 @@ public:
 	~QMenuBar();
 
 	// Api
-	GRect &Pour(GRect &p);
+	LRect &Pour(LRect &p);
 
 	// Widget
 	void paintEvent(QEvent *e);

@@ -11,7 +11,7 @@
 
 #define DEBUG_COMBOBOX	1365
 
-GRect GCombo::Pad(8, 4, 24, 4);
+LRect GCombo::Pad(8, 4, 24, 4);
 
 class GComboPrivate
 {
@@ -19,7 +19,7 @@ public:
 	bool SortItems;
 	int SubType;
 	GAutoString Buffer;
-	GRect Pos;
+	LRect Pos;
 	
 	// Initialization data
 	size_t Len;
@@ -45,7 +45,7 @@ GCombo::GCombo(int id, int x, int y, int cx, int cy, const char *name) :
 	if (ValidStr(name))
 		Name(name);
 	
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	
 	SetId(id);
@@ -332,7 +332,7 @@ int GCombo::IndexOf(const char *str)
 	return -1;
 }
 
-bool GCombo::SetPos(GRect &p, bool Repaint)
+bool GCombo::SetPos(LRect &p, bool Repaint)
 {
 	if (p == Pos)
 		return true;

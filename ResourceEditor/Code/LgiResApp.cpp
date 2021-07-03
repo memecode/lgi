@@ -611,13 +611,13 @@ class Hr : public GView
 public:
 	Hr(int x1, int y, int x2)
 	{
-		GRect r(x1, y, x2, y+1);
+		LRect r(x1, y, x2, y+1);
 		SetPos(r);
 	}
 
 	void OnPaint(GSurface *pDC)
 	{
-		GRect c = GetClient();
+		LRect c = GetClient();
 		LgiThinBorder(pDC, c, DefaultSunkenEdge);
 	}
 
@@ -760,7 +760,7 @@ void FieldView::OnSelect(FieldSource *s)
 
 void FieldView::OnPosChange()
 {
-	GRect c = GetClient();
+	LRect c = GetClient();
 	c.Size(6, 6);
 
 	GViewI *v;
@@ -1162,7 +1162,7 @@ public:
 	Test(COLOUR col, int x1, int y1, int x2, int y2)
 	{
 		c = col;
-		GRect r(x1, y1, x2, y2);
+		LRect r(x1, y1, x2, y2);
 		SetPos(r);
 		_BorderSize = 1;
 		Sunken(true);
@@ -2011,7 +2011,7 @@ public:
 	ResCompare(const char *File1, const char *File2)
 	{
 		Lst = 0;
-		GRect p;
+		LRect p;
 		GAutoString n;
 
 		if (LoadFromResource(IDD_COMPARE, this, &p, &n))
@@ -2222,7 +2222,7 @@ public:
 
 	void OnPosChange()
 	{
-		GRect c = GetClient();
+		LRect c = GetClient();
 		if (Lst)
 		{
 			c.Size(7, 7);
@@ -3569,7 +3569,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 												}
 											}
 
-											GRect r(Pos[0], Pos[1], Pos[0]+(Pos[2]*DIALOG_X), Pos[1]+(Pos[3]*DIALOG_Y));
+											LRect r(Pos[0], Pos[1], Pos[0]+(Pos[2]*DIALOG_X), Pos[1]+(Pos[3]*DIALOG_Y));
 											r.Offset(7, 7);
 											Dlg->ResDialogCtrl::SetPos(r);
 											Dlg->GetStr()->SetDefine(T[0]);
@@ -3708,7 +3708,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[5])*CTRL_X, atoi(T[6])*CTRL_Y);
 										r.Offset(atoi(T[3])*CTRL_X+ADJUST_CTRLS_X, atoi(T[4])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3731,7 +3731,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[4])*CTRL_X, atoi(T[5])*CTRL_Y);
 										r.Offset(atoi(T[2])*CTRL_X+ADJUST_CTRLS_X, atoi(T[3])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3754,7 +3754,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[4])*CTRL_X, atoi(T[5])*CTRL_Y);
 										r.Offset(atoi(T[2])*CTRL_X+ADJUST_CTRLS_X, atoi(T[3])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3777,7 +3777,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[4])*CTRL_X, atoi(T[5])*CTRL_Y);
 										r.Offset(atoi(T[2])*CTRL_X+ADJUST_CTRLS_X, atoi(T[3])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3801,7 +3801,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[5])*CTRL_X, atoi(T[6])*CTRL_Y);
 										r.Offset(atoi(T[3])*CTRL_X+ADJUST_CTRLS_X, atoi(T[4])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3826,7 +3826,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[5])*CTRL_X, atoi(T[6])*CTRL_Y);
 										r.Offset(atoi(T[3])*CTRL_X+ADJUST_CTRLS_X, atoi(T[4])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3868,7 +3868,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 										}
 									}
 
-									GRect r(0, 0, 0, 0);
+									LRect r(0, 0, 0, 0);
 									if (i + 3 < T.Length() && Type)
 									{
 										ResDialogCtrl *Ctrl = 0;
@@ -3921,7 +3921,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[5])*CTRL_X, atoi(T[6])*CTRL_Y);
 										r.Offset(atoi(T[3])*CTRL_X+ADJUST_CTRLS_X, atoi(T[4])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3944,7 +3944,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[4])*CTRL_X, atoi(T[5])*CTRL_Y);
 										r.Offset(atoi(T[2])*CTRL_X+ADJUST_CTRLS_X, atoi(T[3])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -4021,9 +4021,9 @@ bool AppWnd::LoadWin32(const char *FileName)
 											List<ResDialogCtrl> Overlapping;
 											for (auto Mc: Old)
 											{
-												GRect a = Mc->View()->GetPos();
-												GRect b = c->View()->GetPos();
-												GRect c = a;
+												LRect a = Mc->View()->GetPos();
+												LRect b = c->View()->GetPos();
+												LRect c = a;
 												c.Bound(&b);
 												if (c.Valid())
 												{
@@ -4363,7 +4363,7 @@ bool ResFrame::Attach(GViewI *p)
 
 bool ResFrame::Pour(GRegion &r)
 {
-	GRect *Best = FindLargest(r);
+	LRect *Best = FindLargest(r);
 	if (Best)
 	{
 		SetPos(*Best);
@@ -4445,7 +4445,7 @@ bool ResFrame::OnKey(GKey &k)
 void ResFrame::OnPaint(GSurface *pDC)
 {
 	// Draw nice frame
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	LgiThinBorder(pDC, r, DefaultRaisedEdge);
 	pDC->Colour(L_MED);
 	LgiFlatBorder(pDC, r, 4);
@@ -4481,7 +4481,7 @@ public:
 ShortCutView::ShortCutView(AppWnd *app)
 {
 	App = app;
-	GRect r(0, 0, 300, 600);
+	LRect r(0, 0, 300, 600);
 	SetPos(r);
 	MoveSameScreen(App);
 	Name("Dialog Shortcuts");

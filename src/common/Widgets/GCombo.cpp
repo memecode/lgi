@@ -37,7 +37,7 @@ public:
 	ssize_t Current;
 	bool SortItems;
 	int Sub;
-	GRect Arrow;
+	LRect Arrow;
 	List<char> Items;
 	uint64 LastKey;
 	GAutoString Find;
@@ -91,7 +91,7 @@ public:
 	}
 };
 
-GRect GCombo::Pad(8, 4, 24, 4);
+LRect GCombo::Pad(8, 4, 24, 4);
 
 GCombo::GCombo(int id, int x, int y, int cx, int cy, const char *name) :
 	ResObject(Res_ComboBox)
@@ -99,7 +99,7 @@ GCombo::GCombo(int id, int x, int y, int cx, int cy, const char *name) :
 	d = new GComboPrivate;
 	
 	SetId(id);
-	GRect e(x, y, x+cx, y+cy);
+	LRect e(x, y, x+cx, y+cy);
 	SetPos(e);
 	Name(name);
 	SetTabStop(true);
@@ -552,8 +552,8 @@ void GCombo::OnPaint(GSurface *pDC)
 		pDC->Colour(cBack);
 		pDC->Rectangle();
 
-		GRect Cli = GetClient();
-		GRect c = Cli;
+		LRect Cli = GetClient();
+		LRect c = Cli;
 	
 		c.Size(1, 1);
 		c.y2 -= 1;
@@ -576,7 +576,7 @@ void GCombo::OnPaint(GSurface *pDC)
 		if (e) printf("%s:%i - HIThemeDrawButton failed %li\n", _FL, e);
 		else if (d->GetText(_FL))
 		{
-			GRect Txt;
+			LRect Txt;
 			Txt = LabelRect;
 			GDisplayString *Ds = d->GetText(_FL);
 			int y = Cli.y1 + ((Cli.Y() - Ds->Y()) / 2) + 1;
@@ -605,7 +605,7 @@ void GCombo::OnPaint(GSurface *pDC)
 	}
 	else
 	{
-		GRect r(0, 0, X()-1, Y()-1);
+		LRect r(0, 0, X()-1, Y()-1);
 
 		// draw shadowed border
 		pDC->Colour(L_SHADOW);

@@ -140,14 +140,14 @@ void GRichTextEdit::SetReadOnly(bool i)
 	#endif
 }
 
-GRect GRichTextEdit::GetArea(RectType Type)
+LRect GRichTextEdit::GetArea(RectType Type)
 {
 	return	Type >= ContentArea &&
 			Type <= MaxArea
 			?
 			d->Areas[Type]
 			:
-			GRect(0, 0, -1, -1);
+			LRect(0, 0, -1, -1);
 }
 
 bool GRichTextEdit::ShowStyleTools()
@@ -875,7 +875,7 @@ void GRichTextEdit::UpdateScrollBars(bool Reset)
 {
 	if (VScroll)
 	{
-		//GRect Before = GetClient();
+		//LRect Before = GetClient();
 
 	}
 }
@@ -1081,7 +1081,7 @@ void GRichTextEdit::OnPosChange()
 		Processing = true;
 		GLayout::OnPosChange();
 
-		// GRect c = GetClient();
+		// LRect c = GetClient();
 		Processing = false;
 	}
 	
@@ -1231,7 +1231,7 @@ public:
 	
 	NodeView(GViewI *w)
 	{
-		GRect r(0, 0, 500, 600);
+		LRect r(0, 0, 500, 600);
 		SetPos(r);
 		MoveSameScreen(w);
 		Attach(0);
@@ -1256,7 +1256,7 @@ void GRichTextEdit::DoContextMenu(GMouse &m)
 	}
 
 	GRichTextPriv::Block *Over = NULL;
-	GRect &Content = d->Areas[ContentArea];
+	LRect &Content = d->Areas[ContentArea];
 	LPoint Doc = d->ScreenToDoc(m.x, m.y);
 	// int BlockIndex = -1;
 	ssize_t Offset = -1;
@@ -1576,7 +1576,7 @@ void GRichTextEdit::OnMouseMove(GMouse &m)
 	}
 
 	#ifdef WIN32
-	GRect c = GetClient();
+	LRect c = GetClient();
 	c.Offset(-c.x1, -c.y1);
 	if (c.Overlap(m.x, m.y))
 	{
@@ -1873,7 +1873,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 				{
 					if (HasSelection() && !k.Shift())
 					{
-						GRect r = d->SelectionRect();
+						LRect r = d->SelectionRect();
 						Invalidate(&r);
 						
 						AutoCursor c(new BlkCursor(d->CursorFirst() ? *d->Cursor : *d->Selection));
@@ -1912,7 +1912,7 @@ bool GRichTextEdit::OnKey(GKey &k)
 				{
 					if (HasSelection() && !k.Shift())
 					{
-						GRect r = d->SelectionRect();
+						LRect r = d->SelectionRect();
 						Invalidate(&r);
 
 						AutoCursor c(new BlkCursor(d->CursorFirst() ? *d->Selection : *d->Cursor));
@@ -2431,7 +2431,7 @@ void GRichTextEdit::OnEnter(GKey &k)
 	}
 }
 
-void GRichTextEdit::OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour)
+void GRichTextEdit::OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour)
 {
 	pDC->Colour(colour);
 	pDC->Rectangle(&r);
@@ -2439,7 +2439,7 @@ void GRichTextEdit::OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour)
 
 void GRichTextEdit::OnPaint(GSurface *pDC)
 {
-	GRect r = GetClient();
+	LRect r = GetClient();
 	if (!r.Valid())
 		return;
 
@@ -2682,7 +2682,7 @@ void GRichTextEdit::OnPulse()
 			GetMouse(m);
 			
 			// Is the mouse outside the content window
-			GRect &r = d->Areas[ContentArea];
+			LRect &r = d->Areas[ContentArea];
 			if (!r.Overlap(m.x, m.y))
 			{
 				AutoCursor c(new BlkCursor(NULL, 0, 0));
@@ -2791,7 +2791,7 @@ SelectColour::SelectColour(GRichTextPriv *priv, LPoint p, GRichTextEdit::RectTyp
 
 	SetParent(d->View);
 
-	GRect r(0, 0, 12 + (8 * PxSp) - 1, y + 6 - 1);
+	LRect r(0, 0, 12 + (8 * PxSp) - 1, y + 6 - 1);
 	r.Offset(p.x, p.y);
 	SetPos(r);
 
@@ -2872,7 +2872,7 @@ EmojiMenu::EmojiMenu(GRichTextPriv *priv, LPoint p) : GPopup(priv->View)
 
 	int PaneSelectSz = SysFont->GetHeight() * 2;
 	int Rows = (PaneSz + EMOJI_GROUP_X - 1) / EMOJI_GROUP_X;
-	GRect r(0, 0,
+	LRect r(0, 0,
 			(EMOJI_CELL_SIZE + EMOJI_PAD) * EMOJI_GROUP_X + EMOJI_PAD,
 			(EMOJI_CELL_SIZE + EMOJI_PAD) * Rows + EMOJI_PAD + PaneSelectSz);
 	r.Offset(p.x, p.y);
@@ -2961,7 +2961,7 @@ void EmojiMenu::OnPaint(GSurface *pDC)
 	}
 	else
 	{
-		GRect c = GetClient();
+		LRect c = GetClient();
 		GDisplayString Ds(SysFont, "Loading...");
 		SysFont->Colour(L_TEXT, L_MED);
 		SysFont->Transparent(true);
@@ -3034,7 +3034,7 @@ void EmojiMenu::Visible(bool i)
 ///////////////////////////////////////////////////////////////////////////////
 class GRichTextEdit_Factory : public GViewFactory
 {
-	GView *NewView(const char *Class, GRect *Pos, const char *Text)
+	GView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (_stricmp(Class, "GRichTextEdit") == 0)
 		{

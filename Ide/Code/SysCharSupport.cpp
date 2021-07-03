@@ -137,8 +137,8 @@ void SysCharSupport::OnPosChange()
 	/*
 	if (d->Match)
 	{
-		GRect c = GetClient();
-		GRect r = d->Lst->GetPos();
+		LRect c = GetClient();
+		LRect r = d->Lst->GetPos();
 		r.x2 = c.x2 - r.x1;
 		r.y2 = c.y2 - r.x1;
 		d->Lst->SetPos(r);

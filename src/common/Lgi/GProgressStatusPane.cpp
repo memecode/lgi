@@ -26,7 +26,7 @@ GProgressStatusPane::~GProgressStatusPane()
 
 void GProgressStatusPane::OnPaint(GSurface *pDC)
 {
-	GRect r = GetClient();
+	LRect r = GetClient();
 
 	pDC->Colour(L_MED);
 	pDC->Box(&r);

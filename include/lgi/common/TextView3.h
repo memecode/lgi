@@ -201,7 +201,7 @@ protected:
 		ssize_t Start;	// Start offset
 		ssize_t Len;	// length of text
 		*/
-		GRect r;		// Screen location
+		LRect r;		// Screen location
 		GColour c;		// Colour of line... transparent = default colour
 		GColour Back;	// Background colour or transparent
 
@@ -246,7 +246,7 @@ protected:
 	bool Blink;
 	uint64 BlinkTs;
 	int ScrollX;
-	GRect CursorPos;
+	LRect CursorPos;
 
 	/// true if the text pour process is still ongoing
 	bool PourEnabled;		// True if pouring the text happens on edit. Turn off if doing lots
@@ -282,7 +282,7 @@ protected:
 	bool ScrollToOffset(size_t Off);
 	int ScrollYLine();
 	int ScrollYPixel();
-	GRect DocToScreen(GRect r);
+	LRect DocToScreen(LRect r);
 	ptrdiff_t MatchText(const char16 *Text, bool MatchWord, bool MatchCase, bool SelectionOnly, bool SearchUpwards);
 	void InternalPulse();
 
@@ -298,7 +298,7 @@ protected:
 	virtual void PourText(size_t Start, ssize_t Length);
 	virtual void PourStyle(size_t Start, ssize_t Length);
 	virtual void OnFontChange();
-	virtual void OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour);
+	virtual void OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour);
 	virtual char16 *MapText(char16 *Str, ssize_t Len, bool RtlTrailingSpace = false);
 
 	#ifdef _DEBUG

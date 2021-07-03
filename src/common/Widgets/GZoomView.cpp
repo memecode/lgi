@@ -144,7 +144,7 @@ public:
 		EmptyTiles();
 	}
 
-	GRect DocToScreen(GRect s)
+	LRect DocToScreen(LRect s)
 	{
 		int f = Factor();
 		if (Zoom < 0)
@@ -167,7 +167,7 @@ public:
 		return s;
 	}
 
-	GRect ScreenToDoc(GRect s)
+	LRect ScreenToDoc(LRect s)
 	{
 		int f = Factor();
 		if (Zoom > 0)
@@ -243,7 +243,7 @@ public:
 	{
 		if (pDC)
 		{
-			GRect c = View->GetClient();
+			LRect c = View->GetClient();
 			int z;
 
 			bool Loop = true;
@@ -313,7 +313,7 @@ public:
 		
 		if (pDC)
 		{
-			GRect full = DocToScreen(pDC->Bounds());
+			LRect full = DocToScreen(pDC->Bounds());
 			
 			// Pick a suitable tile size
 			TileSize = 128;
@@ -777,7 +777,7 @@ public:
 				
 				if (TileCache)
 				{
-					GRect s;
+					LRect s;
 					s.ZOff(TileSize-1, TileSize-1);
 					s.Offset(Sx, Sy);
 					
@@ -1111,7 +1111,7 @@ public:
 			// Draw background
 			if (Callback)
             {
-                GRect r = Dst->Bounds();
+                LRect r = Dst->Bounds();
                 LPoint off(x, y);
 				Callback->DrawBackground(View, Dst, off, &r);
             }
@@ -1139,12 +1139,12 @@ public:
 			else
 			{
 				// 1:1
-				GRect s;
+				LRect s;
 				s.ZOff(TileSize-1, TileSize-1);
 				s.Offset(x * TileSize, y * TileSize);
 				
 				#if 0
-				GRect dd = s;
+				LRect dd = s;
 				dd.Bound(&Src->Bounds());
 				dd.Offset(-x * TileSize, -y * TileSize);
 
@@ -1174,7 +1174,7 @@ public:
 			// Draw any foreground elements
 			if (Callback)
 			{
-                GRect r = Dst->Bounds();
+                LRect r = Dst->Bounds();
                 LPoint off(x, y);
 				Callback->DrawForeground(View, Dst, off, &r);
 			}
@@ -1218,7 +1218,7 @@ void GZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 	if (!Updating)
 	{
 		Updating = true;	
-		GRect c = GetClient();    
+		LRect c = GetClient();    
 		// int Factor = d->Factor();
 		// int Fmin1 = Factor - 1;
 
@@ -1269,14 +1269,14 @@ GSurface *GZoomView::GetSurface()
 	return d->pDC;
 }
 
-void GZoomView::Update(GRect *Where)
+void GZoomView::Update(LRect *Where)
 {
 	#if DEBUG_THREADING
 	if (!d->Dirty)
 		LgiTrace("%i setting DIRTY\n", LgiGetCurrentThread());
 	#endif
 
-	GRect w;
+	LRect w;
 	if (Where)
 	{
 		// Some tiles only
@@ -1286,7 +1286,7 @@ void GZoomView::Update(GRect *Where)
 		w.x2 /= d->TileSize;
 		w.y2 /= d->TileSize;
 		
-		GRect b(0, 0, d->Tiles.x-1, d->Tiles.y-1);
+		LRect b(0, 0, d->Tiles.x-1, d->Tiles.y-1);
 		w.Bound(&b);
 	}
 	else
@@ -1502,7 +1502,7 @@ bool GZoomView::OnMouseWheel(double Lines)
 			GSurface *Src = d->pDC;
 			if (Src)
 			{
-				GRect c = GetClient();
+				LRect c = GetClient();
 				int Factor = d->Factor();
 
 				int NewSx, NewSy;
@@ -1622,7 +1622,7 @@ void GZoomView::OnPulse()
 		return;
 	}
 
-	GRect c = GetClient();
+	LRect c = GetClient();
 	bool Inside = c.Overlap(m.x, m.y);
 
 	if (!Inside)
@@ -1710,7 +1710,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 	#endif
 
 
-	GRect c = GetClient();
+	LRect c = GetClient();
 	GRegion Rgn(c);
 
 	GSurface *Src = d->pDC;
@@ -1723,10 +1723,10 @@ void GZoomView::OnPaint(GSurface *pDC)
 		GetScrollPos(Sx, Sy);
 
 		// Get the image bounds and scroll it into position (view coords)
-		GRect ScaledDocSize = Src->Bounds();
+		LRect ScaledDocSize = Src->Bounds();
 		ScaledDocSize = d->DocToScreen(ScaledDocSize);
 
-		GRect s = ScaledDocSize;
+		LRect s = ScaledDocSize;
 		
 		// Scroll positions are in doc px, so scale them here to screen
 		LPoint ScaledScroll((int)Sx, (int)Sy);
@@ -1734,11 +1734,11 @@ void GZoomView::OnPaint(GSurface *pDC)
 		s.Offset(-ScaledScroll.x, -ScaledScroll.y);
 
 		// Work out the visible tiles...
-		GRect vis = s;
+		LRect vis = s;
 		vis.Bound(&c);
 		vis.Offset(ScaledScroll.x, ScaledScroll.y);
 		
-		GRect tile;
+		LRect tile;
 		tile.x1 = vis.x1 / d->TileSize;
 		tile.y1 = vis.y1 / d->TileSize;
 		tile.x2 = vis.x2 / d->TileSize;
@@ -1781,7 +1781,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 				{
 					int px = x * d->TileSize;
 					int py = y * d->TileSize;
-					GRect r(px, py, px + d->TileSize - 1, py + d->TileSize - 1);
+					LRect r(px, py, px + d->TileSize - 1, py + d->TileSize - 1);
 					
 					if (LastY || x == d->Tiles.x - 1)
 					{
@@ -1789,17 +1789,17 @@ void GZoomView::OnPaint(GSurface *pDC)
 						// contain image.
 						
 						// Work out how much image is in the tile
-						GRect img = r;
+						LRect img = r;
 						if (img.x2 >= ScaledDocSize.X())
 							img.x2 = ScaledDocSize.X() - 1;
 						if (img.y2 >= ScaledDocSize.Y())
 							img.y2 = ScaledDocSize.Y() - 1;
 						
 						// Work out the image pixels in tile co-ords
-						GRect tile_source(0, 0, img.X()-1, img.Y()-1);
+						LRect tile_source(0, 0, img.X()-1, img.Y()-1);
 						
 						// Also work out where this is on the screen
-						GRect screen_source = tile_source;
+						LRect screen_source = tile_source;
 						screen_source.Offset(px, py);
 						
 						// Blt the tile image pixels to the screen
@@ -1844,7 +1844,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 	}
 
 	pDC->SetOrigin(0, 0);
-	for (GRect *r = Rgn.First(); r; r = Rgn.Next())
+	for (LRect *r = Rgn.First(); r; r = Rgn.Next())
 	{
 		pDC->Colour(L_MED);
 		pDC->Rectangle(r);
@@ -1858,7 +1858,7 @@ void GZoomView::OnPaint(GSurface *pDC)
 class GZoomViewFactory : public GViewFactory
 {
 public:
-	GView *NewView(const char *Class, GRect *Pos, const char *Text)
+	GView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (!_stricmp(Class, "GZoomView"))
 			return new GZoomView(NULL);

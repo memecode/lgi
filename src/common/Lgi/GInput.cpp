@@ -55,7 +55,7 @@ GInput::GInput(GViewI *parent, const char *InitStr, const char *Msg, const char 
 	int CallbackX = callback ? GBUTTON_MIN_X + 20 : 0;
 	ContextX = MAX(ContextX, Txt->X() + CallbackX);
 
-	GRect r(0, 0, ContextX + CallbackX + Dx, 80 + MAX(SysFont->GetHeight(), Txt->Y()) + Dy);
+	LRect r(0, 0, ContextX + CallbackX + Dx, 80 + MAX(SysFont->GetHeight(), Txt->Y()) + Dy);
 
 	SetParent(parent);
 	Name(Title);

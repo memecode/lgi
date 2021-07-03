@@ -27,7 +27,7 @@ public:
 	int64 Val;
 	bool Over;
 	bool Three;
-	GRect ValuePos;
+	LRect ValuePos;
 
 	GCheckBoxPrivate(GCheckBox *ctrl) :
 		LMutex("GCheckBoxPrivate"),
@@ -77,7 +77,7 @@ GCheckBox::GCheckBox(int id, int x, int y, int cx, int cy, const char *name, int
 	if (cy < 0) cy = MAX(Max.y, MinYSize) + PadYPx;
 
 	d->Val = InitState;
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	SetId(id);
 	SetTabStop(true);
@@ -220,7 +220,7 @@ void GCheckBox::OnMouseClick(GMouse &m)
 			Focus(true);
 		}
 		
-		GRect r(0, 0, X()-1, Y()-1);
+		LRect r(0, 0, X()-1, Y()-1);
 		if (!m.Down() &&
 			r.Overlap(m.x, m.y) &&
 			Click)
@@ -356,7 +356,7 @@ void GCheckBox::OnPaint(GSurface *pDC)
 	else
 	{
 		bool en = Enabled();
-		GRect r = GetClient();
+		LRect r = GetClient();
 		
 		#if defined MAC && !LGI_COCOA
 		d->ValuePos.Set(0, 0, PadX1Px, MinYSize);
@@ -370,7 +370,7 @@ void GCheckBox::OnPaint(GSurface *pDC)
 			pDC->Rectangle(0, d->ValuePos.y2+1, d->ValuePos.x2, r.y2);
 		}
 
-		GRect t = r;
+		LRect t = r;
 		t.x1 = d->ValuePos.x2 + 1;
 		// GColour cFore = StyleColour(GCss::PropColor, LC_TEXT);
 		GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
@@ -392,7 +392,7 @@ void GCheckBox::OnPaint(GSurface *pDC)
 				pDC->Rectangle(d->ValuePos.x1, d->ValuePos.y1, d->ValuePos.x2, Y()-1);
 			}
 		
-			GRect c = GetClient();
+			LRect c = GetClient();
 			#if 0
 			pDC->Colour(GColour(255, 0, 0));
 			pDC->Box(&c);
@@ -402,7 +402,7 @@ void GCheckBox::OnPaint(GSurface *pDC)
 
 			for (GViewI *v = this; v && !v->Handle(); v = v->GetParent())
 			{
-				GRect p = v->GetPos();
+				LRect p = v->GetPos();
 				c.Offset(p.x1, p.y1);
 			}
 			

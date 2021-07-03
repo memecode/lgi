@@ -47,7 +47,7 @@ public:
 	int X();
 	int Y();
 	XWidget *Handle();
-	class GRect *GetClient();
+	class LRect *GetClient();
 
 	virtual void GetScale(double &x, double &y) { x = 1.0; y = 1.0; }
 	
@@ -55,7 +55,7 @@ public:
 	virtual void End();
 	virtual bool IsOk();
 
-	virtual void SetClient(class GRect *r);
+	virtual void SetClient(class LRect *r);
 	virtual void PushClip(int x1, int y1, int x2, int y2);
 	virtual void PopClip();
 	virtual void EmptyClip();
@@ -75,7 +75,7 @@ public:
 	virtual void fillArc(double cx, double cy, double radius);
 	virtual void fillArc(double cx, double cy, double radius, double start, double end);
 	virtual void drawImage(int x, int y, XBitmapImage &image, int sx, int sy, int sw, int sh, XBitmapImage::BlitOp op);
-	virtual void drawText(int x, int y, char16 *text, int len, int *backColour, GRect *clip);
+	virtual void drawText(int x, int y, char16 *text, int len, int *backColour, LRect *clip);
 };
 
 #endif

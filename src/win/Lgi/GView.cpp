@@ -772,9 +772,9 @@ bool GView::Detach()
 	return Status;
 }
 
-GRect &GView::GetClient(bool InClientSpace)
+LRect &GView::GetClient(bool InClientSpace)
 {
-	static GRect Client;
+	static LRect Client;
 
 	if (_View)
 	{
@@ -956,10 +956,10 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 	return true;
 }
 
-bool GView::SetPos(GRect &p, bool Repaint)
+bool GView::SetPos(LRect &p, bool Repaint)
 {
 	bool Status = true;
-	GRect OldPos = Pos;
+	LRect OldPos = Pos;
 
 	if (Pos != p)
 	{
@@ -994,7 +994,7 @@ bool GView::SetPos(GRect &p, bool Repaint)
 	return Status;
 }
 
-bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
+bool GView::Invalidate(LRect *r, bool Repaint, bool Frame)
 {
 	if (_View)
 	{
@@ -1032,7 +1032,7 @@ bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
 	}
 	else
 	{
-		GRect Up;
+		LRect Up;
 		GViewI *p = this;
 
 		if (r)
@@ -1051,8 +1051,8 @@ bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
 		{
 			GViewI *Par = p->GetParent();
 			GView *VPar = Par?Par->GetGView():0;
-			GRect w = p->GetPos();
-			GRect c = p->GetClient(false);
+			LRect w = p->GetPos();
+			LRect c = p->GetClient(false);
 			if (Frame && p == this)
 				Up.Offset(w.x1, w.y1);
 			else				
@@ -1135,7 +1135,7 @@ bool SysOnKey(GView *w, GMessage *m)
 #ifdef _MSC_VER
 #include "vsstyle.h"
 
-void GView::DrawThemeBorder(GSurface *pDC, GRect &r)
+void GView::DrawThemeBorder(GSurface *pDC, LRect &r)
 {
 	if (!d->hTheme)
 		d->hTheme = OpenThemeData(_View, VSCLASS_EDIT);
@@ -1155,10 +1155,10 @@ void GView::DrawThemeBorder(GSurface *pDC, GRect &r)
 		// LgiTrace("ThemeDraw %s: %i\n", GetClass(), StateId);
 		
 		RECT clip[4];
-		clip[0] = GRect(r.x1, r.y1, r.x1 + 1, r.y2); // left
-		clip[1] = GRect(r.x1 + 2, r.y1, r.x2 - 2, r.y1 + 1); // top
-		clip[2] = GRect(r.x2 - 1, r.y1, r.x2, r.y2);  // right
-		clip[3] = GRect(r.x1 + 2, r.y2 - 1, r.x2 - 2, r.y2); // bottom
+		clip[0] = LRect(r.x1, r.y1, r.x1 + 1, r.y2); // left
+		clip[1] = LRect(r.x1 + 2, r.y1, r.x2 - 2, r.y1 + 1); // top
+		clip[2] = LRect(r.x2 - 1, r.y1, r.x2, r.y2);  // right
+		clip[3] = LRect(r.x1 + 2, r.y2 - 1, r.x2 - 2, r.y2); // bottom
 		
 		GColour cols[4] = 
 		{
@@ -1171,7 +1171,7 @@ void GView::DrawThemeBorder(GSurface *pDC, GRect &r)
 		for (int i=0; i<CountOf(clip); i++)
 		{
 			#if 0
-			GRect tmp = clip[i];
+			LRect tmp = clip[i];
 			pDC->Colour(cols[i]);
 			pDC->Rectangle(&tmp);
 			#else
@@ -1199,7 +1199,7 @@ void GView::DrawThemeBorder(GSurface *pDC, GRect &r)
 	}
 }
 #else
-void GView::DrawThemeBorder(GSurface *pDC, GRect &r)
+void GView::DrawThemeBorder(GSurface *pDC, LRect &r)
 {
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
 }
@@ -1354,7 +1354,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 							{
 								case ODA_DRAWENTIRE:
 								{
-									GRect c = di->rcItem;
+									LRect c = di->rcItem;
 									GMemDC m(c.X(), c.Y(), GdcD->GetColourSpace());
 									HDC hdc = m.StartDC();
 									m.Colour(GColour(255, 0, 255));
@@ -1556,7 +1556,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 					// This can happen in popup sub-trees of views. Where the focus
 					// is tracked separately from the main LWindow.
 					OnFocus(true);
-					Invalidate((GRect*)NULL, false, true);
+					Invalidate((LRect*)NULL, false, true);
 				}
 				break;
 			}
@@ -1570,7 +1570,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				else
 				{
 					// This can happen when the LWindow is being destroyed
-					Invalidate((GRect*)NULL, false, true);
+					Invalidate((LRect*)NULL, false, true);
 					OnFocus(false);
 				}
 				break;
@@ -1596,7 +1596,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 						}
 						else
 						{
-							GRect r;
+							LRect r;
 							r.ZOff(Info->cx-1, Info->cy-1);
 							r.Offset(Info->x, Info->y);
 							if (r.Valid() && r != Pos)
@@ -2034,7 +2034,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				{
 					HDC hDC = GetWindowDC(_View);
 					GScreenDC Dc(hDC, _View, true);
-					GRect p(0, 0, Dc.X()-1, Dc.Y()-1);
+					LRect p(0, 0, Dc.X()-1, Dc.Y()-1);
 					OnNcPaint(&Dc, p);
 				}
 

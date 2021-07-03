@@ -782,9 +782,9 @@ GMenu::~GMenu()
 	DeleteObj(d);
 }
 
-GRect GMenu::GetPos()
+LRect GMenu::GetPos()
 {
-	GRect r(d->Bar->Frame());
+	LRect r(d->Bar->Frame());
 	return r;
 }
 

@@ -16,7 +16,7 @@ public:
 	{
 	    Ly = SysFont->GetHeight();
 		SetParent(Colour = Parent);
-		GRect r(0, 0, 120, Ly + 4);
+		LRect r(0, 0, 120, Ly + 4);
 		SetPos(r);
 	}
 	
@@ -24,7 +24,7 @@ public:
 
 	void OnPaint(GSurface *pDC)
 	{
-		GRect r = GetClient();
+		LRect r = GetClient();
 		LgiWideBorder(pDC, r, DefaultRaisedEdge);
 		pDC->Colour(L_MED);
 		pDC->Rectangle(&r);
@@ -55,7 +55,7 @@ public:
 
 	void OnMouseClick(GMouse &m)
 	{
-		GRect r = GetClient();
+		LRect r = GetClient();
 		r.Size(2, 2);
 		if (m.Down() && r.Overlap(m.x, m.y))
 		{
@@ -96,7 +96,7 @@ void GColourSelect::SetColourList(GArray<GColour> *cols)
 
 	if (GetPopup())
 	{
-		GRect r(0, 0, 100, (MAX((int)Presets.Length()+1, 1) * SysFont->GetHeight()) + 4);
+		LRect r(0, 0, 100, (MAX((int)Presets.Length()+1, 1) * SysFont->GetHeight()) + 4);
 		GetPopup()->SetPos(r);
 	}
 }
@@ -139,7 +139,7 @@ void GColourSelect::OnPaint(GSurface *pDC)
 {
 	GDropDown::OnPaint(pDC);
 
-	GRect r = GetClient();
+	LRect r = GetClient();
 	r.x1 += 2;
 	r.x2 -= 14;
 	r.Size(5, 5);
@@ -171,7 +171,7 @@ bool GColourSelect::OnLayout(GViewLayoutInfo &Inf)
 
 class GColourFactory : public GViewFactory
 {
-	GView *NewView(const char *Class, GRect *Pos, const char *Text)
+	GView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (Class &&
 			_stricmp(Class, "GColourSelect") == 0)

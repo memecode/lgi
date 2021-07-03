@@ -4041,7 +4041,7 @@ AddFilesProgress::AddFilesProgress(GViewI *par)
 	Msg = NULL;
 	SetParent(par);
 	Ts = LgiCurrentTime();
-	GRect r(0, 0, 140, 100);
+	LRect r(0, 0, 140, 100);
 	SetPos(r);
 	MoveSameScreen(par);
 	Name("Importing files...");

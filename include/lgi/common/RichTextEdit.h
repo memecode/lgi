@@ -64,7 +64,7 @@ protected:
 	virtual void PourText(ssize_t Start, ssize_t Length);
 	virtual void PourStyle(ssize_t Start, ssize_t Length);
 	virtual void OnFontChange();
-	virtual void OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour);
+	virtual void OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour);
 
 public:
 	// Construction
@@ -137,7 +137,7 @@ public:
 		
 		MaxArea
 	};
-	GRect GetArea(RectType Type);
+	LRect GetArea(RectType Type);
 
 	/// Sets the wrapping on the control, use #TEXTED_WRAP_NONE or #TEXTED_WRAP_REFLOW
 	void SetWrapType(LDocWrapType i);

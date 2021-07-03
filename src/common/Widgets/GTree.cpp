@@ -77,10 +77,10 @@ class GTreeItemPrivate
 
 public:
 	GTreeItem *Item;
-	GRect Pos;
-	GRect Thumb;
-	GRect Text;
-	GRect Icon;
+	LRect Pos;
+	LRect Thumb;
+	LRect Text;
+	LRect Icon;
 	bool Open;
 	bool Selected;
 	bool Visible;
@@ -259,7 +259,7 @@ void GTreeNode::Remove()
 		GTreeItem *i = Item();
 		if (i && i->IsRoot())
 		{
-			GRect *p = Pos();
+			LRect *p = Pos();
 			GTreeItem *Prev = GetPrev();
 			if (Prev)
 			{
@@ -452,7 +452,7 @@ int GTreeItem::GetColumnSize(int Col)
 	return Px;
 }
 
-GRect *GTreeItem::Pos()
+LRect *GTreeItem::Pos()
 {
 	return &d->Pos;
 }
@@ -464,7 +464,7 @@ LPoint GTreeItem::_ScrollPos()
 	return p;
 }
 
-GRect *GTreeItem::_GetRect(GTreeItemRect Which)
+LRect *GTreeItem::_GetRect(GTreeItemRect Which)
 {
 	switch (Which)
 	{
@@ -497,12 +497,12 @@ bool GTreeItem::IsDropTarget()
 	return false;
 }
 
-GRect *GTreeItem::GetPos(int Col)
+LRect *GTreeItem::GetPos(int Col)
 {
 	if (!d->Pos.Valid() && Tree)
 		Tree->_Pour();
 
-	static GRect r;
+	static LRect r;
 
 	r = d->Pos;
 
@@ -546,8 +546,8 @@ void GTreeItem::ScrollTo()
 
 	if (Tree->VScroll)
 	{
-		GRect c = Tree->GetClient();
-		GRect p = d->Pos;
+		LRect c = Tree->GetClient();
+		LRect p = d->Pos;
 		int y = d->Pos.Y() ? d->Pos.Y() : 16;
 		p.Offset(0, (int) (-Tree->VScroll->Value() * y));
 
@@ -664,7 +664,7 @@ void GTreeItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 			Ds->Draw(Ctx.pDC, d->Text.x1 + 2, d->Text.y1 + 1, &d->Text);
 			if (Ctx.x2 > d->Text.x2)
 			{
-				GRect r = Ctx;
+				LRect r = Ctx;
 				r.x1 = d->Text.x2 + 1;
 				Ctx.pDC->Colour(Ctx.Back);
 				Ctx.pDC->Rectangle(&r);
@@ -759,7 +759,7 @@ void GTreeItem::Update()
 {
 	if (Tree)
 	{
-		GRect p = d->Pos;
+		LRect p = d->Pos;
 		p.x2 = 10000;
 		d->ClearDs();
 		Tree->_Update(&p, TreeUpdateNow);
@@ -856,7 +856,7 @@ void GTreeItem::_MouseClick(GMouse &m)
 			Expanded(!Expanded());
 		}
 
-		GRect rText = d->Text;
+		LRect rText = d->Text;
 		if (Tree && Tree->Columns.Length() > 0)
 			rText.x2 = Tree->X();
 
@@ -883,7 +883,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	pDC->Rectangle(0, d->Pos.y1, (d->Depth*TREE_BLOCK)+TREE_BLOCK, d->Pos.y2);
 
 	// draw trunk
-	GRect Pos = d->Pos;
+	LRect Pos = d->Pos;
 	Pos.x2 = Pos.x1 + Ctx.ColPx[0] - 1;
 
 	int x = 0;
@@ -1012,7 +1012,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 		if (Tree->d->IconCache)
 		{
 			// no flicker
-			GRect From;
+			LRect From;
 
 			From.ZOff(Lst->TileX()-1, Tree->d->IconCache->Y()-1);
 			From.Offset(Lst->TileX()*Image, 0);
@@ -1061,7 +1061,7 @@ void GTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	_PourText(TextSize);
 	d->Text.ZOff(TextSize.x-1, Pos.Y()-1);
 	d->Text.Offset(x, Pos.y1);
-	(GRect&)Ctx = d->Text;
+	(LRect&)Ctx = d->Text;
 	Ctx.x2 = Ctx.ColPx[0] - 1;
 	_PaintText(Ctx);
 	x = Pos.x2 + 1;
@@ -1114,7 +1114,7 @@ GTree::GTree(int id, int x, int y, int cx, int cy, const char *name) :
 {
 	d = new GTreePrivate;
 	SetId(id);
-	GRect e(x, y, x+cx, y+cy);
+	LRect e(x, y, x+cx, y+cy);
 	SetPos(e);
 	if (name) Name(name);
 	else Name("LGI.GTree");
@@ -1160,21 +1160,21 @@ List<GTreeItem>	*GTree::GetSelLst()
 	return &d->Selection;
 }
 
-void GTree::_Update(GRect *r, bool Now)
+void GTree::_Update(LRect *r, bool Now)
 {
 	TREELOCK
 
 	if (r)
 	{
-		GRect u = *r;
+		LRect u = *r;
 		LPoint s = _ScrollPos();
-		GRect c = GetClient();
+		LRect c = GetClient();
 		u.Offset(c.x1-s.x, c.y1-s.y);
 		Invalidate(&u, Now && !d->InPour);
 	}
 	else
 	{
-		Invalidate((GRect*)0, Now && !d->InPour);
+		Invalidate((LRect*)0, Now && !d->InPour);
 	}
 }
 
@@ -1183,8 +1183,8 @@ void GTree::_UpdateBelow(int y, bool Now)
 	TREELOCK
 
 	LPoint s = _ScrollPos();
-	GRect c = GetClient();
-	GRect u(c.x1, y - s.y + c.y1, X()-1, Y()-1);
+	LRect c = GetClient();
+	LRect u(c.x1, y - s.y + c.y1, X()-1, Y()-1);
 	Invalidate(&u, Now);
 }
 
@@ -1219,7 +1219,7 @@ void GTree::_UpdateScrollBars()
 			TREELOCK
 			LPoint Old = _ScrollPos();
 			
-			GRect Client = GetClient();
+			LRect Client = GetClient();
 			bool x = d->Limit.x > Client.X();
 			bool y = d->Limit.y > Client.Y();
 			SetScrollBars(x, y);
@@ -1580,7 +1580,7 @@ bool GTree::OnKey(GKey &k)
 				GTreeItem *s = Selection();
 				if (s)
 				{
-					GRect *r = &s->d->Text;
+					LRect *r = &s->d->Text;
 					if (r)
 					{
 						GMouse m;
@@ -1694,7 +1694,7 @@ void GTree::OnMouseClick(GMouse &m)
 				if (Over)
 				{
 					Over->Value(true);
-					GRect r = Over->GetPos();
+					LRect r = Over->GetPos();
 					Invalidate(&r);
 					Capture(true);
 				}
@@ -1762,7 +1762,7 @@ void GTree::OnMouseMove(GMouse &m)
 				LPoint p;
 				PointToScreen(p);
 
-				GRect r = DragCol->GetPos();
+				LRect r = DragCol->GetPos();
 				r.Offset(-p.x, -p.y); // to view co-ord
 
 				r.Offset(m.x - DragCol->GetOffset() - r.x1, 0);
@@ -2078,7 +2078,7 @@ void GTree::OnPulse()
 			}
 			else
 			{
-				GRect c = GetClient();
+				LRect c = GetClient();
 				if (VScroll)
 				{
 					if (m.y < DRAG_SCROLL_EDGE)

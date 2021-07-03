@@ -250,9 +250,9 @@ bool LListItem::Select()
 	return d->Selected;
 }
 
-GRect *LListItem::GetPos(int Col)
+LRect *LListItem::GetPos(int Col)
 {
-	static GRect r;
+	static LRect r;
 
 	r = Pos;
 
@@ -354,7 +354,7 @@ void LListItem::Update()
 			LPoint Info;
 			OnMeasure(&Info);
 
-			GRect r = Pos;
+			LRect r = Pos;
 			if (r.Valid())
 			{
 				if (Info.y != r.Y())
@@ -452,7 +452,7 @@ void LListItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 	GSurface *&pDC = Ctx.pDC;
 	if (pDC && c)
 	{
-		GRect ng = Ctx; // non-grid area
+		LRect ng = Ctx; // non-grid area
 
 		if (c->InDrag())
 		{
@@ -631,7 +631,7 @@ LList::LList(int id, int x, int y, int cx, int cy, const char *name)
 	#endif
 	SetTabStop(true);
 
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	LResources::StyleElement(this);
 }
@@ -772,9 +772,9 @@ int LList::OnNotify(GViewI *Ctrl, int Flags)
 	return GLayout::OnNotify(Ctrl, Flags);
 }
 
-GRect &LList::GetClientRect()
+LRect &LList::GetClientRect()
 {
-	static GRect r;
+	static LRect r;
 
 	r = GetPos();
 	r.Offset(-r.x1, -r.y1);
@@ -1161,7 +1161,7 @@ bool LList::OnKey(GKey &k)
 					LListItem *s = GetSelected();
 					if (s)
 					{
-						GRect *r = &s->Pos;
+						LRect *r = &s->Pos;
 						if (r)
 						{
 							GMouse m;
@@ -1347,7 +1347,7 @@ void LList::OnMouseClick(GMouse &m)
 					if (Over)
 					{
 						Over->Value(true);
-						GRect r = Over->GetPos();
+						LRect r = Over->GetPos();
 						Invalidate(&r);
 						Capture(true);
 					}
@@ -1529,7 +1529,7 @@ void LList::OnMouseClick(GMouse &m)
 					{
 						c->Value(false);
 						
-						GRect cpos = c->GetPos();
+						LRect cpos = c->GetPos();
 						Invalidate(&cpos);
 
 						if (cpos.Overlap(m.x, m.y))
@@ -1585,7 +1585,7 @@ void LList::OnMouseClick(GMouse &m)
 					// End column drag
 					if (DragCol)
 					{
-						GRect DragPos = DragCol->GetPos();
+						LRect DragPos = DragCol->GetPos();
 						LPoint p(DragPos.x1 + (DragPos.X()/2), 0);
 						PointToView(p);
 
@@ -1769,7 +1769,7 @@ void LList::OnMouseMove(GMouse &m)
 				LPoint p;
 				PointToScreen(p);
 
-				GRect r = DragCol->GetPos();
+				LRect r = DragCol->GetPos();
 				r.Offset(-p.x, -p.y); // to view co-ord
 
 				r.Offset(m.x - DragCol->GetOffset() - r.x1, 0);
@@ -1815,7 +1815,7 @@ void LList::OnMouseMove(GMouse &m)
 					if (m.Down() && Over != c->Value())
 					{
 						c->Value(Over);
-						GRect r = c->GetPos();
+						LRect r = c->GetPos();
 						Invalidate(&r);
 					}
 				}
@@ -2004,7 +2004,7 @@ bool LList::GetUpdateRegion(LListItem *i, GRegion &r)
 	{
 		if (i->Pos.Valid())
 		{
-			GRect u = i->Pos;
+			LRect u = i->Pos;
 			u.y2 = ItemsPos.y2;
 			r.Union(&u);
 			
@@ -2015,7 +2015,7 @@ bool LList::GetUpdateRegion(LListItem *i, GRegion &r)
 	{
 		if (i->Pos.Valid())
 		{
-			GRect u = i->Pos;
+			LRect u = i->Pos;
 			u.y2 = ItemsPos.y2;
 			r.Union(&u);
 			
@@ -2327,7 +2327,7 @@ void LList::PourAll()
 	#endif
 
 	// Layout all the elements
-	GRect Client = GetClient();
+	LRect Client = GetClient();
 	GFont *Font = GetFont();
 
 	if (d->Mode == LListDetails)
@@ -2372,7 +2372,7 @@ void LList::PourAll()
 				if (i->Pos.Valid() && Info.y != i->Pos.Y())
 				{
 					// This detects changes in item height and invalidates the items below this one.
-					GRect in(0, y+Info.y, X()-1, Y()-1);
+					LRect in(0, y+Info.y, X()-1, Y()-1);
 					Invalidate(&in);
 				}
 
@@ -2561,7 +2561,7 @@ void LList::OnPaint(GSurface *pDC)
 	if (!Buf)
 		Buf = new GMemDC;
 	
-	GRect r = ItemsPos;
+	LRect r = ItemsPos;
 	int n = FirstVisible;
 	int LastY = r.y1;
 	GCss::ColorDef Fill;
@@ -2606,7 +2606,7 @@ void LList::OnPaint(GSurface *pDC)
 				i->OnPaint(Ctx);
 				pDC->Blt(i->Pos.x1, i->Pos.y1, Buf, &Ctx.r);
 				#else
-				(GRect&)Ctx = i->Pos;
+				(LRect&)Ctx = i->Pos;
 				i->OnPaint(Ctx);
 				#endif
 				Rgn.Subtract(&i->Pos);
@@ -2621,7 +2621,7 @@ void LList::OnPaint(GSurface *pDC)
 	}
 		
 	pDC->Colour(Back);
-	for (GRect *w=Rgn.First(); w; w=Rgn.Next())
+	for (LRect *w=Rgn.First(); w; w=Rgn.Next())
 	{
 		pDC->Rectangle(w);
 	}

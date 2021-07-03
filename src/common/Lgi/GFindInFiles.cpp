@@ -104,7 +104,7 @@ GHistoryPopup::GHistoryPopup(GHistory *h) : GPopup(h)
 {
 	History = h;
 	
-	GRect r(0, 0, 300, 200);
+	LRect r(0, 0, 300, 200);
 	SetPos(r);
 	r.Size(1, 1);
 	AddView(Lst = new LList(100, r.x1, r.y1, r.X()-1, r.Y()-1));
@@ -153,7 +153,7 @@ GFindInFiles::GFindInFiles(GViewI *Parent, GAutoString Search, GDom *Store)
 	d->Search = Search;
 	d->Store = Store;
 	SetParent(Parent);
-	GRect r(7, 7, 450, 343);
+	LRect r(7, 7, 450, 343);
 	SetPos(r);
 
 	AddView(d->Tbl = new GTableLayout(IDC_TABLE));

@@ -19,7 +19,7 @@ class LgiClass GTabView :
 
 protected:
 	int TabY();
-	GRect &CalcInset();
+	LRect &CalcInset();
 
 public:
 	enum
@@ -69,7 +69,7 @@ public:
 	GViewI *FindControl(int Id);
 	int OnNotify(GViewI *Ctrl, int Flags);
 	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
-	GRect &GetTabClient();
+	LRect &GetTabClient();
 
 	#if defined(WINNATIVE) && !defined(LGI_SDL)
 	GViewI *FindControl(HWND hCtrl);
@@ -99,7 +99,7 @@ class LgiClass GTabPage :
 	GTabView *TabCtrl;
 	
 	// Position of the clickable UI element for selecting the tab.
-	GRect TabPos;
+	LRect TabPos;
 
 	/// Draws the tab part of the control (in the parent's context)
 	void PaintTab(GSurface *pDC, bool Selected);
@@ -111,7 +111,7 @@ class LgiClass GTabPage :
 	bool Button;
 
 	/// The location of the optional button after the tab's text (set during OnPaint)
-	GRect BtnPos;
+	LRect BtnPos;
 
 	/// This is called when the user clicks the button
 	virtual void OnButtonClick(GMouse &m);

@@ -12,7 +12,7 @@ void lgi_widget_add(GtkContainer *wid, GtkWidget *child);
 void lgi_widget_remove(GtkContainer *wid, GtkWidget *child);
 
 // Other widget methods
-void lgi_widget_setpos(GtkWidget *wid, GRect rc);
+void lgi_widget_setpos(GtkWidget *wid, LRect rc);
 void BuildTabStops(GViewI *v, ::GArray<GViewI*> &a);
 
 G_END_DECLS

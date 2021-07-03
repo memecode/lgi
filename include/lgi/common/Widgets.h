@@ -50,7 +50,7 @@ public:
 		/// The target view to populate
 		GViewI *Parent,
 		/// The size of the view in the resource
-		GRect *Pos = 0,
+		LRect *Pos = 0,
 		/// The name of the window
 		GAutoString *Name = 0,
 		/// [Optional] List of tags to exclude/include items
@@ -83,7 +83,7 @@ public:
 /// 	{
 ///			Str = 0;
 /// 		SetParent(p);
-/// 		GRect r(0, 0, 400, 300);
+/// 		LRect r(0, 0, 400, 300);
 /// 		SetPos(p);
 /// 		MoveToCenter();
 /// 			
@@ -337,7 +337,7 @@ struct GLabelData
 {
 	GView *Ctrl;
 	GSurface *pDC;
-	GRect r;
+	LRect r;
 	int Justification;
 	
 	GLabelData()

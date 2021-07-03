@@ -29,7 +29,7 @@ public:
 	GScrollBar *Widget;
 	bool Vertical;
 	int64 Value, Min, Max, Page;
-	GRect Sub, Add, Slide, PageSub, PageAdd;
+	LRect Sub, Add, Slide, PageSub, PageAdd;
 	int Clicked;
 	bool Over;
 	int SlideOffset;
@@ -57,7 +57,7 @@ public:
 		return Over ? Clicked : BTN_NONE;
 	}
 
-	void DrawIcon(GSurface *pDC, GRect &r, bool Add, LSystemColour c)
+	void DrawIcon(GSurface *pDC, LRect &r, bool Add, LSystemColour c)
 	{
 		pDC->Colour(c);
 		int IconSize = MAX(r.X(), r.Y()) * 2 / 6;
@@ -131,7 +131,7 @@ public:
 		
 			if (IsValid())
 			{
-				GRect r = Slide;
+				LRect r = Slide;
 				r.Size(3, 3);
 				pDC->Colour(L_LOW);
 				
@@ -146,7 +146,7 @@ public:
 		#elif WINXP_LOOK
 		
 			// left/up button
-			GRect r = Sub;
+			LRect r = Sub;
 			DrawBorder(pDC, r, IsOver() == BTN_SUB ? DefaultSunkenEdge : DefaultRaisedEdge);
 			pDC->Colour(L_MED);
 			pDC->Rectangle(&r);
@@ -213,7 +213,7 @@ public:
 
 	void CalcRegions()
 	{
-		GRect r = Widget->GetPos();
+		LRect r = Widget->GetPos();
 		Vertical = r.Y() > r.X();
 
 		int w = GetWidth();
@@ -360,7 +360,7 @@ public:
 		#if MAC_SKIN
 		
 		HIThemeTrackDrawInfo Info;
-		GRect Client = Widget->GetClient();
+		LRect Client = Widget->GetClient();
 		HIRect Rc = Client;
 		Info.version = 0;
 		Info.kind = kThemeScrollBarMedium;
@@ -533,7 +533,7 @@ void GScrollBar::OnPaint(GSurface *pDC)
 		#endif
 	
 		HIThemeTrackDrawInfo Info;
-		GRect Client = GetClient();
+		LRect Client = GetClient();
 		HIRect Rc = Client;
 		Info.version = 0;
 		Info.kind = kThemeScrollBarMedium;

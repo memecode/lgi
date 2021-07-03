@@ -42,7 +42,7 @@ GCheckBox::GCheckBox(int id, int x, int y, int cx, int cy, const char *name, int
 			cy = ds.Y();
 	}
 	
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	SetId(id);
 	SetTabStop(true);

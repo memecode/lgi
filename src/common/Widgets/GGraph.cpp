@@ -211,7 +211,7 @@ struct GGraphPriv
 		return 0;
 	}
 
-	void DrawAxis(GSurface *pDC, GRect &r, int xaxis, GVariant &min, GVariant &max)
+	void DrawAxis(GSurface *pDC, LRect &r, int xaxis, GVariant &min, GVariant &max)
 	{
 		GVariant v = min;
 		bool First = true;
@@ -601,13 +601,13 @@ void GGraph::OnPaint(GSurface *pDC)
 	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle();
 
-	GRect c = GetClient();
-	GRect data = c;
+	LRect c = GetClient();
+	LRect data = c;
 	data.Size(20, 20);
-	GRect y = data;
+	LRect y = data;
 	y.x2 = y.x1 + 60;
 	data.x1 = y.x2 + 1;
-	GRect x = data;
+	LRect x = data;
 	x.y1 = x.y2 - 60;
 	y.y2 = data.y2 = x.y1 - 1;	
 	

@@ -78,7 +78,7 @@ RLogView::RLogView(GLog *log)
 
 int RLogView::GetScreenItems()
 {
-	GRect Client = GetClient();
+	LRect Client = GetClient();
 	int y = SysFont->GetHeight();
 	return Client.Y() / y;
 }
@@ -152,7 +152,7 @@ void RLogView::UpdateScrollBar()
 
 void RLogView::OnPaint(GSurface *pDC)
 {
-	GRect r(GetClient());
+	LRect r(GetClient());
 	r.Offset(-r.x1, -r.y1);
 
 	pDC->Colour(L_MED);
@@ -176,7 +176,7 @@ void RLogView::OnPaint(GSurface *pDC)
         auto e = *It;
 		while (e)
 		{
-			GRect t;
+			LRect t;
 
 			SysFont->Fore(e->c);
 
@@ -235,9 +235,9 @@ void RLogView::OnPaint(GSurface *pDC)
 }
 
 /*
-void RLogView::OnNcPaint(GSurface *pDC, GRect &r)
+void RLogView::OnNcPaint(GSurface *pDC, LRect &r)
 {
-	// GRect r(0, 0, X()-1, Y()-1);
+	// LRect r(0, 0, X()-1, Y()-1);
 	if (r.Valid())
 	{
 		pDC->Colour(LC_MED, 24);

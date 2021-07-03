@@ -32,8 +32,8 @@ LPoint lgi_view_offset(GViewI *v, bool Debug = false)
 		if (dynamic_cast<LWindow*>(p))
 			break;
 		
-		GRect pos = p->GetPos();
-		GRect cli = p->GetClient(false);
+		LRect pos = p->GetPos();
+		LRect cli = p->GetClient(false);
 
 		if (Debug)
 		{
@@ -86,7 +86,7 @@ GMouse &lgi_adjust_click(GMouse &Info, GViewI *Wnd, bool Capturing, bool Debug)
 					Temp.y += TargetOff.y - WndOffset.y;
 
 					#if 0
-					GRect c = Wnd->GetClient(false);
+					LRect c = Wnd->GetClient(false);
 					Temp.x -= c.x1;
 					Temp.y -= c.y1;
 					if (Debug)
@@ -102,7 +102,7 @@ GMouse &lgi_adjust_click(GMouse &Info, GViewI *Wnd, bool Capturing, bool Debug)
 				Temp.Target = Wnd;
 				if (Wnd->WindowVirtualOffset(&Offset))
 				{
-					GRect c = Wnd->GetClient(false);
+					LRect c = Wnd->GetClient(false);
 					Temp.x -= Offset.x + c.x1;
 					Temp.y -= Offset.y + c.y1;
 				}
@@ -488,7 +488,7 @@ int GView::OnCommand(int Cmd, int Event, OsView Wnd)
 	return 0;
 }
 
-void GView::OnNcPaint(GSurface *pDC, GRect &r)
+void GView::OnNcPaint(GSurface *pDC, LRect &r)
 {
 	int Border = Sunken() || Raised() ? _BorderSize : 0;
 	if (Border == 2)
@@ -519,7 +519,7 @@ uint64 nPaint = 0;
 uint64 PaintTime = 0;
 */
 
-void GView::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
+void GView::_Paint(GSurface *pDC, LPoint *Offset, LRect *Update)
 {
 	/*
 	uint64 StartTs = Update ? LgiCurrentTime() : 0;
@@ -542,7 +542,7 @@ void GView::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
 	#endif
 
 	// Non-Client drawing
-	GRect r;
+	LRect r;
 	if (Offset)
 	{
 		r = Pos;
@@ -554,7 +554,7 @@ void GView::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
 	}
 
 	pDC->SetClient(&r);
-	GRect zr1 = r.ZeroTranslate(), zr2 = zr1;
+	LRect zr1 = r.ZeroTranslate(), zr2 = zr1;
 	OnNcPaint(pDC, zr1);
 	pDC->SetClient(NULL);
 	if (zr2 != zr1)
@@ -586,7 +586,7 @@ void GView::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
 		#elif LGI_COCOA
 			auto Ctx = pDC->Handle();
 			CGAffineTransform t = CGContextGetCTM(Ctx);
-			GRect cr = CGContextGetClipBoundingBox(Ctx);
+			LRect cr = CGContextGetClipBoundingBox(Ctx);
 			printf("%s::_Paint() pos=%s transform=%g,%g,%g,%g-%g,%g clip=%s r=%s\n",
 					GetClass(),
 					GetPos().GetStr(),
@@ -619,7 +619,7 @@ void GView::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
 	}
 }
 #else
-void GView::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
+void GView::_Paint(GSurface *pDC, LPoint *Offset, LRect *Update)
 {
 	// Create temp DC if needed...
 	GAutoPtr<GSurface> Local;
@@ -641,7 +641,7 @@ void GView::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
 	#endif
 
 	bool HasClient = false;
-	GRect r(0, 0, Pos.X()-1, Pos.Y()-1), Client;
+	LRect r(0, 0, Pos.X()-1, Pos.Y()-1), Client;
 	LPoint o;
 	if (Offset)
 		o = *Offset;
@@ -666,7 +666,7 @@ void GView::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
 	// Paint this view's contents
 	if (Update)
 	{
-		GRect OldClip = pDC->ClipRgn();
+		LRect OldClip = pDC->ClipRgn();
 		pDC->ClipRgn(Update);
 		OnPaint(pDC);
 		pDC->ClipRgn(OldClip.Valid() ? &OldClip : NULL);
@@ -687,7 +687,7 @@ void GView::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
 			if (!w->Handle())
 			#endif
 			{
-				GRect p = w->GetPos();
+				LRect p = w->GetPos();
 				p.Offset(o.x, o.y);
 				if (HasClient)
 					p.Offset(Client.x1 - r.x1, Client.y1 - r.y1);
@@ -802,7 +802,7 @@ void GView::SetNotify(GViewI *p)
 #define ADJ_UP				3
 #define ADJ_DOWN			4
 
-int IsAdjacent(GRect &a, GRect &b)
+int IsAdjacent(LRect &a, LRect &b)
 {
 	if ( (a.x1 == b.x2 + 1) &&
 		!(a.y1 > b.y2 || a.y2 < b.y1))
@@ -831,9 +831,9 @@ int IsAdjacent(GRect &a, GRect &b)
 	return 0;
 }
 
-GRect JoinAdjacent(GRect &a, GRect &b, int Adj)
+LRect JoinAdjacent(LRect &a, LRect &b, int Adj)
 {
-	GRect t;
+	LRect t;
 
 	switch (Adj)
 	{
@@ -860,16 +860,16 @@ GRect JoinAdjacent(GRect &a, GRect &b, int Adj)
 	return t;
 }
 
-GRect *GView::FindLargest(GRegion &r)
+LRect *GView::FindLargest(GRegion &r)
 {
 	ThreadCheck();
 
 	int Pixels = 0;
-	GRect *Best = 0;
-	static GRect Final;
+	LRect *Best = 0;
+	static LRect Final;
 
 	// do initial run through the list to find largest single region
-	for (GRect *i = r.First(); i; i = r.Next())
+	for (LRect *i = r.First(); i; i = r.Next())
 	{
 		int Pix = i->X() * i->Y();
 		if (Pix > Pixels)
@@ -885,12 +885,12 @@ GRect *GView::FindLargest(GRegion &r)
 		Pixels = Final.X() * Final.Y();
 
 		int LastPixels = Pixels;
-		GRect LastRgn = Final;
+		LRect LastRgn = Final;
 		int ThisPixels = Pixels;
-		GRect ThisRgn = Final;
+		LRect ThisRgn = Final;
 
 		GRegion TempList;
-		for (GRect *i = r.First(); i; i = r.Next())
+		for (LRect *i = r.First(); i; i = r.Next())
 		{
 			TempList.Union(i);
 		}
@@ -902,12 +902,12 @@ GRect *GView::FindLargest(GRegion &r)
 			LastRgn = ThisRgn;
 
 			// search for adjoining rectangles that maybe we can add
-			for (GRect *i = TempList.First(); i; i = TempList.Next())
+			for (LRect *i = TempList.First(); i; i = TempList.Next())
 			{
 				int Adj = IsAdjacent(ThisRgn, *i);
 				if (Adj)
 				{
-					GRect t = JoinAdjacent(ThisRgn, *i, Adj);
+					LRect t = JoinAdjacent(ThisRgn, *i, Adj);
 					int Pix = t.X() * t.Y();
 					if (Pix > ThisPixels)
 					{
@@ -927,15 +927,15 @@ GRect *GView::FindLargest(GRegion &r)
 	return &Final;
 }
 
-GRect *GView::FindSmallestFit(GRegion &r, int Sx, int Sy)
+LRect *GView::FindSmallestFit(GRegion &r, int Sx, int Sy)
 {
 	ThreadCheck();
 
 	int X = 1000000;
 	int Y = 1000000;
-	GRect *Best = 0;
+	LRect *Best = 0;
 
-	for (GRect *i = r.First(); i; i = r.Next())
+	for (LRect *i = r.First(); i; i = r.Next())
 	{
 		if ((i->X() >= Sx && i->Y() >= Sy) &&
 			(i->X() < X || i->Y() < Y))
@@ -949,12 +949,12 @@ GRect *GView::FindSmallestFit(GRegion &r, int Sx, int Sy)
 	return Best;
 }
 
-GRect *GView::FindLargestEdge(GRegion &r, int Edge)
+LRect *GView::FindLargestEdge(GRegion &r, int Edge)
 {
-	GRect *Best = 0;
+	LRect *Best = 0;
 	ThreadCheck();
 
-	for (GRect *i = r.First(); i; i = r.Next())
+	for (LRect *i = r.First(); i; i = r.Next())
 	{
 		if (!Best)
 		{
@@ -1815,11 +1815,11 @@ bool GView::WindowVirtualOffset(LPoint *Offset)
 			if (!Wnd->Handle())
 			#endif
 			{
-				GRect r = Wnd->GetPos();
+				LRect r = Wnd->GetPos();
 				GViewI *Par = Wnd->GetParent();
 				if (Par)
 				{
-					GRect c = Par->GetClient(false);
+					LRect c = Par->GetClient(false);
 					Offset->x += r.x1 + c.x1;
 					Offset->y += r.y1 + c.y1;
 				}
@@ -1862,11 +1862,11 @@ GViewI *GView::WindowFromPoint(int x, int y, int DebugDepth)
 	int n = (int)Children.Length() - 1;
 	for (GViewI *c = *it; c; c = *--it)
 	{
-		GRect CPos = c->GetPos();
+		LRect CPos = c->GetPos();
 		
 		if (CPos.Overlap(x, y) && c->Visible())
 		{
-			GRect CClient;
+			LRect CClient;
 			CClient = c->GetClient(false);
 
             int Ox = CPos.x1 + CClient.x1;
@@ -2142,7 +2142,7 @@ void GView::SetMinimumSize(LPoint Size)
 	d->MinimumSize = Size;
 
 	bool Change = false;
-	GRect p = Pos;
+	LRect p = Pos;
 	if (X() < d->MinimumSize.x)
 	{
 		p.x2 = p.x1 + d->MinimumSize.x - 1;
@@ -2392,7 +2392,7 @@ GViewFactory::~GViewFactory()
 	}
 }
 
-GView *GViewFactory::Create(const char *Class, GRect *Pos, const char *Text)
+GView *GViewFactory::Create(const char *Class, LRect *Pos, const char *Text)
 {
 	if (ValidStr(Class) && AllFactories)
 	{

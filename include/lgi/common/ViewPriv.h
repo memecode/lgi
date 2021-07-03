@@ -27,7 +27,7 @@ extern GMouse &lgi_adjust_click(GMouse &Info,
 								bool Debug = false);
 #ifdef __GTK_H__
 extern LPoint GtkAbsPos(Gtk::GtkWidget *w);
-extern GRect GtkGetPos(Gtk::GtkWidget *w);
+extern LRect GtkGetPos(Gtk::GtkWidget *w);
 #endif
 
 #if !WINNATIVE

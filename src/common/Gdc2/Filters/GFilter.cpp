@@ -288,7 +288,7 @@ GFilter::IoStatus GdcBmp::ReadImage(GSurface *pDC, GStream *In)
 	
 	BMP_FILE File;
 	BMP_WININFO Info;
-	GRect Cr;
+	LRect Cr;
 	
 	Read(In, &File.Type, sizeof(File.Type));
 	Read(In, &File.Size, sizeof(File.Size));

@@ -51,16 +51,16 @@
 #include "lgi/common/Point.h"
 
 /// Rectangle class
-class LgiClass GRect
+class LgiClass LRect
 {
-	friend LgiClass bool operator ==(GRect &a, GRect &b);
-	friend LgiClass bool operator !=(GRect &a, GRect &b);
+	friend LgiClass bool operator ==(LRect &a, LRect &b);
+	friend LgiClass bool operator !=(LRect &a, LRect &b);
 
 public:
 	int x1, y1, x2, y2;
 
-	GRect() {}
-	GRect(int X1, int Y1, int X2, int Y2)
+	LRect() {}
+	LRect(int X1, int Y1, int X2, int Y2)
 	{
 		x1 = X1;
 		x2 = X2;
@@ -68,7 +68,7 @@ public:
 		y2 = Y2;
 	}
 
-	GRect(int Width, int Height)
+	LRect(int Width, int Height)
 	{
 		x1 = 0;
 		x2 = Width - 1;
@@ -76,7 +76,7 @@ public:
 		y2 = Height - 1;
 	}
 
-	GRect(GRect *r)
+	LRect(LRect *r)
 	{
 		x1 = r->x1;
 		x2 = r->x2;
@@ -113,11 +113,11 @@ public:
 	void Offset(LPoint *p);
 	
 	/// Moves the edges by an offset
-	void Offset(GRect *a);
+	void Offset(LRect *a);
 
-	GRect Move(int x, int y)
+	LRect Move(int x, int y)
 	{
-		GRect r = *this;
+		LRect r = *this;
 		r.Offset(x, y);
 		return r;
 	}
@@ -126,37 +126,37 @@ public:
 	void Size(int x, int y);
 
 	/// Zooms the rectangle
-	void Size(GRect *a);
+	void Size(LRect *a);
 
 	/// Sets the width and height
 	void Dimension(int x, int y);
 
 	/// Sets the width and height
-	void Dimension(GRect *a);
+	void Dimension(LRect *a);
 
 	/// Sets the rectangle to the intersection of this object and 'b'
-	void Bound(GRect *b);
+	void Bound(LRect *b);
 
 	/// Returns true if the point 'x,y' is in this rectangle
 	bool Overlap(int x, int y);
 
 	/// Returns true if the rectangle 'b' overlaps this rectangle
-	bool Overlap(GRect *b);
+	bool Overlap(LRect *b);
 	
 	/// Enlarges this rectangle to include the point 'x,y'
 	void Union(int x, int y);
 
 	/// Enlarges this rectangle to include all points in 'a'
-	void Union(GRect *a);
+	void Union(LRect *a);
 
 	/// Makes this rectangle include all points in 'a' OR 'b'
-	void Union(GRect *a, GRect *b);
+	void Union(LRect *a, LRect *b);
 
 	/// Makes this rectangle the intersection of 'this' AND 'a'
-	void Intersection(GRect *a);
+	void Intersection(LRect *a);
 
 	/// Makes this rectangle the intersection of 'a' AND 'b'
-	void Intersection(GRect *a, GRect *b);
+	void Intersection(LRect *a, LRect *b);
 
 	/// Returns a static string formated to include the points in the order: x1,y1,x2,y2
 	char *GetStr();
@@ -168,11 +168,11 @@ public:
 	/// Returns how near a point is to a rectangle
 	int Near(int x, int y);
 	/// Returns how near a point is to a rectangle
-	int Near(GRect &r);
+	int Near(LRect &r);
 
-	GRect ZeroTranslate()
+	LRect ZeroTranslate()
 	{
-		return GRect(0, 0, X()-1, Y()-1);
+		return LRect(0, 0, X()-1, Y()-1);
 	}
 
 	#if LGI_COCOA
@@ -189,7 +189,7 @@ public:
 			return r;
 		}
 		
-		GRect &operator =(OsRect &r)
+		LRect &operator =(OsRect &r)
 		{
 			if (isinf(r.origin.x) || isinf(r.origin.y))
 			{
@@ -205,7 +205,7 @@ public:
 			return *this;
 		}
 		
-		GRect(OsRect r)
+		LRect(OsRect r)
 		{
 			if (isinf(r.origin.x) || isinf(r.origin.y))
 			{
@@ -235,7 +235,7 @@ public:
 			return r;
 		}
 
-		GRect &operator =(OsRect &r)
+		LRect &operator =(OsRect &r)
 		{
 			x1 = (int) r.left;
 			y1 = (int) r.top;
@@ -244,7 +244,7 @@ public:
 			return *this;
 		}
 
-		GRect(OsRect r)
+		LRect(OsRect r)
 		{
 			x1 = (int) r.left;
 			y1 = (int) r.top;
@@ -253,7 +253,7 @@ public:
 		}
 
 		#if defined(MAC)
-		GRect(const CGRect &r)
+		LRect(const CGRect &r)
 		{
 			x1 = (int)r.origin.x;
 			y1 = (int)r.origin.y;
@@ -261,7 +261,7 @@ public:
 			y2 = y1 + (int)r.size.height - 1;
 		}
 
-		GRect &operator =(const CGRect &r)
+		LRect &operator =(const CGRect &r)
 		{
 			x1 = (int)r.origin.x;
 			y1 = (int)r.origin.y;
@@ -283,7 +283,7 @@ public:
 	
 	#endif
 	
-	bool operator ==(const GRect &r)
+	bool operator ==(const LRect &r)
 	{
 		return	x1 == r.x1 &&
 				y1 == r.y1 &&
@@ -291,7 +291,7 @@ public:
 				y2 == r.y2;
 	}
 	
-	GRect &operator =(const GRect &r);	
+	LRect &operator =(const LRect &r);	
 	
 	#ifdef __GTK_H__
 	operator Gtk::GdkRectangle()
@@ -304,7 +304,7 @@ public:
 	    return r;
 	}
 
-	GRect &operator =(const Gtk::GdkRectangle r)
+	LRect &operator =(const Gtk::GdkRectangle r)
 	{
 		x1 = r.x;
 		y1 = r.y;
@@ -313,7 +313,7 @@ public:
 		return *this;
 	}
 
-	GRect(const Gtk::GtkAllocation &a)
+	LRect(const Gtk::GtkAllocation &a)
 	{
 		x1 = a.x;
 		y1 = a.y;
@@ -330,33 +330,33 @@ public:
 	}
 	#endif
 
-	GRect operator +(const LPoint &p)
+	LRect operator +(const LPoint &p)
 	{
-		GRect r = *this;
+		LRect r = *this;
 		r.Offset(p.x, p.y);
 		return r;
 	}
 	
-	GRect &operator +=(const LPoint &p)
+	LRect &operator +=(const LPoint &p)
 	{
 		Offset(p.x, p.y);
 		return *this;
 	}
 	
-	GRect operator -(const LPoint &p)
+	LRect operator -(const LPoint &p)
 	{
-		GRect r = *this;
+		LRect r = *this;
 		r.Offset(-p.x, -p.y);
 		return r;
 	}
 	
-	GRect &operator -=(const LPoint &p)
+	LRect &operator -=(const LPoint &p)
 	{
 		Offset(-p.x, -p.y);
 		return *this;
 	}
 
-	GRect &operator *=(int factor)
+	LRect &operator *=(int factor)
 	{
 		x1 *= factor;
 		y1 *= factor;
@@ -365,7 +365,7 @@ public:
 		return *this;
 	}
 	
-	GRect &operator /=(int factor)
+	LRect &operator /=(int factor)
 	{
 		x1 /= factor;
 		y1 /= factor;
@@ -375,11 +375,11 @@ public:
 	}
 };
 
-LgiClass bool operator ==(GRect &a, GRect &b);
-LgiClass bool operator !=(GRect &a, GRect &b);
+LgiClass bool operator ==(LRect &a, LRect &b);
+LgiClass bool operator !=(LRect &a, LRect &b);
 
 /// A region is a list of non-overlapping rectangles that can describe any shape
-class LgiClass GRegion : public GRect
+class LgiClass GRegion : public LRect
 {
 	/// Current number of stored rectangles
 	int Size;
@@ -388,16 +388,16 @@ class LgiClass GRegion : public GRect
 	/// The current index (must be >= 0 and < Size)
 	int Current;
 	/// The array of rectangles
-	GRect *a;
+	LRect *a;
 
 	bool SetSize(int s);
-	GRect *NewOne() { return (SetSize(Size+1)) ? a+(Size-1) : 0; }
+	LRect *NewOne() { return (SetSize(Size+1)) ? a+(Size-1) : 0; }
 	bool Delete(int i);
 
 public:
 	GRegion();
 	GRegion(int X1, int Y1, int X2, int Y2);
-	GRegion(const GRect &r);
+	GRegion(const LRect &r);
 	GRegion(OsRect &r);
 	GRegion(GRegion &c);
 	~GRegion();
@@ -405,26 +405,26 @@ public:
 	int X() { return x2 - x1 + 1; }
 	int Y() { return y2 - y1 + 1; }
 	int Length() { return Size; }
-	GRect *operator [](int i) { return (i >= 0 && i < Size) ? a+i : 0; }
-	GRegion &operator =(const GRect &r);	
-	GRect *First();
-	GRect *Last();
-	GRect *Next();
-	GRect *Prev();
+	LRect *operator [](int i) { return (i >= 0 && i < Size) ? a+i : 0; }
+	GRegion &operator =(const LRect &r);	
+	LRect *First();
+	LRect *Last();
+	LRect *Next();
+	LRect *Prev();
 
 	void Empty();
 	void ZOff(int x, int y);
 	void Normal();
 	bool Valid();
 	void Offset(int x, int y);
-	void Bound(GRect *b);
-	GRect Bound();
-	bool Overlap(GRect *b);
+	void Bound(LRect *b);
+	LRect Bound();
+	bool Overlap(LRect *b);
 	bool Overlap(int x, int y);
 	
-	void Union(GRect *a);
-	void Intersect(GRect *a);
-	void Subtract(GRect *a);
+	void Union(LRect *a);
+	void Intersect(LRect *a);
+	void Subtract(LRect *a);
 	
 	/// This joins adjacent blocks into one rect where possible
 	void Simplify

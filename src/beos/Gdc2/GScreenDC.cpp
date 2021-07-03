@@ -19,8 +19,8 @@ public:
 	OsView View;
 	int Depth;
 	bool ClientClip;
-	GRect Client;
-	GRect Clip;
+	LRect Client;
+	LRect Clip;
 	int ConstAlpha;
 	
 	GScreenPrivate()
@@ -59,7 +59,7 @@ int GScreenDC::GetFlags()
 	return 0;
 }
 
-bool GScreenDC::GetClient(GRect *c)
+bool GScreenDC::GetClient(LRect *c)
 {
 	if (!c)
 		return false;
@@ -68,7 +68,7 @@ bool GScreenDC::GetClient(GRect *c)
 	return true;
 }
 
-void GScreenDC::SetClient(GRect *r)
+void GScreenDC::SetClient(LRect *r)
 {
 	// Unset previous client
 	if (d->Client.Valid())
@@ -89,7 +89,7 @@ void GScreenDC::SetClient(GRect *r)
 	// Set new client
 	if (d->Client.Valid())
 	{
-		GRect b = d->Client;
+		LRect b = d->Client;
 		b.Offset(-b.x1, -b.y1);
 		BRegion r(b);
 		d->View->ConstrainClippingRegion(&r);
@@ -133,12 +133,12 @@ void GScreenDC::SetOrigin(int x, int y)
 	d->View->SetOrigin(-x, -y);
 }
 
-GRect GScreenDC::ClipRgn()
+LRect GScreenDC::ClipRgn()
 {
 	return d->Clip;
 }
 
-GRect GScreenDC::ClipRgn(GRect *Rgn)
+LRect GScreenDC::ClipRgn(LRect *Rgn)
 {
 	if (Rgn)
 	{
@@ -318,7 +318,7 @@ void GScreenDC::Box(int x1, int y1, int x2, int y2)
 	d->View->StrokeRect(BRect(x1, y1, x2, y2));
 }
 
-void GScreenDC::Box(GRect *a)
+void GScreenDC::Box(LRect *a)
 {
 	BRect r;
 	if (a)
@@ -340,7 +340,7 @@ void GScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 	d->View->FillRect(BRect(x1, y1, x2, y2));
 }
 
-void GScreenDC::Rectangle(GRect *a)
+void GScreenDC::Rectangle(LRect *a)
 {
 	BRect r;
 	if (a)
@@ -357,7 +357,7 @@ void GScreenDC::Rectangle(GRect *a)
 	d->View->FillRect(r);
 }
 
-void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
+void GScreenDC::Blt(int x, int y, GSurface *Src, LRect *a)
 {
 	if (Src)
 	{
@@ -373,7 +373,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 			BBitmap *Bmp = Dc ? Dc->GetBitmap() : 0;
 			if (Bmp)
 			{
-				GRect SrcRc;
+				LRect SrcRc;
 				if (a)
 					SrcRc = *a;
 				else
@@ -407,7 +407,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	}
 }
 
-void GScreenDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
+void GScreenDC::StretchBlt(LRect *d, GSurface *Src, LRect *s)
 {
 }
 
@@ -434,7 +434,7 @@ void GScreenDC::Bezier(int Threshold, LPoint *Pt)
 {
 }
 
-void GScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, GRect *Bounds)
+void GScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
 }
 

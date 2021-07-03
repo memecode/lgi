@@ -695,7 +695,7 @@ public:
 
     void OnPaint(GSurface *pDC)
     {
-        GRect c = GetClient();
+        LRect c = GetClient();
         pDC->Colour(GColour(0xcc, 0xcc, 0xcc));
         pDC->Rectangle();
         pDC->Colour(GColour(0xff, 0, 0));
@@ -861,7 +861,7 @@ void LResources::Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2)
 		GView *w = CastToGWnd(Obj);
 		if (w)
 		{
-			GRect n(x1, y1, x2, y2);
+			LRect n(x1, y1, x2, y2);
 			w->SetPos(n);
 		}
 	}
@@ -976,7 +976,7 @@ bool LResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 	return true;
 }
 
-GRect LResources::Res_GetPos(ResObject *Obj)
+LRect LResources::Res_GetPos(ResObject *Obj)
 {
 	GView *w = CastToGWnd(Obj);
 	if (w)
@@ -984,7 +984,7 @@ GRect LResources::Res_GetPos(ResObject *Obj)
 		return w->GetPos();
 	}
 
-	return GRect(0, 0, 0, 0);
+	return LRect(0, 0, 0, 0);
 }
 
 int LResources::Res_GetStrRef(ResObject *Obj)
@@ -1041,7 +1041,7 @@ void LResources::Res_Attach(ResObject *Obj, ResObject *Parent)
 		{
 			if (Tab)
 			{
-				GRect r = o->GetPos();
+				LRect r = o->GetPos();
 				r.Offset(-4, -24);
 				o->SetPos(r);
 
@@ -1224,7 +1224,7 @@ bool LgiMenuRes::Read(GXmlTag *t, ResFileFormat Format)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Dialog
-bool LResourceLoad::LoadFromResource(int Resource, GViewI *Parent, GRect *Pos, GAutoString *Name, char *TagList)
+bool LResourceLoad::LoadFromResource(int Resource, GViewI *Parent, LRect *Pos, GAutoString *Name, char *TagList)
 {
 	LgiGetResObj();
 
@@ -1366,7 +1366,7 @@ const char *LgiLoadString(int Res, const char *Default)
 	return Default;
 }
 
-bool LResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoString *Name, GEventsI *Engine, char *TagList)
+bool LResources::LoadDialog(int Resource, GViewI *Parent, LRect *Pos, GAutoString *Name, GEventsI *Engine, char *TagList)
 {
 	bool Status = false;
 
@@ -1426,7 +1426,7 @@ bool LResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStrin
 				}
 				else if (Parent && stricmp(Parent->GetClass(), "GTabPage"))
 				{
-					GRect r = Parent->GetPos();
+					LRect r = Parent->GetPos();
 					r.Dimension(x, y);
 					Parent->SetPos(r);
 				}

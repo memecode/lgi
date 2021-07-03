@@ -42,43 +42,43 @@ using namespace Gtk;
 struct CursorInfo
 {
 public:
-	GRect Pos;
+	LRect Pos;
 	LPoint HotSpot;
 }
 CursorMetrics[] =
 {
 	// up arrow
-	{ GRect(0, 0, 8, 15),			LPoint(4, 0) },
+	{ LRect(0, 0, 8, 15),			LPoint(4, 0) },
 	// cross hair
-	{ GRect(20, 0, 38, 18),			LPoint(29, 9) },
+	{ LRect(20, 0, 38, 18),			LPoint(29, 9) },
 	// hourglass
-	{ GRect(40, 0, 51, 15),			LPoint(45, 8) },
+	{ LRect(40, 0, 51, 15),			LPoint(45, 8) },
 	// I beam
-	{ GRect(60, 0, 66, 17),			LPoint(63, 8) },
+	{ LRect(60, 0, 66, 17),			LPoint(63, 8) },
 	// N-S arrow
-	{ GRect(80, 0, 91, 16),			LPoint(85, 8) },
+	{ LRect(80, 0, 91, 16),			LPoint(85, 8) },
 	// E-W arrow
-	{ GRect(100, 0, 116, 11),		LPoint(108, 5) },
+	{ LRect(100, 0, 116, 11),		LPoint(108, 5) },
 	// NW-SE arrow
-	{ GRect(120, 0, 132, 12),		LPoint(126, 6) },
+	{ LRect(120, 0, 132, 12),		LPoint(126, 6) },
 	// NE-SW arrow
-	{ GRect(140, 0, 152, 12),		LPoint(146, 6) },
+	{ LRect(140, 0, 152, 12),		LPoint(146, 6) },
 	// 4 way arrow
-	{ GRect(160, 0, 178, 18),		LPoint(169, 9) },
+	{ LRect(160, 0, 178, 18),		LPoint(169, 9) },
 	// Blank
-	{ GRect(0, 0, 0, 0),			LPoint(0, 0) },
+	{ LRect(0, 0, 0, 0),			LPoint(0, 0) },
 	// Vertical split
-	{ GRect(180, 0, 197, 16),		LPoint(188, 8) },
+	{ LRect(180, 0, 197, 16),		LPoint(188, 8) },
 	// Horizontal split
-	{ GRect(200, 0, 216, 17),		LPoint(208, 8) },
+	{ LRect(200, 0, 216, 17),		LPoint(208, 8) },
 	// Hand
-	{ GRect(220, 0, 233, 13),		LPoint(225, 0) },
+	{ LRect(220, 0, 233, 13),		LPoint(225, 0) },
 	// No drop
-	{ GRect(240, 0, 258, 18),		LPoint(249, 9) },
+	{ LRect(240, 0, 258, 18),		LPoint(249, 9) },
 	// Copy drop
-	{ GRect(260, 0, 279, 19),		LPoint(260, 0) },
+	{ LRect(260, 0, 279, 19),		LPoint(260, 0) },
 	// Move drop
-	{ GRect(280, 0, 299, 19),		LPoint(280, 0) },
+	{ LRect(280, 0, 299, 19),		LPoint(280, 0) },
 };
 
 // CursorData is a bitmap in an array of uint32's. This is generated from a graphics file:
@@ -430,7 +430,7 @@ bool GView::_Mouse(GMouse &m, bool Move)
 	if (!Target)
 		return false;
 
-	GRect Client = Target->GView::GetClient(false);
+	LRect Client = Target->GView::GetClient(false);
 	
 	m = lgi_adjust_click(m, Target, !Move);
 	if (!Client.Valid() || Client.Overlap(m.x, m.y) || _Capturing)
@@ -552,11 +552,11 @@ gboolean GView::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 	return false;
 }
 
-GRect &GView::GetClient(bool ClientSpace)
+LRect &GView::GetClient(bool ClientSpace)
 {
 	int Edge = (Sunken() || Raised()) ? _BorderSize : 0;
 
-	static GRect c;
+	static LRect c;
 	if (ClientSpace)
 	{
 		c.ZOff(Pos.X() - 1 - (Edge<<1), Pos.Y() - 1 - (Edge<<1));
@@ -584,7 +584,7 @@ void GView::Quit(bool DontDelete)
 	}
 }
 
-bool GView::SetPos(GRect &p, bool Repaint)
+bool GView::SetPos(LRect &p, bool Repaint)
 {
 	if (Pos != p)
 	{
@@ -595,14 +595,14 @@ bool GView::SetPos(GRect &p, bool Repaint)
 	return true;
 }
 
-GRect GtkGetPos(GtkWidget *w)
+LRect GtkGetPos(GtkWidget *w)
 {
 	GtkAllocation a = {0};
 	gtk_widget_get_allocation(w, &a);
 	return a;
 }
 
-bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
+bool GView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 {
 	auto *ParWnd = GetWindow();
 	if (!ParWnd)
@@ -613,7 +613,7 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 		return PostEvent(M_INVALIDATE, NULL, (GMessage::Param)this);
 	}
 
-	GRect r;
+	LRect r;
 	if (rc)
 	{
 		r = *rc;
@@ -699,7 +699,7 @@ GMessage::Param GView::OnEvent(GMessage *Msg)
 		{
 			if ((GView*)this == (GView*)Msg->B())
 			{
-				GAutoPtr<GRect> r((GRect*)Msg->A());
+				GAutoPtr<LRect> r((LRect*)Msg->A());
 				Invalidate(r);
 			}
 			break;

@@ -58,7 +58,7 @@ public:
 		Registered = false;
 		PosType = pos;
 
-		GRect r(width - 1, height - 1);
+		LRect r(width - 1, height - 1);
 		Edit = edit;
 		SetPos(r);
 		AddView(Lst = new LList(IDC_BROWSE_LIST, r.x1+1, r.y1+1, r.X()-3, r.Y()-3));
@@ -106,7 +106,7 @@ public:
 	void AdjustPosition()
 	{
 		// Set position relative to editbox
-		GRect r = GetPos();
+		LRect r = GetPos();
 		LPoint p(0, PosType == PopupAbove ? 0 : Edit->Y());
 		Edit->PointToScreen(p);
 		if (PosType == PopupAbove)
@@ -153,11 +153,11 @@ public:
 	{
 		// Draw the CSS border... (the default value is set in the constructor)
 		GCssTools t(GetCss(true), GetFont());
-		GRect c = GetClient();
+		LRect c = GetClient();
 		c = t.PaintBorder(pDC, c);
 		
 		// Move Lst if needed...
-		GRect r = Lst->GetPos();
+		LRect r = Lst->GetPos();
 		if (r != c)
 			Lst->SetPos(c);
 	}

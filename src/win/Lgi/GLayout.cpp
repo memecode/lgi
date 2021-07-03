@@ -158,11 +158,11 @@ bool GLayout::Pour(GRegion &r)
 	if (!_PourLargest)
 		return false;
 
-	GRect *Largest = FindLargest(r);
+	LRect *Largest = FindLargest(r);
 	if (!Largest)
 		return false;
 
-	GRect p = *Largest;
+	LRect p = *Largest;
 	GCss *css = GetCss();
 	if (css)
 	{

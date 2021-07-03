@@ -75,7 +75,7 @@ protected:
 	// Array of display strings...
 	GArray<LLayoutRun*> Text;
 	GArray<GDisplayString*> Strs;
-	GRect Bounds;
+	LRect Bounds;
 
 public:
 	bool Debug;
@@ -90,7 +90,7 @@ public:
 	LPoint GetMin() { return Min; }
 	LPoint GetMax() { return Max; }
 	GArray<GDisplayString*> *GetStrs() { return &Strs; }
-	GRect GetBounds() { return Bounds; }
+	LRect GetBounds() { return Bounds; }
 
 	/// Adds a run of text with the same style
 	bool Add(const char *Str, GCss *Style);
@@ -110,7 +110,7 @@ public:
 	void Paint(	GSurface *pDC,
 				LPoint pt,
 				GColour Back,
-				GRect &rc,
+				LRect &rc,
 				bool Enabled,
 				bool Focused);
 };

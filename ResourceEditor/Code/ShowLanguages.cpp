@@ -48,7 +48,7 @@ ShowLanguagesDlg::ShowLanguagesDlg(AppWnd *app)
 	d = new ShowLanguagesDlgPriv;
 	SetParent(d->App = app);
 
-	GRect r(0, 0, 300, 500);
+	LRect r(0, 0, 300, 500);
 	SetPos(r);
 	MoveToCenter();
 	Name("Show Languages");

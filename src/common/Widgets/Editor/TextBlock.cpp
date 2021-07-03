@@ -87,7 +87,7 @@ GRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, GSurface *img, G
 		{
 			int x = Idx % EMOJI_GROUP_X;
 			int y = Idx / EMOJI_GROUP_X;
-			GRect &rc = SrcRect[i];
+			LRect &rc = SrcRect[i];
 			rc.ZOff(EMOJI_CELL_SIZE-1, EMOJI_CELL_SIZE-1);
 			rc.Offset(x * EMOJI_CELL_SIZE, y * EMOJI_CELL_SIZE);
 		}
@@ -120,7 +120,7 @@ GAutoPtr<GRichTextPriv::DisplayStr> GRichTextPriv::EmojiDisplayStr::Clone(ssize_
 
 void GRichTextPriv::EmojiDisplayStr::Paint(GSurface *pDC, int &FixX, int FixY, GColour &Back)
 {
-	GRect f(0, 0, x-1, y-1);
+	LRect f(0, 0, x-1, y-1);
 	f.Offset(FixedToInt(FixX), FixedToInt(FixY));
 	pDC->Colour(Back);
 	pDC->Rectangle(&f);
@@ -474,7 +474,7 @@ bool GRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 		TextLine *tl = Layout[i];
 		PtrCheckBreak(tl);
 
-		GRect r = tl->PosOff;
+		LRect r = tl->PosOff;
 		r.Offset(Pos.x1, Pos.y1);
 				
 		int FixX = 0;
@@ -580,7 +580,7 @@ bool GRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 		PtrCheckBreak(tl);
 		// int InitCharPos = CharPos;
 
-		GRect r = tl->PosOff;
+		LRect r = tl->PosOff;
 		r.Offset(Pos.x1, Pos.y1);
 		bool Over = r.Overlap(htr.In.x, htr.In.y);
 		bool OnThisLine =	htr.In.y >= r.y1 &&
@@ -737,7 +737,7 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 	}
 	
 	// Paint margins, borders and padding...
-	GRect r = Pos;
+	LRect r = Pos;
 	r.x1 -= Margin.x1;
 	r.y1 -= Margin.y1;
 	r.x2 -= Margin.x2;
@@ -761,7 +761,7 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 	{
 		TextLine *Line = Layout[i];
 
-		GRect LinePos = Line->PosOff;
+		LRect LinePos = Line->PosOff;
 		LinePos.Offset(Pos.x1, Pos.y1);
 		if (Line->PosOff.X() < Pos.X())
 		{
@@ -816,7 +816,7 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 			int FixY = IntToFixed(CurY + Ds->OffsetY);
 
 			#if DEBUG_OUTLINE_CUR_STYLE_TEXT
-			GRect r(0, 0, -1, -1);
+			LRect r(0, 0, -1, -1);
 			if (Ctx.Cursor->Blk == (Block*)this)
 			{
 				GArray<StyleText*> CurStyle;
@@ -913,7 +913,7 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 					Ctx.Cursor->Offset >= CharPos &&
 					Ctx.Cursor->Offset < CharPos + Ds->Chars)
 				{
-					GRect r(0, 0, Ds->X()-1, Ds->Y()-1);
+					LRect r(0, 0, Ds->X()-1, Ds->Y()-1);
 					r.Offset(FixedToInt(OldFixX), FixedToInt(FixY));
 					Ctx.pDC->Colour(GColour::Red);
 					Ctx.pDC->Box(&r);

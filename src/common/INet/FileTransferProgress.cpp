@@ -54,7 +54,7 @@ class GPaneThrottle : public GStatusPane
 
 	void Set()
 	{
-		GRect r(0, 0, THROTTLE_TEXT_WIDTH, Y()-1);
+		LRect r(0, 0, THROTTLE_TEXT_WIDTH, Y()-1);
 		GView::Invalidate(&r);
 
 		if (App)
@@ -99,7 +99,7 @@ int GPaneThrottle::OnNotify(GViewI *Ctrl, int Flags)
 
 void GPaneThrottle::OnPaint(GSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 
 	int x, y;
 	pDC->GetOrigin(x, y);
@@ -110,7 +110,7 @@ void GPaneThrottle::OnPaint(GSurface *pDC)
 
 	if (Slider)
 	{
-		GRect Sr = r;
+		LRect Sr = r;
 		#ifdef WIN32
 		Sr.Offset(GetPos().x1, GetPos().y1);
 		#endif
@@ -269,7 +269,7 @@ GPaneHistory::~GPaneHistory()
 
 void GPaneHistory::OnPaint(GSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 
 	LgiThinBorder(pDC, r, DefaultSunkenEdge);
 	pDC->Colour(L_MED);

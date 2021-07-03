@@ -63,7 +63,7 @@ GFontSelect::GFontSelect(GView *Parent, void *Init, int InitLen)
 
 	SetParent(Parent);
 	Name(LgiLoadString(L_FONTUI_TITLE, "Select Font"));
-	GRect r(0, 0, 290 + LgiApp->GetMetric(LGI_MET_DECOR_X), 290 + LgiApp->GetMetric(LGI_MET_DECOR_Y));
+	LRect r(0, 0, 290 + LgiApp->GetMetric(LGI_MET_DECOR_X), 290 + LgiApp->GetMetric(LGI_MET_DECOR_Y));
 	SetPos(r);
 	MoveToCenter();
 

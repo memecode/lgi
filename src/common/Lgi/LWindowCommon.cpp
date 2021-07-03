@@ -35,9 +35,9 @@ void LWindow::BuildShortcuts(ShortcutMap &Map, GViewI *v)
 
 void LWindow::MoveOnScreen()
 {
-	GRect p = GetPos();
+	LRect p = GetPos();
 	GArray<GDisplayInfo*> Displays;
-	GRect Screen(0, 0, -1, -1);
+	LRect Screen(0, 0, -1, -1);
 
 	if (
 		#if WINNATIVE
@@ -51,7 +51,7 @@ void LWindow::MoveOnScreen()
 		int Close = 0x7fffffff;
 		for (int i=0; i<Displays.Length(); i++)
 		{
-			GRect o = p;
+			LRect o = p;
 			o.Bound(&Displays[i]->r);
 			if (o.Valid())
 			{
@@ -96,9 +96,9 @@ void LWindow::MoveOnScreen()
 
 void LWindow::MoveToCenter()
 {
-	GRect Screen(0, 0, GdcD->X()-1, GdcD->Y()-1);
+	LRect Screen(0, 0, GdcD->X()-1, GdcD->Y()-1);
 	::GArray<GDisplayInfo*> Displays;
-	GRect p = GetPos();
+	LRect p = GetPos();
 
 	p.Offset(-p.x1, -p.y1);
 	if (LgiGetDisplays(Displays, &Screen) && Displays.Length() > 0)
@@ -133,7 +133,7 @@ void LWindow::MoveToMouse()
 	GMouse m;
 	if (GetMouse(m, true))
 	{
-		GRect p = GetPos();
+		LRect p = GetPos();
 
 		p.Offset(-p.x1, -p.y1);
 		p.Offset(m.x-(p.X()/2), m.y-(p.Y()/2));
@@ -152,11 +152,11 @@ bool LWindow::MoveSameScreen(GViewI *View)
 	}
 
 	auto Wnd = View->GetWindow();
-	GRect p = Wnd ? Wnd->GetPos() : View->GetPos();
+	LRect p = Wnd ? Wnd->GetPos() : View->GetPos();
 	int cx = p.x1 + (p.X() >> 4);
 	int cy = p.y1 + (p.Y() >> 4);
 	
-	GRect np = GetPos();
+	LRect np = GetPos();
 	np.Offset(cx - np.x1, cy - np.y1);
 	SetPos(np);
 	

@@ -26,7 +26,7 @@
 class GItemColumnPrivate
 {
 public:
-	GRect Pos;
+	LRect Pos;
 	bool Down;
 	bool Drag;
 
@@ -69,7 +69,7 @@ public:
 };
 
 static GColour cActiveCol(0x86, 0xba, 0xe9);
-static void FillStops(GArray<GColourStop> &Stops, GRect &r, bool Active)
+static void FillStops(GArray<GColourStop> &Stops, LRect &r, bool Active)
 {
 	if (Active)
 	{
@@ -122,7 +122,7 @@ void GItemContainer::PaintColumnHeadings(GSurface *pDC)
 		return;
 
 	GSurface *ColDC = pDC;
-	GRect cr;
+	LRect cr;
 
 	#if DOUBLE_BUFFER_COLUMN_DRAWING
 	GMemDC Bmp;
@@ -175,7 +175,7 @@ void GItemContainer::PaintColumnHeadings(GSurface *pDC)
 		// Draw end section where there are no columns
 		#ifdef MAC
 			GArray<GColourStop> Stops;
-			GRect j(cr.x1, cr.y1, cr.x2-1, cr.y2-1);
+			LRect j(cr.x1, cr.y1, cr.x2-1, cr.y2-1);
 		
 			FillStops(Stops, j, false);
 			LgiFillGradient(ColDC, j, true, Stops);
@@ -475,7 +475,7 @@ GDragColumn::GDragColumn(GItemContainer *list, int col)
 		Col->d->Down = false;
 		Col->d->Drag = true;
 
-		GRect r = Col->d->Pos;
+		LRect r = Col->d->Pos;
 		r.y1 = 0;
 		r.y2 = List->Y()-1;
 		List->Invalidate(&r, true);
@@ -576,7 +576,7 @@ void GDragColumn::OnPaint(GSurface *pScreen)
 	#if LINUX_TRANS_COL
 	if (Buf && pDC)
 	{
-		GRect p = GetPos();
+		LRect p = GetPos();
 		
 		// Fill the buffer with the background
 		Buf->Blt(ListScrPos.x - p.x1, 0, Back);
@@ -650,12 +650,12 @@ bool GItemColumn::InDrag()
 	return d->Drag;
 }
 
-GRect GItemColumn::GetPos()
+LRect GItemColumn::GetPos()
 {
 	return d->Pos;
 }
 
-void GItemColumn::SetPos(GRect &r)
+void GItemColumn::SetPos(LRect &r)
 {
 	d->Pos = r;
 }
@@ -719,7 +719,7 @@ void GItemColumn::Width(int i)
 			if (d->Parent->IsAttached())
 			{
 				// Update the screen from this column across
-				GRect Up = d->Parent->GetClient();
+				LRect Up = d->Parent->GetClient();
 				Up.x1 = d->Pos.x1;
 				d->Parent->Invalidate(&Up);
 			}
@@ -796,7 +796,7 @@ void GItemColumn::Value(bool i)
 	d->Down = i;
 }
 
-void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
+void GItemColumn::OnPaint_Content(GSurface *pDC, LRect &r, bool FillBackground)
 {
 	if (!d->Drag)
 	{
@@ -835,7 +835,7 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 			
 			if (d->Parent->GetImageList())
 			{
-				GRect *b = d->Parent->GetImageList()->GetBounds();
+				LRect *b = d->Parent->GetImageList()->GetBounds();
 				int x = r.x1;
 				int y = r.y1;
 				if (b)
@@ -925,14 +925,14 @@ void GItemColumn::OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground)
 	}
 }
 
-void ColumnPaint(void *UserData, GSurface *pDC, GRect &r, bool FillBackground)
+void ColumnPaint(void *UserData, GSurface *pDC, LRect &r, bool FillBackground)
 {
 	((GItemColumn*)UserData)->OnPaint_Content(pDC, r, FillBackground);
 }
 
-void GItemColumn::OnPaint(GSurface *pDC, GRect &Rgn)
+void GItemColumn::OnPaint(GSurface *pDC, LRect &Rgn)
 {
-	GRect r = Rgn;
+	LRect r = Rgn;
 
 	if (d->Drag)
 	{
@@ -944,7 +944,7 @@ void GItemColumn::OnPaint(GSurface *pDC, GRect &Rgn)
 		#ifdef MAC
 
 			GArray<GColourStop> Stops;
-			GRect j(r.x1, r.y1, r.x2-1, r.y2-1);
+			LRect j(r.x1, r.y1, r.x2-1, r.y2-1);
 			FillStops(Stops, j, d->cMark != 0);
 			LgiFillGradient(pDC, j, true, Stops);
 			if (d->cMark)
@@ -954,7 +954,7 @@ void GItemColumn::OnPaint(GSurface *pDC, GRect &Rgn)
 			pDC->Line(r.x1, r.y2, r.x2, r.y2);
 			pDC->Line(r.x2, r.y1, r.x2, r.y2);
 
-			GRect n = r;
+			LRect n = r;
 			n.Size(2, 2);
 			OnPaint_Content(pDC, n, false);
 
@@ -1139,7 +1139,7 @@ GItemEdit::GItemEdit(GView *parent, GItem *item, int index, int SelStart, int Se
 	SetParent(parent);
 	GetParent()->PointToScreen(p);
 
-	GRect r = d->Item->GetPos(d->Index);
+	LRect r = d->Item->GetPos(d->Index);
 	int MinY = 6 + SysFont->GetHeight();
 	if (r.Y() < MinY)
 		r.y2 = r.y1 + MinY - 1;

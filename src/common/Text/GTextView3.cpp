@@ -128,7 +128,7 @@ class GTextView3Private : public GCss, public LMutex
 {
 public:
 	GTextView3 *View;
-	GRect rPadding;
+	LRect rPadding;
 	int PourX;
 	bool LayoutDirty;
 	ssize_t DirtyStart, DirtyLen;
@@ -443,7 +443,7 @@ GTextView3::GTextView3(	int Id,
 	CursorPos.ZOff(1, LineY-1);
 	CursorPos.Offset(d->rPadding.x1, d->rPadding.y1);
 
-	GRect r;
+	LRect r;
 	r.ZOff(cx-1, cy-1);
 	r.Offset(x, y);
 	SetPos(r);
@@ -837,7 +837,7 @@ void GTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 
 	LgiAssert(InThread());
 
-	GRect Client = GetClient();
+	LRect Client = GetClient();
 	int Mx = Client.X() - d->rPadding.x1 - d->rPadding.x2;
 	int Cy = 0;
 	MaxX = 0;
@@ -1706,7 +1706,7 @@ bool GTextView3::Delete(size_t At, ssize_t Len)
 				GTextLine *Cur = GetTextLine(At, &Index);
 				if (Cur)
 				{
-					GRect r = Cur->r;
+					LRect r = Cur->r;
 					r.x2 = GetClient().x2;
 					r.y2 = GetClient().y2;
 					Invalidate(&r);
@@ -2004,7 +2004,7 @@ bool GTextView3::ScrollToOffset(size_t Off)
 	GTextLine *To = GetTextLine(Off, &ToIndex);
 	if (To)
 	{
-		GRect Client = GetClient();
+		LRect Client = GetClient();
 		int DisplayLines = Client.Y() / LineY;
 
 		if (VScroll)
@@ -2104,7 +2104,7 @@ void GTextView3::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 	)
 	{
 		// Update just the selection bounds
-		GRect Client = GetClient();
+		LRect Client = GetClient();
 		size_t Start, End;
 		if (SelStart >= 0 && s >= 0)
 		{
@@ -2128,7 +2128,7 @@ void GTextView3::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 
 		GTextLine *SLine = GetTextLine(Start);
 		GTextLine *ELine = GetTextLine(End);
-		GRect u;
+		LRect u;
 		if (SLine && ELine)
 		{
 			if (SLine->r.Valid())
@@ -2138,7 +2138,7 @@ void GTextView3::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 			else
 				u.Set(0, 0, Client.X()-1, 1); // Start of visible page 
 			
-			GRect b(0, Client.Y()-1, Client.X()-1, Client.Y()-1);
+			LRect b(0, Client.Y()-1, Client.X()-1, Client.Y()-1);
 			if (ELine->r.Valid())
 			{
 				b = DocToScreen(ELine->r);
@@ -2170,7 +2170,7 @@ void GTextView3::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 		// just the cursor has moved
 
 		// update the line the cursor moved to
-		GRect r = To->r;
+		LRect r = To->r;
 		r.Offset(-ScrollX, d->rPadding.y1-DocOffset);
 		r.x2 = X();
 		Invalidate(&r);
@@ -2582,7 +2582,7 @@ void GTextView3::UpdateScrollBars(bool Reset)
 {
 	if (VScroll)
 	{
-		GRect Before = GetClient();
+		LRect Before = GetClient();
 
 		int DisplayLines = Y() / LineY;
 		ssize_t Lines = GetLines();
@@ -2611,7 +2611,7 @@ void GTextView3::UpdateScrollBars(bool Reset)
 				SelStart = SelEnd = -1;
 			}
 
-			GRect After = GetClient();
+			LRect After = GetClient();
 
 			if (Before != After && GetWrapType())
 			{
@@ -3254,7 +3254,7 @@ void GTextView3::OnPosChange()
 		Processing = true;
 		GLayout::OnPosChange();
 
-		GRect c = GetClient();
+		LRect c = GetClient();
 		bool ScrollYNeeded = c.Y() < (Line.Length() * LineY);
 		bool ScrollChange = ScrollYNeeded ^ (VScroll != NULL);
 		if (ScrollChange)
@@ -3789,7 +3789,7 @@ void GTextView3::OnMouseMove(GMouse &m)
 
 LgiCursor GTextView3::GetCursor(int x, int y)
 {
-	GRect c = GetClient();
+	LRect c = GetClient();
 	c.Offset(-c.x1, -c.y1);
 	GStyle *s = NULL;
 	if (c.Overlap(x, y))
@@ -4749,13 +4749,13 @@ int GTextView3::ScrollYPixel()
 	return ScrollYLine() * LineY;
 }
 
-GRect GTextView3::DocToScreen(GRect r)
+LRect GTextView3::DocToScreen(LRect r)
 {
 	r.Offset(0, d->rPadding.y1 - ScrollYPixel());
 	return r;
 }
 
-void GTextView3::OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour)
+void GTextView3::OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour)
 {
 	pDC->Colour(colour);
 	pDC->Rectangle(&r);
@@ -4792,7 +4792,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 	Prof.Add("Setup");
 	#endif
 		
-		GRect r = GetClient();
+		LRect r = GetClient();
 		r.x2 += ScrollX;
 
 		int Ox, Oy;
@@ -4864,7 +4864,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 			pDC->Rectangle(0, 0, r.x2, d->rPadding.y1-1);
 			// left margin
 			{
-				GRect LeftMargin(0, d->rPadding.y1, d->rPadding.x1-1, r.y2);
+				LRect LeftMargin(0, d->rPadding.y1, d->rPadding.x1-1, r.y2);
 				OnPaintLeftMargin(pDC, LeftMargin, PAINT_BORDER);
 			}
 		
@@ -4902,13 +4902,13 @@ void GTextView3::OnPaint(GSurface *pDC)
 			while ((l = *It) &&
 					l->r.y1+Dy < r.Y())
 			{
-				GRect Tr = l->r;
+				LRect Tr = l->r;
 				#ifdef DOUBLE_BUFFER_PAINT
 				Tr.Offset(-Tr.x1, -Tr.y1);
 				#else
 				Tr.Offset(0, y - Tr.y1);
 				#endif
-				//GRect OldTr = Tr;
+				//LRect OldTr = Tr;
 
 				// deal with selection change on beginning of line
 				if (NextSelection == l->Start)
@@ -5112,9 +5112,9 @@ void GTextView3::OnPaint(GSurface *pDC)
 						if (CanScrollX)
 						{
 							// Cursor on screen check
-							GRect Scr = GetClient();
+							LRect Scr = GetClient();
 							Scr.Offset(ScrollX, 0);
-							GRect Cur = CursorPos;
+							LRect Cur = CursorPos;
 							if (Cur.x2 > Scr.x2 - 5) // right edge check
 							{
 								ScrollX = ScrollX + Cur.x2 - Scr.x2 + 40;
@@ -5129,7 +5129,7 @@ void GTextView3::OnPaint(GSurface *pDC)
 
 						if (Blink)
 						{
-							GRect c = CursorPos;
+							LRect c = CursorPos;
 							#ifdef DOUBLE_BUFFER_PAINT
 							c.Offset(-d->rPadding.x1, -y);
 							#endif
@@ -5347,7 +5347,7 @@ void GTextView3::InternalPulse()
 		{
 			Blink = !Blink;
 
-			GRect p = CursorPos;
+			LRect p = CursorPos;
 			p.Offset(-ScrollX, 0);
 			Invalidate(&p);
 			BlinkTs = Now;
@@ -5399,7 +5399,7 @@ bool GTextView3::OnLayout(GViewLayoutInfo &Inf)
 ///////////////////////////////////////////////////////////////////////////////
 class GTextView3_Factory : public GViewFactory
 {
-	GView *NewView(const char *Class, GRect *Pos, const char *Text)
+	GView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (_stricmp(Class, "GTextView3") == 0)
 		{

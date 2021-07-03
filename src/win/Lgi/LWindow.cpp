@@ -730,7 +730,7 @@ void LWindow::PourAll()
 			GView *k = dynamic_cast<GView*>(v);
 			if (k && k->_IsToolBar)
 			{
-				GRect OldPos = v->GetPos();
+				LRect OldPos = v->GetPos();
 				Update.Union(&OldPos);
 
 				if (HasTools)
@@ -754,7 +754,7 @@ void LWindow::PourAll()
 						auto b = Tools.Bound();
 						if (vpos.y2 >= b.y2)
 						{
-							GRect Bar = Client;
+							LRect Bar = Client;
 							Bar.y2 = vpos.y2;
 							Client.Subtract(&Bar);
 							// LgiTrace("IncreaseToolbar=%s\n", Bar.GetStr());
@@ -782,7 +782,7 @@ void LWindow::PourAll()
 							v->Invalidate();
 						}
 
-						GRect Bar(v->GetPos());
+						LRect Bar(v->GetPos());
 						Bar.x2 = GetClient().x2;
 						Tools = Bar;
 						Tools.Subtract(&v->GetPos());
@@ -800,7 +800,7 @@ void LWindow::PourAll()
 		GView *k = dynamic_cast<GView*>(v);
 		if (!(k && k->_IsToolBar))
 		{
-			GRect OldPos = v->GetPos();
+			LRect OldPos = v->GetPos();
 			Update.Union(&OldPos);
 
 			if (v->Pour(Client))
@@ -880,7 +880,7 @@ GMessage::Result LWindow::OnEvent(GMessage *Msg)
 			if (!d->Wp || !_View)
 				break;
 
-			GRect r = d->Wp->rcNormalPosition;
+			LRect r = d->Wp->rcNormalPosition;
 
 			if (!GView::Visible())
 				d->Wp->showCmd = SW_HIDE;
@@ -932,8 +932,8 @@ GMessage::Result LWindow::OnEvent(GMessage *Msg)
 				if (d->SnapToEdge &&
 					SystemParametersInfo(SPI_GETWORKAREA, 0, &Rc, SPIF_SENDCHANGE))
 				{
-					GRect r = Rc;
-					GRect p(Info->x,
+					LRect r = Rc;
+					LRect p(Info->x,
 					        Info->y,
 					        Info->x + Info->cx - 1,
 					        Info->y + Info->cy - 1);
@@ -1139,11 +1139,11 @@ LPointF LWindow::GetDpiScale()
 	return r;
 }
 
-GRect &LWindow::GetPos()
+LRect &LWindow::GetPos()
 {
 	if (_View && IsZoomed(_View))
 	{
-		static GRect r;
+		static LRect r;
 		RECT rc;
 		GetWindowRect(_View, &rc);
 		r = rc;
@@ -1218,7 +1218,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 		GVariant v;
 		if (Store->GetValue(FieldName, v) && v.Str())
 		{
-			GRect Position(0, 0, -1, -1);
+			LRect Position(0, 0, -1, -1);
 			LWindowZoom State = GZoomNormal;
 
 			#if DEBUG_SERIALIZE_STATE
@@ -1238,7 +1238,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 						State = (LWindowZoom)atoi(Value);
 					else if (stricmp(Var, "Pos") == 0)
 					{
-					    GRect r;
+					    LRect r;
 					    r.SetStr(Value);
 					    if (r.Valid())
 						    Position = r;
@@ -1291,11 +1291,11 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 					d->Show = State;
 				}
 
-				GRect DefaultPos(100, 100, 900, 700);
+				LRect DefaultPos(100, 100, 900, 700);
 				if (Position.Valid())
 				{
 					GArray<GDisplayInfo*> Displays;
-					GRect AllDisplays;
+					LRect AllDisplays;
 					bool PosOk = true;
 					if (LgiGetDisplays(Displays, &AllDisplays))
 					{
@@ -1303,7 +1303,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 						PosOk = false;
 						for (unsigned i=0; i<Displays.Length(); i++)
 						{
-							GRect Int = Displays[i]->r;
+							LRect Int = Displays[i]->r;
 							Int.Intersection(&Position);
 							if (Int.Valid() &&
 								Int.X() > 20 &&
@@ -1339,7 +1339,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 	{
 		char s[256];
 		LWindowZoom State = GetZoom();
-		GRect Position;
+		LRect Position;
 		
 		if (Handle())
 		{

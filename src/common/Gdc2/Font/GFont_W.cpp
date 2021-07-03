@@ -94,7 +94,7 @@ int GFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
 	return Fit;
 }
 
-void GFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, GRect *r, GColour &fore)
+void GFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore)
 {
 	if (!Handle())
 		return;
@@ -166,7 +166,7 @@ int GFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
 	return -1;
 }
 
-void GFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, GRect *r, GColour &fore)
+void GFont::_Draw(GSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore)
 {
 }
 

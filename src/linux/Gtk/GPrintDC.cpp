@@ -14,7 +14,7 @@ public:
 	GString PrinterName;
 	int Pages;
 	GColour c;
-	GRect Clip;
+	LRect Clip;
 	Gtk::cairo_t *cr;
 	
 	GPrintDCPrivate(Gtk::GtkPrintContext *handle)
@@ -85,9 +85,9 @@ int GPrintDC::DpiY()
 	return Gtk::gtk_print_context_get_dpi_y(d->Handle);
 }
 
-GRect GPrintDC::ClipRgn(GRect *Rgn)
+LRect GPrintDC::ClipRgn(LRect *Rgn)
 {
-	GRect Prev = d->Clip;
+	LRect Prev = d->Clip;
 	if (Rgn)
 		d->Clip = *Rgn;
 	else
@@ -95,7 +95,7 @@ GRect GPrintDC::ClipRgn(GRect *Rgn)
 	return Prev;
 }
 
-GRect GPrintDC::ClipRgn()
+LRect GPrintDC::ClipRgn()
 {
 	return d->Clip;
 }
@@ -187,13 +187,13 @@ void GPrintDC::FilledEllipse(double cx, double cy, double x, double y)
 
 void GPrintDC::Box(int x1, int y1, int x2, int y2)
 {
-	GRect r(x1, y1, x2, y2);
+	LRect r(x1, y1, x2, y2);
 	Box(&r);
 }
 
-void GPrintDC::Box(GRect *a)
+void GPrintDC::Box(LRect *a)
 {
-	GRect r;
+	LRect r;
 	if (a)
 		r = *a;
 	else
@@ -214,13 +214,13 @@ void GPrintDC::Box(GRect *a)
 
 void GPrintDC::Rectangle(int x1, int y1, int x2, int y2)
 {
-	GRect r(x1, y1, x2, y2);
+	LRect r(x1, y1, x2, y2);
 	Rectangle(&r);
 }
 
-void GPrintDC::Rectangle(GRect *a)
+void GPrintDC::Rectangle(LRect *a)
 {
-	GRect r;
+	LRect r;
 	if (a)
 		r = *a;
 	else
@@ -233,15 +233,15 @@ void GPrintDC::Rectangle(GRect *a)
 	}
 }
 
-void GPrintDC::Blt(int x, int y, GSurface *Src, GRect *SrcClip)
+void GPrintDC::Blt(int x, int y, GSurface *Src, LRect *SrcClip)
 {
-	GRect s = SrcClip ? *SrcClip : Src->Bounds();
-	GRect d = s;
+	LRect s = SrcClip ? *SrcClip : Src->Bounds();
+	LRect d = s;
 	d.ZOff(x, y);
 	StretchBlt(&d, Src, &s);
 }
 
-void GPrintDC::StretchBlt(GRect *rc, GSurface *Src, GRect *s)
+void GPrintDC::StretchBlt(LRect *rc, GSurface *Src, LRect *s)
 {
 	if (!d->cr)
 	{

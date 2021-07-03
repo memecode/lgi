@@ -1,5 +1,5 @@
 /*hdr
-**	FILE:			GRect.cpp
+**	FILE:			LRect.cpp
 **	AUTHOR:			Matthew Allen
 **	DATE:			22/8/97
 **	DESCRIPTION:	Rectangle class
@@ -14,7 +14,7 @@
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/Token.h"
 
-bool LPoint::Inside(GRect &r)
+bool LPoint::Inside(LRect &r)
 {
 	return	(x >= r.x1) &&
 			(x <= r.x2) &&
@@ -22,7 +22,7 @@ bool LPoint::Inside(GRect &r)
 			(y <= r.y2);
 }
 
-GRect &GRect::operator =(const GRect &r)
+LRect &LRect::operator =(const LRect &r)
 {
 	x1 = r.x1;
 	x2 = r.x2;
@@ -32,14 +32,14 @@ GRect &GRect::operator =(const GRect &r)
 	return *this;
 }
 
-void GRect::ZOff(int x, int y)
+void LRect::ZOff(int x, int y)
 {
 	x1 = y1 = 0;
 	x2 = x;
 	y2 = y;
 }
 
-void GRect::Normal()
+void LRect::Normal()
 {
 	if (x1 > x2)
 	{
@@ -52,7 +52,7 @@ void GRect::Normal()
 	}
 }
 
-int GRect::Near(int x, int y)
+int LRect::Near(int x, int y)
 {
 	if (Overlap(x, y))
 	{
@@ -109,7 +109,7 @@ int GRect::Near(int x, int y)
 	return (int)ceil(sqrt( (double) ((dx * dx) + (dy * dy)) ));
 }
 
-int GRect::Near(GRect &r)
+int LRect::Near(LRect &r)
 {
 	if (Overlap(&r))
 		return 0;
@@ -136,12 +136,12 @@ int GRect::Near(GRect &r)
 	}
 }
 
-bool GRect::Valid()
+bool LRect::Valid()
 {
 	return (x1 <= x2 && y1 <= y2);
 }
 
-void GRect::Offset(int x, int y)
+void LRect::Offset(int x, int y)
 {
 	x1 += x;
 	y1 += y;
@@ -149,7 +149,7 @@ void GRect::Offset(int x, int y)
 	y2 += y;
 }
 
-void GRect::Offset(LPoint *p)
+void LRect::Offset(LPoint *p)
 {
 	if (!p) return;
 	x1 += p->x;
@@ -158,7 +158,7 @@ void GRect::Offset(LPoint *p)
 	y2 += p->y;
 }
 
-void GRect::Offset(GRect *a)
+void LRect::Offset(LRect *a)
 {
 	x1 += a->x1;
 	y1 += a->y1;
@@ -166,7 +166,7 @@ void GRect::Offset(GRect *a)
 	y2 += a->y2;
 }
 
-void GRect::Size(int x, int y)
+void LRect::Size(int x, int y)
 {
 	x1 += x;
 	y1 += y;
@@ -174,7 +174,7 @@ void GRect::Size(int x, int y)
 	y2 -= y;
 }
 
-void GRect::Size(GRect *a)
+void LRect::Size(LRect *a)
 {
 	x1 += a->x1;
 	y1 += a->y1;
@@ -182,19 +182,19 @@ void GRect::Size(GRect *a)
 	y2 -= a->y2;
 }
 
-void GRect::Dimension(int x, int y)
+void LRect::Dimension(int x, int y)
 {
 	x2 = x1 + x - 1;
 	y2 = y1 + y - 1;
 }
 
-void GRect::Dimension(GRect *a)
+void LRect::Dimension(LRect *a)
 {
 	x2 = x1 + a->X() - 1;
 	y2 = y1 + a->Y() - 1;
 }
 
-void GRect::Bound(GRect *b)
+void LRect::Bound(LRect *b)
 {
 	x1 = MAX(x1,b->x1);
 	y1 = MAX(y1,b->y1);
@@ -202,12 +202,12 @@ void GRect::Bound(GRect *b)
 	y2 = MIN(y2,b->y2);
 }
 
-bool GRect::Overlap(int x, int y)
+bool LRect::Overlap(int x, int y)
 {
 	return (x >= x1) && (x <= x2) && (y >= y1) && (y <= y2);
 }
 
-bool GRect::Overlap(GRect *b)
+bool LRect::Overlap(LRect *b)
 {
 	if (Valid() &&
 		b->Valid() &&
@@ -222,7 +222,7 @@ bool GRect::Overlap(GRect *b)
 	return true;
 }
 
-void GRect::Union(int x, int y)
+void LRect::Union(int x, int y)
 {
 	x1 = MIN(x1, x);
 	y1 = MIN(y1, y);
@@ -230,7 +230,7 @@ void GRect::Union(int x, int y)
 	y2 = MAX(y2, y);
 }
 
-void GRect::Union(GRect *a)
+void LRect::Union(LRect *a)
 {
 	x1 = MIN(a->x1, x1);
 	y1 = MIN(a->y1, y1);
@@ -238,7 +238,7 @@ void GRect::Union(GRect *a)
 	y2 = MAX(a->y2, y2);
 }
 
-void GRect::Union(GRect *a, GRect *b)
+void LRect::Union(LRect *a, LRect *b)
 {
 	x1 = MIN(a->x1,b->x1);
 	y1 = MIN(a->y1,b->y1);
@@ -246,7 +246,7 @@ void GRect::Union(GRect *a, GRect *b)
 	y2 = MAX(a->y2,b->y2);
 }
 
-void GRect::Intersection(GRect *a)
+void LRect::Intersection(LRect *a)
 {
 	if (Overlap(a))
 	{
@@ -262,7 +262,7 @@ void GRect::Intersection(GRect *a)
 	}
 }
 
-void GRect::Intersection(GRect *a, GRect *b)
+void LRect::Intersection(LRect *a, LRect *b)
 {
 	if (a->Overlap(b))
 	{
@@ -278,7 +278,7 @@ void GRect::Intersection(GRect *a, GRect *b)
 	}
 }
 
-char *GRect::GetStr()
+char *LRect::GetStr()
 {
 	#define BUFFERS	5
 	static char Str[BUFFERS][48];
@@ -293,7 +293,7 @@ char *GRect::GetStr()
 	return b;
 }
 
-bool GRect::SetStr(const char *s)
+bool LRect::SetStr(const char *s)
 {
 	bool Status = false;
 	if (s)
@@ -311,7 +311,7 @@ bool GRect::SetStr(const char *s)
 	return Status;
 }
 
-bool operator ==(GRect &a, GRect &b)
+bool operator ==(LRect &a, LRect &b)
 {
 	return (a.x1 == b.x1 &&
 		a.y1 == b.y1 &&
@@ -319,7 +319,7 @@ bool operator ==(GRect &a, GRect &b)
 		a.y2 == b.y2);
 }
 
-bool operator !=(GRect &a, GRect &b)
+bool operator !=(LRect &a, LRect &b)
 {
 	return !((a.x1 == b.x1 &&
 		a.y1 == b.y1 &&
@@ -328,14 +328,14 @@ bool operator !=(GRect &a, GRect &b)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-GRegion::GRegion() : GRect(0, 0, 0, 0)
+GRegion::GRegion() : LRect(0, 0, 0, 0)
 {
 	Size = Alloc = 0;
 	a = 0;
 	Current = 0;
 }
 
-GRegion::GRegion(GRegion &c) : GRect(c.x1, c.y1, c.x2, c.y2)
+GRegion::GRegion(GRegion &c) : LRect(c.x1, c.y1, c.x2, c.y2)
 {
 	Size = Alloc = 0;	
 	Current = 0;
@@ -348,7 +348,7 @@ GRegion::GRegion(GRegion &c) : GRect(c.x1, c.y1, c.x2, c.y2)
 	}
 }
 
-GRegion::GRegion(int X1, int Y1, int X2, int Y2) : GRect(X1, Y1, X2, Y2)
+GRegion::GRegion(int X1, int Y1, int X2, int Y2) : LRect(X1, Y1, X2, Y2)
 {
 	Size = Alloc = 0;	
 	Current = 0;
@@ -364,7 +364,7 @@ GRegion::GRegion(int X1, int Y1, int X2, int Y2) : GRect(X1, Y1, X2, Y2)
 	}
 }
 
-GRegion::GRegion(const GRect &r) : GRect(r)
+GRegion::GRegion(const LRect &r) : LRect(r)
 {
 	Size = Alloc = 0;	
 	Current = 0;
@@ -380,7 +380,7 @@ GRegion::GRegion(const GRect &r) : GRect(r)
 	}
 }
 
-GRegion::GRegion(OsRect &r) : GRect(0, 0, 0, 0)
+GRegion::GRegion(OsRect &r) : LRect(0, 0, 0, 0)
 {
 	Size = Alloc = 0;	
 	Current = 0;
@@ -420,7 +420,7 @@ GRegion::~GRegion()
 	Empty();
 }
 
-GRegion &GRegion::operator =(const GRect &r)
+GRegion &GRegion::operator =(const LRect &r)
 {
 	SetSize(1);
 	if (a)
@@ -431,25 +431,25 @@ GRegion &GRegion::operator =(const GRect &r)
 	return *this;
 }
 
-GRect *GRegion::First()
+LRect *GRegion::First()
 {
 	Current = 0;
 	return (Current >= 0 && Current < Size) ? a+Current : 0;
 }
 
-GRect *GRegion::Last()
+LRect *GRegion::Last()
 {
 	Current = Size-1;
 	return (Current >= 0 && Current < Size) ? a+Current : 0;
 }
 
-GRect *GRegion::Next()
+LRect *GRegion::Next()
 {
 	Current++;
 	return (Current >= 0 && Current < Size) ? a+Current : 0;
 }
 
-GRect *GRegion::Prev()
+LRect *GRegion::Prev()
 {
 	Current--;
 	return (Current >= 0 && Current < Size) ? a+Current : 0;
@@ -462,11 +462,11 @@ bool GRegion::SetSize(int s)
 	if (s > Alloc)
 	{
 		int NewAlloc = (s + 15) & (~0xF);
-		GRect *Temp = new GRect[NewAlloc];
+		LRect *Temp = new LRect[NewAlloc];
 		if (Temp)
 		{
 			int Common = MIN(Size, s);
-			memcpy(Temp, a, sizeof(GRect)*Common);
+			memcpy(Temp, a, sizeof(LRect)*Common);
 			DeleteArray(a);
 			a = Temp;
 			Size = s;
@@ -496,7 +496,7 @@ bool GRegion::Delete(int i)
 	{
 		if (i != Size - 1)
 		{
-			memmove(a + i, a + (i + 1), sizeof(GRect) * (Size - i - 1));
+			memmove(a + i, a + (i + 1), sizeof(LRect) * (Size - i - 1));
 		}
 		Size--;
 		return true;
@@ -546,9 +546,9 @@ void GRegion::Offset(int x, int y)
 	}
 }
 
-GRect GRegion::Bound()
+LRect GRegion::Bound()
 {
-	static GRect r;
+	static LRect r;
 	
 	if (a && Size > 0)
 	{
@@ -566,7 +566,7 @@ GRect GRegion::Bound()
 	return r;
 }
 
-void GRegion::Bound(GRect *b)
+void GRegion::Bound(LRect *b)
 {
 	if (b)
 	{
@@ -594,7 +594,7 @@ bool GRegion::Overlap(int x, int y)
 	return false;
 }
 
-bool GRegion::Overlap(GRect *b)
+bool GRegion::Overlap(LRect *b)
 {
 	if (b)
 	{
@@ -610,18 +610,18 @@ bool GRegion::Overlap(GRect *b)
 	return false;
 }
 
-void GRegion::Union(GRect *b)
+void GRegion::Union(LRect *b)
 {
 	if (b && b->Valid())
 	{
 		Subtract(b);
-		GRect *n = NewOne();
+		LRect *n = NewOne();
 		if (n)
 			*n = *b;
 	}
 }
 
-void GRegion::Intersect(GRect *b)
+void GRegion::Intersect(LRect *b)
 {
 	if (b)
 	{
@@ -639,11 +639,11 @@ void GRegion::Intersect(GRect *b)
 	}
 }
 
-void GRegion::Subtract(GRect *b)
+void GRegion::Subtract(LRect *b)
 {
 	if (b && b->Valid())
 	{
-		GRect Sub = *b;
+		LRect Sub = *b;
 		int StartSize = Size;
 
 		Normal();
@@ -651,12 +651,12 @@ void GRegion::Subtract(GRect *b)
 
 		for (int i=0; i<StartSize; )
 		{
-			GRect c = *(a + i);
+			LRect c = *(a + i);
 			if (c.Overlap(&Sub))
 			{
 				if (Sub.y1 > c.y1)
 				{
-					GRect *n = NewOne();
+					LRect *n = NewOne();
 					n->x1 = c.x1;
 					n->y1 = c.y1;
 					n->x2 = c.x2;
@@ -665,7 +665,7 @@ void GRegion::Subtract(GRect *b)
 
 				if (Sub.y2 < c.y2)
 				{
-					GRect *n = NewOne();
+					LRect *n = NewOne();
 					n->x1 = c.x1;
 					n->y1 = Sub.y2 + 1;
 					n->x2 = c.x2;
@@ -674,7 +674,7 @@ void GRegion::Subtract(GRect *b)
 
 				if (Sub.x1 > c.x1)
 				{
-					GRect *n = NewOne();
+					LRect *n = NewOne();
 					n->x1 = c.x1;
 					n->y1 = MAX(Sub.y1, c.y1);
 					n->x2 = Sub.x1 - 1;
@@ -683,7 +683,7 @@ void GRegion::Subtract(GRect *b)
 
 				if (Sub.x2 < c.x2)
 				{
-					GRect *n = NewOne();
+					LRect *n = NewOne();
 					n->x1 = Sub.x2 + 1;
 					n->y1 = MAX(Sub.y1, c.y1);
 					n->x2 = c.x2;
@@ -712,8 +712,8 @@ void GRegion::Simplify(bool PerfectlyAlignOnly)
 		{
 			for (REG int n=i+1; n<Size; n++)
 			{
-				REG GRect *r1 = a + i;
-				REG GRect *r2 = a + n;
+				REG LRect *r1 = a + i;
+				REG LRect *r2 = a + n;
 				bool Merge = false;
 
 				if (r1->x2 == r2->x1 - 1 ||
@@ -740,7 +740,7 @@ void GRegion::Simplify(bool PerfectlyAlignOnly)
 					r1->Union(r2);
 					
 					// Delete the 2nd one
-					GRect *Last = a + Size - 1;
+					LRect *Last = a + Size - 1;
 					if (Last != r2)
 						*r2 = *Last;
 					Size--;

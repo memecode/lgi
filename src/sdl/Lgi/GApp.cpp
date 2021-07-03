@@ -592,7 +592,7 @@ void GApp::OnSDLEvent(GMessage *m)
 							d->Unlock();
 
 							AppWnd->_Paint(&Dc, NULL, &r);
-							for (GRect *i=r.First(); i; i=r.Next())
+							for (LRect *i=r.First(); i; i=r.Next())
 							{
 								SDL_UpdateRect(Screen, i->x1, i->y1, i->X(), i->Y());
 							}
@@ -668,7 +668,7 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 	
 	if (AppWnd)
 	{
-		GRect r(0, 0, GdcD->X()-1, GdcD->Y()-1);
+		LRect r(0, 0, GdcD->X()-1, GdcD->Y()-1);
 		AppWnd->SetPos(r);
 	}
 
@@ -1040,7 +1040,7 @@ int GApp::GetCpuCount()
 	return 1;
 }
 
-bool GApp::InvalidateRect(GRect &r)
+bool GApp::InvalidateRect(LRect &r)
 {
 	if (d->Lock(_FL))
 	{

@@ -19,11 +19,11 @@ public:
 	int SplitPos;
 	int SplitSet;
 	bool OverBar;
-	GRect	Bar;
+	LRect	Bar;
 	int Offset;
 	bool SplitFollow;
-	GRect	PosA;
-	GRect	PosB;
+	LRect	PosA;
+	LRect	PosB;
 	GView *ViewA;
 	GView *ViewB;
 	bool BorderA;
@@ -50,7 +50,7 @@ GSplitter::GSplitter()
 	d->Vertical = true;
 	d->SplitPos = 100;
 
-	GRect r(0, 0, 2000, 1000);
+	LRect r(0, 0, 2000, 1000);
 	SetPos(r);
 	Name("LGI_Spliter");
 	d->SplitSet = d->SplitPos = -1;
@@ -217,11 +217,11 @@ GViewI *GSplitter::FindControl(OsView hCtrl)
 
 void GSplitter::CalcRegions(bool Follow)
 {
-	GRect Rect = GetClient();
+	LRect Rect = GetClient();
 	
 	d->PosA = Rect;
 
-	GRect r = GetClient();
+	LRect r = GetClient();
 	GCssTools Tools(this);
 	d->PosA = Tools.ApplyBorder(d->PosA);
 	d->PosA = Tools.ApplyPadding(d->PosA);
@@ -335,7 +335,7 @@ void ClipDC(HDC hDC, RECT rc)
 
 void GSplitter::OnPaint(GSurface *pDC)
 {
-	GRect r = GetClient();
+	LRect r = GetClient();
 	GCssTools Tools(this);
 	
 	r = Tools.PaintBorder(pDC, r);
@@ -489,7 +489,7 @@ void GSplitter::OnMouseMove(GMouse &m)
 		{
 			d->SplitPos = NewPos;
 			CalcRegions();
-			Invalidate((GRect*)0, true);
+			Invalidate((LRect*)0, true);
 		}
 	}
 }

@@ -48,7 +48,7 @@ public:
 	bool focus();
 
 	// Expose
-	GRect &exposed();
+	LRect &exposed();
 };
 
 #endif

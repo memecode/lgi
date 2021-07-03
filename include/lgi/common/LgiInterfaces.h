@@ -15,7 +15,7 @@
 class GXmlTag;
 class GMouseHook;
 class GFont;
-class GRect;
+class LRect;
 class LPoint;
 class GRegion;
 class GSurface;
@@ -464,9 +464,9 @@ public:
 	virtual const char *GetClass() { return "GViewI"; } // mainly for debugging
 
 	// Size and position	
-	virtual GRect &GetPos() = 0;
-	virtual GRect &GetClient(bool InClientSpace = true) = 0;
-	virtual bool SetPos(GRect &p, bool Repaint = false) = 0;
+	virtual LRect &GetPos() = 0;
+	virtual LRect &GetClient(bool InClientSpace = true) = 0;
+	virtual bool SetPos(LRect &p, bool Repaint = false) = 0;
 	virtual int X() = 0;
 	virtual int Y() = 0;
 	virtual LPoint GetMinimumSize() = 0;
@@ -523,7 +523,7 @@ public:
 	virtual bool IsOver(GMouse &m) = 0;
 
 	// Misc
-	virtual bool Invalidate(GRect *r = 0, bool Repaint = false, bool NonClient = false) = 0;
+	virtual bool Invalidate(LRect *r = 0, bool Repaint = false, bool NonClient = false) = 0;
 	virtual bool Invalidate(GRegion *r, bool Repaint = false, bool NonClient = false) = 0;
 	virtual void SetPulse(int Ms = -1) = 0;
 	virtual bool OnLayout(GViewLayoutInfo &Inf) = 0;

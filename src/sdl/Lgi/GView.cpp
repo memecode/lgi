@@ -225,9 +225,9 @@ bool GView::Detach()
 	return Status;
 }
 
-GRect &GView::GetClient(bool InClientSpace)
+LRect &GView::GetClient(bool InClientSpace)
 {
-	static GRect Client;
+	static LRect Client;
 
 	Client = Pos;
 	Client.Offset(-Client.x1, -Client.y1);
@@ -249,7 +249,7 @@ void GView::PointToScreen(LPoint &p)
 {
 	for (GViewI *i = this; i; i = i->GetParent())
 	{
-		GRect pos = i->GetPos();
+		LRect pos = i->GetPos();
 		// const char *cls = i->GetClass();
 		p.x += pos.x1;
 		p.y += pos.y1;
@@ -260,7 +260,7 @@ void GView::PointToView(LPoint &p)
 {
 	for (GViewI *i = this; i; i = i->GetParent())
 	{
-		GRect pos = i->GetPos();
+		LRect pos = i->GetPos();
 		// const char *cls = i->GetClass();
 		p.x -= pos.x1;
 		p.y -= pos.y1;
@@ -281,10 +281,10 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 	return true;
 }
 
-bool GView::SetPos(GRect &p, bool Repaint)
+bool GView::SetPos(LRect &p, bool Repaint)
 {
 	bool Status = true;
-	GRect OldPos = Pos;
+	LRect OldPos = Pos;
 
 	if (Pos != p)
 	{
@@ -300,9 +300,9 @@ bool GView::SetPos(GRect &p, bool Repaint)
 	return Status;
 }
 
-bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
+bool GView::Invalidate(LRect *r, bool Repaint, bool Frame)
 {
-	GRect Up;
+	LRect Up;
 	GViewI *p = this;
 
 	if (r)
@@ -326,8 +326,8 @@ bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
 		}
 		
 		GView *VPar = Par ? Par->GetGView() : 0;
-		GRect w = p->GetPos();
-		GRect c = p->GetClient(false);
+		LRect w = p->GetPos();
+		LRect c = p->GetClient(false);
 		
 		if (Frame && p == this)
 			Up.Offset(w.x1, w.y1);
@@ -366,7 +366,7 @@ void GView::SetPulse(int Length)
 	}
 }
 
-void GView::DrawThemeBorder(GSurface *pDC, GRect &r)
+void GView::DrawThemeBorder(GSurface *pDC, LRect &r)
 {
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
 }
@@ -476,7 +476,7 @@ bool GView::_Mouse(GMouse &m, bool Move)
 	{
 		GView *Target = dynamic_cast<GView*>(_Over ? _Over : this);
 
-		GRect Client = Target->GView::GetClient(false);
+		LRect Client = Target->GView::GetClient(false);
 		
 		m = lgi_adjust_click(m, Target);
 		if (!Client.Valid() || Client.Overlap(m.x, m.y))

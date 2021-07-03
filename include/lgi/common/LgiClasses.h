@@ -132,10 +132,10 @@ public:
 //////////////////////////////////////////////////////////
 
 // Graphics
-LgiFunc void LgiDrawBox(GSurface *pDC, GRect &r, bool Sunken, bool Fill);
-LgiFunc void LgiWideBorder(GSurface *pDC, GRect &r, LgiEdge Type);
-LgiFunc void LgiThinBorder(GSurface *pDC, GRect &r, LgiEdge Type);
-LgiFunc void LgiFlatBorder(GSurface *pDC, GRect &r, int Width = -1);
+LgiFunc void LgiDrawBox(GSurface *pDC, LRect &r, bool Sunken, bool Fill);
+LgiFunc void LgiWideBorder(GSurface *pDC, LRect &r, LgiEdge Type);
+LgiFunc void LgiThinBorder(GSurface *pDC, LRect &r, LgiEdge Type);
+LgiFunc void LgiFlatBorder(GSurface *pDC, LRect &r, int Width = -1);
 
 // Helpers
 #ifdef __GTK_H__
@@ -173,7 +173,7 @@ struct GDisplayInfo
 	/// The position and dimensions of the display. On windows the left/upper 
 	/// most display will be positioned at 0,0 and each further display will have 
 	/// co-ordinates that join to one edge of that initial rectangle.
-	GRect r;
+	LRect r;
 	/// The number of bits per pixel
 	int BitDepth;
 	/// The refresh rate
@@ -206,7 +206,7 @@ LgiFunc bool LgiGetDisplays
 	GArray<GDisplayInfo*> &Displays,
 	/// [out] Optional bounding rectangle of all displays. Can be NULL if your don't
 	/// need that information.
-	GRect *AllDisplays = 0
+	LRect *AllDisplays = 0
 );
 
 /// This class makes it easy to profile a function and write out timings at the end

@@ -11,8 +11,8 @@ public:
 	CGContextRef Ctx;
 	GWindow *Wnd;
 	GView *View;
-	GRect Rc;
-	GArray<GRect> Stack;
+	LRect Rc;
+	GArray<LRect> Stack;
 	GColour c;
 	int Bits;
 	int Op;
@@ -106,9 +106,9 @@ public:
 		#endif
 	}
 	
-	GRect Client()
+	LRect Client()
 	{
-		GRect r = Rc;
+		LRect r = Rc;
 		r.Offset(-r.x1, -r.y1);
 		return r;
 	}
@@ -159,7 +159,7 @@ GString GScreenDC::Dump()
 {
 	auto Ctx = Handle();
 	CGAffineTransform t = CGContextGetCTM(Ctx);
-	GRect cr = CGContextGetClipBoundingBox(Ctx);
+	LRect cr = CGContextGetClipBoundingBox(Ctx);
 	GString s;
 	s.Printf("ScreenDC transform=%g,%g,%g,%g-%g,%g clip=%s",
 			t.a, t.b, t.c, t.d, t.tx, t.ty,
@@ -189,7 +189,7 @@ void GScreenDC::PopState()
         CGContextRestoreGState(d->Ctx);
 }
 
-bool GScreenDC::GetClient(GRect *c)
+bool GScreenDC::GetClient(LRect *c)
 {
 	if (!c)
 		return false;
@@ -200,7 +200,7 @@ bool GScreenDC::GetClient(GRect *c)
 
 // bool SetClientDebug = false;
 
-void GScreenDC::SetClient(GRect *c)
+void GScreenDC::SetClient(LRect *c)
 {
 	// 'c' is in absolute coordinates
 	if (d->Ctx)
@@ -227,7 +227,7 @@ void GScreenDC::SetClient(GRect *c)
 			{
 				CGAffineTransform t2 = CGContextGetCTM(d->Ctx);
 
-				GRect r1, r2;
+				LRect r1, r2;
 				r1 = old_bounds;
 				CGRect new_bounds = CGContextGetClipBoundingBox(d->Ctx);
 				r2 = new_bounds;
@@ -297,13 +297,13 @@ void GScreenDC::Palette(GPalette *pPal, bool bOwnIt)
 	GSurface::Palette(pPal, bOwnIt);
 }
 
-GRect GScreenDC::ClipRgn(GRect *Rgn)
+LRect GScreenDC::ClipRgn(LRect *Rgn)
 {
-	GRect Prev = Clip;
+	LRect Prev = Clip;
 
 	if (Rgn)
 	{
-		GRect c = *Rgn;
+		LRect c = *Rgn;
 		auto Client = d->Client();
 		Client.Offset(OriginX, OriginY);
 		c.Bound(&Client);
@@ -322,7 +322,7 @@ GRect GScreenDC::ClipRgn(GRect *Rgn)
 	return Prev;
 }
 
-GRect GScreenDC::ClipRgn()
+LRect GScreenDC::ClipRgn()
 {
 	return Clip;
 }
@@ -553,11 +553,11 @@ void GScreenDC::Box(int x1, int y1, int x2, int y2)
 	}
 }
 
-void GScreenDC::Box(GRect *a)
+void GScreenDC::Box(LRect *a)
 {
 	if (d->Ctx)
 	{
-		GRect in;
+		LRect in;
 		if (a)
 			in = *a;
 		else
@@ -578,11 +578,11 @@ void GScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 	}
 }
 
-void GScreenDC::Rectangle(GRect *a)
+void GScreenDC::Rectangle(LRect *a)
 {
 	if (d->Ctx)
 	{
-		GRect c;
+		LRect c;
 		if (!a)
 		{
 			c = d->Client();
@@ -594,15 +594,15 @@ void GScreenDC::Rectangle(GRect *a)
 	}
 }
 
-void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
+void GScreenDC::Blt(int x, int y, GSurface *Src, LRect *a)
 {
 	if (Src && d->Ctx)
 	{
-		GRect b;
+		LRect b;
 		if (a)
 		{
 			b = *a;
-			GRect r = Src->Bounds();
+			LRect r = Src->Bounds();
 			b.Bound(&r);
 		}
 		else
@@ -706,11 +706,11 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	}
 }
 
-void GScreenDC::StretchBlt(GRect *dst, GSurface *Src, GRect *s)
+void GScreenDC::StretchBlt(LRect *dst, GSurface *Src, LRect *s)
 {
 	if (Src)
 	{
-		GRect DestR;
+		LRect DestR;
 		if (dst)
 		{
 			DestR = *dst;
@@ -720,7 +720,7 @@ void GScreenDC::StretchBlt(GRect *dst, GSurface *Src, GRect *s)
 			DestR.ZOff(X()-1, Y()-1);
 		}
 
-		GRect SrcR;
+		LRect SrcR;
 		if (s)
 		{
 			SrcR = *s;
@@ -741,7 +741,7 @@ void GScreenDC::Bezier(int Threshold, LPoint *Pt)
 {
 }
 
-void GScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, GRect *r)
+void GScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *r)
 {
 }
 

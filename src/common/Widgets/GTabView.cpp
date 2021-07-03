@@ -77,11 +77,11 @@ class GTabViewPrivate
 public:
 	// General
 	int Current;
-	GRect TabClient;
+	LRect TabClient;
 	bool PourChildren;
 
 	// Painting
-	GRect Inset, Tabs;
+	LRect Inset, Tabs;
 	int TabsHeight;
 	double TabsBaseline;
 	int Depth;
@@ -98,8 +98,8 @@ public:
 	
 	// Scrolling
 	int Scroll;			// number of buttons scrolled off the left of the control
-	GRect LeftBtn;	// scroll left button
-	GRect RightBtn;	// scroll right button
+	LRect LeftBtn;	// scroll left button
+	LRect RightBtn;	// scroll right button
 
 	GTabViewPrivate()
 	{
@@ -252,7 +252,7 @@ GTabView::GTabView(int id, int x, int y, int cx, int cy, const char *name, int I
 	d->Current = Init;
 
 	SetId(id);
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	Name(name);
 	_BorderSize = 0;
@@ -526,7 +526,7 @@ bool GTabView::Delete(GTabPage *Page)
 	return Status;
 }
 
-GRect &GTabView::GetTabClient()
+LRect &GTabView::GetTabClient()
 {
 	if (d->Style == TvMac)
 	{
@@ -694,7 +694,7 @@ void GTabView::OnFocus(bool f)
 	GTabPage *p = it[d->Current];
 	if (p)
 	{
-		GRect r = p->TabPos;
+		LRect r = p->TabPos;
 		r.y2 += 2;
 		Invalidate(&r);
 	}
@@ -704,9 +704,9 @@ void GTabView::OnAttach()
 {
 }
 
-GRect &GTabView::CalcInset()
+LRect &GTabView::CalcInset()
 {
-	GRect Padding(0, 0, 0, 0);
+	LRect Padding(0, 0, 0, 0);
 	d->Inset = GetClient();
 	auto f = GetFont();
 	if (GetCss())
@@ -820,7 +820,7 @@ void GTabView::OnPaint(GSurface *pDC)
 		#else
 
 			// Draw the inset area at 'd->Inset'
-			GRect Bounds = d->Inset;
+			LRect Bounds = d->Inset;
 			pDC->Colour(d->cBorder);
 			pDC->Box(&Bounds);
 			Bounds.Size(1, 1);
@@ -844,7 +844,7 @@ void GTabView::OnPaint(GSurface *pDC)
 			bool Last = i == it.Length() - 1;
 			bool IsCurrent = d->Current == i;
 
-			GRect r(0, 0, Tab->GetTabPx() - 1, d->Tabs.Y() - 1);
+			LRect r(0, 0, Tab->GetTabPx() - 1, d->Tabs.Y() - 1);
 			r.Offset(x, y);
 
 			#ifdef LGI_CARBON
@@ -876,7 +876,7 @@ void GTabView::OnPaint(GSurface *pDC)
 
 				GColour cTabFill = IsCurrent ? (Foc ? cFocusBack : d->cSelUnfoc) : LColour(L_WORKSPACE);
 				GColour cInterTabBorder = d->Tint(0.9625);
-				GRect b = r;
+				LRect b = r;
 
 				#if MAC_DBL_BUF
 				GMemDC Mem;
@@ -919,11 +919,11 @@ void GTabView::OnPaint(GSurface *pDC)
 				pDC->Colour(cTabFill);
 				pDC->Rectangle(&b);
 
-				GRect Clip00(0, 0, MAC_STYLE_RADIUS-1, MAC_STYLE_RADIUS-1);
+				LRect Clip00(0, 0, MAC_STYLE_RADIUS-1, MAC_STYLE_RADIUS-1);
 				auto Res = IsCurrent ? (Foc ? GTabViewPrivate::ResSelectedFocused : GTabViewPrivate::ResSelectedUnfocused) : GTabViewPrivate::ResWorkspace;
 				if (First)
 				{
-					GRect Clip01 = Clip00.Move(0, r.Y() - Clip00.Y());
+					LRect Clip01 = Clip00.Move(0, r.Y() - Clip00.Y());
 					
 					#if MAC_DBL_BUF
 					// Erase the areas we will paint over
@@ -942,8 +942,8 @@ void GTabView::OnPaint(GSurface *pDC)
 
 				if (Last)
 				{
-					GRect Clip10 = Clip00.Move(r.X() - Clip00.X(), 0);
-					GRect Clip11 = Clip00.Move(Clip10.x1, r.Y() - Clip00.Y());
+					LRect Clip10 = Clip00.Move(r.X() - Clip00.X(), 0);
+					LRect Clip11 = Clip00.Move(Clip10.x1, r.Y() - Clip00.Y());
 					
 					#if MAC_DBL_BUF
 					// Erase the areas we will paint over
@@ -1019,7 +1019,7 @@ void GTabView::OnPaint(GSurface *pDC)
 		}
 		else
 		{
-			GRect r = GetTabClient();
+			LRect r = GetTabClient();
 
 			r.Size(-2, -2);
 			LgiWideBorder(pDC, r, DefaultRaisedEdge);
@@ -1131,7 +1131,7 @@ void GTabView::OnPosChange()
 			p->SetPos(d->TabClient, true);
 			if (d->PourChildren)
 			{
-				GRect r = d->TabClient;
+				LRect r = d->TabClient;
 				r.Offset(-r.x1, -r.y1);
 				GRegion Rgn(r);
 
@@ -1146,7 +1146,7 @@ void GTabView::OnPosChange()
 					GTableLayout *tl = dynamic_cast<GTableLayout*>(It[0]);
 					if (tl)
 					{
-						GRect r = p->GetClient();
+						LRect r = p->GetClient();
 						r.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
 						tl->SetPos(r);
 					}
@@ -1187,7 +1187,7 @@ GTabPage::GTabPage(const char *name) : ResObject(Res_Tab)
 {
 	d = new GTabPagePriv(this);
 
-	GRect r(0, 0, 1000, 1000);
+	LRect r(0, 0, 1000, 1000);
 	SetPos(r);
 	Name(name);
 	Button = false;
@@ -1306,7 +1306,7 @@ void GTabPage::PaintTab(GSurface *pDC, bool Selected)
 
 	#else
 	
-	GRect r = TabPos;
+	LRect r = TabPos;
 	if (Selected)
 	{
 		r.Size(-2, -2);
@@ -1472,7 +1472,7 @@ void GTabPage::SetFont(GFont *Font, bool OwnIt)
 
 void GTabPage::OnPaint(GSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	GColour Bk = StyleColour(GCss::PropBackgroundColor, TabCtrl ? TabCtrl->d->cFill : LColour(L_MED), 1);
 	pDC->Colour(Bk);
 	pDC->Rectangle(&r);

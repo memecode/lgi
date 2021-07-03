@@ -120,13 +120,13 @@ GString GSurface::GetStr()
 	return GString(" ").Join(s);
 }
 
-GSurface *GSurface::SubImage(GRect r)
+GSurface *GSurface::SubImage(LRect r)
 {
 	if (!pMem || !pMem->Base)
 		return NULL;
 		
-	GRect clip = r;
-	GRect bounds = Bounds();
+	LRect clip = r;
+	LRect bounds = Bounds();
 	clip.Intersection(&bounds);
 	if (!clip.Valid())
 		return NULL;
@@ -386,7 +386,7 @@ void GSurface::Line(int x1, int y1, int x2, int y2)
 			LgiSwap(x1, x2);
 		}
 
-		GRect Bound(x1, y1, x2, y2);
+		LRect Bound(x1, y1, x2, y2);
 		
 		Bound.Normal();
 		if (!Bound.Overlap(&Clip)) return;
@@ -679,11 +679,11 @@ void GSurface::FilledCircle(double Cx, double Cy, double radius)
 	Update(GDC_BITS_CHANGE);
 }
 
-void GSurface::Box(GRect *a)
+void GSurface::Box(LRect *a)
 {
 	if (a)
 	{
-		GRect b = *a;
+		LRect b = *a;
 		b.Normal();
 		if (b.x1 != b.x2 && b.y1 != b.y2)
 		{
@@ -699,7 +699,7 @@ void GSurface::Box(GRect *a)
 	}
 	else
 	{
-		GRect b(0, 0, X()-1, Y()-1);
+		LRect b(0, 0, X()-1, Y()-1);
 
 		HLine(b.x1, b.x2 - 1, b.y1);
 		VLine(b.x2, b.y1, b.y2 - 1);
@@ -710,13 +710,13 @@ void GSurface::Box(GRect *a)
 
 void GSurface::Box(int x1, int y1, int x2, int y2)
 {
-	GRect a(x1, y1, x2, y2);
+	LRect a(x1, y1, x2, y2);
 	Box(&a);
 }
 
-void GSurface::Rectangle(GRect *a)
+void GSurface::Rectangle(LRect *a)
 {
-	GRect b;
+	LRect b;
 	if (a)
 		b = a;
 	else
@@ -736,7 +736,7 @@ void GSurface::Rectangle(GRect *a)
 
 void GSurface::Rectangle(int x1, int y1, int x2, int y2)
 {
-	GRect a(x1, y1, x2, y2);
+	LRect a(x1, y1, x2, y2);
 	Rectangle(&a);
 }
 
@@ -1064,29 +1064,29 @@ void GSurface::Polygon(int nPoints, LPoint *aPoints)
 	DeleteArray(AET);
 }
 
-void GSurface::Blt(int x, int y, GSurface *Src, GRect *a)
+void GSurface::Blt(int x, int y, GSurface *Src, LRect *a)
 {
 	OrgXy(x, y);
 
 	if (Src && Src->pMem && Src->pMem->Base)
 	{
-		GRect S;
+		LRect S;
 		if (a)	S = *a;
 		else	S.ZOff(Src->X()-1, Src->Y()-1);
 		S.Offset(Src->OriginX, Src->OriginY);
 
-		GRect SClip = S;
+		LRect SClip = S;
 		SClip.Bound(&Src->Clip);
 
 		if (SClip.Valid())
 		{
-			GRect D = SClip;
+			LRect D = SClip;
 			D.Offset(x-S.x1, y-S.y1);
 
-			GRect DClip = D;
+			LRect DClip = D;
 			DClip.Bound(&Clip);
 
-			GRect Re = DClip;
+			LRect Re = DClip;
 			Re.Offset(S.x1-x, S.y1-y);
 			SClip.Bound(&Re);
 
@@ -1307,13 +1307,13 @@ bool FillMatch_Near(COLOUR Seed, COLOUR Pixel, COLOUR Border, int Bits)
 			((unsigned)abs(Db) < Border);
 }
 
-void GSurface::FloodFill(int StartX, int StartY, int Mode, COLOUR Border, GRect *FillBounds)
+void GSurface::FloodFill(int StartX, int StartY, int Mode, COLOUR Border, LRect *FillBounds)
 {
 	COLOUR Seed = Get(StartX, StartY);
 	if (Seed == 0xffffffff) return; // Doesn't support get pixel
 
 	PointStack Ps;
-	GRect Bounds;
+	LRect Bounds;
 	FillMatchProc Proc = 0;
 	int Bits = GetBits();
 
@@ -1470,7 +1470,7 @@ void GSurface::FloodFill(int StartX, int StartY, int Mode, COLOUR Border, GRect 
 
 void GSurface::Arc(double cx, double cy, double radius, double start, double end) {}
 void GSurface::FilledArc(double cx, double cy, double radius, double start, double end) {}
-void GSurface::StretchBlt(GRect *d, GSurface *Src, GRect *s) {}
+void GSurface::StretchBlt(LRect *d, GSurface *Src, LRect *s) {}
 
 bool GSurface::HasAlpha(bool b)
 {
@@ -1637,9 +1637,9 @@ GApplicator *GSurface::Applicator()
 	return pApp;
 }
 
-GRect GSurface::ClipRgn(GRect *Rgn)
+LRect GSurface::ClipRgn(LRect *Rgn)
 {
-	GRect Old = Clip;
+	LRect Old = Clip;
 	
 	if (Rgn)
 	{
@@ -1659,7 +1659,7 @@ GRect GSurface::ClipRgn(GRect *Rgn)
 	return Old;
 }
 
-GRect GSurface::ClipRgn()
+LRect GSurface::ClipRgn()
 {
 	return Clip;
 }

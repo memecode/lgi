@@ -38,7 +38,7 @@ static OsChar GDisplayStringDots[] = {'.', '.', '.', 0};
 #endif
 
 #if defined(__GTK_H__)
-struct Block : public GRect
+struct Block : public LRect
 {
 	OsChar *Str;
 	int Bytes;
@@ -435,7 +435,7 @@ GDisplayString::~GDisplayString()
 	#endif
 }
 
-void GDisplayString::DrawWhiteSpace(GSurface *pDC, char Ch, GRect &r)
+void GDisplayString::DrawWhiteSpace(GSurface *pDC, char Ch, LRect &r)
 {
 	if (Ch == '\t')
 	{
@@ -1654,14 +1654,14 @@ bool CompositeText5NoAlpha(GSurface *Out, GSurface *In, GFont *Font, int px, int
 
 #endif
 
-void GDisplayString::Draw(GSurface *pDC, int px, int py, GRect *r, bool Debug)
+void GDisplayString::Draw(GSurface *pDC, int px, int py, LRect *r, bool Debug)
 {
 	Layout();
 
 	#if DISPLAY_STRING_FRACTIONAL_NATIVE
 
 	// GTK / Mac use fractional pixels, so call the fractional version:
-	GRect rc;
+	LRect rc;
 	if (r)
 	{
 		rc = *r;
@@ -1763,7 +1763,7 @@ void GDisplayString::Draw(GSurface *pDC, int px, int py, GRect *r, bool Debug)
 
 			if (f)
 			{
-				GRect b;
+				LRect b;
 				if (r)
 				{
 					b.x1 = i ? px : r->x1;
@@ -1796,7 +1796,7 @@ void GDisplayString::Draw(GSurface *pDC, int px, int py, GRect *r, bool Debug)
 							for (int n=0; n<Info[i].Len; n++)
 							{
 								int Dx = TabSize - ((X - Ox + GetDrawOffset()) % TabSize);
-								GRect r(X, b.y1, X + Dx - 1, b.y2);
+								LRect r(X, b.y1, X + Dx - 1, b.y2);
 								pDC->Colour(cWhitespace);
 								DrawWhiteSpace(pDC, '\t', r);
 								X += Dx;
@@ -1823,7 +1823,7 @@ void GDisplayString::Draw(GSurface *pDC, int px, int py, GRect *r, bool Debug)
 									int Sx, Sy;
 									if (Sp < 0) f->_Measure(Sp, Sy, s, 1);
 									f->_Measure(Sx, Sy, start, (int)(s - start));
-									GRect r(0, 0, Sp-1, Sy-1);
+									LRect r(0, 0, Sp-1, Sy-1);
 									r.Offset(px + Sx, py);
 									pDC->Colour(cWhitespace);
 									DrawWhiteSpace(pDC, ' ', r);
@@ -1844,7 +1844,7 @@ void GDisplayString::Draw(GSurface *pDC, int px, int py, GRect *r, bool Debug)
 			int Sx, Sy;
 			Font->_Measure(Sx, Sy, GDisplayStringDots, 3);
 
-			GRect b;
+			LRect b;
 			if (r)
 			{
 				b.x1 = px;
@@ -1907,14 +1907,14 @@ LPoint GDisplayString::FSize()
 	return LPoint(xf, yf);
 }
 
-void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug)
+void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, LRect *frc, bool Debug)
 {
 	Layout(Debug);
 
 	#if !DISPLAY_STRING_FRACTIONAL_NATIVE
 
 		// Windows doesn't use fractional pixels, so call the integer version:
-		GRect rc;
+		LRect rc;
 		if (frc)
 		{
 			rc = *frc;
@@ -2006,7 +2006,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 	    				{
 	    					Gtk::PangoRectangle pos;
 	    					Gtk::pango_layout_index_to_pos(b.Hnd, Idx, &pos);
-	    					GRect r(0, 0, pos.width / FScale, pos.height / FScale);
+	    					LRect r(0, 0, pos.width / FScale, pos.height / FScale);
 	    					r.Offset(pos.x / FScale, pos.y / FScale);
 	    					DrawWhiteSpace(pDC, u, r);
 	    				}
@@ -2032,7 +2032,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 		int Ox = 0, Oy = 0;
 		int px = fx >> FShift;
 		int py = fy >> FShift;
-		GRect rc;
+		LRect rc;
 		if (frc)
 			rc.Set(	frc->x1 >> FShift,
 					frc->y1 >> FShift,
@@ -2051,7 +2051,7 @@ void GDisplayString::FDraw(GSurface *pDC, int fx, int fy, GRect *frc, bool Debug
 			}
 			else
 			{
-				GRect a(px, py, px + x - 1, py + y - 1);
+				LRect a(px, py, px + x - 1, py + y - 1);
 				pDC->Rectangle(&a);
 			}
 			pDC->Colour(Old);

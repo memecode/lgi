@@ -112,7 +112,7 @@ public:
 	void Set(char *s);
 };
 
-class GFlowRect : public GRect
+class GFlowRect : public LRect
 {
 public:
 	GTag *Tag;
@@ -142,8 +142,8 @@ class GArea : public List<GFlowRect>
 public:
 	~GArea();
 
-	GRect Bounds();
-	GRect *TopRect(GRegion *c);
+	LRect Bounds();
+	LRect *TopRect(GRegion *c);
 	void FlowText(GTag *Tag, GFlowRegion *c, GFont *Font, char16 *Text, GCss::LengthType Align);
 };
 
@@ -201,7 +201,7 @@ protected:
 	int NearestChar(GFlowRect *Fr, int x, int y);
 	GTag *HasOpenTag(char *t);
 	GTag *PrevTag();
-	GRect ChildBounds();
+	LRect ChildBounds();
 	bool GetWidthMetrics(uint16 &Min, uint16 &Max);
 	void LayoutTable(GFlowRegion *f);
 	void BoundParents();
@@ -308,7 +308,7 @@ public:
 		/// The surface to paint on
 		GSurface *pDC,
 		/// [Optional] The size of the border painted
-		GRect *Px = NULL);
+		LRect *Px = NULL);
 	void OnPaint(GSurface *pDC);
 	void SetSize(LPoint &s);
 	void SetTag(const char *Tag);
@@ -338,7 +338,7 @@ public:
 	int RelY() { return Pos.y + (int)MarginTop().Value; }
 	int AbsX();
 	int AbsY();
-	GRect GetRect(bool Client = true);
+	LRect GetRect(bool Client = true);
 	GCss::LengthType GetAlign(bool x);
 
 	// Tables

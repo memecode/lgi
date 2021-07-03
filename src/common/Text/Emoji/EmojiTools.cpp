@@ -217,7 +217,7 @@ GAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 				int XChar = IcoIdx % EMOJI_GROUP_X;
 				int YChar = IcoIdx / EMOJI_GROUP_X;
 				
-				GRect rc;
+				LRect rc;
 				rc.ZOff(EMOJI_CELL_SIZE - 1, EMOJI_CELL_SIZE - 1);
 				rc.Offset(XChar * EMOJI_CELL_SIZE, YChar * EMOJI_CELL_SIZE);
 				Ch = my_snwprintf(Buf, BUF_SIZE, img, EmojiPng, rc.GetStr());

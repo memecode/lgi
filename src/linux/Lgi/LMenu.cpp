@@ -100,7 +100,7 @@ gboolean LSubMenuClick(GMouse *m)
 				a.x, a.y, a.width, a.height);
 				*/
 
-			GRect rc = a;
+			LRect rc = a;
 			if (rc.Overlap(m->x, m->y))
 				OverMenu = true;
 		}

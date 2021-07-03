@@ -206,37 +206,37 @@ GInlineBmp Cursors =
 struct CursorInfo
 {
 public:
-	GRect Pos;
+	LRect Pos;
 	LPoint HotSpot;
 }
 CursorMetrics[] =
 {
 	// up arrow
-	{ GRect(0, 0, 8, 15),			LPoint(4, 0) },
+	{ LRect(0, 0, 8, 15),			LPoint(4, 0) },
 	// cross hair
-	{ GRect(16, 0, 30, 13),		LPoint(23, 7) },
+	{ LRect(16, 0, 30, 13),		LPoint(23, 7) },
 	// hourglass
-	{ GRect(32, 0, 43, 15),		LPoint(37, 7) },
+	{ LRect(32, 0, 43, 15),		LPoint(37, 7) },
 	// I beam
-	{ GRect(48, 0, 54, 15),		LPoint(51, 7) },
+	{ LRect(48, 0, 54, 15),		LPoint(51, 7) },
 	// N-S arrow
-	{ GRect(64, 0, 75, 15),		LPoint(69, 7) },
+	{ LRect(64, 0, 75, 15),		LPoint(69, 7) },
 	// E-W arrow
-	{ GRect(80, 0, 95, 11),		LPoint(87, 5) },
+	{ LRect(80, 0, 95, 11),		LPoint(87, 5) },
 	// NW-SE arrow
-	{ GRect(96, 0, 108, 12),		LPoint(102, 6) },
+	{ LRect(96, 0, 108, 12),		LPoint(102, 6) },
 	// NE-SW arrow
-	{ GRect(112, 0, 124, 12),		LPoint(118, 6) },
+	{ LRect(112, 0, 124, 12),		LPoint(118, 6) },
 	// 4 way arrow
-	{ GRect(128, 0, 142, 14),		LPoint(135, 7) },
+	{ LRect(128, 0, 142, 14),		LPoint(135, 7) },
 	// Blank
-	{ GRect(0, 0, 0, 0),			LPoint(0, 0) },
+	{ LRect(0, 0, 0, 0),			LPoint(0, 0) },
 	// Vertical split
-	{ GRect(144, 0, 158, 15),		LPoint(151, 7) },
+	{ LRect(144, 0, 158, 15),		LPoint(151, 7) },
 	// Horizontal split
-	{ GRect(160, 0, 174, 15),		LPoint(167, 7) },
+	{ LRect(160, 0, 174, 15),		LPoint(167, 7) },
 	// Hand
-	{ GRect(176, 0, 189, 13),		LPoint(180, 0) },
+	{ LRect(176, 0, 189, 13),		LPoint(180, 0) },
 };
 
 
@@ -391,7 +391,7 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 	return false;
 }
 
-bool GView::SetPos(GRect &p, bool Repaint)
+bool GView::SetPos(LRect &p, bool Repaint)
 {
 	Pos = p;
 
@@ -478,7 +478,7 @@ void GView::PointToView(LPoint &p)
 	}
 }
 
-bool GView::Invalidate(GRect *r, bool Repaint, bool NonClient)
+bool GView::Invalidate(LRect *r, bool Repaint, bool NonClient)
 {
 	if (_View)
 	{
@@ -497,8 +497,8 @@ bool GView::Invalidate(GRect *r, bool Repaint, bool NonClient)
 					}
 					else
 					{
-						GRect c = GetClient(false);
-						GRect a = *r;
+						LRect c = GetClient(false);
+						LRect a = *r;
 						a.Offset(c.x1, c.y1);
 						a.Bound(&c);
 						BRect Rc = a;
@@ -523,7 +523,7 @@ bool GView::Invalidate(GRect *r, bool Repaint, bool NonClient)
 	}
 	else
 	{
-		GRect Up;
+		LRect Up;
 		GView *p = this;
 
 		if (r)
@@ -623,7 +623,7 @@ bool GView::_Mouse(GMouse &m, bool Move)
 			
 		GView *Target = dynamic_cast<GView*>(_Over ? _Over : this);
 		// GLayout *Lo = dynamic_cast<GLayout*>(Target);
-		GRect Client = Target->GView::GetClient(false);
+		LRect Client = Target->GView::GetClient(false);
 
 		if (!Client.Valid() || Client.Overlap(m.x, m.y))
 		{
@@ -837,9 +837,9 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 	return 0;
 }
 
-GRect &GView::GetClient(bool ClientSpace)
+LRect &GView::GetClient(bool ClientSpace)
 {
-	static GRect Client;
+	static LRect Client;
 
 	Client.ZOff(Pos.X()-1, Pos.Y()-1);
 	if (Sunken() || Raised())
@@ -950,7 +950,7 @@ bool GView::Attach(GViewI *Wnd)
 
 GView *_lgi_search_children(GView *v, int &x, int &y)
 {
-	GRect r = v->GetPos();
+	LRect r = v->GetPos();
 	if (x >= r.x1 &&
 		y >= r.y1 &&
 		x < r.x2 &&
@@ -959,7 +959,7 @@ GView *_lgi_search_children(GView *v, int &x, int &y)
 		List<GViewI>::I It = v->Children.Start();
 		for (GViewI *i=It.First(); i; i=It.Next())
 		{
-			GRect p = i->GetPos();
+			LRect p = i->GetPos();
 			int Cx = x-p.x1;
 			int Cy = y-p.y1;
 			GView *Child = _lgi_search_children(v, Cx, Cy);

@@ -398,7 +398,7 @@ GBrowser::GBrowser(GViewI *owner, const char *Title, char *Uri)
 	d->Stop = 0;
 	Name(Title?Title:(char*)"Browser");
 
-	GRect r(0, 0, 1000, 800);
+	LRect r(0, 0, 1000, 800);
 	SetPos(r);
 	MoveSameScreen(owner);
 
@@ -474,15 +474,15 @@ bool GBrowser::SetUri(const char *Uri)
 
 void GBrowser::OnPosChange()
 {
-	GRect c = GetClient();
-	GRect e = c;
+	LRect c = GetClient();
+	LRect e = c;
 	e.y2 = e.y1 + SysFont->GetHeight() + 8;
-	GRect back = e;
-	GRect forward = e;
-	GRect stop = e;
-	GRect search_txt = e;
-	GRect search_btn = e;
-	GRect uri = e;
+	LRect back = e;
+	LRect forward = e;
+	LRect stop = e;
+	LRect search_txt = e;
+	LRect search_btn = e;
+	LRect uri = e;
 	back.x2 = back.x1 + (d->Back ? d->Back->X() - 1 : 0);
 	forward.x1 = back.x2 + 1;
 	forward.x2 = forward.x1 + (d->Forward ? d->Forward->X() - 1 : 0);
@@ -494,7 +494,7 @@ void GBrowser::OnPosChange()
 	search_txt.x1 = search_txt.x2 - 99;
 	uri.x2 = search_txt.x1 - 1;
 
-	GRect html = c;
+	LRect html = c;
 	html.y1 = e.y2 + 1;
 
 	if (d->Back)

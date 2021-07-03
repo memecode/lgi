@@ -27,7 +27,7 @@ public:
 	HPEN		hPen;
 	HBRUSH		hBrush;
 	HBITMAP		hOldBitmap;
-	GRect		Client;
+	LRect		Client;
 
 	int			Mode;
 	COLOUR		Col;
@@ -83,8 +83,8 @@ public:
 		int			BitDepth;
 
 		bool		_ClientClip;
-		GRect		_Client;
-		void		_SetClient(GRect *c);
+		LRect		_Client;
+		void		_SetClient(LRect *c);
 
 		#ifdef LINUX
 		friend class GFont;
@@ -205,14 +205,14 @@ GScreenDC::~GScreenDC()
 	DeleteObj(d);
 }
 
-bool GScreenDC::GetClient(GRect *c)
+bool GScreenDC::GetClient(LRect *c)
 {
 	if (!c) return false;
 	*c = d->Client;
 	return true;
 }
 
-void GScreenDC::SetClient(GRect *c)
+void GScreenDC::SetClient(LRect *c)
 {
 	if (c)
 	{
@@ -311,9 +311,9 @@ void GScreenDC::Palette(GPalette *pPal, bool bOwnIt)
 	GSurface::Palette(pPal, bOwnIt);
 }
 
-GRect GScreenDC::ClipRgn(GRect *Rgn)
+LRect GScreenDC::ClipRgn(LRect *Rgn)
 {
-	GRect Prev = Clip;
+	LRect Prev = Clip;
 
 	if (Rgn)
 	{
@@ -347,7 +347,7 @@ GRect GScreenDC::ClipRgn(GRect *Rgn)
 	return Prev;
 }
 
-GRect GScreenDC::ClipRgn()
+LRect GScreenDC::ClipRgn()
 {
 	return Clip;
 }
@@ -653,7 +653,7 @@ void GScreenDC::Box(int x1, int y1, int x2, int y2)
 	SelectObject(hDC, hTemp);
 }
 
-void GScreenDC::Box(GRect *a)
+void GScreenDC::Box(LRect *a)
 {
 	HBRUSH hTemp = (HBRUSH) SelectObject(hDC, d->Null.Brush);
 	if (a)
@@ -668,9 +668,9 @@ void GScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 	::Rectangle(hDC, x1, y1, x2+1, y2+1);
 }
 
-void GScreenDC::Rectangle(GRect *a)
+void GScreenDC::Rectangle(LRect *a)
 {
-	GRect b;
+	LRect b;
 	if (a)
 		b = *a;
 	else
@@ -679,11 +679,11 @@ void GScreenDC::Rectangle(GRect *a)
 	::Rectangle(hDC, b.x1, b.y1, b.x2+1, b.y2+1);
 }
 
-void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
+void GScreenDC::Blt(int x, int y, GSurface *Src, LRect *a)
 {
 	if (Src)
 	{
-		GRect b;
+		LRect b;
 		if (a)
 			b = *a;
 		else
@@ -805,11 +805,11 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	}
 }
 
-void GScreenDC::StretchBlt(GRect *dst, GSurface *Src, GRect *s)
+void GScreenDC::StretchBlt(LRect *dst, GSurface *Src, LRect *s)
 {
 	if (Src)
 	{
-		GRect DestR;
+		LRect DestR;
 		if (dst)
 		{
 			DestR = *dst;
@@ -819,7 +819,7 @@ void GScreenDC::StretchBlt(GRect *dst, GSurface *Src, GRect *s)
 			DestR.ZOff(X()-1, Y()-1);
 		}
 
-		GRect SrcR;
+		LRect SrcR;
 		if (s)
 		{
 			SrcR = *s;
@@ -892,7 +892,7 @@ void GScreenDC::Bezier(int Threshold, LPoint *Pt)
 {
 }
 
-void GScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, GRect *r)
+void GScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *r)
 {
 	::FloodFill(hDC, x, y, d->Col);
 }

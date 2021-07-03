@@ -70,7 +70,7 @@ void GDialog::OnPosChange()
         GTableLayout *t = dynamic_cast<GTableLayout*>((GViewI*)it);
         if (t)
         {
-            GRect r = GetClient();
+            LRect r = GetClient();
             r.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
             t->SetPos(r);
         }
@@ -80,7 +80,7 @@ void GDialog::OnPosChange()
 bool GDialog::LoadFromResource(int Resource, char *TagList)
 {
 	GAutoString n;
-	GRect p;
+	LRect p;
 
 	bool Status = GLgiRes::LoadFromResource(Resource, this, &p, &n, TagList);
 	if (Status)
@@ -204,7 +204,7 @@ GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool ve
 	ResObject(Res_Slider)
 {
 	SetId(id);
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	Name(name);
 	Vertical = vert;
@@ -263,7 +263,7 @@ void GSlider::OnPaint(GSurface *pDC)
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle();
 	
-	GRect r = GetClient();
+	LRect r = GetClient();
 	int y = r.Y() >> 1;
 	r.y1 = y - 2;
 	r.y2 = r.y1 + 3;
@@ -276,7 +276,7 @@ void GSlider::OnPaint(GSurface *pDC)
 		int x = Val * r.X() / (Max-Min);
 		Thumb.ZOff(5, 9);
 		Thumb.Offset(r.x1 + x - 3, y - 5);
-		GRect b = Thumb;
+		LRect b = Thumb;
 		LgiWideBorder(pDC, b, DefaultRaisedEdge);
 		pDC->Rectangle(&b);		
 	}
@@ -349,7 +349,7 @@ public:
 			if (pDC)
 			{
 				Bmp->SetDC(pDC);
-				GRect r = Bmp->GetPos();
+				LRect r = Bmp->GetPos();
 				r.Dimension(pDC->X()+4, pDC->Y()+4);
 				Bmp->SetPos(r);
 				Bmp->Invalidate();
@@ -384,7 +384,7 @@ GBitmap::GBitmap(int id, int x, int y, char *FileName, bool Async) :
 	pThread = 0;
 
 	SetId(id);
-	GRect r;
+	LRect r;
 	r.ZOff(16, 16);
 	r.Offset(x, y);
 
@@ -431,7 +431,7 @@ void GBitmap::SetDC(GSurface *pNewDC)
 	if (pDC)
 	{
 		int Border = (Sunken() || Raised()) ? _BorderSize : 0;
-		GRect r = GetPos();
+		LRect r = GetPos();
 		r.Dimension(pDC->X() + (Border<<1), pDC->Y() + (Border<<1));
 		SetPos(r, true);
 	}
@@ -451,7 +451,7 @@ GMessage::Param GBitmap::OnEvent(GMessage *Msg)
 
 void GBitmap::OnPaint(GSurface *pScreen)
 {
-	GRect a(0, 0, X()-1, Y()-1);
+	LRect a(0, 0, X()-1, Y()-1);
 	if (pDC)
 	{
 		pScreen->Blt(a.x1, a.y1, pDC);

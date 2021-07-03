@@ -92,11 +92,11 @@ public:
 
 	bool Pour(GRegion &r)
 	{
-		GRect *rc = FindLargestEdge(r, GV_EDGE_TOP);
+		LRect *rc = FindLargestEdge(r, GV_EDGE_TOP);
 		if (!rc)
 			return false;
 
-		GRect p = *rc;
+		LRect p = *rc;
 		p.y2 = p.y1 + SysFont->GetHeight() + 11;
 		SetPos(p);
 		return true;	
@@ -145,7 +145,7 @@ public:
 			int x = GetClient().x2 - 6;
 			if (!Ok->IsAttached())
 				Ok->Attach(this);
-			GRect r;
+			LRect r;
 			r.Set(0, 0, Ok->X()-1, Ok->Y()-1);
 			r.Offset(x - r.X(), (Y() - r.Y()) >> 1);
 			Ok->SetPos(r);			
@@ -356,7 +356,7 @@ public:
 		if (!Options.SerializeFile(false) ||
 			!SerializeState(&Options, "WndState", true))
 		{
-			GRect r(0, 0, 1200, 800);
+			LRect r(0, 0, 1200, 800);
 			SetPos(r);
 			MoveToCenter();
 		}

@@ -80,7 +80,7 @@ class LgiClass LListItem : public GItem, public LListItemPainter
 protected:
 	// Data
 	class LListItemPrivate *d;
-	GRect Pos;
+	LRect Pos;
 	LList *Parent;
 
 	// Methods
@@ -133,7 +133,7 @@ public:
 	/// Changes the selection start of the control.
 	void Select(bool b) override;
 	/// Gets the on screen position of the field at column 'col'
-	GRect *GetPos(int Col = -1) override;
+	LRect *GetPos(int Col = -1) override;
 	/// True if the item is visible
 	bool OnScreen() { return Pos.y1 < Pos.y2; }
 
@@ -276,8 +276,8 @@ protected:
 	GSurface *Buf;
 
 	// Drawing locations
-	GRect ItemsPos;
-	GRect ScrollX, ScrollY;
+	LRect ItemsPos;
+	LRect ScrollX, ScrollY;
 	int FirstVisible;
 	int LastVisible;
 	int CompletelyVisible;
@@ -285,7 +285,7 @@ protected:
 	// Misc
 	bool GetUpdateRegion(LListItem *i, GRegion &r);
 	LListItem *HitItem(int x, int y, int *Index = 0);
-	GRect &GetClientRect();
+	LRect &GetClientRect();
 	void PourAll();
 	void UpdateScrollBars();
 	void KeyScroll(int iTo, int iFrom, bool SelectItems);

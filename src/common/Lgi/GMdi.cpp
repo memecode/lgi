@@ -18,13 +18,13 @@ class GMdiChildPrivate
 {
 public:
 	GMdiChild *Child;
-	GRect Title;
+	LRect Title;
 	#if MDI_TAB_STYLE
-	GRect Tab, Btn;
+	LRect Tab, Btn;
 	int Order;
 	#else
-	GRect Close;
-	GRect System;
+	LRect Close;
+	LRect System;
 	#endif
 	
 	int Fy;	
@@ -72,7 +72,7 @@ public:
 				}
 				else
 				{
-					GRect c = Child->GLayout::GetClient();
+					LRect c = Child->GLayout::GetClient();
 					int Corner = 24;
 					if (x < c.x1 + Corner)
 					{
@@ -102,8 +102,8 @@ class GMdiParentPrivate
 public:
 	bool InOnPosChange;
 	bool Btn;
-	GRect Tabs;
-	GRect Content;
+	LRect Tabs;
+	LRect Content;
 	::GArray<GMdiChild*> Children;
 	
 	GMdiParentPrivate()
@@ -182,14 +182,14 @@ bool GMdiChild::Name(const char *n)
 	if (GetParent())
 		GetParent()->Invalidate();
 	#else
-	Invalidate((GRect*)0, false, true);
+	Invalidate((LRect*)0, false, true);
 	#endif
 	
 	return s;
 }
 bool GMdiChild::PourAll()
 {
-	GRect c = GetClient();
+	LRect c = GetClient();
 	#if !MDI_TAB_STYLE
 	c.Size(2, 2);
 	#endif
@@ -203,7 +203,7 @@ bool GMdiChild::PourAll()
 	{
 		if (Visible())
 		{
-			GRect OldPos = w->GetPos();
+			LRect OldPos = w->GetPos();
 			Update.Union(&OldPos);
 			if (w->Pour(Client))
 			{
@@ -246,10 +246,10 @@ void GMdiChild::OnButtonClick(GMouse &m)
 		}
 	}
 }
-void GMdiChild::OnPaintButton(GSurface *pDC, GRect &rc)
+void GMdiChild::OnPaintButton(GSurface *pDC, LRect &rc)
 {
 	// Default: Draw little 'x' for closing the MDI child
-	GRect r = rc;
+	LRect r = rc;
 	pDC->Colour(GColour(192,192,192));
 	
 	r.Size(3, 3);
@@ -266,9 +266,9 @@ int GMdiChild::GetOrder()
 	return d->Order;
 }
 #else
-GRect &GMdiChild::GetClient(bool ClientSpace)
+LRect &GMdiChild::GetClient(bool ClientSpace)
 {
-	static GRect r;
+	static LRect r;
 	
 	r = GLayout::GetClient(ClientSpace);
 	r.Size(3, 3);
@@ -279,7 +279,7 @@ GRect &GMdiChild::GetClient(bool ClientSpace)
 }
 void GMdiChild::OnPaint(GSurface *pDC)
 {
-	GRect p = GLayout::GetClient();
+	LRect p = GLayout::GetClient();
 	// Border
 	LgiWideBorder(pDC, p, RAISED);
 	pDC->Colour(LC_MED, 24);
@@ -307,7 +307,7 @@ void GMdiChild::OnPaint(GSurface *pDC)
 	ds.Draw(pDC, d->System.x2 + 1, d->Title.y1 + 1, &d->Title);
 	
 	// System button
-	GRect r = d->System;
+	LRect r = d->System;
 	r.Size(2, 1);
 	pDC->Colour(LC_BLACK, 24);
 	pDC->Box(&r);
@@ -339,7 +339,7 @@ void GMdiChild::OnPaint(GSurface *pDC)
 	pDC->Line(Cx-s, Cy-s, Cx+s, Cy+s);
 	pDC->Line(Cx-s, Cy+s, Cx+s, Cy-s);
 	// Client
-	GRect Client = GetClient();
+	LRect Client = GetClient();
 	Client.Size(-1, -1);
 	pDC->Colour(LC_MED, 24);
 	pDC->Box(&Client);
@@ -360,7 +360,7 @@ void GMdiChild::OnMouseClick(GMouse &m)
 		Raise();
 		if (m.Down())
 		{
-			GRect c = GLayout::GetClient();
+			LRect c = GLayout::GetClient();
 			d->Drag = DragNone;
 			d->Ox = d->Oy = -1;
 			
@@ -502,7 +502,7 @@ void GMdiChild::OnMouseMove(GMouse &m)
 {
 	if (IsCapturing())
 	{
-		GRect p = GetPos();
+		LRect p = GetPos();
 		LPoint Min = GetMinimumSize();
 		if (d->Drag == DragClose)
 		{
@@ -722,7 +722,7 @@ void GMdiParent::OnPaint(GSurface *pDC)
 		GColour Edge(L_BLACK);
 		GColour Txt(L_TEXT);
 		
-		GRect r = c->d->Tab;
+		LRect r = c->d->Tab;
 		if (Active)
 			r.y2 += 1;
 		int OffX = 0, OffY = 0;
@@ -746,7 +746,7 @@ void GMdiParent::OnPaint(GSurface *pDC)
 		Fnt->Fore(Txt);
 		Fnt->Back(Bk);
 		Fnt->Transparent(false);
-		GRect txt = r;
+		LRect txt = r;
 		txt.x1 += OffX - 1;
 		ds.Draw(pDC, r.x1 + MarginPx + 2, r.y1, &txt);
 		c->OnPaintButton(pDC, c->d->Btn);
@@ -851,8 +851,8 @@ void GMdiParent::OnPosChange()
 	if (!IsAttached())
 		return;
 	GFont *Fnt = GetFont();
-	GRect Client = GetClient();
-	GRect Tabs, Content;
+	LRect Client = GetClient();
+	LRect Tabs, Content;
 		
 	d->InOnPosChange = true;
 	
@@ -915,9 +915,9 @@ void GMdiParent::OnPosChange()
 	d->InOnPosChange = false;
 }
 #endif
-GRect GMdiParent::NewPos()
+LRect GMdiParent::NewPos()
 {
-	GRect Status(0, 0, (int)(X()*0.75), (int)(Y()*0.75));
+	LRect Status(0, 0, (int)(X()*0.75), (int)(Y()*0.75));
 	int Block = 5;
 	for (int y=0; y<Y()>>Block; y++)
 	{
@@ -926,7 +926,7 @@ GRect GMdiParent::NewPos()
 			bool Has = false;
 			for (auto c: Children)
 			{
-				GRect p = c->GetPos();
+				LRect p = c->GetPos();
 				if (p.x1 >> Block == x &&
 					p.y1 >> Block == y)
 				{

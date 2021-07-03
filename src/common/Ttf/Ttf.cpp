@@ -197,7 +197,7 @@ bool GFont::CreateFont(LOGFONT *LogFont)
 	return (hFont != 0);
 }
 
-void GFont::Text(GSurface *pDC, int x, int y, char *Str, int Len, GRect *r)
+void GFont::Text(GSurface *pDC, int x, int y, char *Str, int Len, LRect *r)
 {
 	if (pDC AND hFont AND Str)
 	{
@@ -240,7 +240,7 @@ void GFont::Text(GSurface *pDC, int x, int y, char *Str, int Len, GRect *r)
 	}
 }
 
-void GFont::TextW(GSurface *pDC, int x, int y, ushort *Str, int Len, GRect *r)
+void GFont::TextW(GSurface *pDC, int x, int y, ushort *Str, int Len, LRect *r)
 {
 	if (pDC AND hFont AND Str)
 	{
@@ -1463,7 +1463,7 @@ Rule 4
 #define GRID_X			5
 #define GRID_Y			5
 
-bool TtfGlyph::Rasterize(GSurface *pDC, GRect *pDest, double xppem, double yppem, int BaseLine)
+bool TtfGlyph::Rasterize(GSurface *pDC, LRect *pDest, double xppem, double yppem, int BaseLine)
 {
 	bool Status = FALSE;
 	TtfHeader *Header = (TtfHeader*) FindTag("head");
@@ -1962,7 +1962,7 @@ bool TtfRaster::Rasterize(double xPPEm, double yPPEm, int OverSample)
 	YPixelsPerEm = yPPEm;
 	Glyphs = Profile->NumGlyphs;
 
-	pSource = new GRect[Glyphs];
+	pSource = new LRect[Glyphs];
 	BaseLine = new int[Glyphs];
 
 	if (Glyph AND pSource AND BaseLine)
@@ -1972,7 +1972,7 @@ bool TtfRaster::Rasterize(double xPPEm, double yPPEm, int OverSample)
 		double XUnits = (double) XPixelsPerEm / Header->UnitsPerEm;
 		double YUnits = (double) YPixelsPerEm / Header->UnitsPerEm;
 
-		memset(pSource, 0, sizeof(GRect) * Glyphs);
+		memset(pSource, 0, sizeof(LRect) * Glyphs);
 
 		for (int i=0; i<Glyphs; i++)
 		{
@@ -2001,8 +2001,8 @@ bool TtfRaster::Rasterize(double xPPEm, double yPPEm, int OverSample)
 			{
 				if (Glyph[i])
 				{
-					GRect a = *(pSource + i);
-					GRect b;
+					LRect a = *(pSource + i);
+					LRect b;
 
 					b.x1 = a.x1 * OverSample;
 					b.y1 = a.y1 * OverSample;
@@ -2411,7 +2411,7 @@ void StretchBlt(	GSurface *pDest,
 			int X,
 			int Y,
 			GSurface *pSrc,
-			GRect *SRgn,
+			LRect *SRgn,
 			int Scale)
 {
 	if (pDest AND pSrc AND SRgn)

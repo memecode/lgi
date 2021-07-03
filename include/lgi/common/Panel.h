@@ -20,7 +20,7 @@ protected:
 	int Align;
 	int ClosedSize;
 	int OpenSize;
-	GRect ThumbPos;
+	LRect ThumbPos;
 	GDisplayString *Ds;
 
 	void RePour();

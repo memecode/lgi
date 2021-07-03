@@ -85,7 +85,7 @@ GEdit::GEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	SetId(id);
 	Sunken(true);
 	if (name) Name(name);
-	GRect r(x, y, x+max(cx, 10), y+max(cy, 10));
+	LRect r(x, y, x+max(cx, 10), y+max(cy, 10));
 	SetPos(r);
 	SetStyle(WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP);
 	SetFont(SysFont);

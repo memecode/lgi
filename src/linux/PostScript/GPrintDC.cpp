@@ -237,7 +237,7 @@ class PrintPainter
 {
 	GPrintDC *pDC;
 	int Fore, Back;
-	List<GRect> Clip;
+	List<LRect> Clip;
 	int Ox, Oy;
 
 	char Face[256];
@@ -335,17 +335,17 @@ public:
 	
 	void PushClip(int x1, int y1, int x2, int y2)
 	{
-		GRect *Next = new GRect(Ox + x1, Oy + y1, Ox + x2, Ox + y2);
+		LRect *Next = new LRect(Ox + x1, Oy + y1, Ox + x2, Ox + y2);
 		if (Next)
 		{
-			GRect *Last = Clip.Last();
+			LRect *Last = Clip.Last();
 			if (Last)
 			{
 				Next->Bound(Last);
 			}
 			else
 			{
-				GRect r(0, 0, X()-1, Y()-1);
+				LRect r(0, 0, X()-1, Y()-1);
 				Next->Bound(&r);
 			}
 			
@@ -355,7 +355,7 @@ public:
 	
 	void PopClip()
 	{
-		GRect *Last = Clip.Last();
+		LRect *Last = Clip.Last();
 		if (Last)
 		{
 			Clip.Delete(Last);
@@ -368,11 +368,11 @@ public:
 		Clip.DeleteObjects();
 	}
 	
-	void SetClient(GRect *Client)
+	void SetClient(LRect *Client)
 	{
 	}
 	
-	void drawText(int x, int y, char16 *text, int len, int *backColour, GRect *clip)
+	void drawText(int x, int y, char16 *text, int len, int *backColour, LRect *clip)
 	{
 		if (ValidStrW(text) && File().IsOpen())
 		{
@@ -703,13 +703,13 @@ void GPrintDC::FilledEllipse(double cx, double cy, double x, double y)
 
 void GPrintDC::Box(int x1, int y1, int x2, int y2)
 {
-	GRect a(x1, y1, x2, y2);
+	LRect a(x1, y1, x2, y2);
 	Box(&a);
 }
 
-void GPrintDC::Box(GRect *a)
+void GPrintDC::Box(LRect *a)
 {
-	GRect r;
+	LRect r;
 	if (a) r = *a;
 	else r.ZOff(X()-1, Y()-1);
 
@@ -731,13 +731,13 @@ void GPrintDC::Box(GRect *a)
 
 void GPrintDC::Rectangle(int x1, int y1, int x2, int y2)
 {
-	GRect a(x1, y1, x2, y2);
+	LRect a(x1, y1, x2, y2);
 	Rectangle(&a);
 }
 
-void GPrintDC::Rectangle(GRect *a)
+void GPrintDC::Rectangle(LRect *a)
 {
-	GRect r;
+	LRect r;
 	if (a) r = *a;
 	else r.ZOff(X()-1, Y()-1);
 	
@@ -757,11 +757,11 @@ void GPrintDC::Rectangle(GRect *a)
 	}
 }
 
-void GPrintDC::Blt(int x, int y, GSurface *Src, GRect *a)
+void GPrintDC::Blt(int x, int y, GSurface *Src, LRect *a)
 {
 }
 
-void GPrintDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
+void GPrintDC::StretchBlt(LRect *d, GSurface *Src, LRect *s)
 {
 }
 
@@ -773,7 +773,7 @@ void GPrintDC::Bezier(int Threshold, LPoint *Pt)
 {
 }
 
-void GPrintDC::FloodFill(int x, int y, int Mode, COLOUR Border, GRect *Bounds)
+void GPrintDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
 }
 

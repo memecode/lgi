@@ -68,7 +68,7 @@ class LgiClass LgiDialogRes
 public:
 	GXmlTag *Dialog;
 	LgiStringRes *Str;
-	GRect Pos;
+	LRect Pos;
 
 	LgiDialogRes(LResources *res);
 	~LgiDialogRes();
@@ -163,7 +163,7 @@ public:
 		/// The view to contain all the new controls.
 		GViewI *Parent,
 		/// [Optional] The size of the dialog if needed
-		GRect *Pos = NULL,
+		LRect *Pos = NULL,
 		/// [Optional] The name of the window.
 		GAutoString *Name = NULL,
 		/// [Optional] A scripting engine interface
@@ -214,7 +214,7 @@ public:
 
 	/// Gets the position
 	/// \private
-	GRect Res_GetPos(ResObject *Obj);
+	LRect Res_GetPos(ResObject *Obj);
 
 	/// Gets the string ref number
 	/// \private

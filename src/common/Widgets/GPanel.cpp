@@ -109,7 +109,7 @@ bool GPanel::Attach(GViewI *Wnd)
 bool GPanel::Pour(GRegion &r)
 {
 	int Sx = CalcWidth();
-	GRect *Best = 0;
+	LRect *Best = 0;
 	if (Open())
 	{
 		Best = FindLargest(r);
@@ -125,7 +125,7 @@ bool GPanel::Pour(GRegion &r)
 
 	if (Best)
 	{
-		GRect r = *Best;
+		LRect r = *Best;
 		if (OpenSize > 0)
 		{
 			int Size = ((Open()) ? OpenSize : ClosedSize);
@@ -179,7 +179,7 @@ bool GPanel::Pour(GRegion &r)
 					css->Width() == GCss::LenAuto &&
 					css->Height() == GCss::LenAuto)
 				{
-					GRect c = GetClient();
+					LRect c = GetClient();
 					GCssTools tools(css, v->GetFont());
 					c = tools.ApplyMargin(c);
 					v->SetPos(c);
@@ -206,7 +206,7 @@ int GPanel::OnNotify(GViewI *Ctrl, int Flags)
 
 void GPanel::OnPaint(GSurface *pDC)
 {
-	GRect r = GetClient();
+	LRect r = GetClient();
 	GCssTools Tools(this);
 	GColour cFore = Tools.GetFore();
 	GColour cBack = Tools.GetBack();

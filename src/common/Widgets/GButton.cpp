@@ -43,7 +43,7 @@ public:
 	bool WantsDefault;
 	bool Toggle;
 	
-	GRect TxtSz;
+	LRect TxtSz;
 	GSurface *Image;
 	bool OwnImage;
 	
@@ -88,7 +88,7 @@ GButton::GButton(int id, int x, int y, int cx, int cy, const char *name) :
 	d = new GButtonPrivate;
 	Name(name);
 	
-	GRect r(x,
+	LRect r(x,
 			y,
 			x + (cx <= 0 ? d->TxtSz.X() + Overhead.x : cx) - 1,
 			y + (cy <= 0 ? d->TxtSz.Y() + Overhead.y : cy) - 1);
@@ -394,7 +394,7 @@ void GButton::OnPaint(GSurface *pDC)
 			pDC->Rectangle();
 		}
 	
-		GRect rc = GetClient();
+		LRect rc = GetClient();
 		rc.x1 += 2;
 		rc.y2 -= 1;
 		rc.x2 -= 1;
@@ -418,7 +418,7 @@ void GButton::OnPaint(GSurface *pDC)
 		else
 		{
 			LPoint pt;
-			GRect r = GetClient();
+			LRect r = GetClient();
 			pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
 			pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
 			d->Paint(pDC, pt, GColour(), r, Enabled(), Info.state == kThemeStatePressed);
@@ -439,13 +439,13 @@ void GButton::OnPaint(GSurface *pDC)
 				GApp::SkinEngine->OnPaint_GButton(this, &State);
 			
 			LPoint pt;
-			GRect r = GetClient();
+			LRect r = GetClient();
 			pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
 			pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
 			d->Paint(pDC, pt, GColour(), r, Enabled(), false);
 			if (Focus())
 			{
-				GRect r = GetClient();
+				LRect r = GetClient();
 				r.Size(5, 3);
 				pDC->Colour(GColour(180, 180, 180));
 				pDC->LineStyle(GSurface::LineAlternate);
@@ -455,7 +455,7 @@ void GButton::OnPaint(GSurface *pDC)
 		else
 		{
 			GColour Back(d->Over ? L_HIGH : L_MED);
-			GRect r(0, 0, X()-1, Y()-1);
+			LRect r(0, 0, X()-1, Y()-1);
 			if (Default())
 			{
 				pDC->Colour(L_BLACK);
@@ -504,7 +504,7 @@ void GButton::OnAttach()
 
 void GButton::SetPreferredSize(int x, int y)
 {
-	GRect r = GetPos();
+	LRect r = GetPos();
 
 	int Ix = d->Image ? d->Image->X() : 0;
 	int Iy = d->Image ? d->Image->Y() : 0;
@@ -532,8 +532,8 @@ bool GButton::OnLayout(GViewLayoutInfo &Inf)
 		Dpi = Wnd->GetDpi();
 	double Scale = (double)Dpi.x / 96.0;
 
-	GRect DefaultPad(Scale*Overhead.x/2, Scale*Overhead.y/2, Scale*Overhead.x/2, Scale*Overhead.y/2);
-	GRect Pad = Tools.GetPadding(c, &DefaultPad), Border = Tools.GetBorder(c);
+	LRect DefaultPad(Scale*Overhead.x/2, Scale*Overhead.y/2, Scale*Overhead.x/2, Scale*Overhead.y/2);
+	LRect Pad = Tools.GetPadding(c, &DefaultPad), Border = Tools.GetBorder(c);
 
 	if (!Inf.Width.Min)
 	{

@@ -89,7 +89,7 @@ void GRichTextPriv::BlockCursor::Set(GRichTextPriv::Block *b, ssize_t off, int l
 	LineHint = line;
 	if (Blk)
 	{
-		GRect Line;
+		LRect Line;
 		#ifdef _DEBUG
 		ssize_t BlkLen = Blk->Length();
 		#endif

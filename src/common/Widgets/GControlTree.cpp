@@ -121,11 +121,11 @@ void GControlTree::Item::SetValue(GVariant &v)
 	else Update();
 }
 
-GRect &GControlTree::Item::GetRect()
+LRect &GControlTree::Item::GetRect()
 {
-	static GRect r;
+	static LRect r;
 	r.ZOff(-1, -1);
-	GRect *p = _GetRect(TreeItemText);
+	LRect *p = _GetRect(TreeItemText);
 	if (p)
 	{
 		bool HasBrowse = (Flags & TYPE_FILE) != 0;
@@ -287,12 +287,12 @@ void GControlTree::Item::PositionControls()
 {
 	if (Ctrl)
 	{
-		GRect r = GetRect();
+		LRect r = GetRect();
 		Ctrl->SetPos(r);
 		Ctrl->Visible(true);
 		if (Browse)
 		{
-			GRect b = Browse->GetPos();
+			LRect b = Browse->GetPos();
 			b.Offset(r.x2 + 5 - b.x1, r.y1 - b.y1);
 			Browse->SetPos(b);
 			Browse->Visible(true);
@@ -311,7 +311,7 @@ void GControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 		SysBold->Colour(Tools.GetFore(), Tools.GetBack(&Ws, 0));
 		SysBold->Transparent(true);
 
-		GRect p = GetRect();
+		LRect p = GetRect();
 		switch (Type)
 		{
 			default:
@@ -592,7 +592,7 @@ int GControlTree::OnNotify(GViewI *c, int f)
 ///////////////////////////////////////////////////////////////////////////////
 class GControlTree_Factory : public GViewFactory
 {
-	GView *NewView(const char *Class, GRect *Pos, const char *Text)
+	GView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (_stricmp(Class, "GControlTree") == 0)
 		{

@@ -86,8 +86,8 @@ class ResTableCell : public GDom
 {
 public:
 	CtrlTable *Table;
-	GRect Cell;	// Cell location
-	GRect Pos;	// Pixels
+	LRect Cell;	// Cell location
+	LRect Pos;	// Pixels
 	bool Selected;
 	GArray<ResDialogCtrl*> Ctrls;
 	TableAlign AlignX;
@@ -117,7 +117,7 @@ public:
 			ResDialogCtrl *c = Ctrls[i];
 			if (c)
 			{
-				GRect r = c->View()->GetPos();
+				LRect r = c->View()->GetPos();
 
 				if (r.X() > Pos.X())
 				{
@@ -141,7 +141,7 @@ public:
 		}
 	}
 
-	void SetPos(GRect &p)
+	void SetPos(LRect &p)
 	{
 		int Dx = p.x1 - Pos.x1;
 		int Dy = p.y1 - Pos.y1;
@@ -150,7 +150,7 @@ public:
 			ResDialogCtrl *c = Ctrls[i];
 			if (c)
 			{
-				GRect r = c->View()->GetPos();
+				LRect r = c->View()->GetPos();
 				r.Offset(Dx, Dy);
 				c->SetPos(r);
 			}
@@ -200,7 +200,7 @@ public:
 	{
 		if (stricmp(Name, VAL_Span) == 0)
 		{
-			GRect r;
+			LRect r;
 			if (r.SetStr(Value.Str()))
 			{
 				Cell = r;
@@ -216,7 +216,7 @@ public:
 				if (Obj)
 				{
 					Table->SetAttachCell(this);
-					GRect r = Obj->View()->GetPos();
+					LRect r = Obj->View()->GetPos();
 					Table->AttachCtrl(Obj, &r);
 					Table->SetAttachCell(0);
 				}
@@ -344,7 +344,7 @@ enum HandleTypes
 	LJoinCells,
 };
 
-struct OpHandle : public GRect
+struct OpHandle : public LRect
 {
 	bool Over;
 	HandleTypes Type;
@@ -476,7 +476,7 @@ public:
 		return 0;
 	}
 
-	void Layout(GRect c)
+	void Layout(LRect c)
 	{
 		#define ADD_BORDER		10
 		#define CELL_SPACING	1
@@ -551,7 +551,7 @@ public:
 						if (Cell->Cell.x1 == x &&
 							Cell->Cell.y1 == y)
 						{
-							GRect Pos = Cell->Pos;
+							LRect Pos = Cell->Pos;
 							
 							// Set cells pixel position, with spanning
 							int Ex = XPair[Cell->Cell.x2 + 1].Pos;
@@ -905,7 +905,7 @@ bool CtrlTable::SetVariant(const char *Name, GVariant &Value, char *Array)
 	return true;
 }
 
-GRect *CtrlTable::GetPasteArea()
+LRect *CtrlTable::GetPasteArea()
 {
 	for (int i=0; i<d->Cells.Length(); i++)
 	{
@@ -916,7 +916,7 @@ GRect *CtrlTable::GetPasteArea()
 	return 0;
 }
 
-GRect *CtrlTable::GetChildArea(ResDialogCtrl *Ctrl)
+LRect *CtrlTable::GetChildArea(ResDialogCtrl *Ctrl)
 {
 	ResTableCell *c = d->GetCell(Ctrl);
 	if (c)
@@ -943,7 +943,7 @@ void CtrlTable::SetAttachCell(ResTableCell *c)
 	d->AttachTo = c;
 }
 
-bool CtrlTable::AttachCtrl(ResDialogCtrl *Ctrl, GRect *r)
+bool CtrlTable::AttachCtrl(ResDialogCtrl *Ctrl, LRect *r)
 {
 	if (d->AttachTo)
 	{
@@ -955,7 +955,7 @@ bool CtrlTable::AttachCtrl(ResDialogCtrl *Ctrl, GRect *r)
 		}
 
 	
-		GRect b = d->AttachTo->Pos;
+		LRect b = d->AttachTo->Pos;
 		if (r->X() > b.X())
 		{
 			r->x1 = b.x1;
@@ -1365,7 +1365,7 @@ void CtrlTable::OnMouseClick(GMouse &m)
 				if (h && h->Type == LJoinCells)
 				{
 					// Do a cell merge
-					GRect u = h->a->Cell;
+					LRect u = h->a->Cell;
 					u.Union(&h->b->Cell);
 
 					d->Cells.Delete(h->a);
@@ -1625,7 +1625,7 @@ public:
 class DlgContainer : public GLayout
 {
     LgiDialogRes *Dlg;
-    GRect Size;
+    LRect Size;
 
 public:
     DlgContainer(int id)
@@ -1653,7 +1653,7 @@ public:
         {
             if (Dlg->GetRes()->LoadDialog(Dlg->Str->Id, this, &Size))
             {
-                GRect r = GetPos();
+                LRect r = GetPos();
                 r.Dimension(Size.X(), Size.Y());
                 SetPos(r);
                 AttachChildren();
@@ -1666,7 +1666,7 @@ public:
 
 TableLayoutTest::TableLayoutTest(GViewI *par)
 {
-	GRect r(0, 0, 1000, 800);
+	LRect r(0, 0, 1000, 800);
 	SetPos(r);
 	SetParent(par);
 	

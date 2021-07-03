@@ -29,7 +29,7 @@ public:
 		Log = NULL;
 		Loop = true;
         GWindow::Name(AppName);
-        GRect r(0, 0, 1000, 800);
+        LRect r(0, 0, 1000, 800);
         SetPos(r);
         MoveToCenter();
         SetQuitOnClose(true);

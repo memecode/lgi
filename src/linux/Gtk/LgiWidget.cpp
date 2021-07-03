@@ -119,7 +119,7 @@ GMouse _map_mouse_event(GView *v, int x, int y, bool Motion, bool Debug = false)
 			break;
 		}
 
-		GRect Pos = i->GetPos();
+		LRect Pos = i->GetPos();
 		Offset.x += Pos.x1;
 		Offset.y += Pos.y1;
 
@@ -833,7 +833,7 @@ lgi_widget_draw(GtkWidget *widget, cairo_t *cr)
 	if (v)
 	{
 		GdkRectangle GtkUp;
-		GRect Up;
+		LRect Up;
 		if (gdk_cairo_get_clip_rectangle(cr, &GtkUp))
 			Up = GtkUp;			
 		v->_Paint(&Dc, NULL, Up.Valid() ? &Up : NULL);
@@ -939,7 +939,7 @@ lgi_widget_unmap (GtkWidget *widget)
 }
 
 void
-lgi_widget_setpos(GtkWidget *widget, GRect rc)
+lgi_widget_setpos(GtkWidget *widget, LRect rc)
 {
 	auto parentWidget = gtk_widget_get_parent(widget);
 	if (parentWidget)

@@ -67,11 +67,11 @@ struct LCmdBlt : public LCmd
 {
 	LPoint p;
 	GSurface *Img;
-	GRect Dst;
-	GRect Src;
+	LRect Dst;
+	LRect Src;
 	bool Stretch;
 
-	LCmdBlt(int X, int Y, GSurface *img, GRect *dst, GRect *src, bool stretch = false) :
+	LCmdBlt(int X, int Y, GSurface *img, LRect *dst, LRect *src, bool stretch = false) :
 		p(X, Y)
 	{
 		Img = img;
@@ -100,10 +100,10 @@ struct LCmdBlt : public LCmd
 
 struct LCmdRect : public LCmd
 {
-	GRect r;
+	LRect r;
 	bool Filled;
 	
-	LCmdRect(GRect &rc, bool filled)
+	LCmdRect(LRect &rc, bool filled)
 	{
 		r = rc;
 		Filled = filled;
@@ -252,12 +252,12 @@ GDisplayString *GDrawListSurface::Text(int x, int y, const char *Str, int Len)
 	return Ds;
 }
 
-GRect GDrawListSurface::ClipRgn()
+LRect GDrawListSurface::ClipRgn()
 {
 	return Clip;
 }
 
-GRect GDrawListSurface::ClipRgn(GRect *Rgn)
+LRect GDrawListSurface::ClipRgn(LRect *Rgn)
 {
 	Clip = *Rgn;
 	return Clip;
@@ -419,7 +419,7 @@ void GDrawListSurface::FilledEllipse(double cx, double cy, double x, double y)
 
 void GDrawListSurface::Box(int x1, int y1, int x2, int y2)
 {
-	GRect r(x1, y1, x2, y2);
+	LRect r(x1, y1, x2, y2);
 	LCmdRect *c = new LCmdRect(r, false);
 	if (c)
 		d->Add(c);
@@ -427,9 +427,9 @@ void GDrawListSurface::Box(int x1, int y1, int x2, int y2)
 		LgiAssert(0);
 }
 
-void GDrawListSurface::Box(GRect *r)
+void GDrawListSurface::Box(LRect *r)
 {
-    GRect rc = r ? r : Bounds();
+    LRect rc = r ? r : Bounds();
 	LCmdRect *c = new LCmdRect(rc, false);
 	if (c)
 		d->Add(c);
@@ -439,7 +439,7 @@ void GDrawListSurface::Box(GRect *r)
 
 void GDrawListSurface::Rectangle(int x1, int y1, int x2, int y2)
 {
-	GRect r(x1, y1, x2, y2);
+	LRect r(x1, y1, x2, y2);
 	LCmdRect *c = new LCmdRect(r, true);
 	if (c)
 		d->Add(c);
@@ -447,9 +447,9 @@ void GDrawListSurface::Rectangle(int x1, int y1, int x2, int y2)
 		LgiAssert(0);
 }
 
-void GDrawListSurface::Rectangle(GRect *r)
+void GDrawListSurface::Rectangle(LRect *r)
 {
-    GRect rc = r ? r : Bounds();
+    LRect rc = r ? r : Bounds();
 	LCmdRect *c = new LCmdRect(rc, true);
 	if (c)
 		d->Add(c);
@@ -457,7 +457,7 @@ void GDrawListSurface::Rectangle(GRect *r)
 		LgiAssert(0);
 }
 
-void GDrawListSurface::Blt(int x, int y, GSurface *Src, GRect *SrcRc)
+void GDrawListSurface::Blt(int x, int y, GSurface *Src, LRect *SrcRc)
 {
 	if (!Src)
 	{
@@ -472,7 +472,7 @@ void GDrawListSurface::Blt(int x, int y, GSurface *Src, GRect *SrcRc)
 		LgiAssert(0);	
 }
 
-void GDrawListSurface::StretchBlt(GRect *drc, GSurface *Src, GRect *s)
+void GDrawListSurface::StretchBlt(LRect *drc, GSurface *Src, LRect *s)
 {
 	if (!d || !Src || !s)
 	{
@@ -497,7 +497,7 @@ void GDrawListSurface::Bezier(int Threshold, LPoint *Pt)
 	LgiAssert(!"Impl me.");
 }
 
-void GDrawListSurface::FloodFill(int x, int y, int Mode, COLOUR Border, GRect *Bounds)
+void GDrawListSurface::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
 	LgiAssert(!"Impl me.");
 }

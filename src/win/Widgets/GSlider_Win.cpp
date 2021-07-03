@@ -10,7 +10,7 @@ GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool ve
 	ResObject(Res_Slider)
 {
 	SetId(id);
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	Name(name);
 	Vertical = vert;
@@ -121,11 +121,11 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 					
 					RECT rc;
 					SendMessage(Handle(), TBM_GETCHANNELRECT, 0, (LPARAM)&rc);
-					GRect r = rc;
+					LRect r = rc;
 					LgiWideBorder(&dc, r, DefaultSunkenEdge);
 
 					SendMessage(Handle(), TBM_GETTHUMBRECT, 0, (LPARAM)&rc);
-					GRect t = rc;
+					LRect t = rc;
 					LgiWideBorder(&dc, t, DefaultRaisedEdge);
 					dc.Colour(L_MED);
 					dc.Rectangle(&t);
@@ -178,7 +178,7 @@ bool GSlider::OnLayout(GViewLayoutInfo &Inf)
 ////////////////////////////////////////////////////////////////////////
 class GSlider_Factory : public GViewFactory
 {
-	GView *NewView(const char *Class, GRect *Pos, const char *Text)
+	GView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (stricmp(Class, "GSlider") == 0)
 		{

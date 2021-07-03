@@ -31,9 +31,9 @@ public:
 	int GetItems();
 	/// Finds the bounds of valid data for each image and returns it in an array
 	/// valid from 0 to GetItems()-1.
-	GRect *GetBounds();
+	LRect *GetBounds();
 	/// Gets the full source rect for the icon
-	GRect GetIconRect(int Idx);
+	LRect GetIconRect(int Idx);
 	/// Level of alpha blending for disabled icons
 	uint8_t GetDisabledAlpha();
 	void SetDisabledAlpha(uint8_t alpha);

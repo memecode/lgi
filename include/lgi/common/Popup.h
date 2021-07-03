@@ -37,7 +37,7 @@ protected:
 	bool Cancelled;
 	GView *Owner;
 	uint64 Start;
-	GRect ScreenPos;
+	LRect ScreenPos;
 	
 	#if LGI_COCOA
 	OsPanel Panel;
@@ -49,8 +49,8 @@ public:
 
 	#if LGI_COCOA
 	OsPanel Handle() { return Panel; }
-	GRect &GetPos() override;
-	bool SetPos(GRect &r, bool repaint = false) override;
+	LRect &GetPos() override;
+	bool SetPos(LRect &r, bool repaint = false) override;
 	#endif
 
 	/// Sets whether the popup should take the focus when it's shown.

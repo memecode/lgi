@@ -90,7 +90,7 @@ public:
 		
 	#else
 
-		GRect ClipRgn() { return Clip; }
+		LRect ClipRgn() { return Clip; }
 
 		#if defined(__GTK_H__)
 
@@ -99,7 +99,7 @@ public:
 
 			/// This returns a sub-image, caller is responsible to free via
 			/// calling cairo_surface_destroy
-			LCairoSurface GetSubImage(GRect &r);
+			LCairoSurface GetSubImage(LRect &r);
 			
 			Gtk::GdkPixbuf *CreatePixBuf();
 
@@ -109,12 +109,12 @@ public:
 	
 			#if LGI_COCOA && defined(__OBJC__)
 			LCairoSurface(NSImage *img);
-			NSImage *NsImage(GRect *rc = NULL);
+			NSImage *NsImage(LRect *rc = NULL);
 			#endif
 	
 			#if !defined(LGI_SDL)
 				CGColorSpaceRef GetColourSpaceRef();
-				CGImg *GetImg(GRect *Sub = 0, int Debug = 0);
+				CGImg *GetImg(LRect *Sub = 0, int Debug = 0);
 			#endif
 		
 		#elif defined(LGI_SDL)
@@ -128,8 +128,8 @@ public:
 	#endif
 
 	// Set new clipping region
-	GRect ClipRgn(GRect *Rgn);
-	void SetClient(GRect *c);
+	LRect ClipRgn(LRect *Rgn);
+	void SetClient(LRect *c);
 	LPoint GetSize();
 	GColourSpace GetCreateCs();
 
@@ -148,8 +148,8 @@ public:
 	bool SwapRedAndBlue();
 	
 	bool Create(int x, int y, GColourSpace Cs, int Flags = SurfaceCreateNone);
-	void Blt(int x, int y, GSurface *Src, GRect *a = NULL);
-	void StretchBlt(GRect *d, GSurface *Src, GRect *s = NULL);
+	void Blt(int x, int y, GSurface *Src, LRect *a = NULL);
+	void StretchBlt(LRect *d, GSurface *Src, LRect *s = NULL);
 
 	void HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b);
 	void VertLine(int x, int y1, int y2, COLOUR a, COLOUR b);

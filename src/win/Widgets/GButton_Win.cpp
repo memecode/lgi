@@ -59,7 +59,7 @@ GButton::GButton(int id, int x, int y, int cx, int cy, const char *name) :
 		if (cy < 0) cy = ds.Y() + Overhead.y;
 	}
 	
-	GRect r(x, y, x+cx-1, y+cy-1);
+	LRect r(x, y, x+cx-1, y+cy-1);
 	SetPos(r);
 	SetId(id);
 	SetTabStop(true);
@@ -249,7 +249,7 @@ GMessage::Result GButton::OnEvent(GMessage *Msg)
 			GScreenDC dc(this);
 			
 			// Get the control to draw itself into a bitmap
-			GRect c = GetPos();
+			LRect c = GetPos();
 			
 			// Create a HBITMAP in the same size as the control 
 			// and the same bit depth as the screen
@@ -341,7 +341,7 @@ void GButton::OnPaint(GSurface *pDC)
 		pDC->Colour(L_MED);
 		pDC->Rectangle();
 		pDC->Colour(GColour::Red);
-		GRect c = GetClient();
+		LRect c = GetClient();
 		pDC->Line(0, 0, c.X()-1, c.Y()-1); 
 		pDC->Line(c.X()-1, 0, 0, c.Y()-1); 
 	}

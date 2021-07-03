@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "GMem.h"
 #include "GToken.h"
-#include "GRect.h"
+#include "LRect.h"
 
 extern "C" uint64 LgiCurrentTime();
 extern bool _GetKdePaths(GToken &t, char *Type);

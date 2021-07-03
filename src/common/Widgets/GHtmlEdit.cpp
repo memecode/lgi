@@ -119,7 +119,7 @@ public:
 		Toggle = toggle;
 		SpaceAfter = 0;
 
-		GRect r(0, 0, wid-1, TOOLBAR_HT);
+		LRect r(0, 0, wid-1, TOOLBAR_HT);
 		SetPos(r);
 		SetTabStop(TAB_STOP);
 	}
@@ -136,7 +136,7 @@ public:
 		SpaceAfter = 0;
 		
 		Str.Reset(new GDisplayString(SysBold, Text));
-		GRect r(0, 0, Str->X()+16, TOOLBAR_HT);
+		LRect r(0, 0, Str->X()+16, TOOLBAR_HT);
 		SetPos(r);
 		SetTabStop(TAB_STOP);
 	}
@@ -162,11 +162,11 @@ public:
 				HasLeft = false;
 				HasRight = false;
 
-				GRect Pos = GetPos();
+				LRect Pos = GetPos();
 
 				for (GViewI *c = i->First(); c; c = i->Next())
 				{
-					GRect CPos = c->GetPos();
+					LRect CPos = c->GetPos();
 					if (CPos.x2 == Pos.x1 - 1)
 					{
 						HasLeft = true;
@@ -181,7 +181,7 @@ public:
 			}
 		}
 
-		GRect Back = GetClient();
+		LRect Back = GetClient();
 		if (HasLeft)
 		{
 			Back.x1 -= 40;
@@ -221,7 +221,7 @@ public:
 		}
 		else if (Img)
 		{
-			GRect r(0, 0, Img->TileX()-1, Img->TileY()-1);
+			LRect r(0, 0, Img->TileX()-1, Img->TileY()-1);
 			r.Offset(((X()-Img->TileX())>>1)+(int)Val, ((Y()-Img->TileY())>>1)+(int)Val);
 			Mem.Colour(GColour(255, 0, 0));
 			if (HasLeft && !HasRight)
@@ -288,7 +288,7 @@ class HtmlEdit : public Html1::GHtml, public GDefaultDocumentEnv
 		OptimizeTags.Add(t);
 	}
 
-	float OverlapY(GRect &a, GRect &b)
+	float OverlapY(LRect &a, LRect &b)
 	{
 		int y1 = MAX(a.y1, b.y1);
 		int y2 = MIN(a.y2, b.y2);
@@ -465,7 +465,7 @@ public:
 		int LineY = GetFont()->GetHeight();
 		int sx, sy;
 		GetScrollPos(sx, sy);
-		GRect c = GetCursorPos();
+		LRect c = GetCursorPos();
 		c.Offset(0, -LineY*sy);
 		c.Size(-1, -1);
 		pDC->Colour(Rgb24(255, 0, 0), 24);
@@ -1081,7 +1081,7 @@ public:
 		{
 			GFlowRect *Inside = 0;
 			LPoint BaseOff = t->AbsolutePos();
-			GRect BasePos;
+			LRect BasePos;
 			char16 *End = Base + StrlenW(Base);
 			for (unsigned i=0; i<t->TextPos.Length(); i++)
 			{
@@ -1111,7 +1111,7 @@ public:
 				{
 					GFlowRect *f = t->TextPos[i];
 					if (!f) break;
-					GRect pos = *f;
+					LRect pos = *f;
 					pos += BaseOff;
 					float Over = OverlapY(BasePos, pos);
 					if (f != Inside && Over > OverlapThreshold)
@@ -1131,7 +1131,7 @@ public:
 					for (unsigned i=0; i<b->TextPos.Length(); i++)
 					{
 						GFlowRect *f = b->TextPos[i];
-						GRect pos = *f;
+						LRect pos = *f;
 						pos += Off;
 						float Over = OverlapY(BasePos, pos);
 						if (Over > OverlapThreshold)
@@ -1152,7 +1152,7 @@ public:
 					for (unsigned i=0; i<b->TextPos.Length(); i++)
 					{
 						GFlowRect *f = b->TextPos[i];
-						GRect pos = *f;
+						LRect pos = *f;
 						pos += Off;
 						float Over = OverlapY(BasePos, pos);
 						if (Over > OverlapThreshold)
@@ -1207,8 +1207,8 @@ public:
 
 				int LineY = GetFont()->GetHeight();
 				int64 Pos = VScroll->Value();
-				GRect Client = GetClient();
-				GRect c = GetCursorPos();
+				LRect Client = GetClient();
+				LRect c = GetCursorPos();
 				c.Offset(0, -(int)Pos * LineY);
 
 				// LgiTrace("cli=%s c=%s\n", Client.GetStr(), c.GetStr());
@@ -1413,7 +1413,7 @@ public:
 		}
 		else if (Dy)
 		{
-			GRect *CursorPos = GetCursorPos(); // doc coords
+			LRect *CursorPos = GetCursorPos(); // doc coords
 			if (CursorPos)
 			{
 				int Idx;
@@ -1427,7 +1427,7 @@ public:
 						for (unsigned i=0; i<t->TextPos.Length(); i++)
 						{
 							GFlowRect *r = t->TextPos[i];
-							GRect rp = *r;
+							LRect rp = *r;
 							rp.Offset(Off.x, Off.y);
 							if (rp.y1 >= CursorPos->y2)
 							{
@@ -1450,7 +1450,7 @@ public:
 						for (int i=t->TextPos.Length()-1; i>=0; i--)
 						{
 							GFlowRect *r = t->TextPos[i];
-							GRect rp = *r;
+							LRect rp = *r;
 							rp.Offset(Off.x, Off.y);
 							if (rp.y2 <= CursorPos->y1)
 							{
@@ -2549,7 +2549,7 @@ public:
 	{
 		d = priv;
 		Name("Html Edit Debug");
-		GRect r(1800, 200, 3000, 1000);
+		LRect r(1800, 200, 3000, 1000);
 		SetPos(r);
 		if (Attach(0))
 		{
@@ -2729,7 +2729,7 @@ void GHtmlEdit::OnPosChange()
 {
 	int x = 0;
 	int y = 0;
-	GRect Client = GetClient();
+	LRect Client = GetClient();
 	if (Client.X() > 16)
 	{
 		Btn *btn;
@@ -2737,7 +2737,7 @@ void GHtmlEdit::OnPosChange()
 		{
 			if (c != (GView*)d->e)
 			{
-				GRect p = c->GetPos();
+				LRect p = c->GetPos();
 				p.Offset(x - p.x1, y - p.y1);
 				if (x > 0 && p.x2 > Client.x2)
 				{
@@ -2757,7 +2757,7 @@ void GHtmlEdit::OnPosChange()
 
 	if (d->e)
 	{
-		GRect c = GetClient();
+		LRect c = GetClient();
 		c.y1 += y + TOOLBAR_HT + 6;
 		if (c.Valid())
 		{
@@ -2910,7 +2910,7 @@ void GHtmlEdit::DumpNodes(GTree *Out)
 /////////////////////////////////////////////////////////////////////////////////////
 class GHtmlEdit_Factory : public GViewFactory
 {
-	GView *NewView(const char *Class, GRect *Pos, const char *Text)
+	GView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (_stricmp(Class, "GHtmlEdit") == 0)
 		{

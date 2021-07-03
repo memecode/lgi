@@ -432,7 +432,7 @@
     <ClCompile Include="src\common\Gdc2\Font\LStringLayout.cpp" />
     <ClCompile Include="src\common\Gdc2\GColour.cpp" />
     <ClCompile Include="src\common\Gdc2\GdcCommon.cpp" />
-    <ClCompile Include="src\common\Gdc2\GRect.cpp" />
+    <ClCompile Include="src\common\Gdc2\LRect.cpp" />
     <ClCompile Include="src\common\Gdc2\GSurface.cpp" />
     <ClCompile Include="src\common\Gdc2\Path\GPath.cpp" />
     <ClCompile Include="src\common\Gdc2\Tools\GColourReduce.cpp" />

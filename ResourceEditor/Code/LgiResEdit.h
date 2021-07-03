@@ -576,7 +576,7 @@ public:
 		}
 	}
 
-	void Serialize(void *Token, const char *FieldName, GRect &r)
+	void Serialize(void *Token, const char *FieldName, LRect &r)
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;

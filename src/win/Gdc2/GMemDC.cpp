@@ -23,7 +23,7 @@ public:
 	PBITMAPINFO	Info;
 	HPALETTE	OldPal;
 	bool		UpsideDown;
-	GRect		Client;
+	LRect		Client;
 	int			ConstAlpha;
 
 	GMemDCPrivate()
@@ -88,7 +88,7 @@ GMemDC::~GMemDC()
 	DeleteObj(d);
 }
 
-void GMemDC::SetClient(GRect *c)
+void GMemDC::SetClient(LRect *c)
 {
 	if (c)
 	{
@@ -107,7 +107,7 @@ void GMemDC::SetClient(GRect *c)
 			SetWindowOrgEx(hDC, -c->x1, -c->y1, NULL);
 		}
 
-		GRect Doc(0, 0, pMem->x-1, pMem->y-1);
+		LRect Doc(0, 0, pMem->x-1, pMem->y-1);
 		Clip = d->Client = *c;
 		Clip.Bound(&Doc);
 		
@@ -201,9 +201,9 @@ void GMemDC::EndDC()
 	}
 }
 
-GRect GMemDC::ClipRgn(GRect *Rgn)
+LRect GMemDC::ClipRgn(LRect *Rgn)
 {
-	GRect Prev = Clip;
+	LRect Prev = Clip;
 
 	if (Rgn)
 	{
@@ -526,7 +526,7 @@ void GMemDC::Empty()
 	DeleteObj(pMem);
 }
 
-void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
+void GMemDC::Blt(int x, int y, GSurface *Src, LRect *a)
 {
     LgiAssert(Src != 0);
     if (!Src)
@@ -534,7 +534,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 
 	if (Src->IsScreen())
 	{
-		GRect b;
+		LRect b;
 		if (a)
 		{
 			b = *a;
@@ -619,11 +619,11 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	}
 }
 
-void GMemDC::StretchBlt(GRect *Dest, GSurface *Src, GRect *s)
+void GMemDC::StretchBlt(LRect *Dest, GSurface *Src, LRect *s)
 {
 	if (Src)
 	{
-		GRect DestR;
+		LRect DestR;
 		if (Dest)
 		{
 			DestR = *Dest;
@@ -633,7 +633,7 @@ void GMemDC::StretchBlt(GRect *Dest, GSurface *Src, GRect *s)
 			DestR.ZOff(X()-1, Y()-1);
 		}
 
-		GRect SrcR;
+		LRect SrcR;
 		if (s)
 		{
 			SrcR = *s;

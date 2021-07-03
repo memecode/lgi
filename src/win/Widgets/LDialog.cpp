@@ -190,7 +190,7 @@ int LDialog::DoModal(OsView ParentHnd)
 		DLGTEMPLATE *Template = (DLGTEMPLATE*) d->Mem->Lock();
 		if (Template)
 		{
-			GRect r = GetPos();
+			LRect r = GetPos();
 
 			r.x1 = (double)r.x1 / DIALOG_X;
 			r.y1 = (double)r.y1 / DIALOG_Y;
@@ -269,13 +269,13 @@ int LDialog::DoModal(OsView ParentHnd)
 
 	    if (p)
 	    {
-	        GRect pp = p->GetPos();
+	        LRect pp = p->GetPos();
 			if (pp.Valid())
 			{
 				int cx = pp.x1 + (pp.X() >> 1);
 				int cy = pp.y1 + (pp.Y() >> 1);
 	        
-				GRect np = GetPos();
+				LRect np = GetPos();
 				np.Offset(  cx - (np.X() >> 1) - np.x1,
 							cy - (np.Y() >> 1) - np.y1);
 	        
@@ -325,7 +325,7 @@ int LDialog::DoModeless()
 	#if USE_DIALOGBOXINDIRECTPARAM
 	d->Mem = new GMem(16<<10);
 	d->IsModal = false;
-	GRect OldPos = GetPos();
+	LRect OldPos = GetPos();
 	if (d->Mem)
 	{
 		LONG DlgUnits = GetDialogBaseUnits();
@@ -338,7 +338,7 @@ int LDialog::DoModeless()
 		DLGTEMPLATE *Template = (DLGTEMPLATE*) d->Mem->Lock();
 		if (Template)
 		{
-			GRect r = Pos;
+			LRect r = Pos;
 			r.x1 = MulDiv(r.x1, 4, baseunitX);
 			r.y1 = MulDiv(r.y1, 8, baseunitY);
 			r.x2 = MulDiv(r.x2, 4, baseunitX);
@@ -405,11 +405,11 @@ int LDialog::DoModeless()
 	    
 	    if (p)
 	    {
-	        GRect pp = p->GetPos();
+	        LRect pp = p->GetPos();
 	        int cx = pp.x1 + (pp.X() >> 1);
 	        int cy = pp.y1 + (pp.Y() >> 1);
 	        
-	        GRect np = GetPos();
+	        LRect np = GetPos();
 	        np.Offset(  cx - (np.X() >> 1) - np.x1,
 	                    cy - (np.Y() >> 1) - np.y1);
 	        
@@ -440,7 +440,7 @@ GMessage::Result LDialog::OnEvent(GMessage *Msg)
 		case WM_CREATE:
 		#endif
 		{
-			GRect r = Pos;
+			LRect r = Pos;
 			Pos.ZOff(-1, -1);
 			SetPos(r);	// resets the dialog to the correct
 						// size when large fonts are used
@@ -520,7 +520,7 @@ void LDialog::OnPosChange()
         GLayout *t = dynamic_cast<GLayout*>((GViewI*)it);
         if (t)
         {
-            GRect r = GetClient();
+            LRect r = GetClient();
             r.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
             t->SetPos(r);
         }

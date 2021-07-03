@@ -159,11 +159,11 @@ struct GSoftwareUpdatePriv
 		{
 			Watch = watch;
 			SetParent(par);
-			GRect r(0, 0, 330, 400);
+			LRect r(0, 0, 330, 400);
 			SetPos(r);
 			Name("Software Update");
 
-			GRect c = GetClient();
+			LRect c = GetClient();
 			GTextLabel *t = new GTextLabel(	-1,
 											10, 10,
 											c.X()-20,

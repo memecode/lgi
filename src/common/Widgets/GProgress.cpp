@@ -10,7 +10,7 @@ GProgress::GProgress(int id, int x, int y, int cx, int cy, const char *name) :
 	ResObject(Res_Progress)
 {
 	SetId(id);
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	if (name) GControl::Name(name);
 
@@ -35,7 +35,7 @@ GColour GProgress::Colour()
 
 bool GProgress::Pour(GRegion &r)
 {
-	GRect *l = FindLargest(r);
+	LRect *l = FindLargest(r);
 	if (l)
 	{
 		l->y2 = l->y1 + 10;
@@ -90,7 +90,7 @@ GMessage::Result GProgress::OnEvent(GMessage *Msg)
 
 void GProgress::OnPaint(GSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	LgiThinBorder(pDC, r, DefaultSunkenEdge);
 
 	if (High > Low)
@@ -102,7 +102,7 @@ void GProgress::OnPaint(GSurface *pDC)
 		{
 			GColour High = c.Mix(GColour::White);
 			GColour Low = c.Mix(GColour::Black);
-			GRect p = r;
+			LRect p = r;
 
 			p.x2 = p.x1 + Pos - 1;
 			r.x1 = p.x2 + 1;

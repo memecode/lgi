@@ -227,7 +227,7 @@ GTree::~GTree()
 	Lines = false;
 }
 
-bool GTree::SetPos(GRect &p, bool Repaint)
+bool GTree::SetPos(LRect &p, bool Repaint)
 {
 	ScrollView->MoveTo(p.x1, p.y1);
 	ScrollView->ResizeTo(p.X()-1, p.Y()-1);

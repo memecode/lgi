@@ -24,7 +24,7 @@ using namespace Gtk;
 class LCairoSurfacePriv
 {
 public:
-	::GArray<GRect> Client;
+	::GArray<LRect> Client;
 	cairo_t *cr;
 	LCairoSurfaceT Img;
 	GColourSpace CreateCs;
@@ -81,7 +81,7 @@ cairo_surface_t *LCairoSurface::GetSurface()
 	return d->Img;
 }
 
-LCairoSurface LCairoSurface::GetSubImage(GRect &r)
+LCairoSurface LCairoSurface::GetSubImage(LRect &r)
 {
 	LCairoSurface s;
 
@@ -163,13 +163,13 @@ LPoint LCairoSurface::GetSize()
 	return LPoint(pMem->x, pMem->y);
 }
 
-GRect LCairoSurface::ClipRgn(GRect *Rgn)
+LRect LCairoSurface::ClipRgn(LRect *Rgn)
 {
-	GRect Old = Clip;
+	LRect Old = Clip;
 	
 	if (Rgn)
 	{
-		GRect Dc(0, 0, X()-1, Y()-1);
+		LRect Dc(0, 0, X()-1, Y()-1);
 		
 		Clip = *Rgn;
 		Clip.Offset(-OriginX, -OriginY);
@@ -183,19 +183,19 @@ GRect LCairoSurface::ClipRgn(GRect *Rgn)
 	return Old;
 }
 
-void LCairoSurface::SetClient(GRect *c)
+void LCairoSurface::SetClient(LRect *c)
 {
 	if (c)
 	{
 		Handle();
 
-		GRect Doc;
+		LRect Doc;
 		if (d->Client.Length())
 			Doc = d->Client.Last();
 		else
 			Doc = Bounds();
 		
-		GRect r = *c;
+		LRect r = *c;
 		r.Bound(&Doc);
 		d->Client.Add(r);
 		
@@ -400,7 +400,7 @@ bool LCairoSurface::Create(int x, int y, GColourSpace Cs, int Flags)
 	return true;
 }
 
-void LCairoSurface::Blt(int x, int y, GSurface *Src, GRect *a)
+void LCairoSurface::Blt(int x, int y, GSurface *Src, LRect *a)
 {
 	if (!Src)
 		return;
@@ -466,7 +466,7 @@ void LCairoSurface::Blt(int x, int y, GSurface *Src, GRect *a)
 	}
 }
 
-void LCairoSurface::StretchBlt(GRect *d, GSurface *Src, GRect *s)
+void LCairoSurface::StretchBlt(LRect *d, GSurface *Src, LRect *s)
 {
     LgiAssert(!"Not implemented");
 }

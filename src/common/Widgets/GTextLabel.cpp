@@ -58,7 +58,7 @@ GTextLabel::GTextLabel(int id, int x, int y, int cx, int cy, const char *name) :
 	d = new GTextPrivate(this);
 
 	// This allows LStringLayout::DoLayout to do some basic layout for GetMax.
-	GRect rc(0, 0, 1, 20);
+	LRect rc(0, 0, 1, 20);
 	SetPos(rc);
 
 	if (name)
@@ -67,7 +67,7 @@ GTextLabel::GTextLabel(int id, int x, int y, int cx, int cy, const char *name) :
 	if (cx < 0) cx = d->GetMax().x;
 	if (cy < 0) cy = d->GetMax().y;
 
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	SetId(id);
 }
@@ -283,7 +283,7 @@ void GTextLabel::OnPaint(GSurface *pDC)
 			d->ThreadName.Empty();
 		}
 		
-		GRect c = GetClient();
+		LRect c = GetClient();
 		LPoint pt(c.x1, c.y1);
 		d->Paint(pDC, pt, Back, c, Enabled(), false);
 		d->Unlock();

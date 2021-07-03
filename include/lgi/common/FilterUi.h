@@ -29,7 +29,7 @@ class GFilterItem;
 typedef int (*FilterUi_Menu)(GFilterView *View,
 							 GFilterItem *Item,
 							 GFilterMenu Menu,
-							 GRect &r,
+							 LRect &r,
 							 GArray<char*> *GetList,
 							 void *UserData);
 

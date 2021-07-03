@@ -17,7 +17,7 @@ protected:
     
 public:
 	/// Painting context
-	struct ItemPaintCtx : public GRect
+	struct ItemPaintCtx : public LRect
 	{
 		/// The surface to draw on
 		GSurface *pDC;
@@ -99,7 +99,7 @@ public:
 	/// Sets the icon index
 	virtual void SetImage(int Col) {}
 	/// Gets the position
-	virtual GRect *GetPos(int Col = -1) { return 0; }
+	virtual LRect *GetPos(int Col = -1) { return 0; }
 	/// Gets the font for the item
 	virtual GFont *GetFont() { return 0; }
 	
@@ -180,8 +180,8 @@ public:
 
 	// properties
 	bool InDrag();
-	GRect GetPos();
-	void SetPos(GRect &r);
+	LRect GetPos();
+	void SetPos(LRect &r);
 	
 	/// Sets the text
 	void Name(const char *n);
@@ -227,10 +227,10 @@ public:
 	GItemContainer *GetList();
 
 	/// Paint the column header.
-	void OnPaint(GSurface *pDC, GRect &r);
+	void OnPaint(GSurface *pDC, LRect &r);
 
 	/// Draws the just the icon, text and mark.
-	void OnPaint_Content(GSurface *pDC, GRect &r, bool FillBackground); 
+	void OnPaint_Content(GSurface *pDC, LRect &r, bool FillBackground); 
 };
 
 /// Client draws the content.
@@ -282,7 +282,7 @@ protected:
 	int Flags;
 	int DragMode;
 	bool ColumnHeaders;
-	GRect ColumnHeader;
+	LRect ColumnHeader;
 	int ColClick;
 	GMouse ColMouse;
 	GItemEdit *ItemEdit;

@@ -77,9 +77,9 @@ public:
 			GTableLayout *t;
 			if (GetViewById(IDC_TABLE, t))
 			{
-				GRect u = t->GetUsedArea();
+				LRect u = t->GetUsedArea();
 				u.Size(-GTableLayout::CellSpacing, -GTableLayout::CellSpacing);
-				GRect p = GetPos();
+				LRect p = GetPos();
 				if (u.X() < p.X() ||
 					u.Y() < p.Y())
 				{

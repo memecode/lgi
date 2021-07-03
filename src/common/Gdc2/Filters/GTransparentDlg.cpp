@@ -18,7 +18,7 @@ GTransparentDlg::GTransparentDlg(GView *parent, GVariant *trans)
 	SetParent(parent);
 	Name("Tranparency Settings");
 	
-	GRect r(0, 0, 200, TRANS_DLG_Y);
+	LRect r(0, 0, 200, TRANS_DLG_Y);
 	SetPos(r);
 	MoveToCenter();
 

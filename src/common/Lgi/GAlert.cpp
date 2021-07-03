@@ -46,7 +46,7 @@ GAlert::GAlert(	GViewI *parent,
 							Names[i]));
 	}
 		
-	GRect r(0, 0, 1000, 1000);
+	LRect r(0, 0, 1000, 1000);
 	Tbl->SetPos(r);
 	r = Tbl->GetUsedArea();
 	r.Size(-10, -10);

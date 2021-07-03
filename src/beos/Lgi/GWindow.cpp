@@ -154,7 +154,7 @@ GWindow::~GWindow()
 	DeleteObj(d);
 }
 
-GRect &GWindow::GetClient(bool ClientSpace)
+LRect &GWindow::GetClient(bool ClientSpace)
 {
 	return GView::GetClient(ClientSpace);
 }
@@ -265,7 +265,7 @@ void GWindow::Visible(bool v)
 					*/
 					
 					Wnd->Show();
-					Invalidate((GRect*)0, true);
+					Invalidate((LRect*)0, true);
 				}
 			}
 			else
@@ -302,9 +302,9 @@ char *GWindow::Name()
 	return GBase::Name();
 }
 
-GRect &GWindow::GetPos()
+LRect &GWindow::GetPos()
 {
-	static GRect r;
+	static LRect r;
 	
 	r = Pos;
 	
@@ -324,7 +324,7 @@ GRect &GWindow::GetPos()
 	return r;
 }
 
-bool GWindow::SetPos(GRect &p, bool Repaint)
+bool GWindow::SetPos(LRect &p, bool Repaint)
 {
 	if (Wnd)
 	{
@@ -400,7 +400,7 @@ void GWindow::Pour()
 	
 	bool Lock = Wnd->Lock();
 	Wnd->BeginViewTransaction();
-	GRect r(Handle()->Frame());
+	LRect r(Handle()->Frame());
 	r.Offset(-r.x1, -r.y1);
 
 	GRegion Client(r);
@@ -408,14 +408,14 @@ void GWindow::Pour()
 
 	if (Menu)
 	{
-		GRect Mp = Menu->GetPos();
+		LRect Mp = Menu->GetPos();
 		Mp.x2 = 10000;
 		Client.Subtract(&Mp);
 	}
 
 	for (GViewI *w = Children.First(); w; w = Children.Next())
 	{
-		GRect OldPos = w->GetPos();
+		LRect OldPos = w->GetPos();
 		Update.Union(&OldPos);
 
 		if (w->Pour(Client))

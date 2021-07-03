@@ -20,7 +20,7 @@ BlameUi::BlameUi(AppPriv *priv, VersionCtrl Vc, GString Output)
 
 	if (!SerializeState(&d->Priv->Opts, OPT_WND_STATE, true))
 	{
-		GRect r(0, 0, 800, 500);
+		LRect r(0, 0, 800, 500);
 		SetPos(r);
 		MoveToCenter();
 	}

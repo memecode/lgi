@@ -56,7 +56,7 @@ GFindDlg::GFindDlg(GView *Parent, char *Init, GFrCallback Callback, void *UserDa
 	SetParent(Parent);
 	Name(LgiLoadString(L_FR_FIND, "Find"));
 
-	GRect r(0, 0, 450, 370);
+	LRect r(0, 0, 450, 370);
 	SetPos(r);
 	MoveSameScreen(Parent);
 
@@ -90,9 +90,9 @@ GFindDlg::GFindDlg(GView *Parent, char *Init, GFrCallback Callback, void *UserDa
 	    
 	    OnPosChange();
 	    
-	    GRect TblPos = t->GetPos();
+	    LRect TblPos = t->GetPos();
 		int TblY = TblPos.Y();
-		GRect Used = t->GetUsedArea();
+		LRect Used = t->GetUsedArea();
 		int UsedY = Used.Y();
 	    
 		int Over = TblY - UsedY;
@@ -115,7 +115,7 @@ void GFindDlg::OnPosChange()
     GTableLayout *t;
     if (GetViewById(IDC_FIND_TABLE, t))
     {
-        GRect c = GetClient();
+        LRect c = GetClient();
         c.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
         t->SetPos(c);
     }
@@ -201,7 +201,7 @@ GReplaceDlg::GReplaceDlg(GView *Parent, char *InitFind, char *InitReplace, GFrCa
 
 	GView *f = 0;
 	
-	GRect r(0, 0, 450, 300);
+	LRect r(0, 0, 450, 300);
 	SetPos(r);
 	MoveToCenter();
 	
@@ -247,7 +247,7 @@ GReplaceDlg::GReplaceDlg(GView *Parent, char *InitFind, char *InitReplace, GFrCa
 	
 	    OnPosChange();
 	    
-	    GRect u = t->GetUsedArea();
+	    LRect u = t->GetUsedArea();
 	    int Over = t->GetPos().Y() - u.Y();
 	    r = GetPos();
         r.y2 -= Over - (GTableLayout::CellSpacing << 1);
@@ -311,7 +311,7 @@ void GReplaceDlg::OnPosChange()
     GTableLayout *t;
     if (GetViewById(IDC_FIND_TABLE, t))
     {
-        GRect c = GetClient();
+        LRect c = GetClient();
         c.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
         t->SetPos(c);
     }

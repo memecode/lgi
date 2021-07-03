@@ -18,7 +18,7 @@ class GScreenPrivate
 {
 public:
 	int			Op;
-	GRect		Client;
+	LRect		Client;
 	uint32		Col;
 	SDL_Surface *Screen;
 	
@@ -96,18 +96,18 @@ int GScreenDC::GetFlags()
 	return 0;
 }
 
-bool GScreenDC::GetClient(GRect *c)
+bool GScreenDC::GetClient(LRect *c)
 {
 	if (!c) return false;
 	*c = d->Client;
 	return true;
 }
 
-void GScreenDC::SetClient(GRect *c)
+void GScreenDC::SetClient(LRect *c)
 {
 	if (c)
 	{
-		GRect Doc(0, 0, pMem->x-1, pMem->y-1);
+		LRect Doc(0, 0, pMem->x-1, pMem->y-1);
 		Clip = *c;
 		Clip.Bound(&Doc);
 		

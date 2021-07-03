@@ -7,7 +7,7 @@ GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool ve
 	ResObject(Res_Slider)
 {
 	SetId(id);
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	Name(name);
 	Vertical = vert;
@@ -95,7 +95,7 @@ void GSlider::OnPaint(GSurface *pDC)
 	pDC->Colour(L_MED);
 	pDC->Rectangle();
 	
-	GRect r = GetClient();
+	LRect r = GetClient();
 	int y = r.Y() >> 1;
 	r.y1 = y - 2;
 	r.y2 = r.y1 + 3;
@@ -108,7 +108,7 @@ void GSlider::OnPaint(GSurface *pDC)
 		int x = Val * r.X() / (Max-Min);
 		Thumb.ZOff(5, 9);
 		Thumb.Offset(r.x1 + x - 3, y - 5);
-		GRect b = Thumb;
+		LRect b = Thumb;
 		LgiWideBorder(pDC, b, DefaultRaisedEdge);
 		pDC->Rectangle(&b);		
 	}
@@ -140,7 +140,7 @@ void GSlider::OnMouseMove(GMouse &m)
 
 class GSlider_Factory : public GViewFactory
 {
-	GView *NewView(const char *Class, GRect *Pos, const char *Text)
+	GView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (stricmp(Class, "GSlider") == 0)
 		{

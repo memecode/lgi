@@ -37,7 +37,7 @@ void GToolTab::OnPaint(GSurface *pDC)
 	pDC->Rectangle();
 }
 
-bool GToolTab::SetPos(GRect &r, bool Repaint)
+bool GToolTab::SetPos(LRect &r, bool Repaint)
 {
 	return GToolButton::SetPos(r, Repaint);
 }
@@ -45,7 +45,7 @@ bool GToolTab::SetPos(GRect &r, bool Repaint)
 /////////////////////////////////////////////////////////////////////////
 GToolTabBar::GToolTabBar(int Id)
 {
-	GRect r(0, 0, 100, 100);
+	LRect r(0, 0, 100, 100);
 	if (Id >= 0)
 		SetId(Id);
 	SetPos(r);
@@ -163,7 +163,7 @@ void GToolTabBar::OnChange(GToolButton *Btn)
 
 void GToolTabBar::_PaintTab(GSurface *pDC, GToolTab *Tab)
 {
-	GRect t = Tab->TabPos;
+	LRect t = Tab->TabPos;
 	GColour Background(L_MED);
 
 	if (Tab->Value())
@@ -235,7 +235,7 @@ void GToolTabBar::_PaintTab(GSurface *pDC, GToolTab *Tab)
 
 void GToolTabBar::OnPaint(GSurface *pScreen)
 {
-	GRect r = GetClient();
+	LRect r = GetClient();
 
 	#ifdef WIN32
 	GMemDC Mem(r.X(), r.Y(), GdcD->GetColourSpace());
@@ -376,7 +376,7 @@ bool GToolTabBar::Pour(GRegion &r)
 					}
 				}
 
-				GRect Rgn(x, y, x + GetBx() + 4, y + GetBy() + 4);
+				LRect Rgn(x, y, x + GetBx() + 4, y + GetBy() + 4);
 				Btn->TabPos = Rgn;
 				if (IsVertical())
 				{
@@ -403,10 +403,10 @@ bool GToolTabBar::Pour(GRegion &r)
 		Tab.y2 = y + ((Border) ? 12 : 0);
 	}
 
-	GRect *Best = FindLargest(r);
+	LRect *Best = FindLargest(r);
 	if (Best)
 	{
-		GRect p;
+		LRect p;
 		if (FitToArea)
 		{
 			p.Set(0, 0, Best->X()-1, Best->Y()-1);

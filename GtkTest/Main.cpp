@@ -12,7 +12,7 @@ public:
     Test(GViewI *p)
     {
         SetParent(p);
-        SetPos(GRect(0, 0, 300, 300));
+        SetPos(LRect(0, 0, 300, 300));
         MoveToCenter();
         
 		GCombo *c;
@@ -57,7 +57,7 @@ public:
         i = LgiLoadImageList("cmds.png", 16, 16);
         Name("Gtk Test");
         SetQuitOnClose(true);
-        GRect r(0, 0, 1000, 800);
+        LRect r(0, 0, 1000, 800);
         SetPos(r);
         MoveToCenter();
         if (Attach(0))

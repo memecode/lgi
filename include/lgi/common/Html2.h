@@ -71,7 +71,7 @@ protected:
 	int ScrollY();
 	void SetCursorVis(bool b);
 	bool GetCursorVis();
-	GRect *GetCursorPos();
+	LRect *GetCursorPos();
 	bool IsCursorFirst();
 	int GetTagDepth(GTag *Tag);
 	GTag *PrevTag(GTag *t);

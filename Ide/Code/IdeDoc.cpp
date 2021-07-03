@@ -134,7 +134,7 @@ void EditTray::OnPosChange()
 	
 void EditTray::OnPaint(GSurface *pDC)
 {
-	GRect c = GetClient();
+	LRect c = GetClient();
 	pDC->Colour(L_MED);
 	pDC->Rectangle();
 	SysFont->Colour(L_TEXT, L_MED);
@@ -147,7 +147,7 @@ void EditTray::OnPaint(GSurface *pDC)
 		ds.Draw(pDC, TextMsg.x1, TextMsg.y1 + ((c.Y()-TextMsg.Y())/2), &TextMsg);
 	}
 
-	GRect f = FileBtn;
+	LRect f = FileBtn;
 	LgiThinBorder(pDC, f, DefaultRaisedEdge);
 	{
 		GDisplayString ds(SysFont, HEADER_BTN_LABEL);
@@ -171,10 +171,10 @@ void EditTray::OnPaint(GSurface *pDC)
 
 bool EditTray::Pour(GRegion &r)
 {
-	GRect *c = FindLargest(r);
+	LRect *c = FindLargest(r);
 	if (c)
 	{
-		GRect n = *c;
+		LRect n = *c;
 		SetPos(n);		
 		return true;
 	}
@@ -1858,7 +1858,7 @@ void IdeDoc::OnPaint(GSurface *pDC)
 	GMdiChild::OnPaint(pDC);
 	
 	#if !MDI_TAB_STYLE
-	GRect c = GetClient();
+	LRect c = GetClient();
 	LgiWideBorder(pDC, c, SUNKEN);
 	#endif
 }

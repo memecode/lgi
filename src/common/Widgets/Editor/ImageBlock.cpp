@@ -730,7 +730,7 @@ void GRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 	bool ImgSelected = Ctx.SelectBeforePaint(this);
 			
 	// Paint margins, borders and padding...
-	GRect r = Pos;
+	LRect r = Pos;
 	r.x1 -= Margin.x1;
 	r.y1 -= Margin.y1;
 	r.x2 -= Margin.x2;
@@ -758,7 +758,7 @@ void GRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 	{
 		if (SourceValid.Valid())
 		{
-			GRect Bounds(0, 0, Size.x-1, Size.y-1);
+			LRect Bounds(0, 0, Size.x-1, Size.y-1);
 			Bounds.Offset(r.x1, r.y1);
 
 			Ctx.pDC->Colour(L_MED);
@@ -767,7 +767,7 @@ void GRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 			Ctx.pDC->Colour(L_WORKSPACE);
 			Ctx.pDC->Rectangle(&Bounds);
 
-			GRect rr(0, 0, Src->X()-1, SourceValid.y2 / Scale);
+			LRect rr(0, 0, Src->X()-1, SourceValid.y2 / Scale);
 			Ctx.pDC->Blt(r.x1, r.y1, Src, &rr);
 		}
 		else
@@ -1010,7 +1010,7 @@ void GRichTextPriv::ImageBlock::OnComponentInstall(GString Name)
 
 void GRichTextPriv::ImageBlock::UpdateDisplay(int yy)
 {
-	GRect s;
+	LRect s;
 	if (DisplayImg && !SourceValid.Valid())
 	{
 		SourceValid = SourceImg->Bounds();
@@ -1026,7 +1026,7 @@ void GRichTextPriv::ImageBlock::UpdateDisplay(int yy)
 
 	if (DisplayImg)
 	{
-		GRect d(0, s.y1 / Scale, DisplayImg->X()-1, s.y2 / Scale);
+		LRect d(0, s.y1 / Scale, DisplayImg->X()-1, s.y2 / Scale);
 
 		// Do a quick and dirty nearest neighbor scale to 
 		// show the user some feed back.

@@ -140,7 +140,7 @@ public:
 	LHashTbl<ConstStrKey<char>, GTag*> Loading;
 	GHtmlStaticInst Inst;
 	bool CursorVis;
-	GRect CursorPos;
+	LRect CursorPos;
 	LPoint Content;
 	bool WordSelectMode;
 	bool LinkDoubleClick;
@@ -456,7 +456,7 @@ public:
 		InBody = inbody;
 	}
 
-	GFlowRegion(GHtml *html, GRect r, bool inbody)
+	GFlowRegion(GHtml *html, LRect r, bool inbody)
 	{
 		Html = html;
 		MAX.x = cx = x1 = r.x1;
@@ -505,7 +505,7 @@ public:
 		return x2 - x1 + 1;
 	}
 
-	GFlowRegion &operator +=(GRect r)
+	GFlowRegion &operator +=(LRect r)
 	{
 		x1 += r.x1;
 		cx += r.x1;
@@ -516,7 +516,7 @@ public:
 		return *this;
 	}
 
-	GFlowRegion &operator -=(GRect r)
+	GFlowRegion &operator -=(LRect r)
 	{
 		x1 -= r.x1;
 		cx -= r.x1;
@@ -530,7 +530,7 @@ public:
 	void FinishLine(GCss::LengthType Align, bool Margin = false);
 	void EndBlock(GCss::LengthType Align);
 	void Insert(GFlowRect *Tr);
-	GRect *LineBounds();
+	LRect *LineBounds();
 
 	void Indent(GTag *Tag,
 				GCss::Len Left,
@@ -555,7 +555,7 @@ public:
 			my += Fs.TopAbs;
 	}
 
-	void Indent(GRect &Px,
+	void Indent(LRect &Px,
 				bool IsMargin)
 	{
 		GFlowRegion This(*this);
@@ -575,7 +575,7 @@ public:
 			my += Fs.TopAbs;
 	}
 
-	void Outdent(GRect &Px,
+	void Outdent(LRect &Px,
 				bool IsMargin)
 	{
 		GFlowRegion This = *this;
@@ -836,9 +836,9 @@ public:
 		return Limited;
 	}
 
-	GRect ResolveMargin(GCss *Src, GTag *Tag)
+	LRect ResolveMargin(GCss *Src, GTag *Tag)
 	{
-		GRect r;
+		LRect r;
 		r.x1 = ResolveX(Src->MarginLeft(), Tag, true);
 		r.y1 = ResolveY(Src->MarginTop(), Tag, true);
 		r.x2 = ResolveX(Src->MarginRight(), Tag, true);
@@ -846,9 +846,9 @@ public:
 		return r;
 	}
 
-	GRect ResolveBorder(GCss *Src, GTag *Tag)
+	LRect ResolveBorder(GCss *Src, GTag *Tag)
 	{
-		GRect r;
+		LRect r;
 		r.x1 = ResolveX(Src->BorderLeft(), Tag, true);
 		r.y1 = ResolveY(Src->BorderTop(), Tag, true);
 		r.x2 = ResolveX(Src->BorderRight(), Tag, true);
@@ -856,9 +856,9 @@ public:
 		return r;
 	}
 
-	GRect ResolvePadding(GCss *Src, GTag *Tag)
+	LRect ResolvePadding(GCss *Src, GTag *Tag)
 	{
-		GRect r;
+		LRect r;
 		r.x1 = ResolveX(Src->PaddingLeft(), Tag, true);
 		r.y1 = ResolveY(Src->PaddingTop(), Tag, true);
 		r.x2 = ResolveX(Src->PaddingRight(), Tag, true);
@@ -1136,9 +1136,9 @@ void GLine::Set(char *s)
 }
 
 //////////////////////////////////////////////////////////////////////
-GRect GTag::GetRect(bool Client)
+LRect GTag::GetRect(bool Client)
 {
-	GRect r(Pos.x, Pos.y, Pos.x + Size.x - 1, Pos.y + Size.y - 1);
+	LRect r(Pos.x, Pos.y, Pos.x + Size.x - 1, Pos.y + Size.y - 1);
 	if (!Client)
 	{
 		for (GTag *p = ToTag(Parent); p; p=ToTag(p->Parent))
@@ -1229,14 +1229,14 @@ void GFlowRegion::FinishLine(GCss::LengthType Align, bool Margin)
 	Line.Empty();
 }
 
-GRect *GFlowRegion::LineBounds()
+LRect *GFlowRegion::LineBounds()
 {
 	auto It = Line.begin();
 	GFlowRect *Prev = *It;
 	GFlowRect *r=Prev;
 	if (r)
 	{
-		GRect b;
+		LRect b;
 		
 		b = *r;
 		int Ox = r->Tag->AbsX();
@@ -1246,7 +1246,7 @@ GRect *GFlowRegion::LineBounds()
 		// int Ox = 0, Oy = 0;
 		while ((r = *(++It) ))
 		{
-			GRect c = *r;
+			LRect c = *r;
 			Ox = r->Tag->AbsX();
 			Oy = r->Tag->AbsY();
 			c.Offset(Ox, Oy);
@@ -1261,7 +1261,7 @@ GRect *GFlowRegion::LineBounds()
 			Prev = r;
 		}
 
-		static GRect Rgn;
+		static LRect Rgn;
 		Rgn = b;
 		return &Rgn;
 	}
@@ -1976,7 +1976,7 @@ GTag *GTag::PrevTag()
 
 void GTag::Invalidate()
 {
-	GRect p = GetRect();
+	LRect p = GetRect();
 	for (GTag *t=ToTag(Parent); t; t=ToTag(t->Parent))
 	{
 		p.Offset(t->Pos.x, t->Pos.y);
@@ -2235,7 +2235,7 @@ GTag *GTag::GetTagByName(const char *Name)
 	return 0;
 }
 
-static int IsNearRect(GRect *r, int x, int y)
+static int IsNearRect(LRect *r, int x, int y)
 {
 	if (r->Overlap(x, y))
 	{
@@ -2334,7 +2334,7 @@ void GTag::GetTagByPos(GTagHit &TagHit, int x, int y, int Depth, bool InBody, bo
 
 	if (TagId == TAG_IMG)
 	{
-		GRect img(0, 0, Size.x - 1, Size.y - 1);
+		LRect img(0, 0, Size.x - 1, Size.y - 1);
 		if (/*InBody &&*/ img.Overlap(x, y))
 		{
 			TagHit.Direct = this;
@@ -2561,7 +2561,7 @@ void GTag::SetImage(const char *Uri, GSurface *Img)
 			}
 			else Image.Reset(Img);
 			
-			GRect r = XSubRect();
+			LRect r = XSubRect();
 			if (r.Valid())
 			{
 				GAutoPtr<GSurface> t(new GMemDC(r.X(), r.Y(), Image->GetColourSpace()));
@@ -4658,7 +4658,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 
 	// Layout cell horizontally and then flow the contents to get 
 	// the height of all the cells
-	GArray<GRect> RowPad;
+	GArray<LRect> RowPad;
 	MaxRow.Length(s.y);
 	for (y=0; y<s.y; y++)
 	{
@@ -4677,7 +4677,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 					RowPad[y].y1 = MAX(RowPad[y].y1, t->Cell->BorderPx.y1 + t->Cell->PaddingPx.y1);
 					RowPad[y].y2 = MAX(RowPad[y].y2, t->Cell->BorderPx.y2 + t->Cell->PaddingPx.y2);
 					
-					GRect Box(0, 0, -CellSpacing, 0);
+					LRect Box(0, 0, -CellSpacing, 0);
 					for (int i=0; i<t->Cell->Span.x; i++)
 					{
 						int ColSize = MinCol[x + i] + CellSpacing;
@@ -4863,16 +4863,16 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 	Table->Size.y = Cy + TablePadding.y2 + TableBorder.y2;
 }
 
-GRect GTag::ChildBounds()
+LRect GTag::ChildBounds()
 {
-	GRect b(0, 0, -1, -1);
+	LRect b(0, 0, -1, -1);
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
 		GTag *t = ToTag(Children[i]);
 		if (i)
 		{
-			GRect c = t->GetRect();
+			LRect c = t->GetRect();
 			b.Union(&c);
 		}
 		else
@@ -4904,9 +4904,9 @@ GArea::~GArea()
 	DeleteObjects();
 }
 
-GRect GArea::Bounds()
+LRect GArea::Bounds()
 {
-	GRect n(0, 0, -1, -1);
+	LRect n(0, 0, -1, -1);
 
 	for (unsigned i=0; i<Length(); i++)
 	{
@@ -4923,13 +4923,13 @@ GRect GArea::Bounds()
 	return n;
 }
 
-GRect *GArea::TopRect(GRegion *c)
+LRect *GArea::TopRect(GRegion *c)
 {
-	GRect *Top = 0;
+	LRect *Top = 0;
 	
 	for (int i=0; i<c->Length(); i++)
 	{
-		GRect *r = (*c)[i];
+		LRect *r = (*c)[i];
 		if (!Top || (r && (r->y1 < Top->y1)))
 		{
 			Top = r;
@@ -5099,7 +5099,7 @@ char16 htoi(char16 c)
 
 bool GTag::Serialize(GXmlTag *t, bool Write)
 {
-	GRect pos;
+	LRect pos;
 	if (Write)
 	{
 		// Obj -> Tag
@@ -5298,7 +5298,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 	Size.y = 0;
 	
 	GCssTools Tools(this, f);
-	GRect rc(Flow->X(), Html->Y());
+	LRect rc(Flow->X(), Html->Y());
 	PadPx = Tools.GetPadding(rc);
 
 	if (TipId)
@@ -5845,7 +5845,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			{
 				if (Html->InThread() && Ctrl)
 				{
-					GRect r = Ctrl->GetPos();
+					LRect r = Ctrl->GetPos();
 
 					if (Width().IsValid())
 						Size.x = Flow->ResolveX(Width(), this, false);
@@ -6063,7 +6063,7 @@ void GTag::GetInlineRegion(GRegion &rgn, int ox, int oy)
 {
 	if (TagId == TAG_IMG)
 	{
-		GRect rc(0, 0, Size.x-1, Size.y-1);
+		LRect rc(0, 0, Size.x-1, Size.y-1);
 		rc.Offset(ox + Pos.x, oy + Pos.y);
 		rgn.Union(&rc);
 	}
@@ -6071,7 +6071,7 @@ void GTag::GetInlineRegion(GRegion &rgn, int ox, int oy)
 	{
 		for (unsigned i=0; i<TextPos.Length(); i++)
 		{
-			GRect rc = *(TextPos[i]);
+			LRect rc = *(TextPos[i]);
 			rc.Offset(ox + Pos.x, oy + Pos.y);
 			rgn.Union(&rc);
 		}
@@ -6090,7 +6090,7 @@ public:
 	int Px, Px2;
 
 	CornersImg(	float RadPx,
-				GRect *BorderPx,
+				LRect *BorderPx,
 				GCss::BorderDef **defs,
 				GColour &Back,
 				bool DrawBackground)
@@ -6155,7 +6155,7 @@ public:
 					);
 					
 					// Setup the clip
-					GRect clip(	(int)MIN(pts[i]->x, pts[k]->x),
+					LRect clip(	(int)MIN(pts[i]->x, pts[k]->x),
 								(int)MIN(pts[i]->y, pts[k]->y),
 								(int)MAX(pts[i]->x, pts[k]->x)-1,
 								(int)MAX(pts[i]->y, pts[k]->y)-1);
@@ -6199,10 +6199,10 @@ public:
 	}
 };
 
-void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, GRect *BorderPx)
+void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, LRect *BorderPx)
 {
-	GArray<GRect> r;
-	GRect BorderPxRc;
+	GArray<LRect> r;
+	LRect BorderPxRc;
 	bool DrawBackground = !Back.IsTransparent();
 
 	#ifdef _DEBUG
@@ -6255,7 +6255,7 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, GRect *BorderP
 				{
 					for (int i=0; i<rgn.Length(); i++)
 					{
-						GRect *r = rgn[i];
+						LRect *r = rgn[i];
 						r->x1 -= BorderPx->x1 + PadPx.x1;
 						r->y1 -= BorderPx->y1 + PadPx.y1;
 						r->x2 += BorderPx->x2 + PadPx.x2;
@@ -6285,7 +6285,7 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, GRect *BorderP
 
 		for (unsigned i=0; i<r.Length(); i++)
 		{
-			GRect rc = r[i];
+			LRect rc = r[i];
 			if (HasRadius)
 			{
 				Px = (int)ceil(RadPx);
@@ -6301,7 +6301,7 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, GRect *BorderP
 				}
 			
 				// top left
-				GRect r(0, 0, Px-1, Px-1);
+				LRect r(0, 0, Px-1, Px-1);
 				pDC->Blt(rc.x1, rc.y1, Corners, &r);
 			
 				// top right
@@ -6383,7 +6383,7 @@ void GTag::PaintBorderAndBackground(GSurface *pDC, GColour &Back, GRect *BorderP
 	}
 }
 
-static void FillRectWithImage(GSurface *pDC, GRect *r, GSurface *Image, GCss::RepeatType Repeat)
+static void FillRectWithImage(GSurface *pDC, LRect *r, GSurface *Image, GCss::RepeatType Repeat)
 {
 	int Px = 0, Py = 0;
 	int Old = pDC->Op(GDC_ALPHA);
@@ -6448,7 +6448,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 		Gtk::cairo_get_matrix(pDC->Handle(), &mx);
 		LPoint Offset;
 		Html->WindowVirtualOffset(&Offset);
-		GRect cli;
+		LRect cli;
 		pDC->GetClient(&cli);
 		printf("\tTag paint mx=%g,%g off=%i,%i p=%i,%i Pos=%i,%i cli=%s\n",
 			mx.x0, mx.y0,
@@ -6472,7 +6472,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 				Sx *= LineY;
 				Sy *= LineY;
 				
-				GRect r(0, 0, Size.x-1, Size.y-1), Px;
+				LRect r(0, 0, Size.x-1, Size.y-1), Px;
 				GColour back = _Colour(false);
 				PaintBorderAndBackground(pDC, back, &Px);
 				if (!dynamic_cast<GButton*>(Ctrl))
@@ -6500,7 +6500,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 			}
 			if (Image)
 			{
-				GRect r;
+				LRect r;
 				r.ZOff(Size.x-1, Size.y-1);
 				FillRectWithImage(pDC, &r, Image, BackgroundRepeat());
 			}
@@ -6526,7 +6526,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 		}
 		case TAG_IMG:
 		{
-			GRect Clip(0, 0, Size.x-1, Size.y-1);
+			LRect Clip(0, 0, Size.x-1, Size.y-1);
 			pDC->ClipRgn(&Clip);
 			
 			if (Image)
@@ -6565,7 +6565,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 			}
 			else if (Size.x > 1 && Size.y > 1)
 			{
-				GRect b(0, 0, Size.x-1, Size.y-1);
+				LRect b(0, 0, Size.x-1, Size.y-1);
 				GColour Fill(LColour(L_MED).Mix(LColour(L_LIGHT), 0.2f));
 				GColour Border(L_MED);
 
@@ -6591,7 +6591,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 					// Red 'x'
 					int Cx = b.x1 + (b.X()/2);
 					int Cy = b.y1 + (b.Y()/2);
-					GRect c(Cx-4, Cy-4, Cx+4, Cy+4);
+					LRect c(Cx-4, Cy-4, Cx+4, Cy+4);
 					
 					pDC->Colour(Red);
 					pDC->Line(c.x1, c.y1, c.x2, c.y2);
@@ -6616,7 +6616,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 				GCss::ImageDef Img = BackgroundImage();
 				if (Img.Img)
 				{
-					GRect Clip(0, 0, Size.x-1, Size.y-1);
+					LRect Clip(0, 0, Size.x-1, Size.y-1);
 					pDC->ClipRgn(&Clip);					
 					FillRectWithImage(pDC, &Clip, Img.Img, BackgroundRepeat());					
 					pDC->ClipRgn(NULL);
@@ -6682,7 +6682,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 						Min = MAX(Cursor, Selection) + Base;
 					}
 
-					GRect CursorPos;
+					LRect CursorPos;
 					CursorPos.ZOff(-1, -1);
 
 					for (unsigned i=0; i<TextPos.Length(); i++)
@@ -6747,7 +6747,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 							GDisplayString ds(f, Tr->Text + Done, c);
 							if (IsEditor)
 							{
-								GRect r(x, Tr->y1, x + ds.X() - 1, Tr->y2);
+								LRect r(x, Tr->y1, x + ds.X() - 1, Tr->y2);
 								ds.Draw(pDC, x, Tr->y1 + LineHtOff, &r);
 							}
 							else
@@ -6830,7 +6830,7 @@ void GTag::OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth)
 						{
 							ssize_t Off = Tr->Text == PreText() ? StrlenW(PreText()) : Cursor - Pos;
 							pDC->Colour(L_TEXT);
-							GRect c;
+							LRect c;
 							if (Off)
 							{
 								GDisplayString ds(f, Tr->Text, Off);
@@ -6916,7 +6916,7 @@ GHtml::GHtml(int id, int x, int y, int cx, int cy, GDocumentEnv *e) :
 	SetReadOnly(true);
 	ViewWidth = -1;
 	SetId(id);
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	Cursor = 0;
 	Selection = 0;
@@ -7410,7 +7410,7 @@ void GHtml::OnPosChange()
 
 LPoint GHtml::Layout(bool ForceLayout)
 {
-	GRect Client = GetClient();
+	LRect Client = GetClient();
 	if (Tag && (ViewWidth != Client.X() || ForceLayout))
 	{
 		GFlowRegion f(this, Client, false);
@@ -7463,7 +7463,7 @@ void GHtml::OnPaint(GSurface *ScreenDC)
 	// GProfile Prof("GHtml::OnPaint");
 
 	#if GHTML_USE_DOUBLE_BUFFER
-	GRect Client = GetClient();
+	LRect Client = GetClient();
 	if (!MemDC ||
 		(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
 	{
@@ -8527,7 +8527,7 @@ LgiCursor GHtml::GetCursor(int x, int y)
 			LocalCoords.y >= 0 &&
 			Tag->IsAnchor(&Uri))
 		{
-			GRect c = GetClient();
+			LRect c = GetClient();
 			c.Offset(-c.x1, -c.y1);
 			if (c.Overlap(x, y) && ValidStr(Uri))
 			{
@@ -8577,7 +8577,7 @@ void GHtml::OnMouseMove(GMouse &m)
 			Tip.Attach(this);
 		}
 
-		GRect r = HitTag->GetRect(false);
+		LRect r = HitTag->GetRect(false);
 		r.Offset(0, -Offset);
 		if (!HitTag->TipId)
 			HitTag->TipId = Tip.NewTip(Uri, r);
@@ -8664,7 +8664,7 @@ void GHtml::OnPulse()
 		GMouse m;
 		if (GetMouse(m, false))
 		{
-			GRect c = GetClient();
+			LRect c = GetClient();
 			int Lines = 0;
 			
 			if (m.y < c.y1)
@@ -8684,7 +8684,7 @@ void GHtml::OnPulse()
 	}
 }
 
-GRect *GHtml::GetCursorPos()
+LRect *GHtml::GetCursorPos()
 {
 	return &d->CursorPos;
 }
@@ -8937,7 +8937,7 @@ void GHtml::SetEmoji(bool i)
 ////////////////////////////////////////////////////////////////////////
 class GHtml_Factory : public GViewFactory
 {
-	GView *NewView(const char *Class, GRect *Pos, const char *Text)
+	GView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (_stricmp(Class, "GHtml") == 0)
 		{

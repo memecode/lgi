@@ -86,7 +86,7 @@ class GelSkin : public GSkinEngine
 	{
 		if (pDC)
 		{
-			GRect r(0, 0, pDC->X()-1, pDC->Y()-1);
+			LRect r(0, 0, pDC->X()-1, pDC->Y()-1);
 
 			auto Top = Tint(Back, 253.0 / 240.0);
 			auto Mid = Tint(Back, 232.0 / 240.0);
@@ -141,7 +141,7 @@ class GelSkin : public GSkinEngine
 		}
 	}
 	
-	void DrawBtn(GSurface *pDC, GRect &r, GColour Back, bool Down, bool Enabled, bool Default = false)
+	void DrawBtn(GSurface *pDC, LRect &r, GColour Back, bool Down, bool Enabled, bool Default = false)
 	{
 		if (!pDC)
 			return;
@@ -164,7 +164,7 @@ class GelSkin : public GSkinEngine
 		
 		#else
 			
-		GRect Client = r;
+		LRect Client = r;
 		{
 			// Edge
 			GPath e;
@@ -255,7 +255,7 @@ class GelSkin : public GSkinEngine
 		#endif
 	}
 
-	GMemDC *DrawCtrl(GViewI *Ctrl, GRect *Sz, int Flags, bool Round)
+	GMemDC *DrawCtrl(GViewI *Ctrl, LRect *Sz, int Flags, bool Round)
 	{
 		GMemDC *Mem = new GMemDC;
 		if (Mem && Mem->Create(Sz ? Sz->X() : 14, Sz ? Sz->Y() : 14, OsDefaultCs))
@@ -412,7 +412,7 @@ class GelSkin : public GSkinEngine
 		return Mem;
 	}
 
-	void DrawText(GSkinState *State, int x, int y, GRect &rcFill, bool Enabled, GView *Ctrl, GCssTools &Tools)
+	void DrawText(GSkinState *State, int x, int y, LRect &rcFill, bool Enabled, GView *Ctrl, GCssTools &Tools)
 	{
 		GCss::ColorDef CssFore, CssBack;
 		GColour Fore = Tools.GetFore(), Back = Tools.GetBack(), Light, Low;
@@ -429,13 +429,13 @@ class GelSkin : public GSkinEngine
 		GSurface *pDC = State->pScreen;
 		if (Text && Text->Length() > 0 && rcFill.X() > 3)
 		{
-			GRect Bounds;
+			LRect Bounds;
 			for (unsigned i=0; i<Text->Length(); i++)
 			{
 				LLayoutString *t = dynamic_cast<LLayoutString*>((*Text)[i]);
 				if (!t)
 					break;
-				GRect c;
+				LRect c;
 				c.ZOff(t->X() - 1, t->Y() - 1);
 				c.Offset(x + (t->Fx >> GDisplayString::FShift), y + t->y);
 				Rgn.Subtract(&c);
@@ -476,7 +476,7 @@ class GelSkin : public GSkinEngine
 		if (Back.IsValid())
 		{
 			pDC->Colour(Back);
-			for (GRect *rc = Rgn.First(); rc; rc = Rgn.Next())
+			for (LRect *rc = Rgn.First(); rc; rc = Rgn.Next())
 				pDC->Rectangle(rc);
 		}
 	}
@@ -694,7 +694,7 @@ public:
 			
 			if (Ctrl->Focus())
 			{
-				GRect b(CurX-2, ty, CurX + sx + 1, ty + sy - 2);
+				LRect b(CurX-2, ty, CurX + sx + 1, ty + sy - 2);
 				b.Offset(Off, Off);
 				Out->Colour(Rgb24(180, 180, 180), 24);
 				Out->Box(&b);
@@ -709,7 +709,7 @@ public:
 	void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, GSkinState *State)
 	{
 		// Setup memory context
-		GRect r = State->Rect;
+		LRect r = State->Rect;
 		GMemDC Mem(r.X(), r.Y(), OsDefaultCs);
 		if (!Mem[0])
 			return;
@@ -773,7 +773,7 @@ public:
 					int ty = (Ctrl->Y()-sy+1) >> 1;
 						
 					int Off = 0;
-					GRect c = Ctrl->GetClient();
+					LRect c = Ctrl->GetClient();
 					c.x1 += 8;
 					c.x2 -= n + 3;
 					
@@ -803,7 +803,7 @@ public:
 					
 					if (Ctrl->Focus() && c.X() > 4)
 					{
-						GRect b(tx-2, ty, tx + sx + 1, ty + sy - 2);
+						LRect b(tx-2, ty, tx + sx + 1, ty + sy - 2);
 						b.Offset(Off, Off);
 						c.Size(-2, 0);
 						b.Bound(&c);
@@ -857,11 +857,11 @@ public:
 			// Draw icon
 			// int FontY = Ctrl->GetFont()->GetHeight();
 
-			GRect &Box = State->Rect;
+			LRect &Box = State->Rect;
 			State->pScreen->Blt(Box.x1, Box.y1, Mem);
 
-			GRect Box1(Box.x1, 0, Box.x2, Box.y1 - 1);
-			GRect Box2(Box.x1, Box.y2 + 1, Box.x2, Ctrl->Y()-1);
+			LRect Box1(Box.x1, 0, Box.x2, Box.y1 - 1);
+			LRect Box2(Box.x1, Box.y2 + 1, Box.x2, Ctrl->Y()-1);
 			if (Back.IsValid())
 			{
 				State->pScreen->Colour(Back);
@@ -880,7 +880,7 @@ public:
 			}	
 
 			// Draw text
-			GRect t(Mem->X(), 0, Ctrl->X()-1, Ctrl->Y()-1);
+			LRect t(Mem->X(), 0, Ctrl->X()-1, Ctrl->Y()-1);
 			if (t.Valid())
 			{
 				DrawText(State,
@@ -917,7 +917,7 @@ public:
 		if (Mem)
 		{
 			// Draw icon
-			GRect ico;
+			LRect ico;
 			GCssTools Tools(Ctrl);
 			GColour &Back = Tools.GetBack();
 
@@ -935,7 +935,7 @@ public:
 			}
 
 			// Draw text
-			GRect t(Mem->X(), 0, Ctrl->X()-1, Ctrl->Y()-1);
+			LRect t(Mem->X(), 0, Ctrl->X()-1, Ctrl->Y()-1);
 			if (t.Valid())
 			{
 				int y = 0;

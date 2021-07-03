@@ -128,8 +128,8 @@ void DocEdit::OnApplyStyles()
 					if (DirtyStartLine != CurLine ||
 						DirtyEndLine != CurLine)
 					{
-						GRect c = GetClient();
-						GRect r(c.x1,
+						LRect c = GetClient();
+						LRect r(c.x1,
 								Start->r.Valid() ? DocToScreen(Start->r).y1 : c.y1,
 								c.x2,
 								Params.Dirty.End() >= Vis.End() ? c.y2 : DocToScreen(End->r).y2);

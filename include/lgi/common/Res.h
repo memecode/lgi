@@ -153,7 +153,7 @@ public:
 	// Overide these to operate on the objects
 	virtual void		Res_SetPos		(ResObject *Obj, int x1, int y1, int x2, int y2) = 0;
 	virtual void		Res_SetPos		(ResObject *Obj, char *s) = 0;
-	virtual GRect		Res_GetPos		(ResObject *Obj) = 0;
+	virtual LRect		Res_GetPos		(ResObject *Obj) = 0;
 	virtual int			Res_GetStrRef	(ResObject *Obj) = 0;
 	virtual bool		Res_SetStrRef	(ResObject *Obj, int Ref, ResReadCtx *Ctx) = 0;
 	virtual void		Res_Attach		(ResObject *Obj, ResObject *Parent) = 0;

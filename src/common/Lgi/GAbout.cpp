@@ -92,7 +92,7 @@ GAbout::GAbout(	GView *parent,
 	c->TextAlign(GCss::AlignRight);
 	c->Add(new GButton(IDOK, 0, 0, -1, -1, "Ok"));
 
-	GRect r(0, 0, 400, 260);
+	LRect r(0, 0, 400, 260);
 	SetPos(r);
 	MoveSameScreen(parent);
 

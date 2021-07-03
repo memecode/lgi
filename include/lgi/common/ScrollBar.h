@@ -63,9 +63,9 @@ public:
 	bool Valid();
 
 	#if WINNATIVE
-	bool SetPos(GRect &p, bool Repaint = false);
+	bool SetPos(LRect &p, bool Repaint = false);
 	void SetParent(GViewI *p);
-	bool Invalidate(GRect *r = NULL, bool Repaint = false, bool NonClient = false);
+	bool Invalidate(LRect *r = NULL, bool Repaint = false, bool NonClient = false);
 	#else
 	bool Attach(GViewI *p);
 	void OnPaint(GSurface *pDC);

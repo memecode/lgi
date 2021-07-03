@@ -90,7 +90,7 @@ public:
 	#endif
 
 	int Sx, Sy;
-	GRect *Bounds;
+	LRect *Bounds;
 
 	GImageListPriv()
 	{
@@ -397,7 +397,7 @@ void GImageList::Draw(GSurface *pDest, int Dx, int Dy, int Image, int Flags)
 {
 	if (pDest)
 	{
-		GRect r;
+		LRect r;
 		r.ZOff(d->Sx-1, d->Sy-1);
 		r.Offset(Image * d->Sx, 0);
 
@@ -505,7 +505,7 @@ void GImageList::Draw(GSurface *pDest, int Dx, int Dy, int Image, int Flags)
 				/*
 				GMemDC Buf(r.X(), r.Y(), GdcD->GetBits());
 				GSurface *Screen = pDest;
-				GRect Src;
+				LRect Src;
 				Src.ZOff(r.X()-1, r.Y()-1);
 				Src.Offset(Dx, Dy);
 				Buf.Blt(0, 0, Screen, &Src);
@@ -598,11 +598,11 @@ void GImageList::Update(int Flags)
 {
 }
 
-GRect *GImageList::GetBounds()
+LRect *GImageList::GetBounds()
 {
 	if (!d->Bounds && (*this)[0])
 	{
-		d->Bounds = new GRect[GetItems()];
+		d->Bounds = new LRect[GetItems()];
 		if (d->Bounds)
 		{
 			COLOUR Key = Get(0, 0);
@@ -754,7 +754,7 @@ GToolButton::GToolButton(int Bx, int By)
 	NeedsRightClick = false;
 	ItemRef = 0;
 
-	GRect r(0, 0, Bx+1, By+1);
+	LRect r(0, 0, Bx+1, By+1);
 	SetPos(r);
 	SetParent(0);
 	TipId = -1;
@@ -846,7 +846,7 @@ void GToolButton::OnPaint(GSurface *pDC)
 
 	if (Par)
 	{
-		GRect p = GetClient();
+		LRect p = GetClient();
 
 		// Draw Background
 		COLOUR Grey = (e && Over) ? LC_HIGH : LC_MED;
@@ -1240,7 +1240,7 @@ bool GToolBar::Attach(GViewI *parent)
 	GWindow *Wnd = dynamic_cast<GWindow*>(parent);
 	if (Wnd)
 	{
-		GRect r = Wnd->GetPos();
+		LRect r = Wnd->GetPos();
 		
 		// Unified view...
 		OsWindow Hnd = Wnd->WindowHandle();
@@ -1495,7 +1495,7 @@ void GToolBar::_BuildCache(GImageList *From)
 				{
 					d->pDisabled->Palette(new GPalette(GdcD->GetGlobalColour()->GetPalette()));
 
-					GRect t(0, From->Y(), From->X()-1, (From->Y() * 2)-1);
+					LRect t(0, From->Y(), From->X()-1, (From->Y() * 2)-1);
 
 					int OldType = GdcD->GetOption(GDC_REDUCE_TYPE);
 					GdcD->SetOption(GDC_REDUCE_TYPE, REDUCE_ERROR_DIFFUSION);
@@ -1567,7 +1567,7 @@ void GToolBar::_DrawFromCache(GSurface *pDC, int x, int y, int Index, bool Disab
 		d->pColour &&
 		d->ImgList)
 	{
-		GRect s;
+		LRect s;
 		
 		s.ZOff(d->ImgList->TileX()-1, d->ImgList->TileY()-1);
 		s.Offset(d->ImgList->TileX()*Index, 0);
@@ -1586,7 +1586,7 @@ bool GToolBar::Pour(GRegion &r)
 	int EndY = 0;
 	int MaxDim = 0;
 
-	GRect ButPos;
+	LRect ButPos;
 	GViewI *But = Children.First();
 	while (But)
 	{
@@ -1751,7 +1751,7 @@ bool GToolBar::Pour(GRegion &r)
 		}
 		else
 		{
-			GRect p(0, 0, 0, 0);
+			LRect p(0, 0, 0, 0);
 			But->SetPos(p);
 			// printf("%s:%i - btn pour=%s\n", _FL, p.GetStr());
 		}
@@ -1761,7 +1761,7 @@ bool GToolBar::Pour(GRegion &r)
 
 	for (GViewI *w = Children.First(); w; w = Children.Next())
 	{
-		GRect p = w->GetPos();
+		LRect p = w->GetPos();
 
 		if (d->Vertical)
 		{
@@ -1791,10 +1791,10 @@ bool GToolBar::Pour(GRegion &r)
 
 	int BorderPx = Raised() || Sunken() ? _BorderSize<<1 : 0;
 
-	GRect n;
+	LRect n;
 	n.ZOff(max(7, d->Sx)+BorderPx, max(7, d->Sy)+BorderPx);
 
-	GRect *Best = FindLargestEdge(r, GV_EDGE_TOP);
+	LRect *Best = FindLargestEdge(r, GV_EDGE_TOP);
 	if (Best)
 	{
 		n.Offset(Best->x1, Best->y1);
@@ -1844,7 +1844,7 @@ int GToolBar::OnEvent(GMessage *Msg)
 
 void GToolBar::OnPaint(GSurface *pDC)
 {
-	GRect r = GetClient();
+	LRect r = GetClient();
 
 	pDC->Colour(LC_MED, 24);
 	pDC->Box(&r);
@@ -2085,7 +2085,7 @@ GToolButton *GToolBar::AppendButton(char *Tip, int Id, int Type, int Enabled, in
 				IconRef Icon = 0;
 				if (d->ImgList && IconId >= 0)
 				{
-					GRect Sub(0, 0, d->ImgList->TileX()-1, d->ImgList->TileY()-1);
+					LRect Sub(0, 0, d->ImgList->TileX()-1, d->ImgList->TileY()-1);
 					Sub.Offset(IconId * d->ImgList->TileX(), 0);
 					GAutoPtr<CGImg> Img(d->ImgList->GetImg(&Sub));
 

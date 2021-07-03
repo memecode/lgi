@@ -348,7 +348,7 @@ public:
 	{
 		Root = 0;
 		SetParent(Parent);
-		GRect r(0, 0, 600, 700);
+		LRect r(0, 0, 600, 700);
 		SetPos(r);
 		MoveToCenter();
 		Name("Dependencies");
@@ -1539,7 +1539,7 @@ AppWnd::AppWnd()
 	
 Chk;
 
-	GRect r(0, 0, 1300, 900);
+	LRect r(0, 0, 1300, 900);
 	#ifdef BEOS
 	r.Offset(GdcD->X() - r.X() - 10, GdcD->Y() - r.Y() - 10);
 	SetPos(r);
@@ -1672,7 +1672,7 @@ Chk;
 Chk;
 		d->HBox->Value(MAX(v.CastInt32(), 20));
 
-		GRect c = GetClient();
+		LRect c = GetClient();
 		if (c.Y() > OutPx.CastInt32())
 		{
 			auto Px = OutPx.CastInt32();
@@ -2499,7 +2499,7 @@ IdeDoc *AppWnd::NewDocWnd(const char *FileName, NodeSource *Src)
 	{
 		d->Docs.Insert(Doc);
 
-		GRect p = d->Mdi->NewPos();
+		LRect p = d->Mdi->NewPos();
 		Doc->GView::SetPos(p);
 		Doc->Attach(d->Mdi);
 		Doc->Focus(true);
@@ -2638,7 +2638,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 		{
 			Doc->OpenFile(File);
 
-			GRect p = d->Mdi->NewPos();
+			LRect p = d->Mdi->NewPos();
 			Doc->GView::SetPos(p);
 			d->Docs.Insert(Doc);
 			d->OnFile(File);
@@ -3290,7 +3290,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			d->Docs.Insert(Doc = new IdeDoc(this, 0, 0));
 			if (Doc && d->Mdi)
 			{
-				GRect p = d->Mdi->NewPos();
+				LRect p = d->Mdi->NewPos();
 				Doc->GView::SetPos(p);
 				Doc->Attach(d->Mdi);
 				Doc->Focus(true);
@@ -4212,7 +4212,7 @@ public:
 	{
 		Log = new GTextLog(100);
 
-		SetPos(GRect(200, 200, 900, 800));
+		SetPos(LRect(200, 200, 900, 800));
 		Attach(0);
 		Visible(true);
 		Log->Attach(this);

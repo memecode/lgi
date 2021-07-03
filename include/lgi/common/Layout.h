@@ -114,21 +114,21 @@ public:
 
 	bool Attach(GViewI *p) override;
 	bool Detach() override;
-	GRect &GetClient(bool InClientSpace = true) override;
+	LRect &GetClient(bool InClientSpace = true) override;
 	void OnCreate() override;
 	
 	#if defined(MAC) && !XPLATFORM_GLAYOUT
 
-	bool Invalidate(GRect *r = NULL, bool Repaint = false, bool NonClient = false) override;
+	bool Invalidate(LRect *r = NULL, bool Repaint = false, bool NonClient = false) override;
 	bool Focus() override;
 	void Focus(bool f) override;
-	bool SetPos(GRect &p, bool Repaint = false) override;
+	bool SetPos(LRect &p, bool Repaint = false) override;
 
 	#else
 	
 	void OnPosChange() override;
 	int OnNotify(GViewI *c, int f) override;
-	void OnNcPaint(GSurface *pDC, GRect &r) override;
+	void OnNcPaint(GSurface *pDC, LRect &r) override;
 
 	#endif
 	#endif

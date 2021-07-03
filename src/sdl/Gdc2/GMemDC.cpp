@@ -21,7 +21,7 @@ class GMemDCPrivate
 public:
 	void		*pBits;
 	bool		UpsideDown;
-	GRect		Client;
+	LRect		Client;
 
 	GMemDCPrivate()
 	{
@@ -87,11 +87,11 @@ OsBitmap GMemDC::GetBitmap()
 	return NULL;
 }
 
-void GMemDC::SetClient(GRect *c)
+void GMemDC::SetClient(LRect *c)
 {
 	if (c)
 	{
-		GRect Doc(0, 0, pMem->x-1, pMem->y-1);
+		LRect Doc(0, 0, pMem->x-1, pMem->y-1);
 		Clip = d->Client = *c;
 		Clip.Bound(&Doc);
 		
@@ -118,9 +118,9 @@ bool GMemDC::Unlock()
 	return true;
 }
 
-GRect GMemDC::ClipRgn(GRect *Rgn)
+LRect GMemDC::ClipRgn(LRect *Rgn)
 {
-	GRect Prev = Clip;
+	LRect Prev = Clip;
 
 	if (Rgn)
 	{
@@ -246,7 +246,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 }
 
 
-void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
+void GMemDC::Blt(int x, int y, GSurface *Src, LRect *a)
 {
     LgiAssert(Src);
     if (!Src)
@@ -254,8 +254,8 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 
 	if (Src->IsScreen())
 	{
-		GRect b;
-		GRect Bounds(0, 0, GdcD->X()-1, GdcD->Y()-1);
+		LRect b;
+		LRect Bounds(0, 0, GdcD->X()-1, GdcD->Y()-1);
 		if (a)
 		{
 			b = *a;
@@ -273,11 +273,11 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	}
 }
 
-void GMemDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
+void GMemDC::StretchBlt(LRect *d, GSurface *Src, LRect *s)
 {
 	if (Src)
 	{
-		GRect DestR;
+		LRect DestR;
 		if (d)
 		{
 			DestR = *d;
@@ -287,7 +287,7 @@ void GMemDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
 			DestR.ZOff(X()-1, Y()-1);
 		}
 
-		GRect SrcR;
+		LRect SrcR;
 		if (s)
 		{
 			SrcR = *s;

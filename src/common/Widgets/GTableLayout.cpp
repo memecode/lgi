@@ -305,15 +305,15 @@ public:
 	{
 		GViewLayoutInfo Inf;
 		GView *View;
-		GRect r;
+		LRect r;
 		bool IsLayout;
 		bool Debug;
 	};
 
 	GTableLayout *Table;
-	GRect Cell;		// Cell position
-	GRect Pos;		// Pixel position
-	GRect Padding;	// Cell padding from CSS styles
+	LRect Cell;		// Cell position
+	LRect Pos;		// Pixel position
+	LRect Padding;	// Cell padding from CSS styles
 	GArray<Child> Children;
 	GCss::DisplayType Disp;
 	GString ClassName;
@@ -354,7 +354,7 @@ public:
 	GArray<double> Rows, Cols;
 	GArray<TableCell*> Cells;
 	int BorderSpacing;
-	GRect LayoutBounds;
+	LRect LayoutBounds;
 	int LayoutMinX, LayoutMaxX;
 	GTableLayout *Ctrl;
 
@@ -365,7 +365,7 @@ public:
 	// Utils
 	bool IsInLayout() { return InLayout; }
 	TableCell *GetCellAt(int cx, int cy);
-	void Empty(GRect *Range = NULL);
+	void Empty(LRect *Range = NULL);
     bool CollectRadioButtons(GArray<GRadioButton*> &Btns);
     void InitBorderSpacing();
 	double Scale()
@@ -391,12 +391,12 @@ public:
 	GArray<CellFlag> ColFlags, RowFlags;
 
 	// Layout staged methods, call in order to complete the layout
-	void LayoutHorizontal(GRect &Client, int *MinX = NULL, int *MaxX = NULL, CellFlag *Flag = NULL);
-	void LayoutVertical(GRect &Client, int *MinY = NULL, int *MaxY = NULL, CellFlag *Flag = NULL, int Depth = 0);
-	void LayoutPost(GRect &Client);
+	void LayoutHorizontal(LRect &Client, int *MinX = NULL, int *MaxX = NULL, CellFlag *Flag = NULL);
+	void LayoutVertical(LRect &Client, int *MinY = NULL, int *MaxY = NULL, CellFlag *Flag = NULL, int Depth = 0);
+	void LayoutPost(LRect &Client);
 	
 	// This does the whole layout, basically calling all the stages for you
-	void Layout(GRect &Client);
+	void Layout(LRect &Client);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -519,7 +519,7 @@ bool TableCell::GetVariant(const char *Name, GVariant &Value, char *Array)
 			}
 			break;
 		}
-		case ContainerSpan: // Type: GRect
+		case ContainerSpan: // Type: LRect
 		{
 			Value = Cell.GetStr();
 			break;
@@ -611,7 +611,7 @@ bool TableCell::SetVariant(const char *Name, GVariant &Value, char *Array)
 		}
 		case ContainerSpan:
 		{
-			GRect r;
+			LRect r;
 			if (r.SetStr(Value.Str()))
 				Cell = r;
 			else
@@ -688,7 +688,7 @@ int TableCell::MaxCellWidth()
 {
 	// Table size minus padding
 	GCssTools t(Table->GetCss(), Table->GetFont());
-	GRect cli = Table->GetClient();
+	LRect cli = Table->GetClient();
 	cli = t.ApplyPadding(cli);
 	
 	// Work out any borders on spanned cells...
@@ -1161,7 +1161,7 @@ void TableCell::PostLayout()
 	int Cy = Padding.y1;
 	int MaxY = Padding.y1;
 	int RowStart = 0;
-	GArray<GRect> New;
+	GArray<LRect> New;
 	int WidthPx = Pos.X() - Padding.x1 - Padding.x2;
 	int HeightPx = Pos.Y() - Padding.y1 - Padding.y2;
 
@@ -1352,7 +1352,7 @@ void TableCell::PostLayout()
 void TableCell::OnPaint(GSurface *pDC)
 {
 	GCssTools t(this, Table->GetFont());
-	GRect r = Pos;	
+	LRect r = Pos;	
 	t.PaintBorder(pDC, r);
 
 	GColour Trans;
@@ -1392,7 +1392,7 @@ bool GTableLayoutPrivate::CollectRadioButtons(GArray<GRadioButton*> &Btns)
     return Btns.Length() > 0;
 }
 
-void GTableLayoutPrivate::Empty(GRect *Range)
+void GTableLayoutPrivate::Empty(LRect *Range)
 {
 	if (Range)
 	{
@@ -1435,7 +1435,7 @@ TableCell *GTableLayoutPrivate::GetCellAt(int cx, int cy)
 	return 0;
 }
 
-void GTableLayoutPrivate::LayoutHorizontal(GRect &Client, int *MinX, int *MaxX, CellFlag *Flag)
+void GTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, CellFlag *Flag)
 {
 	// This only gets called when you nest GTableLayout controls. It's 
 	// responsible for doing pre layout stuff for an entire control of cells.
@@ -1686,7 +1686,7 @@ void GTableLayoutPrivate::LayoutHorizontal(GRect &Client, int *MinX, int *MaxX, 
 	Prof.Reset();
 }
 
-void GTableLayoutPrivate::LayoutVertical(GRect &Client, int *MinY, int *MaxY, CellFlag *Flag, int Depth)
+void GTableLayoutPrivate::LayoutVertical(LRect &Client, int *MinY, int *MaxY, CellFlag *Flag, int Depth)
 {
 	int Cx, Cy, i;
 
@@ -1873,7 +1873,7 @@ void GTableLayoutPrivate::LayoutVertical(GRect &Client, int *MinY, int *MaxY, Ce
 	}
 }
 
-void GTableLayoutPrivate::LayoutPost(GRect &Client)
+void GTableLayoutPrivate::LayoutPost(LRect &Client)
 {
 	int Px = 0, Py = 0, Cx, Cy;
 	GFont *Fnt = Ctrl->GetFont();
@@ -1957,7 +1957,7 @@ void GTableLayoutPrivate::InitBorderSpacing()
 	}
 }
 
-void GTableLayoutPrivate::Layout(GRect &Client)
+void GTableLayoutPrivate::Layout(LRect &Client)
 {
     if (InLayout)
     {    
@@ -2063,14 +2063,14 @@ GLayoutCell *GTableLayout::CellAt(int x, int y)
 
 bool GTableLayout::SizeChanged()
 {
-	GRect r = GetClient();
+	LRect r = GetClient();
 	return	r.X() != d->PrevSize.x ||
 			r.Y() != d->PrevSize.y;
 }
 
 void GTableLayout::OnPosChange()
 {
-	GRect r = GetClient();
+	LRect r = GetClient();
 
 	bool Up = SizeChanged() || d->LayoutDirty;
 	// LgiTrace("%s:%i - Up=%i for Id=%i\n", _FL, Up, GetId());
@@ -2093,14 +2093,14 @@ void GTableLayout::OnPosChange()
 	}
 }
 
-GRect GTableLayout::GetUsedArea()
+LRect GTableLayout::GetUsedArea()
 {
 	if (SizeChanged())
 	{
 		OnPosChange();
 	}
 
-	GRect r(0, 0, -1, -1);
+	LRect r(0, 0, -1, -1);
     for (int i=0; i<d->Cells.Length(); i++)
     {
         TableCell *c = d->Cells[i];
@@ -2159,7 +2159,7 @@ void GTableLayout::OnPaint(GSurface *pDC)
 
 	d->Dpi = GetWindow()->GetDpi();
 	GCssTools Tools(this);
-	GRect Client = GetClient();
+	LRect Client = GetClient();
 	Tools.PaintContent(pDC, Client);
 
 	for (int i=0; i<d->Cells.Length(); i++)
@@ -2182,7 +2182,7 @@ void GTableLayout::OnPaint(GSurface *pDC)
 		for (int i=0; i<d->Cells.Length(); i++)
 		{
 			TableCell *c = d->Cells[i];
-			GRect r = c->Pos;
+			LRect r = c->Pos;
 			pDC->Colour(c->Debug ? Rgb24(255, 222, 0) : Rgb24(192, 192, 222), 24);
 			pDC->Box(&r);
 			pDC->Line(r.x1, r.y1, r.x2, r.y2);
@@ -2322,7 +2322,7 @@ void GTableLayout::Value(int64 v)
     }
 }
 
-void GTableLayout::Empty(GRect *Range)
+void GTableLayout::Empty(LRect *Range)
 {
 	d->Empty(Range);
 }

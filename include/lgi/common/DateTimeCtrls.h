@@ -53,10 +53,10 @@ public:
 class GDatePopup : public GPopup
 {
 	GView *Owner;
-	GRect Caption;
-	GRect Date;
-	GRect Prev;
-	GRect Next;
+	LRect Caption;
+	LRect Date;
+	LRect Prev;
+	LRect Next;
 
 	int Cx, Cy; // Cell Dimensions
 	MonthView Mv;

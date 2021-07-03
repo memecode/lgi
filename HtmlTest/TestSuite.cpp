@@ -420,7 +420,7 @@ public:
 			}
 			
 			
-			GRect r(0, 0, 1200, 800);
+			LRect r(0, 0, 1200, 800);
 			SetPos(r);
 			MoveToCenter();
 			AttachChildren();

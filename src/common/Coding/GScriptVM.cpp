@@ -1311,7 +1311,7 @@ public:
 	int GetAddr();
 	void ScrollToCurLine();
 	void PourText(size_t Start, ssize_t Length) override;
-	void OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour) override;
+	void OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour) override;
 	void OnPaint(GSurface *pDC) override;
 	bool Breakpoint(int Addr);
 };
@@ -1436,7 +1436,7 @@ bool GDebugView::Breakpoint(int Addr)
 	}
 }
 
-void GDebugView::OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour)
+void GDebugView::OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour)
 {
 	GTextView3::OnPaintLeftMargin(pDC, r, colour);
 
@@ -1483,10 +1483,10 @@ void GDebugView::OnPaint(GSurface *pDC)
 		GTextLine *Ln = Line[ErrorLine];
 
 		GFont *f = GetFont();
-		GRect c = GetClient();
+		LRect c = GetClient();
 		int Pad = 3;
 		GDisplayString Ds(f, Error);
-		GRect r(0, 0, Ds.X()-1, Ds.Y()-1);
+		LRect r(0, 0, Ds.X()-1, Ds.Y()-1);
 		r.Size(-Pad, -Pad);
 		r.Offset(c.X()-r.X(), Ln ? Ln->r.y1 - ScrollYPixel(): 0);
 		f->Transparent(false);
@@ -1547,7 +1547,7 @@ GVmDebuggerWnd::GVmDebuggerWnd(GView *Parent, GVmDebuggerCallback *Callback, GVi
 		d->Script = Code->GetSource();
 	d->Assembly = Assembly;
 	
-	GRect r(0, 0, 1000, 900);
+	LRect r(0, 0, 1000, 900);
 	SetPos(r);
 	if (Parent)
 		MoveSameScreen(Parent);

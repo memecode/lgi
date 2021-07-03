@@ -188,7 +188,7 @@ public:
 	GFilterView *View;
 	GAutoPtr<GFilterTree> Tree;
 	bool ShowLegend;
-	GRect Info;
+	LRect Info;
 	GArray<GSurface*> Icons;
 	FilterUi_Menu Callback;
 	void *CallbackData;
@@ -461,11 +461,11 @@ class GFilterItemPrivate
 public:
 	GFilterNode Node;
 	GFilterViewPrivate *Data;
-	GRect Btns[IconMax];
-	GRect NotBtn;
-	GRect FieldBtn, FieldDropBtn;
-	GRect OpBtn, OpDropBtn;
-	GRect ValueBtn;
+	LRect Btns[IconMax];
+	LRect NotBtn;
+	LRect FieldBtn, FieldDropBtn;
+	LRect OpBtn, OpDropBtn;
+	LRect ValueBtn;
 
 	bool Not;
 	char *Field, *Value;
@@ -591,7 +591,7 @@ void GFilterItem::SetValue(char *s)
 	} \
 	else \
 	{ \
-		GRect r = Rc; \
+		LRect r = Rc; \
 		LPoint sc = d->Data->Tree->_ScrollPos(); \
 		r.Offset(c.x1 + Pos->x1 - sc.x, c.y1 + Pos->y1 - sc.y); \
 		d->Ed->SetPos(r); \
@@ -629,7 +629,7 @@ void GFilterItem::_PourText(LPoint &Size)
 
 void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 {
-	GRect *Pos = _GetRect(TreeItemText);
+	LRect *Pos = _GetRect(TreeItemText);
 
 	// Create a memory context
 	GMemDC Buf(Pos->X(), Pos->Y(), System32BitColourSpace);
@@ -861,11 +861,11 @@ void GFilterItem::ShowControls(bool s)
 
 	if (s)
 	{
-		GRect *Pos = _GetRect(TreeItemText);
-		GRect c = GetTree()->GetClient();
+		LRect *Pos = _GetRect(TreeItemText);
+		LRect c = GetTree()->GetClient();
 		int n = 1;
 
-		GRect Cbo = d->OpBtn;
+		LRect Cbo = d->OpBtn;
 		Cbo.Union(&d->OpDropBtn);
 
 		StartCtrl(d->FieldBtn, FieldEd, d->Field, GEdit);
@@ -983,7 +983,7 @@ void GFilterItem::OnMouseClick(GMouse &m)
 {
 	if (m.Down() && m.Left())
 	{
-		GRect *Pos = _GetRect(TreeItemText);
+		LRect *Pos = _GetRect(TreeItemText);
 		if (!Pos) return;
 
 		int Hit = -1;
@@ -996,7 +996,7 @@ void GFilterItem::OnMouseClick(GMouse &m)
 			}
 		}
 
-		GRect Rc, Client = GetTree()->GetClient();
+		LRect Rc, Client = GetTree()->GetClient();
 		if (d->NotBtn.Overlap(m.x - Pos->x1, m.y - Pos->y1))
 		{
 			d->Not = !d->Not;
@@ -1092,9 +1092,9 @@ void GFilterItem::OnMouseClick(GMouse &m)
 
 void GFilterItem::OptionsMenu()
 {
-	GRect *Pos = _GetRect(TreeItemText);
+	LRect *Pos = _GetRect(TreeItemText);
 	if (!Pos) return;
-	GRect Client = GetTree()->GetClient();
+	LRect Client = GetTree()->GetClient();
 
 	LSubMenu s;
 	if (d->Node == LNODE_NEW)
@@ -1102,7 +1102,7 @@ void GFilterItem::OptionsMenu()
 	s.AppendItem(LgiLoadString(L_FUI_AND, "And"), 1, true);
 	s.AppendItem(LgiLoadString(L_FUI_OR, "Or"), 2, true);
 
-	GRect r = d->Btns[d->Node == LNODE_NEW ? IconNewCond : IconOptions];
+	LRect r = d->Btns[d->Node == LNODE_NEW ? IconNewCond : IconOptions];
 	r.Offset(Pos->x1 + Client.x1, Pos->y1 + Client.y1);
 	LPoint p(r.x1, r.y2+1);
 	GetTree()->PointToScreen(p);
@@ -1162,7 +1162,7 @@ GFilterView::GFilterView(FilterUi_Menu Callback, void *Data)
 
 	if (d->Callback)
 	{
-		GRect r;
+		LRect r;
 		d->Callback(this,
 					0,
 					FMENU_OP,
@@ -1202,7 +1202,7 @@ GFilterItem *GFilterView::Create(GFilterNode Node)
 
 void GFilterView::OnPosChange()
 {
-	GRect c = GLayout::GetClient();
+	LRect c = GLayout::GetClient();
 	if (d->ShowLegend)
 	{
 		d->Info = c;
@@ -1214,9 +1214,9 @@ void GFilterView::OnPosChange()
 }
 
 /*
-GRect &GFilterView::GetClient(bool ClientCoods)
+LRect &GFilterView::GetClient(bool ClientCoods)
 {
-	static GRect c;
+	static LRect c;
 
 	c = GView::GetClient(ClientCoods);
 	if (d->ShowLegend)

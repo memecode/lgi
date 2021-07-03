@@ -47,7 +47,7 @@ protected:
 
 	#if WINNATIVE
 
-		GRect OldPos;
+		LRect OldPos;
 		LWindow *_Dialog;
 
 	#else
@@ -235,7 +235,7 @@ public:
 	void Visible(bool i) override;
 	bool IsActive();
 	bool SetActive();
-	GRect &GetPos() override;
+	LRect &GetPos() override;
 	void SetDecor(bool Visible);
 	LPoint GetDpi();
 	LPointF GetDpiScale();
@@ -252,8 +252,8 @@ public:
 		OsWindow WindowHandle() override { return Wnd; }
 		bool Name(const char *n) override;
 		const char *Name() override;
-		bool SetPos(GRect &p, bool Repaint = false) override;
-		GRect &GetClient(bool InClientSpace = true) override;
+		bool SetPos(LRect &p, bool Repaint = false) override;
+		LRect &GetClient(bool InClientSpace = true) override;
 	
 		// Events
 		void OnChildrenChanged(GViewI *Wnd, bool Attaching) override;
@@ -272,7 +272,7 @@ public:
 		void OnGtkRealize();
 		bool IsAttached();
 		void Quit(bool DontDelete = false);
-		GRect *GetDecorSize();
+		LRect *GetDecorSize();
 		bool TranslateMouse(GMouse &m);
 		GViewI *WindowFromPoint(int x, int y, bool Debug);
 		void _SetDynamic(bool b);

@@ -390,7 +390,7 @@ public:
 	ToolBar()
 	{
 		GAutoString Name;
-		GRect Pos;
+		LRect Pos;
 		if (LoadFromResource(IDD_TOOLBAR, this, &Pos, &Name))
 		{
 			OnPosChange();
@@ -405,7 +405,7 @@ public:
 
 	void OnPosChange()
 	{
-		GRect Cli = GetClient();
+		LRect Cli = GetClient();
 
 		GTableLayout *v;
 		if (GetViewById(IDC_TABLE, v))
@@ -442,14 +442,14 @@ public:
 	CommitCtrls()
 	{
 		GAutoString Name;
-		GRect Pos;
+		LRect Pos;
 		if (LoadFromResource(IDD_COMMIT, this, &Pos, &Name))
 		{
 			GTableLayout *v;
 			if (GetViewById(IDC_COMMIT_TABLE, v))
 			{
 				v->GetCss(true)->PaddingRight("8px");
-				GRect r = v->GetPos();
+				LRect r = v->GetPos();
 				r.Offset(-r.x1, -r.y1);
 				r.x2++;
 				v->SetPos(r);
@@ -537,7 +537,7 @@ public:
 
 	void BrowseFiles(GViewI *Ctrl, const char *Bin, int EditId)
 	{
-		GRect Pos = Ctrl->GetPos();
+		LRect Pos = Ctrl->GetPos();
 		LPoint Pt(Pos.x1, Pos.y2 + 1);
 		PointToScreen(Pt);
 		
@@ -986,7 +986,7 @@ public:
 		AppRev.Printf("%s v%s", AppName, APP_VERSION);
 		Name(AppRev);
 
-		GRect r(0, 0, 1400, 800);
+		LRect r(0, 0, 1400, 800);
 		SetPos(r);
 		MoveToCenter();
 		SetQuitOnClose(true);
@@ -1109,7 +1109,7 @@ public:
 			}
 			Opts.Unlock();
 			
-			GRect Large(0, 0, 2000, 200);
+			LRect Large(0, 0, 2000, 200);
 			Tree->SetPos(Large);
 			Tree->ResizeColumnsToContent();
 			

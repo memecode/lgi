@@ -126,7 +126,7 @@ public:
 	{
 		App = app;
 		Name("Memory Dump Viewer");
-		GRect r(0, 0, 800, 600);
+		LRect r(0, 0, 800, 600);
 		SetPos(r);
 		MoveToCenter();
 		if (Attach(0))

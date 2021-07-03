@@ -140,7 +140,7 @@ public:
 	};
 
 	GArray<CacheDC*> Cache;
-	GArray<GRect> Bounds;
+	GArray<LRect> Bounds;
 
 	CacheDC *GetCache(GColour Back, bool Disabled)
 	{
@@ -312,14 +312,14 @@ void GImageList::Draw(GSurface *pDC, int Dx, int Dy, int Image, GColour Backgrou
 	if (!pDC)
 		return;
 
-	GRect rSrc;
+	LRect rSrc;
 	rSrc.ZOff(d->Sx-1, d->Sy-1);
 	rSrc.Offset(Image * d->Sx, 0);
 
 	GImageListPriv::CacheDC *Cache = d->GetCache(Background, Disabled);
 	if (!Cache && Background.IsValid())
 	{
-		GRect rDst;
+		LRect rDst;
 		rDst.ZOff(d->Sx-1, d->Sy-1);
 		rDst.Offset(Dx, Dy);
 
@@ -373,9 +373,9 @@ void GImageList::SetDisabledAlpha(uint8_t alpha)
 	d->DisabledAlpha = alpha;
 }
 
-GRect GImageList::GetIconRect(int Idx)
+LRect GImageList::GetIconRect(int Idx)
 {
-	GRect r(0, 0, -1, -1);
+	LRect r(0, 0, -1, -1);
 	
 	if (Idx >= 0 && Idx < GetItems())
 	{
@@ -386,7 +386,7 @@ GRect GImageList::GetIconRect(int Idx)
 	return r;
 }
 
-GRect *GImageList::GetBounds()
+LRect *GImageList::GetBounds()
 {
 	if (!d->Bounds.Length() && (*this)[0])
 	{
@@ -533,7 +533,7 @@ GToolButton::GToolButton(int Bx, int By)
 	ImgIndex = -1;
 	NeedsRightClick = false;
 
-	GRect r(0, 0, Bx+1, By+1);
+	LRect r(0, 0, Bx+1, By+1);
 	SetPos(r);
 	SetParent(0);
 	TipId = -1;
@@ -610,7 +610,7 @@ void GToolButton::OnPaint(GSurface *pDC)
 
 	if (Par)
 	{
-		GRect p = GetClient();
+		LRect p = GetClient();
 		
 		#if 0 // def _DEBUG
 		pDC->Colour(GColour(255, 0, 255));
@@ -652,7 +652,7 @@ void GToolButton::OnPaint(GSurface *pDC)
 				p.Size(1, 1);
 			}
 
-			GRect IconPos;
+			LRect IconPos;
 			if (Par->d->ImgList)
 				IconPos.Set(0, 0, Par->d->ImgList->TileX()-1, Par->d->ImgList->TileY()-1);
 			else
@@ -690,7 +690,7 @@ void GToolButton::OnPaint(GSurface *pDC)
 					{
 						// Fill in the rest of the area
 						pDC->Colour(Background);
-						for (GRect *r = Unpainted.First(); r; r = Unpainted.Next())
+						for (LRect *r = Unpainted.First(); r; r = Unpainted.Next())
 							pDC->Rectangle(r);
 					}
 				}
@@ -1215,12 +1215,12 @@ bool GToolBar::Pour(GRegion &r)
 	int EndY = 0;
 	int MaxDim = 0;
 	GCssTools Tools(this);
-	GRect Border = Tools.GetBorder(r);
-	GRect Padding = Tools.GetPadding(r);
+	LRect Border = Tools.GetBorder(r);
+	LRect Padding = Tools.GetPadding(r);
 	int PosX = BorderSpacing + Border.x1 + Padding.x1;
 	int PosY = BorderSpacing + Border.y1 + Padding.y1;
 
-	GRect ButPos;
+	LRect ButPos;
 	for (auto But: Children)
 	{
 		if (But->Visible())
@@ -1315,14 +1315,14 @@ bool GToolBar::Pour(GRegion &r)
 		}
 		else
 		{
-			GRect p(-100, -100, -90, -90);
+			LRect p(-100, -100, -90, -90);
 			But->SetPos(p);
 		}
 	}
 
 	for (auto w: Children)
 	{
-		GRect p = w->GetPos();
+		LRect p = w->GetPos();
 
 		if (d->Vertical)
 		{
@@ -1351,10 +1351,10 @@ bool GToolBar::Pour(GRegion &r)
 	d->Sx += Border.x2 + Padding.x2;
 	d->Sy += Border.y2 + Padding.y2;
 
-	GRect n;
+	LRect n;
 	n.ZOff(MAX(7, d->Sx), MAX(7, d->Sy));
 
-	GRect *Best = FindLargestEdge(r, GV_EDGE_TOP);
+	LRect *Best = FindLargestEdge(r, GV_EDGE_TOP);
 	if (Best)
 	{
 		n.Offset(Best->x1, Best->y1);
@@ -1410,7 +1410,7 @@ GMessage::Result GToolBar::OnEvent(GMessage *Msg)
 
 void GToolBar::OnPaint(GSurface *pDC)
 {
-	GRect c = GetClient();
+	LRect c = GetClient();
 	GCssTools Tools(this);
 	Tools.PaintBorder(pDC, c);
 	Tools.PaintPadding(pDC, c);

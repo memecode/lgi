@@ -48,7 +48,7 @@ public:
 		Item *Find(const char *opt);
 		bool Serialize(GDom *Store, bool Write);
 		void SetValue(GVariant &v);
-		GRect &GetRect();
+		LRect &GetRect();
 		void Select(bool b);
 		void OnPaint(ItemPaintCtx &Ctx);
 		void SetEnum(GAutoPtr<EnumArr> e);

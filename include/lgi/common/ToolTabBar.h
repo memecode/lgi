@@ -14,10 +14,10 @@
 class GToolTab : public GToolButton
 {
 	friend class GToolTabBar;
-	GRect TabPos;
+	LRect TabPos;
 	bool First;
 
-	bool SetPos(GRect &r, bool Repaint = false);
+	bool SetPos(LRect &r, bool Repaint = false);
 	void OnPaint(GSurface *pDC);
 	void OnMouseClick(GMouse &m) {}
 	void OnMouseMove(GMouse &m) {}
@@ -38,8 +38,8 @@ class GToolTabBar : public GToolBar
 {
 	friend class GToolTab;
 
-	GRect Client;
-	GRect Tab;
+	LRect Client;
+	LRect Tab;
 	GToolTab *Current;
 	bool FitToArea;
 	bool Border;

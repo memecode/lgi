@@ -11,7 +11,7 @@ public:
 		Defined = false;
 	}
 
-	LRectF(GRect &r)
+	LRectF(LRect &r)
 	{
 		*this = r;
 	}
@@ -49,7 +49,7 @@ public:
 	void Size(double dx, double dy);
 	char *Describe();
 
-	LRectF &operator =(GRect &f);
+	LRectF &operator =(LRect &f);
 	LRectF &operator =(LRectF &f);
 	LRectF &operator =(LPointF &p);
 };

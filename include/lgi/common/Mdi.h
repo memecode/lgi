@@ -22,7 +22,7 @@ public:
 	void OnMouseClick(GMouse &m);
 	void OnMouseMove(GMouse &m);
 	LgiCursor GetCursor(int x, int y);
-	GRect &GetClient(bool InClientSpace = true);
+	LRect &GetClient(bool InClientSpace = true);
 	#endif
 
 	bool Attach(GViewI *p);
@@ -36,7 +36,7 @@ public:
 	virtual void Lower();
 	virtual void OnTitleClick(GMouse &m);
 	virtual void OnButtonClick(GMouse &m);
-	virtual void OnPaintButton(GSurface *pDC, GRect &rc);
+	virtual void OnPaintButton(GSurface *pDC, LRect &rc);
 };
 
 class GMdiParent : public GLayout
@@ -64,7 +64,7 @@ public:
 	bool OnViewMouse(GView *View, GMouse &m);
 	bool OnViewKey(GView *View, GKey &Key);
 	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
-	GRect NewPos();
+	LRect NewPos();
 	GViewI *GetTop();
 
 	template<typename T>

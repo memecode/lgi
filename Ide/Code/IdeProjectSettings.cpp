@@ -466,7 +466,7 @@ class GSettingDetailFactory : public GViewFactory
 	GView *NewView
 	(
 		const char *Class,
-		GRect *Pos,
+		LRect *Pos,
 		const char *Text
 	)
 	{

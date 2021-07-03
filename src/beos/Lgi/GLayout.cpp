@@ -45,7 +45,7 @@ bool GLayout::Pour(GRegion &r)
 {
 	if (_PourLargest)
 	{
-		GRect *Best = FindLargest(r);
+		LRect *Best = FindLargest(r);
 		if (Best)
 		{
 			SetPos(*Best, true);
@@ -182,9 +182,9 @@ bool GLayout::SetScrollBars(bool x, bool y)
 
 void GLayout::OnPosChange()
 {
-	GRect r = GView::GetClient();	
-	GRect v(r.x2-B_V_SCROLL_BAR_WIDTH+1, r.y1, r.x2, r.y2);
-	GRect h(r.x1, r.y2-B_H_SCROLL_BAR_HEIGHT+1, r.x2, r.y2);
+	LRect r = GView::GetClient();	
+	LRect v(r.x2-B_V_SCROLL_BAR_WIDTH+1, r.y1, r.x2, r.y2);
+	LRect h(r.x1, r.y2-B_H_SCROLL_BAR_HEIGHT+1, r.x2, r.y2);
 
 	if (VScroll)
 	{
@@ -207,9 +207,9 @@ void GLayout::OnPosChange()
 	}
 }
 
-GRect &GLayout::GetClient(bool ClientSpace)
+LRect &GLayout::GetClient(bool ClientSpace)
 {
-	static GRect r;
+	static LRect r;
 
 	r = GView::GetClient(ClientSpace);
 	
@@ -226,7 +226,7 @@ GRect &GLayout::GetClient(bool ClientSpace)
 	return r;
 }
 
-void GLayout::OnNcPaint(GSurface *pDC, GRect &r)
+void GLayout::OnNcPaint(GSurface *pDC, LRect &r)
 {
 	GView::OnNcPaint(pDC, r);
 }

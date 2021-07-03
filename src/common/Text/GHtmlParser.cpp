@@ -1195,7 +1195,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								if ((img->Info = GetTagInfo(img->Tag)))
 									img->TagId = img->Info->Id;
 
-								GRect rc;
+								LRect rc;
 								EMOJI_CH2LOC(*c, rc);
 
 								img->Set("src", Html->d->EmojiImg);

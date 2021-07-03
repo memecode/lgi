@@ -48,7 +48,7 @@ public:
 	RLogView(GLog *log);
 
 	void OnPaint(GSurface *pDC);
-	// void OnNcPaint(GSurface *pDC, GRect &r);
+	// void OnNcPaint(GSurface *pDC, LRect &r);
 	// void OnNcCalcClient(long &x1, long &y1, long & x2, long &y2);
 	GMessage::Result OnEvent(GMessage *Msg);
 	void OnPosChange();

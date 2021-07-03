@@ -976,7 +976,7 @@ int64 GVariant::Length()
 			int64 Sz = 0;
 			if (Value.Surface.Ptr)
 			{
-				GRect r = Value.Surface.Ptr->Bounds();
+				LRect r = Value.Surface.Ptr->Bounds();
 				int Bytes = Value.Surface.Ptr->GetBits() >> 3;
 				Sz = r.X() * r.Y() * Bytes;
 			}

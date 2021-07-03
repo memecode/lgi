@@ -53,7 +53,7 @@ bool GLayout::Pour(GRegion &r)
 {
 	if (_PourLargest)
 	{
-		GRect *Best = FindLargest(r);
+		LRect *Best = FindLargest(r);
 		if (Best)
 		{
 			SetPos(*Best);
@@ -120,14 +120,14 @@ void GLayout::AttachScrollBars()
 {
 	if (HScroll && !HScroll->IsAttached())
 	{
-		// GRect r = HScroll->GetPos();
+		// LRect r = HScroll->GetPos();
 		HScroll->Attach(this);
 		HScroll->SetNotify(this);
 	}
 
 	if (VScroll && !VScroll->IsAttached())
 	{
-		// GRect r = VScroll->GetPos();
+		// LRect r = VScroll->GetPos();
 		VScroll->Attach(this);
 		VScroll->SetNotify(this);
 	}
@@ -221,9 +221,9 @@ int GLayout::OnNotify(GViewI *c, int f)
 
 void GLayout::OnPosChange()
 {
-	GRect r = GView::GetClient();
-	GRect v(r.x2-SCROLL_BAR_SIZE+1, r.y1, r.x2, r.y2);
-	GRect h(r.x1, r.y2-SCROLL_BAR_SIZE+1, r.x2, r.y2);
+	LRect r = GView::GetClient();
+	LRect v(r.x2-SCROLL_BAR_SIZE+1, r.y1, r.x2, r.y2);
+	LRect h(r.x1, r.y2-SCROLL_BAR_SIZE+1, r.x2, r.y2);
 	if (VScroll && HScroll)
 	{
 		h.x2 = v.x1 - 1;
@@ -242,7 +242,7 @@ void GLayout::OnPosChange()
 	}
 }
 
-void GLayout::OnNcPaint(GSurface *pDC, GRect &r)
+void GLayout::OnNcPaint(GSurface *pDC, LRect &r)
 {
 	GView::OnNcPaint(pDC, r);
 	
@@ -260,16 +260,16 @@ void GLayout::OnNcPaint(GSurface *pDC, GRect &r)
 		HScroll && HScroll->Visible())
 	{
 		// Draw square at the end of each scroll bar
-		GRect s(	VScroll->GetPos().x1, HScroll->GetPos().y1,
+		LRect s(	VScroll->GetPos().x1, HScroll->GetPos().y1,
 					VScroll->GetPos().x2, HScroll->GetPos().y2);
 		pDC->Colour(L_MED);
 		pDC->Rectangle(&s);
 	}
 }
 
-GRect &GLayout::GetClient(bool ClientSpace)
+LRect &GLayout::GetClient(bool ClientSpace)
 {
-	static GRect r;
+	static LRect r;
 	r = GView::GetClient(ClientSpace);
 
 	if (VScroll && VScroll->Visible())

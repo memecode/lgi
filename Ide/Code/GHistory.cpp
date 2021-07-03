@@ -14,7 +14,7 @@ public:
 	{
 		Lst = 0;
 		Index = -1;
-		GRect r(0, 0, 300, 300);
+		LRect r(0, 0, 300, 300);
 		SetPos(r);
 		Children.Insert(Lst = new LList(1, 1, 1, 100, 100));
 		if (Lst)
@@ -45,7 +45,7 @@ public:
 	{
 		if (Lst)
 		{
-			GRect r = GetClient();
+			LRect r = GetClient();
 			r.Size(1, 1);
 			Lst->SetPos(r);
 		}
@@ -210,7 +210,7 @@ public:
 	virtual GView *NewView
 	(
 		const char *Class,
-		GRect *Pos,
+		LRect *Pos,
 		const char *Text
 	)
 	{

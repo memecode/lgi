@@ -495,7 +495,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 				Prof.Add("Bounds");
 				#endif
 
-				GRect Sr(0, 0, n->X()-1, n->Y()-1);
+				LRect Sr(0, 0, n->X()-1, n->Y()-1);
 				Sr.Offset(n->Fx >> Shift, n->y);
 				if (Strs.Length()) Bounds.Union(&Sr);
 				else Bounds = Sr;
@@ -543,7 +543,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 void LStringLayout::Paint(	GSurface *pDC,
 							LPoint pt,
 							GColour Back,
-							GRect &rc,
+							LRect &rc,
 							bool Enabled,
 							bool Focused)
 {
@@ -573,7 +573,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 
 		#ifdef WINNATIVE
 		int y = pt.y + s->y;
-		GRect r(pt.x + s->Fx, y,
+		LRect r(pt.x + s->Fx, y,
 				pt.x + s->Fx + s->FX() - 1, y + s->Y() - 1);
 		Rgn.Subtract(&r);
 		f->Transparent(Bk.IsTransparent());
@@ -619,7 +619,7 @@ void LStringLayout::Paint(	GSurface *pDC,
 	if (!Back.IsTransparent())
 	{
 		pDC->Colour(Back);
-		for (GRect *r=Rgn.First(); r; r=Rgn.Next())
+		for (LRect *r=Rgn.First(); r; r=Rgn.Next())
 			pDC->Rectangle(r);
 	}
 	#endif

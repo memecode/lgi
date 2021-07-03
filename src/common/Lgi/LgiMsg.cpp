@@ -323,7 +323,7 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 
 		int BtnsX = (int) ((Btns.Length() * BtnX) + ((Btns.Length()-1) * 10));
 		int MaxX = MAX(BtnsX, Text->X());
-		GRect p(0, 0, MaxX + 30, Text->Y() + 30 + BtnY + LgiApp->GetMetric(LGI_MET_DECOR_Y) );
+		LRect p(0, 0, MaxX + 30, Text->Y() + 30 + BtnY + LgiApp->GetMetric(LGI_MET_DECOR_Y) );
 		Dlg.SetPos(p);
 		Dlg.MoveToCenter();
 
@@ -331,7 +331,7 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 		int y = Text->Y() + 20;
 		for (auto b: Btns)
 		{
-			GRect r(x, y, x+BtnX-1, y+BtnY-1);
+			LRect r(x, y, x+BtnX-1, y+BtnY-1);
 			b->SetPos(r);
 			Dlg.AddView(b);
 			x += r.X() + 10;
@@ -433,7 +433,7 @@ void LDialogTextMsg(GViewI *Parent, const char *Title, GString Txt)
 		GTextLog *Log = NULL;
 		d->SetParent(Parent);
 		d->Name(Title);
-		GRect r(0, 0, 600, 500);
+		LRect r(0, 0, 600, 500);
 		d->SetPos(r);
 		d->MoveSameScreen(Parent);
 

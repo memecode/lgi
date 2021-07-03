@@ -116,7 +116,7 @@ void GRichTextPriv::HorzRuleBlock::OnPaint(PaintContext &Ctx)
 		Ctx.Cursor->Blink &&
 		d->View->Focus())
 	{
-		GRect &p = Ctx.Cursor->Pos;
+		LRect &p = Ctx.Cursor->Pos;
 		Ctx.pDC->Colour(Ctx.Fore());
 		Ctx.pDC->Rectangle(&p);
 	}

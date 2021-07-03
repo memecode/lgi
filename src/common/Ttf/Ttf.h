@@ -319,7 +319,7 @@ public:
 	void Draw(GSurface *pDC, int x, int y, int Scale);
 	int DrawEm(GSurface *pDC, int X, int Y, int EmUnits, double PixelsPerEm);
 	bool Rasterize(	GSurface *pDC,
-			GRect *pDest,
+			LRect *pDest,
 			double xppem,
 			double yppem,
 			int BaseLine);
@@ -447,7 +447,7 @@ class LgiClass TtfRaster : public TtfObj {
 
 public:
 	int *BaseLine;			// pixels down to baseline in bitmap
-	GRect *pSource;		// where glyph is stored in the bitmap
+	LRect *pSource;		// where glyph is stored in the bitmap
 	GSurface *pDC;		// the bitmap
 
 	TtfRaster();
@@ -542,7 +542,7 @@ public:
 				int x, int y,
 				char *Str,
 				int Len = -1,
-				GRect *r = NULL); // ASCII version
+				LRect *r = NULL); // ASCII version
 	void Size(int *x, int *y, char *Str, int Len = -1, int Flags = 0);
 	int CharAt(int x, char *Str, int Len = -1);
 };

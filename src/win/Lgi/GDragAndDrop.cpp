@@ -346,7 +346,7 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::
 	return Status;
 }
 
-bool GDragDropSource::SetIcon(GSurface *Img, GRect *SubRgn)
+bool GDragDropSource::SetIcon(GSurface *Img, LRect *SubRgn)
 {
 	return false;
 }

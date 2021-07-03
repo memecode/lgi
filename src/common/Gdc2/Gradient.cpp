@@ -9,7 +9,7 @@ protected:
 	int Bytes;
 	COLOUR Background;
 	int Angle;
-	GRect Rect;
+	LRect Rect;
 
 public:
 	const char *GetClass() { return "GGradient"; }
@@ -135,7 +135,7 @@ public:
 			{
 				if (Value)
 				{
-					Rect = *((GRect*)Value);
+					Rect = *((LRect*)Value);
 				}
 				break;
 			}

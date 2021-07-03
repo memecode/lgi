@@ -101,7 +101,7 @@
 	public:
 		MyWindow()
 		{
-			GRect r(0, 0, 700, 600);
+			LRect r(0, 0, 700, 600);
 			SetPos(r);
 			MoveToCenter();
 			SetQuitOnClose(true);

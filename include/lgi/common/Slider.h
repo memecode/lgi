@@ -19,7 +19,7 @@ class LgiClass GSlider :
 	int64 Min, Max;
 	int64 Val;
 
-	GRect Thumb;
+	LRect Thumb;
 	int Tx, Ty;
 
 public:

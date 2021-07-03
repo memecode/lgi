@@ -254,7 +254,7 @@ bool SubMenuImpl::OnKey(GKey &k)
 
 void SubMenuImpl::OnPaint(GSurface *pDC)
 {
-	GRect c = GetClient();
+	LRect c = GetClient();
     LgiWideBorder(pDC, c, EdgeXpRaised);
     pDC->Colour(LC_MED, 24);
     pDC->Rectangle(&c);
@@ -289,7 +289,7 @@ void SubMenuImpl::Layout(int Bx, int By)
 
 			int Ht = Size.y;
 			
-			GRect r;
+			LRect r;
 			r.ZOff(x-1, Ht-1);
 			r.Offset(ColX + 2, 2 + y);
 			
@@ -312,7 +312,7 @@ void SubMenuImpl::Layout(int Bx, int By)
 	MaxX += 4;
 	MaxY += 4;
 
-	GRect p = GetPos();
+	LRect p = GetPos();
 	p.Offset(Bx - p.x1, By - p.y1);
 	
 	int ScrX = GdcD->X();
@@ -403,7 +403,7 @@ MenuImpl::MenuImpl(GMenu *Menu)
 	d->Menu = Menu;
 	Name("MenuImpl");
 
-	GRect r(0, 0, 1000, SysFont->GetHeight() + 4);
+	LRect r(0, 0, 1000, SysFont->GetHeight() + 4);
 	SetPos(r);
 }
 
@@ -435,7 +435,7 @@ bool MenuImpl::HasSubOpen()
 
 void MenuImpl::OnPaint(GSurface *pDC)
 {
-	GRect c = GetClient();
+	LRect c = GetClient();
 	
 	LgiThinBorder(pDC, c, EdgeXpRaised);
     pDC->Colour(LC_MED, 24);
@@ -444,7 +444,7 @@ void MenuImpl::OnPaint(GSurface *pDC)
 
 bool MenuImpl::Pour(GRegion &r)
 {
-	GRect *p = FindLargest(r);
+	LRect *p = FindLargest(r);
 	if (!p)
 		return false;
 
@@ -458,7 +458,7 @@ bool MenuImpl::Pour(GRegion &r)
 		i->_Measure(Size);
 		int Tx = Size.x;
 		
-		GRect r;
+		LRect r;
 		if (x + Tx + 4 > p->X()-1)
 		{
 			// next line
@@ -489,7 +489,7 @@ bool MenuImpl::Pour(GRegion &r)
 		}
 	}
 
-	GRect Area;
+	LRect Area;
 	Area.ZOff(p->X(), y + Ly);
 	SetPos(Area);
 	
@@ -668,7 +668,7 @@ void MenuItemImpl::OnMouseClick(GMouse &m)
 		{
 			Capture(false);
 			
-			GRect c = GetClient();
+			LRect c = GetClient();
 			if (c.Overlap(m.x, m.y))
 			{
 				Activate();

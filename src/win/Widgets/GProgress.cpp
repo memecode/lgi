@@ -11,7 +11,7 @@ GProgress::GProgress(int id, int x, int y, int cx, int cy, const char *name) :
 	Shift = 0;
 	SetClassW32(LGI_PROGRESS);
 	SetId(id);
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	if (name) GControl::Name(name);
 
@@ -92,7 +92,7 @@ void GProgress::Value(int64 v)
 
 bool GProgress::Pour(GRegion &r)
 {
-	GRect *l = FindLargest(r);
+	LRect *l = FindLargest(r);
 	if (l)
 	{
 		l->y2 = l->y1 + 10;

@@ -293,7 +293,7 @@ public:
 
 		/// This keeps track of the dirty rectangle and issues a M_INVALIDATE
 		/// event when needed to keep the screen up to date.
-		bool InvalidateRect(GRect &r);
+		bool InvalidateRect(LRect &r);
 		
 		/// Push a new window to the top of the window stack
 		bool PushWindow(LWindow *w);

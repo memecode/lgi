@@ -532,7 +532,7 @@ float blerp(float c00, float c10, float c01, float c11, float tx, float ty)
     return lerp(lerp(c00, c10, tx), lerp(c01, c11, tx), ty);
 }
 
-bool ResampleDC(GSurface *dst, GSurface *src, GRect *FromRgn, Progress *Prog)
+bool ResampleDC(GSurface *dst, GSurface *src, LRect *FromRgn, Progress *Prog)
 {
 	// void scale(image_t *src, image_t *dst, float scalex, float scaley){
     int newWidth = dst->X();
@@ -585,12 +585,12 @@ bool ResampleDC(GSurface *dst, GSurface *src, GRect *FromRgn, Progress *Prog)
 
 #else
 
-bool ResampleDC(GSurface *pDest, GSurface *pSrc, GRect *FromRgn, Progress *Prog)
+bool ResampleDC(GSurface *pDest, GSurface *pSrc, LRect *FromRgn, Progress *Prog)
 {
 	if (!pDest || !pSrc)
 		return false;
 
-	GRect Full(0, 0, pSrc->X()-1, pSrc->Y()-1), Sr;
+	LRect Full(0, 0, pSrc->X()-1, pSrc->Y()-1), Sr;
 	if (FromRgn)
 	{
 		Sr = *FromRgn;

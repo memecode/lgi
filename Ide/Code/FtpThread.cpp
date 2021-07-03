@@ -170,7 +170,7 @@ class FtpRedir : public LWindow
 public:
 	FtpRedir()
 	{
-		GRect r(-20001, -20001, -20000, -20000);
+		LRect r(-20001, -20001, -20000, -20000);
 		SetPos(r);
 		Attach(0);
 	}

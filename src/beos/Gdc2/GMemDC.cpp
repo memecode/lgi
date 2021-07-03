@@ -192,7 +192,7 @@ OsBitmap GMemDC::GetBitmap()
 	return d->Bmp;
 }
 
-void GMemDC::SetClient(GRect *c)
+void GMemDC::SetClient(LRect *c)
 {
 }
 
@@ -320,7 +320,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	return Status;
 }
 
-void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
+void GMemDC::Blt(int x, int y, GSurface *Src, LRect *a)
 {
 	if (!Src)
 	{
@@ -340,7 +340,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	}
 }
 
-void GMemDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
+void GMemDC::StretchBlt(LRect *d, GSurface *Src, LRect *s)
 {
 	LgiAssert(!"Impl me.");
 }
@@ -419,13 +419,13 @@ bool GMemDC::Unlock()
 	return true;
 }
 
-GRect GMemDC::ClipRgn(GRect *Rgn)
+LRect GMemDC::ClipRgn(LRect *Rgn)
 {
-	GRect Old = Clip;
+	LRect Old = Clip;
 	
 	if (Rgn)
 	{
-		GRect Dc(0, 0, X()-1, Y()-1);
+		LRect Dc(0, 0, X()-1, Y()-1);
 		
 		Clip = *Rgn;
 		Clip.Offset(-OriginX, -OriginY);

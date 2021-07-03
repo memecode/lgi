@@ -476,7 +476,7 @@ void LRectF::Size(double dx, double dy)
 	y2 -= dy;
 }
 
-LRectF &LRectF::operator =(GRect &f)
+LRectF &LRectF::operator =(LRect &f)
 {
 	x1 = f.x1;
 	y1 = f.y1;
@@ -1456,7 +1456,7 @@ void GPath::Fill(GSurface *pDC, GBrush &c)
 		
 		Doc.Offset(OffsetX, OffsetY);
 		LRectF Page(0, 0, pDC->X(), pDC->Y());
-		GRect DcClip = pDC->ClipRgn();
+		LRect DcClip = pDC->ClipRgn();
 		if (DcClip.Valid())
 			Page = DcClip;
 		LRectF Clip = Doc;

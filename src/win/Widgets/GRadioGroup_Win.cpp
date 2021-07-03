@@ -51,7 +51,7 @@ GRadioGroup::GRadioGroup(int id, int x, int y, int cx, int cy, const char *name,
 	d->InitVal = Init;
 
 	Name(name);
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	SetId(id);
 	SetTabStop(true);
@@ -248,7 +248,7 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
             {
                 if (w->OnLayout(*c))
                 {
-                    GRect r(Cx, Cy, Cx + c->Width.Max - 1, Cy + c->Height.Max - 1);
+                    LRect r(Cx, Cy, Cx + c->Width.Max - 1, Cy + c->Height.Max - 1);
                     w->SetPos(r);
                     if (Horiz)
                         // Horizontal layout
@@ -263,7 +263,7 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
             else
             {
                 // Non layout control... just use existing size
-                GRect r = w->GetPos();
+                LRect r = w->GetPos();
                 r.Offset(Cx - r.x1, Cy - r.y1);
                 w->SetPos(r);
                 if (Horiz)
@@ -312,7 +312,7 @@ GRadioButton::GRadioButton(int id, int x, int y, int cx, int cy, const char *nam
 	if (cx < 0) cx = t.X() + 26;
 	if (cy < 0) cy = t.Y() + 4;
 
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	SetId(id);
 	SetTabStop(true);

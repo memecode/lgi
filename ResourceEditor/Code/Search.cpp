@@ -641,7 +641,7 @@ Results::Results(AppWnd *app, Search *params)
 	d->Lst = 0;
 	
 	GLgiRes r;
-	GRect p;
+	LRect p;
 	GAutoString n;
 	if (r.LoadFromResource(IDD_RESULTS, this, &p, &n))
 	{
@@ -735,12 +735,12 @@ Results::~Results()
 
 void Results::OnPosChange()
 {
-	GRect Client = GetClient();
+	LRect Client = GetClient();
 
 	GViewI *v;
 	if (GetViewById(IDC_LIST, v))
 	{
-		GRect r = v->GetPos();
+		LRect r = v->GetPos();
 		r.x2 = Client.x2 - 12;
 		r.y2 = Client.y2 - 40;
 		v->SetPos(r);
@@ -748,7 +748,7 @@ void Results::OnPosChange()
 		v = FindControl(IDOK);
 		if (v)
 		{
-			GRect p = v->GetPos();
+			LRect p = v->GetPos();
 			p.Offset(Client.x2 - p.X() - 12 - p.x1, r.y2 + 10 - p.y1);
 			v->SetPos(p);
 		}

@@ -29,7 +29,7 @@ void GFont::Text(	GSurface *pDC,
 					int x, int y,
 					char *Str,
 					int Len,
-					GRect *r,
+					LRect *r,
 					int TabOrigin)
 {
 	COLOUR ForeCol = Fore();

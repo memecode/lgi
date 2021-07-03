@@ -232,7 +232,7 @@ GTimePopup::GTimePopup(GView *owner) : GPopup(owner)
 		Now.SetNow();
 	SetTime(&Now);
 
-	GRect r(0, 0, 100, 10*16 + 1);
+	LRect r(0, 0, 100, 10*16 + 1);
 	SetPos(r);
 }
 
@@ -253,7 +253,7 @@ void GTimePopup::OnCreate()
 void GTimePopup::OnPaint(GSurface *pDC)
 {
 	// 1px black border
-	GRect r = GetClient();
+	LRect r = GetClient();
 	r.Offset(-r.x1, -r.y1);
 	pDC->Colour(L_TEXT);
 	pDC->Box(&r);
@@ -351,7 +351,7 @@ void GTimePopup::SetTime(LDateTime *t)
 
 class GTimePopupFactory : public GViewFactory
 {
-	GView *NewView(const char *Class, GRect *Pos, const char *Text)
+	GView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (Class &&
 			_stricmp(Class, "GTimeDropDown") == 0)

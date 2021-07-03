@@ -59,7 +59,7 @@ void MemOr(void *d, void *s, uint l)
 }
 
 //////////////////////////////////////////////////////////////////////
-bool LgiFindBounds(GSurface *pDC, GRect *rc)
+bool LgiFindBounds(GSurface *pDC, LRect *rc)
 {
 	if (!pDC || ! rc)
 		return false;
@@ -145,7 +145,7 @@ bool LgiFindBounds(GSurface *pDC, GRect *rc)
 
 //////////////////////////////////////////////////////////////////////
 // Drawing functions
-void LgiDrawBox(GSurface *pDC, GRect &r, bool Sunken, bool Fill)
+void LgiDrawBox(GSurface *pDC, LRect &r, bool Sunken, bool Fill)
 {
 	if (Fill)
 	{
@@ -162,7 +162,7 @@ void LgiDrawBox(GSurface *pDC, GRect &r, bool Sunken, bool Fill)
 	pDC->Line(r.x1, r.y1, r.x2, r.y1);
 }
 
-void LgiWideBorder(GSurface *pDC, GRect &r, LgiEdge Type)
+void LgiWideBorder(GSurface *pDC, LRect &r, LgiEdge Type)
 {
 	if (!pDC) return;
 	COLOUR Old = pDC->Colour();
@@ -289,7 +289,7 @@ void LgiWideBorder(GSurface *pDC, GRect &r, LgiEdge Type)
 	pDC->Colour(Old);
 }
 
-void LgiThinBorder(GSurface *pDC, GRect &r, LgiEdge Type)
+void LgiThinBorder(GSurface *pDC, LRect &r, LgiEdge Type)
 {
 	if (!pDC) return;
 	COLOUR Old = pDC->Colour();
@@ -334,7 +334,7 @@ void LgiThinBorder(GSurface *pDC, GRect &r, LgiEdge Type)
 	pDC->Colour(Old);
 }
 
-void LgiFlatBorder(GSurface *pDC, GRect &r, int Width)
+void LgiFlatBorder(GSurface *pDC, LRect &r, int Width)
 {
 	pDC->Colour(LColour(L_MED));
 	if (Width < 1 || r.X() < (2 * Width) || r.Y() < (2 * Width))
@@ -352,7 +352,7 @@ void LgiFlatBorder(GSurface *pDC, GRect &r, int Width)
 	}
 }
 
-void LgiFillGradient(GSurface *pDC, GRect &r, bool Vert, GArray<GColourStop> &Stops)
+void LgiFillGradient(GSurface *pDC, LRect &r, bool Vert, GArray<GColourStop> &Stops)
 {
 	int CurStop = 0;
 	GColourStop *This = Stops.Length() > CurStop ? &Stops[CurStop] : 0;

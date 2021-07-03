@@ -168,7 +168,7 @@ public:
 		GSurface *Img,
 		/// If only a portion of the image is needed set this to the part to
 		/// use. Otherwise NULL means use the whole image.
-		GRect *SubRgn = NULL
+		LRect *SubRgn = NULL
 	);
 
 	/// Start a drag operation

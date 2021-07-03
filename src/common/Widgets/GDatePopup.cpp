@@ -17,7 +17,7 @@ GDatePopup::GDatePopup(GView *owner) : GPopup(owner)
 		Now.SetNow();
 	Mv.Set(&Now);
 
-	GRect r(0, 0, 150, 130);
+	LRect r(0, 0, 150, 130);
 	SetPos(r);
 }
 
@@ -49,7 +49,7 @@ void GDatePopup::OnPaint(GSurface *pDC)
 	}
 
 	// Border
-	GRect r = GetClient();
+	LRect r = GetClient();
 	LgiWideBorder(pDC, r, DefaultRaisedEdge);
 	pDC->Colour(L_MED);
 	pDC->Line(r.x2, r.y1, r.x2, r.y2);
@@ -356,7 +356,7 @@ void GDateDropDown::OnMouseClick(GMouse &m)
 
 class GDatePopupFactory : public GViewFactory
 {
-	GView *NewView(const char *Class, GRect *Pos, const char *Text)
+	GView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (Class &&
 			_stricmp(Class, "GDateDropDown") == 0)

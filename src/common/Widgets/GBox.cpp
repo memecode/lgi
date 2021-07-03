@@ -31,7 +31,7 @@ public:
 		Dragging = NULL;
 	}
 	
-	int GetBox(GRect &r)
+	int GetBox(LRect &r)
 	{
 		return Vertical ? r.Y() : r.X();
 	}
@@ -41,7 +41,7 @@ public:
 		for (int i=0; i<Spacers.Length(); i++)
 		{
 			GBox::Spacer &s = Spacers[i];
-			GRect Pos = s.Pos;
+			LRect Pos = s.Pos;
 			if (Vertical)
 			{
 				while (Pos.Y() < ACTIVE_SPACER_SIZE_PX)
@@ -178,7 +178,7 @@ bool GBox::OnViewMouse(GView *v, GMouse &m)
 			if (dynamic_cast<GPopup*>(v))
 				return true;
 
-			GRect p = v->GetPos();
+			LRect p = v->GetPos();
 			Local.x += p.x1;
 			Local.y += p.y1;
 			GViewI *vi = v->GetParent();
@@ -203,7 +203,7 @@ bool GBox::OnViewMouse(GView *v, GMouse &m)
 
 bool GBox::Pour(GRegion &r)
 {
-	GRect *p = FindLargest(r);
+	LRect *p = FindLargest(r);
 	if (!p)
 		return false;
 
@@ -219,7 +219,7 @@ void GBox::OnPaint(GSurface *pDC)
 		OnPosChange();
 	}
 
-	GRect cli = GetClient();
+	LRect cli = GetClient();
 	GCssTools tools(GetCss(), GetFont());
 	cli = tools.PaintBorderAndPadding(pDC, cli);
 
@@ -277,11 +277,11 @@ struct BoxRange
 void GBox::OnPosChange()
 {
 	GCssTools tools(GetCss(), GetFont());
-	GRect client = GetClient();
+	LRect client = GetClient();
 	if (!client.Valid())
 		return;
 
-	GRect content = tools.ApplyBorder(client);
+	LRect content = tools.ApplyBorder(client);
 	content = tools.ApplyPadding(content);
 	GetSpacer(0);
 
@@ -431,7 +431,7 @@ void GBox::OnPosChange()
 		int Px = (int) (box.Size.Value + 0.01);
 
 		// Allocate space for view
-		GRect viewPos = content;
+		LRect viewPos = content;
 		if (d->Vertical)
 		{
 			viewPos.y1 = Cur;
@@ -449,7 +449,7 @@ void GBox::OnPosChange()
 		#ifdef WIN32
 		// This forces the update, otherwise the child's display lags till the
 		// mouse is released *rolls eyes*
-		box.View->Invalidate((GRect*)NULL, true);
+		box.View->Invalidate((LRect*)NULL, true);
 		#endif
 		Cur += Px;
 		
@@ -547,17 +547,17 @@ void GBox::OnMouseMove(GMouse &m)
 	GViewI *Next = DragIndex < Children.Length() ? Children[DragIndex+1] : NULL;
 
 	GCssTools tools(GetCss(), GetFont());
-	GRect Content = tools.ApplyMargin(GetClient());
+	LRect Content = tools.ApplyMargin(GetClient());
 	int ContentPx = d->GetBox(Content);
 
-	GRect SplitPos = d->Dragging->Pos;
+	LRect SplitPos = d->Dragging->Pos;
 
 	GCss *PrevStyle = Prev->GetCss();
 	GCss::PropType Style = d->Vertical ? GCss::PropHeight : GCss::PropWidth;
 	bool EditPrev = !Next || IsValidLen(PrevStyle, Style);
 	GViewI *Edit = EditPrev ? Prev : Next;
 	LgiAssert(Edit != NULL);
-	GRect ViewPos = Edit->GetPos();
+	LRect ViewPos = Edit->GetPos();
 	auto *EditCss = Edit->GetCss(true);
 
 	if (d->Vertical)
@@ -572,7 +572,7 @@ void GBox::OnMouseMove(GMouse &m)
 			// Slide up and down the Y axis
 
 			// Limit to the min size
-			GRect r = ViewPos;
+			LRect r = ViewPos;
 			if (EditPrev)
 			{
 				r.y2 += Offset;
@@ -626,7 +626,7 @@ void GBox::OnMouseMove(GMouse &m)
 			// Slide along the X axis
 
 			// Limit to the min size
-			GRect r = ViewPos;
+			LRect r = ViewPos;
 			if (EditPrev)
 			{
 				r.x2 += Offset;
@@ -672,7 +672,7 @@ void GBox::OnMouseMove(GMouse &m)
 	}
 	
 	OnPosChange();
-	Invalidate((GRect*)NULL, true);
+	Invalidate((LRect*)NULL, true);
 }
 
 int GBox::OnNotify(GViewI *Ctrl, int Flags)

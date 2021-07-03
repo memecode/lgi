@@ -22,7 +22,7 @@ enum LCloseContext
 	CloseDestructor,
 };
 
-LgiExtern GRect LScreenFlip(GRect r);
+LgiExtern LRect LScreenFlip(LRect r);
 
 #define objc_dynamic_cast(TYPE, object) \
   ({ \

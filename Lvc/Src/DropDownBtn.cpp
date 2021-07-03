@@ -33,7 +33,7 @@ public:
 		d = priv;
 
 		int x = 300;
-		GRect r(0, 0, x, 200);
+		LRect r(0, 0, x, 200);
 		SetPos(r);
 		AddView(Lst = new LList(10));
 		Lst->Sunken(false);
@@ -43,7 +43,7 @@ public:
 
 	void OnPosChange()
 	{
-		GRect c = GetClient();
+		LRect c = GetClient();
 		c.Size(1, 1);
 		if (Lst)
 			Lst->SetPos(c);
@@ -134,7 +134,7 @@ bool DropDownBtn::SetList(int EditCtrl, GString::Array a)
 
 class DropDownBtnFactory : public GViewFactory
 {
-	GView *NewView(const char *Class, GRect *Pos, const char *Text)
+	GView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (!stricmp(Class, "DropDownBtn"))
 			return new DropDownBtn;

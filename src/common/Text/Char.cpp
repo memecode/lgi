@@ -15,7 +15,7 @@ public:
 		SetText(Num, 0);
 	}
 
-	void OnPaintColumn(GSurface *pDC, GRect &r, int Col, GListColumn *c, COLOUR Fore, COLOUR Back)
+	void OnPaintColumn(GSurface *pDC, LRect &r, int Col, GListColumn *c, COLOUR Fore, COLOUR Back)
 	{
 		if (Col == 1)
 		{

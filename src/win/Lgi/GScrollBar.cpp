@@ -40,7 +40,7 @@ GScrollBar::GScrollBar(int id, int x, int y, int cx, int cy, const char *name)
 	d->Info.fMask |= SIF_DISABLENOSCROLL;
 
 	SetId(id);
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	if (name) Name(name);
 
@@ -65,7 +65,7 @@ int GScrollBar::GetScrollSize()
 	return GetSystemMetrics(SM_CXVSCROLL);
 }
 
-bool GScrollBar::SetPos(GRect &p, bool Repaint)
+bool GScrollBar::SetPos(LRect &p, bool Repaint)
 {
 	if (d->Type == SB_CTL)
 	{
@@ -299,7 +299,7 @@ void GScrollBar::SetPage(int64 p)
 	Update();
 }
 
-bool GScrollBar::Invalidate(GRect *r, bool Repaint, bool NonClient)
+bool GScrollBar::Invalidate(LRect *r, bool Repaint, bool NonClient)
 {
 	if (GetParent())
 	{
@@ -401,7 +401,7 @@ GMessage::Result GScrollBar::OnEvent(GMessage *Msg)
 			LgiCursor Cursor = LCUR_Normal;
 			for (GViewI *c = this; Cursor == LCUR_Normal && c->GetParent(); c = c->GetParent())
 			{
-				GRect CPos = c->GetPos();
+				LRect CPos = c->GetPos();
 				Cursor = c->GetCursor(CurX, CurY);
 				LgiTrace("Scrollbar MouseMOve %s = %i, pos=%i, %i\n", c->GetClass(), Cursor, CurX, CurY);
 				CurX += CPos.x1;

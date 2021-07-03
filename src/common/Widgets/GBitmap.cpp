@@ -47,7 +47,7 @@ public:
 					LgiSleep(10);
 				#endif
 
-				GRect r = Bmp->GetPos();
+				LRect r = Bmp->GetPos();
 				r.Dimension(pDC->X()+4, pDC->Y()+4);
 				Bmp->SetPos(r, true);
                 Bmp->SendNotify();
@@ -72,7 +72,7 @@ GBitmap::GBitmap(int id, int x, int y, char *FileName, bool Async)
 	#endif
 
 	SetId(id);
-	GRect r(0, 0, 4, 4);
+	LRect r(0, 0, 4, 4);
 	r.Offset(x, y);
 
 	if (ValidStr(FileName))
@@ -134,7 +134,7 @@ void GBitmap::SetDC(GSurface *pNewDC)
 			pDC->Op(GDC_ALPHA);
 			pDC->Blt(0, 0, pNewDC);
 
-			GRect r = GetPos();
+			LRect r = GetPos();
 			r.Dimension(pDC->X() + 4, pDC->Y() + 4);
 			SetPos(r);
 			Invalidate();
@@ -168,7 +168,7 @@ void GBitmap::OnPaint(GSurface *pScreen)
 {
 	GColour cBack = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 
-	GRect a = GetClient();
+	LRect a = GetClient();
 	pScreen->Colour(cBack);
 	pScreen->Rectangle(&a);
 

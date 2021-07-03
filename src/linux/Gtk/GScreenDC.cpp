@@ -20,7 +20,7 @@ public:
 	int x, y, Bits;
 	bool Own;
 	GColour Col;
-	GRect Client;
+	LRect Client;
 
 	GView *View;
 	OsView v;
@@ -147,7 +147,7 @@ LPoint GScreenDC::GetSize()
 	return LPoint(d->x, d->y);
 }
 
-bool GScreenDC::GetClient(GRect *c)
+bool GScreenDC::GetClient(LRect *c)
 {
 	if (!c)
 		return false;
@@ -190,7 +190,7 @@ void GScreenDC::SetOrigin(int x, int y)
 	cairo_set_matrix(d->cr, &m);
 }
 
-void GScreenDC::SetClient(GRect *c)
+void GScreenDC::SetClient(LRect *c)
 {
 	if (c)
 	{
@@ -218,7 +218,7 @@ void GScreenDC::SetClient(GRect *c)
 	}
 }
 
-GRect *GScreenDC::GetClient()
+LRect *GScreenDC::GetClient()
 {
 	return &d->Client;
 }
@@ -238,14 +238,14 @@ int GScreenDC::GetFlags()
 	return 0;
 }
 
-GRect GScreenDC::ClipRgn()
+LRect GScreenDC::ClipRgn()
 {
 	return Clip;
 }
 
-GRect GScreenDC::ClipRgn(GRect *c)
+LRect GScreenDC::ClipRgn(LRect *c)
 {
-	GRect Prev = Clip;
+	LRect Prev = Clip;
 
 	if (c)
 	{
@@ -468,7 +468,7 @@ void GScreenDC::Box(int x1, int y1, int x2, int y2)
 	cairo_fill(d->cr);
 }
 
-void GScreenDC::Box(GRect *a)
+void GScreenDC::Box(LRect *a)
 {
 	if (a)
 		Box(a->x1, a->y1, a->x2, a->y2);
@@ -486,7 +486,7 @@ void GScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 	}
 }
 
-void GScreenDC::Rectangle(GRect *a)
+void GScreenDC::Rectangle(LRect *a)
 {
 	if (a)
 	{
@@ -516,7 +516,7 @@ void GScreenDC::Polygon(int Points, LPoint *Data)
 	cairo_fill(d->cr);
 }
 
-void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
+void GScreenDC::Blt(int x, int y, GSurface *Src, LRect *a)
 {
 	if (!Src)
 	{
@@ -531,7 +531,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	}
 		
 	// memory -> screen blt
-	GRect RealClient = d->Client;
+	LRect RealClient = d->Client;
 	d->Client.ZOff(-1, -1); // Clear this so the blit rgn calculation uses the
 							// full context size rather than just the client.
 	GBlitRegions br(this, x, y, Src, a);
@@ -582,7 +582,7 @@ void GScreenDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	}
 }
 
-void GScreenDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
+void GScreenDC::StretchBlt(LRect *d, GSurface *Src, LRect *s)
 {
 	LgiAssert(0);
 }
@@ -592,7 +592,7 @@ void GScreenDC::Bezier(int Threshold, LPoint *Pt)
 	LgiAssert(0);
 }
 
-void GScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, GRect *Bounds)
+void GScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
 	LgiAssert(0);
 }

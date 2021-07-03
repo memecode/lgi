@@ -2,7 +2,6 @@
 #include "lgi/common/Net.h"
 #include "lgi/common/RegKey.h"
 
-
 /////////////////////////////////////////////////////////////////////////////////
 static const char *Ws = " \t\r\n";
 #define SkipWs(s) while (*s && strchr(Ws, *s)) s++;

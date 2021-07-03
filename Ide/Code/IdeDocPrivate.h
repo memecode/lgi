@@ -5,18 +5,18 @@
 
 class EditTray : public GLayout
 {
-	GRect FileBtn;
+	LRect FileBtn;
 	GEdit *FileSearch;
 
-	GRect FuncBtn;
+	LRect FuncBtn;
 	GEdit *FuncSearch;
 
-	GRect SymBtn;
+	LRect SymBtn;
 	GEdit *SymSearch;
 
 	GCheckBox *AllPlatforms;
 
-	GRect TextMsg;
+	LRect TextMsg;
 
 	GTextView3 *Ctrl;
 	IdeDoc *Doc;

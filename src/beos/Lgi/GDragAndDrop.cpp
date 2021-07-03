@@ -31,7 +31,7 @@ GDragDropSource::~GDragDropSource()
 	DeleteObj(d);
 }
 
-bool GDragDropSource::SetIcon(GSurface *Img, GRect *SubRgn)
+bool GDragDropSource::SetIcon(GSurface *Img, LRect *SubRgn)
 {
 	return false;
 }

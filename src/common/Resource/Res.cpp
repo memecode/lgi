@@ -1281,7 +1281,7 @@ void ResObjectImpl::Res_SetPos(int x1, int y1, int x2, int y2)
 
 void ResObjectImpl::WritePos(GXmlTag *t)
 {
-	GRect r = Factory->Res_GetPos(Object);
+	LRect r = Factory->Res_GetPos(Object);
 	t->SetAttr("pos", r.Describe());
 }
 
@@ -1441,7 +1441,7 @@ ResObjectImpl::SStatus ResDialogObj::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 				GViewI *v = dynamic_cast<GViewI*>(Ctrl->Object);
 				if (v)
 				{
-					GRect r = v->GetPos();
+					LRect r = v->GetPos();
 					r.Offset(-3, -17);
 					v->SetPos(r);
 				}
@@ -1541,7 +1541,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 		if (v.Str())
 			d->SetValue("style", v);
 
-		GRect Bounds(0, 0, Cx-1, Cy-1);
+		LRect Bounds(0, 0, Cx-1, Cy-1);
 		int PadCellX = Cx << 1;
 		#define UsedCell(x, y) Used[(PadCellX * y) + x]
 		GArray<bool> Used;
@@ -1575,7 +1575,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 				sprintf_s(CellName, sizeof(CellName), "cell[%i,%i]", x, y);
 				if (d->SetValue(CellName, v))
 				{
-					GRect Span(x, y, x + ColSpan - 1, y + RowSpan - 1);
+					LRect Span(x, y, x + ColSpan - 1, y + RowSpan - 1);
 						
 					for (int Y=Span.y1; Y<=Span.y2; Y++)
 						for (int X=Span.x1; X<=Span.x2; X++)
@@ -1682,7 +1682,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Write(GXmlTag *t)
 						GDom *c = v.Value.Dom;
 						if (c)
 						{
-							GRect Span;
+							LRect Span;
 							if (c->GetValue("span", v) &&
 								Span.SetStr(v.Str()))
 							{
@@ -1969,7 +1969,7 @@ ResObjectImpl::SStatus ResColumn::Res_Read(GXmlTag *Tag, ResReadCtx &Ctx)
 
 ResObjectImpl::SStatus ResColumn::Res_Write(GXmlTag *t)
 {
-	GRect Pos = Factory->Res_GetPos(Object);
+	LRect Pos = Factory->Res_GetPos(Object);
 
 	t->SetTag(Res_Column);
 	WriteStrRef(t);

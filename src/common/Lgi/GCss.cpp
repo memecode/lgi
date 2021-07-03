@@ -683,7 +683,7 @@ GAutoString GCss::ToString()
 			}
 			case TypeGRect:
 			{
-				GRect *r = (GRect*)v.value;
+				LRect *r = (LRect*)v.value;
 				const char *Name = PropName(Prop);
 				p.Print("%s: rect(%s);\n", Name, r->GetStr());
 				break;
@@ -853,13 +853,13 @@ bool GCss::InheritCollect(GCss &c, PropMap &Contrib)
 			}
 			case TypeGRect:
 			{
-				GRect *Mine = (GRect*)Props.Find(a.key);
+				LRect *Mine = (LRect*)Props.Find(a.key);
 				if (!Mine || !Mine->Valid())
 				{
-					GRect *Theirs = (GRect*)c.Props.Find(a.key);
+					LRect *Theirs = (LRect*)c.Props.Find(a.key);
 					if (Theirs)
 					{
-						if (!Mine) Props.Add(a.key, Mine = new GRect);
+						if (!Mine) Props.Add(a.key, Mine = new LRect);
 						*Mine = *Theirs;
 					}
 					else StillInherit++;
@@ -1155,7 +1155,7 @@ bool GCss::CopyStyle(const GCss &c)
 				break;
 			}
 			CopyProp(TypeLen, Len);
-			CopyProp(TypeGRect, GRect);
+			CopyProp(TypeGRect, LRect);
 			CopyProp(TypeColor, ColorDef);
 			CopyProp(TypeImage, ImageDef);
 			CopyProp(TypeBorder, BorderDef);
@@ -1198,7 +1198,7 @@ bool GCss::operator ==(GCss &c)
 
 			CmpType(TypeEnum, uint32_t);
 			CmpType(TypeLen, Len);
-			CmpType(TypeGRect, GRect);
+			CmpType(TypeGRect, LRect);
 			CmpType(TypeColor, ColorDef);
 			CmpType(TypeImage, ImageDef);
 			CmpType(TypeBorder, BorderDef);
@@ -1237,7 +1237,7 @@ void GCss::DeleteProp(PropType Prop, void *Data)
 			delete ((Len*)Data);
 			break;
 		case TypeGRect:
-			delete ((GRect*)Data);
+			delete ((LRect*)Data);
 			break;
 		case TypeColor:
 			delete ((ColorDef*)Data);
@@ -1936,7 +1936,7 @@ bool GCss::Parse(const char *&s, ParsingStyle Type)
 			}
 			case TypeGRect:
 			{
-				GRect r;
+				LRect r;
 				if (ParseWord(s, "rect"))
 				{
 					SkipWhite(s);
@@ -1951,9 +1951,9 @@ bool GCss::Parse(const char *&s, ParsingStyle Type)
 							r.SetStr(tmp);
 							s++;
 
-							GRect *e = (GRect*)Props.Find(PropId);
+							LRect *e = (LRect*)Props.Find(PropId);
 							if (e) *e = r;
-							else Props.Add(PropId, new GRect(r));
+							else Props.Add(PropId, new LRect(r));
 						}
 						return false;
 					}

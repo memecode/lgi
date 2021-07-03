@@ -53,14 +53,14 @@ public:
 	/// Returns the cell at a given location.
 	GLayoutCell *CellAt(int x, int y);
 	/// Returns area being used by cells
-	GRect GetUsedArea();
+	LRect GetUsedArea();
 	/// Invalidates the layout, causing the control to relay all the children
 	void InvalidateLayout();
 
     /// Create a cell
     GLayoutCell *GetCell(int x, int y, bool create = true, int colspan = 1, int rowspan = 1);
     /// Clear all cells;
-    void Empty(GRect *Range = NULL);
+    void Empty(LRect *Range = NULL);
 
 	// Impl
 	void OnFocus(bool b);
@@ -78,7 +78,7 @@ public:
 
 
 /// This is just a light-weight layout system for doing things manually.
-class GLayoutRect : public GRect
+class GLayoutRect : public LRect
 {
 	int Spacing;
 
@@ -86,19 +86,19 @@ public:
 	GLayoutRect(GViewI *c, int spacing = GTableLayout::CellSpacing)
 	{
 		Spacing = spacing;
-		((GRect&)*this) = c->GetClient();
+		((LRect&)*this) = c->GetClient();
 		Size(Spacing, Spacing);
 	}
 
-	GLayoutRect(GRect rc, int spacing = GTableLayout::CellSpacing)
+	GLayoutRect(LRect rc, int spacing = GTableLayout::CellSpacing)
 	{
 		Spacing = spacing;
-		((GRect&)*this) = rc;		
+		((LRect&)*this) = rc;		
 	}
 
 	// Allocate object on left edge
 	// ------------------------------------
-		GLayoutRect Left(GRect &rc, int Px)
+		GLayoutRect Left(LRect &rc, int Px)
 		{
 			rc = *this;
 			rc.x2 = rc.x1 + Px - 1;
@@ -108,7 +108,7 @@ public:
 
 		GLayoutRect Left(GViewI *v, int Px)
 		{
-			GRect r;
+			LRect r;
 			Left(r, Px);
 			if (v) v->SetPos(r);
 			return *this;
@@ -116,7 +116,7 @@ public:
 
 	// Allocate on right edge...
 	// ------------------------------------
-		GLayoutRect Right(GRect &rc, int Px)
+		GLayoutRect Right(LRect &rc, int Px)
 		{
 			rc = *this;
 			rc.x1 = rc.x2 - Px + 1;
@@ -126,7 +126,7 @@ public:
 
 		GLayoutRect Right(GViewI *v, int Px)
 		{
-			GRect r;
+			LRect r;
 			Right(r, Px);
 			if (v) v->SetPos(r);
 			return *this;
@@ -134,7 +134,7 @@ public:
 
 	// Allocate on top edge...
 	// ------------------------------------
-		GLayoutRect Top(GRect &rc, int Px)
+		GLayoutRect Top(LRect &rc, int Px)
 		{
 			rc = *this;
 			rc.y2 = rc.y1 + Px - 1;
@@ -144,7 +144,7 @@ public:
 
 		GLayoutRect Top(GViewI *v, int Px)
 		{
-			GRect r;
+			LRect r;
 			Top(r, Px);
 			if (v) v->SetPos(r);
 			return *this;
@@ -152,7 +152,7 @@ public:
 
 	// Allocate on top edge...
 	// ------------------------------------
-		GLayoutRect Bottom(GRect &rc, int Px)
+		GLayoutRect Bottom(LRect &rc, int Px)
 		{
 			rc = *this;
 			rc.y2 = rc.y1 + Px - 1;
@@ -162,7 +162,7 @@ public:
 
 		GLayoutRect Bottom(GViewI *v, int Px)
 		{
-			GRect r;
+			LRect r;
 			Bottom(r, Px);
 			if (v) v->SetPos(r);
 			return *this;
@@ -170,7 +170,7 @@ public:
 	
 	// Allocate all remaining space.
 	// ------------------------------------
-	void Remaining(GRect &rc)
+	void Remaining(LRect &rc)
 	{
 		rc = *this;
 		ZOff(-1, -1);

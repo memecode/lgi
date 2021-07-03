@@ -45,7 +45,7 @@ enum PopupNotifications
 		return NULL;
 	}
 
-	bool GetWindowRect(OsView Wnd, GRect &rc)
+	bool GetWindowRect(OsView Wnd, LRect &rc)
 	{
 		return false;
 	}
@@ -252,7 +252,7 @@ public:
 							// Are we over a popup?
 							RECT rc;
 							GetWindowRect(hnd, &rc);
-							GRect gr = rc;
+							LRect gr = rc;
 							if (gr.Overlap(m.x, m.y))
 							{
 								// Yes, so don't close it
@@ -308,13 +308,13 @@ public:
 				RECT WinRect;
 				GetClientRect(hOver, &WinRect);
 				ScreenToClient(hOver, &WinPt);
-				GRect rc = WinRect;
+				LRect rc = WinRect;
 				LPoint p(WinPt.x, WinPt.y);
 
 				#elif defined __GTK_H__
 				
 				hOver = WindowFromPoint(m.x, m.y);
-				GRect rc;
+				LRect rc;
 				LPoint p(m.x, m.y);
 				if (hOver)
 				{
@@ -336,7 +336,7 @@ public:
 				
 				// Not implemented.
 				LPoint p;
-				GRect rc;
+				LRect rc;
 				
 				#endif
 
@@ -638,18 +638,18 @@ GPopup::~GPopup()
 
 #if LGI_COCOA
 
-GRect &GPopup::GetPos()
+LRect &GPopup::GetPos()
 {
 	return Pos;
 }
 
-bool GPopup::SetPos(GRect &r, bool repaint)
+bool GPopup::SetPos(LRect &r, bool repaint)
 {
 	Pos = r;
 	
 	if (Panel)
 	{
-		GRect flipped = LScreenFlip(r);
+		LRect flipped = LScreenFlip(r);
 		[Panel.p setFrame:flipped display:Visible()];
 	}
 	
@@ -963,7 +963,7 @@ bool GPopup::Visible()
 GDropDown::GDropDown(int Id, int x, int y, int cx, int cy, GPopup *popup)
 {
 	SetId(Id);
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	if ((Popup = popup))
 		Popup->SetNotify(this);
@@ -999,7 +999,7 @@ bool GDropDown::IsOpen()
 
 void GDropDown::OnPaint(GSurface *pDC)
 {
-	GRect r = GetClient();
+	LRect r = GetClient();
 	r.Offset(-r.x1, -r.y1);
 	if (!r.Valid())
 		return;
@@ -1020,7 +1020,7 @@ void GDropDown::OnPaint(GSurface *pDC)
 		pDC->Rectangle();
 	}
 	
-	GRect rc = GetClient();
+	LRect rc = GetClient();
 	rc.x1 += 2;
 	rc.y2 -= 1;
 	rc.x2 -= 1;
@@ -1116,7 +1116,7 @@ void GDropDown::Activate()
 		// Locate under myself
 		LPoint p(X()-1, Y());
 		PointToScreen(p);
-		GRect r(p.x-Popup->X()+1, p.y, p.x, p.y+Popup->Y()-1);
+		LRect r(p.x-Popup->X()+1, p.y, p.x, p.y+Popup->Y()-1);
 		
 		// Show the popup
 		if (!Popup->IsAttached())

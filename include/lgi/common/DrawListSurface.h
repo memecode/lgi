@@ -20,8 +20,8 @@ public:
 	GDisplayString *Text(int x, int y, const char *Str, int Len = -1);
 	
 	// Calls that are stored and played back:
-	GRect ClipRgn();
-	GRect ClipRgn(GRect *Rgn);
+	LRect ClipRgn();
+	LRect ClipRgn(LRect *Rgn);
 	COLOUR Colour();
 	COLOUR Colour(COLOUR c, int Bits = 0);
 	GColour Colour(GColour c);
@@ -51,14 +51,14 @@ public:
 	void Ellipse(double cx, double cy, double x, double y);
 	void FilledEllipse(double cx, double cy, double x, double y);
 	void Box(int x1, int y1, int x2, int y2);
-	void Box(GRect *a = NULL);
+	void Box(LRect *a = NULL);
 	void Rectangle(int x1, int y1, int x2, int y2);
-	void Rectangle(GRect *a = NULL);
-	void Blt(int x, int y, GSurface *Src, GRect *a = NULL);
-	void StretchBlt(GRect *d, GSurface *Src, GRect *s);
+	void Rectangle(LRect *a = NULL);
+	void Blt(int x, int y, GSurface *Src, LRect *a = NULL);
+	void StretchBlt(LRect *d, GSurface *Src, LRect *s);
 	void Polygon(int Points, LPoint *Data);
 	void Bezier(int Threshold, LPoint *Pt);
-	void FloodFill(int x, int y, int Mode, COLOUR Border = 0, GRect *Bounds = NULL);	
+	void FloodFill(int x, int y, int Mode, COLOUR Border = 0, LRect *Bounds = NULL);	
 
 
 	// Stubs that don't work here..

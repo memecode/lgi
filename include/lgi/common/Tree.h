@@ -26,7 +26,7 @@ protected:
 	List<GTreeItem> Items;
 
 	virtual GTreeItem *Item() { return 0; }
-	virtual GRect *Pos() { return 0; }
+	virtual LRect *Pos() { return 0; }
 	virtual void _ClearDs(int Col);
 	void _Visible(bool v);
 	void SetLayoutDirty();
@@ -106,10 +106,10 @@ protected:
 	void _MouseClick(GMouse &m);
 	void _SetTreePtr(GTree *t);
 	GTreeItem *_HitTest(int x, int y, bool Debug = false);
-	GRect *_GetRect(GTreeItemRect Which);
+	LRect *_GetRect(GTreeItemRect Which);
 	LPoint _ScrollPos();
 	GTreeItem *Item() override { return this; }
-	GRect *Pos() override;
+	LRect *Pos() override;
 
 	virtual void _PourText(LPoint &Size);
 	virtual void _PaintText(GItem::ItemPaintCtx &Ctx);
@@ -156,7 +156,7 @@ public:
 	/// Scrolls the tree view so this node is visible.
 	void ScrollTo() override;
 	/// Gets the bounding box of the item.
-	GRect *GetPos(int Col = -1) override;
+	LRect *GetPos(int Col = -1) override;
 	/// Sort the child folder
 	bool SortChildren(int (*compare)(GTreeItem *a, GTreeItem *b, NativeInt UserData), NativeInt UserData = 0);
 	/// True if the node is the drop target
@@ -184,7 +184,7 @@ class LgiClass GTree :
 	// Private methods
 	void _Pour();
 	void _OnSelect(GTreeItem *Item);
-	void _Update(GRect *r = 0, bool Now = false);
+	void _Update(LRect *r = 0, bool Now = false);
 	void _UpdateBelow(int y, bool Now = false);
 	void _UpdateScrollBars();
 	List<GTreeItem>	*GetSelLst();
@@ -196,7 +196,7 @@ protected:
 	bool LinesAtRoot;
 	bool EditLabels;
 	
-	GRect rItems;
+	LRect rItems;
 	
 	LPoint _ScrollPos();
 	GTreeItem *GetAdjacent(GTreeItem *From, bool Down);

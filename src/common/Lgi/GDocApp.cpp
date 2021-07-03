@@ -188,7 +188,7 @@ GDocApp<OptionsFmt>::GDocApp(const char *appname, LIcon icon, char *optsname)
 	_LangOptsName = 0;
 	d = new GDocAppPrivate(this, optsname);
 	
-	GRect r(0, 0, 800, 600);
+	LRect r(0, 0, 800, 600);
 	SetPos(r);
 	MoveToCenter();
 	_FileMenu = 0;
@@ -357,7 +357,7 @@ bool GDocApp<OptionsFmt>::_Create(LIcon IconResource)
 	
 		if (X() < 1)
 		{	
-			GRect r(100, 100, 600, 500);
+			LRect r(100, 100, 600, 500);
 			SetPos(r);
 		}
 	}

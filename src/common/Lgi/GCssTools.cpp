@@ -99,12 +99,12 @@ GColour &GCssTools::GetBack(GColour *Default, int Depth)
 	return Back;
 }
 
-GRect GCssTools::ApplyMargin(GRect &in)
+LRect GCssTools::ApplyMargin(LRect &in)
 {
 	if (!Css)
 		return in;
 
-	GRect r = in;
+	LRect r = in;
 	
 	// Insert by the margin
 	GCss::Len margin = Css->Margin();
@@ -119,9 +119,9 @@ GRect GCssTools::ApplyMargin(GRect &in)
 	return r;
 }
 
-GRect GCssTools::GetPadding(GRect &box, GRect *def)
+LRect GCssTools::GetPadding(LRect &box, LRect *def)
 {
-	GRect r(0, 0, 0, 0);
+	LRect r(0, 0, 0, 0);
 	if (Css)
 	{
 		GCss::Len padding = Css->Padding();
@@ -145,9 +145,9 @@ GRect GCssTools::GetPadding(GRect &box, GRect *def)
 	return r;
 }
 
-GRect GCssTools::GetBorder(GRect &box, GRect *def)
+LRect GCssTools::GetBorder(LRect &box, LRect *def)
 {
-	GRect r(0, 0, 0, 0);
+	LRect r(0, 0, 0, 0);
 	if (Css)
 	{
 		GCss::Len border = Css->Border();
@@ -171,27 +171,27 @@ GRect GCssTools::GetBorder(GRect &box, GRect *def)
 	return r;
 }
 
-GRect GCssTools::ApplyBorder(GRect &in)
+LRect GCssTools::ApplyBorder(LRect &in)
 {
 	if (!Css)
 		return in;
 
 	// Insert by the padding
-	GRect b = GetBorder(in);
-	return GRect(in.x1 + b.x1,
+	LRect b = GetBorder(in);
+	return LRect(in.x1 + b.x1,
 				 in.y1 + b.y1,
 				 in.x2 - b.x2,
 				 in.y2 - b.y2);
 }
 
-GRect GCssTools::ApplyPadding(GRect &in)
+LRect GCssTools::ApplyPadding(LRect &in)
 {
 	if (!Css)
 		return in;
 
 	// Insert by the padding
-	GRect pad = GetPadding(in);
-	return GRect(in.x1 + pad.x1,
+	LRect pad = GetPadding(in);
+	return LRect(in.x1 + pad.x1,
 				 in.y1 + pad.y1,
 				 in.x2 - pad.x2,
 				 in.y2 - pad.y2);
@@ -221,9 +221,9 @@ bool GCssTools::SetLineStyle(GSurface *pDC, GCss::BorderDef &b)
 	return true;
 }
 
-GRect GCssTools::PaintBorder(GSurface *pDC, GRect &in)
+LRect GCssTools::PaintBorder(GSurface *pDC, LRect &in)
 {
-	GRect Content = in;
+	LRect Content = in;
 	if (!Css)
 		return Content;
 
@@ -327,14 +327,14 @@ GRect GCssTools::PaintBorder(GSurface *pDC, GRect &in)
 	return Content;
 }
 
-GRect GCssTools::PaintPadding(GSurface *pDC, GRect &in)
+LRect GCssTools::PaintPadding(GSurface *pDC, LRect &in)
 {
-	GRect Content = in;
+	LRect Content = in;
 	if (!Css)
 		return Content;
 
 	// Insert by the padding
-	GRect r = ApplyPadding(Content);
+	LRect r = ApplyPadding(Content);
 	if (r != Content)
 	{
 		// Draw the padding in the background colour
@@ -361,7 +361,7 @@ GSurface *GCssTools::GetCachedImage(const char *Uri)
 	return Cache.Get(Uri);
 }
 
-bool GCssTools::Tile(GSurface *pDC, GRect in, GSurface *Img, int Ox, int Oy)
+bool GCssTools::Tile(GSurface *pDC, LRect in, GSurface *Img, int Ox, int Oy)
 {
 	if (!pDC || !Img)
 		return false;
@@ -394,7 +394,7 @@ GSurface *GCssTools::GetBackImage()
 	return BackImg;
 }
 
-void GCssTools::PaintContent(GSurface *pDC, GRect &in, const char *utf8, GSurface *img)
+void GCssTools::PaintContent(GSurface *pDC, LRect &in, const char *utf8, GSurface *img)
 {
 	bool BackgroundDrawn = false;
 	auto BkImg = GetBackImage();

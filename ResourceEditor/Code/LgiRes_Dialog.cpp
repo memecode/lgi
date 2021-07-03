@@ -119,7 +119,7 @@ public:
 		Children.Insert(Up = new GButton(IDC_UP, Lst->GetPos().x2 + 10, Cancel->GetPos().y2 + 15, 60, 20, "Up"));
 		Children.Insert(Down = new GButton(IDC_DOWN, Lst->GetPos().x2 + 10, Up->GetPos().y2 + 5, 60, 20, "Down"));
 
-		GRect r(0, 0, Ok->GetPos().x2 + 17, Lst->GetPos().y2 + 40);
+		LRect r(0, 0, Ok->GetPos().x2 + 17, Lst->GetPos().y2 + 40);
 		SetPos(r);
 		MoveToCenter();
 
@@ -204,7 +204,7 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////
-void DrawGoobers(GSurface *pDC, GRect &r, GRect *Goobers, GColour c, int OverIdx)
+void DrawGoobers(GSurface *pDC, LRect &r, LRect *Goobers, GColour c, int OverIdx)
 {
 	int Mx = (r.x2 + r.x1) / 2 - (GOOBER_SIZE / 2);
 	int My = (r.y2 + r.y1) / 2 - (GOOBER_SIZE / 2);
@@ -358,17 +358,17 @@ void ResDialogCtrl::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 	}
 }
 
-GRect ResDialogCtrl::GetMinSize()
+LRect ResDialogCtrl::GetMinSize()
 {
-	GRect m(0, 0, GRID_X-1, GRID_Y-1);
+	LRect m(0, 0, GRID_X-1, GRID_Y-1);
 
 	if (IsContainer())
 	{
-		GRect cli = View()->GetClient(false);
+		LRect cli = View()->GetClient(false);
 
 		for (GViewI *c: View()->IterateViews())
 		{
-			GRect cpos = c->GetPos();
+			LRect cpos = c->GetPos();
 			cpos.Offset(cli.x1, cli.y1);
 			m.Union(&cpos);
 		}
@@ -377,9 +377,9 @@ GRect ResDialogCtrl::GetMinSize()
 	return m;
 }
 
-bool ResDialogCtrl::SetPos(GRect &p, bool Repaint)
+bool ResDialogCtrl::SetPos(LRect &p, bool Repaint)
 {
-	GRect m = GetMinSize();
+	LRect m = GetMinSize();
 	if (m.X() > p.X()) p.x2 = p.x1 + m.X() - 1;
 	if (m.Y() > p.Y()) p.y2 = p.y1 + m.Y() - 1;
 
@@ -406,7 +406,7 @@ bool ResDialogCtrl::SetPos(GRect &p, bool Repaint)
 		// tell everyone else about the change
 		OnFieldChange();
 
-		GRect r(0, 0, p.X()-1, p.Y()-1);
+		LRect r(0, 0, p.X()-1, p.Y()-1);
 		r.Size(-GOOBER_BORDER, -GOOBER_BORDER);
 		View()->Invalidate(&r, false, true);
 		
@@ -414,7 +414,7 @@ bool ResDialogCtrl::SetPos(GRect &p, bool Repaint)
 		ResDialogCtrl *Par = ParentCtrl();
 		if (Par)
 		{
-			GRect t = Par->View()->GetPos();
+			LRect t = Par->View()->GetPos();
 			Par->ResDialogCtrl::SetPos(t, true);
 		}
 		
@@ -473,20 +473,20 @@ void ResDialogCtrl::TabString(char *Str)
 	Str[TabDepth] = 0;
 }
 
-GRect ResDialogCtrl::AbsPos()
+LRect ResDialogCtrl::AbsPos()
 {
 	GViewI *w = View();
-	GRect r = w->GetPos();
+	LRect r = w->GetPos();
 	r.Offset(-r.x1, -r.y1);
 
 	for (; w && w != Dlg; w = w->GetParent())
 	{
-		GRect pos = w->GetPos();
+		LRect pos = w->GetPos();
 		if (w->GetParent())
 		{
 			// GView *Ctrl = w->GetParent()->GetGView();
 
-			GRect client = w->GetParent()->GetClient(false);
+			LRect client = w->GetParent()->GetClient(false);
 			r.Offset(pos.x1 + client.x1, pos.y1 + client.y1);
 		}
 		else
@@ -557,7 +557,7 @@ bool ResDialogCtrl::Serialize(FieldTree &Fields)
 		GetStr()->Serialize(Fields);
 	}
 
-	GRect r = View()->GetPos(), Old = View()->GetPos();
+	LRect r = View()->GetPos(), Old = View()->GetPos();
 	bool e = true;
 
 	if (Fields.GetMode() == FieldTree::ObjToUi ||
@@ -607,7 +607,7 @@ void ResDialogCtrl::PasteText()
 	}
 }
 
-bool ResDialogCtrl::AttachCtrl(ResDialogCtrl *Ctrl, GRect *r)
+bool ResDialogCtrl::AttachCtrl(ResDialogCtrl *Ctrl, LRect *r)
 {
 	bool Status = false;
 	if (Ctrl)
@@ -638,7 +638,7 @@ void ResDialogCtrl::OnPaint(GSurface *pDC)
 {
 	if (DragCtrl >= 0)
 	{
-		GRect r = DragRgn;
+		LRect r = DragRgn;
 		r.Normal();
 		pDC->Colour(L_FOCUS_SEL_BACK);
 		pDC->Box(&r);
@@ -654,7 +654,7 @@ GMouse ResDialogCtrl::MapToDialog(GMouse m)
 	for (GViewI *i = View(); i && i != (GViewI*)Dlg; i = Parent)
 	{
 		Parent = i->GetParent();
-		GRect Pos = i->GetPos(), Cli = i->GetClient(false);
+		LRect Pos = i->GetPos(), Cli = i->GetClient(false);
 
 		#if DEBUG_OVERLAY
 		LgiTrace("%s %i,%i + %i,%i + %i,%i = %i,%i\n",
@@ -690,7 +690,7 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 				#endif
 
 				bool Processed = false;
-				GRect c = View()->GetClient();
+				LRect c = View()->GetClient();
 				bool ClickedThis = c.Overlap(m.x, m.y);
 
 				// Convert co-ords from out own local space to be relative to 'Dlg'
@@ -882,7 +882,7 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 		
 		if (SelectMode > SelNone)
 		{
-			GRect r = View()->GetPos();
+			LRect r = View()->GetPos();
 			if (SelectStart == r)
 			{
 				Dlg->OnSelect(this, SelectMode != SelAdd);
@@ -897,7 +897,7 @@ void ResDialogCtrl::OnMouseMove(GMouse &m)
 	// Drag a rubber band...
 	if (DragCtrl >= 0)
 	{
-		GRect Old = DragRgn;
+		LRect Old = DragRgn;
 
 		DragRgn.x1 = DragStart.x;
 		DragRgn.y1 = DragStart.y;
@@ -932,8 +932,8 @@ void ResDialogCtrl::OnMouseMove(GMouse &m)
 				Dlg->OnSelect(this);
 			}
 
-			GRect Old = View()->GetPos();
-			GRect New = Old;
+			LRect Old = View()->GetPos();
+			LRect New = Old;
 			New.Offset(	m.x - DragRgn.x1,
 						m.y - DragRgn.y1);
 
@@ -969,7 +969,7 @@ void ResDialogCtrl::ReadPos(char *Str)
 		char *s = NewStr(Str);
 		if (s)
 		{
-			GRect r = View()->GetPos();
+			LRect r = View()->GetPos();
 
 			char *p = ReadInt(s, r.x1);
 			if (p) p = ReadInt(p, r.y1);
@@ -993,9 +993,9 @@ CtrlDlg::CtrlDlg(ResDialog *dlg, GXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlDlg)
 
-GRect &CtrlDlg::GetClient(bool InClientSpace)
+LRect &CtrlDlg::GetClient(bool InClientSpace)
 {
-	static GRect r;
+	static LRect r;
 	
 	Client.Set(0, 0, View()->X()-1, View()->Y()-1);
 	Client.Size(2, 2);
@@ -1010,14 +1010,14 @@ GRect &CtrlDlg::GetClient(bool InClientSpace)
 	return r;
 }
 
-void CtrlDlg::OnNcPaint(GSurface *pDC, GRect &r)
+void CtrlDlg::OnNcPaint(GSurface *pDC, LRect &r)
 {
 	// Draw the border
 	LgiWideBorder(pDC, r, DefaultRaisedEdge);
 
 	// Draw the title bar
 	int TitleY = LgiApp->GetMetric(LGI_MET_DECOR_CAPTION);
-	GRect t = r;
+	LRect t = r;
 	t.y2 = t.y1 + TitleY - 1;
 	pDC->Colour(L_ACTIVE_TITLE);
 	pDC->Rectangle(&t);
@@ -1071,7 +1071,7 @@ void CtrlText::OnPaint(GSurface *pDC)
 
 	if (Text)
 	{
-		GRect Client = GetClient();
+		LRect Client = GetClient();
 
 		int y = 0;
 		char *Start = Text;
@@ -1104,7 +1104,7 @@ IMPL_DIALOG_CTRL(CtrlEditbox)
 
 void CtrlEditbox::OnPaint(GSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 	
 	// Draw the ctrl
@@ -1175,7 +1175,7 @@ IMPL_DIALOG_CTRL(CtrlCheckbox)
 void CtrlCheckbox::OnPaint(GSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
-	GRect r(0, 0, 12, 12);
+	LRect r(0, 0, 12, 12);
 	
 	// Draw the ctrl
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
@@ -1241,7 +1241,7 @@ bool CtrlButton::Serialize(FieldTree &Fields)
 void CtrlButton::OnPaint(GSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
-	GRect r = Client;
+	LRect r = Client;
 	char *Text = GetStr()->Get();
 	
 	// Draw the ctrl
@@ -1284,7 +1284,7 @@ IMPL_DIALOG_CTRL(CtrlGroup)
 void CtrlGroup::OnPaint(GSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
-	GRect r = Client;
+	LRect r = Client;
 	
 	// Draw the ctrl
 	r.y1 += 5;
@@ -1351,7 +1351,7 @@ IMPL_DIALOG_CTRL(CtrlRadio)
 void CtrlRadio::OnPaint(GSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
-	GRect r(0, 0, 12, 12);
+	LRect r(0, 0, 12, 12);
 	
 	// Draw the ctrl
 	if (Bmp)
@@ -1476,12 +1476,12 @@ void CtrlTabs::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 	ResDialogCtrl::EnumCtrls(Ctrls);
 }
 
-GRect CtrlTabs::GetMinSize()
+LRect CtrlTabs::GetMinSize()
 {
 	List<ResDialogCtrl> l;
 	ListChildren(l, false);
 
-	GRect r(0, 0, GRID_X-1, GRID_Y-1);
+	LRect r(0, 0, GRID_X-1, GRID_Y-1);
 
 	/*
 	// don't resize smaller than the tabs
@@ -1494,10 +1494,10 @@ GRect CtrlTabs::GetMinSize()
 
 	// don't resize smaller than any of the children
 	// on any of the tabs
-	GRect cli = GetClient(false);
+	LRect cli = GetClient(false);
 	for (auto c: l)
 	{
-		GRect cpos = c->View()->GetPos();
+		LRect cpos = c->View()->GetPos();
 		cpos.Offset(cli.x1, cli.y1);
 		r.Union(&cpos);
 	}
@@ -1538,7 +1538,7 @@ void CtrlTabs::OnPaint(GSurface *pDC)
 	Title.ZOff(X()-1, 17);
 	Client.ZOff(X()-1, Y()-1);
 	Client.y1 = Title.y2;
-	GRect r = Client;
+	LRect r = Client;
 	LgiWideBorder(pDC, r, DefaultRaisedEdge);
 
 	// Draw the tabs
@@ -1550,7 +1550,7 @@ void CtrlTabs::OnPaint(GSurface *pDC)
 		GDisplayString ds(SysFont, Str);
 
 		int Width = 12 + ds.X();
-		GRect t(x, Title.y1 + 2, x + Width - 1, Title.y2 - 1);
+		LRect t(x, Title.y1 + 2, x + Width - 1, Title.y2 - 1);
 
 		if (Current == i)
 		{
@@ -1785,7 +1785,7 @@ ListCol::ListCol(ResDialog *dlg, GXmlTag *load, char *s, int Width) :
 		GetStr()->Set(s);
 	}
 	
-	GRect r(0, 0, Width-1, 18);
+	LRect r(0, 0, Width-1, 18);
 	ResDialogCtrl::SetPos(r);
 }
 
@@ -1990,7 +1990,7 @@ void CtrlList::OnMouseMove(GMouse &m)
 			{
 				int Dx = (m.x - x - Title.x1);
 				
-				GRect r = Col->GetPos();
+				LRect r = Col->GetPos();
 				r.x2 = r.x1 + Dx;
 				Col->ResDialogCtrl::SetPos(r);
 				break;
@@ -2008,7 +2008,7 @@ void CtrlList::OnMouseMove(GMouse &m)
 
 void CtrlList::OnPaint(GSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 
 	// Draw the ctrl
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
@@ -2025,7 +2025,7 @@ void CtrlList::OnPaint(GSurface *pDC)
 	{
 		int Width = c->r().X();
 		c->r().Set(x, Title.y1, x + Width - 1, Title.y2);
-		GRect r = c->r();
+		LRect r = c->r();
 		r.x2 = MIN(r.x2, Title.x2);
 		x = r.x2 + 1;
 		if (r.Valid())
@@ -2043,7 +2043,7 @@ void CtrlList::OnPaint(GSurface *pDC)
 		}
 	}
 
-	GRect Client(x, Title.y1, Title.x2, Title.y2);
+	LRect Client(x, Title.y1, Title.x2, Title.y2);
 	if (Client.Valid())
 	{
 		LgiWideBorder(pDC, Client, DefaultRaisedEdge);
@@ -2065,16 +2065,16 @@ IMPL_DIALOG_CTRL(CtrlComboBox)
 
 void CtrlComboBox::OnPaint(GSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 	
 	// Draw the ctrl
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
 	
 	// Allocate space
-	GRect e = r;
+	LRect e = r;
 	e.x2 -= 15;
-	GRect d = r;
+	LRect d = r;
 	d.x1 = e.x2 + 1;
 
 	// Draw edit
@@ -2119,13 +2119,13 @@ IMPL_DIALOG_CTRL(CtrlScrollBar)
 
 void CtrlScrollBar::OnPaint(GSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 	
 	// Draw the ctrl
 	bool Vertical = r.Y() > r.X();
 	int ButSize = Vertical ? r.X() : r.Y();
-	GRect a, b, c;
+	LRect a, b, c;
 	if (Vertical)
 	{
 		a.Set(r.x1, r.y1, r.x2, r.y1 + ButSize);
@@ -2180,7 +2180,7 @@ IMPL_DIALOG_CTRL(CtrlTree)
 
 void CtrlTree::OnPaint(GSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
@@ -2205,7 +2205,7 @@ IMPL_DIALOG_CTRL(CtrlBitmap)
 
 void CtrlBitmap::OnPaint(GSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
@@ -2229,7 +2229,7 @@ IMPL_DIALOG_CTRL(CtrlProgress)
 
 void CtrlProgress::OnPaint(GSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
@@ -2265,7 +2265,7 @@ CtrlCustom::~CtrlCustom()
 
 void CtrlCustom::OnPaint(GSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 
 	LgiWideBorder(pDC, r, DefaultSunkenEdge);
@@ -2517,7 +2517,7 @@ void ResDialog::Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2)
 		ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>((ResDialogCtrl*)Obj);
 		if (Ctrl)
 		{
-			GRect r(x1, y1, x2, y2);
+			LRect r(x1, y1, x2, y2);
 			Ctrl->SetPos(r);
 		}
 	}
@@ -2535,7 +2535,7 @@ void ResDialog::Res_SetPos(ResObject *Obj, char *s)
 	}
 }
 
-GRect ResDialog::Res_GetPos(ResObject *Obj)
+LRect ResDialog::Res_GetPos(ResObject *Obj)
 {
 	if (Obj)
 	{
@@ -2546,7 +2546,7 @@ GRect ResDialog::Res_GetPos(ResObject *Obj)
 			return Ctrl->View()->GetPos();
 		}
 	}
-	return GRect(0, 0, 0, 0);
+	return LRect(0, 0, 0, 0);
 }
 
 int ResDialog::Res_GetStrRef(ResObject *Obj)
@@ -2675,7 +2675,7 @@ void ResDialog::Create(GXmlTag *load, SerialiseContext *Ctx)
 	CtrlDlg *Dlg = new CtrlDlg(this, load);
 	if (Dlg)
 	{
-		GRect r = DlgPos;
+		LRect r = DlgPos;
 		r.Offset(GOOBER_BORDER, GOOBER_BORDER);
 		Children.Insert(Dlg);
 		Dlg->SetParent(this);
@@ -3026,7 +3026,7 @@ void ResDialog::Paste()
 				ResDialogCtrl *c = *It;
 				if (c)
 				{
-					GRect All = c->View()->GetPos();
+					LRect All = c->View()->GetPos();
 					while ((c = *(++It)))
 					{
 						All.Union(&c->View()->GetPos());
@@ -3035,8 +3035,8 @@ void ResDialog::Paste()
 					// now paste in the controls
 					for (auto c: NewCtrls)
 					{
-						GRect *Preference = Container->GetPasteArea();
-						GRect p = c->View()->GetPos();
+						LRect *Preference = Container->GetPasteArea();
+						LRect p = c->View()->GetPos();
 						p.Offset(-All.x1, -All.y1);
 
 						p.Offset(Preference ? Preference->x1 : Container->Client.x1 + GRID_X,
@@ -3047,7 +3047,7 @@ void ResDialog::Paste()
 					}
 
 					// reset parent size to fit
-					GRect cp = Container->View()->GetPos();
+					LRect cp = Container->View()->GetPos();
 					Container->SetPos(cp, true);
 				}
 
@@ -3093,7 +3093,7 @@ void ResDialog::SnapPoint(LPoint *p, ResDialogCtrl *From)
 	}
 }
 
-void ResDialog::SnapRect(GRect *r, ResDialogCtrl *From)
+void ResDialog::SnapRect(LRect *r, ResDialogCtrl *From)
 {
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	if (r && Ctrl)
@@ -3141,12 +3141,12 @@ void ResDialog::MoveSelection(int Dx, int Dy)
 		return;
 
 	// find dimensions of group
-	GRect All = w->View()->GetPos();
+	LRect All = w->View()->GetPos();
 	for (; w; w = *(++It))
 		All.Union(&w->View()->GetPos());
 
 	// limit the move to the top-left corner of the parent's client
-	GRect ParentClient = Parent->Client;
+	LRect ParentClient = Parent->Client;
 	if (dynamic_cast<CtrlDlg*>(Parent))
 		ParentClient.ZOff(-ParentClient.x1, -ParentClient.y1);
 
@@ -3159,12 +3159,12 @@ void ResDialog::MoveSelection(int Dx, int Dy)
 	GRegion Update;
 	for (auto w: Selection)
 	{
-		GRect Old = w->View()->GetPos();
-		GRect New = Old;
+		LRect Old = w->View()->GetPos();
+		LRect New = Old;
 		New.Offset(Dx, Dy);
 
 		// optionally limit the move to the containers bounds
-		GRect *b = w->ParentCtrl()->GetChildArea(w);
+		LRect *b = w->ParentCtrl()->GetChildArea(w);
 		if (b)
 		{
 			if (New.x1 < b->x1)
@@ -3177,7 +3177,7 @@ void ResDialog::MoveSelection(int Dx, int Dy)
 				New.Offset(0, b->y2 - New.y2);
 		}
 
-		GRect Up = w->AbsPos();
+		LRect Up = w->AbsPos();
 		Up.Size(-GOOBER_BORDER, -GOOBER_BORDER);
 		Update.Union(&Up);
 
@@ -3244,7 +3244,7 @@ void ResDialog::SelectNone()
 	}
 }
 
-void ResDialog::SelectRect(ResDialogCtrl *Parent, GRect *r, bool ClearPrev)
+void ResDialog::SelectRect(ResDialogCtrl *Parent, LRect *r, bool ClearPrev)
 {
 	if (ClearPrev)
 	{
@@ -3496,7 +3496,7 @@ void ResDialog::DrawSelection(GSurface *pDC)
 	// Draw selection
 	for (auto Ctrl: Selection)
 	{
-		GRect r = Ctrl->AbsPos();
+		LRect r = Ctrl->AbsPos();
 		GColour s(255, 0, 0);
 		GColour c = GetParent()->Focus() ? s : s.Mix(LColour(L_MED), 0.4);
 		DrawGoobers(pDC, r, Ctrl->Goobers, c, Ctrl->OverGoober);
@@ -3509,7 +3509,7 @@ void ResDialog::DrawSelection(GSurface *pDC)
 #define USE_MEM_DC		0
 #endif
 
-void ResDialog::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
+void ResDialog::_Paint(GSurface *pDC, LPoint *Offset, LRect *Update)
 {
 	// Create temp DC if needed...
 	GAutoPtr<GSurface> Local;
@@ -3528,7 +3528,7 @@ void ResDialog::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
 	if (GetParent())
 	{
 		#ifndef WIN32
-		GRect p = GetPos();
+		LRect p = GetPos();
 		if (Offset) p.Offset(Offset);
 		pDC->SetClient(&p);
 		#endif
@@ -3733,8 +3733,8 @@ void ResDialog::OnMouseMove(GMouse &m)
 			*DragY = m.y - DragOy;
 
 		// DragRgn in real coords
-		GRect Old = DragCtrl->View()->GetPos();
-		GRect New = DragRgn;
+		LRect Old = DragCtrl->View()->GetPos();
+		LRect New = DragRgn;
 		
 		auto It = IterateViews();
 		if (DragCtrl->View() != It[0])
@@ -3750,15 +3750,15 @@ void ResDialog::OnMouseMove(GMouse &m)
 			// change everyone else by the same amount
 			for (auto c: Selection)
 			{
-				GRect OldPos = c->View()->GetPos();
-				GRect NewPos = OldPos;
+				LRect OldPos = c->View()->GetPos();
+				LRect NewPos = OldPos;
 
 				NewPos.x1 += New.x1 - Old.x1;
 				NewPos.y1 += New.y1 - Old.y1;
 				NewPos.x2 += New.x2 - Old.x2;
 				NewPos.y2 += New.y2 - Old.y2;
 
-				GRect Up = c->AbsPos();
+				LRect Up = c->AbsPos();
 				Up.Size(-GOOBER_BORDER, -GOOBER_BORDER);
 				Update.Union(&Up);
 				
@@ -4211,12 +4211,12 @@ void ResDialogUi::OnPaint(GSurface *pDC)
 	GRegion Client(0, 0, X()-1, Y()-1);
 	for (auto w: Children)
 	{
-		GRect r = w->GetPos();
+		LRect r = w->GetPos();
 		Client.Subtract(&r);
 	}
 
 	pDC->Colour(L_MED);
-	for (GRect *r = Client.First(); r; r = Client.Next())
+	for (LRect *r = Client.First(); r; r = Client.Next())
 	{
 		pDC->Rectangle(r);
 	}
@@ -4229,7 +4229,7 @@ void ResDialogUi::PourAll()
 
 	for (auto v: Children)
 	{
-		GRect OldPos = v->GetPos();
+		LRect OldPos = v->GetPos();
 		Update.Union(&OldPos);
 
 		if (v->Pour(Client))

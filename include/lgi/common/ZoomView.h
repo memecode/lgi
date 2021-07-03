@@ -24,8 +24,8 @@ public:
 	
 	#undef DefOption
 	
-	virtual void DrawBackground(GZoomView *View, GSurface *Dst, LPoint TileIdx, GRect *Where = NULL) = 0;
-	virtual void DrawForeground(GZoomView *View, GSurface *Dst, LPoint TileIdx, GRect *Where = NULL) = 0;
+	virtual void DrawBackground(GZoomView *View, GSurface *Dst, LPoint TileIdx, LRect *Where = NULL) = 0;
+	virtual void DrawForeground(GZoomView *View, GSurface *Dst, LPoint TileIdx, LRect *Where = NULL) = 0;
 	virtual void SetStatusText(const char *Msg, int Pane = 0) {}
 };
 
@@ -86,7 +86,7 @@ public:
 	// Subclass
 	void SetSurface(GSurface *dc, bool own);
 	GSurface *GetSurface();
-	void Update(GRect *Where = NULL);
+	void Update(LRect *Where = NULL);
 	void Reset();
 	int GetBlockSize();
 

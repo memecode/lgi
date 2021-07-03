@@ -111,7 +111,7 @@ protected:
 	#endif
 
 	void Layout(bool Debug = false);
-	void DrawWhiteSpace(GSurface *pDC, char Ch, GRect &r);
+	void DrawWhiteSpace(GSurface *pDC, char Ch, LRect &r);
 
 public:
 	/// Constructor
@@ -230,7 +230,7 @@ public:
 			/// The y coordinate of the top left corner of the output box
 			int y,
 			/// An optional clipping rectangle. If the font is not transparent this rectangle will be filled with the background colour.
-			GRect *r = NULL,
+			LRect *r = NULL,
 			/// Turn on debug logging
 			bool Debug = false
 		);
@@ -241,7 +241,7 @@ public:
 			/// The output device
 			GSurface *pDC,
 			/// An rectangle to center in. If the font is not transparent this rectangle will be filled with the background colour.
-			GRect *r
+			LRect *r
 		)
 		{
 			if (r)
@@ -294,7 +294,7 @@ public:
 			int fy,
 			/// [Optional] fractional clipping rectangle. If the font is not transparent 
 			/// this rectangle will be filled with the background colour.
-			GRect *frc = NULL,
+			LRect *frc = NULL,
 			/// [Optional] print debug info
 			bool Debug = false
 		);

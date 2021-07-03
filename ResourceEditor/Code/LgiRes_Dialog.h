@@ -77,18 +77,18 @@ protected:
 	void ReadPos(char *Str);
 	char *GetRefText();
 
-	GRect Goobers[8];
+	LRect Goobers[8];
 	int OverGoober;
 
 	ResDialog *Dlg;
-	GRect Title;
-	GRect Client;
+	LRect Title;
+	LRect Client;
 	int DragCtrl;
-	GRect DragRgn;
+	LRect DragRgn;
 	LPoint DragStart;
 	bool MoveCtrl;
 	DlgSelectMode SelectMode;
-	GRect SelectStart;
+	LRect SelectStart;
 
 	bool AcceptChildren;
 	bool Movable;
@@ -113,9 +113,9 @@ public:
 	void OnPaint(GSurface *pDC);
 	void OnMouseClick(GMouse &m);
 	void OnMouseMove(GMouse &m);
-	bool SetPos(GRect &p, bool Repaint = false);
+	bool SetPos(LRect &p, bool Repaint = false);
 	void StrFromRef(int Id);
-	GRect AbsPos();
+	LRect AbsPos();
 	bool GetFields(FieldTree &Fields);
 
 	// Copy/Paste translations only
@@ -123,12 +123,12 @@ public:
 	void PasteText();
 
 	virtual int GetType() = 0;
-	virtual GRect GetMinSize();
+	virtual LRect GetMinSize();
 	virtual bool Serialize(FieldTree &Fields);
 	virtual void ListChildren(List<ResDialogCtrl> &l, bool Deep = true);
-	virtual bool AttachCtrl(ResDialogCtrl *Ctrl, GRect *r = 0);
-	virtual GRect *GetChildArea(ResDialogCtrl *Ctrl) { return 0; }
-	virtual GRect *GetPasteArea() { return 0; }
+	virtual bool AttachCtrl(ResDialogCtrl *Ctrl, LRect *r = 0);
+	virtual LRect *GetChildArea(ResDialogCtrl *Ctrl) { return 0; }
+	virtual LRect *GetPasteArea() { return 0; }
 	virtual void EnumCtrls(List<ResDialogCtrl> &Ctrls);
 	virtual void ShowMe(ResDialogCtrl *Child) {}
 };
@@ -153,12 +153,12 @@ protected:
 
 	ResDialogUi *Ui;
 	List<ResDialogCtrl> Selection;
-	GRect DlgPos;
+	LRect DlgPos;
 	
 	int DragGoober;
 	int *DragX, *DragY;
 	int DragOx, DragOy;
-	GRect DragRgn;
+	LRect DragRgn;
 	ResDialogCtrl *DragCtrl;
 	void DrawSelection(GSurface *pDC);
 
@@ -188,7 +188,7 @@ public:
 	bool Res_SetStrRef(ResObject *Obj, int Id, ResReadCtx *Ctx) override;
 	void Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2) override;
 	void Res_SetPos(ResObject *Obj, char *s) override;
-	GRect Res_GetPos(ResObject *Obj) override;
+	LRect Res_GetPos(ResObject *Obj) override;
 	void Res_Attach(ResObject *Obj, ResObject *Parent) override;
 	bool Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep) override;
 	void Res_Append(ResObject *Obj, ResObject *Parent) override;
@@ -204,9 +204,9 @@ public:
 	bool IsSelected(ResDialogCtrl *Ctrl);
 	bool IsDraging();
 	void SnapPoint(LPoint *p, ResDialogCtrl *From);
-	void SnapRect(GRect *r, ResDialogCtrl *From);
+	void SnapRect(LRect *r, ResDialogCtrl *From);
 	void MoveSelection(int Dx, int Dy);
-	void SelectRect(ResDialogCtrl *Parent, GRect *r, bool ClearPrev = true);
+	void SelectRect(ResDialogCtrl *Parent, LRect *r, bool ClearPrev = true);
 	void SelectNone();
 	void SelectCtrl(ResDialogCtrl *c);
 	void CleanSymbols();
@@ -230,7 +230,7 @@ public:
 	int OnCommand(int Cmd, int Event, OsView hWnd) override;
 	void OnLanguageChange();
 
-	void _Paint(GSurface *pDC = NULL, LPoint *Offset = NULL, GRect *Update = NULL) override;
+	void _Paint(GSurface *pDC = NULL, LPoint *Offset = NULL, LRect *Update = NULL) override;
 	void OnPaint(GSurface *pDC) override;
 
 	bool Test(ErrorCollection *e) override;
@@ -271,10 +271,10 @@ public:
 	DECL_DIALOG_CTRL(UI_DIALOG)
 	const char *GetClass() { return "CtrlDlg"; }
 
-	GRect &GetClient(bool InClientSpace = true);
+	LRect &GetClient(bool InClientSpace = true);
 	
-	// void _Paint(GSurface *pDC = NULL, LPoint *Offset = NULL, GRect *Update = NULL);
-	void OnNcPaint(GSurface *pDC, GRect &r);
+	// void _Paint(GSurface *pDC = NULL, LPoint *Offset = NULL, LRect *Update = NULL);
+	void OnNcPaint(GSurface *pDC, LRect &r);
 };
 
 class CtrlTable : public ResDialogCtrl, public GDom, public GView
@@ -292,10 +292,10 @@ public:
 	bool Serialize(FieldTree &Fields);
 
 	void SetAttachCell(class ResTableCell *c);
-	bool AttachCtrl(ResDialogCtrl *Ctrl, GRect *r = 0);
+	bool AttachCtrl(ResDialogCtrl *Ctrl, LRect *r = 0);
 	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
-	GRect *GetPasteArea();
-	GRect *GetChildArea(ResDialogCtrl *Ctrl);
+	LRect *GetPasteArea();
+	LRect *GetChildArea(ResDialogCtrl *Ctrl);
 	void Layout();
 	void UnMerge(class ResTableCell *Cell);
 	void Fix();
@@ -407,7 +407,7 @@ public:
 	void ToTab();
 	void FromTab();
 
-	GRect GetMinSize();
+	LRect GetMinSize();
 	void EnumCtrls(List<ResDialogCtrl> &Ctrls);
 	void ShowMe(ResDialogCtrl *Child);
 };
@@ -415,7 +415,7 @@ public:
 class ListCol : public ResDialogCtrl, public GView
 {
 public:
-	GRect &r() { return GetPos(); }
+	LRect &r() { return GetPos(); }
 
 	DECL_DIALOG_CTRL(UI_COLUMN)
 	const char *GetClass() { return "ListCol"; }

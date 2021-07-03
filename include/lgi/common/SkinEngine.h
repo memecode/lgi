@@ -29,7 +29,7 @@ public:
 	GSurface *pScreen;				// Output surface
 	GArray<GDisplayString*> *aText;	// Array of display strings for the view
 	GDisplayString **ptrText;		// Ptr to ptr for display string
-	GRect Rect;						// Region to paint (if relevant)
+	LRect Rect;						// Region to paint (if relevant)
 	bool MouseOver;					// TRUE if the mouse is over the view
 	int64 Value;					// Value of the control if available
 	bool Enabled;					// TRUE if the control is enabled
@@ -91,7 +91,7 @@ public:
 	}
 };
 
-typedef void (*ProcColumnPaint)(void *UserData, GSurface *pDC, GRect &r, bool FillBackground);
+typedef void (*ProcColumnPaint)(void *UserData, GSurface *pDC, LRect &r, bool FillBackground);
 
 // Engine class
 class GSkinEngine
@@ -140,7 +140,7 @@ public:
 	virtual void FillPath(class GPath *Path, GSurface *pDC, GColour Back, bool Down, bool Enabled = true) {}
 
 	// Draws a button
-	virtual void DrawBtn(GSurface *pDC, GRect &r, GColour Back, bool Down, bool Enabled, bool Default = false) = 0;
+	virtual void DrawBtn(GSurface *pDC, LRect &r, GColour Back, bool Down, bool Enabled, bool Default = false) = 0;
 
 	///////////////////////////////////////////////////////////////////////////////
 	// Add new features down here with an associated feature flag defined above. //

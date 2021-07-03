@@ -106,7 +106,7 @@ public:
 		PropBorderRadius,
 		Prop_CellPadding, // not real CSS, but used by GHtml2 to store 'cellpadding'
 
-		// GRect based props
+		// LRect based props
 		PropClip = TypeGRect<<8,
 		PropXSubRect,
 
@@ -1176,8 +1176,8 @@ public:
 	Accessor(_CellPadding, Len, Len(), PropNull); // 'cellpadding' (not CSS)
 
 	Accessor(Overflow, OverflowType, OverflowInherit, PropNull);
-	Accessor(Clip, GRect, GRect(0, 0, -1, -1), PropNull);
-	Accessor(XSubRect, GRect, GRect(0, 0, -1, -1), PropNull);
+	Accessor(Clip, LRect, LRect(0, 0, -1, -1), PropNull);
+	Accessor(XSubRect, LRect, LRect(0, 0, -1, -1), PropNull);
 	Accessor(Visibility, VisibilityType, VisibilityInherit, PropNull);
 	Accessor(ListStyleType, ListStyleTypes, ListInherit, PropNull);
 

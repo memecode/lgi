@@ -189,7 +189,7 @@ public:
 	static GImageList *BtnIcons, *TreeIcons;
 	static char *InitPath;
 	static bool InitShowHiddenFiles;
-	static GRect InitSize;
+	static LRect InitSize;
 
 	GFileSelectPrivate(GFileSelect *select)
 	{
@@ -249,7 +249,7 @@ GImageList *GFileSelectPrivate::BtnIcons = NULL;
 GImageList *GFileSelectPrivate::TreeIcons = NULL;
 char *GFileSelectPrivate::InitPath = 0;
 bool GFileSelectPrivate::InitShowHiddenFiles = false;
-GRect GFileSelectPrivate::InitSize(0, 0, 600, 500);
+LRect GFileSelectPrivate::InitSize(0, 0, 600, 500);
 
 //////////////////////////////////////////////////////////////////////////
 // This class implements the UI for the selector.
@@ -296,7 +296,7 @@ public:
 		Icons = icons;
 		Icon = icon;
 		SetId(Id);
-		GRect r(x, y, x+cx, y+cy);
+		LRect r(x, y, x+cx, y+cy);
 		SetPos(r);
 		Down = false;
 		SetTabStop(true);
@@ -304,7 +304,7 @@ public:
 
 	void OnPaint(GSurface *pDC)
 	{
-		GRect c = GetClient();
+		LRect c = GetClient();
 		GColour Background(L_MED);
 		c.Offset(-c.x1, -c.y1);
 		LgiWideBorder(pDC, c, Down ? DefaultSunkenEdge : DefaultRaisedEdge);
@@ -442,7 +442,7 @@ enum FolderCtrlMessages
 class FolderCtrlEdit : public GEdit
 {
 public:
-	FolderCtrlEdit(int id, GRect c) :
+	FolderCtrlEdit(int id, LRect c) :
 		GEdit(id, c.x1, c.y1, c.X()-1, c.Y()-1)
 	{
 	}
@@ -460,8 +460,8 @@ class FolderCtrl : public GView
 	struct Part
 	{
 		GAutoPtr<GDisplayString> ds;
-		GRect Arrow;
-		GRect Text;
+		LRect Arrow;
+		LRect Text;
 	};
 	
 	GEdit *e;
@@ -563,7 +563,7 @@ public:
 	
 	void OnPaint(GSurface *pDC)
 	{
-		GRect c = GetClient();
+		LRect c = GetClient();
 		LgiThinBorder(pDC, c, EdgeWin7Sunken);
 		
 		GFont *f = GetFont();
@@ -608,7 +608,7 @@ public:
 		{
 			// Layout and draw arrow for the "root folder"
 			f->Colour(GColour(192,192,192), L_WORKSPACE);
-			GRect a;
+			LRect a;
 			a.ZOff(Arrow.X()+1, c.Y()-1);
 			a.Offset(c.x1, c.y1);
 			Arrow.DrawCenter(pDC, &a);
@@ -660,7 +660,7 @@ public:
 				else if (!e)
 				{
 					// In empty space
-					GRect c = GetClient();
+					LRect c = GetClient();
 					e = new FolderCtrlEdit(GetId()+1, c);
 					if (e)
 					{
@@ -775,8 +775,8 @@ public:
 class GFileSelectDlg :
 	public GDialog
 {
-	GRect OldPos;
-	GRect MinSize;
+	LRect OldPos;
+	LRect MinSize;
 	GArray<GString> Links;
 	GArray<GFolderItem*> Hidden;
 	
@@ -1458,7 +1458,7 @@ public:
 	GFileSystemPopup(GView *owner, GFileSelectDlg *dlg, int x) : GPopup(owner)
 	{
 		Dlg = dlg;
-		GRect r(0, 0, x, 150);
+		LRect r(0, 0, x, 150);
 		SetPos(r);
 		Children.Insert(Tree = new GTree(IDC_TREE, 1, 1, X()-3, Y()-3));
 		if (Tree)
@@ -1491,7 +1491,7 @@ public:
 	void OnPaint(GSurface *pDC)
 	{
 		// Draw border
-		GRect c = GetClient();
+		LRect c = GetClient();
 		c.Offset(-c.x1, -c.y1);
 		pDC->Colour(L_BLACK);
 		pDC->Box(&c);

@@ -83,7 +83,7 @@ private:
 	#endif
 
 
-	GRect				Pos;
+	LRect				Pos;
 	int					_InLock;
 
 protected:
@@ -147,7 +147,7 @@ protected:
 		#if LGI_COCOA
 		public:
 			LPoint Flip(LPoint p);
-			GRect Flip(GRect p);
+			LRect Flip(LRect p);
 			virtual void OnDealloc();
 	
 		#elif LGI_CARBON
@@ -174,13 +174,13 @@ protected:
 	// Complex Region searches
 	
 	/// Finds the largest rectangle in the region
-	GRect *FindLargest(GRegion &r);
+	LRect *FindLargest(GRegion &r);
 
 	/// Finds the smallest rectangle that would fit a window 'Sx' by 'Sy'
-	GRect *FindSmallestFit(GRegion &r, int Sx, int Sy);
+	LRect *FindSmallestFit(GRegion &r, int Sx, int Sy);
 
 	/// Finds the largest rectangle on the  specified
-	GRect *FindLargestEdge
+	LRect *FindLargestEdge
 	(
 		/// The region to search
 		GRegion &r,
@@ -196,7 +196,7 @@ protected:
 	
 	virtual bool OnViewMouse(GView *v, GMouse &m) override { return true; }
 	virtual bool OnViewKey(GView *v, GKey &k) override { return false; }
-	virtual void OnNcPaint(GSurface *pDC, GRect &r);
+	virtual void OnNcPaint(GSurface *pDC, LRect &r);
 
 	/// List of children views.
 	friend class GViewIter;
@@ -205,7 +205,7 @@ protected:
 #if defined(LGI_SDL) || defined(LGI_COCOA)
 public:
 #endif
-	virtual void	_Paint(GSurface *pDC = NULL, LPoint *Offset = NULL, GRect *Update = NULL);
+	virtual void	_Paint(GSurface *pDC = NULL, LPoint *Offset = NULL, LRect *Update = NULL);
 
 public:
 	/// \brief Creates a view/window.
@@ -383,7 +383,7 @@ public:
 	void Raised(bool i) override;
 
 	/// Draws an OS themed border
-	void DrawThemeBorder(GSurface *pDC, GRect &r);
+	void DrawThemeBorder(GSurface *pDC, LRect &r);
 
 	/// \brief true if the control is currently executing in the GUI thread
 	///
@@ -447,11 +447,11 @@ public:
 	LgiCursor GetCursor(int x, int y) override;
 	
 	/// \brief Get the position of the view relitive to it's parent.
-	virtual GRect &GetPos() override { return Pos; }
+	virtual LRect &GetPos() override { return Pos; }
 	/// Get the client region of the window relitive to itself (ie always 0,0-x,y)
-	virtual GRect &GetClient(bool InClientSpace = true) override;
+	virtual LRect &GetClient(bool InClientSpace = true) override;
 	/// Set the position of the view in terms of it's parent
-	virtual bool SetPos(GRect &p, bool Repaint = false) override;
+	virtual bool SetPos(LRect &p, bool Repaint = false) override;
 	/// Gets the width of the view in pixels
 	int X() override { return Pos.X(); }
 	/// Gets the height of the view in pixels.
@@ -555,7 +555,7 @@ public:
 	bool Invalidate
 	(
 		/// The rectangle of the view to repaint, or NULL for the entire view
-		GRect *r = NULL,
+		LRect *r = NULL,
 		/// true if you want to wait for the update to happen
 		bool Repaint = false,
 		/// false to update in client coordinates, true to update the non client region
@@ -719,7 +719,7 @@ class LgiClass GViewFactory
 		/// The name of the class to create
 		const char *Class,
 		/// The initial position of the view
-		GRect *Pos,
+		LRect *Pos,
 		/// The initial text of the view
 		const char *Text
 	) = 0;
@@ -729,13 +729,13 @@ public:
 	virtual ~GViewFactory();
 
 	/// Create a view by name.
-	static GView *Create(const char *Class, GRect *Pos = 0, const char *Text = 0);
+	static GView *Create(const char *Class, LRect *Pos = 0, const char *Text = 0);
 };
 
 #define DeclFactory(CLS) \
 	class CLS ## Factory : public GViewFactory \
 	{ \
-		GView *NewView(const char *Name, GRect *Pos, const char *Text) \
+		GView *NewView(const char *Name, LRect *Pos, const char *Text) \
 		{ \
 			if (!_stricmp(Name, #CLS)) return new CLS; \
 			return NULL; \
@@ -745,7 +745,7 @@ public:
 #define DeclFactoryParam1(CLS, Param1) \
 	class CLS ## Factory : public GViewFactory \
 	{ \
-		GView *NewView(const char *Name, GRect *Pos, const char *Text) \
+		GView *NewView(const char *Name, LRect *Pos, const char *Text) \
 		{ \
 			if (!_stricmp(Name, #CLS)) return new CLS(Param1); \
 			return NULL; \

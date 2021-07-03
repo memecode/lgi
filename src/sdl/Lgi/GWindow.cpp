@@ -504,7 +504,7 @@ char *GWindow::Name()
 
 struct CallbackParams
 {
-	GRect Menu;
+	LRect Menu;
 	int Depth;
 	
 	CallbackParams()
@@ -514,9 +514,9 @@ struct CallbackParams
 	}
 };
 
-GRect &GWindow::GetClient(bool ClientSpace)
+LRect &GWindow::GetClient(bool ClientSpace)
 {
-	static GRect r;
+	static LRect r;
 	r = GView::GetClient(ClientSpace);
 	if (Wnd)
 	{
@@ -534,7 +534,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 		::GVariant v;
 		if (Store->GetValue(FieldName, v) && v.Str())
 		{
-			GRect Position(0, 0, -1, -1);
+			LRect Position(0, 0, -1, -1);
 			GWindowZoom State = GZoomNormal;
 
 // printf("SerializeState load %s\n", v.Str());
@@ -581,7 +581,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 	return true;
 }
 
-GRect &GWindow::GetPos()
+LRect &GWindow::GetPos()
 {
 	if (Wnd && _View)
 	{
@@ -610,7 +610,7 @@ GRect &GWindow::GetPos()
 	return Pos;
 }
 
-bool GWindow::SetPos(GRect &p, bool Repaint)
+bool GWindow::SetPos(LRect &p, bool Repaint)
 {
 	Pos = p;
 	if (Wnd)
@@ -657,7 +657,7 @@ void GWindow::OnPosChange()
 
 void GWindow::PourAll()
 {
-	GRect Cli = GetClient();
+	LRect Cli = GetClient();
 	if (!Cli.Valid())
 		return;
 	GRegion Client(Cli);
@@ -676,7 +676,7 @@ void GWindow::PourAll()
 			bool IsMenu = MenuView == v;
 			if (!IsMenu && IsTool(v))
 			{
-				GRect OldPos = v->GetPos();
+				LRect OldPos = v->GetPos();
 				Update.Union(&OldPos);
 				
 				if (HasTools)
@@ -716,7 +716,7 @@ void GWindow::PourAll()
 							v->Invalidate();
 						}
 
-						GRect Bar(v->GetPos());
+						LRect Bar(v->GetPos());
 						Bar.x2 = GetClient().x2;
 
 						Tools = Bar;
@@ -735,12 +735,12 @@ void GWindow::PourAll()
 		bool IsMenu = MenuView == v;
 		if (!IsMenu && !IsTool(v))
 		{
-			GRect OldPos = v->GetPos();
+			LRect OldPos = v->GetPos();
 			Update.Union(&OldPos);
 
 			if (v->Pour(Client))
 			{
-				GRect p = v->GetPos();
+				LRect p = v->GetPos();
 
 				if (!v->Visible())
 				{

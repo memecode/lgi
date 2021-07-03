@@ -17,7 +17,7 @@ public:
 		/// The text to display
 		const char *Name,
 		/// The region the mouse has to be in to trigger the tip
-		GRect &Pos
+		LRect &Pos
 	);
 	
 	/// Delete the tip.

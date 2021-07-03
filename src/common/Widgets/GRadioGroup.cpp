@@ -71,7 +71,7 @@ GRadioGroup::GRadioGroup(int id, int x, int y, int cx, int cy, const char *name,
 {
 	d = new GRadioGroupPrivate(this);
 	Name(name);
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	SetId(id);
 	d->Val = Init;
@@ -155,7 +155,7 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
 			{
 				if (w->OnLayout(*c))
 				{
-					GRect r(Cx, Cy, Cx + c->Width.Max - 1, Cy + c->Height.Max - 1);
+					LRect r(Cx, Cy, Cx + c->Width.Max - 1, Cy + c->Height.Max - 1);
 					w->SetPos(r);
 
 					if (Horiz)
@@ -172,7 +172,7 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
 			else
 			{
 				// Non layout control... just use existing size
-				GRect r = w->GetPos();
+				LRect r = w->GetPos();
 				r.Offset(Cx - r.x1, Cy - r.y1);
 				w->SetPos(r);
 
@@ -339,11 +339,11 @@ void GRadioGroup::OnPaint(GSurface *pDC)
 		}
 
 		int y = d->GetMin().y;
-		GRect b(0, y/2, X()-1, Y()-1);
+		LRect b(0, y/2, X()-1, Y()-1);
 		LgiWideBorder(pDC, b, EdgeXpChisel);
 
 		LPoint TxtPt(6, 0);
-		GRect TxtRc = d->GetBounds();
+		LRect TxtRc = d->GetBounds();
 		TxtRc.Offset(TxtPt.x, TxtPt.y);		
 		d->Paint(pDC, TxtPt, Back, TxtRc, Enabled(), false);
 	}
@@ -368,7 +368,7 @@ public:
 	GRadioButton *Ctrl;
 	bool Val;
 	bool Over;
-	GRect Btn;
+	LRect Btn;
 	GColour BackCol;
 
 	GRadioButtonPrivate(GRadioButton *c) :
@@ -386,7 +386,7 @@ public:
 	{
 	}
 
-	GRect GetBtn()
+	LRect GetBtn()
 	{
 		auto CtrlHt = Ctrl->Y();
 		auto Fnt = Ctrl->GetFont();
@@ -444,7 +444,7 @@ GRadioButton::GRadioButton(int id, int x, int y, int cx, int cy, const char *nam
 	if (cx < 0) cx = d->GetBounds().X() + PadXPx;
 	if (cy < 0) cy = d->GetBounds().Y() + PadYPx;
 
-	GRect r(x, y, x+cx, y+cy);
+	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
 	SetId(id);
 	d->Val = false;
@@ -613,7 +613,7 @@ void GRadioButton::OnMouseClick(GMouse &m)
 		Capture(m.Down());
 		d->Over = m.Down();
 	
-		GRect r(0, 0, X()-1, Y()-1);
+		LRect r(0, 0, X()-1, Y()-1);
 		if (!m.Down() &&
 			r.Overlap(m.x, m.y) &&
 			WasCapturing)
@@ -732,29 +732,29 @@ void GRadioButton::OnPaint(GSurface *pDC)
 	}
 	else
 	{
-		GRect r(0, 0, X()-1, Y()-1);
-		GRect c(0, 0, 12, 12);
+		LRect r(0, 0, X()-1, Y()-1);
+		LRect c(0, 0, 12, 12);
 		// GColour Fore = StyleColour(GCss::PropColor, LC_TEXT, 4);
 		GColour Back = StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
 		
 		// bool e = Enabled();
-		GRect fill(c.x2 + 1, r.y1, r.x2, r.x2);
+		LRect fill(c.x2 + 1, r.y1, r.x2, r.x2);
 		LPoint TxtPt(c.x2 + 11, (r.Y() - d->GetBounds().Y()) >> 1);
 		d->Paint(pDC, TxtPt, Back, fill, Enabled(), false);
 		
 		#if defined LGI_CARBON
 
-		GRect cli = GetClient();
+		LRect cli = GetClient();
 		for (GViewI *v = this; v && !v->Handle(); v = v->GetParent())
 		{
-			GRect p = v->GetPos();
+			LRect p = v->GetPos();
 			cli.Offset(p.x1, p.y1);
 		}
 		
 		pDC->Colour(Back);
 		pDC->Rectangle(cli.x1, cli.y1, c.x2, cli.y2);
 		
-		GRect rc(c.x1, c.y1 + 4, c.x2 - 1, c.y2 - 1);
+		LRect rc(c.x1, c.y1 + 4, c.x2 - 1, c.y2 - 1);
 		HIRect Bounds = rc;
 		HIThemeButtonDrawInfo Info;
 		HIRect LabelRect;

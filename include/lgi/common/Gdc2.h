@@ -401,7 +401,7 @@ class LgiClass GSurface : public GRefCount, public GDom
 protected:
 	int				Flags;
 	int				PrevOp;
-	GRect			Clip;
+	LRect			Clip;
 	GColourSpace	ColourSpace;
 	GBmpMem			*pMem;
 	GSurface		*pAlphaDC;
@@ -450,8 +450,8 @@ public:
 
 	virtual OsBitmap GetBitmap();
 	virtual OsPainter Handle();
-	virtual void SetClient(GRect *c) {}
-	virtual bool GetClient(GRect *c) { return false; }
+	virtual void SetClient(LRect *c) {}
+	virtual bool GetClient(LRect *c) { return false; }
 
 	// Creation
 	enum SurfaceCreateFlags
@@ -480,10 +480,10 @@ public:
 	bool SetConstantAlpha(uint8_t Alpha);
 
 	// Create sub-images (that reference the memory of this object)
-	GSurface *SubImage(GRect r);
+	GSurface *SubImage(LRect r);
 	GSurface *SubImage(int x1, int y1, int x2, int y2)
 	{
-		GRect r(x1, y1, x2, y2);
+		LRect r(x1, y1, x2, y2);
 		return SubImage(r);
 	}
 
@@ -496,8 +496,8 @@ public:
 	virtual void Palette(GPalette *pPal, bool bOwnIt = true);
 
 	// Clip region
-	virtual GRect ClipRgn(GRect *Rgn);
-	virtual GRect ClipRgn();
+	virtual LRect ClipRgn(LRect *Rgn);
+	virtual LRect ClipRgn();
 
 	/// Gets the current colour
 	virtual COLOUR Colour() { return pApp->c; }
@@ -526,8 +526,8 @@ public:
 	virtual int X() { return (pMem) ? pMem->x : 0; }
 	/// Gets the height in pixels
 	virtual int Y() { return (pMem) ? pMem->y : 0; }
-	/// Gets the bounds of the image as a GRect
-	GRect Bounds() { return GRect(0, 0, X()-1, Y()-1); }
+	/// Gets the bounds of the image as a LRect
+	LRect Bounds() { return LRect(0, 0, X()-1, Y()-1); }
 	/// Gets the length of a scanline in bytes
 	virtual ssize_t GetRowStep() { return (pMem) ? pMem->Line : 0; }
 	/// Returns the horizontal resolution of the device
@@ -621,7 +621,7 @@ public:
 	virtual void Box
 	(
 		/// The rectangle, or NULL to stroke the edge of the entire surface
-		GRect *a = NULL
+		LRect *a = NULL
 	);
 	/// Fill a rectangle in the current colour
 	virtual void Rectangle(int x1, int y1, int x2, int y2);
@@ -629,7 +629,7 @@ public:
 	virtual void Rectangle
 	(
 		/// The rectangle, or NULL to fill the entire surface
-		GRect *a = NULL
+		LRect *a = NULL
 	);
 	/// Copy an image onto the surface
 	virtual void Blt
@@ -641,11 +641,11 @@ public:
 		/// The source surface
 		GSurface *Src,
 		/// The optional area of the source to use, if not specified the whole source is used
-		GRect *a = NULL
+		LRect *a = NULL
 	);
-	void Blt(int x, int y, GSurface *Src, GRect a) { Blt(x, y, Src, &a); }
+	void Blt(int x, int y, GSurface *Src, LRect a) { Blt(x, y, Src, &a); }
 	/// Not implemented
-	virtual void StretchBlt(GRect *d, GSurface *Src, GRect *s);
+	virtual void StretchBlt(LRect *d, GSurface *Src, LRect *s);
 
 	// Other
 
@@ -665,7 +665,7 @@ public:
 		/// Fill colour
 		COLOUR Border = 0,
 		/// The bounds of the filled area or NULL if you don't care
-		GRect *Bounds = NULL
+		LRect *Bounds = NULL
 	);
 	
 	/// Describes the image
@@ -740,7 +740,7 @@ public:
 	
 			GScreenDC(LWindow *wnd, void *Param = 0);
 			GScreenDC(GPrintDcParams *Params); // Used by GPrintDC
-			GRect GetPos();
+			LRect GetPos();
 			void PushState();
 			void PopState();
 	
@@ -749,13 +749,13 @@ public:
 		OsPainter Handle();
 		GView *GetView();
 		int GetFlags();
-		GRect *GetClient();
+		LRect *GetClient();
 
 	#endif
 
 	// Properties
-	bool GetClient(GRect *c);
-	void SetClient(GRect *c);
+	bool GetClient(LRect *c);
+	void SetClient(LRect *c);
 
 	int X();
 	int Y();
@@ -775,8 +775,8 @@ public:
 
 	void GetOrigin(int &x, int &y);
 	void SetOrigin(int x, int y);
-	GRect ClipRgn();
-	GRect ClipRgn(GRect *Rgn);
+	LRect ClipRgn();
+	LRect ClipRgn(LRect *Rgn);
 	COLOUR Colour();
 	COLOUR Colour(COLOUR c, int Bits = 0);
 	GColour Colour(GColour c);
@@ -798,14 +798,14 @@ public:
 	void Ellipse(double cx, double cy, double x, double y);
 	void FilledEllipse(double cx, double cy, double x, double y);
 	void Box(int x1, int y1, int x2, int y2);
-	void Box(GRect *a);
+	void Box(LRect *a);
 	void Rectangle(int x1, int y1, int x2, int y2);
-	void Rectangle(GRect *a = NULL);
-	void Blt(int x, int y, GSurface *Src, GRect *a = NULL);
-	void StretchBlt(GRect *d, GSurface *Src, GRect *s = NULL);
+	void Rectangle(LRect *a = NULL);
+	void Blt(int x, int y, GSurface *Src, LRect *a = NULL);
+	void StretchBlt(LRect *d, GSurface *Src, LRect *s = NULL);
 	void Polygon(int Points, LPoint *Data);
 	void Bezier(int Threshold, LPoint *Pt);
-	void FloodFill(int x, int y, int Mode, COLOUR Border = 0, GRect *Bounds = NULL);
+	void FloodFill(int x, int y, int Mode, COLOUR Border = 0, LRect *Bounds = NULL);
 	#endif
 };
 
@@ -814,18 +814,18 @@ public:
 class GBlitRegions
 {
 	// Raw image bounds
-	GRect SrcBounds;
-	GRect DstBounds;
+	LRect SrcBounds;
+	LRect DstBounds;
 	
 	// Unclipped blit regions
-	GRect SrcBlt;
-	GRect DstBlt;
+	LRect SrcBlt;
+	LRect DstBlt;
 
 public:
 	/// Clipped blit region in destination co-ords
-	GRect SrcClip;
+	LRect SrcClip;
 	/// Clipped blit region in source co-ords
-	GRect DstClip;
+	LRect DstClip;
 
 	/// Calculate the rectangles.
 	GBlitRegions
@@ -839,7 +839,7 @@ public:
 		/// Source surface
 		GSurface *Src,
 		/// [Optional] Crop the source surface first, else whole surface is blt
-		GRect *SrcRc = 0
+		LRect *SrcRc = 0
 	)
 	{
 		// Calc full image bounds
@@ -901,10 +901,10 @@ class CGImg
 {
 	class CGImgPriv *d;
 
-	void Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, GRect *r);
+	void Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, LRect *r);
 
 public:
-	CGImg(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, GRect *r, int Debug = 0);
+	CGImg(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, LRect *r, int Debug = 0);
 	CGImg(GSurface *pDC);
 	~CGImg();
 	
@@ -960,7 +960,7 @@ public:
 		
 	#else
 
-		GRect ClipRgn() { return Clip; }
+		LRect ClipRgn() { return Clip; }
 
 		#if defined(__GTK_H__)
 
@@ -971,7 +971,7 @@ public:
 
 			/// This returns a sub-image, caller is responsible to free via
 			/// calling cairo_surface_destroy
-			LCairoSurfaceT GetSubImage(GRect &r);
+			LCairoSurfaceT GetSubImage(LRect &r);
 			
 			GColourSpace GetCreateCs();
 			Gtk::GdkPixbuf *CreatePixBuf();
@@ -982,12 +982,12 @@ public:
 	
 			#if LGI_COCOA && defined(__OBJC__)
 			GMemDC(NSImage *img);
-			NSImage *NsImage(GRect *rc = NULL);
+			NSImage *NsImage(LRect *rc = NULL);
 			#endif
 	
 			#if !defined(LGI_SDL)
 				CGColorSpaceRef GetColourSpaceRef();
-				CGImg *GetImg(GRect *Sub = 0, int Debug = 0);
+				CGImg *GetImg(LRect *Sub = 0, int Debug = 0);
 			#endif
 		
 		#elif defined(LGI_SDL)
@@ -1001,9 +1001,9 @@ public:
 	#endif
 
 	// Set new clipping region
-	GRect ClipRgn(GRect *Rgn);
+	LRect ClipRgn(LRect *Rgn);
 
-	void SetClient(GRect *c);
+	void SetClient(LRect *c);
 
 	/// Locks the bits for access. GMemDC's start in the locked state.
 	bool Lock();
@@ -1022,8 +1022,8 @@ public:
 	bool SwapRedAndBlue();
 	
 	bool Create(int x, int y, GColourSpace Cs, int Flags = SurfaceCreateNone);
-	void Blt(int x, int y, GSurface *Src, GRect *a = NULL);
-	void StretchBlt(GRect *d, GSurface *Src, GRect *s = NULL);
+	void Blt(int x, int y, GSurface *Src, LRect *a = NULL);
+	void StretchBlt(LRect *d, GSurface *Src, LRect *s = NULL);
 
 	void HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b);
 	void VertLine(int x, int y1, int y2, COLOUR a, COLOUR b);
@@ -1065,8 +1065,8 @@ public:
 	int Op() { return GDC_SET; }
 	int Op(int Op, NativeInt Param = -1) { return GDC_SET; }
 
-	GRect ClipRgn(GRect *Rgn);
-	GRect ClipRgn();
+	LRect ClipRgn(LRect *Rgn);
+	LRect ClipRgn();
 	COLOUR Colour();
 	COLOUR Colour(COLOUR c, int Bits = 0);
 	GColour Colour(GColour c);
@@ -1085,11 +1085,11 @@ public:
 	void FilledEllipse(double cx, double cy, double x, double y);
 
 	void Box(int x1, int y1, int x2, int y2);
-	void Box(GRect *a = NULL);
+	void Box(LRect *a = NULL);
 	void Rectangle(int x1, int y1, int x2, int y2);
-	void Rectangle(GRect *a = NULL);
-	void Blt(int x, int y, GSurface *Src, GRect *a = NULL);
-	void StretchBlt(GRect *d, GSurface *Src, GRect *s);
+	void Rectangle(LRect *a = NULL);
+	void Blt(int x, int y, GSurface *Src, LRect *a = NULL);
+	void StretchBlt(LRect *d, GSurface *Src, LRect *s);
 
 	void Polygon(int Points, LPoint *Data);
 	void Bezier(int Threshold, LPoint *Pt);
@@ -1129,11 +1129,11 @@ class GDoubleBuffer
 	GSurface **In;
 	GSurface *Screen;
 	GMemDC Mem;
-	GRect Rgn;
+	LRect Rgn;
 	bool Valid;
 
 public:
-	GDoubleBuffer(GSurface *&pDC, GRect *Sub = NULL) : In(&pDC)
+	GDoubleBuffer(GSurface *&pDC, LRect *Sub = NULL) : In(&pDC)
 	{
 		Rgn = Sub ? *Sub : pDC->Bounds();
 		Screen = pDC;
@@ -1197,7 +1197,7 @@ public:
 	/// Returns the current screen height
 	int Y();
 	/// Returns the size of the screen as a rectangle.
-	GRect Bounds() { return GRect(0, 0, X()-1, Y()-1); }
+	LRect Bounds() { return LRect(0, 0, X()-1, Y()-1); }
 
 	GGlobalColour *GetGlobalColour();
 
@@ -1391,7 +1391,7 @@ struct GColourStop
 };
 
 /// Draws a horizontal or vertical gradient
-LgiFunc void LgiFillGradient(GSurface *pDC, GRect &r, bool Vert, GArray<GColourStop> &Stops);
+LgiFunc void LgiFillGradient(GSurface *pDC, LRect &r, bool Vert, GArray<GColourStop> &Stops);
 
 #ifdef WIN32
 /// Draws a windows HICON onto a surface at Dx, Dy
@@ -1429,7 +1429,7 @@ LgiFunc bool LgiFindBounds
 	GSurface *pDC,
 	/// [in/out] Starts off as the initial bounds to search.
 	/// Returns the non-background area.
-	GRect *rc
+	LRect *rc
 );
 
 #if defined(LGI_SDL)

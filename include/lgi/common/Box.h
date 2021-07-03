@@ -14,7 +14,7 @@ protected:
 public:
 	struct Spacer
 	{
-		GRect Pos; // Position on screen in view coords
+		LRect Pos; // Position on screen in view coords
 		GColour Colour; // Colour of the spacer
 		uint32_t SizePx; // Size in pixels
 	};

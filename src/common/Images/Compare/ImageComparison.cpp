@@ -425,7 +425,7 @@ public:
 		if (AName && BName &&
 			AView && BView && CView)
 		{
-			GRect c = GetClient();
+			LRect c = GetClient();
 			GRegion rgn;
 			rgn = c;
 			if (Status)
@@ -436,19 +436,19 @@ public:
 			}
 				
 			int width = (c.X() - 10) / 3;
-			GRect ar = c;
+			LRect ar = c;
 			ar.x2 = ar.x1 + width - 1;
-			GRect cr = c;
+			LRect cr = c;
 			cr.x1 = ar.x2 + 6;
 			cr.x2 = cr.x1 + width - 1;
-			GRect br = c;
+			LRect br = c;
 			br.x1 = br.x2 - width;
 
 			Pane[0]->SetWidth(cr.x1);
 			Pane[1]->SetWidth(br.x1 - cr.x1);
 			Pane[2]->SetWidth(cr.X());
 			
-			GRect name = ar;
+			LRect name = ar;
 			name.y2 = name.y1 + AName->Y() - 1;
 			AName->SetPos(name);
 			ar.y1 = name.y2 + 1;
@@ -861,13 +861,13 @@ struct ImageCompareDlgPriv : public GZoomViewCallback
 		tabs = NULL;
 	}
 
-	void DrawBackground(GZoomView *View, GSurface *Dst, LPoint Offset, GRect *Where)
+	void DrawBackground(GZoomView *View, GSurface *Dst, LPoint Offset, LRect *Where)
 	{
 		Dst->Colour(L_WORKSPACE, 24);
 		Dst->Rectangle(Where);
 	}
 	
-	void DrawForeground(GZoomView *View, GSurface *Dst, LPoint Offset, GRect *Where)
+	void DrawForeground(GZoomView *View, GSurface *Dst, LPoint Offset, LRect *Where)
 	{
 	}
 
@@ -880,7 +880,7 @@ ImageCompareDlg::ImageCompareDlg(GView *p, const char *OutPath)
 {
 	d = new ImageCompareDlgPriv();
 	SetParent(p);
-	GRect r(0, 0, 1200, 900);
+	LRect r(0, 0, 1200, 900);
 	SetPos(r);
 	MoveToCenter();
 	Name("Image Compare");

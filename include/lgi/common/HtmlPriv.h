@@ -81,7 +81,7 @@ public:
 	void Set(char *s);
 };
 
-class GFlowRect : public GRect
+class GFlowRect : public LRect
 {
 public:
 	GTag *Tag;
@@ -112,8 +112,8 @@ public:
 	~GArea();
 
 	void Empty() { DeleteObjects(); }
-	GRect Bounds();
-	GRect *TopRect(GRegion *c);
+	LRect Bounds();
+	LRect *TopRect(GRegion *c);
 	void FlowText(GTag *Tag, GFlowRegion *c, GFont *Font, int LineHeight, char16 *Text, GCss::LengthType Align);
 };
 
@@ -129,7 +129,7 @@ struct GHtmlTableLayout
 	int AvailableX;
 	int CellSpacing;
 	int BorderX1, BorderX2;
-	GRect TableBorder, TablePadding; // in Px
+	LRect TableBorder, TablePadding; // in Px
 
 	// The col and row sizes
 	GArray<int> MinCol, MaxCol, MaxRow;
@@ -291,7 +291,7 @@ protected:
 	ssize_t NearestChar(GFlowRect *Fr, int x, int y);
 	GTag *HasOpenTag(char *t);
 	GTag *PrevTag();
-	GRect ChildBounds();
+	LRect ChildBounds();
 	bool GetWidthMetrics(GTag *Table, uint16 &Min, uint16 &Max);
 	void LayoutTable(GFlowRegion *f, uint16 Depth);
 	void BoundParents();
@@ -323,7 +323,7 @@ public:
 	LPoint Size;
 	GFont *Font;
 	int LineHeightCache;
-	GRect PadPx;
+	LRect PadPx;
 	
 	// Images
 	bool ImageResized;
@@ -339,8 +339,8 @@ public:
 	{
 		LPoint Pos;
 		LPoint Span;
-		GRect BorderPx;
-		GRect PaddingPx;
+		LRect BorderPx;
+		LRect PaddingPx;
 		uint16 MinContent, MaxContent;
 		GCss::LengthType XAlign;
 		GHtmlTableLayout *Cells;
@@ -416,7 +416,7 @@ public:
 		/// The background colour (transparent is OK)
 		GColour &Back,
 		/// [Optional] The size of the border painted
-		GRect *Px = NULL);
+		LRect *Px = NULL);
 	/// This fills 'rgn' with all the rectangles making up the inline tags region
 	void GetInlineRegion(GRegion &rgn, int ox = 0, int oy = 0);
 	void OnPaint(GSurface *pDC, bool &InSelection, uint16 Depth);
@@ -449,7 +449,7 @@ public:
 	LPoint AbsolutePos();
 	inline int AbsX() { return AbsolutePos().x; }
 	inline int AbsY() { return AbsolutePos().y; }
-	GRect GetRect(bool Client = true);
+	LRect GetRect(bool Client = true);
 	GCss::LengthType GetAlign(bool x);
 
 	// Tables

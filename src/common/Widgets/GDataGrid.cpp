@@ -132,7 +132,7 @@ class GDataGridCombo : public GCombo
 	GDataGridPriv *d;
 
 public:
-	GDataGridCombo(GDataGridPriv *priv, int id, GRect &rc) : GCombo(id, rc.x1, rc.y1, rc.X(), rc.Y(), 0)
+	GDataGridCombo(GDataGridPriv *priv, int id, LRect &rc) : GCombo(id, rc.x1, rc.y1, rc.X(), rc.Y(), 0)
 	{
 		d = priv;
 	}
@@ -206,10 +206,10 @@ void GDataGridPriv::UpdatePos()
 {
 	if (e && Cur)
 	{
-		GRect *r = Cur->GetPos(Col);
+		LRect *r = Cur->GetPos(Col);
 		if (r)
 		{
-			GRect rc = *r;
+			LRect rc = *r;
 
 			if (Flags[Col] & GDataGrid::GDG_INTEGER)
 			{
@@ -234,7 +234,7 @@ void GDataGridPriv::Invalidate()
 {
 	if (e)
 	{
-		GRect p = e->GetPos();
+		LRect p = e->GetPos();
 		p.Size(-CELL_EDGE, -CELL_EDGE);
 		This->Invalidate(&p);
 	}
@@ -293,12 +293,12 @@ void GDataGridPriv::Create(int NewCol)
 		int NewCtrl = Flags[Col] & GDataGrid::GDG_INTEGER;
 
 		const char *CurText = i->GetText(Col);
-		GRect *r = i->GetPos(Col);
+		LRect *r = i->GetPos(Col);
 		if (r)
 		{
 			GDataGridEdit *Edit = 0;
 			GCombo *Combo = 0;
-			GRect rc = r;
+			LRect rc = r;
 			
 			if (!e || (NewCtrl ^ OldCtrl))
 			{
@@ -536,7 +536,7 @@ void GDataGrid::OnPaint(GSurface *pDC)
 	if (d->e && !(d->Flags[d->Col] & GDG_INTEGER))
 	{
 		pDC->Colour(L_BLACK);
-		GRect p = d->e->GetPos();
+		LRect p = d->e->GetPos();
 		p.Size(-CELL_EDGE, -CELL_EDGE);
 		pDC->Box(&p);
 	}
@@ -677,7 +677,7 @@ bool GDataGrid::GetData(GArray<GDragData> &Data)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 class GDataGridFactory : public GViewFactory
 {
-	GView *NewView(const char *Class, GRect *Pos, const char *Text)
+	GView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (Class &&
 			stricmp(Class, "GDataGrid") == 0)

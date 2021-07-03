@@ -108,7 +108,7 @@ public:
 	BltTest()
 	{
 		Name("BltTest");
-		GRect r(0, 0, 1200, 1000);
+		LRect r(0, 0, 1200, 1000);
 		SetPos(r);
 		MoveToCenter();
 		
@@ -226,7 +226,7 @@ public:
 		Txt = 0;
 		Tbl = 0;
 
-		GRect r(0, 0, 1000, 800);
+		LRect r(0, 0, 1000, 800);
 		SetPos(r);
 		Name(AppName);
 		MoveToCenter();

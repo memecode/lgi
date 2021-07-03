@@ -42,7 +42,7 @@ public:
 	::GArray<HookInfo> Hooks;
 	bool SnapToEdge;
 	::GString Icon;
-	GRect Decor;
+	LRect Decor;
 	gulong DestroySig;
 	GAutoPtr<GSurface> IconImg;
 	LAttachState AttachState;
@@ -291,7 +291,7 @@ void GWindow::OnGtkDelete()
 	#endif
 }
 
-GRect *GWindow::GetDecorSize()
+LRect *GWindow::GetDecorSize()
 {
 	return d->Decor.x2 >= 0 ? &d->Decor : NULL;
 }
@@ -676,7 +676,7 @@ GWindowUnrealize(GtkWidget *widget, GWindow *wnd)
 
 bool DndPointMap(GViewI *&v, LPoint &p, GDragDropTarget *&t, GWindow *Wnd, int x, int y)
 {
-	GRect cli = Wnd->GetClient();
+	LRect cli = Wnd->GetClient();
 	t = NULL;
 	v = Wnd->WindowFromPoint(x - cli.x1, y - cli.y1, false);
 	if (!v)
@@ -1300,7 +1300,7 @@ const char *GWindow::Name()
 
 struct CallbackParams
 {
-	GRect Menu;
+	LRect Menu;
 	int Depth;
 	
 	CallbackParams()
@@ -1341,9 +1341,9 @@ LPointF GWindow::GetDpiScale()
 	return LPointF((double)Dpi.x/96.0, (double)Dpi.y/96.0);
 }
 
-GRect &GWindow::GetClient(bool ClientSpace)
+LRect &GWindow::GetClient(bool ClientSpace)
 {
-	static GRect r;
+	static LRect r;
 	r = GView::GetClient(ClientSpace);
 
 	if (Wnd)
@@ -1372,7 +1372,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 		::GVariant v;
 		if (Store->GetValue(FieldName, v) && v.Str())
 		{
-			GRect Position(0, 0, -1, -1);
+			LRect Position(0, 0, -1, -1);
 			GWindowZoom State = GZoomNormal;
 
 // printf("SerializeState load %s\n", v.Str());
@@ -1419,12 +1419,12 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 	return true;
 }
 
-GRect &GWindow::GetPos()
+LRect &GWindow::GetPos()
 {
 	return Pos;
 }
 
-bool GWindow::SetPos(GRect &p, bool Repaint)
+bool GWindow::SetPos(LRect &p, bool Repaint)
 {
 	Pos = p;
 	if (Wnd)
@@ -1477,7 +1477,7 @@ void GWindow::OnPosChange()
 
 void GWindow::PourAll()
 {
-	GRect c;
+	LRect c;
 	if (_Root)
 		c = GtkGetPos(_Root).ZeroTranslate();
 	else
@@ -1502,7 +1502,7 @@ void GWindow::PourAll()
 			bool IsMenu = MenuView == v;
 			if (!IsMenu && IsTool(v))
 			{
-				GRect OldPos = v->GetPos();
+				LRect OldPos = v->GetPos();
 				if (OldPos.Valid())
 					Update.Union(&OldPos);
 				
@@ -1527,7 +1527,7 @@ void GWindow::PourAll()
 						auto b = Tools.Bound();
 						if (vpos.y2 >= b.y2)
 						{
-							GRect Bar = Client;
+							LRect Bar = Client;
 							Bar.y2 = vpos.y2;
 							Client.Subtract(&Bar);
 							// LgiTrace("IncreaseToolbar=%s\n", Bar.GetStr());
@@ -1555,7 +1555,7 @@ void GWindow::PourAll()
 							v->Invalidate();
 						}
 
-						GRect Bar(v->GetPos());
+						LRect Bar(v->GetPos());
 						// LgiTrace("%s = %s\n", v->GetClass(), Bar.GetStr());
 						Bar.x2 = GetClient().x2;
 
@@ -1575,13 +1575,13 @@ void GWindow::PourAll()
 		bool IsMenu = MenuView == v;
 		if (!IsMenu && !IsTool(v))
 		{
-			GRect OldPos = v->GetPos();
+			LRect OldPos = v->GetPos();
 			if (OldPos.Valid())
 				Update.Union(&OldPos);
 
 			if (v->Pour(Client))
 			{
-				// GRect p = v->GetPos();
+				// LRect p = v->GetPos();
 				// LgiTrace("%s = %s\n", v->GetClass(), p.GetStr());
 				if (!v->Visible())
 					v->Visible(true);

@@ -33,7 +33,7 @@ public:
 	static LPoint Padding;
 
 	int Id;
-	GRect Watch;
+	LRect Watch;
 	
 	const char *GetClass() { return "NativeTip"; }
 
@@ -86,7 +86,7 @@ public:
 				{
 					m.Target = t->Owner;
 			
-					GRect w = t->Watch;
+					LRect w = t->Watch;
 					bool Vis = w.Overlap(m.x, m.y);					
 					
 					LOG("Tip %s, in=%i, act=%i\n", t->GView::Name(), Vis, Active);
@@ -95,7 +95,7 @@ public:
 					
 					if (Vis ^ t->Visible())
 					{
-						GRect r = t->GetPos();
+						LRect r = t->GetPos();
 						LPoint pt(w.x1, w.y2);
 						#ifdef __GTK_H__
 						pt.y += 8;
@@ -122,7 +122,7 @@ public:
 		bool Status = GView::Name(n);
 		if (s.Reset(new GDisplayString(SysFont, GView::Name())))
 		{
-			GRect r = GetPos();
+			LRect r = GetPos();
 			r.Dimension(s->X()+NativeTip::Padding.x, s->Y()+NativeTip::Padding.y);
 			SetPos(r);
 		}
@@ -131,7 +131,7 @@ public:
 	
 	void OnPaint(GSurface *pDC)
 	{
-		GRect c = GetClient();
+		LRect c = GetClient();
 		auto b = L_TOOL_TIP;
 		
 		// Draw border
@@ -219,7 +219,7 @@ GToolTip::~GToolTip()
 	DeleteObj(d);
 }
 
-int GToolTip::NewTip(const char *Name, GRect &Pos)
+int GToolTip::NewTip(const char *Name, LRect &Pos)
 {
 	int Status = 0;
 

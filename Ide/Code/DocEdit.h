@@ -183,7 +183,7 @@ public:
 	// Overrides
 	bool AppendItems(LSubMenu *Menu, const char *Param, int Base) override;
 	bool DoGoto() override;
-	void OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour) override;
+	void OnPaintLeftMargin(GSurface *pDC, LRect &r, GColour &colour) override;
 	void OnMouseClick(GMouse &m) override;
 	bool OnKey(GKey &k) override;	
 	bool OnMenu(GDocView *View, int Id, void *Context) override;

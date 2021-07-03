@@ -104,7 +104,7 @@ void GDialog::OnPosChange()
         GTableLayout *t = dynamic_cast<GTableLayout*>((GViewI*)it);
         if (t)
         {
-            GRect r = GetClient();
+            LRect r = GetClient();
             r.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
             t->SetPos(r);
 
@@ -116,7 +116,7 @@ void GDialog::OnPosChange()
 bool GDialog::LoadFromResource(int Resource, char *TagList)
 {
 	GAutoString n;
-	GRect p;
+	LRect p;
 	GProfile Prof("GDialog::LoadFromResource");
 
 	bool Status = GLgiRes::LoadFromResource(Resource, this, &p, &n, TagList);
