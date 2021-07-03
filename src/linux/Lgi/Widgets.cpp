@@ -13,7 +13,7 @@
 
 #include "Lgi.h"
 #include "GSlider.h"
-#include "GBitmap.h"
+#include "LBitmap.h"
 #include "GTableLayout.h"
 #include "LDisplayString.h"
 #include "GButton.h"

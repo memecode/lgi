@@ -187,7 +187,7 @@
 		<li> GCheckBox (Independant boolean)
 		<li> GCombo (Select one from many)
 		<li> GSlider (Select a position)
-		<li> GBitmap (Display an image)
+		<li> LBitmap (Display an image)
 		<li> LProgressView (Show a progress)
 		<li> LList (List containing LListItem)
 		<li> GTree (Heirarchy of GTreeItem)

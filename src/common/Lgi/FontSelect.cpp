@@ -33,7 +33,7 @@ struct GFontSelectPriv
 {
 	GTableLayout *Tbl;
 	LList *Lst;
-	GBitmap *Bmp;
+	LBitmap *Bmp;
 	GCombo *PtSizes;
 	bool Running;
 	
@@ -92,7 +92,7 @@ LFontSelect::LFontSelect(LView *Parent, void *Init, int InitLen)
 		c->Add(new GTextLabel(IDM_STATIC, 0, 0, -1, -1, LgiLoadString(L_FONTUI_PREVIEW, "Preview:")));
 	
 	c = d->Tbl->GetCell(0, 3, true, 2, 1);
-		c->Add(d->Bmp = new GBitmap(IDC_PREVIEW, 14, 182, 0));
+		c->Add(d->Bmp = new LBitmap(IDC_PREVIEW, 14, 182, 0));
 	
 	c = d->Tbl->GetCell(0, 4, true, 2, 1);
 		c->TextAlign(LCss::Len(LCss::AlignRight));

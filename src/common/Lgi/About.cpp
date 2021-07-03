@@ -70,7 +70,7 @@ GAbout::GAbout(	LView *parent,
 		if (FileName)
 		{
 			auto c = Tbl->GetCell(x++, 0, true);
-			auto Img = new GBitmap(IDC_BMP, 0, 0, FileName, true);
+			auto Img = new LBitmap(IDC_BMP, 0, 0, FileName, true);
 			c->Add(Img);
 			Img->GetCss(true)->BackgroundColor(cBack);
 		}

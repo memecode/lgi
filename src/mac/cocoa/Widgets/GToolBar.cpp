@@ -1973,8 +1973,8 @@ IconRef GetIconRefFromCGImage(CGImageRef cgImage)
     if (cgColourSpace == NULL)
         return(NULL);
 
-    cgContextRGB  = CGBitmapContextCreate(dataRGB, 128, 128, 8, 128 * 4, cgColourSpace, kCGImageAlphaNoneSkipFirst);
-    cgContextA    = CGBitmapContextCreate(dataA,   128, 128, 8, 128 * 1, NULL,          kCGImageAlphaOnly);
+    cgContextRGB  = CLBitmapContextCreate(dataRGB, 128, 128, 8, 128 * 4, cgColourSpace, kCGImageAlphaNoneSkipFirst);
+    cgContextA    = CLBitmapContextCreate(dataA,   128, 128, 8, 128 * 1, NULL,          kCGImageAlphaOnly);
 
     if (cgContextRGB != NULL && cgContextA != NULL)
 	{

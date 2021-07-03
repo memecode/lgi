@@ -694,8 +694,8 @@ class AppWnd : public GDocApp<GOptionsFile>
 {
 protected:
 	// UI
-	GBox			*HBox;
-	GBox			*VBox;
+	LBox			*HBox;
+	LBox			*VBox;
 	LView			*ContentView;
 
 	LSubMenu		*Edit;

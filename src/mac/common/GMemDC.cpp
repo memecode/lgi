@@ -338,8 +338,8 @@ NSImage *LMemDC::NsImage(LRect *rc)
 	provider = CGDataProviderCreateWithData(NULL, Mem.Release(), len, MemRelease);
 	
 	CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
-	// CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast;
-	CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaLast;
+	// CLBitmapInfo bitmapInfo = kCLBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast;
+	CLBitmapInfo bitmapInfo = kCLBitmapByteOrderDefault | kCGImageAlphaLast;
 	CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
 
 	CGImageRef iref = CGImageCreate(r.X(), r.Y(),
@@ -442,7 +442,7 @@ bool LMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 		if (Bits > 16)
 		{
 			d->Cs = CGColorSpaceCreateDeviceRGB();
-			d->Bmp = CGBitmapContextCreate
+			d->Bmp = CLBitmapContextCreate
 				(
 					NULL,
 					x,
@@ -454,8 +454,8 @@ bool LMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 				);
 			if (d->Bmp)
 			{
-				LineLen = CGBitmapContextGetBytesPerRow(d->Bmp);
-				d->Data = (uint8*) CGBitmapContextGetData(d->Bmp);
+				LineLen = CLBitmapContextGetBytesPerRow(d->Bmp);
+				d->Data = (uint8*) CLBitmapContextGetData(d->Bmp);
 			}
 		}
 		
@@ -471,12 +471,12 @@ bool LMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 				pMem->Base = (uchar*)d->Data;
 				pMem->Line = LineLen;
 
-				switch (CGBitmapContextGetBitsPerPixel(d->Bmp))
+				switch (CLBitmapContextGetBitsPerPixel(d->Bmp))
 				{
 					case 24:
 					case 32:
 					{
-						CGImageAlphaInfo ai = CGBitmapContextGetAlphaInfo(d->Bmp);
+						CGImageAlphaInfo ai = CLBitmapContextGetAlphaInfo(d->Bmp);
 						switch (ai)
 						{
 							case kCGImageAlphaNone:

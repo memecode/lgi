@@ -327,7 +327,7 @@ public:
 
 class App : public LWindow, public GCapabilityInstallTarget
 {
-	GBox *Split;
+	LBox *Split;
 	GTextView3 *Txt;
 	LList *Imgs;
 	GTabView *Tabs;
@@ -393,7 +393,7 @@ public:
 				s->AppendItem("E&xit", IDC_EXIT, true, -1, "Ctrl+W");
 			}
 
-			AddView(Split = new GBox);
+			AddView(Split = new LBox);
 			if (Split)
 			{
 				// Split->Debug();
@@ -437,7 +437,7 @@ public:
 					GTabPage *p = Tabs->Append("Html Output");
 					if (p)
 					{
-						GBox *b = new GBox(IDC_HTML_BOX);
+						LBox *b = new LBox(IDC_HTML_BOX);
 						b->SetVertical(true);
 						
 						b->AddView(Txt = new GTextView3(IDC_HTML, 0, 0, 100, 100));

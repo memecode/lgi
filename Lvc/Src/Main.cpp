@@ -965,7 +965,7 @@ public:
 class App : public LWindow, public AppPriv
 {
 	GAutoPtr<GImageList> ImgLst;
-	GBox *FoldersBox;
+	LBox *FoldersBox;
 
 	bool CallMethod(const char *MethodName, LVariant *ReturnValue, GArray<LVariant*> &Args)
 	{
@@ -1012,9 +1012,9 @@ public:
 				Menu->Load(this, "IDM_MENU");
 			}
 
-			GBox *ToolsBox = new GBox(IDC_TOOLS_BOX, true, "ToolsBox");
-			FoldersBox = new GBox(IDC_FOLDERS_BOX, false, "FoldersBox");
-			GBox *CommitsBox = new GBox(IDC_COMMITS_BOX, true, "CommitsBox");
+			LBox *ToolsBox = new LBox(IDC_TOOLS_BOX, true, "ToolsBox");
+			FoldersBox = new LBox(IDC_FOLDERS_BOX, false, "FoldersBox");
+			LBox *CommitsBox = new LBox(IDC_COMMITS_BOX, true, "CommitsBox");
 
 			ToolBar *Tools = new ToolBar;
 
@@ -1035,7 +1035,7 @@ public:
 			Commits->Attach(CommitsBox);
 			Commits->GetCss(true)->Height("40%");
 
-			GBox *FilesBox = new GBox(IDC_FILES_BOX, false);
+			LBox *FilesBox = new LBox(IDC_FILES_BOX, false);
 			FilesBox->Attach(CommitsBox);
 
 			Files = new LList(IDC_FILES, 0, 0, 200, 200);
@@ -1045,7 +1045,7 @@ public:
 			Files->AddColumn("State", 100);
 			Files->AddColumn("Name", 400);
 
-			GBox *MsgBox = new GBox(IDC_MSG_BOX, true);
+			LBox *MsgBox = new LBox(IDC_MSG_BOX, true);
 			MsgBox->Attach(FilesBox);
 			
 			CommitCtrls *Commit = new CommitCtrls;

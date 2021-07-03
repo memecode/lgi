@@ -10,21 +10,21 @@
 #define DEFAULT_MINIMUM_SIZE_PX		5
 #define ACTIVE_SPACER_SIZE_PX		9
 
-enum GBoxMessages
+enum LBoxMessages
 {
 	M_CHILDREN_CHANGED = M_USER + 0x2000
 };
 
-struct GBoxPriv
+struct LBoxPriv
 {
 public:
 	bool Vertical;
-	GArray<GBox::Spacer> Spacers;
-	GBox::Spacer *Dragging;
+	GArray<LBox::Spacer> Spacers;
+	LBox::Spacer *Dragging;
 	LPoint DragOffset;
 	bool Dirty;
 	
-	GBoxPriv()
+	LBoxPriv()
 	{
 		Dirty = false;
 		Vertical = false;
@@ -36,11 +36,11 @@ public:
 		return Vertical ? r.Y() : r.X();
 	}
 
-	GBox::Spacer *HitTest(int x, int y)
+	LBox::Spacer *HitTest(int x, int y)
 	{
 		for (int i=0; i<Spacers.Length(); i++)
 		{
-			GBox::Spacer &s = Spacers[i];
+			LBox::Spacer &s = Spacers[i];
 			LRect Pos = s.Pos;
 			if (Vertical)
 			{
@@ -63,9 +63,9 @@ public:
 	}	
 };
 
-GBox::GBox(int Id, bool Vertical, const char *name)
+LBox::LBox(int Id, bool Vertical, const char *name)
 {
-	d = new GBoxPriv;
+	d = new LBoxPriv;
 	SetId(Id);
 	SetVertical(Vertical);
 	if (name)
@@ -73,7 +73,7 @@ GBox::GBox(int Id, bool Vertical, const char *name)
 	LResources::StyleElement(this);
 }
 
-GBox::~GBox()
+LBox::~LBox()
 {
 	LWindow *Wnd = GetWindow();
 	if (Wnd)
@@ -82,12 +82,12 @@ GBox::~GBox()
 	DeleteObj(d);
 }
 
-bool GBox::IsVertical()
+bool LBox::IsVertical()
 {
 	return d->Vertical;
 }
 
-void GBox::SetVertical(bool v)
+void LBox::SetVertical(bool v)
 {
 	if (d->Vertical != v)
 	{
@@ -96,7 +96,7 @@ void GBox::SetVertical(bool v)
 	}
 }
 
-GBox::Spacer *GBox::GetSpacer(int idx)
+LBox::Spacer *LBox::GetSpacer(int idx)
 {
 	if (Children.Length())
 	{
@@ -111,12 +111,12 @@ GBox::Spacer *GBox::GetSpacer(int idx)
 	return idx >= 0 && idx < d->Spacers.Length() ? &d->Spacers[idx] : NULL;
 }
 
-LViewI *GBox::GetViewAt(int i)
+LViewI *LBox::GetViewAt(int i)
 {
 	return Children[i];
 }
 
-bool GBox::SetViewAt(uint32_t i, LViewI *v)
+bool LBox::SetViewAt(uint32_t i, LViewI *v)
 {
 	if (!v || i > Children.Length())
 	{
@@ -153,7 +153,7 @@ bool GBox::SetViewAt(uint32_t i, LViewI *v)
 	return Status;
 }
 
-void GBox::OnCreate()
+void LBox::OnCreate()
 {
 	AttachChildren();
 	OnPosChange();
@@ -163,12 +163,12 @@ void GBox::OnCreate()
 		Wnd->RegisterHook(this, LMouseEvents);
 }
 
-bool GBox::OnViewMouse(LView *v, LMouse &m)
+bool LBox::OnViewMouse(LView *v, LMouse &m)
 {
-	// This hook allows the GBox to catch clicks nearby the splits even if the splits are too small
+	// This hook allows the LBox to catch clicks nearby the splits even if the splits are too small
 	// to grab normally. Consider the case of a split that is 1px wide. The active region needs to
 	// be a little larger than that, however a normal click would go through to the child windows
-	// on either side of the split rather than to the GBox.
+	// on either side of the split rather than to the LBox.
 	if (!m.IsMove() && m.Down())
 	{
 		// Convert click to the local coordinates of this view
@@ -201,7 +201,7 @@ bool GBox::OnViewMouse(LView *v, LMouse &m)
 	return true;
 }
 
-bool GBox::Pour(LRegion &r)
+bool LBox::Pour(LRegion &r)
 {
 	LRect *p = FindLargest(r);
 	if (!p)
@@ -211,7 +211,7 @@ bool GBox::Pour(LRegion &r)
 	return true;
 }
 
-void GBox::OnPaint(LSurface *pDC)
+void LBox::OnPaint(LSurface *pDC)
 {
 	if (d->Dirty)
 	{
@@ -274,7 +274,7 @@ struct BoxRange
 	}
 };
 
-void GBox::OnPosChange()
+void LBox::OnPosChange()
 {
 	GCssTools tools(GetCss(), GetFont());
 	LRect client = GetClient();
@@ -473,14 +473,14 @@ void GBox::OnPosChange()
 	}
 }
 
-void GBox::OnMouseClick(LMouse &m)
+void LBox::OnMouseClick(LMouse &m)
 {
 	#if 0
 	{
 		GString::Array a;
 		for (LViewI *p = this; p; p = p->GetParent())
 			a.New() = p->GetClass();
-		m.Trace(GString("GBox::OnMouseClick-") + GString(".").Join(a));
+		m.Trace(GString("LBox::OnMouseClick-") + GString(".").Join(a));
 	}
 	#endif
 
@@ -509,7 +509,7 @@ bool IsValidLen(LCss *c, LCss::PropType p)
 	return l->IsValid();
 }
 
-void GBox::OnMouseMove(LMouse &m)
+void LBox::OnMouseMove(LMouse &m)
 {
 	if (!d->Dragging || !IsCapturing())
 		return;
@@ -519,7 +519,7 @@ void GBox::OnMouseMove(LMouse &m)
 		GString::Array a;
 		for (LViewI *p = this; p; p = p->GetParent())
 			a.New().Printf("%s/%p", p->GetClass(), p);
-		m.Trace(GString("GBox::OnMouseMove-") + GString(".").Join(a));
+		m.Trace(GString("LBox::OnMouseMove-") + GString(".").Join(a));
 	}
 	#endif
 
@@ -675,7 +675,7 @@ void GBox::OnMouseMove(LMouse &m)
 	Invalidate((LRect*)NULL, true);
 }
 
-int GBox::OnNotify(LViewI *Ctrl, int Flags)
+int LBox::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Flags == GNotifyTableLayout_Refresh)
 	{
@@ -690,10 +690,10 @@ int GBox::OnNotify(LViewI *Ctrl, int Flags)
 	return LView::OnNotify(Ctrl, Flags);
 }
 
-void GBox::OnChildrenChanged(LViewI *Wnd, bool Attaching)
+void LBox::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	#if 0
-	LgiTrace("GBox(%s)::OnChildrenChanged(%s, %i)\n", Name(), Wnd ? Wnd->GetClass() : NULL, Attaching);
+	LgiTrace("LBox(%s)::OnChildrenChanged(%s, %i)\n", Name(), Wnd ? Wnd->GetClass() : NULL, Attaching);
 	for (int i=0; i<Children.Length(); i++)
 		LgiTrace("	[%i]=%s hnd=%p vis=%i\n", i, Children[i]->GetClass(), Children[i]->Handle(), Children[i]->Visible());
 	#endif
@@ -705,7 +705,7 @@ void GBox::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 		PostEvent(M_CHILDREN_CHANGED);
 }
 
-int64 GBox::Value()
+int64 LBox::Value()
 {
 	LViewI *v = Children.Length() ? Children[0] : NULL;
 	if (!v) return 0;
@@ -720,7 +720,7 @@ int64 GBox::Value()
 	return (int64)l.Value;
 }
 
-void GBox::Value(int64 i)
+void LBox::Value(int64 i)
 {
 	LViewI *v = Children.Length() ? Children[0] : NULL;
 	if (!v) return;
@@ -735,7 +735,7 @@ void GBox::Value(int64 i)
 	OnPosChange();
 }
 
-LgiCursor GBox::GetCursor(int x, int y)
+LgiCursor LBox::GetCursor(int x, int y)
 {
 	Spacer *Over = d->HitTest(x, y);
 	if (Over)
@@ -744,7 +744,7 @@ LgiCursor GBox::GetCursor(int x, int y)
 		return LCUR_Normal;
 }
 
-bool GBox::OnLayout(LViewLayoutInfo &Inf)
+bool LBox::OnLayout(LViewLayoutInfo &Inf)
 {
 	Inf.Width.Min = -1;
 	Inf.Width.Max = -1;
@@ -753,7 +753,7 @@ bool GBox::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-bool GBox::Serialize(GDom *Dom, const char *OptName, bool Write)
+bool LBox::Serialize(GDom *Dom, const char *OptName, bool Write)
 {
 	if (Write)
 	{
@@ -767,7 +767,7 @@ bool GBox::Serialize(GDom *Dom, const char *OptName, bool Write)
 	return false;
 }
 
-bool GBox::SetSize(int ViewIndex, LCss::Len Size)
+bool LBox::SetSize(int ViewIndex, LCss::Len Size)
 {
 	LViewI *v = Children[ViewIndex];
 	if (!v)
@@ -781,7 +781,7 @@ bool GBox::SetSize(int ViewIndex, LCss::Len Size)
 	return true;
 }
 
-GMessage::Result GBox::OnEvent(GMessage *Msg)
+GMessage::Result LBox::OnEvent(GMessage *Msg)
 {
 	if (Msg->Msg() == M_CHILDREN_CHANGED)
 	{

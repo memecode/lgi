@@ -143,7 +143,7 @@
 ///		<li> GCheckBox (Independent boolean)
 ///		<li> GCombo (Select one from many)
 ///		<li> GSlider (Select a position)
-///		<li> GBitmap (Display an image)
+///		<li> LBitmap (Display an image)
 ///		<li> GProgress (Show a progress)
 ///		<li> GList (List containing LListItem)
 ///		<li> GTree (Hierarchy of GTreeItem)

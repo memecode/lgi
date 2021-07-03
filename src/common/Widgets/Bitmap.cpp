@@ -7,14 +7,14 @@
 #ifdef _MT
 #include "lgi/common/Thread.h"
 
-class GBitmapThread : public LThread
+class LBitmapThread : public LThread
 {
-	GBitmap *Bmp;
+	LBitmap *Bmp;
 	char *File;
 	LThread **Owner;
 
 public:
-	GBitmapThread(GBitmap *bmp, char *file, LThread **owner) : LThread("GBitmapThread")
+	LBitmapThread(LBitmap *bmp, char *file, LThread **owner) : LThread("LBitmapThread")
 	{
 		Bmp = bmp;
 		File = NewStr(file);
@@ -26,7 +26,7 @@ public:
 		Run();
 	}
 
-	~GBitmapThread()
+	~LBitmapThread()
 	{
 		if (Owner)
 		{
@@ -63,7 +63,7 @@ public:
 };
 #endif
 
-GBitmap::GBitmap(int id, int x, int y, char *FileName, bool Async)
+LBitmap::LBitmap(int id, int x, int y, char *FileName, bool Async)
 	: ResObject(Res_Bitmap)
 {
 	pDC = 0;
@@ -92,7 +92,7 @@ GBitmap::GBitmap(int id, int x, int y, char *FileName, bool Async)
 		}
 		else
 		{
-			new GBitmapThread(this, FileName, &pThread);
+			new LBitmapThread(this, FileName, &pThread);
 		}
 		#endif
 
@@ -102,7 +102,7 @@ GBitmap::GBitmap(int id, int x, int y, char *FileName, bool Async)
 	LResources::StyleElement(this);
 }
 
-GBitmap::~GBitmap()
+LBitmap::~LBitmap()
 {
 	#ifdef _MT
 	if (pThread)
@@ -114,7 +114,7 @@ GBitmap::~GBitmap()
 	DeleteObj(pDC);
 }
 
-void GBitmap::SetDC(LSurface *pNewDC)
+void LBitmap::SetDC(LSurface *pNewDC)
 {
 	DeleteObj(pDC);
 	if (pNewDC)
@@ -156,17 +156,17 @@ void GBitmap::SetDC(LSurface *pNewDC)
 	}
 }
 
-LSurface *GBitmap::GetSurface()
+LSurface *LBitmap::GetSurface()
 {
 	return pDC;
 }
 
-GMessage::Result GBitmap::OnEvent(GMessage *Msg)
+GMessage::Result LBitmap::OnEvent(GMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }
 
-void GBitmap::OnPaint(LSurface *pScreen)
+void LBitmap::OnPaint(LSurface *pScreen)
 {
 	GColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 
@@ -181,7 +181,7 @@ void GBitmap::OnPaint(LSurface *pScreen)
 	}
 }
 
-void GBitmap::OnMouseClick(LMouse &m)
+void LBitmap::OnMouseClick(LMouse &m)
 {
 	if (!m.Down() && GetParent())
 	{

@@ -2,11 +2,10 @@
 /// \author Matthew Allen (fret@memecode.com)
 /// \brief Bitmap control
 
-#ifndef _GBITMAP_H_
-#define _GBITMAP_H_
+#pragma once
 
 /// Bitmap control
-class LgiClass GBitmap :
+class LgiClass LBitmap :
 	public GControl,
 	public ResObject
 {
@@ -15,8 +14,8 @@ class LgiClass GBitmap :
 
 public:
 	/// Construct the bitmap control with the usual parameters
-	GBitmap(int id, int x, int y, char *FileName, bool Async = false);
-	~GBitmap();
+	LBitmap(int id, int x, int y, char *FileName, bool Async = false);
+	~LBitmap();
 
 	/// Sets the surface to display in the control
 	virtual void SetDC(LSurface *pDC = 0);
@@ -27,5 +26,3 @@ public:
 	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
 };
-
-#endif

@@ -859,9 +859,9 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 				if (Flag < SizeGrow)
 					Flag = SizeGrow;
 			}
-			else if (Izza(GBitmap))
+			else if (Izza(LBitmap))
 			{
-				GBitmap *b = Izza(GBitmap);
+				LBitmap *b = Izza(LBitmap);
 				LSurface *Dc = b->GetSurface();
 				if (Dc)
 				{
@@ -1113,9 +1113,9 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			// MaxY = MAX(MaxY, 1000);
 			Flags = SizeFill;
 		}
-		else if (Izza(GBitmap))
+		else if (Izza(LBitmap))
 		{
-			GBitmap *b = Izza(GBitmap);
+			LBitmap *b = Izza(LBitmap);
 			LSurface *Dc = b->GetSurface();
 			if (Dc)
 			{

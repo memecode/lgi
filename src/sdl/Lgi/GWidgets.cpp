@@ -13,7 +13,7 @@
 
 #include "Lgi.h"
 #include "GSlider.h"
-#include "GBitmap.h"
+#include "LBitmap.h"
 #include "GTableLayout.h"
 #include "LDisplayString.h"
 
@@ -313,14 +313,14 @@ void GSlider::OnMouseMove(LMouse &m)
 #endif
 
 #ifdef LgiThreadBitmapLoad
-class GBitmapThread : public ::LThread
+class LBitmapThread : public ::LThread
 {
-	GBitmap *Bmp;
+	LBitmap *Bmp;
 	char *File;
 	LThread **Owner;
 
 public:
-	GBitmapThread(GBitmap *bmp, char *file, LThread **owner) : LThread("GBitmapThread")
+	LBitmapThread(LBitmap *bmp, char *file, LThread **owner) : LThread("LBitmapThread")
 	{
 		Bmp = bmp;
 		File = NewStr(file);
@@ -332,7 +332,7 @@ public:
 		Run();
 	}
 
-	~GBitmapThread()
+	~LBitmapThread()
 	{
 		if (Owner)
 		{
@@ -377,7 +377,7 @@ public:
 };
 #endif
 
-GBitmap::GBitmap(int id, int x, int y, char *FileName, bool Async) :
+LBitmap::LBitmap(int id, int x, int y, char *FileName, bool Async) :
 	ResObject(Res_Bitmap)
 {
 	pDC = 0;
@@ -403,7 +403,7 @@ GBitmap::GBitmap(int id, int x, int y, char *FileName, bool Async) :
 		}
 		else
 		{
-			new GBitmapThread(this, FileName, &pThread);
+			new LBitmapThread(this, FileName, &pThread);
 		}
 		#endif
 	}
@@ -411,7 +411,7 @@ GBitmap::GBitmap(int id, int x, int y, char *FileName, bool Async) :
 	SetPos(r);
 }
 
-GBitmap::~GBitmap()
+LBitmap::~LBitmap()
 {
 	#ifdef _MT
 	if (pThread)
@@ -423,7 +423,7 @@ GBitmap::~GBitmap()
 	DeleteObj(pDC);
 }
 
-void GBitmap::SetDC(LSurface *pNewDC)
+void LBitmap::SetDC(LSurface *pNewDC)
 {
 	DeleteObj(pDC);
 	pDC = pNewDC;
@@ -439,17 +439,17 @@ void GBitmap::SetDC(LSurface *pNewDC)
 	Invalidate();
 }
 
-LSurface *GBitmap::GetSurface()
+LSurface *LBitmap::GetSurface()
 {
 	return pDC;
 }
 
-GMessage::Param GBitmap::OnEvent(GMessage *Msg)
+GMessage::Param LBitmap::OnEvent(GMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }
 
-void GBitmap::OnPaint(LSurface *pScreen)
+void LBitmap::OnPaint(LSurface *pScreen)
 {
 	LRect a(0, 0, X()-1, Y()-1);
 	if (pDC)
@@ -473,7 +473,7 @@ void GBitmap::OnPaint(LSurface *pScreen)
 	}
 }
 
-void GBitmap::OnMouseClick(LMouse &m)
+void LBitmap::OnMouseClick(LMouse &m)
 {
 	if (!m.Down() && GetParent())
 	{

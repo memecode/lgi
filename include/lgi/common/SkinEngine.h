@@ -131,7 +131,7 @@ public:
 	virtual void OnPaint_GTabView     (GTabView *Ctrl,     GSkinState *State) {};
 	virtual void OnPaint_GSlider      (GSlider *Ctrl,      GSkinState *State) {};
 	virtual void OnPaint_GCombo       (GCombo *Ctrl,       GSkinState *State) {};
-	virtual void OnPaint_GBitmap      (GBitmap *Ctrl,      GSkinState *State) {};
+	virtual void OnPaint_LBitmap      (LBitmap *Ctrl,      GSkinState *State) {};
 	virtual void OnPaint_GProgress    (LProgressView *Ctrl,GSkinState *State) {};
 	virtual void OnPaint_GTree        (GTree *Ctrl,        GSkinState *State) {};
 	virtual void OnPaint_LList        (LList *Ctrl,        GSkinState *State) {};

@@ -22,7 +22,7 @@
 #include "GCombo.h"
 #include "GTree.h"
 #include "GTableLayout.h"
-#include "GBox.h"
+#include "LBox.h"
 
 #define FSI_FILE			0
 #define FSI_DIRECTORY		1
@@ -784,7 +784,7 @@ public:
 	GFileSelectPrivate *d;
 
 	GTableLayout *Tbl;
-	GBox *Sub;
+	LBox *Sub;
 
 	GTree *Bookmarks;
 	GTextLabel *Ctrl1;
@@ -938,7 +938,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	// Folders/items row
 	x = 0; y++;
 	c = Tbl->GetCell(x, y, true, 6, 1);
-	c->Add(Sub = new GBox(IDC_SUB_TBL));
+	c->Add(Sub = new LBox(IDC_SUB_TBL));
 	Sub->AddView(Bookmarks = new GTree(IDC_BOOKMARKS, 0, 0, -1, -1));
 	Bookmarks->GetCss(true)->Width(LCss::Len(LCss::LenPx, 150.0f));
 	Bookmarks->SetImageList(d->TreeIcons, false);

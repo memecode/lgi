@@ -32,7 +32,7 @@ class GTabView;
 class GTabPage;
 class GSlider;
 class GCombo;
-class GBitmap;
+class LBitmap;
 class LList;
 class GTree;
 

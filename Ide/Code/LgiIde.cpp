@@ -549,8 +549,8 @@ public:
 	LFont Fixed;
 
 	GTabView *DebugTab;
-	GBox *DebugBox;
-	GBox *DebugLog;
+	LBox *DebugBox;
+	LBox *DebugLog;
 	LList *Locals, *CallStack, *Threads;
 	GTree *Watch;
 	GTextLog *ObjectDump, *MemoryDump, *Registers;
@@ -620,7 +620,7 @@ public:
 			Ftp->Append(FtpLog = new LList(104, 0, 0, 100, 100));
 		if (Debug)
 		{
-			Debug->Append(DebugBox = new GBox);
+			Debug->Append(DebugBox = new LBox);
 			if (DebugBox)
 			{
 				DebugBox->SetVertical(false);
@@ -806,7 +806,7 @@ public:
 					}
 				}
 					
-				if ((DebugLog = new GBox))
+				if ((DebugLog = new LBox))
 				{
 					DebugLog->SetVertical(true);
 					DebugBox->AddView(DebugLog);
@@ -1017,7 +1017,7 @@ public:
 	AppWnd *App;
 	GMdiParent *Mdi;
 	GOptionsFile Options;
-	GBox *HBox, *VBox;
+	LBox *HBox, *VBox;
 	List<IdeDoc> Docs;
 	List<IdeProject> Projects;
 	GImageList *Icons;
@@ -1653,10 +1653,10 @@ Chk;
 		d->Options.GetValue(OPT_SPLIT_PX, v);
 		d->Options.GetValue(OPT_OUTPUT_PX, OutPx);
 
-		AddView(d->VBox = new GBox);
+		AddView(d->VBox = new LBox);
 		d->VBox->SetVertical(true);
 
-		d->HBox = new GBox;
+		d->HBox = new LBox;
 		d->VBox->AddView(d->HBox);
 		d->VBox->AddView(d->Output = new IdeOutput(this));
 

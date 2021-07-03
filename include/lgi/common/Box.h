@@ -5,9 +5,9 @@
 
 /// This is a vertical or horizontal layout box, similar to the
 /// old GSplitter control except it can handle any number of children
-class LgiClass GBox : public LView
+class LgiClass LBox : public LView
 {
-	struct GBoxPriv *d;
+	struct LBoxPriv *d;
 
 protected:
 
@@ -19,10 +19,10 @@ public:
 		uint32_t SizePx; // Size in pixels
 	};
 
-	GBox(int Id = -1, bool Vertical = false, const char *name = NULL);
-	~GBox();
+	LBox(int Id = -1, bool Vertical = false, const char *name = NULL);
+	~LBox();
 
-	const char *GetClass() { return "GBox"; }
+	const char *GetClass() { return "LBox"; }
 
 	bool IsVertical();
 	void SetVertical(bool v);

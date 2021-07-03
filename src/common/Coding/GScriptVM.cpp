@@ -1334,8 +1334,8 @@ struct LScriptVmDebuggerPriv
 	// Ui
 	bool RunLoop;
 	LView *Parent;
-	GBox *Main;
-	GBox *Sub;
+	LBox *Main;
+	LBox *Sub;
 	LList *SourceLst;
 	GTabView *Tabs;
 	GDebugView *Text;
@@ -1593,10 +1593,10 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVi
 		d->Tools->AppendButton("Step Line", IDC_STEP_LINE);
 		d->Tools->AppendButton("Step Out", IDC_STEP_OUT);
 		
-		AddView(d->Main = new GBox(IDC_BOX));		
+		AddView(d->Main = new LBox(IDC_BOX));		
 		d->Main->SetVertical(true);
 		
-		d->Main->AddView(d->Sub = new GBox(IDC_BOX2));
+		d->Main->AddView(d->Sub = new LBox(IDC_BOX2));
 		d->Sub->SetVertical(false);
 		
 		d->Sub->AddView(d->SourceLst = new LList(IDC_SOURCE_LST, 0, 0, 100, 100));

@@ -782,7 +782,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_Bitmap) == 0)
 		{
-			Wnd = new GBitmap(0, 0, 0, 0);
+			Wnd = new LBitmap(0, 0, 0, 0);
 		}
 		else if (stricmp(t->GetTag(), Res_Progress) == 0)
 		{

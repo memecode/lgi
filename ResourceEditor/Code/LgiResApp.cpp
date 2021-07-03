@@ -987,12 +987,12 @@ void AppWnd::OnCreate()
 	Status = 0;
 	StatusInfo[0] = StatusInfo[1] = 0;
 
-	HBox = new GBox(IDC_HBOX);
+	HBox = new LBox(IDC_HBOX);
 	if (HBox)
 	{
 		HBox->GetCss(true)->Padding("5px");
 
-		VBox = new GBox(IDC_VBOX, true);
+		VBox = new LBox(IDC_VBOX, true);
 		if (VBox)
 		{
 			HBox->AddView(VBox);

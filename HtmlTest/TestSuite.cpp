@@ -325,7 +325,7 @@ public:
 				Menu->Load(this, "IDM_MENU");
 			}
 			
-			GBox *s = new GBox;
+			LBox *s = new LBox;
 			if (s)
 			{
 				AddView(s);
@@ -336,7 +336,7 @@ public:
 				s->Value(200);
 
 				#if HAS_LOG_VIEW
-				GBox *vert = new GBox;
+				LBox *vert = new LBox;
 				vert->SetVertical(true);
 				s->AddView(vert);
 
@@ -345,7 +345,7 @@ public:
 
 				vert->AddView(Text = new GTextView3(IDC_LOG, 0, 0, 100, 100));
 				
-				GBox::Spacer *sp = s->GetSpacer(0);
+				LBox::Spacer *sp = s->GetSpacer(0);
 				if (sp)
 				{
 					sp->Colour.Rgb(64, 64, 64);

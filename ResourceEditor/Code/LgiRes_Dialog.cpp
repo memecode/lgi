@@ -57,7 +57,7 @@ NameMap[] =
 	{UI_COLUMN,			"LListColumn",	Res_Column,			false},
 	{UI_COMBO,			"GCombo",		Res_ComboBox,		true},
 	{UI_TREE,			"GTree",		Res_TreeView,		true},
-	{UI_BITMAP,			"GBitmap",		Res_Bitmap,			true},
+	{UI_BITMAP,			"LBitmap",		Res_Bitmap,			true},
 	{UI_PROGRESS,		"LProgressView",	Res_Progress,		true},
 	{UI_SCROLL_BAR,		"GScrollBar",	Res_ScrollBar,		true},
 	{UI_CUSTOM,			"GCustom",		Res_Custom,			true},
