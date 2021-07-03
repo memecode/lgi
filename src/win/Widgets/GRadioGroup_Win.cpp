@@ -336,7 +336,7 @@ void GRadioButton::OnAttach()
 {
 	SetFont(SysFont);
 
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 	OnStyleChange();
 	GView::OnAttach();
 

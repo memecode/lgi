@@ -6,9 +6,9 @@
 #define __GPOPUP_H
 
 #if defined(LGI_CARBON) || defined(__GTK_H__)
-#define LGI_POPUP_GWINDOW	1
+#define LGI_POPUP_LWINDOW	1
 #else
-#define LGI_POPUP_GWINDOW	0
+#define LGI_POPUP_LWINDOW	0
 #endif
 
 #if LGI_COCOA
@@ -17,14 +17,14 @@ ObjCWrapper(NSPanel, OsPanel)
 
 /// A popup window: closes when the user clicks off-window.
 class LgiClass GPopup :
-	#if LGI_POPUP_GWINDOW
-	public GWindow
+	#if LGI_POPUP_LWINDOW
+	public LWindow
 	#else
 	public GView
 	#endif
 {
 	friend class _QPopup;
-	friend class GWindow;
+	friend class LWindow;
 	friend class GDropDown;
 	friend class GMouseHook;
 	friend class GMouseHookPrivate;

@@ -50,13 +50,13 @@ public:
 	GView *Target;
 };
 
-class GWindowPrivate
+class LWindowPrivate
 {
 public:
 	GArray<HookInfo> Hooks;
 	bool SnapToEdge;
 	bool AlwaysOnTop;
-	GWindowZoom Show;
+	LWindowZoom Show;
 	bool InCreate;
 	GAutoPtr<WINDOWPLACEMENT> Wp;
 	LPoint Dpi;
@@ -64,7 +64,7 @@ public:
 	// Focus stuff
 	GViewI *Focus;
 
-	GWindowPrivate()
+	LWindowPrivate()
 	{
 		Focus = NULL;
 		InCreate = true;
@@ -73,7 +73,7 @@ public:
 		AlwaysOnTop = false;
 	}
 
-	~GWindowPrivate()
+	~LWindowPrivate()
 	{
 	}
 	
@@ -100,10 +100,10 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GWindow::GWindow() : GView(0)
+LWindow::LWindow() : GView(0)
 {
 	_Window = this;
-	d = new GWindowPrivate;
+	d = new LWindowPrivate;
 	Menu = 0;
 	_Dialog = NULL;
 	SetStyle(GetStyle() | WS_TILEDWINDOW | WS_CLIPCHILDREN);
@@ -119,11 +119,11 @@ GWindow::GWindow() : GView(0)
 	Visible(false);
 
 	_Default = 0;
-	_Lock = new LMutex("GWindow");
+	_Lock = new LMutex("LWindow");
 	_QuitOnClose = false;
 }
 
-GWindow::~GWindow()
+LWindow::~LWindow()
 {
 	if (LgiApp && LgiApp->AppWnd == this)
 	{
@@ -140,12 +140,12 @@ GWindow::~GWindow()
 	DeleteObj(d);
 }
 
-bool GWindow::SetIcon(const char *Icon)
+bool LWindow::SetIcon(const char *Icon)
 {
 	return CreateClassW32(LgiApp->Name(), LoadIcon(LgiProcessInst(), (LPCWSTR)Icon)) != 0;
 }
 
-GViewI *GWindow::GetFocus()
+GViewI *LWindow::GetFocus()
 {
 	return d->Focus;
 }
@@ -180,7 +180,7 @@ static bool HasParentPopup(GViewI *v)
 	return false;
 }
 
-void GWindow::SetFocus(GViewI *ctrl, FocusType type)
+void LWindow::SetFocus(GViewI *ctrl, FocusType type)
 {
 	const char *TypeName = NULL;
 	switch (type)
@@ -197,7 +197,7 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 			GViewI *This = this;
 			if (ctrl == This && d->Focus)
 			{
-				// The main GWindow is getting focus.
+				// The main LWindow is getting focus.
 				// Check if we can re-focus the previous child focus...
 				GView *v = d->Focus->GetGView();
 				if (v && !HasParentPopup(v))
@@ -220,7 +220,7 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 						#if DEBUG_SETFOCUS
 						GAutoString _set = DescribeView(ctrl);
 						GAutoString _foc = DescribeView(d->Focus);
-						LgiTrace("GWindow::SetFocus(%s, %s) refocusing: %s\n",
+						LgiTrace("LWindow::SetFocus(%s, %s) refocusing: %s\n",
 							_set.Get(),
 							TypeName,
 							_foc.Get());
@@ -259,7 +259,7 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 
 				#if DEBUG_SETFOCUS
 				GAutoString _set = DescribeView(d->Focus);
-				LgiTrace("GWindow::SetFocus(%s, %s) focusing\n",
+				LgiTrace("LWindow::SetFocus(%s, %s) focusing\n",
 					_set.Get(),
 					TypeName);
 				#endif
@@ -284,7 +284,7 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 						#if DEBUG_SETFOCUS
 						GAutoString _ctrl = DescribeView(ctrl);
 						GAutoString _foc = DescribeView(d->Focus);
-						LgiTrace("GWindow::SetFocus(%s, %s) keep_focus: %s\n",
+						LgiTrace("LWindow::SetFocus(%s, %s) keep_focus: %s\n",
 							_ctrl.Get(),
 							TypeName,
 							_foc.Get());
@@ -303,7 +303,7 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 			else
 			{
 				/*
-				LgiTrace("GWindow::SetFocus(%p.%s, %s) error on losefocus: %p(%s)\n",
+				LgiTrace("LWindow::SetFocus(%p.%s, %s) error on losefocus: %p(%s)\n",
 					ctrl,
 					ctrl ? ctrl->GetClass() : NULL,
 					TypeName,
@@ -318,7 +318,7 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 			if (ctrl == d->Focus)
 			{
 				#if DEBUG_SETFOCUS
-				LgiTrace("GWindow::SetFocus(%p.%s, %s) delete_focus: %p(%s)\n",
+				LgiTrace("LWindow::SetFocus(%p.%s, %s) delete_focus: %p(%s)\n",
 					ctrl,
 					ctrl ? ctrl->GetClass() : NULL,
 					TypeName,
@@ -333,29 +333,29 @@ void GWindow::SetFocus(GViewI *ctrl, FocusType type)
 	}
 }
 
-bool GWindow::GetSnapToEdge()
+bool LWindow::GetSnapToEdge()
 {
 	return d->SnapToEdge;
 }
 
-void GWindow::SetSnapToEdge(bool b)
+void LWindow::SetSnapToEdge(bool b)
 {
 	d->SnapToEdge = b;
 }
 
-bool GWindow::GetAlwaysOnTop()
+bool LWindow::GetAlwaysOnTop()
 {
 	return d->AlwaysOnTop;
 }
 
-void GWindow::SetAlwaysOnTop(bool b)
+void LWindow::SetAlwaysOnTop(bool b)
 {
 	d->AlwaysOnTop = b;
 	if (_View)
 		SetWindowPos(_View, b ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
 }
 
-void GWindow::Raise()
+void LWindow::Raise()
 {
 	if (_View)
 	{
@@ -379,7 +379,7 @@ void GWindow::Raise()
 	}
 }
 
-GWindowZoom GWindow::GetZoom()
+LWindowZoom LWindow::GetZoom()
 {
 	if (IsZoomed(Handle()))
 	{
@@ -393,7 +393,7 @@ GWindowZoom GWindow::GetZoom()
 	return GZoomNormal;
 }
 
-void GWindow::SetZoom(GWindowZoom i)
+void LWindow::SetZoom(LWindowZoom i)
 {
 	if (_View && IsWindowVisible(_View))
 	{
@@ -439,7 +439,7 @@ void GWindow::SetZoom(GWindowZoom i)
 	d->Show = i;
 }
 
-bool GWindow::OnRequestClose(bool OsShuttingDown)
+bool LWindow::OnRequestClose(bool OsShuttingDown)
 {
 	if (GetQuitOnClose())
 	{
@@ -449,7 +449,7 @@ bool GWindow::OnRequestClose(bool OsShuttingDown)
 	return true;
 }
 
-bool GWindow::HandleViewMouse(GView *v, GMouse &m)
+bool LWindow::HandleViewMouse(GView *v, GMouse &m)
 {
 	#if DEBUG_HANDLE_VIEW_MOUSE
 	m.Trace("HandleViewMouse");
@@ -478,7 +478,7 @@ bool GWindow::HandleViewMouse(GView *v, GMouse &m)
 	return true;
 }
 
-bool GWindow::HandleViewKey(GView *v, GKey &k)
+bool LWindow::HandleViewKey(GView *v, GKey &k)
 {
 	#if DEBUG_HANDLE_VIEW_KEY
 	char msg[256];
@@ -585,14 +585,14 @@ bool GWindow::HandleViewKey(GView *v, GKey &k)
 	return false;
 }
 
-void GWindow::OnPaint(GSurface *pDC)
+void LWindow::OnPaint(GSurface *pDC)
 {
 	auto c = GetClient();
 	GCssTools Tools(this);
 	Tools.PaintContent(pDC, c);
 }
 
-bool GWindow::Obscured()
+bool LWindow::Obscured()
 {
 	RECT tRect;
 
@@ -622,12 +622,12 @@ bool GWindow::Obscured()
 	return isObscured;
 }
 
-bool GWindow::Visible()
+bool LWindow::Visible()
 {
 	return GView::Visible();
 }
 
-void GWindow::Visible(bool v)
+void LWindow::Visible(bool v)
 {
 	if (v)
 		PourAll();
@@ -638,7 +638,7 @@ void GWindow::Visible(bool v)
 
 		if (_View)
 		{
-			GWindowZoom z = d->Show;
+			LWindowZoom z = d->Show;
 			char *Cmd = 0;
 
 			GAutoPtr<WINDOWPLACEMENT> Wp(new WINDOWPLACEMENT);
@@ -701,7 +701,7 @@ static bool IsAppWnd(HWND h)
 	return true;
 }
 
-bool GWindow::IsActive()
+bool LWindow::IsActive()
 {
 	auto top = GetTopWindow(GetDesktopWindow());
 	while (top && !IsAppWnd(top))
@@ -709,14 +709,14 @@ bool GWindow::IsActive()
 	return top == _View;
 }
 
-bool GWindow::SetActive()
+bool LWindow::SetActive()
 {
 	if (!_View)
 		return false;
 	return SetWindowPos(_View, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE) != 0;
 }
 
-void GWindow::PourAll()
+void LWindow::PourAll()
 {
 	GRegion Client(GetClient());
 	GRegion Update;
@@ -847,7 +847,7 @@ public:
 	}
 };
 
-GMessage::Result GWindow::OnEvent(GMessage *Msg)
+GMessage::Result LWindow::OnEvent(GMessage *Msg)
 {
 	int Status = 0;
 
@@ -973,7 +973,7 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 		{
 			if (Visible())
 			{
-				GWindowZoom z = d->Show;
+				LWindowZoom z = d->Show;
 				switch (Msg->a)
 				{
 					case SIZE_MINIMIZED:
@@ -1124,7 +1124,7 @@ GMessage::Result GWindow::OnEvent(GMessage *Msg)
 	return Status;
 }
 
-LPoint GWindow::GetDpi()
+LPoint LWindow::GetDpi()
 {
 	if (!d->Dpi.x)
 		d->Dpi.x = d->Dpi.y = LGetDpiForWindow(_View);
@@ -1132,14 +1132,14 @@ LPoint GWindow::GetDpi()
 	return d->Dpi;
 }
 
-LPointF GWindow::GetDpiScale()
+LPointF LWindow::GetDpiScale()
 {
 	auto Dpi = GetDpi();
 	LPointF r( Dpi.x / 96.0, Dpi.y / 96.0 );
 	return r;
 }
 
-GRect &GWindow::GetPos()
+GRect &LWindow::GetPos()
 {
 	if (_View && IsZoomed(_View))
 	{
@@ -1153,12 +1153,12 @@ GRect &GWindow::GetPos()
 	return Pos;
 }
 
-void GWindow::OnPosChange()
+void LWindow::OnPosChange()
 {
 	PourAll();
 }
 
-bool GWindow::RegisterHook(GView *Target, GWindowHookType EventType, int Priority)
+bool LWindow::RegisterHook(GView *Target, LWindowHookType EventType, int Priority)
 {
 	bool Status = false;
 	
@@ -1175,12 +1175,12 @@ bool GWindow::RegisterHook(GView *Target, GWindowHookType EventType, int Priorit
 	return Status;
 }
 
-GViewI *GWindow::GetDefault()
+GViewI *LWindow::GetDefault()
 {
 	return _Default;
 }
 
-void GWindow::SetDefault(GViewI *v)
+void LWindow::SetDefault(GViewI *v)
 {
 	#if WINNATIVE
 	GButton *Btn;
@@ -1194,7 +1194,7 @@ void GWindow::SetDefault(GViewI *v)
 	#endif
 }
 
-bool GWindow::UnregisterHook(GView *Target)
+bool LWindow::UnregisterHook(GView *Target)
 {
 	auto i = d->GetHookIndex(Target);
 	if (i >= 0)
@@ -1205,13 +1205,13 @@ bool GWindow::UnregisterHook(GView *Target)
 	return false;
 }
 
-bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
+bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 {
 	if (!Store || !FieldName)
 		return false;
 
 	#if DEBUG_SERIALIZE_STATE
-	LgiTrace("GWindow::SerializeState(%p, %s, %i)\n", Store, FieldName, Load);
+	LgiTrace("LWindow::SerializeState(%p, %s, %i)\n", Store, FieldName, Load);
 	#endif
 	if (Load)
 	{
@@ -1219,7 +1219,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 		if (Store->GetValue(FieldName, v) && v.Str())
 		{
 			GRect Position(0, 0, -1, -1);
-			GWindowZoom State = GZoomNormal;
+			LWindowZoom State = GZoomNormal;
 
 			#if DEBUG_SERIALIZE_STATE
 			LgiTrace("\t::SerializeState:%i v=%s\n", __LINE__, v.Str());
@@ -1235,7 +1235,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 					*Value++ = 0;
 
 					if (stricmp(Var, "State") == 0)
-						State = (GWindowZoom)atoi(Value);
+						State = (LWindowZoom)atoi(Value);
 					else if (stricmp(Var, "Pos") == 0)
 					{
 					    GRect r;
@@ -1338,7 +1338,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 	else
 	{
 		char s[256];
-		GWindowZoom State = GetZoom();
+		LWindowZoom State = GetZoom();
 		GRect Position;
 		
 		if (Handle())
@@ -1369,7 +1369,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 	return true;
 }
 
-void GWindow::OnTrayClick(GMouse &m)
+void LWindow::OnTrayClick(GMouse &m)
 {
 	if (m.Down() || m.IsContextMenu())
 	{

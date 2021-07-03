@@ -20,7 +20,7 @@
 /// 	Dlg.Serialize(Info, true);
 /// }
 /// \endcode
-class GFontSelect : public GDialog
+class GFontSelect : public LDialog
 {
 	struct GFontSelectPriv *d;
 	

@@ -12,15 +12,15 @@ LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
 ///
 /// This is the core object that all on screen windows inherit from. It encapsulates
 /// a HWND on Win32, a GtkWidget on Linux, and a NSView for Mac OS X. Used by
-/// itself it's not a top level window, for that see the GWindow class.
+/// itself it's not a top level window, for that see the LWindow class.
 ///
-/// To create a top level window see GWindow or GDialog.
+/// To create a top level window see LWindow or LDialog.
 ///
 /// For a GView with scroll bars use GLayout.
 ///
 class LgiClass GView : virtual public GViewI, virtual public GBase
 {
-	friend		class GWindow;
+	friend		class LWindow;
 	friend		class GLayout;
 	friend		class GControl;
 	friend		class LMenu;
@@ -28,10 +28,10 @@ class LgiClass GView : virtual public GViewI, virtual public GBase
 	friend		class GWnd;
 	friend		class GScrollBar;
 	friend		class GFileTarget;
-	friend		class GDialog;
+	friend		class LDialog;
 	friend		class GDragDropTarget;
 	friend		class GPopup;
-	friend		class GWindowPrivate;
+	friend		class LWindowPrivate;
 
 	friend		bool SysOnKey(GView *w, GMessage *m);
 
@@ -272,7 +272,7 @@ public:
 	// Properties
 	
 	/// Gets the top level window that this view belongs to
-	GWindow *GetWindow() override;
+	LWindow *GetWindow() override;
 	
 	/// Gets the parent view.
 	GViewI *GetParent() override;
@@ -294,8 +294,8 @@ public:
 	/// default the parent view receives the events.
 	virtual void SetNotify(GViewI *n) override;
 
-	/// \brief Each top level window (GWindow) has a lock. By calling this function
-	/// you lock the whole GWindow and all it's children.
+	/// \brief Each top level window (LWindow) has a lock. By calling this function
+	/// you lock the whole LWindow and all it's children.
 	bool Lock
 	(
 		/// The file name of the caller
@@ -306,7 +306,7 @@ public:
 		int TimeOut = -1
 	) override;
 	
-	/// Unlocks the GWindow and that this view belongs to.
+	/// Unlocks the LWindow and that this view belongs to.
 	void Unlock() override;
 
 	/// Add this view to the event target sink dispatch hash table.
@@ -667,7 +667,7 @@ public:
 	void OnPaint(GSurface *pDC) override;
 	/// \brief Called when a child view or view with it's SetNotify() set to this window changes.
 	///
-	/// The event by default will bubble up to the GWindow at the top of the window heirarchy visiting
+	/// The event by default will bubble up to the LWindow at the top of the window heirarchy visiting
 	/// each GView on the way. If it reaches a GView that processes it then the event stops propergating
 	/// up the heirarchy.
 	int OnNotify(GViewI *Ctrl, int Flags) override;

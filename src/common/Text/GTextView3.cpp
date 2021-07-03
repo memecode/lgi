@@ -447,7 +447,7 @@ GTextView3::GTextView3(	int Id,
 	r.ZOff(cx-1, cy-1);
 	r.Offset(x, y);
 	SetPos(r);
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 }
 
 GTextView3::~GTextView3()
@@ -2586,8 +2586,7 @@ void GTextView3::UpdateScrollBars(bool Reset)
 
 		int DisplayLines = Y() / LineY;
 		ssize_t Lines = GetLines();
-		// printf("SetLimits %i, %i\n", 0, (int)Lines);
-		VScroll->SetLimits(0, Lines);
+		VScroll->SetRange(GRange(0, Lines));
 		if (VScroll)
 		{
 			VScroll->SetPage(DisplayLines);

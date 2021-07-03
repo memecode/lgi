@@ -2,7 +2,7 @@
 #define _WEB_FLD_DLG_H_
 
 //////////////////////////////////////////////////////////////////////////////////
-class WebFldDlg : public GDialog
+class WebFldDlg : public LDialog
 {
 public:
 	char *Name;

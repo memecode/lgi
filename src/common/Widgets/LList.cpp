@@ -633,7 +633,7 @@ LList::LList(int id, int x, int y, int cx, int cy, const char *name)
 
 	GRect r(x, y, x+cx, y+cy);
 	SetPos(r);
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 }
 
 LList::~LList()
@@ -2239,7 +2239,7 @@ void LList::Empty()
 		if (VScroll)
 		{
 			VScroll->Value(0);
-			VScroll->SetLimits(0, -1);
+			VScroll->SetRange(GRange());
 		}
 
 		Invalidate();
@@ -2274,7 +2274,7 @@ void LList::RemoveAll()
 			// "SetLimits" can cause the VScroll object to
 			// be deleted and becoming NULL
 			VScroll->Value(0);
-			VScroll->SetLimits(0, -1);
+			VScroll->SetRange(GRange());
 		}
 
 		Invalidate();
@@ -2307,13 +2307,13 @@ void LList::UpdateScrollBars()
 			}
 
 			VScroll->SetPage(Vis);
-			VScroll->SetLimits(0, Items.Length() - 1);
+			VScroll->SetRange(GRange(0, Items.Length()));
 		}
 		
 		if (HScroll)
 		{
 			HScroll->SetPage(d->VisibleColumns);
-			HScroll->SetLimits(0, d->Columns - 1);
+			HScroll->SetRange(GRange(0, d->Columns));
 		}
 		
 		Processing = false;

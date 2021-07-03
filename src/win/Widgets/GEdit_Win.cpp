@@ -323,7 +323,7 @@ GMessage::Result GEdit::OnEvent(GMessage *Msg)
 		case WM_CREATE:
 		{
 			d->IgnoreNotify = false;
-			LgiResources::StyleElement(this);
+			LResources::StyleElement(this);
 			break;
 		}
 		case WM_LBUTTONDBLCLK:

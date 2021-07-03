@@ -97,7 +97,7 @@ GBitmap::GBitmap(int id, int x, int y, char *FileName, bool Async)
 	}
 
 	SetPos(r);
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 }
 
 GBitmap::~GBitmap()
@@ -183,7 +183,7 @@ void GBitmap::OnMouseClick(GMouse &m)
 {
 	if (!m.Down() && GetParent())
 	{
-		GDialog *Dlg = dynamic_cast<GDialog*>(GetParent());
+		LDialog *Dlg = dynamic_cast<LDialog*>(GetParent());
 		if (Dlg) Dlg->OnNotify(this, 0);
 	}
 }

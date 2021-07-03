@@ -1132,7 +1132,7 @@ GTree::GTree(int id, int x, int y, int cx, int cy, const char *name) :
 	SetStyle(GetStyle() | WS_CHILD | WS_VISIBLE | WS_TABSTOP);
 	#endif
 	SetTabStop(true);
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 }
 
 GTree::~GTree()
@@ -1228,7 +1228,7 @@ void GTree::_UpdateScrollBars()
 			// x scroll... in pixels
 			if (HScroll)
 			{
-				HScroll->SetLimits(0, d->Limit.x-1);
+				HScroll->SetRange(GRange(0, d->Limit.x));
 				HScroll->SetPage(Client.X());
 
 				int Max = d->Limit.x - Client.X();
@@ -1244,7 +1244,7 @@ void GTree::_UpdateScrollBars()
 				int All = (d->Limit.y + TREE_BLOCK - 1) / TREE_BLOCK;
 				int Visible = Client.Y() / TREE_BLOCK;
 
-				VScroll->SetLimits(0, All-1);
+				VScroll->SetRange(GRange(0, All));
 				VScroll->SetPage(Visible);
 
 				/* Why is this commented out? -fret Dec2018

@@ -290,10 +290,10 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	
 	Gtk::GtkTargetList *Targets = Gtk::gtk_target_list_new(&e[0], e.Length());
 	Gtk::GdkDragAction Action = EffectToDragAction(Effect);
-	GWindow *w = SourceWnd->GetWindow();
+	auto *w = SourceWnd->GetWindow();
 	if (!w)
 	{
-		LgiTrace("%s:%i - No GWindow.\n", _FL);
+		LgiTrace("%s:%i - No Window.\n", _FL);
 		return -1;
 	}
 

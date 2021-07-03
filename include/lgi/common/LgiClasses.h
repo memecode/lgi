@@ -79,7 +79,7 @@ public:
 ///
 /// The button pressed is returned as a index from the DoModal() function. Starting
 /// at '1'. i.e. Btn2 -> returns 2.
-class LgiClass GAlert : public GDialog
+class LgiClass GAlert : public LDialog
 {
 public:
 	/// Constructor

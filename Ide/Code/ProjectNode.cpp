@@ -25,7 +25,7 @@ const char *TypeNames[NodeMax] = {
 };
 
 //////////////////////////////////////////////////////////////////////////////////
-class FileProps : public GDialog
+class FileProps : public LDialog
 {
 public:
 	NodeType Type;

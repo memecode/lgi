@@ -97,7 +97,7 @@ int GCheckBox::SysOnNotify(int Msg, int Code)
 
 void GCheckBox::OnAttach()
 {
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 	OnStyleChange();
 	GView::OnAttach();
 }

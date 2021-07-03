@@ -495,7 +495,7 @@ public:
 	void Select(bool b);
 };
 
-class ProjectSettingsDlg : public GDialog
+class ProjectSettingsDlg : public LDialog
 {
 	IdeProjectSettingsPriv *d;
 	GTree *Tree;
@@ -693,7 +693,7 @@ public:
 			}
 		}
 		
-		return GDialog::OnNotify(Ctrl, Flags);
+		return LDialog::OnNotify(Ctrl, Flags);
 	}
 	
 	void OnSelect(SettingItem *si)

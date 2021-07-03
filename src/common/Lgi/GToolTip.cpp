@@ -79,7 +79,7 @@ public:
 			GMouse m;
 			if (t->Owner)
 			{
-				GWindow *Wnd = t->Owner->GetWindow();
+				auto *Wnd = t->Owner->GetWindow();
 				bool Active = Wnd ? Wnd->IsActive() : false;
 				
 				if (t->Owner->GetMouse(m))

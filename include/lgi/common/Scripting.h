@@ -409,7 +409,7 @@ public:
 };
 
 /// Debugger for vm script
-class GVmDebuggerWnd : public GWindow, public GVmDebugger
+class GVmDebuggerWnd : public LWindow, public GVmDebugger
 {
 	struct GScriptVmDebuggerPriv *d;
 

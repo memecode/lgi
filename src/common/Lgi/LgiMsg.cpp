@@ -22,7 +22,7 @@ void MsgCb(Gtk::GtkDialog *dialog, Gtk::gint response_id, Gtk::gpointer user_dat
 #import <Cocoa/Cocoa.h>
 #endif
 
-class GMsgDlg : public GDialog
+class GMsgDlg : public LDialog
 {
 public:
 	GMsgDlg()
@@ -73,7 +73,7 @@ public:
 			}
 		}
 		
-		return GDialog::OnViewKey(v, k);
+		return LDialog::OnViewKey(v, k);
 	}
 	
 	int OnNotify(GViewI *Ctrl, int f)
@@ -427,7 +427,7 @@ int LgiMsg(GViewI *Parent, const char *Str, const char *Title, int Type, ...)
 #if !LGI_STATIC
 void LDialogTextMsg(GViewI *Parent, const char *Title, GString Txt)
 {
-	GAutoPtr<GDialog> d(new GDialog);
+	GAutoPtr<LDialog> d(new LDialog);
 	if (d)
 	{
 		GTextLog *Log = NULL;

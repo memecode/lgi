@@ -8,7 +8,7 @@ GStatusBar::GStatusBar()
 	Name("LGI_StatusBar");
 	Raised(true);
 	_BorderSize = 1;
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 }
 
 GStatusBar::~GStatusBar()

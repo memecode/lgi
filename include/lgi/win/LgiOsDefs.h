@@ -264,7 +264,7 @@ typedef HWND OsView;
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs
-LgiFunc class GViewI *GWindowFromHandle(OsView hWnd);
+LgiFunc class GViewI *LWindowFromHandle(OsView hWnd);
 LgiFunc int GetMouseWheelLines();
 LgiFunc int WinPointToHeight(int Pt, HDC hDC = NULL);
 LgiFunc int WinHeightToPoint(int Ht, HDC hDC = NULL);

@@ -38,7 +38,7 @@ public:
 	}
 };
 
-class SysCharSupportPriv : public GLgiRes
+class SysCharSupportPriv : public LResourceLoad
 {
 public:
 	LList *Match, *NonMatch;

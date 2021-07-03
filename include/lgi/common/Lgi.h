@@ -92,11 +92,11 @@
 		return 0;
 	}
 	\endcode
-	Where 'MyWindow' is a class that inherits from GWindow. This class should initialize 
+	Where 'MyWindow' is a class that inherits from LWindow. This class should initialize 
 	the user interface for your application and then make itself visible. This is typically
 	done like this:
 	\code
-	class MyWindow : public GWindow
+	class MyWindow : public LWindow
 	{
 	public:
 		MyWindow()
@@ -133,7 +133,7 @@
 		<li> GTree
 		<li> etc...
 	</ul>
-	A GWindow will layout controls automatically according to the order you attach (GView::Attach) them.
+	A LWindow will layout controls automatically according to the order you attach (GView::Attach) them.
 	The first window gets to lay itself out anywhere in the client area, and once it's positioned itself,
 	the second window gets the area left over. And so on until the window is filled. There are a number of
 	helper functions for layout:
@@ -144,7 +144,7 @@
 	</ul>
 	Usually you attach a GToolBar first, as it will automatically slide in below the menu (if any). Then a
 	GStatusBar, if your going to need one. And finally a GSplitter or LList to fill out the rest of the space.
-	The standard method of attaching a view to a GWindow in the constructor of your window:
+	The standard method of attaching a view to a LWindow in the constructor of your window:
 	\code
 	GSplitter *s = new GSplitter;
 	if (s)
@@ -175,7 +175,7 @@
 	</ul>
 	To create your own custom dialog you derive from:
 	<ul>
-		<li> GDialog
+		<li> LDialog
 	</ul>
 	Throughout Lgi applications windows can be constructed from a variety of Controls (or Widgets, or Views)
 	that form the common methods for interacting with users and displaying information. Lgi has a rich set

@@ -1699,7 +1699,7 @@ GVmDebuggerWnd::~GVmDebuggerWnd()
 bool GVmDebuggerWnd::OnRequestClose(bool OsShuttingDown)
 {
 	if (!d->RunLoop)
-		return GWindow::OnRequestClose(OsShuttingDown);
+		return LWindow::OnRequestClose(OsShuttingDown);
 
 	d->RunLoop = false;
 	return false; // Wait for Run() to exit in it's own time.
@@ -2047,7 +2047,7 @@ int GVmDebuggerWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 	}
 
-	return GWindow::OnCommand(Cmd, Event, Wnd);
+	return LWindow::OnCommand(Cmd, Event, Wnd);
 }
 
 int GVmDebuggerWnd::OnNotify(GViewI *Ctrl, int Flags)
@@ -2131,12 +2131,12 @@ int GVmDebuggerWnd::OnNotify(GViewI *Ctrl, int Flags)
 		}
 	}
 	
-	return GWindow::OnNotify(Ctrl, Flags);
+	return LWindow::OnNotify(Ctrl, Flags);
 }
 
 GMessage::Param GVmDebuggerWnd::OnEvent(GMessage *Msg)
 {
-	return GWindow::OnEvent(Msg);
+	return LWindow::OnEvent(Msg);
 }
 
 /////////////////////////////////////////////////////////////////////////////

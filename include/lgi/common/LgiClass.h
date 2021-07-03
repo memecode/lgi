@@ -18,7 +18,7 @@ class GComponent;
 class GEvent;
 class GId;
 class GApp;
-class GWindow;
+class LWindow;
 class GWin32Class;
 class GView;
 class GLayout;
@@ -35,7 +35,7 @@ class GStatusBar;
 class GToolColour;
 class GScrollBar;
 class GImageList;
-class GDialog;
+class LDialog;
 
 // General objects
 class LgiClass GBase

@@ -392,7 +392,7 @@ public:
 					// First find the parent LGI window
 					HWND hWnd = hMouseOver;
 					GViewI *v = 0;
-					while (hWnd && !(v = GWindowFromHandle(hMouseOver)))
+					while (hWnd && !(v = LWindowFromHandle(hMouseOver)))
 					{
 						HWND w = ::GetParent(hWnd);
 						if (w)
@@ -401,7 +401,7 @@ public:
 					}
 
 					// Get the window...
-					GWindow *w = v ? v->GetWindow() : 0;
+					auto *w = v ? v->GetWindow() : 0;
 
 					// Post the event to the window
 					PostEvent(w ? w->Handle() : hWnd, M_HANDLEMOUSEMOVE, MAKELONG((short) p.x, (short) p.y), (LPARAM)hMouseOver);
@@ -544,9 +544,9 @@ public:
 
 GPopup::GPopup(GView *owner)
 	#if LGI_CARBON
-	: GWindow(CreateBorderlessWindow())
+	: LWindow(CreateBorderlessWindow())
 	#elif defined(__GTK_H__)
-	: GWindow(gtk_window_new(GTK_WINDOW_POPUP))
+	: LWindow(gtk_window_new(GTK_WINDOW_POPUP))
 	#endif
 {
 	d = new GPopupPrivate;
@@ -688,7 +688,7 @@ bool GPopup::Attach(GViewI *p)
 {
 	#if defined(LGI_CARBON)
 	
-	return GWindow::Attach(NULL);
+	return LWindow::Attach(NULL);
 	
 	#else
 	
@@ -714,7 +714,7 @@ bool GPopup::Attach(GViewI *p)
 		}
 	}
 	gtk_window_set_decorated(WindowHandle(), FALSE);
-	return GWindow::Attach(p);
+	return LWindow::Attach(p);
 
 	#endif
 
@@ -742,10 +742,10 @@ void GPopup::Visible(bool i)
 	}
 	else
 	{
-		#if !LGI_POPUP_GWINDOW
+		#if !LGI_POPUP_LWINDOW
 		// When this popup hides and we have the keyboard focus... move the focus
-		// up to the first parent view. If LGI_POPUP_GWINDOW is true, this won't
-		// work because each GWindow has it's own independant focus. Right?
+		// up to the first parent view. If LGI_POPUP_LWINDOW is true, this won't
+		// work because each LWindow has it's own independant focus. Right?
 		auto Wnd = GetWindow();
 		if (Wnd)
 		{
@@ -808,7 +808,7 @@ void GPopup::Visible(bool i)
 		#endif
 	
 		#ifdef LGI_SDL
-			GWindow *TopWnd = LgiApp->AppWnd;
+			auto *TopWnd = LgiApp->AppWnd;
 			if (i && TopWnd)
 			{
 				if (!TopWnd->HasView(this))
@@ -852,7 +852,7 @@ void GPopup::Visible(bool i)
 		#elif LGI_CARBON
 	
 			SetAlwaysOnTop(true);
-			GWindow::Visible(i);
+			LWindow::Visible(i);
 	
 		#elif LGI_COCOA
 	
@@ -951,8 +951,8 @@ bool GPopup::Visible()
 	    
     #endif
 
-	#if LGI_POPUP_GWINDOW
-	bool v = GWindow::Visible();
+	#if LGI_POPUP_LWINDOW
+	bool v = LWindow::Visible();
 	#else
 	bool v = GView::Visible();
 	#endif

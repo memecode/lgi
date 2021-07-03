@@ -4,7 +4,7 @@
 #include "resdefs.h"
 #include "lgi\common\SubProcess.h"
 static GString TemplatesPath;
-class NewProjFromTemplate : public GDialog
+class NewProjFromTemplate : public LDialog
 {
 public:
 	NewProjFromTemplate(GViewI *parent)

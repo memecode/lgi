@@ -539,7 +539,7 @@ GToolButton::GToolButton(int Bx, int By)
 	TipId = -1;
 
 	_BorderSize = 0;
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 }
 
 GToolButton::~GToolButton()
@@ -1022,7 +1022,7 @@ GToolBar::GToolBar()
 	d->ImgList = 0;
 
 	GetCss(true)->BackgroundColor(LColour(L_MED).Mix(GColour::Black, 0.05f));
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 }
 
 GToolBar::~GToolBar()

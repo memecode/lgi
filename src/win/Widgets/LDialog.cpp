@@ -19,7 +19,7 @@
 
 #define USE_DIALOGBOXINDIRECTPARAM         0
 
-struct GDialogPriv
+struct LDialogPriv
 {
 	bool IsModal, IsModeless, _Resizable;
 	int ModalStatus;
@@ -38,7 +38,7 @@ struct GDialogPriv
 
 	#endif
 
-    GDialogPriv()
+    LDialogPriv()
     {
         #if USE_DIALOGBOXINDIRECTPARAM
     	Mem = 0;
@@ -50,7 +50,7 @@ struct GDialogPriv
 		BtnId = -1;
     }
     
-    ~GDialogPriv()
+    ~LDialogPriv()
     {
     	#if USE_DIALOGBOXINDIRECTPARAM
         DeleteObj(Mem);
@@ -106,10 +106,10 @@ short *DlgPadToDWord(short *A, bool Seek = false)
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GDialog::GDialog()
+LDialog::LDialog()
 	: ResObject(Res_Dialog)
 {
-	d = new GDialogPriv;
+	d = new LDialogPriv;
 	_Window = this;
 	Name("Dialog");
 
@@ -122,15 +122,15 @@ GDialog::GDialog()
 	#endif
 }
 
-GDialog::~GDialog()
+LDialog::~LDialog()
 {
     DeleteObj(d);
 }
 
-bool GDialog::LoadFromResource(int Resource, char *TagList)
+bool LDialog::LoadFromResource(int Resource, char *TagList)
 {
 	GAutoString n;
-	bool Status = GLgiRes::LoadFromResource(Resource, this, &Pos, &n, TagList);
+	bool Status = LResourceLoad::LoadFromResource(Resource, this, &Pos, &n, TagList);
 	if (Status && n)
 		Name(n);
 	return Status;
@@ -140,7 +140,7 @@ LRESULT CALLBACK DlgRedir(HWND hWnd, UINT m, WPARAM a, LPARAM b)
 {
 	if (m == WM_INITDIALOG)
 	{
-		GDialog *NewWnd = (GDialog*) b;
+		LDialog *NewWnd = (LDialog*) b;
 		NewWnd->_View = hWnd;
 		#if _MSC_VER >= _MSC_VER_VS2005
         SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)(GViewI*)NewWnd);
@@ -166,17 +166,17 @@ LRESULT CALLBACK DlgRedir(HWND hWnd, UINT m, WPARAM a, LPARAM b)
 	return 0;
 }
 
-bool GDialog::OnRequestClose(bool OsClose)
+bool LDialog::OnRequestClose(bool OsClose)
 {
 	return true;
 }
 
-bool GDialog::IsModal()
+bool LDialog::IsModal()
 {
 	return d->IsModal;
 }
 
-int GDialog::DoModal(OsView ParentHnd)
+int LDialog::DoModal(OsView ParentHnd)
 {
 	int Status = -1;
 
@@ -263,7 +263,7 @@ int GDialog::DoModal(OsView ParentHnd)
 	{
 	    AttachChildren();
 	    
-	    GWindow *ParentWnd = dynamic_cast<GWindow*>(p);
+	    LWindow *ParentWnd = dynamic_cast<LWindow*>(p);
 	    if (ParentWnd)
 	        ParentWnd->_Dialog = this;
 
@@ -312,7 +312,7 @@ int GDialog::DoModal(OsView ParentHnd)
 
 static char *BaseStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-int GDialog::DoModeless()
+int LDialog::DoModeless()
 {
 	int Status = -1;
 
@@ -430,7 +430,7 @@ int GDialog::DoModeless()
 	return Status;
 }
 
-GMessage::Result GDialog::OnEvent(GMessage *Msg)
+GMessage::Result LDialog::OnEvent(GMessage *Msg)
 {
 	switch (Msg->m)
 	{
@@ -452,7 +452,7 @@ GMessage::Result GDialog::OnEvent(GMessage *Msg)
 			if (!_Default)
 				SetDefault(FindControl(IDOK));
 
-			LgiResources::StyleElement(this);			
+			LResources::StyleElement(this);			
 
 			// This was commented out. I've re-introduced it until such time
 			// as there is a good reason not to have it enabled. If such a reason
@@ -461,7 +461,7 @@ GMessage::Result GDialog::OnEvent(GMessage *Msg)
 
     		#if USE_DIALOGBOXINDIRECTPARAM
 			GViewI *v = LgiApp->GetFocus();
-			GWindow *w = v ? v->GetWindow() : 0;
+			LWindow *w = v ? v->GetWindow() : NULL;
 			if (v && (w != v) && (w == this))
 			{
 				// Application has set the focus, don't set to default focus.
@@ -474,21 +474,21 @@ GMessage::Result GDialog::OnEvent(GMessage *Msg)
 			}
 			#endif
 			
-			// If we don't return true here the GWindow::OnEvent handler for
+			// If we don't return true here the LWindow::OnEvent handler for
 			// WM_CREATE will call OnCreate again.
 			return true;
 		}
 	}
 
-    return GWindow::OnEvent(Msg);
+    return LWindow::OnEvent(Msg);
 }
 
-int GDialog::GetButtonId()
+int LDialog::GetButtonId()
 {
 	return d->BtnId;
 }
 
-int GDialog::OnNotify(GViewI *Ctrl, int Flags)
+int LDialog::OnNotify(GViewI *Ctrl, int Flags)
 {
 	GButton *b = dynamic_cast<GButton*>(Ctrl);
 	if (b)
@@ -504,7 +504,7 @@ int GDialog::OnNotify(GViewI *Ctrl, int Flags)
 	return 0;
 }
 
-void GDialog::Quit(bool DontDelete)
+void LDialog::Quit(bool DontDelete)
 {
 	if (d->IsModal)
 		EndModal(0);
@@ -512,7 +512,7 @@ void GDialog::Quit(bool DontDelete)
 		GView::Quit(DontDelete);
 }
 
-void GDialog::OnPosChange()
+void LDialog::OnPosChange()
 {
     if (Children.Length() == 1)
     {
@@ -527,7 +527,7 @@ void GDialog::OnPosChange()
     }
 }
 
-void GDialog::EndModal(int Code)
+void LDialog::EndModal(int Code)
 {
 	if (d->IsModal)
 	{
@@ -540,7 +540,7 @@ void GDialog::EndModal(int Code)
 	}
 }
 
-void GDialog::EndModeless(int Code)
+void LDialog::EndModeless(int Code)
 {
 	if (d->IsModeless)
 	{

@@ -34,13 +34,13 @@
 #include "lgi/common/AutoPtr.h"
 #include "lgi/common/FontCache.h"
 
-class LgiResources;
+class LResources;
 
 /// A string resource
 /// \ingroup Resources
 class LgiClass LgiStringRes
 {
-	LgiResources *Res;
+	LResources *Res;
 
 public:
 	static const char *CodePage;
@@ -52,10 +52,10 @@ public:
 	char *Tag;
 	// bool IsString;
 
-	LgiStringRes(LgiResources *res);
+	LgiStringRes(LResources *res);
 	~LgiStringRes();
 
-	LgiResources *GetRes() { return Res; }
+	LResources *GetRes() { return Res; }
 	bool Read(GXmlTag *Tag, ResFileFormat Format);
 };
 
@@ -63,17 +63,17 @@ public:
 /// \ingroup Resources
 class LgiClass LgiDialogRes
 {
-	LgiResources *Res;
+	LResources *Res;
 
 public:
 	GXmlTag *Dialog;
 	LgiStringRes *Str;
 	GRect Pos;
 
-	LgiDialogRes(LgiResources *res);
+	LgiDialogRes(LResources *res);
 	~LgiDialogRes();
 
-	LgiResources *GetRes() { return Res; }
+	LResources *GetRes() { return Res; }
 	bool Read(GXmlTag *Tag, ResFileFormat Format);
 	char *Name() { return (Str) ? Str->Str : 0; }
 	int Id() { return (Str) ? Str->Id : 0; }
@@ -85,23 +85,23 @@ public:
 /// \ingroup Resources
 class LgiClass LgiMenuRes : public GBase
 {
-	LgiResources *Res;
+	LResources *Res;
 	LHashTbl<IntKey<int>, LgiStringRes*> Strings;
 
 public:
 	GXmlTag *Tag;
 
-	LgiMenuRes(LgiResources *res);
+	LgiMenuRes(LResources *res);
 	~LgiMenuRes();
 
 	bool Read(GXmlTag *Tag, ResFileFormat Format);
-	LgiResources *GetRes() { return Res; }
+	LResources *GetRes() { return Res; }
 	LgiStringRes *GetString(GXmlTag *Tag);
 };
 
 /// A resource collection.
 /// \ingroup Resources
-class LgiClass LgiResources : public ResFactory
+class LgiClass LResources : public ResFactory
 {
 	friend class GLgiRes;
 	friend class LMenu;
@@ -143,7 +143,7 @@ public:
 	void SetThemeFolder(const char *f);
 
 	/// The constructor
-	LgiResources
+	LResources
 	(
 		/// [optional] The filename to use.
 		const char *FileName = NULL,
@@ -152,7 +152,7 @@ public:
 		/// [optional] Folder for theming info
 		const char *ThemeFolder = NULL
 	);
-	virtual ~LgiResources();
+	virtual ~LResources();
 
 	/// Loads a dialog from the resource into the UI.
 	/// \return true on success.
@@ -255,7 +255,7 @@ public:
 
 /// Loads a resource and returns a pointer to it.
 /// \ingroup Resources
-LgiExtern LgiResources *LgiGetResObj(bool Warn = false, const char *filename = 0, bool LoadOnDemand = true);
+LgiExtern LResources *LgiGetResObj(bool Warn = false, const char *filename = 0, bool LoadOnDemand = true);
 
 /// This class is used to style GView controls with CSS
 class LgiClass GViewCssCb : public GCss::ElementCallback<GViewI>

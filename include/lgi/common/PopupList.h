@@ -43,7 +43,7 @@ protected:
 	bool Registered;
 	PositionType PosType;
 
-	GWindow *HookWnd()
+	LWindow *HookWnd()
 	{
 		#if defined(LGI_CARBON)// || defined(__GTK_H__)
 		return GetWindow();

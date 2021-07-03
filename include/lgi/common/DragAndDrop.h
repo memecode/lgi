@@ -230,8 +230,8 @@ private:
 	GDragFormats Formats;
 
 	#ifdef __GTK_H__
-	friend Gtk::gboolean GWindowDragDataDrop(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::guint time, class GWindow *Wnd);
-	friend void GWindowDragDataReceived(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::GtkSelectionData *data, Gtk::guint info, Gtk::guint time, GWindow *Wnd);
+	friend Gtk::gboolean LWindowDragDataDrop(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::guint time, class LWindow *Wnd);
+	friend void LWindowDragDataReceived(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::GtkSelectionData *data, Gtk::guint info, Gtk::guint time, LWindow *Wnd);
 	GArray<GDragData> Data;
 	#endif
 

@@ -397,7 +397,7 @@ public:
 #define DRAG_COL_ALPHA					0xc0
 #define LINUX_TRANS_COL					0
 
-class GDragColumn : public GWindow
+class GDragColumn : public LWindow
 {
 	GItemContainer *List;
 	GItemColumn *Col;

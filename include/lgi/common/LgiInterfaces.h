@@ -22,7 +22,7 @@ class GSurface;
 class GViewI;
 class GMouse;
 class GKey;
-class GWindow;
+class LWindow;
 class GViewFill;
 class GView;
 class GVariant;
@@ -412,7 +412,7 @@ public:
 	virtual bool AttachChildren() = 0;
 	virtual bool Detach() = 0;
 	virtual bool IsAttached() = 0;
-	virtual GWindow *GetWindow() = 0;
+	virtual LWindow *GetWindow() = 0;
 	virtual GViewI *GetParent() = 0;
 	virtual void SetParent(GViewI *p) = 0;
 	virtual void Quit(bool DontDelete = false) = 0;

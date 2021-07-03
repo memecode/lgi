@@ -75,7 +75,7 @@ GButton::GButton(int id, int x, int y, int cx, int cy, const char *name) :
 
 GButton::~GButton()
 {
-	GWindow *w = GetWindow();
+	LWindow *w = GetWindow();
 	if (w && w->GetDefault() == (GViewI*)this)
 	{
 		w->SetDefault(NULL);
@@ -122,7 +122,7 @@ void GButton::OnCreate()
 
 void GButton::OnAttach()
 {
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 }
 
 bool GButton::Default()

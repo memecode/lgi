@@ -69,7 +69,7 @@ GCheckBox::~GCheckBox()
 #include "Uxtheme.h"
 void GCheckBox::OnAttach()
 {
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 	OnStyleChange();
 	GView::OnAttach();
 

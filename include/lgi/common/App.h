@@ -102,7 +102,7 @@ class LgiClass GApp : virtual public GAppI,
 	public OsApplication
 {
 	friend class GView;
-	friend class GWindow;
+	friend class LWindow;
 
 public:
 	typedef LHashTbl<ConstStrKey<char>, GWin32Class*> ClassContainer;
@@ -157,7 +157,7 @@ public:
 	GFont *SystemBold;
 	
 	/// Pointer to the applications main window
-	GWindow *AppWnd;
+	LWindow *AppWnd;
 
 	/// Returns true if the GApp object initialized correctly
 	bool IsOk();
@@ -296,10 +296,10 @@ public:
 		bool InvalidateRect(GRect &r);
 		
 		/// Push a new window to the top of the window stack
-		bool PushWindow(GWindow *w);
+		bool PushWindow(LWindow *w);
 
 		/// Remove the top most window
-		GWindow *PopWindow();
+		LWindow *PopWindow();
 
 		/// Sets up mouse tracking beyond the current window...
 		void CaptureMouse(bool capture);

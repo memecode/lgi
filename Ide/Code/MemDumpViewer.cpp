@@ -115,7 +115,7 @@ char *Strnstr(char *s, const char *find, int len)
 }
 */
 
-class DumpView : public GWindow
+class DumpView : public LWindow
 {
 	AppWnd *App;
 	LList *Lst;

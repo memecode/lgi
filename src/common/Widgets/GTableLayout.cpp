@@ -644,7 +644,7 @@ bool TableCell::SetVariant(const char *Name, GVariant &Value, char *Array)
 		{
 			ClassName = Value.Str();
 			
-			LgiResources *r = LgiGetResObj();
+			LResources *r = LgiGetResObj();
 			if (r)
 			{	
 				GCss::SelArray *a = r->CssStore.ClassMap.Find(ClassName);
@@ -2042,7 +2042,7 @@ void GTableLayout::OnFocus(bool b)
 
 void GTableLayout::OnCreate()
 {
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 	AttachChildren();
 }
 

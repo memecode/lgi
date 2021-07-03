@@ -384,7 +384,7 @@ int64 GTabView::Value()
 
 void GTabView::OnCreate()
 {
-	LgiResources::StyleElement(this);			
+	LResources::StyleElement(this);			
 
 	d->Depth = 0;
 	GViewI *p = this;
@@ -1201,7 +1201,7 @@ GTabPage::GTabPage(const char *name) : ResObject(Res_Tab)
 	CreateClassW32(GetClass(), 0, CS_HREDRAW | CS_VREDRAW);
 	#endif
 
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 }
 
 GTabPage::~GTabPage()
@@ -1505,7 +1505,7 @@ bool GTabPage::LoadFromResource(int Res)
 		ch.Delete(v, true);
 	}
 	
-	bool Status = GLgiRes::LoadFromResource(Res, this, 0, &n);
+	bool Status = LResourceLoad::LoadFromResource(Res, this, 0, &n);
 	if (ValidStr(n))
 		Name(n);
 

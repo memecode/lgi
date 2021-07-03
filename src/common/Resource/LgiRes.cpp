@@ -83,7 +83,7 @@ public:
 const char *LgiStringRes::CodePage = 0;
 GLanguage *LgiStringRes::CurLang = 0;
 
-LgiStringRes::LgiStringRes(LgiResources *res)
+LgiStringRes::LgiStringRes(LResources *res)
 {
 	Res = res;
 	Ref = 0;
@@ -269,7 +269,7 @@ public:
 
 /// A collection of resources
 /// \ingroup Resources
-class GResourceContainer : public GArray<LgiResources*>
+class GResourceContainer : public GArray<LResources*>
 {
 public:
 	~GResourceContainer()
@@ -279,9 +279,9 @@ public:
 };
 
 static GResourceContainer ResourceOwner;
-bool LgiResources::LoadStyles = false;
+bool LResources::LoadStyles = false;
 
-LgiResources::LgiResources(const char *FileName, bool Warn, const char *ThemeFolder)
+LResources::LResources(const char *FileName, bool Warn, const char *ThemeFolder)
 {
 	d = new LgiResourcesPrivate;
 	ScriptEngine = 0;
@@ -405,7 +405,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 	}
 }
 
-LgiResources::~LgiResources()
+LResources::~LResources()
 {
 	ResourceOwner.Delete(this);
 	LanguageNames.DeleteArrays();
@@ -415,13 +415,13 @@ LgiResources::~LgiResources()
 	DeleteObj(d);
 }
 
-const char *LgiResources::GetThemeFolder()
+const char *LResources::GetThemeFolder()
 {
 	return d->ThemeFolder;
 }
 
-bool LgiResources::DefaultColours = true;
-void LgiResources::SetThemeFolder(const char *f)
+bool LResources::DefaultColours = true;
+void LResources::SetThemeFolder(const char *f)
 {
 	d->ThemeFolder = f;
 
@@ -442,7 +442,7 @@ void LgiResources::SetThemeFolder(const char *f)
 	}		
 }
 
-bool LgiResources::StyleElement(GViewI *v)
+bool LResources::StyleElement(GViewI *v)
 {
 	if (!v) return false;
 	if (!LoadStyles) return true;
@@ -472,17 +472,17 @@ bool LgiResources::StyleElement(GViewI *v)
 	return true;
 }
 
-ResFileFormat LgiResources::GetFormat()
+ResFileFormat LResources::GetFormat()
 {
 	return d->Format;
 }
 
-bool LgiResources::IsOk()
+bool LResources::IsOk()
 {
 	return d->Ok;
 }
 
-void LgiResources::AddLang(GLanguageId id)
+void LResources::AddLang(GLanguageId id)
 {
 	// search through id's...
 	for (int i=0; i<Languages.Length(); i++)
@@ -495,12 +495,12 @@ void LgiResources::AddLang(GLanguageId id)
 	Languages.Add(id);
 }
 
-char *LgiResources::GetFileName()
+char *LResources::GetFileName()
 {
 	return d->File;
 }
 
-bool LgiResources::Load(const char *FileName)
+bool LResources::Load(const char *FileName)
 {
 	if (!FileName)
 	{
@@ -646,12 +646,12 @@ bool LgiResources::Load(const char *FileName)
 	return true;
 }
 
-LgiStringRes *LgiResources::StrFromRef(int Ref)
+LgiStringRes *LResources::StrFromRef(int Ref)
 {
 	return d->StrRef.Find(Ref);
 }
 
-char *LgiResources::StringFromId(int Id)
+char *LResources::StringFromId(int Id)
 {
 	LgiStringRes *NotStr = 0;
 	LgiStringRes *sr;
@@ -665,7 +665,7 @@ char *LgiResources::StringFromId(int Id)
 	return NotStr ? NotStr->Str : 0;
 }
 
-char *LgiResources::StringFromRef(int Ref)
+char *LResources::StringFromRef(int Ref)
 {
 	LgiStringRes *s = d->StrRef.Find(Ref);
 	return s ? s->Str : 0;
@@ -708,7 +708,7 @@ public:
     }
 };
 
-ResObject *LgiResources::CreateObject(GXmlTag *t, ResObject *Parent)
+ResObject *LResources::CreateObject(GXmlTag *t, ResObject *Parent)
 {
 	ResObject *Wnd = 0;
 	if (t && t->GetTag())
@@ -849,7 +849,7 @@ ResObject *LgiResources::CreateObject(GXmlTag *t, ResObject *Parent)
 	return Wnd;
 }
 
-void LgiResources::Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2)
+void LResources::Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2)
 {
 	GItemColumn *Col = dynamic_cast<GItemColumn*>(Obj);
 	if (Col)
@@ -867,7 +867,7 @@ void LgiResources::Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2)
 	}
 }
 
-void LgiResources::Res_SetPos(ResObject *Obj, char *s)
+void LResources::Res_SetPos(ResObject *Obj, char *s)
 {
 	if (Obj && s)
 	{
@@ -879,7 +879,7 @@ void LgiResources::Res_SetPos(ResObject *Obj, char *s)
 	}
 }
 
-bool LgiResources::Res_GetProperties(ResObject *Obj, GDom *Props)
+bool LResources::Res_GetProperties(ResObject *Obj, GDom *Props)
 {
 	// this is a read-only system...
 	return false;
@@ -927,7 +927,7 @@ struct ResObjectCallback : public GCss::ElementCallback<ResObject>
 	}
 };
 
-bool LgiResources::Res_SetProperties(ResObject *Obj, GDom *Props)
+bool LResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 {
 	GView *v = dynamic_cast<GView*>(Obj);
 	if (!v || !Props)
@@ -976,7 +976,7 @@ bool LgiResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 	return true;
 }
 
-GRect LgiResources::Res_GetPos(ResObject *Obj)
+GRect LResources::Res_GetPos(ResObject *Obj)
 {
 	GView *w = CastToGWnd(Obj);
 	if (w)
@@ -987,12 +987,12 @@ GRect LgiResources::Res_GetPos(ResObject *Obj)
 	return GRect(0, 0, 0, 0);
 }
 
-int LgiResources::Res_GetStrRef(ResObject *Obj)
+int LResources::Res_GetStrRef(ResObject *Obj)
 {
 	return 0;
 }
 
-bool LgiResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
+bool LResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 {
 	LgiStringRes *s = d->StrRef.Find(Ref);
 	if (!s)
@@ -1030,7 +1030,7 @@ bool LgiResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 	return true;
 }
 
-void LgiResources::Res_Attach(ResObject *Obj, ResObject *Parent)
+void LResources::Res_Attach(ResObject *Obj, ResObject *Parent)
 {
 	GView *o = CastToGWnd(Obj);
 	GView *p = CastToGWnd(Parent);
@@ -1064,7 +1064,7 @@ void LgiResources::Res_Attach(ResObject *Obj, ResObject *Parent)
 	}
 }
 
-bool LgiResources::Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep)
+bool LResources::Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep)
 {
 	GView *o = CastToGWnd(Obj);
 	if (o && l)
@@ -1080,7 +1080,7 @@ bool LgiResources::Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep
 	return false;
 }
 
-void LgiResources::Res_Append(ResObject *Obj, ResObject *Parent)
+void LResources::Res_Append(ResObject *Obj, ResObject *Parent)
 {
 	if (Obj && Parent)
 	{
@@ -1100,7 +1100,7 @@ void LgiResources::Res_Append(ResObject *Obj, ResObject *Parent)
 	}
 }
 
-bool LgiResources::Res_GetItems(ResObject *Obj, List<ResObject> *l)
+bool LResources::Res_GetItems(ResObject *Obj, List<ResObject> *l)
 {
 	if (Obj && l)
 	{
@@ -1127,13 +1127,13 @@ bool LgiResources::Res_GetItems(ResObject *Obj, List<ResObject> *l)
 	return false;
 }
 
-GDom *LgiResources::Res_GetDom(ResObject *Obj)
+GDom *LResources::Res_GetDom(ResObject *Obj)
 {
 	return dynamic_cast<GDom*>(Obj);
 }
 
 ///////////////////////////////////////////////////////
-LgiDialogRes::LgiDialogRes(LgiResources *res)
+LgiDialogRes::LgiDialogRes(LResources *res)
 {
 	Res = res;
 	Dialog = 0;
@@ -1172,7 +1172,7 @@ bool LgiDialogRes::Read(GXmlTag *t, ResFileFormat Format)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-LgiMenuRes::LgiMenuRes(LgiResources *res)
+LgiMenuRes::LgiMenuRes(LResources *res)
 {
 	Res = res;
 	Tag = 0;
@@ -1224,7 +1224,7 @@ bool LgiMenuRes::Read(GXmlTag *t, ResFileFormat Format)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Dialog
-bool GLgiRes::LoadFromResource(int Resource, GViewI *Parent, GRect *Pos, GAutoString *Name, char *TagList)
+bool LResourceLoad::LoadFromResource(int Resource, GViewI *Parent, GRect *Pos, GAutoString *Name, char *TagList)
 {
 	LgiGetResObj();
 
@@ -1352,7 +1352,7 @@ GLanguage *LGetLanguageId()
 const char *LgiLoadString(int Res, const char *Default)
 {
 	char *s = 0;
-	LgiResources *r = LgiGetResObj();
+	LResources *r = LgiGetResObj();
 	if (r)
 	{
 		// use to test for non-resource strings
@@ -1366,7 +1366,7 @@ const char *LgiLoadString(int Res, const char *Default)
 	return Default;
 }
 
-bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoString *Name, GEventsI *Engine, char *TagList)
+bool LResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoString *Name, GEventsI *Engine, char *TagList)
 {
 	bool Status = false;
 
@@ -1401,7 +1401,7 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 
 					// Do some scaling for the monitor's DPI
 					LPoint Dpi;
-					GWindow *Wnd = Parent ? Parent->GetWindow() : NULL;
+					auto *Wnd = Parent ? Parent->GetWindow() : NULL;
 					if (Wnd)
 						Dpi = Wnd->GetDpi();
 					else
@@ -1588,7 +1588,7 @@ bool LMenu::Load(GView *w, const char *Res, const char *TagList)
 {
 	bool Status = false;
 
-	LgiResources *r = LgiGetResObj();
+	LResources *r = LgiGetResObj();
 	if (r)
 	{
 		TagHash Tags(TagList);
@@ -1609,7 +1609,7 @@ bool LMenu::Load(GView *w, const char *Res, const char *TagList)
 	return Status;
 }
 
-LgiResources *LgiGetResObj(bool Warn, const char *filename, bool LoadOnDemand)
+LResources *LgiGetResObj(bool Warn, const char *filename, bool LoadOnDemand)
 {
 	// Look for existing file?
 	if (filename && LoadOnDemand)
@@ -1619,7 +1619,7 @@ LgiResources *LgiGetResObj(bool Warn, const char *filename, bool LoadOnDemand)
 				return r;
 
 		// Load the new file...
-		return new LgiResources(filename, Warn);
+		return new LResources(filename, Warn);
 	}
 
 	if (ResourceOwner.Length())
@@ -1627,5 +1627,5 @@ LgiResources *LgiGetResObj(bool Warn, const char *filename, bool LoadOnDemand)
 	if (!LoadOnDemand)
 		return NULL;
 
-	return new LgiResources(filename, Warn);
+	return new LResources(filename, Warn);
 }

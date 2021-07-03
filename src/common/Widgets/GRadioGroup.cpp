@@ -75,7 +75,7 @@ GRadioGroup::GRadioGroup(int id, int x, int y, int cx, int cy, const char *name,
 	SetPos(r);
 	SetId(id);
 	d->Val = Init;
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 }
 
 GRadioGroup::~GRadioGroup()
@@ -195,7 +195,7 @@ bool GRadioGroup::OnLayout(GViewLayoutInfo &Inf)
 
 void GRadioGroup::OnAttach()
 {
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 	OnStyleChange();
 	GView::OnAttach();
 }
@@ -463,7 +463,7 @@ GRadioButton::~GRadioButton()
 
 void GRadioButton::OnAttach()
 {
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 	OnStyleChange();
 	GView::OnAttach();
 }

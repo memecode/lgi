@@ -8,7 +8,7 @@ typedef void (*GInputCallback)(class GInput *Dlg, GViewI *EditCtrl, void *Param)
 /// This class displays a window with a message and an edit box to enter a string.
 /// Once constructed, use the GDialog::DoModal() call to run the input window, it
 /// returns TRUE if 'Ok' is clicked.
-class LgiClass GInput : public GDialog
+class LgiClass GInput : public LDialog
 {
 	GEdit *Edit;
 	GInputCallback Callback;

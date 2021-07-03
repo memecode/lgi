@@ -490,7 +490,7 @@ void GButton::OnCreate()
 
 void GButton::OnAttach()
 {
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 	OnStyleChange();
 	GView::OnAttach();
 

@@ -152,7 +152,7 @@ public:
 	}
 };
 
-class MissingFiles : public GDialog
+class MissingFiles : public LDialog
 {
 	IdeProject *Proj;
 	int SearchHnd;
@@ -382,7 +382,7 @@ public:
 			}
 		}
 
-		return GDialog::OnEvent(Msg);
+		return LDialog::OnEvent(Msg);
 	}
 };
 

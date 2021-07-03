@@ -432,7 +432,7 @@ public:
 
 This class contains LMenuItem's and LSubMenu's.
 
-A basic menu can be constructed inside a GWindow like this:
+A basic menu can be constructed inside a LWindow like this:
 \code
 Menu = new LMenu;
 if (Menu)
@@ -476,7 +476,7 @@ class LgiClass LMenu :
 {
 	friend class LSubMenu;
 	friend class LMenuItem;
-	friend class GWindow;
+	friend class LWindow;
 
 	class LMenuPrivate *d;
 

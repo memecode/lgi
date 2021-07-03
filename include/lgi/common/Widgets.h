@@ -15,7 +15,7 @@
 #define IDM_STATIC				-1
 
 /////////////////////////////////////////////////////////////////////////////////////////
-class GDialog;
+class LDialog;
 #if defined WIN32
 class GDlgFunc;
 #endif
@@ -39,7 +39,7 @@ class GTree;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 /// Resource loader
-class LgiClass GLgiRes
+class LgiClass LResourceLoad
 {
 public:
 	/// Loading a dialog from the resource collection
@@ -205,22 +205,22 @@ public:
 ///		<li> GRadioGroup (One of many selection using GRadioButton)
 ///		<li> GTabView (Containing GTabPage)
 /// </ul>
-class LgiClass GDialog :
-	public GWindow,
-	public GLgiRes,
+class LgiClass LDialog :
+	public LWindow,
+	public LResourceLoad,
 	public ResObject
 {
 	friend class GControl;
 
 private:
-    struct GDialogPriv *d;
+    struct LDialogPriv *d;
 
 public:
 	/// Constructor
-	GDialog();
+	LDialog();
 	
 	/// Destructor
-	~GDialog();
+	~LDialog();
 
 	const char *GetClass() { return "GDialog"; }
 
@@ -271,7 +271,7 @@ public:
 	int GetButtonId();
 	
 	#if defined(__GTK_H__)
-	friend Gtk::gboolean GtkDialogDestroy(Gtk::GtkWidget *widget, GDialog *This);
+	friend Gtk::gboolean GtkDialogDestroy(Gtk::GtkWidget *widget, LDialog *This);
     bool IsResizeable();
     void IsResizeable(bool r);
 	// Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
@@ -285,7 +285,7 @@ public:
 class LgiClass GControl :
 	public GView
 {
-	friend class GDialog;
+	friend class LDialog;
 
 protected:
 	#if defined BEOS

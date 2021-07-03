@@ -155,7 +155,7 @@ void GView::OnGtkRealize()
 		{
 			d->WantsFocus = false;
 			if (GetWindow())
-				GetWindow()->SetFocus(this, GWindow::GainFocus);
+				GetWindow()->SetFocus(this, LWindow::GainFocus);
 		}
 		
 		OnCreate();
@@ -202,9 +202,9 @@ void GView::_Delete()
 	if (_Capturing == this)
 		_Capturing = 0;
 	
-	GWindow *Wnd = GetWindow();
+	auto *Wnd = GetWindow();
 	if (Wnd && Wnd->GetFocus() == static_cast<GViewI*>(this))
-		Wnd->SetFocus(this, GWindow::ViewDelete);
+		Wnd->SetFocus(this, LWindow::ViewDelete);
 
 	if (LgiApp && LgiApp->AppWnd == this)
 	{
@@ -329,7 +329,7 @@ void LgiToGtkCursor(GViewI *v, LgiCursor c)
 	}
 	
 	OsView h = NULL;
-	GWindow *w = v->GetWindow();
+	auto *w = v->GetWindow();
 	if (w)
 		h = GTK_WIDGET(w->WindowHandle());
 	
@@ -604,7 +604,7 @@ GRect GtkGetPos(GtkWidget *w)
 
 bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 {
-	GWindow *ParWnd = GetWindow();
+	auto *ParWnd = GetWindow();
 	if (!ParWnd)
 		return false; // Nothing we can do till we attach
 	if (!InThread())
@@ -725,7 +725,7 @@ GMessage::Param GView::OnEvent(GMessage *Msg)
 	return 0;
 }
 
-LPoint GtkGetOrigin(GWindow *w)
+LPoint GtkGetOrigin(LWindow *w)
 {
 	auto Hnd = w->WindowHandle();
 	if (Hnd)
@@ -810,7 +810,7 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 	bool Status = true;
 	ThreadCheck();
 
-	GWindow *w = GetWindow();
+	auto *w = GetWindow();
 	GdkModifierType mask = (GdkModifierType)0;
 	auto display = gdk_display_get_default();
 	auto deviceManager = gdk_display_get_device_manager(display);
@@ -863,7 +863,7 @@ bool GView::IsAttached()
 	if (!w)
 		return false;
 
-	w = dynamic_cast<GWindow*>(this);
+	w = dynamic_cast<LWindow*>(this);
 	if (!w)
 	{
 		auto p = GetParent();
@@ -897,7 +897,7 @@ bool GView::Attach(GViewI *parent)
 	{
 		auto w = GetWindow();
 		if (w && TestFlag(WndFlags, GWF_FOCUS))
-			w->SetFocus(this, GWindow::GainFocus);
+			w->SetFocus(this, LWindow::GainFocus);
 
 		Status = true;
 
@@ -923,9 +923,9 @@ bool GView::Detach()
 	// Detach view
 	if (_Window)
 	{
-		GWindow *Wnd = dynamic_cast<GWindow*>(_Window);
+		auto *Wnd = dynamic_cast<GWindow*>(_Window);
 		if (Wnd)
-			Wnd->SetFocus(this, GWindow::ViewDelete);
+			Wnd->SetFocus(this, LWindow::ViewDelete);
 		_Window = NULL;
 	}
 

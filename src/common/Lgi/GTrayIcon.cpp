@@ -11,8 +11,8 @@
 	@interface LStatusItem : NSObject
 	{
 	}
-	@property GWindow *parent;
-	- (id)init:(GWindow*)p;
+	@property LWindow *parent;
+	- (id)init:(LWindow*)p;
 	- (void)onClick;
 	@end
 
@@ -44,7 +44,7 @@
 class GTrayIconPrivate
 {
 public:
-	GWindow *Parent;	// parent window
+	LWindow *Parent;	// parent window
 	int64 Val;			// which icon is currently visible
 	bool Visible;
 
@@ -125,7 +125,7 @@ public:
 	#endif
 
 
-	GTrayIconPrivate(GWindow *p)
+	GTrayIconPrivate(LWindow *p)
 	{
 		Parent = p;
 		Val = 0;
@@ -220,7 +220,7 @@ public:
 
 	@implementation LStatusItem
 
-	- (id)init:(GWindow*)p
+	- (id)init:(LWindow*)p
 	{
 		if ((self = [super init]) != nil)
 		{
@@ -243,7 +243,7 @@ public:
 #endif
 
 ////////////////////////////////////////////////////////////////////////////
-GTrayIcon::GTrayIcon(GWindow *p)
+GTrayIcon::GTrayIcon(LWindow *p)
 {
 	d = new GTrayIconPrivate(p);
 }

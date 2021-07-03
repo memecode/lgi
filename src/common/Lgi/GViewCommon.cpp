@@ -29,7 +29,7 @@ LPoint lgi_view_offset(GViewI *v, bool Debug = false)
 	
 	for (GViewI *p = v; p; p = p->GetParent())
 	{
-		if (dynamic_cast<GWindow*>(p))
+		if (dynamic_cast<LWindow*>(p))
 			break;
 		
 		GRect pos = p->GetPos();
@@ -73,8 +73,8 @@ GMouse &lgi_adjust_click(GMouse &Info, GViewI *Wnd, bool Capturing, bool Debug)
 		{
 			if (Temp.Target)
 			{
-				GWindow *TargetWnd = Temp.Target->GetWindow();
-				GWindow *WndWnd = Wnd->GetWindow();
+				auto *TargetWnd = Temp.Target->GetWindow();
+				auto *WndWnd = Wnd->GetWindow();
 				if (TargetWnd == WndWnd)
 				{
 					LPoint TargetOff = lgi_view_offset(Temp.Target, Debug);
@@ -300,16 +300,16 @@ bool GView::HasView(GViewI *v)
 
 OsWindow GView::WindowHandle()
 {
-	GWindow *w = GetWindow();
+	auto *w = GetWindow();
 	return (w) ? w->WindowHandle() : OsWindow();
 }
 
-GWindow *GView::GetWindow()
+LWindow *GView::GetWindow()
 {
 	if (!_Window)
 	{
 		// Walk up parent list and find someone who has a window
-		GView *w = d->GetParent();
+		auto *w = d->GetParent();
 		for (; w; w = w->d ? w->d->GetParent() : NULL)
 		{
 			if (w->_Window)
@@ -321,7 +321,7 @@ GWindow *GView::GetWindow()
 		}
 	}
 		
-	return dynamic_cast<GWindow*>(_Window);
+	return dynamic_cast<LWindow*>(_Window);
 }
 
 bool GView::Lock(const char *file, int line, int TimeOut)
@@ -1234,7 +1234,7 @@ bool GView::Focus()
 	bool Has = false;
 	
 	#if defined(__GTK_H__)
-	GWindow *w = GetWindow();
+	LWindow *w = GetWindow();
 	if (w)
 	{
 		bool Active = w->IsActive();
@@ -1250,7 +1250,7 @@ bool GView::Focus()
 	#elif LGI_COCOA
 	Has = TestFlag(WndFlags, GWF_FOCUS);
 	#elif LGI_CARBON
-	GWindow *w = GetWindow();
+	LWindow *w = GetWindow();
 	if (w)
 	{
 		ControlRef Cur;
@@ -1281,9 +1281,9 @@ void GView::Focus(bool i)
 	else
 		ClearFlag(WndFlags, GWF_FOCUS);
 
-	GWindow *Wnd = GetWindow();
+	auto *Wnd = GetWindow();
 	if (Wnd)
-		Wnd->SetFocus(this, i ? GWindow::GainFocus : GWindow::LoseFocus);
+		Wnd->SetFocus(this, i ? LWindow::GainFocus : LWindow::LoseFocus);
 
 	#if LGI_VIEW_HANDLE
 	if (_View)
@@ -1291,7 +1291,7 @@ void GView::Focus(bool i)
 	{
 		#if defined(LGI_SDL) || defined(__GTK_H__)
 		
-			// Nop: Focus is all handled by Lgi's GWindow class.
+			// Nop: Focus is all handled by Lgi's LWindow class.
 		
 		#elif WINNATIVE
 
@@ -1370,7 +1370,7 @@ extern pascal OSStatus LgiViewDndHandler(EventHandlerCallRef inHandlerCallRef, E
 bool GtkAddDragDest(GViewI *v, bool IsTarget)
 {
 	if (!v) return false;
-	GWindow *w = v->GetWindow();
+	LWindow *w = v->GetWindow();
 	if (!w) return false;
 	auto wid = GtkCast(w->WindowHandle(), gtk_widget, GtkWidget);
 
@@ -1423,7 +1423,7 @@ bool GView::DropTarget(bool t)
 
 	#elif defined MAC && !defined(LGI_SDL)
 
-		GWindow *Wnd = dynamic_cast<GWindow*>(GetWindow());
+		LWindow *Wnd = dynamic_cast<LWindow*>(GetWindow());
 		if (Wnd)
 		{
 			Wnd->SetDragHandlers(t);
@@ -1433,7 +1433,7 @@ bool GView::DropTarget(bool t)
 
 		#if LGI_COCOA
 
-			GWindow *w = GetWindow();
+			LWindow *w = GetWindow();
 			if (w)
 			{
 				OsWindow h = w->WindowHandle();
@@ -1737,7 +1737,7 @@ GFont *GView::GetFont()
 	
 	if (!d->Font &&
 		d->Css &&
-		LgiResources::GetLoadStyles())
+		LResources::GetLoadStyles())
 	{
 		GFontCache *fc = LgiApp->GetFontCache();
 		if (fc)
@@ -1809,7 +1809,7 @@ bool GView::WindowVirtualOffset(LPoint *Offset)
 		for (GViewI *Wnd = this; Wnd; Wnd = Wnd->GetParent())
 		{
 			#if !LGI_VIEW_HANDLE
-			auto IsWnd = dynamic_cast<GWindow*>(Wnd);
+			auto IsWnd = dynamic_cast<LWindow*>(Wnd);
 			if (!IsWnd)
 			#else
 			if (!Wnd->Handle())
@@ -1928,7 +1928,7 @@ GColour GView::StyleColour(int CssPropType, GColour Default, int Depth)
 				}
 			}
 			
-			if (dynamic_cast<GWindow*>(v) ||
+			if (dynamic_cast<LWindow*>(v) ||
 				dynamic_cast<GPopup*>(v))
 				break;
 		}

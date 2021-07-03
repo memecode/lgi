@@ -482,7 +482,7 @@ GMessage::Result GProgressDlg::OnEvent(GMessage *Msg)
 		#endif
 	}
 
-	return GDialog::OnEvent(Msg);
+	return LDialog::OnEvent(Msg);
 }
 
 GProgressPane *GProgressDlg::ItemAt(int i)

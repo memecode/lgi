@@ -1,5 +1,5 @@
 //
-//  GWindowCommon.cpp
+//  LWindowCommon.cpp
 //  LgiCarbon
 //
 //  Created by Matthew Allen on 11/09/14.
@@ -9,7 +9,7 @@
 #include "lgi/common/Net.h"
 #include "lgi/common/DropFiles.h"
 
-void GWindow::BuildShortcuts(ShortcutMap &Map, GViewI *v)
+void LWindow::BuildShortcuts(ShortcutMap &Map, GViewI *v)
 {
 	if (!v) v = this;
 
@@ -33,7 +33,7 @@ void GWindow::BuildShortcuts(ShortcutMap &Map, GViewI *v)
 	}
 }
 
-void GWindow::MoveOnScreen()
+void LWindow::MoveOnScreen()
 {
 	GRect p = GetPos();
 	GArray<GDisplayInfo*> Displays;
@@ -94,7 +94,7 @@ void GWindow::MoveOnScreen()
 	Displays.DeleteObjects();
 }
 
-void GWindow::MoveToCenter()
+void LWindow::MoveToCenter()
 {
 	GRect Screen(0, 0, GdcD->X()-1, GdcD->Y()-1);
 	::GArray<GDisplayInfo*> Displays;
@@ -128,7 +128,7 @@ void GWindow::MoveToCenter()
 	Displays.DeleteObjects();
 }
 
-void GWindow::MoveToMouse()
+void LWindow::MoveToMouse()
 {
 	GMouse m;
 	if (GetMouse(m, true))
@@ -143,7 +143,7 @@ void GWindow::MoveToMouse()
 	}
 }
 
-bool GWindow::MoveSameScreen(GViewI *View)
+bool LWindow::MoveSameScreen(GViewI *View)
 {
 	if (!View)
 	{
@@ -164,13 +164,13 @@ bool GWindow::MoveSameScreen(GViewI *View)
 	return true;
 }
 
-int GWindow::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
+int LWindow::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 {
 	Formats.SupportsFileDrops();
 	return true;
 }
 
-int GWindow::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
+int LWindow::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 {
 	int Status = DROPEFFECT_NONE;
 	

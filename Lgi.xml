@@ -4,7 +4,7 @@
 		<Node Name="Core" Type="1" Platforms="15" Open="1" Id="2">
 			<Node Name="DateTime" Type="1" Platforms="15" Open="0" Id="3">
 				<Node File="./src/common/General/LDateTime.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/LDateTime.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\DateTime.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Drag and Drop" Type="1" Platforms="15" Open="0" Id="4">
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="6">
@@ -14,12 +14,12 @@
 					<Node File=".\src\mac\cocoa\Lgi\GDragAndDrop.mm" Type="8" Platforms="4" />
 				</Node>
 				<Node Name="Windows" Type="1" Platforms="15" Open="0" Id="7">
-					<Node File="./include/common/GCom.h" Type="3" Platforms="15" />
-					<Node File=".\src\win32\Lgi\GDragAndDrop.cpp" Type="2" Platforms="1" />
+					<Node File=".\include\lgi\common\Com.h" Type="3" Platforms="15" />
+					<Node File=".\src\win\Lgi\GDragAndDrop.cpp" Type="2" Platforms="1" />
 				</Node>
-				<Node File="./include/common/GDragAndDrop.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\DragAndDrop.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/GDragAndDropCommon.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GDropFiles.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\DropFiles.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="File" Type="1" Platforms="15" Open="0" Id="8">
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="10">
@@ -30,48 +30,48 @@
 					<Node File="./src/mac/cocoa/General/ShowFileProp_Mac.mm" Type="8" Platforms="15" />
 				</Node>
 				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="11">
-					<Node File="./src/win32/General/GFile.cpp" Type="2" Platforms="1" />
-					<Node File="./src/win32/General/ShowFileProp_Win.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\General\GFile.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\General\ShowFileProp_Win.cpp" Type="2" Platforms="1" />
 				</Node>
 				<Node File="./src/common/General/GExeCheck.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GFile.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\File.h" Type="3" Platforms="15" />
 				<Node File="./src/common/General/GFileCommon.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Interface" Type="1" Platforms="15" Open="1" Id="12">
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="14">
 					<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="15">
-						<Node File="./include/linux/Gtk/LgiOsClasses.h" Type="3" Platforms="2" />
-						<Node File="./include/linux/Gtk/LgiOsDefs.h" Type="3" Platforms="2" />
+						<Node File=".\include\lgi\linux\Gtk\LgiOsClasses.h" Type="3" Platforms="2" />
+						<Node File=".\include\lgi\linux\Gtk\LgiOsDefs.h" Type="3" Platforms="2" />
 					</Node>
 					<Node File="./src/linux/Lgi/GApp.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/Lgi/GGeneral.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/Lgi/GView.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/Lgi/GWindow.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/Gtk/LgiWidget.cpp" Type="2" Platforms="2" />
-					<Node File="./include/linux/Gtk/LgiWidget.h" Type="3" Platforms="15" />
+					<Node File=".\include\lgi\linux\Gtk\LgiWidget.h" Type="3" Platforms="15" />
 				</Node>
 				<Node Name="Mac" Type="1" Platforms="15" Id="1" />
 				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="16">
-					<Node File=".\src\win32\Lgi\GApp.cpp" Type="2" Platforms="1" />
-					<Node File=".\src\win32\Lgi\GGeneral.cpp" Type="2" Platforms="1" />
-					<Node File=".\src\win32\Lgi\GPrinter.cpp" Type="2" Platforms="1" />
-					<Node File=".\src\win32\Lgi\GView.cpp" Type="2" Platforms="1" />
-					<Node File=".\src\win32\Lgi\GWindow.cpp" Type="2" Platforms="1" />
-					<Node File=".\src\win32\Lgi\LgiException.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Lgi\GApp.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Lgi\GGeneral.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Lgi\GPrinter.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Lgi\GView.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Lgi\GWindow.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Lgi\LgiException.cpp" Type="2" Platforms="1" />
 				</Node>
-				<Node File="./include/common/GApp.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\App.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/GWindowCommon.cpp" Type="2" Platforms="15" />
 				<Node File="./private/linux/GAppPriv.h" Type="3" Platforms="15" />
-				<Node File="./include/common/GMessage.h" Type="3" Platforms="15" />
-				<Node File="./include/common/GView.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Message.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\View.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/GViewCommon.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GViewPriv.h" Type="3" Platforms="15" />
-				<Node File="./include/common/GWindow.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\ViewPriv.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Window.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/GAppCommon.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Libraries" Type="1" Platforms="15" Open="1" Id="17">
 				<Node File="./src/common/Lgi/GLibrary.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GLibrary.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Library.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Memory Subsystem" Type="1" Platforms="15" Open="0" Id="18">
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="20">
@@ -79,91 +79,91 @@
 				</Node>
 				<Node Name="Property List" Type="1" Platforms="15" Open="0" Id="21">
 					<Node File=".\src\common\General\GProperties.cpp" Type="2" Platforms="15" />
-					<Node File="./include/common/GProperties.h" Type="3" Platforms="15" />
+					<Node File=".\include\lgi\common\Properties.h" Type="3" Platforms="15" />
 				</Node>
 				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="22">
-					<Node File="./src/win32/General/GMem.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\General\GMem.cpp" Type="2" Platforms="1" />
 					<Node File="./src/common/General/qsort.cpp" Type="2" Platforms="1" />
 				</Node>
-				<Node File="./include/common/GArray.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Array.h" Type="3" Platforms="15" />
 				<Node File="./src/common/General/GContainers.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GContainers.h" Type="3" Platforms="15" />
-				<Node File="./include/common/GHashTable.h" Type="3" Platforms="15" />
-				<Node File="./include/common/GMem.h" Type="3" Platforms="15" />
-				<Node File="./include/common/LHashTable.h" Type="3" Platforms="15" />
-				<Node File="./include/common/LUnrolledList.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Containers.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\HashTable.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Mem.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\HashTable.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\UnrolledList.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Menus" Type="1" Platforms="15" Open="0" Id="23">
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="25">
 					<Node File="./src/linux/Lgi/LMenu.cpp" Type="2" Platforms="2" />
 				</Node>
 				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="26">
-					<Node File="./src/win32/Lgi/LMenu.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Lgi\LMenu.cpp" Type="2" Platforms="1" />
 				</Node>
-				<Node File="./include/common/LMenu.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Menu.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/LMenuCommon.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Process" Type="1" Platforms="15" Open="0" Id="27">
 				<Node File="./src/common/Lgi/GSubProcess.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GSubProcess.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\SubProcess.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Resources" Type="1" Platforms="15" Open="0" Id="28">
 				<Node File="./src/common/Resource/LgiRes.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/LgiRes.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\LgiRes.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Resource/Res.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/Res.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Res.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Skin" Type="1" Platforms="15" Open="0" Id="29">
 				<Node File="./src/common/Skins/Gel/Gel.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Path/GPath.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Stream" Type="1" Platforms="15" Open="0" Id="30">
-				<Node File="./include/common/GDom.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Dom.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/GMemStream.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Lgi/GStream.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GStream.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Stream.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Threads" Type="1" Platforms="15" Open="0" Id="31">
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="33">
 					<Node File="./src/linux/Lgi/LThread.cpp" Type="2" Platforms="2" />
 				</Node>
 				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="34">
-					<Node File="./src/win32/Lgi/LThread.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Lgi\LThread.cpp" Type="2" Platforms="1" />
 				</Node>
-				<Node File="./include/common/GEventTargetThread.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\EventTargetThread.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/LMutex.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/LMutex.h" Type="3" Platforms="15" />
-				<Node File="./include/common/LThread.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Mutex.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Thread.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/LThreadCommon.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Lgi/LThreadEvent.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/LThreadEvent.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\ThreadEvent.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Variant" Type="1" Platforms="15" Open="0" Id="35">
 				<Node File=".\src\common\Lgi\GVariant.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GVariant.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Variant.h" Type="3" Platforms="15" />
 			</Node>
 			<Node File="./src/common/Lgi/GGuiUtils.cpp" Type="2" Platforms="15" />
 			<Node File="./src/common/Lgi/GObject.cpp" Type="2" Platforms="15" />
 			<Node File="./src/common/Lgi/GToolTip.cpp" Type="2" Platforms="15" />
-			<Node File="./include/common/GToolTip.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\common\ToolTip.h" Type="3" Platforms="15" />
 			<Node File="./src/common/Lgi/GTrayIcon.cpp" Type="2" Platforms="15" />
 			<Node File="./src/common/Lgi/LgiCommon.cpp" Type="2" Platforms="15" />
 			<Node File="./src/common/Lgi/LgiMsg.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="36">
 			<Node Name="File Select Win" Type="1" Platforms="15" Open="0" Id="38">
-				<Node File="./src/win32/Lgi/GFileSelect.cpp" Type="2" Platforms="1" />
+				<Node File=".\src\win\Lgi\GFileSelect.cpp" Type="2" Platforms="1" />
 			</Node>
 			<Node Name="File Select XP" Type="1" Platforms="15" Open="0" Id="37">
 				<Node File="./src/common/Lgi/GFileSelect.cpp" Type="2" Platforms="14" />
-				<Node File="./include/common/GFileSelect.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\FileSelect.h" Type="3" Platforms="15" />
 			</Node>
 			<Node File="./src/common/Lgi/GAlert.cpp" Type="2" Platforms="15" />
 			<Node File="./src/common/Lgi/GFindReplace.cpp" Type="2" Platforms="15" />
 			<Node File="./src/common/Lgi/GFontSelect.cpp" Type="2" Platforms="15" />
-			<Node File="./include/common/GFontSelect.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\common\FontSelect.h" Type="3" Platforms="15" />
 			<Node File="./src/common/Lgi/GInput.cpp" Type="2" Platforms="15" />
-			<Node File="./include/common/GInput.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\common\Input.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Graphics" Type="1" Platforms="15" Open="0" Id="39">
 			<Node Name="_Core" Type="1" Platforms="15" Open="0" Id="40">
@@ -171,30 +171,30 @@
 					<Node File="./src/linux/Gtk/Gdc2.cpp" Type="2" Platforms="2" />
 				</Node>
 				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="43">
-					<Node File="./src/win32/Gdc2/Gdc2.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Gdc2\Gdc2.cpp" Type="2" Platforms="1" />
 				</Node>
 				<Node File="./src/common/Gdc2/GColour.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GColour.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Colour.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/Tools/GColourReduce.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GColourSpace.h" Type="3" Platforms="15" />
-				<Node File="./include/common/Gdc2.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\ColourSpace.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Gdc2.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/GdcCommon.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Tools/GdcTools.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GdcTools.h" Type="3" Platforms="15" />
-				<Node File="./include/common/GFilter.h" Type="3" Platforms="15" />
-				<Node File="./include/common/GPixelRops.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\GdcTools.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Filter.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\PixelRops.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Font" Type="1" Platforms="15" Open="0" Id="44">
 				<Node File="./src/common/Gdc2/Font/GDisplayString.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GDisplayString.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\DisplayString.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/GFont.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GFont.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Font.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/GFont_W.cpp" Type="2" Platforms="7" />
-				<Node File="./include/common/GFontCache.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\FontCache.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/GFontCodePages.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/GFontSystem.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/LStringLayout.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/LStringLayout.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\StringLayout.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Applicators" Type="1" Platforms="15" Open="0" Id="45">
 				<Node File="./src/common/Gdc2/15Bit.cpp" Type="2" Platforms="15" />
@@ -209,7 +209,7 @@
 			</Node>
 			<Node Name="Rect/Region" Type="1" Platforms="15" Open="0" Id="47">
 				<Node File="./src/common/Gdc2/GRect.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GRect.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Rect.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Surfaces" Type="1" Platforms="15" Open="0" Id="48">
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="50">
@@ -224,15 +224,15 @@
 					<Node File="./src/mac/common/GScreenDC.cpp" Type="2" Platforms="4" />
 				</Node>
 				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="52">
-					<Node File="./src/win32/Gdc2/GScreenDC.cpp" Type="2" Platforms="1" />
-					<Node File="./src/win32/Gdc2/GPrintDC.cpp" Type="2" Platforms="1" />
-					<Node File="./src/win32/Gdc2/GMemDC.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Gdc2\GScreenDC.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Gdc2\GPrintDC.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Gdc2\GMemDC.cpp" Type="2" Platforms="1" />
 				</Node>
 				<Node File="./src/common/Gdc2/GSurface.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Gdi Leak" Type="1" Platforms="15" Open="0" Id="53">
-				<Node File="./src/win32/Gdc2/GdiLeak.cpp" Type="2" Platforms="1" />
-				<Node File="./include/common/GdiLeak.h" Type="3" Platforms="15" />
+				<Node File=".\src\win\Gdc2\GdiLeak.cpp" Type="2" Platforms="1" />
+				<Node File=".\include\lgi\common\GdiLeak.h" Type="3" Platforms="15" />
 			</Node>
 		</Node>
 		<Node Name="General" Type="1" Platforms="15" Open="0" Id="54">
@@ -244,15 +244,15 @@
 					<Node File="./src/linux/Lgi/GClipBoard.cpp" Type="2" Platforms="2" />
 				</Node>
 				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="56">
-					<Node File="./src/win32/Lgi/GClipBoard.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Lgi\GClipBoard.cpp" Type="2" Platforms="1" />
 				</Node>
-				<Node File="./include/common/GClipBoard.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\ClipBoard.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Data Dlg" Type="1" Platforms="15" Open="0" Id="59">
 				<Node File="./src/common/Lgi/GDataDlg.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GDataDlg.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\DataDlg.h" Type="3" Platforms="15" />
 				<Node File="./src/common/General/GPassword.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GPassword.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Password.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Hash" Type="1" Platforms="15" Id="1">
 				<Node File="./src/common/Hash/md5/md5.c" Type="2" Platforms="15" />
@@ -262,7 +262,7 @@
 			</Node>
 			<Node Name="Mru" Type="1" Platforms="15" Open="0" Id="60">
 				<Node File="./src/common/Lgi/GMru.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GMru.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Mru.h" Type="3" Platforms="15" />
 			</Node>
 			<Node File="./src/common/INet/Base64.cpp" Type="2" Platforms="15" />
 			<Node File="./src/common/Lgi/GOptionsFile.cpp" Type="2" Platforms="15" />
@@ -270,86 +270,86 @@
 		</Node>
 		<Node Name="Text" Type="1" Platforms="15" Open="0" Id="61">
 			<Node File="./src/common/Text/GString.cpp" Type="2" Platforms="15" />
-			<Node File="./include/common/GString.h" Type="3" Platforms="15" />
-			<Node File="./include/common/GStringClass.h" Type="3" Platforms="15" />
-			<Node File="./include/common/GTextFile.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\common\String.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\common\StringClass.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\common\TextFile.h" Type="3" Platforms="15" />
 			<Node File="./src/common/Text/GToken.cpp" Type="2" Platforms="15" />
 			<Node File="./src/common/Text/GUnicode.cpp" Type="2" Platforms="15" />
-			<Node File="./include/common/GUnicode.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\common\Unicode.h" Type="3" Platforms="15" />
 			<Node File="./src/common/Text/GUtf8.cpp" Type="2" Platforms="15" />
 			<Node File="./src/common/Text/GXmlTree.cpp" Type="2" Platforms="15" />
-			<Node File="./include/common/GXmlTree.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\common\XmlTree.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Widgets" Type="1" Platforms="15" Open="1" Id="62">
 			<Node Name="Common" Type="1" Platforms="15" Open="0" Id="63">
 				<Node File="./src/common/Widgets/GBitmap.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Widgets/GButton.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GButton.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Button.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GCheckBox.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GCheckBox.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\CheckBox.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GCombo.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GCombo.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Combo.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Text/GDocView.cpp" Type="2" Platforms="14" />
 				<Node File="./src/common/Widgets/GEdit.cpp" Type="2" Platforms="14" />
-				<Node File="./include/common/GEdit.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Edit.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GItemContainer.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GItemContainer.h" Type="3" Platforms="15" />
-				<Node File="./include/common/GLayout.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\ItemContainer.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Layout.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GPanel.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Widgets/GPopup.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GPopup.h" Type="3" Platforms="15" />
-				<Node File="./include/common/GPopupList.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Popup.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\PopupList.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GProgress.cpp" Type="2" Platforms="14" />
-				<Node File="./include/common/GProgress.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Progress.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GProgressDlg.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GProgressDlg.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\ProgressDlg.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GRadioGroup.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GRadioGroup.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\RadioGroup.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GScrollBar.cpp" Type="2" Platforms="14" />
-				<Node File="./include/common/GScrollBar.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\ScrollBar.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GSlider.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GSlider.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Slider.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GStatusBar.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Widgets/GTabView.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GTabView.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\TabView.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GTextLabel.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GTextLabel.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\TextLabel.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Text/GTextView3.cpp" Type="2" Platforms="14" />
-				<Node File="./include/common/GTextView3.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\TextView3.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GToolBar.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GToolBar.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\ToolBar.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GTree.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GTree.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Tree.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/LList.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/LList.h" Type="3" Platforms="15" />
-				<Node File="./include/common/LListItemCheckBox.h" Type="3" Platforms="15" />
-				<Node File="./include/common/LListItemRadioBtn.h" Type="3" Platforms="15" />
-				<Node File="./include/common/Progress.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\List.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\ListItemCheckBox.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\ListItemRadioBtn.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Progress.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Css" Type="1" Platforms="15" Open="0" Id="64">
 				<Node File="./src/common/Lgi/GCss.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GCss.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Css.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Lgi/GCssTools.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GCssTools.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\CssTools.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Layout" Type="1" Platforms="15" Open="0" Id="68">
 				<Node File="./src/common/Widgets/GBox.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GBox.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Box.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/GSplitter.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Widgets/GTableLayout.cpp" Type="2" Platforms="15" />
-				<Node File="./include/common/GTableLayout.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\TableLayout.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="66">
 				<Node File="./src/linux/Lgi/GLayout.cpp" Type="2" Platforms="2" />
 				<Node File="./src/linux/Lgi/GWidgets.cpp" Type="2" Platforms="2" />
-				<Node File="./include/common/LgiWidgets.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Widgets.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="67">
-				<Node File="./src/win32/Widgets/GEdit_Win.cpp" Type="2" Platforms="1" />
-				<Node File="./src/win32/Widgets/GDialog.cpp" Type="2" Platforms="1" />
-				<Node File="./src/win32/Lgi/GScrollBar.cpp" Type="2" Platforms="1" />
-				<Node File="./src/win32/Lgi/GLayout.cpp" Type="2" Platforms="1" />
-				<Node File="./src/win32/Widgets/GProgress.cpp" Type="2" Platforms="1" />
+				<Node File=".\src\win\Widgets\GEdit_Win.cpp" Type="2" Platforms="1" />
+				<Node File=".\src\win\Widgets\GDialog.cpp" Type="2" Platforms="1" />
+				<Node File=".\src\win\Lgi\GScrollBar.cpp" Type="2" Platforms="1" />
+				<Node File=".\src\win\Lgi\GLayout.cpp" Type="2" Platforms="1" />
+				<Node File=".\src\win\Widgets\GProgress.cpp" Type="2" Platforms="1" />
 			</Node>
 		</Node>
 	</Node>
@@ -359,39 +359,39 @@
 			<Node File=".\src\common\INet\INet.cpp" Type="2" Platforms="15" />
 			<Node File=".\src\common\INet\INetTools.cpp" Type="2" Platforms="15" />
 			<Node File=".\src\common\INet\MDStringToDigest.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\win32\INet\MibAccess.cpp" Type="2" Platforms="1" />
+			<Node File=".\src\win\INet\MibAccess.cpp" Type="2" Platforms="1" />
 		</Node>
 		<Node Name="Header" Type="1" Platforms="15" Open="0" Id="71">
-			<Node File="./include/common/INet.h" Type="3" Platforms="15" />
-			<Node File="./include/common/INetTools.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\common\Net.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\common\NetTools.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Mime Message" Type="1" Platforms="15" Open="0" Id="72">
-			<Node File="./include/common/GMime.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\common\Mime.h" Type="3" Platforms="15" />
 		</Node>
 	</Node>
 	<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="73">
 		<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="75">
-			<Node File="./include/linux/Gtk/LgiOsDefs.h" Type="3" Platforms="2" />
+			<Node File=".\include\lgi\linux\Gtk\LgiOsDefs.h" Type="3" Platforms="2" />
 		</Node>
 		<Node Name="Mac" Type="1" Platforms="15" Id="1" />
 		<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
-			<Node File="./include/win32/LgiOsDefs.h" Type="3" Platforms="1" />
+			<Node File=".\include\lgi\win\LgiOsDefs.h" Type="3" Platforms="1" />
 		</Node>
-		<Node File="./include/common/GAutoPtr.h" Type="3" Platforms="15" />
-		<Node File="./include/common/GNotifications.h" Type="3" Platforms="15" />
-		<Node File="./include/common/GRefCount.h" Type="3" Platforms="15" />
-		<Node File="./include/common/GTextLog.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LCancel.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LError.h" Type="3" Platforms="15" />
-		<Node File="./include/common/Lgi.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LgiClass.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LgiClasses.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LgiCommon.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LgiDefs.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LgiInc.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LgiInterfaces.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LgiMsgs.h" Type="3" Platforms="15" />
-		<Node File="./include/common/LJson.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\AutoPtr.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Notifications.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\RefCount.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\TextLog.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Cancel.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Error.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Lgi.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiClass.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiClasses.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiCommon.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiDefs.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiInc.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiInterfaces.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiMsgs.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Json.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
 		<Node File="./Ide/Gtk3/CMakeLists.txt" Type="8" Platforms="15" />

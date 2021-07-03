@@ -391,7 +391,7 @@ class LgiClass GSurface : public GRefCount, public GDom
 {
 	friend class GFilter;
 	friend class GView;
-	friend class GWindow;
+	friend class LWindow;
 	friend class GVariant;
 	friend class GRegionClipDC;
 	friend class GMemDC;
@@ -738,7 +738,7 @@ public:
 		
 		#elif defined(MAC)
 	
-			GScreenDC(GWindow *wnd, void *Param = 0);
+			GScreenDC(LWindow *wnd, void *Param = 0);
 			GScreenDC(GPrintDcParams *Params); // Used by GPrintDC
 			GRect GetPos();
 			void PushState();

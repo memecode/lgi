@@ -705,7 +705,7 @@ GViewI *GApp::GetFocus()
 	HWND h = ::GetFocus();
 	if (h)
 	{
-		return GWindowFromHandle(h);
+		return LWindowFromHandle(h);
 	}
 
 	return 0;
@@ -739,7 +739,7 @@ int GApp::GetShow()
 class GWnd
 {
 public:
-	LMutex *GetLock(GWindow *w)
+	LMutex *GetLock(LWindow *w)
 	{
 		return w->_Lock;
 	}

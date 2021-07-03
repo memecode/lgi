@@ -165,7 +165,7 @@ void FtpCmd::Error(const char *e)
 ////////////////////////////////////////////////////////////////////////////////////
 #define M_FTP_CMD			(M_USER + 0x4000)
 
-class FtpRedir : public GWindow
+class FtpRedir : public LWindow
 {
 public:
 	FtpRedir()
@@ -184,7 +184,7 @@ public:
 			DeleteObj(c);
 		}
 
-		return GWindow::OnEvent(m);
+		return LWindow::OnEvent(m);
 	}
 };
 

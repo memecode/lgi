@@ -245,7 +245,7 @@ GViewI *GetNextTabStop(GViewI *v, bool Back)
 {
 	if (v)
 	{
-		GWindow *Wnd = v->GetWindow();
+		LWindow *Wnd = v->GetWindow();
 		if (Wnd)
 		{
 			List<GViewI> All;

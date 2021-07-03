@@ -54,7 +54,7 @@ enum ProjectStatus
 
 extern int PlatformCtrlId[];
 
-class AddFilesProgress : public GDialog
+class AddFilesProgress : public LDialog
 {
 	uint64 Ts;
 	uint64 v;

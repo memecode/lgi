@@ -88,7 +88,7 @@ public:
 
 class LgiClass GTabPage :
 	public GView,
-	public GLgiRes,
+	public LResourceLoad,
 	public ResObject
 {
 	friend class GTabView;

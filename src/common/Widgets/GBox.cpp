@@ -70,12 +70,12 @@ GBox::GBox(int Id, bool Vertical, const char *name)
 	SetVertical(Vertical);
 	if (name)
 		Name(name);
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 }
 
 GBox::~GBox()
 {
-	GWindow *Wnd = GetWindow();
+	LWindow *Wnd = GetWindow();
 	if (Wnd)
 		Wnd->UnregisterHook(this);
 
@@ -158,7 +158,7 @@ void GBox::OnCreate()
 	AttachChildren();
 	OnPosChange();
 	
-	GWindow *Wnd = GetWindow();
+	LWindow *Wnd = GetWindow();
 	if (Wnd)
 		Wnd->RegisterHook(this, GMouseEvents);
 }

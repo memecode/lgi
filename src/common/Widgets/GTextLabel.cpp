@@ -79,7 +79,7 @@ GTextLabel::~GTextLabel()
 
 void GTextLabel::OnAttach()
 {
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 	OnStyleChange();
 	GView::OnAttach();
 }

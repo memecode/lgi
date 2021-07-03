@@ -471,7 +471,7 @@
     <ClCompile Include="src\common\Lgi\GTrayIcon.cpp" />
     <ClCompile Include="src\common\Lgi\GVariant.cpp" />
     <ClCompile Include="src\common\Lgi\GViewCommon.cpp" />
-    <ClCompile Include="src\common\Lgi\GWindowCommon.cpp" />
+    <ClCompile Include="src\common\Lgi\LWindowCommon.cpp" />
     <ClCompile Include="src\common\Lgi\LgiCommon.cpp" />
     <ClCompile Include="src\common\Lgi\LgiMsg.cpp" />
     <ClCompile Include="src\common\Lgi\LgiRand.cpp" />
@@ -570,7 +570,7 @@
     <ClCompile Include="src\win\Lgi\GPrinter.cpp" />
     <ClCompile Include="src\win\Lgi\GScrollBar.cpp" />
     <ClCompile Include="src\win\Lgi\GView.cpp" />
-    <ClCompile Include="src\win\Lgi\GWindow.cpp" />
+    <ClCompile Include="src\win\Lgi\LWindow.cpp" />
     <ClCompile Include="src\win\Lgi\LgiException.cpp" />
     <ClCompile Include="src\win\Lgi\LThread.cpp" />
     <ClCompile Include="src\win\Widgets\GButton_Win.cpp" />
@@ -583,11 +583,11 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\win\Widgets\GCombo_Win.cpp" />
-    <ClCompile Include="src\win\Widgets\GDialog.cpp" />
     <ClCompile Include="src\win\Widgets\GEdit_Win.cpp" />
     <ClCompile Include="src\win\Widgets\GProgress.cpp" />
     <ClCompile Include="src\win\Widgets\GRadioGroup_Win.cpp" />
     <ClCompile Include="src\win\Widgets\GSlider_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\LDialog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\lgi\common\Array.h" />

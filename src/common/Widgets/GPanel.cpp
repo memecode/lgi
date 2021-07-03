@@ -27,7 +27,7 @@ GPanel::GPanel(const char *name, int size, bool open)
 	
 	_BorderSize = 1;
 	Raised(true);
-	LgiResources::StyleElement(this);
+	LResources::StyleElement(this);
 }
 
 GPanel::~GPanel()
@@ -269,7 +269,7 @@ void GPanel::OnMouseClick(GMouse &m)
 
 void GPanel::RePour()
 {
-	GWindow *Top = dynamic_cast<GWindow*>(GetWindow());
+	LWindow *Top = dynamic_cast<LWindow*>(GetWindow());
 	if (Top)
 	{
 		Top->PourAll();

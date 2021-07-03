@@ -47,7 +47,7 @@ public:
 };
 
 /// Progress dialog
-class LgiClass GProgressDlg : public GDialog, public Progress
+class LgiClass GProgressDlg : public LDialog, public Progress
 {
 	friend class GProgressPane;
 

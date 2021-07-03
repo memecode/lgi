@@ -48,7 +48,7 @@ GViewPrivate::GViewPrivate()
 	Notify = 0;
 	WantsPulse = -1;
 	hTheme = NULL;
-	IsThemed = LgiResources::DefaultColours;
+	IsThemed = LResources::DefaultColours;
 	CssDirty = false;
 }
 
@@ -422,7 +422,7 @@ LRESULT CALLBACK GWin32Class::CallParent(HWND hWnd, UINT m, WPARAM a, LPARAM b)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-GViewI *GWindowFromHandle(HWND hWnd)
+GViewI *LWindowFromHandle(HWND hWnd)
 {
 	if (hWnd)
 	{
@@ -531,11 +531,11 @@ void GView::_Delete()
 		_Capturing = 0;
 	}
 
-	GWindow *Wnd = GetWindow();
+	LWindow *Wnd = GetWindow();
 	if (Wnd)
-		Wnd->SetFocus(this, GWindow::ViewDelete);
+		Wnd->SetFocus(this, LWindow::ViewDelete);
 
-	// this should only exist in an ex-GWindow, due to the way
+	// this should only exist in an ex-LWindow, due to the way
 	// C++ deletes objects it needs to be here.
 	DeleteObj(_Lock);
 }
@@ -737,9 +737,9 @@ bool GView::Detach()
 
 	if (_Window)
 	{
-		GWindow *Wnd = dynamic_cast<GWindow*>(_Window);
+		LWindow *Wnd = dynamic_cast<LWindow*>(_Window);
 		if (Wnd)
-			Wnd->SetFocus(this, GWindow::ViewDelete);
+			Wnd->SetFocus(this, LWindow::ViewDelete);
 		_Window = NULL;
 	}
 	if (d->Parent)
@@ -786,8 +786,8 @@ GRect &GView::GetClient(bool InClientSpace)
 	{
 		Client.Set(0, 0, Pos.X()-1, Pos.Y()-1);
 
-		if (dynamic_cast<GWindow*>(this) ||
-			dynamic_cast<GDialog*>(this))
+		if (dynamic_cast<LWindow*>(this) ||
+			dynamic_cast<LDialog*>(this))
 		{
 			Client.x1 += GetSystemMetrics(SM_CXFRAME);
 			Client.x2 -= GetSystemMetrics(SM_CXFRAME);
@@ -1044,7 +1044,7 @@ bool GView::Invalidate(GRect *r, bool Repaint, bool Frame)
 			Up.Set(0, 0, Pos.X()-1, Pos.Y()-1);
 		}
 
-		if (dynamic_cast<GWindow*>(this))
+		if (dynamic_cast<LWindow*>(this))
 			return true;
 
 		while (p && !p->Handle())
@@ -1442,7 +1442,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			}
 			case M_CHANGE:
 			{
-				GWindow *w = GetWindow();
+				LWindow *w = GetWindow();
 				GViewI *Ctrl = w ? w->FindControl((int)Msg->a) : 0;
 				if (Ctrl)
 				{
@@ -1520,7 +1520,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			{
 				SetId(d->CtrlId);
 
-				GWindow *w = GetWindow();
+				LWindow *w = GetWindow();
 				if (w && w->GetFocus() == this)
 				{
 					HWND hCur = GetFocus();
@@ -1546,15 +1546,15 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			}
 			case WM_SETFOCUS:
 			{
-				GWindow *w = GetWindow();
+				LWindow *w = GetWindow();
 				if (w)
 				{
-					w->SetFocus(this, GWindow::GainFocus);
+					w->SetFocus(this, LWindow::GainFocus);
 				}
 				else
 				{
 					// This can happen in popup sub-trees of views. Where the focus
-					// is tracked separately from the main GWindow.
+					// is tracked separately from the main LWindow.
 					OnFocus(true);
 					Invalidate((GRect*)NULL, false, true);
 				}
@@ -1562,14 +1562,14 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 			}
 			case WM_KILLFOCUS:
 			{
-				GWindow *w = GetWindow();
+				LWindow *w = GetWindow();
 				if (w)
 				{
-					w->SetFocus(this, GWindow::LoseFocus);
+					w->SetFocus(this, LWindow::LoseFocus);
 				}
 				else
 				{
-					// This can happen when the GWindow is being destroyed
+					// This can happen when the LWindow is being destroyed
 					Invalidate((GRect*)NULL, false, true);
 					OnFocus(false);
 				}
@@ -1798,7 +1798,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				else
 					return 0;
 
-				GWindow *Wnd = GetWindow();
+				LWindow *Wnd = GetWindow();
 				if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(Ms.Target), Ms))
 				{
 					Ms.Target->OnMouseMove(Ms);
@@ -1845,7 +1845,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				Ms.Trace(Msg);
 				#endif
 
-				GWindow *Wnd = GetWindow();
+				LWindow *Wnd = GetWindow();
 				if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(Ms.Target), Ms))
 					Ms.Target->OnMouseClick(Ms);
 				break;
@@ -1874,7 +1874,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				Ms.Trace(Msg);
 				#endif
 
-				GWindow *Wnd = GetWindow();
+				LWindow *Wnd = GetWindow();
 				if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(Ms.Target), Ms))
 					Ms.Target->OnMouseClick(Ms);
 				break;
@@ -1897,7 +1897,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				else
 					Ms.Target = this;
 
-				GWindow *Wnd = GetWindow();
+				LWindow *Wnd = GetWindow();
 				if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(Ms.Target), Ms))
 					Ms.Target->OnMouseClick(Ms);
 				break;
@@ -1938,7 +1938,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 					}
 					else
 					{
-						GWindow *Wnd = GetWindow();
+						LWindow *Wnd = GetWindow();
 						if (Wnd)
 						{
 							if (Key.Alt() ||
@@ -2001,7 +2001,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 				}
 				else
 				{
-					GWindow *Wnd = GetWindow();
+					LWindow *Wnd = GetWindow();
 					if (Wnd)
 					{
 						Wnd->HandleViewKey(this, Key);

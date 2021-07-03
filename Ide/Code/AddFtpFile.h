@@ -3,7 +3,7 @@
 
 #include "FtpThread.h"
 
-class AddFtpFile : public GDialog, public FtpCallback
+class AddFtpFile : public LDialog, public FtpCallback
 {
 	GUri *Base;
 	LList *Files;

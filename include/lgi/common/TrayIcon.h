@@ -14,8 +14,8 @@ public:
 	/// Constructor
 	GTrayIcon
 	(
-		/// The owner GWindow
-		GWindow *p
+		/// The owner LWindow
+		LWindow *p
 	);
 	
 	~GTrayIcon();

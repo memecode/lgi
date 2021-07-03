@@ -267,6 +267,26 @@ void GScrollBar::SetLimits(int64 Low, int64 High)
 	Update();
 }
 
+bool GScrollBar::SetRange(const GRange &r)
+{
+	int64 h = r.End();
+	d->Shift = 0;
+	while (h > 0 && ((h >> d->Shift) >> 31) != 0)
+	{
+		d->Shift++;
+	}
+ 
+	LgiAssert(r.Start < 1000000);
+ 
+	d->Min = r.Start;
+	d->Max = r.End();
+	d->Info.nMin = (int) (r.Start >> d->Shift);
+	d->Info.nMax = (int) (r.End() >> d->Shift);
+
+	Update();
+	return true;
+}
+
 int64 GScrollBar::Page()
 {
 	return d->Page;

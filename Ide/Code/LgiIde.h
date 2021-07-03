@@ -215,7 +215,7 @@ public:
 	NodeSource *GetSrc() { return nSrc; }
 };
 
-class AppWnd : public GWindow
+class AppWnd : public LWindow
 {
 	class AppWndPrivate *d;
 	friend class AppWndPrivate;
@@ -305,7 +305,7 @@ public:
 extern void NewMemDumpViewer(AppWnd *App, const char *file = 0);
 extern void NewProjectFromTemplate(GViewI *parent);
 
-class SysCharSupport : public GWindow
+class SysCharSupport : public LWindow
 {
 	class SysCharSupportPriv *d;
 

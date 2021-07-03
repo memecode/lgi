@@ -43,7 +43,7 @@
 #define IsSymbolChar(c)			( IsDigit(c) || IsAlpha(c) || strchr("-_", c) )
 
 //////////////////////////////////////////////////////////////////////////////////////////
-class FindInProject : public GDialog
+class FindInProject : public LDialog
 {
 	AppWnd *App;
 	LList *Lst;
@@ -339,7 +339,7 @@ public:
 };
 
 #define IDC_COPY 100
-class Depends : public GDialog
+class Depends : public LDialog
 {
 	Dependency *Root;
 
@@ -2335,7 +2335,7 @@ void AppWnd::CloseAll()
 bool AppWnd::OnRequestClose(bool IsClose)
 {
 	SaveAll();
-	return GWindow::OnRequestClose(IsClose);
+	return LWindow::OnRequestClose(IsClose);
 }
 
 bool AppWnd::OnBreakPoint(GDebugger::BreakPoint &b, bool Add)
@@ -2845,7 +2845,7 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 		}
 	}
 
-	return GWindow::OnEvent(m);
+	return LWindow::OnEvent(m);
 }
 
 bool AppWnd::OnNode(const char *Path, ProjectNode *Node, FindSymbolSystem::SymAction Action)
@@ -2863,7 +2863,7 @@ GOptionsFile *AppWnd::GetOptions()
 	return &d->Options;
 }
 
-class Options : public GDialog
+class Options : public LDialog
 {
 	AppWnd *App;
 	GFontType Font;
@@ -3192,7 +3192,7 @@ bool AppWnd::Build()
 	return false;
 }
 
-class RenameDlg : public GDialog
+class RenameDlg : public LDialog
 {
 	AppWnd *App;
 
@@ -4203,7 +4203,7 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 }
 
 /*
-class SocketTest : public GWindow, public LThread
+class SocketTest : public LWindow, public LThread
 {
 	GTextLog *Log;
 

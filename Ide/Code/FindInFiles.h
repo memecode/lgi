@@ -60,7 +60,7 @@ public:
 	}
 };
 
-class FindInFiles : public GDialog
+class FindInFiles : public LDialog
 {
 	AppWnd *App;
 	GHistory *TypeHistory;

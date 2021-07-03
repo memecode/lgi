@@ -1,8 +1,8 @@
-#ifndef _GWINDOW_H_
-#define _GWINDOW_H_
+#ifndef _LWINDOW_H_
+#define _LWINDOW_H_
 
 /// The available states for a top level window
-enum GWindowZoom
+enum LWindowZoom
 {
 	/// Minimized
 	GZoomMin,
@@ -24,7 +24,7 @@ enum GWindowHookType
 };
 
 /// A top level window.
-class LgiClass GWindow :
+class LgiClass LWindow :
 	public GView,
 	// This needs to be second otherwise is causes v-table problems.
 	#ifndef LGI_SDL
@@ -33,12 +33,12 @@ class LgiClass GWindow :
 	public GDragDropTarget
 {
 	friend class BViewRedir;
+	friend class GApp;
 	friend class GView;
 	friend class GButton;
-	friend class GDialog;
-	friend class GApp;
-	friend class GWindowPrivate;
-	friend struct GDialogPriv;
+	friend class LDialog;
+	friend class LWindowPrivate;
+	friend struct LDialogPriv;
 
 	bool _QuitOnClose;
 
@@ -48,7 +48,7 @@ protected:
 	#if WINNATIVE
 
 		GRect OldPos;
-		GWindow *_Dialog;
+		LWindow *_Dialog;
 
 	#else
 
@@ -87,7 +87,7 @@ protected:
 	/// The menu on the window
 	LMenu *Menu;
 
-	void SetChildDialog(GDialog *Dlg);
+	void SetChildDialog(LDialog *Dlg);
 	void SetDragHandlers(bool On);
 
 public:
@@ -96,15 +96,15 @@ public:
 	#endif
 
 	#ifdef __GTK_H__
-		GWindow(Gtk::GtkWidget *w = NULL);
+		LWindow(Gtk::GtkWidget *w = NULL);
 	#elif LGI_CARBON
-		GWindow(WindowRef wr = NULL);
+		LWindow(WindowRef wr = NULL);
 	#elif LGI_COCOA
-		GWindow(OsWindow wnd = NULL);
+		LWindow(OsWindow wnd = NULL);
 	#else
-		GWindow();
+		LWindow();
 	#endif
-	~GWindow();
+	~LWindow();
 
 	const char *GetClass() override { return "GWindow"; }
 
@@ -138,10 +138,10 @@ public:
 	void SetAlwaysOnTop(bool b);
 	
 	/// Gets the current zoom setting
-	GWindowZoom GetZoom();
+	LWindowZoom GetZoom();
 	
 	/// Sets the current zoom
-	void SetZoom(GWindowZoom i);
+	void SetZoom(LWindowZoom i);
 	
 	/// Raises the window to the top of the stack.
 	void Raise();
@@ -207,7 +207,7 @@ public:
 	////////////////////// Events ///////////////////////////////
 	
 	/// Called when the window zoom state changes.
-	virtual void OnZoom(GWindowZoom Action) {}
+	virtual void OnZoom(LWindowZoom Action) {}
 	
 	/// Called when the tray icon is clicked. (if present)
 	virtual void OnTrayClick(GMouse &m);
@@ -264,8 +264,8 @@ public:
 
 	#if defined(LGI_SDL)
 
-		virtual bool PushWindow(GWindow *v);
-		virtual GWindow *PopWindow();
+		virtual bool PushWindow(LWindow *v);
+		virtual LWindow *PopWindow();
 	
 	#elif defined __GTK_H__
 	

@@ -25,7 +25,7 @@
 int SYM_FILE_SENT = 0;
 
 
-class FindSymbolDlg : public GDialog
+class FindSymbolDlg : public LDialog
 {
 	// AppWnd *App;
 	LList *Lst;
@@ -575,7 +575,7 @@ GMessage::Result FindSymbolDlg::OnEvent(GMessage *m)
 		}
 	}
 
-	return GDialog::OnEvent(m);
+	return LDialog::OnEvent(m);
 }
 
 int FindSymbolDlg::OnNotify(GViewI *v, int f)
@@ -625,7 +625,7 @@ int FindSymbolDlg::OnNotify(GViewI *v, int f)
 		}
 	}
 	
-	return GDialog::OnNotify(v, f);
+	return LDialog::OnNotify(v, f);
 }
 
 ///////////////////////////////////////////////////////////////////////////

@@ -95,14 +95,14 @@ public:
 
 	A toolbar hosts buttons and separators in a row. The buttons contain
 	icons and optionally text describing there function. When the user clicks
-	a button a M_COMMAND message is passed up to the owning GWindow for the
+	a button a M_COMMAND message is passed up to the owning LWindow for the
 	application to handle. In the same fashion as a menu command being clicked.
-	You should override GWindow::OnCommand to catch events from a GToolBar.
+	You should override LWindow::OnCommand to catch events from a GToolBar.
 
-	This should be attached to the GWindow before other windows so that it
+	This should be attached to the LWindow before other windows so that it
 	lays itself out under the menu.
 
-	To initialize and attach a toolbar to your GWindow use something like:
+	To initialize and attach a toolbar to your LWindow use something like:
 	\code
 	GToolBar *t = LgiLoadToolbar(this, "icons.png");
 	if (t)

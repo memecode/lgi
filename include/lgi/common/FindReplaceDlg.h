@@ -4,7 +4,7 @@
 #define __GFINDREPLACEDLG_H
 
 /// Common find/replace window parameters
-class LgiClass GFindReplaceCommon : public GDialog
+class LgiClass GFindReplaceCommon : public LDialog
 {
 	// bool OnViewKey(GView *v, GKey &k);
 
