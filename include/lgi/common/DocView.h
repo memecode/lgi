@@ -412,7 +412,7 @@ public:
 		GString Id;
 		GString FileName;
 		GString MimeType;
-		GVariant Data;
+		LVariant Data;
 		GAutoPtr<GStreamI> Stream;
 
 		bool Valid()

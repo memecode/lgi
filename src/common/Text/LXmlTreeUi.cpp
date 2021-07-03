@@ -20,7 +20,7 @@ struct Mapping
 	int Hint;
 	LXmlTreeUi::CreateListItem ListItemFactory;
 	LXmlTreeUi::CreateTreeItem TreeItemFactory;
-	GVariant ChildElements;
+	LVariant ChildElements;
 	void *User;
 
 	Mapping()
@@ -254,7 +254,7 @@ bool LXmlTreeUi::Convert(GDom *Tag, GViewI *Ui, bool ToUI)
 
 	if (Ui && Tag)
 	{
-		GVariant v;
+		LVariant v;
 		LXmlTag *Xml = dynamic_cast<LXmlTag*>(Tag);
 		if (ToUI)
 		{

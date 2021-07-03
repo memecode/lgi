@@ -80,7 +80,7 @@ public:
 	/// Writes a Windows BMP file
 	IoStatus WriteImage(GStream *Out, GSurface *In);
 
-	bool GetVariant(const char *n, GVariant &v, char *a)
+	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
 		if (!stricmp(n, LGI_FILTER_TYPE))
 		{
@@ -861,7 +861,7 @@ public:
 	int GetImages() { return 1; }
 	IoStatus ReadImage(GSurface *pDC, GStream *In);
 	IoStatus WriteImage(GStream *Out, GSurface *pDC);
-	bool GetVariant(const char *n, GVariant &v, char *a);
+	bool GetVariant(const char *n, LVariant &v, char *a);
 };
 
 class GdcIcoFactory : public GFilterFactory
@@ -882,7 +882,7 @@ GdcIco::GdcIco()
 {
 }
 
-bool GdcIco::GetVariant(const char *n, GVariant &v, char *a)
+bool GdcIco::GetVariant(const char *n, LVariant &v, char *a)
 {
 	if (!stricmp(n, LGI_FILTER_TYPE))
 	{
@@ -1206,7 +1206,7 @@ GFilter::IoStatus GdcIco::WriteImage(GStream *Out, GSurface *pDC)
 	COLOUR Back = 0xffffffff;
 	if (Props)
 	{
-		GVariant v;
+		LVariant v;
 		if (Props->GetValue(LGI_FILTER_BACKGROUND, v))
 			Back = v.CastInt32();
 	}
@@ -1452,7 +1452,7 @@ GSurface *GdcDevice::Load(GStream *In, const char *Name, bool UseOSLoader)
 		{
 			pDC.Reset();
 			
-			GVariant m;
+			LVariant m;
 			Props.GetValue(LGI_FILTER_ERROR, m);			
 			LgiTrace("%s:%i - Filter couldn't cope with '%s' (msg=%s).\n", _FL, Name, m.Str());
 		}
@@ -1541,7 +1541,7 @@ GSurface *GdcDevice::Load(GStream *In, const char *Name, bool UseOSLoader)
 			HRESULT hr = CoCreateInstance(CLSID_IImgCtx, NULL, CLSCTX_INPROC_SERVER, IID_IImgCtx, (LPVOID*)&Ctx);
 			if (SUCCEEDED(hr))
 			{
-				GVariant Fn = Name;
+				LVariant Fn = Name;
 				hr = Ctx->Load(Fn.WStr(), 0);
 				if (SUCCEEDED(hr))
 				{

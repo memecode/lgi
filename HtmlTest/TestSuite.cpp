@@ -86,9 +86,9 @@ class HtmlScriptContext :
 	#else
 	public Html1::GHtml,
 	#endif
-	public GScriptContext
+	public LScriptContext
 {
-	GScriptEngine *Eng;
+	LScriptEngine *Eng;
 	
 public:
 	static GHostFunc Methods[];
@@ -117,7 +117,7 @@ public:
 		return Methods;
 	}
 	
-	void SetEngine(GScriptEngine *Eng)
+	void SetEngine(LScriptEngine *Eng)
 	{		
 	}
 	
@@ -258,7 +258,7 @@ class AppWnd : public GWindow, public GDefaultDocumentEnv
     HtmlScriptContext *Html;
     GTextView3 *Text;
 	char Base[256];
-	GAutoPtr<GScriptEngine> Script;
+	GAutoPtr<LScriptEngine> Script;
 	GAutoPtr<HtmlImageLoader> Worker;
 	GAutoPtr<LEmojiFont> Emoji;
 
@@ -360,7 +360,7 @@ public:
 				s->AddView(Html = new HtmlScriptContext(IDC_HTML, this));
 				#endif
 
-				Script.Reset(new GScriptEngine(this, Html, NULL));
+				Script.Reset(new LScriptEngine(this, Html, NULL));
 
 				if (Html)
 					Html->SetEnv(this);

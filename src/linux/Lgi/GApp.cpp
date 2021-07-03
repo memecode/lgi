@@ -11,7 +11,7 @@
 #include "Lgi.h"
 #include "GSkinEngine.h"
 #include "GArray.h"
-#include "GVariant.h"
+#include "LVariant.h"
 #include "GToken.h"
 #include "GFontCache.h"
 #include "GAppPriv.h"
@@ -1055,13 +1055,13 @@ void GApp::DeleteMeLater(GViewI *v)
 	d->DeleteLater.Add(v);
 }
 
-void GApp::SetClipBoardContent(OsView Hnd, ::GVariant &v)
+void GApp::SetClipBoardContent(OsView Hnd, ::LVariant &v)
 {
 	// Store the clipboard data we will serve
 	d->ClipData = v;
 }
 
-bool GApp::GetClipBoardContent(OsView Hnd, ::GVariant &v, ::GArray<char*> &Types)
+bool GApp::GetClipBoardContent(OsView Hnd, ::LVariant &v, ::GArray<char*> &Types)
 {
 	return false;
 }

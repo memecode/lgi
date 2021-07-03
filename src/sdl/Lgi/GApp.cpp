@@ -12,7 +12,7 @@
 #include "GSubProcess.h"
 #include "GSkinEngine.h"
 #include "GArray.h"
-#include "GVariant.h"
+#include "LVariant.h"
 #if defined(WIN32)
 #include "../win32/GSymLookup.h"
 #elif defined(LINUX) && defined(LGI_SDL)
@@ -199,8 +199,8 @@ public:
 	
 	// Clipboard handling
 	int Clipboard, Utf8, Utf8String;
-	GVariant ClipData;
-	LHashTbl<IntKey<int>, GVariant*> ClipNotify;
+	LVariant ClipData;
+	LHashTbl<IntKey<int>, LVariant*> ClipNotify;
 
 	// Mouse click info
 	uint64 LastClickTime;

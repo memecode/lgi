@@ -2,7 +2,7 @@
 #define _ICC_H_
 
 #include "GDom.h"
-#include "GVariant.h"
+#include "LVariant.h"
 
 class GIccProfile : public GDom
 {
@@ -28,7 +28,7 @@ public:
 	bool Convert(GSurface *Dest, GSurface *Src, GIccProfile *Profile = 0);
 
 	// Dom
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
 };
 
 #endif

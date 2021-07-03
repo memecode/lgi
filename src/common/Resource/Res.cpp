@@ -1247,7 +1247,7 @@ ResObjectImpl::SStatus ResObjectImpl::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 		const char *Style = Tag->GetAttr("style");
 		if (Style)
 		{
-			GVariant v = Style;
+			LVariant v = Style;
 			GDom *d = Factory->Res_GetDom(Object);
 			if (d)
 				d->SetValue("style", v);
@@ -1512,7 +1512,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 	const char *Style = Tag->GetAttr("style");
 	if (Style)
 	{
-		GVariant v = Style;
+		LVariant v = Style;
 		GDom *d = Factory->Res_GetDom(Object);
 		if (d)
 			d->SetValue("style", v);
@@ -1521,7 +1521,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 	GDom *d = Factory->Res_GetDom(Object);
 	if (d)
 	{
-		GVariant v;
+		LVariant v;
 		int Cx = 0, Cy = 0;
 
 		char *s;
@@ -1606,7 +1606,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 								ResObjectImpl::SStatus Status = c->Res_Read(Ctrl, Ctx);
 								if (Status == SOk)
 								{
-									v.Value.Lst->Insert(new GVariant((void*)c->Object));
+									v.Value.Lst->Insert(new LVariant((void*)c->Object));
 								}
 								else
 								{
@@ -1653,7 +1653,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Write(LXmlTag *t)
 	GDom *d = Factory->Res_GetDom(Object);
 	if (d)
 	{
-		GVariant v;
+		LVariant v;
 		int Cx = 0, Cy = 0;
 		if (d->GetValue("cols", v))
 		{
@@ -2092,7 +2092,7 @@ ResObjectImpl::SStatus ResControlTree::Res_Read(LXmlTag *t, ResReadCtx &Ctx)
 		return SError;
 	}
 
-	GVariant v;
+	LVariant v;
 	d->SetValue("LgiFactory", v = Factory);
 	d->SetValue("Tree", v = t);
 	return SOk;
@@ -2111,7 +2111,7 @@ ResObjectImpl::SStatus ResControlTree::Res_Write(LXmlTag *t)
 		return SError;
 	}
 
-	GVariant v;
+	LVariant v;
 	if (d->GetValue("Tree", v))
 	{
 		LXmlTag *n = dynamic_cast<LXmlTag*>(v.Value.Dom);

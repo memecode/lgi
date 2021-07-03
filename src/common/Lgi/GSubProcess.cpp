@@ -418,7 +418,7 @@ bool GSubProcess::SetEnvironment(const char *Var, const char *Value)
 	return true;
 }	
 
-bool GSubProcess::GetValue(const char *Var, ::GVariant &Value)
+bool GSubProcess::GetValue(const char *Var, ::LVariant &Value)
 {
 	switch (LgiStringToDomProp(Var))
 	{

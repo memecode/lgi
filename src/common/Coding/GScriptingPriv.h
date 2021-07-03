@@ -194,7 +194,7 @@ union GPtr
 	double *dbl;
 	float *flt;
 	GVarRef *r;
-	GFunc **fn;
+	LFunc **fn;
 };
 
 class SystemFunctions;
@@ -359,9 +359,9 @@ protected:
 };
 
 /// This class compiles the source down to byte code
-class GCompiler : public GScriptUtils
+class GCompiler : public LScriptUtils
 {
-	class GCompilerPriv *d;
+	class LCompilerPriv *d;
 
 public:
 	/// Constructor
@@ -371,9 +371,9 @@ public:
 	/// Compile the source into byte code.
 	bool Compile
 	(
-		GAutoPtr<GCompiledCode> &Code,
-		GScriptContext *SysContext,
-		GScriptContext *UserContext,
+		GAutoPtr<LCompiledCode> &Code,
+		LScriptContext *SysContext,
+		LScriptContext *UserContext,
 		const char *FileName,
 		const char *Script,
 		GDom *Args
@@ -381,25 +381,25 @@ public:
 };
 
 /// This class is the VM for the byte language
-class GVirtualMachine : public GScriptUtils
+class LVirtualMachine : public LScriptUtils
 {
-	friend class GVmDebuggerWnd;
+	friend class LVmDebuggerWnd;
 	friend class LScriptArguments;
 	
-	class GVirtualMachinePriv *d;
+	class LVirtualMachinePriv *d;
 
 public:
 	static bool BreakOnWarning;
 
-	GVirtualMachine(GVmDebuggerCallback *callback = NULL);
-	GVirtualMachine(GVirtualMachine *vm);
-	~GVirtualMachine();
+	LVirtualMachine(LVmDebuggerCallback *callback = NULL);
+	LVirtualMachine(LVirtualMachine *vm);
+	~LVirtualMachine();
 
 	/// Executes the whole script starting at the top
-	GExecutionStatus Execute
+	LExecutionStatus Execute
 	(
 		/// [In] The code to execute
-		GCompiledCode *Code,
+		LCompiledCode *Code,
 		/// [In] The instruction to start at... [defaults to the start of script)
 		uint32_t StartOffset = 0,
 		/// [Optional] Log file for execution
@@ -407,16 +407,16 @@ public:
 		/// Start the script execution straight away?
 		bool StartImmediately = true,
 		/// Optional return value
-		GVariant *Return = NULL
+		LVariant *Return = NULL
 	);
 
 	/// Execute just one method and return
-	GExecutionStatus ExecuteFunction
+	LExecutionStatus ExecuteFunction
 	(
 		/// [In] The code to execute
-		GCompiledCode *Code,
+		LCompiledCode *Code,
 		/// [In] The function to execute
-		GFunctionInfo *Func,
+		LFunctionInfo *Func,
 		/// [In/Out] The function's arguments
 		LScriptArguments &Args,
 		/// [Optional] Log file for execution
@@ -426,7 +426,7 @@ public:
 	);
 
 	// Debugging commands
-	GVmDebugger *OpenDebugger(GCompiledCode *Code = NULL, const char *Assembly = NULL);
+	LVmDebugger *OpenDebugger(LCompiledCode *Code = NULL, const char *Assembly = NULL);
 	bool StepInstruction();
 	bool StepLine();
 	bool StepOut();
@@ -442,15 +442,15 @@ public:
 };
 
 /// Scripting engine system functions
-class SystemFunctions : public GScriptContext
+class SystemFunctions : public LScriptContext
 {
-	GScriptEngine *Engine;
+	LScriptEngine *Engine;
 	GStream *Log;
 	#ifdef WINNATIVE
 	HANDLE Brk;
 	#endif
 
-	GView *CastGView(GVariant &v);
+	GView *CastGView(LVariant &v);
 
 public:
 	SystemFunctions();
@@ -458,7 +458,7 @@ public:
 
 	GStream *GetLog();
 	bool SetLog(GStream *log);
-	void SetEngine(GScriptEngine *Eng);	
+	void SetEngine(LScriptEngine *Eng);	
 	
 	char *GetIncludeFile(char *FileName)
 	{

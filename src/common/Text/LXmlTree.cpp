@@ -539,7 +539,7 @@ LXmlTag *LXmlTag::GetChildTag(const char *Name, bool Create, const char *TagSepa
 	return t;
 }
 
-bool LXmlTag::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool LXmlTag::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	/* !_stricmp(Name, "'attribute_name'") // Type: String
 	*/
@@ -610,7 +610,7 @@ bool LXmlTag::GetVariant(const char *Name, GVariant &Value, char *Array)
 	return false;	
 }
 
-bool LXmlTag::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool LXmlTag::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	if (Name)
 	{
@@ -1449,7 +1449,7 @@ bool LXmlTree::Read(LXmlTag *Root, GStreamI *File, LXmlFactory *Factory)
 								Value.Name &&
 								!d->Entities.Find(Ent.Name))
 							{
-								GVariant v(Value.Name);
+								LVariant v(Value.Name);
 								char16 *w = v.WStr();
 								if (w)
 									d->Entities.Add(Ent.Name, *w);

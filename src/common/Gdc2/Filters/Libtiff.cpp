@@ -17,7 +17,7 @@
 
 #include "Lgi.h"
 #include "Lzw.h"
-#include "GVariant.h"
+#include "LVariant.h"
 #include "GLibraryUtils.h"
 #include "GPalette.h"
 
@@ -104,7 +104,7 @@ public:
 	IoStatus ReadImage(GSurface *pDC, GStream *In);
 	IoStatus WriteImage(GStream *Out, GSurface *pDC);
 
-	bool GetVariant(const char *n, GVariant &v, char *a)
+	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
 		if (!_stricmp(n, LGI_FILTER_TYPE))
 		{
@@ -445,7 +445,7 @@ void CmykToRgb32(D *d, S *s, int width)
 
 GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 {
-	GVariant v;
+	LVariant v;
 	if (!pDC || !In)
 	{
 		Props->SetValue(LGI_FILTER_ERROR, v = "Parameter error.");
@@ -801,7 +801,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 
 GFilter::IoStatus GdcLibTiff::WriteImage(GStream *Out, GSurface *pDC)
 {
-	GVariant v;
+	LVariant v;
 	if (!pDC || !Out)
 	{
 		Props->SetValue(LGI_FILTER_ERROR, v = "Parameter error.");

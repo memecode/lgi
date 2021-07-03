@@ -1739,7 +1739,7 @@ int BuildThread::Main()
 		bool Status = false;
 		GString MakePath = Makefile.Get();
 		GString InitDir = Makefile.Get();
-		GVariant Jobs;
+		LVariant Jobs;
 		if (!Proj->GetApp()->GetOptions()->GetValue(OPT_Jobs, Jobs) || Jobs.CastInt32() < 1)
 			Jobs = 2;
 
@@ -3963,7 +3963,7 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, LPoint p, int KeyState)
 	for (unsigned n=0; n<Data.Length(); n++)
 	{
 		GDragData &dd = Data[n];
-		GVariant *Data = &dd.Data[0];
+		LVariant *Data = &dd.Data[0];
 		if (dd.IsFormat(NODE_DROP_FORMAT))
 		{
 			if (Data->Type == GV_BINARY && Data->Value.Binary.Length == sizeof(ProjectNode*))

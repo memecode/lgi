@@ -141,7 +141,7 @@ bool IHttp::IsOpen()
 bool IHttp::GetFile(char *File, GStream &Out, int Format, int *ProtocolStatus, int *DataLength)
 {
 	bool Status = false;
-	GVariant v;
+	LVariant v;
 
 	DeleteArray(FileLocation);
 	DeleteArray(Headers);
@@ -194,7 +194,7 @@ bool IHttp::GetFile(char *File, GStream &Out, int Format, int *ProtocolStatus, i
 		Buf.Print("\r\n");
 
 		// write request
-		GVariant v;
+		LVariant v;
 		Socket->SetValue(GSocket_Log, v = true);
 		char *Str = Buf.NewStr();
 		if (Str)
@@ -444,7 +444,7 @@ bool IHttp::Request
 			
 			GAutoString Hdr(Headers.NewStr());
 
-			GVariant v;
+			LVariant v;
 			if (Socket)
 				Socket->SetValue(GSocket_Protocol, v = "SSL");
 			

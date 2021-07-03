@@ -169,7 +169,7 @@ public:
 	int Open(const char *Str = 0, int Int = 0) { return IsOpen(); }
 	bool IsOpen() { return s != NULL; }
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = NULL) override
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL) override
 	{
 		if (!Desc) return false;
 		GDomProperty p = LgiStringToDomProp(Name);
@@ -189,7 +189,7 @@ public:
 		return false;
 	}
 	
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = NULL) override
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL) override
 	{
 		LgiAssert(!"Impl me.");
 		return false;
@@ -360,7 +360,7 @@ public:
 		if (!pstatstg)
 			return E_INVALIDARG;
 		
-		GVariant Name;
+		LVariant Name;
 		if (pstatstg->pwcsName &&
 			FileName)
 		{

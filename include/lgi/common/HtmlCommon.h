@@ -154,8 +154,8 @@ public:
 		Css = NULL;
 	}
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = 0);
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 };
 
 /// Common base class for a HTML element

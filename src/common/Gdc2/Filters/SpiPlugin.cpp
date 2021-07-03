@@ -4,7 +4,7 @@
 
 #include "Lgi.h"
 #include "GToken.h"
-#include "GVariant.h"
+#include "LVariant.h"
 
 //char *PluginDir = "D:\\Documents and Settings\\Administrator.FRET\\Desktop\\Susie";
 class GdcSpiPluginFactory;
@@ -33,7 +33,7 @@ public:
 	int GetCapabilites() { return FILTER_CAP_READ; }
 	bool ReadImage(GSurface *pDC, GStream *In);
 	bool WriteImage(GStream *s, GSurface *pDC);
-	bool GetVariant(const char *n, GVariant &v, char *a);
+	bool GetVariant(const char *n, LVariant &v, char *a);
 };
 
 // Plugin
@@ -295,7 +295,7 @@ bool GdcSpiPlugin::ReadImage(GSurface *pDC, GStream *In)
 	return Status;
 }
 
-bool GdcSpiPlugin::GetVariant(const char *n, GVariant &v, char *a)
+bool GdcSpiPlugin::GetVariant(const char *n, LVariant &v, char *a)
 {
 	if (!stricmp(n, LGI_FILTER_TYPE))
 	{

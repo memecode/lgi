@@ -133,8 +133,8 @@ protected:
 	
 	// virtual void OnEvents();
 	void DeleteMeLater(GViewI *v);
-	void SetClipBoardContent(OsView Hnd, GVariant &v);
-	bool GetClipBoardContent(OsView Hnd, GVariant &v, GArray<char*> &Types);
+	void SetClipBoardContent(OsView Hnd, LVariant &v);
+	bool GetClipBoardContent(OsView Hnd, LVariant &v, GArray<char*> &Types);
 	
 	#endif
 

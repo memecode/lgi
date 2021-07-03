@@ -104,7 +104,7 @@ public:
 	void SetEmoji(bool i);
 
 	// GDocView
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 	
 	/// Copy the selection to the clipboard
 	bool Copy();
@@ -146,7 +146,7 @@ public:
 	bool GotoAnchor(char *Name);
 	GHtmlElement *CreateElement(GHtmlElement *Parent);
 	bool EvaluateCondition(const char *Cond);
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = NULL);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL);
 	bool DoFind();
 	LPointF GetDpiScale();
 	void SetVScroll(int64 v);

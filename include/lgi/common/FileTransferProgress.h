@@ -38,7 +38,7 @@ public:
 
 	// Parameters
 	constexpr static const char *sStartValue = "StartValue";
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0) override;
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0) override;
 
 	// Impl
 	GMessage::Result OnEvent(GMessage *m) override;

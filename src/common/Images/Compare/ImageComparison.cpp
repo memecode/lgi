@@ -628,8 +628,8 @@ public:
 	/*
 	#undef DefOption
 	#define DefOption(_type, _name, _opt, _def) \
-		_type _name() { GVariant v = _def; App->GetOptions()->GetValue(_opt, v); return v.CastInt32(); } \
-		void _name(_type i) { GVariant v; App->GetOptions()->SetValue(_opt, v = i); }
+		_type _name() { LVariant v = _def; App->GetOptions()->GetValue(_opt, v); return v.CastInt32(); } \
+		void _name(_type i) { LVariant v; App->GetOptions()->SetValue(_opt, v = i); }
 
 	DefOption(int, DisplayGrid, OPT_DisplayGrid, true);
 	DefOption(int, GridSize, OPT_GridSize, 8);

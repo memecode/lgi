@@ -140,7 +140,7 @@ public:
 				return E_FAIL;
 			}
 
-			GVariant &d = Data.Data[0];
+			LVariant &d = Data.Data[0];
 			Med->tymed = TYMED_HGLOBAL;
 			Med->hGlobal = GlobalAlloc(GHND, d.Value.Binary.Length);
 			if (Med->hGlobal == NULL)
@@ -379,7 +379,7 @@ bool GClipBoard::Files(GString::Array &Paths, bool AutoEmpty)
 	if (!Src.CreateFileDrop(&Output, m, Paths))
 		return false;
 
-	GVariant &v = Output.Data[0];
+	LVariant &v = Output.Data[0];
 	if (v.Type != GV_BINARY)
 		return false;
 

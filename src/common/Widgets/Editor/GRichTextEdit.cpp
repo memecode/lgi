@@ -279,7 +279,7 @@ void GRichTextEdit::SetCharset(const char *s)
 	d->Charset = s;
 }
 
-bool GRichTextEdit::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool GRichTextEdit::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)
@@ -306,7 +306,7 @@ bool GRichTextEdit::GetVariant(const char *Name, GVariant &Value, char *Array)
 	return true;
 }
 
-bool GRichTextEdit::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool GRichTextEdit::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)

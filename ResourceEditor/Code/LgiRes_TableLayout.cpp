@@ -159,7 +159,7 @@ public:
 		MoveCtrls();
 	}
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, char *Array)
 	{
 		if (stricmp(Name, VAL_Span) == 0)
 		{
@@ -167,10 +167,10 @@ public:
 		}
 		else if (stricmp(Name, VAL_Children) == 0)
 		{
-			List<GVariant> c;
+			List<LVariant> c;
 			for (int i=0; i<Ctrls.Length(); i++)
 			{
-				c.Insert(new GVariant((ResObject*)Ctrls[i]));
+				c.Insert(new LVariant((ResObject*)Ctrls[i]));
 			}
 			Value.SetList(&c);
 			c.DeleteObjects();
@@ -196,7 +196,7 @@ public:
 		return true;
 	}
 
-	bool SetVariant(const char *Name, GVariant &Value, char *Array)
+	bool SetVariant(const char *Name, LVariant &Value, char *Array)
 	{
 		if (stricmp(Name, VAL_Span) == 0)
 		{
@@ -784,7 +784,7 @@ void CtrlTable::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 	}
 }
 
-bool CtrlTable::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool CtrlTable::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)
@@ -830,7 +830,7 @@ bool CtrlTable::GetVariant(const char *Name, GVariant &Value, char *Array)
 	return true;
 }
 
-bool CtrlTable::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool CtrlTable::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)

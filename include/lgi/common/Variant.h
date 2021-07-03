@@ -5,8 +5,8 @@
 	Copyright (C), <a href="mailto:fret@memecode.com">Matthew Allen</a>
  */
 
-#ifndef __GVARIANT_H__
-#define __GVARIANT_H__
+#ifndef __LVariant_H__
+#define __LVariant_H__
 
 #include "lgi/common/Dom.h"
 #undef Bool
@@ -15,16 +15,16 @@
 #include "lgi/common/HashTable.h"
 #include "lgi/common/String.h"
 
-class GCompiledCode;
+class LCompiledCode;
 
 #if !defined(_MSC_VER) && !defined(LINUX) && (defined(LGI_64BIT) || defined(MAC))
-	#define GVARIANT_SIZET	1
-	#define GVARIANT_SSIZET	1
+	#define LVARIANT_SIZET	1
+	#define LVARIANT_SSIZET	1
 #endif
 
 /// The different types the varient can be.
-/// \sa GVariant::TypeToString to convert to string.
-enum GVariantType
+/// \sa LVariant::TypeToString to convert to string.
+enum LVariantType
 {
 	// Main types
 	
@@ -42,7 +42,7 @@ enum GVariantType
 	GV_STRING,
 	/// Block of binary data
 	GV_BINARY,
-	/// List of GVariant
+	/// List of LVariant
 	GV_LIST,
 	/// Pointer to GDom object
 	GV_DOM,
@@ -52,7 +52,7 @@ enum GVariantType
 	GV_VOID_PTR,
 	/// LDateTime class.
 	GV_DATETIME,
-	/// Hash table class, containing pointers to GVariants
+	/// Hash table class, containing pointers to LVariants
 	GV_HASHTABLE,
 	// Scripting language operator
 	GV_OPERATOR,
@@ -71,7 +71,7 @@ enum GVariantType
 	/// Pointer to GStream
 	GV_STREAM,
 	/// The maximum value for the variant type.
-	/// (This is used by the scripting engine to refer to a GVariant itself)
+	/// (This is used by the scripting engine to refer to a LVariant itself)
 	GV_MAX,
 };
 
@@ -106,7 +106,7 @@ enum GOperator
 	OpNot,
 };
 
-class LgiClass GCustomType : public GDom
+class LgiClass LCustomType : public GDom
 {
 protected:
 	struct CustomField : public GDom
@@ -114,12 +114,12 @@ protected:
 		ssize_t Offset;
 		ssize_t Bytes;
 		ssize_t ArrayLen;
-		GVariantType Type;
+		LVariantType Type;
 		GString Name;
-		GCustomType *Nested;
+		LCustomType *Nested;
 
 		ssize_t Sizeof();
-		bool GetVariant(const char *Name, GVariant &Value, char *Array = NULL);
+		bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL);
 	};
 
 public:
@@ -155,40 +155,40 @@ protected:
 	ssize_t PadSize();
 
 public:
-	GCustomType(const char *name, int pack = 1);
-	GCustomType(const char16 *name, int pack = 1);
-	~GCustomType();
+	LCustomType(const char *name, int pack = 1);
+	LCustomType(const char16 *name, int pack = 1);
+	~LCustomType();
 	
 	size_t Sizeof();
 	const char *GetName() { return Name; }
 	ssize_t Members() { return Flds.Length(); }
 	int AddressOf(const char *Field);
 	int IndexOf(const char *Field);
-	bool DefineField(const char *Name, GVariantType Type, int Bytes, int ArrayLen = 1);
-	bool DefineField(const char *Name, GCustomType *Type, int ArrayLen = 1);
+	bool DefineField(const char *Name, LVariantType Type, int Bytes, int ArrayLen = 1);
+	bool DefineField(const char *Name, LCustomType *Type, int ArrayLen = 1);
 	Method *DefineMethod(const char *Name, GArray<GString> &Params, size_t Address);
 	Method *GetMethod(const char *Name);
 
 	// Field access. You can't use the GDom interface to get/set member variables because
 	// there is no provision for the 'This' pointer.
-	bool Get(int Index, GVariant &Out, uint8_t *This, int ArrayIndex = 0);
-	bool Set(int Index, GVariant &In, uint8_t *This, int ArrayIndex = 0);
+	bool Get(int Index, LVariant &Out, uint8_t *This, int ArrayIndex = 0);
+	bool Set(int Index, LVariant &In, uint8_t *This, int ArrayIndex = 0);
 	
 	// Dom access. However the DOM can be used to access information about the type itself.
 	// Which doesn't need a 'This' pointer.
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = NULL);
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = NULL);
-	bool CallMethod(const char *MethodName, GVariant *ReturnValue, GArray<GVariant*> &Args);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL);
+	bool CallMethod(const char *MethodName, LVariant *ReturnValue, GArray<LVariant*> &Args);
 };
 
 /// A class that can be different types
-class LgiClass GVariant
+class LgiClass LVariant
 {
 public:
-	typedef LHashTbl<ConstStrKey<char>,GVariant*> LHash;
+	typedef LHashTbl<ConstStrKey<char>,LVariant*> LHash;
 
 	/// The type of the variant
-    GVariantType Type;
+    LVariantType Type;
 
     /// The value of the variant
 	union
@@ -216,7 +216,7 @@ public:
 		    void *Data;
 	    } Binary;
 		/// Valid when Type == #GV_LIST
-	    List<GVariant> *Lst;
+	    List<LVariant> *Lst;
 		/// Valid when Type == #GV_HASHTABLE
 	    LHash *Hash;
 		/// Valid when Type == #GV_DATETIME
@@ -224,7 +224,7 @@ public:
 		/// Valid when Type == #GV_CUSTOM
 		struct _Custom
 		{
-			GCustomType *Dom;
+			LCustomType *Dom;
 			uint8_t *Data;
 
 			bool operator == (_Custom &c)
@@ -278,81 +278,81 @@ public:
 	} Value;
 
 	/// Constructor to null
-	GVariant();
+	LVariant();
 	/// Constructor for integers
-	GVariant(int32_t i);
-	GVariant(uint32_t i);
-	GVariant(int64_t i);
-	GVariant(uint64_t i);
-	#if GVARIANT_SIZET
-	GVariant(size_t i);
+	LVariant(int32_t i);
+	LVariant(uint32_t i);
+	LVariant(int64_t i);
+	LVariant(uint64_t i);
+	#if LVARIANT_SIZET
+	LVariant(size_t i);
 	#endif
-	#if GVARIANT_SSIZET
-	GVariant(ssize_t i);
+	#if LVARIANT_SSIZET
+	LVariant(ssize_t i);
 	#endif
 	/// Constructor for double
-	GVariant(double i);
+	LVariant(double i);
 	/// Constructor for string
-	GVariant(const char *s);
+	LVariant(const char *s);
 	/// Constructor for wide string
-	GVariant(const char16 *s);
+	LVariant(const char16 *s);
 	/// Constructor for ptr
-	GVariant(void *p);
+	LVariant(void *p);
 	/// Constructor for DOM ptr
-	GVariant(GDom *p);
+	LVariant(GDom *p);
 	/// Constructor for DOM variable reference
-	GVariant(GDom *p, char *name);
+	LVariant(GDom *p, char *name);
 	/// Constructor for date
-	GVariant(const LDateTime *d);
+	LVariant(const LDateTime *d);
 	/// Constructor for variant
-	GVariant(GVariant const &v);
+	LVariant(LVariant const &v);
 	/// Constructor for operator
-	GVariant(GOperator Op);
+	LVariant(GOperator Op);
 	/// Destructor
-	~GVariant();
+	~LVariant();
 
 	/// Assign bool value
-	GVariant &operator =(bool i);
+	LVariant &operator =(bool i);
 	/// Assign an integer value
-	GVariant &operator =(int32_t i);
-	GVariant &operator =(uint32_t i);
-	GVariant &operator =(int64_t i);
-	GVariant &operator =(uint64_t i);
-	#if GVARIANT_SIZET
-	GVariant &operator =(size_t i);
+	LVariant &operator =(int32_t i);
+	LVariant &operator =(uint32_t i);
+	LVariant &operator =(int64_t i);
+	LVariant &operator =(uint64_t i);
+	#if LVARIANT_SIZET
+	LVariant &operator =(size_t i);
 	#endif
-	#if GVARIANT_SSIZET
-	GVariant &operator =(ssize_t i);
+	#if LVARIANT_SSIZET
+	LVariant &operator =(ssize_t i);
 	#endif
 	/// Assign double value
-	GVariant &operator =(double i);
+	LVariant &operator =(double i);
 	/// Assign string value (makes a copy)
-	GVariant &operator =(const char *s);
+	LVariant &operator =(const char *s);
 	/// Assign a wide string value (makes a copy)
-	GVariant &operator =(const char16 *s);
+	LVariant &operator =(const char16 *s);
 	/// Assign another variant value
-	GVariant &operator =(GVariant const &i);
+	LVariant &operator =(LVariant const &i);
 	/// Assign value to a void ptr
-	GVariant &operator =(void *p);
+	LVariant &operator =(void *p);
 	/// Assign value to DOM ptr
-	GVariant &operator =(GDom *p);
+	LVariant &operator =(GDom *p);
 	/// Assign value to be a date/time
-	GVariant &operator =(const LDateTime *d);
+	LVariant &operator =(const LDateTime *d);
 
-	GVariant &operator =(class GView *p);
-	GVariant &operator =(class LMouse *p);
-	GVariant &operator =(class LKey *k);
-	GVariant &operator =(class GStream *s);
+	LVariant &operator =(class GView *p);
+	LVariant &operator =(class LMouse *p);
+	LVariant &operator =(class LKey *k);
+	LVariant &operator =(class GStream *s);
 
-	bool operator ==(GVariant &v);
-	bool operator !=(GVariant &v) { return !(*this == v); }
+	bool operator ==(LVariant &v);
+	bool operator !=(LVariant &v) { return !(*this == v); }
 
 	/// Sets the value to a DOM variable reference
 	bool SetDomRef(GDom *obj, char *name);
 	/// Sets the value to a copy of	block of binary data
 	bool SetBinary(ssize_t Len, void *Data, bool Own = false);
 	/// Sets the value to a copy of the list
-	bool SetList(List<GVariant> *Lst = 0);
+	bool SetList(List<LVariant> *Lst = 0);
 	/// Sets the value to a hashtable
 	bool SetHashTable(LHash *Table = 0, bool Copy = true);
 	/// Set the value to a surface
@@ -365,10 +365,10 @@ public:
 	/// Returns a wide string if valid (will convert a GV_STRING to wide)
 	char16 *WStr();
 	/// Returns the string, releasing ownership of the memory to caller and
-	/// changing this GVariant to GV_NULL.
+	/// changing this LVariant to GV_NULL.
 	char *ReleaseStr();
 	/// Returns the wide string, releasing ownership of the memory to caller and
-	/// changing this GVariant to GV_NULL.
+	/// changing this LVariant to GV_NULL.
 	char16 *ReleaseWStr();
 	/// Sets the variant to a heap string and takes ownership of it
 	bool OwnStr(char *s);
@@ -394,17 +394,17 @@ public:
 
 	/// Changes the variant's type, maintaining the value where possible. If
 	/// no conversion is available then nothing happens.
-	GVariant &Cast(GVariantType NewType);
+	LVariant &Cast(LVariantType NewType);
 	/// Casts the value to int, from whatever source type. The
-	/// GVariant type does not change after calling this.
+	/// LVariant type does not change after calling this.
 	int32 CastInt32();
 	/// Casts the value to a 64 bit int, from whatever source type. The
-	/// GVariant type does not change after calling this.
+	/// LVariant type does not change after calling this.
 	int64 CastInt64();
 	/// Casts the value to double, from whatever source type. The
-	/// GVariant type does not change after calling this.
+	/// LVariant type does not change after calling this.
 	double CastDouble();
-	/// Cast to a string from whatever source type, the GVariant will
+	/// Cast to a string from whatever source type, the LVariant will
 	/// take the type GV_STRING after calling this. This is because
 	/// returning a static string is not thread safe.
 	char *CastString();
@@ -422,10 +422,10 @@ public:
 	GView *CastView() { return Type == GV_GVIEW ? Value.View : NULL; }
 
 	/// List insert
-	bool Add(GVariant *v, int Where = -1);	
+	bool Add(LVariant *v, int Where = -1);	
 	
 	/// Converts the varient type to a string
-	static const char *TypeToString(GVariantType t);
+	static const char *TypeToString(LVariantType t);
 	/// Converts an operator to a string
 	static const char *OperatorToString(GOperator op);
 	/// Converts the varient value to a string

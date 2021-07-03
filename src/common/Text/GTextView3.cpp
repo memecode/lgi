@@ -3293,7 +3293,7 @@ int GTextView3::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 		
 		if (dd.IsFormat("text/html") || dd.IsFormat("UniformResourceLocatorW"))
 		{
-			GVariant *Data = &dd.Data[0];
+			LVariant *Data = &dd.Data[0];
 			LgiAssert(dd.Data.Length() == 1); // Impl multiple data entries if this asserts.
 			if (Data->IsBinary())
 			{

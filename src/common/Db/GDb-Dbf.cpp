@@ -80,8 +80,8 @@ public:
 	bool Length(int NewLength);
 
 	// Data access
-	bool Set(GVariant &v);
-	bool Get(GVariant &v);
+	bool Set(LVariant &v);
+	bool Get(LVariant &v);
 
 	// Not implemented
 	char *Description() { return 0; }
@@ -338,7 +338,7 @@ char *GDbfField::GetPtr()
 	return 0;
 }
 
-bool GDbfField::Set(GVariant &v)
+bool GDbfField::Set(LVariant &v)
 {
 	char *Data = GetPtr();
 
@@ -394,7 +394,7 @@ bool GDbfField::Set(GVariant &v)
 	return false;
 }
 
-bool GDbfField::Get(GVariant &v)
+bool GDbfField::Get(LVariant &v)
 {
 	char *Data = GetPtr();
 

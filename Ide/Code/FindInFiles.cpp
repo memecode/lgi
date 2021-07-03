@@ -61,7 +61,7 @@ void SerializeHistory(GHistory *h, const char *opt, GOptionsFile *p, bool Write)
 		LgiTrace("%s:%i - SerializeHistory '%s', Write=%i\n", _FL, last.Get(), Write);
 		#endif
 
-		GVariant v;
+		LVariant v;
 		if (Write)
 		{
 			GString::Array a;

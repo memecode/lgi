@@ -42,7 +42,7 @@ bool GDragDropSource::GetData(GArray<GDragData> &DragData)
 		return false;
 
 	// Call the deprecated version of 'GetData'
-	GVariant *v = &DragData[0].Data[0];
+	LVariant *v = &DragData[0].Data[0];
 	char *fmt = DragData[0].Format;
 	if (!v || !fmt)
 		return false;
@@ -121,6 +121,6 @@ int GDragDropTarget::OnDrop(GArray<GDragData> &DropData,
 		return DROPEFFECT_NONE;
 	
 	char *Fmt = DropData[0].Format;
-	GVariant *Var = &DropData[0].Data[0];
+	LVariant *Var = &DropData[0].Data[0];
 	return OnDrop(Fmt, Var, Pt, KeyState);
 }

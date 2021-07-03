@@ -1224,7 +1224,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 		}
 
 		// Set SSL mode
-		GVariant v;
+		LVariant v;
 		if (Flags == MAIL_SSL)
 			v = "SSL";
 		Socket->SetValue(GSocket_Protocol, v);
@@ -1325,7 +1325,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 						CommandFinished();
 						if (Rd)
 						{
-							GVariant v;
+							LVariant v;
 							TlsError = !Socket->SetValue(GSocket_Protocol, v="SSL");
 						}
 						else
@@ -1831,7 +1831,7 @@ bool MailIMap::Open(GSocketI *s, const char *RemoteHost, int Port, const char *U
 											if (SettingStore)
 											{
 												// Login successful, so persist the AuthCode for next time
-												GVariant v = AccessToken.Get();
+												LVariant v = AccessToken.Get();
 												bool b = SettingStore->SetValue(OPT_ImapOAuth2AccessToken, v);
 												if (!b)
 												{

@@ -401,7 +401,7 @@ public:
 				{
 					if (Speller)
 					{
-						GVariant v;
+						LVariant v;
 						Edit->SetValue("SpellCheckLanguage", v = "English");
 						Edit->SetValue("SpellCheckDictionary", v = "AU");
 						Edit->SetSpellCheck(Speller);
@@ -409,7 +409,7 @@ public:
 					Edit->Sunken(true);
 					Edit->SetId(IDC_EDITOR);
 					Edit->Register(this);
-					GVariant v;
+					LVariant v;
 					Edit->SetValue("HtmlImagesLinkCid", v = true);
 
 					#if LOAD_DOC

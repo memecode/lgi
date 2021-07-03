@@ -12,7 +12,7 @@
 #include <string.h>
 #include <math.h>
 #include "Lgi.h"
-#include "GVariant.h"
+#include "LVariant.h"
 
 class GdcTga : public GFilter
 {
@@ -20,7 +20,7 @@ public:
 	int GetCapabilites() { return FILTER_CAP_READ; }
 	Format GetFormat() { return FmtTga; }
 
-	bool GetVariant(const char *n, GVariant &v, char *a)
+	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
 		if (!stricmp(n, LGI_FILTER_TYPE))
 		{

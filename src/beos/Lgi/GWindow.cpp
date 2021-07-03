@@ -519,7 +519,7 @@ bool GWindow::SetIcon(char const *IcoFile)
 	return false;
 }
 
-int GWindow::OnDrop(char *Format, GVariant *Data, LPoint Pt, int KeyState)
+int GWindow::OnDrop(char *Format, LVariant *Data, LPoint Pt, int KeyState)
 {
 	int Status = DROPEFFECT_NONE;
 

@@ -507,8 +507,8 @@ public:
 	bool Length(int NewLength);
 	char *Description();
 	bool Description(char *NewDesc);
-	bool Set(GVariant &v);
-	bool Get(GVariant &v);
+	bool Set(LVariant &v);
+	bool Get(LVariant &v);
 };
 
 class MysqlDirectRs : public GDbRecordset
@@ -607,12 +607,12 @@ bool MysqlDirectField::Description(char *NewDesc)
 	return false;
 }
 
-bool MysqlDirectField::Set(GVariant &v)
+bool MysqlDirectField::Set(LVariant &v)
 {
 	return false;
 }
 
-bool MysqlDirectField::Get(GVariant &v)
+bool MysqlDirectField::Get(LVariant &v)
 {
 	if (!Rs->End())
 	{
@@ -779,7 +779,7 @@ public:
 	{
 	}
 
-	bool GetVariant(const char *n, GVariant &val, char *arr)
+	bool GetVariant(const char *n, LVariant &val, char *arr)
 	{
 		if (!stricmp(n, Dom_IsConnected))
 		{

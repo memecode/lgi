@@ -8,7 +8,7 @@
 #include "GHtmlPriv2.h"
 #include "GToken.h"
 #include "GScrollBar.h"
-#include "GVariant.h"
+#include "LVariant.h"
 #include "GFindReplaceDlg.h"
 #include "Emoji.h"
 #include "GClipBoard.h"
@@ -1436,12 +1436,12 @@ void GTag::Set(const char *attr, const char *val)
 		Attr.Add(attr, NewStr(val));
 }
 
-bool GTag::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool GTag::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	return false;
 }
 
-bool GTag::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool GTag::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	if (!Name)
 		return false;
@@ -7227,7 +7227,7 @@ char *GHtml2::GetSelection()
 	return s;
 }
 
-bool GHtml2::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool GHtml2::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	if (!Name)
 		return false;

@@ -183,7 +183,7 @@ int GHttpThread::Main()
 					if (Eoh)
 						*Eoh = 0;
 
-					GVariant Out;
+					LVariant Out;
 					int Code = p->Callback->OnRequest(Action, Uri, Eol, Eoh + 4, Out);
 					#if LOG_HTTP
 					LgiTrace("%s:%i - Code=%i\n", _FL, Code);
@@ -272,7 +272,7 @@ char *GHttpCallback::HtmlEncode(char *s)
 	return p.NewStr();
 }
 
-bool GHttpCallback::ParseHtmlWithDom(GVariant &Out, GDom *Dom, char *Html)
+bool GHttpCallback::ParseHtmlWithDom(LVariant &Out, GDom *Dom, char *Html)
 {
 	if (!Dom || !Html)
 		return false;
@@ -292,7 +292,7 @@ bool GHttpCallback::ParseHtmlWithDom(GVariant &Out, GDom *Dom, char *Html)
 			while (*s && strchr(" \t\r\n", *s)) s++;
 			if (strncmp(s, "?>", 2) == 0)
 			{
-				GVariant Value;
+				LVariant Value;
 				if (Dom->GetValue(Var, Value))
 				{
 					p.Push(Value.CastString());

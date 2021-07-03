@@ -12,7 +12,7 @@
 #include "GRadioGroup.h"
 #include "GButton.h"
 
-GTransparentDlg::GTransparentDlg(GView *parent, GVariant *trans)
+GTransparentDlg::GTransparentDlg(GView *parent, LVariant *trans)
 {
 	Trans = trans;
 	SetParent(parent);

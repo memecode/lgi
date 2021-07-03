@@ -14,7 +14,7 @@
 
 #include "Gdc2.h"
 #include "GString.h"
-#include "GVariant.h"
+#include "LVariant.h"
 #include "GPalette.h"
 
 class GdcPcx : public GFilter {
@@ -24,7 +24,7 @@ public:
 	IoStatus ReadImage(GSurface *Out, GStream *In);
 	IoStatus WriteImage(GStream *Out, GSurface *In);
 	
-	bool GetVariant(const char *n, GVariant &v, char *a)
+	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
 		if (!stricmp(n, LGI_FILTER_TYPE))
 		{

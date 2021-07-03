@@ -392,7 +392,7 @@ class LgiClass GSurface : public GRefCount, public GDom
 	friend class GFilter;
 	friend class GView;
 	friend class LWindow;
-	friend class GVariant;
+	friend class LVariant;
 	friend class GRegionClipDC;
 	friend class GMemDC;
 
@@ -672,9 +672,9 @@ public:
 	virtual GString GetStr();
 
 	// GDom interface
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = NULL);
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = NULL);
-	bool CallMethod(const char *Name, GVariant *ReturnValue, GArray<GVariant*> &Args);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL);
+	bool CallMethod(const char *Name, LVariant *ReturnValue, GArray<LVariant*> &Args);
 };
 
 #if defined(MAC) && !defined(__GTK_H__)

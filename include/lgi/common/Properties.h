@@ -154,14 +154,14 @@ public:
 	bool Set(const char *Name, const char *n);
 	bool Set(const char *Name, void *Data, int Len);
 	bool Set(Prop *p);
-	bool SetValue(const char *Name, GVariant &v);
+	bool SetValue(const char *Name, LVariant &v);
 
 	bool Get(const char *Name, int &n);
 	bool Get(const char *Name, double &n);
 	bool Get(const char *Name, char *&n);
 	bool Get(const char *Name, void *&Data, int &Len);
 	bool Get(Prop *&p);
-	bool GetValue(const char *Name, GVariant &v);
+	bool GetValue(const char *Name, LVariant &v);
 
 	bool Serialize(GFile &f, bool Write);
 	bool SerializeText(GFile &f, bool Write);

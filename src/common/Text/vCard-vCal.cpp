@@ -500,7 +500,7 @@ bool VCard::Import(GDataPropI *c, GStreamI *s)
 					if (Bin)
 					{
 						ssize_t Bytes = ConvertBase64ToBinary(Bin.Get(), BinLen, Data, B64Len);
-						GVariant v;
+						LVariant v;
 						if (v.SetBinary(Bytes, Bin.Release(), true))
 						{
 							c->SetVar(FIELD_CONTACT_IMAGE, &v);
@@ -862,7 +862,7 @@ bool VCard::Export(GDataPropI *c, GStreamI *o)
 		WriteField(*o, "note", 0, Note);
 	}
 	
-	const GVariant *Photo = c->GetVar(FIELD_CONTACT_IMAGE);
+	const LVariant *Photo = c->GetVar(FIELD_CONTACT_IMAGE);
 	if (Photo && Photo->Type == GV_BINARY)
 	{
 		ssize_t B64Len = BufferLen_BinTo64(Photo->Value.Binary.Length);

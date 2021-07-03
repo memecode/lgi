@@ -62,7 +62,7 @@ public:
 	void OnAttach() override;
 	bool OnLayout(GViewLayoutInfo &Inf) override;
 	void OnStyleChange();
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = NULL) override;
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL) override;
 	void OnCreate() override;
 };
 

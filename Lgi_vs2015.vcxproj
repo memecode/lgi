@@ -469,7 +469,7 @@
     <ClCompile Include="src\common\Lgi\GSubProcess.cpp" />
     <ClCompile Include="src\common\Lgi\GToolTip.cpp" />
     <ClCompile Include="src\common\Lgi\GTrayIcon.cpp" />
-    <ClCompile Include="src\common\Lgi\GVariant.cpp" />
+    <ClCompile Include="src\common\Lgi\LVariant.cpp" />
     <ClCompile Include="src\common\Lgi\GViewCommon.cpp" />
     <ClCompile Include="src\common\Lgi\LWindowCommon.cpp" />
     <ClCompile Include="src\common\Lgi\LgiCommon.cpp" />

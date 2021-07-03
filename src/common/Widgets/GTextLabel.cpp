@@ -84,7 +84,7 @@ void GTextLabel::OnAttach()
 	GView::OnAttach();
 }
 
-bool GTextLabel::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool GTextLabel::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	if (p == ObjStyle)

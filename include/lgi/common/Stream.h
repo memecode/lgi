@@ -215,8 +215,8 @@ public:
 	int64 SetPos(int64 Pos) override { return s->SetPos(Pos); }
 	ssize_t Read(void *b, ssize_t l, int f = 0) override { return s->Read(b, l, f); }
 	ssize_t Write(const void *b, ssize_t l, int f = 0) override { return s->Write(b, l, f); }
-	bool GetValue(const char *n, GVariant &v) override { return s->GetValue(n, v); }
-	bool SetValue(const char *n, GVariant &v) override { return s->SetValue(n, v); }
+	bool GetValue(const char *n, LVariant &v) override { return s->GetValue(n, v); }
+	bool SetValue(const char *n, LVariant &v) override { return s->SetValue(n, v); }
 
 	GStreamI *Clone() override { return new GProxyStream(s); }
 };

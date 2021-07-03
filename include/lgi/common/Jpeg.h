@@ -29,7 +29,7 @@ public:
 	IoStatus ReadImage(GSurface *pDC, GStream *In);
 	IoStatus WriteImage(GStream *Out, GSurface *pDC);
 
-	bool GetVariant(const char *n, GVariant &v, char *a)
+	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
 		if (!_stricmp(n, LGI_FILTER_TYPE))
 		{

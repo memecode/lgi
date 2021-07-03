@@ -1,7 +1,7 @@
 #ifndef _DB_TABLE_H_
 #define _DB_TABLE_H_
 
-#include "GVariant.h"
+#include "LVariant.h"
 #include "Store3.h"
 
 struct DbTablePriv;
@@ -16,7 +16,7 @@ struct LDbDate
 struct LDbField
 {
 	int Id;
-	GVariantType Type;
+	LVariantType Type;
 	int Offset;
 
 	int DataSize();
@@ -88,8 +88,8 @@ public:
 	Store3Status SetInt(int id, int64 i);
 	const LDateTime *GetDate(int id);
 	Store3Status SetDate(int id, const LDateTime *i);
-	GVariant *GetVar(int id);
-	Store3Status SetVar(int id, GVariant *i);
+	LVariant *GetVar(int id);
+	Store3Status SetVar(int id, LVariant *i);
 	GDataPropI *GetObj(int id);
 	Store3Status SetObj(int id, GDataPropI *i);
 	GDataIt GetList(int id);
@@ -131,7 +131,7 @@ public:
 	~LDbTable();
 
 	// Fields
-	bool AddField(int Id, GVariantType Type);
+	bool AddField(int Id, LVariantType Type);
 	bool DeleteField(int Id);
 	int GetFields();
 	LDbField &GetField(int Idx);

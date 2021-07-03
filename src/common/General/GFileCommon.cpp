@@ -40,7 +40,7 @@ GString GFileSystem::GetCurrentFolder()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-bool GFile::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool GFile::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)
@@ -64,7 +64,7 @@ bool GFile::GetVariant(const char *Name, GVariant &Value, char *Array)
 	return true;
 }
 
-bool GFile::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool GFile::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)
@@ -82,7 +82,7 @@ bool GFile::SetVariant(const char *Name, GVariant &Value, char *Array)
 	return true;
 }
 
-bool GFile::CallMethod(const char *Name, GVariant *Dst, GArray<GVariant*> &Arg)
+bool GFile::CallMethod(const char *Name, LVariant *Dst, GArray<LVariant*> &Arg)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)
@@ -216,7 +216,7 @@ bool GFile::CallMethod(const char *Name, GVariant *Dst, GArray<GVariant*> &Arg)
 		}
 		case FileWrite: // Type: (Data[, WriteLength])
 		{
-			GVariant *v;
+			LVariant *v;
 			if (Arg.Length() < 1 ||
 				Arg.Length() > 2 ||
 				!(v = Arg[0]))

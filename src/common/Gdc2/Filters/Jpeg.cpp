@@ -522,7 +522,7 @@ void CmykToRgb32(D *d, S *s, int width)
 GFilter::IoStatus GdcJpeg::ReadImage(GSurface *pDC, GStream *In)
 {
 	GFilter::IoStatus Status = IoError;
-	GVariant v;
+	LVariant v;
 	
 	#if LIBJPEG_SHARED
 	if (!d->IsLoaded() &&
@@ -871,7 +871,7 @@ void j_term_destination(j_compress_ptr cinfo)
 
 GFilter::IoStatus GdcJpeg::WriteImage(GStream *Out, GSurface *pDC)
 {
-	GVariant v;
+	LVariant v;
 	#if LIBJPEG_SHARED
 	if (!d->IsLoaded() && !d->Load(sLibrary))
 	{
@@ -892,7 +892,7 @@ GFilter::IoStatus GdcJpeg::WriteImage(GStream *Out, GSurface *pDC)
 	// bool Ok = true;
 
 	// Setup quality setting
-	GVariant Quality(80), SubSample(Sample_1x1_1x1_1x1), DpiX, DpiY;
+	LVariant Quality(80), SubSample(Sample_1x1_1x1_1x1), DpiX, DpiY;
 	LPoint Dpi;
 	if (Props)
 	{

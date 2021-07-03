@@ -762,7 +762,7 @@ void IdeProjectSettings::InitAllSettings(bool ClearCurrent)
 	char *p;
 	for (SettingInfo *i = AllSettings; i->Setting; i++)
 	{
-		GVariant Default;
+		LVariant Default;
 		LXmlTag *t = NULL;
 		switch (i->Setting)
 		{

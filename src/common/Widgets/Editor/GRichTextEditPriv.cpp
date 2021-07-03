@@ -1472,7 +1472,7 @@ bool GRichTextPriv::ChangeSelectionStyle(GCss *Style, bool Add)
 void GRichTextPriv::PaintBtn(GSurface *pDC, GRichTextEdit::RectType t)
 {
 	LRect r = Areas[t];
-	GVariant &v = Values[t];
+	LVariant &v = Values[t];
 	bool Down = (v.Type == GV_BOOL && v.Value.Bool) ||
 				(BtnState[t].IsPress && BtnState[t].Pressed && BtnState[t].MouseOver);
 

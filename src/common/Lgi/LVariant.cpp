@@ -5,7 +5,7 @@
 #include "lgi/common/Variant.h"
 #include "lgi/common/Token.h"
 
-const char *GVariant::TypeToString(GVariantType t)
+const char *LVariant::TypeToString(LVariantType t)
 {
 	switch (t)
 	{
@@ -36,7 +36,7 @@ const char *GVariant::TypeToString(GVariantType t)
 	return NULL;
 }
 
-const char *GVariant::OperatorToString(GOperator op)
+const char *LVariant::OperatorToString(GOperator op)
 {
 	switch (op)
 	{
@@ -70,113 +70,113 @@ const char *GVariant::OperatorToString(GOperator op)
 	return NULL;
 }
 
-GVariant::GVariant()
+LVariant::LVariant()
 {
 	Type = GV_NULL;
 	ZeroObj(Value);
 }
 
-GVariant::GVariant(GVariant const &v)
+LVariant::LVariant(LVariant const &v)
 {
 	Type = GV_NULL;
 	ZeroObj(Value);
 	*this = v;
 }
 
-#if GVARIANT_SIZET
-GVariant::GVariant(size_t i)
+#if LVARIANT_SIZET
+LVariant::LVariant(size_t i)
 {
 	Type = GV_NULL;
 	*this = i;
 }
 #endif
 
-#if GVARIANT_sSIZET
-GVariant::GVariant(ssize_t i)
+#if LVARIANT_SSIZET
+LVariant::LVariant(ssize_t i)
 {
 	Type = GV_NULL;
 	*this = i;
 }
 #endif
 
-GVariant::GVariant(int32_t i)
+LVariant::LVariant(int32_t i)
 {
 	Type = GV_INT32;
 	Value.Int = i;
 }
 
-GVariant::GVariant(uint32_t i)
+LVariant::LVariant(uint32_t i)
 {
 	Type = GV_INT32;
 	Value.Int = i;
 }
 
-GVariant::GVariant(int64_t i)
+LVariant::LVariant(int64_t i)
 {
 	Type = GV_INT64;
 	Value.Int64 = i;
 }
 
-GVariant::GVariant(uint64_t i)
+LVariant::LVariant(uint64_t i)
 {
 	Type = GV_INT64;
 	Value.Int64 = i;
 }
 
-GVariant::GVariant(double i)
+LVariant::LVariant(double i)
 {
 	Type = GV_DOUBLE;
 	Value.Dbl = i;
 }
 
-GVariant::GVariant(const char *s)
+LVariant::LVariant(const char *s)
 {
 	Value.String = NewStr(s);
 	Type = Value.String ? GV_STRING : GV_NULL;
 }
 
-GVariant::GVariant(const char16 *s)
+LVariant::LVariant(const char16 *s)
 {
 	Value.WString = NewStrW(s);
 	Type = Value.WString ? GV_WSTRING : GV_NULL;
 }
 
-GVariant::GVariant(void *p)
+LVariant::LVariant(void *p)
 {
 	Type = GV_NULL;
 	*this = p;
 }
 
-GVariant::GVariant(GDom *p)
+LVariant::LVariant(GDom *p)
 {
 	Type = GV_NULL;
 	*this = p;
 }
 
-GVariant::GVariant(GDom *p, char *name)
+LVariant::LVariant(GDom *p, char *name)
 {
 	Type = GV_NULL;
 	SetDomRef(p, name);
 }
 
-GVariant::GVariant(const LDateTime *d)
+LVariant::LVariant(const LDateTime *d)
 {
 	Type = GV_NULL;
 	*this = d;
 }
 
-GVariant::GVariant(GOperator Op)
+LVariant::LVariant(GOperator Op)
 {
 	Type = GV_OPERATOR;
 	Value.Op = Op;
 }
 
-GVariant::~GVariant()
+LVariant::~LVariant()
 {
 	Empty();
 }
 
-bool GVariant::operator ==(GVariant &v)
+bool LVariant::operator ==(LVariant &v)
 {
 	switch (Type)
 	{
@@ -225,7 +225,7 @@ bool GVariant::operator ==(GVariant &v)
 
 			auto ValIt = Value.Lst->begin();
 			auto VIt = v.Value.Lst->begin();
-			GVariant *a, *b;
+			LVariant *a, *b;
 			while ( (a = *ValIt) && (b = *VIt) )
 			{
 				if (!(*a == *b))
@@ -283,7 +283,7 @@ bool GVariant::operator ==(GVariant &v)
 	return false;
 }
 
-GVariant &GVariant::operator =(const LDateTime *d)
+LVariant &LVariant::operator =(const LDateTime *d)
 {
 	Empty();
 
@@ -301,7 +301,7 @@ GVariant &GVariant::operator =(const LDateTime *d)
 	return *this;
 }
 
-GVariant &GVariant::operator =(bool i)
+LVariant &LVariant::operator =(bool i)
 {
 	Empty();
 	Type = GV_BOOL;
@@ -311,8 +311,8 @@ GVariant &GVariant::operator =(bool i)
 	return *this;
 }
 
-#if GVARIANT_SIZET
-GVariant &GVariant::operator =(size_t i)
+#if LVariant_SIZET
+LVariant &LVariant::operator =(size_t i)
 {
 	Empty();
 	
@@ -328,8 +328,8 @@ GVariant &GVariant::operator =(size_t i)
 }
 #endif
 
-#if GVARIANT_SSIZET
-GVariant &GVariant::operator =(ssize_t i)
+#if LVariant_SSIZET
+LVariant &LVariant::operator =(ssize_t i)
 {
 	Empty();
 	
@@ -345,7 +345,7 @@ GVariant &GVariant::operator =(ssize_t i)
 }
 #endif
 
-GVariant &GVariant::operator =(int32 i)
+LVariant &LVariant::operator =(int32 i)
 {
 	Empty();
 	Type = GV_INT32;
@@ -353,7 +353,7 @@ GVariant &GVariant::operator =(int32 i)
 	return *this;
 }
 
-GVariant &GVariant::operator =(uint32_t i)
+LVariant &LVariant::operator =(uint32_t i)
 {
 	Empty();
 	Type = GV_INT32;
@@ -361,7 +361,7 @@ GVariant &GVariant::operator =(uint32_t i)
 	return *this;
 }
 
-GVariant &GVariant::operator =(int64_t i)
+LVariant &LVariant::operator =(int64_t i)
 {
 	Empty();
 	Type = GV_INT64;
@@ -369,7 +369,7 @@ GVariant &GVariant::operator =(int64_t i)
 	return *this;
 }
 
-GVariant &GVariant::operator =(uint64_t i)
+LVariant &LVariant::operator =(uint64_t i)
 {
 	Empty();
 	Type = GV_INT64;
@@ -377,7 +377,7 @@ GVariant &GVariant::operator =(uint64_t i)
 	return *this;
 }
 
-GVariant &GVariant::operator =(double i)
+LVariant &LVariant::operator =(double i)
 {
 	Empty();
 	Type = GV_DOUBLE;
@@ -387,7 +387,7 @@ GVariant &GVariant::operator =(double i)
 	return *this;
 }
 
-GVariant &GVariant::operator =(const char *s)
+LVariant &LVariant::operator =(const char *s)
 {
 	Empty();
 	if (s)
@@ -399,7 +399,7 @@ GVariant &GVariant::operator =(const char *s)
 	return *this;
 }
 
-GVariant &GVariant::operator =(const char16 *s)
+LVariant &LVariant::operator =(const char16 *s)
 {
 	Empty();
 	if (s)
@@ -412,7 +412,7 @@ GVariant &GVariant::operator =(const char16 *s)
 	return *this;
 }
 
-GVariant &GVariant::operator =(void *p)
+LVariant &LVariant::operator =(void *p)
 {
 	Empty();
 	if (p)
@@ -425,7 +425,7 @@ GVariant &GVariant::operator =(void *p)
 	return *this;
 }
 
-GVariant &GVariant::operator =(GDom *p)
+LVariant &LVariant::operator =(GDom *p)
 {
 	Empty();
 	if (p)
@@ -438,7 +438,7 @@ GVariant &GVariant::operator =(GDom *p)
 	return *this;
 }
 
-GVariant &GVariant::operator =(GView *p)
+LVariant &LVariant::operator =(GView *p)
 {
 	Empty();
 	if (p)
@@ -451,7 +451,7 @@ GVariant &GVariant::operator =(GView *p)
 	return *this;
 }
 
-GVariant &GVariant::operator =(LMouse *p)
+LVariant &LVariant::operator =(LMouse *p)
 {
 	Empty();
 	if (p)
@@ -464,7 +464,7 @@ GVariant &GVariant::operator =(LMouse *p)
 	return *this;
 }
 
-GVariant &GVariant::operator =(LKey *p)
+LVariant &LVariant::operator =(LKey *p)
 {
 	Empty();
 	if (p)
@@ -476,7 +476,7 @@ GVariant &GVariant::operator =(LKey *p)
 	return *this;
 }
 
-GVariant &GVariant::operator =(GStream *s)
+LVariant &LVariant::operator =(GStream *s)
 {
 	Empty();
 	if (s)
@@ -488,7 +488,7 @@ GVariant &GVariant::operator =(GStream *s)
 	return *this;
 }
 
-GVariant &GVariant::operator =(GVariant const &i)
+LVariant &LVariant::operator =(LVariant const &i)
 {
 	if (&i == this)
 		return *this;
@@ -524,7 +524,7 @@ GVariant &GVariant::operator =(GVariant const &i)
 		}
 		case GV_STRING:
 		{
-			Value.String = NewStr(((GVariant&)i).Str());
+			Value.String = NewStr(((LVariant&)i).Str());
 			break;
 		}
 		case GV_WSTRING:
@@ -574,10 +574,10 @@ GVariant &GVariant::operator =(GVariant const &i)
 				if (i.Value.Hash)
 				{
 					// const char *k;
-					// for (GVariant *var = i.Value.Hash->First(&k); var; var = i.Value.Hash->Next(&k))
+					// for (LVariant *var = i.Value.Hash->First(&k); var; var = i.Value.Hash->Next(&k))
 					for (auto it : *i.Value.Hash)
 					{
-						Value.Hash->Add(it.key, new GVariant(*it.value));
+						Value.Hash->Add(it.key, new LVariant(*it.value));
 					}
 				}
 			}
@@ -626,7 +626,7 @@ GVariant &GVariant::operator =(GVariant const &i)
 	return *this;
 }
 
-bool GVariant::SetDomRef(GDom *obj, char *name)
+bool LVariant::SetDomRef(GDom *obj, char *name)
 {
 	Empty();
 
@@ -637,7 +637,7 @@ bool GVariant::SetDomRef(GDom *obj, char *name)
 	return Value.DomRef.Name != 0;
 }
 
-bool GVariant::SetBinary(ssize_t Len, void *Data, bool Own)
+bool LVariant::SetBinary(ssize_t Len, void *Data, bool Own)
 {
 	bool Status = false;
 
@@ -666,16 +666,16 @@ bool GVariant::SetBinary(ssize_t Len, void *Data, bool Own)
 	return Status;
 }
 
-bool GVariant::SetList(List<GVariant> *Lst)
+bool LVariant::SetList(List<LVariant> *Lst)
 {
 	Empty();
 	Type = GV_LIST;
 
-	if ((Value.Lst = new List<GVariant>) && Lst)
+	if ((Value.Lst = new List<LVariant>) && Lst)
 	{
 		for (auto s: *Lst)
 		{
-			GVariant *New = new GVariant;
+			LVariant *New = new LVariant;
 			if (New)
 			{
 				*New = *s;
@@ -687,7 +687,7 @@ bool GVariant::SetList(List<GVariant> *Lst)
 	return Value.Lst != 0;
 }
 
-bool GVariant::SetHashTable(LHash *Table, bool Copy)
+bool LVariant::SetHashTable(LHash *Table, bool Copy)
 {
 	Empty();
 	Type = GV_HASHTABLE;
@@ -697,7 +697,7 @@ bool GVariant::SetHashTable(LHash *Table, bool Copy)
 		if ((Value.Hash = new LHash))
 		{
 			// const char *k;
-			// for (GVariant *p = Table->First(&k); p; p = Table->Next(&k))
+			// for (LVariant *p = Table->First(&k); p; p = Table->Next(&k))
 			for (auto i : *Table)
 			{
 				Value.Hash->Add(i.key, i.value);
@@ -712,7 +712,7 @@ bool GVariant::SetHashTable(LHash *Table, bool Copy)
 	return Value.Hash != 0;
 }
 
-bool GVariant::SetSurface(class GSurface *Ptr, bool Own)
+bool LVariant::SetSurface(class GSurface *Ptr, bool Own)
 {
     Empty();
     if (!Ptr)
@@ -726,7 +726,7 @@ bool GVariant::SetSurface(class GSurface *Ptr, bool Own)
     return true;
 }
 
-bool GVariant::SetStream(class GStreamI *Ptr, bool Own)
+bool LVariant::SetStream(class GStreamI *Ptr, bool Own)
 {
     Empty();
     if (!Ptr)
@@ -739,7 +739,7 @@ bool GVariant::SetStream(class GStreamI *Ptr, bool Own)
     return true;
 }
 
-bool GVariant::OwnStr(char *s)
+bool LVariant::OwnStr(char *s)
 {
 	Empty();
 	if (!s)
@@ -750,7 +750,7 @@ bool GVariant::OwnStr(char *s)
 	return true;
 }
 
-bool GVariant::OwnStr(char16 *w)
+bool LVariant::OwnStr(char16 *w)
 {
 	Empty();
 	if (!w)
@@ -761,7 +761,7 @@ bool GVariant::OwnStr(char16 *w)
 	return true;
 }
 
-char *GVariant::ReleaseStr()
+char *LVariant::ReleaseStr()
 {
 	char *Ret = Str();
 	if (Ret)
@@ -772,7 +772,7 @@ char *GVariant::ReleaseStr()
 	return Ret;
 }
 
-char *GVariant::Str()
+char *LVariant::Str()
 {
 	if (Type == GV_STRING)
 		return Value.String;
@@ -788,7 +788,7 @@ char *GVariant::Str()
 	return 0;
 }
 
-char16 *GVariant::ReleaseWStr()
+char16 *LVariant::ReleaseWStr()
 {
 	char16 *Ret = WStr();
 	if (Ret)
@@ -799,7 +799,7 @@ char16 *GVariant::ReleaseWStr()
 	return Ret;
 }
 
-char16 *GVariant::WStr()
+char16 *LVariant::WStr()
 {
 	if (Type == GV_WSTRING)
 		return Value.WString;
@@ -815,7 +815,7 @@ char16 *GVariant::WStr()
 	return 0;
 }
 
-void GVariant::Empty()
+void LVariant::Empty()
 {
 	switch (Type)
 	{
@@ -868,7 +868,7 @@ void GVariant::Empty()
 		{
 			if (Value.Hash)
 			{
-				// for (GVariant *v = (GVariant*) Value.Hash->First(); v; v = (GVariant*) Value.Hash->Next())
+				// for (LVariant *v = (LVariant*) Value.Hash->First(); v; v = (LVariant*) Value.Hash->Next())
 				for (auto i : *Value.Hash)
 				{
 					DeleteObj(i.value);
@@ -915,7 +915,7 @@ void GVariant::Empty()
 	ZeroObj(Value);
 }
 
-int64 GVariant::Length()
+int64 LVariant::Length()
 {
 	switch (Type)
 	{
@@ -943,7 +943,7 @@ int64 GVariant::Length()
 		}
 		case GV_DOM:
 		{
-			GVariant v;
+			LVariant v;
 			if (Value.Dom)
 				Value.Dom->GetValue("length", v);
 			return v.CastInt32();
@@ -959,7 +959,7 @@ int64 GVariant::Length()
 			int64 Sz = 0;
 			if (Value.Hash)
 			{
-				// for (GVariant *v=Value.Hash->First(); v; v=Value.Hash->Next())
+				// for (LVariant *v=Value.Hash->First(); v; v=Value.Hash->Next())
 				for (auto i : *Value.Hash)
 					Sz += i.value->Length();
 			}
@@ -996,39 +996,39 @@ int64 GVariant::Length()
 	return 0;
 }
 
-bool GVariant::IsInt()
+bool LVariant::IsInt()
 {
 	return Type == GV_INT32 || Type == GV_INT64;
 }
 
-bool GVariant::IsBool()
+bool LVariant::IsBool()
 {
 	return Type == GV_BOOL;
 }
 
-bool GVariant::IsDouble()
+bool LVariant::IsDouble()
 {
 	return Type == GV_DOUBLE;
 }
 
-bool GVariant::IsString()
+bool LVariant::IsString()
 {
 	return Type == GV_STRING;
 }
 
-bool GVariant::IsBinary()
+bool LVariant::IsBinary()
 {
 	return Type == GV_BINARY;
 }
 
-bool GVariant::IsNull()
+bool LVariant::IsNull()
 {
 	return Type == GV_NULL;
 }
 
 #define IsList() (Type == GV_LIST && Value.Lst)
 
-GVariant &GVariant::Cast(GVariantType NewType)
+LVariant &LVariant::Cast(LVariantType NewType)
 {
 	if (NewType != Type)
 	{
@@ -1115,7 +1115,7 @@ GVariant &GVariant::Cast(GVariantType NewType)
 	return *this;
 }
 
-void *GVariant::CastVoidPtr()
+void *LVariant::CastVoidPtr()
 {
 	switch (Type)
 	{
@@ -1154,7 +1154,7 @@ void *GVariant::CastVoidPtr()
 	return 0;
 }
 
-GDom *GVariant::CastDom()
+GDom *LVariant::CastDom()
 {
 	switch (Type)
 	{
@@ -1175,7 +1175,7 @@ GDom *GVariant::CastDom()
 	return NULL;
 }
 
-bool GVariant::CastBool()
+bool LVariant::CastBool()
 {
 	switch (Type)
 	{
@@ -1227,7 +1227,7 @@ bool GVariant::CastBool()
 		// a reference to what the "correct" thing to do here is. Basically it's treating
 		// the string like a pointer instead of a value. If the pointer is valid the
 		// conversion to bool return true, and false if it's not a valid pointer. This
-		// means things like if (!StringVariant) evaluate correctly in the scripting engine
+		// means things like if (!StrinLVariant) evaluate correctly in the scripting engine
 		// but it means that if you want to evaluate the value of the varient you should
 		// use CastInt32 instead.
 		case GV_STRING:
@@ -1239,7 +1239,7 @@ bool GVariant::CastBool()
 	return false;
 }
 
-double GVariant::CastDouble()
+double LVariant::CastDouble()
 {
 	switch (Type)
 	{
@@ -1257,7 +1257,7 @@ double GVariant::CastDouble()
 			return Value.String ? atof(Value.String) : 0;
 		case GV_DOMREF:
 		{
-			static GVariant v;
+			static LVariant v;
 			if (Value.DomRef.Dom)
 			{
 				if (Value.DomRef.Dom->GetValue(Value.DomRef.Name, v))
@@ -1272,7 +1272,7 @@ double GVariant::CastDouble()
 	return 0;
 }
 
-int32 GVariant::CastInt32()
+int32 LVariant::CastInt32()
 {
 	switch (Type)
 	{
@@ -1300,7 +1300,7 @@ int32 GVariant::CastInt32()
 			return Value.Dom != 0;
 		case GV_DOMREF:
 		{
-			static GVariant v;
+			static LVariant v;
 			if (Value.DomRef.Dom)
 			{
 				if (Value.DomRef.Dom->GetValue(Value.DomRef.Name, v))
@@ -1329,7 +1329,7 @@ int32 GVariant::CastInt32()
 	return 0;
 }
 
-int64 GVariant::CastInt64()
+int64 LVariant::CastInt64()
 {
 	switch (Type)
 	{
@@ -1357,7 +1357,7 @@ int64 GVariant::CastInt64()
 		}
 		case GV_DOMREF:
 		{
-			static GVariant v;
+			static LVariant v;
 			if (Value.DomRef.Dom)
 			{
 				if (Value.DomRef.Dom->GetValue(Value.DomRef.Name, v))
@@ -1372,7 +1372,7 @@ int64 GVariant::CastInt64()
 	return 0;
 }
 
-char *GVariant::CastString()
+char *LVariant::CastString()
 {
 	char i[40];
 
@@ -1382,11 +1382,11 @@ char *GVariant::CastString()
 		{
 			GStringPipe p(256);
 			
-			List<GVariant>::I it = Value.Lst->begin();
+			List<LVariant>::I it = Value.Lst->begin();
 			bool First = true;
 			
 			p.Print("{");
-			for (GVariant *v = *it; v; v = *++it)
+			for (LVariant *v = *it; v; v = *++it)
 			{
 				if (v->Type == GV_STRING ||
 					v->Type == GV_WSTRING)
@@ -1408,7 +1408,7 @@ char *GVariant::CastString()
 			
 			bool First = true;
 			// const char *k;
-			// for (GVariant *v = Value.Hash->First(&k); v; v = Value.Hash->Next(&k))
+			// for (LVariant *v = Value.Hash->First(&k); v; v = Value.Hash->Next(&k))
 			for (auto i : *Value.Hash)
 			{
 				p.Print("%s%s = %s", First ? "" : ", ", i.key, i.value->CastString());
@@ -1421,7 +1421,7 @@ char *GVariant::CastString()
 		}
 		case GV_DOMREF:
 		{
-			static GVariant v;
+			static LVariant v;
 			if (Value.DomRef.Dom)
 			{
 				if (Value.DomRef.Dom->GetValue(Value.DomRef.Name, v))
@@ -1588,7 +1588,7 @@ GDom *GDom::ResolveObject(const char *Var, char *Name, char *Array)
 		}
 		else
 		{
-			GVariant v;
+			LVariant v;
 			if (Index[0])
 			{
 				if (Object->GetVariant(Base, v, Index))
@@ -1596,7 +1596,7 @@ GDom *GDom::ResolveObject(const char *Var, char *Name, char *Array)
 					if (v.Type == GV_LIST)
 					{
 						int N = atoi(Index);
-						GVariant *Element = v.Value.Lst->ItemAt(N);
+						LVariant *Element = v.Value.Lst->ItemAt(N);
 						if (Element && Element->Type == GV_DOM)
 						{
 							Object = Element->Value.Dom;
@@ -1685,7 +1685,7 @@ const char *LgiDomPropToString(GDomProperty Prop)
 	return DomPropMap.ToString.Find(Prop);
 }
 
-bool GDom::GetValue(const char *Var, GVariant &Value)
+bool GDom::GetValue(const char *Var, LVariant &Value)
 {
 	bool Status = false;
 
@@ -1720,7 +1720,7 @@ bool GDom::GetValue(const char *Var, GVariant &Value)
 	return Status;
 }
 
-bool GDom::SetValue(const char *Var, GVariant &Value)
+bool GDom::SetValue(const char *Var, LVariant &Value)
 {
 	bool Status = false;
 
@@ -1754,7 +1754,7 @@ bool GDom::SetValue(const char *Var, GVariant &Value)
 	return Status;
 }
 
-bool GVariant::Add(GVariant *v, int Where)
+bool LVariant::Add(LVariant *v, int Where)
 {
 	if (!v)
 	{
@@ -1774,7 +1774,7 @@ bool GVariant::Add(GVariant *v, int Where)
 	return Value.Lst->Insert(v, Where);
 }
 
-GString GVariant::ToString()
+GString LVariant::ToString()
 {
 	GString s;
 	switch (Type)
@@ -1854,32 +1854,32 @@ GString GVariant::ToString()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-GCustomType::GCustomType(const char *name, int pack) : FldMap(0, -1)
+LCustomType::LCustomType(const char *name, int pack) : FldMap(0, -1)
 {
 	Name = name;
 	Pack = 1;
 	Size = 0;
 }
 
-GCustomType::GCustomType(const char16 *name, int pack) : FldMap(0, -1)
+LCustomType::LCustomType(const char16 *name, int pack) : FldMap(0, -1)
 {
 	Name = name;
 	Pack = 1;
 	Size = 0;
 }
 
-GCustomType::~GCustomType()
+LCustomType::~LCustomType()
 {
 	Flds.DeleteObjects();
 	Methods.DeleteObjects();
 }
 
-size_t GCustomType::Sizeof()
+size_t LCustomType::Sizeof()
 {
 	return (size_t)PadSize();
 }
 
-ssize_t GCustomType::PadSize()
+ssize_t LCustomType::PadSize()
 {
 	if (Pack > 1)
 	{
@@ -1891,12 +1891,12 @@ ssize_t GCustomType::PadSize()
 	return Size;
 }
 
-int GCustomType::IndexOf(const char *Field)
+int LCustomType::IndexOf(const char *Field)
 {
 	return FldMap.Find(Field);
 }
 
-int GCustomType::AddressOf(const char *Field)
+int LCustomType::AddressOf(const char *Field)
 {
 	if (!Field)
 		return -1;
@@ -1908,7 +1908,7 @@ int GCustomType::AddressOf(const char *Field)
 	return -1;
 }
 
-bool GCustomType::DefineField(const char *Name, GCustomType *Type, int ArrayLen)
+bool LCustomType::DefineField(const char *Name, LCustomType *Type, int ArrayLen)
 {
 	if (ArrayLen < 1)
 	{
@@ -1944,7 +1944,7 @@ bool GCustomType::DefineField(const char *Name, GCustomType *Type, int ArrayLen)
 	return true;
 }
 
-bool GCustomType::DefineField(const char *Name, GVariantType Type, int Bytes, int ArrayLen)
+bool LCustomType::DefineField(const char *Name, LVariantType Type, int Bytes, int ArrayLen)
 {
 	if (ArrayLen < 1)
 	{
@@ -1980,12 +1980,12 @@ bool GCustomType::DefineField(const char *Name, GVariantType Type, int Bytes, in
 	return true;
 }
 
-GCustomType::Method *GCustomType::GetMethod(const char *Name)
+LCustomType::Method *LCustomType::GetMethod(const char *Name)
 {
 	return MethodMap.Find(Name);
 }
 
-GCustomType::Method *GCustomType::DefineMethod(const char *Name, GArray<GString> &Params, size_t Address)
+LCustomType::Method *LCustomType::DefineMethod(const char *Name, GArray<GString> &Params, size_t Address)
 {
 	Method *m = MethodMap.Find(Name);
 	if (m)
@@ -2004,7 +2004,7 @@ GCustomType::Method *GCustomType::DefineMethod(const char *Name, GArray<GString>
 	return m;
 }
 
-bool GCustomType::CustomField::GetVariant(const char *Field, GVariant &Value, char *Array)
+bool LCustomType::CustomField::GetVariant(const char *Field, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Field);
 	switch (p)
@@ -2022,7 +2022,7 @@ bool GCustomType::CustomField::GetVariant(const char *Field, GVariant &Value, ch
 	return true;
 }
 
-ssize_t GCustomType::CustomField::Sizeof()
+ssize_t LCustomType::CustomField::Sizeof()
 {
 	switch (Type)
 	{
@@ -2039,7 +2039,7 @@ ssize_t GCustomType::CustomField::Sizeof()
 		case GV_DATETIME:
 			return sizeof(LDateTime);
 		case GV_HASHTABLE:
-			return sizeof(GVariant::LHash);
+			return sizeof(LVariant::LHash);
 		case GV_OPERATOR:
 			return sizeof(GOperator);
 		case GV_LMOUSE:
@@ -2056,7 +2056,7 @@ ssize_t GCustomType::CustomField::Sizeof()
 	return 0;
 }
 
-bool GCustomType::Get(int Index, GVariant &Out, uint8_t *This, int ArrayIndex)
+bool LCustomType::Get(int Index, LVariant &Out, uint8_t *This, int ArrayIndex)
 {
 	if (Index < 0 ||
 		Index >= Flds.Length() ||
@@ -2134,7 +2134,7 @@ bool GCustomType::Get(int Index, GVariant &Out, uint8_t *This, int ArrayIndex)
 		}
 		case GV_MAX:
 		{
-			Out = *((GVariant*)Ptr);
+			Out = *((LVariant*)Ptr);
 			break;
 		}
 		default:
@@ -2147,7 +2147,7 @@ bool GCustomType::Get(int Index, GVariant &Out, uint8_t *This, int ArrayIndex)
 	return true;
 }
 
-bool GCustomType::Set(int Index, GVariant &In, uint8_t *This, int ArrayIndex)
+bool LCustomType::Set(int Index, LVariant &In, uint8_t *This, int ArrayIndex)
 {
 	if (Index < 0 ||
 		Index >= Flds.Length() ||
@@ -2272,7 +2272,7 @@ bool GCustomType::Set(int Index, GVariant &In, uint8_t *This, int ArrayIndex)
 		}
 		case GV_MAX:
 		{
-			*((GVariant*)Ptr) = In;
+			*((LVariant*)Ptr) = In;
 			break;
 		}
 		default:
@@ -2283,7 +2283,7 @@ bool GCustomType::Set(int Index, GVariant &In, uint8_t *This, int ArrayIndex)
 	return true;
 }
 
-bool GCustomType::GetVariant(const char *Field, GVariant &Value, char *Array)
+bool LCustomType::GetVariant(const char *Field, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Field);
 	switch (p)
@@ -2295,7 +2295,7 @@ bool GCustomType::GetVariant(const char *Field, GVariant &Value, char *Array)
 		}
 		case ObjType: // Type: String
 		{
-			Value = "GCustomType";
+			Value = "LCustomType";
 			return true;
 		}
 		case ObjLength: // Type: Int32
@@ -2329,13 +2329,13 @@ bool GCustomType::GetVariant(const char *Field, GVariant &Value, char *Array)
 	return false;
 }
 
-bool GCustomType::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool LCustomType::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	LgiAssert(0);
 	return false;
 }
 
-bool GCustomType::CallMethod(const char *MethodName, GVariant *ReturnValue, GArray<GVariant*> &Args)
+bool LCustomType::CallMethod(const char *MethodName, LVariant *ReturnValue, GArray<LVariant*> &Args)
 {
 	if (!MethodName || !ReturnValue)
 		return false;
@@ -2353,7 +2353,7 @@ bool GCustomType::CallMethod(const char *MethodName, GVariant *ReturnValue, GArr
 	{
 		for (unsigned i=0; i<Args.Length(); i++)
 		{
-			GVariant *v = Args[i];
+			LVariant *v = Args[i];
 			if (v && v->Type == GV_CUSTOM)
 			{
 				DeleteArray(v->Value.Custom.Data);

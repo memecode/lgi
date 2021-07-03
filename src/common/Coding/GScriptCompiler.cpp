@@ -12,7 +12,7 @@
 #define GV_VARIANT			GV_MAX
 const char *sDebugger		= "Debugger";
 
-int GFunctionInfo::_Infos = 0;
+int LFunctionInfo::_Infos = 0;
 
 enum GTokenType
 {
@@ -26,7 +26,7 @@ struct LinkFixup
 	int Tok;
 	size_t Offset;
 	int Args;
-	GFunctionInfo *Func;
+	LFunctionInfo *Func;
 };
 
 struct Node
@@ -34,7 +34,7 @@ struct Node
 	typedef GArray<Node> NodeExp;
 	struct VariablePart
 	{
-		GVariant Name;
+		LVariant Name;
 		NodeExp Array;
 		bool Call;
 		GArray<NodeExp*> Args;
@@ -61,10 +61,10 @@ struct Node
 	GArray<int> Lst;
 	GTokenType ConstTok;
 	// -or-
-	GFunc *ContextFunc;
+	LFunc *ContextFunc;
 	GArray<NodeExp> Args;
 	// -or-
-	GFunctionInfo *ScriptFunc;
+	LFunctionInfo *ScriptFunc;
 	// -or-
 	GArray<VariablePart> Variable;
 	
@@ -107,14 +107,14 @@ struct Node
 		ConstTok = e;
 	}
 
-	void SetContextFunction(GFunc *m, int tok)
+	void SetContextFunction(LFunc *m, int tok)
 	{
 		Init();
 		ContextFunc = m;
 		Tok = tok;
 	}
 
-	void SetScriptFunction(GFunctionInfo *m, int tok)
+	void SetScriptFunction(LFunctionInfo *m, int tok)
 	{
 		Init();
 		ScriptFunc = m;
@@ -134,25 +134,25 @@ struct Node
 	bool IsConst() { return Constant; }
 };
 
-GCompiledCode::GCompiledCode() : Globals(SCOPE_GLOBAL), Debug(0, -1)
+LCompiledCode::LCompiledCode() : Globals(SCOPE_GLOBAL), Debug(0, -1)
 {
 	SysContext = NULL;
 	UserContext = NULL;
 }
 
-GCompiledCode::GCompiledCode(GCompiledCode &copy) : Globals(SCOPE_GLOBAL), Debug(0, -1)
+LCompiledCode::LCompiledCode(LCompiledCode &copy) : Globals(SCOPE_GLOBAL), Debug(0, -1)
 {
 	*this = copy;
 }
 
-GCompiledCode::~GCompiledCode()
+LCompiledCode::~LCompiledCode()
 {
 	for (auto e: Externs)
 		e->InUse = false;
 	Externs.DeleteObjects();
 }
 
-GCompiledCode &GCompiledCode::operator =(const GCompiledCode &c)
+LCompiledCode &LCompiledCode::operator =(const LCompiledCode &c)
 {
 	Globals = c.Globals;
 	ByteCode = c.ByteCode;
@@ -165,7 +165,7 @@ GCompiledCode &GCompiledCode::operator =(const GCompiledCode &c)
 	return *this;
 }
 
-GFunctionInfo *GCompiledCode::GetMethod(const char *Name, bool Create)
+LFunctionInfo *LCompiledCode::GetMethod(const char *Name, bool Create)
 {
 	for (unsigned i=0; i<Methods.Length(); i++)
 	{
@@ -176,7 +176,7 @@ GFunctionInfo *GCompiledCode::GetMethod(const char *Name, bool Create)
 
 	if (Create)
 	{
-		GAutoRefPtr<GFunctionInfo> n(new GFunctionInfo(Name));
+		GAutoRefPtr<LFunctionInfo> n(new LFunctionInfo(Name));
 		if (n)
 		{
 			Methods.Add(n);
@@ -187,13 +187,13 @@ GFunctionInfo *GCompiledCode::GetMethod(const char *Name, bool Create)
 	return 0;
 }
 
-int GCompiledCode::ObjectToSourceAddress(size_t ObjAddr)
+int LCompiledCode::ObjectToSourceAddress(size_t ObjAddr)
 {
 	auto Idx = Debug.Find(ObjAddr);
 	return Idx < 0 ? 1 : Idx;
 }
 
-const char *GCompiledCode::AddrToSourceRef(size_t ObjAddr)
+const char *LCompiledCode::AddrToSourceRef(size_t ObjAddr)
 {
 	static char Status[256];
 	size_t Addr = ObjAddr;
@@ -218,7 +218,7 @@ const char *GCompiledCode::AddrToSourceRef(size_t ObjAddr)
 	return Status;
 }
 
-GVariant *GCompiledCode::Set(const char *Name, GVariant &v)
+LVariant *LCompiledCode::Set(const char *Name, LVariant &v)
 {
 	int i = Globals.Var(Name, true);
 	if (i >= 0)
@@ -376,25 +376,25 @@ public:
 };
 
 /// Scripting language compiler implementation
-class GCompilerPriv :
+class LCompilerPriv :
 	public GCompileTools,
-	public GScriptUtils
+	public LScriptUtils
 {
-	LHashTbl<ConstStrKey<char>, GVariantType> Types;
+	LHashTbl<ConstStrKey<char>, LVariantType> Types;
 	size_t JumpLoc;
-	GArray<GAutoPtr<GExternFunc>> FuncMem;
+	GArray<GAutoPtr<LExternFunc>> FuncMem;
 
 public:
-	GScriptContext *SysCtx;
-	GScriptContext *UserCtx;
-	GCompiledCode *Code;
+	LScriptContext *SysCtx;
+	LScriptContext *UserCtx;
+	LCompiledCode *Code;
 	GStream *Log;
 	GArray<char16*> Tokens;	
 	TokenRanges Lines;
 	char16 *Script;
-	LHashTbl<StrKey<char>, GFunc*> Methods;
+	LHashTbl<StrKey<char>, LFunc*> Methods;
 	int Regs;
-	GArray<GVariables*> Scopes;
+	GArray<LVariables*> Scopes;
 	GArray<LinkFixup> Fixups;
 	LHashTbl<StrKey<char16>, char16*> Defines;
 	LHashTbl<ConstStrKey<char16,false>, GTokenType> ExpTok;
@@ -405,10 +405,10 @@ public:
 	bool Debug;
 
 	#ifdef _DEBUG
-	GArray<GVariant> RegAllocators;
+	GArray<LVariant> RegAllocators;
 	#endif
 
-	GCompilerPriv()
+	LCompilerPriv()
 	{
 		Debug = false;
 		ErrShowFirstOnly = true;
@@ -451,13 +451,13 @@ public:
 		Types.Add("GView", GV_GVIEW);
 		Types.Add("LMouse", GV_LMOUSE);
 		Types.Add("LKey", GV_LKEY);
-		Types.Add("GVariant", GV_VARIANT);
+		Types.Add("LVariant", GV_VARIANT);
 		// Types.Add("binary", GV_BINARY);
 		// Types.Add("List", GV_LIST);
 		// Types.Add("GDom&", GV_DOMREF);
 	}
 
-	~GCompilerPriv()
+	~LCompilerPriv()
 	{
 		Empty();
 	}
@@ -662,7 +662,7 @@ public:
 					GAutoWString File(TrimStrW(Raw, (char16*)L"\"\'"));
 					if (File)
 					{
-						GVariant v;
+						LVariant v;
 						GAutoString IncCode;
 						v.OwnStr(File.Release());
 
@@ -779,7 +779,7 @@ public:
 	}
 
 	/// Allocate a variant and ref
-	GVariant *PreAllocVariant(GVarRef &r)
+	LVariant *PreAllocVariant(GVarRef &r)
 	{
 		r.Scope = SCOPE_GLOBAL;
 		r.Index = (int)Code->Globals.Length();
@@ -794,8 +794,8 @@ public:
 		if (Code->Globals.Length())
 		{
 			// Check for existing int
-			GVariant *p = &Code->Globals[0];
-			GVariant *e = p + Code->Globals.Length();
+			LVariant *p = &Code->Globals[0];
+			LVariant *e = p + Code->Globals.Length();
 			while (p < e)
 			{
 				if (p->Type == GV_DOUBLE &&
@@ -820,8 +820,8 @@ public:
 		if (Code->Globals.Length())
 		{
 			// Check for existing int
-			GVariant *p = &Code->Globals[0];
-			GVariant *e = p + Code->Globals.Length();
+			LVariant *p = &Code->Globals[0];
+			LVariant *e = p + Code->Globals.Length();
 			while (p < e)
 			{
 				if (p->Type == GV_BOOL &&
@@ -843,13 +843,13 @@ public:
 	{
 		r.Scope = SCOPE_GLOBAL;
 
-		GVariantType Type = i <= INT_MAX && i >= INT_MIN ? GV_INT32 : GV_INT64;
+		LVariantType Type = i <= INT_MAX && i >= INT_MIN ? GV_INT32 : GV_INT64;
 
 		if (Code->Globals.Length())
 		{
 			// Check for existing int
-			GVariant *p = &Code->Globals[0];
-			GVariant *e = p + Code->Globals.Length();
+			LVariant *p = &Code->Globals[0];
+			LVariant *e = p + Code->Globals.Length();
 			while (p < e)
 			{
 				if (p->Type == Type)
@@ -907,7 +907,7 @@ public:
 			}
 		}
 
-		GVariant &v = Code->Globals[r.Index];
+		LVariant &v = Code->Globals[r.Index];
 		v.Type = GV_STRING;
 		if ((v.Value.String = NewStr(s, len)))
 		{
@@ -941,7 +941,7 @@ public:
 			}
 		}
 
-		GVariant &v = Code->Globals[r.Index];
+		LVariant &v = Code->Globals[r.Index];
 		v.Type = GV_STRING;
 		if ((v.Value.String = utf))
 		{
@@ -950,7 +950,7 @@ public:
 	}
 
 	/// Find a variable by name, creating it if needed
-	GVarRef FindVariable(GVariant &Name, bool Create)
+	GVarRef FindVariable(LVariant &Name, bool Create)
 	{
 		GVarRef r = {0, -1};
 
@@ -1203,7 +1203,7 @@ public:
 		return true;
 	}
 	
-	bool ConvertStringToVariant(GVariant *v, char16 *t)
+	bool ConvertStringToVariant(LVariant *v, char16 *t)
 	{
 		if (!t)
 			return false;
@@ -1271,7 +1271,7 @@ public:
 								ScriptArgsRef.Scope = SCOPE_GLOBAL;
 								ScriptArgsRef.Index = (int)Code->Globals.Length();
 								
-								GVariant &v = Code->Globals[ScriptArgsRef.Index];
+								LVariant &v = Code->Globals[ScriptArgsRef.Index];
 								v.Type = GV_DOM;
 								v.Value.Dom = ScriptArgs;								
 							}
@@ -1324,7 +1324,7 @@ public:
 							v = reg;
 						}
 
-						// Casting to DOM will give as access to the type info for a GCustomType.
+						// Casting to DOM will give as access to the type info for a LCustomType.
 						// This currently doesn't work with other types :(					
 						Asm1(n.Tok, ICast, v);
 						Code->ByteCode.Add(GV_DOM);
@@ -1448,7 +1448,7 @@ public:
 						if (n.Lst.Length())
 						{
 							// List/array constant
-							GVariant *v = PreAllocVariant(n.Reg);
+							LVariant *v = PreAllocVariant(n.Reg);
 							if (v)
 							{
 								v->SetList();
@@ -1457,7 +1457,7 @@ public:
 									char16 *t = Tokens[n.Lst[i]];
 									if (!t)
 										break;
-									GAutoPtr<GVariant> a(new GVariant);
+									GAutoPtr<LVariant> a(new LVariant);
 									if (!ConvertStringToVariant(a, t))
 										break;
 									v->Value.Lst->Insert(a.Release());
@@ -1522,7 +1522,7 @@ public:
 				}
 
 				ssize_t Len = Code->ByteCode.Length();
-				ssize_t Size = 1 + sizeof(GFunc*) + sizeof(GVarRef) + 2 + (a.Length() * sizeof(GVarRef));
+				ssize_t Size = 1 + sizeof(LFunc*) + sizeof(GVarRef) + 2 + (a.Length() * sizeof(GVarRef));
 				Code->ByteCode.Length(Len + Size);
 				GPtr p;
 				uint8_t *Start = &Code->ByteCode[Len];
@@ -1788,10 +1788,10 @@ public:
 				{
 					PrevIsOp = 0;
 
-					GVariant m;
+					LVariant m;
 					m = t;
-					GFunc *f = Methods.Find(m.Str());
-					GFunctionInfo *sf = 0;
+					LFunc *f = Methods.Find(m.Str());
+					LFunctionInfo *sf = 0;
 					char16 *Next;
 					if (f)
 					{
@@ -2171,7 +2171,7 @@ public:
 					if (Op == OpPostInc || Op == OpPostDec)
 					{
 						// Write value back to origin
-						GVariant &VarName = a.Variable[0].Name;
+						LVariant &VarName = a.Variable[0].Name;
 
 						GVarRef n = FindVariable(VarName, false);
 						if (n.Valid())
@@ -2587,11 +2587,11 @@ public:
 
 	class GJumpZero
 	{
-		GCompilerPriv *Comp;
+		LCompilerPriv *Comp;
 		int JzOffset;
 
 	public:
-		GJumpZero(GCompilerPriv *d, int Tok, GVarRef &r, bool DeallocReg = true)
+		GJumpZero(LCompilerPriv *d, int Tok, GVarRef &r, bool DeallocReg = true)
 		{
 			// Create jump instruction to jump over the body if the expression evaluates to false
 			Comp = d;
@@ -2843,7 +2843,7 @@ public:
 		uint32_t &Cur,
 		/// [Optional] Current struct / class.
 		/// If not NULL this is a method definition for said class.
-		GCustomType *Struct = NULL
+		LCustomType *Struct = NULL
 	)
 	{
 		bool Status = false;
@@ -2864,8 +2864,8 @@ public:
 		}
 
 		GString FunctionName;
-		GCustomType::Method *StructMethod = NULL; // Member function of script struct/class
-		GFunctionInfo *ScriptMethod = NULL; // Standalone scripting function
+		LCustomType::Method *StructMethod = NULL; // Member function of script struct/class
+		LFunctionInfo *ScriptMethod = NULL; // Standalone scripting function
 		
 		char16 *Name = GetTok(Cur);
 		if (Name)
@@ -2924,16 +2924,16 @@ public:
 				return OnError(Cur, "Expecting '{'.");
 
 			// Setup new scope(s)
-			GAutoPtr<GVariables> ObjectScope;
+			GAutoPtr<LVariables> ObjectScope;
 			if (Struct)
 			{
 				// The object scope has to be first so that local variables take
 				// precedence over object member variables.
-				if (ObjectScope.Reset(new GVariables(Struct)))
+				if (ObjectScope.Reset(new LVariables(Struct)))
 					Scopes.Add(ObjectScope);
 			}
 
-			GVariables LocalScope(SCOPE_LOCAL);
+			LVariables LocalScope(SCOPE_LOCAL);
 			if (Struct)
 				LocalScope.Var("This", true);
 			for (unsigned i=0; i<Params.Length(); i++)
@@ -2987,9 +2987,9 @@ public:
 		return OnError(Cur, "Unexpected EOF in function.");
 	}
 	
-	GExternFunc::ExternType ParseExternType(GArray<const char16*> &Strs)
+	LExternFunc::ExternType ParseExternType(GArray<const char16*> &Strs)
 	{
-		GExternFunc::ExternType Type;
+		LExternFunc::ExternType Type;
 		
 		Type.Out = false;
 		Type.Ptr = 0;
@@ -3017,7 +3017,7 @@ public:
 			else
 			{
 				GAutoString u(WideToUtf8(t));
-				GVariantType tok_type = Types.Find(u);
+				LVariantType tok_type = Types.Find(u);
 				if (tok_type != GV_NULL)
 				{
 					Type.Base = tok_type;
@@ -3053,7 +3053,7 @@ public:
 		}
 		
 		// First token is library name
-		GExternFunc *e = new GExternFunc;
+		LExternFunc *e = new LExternFunc;
 		if (!e)
 			return OnError(Cur, "Alloc error.");
 		
@@ -3228,7 +3228,7 @@ public:
 		return 0;
 	}
 	
-	int ByteSizeFromType(char *s, GVariantType t)
+	int ByteSizeFromType(char *s, LVariantType t)
 	{
 		switch (t)
 		{
@@ -3275,9 +3275,9 @@ public:
 
 		// Parse struct name and setup a type
 		char16 *t;
-		GCustomType *Def = Code->Types.Find(t = GetTok(Cur));
+		LCustomType *Def = Code->Types.Find(t = GetTok(Cur));
 		if (!Def)
-			Code->Types.Add(t, Def = new GCustomType(t));
+			Code->Types.Add(t, Def = new LCustomType(t));
 		Cur++;
 		t = GetTok(Cur);
 		if (!t || StricmpW(t, sStartCurlyBracket))
@@ -3309,10 +3309,10 @@ public:
 			else
 			{
 				// Parse member field
-				GVariant TypeName = t;
+				LVariant TypeName = t;
 
-				GCustomType *NestedType = 0;
-				GVariantType Type = Types.Find(TypeName.Str());
+				LCustomType *NestedType = 0;
+				LVariantType Type = Types.Find(TypeName.Str());
 				if (!Type)
 				{
 					// Check other custom types
@@ -3337,7 +3337,7 @@ public:
 						goto EofError;
 				}
 
-				GVariant Name = t;
+				LVariant Name = t;
 				Cur++;
 				if (!(t = GetTok(Cur)))
 					goto EofError;
@@ -3495,7 +3495,7 @@ public:
 
 GCompiler::GCompiler()
 {
-	d = new GCompilerPriv;
+	d = new LCompilerPriv;
 }
 
 GCompiler::~GCompiler()
@@ -3505,9 +3505,9 @@ GCompiler::~GCompiler()
 
 bool GCompiler::Compile
 (
-	GAutoPtr<GCompiledCode> &Code,
-	GScriptContext *SysContext,
-	GScriptContext *UserContext,
+	GAutoPtr<LCompiledCode> &Code,
+	LScriptContext *SysContext,
+	LScriptContext *UserContext,
 	const char *FileName,
 	const char *Script,
 	GDom *Args
@@ -3560,10 +3560,10 @@ bool GCompiler::Compile
 	}
 
 	if (!Code)
-		Code.Reset(new GCompiledCode);
+		Code.Reset(new LCompiledCode);
 	
 	bool Status = false;
-	d->Code = dynamic_cast<GCompiledCode*>(Code.Get());
+	d->Code = dynamic_cast<LCompiledCode*>(Code.Get());
 	if (d->Code)
 	{
 		d->Code->UserContext = UserContext;
@@ -3591,17 +3591,17 @@ bool GCompiler::Compile
 }
 
 //////////////////////////////////////////////////////////////////////
-class GScriptEnginePrivate
+class LScriptEnginePrivate
 {
 public:
 	GViewI *Parent;
 	SystemFunctions SysContext;
-	GScriptContext *UserContext;
-	GCompiledCode *Code;
-	GVmDebuggerCallback *Callback;
-	GVariant ReturnValue;
+	LScriptContext *UserContext;
+	LCompiledCode *Code;
+	LVmDebuggerCallback *Callback;
+	LVariant ReturnValue;
 
-	GScriptEnginePrivate()
+	LScriptEnginePrivate()
 	{
 		UserContext = NULL;
 		Parent = NULL;
@@ -3610,26 +3610,26 @@ public:
 	}
 };
 
-GScriptEngine::GScriptEngine(GViewI *parent, GScriptContext *UserContext, GVmDebuggerCallback *Callback)
+LScriptEngine::LScriptEngine(GViewI *parent, LScriptContext *UserContext, LVmDebuggerCallback *Callback)
 {
-	d = new GScriptEnginePrivate;
+	d = new LScriptEnginePrivate;
 	d->Parent = parent;
 	d->UserContext = UserContext;
 	d->Callback = Callback;
 	d->SysContext.SetEngine(this);
 }
 
-GScriptEngine::~GScriptEngine()
+LScriptEngine::~LScriptEngine()
 {
 	DeleteObj(d);
 }
 
-GCompiledCode *GScriptEngine::GetCurrentCode()
+LCompiledCode *LScriptEngine::GetCurrentCode()
 {
 	return d->Code;
 }
 
-bool GScriptEngine::Compile(GAutoPtr<GCompiledCode> &Obj, GScriptContext *UserContext, const char *Script, const char *FileName, GDom *Args)
+bool LScriptEngine::Compile(GAutoPtr<LCompiledCode> &Obj, LScriptContext *UserContext, const char *Script, const char *FileName, GDom *Args)
 {
 	if (!Script)
 	{
@@ -3646,14 +3646,14 @@ bool GScriptEngine::Compile(GAutoPtr<GCompiledCode> &Obj, GScriptContext *UserCo
 						Args);
 }
 
-GExecutionStatus GScriptEngine::Run(GCompiledCode *Obj, GVariant *Ret, const char *TempPath)
+LExecutionStatus LScriptEngine::Run(LCompiledCode *Obj, LVariant *Ret, const char *TempPath)
 {
-	GExecutionStatus Status = ScriptError;
+	LExecutionStatus Status = ScriptError;
 
 	d->Code = Obj;
 	if (d->Code)
 	{
-		GVirtualMachine Vm(d->Callback);
+		LVirtualMachine Vm(d->Callback);
 		if (TempPath)
 			Vm.SetTempPath(TempPath);
 		Status = Vm.Execute(d->Code, 0, NULL, true, Ret ? Ret : &d->ReturnValue);
@@ -3663,21 +3663,21 @@ GExecutionStatus GScriptEngine::Run(GCompiledCode *Obj, GVariant *Ret, const cha
 	return Status;
 }
 
-GExecutionStatus GScriptEngine::RunTemporary(GCompiledCode *Obj, char *Script, GVariant *Ret)
+LExecutionStatus LScriptEngine::RunTemporary(LCompiledCode *Obj, char *Script, LVariant *Ret)
 {
-	GExecutionStatus Status = ScriptError;
-	GCompiledCode *Code = dynamic_cast<GCompiledCode*>(Obj);
+	LExecutionStatus Status = ScriptError;
+	LCompiledCode *Code = dynamic_cast<LCompiledCode*>(Obj);
 	if (Script && Code)
 	{
-		GAutoPtr<GCompiledCode> Temp(new GCompiledCode(*Code));
+		GAutoPtr<LCompiledCode> Temp(new LCompiledCode(*Code));
 		uint32_t TempLen = (uint32_t) Temp->Length();
 		d->Code = Temp;
 		
 		GCompiler Comp;
 		if (Comp.Compile(Temp, &d->SysContext, d->UserContext, Temp->GetFileName(), Script, NULL))
 		{
-			GVirtualMachine Vm(d->Callback);
-			Status = Vm.Execute(dynamic_cast<GCompiledCode*>(Temp.Get()), TempLen, NULL, true, Ret ? Ret : &d->ReturnValue);
+			LVirtualMachine Vm(d->Callback);
+			Status = Vm.Execute(dynamic_cast<LCompiledCode*>(Temp.Get()), TempLen, NULL, true, Ret ? Ret : &d->ReturnValue);
 		}
 		
 		d->Code = NULL;
@@ -3686,7 +3686,7 @@ GExecutionStatus GScriptEngine::RunTemporary(GCompiledCode *Obj, char *Script, G
 	return Status;
 }
 
-bool GScriptEngine::EvaluateExpression(GVariant *Result, GDom *VariableSource, char *Expression)
+bool LScriptEngine::EvaluateExpression(LVariant *Result, GDom *VariableSource, char *Expression)
 {
 	if (!Result || !VariableSource || !Expression)
 	{
@@ -3701,7 +3701,7 @@ bool GScriptEngine::EvaluateExpression(GVariant *Result, GDom *VariableSource, c
 	
 	// Compile the script
 	GCompiler Comp;
-	GAutoPtr<GCompiledCode> Obj;
+	GAutoPtr<LCompiledCode> Obj;
 	if (!Comp.Compile(Obj, NULL, NULL, NULL, a, VariableSource))
 	{
 		LgiAssert(0);
@@ -3709,9 +3709,9 @@ bool GScriptEngine::EvaluateExpression(GVariant *Result, GDom *VariableSource, c
 	}
 	
 	// Execute the script
-	GVirtualMachine Vm(d->Callback);
-	GCompiledCode *Code = dynamic_cast<GCompiledCode*>(Obj.Get());
-	GExecutionStatus s = Vm.Execute(Code, 0, NULL, true, Result ? Result : &d->ReturnValue);
+	LVirtualMachine Vm(d->Callback);
+	LCompiledCode *Code = dynamic_cast<LCompiledCode*>(Obj.Get());
+	LExecutionStatus s = Vm.Execute(Code, 0, NULL, true, Result ? Result : &d->ReturnValue);
 	if (s == ScriptError)
 	{
 		LgiAssert(0);
@@ -3721,7 +3721,7 @@ bool GScriptEngine::EvaluateExpression(GVariant *Result, GDom *VariableSource, c
 	return true;
 }
 
-GStream *GScriptEngine::GetConsole()
+GStream *LScriptEngine::GetConsole()
 {
 	if (d->SysContext.GetLog())
 		return d->SysContext.GetLog();
@@ -3732,7 +3732,7 @@ GStream *GScriptEngine::GetConsole()
 	return NULL;
 }
 
-bool GScriptEngine::SetConsole(GStream *t)
+bool LScriptEngine::SetConsole(GStream *t)
 {
 	d->SysContext.SetLog(t);
 
@@ -3742,24 +3742,24 @@ bool GScriptEngine::SetConsole(GStream *t)
 	return true;
 }
 
-bool GScriptEngine::CallMethod(GCompiledCode *Obj, const char *Method, LScriptArguments &Args)
+bool LScriptEngine::CallMethod(LCompiledCode *Obj, const char *Method, LScriptArguments &Args)
 {
-	GCompiledCode *Code = dynamic_cast<GCompiledCode*>(Obj);
+	LCompiledCode *Code = dynamic_cast<LCompiledCode*>(Obj);
 	if (!Code || !Method)
 		return false;
 
-	GFunctionInfo *i = Code->GetMethod(Method);
+	LFunctionInfo *i = Code->GetMethod(Method);
 	if (!i)
 		return false;
 
-	GVirtualMachine Vm(d->Callback);
+	LVirtualMachine Vm(d->Callback);
 	Args.Vm = &Vm;
-	GExecutionStatus Status = Vm.ExecuteFunction(Code, i, Args, NULL);
+	LExecutionStatus Status = Vm.ExecuteFunction(Code, i, Args, NULL);
 	Args.Vm = NULL;
 	return Status != ScriptError;
 }
 
-GScriptContext *GScriptEngine::GetSystemContext()
+LScriptContext *LScriptEngine::GetSystemContext()
 {
 	return &d->SysContext;
 }

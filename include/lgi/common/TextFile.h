@@ -54,7 +54,7 @@ public:
 		return NULL;
 	}
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = NULL)
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL)
 	{
 		if (LgiStringToDomProp(Name) == FileEncoding)
 		{

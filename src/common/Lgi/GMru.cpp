@@ -390,7 +390,7 @@ GMessage::Result GMru::OnEvent(GMessage *Msg)
 bool GMru::Serialize(GDom *Store, const char *Prefix, bool Write)
 {
 	bool Status = false;
-	GVariant v;
+	LVariant v;
 
 	if (Store && Prefix)
 	{
@@ -430,14 +430,14 @@ bool GMru::Serialize(GDom *Store, const char *Prefix, bool Write)
 			// read our keys in
 			char Key[64];
 			sprintf_s(Key, sizeof(Key), "%s.Items", Prefix);
-			GVariant i;
+			LVariant i;
 			if (Store->GetValue(Key, i))
 			{
 				for (int n=0; n<i.CastInt32(); n++)
 				{
 					sprintf_s(Key, sizeof(Key), "%s.Item%i", Prefix, n);
 
-					GVariant File;
+					LVariant File;
 					if (Store->GetValue(Key, File))
 					{
 						GString Stored = File.Str();

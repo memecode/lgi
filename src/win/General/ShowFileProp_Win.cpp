@@ -14,7 +14,7 @@ void LgiShowFileProperties(OsView Parent, const char *Filename)
 	#endif
 	info.lpVerb = _T("properties");
 	#ifdef _UNICODE
-		GVariant v(Filename);
+		LVariant v(Filename);
 		info.lpFile = v.WStr();
 	#else
 		info.lpFile = Filename;

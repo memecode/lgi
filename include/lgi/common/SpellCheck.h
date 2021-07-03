@@ -70,7 +70,7 @@ public:
 		GArray<SpellingError> Errors;
 
 		// Application specific data
-		GArray<GVariant> User;
+		GArray<LVariant> User;
 		
 		CheckText()
 		{
@@ -127,7 +127,7 @@ public:
 	bool Check(	int ResponseHnd,
 				GString s,
 				ssize_t Start, ssize_t Len,
-				GArray<GVariant> *User = NULL /* see 'SpellCheckParams' */)
+				GArray<LVariant> *User = NULL /* see 'SpellCheckParams' */)
 	{
 		SPELL_CHK_VALID_HND(ResponseHnd);
 		

@@ -172,7 +172,7 @@ bool GOptionsFile::DeleteValue(const char *Name)
 
 	if (Name && Lock(_FL))
 	{
-		GVariant v;
+		LVariant v;
 		SetValue(Name, v);
 		Unlock();
 	}

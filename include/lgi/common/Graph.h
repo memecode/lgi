@@ -16,7 +16,7 @@ public:
 
     struct GGraphPair
     {
-	    GVariant x, y;
+	    LVariant x, y;
 	    void *UserData;
     };
     

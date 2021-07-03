@@ -349,7 +349,7 @@ public:
 	IoStatus ReadImage(GSurface *pDC, GStream *In);
 	IoStatus WriteImage(GStream *Out, GSurface *pDC);
 
-	bool GetVariant(const char *n, GVariant &v, char *a)
+	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
 		if (!_stricmp(n, LGI_FILTER_TYPE))
 		{
@@ -429,7 +429,7 @@ void PNGAPI LibPngError(png_structp Png, png_const_charp Msg)
 
 		if (This->Props)
 		{
-			GVariant v;
+			LVariant v;
 			This->Props->SetValue(LGI_FILTER_ERROR, v = (char*)Msg);
 		}
 
@@ -675,7 +675,7 @@ GFilter::IoStatus GdcPng::ReadImage(GSurface *pDeviceContext, GStream *In)
 	pDC = pDeviceContext;
 	DeleteArray(PrevScanLine);
 
-	GVariant v;
+	LVariant v;
 	if (Props &&
 		Props->GetValue(LGI_FILTER_PARENT_WND, v) &&
 		v.Type == GV_GVIEW)
@@ -1061,10 +1061,10 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 {
 	GFilter::IoStatus Status = IoError;
 	
-	GVariant Transparent;
+	LVariant Transparent;
 	bool HasTransparency = false;
 	COLOUR Back = 0;
-	GVariant v;
+	LVariant v;
 
 	if (!pDC)
 		return GFilter::IoError;
@@ -1159,7 +1159,7 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 
 	if (setjmp(Here) == 0 && pDC && Out)
 	{
-		GVariant ColProfile;
+		LVariant ColProfile;
 		if (Props)
 		{
 			Props->GetValue(LGI_FILTER_COLOUR_PROF, ColProfile);

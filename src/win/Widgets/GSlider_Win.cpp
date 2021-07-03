@@ -22,8 +22,6 @@ GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool ve
 	{
 		LgiAssert(0);
 	}
-
-	// SetBackgroundFill(new GViewFill(LC_MED, 24));
 }
 
 GSlider::~GSlider()

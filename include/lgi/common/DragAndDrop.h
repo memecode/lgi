@@ -47,7 +47,7 @@ LgiFunc const char *LMimeToUti(const char *Mime);
 struct LgiClass GDragData
 {
 	GString Format;
-	GArray<GVariant> Data;
+	GArray<LVariant> Data;
 	
 	bool IsFormat(GString Fmt)
 	{
@@ -184,7 +184,7 @@ public:
 	
 	/// This is called when you are being asked for your
 	/// data. You must provide it in the format specified
-	/// and return it via the GVariant.
+	/// and return it via the LVariant.
 	virtual bool GetData
 	(
 		/// Fill out as many GDragData structures as you need.
@@ -296,7 +296,7 @@ public:
 	) = 0;
 
 	/// 'OnDrop' is called when the user releases the data over
-	/// your window. The data is going to be a binary GVariant
+	/// your window. The data is going to be a binary LVariant
 	/// in the format you accepted earlier.
 	/// \returns #DROPEFFECT_NONE for failure or #DROPEFFECT_COPY, #DROPEFFECT_MOVE, #DROPEFFECT_LINK
 	virtual int OnDrop

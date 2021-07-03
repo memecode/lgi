@@ -111,7 +111,7 @@ public:
 	
 	bool SetText(const char *s, int i = 0) override;
 	void OnExpand(bool b) override;
-	bool SetValue(GVariant &v);
+	bool SetValue(LVariant &v);
 };
 
 #include "IdeProjectSettings.h"

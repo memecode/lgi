@@ -1,6 +1,6 @@
 // Clipboard Implementation
 #include "Lgi.h"
-#include "GVariant.h"
+#include "LVariant.h"
 #include "GClipBoard.h"
 
 #define DEBUG_CLIPBOARD		0

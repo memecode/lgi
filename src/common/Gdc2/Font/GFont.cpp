@@ -1559,7 +1559,7 @@ bool GFontType::Serialize(GDom *Options, const char *OptName, bool Write)
 
 	if (Options && OptName)
 	{
-		GVariant v;
+		LVariant v;
 		#if defined WINNATIVE
 		if (Write)
 		{

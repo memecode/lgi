@@ -107,11 +107,11 @@ public:
 
 	bool SetOpt(GOptionsFile *p, const char *opt, char *str)
 	{
-		GVariant v = str;
+		LVariant v = str;
 		return p ? p->SetValue(opt, v) : false;
 	}
 
-	bool GetOpt(GOptionsFile *p, const char *opt, GVariant &v)
+	bool GetOpt(GOptionsFile *p, const char *opt, LVariant &v)
 	{
 		return p ? p->GetValue(opt, v) : false;
 	}
@@ -149,7 +149,7 @@ public:
 		return p ? p->Set(opt, str) : false;
 	}
 
-	bool GetOpt(ObjProperties *p, char *opt, GVariant &v)
+	bool GetOpt(ObjProperties *p, char *opt, LVariant &v)
 	{
 		char *str;
 		if (p && p->Get(opt, str))
@@ -255,7 +255,7 @@ bool GDocApp<OptionsFmt>::SetLanguage(char *LangId)
 				MB_YESNO) != IDYES)
 		return false;
 
-	GVariant v;
+	LVariant v;
 	GetOptions()->SetValue(_LangOptsName, v = LangId);
 	GetOptions()->SerializeFile(true);
 	LgiCloseApp();
@@ -313,7 +313,7 @@ bool GDocApp<OptionsFmt>::_DoSerialize(bool Write)
 
 	if (!Write)
 	{
-		GVariant Lang;
+		LVariant Lang;
 		if (_LangOptsName &&
 			Options->GetValue(_LangOptsName, Lang))
 		{

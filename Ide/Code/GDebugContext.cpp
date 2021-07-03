@@ -331,7 +331,7 @@ bool GDebugContext::UpdateLocals()
 				}
 				default:
 				{
-					sprintf_s(s, sizeof(s), "notimp(%s)", GVariant::TypeToString(v.Value.Type));
+					sprintf_s(s, sizeof(s), "notimp(%s)", LVariant::TypeToString(v.Value.Type));
 					it->SetText(v.Type ? v.Type : s, 1);
 					s[0] = 0;
 					break;

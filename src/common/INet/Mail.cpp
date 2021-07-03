@@ -1015,7 +1015,7 @@ bool MailSmtp::Open(GSocketI *S,
 					VERIFY_RET_VAL(Write(0, true));
 					VERIFY_RET_VAL(ReadReply("220", &Str));
 
-					GVariant v;
+					LVariant v;
 					if (Socket->SetValue(GSocket_Protocol, v="SSL"))
 					{
 						Flags &= ~MAIL_USE_STARTTLS;
@@ -2095,7 +2095,7 @@ bool MailPop3::Open(GSocketI *S, const char *RemoteHost, int Port, const char *U
 
 		if (Port < 1)
 		{
-			GVariant IsSsl;
+			LVariant IsSsl;
 			if (S->GetValue("IsSSL", IsSsl) &&
 				IsSsl.CastInt32())
 				Port = POP3_SSL_PORT;
@@ -2131,7 +2131,7 @@ bool MailPop3::Open(GSocketI *S, const char *RemoteHost, int Port, const char *U
 				Socket->Open(Server, Port) &&
 				ReadReply())
 			{
-				GVariant NoAPOP = false;
+				LVariant NoAPOP = false;
 				if (SettingStore)
 					SettingStore->GetValue(OPT_Pop3NoApop, NoAPOP);
 				if (!NoAPOP.CastInt32())
@@ -2162,7 +2162,7 @@ bool MailPop3::Open(GSocketI *S, const char *RemoteHost, int Port, const char *U
 						VERIFY_RET_VAL(Write(0, true));
 						VERIFY_RET_VAL(ReadReply());
 
-						GVariant v;
+						LVariant v;
 						if (Socket->SetValue(GSocket_Protocol, v="SSL"))
 						{
 							Flags &= ~MAIL_USE_STARTTLS;
@@ -2196,7 +2196,7 @@ bool MailPop3::Open(GSocketI *S, const char *RemoteHost, int Port, const char *U
 						if (!Authed)
 						{
 							DeleteArray(Apop);
-							GVariant NoAPOP = true;
+							LVariant NoAPOP = true;
 							if (SettingStore)
 								SettingStore->SetValue(OPT_Pop3NoApop, NoAPOP);
 							S->Close();

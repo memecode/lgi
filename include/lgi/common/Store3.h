@@ -50,7 +50,7 @@
 #include "LgiInterfaces.h"
 #include "GMime.h"
 #include "GOptionsFile.h"
-#include "GVariant.h"
+#include "LVariant.h"
 
 class GDataI;
 class GDataFolderI;
@@ -166,9 +166,9 @@ public:
 	virtual Store3Status SetDate(int id, const LDateTime *i) { EmptyVirtual(Store3Error); }
 
 	/// Gets a variant
-	virtual const GVariant *GetVar(int id) { EmptyVirtual(NULL); }
+	virtual const LVariant *GetVar(int id) { EmptyVirtual(NULL); }
 	/// Sets a variant property
-	virtual Store3Status SetVar(int id, GVariant *i) { EmptyVirtual(Store3Error); }
+	virtual Store3Status SetVar(int id, LVariant *i) { EmptyVirtual(Store3Error); }
 
 	/// Gets a sub object pointer
 	virtual GDataPropI *GetObj(int id) { EmptyVirtual(NULL); }
@@ -292,7 +292,7 @@ public:
 	/// \sa M_STORAGE_EVENT
 	virtual void Post(GDataStoreI *store, void *Param) {}
 	/// \returns the system path
-	virtual bool GetSystemPath(int Folder, GVariant &Path) { return false; }
+	virtual bool GetSystemPath(int Folder, LVariant &Path) { return false; }
 	/// \returns the options object
 	virtual GOptionsFile *GetOptions(bool Create = false) { return 0; }
 	/// A new item is available
@@ -304,7 +304,7 @@ public:
 	/// When an item changes
 	virtual bool OnChange(GArray<GDataI*> &items, int FieldHint) = 0;
 	/// Notifcation of property change
-	virtual void OnPropChange(GDataStoreI *Store, int Prop, GVariantType Type) {}
+	virtual void OnPropChange(GDataStoreI *Store, int Prop, LVariantType Type) {}
 	/// Get the logging stream
 	virtual GStreamI *GetLogger(GDataStoreI *store) { return 0; }
 	/// Search for a object by type and name
@@ -440,7 +440,7 @@ public:
 		int PropId,
 		/// The value to assign
 		/// (GV_INT32/64 -> SetInt, GV_DATETIME -> SetDateTime, GV_STRING -> SetStr)
-		GVariant &Value
+		LVariant &Value
 	) = 0;
 	
 	/// Compact the mail store

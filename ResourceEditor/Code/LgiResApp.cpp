@@ -941,7 +941,7 @@ AppWnd::AppWnd() :
 
 	if (_Create())
 	{
-		GVariant Langs;
+		LVariant Langs;
 		if (GetOptions()->GetValue(OPT_ShowLanguages, Langs))
 		{
 			ShowLanguages.Empty();
@@ -1101,7 +1101,7 @@ void AppWnd::ShowLang(GLanguageId Lang, bool Show)
 	char *Langs = p.NewStr();
 	if (Langs)
 	{
-		GVariant v;
+		LVariant v;
 		GetOptions()->SetValue(OPT_ShowLanguages, v = Langs);
 		DeleteArray(Langs);
 	}

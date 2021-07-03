@@ -70,7 +70,7 @@ public:
 		
 		GString Name;
 		GString Type;
-		GVariant Value;
+		LVariant Value;
 		GString Detail;
 	};
 	

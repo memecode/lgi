@@ -557,7 +557,7 @@ int ObjProperties::SizeofData()
 	return (Current) ? Current->Size : 0;
 }
 
-bool ObjProperties::SetValue(const char *Name, GVariant &v)
+bool ObjProperties::SetValue(const char *Name, LVariant &v)
 {
 	switch (v.Type)
 	{
@@ -723,7 +723,7 @@ bool ObjProperties::Set(Prop *p)
 	return false;
 }
 
-bool ObjProperties::GetValue(const char *Name, GVariant &v)
+bool ObjProperties::GetValue(const char *Name, LVariant &v)
 {
 	Prop *c = FindProp(Name);
 	if (!c)

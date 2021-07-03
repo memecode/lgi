@@ -29,7 +29,7 @@ public:
 	virtual ~Visualizer() {}
 	
 	virtual bool Match(GString s) = 0;
-	virtual bool Transform(GString name, GString val, Callback *Cb, GVariant &Value, GString &Detail) = 0;
+	virtual bool Transform(GString name, GString val, Callback *Cb, LVariant &Value, GString &Detail) = 0;
 };
 
 class GStringVis : public Visualizer
@@ -40,7 +40,7 @@ public:
 		return s == "GString";
 	}
 	
-	bool Transform(GString name, GString val, Callback *Cb, GVariant &Value, GString &Detail)	
+	bool Transform(GString name, GString val, Callback *Cb, LVariant &Value, GString &Detail)	
 	{
 		GString::Array a = val.SplitDelimit("{} \t\r\n");
 		if (a.Length() == 3 &&

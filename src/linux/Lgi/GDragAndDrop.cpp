@@ -186,7 +186,7 @@ LgiDragDataGet(GtkWidget        *widget,
 			if (dd.Length() > 0 &&
 				dd[0].Data.Length() > 0)
 			{
-				::GVariant &v = dd[0].Data[0];
+				::LVariant &v = dd[0].Data[0];
 				switch (v.Type)
 				{
 					case GV_STRING:

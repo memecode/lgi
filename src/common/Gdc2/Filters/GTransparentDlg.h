@@ -4,15 +4,15 @@
 #ifdef FILTER_UI
 
 #include "Lgi.h"
-#include "GVariant.h"
+#include "LVariant.h"
 
 class GTransparentDlg : public GDialog
 {
 	GRadioGroup *Grp;
-	GVariant *Trans;
+	LVariant *Trans;
 
 public:
-	GTransparentDlg(GView *parent, GVariant *trans);
+	GTransparentDlg(GView *parent, LVariant *trans);
 	int OnNotify(GViewI *Ctrl, int Flags);
 };
 #endif

@@ -39,8 +39,8 @@ SshConnection::SshConnection(GTextLog *log, const char *uri, const char *prompt)
 	Host.Set(Uri = uri);
 	d = NULL;
 
-	GVariant Ret;
-	GArray<GVariant*> Args;
+	LVariant Ret;
+	GArray<LVariant*> Args;
 	if (Wnd->CallMethod(METHOD_GetContext, &Ret, Args))
 	{
 		if (Ret.Type == GV_VOID_PTR)
@@ -966,7 +966,7 @@ class App : public GWindow, public AppPriv
 	GAutoPtr<GImageList> ImgLst;
 	GBox *FoldersBox;
 
-	bool CallMethod(const char *MethodName, GVariant *ReturnValue, GArray<GVariant*> &Args)
+	bool CallMethod(const char *MethodName, LVariant *ReturnValue, GArray<LVariant*> &Args)
 	{
 		if (!Stricmp(MethodName, METHOD_GetContext))
 		{

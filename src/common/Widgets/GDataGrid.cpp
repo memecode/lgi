@@ -22,7 +22,7 @@ struct GDataGridPriv
 	LListItem *Cur;
 	bool Dirty, PosDirty;
 	GArray<GDataGrid::GDataGridFlags> Flags;
-	GArray<GVariant> ColumnArgs;
+	GArray<LVariant> ColumnArgs;
 	LListItem *NewRecord;
 	GDataGrid::ItemFactory Factory;
 	void *UserData;
@@ -316,7 +316,7 @@ void GDataGridPriv::Create(int NewCol)
                     e = Combo = new GDataGridCombo(this, IDC_EDIT, rc);
 					if (e)
 					{
-						GVariant &e = ColumnArgs[Col];
+						LVariant &e = ColumnArgs[Col];
 						if (e.Type == GV_LIST)
 						{
 							for (auto v: *e.Value.Lst)
@@ -514,7 +514,7 @@ int GDataGrid::OnNotify(GViewI *c, int f)
 	return LList::OnNotify(c, f);
 }
 
-void GDataGrid::SetColFlag(int Col, GDataGridFlags Flags, GVariant *Arg)
+void GDataGrid::SetColFlag(int Col, GDataGridFlags Flags, LVariant *Arg)
 {
 	d->Flags[Col] = Flags;
 	if (Arg)
@@ -618,7 +618,7 @@ int GDataGrid::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 		GDragData &dd = Data[n];
 		if (dd.IsFormat(d->AcceptFmt))
 		{
-			GVariant *Data = &dd.Data.First();
+			LVariant *Data = &dd.Data.First();
 			if (Data->Type == GV_BINARY)
 			{
 				LListItem **Item = (LListItem**)Data->Value.Binary.Data;

@@ -186,7 +186,7 @@ protected:
 
 	// Forms
 	GViewI *Ctrl;
-	GVariant CtrlValue;
+	LVariant CtrlValue;
 	HtmlControlType CtrlType;
 
 	// Text
@@ -326,8 +326,8 @@ public:
 	void CollectFormValues(LHashTbl<ConstStrKey<char,false>,char*> &f);
 
 	// GDom impl
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = 0);
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 
 	// Window
 	bool OnMouseClick(LMouse &m);

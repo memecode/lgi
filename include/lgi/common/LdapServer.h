@@ -2,7 +2,7 @@
 #define __ILDAP_SERVER_H
 
 #include "../../src/common/INet/Ber/Ber.h"
-#include "GVariant.h"
+#include "LVariant.h"
 #include "INet.h"
 
 #define LDAP_PORT				389

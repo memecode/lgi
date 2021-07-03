@@ -27,7 +27,7 @@ public:
 	void CanAddRecord(bool b);
 	void SetFactory(ItemFactory Func = 0, void *userdata = 0);
 	LListItem *NewItem();
-	void SetColFlag(int Col, GDataGridFlags Flags, GVariant *Arg = 0);
+	void SetColFlag(int Col, GDataGridFlags Flags, LVariant *Arg = 0);
 	IndexArray *GetDeletedItems();
 
 	// Impl

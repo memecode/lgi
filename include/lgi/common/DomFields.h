@@ -38,7 +38,7 @@ _(DateSetStr, "SetStr")
 _(DateGetStr, "GetStr")
 _(DateSecond64Bit, "Second64Bit")
 
-// GVariant string
+// LVariant string
 _(StrJoin, "Join")
 _(StrSplit, "Split")
 _(StrSplitDelimit, "SplitDelimit")

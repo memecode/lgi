@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 #include "Lgi.h"
-#include "GVariant.h"
+#include "LVariant.h"
 #include "GSkinEngine.h"
 #include "GCombo.h"
 #include "GDisplayString.h"

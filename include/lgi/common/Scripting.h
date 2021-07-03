@@ -5,25 +5,25 @@
 #include "lgi\common\Variant.h"
 #include "lgi\common\List.h"
 
-class GScriptContext;
-class GScriptEnginePrivate;
-class GVmDebuggerCallback;
-class GVirtualMachine;
+class LScriptContext;
+class LScriptEnginePrivate;
+class LVmDebuggerCallback;
+class LVirtualMachine;
 
-class LScriptArguments : public GArray<GVariant*>
+class LScriptArguments : public GArray<LVariant*>
 {
-	friend class GScriptEngine;
-	friend class GVirtualMachine;
+	friend class LScriptEngine;
+	friend class LVirtualMachine;
 
-	GVirtualMachine *Vm;
+	LVirtualMachine *Vm;
 	GStream *Console;
-	GVariant _Return;
-	GVariant *PtrRet;
+	LVariant _Return;
+	LVariant *PtrRet;
 
 public:
 	static GStream NullConsole;
 
-	LScriptArguments(GVirtualMachine *vm, GVariant *ret = NULL, GStream *console = NULL)
+	LScriptArguments(LVirtualMachine *vm, LVariant *ret = NULL, GStream *console = NULL)
 	{
 		Vm = vm;
 		if (ret)
@@ -37,13 +37,13 @@ public:
 			Console = &NullConsole;
 	}
 
-	GVirtualMachine *GetVm() { return Vm; }
-	GVariant *GetReturn() { return PtrRet; }
+	LVirtualMachine *GetVm() { return Vm; }
+	LVariant *GetReturn() { return PtrRet; }
 	GStream *GetConsole() { return Console; }
 	bool Throw(const char *File, int Line, const char *Msg, ...);
 };
 
-typedef bool (GScriptContext::*ScriptCmd)(LScriptArguments &Args);
+typedef bool (LScriptContext::*ScriptCmd)(LScriptArguments &Args);
 
 #define SCOPE_REGISTER		0
 #define SCOPE_LOCAL			1
@@ -53,7 +53,7 @@ typedef bool (GScriptContext::*ScriptCmd)(LScriptArguments &Args);
 #define SCOPE_MAX			5
 
 /// Execution status
-enum GExecutionStatus
+enum LExecutionStatus
 {
 	ScriptError,
 	ScriptWarning,
@@ -61,7 +61,7 @@ enum GExecutionStatus
 };
 
 /// Various type of methods
-enum GFuncType
+enum LFuncType
 {
 	/// No method type.
 	NullFunc,
@@ -73,13 +73,13 @@ enum GFuncType
 	ExternFunc
 };
 
-struct GFunc
+struct LFunc
 {
-	GFuncType Type;
+	LFuncType Type;
 	GString Method;
 	bool InUse;
 
-	GFunc(const char *m = 0, GFuncType t = NullFunc)
+	LFunc(const char *m = 0, LFuncType t = NullFunc)
 	{
 		Type = t;
 		Method = m;
@@ -88,17 +88,17 @@ struct GFunc
 		// LgiStackTrace("%p alloc\n", this);
 	}
 
-	virtual ~GFunc()
+	virtual ~LFunc()
 	{
 		// LgiAssert(!InUse);
 	}
 
-	virtual GExecutionStatus Call(GScriptContext *Ctx, LScriptArguments &Args) = 0;
+	virtual LExecutionStatus Call(LScriptContext *Ctx, LScriptArguments &Args) = 0;
 };
 
-struct GHostFunc : public GFunc
+struct GHostFunc : public LFunc
 {
-	GScriptContext *Context;
+	LScriptContext *Context;
 	GString Args;
 	ScriptCmd Func;
 	
@@ -110,16 +110,16 @@ struct GHostFunc : public GFunc
 		Func = f.Func;
 	}
 	
-	GHostFunc(const char *method, const char *args, ScriptCmd proc) : GFunc(method, HostFunc)
+	GHostFunc(const char *method, const char *args, ScriptCmd proc) : LFunc(method, HostFunc)
 	{
 		Args = args;
 		Func = proc;
 	}
 
-	GExecutionStatus Call(GScriptContext *Ctx, LScriptArguments &Args) override;
+	LExecutionStatus Call(LScriptContext *Ctx, LScriptArguments &Args) override;
 };
 
-struct GExternFunc : public GFunc
+struct LExternFunc : public LFunc
 {
 	struct ExternType
 	{
@@ -127,20 +127,20 @@ struct GExternFunc : public GFunc
 		bool Unsigned;
 		bool Out;
 		int ArrayLen;
-		GVariantType Base;
+		LVariantType Base;
 	};
 
 	GAutoString Lib;
 	ExternType ReturnType;
 	GArray<ExternType> ArgType;
 
-	GExecutionStatus Call(GScriptContext *Ctx, LScriptArguments &Args) override;
+	LExecutionStatus Call(LScriptContext *Ctx, LScriptArguments &Args) override;
 };
 
-class GFunctionInfo : public GRefCount
+class LFunctionInfo : public GRefCount
 {
-	friend class GVirtualMachinePriv;
-	friend class GCompilerPriv;
+	friend class LVirtualMachinePriv;
+	friend class LCompilerPriv;
 	
 	static int _Infos;
 
@@ -157,14 +157,14 @@ class GFunctionInfo : public GRefCount
 	GArray<GString> Params;
 
 public:
-	GFunctionInfo(const char *name)
+	LFunctionInfo(const char *name)
 	{
 		StartAddr = 0;
 		if (name)
 			Name = name;
 	}
 
-	~GFunctionInfo()
+	~LFunctionInfo()
 	{
 	}
 	
@@ -183,7 +183,7 @@ public:
 		return Params.Length();
 	}
 
-	GFunctionInfo &operator =(GFunctionInfo &f)
+	LFunctionInfo &operator =(LFunctionInfo &f)
 	{
 		StartAddr = f.StartAddr;
 		FrameSize = f.FrameSize;
@@ -196,10 +196,10 @@ public:
 	}
 };
 
-class GScriptUtils
+class LScriptUtils
 {
 public:
-	virtual ~GScriptUtils() {}
+	virtual ~LScriptUtils() {}
 
 	int atoi(char16 *s);
 	int64 atoi64(char16 *s);
@@ -208,10 +208,10 @@ public:
 };
 
 /// The base context class for scripting engines
-class GScriptContext : public GScriptUtils
+class LScriptContext : public LScriptUtils
 {
 public:
-	virtual ~GScriptContext() {}
+	virtual ~LScriptContext() {}
 	
 	virtual GHostFunc *GetCommands() = 0;
 	virtual char *GetIncludeFile(char *FileName) = 0;
@@ -221,30 +221,30 @@ public:
 
 	// AddPrimitive: Add your primitive's functions in a derived class using the format:
 	//
-	//		bool MyPrim(GVariant *Ret, ArgumentArray &Args) { ... }
+	//		bool MyPrim(LVariant *Ret, ArgumentArray &Args) { ... }
 	//
 	// Where you return true if successful or false on error.
 };
 
-class GVariables : public GArray<GVariant>
+class LVariables : public GArray<LVariant>
 {
-	friend class GVirtualMachinePriv;
+	friend class LVirtualMachinePriv;
 
 	LHashTbl<ConstStrKey<char>,int> Lut;
 	
 public:
 	int Scope;
 	int NullIndex;
-	GCustomType *Obj;
+	LCustomType *Obj;
 	
-	GVariables(int scope)
+	LVariables(int scope)
 	{
 		Scope = scope;
 		NullIndex = -1;
 		Obj = NULL;
 	}
 	
-	GVariables(GCustomType *obj)
+	LVariables(LCustomType *obj)
 	{
 		Scope = SCOPE_OBJECT;
 		NullIndex = -1;
@@ -281,56 +281,56 @@ public:
 };
 
 /// A block of compile byte code
-class GCompiledCode
+class LCompiledCode
 {
-	friend class GCompilerPriv;
-	friend class GVirtualMachinePriv;
+	friend class LCompilerPriv;
+	friend class LVirtualMachinePriv;
 	friend class GCompiler;
-	friend class GVmDebuggerWnd;
+	friend class LVmDebuggerWnd;
 
 	/// The global variables
-	GVariables Globals;
+	LVariables Globals;
 	
 	/// The byte code of all the instructions
 	GArray<uint8_t> ByteCode;
 	
 	/// All the methods defined in the byte code and their arguments.
-	GArray< GAutoRefPtr<GFunctionInfo> > Methods;
+	GArray< GAutoRefPtr<LFunctionInfo> > Methods;
 	
 	/// All the externs defined in the code.
-	GArray<GExternFunc*> Externs;
+	GArray<LExternFunc*> Externs;
 	
 	/// All the user types defined
-	LHashTbl<StrKey<char16>, class GCustomType*> Types;
+	LHashTbl<StrKey<char16>, class LCustomType*> Types;
 	
 	/// The original script details
 	GString FileName;
 	GString Source;
 	
 	/// The system context (all the system functions)
-	GScriptContext *SysContext;
+	LScriptContext *SysContext;
 	
 	/// Any user context (application functions)
-	GScriptContext *UserContext;
+	LScriptContext *UserContext;
 
 	/// Debug info to map instruction address back to source line numbers
 	LHashTbl<IntKey<NativeInt>, int> Debug;
 
 public:
-	GCompiledCode();
-	GCompiledCode(GCompiledCode &copy);
-	~GCompiledCode();
+	LCompiledCode();
+	LCompiledCode(LCompiledCode &copy);
+	~LCompiledCode();
 
 	/// Size of the byte code
 	size_t Length() { return ByteCode.Length(); }
 	/// Assignment operator
-	GCompiledCode &operator =(const GCompiledCode &c);
+	LCompiledCode &operator =(const LCompiledCode &c);
 	/// Gets a method defined in the code
-	GFunctionInfo *GetMethod(const char *Name, bool Create = false);
+	LFunctionInfo *GetMethod(const char *Name, bool Create = false);
 	/// Sets a global variable
-	GVariant *Set(const char *Name, GVariant &v);
+	LVariant *Set(const char *Name, LVariant &v);
 	/// Gets the definition of a struct or custom type
-	GCustomType *GetType(char16 *Name) { return Types.Find(Name); }
+	LCustomType *GetType(char16 *Name) { return Types.Find(Name); }
 	/// Gets the file name this code was compiled from
 	const char *GetFileName() { return FileName; }
 	/// Gets the source
@@ -350,41 +350,41 @@ public:
 };
 
 /// New compiler/byte code/VM scripting engine
-class GScriptEngine
+class LScriptEngine
 {
-	class GScriptEnginePrivate *d;
+	class LScriptEnginePrivate *d;
 
 public:
-	GScriptEngine(GViewI *parent, GScriptContext *UserContext, GVmDebuggerCallback *Callback);
-	~GScriptEngine();
+	LScriptEngine(GViewI *parent, LScriptContext *UserContext, LVmDebuggerCallback *Callback);
+	~LScriptEngine();
 
 	GStream *GetConsole();
 	bool SetConsole(GStream *t);
 
-	GCompiledCode *GetCurrentCode();
-	bool Compile(	GAutoPtr<GCompiledCode> &Obj,
-					GScriptContext *UserContext,
+	LCompiledCode *GetCurrentCode();
+	bool Compile(	GAutoPtr<LCompiledCode> &Obj,
+					LScriptContext *UserContext,
 					const char *Script,
 					const char *FileName = NULL,
 					GDom *Args = NULL);
-	GExecutionStatus Run(GCompiledCode *Obj, GVariant *Ret = NULL, const char *TempPath = NULL);
-	GExecutionStatus RunTemporary(GCompiledCode *Obj, char *Script, GVariant *Ret = NULL);
-	bool EvaluateExpression(GVariant *Result, GDom *VariableSource, char *Expression);
-	bool CallMethod(GCompiledCode *Obj, const char *Method, LScriptArguments &Args);
-	GScriptContext *GetSystemContext();
+	LExecutionStatus Run(LCompiledCode *Obj, LVariant *Ret = NULL, const char *TempPath = NULL);
+	LExecutionStatus RunTemporary(LCompiledCode *Obj, char *Script, LVariant *Ret = NULL);
+	bool EvaluateExpression(LVariant *Result, GDom *VariableSource, char *Expression);
+	bool CallMethod(LCompiledCode *Obj, const char *Method, LScriptArguments &Args);
+	LScriptContext *GetSystemContext();
 };
 
-class GVirtualMachine;
+class LVirtualMachine;
 
-class GVmDebugger : public GDom
+class LVmDebugger : public GDom
 {
 public:
 	/// Set the VM ownership flag.
 	virtual void OwnVm(bool Own) = 0;
 	/// Makes the debugger the owner of the compiled code
-	virtual void OwnCompiledCode(GAutoPtr<GCompiledCode> Cc) = 0;
+	virtual void OwnCompiledCode(GAutoPtr<LCompiledCode> Cc) = 0;
 	/// Gets the code owned by the debugger
-	virtual GCompiledCode *GetCode() = 0;
+	virtual LCompiledCode *GetCode() = 0;
 	/// Set the source and asm
 	virtual void SetSource(const char *Mixed) = 0;
 	/// Show UI and wait for user response
@@ -399,25 +399,25 @@ public:
 		virtual void OnRun(bool Running) = 0;
 };
 
-class GVmDebuggerCallback : public GDom
+class LVmDebuggerCallback : public GDom
 {
 public:
 	/// Start a debugger instance to handle the execution in 'Vm'
-	virtual GVmDebugger *AttachVm(GVirtualMachine *Vm, GCompiledCode *Code, const char *Assembly) = 0;
+	virtual LVmDebugger *AttachVm(LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly) = 0;
 	/// Compile a new script
-	virtual bool CompileScript(GAutoPtr<GCompiledCode> &Output, const char *FileName, const char *Source) = 0;
+	virtual bool CompileScript(GAutoPtr<LCompiledCode> &Output, const char *FileName, const char *Source) = 0;
 };
 
 /// Debugger for vm script
-class GVmDebuggerWnd : public LWindow, public GVmDebugger
+class LVmDebuggerWnd : public LWindow, public LVmDebugger
 {
-	struct GScriptVmDebuggerPriv *d;
+	struct LScriptVmDebuggerPriv *d;
 
-	void UpdateVariables(LList *Lst, GVariant *Arr, ssize_t Len, char Prefix);
+	void UpdateVariables(LList *Lst, LVariant *Arr, ssize_t Len, char Prefix);
 
 public:
-	GVmDebuggerWnd(GView *Parent, GVmDebuggerCallback *Callback, GVirtualMachine *Vm, GCompiledCode *Code, const char *Assembly);
-	~GVmDebuggerWnd();
+	LVmDebuggerWnd(GView *Parent, LVmDebuggerCallback *Callback, LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly);
+	~LVmDebuggerWnd();
 
 	void OwnVm(bool Own);
 	void OnAddress(size_t Addr);
@@ -430,8 +430,8 @@ public:
 	GMessage::Param OnEvent(GMessage *Msg);
 	void LoadFile(const char *File);
 	GStream *GetLog();
-	void OwnCompiledCode(GAutoPtr<GCompiledCode> Cc);
-	GCompiledCode *GetCode();
+	void OwnCompiledCode(GAutoPtr<LCompiledCode> Cc);
+	LCompiledCode *GetCode();
 	
 	void Run();
 };

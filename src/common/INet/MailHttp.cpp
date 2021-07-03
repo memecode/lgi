@@ -202,7 +202,7 @@ public:
 		}
 	}
 
-	bool SetValue(const char *Which, GVariant &What)
+	bool SetValue(const char *Which, LVariant &What)
 	{
 		int r = S->SetValue(Which, What);
 		if (T && _stricmp(Which, GSocket_TransferSize) == 0)

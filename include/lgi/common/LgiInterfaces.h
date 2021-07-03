@@ -23,9 +23,8 @@ class GViewI;
 class LMouse;
 class LKey;
 class LWindow;
-class GViewFill;
 class GView;
-class GVariant;
+class LVariant;
 class GCss;
 
 // Classes
@@ -34,9 +33,9 @@ class GDomI
 public:
 	virtual ~GDomI() {}
 
-	virtual bool GetValue(const char *Var, GVariant &Value) { return false; }
-	virtual bool SetValue(const char *Var, GVariant &Value) { return false; }
-	virtual bool CallMethod(const char *MethodName, GVariant *ReturnValue, GArray<GVariant*> &Args) { return false; }
+	virtual bool GetValue(const char *Var, LVariant &Value) { return false; }
+	virtual bool SetValue(const char *Var, LVariant &Value) { return false; }
+	virtual bool CallMethod(const char *MethodName, LVariant *ReturnValue, GArray<LVariant*> &Args) { return false; }
 };
 
 /// Stream interface class

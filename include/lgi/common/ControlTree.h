@@ -10,7 +10,7 @@ public:
 	struct EnumValue
 	{
 		GString Name;
-		GVariant Value;
+		LVariant Value;
 		
 		void Set(const char *n, int val)
 		{
@@ -27,8 +27,8 @@ public:
 	private:
 		int CtrlId;
 		GAutoString Opt;
-		GVariantType Type;
-		GVariant Value;
+		LVariantType Type;
+		LVariant Value;
 		GViewI *Ctrl;
 		GButton *Browse;
 		GAutoPtr<EnumArr> Enum;
@@ -42,12 +42,12 @@ public:
 		};
 		int Flags;
 
-		Item(int ctrlId, char *Txt, const char *opt, GVariantType type, GArray<EnumValue> *pEnum);
+		Item(int ctrlId, char *Txt, const char *opt, LVariantType type, GArray<EnumValue> *pEnum);
 		~Item();
 
 		Item *Find(const char *opt);
 		bool Serialize(GDom *Store, bool Write);
-		void SetValue(GVariant &v);
+		void SetValue(LVariant &v);
 		LRect &GetRect();
 		void Select(bool b);
 		void OnPaint(ItemPaintCtx &Ctx);
@@ -59,7 +59,7 @@ public:
 protected:
 	class GControlTreePriv *d;
 
-	class Item *Resolve(bool Create, const char *Path, int CtrlId, GVariantType Type = GV_NULL, GArray<EnumValue> *Enum = 0);
+	class Item *Resolve(bool Create, const char *Path, int CtrlId, LVariantType Type = GV_NULL, GArray<EnumValue> *Enum = 0);
     void ReadTree(LXmlTag *t, GTreeNode *n);
 
 public:
@@ -69,8 +69,8 @@ public:
 	const char *GetClass() { return "GControlTree"; }
 
 	Item *Find(const char *opt);
-	GTreeItem *Insert(const char *DomPath, int CtrlId, GVariantType Type, GVariant *Value = 0, GArray<EnumValue> *Enum = 0);
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
+	GTreeItem *Insert(const char *DomPath, int CtrlId, LVariantType Type, LVariant *Value = 0, GArray<EnumValue> *Enum = 0);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 	bool Serialize(GDom *Store, bool Write);
 	int OnNotify(GViewI *c, int f);
 };

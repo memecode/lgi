@@ -1,6 +1,6 @@
 // Clipboard Implementation
 #include "Lgi.h"
-#include "GVariant.h"
+#include "LVariant.h"
 #include "GClipBoard.h"
 
 #define DEBUG_CLIPBOARD					0
@@ -12,7 +12,7 @@ using namespace Gtk;
 
 struct ClipData : public LMutex
 {
-	::GVariant v[VAR_COUNT];
+	::LVariant v[VAR_COUNT];
 	
 	ClipData() : LMutex("ClipData")
 	{
@@ -252,7 +252,7 @@ void LgiClipboardGetFunc(GtkClipboard *clipboard,
 {
 	if (Data.Lock(_FL))
 	{
-		::GVariant *p = (::GVariant*)user_data;
+		::LVariant *p = (::LVariant*)user_data;
 		#if DEBUG_CLIPBOARD
 		printf("%s:%i - LgiClipboardGetFunc: %p, %i\n", _FL, p, info);
 		#endif
@@ -286,7 +286,7 @@ void LgiClipboardClearFunc(GtkClipboard *clipboard,
 {
 	if (Data.Lock(_FL))
 	{
-		::GVariant *p = (::GVariant*)user_data;
+		::LVariant *p = (::LVariant*)user_data;
 		#if DEBUG_CLIPBOARD
 		printf("%s:%i - LgiClipboardClearFunc: %i\n", _FL, p->Type);
 		#endif
@@ -300,7 +300,7 @@ bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	if (!Ptr || Len <= 0)
 		return false;
 
-	::GVariant *p = NULL;
+	::LVariant *p = NULL;
 	if (Data.Lock(_FL))
 	{
 		for (int i=0; i<VAR_COUNT; i++)

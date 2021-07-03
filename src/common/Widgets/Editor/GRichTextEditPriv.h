@@ -368,7 +368,7 @@ public:
 	GRichTextEdit::RectType ClickedBtn, OverBtn;
 	ButtonState BtnState[GRichTextEdit::MaxArea];
 	LRect Areas[GRichTextEdit::MaxArea];
-	GVariant Values[GRichTextEdit::MaxArea];
+	LVariant Values[GRichTextEdit::MaxArea];
 
 	// Scrolling
 	int ScrollLinePx;

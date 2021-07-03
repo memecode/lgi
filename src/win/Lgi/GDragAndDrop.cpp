@@ -180,7 +180,7 @@ HRESULT GDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 			}
 			else
 			{
-				GVariant &Data = CurData.Data[0];
+				LVariant &Data = CurData.Data[0];
 				switch (Data.Type)
 				{
 					case GV_NULL:
@@ -691,7 +691,7 @@ int GDragDropTarget::OnDrop(GArray<GDragData> &DropData,
 		return DROPEFFECT_NONE;
 	
 	char *Fmt = DropData[0].Format;
-	GVariant *Var = &DropData[0].Data[0];
+	LVariant *Var = &DropData[0].Data[0];
 	return OnDrop(Fmt, Var, Pt, KeyState);
 }
 */
@@ -771,7 +771,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::Drop(IDataObject *pDataObject, DWORD 
 									if (w)
 									{
 										// Wrap a GStream around it so we can talk to it...
-										GVariant *s = &CurData.Data.New();
+										LVariant *s = &CurData.Data.New();
 										s->Type = GV_STREAM;
 										s->Value.Stream.Ptr = w;
 										s->Value.Stream.Own = true;
@@ -785,7 +785,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::Drop(IDataObject *pDataObject, DWORD 
 						else
 						{
 							// Default handling
-							GVariant *s = &CurData.Data.New();
+							LVariant *s = &CurData.Data.New();
 							s->SetBinary(Size, Ptr);
 						}
 						
@@ -795,7 +795,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::Drop(IDataObject *pDataObject, DWORD 
 				}
 				case TYMED_ISTREAM:
 				{
-					GVariant *s = &CurData.Data.New();
+					LVariant *s = &CurData.Data.New();
 					s->Type = GV_STREAM;
 					s->Value.Stream.Own = true;
 					s->Value.Stream.Ptr = new IStreamWrap(Medium.pstm);

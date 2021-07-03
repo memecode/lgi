@@ -29,7 +29,7 @@ public:
 		}
 	}
 
-    GDropFiles(GVariant &v)
+    GDropFiles(LVariant &v)
 	{
 		Init(v);
 	}
@@ -39,7 +39,7 @@ public:
 		DeleteArrays();
 	}
 
-	void Init(GVariant &v)
+	void Init(LVariant &v)
 	{
 		#if WINNATIVE
 	
@@ -123,7 +123,7 @@ public:
 
 		#elif defined MAC
 
-			GArray<GVariant*> a;
+			GArray<LVariant*> a;
 			if (v.Type == GV_LIST)
 			{
 				for (auto f: *v.Value.Lst)
@@ -138,7 +138,7 @@ public:
 	
 			for (int i=0; i<a.Length(); i++)
 			{
-				GVariant *v = a[i];
+				LVariant *v = a[i];
 				GString s;
 				if (v->Type == GV_STRING)
 					s = v->Str();
@@ -217,7 +217,7 @@ public:
 		#if defined(WINDOWS)
 		for (unsigned i=0; i<dd.Data.Length(); i++)
 		{
-			GVariant &v = dd.Data[i];
+			LVariant &v = dd.Data[i];
 			if (v.Type == GV_LIST)
 			{
 				for (auto f: *v.Value.Lst)

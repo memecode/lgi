@@ -46,7 +46,7 @@ _CRTIMP void __cdecl qsort_s(void *_Base,
 /// will remain the same over time either. However when objects are deleted from the
 /// array their destructors WILL be called. This allows you to have simple objects that
 /// have dynamically allocated pointers that are freed properly. A good example of this
-/// type of object is the GVariant or GAutoString class.
+/// type of object is the LVariant or GAutoString class.
 ///
 /// If you want to store objects with a virtual table, or that need their constructor
 /// to be called then you should create the GArray with pointers to the objects instead

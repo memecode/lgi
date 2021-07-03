@@ -24,8 +24,8 @@ public:
 	bool Length(int NewLength);
 	char *Description();
 	bool Description(char *NewDesc);
-	bool Set(GVariant &v);
-	bool Get(GVariant &v);
+	bool Set(LVariant &v);
+	bool Get(LVariant &v);
 };
 
 class MysqlRs : public GDbRecordset
@@ -124,12 +124,12 @@ bool MysqlField::Description(char *NewDesc)
 	return false;
 }
 
-bool MysqlField::Set(GVariant &v)
+bool MysqlField::Set(LVariant &v)
 {
 	return false;
 }
 
-bool MysqlField::Get(GVariant &v)
+bool MysqlField::Get(LVariant &v)
 {
 	if (!Rs->End())
 	{
@@ -298,7 +298,7 @@ public:
 	{
 	}
 
-	bool GetVariant(const char *n, GVariant &val, char *arr)
+	bool GetVariant(const char *n, LVariant &val, char *arr)
 	{
 		if (!stricmp(n, Dom_IsConnected))
 		{

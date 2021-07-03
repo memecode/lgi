@@ -24,7 +24,7 @@ public:
     }
 };
 
-GControlTree::Item::Item(int ctrlId, char *Txt, const char *opt, GVariantType type, GArray<GControlTree::EnumValue> *pEnum)
+GControlTree::Item::Item(int ctrlId, char *Txt, const char *opt, LVariantType type, GArray<GControlTree::EnumValue> *pEnum)
 {
 	if (ValidStr(opt))
 		Opt.Reset(NewStr(opt));
@@ -109,7 +109,7 @@ bool GControlTree::Item::Serialize(GDom *Store, bool Write)
 	return true;
 }
 
-void GControlTree::Item::SetValue(GVariant &v)
+void GControlTree::Item::SetValue(LVariant &v)
 {
 	Value = v;
 	if (GTreeItem::Select())
@@ -425,7 +425,7 @@ bool GControlTree::Serialize(GDom *Store, bool Write)
 	return !Error;
 }
 
-GControlTree::Item *GControlTree::Resolve(bool Create, const char *Path, int CtrlId, GVariantType Type, GArray<EnumValue> *Enum)
+GControlTree::Item *GControlTree::Resolve(bool Create, const char *Path, int CtrlId, LVariantType Type, GArray<EnumValue> *Enum)
 {
 	auto t  = GString(Path).SplitDelimit(".");
 	if (t.Length() > 0)
@@ -474,7 +474,7 @@ GControlTree::Item *GControlTree::Resolve(bool Create, const char *Path, int Ctr
 	return 0;
 }
 
-GTreeItem *GControlTree::Insert(const char *DomPath, int CtrlId, GVariantType Type, GVariant *Value, GArray<EnumValue> *Enum)
+GTreeItem *GControlTree::Insert(const char *DomPath, int CtrlId, LVariantType Type, LVariant *Value, GArray<EnumValue> *Enum)
 {
 	GControlTree::Item *c = Resolve(true, DomPath, CtrlId, Type, Enum);
 	if (c)
@@ -500,7 +500,7 @@ void GControlTree::ReadTree(LXmlTag *t, GTreeNode *n)
 		CtrlId = Str->Id;		
 
 		char *Type = c->GetAttr("ControlType");
-		GVariantType iType = GV_NULL;
+		LVariantType iType = GV_NULL;
 		int Flags = 0;
 		if (Type)
 		{
@@ -534,7 +534,7 @@ void GControlTree::ReadTree(LXmlTag *t, GTreeNode *n)
 	}
 }
 
-bool GControlTree::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool GControlTree::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	if (!Name)
 		return false;
@@ -578,7 +578,7 @@ int GControlTree::OnNotify(GViewI *c, int f)
 				s.Parent(this);
 				if (s.Open())
 				{
-					GVariant v;
+					LVariant v;
 					i->SetValue(v = s.Name());
 				}
 			}

@@ -44,9 +44,9 @@ extern "C" uint64 __cdecl CallExtern64(void *FuncAddr, NativeInt *Ret, uint32_t 
 #include <signal.h>
 #endif
 
-int GVariantCmp(GVariant *a, GVariant *b, NativeInt Data)
+int LVariantCmp(LVariant *a, LVariant *b, NativeInt Data)
 {
-	GVariant *Param = (GVariant*) Data;
+	LVariant *Param = (LVariant*) Data;
 	if (!a || !b)
 		return 0;
 		
@@ -71,11 +71,11 @@ int GVariantCmp(GVariant *a, GVariant *b, NativeInt Data)
 			Dir = -1;
 		}
 
-		GVariant av, bv;
+		LVariant av, bv;
 		if (a->Value.Dom->GetValue(Fld, av) &&
 			b->Value.Dom->GetValue(Fld, bv))
 		{
-			return GVariantCmp(&av, &bv, 0) * Dir;
+			return LVariantCmp(&av, &bv, 0) * Dir;
 		}
 	}
 	else if (a->Type == GV_INT32 &&
@@ -96,7 +96,7 @@ int GVariantCmp(GVariant *a, GVariant *b, NativeInt Data)
 	return 0;
 }
 
-inline GVariantType DecidePrecision(GVariantType a, GVariantType b)
+inline LVariantType DecidePrecision(LVariantType a, LVariantType b)
 {
 	if (a == GV_DOUBLE || b == GV_DOUBLE)
 		return GV_DOUBLE;
@@ -107,7 +107,7 @@ inline GVariantType DecidePrecision(GVariantType a, GVariantType b)
 	return GV_INT32;
 }
 
-inline GVariantType ComparePrecision(GVariantType a, GVariantType b)
+inline LVariantType ComparePrecision(LVariantType a, LVariantType b)
 {
 	if (a == GV_NULL || b == GV_NULL)
 		return GV_NULL;
@@ -127,7 +127,7 @@ inline GVariantType ComparePrecision(GVariantType a, GVariantType b)
 	return GV_INT32;
 }
 
-inline char *CastString(GVariant *v, GVariant &cache)
+inline char *CastString(LVariant *v, LVariant &cache)
 {
 	if (v->Type == GV_STRING)
 		return v->Str();
@@ -136,7 +136,7 @@ inline char *CastString(GVariant *v, GVariant &cache)
 	return cache.CastString();
 }
 
-inline int CompareVariants(GVariant *a, GVariant *b)
+inline int CompareVariants(LVariant *a, LVariant *b)
 {
 	// Calculates "a - b"
 
@@ -154,7 +154,7 @@ inline int CompareVariants(GVariant *a, GVariant *b)
 		}
 		case GV_STRING:
 		{
-			GVariant as, bs;
+			LVariant as, bs;
 			char *A = CastString(a, as);
 			char *B = CastString(b, bs);
 			if (!A || !B)
@@ -175,7 +175,7 @@ inline int CompareVariants(GVariant *a, GVariant *b)
 			// One or more values is NULL
 			if (a->IsNull() && b->IsNull())
 				return 0; // The same..
-			GVariant *Val = a->IsNull() ? b : a;
+			LVariant *Val = a->IsNull() ? b : a;
 			if (Val->IsNull())
 			{
 				LgiAssert(0);
@@ -199,7 +199,7 @@ inline int CompareVariants(GVariant *a, GVariant *b)
 	}
 }
 
-GExecutionStatus GExternFunc::Call(GScriptContext *Ctx, LScriptArguments &Args)
+LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 {
 	if (!Lib || !Method)
 		return ScriptError;
@@ -224,7 +224,7 @@ GExecutionStatus GExternFunc::Call(GScriptContext *Ctx, LScriptArguments &Args)
 	Ptr.ni = &Val[0];
 	for (unsigned i=0; !UnsupportedArg && i<Args.Length(); i++)
 	{
-		GVariant *v = Args[i];
+		LVariant *v = Args[i];
 		ExternType &t = ArgType[i];
 		if (!v)
 			return ScriptError;
@@ -367,7 +367,7 @@ GExecutionStatus GExternFunc::Call(GScriptContext *Ctx, LScriptArguments &Args)
 	*Args.GetReturn() = (int) r;
 	for (unsigned i=0; i<Args.Length(); i++)
 	{
-		GVariant *v = Args[i];
+		LVariant *v = Args[i];
 		ExternType &t = ArgType[i];
 		if (t.Out)
 		{
@@ -401,11 +401,11 @@ struct CodeBlock
 	int AsmLines;
 };
 
-class GVirtualMachinePriv : public GRefCount
+class LVirtualMachinePriv : public GRefCount
 {
-	GVariant ArrayTemp;
+	LVariant ArrayTemp;
 	
-	char *CastArrayIndex(GVariant *Idx)	
+	char *CastArrayIndex(LVariant *Idx)	
 	{
 		if (Idx == NULL || Idx->Type == GV_NULL)
 			return NULL;
@@ -435,24 +435,24 @@ public:
 	};
 
 	GStream *Log;
-	GCompiledCode *Code;
-	GExecutionStatus Status;
+	LCompiledCode *Code;
+	LExecutionStatus Status;
 	GPtr c;
-	GVariant Reg[MAX_REGISTER];
-	GArray<GVariant> Locals;
-	GVariant *Scope[SCOPE_MAX];
+	LVariant Reg[MAX_REGISTER];
+	GArray<LVariant> Locals;
+	LVariant *Scope[SCOPE_MAX];
 	GArray<StackFrame> Frames;
 	RunType StepType;
-	GVmDebuggerCallback *DbgCallback;
+	LVmDebuggerCallback *DbgCallback;
 	bool DebuggerEnabled;
-	GVmDebugger *Debugger;
-	GVirtualMachine *Vm;
+	LVmDebugger *Debugger;
+	LVirtualMachine *Vm;
 	LScriptArguments *ArgsOutput;
 	bool BreakCpp;
 	GArray<ssize_t> BreakPts;
 	GString TempPath;
 
-	GVirtualMachinePriv(GVirtualMachine *vm, GVmDebuggerCallback *Callback)
+	LVirtualMachinePriv(LVirtualMachine *vm, LVmDebuggerCallback *Callback)
 	{
 		Vm = vm;
 		DebuggerEnabled = true;
@@ -465,11 +465,11 @@ public:
 		ZeroObj(Scope);
 	}
 	
-	~GVirtualMachinePriv()
+	~LVirtualMachinePriv()
 	{
 	}
 
-	void DumpVariant(GStream *Log, GVariant &v)
+	void DumpVariant(GStream *Log, LVariant &v)
 	{
 		if (!Log)
 			return;
@@ -506,7 +506,7 @@ public:
 
 				int n = 0;
 				// const char *k;
-				// for (GVariant *p = v.Value.Hash->First(&k); p; p = v.Value.Hash->Next(&k), n++)
+				// for (LVariant *p = v.Value.Hash->First(&k); p; p = v.Value.Hash->Next(&k), n++)
 				for (auto it : *v.Value.Hash)
 				{
 					Log->Print("%s\"%s\"=", n?",":"", it.key);
@@ -555,7 +555,7 @@ public:
 		}
 	}
 
-	void DumpVariables(GVariant *v, int len)
+	void DumpVariables(LVariant *v, int len)
 	{
 		if (!Log)
 			return;
@@ -600,7 +600,7 @@ public:
 		{
 			if (!Debugger->GetCode())
 			{
-				GAutoPtr<GCompiledCode> Cp(new GCompiledCode(*Code));
+				GAutoPtr<LCompiledCode> Cp(new LCompiledCode(*Code));
 				Debugger->OwnCompiledCode(Cp);
 				
 				GStringPipe AsmBuf;
@@ -624,7 +624,7 @@ public:
 			{
 				StackFrame Sf = Frames[0];
 				GVarRef &Ret = Sf.ReturnValue;
-				GVariant *RetVar = &Scope[Ret.Scope][Ret.Index];
+				LVariant *RetVar = &Scope[Ret.Scope][Ret.Index];
 				*RetVar = false;
 			}			
 
@@ -636,9 +636,9 @@ public:
 		}
 	}
 
-	GExecutionStatus Decompile(GScriptContext *Context, GCompiledCode *Code, GStream *log)
+	LExecutionStatus Decompile(LScriptContext *Context, LCompiledCode *Code, GStream *log)
 	{
-		GExecutionStatus Status = ScriptSuccess;
+		LExecutionStatus Status = ScriptSuccess;
 		LgiAssert(sizeof(GVarRef) == 4);
 
 		GPtr c;
@@ -660,7 +660,7 @@ public:
 		LHashTbl<IntKey<NativeInt>, char*> Fn;
 		for (unsigned m=0; m<Code->Methods.Length(); m++)
 		{
-			GFunctionInfo *Info = Code->Methods[m];
+			LFunctionInfo *Info = Code->Methods[m];
 			if (Info->StartAddr >= 0)
 				Fn.Add(Info->StartAddr, Info->Name.Get());
 			else
@@ -696,7 +696,7 @@ public:
 		return Status;
 	}
 
-	GExecutionStatus Setup(GCompiledCode *code, uint32_t StartOffset, GStream *log, GFunctionInfo *Func, LScriptArguments *Args)
+	LExecutionStatus Setup(LCompiledCode *code, uint32_t StartOffset, GStream *log, LFunctionInfo *Func, LScriptArguments *Args)
 	{
 		Status = ScriptSuccess;
 		
@@ -786,7 +786,7 @@ public:
 
 				if (Out)
 				{
-					GExecutionStatus Decomp = Decompile(Code->UserContext, Code, Out);
+					LExecutionStatus Decomp = Decompile(Code->UserContext, Code, Out);
 					f.Close();
 					if (Decomp != ScriptSuccess)
 					{
@@ -881,7 +881,7 @@ public:
 		return -1;
 	}
 	
-	GExecutionStatus Run(RunType Type)
+	LExecutionStatus Run(RunType Type)
 	{
 		LgiAssert(Code != NULL);
 		
@@ -1015,63 +1015,63 @@ public:
 	}
 };
 
-bool GVirtualMachine::BreakOnWarning = false;
+bool LVirtualMachine::BreakOnWarning = false;
 
-GVirtualMachine::GVirtualMachine(GVmDebuggerCallback *callback)
+LVirtualMachine::LVirtualMachine(LVmDebuggerCallback *callback)
 {
-	d = new GVirtualMachinePriv(this, callback);
+	d = new LVirtualMachinePriv(this, callback);
 	d->AddRef();
 }
 
-GVirtualMachine::GVirtualMachine(GVirtualMachine *vm)
+LVirtualMachine::LVirtualMachine(LVirtualMachine *vm)
 {
 	d = vm->d;
 	d->AddRef();
 }
 
-GVirtualMachine::~GVirtualMachine()
+LVirtualMachine::~LVirtualMachine()
 {
 	if (d->Vm == this)
 		d->Vm = NULL;
 	d->DecRef();
 }
 
-GExecutionStatus GVirtualMachine::Execute(GCompiledCode *Code, uint32_t StartOffset, GStream *Log, bool StartImmediately, GVariant *Return)
+LExecutionStatus LVirtualMachine::Execute(LCompiledCode *Code, uint32_t StartOffset, GStream *Log, bool StartImmediately, LVariant *Return)
 {
 	if (!Code)
 		return ScriptError;
 
 	LScriptArguments Args(this, Return);
-	GExecutionStatus s = d->Setup(Code, StartOffset, Log, NULL, &Args);
+	LExecutionStatus s = d->Setup(Code, StartOffset, Log, NULL, &Args);
 	if (s != ScriptSuccess || !StartImmediately)
 		return s;
 
-	return d->Run(GVirtualMachinePriv::RunContinue);
+	return d->Run(LVirtualMachinePriv::RunContinue);
 }
 
-GExecutionStatus GVirtualMachine::ExecuteFunction(GCompiledCode *Code, GFunctionInfo *Func, LScriptArguments &Args, GStream *Log, LScriptArguments *ArgsOut)
+LExecutionStatus LVirtualMachine::ExecuteFunction(LCompiledCode *Code, LFunctionInfo *Func, LScriptArguments &Args, GStream *Log, LScriptArguments *ArgsOut)
 {
-	GCompiledCode *Cc = dynamic_cast<GCompiledCode*>(Code);
+	LCompiledCode *Cc = dynamic_cast<LCompiledCode*>(Code);
 	if (!Cc || !Func)
 		return ScriptError;
 
-	GExecutionStatus s = d->Setup(Cc, 0, Log, Func, &Args);
+	LExecutionStatus s = d->Setup(Cc, 0, Log, Func, &Args);
 	if (s != ScriptSuccess)
 		return s;
 
 	d->ArgsOutput = ArgsOut;
 	Args.Vm = this;
-	GExecutionStatus r = d->Run(GVirtualMachinePriv::RunContinue);
+	LExecutionStatus r = d->Run(LVirtualMachinePriv::RunContinue);
 	Args.Vm = NULL;
 	return r;
 }
 
-void GVirtualMachine::SetDebuggerEnabled(bool b)
+void LVirtualMachine::SetDebuggerEnabled(bool b)
 {
 	d->DebuggerEnabled = b;
 }
 
-GVmDebugger *GVirtualMachine::OpenDebugger(GCompiledCode *Code, const char *Assembly)
+LVmDebugger *LVirtualMachine::OpenDebugger(LCompiledCode *Code, const char *Assembly)
 {
 	if (d->DebuggerEnabled && !d->Debugger)
 	{
@@ -1084,41 +1084,41 @@ GVmDebugger *GVirtualMachine::OpenDebugger(GCompiledCode *Code, const char *Asse
 	return d->Debugger;
 }
 
-bool GVirtualMachine::StepInstruction()
+bool LVirtualMachine::StepInstruction()
 {
-	GExecutionStatus s = d->Run(GVirtualMachinePriv::RunStepInstruction);
+	LExecutionStatus s = d->Run(LVirtualMachinePriv::RunStepInstruction);
 	return s != ScriptError;
 }
 
-bool GVirtualMachine::StepLine()
+bool LVirtualMachine::StepLine()
 {
-	GExecutionStatus s = d->Run(GVirtualMachinePriv::RunStepLine);
+	LExecutionStatus s = d->Run(LVirtualMachinePriv::RunStepLine);
 	return s != ScriptError;
 }
 
-bool GVirtualMachine::StepOut()
+bool LVirtualMachine::StepOut()
 {
-	GExecutionStatus s = d->Run(GVirtualMachinePriv::RunStepOut);
+	LExecutionStatus s = d->Run(LVirtualMachinePriv::RunStepOut);
 	return s != ScriptError;
 }
 
-bool GVirtualMachine::BreakExecution()
+bool LVirtualMachine::BreakExecution()
 {
 	return false;
 }
 
-bool GVirtualMachine::Continue()
+bool LVirtualMachine::Continue()
 {
-	GExecutionStatus s = d->Run(GVirtualMachinePriv::RunContinue);
+	LExecutionStatus s = d->Run(LVirtualMachinePriv::RunContinue);
 	return s != ScriptError;
 }
 
-bool GVirtualMachine::BreakPoint(const char *File, int Line, bool Add)
+bool LVirtualMachine::BreakPoint(const char *File, int Line, bool Add)
 {
 	return false;
 }
 
-bool GVirtualMachine::BreakPoint(int Addr, bool Add)
+bool LVirtualMachine::BreakPoint(int Addr, bool Add)
 {
 	if (Add)
 		d->BreakPts.Add(Addr);
@@ -1127,19 +1127,19 @@ bool GVirtualMachine::BreakPoint(int Addr, bool Add)
 	return true;
 }
 
-void GVirtualMachine::SetBreakCpp(bool Brk)
+void LVirtualMachine::SetBreakCpp(bool Brk)
 {
 	d->BreakCpp = Brk;
 }
 
-void GVirtualMachine::SetTempPath(const char *Path)
+void LVirtualMachine::SetTempPath(const char *Path)
 {
 	d->TempPath = Path;
 }
 
 ////////////////////////////////////////////////////////////////////
 /*
-bool GTypeDef::GetVariant(const char *Name, GVariant &Value, char *Arr)
+bool GTypeDef::GetVariant(const char *Name, LVariant &Value, char *Arr)
 {
 	GMember *m = Members.Find(Name);
 	if (!m || !Object)
@@ -1185,7 +1185,7 @@ bool GTypeDef::GetVariant(const char *Name, GVariant &Value, char *Arr)
 	return true;
 }
 
-bool GTypeDef::SetVariant(const char *Name, GVariant &Value, char *Arr)
+bool GTypeDef::SetVariant(const char *Name, LVariant &Value, char *Arr)
 {
 	GMember *m = Members.Find(Name);
 	if (!m || !Object)
@@ -1291,10 +1291,10 @@ enum DbgCtrls
 	IDC_VARS_TBL
 };
 
-struct GScriptVmDebuggerPriv;
+struct LScriptVmDebuggerPriv;
 class GDebugView : public GTextView3
 {
-	GScriptVmDebuggerPriv *d;
+	LScriptVmDebuggerPriv *d;
 	int CurLine;
 	
 	int ErrorLine;
@@ -1303,7 +1303,7 @@ class GDebugView : public GTextView3
 	GArray<int> BreakPts;
 	
 public:
-	GDebugView(GScriptVmDebuggerPriv *priv);
+	GDebugView(LScriptVmDebuggerPriv *priv);
 	~GDebugView();
 
 	void SetError(const char *Err);
@@ -1316,18 +1316,18 @@ public:
 	bool Breakpoint(int Addr);
 };
 
-struct GScriptVmDebuggerPriv
+struct LScriptVmDebuggerPriv
 {
 	// Current script
 	bool OwnVm;
-	GAutoPtr<GVirtualMachine> Vm;
-	GVmDebuggerCallback *Callback;
+	GAutoPtr<LVirtualMachine> Vm;
+	LVmDebuggerCallback *Callback;
 	GString Script, Assembly;
 	GArray<CodeBlock> Blocks;
 	size_t CurrentAddr;
 	GArray<bool> LineIsAsm;
-	GAutoPtr<GCompiledCode> Obj;
-	GVariant Return;
+	GAutoPtr<LCompiledCode> Obj;
+	LVariant Return;
 	bool AcceptNotify;
 
 	// Ui
@@ -1343,7 +1343,7 @@ struct GScriptVmDebuggerPriv
 	GToolBar *Tools;
 	GTableLayout *VarsTbl;
 
-	GScriptVmDebuggerPriv()
+	LScriptVmDebuggerPriv()
 	{
 		RunLoop = false;
 		OwnVm = false;
@@ -1363,7 +1363,7 @@ struct GScriptVmDebuggerPriv
 	}
 };
 
-GDebugView::GDebugView(GScriptVmDebuggerPriv *priv) : GTextView3(IDC_TEXT, 0, 0, 100, 100)
+GDebugView::GDebugView(LScriptVmDebuggerPriv *priv) : GTextView3(IDC_TEXT, 0, 0, 100, 100)
 {
 	d = priv;
 	ErrorLine = -1;
@@ -1535,13 +1535,13 @@ void GDebugView::PourText(size_t Start, ssize_t Len)
 	}
 }
 
-GVmDebuggerWnd::GVmDebuggerWnd(GView *Parent, GVmDebuggerCallback *Callback, GVirtualMachine *Vm, GCompiledCode *Code, const char *Assembly)
+LVmDebuggerWnd::LVmDebuggerWnd(GView *Parent, LVmDebuggerCallback *Callback, LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly)
 {
-	d = new GScriptVmDebuggerPriv;
+	d = new LScriptVmDebuggerPriv;
 	d->Parent = Parent;
 	d->AcceptNotify = false;
 	if (Vm)
-		d->Vm.Reset(new GVirtualMachine(Vm));
+		d->Vm.Reset(new LVirtualMachine(Vm));
 	d->Callback = Callback;
 	if (Code)
 		d->Script = Code->GetSource();
@@ -1691,12 +1691,12 @@ GVmDebuggerWnd::GVmDebuggerWnd(GView *Parent, GVmDebuggerCallback *Callback, GVi
 	d->AcceptNotify = true;
 }
 
-GVmDebuggerWnd::~GVmDebuggerWnd()
+LVmDebuggerWnd::~LVmDebuggerWnd()
 {
 	LgiAssert(d->RunLoop == false);
 }
 
-bool GVmDebuggerWnd::OnRequestClose(bool OsShuttingDown)
+bool LVmDebuggerWnd::OnRequestClose(bool OsShuttingDown)
 {
 	if (!d->RunLoop)
 		return LWindow::OnRequestClose(OsShuttingDown);
@@ -1705,7 +1705,7 @@ bool GVmDebuggerWnd::OnRequestClose(bool OsShuttingDown)
 	return false; // Wait for Run() to exit in it's own time.
 }
 
-void GVmDebuggerWnd::Run()
+void LVmDebuggerWnd::Run()
 {
 	// This is to allow objects on the application's stack to 
 	// still be valid while the debugger UI is shown.
@@ -1718,27 +1718,27 @@ void GVmDebuggerWnd::Run()
 	Quit();
 }
 
-GStream *GVmDebuggerWnd::GetLog()
+GStream *LVmDebuggerWnd::GetLog()
 {
 	return d->Log;
 }
 
-void GVmDebuggerWnd::OwnVm(bool Own)
+void LVmDebuggerWnd::OwnVm(bool Own)
 {
 	d->OwnVm = Own;
 }
 
-void GVmDebuggerWnd::OwnCompiledCode(GAutoPtr<GCompiledCode> Cc)
+void LVmDebuggerWnd::OwnCompiledCode(GAutoPtr<LCompiledCode> Cc)
 {
 	d->Obj = Cc;
 }
 
-GCompiledCode *GVmDebuggerWnd::GetCode()
+LCompiledCode *LVmDebuggerWnd::GetCode()
 {
 	return d->Obj;
 }
 
-void GVmDebuggerWnd::SetSource(const char *Mixed)
+void LVmDebuggerWnd::SetSource(const char *Mixed)
 {
 	#if 1
 	GStringPipe Glob(256);
@@ -1865,7 +1865,7 @@ void GVmDebuggerWnd::SetSource(const char *Mixed)
 	#endif
 }
 
-void GVmDebuggerWnd::UpdateVariables(LList *Lst, GVariant *Arr, ssize_t Len, char Prefix)
+void LVmDebuggerWnd::UpdateVariables(LList *Lst, LVariant *Arr, ssize_t Len, char Prefix)
 {
 	if (!d->Vm || !Lst || !Arr)
 		return;
@@ -1876,7 +1876,7 @@ void GVmDebuggerWnd::UpdateVariables(LList *Lst, GVariant *Arr, ssize_t Len, cha
 	LListItem *it;
 	for (ssize_t i=0; i<Len; i++)
 	{
-		GVariant *v = Arr + i;
+		LVariant *v = Arr + i;
 		GStringPipe p(64);
 		d->Vm->d->DumpVariant(&p, *v);
 		GAutoString a(p.NewStr());
@@ -1900,7 +1900,7 @@ void GVmDebuggerWnd::UpdateVariables(LList *Lst, GVariant *Arr, ssize_t Len, cha
 	Lst->ResizeColumnsToContent();
 }
 
-void GVmDebuggerWnd::OnAddress(size_t Addr)
+void LVmDebuggerWnd::OnAddress(size_t Addr)
 {
 	d->CurrentAddr = Addr;
 	if (d->Text)
@@ -1914,17 +1914,17 @@ void GVmDebuggerWnd::OnAddress(size_t Addr)
 	OnNotify(d->Tabs, 0);	
 }
 
-void GVmDebuggerWnd::OnError(const char *Msg)
+void LVmDebuggerWnd::OnError(const char *Msg)
 {
 	if (Msg)
 		d->Text->SetError(Msg);
 }
 
-void GVmDebuggerWnd::OnRun(bool Running)
+void LVmDebuggerWnd::OnRun(bool Running)
 {
 }
 
-void GVmDebuggerWnd::LoadFile(const char *File)
+void LVmDebuggerWnd::LoadFile(const char *File)
 {
 	if (!d->Vm || !d->Callback)
 	{
@@ -1940,7 +1940,7 @@ void GVmDebuggerWnd::LoadFile(const char *File)
 	d->Obj.Reset();
 	if (d->Callback->CompileScript(d->Obj, File, d->Script))
 	{
-		GCompiledCode *Code = dynamic_cast<GCompiledCode*>(d->Obj.Get());
+		LCompiledCode *Code = dynamic_cast<LCompiledCode*>(d->Obj.Get());
 		if (Code)
 		{
 			d->Return.Empty();
@@ -1952,7 +1952,7 @@ void GVmDebuggerWnd::LoadFile(const char *File)
 	}
 }
 
-int GVmDebuggerWnd::OnCommand(int Cmd, int Event, OsView Wnd)
+int LVmDebuggerWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 {
 	if (d->Vm &&
 		d->Vm->d->Vm == NULL)
@@ -1990,7 +1990,7 @@ int GVmDebuggerWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		{
 			if (d->Vm && d->Obj)
 			{
-				GCompiledCode *Code = dynamic_cast<GCompiledCode*>(d->Obj.Get());
+				LCompiledCode *Code = dynamic_cast<LCompiledCode*>(d->Obj.Get());
 				if (Code)
 					d->Vm->Execute(Code, 0, d->Log, false);
 			}
@@ -2050,7 +2050,7 @@ int GVmDebuggerWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 	return LWindow::OnCommand(Cmd, Event, Wnd);
 }
 
-int GVmDebuggerWnd::OnNotify(GViewI *Ctrl, int Flags)
+int LVmDebuggerWnd::OnNotify(GViewI *Ctrl, int Flags)
 {
 	if (!d->AcceptNotify)
 		return 0;
@@ -2072,7 +2072,7 @@ int GVmDebuggerWnd::OnNotify(GViewI *Ctrl, int Flags)
 					}
 					if (d->Vm->d->Frames.Length())
 					{
-						GVirtualMachinePriv::StackFrame &frm = d->Vm->d->Frames.Last();
+						LVirtualMachinePriv::StackFrame &frm = d->Vm->d->Frames.Last();
 						UpdateVariables(d->Locals,
 									d->Vm->d->Scope[SCOPE_LOCAL],
 									frm.CurrentFrameSize,
@@ -2090,10 +2090,10 @@ int GVmDebuggerWnd::OnNotify(GViewI *Ctrl, int Flags)
 				{
 					d->Stack->Empty();
 					
-					GArray<GVirtualMachinePriv::StackFrame> &Frames = d->Vm->d->Frames;
+					GArray<LVirtualMachinePriv::StackFrame> &Frames = d->Vm->d->Frames;
 					for (int i=(int)Frames.Length()-1; i>=0; i--)
 					{
-						GVirtualMachinePriv::StackFrame &Sf = Frames[i];
+						LVirtualMachinePriv::StackFrame &Sf = Frames[i];
 						LListItem *li = new LListItem;
 						GString s;
 						s.Printf("%p/%i", Sf.ReturnIp, Sf.ReturnIp);
@@ -2134,7 +2134,7 @@ int GVmDebuggerWnd::OnNotify(GViewI *Ctrl, int Flags)
 	return LWindow::OnNotify(Ctrl, Flags);
 }
 
-GMessage::Param GVmDebuggerWnd::OnEvent(GMessage *Msg)
+GMessage::Param LVmDebuggerWnd::OnEvent(GMessage *Msg)
 {
 	return LWindow::OnEvent(Msg);
 }

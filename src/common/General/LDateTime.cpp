@@ -2028,7 +2028,7 @@ bool LDateTime::Decode(const char *In)
 	return Status;
 }
 
-bool LDateTime::GetVariant(const char *Name, GVariant &Dst, char *Array)
+bool LDateTime::GetVariant(const char *Name, LVariant &Dst, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)
@@ -2092,7 +2092,7 @@ bool LDateTime::GetVariant(const char *Name, GVariant &Dst, char *Array)
 	return true;
 }
 
-bool LDateTime::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool LDateTime::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)
@@ -2134,7 +2134,7 @@ bool LDateTime::SetVariant(const char *Name, GVariant &Value, char *Array)
 	return true;
 }
 
-bool LDateTime::CallMethod(const char *Name, GVariant *ReturnValue, GArray<GVariant*> &Args)
+bool LDateTime::CallMethod(const char *Name, LVariant *ReturnValue, GArray<LVariant*> &Args)
 {
 	switch (LgiStringToDomProp(Name))
 	{

@@ -1,6 +1,6 @@
 #include "Lgi.h"
 #include "GTnef.h"
-#include "GVariant.h"
+#include "LVariant.h"
 
 #define TNEF_SIGNATURE  ((uint32_t) 0x223E9F78)
 
@@ -76,7 +76,7 @@ public:
 	uint16 Tag;
 	uint16 Type;
 	uint32_t Size;
-	GVariant Value;
+	LVariant Value;
 
 	uint32_t Prop()
 	{

@@ -380,9 +380,9 @@ public:
 	/// interface for ease of use. Currently there are cases where LDateTime is used
 	/// in GArray's which don't implement calling a constructor (they init with all
 	/// zeros).
-	bool GetVariant(const char *Name, class GVariant &Value, char *Array = NULL);
-	bool SetVariant(const char *Name, class GVariant &Value, char *Array = NULL);
-	bool CallMethod(const char *Name, class GVariant *ReturnValue, GArray<class GVariant*> &Args);
+	bool GetVariant(const char *Name, class LVariant &Value, char *Array = NULL);
+	bool SetVariant(const char *Name, class LVariant &Value, char *Array = NULL);
+	bool CallMethod(const char *Name, class LVariant *ReturnValue, GArray<class LVariant*> &Args);
 };
 
 /// Time zone information

@@ -1873,7 +1873,7 @@ void GSurface::Palette(GPalette *pPal, bool bOwnIt)
 	}
 }
 
-bool GSurface::GetVariant(const char *Name, GVariant &Dst, char *Array)
+bool GSurface::GetVariant(const char *Name, LVariant &Dst, char *Array)
 {
 	switch (LgiStringToDomProp(Name))
 	{
@@ -1911,7 +1911,7 @@ bool GSurface::GetVariant(const char *Name, GVariant &Dst, char *Array)
 	return true;
 }
 
-bool GSurface::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool GSurface::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	switch (LgiStringToDomProp(Name))
 	{
@@ -1930,7 +1930,7 @@ bool GSurface::SetVariant(const char *Name, GVariant &Value, char *Array)
 	return false;
 }
 
-bool GSurface::CallMethod(const char *Name, GVariant *ReturnValue, GArray<GVariant*> &Args)
+bool GSurface::CallMethod(const char *Name, LVariant *ReturnValue, GArray<LVariant*> &Args)
 {
 	return false;
 }

@@ -66,7 +66,7 @@ enum DbMagic
 };
 
 ///////////////////////////////////////////////////////////////////
-inline bool IsFixed(GVariantType t)
+inline bool IsFixed(LVariantType t)
 {
 	return	t != GV_STRING &&
 			t != GV_BINARY;
@@ -74,10 +74,10 @@ inline bool IsFixed(GVariantType t)
 
 struct Info
 {
-	GVariantType Type;
+	LVariantType Type;
 	int Index;
 
-	Info(GVariantType t = GV_NULL, int index = -1)
+	Info(LVariantType t = GV_NULL, int index = -1)
 	{
 		Type = t;
 		Index = index;
@@ -175,7 +175,7 @@ struct DbTablePriv
 		return true;
 	}
 
-	bool AddField(int Id, GVariantType Type)
+	bool AddField(int Id, LVariantType Type)
 	{
 		if (Rows > 0)
 		{
@@ -434,7 +434,7 @@ bool LDbField::Serialize(GPointer &p, bool Write)
 		
 	SERIALIZE(s32, Id);
 	SERIALIZE(s32, Offset);
-	SERIALIZE_CAST(GVariantType, u16, Type);
+	SERIALIZE_CAST(LVariantType, u16, Type);
 
 	OBJ_TAIL();
 }
@@ -744,13 +744,13 @@ Store3Status LDbRow::SetDate(int id, const LDateTime *dt)
 	return Store3Success;
 }
 
-GVariant *LDbRow::GetVar(int id)
+LVariant *LDbRow::GetVar(int id)
 {
 	LgiAssert(0);
 	return NULL;
 }
 
-Store3Status LDbRow::SetVar(int id, GVariant *i)
+Store3Status LDbRow::SetVar(int id, LVariant *i)
 {
 	LgiAssert(0);
 	return Store3Error;
@@ -794,7 +794,7 @@ LDbTable::~LDbTable()
 	DeleteObj(d);
 }
 
-bool LDbTable::AddField(int Id, GVariantType Type)
+bool LDbTable::AddField(int Id, LVariantType Type)
 {
 	return d->AddField(Id, Type);
 }

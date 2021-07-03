@@ -789,7 +789,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 					List<char> Formats;
 					if (Target->WillAccept(Formats, MousePt, 0) != DROPEFFECT_NONE)
 					{
-						GVariant Data;
+						LVariant Data;
 						if (Source->GetData(&Data, Formats.First()))
 						{
 							Target->OnDrop(Formats.First(), &Data, MousePt, 0);

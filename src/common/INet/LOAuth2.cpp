@@ -442,7 +442,7 @@ struct LOAuth2Priv
 		if (!Store)
 			return false;
 
-		GVariant v;
+		LVariant v;
 		GString Key, kAccTok, kRefreshTok;
 		Key.Printf("%s.%s", Params.Scope.Get(), Id.Get());
 		auto KeyB64 = Base64(Key);

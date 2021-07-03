@@ -385,7 +385,7 @@ bool GIndexFile::Parse()
 
 					GTableDb::Field &f = Table->Fields.New();
 					f.Id = *p.u32++;
-					f.Type = (GVariantType)*p.u8++;
+					f.Type = (LVariantType)*p.u8++;
 					f.Name = ReadStr(p);
 					
 					LgiAssert(p.u8 <= Next);

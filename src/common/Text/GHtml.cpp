@@ -1350,7 +1350,7 @@ void GTag::Set(const char *attr, const char *val)
 		Attr.Add(attr, NewStr(val));
 }
 
-bool GTag::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool GTag::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty Fld = LgiStringToDomProp(Name);
 	switch (Fld)
@@ -1380,7 +1380,7 @@ bool GTag::GetVariant(const char *Name, GVariant &Value, char *Array)
 	return false;
 }
 
-bool GTag::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool GTag::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty Fld = LgiStringToDomProp(Name);
 	switch (Fld)
@@ -7760,7 +7760,7 @@ char *GHtml::GetSelection()
 	return s;
 }
 
-bool GHtml::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool GHtml::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	if (!Name)
 		return false;
@@ -8821,7 +8821,7 @@ GHtmlElement *GHtml::CreateElement(GHtmlElement *Parent)
 	return new GTag(this, Parent);
 }
 
-bool GHtml::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool GHtml::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	if (!_stricmp(Name, "supportLists")) // Type: Bool
 		Value = false;
@@ -8881,7 +8881,7 @@ bool GHtml::EvaluateCondition(const char *Cond)
 			Not = true;
 		else
 		{
-			GVariant v;
+			LVariant v;
 			if (GetValue(s, v))
 			{
 				Result = v.CastInt32() != 0;

@@ -81,7 +81,7 @@ public:
 		GColour DecorColour;
 
 		/// Application base data
-		GVariant Data;
+		LVariant Data;
 
 		GStyle(GTextViewStyleOwners owner = STYLE_NONE)
 		{

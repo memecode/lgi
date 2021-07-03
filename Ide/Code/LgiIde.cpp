@@ -456,7 +456,7 @@ WatchItem::~WatchItem()
 {
 }
 
-bool WatchItem::SetValue(GVariant &v)
+bool WatchItem::SetValue(LVariant &v)
 {
 	char *Str = v.CastString();
 	if (ValidStr(Str))
@@ -1497,7 +1497,7 @@ public:
 
 	void SerializeStringList(const char *Opt, GString::Array *Lst, bool Write)
 	{
-		GVariant v;
+		LVariant v;
 		if (Write)
 		{
 			GMemQueue p;
@@ -1646,7 +1646,7 @@ Chk;
 
 		#if 1
 Chk;
-		GVariant v = 270, OutPx = 250;
+		LVariant v = 270, OutPx = 250;
 		d->Options.GetValue(OPT_SPLIT_PX, v);
 		d->Options.GetValue(OPT_OUTPUT_PX, OutPx);
 
@@ -1718,12 +1718,12 @@ AppWnd::~AppWnd()
 {
 	if (d->HBox)
 	{
-		GVariant v = d->HBox->Value();
+		LVariant v = d->HBox->Value();
 		d->Options.SetValue(OPT_SPLIT_PX, v);
 	}
 	if (d->Output)
 	{
-		GVariant v = d->Output->Y();
+		LVariant v = d->Output->Y();
 		d->Options.SetValue(OPT_OUTPUT_PX, v);
 	}
 
@@ -2098,7 +2098,7 @@ struct LFileInfo
 void AppWnd::OnFixBuildErrors()
 {
 	LHashTbl<StrKey<char>, GString> Map;
-	GVariant v;
+	LVariant v;
 	if (GetOptions()->GetValue(OPT_RENAMED_SYM, v))
 	{
 		auto Lines = GString(v.Str()).Split("\n");
@@ -2229,7 +2229,7 @@ void AppWnd::OnFixBuildErrors()
 
 void AppWnd::OnBuildStateChanged(bool NewState)
 {
-	GVariant v;
+	LVariant v;
 	if (!NewState &&
 		GetOptions()->GetValue(OPT_FIX_RENAMED, v) &&
 		v.CastInt32())
@@ -2887,7 +2887,7 @@ public:
 				SetCtrlName(IDC_FONT, s);
 			}
 
-			GVariant v;
+			LVariant v;
 			if (App->GetOptions()->GetValue(OPT_Jobs, v))
 				SetCtrlValue(IDC_JOBS, v.CastInt32());
 			else
@@ -2903,7 +2903,7 @@ public:
 		{
 			case IDOK:
 			{
-				GVariant v;
+				LVariant v;
 				Font.Serialize(App->GetOptions(), OPT_EditorFont, true);
 				App->GetOptions()->SetValue(OPT_Jobs, v = GetCtrlValue(IDC_JOBS));
 			}
@@ -3204,7 +3204,7 @@ public:
 
 		if (LoadFromResource(IDC_RENAME))
 		{
-			GVariant v;
+			LVariant v;
 			if (App->GetOptions()->GetValue(OPT_FIX_RENAMED, v))
 				SetCtrlValue(IDC_FIX_RENAMED, v.CastInt32());
 			if (App->GetOptions()->GetValue(OPT_RENAMED_SYM, v))
@@ -3218,7 +3218,7 @@ public:
 		{
 			case IDOK:
 			{
-				GVariant v;
+				LVariant v;
 				App->GetOptions()->SetValue(OPT_RENAMED_SYM, v = GetCtrlName(IDC_SYM));
 				App->GetOptions()->SetValue(OPT_FIX_RENAMED, v = GetCtrlValue(IDC_FIX_RENAMED));
 			}
@@ -3463,7 +3463,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				if (!d->FindParameters &&
 					d->FindParameters.Reset(new FindParams))
 				{
-					GVariant var;
+					LVariant var;
 					if (GetOptions()->GetValue(OPT_ENTIRE_SOLUTION, var))
 						d->FindParameters->Type = var.CastInt32() ? FifSearchSolution : FifSearchDirectory;
 				}		
@@ -3512,7 +3512,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						}
 					}
 
-					GVariant var = d->FindParameters->Type == FifSearchSolution;
+					LVariant var = d->FindParameters->Type == FifSearchSolution;
 					GetOptions()->SetValue(OPT_ENTIRE_SOLUTION, var);
 
 					d->Finder->Stop();

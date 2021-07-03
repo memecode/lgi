@@ -1,7 +1,7 @@
 
 #include "Lgi.h"
 #include "GSharedMemory.h"
-#include "GVariant.h"
+#include "LVariant.h"
 
 #ifndef BEOS // unsupported in Haik
 
@@ -31,7 +31,7 @@ public:
 		Ptr = 0;
 		
 		#if defined(WIN32)
-		GVariant v = Name;
+		LVariant v = Name;
 		hMem = CreateFileMapping(	INVALID_HANDLE_VALUE,
 									NULL,
 									PAGE_READWRITE,

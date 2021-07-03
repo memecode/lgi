@@ -327,8 +327,8 @@ public:
 	Child *HasView(GView *v);
 
 	bool IsSpanned();
-	bool GetVariant(const char *Name, GVariant &Value, char *Array);
-	bool SetVariant(const char *Name, GVariant &Value, char *Array);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array);
 	int MaxCellWidth();
 
 	/// Calculates the minimum and maximum widths this cell can occupy.
@@ -496,7 +496,7 @@ bool TableCell::IsSpanned()
 	return Cell.X() > 1 || Cell.Y() > 1;
 }
 
-bool TableCell::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool TableCell::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty Fld = LgiStringToDomProp(Name);
 	switch (Fld)
@@ -509,7 +509,7 @@ bool TableCell::GetVariant(const char *Name, GVariant &Value, char *Array)
 			for (unsigned i=0; i<Children.Length(); i++)
 			{
 				Child &c = Children[i];
-				GVariant *v = new GVariant;
+				LVariant *v = new LVariant;
 				if (v)
 				{
 					v->Type = GV_GVIEW;
@@ -564,7 +564,7 @@ bool TableCell::GetVariant(const char *Name, GVariant &Value, char *Array)
 	return true;
 }
 
-bool TableCell::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool TableCell::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty Fld = LgiStringToDomProp(Name);
 	switch (Fld)
@@ -2193,7 +2193,7 @@ void GTableLayout::OnPaint(GSurface *pDC)
 	#endif
 }
 
-bool GTableLayout::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool GTableLayout::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	return false;
 }
@@ -2208,7 +2208,7 @@ bool ConvertNumbers(GArray<double> &a, char *s)
 	return a.Length() > 0;
 }
 
-bool GTableLayout::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool GTableLayout::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)

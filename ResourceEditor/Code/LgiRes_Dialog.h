@@ -304,8 +304,8 @@ public:
 	void EnumCtrls(List<ResDialogCtrl> &Ctrls);
 	void OnPosChange();
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = 0);
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 };
 
 class CtrlText : public ResDialogCtrl, public GView
@@ -514,8 +514,8 @@ public:
 	bool GetFields(FieldTree &Fields);
 	bool Serialize(FieldTree &Fields);
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = 0);
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 };
 
 ////////////////////////////////////////////////////////////////

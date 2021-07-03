@@ -33,8 +33,8 @@ public:
 	bool Description(char *NewDesc);
 
 	// Set/Get
-	bool Set(GVariant &v);
-	bool Get(GVariant &v);
+	bool Set(LVariant &v);
+	bool Get(LVariant &v);
 };
 
 class MkTable : public GDbRecordset
@@ -167,7 +167,7 @@ bool MkField::Description(char *NewDesc)
 	return 0;
 }
 
-bool MkField::Set(GVariant &v)
+bool MkField::Set(LVariant &v)
 {
 	switch (Fld->Type())
 	{
@@ -192,7 +192,7 @@ bool MkField::Set(GVariant &v)
 	return false;
 }
 
-bool MkField::Get(GVariant &v)
+bool MkField::Get(LVariant &v)
 {
 	switch (Fld->Type())
 	{

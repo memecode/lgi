@@ -15,9 +15,9 @@ struct GraphAv
 struct GGraphPriv
 {
 	int XAxis, YAxis;
-	GVariantType XType, YType;
-	GVariant MaxX, MinX;
-	GVariant MaxY, MinY;
+	LVariantType XType, YType;
+	LVariant MaxX, MinX;
+	LVariant MaxY, MinY;
     GArray<GGraph::GGraphPair> Val;
 	GGraph::Style Style;
 	
@@ -44,7 +44,7 @@ struct GGraphPriv
 	    YType = GV_NULL;
 	}
 
-	GVariantType GuessType(char *s)
+	LVariantType GuessType(char *s)
 	{
 		bool Dot = false;
 		bool Num = false;
@@ -79,7 +79,7 @@ struct GGraphPriv
 		}
 	}
 
-	bool Convert(GVariant &v, GVariantType type, char *in)
+	bool Convert(LVariant &v, LVariantType type, char *in)
 	{
 		if (!in)
 			return false;
@@ -109,7 +109,7 @@ struct GGraphPriv
 		return true;
 	}
 
-	int Compare(GVariant &a, GVariant &b)
+	int Compare(LVariant &a, LVariant &b)
 	{
 		// a - b
 		if (a.Type != b.Type)
@@ -154,7 +154,7 @@ struct GGraphPriv
 		return 0;
 	}
 
-	int Map(GVariant &v, int pixels, GVariant &min, GVariant &max)
+	int Map(LVariant &v, int pixels, LVariant &min, LVariant &max)
 	{
 		if (v.Type != min.Type ||
 			v.Type != max.Type)
@@ -211,9 +211,9 @@ struct GGraphPriv
 		return 0;
 	}
 
-	void DrawAxis(GSurface *pDC, LRect &r, int xaxis, GVariant &min, GVariant &max)
+	void DrawAxis(GSurface *pDC, LRect &r, int xaxis, LVariant &min, LVariant &max)
 	{
-		GVariant v = min;
+		LVariant v = min;
 		bool First = true;
 		bool Loop = true;
 
@@ -231,7 +231,7 @@ struct GGraphPriv
 
 		SysFont->Colour(L_TEXT, L_WORKSPACE);
 
-		GArray<GVariant> Values;
+		GArray<LVariant> Values;
 		while (Loop)
 		{
 			Values.Add(v);
@@ -450,7 +450,7 @@ bool GGraph::SetDataSource(GDbRecordset *Rs, int XAxis, int YAxis)
                 for (int i=0; i<Rs->Fields(); i++)
                 {
                     char *s = (*Rs)[i];
-                    GVariantType t = d->GuessType(s);
+                    LVariantType t = d->GuessType(s);
                     if (t != GV_NULL && t != GV_STRING)
                     {
                         if (d->XAxis < 0)
@@ -677,7 +677,7 @@ void GGraph::OnPaint(GSurface *pDC)
 	                if (d->Ave[b].Count)
 	                {
 	                    int cx = x.x1 + (((b * x.X()) + (x.X() >> 1)) / d->BucketSize);
-	                    GVariant v = d->Ave[b].Sum / d->Ave[b].Count;
+	                    LVariant v = d->Ave[b].Sum / d->Ave[b].Count;
 	                    int cy = y.y2 - d->Map(v, y.Y(), d->MinY, d->MaxY);
 	                    
 	                    if (py >= 0)

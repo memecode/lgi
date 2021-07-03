@@ -1,11 +1,11 @@
 #ifndef _GTAG_H
 #define _GTAG_H
 
-#include "GVariant.h"
+#include "LVariant.h"
 #include "GMap.h"
 #include "LXmlTree.h"
 
-class GNamedVariant : public GVariant, public GObj
+class GNamedVariant : public LVariant, public GObj
 {
 public:
 	GNamedVariant(char *s = 0)
@@ -20,7 +20,7 @@ protected:
 	char *Element;
 	bool ObscurePasswords;
 
-	GVariantType TypeOf(char *Name);
+	LVariantType TypeOf(char *Name);
 
 public:
 	GTag(char *e);
@@ -33,8 +33,8 @@ public:
 	void Empty();
 	bool Read(LXmlTag *t);
 	void Write(GFile &f);
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = 0);
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 	void SerializeUI(GView *Dlg, GMap<char*,int> &Fields, bool To);
 };
 

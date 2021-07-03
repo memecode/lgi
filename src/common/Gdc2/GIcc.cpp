@@ -345,7 +345,7 @@ public:
 		DeleteArray(Txt);
 	}
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, char *Array)
 	{
 		if (!Name)
 			return false;
@@ -375,7 +375,7 @@ public:
 		Str = s;
 	}
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, char *Array)
 	{
 		if (!Name)
 			return false;
@@ -431,7 +431,7 @@ public:
 		Dom.DeleteObjects();
 	}
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, char *Array)
 	{
 		if (!Name)
 			return false;
@@ -441,7 +441,7 @@ public:
 			Value.SetList();
 			for (int i=0; i<Dom.Length(); i++)
 			{
-				Value.Value.Lst->Insert(new GVariant(Dom[i]));
+				Value.Value.Lst->Insert(new LVariant(Dom[i]));
 			}
 		}
 		else if (stricmp(Name, "Text") == 0)
@@ -463,7 +463,7 @@ class TagDom : public GDom
 public:
 	TagDom(IccTag *tag, char *header);
 	~TagDom();
-	bool GetVariant(const char *Name, GVariant &Value, char *Array);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array);
 };
 
 class HeaderDom : public GDom
@@ -497,7 +497,7 @@ public:
 		Dom.DeleteObjects();
 	}
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, char *Array)
 	{
 		if (!Name)
 			return false;
@@ -507,7 +507,7 @@ public:
 			Value.SetList();
 			for (int i=0; i<Dom.Length(); i++)
 			{
-				Value.Value.Lst->Insert(new GVariant(Dom[i]));
+				Value.Value.Lst->Insert(new LVariant(Dom[i]));
 			}
 		}
 		else if (stricmp(Name, "Text") == 0)
@@ -530,7 +530,7 @@ public:
 		c = curve;
 	}
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, char *Array)
 	{
 		if (!Name)
 			return false;
@@ -573,7 +573,7 @@ public:
 		Len = Swap32(len);
 	}
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, char *Array)
 	{
 		if (!Name)
 			return false;
@@ -616,7 +616,7 @@ public:
 		DeleteArray(Txt);
 	}
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, char *Array)
 	{
 		if (!Name)
 			return false;
@@ -630,7 +630,7 @@ public:
 			Value.SetList();
 			for (int i=0; i<Dom.Length(); i++)
 			{
-				Value.Value.Lst->Insert(new GVariant(Dom[i]));
+				Value.Value.Lst->Insert(new LVariant(Dom[i]));
 			}
 		}
 		else if (stricmp(Name, "Expand") == 0)
@@ -762,7 +762,7 @@ TagDom::~TagDom()
 	Dom.DeleteObjects();
 }
 
-bool TagDom::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool TagDom::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	if (!Name)
 		return false;
@@ -772,7 +772,7 @@ bool TagDom::GetVariant(const char *Name, GVariant &Value, char *Array)
 		Value.SetList();
 		for (int i=0; i<Dom.Length(); i++)
 		{
-			Value.Value.Lst->Insert(new GVariant(Dom[i]));
+			Value.Value.Lst->Insert(new LVariant(Dom[i]));
 		}
 	}
 	else if (stricmp(Name, "Text") == 0)
@@ -814,7 +814,7 @@ public:
 		Dom.DeleteObjects();
 	}
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, char *Array)
 	{
 		if (!Name)
 			return false;
@@ -824,7 +824,7 @@ public:
 			Value.SetList();
 			for (int i=0; i<Dom.Length(); i++)
 			{
-				Value.Value.Lst->Insert(new GVariant(Dom[i]));
+				Value.Value.Lst->Insert(new LVariant(Dom[i]));
 			}
 		}
 		else if (stricmp(Name, "Text") == 0)
@@ -996,7 +996,7 @@ bool GIccProfile::Open(GStream *Stream)
 					d->Dom.Add(new HeaderDom(d->Header()));
 					d->Dom.Add(new TagTableDom(d->TagTable(), d->Data ));
 
-					GVariant Desc;
+					LVariant Desc;
 					if (GetValue("Children[1].Name.Name", Desc))
 					{
 						d->Name = NewStr(Desc.Str());
@@ -1157,7 +1157,7 @@ bool GIccProfile::Convert(GSurface *Dest, GSurface *Src, GIccProfile *Profile)
 	return false;
 }
 
-bool GIccProfile::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool GIccProfile::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	if (!Name)
 		return false;
@@ -1173,7 +1173,7 @@ bool GIccProfile::GetVariant(const char *Name, GVariant &Value, char *Array)
 			Value.SetList();
 			for (int i=0; i<d->Dom.Length(); i++)
 			{
-				Value.Value.Lst->Insert(new GVariant(d->Dom[i]));
+				Value.Value.Lst->Insert(new LVariant(d->Dom[i]));
 			}
 		}
 	}

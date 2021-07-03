@@ -207,7 +207,7 @@ public:
 	{
 		LHashTbl<ConstStrKey<char,false>, bool> Except(0, false);
 		Except.Add("GString.cpp", true);
-		Except.Add("GVariant.cpp", true);
+		Except.Add("LVariant.cpp", true);
 		Except.Add("GContainers.cpp", true);
 		Except.Add("GContainers.h", true);
 		Except.Add("GFile.cpp", true);

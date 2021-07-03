@@ -63,7 +63,7 @@ public:
 	IoStatus ReadImage(GSurface *pDC, GStream *In);
 	IoStatus WriteImage(GStream *Out, GSurface *pDC);
 
-	bool GetVariant(const char *n, GVariant &v, char *a)
+	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
 		if (!_stricmp(n, LGI_FILTER_TYPE))
 		{
@@ -816,9 +816,9 @@ GFilter::IoStatus GdcGif::ReadImage(GSurface *pdc, GStream *in)
 
 GFilter::IoStatus GdcGif::WriteImage(GStream *Out, GSurface *pDC)
 {
-	GVariant Transparent;
+	LVariant Transparent;
 	int Back = -1;
-	GVariant v;
+	LVariant v;
 
 	if (!Out || !pDC)
 		return GFilter::IoError;
@@ -831,7 +831,7 @@ GFilter::IoStatus GdcGif::WriteImage(GStream *Out, GSurface *pDC)
 	}
 
 	#ifdef FILTER_UI
-	GVariant Parent;
+	LVariant Parent;
 
 	if (Props)
 	{

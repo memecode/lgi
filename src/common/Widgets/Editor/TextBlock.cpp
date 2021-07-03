@@ -1809,7 +1809,7 @@ void GRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange
 		}
 
 		GString s(Text.AddressOf(Rgn.Start), Rgn.Len);
-		GArray<GVariant> Params;
+		GArray<LVariant> Params;
 		Params[SpellBlockPtr] = (Block*)this;
 
 		// LgiTrace("%s:%i - Check(%s) " LPrintfSSizeT ":" LPrintfSSizeT "\n", _FL, s.Get(), Rgn.Start, Rgn.End());

@@ -69,7 +69,7 @@ struct GCode
 		struct
 		{
 			/// The command to call
-			GFunc *Method;
+			LFunc *Method;
 			/// Indexes to the start of each argument expression
 			GArray<int> *Args;
 
@@ -119,7 +119,7 @@ class GExternType;
 class GExternType
 {
 public:
-	GVariantType Simple;
+	LVariantType Simple;
 	GArray<GExternType*> Struct;
 
 	int Sizeof()
@@ -156,48 +156,48 @@ public:
 	}
 };
 
-struct GExternFunc : public GFunc
+struct LExternFunc : public LFunc
 {
-	GScriptEnginePrivate *Priv;
+	LScriptEnginePrivate *Priv;
 	char *Library;
 	GExternType Return;
 	GArray<GExternType*> Args;
 
-	GExternFunc(GScriptEnginePrivate *p) : GFunc(0, ExternFunc)
+	LExternFunc(LScriptEnginePrivate *p) : LFunc(0, ExternFunc)
 	{
 		Priv = p;
 		Library = 0;
 	}
 
-	~GExternFunc()
+	~LExternFunc()
 	{
 		DeleteArray(Library);
 		Args.DeleteObjects();
 	}
 
-	GExecutionStatus Call(GScriptContext *Ctx, GVariant *Ret, ArgumentArray &Args);
+	LExecutionStatus Call(LScriptContext *Ctx, LVariant *Ret, ArgumentArray &Args);
 };
 
-struct GScriptFunc : public GFunc
+struct LScriptFunc : public LFunc
 {
 	GArray<GCode> *BodyArr;
 	int	BodyIdx;
 	GArray<char*> Args;
-	GScriptEnginePrivate *Priv;
+	LScriptEnginePrivate *Priv;
 
-	GScriptFunc(GScriptEnginePrivate *p, char *meth = 0) : GFunc(meth, ScriptFunc)
+	LScriptFunc(LScriptEnginePrivate *p, char *meth = 0) : LFunc(meth, ScriptFunc)
 	{
 		Priv = p;
 		BodyArr = 0;
 		BodyIdx = -1;
 	}
 
-	~GScriptFunc()
+	~LScriptFunc()
 	{
 		Args.DeleteArrays();
 	}
 
-	GExecutionStatus Call(GScriptContext *Ctx, GVariant *Ret, ArgumentArray &Args);
+	LExecutionStatus Call(LScriptContext *Ctx, LVariant *Ret, ArgumentArray &Args);
 };
 
 struct GDomPart
@@ -262,7 +262,7 @@ struct GDomAddr
 
 struct GDomRef
 {
-	GVariant *Var;
+	LVariant *Var;
 	
 	/// Any member name, i.e. if Var is a DOM reference
 	char *Member;
@@ -285,7 +285,7 @@ struct GDomRef
 	{
 		if ((FreeVar = dr.FreeVar))
 		{
-			if (dr.Var && (Var = new GVariant) != 0)
+			if (dr.Var && (Var = new LVariant) != 0)
 			{
 				*Var = *dr.Var;
 			}
@@ -302,11 +302,11 @@ struct GDomRef
 		if (FreeVar) DeleteObj(Var);
 	}
 
-	bool Get(GScriptEnginePrivate *Priv, GVariant &v);
-	bool Set(GScriptEnginePrivate *Priv, GVariant &v);
+	bool Get(LScriptEnginePrivate *Priv, LVariant &v);
+	bool Set(LScriptEnginePrivate *Priv, LVariant &v);
 };
 
-bool InsertUtfCharacter(GVariant *Var, GVariant &v, int Idx)
+bool InsertUtfCharacter(LVariant *Var, LVariant &v, int Idx)
 {
 	bool Status = false;
 	uint8 *Start = (uint8*) Var->CastString();
@@ -395,14 +395,14 @@ public:
 	{
 		for (void *v = First(); v; v = Next())
 		{
-			GVariant *i = (GVariant*)v;
+			LVariant *i = (LVariant*)v;
 			DeleteObj(i);
 		}
 		Empty();
 	}
 };
 
-class GScriptEnginePrivate : public GScriptUtils, public GCompileTools
+class LScriptEnginePrivate : public LScriptUtils, public GCompileTools
 {
 public:
 	GScriptEngine1 *Engine;
@@ -410,15 +410,15 @@ public:
 	GViewI *Parent;
 	char16 *Script;
 	GArray<StackFrame*> Stack;
-	GScriptContext *Context;
-	GHashTbl<const char*, GFunc*> Methods;
+	LScriptContext *Context;
+	GHashTbl<const char*, LFunc*> Methods;
 	bool IsCompiling;
 
 	GArray<GCode> Compiled;
 	GArray<char16*> Tokens;
 	GArray<int> Lines;
 
-	GScriptEnginePrivate(GScriptEngine1 *e)
+	LScriptEnginePrivate(GScriptEngine1 *e)
 	{
 		Engine = e;
 		Script = 0;
@@ -426,7 +426,7 @@ public:
 		Stack.Add(new StackFrame);
 	}
 
-	~GScriptEnginePrivate()
+	~LScriptEnginePrivate()
 	{
 		Empty(true);
 	}
@@ -436,14 +436,14 @@ public:
 		return (char*) (IsCompiling ? "CompileError" : "ExecuteError");
 	}
 
-	GExecutionStatus Call(GFunc *Fn, GVariant *Ret, GArray<int> *Idx)
+	LExecutionStatus Call(LFunc *Fn, LVariant *Ret, GArray<int> *Idx)
 	{
 		if (!Fn)
 			return ScriptError;
 
 		ArgumentArray Args, Mem;
 		ProcessArguments(Args, Mem, Idx);
-		GExecutionStatus Status = Fn->Call(Context, Ret, Args);
+		LExecutionStatus Status = Fn->Call(Context, Ret, Args);
 		Mem.DeleteObjects();
 
 		return Status;
@@ -460,10 +460,10 @@ public:
 		if (!Deleting)
 			Stack.Add(new StackFrame);
 
-		GArray<GFunc*> Del;
+		GArray<LFunc*> Del;
 		for (void *v = Methods.First(); v; v = Methods.Next())
 		{
-			GFunc *i = (GFunc*)v;
+			LFunc *i = (LFunc*)v;
 			if (i->Type != HostFunc)
 			{
 				Del.Add(i);
@@ -603,11 +603,11 @@ public:
 
 	void ProcessArguments(ArgumentArray &Args, ArgumentArray &Mem, GArray<int> *Idx);
 	int FindEndOfBlock(int Cur);
-	GVariant *Var(char16 *name, bool create = true);
-	bool ToVar(GVariant &v, char16 *s);
+	LVariant *Var(char16 *name, bool create = true);
+	bool ToVar(LVariant &v, char16 *s);
 	bool Require(int &Cur, const char *tok);
 	bool Type(int &Cur, class GExternType &Type);
-	bool CallExtern(int &Cur, uint32 &ReturnValue, struct GExternFunc *Func);
+	bool CallExtern(int &Cur, uint32 &ReturnValue, struct LExternFunc *Func);
 
 	// Dom addressing
 	bool CreateDomAddr(int &Cur, GDomAddr &Addr);
@@ -619,11 +619,11 @@ public:
 	bool    Compile_Statement(GArray<GCode> &To, int &Cur);
 
 	// Execution of code
-	GVariant *Execute_Expression(int &Cur, GDom *Src = 0, int Depth = 0);
-	GExecutionStatus Execute_Statement(GArray<GCode> &To);
+	LVariant *Execute_Expression(int &Cur, GDom *Src = 0, int Depth = 0);
+	LExecutionStatus Execute_Statement(GArray<GCode> &To);
 };
 
-bool GDomRef::Get(GScriptEnginePrivate *Priv, GVariant &v)
+bool GDomRef::Get(LScriptEnginePrivate *Priv, LVariant &v)
 {
 	if (Var)
 	{
@@ -633,7 +633,7 @@ bool GDomRef::Get(GScriptEnginePrivate *Priv, GVariant &v)
 			{
 				if (Var->Value.Dom)
 				{
-					GVariant *ArrVal = 0;
+					LVariant *ArrVal = 0;
 					if (Array)
 					{
 						int Cur = Array;
@@ -730,7 +730,7 @@ bool GDomRef::Get(GScriptEnginePrivate *Priv, GVariant &v)
 			if (Array)
 			{
 				int Cur = Array;
-				GVariant *a = Priv->Execute_Expression(Cur);
+				LVariant *a = Priv->Execute_Expression(Cur);
 				if (a)
 				{
 					if (Var->Type == GV_STRING)
@@ -756,7 +756,7 @@ bool GDomRef::Get(GScriptEnginePrivate *Priv, GVariant &v)
 					else if (Var->Type == GV_HASHTABLE)
 					{
 						char *Key = a->CastString();
-						GVariant *h = (GVariant*) Var->Value.Hash->Find(Key);
+						LVariant *h = (LVariant*) Var->Value.Hash->Find(Key);
 						if (h)
 						{
 							v = *h;
@@ -770,7 +770,7 @@ bool GDomRef::Get(GScriptEnginePrivate *Priv, GVariant &v)
 					else if (Var->Type == GV_LIST)
 					{
 						int Idx = a->CastInt32();
-						GVariant *h = (*Var->Value.Lst)[Idx];
+						LVariant *h = (*Var->Value.Lst)[Idx];
 						if (h)
 						{
 							v = *h;
@@ -799,7 +799,7 @@ bool GDomRef::Get(GScriptEnginePrivate *Priv, GVariant &v)
 	return false;
 }
 
-bool GDomRef::Set(GScriptEnginePrivate *Priv, GVariant &v)
+bool GDomRef::Set(LScriptEnginePrivate *Priv, LVariant &v)
 {
 	if (Var)
 	{
@@ -869,7 +869,7 @@ bool GDomRef::Set(GScriptEnginePrivate *Priv, GVariant &v)
 				bool Status = false;
 
 				int Cur = Array;
-				GVariant *a = Priv->Execute_Expression(Cur);
+				LVariant *a = Priv->Execute_Expression(Cur);
 				if (a)
 				{
 					if (Var->Type == GV_STRING)
@@ -879,10 +879,10 @@ bool GDomRef::Set(GScriptEnginePrivate *Priv, GVariant &v)
 					else if (Var->Type == GV_HASHTABLE)
 					{
 						char *Key = a->CastString();
-						GVariant *n = (GVariant*) Var->Value.Hash->Find(Key);
+						LVariant *n = (LVariant*) Var->Value.Hash->Find(Key);
 						if (!n)
 						{
-							Var->Value.Hash->Add(Key, n = new GVariant);
+							Var->Value.Hash->Add(Key, n = new LVariant);
 						}
 						if (n)
 						{
@@ -896,7 +896,7 @@ bool GDomRef::Set(GScriptEnginePrivate *Priv, GVariant &v)
 						if (Idx < 0 || Idx >= Var->Value.Lst->Length())
 						{
 							// Add a new element
-							GVariant *h = new GVariant(v);
+							LVariant *h = new LVariant(v);
 							if (h)
 							{
 								Var->Value.Lst->Insert(h);
@@ -906,7 +906,7 @@ bool GDomRef::Set(GScriptEnginePrivate *Priv, GVariant &v)
 						else
 						{
 							// Change an existing element
-							GVariant *h = (*Var->Value.Lst)[Idx];
+							LVariant *h = (*Var->Value.Lst)[Idx];
 							if (h) *h = v;
 							Status = true;
 						}
@@ -936,9 +936,9 @@ bool GDomRef::Set(GScriptEnginePrivate *Priv, GVariant &v)
 #define CompToInt(v) \
 	(v[0] == '0' && v[1] == 'x') ? htoi(v + 2) : atoi(v);
 
-GScriptEngine1::GScriptEngine1(GViewI *parent, GScriptContext *context)
+GScriptEngine1::GScriptEngine1(GViewI *parent, LScriptContext *context)
 {
-	d = new GScriptEnginePrivate(this);
+	d = new LScriptEnginePrivate(this);
 	d->Parent = parent;
 	d->Context = context;
 	d->Script = 0;
@@ -957,7 +957,7 @@ GScriptEngine1::GScriptEngine1(GViewI *parent, GScriptContext *context)
 		{
 			for (GHostFunc *cmd = CmdTable; cmd->Method; cmd++)
 			{
-				d->Methods.Add(cmd->Method, (GFunc*)cmd);
+				d->Methods.Add(cmd->Method, (LFunc*)cmd);
 			}
 		}
 	}
@@ -974,7 +974,7 @@ GScriptEngine1::~GScriptEngine1()
 	DeleteObj(d);
 }
 
-GVariant *GScriptEngine1::Var(char16 *name, bool create)
+LVariant *GScriptEngine1::Var(char16 *name, bool create)
 {
 	return d->Var(name, create);
 }
@@ -984,13 +984,13 @@ GStringPipe *GScriptEngine1::GetTerm()
 	return &d->Term;
 }
 
-bool GScriptEngine1::CallMethod(const char *Method, GVariant *Ret, ArgumentArray &Args)
+bool GScriptEngine1::CallMethod(const char *Method, LVariant *Ret, ArgumentArray &Args)
 {
 	bool Status = false;
 
 	if (Method)
 	{
-		GFunc *Func = (GFunc*) d->Methods.Find(Method);
+		LFunc *Func = (LFunc*) d->Methods.Find(Method);
 		if (Func)
 		{
 			Status = Func->Call(d->Context, Ret, Args);
@@ -1000,7 +1000,7 @@ bool GScriptEngine1::CallMethod(const char *Method, GVariant *Ret, ArgumentArray
 	return Status;
 }
 
-bool GScriptEnginePrivate::CreateDomAddr(int &Cur, GDomAddr &Addr)
+bool LScriptEnginePrivate::CreateDomAddr(int &Cur, GDomAddr &Addr)
 {
 	char16 *t = ThisToken();
 	if (t && isalpha(*t))
@@ -1061,7 +1061,7 @@ bool GScriptEnginePrivate::CreateDomAddr(int &Cur, GDomAddr &Addr)
 	return false;
 }
 
-bool GScriptEnginePrivate::ResolveDomAddr(GDomRef &Ref, GDomAddr &Addr, bool Create)
+bool LScriptEnginePrivate::ResolveDomAddr(GDomRef &Ref, GDomAddr &Addr, bool Create)
 {
 	if (Addr.Length() == 1)
 	{
@@ -1081,7 +1081,7 @@ bool GScriptEnginePrivate::ResolveDomAddr(GDomRef &Ref, GDomAddr &Addr, bool Cre
 				if (Ref.Var->Type == GV_DOM &&
 					Ref.Var->Value.Dom)
 				{
-					GVariant *v = new GVariant;
+					LVariant *v = new LVariant;
 					if (v)
 					{
 						char *c = LgiNewUtf16To8(Addr[i]);
@@ -1091,7 +1091,7 @@ bool GScriptEnginePrivate::ResolveDomAddr(GDomRef &Ref, GDomAddr &Addr, bool Cre
 							int ArrayPos = Addr.Parts[i].Array;
 							if (ArrayPos)
 							{
-								GVariant *a = Execute_Expression(ArrayPos);
+								LVariant *a = Execute_Expression(ArrayPos);
 								if (a)
 								{
 									ArrayVal = NewStr(a->Str());
@@ -1162,7 +1162,7 @@ bool GScriptEngine1::Compile(char *Script, const char *FileName, bool Add)
 	return Status;
 }
 
-GExecutionStatus GScriptEngine1::Run()
+LExecutionStatus GScriptEngine1::Run()
 {
 	if (d->Compiled.Length() > 0)
 	{
@@ -1175,12 +1175,12 @@ GExecutionStatus GScriptEngine1::Run()
 
 class ScriptTokenState
 {
-	GScriptEnginePrivate *d;
+	LScriptEnginePrivate *d;
 	int TokLen;
 	int LinesLen;
 
 public:
-	ScriptTokenState(GScriptEnginePrivate *priv)
+	ScriptTokenState(LScriptEnginePrivate *priv)
 	{
 		d = priv;
 		TokLen = d->Tokens.Length();
@@ -1198,9 +1198,9 @@ public:
 	}
 };
 
-GExecutionStatus GScriptEngine1::RunTemporary(char *Script)
+LExecutionStatus GScriptEngine1::RunTemporary(char *Script)
 {
-	GExecutionStatus Status = ScriptError;
+	LExecutionStatus Status = ScriptError;
 
 	if (Script)
 	{
@@ -1219,7 +1219,7 @@ GExecutionStatus GScriptEngine1::RunTemporary(char *Script)
 	return Status;
 }
 
-bool GScriptEngine1::EvaluateExpression(GVariant *Result, GDom *VariableSource, char *Expression)
+bool GScriptEngine1::EvaluateExpression(LVariant *Result, GDom *VariableSource, char *Expression)
 {
 	bool Status = false;
 
@@ -1230,7 +1230,7 @@ bool GScriptEngine1::EvaluateExpression(GVariant *Result, GDom *VariableSource, 
 		int Cur = d->Tokens.Length();
 		if (d->LexScript(Expression))
 		{
-			GVariant *v = d->Execute_Expression(Cur, VariableSource);
+			LVariant *v = d->Execute_Expression(Cur, VariableSource);
 			if (v)
 			{
 				*Result = *v;
@@ -1251,7 +1251,7 @@ void GScriptEngine1::DumpVariables()
 	for (int i=0; i<d->Stack.Length(); i++)
 	{
 		StackFrame *sf = d->Stack[i];
-		for (GVariant *v = (GVariant*)sf->First(&VarName); v; v = (GVariant*)sf->Next(&VarName))
+		for (LVariant *v = (LVariant*)sf->First(&VarName); v; v = (LVariant*)sf->Next(&VarName))
 		{
 			char t[128];
 			ZeroObj(t);
@@ -1287,7 +1287,7 @@ void GScriptEngine1::DumpVariables()
 	}
 }
 
-GVariant *GScriptEnginePrivate::Var(char16 *name, bool create)
+LVariant *LScriptEnginePrivate::Var(char16 *name, bool create)
 {
 	if (name)
 	{
@@ -1296,11 +1296,11 @@ GVariant *GScriptEnginePrivate::Var(char16 *name, bool create)
 		int Bytes = LBufConvertCp(b, "utf-8", sizeof(b), (const void*&)name, LGI_WideCharset, Len);
 		b[Bytes/sizeof(*b)] = 0;
 
-		GVariant *v = 0;
+		LVariant *v = 0;
 		for (int i=Stack.Length()-1; i>=0; i--)
 		{
 			StackFrame *sf = Stack[i];
-			if ((v = (GVariant*) sf->Find(b)))
+			if ((v = (LVariant*) sf->Find(b)))
 			{
 				break;
 			}
@@ -1308,7 +1308,7 @@ GVariant *GScriptEnginePrivate::Var(char16 *name, bool create)
 
 		if (!v && create)
 		{
-			if ((v = new GVariant))
+			if ((v = new LVariant))
 			{
 				Stack[Stack.Length()-1]->Add(b, v);
 			}
@@ -1320,7 +1320,7 @@ GVariant *GScriptEnginePrivate::Var(char16 *name, bool create)
 	return 0;
 }
 
-bool GScriptEnginePrivate::ToVar(GVariant &v, char16 *s)
+bool LScriptEnginePrivate::ToVar(LVariant &v, char16 *s)
 {
 	if (s)
 	{
@@ -1385,7 +1385,7 @@ bool GScriptEnginePrivate::ToVar(GVariant &v, char16 *s)
 	return false;
 }
 
-bool GScriptEnginePrivate::Require(int &Cur, const char *tok)
+bool LScriptEnginePrivate::Require(int &Cur, const char *tok)
 {
 	if (tok && Cur >= 0 && Cur < Tokens.Length())
 	{
@@ -1410,7 +1410,7 @@ bool GScriptEnginePrivate::Require(int &Cur, const char *tok)
 	return false;
 }
 
-bool GScriptEnginePrivate::Compile_MethodCall(int &Cur)
+bool LScriptEnginePrivate::Compile_MethodCall(int &Cur)
 {
 	char16 *t = ThisToken();
 	if (t)
@@ -1451,7 +1451,7 @@ bool GScriptEnginePrivate::Compile_MethodCall(int &Cur)
 	return false;
 }
 
-bool GScriptEnginePrivate::Compile_Expression(int &Cur, int Depth)
+bool LScriptEnginePrivate::Compile_Expression(int &Cur, int Depth)
 {
 	if (Cur >= 0 && Cur < Tokens.Length())
 	{
@@ -1575,15 +1575,15 @@ bool GScriptEnginePrivate::Compile_Expression(int &Cur, int Depth)
 	return false;
 }
 
-GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Depth)
+LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Depth)
 {
-	// Internally to this function we use the GVariant::User member to
-	// store non-zero if we don't own the GVariant object. And thus
+	// Internally to this function we use the LVariant::User member to
+	// store non-zero if we don't own the LVariant object. And thus
 	// shouldn't free the memory on exit.
 
 	if (Cur >= 0 && Cur < Tokens.Length())
 	{
-		GArray<GVariant*> Args;
+		GArray<LVariant*> Args;
 		int StartToken = Cur;
 		int PrevIsOp = -1;
 
@@ -1593,7 +1593,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 			if (StricmpW(t, sStartRdBracket) == 0)
 			{
 				Cur++;
-				GVariant *r = Execute_Expression(Cur, Src, Depth + 1);
+				LVariant *r = Execute_Expression(Cur, Src, Depth + 1);
 				if (r)
 				{
 					LgiAssert(r->Type != GV_NULL);
@@ -1636,7 +1636,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 					}
 					else
 					{
-						Args.Add(new GVariant(Top));
+						Args.Add(new LVariant(Top));
 						PrevIsOp = 1;
 					}
 				}
@@ -1648,7 +1648,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 						{
 							// Emit a minus operator and treat the value as a number
 							t++;
-							Args.Add(new GVariant(OpMinus));
+							Args.Add(new LVariant(OpMinus));
 						}
 						else
 						{						
@@ -1659,7 +1659,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 						}
 					}
 
-					GFunc *Method = 0;
+					LFunc *Method = 0;
 					char16 *Next = NextToken();
 					if (Next && Next[0] == '(' && Next[1] == 0)
 					{
@@ -1668,12 +1668,12 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 						int InLen = StrlenW(t) * sizeof(*t);
 						int Converted = LBufConvertCp(Name, "utf-8", sizeof(Name)-1, In, LGI_WideCharset, InLen);
 						Name[Converted] = 0;
-						Method = (GFunc*) Methods.Find(Name);
+						Method = (LFunc*) Methods.Find(Name);
 						if (Method)
 						{
 							GArray<int> Idx;
 							ArgumentArray Arg, Mem;
-							GVariant *Ret = new GVariant;
+							LVariant *Ret = new LVariant;
 
 							// Collect arguments
 							Cur += 2;
@@ -1717,7 +1717,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 
 					if (!Method)
 					{
-						GVariant *v = 0;
+						LVariant *v = 0;
 						GDomRef *Ref = 0;
 
 						int Start = Cur;
@@ -1740,7 +1740,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 								char *utf = LgiNewUtf16To8(&a[0]);
 
 								// Ask the variable source to get the value
-								if ((v = new GVariant))
+								if ((v = new LVariant))
 									Src->GetValue(utf, *v);
 
 								// Clean up...
@@ -1758,14 +1758,14 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 									// Variable name...
 									LgiAssert(Ref->Array == 0);
 									DeleteObj(Ref);
-									if ((v = new GVariant))
+									if ((v = new LVariant))
 										ToVar(*v, t);
 								}
 							}
 						}
 						else
 						{
-							if ((v = new GVariant))
+							if ((v = new LVariant))
 								ToVar(*v, t);
 						}
 
@@ -1784,7 +1784,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 							{
 								GDom *dom = Ref->Var->CastDom();
 								if (dom)
-									Args.Add(new GVariant(dom, Ref->Member));
+									Args.Add(new LVariant(dom, Ref->Member));
 								else
 									LgiAssert(!"No DOM ptr.");
 							}
@@ -1798,7 +1798,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 										{
 											char16 *a = Tokens[Ref->Array];
 											int idx = atoi(a);
-											GVariant *k = Ref->Var->Value.Lst->ItemAt(idx);
+											LVariant *k = Ref->Var->Value.Lst->ItemAt(idx);
 											if (k)
 											{
 												k->User = true;
@@ -1807,7 +1807,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 											else
 											{
 												Term.Print("%s:%i - List idx %i doesn't exist.\n", ErrorTitle(), Lines[StartToken], idx);
-												Args.Add(new GVariant);
+												Args.Add(new LVariant);
 											}
 											break;
 										}
@@ -1815,11 +1815,11 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 										{
 											char16 *a = Tokens[Ref->Array];
 											char *u = 0;
-											GVariant *k = 0;
+											LVariant *k = 0;
 
 											if (a &&
 												(u = LgiNewUtf16To8(a)) != 0 &&
-												(k = (GVariant*) Ref->Var->Value.Hash->Find(u)) != 0)
+												(k = (LVariant*) Ref->Var->Value.Hash->Find(u)) != 0)
 											{
 												k->User = true;
 												Args.Add(k);
@@ -1827,7 +1827,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 											else
 											{
 												Term.Print("%s:%i - Hash element '%s' doesn't exist.\n", ErrorTitle(), Lines[StartToken], u);
-												Args.Add(new GVariant);
+												Args.Add(new LVariant);
 											}
 
 											DeleteArray(u);
@@ -1838,10 +1838,10 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 											if (Ref->Var->Value.Dom)
 											{
 												int Exp = Ref->Array;
-												GVariant *Idx = Execute_Expression(Exp, 0, 0);
+												LVariant *Idx = Execute_Expression(Exp, 0, 0);
 												if (Idx)
 												{
-													GVariant *Result = new GVariant;
+													LVariant *Result = new LVariant;
 													if (Ref->Var->Value.Dom->GetVariant(Ref->Member, *Result, Idx->CastString()))
 													{
 														Args.Add(Result);
@@ -1855,7 +1855,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 										default:
 										{
 											Term.Print("%s:%i - Array lookup not support for variant type %i.\n", ErrorTitle(), Lines[StartToken], Ref->Var->Type);
-											Args.Add(new GVariant);
+											Args.Add(new LVariant);
 											break;
 										}
 									}
@@ -1866,7 +1866,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 
 									if (Ref->Member)
 									{
-										GVariant *t = new GVariant;
+										LVariant *t = new LVariant;
 										if (t)
 										{
 											Ref->Get(this, *t);
@@ -1925,9 +1925,9 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 					}
 					else
 					{
-						GVariant *Op = Args[LowestOp];
-						GVariant *Var = Args[LowestOp + 1];
-						GVariant r;
+						LVariant *Op = Args[LowestOp];
+						LVariant *Var = Args[LowestOp + 1];
+						LVariant r;
 
 						switch (Op->Value.Op)
 						{
@@ -2017,7 +2017,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 						}
 						else if (Var->User)
 						{
-							Args[LowestOp+1] = new GVariant(r);
+							Args[LowestOp+1] = new LVariant(r);
 						}
 						else
 						{
@@ -2037,9 +2037,9 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 					}
 					else
 					{
-						GVariant *Op = Args[LowestOp];
-						GVariant *Var = Args[LowestOp - 1];
-						GVariant r;
+						LVariant *Op = Args[LowestOp];
+						LVariant *Var = Args[LowestOp - 1];
+						LVariant r;
 
 						switch (Op->Value.Op)
 						{
@@ -2091,7 +2091,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 						}
 						else if (Var->User)
 						{
-							Args[LowestOp-1] = new GVariant(r);
+							Args[LowestOp-1] = new LVariant(r);
 						}
 						else
 						{
@@ -2112,10 +2112,10 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 						break;
 					}
 
-					GVariant *a = Args[LowestOp - 1];
-					GVariant *op = Args[LowestOp];
-					GVariant *b = Args[LowestOp + 1];
-					GVariant r;
+					LVariant *a = Args[LowestOp - 1];
+					LVariant *op = Args[LowestOp];
+					LVariant *b = Args[LowestOp + 1];
+					LVariant r;
 
 					LgiAssert(op->Value.Op);
 
@@ -2299,7 +2299,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 					}
 					else if (a->User)
 					{
-						Args[LowestOp-1] = new GVariant(r);
+						Args[LowestOp-1] = new LVariant(r);
 					}
 					else
 					{
@@ -2315,8 +2315,8 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 
 		if (Args.Length() == 1)
 		{
-			GVariant *v = Args[0];
-			return v->User ? new GVariant(*v) : v;
+			LVariant *v = Args[0];
+			return v->User ? new LVariant(*v) : v;
 		}
 	}
 	else
@@ -2327,7 +2327,7 @@ GVariant *GScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 	return 0;
 }
 
-int GScriptEnginePrivate::FindEndOfBlock(int Cur)
+int LScriptEnginePrivate::FindEndOfBlock(int Cur)
 {
 	int Depth = 1;
 	while (Cur < Tokens.Length())
@@ -2352,7 +2352,7 @@ int GScriptEnginePrivate::FindEndOfBlock(int Cur)
 	return -1;
 }
 
-bool GScriptEnginePrivate::Type(int &Cur, GExternType &Type)
+bool LScriptEnginePrivate::Type(int &Cur, GExternType &Type)
 {
 	char16 *t = Tokens[Cur];
 	if (t)
@@ -2396,12 +2396,12 @@ bool GScriptEnginePrivate::Type(int &Cur, GExternType &Type)
 	return false;
 }
 
-GExecutionStatus GExternFunc::Call(GScriptContext *Ctx, GVariant *Ret, ArgumentArray &In)
+LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LVariant *Ret, ArgumentArray &In)
 {
 	if (!Priv || !Library || !Method)
 		return ScriptError;
 
-	GExecutionStatus Status = ScriptError;
+	LExecutionStatus Status = ScriptError;
 	GArray<uint32> ArgVal;
 	GArray<char*> Mem;
 
@@ -2411,10 +2411,10 @@ GExecutionStatus GExternFunc::Call(GScriptContext *Ctx, GVariant *Ret, ArgumentA
 		int Cur = (*Idx)[i];
 		char16 *t1 = Priv->Tokens[Cur];
 		char16 *t2 = Priv->Tokens[Cur + 1];
-		GVariant *v = t1 && isalpha(*t1) && t2 && (*t2 == ',' || *t2 == ')') ? Priv->Var(t1, false) : 0;
+		LVariant *v = t1 && isalpha(*t1) && t2 && (*t2 == ',' || *t2 == ')') ? Priv->Var(t1, false) : 0;
 		*/
 
-		GVariant *v = In[i];
+		LVariant *v = In[i];
 		if (v)
 		{
 			switch (Args[i]->Simple)
@@ -2516,18 +2516,18 @@ GExecutionStatus GExternFunc::Call(GScriptContext *Ctx, GVariant *Ret, ArgumentA
 	return Status;
 }
 
-GExecutionStatus GScriptFunc::Call(GScriptContext *Ctx, GVariant *Ret, ArgumentArray &Values)
+LExecutionStatus LScriptFunc::Call(LScriptContext *Ctx, LVariant *Ret, ArgumentArray &Values)
 {
 	if (!BodyArr || BodyIdx < 0 || !Priv)
 		return ScriptError;
 
-	GExecutionStatus Status = ScriptError;
+	LExecutionStatus Status = ScriptError;
 
 	// Process the arguments into values...
 	if (Args.Length() == Values.Length())
 	{
 		// Set up new stack frame...
-		GVariant *n;
+		LVariant *n;
 		StackFrame *sf = new StackFrame;
 		if (!sf)
 			return ScriptError;
@@ -2538,7 +2538,7 @@ GExecutionStatus GScriptFunc::Call(GScriptContext *Ctx, GVariant *Ret, ArgumentA
 		// Set copies of all the arguments as local variables
 		for (int i=0; i<Args.Length(); i++)
 		{
-			if ((n = new GVariant))
+			if ((n = new LVariant))
 			{
 				*n = *(Values[i]);
 				sf->Add(Args[i], (void*)n);
@@ -2567,7 +2567,7 @@ GExecutionStatus GScriptFunc::Call(GScriptContext *Ctx, GVariant *Ret, ArgumentA
 	return Status;
 }
 
-void GScriptEnginePrivate::ProcessArguments(ArgumentArray &Args, ArgumentArray &Mem, GArray<int> *Idx)
+void LScriptEnginePrivate::ProcessArguments(ArgumentArray &Args, ArgumentArray &Mem, GArray<int> *Idx)
 {
 	if (Idx)
 	{
@@ -2576,7 +2576,7 @@ void GScriptEnginePrivate::ProcessArguments(ArgumentArray &Args, ArgumentArray &
 			int Cur = (*Idx)[i];
 			char16 *Tok = ThisToken();
 			char16 *Next = NextToken();
-			GVariant *v = 0;
+			LVariant *v = 0;
 			if (Tok && Next && isalpha(*Tok) && (*Next == ')' || *Next == ','))
 			{
 				v = Var(Tok, false);
@@ -2587,10 +2587,10 @@ void GScriptEnginePrivate::ProcessArguments(ArgumentArray &Args, ArgumentArray &
 			}
 			else
 			{
-				GVariant *v = Execute_Expression(Cur);
+				LVariant *v = Execute_Expression(Cur);
 				if (!v)
 				{
-					v = new GVariant;
+					v = new LVariant;
 				}
 				if (v)
 				{
@@ -2602,9 +2602,9 @@ void GScriptEnginePrivate::ProcessArguments(ArgumentArray &Args, ArgumentArray &
 	}
 }
 
-GExecutionStatus GScriptEnginePrivate::Execute_Statement(GArray<GCode> &To)
+LExecutionStatus LScriptEnginePrivate::Execute_Statement(GArray<GCode> &To)
 {
-	GExecutionStatus Status = ScriptError;
+	LExecutionStatus Status = ScriptError;
 
 	for (int k=0; k<To.Length(); k++)
 	{
@@ -2631,7 +2631,7 @@ GExecutionStatus GScriptEnginePrivate::Execute_Statement(GArray<GCode> &To)
 						break;
 					}
 
-					GVariant *e = Execute_Expression(Cur);
+					LVariant *e = Execute_Expression(Cur);
 					if (e)
 					{
 						bool IsTrue;
@@ -2681,7 +2681,7 @@ GExecutionStatus GScriptEnginePrivate::Execute_Statement(GArray<GCode> &To)
 				if (!Code.MethodCall.Method)
 					break;
 
-				GVariant Ret;
+				LVariant Ret;
 				Status = Call(Code.MethodCall.Method, &Ret, Code.MethodCall.Args);
 				if (!Status)
 				{
@@ -2704,7 +2704,7 @@ GExecutionStatus GScriptEnginePrivate::Execute_Statement(GArray<GCode> &To)
 				{
 					// Evaluate the condition
 					int Cur = Code.For.Condition;
-					GVariant *v = Execute_Expression(Cur);
+					LVariant *v = Execute_Expression(Cur);
 					if (!v)
 					{
 						break;
@@ -2744,7 +2744,7 @@ GExecutionStatus GScriptEnginePrivate::Execute_Statement(GArray<GCode> &To)
 						case OpAssign:
 						{
 							Cur = Code.LValue.Expression;
-							GVariant *v = Execute_Expression(Cur);
+							LVariant *v = Execute_Expression(Cur);
 							if (v)
 							{
 								GDomRef Ref;
@@ -2808,7 +2808,7 @@ GExecutionStatus GScriptEnginePrivate::Execute_Statement(GArray<GCode> &To)
 						}
 						case OpPostInc:
 						{
-							GVariant *v = Var(Dom[0]);
+							LVariant *v = Var(Dom[0]);
 							if (v)
 							{
 								*v = v->CastInt32() + 1;
@@ -2818,7 +2818,7 @@ GExecutionStatus GScriptEnginePrivate::Execute_Statement(GArray<GCode> &To)
 						}
 						case OpPostDec:
 						{
-							GVariant *v = Var(Dom[0]);
+							LVariant *v = Var(Dom[0]);
 							if (v)
 							{
 								*v = v->CastInt32() - 1;
@@ -2829,7 +2829,7 @@ GExecutionStatus GScriptEnginePrivate::Execute_Statement(GArray<GCode> &To)
 						case OpPlusEquals:
 						{
 							Cur = Code.LValue.Expression;
-							GVariant *v = Execute_Expression(Cur);
+							LVariant *v = Execute_Expression(Cur);
 							if (v)
 							{
 								GDomRef Ref;
@@ -2840,10 +2840,10 @@ GExecutionStatus GScriptEnginePrivate::Execute_Statement(GArray<GCode> &To)
 										if (Ref.Var->Type == GV_DOM &&
 											Ref.Var->Value.Dom)
 										{
-											GVariant a;
+											LVariant a;
 											if (Ref.Var->Value.Dom->GetValue(Ref.Member, a))
 											{
-												GVariant b = a.CastInt32() + v->CastInt32();
+												LVariant b = a.CastInt32() + v->CastInt32();
 												Ref.Var->Value.Dom->SetValue(Ref.Member, b);
 											}
 										}
@@ -2906,7 +2906,7 @@ GExecutionStatus GScriptEnginePrivate::Execute_Statement(GArray<GCode> &To)
 	return ScriptSuccess;
 }
 
-bool GScriptEnginePrivate::Compile_Statement(GArray<GCode> &To, int &Cur)
+bool LScriptEnginePrivate::Compile_Statement(GArray<GCode> &To, int &Cur)
 {
 	bool Status = false;
 
@@ -3030,20 +3030,20 @@ bool GScriptEnginePrivate::Compile_Statement(GArray<GCode> &To, int &Cur)
 			Code.Start = Cur - 1;
 			if ((t = ThisToken()))
 			{
-				GScriptFunc *Func = 0;
+				LScriptFunc *Func = 0;
 				if (!isalpha(*t))
 				{
 					Term.Print("%s:%i - Function name must start with a letter.\n", ErrorTitle(), Lines[Cur]);
 					goto EndFuncDefn;
 				}
 
-				Func = new GScriptFunc(this);
+				Func = new LScriptFunc(this);
 				if (Func)
 				{
 					Func->Method = LgiNewUtf16To8(t);
 					Func->BodyArr = &To;
 					Func->BodyIdx = To.Length() - 1;
-					Methods.Add(Func->Method, (GFunc*)Func);
+					Methods.Add(Func->Method, (LFunc*)Func);
 
 					if (!Require(++Cur, "("))
 					{
@@ -3127,7 +3127,7 @@ bool GScriptEnginePrivate::Compile_Statement(GArray<GCode> &To, int &Cur)
 		}
 		else if (StricmpW(t, sExtern) == 0)
 		{
-			GExternFunc *Func = new GExternFunc(this);
+			LExternFunc *Func = new LExternFunc(this);
 			if (Func)
 			{
 				// Parse the return type
@@ -3187,7 +3187,7 @@ bool GScriptEnginePrivate::Compile_Statement(GArray<GCode> &To, int &Cur)
 								{
 									Cur++;
 
-									GVariant v;
+									LVariant v;
 									ToVar(v, t);
 									Func->Library = NewStr(v.Str());
 
@@ -3197,7 +3197,7 @@ bool GScriptEnginePrivate::Compile_Statement(GArray<GCode> &To, int &Cur)
 									}
 									else
 									{
-										Methods.Add(Func->Method, (GFunc*)Func);
+										Methods.Add(Func->Method, (LFunc*)Func);
 										Status = true;
 										Func = 0;
 									}
@@ -3282,7 +3282,7 @@ bool GScriptEnginePrivate::Compile_Statement(GArray<GCode> &To, int &Cur)
 		{
 			// See if this token is a method
 			char *t8 = LgiNewUtf16To8(t);
-			GFunc *Func = (GFunc*) Methods.Find(t8);
+			LFunc *Func = (LFunc*) Methods.Find(t8);
 			if (Func)
 			{
 				GCode &Code = To[To.Length()];

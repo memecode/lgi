@@ -135,7 +135,7 @@ public:
 			if (dd.IsFormat(FILTER_DRAG_FORMAT) &&
 				dd.Data.Length() == 1)
 			{
-				GVariant &v = dd.Data.First();
+				LVariant &v = dd.Data.First();
 				if (v.IsBinary() &&
 					v.Value.Binary.Length == sizeof(GFilterItem *))
 				{
@@ -934,7 +934,7 @@ bool GFilterItem::GetData(GArray<GDragData> &Data)
 	GDragData &dd = Data[0];
 	
 	dd.Format = FILTER_DRAG_FORMAT;
-	GVariant &v = dd.Data[0];
+	LVariant &v = dd.Data[0];
 	v.Type = GV_VOID_PTR;
 	v.Value.Ptr = this;
 	

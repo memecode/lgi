@@ -138,7 +138,7 @@ bool GPassword::Serialize(GDom *Options, const char *Prop, int Write)
 	bool Status = false;
 	if (Options && Prop)
 	{
-		GVariant v;
+		LVariant v;
 		if (Write)
 		{
 			v.SetBinary(Len, Data);
@@ -167,7 +167,7 @@ void GPassword::Delete(GDom *Options, char *Option)
 {
 	if (Options && Option)
 	{
-		GVariant v;
+		LVariant v;
 		Options->SetValue(Option, v);
 	}
 }

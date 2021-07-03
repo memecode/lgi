@@ -99,7 +99,7 @@ public:
 	bool SetEnvironment(const char *Var, const char *Value);
 
 	// Dom (support StreamReadable/StreamWritable)
-	bool GetValue(const char *Var, GVariant &Value) override;
+	bool GetValue(const char *Var, LVariant &Value) override;
 
 	// Handles
 	void SetStdin(PipeHandle Hnd);

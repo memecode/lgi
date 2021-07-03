@@ -9,7 +9,7 @@
 #include "lgi/common/Lgi.h"
 
 
-bool LSubMenu::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool LSubMenu::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)
@@ -23,7 +23,7 @@ bool LSubMenu::GetVariant(const char *Name, GVariant &Value, char *Array)
 	return true;
 }
 
-bool LSubMenu::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool LSubMenu::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	/*
 	GDomProperty p = LgiStringToDomProp(Name);
@@ -36,7 +36,7 @@ bool LSubMenu::SetVariant(const char *Name, GVariant &Value, char *Array)
 	return false;
 }
 
-bool LSubMenu::CallMethod(const char *MethodName, GVariant *ReturnValue, GArray<GVariant*> &Args)
+bool LSubMenu::CallMethod(const char *MethodName, LVariant *ReturnValue, GArray<LVariant*> &Args)
 {
 	GDomProperty Method = LgiStringToDomProp(MethodName);	
 	switch (Method)

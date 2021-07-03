@@ -19,7 +19,7 @@
 #include "Lgi.h"
 #include "FileTransferProgress.h"
 #include "GSlider.h"
-#include "GVariant.h"
+#include "LVariant.h"
 #include "GDisplayString.h"
 
 //////////////////////////////////////////////////////////////////
@@ -64,7 +64,7 @@ class GPaneThrottle : public GStatusPane
 								(Value() * (PipeSize[Pipe]/8)) / 100 );
 			*/
 
-			GVariant v;
+			LVariant v;
 			App->SetValue(OPT_Throttle, v = Value());
 			App->SetValue(OPT_PipeSize, v = Pipe);
 		}
@@ -130,7 +130,7 @@ void GPaneThrottle::OnPaint(GSurface *pDC)
 
 			if (Pipe < 0)
 			{
-				GVariant v;
+				LVariant v;
 				if (App->GetValue(OPT_PipeSize, v))
 					Pipe = v.CastInt32();
 				if (Slider)
@@ -451,7 +451,7 @@ GMessage::Result FileTransferProgress::OnEvent(GMessage *m)
         }
         case IDM_SET_START_VAL:
         {
-			GVariant v = m->A();
+			LVariant v = m->A();
 			SetVariant(sStartValue, v);
             break;
         }
@@ -552,7 +552,7 @@ void FileTransferProgress::UpdateUi()
 	DspVal = Val;
 }
 
-bool FileTransferProgress::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool FileTransferProgress::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	if (Stricmp(Name, sStartValue))
 		return false;

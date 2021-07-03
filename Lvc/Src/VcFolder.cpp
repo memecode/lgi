@@ -375,7 +375,7 @@ const char *VcFolder::GetVcName()
 	{
 		GString Opt;
 		Opt.Printf("%s-path", Def);
-		GVariant v;
+		LVariant v;
 		if (d->Opts.GetValue(Opt, v))
 			VcCmd = v.Str();
 	}
@@ -715,7 +715,7 @@ void VcFolder::Select(bool b)
 				}
 				case VcSvn:
 				{
-					GVariant Limit;
+					LVariant Limit;
 					d->Opts.GetValue("svn-limit", Limit);
 
 					if (CommitListDirty)
@@ -3295,7 +3295,7 @@ bool VcFolder::ParsePull(int Result, GString s, ParseParams *Params)
 
 			if (Params && Params->Str.Equals("log"))
 			{
-				GVariant Limit;
+				LVariant Limit;
 				d->Opts.GetValue("svn-limit", Limit);
 				
 				GString Args;

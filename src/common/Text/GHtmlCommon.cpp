@@ -662,7 +662,7 @@ bool GHtmlElement::HasChild(GHtmlElement *c)
 }
 
 ////////////////////////////////////////////////////////////////////////
-bool GCssStyle::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool GCssStyle::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	if (!Stricmp(Name, "Display")) // Type: String
 	{
@@ -674,7 +674,7 @@ bool GCssStyle::GetVariant(const char *Name, GVariant &Value, char *Array)
 	return false;
 }
 
-bool GCssStyle::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool GCssStyle::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	if (!Stricmp(Name, "display"))
 	{

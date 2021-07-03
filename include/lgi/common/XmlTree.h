@@ -75,8 +75,8 @@ protected:
 
 	bool Write;
 	LXmlAttr *_Attr(const char *Name, bool Write);
-	bool GetVariant(const char *Name, GVariant &Value, char *Array);
-	bool SetVariant(const char *Name, GVariant &Value, char *Array);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array);
 
 	/// The name of the tag/element. This can be NULL in the case
 	/// that the element is purely content. The memory is managed by 

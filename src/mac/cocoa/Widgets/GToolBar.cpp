@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include "Lgi.h"
 #include "GToken.h"
-#include "GVariant.h"
+#include "LVariant.h"
 
 #define AttachButton(b) b->Attach(this);
 
@@ -705,7 +705,7 @@ public:
 
 	void Customizable(GToolBar *Tb)
 	{
-		GVariant v;
+		LVariant v;
 		if (CustomDom)
 		{
 			CustomDom->GetValue(CustomProp, v);
@@ -1354,7 +1354,7 @@ void GToolBar::ContextMenu(LMouse &m)
 				{
 					if (d->CustomDom)
 					{
-						GVariant v(o);
+						LVariant v(o);
 						d->CustomDom->SetValue(d->CustomProp, v);
 					}
 					DeleteArray(o);

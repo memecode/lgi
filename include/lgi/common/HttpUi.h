@@ -10,9 +10,9 @@ public:
 
 	char *FormDecode(char *s);
 	char *HtmlEncode(char *s);
-	bool ParseHtmlWithDom(GVariant &Out, GDom *Dom, char *Html);
+	bool ParseHtmlWithDom(LVariant &Out, GDom *Dom, char *Html);
 
-	virtual int OnRequest(char *Action, char *Uri, char *Headers, char *Body, GVariant &Out) = 0;
+	virtual int OnRequest(char *Action, char *Uri, char *Headers, char *Body, LVariant &Out) = 0;
 };
 
 class GHttpServer

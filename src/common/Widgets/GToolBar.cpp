@@ -481,7 +481,7 @@ public:
 
 	void Customizable(GToolBar *Tb)
 	{
-		GVariant v;
+		LVariant v;
 		if (CustomDom)
 		{
 			CustomDom->GetValue(CustomProp, v);
@@ -1124,7 +1124,7 @@ void GToolBar::ContextMenu(LMouse &m)
 				{
 					if (d->CustomDom)
 					{
-						GVariant v(o);
+						LVariant v(o);
 						d->CustomDom->SetValue(d->CustomProp, v);
 					}
 					DeleteArray(o);

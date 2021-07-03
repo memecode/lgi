@@ -886,7 +886,7 @@ bool LResources::Res_GetProperties(ResObject *Obj, GDom *Props)
 struct ResObjectCallback : public GCss::ElementCallback<ResObject>
 {
 	GDom *Props;
-	GVariant v;
+	LVariant v;
 	
 	ResObjectCallback(GDom *props)
 	{
@@ -931,7 +931,7 @@ bool LResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 	if (!v || !Props)
 		return false;
 
-	GVariant i;
+	LVariant i;
 	if (Props->GetValue("enabled", i))
 		v->Enabled(i.CastInt32() != 0);
 

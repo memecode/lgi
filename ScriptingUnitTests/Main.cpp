@@ -12,18 +12,18 @@ struct ConsoleLog : public GStream
 	}
 };
 
-class App : public GApp, public GScriptContext, public GVmDebuggerCallback
+class App : public GApp, public LScriptContext, public LVmDebuggerCallback
 {
-	GScriptEngine *Engine;
+	LScriptEngine *Engine;
 	GAutoString SrcFile;
 	ConsoleLog Log;
 
-	GVmDebugger *AttachVm(GVirtualMachine *Vm, GCompiledCode *Code, const char *Assembly)
+	LVmDebugger *AttachVm(LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly)
 	{
-		return new GVmDebuggerWnd(NULL, this, Vm, Code, Assembly);
+		return new LVmDebuggerWnd(NULL, this, Vm, Code, Assembly);
 	}
 
-	bool CompileScript(GAutoPtr<GCompiledCode> &Output, const char *FileName, const char *Source)
+	bool CompileScript(GAutoPtr<LCompiledCode> &Output, const char *FileName, const char *Source)
 	{
 		return false;
 	}
@@ -43,7 +43,7 @@ public:
 	}
 
 	GHostFunc *GetCommands() { return NULL; }
-	void SetEngine(GScriptEngine *Eng) { Engine = Eng; }
+	void SetEngine(LScriptEngine *Eng) { Engine = Eng; }
 
 	void OnReceiveFiles(GArray<const char*> &Files)
 	{
@@ -84,7 +84,7 @@ public:
 			return false;
 		}
 		
-		GScriptEngine Eng(NULL, NULL, this);
+		LScriptEngine Eng(NULL, NULL, this);
 		Eng.SetConsole(&Log);
 
 		GAutoString Src(::ReadTextFile(SrcFile));
@@ -94,15 +94,15 @@ public:
 			return false;
 		}
 		
-		GAutoPtr<GCompiledCode> Obj;
+		GAutoPtr<LCompiledCode> Obj;
 		if (!Eng.Compile(Obj, NULL, Src, File))
 		{
 			printf("Error: Compilation failed '%s'.\n", SrcFile.Get());
 			return false;
 		}
 		
-		GVariant Ret;
-		GExecutionStatus s = Eng.Run(Obj, &Ret);
+		LVariant Ret;
+		LExecutionStatus s = Eng.Run(Obj, &Ret);
 		if (s == ScriptError)
 		{
 			printf("Error: Execution failed '%s'.\n", SrcFile.Get());

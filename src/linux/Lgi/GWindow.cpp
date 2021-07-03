@@ -1369,7 +1369,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 
 	if (Load)
 	{
-		::GVariant v;
+		::LVariant v;
 		if (Store->GetValue(FieldName, v) && v.Str())
 		{
 			LRect Position(0, 0, -1, -1);
@@ -1411,7 +1411,7 @@ bool GWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 		GWindowZoom State = GetZoom();
 		sprintf(s, "State=%i;Pos=%s", State, GetPos().GetStr());
 
-		::GVariant v = s;
+		::LVariant v = s;
 		if (!Store->SetValue(FieldName, v))
 			return false;
 	}

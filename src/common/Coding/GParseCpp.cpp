@@ -967,7 +967,7 @@ GSymbol *GCppParserWorker::Resolve(char16 *Symbol)
 	return NULL;
 }
 
-GVariant *GetArg(GArray<GVariant> &Values, int i)
+LVariant *GetArg(GArray<LVariant> &Values, int i)
 {
 	if (i < 0 || i >= Values.Length())
 		return NULL;
@@ -999,7 +999,7 @@ int FindMatchingBracket(GArray<char16*> &Exp, int Start)
 int GCppParserWorker::Evaluate(GArray<char16*> &Exp)
 {
 	bool Error = false;
-	GArray<GVariant> Values;
+	GArray<LVariant> Values;
 	
 	for (int i=0; i<Exp.Length(); i++)
 	{
@@ -1053,7 +1053,7 @@ int GCppParserWorker::Evaluate(GArray<char16*> &Exp)
 			GOperator Op = IsOp(t, false);
 			if (Op != OpNull)
 			{
-				GVariant &o = Values.New();
+				LVariant &o = Values.New();
 				o.Type = GV_OPERATOR;
 				o.Value.Op = Op;
 			}
@@ -1109,7 +1109,7 @@ int GCppParserWorker::Evaluate(GArray<char16*> &Exp)
 		int Prec = -1;
 		for (int i=0; i<Values.Length(); i++)
 		{
-			GVariant &v = Values[i];
+			LVariant &v = Values[i];
 			if (v.Type == GV_OPERATOR)
 			{
 				int p = GetPrecedence(v.Value.Op);
@@ -1127,13 +1127,13 @@ int GCppParserWorker::Evaluate(GArray<char16*> &Exp)
 			break;
 		}
 		
-		GVariant &OpVar = Values[OpIdx];
+		LVariant &OpVar = Values[OpIdx];
 		OperatorType Type = OpType(OpVar.Value.Op);
 		switch (Type)
 		{
 			case OpPrefix:
 			{
-				GVariant *a = GetArg(Values, OpIdx + 1);
+				LVariant *a = GetArg(Values, OpIdx + 1);
 				if (!a)
 				{
 					Msg(MsgError, "Missing op arg.\n");
@@ -1159,8 +1159,8 @@ int GCppParserWorker::Evaluate(GArray<char16*> &Exp)
 			}
 			case OpInfix:
 			{
-				GVariant *a = GetArg(Values, OpIdx - 1);
-				GVariant *b = GetArg(Values, OpIdx + 1);
+				LVariant *a = GetArg(Values, OpIdx - 1);
+				LVariant *b = GetArg(Values, OpIdx + 1);
 				if (!a || !b)
 				{
 					Msg(MsgError, "Missing op args.\n");

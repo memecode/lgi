@@ -431,7 +431,7 @@ public:
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;
-		GVariant v;
+		LVariant v;
 
 		switch (Mode)
 		{
@@ -457,7 +457,7 @@ public:
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;
-		GVariant i;
+		LVariant i;
 
 		switch (Mode)
 		{
@@ -488,7 +488,7 @@ public:
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;
-		GVariant v;
+		LVariant v;
 
 		switch (Mode)
 		{
@@ -522,7 +522,7 @@ public:
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;
-		GVariant v;
+		LVariant v;
 
 		switch (Mode)
 		{
@@ -552,7 +552,7 @@ public:
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;
-		GVariant v;
+		LVariant v;
 
 		switch (Mode)
 		{
@@ -580,7 +580,7 @@ public:
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;
-		GVariant v;
+		LVariant v;
 
 		switch (Mode)
 		{

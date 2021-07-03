@@ -68,8 +68,8 @@ public:
 	bool IsBlocking();
 	void IsBlocking(bool block);
 
-	bool SetVariant(const char *Name, GVariant &Val, char *Arr = NULL);
-	bool GetVariant(const char *Name, GVariant &Val, char *Arr = NULL);
+	bool SetVariant(const char *Name, LVariant &Val, char *Arr = NULL);
+	bool GetVariant(const char *Name, LVariant &Val, char *Arr = NULL);
 
 	GStreamI *Clone();
 	const char *GetErrorString();

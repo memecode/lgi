@@ -67,8 +67,8 @@ public:
 	void OnCreate();
 	void OnPosChange();
 	void OnPaint(GSurface *pDC);
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = 0);
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
 	int64 Value();
 	void Value(int64 v);

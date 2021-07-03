@@ -11,7 +11,7 @@
 #ifndef __GDB_H
 #define __GDB_H
 
-#include "GVariant.h"
+#include "LVariant.h"
 
 #define Dom_IsConnected		"IsConnected"
 
@@ -36,8 +36,8 @@ public:
 	virtual bool Description(char *NewDesc) { return 0; }
 
 	// Set/Get
-	virtual bool Set(GVariant &v) { return 0; }
-	virtual bool Get(GVariant &v) { return 0; }
+	virtual bool Set(LVariant &v) { return 0; }
+	virtual bool Get(LVariant &v) { return 0; }
 };
 
 class GDbRecordset

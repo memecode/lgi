@@ -97,8 +97,8 @@ public:
 	bool GetFormattedContent(const char *MimeType, GString &Out, GArray<ContentMedia> *Media = NULL);
 
 	// Dom	
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = NULL);
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = NULL);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL);
 
 	// Font
 	GFont *GetFont();

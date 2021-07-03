@@ -719,7 +719,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								if (View && View->GetEnv())
 								{
 									*End = 0;
-									GVariant Lang, Type;
+									LVariant Lang, Type;
 									Elem->GetValue("language", Lang);
 									Elem->GetValue("type", Type);
 									View->GetEnv()->OnCompileScript(View, s, Lang.Str(), Type.Str());
@@ -947,7 +947,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 					
 					if (Elem->TagId == TAG_IFRAME)
 					{
-						GVariant Src;
+						LVariant Src;
 						if (Elem->GetValue("src", Src) && View && View->GetEnv())
 						{
 							GDocumentEnv::LoadJob *j = View->GetEnv()->NewJob();
@@ -1451,7 +1451,7 @@ void GHtmlParser::_TraceOpenTags()
 		GHtmlElement *t = OpenTags[i];
 		p.Print(", %s", t->Tag.Get());
 		
-		GVariant Id;
+		LVariant Id;
 		if (t->GetValue("id", Id))
 		{
 			p.Print("#%s", Id.Str());

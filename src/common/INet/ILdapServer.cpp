@@ -32,7 +32,7 @@ char *ILdapServer::GetContactUid(GDom *c)
 	static char Buf[256];
 
 	Buf[0] = 0;
-	GVariant First, Last;
+	LVariant First, Last;
 	if (c AND
 		Db AND
 		c->GetValue(Db->MapField(LdapFirstName), First) AND
@@ -125,7 +125,7 @@ void ILdapServer::ProcessFilter(DecBer *Filter, int FilterType, List<GDom> *Inpu
 					{
 						if (stricmp(Type, "cn") == 0)
 						{
-							GVariant CName;
+							LVariant CName;
 							if (Db AND
 								c->GetValue(Db->MapField(LdapFirstName), CName) AND
 								CName.Str() AND
@@ -262,7 +262,7 @@ void ILdapServer::OnMessage(DecBer &Buf)
 
 					for (GDom *c=Results.First(); c; c=Results.Next())
 					{
-						GVariant First, Last, Email;
+						LVariant First, Last, Email;
 						if (Db AND
 							c->GetValue(Db->MapField(LdapFirstName), First) AND
 							c->GetValue(Db->MapField(LdapLastName), Last) AND

@@ -344,7 +344,7 @@ public:
 		return false;
 	}
 
-	bool Set(GVariant &v)
+	bool Set(LVariant &v)
 	{
 		SvRecord *r = Rs->Record();
 		if (r && v.Str())
@@ -390,7 +390,7 @@ public:
 		return 0;
 	}
 
-	bool Get(GVariant &v)
+	bool Get(LVariant &v)
 	{
 		SvRecord *r = Rs->Record();
 		if (r)
@@ -512,7 +512,7 @@ void SvRecordset::Write()
 		// Records
 		for (bool b = MoveFirst(); b; b = MoveNext())
 		{
-			GVariant v;
+			LVariant v;
 			for (unsigned i=0; i<F.Length(); i++)
 			{
 				if (i)

@@ -8,7 +8,7 @@
 #ifndef _GDOM_H_
 #define _GDOM_H_
 
-class GVariant;
+class LVariant;
 #include "lgi/common/LgiInterfaces.h"
 #include "lgi/common/Mem.h"
 #include "lgi/common/Array.h"
@@ -16,17 +16,16 @@ class GVariant;
 /// API for reading and writing properties in objects.
 class LgiClass GDom : virtual public GDomI
 {
-	friend class GScriptEval;
-	friend class GScriptEnginePrivate;
+	friend class LScriptEnginePrivate;
 	friend struct GDomRef;
-	friend class GVirtualMachinePriv;
+	friend class LVirtualMachinePriv;
 
 protected:
 	GDom *ResolveObject(const char *Var, char *Name, char *Array);
 
 	virtual bool _OnAccess(bool Start) { return true; }
-	virtual bool GetVariant(const char *Name, GVariant &Value, char *Array = 0) { return false; }
-	virtual bool SetVariant(const char *Name, GVariant &Value, char *Array = 0) { return false; }
+	virtual bool GetVariant(const char *Name, LVariant &Value, char *Array = 0) { return false; }
+	virtual bool SetVariant(const char *Name, LVariant &Value, char *Array = 0) { return false; }
 
 public:
 	/// Gets an object's property
@@ -35,7 +34,7 @@ public:
 		/// The string describing the property
 		const char *Var,
 		/// The value returned
-		GVariant &Value
+		LVariant &Value
 	);
 	
 	/// Sets an object's property
@@ -44,7 +43,7 @@ public:
 		/// The string describing the property
 		const char *Var,
 		/// The value to set the property to
-		GVariant &Value
+		LVariant &Value
 	);
 };
 

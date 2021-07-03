@@ -14,7 +14,7 @@
 #include <stdio.h>
 
 #include "Lgi.h"
-#include "GVariant.h"
+#include "LVariant.h"
 #include "ILdap.h"
 
 void _do_nothing(const char *s, ...) {}
@@ -240,7 +240,7 @@ bool ILdap::Search(GDom *Results, const char *BaseDn, const char *UserFilter, co
 				// int Entries = ldap_count_entries(Ldap, Msg);
 				// Ldap_Trace("ldap_search_s('%s'), ldap_count_entries=%i\n", Str, Entries);
 
-				GArray<GVariant*> Args;
+				GArray<LVariant*> Args;
 				for (LDAPMessage *m = ldap_first_entry(Ldap, Msg);
 					m;
 					m = ldap_next_entry(Ldap, m))
@@ -289,7 +289,7 @@ bool ILdap::Search(GDom *Results, const char *BaseDn, const char *UserFilter, co
 								e->Email = NewStr(Email2[0]);
 							}
 
-							Args.Add(new GVariant(e));
+							Args.Add(new LVariant(e));
 							Status = true;
 						}
 					}
