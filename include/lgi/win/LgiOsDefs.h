@@ -34,8 +34,8 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "LgiInc.h"
-#include "LgiDefs.h"
+#include "lgi/common/LgiInc.h"
+#include "lgi/common/LgiDefs.h"
 
 #define _MSC_VER_VS2019	1920 // MSVC++ 16.0 (really all 192x values)
 #define _MSC_VER_VS2017	1910 // MSVC++ 15.0
@@ -70,7 +70,6 @@
 #include "windows.h"
 #include "SHELLAPI.H"
 #include "COMMDLG.H"
-#include "LgiInc.h"
 #include <crtdefs.h>
 
 //////////////////////////////////////////////////////////////////

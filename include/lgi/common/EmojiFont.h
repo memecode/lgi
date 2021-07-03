@@ -7,7 +7,7 @@
 #ifndef _EMOJI_FONT_H_
 #define _EMOJI_FONT_H_
 
-#include "GFont.h"
+#include "lgi/common/Font.h"
 
 class LEmojiFont : public GFont
 {

@@ -1,8 +1,8 @@
-#include "Lgi.h"
-#include "LEmojiFont.h"
-#include "Emoji.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/EmojiFont.h"
+#include "lgi/common/Emoji.h"
 #include "GFontPriv.h"
-#include "GdcTools.h"
+#include "lgi/common/GdcTools.h"
 
 #define FILE_NAME "EmojiMap.png"
 // 200,960-219,979

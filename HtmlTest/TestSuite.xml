@@ -33,13 +33,13 @@
 	<Node Name="Tests" Type="1" Platforms="15" Id="1">
 		<Node File="./Files/whistle.html" Type="7" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
 	<Settings>
 		<Build>
 			<IncludePaths>
 				<All>
-					<Debug>../include/common</Debug>
-					<Release>../include/common</Release>
+					<Debug>../include</Debug>
+					<Release>../include</Release>
 				</All>
 				<Linux>
 					<Debug>../include/linux
@@ -47,6 +47,10 @@
 					<Release>../include/linux
 ../include/linux/Gtk</Release>
 				</Linux>
+				<Windows>
+					<Debug>../include/lgi/win</Debug>
+					<Release>../include/lgi/win</Release>
+				</Windows>
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
@@ -55,6 +59,7 @@
 					<Release>/usr/include/gstreamer-1.0
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Windows />
 			</SystemIncludes>
 			<TargetType>
 				<All>Executable</All>
@@ -66,34 +71,67 @@
 					<Release>-static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
+				<All />
+				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-html-test-suite</Debug>
 					<Release>lgi-html-test-suite</Release>
 				</Linux>
+				<Windows />
 			</TargetName>
-			<Defines />
-			<LibraryPaths />
+			<Defines>
+				<All />
+				<Windows />
+			</Defines>
+			<LibraryPaths>
+				<All />
+				<Windows />
+			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
 		<General>
 			<Makefile>
 				<Linux>Makefile.linux</Linux>
+				<Windows>.\HtmlTest.sln</Windows>
 			</Makefile>
 			<Executable>
 				<Linux>
 					<Debug>./HtmlTestSuite</Debug>
 					<Release>./HtmlTestSuite</Release>
 				</Linux>
+				<Windows />
 			</Executable>
+			<Compiler />
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Windows />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
-		<Remote />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 		<Debug>
-			<Arguments />
+			<Arguments>
+				<All />
+			</Arguments>
+			<Environment />
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
-		<Editor />
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
 	</Settings>
 </Project>

@@ -3,8 +3,8 @@
 #ifndef _ZOOM_VIEW_H_
 #define _ZOOM_VIEW_H_
 
-#include "GPath.h"
-#include "GNotifications.h"
+#include "lgi/common/Path.h"
+#include "lgi/common/Notifications.h"
 
 class GZoomView;
 

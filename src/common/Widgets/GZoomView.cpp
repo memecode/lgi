@@ -7,11 +7,11 @@ Notes:
 */
 
 #include <math.h>
-#include "Lgi.h"
-#include "GZoomView.h"
-#include "GScrollBar.h"
-#include "LThreadEvent.h"
-#include "GPalette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ZoomView.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/ThreadEvent.h"
+#include "lgi/common/Palette.h"
 
 #define MAX_FACTOR				32
 #define DEBUG_TILE_BOUNDARIES	0

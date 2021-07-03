@@ -14,10 +14,10 @@
 #include <math.h>
 
 #include "LgiOsDefs.h"
-#include "GFile.h"
-#include "GProperties.h"
-#include "GString.h"
-#include "GVariant.h"
+#include "lgi/common/File.h"
+#include "lgi/common/Properties.h"
+#include "lgi/common/String.h"
+#include "lgi/common/Variant.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Prop::Serialize(GFile &f, bool Write)
