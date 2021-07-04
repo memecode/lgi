@@ -270,7 +270,7 @@ GMessage::Result SearchThread::OnEvent(GMessage *Msg)
 
 void FillLangs(LViewI *v, int id, List<GLanguage> &l)
 {
-	GCombo *c;
+	LCombo *c;
 	if (!v->GetViewById(id, c))
 		return;
 	for (auto li: l)

@@ -1,6 +1,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/RichTextEdit.h"
-#include "GRichTextEditPriv.h"
+#include "RichTextEditPriv.h"
 #include "lgi/common/DocView.h"
 
 LRichTextPriv::HorzRuleBlock::HorzRuleBlock(LRichTextPriv *priv) : Block(priv)

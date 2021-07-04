@@ -42,26 +42,26 @@ public:
 }
 NameMap[] =
 {
-	// ID				Lgi's name		Resource editor name
-	{UI_DIALOG,			"LDialog",		Res_Dialog,			false},
-	{UI_TABLE,			"LTableLayout",	Res_Table,			true},
-	{UI_TEXT,			"GText",		Res_StaticText,		true},
-	{UI_EDITBOX,		"LEdit",		Res_EditBox,		true},
-	{UI_CHECKBOX,		"GCheckBox",	Res_CheckBox,		true},
-	{UI_BUTTON,			"GButton",		Res_Button,			true},
-	{UI_GROUP,			"LRadioGroup",	Res_Group,			true},
-	{UI_RADIO,			"LRadioButton",	Res_RadioBox,		true},
-	{UI_TABS,			"LTabView",		Res_TabView,		true},
-	{UI_TAB,			"LTabPage",		Res_Tab,			false},
-	{UI_LIST,			"LList",		Res_ListView,		true},
-	{UI_COLUMN,			"LListColumn",	Res_Column,			false},
-	{UI_COMBO,			"GCombo",		Res_ComboBox,		true},
-	{UI_TREE,			"LTree",		Res_TreeView,		true},
-	{UI_BITMAP,			"LBitmap",		Res_Bitmap,			true},
+	// ID				Lgi's name			Resource editor name
+	{UI_DIALOG,			"LDialog",			Res_Dialog,			false},
+	{UI_TABLE,			"LTableLayout",		Res_Table,			true},
+	{UI_TEXT,			"LText",			Res_StaticText,		true},
+	{UI_EDITBOX,		"LEdit",			Res_EditBox,		true},
+	{UI_CHECKBOX,		"LCheckBox",		Res_CheckBox,		true},
+	{UI_BUTTON,			"LButton",			Res_Button,			true},
+	{UI_GROUP,			"LRadioGroup",		Res_Group,			true},
+	{UI_RADIO,			"LRadioButton",		Res_RadioBox,		true},
+	{UI_TABS,			"LTabView",			Res_TabView,		true},
+	{UI_TAB,			"LTabPage",			Res_Tab,			false},
+	{UI_LIST,			"LList",			Res_ListView,		true},
+	{UI_COLUMN,			"LListColumn",		Res_Column,			false},
+	{UI_COMBO,			"LCombo",			Res_ComboBox,		true},
+	{UI_TREE,			"LTree",			Res_TreeView,		true},
+	{UI_BITMAP,			"LBitmap",			Res_Bitmap,			true},
 	{UI_PROGRESS,		"LProgressView",	Res_Progress,		true},
-	{UI_SCROLL_BAR,		"LScrollBar",	Res_ScrollBar,		true},
-	{UI_CUSTOM,			"GCustom",		Res_Custom,			true},
-	{UI_CONTROL_TREE,	"GControlTree", Res_ControlTree,	true},
+	{UI_SCROLL_BAR,		"LScrollBar",		Res_ScrollBar,		true},
+	{UI_CUSTOM,			"LCustom",			Res_Custom,			true},
+	{UI_CONTROL_TREE,	"LControlTree",		Res_ControlTree,	true},
 
 	// If you add a new control here update ResDialog::CreateCtrl(int Tool) as well
 
@@ -105,10 +105,10 @@ class TabOrder : public LDialog
 {
 	ResDialogCtrl *Top;
 	LList *Lst;
-	GButton *Ok;
-	GButton *Cancel;
-	GButton *Up;
-	GButton *Down;
+	LButton *Ok;
+	LButton *Cancel;
+	LButton *Up;
+	LButton *Down;
 
 public:
 	TabOrder(LView *Parent, ResDialogCtrl *top)
@@ -117,10 +117,10 @@ public:
 		SetParent(Parent);
 
 		Children.Insert(Lst = new LList(IDC_LIST, 10, 10, 350, 300));
-		Children.Insert(Ok = new GButton(IDOK, Lst->GetPos().x2 + 10, 10, 60, 20, "Ok"));
-		Children.Insert(Cancel = new GButton(IDCANCEL, Lst->GetPos().x2 + 10, Ok->GetPos().y2 + 5, 60, 20, "Cancel"));
-		Children.Insert(Up = new GButton(IDC_UP, Lst->GetPos().x2 + 10, Cancel->GetPos().y2 + 15, 60, 20, "Up"));
-		Children.Insert(Down = new GButton(IDC_DOWN, Lst->GetPos().x2 + 10, Up->GetPos().y2 + 5, 60, 20, "Down"));
+		Children.Insert(Ok = new LButton(IDOK, Lst->GetPos().x2 + 10, 10, 60, 20, "Ok"));
+		Children.Insert(Cancel = new LButton(IDCANCEL, Lst->GetPos().x2 + 10, Ok->GetPos().y2 + 5, 60, 20, "Cancel"));
+		Children.Insert(Up = new LButton(IDC_UP, Lst->GetPos().x2 + 10, Cancel->GetPos().y2 + 15, 60, 20, "Up"));
+		Children.Insert(Down = new LButton(IDC_DOWN, Lst->GetPos().x2 + 10, Up->GetPos().y2 + 5, 60, 20, "Down"));
 
 		LRect r(0, 0, Ok->GetPos().x2 + 17, Lst->GetPos().y2 + 40);
 		SetPos(r);

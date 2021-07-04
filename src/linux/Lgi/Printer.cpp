@@ -1,6 +1,6 @@
 #include "Lgi.h"
 #include "LList.h"
-#include "GButton.h"
+#include "LButton.h"
 #include "GPrinter.h"
 
 using namespace Gtk;

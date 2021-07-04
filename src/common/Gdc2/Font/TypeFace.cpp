@@ -1,5 +1,5 @@
 #include "lgi/common/Lgi.h"
-#include "LFontPriv.h"
+#include "FontPriv.h"
 
 LTypeFace::LTypeFace()
 {

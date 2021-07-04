@@ -33,8 +33,8 @@
 /// 		MoveToCenter();
 /// 			
 /// 		Children.Insert(new LEdit(IDC_STRING, 10, 10, 200, 20, ""));
-/// 		Children.Insert(new GButton(IDOK, 10, 30, 80, 20, "Ok"));
-/// 		Children.Insert(new GButton(IDCANCEL, 100, 30, 80, 20, "Cancel"));
+/// 		Children.Insert(new LButton(IDOK, 10, 30, 80, 20, "Ok"));
+/// 		Children.Insert(new LButton(IDCANCEL, 100, 30, 80, 20, "Cancel"));
 /// 	}
 ///
 ///		~Example()
@@ -137,7 +137,7 @@
 ///
 /// The built in controls that you can use are:
 /// <ul>
-///		<li> GButton (Push button)
+///		<li> LButton (Push button)
 ///		<li> LEdit (Edit box for text entry)
 ///		<li> GText (Static label)
 ///		<li> GCheckBox (Independent boolean)

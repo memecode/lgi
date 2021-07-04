@@ -1,6 +1,6 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "UnitTests.h"
-#include "LCss.h"
+#include "lgi/common/Css.h"
 
 class GCssTestPriv
 {

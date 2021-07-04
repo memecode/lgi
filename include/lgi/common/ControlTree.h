@@ -4,7 +4,7 @@
 #include "lgi\common\Tree.h"
 #include "lgi/common/Variant.h"
 
-class GControlTree : public LTree, public GDom
+class LControlTree : public LTree, public GDom
 {
 public:
 	struct EnumValue
@@ -30,7 +30,7 @@ public:
 		LVariantType Type;
 		LVariant Value;
 		LViewI *Ctrl;
-		GButton *Browse;
+		LButton *Browse;
 		GAutoPtr<EnumArr> Enum;
 
 		void Save();
@@ -57,16 +57,16 @@ public:
 	};
 
 protected:
-	class GControlTreePriv *d;
+	class LControlTreePriv *d;
 
 	class Item *Resolve(bool Create, const char *Path, int CtrlId, LVariantType Type = GV_NULL, GArray<EnumValue> *Enum = 0);
     void ReadTree(LXmlTag *t, LTreeNode *n);
 
 public:
-	GControlTree();
-	~GControlTree();
+	LControlTree();
+	~LControlTree();
 
-	const char *GetClass() { return "GControlTree"; }
+	const char *GetClass() { return "LControlTree"; }
 
 	Item *Find(const char *opt);
 	LTreeItem *Insert(const char *DomPath, int CtrlId, LVariantType Type, LVariant *Value = 0, GArray<EnumValue> *Enum = 0);

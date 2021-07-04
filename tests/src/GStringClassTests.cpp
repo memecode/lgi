@@ -1,6 +1,6 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "UnitTests.h"
-#include "GStringClass.h"
+#include "lgi/common/StringClass.h"
 
 #ifdef LGI_UNIT_TESTS
 int32 GString::RefStrCount = 0;

@@ -13,7 +13,7 @@
 #include <time.h>
 
 #include "Lgi.h"
-#include "GButton.h"
+#include "LButton.h"
 #include "LTableLayout.h"
 
 #define TICKS_PER_SECOND					1000000
@@ -42,7 +42,7 @@ struct LDialogPriv
 		if (!Dlg->_Default)
 		{
 			LViewI *c = Dlg->FindControl(IDOK);
-			GButton *Def = c ? dynamic_cast<GButton*>(c) : 0;
+			LButton *Def = c ? dynamic_cast<LButton*>(c) : 0;
 			if (Def)
 			{
 				Dlg->_Default = Def;
@@ -51,7 +51,7 @@ struct LDialogPriv
 			{
 				for (c=Dlg->Children.First(); c; c=Dlg->Children.Next())
 				{
-					Dlg->_Default = dynamic_cast<GButton*>(c);
+					Dlg->_Default = dynamic_cast<LButton*>(c);
 					if (Dlg->_Default)
 						break;
 				}

@@ -190,18 +190,18 @@ int GetCtrlType(LViewI *v)
 {
 	if (v)
 	{
-		if (dynamic_cast<GControlTree*>(v))
+		if (dynamic_cast<LControlTree*>(v))
 		{
 			return GV_DOM;
 		}
-		else if (dynamic_cast<GCheckBox*>(v) ||
-				dynamic_cast<GButton*>(v) ||
+		else if (dynamic_cast<LCheckBox*>(v) ||
+				dynamic_cast<LButton*>(v) ||
 				dynamic_cast<LRadioButton*>(v))
 		{
 			return GV_BOOL;
 		}
 		else if (dynamic_cast<LSlider*>(v) ||
-				dynamic_cast<GCombo*>(v) ||
+				dynamic_cast<LCombo*>(v) ||
 				dynamic_cast<LRadioGroup*>(v))
 		{
 			return GV_INT32;
@@ -299,7 +299,7 @@ bool LXmlTreeUi::Convert(GDom *Tag, LViewI *Ui, bool ToUI)
 				}
 				else if (Map.value->Hint == GV_DOM)
 				{
-					GControlTree *ct;
+					LControlTree *ct;
 					if (Ui->GetViewById(Map.value->Id, ct))
 					{
 						ct->Serialize(Xml, false);
@@ -390,7 +390,7 @@ bool LXmlTreeUi::Convert(GDom *Tag, LViewI *Ui, bool ToUI)
 						}
 						case GV_DOM:
 						{
-							GControlTree *ct;
+							LControlTree *ct;
 							if (Ui->GetViewById(Map.value->Id, ct))
 							{
 								ct->Serialize(Xml, true);

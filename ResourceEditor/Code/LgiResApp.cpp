@@ -733,7 +733,7 @@ void FieldView::OnSelect(FieldSource *s)
 						case DATA_BOOL:
 						{
 							Cell = t->GetCell(1, Row, true, 2);
-							Cell->Add(new GCheckBox(c->Id, 0, 0, -1, -1, c->Label));
+							Cell->Add(new LCheckBox(c->Id, 0, 0, -1, -1, c->Label));
 							break;
 						}
 						default:

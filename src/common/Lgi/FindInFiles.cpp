@@ -2,7 +2,7 @@
 #include "GFindInFiles.h"
 #include "LPopup.h"
 #include "LList.h"
-#include "GButton.h"
+#include "LButton.h"
 #include "LTableLayout.h"
 #include "LTextLabel.h"
 #include "LEdit.h"
@@ -78,7 +78,7 @@ public:
 	    else if (!Inf.Height.Max)
 	    {
 	        Inf.Height.Min =
-                Inf.Height.Max = GButton::Overhead.y + SysFont->GetHeight();
+                Inf.Height.Max = LButton::Overhead.y + SysFont->GetHeight();
 	    }
 	    else return false;
 
@@ -179,7 +179,7 @@ GFindInFiles::GFindInFiles(LViewI *Parent, GAutoString Search, GDom *Store)
 	c = d->Tbl->GetCell(0, ++y);
 	c->Add(new LEdit(IDC_WHERE, 0, 0, 60, 20));
 	c = d->Tbl->GetCell(1, y);
-	c->Add(new GButton(IDC_WHERE_BROWSE, 0, 0, 20, 20, "..."));
+	c->Add(new LButton(IDC_WHERE_BROWSE, 0, 0, 20, 20, "..."));
 	c = d->Tbl->GetCell(2, y);
 	c->Add(d->WhereHistory = new GHistory(IDC_WHERE_HISTORY));
 
@@ -204,8 +204,8 @@ GFindInFiles::GFindInFiles(LViewI *Parent, GAutoString Search, GDom *Store)
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
 	c->TextAlign(LCss::AlignRight);
-	c->Add(new GButton(IDOK, 0, 0, 60, 20, "Search"));
-	c->Add(new GButton(IDCANCEL, 0, 0, 60, 20, "Cancel"));
+	c->Add(new LButton(IDOK, 0, 0, 60, 20, "Search"));
+	c->Add(new LButton(IDCANCEL, 0, 0, 60, 20, "Cancel"));
 
 	d->Convert(d->Store, this, true);
 	MoveToCenter();

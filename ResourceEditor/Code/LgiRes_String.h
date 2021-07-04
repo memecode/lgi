@@ -187,7 +187,7 @@ public:
 
 class LangDlg : public LDialog
 {
-	GCombo *Sel;
+	LCombo *Sel;
 	List<GLanguage> Langs;
 
 public:

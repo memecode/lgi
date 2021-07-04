@@ -4,7 +4,7 @@
 #include "INet.h"
 #include "IHttp.h"
 #include "LEdit.h"
-#include "GButton.h"
+#include "LButton.h"
 #include "GToken.h"
 
 #define M_LOADED		(M_USER+3000)
@@ -62,10 +62,10 @@ public:
 	GAutoPtr<GBrowserThread> Thread;
 	LEdit *UriEdit;
 	LEdit *SearchEdit;
-	GButton *Back;
-	GButton *Forward;
-	GButton *Stop;
-	GButton *Search;
+	LButton *Back;
+	LButton *Forward;
+	LButton *Stop;
+	LButton *Search;
 	GArray<GString> History;
 	ssize_t CurHistory;
 	bool Loading;
@@ -410,12 +410,12 @@ GBrowser::GBrowser(LViewI *owner, const char *Title, char *Uri)
 		#define BTN_X 30
 		#endif
 		
-		AddView(d->Back = new GButton(IDC_BACK, 0, 0, BTN_X, 20, "<-"));
-		AddView(d->Forward = new GButton(IDC_FORWARD, 0, 0, BTN_X, 20, "->"));
-		AddView(d->Stop = new GButton(IDC_REFRESH_STOP, 0, 0, -1, 20, "Refresh"));
+		AddView(d->Back = new LButton(IDC_BACK, 0, 0, BTN_X, 20, "<-"));
+		AddView(d->Forward = new LButton(IDC_FORWARD, 0, 0, BTN_X, 20, "->"));
+		AddView(d->Stop = new LButton(IDC_REFRESH_STOP, 0, 0, -1, 20, "Refresh"));
 		AddView(d->UriEdit = new LEdit(IDC_URI, 0, 0, 100, 20, 0));
 		AddView(d->SearchEdit = new LEdit(IDC_SEARCH_TXT, 0, 0, 100, 20, ""));
-		AddView(d->Search = new GButton(IDC_SEARCH, 0, 0, -1, 20, "Search"));
+		AddView(d->Search = new LButton(IDC_SEARCH, 0, 0, -1, 20, "Search"));
 		AddView(d->Html = new Html1::GHtml(IDC_HTML, 0, 0, 100, 100));
 
 		AttachChildren();

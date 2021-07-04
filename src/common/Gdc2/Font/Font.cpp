@@ -133,7 +133,7 @@
 #endif
 
 ////////////////////////////////////////////////////////////////////
-#include "LFontPriv.h"
+#include "FontPriv.h"
 
 #ifdef WINDOWS
 GAutoPtr<GLibrary> LFontPrivate::Gdi32;

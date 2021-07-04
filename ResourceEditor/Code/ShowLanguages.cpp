@@ -54,8 +54,8 @@ ShowLanguagesDlg::ShowLanguagesDlg(AppWnd *app)
 	Name("Show Languages");
 	r = GetClient();
 	Children.Insert(d->Lst = new LList(100, 10, 10, r.X() - 20, r.Y() - 50));
-	Children.Insert(new GButton(IDOK, r.X() - 140, r.Y() - 30, 60, 20, "Ok"));
-	Children.Insert(new GButton(IDCANCEL, r.X() - 70, r.Y() - 30, 60, 20, "Cancel"));
+	Children.Insert(new LButton(IDOK, r.X() - 140, r.Y() - 30, 60, 20, "Ok"));
+	Children.Insert(new LButton(IDCANCEL, r.X() - 70, r.Y() - 30, 60, 20, "Cancel"));
 
 	if (d->Lst)
 	{

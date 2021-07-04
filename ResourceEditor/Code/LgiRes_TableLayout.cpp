@@ -1684,7 +1684,7 @@ TableLayoutTest::TableLayoutTest(LViewI *par)
 
 	c = Tbl->GetCell(0, 2, true, 2);
 	c->TextAlign(LCss::AlignRight);
-	c->Add(new GButton(IDOK, 0, 0, -1, -1, "Close"));
+	c->Add(new LButton(IDOK, 0, 0, -1, -1, "Close"));
 
 	char e[MAX_PATH];
 	LGetSystemPath(LSP_APP_INSTALL, e, sizeof(e));

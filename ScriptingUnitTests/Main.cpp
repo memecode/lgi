@@ -1,8 +1,8 @@
-#include "Lgi.h"
-#include "Scripting.h"
-#include "../src/common/Coding/GScriptingPriv.h"
-#include "GStringClass.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Scripting.h"
+#include "../src/common/Coding/ScriptingPriv.h"
+#include "lgi/common/StringClass.h"
+#include "lgi/common/LgiRes.h"
 
 struct ConsoleLog : public GStream
 {

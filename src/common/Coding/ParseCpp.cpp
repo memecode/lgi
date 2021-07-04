@@ -6,9 +6,9 @@
 #include "lgi\common\ThreadEvent.h"
 #include "lgi\common\LexCpp.h"
 #include "lgi\common\Variant.h"
-#include "GScriptingPriv.h"
 #include "lgi\common\XmlTree.h"
 #include "lgi\common\Token.h"
+#include "ScriptingPriv.h"
 
 #define CheckToken(t)	if (!t) { Error = true; break; }
 #if defined(WINDOWS) && defined(_MSC_VER) && !defined(_WIN64)

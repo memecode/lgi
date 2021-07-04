@@ -1454,7 +1454,7 @@ void VcFolder::LinkParents()
 
 	// Find all the "heads", i.e. a commit without any children
 	PROF("Find heads.");
-	GCombo *Heads;
+	LCombo *Heads;
 	if (d->Files->GetWindow()->GetViewById(IDC_HEADS, Heads))
 	{
 		Heads->Empty();

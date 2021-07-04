@@ -852,7 +852,7 @@ struct CompareThread : public LThread
 
 struct ImageCompareDlgPriv : public GZoomViewCallback
 {
-	GCombo *l, *r;
+	LCombo *l, *r;
 	LList *lst;
 	LTabView *tabs;
 	GAutoPtr<CompareThread> Thread;
@@ -915,7 +915,7 @@ ImageCompareDlg::ImageCompareDlg(LView *p, const char *OutPath)
 		{
 			MoveToCenter();
 			
-			GButton *b;
+			LButton *b;
 			if (GetViewById(IDC_COMPARE, b))
 			{
 				b->Default(true);

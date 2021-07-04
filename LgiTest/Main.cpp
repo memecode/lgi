@@ -275,7 +275,7 @@ public:
 
 			AddView(e = new LEdit(IDC_EDIT1, 10, 10, 200, 22));
 			AddView(e2 = new LEdit(IDC_EDIT1, 10, 50, 200, 22));
-			AddView(new GButton(IDC_BLT_TEST, 10, 200, -1, -1, "Blt Test"));
+			AddView(new LButton(IDC_BLT_TEST, 10, 200, -1, -1, "Blt Test"));
 			// e->Focus(true);
 			e->Password(true);
 			e->SetEmptyText("(this is a test)");

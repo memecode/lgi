@@ -1,7 +1,7 @@
 /// \file
 #include "lgi\common\Lgi.h"
 #include "lgi\common\Scripting.h"
-#include "GScriptingPriv.h"
+#include "ScriptingPriv.h"
 #include "lgi\common\LexCpp.h"
 #include "lgi\common\String.h"
 #include "lgi\common\Token.h"
@@ -17,7 +17,7 @@ int LFunctionInfo::_Infos = 0;
 enum GTokenType
 {
 	#define _(type, str) T##type,
-	#include "GTokenType.h"
+	#include "TokenType.h"
 	#undef _
 };
 
@@ -423,7 +423,7 @@ public:
 		
 		#define LNULL NULL
 		#define _(type, str) if (str) ExpTok.Add(L##str, T##type);
-		#include "GTokenType.h"
+		#include "TokenType.h"
 		#undef _
 		#undef LNULL
 

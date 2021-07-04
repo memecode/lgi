@@ -1,7 +1,7 @@
 #include <math.h>
 #include "lgi\common\Lgi.h"
 #include "lgi\common\Scripting.h"
-#include "GScriptingPriv.h"
+#include "ScriptingPriv.h"
 #include "lgi\common\Box.h"
 #include "lgi\common\TabView.h"
 #include "lgi\common\TextLog.h"

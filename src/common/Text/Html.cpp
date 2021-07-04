@@ -200,12 +200,12 @@ public:
 //////////////////////////////////////////////////////////////////////
 namespace Html1 {
 
-class InputButton : public GButton
+class InputButton : public LButton
 {
 	GTag *Tag;
 	
 public:
-	InputButton(GTag *tag, int Id, const char *Label) : GButton(Id, 0, 0, -1, -1, Label)
+	InputButton(GTag *tag, int Id, const char *Label) : LButton(Id, 0, 0, -1, -1, Label)
 	{
 		Tag = tag;
 	}
@@ -3336,7 +3336,7 @@ void GTag::SetStyle()
 				break;
 
 			LgiAssert(!Ctrl);
-			Ctrl = new GCombo(Html->d->NextCtrlId++, 0, 0, 100, SysFont->GetHeight() + 8, NULL);
+			Ctrl = new LCombo(Html->d->NextCtrlId++, 0, 0, 100, SysFont->GetHeight() + 8, NULL);
 			CtrlType = CtrlSelect;
 			break;
 		}
@@ -6477,7 +6477,7 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 				LRect r(0, 0, Size.x-1, Size.y-1), Px;
 				GColour back = _Colour(false);
 				PaintBorderAndBackground(pDC, back, &Px);
-				if (!dynamic_cast<GButton*>(Ctrl))
+				if (!dynamic_cast<LButton*>(Ctrl))
 				{
 					r.x1 += Px.x1;
 					r.y1 += Px.y1;

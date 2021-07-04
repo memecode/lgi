@@ -35,7 +35,7 @@ LangDlg::LangDlg(LView *parent, List<GLanguage> &l, int Init)
 	Name("Language");
 
 	Children.Insert(new LTextLabel(-1, 10, 10, -1, -1, "Select language:"));
-	Children.Insert(Sel = new GCombo(-1, 20, 30, 150, 20, ""));
+	Children.Insert(Sel = new LCombo(-1, 20, 30, 150, 20, ""));
 	if (Sel)
 	{
 		if (l.Length() > 40)
@@ -55,8 +55,8 @@ LangDlg::LangDlg(LView *parent, List<GLanguage> &l, int Init)
 		}
 	}
 
-	Children.Insert(new GButton(IDOK, 180, 5, 60, 20, "Ok"));
-	Children.Insert(new GButton(IDCANCEL, 180, 30, 60, 20, "Cancel"));
+	Children.Insert(new LButton(IDOK, 180, 5, 60, 20, "Ok"));
+	Children.Insert(new LButton(IDCANCEL, 180, 30, 60, 20, "Cancel"));
 }
 
 int LangDlg::OnNotify(LViewI *Ctrl, int Flags)

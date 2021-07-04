@@ -16,7 +16,7 @@
 #include "LBitmap.h"
 #include "LTableLayout.h"
 #include "LDisplayString.h"
-#include "GButton.h"
+#include "LButton.h"
 
 using namespace Gtk;
 #include "LgiWidget.h"
@@ -72,7 +72,7 @@ int GDialog::GetButtonId()
 
 int GDialog::OnNotify(LViewI *Ctrl, int Flags)
 {
-	GButton *b = dynamic_cast<GButton*>(Ctrl);
+	LButton *b = dynamic_cast<LButton*>(Ctrl);
 	if (b)
 	{
 		d->BtnId = b->GetId();
@@ -218,7 +218,7 @@ void GDialog::EndModeless(int Code)
 	Quit(Code);
 }
 
-extern GButton *FindDefault(LView *w);
+extern LButton *FindDefault(LView *w);
 
 GMessage::Param GDialog::OnEvent(GMessage *Msg)
 {

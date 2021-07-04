@@ -1,8 +1,7 @@
-#include "Lgi.h"
-#include "GButton.h"
-#include "LEdit.h"
-#include "GCombo.h"
-// #include "LgiSkinGel.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/Combo.h"
 
 #define IDM_EXIT 4
 
@@ -21,7 +20,7 @@ public:
 		c->Insert("Two");
 		c->Insert("Three");
 
-		AddView(new GButton(50, 10, 10, -1, -1, "Open"));
+		AddView(new LButton(50, 10, 10, -1, -1, "Open"));
 
         /*
 		AddView(c = new GCombo(200, 10, 140, 100, 20, ""));
@@ -99,7 +98,7 @@ public:
             #endif
 			*/
 			
-			AddView(new GButton(50, 10, 10, -1, -1, "Open"));
+			AddView(new LButton(50, 10, 10, -1, -1, "Open"));
 
 		    GCombo *c;
 		    AddView(c = new GCombo(100, 10, 40, 100, 20, ""));

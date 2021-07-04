@@ -1,4 +1,4 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "UnitTests.h"
 
 void UnitTests()

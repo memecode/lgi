@@ -98,8 +98,8 @@ GSelectFont::GSelectFont(LView *parent, char *Face)
 		CSize->Value(DefSize);
 	}
 	
-	Children.Insert(new GButton(IDOK, 20, 70, 60, 20, "Ok"));
-	Children.Insert(new GButton(IDCANCEL, 90, 70, 60, 20, "Cancel"));
+	Children.Insert(new LButton(IDOK, 20, 70, 60, 20, "Ok"));
+	Children.Insert(new LButton(IDCANCEL, 90, 70, 60, 20, "Cancel"));
 }
 
 GSelectFont::~GSelectFont()

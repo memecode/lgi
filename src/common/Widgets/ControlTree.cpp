@@ -221,17 +221,17 @@ void LControlTree::Item::Select(bool b)
 					if ((Ctrl = new LEdit(CtrlId, 0, 0, 200, CtrlY, 0)))
 						Ctrl->Name(Value.Str());
 					if (Flags & TYPE_FILE)
-						Browse = new GButton(IDC_BROWSE, 0, 0, -1, CtrlY, "...");
+						Browse = new LButton(IDC_BROWSE, 0, 0, -1, CtrlY, "...");
 					break;
 				case GV_BOOL:
-					if ((Ctrl = new GCheckBox(CtrlId, 0, 0, 14, 16, 0)))
+					if ((Ctrl = new LCheckBox(CtrlId, 0, 0, 14, 16, 0)))
 						Ctrl->Value(Value.CastInt32());
 					break;
 				case GV_INT32:
 					if (Enum)
 					{
-						GCombo *Cbo;
-						if ((Ctrl = (Cbo = new GCombo(CtrlId, 0, 0, 120, CtrlY, 0))))
+						LCombo *Cbo;
+						if ((Ctrl = (Cbo = new LCombo(CtrlId, 0, 0, 120, CtrlY, 0))))
 						{
 							int Idx = -1;
 

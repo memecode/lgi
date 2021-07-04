@@ -41,8 +41,7 @@
 
 // static char SelectWordDelim[] = " \t\n.,()[]<>=?/\\{}\"\';:+=-|!@#$%^&*";
 
-#include "GRichTextEditPriv.h"
-
+#include "RichTextEditPriv.h"
 
 //////////////////////////////////////////////////////////////////////
 LRichTextEdit::LRichTextEdit(	int Id,

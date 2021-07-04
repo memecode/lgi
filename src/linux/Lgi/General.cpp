@@ -11,7 +11,7 @@
 #include "Lgi.h"
 #include "GSubProcess.h"
 #include "LTextLabel.h"
-#include "GButton.h"
+#include "LButton.h"
 #ifndef LGI_SDL
 #include "LgiWinManGlue.h"
 #endif

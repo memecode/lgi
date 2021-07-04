@@ -175,8 +175,8 @@
     <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
     <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
     <ClCompile Include="..\src\common\Text\DeEscape.cpp" />
-    <ClCompile Include="..\src\common\Text\LXmlTreeUi.cpp" />
-    <ClCompile Include="..\src\common\Widgets\GControlTree.cpp" />
+    <ClCompile Include="..\src\common\Text\XmlTreeUi.cpp" />
+    <ClCompile Include="..\src\common\Widgets\ControlTree.cpp" />
     <ClCompile Include="Src\BlameUi.cpp" />
     <ClCompile Include="Src\DropDownBtn.cpp" />
     <ClCompile Include="Src\Main.cpp" />

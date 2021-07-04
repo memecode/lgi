@@ -124,7 +124,7 @@ enum LgiStringID
 	L_DOCAPP_SAVE_CHANGE = -1100,
 	L_DOCAPP_RESTART_APP = -1101,
 	
-	// GControlTree
+	// LControlTree
 	L_CONTROLTREE_NO_VALUE = -1200,
 
 	// GProgressDlg

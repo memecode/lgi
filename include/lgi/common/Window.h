@@ -37,7 +37,7 @@ class LgiClass LWindow :
 	friend class BViewRedir;
 	friend class GApp;
 	friend class LView;
-	friend class GButton;
+	friend class LButton;
 	friend class LDialog;
 	friend class LWindowPrivate;
 	friend struct LDialogPriv;

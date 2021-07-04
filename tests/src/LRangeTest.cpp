@@ -1,7 +1,7 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "UnitTests.h"
-#include "LUnrolledList.h"
-#include "LHashTable.h"
+#include "lgi/common/UnrolledList.h"
+#include "lgi/common/HashTable.h"
 
 bool LRangeTest::Run()
 {

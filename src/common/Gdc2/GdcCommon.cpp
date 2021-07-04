@@ -1047,7 +1047,7 @@ bool LgiRopRgb(uint8_t *d, GColourSpace DstCs, uint8_t *s, GColourSpace SrcCs, i
 	#define JointCs(dst, src) (((uint64)(dst) << 32) | (src))
 	switch (JointCs(DstCs, SrcCs))
 	{
-		#include "../../src/common/Gdc2/GRopsCases.cpp"
+		#include "../../src/common/Gdc2/RopsCases.cpp"
 		default:
 		{
 			GColourSpaceBits Src, Dst;

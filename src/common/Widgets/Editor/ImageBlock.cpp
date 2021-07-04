@@ -1,6 +1,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/RichTextEdit.h"
-#include "GRichTextEditPriv.h"
+#include "RichTextEditPriv.h"
 #include "lgi/common/GdcTools.h"
 #include "lgi/common/Token.h"
 #include "lgi/common/Menu.h"

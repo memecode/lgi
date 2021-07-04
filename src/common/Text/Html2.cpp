@@ -12,7 +12,7 @@
 #include "GFindReplaceDlg.h"
 #include "Emoji.h"
 #include "GClipBoard.h"
-#include "GButton.h"
+#include "LButton.h"
 #include "LEdit.h"
 #include "GCombo.h"
 
@@ -360,12 +360,12 @@ static char *ParsePropList(char *s, GTag *Obj, bool &Closed)
 //////////////////////////////////////////////////////////////////////
 namespace Html2 {
 
-class InputButton : public GButton
+class InputButton : public LButton
 {
 	GTag *Tag;
 	
 public:
-	InputButton(GTag *tag, int Id, const char *Label) : GButton(Id, 0, 0, -1, -1, Label)
+	InputButton(GTag *tag, int Id, const char *Label) : LButton(Id, 0, 0, -1, -1, Label)
 	{
 		Tag = tag;
 	}
@@ -6050,7 +6050,7 @@ void GTag::OnPaint(LSurface *pDC)
 				
 				LRect r(0, 0, Size.x-1, Size.y-1), Px;
 				OnPaintBorder(pDC, &Px);
-				if (!dynamic_cast<GButton*>(Ctrl))
+				if (!dynamic_cast<LButton*>(Ctrl))
 				{
 					r.x1 += Px.x1;
 					r.y1 += Px.y1;

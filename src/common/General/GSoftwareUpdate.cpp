@@ -4,7 +4,7 @@
 #include "IHttp.h"
 #include "GProgressDlg.h"
 #include "LTextLabel.h"
-#include "GButton.h"
+#include "LButton.h"
 #include "LgiRes.h"
 
 static char sHttpDownloadFailed[] = "HTTP download failed.";
@@ -172,7 +172,7 @@ struct GSoftwareUpdatePriv
 			if (t)
 			{
 				AddView(t);
-				GButton *btn = new GButton(	IDCANCEL,
+				LButton *btn = new LButton(	IDCANCEL,
 											(c.X()-70)/2,
 											t->GetPos().y2 + 10,
 											70,

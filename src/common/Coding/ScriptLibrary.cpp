@@ -3,7 +3,7 @@
 
 #include "lgi\common\Lgi.h"
 #include "lgi\common\Scripting.h"
-#include "GScriptingPriv.h"
+#include "ScriptingPriv.h"
 #include "lgi\common\Token.h"
 #include "lgi\common\SubProcess.h"
 #include "lgi\common\LgiRes.h"

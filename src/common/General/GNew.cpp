@@ -1,4 +1,4 @@
-#include "GMem.h"
+#include "lgi/common/Mem.h"
 
 #ifdef LGI_MEM_DEBUG
 

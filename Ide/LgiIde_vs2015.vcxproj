@@ -211,11 +211,11 @@
     <ClInclude Include="Code\WebFldDlg.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\common\Coding\GLexCpp.cpp" />
-    <ClCompile Include="..\src\common\Coding\GParseCpp.cpp" />
-    <ClCompile Include="..\src\common\Coding\GScriptCompiler.cpp" />
-    <ClCompile Include="..\src\common\Coding\GScriptLibrary.cpp" />
-    <ClCompile Include="..\src\common\Coding\GScriptVM.cpp" />
+    <ClCompile Include="..\src\common\Coding\LexCpp.cpp" />
+    <ClCompile Include="..\src\common\Coding\ParseCpp.cpp" />
+    <ClCompile Include="..\src\common\Coding\ScriptCompiler.cpp" />
+    <ClCompile Include="..\src\common\Coding\ScriptLibrary.cpp" />
+    <ClCompile Include="..\src\common\Coding\ScriptVM.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
     <ClCompile Include="..\src\common\INet\IFtp.cpp" />
     <ClCompile Include="..\src\common\INet\IHttp.cpp" />
