@@ -180,8 +180,8 @@ public:
 	
 	int Main()
 	{
-		GSocket Listen;
-		GSocket Client;
+		LSocket Listen;
+		LSocket Client;
 
 		bool ListenWarn = false;
 		while (!Listen.Listen(LLDB_CB_PORT))

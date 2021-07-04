@@ -277,7 +277,7 @@ GDirectory *GZipFile::List()
 	return new GZipDir(&d->Files);
 }
 
-bool GZipFile::Decompress(char *File, GStream *To)
+bool GZipFile::Decompress(char *File, LStream *To)
 {
 	ZipLocalHeader *h = d->Find(File);
 	if (h)
@@ -331,7 +331,7 @@ bool GZipFile::Decompress(char *File, GStream *To)
 	return false;
 }
 
-bool GZipFile::Compress(char *File, GStream *From)
+bool GZipFile::Compress(char *File, LStream *From)
 {
 	return false;
 }

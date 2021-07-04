@@ -218,7 +218,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 
 			#ifdef _DEBUG
 
-			GStringPipe p;
+			LStringPipe p;
 			p.Print("Assert failed, file: %s, line: %i\n%s", file, line, test);
 			GAutoPtr<char,true> Msg(p.NewStr());
 			

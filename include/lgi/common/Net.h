@@ -51,16 +51,17 @@ typedef int SOCKET;
 #define IMAP_PORT				143
 #define IMAP_SSL_PORT			993
 
-// Parameters for passing to GSocket::SetVariant
+// Parameters for passing to LSocket::SetVariant
 
-/// Turn on/off logging. Used with GSocket::SetParameter.
-#define GSocket_Log				"Log"
-/// Set the progress object. Used with GSocket::SetParameter. Value = (LProgressView*)Prog
-#define GSocket_Progress		"Progress"
-/// Set the size of the transfer. Used with GSocket::SetParameter. Value = (int)Size
-#define GSocket_TransferSize	"TransferSize"
-/// Set the type of protocol. Used with GSocket::SetParameter. Value = (char*)Protocol
-#define GSocket_Protocol		"Protocol"
+/// Turn on/off logging. Used with LSocket::SetParameter.
+#define LSocket_Log				"Log"
+/// Set the progress object. Used with LSocket::SetParameter. Value = (LProgressView*)Prog
+#define LSocket_Progress		"Progress"
+/// Set the size of the transfer. Used with LSocket::SetParameter. Value = (int)Size
+#define LSocket_TransferSize	"TransferSize"
+/// Set the type of protocol. Used with LSocket::SetParameter. Value = (char*)Protocol
+#define LSocket_Protocol		"Protocol"
+#define LSocket_SetDelete		"SetDelete"
 
 // Functions
 LgiNetFunc bool HaveNetConnection();
@@ -81,12 +82,12 @@ LgiNetFunc void MDStringToDigest
 
 
 /// Implementation of a network socket
-class LgiNetClass GSocket :
+class LgiNetClass LSocket :
 	public LSocketI,
-	public GStream
+	public LStream
 {
 protected:
-	class GSocketImplPrivate *d;
+	class LSocketImplPrivate *d;
 
 	// Methods
 	void Log(const char *Msg, ssize_t Ret, const char *Buf, ssize_t Len);
@@ -96,10 +97,10 @@ public:
 	ssize_t	BytesRead, BytesWritten;
 
 	/// Creates the class
-	GSocket(LStreamI *logger = 0, void *unused_param = 0);
+	LSocket(LStreamI *logger = 0, void *unused_param = 0);
 	
 	/// Destroys the class
-	~GSocket();
+	~LSocket();
 
 	/// Gets the active cancellation object
 	LCancel *GetCancel();
@@ -243,7 +244,7 @@ public:
 	/// Parameter change handler.
 	int SetParameter
 	(
-		/// e.g. #GSocket_Log
+		/// e.g. #LSocket_Log
 		int Param,
 		int Value
 	) { return false; }
@@ -265,7 +266,7 @@ public:
 	// Impl
 	LStreamI *Clone()
 	{
-		GSocket *s = new GSocket;
+		LSocket *s = new LSocket;
 		if (s)
 			s->SetCancel(GetCancel());
 		return s;
@@ -322,7 +323,7 @@ public:
 	static bool EnumInterfaces(GArray<Interface> &Out);
 };
 
-class LgiNetClass GSocks5Socket : public GSocket
+class LgiNetClass LSocks5Socket : public LSocket
 {
 	GAutoString Proxy;
 	int Port;
@@ -333,9 +334,9 @@ protected:
 	bool Socks5Connected;
 
 public:
-	GSocks5Socket();
+	LSocks5Socket();
 
-	GSocks5Socket &operator=(const GSocks5Socket &s)
+	LSocks5Socket &operator=(const LSocks5Socket &s)
 	{
 		Proxy.Reset(NewStr(s.Proxy));
 		UserName.Reset(NewStr(s.UserName));
@@ -346,7 +347,7 @@ public:
 
 	// Connection
 	void SetProxy(char *proxy, int port, char *username, char *password);
-	void SetProxy(const GSocks5Socket *s);
+	void SetProxy(const LSocks5Socket *s);
 	int Open(const char *HostAddr, int port);
 
 	// Server
@@ -354,7 +355,7 @@ public:
 };
 
 /// Uri parser
-class LgiNetClass GUri
+class LgiNetClass LUri
 {
 public:
 	GString sProtocol;
@@ -366,12 +367,12 @@ public:
 	GString sAnchor;
 
 	/// Parser for URI's.
-	GUri
+	LUri
 	(
 		/// Optional URI to start parsing
 		const char *uri = 0
 	);
-	~GUri();
+	~LUri();
 
 	bool IsProtocol(const char *p) { return sProtocol.Equals(p); }
 	bool IsHttp() { return sProtocol.Equals("http") || sProtocol.Equals("https"); }
@@ -405,27 +406,27 @@ public:
 	typedef LHashTbl<StrKey<char,false>,GString> StrMap;
 	StrMap Params();
 
-	GUri &operator =(const GUri &u);
-	GUri &operator =(const char *s) { Set(s); return *this; }
-	GUri &operator +=(const char *s);
+	LUri &operator =(const LUri &u);
+	LUri &operator =(const char *s) { Set(s); return *this; }
+	LUri &operator +=(const char *s);
 };
 
 /// Proxy settings lookup
-class LgiNetClass GProxyUri : public GUri
+class LgiNetClass LProxyUri : public LUri
 {
 public:
-	GProxyUri();
+	LProxyUri();
 };
 
 #define MAX_UDP_SIZE		512
 
-class LUdpListener : public GSocket
+class LUdpListener : public LSocket
 {
-	GStream *Log;
+	LStream *Log;
 	GString Context;
 
 public:
-	LUdpListener(GArray<uint32_t> interface_ips, uint32_t mc_ip, uint16_t port, GStream *log = NULL) : Log(log)
+	LUdpListener(GArray<uint32_t> interface_ips, uint32_t mc_ip, uint16_t port, LStream *log = NULL) : Log(log)
 	{
 		//SetBroadcast();
 		SetUdp(true);
@@ -489,7 +490,7 @@ public:
 	}
 };
 
-class LUdpBroadcast : public GSocket
+class LUdpBroadcast : public LSocket
 {
 	GArray<Interface> Intf;
 	uint32_t SelectIf;

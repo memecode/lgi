@@ -5,7 +5,7 @@
 
 class AddFtpFile : public LDialog, public FtpCallback
 {
-	GUri *Base;
+	LUri *Base;
 	LList *Files;
 	LList *Log;
 	FtpThread *Thread;

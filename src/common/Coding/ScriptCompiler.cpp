@@ -388,7 +388,7 @@ public:
 	LScriptContext *SysCtx;
 	LScriptContext *UserCtx;
 	LCompiledCode *Code;
-	GStream *Log;
+	LStream *Log;
 	GArray<char16*> Tokens;	
 	TokenRanges Lines;
 	char16 *Script;
@@ -2011,7 +2011,7 @@ public:
 
 	char *DumpExp(GArray<Node> &n)
 	{
-		GStringPipe e;
+		LStringPipe e;
 		for (unsigned i=0; i<n.Length(); i++)
 		{
 			if (i)
@@ -3516,7 +3516,7 @@ bool GCompiler::Compile
 	if (!Script)
 		return false;
 
-	GStringPipe p;
+	LStringPipe p;
 
 	#ifdef DEBUG_SCRIPT_FILE
 	d->Debug = Stristr(FileName, DEBUG_SCRIPT_FILE) != NULL;
@@ -3695,7 +3695,7 @@ bool LScriptEngine::EvaluateExpression(LVariant *Result, GDom *VariableSource, c
 	}
 
 	// Create trivial script to evaluate the expression
-	GStringPipe p;
+	LStringPipe p;
 	p.Print("return %s;", Expression);
 	GAutoString a(p.NewStr());
 	
@@ -3721,7 +3721,7 @@ bool LScriptEngine::EvaluateExpression(LVariant *Result, GDom *VariableSource, c
 	return true;
 }
 
-GStream *LScriptEngine::GetConsole()
+LStream *LScriptEngine::GetConsole()
 {
 	if (d->SysContext.GetLog())
 		return d->SysContext.GetLog();
@@ -3732,7 +3732,7 @@ GStream *LScriptEngine::GetConsole()
 	return NULL;
 }
 
-bool LScriptEngine::SetConsole(GStream *t)
+bool LScriptEngine::SetConsole(LStream *t)
 {
 	d->SysContext.SetLog(t);
 

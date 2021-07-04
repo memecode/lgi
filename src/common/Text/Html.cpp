@@ -1465,7 +1465,7 @@ ssize_t GTag::GetTextStart()
 	return 0;
 }
 
-static bool TextToStream(GStream &Out, char16 *Text)
+static bool TextToStream(LStream &Out, char16 *Text)
 {
 	if (!Text)
 		return true;
@@ -1510,7 +1510,7 @@ static bool TextToStream(GStream &Out, char16 *Text)
 	return true;
 }
 
-bool GTag::CreateSource(GStringPipe &p, int Depth, bool LastWasBlock)
+bool GTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 {
 	char *Tabs = new char[Depth+1];
 	memset(Tabs, '\t', Depth);
@@ -1814,7 +1814,7 @@ _DumpColour(LCss::ColorDef c)
 	return b;
 }
 
-void GTag::_Dump(GStringPipe &Buf, int Depth)
+void GTag::_Dump(LStringPipe &Buf, int Depth)
 {
 	GString Tabs;
 	Tabs.Set(NULL, Depth);
@@ -1877,7 +1877,7 @@ void GTag::_Dump(GStringPipe &Buf, int Depth)
 
 GAutoWString GTag::DumpW()
 {
-	GStringPipe Buf;
+	LStringPipe Buf;
 	// Buf.Print("Html pos=%s\n", Html?Html->GetPos().GetStr():0);
 	_Dump(Buf, 0);
 	GAutoString a(Buf.NewStr());
@@ -1887,7 +1887,7 @@ GAutoWString GTag::DumpW()
 
 GAutoString GTag::DescribeElement()
 {
-	GStringPipe s(256);
+	LStringPipe s(256);
 	s.Print("%s", Tag ? Tag.Get() : "CONTENT");
 	if (HtmlId)
 		s.Print("#%s", HtmlId);
@@ -2076,7 +2076,7 @@ bool GTag::OnMouseClick(LMouse &m)
 		if (m.Ctrl())
 		{
 			GAutoString Style = ToString();
-			GStringPipe p(256);
+			LStringPipe p(256);
 			p.Print("Tag: %s\n", Tag ? Tag.Get() : "CONTENT");
 			if (Class.Length())
 			{
@@ -2101,7 +2101,7 @@ bool GTag::OnMouseClick(LMouse &m)
 			LDisplayString Sp(SysFont, " ");
 			for (GTag *t=ToTag(Parent); t && t->Parent; t=ToTag(t->Parent))
 			{
-				GStringPipe Tmp;
+				LStringPipe Tmp;
 				Tmp.Print("    %s", t->Tag ? t->Tag.Get() : "CONTENT");
 				if (t->HtmlId)
 				{
@@ -2480,7 +2480,7 @@ void GTag::CollectFormValues(LHashTbl<ConstStrKey<char,false>,char*> &f)
 			char *Val = CtrlValue.Str();
 			if (Val)
 			{
-				GStringPipe p(256);
+				LStringPipe p(256);
 				for (char *v = Val; *v; v++)
 				{
 					if (*v == ' ')
@@ -2597,7 +2597,7 @@ void GTag::LoadImage(const char *Uri)
 	if (!Html->Environment)
 		return;
 
-	GUri u(Uri);
+	LUri u(Uri);
 	bool LdImg = Html->GetLoadImages();
 	bool IsRemote = u.sProtocol &&
 					(
@@ -3618,7 +3618,7 @@ char *GTag::ParseText(char *Doc)
 	Info = Html->GetTagInfo(Tag);
 	char *OriginalCp = NewStr(Html->Charset);
 
-	GStringPipe Utf16;
+	LStringPipe Utf16;
 	char *s = Doc;
 	while (s)
 	{
@@ -5112,7 +5112,7 @@ bool GTag::Serialize(LXmlTag *t, bool Write)
 		t->SetAttr("tagid", TagId);		
 		if (Txt)
 		{
-			GStringPipe p(256);
+			LStringPipe p(256);
 			for (char16 *c = Txt; *c; c++)
 			{
 				if (*c > ' ' &&
@@ -5176,7 +5176,7 @@ bool GTag::Serialize(LXmlTag *t, bool Write)
 		}
 		if (ValidStr(t->GetContent()))
 		{
-			GStringPipe p(256);
+			LStringPipe p(256);
 			char *c = t->GetContent();
 			SkipWhiteSpace(c);
 			for (; *c && *c > ' '; c++)
@@ -6130,7 +6130,7 @@ public:
 					int k = (i + 1) % 4;
 
 					// Setup the stops					
-					GBlendStop stops[2] = { {0.0, 0}, {1.0, 0} };
+					LBlendStop stops[2] = { {0.0, 0}, {1.0, 0} };
 					uint32_t iColour = defs[i]->Color.IsValid() ? defs[i]->Color.Rgb32 : Back.c32();
 					uint32_t kColour = defs[k]->Color.IsValid() ? defs[k]->Color.Rgb32 : Back.c32();
 					if (defs[i]->IsValid() && defs[k]->IsValid())
@@ -6148,7 +6148,7 @@ public:
 					}
 					
 					// Create a brush
-					GLinearBlendBrush br
+					LLinearBlendBrush br
 					(
 						*pts[i],
 						*pts[k],
@@ -6164,7 +6164,7 @@ public:
 					ClipRgn(&clip);
 					
 					// Draw the arc...
-					GPath p;
+					LPath p;
 					p.Circle(ctr, Px);
 					if (defs[i]->IsValid() || defs[k]->IsValid())
 						p.Fill(this, br);
@@ -6174,12 +6174,12 @@ public:
 					p.Ellipse(ctr, Px-x_px[i], Px-y_px[i]);
 					if (DrawBackground)
 					{
-						GSolidBrush br(Back);
+						LSolidBrush br(Back);
 						p.Fill(this, br);					
 					}
 					else
 					{
-						GEraseBrush br;
+						LEraseBrush br;
 						p.Fill(this, br);
 					}
 					
@@ -7012,7 +7012,7 @@ void GHtml::OnAddStyle(const char *MimeType, const char *Styles)
 
 		if (LogCss)
 		{
-			GStringPipe p;
+			LStringPipe p;
 			CssStore.Dump(p);
 			GAutoString a(p.NewStr());
 			GFile f;
@@ -7235,7 +7235,7 @@ const char *GHtml::Name()
 {
 	if (!Source && Tag)
 	{
-		GStringPipe s(1024);
+		LStringPipe s(1024);
 		Tag->CreateSource(s);
 		Source.Reset(s.NewStr());
 	}
@@ -7288,7 +7288,7 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 								}
 								else if (j->Stream)
 								{
-									GAutoPtr<LSurface> pDC(GdcD->Load(dynamic_cast<GStream*>(j->Stream.Get())));
+									GAutoPtr<LSurface> pDC(GdcD->Load(dynamic_cast<LStream*>(j->Stream.Get())));
 									if (pDC)
 									{
 										r->SetImage(j->Uri, pDC.Release());
@@ -7812,7 +7812,7 @@ void BuildTagList(GArray<GTag*> &t, GTag *Tag)
 	}
 }
 
-static void FormEncode(GStringPipe &p, const char *c)
+static void FormEncode(LStringPipe &p, const char *c)
 {
 	const char *s = c;
 	while (*c)
@@ -7856,7 +7856,7 @@ bool GHtml::OnSubmitForm(GTag *Form)
 	bool Status = false;
 	if (!_stricmp(Method, "post"))
 	{
-		GStringPipe p(256);
+		LStringPipe p(256);
 		bool First = true;
 
 		// const char *Field;
@@ -8301,7 +8301,7 @@ void GHtml::OnMouseClick(LMouse &m)
 							break;
 						}
 
-						GStringPipe Ex;
+						LStringPipe Ex;
 						bool Error = false;
 						
 						F.SetSize(0);
@@ -8796,7 +8796,7 @@ bool GHtml::GetFormattedContent(const char *MimeType, GString &Out, GArray<GDocV
 	else if (!_stricmp(MimeType, "text/plain"))
 	{
 		// Convert DOM tree down to text instead...
-		GStringPipe p(512);
+		LStringPipe p(512);
 		if (Tag)
 		{
 			GTag::TextConvertState State(&p);

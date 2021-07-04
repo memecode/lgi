@@ -71,7 +71,7 @@ bool GWordStore::Serialize(const char *FileName, bool Load)
 			double FileFormat = 0.0;
 			int64 Start = LgiCurrentTime();
 			
-			GStringPipe p;
+			LStringPipe p;
 			char Buf[4<<10];
 			int Words = 0;
 			while (!f.Eof())

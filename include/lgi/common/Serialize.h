@@ -448,7 +448,7 @@ public:
 		return true;
 	}
 
-	bool Serialize(GStream *stream, bool write)
+	bool Serialize(LStream *stream, bool write)
 	{
 		if ((ToStream = write))
 		{

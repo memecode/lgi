@@ -57,7 +57,7 @@ LXmlTag *GetFormField(LXmlTag *Form, char *Field)
 	return 0;
 }
 
-void StrFormEncode(GStream &p, char *s, bool InValue)
+void StrFormEncode(LStream &p, char *s, bool InValue)
 {
 	for (char *c = s; *c; c++)
 	{
@@ -77,7 +77,7 @@ void StrFormEncode(GStream &p, char *s, bool InValue)
 }
 
 // This just extracts the forms in the HTML and makes an XML tree of what it finds.
-LXmlTag *ExtractForms(char *Html, GStream *Log)
+LXmlTag *ExtractForms(char *Html, LStream *Log)
 {
 	LXmlTag *f = 0;
 
@@ -108,7 +108,7 @@ LXmlTag *ExtractForms(char *Html, GStream *Log)
 								char *s = c->GetAttr("action");
 								if (s)
 								{
-									GStringPipe p;
+									LStringPipe p;
 									for (char *c = s; *c; c++)
 									{
 										if (*c == ' ')
@@ -193,11 +193,11 @@ LXmlTag *ExtractForms(char *Html, GStream *Log)
 	return f;
 }
 
-void XmlToStream(GStream *s, LXmlTag *x, char *Style)
+void XmlToStream(LStream *s, LXmlTag *x, char *Style)
 {
 	if (s && x)
 	{
-		GStringPipe p(1024);
+		LStringPipe p(1024);
 		LXmlTree t;
 		if (Style) t.SetStyleFile(Style, "text/xsl");
 		t.Write(x, &p);
@@ -213,7 +213,7 @@ void XmlToStream(GStream *s, LXmlTag *x, char *Style)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-WebPage::WebPage(char *Page, GStream *Log)
+WebPage::WebPage(char *Page, LStream *Log)
 {
 	Html = 0;
 	Script = 0;
@@ -223,7 +223,7 @@ WebPage::WebPage(char *Page, GStream *Log)
 	if (Page)
 	{
 		// Parse out the scripts...
-		GStringPipe h, scr;
+		LStringPipe h, scr;
 		for (char *s = Page; s && *s; )
 		{
 			char *e = stristr(s, "<script");
@@ -306,14 +306,14 @@ char *WebPage::GetCharSet()
 	return Charset;
 }
 
-LXmlTag *WebPage::GetRoot(GStream *Log)
+LXmlTag *WebPage::GetRoot(LStream *Log)
 {
 	if (!Parsed && Html)
 	{
 		LXmlTree t(GXT_NO_DOM);
 		if ((Parsed = new LXmlTag))
 		{
-			GStringPipe p;
+			LStringPipe p;
 			p.Push(Html);
 			
 			t.GetEntityTable()->Add("nbsp", ' ');
@@ -388,9 +388,9 @@ char *FormPost::GetActionUri()
 	return Form->GetAttr("action");
 }
 
-char *FormPost::EncodeFields(GStream *Debug, char *RealFields, bool EncodePlus)
+char *FormPost::EncodeFields(LStream *Debug, char *RealFields, bool EncodePlus)
 {
-	GStringPipe p;
+	LStringPipe p;
 	LHashTbl<StrKey<char,false>,bool> Done;
 	LHashTbl<StrKey<char,false>,char*> Real;
 
@@ -524,7 +524,7 @@ bool Match(char *a, char *b)
 	return false;
 }
 
-bool FormPost::Set(char *field, char *value, GStream *Log, bool AllowCreate)
+bool FormPost::Set(char *field, char *value, LStream *Log, bool AllowCreate)
 {
 	bool Status = false;
 
@@ -689,7 +689,7 @@ void HttpTools::DumpView(LViewI *v, char *p)
 	}
 }
 
-char *HttpTools::Fetch(char *uri, GStream *Log, LViewI *Dump, CookieJar *Cookies)
+char *HttpTools::Fetch(char *uri, LStream *Log, LViewI *Dump, CookieJar *Cookies)
 {
 	char *Page = 0;
 
@@ -702,19 +702,19 @@ char *HttpTools::Fetch(char *uri, GStream *Log, LViewI *Dump, CookieJar *Cookies
 	{
 		IHttp h;
 
-		GProxyUri Proxy;
+		LProxyUri Proxy;
 		if (Proxy.sHost)
 			h.SetProxy(Proxy.sHost, Proxy.Port);
 
-		GUri u(uri);
+		LUri u(uri);
 		if (!u.Port)
 			u.Port = HTTP_PORT;
 
-		GAutoPtr<LSocketI> Sock(new GSocket);
+		GAutoPtr<LSocketI> Sock(new LSocket);
 		if (h.Open(Sock, u.sHost))
 		{
 			int ProtocolStatus = 0;
-			GStringPipe p, hdr;
+			LStringPipe p, hdr;
 
 			auto Enc = u.ToString();
 			IHttp::ContentEncoding type;
@@ -791,17 +791,17 @@ char *HttpTools::Fetch(char *uri, GStream *Log, LViewI *Dump, CookieJar *Cookies
 	return Page;
 }
 
-char *HttpTools::Post(char *uri, char *headers, char *body, GStream *Log, LViewI *Dump)
+char *HttpTools::Post(char *uri, char *headers, char *body, LStream *Log, LViewI *Dump)
 {
 	if (uri && headers && body)
 	{
 		IHttp h;
 
-		GUri u(uri);
-		GSocket s;
+		LUri u(uri);
+		LSocket s;
 		bool Open;
 
-		GProxyUri Proxy;
+		LProxyUri Proxy;
 		if (Proxy.sHost)
 		{
 			Open = s.Open(Proxy.sHost, Proxy.Port) != 0;
@@ -820,7 +820,7 @@ char *HttpTools::Post(char *uri, char *headers, char *body, GStream *Log, LViewI
 			}
 
 			size_t ContentLen = strlen(body);
-			GStringPipe p;
+			LStringPipe p;
 			auto EncPath = u.EncodeStr(u.sPath);
 
 			if (Proxy.sHost)
@@ -998,7 +998,7 @@ void CookieJar::Set(char *Headers)
 
 char *CookieJar::Get()
 {
-	GStringPipe p;
+	LStringPipe p;
 
 	// char *k;
 	// for (char *s = (char*)First(&k); s; s = (char*)Next(&k))
@@ -1014,7 +1014,7 @@ char *CookieJar::Get()
 ///////////////////////////////////////////////////////////////////////////////////
 char *HtmlTidy(char *Html)
 {
-	GStringPipe p(256);
+	LStringPipe p(256);
 	int Depth = 0;
 	bool LastWasEnd = false;
 
@@ -1096,15 +1096,15 @@ LSurface *GetHttpImage(char *Uri)
 	{
 		IHttp Http;
 
-		GProxyUri p;
+		LProxyUri p;
 		if (p.sHost)
 			Http.SetProxy(p.sHost, p.Port);
 
-		GUri u(Uri);
-		GAutoPtr<LSocketI> Sock(new GSocket);
+		LUri u(Uri);
+		GAutoPtr<LSocketI> Sock(new LSocket);
 		if (Http.Open(Sock, u.sHost))
 		{
-			GStringPipe Data;
+			LStringPipe Data;
 			int Code = 0;
 			IHttp::ContentEncoding enc;
 			if (Http.Get(Uri, 0, &Code, &Data, &enc))

@@ -336,7 +336,7 @@ class App : public LWindow, public GCapabilityInstallTarget
 
 	EditCtrl *Edit;
 
-	GAutoPtr<GSpellCheck> Speller;
+	GAutoPtr<LSpellCheck> Speller;
 	CapsBar *Bar;
 	GCapabilityTarget::CapsHash Caps;
 	GAutoPtr<LEventTargetThread> Installer;

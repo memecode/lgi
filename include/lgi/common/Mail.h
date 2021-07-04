@@ -122,7 +122,7 @@ protected:
 
 	// Write to memory
 	uchar *Data;
-	GAutoPtr<GStream> DataStream;
+	GAutoPtr<LStream> DataStream;
 
 public:
 	FileDescriptor(LStreamI *embed, int64 Offset, int64 Size, char *Name);
@@ -302,12 +302,12 @@ public:
 
 	// Commands available while connected
 
-	/// Write the email's contents into the GStringPipe returned from
+	/// Write the email's contents into the LStringPipe returned from
 	/// SendStart and then call SendEnd to finish the transaction
-	virtual GStringPipe *SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = 0) = 0;
+	virtual LStringPipe *SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = 0) = 0;
 	
 	/// Finishes the mail send
-	virtual bool SendEnd(GStringPipe *Sink) = 0;
+	virtual bool SendEnd(LStringPipe *Sink) = 0;
 };
 
 struct ImapMailFlags
@@ -563,7 +563,7 @@ public:
 class MailSmtp : public MailSink
 {
 protected:
-	bool ReadReply(const char *Str, GStringPipe *Pipe = 0, MailProtocolError *Err = 0);
+	bool ReadReply(const char *Str, LStringPipe *Pipe = 0, MailProtocolError *Err = 0);
 	bool WriteText(const char *Str);
 
 public:
@@ -574,10 +574,10 @@ public:
 	bool Close();
 
 	bool SendToFrom(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = 0);
-	GStringPipe *SendData(MailProtocolError *Err = 0);
+	LStringPipe *SendData(MailProtocolError *Err = 0);
 
-	GStringPipe *SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = 0);
-	bool SendEnd(GStringPipe *Sink);
+	LStringPipe *SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = 0);
+	bool SendEnd(LStringPipe *Sink);
 
 	// bool Send(MailMessage *Msg, bool Mime = false);
 };
@@ -593,8 +593,8 @@ public:
 	bool Open(LSocketI *S, const char *RemoteHost, const char *LocalDomain, const char *UserName, const char *Password, int Port = 0, int Flags = 0);
 	bool Close();
 
-	GStringPipe *SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = 0);
-	bool SendEnd(GStringPipe *Sink);
+	LStringPipe *SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = 0);
+	bool SendEnd(LStringPipe *Sink);
 };
 
 class MailPop3 : public MailSource
@@ -657,7 +657,7 @@ class MailPhp : public MailSource
 protected:
 	class MailPhpPrivate *d;
 
-	bool Get(LSocketI *S, char *Uri, GStream &Out, bool ChopDot);
+	bool Get(LSocketI *S, char *Uri, LStream &Out, bool ChopDot);
 
 public:
 	MailPhp();
@@ -714,7 +714,7 @@ protected:
 
 	char Buf[2048];
 	List<char> Uid;
-	GStringPipe ReadBuf;
+	LStringPipe ReadBuf;
 	List<char> Dialog;
 
 	void ClearDialog();

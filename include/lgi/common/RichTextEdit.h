@@ -93,7 +93,7 @@ public:
 
 	ssize_t HitTest(int x, int y);
 	bool DeleteSelection(char16 **Cut = 0);
-	bool SetSpellCheck(class GSpellCheck *sp);
+	bool SetSpellCheck(class LSpellCheck *sp);
 	
 	bool GetFormattedContent(const char *MimeType, GString &Out, GArray<ContentMedia> *Media = NULL);
 

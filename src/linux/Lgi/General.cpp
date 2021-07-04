@@ -224,7 +224,7 @@ bool LGetAppsForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
 
 	char Args[MAX_PATH];
 	sprintf(Args, "query default %s", Mime);
-	GStringPipe Output;
+	LStringPipe Output;
 
 	GLanguage *CurLang = LGetLanguageId();	
 	char LangName[64];
@@ -559,7 +559,7 @@ void LFinishXWindowsStartup(LViewI *Wnd)
 	char *DesktopStartupId = getenv(EnvStartId);
 	if (ValidStr(DesktopStartupId))
 	{
-		GStringPipe oss;
+		LStringPipe oss;
 
 		// Create remove string
 		oss.Push("remove: ID=");

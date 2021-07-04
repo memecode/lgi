@@ -82,7 +82,7 @@ DistributeUnusedSpace(	GArray<int> &Min,
 						GArray<CellFlag> &Flags,
 						int Total,
 						int CellSpacing,
-						GStream *Debug = NULL)
+						LStream *Debug = NULL)
 {
 	// Now allocate unused space
 	int Borders = (int)Min.Length() - 1;
@@ -174,7 +174,7 @@ DistributeSize(	GArray<int> &a,
 				int Start, int Span,
 				int Size,
 				int Border,
-				GStream *Debug = NULL)
+				LStream *Debug = NULL)
 {
 	// Calculate the current size of the cells
 	int Cur = -Border;
@@ -385,7 +385,7 @@ public:
 	}
 
 	// Layout temporary values
-	GStringPipe Dbg;
+	LStringPipe Dbg;
 	GArray<int> MinCol, MaxCol;
 	GArray<int> MinRow, MaxRow;
 	GArray<CellFlag> ColFlags, RowFlags;
@@ -526,7 +526,7 @@ bool TableCell::GetVariant(const char *Name, LVariant &Value, char *Array)
 		}
 		case ContainerAlign: // Type: String
 		{
-			GStringPipe p(128);
+			LStringPipe p(128);
 			if (TextAlign().ToString(p))
 				Value.OwnStr(p.NewStr());
 			else
@@ -535,7 +535,7 @@ bool TableCell::GetVariant(const char *Name, LVariant &Value, char *Array)
 		}
 		case ContainerVAlign: // Type: String
 		{
-			GStringPipe p(128);
+			LStringPipe p(128);
 			if (VerticalAlign().ToString(p))
 				Value.OwnStr(ToString());
 			else

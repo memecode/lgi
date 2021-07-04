@@ -39,7 +39,7 @@ public:
 class GBrowserPriv : public GDocumentEnv
 {
 public:
-	typedef LHashTbl<StrKey<char,false>,GStream*> Collection;
+	typedef LHashTbl<StrKey<char,false>,LStream*> Collection;
 
 	struct FileLock : public LMutex::Auto
 	{
@@ -89,7 +89,7 @@ public:
 		return p;
 	}
 
-	void LoadStream(GStream *s)
+	void LoadStream(LStream *s)
 	{
 		int len = (int) s->GetSize();
 		GArray<char> txt;
@@ -105,7 +105,7 @@ public:
 		if (!Uri)
 			return false;
 
-		GUri u(Uri);
+		LUri u(Uri);
 		#ifdef WIN32
 		if (u.sPath)
 			u.sPath = u.sPath.Replace("/", DIR_STR);
@@ -178,7 +178,7 @@ public:
 		if (!Uri)
 			return false;
 
-		GUri u(Uri);
+		LUri u(Uri);
 		char Sep, Buf[MAX_PATH];
 		if (!u.sProtocol)
 		{
@@ -240,9 +240,9 @@ public:
 			return LoadError;
 
 		auto Uri = History[CurHistory];
-		GUri BaseUri(Uri);
+		LUri BaseUri(Uri);
 		
-		GUri u(j->Uri);
+		LUri u(j->Uri);
 		char *LoadFileName = 0;
 		if (u.sProtocol)
 		{
@@ -353,19 +353,19 @@ int GBrowserThread::Main()
 
 		if (Uri)
 		{
-			GUri u(Uri);
+			LUri u(Uri);
 			if (!u.Port)
 				u.Port = HTTP_PORT;
 
 			int Status = 0;
-			GAutoPtr<GStream> p(new GStringPipe);
+			GAutoPtr<LStream> p(new LStringPipe);
 			if (p)
 			{
-				GProxyUri Proxy;
+				LProxyUri Proxy;
 				if (Proxy.sHost)
 					d->Http.SetProxy(Proxy.sHost, Proxy.Port);
 
-				GAutoPtr<LSocketI> Sock(new GSocket);
+				GAutoPtr<LSocketI> Sock(new LSocket);
 				if (d->Http.Open(Sock, u.sHost, u.Port))
 				{
 					IHttp::ContentEncoding Enc;
@@ -603,7 +603,7 @@ GMessage::Result GBrowser::OnEvent(GMessage *m)
 			GBrowserPriv::FilePtr f = d->Lock();
 
 			char *Uri = d->History[d->CurHistory];
-			GStream *s = f->Files->Find(Uri);
+			LStream *s = f->Files->Find(Uri);
 			if (s)
 			{
 				f->Files->Delete(Uri);

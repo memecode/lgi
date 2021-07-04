@@ -2823,7 +2823,7 @@ void ResDialog::Copy(bool Delete)
 
 
 		// Read the file in and copy to the clipboard
-		GStringPipe Xml;
+		LStringPipe Xml;
 		LXmlTree Tree;
 		if (Tree.Write(Root, &Xml))
 		{
@@ -2953,7 +2953,7 @@ void ResDialog::Paste()
 			// Parse the data
 			List<ResString> NewStrs;
 			LXmlTree Tree;
-			GStringPipe p;
+			LStringPipe p;
 			p.Push(Data);
 			
 			// Create the new controls, strings first
@@ -3928,9 +3928,9 @@ const char *TextOfCtrl(ResDialogCtrl *Ctrl)
 	return "";
 }
 
-void OutputCtrl(GStringPipe &Def,
-				GStringPipe &Var,
-				GStringPipe &Inst,
+void OutputCtrl(LStringPipe &Def,
+				LStringPipe &Var,
+				LStringPipe &Inst,
 				ResDialogCtrl *Ctrl,
 				ResDialogCtrl *Parent,
 				int &Index)
@@ -4005,8 +4005,8 @@ void ResDialog::OnCommand(int Cmd)
 	{
 		case IDM_DUMP:
 		{
-			GStringPipe Def, Var, Inst;
-			GStringPipe Buf;
+			LStringPipe Def, Var, Inst;
+			LStringPipe Buf;
 			char Str[256];
 
 			ResDialogCtrl *Dlg = dynamic_cast<ResDialogCtrl*>(Children[0]);

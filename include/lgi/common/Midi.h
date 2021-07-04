@@ -47,7 +47,7 @@ public:
 
 	static int GetMidiPacketSize(uint8_t *ptr, size_t len);
 	
-	virtual GStream *GetLog() { return NULL; }
+	virtual LStream *GetLog() { return NULL; }
 
 	bool IsMidiOpen();
 	bool Connect(int InIdx, int OutIdx, GAutoString *ErrorMsg = NULL);

@@ -5,7 +5,7 @@
 
 /// This class concatenates several streams into one large logical stream
 /// Note: currently only reading is implemented...
-class GStreamConcat : public LStreamI
+class LStreamConcat : public LStreamI
 {
 	struct StreamBlock
 	{
@@ -20,13 +20,13 @@ class GStreamConcat : public LStreamI
 	GArray<StreamBlock> a;
 
 public:
-	GStreamConcat()
+	LStreamConcat()
 	{
 		Cur = 0;
 		Sz = Pos = 0;
 	}
 
-	GStreamConcat(const GStreamConcat &c)
+	LStreamConcat(const LStreamConcat &c)
 	{
 		Cur = c.Cur;
 		Sz = c.Sz;
@@ -34,7 +34,7 @@ public:
 		a = c.a;
 	}
 	
-	~GStreamConcat()
+	~LStreamConcat()
 	{
 		for (unsigned i=0; i<a.Length(); i++)
 		{
@@ -161,7 +161,7 @@ public:
 	
 	LStreamI *Clone()
 	{
-		return new GStreamConcat(*this);
+		return new LStreamConcat(*this);
 	}
 };
 

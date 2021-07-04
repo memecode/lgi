@@ -31,7 +31,7 @@
 /// A comma separated list of extensions the GFilter can handle
 #define LGI_FILTER_EXTENSIONS	"Extension"
 
-LgiFunc int FindHeader(int Offset, const char *Str, GStream *f);
+LgiFunc int FindHeader(int Offset, const char *Str, LStream *f);
 
 /// Filter can read an image
 #define FILTER_CAP_READ			0x0001
@@ -70,7 +70,7 @@ protected:
 		#endif
 	}
 
-	bool Read(GStream *s, void *p, ssize_t len)
+	bool Read(LStream *s, void *p, ssize_t len)
 	{
 		if (Buf.Length() < (uint32_t)len)
 			Buf.Length(len);
@@ -83,7 +83,7 @@ protected:
 		return true;
 	}
 
-	bool Write(GStream *s, const void *p, ssize_t len)
+	bool Write(LStream *s, const void *p, ssize_t len)
 	{
 		if (Buf.Length() < (uint32_t)len)
 			Buf.Length(len);
@@ -138,10 +138,10 @@ public:
 	virtual int GetImages() { return 1; }
 	/// Reads an image into the specified surface. Override to implement reading an image.
 	/// Also you need to return FILTER_CAP_READ from GetCapabilites if implemented.
-	virtual IoStatus ReadImage(LSurface *Out, GStream *In) = 0;
+	virtual IoStatus ReadImage(LSurface *Out, LStream *In) = 0;
 	/// Writes an image from the specified surface. Override to implement writing an image.
 	/// Also you need to return FILTER_CAP_WRITE from GetCapabilites if implemented.
-	virtual IoStatus WriteImage(GStream *Out, LSurface *In) = 0;
+	virtual IoStatus WriteImage(LStream *Out, LSurface *In) = 0;
     /// Returns the name of the external component needed to read/write images.
     virtual const char *GetComponentName() { return NULL; }
 };

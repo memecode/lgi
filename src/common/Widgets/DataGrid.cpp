@@ -432,7 +432,7 @@ void LDataGrid::OnItemClick(LListItem *Item, LMouse &m)
 			{
 				List<LListItem> Sel;
 				GetSelection(Sel);
-				GStringPipe p(256);
+				LStringPipe p(256);
 				int Cols = GetColumns();
 				for (auto i: Sel)
 				{

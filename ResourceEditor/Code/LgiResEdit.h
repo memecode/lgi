@@ -160,7 +160,7 @@ public:
 struct SerialiseContext
 {
 	ResFileFormat Format;
-	GStringPipe Log;
+	LStringPipe Log;
 	GArray<ResString*> FixId;
 	
 	SerialiseContext() : Log(512)

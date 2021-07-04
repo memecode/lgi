@@ -243,19 +243,19 @@ public:
 		if (1)
 		{
 			// Shadow
-			GPath p;
+			LPath p;
 			double z = ((double)pDC->X()-0.5) / 2;
 			p.Circle(z, z, z);
-			GSolidBrush b(Rgba32(0, 0, 0, 40));
+			LSolidBrush b(Rgba32(0, 0, 0, 40));
 			p.Fill(pDC, b);
 		}
 
 		if (1)
 		{
-			GPath p;
+			LPath p;
 			p.Circle(n/2, n/2, n/2);
 
-			GBlendStop r[] =
+			LBlendStop r[] =
 			{
 				{0.0, White.Mix(c, 0.1f).c32()},
 				{0.3, White.Mix(c, 0.3f).c32()},
@@ -263,23 +263,23 @@ public:
 				{1.0, Black.Mix(c, 0.8f).c32()},
 			};
 
-			GRadialBlendBrush b(Ctr, Rim, CountOf(r), r);
+			LRadialBlendBrush b(Ctr, Rim, CountOf(r), r);
 			p.Fill(pDC, b);
 		}
 
 		if (1)
 		{
 			// Draw the highlight
-			GPath p;
+			LPath p;
 			p.Circle(n/2, n/2, n/2);
-			GBlendStop Highlight[] =
+			LBlendStop Highlight[] =
 			{
 				{0.0, TransparentBlk.c32()},
 				{0.7, TransparentBlk.c32()},
 				{0.9, White.c32()},
 			};
 
-			GLinearBlendBrush b2(Ctr, Rim, CountOf(Highlight), Highlight);
+			LLinearBlendBrush b2(Ctr, Rim, CountOf(Highlight), Highlight);
 			p.Fill(pDC, b2);
 		}
 
@@ -304,16 +304,16 @@ public:
 			case IconNewCond:
 			case IconBoolTrue:
 			{
-				GPath p;
+				LPath p;
 				p.Circle(n/2, n/2, n/6);
-				GSolidBrush b(ContentColour);
+				LSolidBrush b(ContentColour);
 				p.Fill(pDC, b);
 				break;
 			}
 			case IconNewAnd:
 			case IconDelete:
 			{
-				GPath p;
+				LPath p;
 				LPointF Ctr(n/2, n/2);
 				for (int i=0; i<CountOf(Plus); i++)
 				{
@@ -325,19 +325,19 @@ public:
 					else p.MoveTo(pt.x, pt.y);
 				}
 
-				GSolidBrush b(ContentColour);
+				LSolidBrush b(ContentColour);
 				p.Fill(pDC, b);
 				break;
 			}
 			case IconNewOr:
 			{
-				GPath p;
+				LPath p;
 				for (int i=0; i<CountOf(Plus); i++)
 				{
 					if (i) p.LineTo(k[Plus[i][0]], k[Plus[i][1]]);
 					else p.MoveTo(k[Plus[i][0]], k[Plus[i][1]]);
 				}
-				GSolidBrush b(ContentColour);
+				LSolidBrush b(ContentColour);
 				p.Fill(pDC, b);
 				break;
 			}
@@ -356,7 +356,7 @@ public:
 					{(int)(n/2), (int)(k[0])},
 				};
 
-				GPath p;
+				LPath p;
 				for (int i=0; i<CountOf(Pt); i++)
 				{
 					LPointF m(Pt[i][0]+0.5, Pt[i][1]+0.5);
@@ -365,20 +365,20 @@ public:
 					if (i) p.LineTo(m.x, m.y);
 					else p.MoveTo(m.x, m.y);
 				}
-				GSolidBrush b(ContentColour);
+				LSolidBrush b(ContentColour);
 				p.Fill(pDC, b);
 				break;
 			}
 			case IconOptions:
 			{
-				GPath p;
+				LPath p;
 				for (int i=0; i<3; i++)
 				{
 					LPointF c(n * (1+i) / 4, n / 2);
 					p.Circle(c, n/10);
 				}
 				
-				GSolidBrush b(ContentColour);
+				LSolidBrush b(ContentColour);
 				p.Fill(pDC, b);
 				break;
 			}
@@ -396,13 +396,13 @@ public:
 					n * 3 / 6,
 					n * 4 / 6,
 				};
-				GPath p;
+				LPath p;
 				p.MoveTo(x[0], y[0]+0.5);
 				p.LineTo(x[1], y[2]+0.5);
 				p.LineTo(x[2], y[0]+0.5);
 				p.LineTo(x[0], y[0]+0.5);
 				
-				GSolidBrush b(ContentColour);
+				LSolidBrush b(ContentColour);
 				p.Fill(pDC, b);
 				break;
 			}
@@ -411,10 +411,10 @@ public:
 		if (1)
 		{
 			// Draw the outline
-			GPath p;
+			LPath p;
 			p.Circle(n/2, n/2, n/2);
 			p.Circle(n/2, n/2, n/2 - 1);
-			GSolidBrush b(Rgba32(64, 64, 64, 255));
+			LSolidBrush b(Rgba32(64, 64, 64, 255));
 			p.Fill(pDC, b);
 		}
 
@@ -661,8 +661,8 @@ void LFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 
 	if (Select() || IsTarget)
 	{
-		GPath p;
-		GSolidBrush b(LColour(L_FOCUS_SEL_BACK));
+		LPath p;
+		LSolidBrush b(LColour(L_FOCUS_SEL_BACK));
 		LRectF PosF(0, 0, Pos->X()-1, Pos->Y());
 		p.RoundRect(PosF, PosF.Y()/2);
 		p.Fill(&Buf, b);
@@ -670,8 +670,8 @@ void LFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 
 	if (!IsTarget)
 	{
-		GPath p;
-		GSolidBrush b(BackCol);
+		LPath p;
+		LSolidBrush b(BackCol);
 		LRectF PosF(0, 0, Pos->X()-(ox*2)-1, Pos->Y()-(oy*2));
 		PosF.Offset(ox, oy);
 		p.RoundRect(PosF, r);
@@ -680,8 +680,8 @@ void LFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 
 	if (d->Node == LNODE_NEW)
 	{
-		GPath p;
-		GSolidBrush b(Workspace);
+		LPath p;
+		LSolidBrush b(Workspace);
 		LRectF PosF(0, 0, Pos->X()-(ox*2)-3, Pos->Y()-(oy*2)-2);
 		PosF.Offset(ox+1, oy+1);
 		p.RoundRect(PosF, r);

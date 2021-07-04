@@ -24,11 +24,11 @@ public:
 	}
 };
 
-class LogSock : public GSocket
+class LogSock : public LSocket
 {
-	GStringPipe r, w;
+	LStringPipe r, w;
 
-	void Pop(GStringPipe &p, COLOUR c)
+	void Pop(LStringPipe &p, COLOUR c)
 	{
 		char s[256];
 		while (p.Pop(s, sizeof(s)))
@@ -79,13 +79,13 @@ public:
 
 struct FtpConn
 {
-	GUri *Base;
+	LUri *Base;
 	LogSock *Sock;
 	IFtp Ftp;
 
 	FtpConn(char *u)
 	{
-		Base = new GUri(u);
+		Base = new LUri(u);
 		Sock = 0;
 	}
 
@@ -97,7 +97,7 @@ struct FtpConn
 
 	bool Match (char *Uri)
 	{
-		GUri u(Uri);
+		LUri u(Uri);
 		
 		if (Base &&
 			u.sHost && Base->sHost &&
@@ -314,7 +314,7 @@ int FtpThread::Main()
 						FtpConn *Conn = d->GetConn(c->Uri, c->Watch);
 						if (Conn)
 						{
-							GUri u(c->Uri);
+							LUri u(c->Uri);
 							if (u.sPath)
 							{
 								char p[256];
@@ -360,7 +360,7 @@ int FtpThread::Main()
 						FtpConn *Conn = d->GetConn(c->Uri, c->Watch);
 						if (Conn)
 						{
-							GUri u(c->Uri);
+							LUri u(c->Uri);
 							if (u.sPath)
 							{
 								char p[256];

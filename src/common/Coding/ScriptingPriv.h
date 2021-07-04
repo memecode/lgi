@@ -403,7 +403,7 @@ public:
 		/// [In] The instruction to start at... [defaults to the start of script)
 		uint32_t StartOffset = 0,
 		/// [Optional] Log file for execution
-		GStream *Log = NULL,
+		LStream *Log = NULL,
 		/// Start the script execution straight away?
 		bool StartImmediately = true,
 		/// Optional return value
@@ -420,7 +420,7 @@ public:
 		/// [In/Out] The function's arguments
 		LScriptArguments &Args,
 		/// [Optional] Log file for execution
-		GStream *Log = NULL,
+		LStream *Log = NULL,
 		/// [Optional] Copy arguments back to this array
 		LScriptArguments *ArgsOut = NULL
 	);
@@ -445,7 +445,7 @@ public:
 class SystemFunctions : public LScriptContext
 {
 	LScriptEngine *Engine;
-	GStream *Log;
+	LStream *Log;
 	#ifdef WINNATIVE
 	HANDLE Brk;
 	#endif
@@ -456,8 +456,8 @@ public:
 	SystemFunctions();
 	~SystemFunctions();
 
-	GStream *GetLog();
-	bool SetLog(GStream *log);
+	LStream *GetLog();
+	bool SetLog(LStream *log);
 	void SetEngine(LScriptEngine *Eng);	
 	
 	char *GetIncludeFile(char *FileName)

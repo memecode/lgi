@@ -18,7 +18,7 @@ class ImageLoader : public LEventTargetThread, public Progress
 	GAutoPtr<GFilter> Filter;
 	bool SurfaceSent;
 	int64 Ts;
-	GAutoPtr<GStream> In;
+	GAutoPtr<LStream> In;
 
 public:
 	ImageLoader(LEventSinkI *s) : LEventTargetThread("ImageLoader")
@@ -588,7 +588,7 @@ ssize_t LRichTextPriv::ImageBlock::Length()
 	return IsDeleted ? 0 : 1;
 }
 
-bool LRichTextPriv::ImageBlock::ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng)
+bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng)
 {
 	if (Media)
 	{
@@ -1220,7 +1220,7 @@ GMessage::Result LRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 		}
 		case M_IMAGE_SET_SURFACE:
 		{
-			GAutoPtr<GStream> File((GStream*)Msg->B());
+			GAutoPtr<LStream> File((LStream*)Msg->B());
 
 			#if LOADER_THREAD_LOGGING
 			LgiTrace("%s:%i - Received M_IMAGE_SET_SURFACE\n", _FL);

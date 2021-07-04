@@ -77,7 +77,7 @@ bool GetDnsServers(GArray<char*> &Servers)
 
 uchar *DnsMethods::ReadLabel(void *Header, uchar *s, char *&Label)
 {
-	GStringPipe p;
+	LStringPipe p;
 	while (*s)
 	{
 		if (p.GetSize()) p.Push(".");
@@ -140,7 +140,7 @@ bool IDnsResolve(GArray<char*> &Results, char *Name, int Type, int Class)
 	{
 		#if 0
 		// TCP
-		LSocketI *s = new GSocket;
+		LSocketI *s = new LSocket;
 		if (s)
 		{
 			if (s->Open(Ns[n], DNS_PORT))
@@ -241,7 +241,7 @@ bool IDnsResolve(GArray<char*> &Results, char *Name, int Type, int Class)
 		size_t Length = (uchar*)p - (uchar*)&m;
 		int Bytes;
 
-		GSocket s;
+		LSocket s;
 		s.SetUdp(true);
 
 		Bytes = s.WriteUdp(&m, Length + 2, 0, inet_addr(Ns[n]), DNS_PORT);

@@ -6,7 +6,7 @@
 AddFtpFile::AddFtpFile(LViewI *p, char *ftp)
 {
 	SetParent(p);
-	Base = new GUri(ftp);
+	Base = new LUri(ftp);
 	Thread = 0;
 	Files = Log = 0;
 	if (LoadFromResource(IDD_FTP_FILE))
@@ -44,7 +44,7 @@ void AddFtpFile::OnCmdComplete(FtpCmd *Cmd)
 		{
 			if (e->Name && !e->IsDir())
 			{
-				GUri fu(Cmd->Uri);
+				LUri fu(Cmd->Uri);
 				char path[256];
 				if (Base->sPath)
 					sprintf(path, "%s/%s", Base->sPath.Get(), e->Name.Get());

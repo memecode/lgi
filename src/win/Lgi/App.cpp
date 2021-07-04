@@ -15,7 +15,7 @@
 #include "lgi/common/Json.h"
 
 // Don't have a better place to put this...
-const char GSpellCheck::Delimiters[] =
+const char LSpellCheck::Delimiters[] =
 {
 	' ', '\t', '\r', '\n', ',', ',', '.', ':', ';',
 	'{', '}', '[', ']', '!', '@', '#', '$', '%', '^', '&', '*',
@@ -59,7 +59,7 @@ void OsAppArguments::_Default()
 
 void OsAppArguments::Set(int Args, char **Arg)
 {
-	GStringPipe p;
+	LStringPipe p;
 	for (int i=0; i<Args; i++)
 	{
 		p.Print("%s%s", i?" ":"", Arg[i]);
@@ -874,13 +874,13 @@ bool GApp::GetAppsForMimeType(char *Mime, GArray<LAppInfo*> &Apps)
 	return false;
 }
 
-GSymLookup *GApp::GetSymLookup()
+LSymLookup *GApp::GetSymLookup()
 {
 	if (!this)
 		return 0;
 
 	if (!d->SymLookup)
-		d->SymLookup = new GSymLookup;
+		d->SymLookup = new LSymLookup;
 	
 	return d->SymLookup;
 }

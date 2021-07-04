@@ -16,15 +16,15 @@ enum LMimeEncodings
 	CONTENT_OCTET_STREAM
 };
 
-class GMime;
+class LMime;
 
 class GMimeAction
 {
-	friend class GMime;
+	friend class LMime;
 
 protected:
 	// Parent ptr
-	GMime *Mime;
+	LMime *Mime;
 
 public:
 	GMimeAction()
@@ -35,20 +35,20 @@ public:
 	virtual void Empty() {} // reset to initial state
 };
 
-class GMimeBuf : public GStringPipe
+class GMimeBuf : public LStringPipe
 {
 	int Total;
 	LStreamI *Src;
-	GStreamEnd *End;
+	LStreamEnd *End;
 
 public:
-	GMimeBuf(LStreamI *src, GStreamEnd *end);
+	GMimeBuf(LStreamI *src, LStreamEnd *end);
 
 	ssize_t Pop(GArray<char> &Buf) override;
 	ssize_t Pop(char *Str, ssize_t BufSize) override;
 };
 
-class GMime
+class LMime
 {
 	// Header info
 	char *Headers;
@@ -62,8 +62,8 @@ class GMime
 
 	// Other info
 	char *TmpPath;
-	GMime *Parent;
-	GArray<GMime*> Children;
+	LMime *Parent;
+	GArray<LMime*> Children;
 
 	// Private methods
 	bool Lock();
@@ -77,15 +77,15 @@ class GMime
 public:
 	static const char *DefaultCharset;
 
-	GMime(const char *TmpFileRoot = 0);
-	virtual ~GMime();
+	LMime(const char *TmpFileRoot = 0);
+	virtual ~LMime();
 
 	// Methods
-	bool Insert(GMime *m, int pos = -1);
+	bool Insert(LMime *m, int pos = -1);
 	void Remove();
 	ssize_t Length() { return Children.Length(); }
-	GMime *operator[](uint32_t i);
-	GMime *NewChild();
+	LMime *operator[](uint32_t i);
+	LMime *NewChild();
 	void DeleteChildren() { Children.DeleteObjects(); }
 
 	void Empty();
@@ -118,33 +118,33 @@ public:
 	class GMimeText
 	{
 	public:
-		class GMimeDecode : public GPullStreamer, public GMimeAction
+		class GMimeDecode : public LPullStreamer, public GMimeAction
 		{
 		public:
-			ssize_t Pull(LStreamI *Source, GStreamEnd *End = 0);
-			int Parse(GStringPipe *Source, class ParentState *State = 0);
+			ssize_t Pull(LStreamI *Source, LStreamEnd *End = 0);
+			int Parse(LStringPipe *Source, class ParentState *State = 0);
 			void Empty();
 		} Decode;
 
 		class GMimeEncode : public GPushStreamer, public GMimeAction
 		{
 		public:
-			ssize_t Push(LStreamI *Dest, GStreamEnd *End = 0);
+			ssize_t Push(LStreamI *Dest, LStreamEnd *End = 0);
 			void Empty();
 		} Encode;
 
 	} Text;
 
-	friend class GMime::GMimeText::GMimeDecode;
-	friend class GMime::GMimeText::GMimeEncode;
+	friend class LMime::GMimeText::GMimeDecode;
+	friend class LMime::GMimeText::GMimeEncode;
 
 	class GMimeBinary
 	{
 	public:
-		class GMimeRead : public GPullStreamer, public GMimeAction
+		class GMimeRead : public LPullStreamer, public GMimeAction
 		{
 		public:
-			ssize_t Pull(LStreamI *Source, GStreamEnd *End = 0);
+			ssize_t Pull(LStreamI *Source, LStreamEnd *End = 0);
 			void Empty();
 		} Read;
 
@@ -152,14 +152,14 @@ public:
 		{
 		public:
 			int64 GetSize();
-			ssize_t Push(LStreamI *Dest, GStreamEnd *End = 0);
+			ssize_t Push(LStreamI *Dest, LStreamEnd *End = 0);
 			void Empty();
 		} Write;
 
 	} Binary;
 
-	friend class GMime::GMimeBinary::GMimeRead;
-	friend class GMime::GMimeBinary::GMimeWrite;
+	friend class LMime::GMimeBinary::GMimeRead;
+	friend class LMime::GMimeBinary::GMimeWrite;
 };
 
 #endif

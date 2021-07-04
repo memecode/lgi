@@ -108,7 +108,7 @@ void GCssCache::ZeroRefCounts()
 	}
 }
 
-bool GCssCache::OutputStyles(GStream &s, int TabDepth)
+bool GCssCache::OutputStyles(LStream &s, int TabDepth)
 {
 	char Tabs[64];
 	memset(Tabs, '\t', TabDepth);
@@ -1990,7 +1990,7 @@ bool LRichTextPriv::ToHtml(GArray<GDocView::ContentMedia> *Media, BlockCursor *F
 	if (!Blocks.Length())
 		return false;
 
-	GStringPipe p(256);
+	LStringPipe p(256);
 
 	p.Print("<html>\n"
 			"<head>\n"

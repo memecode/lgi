@@ -35,7 +35,7 @@ class GFileSelectPrivate
 
 	char *TypeStrA()
 	{
-		GStringPipe p;
+		LStringPipe p;
 
 		for (auto Type: TypeList)
 		{

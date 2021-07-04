@@ -428,7 +428,7 @@ ssize_t GMemQueue::Write(const void *Ptr, ssize_t Size, int Flags)
 }
 
 //////////////////////////////////////////////////////////////////////////
-GString GStringPipe::NewGStr()
+GString LStringPipe::NewGStr()
 {
 	GString s;
 	
@@ -449,7 +449,7 @@ GString GStringPipe::NewGStr()
 	return s;
 }
 
-ssize_t GStringPipe::LineChars()
+ssize_t LStringPipe::LineChars()
 {
 	ssize_t Len = 0;
 	for (auto m: Mem)
@@ -467,7 +467,7 @@ ssize_t GStringPipe::LineChars()
 	return -1;
 }
 
-ssize_t GStringPipe::SaveToBuffer(char *Start, ssize_t BufSize, ssize_t Chars)
+ssize_t LStringPipe::SaveToBuffer(char *Start, ssize_t BufSize, ssize_t Chars)
 {
 	char *Str = Start;
 	char *End = Str + BufSize; // Not including NULL
@@ -504,7 +504,7 @@ ssize_t GStringPipe::SaveToBuffer(char *Start, ssize_t BufSize, ssize_t Chars)
 	return Str - Start;
 }
 
-ssize_t GStringPipe::Pop(GArray<char> &Buf)
+ssize_t LStringPipe::Pop(GArray<char> &Buf)
 {
 	ssize_t Chars = LineChars();
 	if (Chars > 0)
@@ -520,7 +520,7 @@ ssize_t GStringPipe::Pop(GArray<char> &Buf)
 	return Chars;
 }
 
-GString GStringPipe::Pop()
+GString LStringPipe::Pop()
 {
 	GString s;
 	ssize_t Chars = LineChars();
@@ -533,7 +533,7 @@ GString GStringPipe::Pop()
 	return s;
 }
 
-ssize_t GStringPipe::Pop(char *Str, ssize_t BufSize)
+ssize_t LStringPipe::Pop(char *Str, ssize_t BufSize)
 {
 	if (!Str)
 		return 0;
@@ -545,7 +545,7 @@ ssize_t GStringPipe::Pop(char *Str, ssize_t BufSize)
 	return SaveToBuffer(Str, BufSize-1 /* for the NULL */, Chars);
 }
 
-ssize_t GStringPipe::Push(const char *Str, ssize_t Chars)
+ssize_t LStringPipe::Push(const char *Str, ssize_t Chars)
 {
 	if (!Str)
 		return 0;
@@ -556,7 +556,7 @@ ssize_t GStringPipe::Push(const char *Str, ssize_t Chars)
 	return Write((void*)Str, Chars);
 }
 
-ssize_t GStringPipe::Push(const char16 *Str, ssize_t Chars)
+ssize_t LStringPipe::Push(const char16 *Str, ssize_t Chars)
 {
 	if (!Str)
 		return 0;
@@ -568,11 +568,11 @@ ssize_t GStringPipe::Push(const char16 *Str, ssize_t Chars)
 }
 
 #ifdef _DEBUG
-bool GStringPipe::UnitTest()
+bool LStringPipe::UnitTest()
 {
 	char Buf[16];
 	memset(Buf, 0x1, sizeof(Buf));
-	GStringPipe p(8);
+	LStringPipe p(8);
 	const char s[] = "1234567890abc\n"
 					"abcdefghijklmn\n";
 	p.Write(s, sizeof(s)-1);

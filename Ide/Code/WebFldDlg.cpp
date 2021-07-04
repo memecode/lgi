@@ -13,7 +13,7 @@ WebFldDlg::WebFldDlg(LViewI *p, char *name, char *ftp, char *www)
 
 	if (ftp)
 	{
-		GUri u(ftp);
+		LUri u(ftp);
 		SetCtrlName(IDC_HOST, u.sHost);
 		SetCtrlName(IDC_USERNAME, u.sUser);
 		SetCtrlName(IDC_PASSWORD, u.sPass);
@@ -37,7 +37,7 @@ int WebFldDlg::OnNotify(LViewI *v, int f)
 	{
 		case IDOK:
 		{
-			GUri u;
+			LUri u;
 			u.sHost = GetCtrlName(IDC_HOST);
 			u.sUser = GetCtrlName(IDC_USERNAME);
 			u.sPass = GetCtrlName(IDC_PASSWORD);

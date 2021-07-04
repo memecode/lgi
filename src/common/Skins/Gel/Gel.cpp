@@ -82,7 +82,7 @@ class GelSkin : public LSkinEngine
 		return back.Mix(Mixer, (float)(1.0f - amt));
 	}
 
-	void FillPath(GPath *Path, LSurface *pDC, GColour Back, bool Down, bool Enabled = true)
+	void FillPath(LPath *Path, LSurface *pDC, GColour Back, bool Down, bool Enabled = true)
 	{
 		if (pDC)
 		{
@@ -102,14 +102,14 @@ class GelSkin : public LSkinEngine
 			}
 			
 			// Draw background
-			GPath e;
+			LPath e;
 			e.Rectangle(r.x1, r.y1, r.x2+1, r.y2+1);
 			
 			LPointF c1(r.x1, r.y1);
 			LPointF d1(r.x1, r.y2+1);
 			if (Down)
 			{
-				GBlendStop s1[] =
+				LBlendStop s1[] =
 				{
 					{0.0, Rgba32(192, 192, 192, 255)},
 					{0.1, Top.c32()},
@@ -117,19 +117,19 @@ class GelSkin : public LSkinEngine
 					{0.601, Mid2.c32()},
 					{1.0, Bot.c32()},
 				};					
-				GLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
+				LLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
 				e.Fill(pDC, b1);
 			}
 			else
 			{
-				GBlendStop s1[] =
+				LBlendStop s1[] =
 				{
 					{0.0, Top.c32()},
 					{0.5, Mid.c32()},
 					{0.501, Mid2.c32()},
 					{1.0, Bot.c32()},
 				};					
-				GLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
+				LLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
 				e.Fill(pDC, b1);
 			}
 
@@ -167,19 +167,19 @@ class GelSkin : public LSkinEngine
 		LRect Client = r;
 		{
 			// Edge
-			GPath e;
+			LPath e;
 			LRectF r(Client);
 			// r.y2++;
 			e.RoundRect(r, 6);
 		
 			COLOUR EdgeColour = Default ? Rgba32(40, 40, 40, 255) : Rgba32(114, 114, 114, 255);
-			GSolidBrush b(EdgeColour);
+			LSolidBrush b(EdgeColour);
 			e.Fill(pDC, b);
 		}
 
 		{
 			// Border
-			GPath e;
+			LPath e;
 			LRectF r(Client);
 			// r.y2++;
 			int Resize = Default ? 2 : 1;
@@ -210,7 +210,7 @@ class GelSkin : public LSkinEngine
 			LPointF d1(r.x1, r.y2);
 			if (Down)
 			{
-				GBlendStop s1[] =
+				LBlendStop s1[] =
 				{
 					{0.0, Rgba32(192, 192, 192, 255)},
 					{0.1, Top.c32()},
@@ -218,19 +218,19 @@ class GelSkin : public LSkinEngine
 					{0.601, Tint(Mid2, 230.0/240.0).c32()},
 					{1.0, Tint(Bot, 230.0/240.0).c32()},
 				};					
-				GLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
+				LLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
 				e.Fill(pDC, b1);
 			}
 			else
 			{
-				GBlendStop s1[] =
+				LBlendStop s1[] =
 				{
 					{0.0, Top.c32()},
 					{0.5, Mid.c32()},
 					{0.501, Mid2.c32()},
 					{1.0, Bot.c32()},
 				};					
-				GLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
+				LLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
 				e.Fill(pDC, b1);
 			}
 
@@ -239,7 +239,7 @@ class GelSkin : public LSkinEngine
 				Round = 0.6;
 				
 			int Sa = Down ? 128 : 50;
-			GBlendStop s3[] =
+			LBlendStop s3[] =
 			{
 				{Round, GREY32(0)},
 				{1.0, GREY32(Sa)},
@@ -248,7 +248,7 @@ class GelSkin : public LSkinEngine
 			// Rounded corners
 			LPointF c3(r.x1 + (r.X()/2), r.y1 + (r.Y()/2));
 			LPointF d3(r.x1, r.y1);
-			GRadialBlendBrush b3(c3, d3, CountOf(s3), s3);
+			LRadialBlendBrush b3(c3, d3, CountOf(s3), s3);
 			e.Fill(pDC, b3);
 		}
 		
@@ -276,7 +276,7 @@ class GelSkin : public LSkinEngine
 			{
 				// draw sunken border
 				LRectF r = Box;
-				GPath p;
+				LPath p;
 				if (Round)
 					p.Circle(Center, Radius);
 				else
@@ -284,12 +284,12 @@ class GelSkin : public LSkinEngine
 				
 				// gradient from 169,169,169 at the top through to 225,225,225
 				LPointF a(0, 0), b(0, 15);
-				GBlendStop s[] =
+				LBlendStop s[] =
 				{
 					{0, c172.c32()},
 					{1, c253.c32()}
 				};
-				GLinearBlendBrush c(a, b, 2, s);
+				LLinearBlendBrush c(a, b, 2, s);
 				p.Fill(Mem, c);
 			}
 			
@@ -298,7 +298,7 @@ class GelSkin : public LSkinEngine
 				// draw button center
 				LRectF r = Box;
 				r.Size(CHECK_BORDER+1, CHECK_BORDER+1);
-				GPath p;
+				LPath p;
 				if (Round)
 					p.Circle(Center, r.X()/2);
 				else
@@ -307,18 +307,18 @@ class GelSkin : public LSkinEngine
 				if (Enabled)
 				{
 					LPointF a(0, r.y1), b(0, r.y2);
-					GBlendStop s[] =
+					LBlendStop s[] =
 					{
 						{1.0/15.0, c255.c32()},
 						{1.0/14.0, c253.c32()},
 						{1, c232.c32()}
 					};
-					GLinearBlendBrush c(a, b, CountOf(s), s);
+					LLinearBlendBrush c(a, b, CountOf(s), s);
 					p.Fill(Mem, c);
 				}
 				else
 				{
-					GSolidBrush c(LColour(L_MED));
+					LSolidBrush c(LColour(L_MED));
 					p.Fill(Mem, c);
 				}
 			}
@@ -331,7 +331,7 @@ class GelSkin : public LSkinEngine
 				LPointF Cntr = Center;
 				Cntr.y = Cntr.y + 1;
 				
-				GPath p;
+				LPath p;
 				if (Round)
 					p.Circle(Cntr, r.X()/2);
 				else
@@ -342,7 +342,7 @@ class GelSkin : public LSkinEngine
 				else
 					p.RoundRect(r, CHECK_RADIUS-1);
 				
-				GSolidBrush c(LColour(L_LIGHT));
+				LSolidBrush c(LColour(L_LIGHT));
 				p.Fill(Mem, c);
 			}
 
@@ -350,7 +350,7 @@ class GelSkin : public LSkinEngine
 				// draw button outline
 				LRectF r = Box;
 				r.Size(CHECK_BORDER, CHECK_BORDER);
-				GPath p;
+				LPath p;
 				if (Round)
 					p.Circle(Center, r.X()/2);
 				else
@@ -361,7 +361,7 @@ class GelSkin : public LSkinEngine
 				else
 					p.RoundRect(r, CHECK_RADIUS-1);
 				
-				GSolidBrush c(Enabled ? c80 : c160);
+				LSolidBrush c(Enabled ? c80 : c160);
 				p.Fill(Mem, c);
 			}
 			
@@ -378,7 +378,7 @@ class GelSkin : public LSkinEngine
 				double A = r.X() / 6;
 				double B = (r.X() / 2) - A;
 
-				GPath p;
+				LPath p;
 				if (Round)
 				{
 					p.Circle(Center, r.X()/3);
@@ -404,7 +404,7 @@ class GelSkin : public LSkinEngine
 					p.LineTo(r.x1, r.y1);
 				}
 				
-				GSolidBrush c(Enabled ? c80 : c160);
+				LSolidBrush c(Enabled ? c80 : c160);
 				p.Fill(Mem, c);
 			}
 		}
@@ -719,7 +719,7 @@ public:
 		auto Back = Tint(Tools.GetBack(&Ws, 0), 220.0/240.0);
 		r.Offset(-r.x1, -r.y1);
 
-		GPath e;
+		LPath e;
 		e.Rectangle(r.x1, r.y1, r.x2, r.y2);
 		static bool LastEnabled = true;			
 		FillPath(&e, &Mem, Back, State ? State->Value != 0 : false, State ? LastEnabled = State->Enabled : LastEnabled);

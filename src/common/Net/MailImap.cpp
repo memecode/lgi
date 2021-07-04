@@ -39,7 +39,7 @@
 static const char *sRfc822Header	= "RFC822.HEADER";
 static const char *sRfc822Size		= "RFC822.SIZE";
 
-struct TraceLog : public GStream
+struct TraceLog : public LStream
 {
 	ssize_t Read(void *Buffer, ssize_t Size, int Flags = 0) { return 0; }
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0)
@@ -259,8 +259,8 @@ bool MailIMap::Http(LSocketI *S,
 	if (!S || !InUri)
 		return false;
 
-	GStringPipe p(256);
-	GUri u(InUri);
+	LStringPipe p(256);
+	LUri u(InUri);
 
 	p.Print("POST %s HTTP/1.1\r\n"
 			"Host: %s\r\n"
@@ -424,7 +424,7 @@ char *Tok(char *&s)
 
 char *DecodeImapString(const char *s)
 {
-	GStringPipe p;
+	LStringPipe p;
 	while (s && *s)
 	{
 		if (*s == '&')
@@ -495,7 +495,7 @@ char *DecodeImapString(const char *s)
 
 char *EncodeImapString(const char *s)
 {
-	GStringPipe p;
+	LStringPipe p;
 	ssize_t Len = s ? strlen(s) : 0;
 	
 	while (s && *s)
@@ -1014,7 +1014,7 @@ class OAuthWebServer : public LThread, public LMutex
 {
 	bool Loop;
 	int Port;
-	GSocket Listen;
+	LSocket Listen;
 	GAutoString Req;
 	GString Resp;
 	bool Finished;
@@ -1093,13 +1093,13 @@ public:
 	
 	int Main()
 	{
-		GAutoPtr<GSocket> s;
+		GAutoPtr<LSocket> s;
 		Loop = true;
 		while (Loop)
 		{
 			if (Listen.CanAccept(100))
 			{
-				s.Reset(new GSocket);
+				s.Reset(new LSocket);
 				
 				if (!Listen.Accept(s))
 					s.Reset();
@@ -1227,7 +1227,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 		LVariant v;
 		if (Flags == MAIL_SSL)
 			v = "SSL";
-		Socket->SetValue(GSocket_Protocol, v);
+		Socket->SetValue(LSocket_Protocol, v);
 
 		// connect
 		if (Socket->Open(Remote, Port))
@@ -1326,7 +1326,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 						if (Rd)
 						{
 							LVariant v;
-							TlsError = !Socket->SetValue(GSocket_Protocol, v="SSL");
+							TlsError = !Socket->SetValue(LSocket_Protocol, v="SSL");
 						}
 						else
 						{
@@ -1648,7 +1648,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 									char DigestUri[256];
 									sprintf_s(DigestUri, sizeof(DigestUri), "imap/%s", Realm ? Realm : RemoteHost);
 
-									GStringPipe p;
+									LStringPipe p;
 									p.Print("username=\"%s\"", User);
 									p.Print(",nc=%08.8i", Nc);
 									p.Print(",digest-uri=\"%s\"", DigestUri);
@@ -2069,7 +2069,7 @@ char *MailIMap::SequenceToString(GArray<int> *Seq)
 	if (!Seq)
 		return NewStr("1:*");
 
-	GStringPipe p;			
+	LStringPipe p;			
 	// int Last = 0;
 	for (unsigned s=0; s<Seq->Length(); )
 	{
@@ -2151,7 +2151,7 @@ int MailIMap::Fetch(bool ByUid,
 	
 	int Status = 0;
 	int Cmd = d->NextCmd++;
-	GStringPipe p(256);
+	LStringPipe p(256);
 	p.Print("A%4.4i %sFETCH ", Cmd, ByUid ? "UID " : "");
 	p.Write(Seq, strlen(Seq));
 	p.Print(" (%s)\r\n", Parts);
@@ -2995,7 +2995,7 @@ bool MailIMap::SetFlagsByUid(GArray<uint32_t> &Uids, const char *Flags)
 	{
 		int Cmd = d->NextCmd++;
 
-		GStringPipe p;
+		LStringPipe p;
 		p.Print("A%04.4i UID STORE ", Cmd);
 		if (Uids.Length())
 		{
@@ -3031,7 +3031,7 @@ bool MailIMap::CopyByUid(GArray<uint32_t> &InUids, const char *DestFolder)
 		int Cmd = d->NextCmd++;
 		GAutoString Dest(EncodePath(DestFolder));
 
-		GStringPipe p(1024);
+		LStringPipe p(1024);
 		p.Print("A%04.4i UID COPY ", Cmd);
 		for (unsigned i=0; i<InUids.Length(); i++)
 		{

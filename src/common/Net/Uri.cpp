@@ -6,19 +6,19 @@
 static const char *Ws = " \t\r\n";
 #define SkipWs(s) while (*s && strchr(Ws, *s)) s++;
 
-GUri::GUri(const char *uri)
+LUri::LUri(const char *uri)
 {
 	Port = 0;
 	if (uri)
 		Set(uri);
 }
 
-GUri::~GUri()
+LUri::~LUri()
 {
 	Empty();
 }
 
-GUri &GUri::operator +=(const char *s)
+LUri &LUri::operator +=(const char *s)
 {
 	// Add segment to path
 	if (!sPath.Length() || sPath(-1) != '/')
@@ -45,7 +45,7 @@ GUri &GUri::operator +=(const char *s)
 	return *this;
 }
 
-GUri &GUri::operator =(const GUri &u)
+LUri &LUri::operator =(const LUri &u)
 {
 	Empty();
 	sProtocol = u.sProtocol;
@@ -57,7 +57,7 @@ GUri &GUri::operator =(const GUri &u)
 	return *this;
 }
 
-void GUri::Empty()
+void LUri::Empty()
 {
 	Port = 0;
 	sProtocol.Empty();
@@ -68,12 +68,12 @@ void GUri::Empty()
 	sAnchor.Empty();
 }
 
-GUri::operator bool()
+LUri::operator bool()
 {
 	return IsFile() ? !sPath.IsEmpty() : !sHost.IsEmpty();
 }
 
-const char *GUri::LocalPath()
+const char *LUri::LocalPath()
 {
 	if (!IsFile())
 		return NULL;
@@ -87,9 +87,9 @@ const char *GUri::LocalPath()
 	return s;
 }
 
-GString GUri::ToString()
+GString LUri::ToString()
 {
-	GStringPipe p;
+	LStringPipe p;
 	if (sProtocol)
 		p.Print("%s://", sProtocol.Get());
 
@@ -115,7 +115,7 @@ GString GUri::ToString()
 	return p.NewGStr();
 }
 
-bool GUri::Set(const char *uri)
+bool LUri::Set(const char *uri)
 {
 	if (!uri)
 		return false;
@@ -238,9 +238,9 @@ bool GUri::Set(const char *uri)
 	return sHost || sPath;
 }
 
-GString GUri::EncodeStr(const char *s, const char *ExtraCharsToEncode)
+GString LUri::EncodeStr(const char *s, const char *ExtraCharsToEncode)
 {
-	GStringPipe p(256);
+	LStringPipe p(256);
 	if (s)
 	{
 		while (*s)
@@ -261,7 +261,7 @@ GString GUri::EncodeStr(const char *s, const char *ExtraCharsToEncode)
 	return p.NewGStr();
 }
 
-GUri::StrMap GUri::Params()
+LUri::StrMap LUri::Params()
 {
 	StrMap m;
 
@@ -283,9 +283,9 @@ GUri::StrMap GUri::Params()
 	return m;
 }
 
-GString GUri::DecodeStr(const char *s)
+GString LUri::DecodeStr(const char *s)
 {
-	GStringPipe p(256);
+	LStringPipe p(256);
 	if (s)
 	{
 		while (*s)
@@ -320,7 +320,7 @@ int CFNumberRefToInt(CFNumberRef r, int Default = 0)
 }
 #endif
 
-GProxyUri::GProxyUri()
+LProxyUri::LProxyUri()
 {
 	#if defined(WIN32)
 

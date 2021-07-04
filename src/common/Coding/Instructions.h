@@ -1579,7 +1579,7 @@ case IDomCall:
 					{
 						case GV_LIST:
 						{
-							GStringPipe p(256);
+							LStringPipe p(256);
 							List<LVariant> *Lst = Arg[0]->Value.Lst;
 							const char *Sep = Dom->CastString();
 							auto It = Lst->begin();

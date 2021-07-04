@@ -366,7 +366,7 @@ public:
 									Type == SizeLarger; }
 		bool operator ==(const Len &l) const { return Type == l.Type && FloatIsEqual(Value, l.Value); }
 		bool operator !=(const Len &l) const { return !(*this == l); }
-		bool ToString(GStream &p) const;
+		bool ToString(LStream &p) const;
 		
 		/// Convert the length to pixels
 		int ToPx
@@ -457,7 +457,7 @@ public:
 			return true;
 		}
 		bool operator !=(const ColorDef &c) { return !(*this == c); }
-		bool ToString(GStream &p);
+		bool ToString(LStream &p);
 	};
 
 	enum BorderStyle {
@@ -757,7 +757,7 @@ public:
 		bool Parse(const char *&s);
 		size_t GetSimpleIndex() { return Combs.Length() ? Combs[Combs.Length()-1] + 1 : 0; }
 		bool IsAtMedia();
-		bool ToString(GStream &p);
+		bool ToString(LStream &p);
 		uint32_t GetSpecificity();
 		
 		Selector &operator =(const Selector &s);
@@ -1047,7 +1047,7 @@ public:
 		bool Parse(const char *&s, int Depth = 0);
 
 		/// Converts store back into string form
-		bool ToString(GStream &p);
+		bool ToString(LStream &p);
 
 		/// Use to finding matching selectors for an element.
 		template<typename T>
@@ -1109,7 +1109,7 @@ public:
 		}
 
 		/// For debugging: dumps a description of the store to a stream
-		bool Dump(GStream &out);
+		bool Dump(LStream &out);
 	};
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////

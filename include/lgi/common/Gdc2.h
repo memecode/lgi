@@ -700,7 +700,7 @@ struct GPrintDcParams
 /// the time doesn't matter unless your doing something unusual.
 class LgiClass LScreenDC : public LSurface
 {
-	class GScreenPrivate *d;
+	class LScreenPrivate *d;
 
 public:
 	LScreenDC();
@@ -1249,7 +1249,7 @@ public:
     LSurface *Load
     (
         /// The full path of the file
-        GStream *In,
+        LStream *In,
         /// [Optional] File name hint for selecting a filter
         const char *Name = NULL,
     	/// [Optional] Enable OS based loaders
@@ -1260,7 +1260,7 @@ public:
     bool Save
     (
         /// The file to write to
-        GStream *Out,
+        LStream *Out,
         /// The pixels to store
         LSurface *In,
 		/// Dummy file name to determine the file type, eg: "img.jpg"

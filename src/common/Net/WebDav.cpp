@@ -20,13 +20,13 @@ LWebdav::LWebdav(GString endPoint, GString user, GString pass)
 	User = user;
 	Pass = pass;
 
-	GUri u(EndPoint);
+	LUri u(EndPoint);
 	EndPointPath = u.sPath;
 }
 
 void LWebdav::PrettyPrint(LXmlTag &x)
 {
-	GStringPipe p;
+	LStringPipe p;
 	LXmlTree t;
 	t.Write(&x, &p);
 	auto s = p.NewGStr();
@@ -37,14 +37,14 @@ bool LWebdav::Request(Req &r, const char *Name, GString Resource)
 {
 	auto sock = GetSocket();
 	IHttp http;
-	GUri u(EndPoint);
+	LUri u(EndPoint);
 	if (!http.Open(sock, u.sHost, u.Port ? u.Port : HTTPS_PORT))
 	{
 		r.Status = false;
 	}
 	else
 	{
-		GStringPipe OutPipe, OutHdrsPipe;
+		LStringPipe OutPipe, OutHdrsPipe;
 
 		GString Delim("/");
 		auto Path = u.sPath.SplitDelimit(Delim);

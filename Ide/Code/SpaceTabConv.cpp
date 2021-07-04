@@ -2,7 +2,7 @@
 #include "lgi\common\Containers.h"
 char *SpacesToTabs(const char *Text, int TabSize)
 {
-	GStringPipe p(4 << 10);
+	LStringPipe p(4 << 10);
 	
 	if (Text)
 	{
@@ -60,7 +60,7 @@ char *SpacesToTabs(const char *Text, int TabSize)
 }
 char *TabsToSpaces(const char *Text, int TabSize)
 {
-	GStringPipe p(4 << 10);
+	LStringPipe p(4 << 10);
 	
 	if (Text)
 	{

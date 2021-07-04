@@ -141,7 +141,7 @@ static bool Write(LSocketI *s, GString b)
 
 static GString FormEncode(const char *s, bool InValue = true)
 {
-	GStringPipe p;
+	LStringPipe p;
 	for (auto c = s; *c; c++)
 	{
 		if (isalpha(*c) || isdigit(*c) || *c == '_' || *c == '.' || (!InValue && *c == '+') || *c == '-' || *c == '%')
@@ -164,21 +164,21 @@ struct LOAuth2Priv
 {
 	LOAuth2::Params Params;
 	GString Id;
-	GStream *Log;
+	LStream *Log;
 	GString Token;
 	GString CodeVerifier;
-	GStringPipe LocalLog;
+	LStringPipe LocalLog;
 	GDom *Store;
 	LCancel *Cancel;
 
 	GString AccessToken, RefreshToken;
 	int64 ExpiresIn;
 
-	struct Server : public GSocket
+	struct Server : public LSocket
 	{
-		GSocket Listen;
+		LSocket Listen;
 		LOAuth2Priv *d;
-		GSocket s;
+		LSocket s;
 
 	public:
 		LHashTbl<ConstStrKey<char,false>,GString> Params;
@@ -283,7 +283,7 @@ struct LOAuth2Priv
 		Endpoint.Printf(Params.ApiUri, Id.Get());
 		CodeVerifier = ToText(SslSocket::Random(48));
 
-		GUri u(Endpoint);
+		LUri u(Endpoint);
 		GString Uri, Redir, RedirEnc, Scope;
 		Redir.Printf("http://localhost:%i", LOCALHOST_PORT);
 		Scope = u.EncodeStr(Params.Scope);
@@ -311,8 +311,8 @@ struct LOAuth2Priv
 	{
 		if (!AccessToken)
 		{
-			GStringPipe p(1024);
-			GUri u(Params.ApiUri);
+			LStringPipe p(1024);
+			LUri u(Params.ApiUri);
 			SslSocket sock(NULL, NULL, true);
 			if (!sock.Open(u.sHost, HTTPS_PORT))
 			{
@@ -336,7 +336,7 @@ struct LOAuth2Priv
 				Body += Params.ClientSecret;
 			}
 
-			GUri Api(Params.ApiUri);
+			LUri Api(Params.ApiUri);
 			Http.Printf("POST %s HTTP/1.1\r\n"
 						"Host: %s\r\n"
 						"Content-Type: application/x-www-form-urlencoded\r\n"
@@ -378,8 +378,8 @@ struct LOAuth2Priv
 		if (!RefreshToken)
 			return false;
 
-		GStringPipe p(1024);
-		GUri u(Params.Scope);
+		LStringPipe p(1024);
+		LUri u(Params.Scope);
 		SslSocket sock(NULL, NULL, true);
 		if (!sock.Open(u.sHost, HTTPS_PORT))
 		{
@@ -396,7 +396,7 @@ struct LOAuth2Priv
 					Params.ClientID.Get(),
 					Params.ClientSecret.Get());
 
-		GUri Api(Params.ApiUri);
+		LUri Api(Params.ApiUri);
 		Http.Printf("POST %s HTTP/1.1\r\n"
 					"Host: %s\r\n"
 					"Content-Type: application/x-www-form-urlencoded\r\n"
@@ -428,7 +428,7 @@ struct LOAuth2Priv
 		return AccessToken.Get() != NULL;
 	}
 
-	LOAuth2Priv(LOAuth2::Params &params, const char *account, GDom *store, GStream *log, LCancel *cancel)
+	LOAuth2Priv(LOAuth2::Params &params, const char *account, GDom *store, LStream *log, LCancel *cancel)
 	{
 		Params = params;
 		Id = account;
@@ -468,7 +468,7 @@ struct LOAuth2Priv
 	}
 };
 
-LOAuth2::LOAuth2(LOAuth2::Params &params, const char *account, GDom *store, LCancel *cancel, GStream *log)
+LOAuth2::LOAuth2(LOAuth2::Params &params, const char *account, GDom *store, LCancel *cancel, LStream *log)
 {
 	d = new LOAuth2Priv(params, account, store, log, cancel);
 	d->Serialize(false);

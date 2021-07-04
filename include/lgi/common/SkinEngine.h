@@ -146,7 +146,7 @@ public:
 	virtual LFont *GetDefaultFont(char *Class) { return SysFont; }
 
 	// Fills an abitary path with the skin's default fill...
-	virtual void FillPath(class GPath *Path, LSurface *pDC, GColour Back, bool Down, bool Enabled = true) {}
+	virtual void FillPath(class LPath *Path, LSurface *pDC, GColour Back, bool Down, bool Enabled = true) {}
 
 	// Draws a button
 	virtual void DrawBtn(LSurface *pDC, LRect &r, GColour Back, bool Down, bool Enabled, bool Default = false) = 0;

@@ -205,7 +205,7 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 	if (!Lib || !Method)
 		return ScriptError;
 
-	GStream *Log = Ctx ? Ctx->GetLog() : NULL;
+	LStream *Log = Ctx ? Ctx->GetLog() : NULL;
 	if (Args.Length() != ArgType.Length())
 	{
 		if (Log)
@@ -435,7 +435,7 @@ public:
 		RunStepOut
 	};
 
-	GStream *Log;
+	LStream *Log;
 	LCompiledCode *Code;
 	LExecutionStatus Status;
 	GPtr c;
@@ -470,7 +470,7 @@ public:
 	{
 	}
 
-	void DumpVariant(GStream *Log, LVariant &v)
+	void DumpVariant(LStream *Log, LVariant &v)
 	{
 		if (!Log)
 			return;
@@ -604,7 +604,7 @@ public:
 				GAutoPtr<LCompiledCode> Cp(new LCompiledCode(*Code));
 				Debugger->OwnCompiledCode(Cp);
 				
-				GStringPipe AsmBuf;
+				LStringPipe AsmBuf;
 				Decompile(Code->UserContext, Code, &AsmBuf);
 				GAutoString Asm(AsmBuf.NewStr());
 				Debugger->SetSource(Asm);
@@ -637,7 +637,7 @@ public:
 		}
 	}
 
-	LExecutionStatus Decompile(LScriptContext *Context, LCompiledCode *Code, GStream *log)
+	LExecutionStatus Decompile(LScriptContext *Context, LCompiledCode *Code, LStream *log)
 	{
 		LExecutionStatus Status = ScriptSuccess;
 		LgiAssert(sizeof(GVarRef) == 4);
@@ -647,7 +647,7 @@ public:
 		c.u8 = Base;
 		uint8_t *e = c.u8 + Code->ByteCode.Length();
 
-		GStream *OldLog = Log;
+		LStream *OldLog = Log;
 		if (log)
 			Log = log;
 		for (unsigned k=0; k<Code->Globals.Length(); k++)
@@ -697,7 +697,7 @@ public:
 		return Status;
 	}
 
-	LExecutionStatus Setup(LCompiledCode *code, uint32_t StartOffset, GStream *log, LFunctionInfo *Func, LScriptArguments *Args)
+	LExecutionStatus Setup(LCompiledCode *code, uint32_t StartOffset, LStream *log, LFunctionInfo *Func, LScriptArguments *Args)
 	{
 		Status = ScriptSuccess;
 		
@@ -772,8 +772,8 @@ public:
 			if (OutOfDate || Debugger)
 			{
 				GFile f;
-				GStringPipe p;
-				GStream *Out = NULL;
+				LStringPipe p;
+				LStream *Out = NULL;
 			
 				if (Debugger)
 				{
@@ -1037,7 +1037,7 @@ LVirtualMachine::~LVirtualMachine()
 	d->DecRef();
 }
 
-LExecutionStatus LVirtualMachine::Execute(LCompiledCode *Code, uint32_t StartOffset, GStream *Log, bool StartImmediately, LVariant *Return)
+LExecutionStatus LVirtualMachine::Execute(LCompiledCode *Code, uint32_t StartOffset, LStream *Log, bool StartImmediately, LVariant *Return)
 {
 	if (!Code)
 		return ScriptError;
@@ -1050,7 +1050,7 @@ LExecutionStatus LVirtualMachine::Execute(LCompiledCode *Code, uint32_t StartOff
 	return d->Run(LVirtualMachinePriv::RunContinue);
 }
 
-LExecutionStatus LVirtualMachine::ExecuteFunction(LCompiledCode *Code, LFunctionInfo *Func, LScriptArguments &Args, GStream *Log, LScriptArguments *ArgsOut)
+LExecutionStatus LVirtualMachine::ExecuteFunction(LCompiledCode *Code, LFunctionInfo *Func, LScriptArguments &Args, LStream *Log, LScriptArguments *ArgsOut)
 {
 	LCompiledCode *Cc = dynamic_cast<LCompiledCode*>(Code);
 	if (!Cc || !Func)
@@ -1719,7 +1719,7 @@ void LVmDebuggerWnd::Run()
 	Quit();
 }
 
-GStream *LVmDebuggerWnd::GetLog()
+LStream *LVmDebuggerWnd::GetLog()
 {
 	return d->Log;
 }
@@ -1742,8 +1742,8 @@ LCompiledCode *LVmDebuggerWnd::GetCode()
 void LVmDebuggerWnd::SetSource(const char *Mixed)
 {
 	#if 1
-	GStringPipe Glob(256);
-	GStringPipe Tmp(256);
+	LStringPipe Glob(256);
+	LStringPipe Tmp(256);
 	
 	d->Blocks.Length(0);
 	CodeBlock *Cur = &d->Blocks.New();
@@ -1806,7 +1806,7 @@ void LVmDebuggerWnd::SetSource(const char *Mixed)
 
 	Tmp.Empty();
 	
-	GStringPipe Txt;
+	LStringPipe Txt;
 	GToken Src(d->Script, "\n", false);
 	unsigned SrcLine = 1;
 	unsigned ViewLine = 1;
@@ -1878,7 +1878,7 @@ void LVmDebuggerWnd::UpdateVariables(LList *Lst, LVariant *Arr, ssize_t Len, cha
 	for (ssize_t i=0; i<Len; i++)
 	{
 		LVariant *v = Arr + i;
-		GStringPipe p(64);
+		LStringPipe p(64);
 		d->Vm->d->DumpVariant(&p, *v);
 		GAutoString a(p.NewStr());
 		char nm[32];

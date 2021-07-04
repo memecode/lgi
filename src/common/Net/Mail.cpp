@@ -967,7 +967,7 @@ bool MailSmtp::Open(LSocketI *S,
 				Error(_FL, "Failed to connect socket to %s:%i\n", Server.Get(), Port);
 			else
 			{
-				GStringPipe Str;
+				LStringPipe Str;
 
 				// receive signon message
 				VERIFY_RET_VAL(ReadReply("220"));
@@ -1016,7 +1016,7 @@ bool MailSmtp::Open(LSocketI *S,
 					VERIFY_RET_VAL(ReadReply("220", &Str));
 
 					LVariant v;
-					if (Socket->SetValue(GSocket_Protocol, v="SSL"))
+					if (Socket->SetValue(LSocket_Protocol, v="SSL"))
 					{
 						Flags &= ~MAIL_USE_STARTTLS;
 						goto SmtpHello;
@@ -1167,7 +1167,7 @@ bool MailSmtp::Open(LSocketI *S,
 						}
 						else if (Auth.Equals("XOAUTH2"))
 						{
-							auto Log = dynamic_cast<GStream*>(Socket->GetLog());
+							auto Log = dynamic_cast<LStream*>(Socket->GetLog());
 							LOAuth2 Authenticator(OAuth2, UserName, SettingStore, Socket->GetCancel(), Log);
 							auto Tok = Authenticator.GetAccessToken();
 							if (Tok)
@@ -1300,7 +1300,7 @@ char *CreateAddressTag(List<AddressDescriptor> &l, int Type, List<char> *Charset
 	
 	if (Addr.Length() > 0)
 	{
-		GStringPipe StrBuf;
+		LStringPipe StrBuf;
 		StrBuf.Push((Type == 0) ? (char*)"To: " : (char*)"Cc: ");
 
 		for (auto It = Addr.begin(); It != Addr.end(); )
@@ -1362,7 +1362,7 @@ char *CreateAddressTag(List<AddressDescriptor> &l, int Type, List<char> *Charset
 }
 
 // This class implements a pipe that writes to a socket
-class SocketPipe : public GStringPipe
+class SocketPipe : public LStringPipe
 {
 	LSocketI *s;
 	MailProtocolProgress *p;
@@ -1472,7 +1472,7 @@ bool MailSmtp::SendToFrom(List<AddressDescriptor> &To, AddressDescriptor *From, 
 	return AddrOk;
 }
 
-GStringPipe *MailSmtp::SendData(MailProtocolError *Err)
+LStringPipe *MailSmtp::SendData(MailProtocolError *Err)
 {
 	// send DATA message
 	sprintf_s(Buffer, sizeof(Buffer), "DATA\r\n");
@@ -1482,12 +1482,12 @@ GStringPipe *MailSmtp::SendData(MailProtocolError *Err)
 	return new SocketPipe(Socket, Transfer);
 }
 
-GStringPipe *MailSmtp::SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err)
+LStringPipe *MailSmtp::SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err)
 {
 	return SendToFrom(To, From, Err) ? SendData(Err) : NULL;
 }
 
-bool MailSmtp::SendEnd(GStringPipe *m)
+bool MailSmtp::SendEnd(LStringPipe *m)
 {
 	bool Status = false;
 
@@ -1517,7 +1517,7 @@ bool MailSmtp::Send(MailMessage *Msg, bool Mime)
 
 	if (Socket && Msg)
 	{
-		GStringPipe *Sink = SendStart(Msg->To, Msg->From);
+		LStringPipe *Sink = SendStart(Msg->To, Msg->From);
 		if (Sink)
 		{
 			// setup a gui progress meter to send the email,
@@ -1558,7 +1558,7 @@ bool MailSmtp::Close()
 	return false;
 }
 
-bool MailSmtp::ReadReply(const char *Str, GStringPipe *Pipe, MailProtocolError *Err)
+bool MailSmtp::ReadReply(const char *Str, LStringPipe *Pipe, MailProtocolError *Err)
 {
 	bool Status = false;
 	if (Socket && Str)
@@ -1633,7 +1633,7 @@ bool MailSmtp::ReadReply(const char *Str, GStringPipe *Pipe, MailProtocolError *
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-class Mail2Folder : public GStringPipe
+class Mail2Folder : public LStringPipe
 {
 	char File[256];
 	GFile F;
@@ -1722,12 +1722,12 @@ bool MailSendFolder::Close()
 	return true;
 }
 
-GStringPipe *MailSendFolder::SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err)
+LStringPipe *MailSendFolder::SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err)
 {
 	return new Mail2Folder(d->Path, To);
 }
 
-bool MailSendFolder::SendEnd(GStringPipe *Sink)
+bool MailSendFolder::SendEnd(LStringPipe *Sink)
 {
 	DeleteObj(Sink);
 	return true;
@@ -1946,7 +1946,7 @@ char *MailReceiveFolder::GetHeaders(int Message)
 		GFile i;
 		if (i.Open(m->File, O_READ))
 		{
-			GStringPipe o;
+			LStringPipe o;
 			GCopyStreamer c;
 			GLinePrefix e("", false);
 			if (c.Copy(&i, &o, &e))
@@ -2163,7 +2163,7 @@ bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *U
 						VERIFY_RET_VAL(ReadReply());
 
 						LVariant v;
-						if (Socket->SetValue(GSocket_Protocol, v="SSL"))
+						if (Socket->SetValue(LSocket_Protocol, v="SSL"))
 						{
 							Flags &= ~MAIL_USE_STARTTLS;
 						}

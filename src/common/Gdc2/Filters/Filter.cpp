@@ -31,7 +31,7 @@
 #include "lgi/common/Token.h"
 #include "lgi/common/Palette.h"
 
-int FindHeader(int Offset, const char *Str, GStream *f)
+int FindHeader(int Offset, const char *Str, LStream *f)
 {
 	int i = 0;
 	
@@ -75,10 +75,10 @@ public:
 	Format GetFormat() { return FmtBmp; }
 
 	/// Reads a BMP file
-	IoStatus ReadImage(LSurface *Out, GStream *In);
+	IoStatus ReadImage(LSurface *Out, LStream *In);
 	
 	/// Writes a Windows BMP file
-	IoStatus WriteImage(GStream *Out, LSurface *In);
+	IoStatus WriteImage(LStream *Out, LSurface *In);
 
 	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
@@ -176,7 +176,7 @@ public:
 	uint32_t GammaGreen;    /* Gamma green coordinate scale value */
 	uint32_t GammaBlue;     /* Gamma blue coordinate scale value */
 
-	bool Read(GStream &f)
+	bool Read(LStream &f)
 	{
 		ZeroObj(*this);
 		int64 Start = f.GetPos();
@@ -278,7 +278,7 @@ int DownSort(MaskComp *a, MaskComp *b)
 	return b->Mask > a->Mask ? 1 : -1;
 }
 
-GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, GStream *In)
+GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 {
 	if (!pDC || !In)
 		return GFilter::IoError;
@@ -598,7 +598,7 @@ GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, GStream *In)
 }
 
 template<typename T>
-ssize_t SwapWrite(GStream *Out, T v)
+ssize_t SwapWrite(LStream *Out, T v)
 {
 	#if 0 // __ORDER_BIG_ENDIAN__
 	uint8_t *s = (uint8_t*)&v;
@@ -613,7 +613,7 @@ ssize_t SwapWrite(GStream *Out, T v)
 	return Out->Write(&v, sizeof(v));
 }
 
-GFilter::IoStatus GdcBmp::WriteImage(GStream *Out, LSurface *pDC)
+GFilter::IoStatus GdcBmp::WriteImage(LStream *Out, LSurface *pDC)
 {
     GFilter::IoStatus Status = IoError;
 	
@@ -859,8 +859,8 @@ public:
 	Format GetFormat() { return FmtIco; }
 	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
 	int GetImages() { return 1; }
-	IoStatus ReadImage(LSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, LSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, LStream *In);
+	IoStatus WriteImage(LStream *Out, LSurface *pDC);
 	bool GetVariant(const char *n, LVariant &v, char *a);
 };
 
@@ -897,7 +897,7 @@ bool GdcIco::GetVariant(const char *n, LVariant &v, char *a)
 	return true;
 }
 
-GFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, GStream *In)
+GFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, LStream *In)
 {
 	GFilter::IoStatus Status = IoError;
 	int MyBits = 0;
@@ -1119,7 +1119,7 @@ GFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, GStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcIco::WriteImage(GStream *Out, LSurface *pDC)
+GFilter::IoStatus GdcIco::WriteImage(LStream *Out, LSurface *pDC)
 {
 	GFilter::IoStatus Status = IoError;
 
@@ -1413,7 +1413,7 @@ LSurface *GdcDevice::Load(const char *Name, bool UseOSLoader)
 	return Load(&File, Name, UseOSLoader);
 }
 
-LSurface *GdcDevice::Load(GStream *In, const char *Name, bool UseOSLoader)
+LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 {
 	if (!In)
 		return NULL;
@@ -1622,7 +1622,7 @@ bool WriteDC(const char *Name, LSurface *pDC)
     return GdcD->Save(Name, pDC);
 }
 
-bool GdcDevice::Save(GStream *Out, LSurface *In, const char *FileType)
+bool GdcDevice::Save(LStream *Out, LSurface *In, const char *FileType)
 {
 	if (!Out || !In || !FileType)
 		return false;

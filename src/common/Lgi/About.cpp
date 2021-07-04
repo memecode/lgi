@@ -39,7 +39,7 @@ GAbout::GAbout(	LView *parent,
 	const char *Build = "Release";
 	#endif
 
-	GStringPipe p;
+	LStringPipe p;
 	const char *OsName = LGetOsName();
 	#if defined(_WIN64)
 	OsName = "Win64";

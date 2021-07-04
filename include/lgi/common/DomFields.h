@@ -76,7 +76,7 @@ _(FileModified, "Modified")
 _(FileFolder, "Folder")
 _(FileEncoding, "Encoding")
 	
-// GStream
+// LStream
 _(StreamReadable, "Readable")
 _(StreamWritable, "Writable")
 

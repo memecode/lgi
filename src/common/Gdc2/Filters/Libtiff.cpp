@@ -101,8 +101,8 @@ public:
 	Format GetFormat() { return FmtTiff; }
 	bool IsOk() { return Lib ? Lib->IsLoaded() : false; }
 
-	IoStatus ReadImage(LSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, LSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, LStream *In);
+	IoStatus WriteImage(LStream *Out, LSurface *pDC);
 
 	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
@@ -144,21 +144,21 @@ class GdcTiffFactory : public GFilterFactory
 
 static t::tsize_t TRead(t::thandle_t Hnd, t::tdata_t Ptr, t::tsize_t Size)
 {
-	GStream *s = (GStream*)Hnd;
+	LStream *s = (LStream*)Hnd;
 	int r = s->Read(Ptr, Size);
 	return r;
 }
 
 static t::tsize_t TWrite(t::thandle_t Hnd, t::tdata_t Ptr, t::tsize_t Size)
 {
-	GStream *s = (GStream*)Hnd;
+	LStream *s = (LStream*)Hnd;
 	int w = s->Write(Ptr, Size);
 	return w; 
 }
 
 static t::toff_t TSeek(t::thandle_t Hnd, t::toff_t Where, int Whence)
 {
-	GStream *s = (GStream*)Hnd;
+	LStream *s = (LStream*)Hnd;
 
 	switch (Whence)
 	{
@@ -178,13 +178,13 @@ static t::toff_t TSeek(t::thandle_t Hnd, t::toff_t Where, int Whence)
 
 static int TClose(t::thandle_t Hnd)
 {
-	GStream *s = (GStream*)Hnd;
+	LStream *s = (LStream*)Hnd;
 	return !s->Close();
 }
 
 static t::toff_t TSize(t::thandle_t Hnd)
 {
-	GStream *s = (GStream*)Hnd;
+	LStream *s = (LStream*)Hnd;
 	t::toff_t size = (t::toff_t) s->GetSize();
 	return size;
 }
@@ -443,7 +443,7 @@ void CmykToRgb32(D *d, S *s, int width)
 	}
 }
 
-GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, GStream *In)
+GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 {
 	LVariant v;
 	if (!pDC || !In)
@@ -799,7 +799,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, GStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcLibTiff::WriteImage(GStream *Out, LSurface *pDC)
+GFilter::IoStatus GdcLibTiff::WriteImage(LStream *Out, LSurface *pDC)
 {
 	LVariant v;
 	if (!pDC || !Out)

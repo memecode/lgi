@@ -16,7 +16,7 @@ bool HasTag(List<char> &Tags, const char *Tag)
 	return false;
 }
 
-void ParseRtf(GStringPipe &p, char *&s)
+void ParseRtf(LStringPipe &p, char *&s)
 {
 	List<char> Tags;
 
@@ -76,7 +76,7 @@ void ParseRtf(GStringPipe &p, char *&s)
 
 char *MsRtfToHtml(char *s)
 {
-	GStringPipe p;
+	LStringPipe p;
 	ParseRtf(p, s);
 	return p.NewStr();
 }

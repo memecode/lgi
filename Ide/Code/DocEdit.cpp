@@ -216,7 +216,7 @@ void DocEdit::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 char *DocEdit::TemplateMerge(const char *Template, const char *Name, List<char> *Params)
 {
 	// Parse template and insert into doc
-	GStringPipe T;
+	LStringPipe T;
 	for (const char *t = Template; *t; )
 	{
 		char *e = strstr((char*) t, "<%");

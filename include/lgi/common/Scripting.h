@@ -16,14 +16,14 @@ class LScriptArguments : public GArray<LVariant*>
 	friend class LVirtualMachine;
 
 	LVirtualMachine *Vm;
-	GStream *Console;
+	LStream *Console;
 	LVariant _Return;
 	LVariant *PtrRet;
 
 public:
-	static GStream NullConsole;
+	static LStream NullConsole;
 
-	LScriptArguments(LVirtualMachine *vm, LVariant *ret = NULL, GStream *console = NULL)
+	LScriptArguments(LVirtualMachine *vm, LVariant *ret = NULL, LStream *console = NULL)
 	{
 		Vm = vm;
 		if (ret)
@@ -39,7 +39,7 @@ public:
 
 	LVirtualMachine *GetVm() { return Vm; }
 	LVariant *GetReturn() { return PtrRet; }
-	GStream *GetConsole() { return Console; }
+	LStream *GetConsole() { return Console; }
 	bool Throw(const char *File, int Line, const char *Msg, ...);
 };
 
@@ -216,8 +216,8 @@ public:
 	virtual GHostFunc *GetCommands() = 0;
 	virtual char *GetIncludeFile(char *FileName) = 0;
 	virtual GAutoString GetDataFolder() { return GAutoString(); }
-	virtual GStream *GetLog() { return NULL; }
-	virtual bool SetLog(GStream *Log) { return false; }
+	virtual LStream *GetLog() { return NULL; }
+	virtual bool SetLog(LStream *Log) { return false; }
 
 	// AddPrimitive: Add your primitive's functions in a derived class using the format:
 	//
@@ -358,8 +358,8 @@ public:
 	LScriptEngine(LViewI *parent, LScriptContext *UserContext, LVmDebuggerCallback *Callback);
 	~LScriptEngine();
 
-	GStream *GetConsole();
-	bool SetConsole(GStream *t);
+	LStream *GetConsole();
+	bool SetConsole(LStream *t);
 
 	LCompiledCode *GetCurrentCode();
 	bool Compile(	GAutoPtr<LCompiledCode> &Obj,
@@ -429,7 +429,7 @@ public:
 	bool OnRequestClose(bool OsShuttingDown);
 	GMessage::Param OnEvent(GMessage *Msg);
 	void LoadFile(const char *File);
-	GStream *GetLog();
+	LStream *GetLog();
 	void OwnCompiledCode(GAutoPtr<LCompiledCode> Cc);
 	LCompiledCode *GetCode();
 	

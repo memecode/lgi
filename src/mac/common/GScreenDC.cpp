@@ -5,7 +5,7 @@
 
 #include "Lgi.h"
 
-class GScreenPrivate
+class LScreenPrivate
 {
 public:
 	CGContextRef Ctx;
@@ -45,12 +45,12 @@ public:
 	}
 	#endif
 	
-	GScreenPrivate()
+	LScreenPrivate()
 	{
 		Init();
 	}
 	
-	GScreenPrivate(LWindow *w, void *param = NULL)
+	LScreenPrivate(LWindow *w, void *param = NULL)
 	{
 		Init();
 		Wnd = w;
@@ -79,7 +79,7 @@ public:
 		#endif
 	}
 
-	GScreenPrivate(LView *v, void *param = NULL)
+	LScreenPrivate(LView *v, void *param = NULL)
 	{
 		Init();
 		View = v;
@@ -117,12 +117,12 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 LScreenDC::LScreenDC()
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 }
 
 LScreenDC::LScreenDC(GPrintDcParams *Params)
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	
 	#if LGI_COCOA
 	#else
@@ -141,13 +141,13 @@ LScreenDC::LScreenDC(GPrintDcParams *Params)
 
 LScreenDC::LScreenDC(LWindow *w, void *param)
 {
-	d = new GScreenPrivate(w, param);
+	d = new LScreenPrivate(w, param);
 	d->Wnd = w;
 }
 
 LScreenDC::LScreenDC(LView *v, void *param)
 {
-	d = new GScreenPrivate(v, param);
+	d = new LScreenPrivate(v, param);
 }
 
 LScreenDC::~LScreenDC()

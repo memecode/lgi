@@ -6,7 +6,7 @@
 #include "lgi/common/TextView3.h"
 #include "lgi/common/Net.h"
 
-class GTextLog : public LTextView3, public GStream
+class GTextLog : public LTextView3, public LStream
 {
 protected:
 	bool ProcessReturns;

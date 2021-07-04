@@ -15,9 +15,9 @@ public:
 	// I/O
 	bool CreateNamed(const char *name);
 	bool Open(const char *file);
-	bool Open(GStream *stream);
+	bool Open(LStream *stream);
 	bool Save(const char *file);
-	bool Save(GStream *stream);
+	bool Save(LStream *stream);
 	
 	// Props
 	char *GetName();

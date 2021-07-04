@@ -170,7 +170,7 @@ public:
 
 	class TextConvertState
 	{
-		GStream *Out;
+		LStream *Out;
 		ssize_t PrevLineLen;
 		GArray<char> Buf;
 	
@@ -178,7 +178,7 @@ public:
 		int Depth;
 		ssize_t CharsOnLine;
 		
-		TextConvertState(GStream *o)
+		TextConvertState(LStream *o)
 		{
 			Out = o;
 			Depth = 0;
@@ -283,7 +283,7 @@ protected:
 	GAutoWString PreTxt;
 
 	// Debug stuff
-	void _Dump(GStringPipe &Buf, int Depth);
+	void _Dump(LStringPipe &Buf, int Depth);
 	void _TraceOpenTags();
 
 	// Private methods
@@ -426,7 +426,7 @@ public:
 	GTag *GetTagByName(const char *Name);
 	void CopyClipboard(GMemQueue &p, bool &InSelection);
 	GTag *IsAnchor(GString *Uri);
-	bool CreateSource(GStringPipe &p, int Depth = 0, bool LastWasBlock = true);
+	bool CreateSource(LStringPipe &p, int Depth = 0, bool LastWasBlock = true);
 	void Find(int TagType, GArray<GTag*> &Tags);
 	GTag *GetAnchor(char *Name);
 

@@ -1,7 +1,7 @@
 #pragma once
 
+#include "SymLookup.h"
 #include "lgi/common/Json.h"
-#include "GSymLookup.h"
 #include "lgi/common/FontCache.h"
 
 class GAppPrivate
@@ -25,7 +25,7 @@ public:
 	// Win32
 	bool QuitReceived;
 	GApp::ClassContainer Classes;
-	GSymLookup *SymLookup;
+	LSymLookup *SymLookup;
 
 	GAppPrivate(GApp *owner) : Owner(owner)
 	{

@@ -842,7 +842,7 @@ void GApp::OnCommandLine()
 			LSubProcess sub("file", args);
 			if (sub.Start())
 			{
-				GStringPipe p;
+				LStringPipe p;
 				sub.Communicate(&p);
 				auto s = p.NewGStr();
 				if (s && s.Find(":") > 0)
@@ -935,7 +935,7 @@ void GApp::OnCommandLine()
 
 	#if HAS_FILE_CMD
 	// doh! not installed... :(
-	GStringPipe Output;
+	LStringPipe Output;
 	char Args[256];
 	sprintf(Args, "-i \"%s\"", File);
 	LSubProcess p("file", Args);
@@ -1067,7 +1067,7 @@ bool GApp::GetClipBoardContent(OsView Hnd, ::LVariant &v, ::GArray<char*> &Types
 }
 #endif
 
-GSymLookup *GApp::GetSymLookup()
+LSymLookup *GApp::GetSymLookup()
 {
 	return d;
 }

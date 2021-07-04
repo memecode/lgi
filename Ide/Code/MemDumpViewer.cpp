@@ -324,7 +324,7 @@ public:
 										h.Add(Alloc, di);
 										di->Alloc = NewStr(Alloc);
 
-										GStringPipe p;
+										LStringPipe p;
 										for (int k=0; k<Stack.Length(); k++)
 										{
 											p.Print("%s\n", Stack[k] + 1);

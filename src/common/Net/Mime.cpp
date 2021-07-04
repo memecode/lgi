@@ -23,7 +23,7 @@ static const char *MimeBase64			= "base64";
 #define SkipWs(s)					while (*s && strchr(MimeWs, *s)) s++
 #define SkipNonWs(s)				while (*s && !strchr(MimeWs, *s)) s++
 
-const char *GMime::DefaultCharset =		"text/plain";
+const char *LMime::DefaultCharset =		"text/plain";
 
 template<typename T>
 int CastInt(T in)
@@ -48,7 +48,7 @@ int AltScore(char *Mt)
 	return Score;
 }
 
-int AltSortCmp(GMime **a, GMime **b)
+int AltSortCmp(LMime **a, LMime **b)
 {
 	int a_score = AltScore((*a)->GetMimeType());
 	int b_score = AltScore((*b)->GetMimeType());
@@ -100,31 +100,31 @@ void CreateMimeBoundary(char *Buf, int BufLen)
 }
 
 ///////////////////////////////////////////////////////////////////////
-class GCoderStream : public GStream
+class LCoderStream : public LStream
 {
 protected:
 	LStreamI *Out;
 
 public:
-	GCoderStream(LStreamI *o)
+	LCoderStream(LStreamI *o)
 	{
 		Out = o;
 	}
 };
 
-class GMimeTextEncode : public GCoderStream
+class LMimeTextEncode : public LCoderStream
 {
 	// This code needs to make sure it writes an end-of-line at
 	// the end, otherwise a following MIME boundary could be missed.
 	bool LastEol;
 	
 public:
-	GMimeTextEncode(LStreamI *o) : GCoderStream(o)
+	LMimeTextEncode(LStreamI *o) : LCoderStream(o)
 	{
 		LastEol = false;
 	}
 	
-	~GMimeTextEncode()
+	~LMimeTextEncode()
 	{
 		if (!LastEol)
 		{
@@ -178,7 +178,7 @@ public:
 	}
 };
 
-class GMimeQuotedPrintableEncode : public GCoderStream
+class GMimeQuotedPrintableEncode : public LCoderStream
 {
 	// 'd' is our current position in 'Buf'
 	char *d;
@@ -187,7 +187,7 @@ class GMimeQuotedPrintableEncode : public GCoderStream
 	char Buf[128];
 
 public:
-	GMimeQuotedPrintableEncode(LStreamI *o) : GCoderStream(o)
+	GMimeQuotedPrintableEncode(LStreamI *o) : LCoderStream(o)
 	{
 		Buf[0] = 0;
 		d = Buf;
@@ -276,7 +276,7 @@ public:
 	}
 };
 
-class GMimeQuotedPrintableDecode : public GCoderStream
+class GMimeQuotedPrintableDecode : public LCoderStream
 {
 	uint8_t ConvHexToBin(char c)
 	{
@@ -290,7 +290,7 @@ class GMimeQuotedPrintableDecode : public GCoderStream
 	}
 
 public:
-	GMimeQuotedPrintableDecode(LStreamI *o) : GCoderStream(o) {}
+	GMimeQuotedPrintableDecode(LStreamI *o) : LCoderStream(o) {}
 
 	ssize_t Write(const void *p, ssize_t size, int f = 0)
 	{
@@ -357,12 +357,12 @@ public:
 #define BASE64_LINE_SZ			76
 #define BASE64_READ_SZ			(BASE64_LINE_SZ*3/4)
 
-class GMimeBase64Encode : public GCoderStream
+class GMimeBase64Encode : public LCoderStream
 {
 	GMemQueue Buf;
 
 public:
-	GMimeBase64Encode(LStreamI *o) : GCoderStream(o) {}
+	GMimeBase64Encode(LStreamI *o) : LCoderStream(o) {}
 	
 	~GMimeBase64Encode()
 	{
@@ -408,13 +408,13 @@ public:
 };
 
 
-class GMimeBase64Decode : public GCoderStream
+class GMimeBase64Decode : public LCoderStream
 {
-	GStringPipe Buf;
+	LStringPipe Buf;
 	uint8_t Lut[256];
 
 public:
-	GMimeBase64Decode(LStreamI *o) : GCoderStream(o)
+	GMimeBase64Decode(LStreamI *o) : LCoderStream(o)
 	{
 		ZeroObj(Lut);
 		memset(Lut+(int)'a', 1, 'z'-'a'+1);
@@ -466,7 +466,7 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////
-GMimeBuf::GMimeBuf(LStreamI *src, GStreamEnd *end)
+GMimeBuf::GMimeBuf(LStreamI *src, LStreamEnd *end)
 {
 	Total = 0;
 	Src = src;
@@ -479,7 +479,7 @@ ssize_t GMimeBuf::Pop(GArray<char> &Out)
 {
 	ssize_t Ret = 0;
 
-	while (!(Ret = GStringPipe::Pop(Out)))
+	while (!(Ret = LStringPipe::Pop(Out)))
 	{
 		if (Src)
 		{
@@ -519,12 +519,12 @@ ssize_t GMimeBuf::Pop(GArray<char> &Out)
 		else
 		{
 			// Is there any unterminated space in the string pipe?
-			int64 Sz = GStringPipe::GetSize();
+			int64 Sz = LStringPipe::GetSize();
 			if (Sz > 0)
 			{
 				if (Out.Length() < Sz)
 					Out.Length(Sz);
-				Ret = GStringPipe::Read(Out.AddressOf(), Sz);
+				Ret = LStringPipe::Read(Out.AddressOf(), Sz);
 			}
 			break;
 		}
@@ -537,7 +537,7 @@ ssize_t GMimeBuf::Pop(char *Str, ssize_t BufSize)
 {
 	ssize_t Ret = 0;
 
-	while (!(Ret = GStringPipe::Pop(Str, BufSize)))
+	while (!(Ret = LStringPipe::Pop(Str, BufSize)))
 	{
 		if (Src)
 		{
@@ -577,10 +577,10 @@ ssize_t GMimeBuf::Pop(char *Str, ssize_t BufSize)
 		else
 		{
 			// Is there any unterminated space in the string pipe?
-			int64 Sz = GStringPipe::GetSize();
+			int64 Sz = LStringPipe::GetSize();
 			if (Sz > 0)
 			{
-				Ret = GStringPipe::Read(Str, BufSize);
+				Ret = LStringPipe::Read(Str, BufSize);
 			}
 			break;
 		}
@@ -591,7 +591,7 @@ ssize_t GMimeBuf::Pop(char *Str, ssize_t BufSize)
 
 ///////////////////////////////////////////////////////////////////////
 // Mime Object
-GMime::GMime(const char *tmp)
+LMime::LMime(const char *tmp)
 {
 	Parent = 0;
 	TmpPath = NewStr(tmp);
@@ -609,14 +609,14 @@ GMime::GMime(const char *tmp)
 	Binary.Write.Mime = this;
 }
 
-GMime::~GMime()
+LMime::~LMime()
 {
 	Remove();
 	Empty();
 	DeleteArray(TmpPath);
 }
 
-char *GMime::GetFileName()
+char *LMime::GetFileName()
 {
 	char *n = GetSub("Content-Type", "Name");
 	if (!n)
@@ -637,15 +637,15 @@ char *GMime::GetFileName()
 	return n;
 }
 
-GMime *GMime::NewChild()
+LMime *LMime::NewChild()
 {
-	GMime *n = new GMime(GetTmpPath());
+	LMime *n = new LMime(GetTmpPath());
 	if (n)
 		Insert(n);
 	return n;
 }
 
-bool GMime::Insert(GMime *m, int Pos)
+bool LMime::Insert(LMime *m, int Pos)
 {
 	LgiAssert(m != NULL);
 	if (!m)
@@ -667,7 +667,7 @@ bool GMime::Insert(GMime *m, int Pos)
 	return true;
 }
 
-void GMime::Remove()
+void LMime::Remove()
 {
 	if (Parent)
 	{
@@ -677,7 +677,7 @@ void GMime::Remove()
 	}
 }
 
-GMime *GMime::operator[](uint32_t i)
+LMime *LMime::operator[](uint32_t i)
 {
 	if (i >= Children.Length())
 		return 0;
@@ -685,9 +685,9 @@ GMime *GMime::operator[](uint32_t i)
 	return Children[i];
 }
 
-char *GMime::GetTmpPath()
+char *LMime::GetTmpPath()
 {
-	for (GMime *m = this; m; m = m->Parent)
+	for (LMime *m = this; m; m = m->Parent)
 	{
 		if (m->TmpPath)
 			return m->TmpPath;
@@ -695,14 +695,14 @@ char *GMime::GetTmpPath()
 	return 0;
 }
 
-bool GMime::SetHeaders(const char *h)
+bool LMime::SetHeaders(const char *h)
 {
 	DeleteArray(Headers);
 	Headers = NewStr(h);
 	return Headers != 0;
 }
 
-bool GMime::Lock()
+bool LMime::Lock()
 {
 	bool Lock = true;
 	if (DataLock)
@@ -712,7 +712,7 @@ bool GMime::Lock()
 	return Lock;
 }
 
-void GMime::Unlock()
+void LMime::Unlock()
 {
 	if (DataLock)
 	{
@@ -720,7 +720,7 @@ void GMime::Unlock()
 	}
 }
 
-bool GMime::CreateTempData()
+bool LMime::CreateTempData()
 {
 	bool Status = false;
 
@@ -735,7 +735,7 @@ bool GMime::CreateTempData()
 	return Status;
 }
 
-LStreamI *GMime::GetData(bool Detach)
+LStreamI *LMime::GetData(bool Detach)
 {
 	LStreamI *Ds = DataStore;
 
@@ -752,7 +752,7 @@ LStreamI *GMime::GetData(bool Detach)
 	return Ds;
 }
 
-bool GMime::SetData(bool OwnStream, LStreamI *d, int Pos, int Size, LMutex *l)
+bool LMime::SetData(bool OwnStream, LStreamI *d, int Pos, int Size, LMutex *l)
 {
 	if (DataStore && Lock())
 	{
@@ -772,7 +772,7 @@ bool GMime::SetData(bool OwnStream, LStreamI *d, int Pos, int Size, LMutex *l)
 	return true;
 }
 
-bool GMime::SetData(char *Str, int Len)
+bool LMime::SetData(char *Str, int Len)
 {
 	if (DataStore && Lock())
 	{
@@ -800,7 +800,7 @@ bool GMime::SetData(char *Str, int Len)
 	return true;
 }
 
-void GMime::Empty()
+void LMime::Empty()
 {
 	if (OwnDataStore)
 	{
@@ -822,7 +822,7 @@ void GMime::Empty()
 	OwnDataStore = 0;
 }
 
-char *GMime::NewValue(char *&s, bool Alloc)
+char *LMime::NewValue(char *&s, bool Alloc)
 {
 	char *Status = 0;
 
@@ -857,7 +857,7 @@ char *GMime::NewValue(char *&s, bool Alloc)
 	return Status;
 }
 
-char *GMime::StartOfField(char *s, const char *Field)
+char *LMime::StartOfField(char *s, const char *Field)
 {
 	if (s && Field)
 	{
@@ -893,7 +893,7 @@ char *GMime::StartOfField(char *s, const char *Field)
 	return 0;
 }
 
-char *GMime::NextField(char *s)
+char *LMime::NextField(char *s)
 {
 	while (s)
 	{
@@ -915,7 +915,7 @@ char *GMime::NextField(char *s)
 	return s;
 }
 
-char *GMime::Get(const char *Name, bool Short, const char *Default)
+char *LMime::Get(const char *Name, bool Short, const char *Default)
 {
 	char *Status = 0;
 
@@ -951,12 +951,12 @@ char *GMime::Get(const char *Name, bool Short, const char *Default)
 	return Status;
 }
 
-bool GMime::Set(const char *Name, const char *Value)
+bool LMime::Set(const char *Name, const char *Value)
 {
 	if (!Name)
 		return false;
 
-	GStringPipe p;
+	LStringPipe p;
 
 	char *h = Headers;
 	if (h)
@@ -1007,7 +1007,7 @@ bool GMime::Set(const char *Name, const char *Value)
 	return Headers != NULL;
 }
 
-char *GMime::GetSub(const char *Field, const char *Sub)
+char *LMime::GetSub(const char *Field, const char *Sub)
 {
 	char *Status = 0;
 
@@ -1047,7 +1047,7 @@ char *GMime::GetSub(const char *Field, const char *Sub)
 	return Status;
 }
 
-bool GMime::SetSub(const char *Field, const char *Sub, const char *Value, const char *DefaultValue)
+bool LMime::SetSub(const char *Field, const char *Sub, const char *Value, const char *DefaultValue)
 {
 	if (Field && Sub)
 	{
@@ -1062,7 +1062,7 @@ bool GMime::SetSub(const char *Field, const char *Sub, const char *Value, const 
 			{
 				SkipWs(s);
 
-				GStringPipe p;
+				LStringPipe p;
 
 				// Push the field data
 				char *e = s;
@@ -1136,7 +1136,7 @@ bool GMime::SetSub(const char *Field, const char *Sub, const char *Value, const 
 // Mime Text Conversion
 
 // Rfc822 Text -> Object
-ssize_t GMime::GMimeText::GMimeDecode::Pull(LStreamI *Source, GStreamEnd *End)
+ssize_t LMime::GMimeText::GMimeDecode::Pull(LStreamI *Source, LStreamEnd *End)
 {
 	GMimeBuf Buf(Source, End); // Stream -> Lines
 	return Parse(&Buf);
@@ -1155,7 +1155,7 @@ public:
 	}
 };
 
-int GMime::GMimeText::GMimeDecode::Parse(GStringPipe *Source, ParentState *State)
+int LMime::GMimeText::GMimeDecode::Parse(LStringPipe *Source, ParentState *State)
 {
 	int Status = 0;
 
@@ -1176,7 +1176,7 @@ int GMime::GMimeText::GMimeDecode::Parse(GStringPipe *Source, ParentState *State
 	LgiAssert(Mime->DataStore != NULL);
 
 	// Read the headers..
-	GStringPipe HeaderBuf;
+	LStringPipe HeaderBuf;
 	ssize_t r;
 
 	if (Buffer.Length() == 0)
@@ -1206,7 +1206,7 @@ int GMime::GMimeText::GMimeDecode::Parse(GStringPipe *Source, ParentState *State
 	GAutoString MimeType(Mime->GetMimeType());
 	LOG("%s:%i - Encoding=%s, MimeType=%s, Boundary=%s\n", _FL, Encoding, MimeType.Get(), Boundary);
 
-	GStream *Decoder = 0;
+	LStream *Decoder = 0;
 	if (Encoding)
 	{
 		if (_stricmp(Encoding, MimeQuotedPrintable) == 0)
@@ -1274,7 +1274,7 @@ int GMime::GMimeText::GMimeDecode::Parse(GStringPipe *Source, ParentState *State
 				ParentState MyState;
 				MyState.Boundary = Boundary;
 
-				GMime *Seg = new GMime(Mime->GetTmpPath());
+				LMime *Seg = new LMime(Mime->GetTmpPath());
 				if (Seg &&
 					Seg->Text.Decode.Parse(Source, &MyState))
 				{
@@ -1339,12 +1339,12 @@ int GMime::GMimeText::GMimeDecode::Parse(GStringPipe *Source, ParentState *State
 	return Status;
 }
 
-void GMime::GMimeText::GMimeDecode::Empty()
+void LMime::GMimeText::GMimeDecode::Empty()
 {
 }
 
 // Object -> Rfc822 Text
-ssize_t GMime::GMimeText::GMimeEncode::Push(LStreamI *Dest, GStreamEnd *End)
+ssize_t LMime::GMimeText::GMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 {
 	int Status = 0;
 
@@ -1451,7 +1451,7 @@ ssize_t GMime::GMimeText::GMimeEncode::Push(LStreamI *Dest, GStreamEnd *End)
 		Dest->Write(MimeEol, 2);
 
 		// Write data
-		GStream *Encoder = 0;
+		LStream *Encoder = 0;
 		if (Encoding)
 		{
 			if (_stricmp(Encoding, MimeQuotedPrintable) == 0)
@@ -1465,7 +1465,7 @@ ssize_t GMime::GMimeText::GMimeEncode::Push(LStreamI *Dest, GStreamEnd *End)
 		}
 		if (!Encoder)
 		{
-			Encoder = new GMimeTextEncode(Dest);
+			Encoder = new LMimeTextEncode(Dest);
 		}
 
 		if (Mime->DataStore)
@@ -1530,7 +1530,7 @@ ssize_t GMime::GMimeText::GMimeEncode::Push(LStreamI *Dest, GStreamEnd *End)
 	return Status;
 }
 
-void GMime::GMimeText::GMimeEncode::Empty()
+void LMime::GMimeText::GMimeEncode::Empty()
 {
 }
 
@@ -1538,7 +1538,7 @@ void GMime::GMimeText::GMimeEncode::Empty()
 // Mime Binary Serialization
 
 // Source -> Object
-ssize_t GMime::GMimeBinary::GMimeRead::Pull(LStreamI *Source, GStreamEnd *End)
+ssize_t LMime::GMimeBinary::GMimeRead::Pull(LStreamI *Source, LStreamEnd *End)
 {
 	if (Source)
 	{
@@ -1564,7 +1564,7 @@ ssize_t GMime::GMimeBinary::GMimeRead::Pull(LStreamI *Source, GStreamEnd *End)
 					// Read the children in
 					for (int i=0; i<Header[3]; i++)
 					{
-						GMime *c = new GMime(Mime->GetTmpPath());
+						LMime *c = new LMime(Mime->GetTmpPath());
 						if (c &&
 							c->Binary.Read.Pull(Source, End))
 						{
@@ -1582,12 +1582,12 @@ ssize_t GMime::GMimeBinary::GMimeRead::Pull(LStreamI *Source, GStreamEnd *End)
 	return 0; // failure
 }
 
-void GMime::GMimeBinary::GMimeRead::Empty()
+void LMime::GMimeBinary::GMimeRead::Empty()
 {
 }
 
 // Object -> Dest
-int64 GMime::GMimeBinary::GMimeWrite::GetSize()
+int64 LMime::GMimeBinary::GMimeWrite::GetSize()
 {
 	int64 Size = 0;
 
@@ -1607,7 +1607,7 @@ int64 GMime::GMimeBinary::GMimeWrite::GetSize()
 	return Size;
 }
 
-ssize_t GMime::GMimeBinary::GMimeWrite::Push(LStreamI *Dest, GStreamEnd *End)
+ssize_t LMime::GMimeBinary::GMimeWrite::Push(LStreamI *Dest, LStreamEnd *End)
 {
 	if (Dest && Mime)
 	{
@@ -1665,7 +1665,7 @@ ssize_t GMime::GMimeBinary::GMimeWrite::Push(LStreamI *Dest, GStreamEnd *End)
 	return 0;
 }
 
-void GMime::GMimeBinary::GMimeWrite::Empty()
+void LMime::GMimeBinary::GMimeWrite::Empty()
 {
 }
 

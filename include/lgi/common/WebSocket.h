@@ -7,19 +7,19 @@
 class LSelect
 {
 protected:
-	GArray<GSocket*> s;
-	int Select(GArray<GSocket*> &Results, bool Rd, bool Wr, int TimeoutMs);
+	GArray<LSocket*> s;
+	int Select(GArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs);
 
 public:
-	LSelect(GSocket *sock = NULL);
+	LSelect(LSocket *sock = NULL);
 	
-	LSelect &operator +=(GSocket *sock);
+	LSelect &operator +=(LSocket *sock);
 	
-	GArray<GSocket*> Readable(int Timeout = -1);
-	GArray<GSocket*> Writeable(int Timeout = -1);
+	GArray<LSocket*> Readable(int Timeout = -1);
+	GArray<LSocket*> Writeable(int Timeout = -1);
 };
 
-class LWebSocket : public GSocket
+class LWebSocket : public LSocket
 {
 	struct LWebSocketPriv *d;
 

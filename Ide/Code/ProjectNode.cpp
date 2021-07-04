@@ -663,7 +663,7 @@ bool ProjectNode::Serialize(bool Write)
 						{
 							if (Files.Length())
 							{
-								GStringPipe Buf;
+								LStringPipe Buf;
 								Buf.Print(	"The file:\n"
 											"\n"
 											"\t%s\n"
@@ -706,7 +706,7 @@ bool ProjectNode::Serialize(bool Write)
 							}
 							else
 							{
-								GStringPipe Buf;
+								LStringPipe Buf;
 								Buf.Print(	"The file:\n"
 											"\n"
 											"\t%s\n"

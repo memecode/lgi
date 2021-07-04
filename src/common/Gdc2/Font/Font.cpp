@@ -1008,7 +1008,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 				#if 0
 				if (Sz.Type == LCss::LenPx)
 				{
-					GStringPipe p;
+					LStringPipe p;
 					Sz.ToString(p);
 					LgiTrace("%s:%i - LFont::Create(%s,%s) = %f,%f,%f (%i)\n",
 							_FL,
@@ -1165,7 +1165,7 @@ GAutoString LFont::ConvertToUnicode(char16 *Input, ssize_t Len)
 		// F***ing wingdings.
 		if (Input)
 		{
-			GStringPipe p(256);
+			LStringPipe p(256);
 			if (Len < 0)
 				Len = StrlenW(Input);
 			char16 *c = Input, *e = Input + Len;

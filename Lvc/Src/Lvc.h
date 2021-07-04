@@ -178,14 +178,14 @@ struct AppPriv
 class SshConnection : public LSsh, public LEventTargetThread
 {
 	int GuiHnd;
-	GUri Host;
-	GAutoPtr<GStream> c;
+	LUri Host;
+	GAutoPtr<LStream> c;
 	GString Uri, Prompt;
 	AppPriv *d;
 
 	GMessage::Result OnEvent(GMessage *Msg);
-	GStream *GetConsole();
-	bool WaitPrompt(GStream *c, GString *Data = NULL);
+	LStream *GetConsole();
+	bool WaitPrompt(LStream *c, GString *Data = NULL);
 
 public:
 	LHashTbl<StrKey<char,false>,VersionCtrl> Types;

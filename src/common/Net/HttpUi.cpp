@@ -9,15 +9,15 @@ struct GHttpServerPriv;
 
 class GHttpThread : public LThread
 {
-	GSocket *s;
+	LSocket *s;
 	GHttpServerPriv *p;
 
 public:
-	GHttpThread(GSocket *sock, GHttpServerPriv *priv);
+	GHttpThread(LSocket *sock, GHttpServerPriv *priv);
 	int Main();
 };
 
-class GHttpServer_TraceSocket : public GSocket
+class GHttpServer_TraceSocket : public LSocket
 {
 public:
 	void OnInformation(char *Str)
@@ -69,7 +69,7 @@ struct GHttpServerPriv : public LThread
 		#endif
 		while (Listen.IsOpen())
 		{
-			GSocket *s = new GSocket;
+			LSocket *s = new LSocket;
 			#if LOG_HTTP
 			LgiTrace("Accepting...\n");
 			#endif
@@ -86,7 +86,7 @@ struct GHttpServerPriv : public LThread
 	}
 };
 
-GHttpThread::GHttpThread(GSocket *sock, GHttpServerPriv *priv)
+GHttpThread::GHttpThread(LSocket *sock, GHttpServerPriv *priv)
 {
 	s = sock;
 	p = priv;
@@ -250,7 +250,7 @@ char *GHttpCallback::FormDecode(char *s)
 
 char *GHttpCallback::HtmlEncode(char *s)
 {
-	GStringPipe p;
+	LStringPipe p;
 	char *e = "<>";
 
 	while (s && *s)
@@ -277,7 +277,7 @@ bool GHttpCallback::ParseHtmlWithDom(LVariant &Out, GDom *Dom, char *Html)
 	if (!Dom || !Html)
 		return false;
 
-	GStringPipe p;
+	LStringPipe p;
 	for (char *s = Html; s && *s; )
 	{
 		char *e = stristr(s, "<?");

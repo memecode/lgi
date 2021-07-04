@@ -332,7 +332,7 @@ bool TnefReadIndex(LStreamI *Tnef, GArray<TnefFileInfo*> &Index)
 	return Status;
 }
 
-bool TnefExtract(LStreamI *Tnef, GStream *Out, TnefFileInfo *File)
+bool TnefExtract(LStreamI *Tnef, LStream *Out, TnefFileInfo *File)
 {
 	bool Status = false;
 

@@ -14,11 +14,11 @@
 #include "GArray.h"
 #include "LVariant.h"
 #if defined(WIN32)
-#include "../win32/GSymLookup.h"
+#include "../win32/LSymLookup.h"
 #elif defined(LINUX) && defined(LGI_SDL)
-#include "../linux/GSymLookup.h"
+#include "../linux/LSymLookup.h"
 #else
-#include "GSymLookup.h"
+#include "LSymLookup.h"
 #endif
 #include "GToken.h"
 #include "GViewPriv.h"
@@ -162,7 +162,7 @@ typedef GArray<LAppInfo*> AppArray;
 #define XK_Caps_Lock                     0xffe5
 #endif
 
-class GAppPrivate : public GSymLookup, public LMutex
+class GAppPrivate : public LSymLookup, public LMutex
 {
 public:
 	// Common
@@ -956,7 +956,7 @@ GAutoString GApp::GetFileMimeType(const char *File)
 
 	#if HAS_FILE_CMD
 	// doh! not installed... :(
-	GStringPipe Output;
+	LStringPipe Output;
 	char Args[256];
 	sprintf(Args, "-i \"%s\"", File);
 	GProcess p;
@@ -1013,7 +1013,7 @@ bool GApp::GetAppsForMimeType(char *Mime, GArray<LAppInfo*> &Apps)
 	return Apps.Length() > 0;
 }
 
-GSymLookup *GApp::GetSymLookup()
+LSymLookup *GApp::GetSymLookup()
 {
 	return d;
 }

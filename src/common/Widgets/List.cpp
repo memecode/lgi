@@ -1203,7 +1203,7 @@ bool LList::OnKey(LKey &k)
 					if (k.Down())
 					{
 						uint64 Now = LgiCurrentTime();
-						GStringPipe p;
+						LStringPipe p;
 						if (d->KeyBuf && Now < d->KeyLast + 1500)
 						{
 							p.Push(d->KeyBuf);

@@ -25,7 +25,7 @@ private:
 	bool LoadDiff;
 	GString Diff;
 	GString Revision;
-	GUri Uri;
+	LUri Uri;
 	LListItemCheckBox *Chk;
 	FileStatus Status;
 

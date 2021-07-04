@@ -148,22 +148,22 @@ public:
 		Dc->Colour(0, 32);
 		Dc->Rectangle();
 
-		GPath p;
+		LPath p;
 		p.Circle(r, r, r-0.7);
 		p.SetFillRule(FILLRULE_ODDEVEN);
-		GSolidBrush s(c);
+		LSolidBrush s(c);
 		p.Fill(Dc, s);
 		p.Empty();
 
 		p.Circle(r, r, r);
 		p.Circle(r, r, r - 1.0);
 		p.SetFillRule(FILLRULE_ODDEVEN);
-		GBlendStop Stops[2] = {
+		LBlendStop Stops[2] = {
 			{0.0, cTopEdge.c32()},
 			{1.0, cBottomEdge.c32()}
 		};
 		LPointF a(4, 4), b(9, 9);
-		GLinearBlendBrush s2(a, b, CountOf(Stops), Stops);
+		LLinearBlendBrush s2(a, b, CountOf(Stops), Stops);
 		p.Fill(Dc, s2);
 
 		Dc->ConvertPreMulAlpha(true);

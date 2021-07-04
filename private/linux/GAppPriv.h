@@ -2,9 +2,9 @@
 
 #include "LJson.h"
 #if defined(WIN32) && defined(__GTK_H__)
-#include "../win32/GSymLookup.h"
+#include "../win32/LSymLookup.h"
 #else
-#include "GSymLookup.h"
+#include "LSymLookup.h"
 #endif
 
 #if HAS_LIB_MAGIC
@@ -17,7 +17,7 @@
 typedef GArray<LAppInfo*> AppArray;
 using namespace Gtk;
 
-class GAppPrivate : public GSymLookup
+class GAppPrivate : public LSymLookup
 {
 public:
 	// Common

@@ -14,20 +14,20 @@
 #define LOG_ALL 0
 
 ////////////////////////////////////////////////////////////////////////////
-LSelect::LSelect(GSocket *sock)
+LSelect::LSelect(LSocket *sock)
 {
 	if (sock)
 		*this += sock;
 }
 	
-LSelect &LSelect::operator +=(GSocket *sock)
+LSelect &LSelect::operator +=(LSocket *sock)
 {
 	if (sock)
 		s.Add(sock);
 	return *this;
 }
 	
-int LSelect::Select(GArray<GSocket*> &Results, bool Rd, bool Wr, int TimeoutMs)
+int LSelect::Select(GArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs)
 {
 	if (s.Length() == 0)
 		return 0;
@@ -106,16 +106,16 @@ int LSelect::Select(GArray<GSocket*> &Results, bool Rd, bool Wr, int TimeoutMs)
 	#endif
 }
 
-GArray<GSocket*> LSelect::Readable(int TimeoutMs)
+GArray<LSocket*> LSelect::Readable(int TimeoutMs)
 {
-	GArray<GSocket*> r;
+	GArray<LSocket*> r;
 	Select(r, true, false, TimeoutMs);
 	return r;
 }
 
-GArray<GSocket*> LSelect::Writeable(int TimeoutMs)
+GArray<LSocket*> LSelect::Writeable(int TimeoutMs)
 {
-	GArray<GSocket*> r;
+	GArray<LSocket*> r;
 	Select(r, false, true, TimeoutMs);
 	return r;
 }

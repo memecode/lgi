@@ -89,7 +89,7 @@ protected:
 		}
 	};
 
-	struct SshConsole : public GStream
+	struct SshConsole : public LStream
 	{
 		LSsh *s;
 		ssh_channel channel;
@@ -327,13 +327,13 @@ public:
 		return Status;
 	}
 
-	GAutoPtr<GStream> CreateConsole()
+	GAutoPtr<LStream> CreateConsole()
 	{
-		GAutoPtr<GStream> con(new SshConsole(this));
+		GAutoPtr<LStream> con(new SshConsole(this));
 		return con;
 	}
 
-	bool RunCommands(GStream *Console, const char **Cmds, const char *Prompt = DEFAULT_PROMPT)
+	bool RunCommands(LStream *Console, const char **Cmds, const char *Prompt = DEFAULT_PROMPT)
 	{
 		GString Buf;
 		int CmdIdx = 0;

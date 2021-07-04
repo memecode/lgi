@@ -811,8 +811,8 @@ GLanguage *GFindOldLang(int OldId)
 LgiFunc char *_LgiGenLangLookup()
 {
 	char s[256];
-	GStringPipe p;
-	GStringPipe Old;
+	LStringPipe p;
+	LStringPipe Old;
 
 	Old.Push("switch (OldId)\n{\n");
 

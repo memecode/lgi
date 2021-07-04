@@ -125,7 +125,7 @@ GAutoPtr<LMemDC> CreateDiff(LViewI *Parent, LSurface *A, LSurface *B)
 	int Cx = MIN(A->X(), B->X()), Cy = MIN(A->Y(), B->Y());
 	if (A->GetColourSpace() != B->GetColourSpace())
 	{
-		GStringPipe p;
+		LStringPipe p;
 		p.Print("The bit depths of the images are different: %i (left), %i (right).",
 				A->GetBits(), B->GetBits());
 		GAutoString a(p.NewStr());

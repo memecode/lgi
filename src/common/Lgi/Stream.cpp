@@ -48,7 +48,7 @@ ssize_t LgiPrintf(GAutoString &Str, const char *Format, va_list &Arg)
 	return Bytes;
 }
 
-ssize_t GStreamPrintf(LStreamI *Stream, int Flags, const char *Format, va_list &Arg)
+ssize_t LStreamPrintf(LStreamI *Stream, int Flags, const char *Format, va_list &Arg)
 {
 	if (!Stream || !Format)
 		return 0;
@@ -61,26 +61,26 @@ ssize_t GStreamPrintf(LStreamI *Stream, int Flags, const char *Format, va_list &
 	return Stream->Write(a, Bytes, Flags);
 }
 
-ssize_t GStreamPrint(LStreamI *s, const char *fmt, ...)
+ssize_t LStreamPrint(LStreamI *s, const char *fmt, ...)
 {
 	va_list Arg;
 	va_start(Arg, fmt);
-    ssize_t Ch = GStreamPrintf(s, 0, fmt, Arg);
+    ssize_t Ch = LStreamPrintf(s, 0, fmt, Arg);
 	va_end(Arg);
 	return Ch;
 }
 
-ssize_t GStream::Print(const char *Format, ...)
+ssize_t LStream::Print(const char *Format, ...)
 {
 	va_list Arg;
 	va_start(Arg, Format);
-    ssize_t Ch = GStreamPrintf(this, 0, Format, Arg);
+    ssize_t Ch = LStreamPrintf(this, 0, Format, Arg);
 	va_end(Arg);
 	return Ch;
 }
 
 /////////////////////////////////////////////////////////////////
-GStreamOp::GStreamOp(int64 BufSz)
+LStreamOp::LStreamOp(int64 BufSz)
 {
 	StartTime = 0;
 	EndTime = 0;
@@ -89,17 +89,17 @@ GStreamOp::GStreamOp(int64 BufSz)
 		Buffer.Length(BufSz);
 }
 
-ssize_t GStreamOp::GetRate()
+ssize_t LStreamOp::GetRate()
 {
 	return (Total * GetElapsedTime()) / 1000;
 }
 
-ssize_t GStreamOp::GetTotal()
+ssize_t LStreamOp::GetTotal()
 {
 	return Total;
 }
 
-ssize_t GStreamOp::GetElapsedTime()
+ssize_t LStreamOp::GetElapsedTime()
 {
 	if (EndTime)
 	{
@@ -172,7 +172,7 @@ ssize_t GLinePrefix::IsEnd(void *v, ssize_t Len)
 	return -1;
 }
 
-ssize_t GEndOfLine::IsEnd(void *s, ssize_t Len)
+ssize_t LEndOfLine::IsEnd(void *s, ssize_t Len)
 {
 	for (int i=0; i<Len; i++)
 	{
@@ -186,7 +186,7 @@ ssize_t GEndOfLine::IsEnd(void *s, ssize_t Len)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-ssize_t GCopyStreamer::Copy(LStreamI *Source, LStreamI *Dest, GStreamEnd *End)
+ssize_t GCopyStreamer::Copy(LStreamI *Source, LStreamI *Dest, LStreamEnd *End)
 {
 	if (!Source || !Dest)
 		return -1;

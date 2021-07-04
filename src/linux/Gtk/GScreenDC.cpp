@@ -14,7 +14,7 @@
 #include "Lgi.h"
 using namespace Gtk;
 
-class GScreenPrivate
+class LScreenPrivate
 {
 public:
 	int x, y, Bits;
@@ -28,7 +28,7 @@ public:
 	cairo_t *cr;
 	cairo_matrix_t matrix;
 
-	GScreenPrivate()
+	LScreenPrivate()
 	{
 		View = NULL;
 		x = y = Bits = 0;
@@ -39,7 +39,7 @@ public:
 		Client.ZOff(-1, -1);
 	}
 	
-	~GScreenPrivate()
+	~LScreenPrivate()
 	{
 	}
 };
@@ -48,14 +48,14 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 LScreenDC::LScreenDC()
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	d->x = GdcD->X();
 	d->y = GdcD->Y();
 }
 
 LScreenDC::LScreenDC(int x, int y, int bits)
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	d->x = x;
 	d->y = y;
 	d->Bits = bits;
@@ -63,7 +63,7 @@ LScreenDC::LScreenDC(int x, int y, int bits)
 
 LScreenDC::LScreenDC(Gtk::cairo_t *cr, int x, int y)
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	d->Own = false;
 	d->cr = cr;
 	d->x = x;
@@ -75,14 +75,14 @@ LScreenDC::LScreenDC(Gtk::cairo_t *cr, int x, int y)
 
 LScreenDC::LScreenDC(OsDrawable *Drawable)
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	d->Own = false;
 	d->d = Drawable;
 }
 
 LScreenDC::LScreenDC(LView *view, void *param)
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	d->View = view;
 	if (view)
 	{

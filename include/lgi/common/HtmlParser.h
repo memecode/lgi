@@ -6,7 +6,7 @@
 
 class GHtmlParser
 {
-	GStringPipe SourceData;
+	LStringPipe SourceData;
 	const char *CurrentSrc;
 
 protected:

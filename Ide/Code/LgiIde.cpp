@@ -241,7 +241,7 @@ public:
 		return File;
 	}
 	
-	void Copy(GStringPipe &p, int Depth = 0)
+	void Copy(LStringPipe &p, int Depth = 0)
 	{
 		{
 			char s[1024];
@@ -298,7 +298,7 @@ public:
 			Loaded = true;
 			DeleteObj(Fake);
 			
-			GStringPipe Out;
+			LStringPipe Out;
 			char Args[256];
 			sprintf(Args, "-d %s", File);
 			
@@ -385,7 +385,7 @@ public:
 			{
 				if (Root)
 				{
-					GStringPipe p;
+					LStringPipe p;
 					Root->Copy(p);
 					char *s = p.NewStr();
 					if (s)
@@ -1758,12 +1758,12 @@ GDebugContext *AppWnd::GetDebugContext()
 
 struct DumpBinThread : public LThread
 {
-	GStream *Out;
+	LStream *Out;
 	GString InFile;
 	bool IsLib;
 
 public:
-	DumpBinThread(GStream *out, GString file) : LThread("DumpBin.Thread")
+	DumpBinThread(LStream *out, GString file) : LThread("DumpBin.Thread")
 	{
 		Out = out;
 		InFile = file;
@@ -1775,7 +1775,7 @@ public:
 		Run();
 	}
 
-	bool DumpBin(GString Args, GStream *Str)
+	bool DumpBin(GString Args, LStream *Str)
 	{
 		char Buf[256];
 		ssize_t Rd;
@@ -1797,7 +1797,7 @@ public:
 	GString::Array Dependencies(const char *Executable, int Depth = 0)
 	{
 		GString Args;
-		GStringPipe p;
+		LStringPipe p;
 		Args.Printf("/dependents \"%s\"", Executable);
 		DumpBin(Args, &p);
 
@@ -1857,7 +1857,7 @@ public:
 	GString GetArch()
 	{
 		GString Args;
-		GStringPipe p;
+		LStringPipe p;
 		Args.Printf("/headers \"%s\"", InFile.Get());
 		DumpBin(Args, &p);
 	
@@ -1891,7 +1891,7 @@ public:
 	GString GetExports()
 	{
 		GString Args;
-		GStringPipe p;
+		LStringPipe p;
 
 		if (IsLib)
 			Args.Printf("/symbols \"%s\"", InFile.Get());
@@ -4079,12 +4079,12 @@ LList *AppWnd::GetFtpLog()
 	return d->Output->FtpLog;
 }
 
-GStream *AppWnd::GetBuildLog()
+LStream *AppWnd::GetBuildLog()
 {
 	return d->Output->Txt[AppWnd::BuildTab];
 }
 
-GStream *AppWnd::GetDebugLog()
+LStream *AppWnd::GetDebugLog()
 {
 	return d->Output->Txt[AppWnd::DebugTab];
 }
@@ -4109,7 +4109,7 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 		char Buf[256];
 		ssize_t r;
 
-		GStringPipe p;
+		LStringPipe p;
 		while ((r = sp1.Read(Buf, sizeof(Buf))) > 0)
 		{
 			p.Write(Buf, r);
@@ -4225,7 +4225,7 @@ public:
 
 	int Main()
 	{
-		GSocket s;
+		LSocket s;
 		s.SetTimeout(15000);
 		Log->Print("Starting...\n");
 		auto r = s.Open("192.168.1.30", 7000);

@@ -1933,7 +1933,7 @@ bool GFolderList::OnKey(LKey &k)
 				List<LListItem> Sel;
 				if (GetSelection(Sel))
 				{
-					GStringPipe Msg;
+					LStringPipe Msg;
 					Msg.Push("Do you want to delete:\n\n");
 					
 					List<GFolderItem> Delete;
@@ -2237,7 +2237,7 @@ bool LgiGetUsersLinks(GArray<GString> &Links)
 		GString::Array a = s.Split("\n");
 		for (unsigned i=0; i<a.Length(); i++)
 		{
-			GUri u(a[i]);
+			LUri u(a[i]);
 			if (u.sProtocol.Equals("file"))
 				Links.New() = u.sPath;
 		}

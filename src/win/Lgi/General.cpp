@@ -158,7 +158,7 @@ bool _GetApps_Add(GArray<LAppInfo*> &Apps, char *In)
 
 	if (Path)
 	{
-		GStringPipe p;
+		LStringPipe p;
 
 		char *RootVar = "%SystemRoot%";
 		char *SysRoot = stristr(Path, RootVar);

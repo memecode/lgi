@@ -138,7 +138,7 @@ void StopNetworkStack()
 #pragma comment(lib, "iphlpapi.lib")
 #endif
 
-bool GSocket::EnumInterfaces(GArray<Interface> &Out)
+bool LSocket::EnumInterfaces(GArray<Interface> &Out)
 {
 	bool Status = false;
 
@@ -225,7 +225,7 @@ bool GSocket::EnumInterfaces(GArray<Interface> &Out)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-class GSocketImplPrivate : public LCancel
+class LSocketImplPrivate : public LCancel
 {
 public:
 	// Data
@@ -242,7 +242,7 @@ public:
 	GString		ErrStr;
 	LCancel		*Cancel;
 
-	GSocketImplPrivate()
+	LSocketImplPrivate()
 	{	
 		Blocking = true;
 		NoDelay = false;
@@ -256,27 +256,27 @@ public:
 		LastError = 0;
 	}
 
-	~GSocketImplPrivate()
+	~LSocketImplPrivate()
 	{
 		DeleteArray(LogFile);
 	}
 };
 
-GSocket::GSocket(LStreamI *logger, void *unused_param)
+LSocket::LSocket(LStreamI *logger, void *unused_param)
 {
 	StartNetworkStack();
 	BytesWritten = 0;
 	BytesRead = 0;
-	d = new GSocketImplPrivate;
+	d = new LSocketImplPrivate;
 }
 
-GSocket::~GSocket()
+LSocket::~LSocket()
 {
 	Close();
 	DeleteObj(d);
 }
 
-bool GSocket::IsOK()
+bool LSocket::IsOK()
 {
 	return
 			#ifndef __llvm__
@@ -285,28 +285,28 @@ bool GSocket::IsOK()
 			d != 0;
 }
 
-LCancel *GSocket::GetCancel()
+LCancel *LSocket::GetCancel()
 {
 	return d->Cancel;
 }
 
-void GSocket::SetCancel(LCancel *c)
+void LSocket::SetCancel(LCancel *c)
 {
 	d->Cancel = c;
 }
 
-void GSocket::OnDisconnect()
+void LSocket::OnDisconnect()
 {
 }
 
-OsSocket GSocket::ReleaseHandle()
+OsSocket LSocket::ReleaseHandle()
 {
 	auto h = d->Socket;
 	d->Socket = INVALID_SOCKET;
 	return h;
 }
 
-OsSocket GSocket::Handle(OsSocket Set)
+OsSocket LSocket::Handle(OsSocket Set)
 {
 	if (Set != INVALID_SOCKET)
 	{
@@ -316,7 +316,7 @@ OsSocket GSocket::Handle(OsSocket Set)
 	return d->Socket;
 }
 
-bool GSocket::IsOpen()
+bool LSocket::IsOpen()
 {
 	if (ValidSocket(d->Socket) && !d->Cancel->IsCancelled())
 	{
@@ -326,17 +326,17 @@ bool GSocket::IsOpen()
 	return false;
 }
 
-int GSocket::GetTimeout()
+int LSocket::GetTimeout()
 {
 	return d->Timeout;
 }
 
-void GSocket::SetTimeout(int ms)
+void LSocket::SetTimeout(int ms)
 {
 	d->Timeout = ms;
 }
 
-bool GSocket::IsReadable(int TimeoutMs)
+bool LSocket::IsReadable(int TimeoutMs)
 {
 	// Assign to local var to avoid a thread changing it
 	// on us between the validity check and the select.
@@ -392,7 +392,7 @@ bool GSocket::IsReadable(int TimeoutMs)
 	return false;
 }
 
-bool GSocket::IsWritable(int TimeoutMs)
+bool LSocket::IsWritable(int TimeoutMs)
 {
 	// Assign to local var to avoid a thread changing it
 	// on us between the validity check and the select.
@@ -417,17 +417,17 @@ bool GSocket::IsWritable(int TimeoutMs)
 	return false;
 }
 
-bool GSocket::CanAccept(int TimeoutMs)
+bool LSocket::CanAccept(int TimeoutMs)
 {
 	return IsReadable(TimeoutMs);
 }
 
-bool GSocket::IsBlocking()
+bool LSocket::IsBlocking()
 {
 	return d->Blocking != 0;
 }
 
-void GSocket::IsBlocking(bool block)
+void LSocket::IsBlocking(bool block)
 {
 	if (d->Blocking ^ block)
 	{
@@ -444,12 +444,12 @@ void GSocket::IsBlocking(bool block)
 	}
 }
 
-bool GSocket::IsDelayed()
+bool LSocket::IsDelayed()
 {
 	return !d->NoDelay;
 }
 
-void GSocket::IsDelayed(bool Delay)
+void LSocket::IsDelayed(bool Delay)
 {
 	bool NoDelay = !Delay;
 	if (d->NoDelay ^ NoDelay)
@@ -461,7 +461,7 @@ void GSocket::IsDelayed(bool Delay)
 	}
 }
 
-int GSocket::GetLocalPort()
+int LSocket::GetLocalPort()
 {
 	struct sockaddr_in addr;
 	socklen_t size;
@@ -475,7 +475,7 @@ int GSocket::GetLocalPort()
 	return 0;
 }
 
-bool GSocket::GetLocalIp(char *IpAddr)
+bool LSocket::GetLocalIp(char *IpAddr)
 {
 	if (IpAddr)
 	{
@@ -504,7 +504,7 @@ bool GSocket::GetLocalIp(char *IpAddr)
 	return false;
 }
 
-bool GSocket::GetRemoteIp(uint32_t *IpAddr)
+bool LSocket::GetRemoteIp(uint32_t *IpAddr)
 {
 	if (IpAddr)
 	{
@@ -520,7 +520,7 @@ bool GSocket::GetRemoteIp(uint32_t *IpAddr)
 	return false;
 }
 
-bool GSocket::GetRemoteIp(char *IpAddr)
+bool LSocket::GetRemoteIp(char *IpAddr)
 {
 	if (!IpAddr)
 		return false;
@@ -540,7 +540,7 @@ bool GSocket::GetRemoteIp(char *IpAddr)
 	return false;
 }
 
-int GSocket::GetRemotePort()
+int LSocket::GetRemotePort()
 {
 	struct sockaddr_in a;
 	socklen_t addrlen = sizeof(a);
@@ -552,7 +552,7 @@ int GSocket::GetRemotePort()
 	return 0;
 }
 
-int GSocket::Open(const char *HostAddr, int Port)
+int LSocket::Open(const char *HostAddr, int Port)
 {
 	int Status = -1;
 	
@@ -856,7 +856,7 @@ int GSocket::Open(const char *HostAddr, int Port)
 	return Status == 0;
 }
 
-bool GSocket::Bind(int Port)
+bool LSocket::Bind(int Port)
 {
 	sockaddr_in add;
 	add.sin_family = AF_INET;
@@ -866,7 +866,7 @@ bool GSocket::Bind(int Port)
 	return ret == 0;
 }
 
-bool GSocket::Listen(int Port)
+bool LSocket::Listen(int Port)
 {
 	Close();
 
@@ -907,7 +907,7 @@ bool GSocket::Listen(int Port)
 	return false;
 }
 
-bool GSocket::Accept(LSocketI *c)
+bool LSocket::Accept(LSocketI *c)
 {
 	if (!c)
 	{
@@ -953,7 +953,7 @@ bool GSocket::Accept(LSocketI *c)
 	return ValidSocket(c->Handle(NewSocket));
 }
 
-int GSocket::Close()
+int LSocket::Close()
 {
 	if (ValidSocket(d->Socket))
 	{
@@ -969,7 +969,7 @@ int GSocket::Close()
 	return true;
 }
 
-void GSocket::Log(const char *Msg, ssize_t Ret, const char *Buf, ssize_t Len)
+void LSocket::Log(const char *Msg, ssize_t Ret, const char *Buf, ssize_t Len)
 {
 	if (d->LogFile)
 	{
@@ -1018,7 +1018,7 @@ void GSocket::Log(const char *Msg, ssize_t Ret, const char *Buf, ssize_t Len)
 	}
 }
 
-ssize_t GSocket::Write(const void *Data, ssize_t Len, int Flags)
+ssize_t LSocket::Write(const void *Data, ssize_t Len, int Flags)
 {
 	if (!ValidSocket(d->Socket) || !Data || d->Cancel->IsCancelled())
 		return -1;
@@ -1058,7 +1058,7 @@ ssize_t GSocket::Write(const void *Data, ssize_t Len, int Flags)
 	return Status;
 }
 
-ssize_t GSocket::Read(void *Data, ssize_t Len, int Flags)
+ssize_t LSocket::Read(void *Data, ssize_t Len, int Flags)
 {
 	if (!ValidSocket(d->Socket) || !Data || d->Cancel->IsCancelled())
 		return -1;
@@ -1095,17 +1095,17 @@ ssize_t GSocket::Read(void *Data, ssize_t Len, int Flags)
 	return (int)Status;
 }
 
-void GSocket::OnError(int ErrorCode, const char *ErrorDescription)
+void LSocket::OnError(int ErrorCode, const char *ErrorDescription)
 {
 	d->ErrStr.Printf("Error(%i): %s", ErrorCode, ErrorDescription);
 }
 
-const char *GSocket::GetErrorString()
+const char *LSocket::GetErrorString()
 {
 	return d->ErrStr;
 }
 
-int GSocket::Error(void *Param)
+int LSocket::Error(void *Param)
 {
 	// Get the most recent error.
 	if (!(d->LastError =
@@ -1263,7 +1263,7 @@ int GSocket::Error(void *Param)
 }
 
 /*
-void GSocket::SetLogFile(char *FileName, int Type)
+void LSocket::SetLogFile(char *FileName, int Type)
 {
 	DeleteArray(d->LogFile);
 
@@ -1283,12 +1283,12 @@ void GSocket::SetLogFile(char *FileName, int Type)
 }
 */
 
-bool GSocket::GetUdp()
+bool LSocket::GetUdp()
 {
 	return d->Udp != 0;
 }
 
-void GSocket::SetUdp(bool b)
+void LSocket::SetUdp(bool b)
 {
 	if (d->Udp ^ b)
 	{
@@ -1309,12 +1309,12 @@ void GSocket::SetUdp(bool b)
 	}
 }
 
-void GSocket::SetBroadcast()
+void LSocket::SetBroadcast()
 {
 	d->Broadcast = true;
 }
 
-bool GSocket::AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface)
+bool LSocket::AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface)
 {
 	if (!MulticastIp)
 		return false;
@@ -1330,7 +1330,7 @@ bool GSocket::AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface)
 	return false;
 }
 
-bool GSocket::SetMulticastInterface(uint32_t Interface)
+bool LSocket::SetMulticastInterface(uint32_t Interface)
 {
 	if (!Interface)
 		return false;
@@ -1345,7 +1345,7 @@ bool GSocket::SetMulticastInterface(uint32_t Interface)
 	return false;
 }
 
-bool GSocket::CreateUdpSocket()
+bool LSocket::CreateUdpSocket()
 {
 	if (!ValidSocket(d->Socket))
 	{
@@ -1365,7 +1365,7 @@ bool GSocket::CreateUdpSocket()
 	return ValidSocket(d->Socket);
 }
 
-int GSocket::ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip, uint16_t *Port)
+int LSocket::ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip, uint16_t *Port)
 {
 	if (!Buffer || Size < 0)
 		return -1;
@@ -1400,7 +1400,7 @@ int GSocket::ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip, uint16_t *
 	return (int)b;
 }
 
-int GSocket::WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port)
+int LSocket::WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port)
 {
 	if (!Buffer || Size < 0)
 		return -1;
@@ -1588,12 +1588,12 @@ bool WhatsMyIp(GAutoString &Ip)
 #define SOCKS5_AUTH_GSSAPI			1
 #define SOCKS5_AUTH_USER_PASS		2
 
-GSocks5Socket::GSocks5Socket()
+LSocks5Socket::LSocks5Socket()
 {
 	Socks5Connected = false;
 }
 
-void GSocks5Socket::SetProxy(const GSocks5Socket *s)
+void LSocks5Socket::SetProxy(const LSocks5Socket *s)
 {
 	Proxy.Reset(s ? NewStr(s->Proxy) : 0);
 	Port = s ? s->Port : 0;
@@ -1601,7 +1601,7 @@ void GSocks5Socket::SetProxy(const GSocks5Socket *s)
 	Password.Reset(s ? NewStr(s->Password) : 0);
 }
 
-void GSocks5Socket::SetProxy(char *proxy, int port, char *username, char *password)
+void LSocks5Socket::SetProxy(char *proxy, int port, char *username, char *password)
 {
 	Proxy.Reset(NewStr(proxy));
 	Port = port;
@@ -1609,7 +1609,7 @@ void GSocks5Socket::SetProxy(char *proxy, int port, char *username, char *passwo
 	Password.Reset(NewStr(password));
 }
 
-int GSocks5Socket::Open(const char *HostAddr, int port)
+int LSocks5Socket::Open(const char *HostAddr, int port)
 {
 	bool Status = false;
 	if (HostAddr)
@@ -1618,7 +1618,7 @@ int GSocks5Socket::Open(const char *HostAddr, int port)
 		sprintf_s(Msg, sizeof(Msg), "[SOCKS5] Connecting to proxy server '%s'", HostAddr);
 		OnInformation(Msg);
 
-		Status = GSocket::Open(Proxy, Port) != 0;
+		Status = LSocket::Open(Proxy, Port) != 0;
 		if (Status)
 		{
 			char Buf[1024];
@@ -1631,8 +1631,8 @@ int GSocks5Socket::Open(const char *HostAddr, int port)
 			// AuthReq[3] = SOCKS5_AUTH_GSSAPI;
 
 			OnInformation("[SOCKS5] Connected, Requesting authentication type.");
-			GSocket::Write(Buf, 4, 0);
-			if (GSocket::Read(Buf, 2, 0) == 2)
+			LSocket::Write(Buf, 4, 0);
+			if (LSocket::Read(Buf, 2, 0) == 2)
 			{
 				if (Buf[0] == SOCKS5_VER)
 				{
@@ -1663,8 +1663,8 @@ int GSocks5Socket::Open(const char *HostAddr, int port)
 								*b++ = (char)PassLen;
 								b += sprintf_s(b, PassLen+1, "%s", Password.Get());
 
-								GSocket::Write(Buf, (int)(3 + NameLen + PassLen));
-								if (GSocket::Read(Buf, 2, 0) == 2)
+								LSocket::Write(Buf, (int)(3 + NameLen + PassLen));
+								if (LSocket::Read(Buf, 2, 0) == 2)
 								{
 									Authenticated = (Buf[0] == 1 && Buf[1] == 0);
 								}
@@ -1713,8 +1713,8 @@ int GSocks5Socket::Open(const char *HostAddr, int port)
 						memcpy(b, &HostPort, 2);
 						b += 2;
 
-						GSocket::Write(Buf, (int)(b - Buf), 0);
-						if (GSocket::Read(Buf, 10, 0) == 10)
+						LSocket::Write(Buf, (int)(b - Buf), 0);
+						if (LSocket::Read(Buf, 10, 0) == 10)
 						{
 							if (Buf[0] == SOCKS5_VER)
 							{
@@ -1781,7 +1781,7 @@ int GSocks5Socket::Open(const char *HostAddr, int port)
 			Status = Socks5Connected;
 			if (!Status)
 			{
-				GSocket::Close();
+				LSocket::Close();
 				OnInformation("[SOCKS5] Failure: Disconnecting.");
 			}
 		}

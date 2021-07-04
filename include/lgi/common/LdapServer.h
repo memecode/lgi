@@ -29,8 +29,8 @@ class ILdapServer : public LThread
 	LView *Parent;
 	ILdapServerDb *Db;
 	GFile Log;
-	GSocket Socket;
-	GSocket Listen;
+	LSocket Socket;
+	LSocket Listen;
 	List<GDom> Contacts;
 
 	// Internal

@@ -69,7 +69,7 @@ class LJson
 
 		GString Print(int Depth = 0)
 		{
-			GStringPipe r(512);
+			LStringPipe r(512);
 			GString s;
 			GString d("");
 			if (Depth)

@@ -66,7 +66,7 @@ const char *InstToString(GInstruction i)
 	return "#err";
 }
 
-GStream LScriptArguments::NullConsole;
+LStream LScriptArguments::NullConsole;
 
 //////////////////////////////////////////////////////////////////////////////////////
 int LScriptUtils::atoi(char16 *s)
@@ -150,12 +150,12 @@ SystemFunctions::~SystemFunctions()
 {
 }
 
-GStream *SystemFunctions::GetLog()
+LStream *SystemFunctions::GetLog()
 {
 	return Log;
 }
 
-bool SystemFunctions::SetLog(GStream *log)
+bool SystemFunctions::SetLog(LStream *log)
 {
 	LgiAssert(Log == NULL);
 	Log = log;
@@ -489,7 +489,7 @@ bool SystemFunctions::Sleep(LScriptArguments &Args)
 
 bool SystemFunctions::ToString(LScriptArguments &Args)
 {
-	GStringPipe p;
+	LStringPipe p;
 	const char *Sep = ", ";
 
 	for (unsigned i=0; i<Args.Length(); i++)
@@ -504,7 +504,7 @@ bool SystemFunctions::ToString(LScriptArguments &Args)
 
 bool SystemFunctions::Print(LScriptArguments &Args)
 {
-	GStream *Out = Log ? Log : (Engine ? Engine->GetConsole() : NULL);
+	LStream *Out = Log ? Log : (Engine ? Engine->GetConsole() : NULL);
 
 	for (unsigned n=0; Out && n<Args.Length(); n++)
 	{
@@ -937,7 +937,7 @@ bool SystemFunctions::Execute(LScriptArguments &Args)
 	if (Args.Length() < 2)
 		return false;
 
-	GStringPipe p;
+	LStringPipe p;
 	char *Exe = Args[0]->CastString();
 	char *Arguments = Args[1]->CastString();
 	LSubProcess e(Exe, Arguments);

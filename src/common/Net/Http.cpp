@@ -100,7 +100,7 @@ bool IHttp::Open(GAutoPtr<LSocketI> S, const char *RemoteHost, int Port)
 	
 	if (RemoteHost)
 	{
-		GUri u;
+		LUri u;
 		if (stristr(RemoteHost, "://") || strchr(RemoteHost, '/'))
 			u.Set(RemoteHost);
 		else
@@ -138,7 +138,7 @@ bool IHttp::IsOpen()
 }
 
 #if 0
-bool IHttp::GetFile(char *File, GStream &Out, int Format, int *ProtocolStatus, int *DataLength)
+bool IHttp::GetFile(char *File, LStream &Out, int Format, int *ProtocolStatus, int *DataLength)
 {
 	bool Status = false;
 	LVariant v;
@@ -148,13 +148,13 @@ bool IHttp::GetFile(char *File, GStream &Out, int Format, int *ProtocolStatus, i
 
 	if (File && Socket)
 	{
-		GStringPipe Buf;
+		LStringPipe Buf;
 		// char *ContentStr = "Content-Length:";
 		// char Line[4096] = "", *Cur = Line;
 		// int ContentLength = 0;
 		// int DataToGo = 1000000000;
 
-		GUri u(File);
+		LUri u(File);
 		if (!u.Protocol)
 		{
 			printf("%s:%i - No protocol.\n", _FL);
@@ -195,7 +195,7 @@ bool IHttp::GetFile(char *File, GStream &Out, int Format, int *ProtocolStatus, i
 
 		// write request
 		LVariant v;
-		Socket->SetValue(GSocket_Log, v = true);
+		Socket->SetValue(LSocket_Log, v = true);
 		char *Str = Buf.NewStr();
 		if (Str)
 		{
@@ -206,7 +206,7 @@ bool IHttp::GetFile(char *File, GStream &Out, int Format, int *ProtocolStatus, i
 		// read headers
 		int Code = 0, r = 0, HeaderSize = 0, Length = 0;
 		GLinePrefix EndHeaders("\r\n");
-		GStringPipe In;
+		LStringPipe In;
 
 		int Start = LgiCurrentTime();
 		do
@@ -288,7 +288,7 @@ bool IHttp::GetFile(char *File, GStream &Out, int Format, int *ProtocolStatus, i
 				// Start reading the rest of the document
 				if (Length > 0)
 				{
-					Socket->SetValue(GSocket_TransferSize, v = Length);
+					Socket->SetValue(LSocket_TransferSize, v = Length);
 
 					if (Meter &&
 						Meter->Lock(_FL))
@@ -351,7 +351,7 @@ bool IHttp::GetFile(char *File, GStream &Out, int Format, int *ProtocolStatus, i
 		}
 
 		// Turn logging on
-		Socket->SetValue(GSocket_Log, v = true);
+		Socket->SetValue(LSocket_Log, v = true);
 	}
 	else
 	{
@@ -387,7 +387,7 @@ bool IHttp::Request
 		return false;
 
 	#if DEBUG_LOGGING
-	GStringPipe Log;
+	LStringPipe Log;
 	#endif
 
 	HttpRequestType ReqType = HttpNone;
@@ -399,13 +399,13 @@ bool IHttp::Request
 		ReqType = HttpOther;
 
 	// Generate the request string
-	GStringPipe Cmd;
-	GUri u(Uri);
+	LStringPipe Cmd;
+	LUri u(Uri);
 	bool IsHTTPS = u.sProtocol && !_stricmp(u.sProtocol, "https");
 	GString EncPath = u.EncodeStr(u.sPath.Get() ? u.sPath.Get() : (char*)"/"), Mem;
 	char s[1024];
 	GLinePrefix EndHeaders("\r\n");
-	GStringPipe Headers;
+	LStringPipe Headers;
 
 	if (IsHTTPS && Proxy)
 	{
@@ -446,7 +446,7 @@ bool IHttp::Request
 
 			LVariant v;
 			if (Socket)
-				Socket->SetValue(GSocket_Protocol, v = "SSL");
+				Socket->SetValue(LSocket_Protocol, v = "SSL");
 			
 			EndHeaders.Reset();
 		}
@@ -587,7 +587,7 @@ bool IHttp::Request
 				if (IsChunked)
 				{
 					#ifdef _DEBUG
-					GStringPipe Log;
+					LStringPipe Log;
 					#endif
 
 					while (true)
@@ -807,7 +807,7 @@ bool IHttp::Post
 	{
 		// Read in the data part of the PUT command, because we need the
 		// Content-Length to put in the headers.
-		GStringPipe Content;
+		LStringPipe Content;
 		while (In)
 		{
 			char s[1024];
@@ -820,7 +820,7 @@ bool IHttp::Post
 		}
 		
 		// Generate the request string
-		GStringPipe Cmd;
+		LStringPipe Cmd;
 		Cmd.Print("POST %s HTTP/1.0\r\n", File);
 		if (InHeaders) Cmd.Print("%s", InHeaders);
 		if (ContentType) Cmd.Print("Content-Type: %s\r\n", ContentType);
@@ -870,7 +870,7 @@ LgiTrace("IHTTP::Post Starting on response\n");
 				// Read the response
 				GLinePrefix EndHeaders("\r\n");
 				int Total = 0;
-				GStringPipe Headers;
+				LStringPipe Headers;
 				while (Out)
 				{
 					int r = Socket->Read(Buf, sizeof(Buf));
@@ -956,7 +956,7 @@ void ZLibFree(voidpf opaque, voidpf address)
 	// Do nothing... the memory is owned by an autoptr
 }
 
-bool LgiGetUri(LCancel *Cancel, LStreamI *Out, GString *OutError, const char *InUri, const char *InHeaders, GUri *InProxy)
+bool LgiGetUri(LCancel *Cancel, LStreamI *Out, GString *OutError, const char *InUri, const char *InHeaders, LUri *InProxy)
 {
 	if (!InUri || !Out)
 	{
@@ -974,7 +974,7 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, GString *OutError, const char *In
 		(!Cancel || !Cancel->IsCancelled());
 		i++)
 	{
-		GUri u(InUri);
+		LUri u(InUri);
 		bool IsHTTPS = u.sProtocol && !_stricmp(u.sProtocol, "https");
 		int DefaultPort = IsHTTPS ? HTTPS_PORT : HTTP_PORT;
 
@@ -991,7 +991,7 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, GString *OutError, const char *In
 		}
 		else
 		{
-			s.Reset(new GSocket);
+			s.Reset(new LSocket);
 		}
 		
 		if (!s)
@@ -1035,8 +1035,8 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, GString *OutError, const char *In
 
 		int Status = 0;
 		IHttp::ContentEncoding Enc;
-		GStringPipe OutHeaders;
-		GStringPipe TmpFile(4 << 10);
+		LStringPipe OutHeaders;
+		LStringPipe TmpFile(4 << 10);
 		Http.Get(InUri, InHeaders ? InputHeaders : DefaultHeaders, &Status, &TmpFile, &Enc, &OutHeaders);
 		
 		int StatusCatagory = Status / 100;

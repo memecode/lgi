@@ -143,7 +143,7 @@ GArray<char> Sha1(GArray<char> &a, GArray<char> *b = 0)
 
 struct MysqlDirectContext
 {
-	class ErrorSocket : public GSocket
+	class ErrorSocket : public LSocket
 	{
 	public:
 		int Code;
@@ -795,7 +795,7 @@ public:
 		if (!Init)
 			return false;
 
-		GUri u(Init);
+		LUri u(Init);
 		if (u.User &&
 			u.Pass &&
 			u.Host &&

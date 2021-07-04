@@ -116,7 +116,7 @@ char *DeEscape(char *s, bool QuotedPrintable)
 class VIoPriv
 {
 public:
-	GStringPipe Buf;
+	LStringPipe Buf;
 };
 
 VIo::VIo() : d(new VIoPriv)
@@ -243,7 +243,7 @@ void VIo::Fold(LStreamI &o, const char *i, int pre_chars)
 		{
 			// quoted printable
 			o.Write(i, (int)(s-i));
-			GStreamPrint(&o, "=%02.2x", (uint8_t)*s);
+			LStreamPrint(&o, "=%02.2x", (uint8_t)*s);
 			x += 3;
 			i = ++s;
 		}
@@ -273,7 +273,7 @@ char *VIo::Unfold(char *In)
 {
 	if (In)
 	{
-		GStringPipe p(256);
+		LStringPipe p(256);
 
 		for (char *i=In; i && *i; i++)
 		{
@@ -304,7 +304,7 @@ char *VIo::UnMultiLine(char *In)
 {
 	if (In)
 	{
-		GStringPipe p;
+		LStringPipe p;
 		char *n;
 		for (char *i=In; i && *i; i=n)
 		{
@@ -522,7 +522,7 @@ bool VCard::Import(GDataPropI *c, LStreamI *s)
 
 		if (Emails.Length())
 		{
-			GStringPipe p;
+			LStringPipe p;
 			for (uint32_t i=0; i<Emails.Length(); i++)
 			{
 				if (i) p.Print(",%s", Emails[i]);
@@ -698,13 +698,13 @@ void VIo::WriteField(LStreamI &s, const char *Name, ParamArray *Params, const ch
 	{
 		int64 Size = s.GetSize();
 
-		GStreamPrint(&s, "%s", Name);
+		LStreamPrint(&s, "%s", Name);
 		if (Params)
 		{
 			for (uint32_t i=0; i<Params->Length(); i++)
 			{
 				Parameter &p = (*Params)[i];
-				GStreamPrint(&s, "%s%s=%s", i?"":";", p.Field.Get(), p.Value.Get());
+				LStreamPrint(&s, "%s%s=%s", i?"":";", p.Field.Get(), p.Value.Get());
 			}
 		}
 		
@@ -797,7 +797,7 @@ bool VCard::Export(GDataPropI *c, LStreamI *o)
 	const char * Uid;
 	if ((Uid = c->GetStr(FIELD_UID)))
 	{
-		GStreamPrint(o, "UID:%s\r\n", Uid);
+		LStreamPrint(o, "UID:%s\r\n", Uid);
 	}
 
 	const char *Street, *Suburb, *PostCode, *State, *Country;
@@ -872,7 +872,7 @@ bool VCard::Export(GDataPropI *c, LStreamI *o)
 			ssize_t Bytes = ConvertBinaryToBase64(B64Buf, B64Len, (uchar*)Photo->Value.Binary.Data, Photo->Value.Binary.Length);
 			if (Bytes > 0)
 			{
-				GStreamPrint(o, "photo;type=jpeg;encoding=base64:\r\n");
+				LStreamPrint(o, "photo;type=jpeg;encoding=base64:\r\n");
 				
 				int LineChar = 76;
 				for (int i=0; i<Bytes; )
@@ -1381,7 +1381,7 @@ bool VCal::Export(GDataPropI *c, LStreamI *o)
 
 	if (c)
 	{
-		GStreamPrint(o, "BEGIN:%s\r\n", TypeStr);
+		LStreamPrint(o, "BEGIN:%s\r\n", TypeStr);
 
 		#define OutputStr(Field, Name)						\
 		{													\
@@ -1395,7 +1395,7 @@ bool VCal::Export(GDataPropI *c, LStreamI *o)
 		LDateTime Now;
 		Now.SetNow();
 		Now.ToUtc();
-		GStreamPrint(o, "DTSTAMP:%s\r\n", ToString(Now).Get());
+		LStreamPrint(o, "DTSTAMP:%s\r\n", ToString(Now).Get());
 
 		OutputStr(FIELD_CAL_SUBJECT, "SUMMARY");
 		OutputStr(FIELD_CAL_LOCATION, "LOCATION");
@@ -1426,7 +1426,7 @@ bool VCal::Export(GDataPropI *c, LStreamI *o)
 		const char *Uid;
 		if ((Uid = c->GetStr(FIELD_UID)))
 		{
-			GStreamPrint(o, "UID:%s\r\n", Uid);
+			LStreamPrint(o, "UID:%s\r\n", Uid);
 		}
 
 		const LDateTime *Dt;
@@ -1434,13 +1434,13 @@ bool VCal::Export(GDataPropI *c, LStreamI *o)
 		{
 			LDateTime dt = *Dt;
 			dt.ToUtc();
-			GStreamPrint(o, "DTSTART:%s\r\n", ToString(dt).Get());
+			LStreamPrint(o, "DTSTART:%s\r\n", ToString(dt).Get());
 		}
 		if ((Dt = c->GetDate(FIELD_CAL_END_UTC)))
 		{
 			LDateTime dt = *Dt;
 			dt.ToUtc();
-			GStreamPrint(o, "DTEND:%s\r\n", ToString(dt).Get());
+			LStreamPrint(o, "DTEND:%s\r\n", ToString(dt).Get());
 		}
 
 		const char *Reminders;
@@ -1512,7 +1512,7 @@ bool VCal::Export(GDataPropI *c, LStreamI *o)
 			}				
 		}
 
-		GStreamPrint(o, "END:%s\r\n", TypeStr);
+		LStreamPrint(o, "END:%s\r\n", TypeStr);
 	}
 
 	o->Push((char*)"END:VCALENDAR\r\n");

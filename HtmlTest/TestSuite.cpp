@@ -174,7 +174,7 @@ public:
 			ss->SetSslOnConnect(false);
 		}
 		else
-			s.Reset(new GSocket);
+			s.Reset(new LSocket);
 		
 		return s;
 	}
@@ -197,7 +197,7 @@ public:
 			GDocumentEnv::LoadJob *Job = dynamic_cast<GDocumentEnv::LoadJob*>(j.Get());
 			if (Job)
 			{
-				GUri u(Job->Uri);
+				LUri u(Job->Uri);
 				if (u.IsFile())
 				{
 					// Local document?
@@ -265,7 +265,7 @@ class AppWnd : public LWindow, public GDefaultDocumentEnv
 
 	LoadType GetContent(LoadJob *&j)
 	{
-		GUri u(j->Uri);
+		LUri u(j->Uri);
 		if (!u.sProtocol)
 		{
 			char p[MAX_PATH];

@@ -4,21 +4,21 @@
 #include "LgiDefs.h"
 #include "lgi/common/Mem.h"
 
-class GSegment
+class LSegment
 {
-	friend class GSegmentTree;
-	GSegment *Left, *Right, *Parent;	
+	friend class LSegmentTree;
+	LSegment *Left, *Right, *Parent;	
 
-	bool Insert(GSegment *Seg, GSegment **Conflict);
-	GSegment *Find(int64 Off);
-	void Index(GSegment **&i);
+	bool Insert(LSegment *Seg, LSegment **Conflict);
+	LSegment *Find(int64 Off);
+	void Index(LSegment **&i);
 
 public:
 	int64 Start;
 	int64 Length;
 	void *UserData;
 
-	GSegment(int64 start, int64 len, void *userData = 0)
+	LSegment(int64 start, int64 len, void *userData = 0)
 	{
 		Left = Right = Parent = 0;
 		Start = start;
@@ -26,13 +26,13 @@ public:
 		UserData = userData;
 	}
 
-	~GSegment()
+	~LSegment()
 	{
 		DeleteObj(Left);
 		DeleteObj(Right);
 	}
 
-	bool Overlap(GSegment *Seg)
+	bool Overlap(LSegment *Seg)
 	{
 		if (Seg->Start + Seg->Length <= Start ||
 			Seg->Start >= Start + Length)
@@ -43,36 +43,36 @@ public:
 		return true;
 	}
 
-	bool operator < (GSegment *Seg)
+	bool operator < (LSegment *Seg)
 	{
 		return Start + Length <= Seg->Start;
 	}
 
-	bool operator > (GSegment *Seg)
+	bool operator > (LSegment *Seg)
 	{
 		return Start >= Seg->Start + Seg->Length;
 	}
 };
 
-class GSegmentTree
+class LSegmentTree
 {
-	class GSegmentTreePrivate *d;
+	class LSegmentTreePrivate *d;
 
 public:
-	GSegmentTree();
-	virtual ~GSegmentTree();
+	LSegmentTree();
+	virtual ~LSegmentTree();
 
 	// Status
 	int Items();
 
 	// Change
-	bool Insert(GSegment *Seg, GSegment **Conflict = 0);
-	bool Delete(GSegment *Seg);
+	bool Insert(LSegment *Seg, LSegment **Conflict = 0);
+	bool Delete(LSegment *Seg);
 	void Empty();
 
 	// Query
-	GSegment *ItemAt(int Offset);
-	GSegment **CreateIndex();
+	LSegment *ItemAt(int Offset);
+	LSegment **CreateIndex();
 };
 
 #endif

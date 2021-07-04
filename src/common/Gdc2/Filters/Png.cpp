@@ -346,8 +346,8 @@ public:
 	Format GetFormat() { return FmtPng; }
 	void SetMeter(int i) { if (Meter) Meter->Value(i); }
 	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
-	IoStatus ReadImage(LSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, LSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, LStream *In);
+	IoStatus WriteImage(LStream *Out, LSurface *pDC);
 
 	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
@@ -444,7 +444,7 @@ void PNGAPI LibPngWarning(png_structp Png, png_const_charp Msg)
 
 void PNGAPI LibPngRead(png_structp Png, png_bytep Ptr, png_size_t Size)
 {
-	GStream *s = (GStream*)
+	LStream *s = (LStream*)
 					#if LIBPNG_SHARED
 					CurrentLibPng.Get()->
 					#endif
@@ -462,7 +462,7 @@ void PNGAPI LibPngRead(png_structp Png, png_bytep Ptr, png_size_t Size)
 
 struct PngWriteInfo
 {
-	GStream *s;
+	LStream *s;
 	Progress *m;
 };
 
@@ -667,7 +667,7 @@ void ReadAlpha64_32(Out *o, In *i, int Len)
 	}
 }
 
-GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, GStream *In)
+GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 {
 	GFilter::IoStatus Status = IoError;
 
@@ -1057,7 +1057,7 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, GStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcPng::WriteImage(GStream *Out, LSurface *pDC)
+GFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 {
 	GFilter::IoStatus Status = IoError;
 	

@@ -4,7 +4,7 @@
 #include "lgi/common/StringClass.h"
 #include "lgi/common/LgiRes.h"
 
-struct ConsoleLog : public GStream
+struct ConsoleLog : public LStream
 {
 	ssize_t Write(const void *Ptr, ssize_t Size, int Flags)
 	{

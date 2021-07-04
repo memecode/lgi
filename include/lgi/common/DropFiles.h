@@ -169,7 +169,7 @@ public:
 				}
 				else
 				{
-					GUri u(s);
+					LUri u(s);
 					if
 					(
 						(

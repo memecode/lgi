@@ -853,7 +853,7 @@ bool ValidStrW(const char16 *s)
 
 char *LDecodeUri(const char *uri, int len)
 {
-	GStringPipe p;
+	LStringPipe p;
 	if (uri)
 	{
 		const char *end = len >= 0 ? uri + len : 0;
@@ -889,7 +889,7 @@ char *LDecodeUri(const char *uri, int len)
 
 char *LEncodeUri(const char *uri, int len)
 {
-	GStringPipe p;
+	LStringPipe p;
 	if (uri)
 	{
 		const char *end = len >= 0 ? uri + len : 0;

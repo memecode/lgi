@@ -476,7 +476,7 @@ LVariant &LVariant::operator =(LKey *p)
 	return *this;
 }
 
-LVariant &LVariant::operator =(GStream *s)
+LVariant &LVariant::operator =(LStream *s)
 {
 	Empty();
 	if (s)
@@ -1380,7 +1380,7 @@ char *LVariant::CastString()
 	{
 		case GV_LIST:
 		{
-			GStringPipe p(256);
+			LStringPipe p(256);
 			
 			List<LVariant>::I it = Value.Lst->begin();
 			bool First = true;
@@ -1402,7 +1402,7 @@ char *LVariant::CastString()
 		}
 		case GV_HASHTABLE:
 		{
-			GStringPipe p(256);
+			LStringPipe p(256);
 
 			p.Print("{");
 			

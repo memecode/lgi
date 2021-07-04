@@ -45,7 +45,7 @@
 #endif
 
 /// Lookup the file/line information for an instruction pointer value
-class GSymLookup
+class LSymLookup
 {
 public:
 	typedef void *Addr;
@@ -203,11 +203,11 @@ private:
 
 
 public:
-	GSymLookup()
+	LSymLookup()
 	{
 	}
 	
-	~GSymLookup()
+	~LSymLookup()
 	{
 	}
 	
@@ -302,7 +302,7 @@ public:
 						{
 							char Args[256];
 							sprintf(Args, "-n %.*s", (int) (c-Start), Start);
-							GStringPipe Out;
+							LStringPipe Out;
 							LSubProcess p("c++filt", Args);
 							if (p.Start())
 							{

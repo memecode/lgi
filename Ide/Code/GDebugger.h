@@ -6,7 +6,7 @@
 
 #define DEBUG_SESSION_LOGGING		0
 
-class GDebugEvents : public GStream
+class GDebugEvents : public LStream
 {
 public:
 	virtual ~GDebugEvents() {}
@@ -91,9 +91,9 @@ public:
 	virtual bool GetBreakPoints(GArray<BreakPoint> &bps) = 0;
 
 	virtual bool GetVariables(bool Locals, GArray<Variable> &vars, bool Detailed) = 0;
-	virtual bool PrintObject(const char *Var, GStream *Output) = 0;
+	virtual bool PrintObject(const char *Var, LStream *Output) = 0;
 	virtual bool ReadMemory(GString &BaseAddr, int Length, GArray<uint8_t> &OutBuf, GString *ErrorMsg = NULL) = 0;
-	virtual bool GetRegisters(GStream *Out) = 0;
+	virtual bool GetRegisters(LStream *Out) = 0;
 
 	virtual bool GetLocation(GAutoString &File, int &Line) = 0;
 	virtual bool SetLocation(const char *File, int Line) = 0;
@@ -108,6 +108,6 @@ public:
 	virtual bool UserCommand(const char *Cmd) = 0;
 };
 
-extern GDebugger *CreateGdbDebugger(GStream *Log);
+extern GDebugger *CreateGdbDebugger(LStream *Log);
 
 #endif

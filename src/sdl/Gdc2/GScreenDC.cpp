@@ -14,7 +14,7 @@
 #include "Gdc2.h"
 #include "GPalette.h"
 
-class GScreenPrivate
+class LScreenPrivate
 {
 public:
 	int			Op;
@@ -22,7 +22,7 @@ public:
 	uint32		Col;
 	SDL_Surface *Screen;
 	
-	GScreenPrivate()
+	LScreenPrivate()
 	{
 		Op = GDC_SET;
 		Client.ZOff(-1, -1);
@@ -32,13 +32,13 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 LScreenDC::LScreenDC()
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	ColourSpace = CsNone;
 }
 
 LScreenDC::LScreenDC(LView *view, void *Param)
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	ColourSpace = CsNone;
 	
 	d->Screen = (SDL_Surface*)Param;

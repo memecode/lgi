@@ -87,7 +87,7 @@ public:
 	int Min, Max;
 };
 
-class GVector
+class LVector
 {
 public:
 	bool Up;
@@ -103,7 +103,7 @@ public:
 	int aay1, aay2;
 	AAEdge *aax;
 
-	GVector()
+	LVector()
 	{
 		Index = -1;
 		x = 0;
@@ -111,7 +111,7 @@ public:
 		aay1 = aay2 = y1 = y2 = -1;
 	}
 
-	~GVector()
+	~LVector()
 	{
 		DeleteArray(x);
 		DeleteArray(aax);
@@ -283,13 +283,13 @@ public:
 	}
 };
 
-int VectCompareY(GVector *a, GVector *b, NativeInt Data)
+int VectCompareY(LVector *a, LVector *b, NativeInt Data)
 {
 	double d = a->Bounds.y1 - b->Bounds.y1;
 	return (d < 0) ? -1 : 1;
 }
 
-int VectCompareX(GVector *a, GVector *b, NativeInt Data)
+int VectCompareX(LVector *a, LVector *b, NativeInt Data)
 {
 	NativeInt i = Data >> SUB_SHIFT;
 	NativeInt r = Data & SUB_MASK;
@@ -300,7 +300,7 @@ int VectCompareX(GVector *a, GVector *b, NativeInt Data)
 }
 
 ///////////////////////////////////////////////////////////
-enum GSegType
+enum LSegType
 {
 	SegMove,
 	SegLine,
@@ -308,14 +308,14 @@ enum GSegType
 	SegCube
 };
 
-class GSeg
+class LSeg
 {
 public:
-	GSegType Type;
+	LSegType Type;
 	int Points;
 	LPointF *Point;
 
-	GSeg(GSegType t)
+	LSeg(LSegType t)
 	{
 		Type = t;
 		switch (Type)
@@ -333,7 +333,7 @@ public:
 		Point = Points ? new LPointF[Points] : 0;
 	}
 
-	~GSeg()
+	~LSeg()
 	{
 		DeleteArray(Point);
 	}
@@ -640,7 +640,7 @@ void FlattenCubic(LPointF *&Out, LPointF &p1, LPointF &p2, LPointF &p3, LPointF 
 }
 
 ///////////////////////////////////////////////////////////
-GPath::GPath(bool aa)
+LPath::LPath(bool aa)
 {
 	Aa = aa;
 	Points = 0;
@@ -654,7 +654,7 @@ GPath::GPath(bool aa)
 	#endif
 }
 
-GPath::~GPath()
+LPath::~LPath()
 {
 	#ifdef DEBUG_LOG
 	Log.Close();
@@ -664,7 +664,7 @@ GPath::~GPath()
 	Segs.DeleteObjects();
 }
 
-void GPath::GetBounds(LRectF *b)
+void LPath::GetBounds(LRectF *b)
 {
 	if (b)
 	{
@@ -677,12 +677,12 @@ void GPath::GetBounds(LRectF *b)
 	}
 }
 
-void GPath::Transform(Matrix &m)
+void LPath::Transform(Matrix &m)
 {
 	Mat = m;
 }
 
-void GPath::MoveTo(double x, double y)
+void LPath::MoveTo(double x, double y)
 {
 	Close();
 	
@@ -690,9 +690,9 @@ void GPath::MoveTo(double x, double y)
 	MoveTo(p);
 }
 
-void GPath::MoveTo(LPointF &pt)
+void LPath::MoveTo(LPointF &pt)
 {
-	GSeg *s = new GSeg(SegMove);
+	LSeg *s = new LSeg(SegMove);
 	if (s)
 	{
 		s->Point[0] = pt;
@@ -700,15 +700,15 @@ void GPath::MoveTo(LPointF &pt)
 	}
 }
 
-void GPath::LineTo(double x, double y)
+void LPath::LineTo(double x, double y)
 {
 	LPointF p(x, y);
 	LineTo(p);
 }
 
-void GPath::LineTo(LPointF &pt)
+void LPath::LineTo(LPointF &pt)
 {
-	GSeg *s = new GSeg(SegLine);
+	LSeg *s = new LSeg(SegLine);
 	if (s)
 	{
 		s->Point[0] = pt;
@@ -716,16 +716,16 @@ void GPath::LineTo(LPointF &pt)
 	}
 }
 
-void GPath::QuadBezierTo(double cx, double cy, double px, double py)
+void LPath::QuadBezierTo(double cx, double cy, double px, double py)
 {
 	LPointF c(cx, cy);
 	LPointF p(px, py);
 	QuadBezierTo(c, p);
 }
 
-void GPath::QuadBezierTo(LPointF &c, LPointF &p)
+void LPath::QuadBezierTo(LPointF &c, LPointF &p)
 {
-	GSeg *s = new GSeg(SegQuad);
+	LSeg *s = new LSeg(SegQuad);
 	if (s)
 	{
 		s->Point[0] = c;
@@ -734,7 +734,7 @@ void GPath::QuadBezierTo(LPointF &c, LPointF &p)
 	}
 }
 
-void GPath::CubicBezierTo(double c1x, double c1y, double c2x, double c2y, double px, double py)
+void LPath::CubicBezierTo(double c1x, double c1y, double c2x, double c2y, double px, double py)
 {
 	LPointF c1(c1x, c1y);
 	LPointF c2(c2x, c2y);
@@ -742,9 +742,9 @@ void GPath::CubicBezierTo(double c1x, double c1y, double c2x, double c2y, double
 	CubicBezierTo(c1, c2, p);
 }
 
-void GPath::CubicBezierTo(LPointF &c1, LPointF &c2, LPointF &p)
+void LPath::CubicBezierTo(LPointF &c1, LPointF &c2, LPointF &p)
 {
-	GSeg *s = new GSeg(SegCube);
+	LSeg *s = new LSeg(SegCube);
 	if (s)
 	{
 		s->Point[0] = c1;
@@ -754,7 +754,7 @@ void GPath::CubicBezierTo(LPointF &c1, LPointF &c2, LPointF &p)
 	}
 }
 
-void GPath::Rectangle(double x1, double y1, double x2, double y2)
+void LPath::Rectangle(double x1, double y1, double x2, double y2)
 {
 	MoveTo(x1, y1);
 	LineTo(x2, y1);
@@ -763,12 +763,12 @@ void GPath::Rectangle(double x1, double y1, double x2, double y2)
 	LineTo(x1, y1); // is this last one necessary?
 }
 
-void GPath::Rectangle(LPointF &tl, LPointF &rb)
+void LPath::Rectangle(LPointF &tl, LPointF &rb)
 {
 	Rectangle(tl.x, tl.y, rb.x, rb.y);
 }
 
-void GPath::Rectangle(LRectF &r)
+void LPath::Rectangle(LRectF &r)
 {
 	MoveTo(r.x1, r.y1);
 	LineTo(r.x2, r.y1);
@@ -777,7 +777,7 @@ void GPath::Rectangle(LRectF &r)
 	LineTo(r.x1, r.y1);
 }
 
-void GPath::RoundRect(LRectF &b, double r)
+void LPath::RoundRect(LRectF &b, double r)
 {
 	double k = 0.5522847498 * r;
 	
@@ -811,13 +811,13 @@ void GPath::RoundRect(LRectF &b, double r)
 					c.x, c.y - r);
 }
 
-void GPath::Circle(double cx, double cy, double radius)
+void LPath::Circle(double cx, double cy, double radius)
 {
 	LPointF c(cx, cy);
 	Circle(c, radius);
 }
 
-void GPath::Circle(LPointF &c, double r)
+void LPath::Circle(LPointF &c, double r)
 {
 	/*
 	double theta;
@@ -825,7 +825,7 @@ void GPath::Circle(LPointF &c, double r)
 	for (int i = 0; i < CIRCLE_STEPS + 1; i++)
 	{
 		theta = (i * LGI_PI * 2.0 / CIRCLE_STEPS);
-		GSeg *s = new GSeg(i ? SegLine : SegMove);
+		LSeg *s = new LSeg(i ? SegLine : SegMove);
 		if (s)
 		{
 			s->Point[0].x = c.x + (radius * cos(theta));
@@ -851,13 +851,13 @@ void GPath::Circle(LPointF &c, double r)
 					c.x, c.y - r);
 }
 
-void GPath::Ellipse(double cx, double cy, double x, double y)
+void LPath::Ellipse(double cx, double cy, double x, double y)
 {
 	LPointF c(cx, cy);
 	Ellipse(c, x, y);
 }
 
-void GPath::Ellipse(LPointF &c, double x, double y)
+void LPath::Ellipse(LPointF &c, double x, double y)
 {
 	double dx = x * 0.552;
 	double dy = y * 0.552;
@@ -887,7 +887,7 @@ LPointF &PointConv(POINTFX pt, double x, double y, double Scale)
 }										
 #endif
 
-void GPath::Append(GPath &p)
+void LPath::Append(LPath &p)
 {
 	Unflatten();
 	for (auto s: p.Segs)
@@ -895,7 +895,7 @@ void GPath::Append(GPath &p)
 	p.Segs.Empty();
 }
 
-bool GPath::Text(	LFont *Font,
+bool LPath::Text(	LFont *Font,
 					double x,
 					double y,
 					char *Utf8,
@@ -908,7 +908,7 @@ bool GPath::Text(	LFont *Font,
 		char16 *Utf16 = Utf8ToWide(Utf8, Bytes);
 		if (Utf16)
 		{
-			GPath Temp;
+			LPath Temp;
 			LDisplayString Sp(Font, " ");
 
 			#ifdef WIN32
@@ -1079,22 +1079,22 @@ bool GPath::Text(	LFont *Font,
 	return !Error;
 }
 
-int GPath::Segments()
+int LPath::Segments()
 {
 	return (int)Segs.Length();
 }
 
-void GPath::DeleteSeg(int i)
+void LPath::DeleteSeg(int i)
 {
 	Segs.DeleteAt(i);
 }
 
-bool GPath::IsClosed()
+bool LPath::IsClosed()
 {
 	auto b = Segs.begin();
 	auto e = Segs.rbegin();
-	GSeg *f = *b;
-	GSeg *l = *e;
+	LSeg *f = *b;
+	LSeg *l = *e;
 	if (f && l)
 	{
 		LPointF *Start = f->First();
@@ -1108,13 +1108,13 @@ bool GPath::IsClosed()
 	return false;
 }
 
-void GPath::Close()
+void LPath::Close()
 {
 	if (!IsClosed())
 	{
 		// Find last moveto
 		auto e = Segs.rbegin();
-		GSeg *f = *e;
+		LSeg *f = *e;
 		while (f && f->Type != SegMove)
 		{
 			e--;
@@ -1130,24 +1130,24 @@ void GPath::Close()
 	}
 }
 
-bool GPath::IsEmpty()
+bool LPath::IsEmpty()
 {
 	return Segs.Length() == 0;
 }
 
-void GPath::Empty()
+void LPath::Empty()
 {
 	Unflatten();
 	Segs.DeleteObjects();
 	Bounds.x1 = Bounds.y1 = Bounds.x2 = Bounds.y2 = 0.0;
 }
 
-bool GPath::IsFlattened()
+bool LPath::IsFlattened()
 {
 	return Outline.Length() > 0;
 }
 
-bool GPath::Flatten()
+bool LPath::Flatten()
 {
 	bool Status = false;
 
@@ -1321,7 +1321,7 @@ bool GPath::Flatten()
 			if (DirChange || Outline[NextOutline] == i || !Next)
 			{
 				// Create a new vector
-				GVector *v = new GVector;
+				LVector *v = new LVector;
 				if (v)
 				{
 					// Store it
@@ -1384,7 +1384,7 @@ bool GPath::Flatten()
 	return Status;
 }
 
-void GPath::Unflatten()
+void LPath::Unflatten()
 {
 	Points = 0;
 	Outline.Length(0);
@@ -1392,7 +1392,7 @@ void GPath::Unflatten()
 	Vecs.DeleteObjects();
 }
 
-void GPath::Fill(LSurface *pDC, GBrush &c)
+void LPath::Fill(LSurface *pDC, LBrush &c)
 {
 	if (!GdcD || !pDC || !(*pDC)[0])
 	{
@@ -1424,16 +1424,16 @@ void GPath::Fill(LSurface *pDC, GBrush &c)
 		#endif
 
 		// Loop scanlines
-		List<GVector> In;
+		List<LVector> In;
 		for (auto v: Vecs)
 		{
 			In.Insert(v);
 		}
 
-		List<GVector> Active;
+		List<LVector> Active;
 		size_t VectorCount = In.Length();
 		double *x = new double[VectorCount];
-		GVector **xv = new GVector*[VectorCount];
+		LVector **xv = new LVector*[VectorCount];
 		int x1 = (int)floor(Bounds.x1);
 		int x2 = (int)ceil(Bounds.x2);
 		int Width = x2 - x1 + 1;
@@ -1466,7 +1466,7 @@ void GPath::Fill(LSurface *pDC, GBrush &c)
 		Doc.Offset(-OffsetX, -OffsetY);
 		Clip.Offset(-OffsetX, -OffsetY);
 
-		GBrush::GRopArgs a;
+		LBrush::LRopArgs a;
 		a.pDC = pDC;
 		a.Pixels = 0;
 		a.Alpha = 0;
@@ -1523,7 +1523,7 @@ void GPath::Fill(LSurface *pDC, GBrush &c)
 									// Add new active vecs
 									for (auto it = In.begin(); it != In.end(); )
 									{
-										GVector *New = *it;
+										LVector *New = *it;
 										if (New->aay1 == y)
 										{
 											Active.Insert(New);
@@ -1541,7 +1541,7 @@ void GPath::Fill(LSurface *pDC, GBrush &c)
 									// Remove old active vecs
 									for (auto it = Active.begin(); it != Active.end(); )
 									{
-										GVector *Old = *it;
+										LVector *Old = *it;
 										PathAssert(Old->aay2 >= y);
 										
 										if (Old->aay2 == y)
@@ -1559,7 +1559,7 @@ void GPath::Fill(LSurface *pDC, GBrush &c)
 								if (FillRule == FILLRULE_NONZERO)
 								{
 									auto it = Active.begin();
-									GVector *a = *it;
+									LVector *a = *it;
 									if (a)
 									{
 										// bool Up = a->Up;
@@ -1832,7 +1832,7 @@ void GPath::Fill(LSurface *pDC, GBrush &c)
 					// Remove old active vecs
 					for (auto it = Active.begin(); it != Active.end(); )
 					{
-						GVector *Old = *it;
+						LVector *Old = *it;
 
 						if (Old->y2 == y)
 							Active.Delete(it);
@@ -1848,7 +1848,7 @@ void GPath::Fill(LSurface *pDC, GBrush &c)
 		DeleteArray(xv);
 
 		#if DEBUG_DRAW_VECTORS
-		for (GVector *h = Vecs.First(); h; h = Vecs.Next())
+		for (LVector *h = Vecs.First(); h; h = Vecs.Next())
 		{
 			pDC->Colour(h->Up ? Rgb24(255, 0, 0) : Rgb24(0, 0, 255), 24);
 			for (int i=0; i<h->Points-1; i++)
@@ -1863,7 +1863,7 @@ void GPath::Fill(LSurface *pDC, GBrush &c)
 		// Debug
 		LPointF Cur;
 		int n = 0;
-		for (GSeg *s=Segs.First(); s; s=Segs.Next(), n++)
+		for (LSeg *s=Segs.First(); s; s=Segs.Next(), n++)
 		{
 			switch (s->Type)
 			{
@@ -1922,7 +1922,7 @@ void GPath::Fill(LSurface *pDC, GBrush &c)
 	}
 }
 
-void GPath::Stroke(LSurface *pDC, GBrush &Brush, double Width)
+void LPath::Stroke(LSurface *pDC, LBrush &Brush, double Width)
 {
 	if (!Point)
 	{
@@ -1957,7 +1957,7 @@ void GPath::Stroke(LSurface *pDC, GBrush &Brush, double Width)
 }
 
 ///////////////////////////////////////////////////////////////////
-void GBrush::MakeAlphaLut()
+void LBrush::MakeAlphaLut()
 {
 	for (int i=0; i<65; i++)
 	{
@@ -1967,7 +1967,7 @@ void GBrush::MakeAlphaLut()
 
 ///////////////////////////////////////////////////////////////////
 // Compositing
-void GSolidBrush::Rop(GRopArgs &Args)
+void LSolidBrush::Rop(LRopArgs &Args)
 {
 	switch (Args.Cs)
 	{
@@ -1996,14 +1996,14 @@ void GSolidBrush::Rop(GRopArgs &Args)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-int StopCompare(GBlendStop *a, GBlendStop *b, NativeInt Data)
+int StopCompare(LBlendStop *a, LBlendStop *b, NativeInt Data)
 {
 	return a->Pos > b->Pos ? 1 : -1;
 }
 
-bool GBlendBrush::Start(GRopArgs &Args)
+bool LBlendBrush::Start(LRopArgs &Args)
 {
-	List<GBlendStop> s;
+	List<LBlendStop> s;
 	for (int n=0; n<Stops; n++)
 	{
 		s.Insert(Stop+n);
@@ -2011,8 +2011,8 @@ bool GBlendBrush::Start(GRopArgs &Args)
 	s.Sort(StopCompare);
 
 	auto it = s.begin();
-	GBlendStop *Prev = *it;
-	GBlendStop *Next = *(++it);
+	LBlendStop *Prev = *it;
+	LBlendStop *Next = *(++it);
 	if (Prev && Next)
 	{
 		for (int i=0; i<CountOf(Lut); i++)
@@ -2021,7 +2021,7 @@ bool GBlendBrush::Start(GRopArgs &Args)
 
 			if (p > Next->Pos)
 			{
-				GBlendStop *n = *(++it);
+				LBlendStop *n = *(++it);
 				if (n)
 				{
 					Prev = Next;
@@ -2060,9 +2060,9 @@ bool GBlendBrush::Start(GRopArgs &Args)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-bool GLinearBlendBrush::Start(GRopArgs &Args)
+bool LLinearBlendBrush::Start(LRopArgs &Args)
 {
-	GBlendBrush::Start(Args);
+	LBlendBrush::Start(Args);
 
 	double dx = p[1].x - p[0].x;
 	double dy = p[1].y - p[0].y;
@@ -2090,7 +2090,7 @@ bool GLinearBlendBrush::Start(GRopArgs &Args)
 	return true;
 }
 
-void GLinearBlendBrush::Rop(GRopArgs &Args)
+void LLinearBlendBrush::Rop(LRopArgs &Args)
 {
 	PathAssert(GdcD != NULL);
 
@@ -2125,7 +2125,7 @@ void GLinearBlendBrush::Rop(GRopArgs &Args)
 //		http://www.azillionmonkeys.com/qed/sqroot.html
 
 ////////////////////////////////////////////////////////////////////////////
-void GRadialBlendBrush::Rop(GRopArgs &Args)
+void LRadialBlendBrush::Rop(LRopArgs &Args)
 {
 	switch (Args.Cs)
 	{
@@ -2155,7 +2155,7 @@ void GRadialBlendBrush::Rop(GRopArgs &Args)
 }
 
 //////////////////////////////////////////////
-void GEraseBrush::Rop(GRopArgs &Args)
+void LEraseBrush::Rop(LRopArgs &Args)
 {
 	uchar *DivLut = Div255Lut;
 	uchar *r = Args.Alpha;

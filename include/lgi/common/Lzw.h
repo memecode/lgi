@@ -6,8 +6,8 @@ class Lzw
 	class LzwPrivate *d;
 
 	int find_match(int hash_prefix, uint hash_character);
-	void output_code(GStream *output, uint code);
-	int input_code(GStream *input);
+	void output_code(LStream *output, uint code);
+	int input_code(LStream *input);
 	uchar *decode_string(unsigned char *buffer, unsigned int code);
 	
 public:
@@ -18,8 +18,8 @@ public:
 	virtual ~Lzw();
 
 	void SetBufSize(int i);
-	bool Decompress(GStream *out, GStream *in);
-	bool Compress(GStream *out, GStream *in);
+	bool Decompress(LStream *out, LStream *in);
+	bool Compress(LStream *out, LStream *in);
 };
 
 #endif

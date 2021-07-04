@@ -168,7 +168,7 @@ bool IScp::WriteData(LSocketI *&s, IScpData *d)
 	return Status;
 }
 
-bool IsHttpEnd(GStringPipe &p)
+bool IsHttpEnd(LStringPipe &p)
 {
 	bool Status = false;
 	int Len = (int)p.GetSize();
@@ -191,7 +191,7 @@ bool IScp::ReadData(LSocketI *&s, IScpData *&d, int *HttpErr)
 	// LgiTrace("SCP: Read(%p, %p)\n", s, d);
 	if (s AND s->IsOpen())
 	{
-		GStringPipe In;
+		LStringPipe In;
 		char RawBuf[1024];
 		do
 		{
@@ -237,7 +237,7 @@ bool IScp::ReadData(LSocketI *&s, IScpData *&d, int *HttpErr)
 				char *StrContentLen = InetGetHeaderField(Headers, "Content-Length");
 				int ContentLen = StrContentLen ? atoi(StrContentLen) : 0;
 
-				GStringPipe DataPipe;
+				LStringPipe DataPipe;
 				DataPipe.Push(EndHeaders + 4);
 				while (ContentLen > DataPipe.GetSize())
 				{
@@ -539,7 +539,7 @@ LSocketI *&IScpClient::Socket(bool Op)
 {
 	if (!s)
 	{
-		s = new GSocket;
+		s = new LSocket;
 		if (s)
 		{
 			s->IsDelayed(false);
@@ -548,7 +548,7 @@ LSocketI *&IScpClient::Socket(bool Op)
 
 	if (s AND Op AND !s->IsOpen())
 	{
-		GUri *Connect = (Proxy.Host) ? &Proxy : &Host;
+		LUri *Connect = (Proxy.Host) ? &Proxy : &Host;
 		s->Open(Connect->Host, Connect->Port);
 	}
 

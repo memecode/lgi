@@ -296,7 +296,7 @@ public:
 	
     bool InitLibrary(SslSocket *sock)
     {
-		GStringPipe Err;
+		LStringPipe Err;
 		GArray<int> Ver;
 		GArray<int> MinimumVer = ParseSslVersion(MinimumVersion);
 		GToken t;
@@ -426,7 +426,7 @@ public:
 			{
 				long e = ERR_get_error();
 				char *Msg = ERR_error_string(e, 0);
-				GStringPipe p;
+				LStringPipe p;
 				p.Print("%s:%i - SSL_CTX_new(server) failed with '%s' (%i)\n", _FL, Msg, e);
 				ErrorMsg.Reset(p.NewStr());
 				sock->DebugTrace("%s", ErrorMsg.Get());
@@ -550,7 +550,7 @@ struct SslSocketPriv : public LCancel
 
 	// This is for the connection logging.
 	GAutoString LogFile;
-	GAutoPtr<GStream> LogStream;
+	GAutoPtr<LStream> LogStream;
 	int LogFormat;
 
 	SslSocketPriv()
@@ -663,7 +663,7 @@ void SslSocket::SetSslOnConnect(bool b)
 	d->SslOnConnect = b;
 }
 
-GStream *SslSocket::GetLogStream()
+LStream *SslSocket::GetLogStream()
 {
 	if (!d->LogStream && d->LogFile)
 	{
@@ -971,7 +971,7 @@ bool SslSocket::SetVariant(const char *Name, LVariant &Value, char *Arr)
 	{
 		d->LogFormat = Value.CastInt32();
 	}
-	else if (!_stricmp(Name, GSocket_Protocol))
+	else if (!_stricmp(Name, LSocket_Protocol))
 	{
 		char *v = Value.CastString();
 		
@@ -1284,7 +1284,7 @@ ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
 	
 	if (r > 0)
 	{
-		GStream *l = GetLogStream();
+		LStream *l = GetLogStream();
 		if (l)
 			l->Write(Data, r);
 	}
@@ -1387,7 +1387,7 @@ DebugTrace("%s:%i - BIO_should_retry=%i IsBlocking=%i\n", _FL, Retry, d->IsBlock
 
 		if (r > 0)
 		{
-			GStream *l = GetLogStream();
+			LStream *l = GetLogStream();
 			if (l)
 				l->Write(Data, r);
 		}

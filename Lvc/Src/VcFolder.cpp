@@ -92,7 +92,7 @@ int Ver2Int(GString v)
 
 int ToolVersion[VcMax] = {0};
 
-ReaderThread::ReaderThread(VersionCtrl vcs, LSubProcess *p, GStream *out) : LThread("ReaderThread")
+ReaderThread::ReaderThread(VersionCtrl vcs, LSubProcess *p, LStream *out) : LThread("ReaderThread")
 {
 	Vcs = vcs;
 	Process = p;
@@ -1002,7 +1002,7 @@ bool VcFolder::ParseRevList(int Result, GString s, ParseParams *Params)
 
 GString VcFolder::GetFilePart(const char *uri)
 {
-	GUri u(uri);
+	LUri u(uri);
 	GString File = u.IsFile() ? GString(u.LocalPath()) : u.sPath(Uri.sPath.Length(), -1).LStrip("/");
 	return File;
 }
@@ -2238,7 +2238,7 @@ bool VcFolder::ParseRemoteFind(int Result, GString s, ParseParams *Params)
 		return false;
 
 	auto Parent = Params->Leaf ? static_cast<LTreeItem*>(Params->Leaf) : static_cast<LTreeItem*>(this);
-	GUri u(Params->Str);
+	LUri u(Params->Str);
 
 	auto Lines = s.SplitDelimit("\r\n");
 	GArray<SshFindEntry> Entries;
@@ -2268,7 +2268,7 @@ bool VcFolder::ParseRemoteFind(int Result, GString s, ParseParams *Params)
 				!stricmp(Ext, "cpp") ||
 				!stricmp(Ext, "h"))
 			{
-				GUri Path = u;
+				LUri Path = u;
 				Path += Dir.GetName();
 				new VcLeaf(this, Parent, Params->Str, Dir.GetName(), false);
 			}
@@ -2280,7 +2280,7 @@ bool VcFolder::ParseRemoteFind(int Result, GString s, ParseParams *Params)
 
 void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 {
-	GUri u(ReadUri);
+	LUri u(ReadUri);
 
 	if (u.IsFile())
 	{
@@ -2303,7 +2303,7 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 					!stricmp(Ext, "cpp") ||
 					!stricmp(Ext, "h"))
 				{
-					GUri Path = u;
+					LUri Path = u;
 					Path += Dir.GetName();
 					new VcLeaf(this, Parent, u.ToString(), Dir.GetName(), false);
 				}
@@ -2720,7 +2720,7 @@ bool VcFolder::ParseUpdateSubs(int Result, GString s, ParseParams *Params)
 
 void VcFolder::FolderStatus(const char *uri, VcLeaf *Notify)
 {
-	GUri Uri(uri);
+	LUri Uri(uri);
 	if (Uri.IsFile() && Uri.sPath)
 	{
 		GFile::Path p(Uri.sPath(1,-1));
@@ -3701,7 +3701,7 @@ bool VcFolder::Revert(GString::Array &Uris, const char *Revision)
 	{
 		case VcGit:
 		{
-			GStringPipe p;
+			LStringPipe p;
 			p.Print("checkout");
 			for (auto u: Uris)
 			{
@@ -3716,7 +3716,7 @@ bool VcFolder::Revert(GString::Array &Uris, const char *Revision)
 		case VcHg:
 		case VcSvn:
 		{
-			GStringPipe p;
+			LStringPipe p;
 			if (Revision)
 				p.Print("up -r %s", Revision);
 			else
@@ -3979,7 +3979,7 @@ VcLeaf::~VcLeaf()
 
 GString VcLeaf::Full()
 {
-	GUri u = Uri;
+	LUri u = Uri;
 	u += Leaf;
 	return u.ToString();
 }

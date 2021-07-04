@@ -776,7 +776,7 @@ GAutoWString GCppParserWorker::GetSymbolName(GArray<char16*> &in, bool IsEnum)
 {
 	GArray<char16*> a = in;
 	GAutoWString ret;
-	GStringPipe p(64);
+	LStringPipe p(64);
 	RoundBracket Rb;
 	int LastName = -1;
 	bool FuncPtr = false;

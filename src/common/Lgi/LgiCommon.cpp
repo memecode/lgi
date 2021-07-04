@@ -40,13 +40,7 @@
 	#include "LSubProcess.h"
 #endif
 
-#if defined(WIN32)
-	#include "lgi/win/GSymLookup.h"
-#elif defined(LINUX)
-	#include "lgi/linux/GSymLookup.h"
-#else
-	#include "GSymLookup.h"
-#endif
+#include "SymLookup.h"
 #include "lgi/common/Library.h"
 
 #if defined(__GTK_H__)
@@ -63,7 +57,7 @@ namespace Gtk {
 #if defined MAC
 	#import <foundation/foundation.h>
 	#if defined LGI_CARBON
-		bool _get_path_FSRef(FSRef &fs, GStringPipe &a)
+		bool _get_path_FSRef(FSRef &fs, LStringPipe &a)
 		{
 			HFSUniStr255 Name;
 			ZeroObj(Name);
@@ -97,7 +91,7 @@ namespace Gtk {
 
 		GAutoString FSRefPath(FSRef &fs)
 		{
-			GStringPipe a;
+			LStringPipe a;
 			if (_get_path_FSRef(fs, a))
 			{
 				return GAutoString(a.NewStr());
@@ -622,9 +616,9 @@ void LgiTrace(const char *Msg, ...)
 
 void LgiStackTrace(const char *Msg, ...)
 {
-	GSymLookup::Addr Stack[STACK_SIZE];
+	LSymLookup::Addr Stack[STACK_SIZE];
 	ZeroObj(Stack);
-	GSymLookup *Lu = LgiApp ? LgiApp->GetSymLookup() : NULL;
+	LSymLookup *Lu = LgiApp ? LgiApp->GetSymLookup() : NULL;
 	if (!Lu)
 	{
 		printf("%s:%i - Failed to get sym lookup object.\n", _FL);
@@ -694,7 +688,7 @@ bool LgiTrimDir(char *Path)
 
 GAutoString LgiMakeRelativePath(const char *Base, const char *Path)
 {
-	GStringPipe Status;
+	LStringPipe Status;
 
 	if (Base && Path)
 	{
@@ -895,7 +889,7 @@ GFile::Path::State GFile::Path::Exists()
 
 GString GFile::Path::PrintAll()
 {
-	GStringPipe p;
+	LStringPipe p;
 	
 	#define _(name) \
 		p.Print(#name ": '%s'\n", GetSystem(name).Get());
@@ -1739,7 +1733,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 						if (!ValidStr(KdeTrash))
 						{
 							// Ask KDE where the current trash is...
-							GStringPipe o;
+							LStringPipe o;
 							LSubProcess p("kde-config", "--userpath trash");
 							if (p.Start())
 							{
@@ -1906,7 +1900,7 @@ GString LGetExeFile()
 					// char Cmd[256];
 					// sprintf_s(Cmd, sizeof(Cmd), "ps | grep \"%i\"", getpid());
 					
-					GStringPipe Ps;
+					LStringPipe Ps;
 					LSubProcess p("ps");
 					if (p.Start())
 					{

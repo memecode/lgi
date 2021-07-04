@@ -1,7 +1,7 @@
 #pragma once
 
 #include "LJson.h"
-#include "GSymLookup.h"
+#include "LSymLookup.h"
 #include "GFontCache.h"
 
 typedef GArray<LAppInfo*> AppArray;
@@ -22,7 +22,7 @@ public:
 	LHashTbl<StrKey<char,false>,AppArray*> MimeToApp;
 	OsThread GuiThread;
 	OsThreadId GuiThreadId;
-	GSymLookup SymLookup;
+	LSymLookup SymLookup;
 	GAutoString Mime;
 	GAutoString Name;
 	GAutoString UrlArg;

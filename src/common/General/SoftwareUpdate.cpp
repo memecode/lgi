@@ -15,7 +15,7 @@ static char sXmlParsingFailed[] = "XML parsing failed.";
 static char sUnexpectedXml[] = "Unexpected XML.";
 static char sUpdateError[] = "Update script error: %s";
 
-struct GSoftwareUpdatePriv
+struct LSoftwareUpdatePriv
 {
 	GAutoString Name;
 	GAutoString UpdateUri;
@@ -30,16 +30,16 @@ struct GSoftwareUpdatePriv
 
 	class UpdateThread : public LThread
 	{
-		GSoftwareUpdatePriv *d;
-		GSocket *s;
-		GSoftwareUpdate::UpdateInfo *Info;
+		LSoftwareUpdatePriv *d;
+		LSocket *s;
+		LSoftwareUpdate::UpdateInfo *Info;
 		IHttp Http;
 		bool IncBetas;
 
 	public:
 		bool Status;
 
-		UpdateThread(GSoftwareUpdatePriv *priv, GSoftwareUpdate::UpdateInfo *info, bool betas) :
+		UpdateThread(LSoftwareUpdatePriv *priv, LSoftwareUpdate::UpdateInfo *info, bool betas) :
 		    LThread("SoftwareUpdateThread")
 		{
 			Info = info;
@@ -66,7 +66,7 @@ struct GSoftwareUpdatePriv
 		{
 			if (d->UpdateUri)
 			{
-				GUri Uri(d->UpdateUri);
+				LUri Uri(d->UpdateUri);
 				char Dir[256];
 				int WordSize = sizeof(size_t) << 3;
 				GString OsName = LGetOsName();
@@ -89,14 +89,14 @@ struct GSoftwareUpdatePriv
 				
 				if (d->Proxy)
 				{
-				    GUri Proxy(d->Proxy);
+				    LUri Proxy(d->Proxy);
 				    if (Proxy.sHost)
 					    Http.SetProxy(Proxy.sHost, Proxy.Port?Proxy.Port:HTTP_PORT);
 				}
 				
-				GStringPipe RawXml;
+				LStringPipe RawXml;
 				int ProtocolStatus = 0;
-				GAutoPtr<LSocketI> s(new GSocket);
+				GAutoPtr<LSocketI> s(new LSocket);
 				if (Http.Open(s, Uri.sHost, Uri.Port))
 				{
 					IHttp::ContentEncoding Enc;
@@ -131,7 +131,7 @@ struct GSoftwareUpdatePriv
 								else
 								{
 									LXmlTag *Msg = Root.GetChildTag("msg");
-									GStringPipe p;
+									LStringPipe p;
 									p.Print(LgiLoadString(L_ERROR_UPDATE, sUpdateError), Msg?Msg->GetContent():(char*)"Unknown");
 									d->Error.Reset(p.NewStr());
 									LgiTrace("UpdateURI=%s\n", GetUri.Get());
@@ -220,20 +220,20 @@ struct GSoftwareUpdatePriv
 
 	class UpdateDownload : public LThread, public GProxyStream
 	{
-		GSoftwareUpdate::UpdateInfo *Info;
-		GUri *Uri;
-		GUri *Proxy;
-		GStream *Local;
+		LSoftwareUpdate::UpdateInfo *Info;
+		LUri *Uri;
+		LUri *Proxy;
+		LStream *Local;
 		GAutoString *Err;
 		int *Status;
 
 	public:
 		int64 Progress, Total;
 
-		UpdateDownload( GSoftwareUpdate::UpdateInfo *info,
-		                GUri *uri,
-		                GUri *proxy,		                
-		                GStream *local,
+		UpdateDownload( LSoftwareUpdate::UpdateInfo *info,
+		                LUri *uri,
+		                LUri *proxy,		                
+		                LStream *local,
 		                GAutoString *err,
 		                int *status) : LThread("UpdateDownload"), GProxyStream(local)
 		{
@@ -267,7 +267,7 @@ struct GSoftwareUpdatePriv
 			if (Proxy->sHost)
 				Http.SetProxy(Proxy->sHost, Proxy->Port?Proxy->Port:HTTP_PORT);
 
-			GAutoPtr<LSocketI> s(new GSocket);
+			GAutoPtr<LSocketI> s(new LSocket);
 			IHttp::ContentEncoding Enc;
 			if (!Http.Open(s, Uri->sHost, Uri->Port))
 			{
@@ -283,30 +283,30 @@ struct GSoftwareUpdatePriv
 	};
 };
 
-GSoftwareUpdate::GSoftwareUpdate(const char *SoftwareName,
+LSoftwareUpdate::LSoftwareUpdate(const char *SoftwareName,
 								const char *UpdateUri,
 								const char *ProxyUri,
 								const char *OptionalTempPath)
 {
-	d = new GSoftwareUpdatePriv;
+	d = new LSoftwareUpdatePriv;
 	d->Name.Reset(NewStr(SoftwareName));
 	d->UpdateUri.Reset(NewStr(UpdateUri));
 	d->Proxy.Reset(NewStr(ProxyUri));
 	d->TempPath.Reset(NewStr(OptionalTempPath));
 }
 
-GSoftwareUpdate::~GSoftwareUpdate()
+LSoftwareUpdate::~LSoftwareUpdate()
 {
 	DeleteObj(d);
 }
 
-bool GSoftwareUpdate::CheckForUpdate(UpdateInfo &Info, LViewI *WithUi, bool IncBetas)
+bool LSoftwareUpdate::CheckForUpdate(UpdateInfo &Info, LViewI *WithUi, bool IncBetas)
 {
-	GSoftwareUpdatePriv::UpdateThread Update(d, &Info, IncBetas);
+	LSoftwareUpdatePriv::UpdateThread Update(d, &Info, IncBetas);
 	
 	if (WithUi)
 	{
-		GSoftwareUpdatePriv::Spinner s(WithUi, &Update);
+		LSoftwareUpdatePriv::Spinner s(WithUi, &Update);
 	}
 	else
 	{
@@ -320,7 +320,7 @@ bool GSoftwareUpdate::CheckForUpdate(UpdateInfo &Info, LViewI *WithUi, bool IncB
 	return Update.Status;
 }
 
-bool GSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *WithUi)
+bool LSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *WithUi)
 {
 	if (!Info.Uri)
 	{
@@ -328,7 +328,7 @@ bool GSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *W
 		return false;
 	}
 
-	GUri Uri(Info.Uri);
+	LUri Uri(Info.Uri);
 	if (!Uri.sPath)
 	{
 		d->SetError(L_ERROR_URI_ERROR, "No path in URI.");
@@ -360,8 +360,8 @@ bool GSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *W
 
 	int HttpStatus = 0;
 	int64 Size = 0;
-	GUri Proxy(d->Proxy);
-	GSoftwareUpdatePriv::UpdateDownload Thread(&Info, &Uri, &Proxy, &Local, &d->Error, &HttpStatus);
+	LUri Proxy(d->Proxy);
+	LSoftwareUpdatePriv::UpdateDownload Thread(&Info, &Uri, &Proxy, &Local, &d->Error, &HttpStatus);
 	while (!Thread.IsExited())
 	{
 		LgiYield();
@@ -429,7 +429,7 @@ bool GSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *W
 	return false;
 }
 
-char *GSoftwareUpdate::GetErrorMessage()
+char *LSoftwareUpdate::GetErrorMessage()
 {
 	return d->Error;
 }

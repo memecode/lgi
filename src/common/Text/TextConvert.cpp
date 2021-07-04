@@ -97,7 +97,7 @@ char *DecodeRfc2047(char *Str)
 	if (!Str)
 		return NULL;
 	
-	GStringPipe p(256);
+	LStringPipe p(256);
 	for (char *s = Str; *s; )
 	{
 		char *e = s;
@@ -243,7 +243,7 @@ char *EncodeRfc2047(char *Str, const char *CodePage, List<char> *CharsetPrefs, s
 		CodePage = "utf-8";
 	}
 
-	GStringPipe p(256);
+	LStringPipe p(256);
 
 	if (!Str)
 		return NULL;

@@ -35,12 +35,12 @@ public:
 		return true;
 	}
 
-	IoStatus WriteImage(GStream *Out, LSurface *pDC)
+	IoStatus WriteImage(LStream *Out, LSurface *pDC)
 	{
 		return IoUnsupportedFormat;
 	}
 
-	IoStatus ReadImage(LSurface *pDC, GStream *In)
+	IoStatus ReadImage(LSurface *pDC, LStream *In)
 	{
 		IoStatus Status = IoError;
 		

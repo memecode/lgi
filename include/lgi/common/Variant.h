@@ -68,7 +68,7 @@ enum LVariantType
 	GV_LMOUSE,
 	/// Pointer to LKey
 	GV_LKEY,
-	/// Pointer to GStream
+	/// Pointer to LStream
 	GV_STREAM,
 	/// The maximum value for the variant type.
 	/// (This is used by the scripting engine to refer to a LVariant itself)
@@ -342,7 +342,7 @@ public:
 	LVariant &operator =(class LView *p);
 	LVariant &operator =(class LMouse *p);
 	LVariant &operator =(class LKey *k);
-	LVariant &operator =(class GStream *s);
+	LVariant &operator =(class LStream *s);
 
 	bool operator ==(LVariant &v);
 	bool operator !=(LVariant &v) { return !(*this == v); }

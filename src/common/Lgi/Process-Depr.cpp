@@ -357,7 +357,7 @@ bool GProcess::Terminate()
 
 bool GNativeString::WinNT = LGetOs() == LGI_OS_WIN32 || LGetOs() == LGI_OS_WIN64;
 
-bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool Wait, GStream *In, GStream *Out, int Priority)
+bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool Wait, LStream *In, LStream *Out, int Priority)
 {
 	bool Status = false;
 
@@ -642,7 +642,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 			while (*s && strchr(" \t\r\n", *s)) s++;
 			
 			// Find token
-			GStringPipe p(256);
+			LStringPipe p(256);
 			const char *n;
 			char d = 0;
 			if (strchr("\"\'", *s))

@@ -71,7 +71,7 @@ char *EncodeXml(const char *Str, int Len)
 	
 	if (Str)
 	{
-		GStringPipe p;
+		LStringPipe p;
 		
 		const char *s = Str;
 		for (const char *e = Str; e && *e && (Len < 0 || ((e-Str) < Len)); )
@@ -146,7 +146,7 @@ char *DecodeXml(const char *Str, int Len)
 {
 	if (Str)
 	{
-		GStringPipe p;
+		LStringPipe p;
 		
 		const char *s = Str;
 		for (const char *e = Str; e && *e && (Len < 0 || ((e-Str) < Len)); )
@@ -1092,7 +1092,7 @@ void AppWnd::ShowLang(GLanguageId Lang, bool Show)
 	}
 
 	// Store the setting for next time
-	GStringPipe p;
+	LStringPipe p;
 	// const char *L;
 	// for (bool i = ShowLanguages.First(&L); i; i = ShowLanguages.Next(&L))
 	for (auto i : ShowLanguages)
@@ -2336,7 +2336,7 @@ void AppWnd::ImportLang()
 						if (Dlg.DoModal() == IDOK &&
 							Dlg.Lang)
 						{
-							GStringPipe Errors;
+							LStringPipe Errors;
 							
 							int Matches = 0;
 							int NotFound = 0;
@@ -2574,7 +2574,7 @@ bool AppWnd::TestLgi(bool Quite)
 
 		if (Errors.StrErr.Length() > 0)
 		{
-			GStringPipe Sample;
+			LStringPipe Sample;
 			for (int i=0; i<Errors.StrErr.Length(); i++)
 			{
 				ResString *s = Errors.StrErr[i].Str;

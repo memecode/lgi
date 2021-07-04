@@ -31,7 +31,7 @@ class SslSocket :
 	// Local stuff
 	virtual void Log(const char *Str, ssize_t Bytes, SocketMsgType Type);
 	void SslError(const char *file, int line, const char *Msg);
-	GStream *GetLogStream();
+	LStream *GetLogStream();
 	void DebugTrace(const char *fmt, ...);
 
 public:

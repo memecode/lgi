@@ -785,10 +785,10 @@ public:
 	}
 };
 
-class GStyleThread : public LEventTargetThread
+class LStyleThread : public LEventTargetThread
 {
 public:
-	GStyleThread() : LEventTargetThread("StyleThread")
+	LStyleThread() : LEventTargetThread("StyleThread")
 	{
 	}
 	
@@ -858,7 +858,7 @@ GString IdeDocPrivate::GetDisplayName()
 		{
 			if (stristr(Fn, "://"))
 			{
-				GUri u(nSrc->GetFileName());
+				LUri u(nSrc->GetFileName());
 				if (u.sPass)
 				{
 					u.sPass = "******";
@@ -1066,7 +1066,7 @@ class WebBuild : public LThread
 	IdeDocPrivate *d;
 	GString Uri;
 	int64 SleepMs;
-	GStream *Log;
+	LStream *Log;
 	LCancel Cancel;
 
 public:
@@ -1097,7 +1097,7 @@ public:
 		}
 
 		// Download the file...
-		GStringPipe Out;
+		LStringPipe Out;
 		GString Error;
 		bool r = LgiGetUri(&Cancel, &Out, &Error, Uri, NULL/*InHdrs*/, NULL/*Proxy*/);
 		if (r)
@@ -1149,7 +1149,7 @@ bool IdeDoc::Build()
 			!d->Build->IsExited())
 		{
 			// Already building...
-			GStream *Log = d->App->GetBuildLog();
+			LStream *Log = d->App->GetBuildLog();
 			if (Log)
 				Log->Print("%s:%i - Already building...\n");
 			return false;
@@ -1981,7 +1981,7 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 	}
 
 	#if DEBUG_FIND_DEFN
-	GStringPipe Dbg;
+	LStringPipe Dbg;
 	LgiTrace("FindDefn(%S)\n", Symbol);
 	#endif
 

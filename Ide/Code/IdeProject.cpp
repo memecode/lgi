@@ -152,7 +152,7 @@ int StrSort(char **a, char **b)
 //////////////////////////////////////////////////////////////////////////////////
 class ProjectNode;
 
-class BuildThread : public LThread, public GStream
+class BuildThread : public LThread, public LStream
 {
 	IdeProject *Proj;
 	GString Makefile, CygwinPath;
@@ -236,7 +236,7 @@ class MakefileThread : public LThread, public LCancel
 	IdeProjectPrivate *d;
 	IdeProject *Proj;
 	IdePlatform Platform;
-	GStream *Log;
+	LStream *Log;
 	bool BuildAfterwards;
 	bool HasError;
 	
@@ -269,7 +269,7 @@ public:
 	{
 		va_list Arg;
 		va_start(Arg, Fmt);
-		GStreamPrintf(Log, 0, Fmt, Arg);
+		LStreamPrintf(Log, 0, Fmt, Arg);
 		va_end(Arg);
 		HasError = true;
 	}
@@ -285,7 +285,7 @@ public:
 		const char *CompilerName = d->Settings.GetStr(ProjCompiler);
 		GString CCompilerBinary = "gcc";
 		GString CppCompilerBinary = "g++";
-		GStream *Log = d->App->GetBuildLog();
+		LStream *Log = d->App->GetBuildLog();
 		bool IsExecutableTarget = TargetType && !stricmp(TargetType, "Executable");
 		bool IsDynamicLibrary	= TargetType && !stricmp(TargetType, "DynamicLibrary");
 		
@@ -746,7 +746,7 @@ public:
 						m.Print("# Executable target\n"
 								"$(Target) :");
 								
-						GStringPipe Rules;
+						LStringPipe Rules;
 						IdeProject *Dep;
 						
 						uint64 Last = LgiCurrentTime();
@@ -1421,7 +1421,7 @@ GString BuildThread::FindExe()
 						free(Buf);
 					#else
 						LSubProcess p(Path, "--version");
-						GStringPipe o;
+						LStringPipe o;
 						if (p.Start())
 							p.Communicate(&o);
 						auto Out = o.NewGStr();
@@ -1715,7 +1715,7 @@ GString BuildThread::FindExe()
 GAutoString BuildThread::WinToMingWPath(const char *path)
 {
 	GToken t(path, "\\");
-	GStringPipe a(256);
+	LStringPipe a(256);
 	for (int i=0; i<t.Length(); i++)
 	{
 		char *p = t[i];
@@ -1871,7 +1871,7 @@ int BuildThread::Main()
 			LSubProcess Ls(Exe, a);
 			if (Ls.Start())
 			{
-				GStringPipe o;
+				LStringPipe o;
 				auto ret = Ls.Communicate(&o);
 				GString Cfgs = o.NewGStr();
 
@@ -2254,7 +2254,7 @@ void IdeProject::Clean(bool All, bool Release)
 
 char *QuoteStr(char *s)
 {
-	GStringPipe p(256);
+	LStringPipe p(256);
 	while (s && *s)
 	{
 		if (*s == ' ')
@@ -2267,7 +2267,7 @@ char *QuoteStr(char *s)
 	return p.NewStr();
 }
 
-class ExecuteThread : public LThread, public GStream
+class ExecuteThread : public LThread, public LStream
 {
 	IdeProject *Proj;
 	GString Exe, Args, Path;
@@ -2474,7 +2474,7 @@ bool IdeProject::IsMakefileUpToDate()
 
 bool IdeProject::FindDuplicateSymbols()
 {
-	GStream *Log = d->App->GetBuildLog();	
+	LStream *Log = d->App->GetBuildLog();	
 	Log->Print("FindDuplicateSymbols starting...\n");
 
 	List<IdeProject> Proj;
@@ -2496,7 +2496,7 @@ bool IdeProject::FindDuplicateSymbols()
 			if (Nm.Start(true, false))
 			{
 				char Buf[256];
-				GStringPipe q;
+				LStringPipe q;
 				for (ssize_t Rd = 0; (Rd = Nm.Read(Buf, sizeof(Buf))); )
 					q.Write(Buf, Rd);
 				GString::Array a = q.NewGStr().SplitDelimit("\r\n");
@@ -2918,7 +2918,7 @@ bool IdeProject::SaveFile()
 
 			d->Settings.Serialize(this, true /* write */);
 			
-			GStringPipe Buf(4096);			
+			LStringPipe Buf(4096);			
 			if (x.Write(this, &Buf, &Prog))
 			{
 				GCopyStreamer Cp;
@@ -3515,7 +3515,7 @@ bool IdeProject::BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool In
 				p = p.Strip("`");
 				GString::Array a = p.Split(" ", 1);
 				LSubProcess Proc(a[0], a.Length() > 1 ? a[1].Get() : NULL);
-				GStringPipe Buf;
+				LStringPipe Buf;
 				if (Proc.Start())
 				{
 					Proc.Communicate(&Buf);

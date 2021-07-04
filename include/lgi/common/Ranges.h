@@ -103,7 +103,7 @@ public:
 
 	GString ToString()
 	{
-		GStringPipe p;
+		LStringPipe p;
 		for (auto r : *this)
 			p.Print(LPrintfSSizeT "-" LPrintfSSizeT ",", r.Start, r.End());
 		return p.NewGStr();

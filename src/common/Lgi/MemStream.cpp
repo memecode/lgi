@@ -243,7 +243,7 @@ LStreamI *GMemStream::Clone()
 	return new GMemStream(Mem, Len, true);
 }
 
-ssize_t GMemStream::Write(GStream *Out, ssize_t Size)
+ssize_t GMemStream::Write(LStream *Out, ssize_t Size)
 {
 	ssize_t Wr = -1;
 

@@ -43,10 +43,10 @@ public:
 		bool Wait,
 		/// A stream to supply input to the process. Only used if
 		/// Wait=true.
-		GStream *In = 0,
+		LStream *In = 0,
 		/// A stream to capture output from the process. Only used if
 		/// Wait=true.
-		GStream *Out = 0,
+		LStream *Out = 0,
 		/// The priority to run the process at.
 		/// <li> -2 = idle
 		/// <li> -1 = low

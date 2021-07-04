@@ -286,7 +286,7 @@ bool GetIccProfile(j_decompress_ptr cinfo, uchar **icc_data, uint *icc_datalen)
 
 struct JpegStream
 {
-    GStream *f;
+    LStream *f;
     GArray<JOCTET> Buf;
 };
 
@@ -519,7 +519,7 @@ void CmykToRgb32(D *d, S *s, int width)
 	}
 }
 
-GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, GStream *In)
+GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 {
 	GFilter::IoStatus Status = IoError;
 	LVariant v;
@@ -616,7 +616,7 @@ GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, GStream *In)
 	
 	if (Props)
 	{
-		GStringPipe s(256);
+		LStringPipe s(256);
 		s.Print("Sub-sampling: ");
 		for (int i=0; i<cinfo.comps_in_scan; i++)
 			s.Print("%s%ix%i", i ? "_" : "", cinfo.comp_info[i].h_samp_factor, cinfo.comp_info[i].v_samp_factor);
@@ -869,7 +869,7 @@ void j_term_destination(j_compress_ptr cinfo)
 		LgiAssert(!"Write failed.");
 }
 
-GFilter::IoStatus GdcJpeg::WriteImage(GStream *Out, LSurface *pDC)
+GFilter::IoStatus GdcJpeg::WriteImage(LStream *Out, LSurface *pDC)
 {
 	LVariant v;
 	#if LIBJPEG_SHARED
@@ -927,7 +927,7 @@ void Rop24(GRgb24 *dst, I *p, int x)
 	}
 }
 
-GFilter::IoStatus GdcJpeg::_Write(GStream *Out, LSurface *pDC, int Quality, SubSampleMode SubSample, LPoint Dpi)
+GFilter::IoStatus GdcJpeg::_Write(LStream *Out, LSurface *pDC, int Quality, SubSampleMode SubSample, LPoint Dpi)
 {
 	struct jpeg_compress_struct cinfo;
 	struct my_error_mgr jerr;

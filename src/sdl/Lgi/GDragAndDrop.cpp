@@ -51,7 +51,7 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, GString::
 {
 	if (OutputData && Files.First())
 	{
-		GStringPipe p;
+		LStringPipe p;
 		for (auto f : Files)
 		{
 			char s[256];

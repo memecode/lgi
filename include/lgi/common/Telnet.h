@@ -4,9 +4,9 @@
 #include "LThread.h"
 #include "INet.h"
 
-class LTelnet : public GStream
+class LTelnet : public LStream
 {
-	GSocket s;
+	LSocket s;
 	GArray<uint8_t> buf;
 	ssize_t used;
 	

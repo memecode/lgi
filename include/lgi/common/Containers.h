@@ -1031,7 +1031,7 @@ public:
 /// PreAlloc size to the constructor. This can reduce the number of blocks
 /// of memory being used (and their associated alloc/free time and
 /// tracking overhead) in high volume situations.
-class LgiClass GMemQueue : public GStream
+class LgiClass GMemQueue : public LStream
 {
 protected:
 	/// Data block. These can contain a mix of 3 types of data:
@@ -1121,20 +1121,20 @@ public:
 };
 
 /// A version of GBytePipe for strings. Adds some special handling for strings.
-class LgiClass GStringPipe : public GMemQueue
+class LgiClass LStringPipe : public GMemQueue
 {
 	ssize_t LineChars();
 	ssize_t SaveToBuffer(char *Str, ssize_t BufSize, ssize_t Chars);
 
 public:
 	/// Constructs the object
-	GStringPipe
+	LStringPipe
 	(
 		/// Number of bytes to allocate per block.
 		int PreAlloc = -1
 	) : GMemQueue(PreAlloc) {}
 	
-	~GStringPipe() {}
+	~LStringPipe() {}
 
 	virtual ssize_t Pop(char *Str, ssize_t Chars);
 	virtual ssize_t Pop(GArray<char> &Buf);
@@ -1144,7 +1144,7 @@ public:
 	char *NewStr() { return (char*)New(sizeof(char)); }
 	GString NewGStr();
 	char16 *NewStrW() { return (char16*)New(sizeof(char16)); }
-	GStringPipe &operator +=(const GString &s) { Write(s.Get(), s.Length()); return *this; }
+	LStringPipe &operator +=(const GString &s) { Write(s.Get(), s.Length()); return *this; }
 
 	#ifdef _DEBUG
 	static bool UnitTest();
@@ -1152,7 +1152,7 @@ public:
 };
 
 #define GMEMFILE_BLOCKS		8
-class LgiClass GMemFile : public GStream
+class LgiClass GMemFile : public LStream
 {
 	struct Block
 	{

@@ -975,7 +975,7 @@ bool GIccProfile::Open(const char *file)
 	return false;
 }
 
-bool GIccProfile::Open(GStream *Stream)
+bool GIccProfile::Open(LStream *Stream)
 {
 	if (Stream)
 	{
@@ -1038,7 +1038,7 @@ bool GIccProfile::Save(const char *file)
 	return false;
 }
 
-bool GIccProfile::Save(GStream *stream)
+bool GIccProfile::Save(LStream *stream)
 {
 	if (stream)
 	{

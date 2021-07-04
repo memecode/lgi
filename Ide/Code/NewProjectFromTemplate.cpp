@@ -76,7 +76,7 @@ GString GetPython3()
 			LSubProcess sp(p, "--version");
 			if (sp.Start())
 			{
-				GStringPipe out;
+				LStringPipe out;
 				sp.Communicate(&out);
 				auto s = out.NewGStr();
 				// printf("out=%s\n", s.Get());
@@ -127,7 +127,7 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 		return false;
 	}
 	
-	GStringPipe Out;
+	LStringPipe Out;
 	p.Communicate(&Out);
 	LgiTrace("Out=%s\n", Out.NewGStr().Get());
 	

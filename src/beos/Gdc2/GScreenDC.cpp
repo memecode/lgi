@@ -13,7 +13,7 @@
 #include "Lgi.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-class GScreenPrivate
+class LScreenPrivate
 {
 public:
 	OsView View;
@@ -23,7 +23,7 @@ public:
 	LRect Clip;
 	int ConstAlpha;
 	
-	GScreenPrivate()
+	LScreenPrivate()
 	{
 		View = 0;
 		ConstAlpha = 255;
@@ -37,7 +37,7 @@ LScreenDC::LScreenDC(LView *view, void *Param)
 {
 	LgiAssert(view);
 
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	d->View = view->Handle();
 }
 
@@ -45,7 +45,7 @@ LScreenDC::LScreenDC(BView *view)
 {
 	LgiAssert(view);
 
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	d->View = view;
 }
 

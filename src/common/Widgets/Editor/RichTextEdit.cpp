@@ -88,7 +88,7 @@ LRichTextEdit::~LRichTextEdit()
 	// 'd' is owned by the LView CSS autoptr.
 }
 
-bool LRichTextEdit::SetSpellCheck(GSpellCheck *sp)
+bool LRichTextEdit::SetSpellCheck(LSpellCheck *sp)
 {
 	if ((d->SpellCheck = sp))
 	{
@@ -2505,7 +2505,7 @@ GMessage::Result LRichTextEdit::OnEvent(GMessage *Msg)
 		}
 		case M_ENUMERATE_LANGUAGES:
 		{
-			GAutoPtr< GArray<GSpellCheck::LanguageId> > Languages((GArray<GSpellCheck::LanguageId>*)Msg->A());
+			GAutoPtr< GArray<LSpellCheck::LanguageId> > Languages((GArray<LSpellCheck::LanguageId>*)Msg->A());
 			if (!Languages)
 			{
 				LgiTrace("%s:%i - M_ENUMERATE_LANGUAGES no param\n", _FL);
@@ -2531,7 +2531,7 @@ GMessage::Result LRichTextEdit::OnEvent(GMessage *Msg)
 		}
 		case M_ENUMERATE_DICTIONARIES:
 		{
-			GAutoPtr< GArray<GSpellCheck::DictionaryId> > Dictionaries((GArray<GSpellCheck::DictionaryId>*)Msg->A());
+			GAutoPtr< GArray<LSpellCheck::DictionaryId> > Dictionaries((GArray<LSpellCheck::DictionaryId>*)Msg->A());
 			if (!Dictionaries)
 				break;
 	
@@ -2572,7 +2572,7 @@ GMessage::Result LRichTextEdit::OnEvent(GMessage *Msg)
 		}
 		case M_CHECK_TEXT:
 		{
-			GAutoPtr<GSpellCheck::CheckText> Ct((GSpellCheck::CheckText*)Msg->A());
+			GAutoPtr<LSpellCheck::CheckText> Ct((LSpellCheck::CheckText*)Msg->A());
 			if (!Ct || Ct->User.Length() > 1)
 			{
 				LgiAssert(0);

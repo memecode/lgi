@@ -553,7 +553,7 @@ void GTableDb::Empty()
 	d->Tables.DeleteObjects();
 }
 
-void GTableDb::SetLogStream(GStream *log)
+void GTableDb::SetLogStream(LStream *log)
 {
 	d->Log = log;
 }
@@ -593,7 +593,7 @@ bool GTableDb::IsOk()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool RunTableDbTest(GStream *Log)
+bool RunTableDbTest(LStream *Log)
 {
 	{	// Field serialization test
 		GArray<char> Mem;

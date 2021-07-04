@@ -280,7 +280,7 @@ public:
 	LMouseHook *GetMouseHook();
 
 	/// Gets the singleton symbol lookup class
-	class GSymLookup *GetSymLookup();
+	class LSymLookup *GetSymLookup();
 
 	/// \returns true if the process is running with elevated permissions
 	bool IsElevated();

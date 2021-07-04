@@ -6,16 +6,16 @@
 #include "LSubProcess.h"
 
 /// Lookup the file/line information for an instruction pointer value
-class GSymLookup
+class LSymLookup
 {
 public:
 	typedef int Addr;
 
-	GSymLookup()
+	LSymLookup()
 	{
 	}
 	
-	~GSymLookup()
+	~LSymLookup()
 	{
 	}
 	

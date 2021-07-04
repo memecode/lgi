@@ -121,7 +121,7 @@ GDocumentEnv::LoadType GDefaultDocumentEnv::GetContent(LoadJob *&j)
 	char p[MAX_PATH];
 	char *FullPath = NULL;
 	char *FileName = NULL;
-	GUri u(j->Uri);
+	LUri u(j->Uri);
 	if (u.sProtocol && !_stricmp(u.sProtocol, "file"))
 		FileName = u.sPath;
 	else
@@ -179,7 +179,7 @@ bool GDefaultDocumentEnv::OnNavigate(GDocView *Parent, const char *Uri)
 			if (LGetAppsForMimeType("application/email", Apps))
 			{
 				LAppInfo *First = Apps[0];
-				GStringPipe a;
+				LStringPipe a;
 
 				char *Arg = First->Params ? strstr(First->Params, "%1") : 0;
 				if (Arg)

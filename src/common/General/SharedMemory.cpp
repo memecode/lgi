@@ -11,7 +11,7 @@
 #include <sys/shm.h>
 #endif
 
-class GSharedMemoryPrivate
+class LSharedMemoryPrivate
 {
 public:
 	char *Name;
@@ -24,7 +24,7 @@ public:
 	int Id;
 	#endif
 	
-	GSharedMemoryPrivate(const char *name, int size)
+	LSharedMemoryPrivate(const char *name, int size)
 	{
 		Name = NewStr(name);
 		Size = size;
@@ -81,7 +81,7 @@ public:
 		#endif
 	}
 	
-	~GSharedMemoryPrivate()
+	~LSharedMemoryPrivate()
 	{
 		#if defined(WIN32)
 		Destroy();
@@ -138,21 +138,21 @@ public:
 #endif
 
 ///////////////////////////////////////////////////////////////////////
-GSharedMemory::GSharedMemory(const char *Name, int Size)
+LSharedMemory::LSharedMemory(const char *Name, int Size)
 {
 	#ifndef BEOS
-	d = new GSharedMemoryPrivate(Name, Size);
+	d = new LSharedMemoryPrivate(Name, Size);
 	#else
 	d = NULL;
 	#endif
 }
 
-GSharedMemory::~GSharedMemory()
+LSharedMemory::~LSharedMemory()
 {
 	DeleteObj(d);
 }
 
-void *GSharedMemory::GetPtr()
+void *LSharedMemory::GetPtr()
 {
 	#ifndef BEOS
 	return d->GetPtr();
@@ -161,7 +161,7 @@ void *GSharedMemory::GetPtr()
 	#endif
 }
 
-int GSharedMemory::GetSize()
+int LSharedMemory::GetSize()
 {
 	#ifndef BEOS
 	return d->Size;
@@ -170,7 +170,7 @@ int GSharedMemory::GetSize()
 	#endif
 }
 
-void GSharedMemory::Destroy()
+void LSharedMemory::Destroy()
 {
 	#ifndef BEOS
 	d->Destroy();

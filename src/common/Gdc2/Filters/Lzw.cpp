@@ -25,7 +25,7 @@ public:
 	int Datum;
 	int BitPos;
 	size_t BitsLeft;
-	GStream *Pipe;
+	LStream *Pipe;
 
 	// Read buffer
 	int InBufSize;
@@ -180,7 +180,7 @@ public:
 		}
 	}
 */
-	bool Decompress(GStream *Out, GStream *in, Progress *Meter, int Block)
+	bool Decompress(LStream *Out, LStream *in, Progress *Meter, int Block)
 	{
 		int Code = 0;
 
@@ -358,7 +358,7 @@ public:
 		}
 	}
 
-	bool Compress(GStream *Out, GStream *In, Progress *Meter, int Block)
+	bool Compress(LStream *Out, LStream *In, Progress *Meter, int Block)
 	{
 		bool Status = false;
 		short index, WaitingCode;
@@ -521,12 +521,12 @@ void Lzw::SetBufSize(int i)
 {
 }
 
-bool Lzw::Decompress(GStream *out, GStream *in)
+bool Lzw::Decompress(LStream *out, LStream *in)
 {
 	return d->Decompress(out, in, Meter, MeterBlock);
 }
 
-bool Lzw::Compress(GStream *out, GStream *in)
+bool Lzw::Compress(LStream *out, LStream *in)
 {
 	return d->Compress(out, in, Meter, MeterBlock);
 }

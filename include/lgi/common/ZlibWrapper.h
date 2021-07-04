@@ -95,7 +95,7 @@ public:
 	DynFunc1(int, gzclearerr,gzFile, file);
 };
 
-class GZlibFile : public GStream
+class GZlibFile : public LStream
 {
 	Zlib *z;
 	gzFile f;

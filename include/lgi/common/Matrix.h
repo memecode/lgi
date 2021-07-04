@@ -110,7 +110,7 @@ struct GMatrix
 	
 	GAutoString GetStr(const char *format)
 	{
-		GStringPipe p(256);
+		LStringPipe p(256);
 		for (int y=0; y<Ys; y++)
 		{
 			for (int x=0; x<Xs; x++)

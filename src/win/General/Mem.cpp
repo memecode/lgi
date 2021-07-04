@@ -21,7 +21,7 @@
 #include "lgi/common/LgiDefs.h"
 #include "ImageHlp.h"
 #include <direct.h>
-#include "GSymLookup.h"
+#include "LSymLookup.h"
 
 #undef malloc
 #undef realloc

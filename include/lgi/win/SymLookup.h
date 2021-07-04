@@ -52,7 +52,7 @@ typedef DWORD (__stdcall *proc_SymSetOptions)(DWORD SymOptions);
 typedef BOOL (WINAPI *pSymFromAddr)(HANDLE hProcess, DWORD64 Address, PDWORD64 Displacement, PSYMBOL_INFO Symbol);
 
 /// Lookup the file/line information for an instruction pointer value
-class GSymLookup
+class LSymLookup
 {
 	HMODULE DbgHelp;
 	HANDLE hProcess;
@@ -77,7 +77,7 @@ class GSymLookup
 public:
 	typedef NativeInt Addr;
 
-	GSymLookup()
+	LSymLookup()
 	{
 		hProcess = GetCurrentProcess();
 		InitOk = 0;
@@ -151,7 +151,7 @@ public:
 		}
 	}
 	
-	~GSymLookup()
+	~LSymLookup()
 	{
 		if (DbgHelp)
 		{

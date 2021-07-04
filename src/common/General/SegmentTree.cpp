@@ -3,7 +3,7 @@
 #include "lgi/common/SegmentTree.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-bool GSegment::Insert(GSegment *Seg, GSegment **Conflict)
+bool LSegment::Insert(LSegment *Seg, LSegment **Conflict)
 {
 	if (Overlap(Seg))
 	{
@@ -39,7 +39,7 @@ bool GSegment::Insert(GSegment *Seg, GSegment **Conflict)
 	return true;
 }
 
-GSegment *GSegment::Find(int64 Off)
+LSegment *LSegment::Find(int64 Off)
 {
 	if (Off >= Start && Off < Start + Length)
 	{
@@ -48,7 +48,7 @@ GSegment *GSegment::Find(int64 Off)
 
 	if (Left)
 	{
-		GSegment *s = Left->Find(Off);
+		LSegment *s = Left->Find(Off);
 		if (s) return s;
 	}
 
@@ -60,7 +60,7 @@ GSegment *GSegment::Find(int64 Off)
 	return 0;
 }
 
-void GSegment::Index(GSegment **&i)
+void LSegment::Index(LSegment **&i)
 {
 	if (Left)
 	{
@@ -76,46 +76,46 @@ void GSegment::Index(GSegment **&i)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-class GSegmentTreePrivate
+class LSegmentTreePrivate
 {
 public:
 	int Items;
-	GSegment *Root;
+	LSegment *Root;
 
-	GSegmentTreePrivate()
+	LSegmentTreePrivate()
 	{
 		Items = 0;
 		Root = 0;
 	}
 
-	~GSegmentTreePrivate()
+	~LSegmentTreePrivate()
 	{
 		DeleteObj(Root);
 	}
 };
 
-GSegmentTree::GSegmentTree()
+LSegmentTree::LSegmentTree()
 {
-	d = new GSegmentTreePrivate;
+	d = new LSegmentTreePrivate;
 }
 
-GSegmentTree::~GSegmentTree()
+LSegmentTree::~LSegmentTree()
 {
 	DeleteObj(d);
 }
 
-int GSegmentTree::Items()
+int LSegmentTree::Items()
 {
 	return d->Items;
 }
 
-void GSegmentTree::Empty()
+void LSegmentTree::Empty()
 {
 	DeleteObj(d->Root);
 	d->Items = 0;
 }
 
-bool GSegmentTree::Insert(GSegment *Seg, GSegment **Conflict)
+bool LSegmentTree::Insert(LSegment *Seg, LSegment **Conflict)
 {
 	bool Status = false;
 
@@ -123,7 +123,7 @@ bool GSegmentTree::Insert(GSegment *Seg, GSegment **Conflict)
 	{
 		if (d->Root)
 		{
-			GSegment *c = 0;			
+			LSegment *c = 0;			
 			Status = d->Root->Insert(Seg, &c);
 			if (!Status && Conflict)
 			{
@@ -145,26 +145,26 @@ bool GSegmentTree::Insert(GSegment *Seg, GSegment **Conflict)
 	return Status;
 }
 
-bool GSegmentTree::Delete(GSegment *Seg)
+bool LSegmentTree::Delete(LSegment *Seg)
 {
 	return false;
 }
 
-GSegment *GSegmentTree::ItemAt(int Offset)
+LSegment *LSegmentTree::ItemAt(int Offset)
 {
 	return d->Root ? d->Root->Find(Offset) : 0;
 }
 
-GSegment **GSegmentTree::CreateIndex()
+LSegment **LSegmentTree::CreateIndex()
 {
-	GSegment **Index = 0;
+	LSegment **Index = 0;
 
 	if (d->Items > 0 && d->Root)
 	{
-		Index = new GSegment*[d->Items];
+		Index = new LSegment*[d->Items];
 		if (Index)
 		{
-			GSegment **i = Index;
+			LSegment **i = Index;
 			d->Root->Index(i);
 			LgiAssert(i == Index + d->Items);
 		}

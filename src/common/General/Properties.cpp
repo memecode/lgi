@@ -297,7 +297,7 @@ bool Prop::SerializeText(GFile &f, bool Write)
 						{
 							char *Start = Equal + 1;
 
-							GStringPipe p(256);
+							LStringPipe p(256);
 							
 							for (char *s = Start; s && *s && *s != '\"'; )
 							{

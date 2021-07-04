@@ -43,7 +43,7 @@ public:
 /// 
 /// Defines the API
 /// for all the streaming data classes. Allows applications to plug
-/// different types of date streams into functions that take a GStream.
+/// different types of date streams into functions that take a LStream.
 /// Typically this means being able to swap files with sockets or data
 /// buffers etc.
 /// 
@@ -111,7 +111,7 @@ enum LSocketLogTypes
 	NET_LOG_ALL_BYTES = 2
 };
 
-/// Virtual base class for a socket. See the documentation for GSocket for a more
+/// Virtual base class for a socket. See the documentation for LSocket for a more
 /// through treatment of this object's API.
 class LSocketI :
 	virtual public LStreamI

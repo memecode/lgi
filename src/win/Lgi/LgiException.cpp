@@ -217,7 +217,7 @@ LONG __stdcall GApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 */
-#include "GSymLookup.h"
+#include "LSymLookup.h"
 
 LONG __stdcall GApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
 {
@@ -227,8 +227,8 @@ LONG __stdcall GApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
 
 	
 	char buf[1024];
-	GSymLookup s;
-	GSymLookup::Addr a[12];
+	LSymLookup s;
+	LSymLookup::Addr a[12];
 	int len = s.BackTrace(e->ContextRecord->Eip, e->ContextRecord->Ebp, a, 12);
 	if (s.Lookup(buf, sizeof(buf), a, len))
 	{

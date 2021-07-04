@@ -26,7 +26,7 @@ public:
 	char InBuf[256];
 	List<char> In;
 	FtpTransferMode CurMode;
-	GAutoPtr<GSocket> Listen;	// listen for data
+	GAutoPtr<LSocket> Listen;	// listen for data
 	GAutoPtr<LSocketI> Data;	// get data
 	GFile *F;
 	char *Charset;
@@ -720,7 +720,7 @@ bool IFtp::ListDir(GArray<IFtpEntry*> &Dir)
 		if (IsOpen() &&
 			SetupData(true))
 		{
-			GStringPipe Buf;
+			LStringPipe Buf;
 
 			// List command
 			strcpy_s(d->OutBuf, sizeof(d->OutBuf), "LIST");
@@ -1144,13 +1144,13 @@ bool IFtp::SetupData(bool Binary)
 			if (Socket)
 			{
 				LStreamI *nstream = Socket->Clone();
-				GSocket *nsock = dynamic_cast<GSocket*>(nstream);
+				LSocket *nsock = dynamic_cast<LSocket*>(nstream);
 				LgiAssert(nsock != NULL);
 				d->Data.Reset(nsock);
 			}
 			else
 			{
-				if (d->Data.Reset(new GSocket()))
+				if (d->Data.Reset(new LSocket()))
 					d->Data->SetCancel(Socket->GetCancel());
 			}
 		}
@@ -1220,7 +1220,7 @@ bool IFtp::SetupData(bool Binary)
 			// static int p = (4<<8) | 27;
 
 			bool ListenStatus = false;
-			d->Listen.Reset(new GSocket);			// listen
+			d->Listen.Reset(new LSocket);			// listen
 			if (d->Listen)
 			{
 				int To = Socket->GetTimeout();
@@ -1268,7 +1268,7 @@ bool IFtp::ConnectData()
 	}
 	else
 	{
-		d->Data.Reset(Socket ? dynamic_cast<GSocket*>(Socket->Clone()) : new GSocket());
+		d->Data.Reset(Socket ? dynamic_cast<LSocket*>(Socket->Clone()) : new LSocket());
 		if (d->Data)
 		{
 			int To = Socket->GetTimeout();

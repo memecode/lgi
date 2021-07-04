@@ -26,7 +26,7 @@
 class TiffIo : public GFilter
 {
 public:
-	GStream *s;
+	LStream *s;
 
 	TiffIo()
 	{
@@ -96,8 +96,8 @@ public:
 	~GdcTiff();
 
 	int GetCapabilites() { return FILTER_CAP_READ; }
-	IoStatus ReadImage(LSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, LSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, LStream *In);
+	IoStatus WriteImage(LStream *Out, LSurface *pDC);
 
 	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
@@ -992,7 +992,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(LSurface *pDC)
 	return Status;
 }
 
-GFilter::IoStatus GdcTiff::ReadImage(LSurface *pDC, GStream *In)
+GFilter::IoStatus GdcTiff::ReadImage(LSurface *pDC, LStream *In)
 {
 	GFilter::IoStatus Status = IoError;
 	ushort n16;
@@ -1078,7 +1078,7 @@ GFilter::IoStatus GdcTiff::ProcessWrite(LSurface *pDC)
 	return IoUnsupportedFormat;
 }
 
-GFilter::IoStatus GdcTiff::WriteImage(GStream *Out, LSurface *pDC)
+GFilter::IoStatus GdcTiff::WriteImage(LStream *Out, LSurface *pDC)
 {
 	return ProcessWrite(pDC);
 }

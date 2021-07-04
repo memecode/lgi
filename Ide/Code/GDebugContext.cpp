@@ -139,7 +139,7 @@ public:
 		{
 			va_list Arg;
 			va_start(Arg, Fmt);
-			GStreamPrintf(Ctx->DebuggerLog, 0, Fmt, Arg);
+			LStreamPrintf(Ctx->DebuggerLog, 0, Fmt, Arg);
 			va_end(Arg);
 		}
 	}
@@ -571,7 +571,7 @@ void GDebugContext::FormatMemoryDump(int WordSize, int Width, bool InHex)
 		WordSize = 1;
 
 	// Format output to the mem dump window
-	GStringPipe p;
+	LStringPipe p;
 	int LineBytes = WordSize * Width;
 	
 	GPointer ptr;

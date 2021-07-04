@@ -1340,7 +1340,7 @@ void LToolBar::ContextMenu(LMouse &m)
 			
 			if (Save)
 			{
-				GStringPipe p(256);
+				LStringPipe p(256);
 				p.Push((char*) (d->Text ? "text" : "no"));
 				for (v = Children.First(); v; v = Children.Next())
 				{

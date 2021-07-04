@@ -3,9 +3,9 @@
 
 #include "lgi/common/DateTime.h"
 
-class GSoftwareUpdate
+class LSoftwareUpdate
 {
-	struct GSoftwareUpdatePriv *d;
+	struct LSoftwareUpdatePriv *d;
 
 public:
 	struct UpdateInfo
@@ -24,8 +24,8 @@ public:
 		}
 	};
 
-	GSoftwareUpdate(const char *SoftwareName, const char *UpdateUri, const char *ProxyUri, const char *OptionalTempPath = 0);
-	virtual ~GSoftwareUpdate();
+	LSoftwareUpdate(const char *SoftwareName, const char *UpdateUri, const char *ProxyUri, const char *OptionalTempPath = 0);
+	virtual ~LSoftwareUpdate();
 
 	bool CheckForUpdate(UpdateInfo &Info, LViewI *WithUi, bool IncBetas);
 	bool ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *WithUi);

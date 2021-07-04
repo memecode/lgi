@@ -406,7 +406,7 @@ class LScriptEnginePrivate : public LScriptUtils, public GCompileTools
 {
 public:
 	GScriptEngine1 *Engine;
-	GStringPipe Term;
+	LStringPipe Term;
 	LViewI *Parent;
 	char16 *Script;
 	GArray<StackFrame*> Stack;
@@ -979,7 +979,7 @@ LVariant *GScriptEngine1::Var(char16 *name, bool create)
 	return d->Var(name, create);
 }
 
-GStringPipe *GScriptEngine1::GetTerm()
+LStringPipe *GScriptEngine1::GetTerm()
 {
 	return &d->Term;
 }
@@ -2129,7 +2129,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 							}
 							else if (a->Type == GV_STRING || b->Type == GV_STRING)
 							{
-								GStringPipe p;
+								LStringPipe p;
 								
 								#define ToStr(v) \
 									if (v->Type == GV_DOM) p.Print("%p", v->Value.Dom); \

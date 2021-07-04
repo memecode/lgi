@@ -7,7 +7,7 @@ const char *AppName = "GPathTest";
 
 class App : public LWindow
 {
-	GPath p;
+	LPath p;
 	LMemDC img;
 
 public:
@@ -36,14 +36,14 @@ public:
 
 		p.Circle(r, r, r);
 		p.SetFillRule(FILLRULE_ODDEVEN);
-		GSolidBrush s(GColour::White);
+		LSolidBrush s(GColour::White);
 		p.Fill(&img, s);
 		p.Empty();
 
 		p.Circle(r, r, r);
 		p.Circle(r, r, r - 1.0);
 		p.SetFillRule(FILLRULE_ODDEVEN);
-		GSolidBrush s2(GColour(0xcb, 0xcb, 0xcb));
+		LSolidBrush s2(GColour(0xcb, 0xcb, 0xcb));
 		p.Fill(&img, s2);
 
 		img.ConvertPreMulAlpha(true);

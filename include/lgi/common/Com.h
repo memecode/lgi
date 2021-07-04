@@ -155,8 +155,8 @@ public:
 	}
 };
 
-/// This class wraps a IStream in an GStream interface...
-class IStreamWrap : public GStream
+/// This class wraps a IStream in an LStream interface...
+class IStreamWrap : public LStream
 {
 	IStream *s;
 	
@@ -264,15 +264,15 @@ public:
 	}
 };
 
-/// This class wraps a GStream in an IStream interface...
-class GStreamWrap : public GUnknownImpl<IStream>
+/// This class wraps a LStream in an IStream interface...
+class LStreamWrap : public GUnknownImpl<IStream>
 {
 	bool Own;
 	GString FileName;
 	LStreamI *s;
 
 public:
-	GStreamWrap(GString fileName, LStreamI *src, bool own = true)
+	LStreamWrap(GString fileName, LStreamI *src, bool own = true)
 	{
 		FileName = fileName;
 		s = src;
@@ -281,7 +281,7 @@ public:
 		AddInterface(IID_IStream, (IStream*)this);
 	}
 	
-	~GStreamWrap()
+	~LStreamWrap()
 	{
 		if (Own)
 			delete s;

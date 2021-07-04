@@ -138,7 +138,7 @@ void LSlider::OnMouseMove(LMouse &m)
 	}
 }
 
-class GSlider_Factory : public LViewFactory
+class LSlider_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
@@ -150,5 +150,5 @@ class GSlider_Factory : public LViewFactory
 		return 0;
 	}
 
-} GSliderFactory;
+}	SliderFactory;
 

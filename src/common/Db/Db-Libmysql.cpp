@@ -314,7 +314,7 @@ public:
 		if (!Init)
 			return false;
 
-		GUri u(Init);
+		LUri u(Init);
 
 		if (u.Path)
 		{

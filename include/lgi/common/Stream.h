@@ -17,14 +17,14 @@
 
 /// Stream printf
 LgiExtern ssize_t LgiPrintf(GAutoString &Str, const char *Format, va_list &Arg);
-LgiFunc ssize_t GStreamPrintf(LStreamI *s, int flags, const char *Format, va_list &Arg);
-LgiFunc ssize_t GStreamPrint(LStreamI *s, const char *fmt, ...);
+LgiFunc ssize_t LStreamPrintf(LStreamI *s, int flags, const char *Format, va_list &Arg);
+LgiFunc ssize_t LStreamPrint(LStreamI *s, const char *fmt, ...);
 
 /// \brief Virtual base class for a data source or sink.
-class LgiClass GStream : virtual public LStreamI, virtual public GDom
+class LgiClass LStream : virtual public LStreamI, virtual public GDom
 {
 public:
-	virtual ~GStream() {}
+	virtual ~LStream() {}
 
 	ssize_t Read(void *Ptr, ssize_t Size, int Flags = 0) override { return 0; }
 	ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override { return 0; }
@@ -34,10 +34,10 @@ public:
 };
 
 /// Defines an API for terminating a stream. 
-class LgiClass GStreamEnd
+class LgiClass LStreamEnd
 {
 public:
-	virtual ~GStreamEnd() {}
+	virtual ~LStreamEnd() {}
 
 	/// Reset the end point's state
 	virtual void Reset() {}
@@ -57,7 +57,7 @@ public:
 };
 
 /// Stateful parser that matches the start of lines to the 'prefix'
-class LgiClass GLinePrefix : public GStreamEnd
+class LgiClass GLinePrefix : public LStreamEnd
 {
 	bool Start;
 	int Pos;
@@ -83,14 +83,14 @@ public:
 };
 
 /// Read a line
-class LgiClass GEndOfLine : public GStreamEnd
+class LgiClass LEndOfLine : public LStreamEnd
 {
 public:
 	ssize_t IsEnd(void *s, ssize_t Len);
 };
 
 /// Generic streaming operator
-class LgiClass GStreamOp
+class LgiClass LStreamOp
 {
 protected:
 	uint64 StartTime;
@@ -100,8 +100,8 @@ protected:
 
 public:
 	/// Constructor
-	GStreamOp(int64 BufSz = -1);
-	virtual ~GStreamOp() {}
+	LStreamOp(int64 BufSz = -1);
+	virtual ~LStreamOp() {}
 
 	// Properties
 	ssize_t GetRate();
@@ -110,29 +110,29 @@ public:
 };
 
 /// API to reads from source
-class LgiClass GPullStreamer : public GStreamOp
+class LgiClass LPullStreamer : public LStreamOp
 {
 public:
-	virtual ssize_t Pull(LStreamI *Source, GStreamEnd *End = 0) = 0;
+	virtual ssize_t Pull(LStreamI *Source, LStreamEnd *End = 0) = 0;
 };
 
 /// API to writes to a destination
-class LgiClass GPushStreamer : public GStreamOp
+class LgiClass GPushStreamer : public LStreamOp
 {
 public:
-	virtual ssize_t Push(LStreamI *Dest, GStreamEnd *End = 0) = 0;
+	virtual ssize_t Push(LStreamI *Dest, LStreamEnd *End = 0) = 0;
 };
 
 /// API to read from source and then write to a destination
-class LgiClass GCopyStreamer : public GStreamOp
+class LgiClass GCopyStreamer : public LStreamOp
 {
 public:
-	GCopyStreamer(int64 BufSz = -1) : GStreamOp(BufSz) {}
-	virtual ssize_t Copy(LStreamI *Source, LStreamI *Dest, GStreamEnd *End = 0);
+	GCopyStreamer(int64 BufSz = -1) : LStreamOp(BufSz) {}
+	virtual ssize_t Copy(LStreamI *Source, LStreamI *Dest, LStreamEnd *End = 0);
 };
 
 /// In memory stream for storing sub-streams or memory blocks
-class LgiClass GMemStream : public GStream
+class LgiClass GMemStream : public LStream
 {
 	char *Mem;
 	int64 Len, Pos, Alloc;
@@ -188,7 +188,7 @@ public:
 	bool IsOk();
 	ssize_t Read(void *Buffer, ssize_t Size, int Flags = 0) override;
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override;
-	ssize_t Write(GStream *Out, ssize_t Size);
+	ssize_t Write(LStream *Out, ssize_t Size);
 	char *GetBase() { return Mem; }
 	LStreamI *Clone() override;
 };
@@ -226,7 +226,7 @@ public:
 /// data in a temporary file on disk.
 class LgiClass GTempStream : public GProxyStream
 {
-	GStream Null;
+	LStream Null;
 	int MaxMemSize;
 
 protected:

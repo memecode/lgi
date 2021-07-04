@@ -28,7 +28,7 @@ enum SpellCheckParams
 	}
 
 // Spell check interface
-class GSpellCheck : public LEventTargetThread
+class LSpellCheck : public LEventTargetThread
 {
 public:
 	static const char Delimiters[];
@@ -78,8 +78,8 @@ public:
 	};
 
 
-	GSpellCheck(GString Name) : LEventTargetThread(Name) {}
-	virtual ~GSpellCheck() {}
+	LSpellCheck(GString Name) : LEventTargetThread(Name) {}
+	virtual ~LSpellCheck() {}
 
 	// Impl OnEvent in your subclass:
 	// GMessage::Result OnEvent(GMessage *Msg);
@@ -152,8 +152,8 @@ public:
 
 // These are the various implementations of the this object. You have to include the
 // correct C++ source to get this to link.
-extern GAutoPtr<GSpellCheck> CreateWindowsSpellCheck();		// Available on Windows 8.0 and greater
-extern GAutoPtr<GSpellCheck> CreateAppleSpellCheck();		// Available on Mac OS X
-extern GAutoPtr<GSpellCheck> CreateAspellObject();			// Available anywhere.
+extern GAutoPtr<LSpellCheck> CreateWindowsSpellCheck();		// Available on Windows 8.0 and greater
+extern GAutoPtr<LSpellCheck> CreateAppleSpellCheck();		// Available on Mac OS X
+extern GAutoPtr<LSpellCheck> CreateAspellObject();			// Available anywhere.
 
 #endif

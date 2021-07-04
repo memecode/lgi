@@ -139,7 +139,7 @@ public:
 	void Empty();
 	
 	/// Set a log file
-	void SetLogStream(GStream *log);
+	void SetLogStream(LStream *log);
 	
 	/// An array of available tables
 	GArray<Table*> &Tables();
@@ -166,6 +166,6 @@ public:
 	bool IsOk();
 };
 
-extern bool RunTableDbTest(GStream *Log);
+extern bool RunTableDbTest(LStream *Log);
 
 #endif

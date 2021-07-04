@@ -80,12 +80,12 @@ MailPhp::~MailPhp()
 	DeleteObj(d);
 }
 
-class MailSocket : public GSocket
+class MailSocket : public LSocket
 {
 	LSocketI *S;
 	MailProtocolProgress *T;
 	MailProtocol *Log;
-	GStringPipe ReadBuf, WriteBuf;
+	LStringPipe ReadBuf, WriteBuf;
 	bool InData;
 	GFile *Temp;
 	ssize_t SepLen;
@@ -101,7 +101,7 @@ public:
 		}
 		else
 		{
-			S = new GSocket;
+			S = new LSocket;
 			OwnSocket = true;
 		}
 		T = t;
@@ -205,7 +205,7 @@ public:
 	bool SetValue(const char *Which, LVariant &What)
 	{
 		int r = S->SetValue(Which, What);
-		if (T && _stricmp(Which, GSocket_TransferSize) == 0)
+		if (T && _stricmp(Which, LSocket_TransferSize) == 0)
 		{
 			T->Range = What.CastInt32();
 		}
@@ -246,7 +246,7 @@ void MailPhp::SetProxy(char *Server, int Port)
 	d->ProxyPort = Port;
 }
 
-bool MailPhp::Get(LSocketI *S, char *Uri, GStream &Out, bool MailTransfer)
+bool MailPhp::Get(LSocketI *S, char *Uri, LStream &Out, bool MailTransfer)
 {
 	bool Status = false;
 
@@ -274,7 +274,7 @@ bool MailPhp::Get(LSocketI *S, char *Uri, GStream &Out, bool MailTransfer)
 			GAutoPtr<LSocketI> s(new MailSocket(S, MailTransfer ? Transfer : 0, this));
 			if (Http.Open(s, Base))
 			{
-				GStringPipe Buf;
+				LStringPipe Buf;
 				int Code = 0;
 				IHttp::ContentEncoding Enc;
 				if (Http.Get(Uri, 0, &Code, &Buf, &Enc))
@@ -324,7 +324,7 @@ bool MailPhp::Open(LSocketI *S, const char *RemoteHost, int Port, const char *Us
 		sprintf_s(e, sizeof(d->Uri)-(e-d->Uri), "?token=" LPrintfInt64, Token);
 		
 		char *m = 0;
-		GStringPipe Text;
+		LStringPipe Text;
 		Socket.Reset(S);
 		if (Get(Socket, d->Uri, Text, false))
 		{
@@ -421,7 +421,7 @@ bool MailPhp::Close()
 	if (d->HasDeletes &&
 		d->Messages)
 	{
-		GStringPipe p;
+		LStringPipe p;
 		p.Print("%s?time=%i&delete=", d->Uri, LgiCurrentTime());
 		
 		bool First = true;
@@ -439,7 +439,7 @@ bool MailPhp::Close()
 		LSocketI *S = new MailSocket(Socket, 0, this);
 		if (S)
 		{
-			GStringPipe Out;
+			LStringPipe Out;
 			
 			char *u = p.NewStr();
 			if (u)
@@ -466,7 +466,7 @@ bool MailPhp::Close()
 
 bool MailPhp::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks)
 {
-	GStringPipe Cmd;
+	LStringPipe Cmd;
 
 	Cmd.Push(d->Uri);
 	Cmd.Print("?time=%i&msg=", LgiCurrentTime());
@@ -481,7 +481,7 @@ bool MailPhp::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks)
 	if (S)
 	{
 		// Download all the messages
-		GStringPipe Out;
+		LStringPipe Out;
 		char *c = Cmd.NewStr();
 		Status = Get(S, c, Out, true);
 		DeleteArray(c);
@@ -610,8 +610,8 @@ char *MailPhp::GetHeaders(int Message)
 			char *e = d->Uri + strlen(d->Uri);
 			sprintf_s(e, sizeof(d->Uri)-(e-d->Uri), "?top=1");
 
-			GStringPipe Text;
-			if (Get(new GSocket, d->Uri, Text, false))
+			LStringPipe Text;
+			if (Get(new LSocket, d->Uri, Text, false))
 			{
 				int n = 0;
 				char *All = Text.NewStr();

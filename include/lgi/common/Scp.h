@@ -59,9 +59,9 @@ class IScp
 	bool Server;
 
 protected:
-	GUri Proxy;
-	GUri Host;
-	GStringPipe Info;
+	LUri Proxy;
+	LUri Host;
+	LStringPipe Info;
 
 	bool WriteData(LSocketI *&s, IScpData *d);
 	bool ReadData(LSocketI *&s, IScpData *&d, int *HttpErr = 0);

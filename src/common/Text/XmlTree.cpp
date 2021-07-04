@@ -176,7 +176,7 @@ const char *EncodeEntitiesContent	= "\'<>\"";
 
 char *LXmlTree::EncodeEntities(const char *s, ssize_t len, const char *extra_characters)
 {
-	GStringPipe p;
+	LStringPipe p;
 	if (EncodeEntities(&p, s, len, extra_characters))
 	{
 		return p.NewStr();
@@ -656,7 +656,7 @@ bool LXmlTag::SetVariant(const char *Name, LVariant &Value, char *Array)
 			}
 			case GV_BINARY:
 			{
-				GStringPipe p;
+				LStringPipe p;
 				p.Print("binary(");
 				for (int i=0; i<Value.Value.Binary.Length; i++)
 				{
@@ -1145,7 +1145,7 @@ LXmlTag *LXmlTree::Parse(LXmlTag *Tag, LXmlAlloc *Alloc, char *&t, bool &NoChild
 {
 	bool KeepWs = TestFlag(d->Flags, GXT_KEEP_WHITESPACE);
 	char *Start = t;
-	GStringPipe Before;
+	LStringPipe Before;
 		
 	// Skip white
 ParsingStart:
@@ -1533,14 +1533,14 @@ void LXmlTree::Output(LXmlTag *t, int Depth)
 	// Test to see if the tag is valid
 	bool ValidTag = ValidStr(t->Tag) && !IsDigit(t->Tag[0]);
 	if (ValidTag)
-		GStreamPrint(d->File, "<%s", t->Tag);
+		LStreamPrint(d->File, "<%s", t->Tag);
 
 	for (int i=0; i<t->Attr.Length(); i++)
 	{
 		LXmlAttr &a = t->Attr[i];
 
 		// Write the attribute name
-		GStreamPrint(d->File, " %s=\"", a.Name);
+		LStreamPrint(d->File, " %s=\"", a.Name);
 		
 		// Encode the value
 		EncodeEntities(d->File, a.Value, -1, EncodeEntitiesAttr);
@@ -1591,7 +1591,7 @@ void LXmlTree::Output(LXmlTag *t, int Depth)
 		}
 	
 		if (!d->NoDom())
-			GStreamPrint(d->File, "</%s>\n", t->Tag);
+			LStreamPrint(d->File, "</%s>\n", t->Tag);
 	}
 	else if (ValidTag)
 	{
@@ -1618,7 +1618,7 @@ bool LXmlTree::Write(LXmlTag *Root, LStreamI *File, Progress *Prog)
 		if (!TestFlag(d->Flags, GXT_NO_HEADER))
 			File->Write(LXmlHeader, strlen(LXmlHeader));
 		if (d->StyleFile && d->StyleType)
-			GStreamPrint(d->File, "<?xml-stylesheet href=\"%s\" type=\"%s\"?>\n", d->StyleFile, d->StyleType);
+			LStreamPrint(d->File, "<?xml-stylesheet href=\"%s\" type=\"%s\"?>\n", d->StyleFile, d->StyleType);
 
 		Output(Root, 0);
 

@@ -1501,7 +1501,7 @@ int GTag::GetTextStart()
 	return 0;
 }
 
-bool TextToStream(GStream &Out, char16 *Text)
+bool TextToStream(LStream &Out, char16 *Text)
 {
 	if (!Text)
 		return true;
@@ -1546,7 +1546,7 @@ bool TextToStream(GStream &Out, char16 *Text)
 	return true;
 }
 
-bool GTag::CreateSource(GStringPipe &p, int Depth, bool LastWasBlock)
+bool GTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 {
 	// char *t8 = LgiNewUtf16To8(Text());
 	char *Tabs = new char[Depth+1];
@@ -1645,7 +1645,7 @@ void GTag::SetTag(const char *NewTag)
 
 void GTag::_TraceOpenTags()
 {
-	GStringPipe p;
+	LStringPipe p;
 	for (GTag *t=Html->OpenTags.First(); t; t=Html->OpenTags.Next())
 	{
 		p.Print(", %s", t->Tag);
@@ -1775,7 +1775,7 @@ _DumpColour(LCss::ColorDef c)
 	return b;
 }
 
-void GTag::_Dump(GStringPipe &Buf, int Depth)
+void GTag::_Dump(LStringPipe &Buf, int Depth)
 {
 	char Tab[64];
 	char s[1024];
@@ -1833,7 +1833,7 @@ void GTag::_Dump(GStringPipe &Buf, int Depth)
 
 char *GTag::Dump()
 {
-	GStringPipe Buf;
+	LStringPipe Buf;
 	Buf.Print("Html pos=%s\n", Html?Html->GetPos().GetStr():0);
 	_Dump(Buf, 0);
 	return (char*)Buf.New(1);
@@ -2006,7 +2006,7 @@ bool GTag::OnMouseClick(LMouse &m)
 		{
 			const char *Id = NULL;
 			GAutoString Style = ToString();
-			GStringPipe p;
+			LStringPipe p;
 
 			p.Print("Tag: %s", Tag ? Tag : "CONTENT");
 			if (Get("id", Id))
@@ -2312,7 +2312,7 @@ void GTag::CollectFormValues(GHashTbl<const char*,char*> &f)
 			char *Val = CtrlValue.Str();
 			if (Val)
 			{
-				GStringPipe p(256);
+				LStringPipe p(256);
 				for (char *v = Val; *v; v++)
 				{
 					if (*v == ' ')
@@ -3488,7 +3488,7 @@ char *GTag::ParseText(char *Doc)
 
 	Html->SetBackColour(Rgb24To32(LC_WORKSPACE));
 	
-	GStringPipe Utf16;
+	LStringPipe Utf16;
 	char *s = Doc;
 	while (true)
 	{
@@ -6782,7 +6782,7 @@ char *GHtml2::Name()
 
 	if (!Source)
 	{
-		GStringPipe s(1024);
+		LStringPipe s(1024);
 		Tag->CreateSource(s);
 		Source = s.NewStr();
 	}
@@ -7273,7 +7273,7 @@ void BuildTagList(GArray<GTag*> &t, GTag *Tag)
 	}
 }
 
-static void FormEncode(GStringPipe &p, const char *c)
+static void FormEncode(LStringPipe &p, const char *c)
 {
 	const char *s = c;
 	while (*c)
@@ -7317,7 +7317,7 @@ bool GHtml2::OnSubmitForm(GTag *Form)
 	bool Status = false;
 	if (!stricmp(Method, "post"))
 	{
-		GStringPipe p(256);
+		LStringPipe p(256);
 		const char *Field;
 		bool First = true;
 		for (char *Val = f.First(&Field); Val; Val = f.Next(&Field))
@@ -7689,7 +7689,7 @@ void GHtml2::OnMouseClick(LMouse &m)
 								GFile F;
 								if (F.Open(Path, O_WRITE))
 								{
-									GStringPipe Ex;
+									LStringPipe Ex;
 									bool Error = false;
 									
 									F.SetSize(0);

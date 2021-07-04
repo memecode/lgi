@@ -529,7 +529,7 @@ extern GDataStoreI *OpenImap
 	/// Pointers to the progress info bars, or NULL if not needed.
 	MailProtocolProgress *prog[2],
 	/// The logging stream.
-	GStream *Log,
+	LStream *Log,
 	/// The identifier for the account
 	int AccoundId,
 	/// An interface into the persistant storage area.

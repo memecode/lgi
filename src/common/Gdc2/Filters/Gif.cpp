@@ -26,7 +26,7 @@
 class GdcGif : public GFilter
 {
 	LSurface *pDC;
-	GStream *s;
+	LStream *s;
 	int ProcessedScanlines;
 
 	// Old GIF coder stuff
@@ -60,8 +60,8 @@ public:
 
 	Format GetFormat() { return FmtGif; }
 	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
-	IoStatus ReadImage(LSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, LSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, LStream *In);
+	IoStatus WriteImage(LStream *Out, LSurface *pDC);
 
 	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
@@ -614,7 +614,7 @@ union GfxCtrlExtBits
 	};
 };
 
-bool GifLoadPalette(GStream *s, LSurface *pDC, int TableBits)
+bool GifLoadPalette(LStream *s, LSurface *pDC, int TableBits)
 {
 	GRgb24 Rgb[256];
 
@@ -632,7 +632,7 @@ bool GifLoadPalette(GStream *s, LSurface *pDC, int TableBits)
 	return true;
 }
 
-GFilter::IoStatus GdcGif::ReadImage(LSurface *pdc, GStream *in)
+GFilter::IoStatus GdcGif::ReadImage(LSurface *pdc, LStream *in)
 {
 	GFilter::IoStatus Status = IoError;
 	pDC = pdc;
@@ -814,7 +814,7 @@ GFilter::IoStatus GdcGif::ReadImage(LSurface *pdc, GStream *in)
 	return Status;
 }
 
-GFilter::IoStatus GdcGif::WriteImage(GStream *Out, LSurface *pDC)
+GFilter::IoStatus GdcGif::WriteImage(LStream *Out, LSurface *pDC)
 {
 	LVariant Transparent;
 	int Back = -1;

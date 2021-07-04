@@ -88,14 +88,14 @@ char16 *GHtmlParser::DecodeEntities(const char *s, ssize_t len)
 	char16 buf[256];
 	char16 *o = buf;
 	const char *end = s + len;
-	GStringPipe p(256);
+	LStringPipe p(256);
 
 	for (const char *i = s; i < end; )
 	{
 		if (o - buf > CountOf(buf) - 32)
 		{
 			// We are getting near the end of the buffer...
-			// push existing data into the GStringPipe and
+			// push existing data into the LStringPipe and
 			// reset the output ptr.
 			p.Write(buf, (o - buf) * sizeof(*o) );
 			o = buf;
@@ -199,7 +199,7 @@ char16 *GHtmlParser::DecodeEntities(const char *s, ssize_t len)
 	
 	if (p.GetSize() > 0)
 	{
-		// Long string mode... use the GStringPipe
+		// Long string mode... use the LStringPipe
 		p.Write(buf, (o - buf) * sizeof(*o));
 		return p.NewStrW();
 	}
@@ -1445,7 +1445,7 @@ char16 *GHtmlParser::CleanText(const char *s, ssize_t Len, bool ConversionAllowe
 
 void GHtmlParser::_TraceOpenTags()
 {
-	GStringPipe p;
+	LStringPipe p;
 	for (unsigned i = 0; i < OpenTags.Length(); i++)
 	{
 		LHtmlElement *t = OpenTags[i];

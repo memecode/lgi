@@ -802,7 +802,7 @@ void ResString::CopyText()
 {
 	if (Items.Length() > 0)
 	{
-		GStringPipe p;
+		LStringPipe p;
 
 		p.Push(TranslationStrMagic);
 		p.Push(EOL_SEQUENCE);

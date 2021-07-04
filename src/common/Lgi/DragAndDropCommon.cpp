@@ -9,7 +9,7 @@ GDragFormats::GDragFormats(bool source)
 
 GString GDragFormats::ToString()
 {
-	GStringPipe p(256);
+	LStringPipe p(256);
 	p.Print("{");
 	for (auto &f: Formats)
 		p.Print("%s,", f.Get());

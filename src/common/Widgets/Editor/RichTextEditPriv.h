@@ -213,7 +213,7 @@ public:
 	void SetPrefix(GString s) { Prefix = s; }
 	uint32_t GetStyles();
 	void ZeroRefCounts();
-	bool OutputStyles(GStream &s, int TabDepth);
+	bool OutputStyles(LStream &s, int TabDepth);
 	LNamedStyle *AddStyleToCache(GAutoPtr<LCss> &s);
 };
 
@@ -303,7 +303,7 @@ class LRichTextPriv :
 	public GFontCache,
 	public GEmojiContext
 {
-	GStringPipe LogBuffer;
+	LStringPipe LogBuffer;
 
 public:
 	enum SelectModeType
@@ -350,12 +350,12 @@ public:
 	GString Charset;
 	GHtmlStaticInst Inst;
 	int NextUid;
-	GStream *Log;
+	LStream *Log;
 	bool HtmlLinkAsCid;
 	uint64 BlinkTs;
 
 	// Spell check support
-	GSpellCheck *SpellCheck;
+	LSpellCheck *SpellCheck;
 	bool SpellDictionaryLoaded;
 	GString SpellLang, SpellDict;
 
@@ -720,12 +720,12 @@ public:
 			virtual bool GetPosFromIndex(BlockCursor *Cursor) = 0;
 			virtual bool OnLayout(Flow &f) = 0;
 			virtual void OnPaint(PaintContext &Ctx) = 0;
-			virtual bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rgn) = 0;
+			virtual bool ToHtml(LStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rgn) = 0;
 			virtual bool OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY) = 0;
 			virtual int LineToOffset(int Line) = 0;
 			virtual int GetLines() = 0;
 			virtual ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params) = 0;
-			virtual void SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, LRange r) {}
+			virtual void SetSpellingErrors(GArray<LSpellCheck::SpellingError> &Errors, LRange r) {}
 			virtual void IncAllStyleRefs() {}
 			virtual void Dump() {}
 			virtual LNamedStyle *GetStyle(ssize_t At = -1) = 0;
@@ -1008,9 +1008,9 @@ public:
 	class TextBlock : public Block
 	{
 		LNamedStyle *Style;
-		GArray<GSpellCheck::SpellingError> SpellingErrors;
+		GArray<LSpellCheck::SpellingError> SpellingErrors;
 		int PaintErrIdx, ClickErrIdx;
-		GSpellCheck::SpellingError *SpErr;
+		LSpellCheck::SpellingError *SpErr;
 
 		bool PreEdit(Transaction *Trans);
 		void DrawDisplayString(LSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, GColour &Bk, int &Pos);
@@ -1052,7 +1052,7 @@ public:
 		LNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
-		bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng);
+		bool ToHtml(LStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
 		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
@@ -1062,7 +1062,7 @@ public:
 		bool Seek(SeekType To, BlockCursor &Cursor);
 		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
 		void IncAllStyleRefs();
-		void SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, LRange r);
+		void SetSpellingErrors(GArray<LSpellCheck::SpellingError> &Errors, LRange r);
 		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
 		void DumpNodes(LTreeItem *Ti);
@@ -1106,7 +1106,7 @@ public:
 		LNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
-		bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng);
+		bool ToHtml(LStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
 		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
@@ -1201,7 +1201,7 @@ public:
 		LNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
-		bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng);
+		bool ToHtml(LStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
 		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);

@@ -43,7 +43,7 @@
 
 LgiExtern bool LIsProcess(OsProcessId Pid);
 
-class LgiClass LSubProcess : public GStream
+class LgiClass LSubProcess : public LStream
 {
 public:
 	#if defined(WIN32)
@@ -78,8 +78,8 @@ public:
 	};
 
 protected:
-	struct GSubProcessPriv *d;
-	friend struct GSubProcessPriv;
+	struct LSubProcessPriv *d;
+	friend struct LSubProcessPriv;
 	
 	struct Variable
 	{

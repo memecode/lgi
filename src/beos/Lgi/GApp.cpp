@@ -128,7 +128,7 @@ GApp::~GApp()
 	DeleteObj(d);
 }
 
-GSymLookup *GApp::GetSymLookup()
+LSymLookup *GApp::GetSymLookup()
 {
 	return NULL;
 }

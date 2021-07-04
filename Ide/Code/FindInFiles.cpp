@@ -215,7 +215,7 @@ public:
 	int AppHnd;
 	GAutoPtr<FindParams> Params;
 	bool Loop, Busy;
-	GStringPipe Pipe;
+	LStringPipe Pipe;
 	int64 Last;
 };
 

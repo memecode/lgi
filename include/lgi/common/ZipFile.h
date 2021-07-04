@@ -14,8 +14,8 @@ public:
 	void Close();
 	
 	GDirectory *List();
-	bool Decompress(char *File, GStream *To);
-	bool Compress(char *File, GStream *From);
+	bool Decompress(char *File, LStream *To);
+	bool Compress(char *File, LStream *From);
 	bool Delete(char *File);
 };
 

@@ -96,7 +96,7 @@ struct GTableDbPriv
 {
 	GAutoString BasePath;
 	GArray<GTableDb::Table*> Tables;
-	GStream *Log;
+	LStream *Log;
 	
 	GTableDbPriv();	
 	void Msg(char *Fmt, ...);

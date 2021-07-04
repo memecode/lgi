@@ -166,7 +166,7 @@ HRESULT GDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 					{
 						PMedium->tymed = TYMED_ISTREAM;
 					
-						PMedium->pstm = new GStreamWrap(FileName, v.Value.Stream.Release());
+						PMedium->pstm = new LStreamWrap(FileName, v.Value.Stream.Release());
 						PMedium->pstm->AddRef();
 					
 						PMedium->pUnkForRelease = PMedium->pstm;
@@ -770,7 +770,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::Drop(IDataObject *pDataObject, DWORD 
 									IStreamWrap *w = new IStreamWrap(Med.pstm);
 									if (w)
 									{
-										// Wrap a GStream around it so we can talk to it...
+										// Wrap a LStream around it so we can talk to it...
 										LVariant *s = &CurData.Data.New();
 										s->Type = GV_STREAM;
 										s->Value.Stream.Ptr = w;

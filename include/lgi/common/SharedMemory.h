@@ -11,13 +11,13 @@
 /// but suffice to say you need to know what your doing.
 ///
 /// Initially all the bytes of the memory block are initialized to 0.
-class GSharedMemory
+class LSharedMemory
 {
-	class GSharedMemoryPrivate *d;
+	class LSharedMemoryPrivate *d;
 
 public:
 	/// Construt the shared memory
-	GSharedMemory
+	LSharedMemory
 	(
 		/// The unique name of the memory block. Should be the same string used by all processes
 		/// wishing to access the same memory.
@@ -28,7 +28,7 @@ public:
 	);
 	/// Disconnect from the shared memory and free resources. This doesn't delete the
 	/// shared memory block on Linux.
-	virtual ~GSharedMemory();
+	virtual ~LSharedMemory();
 	
 	/// Returns the start of the block.
 	void *GetPtr();

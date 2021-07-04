@@ -1112,7 +1112,7 @@ GString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 	if (!stricmp(InCp, OutCp))
 		return GString((char*)In, InLen);
 
-	GStringPipe b;
+	LStringPipe b;
 	if (InInfo->Type == CpIconv ||
 		OutInfo->Type == CpIconv)
 	{

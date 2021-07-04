@@ -76,12 +76,12 @@ public:
 	bool Process(GAutoPtr<GGrowl::GRegister> &reg,
 			     GAutoPtr<GGrowl::GNotify> &note)
 	{
-		GAutoPtr<GSocket> Sock(new GSocket);
+		GAutoPtr<LSocket> Sock(new LSocket);
 		Sock->SetTimeout(5000);
 		if (!Sock->Open("localhost", 23053))
 		    return false;
 		    
-		GStringPipe p(256);
+		LStringPipe p(256);
 		p.Print("GNTP/1.0 %s NONE\r\n", reg ? "REGISTER" : "NOTIFY");
 		if (reg)
 		{

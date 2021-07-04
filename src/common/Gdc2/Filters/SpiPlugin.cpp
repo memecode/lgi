@@ -31,8 +31,8 @@ public:
 	Format GetFormat() { return FmtSpi; }
 	int OnProgress(int Num, int Denom);
 	int GetCapabilites() { return FILTER_CAP_READ; }
-	bool ReadImage(LSurface *pDC, GStream *In);
-	bool WriteImage(GStream *s, LSurface *pDC);
+	bool ReadImage(LSurface *pDC, LStream *In);
+	bool WriteImage(LStream *s, LSurface *pDC);
 	bool GetVariant(const char *n, LVariant &v, char *a);
 };
 
@@ -195,7 +195,7 @@ int GdcSpiPlugin::OnProgress(int Num, int Denom)
 	return false;
 }
 
-bool GdcSpiPlugin::ReadImage(LSurface *pDC, GStream *In)
+bool GdcSpiPlugin::ReadImage(LSurface *pDC, LStream *In)
 {
 	bool Status = false;
 
@@ -317,7 +317,7 @@ bool GdcSpiPlugin::GetVariant(const char *n, LVariant &v, char *a)
 	return true;
 }
 
-bool GdcSpiPlugin::WriteImage(GStream *Out, LSurface *pDC)
+bool GdcSpiPlugin::WriteImage(LStream *Out, LSurface *pDC)
 {
 	return false;
 }

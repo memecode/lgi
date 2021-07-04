@@ -21,8 +21,8 @@ class GdcPcx : public GFilter {
 public:
 	Format GetFormat() { return FmtPcx; }
 	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
-	IoStatus ReadImage(LSurface *Out, GStream *In);
-	IoStatus WriteImage(GStream *Out, LSurface *In);
+	IoStatus ReadImage(LSurface *Out, LStream *In);
+	IoStatus WriteImage(LStream *Out, LSurface *In);
 	
 	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
@@ -81,7 +81,7 @@ typedef struct {
 
 } PCX_HEADER;
 
-GFilter::IoStatus GdcPcx::ReadImage(LSurface *pDC, GStream *In)
+GFilter::IoStatus GdcPcx::ReadImage(LSurface *pDC, LStream *In)
 {
 	IoStatus Status = IoError;
 
@@ -265,7 +265,7 @@ GFilter::IoStatus GdcPcx::ReadImage(LSurface *pDC, GStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcPcx::WriteImage(GStream *Out, LSurface *pDC)
+GFilter::IoStatus GdcPcx::WriteImage(LStream *Out, LSurface *pDC)
 {
 	IoStatus Status = IoError;
 

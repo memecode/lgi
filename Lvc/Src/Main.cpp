@@ -23,7 +23,7 @@ enum SshMsgs
 
 SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
 {
-	GUri u(Uri);
+	LUri u(Uri);
 	u.sPath.Empty();
 	auto s = u.ToString();
 	auto Conn = Connections.Find(s);
@@ -72,7 +72,7 @@ bool SshConnection::Command(VcFolder *Fld, GString Exe, GString Args, ParseFn Pa
 	return PostObject(GetHandle(), M_RUN_CMD, p);
 }
 
-GStream *SshConnection::GetConsole()
+LStream *SshConnection::GetConsole()
 {
 	if (!Connected)
 	{
@@ -119,7 +119,7 @@ public:
 	}
 };
 
-bool SshConnection::WaitPrompt(GStream *con, GString *Data)
+bool SshConnection::WaitPrompt(LStream *con, GString *Data)
 {
 	char buf[1024];
 	GString out;
@@ -224,7 +224,7 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 			if (!ReceiveA(p, Msg))
 				break;
 
-			GStream *con = GetConsole();
+			LStream *con = GetConsole();
 			if (!con)
 				break;
 
@@ -261,7 +261,7 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 			if (!ReceiveA(p, Msg))
 				break;
 
-			GStream *con = GetConsole();
+			LStream *con = GetConsole();
 			if (!con)
 				break;
 
@@ -304,7 +304,7 @@ const char *AppName =			"Lvc";
 VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 {
 	char p[MAX_PATH];
-	GUri u = Fld->GetUri();
+	LUri u = Fld->GetUri();
 
 	if (!u.IsFile() || !u.sPath)
 	{
@@ -849,7 +849,7 @@ public:
         p.SetEnvironment("PATH", t);
         if (p.Start())
         {
-            GStringPipe s;
+            LStringPipe s;
             p.Communicate(&s);
             printf("Test: %s\n", s.NewGStr().Get());
         }
@@ -1316,7 +1316,7 @@ public:
 
 			if (!Has)
 			{
-				GUri u;
+				LUri u;
 				u.SetFile(Fld);
 				Tree->Insert(new VcFolder(this, u.ToString()));
 			}
@@ -1564,7 +1564,7 @@ struct SshHost : public LTreeItem
 	{
 		if (WriteToTag)
 		{
-			GUri u;
+			LUri u;
 			u.sProtocol = "ssh";
 			u.sHost = Host;
 			u.sUser = User;
@@ -1573,7 +1573,7 @@ struct SshHost : public LTreeItem
 		}
 		else
 		{
-			GUri u(t->GetContent());
+			LUri u(t->GetContent());
 			if (!Stricmp(u.sProtocol.Get(), "ssh"))
 			{
 				Host = u.sHost;
@@ -1713,7 +1713,7 @@ int RemoteFolderDlg::OnNotify(LViewI *Ctrl, int Flags)
 
 			app->Opts.Unlock();
 
-			GUri u;
+			LUri u;
 			u.sProtocol = "ssh";
 			u.sHost = GetCtrlName(IDC_HOSTNAME);
 			u.sUser = GetCtrlName(IDC_USER);

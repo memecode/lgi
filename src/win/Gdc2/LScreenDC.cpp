@@ -15,7 +15,7 @@
 #include "lgi/common/GdiLeak.h"
 #include "lgi/common/Palette.h"
 
-class GScreenPrivate
+class LScreenPrivate
 {
 public:
 	#if defined WIN32
@@ -62,7 +62,7 @@ public:
 	static GPalette *LastRealized;
 	static NullObjects Null;
 
-	GScreenPrivate()
+	LScreenPrivate()
 	{
 		Gc = 0;
 		hWnd = 0;
@@ -97,20 +97,20 @@ public:
 	#endif
 };
 
-GScreenPrivate::NullObjects GScreenPrivate::Null;
-GPalette *GScreenPrivate::LastRealized = 0;
+LScreenPrivate::NullObjects LScreenPrivate::Null;
+GPalette *LScreenPrivate::LastRealized = 0;
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 LScreenDC::LScreenDC()
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	ColourSpace = CsNone;
 }
 
 LScreenDC::LScreenDC(LViewI *view)
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	ColourSpace = GdcD->GetColourSpace();
 
 	d->hWnd = view->Handle();
@@ -124,7 +124,7 @@ LScreenDC::LScreenDC(LViewI *view)
 
 LScreenDC::LScreenDC(HWND hWindow)
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	ColourSpace = GdcD->GetColourSpace();
 
 	d->hWnd = hWindow;
@@ -138,7 +138,7 @@ LScreenDC::LScreenDC(HWND hWindow)
 
 LScreenDC::LScreenDC(HDC hdc, HWND hwnd, bool Release)
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	ColourSpace = GdcD->GetColourSpace();
 
 	LgiAssert(hdc != 0);
@@ -155,7 +155,7 @@ LScreenDC::LScreenDC(HDC hdc, HWND hwnd, bool Release)
 
 LScreenDC::LScreenDC(HBITMAP hbmp, int Sx, int Sy)
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	ColourSpace = GdcD->GetColourSpace();
 
 	CreateFromHandle(CreateCompatibleDC(0));

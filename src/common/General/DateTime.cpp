@@ -315,7 +315,7 @@ static bool ParseValue(char *s, GAutoString &var, GAutoString &val)
 	End.Set("31/12/2014");
 	LDateTime::GetDaylightSavingsInfo(Info, Start, &End);
 
-	GStringPipe p;
+	LStringPipe p;
 	for (int i=0; i<Info.Length(); i++)
 	{
 		LDateTime dt;
@@ -476,7 +476,7 @@ bool LDateTime::GetDaylightSavingsInfo(GArray<GDstInfo> &Info, LDateTime &Start,
 			{
 				char s[256];
 				size_t r;
-				GStringPipe p(1024);
+				LStringPipe p(1024);
 				while ((r = fread(s, 1, sizeof(s), f)) > 0)
 				{
 					p.Write(s, (int)r);

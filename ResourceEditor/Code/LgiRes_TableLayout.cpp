@@ -792,7 +792,7 @@ bool CtrlTable::GetVariant(const char *Name, LVariant &Value, char *Array)
 	{
 		case TableLayoutCols:
 		{
-			GStringPipe p;
+			LStringPipe p;
 			for (int i=0; i<d->ColSize.Length(); i++)
 			{
 				if (i) p.Push(",");
@@ -803,7 +803,7 @@ bool CtrlTable::GetVariant(const char *Name, LVariant &Value, char *Array)
 		}
 		case TableLayoutRows:
 		{
-			GStringPipe p;
+			LStringPipe p;
 			for (int i=0; i<d->RowSize.Length(); i++)
 			{
 				if (i) p.Push(",");

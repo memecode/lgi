@@ -7,7 +7,7 @@
 #include "LSubProcess.h"
 
 /// Lookup the file/line information for an instruction pointer value
-class GSymLookup
+class LSymLookup
 {
 public:
 	#if __LP64__ || defined(_WIN64)
@@ -16,11 +16,11 @@ public:
 	typedef int Addr;
 	#endif
 
-	GSymLookup()
+	LSymLookup()
 	{
 	}
 	
-	~GSymLookup()
+	~LSymLookup()
 	{
 	}
 	
@@ -54,7 +54,7 @@ public:
 			char *s = strrchr(Sym[i], '('), *e;
 			if (s != 0 && (e = strchr(++s, '+')))
 			{
-				GStringPipe un;
+				LStringPipe un;
 				un.Write(Sym[i], s - Sym[i] - 1);
 				un.Write((void*)" (", 2);
 

@@ -53,7 +53,7 @@ VcFile::FileStatus VcFile::GetStatus()
 GString VcFile::GetUri()
 {
 	const char *File = GetText(COL_FILENAME);
-	GUri u = Uri || !Owner ? Uri : Owner->GetUri();
+	LUri u = Uri || !Owner ? Uri : Owner->GetUri();
 	LgiAssert(u && File);
 	u += File;
 	return u.ToString();

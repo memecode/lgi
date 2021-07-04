@@ -12,17 +12,17 @@ DEFINE_GUID(IID_ISpellCheckerFactory,0x8E018A9D,0x2415,0x4677,0xBF,0x08,0x79,0x4
 
 #include "lgi/common/HashTable.h"
 
-int LangCmp(GSpellCheck::LanguageId *a, GSpellCheck::LanguageId *b)
+int LangCmp(LSpellCheck::LanguageId *a, LSpellCheck::LanguageId *b)
 {
 	return Stricmp(a->LangCode.Get(), b->LangCode.Get());
 }
 
-int DictionaryCmp(GSpellCheck::DictionaryId *a, GSpellCheck::DictionaryId *b)
+int DictionaryCmp(LSpellCheck::DictionaryId *a, LSpellCheck::DictionaryId *b)
 {
 	return Stricmp(a->Dict.Get(), b->Dict.Get());
 }
 
-class WindowsSpellCheck : public GSpellCheck
+class WindowsSpellCheck : public LSpellCheck
 {
 	bool Ok;
 	ISpellCheckerFactory *Factory;
@@ -72,7 +72,7 @@ class WindowsSpellCheck : public GSpellCheck
 
 public:
 	WindowsSpellCheck() :
-		GSpellCheck("GSpellCheck")
+		LSpellCheck("LSpellCheck")
 	{
 		Ok = false;
 		Sc = NULL;
@@ -326,9 +326,9 @@ public:
 
 #endif
 
-GAutoPtr<GSpellCheck> CreateWindowsSpellCheck()
+GAutoPtr<LSpellCheck> CreateWindowsSpellCheck()
 {
-	GAutoPtr<GSpellCheck> p;
+	GAutoPtr<LSpellCheck> p;
 	#ifdef __spellcheck_h__
 	p.Reset(new WindowsSpellCheck);
 	#endif

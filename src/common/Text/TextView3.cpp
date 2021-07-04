@@ -903,7 +903,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 		Prof.Add("NoWrap: ExistingLines");
 		#endif
 		#ifdef _DEGBUG
-		GStringPipe Log(1024);
+		LStringPipe Log(1024);
 		Log.Printf("Pour: " LPrintfSizeT ", " LPrintfSSizeT ", partial=%i\n", Start, Length, PartialPour);
 		#endif
 
@@ -5376,7 +5376,7 @@ void LTextView3::OnUrl(char *Url)
 		Environment->OnNavigate(this, Url);
 	else
 	{
-		GUri u(Url);
+		LUri u(Url);
 		bool Email = LIsValidEmail(Url);
 		const char *Proto = Email ? "mailto" : u.sProtocol;
 		GString App = LGetAppForProtocol(Proto);

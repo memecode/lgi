@@ -657,7 +657,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns
 							goto DefineEnum;
 						}
 						
-						GStringPipe p;
+						LStringPipe p;
 						char16 *i;
 						for (i = Start; i && *i;)
 						{

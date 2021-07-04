@@ -343,7 +343,7 @@ HtmlTag IsDefaultStyle(HtmlTag Id, LCss *Css)
 	return CONTENT;
 }
 
-bool LRichTextPriv::TextBlock::ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng)
+bool LRichTextPriv::TextBlock::ToHtml(LStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng)
 {
 	s.Print("<p>");
 
@@ -664,7 +664,7 @@ void DrawDecor(LSurface *pDC, LRichTextPriv::DisplayStr *Ds, int Fx, int Fy, ssi
 	}
 }
 
-bool Overlap(GSpellCheck::SpellingError *e, int start, ssize_t len)
+bool Overlap(LSpellCheck::SpellingError *e, int start, ssize_t len)
 {
 	if (!e)
 		return false;
@@ -1464,7 +1464,7 @@ GMessage::Result LRichTextPriv::TextBlock::OnEvent(GMessage *Msg)
 	{
 		case M_COMMAND:
 		{
-			GSpellCheck::SpellingError *e = SpellingErrors.AddressOf(ClickErrIdx);
+			LSpellCheck::SpellingError *e = SpellingErrors.AddressOf(ClickErrIdx);
 			if (e)
 			{
 				// Replacing text with spell check suggestion:
@@ -1757,12 +1757,12 @@ bool DetectUrl(Char *t, ssize_t &len)
 	return true;
 }
 
-int ErrSort(GSpellCheck::SpellingError *a, GSpellCheck::SpellingError *b)
+int ErrSort(LSpellCheck::SpellingError *a, LSpellCheck::SpellingError *b)
 {
 	return (int) (a->Start - b->Start);
 }
 
-void LRichTextPriv::TextBlock::SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, LRange r)
+void LRichTextPriv::TextBlock::SetSpellingErrors(GArray<LSpellCheck::SpellingError> &Errors, LRange r)
 {
 	// LgiTrace("%s:%i - SetSpellingErrors " LPrintfSSizeT ", " LPrintfSSizeT ":" LPrintfSSizeT "\n", _FL, Errors.Length(), r.Start, r.End());
 
@@ -1925,7 +1925,7 @@ bool LRichTextPriv::TextBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset
 		// Is there a spelling error at 'Offset'?		
 		for (unsigned i=0; i<SpellingErrors.Length(); i++)
 		{
-			GSpellCheck::SpellingError &e = SpellingErrors[i];
+			LSpellCheck::SpellingError &e = SpellingErrors[i];
 			if (Offset >= e.Start && Offset < e.End())
 			{
 				ClickErrIdx = i;
@@ -2457,7 +2457,7 @@ void LRichTextPriv::TextBlock::DumpNodes(LTreeItem *Ti)
 			GString u;
 			if (Len)
 			{
-				GStringPipe p(256);
+				LStringPipe p(256);
 				uint32_t *Str = St->At(0);
 				p.Write("\'", 1);
 				for (int k=0; k<MIN(Len, 30); k++)

@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include "Lgi.h"
-#include "GSegmentTree.h"
+#include "LSegmentTree.h"
 #ifndef WIN32
 #include "errno.h"
 #endif
@@ -1153,7 +1153,7 @@ bool StorageItemImpl::DeleteChild(StorageItem *ObjVirtual)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 namespace Storage2
 {
-	class Block : public GSegment
+	class Block : public LSegment
 	{
 	public:
 		StorageItemImpl *Dir;
@@ -1337,7 +1337,7 @@ namespace Storage2
 			}
 		}
 
-		GSegmentTree Segs;
+		LSegmentTree Segs;
 		void AddSegs(StorageItemImpl *s)
 		{
 			if (s &&
@@ -1359,7 +1359,7 @@ namespace Storage2
 
 								New->Length = Item->Header->DirAlloc * sizeof(StorageItemHeader);
 
-								GSegment *Conflict = 0;
+								LSegment *Conflict = 0;
 								if (!Segs.Insert(New, &Conflict))
 								{
 									ProcessConflict(New, (Block*)Conflict);
@@ -1378,7 +1378,7 @@ namespace Storage2
 								
 								New->Length = Item->Header->DataSize;
 
-								GSegment *Conflict = 0;
+								LSegment *Conflict = 0;
 								if (!Segs.Insert(New, &Conflict))
 								{
 									ProcessConflict(New, (Block*)Conflict);

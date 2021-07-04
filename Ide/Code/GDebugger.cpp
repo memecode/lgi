@@ -85,7 +85,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 	int ProcessId;
 	bool SuppressNextFileLine;
 	GArray<Visualizer*> Vis;
-	GStream *Log;
+	LStream *Log;
 
 	LMutex StateMutex;
 	bool DebuggingProcess;
@@ -105,7 +105,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 	GString::Array BreakInfo;
 
 	// Various output modes.
-	GStream *OutStream;
+	LStream *OutStream;
 	GString::Array *OutLines;
 	
 	enum ThreadState
@@ -594,7 +594,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 		return true;
 	}
 	
-	bool Cmd(const char *c, GStream *Output = NULL, GString::Array *Arr = NULL)
+	bool Cmd(const char *c, LStream *Output = NULL, GString::Array *Arr = NULL)
 	{
 		if (!ValidStr(c))
 		{
@@ -642,7 +642,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 	}
 	
 public:
-	Gdb(GStream *log) : LThread("Gdb"), Log(log)
+	Gdb(LStream *log) : LThread("Gdb"), Log(log)
 	{
 		Events = NULL;
 		State = Init;
@@ -877,7 +877,7 @@ public:
 					
 					RemoveBreakPoint(&bp);
 					
-					GStringPipe p;
+					LStringPipe p;
 
 					#if 0 // For some reason this is returning the wrong PID... WTH gdb... WTH.
 					// Get process info
@@ -1141,7 +1141,7 @@ public:
 				
 				if (Detailed)
 				{
-					GStringPipe typePipe, valPipe;
+					LStringPipe typePipe, valPipe;
 					GString c;					
 
 					// Get the type...
@@ -1190,7 +1190,7 @@ public:
 	bool GetVariables(bool Locals, GArray<Variable> &vars, bool Detailed)
 	{
 		// LProfile Prof("GetVars");
-		GStringPipe p(256);
+		LStringPipe p(256);
 
 		if (vars.Length())
 		{
@@ -1274,7 +1274,7 @@ public:
 		return true;
 	}
 
-	bool GetRegisters(GStream *Out)
+	bool GetRegisters(LStream *Out)
 	{
 		if (!Out)
 			return false;
@@ -1282,12 +1282,12 @@ public:
 		return Cmd("info registers", Out);
 	}
 
-	bool PrintObject(const char *Var, GStream *Output)
+	bool PrintObject(const char *Var, LStream *Output)
 	{
 		if (!Var || !Output)
 			return false;
 	
-		GStringPipe q;
+		LStringPipe q;
 		char c[256];
 		
 		// Get type...
@@ -1562,14 +1562,14 @@ public:
 	GString GetResponse(const char *c)
 	{
 		GString r;
-		GStringPipe p;
+		LStringPipe p;
 		if (Cmd(c, &p))
 			r = p.NewGStr();
 		return r;
 	}
 };
 
-GDebugger *CreateGdbDebugger(GStream *Log)
+GDebugger *CreateGdbDebugger(LStream *Log)
 {
 	return new Gdb(Log);
 }

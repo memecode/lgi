@@ -1,20 +1,19 @@
-#ifndef __GPath_h__
-#define __GPath_h__
+#pragma once
 
 #include <math.h>
 #include "lgi/common/Matrix.h"
 
-#define GPATH_DBG	1
+#define LPATH_DBG	1
 
-class GSeg;
-class GVector;
+class LSeg;
+class LVector;
 
 extern bool _Disable_ActiveList;
 extern bool _Disable_XSort;
 extern bool _Disable_Alpha;
 extern bool _Disable_Rops;
 
-enum GPathFillRule
+enum LPathFillRule
 {
 	FILLRULE_ODDEVEN,
 	FILLRULE_NONZERO
@@ -23,14 +22,14 @@ enum GPathFillRule
 #include "lgi/common/Point.h"
 #include "lgi/common/RectF.h"
 
-class LgiClass GBrush
+class LgiClass LBrush
 {
-	friend class GPath;
+	friend class LPath;
 
 protected:
 	uchar AlphaLut[65];
 
-	class GRopArgs
+	class LRopArgs
 	{
 	public:
 		uchar *Pixels;
@@ -45,23 +44,23 @@ protected:
 		LSurface *pDC;
 	};
 
-	virtual bool Start(GRopArgs &a) { return true; }
-	virtual void Rop(GRopArgs &a) = 0;
+	virtual bool Start(LRopArgs &a) { return true; }
+	virtual void Rop(LRopArgs &a) = 0;
 	virtual int Alpha() { return 255; }
 
 	void MakeAlphaLut();
 
 public:
-	GBrush() {}
-	virtual ~GBrush() {}
+	LBrush() {}
+	virtual ~LBrush() {}
 };
 
-class LgiClass GEraseBrush : public GBrush
+class LgiClass LEraseBrush : public LBrush
 {
-	void Rop(GRopArgs &a);
+	void Rop(LRopArgs &a);
 
 public:
-	GEraseBrush()
+	LEraseBrush()
 	{
 		MakeAlphaLut();
 	}
@@ -83,27 +82,27 @@ public:
 	dc = DivLut[d->c * d->a];					\
 	d->c = sc + DivLut[dc * o]
 
-class LgiClass GSolidBrush : public GBrush
+class LgiClass LSolidBrush : public LBrush
 {
 	COLOUR c32;
 
-	void Rop(GRopArgs &a);
+	void Rop(LRopArgs &a);
 	int Alpha() { return A32(c32); }
 
 public:
-	GSolidBrush(COLOUR c)
+	LSolidBrush(COLOUR c)
 	{
 		c32 = c;
 		MakeAlphaLut();
 	}
 
-	GSolidBrush(GColour c)
+	LSolidBrush(GColour c)
 	{
 		c32 = c.c32();
 		MakeAlphaLut();
 	}
 
-	GSolidBrush(int r, int g, int b, int a = 255)
+	LSolidBrush(int r, int g, int b, int a = 255)
 	{
 		c32 = Rgba32(r, g, b, a);
 		MakeAlphaLut();
@@ -205,27 +204,27 @@ public:
 	}
 };
 
-struct GBlendStop
+struct LBlendStop
 {
 	double Pos;
 	COLOUR c32;
 };
 
-class LgiClass GBlendBrush : public GBrush
+class LgiClass LBlendBrush : public LBrush
 {
 protected:
 	int Stops;
-	GBlendStop *Stop;
+	LBlendStop *Stop;
 
 	COLOUR Lut[256];
 	double Base, IncX, IncY;
 
 	LPointF p[2];
 
-	bool Start(GRopArgs &a);
+	bool Start(LRopArgs &a);
 
 public:
-	GBlendBrush(int stops, GBlendStop *stop)
+	LBlendBrush(int stops, LBlendStop *stop)
 	{
 		MakeAlphaLut();
 		Stops = 0;
@@ -236,42 +235,42 @@ public:
 		}
 	}
 
-	~GBlendBrush()
+	~LBlendBrush()
 	{
 		DeleteArray(Stop);
 	}
 
-	int GetStops(GBlendStop **stop = 0)
+	int GetStops(LBlendStop **stop = 0)
 	{
 		if (stop)
 			*stop = Stop;
 		return Stops;
 	}
 
-	void SetStops(int stops, GBlendStop *stop)
+	void SetStops(int stops, LBlendStop *stop)
 	{
 		Stops = stops;
 		DeleteArray(Stop);
-		Stop = new GBlendStop[Stops];
+		Stop = new LBlendStop[Stops];
 		if (Stop) memcpy(Stop, stop, sizeof(*Stop) * Stops);
 	}
 };
 
-class LgiClass GLinearBlendBrush : public GBlendBrush
+class LgiClass LLinearBlendBrush : public LBlendBrush
 {
-	bool Start(GRopArgs &Args);
-	void Rop(GRopArgs &Args);
+	bool Start(LRopArgs &Args);
+	void Rop(LRopArgs &Args);
 
 public:
-	GLinearBlendBrush(LPointF a, LPointF b, int stops = 0, GBlendStop *stop = 0) :
-		GBlendBrush(stops, stop)
+	LLinearBlendBrush(LPointF a, LPointF b, int stops = 0, LBlendStop *stop = 0) :
+		LBlendBrush(stops, stop)
 	{
 		p[0] = a;
 		p[1] = b;
 	}
 
 	template<typename T>
-	void Linear16(T *d, GRopArgs &Args)
+	void Linear16(T *d, LRopArgs &Args)
 	{
 		uchar *DivLut = Div255Lut;
 		uchar *Alpha = Args.Alpha;
@@ -324,7 +323,7 @@ public:
 	}
 
 	template<typename T>
-	void Linear24(T *d, GRopArgs &Args)
+	void Linear24(T *d, LRopArgs &Args)
 	{
 		uchar *DivLut = Div255Lut;
 		uchar *Alpha = Args.Alpha;
@@ -375,7 +374,7 @@ public:
 	}
 
 	template<typename T>
-	void Linear32(T *d, GRopArgs &Args)
+	void Linear32(T *d, LRopArgs &Args)
 	{
 		uchar *DivLut = Div255Lut;
 		uchar *Alpha = Args.Alpha;
@@ -429,20 +428,20 @@ public:
 	}
 };
 
-class LgiClass GRadialBlendBrush : public GBlendBrush
+class LgiClass LRadialBlendBrush : public LBlendBrush
 {
-	void Rop(GRopArgs &Args);
+	void Rop(LRopArgs &Args);
 
 public:
-	GRadialBlendBrush(LPointF center, LPointF rim, int stops = 0, GBlendStop *stop = 0) :
-		GBlendBrush(stops, stop)
+	LRadialBlendBrush(LPointF center, LPointF rim, int stops = 0, LBlendStop *stop = 0) :
+		LBlendBrush(stops, stop)
 	{
 		p[0] = center;
 		p[1] = rim;
 	}
 
 	template<typename T>
-	void Radial16(T *d, GRopArgs &Args)
+	void Radial16(T *d, LRopArgs &Args)
 	{
 		uchar *DivLut = Div255Lut;
 		uchar *Alpha = Args.Alpha;
@@ -546,7 +545,7 @@ public:
 	}
 
 	template<typename T>
-	void Radial24(T *d, GRopArgs &Args)
+	void Radial24(T *d, LRopArgs &Args)
 	{
 		uchar *DivLut = Div255Lut;
 		uchar *Alpha = Args.Alpha;
@@ -646,7 +645,7 @@ public:
 	}
 
 	template<typename T>
-	void Radial32(T *d, GRopArgs &Args)
+	void Radial32(T *d, LRopArgs &Args)
 	{
 		uchar *DivLut = Div255Lut;
 		uchar *Alpha = Args.Alpha;
@@ -749,7 +748,7 @@ public:
 	}
 };
 
-class LgiClass GPath
+class LgiClass LPath
 {
 public:
 	class Matrix : public GMatrix<double, 3, 3>
@@ -778,11 +777,11 @@ public:
 
 protected:
 	// Data
-	List<GSeg> Segs;
-	List<GVector> Vecs;
+	List<LSeg> Segs;
+	List<LVector> Vecs;
 	LRectF Bounds;
 	bool Aa;
-	GPathFillRule FillRule;
+	LPathFillRule FillRule;
 	Matrix Mat;
 	
 	// Flattened representation
@@ -792,11 +791,11 @@ protected:
 
 	// Methods
 	void Unflatten();
-	void Append(GPath &p);
+	void Append(LPath &p);
 
 public:
-	GPath(bool aa = true);
-	virtual ~GPath();
+	LPath(bool aa = true);
+	virtual ~LPath();
 
 	// Primitives
 	void MoveTo(		double x,
@@ -842,8 +841,8 @@ public:
 	// Properties
 	int Segments();
 	void GetBounds(LRectF *b);
-	GPathFillRule GetFillRule() { return FillRule; }
-	void SetFillRule(GPathFillRule r) { FillRule = r; }
+	LPathFillRule GetFillRule() { return FillRule; }
+	void SetFillRule(LPathFillRule r) { FillRule = r; }
 
 	// Methods
 	bool IsClosed();
@@ -859,10 +858,10 @@ public:
 	void DeleteSeg(int i);
 
 	// Colouring (windows: need to call ConvertPreMulAlpha(true) on the pDC after using these)
-	void Fill(LSurface *pDC, GBrush &Brush);
-	void Stroke(LSurface *pDC, GBrush &Brush, double Width);
+	void Fill(LSurface *pDC, LBrush &Brush);
+	void Stroke(LSurface *pDC, LBrush &Brush, double Width);
 
-	#if GPATH_DBG
+	#if LPATH_DBG
 	LMemDC DbgDsp;
 	#endif
 };
@@ -870,4 +869,3 @@ public:
 void FlattenQuadratic(LPointF *&Out, LPointF &p1, LPointF &p2, LPointF &p3, int Steps);
 void FlattenCubic(LPointF *&Out, LPointF &p1, LPointF &p2, LPointF &p3, LPointF &p4, int Steps);
 
-#endif

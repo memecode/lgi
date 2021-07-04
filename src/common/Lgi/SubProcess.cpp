@@ -107,7 +107,7 @@ char *ArgTok(const char *&s)
 	}
 }
 
-struct GSubProcessPriv
+struct LSubProcessPriv
 {
 	GString Exe;
 	GString InitialFolder;
@@ -134,7 +134,7 @@ struct GSubProcessPriv
 		ProcCreatePseudoConsole CreatePseudoConsole;
 	#endif
 
-	GSubProcessPriv(bool pseudoConsole)
+	LSubProcessPriv(bool pseudoConsole)
 		#ifdef WINDOWS
 		: Kernel("Kernel32")
 		#endif
@@ -159,7 +159,7 @@ struct GSubProcessPriv
 		#endif
 	}
 
-	~GSubProcessPriv()
+	~LSubProcessPriv()
 	{
 		Args.DeleteArrays();
 	}
@@ -167,7 +167,7 @@ struct GSubProcessPriv
 
 LSubProcess::LSubProcess(const char *exe, const char *args, bool pseudoConsole)
 {
-	d = new GSubProcessPriv(pseudoConsole);
+	d = new LSubProcessPriv(pseudoConsole);
 	Parent = Child = NULL;
 	d->Exe = exe;
 	d->Args.Add(NewStr(d->Exe));
@@ -365,7 +365,7 @@ bool LSubProcess::SetEnvironment(const char *Var, const char *Value)
 	
 	bool IsPath = !_stricmp(Var, "PATH");
 
-	GStringPipe a;
+	LStringPipe a;
 	const char *s = Value;
 	while (*s)
 	{
@@ -402,7 +402,7 @@ bool LSubProcess::SetEnvironment(const char *Var, const char *Value)
 	{
 		// Remove missing paths from the list
 		GToken t(v->Val, LGI_PATH_SEPARATOR);
-		GStringPipe p;
+		LStringPipe p;
 		for (unsigned i=0; i<t.Length(); i++)
 		{
 			char *Dir = t[i];
@@ -1143,7 +1143,7 @@ bool LSubProcess::Kill()
 
 GString LSubProcess::Read()
 {
-	GStringPipe p(512);
+	LStringPipe p(512);
 	char Buf[512];
 	ssize_t Rd;
 	while (Peek())

@@ -28,7 +28,7 @@ enum LvcStatus
 class ReaderThread : public LThread
 {
 	VersionCtrl Vcs;
-	GStream *Out;
+	LStream *Out;
 	LSubProcess *Process;
 	int FilterCount;
 
@@ -38,7 +38,7 @@ class ReaderThread : public LThread
 public:
 	int Result;
 
-	ReaderThread(VersionCtrl vcs, LSubProcess *p, GStream *out);
+	ReaderThread(VersionCtrl vcs, LSubProcess *p, LStream *out);
 	~ReaderThread();
 
 	int Main();
@@ -90,20 +90,20 @@ class VcFolder : public LTreeItem
 {
 	friend class VcCommit;
 
-	class Cmd : public GStream
+	class Cmd : public LStream
 	{
 		GString::Array Context;
-		GStringPipe Buf;
+		LStringPipe Buf;
 
 	public:
 		LoggingType Logging;
-		GStream *Log;
+		LStream *Log;
 		GAutoPtr<LThread> Rd;
 		ParseFn PostOp;
 		GAutoPtr<ParseParams> Params;
 		LvcError Err;
 
-		Cmd(GString::Array &context, LoggingType logging, GStream *log)
+		Cmd(GString::Array &context, LoggingType logging, LStream *log)
 		{
 			Context = context;
 			Logging = logging;
@@ -162,7 +162,7 @@ class VcFolder : public LTreeItem
 
 	AppPriv *d;
 	VersionCtrl Type;
-	GUri Uri;
+	LUri Uri;
 	GString CurrentCommit, RepoUrl, VcCmd;
 	int64 CurrentCommitIdx;
 	GArray<VcCommit*> Log;
@@ -245,7 +245,7 @@ public:
 	VersionCtrl GetType();
 	AppPriv *GetPriv() { return d; }
 	const char *LocalPath();
-	GUri GetUri() { return Uri; }
+	LUri GetUri() { return Uri; }
 	VcLeaf *FindLeaf(const char *Path, bool OpenTree);
 	void DefaultFields();
 	void UpdateColumns();
@@ -295,7 +295,7 @@ class VcLeaf : public LTreeItem
 	AppPriv *d;
 	VcFolder *Parent;
 	bool Folder;
-	GUri Uri;
+	LUri Uri;
 	GString Leaf;
 	LTreeItem *Tmp;
 

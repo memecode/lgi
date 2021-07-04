@@ -381,7 +381,7 @@ LCss::Len LCss::Len::operator *(const Len &b) const
 	return b;
 }
 
-bool LCss::Len::ToString(GStream &p) const
+bool LCss::Len::ToString(LStream &p) const
 {
 	const char *Unit = 0;
 	switch (Type)
@@ -429,7 +429,7 @@ bool LCss::Len::ToString(GStream &p) const
 	return p.Print("%s", Unit) > 0;
 }
 
-bool LCss::ColorDef::ToString(GStream &p)
+bool LCss::ColorDef::ToString(LStream &p)
 {
 	switch (Type)
 	{
@@ -474,7 +474,7 @@ const char *LCss::ToString(DisplayType dt)
 
 GAutoString LCss::ToString()
 {
-	GStringPipe p;
+	LStringPipe p;
 
 	// PropType Prop;
 	// for (void *v = Props.First((int*)&Prop); v; v = Props.Next((int*)&Prop))
@@ -2440,7 +2440,7 @@ const char *LCss::Selector::PartTypeToString(PartType p)
 
 GAutoString LCss::Selector::Print()
 {
-	GStringPipe p;
+	LStringPipe p;
 	for (int i=0; i<Parts.Length(); i++)
 	{
 		Part &n = Parts[i];
@@ -2494,7 +2494,7 @@ uint32_t LCss::Selector::GetSpecificity()
 			((uint32_t)s[0]);
 }
 
-bool LCss::Selector::ToString(GStream &p)
+bool LCss::Selector::ToString(LStream &p)
 {
 	// Output the selector parts...
 	for (unsigned i=0; i<Parts.Length(); i++)
@@ -2551,7 +2551,7 @@ bool LCss::Selector::Parse(const char *&s)
 
 	const char *Start = s, *Prev = s;
 	GArray<int> Offsets;
-	GStringPipe p;
+	LStringPipe p;
 	while (*s)
 	{
 		SkipWhite(s);
@@ -2794,7 +2794,7 @@ static const char *SkipComment(const char *c)
 	return c;
 }
 
-bool LCss::Store::Dump(GStream &out)
+bool LCss::Store::Dump(LStream &out)
 {
 	const char *MapNames[] = {"TypeMap", "ClassMap", "IdMap", NULL};
 	SelectorMap *Maps[] = {&TypeMap, &ClassMap, &IdMap, NULL};
@@ -2838,7 +2838,7 @@ void LCss::Store::SortStyles(LCss::SelArray &Styles)
 		Styles.Sort(GCssSelectorCmp);
 }
 
-bool LCss::Store::ToString(GStream &p)
+bool LCss::Store::ToString(LStream &p)
 {
 	SelectorMap *Maps[] = {&TypeMap, &ClassMap, &IdMap, NULL};
 	for (int i=0; Maps[i]; i++)

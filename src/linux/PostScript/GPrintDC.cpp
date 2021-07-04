@@ -384,7 +384,7 @@ public:
 			// Encode the string to protect the '(' and ')' characters which are reserved for the syntax
 			// of the postscript language. So we escape them here.
 			char *Mem = LgiNewUtf16To8(text);
-			GStringPipe p;
+			LStringPipe p;
 			for (char *s = Mem; s && *s; )
 			{
 				char *e = s;

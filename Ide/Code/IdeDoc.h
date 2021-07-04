@@ -7,7 +7,7 @@
 
 extern void FilterFiles(GArray<ProjectNode*> &Perfect, GArray<ProjectNode*> &Nodes, GString InputStr);
 
-class IdeDoc : public GMdiChild, public GStream
+class IdeDoc : public GMdiChild, public LStream
 {
 	friend class DocEdit;
 	class IdeDocPrivate *d;

@@ -30,7 +30,7 @@ public:
 		GString ApiUri;
 		// GString RevokeUri;
 		GString Scope;
-		GUri Proxy;
+		LUri Proxy;
 		
 		Params()
 		{
@@ -49,7 +49,7 @@ public:
 		}
 	};
 
-	LOAuth2(Params &params, const char *account, GDom *store, LCancel *cancel, GStream *log = NULL);
+	LOAuth2(Params &params, const char *account, GDom *store, LCancel *cancel, LStream *log = NULL);
 	virtual ~LOAuth2();
 
 	GString GetAccessToken();

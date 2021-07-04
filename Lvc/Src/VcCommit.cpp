@@ -170,17 +170,17 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 			double Cx = x;
 			double Cy = Ht / 2;
 			{
-				GPath p;
+				LPath p;
 				p.Circle(Cx, Cy, r + (Current ? 1 : 0));
-				GSolidBrush sb(GColour::Black);
+				LSolidBrush sb(GColour::Black);
 				p.Fill(&Mem, sb);
 			}
 			{
-				GPath p;
+				LPath p;
 				p.Circle(Cx, Cy, r-1);
 				LgiAssert(NodeColour.IsValid());
 				// LgiTrace("%s = %s\n", Branch.Get(), NodeColour.GetStr());
-				GSolidBrush sb(NodeColour);
+				LSolidBrush sb(NodeColour);
 				p.Fill(&Mem, sb);
 			}
 		}

@@ -112,7 +112,7 @@ bool LgiGetUri
 	/// [Optional] Extra headers to use
 	const char *InHeaders = NULL,
 	/// [Optional] The proxy to use
-	GUri *InProxy = NULL
+	LUri *InProxy = NULL
 );
 
 #endif
