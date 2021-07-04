@@ -422,20 +422,20 @@
     <ClCompile Include="src\common\Gdc2\64Bit.cpp" />
     <ClCompile Include="src\common\Gdc2\8Bit.cpp" />
     <ClCompile Include="src\common\Gdc2\Alpha.cpp" />
-    <ClCompile Include="src\common\Gdc2\Filters\GFilter.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\LDisplayString.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\LFont.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\LFontCodePages.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\LFontSystem.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\LFontType.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\LStringLayout.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\LTypeFace.cpp" />
-    <ClCompile Include="src\common\Gdc2\GColour.cpp" />
+    <ClCompile Include="src\common\Gdc2\Filters\Filter.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\DisplayString.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\Font.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\FontCodePages.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\FontSystem.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\FontType.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\StringLayout.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\TypeFace.cpp" />
+    <ClCompile Include="src\common\Gdc2\Colour.cpp" />
     <ClCompile Include="src\common\Gdc2\GdcCommon.cpp" />
-    <ClCompile Include="src\common\Gdc2\LRect.cpp" />
-    <ClCompile Include="src\common\Gdc2\LSurface.cpp" />
-    <ClCompile Include="src\common\Gdc2\Path\GPath.cpp" />
-    <ClCompile Include="src\common\Gdc2\Tools\GColourReduce.cpp" />
+    <ClCompile Include="src\common\Gdc2\Rect.cpp" />
+    <ClCompile Include="src\common\Gdc2\Surface.cpp" />
+    <ClCompile Include="src\common\Gdc2\Path\Path.cpp" />
+    <ClCompile Include="src\common\Gdc2\Tools\ColourReduce.cpp" />
     <ClCompile Include="src\common\General\GContainers.cpp" />
     <ClCompile Include="src\common\General\GExeCheck.cpp" />
     <ClCompile Include="src\common\General\GFileCommon.cpp" />
@@ -481,17 +481,17 @@
     <ClCompile Include="src\common\Resource\LgiRes.cpp" />
     <ClCompile Include="src\common\Resource\Res.cpp" />
     <ClCompile Include="src\common\Skins\Gel\Gel.cpp" />
-    <ClCompile Include="src\common\Text\GDocView.cpp" />
-    <ClCompile Include="src\common\Text\GString.cpp" />
-    <ClCompile Include="src\common\Text\GTextView3.cpp" />
-    <ClCompile Include="src\common\Text\GToken.cpp" />
-    <ClCompile Include="src\common\Text\GUnicode.cpp" />
-    <ClCompile Include="src\common\Text\GUtf8.cpp" />
-    <ClCompile Include="src\common\Text\LXmlTree.cpp" />
-    <ClCompile Include="src\common\Text\LUnicodeString.cpp" />
-    <ClCompile Include="src\common\Widgets\GBitmap.cpp" />
-    <ClCompile Include="src\common\Widgets\GBox.cpp" />
-    <ClCompile Include="src\common\Widgets\GButton.cpp">
+    <ClCompile Include="src\common\Text\DocView.cpp" />
+    <ClCompile Include="src\common\Text\String.cpp" />
+    <ClCompile Include="src\common\Text\TextView3.cpp" />
+    <ClCompile Include="src\common\Text\Token.cpp" />
+    <ClCompile Include="src\common\Text\Unicode.cpp" />
+    <ClCompile Include="src\common\Text\Utf8.cpp" />
+    <ClCompile Include="src\common\Text\XmlTree.cpp" />
+    <ClCompile Include="src\common\Text\UnicodeString.cpp" />
+    <ClCompile Include="src\common\Widgets\Bitmap.cpp" />
+    <ClCompile Include="src\common\Widgets\Box.cpp" />
+    <ClCompile Include="src\common\Widgets\Button.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">true</ExcludedFromBuild>
@@ -499,7 +499,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\common\Widgets\GCheckBox.cpp">
+    <ClCompile Include="src\common\Widgets\CheckBox.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">false</ExcludedFromBuild>
@@ -507,7 +507,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\common\Widgets\GCombo.cpp">
+    <ClCompile Include="src\common\Widgets\Combo.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">true</ExcludedFromBuild>
@@ -515,7 +515,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\common\Widgets\GEdit.cpp">
+    <ClCompile Include="src\common\Widgets\Edit.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">true</ExcludedFromBuild>
@@ -523,11 +523,11 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\common\Widgets\GItemContainer.cpp" />
-    <ClCompile Include="src\common\Widgets\GPanel.cpp" />
-    <ClCompile Include="src\common\Widgets\GPopup.cpp" />
-    <ClCompile Include="src\common\Widgets\GProgressDlg.cpp" />
-    <ClCompile Include="src\common\Widgets\GRadioGroup.cpp">
+    <ClCompile Include="src\common\Widgets\ItemContainer.cpp" />
+    <ClCompile Include="src\common\Widgets\Panel.cpp" />
+    <ClCompile Include="src\common\Widgets\Popup.cpp" />
+    <ClCompile Include="src\common\Widgets\ProgressDlg.cpp" />
+    <ClCompile Include="src\common\Widgets\RadioGroup.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">false</ExcludedFromBuild>
@@ -535,7 +535,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\common\Widgets\GSlider.cpp">
+    <ClCompile Include="src\common\Widgets\Slider.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -543,14 +543,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\common\Widgets\GSplitter.cpp" />
-    <ClCompile Include="src\common\Widgets\GStatusBar.cpp" />
-    <ClCompile Include="src\common\Widgets\GTableLayout.cpp" />
-    <ClCompile Include="src\common\Widgets\GTabView.cpp" />
-    <ClCompile Include="src\common\Widgets\GTextLabel.cpp" />
-    <ClCompile Include="src\common\Widgets\GToolBar.cpp" />
-    <ClCompile Include="src\common\Widgets\GTree.cpp" />
-    <ClCompile Include="src\common\Widgets\LList.cpp" />
+    <ClCompile Include="src\common\Widgets\Splitter.cpp" />
+    <ClCompile Include="src\common\Widgets\StatusBar.cpp" />
+    <ClCompile Include="src\common\Widgets\TableLayout.cpp" />
+    <ClCompile Include="src\common\Widgets\TabView.cpp" />
+    <ClCompile Include="src\common\Widgets\TextLabel.cpp" />
+    <ClCompile Include="src\common\Widgets\ToolBar.cpp" />
+    <ClCompile Include="src\common\Widgets\Tree.cpp" />
+    <ClCompile Include="src\common\Widgets\List.cpp" />
     <ClCompile Include="src\win\Gdc2\Gdc2.cpp" />
     <ClCompile Include="src\win\Gdc2\GdiLeak.cpp" />
     <ClCompile Include="src\win\Gdc2\LMemDC.cpp" />
@@ -573,8 +573,8 @@
     <ClCompile Include="src\win\Lgi\Window.cpp" />
     <ClCompile Include="src\win\Lgi\LgiException.cpp" />
     <ClCompile Include="src\win\Lgi\Thread.cpp" />
-    <ClCompile Include="src\win\Widgets\GButton_Win.cpp" />
-    <ClCompile Include="src\win\Widgets\GCheckBox_Win.cpp">
+    <ClCompile Include="src\win\Widgets\Button_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\CheckBox_Win.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -582,12 +582,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\win\Widgets\GCombo_Win.cpp" />
-    <ClCompile Include="src\win\Widgets\LDialog.cpp" />
-    <ClCompile Include="src\win\Widgets\GEdit_Win.cpp" />
-    <ClCompile Include="src\win\Widgets\GProgress.cpp" />
-    <ClCompile Include="src\win\Widgets\GRadioGroup_Win.cpp" />
-    <ClCompile Include="src\win\Widgets\GSlider_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\Combo_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\Dialog_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\Edit_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\Progress_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\RadioGroup_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\Slider_Win.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\common\Array.h" />
