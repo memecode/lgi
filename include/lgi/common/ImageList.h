@@ -5,13 +5,13 @@
 /// \brief A list of images/icons all the same size
 ///
 /// Currently the image list treats the pixel at (0,0) as the transparent colour key.
-class LgiClass GImageList : public LMemDC
+class LgiClass LImageList : public LMemDC
 {
-	class GImageListPriv *d;
+	class LImageListPriv *d;
 
 public:
 	/// Create the image list
-	GImageList
+	LImageList
 	(
 		/// The width of each tile
 		int TileX,
@@ -21,7 +21,7 @@ public:
 		LSurface *pDC = NULL
 	);
 	
-	~GImageList();
+	~LImageList();
 
 	/// Returns the width of each image
 	int TileX();
@@ -62,7 +62,7 @@ public:
 class LgiClass GImageListOwner
 {
 	bool OwnList;
-	GImageList *ImageList;
+	LImageList *ImageList;
 
 public:
 	GImageListOwner()
@@ -77,9 +77,9 @@ public:
 			DeleteObj(ImageList);
 	}
 
-	GImageList *GetImageList() { return ImageList; }
+	LImageList *GetImageList() { return ImageList; }
 	
-	bool SetImageList(GImageList *List, bool Own = true)
+	bool SetImageList(LImageList *List, bool Own = true)
 	{
 		if (OwnList)
 			DeleteObj(ImageList);
@@ -96,7 +96,7 @@ public:
 		LSurface *pDC = GdcD->Load(File);
 		if (pDC)
 		{
-			ImageList = new GImageList(x, y, pDC);
+			ImageList = new LImageList(x, y, pDC);
 			if (ImageList)
 			{
 				#ifdef WIN32
@@ -116,7 +116,7 @@ public:
 	file you pass in. For instance if the file is a png, then include the Png.cpp file in your
 	project. Uses LoadDC() internally.
 */
-LgiFunc GImageList *LgiLoadImageList
+LgiFunc LImageList *LLoadImageList
 (
 	/// The file to load
 	const char *File,

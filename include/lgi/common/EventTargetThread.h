@@ -179,7 +179,7 @@ public:
 
 /// This class is a worker thread that accepts messages on it's LEventSinkI interface.
 /// To use, sub class and implement the OnEvent handler.
-class LgiClass GEventTargetThread :
+class LgiClass LEventTargetThread :
 	public LThread,
 	public LMutex,
 	public GMappedEventSink,
@@ -207,7 +207,7 @@ protected:
 	uint64 TimerTs; // Time for next tick
 
 public:
-	GEventTargetThread(GString Name, bool RunImmediately = true) :
+	LEventTargetThread(GString Name, bool RunImmediately = true) :
 		LThread(Name + ".Thread"),
 		LMutex(Name + ".Mutex"),
 		Event(ProcessName(Name, "Event"))
@@ -222,7 +222,7 @@ public:
 			Run();
 	}
 	
-	virtual ~GEventTargetThread()
+	virtual ~LEventTargetThread()
 	{
 		EndThread();
 	}
@@ -245,7 +245,7 @@ public:
 	{
 		if (Loop)
 		{
-			// We can't be locked here, because GEventTargetThread::Main needs
+			// We can't be locked here, because LEventTargetThread::Main needs
 			// to lock to check for messages...
 			Loop = false;
 			

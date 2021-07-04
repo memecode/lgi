@@ -1099,7 +1099,7 @@ bool GGlobalColour::AddBitmap(LSurface *pDC)
 	return false;
 }
 
-bool GGlobalColour::AddBitmap(GImageList *il)
+bool GGlobalColour::AddBitmap(LImageList *il)
 {
 	return false;
 }

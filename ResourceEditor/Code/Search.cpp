@@ -175,7 +175,7 @@ Result *SearchThread::Test(ResMenuItem *mi)
 }
 
 SearchThread::SearchThread(AppWnd *app, LList *results) :
-	App(app), Results(results), GEventTargetThread("SearchThread")
+	App(app), Results(results), LEventTargetThread("SearchThread")
 {
 	App->ListObjects(Res);
 	Run();

@@ -3,8 +3,8 @@
 #include "Lgi.h"
 #include "GDragAndDrop.h"
 #include "GToken.h"
-#include "GPopup.h"
-#include "GPanel.h"
+#include "LPopup.h"
+#include "LPanel.h"
 #include "GNotifications.h"
 
 #include "GViewPriv.h"
@@ -983,17 +983,17 @@ bool LWindow::HandleViewMouse(LView *v, LMouse &m)
 		bool InPopup = false;
 		for (LViewI *p = v; p; p = p->GetParent())
 		{
-			if (dynamic_cast<GPopup*>(p))
+			if (dynamic_cast<LPopup*>(p))
 			{
 				InPopup = true;
 				break;
 			}
 		}
-		if (!InPopup && GPopup::CurrentPopups.Length())
+		if (!InPopup && LPopup::CurrentPopups.Length())
 		{
-			for (int i=0; i<GPopup::CurrentPopups.Length(); i++)
+			for (int i=0; i<LPopup::CurrentPopups.Length(); i++)
 			{
-				GPopup *p = GPopup::CurrentPopups[i];
+				LPopup *p = LPopup::CurrentPopups[i];
 				if (p->Visible())
 					p->Visible(false);
 			}
@@ -1041,7 +1041,7 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	LViewI *p;
 	for (p = v->GetParent(); p; p = p->GetParent())
 	{
-		if (dynamic_cast<GPopup*>(p))
+		if (dynamic_cast<LPopup*>(p))
 		{
 			#if DEBUG_HANDLEVIEWKEY
 			if (Debug)

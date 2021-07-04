@@ -51,7 +51,7 @@ GAutoWString LgiAddReturns(const char16 *n)
 	return w;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////
-class GEditPrivate
+class LEditPrivate
 {
 public:
 	bool IgnoreNotify;
@@ -60,24 +60,24 @@ public:
 	LCss::ColorDef NonEmptyColor;
 	GAutoWString EmptyText;
 
-	GEditPrivate()
+	LEditPrivate()
 	{
 		IgnoreNotify = true;
 		NotificationProcessed = false;
 		InEmptyMode = false;
 	}
 
-	~GEditPrivate()
+	~LEditPrivate()
 	{
 	}
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GEdit::GEdit(int id, int x, int y, int cx, int cy, const char *name) :
-	GControl(LGI_EDITBOX),
+LEdit::LEdit(int id, int x, int y, int cx, int cy, const char *name) :
+	LControl(LGI_EDITBOX),
 	ResObject(Res_EditBox)
 {
-	d = new GEditPrivate;
+	d = new LEditPrivate;
 	LPoint Size = SizeOfStr((name)?name:(char*)"A");
 	if (cx < 0) cx = Size.x + 6;
 	if (cy < 0) cy = Size.y + 4;
@@ -95,12 +95,12 @@ GEdit::GEdit(int id, int x, int y, int cx, int cy, const char *name) :
 		SubClass->SubClass("EDIT");
 }
 
-GEdit::~GEdit()
+LEdit::~LEdit()
 {
 	DeleteObj(d);
 }
 
-void GEdit::Select(int Start, int Len)
+void LEdit::Select(int Start, int Len)
 {
 	if (_View)
 	{
@@ -108,7 +108,7 @@ void GEdit::Select(int Start, int Len)
 	}
 }
 
-GRange GEdit::GetSelectionRange()
+GRange LEdit::GetSelectionRange()
 {
 	GRange r;
 	if (!_View)
@@ -124,12 +124,12 @@ GRange GEdit::GetSelectionRange()
 	return r;
 }
 
-bool GEdit::MultiLine()
+bool LEdit::MultiLine()
 {
 	return TestFlag(GetStyle(), ES_MULTILINE);
 }
 
-void GEdit::MultiLine(bool m)
+void LEdit::MultiLine(bool m)
 {
 	int Flags = ES_MULTILINE | ES_AUTOVSCROLL | WS_VSCROLL | ES_WANTRETURN;
 	if (m)
@@ -138,12 +138,12 @@ void GEdit::MultiLine(bool m)
 		SetStyle(GetStyle() & ~Flags);
 }
 
-bool GEdit::Password()
+bool LEdit::Password()
 {
 	return TestFlag(GetStyle(), ES_PASSWORD);
 }
 
-void GEdit::Password(bool m)
+void LEdit::Password(bool m)
 {
 	if (m)
 		SetStyle(GetStyle() | ES_PASSWORD);
@@ -151,7 +151,7 @@ void GEdit::Password(bool m)
 		SetStyle(GetStyle() & ~ES_PASSWORD);
 }
 
-int GEdit::SysOnNotify(int Msg, int Code)
+int LEdit::SysOnNotify(int Msg, int Code)
 {
 	if (Msg == WM_COMMAND &&
 		Code == EN_CHANGE &&
@@ -164,21 +164,21 @@ int GEdit::SysOnNotify(int Msg, int Code)
 			LBase::NameW(w);
 		}
 		
-		// LgiTrace("GEdit::SysOnNotify EN_CHANGE inempty=%i, n16=%S\n", d->InEmptyMode, LBase::NameW());
+		// LgiTrace("LEdit::SysOnNotify EN_CHANGE inempty=%i, n16=%S\n", d->InEmptyMode, LBase::NameW());
 		SendNotify(0);
 	}
 
 	return 0;
 }
 
-void GEdit::Value(int64 i)
+void LEdit::Value(int64 i)
 {
 	char Str[32];
 	sprintf_s(Str, sizeof(Str), LPrintfInt64, i);
 	Name(Str);
 }
 
-int64 GEdit::Value()
+int64 LEdit::Value()
 {
 	auto n = Name();
 	return (n) ? atoi64(n) : 0;
@@ -186,7 +186,7 @@ int64 GEdit::Value()
 
 #define EDIT_PROCESSING 1
 
-GMessage::Result GEdit::OnEvent(GMessage *Msg)
+GMessage::Result LEdit::OnEvent(GMessage *Msg)
 {
 	#if EDIT_PROCESSING
 	switch (Msg->m)
@@ -201,12 +201,12 @@ GMessage::Result GEdit::OnEvent(GMessage *Msg)
 		{
 			if (d->InEmptyMode && SubClass)
 			{
-				// LgiTrace("GEdit WM_SETTEXT - calling parent, inempty=%i\n", d->InEmptyMode);
+				// LgiTrace("LEdit WM_SETTEXT - calling parent, inempty=%i\n", d->InEmptyMode);
 				return SubClass->CallParent(Handle(), Msg->m, Msg->a, Msg->b);
 			}
 			else
 			{
-				// LgiTrace("GEdit WM_SETTEXT - dropping through to GControl, inempty=%i.\n", d->InEmptyMode);
+				// LgiTrace("LEdit WM_SETTEXT - dropping through to LControl, inempty=%i.\n", d->InEmptyMode);
 			}
 			break;
 		}
@@ -316,7 +316,7 @@ GMessage::Result GEdit::OnEvent(GMessage *Msg)
 	}
 	#endif
 
-	auto Status = GControl::OnEvent(Msg);
+	auto Status = LControl::OnEvent(Msg);
 
 	#if EDIT_PROCESSING
 	switch (Msg->Msg())
@@ -349,24 +349,24 @@ GMessage::Result GEdit::OnEvent(GMessage *Msg)
 	return Status;
 }
 
-void GEdit::OnCreate()
+void LEdit::OnCreate()
 {
 	if (d->EmptyText)
 		SysEmptyText();
 }
 
-void GEdit::OnFocus(bool f)
+void LEdit::OnFocus(bool f)
 {
 	if (d->EmptyText)
 		SysEmptyText();
 }
 
-void GEdit::KeyProcessed()
+void LEdit::KeyProcessed()
 {
 	d->NotificationProcessed = true;
 }
 
-bool GEdit::OnKey(LKey &k)
+bool LEdit::OnKey(LKey &k)
 {
 	if (k.Down())
 		d->NotificationProcessed = false;
@@ -454,7 +454,7 @@ bool GEdit::OnKey(LKey &k)
 	return false;
 }
 
-ssize_t GEdit::GetCaret(bool Cursor)
+ssize_t LEdit::GetCaret(bool Cursor)
 {
 	DWORD Start, End = 0;
 	if (_View)
@@ -462,14 +462,14 @@ ssize_t GEdit::GetCaret(bool Cursor)
 	return End;
 }
 
-void GEdit::SetCaret(size_t Pos, bool Select, bool ForceFullUpdate)
+void LEdit::SetCaret(size_t Pos, bool Select, bool ForceFullUpdate)
 {
 	if (_View)
 		SendMessage(_View, EM_SETSEL, Pos, Pos);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-GAutoWString GEdit::SysName()
+GAutoWString LEdit::SysName()
 {
 	GAutoWString a;
 	if (_View)
@@ -502,7 +502,7 @@ GAutoWString GEdit::SysName()
 	return a;
 }
 
-bool GEdit::SysName(const char16 *n)
+bool LEdit::SysName(const char16 *n)
 {
 	if (!_View)
 		return false;
@@ -514,7 +514,7 @@ bool GEdit::SysName(const char16 *n)
 	return SetWindowTextW(_View, n ? n : L"") != FALSE;
 }
 
-const char *GEdit::Name()
+const char *LEdit::Name()
 {
 	if (Handle() && !d->InEmptyMode)
 	{
@@ -525,7 +525,7 @@ const char *GEdit::Name()
 	return LBase::Name();
 }
 
-bool GEdit::Name(const char *n)
+bool LEdit::Name(const char *n)
 {
 	bool Old = d->IgnoreNotify;
 	d->IgnoreNotify = true;
@@ -540,7 +540,7 @@ bool GEdit::Name(const char *n)
 	return Status;
 }
 
-const char16 *GEdit::NameW()
+const char16 *LEdit::NameW()
 {
 	if (Handle() && !d->InEmptyMode)
 	{
@@ -551,7 +551,7 @@ const char16 *GEdit::NameW()
 	return LBase::NameW();
 }
 
-bool GEdit::NameW(const char16 *s)
+bool LEdit::NameW(const char16 *s)
 {
 	bool Old = d->IgnoreNotify;
 	d->IgnoreNotify = true;
@@ -564,7 +564,7 @@ bool GEdit::NameW(const char16 *s)
 	return Status;
 }
 
-bool GEdit::SysEmptyText()
+bool LEdit::SysEmptyText()
 {
 	bool Status = false;
 	bool HasFocus = Focus();
@@ -572,7 +572,7 @@ bool GEdit::SysEmptyText()
 				!ValidStrW(LBase::NameW()) &&
 				!HasFocus;
 
-	// LgiTrace("GEdit::SysEmptyText Empty=%i W=%p Focus=%i\n", Empty, LBase::NameW(), HasFocus);
+	// LgiTrace("LEdit::SysEmptyText Empty=%i W=%p Focus=%i\n", Empty, LBase::NameW(), HasFocus);
 		
 	if (Empty)
 	{
@@ -624,7 +624,7 @@ bool GEdit::SysEmptyText()
 	return Status;
 }
 
-void GEdit::SetEmptyText(const char *EmptyText)
+void LEdit::SetEmptyText(const char *EmptyText)
 {
 	d->EmptyText.Reset(Utf8ToWide(EmptyText));
 	SysEmptyText();

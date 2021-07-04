@@ -12,9 +12,9 @@
 #include <stdio.h>
 
 #include "Lgi.h"
-#include "GSlider.h"
+#include "LSlider.h"
 #include "LBitmap.h"
-#include "GTableLayout.h"
+#include "LTableLayout.h"
 #include "LDisplayString.h"
 #include "GButton.h"
 
@@ -101,11 +101,11 @@ void GDialog::OnPosChange()
     if (Children.Length() == 1)
     {
         List<LViewI>::I it = Children.begin();
-        GTableLayout *t = dynamic_cast<GTableLayout*>((LViewI*)it);
+        LTableLayout *t = dynamic_cast<LTableLayout*>((LViewI*)it);
         if (t)
         {
             LRect r = GetClient();
-            r.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
+            r.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
             t->SetPos(r);
 
 			// _Dump();

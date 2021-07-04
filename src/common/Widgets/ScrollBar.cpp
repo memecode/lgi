@@ -1,8 +1,7 @@
-#include "Lgi.h"
-#include "GScrollBar.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/LgiRes.h"
 
-// #define DrawBorder(dc, r, edge) LWideBorder(dc, r, edge)
 #define DrawBorder(dc, r, edge) LThinBorder(dc, r, edge)
 
 #if defined(LGI_CARBON)
@@ -23,10 +22,10 @@ enum ScrollZone
 	BTN_PAGE_ADD,
 };
 
-class GScrollBarPrivate
+class LScrollBarPrivate
 {
 public:
-	GScrollBar *Widget;
+	LScrollBar *Widget;
 	bool Vertical;
 	int64 Value, Min, Max, Page;
 	LRect Sub, Add, Slide, PageSub, PageAdd;
@@ -35,7 +34,7 @@ public:
 	int SlideOffset;
 	int Ignore;
 
-	GScrollBarPrivate(GScrollBar *w)
+	LScrollBarPrivate(LScrollBar *w)
 	{
 		Ignore = 0;
 		Widget = w;
@@ -473,16 +472,16 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////////////
-GScrollBar::GScrollBar()
+LScrollBar::LScrollBar()
 	: ResObject(Res_ScrollBar)
 {
-	d = new GScrollBarPrivate(this);
+	d = new LScrollBarPrivate(this);
 }
 
-GScrollBar::GScrollBar(int id, int x, int y, int cx, int cy, const char *name)
+LScrollBar::LScrollBar(int id, int x, int y, int cx, int cy, const char *name)
 	:	ResObject(Res_ScrollBar)	
 {
-	d = new GScrollBarPrivate(this);
+	d = new LScrollBarPrivate(this);
 	SetId(id);
 
 	if (name) Name(name);
@@ -493,22 +492,22 @@ GScrollBar::GScrollBar(int id, int x, int y, int cx, int cy, const char *name)
 	LResources::StyleElement(this);
 }
 
-GScrollBar::~GScrollBar()
+LScrollBar::~LScrollBar()
 {
 	DeleteObj(d);
 }
 
-bool GScrollBar::Valid()
+bool LScrollBar::Valid()
 {
 	return d->Max > d->Min;
 }
 
-int GScrollBar::GetScrollSize()
+int LScrollBar::GetScrollSize()
 {
 	return SCROLL_BAR_SIZE;
 }
 
-bool GScrollBar::Attach(LViewI *p)
+bool LScrollBar::Attach(LViewI *p)
 {
 	bool Status = GControl::Attach(p);
 	
@@ -523,7 +522,7 @@ bool GScrollBar::Attach(LViewI *p)
 	return Status;
 }
 
-void GScrollBar::OnPaint(LSurface *pDC)
+void LScrollBar::OnPaint(LSurface *pDC)
 {
 	#if MAC_SKIN
 
@@ -561,12 +560,12 @@ void GScrollBar::OnPaint(LSurface *pDC)
 	#endif
 }
 
-void GScrollBar::OnPosChange()
+void LScrollBar::OnPosChange()
 {
 	d->CalcRegions();
 }
 
-void GScrollBar::OnMouseClick(LMouse &m)
+void LScrollBar::OnMouseClick(LMouse &m)
 {
 	if (d->Max >= d->Min)
 	{
@@ -600,7 +599,7 @@ void GScrollBar::OnMouseClick(LMouse &m)
 	}
 }
 
-void GScrollBar::OnMouseMove(LMouse &m)
+void LScrollBar::OnMouseMove(LMouse &m)
 {
 	if (IsCapturing())
 	{
@@ -630,56 +629,56 @@ void GScrollBar::OnMouseMove(LMouse &m)
 	}
 }
 
-bool GScrollBar::OnKey(LKey &k)
+bool LScrollBar::OnKey(LKey &k)
 {
 	return false;
 }
 
-bool GScrollBar::OnMouseWheel(double Lines)
+bool LScrollBar::OnMouseWheel(double Lines)
 {
 	return false;
 }
 
-bool GScrollBar::Vertical()
+bool LScrollBar::Vertical()
 {
 	return d->Vertical;
 }
 
-void GScrollBar::SetVertical(bool v)
+void LScrollBar::SetVertical(bool v)
 {
 	d->Vertical = v;
 	d->CalcRegions();
 	Invalidate();
 }
 
-int64 GScrollBar::Value()
+int64 LScrollBar::Value()
 {
 	return d->Value;
 }
 
-void GScrollBar::Value(int64 v)
+void LScrollBar::Value(int64 v)
 {
 	d->SetValue(v);
 }
 
-GRange GScrollBar::GetRange() const
+GRange LScrollBar::GetRange() const
 {
 	return GRange(d->Min, d->Max - d->Min + 1);
 }
 
-void GScrollBar::Limits(int64 &Low, int64 &High)
+void LScrollBar::Limits(int64 &Low, int64 &High)
 {
 	Low = d->Min;
 	High = d->Max;
 }
 
-bool GScrollBar::SetRange(const GRange &r)
+bool LScrollBar::SetRange(const GRange &r)
 {
 	SetLimits(r.Start, r.End());
 	return true;
 }
 
-void GScrollBar::SetLimits(int64 Low, int64 High)
+void LScrollBar::SetLimits(int64 Low, int64 High)
 {
 	if (d->Min != Low ||
 		d->Max != High)
@@ -693,16 +692,16 @@ void GScrollBar::SetLimits(int64 Low, int64 High)
 		Invalidate();
 		OnConfigure();
 		
-		// printf("GScrollBar::SetLimits " LPrintfInt64 ", " LPrintfInt64 "\n", d->Min, d->Max);
+		// printf("LScrollBar::SetLimits " LPrintfInt64 ", " LPrintfInt64 "\n", d->Min, d->Max);
 	}
 }
 
-int64 GScrollBar::Page()
+int64 LScrollBar::Page()
 {
 	return d->Page;
 }
 
-void GScrollBar::SetPage(int64 i)
+void LScrollBar::SetPage(int64 i)
 {
 	if (d->Page != i)
 	{
@@ -713,12 +712,12 @@ void GScrollBar::SetPage(int64 i)
 	}
 }
 
-GMessage::Result GScrollBar::OnEvent(GMessage *Msg)
+GMessage::Result LScrollBar::OnEvent(GMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }
 
-void GScrollBar::OnPulse()
+void LScrollBar::OnPulse()
 {
 	if (d->Ignore > 0)
 	{

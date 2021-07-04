@@ -22,7 +22,7 @@ static int PadYPx = 4;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Radio group
-class GRadioGroupPrivate
+class LRadioGroupPrivate
 {
 public:
 	static int NextId;
@@ -30,24 +30,24 @@ public:
 	int MaxLayoutWidth;
     LHashTbl<PtrKey<void*>,LViewLayoutInfo*> Info;
 
-	GRadioGroupPrivate()
+	LRadioGroupPrivate()
 	{
 		InitVal = 0;
 		MaxLayoutWidth = 0;
 	}
 
-	~GRadioGroupPrivate()
+	~LRadioGroupPrivate()
 	{
         Info.DeleteObjects();
 	}
 };
 
-int GRadioGroupPrivate::NextId = 10000;
+int LRadioGroupPrivate::NextId = 10000;
 
-GRadioGroup::GRadioGroup(int id, int x, int y, int cx, int cy, const char *name, int Init)
+LRadioGroup::LRadioGroup(int id, int x, int y, int cx, int cy, const char *name, int Init)
 	: ResObject(Res_Group)
 {
-	d = new GRadioGroupPrivate;
+	d = new LRadioGroupPrivate;
 	d->InitVal = Init;
 
 	Name(name);
@@ -66,16 +66,16 @@ GRadioGroup::GRadioGroup(int id, int x, int y, int cx, int cy, const char *name,
 		LgiAssert(!"No subclass?");
 }
 
-GRadioGroup::~GRadioGroup()
+LRadioGroup::~LRadioGroup()
 {
 	DeleteObj(d);
 }
 
-void GRadioGroup::OnAttach()
+void LRadioGroup::OnAttach()
 {
 }
 
-GMessage::Result GRadioGroup::OnEvent(GMessage *Msg)
+GMessage::Result LRadioGroup::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -95,39 +95,39 @@ GMessage::Result GRadioGroup::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GControl::OnEvent(Msg);
+	return LControl::OnEvent(Msg);
 }
 
-bool GRadioGroup::Name(const char *n)
+bool LRadioGroup::Name(const char *n)
 {
 	return LView::Name(n);
 }
 
-bool GRadioGroup::NameW(const char16 *n)
+bool LRadioGroup::NameW(const char16 *n)
 {
 	return LView::NameW(n);
 }
 
-void GRadioGroup::SetFont(LFont *Fnt, bool OwnIt)
+void LRadioGroup::SetFont(LFont *Fnt, bool OwnIt)
 {
 	LView::SetFont(Fnt);
 }
 
-void GRadioGroup::OnCreate()
+void LRadioGroup::OnCreate()
 {
 	SetFont(SysFont);
 	AttachChildren();
 	Value(d->InitVal);
 }
 
-int64 GRadioGroup::Value()
+int64 LRadioGroup::Value()
 {
 	if (Handle())
 	{
 		int n = 0;
 		for (auto c: Children)
 		{
-			GRadioButton *Check = dynamic_cast<GRadioButton*>(c);
+			LRadioButton *Check = dynamic_cast<LRadioButton*>(c);
 			if (Check)
 			{
 				if (Check->Value())
@@ -144,14 +144,14 @@ int64 GRadioGroup::Value()
 	}
 }
 
-void GRadioGroup::Value(int64 Which)
+void LRadioGroup::Value(int64 Which)
 {
 	if (Handle())
 	{
 		int n = 0;
 		for (auto c: Children)
 		{
-			GRadioButton *Check = dynamic_cast<GRadioButton*>(c);
+			LRadioButton *Check = dynamic_cast<LRadioButton*>(c);
 			if (Check)
 			{
 				Check->Value(n == Which);
@@ -165,12 +165,12 @@ void GRadioGroup::Value(int64 Which)
 	}
 }
 
-int GRadioGroup::OnNotify(LViewI *Ctrl, int Flags)
+int LRadioGroup::OnNotify(LViewI *Ctrl, int Flags)
 {
 	LViewI *n = GetNotify() ? GetNotify() : GetParent();
 	if (n)
 	{
-		if (dynamic_cast<GRadioButton*>(Ctrl))
+		if (dynamic_cast<LRadioButton*>(Ctrl))
 		{
 			return n->OnNotify(this, Flags);
 		}
@@ -182,13 +182,13 @@ int GRadioGroup::OnNotify(LViewI *Ctrl, int Flags)
 	return 0;
 }
 
-void GRadioGroup::OnPaint(LSurface *pDC)
+void LRadioGroup::OnPaint(LSurface *pDC)
 {
 }
 
-GRadioButton *GRadioGroup::Append(int x, int y, const char *name)
+LRadioButton *LRadioGroup::Append(int x, int y, const char *name)
 {
-	GRadioButton *But = new GRadioButton(d->NextId++, x, y, -1, -1, name);
+	LRadioButton *But = new LRadioButton(d->NextId++, x, y, -1, -1, name);
 	if (But)
 	{
 		Children.Insert(But);
@@ -197,7 +197,7 @@ GRadioButton *GRadioGroup::Append(int x, int y, const char *name)
 	return But;
 }
 
-bool GRadioGroup::OnLayout(LViewLayoutInfo &Inf)
+bool LRadioGroup::OnLayout(LViewLayoutInfo &Inf)
 {
     auto it = IterateViews();
     const int BORDER_PX = 2;
@@ -284,27 +284,27 @@ bool GRadioGroup::OnLayout(LViewLayoutInfo &Inf)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Radio button
-class GRadioButtonPrivate
+class LRadioButtonPrivate
 {
 public:
 	DWORD ParentProc;
 	int64 InitVal;
 
-	GRadioButtonPrivate()
+	LRadioButtonPrivate()
 	{
 		ParentProc = 0;
 		InitVal = 0;
 	}
 
-	~GRadioButtonPrivate()
+	~LRadioButtonPrivate()
 	{
 	}
 };
 
-GRadioButton::GRadioButton(int id, int x, int y, int cx, int cy, const char *name)
+LRadioButton::LRadioButton(int id, int x, int y, int cx, int cy, const char *name)
 	: ResObject(Res_RadioBox)
 {
-	d = new GRadioButtonPrivate;
+	d = new LRadioButtonPrivate;
 
 	Name(name);
 
@@ -327,12 +327,12 @@ GRadioButton::GRadioButton(int id, int x, int y, int cx, int cy, const char *nam
 		LgiAssert(!"No subclass?");
 }
 
-GRadioButton::~GRadioButton()
+LRadioButton::~LRadioButton()
 {
 	DeleteObj(d);
 }
 
-void GRadioButton::OnAttach()
+void LRadioButton::OnAttach()
 {
 	SetFont(SysFont);
 
@@ -343,10 +343,10 @@ void GRadioButton::OnAttach()
 	Value(d->InitVal);
 }
 
-void GRadioButton::OnStyleChange()
+void LRadioButton::OnStyleChange()
 {
 }
-int GRadioButton::SysOnNotify(int Msg, int Code)
+int LRadioButton::SysOnNotify(int Msg, int Code)
 {
 	if (Msg == WM_COMMAND &&
 		Code == BN_CLICKED &&
@@ -357,17 +357,17 @@ int GRadioButton::SysOnNotify(int Msg, int Code)
 	
 	return 0;
 }
-bool GRadioButton::Name(const char *n)
+bool LRadioButton::Name(const char *n)
 {
 	return LView::Name(n);
 }
 
-bool GRadioButton::NameW(const char16 *n)
+bool LRadioButton::NameW(const char16 *n)
 {
 	return LView::NameW(n);
 }
 
-int64 GRadioButton::Value()
+int64 LRadioButton::Value()
 {
 	if (Handle())
 		return SendMessage(Handle(), BM_GETCHECK, 0, 0);
@@ -375,7 +375,7 @@ int64 GRadioButton::Value()
 	return d->InitVal;
 }
 
-void GRadioButton::Value(int64 i)
+void LRadioButton::Value(int64 i)
 {
 	static bool InValue = false;
 	if (!InValue)
@@ -388,7 +388,7 @@ void GRadioButton::Value(int64 i)
 				// Turn off any other radio buttons in the current group
 				for (LViewI *c: GetParent()->IterateViews())
 				{
-					GRadioButton *b = dynamic_cast<GRadioButton*>(c);
+					LRadioButton *b = dynamic_cast<LRadioButton*>(c);
 					if (b &&
 						b != this &&
 						b-Value())
@@ -415,7 +415,7 @@ void GRadioButton::Value(int64 i)
 	}
 }
 
-bool GRadioButton::OnLayout(LViewLayoutInfo &Inf)
+bool LRadioButton::OnLayout(LViewLayoutInfo &Inf)
 {
 	LDisplayString Txt(GetFont(), Name());
     if (!Inf.Width.Max)
@@ -433,7 +433,7 @@ bool GRadioButton::OnLayout(LViewLayoutInfo &Inf)
 	
     return true;    
 }
-int GRadioButton::OnNotify(LViewI *Ctrl, int Flags)
+int LRadioButton::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
 	{
@@ -441,7 +441,7 @@ int GRadioButton::OnNotify(LViewI *Ctrl, int Flags)
 	}
 	return 0;
 }
-bool GRadioButton::OnKey(LKey &k)
+bool LRadioButton::OnKey(LKey &k)
 {
 	bool Status = false;
 	int Move = 0;
@@ -478,11 +478,11 @@ bool GRadioButton::OnKey(LKey &k)
 	}
 	if (Move)
 	{
-		List<GRadioButton> Btns;
+		List<LRadioButton> Btns;
 		auto L = GetParent()->IterateViews();
 		for (LViewI *c: L)
 		{
-			GRadioButton *b = dynamic_cast<GRadioButton*>(c);
+			LRadioButton *b = dynamic_cast<LRadioButton*>(c);
 			if (b) Btns.Insert(b);
 		}
 		if (Btns.Length() > 1)
@@ -490,7 +490,7 @@ bool GRadioButton::OnKey(LKey &k)
 			auto Index = Btns.IndexOf(this);
 			if (Index >= 0)
 			{
-				GRadioButton *n = Btns[(Index + Move + Btns.Length()) % Btns.Length()];
+				LRadioButton *n = Btns[(Index + Move + Btns.Length()) % Btns.Length()];
 				if (n)
 				{
 					n->Focus(true);

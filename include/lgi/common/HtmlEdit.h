@@ -2,7 +2,7 @@
 #define _RICH_EDIT_H_
 
 #include "GHtml.h"
-#include "GTree.h"
+#include "LTree.h"
 
 class GHtmlEdit : public GDocView
 {
@@ -28,7 +28,7 @@ public:
 	void Sunken(bool i);
 	
 	// Debugging
-	void DumpNodes(GTree *Out);
+	void DumpNodes(LTree *Out);
 };
 
 #endif

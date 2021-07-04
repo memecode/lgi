@@ -3,7 +3,7 @@
 #include "GHtml.h"
 #include "INet.h"
 #include "IHttp.h"
-#include "GEdit.h"
+#include "LEdit.h"
 #include "GButton.h"
 #include "GToken.h"
 
@@ -60,8 +60,8 @@ public:
 	GBrowser *Wnd;
 	Html1::GHtml *Html;
 	GAutoPtr<GBrowserThread> Thread;
-	GEdit *UriEdit;
-	GEdit *SearchEdit;
+	LEdit *UriEdit;
+	LEdit *SearchEdit;
 	GButton *Back;
 	GButton *Forward;
 	GButton *Stop;
@@ -413,8 +413,8 @@ GBrowser::GBrowser(LViewI *owner, const char *Title, char *Uri)
 		AddView(d->Back = new GButton(IDC_BACK, 0, 0, BTN_X, 20, "<-"));
 		AddView(d->Forward = new GButton(IDC_FORWARD, 0, 0, BTN_X, 20, "->"));
 		AddView(d->Stop = new GButton(IDC_REFRESH_STOP, 0, 0, -1, 20, "Refresh"));
-		AddView(d->UriEdit = new GEdit(IDC_URI, 0, 0, 100, 20, 0));
-		AddView(d->SearchEdit = new GEdit(IDC_SEARCH_TXT, 0, 0, 100, 20, ""));
+		AddView(d->UriEdit = new LEdit(IDC_URI, 0, 0, 100, 20, 0));
+		AddView(d->SearchEdit = new LEdit(IDC_SEARCH_TXT, 0, 0, 100, 20, ""));
 		AddView(d->Search = new GButton(IDC_SEARCH, 0, 0, -1, 20, "Search"));
 		AddView(d->Html = new Html1::GHtml(IDC_HTML, 0, 0, 100, 100));
 

@@ -6,7 +6,7 @@
 
 /// Bitmap control
 class LgiClass LBitmap :
-	public GControl,
+	public LControl,
 	public ResObject
 {
 	LSurface *pDC;

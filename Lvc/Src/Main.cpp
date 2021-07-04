@@ -32,7 +32,7 @@ SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
 	return Conn;
 }
 
-SshConnection::SshConnection(GTextLog *log, const char *uri, const char *prompt) : LSsh(log), GEventTargetThread("SshConnection")
+SshConnection::SshConnection(GTextLog *log, const char *uri, const char *prompt) : LSsh(log), LEventTargetThread("SshConnection")
 {
 	auto Wnd = log->GetWindow();
 	GuiHnd = Wnd->AddDispatch();
@@ -385,7 +385,7 @@ public:
 	}
 };
 
-class ToolBar : public GLayout, public LResourceLoad
+class ToolBar : public LLayout, public LResourceLoad
 {
 public:
 	ToolBar()
@@ -408,7 +408,7 @@ public:
 	{
 		LRect Cli = GetClient();
 
-		GTableLayout *v;
+		LTableLayout *v;
 		if (GetViewById(IDC_TABLE, v))
 		{
 			v->SetPos(Cli);
@@ -437,7 +437,7 @@ public:
 	}
 };
 
-class CommitCtrls : public GLayout, public LResourceLoad
+class CommitCtrls : public LLayout, public LResourceLoad
 {
 public:
 	CommitCtrls()
@@ -446,7 +446,7 @@ public:
 		LRect Pos;
 		if (LoadFromResource(IDD_COMMIT, this, &Pos, &Name))
 		{
-			GTableLayout *v;
+			LTableLayout *v;
 			if (GetViewById(IDC_COMMIT_TABLE, v))
 			{
 				v->GetCss(true)->PaddingRight("8px");
@@ -468,7 +468,7 @@ public:
 
 	void OnPosChange()
 	{
-		GTableLayout *v;
+		LTableLayout *v;
 		if (GetViewById(IDC_COMMIT_TABLE, v))
 			v->SetPos(GetClient());
 	}
@@ -860,7 +860,7 @@ public:
 class RemoteFolderDlg : public LDialog
 {
 	class App *app;
-	GTree *tree;
+	LTree *tree;
 	struct SshHost *root, *newhost;
 	LXmlTreeUi Ui;
 
@@ -873,7 +873,7 @@ public:
 	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
-class VcDiffFile : public GTreeItem
+class VcDiffFile : public LTreeItem
 {
 	AppPriv *d;
 	GString File;
@@ -890,7 +890,7 @@ public:
 	
 	void Select(bool s) override
 	{
-		GTreeItem::Select(s);
+		LTreeItem::Select(s);
 		if (s)
 		{
 			d->Files->Empty();
@@ -964,7 +964,7 @@ public:
 
 class App : public LWindow, public AppPriv
 {
-	GAutoPtr<GImageList> ImgLst;
+	GAutoPtr<LImageList> ImgLst;
 	LBox *FoldersBox;
 
 	bool CallMethod(const char *MethodName, LVariant *ReturnValue, GArray<LVariant*> &Args)
@@ -1001,7 +1001,7 @@ public:
 		SetIcon("icon32.png");
 		#endif
 
-		ImgLst.Reset(LgiLoadImageList("image-list.png", 16, 16));
+		ImgLst.Reset(LLoadImageList("image-list.png", 16, 16));
 
 		if (Attach(0))
 		{
@@ -1022,7 +1022,7 @@ public:
 			Tools->Attach(ToolsBox);
 			FoldersBox->Attach(ToolsBox);
 
-			Tree = new GTree(IDC_TREE, 0, 0, 320, 200);
+			Tree = new LTree(IDC_TREE, 0, 0, 320, 200);
 			// Tree->GetCss(true)->Width(LCss::Len("320px"));
 			Tree->ShowColumnHeader(true);
 			Tree->AddColumn("Folder", 250);
@@ -1062,12 +1062,12 @@ public:
 			}
 			else LgiAssert(!"No ctrl?");
 
-			Tabs = new GTabView(IDC_TAB_VIEW);
+			Tabs = new LTabView(IDC_TAB_VIEW);
 			Tabs->Attach(MsgBox);
 			const char *Style = "Padding: 0px 8px 8px 0px";
 			Tabs->GetCss(true)->Parse(Style);
 
-			GTabPage *p = Tabs->Append("Diff");
+			LTabPage *p = Tabs->Append("Diff");
 			p->Append(Diff = new DiffView(IDC_TXT));
 			// Diff->Sunken(true);
 			Diff->SetWrapType(TEXTED_WRAP_NONE);
@@ -1545,7 +1545,7 @@ public:
 	}
 };
 
-struct SshHost : public GTreeItem
+struct SshHost : public LTreeItem
 {
 	LXmlTag *t;
 	GString Host, User, Pass;

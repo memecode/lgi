@@ -1,5 +1,5 @@
 /*hdr
-**      FILE:           GTabView.cpp
+**      FILE:           LTabView.cpp
 **      AUTHOR:         Matthew Allen
 **      DATE:           20/10/2000
 **      DESCRIPTION:    Lgi self-drawn tab control
@@ -72,7 +72,7 @@ enum TabViewStyle
 #define cFocusBack			LColour(L_FOCUS_SEL_BACK)
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-class GTabViewPrivate
+class LTabViewPrivate
 {
 public:
 	// General
@@ -101,7 +101,7 @@ public:
 	LRect LeftBtn;	// scroll left button
 	LRect RightBtn;	// scroll right button
 
-	GTabViewPrivate()
+	LTabViewPrivate()
 	{
 		Depth = 0;
 		TabsHeight = 0;
@@ -182,13 +182,13 @@ public:
 	}
 };
 
-struct GTabPagePriv
+struct LTabPagePriv
 {
-	GTabPage *Tab;
+	LTabPage *Tab;
 	bool NonDefaultFont;
 	GAutoPtr<LDisplayString> Ds;
 
-	GTabPagePriv(GTabPage *t) : Tab(t)
+	LTabPagePriv(LTabPage *t) : Tab(t)
 	{
 		NonDefaultFont = false;
 	}
@@ -228,14 +228,14 @@ struct GTabPagePriv
 	}
 };
 
-class TabIterator : public GArray<GTabPage*>
+class TabIterator : public GArray<LTabPage*>
 {
 public:
 	TabIterator(List<LViewI> &l)
 	{
 		for (auto c : l)
 		{
-			auto p = dynamic_cast<GTabPage*>(c);
+			auto p = dynamic_cast<LTabPage*>(c);
 			if (p) Add(p);
 		}
 
@@ -245,10 +245,10 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Tab Control
-GTabView::GTabView(int id, int x, int y, int cx, int cy, const char *name, int Init) :
+LTabView::LTabView(int id, int x, int y, int cx, int cy, const char *name, int Init) :
 	ResObject(Res_TabView)
 {
-	d = new GTabViewPrivate;
+	d = new LTabViewPrivate;
 	d->Current = Init;
 
 	SetId(id);
@@ -264,44 +264,44 @@ GTabView::GTabView(int id, int x, int y, int cx, int cy, const char *name, int I
 	#endif
 }
 
-GTabView::~GTabView()
+LTabView::~LTabView()
 {
 	DeleteObj(d);
 }
 
-bool GTabView::GetPourChildren()
+bool LTabView::GetPourChildren()
 {
 	return d->PourChildren;
 }
 
-void GTabView::SetPourChildren(bool b)
+void LTabView::SetPourChildren(bool b)
 {
 	d->PourChildren = b;
 }
 
-GTabPage *GTabView::TabAt(int Idx)
+LTabPage *LTabView::TabAt(int Idx)
 {
 	TabIterator i(Children);
 	return i[Idx];
 }
 
-size_t GTabView::GetTabs()
+size_t LTabView::GetTabs()
 {
 	return Children.Length();
 }
 
-GTabPage *GTabView::GetCurrent()
+LTabPage *LTabView::GetCurrent()
 {
 	TabIterator i(Children);
 	return i[d->Current];
 }
 
-int GTabView::TabY()
+int LTabView::TabY()
 {
 	return d->TabsHeight + (TAB_TXT_PAD << 1);
 }
 
-void GTabView::OnChildrenChanged(LViewI *Wnd, bool Attaching)
+void LTabView::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	if (!Attaching)
 	{
@@ -317,7 +317,7 @@ void GTabView::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 }
 
 #if defined(WINNATIVE)
-LViewI *GTabView::FindControl(HWND hCtrl)
+LViewI *LTabView::FindControl(HWND hCtrl)
 {
 	LViewI *Ctrl = 0;
 
@@ -337,7 +337,7 @@ LViewI *GTabView::FindControl(HWND hCtrl)
 }
 #endif
 
-LViewI *GTabView::FindControl(int Id)
+LViewI *LTabView::FindControl(int Id)
 {
 	if (GetId() == Id)
 	{
@@ -355,13 +355,13 @@ LViewI *GTabView::FindControl(int Id)
 	return 0;
 }
 
-bool GTabView::Attach(LViewI *parent)
+bool LTabView::Attach(LViewI *parent)
 {
 	bool Status = LView::Attach(parent);
 	if (Status)
 	{
 		TabIterator it(Children);
-		GTabPage *p = d->Current < it.Length() ? it[d->Current] : 0;
+		LTabPage *p = d->Current < it.Length() ? it[d->Current] : 0;
 		if (p)
 		{
 			OnPosChange();
@@ -377,12 +377,12 @@ bool GTabView::Attach(LViewI *parent)
 	return Status;
 }
 
-int64 GTabView::Value()
+int64 LTabView::Value()
 {
 	return d->Current;
 }
 
-void GTabView::OnCreate()
+void LTabView::OnCreate()
 {
 	LResources::StyleElement(this);			
 
@@ -392,7 +392,7 @@ void GTabView::OnCreate()
 	{
 		if (p == (LViewI*)GetWindow())
 			break;
-		GTabView *tv = dynamic_cast<GTabView*>(p);
+		LTabView *tv = dynamic_cast<LTabView*>(p);
 		if (tv)
 			d->Depth++;
 	}
@@ -400,7 +400,7 @@ void GTabView::OnCreate()
 	OnStyleChange();
 
 	TabIterator it(Children);
-	GTabPage *page = d->Current < it.Length() ? it[d->Current] : 0;
+	LTabPage *page = d->Current < it.Length() ? it[d->Current] : 0;
 	if (page)
 	{
 		page->Attach(this);
@@ -408,14 +408,14 @@ void GTabView::OnCreate()
 	}
 }
 
-void GTabView::Value(int64 i)
+void LTabView::Value(int64 i)
 {
 	if (Children.Length() > 0 &&
 		i != d->Current)
 	{
 		// change tab
 		TabIterator it(Children);
-		GTabPage *Old = it[d->Current];
+		LTabPage *Old = it[d->Current];
 		if (Old)
 		{
 			Old->Visible(false);
@@ -424,7 +424,7 @@ void GTabView::Value(int64 i)
 		d->Current = (int)MIN(i, (ssize_t)it.Length()-1);
 		OnPosChange();
 
-		GTabPage *p = it[d->Current];
+		LTabPage *p = it[d->Current];
 		if (p && IsAttached())
 		{
 			p->Attach(this);
@@ -436,12 +436,12 @@ void GTabView::Value(int64 i)
 	}
 }
 
-GMessage::Result GTabView::OnEvent(GMessage *Msg)
+GMessage::Result LTabView::OnEvent(GMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }
 
-int GTabView::OnNotify(LViewI *Ctrl, int Flags)
+int LTabView::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (GetParent())
 	{
@@ -451,7 +451,7 @@ int GTabView::OnNotify(LViewI *Ctrl, int Flags)
 	return 0;
 }
 
-bool GTabView::Append(GTabPage *Page, int Where)
+bool LTabView::Append(LTabPage *Page, int Where)
 {
 	if (Page)
 	{
@@ -475,9 +475,9 @@ bool GTabView::Append(GTabPage *Page, int Where)
 	return false;
 }
 
-GTabPage *GTabView::Append(const char *name, int Where)
+LTabPage *LTabView::Append(const char *name, int Where)
 {
-	GTabPage *Page = new GTabPage(name);
+	LTabPage *Page = new LTabPage(name);
 	if (Page)
 	{
 		Page->TabCtrl = this;
@@ -500,7 +500,7 @@ GTabPage *GTabView::Append(const char *name, int Where)
 	return Page;
 }
 
-bool GTabView::Delete(GTabPage *Page)
+bool LTabView::Delete(LTabPage *Page)
 {
 	bool Status = false;
 
@@ -526,7 +526,7 @@ bool GTabView::Delete(GTabPage *Page)
 	return Status;
 }
 
-LRect &GTabView::GetTabClient()
+LRect &LTabView::GetTabClient()
 {
 	if (d->Style == TvMac)
 	{
@@ -534,7 +534,7 @@ LRect &GTabView::GetTabClient()
 		d->TabClient.Size(2, 2); // The inset border
 		d->TabClient.y1 = d->Tabs.y2 + 1; // The tab strip
 
-		GTabPage *p = Children.Length() ? GetCurrent() : NULL;
+		LTabPage *p = Children.Length() ? GetCurrent() : NULL;
 		if (p && p->GetCss())
 		{
 			// Inset by any padding
@@ -557,7 +557,7 @@ LRect &GTabView::GetTabClient()
 	return d->TabClient;
 }
 
-int GTabView::HitTest(LMouse &m)
+int LTabView::HitTest(LMouse &m)
 {
 	if (d->LeftBtn.Overlap(m.x, m.y))
 	{
@@ -573,7 +573,7 @@ int GTabView::HitTest(LMouse &m)
 		TabIterator it(Children);
 		for (int i=0; i<it.Length(); i++)
 		{
-			GTabPage *p = it[i];
+			LTabPage *p = it[i];
 			if (p->TabPos.Overlap(m.x, m.y))
 				return i;
 		}
@@ -582,7 +582,7 @@ int GTabView::HitTest(LMouse &m)
 	return NoBtn;
 }
 
-void GTabView::OnMouseClick(LMouse &m)
+void LTabView::OnMouseClick(LMouse &m)
 {
 	bool DownLeft = m.Down() || m.Left();
 	int Result = HitTest(m);
@@ -609,7 +609,7 @@ void GTabView::OnMouseClick(LMouse &m)
 	else if (Result >= 0)
 	{
 		TabIterator it(Children);
-		GTabPage *p = it[Result];
+		LTabPage *p = it[Result];
 		if (p)
 		{
 			if (p->HasButton() &&
@@ -638,7 +638,7 @@ void GTabView::OnMouseClick(LMouse &m)
 		Focus(true);
 }
 
-bool GTabView::OnKey(LKey &k)
+bool LTabView::OnKey(LKey &k)
 {
 	if (k.Down())
 	{
@@ -651,7 +651,7 @@ bool GTabView::OnKey(LKey &k)
 				if (d->Current > 0)
 				{
 					TabIterator it(Children);
-					GTabPage *p = it[d->Current - 1];
+					LTabPage *p = it[d->Current - 1];
 					if (p && !p->TabPos.Valid())
 					{
 						if (d->Scroll) d->Scroll--;
@@ -669,7 +669,7 @@ bool GTabView::OnKey(LKey &k)
 				TabIterator it(Children);
 				if (d->Current < it.Length() - 1)
 				{
-					GTabPage *p = it[d->Current + 1];
+					LTabPage *p = it[d->Current + 1];
 					if (p && !p->TabPos.Valid())
 					{
 						d->Scroll++;
@@ -686,12 +686,12 @@ bool GTabView::OnKey(LKey &k)
 	return false;
 }
 
-void GTabView::OnFocus(bool f)
+void LTabView::OnFocus(bool f)
 {
 	if (!Children.Length())
 		return;
 	TabIterator it(Children);
-	GTabPage *p = it[d->Current];
+	LTabPage *p = it[d->Current];
 	if (p)
 	{
 		LRect r = p->TabPos;
@@ -700,11 +700,11 @@ void GTabView::OnFocus(bool f)
 	}
 }
 
-void GTabView::OnAttach()
+void LTabView::OnAttach()
 {
 }
 
-LRect &GTabView::CalcInset()
+LRect &LTabView::CalcInset()
 {
 	LRect Padding(0, 0, 0, 0);
 	d->Inset = GetClient();
@@ -748,7 +748,7 @@ LRect &GTabView::CalcInset()
 	return d->Inset;
 }
 
-void GTabView::OnStyleChange()
+void LTabView::OnStyleChange()
 {
 	if (!d->cBack.IsValid())
 	{
@@ -781,7 +781,7 @@ void GTabView::OnStyleChange()
 	Invalidate();
 }
 
-void GTabView::OnPaint(LSurface *pDC)
+void LTabView::OnPaint(LSurface *pDC)
 {
 	if (!d->cBack.IsValid())
 		OnStyleChange();
@@ -920,7 +920,7 @@ void GTabView::OnPaint(LSurface *pDC)
 				pDC->Rectangle(&b);
 
 				LRect Clip00(0, 0, MAC_STYLE_RADIUS-1, MAC_STYLE_RADIUS-1);
-				auto Res = IsCurrent ? (Foc ? GTabViewPrivate::ResSelectedFocused : GTabViewPrivate::ResSelectedUnfocused) : GTabViewPrivate::ResWorkspace;
+				auto Res = IsCurrent ? (Foc ? LTabViewPrivate::ResSelectedFocused : LTabViewPrivate::ResSelectedUnfocused) : LTabViewPrivate::ResWorkspace;
 				if (First)
 				{
 					LRect Clip01 = Clip00.Move(0, r.Y() - Clip00.Y());
@@ -1012,10 +1012,10 @@ void GTabView::OnPaint(LSurface *pDC)
 		if (GApp::SkinEngine &&
 			TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_TABVIEW))
 		{
-			GSkinState State;
+			LSkinState State;
 			State.pScreen = pDC;
 			State.MouseOver = false;
-			GApp::SkinEngine->OnPaint_GTabView(this, &State);
+			GApp::SkinEngine->OnPaint_LTabView(this, &State);
 		}
 		else
 		{
@@ -1027,7 +1027,7 @@ void GTabView::OnPaint(LSurface *pDC)
 			pDC->Colour(L_MED);
 			pDC->Rectangle(0, 0, X()-1, d->TabClient.y1-3);
 
-			GTabPage *Sel = 0;
+			LTabPage *Sel = 0;
 			int x = r.x1;
 			
 			if (d->Scroll)
@@ -1043,7 +1043,7 @@ void GTabView::OnPaint(LSurface *pDC)
 			
 			for (int n=0; n<it.Length(); n++)
 			{
-				GTabPage *p = it[n];
+				LTabPage *p = it[n];
 				if (n < d->Scroll)
 				{
 					p->TabPos.ZOff(-1, -1);
@@ -1119,13 +1119,13 @@ void GTabView::OnPaint(LSurface *pDC)
 	else LgiAssert(!"Not impl.");
 }
 
-void GTabView::OnPosChange()
+void LTabView::OnPosChange()
 {
 	GetTabClient();
 	if (Children.Length())
 	{
 		TabIterator it(Children);
-		GTabPage *p = it[d->Current];
+		LTabPage *p = it[d->Current];
 		if (p)
 		{
 			p->SetPos(d->TabClient, true);
@@ -1143,11 +1143,11 @@ void GTabView::OnPosChange()
 				auto It = p->IterateViews();
 				if (It.Length() == 1)
 				{
-					GTableLayout *tl = dynamic_cast<GTableLayout*>(It[0]);
+					LTableLayout *tl = dynamic_cast<LTableLayout*>(It[0]);
 					if (tl)
 					{
 						LRect r = p->GetClient();
-						r.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
+						r.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
 						tl->SetPos(r);
 					}
 				}
@@ -1183,9 +1183,9 @@ char *_lgi_gview_cmp(LView *a, LView *b)
 	return Str;
 }
 
-GTabPage::GTabPage(const char *name) : ResObject(Res_Tab)
+LTabPage::LTabPage(const char *name) : ResObject(Res_Tab)
 {
-	d = new GTabPagePriv(this);
+	d = new LTabPagePriv(this);
 
 	LRect r(0, 0, 1000, 1000);
 	SetPos(r);
@@ -1204,12 +1204,12 @@ GTabPage::GTabPage(const char *name) : ResObject(Res_Tab)
 	LResources::StyleElement(this);
 }
 
-GTabPage::~GTabPage()
+LTabPage::~LTabPage()
 {
 	delete d;
 }
 
-int GTabPage::GetTabPx()
+int LTabPage::GetTabPx()
 {
 	LDisplayString *Ds = d->GetDs();
 
@@ -1224,31 +1224,31 @@ int GTabPage::GetTabPx()
 	return Px;
 }
 
-bool GTabPage::HasButton()
+bool LTabPage::HasButton()
 {
 	return Button;
 }
 
-void GTabPage::HasButton(bool b)
+void LTabPage::HasButton(bool b)
 {
 	Button = b;
 	if (GetParent())
 		GetParent()->Invalidate();
 }
 
-void GTabPage::OnButtonClick(LMouse &m)
+void LTabPage::OnButtonClick(LMouse &m)
 {
 	if (GetId() > 0)
 		SendNotify(GNotifyTabPage_ButtonClick);
 }
 
-void GTabPage::OnTabClick(LMouse &m)
+void LTabPage::OnTabClick(LMouse &m)
 {
 	LViewI *v = GetId() > 0 ? this : GetParent();
 	v->SendNotify(GNotifyItem_Click);
 }
 
-void GTabPage::OnButtonPaint(LSurface *pDC)
+void LTabPage::OnButtonPaint(LSurface *pDC)
 {
 	#if MAC_PAINT
 	
@@ -1272,7 +1272,7 @@ void GTabPage::OnButtonPaint(LSurface *pDC)
 	#endif
 }
 
-int64 GTabPage::Value()
+int64 LTabPage::Value()
 {
 	if (!TabCtrl)
 		return false;
@@ -1280,18 +1280,18 @@ int64 GTabPage::Value()
 	return TabCtrl->Value() == Idx;
 }
 
-void GTabPage::Value(int64 v)
+void LTabPage::Value(int64 v)
 {
 	if (v)
 		Select();
 }
 
-const char *GTabPage::Name()
+const char *LTabPage::Name()
 {
 	return LBase::Name();
 }
 
-bool GTabPage::Name(const char *name)
+bool LTabPage::Name(const char *name)
 {
 	bool Status = LView::Name(name);
 	d->Ds.Reset();
@@ -1300,7 +1300,7 @@ bool GTabPage::Name(const char *name)
 	return Status;
 }
 
-void GTabPage::PaintTab(LSurface *pDC, bool Selected)
+void LTabPage::PaintTab(LSurface *pDC, bool Selected)
 {
 	#if MAC_PAINT
 
@@ -1381,7 +1381,7 @@ void GTabPage::PaintTab(LSurface *pDC, bool Selected)
 	#endif
 }
 
-bool GTabPage::Attach(LViewI *parent)
+bool LTabPage::Attach(LViewI *parent)
 {
 	bool Status = false;
 
@@ -1409,12 +1409,12 @@ bool GTabPage::Attach(LViewI *parent)
 	return Status;
 }
 
-GMessage::Result GTabPage::OnEvent(GMessage *Msg)
+GMessage::Result LTabPage::OnEvent(GMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }
 
-void GTabPage::Append(LViewI *Wnd)
+void LTabPage::Append(LViewI *Wnd)
 {
 	if (Wnd)
 	{
@@ -1424,7 +1424,7 @@ void GTabPage::Append(LViewI *Wnd)
 		{
 			Wnd->Attach(this);
 
-			GTabView *v = dynamic_cast<GTabView*>(GetParent());
+			LTabView *v = dynamic_cast<LTabView*>(GetParent());
 			if (v && v->GetPourChildren())
 			{
 				v->OnPosChange();
@@ -1438,7 +1438,7 @@ void GTabPage::Append(LViewI *Wnd)
 	}
 }
 
-bool GTabPage::Remove(LViewI *Wnd)
+bool LTabPage::Remove(LViewI *Wnd)
 {
 	if (Wnd)
 	{
@@ -1449,7 +1449,7 @@ bool GTabPage::Remove(LViewI *Wnd)
 	return false;
 }
 
-GColour GTabPage::GetBackground()
+GColour LTabPage::GetBackground()
 {
 	if (TabCtrl && TabCtrl->d->Style == TvMac)
 		return GColour(226, 226, 226); // 207?
@@ -1457,20 +1457,20 @@ GColour GTabPage::GetBackground()
 		return LColour(L_MED);
 }
 
-void GTabPage::OnStyleChange()
+void LTabPage::OnStyleChange()
 {
 	SetFont(SysFont, false);
 	GetParent()->Invalidate();
 }
 
-void GTabPage::SetFont(LFont *Font, bool OwnIt)
+void LTabPage::SetFont(LFont *Font, bool OwnIt)
 {
 	d->Ds.Reset();
 	Invalidate();
 	return LView::SetFont(Font, OwnIt);
 }
 
-void GTabPage::OnPaint(LSurface *pDC)
+void LTabPage::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 	GColour Bk = StyleColour(LCss::PropBackgroundColor, TabCtrl ? TabCtrl->d->cFill : LColour(L_MED), 1);
@@ -1483,16 +1483,16 @@ void GTabPage::OnPaint(LSurface *pDC)
 	#endif
 }
 
-void GTabPage::OnFocus(bool b)
+void LTabPage::OnFocus(bool b)
 {
 }
 
-bool GTabPage::OnKey(LKey &k)
+bool LTabPage::OnKey(LKey &k)
 {
 	return false;
 }
 
-bool GTabPage::LoadFromResource(int Res)
+bool LTabPage::LoadFromResource(int Res)
 {
 	GAutoString n;
 
@@ -1522,7 +1522,7 @@ bool GTabPage::LoadFromResource(int Res)
 	return Status;
 }
 
-void GTabPage::Select()
+void LTabPage::Select()
 {
 	if (GetParent())
 	{

@@ -43,19 +43,19 @@ bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int WordLen)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-const char *GRichEditElemContext::GetElement(GRichEditElem *obj)
+const char *LRichEditElemContext::GetElement(LRichEditElem *obj)
 {
 	return obj->Tag;
 }
 	
-const char *GRichEditElemContext::GetAttr(GRichEditElem *obj, const char *Attr)
+const char *LRichEditElemContext::GetAttr(LRichEditElem *obj, const char *Attr)
 {
 	const char *a = NULL;
 	obj->Get(Attr, a);
 	return a;
 }
 
-bool GRichEditElemContext::GetClasses(GString::Array &Classes, GRichEditElem *obj)
+bool LRichEditElemContext::GetClasses(GString::Array &Classes, LRichEditElem *obj)
 {
 	const char *c;
 	if (!obj->Get("class", c))
@@ -66,16 +66,16 @@ bool GRichEditElemContext::GetClasses(GString::Array &Classes, GRichEditElem *ob
 	return Classes.Length() > 0;
 }
 
-GRichEditElem *GRichEditElemContext::GetParent(GRichEditElem *obj)
+LRichEditElem *LRichEditElemContext::GetParent(LRichEditElem *obj)
 {
-	return dynamic_cast<GRichEditElem*>(obj->Parent);
+	return dynamic_cast<LRichEditElem*>(obj->Parent);
 }
 
-GArray<GRichEditElem*> GRichEditElemContext::GetChildren(GRichEditElem *obj)
+GArray<LRichEditElem*> LRichEditElemContext::GetChildren(LRichEditElem *obj)
 {
-	GArray<GRichEditElem*> a;
+	GArray<LRichEditElem*> a;
 	for (unsigned i=0; i<obj->Children.Length(); i++)
-		a.Add(dynamic_cast<GRichEditElem*>(obj->Children[i]));
+		a.Add(dynamic_cast<LRichEditElem*>(obj->Children[i]));
 	return a;
 }
 
@@ -116,7 +116,7 @@ bool GCssCache::OutputStyles(GStream &s, int TabDepth)
 		
 	for (unsigned i=0; i<Styles.Length(); i++)
 	{
-		GNamedStyle *ns = Styles[i];
+		LNamedStyle *ns = Styles[i];
 		if (ns && ns->RefCount > 0)
 		{
 			s.Print("%s.%s {\n", Tabs, ns->Name.Get());
@@ -136,7 +136,7 @@ bool GCssCache::OutputStyles(GStream &s, int TabDepth)
 	return true;
 }
 
-GNamedStyle *GCssCache::AddStyleToCache(GAutoPtr<LCss> &s)
+LNamedStyle *GCssCache::AddStyleToCache(GAutoPtr<LCss> &s)
 {
 	if (!s)
 		return NULL;
@@ -144,13 +144,13 @@ GNamedStyle *GCssCache::AddStyleToCache(GAutoPtr<LCss> &s)
 	// Look through existing styles for a match...			
 	for (unsigned i=0; i<Styles.Length(); i++)
 	{
-		GNamedStyle *ns = Styles[i];
+		LNamedStyle *ns = Styles[i];
 		if (*ns == *s)
 			return ns;
 	}
 		
 	// Not found... create new...
-	GNamedStyle *ns = new GNamedStyle;
+	LNamedStyle *ns = new LNamedStyle;
 	if (ns)
 	{
 		char *p = Prefix;
@@ -169,7 +169,7 @@ GNamedStyle *GCssCache::AddStyleToCache(GAutoPtr<LCss> &s)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-BlockCursorState::BlockCursorState(bool cursor, GRichTextPriv::BlockCursor *c)
+BlockCursorState::BlockCursorState(bool cursor, LRichTextPriv::BlockCursor *c)
 {
 	Cursor = cursor;
 	Offset = c->Offset;
@@ -177,9 +177,9 @@ BlockCursorState::BlockCursorState(bool cursor, GRichTextPriv::BlockCursor *c)
 	BlockUid = c->Blk->GetUid();
 }
 
-bool BlockCursorState::Apply(GRichTextPriv *Ctx, bool Forward)
+bool BlockCursorState::Apply(LRichTextPriv *Ctx, bool Forward)
 {
-	GAutoPtr<GRichTextPriv::BlockCursor> &Bc = Cursor ? Ctx->Cursor : Ctx->Selection;
+	GAutoPtr<LRichTextPriv::BlockCursor> &Bc = Cursor ? Ctx->Cursor : Ctx->Selection;
 	if (!Bc)
 		return false;
 
@@ -188,12 +188,12 @@ bool BlockCursorState::Apply(GRichTextPriv *Ctx, bool Forward)
 	int uid = Bc->Blk->GetUid();
 
 	int Index;
-	GRichTextPriv::Block *b;
+	LRichTextPriv::Block *b;
 	if (!Ctx->GetBlockByUid(b, BlockUid, &Index))
 		return false;
 
 	if (b != Bc->Blk)
-		Bc.Reset(new GRichTextPriv::BlockCursor(b, Offset, LineHint));
+		Bc.Reset(new LRichTextPriv::BlockCursor(b, Offset, LineHint));
 	else
 	{
 		Bc->Offset = Offset;
@@ -207,7 +207,7 @@ bool BlockCursorState::Apply(GRichTextPriv *Ctx, bool Forward)
 }
 
 /// This is the simplest form of undo, just save the entire block state, and restore it if needed
-CompleteTextBlockState::CompleteTextBlockState(GRichTextPriv *Ctx, GRichTextPriv::TextBlock *Tb)
+CompleteTextBlockState::CompleteTextBlockState(LRichTextPriv *Ctx, LRichTextPriv::TextBlock *Tb)
 {
 	if (Ctx->Cursor)
 		Cur.Reset(new BlockCursorState(true, Ctx->Cursor));
@@ -216,14 +216,14 @@ CompleteTextBlockState::CompleteTextBlockState(GRichTextPriv *Ctx, GRichTextPriv
 	if (Tb)
 	{
 		Uid = Tb->GetUid();
-		Blk.Reset(new GRichTextPriv::TextBlock(Tb));
+		Blk.Reset(new LRichTextPriv::TextBlock(Tb));
 	}
 }
 
-bool CompleteTextBlockState::Apply(GRichTextPriv *Ctx, bool Forward)
+bool CompleteTextBlockState::Apply(LRichTextPriv *Ctx, bool Forward)
 {
 	int Index;
-	GRichTextPriv::TextBlock *b;
+	LRichTextPriv::TextBlock *b;
 	if (!Ctx->GetBlockByUid(b, Uid, &Index))
 		return false;
 
@@ -241,14 +241,14 @@ bool CompleteTextBlockState::Apply(GRichTextPriv *Ctx, bool Forward)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-MultiBlockState::MultiBlockState(GRichTextPriv *ctx, ssize_t Start)
+MultiBlockState::MultiBlockState(LRichTextPriv *ctx, ssize_t Start)
 {
 	Ctx = ctx;
 	Index = Start;
 	Length = -1;
 }
 
-bool MultiBlockState::Apply(GRichTextPriv *Ctx, bool Forward)
+bool MultiBlockState::Apply(LRichTextPriv *Ctx, bool Forward)
 {
 	if (Index < 0 || Length < 0)
 	{
@@ -270,7 +270,7 @@ bool MultiBlockState::Copy(ssize_t Idx)
 	if (!Ctx->Blocks.AddressOf(Idx))
 		return false;
 
-	GRichTextPriv::Block *b = Ctx->Blocks[Idx]->Clone();
+	LRichTextPriv::Block *b = Ctx->Blocks[Idx]->Clone();
 	if (!b)
 		return false;
 
@@ -283,7 +283,7 @@ bool MultiBlockState::Cut(ssize_t Idx)
 	if (!Ctx->Blocks.AddressOf(Idx))
 		return false;
 
-	GRichTextPriv::Block *b = Ctx->Blocks[Idx];
+	LRichTextPriv::Block *b = Ctx->Blocks[Idx];
 	if (!b)
 		return false;
 
@@ -293,7 +293,7 @@ bool MultiBlockState::Cut(ssize_t Idx)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-GRichTextPriv::GRichTextPriv(GRichTextEdit *view, GRichTextPriv **Ptr) :
+LRichTextPriv::LRichTextPriv(LRichTextEdit *view, LRichTextPriv **Ptr) :
 	GHtmlParser(view),
 	GFontCache(SysFont)
 {
@@ -323,45 +323,45 @@ GRichTextPriv::GRichTextPriv(GRichTextEdit *view, GRichTextPriv **Ptr) :
 		Areas[i].ZOff(-1, -1);
 	}
 
-	ClickedBtn = GRichTextEdit::MaxArea;
-	OverBtn = GRichTextEdit::MaxArea;
+	ClickedBtn = LRichTextEdit::MaxArea;
+	OverBtn = LRichTextEdit::MaxArea;
 	ZeroObj(BtnState);
 
-	Values[GRichTextEdit::FontFamilyBtn] = "FontName";
-	BtnState[GRichTextEdit::FontFamilyBtn].IsMenu = true;
-	Values[GRichTextEdit::FontSizeBtn] = "14";
-	BtnState[GRichTextEdit::FontSizeBtn].IsMenu = true;
+	Values[LRichTextEdit::FontFamilyBtn] = "FontName";
+	BtnState[LRichTextEdit::FontFamilyBtn].IsMenu = true;
+	Values[LRichTextEdit::FontSizeBtn] = "14";
+	BtnState[LRichTextEdit::FontSizeBtn].IsMenu = true;
 
-	Values[GRichTextEdit::BoldBtn] = true;
-	BtnState[GRichTextEdit::BoldBtn].IsPress = true;
-	Values[GRichTextEdit::ItalicBtn] = false;
-	BtnState[GRichTextEdit::ItalicBtn].IsPress = true;
-	Values[GRichTextEdit::UnderlineBtn] = false;
-	BtnState[GRichTextEdit::UnderlineBtn].IsPress = true;
+	Values[LRichTextEdit::BoldBtn] = true;
+	BtnState[LRichTextEdit::BoldBtn].IsPress = true;
+	Values[LRichTextEdit::ItalicBtn] = false;
+	BtnState[LRichTextEdit::ItalicBtn].IsPress = true;
+	Values[LRichTextEdit::UnderlineBtn] = false;
+	BtnState[LRichTextEdit::UnderlineBtn].IsPress = true;
 		
-	Values[GRichTextEdit::ForegroundColourBtn] = (int64)LColour(L_TEXT).c32();
-	BtnState[GRichTextEdit::ForegroundColourBtn].IsMenu = true;
-	Values[GRichTextEdit::BackgroundColourBtn] = (int64)LColour(L_WORKSPACE).c32();
-	BtnState[GRichTextEdit::BackgroundColourBtn].IsMenu = true;
+	Values[LRichTextEdit::ForegroundColourBtn] = (int64)LColour(L_TEXT).c32();
+	BtnState[LRichTextEdit::ForegroundColourBtn].IsMenu = true;
+	Values[LRichTextEdit::BackgroundColourBtn] = (int64)LColour(L_WORKSPACE).c32();
+	BtnState[LRichTextEdit::BackgroundColourBtn].IsMenu = true;
 
-	Values[GRichTextEdit::MakeLinkBtn] = TEXT_LINK;
-	BtnState[GRichTextEdit::MakeLinkBtn].IsPress = true;
-	Values[GRichTextEdit::RemoveLinkBtn] = TEXT_REMOVE_LINK;
-	BtnState[GRichTextEdit::RemoveLinkBtn].IsPress = true;
-	Values[GRichTextEdit::RemoveStyleBtn] = TEXT_REMOVE_STYLE;
-	BtnState[GRichTextEdit::RemoveStyleBtn].IsPress = true;
-	//Values[GRichTextEdit::CapabilityBtn] = TEXT_CAP_BTN;
-	//BtnState[GRichTextEdit::CapabilityBtn].IsPress = true;
-	Values[GRichTextEdit::EmojiBtn] = TEXT_EMOJI;
-	BtnState[GRichTextEdit::EmojiBtn].IsPress = true;
-	Values[GRichTextEdit::HorzRuleBtn] = TEXT_HORZRULE;
-	BtnState[GRichTextEdit::HorzRuleBtn].IsPress = true;
+	Values[LRichTextEdit::MakeLinkBtn] = TEXT_LINK;
+	BtnState[LRichTextEdit::MakeLinkBtn].IsPress = true;
+	Values[LRichTextEdit::RemoveLinkBtn] = TEXT_REMOVE_LINK;
+	BtnState[LRichTextEdit::RemoveLinkBtn].IsPress = true;
+	Values[LRichTextEdit::RemoveStyleBtn] = TEXT_REMOVE_STYLE;
+	BtnState[LRichTextEdit::RemoveStyleBtn].IsPress = true;
+	//Values[LRichTextEdit::CapabilityBtn] = TEXT_CAP_BTN;
+	//BtnState[LRichTextEdit::CapabilityBtn].IsPress = true;
+	Values[LRichTextEdit::EmojiBtn] = TEXT_EMOJI;
+	BtnState[LRichTextEdit::EmojiBtn].IsPress = true;
+	Values[LRichTextEdit::HorzRuleBtn] = TEXT_HORZRULE;
+	BtnState[LRichTextEdit::HorzRuleBtn].IsPress = true;
 
 	Padding(LCss::Len(LCss::LenPx, 4));
 	EmptyDoc();
 }
 	
-GRichTextPriv::~GRichTextPriv()
+LRichTextPriv::~LRichTextPriv()
 {
 	if (IsBusy(true))
 	{
@@ -390,7 +390,7 @@ GRichTextPriv::~GRichTextPriv()
 	Empty();
 }
 	
-bool GRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
+bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 {
 	if (!Cursor || !Selection)
 		return false;
@@ -399,13 +399,13 @@ bool GRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 	GArray<uint32_t> *DelTxt = Cut ? &DeletedText : NULL;
 
 	bool Cf = CursorFirst();
-	GRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
-	GRichTextPriv::BlockCursor *End = Cf ? Selection : Cursor;
+	LRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
+	LRichTextPriv::BlockCursor *End = Cf ? Selection : Cursor;
 	if (Start->Blk == End->Blk)
 	{
 		// In the same block... just delete the text
 		ssize_t Len = End->Offset - Start->Offset;
-		GRichTextPriv::Block *NextBlk = Next(Start->Blk);
+		LRichTextPriv::Block *NextBlk = Next(Start->Blk);
 		if (Len >= Start->Blk->Length() && NextBlk)
 		{
 			// Delete entire block
@@ -456,7 +456,7 @@ bool GRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 		{
 			while (Blocks[i] != End->Blk && i < (int)Blocks.Length())
 			{
-				GRichTextPriv::Block *b = Blocks[i];
+				LRichTextPriv::Block *b = Blocks[i];
 				b->CopyAt(0, -1, DelTxt);
 				printf("%s:%i - inter, %i\n", _FL, (int)i);
 				MultiState->Cut(i);
@@ -498,7 +498,7 @@ bool GRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 }
 
 
-GRichTextPriv::Block *GRichTextPriv::Next(Block *b)
+LRichTextPriv::Block *LRichTextPriv::Next(Block *b)
 {
 	ssize_t Idx = Blocks.IndexOf(b);
 	if (Idx < 0)
@@ -508,7 +508,7 @@ GRichTextPriv::Block *GRichTextPriv::Next(Block *b)
 	return Blocks[Idx];
 }
 
-GRichTextPriv::Block *GRichTextPriv::Prev(Block *b)
+LRichTextPriv::Block *LRichTextPriv::Prev(Block *b)
 {
 	ssize_t Idx = Blocks.IndexOf(b);
 	if (Idx <= 0)
@@ -516,7 +516,7 @@ GRichTextPriv::Block *GRichTextPriv::Prev(Block *b)
 	return Blocks[--Idx];
 }
 
-bool GRichTextPriv::AddTrans(GAutoPtr<Transaction> &t)
+bool LRichTextPriv::AddTrans(GAutoPtr<Transaction> &t)
 {
 	if (t)
 	{
@@ -543,7 +543,7 @@ bool GRichTextPriv::AddTrans(GAutoPtr<Transaction> &t)
 	return true;
 }
 
-bool GRichTextPriv::SetUndoPos(ssize_t Pos)
+bool LRichTextPriv::SetUndoPos(ssize_t Pos)
 {
 	if (UndoPosLock)
 		return false;
@@ -593,7 +593,7 @@ ApplyError:
 	return false;	
 }
 
-bool GRichTextPriv::IsBusy(bool Stop)
+bool LRichTextPriv::IsBusy(bool Stop)
 {
 	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
@@ -603,7 +603,7 @@ bool GRichTextPriv::IsBusy(bool Stop)
 	return false;
 }
 
-bool GRichTextPriv::Error(const char *file, int line, const char *fmt, ...)
+bool LRichTextPriv::Error(const char *file, int line, const char *fmt, ...)
 {
 	va_list Arg;
 	va_start(Arg, fmt);
@@ -622,7 +622,7 @@ bool GRichTextPriv::Error(const char *file, int line, const char *fmt, ...)
 	return false;
 }
 
-void GRichTextPriv::UpdateStyleUI()
+void LRichTextPriv::UpdateStyleUI()
 {
 	if (!Cursor || !Cursor->Blk)
 	{
@@ -647,28 +647,28 @@ void GRichTextPriv::UpdateStyleUI()
 		
 	if (f)
 	{
-		Values[GRichTextEdit::FontFamilyBtn] = f->Face();
-		Values[GRichTextEdit::FontSizeBtn] = f->PointSize();
-		Values[GRichTextEdit::FontSizeBtn].CastString();
-		Values[GRichTextEdit::BoldBtn] = f->Bold();
-		Values[GRichTextEdit::ItalicBtn] = f->Italic();
-		Values[GRichTextEdit::UnderlineBtn] = f->Underline();
+		Values[LRichTextEdit::FontFamilyBtn] = f->Face();
+		Values[LRichTextEdit::FontSizeBtn] = f->PointSize();
+		Values[LRichTextEdit::FontSizeBtn].CastString();
+		Values[LRichTextEdit::BoldBtn] = f->Bold();
+		Values[LRichTextEdit::ItalicBtn] = f->Italic();
+		Values[LRichTextEdit::UnderlineBtn] = f->Underline();
 	}
 	else
 	{
-		Values[GRichTextEdit::FontFamilyBtn] = "(Unknown)";
+		Values[LRichTextEdit::FontFamilyBtn] = "(Unknown)";
 	}
 		
-	Values[GRichTextEdit::ForegroundColourBtn] = (int64) (st && st->Colours.Fore.IsValid() ? st->Colours.Fore.c32() : TextColour.c32());
-	Values[GRichTextEdit::BackgroundColourBtn] = (int64) (st && st->Colours.Back.IsValid() ? st->Colours.Back.c32() : 0);
+	Values[LRichTextEdit::ForegroundColourBtn] = (int64) (st && st->Colours.Fore.IsValid() ? st->Colours.Fore.c32() : TextColour.c32());
+	Values[LRichTextEdit::BackgroundColourBtn] = (int64) (st && st->Colours.Back.IsValid() ? st->Colours.Back.c32() : 0);
 
 	if (View)
-		View->Invalidate(Areas + GRichTextEdit::ToolsArea);
+		View->Invalidate(Areas + LRichTextEdit::ToolsArea);
 }
 
-void GRichTextPriv::ScrollTo(LRect r)
+void LRichTextPriv::ScrollTo(LRect r)
 {
-	LRect Content = Areas[GRichTextEdit::ContentArea];
+	LRect Content = Areas[LRichTextEdit::ContentArea];
 	Content.Offset(-Content.x1, ScrollOffsetPx-Content.y1);
 
 	if (ScrollLinePx > 0)
@@ -688,10 +688,10 @@ void GRichTextPriv::ScrollTo(LRect r)
 	}
 }
 
-void GRichTextPriv::InvalidateDoc(LRect *r)
+void LRichTextPriv::InvalidateDoc(LRect *r)
 {
 	// Transform the coordinates from doc to screen space
-	LRect &c = Areas[GRichTextEdit::ContentArea];
+	LRect &c = Areas[LRichTextEdit::ContentArea];
 	if (r)
 	{
 		LRect t = *r;
@@ -701,7 +701,7 @@ void GRichTextPriv::InvalidateDoc(LRect *r)
 	else View->Invalidate(&c);
 }
 
-void GRichTextPriv::EmptyDoc()
+void LRichTextPriv::EmptyDoc()
 {
 	Block *Def = new TextBlock(this);
 	if (Def)
@@ -712,7 +712,7 @@ void GRichTextPriv::EmptyDoc()
 	}
 }
 	
-void GRichTextPriv::Empty()
+void LRichTextPriv::Empty()
 {
 	// Delete cursors first to avoid hanging references
 	Cursor.Reset();
@@ -722,7 +722,7 @@ void GRichTextPriv::Empty()
 	Blocks.DeleteObjects();
 }
 
-bool GRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
+bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 {
 	if (!In || !In->Blk || Blocks.Length() == 0)
 		return Error(_FL, "Not a valid 'In' cursor, Blks=%i", Blocks.Length());
@@ -959,7 +959,7 @@ bool GRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 		}
 		case SkUpPage:
 		{
-			LRect &Content = Areas[GRichTextEdit::ContentArea];
+			LRect &Content = Areas[LRichTextEdit::ContentArea];
 			int LineHint = -1;
 			int TargetY = In->Pos.y1 - Content.Y();
 			ssize_t Idx = HitTest(In->Pos.x1, MAX(TargetY, 0), LineHint);
@@ -979,7 +979,7 @@ bool GRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 		}
 		case SkDownPage:
 		{
-			LRect &Content = Areas[GRichTextEdit::ContentArea];
+			LRect &Content = Areas[LRichTextEdit::ContentArea];
 			int LineHint = -1;
 			int TargetY = In->Pos.y1 + Content.Y();
 			ssize_t Idx = HitTest(In->Pos.x1, MIN(TargetY, DocumentExtent.y-1), LineHint);
@@ -1020,7 +1020,7 @@ bool GRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 	return Status;
 }
 	
-bool GRichTextPriv::CursorFirst()
+bool LRichTextPriv::CursorFirst()
 {
 	if (!Cursor || !Selection)
 		return true;
@@ -1033,7 +1033,7 @@ bool GRichTextPriv::CursorFirst()
 	return Cursor->Offset < Selection->Offset;
 }
 	
-bool GRichTextPriv::SetCursor(GAutoPtr<BlockCursor> c, bool Select)
+bool LRichTextPriv::SetCursor(GAutoPtr<BlockCursor> c, bool Select)
 {
 	LRect InvalidRc(0, 0, -1, -1);
 
@@ -1106,7 +1106,7 @@ bool GRichTextPriv::SetCursor(GAutoPtr<BlockCursor> c, bool Select)
 	return true;
 }
 
-LRect GRichTextPriv::SelectionRect()
+LRect LRichTextPriv::SelectionRect()
 {
 	LRect SelRc;
 	if (Cursor)
@@ -1122,7 +1122,7 @@ LRect GRichTextPriv::SelectionRect()
 	return SelRc;
 }
 
-ssize_t GRichTextPriv::IndexOfCursor(BlockCursor *c)
+ssize_t LRichTextPriv::IndexOfCursor(BlockCursor *c)
 {
 	if (!c || !c->Blk)
 	{
@@ -1143,19 +1143,19 @@ ssize_t GRichTextPriv::IndexOfCursor(BlockCursor *c)
 	return -1;
 }
 
-LPoint GRichTextPriv::ScreenToDoc(int x, int y)
+LPoint LRichTextPriv::ScreenToDoc(int x, int y)
 {
-	LRect &Content = Areas[GRichTextEdit::ContentArea];
+	LRect &Content = Areas[LRichTextEdit::ContentArea];
 	return LPoint(x - Content.x1, y - Content.y1 + ScrollOffsetPx);
 }
 
-LPoint GRichTextPriv::DocToScreen(int x, int y)
+LPoint LRichTextPriv::DocToScreen(int x, int y)
 {
-	LRect &Content = Areas[GRichTextEdit::ContentArea];
+	LRect &Content = Areas[LRichTextEdit::ContentArea];
 	return LPoint(x + Content.x1, y + Content.y1 - ScrollOffsetPx);
 }
 
-bool GRichTextPriv::Merge(Transaction *Trans, Block *a, Block *b)
+bool LRichTextPriv::Merge(Transaction *Trans, Block *a, Block *b)
 {
 	TextBlock *ta = dynamic_cast<TextBlock*>(a);
 	TextBlock *tb = dynamic_cast<TextBlock*>(b);
@@ -1197,7 +1197,7 @@ LSurface *GEmojiContext::GetEmojiImage()
 	return EmojiImg;
 }
 
-ssize_t GRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk)
+ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk)
 {
 	int CharPos = 0;
 	HitTestResult r(x, y);
@@ -1246,7 +1246,7 @@ ssize_t GRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk)
 	return -1;
 }
 	
-bool GRichTextPriv::CursorFromPos(int x, int y, GAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx)
+bool LRichTextPriv::CursorFromPos(int x, int y, GAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx)
 {
 	int CharPos = 0;
 	HitTestResult r(x, y);
@@ -1270,7 +1270,7 @@ bool GRichTextPriv::CursorFromPos(int x, int y, GAutoPtr<BlockCursor> *Cursor, s
 	return false;
 }
 
-GRichTextPriv::Block *GRichTextPriv::GetBlockByIndex(ssize_t Index, ssize_t *Offset, int *BlockIdx, int *LineCount)
+LRichTextPriv::Block *LRichTextPriv::GetBlockByIndex(ssize_t Index, ssize_t *Offset, int *BlockIdx, int *LineCount)
 {
 	int CharPos = 0;
 	int Lines = 0;
@@ -1306,7 +1306,7 @@ GRichTextPriv::Block *GRichTextPriv::GetBlockByIndex(ssize_t Index, ssize_t *Off
 	return b;
 }
 	
-bool GRichTextPriv::Layout(GScrollBar *&ScrollY)
+bool LRichTextPriv::Layout(LScrollBar *&ScrollY)
 {
 	Flow f(this);
 	
@@ -1315,7 +1315,7 @@ bool GRichTextPriv::Layout(GScrollBar *&ScrollY)
 	if (ScrollLinePx <= 0)
 		ScrollLinePx = 16;
 
-	LRect Client = Areas[GRichTextEdit::ContentArea];
+	LRect Client = Areas[LRichTextEdit::ContentArea];
 	Client.Offset(-Client.x1, -Client.y1);
 	DocumentExtent.x = Client.X();
 
@@ -1359,12 +1359,12 @@ bool GRichTextPriv::Layout(GScrollBar *&ScrollY)
 	return true;
 }
 
-void GRichTextPriv::OnStyleChange(GRichTextEdit::RectType t)
+void LRichTextPriv::OnStyleChange(LRichTextEdit::RectType t)
 {
 	LCss s;
 	switch (t)
 	{
-		case GRichTextEdit::FontFamilyBtn:
+		case LRichTextEdit::FontFamilyBtn:
 		{
 			LCss::StringsDef Fam(Values[t].Str());
 			s.FontFamily(Fam);
@@ -1372,7 +1372,7 @@ void GRichTextPriv::OnStyleChange(GRichTextEdit::RectType t)
 				StyleDirty.Add(t);
 			break;
 		}
-		case GRichTextEdit::FontSizeBtn:
+		case LRichTextEdit::FontSizeBtn:
 		{
 			double Pt = Values[t].CastDouble();
 			s.FontSize(LCss::Len(LCss::LenPt, (float)Pt));
@@ -1380,35 +1380,35 @@ void GRichTextPriv::OnStyleChange(GRichTextEdit::RectType t)
 				StyleDirty.Add(t);
 			break;
 		}
-		case GRichTextEdit::BoldBtn:
+		case LRichTextEdit::BoldBtn:
 		{
 			s.FontWeight(LCss::FontWeightBold);
 			if (!ChangeSelectionStyle(&s, Values[t].CastBool()))
 				StyleDirty.Add(t);
 			break;
 		}
-		case GRichTextEdit::ItalicBtn:
+		case LRichTextEdit::ItalicBtn:
 		{
 			s.FontStyle(LCss::FontStyleItalic);
 			if (!ChangeSelectionStyle(&s, Values[t].CastBool()))
 				StyleDirty.Add(t);
 			break;
 		}
-		case GRichTextEdit::UnderlineBtn:
+		case LRichTextEdit::UnderlineBtn:
 		{
 			s.TextDecoration(LCss::TextDecorUnderline);
 			if (ChangeSelectionStyle(&s, Values[t].CastBool()))
 				StyleDirty.Add(t);
 			break;
 		}
-		case GRichTextEdit::ForegroundColourBtn:
+		case LRichTextEdit::ForegroundColourBtn:
 		{
 			s.Color(LCss::ColorDef(LCss::ColorRgb, (uint32_t) Values[t].Value.Int64));
 			if (!ChangeSelectionStyle(&s, true))
 				StyleDirty.Add(t);
 			break;
 		}
-		case GRichTextEdit::BackgroundColourBtn:
+		case LRichTextEdit::BackgroundColourBtn:
 		{
 			s.BackgroundColor(LCss::ColorDef(LCss::ColorRgb, (uint32_t) Values[t].Value.Int64));
 			if (!ChangeSelectionStyle(&s, true))
@@ -1420,15 +1420,15 @@ void GRichTextPriv::OnStyleChange(GRichTextEdit::RectType t)
 	}
 }
 
-bool GRichTextPriv::ChangeSelectionStyle(LCss *Style, bool Add)
+bool LRichTextPriv::ChangeSelectionStyle(LCss *Style, bool Add)
 {
 	if (!Selection)
 		return false;
 
 	GAutoPtr<Transaction> Trans(new Transaction);
 	bool Cf = CursorFirst();
-	GRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
-	GRichTextPriv::BlockCursor *End = Cf ? Selection : Cursor;
+	LRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
+	LRichTextPriv::BlockCursor *End = Cf ? Selection : Cursor;
 	if (Start->Blk == End->Blk)
 	{
 		// Change style in the same block...
@@ -1449,7 +1449,7 @@ bool GRichTextPriv::ChangeSelectionStyle(LCss *Style, bool Add)
 		{
 			for (++i; Blocks[i] != End->Blk && i < (int)Blocks.Length(); i++)
 			{
-				GRichTextPriv::Block *&b = Blocks[i];
+				LRichTextPriv::Block *&b = Blocks[i];
 				if (!b->ChangeStyle(Trans, 0, -1, Style, Add))
 					return false;
 			}
@@ -1470,7 +1470,7 @@ bool GRichTextPriv::ChangeSelectionStyle(LCss *Style, bool Add)
 	return true;
 }
 
-void GRichTextPriv::PaintBtn(LSurface *pDC, GRichTextEdit::RectType t)
+void LRichTextPriv::PaintBtn(LSurface *pDC, LRichTextEdit::RectType t)
 {
 	LRect r = Areas[t];
 	LVariant &v = Values[t];
@@ -1530,9 +1530,9 @@ void GRichTextPriv::PaintBtn(LSurface *pDC, GRichTextEdit::RectType t)
 			const char *Label = NULL;
 			switch (t)
 			{
-				case GRichTextEdit::BoldBtn: Label = "B"; break;
-				case GRichTextEdit::ItalicBtn: Label = "I"; break;
-				case GRichTextEdit::UnderlineBtn: Label = "U"; break;
+				case LRichTextEdit::BoldBtn: Label = "B"; break;
+				case LRichTextEdit::ItalicBtn: Label = "I"; break;
+				case LRichTextEdit::UnderlineBtn: Label = "U"; break;
 				default:
 					break;
 			}
@@ -1549,7 +1549,7 @@ void GRichTextPriv::PaintBtn(LSurface *pDC, GRichTextEdit::RectType t)
 	}
 }
 
-bool GRichTextPriv::MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, GString Link)
+bool LRichTextPriv::MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, GString Link)
 {
 	if (!tb)
 		return false;
@@ -1558,7 +1558,7 @@ bool GRichTextPriv::MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, GString
 	if (!tb->GetTextAt(Offset, st))
 		return false;
 	
-	GAutoPtr<GNamedStyle> ns(new GNamedStyle);
+	GAutoPtr<LNamedStyle> ns(new LNamedStyle);
 	if (ns)
 	{
 		if (st.Last()->GetStyle())
@@ -1582,11 +1582,11 @@ bool GRichTextPriv::MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, GString
 	return true;
 }
 
-bool GRichTextPriv::ClickBtn(LMouse &m, GRichTextEdit::RectType t)
+bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 {
 	switch (t)
 	{
-		case GRichTextEdit::FontFamilyBtn:
+		case LRichTextEdit::FontFamilyBtn:
 		{
 			GString::Array Fonts;
 			if (!LFontSystem::Inst()->EnumerateFonts(Fonts))
@@ -1635,7 +1635,7 @@ bool GRichTextPriv::ClickBtn(LMouse &m, GRichTextEdit::RectType t)
 			}
 			break;
 		}
-		case GRichTextEdit::FontSizeBtn:
+		case LRichTextEdit::FontSizeBtn:
 		{
 			static const char *Sizes[] = { "6", "7", "8", "9", "10", "11", "12", "14", "16", "18", "20", "24",
 											"28", "32", "40", "50", "60", "80", "100", "120", 0 };
@@ -1654,24 +1654,24 @@ bool GRichTextPriv::ClickBtn(LMouse &m, GRichTextEdit::RectType t)
 			}
 			break;
 		}
-		case GRichTextEdit::BoldBtn:
-		case GRichTextEdit::ItalicBtn:
-		case GRichTextEdit::UnderlineBtn:
+		case LRichTextEdit::BoldBtn:
+		case LRichTextEdit::ItalicBtn:
+		case LRichTextEdit::UnderlineBtn:
 		{
 			Values[t] = !Values[t].CastBool();
 			View->Invalidate(Areas+t);
 			OnStyleChange(t);
 			break;
 		}
-		case GRichTextEdit::ForegroundColourBtn:
-		case GRichTextEdit::BackgroundColourBtn:
+		case LRichTextEdit::ForegroundColourBtn:
+		case LRichTextEdit::BackgroundColourBtn:
 		{
 			LPoint p(Areas[t].x1, Areas[t].y2 + 1);
 			View->PointToScreen(p);
 			new SelectColour(this, p, t);
 			break;
 		}
-		case GRichTextEdit::MakeLinkBtn:
+		case LRichTextEdit::MakeLinkBtn:
 		{
 			if (!Cursor || !Cursor->Blk)
 				break;
@@ -1717,7 +1717,7 @@ bool GRichTextPriv::ClickBtn(LMouse &m, GRichTextEdit::RectType t)
 			}
 			break;
 		}
-		case GRichTextEdit::RemoveLinkBtn:
+		case LRichTextEdit::RemoveLinkBtn:
 		{
 			if (!Cursor || !Cursor->Blk)
 				break;
@@ -1738,7 +1738,7 @@ bool GRichTextPriv::ClickBtn(LMouse &m, GRichTextEdit::RectType t)
 				a->Param.Empty();
 
 				GAutoPtr<LCss> s(new LCss);
-				GNamedStyle *Ns = a->GetStyle();
+				LNamedStyle *Ns = a->GetStyle();
 				if (Ns)
 					*s = *Ns;
 				if (s->TextDecoration() == LCss::TextDecorUnderline)
@@ -1754,27 +1754,27 @@ bool GRichTextPriv::ClickBtn(LMouse &m, GRichTextEdit::RectType t)
 			}
 			break;			
 		}
-		case GRichTextEdit::RemoveStyleBtn:
+		case LRichTextEdit::RemoveStyleBtn:
 		{
 			LCss s;
 			ChangeSelectionStyle(&s, false);
 			break;
 		}
 		/*
-		case GRichTextEdit::CapabilityBtn:
+		case LRichTextEdit::CapabilityBtn:
 		{
 			View->OnCloseInstaller();
 			break;
 		}
 		*/
-		case GRichTextEdit::EmojiBtn:
+		case LRichTextEdit::EmojiBtn:
 		{
 			LPoint p(Areas[t].x1, Areas[t].y2 + 1);
 			View->PointToScreen(p);
 			new EmojiMenu(this, p);
 			break;
 		}
-		case GRichTextEdit::HorzRuleBtn:
+		case LRichTextEdit::HorzRuleBtn:
 		{
 			InsertHorzRule();
 			break;
@@ -1786,7 +1786,7 @@ bool GRichTextPriv::ClickBtn(LMouse &m, GRichTextEdit::RectType t)
 	return true;
 }
 
-bool GRichTextPriv::InsertHorzRule()
+bool LRichTextPriv::InsertHorzRule()
 {
 	if (!Cursor || !Cursor->Blk)
 		return false;
@@ -1800,7 +1800,7 @@ bool GRichTextPriv::InsertHorzRule()
 	DeleteSelection(Trans, NULL);
 
 	ssize_t InsertIdx = Blocks.IndexOf(tb) + 1;
-	GRichTextPriv::Block *After = NULL;
+	LRichTextPriv::Block *After = NULL;
 	if (Cursor->Offset == 0)
 	{
 		InsertIdx--;
@@ -1828,12 +1828,12 @@ bool GRichTextPriv::InsertHorzRule()
 	return SetCursor(c);
 }
 	
-void GRichTextPriv::Paint(LSurface *pDC, GScrollBar *&ScrollY)
+void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 {
-	if (Areas[GRichTextEdit::ToolsArea].Valid())
+	if (Areas[LRichTextEdit::ToolsArea].Valid())
 	{
 		// Draw tools area...
-		LRect &t = Areas[GRichTextEdit::ToolsArea];
+		LRect &t = Areas[LRichTextEdit::ToolsArea];
 		#ifdef WIN32
 		GDoubleBuffer Buf(pDC, &t);
 		#endif
@@ -1846,43 +1846,43 @@ void GRichTextPriv::Paint(LSurface *pDC, GScrollBar *&ScrollY)
 		#define AllocPx(sz, border) \
 			LRect(r.x1, r.y1, r.x1 + (int)(sz) - 1, r.y2); r.x1 += (int)(sz) + border
 
-		Areas[GRichTextEdit::FontFamilyBtn] = AllocPx(130, 6);
-		Areas[GRichTextEdit::FontSizeBtn] = AllocPx(40, 6);
+		Areas[LRichTextEdit::FontFamilyBtn] = AllocPx(130, 6);
+		Areas[LRichTextEdit::FontSizeBtn] = AllocPx(40, 6);
 
-		Areas[GRichTextEdit::BoldBtn] = AllocPx(r.Y(), 0);
-		Areas[GRichTextEdit::ItalicBtn] = AllocPx(r.Y(), 0);
-		Areas[GRichTextEdit::UnderlineBtn] = AllocPx(r.Y(), 6);
+		Areas[LRichTextEdit::BoldBtn] = AllocPx(r.Y(), 0);
+		Areas[LRichTextEdit::ItalicBtn] = AllocPx(r.Y(), 0);
+		Areas[LRichTextEdit::UnderlineBtn] = AllocPx(r.Y(), 6);
 
-		Areas[GRichTextEdit::ForegroundColourBtn] = AllocPx(r.Y()*1.5, 0);
-		Areas[GRichTextEdit::BackgroundColourBtn] = AllocPx(r.Y()*1.5, 6);
+		Areas[LRichTextEdit::ForegroundColourBtn] = AllocPx(r.Y()*1.5, 0);
+		Areas[LRichTextEdit::BackgroundColourBtn] = AllocPx(r.Y()*1.5, 6);
 
 		{
 			LDisplayString Ds(SysFont, TEXT_LINK);
-			Areas[GRichTextEdit::MakeLinkBtn] = AllocPx(Ds.X() + 12, 0);
+			Areas[LRichTextEdit::MakeLinkBtn] = AllocPx(Ds.X() + 12, 0);
 		}
 		{
 			LDisplayString Ds(SysFont, TEXT_REMOVE_LINK);
-			Areas[GRichTextEdit::RemoveLinkBtn] = AllocPx(Ds.X() + 12, 6);
+			Areas[LRichTextEdit::RemoveLinkBtn] = AllocPx(Ds.X() + 12, 6);
 		}
 		{
 			LDisplayString Ds(SysFont, TEXT_REMOVE_STYLE);
-			Areas[GRichTextEdit::RemoveStyleBtn] = AllocPx(Ds.X() + 12, 6);
+			Areas[LRichTextEdit::RemoveStyleBtn] = AllocPx(Ds.X() + 12, 6);
 		}
-		for (unsigned int i=GRichTextEdit::EmojiBtn; i<GRichTextEdit::MaxArea; i++)
+		for (unsigned int i=LRichTextEdit::EmojiBtn; i<LRichTextEdit::MaxArea; i++)
 		{
 			LDisplayString Ds(SysFont, Values[i].Str());
 			Areas[i] = AllocPx(Ds.X() + 12, 6);
 		}
 
-		for (unsigned i = GRichTextEdit::FontFamilyBtn; i < GRichTextEdit::MaxArea; i++)
+		for (unsigned i = LRichTextEdit::FontFamilyBtn; i < LRichTextEdit::MaxArea; i++)
 		{
-			PaintBtn(pDC, (GRichTextEdit::RectType) i);
+			PaintBtn(pDC, (LRichTextEdit::RectType) i);
 		}
 	}
 
 	LPoint Origin;
 	
-	LRect r = Areas[GRichTextEdit::ContentArea];
+	LRect r = Areas[LRichTextEdit::ContentArea];
 	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
 	LMemDC Mem;
 	if (!Mem.Create(r.X(), r.Y(), pDC->GetColourSpace()))
@@ -1901,7 +1901,7 @@ void GRichTextPriv::Paint(LSurface *pDC, GScrollBar *&ScrollY)
 	ScrollOffsetPx = ScrollY ? (int)(ScrollY->Value() * ScrollLinePx) : 0;
 	pDC->SetOrigin(Origin.x-r.x1, Origin.y-r.y1+ScrollOffsetPx);
 
-	int DrawPx = ScrollOffsetPx + Areas[GRichTextEdit::ContentArea].Y();
+	int DrawPx = ScrollOffsetPx + Areas[LRichTextEdit::ContentArea].Y();
 	int ExtraPx = DrawPx > DocumentExtent.y ? DrawPx - DocumentExtent.y : 0;
 
 	r.Set(0, 0, DocumentExtent.x-1, DocumentExtent.y-1);
@@ -1973,18 +1973,18 @@ void GRichTextPriv::Paint(LSurface *pDC, GScrollBar *&ScrollY)
 
 	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
 	Mem.SetOrigin(0, 0);
-	pScreen->Blt(Areas[GRichTextEdit::ContentArea].x1, Areas[GRichTextEdit::ContentArea].y1, &Mem);
+	pScreen->Blt(Areas[LRichTextEdit::ContentArea].x1, Areas[LRichTextEdit::ContentArea].y1, &Mem);
 	#else
 	pDC->ClipRgn(NULL);
 	#endif
 }
 	
-GHtmlElement *GRichTextPriv::CreateElement(GHtmlElement *Parent)
+LHtmlElement *LRichTextPriv::CreateElement(LHtmlElement *Parent)
 {
-	return new GRichEditElem(Parent);
+	return new LRichEditElem(Parent);
 }
 
-bool GRichTextPriv::ToHtml(GArray<GDocView::ContentMedia> *Media, BlockCursor *From, BlockCursor *To)
+bool LRichTextPriv::ToHtml(GArray<GDocView::ContentMedia> *Media, BlockCursor *From, BlockCursor *To)
 {
 	UtfNameCache.Reset();
 	if (!Blocks.Length())
@@ -2036,9 +2036,9 @@ bool GRichTextPriv::ToHtml(GArray<GDocView::ContentMedia> *Media, BlockCursor *F
 	return UtfNameCache.Get() != NULL;
 }
 	
-void GRichTextPriv::DumpBlocks()
+void LRichTextPriv::DumpBlocks()
 {
-	LgiTrace("GRichTextPriv Blocks=%i\n", Blocks.Length());
+	LgiTrace("LRichTextPriv Blocks=%i\n", Blocks.Length());
 	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
 		Block *b = Blocks[i];
@@ -2052,20 +2052,20 @@ void GRichTextPriv::DumpBlocks()
 	}
 }
 
-struct HtmlElementCb : public LCss::ElementCallback<GHtmlElement>
+struct HtmlElementCb : public LCss::ElementCallback<LHtmlElement>
 {
-	const char *GetElement(GHtmlElement *obj)
+	const char *GetElement(LHtmlElement *obj)
 	{
 		return obj->Tag;
 	}
 
-	const char *GetAttr(GHtmlElement *obj, const char *Attr)
+	const char *GetAttr(LHtmlElement *obj, const char *Attr)
 	{
 		const char *Val = NULL;
 		return obj->Get(Attr, Val) ? Val : NULL;
 	}
 
-	bool GetClasses(GString::Array &Classes, GHtmlElement *obj)
+	bool GetClasses(GString::Array &Classes, LHtmlElement *obj)
 	{
 		const char *Cls = NULL;
 		if (!obj->Get("class", Cls))
@@ -2075,18 +2075,18 @@ struct HtmlElementCb : public LCss::ElementCallback<GHtmlElement>
 		return true;
 	}
 
-	GHtmlElement *GetParent(GHtmlElement *obj)
+	LHtmlElement *GetParent(LHtmlElement *obj)
 	{
 		return obj->Parent;
 	}
 
-	GArray<GHtmlElement*> GetChildren(GHtmlElement *obj)
+	GArray<LHtmlElement*> GetChildren(LHtmlElement *obj)
 	{
 		return obj->Children;
 	}
 };
 
-bool GRichTextPriv::FromHtml(GHtmlElement *e, CreateContext &ctx, LCss *ParentStyle, int Depth)
+bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentStyle, int Depth)
 {
 	char Sp[48];
 	int SpLen = MIN(Depth << 1, sizeof(Sp) - 1);
@@ -2095,7 +2095,7 @@ bool GRichTextPriv::FromHtml(GHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		
 	for (unsigned i = 0; i < e->Children.Length(); i++)
 	{
-		GHtmlElement *c = e->Children[i];
+		LHtmlElement *c = e->Children[i];
 		GAutoPtr<LCss> Style;
 		if (ParentStyle)
 			Style.Reset(new LCss(*ParentStyle));
@@ -2197,8 +2197,8 @@ bool GRichTextPriv::FromHtml(GHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 		if (c->Get("class", Class))
 		{
 			LCss::SelArray Selectors;
-			GRichEditElemContext StyleCtx;
-			if (ctx.StyleStore.Match(Selectors, &StyleCtx, dynamic_cast<GRichEditElem*>(c)))
+			LRichEditElemContext StyleCtx;
+			if (ctx.StyleStore.Match(Selectors, &StyleCtx, dynamic_cast<LRichEditElem*>(c)))
 			{
 				for (unsigned n=0; n<Selectors.Length(); n++)
 				{
@@ -2218,7 +2218,7 @@ bool GRichTextPriv::FromHtml(GHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			}
 		}
 
-		GNamedStyle *CachedStyle = AddStyleToCache(Style);			
+		LNamedStyle *CachedStyle = AddStyleToCache(Style);			
 
 		if
 		(
@@ -2363,7 +2363,7 @@ bool GRichTextPriv::FromHtml(GHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 	return true;
 }
 
-bool GRichTextPriv::GetSelection(GArray<char16> *Text, GAutoString *Html)
+bool LRichTextPriv::GetSelection(GArray<char16> *Text, GAutoString *Html)
 {
 	if (!Text && !Html)
 		return false;
@@ -2371,8 +2371,8 @@ bool GRichTextPriv::GetSelection(GArray<char16> *Text, GAutoString *Html)
 	GArray<uint32_t> Utf32;
 
 	bool Cf = CursorFirst();
-	GRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
-	GRichTextPriv::BlockCursor *End = Cf ? Selection : Cursor;
+	LRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
+	LRichTextPriv::BlockCursor *End = Cf ? Selection : Cursor;
 
 	if (Html)
 	{		
@@ -2402,7 +2402,7 @@ bool GRichTextPriv::GetSelection(GArray<char16> *Text, GAutoString *Html)
 			{
 				for (++i; Blocks[i] != End->Blk && i < (int)Blocks.Length(); i++)
 				{
-					GRichTextPriv::Block *&b = Blocks[i];
+					LRichTextPriv::Block *&b = Blocks[i];
 					b->CopyAt(0, -1, &Utf32);
 				}
 			}
@@ -2423,27 +2423,27 @@ bool GRichTextPriv::GetSelection(GArray<char16> *Text, GAutoString *Html)
 	return true;
 }
 
-GRichTextEdit::RectType GRichTextPriv::PosToButton(LMouse &m)
+LRichTextEdit::RectType LRichTextPriv::PosToButton(LMouse &m)
 {
-	if (Areas[GRichTextEdit::ToolsArea].Overlap(m.x, m.y)
-		// || Areas[GRichTextEdit::CapabilityArea].Overlap(m.x, m.y)
+	if (Areas[LRichTextEdit::ToolsArea].Overlap(m.x, m.y)
+		// || Areas[LRichTextEdit::CapabilityArea].Overlap(m.x, m.y)
 		)
 	{
-		for (unsigned i=GRichTextEdit::FontFamilyBtn; i<GRichTextEdit::MaxArea; i++)
+		for (unsigned i=LRichTextEdit::FontFamilyBtn; i<LRichTextEdit::MaxArea; i++)
 		{
 			if (Areas[i].Valid() &&
 				Areas[i].Overlap(m.x, m.y))
 			{
-				return (GRichTextEdit::RectType)i;
+				return (LRichTextEdit::RectType)i;
 				break;
 			}
 		}
 	}
 
-	return GRichTextEdit::MaxArea;
+	return LRichTextEdit::MaxArea;
 }
 
-void GRichTextPriv::OnComponentInstall(GString Name)
+void LRichTextPriv::OnComponentInstall(GString Name)
 {
 	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
@@ -2452,11 +2452,11 @@ void GRichTextPriv::OnComponentInstall(GString Name)
 }
 
 #ifdef _DEBUG
-void GRichTextPriv::DumpNodes(GTree *Root)
+void LRichTextPriv::DumpNodes(LTree *Root)
 {
 	if (Cursor)
 	{
-		GTreeItem *ti = new GTreeItem;
+		LTreeItem *ti = new LTreeItem;
 		ti->SetText("Cursor");
 		PrintNode(ti, "Offset=%i", Cursor->Offset);
 		PrintNode(ti, "Pos=%s", Cursor->Pos.GetStr());
@@ -2466,7 +2466,7 @@ void GRichTextPriv::DumpNodes(GTree *Root)
 	}
 	if (Selection)
 	{
-		GTreeItem *ti = new GTreeItem;
+		LTreeItem *ti = new LTreeItem;
 		ti->SetText("Selection");
 		PrintNode(ti, "Offset=%i", Selection->Offset);
 		PrintNode(ti, "Pos=%s", Selection->Pos.GetStr());
@@ -2477,7 +2477,7 @@ void GRichTextPriv::DumpNodes(GTree *Root)
 
 	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
-		GTreeItem *ti = new GTreeItem;
+		LTreeItem *ti = new LTreeItem;
 		Block *b = Blocks[i];
 		b->DumpNodes(ti);
 
@@ -2489,9 +2489,9 @@ void GRichTextPriv::DumpNodes(GTree *Root)
 	}
 }
 
-GTreeItem *PrintNode(GTreeItem *Parent, const char *Fmt, ...)
+LTreeItem *PrintNode(LTreeItem *Parent, const char *Fmt, ...)
 {
-	GTreeItem *i = new GTreeItem;
+	LTreeItem *i = new LTreeItem;
 	GString s;
 
 	va_list Arg;

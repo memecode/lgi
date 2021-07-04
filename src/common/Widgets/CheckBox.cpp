@@ -19,9 +19,9 @@ static int TextYOffset = 0;
 #endif
 static int MinYSize = 16;
 
-class GCheckBoxPrivate : public LMutex, public LStringLayout
+class LCheckBoxPrivate : public LMutex, public LStringLayout
 {
-	GCheckBox *Ctrl;
+	LCheckBox *Ctrl;
 	
 public:
 	int64 Val;
@@ -29,8 +29,8 @@ public:
 	bool Three;
 	LRect ValuePos;
 
-	GCheckBoxPrivate(GCheckBox *ctrl) :
-		LMutex("GCheckBoxPrivate"),
+	LCheckBoxPrivate(LCheckBox *ctrl) :
+		LMutex("LCheckBoxPrivate"),
 		LStringLayout(LgiApp->GetFontCache())
 	{
 		Ctrl = ctrl;
@@ -67,10 +67,10 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Check box
-GCheckBox::GCheckBox(int id, int x, int y, int cx, int cy, const char *name, int InitState) :
+LCheckBox::LCheckBox(int id, int x, int y, int cx, int cy, const char *name, int InitState) :
 	ResObject(Res_CheckBox)
 {
-	d = new GCheckBoxPrivate(this);
+	d = new LCheckBoxPrivate(this);
 	Name(name);
 	LPoint Max = d->GetMax();
 	if (cx < 0) cx = Max.x + PadX1Px + PadX2Px;
@@ -83,26 +83,26 @@ GCheckBox::GCheckBox(int id, int x, int y, int cx, int cy, const char *name, int
 	SetTabStop(true);
 }
 
-GCheckBox::~GCheckBox()
+LCheckBox::~LCheckBox()
 {
 	DeleteObj(d);
 }
 
 #ifdef WINNATIVE
-int GCheckBox::SysOnNotify(int Msg, int Code)
+int LCheckBox::SysOnNotify(int Msg, int Code)
 {
 	return 0;
 }
 #endif
 
-void GCheckBox::OnAttach()
+void LCheckBox::OnAttach()
 {
 	LResources::StyleElement(this);
 	OnStyleChange();
 	LView::OnAttach();
 }
 
-void GCheckBox::OnStyleChange()
+void LCheckBox::OnStyleChange()
 {
 	if (d->Lock(_FL))
 	{
@@ -114,7 +114,7 @@ void GCheckBox::OnStyleChange()
 	}
 }
 
-int GCheckBox::OnNotify(LViewI *Ctrl, int Flags)
+int LCheckBox::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
 	{
@@ -124,27 +124,27 @@ int GCheckBox::OnNotify(LViewI *Ctrl, int Flags)
 	return 0;
 }
 
-GMessage::Result GCheckBox::OnEvent(GMessage *m)
+GMessage::Result LCheckBox::OnEvent(GMessage *m)
 {
 	return LView::OnEvent(m);
 }
 
-bool GCheckBox::ThreeState()
+bool LCheckBox::ThreeState()
 {
 	return d->Three;
 }
 
-void GCheckBox::ThreeState(bool t)
+void LCheckBox::ThreeState(bool t)
 {
 	d->Three = t;
 }
 
-int64 GCheckBox::Value()
+int64 LCheckBox::Value()
 {
 	return d->Val;
 }
 
-void GCheckBox::Value(int64 i)
+void LCheckBox::Value(int64 i)
 {
 	if (d->Val != i)
 	{
@@ -155,7 +155,7 @@ void GCheckBox::Value(int64 i)
 	}
 }
 
-bool GCheckBox::Name(const char *n)
+bool LCheckBox::Name(const char *n)
 {
 	bool Status = false;
 	if (d->Lock(_FL))
@@ -175,7 +175,7 @@ bool GCheckBox::Name(const char *n)
 	return Status;
 }
 
-bool GCheckBox::NameW(const char16 *n)
+bool LCheckBox::NameW(const char16 *n)
 {
 	bool Status = false;
 	if (d->Lock(_FL))
@@ -195,7 +195,7 @@ bool GCheckBox::NameW(const char16 *n)
 	return Status;
 }
 
-void GCheckBox::SetFont(LFont *Fnt, bool OwnIt)
+void LCheckBox::SetFont(LFont *Fnt, bool OwnIt)
 {
 	LgiAssert(Fnt && Fnt->Handle());
 
@@ -208,7 +208,7 @@ void GCheckBox::SetFont(LFont *Fnt, bool OwnIt)
 	Invalidate();
 }
 
-void GCheckBox::OnMouseClick(LMouse &m)
+void LCheckBox::OnMouseClick(LMouse &m)
 {
 	if (Enabled())
 	{
@@ -249,7 +249,7 @@ void GCheckBox::OnMouseClick(LMouse &m)
 	}
 }
 
-void GCheckBox::OnMouseEnter(LMouse &m)
+void LCheckBox::OnMouseEnter(LMouse &m)
 {
 	if (IsCapturing())
 	{
@@ -258,7 +258,7 @@ void GCheckBox::OnMouseEnter(LMouse &m)
 	}
 }
 
-void GCheckBox::OnMouseExit(LMouse &m)
+void LCheckBox::OnMouseExit(LMouse &m)
 {
 	if (IsCapturing())
 	{
@@ -267,7 +267,7 @@ void GCheckBox::OnMouseExit(LMouse &m)
 	}
 }
 
-bool GCheckBox::OnKey(LKey &k)
+bool LCheckBox::OnKey(LKey &k)
 {
 	switch (k.vkey)
 	{
@@ -283,17 +283,17 @@ bool GCheckBox::OnKey(LKey &k)
 	return false;
 }
 
-void GCheckBox::OnFocus(bool f)
+void LCheckBox::OnFocus(bool f)
 {
 	Invalidate();
 }
 
-void GCheckBox::OnPosChange()
+void LCheckBox::OnPosChange()
 {
 	d->Layout(X());
 }
 
-bool GCheckBox::OnLayout(LViewLayoutInfo &Inf)
+bool LCheckBox::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (!Inf.Width.Min)
 	{
@@ -323,7 +323,7 @@ bool GCheckBox::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-int GCheckBox::BoxSize()
+int LCheckBox::BoxSize()
 {
 	auto Fnt = GetFont();
 	int Px = (int) Fnt->Ascent() + 2;
@@ -331,7 +331,7 @@ int GCheckBox::BoxSize()
 	return Px;
 }
 
-void GCheckBox::OnPaint(LSurface *pDC)
+void LCheckBox::OnPaint(LSurface *pDC)
 {
 	#if 0
 	pDC->Colour(GColour(255, 0, 255));
@@ -344,14 +344,14 @@ void GCheckBox::OnPaint(LSurface *pDC)
 		auto Fnt = GetFont();
 		int Px = BoxSize();
 
-		GSkinState State;
+		LSkinState State;
 		State.pScreen = pDC;
 		State.MouseOver = d->Over;
 		State.aText = d->GetStrs();
 		d->ValuePos.Set(0, 0, Px-1, Px-1);
 		d->ValuePos.Offset(0, (Y()-d->ValuePos.Y())>>1);
 		State.Rect = d->ValuePos;
-		GApp::SkinEngine->OnPaint_GCheckBox(this, &State);
+		GApp::SkinEngine->OnPaint_LCheckBox(this, &State);
 	}
 	else
 	{

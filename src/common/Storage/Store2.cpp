@@ -1280,7 +1280,7 @@ namespace Storage2
 			}						
 
 			const char *DlgTitle = "Compact Error";
-			GLayout *Wnd = dynamic_cast<GLayout*>(_Ui);
+			LLayout *Wnd = dynamic_cast<LLayout*>(_Ui);
 			char Msg[512], KeepItem1[32], KeepItem2[32];
 
 			sprintf_s(KeepItem1, sizeof(KeepItem1), Store2_LgiLoadString(IDC_STORE2_KEEP), 1);
@@ -1523,7 +1523,7 @@ namespace Storage2
 						}						
 
 						char *DlgTitle = "Compact Error";
-						GLayout *Wnd = dynamic_cast<GLayout*>(_Ui);
+						LLayout *Wnd = dynamic_cast<LLayout*>(_Ui);
 						char Msg[512], KeepItem1[32], KeepItem2[32];
 
 						sprintf(KeepItem1, Store2_LgiLoadString(IDC_STORE2_KEEP), 1);

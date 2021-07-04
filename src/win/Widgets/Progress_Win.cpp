@@ -6,7 +6,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 LProgressView::LProgressView(int id, int x, int y, int cx, int cy, const char *name) :
-	GControl(LGI_PROGRESS),
+	LControl(LGI_PROGRESS),
 	ResObject(Res_Progress)
 {
 	Shift = 0;
@@ -14,7 +14,7 @@ LProgressView::LProgressView(int id, int x, int y, int cx, int cy, const char *n
 	SetId(id);
 	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
-	if (name) GControl::Name(name);
+	if (name) LControl::Name(name);
 
 	SetStyle(GetStyle() | WS_CHILD | WS_VISIBLE | PBS_SMOOTH);
 	if (SubClass)
@@ -145,12 +145,12 @@ GMessage::Result LProgressView::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GControl::OnEvent(Msg);
+	return LControl::OnEvent(Msg);
 }
 
 GString LProgressView::CssStyles(const char *CssStyle)
 {
-	GString Status = GControl::CssStyles(CssStyle);
+	GString Status = LControl::CssStyles(CssStyle);
 	if (Status && GetCss())
 	{
 		LCss::ColorDef f = GetCss()->Color();

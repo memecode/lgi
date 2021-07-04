@@ -490,7 +490,7 @@ int LDialog::GetButtonId()
 
 int LDialog::OnNotify(LViewI *Ctrl, int Flags)
 {
-	GButton *b = dynamic_cast<GButton*>(Ctrl);
+	LButton *b = dynamic_cast<LButton*>(Ctrl);
 	if (b)
 	{
 		d->BtnId = b->GetId();
@@ -517,11 +517,11 @@ void LDialog::OnPosChange()
     if (Children.Length() == 1)
     {
         List<LViewI>::I it = Children.begin();
-        GLayout *t = dynamic_cast<GLayout*>((LViewI*)it);
+        LLayout *t = dynamic_cast<LLayout*>((LViewI*)it);
         if (t)
         {
             LRect r = GetClient();
-            r.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
+            r.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
             t->SetPos(r);
         }
     }
@@ -550,7 +550,7 @@ void LDialog::EndModeless(int Code)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GControl::GControl(char *SubClassName) : LView(0)
+LControl::LControl(char *SubClassName) : LView(0)
 {
 	SubClass = 0;
 	SetOnDelete = NULL;
@@ -562,13 +562,13 @@ GControl::GControl(char *SubClassName) : LView(0)
 	Pos.ZOff(10, 10);
 }
 
-GControl::~GControl()
+LControl::~LControl()
 {
 	if (SetOnDelete)
 		*SetOnDelete = true;
 }
 
-GMessage::Result GControl::OnEvent(GMessage *Msg)
+GMessage::Result LControl::OnEvent(GMessage *Msg)
 {
 	GMessage::Result Status = 0;
 	
@@ -627,7 +627,7 @@ GMessage::Result GControl::OnEvent(GMessage *Msg)
 	return Status;
 }
 
-LPoint GControl::SizeOfStr(const char *Str)
+LPoint LControl::SizeOfStr(const char *Str)
 {
 	LPoint Pt(0, 0);
 	if (Str)

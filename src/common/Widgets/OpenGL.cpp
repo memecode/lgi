@@ -1,7 +1,7 @@
 #include "Lgi.h"
-#include "GOpenGL.h"
+#include "LOpenGL.h"
 
-struct GOpenGLPriv
+struct LOpenGLPriv
 {
 	#ifdef WIN32
 	HDC hDC;
@@ -9,12 +9,12 @@ struct GOpenGLPriv
 	#endif
 };
 
-GOpenGL::GOpenGL()
+LOpenGL::LOpenGL()
 {
-	d = new GOpenGLPriv;
+	d = new LOpenGLPriv;
 }
 
-GOpenGL::~GOpenGL()
+LOpenGL::~LOpenGL()
 {
 	#ifdef WIN32
 	wglMakeCurrent(NULL, NULL);
@@ -25,14 +25,14 @@ GOpenGL::~GOpenGL()
 	DeleteObj(d);
 }
 
-void GOpenGL::SwapBuffers()
+void LOpenGL::SwapBuffers()
 {
 	#ifdef WIN32
 	::SwapBuffers(d->hDC);
 	#endif
 }
 
-void GOpenGL::OnCreate()
+void LOpenGL::OnCreate()
 {
 	#ifdef WIN32
 	d->hDC = GetDC(Handle());

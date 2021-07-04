@@ -15,7 +15,7 @@
 
 #if 1
 #include "lgi/common/RichTextEdit.h"
-typedef GRichTextEdit EditCtrl;
+typedef LRichTextEdit EditCtrl;
 #else
 #include "GHtmlEdit.h"
 typedef GHtmlEdit EditCtrl;
@@ -81,15 +81,15 @@ class CapsBar : public LView
 {
 	GCapabilityInstallTarget *App;
 	GCapabilityTarget::CapsHash *Caps;
-	GButton *Ok, *Install;
+	LButton *Ok, *Install;
 
 public:
 	CapsBar(GCapabilityInstallTarget *Parent, GCapabilityTarget::CapsHash *caps)
 	{
 		App = Parent;
 		Caps = caps;
-		Ok = new GButton(IDOK, 0, 0, -1, -1, "Ok");
-		Install = new GButton(IDC_INSTALL, 0, 0, -1, -1, "Install");
+		Ok = new LButton(IDOK, 0, 0, -1, -1, "Ok");
+		Install = new LButton(IDC_INSTALL, 0, 0, -1, -1, "Install");
 	}
 
 	bool Pour(LRegion &r)
@@ -162,12 +162,12 @@ public:
 	}
 };
 
-class InstallThread : public GEventTargetThread, public LCancel
+class InstallThread : public LEventTargetThread, public LCancel
 {
 	int AppHnd;
 
 public:
-	InstallThread(int appHnd) : GEventTargetThread("InstallThread")
+	InstallThread(int appHnd) : LEventTargetThread("InstallThread")
 	{
 		AppHnd = appHnd;
 	}
@@ -330,8 +330,8 @@ class App : public LWindow, public GCapabilityInstallTarget
 	LBox *Split;
 	GTextView3 *Txt;
 	LList *Imgs;
-	GTabView *Tabs;
-	GTree *Tree;
+	LTabView *Tabs;
+	LTree *Tree;
 	uint64 LastChange;
 
 	EditCtrl *Edit;
@@ -339,7 +339,7 @@ class App : public LWindow, public GCapabilityInstallTarget
 	GAutoPtr<GSpellCheck> Speller;
 	CapsBar *Bar;
 	GCapabilityTarget::CapsHash Caps;
-	GAutoPtr<GEventTargetThread> Installer;
+	GAutoPtr<LEventTargetThread> Installer;
 	GOptionsFile Options;
 	GArray<GDocView::ContentMedia> Media;
 
@@ -429,12 +429,12 @@ public:
 					#endif
 				}
 
-				Split->AddView(Tabs = new GTabView(IDC_TABS));
+				Split->AddView(Tabs = new LTabView(IDC_TABS));
 				if (Tabs)
 				{
 					// Tabs->Debug();
 					
-					GTabPage *p = Tabs->Append("Html Output");
+					LTabPage *p = Tabs->Append("Html Output");
 					if (p)
 					{
 						LBox *b = new LBox(IDC_HTML_BOX);
@@ -455,7 +455,7 @@ public:
 					p = Tabs->Append("Node View");
 					if (p)
 					{
-						p->AddView(Tree = new GTree(IDC_TREE, 0, 0, 100, 100));
+						p->AddView(Tree = new LTree(IDC_TREE, 0, 0, 100, 100));
 						Tree->SetPourLargest(true);
 					}
 				}
@@ -660,7 +660,7 @@ public:
 			case IDC_TREE:
 			{
 				GNotifyType ft = (GNotifyType)f;
-				GTreeItem *i = Tree->Selection();
+				LTreeItem *i = Tree->Selection();
 				
 				LHashTbl<ConstStrKey<char>,GString> vars;
 				if (i)

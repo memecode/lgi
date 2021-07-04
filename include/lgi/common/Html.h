@@ -146,7 +146,7 @@ public:
 	const char *GetMimeType() { return "text/html"; }
 	void OnContent(GDocumentEnv::LoadJob *Res);
 	bool GotoAnchor(char *Name);
-	GHtmlElement *CreateElement(GHtmlElement *Parent);
+	LHtmlElement *CreateElement(LHtmlElement *Parent);
 	bool EvaluateCondition(const char *Cond);
 	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL);
 	bool DoFind();

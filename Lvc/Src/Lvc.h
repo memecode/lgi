@@ -123,15 +123,15 @@ class SshConnection;
 
 struct AppPriv
 {
-	GTree *Tree;
+	LTree *Tree;
 	VcFolder *CurFolder;
 	LList *Commits;
 	LList *Files;
 	GOptionsFile Opts;
-	GEdit *Msg;
+	LEdit *Msg;
 	GTextLog *Diff;
 	GTextLog *Log;
-	GTabView *Tabs;
+	LTabView *Tabs;
 	VersionCtrl PrevType;
 	int Resort;
 
@@ -175,7 +175,7 @@ struct AppPriv
 	class VcFile *FindFile(const char *Path);
 };
 
-class SshConnection : public LSsh, public GEventTargetThread
+class SshConnection : public LSsh, public LEventTargetThread
 {
 	int GuiHnd;
 	GUri Host;
@@ -208,7 +208,7 @@ public:
 	~BlameUi();
 };
 
-class DropDownBtn : public GDropDown, public ResObject
+class DropDownBtn : public LDropDown, public ResObject
 {
 	struct DropDownBtnPriv *d;
 	class DropLst *Pu;

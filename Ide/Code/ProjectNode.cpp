@@ -44,7 +44,7 @@ public:
 			MoveToCenter();
 			SetCtrlName(IDC_MSG, m);
 			
-			GCombo *c;
+			LCombo *c;
 			if (GetViewById(IDC_TYPE, c))
 			{
 				for (int i=NodeNone; i<NodeMax; i++)
@@ -76,11 +76,11 @@ public:
 			OnPosChange();
 			
 			// Make sure the dialog can display the whole table...
-			GTableLayout *t;
+			LTableLayout *t;
 			if (GetViewById(IDC_TABLE, t))
 			{
 				LRect u = t->GetUsedArea();
-				u.Size(-GTableLayout::CellSpacing, -GTableLayout::CellSpacing);
+				u.Size(-LTableLayout::CellSpacing, -LTableLayout::CellSpacing);
 				LRect p = GetPos();
 				if (u.X() < p.X() ||
 					u.Y() < p.Y())
@@ -921,7 +921,7 @@ void ProjectNode::Delete()
 {
 	if (Select())
 	{
-		GTreeItem *s = GetNext();
+		LTreeItem *s = GetNext();
 		if (s || (s = GetParent()))
 			s->Select(true);
 	}
@@ -958,7 +958,7 @@ bool ProjectNode::OnKey(LKey &k)
 
 void ProjectNode::OnMouseClick(LMouse &m)
 {
-	GTreeItem::OnMouseClick(m);
+	LTreeItem::OnMouseClick(m);
 	
 	if (m.IsContextMenu())
 	{

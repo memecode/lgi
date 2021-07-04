@@ -1,6 +1,6 @@
 #include "Lgi.h"
 #include "GButton.h"
-#include "GEdit.h"
+#include "LEdit.h"
 #include "GCombo.h"
 // #include "LgiSkinGel.h"
 
@@ -49,12 +49,12 @@ public:
 
 class App : public LWindow
 {
-    GImageList *i;
+    LImageList *i;
     
 public:
     App()
     {
-        i = LgiLoadImageList("cmds.png", 16, 16);
+        i = LLoadImageList("cmds.png", 16, 16);
         Name("Gtk Test");
         SetQuitOnClose(true);
         LRect r(0, 0, 1000, 800);
@@ -82,7 +82,7 @@ public:
             s->AppendItem("About", 31, true);
             #endif
 
-			GToolBar *t = new GToolBar;
+			LToolBar *t = new LToolBar;
             t->SetImageList(i, 16, 16);
             t->AppendButton("New", 1);
             t->AppendButton("Open", 2);
@@ -90,7 +90,7 @@ public:
             AddView(t);
 
             #if 1
-            GSplitter *split = new GSplitter();
+            LSplitter *split = new LSplitter();
             split->Raised(true);
             split->IsVertical(true);
             split->Border(true);

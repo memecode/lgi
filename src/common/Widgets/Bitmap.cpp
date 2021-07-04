@@ -143,7 +143,7 @@ void LBitmap::SetDC(LSurface *pNewDC)
 
 			for (LViewI *p = GetParent(); p; p = p->GetParent())
 			{
-				GTableLayout *Tl = dynamic_cast<GTableLayout*>(p);
+				LTableLayout *Tl = dynamic_cast<LTableLayout*>(p);
 				if (Tl)
 				{
 					Tl->InvalidateLayout();

@@ -1,9 +1,9 @@
 #include "Lgi.h"
-#include "GPopup.h"
+#include "LPopup.h"
 #include "GDateTimeCtrls.h"
 #include "LDisplayString.h"
 
-GDatePopup::GDatePopup(LView *owner) : GPopup(owner)
+LDatePopup::LDatePopup(LView *owner) : LPopup(owner)
 {
 	FirstPaint = true;
 	SetNotify(owner);
@@ -21,7 +21,7 @@ GDatePopup::GDatePopup(LView *owner) : GPopup(owner)
 	SetPos(r);
 }
 
-GDatePopup::~GDatePopup()
+LDatePopup::~LDatePopup()
 {
 	if (Owner)
 	{
@@ -30,17 +30,17 @@ GDatePopup::~GDatePopup()
 	}
 }
 
-LDateTime GDatePopup::Get()
+LDateTime LDatePopup::Get()
 {
 	return Mv.Get();
 }
 
-void GDatePopup::Set(LDateTime &Ts)
+void LDatePopup::Set(LDateTime &Ts)
 {
 	Mv.Set(&Ts);
 }
 
-void GDatePopup::OnPaint(LSurface *pDC)
+void LDatePopup::OnPaint(LSurface *pDC)
 {
 	if (FirstPaint)
 	{
@@ -134,7 +134,7 @@ void GDatePopup::OnPaint(LSurface *pDC)
 	}
 }
 
-void GDatePopup::OnChange()
+void LDatePopup::OnChange()
 {
 	LViewI *n = GetNotify() ? GetNotify() : GetParent();
 	if (n)
@@ -150,7 +150,7 @@ void GDatePopup::OnChange()
 
 }
 
-void GDatePopup::OnMouseClick(LMouse &m)
+void LDatePopup::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -185,10 +185,10 @@ void GDatePopup::OnMouseClick(LMouse &m)
 		}
 	}
 
-	GPopup::OnMouseClick(m);
+	LPopup::OnMouseClick(m);
 }
 
-void GDatePopup::Move(int Dx, int Dy)
+void LDatePopup::Move(int Dx, int Dy)
 {
 	int x = 0, y = 0;
 	Mv.GetCursor(x, y);
@@ -196,7 +196,7 @@ void GDatePopup::Move(int Dx, int Dy)
 	Invalidate();
 }
 
-bool GDatePopup::OnKey(LKey &k)
+bool LDatePopup::OnKey(LKey &k)
 {
 	switch (k.vkey)
 	{
@@ -251,10 +251,10 @@ bool GDatePopup::OnKey(LKey &k)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 GDateDropDown::GDateDropDown() :
-	GDropDown(-1, 0, 0, 10, 10, 0),
+	LDropDown(-1, 0, 0, 10, 10, 0),
 	ResObject(Res_Custom)
 {
-	SetPopup(Drop = new GDatePopup(this));
+	SetPopup(Drop = new LDatePopup(this));
 }
 
 int GDateDropDown::OnNotify(LViewI *Wnd, int Flags)
@@ -267,7 +267,7 @@ int GDateDropDown::OnNotify(LViewI *Wnd, int Flags)
 		SetDate(s);
 	}
 	
-	return GDropDown::OnNotify(Wnd, Flags);
+	return LDropDown::OnNotify(Wnd, Flags);
 }
 
 void GDateDropDown::OnChildrenChanged(LViewI *Wnd, bool Attaching)
@@ -351,10 +351,10 @@ void GDateDropDown::OnMouseClick(LMouse &m)
 		}
 	}
 
-	GDropDown::OnMouseClick(m);
+	LDropDown::OnMouseClick(m);
 }
 
-class GDatePopupFactory : public GViewFactory
+class GDatePopupFactory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{

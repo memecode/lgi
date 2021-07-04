@@ -72,7 +72,7 @@ public:
 				}
 				else
 				{
-					LRect c = Child->GLayout::GetClient();
+					LRect c = Child->LLayout::GetClient();
 					int Corner = 24;
 					if (x < c.x1 + Corner)
 					{
@@ -153,7 +153,7 @@ bool GMdiChild::Attach(LViewI *p)
 	par->d->Children.Add(this);
 	d->Order = par->GetNextOrder();
 	#endif
-	bool s = GLayout::Attach(p);
+	bool s = LLayout::Attach(p);
 	if (s)
 		AttachChildren();
 	return s;
@@ -168,7 +168,7 @@ bool GMdiChild::Detach()
 		par->d->Children.Delete(this);
 	}
 	#endif
-	return GLayout::Detach();
+	return LLayout::Detach();
 }
 const char *GMdiChild::Name()
 {
@@ -270,7 +270,7 @@ LRect &GMdiChild::GetClient(bool ClientSpace)
 {
 	static LRect r;
 	
-	r = GLayout::GetClient(ClientSpace);
+	r = LLayout::GetClient(ClientSpace);
 	r.Size(3, 3);
 	r.y1 += d->Fy + 2;
 	r.Size(1, 1);
@@ -279,7 +279,7 @@ LRect &GMdiChild::GetClient(bool ClientSpace)
 }
 void GMdiChild::OnPaint(LSurface *pDC)
 {
-	LRect p = GLayout::GetClient();
+	LRect p = LLayout::GetClient();
 	// Border
 	LWideBorder(pDC, p, RAISED);
 	pDC->Colour(LC_MED, 24);
@@ -360,7 +360,7 @@ void GMdiChild::OnMouseClick(LMouse &m)
 		Raise();
 		if (m.Down())
 		{
-			LRect c = GLayout::GetClient();
+			LRect c = LLayout::GetClient();
 			d->Drag = DragNone;
 			d->Ox = d->Oy = -1;
 			
@@ -759,7 +759,7 @@ void GMdiParent::OnPaint(LSurface *pDC)
 }
 bool GMdiParent::Attach(LViewI *p)
 {
-	bool s = GLayout::Attach(p);
+	bool s = LLayout::Attach(p);
 	if (s)
 	{
 		GetWindow()->RegisterHook(this, LKeyAndMouseEvents);
@@ -885,7 +885,7 @@ void GMdiParent::OnPosChange()
 				#endif
 				
 				if (!c->IsAttached())
-					c->GLayout::Attach(this);
+					c->LLayout::Attach(this);
 				c->SetPos(d->Content);
 				c->Visible(true);
 				c->PourAll();
@@ -902,7 +902,7 @@ void GMdiParent::OnPosChange()
 					#if DEBUG_MDI
 					LgiTrace("    detaching %s\n", c->GetClass());
 					#endif
-					c->GLayout::Detach();
+					c->LLayout::Detach();
 					c->SetParent(this);
 				}
 				#else
@@ -948,7 +948,7 @@ LRect GMdiParent::NewPos()
 bool GMdiParent::Detach()
 {
 	d->InOnPosChange = true;
-	return GLayout::Detach();
+	return LLayout::Detach();
 }
 void GMdiParent::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {

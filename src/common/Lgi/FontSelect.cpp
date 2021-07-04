@@ -31,10 +31,10 @@ int FontSizes[] = { 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 48, 72, 100, 0
 
 struct GFontSelectPriv
 {
-	GTableLayout *Tbl;
+	LTableLayout *Tbl;
 	LList *Lst;
 	LBitmap *Bmp;
-	GCombo *PtSizes;
+	LCombo *PtSizes;
 	bool Running;
 	
 	GFontSelectPriv()
@@ -69,35 +69,35 @@ LFontSelect::LFontSelect(LView *Parent, void *Init, int InitLen)
 	MoveToCenter();
 
 	// Setup dialog
-	AddView(d->Tbl = new GTableLayout(50));
+	AddView(d->Tbl = new LTableLayout(50));
 
-	GRadioGroup *rg;
+	LRadioGroup *rg;
 	GLayoutCell *c = d->Tbl->GetCell(0, 0, true, 1, 2);
 		c->Add(d->Lst = new LList(IDC_FONT, 14, 14, 161, 147));
 		d->Lst->AddColumn(LgiLoadString(L_FONTUI_FACE, "Face"), 140);
 		d->Lst->MultiSelect(false);
 	
 	c = d->Tbl->GetCell(1, 0, true, 1, 1);
-		c->Add(rg = new GRadioGroup(IDM_STATIC, 0, 0, 100, 100, LgiLoadString(L_FONTUI_STYLE, "Style")));
-		rg->AddView(new GCheckBox(IDC_BOLD, 0, 0, -1, -1, LgiLoadString(L_FONTUI_BOLD, "Bold")));
-		rg->AddView(new GCheckBox(IDC_ITALIC, 0, 0, -1, -1, LgiLoadString(L_FONTUI_ITALIC, "Italic")));
-		rg->AddView(new GCheckBox(IDC_UNDERLINE, 0, 0, -1, -1, LgiLoadString(L_FONTUI_UNDERLINE, "Underline")));
+		c->Add(rg = new LRadioGroup(IDM_STATIC, 0, 0, 100, 100, LgiLoadString(L_FONTUI_STYLE, "Style")));
+		rg->AddView(new LCheckBox(IDC_BOLD, 0, 0, -1, -1, LgiLoadString(L_FONTUI_BOLD, "Bold")));
+		rg->AddView(new LCheckBox(IDC_ITALIC, 0, 0, -1, -1, LgiLoadString(L_FONTUI_ITALIC, "Italic")));
+		rg->AddView(new LCheckBox(IDC_UNDERLINE, 0, 0, -1, -1, LgiLoadString(L_FONTUI_UNDERLINE, "Underline")));
 	
 	c = d->Tbl->GetCell(1, 1, true, 1, 1);
-		c->Add(rg = new GRadioGroup(IDM_STATIC, 0, 0, 100, 100, LgiLoadString(L_FONTUI_PTSIZE, "Pt Size")));
-		rg->AddView(new GEdit(IDC_PT_SIZE, 0, 0, 56, 21, ""));
-		rg->AddView(d->PtSizes = new GCombo(IDC_SELECT_SIZE, 0, 0, 20, 20, ""));
+		c->Add(rg = new LRadioGroup(IDM_STATIC, 0, 0, 100, 100, LgiLoadString(L_FONTUI_PTSIZE, "Pt Size")));
+		rg->AddView(new LEdit(IDC_PT_SIZE, 0, 0, 56, 21, ""));
+		rg->AddView(d->PtSizes = new LCombo(IDC_SELECT_SIZE, 0, 0, 20, 20, ""));
 	
 	c = d->Tbl->GetCell(0, 2, true, 2, 1);
-		c->Add(new GTextLabel(IDM_STATIC, 0, 0, -1, -1, LgiLoadString(L_FONTUI_PREVIEW, "Preview:")));
+		c->Add(new LTextLabel(IDM_STATIC, 0, 0, -1, -1, LgiLoadString(L_FONTUI_PREVIEW, "Preview:")));
 	
 	c = d->Tbl->GetCell(0, 3, true, 2, 1);
 		c->Add(d->Bmp = new LBitmap(IDC_PREVIEW, 14, 182, 0));
 	
 	c = d->Tbl->GetCell(0, 4, true, 2, 1);
 		c->TextAlign(LCss::Len(LCss::AlignRight));
-		c->Add(new GButton(IDOK, 175, 259, 49, 21, LgiLoadString(L_BTN_OK, "Ok")));
-		c->Add(new GButton(IDCANCEL, 231, 259, 49, 21, LgiLoadString(L_BTN_CANCEL, "Cancel")));
+		c->Add(new LButton(IDOK, 175, 259, 49, 21, LgiLoadString(L_BTN_OK, "Ok")));
+		c->Add(new LButton(IDCANCEL, 231, 259, 49, 21, LgiLoadString(L_BTN_CANCEL, "Cancel")));
 
 	// Populate the contents of the controls
 	int n = 0;

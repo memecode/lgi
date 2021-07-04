@@ -31,7 +31,7 @@ GInput::GInput(LViewI *parent, const char *InitStr, const char *Msg, const char 
 	Callback = callback;
 	CallbackParam = callbackparam;
 
-	GTableLayout *Tbl = new GTableLayout(IDC_TABLE);
+	LTableLayout *Tbl = new LTableLayout(IDC_TABLE);
 	if (!Tbl)
 	{
 		LgiAssert(0);
@@ -42,7 +42,7 @@ GInput::GInput(LViewI *parent, const char *InitStr, const char *Msg, const char 
 	int Cy = 0;
 	GLayoutCell *c = Tbl->GetCell(0, Cy++);
 	LView *Txt;
-	c->Add(Txt = new GTextLabel(-1, 5, 5, -1, -1, Msg));
+	c->Add(Txt = new LTextLabel(-1, 5, 5, -1, -1, Msg));
 
 	LDisplayString MsgDs(SysFont, ValidStr(InitStr)?InitStr:"A");
 	int Dx = LgiApp->GetMetric(LGI_MET_DECOR_X) + 10;
@@ -61,21 +61,21 @@ GInput::GInput(LViewI *parent, const char *InitStr, const char *Msg, const char 
 	Name(Title);
 
 	c = Tbl->GetCell(0, Cy++);
-	c->Add(Edit = new GEdit(IDC_EDIT, 5, Txt->GetPos().y2 + 5, EditX - 1, MsgDs.Y()+7, InitStr));
+	c->Add(Edit = new LEdit(IDC_EDIT, 5, Txt->GetPos().y2 + 5, EditX - 1, MsgDs.Y()+7, InitStr));
 	if (Edit)
 	{
 		Edit->Password(Password);
 		Edit->Focus(true);
 		if (Callback)
-			c->Add(new GButton(IDC_CALLBACK, 0, 0, -1, -1, "..."));
+			c->Add(new LButton(IDC_CALLBACK, 0, 0, -1, -1, "..."));
 	}
 
 	c = Tbl->GetCell(0, Cy++);
 	c->TextAlign(LCss::AlignRight);
 
-	GButton *Ok;
-	c->Add(Ok = new GButton(IDOK, 0, 0, -1, -1, LgiLoadString(L_BTN_OK, "Ok")));
-	c->Add(new GButton(IDCANCEL, 0, 0, -1, -1, LgiLoadString(L_BTN_CANCEL, "Cancel")));
+	LButton *Ok;
+	c->Add(Ok = new LButton(IDOK, 0, 0, -1, -1, LgiLoadString(L_BTN_OK, "Ok")));
+	c->Add(new LButton(IDCANCEL, 0, 0, -1, -1, LgiLoadString(L_BTN_CANCEL, "Cancel")));
 	Ok->Default(true);
 
 	SetPos(r);

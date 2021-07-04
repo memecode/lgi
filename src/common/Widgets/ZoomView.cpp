@@ -74,7 +74,7 @@ public:
 	LSurface *pDC;
 
 	/// The parent view that owns us
-	GZoomView *View;
+	LZoomView *View;
 	
 	/// The callback object...
 	GZoomViewCallback *Callback;
@@ -103,10 +103,10 @@ public:
 	ZoomTile ***Tile;
 
 	// Type of sampling to use
-	GZoomView::SampleMode SampleMode;
+	LZoomView::SampleMode SampleMode;
 	
 	// Default zooming behaviour
-	GZoomView::DefaultZoomMode DefaultZoom;
+	LZoomView::DefaultZoomMode DefaultZoom;
 
 	// Threading stuff
 	enum WorkerMode
@@ -118,7 +118,7 @@ public:
 		Stopped,
 	} Mode;
 
-	GZoomViewPriv(GZoomView *view, GZoomViewCallback *callback)
+	GZoomViewPriv(LZoomView *view, GZoomViewCallback *callback)
 	{
 		View = view;
 		Callback = callback;
@@ -132,8 +132,8 @@ public:
 		OwnDC = false;
 		pDC = NULL;
 		
-		SampleMode = GZoomView::SampleNearest;
-		DefaultZoom = GZoomView::ZoomFitBothAxis;
+		SampleMode = LZoomView::SampleNearest;
+		DefaultZoom = LZoomView::ZoomFitBothAxis;
 	}
 	
 	~GZoomViewPriv()
@@ -255,7 +255,7 @@ public:
 				
 				switch (DefaultZoom)
 				{
-					case GZoomView::ZoomFitBothAxis:
+					case LZoomView::ZoomFitBothAxis:
 					{
 						if (x >= c.X() || y >= c.Y())
 						{
@@ -264,7 +264,7 @@ public:
 						}
 						break;
 					}
-					case GZoomView::ZoomFitX:
+					case LZoomView::ZoomFitX:
 					{
 						if (x >= c.X())
 						{
@@ -273,7 +273,7 @@ public:
 						}
 						break;
 					}
-					case GZoomView::ZoomFitY:
+					case LZoomView::ZoomFitY:
 					{
 						if (y >= c.Y())
 						{
@@ -347,7 +347,7 @@ public:
 	template <typename OutPx, typename InPx>
 	void ScaleDown24(OutPx *out, InPx *in, int len, int Factor)
 	{
-		if (SampleMode == GZoomView::SampleNearest)
+		if (SampleMode == LZoomView::SampleNearest)
 		{
 			InPx *end = in + len;
 
@@ -361,7 +361,7 @@ public:
 			}
 		}
 		/*
-		else if (SampleMode == GZoomView::SampleAverage)
+		else if (SampleMode == LZoomView::SampleAverage)
 		{
 			System24BitPixel *src[MAX_FACTOR];
 			for (int i=0; i<Factor; i++)
@@ -400,7 +400,7 @@ public:
 	template <typename OutPx, typename InPx>
 	void ScaleDown24To32(OutPx *out, InPx *in, int len, int Factor)
 	{
-		if (SampleMode == GZoomView::SampleNearest)
+		if (SampleMode == LZoomView::SampleNearest)
 		{
 			InPx *end = in + len;
 
@@ -498,7 +498,7 @@ public:
 			{
 				case CsIndex8:
 				{
-					if (SampleMode == GZoomView::SampleNearest)
+					if (SampleMode == LZoomView::SampleNearest)
 					{
 						uint8_t *src = (*Src)[yy];
 						uint8_t *end = src + Ex;
@@ -513,7 +513,7 @@ public:
 							src += Factor;
 						}
 					}
-					else if (SampleMode == GZoomView::SampleMax)
+					else if (SampleMode == LZoomView::SampleMax)
 					{
 						uint8_t *s[32];
 						LgiAssert(Factor < 32);
@@ -563,7 +563,7 @@ public:
 					uint16 *end = src + Ex;
 					src += Sx;
 					
-					if (SampleMode == GZoomView::SampleNearest)
+					if (SampleMode == LZoomView::SampleNearest)
 					{
 						while (src < end)
 						{
@@ -600,7 +600,7 @@ public:
 
 					#define rop(c) dst->c = (DivLut[DivLut[dst->c * dst->a] * o] + DivLut[src->c * src->a]) * 255 / ra;
 
-					if (SampleMode == GZoomView::SampleNearest)
+					if (SampleMode == LZoomView::SampleNearest)
 					{
 						// if (Dst->GetColourSpace() == Src->GetColourSpace())
 
@@ -641,7 +641,7 @@ public:
 
 					LgiAssert(Dst->GetColourSpace() == CsBgr24);
 
-					if (SampleMode == GZoomView::SampleNearest)
+					if (SampleMode == LZoomView::SampleNearest)
 					{
 						while (src < end)
 						{
@@ -668,7 +668,7 @@ public:
 
 					LgiAssert(Dst->GetColourSpace() == CsBgra32);
 
-					if (SampleMode == GZoomView::SampleNearest)
+					if (SampleMode == LZoomView::SampleNearest)
 					{
 						while (s < end)
 						{
@@ -1184,18 +1184,18 @@ public:
 	}
 };
 
-GZoomView::GZoomView(GZoomViewCallback *callback) : ResObject(Res_Custom)
+LZoomView::LZoomView(GZoomViewCallback *callback) : ResObject(Res_Custom)
 {
 	d = new GZoomViewPriv(this, callback);
 	// Sunken(true);
 }
 
-GZoomView::~GZoomView()
+LZoomView::~LZoomView()
 {
 	DeleteObj(d);
 }
 
-bool GZoomView::OnLayout(LViewLayoutInfo &Inf)
+bool LZoomView::OnLayout(LViewLayoutInfo &Inf)
 {
 	Inf.Width.Min = -1;
 	Inf.Width.Max = -1;
@@ -1205,7 +1205,7 @@ bool GZoomView::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-void GZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
+void LZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 {
 	LSurface *Src = d->pDC;
 	if (!Src)
@@ -1248,12 +1248,12 @@ void GZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 	}
 }
 
-void GZoomView::OnPosChange()
+void LZoomView::OnPosChange()
 {
 	UpdateScrollBars();
 }
 
-void GZoomView::SetSurface(LSurface *dc, bool own)
+void LZoomView::SetSurface(LSurface *dc, bool own)
 {
 	if (d->OwnDC)
 		DeleteObj(d->pDC);
@@ -1264,12 +1264,12 @@ void GZoomView::SetSurface(LSurface *dc, bool own)
 	Reset();
 }
 
-LSurface *GZoomView::GetSurface()
+LSurface *LZoomView::GetSurface()
 {
 	return d->pDC;
 }
 
-void GZoomView::Update(LRect *Where)
+void LZoomView::Update(LRect *Where)
 {
 	#if DEBUG_THREADING
 	if (!d->Dirty)
@@ -1312,7 +1312,7 @@ void GZoomView::Update(LRect *Where)
 	Invalidate();
 }
 
-void GZoomView::Reset()
+void LZoomView::Reset()
 {
 	d->EmptyTiles();
 	d->SetDefaultZoom();
@@ -1320,12 +1320,12 @@ void GZoomView::Reset()
 	Invalidate();
 }
 
-int GZoomView::GetBlockSize()
+int LZoomView::GetBlockSize()
 {
 	return d->GetZoom() > 0 ? 16 : 1;
 }
 
-GZoomView::ViewportInfo GZoomView::GetViewport()
+LZoomView::ViewportInfo LZoomView::GetViewport()
 {
 	ViewportInfo v;
 	
@@ -1337,17 +1337,17 @@ GZoomView::ViewportInfo GZoomView::GetViewport()
 	return v;
 }
 
-void GZoomView::SetDefaultZoomMode(DefaultZoomMode m)
+void LZoomView::SetDefaultZoomMode(DefaultZoomMode m)
 {
 	d->DefaultZoom = m;
 }
 
-GZoomView::DefaultZoomMode GZoomView::GetDefaultZoomMode()
+LZoomView::DefaultZoomMode LZoomView::GetDefaultZoomMode()
 {
 	return d->DefaultZoom;
 }
 
-void GZoomView::ScrollToPoint(LPoint DocCoord)
+void LZoomView::ScrollToPoint(LPoint DocCoord)
 {
 	if (!d->pDC)
 		return;
@@ -1377,12 +1377,12 @@ void GZoomView::ScrollToPoint(LPoint DocCoord)
 	}
 }
 
-void GZoomView::SetSampleMode(SampleMode sm)
+void LZoomView::SetSampleMode(SampleMode sm)
 {
 	d->SampleMode = sm;
 }
 
-void GZoomView::SetViewport(ViewportInfo i)
+void LZoomView::SetViewport(ViewportInfo i)
 {
 	d->SetZoom(i.Zoom);
 	if (!d->Tile)
@@ -1415,12 +1415,12 @@ void GZoomView::SetViewport(ViewportInfo i)
 	}
 }
 
-void GZoomView::SetCallback(GZoomViewCallback *cb)
+void LZoomView::SetCallback(GZoomViewCallback *cb)
 {
 	d->Callback = cb;
 }
 
-bool GZoomView::Convert(LPointF &p, int x, int y)
+bool LZoomView::Convert(LPointF &p, int x, int y)
 {
 	int64 Sx = 0, Sy = 0;
 	int64 Factor = d->Factor();
@@ -1457,13 +1457,13 @@ bool GZoomView::Convert(LPointF &p, int x, int y)
 	return false;
 }
 
-void GZoomView::OnMouseClick(LMouse &m)
+void LZoomView::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 		Focus(true);
 }
 
-bool GZoomView::OnMouseWheel(double Lines)
+bool LZoomView::OnMouseWheel(double Lines)
 {
 	LMouse m;
 	GetMouse(m);
@@ -1613,7 +1613,7 @@ bool GZoomView::OnMouseWheel(double Lines)
 	return true;
 }
 
-void GZoomView::OnPulse()
+void LZoomView::OnPulse()
 {
 	LMouse m;
 	if (!GetMouse(m))
@@ -1669,7 +1669,7 @@ void GZoomView::OnPulse()
 	}
 }
 
-GMessage::Param GZoomView::OnEvent(GMessage *m)
+GMessage::Param LZoomView::OnEvent(GMessage *m)
 {
 	switch (m->Msg())
 	{
@@ -1679,10 +1679,10 @@ GMessage::Param GZoomView::OnEvent(GMessage *m)
 		}
 	}
 	
-	return GLayout::OnEvent(m);
+	return LLayout::OnEvent(m);
 }
 
-int GZoomView::OnNotify(LViewI *v, int f)
+int LZoomView::OnNotify(LViewI *v, int f)
 {
 	switch (v->GetId())
 	{
@@ -1701,7 +1701,7 @@ int GZoomView::OnNotify(LViewI *v, int f)
 	return 0;
 }
 
-void GZoomView::OnPaint(LSurface *pDC)
+void LZoomView::OnPaint(LSurface *pDC)
 {
 	#if 0
 	// coverage test
@@ -1855,13 +1855,13 @@ void GZoomView::OnPaint(LSurface *pDC)
 	}
 }
 
-class GZoomViewFactory : public GViewFactory
+class GZoomViewFactory : public LViewFactory
 {
 public:
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
-		if (!_stricmp(Class, "GZoomView"))
-			return new GZoomView(NULL);
+		if (!_stricmp(Class, "LZoomView"))
+			return new LZoomView(NULL);
 		
 		return NULL;
 	}

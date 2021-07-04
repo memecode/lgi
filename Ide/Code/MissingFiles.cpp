@@ -26,12 +26,12 @@ struct SearchResults
 	}
 };
 
-class FileExistsThread : public GEventTargetThread
+class FileExistsThread : public LEventTargetThread
 {
 	int Hnd;
 
 public:
-	FileExistsThread(int hnd) : GEventTargetThread("FileExistsThread")
+	FileExistsThread(int hnd) : LEventTargetThread("FileExistsThread")
 	{
 		Hnd = hnd;
 	}
@@ -73,14 +73,14 @@ bool IsParentFolder(GString p, GString c)
 	return true;
 }
 
-class SearchThread : public GEventTargetThread
+class SearchThread : public LEventTargetThread
 {
 	int Hnd;
 	GArray<GString> Search;
 	GArray<char*> Files;
 
 public:
-	SearchThread(int hnd) : GEventTargetThread("SearchThread")
+	SearchThread(int hnd) : LEventTargetThread("SearchThread")
 	{
 		Hnd = hnd;
 	}

@@ -29,7 +29,7 @@ class LgiClass LCommand : public LBase //, public GFlags
 
 public:
 	int			Id;
-	GToolButton	*ToolButton;
+	LToolButton	*ToolButton;
 	LMenuItem	*MenuItem;
 	LKey		*Accelerator;
 	char		*TipHelp;

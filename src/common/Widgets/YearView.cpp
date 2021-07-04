@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "YearView.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/YearView.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
 YearView::YearView(LDateTime *dt)

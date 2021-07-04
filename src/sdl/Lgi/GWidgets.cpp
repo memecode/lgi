@@ -12,9 +12,9 @@
 #include <stdio.h>
 
 #include "Lgi.h"
-#include "GSlider.h"
+#include "LSlider.h"
 #include "LBitmap.h"
-#include "GTableLayout.h"
+#include "LTableLayout.h"
 #include "LDisplayString.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -67,11 +67,11 @@ void GDialog::OnPosChange()
     if (Children.Length() == 1)
     {
         auto it = Children.begin();
-        GTableLayout *t = dynamic_cast<GTableLayout*>((LViewI*)it);
+        LTableLayout *t = dynamic_cast<LTableLayout*>((LViewI*)it);
         if (t)
         {
             LRect r = GetClient();
-            r.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
+            r.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
             t->SetPos(r);
         }
     }
@@ -200,7 +200,7 @@ LPoint GControl::SizeOfStr(const char *Str)
 
 //////////////////////////////////////////////////////////////////////////////////
 // Slider control
-GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool vert) :
+LSlider::LSlider(int id, int x, int y, int cx, int cy, const char *name, bool vert) :
 	ResObject(Res_Slider)
 {
 	SetId(id);
@@ -213,11 +213,11 @@ GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool ve
 	SetTabStop(true);
 }
 
-GSlider::~GSlider()
+LSlider::~LSlider()
 {
 }
 
-void GSlider::Value(int64 i)
+void LSlider::Value(int64 i)
 {
 	if (i > Max) i = Max;
 	if (i < Min) i = Min;
@@ -236,29 +236,29 @@ void GSlider::Value(int64 i)
 	}
 }
 
-int64 GSlider::Value()
+int64 LSlider::Value()
 {
 	return Val;
 }
 
-void GSlider::GetLimits(int64 &min, int64 &max)
+void LSlider::GetLimits(int64 &min, int64 &max)
 {
 	min = Min;
 	max = Max;
 }
 
-void GSlider::SetLimits(int64 min, int64 max)
+void LSlider::SetLimits(int64 min, int64 max)
 {
 	Min = min;
 	Max = max;
 }
 
-GMessage::Result GSlider::OnEvent(GMessage *Msg)
+GMessage::Result LSlider::OnEvent(GMessage *Msg)
 {
 	return 0;
 }
 
-void GSlider::OnPaint(LSurface *pDC)
+void LSlider::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle();
@@ -282,7 +282,7 @@ void GSlider::OnPaint(LSurface *pDC)
 	}
 }
 
-void GSlider::OnMouseClick(LMouse &m)
+void LSlider::OnMouseClick(LMouse &m)
 {
 	Capture(m.Down());
 	if (Thumb.Overlap(m.x, m.y))
@@ -292,7 +292,7 @@ void GSlider::OnMouseClick(LMouse &m)
 	}
 }
 
-void GSlider::OnMouseMove(LMouse &m)
+void LSlider::OnMouseMove(LMouse &m)
 {
 	if (IsCapturing())
 	{
@@ -503,7 +503,7 @@ GItemContainer::~GItemContainer()
 	}
 }
 
-bool GItemContainer::SetImageList(GImageList *list, bool Own)
+bool GItemContainer::SetImageList(LImageList *list, bool Own)
 {
 	ImageList = list;
 	OwnList(Own);

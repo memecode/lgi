@@ -22,13 +22,13 @@ struct DropDownBtnPriv
 	}
 };
 
-class DropLst : public GPopup
+class DropLst : public LPopup
 {
 public:
 	DropDownBtnPriv *d;
 	LList *Lst;
 
-	DropLst(DropDownBtnPriv *priv, LView *owner) : Lst(NULL), GPopup(owner)
+	DropLst(DropDownBtnPriv *priv, LView *owner) : Lst(NULL), LPopup(owner)
 	{
 		d = priv;
 
@@ -75,7 +75,7 @@ public:
 };
 
 DropDownBtn::DropDownBtn() :
-	GDropDown(-1, 0, 0, 100, 24, NULL),
+	LDropDown(-1, 0, 0, 100, 24, NULL),
 	ResObject(Res_Custom)
 {
 	d = new DropDownBtnPriv(this);
@@ -132,7 +132,7 @@ bool DropDownBtn::SetList(int EditCtrl, GString::Array a)
 	return true;
 }
 
-class DropDownBtnFactory : public GViewFactory
+class DropDownBtnFactory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{

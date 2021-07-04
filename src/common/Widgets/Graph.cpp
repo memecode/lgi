@@ -1,5 +1,5 @@
 #include "Lgi.h"
-#include "GGraph.h"
+#include "LGraph.h"
 #include "GDocView.h"
 #include "LDisplayString.h"
 #include <math.h>
@@ -12,14 +12,14 @@ struct GraphAv
     uint64 Count;
 };
 
-struct GGraphPriv
+struct LGraphPriv
 {
 	int XAxis, YAxis;
 	LVariantType XType, YType;
 	LVariant MaxX, MinX;
 	LVariant MaxY, MinY;
-    GArray<GGraph::GGraphPair> Val;
-	GGraph::Style Style;
+    GArray<LGraph::GGraphPair> Val;
+	LGraph::Style Style;
 	
 	// Averages
 	bool Average;
@@ -28,14 +28,14 @@ struct GGraphPriv
     
     // Selection
     GAutoPtr<LPoint> Select;
-    GArray<GGraph::GGraphPair*> Selection;
+    GArray<LGraph::GGraphPair*> Selection;
 	
-	GGraphPriv()
+	LGraphPriv()
 	{
 	    #if 1
-        Style = GGraph::PointGraph;
+        Style = LGraph::PointGraph;
         #else
-        Style = GGraph::LineGraph;
+        Style = LGraph::LineGraph;
         #endif
 	    Average = false;
 	    BucketSize = 500;
@@ -372,20 +372,20 @@ struct GGraphPriv
 	}
 };
 
-GGraph::GGraph(int Id, int XAxis, int YAxis)
+LGraph::LGraph(int Id, int XAxis, int YAxis)
 {
-	d = new GGraphPriv;
+	d = new LGraphPriv;
     d->XAxis = XAxis;
     d->YAxis = YAxis;
 	SetPourLargest(true);
 }
 
-GGraph::~GGraph()
+LGraph::~LGraph()
 {
 	DeleteObj(d);
 }
 
-bool GGraph::AddPair(char *x, char *y, void *UserData)
+bool LGraph::AddPair(char *x, char *y, void *UserData)
 {
     if (!x || !y)
         return false;
@@ -427,7 +427,7 @@ bool GGraph::AddPair(char *x, char *y, void *UserData)
     return true;
 }
 
-bool GGraph::SetDataSource(GDbRecordset *Rs, int XAxis, int YAxis)
+bool LGraph::SetDataSource(GDbRecordset *Rs, int XAxis, int YAxis)
 {
 	if (!Rs)
 		return false;
@@ -476,13 +476,13 @@ bool GGraph::SetDataSource(GDbRecordset *Rs, int XAxis, int YAxis)
 	return true;
 }
 
-void GGraph::SetStyle(Style s)
+void LGraph::SetStyle(Style s)
 {
     d->Style = s;
     Invalidate();
 }
 
-GGraph::Style GGraph::GetStyle()
+LGraph::Style LGraph::GetStyle()
 {
     return d->Style;
 }
@@ -495,7 +495,7 @@ enum Msg
     IDC_AVERAGE_SAVE,
 };
 
-void GGraph::OnMouseClick(LMouse &m)
+void LGraph::OnMouseClick(LMouse &m)
 {
     if (m.IsContextMenu())
     {
@@ -527,7 +527,7 @@ void GGraph::OnMouseClick(LMouse &m)
             {
                 if (!d->Ave.Length())
                 {
-                    LgiMsg(this, "No average calculated.", "GGraph");
+                    LgiMsg(this, "No average calculated.", "LGraph");
                     break;
                 }
 
@@ -543,7 +543,7 @@ void GGraph::OnMouseClick(LMouse &m)
                 GFile o;
                 if (!o.Open(s.Name(), O_WRITE))
                 {
-                    LgiMsg(this, "Failed to open file for writing.", "GGraph");
+                    LgiMsg(this, "Failed to open file for writing.", "LGraph");
                     break;
                 }
 
@@ -591,12 +591,12 @@ void GGraph::OnMouseClick(LMouse &m)
     }
 }
 
-GArray<GGraph::GGraphPair*> *GGraph::GetSelection()
+GArray<LGraph::GGraphPair*> *LGraph::GetSelection()
 {
     return &d->Selection;
 }
 
-void GGraph::OnPaint(LSurface *pDC)
+void LGraph::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle();

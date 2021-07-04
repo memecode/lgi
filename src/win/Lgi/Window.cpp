@@ -175,7 +175,7 @@ static bool HasParentPopup(LViewI *v)
 {
 	for (; v; v = v->GetParent())
 	{
-		if (dynamic_cast<GPopup*>(v))
+		if (dynamic_cast<LPopup*>(v))
 			return true;
 	}
 	return false;
@@ -491,7 +491,7 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	LViewI *p;
 	for (p = v->GetParent(); p; p = p->GetParent())
 	{
-		if (dynamic_cast<GPopup*>(p))
+		if (dynamic_cast<LPopup*>(p))
 		{
 			#if DEBUG_HANDLE_VIEW_KEY
 			LgiTrace("    Popup %s handling key.\n", p->GetClass());
@@ -1184,13 +1184,13 @@ LViewI *LWindow::GetDefault()
 void LWindow::SetDefault(LViewI *v)
 {
 	#if WINNATIVE
-	GButton *Btn;
-	if (Btn = dynamic_cast<GButton*>(_Default))
+	LButton *Btn;
+	if (Btn = dynamic_cast<LButton*>(_Default))
 		Btn->Default(false);
 	#endif
 	_Default = v;
 	#if WINNATIVE
-	if (Btn = dynamic_cast<GButton*>(_Default))
+	if (Btn = dynamic_cast<LButton*>(_Default))
 		Btn->Default(true);
 	#endif
 }

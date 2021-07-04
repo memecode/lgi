@@ -6,7 +6,7 @@ class GDebugContext : public GDebugEvents
 	class GDebugContextPriv *d;
 	
 public:
-	GTree *Watch;
+	LTree *Watch;
 	LList *Locals;
 	LList *CallStack;
 	LList *Threads;

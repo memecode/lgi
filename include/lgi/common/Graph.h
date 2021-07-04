@@ -3,9 +3,9 @@
 
 #include "GDb.h"
 
-class GGraph : public GLayout
+class LGraph : public LLayout
 {
-	struct GGraphPriv *d;
+	struct LGraphPriv *d;
 
 public:
     enum Style
@@ -20,8 +20,8 @@ public:
 	    void *UserData;
     };
     
-	GGraph(int Id, int XAxix = -1, int YAxis = -1);
-	~GGraph();
+	LGraph(int Id, int XAxix = -1, int YAxis = -1);
+	~LGraph();
 
 	// Api
 	bool SetDataSource(GDbRecordset *Rs, int XAxis = -1, int YAxis = -1);

@@ -34,7 +34,7 @@ LangDlg::LangDlg(LView *parent, List<GLanguage> &l, int Init)
 	MoveToCenter();
 	Name("Language");
 
-	Children.Insert(new GTextLabel(-1, 10, 10, -1, -1, "Select language:"));
+	Children.Insert(new LTextLabel(-1, 10, 10, -1, -1, "Select language:"));
 	Children.Insert(Sel = new GCombo(-1, 20, 30, 150, 20, ""));
 	if (Sel)
 	{
@@ -1624,7 +1624,7 @@ void ResStringUi::OnPosChange()
 
 void ResStringUi::OnCreate()
 {
-	Tools = new GToolBar;
+	Tools = new LToolBar;
 	if (Tools)
 	{
 		auto FileName = LFindFile("_StringIcons.gif");
@@ -1645,7 +1645,7 @@ void ResStringUi::OnCreate()
 		}
 	}
 
-	Status = new GStatusBar;
+	Status = new LStatusBar;
 	if (Status)
 	{
 		Status->Attach(this);

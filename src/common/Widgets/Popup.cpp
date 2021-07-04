@@ -10,7 +10,7 @@
 	#include <Cocoa/Cocoa.h>
 #endif
 
-enum PopupNotifications
+enum LPopupNotifications
 {
     POPUP_DELETE = 1,
     POPUP_VISIBLE,
@@ -84,7 +84,7 @@ class LMouseHookPrivate : public ::LMutex, public ::LThread
 public:
 	bool Loop;
 	OsView hMouseOver;
-	List<GPopup> Popups;
+	List<LPopup> Popups;
 	#ifdef MAC
 	OsView ViewHandle;
 	LThreadEvent Event;
@@ -200,7 +200,7 @@ public:
 				{
 					// Down click....
 					uint64 Now = LgiCurrentTime();
-					GPopup *Over = 0;
+					LPopup *Over = 0;
 
 					for (auto w: Popups)
 					{
@@ -228,7 +228,7 @@ public:
 							bool Close = true;
 
 							#if WINNATIVE
-							// This is a bit of a hack to prevent GPopup's with open context menus from
+							// This is a bit of a hack to prevent LPopup's with open context menus from
 							// closing when the user clicks on the context menu.
 							//
 							// FIXME: Linux
@@ -258,7 +258,7 @@ public:
 							if (gr.Overlap(m.x, m.y))
 							{
 								// Yes, so don't close it
-								LgiTrace("Popup: Got a click on a GPopup\n");
+								LgiTrace("Popup: Got a click on a LPopup\n");
 								Close = false;
 								break;
 							}
@@ -475,7 +475,7 @@ bool LMouseHook::OnViewKey(LView *v, LKey &k)
 	return Status;
 }
 
-void LMouseHook::RegisterPopup(GPopup *p)
+void LMouseHook::RegisterPopup(LPopup *p)
 {
 	if (d->Lock(_FL))
 	{
@@ -487,7 +487,7 @@ void LMouseHook::RegisterPopup(GPopup *p)
 	}
 }
 
-void LMouseHook::UnregisterPopup(GPopup *p)
+void LMouseHook::UnregisterPopup(LPopup *p)
 {
 	if (d->Lock(_FL))
 	{
@@ -542,9 +542,9 @@ public:
 	}
 };
 
-::GArray<GPopup*> GPopup::CurrentPopups;
+::GArray<LPopup*> LPopup::CurrentPopups;
 
-GPopup::GPopup(LView *owner)
+LPopup::LPopup(LView *owner)
 	#if LGI_CARBON
 	: LWindow(CreateBorderlessWindow())
 	#elif defined(__GTK_H__)
@@ -583,7 +583,7 @@ GPopup::GPopup(LView *owner)
 	LView::Visible(false);
 }
 
-GPopup::~GPopup()
+LPopup::~LPopup()
 {
 	CurrentPopups.Delete(this);
 	SendNotify(POPUP_DELETE);
@@ -595,7 +595,7 @@ GPopup::~GPopup()
 		#endif
 		
 		#ifdef MAC
-		GDropDown *dd = dynamic_cast<GDropDown*>(Owner);
+		LDropDown *dd = dynamic_cast<LDropDown*>(Owner);
 		if (dd)
 			dd->Popup = NULL;
 		#endif
@@ -631,7 +631,7 @@ GPopup::~GPopup()
 		[Panel.p release];
 		Panel.p = NULL;
 
-		// printf("~GPopup %p\n", this);
+		// printf("~LPopup %p\n", this);
 	}
 	#endif
 
@@ -640,12 +640,12 @@ GPopup::~GPopup()
 
 #if LGI_COCOA
 
-LRect &GPopup::GetPos()
+LRect &LPopup::GetPos()
 {
 	return Pos;
 }
 
-bool GPopup::SetPos(LRect &r, bool repaint)
+bool LPopup::SetPos(LRect &r, bool repaint)
 {
 	Pos = r;
 	
@@ -660,7 +660,7 @@ bool GPopup::SetPos(LRect &r, bool repaint)
 
 #endif
 
-GMessage::Result GPopup::OnEvent(GMessage *Msg)
+GMessage::Result LPopup::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -681,12 +681,12 @@ GMessage::Result GPopup::OnEvent(GMessage *Msg)
 	return LView::OnEvent(Msg);
 }
 
-void GPopup::TakeFocus(bool Take)
+void LPopup::TakeFocus(bool Take)
 {
 	d->TakeFocus = Take;
 }
 
-bool GPopup::Attach(LViewI *p)
+bool LPopup::Attach(LViewI *p)
 {
 	#if defined(LGI_CARBON)
 	
@@ -731,7 +731,7 @@ bool GPopup::Attach(LViewI *p)
 	#endif
 }
 
-void GPopup::Visible(bool i)
+void LPopup::Visible(bool i)
 {
 	if (i)
 	{
@@ -936,7 +936,7 @@ void GPopup::Visible(bool i)
 	#endif
 }
 
-bool GPopup::Visible()
+bool LPopup::Visible()
 {
     #if defined __GTK_H__
     
@@ -962,7 +962,7 @@ bool GPopup::Visible()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
-GDropDown::GDropDown(int Id, int x, int y, int cx, int cy, GPopup *popup)
+LDropDown::LDropDown(int Id, int x, int y, int cx, int cy, LPopup *popup)
 {
 	SetId(Id);
 	LRect r(x, y, x+cx, y+cy);
@@ -972,34 +972,34 @@ GDropDown::GDropDown(int Id, int x, int y, int cx, int cy, GPopup *popup)
 	SetTabStop(true);
 }
 
-GDropDown::~GDropDown()
+LDropDown::~LDropDown()
 {
 	DeleteObj(Popup);
 }
 
-void GDropDown::OnFocus(bool f)
+void LDropDown::OnFocus(bool f)
 {
 	Invalidate();
 }
 
-GPopup *GDropDown::GetPopup()
+LPopup *LDropDown::GetPopup()
 {
 	return Popup;
 }
 
-void GDropDown::SetPopup(GPopup *popup)
+void LDropDown::SetPopup(LPopup *popup)
 {
 	DeleteObj(Popup);
 	Popup = popup;
 	Invalidate();
 }
 
-bool GDropDown::IsOpen()
+bool LDropDown::IsOpen()
 {
 	return Popup && Popup->Visible();
 }
 
-void GDropDown::OnPaint(LSurface *pDC)
+void LDropDown::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
 	r.Offset(-r.x1, -r.y1);
@@ -1106,7 +1106,7 @@ void GDropDown::OnPaint(LSurface *pDC)
 	}
 }
 
-void GDropDown::Activate()
+void LDropDown::Activate()
 {
 	if (IsOpen())
 	{
@@ -1134,7 +1134,7 @@ void GDropDown::Activate()
 	Invalidate();
 }
 
-bool GDropDown::OnKey(LKey &k)
+bool LDropDown::OnKey(LKey &k)
 {
 	if (k.IsChar && (k.c16 == ' ' || k.vkey == LK_RETURN))
 	{
@@ -1158,7 +1158,7 @@ bool GDropDown::OnKey(LKey &k)
 	return false;
 }
 
-void GDropDown::OnMouseClick(LMouse &m)
+void LDropDown::OnMouseClick(LMouse &m)
 {
 	if (Popup && m.Down())
 	{
@@ -1167,7 +1167,7 @@ void GDropDown::OnMouseClick(LMouse &m)
 	}
 }
 
-int GDropDown::OnNotify(LViewI *c, int f)
+int LDropDown::OnNotify(LViewI *c, int f)
 {
 	if (c == (LViewI*)Popup)
 	{

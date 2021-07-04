@@ -6,8 +6,8 @@
 #define _GSLIDER_H_
 
 /// Slider
-class LgiClass GSlider :
-	public GControl,
+class LgiClass LSlider :
+	public LControl,
 	public ResObject
 {
 	#if WINNATIVE
@@ -23,14 +23,14 @@ class LgiClass GSlider :
 	int Tx, Ty;
 
 public:
-	GSlider(int id,
+	LSlider(int id,
 			int x = 0, int y = 0,
 			int cx = 100, int cy = 20,
 			const char *name = NULL,
 			bool vert = false);
-	~GSlider();
+	~LSlider();
 
-	const char *GetClass() { return "GSlider"; }
+	const char *GetClass() { return "LSlider"; }
 
 	/// Sets the position of the slider
 	void Value(int64 i);

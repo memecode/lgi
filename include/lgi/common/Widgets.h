@@ -20,21 +20,21 @@ class LDialog;
 class GDlgFunc;
 #endif
 class LListItem;
-class GTreeItem;
+class LTreeItem;
 
 class GButton;
-class GEdit;
+class LEdit;
 class GCheckBox;
-class GTextLabel;
-class GRadioGroup;
-class GRadioButton;
-class GTabView;
-class GTabPage;
-class GSlider;
+class LTextLabel;
+class LRadioGroup;
+class LRadioButton;
+class LTabView;
+class LTabPage;
+class LSlider;
 class GCombo;
 class LBitmap;
 class LList;
-class GTree;
+class LTree;
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Controls

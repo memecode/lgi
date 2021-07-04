@@ -159,7 +159,7 @@ public:
 };
 
 /// Common base class for a HTML element
-class GHtmlElement : public GDom, public LCss
+class LHtmlElement : public GDom, public LCss
 {
 	friend class GHtmlParser;
 	friend class HtmlEdit;
@@ -175,19 +175,19 @@ public:
 	GHtmlElemInfo *Info;
 	GAutoString Condition;
 	
-	GHtmlElement *Parent;
-	GArray<GHtmlElement*> Children;
+	LHtmlElement *Parent;
+	GArray<LHtmlElement*> Children;
 	
-	GHtmlElement(GHtmlElement *parent);
-	~GHtmlElement();
+	LHtmlElement(LHtmlElement *parent);
+	~LHtmlElement();
 	
 	// Methods
 	char16 *GetText() { return Txt; }
 	
 	// Heirarchy
-	bool Attach(GHtmlElement *Child, ssize_t Idx = -1);
+	bool Attach(LHtmlElement *Child, ssize_t Idx = -1);
 	void Detach();
-	bool HasChild(GHtmlElement *Child);
+	bool HasChild(LHtmlElement *Child);
 
 	// Virtuals
 	virtual bool Get(const char *attr, const char *&val) { return false; }

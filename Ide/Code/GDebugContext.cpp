@@ -352,7 +352,7 @@ bool GDebugContext::UpdateLocals()
 bool GDebugContext::UpdateWatches()
 {
 	GArray<GDebugger::Variable> Vars;
-	for (GTreeItem *i = Watch->GetChild(); i; i = i->GetNext())
+	for (LTreeItem *i = Watch->GetChild(); i; i = i->GetNext())
 	{
 		GDebugger::Variable &v = Vars.New();
 		v.Name = i->GetText(0);
@@ -364,7 +364,7 @@ bool GDebugContext::UpdateWatches()
 		return false;
 	
 	int Idx = 0;
-	for (GTreeItem *i = Watch->GetChild(); i; i = i->GetNext(), Idx++)
+	for (LTreeItem *i = Watch->GetChild(); i; i = i->GetNext(), Idx++)
 	{
 		GDebugger::Variable &v = Vars[Idx];
 		WatchItem *wi = dynamic_cast<WatchItem*>(i);

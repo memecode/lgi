@@ -1337,12 +1337,12 @@ struct LScriptVmDebuggerPriv
 	LBox *Main;
 	LBox *Sub;
 	LList *SourceLst;
-	GTabView *Tabs;
+	LTabView *Tabs;
 	GDebugView *Text;
 	LList *Locals, *Globals, *Registers, *Stack;
 	GTextLog *Log;
-	GToolBar *Tools;
-	GTableLayout *VarsTbl;
+	LToolBar *Tools;
+	LTableLayout *VarsTbl;
 
 	LScriptVmDebuggerPriv()
 	{
@@ -1576,10 +1576,10 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVi
 			s->AppendItem("Break Into C++", IDC_BREAK_CPP, true, -1, "Ctrl+F9");
 		}
 		
-		AddView(d->Tools = new GToolBar);
+		AddView(d->Tools = new LToolBar);
 		
 		uint16 *Px = (uint16*) DbgIcons.Data;
-		GImageList *il = new GImageList(16, 16, DbgIcons.Create(*Px));
+		LImageList *il = new LImageList(16, 16, DbgIcons.Create(*Px));
 		if (il)
 			d->Tools->SetImageList(il, 16, 16, true);
 
@@ -1604,19 +1604,19 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVi
 		d->SourceLst->AddColumn("Source", 200);
 		d->Sub->AddView(d->Text = new GDebugView(d));
 		
-		d->Main->AddView(d->Tabs = new GTabView(IDC_TABS));
+		d->Main->AddView(d->Tabs = new LTabView(IDC_TABS));
 		d->Tabs->GetCss(true)->Height(LCss::Len("250px"));
 		
-		GTabPage *p = d->Tabs->Append("Variables");
-		p->Append(d->VarsTbl = new GTableLayout(IDC_VARS_TBL));		
+		LTabPage *p = d->Tabs->Append("Variables");
+		p->Append(d->VarsTbl = new LTableLayout(IDC_VARS_TBL));		
 		
 		int x = 0, y = 0;
 		GLayoutCell *c = d->VarsTbl->GetCell(x++, y);
-		c->Add(new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Globals:"));
+		c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Globals:"));
 		c = d->VarsTbl->GetCell(x++, y);
-		c->Add(new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Locals:"));
+		c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Locals:"));
 		c = d->VarsTbl->GetCell(x++, y);
-		c->Add(new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Registers:"));
+		c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Registers:"));
 
 		x = 0; y++;
 		c = d->VarsTbl->GetCell(x++, y);

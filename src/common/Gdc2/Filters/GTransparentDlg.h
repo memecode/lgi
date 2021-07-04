@@ -8,7 +8,7 @@
 
 class GTransparentDlg : public GDialog
 {
-	GRadioGroup *Grp;
+	LRadioGroup *Grp;
 	LVariant *Trans;
 
 public:

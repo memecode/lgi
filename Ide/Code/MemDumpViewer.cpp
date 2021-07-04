@@ -121,7 +121,7 @@ class DumpView : public LWindow
 {
 	AppWnd *App;
 	LList *Lst;
-	GEdit *Ed;
+	LEdit *Ed;
 
 public:
 	DumpView(AppWnd *app, const char *file)
@@ -133,8 +133,8 @@ public:
 		MoveToCenter();
 		if (Attach(0))
 		{
-			GSplitter *Split;
-			Children.Insert(Split = new GSplitter);
+			LSplitter *Split;
+			Children.Insert(Split = new LSplitter);
 			Split->Value(400);
 			Split->IsVertical(false);
 
@@ -143,7 +143,7 @@ public:
 			Lst->AddColumn("Location", 300);
 			Lst->AddColumn("Count", 100);
 
-			Split->SetViewB(Ed = new GEdit(101, 0, 0, 100, 100, ""), false);
+			Split->SetViewB(Ed = new LEdit(101, 0, 0, 100, 100, ""), false);
 			Ed->Enabled(false);
 			Ed->MultiLine(true);
 

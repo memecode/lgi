@@ -12,16 +12,16 @@
 #include <stdlib.h>
 
 #include "Lgi.h"
-#include "GPopup.h"
+#include "LPopup.h"
 #include "GToken.h"
 #include "LList.h"
-#include "GTextLabel.h"
-#include "GEdit.h"
-#include "GButton.h"
+#include "LTextLabel.h"
+#include "LEdit.h"
+#include "LButton.h"
 #include "GCheckBox.h"
 #include "GCombo.h"
-#include "GTree.h"
-#include "GTableLayout.h"
+#include "LTree.h"
+#include "LTableLayout.h"
 #include "LBox.h"
 
 #define FSI_FILE			0
@@ -186,7 +186,7 @@ class GFileSelectPrivate
 	bool EatClose;
 
 public:
-	static GImageList *BtnIcons, *TreeIcons;
+	static LImageList *BtnIcons, *TreeIcons;
 	static char *InitPath;
 	static bool InitShowHiddenFiles;
 	static LRect InitSize;
@@ -205,7 +205,7 @@ public:
 		CurrentType = -1;
 
 		if (!BtnIcons)
-			BtnIcons = new GImageList(16, 16, FileSelectIcons.Create(0xF81F));
+			BtnIcons = new LImageList(16, 16, FileSelectIcons.Create(0xF81F));
 		if (!TreeIcons)
 		{
 			GAutoPtr<LSurface> a(TreeIconsImg.Create(0xF81F));
@@ -229,7 +229,7 @@ public:
 					}
 				}
 				
-				TreeIcons = new GImageList(22, 22, m.Release());
+				TreeIcons = new LImageList(22, 22, m.Release());
 			}
 		}
 	}
@@ -245,8 +245,8 @@ public:
 	}
 };
 
-GImageList *GFileSelectPrivate::BtnIcons = NULL;
-GImageList *GFileSelectPrivate::TreeIcons = NULL;
+LImageList *GFileSelectPrivate::BtnIcons = NULL;
+LImageList *GFileSelectPrivate::TreeIcons = NULL;
 char *GFileSelectPrivate::InitPath = 0;
 bool GFileSelectPrivate::InitShowHiddenFiles = false;
 LRect GFileSelectPrivate::InitSize(0, 0, 600, 500);
@@ -269,7 +269,7 @@ public:
 	virtual void OnFolder() {}
 };
 
-class GFolderDrop : public GDropDown, public GFolderView
+class GFolderDrop : public LDropDown, public GFolderView
 {
 public:
 	GFolderDrop(GFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy);
@@ -284,14 +284,14 @@ public:
 	}
 };
 
-class GIconButton : public GLayout
+class GIconButton : public LLayout
 {
-	GImageList *Icons;
+	LImageList *Icons;
 	int Icon;
 	bool Down;
 
 public:
-	GIconButton(int Id, int x, int y, int cx, int cy, GImageList *icons, int icon)
+	GIconButton(int Id, int x, int y, int cx, int cy, LImageList *icons, int icon)
 	{
 		Icons = icons;
 		Icon = icon;
@@ -439,11 +439,11 @@ enum FolderCtrlMessages
 	M_LOST_FOCUS,
 };
 
-class FolderCtrlEdit : public GEdit
+class FolderCtrlEdit : public LEdit
 {
 public:
 	FolderCtrlEdit(int id, LRect c) :
-		GEdit(id, c.x1, c.y1, c.X()-1, c.Y()-1)
+		LEdit(id, c.x1, c.y1, c.X()-1, c.Y()-1)
 	{
 	}
 
@@ -464,7 +464,7 @@ class FolderCtrl : public LView
 		LRect Text;
 	};
 	
-	GEdit *e;
+	LEdit *e;
 	GArray<Part> p;
 	Part *Over;
 	ssize_t Cursor;
@@ -783,16 +783,16 @@ class GFileSelectDlg :
 public:
 	GFileSelectPrivate *d;
 
-	GTableLayout *Tbl;
+	LTableLayout *Tbl;
 	LBox *Sub;
 
-	GTree *Bookmarks;
-	GTextLabel *Ctrl1;
+	LTree *Bookmarks;
+	LTextLabel *Ctrl1;
 
 	#if USE_FOLDER_CTRL
 	FolderCtrl *Ctrl2;
 	#else
-	GEdit *Ctrl2;
+	LEdit *Ctrl2;
 	#endif
 	
 	GFolderDrop *Ctrl3;
@@ -800,14 +800,14 @@ public:
 	GIconButton *UpBtn;
 	GIconButton *NewDirBtn;
 	GFolderList *FileLst;
-	GTextLabel *Ctrl8;
-	GTextLabel *Ctrl9;
-	GEdit *FileNameEdit;
+	LTextLabel *Ctrl8;
+	LTextLabel *Ctrl9;
+	LEdit *FileNameEdit;
 	GCombo *FileTypeCbo;
-	GButton *SaveBtn;
-	GButton *CancelBtn;
+	LButton *SaveBtn;
+	LButton *CancelBtn;
 	GCheckBox *ShowHidden;
-	GEdit *FilterEdit;
+	LEdit *FilterEdit;
 
 	GFileSelectDlg(GFileSelectPrivate *Select);
 	~GFileSelectDlg();
@@ -834,7 +834,7 @@ public:
 		return false;
 	}
 	
-	void Add(GTreeItem *i, GVolume *v)
+	void Add(LTreeItem *i, GVolume *v)
 	{
 		if (!i || !v)
 			return;
@@ -854,7 +854,7 @@ public:
 		
 		for (GVolume *cv = v->First(); cv; cv = v->Next())
 		{
-			GTreeItem *ci = new GTreeItem;
+			LTreeItem *ci = new LTreeItem;
 			if (ci)
 			{
 				i->Insert(ci);
@@ -914,17 +914,17 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	SetPos(OldPos);
 
 	int x = 0, y = 0;
-	AddView(Tbl = new GTableLayout);
+	AddView(Tbl = new LTableLayout);
 
 	// Top Row
 	GLayoutCell *c = Tbl->GetCell(x++, y);
-	c->Add(Ctrl1 = new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Look in:"));
+	c->Add(Ctrl1 = new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Look in:"));
 	c->VerticalAlign(LCss::Len(LCss::VerticalMiddle));
 	c = Tbl->GetCell(x++, y);
 	#if USE_FOLDER_CTRL
 	c->Add(Ctrl2 = new FolderCtrl(IDC_PATH));
 	#else
-	c->Add(Ctrl2 = new GEdit(IDC_PATH, 0, 0, 245, 21, ""));
+	c->Add(Ctrl2 = new LEdit(IDC_PATH, 0, 0, 245, 21, ""));
 	#endif
 	c = Tbl->GetCell(x++, y);
 	c->Add(Ctrl3 = new GFolderDrop(this, IDC_DROP, 336, 7, 16, 21));
@@ -939,41 +939,41 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	x = 0; y++;
 	c = Tbl->GetCell(x, y, true, 6, 1);
 	c->Add(Sub = new LBox(IDC_SUB_TBL));
-	Sub->AddView(Bookmarks = new GTree(IDC_BOOKMARKS, 0, 0, -1, -1));
+	Sub->AddView(Bookmarks = new LTree(IDC_BOOKMARKS, 0, 0, -1, -1));
 	Bookmarks->GetCss(true)->Width(LCss::Len(LCss::LenPx, 150.0f));
 	Bookmarks->SetImageList(d->TreeIcons, false);
 	
-	GTableLayout *t;
-	Sub->AddView(t = new GTableLayout(11));
+	LTableLayout *t;
+	Sub->AddView(t = new LTableLayout(11));
 	
 	// Filter / search row
 	c = t->GetCell(0, 0);
 	c->Add(new GCheckBox(IDC_FILTER_CLEAR, 0, 0, -1, -1, "Filter items:"));
 	c->VerticalAlign(LCss::Len(LCss::VerticalMiddle));
 	c = t->GetCell(1, 0);
-	c->Add(FilterEdit = new GEdit(IDC_FILTER, 0, 0, 60, 20));
+	c->Add(FilterEdit = new LEdit(IDC_FILTER, 0, 0, 60, 20));
 	c = t->GetCell(0, 1, true, 2);
 	c->Add(FileLst = new GFolderList(this, IDC_VIEW, 14, 35, 448, 226));
 	
 	// File name row
 	x = 0; y++;
 	c = Tbl->GetCell(x++, y);
-	c->Add(Ctrl8 = new GTextLabel(IDC_STATIC, 14, 275, -1, -1, "File name:"));
+	c->Add(Ctrl8 = new LTextLabel(IDC_STATIC, 14, 275, -1, -1, "File name:"));
 	c = Tbl->GetCell(x, y, true, 2);
 	x += 2;
-	c->Add(FileNameEdit = new GEdit(IDC_FILE, 100, 268, 266, 21, ""));
+	c->Add(FileNameEdit = new LEdit(IDC_FILE, 100, 268, 266, 21, ""));
 	c = Tbl->GetCell(x, y, true, 3);
-	c->Add(SaveBtn = new GButton(IDOK, 392, 268, 70, 21, "Ok"));
+	c->Add(SaveBtn = new LButton(IDOK, 392, 268, 70, 21, "Ok"));
 
 	// 4th row
 	x = 0; y++;
 	c = Tbl->GetCell(x++, y);
-	c->Add(Ctrl9 = new GTextLabel(IDC_STATIC, 14, 303, -1, -1, "Files of type:"));
+	c->Add(Ctrl9 = new LTextLabel(IDC_STATIC, 14, 303, -1, -1, "Files of type:"));
 	c = Tbl->GetCell(x, y, true, 2);
 	x += 2;
 	c->Add(FileTypeCbo = new GCombo(IDC_TYPE, 100, 296, 266, 21, ""));
 	c = Tbl->GetCell(x++, y, true, 3);
-	c->Add(CancelBtn = new GButton(IDCANCEL, 392, 296, 70, 21, "Cancel"));
+	c->Add(CancelBtn = new LButton(IDCANCEL, 392, 296, 70, 21, "Cancel"));
 
 	// 5th row
 	x = 0; y++;
@@ -1043,7 +1043,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	FileLst->Focus(true);
 	
 	LgiGetUsersLinks(Links);
-	GTreeItem *RootItem = new GTreeItem;
+	LTreeItem *RootItem = new LTreeItem;
 	if (RootItem)
 	{
 		Bookmarks->Insert(RootItem);
@@ -1051,7 +1051,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	}
 	for (unsigned n=0; n<Links.Length(); n++)
 	{
-		GTreeItem *ci = new GTreeItem;
+		LTreeItem *ci = new LTreeItem;
 		if (ci)
 		{
 			char *p = Links[n];
@@ -1146,7 +1146,7 @@ int GFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
 		{
 			if (Flags == GNotifyItem_Select && Bookmarks)
 			{
-				GTreeItem *s = Bookmarks->Selection();
+				LTreeItem *s = Bookmarks->Selection();
 				if (s)
 				{
 					const char *p = s->GetText(1);
@@ -1427,7 +1427,7 @@ int GFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
 }
 
 //////////////////////////////////////////////////////////////////////////
-class GFileSystemItem : public GTreeItem
+class GFileSystemItem : public LTreeItem
 {
 	class GFileSystemPopup *Popup;
 	GString Path;
@@ -1446,21 +1446,21 @@ public:
 };
 
 #define IDC_TREE 100
-class GFileSystemPopup : public GPopup
+class GFileSystemPopup : public LPopup
 {
 	friend class GFileSystemItem;
 
 	GFileSelectDlg *Dlg;
-	GTree *Tree;
+	LTree *Tree;
 	GFileSystemItem *Root;
 
 public:
-	GFileSystemPopup(LView *owner, GFileSelectDlg *dlg, int x) : GPopup(owner)
+	GFileSystemPopup(LView *owner, GFileSelectDlg *dlg, int x) : LPopup(owner)
 	{
 		Dlg = dlg;
 		LRect r(0, 0, x, 150);
 		SetPos(r);
-		Children.Insert(Tree = new GTree(IDC_TREE, 1, 1, X()-3, Y()-3));
+		Children.Insert(Tree = new LTree(IDC_TREE, 1, 1, X()-3, Y()-3));
 		if (Tree)
 		{
 			Tree->Sunken(false);
@@ -1485,7 +1485,7 @@ public:
 			Root->OnPath(Dlg->GetCtrlName(IDC_PATH));
 		}
 
-		GPopup::Visible(i);
+		LPopup::Visible(i);
 	}
 
 	void OnPaint(LSurface *pDC)
@@ -1576,7 +1576,7 @@ void GFileSystemItem::OnPath(const char *p)
 		}
 		default:
 		{
-			GTreeItem *Old = Items[0];
+			LTreeItem *Old = Items[0];
 			if (Old)
 			{
 				Old->Remove();
@@ -1597,7 +1597,7 @@ void GFileSystemItem::OnPath(const char *p)
 			#endif
 			)
 		{
-			GTreeItem *Item = this;
+			LTreeItem *Item = this;
 
 			if (GetImage() != FSI_DESKTOP &&
 				strlen(p) > 3)
@@ -1663,7 +1663,7 @@ bool GFileSystemItem::OnKey(LKey &k)
 }
 
 GFolderDrop::GFolderDrop(GFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy) :
-	GDropDown(Id, x, y, cx, cy, 0),
+	LDropDown(Id, x, y, cx, cy, 0),
 	GFolderView(dlg)
 {
 	SetPopup(new GFileSystemPopup(this, dlg, cx + (dlg->Ctrl2 ? dlg->Ctrl2->X() : 0) ));

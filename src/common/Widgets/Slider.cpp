@@ -1,9 +1,9 @@
-#include "Lgi.h"
-#include "GSlider.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Slider.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 // Slider control
-GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool vert) :
+LSlider::LSlider(int id, int x, int y, int cx, int cy, const char *name, bool vert) :
 	ResObject(Res_Slider)
 {
 	SetId(id);
@@ -16,11 +16,11 @@ GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool ve
 	SetTabStop(true);
 }
 
-GSlider::~GSlider()
+LSlider::~LSlider()
 {
 }
 
-void GSlider::Value(int64 i)
+void LSlider::Value(int64 i)
 {
 	if (i > Max) i = Max;
 	if (i < Min) i = Min;
@@ -39,35 +39,35 @@ void GSlider::Value(int64 i)
 	}
 }
 
-int64 GSlider::Value()
+int64 LSlider::Value()
 {
 	return Val;
 }
 
-GRange GSlider::GetRange()
+GRange LSlider::GetRange()
 {
 	return GRange(Min, Max-Min+1);
 }
 
-bool GSlider::SetRange(const GRange &r)
+bool LSlider::SetRange(const GRange &r)
 {
 	Min = r.Start;
 	Max = r.End();
 }
 
-void GSlider::GetLimits(int64 &min, int64 &max)
+void LSlider::GetLimits(int64 &min, int64 &max)
 {
 	min = Min;
 	max = Max;
 }
 
-void GSlider::SetLimits(int64 min, int64 max)
+void LSlider::SetLimits(int64 min, int64 max)
 {
 	Min = min;
 	Max = max;
 }
 
-bool GSlider::OnLayout(LViewLayoutInfo &Inf)
+bool LSlider::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (Inf.Width.Min)
 	{
@@ -85,12 +85,12 @@ bool GSlider::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-GMessage::Param GSlider::OnEvent(GMessage *Msg)
+GMessage::Param LSlider::OnEvent(GMessage *Msg)
 {
-	return GControl::OnEvent(Msg);
+	return LControl::OnEvent(Msg);
 }
 
-void GSlider::OnPaint(LSurface *pDC)
+void LSlider::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_MED);
 	pDC->Rectangle();
@@ -114,7 +114,7 @@ void GSlider::OnPaint(LSurface *pDC)
 	}
 }
 
-void GSlider::OnMouseClick(LMouse &m)
+void LSlider::OnMouseClick(LMouse &m)
 {
 	Capture(m.Down());
 	if (Thumb.Overlap(m.x, m.y))
@@ -124,7 +124,7 @@ void GSlider::OnMouseClick(LMouse &m)
 	}
 }
 
-void GSlider::OnMouseMove(LMouse &m)
+void LSlider::OnMouseMove(LMouse &m)
 {
 	if (IsCapturing())
 	{
@@ -138,13 +138,13 @@ void GSlider::OnMouseMove(LMouse &m)
 	}
 }
 
-class GSlider_Factory : public GViewFactory
+class GSlider_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
-		if (stricmp(Class, "GSlider") == 0)
+		if (stricmp(Class, "LSlider") == 0)
 		{
-			return new GSlider(-1, 0, 0, 100, 20, 0, 0);
+			return new LSlider(-1, 0, 0, 100, 20, 0, 0);
 		}
 
 		return 0;

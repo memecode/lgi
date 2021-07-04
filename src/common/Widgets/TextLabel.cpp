@@ -9,18 +9,18 @@
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/CssTools.h"
 
-class GTextPrivate : public LStringLayout, public LMutex
+class LTextPrivate : public LStringLayout, public LMutex
 {
-	GTextLabel *Ctrl;
+	LTextLabel *Ctrl;
 
 public:
-	/// When GTextLabel::Name(W) is called out of thread, the string is put
+	/// When LTextLabel::Name(W) is called out of thread, the string is put
 	/// here first and then a message is posted over to the GUI thread
 	/// to load it into the ctrl.
 	GString ThreadName;
 	int PrevX;
 
-	GTextPrivate(GTextLabel *ctrl) : LStringLayout(LgiApp->GetFontCache()), LMutex("GTextPrivate")
+	LTextPrivate(LTextLabel *ctrl) : LStringLayout(LgiApp->GetFontCache()), LMutex("LTextPrivate")
 	{
 		Ctrl = ctrl;
 		PrevX = -1;
@@ -52,10 +52,10 @@ public:
 	}
 };
 
-GTextLabel::GTextLabel(int id, int x, int y, int cx, int cy, const char *name) :
+LTextLabel::LTextLabel(int id, int x, int y, int cx, int cy, const char *name) :
 	ResObject(Res_StaticText)
 {
-	d = new GTextPrivate(this);
+	d = new LTextPrivate(this);
 
 	// This allows LStringLayout::DoLayout to do some basic layout for GetMax.
 	LRect rc(0, 0, 1, 20);
@@ -72,19 +72,19 @@ GTextLabel::GTextLabel(int id, int x, int y, int cx, int cy, const char *name) :
 	SetId(id);
 }
 
-GTextLabel::~GTextLabel()
+LTextLabel::~LTextLabel()
 {
 	DeleteObj(d);
 }
 
-void GTextLabel::OnAttach()
+void LTextLabel::OnAttach()
 {
 	LResources::StyleElement(this);
 	OnStyleChange();
 	LView::OnAttach();
 }
 
-bool GTextLabel::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LTextLabel::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	if (p == ObjStyle)
@@ -98,19 +98,19 @@ bool GTextLabel::SetVariant(const char *Name, LVariant &Value, char *Array)
 	return false;
 }
 
-bool GTextLabel::GetWrap()
+bool LTextLabel::GetWrap()
 {
 	return d->GetWrap();
 }
 
-void GTextLabel::SetWrap(bool b)
+void LTextLabel::SetWrap(bool b)
 {
 	d->SetWrap(b);
 	d->Layout(GetFont(), X());
 	Invalidate();
 }
 
-bool GTextLabel::Name(const char *n)
+bool LTextLabel::Name(const char *n)
 {
 	LMutex::Auto Lck(d, _FL);
 	if (!Lck)
@@ -131,7 +131,7 @@ bool GTextLabel::Name(const char *n)
 	return true;
 }
 
-bool GTextLabel::NameW(const char16 *n)
+bool LTextLabel::NameW(const char16 *n)
 {
 	LMutex::Auto Lck(d, _FL);
 	if (!Lck)
@@ -152,27 +152,27 @@ bool GTextLabel::NameW(const char16 *n)
 	return true;
 }
 
-void GTextLabel::SetFont(LFont *Fnt, bool OwnIt)
+void LTextLabel::SetFont(LFont *Fnt, bool OwnIt)
 {
 	LView::SetFont(Fnt, OwnIt);
 	d->Layout(GetFont(), X());
 	Invalidate();
 }
 
-int64 GTextLabel::Value()
+int64 LTextLabel::Value()
 {
 	auto n = Name();
 	return (n) ? Atoi(n) : 0;
 }
 
-void GTextLabel::Value(int64 i)
+void LTextLabel::Value(int64 i)
 {
 	char Str[32];
 	sprintf_s(Str, sizeof(Str), LPrintfInt64, i);
 	Name(Str);
 }
 
-void GTextLabel::OnStyleChange()
+void LTextLabel::OnStyleChange()
 {
 	if (d->Lock(_FL))
 	{
@@ -191,7 +191,7 @@ void GTextLabel::OnStyleChange()
 	}
 }
 
-void GTextLabel::OnPosChange()
+void LTextLabel::OnPosChange()
 {
 	if (d->PrevX != X())
 	{
@@ -203,7 +203,7 @@ void GTextLabel::OnPosChange()
 		LgiTrace("No Layout %i, %i\n", d->PrevX, X());
 }
 
-bool GTextLabel::OnLayout(LViewLayoutInfo &Inf)
+bool LTextLabel::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (!Inf.Width.Min)
 	{
@@ -220,7 +220,7 @@ bool GTextLabel::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-void GTextLabel::OnCreate()
+void LTextLabel::OnCreate()
 {
 	if (d->ThreadName)
 	{
@@ -230,7 +230,7 @@ void GTextLabel::OnCreate()
 	}
 }
 
-GMessage::Result GTextLabel::OnEvent(GMessage *Msg)
+GMessage::Result LTextLabel::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -251,7 +251,7 @@ GMessage::Result GTextLabel::OnEvent(GMessage *Msg)
 	return LView::OnEvent(Msg);
 }
 
-int GTextLabel::OnNotify(LViewI *Ctrl, int Flags)
+int LTextLabel::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl == (LViewI*)this &&
 		Flags == GNotify_Activate &&
@@ -267,7 +267,7 @@ int GTextLabel::OnNotify(LViewI *Ctrl, int Flags)
 	return 0;
 }
 
-void GTextLabel::OnPaint(LSurface *pDC)
+void LTextLabel::OnPaint(LSurface *pDC)
 {
 	GCssTools Tools(this);
 	GColour Back = Tools.GetBack();

@@ -30,7 +30,7 @@ class FileTransferProgress : public GStatusPane, public Progress
 	void UpdateUi();
 
 public:
-	FileTransferProgress(GDom *App, GStatusBar *Status, bool Limit = false);
+	FileTransferProgress(GDom *App, LStatusBar *Status, bool Limit = false);
 
 	// Progress Api (must be thread-safe)
 	bool SetRange(const GRange &r) override;

@@ -259,19 +259,19 @@ public:
 	}
 };
 
-class GSettingDetail : public GLayout, public ResObject
+class GSettingDetail : public LLayout, public ResObject
 {
-	GTableLayout *Tbl;
+	LTableLayout *Tbl;
 	IdeProjectSettingsPriv *d;
 	SettingInfo *Setting;
 	int Flags;
 	
 	struct CtrlInfo
 	{
-		GTextLabel *Text;
-		GEdit *Edit;
-		GCheckBox *Chk;
-		GCombo *Cbo;
+		LTextLabel *Text;
+		LEdit *Edit;
+		LCheckBox *Chk;
+		LCombo *Cbo;
 		
 		CtrlInfo()
 		{
@@ -290,7 +290,7 @@ public:
 		Flags = 0;
 		d = NULL;
 		Setting = NULL;
-		AddView(Tbl = new GTableLayout);
+		AddView(Tbl = new LTableLayout);
 	}
 	
 	void OnCreate()
@@ -325,7 +325,7 @@ public:
 		
 		// Do label cell
 		GLayoutCell *c = Tbl->GetCell(0, CellY);
-		c->Add(Ctrls[i].Text = new GTextLabel(IDC_TEXT_BASE + i, 0, 0, -1, -1, Path = d->BuildPath(Setting->Setting, Flags, PlatformCurrent, Config)));
+		c->Add(Ctrls[i].Text = new LTextLabel(IDC_TEXT_BASE + i, 0, 0, -1, -1, Path = d->BuildPath(Setting->Setting, Flags, PlatformCurrent, Config)));
 		
 		// Do value cell
 		c = Tbl->GetCell(0, CellY + 1);
@@ -333,7 +333,7 @@ public:
 		LXmlTag *t = d->Editing.GetChildTag(Path);
 		if (Setting->Type == GV_STRING)
 		{
-			Ctrls[i].Edit = new GEdit(IDC_EDIT_BASE + i, 0, 0, 60, 20);
+			Ctrls[i].Edit = new LEdit(IDC_EDIT_BASE + i, 0, 0, 60, 20);
 			Ctrls[i].Edit->MultiLine(Setting->Flag.MultiLine);
 			Ctrls[i].Edit->Password(Setting->Flag.IsPassword);
 			if (t && t->GetContent())
@@ -346,7 +346,7 @@ public:
 				c = Tbl->GetCell(1, CellY + 1);
 				int Base = Setting->Flag.FileSelect ? IDC_BROWSE_FILE : IDC_BROWSE_FOLDER;
 				if (c)
-					c->Add(new GButton(Base + i, 0, 0, -1, -1, "..."));
+					c->Add(new LButton(Base + i, 0, 0, -1, -1, "..."));
 				else
 					LgiTrace("%s:%i - No cell.\n", _FL);
 			}
@@ -356,7 +356,7 @@ public:
 			if (Setting->Flag.Enum)
 			{
 				// Enum setting
-				c->Add(Ctrls[i].Cbo = new GCombo(IDC_COMBO_BASE + i, 0, 0, 60, 20));
+				c->Add(Ctrls[i].Cbo = new LCombo(IDC_COMBO_BASE + i, 0, 0, 60, 20));
 				
 				const char **Init = GetEnumValues(Setting->Setting);
 				if (Init)
@@ -372,14 +372,14 @@ public:
 			else
 			{
 				// Straight integer
-				c->Add(Ctrls[i].Edit = new GEdit(IDC_EDIT_BASE + i, 0, 0, 60, 20));
+				c->Add(Ctrls[i].Edit = new LEdit(IDC_EDIT_BASE + i, 0, 0, 60, 20));
 				if (t)
 					Ctrls[i].Edit->Value(t->GetContent() ? atoi(t->GetContent()) : 0);
 			}
 		}
 		else if (Setting->Type == GV_BOOL)
 		{
-			c->Add(Ctrls[i].Chk  = new GCheckBox(IDC_CHECKBOX_BASE + i, 0, 0, -1, -1, NULL));
+			c->Add(Ctrls[i].Chk  = new LCheckBox(IDC_CHECKBOX_BASE + i, 0, 0, -1, -1, NULL));
 			if (t && t->GetContent())
 				Ctrls[i].Chk->Value(atoi(t->GetContent()));
 		}
@@ -462,7 +462,7 @@ public:
 	}
 };
 
-class GSettingDetailFactory : public GViewFactory
+class GSettingDetailFactory : public LViewFactory
 {
 	LView *NewView
 	(
@@ -478,7 +478,7 @@ class GSettingDetailFactory : public GViewFactory
 } SettingDetailFactory;
 
 class ProjectSettingsDlg;
-class SettingItem : public GTreeItem
+class SettingItem : public LTreeItem
 {
 	ProjectSettingsDlg *Dlg;
 	
@@ -499,7 +499,7 @@ public:
 class ProjectSettingsDlg : public LDialog
 {
 	IdeProjectSettingsPriv *d;
-	GTree *Tree;
+	LTree *Tree;
 	GSettingDetail *Detail;
 	uint64 DefLockOut;
 
@@ -524,18 +524,18 @@ public:
 			if (GetViewById(IDC_SETTINGS, Tree))
 			{
 				const char *Section = NULL;
-				GTreeItem *SectionItem = NULL;
+				LTreeItem *SectionItem = NULL;
 				for (SettingInfo *i = AllSettings; i->Setting; i++)
 				{
 					if (!SectionItem || (Section && stricmp(i->Category, Section)))
 					{
 						Section = i->Category;
-						SectionItem = new GTreeItem();
+						SectionItem = new LTreeItem();
 						SectionItem->SetText(i->Category);
 						Tree->Insert(SectionItem);
 					}
 					
-					GTreeItem *Item = new GTreeItem();
+					LTreeItem *Item = new LTreeItem();
 					Item->SetText(i->Name);
 					SectionItem->Insert(Item);
 					SectionItem->Expanded(true);
@@ -567,15 +567,15 @@ public:
 		}
 	}
 	
-	GTreeItem *FindItem(GTreeItem *i, const char *search)
+	LTreeItem *FindItem(LTreeItem *i, const char *search)
 	{
 		const char *s = i->GetText(0);
 		if (s && search && stristr(s, search))
 			return i;
 		
-		for (GTreeItem *c = i->GetChild(); c; c = c->GetNext())
+		for (LTreeItem *c = i->GetChild(); c; c = c->GetNext())
 		{
-			GTreeItem *f = FindItem(c, search);
+			LTreeItem *f = FindItem(c, search);
 			if (f)
 				return f;
 		}
@@ -585,15 +585,15 @@ public:
 	void OnSearch(const char *s)
 	{
 		if (!Tree) return;
-		GTreeItem *f = NULL;
-		for (GTreeItem *i = Tree->GetChild(); i && !f; i = i->GetNext())
+		LTreeItem *f = NULL;
+		for (LTreeItem *i = Tree->GetChild(); i && !f; i = i->GetNext())
 		{
 			f = FindItem(i, s);
 		}
 		if (f)
 		{
 			f->Select(true);
-			for (GTreeItem *i = f; i; i = i->GetParent())
+			for (LTreeItem *i = f; i; i = i->GetParent())
 				i->Expanded(true);
 			Tree->Focus(true);
 		}
@@ -662,7 +662,7 @@ public:
 				
 				if (BrowseIdx >= 0)
 				{
-					GEdit *e;
+					LEdit *e;
 					if (GetViewById(IDC_EDIT_BASE + BrowseIdx, e))
 					{
 						GFileSelect s;
@@ -705,7 +705,7 @@ public:
 
 void SettingItem::Select(bool b)
 {
-	GTreeItem::Select(b);
+	LTreeItem::Select(b);
 	if (b)
 		Dlg->OnSelect(this);
 }

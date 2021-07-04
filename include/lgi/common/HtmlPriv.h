@@ -150,7 +150,7 @@ struct GHtmlTableLayout
 	void Dump();
 };
 
-class GTag : public GHtmlElement
+class GTag : public LHtmlElement
 {
 	friend struct GHtmlTableLayout;
 	friend class ::HtmlEdit;
@@ -371,7 +371,7 @@ public:
 	ssize_t Selection; // index into the text of the selection edge
 	GArea TextPos;
 
-	GTag(GHtml *h, GHtmlElement *p);
+	GTag(GHtml *h, LHtmlElement *p);
 	~GTag();
 
 	// Events

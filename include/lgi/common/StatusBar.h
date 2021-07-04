@@ -6,15 +6,15 @@
 #define STATUSBAR_SEPARATOR			4
 #define GSP_SUNKEN					0x0001
 
-class LgiClass GStatusBar : public GLayout
+class LgiClass LStatusBar : public LLayout
 {
 	friend class GStatusPane;
 
 public:
-	GStatusBar();
-	~GStatusBar();
+	LStatusBar();
+	~LStatusBar();
 
-	const char *GetClass() { return "GStatusBar"; }
+	const char *GetClass() { return "LStatusBar"; }
 	bool Pour(LRegion &r);
 	void OnPaint(LSurface *pDC);
 	void OnPosChange();
@@ -26,7 +26,7 @@ public:
 class LgiClass GStatusPane :
 	public LView
 {
-	friend class GStatusBar;
+	friend class LStatusBar;
 
 protected:
 	int		Flags;

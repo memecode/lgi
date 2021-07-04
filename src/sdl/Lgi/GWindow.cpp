@@ -3,8 +3,8 @@
 #include "Lgi.h"
 #include "GDragAndDrop.h"
 #include "GToken.h"
-#include "GPopup.h"
-#include "GPanel.h"
+#include "LPopup.h"
+#include "LPanel.h"
 
 #define DEBUG_SETFOCUS			0
 #define DEBUG_HANDLEVIEWKEY		0
@@ -238,8 +238,8 @@ bool LWindow::HandleViewMouse(LView *v, LMouse &m)
 	// Any window in a popup always gets the key...
 	for (LView *p = v; p; p = p->GetParent())
 	{
-		GPopup *Popup;
-		if (Popup = dynamic_cast<GPopup*>(p))
+		LPopup *Popup;
+		if (Popup = dynamic_cast<LPopup*>(p))
 		{
 			Status = v->OnKey(k);
 			if (!Status)
@@ -295,7 +295,7 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	LViewI *p;
 	for (p = v->GetParent(); p; p = p->GetParent())
 	{
-		if (dynamic_cast<GPopup*>(p))
+		if (dynamic_cast<LPopup*>(p))
 		{
 			#if DEBUG_HANDLEVIEWKEY
 			if (Debug)

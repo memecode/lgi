@@ -1,5 +1,5 @@
 /*
-**	FILE:			GPanel.h
+**	FILE:			LPanel.h
 **	AUTHOR:			Matthew Allen
 **	DATE:			29/8/99
 **	DESCRIPTION:	Scribe Mail Object and UI
@@ -14,7 +14,7 @@
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/Layout.h"
 
-class LgiClass GPanel : public GLayout
+class LgiClass LPanel : public LLayout
 {
 protected:
 	bool IsOpen;
@@ -29,10 +29,10 @@ protected:
 	virtual int CalcWidth();
 
 public:
-	GPanel(const char *name, int size, bool open = true);
-	~GPanel();
+	LPanel(const char *name, int size, bool open = true);
+	~LPanel();
 
-	const char *GetClass() { return "GPanel"; }
+	const char *GetClass() { return "LPanel"; }
 
 	bool Open();
 	virtual void Open(bool i);

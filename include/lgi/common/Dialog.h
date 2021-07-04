@@ -32,7 +32,7 @@
 /// 		SetPos(p);
 /// 		MoveToCenter();
 /// 			
-/// 		Children.Insert(new GEdit(IDC_STRING, 10, 10, 200, 20, ""));
+/// 		Children.Insert(new LEdit(IDC_STRING, 10, 10, 200, 20, ""));
 /// 		Children.Insert(new GButton(IDOK, 10, 30, 80, 20, "Ok"));
 /// 		Children.Insert(new GButton(IDCANCEL, 100, 30, 80, 20, "Cancel"));
 /// 	}
@@ -77,7 +77,7 @@
 /// look for a file named after the running executable with the right extension and load it. Then it will
 /// find the dialog resource and instantiate all the controls specified in the resource. All the built in
 /// Lgi controls are supported directly as tags in the XML file and you can create your own custom controls
-/// that the resource loader can instantiate as well using the GViewFactory system.
+/// that the resource loader can instantiate as well using the LViewFactory system.
 ///
 /// Resource file example:
 /// \code
@@ -138,17 +138,17 @@
 /// The built in controls that you can use are:
 /// <ul>
 ///		<li> GButton (Push button)
-///		<li> GEdit (Edit box for text entry)
+///		<li> LEdit (Edit box for text entry)
 ///		<li> GText (Static label)
 ///		<li> GCheckBox (Independent boolean)
 ///		<li> GCombo (Select one from many)
-///		<li> GSlider (Select a position)
+///		<li> LSlider (Select a position)
 ///		<li> LBitmap (Display an image)
 ///		<li> GProgress (Show a progress)
 ///		<li> GList (List containing LListItem)
-///		<li> GTree (Hierarchy of GTreeItem)
-///		<li> GRadioGroup (One of many selection using GRadioButton)
-///		<li> GTabView (Containing GTabPage)
+///		<li> LTree (Hierarchy of LTreeItem)
+///		<li> LRadioGroup (One of many selection using LRadioButton)
+///		<li> LTabView (Containing LTabPage)
 /// </ul>
 class LgiClass LDialog :
 	public LWindow,

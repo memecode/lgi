@@ -175,7 +175,7 @@ bool LBox::OnViewMouse(LView *v, LMouse &m)
 		LMouse Local = m;
 		while (v && v != (LView*)this && v->GetParent())
 		{
-			if (dynamic_cast<GPopup*>(v))
+			if (dynamic_cast<LPopup*>(v))
 				return true;
 
 			LRect p = v->GetPos();

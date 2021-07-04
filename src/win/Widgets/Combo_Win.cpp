@@ -11,9 +11,9 @@
 
 #define DEBUG_COMBOBOX	1365
 
-LRect GCombo::Pad(8, 4, 24, 4);
+LRect LCombo::Pad(8, 4, 24, 4);
 
-class GComboPrivate
+class LComboPrivate
 {
 public:
 	bool SortItems;
@@ -28,7 +28,7 @@ public:
 	GString Name;
 	GArray<GString> Strs;
 
-	GComboPrivate()
+	LComboPrivate()
 	{
 		Len = 0;
 		SortItems = 0;
@@ -38,10 +38,10 @@ public:
 	}
 };
 
-GCombo::GCombo(int id, int x, int y, int cx, int cy, const char *name) :
+LCombo::LCombo(int id, int x, int y, int cx, int cy, const char *name) :
 	ResObject(Res_ComboBox)
 {
-	d = new GComboPrivate;
+	d = new LComboPrivate;
 	if (ValidStr(name))
 		Name(name);
 	
@@ -66,12 +66,12 @@ GCombo::GCombo(int id, int x, int y, int cx, int cy, const char *name) :
 	#endif
 }
 
-GCombo::~GCombo()
+LCombo::~LCombo()
 {
 	DeleteObj(d);
 }
 
-void GCombo::OnAttach()
+void LCombo::OnAttach()
 {
 	/*
 	if (!d->Init)
@@ -93,31 +93,31 @@ void GCombo::OnAttach()
 	*/
 }
 
-bool GCombo::Sort()
+bool LCombo::Sort()
 {
 	return d->SortItems;
 }
 
-void GCombo::Sort(bool s)
+void LCombo::Sort(bool s)
 {
 	d->SortItems = s;
 }
 
-int GCombo::Sub()
+int LCombo::Sub()
 {
 	return d->SubType;
 }
 
-void GCombo::Sub(int Type)
+void LCombo::Sub(int Type)
 {
 	d->SubType = Type;
 }
 
-void GCombo::Value(int64 i)
+void LCombo::Value(int64 i)
 {
 	#if defined(DEBUG_COMBOBOX)
 	if (DEBUG_COMBOBOX==GetId())
-		LgiTrace("GCombo::Value(" LPrintfInt64 ") this=%p, hnd=%p strs=%i\n",
+		LgiTrace("LCombo::Value(" LPrintfInt64 ") this=%p, hnd=%p strs=%i\n",
 			i, this, _View, d->Strs.Length());
 	#endif
 
@@ -134,7 +134,7 @@ void GCombo::Value(int64 i)
 	}
 }
 
-int64 GCombo::Value()
+int64 LCombo::Value()
 {
 	if (Handle())
 	{
@@ -151,20 +151,20 @@ int64 GCombo::Value()
 
 	#if defined(DEBUG_COMBOBOX)
 	if (DEBUG_COMBOBOX==GetId())
-		LgiTrace("GCombo::Value()=" LPrintfInt64 " this=%p, hnd=%p strs=%i\n",
+		LgiTrace("LCombo::Value()=" LPrintfInt64 " this=%p, hnd=%p strs=%i\n",
 			d->Value, this, _View, d->Strs.Length());
 	#endif
 	
 	return d->Value;
 }
 
-bool GCombo::Name(const char *n)
+bool LCombo::Name(const char *n)
 {
 	int Idx = IndexOf(n);
 
 	#if defined(DEBUG_COMBOBOX)
 	if (DEBUG_COMBOBOX==GetId())
-		LgiTrace("GCombo::Name(%s) this=%p, hnd=%p idx=%i strs=%i\n",
+		LgiTrace("LCombo::Name(%s) this=%p, hnd=%p idx=%i strs=%i\n",
 			n, this, _View, Idx, d->Strs.Length());
 	#endif
 
@@ -178,7 +178,7 @@ bool GCombo::Name(const char *n)
 	return true;
 }
 
-const char *GCombo::Name()
+const char *LCombo::Name()
 {
 	if (d->Value >= 0 &&
 		d->Value < (ssize_t)d->Strs.Length())
@@ -187,7 +187,7 @@ const char *GCombo::Name()
 
 		#if defined(DEBUG_COMBOBOX)
 		if (DEBUG_COMBOBOX==GetId())
-			LgiTrace("GCombo::Name()=" LPrintfInt64 "=%s this=%p, hnd=%p strs=%i\n",
+			LgiTrace("LCombo::Name()=" LPrintfInt64 "=%s this=%p, hnd=%p strs=%i\n",
 				d->Value, s, this, _View, d->Strs.Length());
 		#endif
 
@@ -196,30 +196,30 @@ const char *GCombo::Name()
 
 	#if defined(DEBUG_COMBOBOX)
 	if (DEBUG_COMBOBOX==GetId())
-		LgiTrace("GCombo::Name() " LPrintfInt64 "=out of range this=%p, hnd=%p strs=%i\n",
+		LgiTrace("LCombo::Name() " LPrintfInt64 "=out of range this=%p, hnd=%p strs=%i\n",
 			d->Value, this, _View, d->Strs.Length());
 	#endif
 	
 	return NULL;
 }
 
-LSubMenu *GCombo::GetMenu()
+LSubMenu *LCombo::GetMenu()
 {
 	LgiAssert(!"Impl me.");
 	return 0;
 }
 
-void GCombo::SetMenu(LSubMenu *m)
+void LCombo::SetMenu(LSubMenu *m)
 {
 	LgiAssert(!"Impl me.");
 }
 
-void GCombo::DoMenu()
+void LCombo::DoMenu()
 {
 	LgiAssert(!"Impl me.");
 }
 
-bool GCombo::Delete()
+bool LCombo::Delete()
 {
 	int64 Idx = Value();
 	
@@ -231,7 +231,7 @@ bool GCombo::Delete()
 	return Delete(Idx);
 }
 
-bool GCombo::Delete(size_t i)
+bool LCombo::Delete(size_t i)
 {
 	#if defined(DEBUG_COMBOBOX)
 	if (DEBUG_COMBOBOX==GetId())
@@ -254,7 +254,7 @@ bool GCombo::Delete(size_t i)
 	return false;
 }
 
-bool GCombo::Delete(char *p)
+bool LCombo::Delete(char *p)
 {
 	int Idx = IndexOf(p);
 
@@ -270,7 +270,7 @@ bool GCombo::Delete(char *p)
 	return true;
 }
 
-bool GCombo::Insert(const char *p, int Index)
+bool LCombo::Insert(const char *p, int Index)
 {
 	if (!p)
 		return false;
@@ -293,7 +293,7 @@ bool GCombo::Insert(const char *p, int Index)
 
 	#if defined(DEBUG_COMBOBOX)
 	if (DEBUG_COMBOBOX==GetId())
-		LgiTrace("GCombo::Insert(%s, %i) this=%p, hnd=%p strs=%i\n",
+		LgiTrace("LCombo::Insert(%s, %i) this=%p, hnd=%p strs=%i\n",
 			p, Index, this, _View, d->Strs.Length());
 	#endif
 	d->Strs.AddAt(Index, p);
@@ -301,7 +301,7 @@ bool GCombo::Insert(const char *p, int Index)
 	return true;
 }
 
-size_t GCombo::Length()
+size_t LCombo::Length()
 {
 	if (_View && d->Init)
 		d->Len = SendMessage(_View, CB_GETCOUNT, 0, 0);
@@ -309,7 +309,7 @@ size_t GCombo::Length()
 	return d->Strs.Length();
 }
 
-char *GCombo::operator [](ssize_t i)
+char *LCombo::operator [](ssize_t i)
 {
 	if (i >= 0 && i < (ssize_t)d->Strs.Length())
 		return d->Strs[i];
@@ -318,7 +318,7 @@ char *GCombo::operator [](ssize_t i)
 	return NULL;
 }
 
-int GCombo::IndexOf(const char *str)
+int LCombo::IndexOf(const char *str)
 {
 	if (!ValidStr(str))
 		return -1;
@@ -332,23 +332,23 @@ int GCombo::IndexOf(const char *str)
 	return -1;
 }
 
-bool GCombo::SetPos(LRect &p, bool Repaint)
+bool LCombo::SetPos(LRect &p, bool Repaint)
 {
 	if (p == Pos)
 		return true;
 	
 	d->Pos = p;
 	d->Pos.y2 = d->Pos.y1 + 200;
-	bool b = GControl::SetPos(d->Pos, Repaint);
+	bool b = LControl::SetPos(d->Pos, Repaint);
 	if (b)
 		Pos = p;
 	
 	return b;
 }
 
-int GCombo::SysOnNotify(int Msg, int Code)
+int LCombo::SysOnNotify(int Msg, int Code)
 {
-	// LgiTrace("%s:%i - GCombo::SysOnNotify %i %i\n", _FL, Msg==WM_COMMAND, Code);
+	// LgiTrace("%s:%i - LCombo::SysOnNotify %i %i\n", _FL, Msg==WM_COMMAND, Code);
 	
 	if (Msg == WM_COMMAND)
 	{
@@ -372,7 +372,7 @@ int GCombo::SysOnNotify(int Msg, int Code)
 	return 0;
 }
 
-GMessage::Result GCombo::OnEvent(GMessage *Msg)
+GMessage::Result LCombo::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -415,7 +415,7 @@ GMessage::Result GCombo::OnEvent(GMessage *Msg)
 		#endif
 	}
 
-	GMessage::Result Status = GControl::OnEvent(Msg);
+	GMessage::Result Status = LControl::OnEvent(Msg);
 	
 	switch (Msg->Msg())
 	{
@@ -444,7 +444,7 @@ GMessage::Result GCombo::OnEvent(GMessage *Msg)
 	return Status;
 }
 
-void GCombo::Empty()
+void LCombo::Empty()
 {
 	if (_View)
 		SendMessage(_View, CB_RESETCONTENT, 0, 0);
@@ -452,7 +452,7 @@ void GCombo::Empty()
 	d->Strs.Length(0);
 }
 
-bool GCombo::OnKey(LKey &k)
+bool LCombo::OnKey(LKey &k)
 {
 	switch (k.vkey)
 	{

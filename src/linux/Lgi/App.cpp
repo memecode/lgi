@@ -9,7 +9,7 @@
 #include <ctype.h>
 
 #include "Lgi.h"
-#include "GSkinEngine.h"
+#include "SkinEngine.h"
 #include "GArray.h"
 #include "LVariant.h"
 #include "GToken.h"
@@ -231,7 +231,7 @@ private:
 #include "GAppPriv.h"
 
 /////////////////////////////////////////////////////////////////////////////
-GSkinEngine *GApp::SkinEngine = 0;
+LSkinEngine *GApp::SkinEngine = 0;
 GApp *TheApp = 0;
 LMouseHook *GApp::MouseHook = 0;
 
@@ -355,7 +355,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	
 	if (!GetOption("noskin"))
 	{
-		extern GSkinEngine *CreateSkinEngine(GApp *App);
+		extern LSkinEngine *CreateSkinEngine(GApp *App);
 		SkinEngine = CreateSkinEngine(this);
 	}
 }

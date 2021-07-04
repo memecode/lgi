@@ -76,7 +76,7 @@ extern IdePlatform GetCurrentPlatform();
 
 class AppWnd;
 class IdeProject;
-class IdeCommon : public GTreeItem, public LXmlTag
+class IdeCommon : public LTreeItem, public LXmlTag
 {
 	friend class IdeProject;
 
@@ -100,10 +100,10 @@ public:
 	IdeCommon *GetSubFolder(IdeProject *Project, char *Name, bool Create = false);
 };
 
-class WatchItem : public GTreeItem
+class WatchItem : public LTreeItem
 {
 	class IdeOutput *Out;
-	GTreeItem *PlaceHolder;
+	LTreeItem *PlaceHolder;
 
 public:
 	WatchItem(IdeOutput *out, const char *Init = NULL);
@@ -202,9 +202,9 @@ public:
 	void OnMouseClick(LMouse &m);
 };
 
-class IdeTree : public GTree, public GDragDropTarget
+class IdeTree : public LTree, public GDragDropTarget
 {
-	GTreeItem *Hit;
+	LTreeItem *Hit;
 
 public:
 	IdeTree();

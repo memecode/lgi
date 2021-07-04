@@ -31,13 +31,13 @@ char *GHtmlParser::NextTag(char *s)
 	return 0;
 }
 
-GHtmlElement *GHtmlParser::GetOpenTag(const char *Tag)
+LHtmlElement *GHtmlParser::GetOpenTag(const char *Tag)
 {
 	if (Tag)
 	{
 		for (int i=(int)OpenTags.Length()-1; i>=0; i--)
 		{
-			GHtmlElement *t = OpenTags[i];
+			LHtmlElement *t = OpenTags[i];
 			if (t->Tag)
 			{
 				if (_stricmp(t->Tag, Tag) == 0)
@@ -261,7 +261,7 @@ char *GHtmlParser::ParseName(char *s, GAutoString &Name)
 	return s;
 }
 
-char *GHtmlParser::ParsePropList(char *s, GHtmlElement *Obj, bool &Closed)
+char *GHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 {
 	while (s && *s)
 	{
@@ -339,7 +339,7 @@ GHtmlElemInfo *GHtmlParser::GetTagInfo(const char *Tag)
 	return GHtmlStatic::Inst->GetTagInfo(Tag);
 }
 
-void DumpDomTree(GHtmlElement *e, int Depth = 0)
+void DumpDomTree(LHtmlElement *e, int Depth = 0)
 {
 	char Sp[256];
 	int d = Depth << 1;
@@ -352,7 +352,7 @@ void DumpDomTree(GHtmlElement *e, int Depth = 0)
 	}
 }
 
-bool GHtmlParser::Parse(GHtmlElement *Root, const char *Doc)
+bool GHtmlParser::Parse(LHtmlElement *Root, const char *Doc)
 {
 	SourceData.Empty();
 	CurrentSrc = Doc;
@@ -367,7 +367,7 @@ bool GHtmlParser::Parse(GHtmlElement *Root, const char *Doc)
 	return true;
 }
 
-char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPreTag, bool *BackOut)
+char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPreTag, bool *BackOut)
 {
 	#if CRASH_TRACE
 	LgiTrace("::ParseHtml Doc='%.10s'\n", Doc);
@@ -460,7 +460,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 									char *p = Result;
 									do
 									{
-										GHtmlElement *c = CreateElement(Elem);
+										LHtmlElement *c = CreateElement(Elem);
 										if (c)
 										{
 											p = ParseHtml(c, p, Depth + 1, InPreTag);
@@ -532,10 +532,10 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 				}
 				else if (!_stricmp(Cond, "endif"))
 				{
-					GHtmlElement *MatchingIf = NULL;
+					LHtmlElement *MatchingIf = NULL;
 					for (int i = (int)OpenTags.Length()-1; i>=0; i--)
 					{
-						GHtmlElement *e = OpenTags[i];
+						LHtmlElement *e = OpenTags[i];
 						if (e->TagId == CONDITIONAL &&
 							e->Tag &&
 							!_stricmp(e->Tag, "[if]"))
@@ -587,7 +587,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 					
 					#if 0 // _DEBUG
 					int Depth = 0;
-					for (GHtmlElement *ep = Elem; ep; ep=ep->Parent)
+					for (LHtmlElement *ep = Elem; ep; ep=ep->Parent)
 					{
 						Depth++;
 					}
@@ -607,7 +607,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 							// Do singleton check... we don't want nested BODY or HEAD tags...
 							for (int i = (int)OpenTags.Length() - 1; i >= 0; i--)
 							{
-								GHtmlElement *e = OpenTags[i];
+								LHtmlElement *e = OpenTags[i];
 								
 								if (e->TagId == TAG_IFRAME)
 								{
@@ -623,7 +623,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 									#if 0 // This dumps the tags in the list
 									it = OpenTags.Start();
 									LgiTrace("Open tags:\n");
-									for (GHtmlElement *e = *it; e; e = *++it)
+									for (LHtmlElement *e = *it; e; e = *++it)
 									{
 										GAutoString a = e->DescribeElement();
 										LgiTrace("\t%s\n", a.Get());
@@ -741,7 +741,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								// Um no...
 								if (BackOut)
 								{
-									GHtmlElement *l = OpenTags.Last();
+									LHtmlElement *l = OpenTags.Last();
 									if (l && l->TagId == TAG_TABLE)
 									{
 										CloseTag(l);
@@ -844,7 +844,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 
 						if (CloseExisting)
 						{
-							GHtmlElement *p;
+							LHtmlElement *p;
 							for (int TagIdx = (int)OpenTags.Length()-1; TagIdx >= 0 && (p = OpenTags[TagIdx]) && p->TagId != TAG_TABLE; TagIdx--)
 							{
 								if (p->TagId == Elem->TagId)
@@ -865,10 +865,10 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 							}
 							else
 							{
-								GHtmlElement *Parent = NULL;
+								LHtmlElement *Parent = NULL;
 								for (int TagIdx = (int)OpenTags.Length()-1; TagIdx >= 0; TagIdx--)
 								{
-									GHtmlElement *t = OpenTags[TagIdx];
+									LHtmlElement *t = OpenTags[TagIdx];
 									if (t->TagId && ParentTags.HasItem(t->TagId))
 									{
 										Parent = t;
@@ -901,7 +901,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 										case TAG_TH:
 										{
 											// Find a TBODY or TABLE to attach a new ROW
-											GHtmlElement *Attach = Elem->Parent;
+											LHtmlElement *Attach = Elem->Parent;
 											while (Attach)
 											{
 												if (Attach->TagId == TAG_TABLE || Attach->TagId == TAG_TBODY)
@@ -911,7 +911,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 											if (Attach)
 											{
 												// Create a new ROW
-												GHtmlElement *NewRow = CreateElement(Attach);
+												LHtmlElement *NewRow = CreateElement(Attach);
 												if (NewRow)
 												{
 													NewRow->Tag.Reset(NewStr("tr"));
@@ -973,11 +973,11 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 											ssize_t r = s->Read(a, (int)Len);
 											a[r] = 0;
 											
-											GHtmlElement *Child = CreateElement(Elem);
+											LHtmlElement *Child = CreateElement(Elem);
 											if (Child)
 											{
 												bool BackOut = false;
-												GArray<GHtmlElement*> ot = OpenTags;
+												GArray<LHtmlElement*> ot = OpenTags;
 
 												ParseHtml(Child, a, Depth + 1, false, &BackOut);
 
@@ -995,7 +995,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 				{
 					// Child tag
 					DoChildTag:
-					GHtmlElement *c = CreateElement(Elem);
+					LHtmlElement *c = CreateElement(Elem);
 					if (c)
 					{
 						bool BackOut = false;
@@ -1011,7 +1011,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 						{
 							while (c->Children.Length())
 							{
-								GHtmlElement *Last = c->Children.Last();
+								LHtmlElement *Last = c->Children.Last();
 
 								if (Last->TagId == CONTENT &&
 									!ValidStrW(Last->Txt))
@@ -1050,7 +1050,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 					while (e > s && strchr(WhiteSpace, e[-1]))
 						e--;
 					GAutoString Name(NewStr(s, e - s));
-					GHtmlElement *Open = GetOpenTag(Name);					
+					LHtmlElement *Open = GetOpenTag(Name);					
 					if (Open)
 					{
 						Open->WasClosed = true;
@@ -1081,7 +1081,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 
 					if (*s == '>')
 					{
-						GHtmlElement *t;
+						LHtmlElement *t;
 						while ((t = OpenTags.Last()))
 						{
 							CloseTag(t);
@@ -1139,7 +1139,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 				};
 
 				char16 *Start = WStr;
-				GHtmlElement *Child = NULL;
+				LHtmlElement *Child = NULL;
 				for (char16 *c = WStr; true; c++)
 				{
 					TxtClass Cls = TxtNone;
@@ -1188,7 +1188,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 						if (Cls == TxtEmoji)
 						{
 							// Emit the emoji image
-							GHtmlElement *img = CreateElement(Elem);
+							LHtmlElement *img = CreateElement(Elem);
 							if (img)
 							{
 								img->Tag.Reset(NewStr("img"));
@@ -1212,7 +1212,7 @@ char *GHtmlParser::ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPr
 						if (Cls == TxtEol)
 						{
 							// Emit the <br> tag
-							GHtmlElement *br = CreateElement(Elem);
+							LHtmlElement *br = CreateElement(Elem);
 							if (br)
 							{
 								br->Tag.Reset(NewStr("br"));
@@ -1448,7 +1448,7 @@ void GHtmlParser::_TraceOpenTags()
 	GStringPipe p;
 	for (unsigned i = 0; i < OpenTags.Length(); i++)
 	{
-		GHtmlElement *t = OpenTags[i];
+		LHtmlElement *t = OpenTags[i];
 		p.Print(", %s", t->Tag.Get());
 		
 		LVariant Id;

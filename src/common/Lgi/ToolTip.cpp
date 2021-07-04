@@ -23,7 +23,7 @@
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/Popup.h"
 
-class NativeTip : public GPopup
+class NativeTip : public LPopup
 {
 	GAutoPtr<LDisplayString> s;
 	
@@ -37,7 +37,7 @@ public:
 	
 	const char *GetClass() { return "NativeTip"; }
 
-	NativeTip(int id, LView *p) : GPopup(p)
+	NativeTip(int id, LView *p) : LPopup(p)
 	{
 		All.Add(this);
 		Id = id;
@@ -62,7 +62,7 @@ public:
 	
 	void OnCreate()
 	{
-		GPopup::OnCreate();
+		LPopup::OnCreate();
 		if (!PulseRunning)
 		{
 			PulseRunning = this;

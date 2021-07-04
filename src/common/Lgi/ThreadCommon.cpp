@@ -150,7 +150,7 @@ LThreadOwner::~LThreadOwner()
 
 ////////////////////////////////////////////////////////////////////////////////////////
 /*
-GEventSinkPtr::GEventSinkPtr(GEventTargetThread *p, bool own)
+GEventSinkPtr::GEventSinkPtr(LEventTargetThread *p, bool own)
 {
 	Ptr = p;
 	OwnPtr = own;
@@ -165,7 +165,7 @@ GEventSinkPtr::~GEventSinkPtr()
 {
 	if (Lock(_FL))
 	{
-		GEventTargetThread *tt = dynamic_cast<GEventTargetThread*>(Ptr);
+		LEventTargetThread *tt = dynamic_cast<LEventTargetThread*>(Ptr);
 		if (tt)
 		{
 			if (tt->Lock(_FL))

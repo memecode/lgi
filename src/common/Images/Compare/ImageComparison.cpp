@@ -8,10 +8,10 @@
 #include "lgi/common/Button.h"
 #include "lgi/common/ImageComparison.h"
 #include "lgi/common/TabView.h"
-#include "resdefs.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/Thread.h"
 #include "lgi/common/StatusBar.h"
+#include "resdefs.h"
 
 #define DIFF_LARGE_8BIT		(45)
 #define DIFF_LARGE_16BIT	(DIFF_LARGE_8BIT << 8)
@@ -290,7 +290,7 @@ public:
 };
 
 class CompareView;
-class CmpZoomView : public GZoomView
+class CmpZoomView : public LZoomView
 {
 	CompareView *View;
 	
@@ -300,14 +300,14 @@ public:
 	void OnMouseMove(LMouse &m);
 };
 
-class CompareView : public GLayout
+class CompareView : public LLayout
 {
 	GZoomViewCallback *Callback;
-	GEdit *AName, *BName, *CName;
+	LEdit *AName, *BName, *CName;
 	GAutoPtr<LSurface> A, B, C;
 	CmpZoomView *AView, *BView, *CView;
 	GArray<ThreadLoader*> Threads;
-	GStatusBar *Status;
+	LStatusBar *Status;
 	GStatusPane *Pane[3];
 	bool DraggingView;	
 	LPointF DocPos;
@@ -320,7 +320,7 @@ public:
 		DraggingView = false;
 		SetPourLargest(true);
 		
-		AddView(Status = new GStatusBar);
+		AddView(Status = new LStatusBar);
 		Status->AppendPane(Pane[0] = new GStatusPane);
 		Status->AppendPane(Pane[1] = new GStatusPane);
 		Status->AppendPane(Pane[2] = new GStatusPane);
@@ -336,9 +336,9 @@ public:
 			Threads.Add(new ThreadLoader(this, a, 1));
 		}
 		
-		AddView(AName = new GEdit(IDC_A_NAME, 0, 0, 100, SysFont->GetHeight() + 8, FileA));
-		AddView(BName = new GEdit(IDC_B_NAME, 0, 0, 100, SysFont->GetHeight() + 8, FileB));			
-		AddView(CName = new GEdit(IDC_C_NAME, 0, 0, 100, SysFont->GetHeight() + 8, NULL));
+		AddView(AName = new LEdit(IDC_A_NAME, 0, 0, 100, SysFont->GetHeight() + 8, FileA));
+		AddView(BName = new LEdit(IDC_B_NAME, 0, 0, 100, SysFont->GetHeight() + 8, FileB));			
+		AddView(CName = new LEdit(IDC_C_NAME, 0, 0, 100, SysFont->GetHeight() + 8, NULL));
 		CName->Sunken(false);
 		CName->Enabled(false);
 
@@ -417,12 +417,12 @@ public:
 			}
 		}
 		
-		return GLayout::OnEvent(Msg);
+		return LLayout::OnEvent(Msg);
 	}
 	
 	void OnPosChange()
 	{
-		GLayout::OnPosChange();
+		LLayout::OnPosChange();
 		
 		if (AName && BName &&
 			AView && BView && CView)
@@ -478,7 +478,7 @@ public:
 	{
 		if (CView && CName)
 		{
-			GZoomView::ViewportInfo i = CView->GetViewport();
+			LZoomView::ViewportInfo i = CView->GetViewport();
 			char s[256];
 			int ch = sprintf_s(s, sizeof(s), "Scroll: %i,%i  ", i.Sx, i.Sy);
 			if (i.Zoom < 0)
@@ -495,7 +495,7 @@ public:
 		{
 			case IDC_A_VIEW:
 			{
-				GZoomView::ViewportInfo i = AView->GetViewport();
+				LZoomView::ViewportInfo i = AView->GetViewport();
 				BView->SetViewport(i);
 				CView->SetViewport(i);
 				OnViewportChange();
@@ -503,7 +503,7 @@ public:
 			}
 			case IDC_B_VIEW:
 			{
-				GZoomView::ViewportInfo i = BView->GetViewport();
+				LZoomView::ViewportInfo i = BView->GetViewport();
 				AView->SetViewport(i);
 				CView->SetViewport(i);
 				OnViewportChange();
@@ -511,7 +511,7 @@ public:
 			}
 			case IDC_C_VIEW:
 			{
-				GZoomView::ViewportInfo i = CView->GetViewport();
+				LZoomView::ViewportInfo i = CView->GetViewport();
 				AView->SetViewport(i);
 				BView->SetViewport(i);
 				OnViewportChange();
@@ -519,7 +519,7 @@ public:
 			}
 		}
 		
-		return GLayout::OnNotify(Ctrl, Flags);
+		return LLayout::OnNotify(Ctrl, Flags);
 	}
 
     int ZoomToFactor(int Zoom)
@@ -656,7 +656,7 @@ public:
 	
 	void UserMouseClick(LMouse &m)
 	{
-		GZoomView *zv = dynamic_cast<GZoomView*>(m.Target);
+		LZoomView *zv = dynamic_cast<LZoomView*>(m.Target);
 		if (!zv)
 		{
 			LgiAssert(0);
@@ -666,7 +666,7 @@ public:
 		zv->Capture(DraggingView = m.Down());
 		if (m.Down())
 		{
-			GZoomView *zv = dynamic_cast<GZoomView*>(m.Target);
+			LZoomView *zv = dynamic_cast<LZoomView*>(m.Target);
 			if (!zv->Convert(DocPos, m.x, m.y))
 				LgiAssert(0);
 
@@ -678,7 +678,7 @@ public:
 	{
 		if (DraggingView)
 		{
-			GZoomView::ViewportInfo vp = AView->GetViewport();
+			LZoomView::ViewportInfo vp = AView->GetViewport();
 			int Factor = ZoomToFactor(vp.Zoom);
 			if (vp.Zoom < 0)
 			{
@@ -737,7 +737,7 @@ public:
 				#define PercentDiff(c) \
 					diff##c, (ap.c ? (double)abs(diff##c) * 100 / ap.c : (diff##c ? 100.0 : 0.0))
 
-				GZoomView *zv = dynamic_cast<GZoomView*>(m.Target);
+				LZoomView *zv = dynamic_cast<LZoomView*>(m.Target);
 				LPointF Doc;
 				zv->Convert(Doc, m.x, m.y);
 				
@@ -755,7 +755,7 @@ public:
 	}
 };
 
-CmpZoomView::CmpZoomView(GZoomViewCallback *callback, CompareView *view) : GZoomView(callback)
+CmpZoomView::CmpZoomView(GZoomViewCallback *callback, CompareView *view) : LZoomView(callback)
 {
 	View = view;
 }
@@ -763,14 +763,14 @@ CmpZoomView::CmpZoomView(GZoomViewCallback *callback, CompareView *view) : GZoom
 void CmpZoomView::OnMouseClick(LMouse &m)
 {
 	LgiAssert(m.Target == this);
-	GZoomView::OnMouseClick(m);
+	LZoomView::OnMouseClick(m);
 	View->UserMouseClick(m);
 }
 
 void CmpZoomView::OnMouseMove(LMouse &m)
 {
 	LgiAssert(m.Target == this);
-	GZoomView::OnMouseMove(m);
+	LZoomView::OnMouseMove(m);
 	View->UserMouseMove(m);
 }
 
@@ -854,7 +854,7 @@ struct ImageCompareDlgPriv : public GZoomViewCallback
 {
 	GCombo *l, *r;
 	LList *lst;
-	GTabView *tabs;
+	LTabView *tabs;
 	GAutoPtr<CompareThread> Thread;
 
 	ImageCompareDlgPriv()
@@ -863,13 +863,13 @@ struct ImageCompareDlgPriv : public GZoomViewCallback
 		tabs = NULL;
 	}
 
-	void DrawBackground(GZoomView *View, LSurface *Dst, LPoint Offset, LRect *Where)
+	void DrawBackground(LZoomView *View, LSurface *Dst, LPoint Offset, LRect *Where)
 	{
 		Dst->Colour(L_WORKSPACE, 24);
 		Dst->Rectangle(Where);
 	}
 	
-	void DrawForeground(GZoomView *View, LSurface *Dst, LPoint Offset, LRect *Where)
+	void DrawForeground(LZoomView *View, LSurface *Dst, LPoint Offset, LRect *Where)
 	{
 	}
 
@@ -905,9 +905,9 @@ ImageCompareDlg::ImageCompareDlg(LView *p, const char *OutPath)
 	LgiAssert(ResFile.GetFull());
 	if (ResFile.GetFull())
 	{
-		AddView(d->tabs = new GTabView(IDC_TAB_VIEW));
+		AddView(d->tabs = new LTabView(IDC_TAB_VIEW));
 		d->tabs->SetPourLargest(true);
-		GTabPage *First = d->tabs->Append("Select");
+		LTabPage *First = d->tabs->Append("Select");
 		
 		LResources *Res = LgiGetResObj(false, ResFile.GetFull());
 		LgiAssert(Res);
@@ -981,7 +981,7 @@ int ImageCompareDlg::OnNotify(LViewI *Ctrl, int Flags)
 					#else
 					const char *Leaf = strrchr(left, DIR_CHAR);
 					auto Len = d->tabs->GetTabs();
-					GTabPage *t = d->tabs->Append(Leaf ? Leaf + 1 : left);
+					LTabPage *t = d->tabs->Append(Leaf ? Leaf + 1 : left);
 					if (t)
 					{
 						t->HasButton(true);
@@ -1035,11 +1035,11 @@ int ImageCompareDlg::OnNotify(LViewI *Ctrl, int Flags)
 		{
 			if (Flags == GNotifyTabPage_ButtonClick)
 			{
-				GTabPage *p = dynamic_cast<GTabPage*>(Ctrl);
+				LTabPage *p = dynamic_cast<LTabPage*>(Ctrl);
 				LgiAssert(p);
 				if (p)
 				{
-					GTabView *v = p->GetTabControl();
+					LTabView *v = p->GetTabControl();
 					LgiAssert(v);
 					if (v)
 					{

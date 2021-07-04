@@ -4,13 +4,13 @@
 #include <gl/gl.h>
 #include <gl/glu.h>
 
-class GOpenGL : public LView
+class LOpenGL : public LView
 {
-	struct GOpenGLPriv *d;
+	struct LOpenGLPriv *d;
 
 public:
-	GOpenGL();
-	~GOpenGL();
+	LOpenGL();
+	~LOpenGL();
 
 	void OnCreate();
 	void SwapBuffers();

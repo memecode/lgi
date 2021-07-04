@@ -9,7 +9,7 @@
 #define TRANS_DLG_Y		110
 #endif
 
-#include "GRadioGroup.h"
+#include "LRadioGroup.h"
 #include "GButton.h"
 
 GTransparentDlg::GTransparentDlg(LView *parent, LVariant *trans)
@@ -22,7 +22,7 @@ GTransparentDlg::GTransparentDlg(LView *parent, LVariant *trans)
 	SetPos(r);
 	MoveToCenter();
 
-	Children.Insert(Grp = new GRadioGroup(100, 10, 10, 180, 65, "Transparency"));
+	Children.Insert(Grp = new LRadioGroup(100, 10, 10, 180, 65, "Transparency"));
 	if (Grp)
 	{
 		Grp->Append(10, 20, "Opaque");

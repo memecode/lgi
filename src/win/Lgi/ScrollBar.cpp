@@ -2,7 +2,7 @@
 #include "lgi/common/ScrollBar.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
-class GScrollBarPrivate
+class LScrollBarPrivate
 {
 public:
 	int			Type;		// vertical, horzontal or control
@@ -14,7 +14,7 @@ public:
 	int64		Page;
 	int64		Value;
 
-	GScrollBarPrivate()
+	LScrollBarPrivate()
 	{
 		Type = SB_VERT;
 		ZeroObj(Info);
@@ -26,16 +26,16 @@ public:
 	}
 };
 
-GScrollBar::GScrollBar()
+LScrollBar::LScrollBar()
 	: ResObject(Res_ScrollBar)
 {
-	d = new GScrollBarPrivate;
+	d = new LScrollBarPrivate;
 }
 
-GScrollBar::GScrollBar(int id, int x, int y, int cx, int cy, const char *name)
+LScrollBar::LScrollBar(int id, int x, int y, int cx, int cy, const char *name)
 	: ResObject(Res_ScrollBar)
 {
-	d = new GScrollBarPrivate;
+	d = new LScrollBarPrivate;
 	d->Type = SB_CTL;
 	d->Info.fMask |= SIF_DISABLENOSCROLL;
 
@@ -51,7 +51,7 @@ GScrollBar::GScrollBar(int id, int x, int y, int cx, int cy, const char *name)
 	}
 }
 
-GScrollBar::~GScrollBar()
+LScrollBar::~LScrollBar()
 {
 	if (!Handle())
 	{
@@ -60,12 +60,12 @@ GScrollBar::~GScrollBar()
 	DeleteObj(d);
 }
 
-int GScrollBar::GetScrollSize()
+int LScrollBar::GetScrollSize()
 {
 	return GetSystemMetrics(SM_CXVSCROLL);
 }
 
-bool GScrollBar::SetPos(LRect &p, bool Repaint)
+bool LScrollBar::SetPos(LRect &p, bool Repaint)
 {
 	if (d->Type == SB_CTL)
 	{
@@ -75,12 +75,12 @@ bool GScrollBar::SetPos(LRect &p, bool Repaint)
 	return LView::SetPos(p, Repaint);
 }
 
-bool GScrollBar::Vertical()
+bool LScrollBar::Vertical()
 {
 	return d->Type == SB_VERT;
 }
 
-void GScrollBar::SetVertical(bool v)
+void LScrollBar::SetVertical(bool v)
 {
 	if (d->Type != SB_CTL)
 	{
@@ -110,7 +110,7 @@ void GScrollBar::SetVertical(bool v)
 	}
 }
 
-void GScrollBar::SetParentFlag(bool Set)
+void LScrollBar::SetParentFlag(bool Set)
 {
 	int Flag = (Vertical()) ? WS_VSCROLL : WS_HSCROLL;
 
@@ -159,7 +159,7 @@ void GScrollBar::SetParentFlag(bool Set)
 	}
 }
 
-LViewI *GScrollBar::GetMyView()
+LViewI *LScrollBar::GetMyView()
 {
 	if (Handle())
 	{
@@ -174,7 +174,7 @@ LViewI *GScrollBar::GetMyView()
 	return 0;
 }
 
-void GScrollBar::Update()
+void LScrollBar::Update()
 {
 	if (Handle())
 	{
@@ -208,13 +208,13 @@ void GScrollBar::Update()
 	}
 }
 
-void GScrollBar::SetParent(LViewI *p)
+void LScrollBar::SetParent(LViewI *p)
 {
 	LView::SetParent(p);
 	SetParentFlag(true);
 }
 
-int64 GScrollBar::Value()
+int64 LScrollBar::Value()
 {
 	LgiAssert(d->Min < 1000000);
 
@@ -224,7 +224,7 @@ int64 GScrollBar::Value()
 	return limit(d->Value, d->Min, Max);
 }
 
-void GScrollBar::Value(int64 p)
+void LScrollBar::Value(int64 p)
 {
 	LgiAssert(d->Min < 1000000);
 
@@ -242,13 +242,13 @@ void GScrollBar::Value(int64 p)
 	}
 }
 
-void GScrollBar::Limits(int64 &Low, int64 &High)
+void LScrollBar::Limits(int64 &Low, int64 &High)
 {
 	Low = d->Min;
 	High = d->Max;
 }
 
-void GScrollBar::SetLimits(int64 Low, int64 High)
+void LScrollBar::SetLimits(int64 Low, int64 High)
 {
 	int64 h = High;
 	d->Shift = 0;
@@ -267,7 +267,7 @@ void GScrollBar::SetLimits(int64 Low, int64 High)
 	Update();
 }
 
-bool GScrollBar::SetRange(const GRange &r)
+bool LScrollBar::SetRange(const GRange &r)
 {
 	int64 h = r.End();
 	d->Shift = 0;
@@ -287,19 +287,19 @@ bool GScrollBar::SetRange(const GRange &r)
 	return true;
 }
 
-int64 GScrollBar::Page()
+int64 LScrollBar::Page()
 {
 	return d->Page;
 }
 
-void GScrollBar::SetPage(int64 p)
+void LScrollBar::SetPage(int64 p)
 {
 	d->Page = p;
 	d->Info.nPage = (int) (p >> d->Shift);
 	Update();
 }
 
-bool GScrollBar::Invalidate(LRect *r, bool Repaint, bool NonClient)
+bool LScrollBar::Invalidate(LRect *r, bool Repaint, bool NonClient)
 {
 	if (GetParent())
 	{
@@ -309,7 +309,7 @@ bool GScrollBar::Invalidate(LRect *r, bool Repaint, bool NonClient)
 	return false;
 }
 
-GMessage::Result GScrollBar::OnEvent(GMessage *Msg)
+GMessage::Result LScrollBar::OnEvent(GMessage *Msg)
 {
 	auto Status = SubClass ? SubClass->CallParent(Handle(), Msg->m, Msg->a, Msg->b) : 0;
 

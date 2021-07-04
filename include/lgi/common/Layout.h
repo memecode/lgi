@@ -17,9 +17,9 @@
 /// \sa LView::FindLargest(LRegion &, int)
 #define GV_EDGE_LEFT			0x0008
 
-/// Id of the vertical scroll bar in a GLayout control
+/// Id of the vertical scroll bar in a LLayout control
 #define IDC_VSCROLL				14000
-/// Id of the horizontal scroll bar in a GLayout control
+/// Id of the horizontal scroll bar in a LLayout control
 #define IDC_HSCROLL				14001
 
 #ifdef MAC
@@ -33,10 +33,10 @@
 /// This class adds scroll bars to the standard LView base class. The scroll bars can be
 /// directly accessed using the VScroll and HScroll member variables. Although you should
 /// always do a NULL check on the pointer before using, if the scroll bar is not activated
-/// using GLayout::SetScrollBars then VScroll and/or HScroll will by NULL. When the scroll
-/// bar is used to scroll the GLayout control you will receive an event on LView::OnNotify
+/// using LLayout::SetScrollBars then VScroll and/or HScroll will by NULL. When the scroll
+/// bar is used to scroll the LLayout control you will receive an event on LView::OnNotify
 /// with the control ID of the scrollbar, which is either #IDC_VSCROLL or #IDC_HSCROLL.
-class LgiClass GLayout : public LView
+class LgiClass LLayout : public LView
 {
 	friend class GScroll;
 	friend class LView;
@@ -53,10 +53,10 @@ class LgiClass GLayout : public LView
 
 protected:
 	/// The vertical scroll bar
-	GScrollBar		*VScroll;
+	LScrollBar		*VScroll;
 
 	/// The horizontal scroll bar
-	GScrollBar		*HScroll;
+	LScrollBar		*HScroll;
 
 	/// Sets which of the scroll bars is visible
 	virtual bool SetScrollBars
@@ -82,10 +82,10 @@ protected:
 	#endif
 
 public:
-	GLayout();
-	~GLayout();
+	LLayout();
+	~LLayout();
 
-	const char *GetClass() override { return "GLayout"; }
+	const char *GetClass() override { return "LLayout"; }
 
 	/// Gets the current scroll bar values.
 	virtual void GetScrollPos(int64 &x, int64 &y);

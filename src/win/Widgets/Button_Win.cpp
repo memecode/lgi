@@ -11,14 +11,14 @@
 #include "lgi/common/LgiRes.h"
 
 // Size of extra pixels, beyond the size of the text itself.
-LPoint GButton::Overhead =
+LPoint LButton::Overhead =
     LPoint(	16,	// Extra width needed
 			8);	// Extra height needed
 
 static int IsWin7 = -1;
 static int IsWin10 = -1;
 
-class GButtonPrivate
+class LButtonPrivate
 {
 public:
 	WNDPROC ButtonClassProc;
@@ -29,7 +29,7 @@ public:
 	LSurface *Img;
 	bool ImgOwned;
 
-	GButtonPrivate()
+	LButtonPrivate()
 	{
 		Toggle = false;
 		WantsDefault = false;
@@ -39,17 +39,17 @@ public:
 		ImgOwned = false;
 	}
 
-	~GButtonPrivate()
+	~LButtonPrivate()
 	{
 		if (ImgOwned)
 			DeleteObj(Img);
 	}
 };
 
-GButton::GButton(int id, int x, int y, int cx, int cy, const char *name) :
+LButton::LButton(int id, int x, int y, int cx, int cy, const char *name) :
 	ResObject(Res_Button)
 {
-	d = new GButtonPrivate;
+	d = new LButtonPrivate;
 	Name(name);
 	
 	if ((cx < 0 || cy < 0))
@@ -73,7 +73,7 @@ GButton::GButton(int id, int x, int y, int cx, int cy, const char *name) :
 		LgiAssert(!"No subclass?");
 }
 
-GButton::~GButton()
+LButton::~LButton()
 {
 	LWindow *w = GetWindow();
 	if (w && w->GetDefault() == (LViewI*)this)
@@ -84,12 +84,12 @@ GButton::~GButton()
 	DeleteObj(d);
 }
 
-bool GButton::GetIsToggle()
+bool LButton::GetIsToggle()
 {
 	return d->Toggle;
 }
 
-void GButton::SetIsToggle(bool toggle)
+void LButton::SetIsToggle(bool toggle)
 {
 	d->Toggle = toggle;
 	
@@ -111,7 +111,7 @@ void GButton::SetIsToggle(bool toggle)
 	}
 }
 
-void GButton::OnCreate()
+void LButton::OnCreate()
 {
 	SetFont(SysFont);
 	if (d->WantsDefault && GetWindow())
@@ -120,12 +120,12 @@ void GButton::OnCreate()
 	}
 }
 
-void GButton::OnAttach()
+void LButton::OnAttach()
 {
 	LResources::StyleElement(this);
 }
 
-bool GButton::Default()
+bool LButton::Default()
 {
 	if (_View)
 	{
@@ -136,7 +136,7 @@ bool GButton::Default()
 	return d->WantsDefault;
 }
 
-void GButton::Default(bool b)
+void LButton::Default(bool b)
 {
 	d->WantsDefault = b;
 	
@@ -151,22 +151,22 @@ void GButton::Default(bool b)
 	}
 }
 
-bool GButton::Name(const char *n)
+bool LButton::Name(const char *n)
 {
 	return LView::Name(n);
 }
 
-bool GButton::NameW(const char16 *n)
+bool LButton::NameW(const char16 *n)
 {
 	return LView::NameW(n);
 }
 
-void GButton::SetFont(LFont *Fnt, bool OwnIt)
+void LButton::SetFont(LFont *Fnt, bool OwnIt)
 {
 	LView::SetFont(Fnt, OwnIt);
 }
 
-int GButton::OnNotify(LViewI *Ctrl, int Flags)
+int LButton::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
 	{
@@ -176,7 +176,7 @@ int GButton::OnNotify(LViewI *Ctrl, int Flags)
 	return 0;
 }
 
-int GButton::SysOnNotify(int Msg, int Code)
+int LButton::SysOnNotify(int Msg, int Code)
 {
 	if (Msg == WM_COMMAND &&
 		Code == BN_CLICKED)
@@ -187,7 +187,7 @@ int GButton::SysOnNotify(int Msg, int Code)
 	return 0;
 }
 
-GMessage::Result GButton::OnEvent(GMessage *Msg)
+GMessage::Result LButton::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -291,24 +291,24 @@ GMessage::Result GButton::OnEvent(GMessage *Msg)
 		}
 	}
 
-	GMessage::Result r = GControl::OnEvent(Msg);
+	GMessage::Result r = LControl::OnEvent(Msg);
 	
 	return r;
 }
 
-void GButton::OnMouseClick(LMouse &m)
+void LButton::OnMouseClick(LMouse &m)
 {
 }
 
-void GButton::OnMouseEnter(LMouse &m)
+void LButton::OnMouseEnter(LMouse &m)
 {
 }
 
-void GButton::OnMouseExit(LMouse &m)
+void LButton::OnMouseExit(LMouse &m)
 {
 }
 
-bool GButton::OnKey(LKey &k)
+bool LButton::OnKey(LKey &k)
 {
 	switch (k.vkey)
 	{
@@ -329,11 +329,11 @@ bool GButton::OnKey(LKey &k)
 	return false;
 }
 
-void GButton::OnFocus(bool f)
+void LButton::OnFocus(bool f)
 {
 }
 
-void GButton::OnPaint(LSurface *pDC)
+void LButton::OnPaint(LSurface *pDC)
 {
 	if (!_View)
 	{
@@ -347,7 +347,7 @@ void GButton::OnPaint(LSurface *pDC)
 	}
 }
 
-int64 GButton::Value()
+int64 LButton::Value()
 {
 	if (d->Toggle)
 	{
@@ -361,7 +361,7 @@ int64 GButton::Value()
 	}
 }
 
-void GButton::Value(int64 i)
+void LButton::Value(int64 i)
 {
 	if (d->Toggle)
 	{
@@ -371,7 +371,7 @@ void GButton::Value(int64 i)
 	}
 }
 
-void GButton::OnClick()
+void LButton::OnClick()
 {
 	int Id = GetId();
 	if (Id)
@@ -399,12 +399,12 @@ void GButton::OnClick()
 		SendNotify();
 }
 
-bool GButton::SetImage(const char *FileName)
+bool LButton::SetImage(const char *FileName)
 {
 	return false;
 }
 
-bool GButton::SetImage(LSurface *Img, bool OwnIt)
+bool LButton::SetImage(LSurface *Img, bool OwnIt)
 {
 	if (d->ImgOwned)
 		DeleteObj(d->Img);
@@ -415,7 +415,7 @@ bool GButton::SetImage(LSurface *Img, bool OwnIt)
 	return true;
 }
 
-void GButton::SetPreferredSize(int x, int y)
+void LButton::SetPreferredSize(int x, int y)
 {
 }
 

@@ -3,7 +3,7 @@
 #include "INet.h"
 #include "IHttp.h"
 #include "GProgressDlg.h"
-#include "GTextLabel.h"
+#include "LTextLabel.h"
 #include "GButton.h"
 #include "LgiRes.h"
 
@@ -164,7 +164,7 @@ struct GSoftwareUpdatePriv
 			Name("Software Update");
 
 			LRect c = GetClient();
-			GTextLabel *t = new GTextLabel(	-1,
+			LTextLabel *t = new LTextLabel(	-1,
 											10, 10,
 											c.X()-20,
 											-1,

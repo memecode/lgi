@@ -1,5 +1,5 @@
 /*
-**	FILE:			GLayout.cpp
+**	FILE:			LLayout.cpp
 **	AUTHOR:			Matthew Allen
 **	DATE:			18/7/1998
 **	DESCRIPTION:	Standard Views
@@ -10,27 +10,27 @@
 
 #include <stdio.h>
 #include "Lgi.h"
-#include "GScrollBar.h"
+#include "LScrollBar.h"
 
 //////////////////////////////////////////////////////////////////////////////
-GLayout::GLayout()
+LLayout::LLayout()
 {
 	_PourLargest = false;
 	VScroll = 0;
 	HScroll = 0;
 }
 
-GLayout::~GLayout()
+LLayout::~LLayout()
 {
 	DeleteObj(HScroll);
 	DeleteObj(VScroll);
 }
 
-void GLayout::OnCreate()
+void LLayout::OnCreate()
 {
 }
 
-LViewI *GLayout::FindControl(int Id)
+LViewI *LLayout::FindControl(int Id)
 {
 	if (VScroll && VScroll->GetId() == Id)
 		return VScroll;
@@ -40,17 +40,17 @@ LViewI *GLayout::FindControl(int Id)
 	return LView::FindControl(Id);
 }
 
-bool GLayout::GetPourLargest()
+bool LLayout::GetPourLargest()
 {
 	return _PourLargest;
 }
 
-void GLayout::SetPourLargest(bool i)
+void LLayout::SetPourLargest(bool i)
 {
 	_PourLargest = i;
 }
 
-bool GLayout::Pour(LRegion &r)
+bool LLayout::Pour(LRegion &r)
 {
 	if (_PourLargest)
 	{
@@ -65,7 +65,7 @@ bool GLayout::Pour(LRegion &r)
 	return false;
 }
 
-void GLayout::GetScrollPos(int64 &x, int64 &y)
+void LLayout::GetScrollPos(int64 &x, int64 &y)
 {
 	if (HScroll)
 	{
@@ -86,7 +86,7 @@ void GLayout::GetScrollPos(int64 &x, int64 &y)
 	}
 }
 
-void GLayout::SetScrollPos(int64 x, int64 y)
+void LLayout::SetScrollPos(int64 x, int64 y)
 {
 	if (HScroll)
 	{
@@ -99,19 +99,19 @@ void GLayout::SetScrollPos(int64 x, int64 y)
 	}
 }
 
-bool GLayout::Attach(LViewI *p)
+bool LLayout::Attach(LViewI *p)
 {
 	bool Status = LView::Attach(p);
 	AttachScrollBars();
 	return Status;
 }
 
-bool GLayout::Detach()
+bool LLayout::Detach()
 {
 	return LView::Detach();
 }
 
-void GLayout::AttachScrollBars()
+void LLayout::AttachScrollBars()
 {
 	if (HScroll && !HScroll->IsAttached())
 	{
@@ -128,7 +128,7 @@ void GLayout::AttachScrollBars()
 	}
 }
 
-bool GLayout::SetScrollBars(bool x, bool y)
+bool LLayout::SetScrollBars(bool x, bool y)
 {
 	static bool Processing = false;
 
@@ -140,7 +140,7 @@ bool GLayout::SetScrollBars(bool x, bool y)
 		{
 			if (!HScroll)
 			{
-				HScroll = new GScrollBar(IDC_HSCROLL, 0, 0, 100, 10, "GLayout->HScroll");
+				HScroll = new LScrollBar(IDC_HSCROLL, 0, 0, 100, 10, "LLayout->HScroll");
 				if (HScroll)
 				{
 					HScroll->SetVertical(false);
@@ -156,7 +156,7 @@ bool GLayout::SetScrollBars(bool x, bool y)
 		{
 			if (!VScroll)
 			{
-				VScroll = new GScrollBar(IDC_VSCROLL, 0, 0, 10, 100, "GLayout->VScroll");
+				VScroll = new LScrollBar(IDC_VSCROLL, 0, 0, 10, 100, "LLayout->VScroll");
 				if (VScroll)
 				{
 					VScroll->Visible(false);
@@ -178,12 +178,12 @@ bool GLayout::SetScrollBars(bool x, bool y)
 	return true;
 }
 
-int GLayout::OnNotify(LViewI *c, int f)
+int LLayout::OnNotify(LViewI *c, int f)
 {
 	return LView::OnNotify(c, f);
 }
 
-void GLayout::OnPosChange()
+void LLayout::OnPosChange()
 {
 	// int Edge = (Sunken() || Raised()) ? _BorderSize : 0;
 	LRect r = LView::GetClient();
@@ -213,7 +213,7 @@ void GLayout::OnPosChange()
 	}
 }
 
-void GLayout::OnNcPaint(LSurface *pDC, LRect &r)
+void LLayout::OnNcPaint(LSurface *pDC, LRect &r)
 {
 	LView::OnNcPaint(pDC, r);
 	
@@ -238,7 +238,7 @@ void GLayout::OnNcPaint(LSurface *pDC, LRect &r)
 	}
 }
 
-LRect &GLayout::GetClient(bool ClientSpace)
+LRect &LLayout::GetClient(bool ClientSpace)
 {
 	static LRect r;
 	r = LView::GetClient(ClientSpace);
@@ -256,7 +256,7 @@ LRect &GLayout::GetClient(bool ClientSpace)
 	return r;
 }
 
-GMessage::Result GLayout::OnEvent(GMessage *Msg)
+GMessage::Result LLayout::OnEvent(GMessage *Msg)
 {
     if (Msg->Msg() != M_INVALIDATE)
     {

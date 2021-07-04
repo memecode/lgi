@@ -11,10 +11,10 @@ enum Ids {
     IDC_NAME = 100,
     IDC_STYLE
 };
-class ResCssUi : public GTableLayout
+class ResCssUi : public LTableLayout
 {
     ResCss *Css;
-    GEdit *Name;
+    LEdit *Name;
     GTextView3 *Style;
     
 public:
@@ -25,16 +25,16 @@ public:
         GLayoutCell *c;
         
         if ((c = GetCell(0, y++)))
-            c->Add(new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Name:"));
+            c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Name:"));
 
         if ((c = GetCell(0, y++)))
         {
-            c->Add(Name = new GEdit(IDC_NAME, 0, 0, 80, 20, 0));
+            c->Add(Name = new LEdit(IDC_NAME, 0, 0, 80, 20, 0));
             Name->Name(Css->Name());
         }
 
         if ((c = GetCell(0, y++)))
-            c->Add(new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Style:"));
+            c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Style:"));
 
         if ((c = GetCell(0, y++)))
         {

@@ -15,21 +15,21 @@ LgiFunc void DumpHnd(HIViewRef v, int depth = 0);
 ///
 /// To create a top level window see LWindow or LDialog.
 ///
-/// For a LView with scroll bars use GLayout.
+/// For a LView with scroll bars use LLayout.
 ///
 class LgiClass LView : virtual public LViewI, virtual public LBase
 {
 	friend		class LWindow;
-	friend		class GLayout;
-	friend		class GControl;
+	friend		class LLayout;
+	friend		class LControl;
 	friend		class LMenu;
 	friend		class LSubMenu;
 	friend		class GWnd;
-	friend		class GScrollBar;
+	friend		class LScrollBar;
 	friend		class GFileTarget;
 	friend		class LDialog;
 	friend		class GDragDropTarget;
-	friend		class GPopup;
+	friend		class LPopup;
 	friend		class LWindowPrivate;
 
 	friend		bool SysOnKey(LView *w, GMessage *m);
@@ -40,7 +40,7 @@ class LgiClass LView : virtual public LViewI, virtual public LBase
 		friend Gtk::gboolean lgi_widget_click(Gtk::GtkWidget *widget, Gtk::GdkEventButton *ev);
 		friend Gtk::gboolean lgi_widget_motion(Gtk::GtkWidget *widget, Gtk::GdkEventMotion *ev);
 		friend Gtk::gboolean GViewCallback(Gtk::GtkWidget *widget, Gtk::GdkEvent  *event, LView *view);
-		friend Gtk::gboolean PopupEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event, class GPopup *This);
+		friend Gtk::gboolean PopupEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event, class LPopup *This);
 		friend Gtk::gboolean GtkViewCallback(Gtk::GtkWidget *widget, Gtk::GdkEvent *event, LView *This);
 	
 		virtual Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
@@ -54,7 +54,7 @@ private:
 	#if defined WIN32
 
 		friend		class LWindowsClass;
-		friend		class GCombo;
+		friend		class LCombo;
 		friend		LRESULT CALLBACK DlgRedir(OsView hWnd, UINT m, WPARAM a, LPARAM b);
 		static		void CALLBACK TimerProc(OsView hwnd, UINT uMsg, UINT_PTR idEvent, uint32_t dwTime);
 
@@ -249,7 +249,7 @@ public:
 	/// and is primarily used to cut down on windowing resources. Mouse clicks are handled
 	/// by the parent window and passed down to the virtual children. Virtual children
 	/// are somewhat limited. They can't receive focus, or participate in drag and drop
-	/// operations. If you want to see an example have a look at the GToolBar code.
+	/// operations. If you want to see an example have a look at the LToolBar code.
 	virtual bool Attach
 	(
 		/// The parent view or NULL for a top level window
@@ -702,7 +702,7 @@ public:
 ///
 /// Inherit from this to add a new factory to create objects. Override
 /// NewView() to create your control.
-class LgiClass GViewFactory
+class LgiClass LViewFactory
 {
 	/** \brief Create a view by name
 
@@ -724,15 +724,15 @@ class LgiClass GViewFactory
 	) = 0;
 
 public:
-	GViewFactory();
-	virtual ~GViewFactory();
+	LViewFactory();
+	virtual ~LViewFactory();
 
 	/// Create a view by name.
 	static LView *Create(const char *Class, LRect *Pos = 0, const char *Text = 0);
 };
 
 #define DeclFactory(CLS) \
-	class CLS ## Factory : public GViewFactory \
+	class CLS ## Factory : public LViewFactory \
 	{ \
 		LView *NewView(const char *Name, LRect *Pos, const char *Text) \
 		{ \
@@ -742,7 +742,7 @@ public:
 	}	CLS ## FactoryInst;
 
 #define DeclFactoryParam1(CLS, Param1) \
-	class CLS ## Factory : public GViewFactory \
+	class CLS ## Factory : public LViewFactory \
 	{ \
 		LView *NewView(const char *Name, LRect *Pos, const char *Text) \
 		{ \
@@ -753,7 +753,7 @@ public:
 
 
 /// Control widget base class
-class LgiClass GControl :
+class LgiClass LControl :
 	public LView
 {
 	friend class LDialog;
@@ -771,12 +771,12 @@ protected:
 
 public:
 	#if WINNATIVE
-	GControl(char *SubClassName = 0);
+	LControl(char *SubClassName = 0);
 	#else
-	GControl(OsView view = NULL);
+	LControl(OsView view = NULL);
 	#endif
 
-	~GControl();
+	~LControl();
 
 	GMessage::Result OnEvent(GMessage *Msg);
 };

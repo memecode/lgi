@@ -146,7 +146,7 @@ public:
 	
 	/// Use 'LgiApp' to return a pointer to the GApp object
 	static GApp *ObjInstance();
-	static class GSkinEngine *SkinEngine;
+	static class LSkinEngine *SkinEngine;
 
 	// public member vars
 	

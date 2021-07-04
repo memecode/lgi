@@ -59,7 +59,7 @@ GAbout::GAbout(	LView *parent,
 	if (Text) p.Write((char*)Text, strlen(Text));
 
 	GColour cBack(L_MED);
-	GTableLayout *Tbl = new GTableLayout(IDC_TABLE);
+	LTableLayout *Tbl = new LTableLayout(IDC_TABLE);
 	AddView(Tbl);
 	Tbl->GetCss(true)->Padding("0.5em");
 	int x = 0;
@@ -76,7 +76,7 @@ GAbout::GAbout(	LView *parent,
 		}
 	}
 
-	LView *Ctrl = GViewFactory::Create("GTextView3");
+	LView *Ctrl = LViewFactory::Create("GTextView3");
 	if (Ctrl)
 	{
 		auto c = Tbl->GetCell(x++, 0, true);
@@ -90,7 +90,7 @@ GAbout::GAbout(	LView *parent,
 
 	auto c = Tbl->GetCell(0, 1, true, x);
 	c->TextAlign(LCss::AlignRight);
-	c->Add(new GButton(IDOK, 0, 0, -1, -1, "Ok"));
+	c->Add(new LButton(IDOK, 0, 0, -1, -1, "Ok"));
 
 	LRect r(0, 0, 400, 260);
 	SetPos(r);

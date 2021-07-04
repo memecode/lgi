@@ -1,18 +1,18 @@
 #include <stdio.h>
 
 #include "Lgi.h"
-#include "GColourSelect.h"
+#include "LColourSelect.h"
 #include "LDisplayString.h"
 #include "LgiRes.h"
 #include "GNotifications.h"
 
-class GColourSelectPopup : public GPopup
+class LColourSelectPopup : public LPopup
 {
-	GColourSelect *Colour;
+	LColourSelect *Colour;
 	int Ly;
 
 public:
-	GColourSelectPopup(GColourSelect *Parent) : GPopup(Parent)
+	LColourSelectPopup(LColourSelect *Parent) : LPopup(Parent)
 	{
 	    Ly = SysFont->GetHeight();
 		SetParent(Colour = Parent);
@@ -20,7 +20,7 @@ public:
 		SetPos(r);
 	}
 	
-	const char *GetClass() { return "GColourSelectPopup"; }
+	const char *GetClass() { return "LColourSelectPopup"; }
 
 	void OnPaint(LSurface *pDC)
 	{
@@ -77,17 +77,17 @@ public:
 	void Value(int64 i) { Colour->Value(i); }
 };
 
-GColourSelect::GColourSelect(GArray<GColour> *cols) :
-	GDropDown(-1, 0, 0, 10, 10, 0), ResObject(Res_Custom)
+LColourSelect::LColourSelect(GArray<GColour> *cols) :
+	LDropDown(-1, 0, 0, 10, 10, 0), ResObject(Res_Custom)
 {
 	c.Rgb(0, 0, 255);
 
-	SetPopup(new GColourSelectPopup(this));
+	SetPopup(new LColourSelectPopup(this));
 	if (cols)
 		SetColourList(cols);
 }
 
-void GColourSelect::SetColourList(GArray<GColour> *cols)
+void LColourSelect::SetColourList(GArray<GColour> *cols)
 {
 	if (cols)
 	{
@@ -101,12 +101,12 @@ void GColourSelect::SetColourList(GArray<GColour> *cols)
 	}
 }
 
-int64 GColourSelect::Value()
+int64 LColourSelect::Value()
 {
 	return c.c32();
 }
 
-void GColourSelect::Value(GColour set)
+void LColourSelect::Value(GColour set)
 {
 	if (c != set)
 	{
@@ -119,7 +119,7 @@ void GColourSelect::Value(GColour set)
 	}
 }
 
-void GColourSelect::Value(int64 i)
+void LColourSelect::Value(int64 i)
 {
 	if (c.c32() != i)
 	{
@@ -135,9 +135,9 @@ void GColourSelect::Value(int64 i)
 	}
 }
 
-void GColourSelect::OnPaint(LSurface *pDC)
+void LColourSelect::OnPaint(LSurface *pDC)
 {
-	GDropDown::OnPaint(pDC);
+	LDropDown::OnPaint(pDC);
 
 	LRect r = GetClient();
 	r.x1 += 2;
@@ -162,21 +162,21 @@ void GColourSelect::OnPaint(LSurface *pDC)
 	}
 }
 
-bool GColourSelect::OnLayout(LViewLayoutInfo &Inf)
+bool LColourSelect::OnLayout(LViewLayoutInfo &Inf)
 {
     Inf.Width.Min = Inf.Width.Max = 80;
     Inf.Height.Min = Inf.Height.Max = SysFont->GetHeight() + 6;
     return true;
 }
 
-class GColourFactory : public GViewFactory
+class GColourFactory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (Class &&
-			_stricmp(Class, "GColourSelect") == 0)
+			_stricmp(Class, "LColourSelect") == 0)
 		{
-			return new GColourSelect;
+			return new LColourSelect;
 		}
 
 		return 0;

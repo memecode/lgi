@@ -13,7 +13,7 @@
 
 #include "Lgi.h"
 #include "GLog.h"
-#include "GScrollBar.h"
+#include "LScrollBar.h"
 #include "LDisplayString.h"
 
 ////////////////////////////////////////////////////////////////////
@@ -90,7 +90,7 @@ int RLogView::GetTotalItems()
 
 void RLogView::OnPosChange()
 {
-	GLayout::OnPosChange();
+	LLayout::OnPosChange();
 	UpdateScrollBar();
 }
 
@@ -264,7 +264,7 @@ void RLogView::OnNcCalcClient(long &x1, long &y1, long &x2, long &y2)
 
 GMessage::Result RLogView::OnEvent(GMessage *Msg)
 {
-	return GLayout::OnEvent(Msg);
+	return LLayout::OnEvent(Msg);
 }
 
 ////////////////////////////////////////////////////////////////////

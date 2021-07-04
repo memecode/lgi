@@ -14,7 +14,7 @@
 
 #include "Lgi.h"
 #include "GButton.h"
-#include "GTableLayout.h"
+#include "LTableLayout.h"
 
 #define TICKS_PER_SECOND					1000000
 #define DOUBLE_CLICK_TIMEOUT				(TICKS_PER_SECOND/3)
@@ -89,11 +89,11 @@ void LDialog::OnPosChange()
     if (Children.Length() == 1)
     {
         List<LViewI>::I it = Children.Start();
-        GTableLayout *t = dynamic_cast<GTableLayout*>((LViewI*)it.First());
+        LTableLayout *t = dynamic_cast<LTableLayout*>((LViewI*)it.First());
         if (t)
         {
             LRect r = GetClient();
-            r.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
+            r.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
             t->SetPos(r);
         }
     }
@@ -329,9 +329,9 @@ void GControl::MouseClickEvent(bool Down)
 
 //////////////////////////////////////////////////////////////////////////////////
 // Slider control
-#include "GSlider.h"
+#include "LSlider.h"
 
-GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool vert) :
+LSlider::LSlider(int id, int x, int y, int cx, int cy, const char *name, bool vert) :
 	GControl(new BViewRedir(this)),
 	ResObject(Res_Slider)
 {
@@ -357,28 +357,28 @@ GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool ve
 	Thumb.ZOff(-1, -1);
 }
 
-GSlider::~GSlider()
+LSlider::~LSlider()
 {
 }
 
-void GSlider::Value(int64 i)
+void LSlider::Value(int64 i)
 {
 	Val = i;
 	Invalidate();
 }
 
-int64 GSlider::Value()
+int64 LSlider::Value()
 {
 	return Val;
 }
 
-void GSlider::GetLimits(int64 &min, int64 &max)
+void LSlider::GetLimits(int64 &min, int64 &max)
 {
 	min = Min;
 	max = Max;
 }
 
-void GSlider::SetLimits(int64 min, int64 max)
+void LSlider::SetLimits(int64 min, int64 max)
 {
 	Min = min;
 	Max = max;
@@ -386,7 +386,7 @@ void GSlider::SetLimits(int64 min, int64 max)
 	if (Val > Max) Val = Max;
 }
 
-GMessage::Result GSlider::OnEvent(GMessage *Msg)
+GMessage::Result LSlider::OnEvent(GMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }
@@ -395,7 +395,7 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 #define SLIDER_THUMB_WIDTH		10
 #define SLIDER_THUMB_HEIGHT		6
 
-void GSlider::OnPaint(LSurface *pDC)
+void LSlider::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 
@@ -441,7 +441,7 @@ void GSlider::OnPaint(LSurface *pDC)
 	pDC->Rectangle(&t);
 }
 
-void GSlider::OnMouseClick(LMouse &m)
+void LSlider::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -458,7 +458,7 @@ void GSlider::OnMouseClick(LMouse &m)
 	}
 }
 
-void GSlider::OnMouseMove(LMouse &m)
+void LSlider::OnMouseMove(LMouse &m)
 {
 	if (IsCapturing())
 	{

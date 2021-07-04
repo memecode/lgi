@@ -6,20 +6,20 @@
 #define _GCHECK_BOX_H_
 
 /// A check box to allow the user to select a boolean setting, i.e. a non-mutually exclusive option. For
-/// mutually exclusive options see GRadioButton.
-class LgiClass GCheckBox :
+/// mutually exclusive options see LRadioButton.
+class LgiClass LCheckBox :
 	#ifdef WINNATIVE
-	public GControl,
+	public LControl,
 	#else
 	public LView,
 	#endif
 	public ResObject
 {
-	class GCheckBoxPrivate *d;
+	class LCheckBoxPrivate *d;
 
 public:
 	/// Constructor
-	GCheckBox
+	LCheckBox
 	(
 		/// The control ID
 		int id,
@@ -36,10 +36,10 @@ public:
 		/// The initial state of the control
 		int InitState = false
 	);
-	~GCheckBox();
+	~LCheckBox();
 
 	// Methods
-	const char *GetClass() override { return "GCheckBox"; }
+	const char *GetClass() override { return "LCheckBox"; }
 	
 	/// Returns whether the control is 3 state
 	bool ThreeState();

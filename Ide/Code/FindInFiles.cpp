@@ -145,7 +145,7 @@ void FindInFiles::OnCreate()
 		SerializeHistory(TypeHistory, "TypeHist", App->GetOptions(), false);
 		SerializeHistory(FolderHistory, "FolderHist", App->GetOptions(), false);
 
-		GEdit *v;
+		LEdit *v;
 		if (GetViewById(IDC_LOOK_FOR, v))
 		{
 			v->Focus(true);
@@ -219,7 +219,7 @@ public:
 	int64 Last;
 };
 
-FindInFilesThread::FindInFilesThread(int AppHnd) : GEventTargetThread("FindInFiles")
+FindInFilesThread::FindInFilesThread(int AppHnd) : LEventTargetThread("FindInFiles")
 {
 	d = new FindInFilesThreadPrivate;
 	d->AppHnd = AppHnd;

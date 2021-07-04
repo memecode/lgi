@@ -10,16 +10,16 @@
 #endif
 
 /// An edit box allowing the user to enter text
-class LgiClass GEdit :
+class LgiClass LEdit :
 	#if WINNATIVE
-	public GControl,
+	public LControl,
 	public ResObject
 	#else
 	public GTextView3
 	#endif
 {
 protected:
-	class GEditPrivate *d;
+	class LEditPrivate *d;
 
 	#if WINNATIVE
 	void OnCreate();
@@ -32,7 +32,7 @@ protected:
 
 public:
 	/// Constructor
-	GEdit
+	LEdit
 	(
 		/// Ctrl's ID
 		int id,
@@ -47,9 +47,9 @@ public:
 		/// Initial text
 		const char *name = NULL
 	);
-	~GEdit();
+	~LEdit();
 
-	const char *GetClass() { return "GEdit"; }
+	const char *GetClass() { return "LEdit"; }
 
 
 	/// Gets "Allow multiple lines"

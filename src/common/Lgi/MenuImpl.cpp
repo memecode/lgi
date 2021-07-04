@@ -99,7 +99,7 @@ public:
 	}
 };
 
-SubMenuImpl::SubMenuImpl(GSubMenu *Sub) : GPopup(0)
+SubMenuImpl::SubMenuImpl(GSubMenu *Sub) : LPopup(0)
 {
 	d = new SubMenuImplPrivate;
 	d->Sub = Sub;
@@ -382,7 +382,7 @@ void SubMenuImpl::Visible(bool b)
 		}
 	}
 	
-	GPopup::Visible(b);
+	LPopup::Visible(b);
 }
 
 /////////////////////////////////////////////////////////////////////////

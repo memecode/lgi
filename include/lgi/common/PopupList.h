@@ -14,7 +14,7 @@
 /// The user can select an item with [Enter] or click on it.
 /// [Escape] cancels the popup.
 template<typename T>
-class GPopupList : public GPopup
+class GPopupList : public LPopup
 {
 public:
 	enum {
@@ -53,7 +53,7 @@ protected:
 	}
 
 public:
-	GPopupList(LViewI *edit, PositionType pos, int width = 200, int height = 300) : GPopup(edit->GetGView())
+	GPopupList(LViewI *edit, PositionType pos, int width = 200, int height = 300) : LPopup(edit->GetGView())
 	{
 		Registered = false;
 		PosType = pos;
@@ -164,14 +164,14 @@ public:
 
 	bool Visible()
 	{
-		return GPopup::Visible();
+		return LPopup::Visible();
 	}
 
 	void Visible(bool i)
 	{
 		if (i)
 			AdjustPosition();
-		GPopup::Visible(i);
+		LPopup::Visible(i);
 		if (i)
 		{
 			AttachChildren();

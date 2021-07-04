@@ -167,11 +167,11 @@ public:
 	void OnItemSelect(GArray<LListItem*> &Items);
 };
 
-class ResStringUi : public GLayout
+class ResStringUi : public LLayout
 {
-	GToolBar *Tools;
+	LToolBar *Tools;
 	ResStringGroup *StringGrp;
-	GStatusBar *Status;
+	LStatusBar *Status;
 	GStatusPane *StatusInfo;
 
 public:

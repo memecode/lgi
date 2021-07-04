@@ -233,7 +233,7 @@ public:
 
 /// TextView class is a base for all text controls
 class LgiClass GDocView :
-	public GLayout,
+	public LLayout,
 	virtual public GDom
 {
 	friend class GDocumentEnv;

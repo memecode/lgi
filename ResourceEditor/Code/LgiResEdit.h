@@ -233,7 +233,7 @@ public:
 	bool Write(LXmlTag *t, SerialiseContext &Ctx) { return false; }
 };
 
-class ResFrame : public GLayout
+class ResFrame : public LLayout
 {
 	Resource *Child;
 
@@ -248,7 +248,7 @@ public:
 	void OnFocus(bool b);
 };
 
-class ObjTreeItem : public GTreeItem
+class ObjTreeItem : public LTreeItem
 {
 	friend class Resource;
 
@@ -264,7 +264,7 @@ public:
 	void OnMouseClick(LMouse &m);
 };
 
-class ObjContainer : public GTree
+class ObjContainer : public LTree
 {
 	friend class AppWnd;
 
@@ -273,7 +273,7 @@ class ObjContainer : public GTree
 	ObjTreeItem *Strings;
 	ObjTreeItem *Menus;
 
-	GImageList *Images;
+	LImageList *Images;
 	AppWnd *Window;
 
 	bool AppendChildren(ObjTreeItem *Item, List<Resource> &Lst);
@@ -652,7 +652,7 @@ public:
 
 #include "LgiRes_Dialog.h"
 
-class FieldView : public GLayout
+class FieldView : public LLayout
 {
 protected:
 	FieldSource *Source;
@@ -702,7 +702,7 @@ protected:
 	LSubMenu		*Help;
 	LSubMenu		*ViewMenu;
 
-	GStatusBar		*Status;
+	LStatusBar		*Status;
 	GStatusPane		*StatusInfo[STATUS_MAX];
 
 	ShortCutView	*ShortCuts;
@@ -814,7 +814,7 @@ struct SearchParams
 	}
 };
 
-class SearchThread : public GEventTargetThread, public LCancel
+class SearchThread : public LEventTargetThread, public LCancel
 {
 	List<Resource> Res;
 	AppWnd *App;
@@ -867,7 +867,7 @@ public:
 	int OnNotify(LViewI *n, int f);
 };
 
-class ResCss : public Resource, public GLayout
+class ResCss : public Resource, public LLayout
 {
     friend class ResCssUi;
     

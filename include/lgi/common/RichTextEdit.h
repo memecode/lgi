@@ -38,7 +38,7 @@ class
 #if defined(MAC)
 	LgiClass
 #endif
-	GRichTextEdit :
+	LRichTextEdit :
 	public GDocView,
 	public ResObject,
 	public GDragDropTarget,
@@ -56,8 +56,8 @@ public:
 	};
 
 protected:
-	class GRichTextPriv *d;
-	friend class GRichTextPriv;
+	class LRichTextPriv *d;
+	friend class LRichTextPriv;
 
 	bool IndexAt(int x, int y, ssize_t &Off, int &LineHint);
 	
@@ -69,15 +69,15 @@ protected:
 
 public:
 	// Construction
-	GRichTextEdit(	int Id,
+	LRichTextEdit(	int Id,
 					int x = 0,
 					int y = 0,
 					int cx = 100,
 					int cy = 100,
 					LFontType *FontInfo = 0);
-	~GRichTextEdit();
+	~LRichTextEdit();
 
-	const char *GetClass() { return "GRichTextEdit"; }
+	const char *GetClass() { return "LRichTextEdit"; }
 
 	// Data
 	const char *Name();
@@ -229,7 +229,7 @@ public:
 	virtual void DoContextMenu(LMouse &m);
 
 	#if _DEBUG
-	void DumpNodes(GTree *Root);
+	void DumpNodes(LTree *Root);
 	void SelectNode(GString Param);
 	#endif
 };

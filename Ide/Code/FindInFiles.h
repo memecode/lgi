@@ -77,7 +77,7 @@ public:
 	void OnCreate() override;
 };
 
-class FindInFilesThread : public GEventTargetThread
+class FindInFilesThread : public LEventTargetThread
 {
 	class FindInFilesThreadPrivate *d;
 

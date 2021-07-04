@@ -114,7 +114,7 @@ LProgressPane::LProgressPane(LProgressDlg *dlg) : Dlg(dlg)
 	SetId(IDC_PANE);
 	Ref = 0;
 
-	if (AddView(t = new GTableLayout(IDC_TABLE)))
+	if (AddView(t = new LTableLayout(IDC_TABLE)))
 	{
 		OnPosChange();
 
@@ -126,19 +126,19 @@ LProgressPane::LProgressPane(LProgressDlg *dlg) : Dlg(dlg)
 		c->Padding(LCss::Len(LCss::LenPx, PAD));
 		#endif
 		c->Height("1.1em"); // This stops the layout flickering
-		c->Add(Desc = new GTextLabel(IDC_DESCRIPTION, 0, 0, -1, -1, "##"));
+		c->Add(Desc = new LTextLabel(IDC_DESCRIPTION, 0, 0, -1, -1, "##"));
 
 		c = t->GetCell(0, Row);
 		#ifdef PAD
 		c->Padding(LCss::Len(LCss::LenPx, PAD));
 		#endif
-		c->Add(ValText = new GTextLabel(IDC_VALUE, 0, 0, -1, -1, "##"));
+		c->Add(ValText = new LTextLabel(IDC_VALUE, 0, 0, -1, -1, "##"));
 
 		c = t->GetCell(1, Row++);
 		#ifdef PAD
 		c->Padding(LCss::Len(LCss::LenPx, PAD));
 		#endif
-		c->Add(Rate = new GTextLabel(IDC_RATE, 0, 0, -1, -1, "##"));
+		c->Add(Rate = new LTextLabel(IDC_RATE, 0, 0, -1, -1, "##"));
 
 		c = t->GetCell(0, Row++, true, 2, 1);
 		#ifdef PAD
@@ -151,7 +151,7 @@ LProgressPane::LProgressPane(LProgressDlg *dlg) : Dlg(dlg)
 		c->Padding(LCss::Len(LCss::LenPx, PAD));
 		#endif
 		c->TextAlign(LCss::Len(LCss::AlignCenter));
-		c->Add(But = new GButton(IDC_BUTTON, 0, 0, -1, -1, LgiLoadString(L_PROGRESSDLG_REQ_ABORT, "Request Abort")));
+		c->Add(But = new LButton(IDC_BUTTON, 0, 0, -1, -1, LgiLoadString(L_PROGRESSDLG_REQ_ABORT, "Request Abort")));
 	}
 }
 
@@ -282,7 +282,7 @@ int LProgressPane::OnNotify(LViewI *Ctrl, int Flags)
 				if (tbl_req.Valid() &&
 					tbl_req.Y() > tbl_pos.Y())
 				{
-					p.y2 = p.y1 + (tbl_req.Y() + GTableLayout::CellSpacing * 2);
+					p.y2 = p.y1 + (tbl_req.Y() + LTableLayout::CellSpacing * 2);
 					SetPos(p);
 					
 					SendNotify(GNotifyTableLayout_LayoutChanged);
@@ -318,7 +318,7 @@ void LProgressPane::OnPosChange()
 	if (t)
 	{
 		LRect cr = GetClient();
-		cr.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
+		cr.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
 		t->SetPos(cr);
 	}
 }

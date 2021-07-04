@@ -2,14 +2,14 @@
 #include "lgi/common/RichTextEdit.h"
 #include "GRichTextEditPriv.h"
 
-GRichTextPriv::BlockCursor::BlockCursor(const BlockCursor &c)
+LRichTextPriv::BlockCursor::BlockCursor(const BlockCursor &c)
 {
 	Blk = NULL;
 	Blink = true;
 	*this = c;
 }
 		
-GRichTextPriv::BlockCursor::BlockCursor(Block *b, ssize_t off, int line)
+LRichTextPriv::BlockCursor::BlockCursor(Block *b, ssize_t off, int line)
 {
 	Blk = NULL;
 	Offset = -1;
@@ -22,12 +22,12 @@ GRichTextPriv::BlockCursor::BlockCursor(Block *b, ssize_t off, int line)
 		Set(b, off, line);
 }
 		
-GRichTextPriv::BlockCursor::~BlockCursor()
+LRichTextPriv::BlockCursor::~BlockCursor()
 {
 	Set(NULL, 0, 0);
 }
 		
-GRichTextPriv::BlockCursor &GRichTextPriv::BlockCursor::operator =(const BlockCursor &c)
+LRichTextPriv::BlockCursor &LRichTextPriv::BlockCursor::operator =(const BlockCursor &c)
 {
 	Set(c.Blk, c.Offset, c.LineHint);
 	Pos = c.Pos;
@@ -38,7 +38,7 @@ GRichTextPriv::BlockCursor &GRichTextPriv::BlockCursor::operator =(const BlockCu
 	return *this;
 }
 		
-void GRichTextPriv::BlockCursor::Set(ssize_t off)
+void LRichTextPriv::BlockCursor::Set(ssize_t off)
 {
 	GArray<int> Ln;
 	if (!Blk->OffsetToLine(off, NULL, &Ln))
@@ -47,7 +47,7 @@ void GRichTextPriv::BlockCursor::Set(ssize_t off)
 	Set(Blk, off, Ln.First());
 }
 
-void GRichTextPriv::BlockCursor::Set(GRichTextPriv::Block *b, ssize_t off, int line)
+void LRichTextPriv::BlockCursor::Set(LRichTextPriv::Block *b, ssize_t off, int line)
 {
 	if (Blk != b)
 	{

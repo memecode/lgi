@@ -37,7 +37,7 @@ enum CellFlag
 #define DEBUG_DRAW_CELLS	0
 // #define DEBUG_CTRL_ID		90
 
-int GTableLayout::CellSpacing = 4;
+int LTableLayout::CellSpacing = 4;
 
 const char *FlagToString(CellFlag f)
 {
@@ -310,7 +310,7 @@ public:
 		bool Debug;
 	};
 
-	GTableLayout *Table;
+	LTableLayout *Table;
 	LRect Cell;		// Cell position
 	LRect Pos;		// Pixel position
 	LRect Padding;	// Cell padding from CSS styles
@@ -318,8 +318,8 @@ public:
 	LCss::DisplayType Disp;
 	GString ClassName;
 
-	TableCell(GTableLayout *t, int Cx, int Cy);
-	GTableLayout *GetTable() { return Table; }
+	TableCell(LTableLayout *t, int Cx, int Cy);
+	LTableLayout *GetTable() { return Table; }
 	bool Add(LView *v);	
 	bool Remove(LView *v);
 	GArray<LView*> GetChildren();
@@ -356,17 +356,17 @@ public:
 	int BorderSpacing;
 	LRect LayoutBounds;
 	int LayoutMinX, LayoutMaxX;
-	GTableLayout *Ctrl;
+	LTableLayout *Ctrl;
 
 	// Object
-	GTableLayoutPrivate(GTableLayout *ctrl);
+	GTableLayoutPrivate(LTableLayout *ctrl);
 	~GTableLayoutPrivate();
 	
 	// Utils
 	bool IsInLayout() { return InLayout; }
 	TableCell *GetCellAt(int cx, int cy);
 	void Empty(LRect *Range = NULL);
-    bool CollectRadioButtons(GArray<GRadioButton*> &Btns);
+    bool CollectRadioButtons(GArray<LRadioButton*> &Btns);
     void InitBorderSpacing();
 	double Scale()
 	{
@@ -400,7 +400,7 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-TableCell::TableCell(GTableLayout *t, int Cx, int Cy)
+TableCell::TableCell(LTableLayout *t, int Cx, int Cy)
 {
 	TextAlign(AlignLeft);
 	VerticalAlign(VerticalTop);
@@ -603,7 +603,7 @@ bool TableCell::SetVariant(const char *Name, LVariant &Value, char *Array)
 				gv->SetParent(Table);
 
 				// p.Add("c4");
-				GTextLabel *t = dynamic_cast<GTextLabel*>(gv);
+				LTextLabel *t = dynamic_cast<LTextLabel*>(gv);
 				if (t)
 					t->SetWrap(true);
 			}			
@@ -802,7 +802,7 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 						Flag = SizeFill;
 				}
 				else if (Max)
-					Max += c->Inf.Width.Max + GTableLayout::CellSpacing;
+					Max += c->Inf.Width.Max + LTableLayout::CellSpacing;
 				else
  					Max = c->Inf.Width.Max;
 
@@ -814,34 +814,34 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 						Flag = SizeGrow;
 				}
 			}
-			else if (Izza(GButton))
+			else if (Izza(LButton))
 			{
 				LDisplayString ds(v->GetFont(), v->Name());
 				auto Scale = Table->d->Scale();
-				LPoint Pad((int)(Scale * GButton::Overhead.x + 0.5), (int)(Scale * GButton::Overhead.y + 0.5));
+				LPoint Pad((int)(Scale * LButton::Overhead.x + 0.5), (int)(Scale * LButton::Overhead.y + 0.5));
 
 				c->Inf.Width.Min = c->Inf.Width.Max = ds.X() + Pad.x;
 				c->Inf.Height.Min = c->Inf.Height.Max = ds.Y() + Pad.y;
 
 				MaxBtnX = MAX(MaxBtnX, c->Inf.Width.Min);
 				TotalBtnX = TotalBtnX ?
-							TotalBtnX + GTableLayout::CellSpacing + c->Inf.Width.Min :
+							TotalBtnX + LTableLayout::CellSpacing + c->Inf.Width.Min :
 							c->Inf.Width.Min;
 				
 				if (Flag < SizeFixed)
 					Flag = SizeFixed;
 			}
-			else if (Izza(GEdit) ||
-					 Izza(GScrollBar))
+			else if (Izza(LEdit) ||
+					 Izza(LScrollBar))
 			{
 				Min = MAX(Min, 40);
 				if (Flag != SizeFixed)
 					Flag = SizeFill;
 			}
-			else if (Izza(GCombo))
+			else if (Izza(LCombo))
 			{
-				int PadX = GCombo::Pad.x1 + GCombo::Pad.x2;
-				GCombo *Cbo = Izza(GCombo);
+				int PadX = LCombo::Pad.x1 + LCombo::Pad.x2;
+				LCombo *Cbo = Izza(LCombo);
 				LFont *f = Cbo->GetFont();
 				int min_x = -1, max_x = 0;
 				char *t;
@@ -888,15 +888,15 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 				Min = MAX(Min, 40);
 				Flag = SizeFill;
 			}
-			else if (Izza(GTree) ||
-					 Izza(GTabView))
+			else if (Izza(LTree) ||
+					 Izza(LTabView))
 			{
 				Min = MAX(Min, 40);
 				Flag = SizeFill;
 			}
 			else
 			{
-				GTableLayout *Tbl = Izza(GTableLayout);
+				LTableLayout *Tbl = Izza(LTableLayout);
 				if (Tbl)
 				{
 					Tbl->d->InitBorderSpacing();
@@ -1001,14 +1001,14 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 				c->Inf.Width.Max = Width;
 		}
 		
-		GTableLayout *Tbl = NULL;
+		LTableLayout *Tbl = NULL;
 
 		LCss *Css = v->GetCss();
 		LCss::Len Ht;
 		if (Css)
 			Ht = Css->Height();
 
-		if (!Izza(GButton) && i)
+		if (!Izza(LButton) && i)
 			Pos.y2 += Table->d->BorderSpacing;
 
 		if (c->Inf.Width.Min > Width)
@@ -1050,7 +1050,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			{
 				// Wrap
 				Cur.x = Pos.x1;
-				Cur.y = NextY + GTableLayout::CellSpacing;
+				Cur.y = NextY + LTableLayout::CellSpacing;
 			}
 
 			c->r.Offset(Cur.x - c->r.x1, Cur.y - c->r.y1);
@@ -1060,11 +1060,11 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 
 			c->IsLayout = true;
 		}
-		else if (Izza(GScrollBar))
+		else if (Izza(LScrollBar))
 		{
 			Pos.y2 += 15;
 		}
-		else if (Izza(GButton))
+		else if (Izza(LButton))
 		{
 			c->r.ZOff(c->Inf.Width.Min-1, c->Inf.Height.Min-1);
 			
@@ -1072,7 +1072,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			{
 				// Wrap
 				Cur.x = Pos.x1;
-				Cur.y = NextY + GTableLayout::CellSpacing;
+				Cur.y = NextY + LTableLayout::CellSpacing;
 			}
 			
 			c->r.Offset(Cur.x, Cur.y);
@@ -1080,7 +1080,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			NextY = MAX(NextY, c->r.y2 + 1);
 			Pos.y2 = MAX(Pos.y2, c->r.y2);
 		}
-		else if (Izza(GEdit) || Izza(GCombo))
+		else if (Izza(LEdit) || Izza(LCombo))
 		{
 			LFont *f = v->GetFont();
 			int y = (f ? f : SysFont)->GetHeight() + 8;
@@ -1089,14 +1089,14 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			c->r.y2 = c->r.y1 + y - 1;
 			Pos.y2 += y;
 
-			if (Izza(GEdit) &&
-				Izza(GEdit)->MultiLine())
+			if (Izza(LEdit) &&
+				Izza(LEdit)->MultiLine())
 			{
 				Flags = SizeFill;
 				// MaxY = MAX(MaxY, 1000);
 			}
 		}
-		else if (Izza(GRadioButton))
+		else if (Izza(LRadioButton))
 		{
 			int y = v->GetFont()->GetHeight() + 2;
 			
@@ -1106,8 +1106,8 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			Pos.y2 += y;
 		}
 		else if (Izza(LList) ||
-				 Izza(GTree) ||
-				 Izza(GTabView))
+				 Izza(LTree) ||
+				 Izza(LTabView))
 		{
 			Pos.y2 += v->GetFont()->GetHeight() + 8;
 			// MaxY = MAX(MaxY, 1000);
@@ -1126,7 +1126,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 				MaxY = MAX(MaxY, 1000);
 			}
 		}
-		else if ((Tbl = Izza(GTableLayout)))
+		else if ((Tbl = Izza(LTableLayout)))
 		{
 			c->r.ZOff(Width-1, Table->Y()-1);
 			Tbl->d->InitBorderSpacing();
@@ -1189,7 +1189,7 @@ void TableCell::PostLayout()
 		}
 		#endif
 
-		GTableLayout *Tbl = Izza(GTableLayout);
+		LTableLayout *Tbl = Izza(LTableLayout);
 		
 		if (i > 0 && Cx + c->r.X() > Pos.X())
 		{
@@ -1234,9 +1234,9 @@ void TableCell::PostLayout()
 		else if
 		(
 			Izza(LList) ||
-			Izza(GTree) ||
-			Izza(GTabView) ||
-			(Izza(GEdit) && Izza(GEdit)->MultiLine())
+			Izza(LTree) ||
+			Izza(LTabView) ||
+			(Izza(LEdit) && Izza(LEdit)->MultiLine())
 		)
 		{
 			c->r.y2 = Pos.y2;
@@ -1255,7 +1255,7 @@ void TableCell::PostLayout()
 				c->r.y2 = c->r.y1 + c->Inf.Height.Max - 1;
 		}
 		else 
-		// if (!Izza(GButton) && !Tbl)
+		// if (!Izza(LButton) && !Tbl)
 		{
 			if (c->Inf.Width.Max <= 0 ||
 				c->Inf.Width.Max >= WidthPx)
@@ -1365,14 +1365,14 @@ void TableCell::OnPaint(LSurface *pDC)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-GTableLayoutPrivate::GTableLayoutPrivate(GTableLayout *ctrl)
+GTableLayoutPrivate::GTableLayoutPrivate(LTableLayout *ctrl)
 {
 	PrevSize.Set(-1, -1);
 	LayoutDirty = true;
 	InLayout = false;
 	DebugLayout = false;
 	Ctrl = ctrl;
-	BorderSpacing = GTableLayout::CellSpacing;
+	BorderSpacing = LTableLayout::CellSpacing;
 	LayoutBounds.ZOff(-1, -1);
 	LayoutMinX = LayoutMaxX = 0;
 }
@@ -1382,11 +1382,11 @@ GTableLayoutPrivate::~GTableLayoutPrivate()
 	Empty();
 }
 
-bool GTableLayoutPrivate::CollectRadioButtons(GArray<GRadioButton*> &Btns)
+bool GTableLayoutPrivate::CollectRadioButtons(GArray<LRadioButton*> &Btns)
 {
     for (LViewI *i: Ctrl->IterateViews())
     {
-        GRadioButton *b = dynamic_cast<GRadioButton*>(i);
+        LRadioButton *b = dynamic_cast<LRadioButton*>(i);
         if (b) Btns.Add(b);
     }
     return Btns.Length() > 0;
@@ -1437,7 +1437,7 @@ TableCell *GTableLayoutPrivate::GetCellAt(int cx, int cy)
 
 void GTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, CellFlag *Flag)
 {
-	// This only gets called when you nest GTableLayout controls. It's 
+	// This only gets called when you nest LTableLayout controls. It's 
 	// responsible for doing pre layout stuff for an entire control of cells.
 	int Cx, Cy, i;
 
@@ -1948,7 +1948,7 @@ void GTableLayoutPrivate::LayoutPost(LRect &Client)
 
 void GTableLayoutPrivate::InitBorderSpacing()
 {
-	BorderSpacing = GTableLayout::CellSpacing;
+	BorderSpacing = LTableLayout::CellSpacing;
 	if (Ctrl->GetCss())
 	{
 		LCss::Len bs = Ctrl->GetCss()->BorderSpacing();
@@ -2000,7 +2000,7 @@ void GTableLayoutPrivate::Layout(LRect &Client)
 	if (Prof) Prof->Add("Notify");
 
 	#if DEBUG_PROFILE
-	LgiTrace("GTableLayout::Layout(%i) = %i ms\n", Ctrl->GetId(), (int)(LgiCurrentTime()-Start));
+	LgiTrace("LTableLayout::Layout(%i) = %i ms\n", Ctrl->GetId(), (int)(LgiCurrentTime()-Start));
 	#endif
 
 	#if DEBUG_LAYOUT
@@ -2017,20 +2017,20 @@ void GTableLayoutPrivate::Layout(LRect &Client)
 	Ctrl->SendNotify(GNotifyTableLayout_LayoutChanged);
 }
 
-GTableLayout::GTableLayout(int id) : ResObject(Res_Table)
+LTableLayout::LTableLayout(int id) : ResObject(Res_Table)
 {
 	d = new GTableLayoutPrivate(this);
 	SetPourLargest(true);
-	Name("GTableLayout");
+	Name("LTableLayout");
 	SetId(id);
 }
 
-GTableLayout::~GTableLayout()
+LTableLayout::~LTableLayout()
 {
 	DeleteObj(d);
 }
 
-void GTableLayout::OnFocus(bool b)
+void LTableLayout::OnFocus(bool b)
 {
 	if (b)
 	{
@@ -2040,35 +2040,35 @@ void GTableLayout::OnFocus(bool b)
 	}
 }
 
-void GTableLayout::OnCreate()
+void LTableLayout::OnCreate()
 {
 	LResources::StyleElement(this);
 	AttachChildren();
 }
 
-int GTableLayout::CellX()
+int LTableLayout::CellX()
 {
 	return (int)d->Cols.Length();
 }
 
-int GTableLayout::CellY()
+int LTableLayout::CellY()
 {
 	return (int)d->Rows.Length();
 }
 
-GLayoutCell *GTableLayout::CellAt(int x, int y)
+GLayoutCell *LTableLayout::CellAt(int x, int y)
 {
 	return d->GetCellAt(x, y);
 }
 
-bool GTableLayout::SizeChanged()
+bool LTableLayout::SizeChanged()
 {
 	LRect r = GetClient();
 	return	r.X() != d->PrevSize.x ||
 			r.Y() != d->PrevSize.y;
 }
 
-void GTableLayout::OnPosChange()
+void LTableLayout::OnPosChange()
 {
 	LRect r = GetClient();
 
@@ -2093,7 +2093,7 @@ void GTableLayout::OnPosChange()
 	}
 }
 
-LRect GTableLayout::GetUsedArea()
+LRect LTableLayout::GetUsedArea()
 {
 	if (SizeChanged())
 	{
@@ -2113,7 +2113,7 @@ LRect GTableLayout::GetUsedArea()
 	return r;
 }
 
-void GTableLayout::InvalidateLayout()
+void LTableLayout::InvalidateLayout()
 {
 	if (!d->LayoutDirty)
 	{
@@ -2126,7 +2126,7 @@ void GTableLayout::InvalidateLayout()
 		Invalidate();
 }
 
-GMessage::Result GTableLayout::OnEvent(GMessage *m)
+GMessage::Result LTableLayout::OnEvent(GMessage *m)
 {
 	switch (m->Msg())
 	{
@@ -2138,10 +2138,10 @@ GMessage::Result GTableLayout::OnEvent(GMessage *m)
 		}
 	}
 	
-	return GLayout::OnEvent(m);
+	return LLayout::OnEvent(m);
 }
 
-void GTableLayout::OnPaint(LSurface *pDC)
+void LTableLayout::OnPaint(LSurface *pDC)
 {
 	if (SizeChanged() || d->LayoutDirty)
 	{
@@ -2193,7 +2193,7 @@ void GTableLayout::OnPaint(LSurface *pDC)
 	#endif
 }
 
-bool GTableLayout::GetVariant(const char *Name, LVariant &Value, char *Array)
+bool LTableLayout::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	return false;
 }
@@ -2208,7 +2208,7 @@ bool ConvertNumbers(GArray<double> &a, char *s)
 	return a.Length() > 0;
 }
 
-bool GTableLayout::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LTableLayout::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)
@@ -2256,7 +2256,7 @@ bool GTableLayout::SetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-void GTableLayout::OnChildrenChanged(LViewI *Wnd, bool Attaching)
+void LTableLayout::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	d->LayoutDirty = true;
 	if (Attaching)
@@ -2276,7 +2276,7 @@ void GTableLayout::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 	}
 }
 
-int GTableLayout::OnNotify(LViewI *c, int f)
+int LTableLayout::OnNotify(LViewI *c, int f)
 {
     if (f == GNotifyTableLayout_Refresh)
     {
@@ -2295,12 +2295,12 @@ int GTableLayout::OnNotify(LViewI *c, int f)
         return 0;
     }
 
-    return GLayout::OnNotify(c, f);
+    return LLayout::OnNotify(c, f);
 }
 
-int64 GTableLayout::Value()
+int64 LTableLayout::Value()
 {
-    GArray<GRadioButton*> Btns;
+    GArray<LRadioButton*> Btns;
     if (d->CollectRadioButtons(Btns))
     {
         for (int i=0; i<Btns.Length(); i++)
@@ -2312,9 +2312,9 @@ int64 GTableLayout::Value()
     return -1;
 }
 
-void GTableLayout::Value(int64 v)
+void LTableLayout::Value(int64 v)
 {
-    GArray<GRadioButton*> Btns;
+    GArray<LRadioButton*> Btns;
     if (d->CollectRadioButtons(Btns))
     {
         if (v >= 0 && v < (ssize_t)Btns.Length())
@@ -2322,12 +2322,12 @@ void GTableLayout::Value(int64 v)
     }
 }
 
-void GTableLayout::Empty(LRect *Range)
+void LTableLayout::Empty(LRect *Range)
 {
 	d->Empty(Range);
 }
 
-GLayoutCell *GTableLayout::GetCell(int cx, int cy, bool create, int colspan, int rowspan)
+GLayoutCell *LTableLayout::GetCell(int cx, int cy, bool create, int colspan, int rowspan)
 {
 	TableCell *c = d->GetCellAt(cx, cy);
 	if (!c && create)

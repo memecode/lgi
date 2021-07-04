@@ -1,5 +1,5 @@
 /*
-**	FILE:			GPanel.cpp
+**	FILE:			LPanel.cpp
 **	AUTHOR:			Matthew Allen
 **	DATE:			29/8/99
 **	DESCRIPTION:	Scribe Mail Object and UI
@@ -15,7 +15,7 @@
 #include "lgi/common/CssTools.h"
 
 //////////////////////////////////////////////////////////////////////////////
-GPanel::GPanel(const char *name, int size, bool open)
+LPanel::LPanel(const char *name, int size, bool open)
 {
 	Ds = 0;
 	if (name) Name(name);
@@ -30,12 +30,12 @@ GPanel::GPanel(const char *name, int size, bool open)
 	LResources::StyleElement(this);
 }
 
-GPanel::~GPanel()
+LPanel::~LPanel()
 {
 	DeleteObj(Ds);
 }
 
-int GPanel::CalcWidth()
+int LPanel::CalcWidth()
 {
 	if (!Ds)
 		Ds = new LDisplayString(GetFont(), Name());
@@ -43,12 +43,12 @@ int GPanel::CalcWidth()
 	return 30 + (Ds ? Ds->X() : 0);
 }
 
-bool GPanel::Open()
+bool LPanel::Open()
 {
 	return IsOpen;
 }
 
-void GPanel::Open(bool i)
+void LPanel::Open(bool i)
 {
 	if (i != IsOpen)
 	{
@@ -66,39 +66,39 @@ void GPanel::Open(bool i)
 	}
 }
 
-int GPanel::Alignment()
+int LPanel::Alignment()
 {
 	return Align;
 }
 
-void GPanel::Alignment(int i)
+void LPanel::Alignment(int i)
 {
 	Align = i;
 }
 
-int GPanel::GetClosedSize()
+int LPanel::GetClosedSize()
 {
 	return ClosedSize;
 }
 
-void GPanel::SetClosedSize(int i)
+void LPanel::SetClosedSize(int i)
 {
 	ClosedSize = i;
 }
 
-int GPanel::GetOpenSize()
+int LPanel::GetOpenSize()
 {
 	return OpenSize;
 }
 
-void GPanel::SetOpenSize(int i)
+void LPanel::SetOpenSize(int i)
 {
 	OpenSize = i;
 }
 
-bool GPanel::Attach(LViewI *Wnd)
+bool LPanel::Attach(LViewI *Wnd)
 {
-	bool Status = GLayout::Attach(Wnd);
+	bool Status = LLayout::Attach(Wnd);
 	SetChildrenVisibility(IsOpen);
 	if (Status)
 		AttachChildren();
@@ -106,7 +106,7 @@ bool GPanel::Attach(LViewI *Wnd)
 	return Status;
 }
 
-bool GPanel::Pour(LRegion &r)
+bool LPanel::Pour(LRegion &r)
 {
 	int Sx = CalcWidth();
 	LRect *Best = 0;
@@ -194,7 +194,7 @@ bool GPanel::Pour(LRegion &r)
 	return false;
 }
 
-int GPanel::OnNotify(LViewI *Ctrl, int Flags)
+int LPanel::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (GetParent())
 	{
@@ -204,7 +204,7 @@ int GPanel::OnNotify(LViewI *Ctrl, int Flags)
 	return 0;
 }
 
-void GPanel::OnPaint(LSurface *pDC)
+void LPanel::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
 	GCssTools Tools(this);
@@ -252,7 +252,7 @@ void GPanel::OnPaint(LSurface *pDC)
 	}
 }
 
-void GPanel::OnMouseClick(LMouse &m)
+void LPanel::OnMouseClick(LMouse &m)
 {
 	if (OpenSize > 0 &&
 		m.Left() &&
@@ -267,7 +267,7 @@ void GPanel::OnMouseClick(LMouse &m)
 	}
 }
 
-void GPanel::RePour()
+void LPanel::RePour()
 {
 	LWindow *Top = dynamic_cast<LWindow*>(GetWindow());
 	if (Top)
@@ -276,7 +276,7 @@ void GPanel::RePour()
 	}
 }
 
-void GPanel::SetChildrenVisibility(bool i)
+void LPanel::SetChildrenVisibility(bool i)
 {
 	for (auto w: Children)
 	{

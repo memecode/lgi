@@ -6,16 +6,16 @@
 #define _GTEXT_LABEL_H_
 
 /// A static text label widget
-class LgiClass GTextLabel :
+class LgiClass LTextLabel :
 	public LView,
 	public ResObject,
 	public GDom
 {
-	class GTextPrivate *d;
+	class LTextPrivate *d;
 
 public:
 	/// Constructor
-	GTextLabel
+	LTextLabel
 	(
 		/// The control's ID
 		int id,
@@ -30,9 +30,9 @@ public:
 		/// Utf-8 text for the label
 		const char *name
 	);
-	~GTextLabel();
+	~LTextLabel();
 	
-	const char *GetClass() override { return "GTextLabel"; }
+	const char *GetClass() override { return "LTextLabel"; }
 
 	/// Set the text
 	bool Name(const char *n) override;

@@ -88,7 +88,7 @@ public:
 // Win32 window class
 class LgiClass LWindowsClass : public LBase
 {
-	friend class GControl;
+	friend class LControl;
 	friend class GApp;
 
 	WNDPROC ParentProc;

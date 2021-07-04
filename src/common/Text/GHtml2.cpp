@@ -7,13 +7,13 @@
 #include "GHtml2.h"
 #include "GHtmlPriv2.h"
 #include "GToken.h"
-#include "GScrollBar.h"
+#include "LScrollBar.h"
 #include "LVariant.h"
 #include "GFindReplaceDlg.h"
 #include "Emoji.h"
 #include "GClipBoard.h"
 #include "GButton.h"
-#include "GEdit.h"
+#include "LEdit.h"
 #include "GCombo.h"
 
 #define DEBUG_TABLE_LAYOUT			0
@@ -3234,9 +3234,9 @@ void GTag::SetStyle()
 					CtrlType == CtrlText ||
 					CtrlType == CtrlPassword)
 				{
-					GEdit *Ed;
+					LEdit *Ed;
 					GAutoString UtfCleanValue(LgiNewUtf16To8(CleanValue));
-					if (Ctrl = Ed = new GEdit(Html->d->NextCtrlId++, 0, 0, 60, SysFont->GetHeight() + 8, UtfCleanValue))
+					if (Ctrl = Ed = new LEdit(Html->d->NextCtrlId++, 0, 0, 60, SysFont->GetHeight() + 8, UtfCleanValue))
 					{
 						Ed->Sunken(false);
 						Ed->Password(CtrlType == CtrlPassword);
@@ -6877,12 +6877,12 @@ int GHtml2::OnNotify(LViewI *c, int f)
 		}
 	}
 
-	return GLayout::OnNotify(c, f);
+	return LLayout::OnNotify(c, f);
 }
 
 void GHtml2::OnPosChange()
 {
-	GLayout::OnPosChange();
+	LLayout::OnPosChange();
 	if (ViewWidth != X())
 	{
 		Invalidate();
@@ -7900,7 +7900,7 @@ void GHtml2::OnMouseMove(LMouse &m)
 			c.Offset(-c.x1, -c.y1);
 			if (c.Overlap(m.x, m.y) && ValidStr(Uri))
 			{
-				GLayout::SetCursor(LCUR_PointingHand);
+				LLayout::SetCursor(LCUR_PointingHand);
 			}
 			*/
 
@@ -8179,7 +8179,7 @@ void GHtml2::SetEmoji(bool i)
 }
 
 ////////////////////////////////////////////////////////////////////////
-class GHtml_Factory2 : public GViewFactory
+class GHtml_Factory2 : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{

@@ -3254,7 +3254,7 @@ void GTextView3::OnPosChange()
 	if (!Processing)
 	{
 		Processing = true;
-		GLayout::OnPosChange();
+		LLayout::OnPosChange();
 
 		LRect c = GetClient();
 		bool ScrollYNeeded = c.Y() < (Line.Length() * LineY);
@@ -5320,7 +5320,7 @@ GMessage::Result GTextView3::OnEvent(GMessage *Msg)
 		#endif
 	}
 
-	return GLayout::OnEvent(Msg);
+	return LLayout::OnEvent(Msg);
 }
 
 int GTextView3::OnNotify(LViewI *Ctrl, int Flags)
@@ -5399,7 +5399,7 @@ bool GTextView3::OnLayout(LViewLayoutInfo &Inf)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-class GTextView3_Factory : public GViewFactory
+class GTextView3_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{

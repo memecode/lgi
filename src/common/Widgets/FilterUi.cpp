@@ -3,7 +3,7 @@
 #include "Lgi.h"
 #include "GFilterUi.h"
 #include "GPath.h"
-#include "GEdit.h"
+#include "LEdit.h"
 #include "GCombo.h"
 #include "GToken.h"
 #include "LDisplayString.h"
@@ -79,12 +79,12 @@ static const char **GetIconNames()
 	return IconName;
 }
 
-class GFilterTree : public GTree, public GDragDropTarget
+class LFilterTree : public LTree, public GDragDropTarget
 {
-	friend class GFilterItem;
+	friend class LFilterItem;
 
 public:
-	GFilterTree() : GTree(-1, 0, 0, 100, 100)
+	LFilterTree() : LTree(-1, 0, 0, 100, 100)
 	{
 	}
 	
@@ -97,7 +97,7 @@ public:
 	{
 		if (f && !Selection())
 		{
-			GTreeItem *n = GetChild();
+			LTreeItem *n = GetChild();
 			if (n) n->Select(true);
 		}
 	}
@@ -105,7 +105,7 @@ public:
 	// Dnd
 	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 	{
-		GFilterItem *i = dynamic_cast<GFilterItem*>(ItemAtPoint(Pt.x, Pt.y));
+		LFilterItem *i = dynamic_cast<LFilterItem*>(ItemAtPoint(Pt.x, Pt.y));
 		if (!i || i->GetNode() == LNODE_NEW)
 			return DROPEFFECT_NONE;
 		
@@ -118,13 +118,13 @@ public:
 	{
 		SelectDropTarget(NULL);
 		
-		GFilterItem *Target = dynamic_cast<GFilterItem*>(ItemAtPoint(Pt.x, Pt.y));
+		LFilterItem *Target = dynamic_cast<LFilterItem*>(ItemAtPoint(Pt.x, Pt.y));
 		if (!Target)
 			return DROPEFFECT_NONE;
 
 		if (Target->GetNode() == LNODE_COND)
 		{
-			Target = dynamic_cast<GFilterItem*>(Target->GetParent());
+			Target = dynamic_cast<LFilterItem*>(Target->GetParent());
 			if (!Target)
 				return DROPEFFECT_NONE;
 		}
@@ -137,9 +137,9 @@ public:
 			{
 				LVariant &v = dd.Data.First();
 				if (v.IsBinary() &&
-					v.Value.Binary.Length == sizeof(GFilterItem *))
+					v.Value.Binary.Length == sizeof(LFilterItem *))
 				{
-					GFilterItem **Item = (GFilterItem**)v.Value.Binary.Data;
+					LFilterItem **Item = (LFilterItem**)v.Value.Binary.Data;
 					if
 					(
 						*Item != NULL &&
@@ -154,9 +154,9 @@ public:
 						(*Item)->Remove();
 						
 						int Idx = 0;
-						for (GFilterItem *ti = dynamic_cast<GFilterItem*>(Target->GetChild());
+						for (LFilterItem *ti = dynamic_cast<LFilterItem*>(Target->GetChild());
 							ti && ti->GetNode() != LNODE_NEW;
-							ti = dynamic_cast<GFilterItem*>(ti->GetNext()))
+							ti = dynamic_cast<LFilterItem*>(ti->GetNext()))
 						{
 							Idx++;
 						}
@@ -182,11 +182,11 @@ void HalveAlpha(T *p, int width)
 	}
 }
 
-class GFilterViewPrivate
+class LFilterViewPrivate
 {
 public:
-	GFilterView *View;
-	GAutoPtr<GFilterTree> Tree;
+	LFilterView *View;
+	GAutoPtr<LFilterTree> Tree;
 	bool ShowLegend;
 	LRect Info;
 	GArray<LSurface*> Icons;
@@ -199,7 +199,7 @@ public:
 	GAutoPtr<LDisplayString> dsLegend;
 	GArray<char*> OpNames;
 
-	GFilterViewPrivate(GFilterView *v)
+	LFilterViewPrivate(LFilterView *v)
 	{
 		View = v;
 
@@ -223,7 +223,7 @@ public:
 		}
 	}
 
-	~GFilterViewPrivate()
+	~LFilterViewPrivate()
 	{
 		Icons.DeleteObjects();
 		OpNames.DeleteArrays();
@@ -460,7 +460,7 @@ class GFilterItemPrivate
 {
 public:
 	GFilterNode Node;
-	GFilterViewPrivate *Data;
+	LFilterViewPrivate *Data;
 	LRect Btns[IconMax];
 	LRect NotBtn;
 	LRect FieldBtn, FieldDropBtn;
@@ -470,7 +470,7 @@ public:
 	bool Not;
 	char *Field, *Value;
 	int Op;
-	GEdit *FieldEd, *ValueEd;
+	LEdit *FieldEd, *ValueEd;
 	GCombo *OpCbo;
 
 	GFilterItemPrivate()
@@ -507,7 +507,7 @@ public:
 	}
 };
 
-GFilterItem::GFilterItem(GFilterViewPrivate *Data, GFilterNode Node)
+LFilterItem::LFilterItem(LFilterViewPrivate *Data, GFilterNode Node)
 {
 	d = new GFilterItemPrivate;
 	d->Data = Data;
@@ -515,17 +515,17 @@ GFilterItem::GFilterItem(GFilterViewPrivate *Data, GFilterNode Node)
 	SetNode(Node);
 }
 
-GFilterItem::~GFilterItem()
+LFilterItem::~LFilterItem()
 {
 	DeleteObj(d);
 }
 
-bool GFilterItem::GetNot()
+bool LFilterItem::GetNot()
 {
 	return d->Not;
 }
 
-const char *GFilterItem::GetField()
+const char *LFilterItem::GetField()
 {
 	if (d->FieldEd)
 		return d->FieldEd->Name();
@@ -533,14 +533,14 @@ const char *GFilterItem::GetField()
 	return d->Field;
 }
 
-int GFilterItem::GetOp()
+int LFilterItem::GetOp()
 {
 	if (d->OpCbo != NULL)
 		return (int)d->OpCbo->Value();
 	return d->Op;
 }
 
-const char *GFilterItem::GetValue()
+const char *LFilterItem::GetValue()
 {
 	if (d->ValueEd)
 		return d->ValueEd->Name();
@@ -548,13 +548,13 @@ const char *GFilterItem::GetValue()
 	return d->Value;
 }
 
-void GFilterItem::SetNot(bool b)
+void LFilterItem::SetNot(bool b)
 {
 	d->Not = b;
 	Update();
 }
 
-void GFilterItem::SetField(const char *s)
+void LFilterItem::SetField(const char *s)
 {
 	DeleteArray(d->Field);
 	d->Field = NewStr(s);
@@ -562,14 +562,14 @@ void GFilterItem::SetField(const char *s)
 	else Update();
 }
 
-void GFilterItem::SetOp(int s)
+void LFilterItem::SetOp(int s)
 {
 	d->Op = s;
 	if (d->OpCbo) d->OpCbo->Value(s);
 	else Update();
 }
 
-void GFilterItem::SetValue(char *s)
+void LFilterItem::SetValue(char *s)
 {
 	DeleteArray(d->Value);
 	d->Value = NewStr(s);
@@ -605,7 +605,7 @@ void GFilterItem::SetValue(char *s)
 		DeleteObj(d->Ed); \
 	}
 
-void GFilterItem::_PourText(LPoint &Size)
+void LFilterItem::_PourText(LPoint &Size)
 {
 	Size.y = SysFont->GetHeight() +
 	#ifdef MAC
@@ -627,7 +627,7 @@ void GFilterItem::_PourText(LPoint &Size)
 	}
 }
 
-void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
+void LFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 {
 	LRect *Pos = _GetRect(TreeItemText);
 
@@ -854,7 +854,7 @@ void GFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	}
 }
 
-void GFilterItem::ShowControls(bool s)
+void LFilterItem::ShowControls(bool s)
 {
 	if (!GetTree() || d->Node != LNODE_COND)
 		return;
@@ -868,14 +868,14 @@ void GFilterItem::ShowControls(bool s)
 		LRect Cbo = d->OpBtn;
 		Cbo.Union(&d->OpDropBtn);
 
-		StartCtrl(d->FieldBtn, FieldEd, d->Field, GEdit);
+		StartCtrl(d->FieldBtn, FieldEd, d->Field, LEdit);
 		StartCtrl(Cbo, OpCbo, 0, GCombo);
-		StartCtrl(d->ValueBtn, ValueEd, d->Value, GEdit);
+		StartCtrl(d->ValueBtn, ValueEd, d->Value, LEdit);
 		
 		if (d->OpCbo && !d->OpCbo->Length())
 		{
 			GArray<char*> Ops;
-			if (d->Data->Callback(	(GFilterView*) GetTree(),
+			if (d->Data->Callback(	(LFilterView*) GetTree(),
 									this,
 									FMENU_OP,
 									d->OpBtn,
@@ -905,31 +905,31 @@ void GFilterItem::ShowControls(bool s)
 	
 }
 
-void GFilterItem::OnExpand(bool b)
+void LFilterItem::OnExpand(bool b)
 {
 	ShowControls(Select() && b);
 
-	for (GTreeNode *c = GetChild(); c; c = c->GetNext())
+	for (LTreeNode *c = GetChild(); c; c = c->GetNext())
 	{
-		GFilterItem *i = dynamic_cast<GFilterItem*>(c);
+		LFilterItem *i = dynamic_cast<LFilterItem*>(c);
 		if (i)
 			i->OnExpand(b);
 	}
 }
 
-bool GFilterItem::OnBeginDrag(LMouse &m)
+bool LFilterItem::OnBeginDrag(LMouse &m)
 {
 	Drag(GetTree(), m.Event, DROPEFFECT_MOVE);
 	return true;
 }
 
-bool GFilterItem::GetFormats(GDragFormats &Formats)
+bool LFilterItem::GetFormats(GDragFormats &Formats)
 {
 	Formats.Supports(FILTER_DRAG_FORMAT);
 	return true;
 }
 
-bool GFilterItem::GetData(GArray<GDragData> &Data)
+bool LFilterItem::GetData(GArray<GDragData> &Data)
 {
 	GDragData &dd = Data[0];
 	
@@ -941,7 +941,7 @@ bool GFilterItem::GetData(GArray<GDragData> &Data)
 	return true;
 }
 
-bool GFilterItem::OnKey(LKey &k)
+bool LFilterItem::OnKey(LKey &k)
 {
 	if (k.IsChar)
 	{
@@ -966,7 +966,7 @@ bool GFilterItem::OnKey(LKey &k)
 	{
 		if (k.Down() && GetParent() && d->Node != LNODE_NEW)
 		{
-			GTreeItem *p = GetNext();
+			LTreeItem *p = GetNext();
 			if (!p) p = GetPrev();
 			if (!p) p = GetParent();
 			delete this;
@@ -979,7 +979,7 @@ bool GFilterItem::OnKey(LKey &k)
 	return false;
 }
 
-void GFilterItem::OnMouseClick(LMouse &m)
+void LFilterItem::OnMouseClick(LMouse &m)
 {
 	if (m.Down() && m.Left())
 	{
@@ -1009,7 +1009,7 @@ void GFilterItem::OnMouseClick(LMouse &m)
 			{
 				Rc = d->FieldDropBtn;
 				Rc.Offset(Pos->x1 + Client.x1, Pos->y1 + Client.y1);
-				d->Data->Callback(	(GFilterView*) GetTree(),
+				d->Data->Callback(	(LFilterView*) GetTree(),
 									this,
 									FMENU_FIELD,
 									Rc,
@@ -1020,7 +1020,7 @@ void GFilterItem::OnMouseClick(LMouse &m)
 			{
 				Rc = d->OpDropBtn;
 				Rc.Offset(Pos->x1 + Client.x1, Pos->y1 + Client.y1);
-				d->Data->Callback(	(GFilterView*) GetTree(),
+				d->Data->Callback(	(LFilterView*) GetTree(),
 									this,
 									FMENU_OP,
 									Rc,
@@ -1039,15 +1039,15 @@ void GFilterItem::OnMouseClick(LMouse &m)
 			}
 			case IconMoveDown:
 			{
-				GFilterItem *p = dynamic_cast<GFilterItem*>(GetParent());
+				LFilterItem *p = dynamic_cast<LFilterItem*>(GetParent());
 				if (p)
 				{
-					GTreeItem *m = this;
+					LTreeItem *m = this;
 					size_t Count = p->Items.Length();
 					ssize_t Idx = p->Items.IndexOf(m);
 					if (Idx + Delta >= 0 && Idx + Delta < Count - 1)
 					{
-						// GTreeItem *i = p->Items[Idx + Delta];
+						// LTreeItem *i = p->Items[Idx + Delta];
 						p->Items.Delete(m);
 						p->Items.Insert(m, Idx + Delta);
 						p->_RePour();
@@ -1075,7 +1075,7 @@ void GFilterItem::OnMouseClick(LMouse &m)
 			{
 				if (IsRoot() && GetTree())
 				{
-					GetTree()->Insert(new GFilterItem(d->Data));
+					GetTree()->Insert(new LFilterItem(d->Data));
 				}
 
 				delete this;
@@ -1090,7 +1090,7 @@ void GFilterItem::OnMouseClick(LMouse &m)
 	}
 }
 
-void GFilterItem::OptionsMenu()
+void LFilterItem::OptionsMenu()
 {
 	LRect *Pos = _GetRect(TreeItemText);
 	if (!Pos) return;
@@ -1123,12 +1123,12 @@ void GFilterItem::OptionsMenu()
 	Update();
 }
 
-GFilterNode GFilterItem::GetNode()
+GFilterNode LFilterItem::GetNode()
 {
 	return d->Node;
 }
 
-void GFilterItem::SetNode(GFilterNode n)
+void LFilterItem::SetNode(GFilterNode n)
 {
 	if (d->Node != n)
 	{
@@ -1136,7 +1136,7 @@ void GFilterItem::SetNode(GFilterNode n)
 			GetParent() &&
 			!IsRoot())
 		{
-			GetParent()->Insert(new GFilterItem(d->Data));
+			GetParent()->Insert(new LFilterItem(d->Data));
 		}
 
 		d->Node = n;
@@ -1145,19 +1145,19 @@ void GFilterItem::SetNode(GFilterNode n)
 		if (d->Node == LNODE_AND ||
 			d->Node == LNODE_OR)
 		{
-			Insert(new GFilterItem(d->Data));
+			Insert(new LFilterItem(d->Data));
 			Expanded(true);
 		}
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-GFilterView::GFilterView(FilterUi_Menu Callback, void *Data)
+LFilterView::LFilterView(FilterUi_Menu Callback, void *Data)
 {
-	d = new GFilterViewPrivate(this);
+	d = new LFilterViewPrivate(this);
 	d->Callback = Callback;
 	d->CallbackData = Data;
-	d->Tree.Reset(new GFilterTree);
+	d->Tree.Reset(new LFilterTree);
 	Sunken(true);
 
 	if (d->Callback)
@@ -1172,37 +1172,37 @@ GFilterView::GFilterView(FilterUi_Menu Callback, void *Data)
 	}
 
 	d->Tree->Sunken(false);
-	d->Tree->Insert(new GFilterItem(d));
+	d->Tree->Insert(new LFilterItem(d));
 	SetDefault();
 }
 
-GFilterView::~GFilterView()
+LFilterView::~LFilterView()
 {
 	d->Tree->Empty();
 	DelView(d->Tree);
 	DeleteObj(d);
 }
 
-void GFilterView::OnCreate()
+void LFilterView::OnCreate()
 {
 	OnPosChange();
 	d->Tree->Attach(this);
 }
 
-void GFilterView::SetDefault()
+void LFilterView::SetDefault()
 {
 	d->Tree->Empty();
-	d->Tree->Insert(new GFilterItem(d));
+	d->Tree->Insert(new LFilterItem(d));
 }
 
-GFilterItem *GFilterView::Create(GFilterNode Node)
+LFilterItem *LFilterView::Create(GFilterNode Node)
 {
-	return new GFilterItem(d, Node);
+	return new LFilterItem(d, Node);
 }
 
-void GFilterView::OnPosChange()
+void LFilterView::OnPosChange()
 {
-	LRect c = GLayout::GetClient();
+	LRect c = LLayout::GetClient();
 	if (d->ShowLegend)
 	{
 		d->Info = c;
@@ -1214,7 +1214,7 @@ void GFilterView::OnPosChange()
 }
 
 /*
-LRect &GFilterView::GetClient(bool ClientCoods)
+LRect &LFilterView::GetClient(bool ClientCoods)
 {
 	static LRect c;
 
@@ -1234,9 +1234,9 @@ LRect &GFilterView::GetClient(bool ClientCoods)
 }
 */
 
-void GFilterView::OnPaint(LSurface *pDC)
+void LFilterView::OnPaint(LSurface *pDC)
 {
-	GLayout::OnPaint(pDC);
+	LLayout::OnPaint(pDC);
 
 	if (d->ShowLegend)
 	{
@@ -1275,12 +1275,12 @@ void GFilterView::OnPaint(LSurface *pDC)
 	}
 }
 
-GTreeNode *GFilterView::GetRootNode()
+LTreeNode *LFilterView::GetRootNode()
 {
 	return d->Tree;
 }
 
-void GFilterView::Empty()
+void LFilterView::Empty()
 {
 	d->Tree->Empty();
 }

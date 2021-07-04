@@ -29,19 +29,19 @@ LAlert::LAlert(	LViewI *parent,
 	SetParent(parent);
 	Name((char*)Title);
 
-	GTableLayout *Tbl = new GTableLayout(100);
+	LTableLayout *Tbl = new LTableLayout(100);
 	Tbl->GetCss(true)->Padding("10px");
 	AddView(Tbl);
 
 	GLayoutCell *c = Tbl->GetCell(0, 0, true);
-	c->Add(new GTextLabel(-1, 8, 8, -1, -1, Text));
+	c->Add(new LTextLabel(-1, 8, 8, -1, -1, Text));
 	c->PaddingBottom(LCss::Len("10px"));
 
 	c = Tbl->GetCell(0, 1, true);
 	for (unsigned i=0; i<Names.Length(); i++)
 	{
 		c->TextAlign(LCss::Len(LCss::AlignCenter));
-		c->Add(new GButton(CMD_BASE + i,
+		c->Add(new LButton(CMD_BASE + i,
 							0, 0, -1, -1,
 							Names[i]));
 	}

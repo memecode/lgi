@@ -622,7 +622,7 @@ bool LView::_Mouse(LMouse &m, bool Move)
 		}
 			
 		LView *Target = dynamic_cast<LView*>(_Over ? _Over : this);
-		// GLayout *Lo = dynamic_cast<GLayout*>(Target);
+		// LLayout *Lo = dynamic_cast<LLayout*>(Target);
 		LRect Client = Target->LView::GetClient(false);
 
 		if (!Client.Valid() || Client.Overlap(m.x, m.y))

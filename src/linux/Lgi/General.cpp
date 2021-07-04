@@ -10,7 +10,7 @@
 
 #include "Lgi.h"
 #include "GSubProcess.h"
-#include "GTextLabel.h"
+#include "LTextLabel.h"
 #include "GButton.h"
 #ifndef LGI_SDL
 #include "LgiWinManGlue.h"

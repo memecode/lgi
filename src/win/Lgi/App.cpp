@@ -103,7 +103,7 @@ LONG __stdcall _ExceptionFilter_Redir(LPEXCEPTION_POINTERS e)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-GSkinEngine *GApp::SkinEngine = 0;
+LSkinEngine *GApp::SkinEngine = 0;
 LMouseHook *GApp::MouseHook = 0;
 LMouseHook *GApp::GetMouseHook()
 {
@@ -409,7 +409,7 @@ DumpTime("ms hook");
 		!GetOption("noskin")
 	)
 	{
-		extern GSkinEngine *CreateSkinEngine(GApp *App);
+		extern LSkinEngine *CreateSkinEngine(GApp *App);
 		SkinEngine = CreateSkinEngine(this);
 	}
 

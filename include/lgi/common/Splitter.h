@@ -4,18 +4,18 @@
 #include "lgi/common/Layout.h"
 
 /// Displays 2 views side by side
-class LgiClass GSplitter : public GLayout
+class LgiClass LSplitter : public LLayout
 {
-	class GSplitterPrivate *d;
+	class LSplitterPrivate *d;
 
 	void		CalcRegions(bool Follow = false);
 	bool		OverSplit(int x, int y);
 
 public:
-	GSplitter();
-	~GSplitter();
+	LSplitter();
+	~LSplitter();
 
-	const char *GetClass() override { return "GSplitter"; }
+	const char *GetClass() override { return "LSplitter"; }
 
 	/// Get the position of the split in px
 	int64 Value() override; // Use to set/get the split position

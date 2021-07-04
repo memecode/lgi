@@ -5,18 +5,18 @@
 
 #define EDIT_CTRL_WIDTH		200
 
-class EditTray : public GLayout
+class EditTray : public LLayout
 {
 	LRect FileBtn;
-	GEdit *FileSearch;
+	LEdit *FileSearch;
 
 	LRect FuncBtn;
-	GEdit *FuncSearch;
+	LEdit *FuncSearch;
 
 	LRect SymBtn;
-	GEdit *SymSearch;
+	LEdit *SymSearch;
 
-	GCheckBox *AllPlatforms;
+	LCheckBox *AllPlatforms;
 
 	LRect TextMsg;
 

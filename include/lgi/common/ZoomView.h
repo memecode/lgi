@@ -7,7 +7,7 @@
 #include "lgi/common/Notifications.h"
 #include "lgi/common/Layout.h"
 
-class GZoomView;
+class LZoomView;
 
 class GZoomViewCallback
 {
@@ -25,15 +25,15 @@ public:
 	
 	#undef DefOption
 	
-	virtual void DrawBackground(GZoomView *View, LSurface *Dst, LPoint TileIdx, LRect *Where = NULL) = 0;
-	virtual void DrawForeground(GZoomView *View, LSurface *Dst, LPoint TileIdx, LRect *Where = NULL) = 0;
+	virtual void DrawBackground(LZoomView *View, LSurface *Dst, LPoint TileIdx, LRect *Where = NULL) = 0;
+	virtual void DrawForeground(LZoomView *View, LSurface *Dst, LPoint TileIdx, LRect *Where = NULL) = 0;
 	virtual void SetStatusText(const char *Msg, int Pane = 0) {}
 };
 
 #define GZOOM_SELECTION_MS          100
 
 /// Zoomable and scrollable bitmap viewer.
-class GZoomView : public GLayout, public ResObject
+class LZoomView : public LLayout, public ResObject
 {
     class GZoomViewPriv *d;
 
@@ -71,8 +71,8 @@ public:
 	};
 
 	// Notifications
-	GZoomView(GZoomViewCallback *App);
-	~GZoomView();
+	LZoomView(GZoomViewCallback *App);
+	~LZoomView();
 
 	// Methods
 	void SetCallback(GZoomViewCallback *cb);

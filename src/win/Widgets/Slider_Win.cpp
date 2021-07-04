@@ -6,8 +6,8 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 // Slider control
-GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool vert) :
-	GControl(LGI_SLIDER),
+LSlider::LSlider(int id, int x, int y, int cx, int cy, const char *name, bool vert) :
+	LControl(LGI_SLIDER),
 	ResObject(Res_Slider)
 {
 	SetId(id);
@@ -25,11 +25,11 @@ GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool ve
 	}
 }
 
-GSlider::~GSlider()
+LSlider::~LSlider()
 {
 }
 
-void GSlider::Value(int64 i)
+void LSlider::Value(int64 i)
 {
 	Val = i;
 	if (Handle())
@@ -38,7 +38,7 @@ void GSlider::Value(int64 i)
 	}
 }
 
-int64 GSlider::Value()
+int64 LSlider::Value()
 {
 	if (Handle())
 	{
@@ -47,7 +47,7 @@ int64 GSlider::Value()
 	return Val;
 }
 
-GRange GSlider::GetRange()
+GRange LSlider::GetRange()
 {
 	if (Handle())
 	{
@@ -57,7 +57,7 @@ GRange GSlider::GetRange()
 	return GRange(Min, Max-Min+1);
 }
 
-bool GSlider::SetRange(const GRange &r)
+bool LSlider::SetRange(const GRange &r)
 {
 	Min = r.Start;
 	Max = r.End();
@@ -69,19 +69,19 @@ bool GSlider::SetRange(const GRange &r)
 	return true;
 }
 
-void GSlider::GetLimits(int64 &min, int64 &max)
+void LSlider::GetLimits(int64 &min, int64 &max)
 {
 	auto r = GetRange();
 	min = r.Start;
 	max = r.End();
 }
 
-void GSlider::SetLimits(int64 min, int64 max)
+void LSlider::SetLimits(int64 min, int64 max)
 {
 	SetRange(GRange(Min, max-min+1));
 }
 
-GMessage::Result GSlider::OnEvent(GMessage *Msg)
+GMessage::Result LSlider::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -141,7 +141,7 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 		}
 	}
 
-	GMessage::Result Status = GControl::OnEvent(Msg);
+	GMessage::Result Status = LControl::OnEvent(Msg);
 
 	switch (Msg->Msg())
 	{
@@ -156,7 +156,7 @@ GMessage::Result GSlider::OnEvent(GMessage *Msg)
 	return Status;
 }
 
-bool GSlider::OnLayout(LViewLayoutInfo &Inf)
+bool LSlider::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (Inf.Width.Min)
 	{
@@ -175,13 +175,13 @@ bool GSlider::OnLayout(LViewLayoutInfo &Inf)
 }
 
 ////////////////////////////////////////////////////////////////////////
-class GSlider_Factory : public GViewFactory
+class GSlider_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
-		if (stricmp(Class, "GSlider") == 0)
+		if (stricmp(Class, "LSlider") == 0)
 		{
-			return new GSlider(-1, 0, 0, 100, 20, 0, 0);
+			return new LSlider(-1, 0, 0, 100, 20, 0, 0);
 		}
 
 		return 0;

@@ -28,7 +28,7 @@ enum SpellCheckParams
 	}
 
 // Spell check interface
-class GSpellCheck : public GEventTargetThread
+class GSpellCheck : public LEventTargetThread
 {
 public:
 	static const char Delimiters[];
@@ -78,7 +78,7 @@ public:
 	};
 
 
-	GSpellCheck(GString Name) : GEventTargetThread(Name) {}
+	GSpellCheck(GString Name) : LEventTargetThread(Name) {}
 	virtual ~GSpellCheck() {}
 
 	// Impl OnEvent in your subclass:

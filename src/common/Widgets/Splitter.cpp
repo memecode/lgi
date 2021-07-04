@@ -12,7 +12,7 @@
 
 #define SPLITER_FULL_DRAG
 
-class GSplitterPrivate
+class LSplitterPrivate
 {
 public:
 	bool Vertical;
@@ -37,9 +37,9 @@ public:
 	#endif
 };
 
-GSplitter::GSplitter()
+LSplitter::LSplitter()
 {
-	d = new GSplitterPrivate;
+	d = new LSplitterPrivate;
 	d->PosA.ZOff(0, 0);
 	d->PosB.ZOff(0, 0);
 	d->ViewA = 0;
@@ -74,22 +74,22 @@ GSplitter::GSplitter()
 	LResources::StyleElement(this);
 }
 
-GSplitter::~GSplitter()
+LSplitter::~LSplitter()
 {
 	DeleteObj(d->ViewA);
 	DeleteObj(d->ViewB);
 	DeleteObj(d);
 }
 
-int GSplitter::BarSize() { return d->BarSize; }
-void GSplitter::BarSize(int i) { d->BarSize = i; CalcRegions(); }
-bool GSplitter::IsVertical() { return d->Vertical; }
-bool GSplitter::DoesSplitFollow() { return d->SplitFollow; }
-void GSplitter::DoesSplitFollow(bool i) { d->SplitFollow = i; }
-LView *GSplitter::GetViewA() { return d->ViewA; }
-LView *GSplitter::GetViewB() { return d->ViewB; }
+int LSplitter::BarSize() { return d->BarSize; }
+void LSplitter::BarSize(int i) { d->BarSize = i; CalcRegions(); }
+bool LSplitter::IsVertical() { return d->Vertical; }
+bool LSplitter::DoesSplitFollow() { return d->SplitFollow; }
+void LSplitter::DoesSplitFollow(bool i) { d->SplitFollow = i; }
+LView *LSplitter::GetViewA() { return d->ViewA; }
+LView *LSplitter::GetViewB() { return d->ViewB; }
 
-void GSplitter::IsVertical(bool v)
+void LSplitter::IsVertical(bool v)
 {
 	d->Vertical = v;
 	#ifdef WIN32
@@ -101,7 +101,7 @@ void GSplitter::IsVertical(bool v)
 	#endif
 }
 
-void GSplitter::SetViewA(LView *a, bool Border)
+void LSplitter::SetViewA(LView *a, bool Border)
 {
 	if (a != d->ViewA)
 	{
@@ -124,7 +124,7 @@ void GSplitter::SetViewA(LView *a, bool Border)
 	}
 }
 
-void GSplitter::DetachViewA()
+void LSplitter::DetachViewA()
 {
 	if (d->ViewA)
 	{
@@ -142,7 +142,7 @@ void GSplitter::DetachViewA()
 	}
 }
 
-void GSplitter::SetViewB(LView *b, bool Border)
+void LSplitter::SetViewB(LView *b, bool Border)
 {
 	if (b != d->ViewB)
 	{
@@ -165,7 +165,7 @@ void GSplitter::SetViewB(LView *b, bool Border)
 	}
 }
 
-void GSplitter::DetachViewB()
+void LSplitter::DetachViewB()
 {
 	if (d->ViewB)
 	{
@@ -183,12 +183,12 @@ void GSplitter::DetachViewB()
 	}
 }
 
-int64 GSplitter::Value()
+int64 LSplitter::Value()
 {
 	return d->SplitPos;
 }
 
-void GSplitter::Value(int64 s)
+void LSplitter::Value(int64 s)
 {
 	d->SplitSet = (int)s;
 	int Limit = ((d->Vertical) ? X() : Y()) - 18;
@@ -205,7 +205,7 @@ void GSplitter::Value(int64 s)
 }
 
 #if LGI_VIEW_HANDLE
-LViewI *GSplitter::FindControl(OsView hCtrl)
+LViewI *LSplitter::FindControl(OsView hCtrl)
 {
 	LViewI *c = 0;
 	if (d->ViewA) c = d->ViewA->FindControl(hCtrl);
@@ -216,7 +216,7 @@ LViewI *GSplitter::FindControl(OsView hCtrl)
 }
 #endif
 
-void GSplitter::CalcRegions(bool Follow)
+void LSplitter::CalcRegions(bool Follow)
 {
 	LRect Rect = GetClient();
 	
@@ -302,7 +302,7 @@ void GSplitter::CalcRegions(bool Follow)
 	}
 
 	#if 0
-	if (d->ViewA && !stricmp(d->ViewA->GetClass(), "GTree"))
+	if (d->ViewA && !stricmp(d->ViewA->GetClass(), "LTree"))
 	{
 		printf("Split::OnPosChange cli=%s a=%s b=%s\n",
 			GetClient().GetStr(),
@@ -314,14 +314,14 @@ void GSplitter::CalcRegions(bool Follow)
 	// printf("CalcPos Client=%s Value=%i A=%s B=%s\n", GetClient().GetStr(), (int)Value(), d->PosA.GetStr(), d->PosB.GetStr());
 }
 
-bool GSplitter::Pour(LRegion &r)
+bool LSplitter::Pour(LRegion &r)
 {
-	bool s = GLayout::Pour(r);
+	bool s = LLayout::Pour(r);
 	CalcRegions(true);
 	return s;
 }
 
-void GSplitter::OnPosChange()
+void LSplitter::OnPosChange()
 {
 	CalcRegions(true);
 }
@@ -334,7 +334,7 @@ void ClipDC(HDC hDC, RECT rc)
 }
 #endif
 
-void GSplitter::OnPaint(LSurface *pDC)
+void LSplitter::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
 	GCssTools Tools(this);
@@ -415,7 +415,7 @@ void GSplitter::OnPaint(LSurface *pDC)
 	}
 }
 
-void GSplitter::OnMouseClick(LMouse &m)
+void LSplitter::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -447,7 +447,7 @@ void GSplitter::OnMouseClick(LMouse &m)
 	}
 }
 
-bool GSplitter::OverSplit(int x, int y)
+bool LSplitter::OverSplit(int x, int y)
 {
 	if (d->Vertical)
 	{
@@ -459,11 +459,11 @@ bool GSplitter::OverSplit(int x, int y)
 	}
 }
 
-void GSplitter::OnMouseExit(LMouse &m)
+void LSplitter::OnMouseExit(LMouse &m)
 {
 }
 
-void GSplitter::OnMouseMove(LMouse &m)
+void LSplitter::OnMouseMove(LMouse &m)
 {
 	if (IsCapturing())
 	{
@@ -495,7 +495,7 @@ void GSplitter::OnMouseMove(LMouse &m)
 	}
 }
 
-LgiCursor GSplitter::GetCursor(int x, int y)
+LgiCursor LSplitter::GetCursor(int x, int y)
 {
 	if (OverSplit(x, y))
 		return (d->Vertical) ? LCUR_SizeHor : LCUR_SizeVer;
@@ -503,14 +503,14 @@ LgiCursor GSplitter::GetCursor(int x, int y)
 	return LCUR_Normal;
 }
 
-int GSplitter::OnHitTest(int x, int y)
+int LSplitter::OnHitTest(int x, int y)
 {
 	return -1;
 }
 
-bool GSplitter::Attach(LViewI *p)
+bool LSplitter::Attach(LViewI *p)
 {
-	bool Status = GLayout::Attach(p);
+	bool Status = LLayout::Attach(p);
 	if (Status)
 	{
 		if (d->ViewA && !d->ViewA->IsAttached())
@@ -529,7 +529,7 @@ bool GSplitter::Attach(LViewI *p)
 	return Status;
 }
 
-void GSplitter::OnChildrenChanged(LViewI *Wnd, bool Attaching)
+void LSplitter::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	if (!Attaching)
 	{

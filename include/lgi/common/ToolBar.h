@@ -34,11 +34,11 @@
 #define BORDER_SEPARATOR		4
 #define BORDER_BUTTON			1
 
-/// Button on a GToolBar
-class LgiClass GToolButton :
+/// Button on a LToolBar
+class LgiClass LToolButton :
 	public LView
 {
-	friend class GToolBar;
+	friend class LToolBar;
 
 protected:
 	struct GToolButtonPriv *d;
@@ -58,10 +58,10 @@ protected:
 	void Layout();
 
 public:
-	GToolButton(int Bx, int By);
-	~GToolButton();
+	LToolButton(int Bx, int By);
+	~LToolButton();
 
-	const char *GetClass() override { return "GToolButton"; }
+	const char *GetClass() override { return "LToolButton"; }
 
 	int64 Value() override { return Down; }
 	void Value(int64 i) override;
@@ -69,9 +69,9 @@ public:
 	const char *Name() override { return LView::Name(); }
 	bool Name(const char *n) override;
 
-	/// Gets the icon index into the parent GToolBar's image list
+	/// Gets the icon index into the parent LToolBar's image list
 	int Image() { return ImgIndex; }
-	/// Sets the icon index into the parent GToolBar's image list
+	/// Sets the icon index into the parent LToolBar's image list
 	void Image(int i);
 
 	int GetType() { return Type; }
@@ -98,14 +98,14 @@ public:
 	icons and optionally text describing there function. When the user clicks
 	a button a M_COMMAND message is passed up to the owning LWindow for the
 	application to handle. In the same fashion as a menu command being clicked.
-	You should override LWindow::OnCommand to catch events from a GToolBar.
+	You should override LWindow::OnCommand to catch events from a LToolBar.
 
 	This should be attached to the LWindow before other windows so that it
 	lays itself out under the menu.
 
 	To initialize and attach a toolbar to your LWindow use something like:
 	\code
-	GToolBar *t = LgiLoadToolbar(this, "icons.png");
+	LToolBar *t = LgiLoadToolbar(this, "icons.png");
 	if (t)
 	{
 		t->Attach(this);
@@ -115,12 +115,12 @@ public:
 	}
 	\endcode
 */
-class LgiClass GToolBar : public GLayout
+class LgiClass LToolBar : public LLayout
 {
-	friend class GToolButton;
+	friend class LToolButton;
 
 protected:
-	class GToolBarPrivate *d;
+	class LToolBarPrivate *d;
 
 	// Local
 	int GetBx();
@@ -135,13 +135,13 @@ protected:
 	#endif
 
 public:
-	GToolBar();
-	~GToolBar();
+	LToolBar();
+	~LToolBar();
 
-	const char *GetClass() { return "GToolBar"; }
+	const char *GetClass() { return "LToolBar"; }
 
 	/// Called when a button is clicked
-	virtual void OnButtonClick(GToolButton *Btn);
+	virtual void OnButtonClick(LToolButton *Btn);
 
 	/// True if the toolbar should layout in a vertical manner
 	bool IsVertical();
@@ -166,14 +166,14 @@ public:
 	/// Sets the image list to use via a memory surface
 	bool SetDC(LSurface *pDC, int Bx, int By);
 	/// Gets the image list
-	GImageList *GetImageList();
+	LImageList *GetImageList();
 	/// Sets the image list to use
-	bool SetImageList(GImageList *l, int Bx, int By, bool Own = true);
+	bool SetImageList(LImageList *l, int Bx, int By, bool Own = true);
 	/// Gets the font used to draw the text below the buttons
 	LFont *GetFont();
 
 	/// Adds a button to the toolbar
-	GToolButton *AppendButton
+	LToolButton *AppendButton
 	(
 		/// The buttons help tip
 		const char *Tip,
@@ -227,7 +227,7 @@ public:
 };
 
 /// Loads a toolbar from a file
-LgiFunc GToolBar *LgiLoadToolbar
+LgiFunc LToolBar *LgiLoadToolbar
 (
 	/// A parent window for error message boxes
 	LViewI *Parent,

@@ -213,10 +213,10 @@ public:
 class App : public LWindow
 {
 	GOptionsFile Opts;
-	GEdit *e;
-	GEdit *e2;
-	GTextLabel *Txt;
-	GTableLayout *Tbl;
+	LEdit *e;
+	LEdit *e2;
+	LTextLabel *Txt;
+	LTableLayout *Tbl;
 
 public:
 	App() : Opts(GOptionsFile::PortableMode, AppName)
@@ -239,7 +239,7 @@ public:
 		{
 			#if 1
 
-			GTabView *t = new GTabView(100);
+			LTabView *t = new LTabView(100);
 			t->Attach(this);
 			t->GetCss(true)->Padding("6px");
 
@@ -256,10 +256,10 @@ public:
 
 			#elif 0
 
-			AddView(Tbl = new GTableLayout(100));
+			AddView(Tbl = new LTableLayout(100));
 			GLayoutCell *c = Tbl->GetCell(0, 0);
 
-			c->Add(Txt = new GTextLabel(IDC_TXT, 0, 0, -1, -1, "This is a test string. &For like\ntesting and stuff. "
+			c->Add(Txt = new LTextLabel(IDC_TXT, 0, 0, -1, -1, "This is a test string. &For like\ntesting and stuff. "
 																"It has multiple\nlines to test wrapping."));
 			Txt->SetWrap(true);
 			//Txt->GetCss(true)->Color(LCss::ColorDef(GColour::Red));
@@ -269,12 +269,12 @@ public:
 			Txt->OnStyleChange();
 
 			c = Tbl->GetCell(1, 0);
-			c->Add(new GEdit(IDC_EDIT1, 0, 0, -1, -1));
+			c->Add(new LEdit(IDC_EDIT1, 0, 0, -1, -1));
 
 			#elif 0
 
-			AddView(e = new GEdit(IDC_EDIT1, 10, 10, 200, 22));
-			AddView(e2 = new GEdit(IDC_EDIT1, 10, 50, 200, 22));
+			AddView(e = new LEdit(IDC_EDIT1, 10, 10, 200, 22));
+			AddView(e2 = new LEdit(IDC_EDIT1, 10, 50, 200, 22));
 			AddView(new GButton(IDC_BLT_TEST, 10, 200, -1, -1, "Blt Test"));
 			// e->Focus(true);
 			e->Password(true);

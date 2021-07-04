@@ -3,7 +3,7 @@
 
 #include "Lgi.h"
 #include "GToken.h"
-#include "GPopup.h"
+#include "LPopup.h"
 
 #define DEBUG_SETFOCUS			0
 #define DEBUG_HANDLEVIEWKEY		0
@@ -619,7 +619,7 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	LViewI *p;
 	for (p = v->GetParent(); p; p = p->GetParent())
 	{
-		if (dynamic_cast<GPopup*>(p))
+		if (dynamic_cast<LPopup*>(p))
 		{
 			#if DEBUG_HANDLEVIEWKEY
 			if (Debug)

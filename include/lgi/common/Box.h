@@ -4,7 +4,7 @@
 #include "lgi/common/Css.h"
 
 /// This is a vertical or horizontal layout box, similar to the
-/// old GSplitter control except it can handle any number of children
+/// old LSplitter control except it can handle any number of children
 class LgiClass LBox : public LView
 {
 	struct LBoxPriv *d;

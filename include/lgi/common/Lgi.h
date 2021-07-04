@@ -124,13 +124,13 @@
 	fill in the contents of the window will be:
 	<ul>
 		<li> LMenu
-		<li> GSplitter
-		<li> GToolBar
-		<li> GStatusBar
-		<li> GLayout
-		<li> GButton
+		<li> LSplitter
+		<li> LToolBar
+		<li> LStatusBar
+		<li> LLayout
+		<li> LButton
 		<li> LList
-		<li> GTree
+		<li> LTree
 		<li> etc...
 	</ul>
 	A LWindow will layout controls automatically according to the order you attach (LView::Attach) them.
@@ -142,11 +142,11 @@
 		<li> LView::FindSmallestFit
 		<li> LView::FindLargestEdge
 	</ul>
-	Usually you attach a GToolBar first, as it will automatically slide in below the menu (if any). Then a
-	GStatusBar, if your going to need one. And finally a GSplitter or LList to fill out the rest of the space.
+	Usually you attach a LToolBar first, as it will automatically slide in below the menu (if any). Then a
+	LStatusBar, if your going to need one. And finally a LSplitter or LList to fill out the rest of the space.
 	The standard method of attaching a view to a LWindow in the constructor of your window:
 	\code
-	GSplitter *s = new GSplitter;
+	LSplitter *s = new LSplitter;
 	if (s)
 	{
 		s->Value(200);
@@ -181,22 +181,22 @@
 	that form the common methods for interacting with users and displaying information. Lgi has a rich set
 	of bundled controls as well as support for writing your own. Here is an index of the built in controls:
 	<ul>
-		<li> GButton (Push button)
-		<li> GEdit (Editbox for text entry)
-		<li> GTextLabel (Static label)
-		<li> GCheckBox (Independant boolean)
-		<li> GCombo (Select one from many)
-		<li> GSlider (Select a position)
+		<li> LButton (Push button)
+		<li> LEdit (Editbox for text entry)
+		<li> LTextLabel (Static label)
+		<li> LCheckBox (Independant boolean)
+		<li> LCombo (Select one from many)
+		<li> LSlider (Select a position)
 		<li> LBitmap (Display an image)
 		<li> LProgressView (Show a progress)
 		<li> LList (List containing LListItem)
-		<li> GTree (Heirarchy of GTreeItem)
-		<li> GRadioGroup (One of many selection using GRadioButton)
-		<li> GTabView (Containing GTabPage)
+		<li> LTree (Heirarchy of LTreeItem)
+		<li> LRadioGroup (One of many selection using LRadioButton)
+		<li> LTabView (Containing LTabPage)
 		<li> GHtml
-		<li> GScrollBar
+		<li> LScrollBar
 	</ul>
-	However it's fairly easy to write custom controls by inheriting from GLayout (or LView for the hardcore) and implementing 
+	However it's fairly easy to write custom controls by inheriting from LLayout (or LView for the hardcore) and implementing 
 	the required functionality by override various events like LView::OnPaint and LView::OnMouseClick.
 */
 

@@ -3,8 +3,8 @@
 
 #include "Lgi.h"
 #include "LVariant.h"
-#include "GSkinEngine.h"
-#include "GCombo.h"
+#include "LSkinEngine.h"
+#include "LCombo.h"
 #include "LDisplayString.h"
 #include "LgiRes.h"
 
@@ -29,7 +29,7 @@ int StringCompare(char *a, char *b, NativeInt c)
 	return stricmp(a, b);
 }
 
-class GComboPrivate
+class LComboPrivate
 {
 	LDisplayString *Text;
 
@@ -42,17 +42,17 @@ public:
 	uint64 LastKey;
 	GAutoString Find;
 	LSubMenu *Menu;
-	GCombo::SelectedState SelState;
+	LCombo::SelectedState SelState;
 	bool LayoutDirty;
 
 	#if defined LGI_CARBON
 	ThemeButtonDrawInfo Cur;
 	#endif
 
-	GComboPrivate()
+	LComboPrivate()
 	{
 		LayoutDirty = false;
-		SelState = GCombo::SelectedDisable;
+		SelState = LCombo::SelectedDisable;
 		SortItems = false;
 		Sub = false;
 		Current = 0;
@@ -67,7 +67,7 @@ public:
 		#endif
 	}
 
-	~GComboPrivate()
+	~LComboPrivate()
 	{
 		Items.DeleteArrays();
 		DeleteObj(Menu);
@@ -91,12 +91,12 @@ public:
 	}
 };
 
-LRect GCombo::Pad(8, 4, 24, 4);
+LRect LCombo::Pad(8, 4, 24, 4);
 
-GCombo::GCombo(int id, int x, int y, int cx, int cy, const char *name) :
+LCombo::LCombo(int id, int x, int y, int cx, int cy, const char *name) :
 	ResObject(Res_ComboBox)
 {
-	d = new GComboPrivate;
+	d = new LComboPrivate;
 	
 	SetId(id);
 	LRect e(x, y, x+cx, y+cy);
@@ -111,52 +111,52 @@ GCombo::GCombo(int id, int x, int y, int cx, int cy, const char *name) :
 	LResources::StyleElement(this);
 }
 
-GCombo::~GCombo()
+LCombo::~LCombo()
 {
 	DeleteObj(d);
 }
 
-bool GCombo::Sort()
+bool LCombo::Sort()
 {
 	return d->SortItems;
 }
 
-void GCombo::Sort(bool s)
+void LCombo::Sort(bool s)
 {
 	d->SortItems = s;
 }
 
-int GCombo::Sub()
+int LCombo::Sub()
 {
 	return d->Sub;
 }
 
-void GCombo::Sub(int s) // GV_???
+void LCombo::Sub(int s) // GV_???
 {
 	d->Sub = s;
 }
 
-LSubMenu *GCombo::GetMenu()
+LSubMenu *LCombo::GetMenu()
 {
 	return d->Menu;
 }
 
-void GCombo::SetMenu(LSubMenu *m)
+void LCombo::SetMenu(LSubMenu *m)
 {
 	d->Menu = m;
 }
 
-size_t GCombo::Length()
+size_t LCombo::Length()
 {
 	return d->Items.Length();
 }
 
-char *GCombo::operator [](ssize_t i)
+char *LCombo::operator [](ssize_t i)
 {
 	return d->Items.ItemAt(i);
 }
 
-bool GCombo::Name(const char *n)
+bool LCombo::Name(const char *n)
 {
 	if (ValidStr(n))
 	{
@@ -191,12 +191,12 @@ bool GCombo::Name(const char *n)
 	return true;
 }
 
-const char *GCombo::Name()
+const char *LCombo::Name()
 {
 	return d->Items.ItemAt(d->Current);
 }
 
-void GCombo::Value(int64 i)
+void LCombo::Value(int64 i)
 {
 	if (d->Current != i)
 	{
@@ -208,29 +208,29 @@ void GCombo::Value(int64 i)
 	}
 }
 
-int64 GCombo::Value()
+int64 LCombo::Value()
 {
 	return d->Current;
 }
 
-GMessage::Result GCombo::OnEvent(GMessage *Msg)
+GMessage::Result LCombo::OnEvent(GMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }
 
-void GCombo::Empty()
+void LCombo::Empty()
 {
 	while (Delete((size_t)0))
 		;
 	Name(0);
 }
 
-bool GCombo::Delete()
+bool LCombo::Delete()
 {
 	return Delete(d->Current);
 }
 
-bool GCombo::Delete(size_t i)
+bool LCombo::Delete(size_t i)
 {
 	char *c = d->Items.ItemAt(i);
 	if (c)
@@ -242,7 +242,7 @@ bool GCombo::Delete(size_t i)
 	return false;
 }
 
-bool GCombo::Delete(char *p)
+bool LCombo::Delete(char *p)
 {
 	if (p && d->Items.HasItem(p))
 	{
@@ -254,7 +254,7 @@ bool GCombo::Delete(char *p)
 	return false;
 }
 
-bool GCombo::Insert(const char *p, int Index)
+bool LCombo::Insert(const char *p, int Index)
 {
 	if (!p)
 		return false;
@@ -267,7 +267,7 @@ bool GCombo::Insert(const char *p, int Index)
 	return true;
 }
 
-void GCombo::DoMenu()
+void LCombo::DoMenu()
 {
 	LPoint p(0, Y());
 	PointToScreen(p);
@@ -415,7 +415,7 @@ void GCombo::DoMenu()
 	}
 }
 
-void GCombo::OnMouseClick(LMouse &m)
+void LCombo::OnMouseClick(LMouse &m)
 {
 	if (m.Down() &&
 		Enabled())
@@ -429,7 +429,7 @@ void GCombo::OnMouseClick(LMouse &m)
 	}
 }
 
-bool GCombo::OnKey(LKey &k)
+bool LCombo::OnKey(LKey &k)
 {
 	bool Status = false;
 
@@ -511,26 +511,26 @@ bool GCombo::OnKey(LKey &k)
 	return Status;
 }
 
-void GCombo::OnFocus(bool f)
+void LCombo::OnFocus(bool f)
 {
 	Invalidate();
 }
 
-void GCombo::SetFont(LFont *Fnt, bool OwnIt)
+void LCombo::SetFont(LFont *Fnt, bool OwnIt)
 {
 	LView::SetFont(Fnt, OwnIt);
 	d->SetText(new LDisplayString(GetFont(), Name()), _FL);
 	Invalidate();
 }
 
-void GCombo::OnPosChange()
+void LCombo::OnPosChange()
 {
 	LDisplayString *ds = d->GetText(_FL);
 	if (ds && ds->IsTruncated())
 		d->SetText(NULL, _FL);
 }
 
-void GCombo::OnPaint(LSurface *pDC)
+void LCombo::OnPaint(LSurface *pDC)
 {
 	if (d->LayoutDirty)
 	{
@@ -597,11 +597,11 @@ void GCombo::OnPaint(LSurface *pDC)
 	if (GApp::SkinEngine &&
 		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_COMBO))
 	{
-		GSkinState State;
+		LSkinState State;
 		State.pScreen = pDC;
 		State.ptrText = d->GetTextPtr();
 		State.Enabled = Enabled();
-		GApp::SkinEngine->OnPaint_GCombo(this, &State);
+		GApp::SkinEngine->OnPaint_LCombo(this, &State);
 	}
 	else
 	{
@@ -684,16 +684,16 @@ void GCombo::OnPaint(LSurface *pDC)
 	#endif
 }
 
-void GCombo::OnAttach()
+void LCombo::OnAttach()
 {
 }
 
-GCombo::SelectedState GCombo::GetSelectedState()
+LCombo::SelectedState LCombo::GetSelectedState()
 {
 	return d->SelState;
 }
 
-void GCombo::SetSelectedState(SelectedState s)
+void LCombo::SetSelectedState(SelectedState s)
 {
 	d->SelState = s;
 }

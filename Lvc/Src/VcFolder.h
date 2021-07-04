@@ -86,7 +86,7 @@ struct SshParams
 	}
 };
 
-class VcFolder : public GTreeItem
+class VcFolder : public LTreeItem
 {
 	friend class VcCommit;
 
@@ -173,7 +173,7 @@ class VcFolder : public GTreeItem
 	bool CommitListDirty;
 	int Unpushed, Unpulled;
 	GString CountCache;
-	GTreeItem *Tmp;
+	LTreeItem *Tmp;
 	int CmdErrors;
 	GArray<CommitField> Fields;
 	
@@ -266,7 +266,7 @@ public:
 	bool AddFile(const char *Path, bool AsBinary = true);
 	bool Blame(const char *Path);
 	bool SaveFileAs(const char *Path, const char *Revision);
-	void ReadDir(GTreeItem *Parent, const char *Uri);
+	void ReadDir(LTreeItem *Parent, const char *Uri);
 	void SetEol(const char *Path, int Type);
 	void GetVersion();
 	void Diff(VcFile *file);
@@ -290,21 +290,21 @@ public:
 	void OnSshCmd(SshParams *p);
 };
 
-class VcLeaf : public GTreeItem
+class VcLeaf : public LTreeItem
 {
 	AppPriv *d;
 	VcFolder *Parent;
 	bool Folder;
 	GUri Uri;
 	GString Leaf;
-	GTreeItem *Tmp;
+	LTreeItem *Tmp;
 
 	void DoExpand();
 
 public:
 	GArray<VcCommit*> Log;
 
-	VcLeaf(VcFolder *parent, GTreeItem *Item, GString uri, GString leaf, bool folder);
+	VcLeaf(VcFolder *parent, LTreeItem *Item, GString uri, GString leaf, bool folder);
 	~VcLeaf();
 
 	GString Full();

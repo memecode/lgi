@@ -18,7 +18,7 @@
 
 #include "Lgi.h"
 #include "FileTransferProgress.h"
-#include "GSlider.h"
+#include "LSlider.h"
 #include "LVariant.h"
 #include "LDisplayString.h"
 
@@ -48,7 +48,7 @@ int PipeSize[] =
 
 class GPaneThrottle : public GStatusPane
 {
-	GSlider *Slider;
+	LSlider *Slider;
 	GDom *App;
 	int Pipe;
 
@@ -84,7 +84,7 @@ GPaneThrottle::GPaneThrottle(GDom *app)
 	Pipe = -1;
 	App = app;
 	Width = 80+THROTTLE_TEXT_WIDTH;
-	Slider = new GSlider(SLIDER_ID, 0, 0, 100, 20, "Throttle", false);
+	Slider = new LSlider(SLIDER_ID, 0, 0, 100, 20, "Throttle", false);
 }
 
 int GPaneThrottle::OnNotify(LViewI *Ctrl, int Flags)
@@ -393,7 +393,7 @@ void GPaneHistory::Value(int64 i)
 
 //////////////////////////////////////////////////////////////////////////////////////
 FileTransferProgress::FileTransferProgress(	GDom *App,
-											GStatusBar *Status,
+											LStatusBar *Status,
 											bool Limit)
 {
 	StartTime = StartPos = 0;

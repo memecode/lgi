@@ -253,7 +253,7 @@ void VcFolder::Init(AppPriv *priv)
 	CurrentCommitIdx = -1;
 
 	Expanded(false);
-	Insert(Tmp = new GTreeItem);
+	Insert(Tmp = new LTreeItem);
 	Tmp->SetText("Loading...");
 
 	LgiAssert(d != NULL);
@@ -564,7 +564,7 @@ bool VcFolder::ParseBranches(int Result, GString s, ParseParams *Params)
 void VcFolder::OnBranchesChange()
 {
 	auto *w = d->Tree->GetWindow();
-	if (!w || !GTreeItem::Select())
+	if (!w || !LTreeItem::Select())
 		return;
 
 	if (Branches.Length())
@@ -686,7 +686,7 @@ void VcFolder::Select(bool b)
 	}
 
 	PROF("Parent.Select");
-	GTreeItem::Select(b);
+	LTreeItem::Select(b);
 	
 	if (b)
 	{
@@ -1946,7 +1946,7 @@ void VcFolder::OnSshCmd(SshParams *p)
 		bool Reselect = CALL_MEMBER_FN(*this, p->Parser)(Result, s, p->Params);
 		if (Reselect)
 		{
-			if (GTreeItem::Select())
+			if (LTreeItem::Select())
 				Select(true);
 		}
 	}
@@ -1995,7 +1995,7 @@ void VcFolder::OnPulse()
 
 	if (Reselect)
 	{
-		if (GTreeItem::Select())
+		if (LTreeItem::Select())
 			Select(true);
 	}
 	if (CmdsChanged)
@@ -2013,7 +2013,7 @@ void VcFolder::OnRemove()
 	if (t)
 	{
 		Uncommit.Reset();
-		if (GTreeItem::Select())
+		if (LTreeItem::Select())
 		{
 			d->Files->Empty();
 			d->Commits->RemoveAll();
@@ -2194,7 +2194,7 @@ void VcFolder::OnUpdate(const char *Rev)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
-int FolderCompare(GTreeItem *a, GTreeItem *b, NativeInt UserData)
+int FolderCompare(LTreeItem *a, LTreeItem *b, NativeInt UserData)
 {
 	VcLeaf *A = dynamic_cast<VcLeaf*>(a);
 	VcLeaf *B = dynamic_cast<VcLeaf*>(b);
@@ -2237,7 +2237,7 @@ bool VcFolder::ParseRemoteFind(int Result, GString s, ParseParams *Params)
 	if (!Params || !s)
 		return false;
 
-	auto Parent = Params->Leaf ? static_cast<GTreeItem*>(Params->Leaf) : static_cast<GTreeItem*>(this);
+	auto Parent = Params->Leaf ? static_cast<LTreeItem*>(Params->Leaf) : static_cast<LTreeItem*>(this);
 	GUri u(Params->Str);
 
 	auto Lines = s.SplitDelimit("\r\n");
@@ -2278,7 +2278,7 @@ bool VcFolder::ParseRemoteFind(int Result, GString s, ParseParams *Params)
 	return false;
 }
 
-void VcFolder::ReadDir(GTreeItem *Parent, const char *ReadUri)
+void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 {
 	GUri u(ReadUri);
 
@@ -2347,7 +2347,7 @@ void VcFolder::OnVcsType()
 			ClearError();
 			Update();
 
-			if (GTreeItem::Select())
+			if (LTreeItem::Select())
 				Select(true);
 		}
 	}
@@ -2667,7 +2667,7 @@ bool VcFolder::ParseStatus(int Result, GString s, ParseParams *Params)
 	}
 
 	Update();
-	if (GTreeItem::Select())
+	if (LTreeItem::Select())
 	{
 		d->Files->Insert(Ins);
 		d->Files->ResizeColumnsToContent();
@@ -2731,7 +2731,7 @@ void VcFolder::FolderStatus(const char *uri, VcLeaf *Notify)
 		}
 	}
 
-	if (GTreeItem::Select())
+	if (LTreeItem::Select())
 		d->ClearFiles();
 
 	GString Arg;
@@ -2890,7 +2890,7 @@ bool VcFolder::ParseGitAdd(int Result, GString s, ParseParams *Params)
 
 bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 {
-	if (GTreeItem::Select())
+	if (LTreeItem::Select())
 		Select(true);
 
 	CommitListDirty = Result == 0;
@@ -2933,7 +2933,7 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 		return false;
 	}
 
-	if (Result == 0 && GTreeItem::Select())
+	if (Result == 0 && LTreeItem::Select())
 	{
 		d->ClearFiles();
 
@@ -3923,7 +3923,7 @@ void VcFolder::UncommitedItem::Select(bool b)
 	LListItem::Select(b);
 	if (b)
 	{
-		GTreeItem *i = d->Tree->Selection();
+		LTreeItem *i = d->Tree->Selection();
 		VcFolder *f = dynamic_cast<VcFolder*>(i);
 		if (f)
 			f->ListWorkingFolder();
@@ -3953,7 +3953,7 @@ void VcFolder::UncommitedItem::OnPaint(GItem::ItemPaintCtx &Ctx)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-VcLeaf::VcLeaf(VcFolder *parent, GTreeItem *Item, GString uri, GString leaf, bool folder)
+VcLeaf::VcLeaf(VcFolder *parent, LTreeItem *Item, GString uri, GString leaf, bool folder)
 {
 	Parent = parent;
 	d = Parent->GetPriv();
@@ -3967,7 +3967,7 @@ VcLeaf::VcLeaf(VcFolder *parent, GTreeItem *Item, GString uri, GString leaf, boo
 
 	if (Folder)
 	{
-		Insert(Tmp = new GTreeItem);
+		Insert(Tmp = new LTreeItem);
 		Tmp->SetText("Loading...");
 	}
 }
@@ -4073,12 +4073,12 @@ int VcLeaf::Compare(VcLeaf *b)
 
 bool VcLeaf::Select()
 {
-	return GTreeItem::Select();
+	return LTreeItem::Select();
 }
 
 void VcLeaf::Select(bool b)
 {
-	GTreeItem::Select(b);
+	LTreeItem::Select(b);
 	if (b)
 	{
 		d->Commits->RemoveAll();

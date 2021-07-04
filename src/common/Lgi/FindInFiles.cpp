@@ -1,11 +1,11 @@
 #include "Lgi.h"
 #include "GFindInFiles.h"
-#include "GPopup.h"
+#include "LPopup.h"
 #include "LList.h"
 #include "GButton.h"
-#include "GTableLayout.h"
-#include "GTextLabel.h"
-#include "GEdit.h"
+#include "LTableLayout.h"
+#include "LTextLabel.h"
+#include "LEdit.h"
 #include "GCheckBox.h"
 #include "LXmlTreeUi.h"
 #include "GStringClass.h"
@@ -27,13 +27,13 @@ enum Ctrls
 };
 
 class GHistory;
-class GHistoryPopup : public GPopup
+class LHistoryPopup : public LPopup
 {
 	GHistory *History;
 	LList *Lst;
 
 public:
-	GHistoryPopup(GHistory *h);
+	LHistoryPopup(GHistory *h);
 	
 	void OnPaint(LSurface *pDC)
 	{
@@ -42,18 +42,18 @@ public:
 	}
 };
 
-class GHistory : public GDropDown, public ResObject
+class GHistory : public LDropDown, public ResObject
 {
-	friend class GHistoryPopup;
+	friend class LHistoryPopup;
 	GString All;
 	GString::Array Strs;
 	
 public:
 	GHistory(int Id) :
-		GDropDown(Id, 0, 0, 80, 20, 0),
+		LDropDown(Id, 0, 0, 80, 20, 0),
 		ResObject(Res_Custom)
 	{
-		SetPopup(new GHistoryPopup(this));
+		SetPopup(new LHistoryPopup(this));
 	}
 	
 	void Add(const char *s)
@@ -100,7 +100,7 @@ public:
 	}
 };
 
-GHistoryPopup::GHistoryPopup(GHistory *h) : GPopup(h)
+LHistoryPopup::LHistoryPopup(GHistory *h) : LPopup(h)
 {
 	History = h;
 	
@@ -121,7 +121,7 @@ GHistoryPopup::GHistoryPopup(GHistory *h) : GPopup(h)
 
 struct GFindInFilesPriv : public LXmlTreeUi
 {
-	GTableLayout *Tbl;
+	LTableLayout *Tbl;
 	GAutoString Search;
 	GDom *Store;
 	GHistory *SearchHistory, *WhereHistory, *TypesHistory;
@@ -156,7 +156,7 @@ GFindInFiles::GFindInFiles(LViewI *Parent, GAutoString Search, GDom *Store)
 	LRect r(7, 7, 450, 343);
 	SetPos(r);
 
-	AddView(d->Tbl = new GTableLayout(IDC_TABLE));
+	AddView(d->Tbl = new LTableLayout(IDC_TABLE));
 
 	int y = 0;
 	int cols = 3;
@@ -165,19 +165,19 @@ GFindInFiles::GFindInFiles(LViewI *Parent, GAutoString Search, GDom *Store)
 	Name("Find In Files");
 	
 	GLayoutCell *c = d->Tbl->GetCell(0, y, true, cols);
-	c->Add(new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Find what:"));
+	c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Find what:"));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols-1);
-	c->Add(v = new GEdit(IDC_SEARCH, 0, 0, 60, 20));
+	c->Add(v = new LEdit(IDC_SEARCH, 0, 0, 60, 20));
 	v->Focus(true);
 	c = d->Tbl->GetCell(2, y);
 	c->Add(d->SearchHistory = new GHistory(IDC_SEARCH_HISTORY));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
-	c->Add(new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Look in:"));
+	c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Look in:"));
 
 	c = d->Tbl->GetCell(0, ++y);
-	c->Add(new GEdit(IDC_WHERE, 0, 0, 60, 20));
+	c->Add(new LEdit(IDC_WHERE, 0, 0, 60, 20));
 	c = d->Tbl->GetCell(1, y);
 	c->Add(new GButton(IDC_WHERE_BROWSE, 0, 0, 20, 20, "..."));
 	c = d->Tbl->GetCell(2, y);
@@ -195,10 +195,10 @@ GFindInFiles::GFindInFiles(LViewI *Parent, GAutoString Search, GDom *Store)
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
 	c->PaddingTop(LCss::Len("1em"));
-	c->Add(new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Look in these file types:"));
+	c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Look in these file types:"));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols-1);
-	c->Add(new GEdit(IDC_FILE_TYPES, 0, 0, 60, 20));
+	c->Add(new LEdit(IDC_FILE_TYPES, 0, 0, 60, 20));
 	c = d->Tbl->GetCell(cols-1, y);
 	c->Add(d->TypesHistory = new GHistory(IDC_TYPES_HISTORY));
 

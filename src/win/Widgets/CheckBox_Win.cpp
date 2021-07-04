@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Lgi.h"
-#include "GSkinEngine.h"
-#include "GCheckBox.h"
+#include "LSkinEngine.h"
+#include "LCheckBox.h"
 #include "LgiRes.h"
 #include "GCssTools.h"
 
@@ -25,7 +25,7 @@ public:
 	}
 };
 
-GCheckBox::GCheckBox(int id, int x, int y, int cx, int cy, const char *name, int initstate) :
+LCheckBox::LCheckBox(int id, int x, int y, int cx, int cy, const char *name, int initstate) :
 	ResObject(Res_CheckBox)
 {
 	d = new GCheckBoxPrivate;
@@ -61,13 +61,13 @@ GCheckBox::GCheckBox(int id, int x, int y, int cx, int cy, const char *name, int
 	#endif
 }
 
-GCheckBox::~GCheckBox()
+LCheckBox::~LCheckBox()
 {
 	DeleteObj(d);
 }
 
 #include "Uxtheme.h"
-void GCheckBox::OnAttach()
+void LCheckBox::OnAttach()
 {
 	LResources::StyleElement(this);
 	OnStyleChange();
@@ -77,17 +77,17 @@ void GCheckBox::OnAttach()
 	Value(d->InitState);
 }
 
-void GCheckBox::OnStyleChange()
+void LCheckBox::OnStyleChange()
 {
 	Invalidate();
 }
 
-bool GCheckBox::ThreeState()
+bool LCheckBox::ThreeState()
 {
 	return TestFlag(GetStyle(), BS_3STATE);
 }
 
-void GCheckBox::ThreeState(bool t)
+void LCheckBox::ThreeState(bool t)
 {
 	auto Cur = GetStyle();
 	if (t)
@@ -96,22 +96,22 @@ void GCheckBox::ThreeState(bool t)
 		SetStyle((Cur & ~BS_AUTO3STATE) | BS_AUTOCHECKBOX);
 }
 
-bool GCheckBox::Name(const char *n)
+bool LCheckBox::Name(const char *n)
 {
 	return LView::Name(n);
 }
 
-bool GCheckBox::NameW(const char16 *n)
+bool LCheckBox::NameW(const char16 *n)
 {
 	return LView::NameW(n);
 }
 
-void GCheckBox::SetFont(LFont *Fnt, bool OwnIt)
+void LCheckBox::SetFont(LFont *Fnt, bool OwnIt)
 {
 	LView::SetFont(Fnt, OwnIt);
 }
 
-int GCheckBox::SysOnNotify(int Msg, int Code)
+int LCheckBox::SysOnNotify(int Msg, int Code)
 {
 	if (Msg == WM_COMMAND &&
 		Code == BN_CLICKED)
@@ -122,7 +122,7 @@ int GCheckBox::SysOnNotify(int Msg, int Code)
 	return 0;
 }
 
-int GCheckBox::OnNotify(LViewI *Ctrl, int Flags)
+int LCheckBox::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
 	{
@@ -132,7 +132,7 @@ int GCheckBox::OnNotify(LViewI *Ctrl, int Flags)
 	return 0;
 }
 
-GMessage::Result GCheckBox::OnEvent(GMessage *Msg)
+GMessage::Result LCheckBox::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -167,35 +167,35 @@ GMessage::Result GCheckBox::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GControl::OnEvent(Msg);
+	return LControl::OnEvent(Msg);
 }
 
-void GCheckBox::OnMouseClick(LMouse &m)
+void LCheckBox::OnMouseClick(LMouse &m)
 {
 }
 
-void GCheckBox::OnMouseEnter(LMouse &m)
+void LCheckBox::OnMouseEnter(LMouse &m)
 {
 }
 
-void GCheckBox::OnMouseExit(LMouse &m)
+void LCheckBox::OnMouseExit(LMouse &m)
 {
 }
 
-bool GCheckBox::OnKey(LKey &k)
+bool LCheckBox::OnKey(LKey &k)
 {
 	return false;
 }
 
-void GCheckBox::OnFocus(bool f)
+void LCheckBox::OnFocus(bool f)
 {
 }
 
-void GCheckBox::OnPaint(LSurface *pDC)
+void LCheckBox::OnPaint(LSurface *pDC)
 {
 }
 
-int64 GCheckBox::Value()
+int64 LCheckBox::Value()
 {
 	if (Handle())
 	{
@@ -205,7 +205,7 @@ int64 GCheckBox::Value()
 	return d->InitState;
 }
 
-void GCheckBox::Value(int64 i)
+void LCheckBox::Value(int64 i)
 {
 	if (Handle())
 	{
@@ -217,7 +217,7 @@ void GCheckBox::Value(int64 i)
 	}
 }
 
-bool GCheckBox::OnLayout(LViewLayoutInfo &Inf)
+bool LCheckBox::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (Inf.Width.Max)
 	{
@@ -236,6 +236,6 @@ bool GCheckBox::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-void GCheckBox::OnPosChange()
+void LCheckBox::OnPosChange()
 {
 }

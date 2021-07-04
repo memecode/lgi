@@ -683,7 +683,7 @@ char *LResources::StringFromRef(int Ref)
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Tree.h"
 
-class GMissingCtrl : public GLayout, public ResObject
+class GMissingCtrl : public LLayout, public ResObject
 {
     GAutoString n;
 
@@ -717,31 +717,31 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		
 		if (stricmp(t->GetTag(), Res_StaticText) == 0)
 		{
-			Wnd = new GTextLabel(0, 0, 0, -1, -1, NULL);
+			Wnd = new LTextLabel(0, 0, 0, -1, -1, NULL);
 		}
 		else if (stricmp(t->GetTag(), Res_EditBox) == 0)
 		{
-			Wnd = new GEdit(0, 0, 0, -1, -1, "");
+			Wnd = new LEdit(0, 0, 0, -1, -1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_CheckBox) == 0)
 		{
-			Wnd = new GCheckBox(0, 0, 0, -1, -1, "");
+			Wnd = new LCheckBox(0, 0, 0, -1, -1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_Button) == 0)
 		{
-			Wnd = new GButton(0, 0, 0, -1, -1, "");
+			Wnd = new LButton(0, 0, 0, -1, -1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_Group) == 0)
 		{
-			Wnd = new GRadioGroup(0, 0, 0, -1, -1, "");
+			Wnd = new LRadioGroup(0, 0, 0, -1, -1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_RadioBox) == 0)
 		{
-			Wnd = new GRadioButton(0, 0, 0, -1, -1, "");
+			Wnd = new LRadioButton(0, 0, 0, -1, -1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_TabView) == 0)
 		{
-			GTabView *Tv = new GTabView(0, 10, 10, 100, 100, "GTabView");
+			LTabView *Tv = new LTabView(0, 10, 10, 100, 100, "LTabView");
 			Wnd = Tv;
 			if (Tv)
 			{
@@ -751,7 +751,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_Tab) == 0)
 		{
-			Wnd = new GTabPage(0);
+			Wnd = new LTabPage(0);
 		}
 		else if (stricmp(t->GetTag(), Res_ListView) == 0)
 		{
@@ -778,7 +778,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_ComboBox) == 0)
 		{
-			Wnd = new GCombo(0, 0, 0, 100, 20, "");
+			Wnd = new LCombo(0, 0, 0, 100, 20, "");
 		}
 		else if (stricmp(t->GetTag(), Res_Bitmap) == 0)
 		{
@@ -790,11 +790,11 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_Slider) == 0)
 		{
-			Wnd = new GSlider(0, 0, 0, -1, -1, "", false);
+			Wnd = new LSlider(0, 0, 0, -1, -1, "", false);
 		}
 		else if (stricmp(t->GetTag(), Res_ScrollBar) == 0)
 		{
-			Wnd = new GScrollBar(0, 0, 0, 20, 100, "");
+			Wnd = new LScrollBar(0, 0, 0, 20, 100, "");
 		}
 		else if (stricmp(t->GetTag(), Res_Progress) == 0)
 		{
@@ -802,11 +802,11 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_TreeView) == 0)
 		{
-			Wnd = new GTree(0, 0, 0, 1, 1, "");
+			Wnd = new LTree(0, 0, 0, 1, 1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_ControlTree) == 0)
 		{
-			LView *v = GViewFactory::Create("GControlTree");
+			LView *v = LViewFactory::Create("LControlTree");
 			if (!(Wnd = dynamic_cast<ResObject*>(v)))
 			{
 				DeleteObj(v);
@@ -815,7 +815,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		else if (stricmp(t->GetTag(), Res_Custom) == 0)
 		{
 			Control = t->GetAttr("ctrl");
-			LView *v = GViewFactory::Create(Control);
+			LView *v = LViewFactory::Create(Control);
 
 			if (!v)
 			    v = new GMissingCtrl(Control);
@@ -833,7 +833,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_Table) == 0)
 		{
-			Wnd = new GTableLayout;
+			Wnd = new LTableLayout;
 		}
 	
 		if (!Wnd)
@@ -953,7 +953,7 @@ bool LResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 	if (Props->GetValue("image", i))
 		v->GetCss(true)->BackgroundImage(LCss::ImageDef(i.Str()));
 
-	auto e = dynamic_cast<GEdit*>(v);
+	auto e = dynamic_cast<LEdit*>(v);
 	if (e)
 	{
 		if (Props->GetValue("pw", i))
@@ -963,7 +963,7 @@ bool LResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 			e->MultiLine(i.CastInt32() != 0);
 	}
 
-	auto b = dynamic_cast<GButton*>(v);
+	auto b = dynamic_cast<LButton*>(v);
 	if (b)
 	{
 		if (Props->GetValue("image", i))
@@ -1019,7 +1019,7 @@ bool LResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 		}
 		else
 		{
-			GTabPage *Page = dynamic_cast<GTabPage*>(Obj);
+			LTabPage *Page = dynamic_cast<LTabPage*>(Obj);
 			if (Page)
 			{
 				Page->Name(s->Str);
@@ -1034,7 +1034,7 @@ void LResources::Res_Attach(ResObject *Obj, ResObject *Parent)
 {
 	LView *o = CastToGWnd(Obj);
 	LView *p = CastToGWnd(Parent);
-	GTabPage *Tab = dynamic_cast<GTabPage*>(Parent);
+	LTabPage *Tab = dynamic_cast<LTabPage*>(Parent);
 	if (o)
 	{
 		if (Tab)
@@ -1091,8 +1091,8 @@ void LResources::Res_Append(ResObject *Obj, ResObject *Parent)
 			Lst->AddColumn(Col);
 		}
 
-		GTabView *Tab = dynamic_cast<GTabView*>(Obj);
-		GTabPage *Page = dynamic_cast<GTabPage*>(Parent);
+		LTabView *Tab = dynamic_cast<LTabView*>(Obj);
+		LTabPage *Page = dynamic_cast<LTabPage*>(Parent);
 		if (Tab && Page)
 		{
 			Tab->Append(Page);
@@ -1114,7 +1114,7 @@ bool LResources::Res_GetItems(ResObject *Obj, List<ResObject> *l)
 			return true;
 		}
 
-		GTabView *Tabs = dynamic_cast<GTabView*>(Obj);
+		LTabView *Tabs = dynamic_cast<LTabView*>(Obj);
 		if (Tabs)
 		{
 			for (int i=0; i<Tabs->GetTabs(); i++)
@@ -1424,7 +1424,7 @@ bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, GAutoStrin
 										(int) (s.y * Pos->Y()));
 					}
 				}
-				else if (Parent && stricmp(Parent->GetClass(), "GTabPage"))
+				else if (Parent && stricmp(Parent->GetClass(), "LTabPage"))
 				{
 					LRect r = Parent->GetPos();
 					r.Dimension(x, y);

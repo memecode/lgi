@@ -10,24 +10,24 @@
 
 #include <stdio.h>
 #include "Lgi.h"
-#include "GToolTabBar.h"
+#include "LToolTabBar.h"
 #include "GNotifications.h"
 #include "LCss.h"
 
 /////////////////////////////////////////////////////////////////////////
-GToolTab::GToolTab() : GToolButton(16, 16)
+LToolTab::LToolTab() : LToolButton(16, 16)
 {
 	First = true;
 	#ifdef WINDOWS
-	SetClassW32("GToolTab");
+	SetClassW32("LToolTab");
 	#endif
 }
 
-GToolTab::~GToolTab()
+LToolTab::~LToolTab()
 {
 }
 
-void GToolTab::OnPaint(LSurface *pDC)
+void LToolTab::OnPaint(LSurface *pDC)
 {
 	#if 1
 	pDC->Colour(L_MED);
@@ -37,13 +37,13 @@ void GToolTab::OnPaint(LSurface *pDC)
 	pDC->Rectangle();
 }
 
-bool GToolTab::SetPos(LRect &r, bool Repaint)
+bool LToolTab::SetPos(LRect &r, bool Repaint)
 {
-	return GToolButton::SetPos(r, Repaint);
+	return LToolButton::SetPos(r, Repaint);
 }
 
 /////////////////////////////////////////////////////////////////////////
-GToolTabBar::GToolTabBar(int Id)
+LToolTabBar::LToolTabBar(int Id)
 {
 	LRect r(0, 0, 100, 100);
 	if (Id >= 0)
@@ -55,16 +55,16 @@ GToolTabBar::GToolTabBar(int Id)
 	InOnChangeEvent = false;
 }
 
-GToolTabBar::~GToolTabBar()
+LToolTabBar::~LToolTabBar()
 {
 }
 
-int64 GToolTabBar::Value()
+int64 LToolTabBar::Value()
 {
 	auto it = IterateViews();
 	for (int n=0; n<it.Length(); n++)
 	{
-		GToolTab *tt = dynamic_cast<GToolTab*>(it[n]);
+		LToolTab *tt = dynamic_cast<LToolTab*>(it[n]);
 		if (tt && tt->Value())
 			return n;
 	}
@@ -72,14 +72,14 @@ int64 GToolTabBar::Value()
 	return -1;
 }
 
-void GToolTabBar::Value(int64 new_value)
+void LToolTabBar::Value(int64 new_value)
 {
 	auto it = IterateViews();
 	for (int n=0; n<it.Length(); n++)
 	{
 		if (n == new_value)
 		{
-			GToolButton *b = dynamic_cast<GToolButton*>(it[n]);
+			LToolButton *b = dynamic_cast<LToolButton*>(it[n]);
 			if (b)
 			{
 				OnChange(b);
@@ -89,33 +89,33 @@ void GToolTabBar::Value(int64 new_value)
 	}
 }
 
-void GToolTabBar::OnButtonClick(GToolButton *Btn)
+void LToolTabBar::OnButtonClick(LToolButton *Btn)
 {
-	GToolBar::OnButtonClick(Btn);
+	LToolBar::OnButtonClick(Btn);
 	
-	GToolTab *b = dynamic_cast<GToolTab*>(Btn);
+	LToolTab *b = dynamic_cast<LToolTab*>(Btn);
 	if (b && b != Current)
 		OnChange(Btn);
 }
 
-int GToolTabBar::OnNotify(LViewI *c, int f)
+int LToolTabBar::OnNotify(LViewI *c, int f)
 {
 	if (f == GNotifyValueChanged)
 	{
-		GToolTab *b = dynamic_cast<GToolTab*>(c);
+		LToolTab *b = dynamic_cast<LToolTab*>(c);
 		if (b && b != Current)
 			OnChange(b);
 	}
 	
-	return GLayout::OnNotify(c, f);
+	return LLayout::OnNotify(c, f);
 }
 
-bool GToolTabBar::IsOk()
+bool LToolTabBar::IsOk()
 {
 	int Count[2] = {0, 0};
 	for (LViewI *c: IterateViews())
 	{
-		GToolTab *tt = dynamic_cast<GToolTab*>(c);
+		LToolTab *tt = dynamic_cast<LToolTab*>(c);
 		if (tt && tt->GetId() > 0)
 		{
 			bool Dn = tt->Value() != 0;
@@ -126,7 +126,7 @@ bool GToolTabBar::IsOk()
 	return Count[1] == 0 || Count[1] == 1;
 }
 
-void GToolTabBar::OnChange(GToolButton *Btn)
+void LToolTabBar::OnChange(LToolButton *Btn)
 {
 	 // Current->Value(...) causes recursive events.
 	if (InOnChangeEvent)
@@ -142,7 +142,7 @@ void GToolTabBar::OnChange(GToolButton *Btn)
 	}
 
 	// Attach new button
-	if ((Current = dynamic_cast<GToolTab*>(Btn)))
+	if ((Current = dynamic_cast<LToolTab*>(Btn)))
 	{
 		Current->Value(true);
 		Current->Visible(true);
@@ -161,7 +161,7 @@ void GToolTabBar::OnChange(GToolButton *Btn)
 	InOnChangeEvent = false;
 }
 
-void GToolTabBar::_PaintTab(LSurface *pDC, GToolTab *Tab)
+void LToolTabBar::_PaintTab(LSurface *pDC, LToolTab *Tab)
 {
 	LRect t = Tab->TabPos;
 	GColour Background(L_MED);
@@ -233,7 +233,7 @@ void GToolTabBar::_PaintTab(LSurface *pDC, GToolTab *Tab)
 		GetImageList()->Draw(pDC, t.x1 + Off, t.y1 + Off, Tab->Image(), Background);
 }
 
-void GToolTabBar::OnPaint(LSurface *pScreen)
+void LToolTabBar::OnPaint(LSurface *pScreen)
 {
 	LRect r = GetClient();
 
@@ -281,10 +281,10 @@ void GToolTabBar::OnPaint(LSurface *pScreen)
 	pDC->Rectangle(&r);
 
 	// Draw tabs
-	GArray<GToolTab*> Down;
+	GArray<LToolTab*> Down;
 	for (auto It = Children.rbegin(); It != Children.end(); It--)
 	{
-		GToolTab *Tab = dynamic_cast<GToolTab*>(*It);
+		LToolTab *Tab = dynamic_cast<LToolTab*>(*It);
 		if (Tab)
 		{
 			if (!Tab->Value())
@@ -314,13 +314,13 @@ void GToolTabBar::OnPaint(LSurface *pScreen)
 	#endif
 }
 
-void GToolTabBar::OnMouseClick(LMouse &m)
+void LToolTabBar::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
 		for (auto c: Children)
 		{
-			GToolTab *Tab = dynamic_cast<GToolTab*>(c);
+			LToolTab *Tab = dynamic_cast<LToolTab*>(c);
 			if (Tab)
 			{
 				if (Tab->TabPos.Overlap(m.x, m.y))
@@ -336,7 +336,7 @@ void GToolTabBar::OnMouseClick(LMouse &m)
 	}
 }
 
-bool GToolTabBar::Pour(LRegion &r)
+bool LToolTabBar::Pour(LRegion &r)
 {
 	bool Status = false;
 
@@ -346,7 +346,7 @@ bool GToolTabBar::Pour(LRegion &r)
 	
 	for (auto w: Children)
 	{
-		GToolTab *Btn = dynamic_cast<GToolTab*>(w);
+		LToolTab *Btn = dynamic_cast<LToolTab*>(w);
 		if (Btn)
 		{
 			if (Btn->GetId() == IDM_SEPARATOR)
@@ -444,11 +444,11 @@ bool GToolTabBar::Pour(LRegion &r)
 	return Status;
 }
 
-void GToolTabBar::OnCreate()
+void LToolTabBar::OnCreate()
 {
 	AttachChildren();
 	
-	GToolButton *Btn = dynamic_cast<GToolButton*>(Children[0]);
+	LToolButton *Btn = dynamic_cast<LToolButton*>(Children[0]);
 	if (Btn)
 	{
 		Btn->Value(true);

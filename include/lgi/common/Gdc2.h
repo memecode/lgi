@@ -1108,7 +1108,7 @@ public:
 	// Add all the colours first
 	COLOUR AddColour(COLOUR c24);
 	bool AddBitmap(LSurface *pDC);
-	bool AddBitmap(GImageList *il);
+	bool AddBitmap(LImageList *il);
 
 	// Then call this
 	bool MakeGlobalPalette();
@@ -1173,7 +1173,7 @@ class LgiClass GdcDevice : public GCapabilityClient
 {
 	friend class LScreenDC;
 	friend class LMemDC;
-	friend class GImageList;
+	friend class LImageList;
 
 	static GdcDevice *pInstance;
 	class GdcDevicePrivate *d;

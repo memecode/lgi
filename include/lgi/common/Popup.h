@@ -16,7 +16,7 @@ ObjCWrapper(NSPanel, OsPanel)
 #endif
 
 /// A popup window: closes when the user clicks off-window.
-class LgiClass GPopup :
+class LgiClass LPopup :
 	#if LGI_POPUP_LWINDOW
 	public LWindow
 	#else
@@ -25,12 +25,12 @@ class LgiClass GPopup :
 {
 	friend class _QPopup;
 	friend class LWindow;
-	friend class GDropDown;
+	friend class LDropDown;
 	friend class LMouseHook;
 	friend class LMouseHookPrivate;
     friend class LView;
 
-    static GArray<GPopup*> CurrentPopups;
+    static GArray<LPopup*> CurrentPopups;
 
 protected:
 	class GPopupPrivate *d;
@@ -44,8 +44,8 @@ protected:
 	#endif
 
 public:
-	GPopup(LView *owner);
-	~GPopup();
+	LPopup(LView *owner);
+	~LPopup();
 
 	#if LGI_COCOA
 	OsPanel Handle() { return Panel; }
@@ -56,7 +56,7 @@ public:
 	/// Sets whether the popup should take the focus when it's shown.
 	/// The default is 'true'
 	void TakeFocus(bool Take);
-	const char *GetClass() override { return "GPopup"; }
+	const char *GetClass() override { return "LPopup"; }
 	bool GetCancelled() { return Cancelled; }
 	bool Attach(LViewI *p) override;
 	void Visible(bool i) override;
@@ -65,20 +65,20 @@ public:
 };
 
 /// Drop down menu, UI widget for opening a popup.
-class LgiClass GDropDown : public GLayout
+class LgiClass LDropDown : public LLayout
 {
-	friend class GPopup;
+	friend class LPopup;
 	
-	GPopup *Popup;
+	LPopup *Popup;
 
 public:
-	GDropDown(int Id, int x, int y, int cx, int cy, GPopup *popup);
-	~GDropDown();
+	LDropDown(int Id, int x, int y, int cx, int cy, LPopup *popup);
+	~LDropDown();
 
 	// Properties
 	bool IsOpen();
-	void SetPopup(GPopup *popup);
-	GPopup *GetPopup();
+	void SetPopup(LPopup *popup);
+	LPopup *GetPopup();
 
 	// Window events
 	void OnFocus(bool f);
@@ -93,7 +93,7 @@ public:
 };
 
 /// Mouse hook grabs mouse events from the OS
-class GPopup;
+class LPopup;
 class LMouseHook
 {
 	class LMouseHookPrivate *d;
@@ -102,8 +102,8 @@ public:
 	LMouseHook();
 	~LMouseHook();
 
-	void RegisterPopup(GPopup *p);
-	void UnregisterPopup(GPopup *p);
+	void RegisterPopup(LPopup *p);
+	void UnregisterPopup(LPopup *p);
 	bool OnViewKey(LView *v, LKey &k);
 	void TrackClick(LView *v);
 

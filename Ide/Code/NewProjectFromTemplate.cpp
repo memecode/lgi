@@ -16,13 +16,13 @@ public:
 		{
 			MoveSameScreen(parent);
 			
-			GTree *t;
+			LTree *t;
 			if (TemplatesPath && GetViewById(IDC_TEMPLATES, t))
 				Add(t, TemplatesPath);
 		}
 	}
 	
-	void Add(GTreeNode *t, const char *path)
+	void Add(LTreeNode *t, const char *path)
 	{
 		GDirectory d;
 		for (auto b=d.First(path); b; b=d.Next())
@@ -30,7 +30,7 @@ public:
 			auto Full = d.FullPath();
 			if (d.IsDir())
 			{
-				GTreeItem *c = new GTreeItem;
+				LTreeItem *c = new LTreeItem;
 				
 				c->SetText(d.GetName());
 				c->SetText(Full, 1);
@@ -149,7 +149,7 @@ void NewProjectFromTemplate(LViewI *parent)
 		LgiTrace("%s:%i - Dialog cancelled.\n", _FL);
 		return;
 	}
-	GTree *t;
+	LTree *t;
 	if (!Dlg.GetViewById(IDC_TEMPLATES, t))
 	{
 		LgiTrace("%s:%i - No tree.\n", _FL);

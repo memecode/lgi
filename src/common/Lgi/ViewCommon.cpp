@@ -219,9 +219,9 @@ LView::~LView()
 	LockHandler(this, OpDelete);
 	#endif
 
-	for (unsigned i=0; i<GPopup::CurrentPopups.Length(); i++)
+	for (unsigned i=0; i<LPopup::CurrentPopups.Length(); i++)
 	{
-		GPopup *pu = GPopup::CurrentPopups[i];
+		LPopup *pu = LPopup::CurrentPopups[i];
 		if (pu->Owner == this)
 		{
 			// printf("%s:%i - ~%s setting %s->Owner to NULL\n", _FL, GetClass(), pu->GetClass());
@@ -1777,7 +1777,7 @@ void LView::SetFont(LFont *Font, bool OwnIt)
 
 		for (LViewI *p = GetParent(); p; p = p->GetParent())
 		{
-			GTableLayout *Tl = dynamic_cast<GTableLayout*>(p);
+			LTableLayout *Tl = dynamic_cast<LTableLayout*>(p);
 			if (Tl)
 			{
 				Tl->InvalidateLayout();
@@ -1929,7 +1929,7 @@ GColour LView::StyleColour(int CssPropType, GColour Default, int Depth)
 			}
 			
 			if (dynamic_cast<LWindow*>(v) ||
-				dynamic_cast<GPopup*>(v))
+				dynamic_cast<LPopup*>(v))
 				break;
 		}
 	}
@@ -2013,13 +2013,13 @@ bool LView::Invalidate(LRegion *r, bool Repaint, bool NonClient)
 	return false;
 }
 
-GButton *FindDefault(LViewI *w)
+LButton *FindDefault(LViewI *w)
 {
-	GButton *But = 0;
+	LButton *But = 0;
 
 	for (auto c: w->IterateViews())
 	{
-		But = dynamic_cast<GButton*>(c);
+		But = dynamic_cast<LButton*>(c);
 		if (But && But->Default())
 		{
 			break;
@@ -2342,18 +2342,18 @@ void LView::_Dump(int Depth)
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-static GArray<GViewFactory*> *AllFactories = NULL;
+static GArray<LViewFactory*> *AllFactories = NULL;
 #if defined(WIN32)
 static HANDLE FactoryEvent;
 #else
 static pthread_once_t FactoryOnce = PTHREAD_ONCE_INIT;
 static void GFactoryInitFactories()
 {
-	AllFactories = new GArray<GViewFactory*>;
+	AllFactories = new GArray<LViewFactory*>;
 }
 #endif
 
-GViewFactory::GViewFactory()
+LViewFactory::LViewFactory()
 {
 	#if defined(WIN32)
 	char16 Name[64];
@@ -2363,7 +2363,7 @@ GViewFactory::GViewFactory()
 	if (err != ERROR_ALREADY_EXISTS)
 	{
 		FactoryEvent = h;
-		AllFactories = new GArray<GViewFactory*>;
+		AllFactories = new GArray<LViewFactory*>;
 	}
 	else
 	{
@@ -2377,7 +2377,7 @@ GViewFactory::GViewFactory()
 		AllFactories->Add(this);
 }
 
-GViewFactory::~GViewFactory()
+LViewFactory::~LViewFactory()
 {
 	if (AllFactories)
 	{
@@ -2392,7 +2392,7 @@ GViewFactory::~GViewFactory()
 	}
 }
 
-LView *GViewFactory::Create(const char *Class, LRect *Pos, const char *Text)
+LView *LViewFactory::Create(const char *Class, LRect *Pos, const char *Text)
 {
 	if (ValidStr(Class) && AllFactories)
 	{

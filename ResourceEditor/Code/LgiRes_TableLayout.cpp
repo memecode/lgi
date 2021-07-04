@@ -1478,9 +1478,9 @@ enum {
 
 class TableLayoutTest : public LDialog
 {
-	GTableLayout *Tbl;
+	LTableLayout *Tbl;
 	LView *Msg;
-	GTree *Tree;
+	LTree *Tree;
 	class DlgContainer *View;
 	GAutoPtr<LThread> Worker;
 	GAutoString Base;
@@ -1494,7 +1494,7 @@ public:
     GMessage::Param OnEvent(GMessage *m);
 };
 
-class DlgItem : public GTreeItem
+class DlgItem : public LTreeItem
 {
     TableLayoutTest *Wnd;
 	LgiDialogRes *Dlg;
@@ -1529,7 +1529,7 @@ static bool HasTableLayout(LXmlTag *t)
 	return false;
 }
 
-class Lr8Item : public GTreeItem
+class Lr8Item : public LTreeItem
 {
     TableLayoutTest *Wnd;
 	GString File;
@@ -1567,10 +1567,10 @@ class Lr8Search : public LThread
 {
     TableLayoutTest *Wnd;
 	char *Base;
-	GTree *Tree;
+	LTree *Tree;
 	
 public:
-	Lr8Search(TableLayoutTest *w, char *base, GTree *tree) : LThread("Lr8Search")
+	Lr8Search(TableLayoutTest *w, char *base, LTree *tree) : LThread("Lr8Search")
 	{
 	    Wnd = w;
 		Base = base;
@@ -1623,7 +1623,7 @@ public:
 	}
 };
 
-class DlgContainer : public GLayout
+class DlgContainer : public LLayout
 {
     LgiDialogRes *Dlg;
     LRect Size;
@@ -1671,14 +1671,14 @@ TableLayoutTest::TableLayoutTest(LViewI *par)
 	SetPos(r);
 	SetParent(par);
 	
-	AddView(Tbl = new GTableLayout);
+	AddView(Tbl = new LTableLayout);
 	GLayoutCell *c;
 
 	c = Tbl->GetCell(0, 0, true, 2);
-	c->Add(Msg = new GTextLabel(100, 0, 0, -1, -1, "Searching for files..."));
+	c->Add(Msg = new LTextLabel(100, 0, 0, -1, -1, "Searching for files..."));
 
 	c = Tbl->GetCell(0, 1);
-	c->Add(Tree = new GTree(101, 0, 0, 100, 100));
+	c->Add(Tree = new LTree(101, 0, 0, 100, 100));
 	c = Tbl->GetCell(1, 1);
 	c->Add(View = new DlgContainer(102));
 

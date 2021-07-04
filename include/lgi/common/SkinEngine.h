@@ -2,6 +2,7 @@
 #define _GSKIN_ENGINE_H_
 
 #include "lgi/common/List.h"
+#include "lgi/common/Button.h"
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/CheckBox.h"
 #include "lgi/common/RadioGroup.h"
@@ -28,7 +29,7 @@
 #define GSKIN_TABVIEW		0x00002000
 
 // Drawing state
-class GSkinState
+class LSkinState
 {
 	GArray<LDisplayString*> Tmp;
 	
@@ -46,7 +47,7 @@ public:
 	LSurface *Image;				// Any icon that needs displaying
 	LView *View;
 
-	GSkinState()
+	LSkinState()
 	{
 		aText = NULL;
 		ptrText = NULL;
@@ -102,10 +103,10 @@ public:
 typedef void (*ProcColumnPaint)(void *UserData, LSurface *pDC, LRect &r, bool FillBackground);
 
 // Engine class
-class GSkinEngine
+class LSkinEngine
 {
 public:
-	virtual ~GSkinEngine() {}
+	virtual ~LSkinEngine() {}
 
 	// Return the features the skin supports. Return the
 	// bitwise OR of all the features you support (the GSKIN_?? flags)
@@ -122,24 +123,24 @@ public:
 
 	// Do painting for the various controls, the relevant GSKIN_??? flag needs to
 	// be returned from GetFeatures before you can call any of these.
-	virtual void OnPaint_GText        (GTextLabel *Ctrl,   GSkinState *State) {};
-	virtual void OnPaint_GButton      (GButton *Ctrl,      GSkinState *State) {};
-	virtual void OnPaint_GEdit        (GEdit *Ctrl,        GSkinState *State) {};
-	virtual void OnPaint_GCheckBox    (GCheckBox *Ctrl,    GSkinState *State) {};
-	virtual void OnPaint_GRadioGroup  (GRadioGroup *Ctrl,  GSkinState *State) {};
-	virtual void OnPaint_GRadioButton (GRadioButton *Ctrl, GSkinState *State) {};
-	virtual void OnPaint_GTabView     (GTabView *Ctrl,     GSkinState *State) {};
-	virtual void OnPaint_GSlider      (GSlider *Ctrl,      GSkinState *State) {};
-	virtual void OnPaint_GCombo       (GCombo *Ctrl,       GSkinState *State) {};
-	virtual void OnPaint_LBitmap      (LBitmap *Ctrl,      GSkinState *State) {};
-	virtual void OnPaint_GProgress    (LProgressView *Ctrl,GSkinState *State) {};
-	virtual void OnPaint_GTree        (GTree *Ctrl,        GSkinState *State) {};
-	virtual void OnPaint_LList        (LList *Ctrl,        GSkinState *State) {};
+	virtual void OnPaint_LText        (LTextLabel *Ctrl,   LSkinState *State) {};
+	virtual void OnPaint_LButton      (LButton *Ctrl,      LSkinState *State) {};
+	virtual void OnPaint_LEdit        (LEdit *Ctrl,        LSkinState *State) {};
+	virtual void OnPaint_LCheckBox    (LCheckBox *Ctrl,    LSkinState *State) {};
+	virtual void OnPaint_LRadioGroup  (LRadioGroup *Ctrl,  LSkinState *State) {};
+	virtual void OnPaint_LRadioButton (LRadioButton *Ctrl, LSkinState *State) {};
+	virtual void OnPaint_LTabView     (LTabView *Ctrl,     LSkinState *State) {};
+	virtual void OnPaint_LSlider      (LSlider *Ctrl,      LSkinState *State) {};
+	virtual void OnPaint_LCombo       (LCombo *Ctrl,       LSkinState *State) {};
+	virtual void OnPaint_LBitmap      (LBitmap *Ctrl,      LSkinState *State) {};
+	virtual void OnPaint_LProgress    (LProgressView *Ctrl,LSkinState *State) {};
+	virtual void OnPaint_LTree        (LTree *Ctrl,        LSkinState *State) {};
+	virtual void OnPaint_LList        (LList *Ctrl,        LSkinState *State) {};
 	
 	// 'Col' may be NULL in the case that the GList control wants to draw the
 	// header beyond the last column. This function can use the call back
 	// GListColumn::OnPaint_Content to draw the text, icon and mark.
-	virtual void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, GSkinState *State) = 0;
+	virtual void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, LSkinState *State) = 0;
 
 	// Get the default font for a control
 	virtual LFont *GetDefaultFont(char *Class) { return SysFont; }
@@ -156,6 +157,6 @@ public:
 };
 
 #define LgiSkinEntryPoint		"CreateSkinEngine"
-typedef GSkinEngine				*(*Proc_CreateSkinEngine)(class GApp *App);
+typedef LSkinEngine				*(*Proc_CreateSkinEngine)(class GApp *App);
 
 #endif

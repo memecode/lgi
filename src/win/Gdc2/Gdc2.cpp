@@ -682,7 +682,7 @@ void KeyBlt(LSurface *To, LSurface *From, COLOUR Key)
 	}
 }
 
-bool GGlobalColour::AddBitmap(GImageList *il)
+bool GGlobalColour::AddBitmap(LImageList *il)
 {
 	if (il)
 	{

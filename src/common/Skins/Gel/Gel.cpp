@@ -40,7 +40,7 @@
 
 #define CUSTOM_COLOURS			0
 
-class GelSkin : public GSkinEngine
+class GelSkin : public LSkinEngine
 {
 	GApp *App;
 	GColour c80;
@@ -412,7 +412,7 @@ class GelSkin : public GSkinEngine
 		return Mem;
 	}
 
-	void DrawText(GSkinState *State, int x, int y, LRect &rcFill, bool Enabled, LView *Ctrl, GCssTools &Tools)
+	void DrawText(LSkinState *State, int x, int y, LRect &rcFill, bool Enabled, LView *Ctrl, GCssTools &Tools)
 	{
 		LCss::ColorDef CssFore, CssBack;
 		GColour Fore = Tools.GetFore(), Back = Tools.GetBack(), Light, Low;
@@ -584,7 +584,7 @@ public:
 	}
 	#endif
 	
-	void OnPaint_GButton(GButton *Ctrl, GSkinState *State)
+	void OnPaint_LButton(LButton *Ctrl, LSkinState *State)
 	{
 		LMemDC Mem;
 		if (!Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
@@ -706,7 +706,7 @@ public:
 		State->pScreen->Op(Op);
 	}
 
-	void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, GSkinState *State)
+	void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, LSkinState *State)
 	{
 		// Setup memory context
 		LRect r = State->Rect;
@@ -739,7 +739,7 @@ public:
 		State->pScreen->Blt(State->Rect.x1, State->Rect.y1, &Mem);
 	}
 
-	void OnPaint_GCombo(GCombo *Ctrl, GSkinState *State)
+	void OnPaint_LCombo(LCombo *Ctrl, LSkinState *State)
 	{
 		LMemDC Mem;
 		if (Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
@@ -769,7 +769,7 @@ public:
 				if (Text)
 				{
 					int sx = Text->X(), sy = Text->Y();
-					int tx = GCombo::Pad.x1;
+					int tx = LCombo::Pad.x1;
 					int ty = (Ctrl->Y()-sy+1) >> 1;
 						
 					int Off = 0;
@@ -778,7 +778,7 @@ public:
 					c.x2 -= n + 3;
 					
 					int Cx = Ctrl->X();
-					int PadX = GCombo::Pad.x1 + GCombo::Pad.x2;
+					int PadX = LCombo::Pad.x1 + LCombo::Pad.x2;
 					if (Text->X() > PadX)
 					{
 						// Make the text fit
@@ -834,7 +834,7 @@ public:
 		}
 	}
 
-	void OnPaint_GCheckBox(GCheckBox *Ctrl, GSkinState *State)
+	void OnPaint_LCheckBox(LCheckBox *Ctrl, LSkinState *State)
 	{
 		int Flags = (Ctrl->Value()   ? Btn_Value   : 0) |
 					(Ctrl->Enabled() ? Btn_Enabled : 0);
@@ -900,7 +900,7 @@ public:
 		DeleteObj(Temp);
 	}
 
-	void OnPaint_GRadioButton(GRadioButton *Ctrl, GSkinState *State)
+	void OnPaint_LRadioButton(LRadioButton *Ctrl, LSkinState *State)
 	{
 		int Flags = (Ctrl->Value() ? Btn_Value : 0) |
 					(Ctrl->Enabled() ? Btn_Enabled : 0);
@@ -974,7 +974,7 @@ public:
 	}
 };
 
-GSkinEngine *
+LSkinEngine *
 CreateSkinEngine(class GApp *App)
 {
 	return new GelSkin(App);

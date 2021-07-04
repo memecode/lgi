@@ -687,7 +687,7 @@ void FieldView::OnSelect(FieldSource *s)
 			LFontType Sys;
 			Sys.GetSystemFont("System");
 
-			GTableLayout *t = new GTableLayout(IDC_TABLE);
+			LTableLayout *t = new LTableLayout(IDC_TABLE);
 
 			int Row = 0;
 			GLayoutCell *Cell;
@@ -710,7 +710,7 @@ void FieldView::OnSelect(FieldSource *s)
 						{
 							Cell = t->GetCell(0, Row);
 							Cell->VerticalAlign(LCss::VerticalMiddle);
-							Cell->Add(new GTextLabel(-1, 0, 0, -1, -1, c->Label));
+							Cell->Add(new LTextLabel(-1, 0, 0, -1, -1, c->Label));
 
 							TextViewEdit *Tv;
 							Cell = t->GetCell(1, Row, true, c->Type == DATA_FILENAME ? 1 : 2);
@@ -726,7 +726,7 @@ void FieldView::OnSelect(FieldSource *s)
 							if (c->Type == DATA_FILENAME)
 							{
 								Cell = t->GetCell(2, Row);
-								Cell->Add(new GButton(-c->Id, 0, 0, 21, 21, "..."));
+								Cell->Add(new LButton(-c->Id, 0, 0, 21, 21, "..."));
 							}
 							break;
 						}
@@ -788,7 +788,7 @@ GMessage::Result FieldView::OnEvent(GMessage *m)
 		}
 	}
 
-	return GLayout::OnEvent(m);
+	return LLayout::OnEvent(m);
 }
 
 int FieldView::OnNotify(LViewI *Ctrl, int Flags)
@@ -859,7 +859,7 @@ void FieldView::OnPaint(LSurface *pDC)
 
 //////////////////////////////////////////////////////////////////////////////
 ObjContainer::ObjContainer(AppWnd *w) :
-	GTree(100, 0, 0, 100, 100, "LgiResObjTree")
+	LTree(100, 0, 0, 100, 100, "LgiResObjTree")
 {
 	Window = w;
 	Sunken(true);
@@ -873,7 +873,7 @@ ObjContainer::ObjContainer(AppWnd *w) :
 	auto f = LFindFile(IconFile);
 	if (f)
 	{
-		Images = LgiLoadImageList(f, 16, 16);
+		Images = LLoadImageList(f, 16, 16);
 		if (Images)
 			SetImageList(Images, false);
 		else
@@ -891,7 +891,7 @@ bool ObjContainer::AppendChildren(ObjTreeItem *Res, List<Resource> &Lst)
 	bool Status = true;
 	if (Res)
 	{
-		GTreeItem *Item = Res->GetChild();
+		LTreeItem *Item = Res->GetChild();
 		while (Item)
 		{
 			ObjTreeItem *i = dynamic_cast<ObjTreeItem*>(Item);
@@ -1834,9 +1834,9 @@ void AppWnd::DelObject(Resource *r)
 	DeleteObj(r);
 }
 
-ObjTreeItem *GetTreeItem(GTreeItem *ti, Resource *r)
+ObjTreeItem *GetTreeItem(LTreeItem *ti, Resource *r)
 {
-	for (GTreeItem *i=ti->GetChild(); i; i=i->GetNext())
+	for (LTreeItem *i=ti->GetChild(); i; i=i->GetNext())
 	{
 		ObjTreeItem *o = dynamic_cast<ObjTreeItem*>(i);
 		if (o)
@@ -1851,9 +1851,9 @@ ObjTreeItem *GetTreeItem(GTreeItem *ti, Resource *r)
 	return 0;
 }
 
-ObjTreeItem *GetTreeItem(GTree *ti, Resource *r)
+ObjTreeItem *GetTreeItem(LTree *ti, Resource *r)
 {
-	for (GTreeItem *i=ti->GetChild(); i; i=i->GetNext())
+	for (LTreeItem *i=ti->GetChild(); i; i=i->GetNext())
 	{
 		ObjTreeItem *o = dynamic_cast<ObjTreeItem*>(i);
 		if (o)
@@ -1910,7 +1910,7 @@ void AppWnd::GotoObject(ResString *s,
 				}
 				else if (m)
 				{
-					for (GTreeItem *i=m; i; i=i->GetParent())
+					for (LTreeItem *i=m; i; i=i->GetParent())
 					{
 						i->Expanded(true);
 					}
@@ -4181,7 +4181,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 										{
 											if (MenuNewLang)
 											{
-												GTreeItem *Ri = 0;
+												LTreeItem *Ri = 0;
 												if (MenuItem[MenuLevel])
 												{
 													Ri = MenuItem[MenuLevel]->GetNext();
@@ -4239,7 +4239,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 														int Id = atoi(id->Value);
 
 														int n = 0;
-														for (GTreeItem *o = MenuItem[MenuLevel-1]->GetChild(); o; o = o->GetNext(), n++)
+														for (LTreeItem *o = MenuItem[MenuLevel-1]->GetChild(); o; o = o->GetNext(), n++)
 														{
 															ResMenuItem *Res = dynamic_cast<ResMenuItem*>(o);
 															if (Res && Res->GetStr()->GetId() == Id)
@@ -4354,7 +4354,7 @@ void ResFrame::OnFocus(bool b)
 
 bool ResFrame::Attach(LViewI *p)
 {
-	bool Status = GLayout::Attach(p);
+	bool Status = LLayout::Attach(p);
 	if (Status && Child)
 	{
 		Child->Attach(this);

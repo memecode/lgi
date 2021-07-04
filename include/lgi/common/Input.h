@@ -12,7 +12,7 @@ typedef void (*GInputCallback)(class GInput *Dlg, LViewI *EditCtrl, void *Param)
 /// returns TRUE if 'Ok' is clicked.
 class LgiClass GInput : public LDialog
 {
-	GEdit *Edit;
+	LEdit *Edit;
 	GInputCallback Callback;
 	void *CallbackParam;
 	GString Str;

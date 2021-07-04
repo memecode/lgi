@@ -185,7 +185,7 @@ void GItemContainer::PaintColumnHeadings(LSurface *pDC)
 		#else
 			if (GApp::SkinEngine)
 			{
-				GSkinState State;
+				LSkinState State;
 				State.pScreen = ColDC;
 				State.Rect = cr;
 				State.Enabled = Enabled();
@@ -399,7 +399,7 @@ GMessage::Result GItemContainer::OnEvent(GMessage *Msg)
 			break;
 	}
 
-	return GLayout::OnEvent(Msg);
+	return LLayout::OnEvent(Msg);
 }
 
 void GItemContainer::ResizeColumnsToContent(int Border)
@@ -962,7 +962,7 @@ void GItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 		
 			if (GApp::SkinEngine)
 			{
-				GSkinState State;
+				LSkinState State;
 				
 				State.pScreen = pDC;
 				State.ptrText = &d->Txt;
@@ -1035,12 +1035,12 @@ void GItem::SetEditLabelSelection(int SelStart, int SelEnd)
 #define M_END_POPUP			(M_USER+0x1500)
 #define M_LOSING_FOCUS		(M_USER+0x1501)
 
-class GItemEditBox : public GEdit
+class GItemEditBox : public LEdit
 {
 	GItemEdit *ItemEdit;
 
 public:
-	GItemEditBox(GItemEdit *i, int x, int y, const char *s) : GEdit(100, 1, 1, x-3, y-3, s)
+	GItemEditBox(GItemEdit *i, int x, int y, const char *s) : LEdit(100, 1, 1, x-3, y-3, s)
 	{
 		ItemEdit = i;
 		Sunken(false);
@@ -1055,7 +1055,7 @@ public:
 
 	void OnCreate()
 	{
-		GEdit::OnCreate();
+		LEdit::OnCreate();
 		Focus(true);
 	}
 
@@ -1069,12 +1069,12 @@ public:
 			GetParent()->PostEvent(M_LOSING_FOCUS);
 		}
 		
-		GEdit::OnFocus(f);
+		LEdit::OnFocus(f);
 	}
 
 	bool OnKey(LKey &k)
 	{
-		/*	This should be handled by GEdit::OnKey now.
+		/*	This should be handled by LEdit::OnKey now.
 			Which will send a GNotify_EscapeKey or GNotify_ReturnKey
 			up to the ItemEdit OnNotify handler.
 
@@ -1090,7 +1090,7 @@ public:
 		}
 		*/
 		
-		return GEdit::OnKey(k);
+		return LEdit::OnKey(k);
 	}
 
 	bool SetScrollBars(bool x, bool y)
@@ -1104,7 +1104,7 @@ class GItemEditPrivate
 {
 public:
 	GItem *Item;
-	GEdit *Edit;
+	LEdit *Edit;
 	int Index;
 	bool Esc;
 
@@ -1117,7 +1117,7 @@ public:
 };
 
 GItemEdit::GItemEdit(LView *parent, GItem *item, int index, int SelStart, int SelEnd)
-	: GPopup(parent)
+	: LPopup(parent)
 {
 	d = new GItemEditPrivate;
 	d->Item = item;
@@ -1248,7 +1248,7 @@ int GItemEdit::OnNotify(LViewI *v, int f)
 
 void GItemEdit::Visible(bool i)
 {
-	GPopup::Visible(i);
+	LPopup::Visible(i);
 	if (!i)
 	{
 		#if DEBUG_EDIT_LABEL
@@ -1307,5 +1307,5 @@ GMessage::Result GItemEdit::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GPopup::OnEvent(Msg);
+	return LPopup::OnEvent(Msg);
 }

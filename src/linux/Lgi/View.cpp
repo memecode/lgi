@@ -13,9 +13,9 @@
 
 #include "Lgi.h"
 #include "GDragAndDrop.h"
-#include "GEdit.h"
+#include "LEdit.h"
 #include "GViewPriv.h"
-#include "GPopup.h"
+#include "LPopup.h"
 #include "LCss.h"
 
 using namespace Gtk;

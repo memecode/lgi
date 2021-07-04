@@ -264,7 +264,7 @@ public:
 	void UpdateState(int Debugging = -1, int Building = -1);
 	void OnReceiveFiles(GArray<const char*> &Files) override;
 	int GetBuildMode();
-	GTree *GetTree();
+	LTree *GetTree();
 	GOptionsFile *GetOptions();
 	LList *GetFtpLog();
 	GStream *GetBuildLog();

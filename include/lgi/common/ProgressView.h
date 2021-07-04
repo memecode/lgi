@@ -9,7 +9,7 @@
 
 /// Progress bar control
 class LgiClass LProgressView
-	: public GControl
+	: public LControl
 	, public Progress
 	, public ResObject
 {

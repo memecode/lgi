@@ -5,35 +5,35 @@
 #ifndef _GRADIO_GROUP_H_
 #define _GRADIO_GROUP_H_
 
-class GRadioButton;
+class LRadioButton;
 
 /// A grouping control. All radio buttons that are children of this control will automatically 
 /// have only one option selected. Other controls can be children as well but are ignored in the
 /// calculation of the groups value. The value of the group is the index into a list of radio buttons
 /// of the radio button that is on.
-class LgiClass GRadioGroup :
+class LgiClass LRadioGroup :
 	#ifdef WINNATIVE
-	public GControl,
+	public LControl,
 	#else
 	public LView,
 	#endif
 	public ResObject
 {
-	class GRadioGroupPrivate *d;
+	class LRadioGroupPrivate *d;
 	void OnCreate() override;
 
 public:
-	GRadioGroup(int id, int x, int y, int cx, int cy, const char *name, int Init = 0);
-	~GRadioGroup();
+	LRadioGroup(int id, int x, int y, int cx, int cy, const char *name, int Init = 0);
+	~LRadioGroup();
 	
-	const char *GetClass() override { return "GRadioGroup"; }
+	const char *GetClass() override { return "LRadioGroup"; }
 
 	/// Returns the index of the set radio button
 	int64 Value() override;
 	/// Sets the 'ith' radio button to on.
 	void Value(int64 i) override;
 	/// Adds a radio button to the group.
-	GRadioButton *Append(int x, int y, const char *name);
+	LRadioButton *Append(int x, int y, const char *name);
 
 	// Impl
 	int OnNotify(LViewI *Ctrl, int Flags) override;
@@ -51,23 +51,23 @@ public:
 };
 
 /// A radio button control. A radio button is used to select between mutually exclusive options. i.e.
-/// only one can be valid at any given time. For non-mutually exclusive options see the GCheckBox control.
-class LgiClass GRadioButton :
+/// only one can be valid at any given time. For non-mutually exclusive options see the LCheckBox control.
+class LgiClass LRadioButton :
 	#if WINNATIVE && !XP_BUTTON
-	public GControl,
+	public LControl,
 	#else
 	public LView,
 	#endif
 	public ResObject
 {
-	friend class GRadioGroup;
-	class GRadioButtonPrivate *d;
+	friend class LRadioGroup;
+	class LRadioButtonPrivate *d;
 
 public:
-	GRadioButton(int id, int x, int y, int cx, int cy, const char *name);
-	~GRadioButton();
+	LRadioButton(int id, int x, int y, int cx, int cy, const char *name);
+	~LRadioButton();
 
-	const char *GetClass() override { return "GRadioButton"; }
+	const char *GetClass() override { return "LRadioButton"; }
 
 	// Impl
 	const char *Name() override { return LView::Name(); }

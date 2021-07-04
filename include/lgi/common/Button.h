@@ -14,20 +14,20 @@
 
 /// \brief A clickable button
 ///
-/// When the user clicks a GButton the OnNotify() event of the GetNotify() or 
+/// When the user clicks a LButton the OnNotify() event of the GetNotify() or 
 /// GetParent() view will be called with this control as the parameter. Allowing
 /// action to be taken in response to the click. This event by default bubbles up
 /// to the top level window unless some other view intercepts it on the way up
 /// the chain of parent views.
-class LgiClass GButton :
+class LgiClass LButton :
 	#if WINNATIVE && !XP_BUTTON
-	public GControl,
+	public LControl,
 	#else
 	public LView,
 	#endif
 	public ResObject
 {
-	class GButtonPrivate *d;
+	class LButtonPrivate *d;
 
 public:
     /// The extra pixels beyond the size of the text needed
@@ -35,7 +35,7 @@ public:
     static LPoint Overhead;
 
 	/// Construct the control
-	GButton
+	LButton
 	(
 		/// The control's ID
 		int id,
@@ -50,9 +50,9 @@ public:
 		/// Initial text
 		const char *name = NULL
 	);
-	~GButton();
+	~LButton();
 	
-	const char *GetClass() override { return "GButton"; }
+	const char *GetClass() override { return "LButton"; }
 	
 	/// True if the button is the default action on the dialog
 	bool Default();

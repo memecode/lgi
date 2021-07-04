@@ -114,12 +114,12 @@ enum RteCommands
 //////////////////////////////////////////////////////////////////////
 #include "lgi/common/Range.h"
 
-class GRichEditElem : public GHtmlElement
+class LRichEditElem : public LHtmlElement
 {
 	LHashTbl<ConstStrKey<char,false>, GString> Attr;
 
 public:
-	GRichEditElem(GHtmlElement *parent) : GHtmlElement(parent)
+	LRichEditElem(LHtmlElement *parent) : LHtmlElement(parent)
 	{
 	}
 
@@ -149,18 +149,18 @@ public:
 	}
 };
 
-struct GRichEditElemContext : public LCss::ElementCallback<GRichEditElem>
+struct LRichEditElemContext : public LCss::ElementCallback<LRichEditElem>
 {
 	/// Returns the element name
-	const char *GetElement(GRichEditElem *obj);
+	const char *GetElement(LRichEditElem *obj);
 	/// Returns the document unque element ID
-	const char *GetAttr(GRichEditElem *obj, const char *Attr);
+	const char *GetAttr(LRichEditElem *obj, const char *Attr);
 	/// Returns the class
-	bool GetClasses(GString::Array &Classes, GRichEditElem *obj);
+	bool GetClasses(GString::Array &Classes, LRichEditElem *obj);
 	/// Returns the parent object
-	GRichEditElem *GetParent(GRichEditElem *obj);
+	LRichEditElem *GetParent(LRichEditElem *obj);
 	/// Returns an array of child objects
-	GArray<GRichEditElem*> GetChildren(GRichEditElem *obj);
+	GArray<LRichEditElem*> GetChildren(LRichEditElem *obj);
 };
 
 class GDocFindReplaceParams3 : public GDocFindReplaceParams
@@ -189,12 +189,12 @@ public:
 	}
 };
 
-struct GNamedStyle : public LCss
+struct LNamedStyle : public LCss
 {
 	int RefCount;
 	GString Name;
 
-	GNamedStyle()
+	LNamedStyle()
 	{
 		RefCount = 0;
 	}
@@ -203,7 +203,7 @@ struct GNamedStyle : public LCss
 class GCssCache
 {
 	int Idx;
-	GArray<GNamedStyle*> Styles;
+	GArray<LNamedStyle*> Styles;
 	GString Prefix;
 
 public:
@@ -214,14 +214,14 @@ public:
 	uint32_t GetStyles();
 	void ZeroRefCounts();
 	bool OutputStyles(GStream &s, int TabDepth);
-	GNamedStyle *AddStyleToCache(GAutoPtr<LCss> &s);
+	LNamedStyle *AddStyleToCache(GAutoPtr<LCss> &s);
 };
 
-class GRichTextPriv;
-class SelectColour : public GPopup
+class LRichTextPriv;
+class SelectColour : public LPopup
 {
-	GRichTextPriv *d;
-	GRichTextEdit::RectType Type;
+	LRichTextPriv *d;
+	LRichTextEdit::RectType Type;
 
 	struct Entry
 	{
@@ -231,7 +231,7 @@ class SelectColour : public GPopup
 	GArray<Entry> e;
 
 public:
-	SelectColour(GRichTextPriv *priv, LPoint p, GRichTextEdit::RectType t);
+	SelectColour(LRichTextPriv *priv, LPoint p, LRichTextEdit::RectType t);
 	
 	const char *GetClass() { return "SelectColour"; }
 
@@ -240,9 +240,9 @@ public:
 	void Visible(bool i);
 };
 
-class EmojiMenu : public GPopup
+class EmojiMenu : public LPopup
 {
-	GRichTextPriv *d;
+	LRichTextPriv *d;
 
 	struct Emoji
 	{
@@ -258,7 +258,7 @@ class EmojiMenu : public GPopup
 	static int Cur;
 
 public:
-	EmojiMenu(GRichTextPriv *priv, LPoint p);
+	EmojiMenu(LRichTextPriv *priv, LPoint p);
 
 	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
@@ -295,7 +295,7 @@ public:
 	LSurface *GetEmojiImage();
 };
 
-class GRichTextPriv :
+class LRichTextPriv :
 	public LCss,
 	public GHtmlParser,
 	public GHtmlStaticInst,
@@ -339,7 +339,7 @@ public:
 	struct BlockCursor;
 	class Block;
 
-	GRichTextEdit *View;
+	LRichTextEdit *View;
 	GString OriginalText;
 	GAutoWString WideNameCache;
 	GAutoString UtfNameCache;
@@ -361,14 +361,14 @@ public:
 
 	// This is set when the user changes a style without a selection,
 	// indicating that we should start a new run when new text is entered
-	GArray<GRichTextEdit::RectType> StyleDirty;
+	GArray<LRichTextEdit::RectType> StyleDirty;
 
 	// Toolbar
 	bool ShowTools;
-	GRichTextEdit::RectType ClickedBtn, OverBtn;
-	ButtonState BtnState[GRichTextEdit::MaxArea];
-	LRect Areas[GRichTextEdit::MaxArea];
-	LVariant Values[GRichTextEdit::MaxArea];
+	LRichTextEdit::RectType ClickedBtn, OverBtn;
+	ButtonState BtnState[LRichTextEdit::MaxArea];
+	LRect Areas[LRichTextEdit::MaxArea];
+	LVariant Values[LRichTextEdit::MaxArea];
 
 	// Scrolling
 	int ScrollLinePx;
@@ -382,15 +382,15 @@ public:
 	GArray<LRect> DebugRects;
 
 	// Constructor
-	GRichTextPriv(GRichTextEdit *view, GRichTextPriv **Ptr);
-	~GRichTextPriv();
+	LRichTextPriv(LRichTextEdit *view, LRichTextPriv **Ptr);
+	~LRichTextPriv();
 	
 	bool Error(const char *file, int line, const char *fmt, ...);
 	bool IsBusy(bool Stop = false);
 
 	struct Flow
 	{
-		GRichTextPriv *d;
+		LRichTextPriv *d;
 		LSurface *pDC;	// Used for printing.
 
 		int Left, Right;// Left and right margin positions as measured in px
@@ -401,7 +401,7 @@ public:
 						// If false, the implementation can take short cuts and
 						// guess various dimensions.
 	
-		Flow(GRichTextPriv *priv)
+		Flow(LRichTextPriv *priv)
 		{
 			d = priv;
 			pDC = NULL;
@@ -439,7 +439,7 @@ public:
 	/// This is a run of text, all of the same style
 	class StyleText : public GArray<uint32_t>
 	{
-		GNamedStyle *Style; // owned by the CSS cache
+		LNamedStyle *Style; // owned by the CSS cache
 	
 	public:
 		ColourPair Colours;
@@ -448,10 +448,10 @@ public:
 		bool Emoji;
 
 		StyleText(const StyleText *St);
-		StyleText(const uint32_t *t = NULL, ssize_t Chars = -1, GNamedStyle *style = NULL);
+		StyleText(const uint32_t *t = NULL, ssize_t Chars = -1, LNamedStyle *style = NULL);
 		uint32_t *At(ssize_t i);
-		GNamedStyle *GetStyle();
-		void SetStyle(GNamedStyle *s);
+		LNamedStyle *GetStyle();
+		void SetStyle(LNamedStyle *s);
 	};
 	
 	struct PaintContext
@@ -520,7 +520,7 @@ public:
 		// This handles calculating the selection stuff for simple "one char" blocks
 		// like images and HR. Call this at the start of the OnPaint.
 		// \return TRUE if the content should be drawn selected.
-		bool SelectBeforePaint(class GRichTextPriv::Block *b)
+		bool SelectBeforePaint(class LRichTextPriv::Block *b)
 		{
 			CurEndPoint = 0;
 
@@ -555,7 +555,7 @@ public:
 
 		// Call this after the OnPaint
 		// \return TRUE if the content after the block is selected.
-		bool SelectAfterPaint(class GRichTextPriv::Block *b)
+		bool SelectAfterPaint(class LRichTextPriv::Block *b)
 		{
 			// After image selection end point
 			if (CurEndPoint < (ssize_t)EndPoints.Length() &&
@@ -595,7 +595,7 @@ public:
 	struct DocChange
 	{
 		virtual ~DocChange() {}
-		virtual bool Apply(GRichTextPriv *Ctx, bool Forward) = 0;
+		virtual bool Apply(LRichTextPriv *Ctx, bool Forward) = 0;
 	};
 
 	class Transaction
@@ -613,7 +613,7 @@ public:
 			Changes.Add(Dc);
 		}
 
-		bool Apply(GRichTextPriv *Ctx, bool Forward)
+		bool Apply(LRichTextPriv *Ctx, bool Forward)
 		{
 			for (unsigned i=0; i<Changes.Length(); i++)
 			{
@@ -659,7 +659,7 @@ public:
 	{
 	protected:
 		int BlockUid;
-		GRichTextPriv *d;
+		LRichTextPriv *d;
 
 	public:
 		/// This is the number of cursors current referencing this Block.
@@ -667,7 +667,7 @@ public:
 		/// Draw debug selection
 		bool DrawDebug;
 		
-		Block(GRichTextPriv *priv)
+		Block(LRichTextPriv *priv)
 		{
 			d = priv;
 			DrawDebug = false;
@@ -728,11 +728,11 @@ public:
 			virtual void SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, GRange r) {}
 			virtual void IncAllStyleRefs() {}
 			virtual void Dump() {}
-			virtual GNamedStyle *GetStyle(ssize_t At = -1) = 0;
+			virtual LNamedStyle *GetStyle(ssize_t At = -1) = 0;
 			virtual int GetUid() const { return BlockUid; }
 			virtual bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling) { return false; }
 			#ifdef _DEBUG
-			virtual void DumpNodes(GTreeItem *Ti) = 0;
+			virtual void DumpNodes(LTreeItem *Ti) = 0;
 			#endif
 			virtual bool IsValid() { return false; }
 			virtual bool IsBusy(bool Stop = false) { return false; }
@@ -767,7 +767,7 @@ public:
 				/// [Optional] The number of characters
 				ssize_t Chars = -1,
 				/// [Optional] Style to give the text, NULL means "use the existing style"
-				GNamedStyle *Style = NULL
+				LNamedStyle *Style = NULL
 			)	{ return false; }
 
 			/// Delete some chars
@@ -852,7 +852,7 @@ public:
 		}
 
 		#ifdef _DEBUG
-		void DumpNodes(GTreeItem *Ti);
+		void DumpNodes(LTreeItem *Ti);
 		#endif
 	};
 	
@@ -1007,7 +1007,7 @@ public:
 	
 	class TextBlock : public Block
 	{
-		GNamedStyle *Style;
+		LNamedStyle *Style;
 		GArray<GSpellCheck::SpellingError> SpellingErrors;
 		int PaintErrIdx, ClickErrIdx;
 		GSpellCheck::SpellingError *SpErr;
@@ -1036,7 +1036,7 @@ public:
 		// Position in document co-ordinates
 		LRect Pos;
 		
-		TextBlock(GRichTextPriv *priv);
+		TextBlock(LRichTextPriv *priv);
 		TextBlock(const TextBlock *Copy);
 		~TextBlock();
 
@@ -1049,8 +1049,8 @@ public:
 		int LineToOffset(int Line);
 		LRect GetPos() { return Pos; }
 		void Dump();
-		GNamedStyle *GetStyle(ssize_t At = -1);
-		void SetStyle(GNamedStyle *s);
+		LNamedStyle *GetStyle(ssize_t At = -1);
+		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
 		bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, GRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
@@ -1065,7 +1065,7 @@ public:
 		void SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, GRange r);
 		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
-		void DumpNodes(GTreeItem *Ti);
+		void DumpNodes(LTreeItem *Ti);
 		#endif
 		Block *Clone();
 		bool IsEmptyLine(BlockCursor *Cursor);
@@ -1075,7 +1075,7 @@ public:
 		GMessage::Result OnEvent(GMessage *Msg);
 
 		// Transactional changes
-		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, GNamedStyle *Style = NULL);
+		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, LNamedStyle *Style = NULL);
 		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add);
 		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText = NULL);
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
@@ -1090,7 +1090,7 @@ public:
 		bool IsDeleted;
 
 	public:
-		HorzRuleBlock(GRichTextPriv *priv);
+		HorzRuleBlock(LRichTextPriv *priv);
 		HorzRuleBlock(const HorzRuleBlock *Copy);
 		~HorzRuleBlock();
 
@@ -1103,8 +1103,8 @@ public:
 		int LineToOffset(int Line);
 		LRect GetPos() { return Pos; }
 		void Dump();
-		GNamedStyle *GetStyle(ssize_t At = -1);
-		void SetStyle(GNamedStyle *s);
+		LNamedStyle *GetStyle(ssize_t At = -1);
+		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
 		bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, GRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
@@ -1118,7 +1118,7 @@ public:
 		void IncAllStyleRefs();
 		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
-		void DumpNodes(GTreeItem *Ti);
+		void DumpNodes(LTreeItem *Ti);
 		#endif
 		Block *Clone();
 
@@ -1126,7 +1126,7 @@ public:
 		GMessage::Result OnEvent(GMessage *Msg);
 
 		// Transactional changes
-		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, GNamedStyle *Style = NULL);
+		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, LNamedStyle *Style = NULL);
 		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add);
 		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText = NULL);
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
@@ -1154,7 +1154,7 @@ public:
 		int ThreadHnd;
 
 	protected:
-		GNamedStyle *Style;
+		LNamedStyle *Style;
 		int Scale;
 		LRect SourceValid;
 		GString FileName;
@@ -1183,7 +1183,7 @@ public:
 		LRect Pos; // position in document co-ordinates
 		LRect ImgPos;
 		
-		ImageBlock(GRichTextPriv *priv);
+		ImageBlock(LRichTextPriv *priv);
 		ImageBlock(const ImageBlock *Copy);
 		~ImageBlock();
 
@@ -1198,8 +1198,8 @@ public:
 		int LineToOffset(int Line);
 		LRect GetPos() { return Pos; }
 		void Dump();
-		GNamedStyle *GetStyle(ssize_t At = -1);
-		void SetStyle(GNamedStyle *s);
+		LNamedStyle *GetStyle(ssize_t At = -1);
+		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
 		bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, GRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
@@ -1213,7 +1213,7 @@ public:
 		void IncAllStyleRefs();
 		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
-		void DumpNodes(GTreeItem *Ti);
+		void DumpNodes(LTreeItem *Ti);
 		#endif
 		Block *Clone();
 		void OnComponentInstall(GString Name);
@@ -1222,7 +1222,7 @@ public:
 		GMessage::Result OnEvent(GMessage *Msg);
 
 		// Transactional changes
-		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, GNamedStyle *Style = NULL);
+		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, LNamedStyle *Style = NULL);
 		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add);
 		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText = NULL);
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
@@ -1247,20 +1247,20 @@ public:
 	ssize_t HitTest(int x, int y, int &LineHint, Block **Blk = NULL);
 	bool CursorFromPos(int x, int y, GAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx);
 	Block *GetBlockByIndex(ssize_t Index, ssize_t *Offset = NULL, int *BlockIdx = NULL, int *LineCount = NULL);
-	bool Layout(GScrollBar *&ScrollY);
-	void OnStyleChange(GRichTextEdit::RectType t);
+	bool Layout(LScrollBar *&ScrollY);
+	void OnStyleChange(LRichTextEdit::RectType t);
 	bool ChangeSelectionStyle(LCss *Style, bool Add);
-	void PaintBtn(LSurface *pDC, GRichTextEdit::RectType t);
+	void PaintBtn(LSurface *pDC, LRichTextEdit::RectType t);
 	bool MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, GString Link);
-	bool ClickBtn(LMouse &m, GRichTextEdit::RectType t);
+	bool ClickBtn(LMouse &m, LRichTextEdit::RectType t);
 	bool InsertHorzRule();
-	void Paint(LSurface *pDC, GScrollBar *&ScrollY);
-	GHtmlElement *CreateElement(GHtmlElement *Parent);
+	void Paint(LSurface *pDC, LScrollBar *&ScrollY);
+	LHtmlElement *CreateElement(LHtmlElement *Parent);
 	LPoint ScreenToDoc(int x, int y);
 	LPoint DocToScreen(int x, int y);
 	bool Merge(Transaction *Trans, Block *a, Block *b);
 	bool DeleteSelection(Transaction *t, char16 **Cut);
-	GRichTextEdit::RectType PosToButton(LMouse &m);
+	LRichTextEdit::RectType PosToButton(LMouse &m);
 	void OnComponentInstall(GString Name);
 
 	struct CreateContext
@@ -1284,7 +1284,7 @@ public:
 			StartOfLine = true;
 		}
 		
-		bool AddText(GNamedStyle *Style, char16 *Str)
+		bool AddText(LNamedStyle *Style, char16 *Str)
 		{
 			if (!Str || !Tb)
 				return false;
@@ -1340,10 +1340,10 @@ public:
 
 	bool ToHtml(GArray<GDocView::ContentMedia> *Media = NULL, BlockCursor *From = NULL, BlockCursor *To = NULL);
 	void DumpBlocks();
-	bool FromHtml(GHtmlElement *e, CreateContext &ctx, LCss *ParentStyle = NULL, int Depth = 0);
+	bool FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentStyle = NULL, int Depth = 0);
 
 	#ifdef _DEBUG
-	void DumpNodes(GTree *Root);
+	void DumpNodes(LTree *Root);
 	#endif
 };
 
@@ -1354,40 +1354,40 @@ struct BlockCursorState
 	int LineHint;
 	int BlockUid;
 
-	BlockCursorState(bool cursor, GRichTextPriv::BlockCursor *c);
-	bool Apply(GRichTextPriv *Ctx, bool Forward);
+	BlockCursorState(bool cursor, LRichTextPriv::BlockCursor *c);
+	bool Apply(LRichTextPriv *Ctx, bool Forward);
 };
 
-struct CompleteTextBlockState : public GRichTextPriv::DocChange
+struct CompleteTextBlockState : public LRichTextPriv::DocChange
 {
 	int Uid;
 	GAutoPtr<BlockCursorState> Cur, Sel;
-	GAutoPtr<GRichTextPriv::TextBlock> Blk;
+	GAutoPtr<LRichTextPriv::TextBlock> Blk;
 
-	CompleteTextBlockState(GRichTextPriv *Ctx, GRichTextPriv::TextBlock *Tb);
-	bool Apply(GRichTextPriv *Ctx, bool Forward);
+	CompleteTextBlockState(LRichTextPriv *Ctx, LRichTextPriv::TextBlock *Tb);
+	bool Apply(LRichTextPriv *Ctx, bool Forward);
 };
 
-struct MultiBlockState : public GRichTextPriv::DocChange
+struct MultiBlockState : public LRichTextPriv::DocChange
 {
-	GRichTextPriv *Ctx;
+	LRichTextPriv *Ctx;
 	ssize_t Index; // Number of blocks before the edit
 	ssize_t Length; // Of the other version currently in the Ctx stack
-	GArray<GRichTextPriv::Block*> Blks;
+	GArray<LRichTextPriv::Block*> Blks;
 	
-	MultiBlockState(GRichTextPriv *ctx, ssize_t Start);
-	bool Apply(GRichTextPriv *Ctx, bool Forward);
+	MultiBlockState(LRichTextPriv *ctx, ssize_t Start);
+	bool Apply(LRichTextPriv *Ctx, bool Forward);
 
 	bool Copy(ssize_t Idx);
 	bool Cut(ssize_t Idx);
 };
 
 #ifdef _DEBUG
-GTreeItem *PrintNode(GTreeItem *Parent, const char *Fmt, ...);
+LTreeItem *PrintNode(LTreeItem *Parent, const char *Fmt, ...);
 #endif
 
-typedef GRichTextPriv::BlockCursor BlkCursor;
-typedef GAutoPtr<GRichTextPriv::BlockCursor> AutoCursor;
-typedef GAutoPtr<GRichTextPriv::Transaction> AutoTrans;
+typedef LRichTextPriv::BlockCursor BlkCursor;
+typedef GAutoPtr<LRichTextPriv::BlockCursor> AutoCursor;
+typedef GAutoPtr<LRichTextPriv::Transaction> AutoTrans;
 
 #endif

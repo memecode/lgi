@@ -205,11 +205,11 @@ char *dirchar(char *s, bool rev = false)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-class Dependency : public GTreeItem
+class Dependency : public LTreeItem
 {
 	char *File;
 	bool Loaded;
-	GTreeItem *Fake;
+	LTreeItem *Fake;
 
 public:
 	Dependency(const char *file)
@@ -217,7 +217,7 @@ public:
 		File = NewStr(file);
 		char *d = strrchr(File, DIR_CHAR);
 		Loaded = false;
-		Insert(Fake = new GTreeItem);
+		Insert(Fake = new LTreeItem);
 
 		if (LFileExists(File))
 		{
@@ -253,7 +253,7 @@ public:
 		
 		if (Loaded)
 		{
-			for (GTreeItem *i=GetChild(); i; i=i->GetNext())
+			for (LTreeItem *i=GetChild(); i; i=i->GetNext())
 			{
 				((Dependency*)i)->Copy(p, Depth+1);
 			}
@@ -356,7 +356,7 @@ public:
 		MoveToCenter();
 		Name("Dependencies");
 		
-		GTree *t = new GTree(100, 10, 10, r.X() - 20, r.Y() - 50);
+		LTree *t = new LTree(100, 10, 10, r.X() - 20, r.Y() - 50);
 		if (t)
 		{
 			t->Sunken(true);
@@ -369,8 +369,8 @@ public:
 			}
 			
 			Children.Insert(t);
-			Children.Insert(new GButton(IDC_COPY, 10, t->LView::GetPos().y2 + 10, 60, 20, "Copy"));
-			Children.Insert(new GButton(IDOK, 80, t->LView::GetPos().y2 + 10, 60, 20, "Ok"));
+			Children.Insert(new LButton(IDC_COPY, 10, t->LView::GetPos().y2 + 10, 60, 20, "Copy"));
+			Children.Insert(new LButton(IDOK, 80, t->LView::GetPos().y2 + 10, 60, 20, "Ok"));
 		}
 		
 		
@@ -452,7 +452,7 @@ WatchItem::WatchItem(IdeOutput *out, const char *Init)
 	Expanded(false);
 	if (Init)
 		SetText(Init);
-	Insert(PlaceHolder = new GTreeItem);
+	Insert(PlaceHolder = new LTreeItem);
 }
 
 WatchItem::~WatchItem()
@@ -465,7 +465,7 @@ bool WatchItem::SetValue(LVariant &v)
 	if (ValidStr(Str))
 		SetText(Str, 2);
 	else
-		GTreeItem::SetText(NULL, 2);
+		LTreeItem::SetText(NULL, 2);
 	return true;
 }
 
@@ -473,7 +473,7 @@ bool WatchItem::SetText(const char *s, int i)
 {
 	if (ValidStr(s))
 	{
-		GTreeItem::SetText(s, i);
+		LTreeItem::SetText(s, i);
 
 		if (i == 0 && Tree && Tree->GetWindow())
 		{
@@ -533,29 +533,29 @@ public:
 	}
 };
 
-class IdeOutput : public GTabView
+class IdeOutput : public LTabView
 {
 public:
 	AppWnd *App;
-	GTabPage *Build;
-	GTabPage *Output;
-	GTabPage *Debug;
-	GTabPage *Find;
-	GTabPage *Ftp;
+	LTabPage *Build;
+	LTabPage *Output;
+	LTabPage *Debug;
+	LTabPage *Find;
+	LTabPage *Ftp;
 	LList *FtpLog;
 	GTextLog *Txt[3];
 	GArray<char> Buf[3];
 	LFont Small;
 	LFont Fixed;
 
-	GTabView *DebugTab;
+	LTabView *DebugTab;
 	LBox *DebugBox;
 	LBox *DebugLog;
 	LList *Locals, *CallStack, *Threads;
-	GTree *Watch;
+	LTree *Watch;
 	GTextLog *ObjectDump, *MemoryDump, *Registers;
-	GTableLayout *MemTable;
-	GEdit *DebugEdit;
+	LTableLayout *MemTable;
+	LEdit *DebugEdit;
 	GTextLog *DebuggerLog;
 
 	IdeOutput(AppWnd *app)
@@ -625,13 +625,13 @@ public:
 			{
 				DebugBox->SetVertical(false);
 					
-				if ((DebugTab = new GTabView(IDC_DEBUG_TAB)))
+				if ((DebugTab = new LTabView(IDC_DEBUG_TAB)))
 				{
 					DebugTab->GetCss(true)->Padding("0px");
 					DebugTab->SetFont(&Small);
 					DebugBox->AddView(DebugTab);
 
-					GTabPage *Page;
+					LTabPage *Page;
 					if ((Page = DebugTab->Append("Locals")))
 					{
 						Page->SetFont(&Small);
@@ -660,7 +660,7 @@ public:
 					if ((Page = DebugTab->Append("Watch")))
 					{
 						Page->SetFont(&Small);
-						if ((Watch = new GTree(IDC_WATCH_LIST, 0, 0, 100, 100, "Watch List")))
+						if ((Watch = new LTree(IDC_WATCH_LIST, 0, 0, 100, 100, "Watch List")))
 						{
 							Watch->SetFont(&Small);
 							Watch->ShowColumnHeader(true);
@@ -695,12 +695,12 @@ public:
 					{
 						Page->SetFont(&Small);
 							
-						if ((MemTable = new GTableLayout(IDC_MEMORY_TABLE)))
+						if ((MemTable = new LTableLayout(IDC_MEMORY_TABLE)))
 						{
-							GCombo *cbo;
-							GCheckBox *chk;
-							GTextLabel *txt;
-							GEdit *ed;
+							LCombo *cbo;
+							LCheckBox *chk;
+							LTextLabel *txt;
+							LEdit *ed;
 							MemTable->SetFont(&Small);
 							
 							int x = 0, y = 0;
@@ -708,21 +708,21 @@ public:
 							if (c)
 							{
 								c->VerticalAlign(LCss::VerticalMiddle);
-								c->Add(txt = new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Address:"));
+								c->Add(txt = new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Address:"));
 								txt->SetFont(&Small);
 							}
 							c = MemTable->GetCell(x++, y);
 							if (c)
 							{
 								c->PaddingRight(LCss::Len("1em"));
-								c->Add(ed = new GEdit(IDC_MEM_ADDR, 0, 0, 60, 20));
+								c->Add(ed = new LEdit(IDC_MEM_ADDR, 0, 0, 60, 20));
 								ed->SetFont(&Small);
 							}								
 							c = MemTable->GetCell(x++, y);
 							if (c)
 							{
 								c->PaddingRight(LCss::Len("1em"));
-								c->Add(cbo = new GCombo(IDC_MEM_SIZE, 0, 0, 60, 20));
+								c->Add(cbo = new LCombo(IDC_MEM_SIZE, 0, 0, 60, 20));
 								cbo->SetFont(&Small);
 								cbo->Insert("1 byte");
 								cbo->Insert("2 bytes");
@@ -733,21 +733,21 @@ public:
 							if (c)
 							{
 								c->VerticalAlign(LCss::VerticalMiddle);
-								c->Add(txt = new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Page width:"));
+								c->Add(txt = new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Page width:"));
 								txt->SetFont(&Small);
 							}
 							c = MemTable->GetCell(x++, y);
 							if (c)
 							{
 								c->PaddingRight(LCss::Len("1em"));
-								c->Add(ed = new GEdit(IDC_MEM_ROW_LEN, 0, 0, 60, 20));
+								c->Add(ed = new LEdit(IDC_MEM_ROW_LEN, 0, 0, 60, 20));
 								ed->SetFont(&Small);
 							}
 							c = MemTable->GetCell(x++, y);								
 							if (c)
 							{
 								c->VerticalAlign(LCss::VerticalMiddle);
-								c->Add(chk = new GCheckBox(IDC_MEM_HEX, 0, 0, -1, -1, "Show Hex"));
+								c->Add(chk = new LCheckBox(IDC_MEM_HEX, 0, 0, -1, -1, "Show Hex"));
 								chk->SetFont(&Small);
 								chk->Value(true);
 							}
@@ -812,7 +812,7 @@ public:
 					DebugBox->AddView(DebugLog);
 					DebugLog->AddView(DebuggerLog = new DebugTextLog(IDC_DEBUGGER_LOG));
 					DebuggerLog->SetFont(&Small);
-					DebugLog->AddView(DebugEdit = new GEdit(IDC_DEBUG_EDIT, 0, 0, 60, 20));
+					DebugLog->AddView(DebugEdit = new LEdit(IDC_DEBUG_EDIT, 0, 0, 60, 20));
 					DebugEdit->GetCss(true)->Height(LCss::Len(LCss::LenPx, (float)(SysFont->GetHeight() + 8)));
 				}
 			}
@@ -857,7 +857,7 @@ public:
 			if (w)
 			{
 				w->EmptyChildren();
-				for (GTreeItem *ti = Watch->GetChild(); ti; ti = ti->GetNext())
+				for (LTreeItem *ti = Watch->GetChild(); ti; ti = ti->GetNext())
 				{
 					LXmlTag *t = new LXmlTag("watch");
 					if (t)
@@ -1020,8 +1020,8 @@ public:
 	LBox *HBox, *VBox;
 	List<IdeDoc> Docs;
 	List<IdeProject> Projects;
-	GImageList *Icons;
-	GTree *Tree;
+	LImageList *Icons;
+	LTree *Tree;
 	IdeOutput *Output;
 	bool Debugging;
 	bool Running;
@@ -1088,7 +1088,7 @@ public:
 		Building = false;
 		RecentFilesMenu = 0;
 		RecentProjectsMenu = 0;
-		Icons = LgiLoadImageList("icons.png", 16, 16);
+		Icons = LLoadImageList("icons.png", 16, 16);
 
 		Options.SerializeFile(false);
 		App->SerializeState(&Options, "WndPos", true);
@@ -1605,7 +1605,7 @@ Chk;
 
 		#if 1
 Chk;
-		GToolBar *Tools;
+		LToolBar *Tools;
 		if (GdcD->Y() > 1200)
 			Tools = LgiLoadToolbar(this, "cmds-32px.png", 32, 32);
 		else
@@ -3110,8 +3110,8 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 			{
 				case GNotify_DeleteKey:
 				{
-					GArray<GTreeItem *> Sel;
-					for (GTreeItem *c = d->Output->Watch->GetChild(); c; c = c->GetNext())
+					GArray<LTreeItem *> Sel;
+					for (LTreeItem *c = d->Output->Watch->GetChild(); c; c = c->GetNext())
 					{
 						if (c->Select())
 							Sel.Add(c);
@@ -3245,7 +3245,7 @@ bool AppWnd::ShowInProject(const char *Fn)
 		ProjectNode *Node = NULL;
 		if (p->FindFullPath(Fn, &Node))
 		{
-			for (GTreeItem *i = Node->GetParent(); i; i = i->GetParent())
+			for (LTreeItem *i = Node->GetParent(); i; i = i->GetParent())
 			{
 				i->Expanded(true);
 			}
@@ -3999,7 +3999,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 	return 0;
 }
 
-GTree *AppWnd::GetTree()
+LTree *AppWnd::GetTree()
 {
 	return d->Tree;
 }

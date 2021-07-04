@@ -5,7 +5,7 @@
 
 #define MDI_TAB_STYLE	1
 
-class GMdiChild : public GLayout
+class GMdiChild : public LLayout
 {
 	friend class GMdiParent;
 	
@@ -41,7 +41,7 @@ public:
 	virtual void OnPaintButton(LSurface *pDC, LRect &rc);
 };
 
-class GMdiParent : public GLayout
+class GMdiParent : public LLayout
 {
 	friend class GMdiChild;
 	class GMdiParentPrivate *d;

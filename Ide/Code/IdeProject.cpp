@@ -228,7 +228,7 @@ public:
 		NextNodeId = 1;
 	}
 
-	void CollectAllFiles(GTreeNode *Base, GArray<ProjectNode*> &Files, bool SubProjects, int Platform);
+	void CollectAllFiles(LTreeNode *Base, GArray<ProjectNode*> &Files, bool SubProjects, int Platform);
 };
 
 class MakefileThread : public LThread, public LCancel
@@ -1195,7 +1195,7 @@ NodeView::~NodeView()
 
 
 //////////////////////////////////////////////////////////////////////////////////
-int NodeSort(GTreeItem *a, GTreeItem *b, NativeInt d)
+int NodeSort(LTreeItem *a, LTreeItem *b, NativeInt d)
 {
 	ProjectNode *A = dynamic_cast<ProjectNode*>(a);
 	ProjectNode *B = dynamic_cast<ProjectNode*>(b);
@@ -1221,8 +1221,8 @@ int NodeSort(GTreeItem *a, GTreeItem *b, NativeInt d)
 
 DeclGArrayCompare(XmlSort, LXmlTag*, NativeInt)
 {
-	GTreeItem *A = dynamic_cast<GTreeItem*>(*a);
-	GTreeItem *B = dynamic_cast<GTreeItem*>(*b);
+	LTreeItem *A = dynamic_cast<LTreeItem*>(*a);
+	LTreeItem *B = dynamic_cast<LTreeItem*>(*b);
 	return NodeSort(A, B, param ? *param : 0);
 }
 
@@ -3628,7 +3628,7 @@ bool IdeProject::BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool In
 	return true;
 }
 
-void IdeProjectPrivate::CollectAllFiles(GTreeNode *Base, GArray<ProjectNode*> &Files, bool SubProjects, int Platform)
+void IdeProjectPrivate::CollectAllFiles(LTreeNode *Base, GArray<ProjectNode*> &Files, bool SubProjects, int Platform)
 {
 	for (auto i:*Base)
 	{
@@ -3895,7 +3895,7 @@ void IdeProject::OnMakefileCreated()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-IdeTree::IdeTree() : GTree(IDC_PROJECT_TREE, 0, 0, 100, 100)
+IdeTree::IdeTree() : LTree(IDC_PROJECT_TREE, 0, 0, 100, 100)
 {
 	Hit = 0;
 	MultiSelect(true);
@@ -3988,7 +3988,7 @@ int IdeTree::OnDrop(GArray<GDragData> &Data, LPoint p, int KeyState)
 						}
 
 						// Detach
-						GTreeItem *i = dynamic_cast<GTreeItem*>(Src);
+						LTreeItem *i = dynamic_cast<LTreeItem*>(Src);
 						i->Detach();
 						if (Src->LXmlTag::Parent)
 						{
@@ -4054,18 +4054,18 @@ AddFilesProgress::AddFilesProgress(LViewI *par)
 		Exts.Add(a[i], true);
 	}
 
-	GTableLayout *t = new GTableLayout(100);
+	LTableLayout *t = new LTableLayout(100);
 	AddView(t);
 		
 	GLayoutCell *c = t->GetCell(0, 0);
-	c->Add(new GTextLabel(-1, 0, 0, -1, -1, "Loaded:"));
+	c->Add(new LTextLabel(-1, 0, 0, -1, -1, "Loaded:"));
 		
 	c = t->GetCell(1, 0);
-	c->Add(Msg = new GTextLabel(-1, 0, 0, -1, -1, "..."));
+	c->Add(Msg = new LTextLabel(-1, 0, 0, -1, -1, "..."));
 		
 	c = t->GetCell(0, 1, true, 2);
 	c->TextAlign(LCss::Len(LCss::AlignRight));
-	c->Add(new GButton(IDCANCEL, 0, 0, -1, -1, "Cancel"));
+	c->Add(new LButton(IDCANCEL, 0, 0, -1, -1, "Cancel"));
 }
 
 int64 AddFilesProgress::Value()

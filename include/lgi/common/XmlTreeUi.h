@@ -20,13 +20,13 @@ public:
 	virtual ~LXmlTreeUi();
 
 	typedef LListItem *(*CreateListItem)(void *User);
-	typedef GTreeItem *(*CreateTreeItem)(void *User);
+	typedef LTreeItem *(*CreateTreeItem)(void *User);
 
 	/// Create attribute <-> UI element mapping for generic control
 	void Map(const char *Attr, int UiIdent, int Type = GV_NULL);
 	/// Create attribute <-> UI element mapping for GList control
 	void Map(const char *Element, int UiIdent, CreateListItem Factory, const char *ChildElements, void *User = 0);
-	/// Create attribute <-> UI element mapping for GTree control
+	/// Create attribute <-> UI element mapping for LTree control
 	void Map(const char *Element, int UiIdent, CreateTreeItem Factory, const char *ChildElements, void *User = 0);
 	/// Clear all mappings
 	void EmptyMaps();

@@ -11,9 +11,9 @@
 #ifndef __TOOL_TAB_BAR_H
 #define __TOOL_TAB_BAR_H
 
-class GToolTab : public GToolButton
+class LToolTab : public LToolButton
 {
-	friend class GToolTabBar;
+	friend class LToolTabBar;
 	LRect TabPos;
 	bool First;
 
@@ -25,33 +25,33 @@ class GToolTab : public GToolButton
 	void OnMouseExit(LMouse &m) {}
 
 public:
-	GToolTab();
-	~GToolTab();
+	LToolTab();
+	~LToolTab();
 
-	const char *GetClass() { return "GToolTab"; }
+	const char *GetClass() { return "LToolTab"; }
 
 	/// Override this event to attach controls to the current view.
 	virtual void OnSelect() {}
 };
 
-class GToolTabBar : public GToolBar
+class LToolTabBar : public LToolBar
 {
-	friend class GToolTab;
+	friend class LToolTab;
 
 	LRect Client;
 	LRect Tab;
-	GToolTab *Current;
+	LToolTab *Current;
 	bool FitToArea;
 	bool Border;
 	bool InOnChangeEvent;
 
-	void _PaintTab(LSurface *pDC, GToolTab *Tab);
+	void _PaintTab(LSurface *pDC, LToolTab *Tab);
 
 public:
-	GToolTabBar(int Id = -1);
-	~GToolTabBar();
+	LToolTabBar(int Id = -1);
+	~LToolTabBar();
 
-	const char *GetClass() { return "GToolTabBar"; }
+	const char *GetClass() { return "LToolTabBar"; }
 
 	int64 Value();
 	void Value(int64 i);
@@ -65,8 +65,8 @@ public:
 
 	bool Pour(LRegion &r);
 
-	void OnButtonClick(GToolButton *Btn);
-	void OnChange(GToolButton *Btn);
+	void OnButtonClick(LToolButton *Btn);
+	void OnChange(LToolButton *Btn);
 	void OnPaint(LSurface *pDC);
 	void OnCreate();
 	void OnMouseClick(LMouse &m);

@@ -53,10 +53,10 @@ EditTray::EditTray(GTextView3 *ctrl, IdeDoc *doc)
 	SymBtn.ZOff(-1, -1);
 		
 	int Ht = SysFont->GetHeight() + 6;
-	AddView(FileSearch = new GEdit(IDC_FILE_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
-	AddView(FuncSearch = new GEdit(IDC_METHOD_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
-	AddView(SymSearch = new GEdit(IDC_SYMBOL_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
-	AddView(AllPlatforms = new GCheckBox(IDC_ALL_PLATFORMS, 0, 0, 20, Ht, "All Platforms"));
+	AddView(FileSearch = new LEdit(IDC_FILE_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
+	AddView(FuncSearch = new LEdit(IDC_METHOD_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
+	AddView(SymSearch = new LEdit(IDC_SYMBOL_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
+	AddView(AllPlatforms = new LCheckBox(IDC_ALL_PLATFORMS, 0, 0, 20, Ht, "All Platforms"));
 }
 	
 EditTray::~EditTray()
@@ -785,10 +785,10 @@ public:
 	}
 };
 
-class GStyleThread : public GEventTargetThread
+class GStyleThread : public LEventTargetThread
 {
 public:
-	GStyleThread() : GEventTargetThread("StyleThread")
+	GStyleThread() : LEventTargetThread("StyleThread")
 	{
 	}
 	

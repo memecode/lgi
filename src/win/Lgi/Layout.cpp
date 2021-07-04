@@ -15,7 +15,7 @@
 #include "lgi/common/Layout.h"
 
 //////////////////////////////////////////////////////////////////////////////
-GLayout::GLayout() : LView(0)
+LLayout::LLayout() : LView(0)
 {
 	_SettingScrollBars = 0;
 	_PourLargest = 0;
@@ -27,13 +27,13 @@ GLayout::GLayout() : LView(0)
 	#endif
 }
 
-GLayout::~GLayout()
+LLayout::~LLayout()
 {
 	DeleteObj(VScroll);
 	DeleteObj(HScroll);
 }
 
-LViewI *GLayout::FindControl(int Id)
+LViewI *LLayout::FindControl(int Id)
 {
 	if (VScroll && VScroll->GetId() == Id)
 		return VScroll;
@@ -43,7 +43,7 @@ LViewI *GLayout::FindControl(int Id)
 	return LView::FindControl(Id);
 }
 
-void GLayout::GetScrollPos(int64 &x, int64 &y)
+void LLayout::GetScrollPos(int64 &x, int64 &y)
 {
 	if (HScroll)
 	{
@@ -64,7 +64,7 @@ void GLayout::GetScrollPos(int64 &x, int64 &y)
 	}
 }
 
-void GLayout::SetScrollPos(int64 x, int64 y)
+void LLayout::SetScrollPos(int64 x, int64 y)
 {
 	if (HScroll)
 	{
@@ -77,7 +77,7 @@ void GLayout::SetScrollPos(int64 x, int64 y)
 	}
 }
 
-bool GLayout::SetScrollBars(bool x, bool y)
+bool LLayout::SetScrollBars(bool x, bool y)
 {
 	bool Status = false;
 
@@ -89,7 +89,7 @@ bool GLayout::SetScrollBars(bool x, bool y)
 		{
 			if (!VScroll)
 			{
-				VScroll = new GScrollBar;
+				VScroll = new LScrollBar;
 				if (VScroll)
 				{
 					VScroll->SetVertical(true);
@@ -112,7 +112,7 @@ bool GLayout::SetScrollBars(bool x, bool y)
 		{
 			if (!HScroll)
 			{
-				HScroll = new GScrollBar;
+				HScroll = new LScrollBar;
 				if (HScroll)
 				{
 					HScroll->SetVertical(false);
@@ -137,12 +137,12 @@ bool GLayout::SetScrollBars(bool x, bool y)
 	return Status;
 }
 
-bool GLayout::GetPourLargest()
+bool LLayout::GetPourLargest()
 {
 	return _PourLargest;
 }
 
-void GLayout::SetPourLargest(bool i)
+void LLayout::SetPourLargest(bool i)
 {
 	_PourLargest = i;
 }
@@ -154,7 +154,7 @@ LCss::Len &SelectValid(LCss::Len &a, LCss::Len &b, LCss::Len &c)
 	return c;
 }
 
-bool GLayout::Pour(LRegion &r)
+bool LLayout::Pour(LRegion &r)
 {
 	if (!_PourLargest)
 		return false;
@@ -203,7 +203,7 @@ bool GLayout::Pour(LRegion &r)
 	return true;
 }
 
-GMessage::Result GLayout::OnEvent(GMessage *Msg)
+GMessage::Result LLayout::OnEvent(GMessage *Msg)
 {
 	if (VScroll) VScroll->OnEvent(Msg);
 	if (HScroll) HScroll->OnEvent(Msg);

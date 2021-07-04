@@ -82,8 +82,8 @@ template <class Record, class Lst>
 class DRecordSetCtrls : public DataDlgTools
 {
 	// Controls
-	GTextLabel *Description;
-	GScrollBar *Scroll;
+	LTextLabel *Description;
+	LScrollBar *Scroll;
 	int NewRecordId;
 	int DeleteRecordId;
 
@@ -115,8 +115,8 @@ public:
 
 		if (Dlg)
 		{
-			Description = dynamic_cast<GTextLabel*>(Dlg->FindControl(DescId));
-			Scroll = dynamic_cast<GScrollBar*>(Dlg->FindControl(ScrollId));
+			Description = dynamic_cast<LTextLabel*>(Dlg->FindControl(DescId));
+			Scroll = dynamic_cast<LScrollBar*>(Dlg->FindControl(ScrollId));
 			OnMoveRecord(dynamic_cast<Record*>(Records->First()));
 		}
 	}

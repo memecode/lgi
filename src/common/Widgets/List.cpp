@@ -751,7 +751,7 @@ GMessage::Result LList::OnEvent(GMessage *Msg)
 		#endif
 	}
 
-	return GLayout::OnEvent(Msg);
+	return LLayout::OnEvent(Msg);
 }
 
 int LList::OnNotify(LViewI *Ctrl, int Flags)
@@ -769,7 +769,7 @@ int LList::OnNotify(LViewI *Ctrl, int Flags)
 		Invalidate(&ItemsPos);
 	}
 
-	return GLayout::OnNotify(Ctrl, Flags);
+	return LLayout::OnNotify(Ctrl, Flags);
 }
 
 LRect &LList::GetClientRect()
@@ -2285,7 +2285,7 @@ void LList::RemoveAll()
 
 void LList::OnPosChange()
 {
-	GLayout::OnPosChange();
+	LLayout::OnPosChange();
 }
 
 void LList::UpdateScrollBars()
@@ -2414,7 +2414,7 @@ void LList::PourAll()
 		d->Columns = 1;
 		d->VisibleColumns = 0;
 		int64 ScrollX = HScroll ? HScroll->Value() : 0;
-		int64 OffsetY = HScroll ? 0 : GScrollBar::GetScrollSize();
+		int64 OffsetY = HScroll ? 0 : LScrollBar::GetScrollSize();
 		FirstVisible = -1;
 		
 		int n = 0;
@@ -2657,7 +2657,7 @@ void LList::OnFocus(bool b)
 		}
 	}
 
-	GLayout::OnFocus(b);
+	LLayout::OnFocus(b);
 	
 	if (!b && IsCapturing())
 	{

@@ -5,11 +5,11 @@
 #ifndef __GCOLOUR_SELECT_H
 #define __GCOLOUR_SELECT_H
 
-#include "GPopup.h"
+#include "LPopup.h"
 
 /// \brief 32-bit colour button.
 class GColourSelect :
-	public GDropDown,
+	public LDropDown,
 	public ResObject
 {
 	friend class GColourSelectPopup;

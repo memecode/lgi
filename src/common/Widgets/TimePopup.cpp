@@ -2,23 +2,23 @@
 /// \author Matthew Allen
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GPopup.h"
-#include "MonthView.h"
-#include "GToken.h"
-#include "LList.h"
-#include "GEdit.h"
-#include "GDateTimeCtrls.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Popup.h"
+#include "lgi/common/MonthView.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/DateTimeCtrls.h"
 
-/// This class is the list of times in a popup, it is used by GTimeDropDown
-GTimeDropDown::GTimeDropDown() :
-	GDropDown(-1, 0, 0, 10, 10, 0),
+/// This class is the list of times in a popup, it is used by LTimeDropDown
+LTimeDropDown::LTimeDropDown() :
+	LDropDown(-1, 0, 0, 10, 10, 0),
 	ResObject(Res_Custom)
 {
-	SetPopup(Drop = new GTimePopup(this));
+	SetPopup(Drop = new LTimePopup(this));
 }
 
-int GTimeDropDown::OnNotify(LViewI *Ctrl, int Flags)
+int LTimeDropDown::OnNotify(LViewI *Ctrl, int Flags)
 {
 	LViewI *DateSrc = GetNotify();
 	if (Ctrl == (LViewI*)Drop && DateSrc)
@@ -34,10 +34,10 @@ int GTimeDropDown::OnNotify(LViewI *Ctrl, int Flags)
 		return true;
 	}
 	
-	return GDropDown::OnNotify(Ctrl, Flags);
+	return LDropDown::OnNotify(Ctrl, Flags);
 }
 
-void GTimeDropDown::OnChildrenChanged(LViewI *Wnd, bool Attaching)
+void LTimeDropDown::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	if (Wnd == (LViewI*)Drop && !Attaching)
 	{
@@ -45,7 +45,7 @@ void GTimeDropDown::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 	}	
 }
 
-bool GTimeDropDown::OnLayout(LViewLayoutInfo &Inf)
+bool LTimeDropDown::OnLayout(LViewLayoutInfo &Inf)
 {
     if (!Inf.Width.Max)
     {
@@ -60,7 +60,7 @@ bool GTimeDropDown::OnLayout(LViewLayoutInfo &Inf)
     return true;
 }
 
-void GTimeDropDown::SetDate(char *d)
+void LTimeDropDown::SetDate(char *d)
 {
 	LViewI *n = GetNotify();
 	if (n && d)
@@ -95,7 +95,7 @@ void GTimeDropDown::SetDate(char *d)
 	}
 }
 
-void GTimeDropDown::OnMouseClick(LMouse &m)
+void LTimeDropDown::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -116,7 +116,7 @@ void GTimeDropDown::OnMouseClick(LMouse &m)
 		}
 	}
 
-	GDropDown::OnMouseClick(m);
+	LDropDown::OnMouseClick(m);
 }
 
 class TimeList : public LList
@@ -161,7 +161,7 @@ public:
 	}
 };
 
-GTimePopup::GTimePopup(LView *owner) : GPopup(owner)
+LTimePopup::LTimePopup(LView *owner) : LPopup(owner)
 {
 	SetParent(owner);
 	SetNotify(owner);
@@ -236,7 +236,7 @@ GTimePopup::GTimePopup(LView *owner) : GPopup(owner)
 	SetPos(r);
 }
 
-GTimePopup::~GTimePopup()
+LTimePopup::~LTimePopup()
 {
 	if (Owner)
 	{
@@ -245,12 +245,12 @@ GTimePopup::~GTimePopup()
 	}
 }
 
-void GTimePopup::OnCreate()
+void LTimePopup::OnCreate()
 {
 	Times->Attach(this);
 }
 
-void GTimePopup::OnPaint(LSurface *pDC)
+void LTimePopup::OnPaint(LSurface *pDC)
 {
 	// 1px black border
 	LRect r = GetClient();
@@ -269,7 +269,7 @@ void GTimePopup::OnPaint(LSurface *pDC)
 	}
 }
 
-int GTimePopup::OnNotify(LViewI *c, int f)
+int LTimePopup::OnNotify(LViewI *c, int f)
 {
 	if (c->GetId() == 100 && !Ignore)
 	{
@@ -309,7 +309,7 @@ int GTimePopup::OnNotify(LViewI *c, int f)
 	return 0;
 }
 
-GString GTimePopup::GetTime()
+GString LTimePopup::GetTime()
 {
 	if (Times)
 	{
@@ -320,7 +320,7 @@ GString GTimePopup::GetTime()
 	return GString();
 }
 
-void GTimePopup::SetTime(LDateTime *t)
+void LTimePopup::SetTime(LDateTime *t)
 {
 	if (!t || !Times)
 		return;
@@ -349,14 +349,14 @@ void GTimePopup::SetTime(LDateTime *t)
 	}
 }
 
-class GTimePopupFactory : public GViewFactory
+class GTimePopupFactory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (Class &&
-			_stricmp(Class, "GTimeDropDown") == 0)
+			_stricmp(Class, "LTimeDropDown") == 0)
 		{
-			return new GTimeDropDown;
+			return new LTimeDropDown;
 		}
 
 		return 0;

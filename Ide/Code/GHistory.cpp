@@ -2,15 +2,15 @@
 #include "GHistory.h"
 #include "lgi\common\List.h"
 //////////////////////////////////////////////////////////////
-// GHistoryPopup
-class GHistoryPopup : public GPopup
+// LHistoryPopup
+class LHistoryPopup : public LPopup
 {
 public:
 	LList *Lst;
 	GString Str;
 	int64 Index;
 	bool Ignore;
-	GHistoryPopup() : GPopup(0)
+	LHistoryPopup() : LPopup(0)
 	{
 		Lst = 0;
 		Index = -1;
@@ -80,7 +80,7 @@ public:
 class GHistoryPrivate
 {
 public:
-	GHistoryPopup *Popup;
+	LHistoryPopup *Popup;
 	int TargetId;
 	int64 Value;
 	
@@ -92,11 +92,11 @@ public:
 	}
 };
 GHistory::GHistory() :
-	GDropDown(-1, 0, 0, 10, 10, 0),
+	LDropDown(-1, 0, 0, 10, 10, 0),
 	ResObject(Res_Custom)
 {
 	d = new GHistoryPrivate;
-	SetPopup(d->Popup = new GHistoryPopup);
+	SetPopup(d->Popup = new LHistoryPopup);
 }
 GHistory::~GHistory()
 {
@@ -204,7 +204,7 @@ void GHistory::OnPopupClose()
 }
 ////////////////////////////////////////////////////////////
 // Factory
-class GHistoryFactory : public GViewFactory
+class GHistoryFactory : public LViewFactory
 {
 public:
 	virtual LView *NewView

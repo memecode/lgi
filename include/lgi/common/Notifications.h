@@ -65,18 +65,18 @@ enum GNotifyType
 	GNotifyFixedWidthChanged,
 	GNotifyShowImagesChanged,
 
-	// GTableLayout
-	GNotifyTableLayout_LayoutChanged,	// Sent by GTableLayout to notify it's layout changed
-	GNotifyTableLayout_Refresh,			// Sent by child views of GTableLayout to cause it to
+	// LTableLayout
+	GNotifyTableLayout_LayoutChanged,	// Sent by LTableLayout to notify it's layout changed
+	GNotifyTableLayout_Refresh,			// Sent by child views of LTableLayout to cause it to
 										// update the layout
 
-	// GZoomView
+	// LZoomView
 	GNotifyViewport_Changed,
 
-	// GTabPage
+	// LTabPage
 	GNotifyTabPage_ButtonClick,
 	
-	// GScrollBar
+	// LScrollBar
 	GNotifyScrollBar_Create,
 	GNotifyScrollBar_Destroy,
 

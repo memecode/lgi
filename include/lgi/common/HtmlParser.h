@@ -12,11 +12,11 @@ class GHtmlParser
 protected:
 	GDocView *View;
 	GAutoString Source;
-	GArray<GHtmlElement*> OpenTags;
+	GArray<LHtmlElement*> OpenTags;
 	GAutoString DocCharSet;
 	bool DocAndCsTheSame;
 
-	void CloseTag(GHtmlElement *t)
+	void CloseTag(LHtmlElement *t)
 	{
 		if (!t)
 			return;
@@ -24,9 +24,9 @@ protected:
 		OpenTags.Delete(t);
 	}
 
-	GHtmlElement *GetOpenTag(const char *Tag);
+	LHtmlElement *GetOpenTag(const char *Tag);
 	void _TraceOpenTags();
-	char *ParseHtml(GHtmlElement *Elem, char *Doc, int Depth, bool InPreTag = false, bool *BackOut = NULL);	
+	char *ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPreTag = false, bool *BackOut = NULL);	
 	char16 *DecodeEntities(const char *s, ssize_t len);
 
 public:
@@ -40,7 +40,7 @@ public:
 	void SetView(GDocView *v) { View = v; }
 
 	// Main entry point
-	bool Parse(GHtmlElement *Root, const char *Doc);
+	bool Parse(LHtmlElement *Root, const char *Doc);
 	
 	// Tool methods
 	GHtmlElemInfo *GetTagInfo(const char *Tag);
@@ -49,13 +49,13 @@ public:
 	char *ParsePropValue(char *s, char16 *&Value);
 	char *ParseName(char *s, GAutoString &Name);
 	char *ParseName(char *s, char **Name);
-	char *ParsePropList(char *s, GHtmlElement *Obj, bool &Closed);
+	char *ParsePropList(char *s, LHtmlElement *Obj, bool &Closed);
 	void SkipNonDisplay(char *&s);
 	char *NextTag(char *s);
 	char16 *CleanText(const char *s, ssize_t Len, bool ConversionAllowed, bool KeepWhiteSpace);
 	
 	// Virtual callbacks
-	virtual GHtmlElement *CreateElement(GHtmlElement *Parent) = 0;
+	virtual LHtmlElement *CreateElement(LHtmlElement *Parent) = 0;
 	virtual bool EvaluateCondition(const char *Cond) { return false; }
 };
 

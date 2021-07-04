@@ -138,7 +138,7 @@ public:
 #define RESIZE_X2			0x0004
 #define RESIZE_Y2			0x0008
 
-class ResDialog : public Resource, public GLayout, public ResFactory
+class ResDialog : public Resource, public LLayout, public ResFactory
 {
 	friend class ResDialogCtrl;
 	friend class ResDialogUi;
@@ -238,13 +238,13 @@ public:
 	bool Write(LXmlTag *Tag, SerialiseContext &Ctx) override;
 };
 
-class ResDialogUi : public GLayout
+class ResDialogUi : public LLayout
 {
 	friend class ResDialog;
 
-	GToolBar *Tools;
+	LToolBar *Tools;
 	ResDialog *Dialog;
-	GStatusBar *Status;
+	LStatusBar *Status;
 	GStatusPane *StatusInfo;
 
 public:
@@ -500,7 +500,7 @@ public:
 	bool Serialize(FieldTree &Fields);
 };
 
-class CtrlControlTree : public ResDialogCtrl, public GTree, public GDom
+class CtrlControlTree : public ResDialogCtrl, public LTree, public GDom
 {
 	class CtrlControlTreePriv *d;
 

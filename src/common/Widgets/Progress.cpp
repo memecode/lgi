@@ -1,12 +1,12 @@
-#include "Lgi.h"
-#include "GProgress.h"
-#include "LCss.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ProgressView.h"
+#include "lgi/common/Css.h"
 
-GColour GProgress::cNormal(50, 150, 255);
-GColour GProgress::cPaused(222, 160, 0);
-GColour GProgress::cError(255, 0, 0);
+GColour LProgressView::cNormal(50, 150, 255);
+GColour LProgressView::cPaused(222, 160, 0);
+GColour LProgressView::cError(255, 0, 0);
 
-GProgress::GProgress(int id, int x, int y, int cx, int cy, const char *name) :
+LProgressView::LProgressView(int id, int x, int y, int cx, int cy, const char *name) :
 	ResObject(Res_Progress)
 {
 	SetId(id);
@@ -17,23 +17,23 @@ GProgress::GProgress(int id, int x, int y, int cx, int cy, const char *name) :
 	c = cNormal;
 }
 
-GProgress::~GProgress()
+LProgressView::~LProgressView()
 {
 }
 
-bool GProgress::Colour(GColour Col)
+bool LProgressView::Colour(GColour Col)
 {
 	c = Col;
 	Invalidate();
 	return true;
 }
 
-GColour GProgress::Colour()
+GColour LProgressView::Colour()
 {
 	return c;
 }
 
-bool GProgress::Pour(LRegion &r)
+bool LProgressView::Pour(LRegion &r)
 {
 	LRect *l = FindLargest(r);
 	if (l)
@@ -45,7 +45,7 @@ bool GProgress::Pour(LRegion &r)
 	return false;
 }
 
-bool GProgress::OnLayout(LViewLayoutInfo &Inf)
+bool LProgressView::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (!Inf.Width.Max)
 	{
@@ -61,7 +61,7 @@ bool GProgress::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-bool GProgress::SetRange(const GRange &r)
+bool LProgressView::SetRange(const GRange &r)
 {
 	Low = r.Start;
 	High = r.End();
@@ -69,7 +69,7 @@ bool GProgress::SetRange(const GRange &r)
 	return true;
 }
 
-void GProgress::Value(int64 v)
+void LProgressView::Value(int64 v)
 {
 	if (Val != v)
 	{
@@ -78,17 +78,17 @@ void GProgress::Value(int64 v)
 	}
 }
 
-int64 GProgress::Value()
+int64 LProgressView::Value()
 {
 	return Val;
 }
 
-GMessage::Result GProgress::OnEvent(GMessage *Msg)
+GMessage::Result LProgressView::OnEvent(GMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }
 
-void GProgress::OnPaint(LSurface *pDC)
+void LProgressView::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 	LThinBorder(pDC, r, DefaultSunkenEdge);

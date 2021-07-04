@@ -2,7 +2,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/ControlTree.h"
-// #include "GToken.h"
 #include "lgi/common/Edit.h"
 #include "lgi/common/CheckBox.h"
 #include "lgi/common/Combo.h"
@@ -14,18 +13,18 @@
 
 #define IDC_BROWSE -10
 
-class GControlTreePriv
+class LControlTreePriv
 {
 public:
     LResources *Factory;
     
-    GControlTreePriv()
+    LControlTreePriv()
     {
         Factory = 0;
     }
 };
 
-GControlTree::Item::Item(int ctrlId, char *Txt, const char *opt, LVariantType type, GArray<GControlTree::EnumValue> *pEnum)
+LControlTree::Item::Item(int ctrlId, char *Txt, const char *opt, LVariantType type, GArray<LControlTree::EnumValue> *pEnum)
 {
 	if (ValidStr(opt))
 		Opt.Reset(NewStr(opt));
@@ -38,17 +37,17 @@ GControlTree::Item::Item(int ctrlId, char *Txt, const char *opt, LVariantType ty
 	Browse = 0;
 }
 
-GControlTree::Item::~Item()
+LControlTree::Item::~Item()
 {
 }
 
-void GControlTree::Item::SetEnum(GAutoPtr<EnumArr> e)
+void LControlTree::Item::SetEnum(GAutoPtr<EnumArr> e)
 {
 	Enum = e;
 	Type = GV_INT32;
 }
 
-void GControlTree::Item::OnVisible(bool v)
+void LControlTree::Item::OnVisible(bool v)
 {
 	if (Ctrl)
 	{
@@ -62,19 +61,19 @@ void GControlTree::Item::OnVisible(bool v)
 	}
 }
 
-GControlTree::Item *GControlTree::Item::Find(const char *opt)
+LControlTree::Item *LControlTree::Item::Find(const char *opt)
 {
 	if (Opt && !_stricmp(Opt, opt))
 	{
 		return this;
 	}
 
-	for (GTreeItem *i = GetChild(); i; i = i->GetNext())
+	for (LTreeItem *i = GetChild(); i; i = i->GetNext())
 	{
-		GControlTree::Item *ci = dynamic_cast<GControlTree::Item*>(i);
+		LControlTree::Item *ci = dynamic_cast<LControlTree::Item*>(i);
 		if (ci)
 		{
-			GControlTree::Item *f = ci->Find(opt);
+			LControlTree::Item *f = ci->Find(opt);
 			if (f)
 				return f;
 		}
@@ -83,7 +82,7 @@ GControlTree::Item *GControlTree::Item::Find(const char *opt)
 	return 0;
 }
 
-bool GControlTree::Item::Serialize(GDom *Store, bool Write)
+bool LControlTree::Item::Serialize(GDom *Store, bool Write)
 {
 	if (Opt)
 	{
@@ -98,9 +97,9 @@ bool GControlTree::Item::Serialize(GDom *Store, bool Write)
 		}
 	}
 
-	for (GTreeItem *i = GetChild(); i; i = i->GetNext())
+	for (LTreeItem *i = GetChild(); i; i = i->GetNext())
 	{
-		GControlTree::Item *ci = dynamic_cast<GControlTree::Item*>(i);
+		LControlTree::Item *ci = dynamic_cast<LControlTree::Item*>(i);
 		if (ci)
 		{
 			ci->Serialize(Store, Write);
@@ -110,10 +109,10 @@ bool GControlTree::Item::Serialize(GDom *Store, bool Write)
 	return true;
 }
 
-void GControlTree::Item::SetValue(LVariant &v)
+void LControlTree::Item::SetValue(LVariant &v)
 {
 	Value = v;
-	if (GTreeItem::Select())
+	if (LTreeItem::Select())
 	{
 		DeleteObj(Ctrl);
 		DeleteObj(Browse);
@@ -122,7 +121,7 @@ void GControlTree::Item::SetValue(LVariant &v)
 	else Update();
 }
 
-LRect &GControlTree::Item::GetRect()
+LRect &LControlTree::Item::GetRect()
 {
 	static LRect r;
 	r.ZOff(-1, -1);
@@ -140,7 +139,7 @@ LRect &GControlTree::Item::GetRect()
 	return r;
 }
 
-void GControlTree::Item::Save()
+void LControlTree::Item::Save()
 {
 	if (Ctrl)
 	{
@@ -174,7 +173,7 @@ void GControlTree::Item::Save()
 				{
 					if (Idx >= 0 && Idx < (int)Enum->Length())
 					{
-						GControlTree::EnumValue &e = (*Enum)[Idx];
+						LControlTree::EnumValue &e = (*Enum)[Idx];
 						if (e.Value.Type == GV_STRING)
 						{
 							if (Stricmp(Value.Str(), e.Value.Str()))
@@ -202,9 +201,9 @@ void GControlTree::Item::Save()
 	}
 }
 
-void GControlTree::Item::Select(bool b)
+void LControlTree::Item::Select(bool b)
 {
-	GTreeItem::Select(b);
+	LTreeItem::Select(b);
 
 	if ((Ctrl != 0) ^ b)
 	{
@@ -219,7 +218,7 @@ void GControlTree::Item::Select(bool b)
 				default:
 					break;
 				case GV_STRING:
-					if ((Ctrl = new GEdit(CtrlId, 0, 0, 200, CtrlY, 0)))
+					if ((Ctrl = new LEdit(CtrlId, 0, 0, 200, CtrlY, 0)))
 						Ctrl->Name(Value.Str());
 					if (Flags & TYPE_FILE)
 						Browse = new GButton(IDC_BROWSE, 0, 0, -1, CtrlY, "...");
@@ -250,7 +249,7 @@ void GControlTree::Item::Select(bool b)
 					}
 					else
 					{
-						if ((Ctrl = new GEdit(CtrlId, 0, 0, 60, CtrlY, 0)))
+						if ((Ctrl = new LEdit(CtrlId, 0, 0, 60, CtrlY, 0)))
 							Ctrl->Value(Value.CastInt32());
 					}
 					break;
@@ -284,7 +283,7 @@ void GControlTree::Item::Select(bool b)
 	}
 }
 
-void GControlTree::Item::PositionControls()
+void LControlTree::Item::PositionControls()
 {
 	if (Ctrl)
 	{
@@ -301,9 +300,9 @@ void GControlTree::Item::PositionControls()
 	}
 }
 
-void GControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
+void LControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 {
-	GTreeItem::OnPaint(Ctx);
+	LTreeItem::OnPaint(Ctx);
 
 	if (!Ctrl)
 	{
@@ -380,25 +379,25 @@ void GControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 }
 
 ///////////////////////////////////////////////////////////////////////
-GControlTree::GControlTree() : GTree(-1, 0, 0, 100, 100)
+LControlTree::LControlTree() : LTree(-1, 0, 0, 100, 100)
 {
 	_ObjName = Res_ControlTree;
-	d = new GControlTreePriv;
+	d = new LControlTreePriv;
 }
 
-GControlTree::~GControlTree()
+LControlTree::~LControlTree()
 {
 	DeleteObj(d);
 }
 
-GControlTree::Item *GControlTree::Find(const char *opt)
+LControlTree::Item *LControlTree::Find(const char *opt)
 {
-	for (GTreeItem *i = GetChild(); i; i = i->GetNext())
+	for (LTreeItem *i = GetChild(); i; i = i->GetNext())
 	{
-		GControlTree::Item *ci = dynamic_cast<GControlTree::Item*>(i);
+		LControlTree::Item *ci = dynamic_cast<LControlTree::Item*>(i);
 		if (ci)
 		{
-			GControlTree::Item *f = ci->Find(opt);
+			LControlTree::Item *f = ci->Find(opt);
 			if (f)
 				return f;
 		}
@@ -407,16 +406,16 @@ GControlTree::Item *GControlTree::Find(const char *opt)
 	return 0;
 }
 
-bool GControlTree::Serialize(GDom *Store, bool Write)
+bool LControlTree::Serialize(GDom *Store, bool Write)
 {
 	bool Error = false;
 
 	if (!Store)
 		return false;
 
-	for (GTreeItem *i = GetChild(); i; i = i->GetNext())
+	for (LTreeItem *i = GetChild(); i; i = i->GetNext())
 	{
-		GControlTree::Item *ci = dynamic_cast<GControlTree::Item*>(i);
+		LControlTree::Item *ci = dynamic_cast<LControlTree::Item*>(i);
 		if (ci)
 		{
 			Error = Error | ci->Serialize(Store, Write);
@@ -426,16 +425,16 @@ bool GControlTree::Serialize(GDom *Store, bool Write)
 	return !Error;
 }
 
-GControlTree::Item *GControlTree::Resolve(bool Create, const char *Path, int CtrlId, LVariantType Type, GArray<EnumValue> *Enum)
+LControlTree::Item *LControlTree::Resolve(bool Create, const char *Path, int CtrlId, LVariantType Type, GArray<EnumValue> *Enum)
 {
 	auto t  = GString(Path).SplitDelimit(".");
 	if (t.Length() > 0)
 	{
-		GTreeNode *Cur = this;
+		LTreeNode *Cur = this;
 		for (unsigned i=0; i<t.Length(); i++)
 		{
-			GTreeItem *Match = 0;
-			for (GTreeItem *c = Cur->GetChild(); c; c = c->GetNext())
+			LTreeItem *Match = 0;
+			for (LTreeItem *c = Cur->GetChild(); c; c = c->GetNext())
 			{
 				const char *s = c->GetText();
 				if (s && _stricmp(t[i], s) == 0)
@@ -453,12 +452,12 @@ GControlTree::Item *GControlTree::Resolve(bool Create, const char *Path, int Ctr
 			{
 				if (Create && i == t.Length() - 1)
 				{
-					GControlTree::Item *Ci = new GControlTree::Item(CtrlId, t[i], Path, Type, Enum);
+					LControlTree::Item *Ci = new LControlTree::Item(CtrlId, t[i], Path, Type, Enum);
 					if (Ci)
 					{
 						Cur->Insert(Ci);
 						
-						GTreeItem *p = Ci->GetParent();
+						LTreeItem *p = Ci->GetParent();
 						if (p)
 							p->Expanded(true);
 						return Ci;
@@ -469,15 +468,15 @@ GControlTree::Item *GControlTree::Resolve(bool Create, const char *Path, int Ctr
 			}
 		}
 
-		return dynamic_cast<GControlTree::Item*>(Cur);
+		return dynamic_cast<LControlTree::Item*>(Cur);
 	}
 
 	return 0;
 }
 
-GTreeItem *GControlTree::Insert(const char *DomPath, int CtrlId, LVariantType Type, LVariant *Value, GArray<EnumValue> *Enum)
+LTreeItem *LControlTree::Insert(const char *DomPath, int CtrlId, LVariantType Type, LVariant *Value, GArray<EnumValue> *Enum)
 {
-	GControlTree::Item *c = Resolve(true, DomPath, CtrlId, Type, Enum);
+	LControlTree::Item *c = Resolve(true, DomPath, CtrlId, Type, Enum);
 	if (c)
 	{
 		if (Value)
@@ -487,7 +486,7 @@ GTreeItem *GControlTree::Insert(const char *DomPath, int CtrlId, LVariantType Ty
 	return 0;
 }
 
-void GControlTree::ReadTree(LXmlTag *t, GTreeNode *n)
+void LControlTree::ReadTree(LXmlTag *t, LTreeNode *n)
 {
 	for (auto c: t->Children)
 	{
@@ -510,7 +509,7 @@ void GControlTree::ReadTree(LXmlTag *t, GTreeNode *n)
 			else if (!_stricmp(Type, "file"))
 			{
 				iType = GV_STRING;
-				Flags |= GControlTree::Item::TYPE_FILE;
+				Flags |= LControlTree::Item::TYPE_FILE;
 			}
 			else if (!_stricmp(Type, "bool"))
 				iType = GV_BOOL;
@@ -520,7 +519,7 @@ void GControlTree::ReadTree(LXmlTag *t, GTreeNode *n)
 		}
 
 		const char *Opt = c->GetAttr("ControlTag");
-		GControlTree::Item *ct = new GControlTree::Item(CtrlId,
+		LControlTree::Item *ct = new LControlTree::Item(CtrlId,
 														Str?Str->Str:(char*)"#error",
 														ValidStr(Opt) ? Opt : NULL,
 														iType,
@@ -535,7 +534,7 @@ void GControlTree::ReadTree(LXmlTag *t, GTreeNode *n)
 	}
 }
 
-bool GControlTree::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LControlTree::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	if (!Name)
 		return false;
@@ -566,7 +565,7 @@ bool GControlTree::SetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-int GControlTree::OnNotify(LViewI *c, int f)
+int LControlTree::OnNotify(LViewI *c, int f)
 {
 	switch (c->GetId())
 	{
@@ -587,17 +586,17 @@ int GControlTree::OnNotify(LViewI *c, int f)
 		}
 	}
 
-	return GTree::OnNotify(c, f);
+	return LTree::OnNotify(c, f);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-class GControlTree_Factory : public GViewFactory
+class GControlTree_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
-		if (_stricmp(Class, "GControlTree") == 0)
+		if (_stricmp(Class, "LControlTree") == 0)
 		{
-			return new GControlTree;
+			return new LControlTree;
 		}
 
 		return 0;

@@ -136,7 +136,7 @@ public:
 };
 
 /// The popup label for GItem's
-class GItemEdit : public GPopup
+class GItemEdit : public LPopup
 {
 	class GItemEditPrivate *d;
 
@@ -211,9 +211,9 @@ public:
 	/// Set clicked
 	void Value(bool i);
 	
-	/// Sets the index into the parent containers GImageList
+	/// Sets the index into the parent containers LImageList
 	void Image(int i);
-	/// Gets the index into the parent containers GImageList
+	/// Gets the index into the parent containers LImageList
 	int Image();
 	/// true if resizable
 	bool Resizable();
@@ -257,7 +257,7 @@ public:
 #define DEFAULT_COLUMN_SPACING		12
 
 class LgiClass GItemContainer :
-	public GLayout,
+	public LLayout,
 	public GImageListOwner
 {
 	friend class GItemColumn;

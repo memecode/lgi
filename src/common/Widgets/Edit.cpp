@@ -1,7 +1,7 @@
 // \file
 // \author Matthew Allen (fret@memecode.com)
 #include "Lgi.h"
-#include "GEdit.h"
+#include "LEdit.h"
 #include "GClipBoard.h"
 #include "LDisplayString.h"
 #include "LgiRes.h"
@@ -21,7 +21,7 @@ public:
 
 static _OsFontType SysFontType;
 
-class GEditPrivate
+class LEditPrivate
 {
 public:
 	bool FocusOnCreate;
@@ -30,19 +30,19 @@ public:
 	bool NotificationProcessed;
 	GAutoString EmptyTxt;
 	
-	GEditPrivate()
+	LEditPrivate()
 	{
 		FocusOnCreate = false;
 		NotificationProcessed = false;
 	}
 };
 
-void GEdit::KeyProcessed()
+void LEdit::KeyProcessed()
 {
 	d->NotificationProcessed = true;
 }
 
-GEdit::GEdit(int id, int x, int y, int cx, int cy, const char *name) :
+LEdit::LEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	#if WINNATIVE
 	ResObject(Res_EditBox)
 	#else
@@ -55,7 +55,7 @@ GEdit::GEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	SetWrapType(TEXTED_WRAP_NONE);
 	#endif
 	_OsFontType Type;
-	d = new GEditPrivate;
+	d = new LEditPrivate;
 
 	LDisplayString Ds(SysFont, (char*)(name?name:"A"));
 	if (cx < 0) cx = Ds.X() + 6;
@@ -72,18 +72,18 @@ GEdit::GEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	LResources::StyleElement(this);
 }
 
-GEdit::~GEdit()
+LEdit::~LEdit()
 {
 	DeleteObj(d);
 }
 
-void GEdit::SetEmptyText(const char *EmptyText)
+void LEdit::SetEmptyText(const char *EmptyText)
 {
 	d->EmptyTxt.Reset(NewStr(EmptyText));
 	Invalidate();
 }
 
-void GEdit::SendNotify(int Data)
+void LEdit::SendNotify(int Data)
 {
 	if (Data == GNotifyDocChanged)
 		return GTextView3::SendNotify(0);
@@ -92,7 +92,7 @@ void GEdit::SendNotify(int Data)
 		return GTextView3::SendNotify(Data);
 }
 
-GRange GEdit::GetSelectionRange()
+GRange LEdit::GetSelectionRange()
 {
 	GRange r;
 	ssize_t Sel = GTextView3::GetCaret(false);
@@ -110,62 +110,62 @@ GRange GEdit::GetSelectionRange()
 	return r;
 }
 
-void GEdit::Select(int Start, int Len)
+void LEdit::Select(int Start, int Len)
 {
 	GTextView3::SetCaret(Start, false);
 	GTextView3::SetCaret(Start + (Len > 0 ? Len : 0x7fffffff) - 1, true);
 }
 
-ssize_t GEdit::GetCaret(bool Cursor)
+ssize_t LEdit::GetCaret(bool Cursor)
 {
 	return GTextView3::GetCaret(Cursor);
 }
 
-void GEdit::SetCaret(size_t Pos, bool Select, bool ForceFullUpdate)
+void LEdit::SetCaret(size_t Pos, bool Select, bool ForceFullUpdate)
 {
 	GTextView3::SetCaret(Pos, Select, ForceFullUpdate);
 }
 
-void GEdit::Value(int64 i)
+void LEdit::Value(int64 i)
 {
 	char Str[32];
 	sprintf(Str, LPrintfInt64, i);
 	Name(Str);
 }
 
-int64 GEdit::Value()
+int64 LEdit::Value()
 {
 	auto n = Name();
 	return (n) ? atoi(n) : 0;
 }
 
-bool GEdit::MultiLine()
+bool LEdit::MultiLine()
 {
 	return d->Multiline;
 }
 
-void GEdit::MultiLine(bool m)
+void LEdit::MultiLine(bool m)
 {
 	d->Multiline = m;
 }
 
-bool GEdit::Password()
+bool LEdit::Password()
 {
 	return d->Password;
 }
 
-void GEdit::Password(bool m)
+void LEdit::Password(bool m)
 {
 	SetObscurePassword(d->Password = m);
 }
 
-bool GEdit::SetScrollBars(bool x, bool y)
+bool LEdit::SetScrollBars(bool x, bool y)
 {
 	// Prevent scrollbars if the control is not multiline.
 	return GTextView3::SetScrollBars(x, y && d->Multiline);
 }
 
-void GEdit::OnPaint(LSurface *pDC)
+void LEdit::OnPaint(LSurface *pDC)
 {
     GTextView3::OnPaint(pDC);
 
@@ -184,7 +184,7 @@ void GEdit::OnPaint(LSurface *pDC)
     }
 }
 
-bool GEdit::OnKey(LKey &k)
+bool LEdit::OnKey(LKey &k)
 {
 	d->NotificationProcessed = false;
 	
@@ -238,7 +238,7 @@ bool GEdit::OnKey(LKey &k)
 	return GTextView3::OnKey(k);
 }
 
-void GEdit::OnEnter(LKey &k)
+void LEdit::OnEnter(LKey &k)
 {
 	if (d->Multiline)
 		GTextView3::OnEnter(k);
@@ -246,7 +246,7 @@ void GEdit::OnEnter(LKey &k)
 		SendNotify(GNotify_ReturnKey);
 }
 
-bool GEdit::Paste()
+bool LEdit::Paste()
 {
 	GClipBoard Clip(this);
 

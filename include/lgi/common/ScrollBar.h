@@ -9,16 +9,16 @@
 
 /// \brief Scroll bar control
 ///
-/// This control can be used as an actual free standing window or to address built in controls on a GLayout
+/// This control can be used as an actual free standing window or to address built in controls on a LLayout
 /// view.
-class LgiClass GScrollBar :
-	public GControl,
+class LgiClass LScrollBar :
+	public LControl,
 	public ResObject
 {
-	friend class GLayout;
+	friend class LLayout;
 
 protected:
-	class GScrollBarPrivate *d;
+	class LScrollBarPrivate *d;
 
 	#if WINNATIVE
 	LViewI *GetMyView();
@@ -28,13 +28,13 @@ protected:
 
 public:
 	/// Call this constructor for embeded scrollbar say in a window
-	GScrollBar();
+	LScrollBar();
 	
-	const char *GetClass() { return "GScrollBar"; }
+	const char *GetClass() { return "LScrollBar"; }
 
 	/// Call this constructor for a control based scrollbar, say in a dialog
-	GScrollBar(int id, int x, int y, int cx, int cy, const char *name);
-	~GScrollBar();
+	LScrollBar(int id, int x, int y, int cx, int cy, const char *name);
+	~LScrollBar();
 
 	/// Returns the size of the bar, i.e. the width if vertical or the height if horizontal
 	static int GetScrollSize();

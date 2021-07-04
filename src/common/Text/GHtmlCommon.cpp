@@ -598,7 +598,7 @@ void GHtmlStatic::OnSystemColourChange()
 }
 
 /////////////////////////////////////////////////////////////////////////////
-GHtmlElement::GHtmlElement(GHtmlElement *parent)
+LHtmlElement::LHtmlElement(LHtmlElement *parent)
 {
 	StyleDom.Css = this;
 	TagId = CONTENT;
@@ -609,12 +609,12 @@ GHtmlElement::GHtmlElement(GHtmlElement *parent)
 		Parent->Children.Add(this);
 }
 
-GHtmlElement::~GHtmlElement()
+LHtmlElement::~LHtmlElement()
 {
 	Children.DeleteObjects();
 }
 
-bool GHtmlElement::Attach(GHtmlElement *Child, ssize_t Idx)
+bool LHtmlElement::Attach(LHtmlElement *Child, ssize_t Idx)
 {
 	if (TagId == CONTENT)
 	{
@@ -638,7 +638,7 @@ bool GHtmlElement::Attach(GHtmlElement *Child, ssize_t Idx)
 	return true;
 }
 
-void GHtmlElement::Detach()
+void LHtmlElement::Detach()
 {
 	if (Parent)
 	{
@@ -647,7 +647,7 @@ void GHtmlElement::Detach()
 	}
 }
 
-bool GHtmlElement::HasChild(GHtmlElement *c)
+bool LHtmlElement::HasChild(LHtmlElement *c)
 {
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
@@ -681,7 +681,7 @@ bool GCssStyle::SetVariant(const char *Name, LVariant &Value, char *Array)
 		const char *d = Value.Str();
 		if (Css->ParseDisplayType(d))
 		{
-			GHtmlElement *e = dynamic_cast<GHtmlElement*>(Css);
+			LHtmlElement *e = dynamic_cast<LHtmlElement*>(Css);
 			if (e)
 				e->OnStyleChange(Name);
 			return true;

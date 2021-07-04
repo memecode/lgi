@@ -4,10 +4,10 @@
 #include <stdio.h>
 
 #include "Lgi.h"
-#include "GSkinEngine.h"
-#include "GButton.h"
+#include "LSkinEngine.h"
+#include "LButton.h"
 #include "LDisplayString.h"
-#include "GTableLayout.h"
+#include "LTableLayout.h"
 #include "LgiRes.h"
 #include "LStringLayout.h"
 #include "GCssTools.h"
@@ -22,7 +22,7 @@
 #endif
 
 // Size of extra pixels, beyond the size of the text itself.
-LPoint GButton::Overhead =
+LPoint LButton::Overhead =
     LPoint(
         // Extra width needed
         #if defined(MAC) && !defined(LGI_SDL)
@@ -34,7 +34,7 @@ LPoint GButton::Overhead =
         6
     );
 
-class GButtonPrivate : public LStringLayout
+class LButtonPrivate : public LStringLayout
 {
 public:
 	int Pressed;
@@ -47,7 +47,7 @@ public:
 	LSurface *Image;
 	bool OwnImage;
 	
-	GButtonPrivate() : LStringLayout(LgiApp->GetFontCache())
+	LButtonPrivate() : LStringLayout(LgiApp->GetFontCache())
 	{
 		AmpersandToUnderline = true;
 		Pressed = 0;
@@ -60,7 +60,7 @@ public:
 		SetWrap(false);
 	}
 
-	~GButtonPrivate()
+	~LButtonPrivate()
 	{
 		if (OwnImage)
 			DeleteObj(Image);
@@ -82,10 +82,10 @@ public:
 	}
 };
 
-GButton::GButton(int id, int x, int y, int cx, int cy, const char *name) :
+LButton::LButton(int id, int x, int y, int cx, int cy, const char *name) :
 	ResObject(Res_Button)
 {
-	d = new GButtonPrivate;
+	d = new LButtonPrivate;
 	Name(name);
 	
 	LRect r(x,
@@ -98,7 +98,7 @@ GButton::GButton(int id, int x, int y, int cx, int cy, const char *name) :
 	SetTabStop(true);
 }
 
-GButton::~GButton()
+LButton::~LButton()
 {
 	if (GetWindow() &&
 		GetWindow()->_Default == this)
@@ -109,7 +109,7 @@ GButton::~GButton()
 	DeleteObj(d);
 }
 
-int GButton::OnNotify(LViewI *Ctrl, int Flags)
+int LButton::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
 	{
@@ -119,7 +119,7 @@ int GButton::OnNotify(LViewI *Ctrl, int Flags)
 	return 0;
 }
 
-bool GButton::Default()
+bool LButton::Default()
 {
 	if (GetWindow())
 		return GetWindow()->_Default == this;
@@ -127,7 +127,7 @@ bool GButton::Default()
 	return false;
 }
 
-void GButton::Default(bool b)
+void LButton::Default(bool b)
 {
 	if (GetWindow())
 	{
@@ -143,22 +143,22 @@ void GButton::Default(bool b)
 	}
 }
 
-bool GButton::GetIsToggle()
+bool LButton::GetIsToggle()
 {
 	return d->Toggle;
 }
 
-void GButton::SetIsToggle(bool toggle)
+void LButton::SetIsToggle(bool toggle)
 {
 	d->Toggle = toggle;
 }
 
-LSurface *GButton::GetImage()
+LSurface *LButton::GetImage()
 {
 	return d->Image;
 }
 
-bool GButton::SetImage(const char *FileName)
+bool LButton::SetImage(const char *FileName)
 {
 	if (d->OwnImage)
 		DeleteObj(d->Image);
@@ -167,7 +167,7 @@ bool GButton::SetImage(const char *FileName)
 	return d->OwnImage = d->Image != NULL;
 }
 
-bool GButton::SetImage(LSurface *Img, bool OwnIt)
+bool LButton::SetImage(LSurface *Img, bool OwnIt)
 {
 	if (d->OwnImage)
 		DeleteObj(d->Image);
@@ -177,26 +177,26 @@ bool GButton::SetImage(LSurface *Img, bool OwnIt)
 	return d->OwnImage;
 }
 
-void GButton::OnStyleChange()
+void LButton::OnStyleChange()
 {
 	d->Layout(GetCss(true), LBase::Name());
 }
 
-bool GButton::Name(const char *n)
+bool LButton::Name(const char *n)
 {
 	bool Status = LView::Name(n);
 	OnStyleChange();
 	return Status;
 }
 
-bool GButton::NameW(const char16 *n)
+bool LButton::NameW(const char16 *n)
 {
 	bool Status = LView::NameW(n);
 	OnStyleChange();
 	return Status;
 }
 
-void GButton::SetFont(LFont *Fnt, bool OwnIt)
+void LButton::SetFont(LFont *Fnt, bool OwnIt)
 {
 	LgiAssert(Fnt && Fnt->Handle());
 	LView::SetFont(Fnt, OwnIt);
@@ -204,12 +204,12 @@ void GButton::SetFont(LFont *Fnt, bool OwnIt)
 	Invalidate();
 }
 
-GMessage::Result GButton::OnEvent(GMessage *Msg)
+GMessage::Result LButton::OnEvent(GMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }
 
-void GButton::OnMouseClick(LMouse &m)
+void LButton::OnMouseClick(LMouse &m)
 {
 	if (!Enabled())
 	{
@@ -261,7 +261,7 @@ void GButton::OnMouseClick(LMouse &m)
 	}
 }
 
-void GButton::OnMouseEnter(LMouse &m)
+void LButton::OnMouseEnter(LMouse &m)
 {
 	DEBUG_LOG("OnMouseEnter\n");
 	d->Over = true;
@@ -276,7 +276,7 @@ void GButton::OnMouseEnter(LMouse &m)
 	}
 }
 
-void GButton::OnMouseExit(LMouse &m)
+void LButton::OnMouseExit(LMouse &m)
 {
 	DEBUG_LOG("OnMouseExit\n");
 	d->Over = false;
@@ -291,7 +291,7 @@ void GButton::OnMouseExit(LMouse &m)
 	}
 }
 
-bool GButton::OnKey(LKey &k)
+bool LButton::OnKey(LKey &k)
 {
 	if (
 		#ifdef WINNATIVE
@@ -346,7 +346,7 @@ bool GButton::OnKey(LKey &k)
 	return false;
 }
 
-void GButton::OnClick()
+void LButton::OnClick()
 {
 	int Id = GetId();
 	if (Id)
@@ -378,12 +378,12 @@ void GButton::OnClick()
 		SendNotify();
 }
 
-void GButton::OnFocus(bool f)
+void LButton::OnFocus(bool f)
 {
 	Invalidate();
 }
 
-void GButton::OnPaint(LSurface *pDC)
+void LButton::OnPaint(LSurface *pDC)
 {
 	#if defined LGI_CARBON
 
@@ -429,14 +429,14 @@ void GButton::OnPaint(LSurface *pDC)
 		if (GApp::SkinEngine &&
 			TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_BUTTON))
 		{
-			GSkinState State;
+			LSkinState State;
 			State.pScreen = pDC;
 			State.MouseOver = d->Over;
 
 			State.Image = d->Image;
 			
 			if (X() < GdcD->X() && Y() < GdcD->Y())
-				GApp::SkinEngine->OnPaint_GButton(this, &State);
+				GApp::SkinEngine->OnPaint_LButton(this, &State);
 			
 			LPoint pt;
 			LRect r = GetClient();
@@ -473,22 +473,22 @@ void GButton::OnPaint(LSurface *pDC)
 	#endif
 }
 
-int64 GButton::Value()
+int64 LButton::Value()
 {
 	return d->Pressed != 0;
 }
 
-void GButton::Value(int64 i)
+void LButton::Value(int64 i)
 {
 	d->Pressed = (int)i;
 	Invalidate();
 }
 
-void GButton::OnCreate()
+void LButton::OnCreate()
 {
 }
 
-void GButton::OnAttach()
+void LButton::OnAttach()
 {
 	LResources::StyleElement(this);
 	OnStyleChange();
@@ -502,13 +502,13 @@ void GButton::OnAttach()
 	}
 }
 
-void GButton::SetPreferredSize(int x, int y)
+void LButton::SetPreferredSize(int x, int y)
 {
 	LRect r = GetPos();
 
 	int Ix = d->Image ? d->Image->X() : 0;
 	int Iy = d->Image ? d->Image->Y() : 0;
-	int Cx = d->TxtSz.X() + Ix + (d->TxtSz.X() && d->Image ? GTableLayout::CellSpacing : 0);
+	int Cx = d->TxtSz.X() + Ix + (d->TxtSz.X() && d->Image ? LTableLayout::CellSpacing : 0);
 	int Cy = MAX(d->TxtSz.Y(), Iy);
 	
 	r.Dimension((x > 0 ? x : Cx + Overhead.x) - 1,
@@ -517,7 +517,7 @@ void GButton::SetPreferredSize(int x, int y)
 	SetPos(r);
 }
 
-bool GButton::OnLayout(LViewLayoutInfo &Inf)
+bool LButton::OnLayout(LViewLayoutInfo &Inf)
 {
 	LPoint Dpi(96, 96);
 	auto Css = GetCss();

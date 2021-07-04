@@ -128,7 +128,7 @@ void IdeCommon::InsertTag(LXmlTag *t)
 {
 	LXmlTag::InsertTag(t);
 
-	GTreeItem *i = dynamic_cast<GTreeItem*>(t);
+	LTreeItem *i = dynamic_cast<LTreeItem*>(t);
 	if (i)
 	{
 		Insert(i);

@@ -1,15 +1,14 @@
-#ifndef _GDATAGRID_H_
-#define _GDATAGRID_H_
+#pragma once
 
-#include "LList.h"
-#include "GDragAndDrop.h"
+#include "lgi/common/List.h"
+#include "lgi/common/DragAndDrop.h"
 
-class GDataGrid : public LList, public GDragDropSource, public GDragDropTarget
+class LDataGrid : public LList, public GDragDropSource, public GDragDropTarget
 {
-	struct GDataGridPriv *d;
+	struct LDataGridPriv *d;
 
 public:
-	enum GDataGridFlags
+	enum LDataGridFlags
 	{
 		GDG_READONLY	= 0x1,
 		GDG_INTEGER		= 0x2,
@@ -19,15 +18,15 @@ public:
 	typedef GArray<LListItem*> ItemArray;
 	typedef GArray<int> IndexArray;
 
-	GDataGrid(int CtrlId, ItemFactory Func = 0, void *userdata = 0);
-	~GDataGrid();
+	LDataGrid(int CtrlId, ItemFactory Func = 0, void *userdata = 0);
+	~LDataGrid();
 
 	// Methods
 	bool CanAddRecord();
 	void CanAddRecord(bool b);
 	void SetFactory(ItemFactory Func = 0, void *userdata = 0);
 	LListItem *NewItem();
-	void SetColFlag(int Col, GDataGridFlags Flags, LVariant *Arg = 0);
+	void SetColFlag(int Col, LDataGridFlags Flags, LVariant *Arg = 0);
 	IndexArray *GetDeletedItems();
 
 	// Impl

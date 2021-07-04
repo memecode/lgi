@@ -4,7 +4,7 @@
 #include "lgi/common/StatusBar.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
-GStatusBar::GStatusBar()
+LStatusBar::LStatusBar()
 {
 	Name("LGI_StatusBar");
 	Raised(true);
@@ -12,11 +12,11 @@ GStatusBar::GStatusBar()
 	LResources::StyleElement(this);
 }
 
-GStatusBar::~GStatusBar()
+LStatusBar::~LStatusBar()
 {
 }
 
-bool GStatusBar::Pour(LRegion &r)
+bool LStatusBar::Pour(LRegion &r)
 {
 	LRect *Best = FindLargestEdge(r, GV_EDGE_BOTTOM);
 	if (Best)
@@ -32,13 +32,13 @@ bool GStatusBar::Pour(LRegion &r)
 	return false;
 }
 
-void GStatusBar::OnPaint(LSurface *pDC)
+void LStatusBar::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_MED);
 	pDC->Rectangle();
 }
 
-void GStatusBar::OnPosChange()
+void LStatusBar::OnPosChange()
 {
 	int x = X() - 5;
 	auto i = Children.Length() - 1;
@@ -81,7 +81,7 @@ void GStatusBar::OnPosChange()
 	}
 }
 
-GStatusPane *GStatusBar::AppendPane(const char *Text, int Width)
+GStatusPane *LStatusBar::AppendPane(const char *Text, int Width)
 {
 	GStatusPane *Pane = 0;
 	if (Text)
@@ -97,7 +97,7 @@ GStatusPane *GStatusBar::AppendPane(const char *Text, int Width)
 	return Pane;
 }
 
-bool GStatusBar::AppendPane(GStatusPane *Pane)
+bool LStatusBar::AppendPane(GStatusPane *Pane)
 {
 	if (!Pane)
 		return false;
@@ -184,7 +184,7 @@ void GStatusPane::SetWidth(int x)
 	Width = x;
 	if (GetParent())
 	{
-		GStatusBar *Bar = dynamic_cast<GStatusBar*>(GetParent());
+		LStatusBar *Bar = dynamic_cast<LStatusBar*>(GetParent());
 		if (Bar)
 			Bar->OnPosChange();
 	}

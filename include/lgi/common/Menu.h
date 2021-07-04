@@ -406,7 +406,7 @@ public:
 	/// Return the icon of this this
 	int Icon();
 
-	GImageList *GetImageList();
+	LImageList *GetImageList();
 
 	#if LGI_COCOA
 	void OnActivate(LMenuItem *item);

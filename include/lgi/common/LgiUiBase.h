@@ -22,20 +22,20 @@ class GApp;
 class LWindow;
 class LWindowsClass;
 class LView;
-class GLayout;
+class LLayout;
 class GFileSelect;
 class GFindReplace;
 class LSubMenu;
 class LMenuItem;
 class LMenu;
-class GToolBar;
-class GToolButton;
-class GSplitter;
+class LToolBar;
+class LToolButton;
+class LSplitter;
 class GStatusPane;
-class GStatusBar;
+class LStatusBar;
 class GToolColour;
-class GScrollBar;
-class GImageList;
+class LScrollBar;
+class LImageList;
 class LDialog;
 
 // Tracing:

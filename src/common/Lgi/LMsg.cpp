@@ -15,8 +15,8 @@ void MsgCb(Gtk::GtkDialog *dialog, Gtk::gint response_id, Gtk::gpointer user_dat
 #endif
 
 #if defined(__GTK_H__) || defined(MAC) || defined(LGI_SDL)
-#include "GTextLabel.h"
-#include "GButton.h"
+#include "LTextLabel.h"
+#include "LButton.h"
 
 #if LGI_COCOA
 #import <Cocoa/Cocoa.h>
@@ -280,10 +280,10 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 		Dlg.SetParent(Parent);
 		Dlg.Name((char*)(Title ? Title : "Message"));
 
-		GTextLabel *Text = new GTextLabel(-1, 10, 10, -1, -1, Msg);
+		LTextLabel *Text = new LTextLabel(-1, 10, 10, -1, -1, Msg);
 		Dlg.AddView(Text);
 
-		List<GButton> Btns;
+		List<LButton> Btns;
 		#ifdef LGI_TOUCHSCREEN
 		float Scale = 1.6f;
 		#else
@@ -297,26 +297,26 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 			default:
 			case MB_OK:
 			{
-				Btns.Insert(new GButton(IDOK, 10, 40, BtnX, BtnY, "Ok"));
+				Btns.Insert(new LButton(IDOK, 10, 40, BtnX, BtnY, "Ok"));
 				break;
 			}
 			case MB_OKCANCEL:
 			{
-				Btns.Insert(new GButton(IDOK, 10, 40, BtnX, BtnY, "Ok"));
-				Btns.Insert(new GButton(IDCANCEL, 10, 40, BtnX, BtnY, "Cancel"));
+				Btns.Insert(new LButton(IDOK, 10, 40, BtnX, BtnY, "Ok"));
+				Btns.Insert(new LButton(IDCANCEL, 10, 40, BtnX, BtnY, "Cancel"));
 				break;
 			}
 			case MB_YESNO:
 			{
-				Btns.Insert(new GButton(IDYES, 10, 40, BtnX, BtnY, "Yes"));
-				Btns.Insert(new GButton(IDNO, 10, 40, BtnX, BtnY, "No"));
+				Btns.Insert(new LButton(IDYES, 10, 40, BtnX, BtnY, "Yes"));
+				Btns.Insert(new LButton(IDNO, 10, 40, BtnX, BtnY, "No"));
 				break;
 			}
 			case MB_YESNOCANCEL:
 			{
-				Btns.Insert(new GButton(IDYES, 10, 40, BtnX, BtnY, "Yes"));
-				Btns.Insert(new GButton(IDNO, 10, 40, BtnX, BtnY, "No"));
-				Btns.Insert(new GButton(IDCANCEL, 10, 40, BtnX, BtnY, "Cancel"));
+				Btns.Insert(new LButton(IDYES, 10, 40, BtnX, BtnY, "Yes"));
+				Btns.Insert(new LButton(IDNO, 10, 40, BtnX, BtnY, "No"));
+				Btns.Insert(new LButton(IDCANCEL, 10, 40, BtnX, BtnY, "Cancel"));
 				break;
 			}
 		}
@@ -437,12 +437,12 @@ void LDialogTextMsg(LViewI *Parent, const char *Title, GString Txt)
 		d->SetPos(r);
 		d->MoveSameScreen(Parent);
 
-		GTableLayout *t = new GTableLayout(100);
+		LTableLayout *t = new LTableLayout(100);
 		auto c = t->GetCell(0, 0);
 		c->Add(Log = new GTextLog(101));
 		Log->Name(Txt);
 		c = t->GetCell(0, 1);
-		c->Add(new GButton(IDOK, 0, 0, -1, -1, "Ok"));
+		c->Add(new LButton(IDOK, 0, 0, -1, -1, "Ok"));
 		c->TextAlign(LCss::AlignCenter);
 		
 		d->AddView(t);

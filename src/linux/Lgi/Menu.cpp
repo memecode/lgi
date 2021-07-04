@@ -1266,7 +1266,7 @@ bool LMenuItem::Replace(Gtk::GtkWidget *newWid)
 	return Info != NULL;
 }
 
-GImageList *LMenuItem::GetImageList()
+LImageList *LMenuItem::GetImageList()
 {
 	if (GetMenu())
 		return GetMenu()->GetImageList();

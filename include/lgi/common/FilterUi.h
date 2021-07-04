@@ -3,9 +3,9 @@
 #ifndef _GFILTER_UI_H_
 #define _GFILTER_UI_H_
 
-#include "GTree.h"
+#include "LTree.h"
 
-class GFilterViewPrivate;
+class LFilterViewPrivate;
 
 enum GFilterNode
 {
@@ -23,17 +23,17 @@ enum GFilterMenu
 	FMENU_VALUE
 };
 
-class GFilterView;
-class GFilterItem;
+class LFilterView;
+class LFilterItem;
 
-typedef int (*FilterUi_Menu)(GFilterView *View,
-							 GFilterItem *Item,
+typedef int (*FilterUi_Menu)(LFilterView *View,
+							 LFilterItem *Item,
 							 GFilterMenu Menu,
 							 LRect &r,
 							 GArray<char*> *GetList,
 							 void *UserData);
 
-class GFilterItem : public GTreeItem, public GDragDropSource
+class LFilterItem : public LTreeItem, public GDragDropSource
 {
 	class GFilterItemPrivate *d;
 
@@ -43,8 +43,8 @@ protected:
 	void ShowControls(bool s);
 
 public:
-	GFilterItem(GFilterViewPrivate *Data, GFilterNode Node = LNODE_NEW);
-	~GFilterItem();
+	LFilterItem(LFilterViewPrivate *Data, GFilterNode Node = LNODE_NEW);
+	~LFilterItem();
 
 	bool GetNot();
 	const char *GetField();
@@ -70,20 +70,20 @@ public:
 };
 
 /// Filter user interface using a tree structure.
-class GFilterView : public GLayout
+class LFilterView : public LLayout
 {
-	class GFilterViewPrivate *d;
+	class LFilterViewPrivate *d;
 
 public:
-	GFilterView(FilterUi_Menu Callback = 0, void *UserData = 0);
-	~GFilterView();
+	LFilterView(FilterUi_Menu Callback = 0, void *UserData = 0);
+	~LFilterView();
 
 	void SetDefault();
 	bool ShowLegend();
 	void ShowLegend(bool b);
 	void Empty();
-	GFilterItem *Create(GFilterNode Node = LNODE_NEW);
-	GTreeNode *GetRootNode();
+	LFilterItem *Create(GFilterNode Node = LNODE_NEW);
+	LTreeNode *GetRootNode();
 
 	void OnPaint(LSurface *pDC);
 	void OnPosChange();

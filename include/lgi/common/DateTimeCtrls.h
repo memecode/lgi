@@ -7,17 +7,17 @@
 #include "GNotifications.h"
 
 /// This is a popup window to select a time.
-class GTimePopup : public GPopup
+class LTimePopup : public LPopup
 {
 	LView *Owner;
 	class TimeList *Times;
 	bool Ignore;
 
 public:
-	GTimePopup(LView *owner);
-	~GTimePopup();
+	LTimePopup(LView *owner);
+	~LTimePopup();
 
-	const char *GetClass() { return "GTimePopup"; }
+	const char *GetClass() { return "LTimePopup"; }
 
 	void SetTime(LDateTime *t);
 	GString GetTime();
@@ -29,17 +29,17 @@ public:
 
 /// This class is a little button to pull down the list of times...
 /// You use it by creating a custom control in LgiRes and using the control
-/// name "GTimePopup". Then at runtime bind it to an editbox by getting the
+/// name "LTimePopup". Then at runtime bind it to an editbox by getting the
 /// LView handle using LView::FindControl then give it the pointer to the
 /// edit box using LView::SetNotify.
-class GTimeDropDown :
-	public GDropDown,
+class LTimeDropDown :
+	public LDropDown,
 	public ResObject
 {
-	GTimePopup *Drop;
+	LTimePopup *Drop;
 
 public:
-	GTimeDropDown();
+	LTimeDropDown();
 
 	/// This sets the date source control is the notify control is empty.
 	void SetDate(char *d);
@@ -50,7 +50,7 @@ public:
 };
 
 /// Popup window used to select a date.
-class GDatePopup : public GPopup
+class LDatePopup : public LPopup
 {
 	LView *Owner;
 	LRect Caption;
@@ -63,10 +63,10 @@ class GDatePopup : public GPopup
 	bool FirstPaint;
 	
 public:
-	GDatePopup(LView *owner);
-	~GDatePopup();
+	LDatePopup(LView *owner);
+	~LDatePopup();
 
-	const char *GetClass() { return "GDatePopup"; }
+	const char *GetClass() { return "LDatePopup"; }
 
 	LDateTime Get();
 	void OnChange();
@@ -79,14 +79,14 @@ public:
 
 /// This class is a little button to pull down a date selection control...
 /// You use it by creating a custom control in LgiRes and using the control
-/// name "GDatePopup". Then at runtime bind it to an editbox by getting the
+/// name "LDatePopup". Then at runtime bind it to an editbox by getting the
 /// LView handle using LView::FindControl then give it the pointer to the
 /// edit box using LView::SetNotify.
 class GDateDropDown :
-	public GDropDown,
+	public LDropDown,
 	public ResObject
 {
-	GDatePopup *Drop;
+	LDatePopup *Drop;
 
 public:
 	GDateDropDown();

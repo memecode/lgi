@@ -1277,8 +1277,8 @@ void GFlowRegion::Insert(GFlowRect *Tr)
 }
 
 //////////////////////////////////////////////////////////////////////
-GTag::GTag(GHtml *h, GHtmlElement *p) :
-	GHtmlElement(p),
+GTag::GTag(GHtml *h, LHtmlElement *p) :
+	LHtmlElement(p),
 	Attr(8)
 {
 	Ctrl = 0;
@@ -2756,7 +2756,7 @@ void GTag::RestyleAll()
 	Restyle();
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GHtmlElement *c = Children[i];
+		LHtmlElement *c = Children[i];
 		GTag *t = ToTag(c);
 		if (t)
 			t->RestyleAll();
@@ -3369,9 +3369,9 @@ void GTag::SetStyle()
 					CtrlType == CtrlText ||
 					CtrlType == CtrlPassword)
 				{
-					GEdit *Ed;
+					LEdit *Ed;
 					GAutoString UtfCleanValue(WideToUtf8(CleanValue));
-					Ctrl = Ed = new GEdit(Html->d->NextCtrlId++, 0, 0, 60, SysFont->GetHeight() + 8, UtfCleanValue);
+					Ctrl = Ed = new LEdit(Html->d->NextCtrlId++, 0, 0, 60, SysFont->GetHeight() + 8, UtfCleanValue);
 					if (Ctrl)
 					{
 						Ed->Sunken(false);
@@ -7398,12 +7398,12 @@ int GHtml::OnNotify(LViewI *c, int f)
 		}
 	}
 
-	return GLayout::OnNotify(c, f);
+	return LLayout::OnNotify(c, f);
 }
 
 void GHtml::OnPosChange()
 {
-	GLayout::OnPosChange();
+	LLayout::OnPosChange();
 	if (ViewWidth != X())
 	{
 		Invalidate();
@@ -8818,7 +8818,7 @@ void GHtml::OnContent(GDocumentEnv::LoadJob *Res)
 	}
 }
 
-GHtmlElement *GHtml::CreateElement(GHtmlElement *Parent)
+LHtmlElement *GHtml::CreateElement(LHtmlElement *Parent)
 {
 	return new GTag(this, Parent);
 }
@@ -8937,7 +8937,7 @@ void GHtml::SetEmoji(bool i)
 }
 
 ////////////////////////////////////////////////////////////////////////
-class GHtml_Factory : public GViewFactory
+class GHtml_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{

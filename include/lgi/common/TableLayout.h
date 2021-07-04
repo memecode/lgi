@@ -17,7 +17,7 @@ public:
 	GLayoutCell() { Debug = false; }
 	virtual ~GLayoutCell() {}
 
-	virtual class GTableLayout *GetTable() = 0;
+	virtual class LTableLayout *GetTable() = 0;
 	virtual bool Add(LView *v) = 0;
 	virtual bool Remove(LView *v) = 0;
 	virtual GArray<LView*> GetChildren() = 0;
@@ -27,8 +27,8 @@ public:
 /// and size of the child controls. Child controls exist in a particular cell of the table. Cells
 /// can span multiple rows and columns. The only way to create/edit these at the moment is via the lr8
 /// resource file and LgiRes.
-class LgiClass GTableLayout :
-	public GLayout,
+class LgiClass LTableLayout :
+	public LLayout,
 	public ResObject,
 	public GDom
 {
@@ -42,10 +42,10 @@ public:
 	/// cell spacing by setting the CSS property 'border-spacing'.
     static int CellSpacing;
 
-	GTableLayout(int id = -1);
-	~GTableLayout();
+	LTableLayout(int id = -1);
+	~LTableLayout();
 
-	const char *GetClass() { return "GTableLayout"; }
+	const char *GetClass() { return "LTableLayout"; }
 
 	/// Return the number of cells across (columns).
 	int CellX();
@@ -84,14 +84,14 @@ class GLayoutRect : public LRect
 	int Spacing;
 
 public:
-	GLayoutRect(LViewI *c, int spacing = GTableLayout::CellSpacing)
+	GLayoutRect(LViewI *c, int spacing = LTableLayout::CellSpacing)
 	{
 		Spacing = spacing;
 		((LRect&)*this) = c->GetClient();
 		Size(Spacing, Spacing);
 	}
 
-	GLayoutRect(LRect rc, int spacing = GTableLayout::CellSpacing)
+	GLayoutRect(LRect rc, int spacing = LTableLayout::CellSpacing)
 	{
 		Spacing = spacing;
 		((LRect&)*this) = rc;		

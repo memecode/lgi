@@ -1,10 +1,10 @@
 #include "Lgi.h"
-#include "GDataGrid.h"
-#include "GEdit.h"
+#include "DataGrid.h"
+#include "LEdit.h"
 #include "GCombo.h"
 #include "GClipBoard.h"
 
-enum GDataGridControls
+enum LDataGridControls
 {
 	IDC_DELETE = 2000,
 	IDC_COPY,
@@ -13,25 +13,25 @@ enum GDataGridControls
 #define M_DELETE_LATER		(M_USER+2000)
 #define CELL_EDGE			2
 
-struct GDataGridPriv
+struct LDataGridPriv
 {
-	GDataGrid *This;
+	LDataGrid *This;
 	int Col;
 	LView *e;
 	LView *DeleteLater;
 	LListItem *Cur;
 	bool Dirty, PosDirty;
-	GArray<GDataGrid::GDataGridFlags> Flags;
+	GArray<LDataGrid::GDataGridFlags> Flags;
 	GArray<LVariant> ColumnArgs;
 	LListItem *NewRecord;
-	GDataGrid::ItemFactory Factory;
+	LDataGrid::ItemFactory Factory;
 	void *UserData;
-	GDataGrid::ItemArray Dropped;
-	GDataGrid::IndexArray Deleted;
+	LDataGrid::ItemArray Dropped;
+	LDataGrid::IndexArray Deleted;
 	char *SrcFmt;
 	char *AcceptFmt;
 
-	GDataGridPriv(GDataGrid *t);
+	LDataGridPriv(LDataGrid *t);
 	void Save();
 	void UpdatePos();
 	void Create(int NewCol = -1);
@@ -47,20 +47,20 @@ struct GDataGridPriv
 	}
 };
 
-class GDataGridEdit : public GEdit
+class LDataGridEdit : public LEdit
 {
-	GDataGridPriv *d;
+	LDataGridPriv *d;
 
 public:
-	GDataGridEdit(GDataGridPriv *data, int id, int x, int y, int cx, int cy, const char *txt) :
-		GEdit(id, x, y, cx, cy, txt)
+	LDataGridEdit(LDataGridPriv *data, int id, int x, int y, int cx, int cy, const char *txt) :
+		LEdit(id, x, y, cx, cy, txt)
 	{
 		d = data;
 	}
 
 	bool OnKey(LKey &k)
 	{
-		if (!GEdit::OnKey(k) && k.Down())
+		if (!LEdit::OnKey(k) && k.Down())
 		{
 			if (k.IsChar)
 			{
@@ -127,12 +127,12 @@ public:
 	}
 };
 
-class GDataGridCombo : public GCombo
+class LDataGridCombo : public GCombo
 {
-	GDataGridPriv *d;
+	LDataGridPriv *d;
 
 public:
-	GDataGridCombo(GDataGridPriv *priv, int id, LRect &rc) : GCombo(id, rc.x1, rc.y1, rc.X(), rc.Y(), 0)
+	LDataGridCombo(LDataGridPriv *priv, int id, LRect &rc) : GCombo(id, rc.x1, rc.y1, rc.X(), rc.Y(), 0)
 	{
 		d = priv;
 	}
@@ -156,7 +156,7 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-GDataGridPriv::GDataGridPriv(GDataGrid *t)
+LDataGridPriv::LDataGridPriv(LDataGrid *t)
 {
 	Factory = 0;
 	UserData = 0;
@@ -172,11 +172,11 @@ GDataGridPriv::GDataGridPriv(GDataGrid *t)
 	e = 0;
 }
 
-void GDataGridPriv::Save()
+void LDataGridPriv::Save()
 {
 	if (Dirty && Cur && e)
 	{
-		if (Flags[Col] & GDataGrid::GDG_INTEGER)
+		if (Flags[Col] & LDataGrid::GDG_INTEGER)
 		{
 			int64 OldVal = e->Value();
 			if (OldVal < 0 && Cur == NewRecord)
@@ -202,7 +202,7 @@ void GDataGridPriv::Save()
 	}
 }
 
-void GDataGridPriv::UpdatePos()
+void LDataGridPriv::UpdatePos()
 {
 	if (e && Cur)
 	{
@@ -211,7 +211,7 @@ void GDataGridPriv::UpdatePos()
 		{
 			LRect rc = *r;
 
-			if (Flags[Col] & GDataGrid::GDG_INTEGER)
+			if (Flags[Col] & LDataGrid::GDG_INTEGER)
 			{
 				rc.Offset(2, 0);
 			}
@@ -230,7 +230,7 @@ void GDataGridPriv::UpdatePos()
 	}
 }
 
-void GDataGridPriv::Invalidate()
+void LDataGridPriv::Invalidate()
 {
 	if (e)
 	{
@@ -240,11 +240,11 @@ void GDataGridPriv::Invalidate()
 	}
 }
 
-void GDataGridPriv::MoveCell(int Dx)
+void LDataGridPriv::MoveCell(int Dx)
 {
 	for (int i=Col+Dx; i>=0 && i<This->GetColumns(); i+=Dx)
 	{
-		if (!(Flags[i] & GDataGrid::GDG_READONLY))
+		if (!(Flags[i] & LDataGrid::GDG_READONLY))
 		{
 			Create(i);
 			break;
@@ -252,7 +252,7 @@ void GDataGridPriv::MoveCell(int Dx)
 	}
 }
 
-void GDataGridPriv::Create(int NewCol)
+void LDataGridPriv::Create(int NewCol)
 {
 	if (!This->IsAttached())
 		return;
@@ -263,7 +263,7 @@ void GDataGridPriv::Create(int NewCol)
 
 	if (!Cur || i != Cur || (NewCol >= 0 && NewCol != Col))
 	{
-		int OldCtrl = Flags[Col] & GDataGrid::GDG_INTEGER;
+		int OldCtrl = Flags[Col] & LDataGrid::GDG_INTEGER;
 
 		Save();
 		Cur = i;
@@ -271,13 +271,13 @@ void GDataGridPriv::Create(int NewCol)
 		if (NewCol >= 0)
 			Col = NewCol;
 
-		if (Flags[Col] & GDataGrid::GDG_READONLY)
+		if (Flags[Col] & LDataGrid::GDG_READONLY)
 		{
 			// Pick a valid column
 			int NewCol = -1;
 			for (int i=0; i<This->GetColumns(); i++)
 			{
-				if (Col != i && !(Flags[i] & GDataGrid::GDG_READONLY))
+				if (Col != i && !(Flags[i] & LDataGrid::GDG_READONLY))
 				{
 					NewCol = i;
 					break;
@@ -290,13 +290,13 @@ void GDataGridPriv::Create(int NewCol)
 			Col = NewCol;
 		}
 
-		int NewCtrl = Flags[Col] & GDataGrid::GDG_INTEGER;
+		int NewCtrl = Flags[Col] & LDataGrid::GDG_INTEGER;
 
 		const char *CurText = i->GetText(Col);
 		LRect *r = i->GetPos(Col);
 		if (r)
 		{
-			GDataGridEdit *Edit = 0;
+			LDataGridEdit *Edit = 0;
 			GCombo *Combo = 0;
 			LRect rc = r;
 			
@@ -311,9 +311,9 @@ void GDataGridPriv::Create(int NewCol)
 					This->PostEvent(M_DELETE_LATER);
 				}
 
-				if (Flags[Col] & GDataGrid::GDG_INTEGER)
+				if (Flags[Col] & LDataGrid::GDG_INTEGER)
 				{
-                    e = Combo = new GDataGridCombo(this, IDC_EDIT, rc);
+                    e = Combo = new LDataGridCombo(this, IDC_EDIT, rc);
 					if (e)
 					{
 						LVariant &e = ColumnArgs[Col];
@@ -338,7 +338,7 @@ void GDataGridPriv::Create(int NewCol)
 					rc.y2 -= 1;
 
 					// Create edit control with the correct info for the cell
-                    e = Edit = new GDataGridEdit(this, IDC_EDIT, rc.x1, rc.y1, rc.X(), rc.Y(), CurText);
+                    e = Edit = new LDataGridEdit(this, IDC_EDIT, rc.x1, rc.y1, rc.X(), rc.Y(), CurText);
 					if (e)
 					{
 						e->Sunken(false);
@@ -365,7 +365,7 @@ void GDataGridPriv::Create(int NewCol)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-GDataGrid::GDataGrid(int CtrlId, ItemFactory Func, void *userdata) :
+LDataGrid::LDataGrid(int CtrlId, ItemFactory Func, void *userdata) :
 	LList(CtrlId, 0, 0, 1000, 1000)
 {
 	_ObjName = Res_Custom;
@@ -373,16 +373,16 @@ GDataGrid::GDataGrid(int CtrlId, ItemFactory Func, void *userdata) :
 	DrawGridLines(true);
 	SetPourLargest(true);
 
-	d = new GDataGridPriv(this);
+	d = new LDataGridPriv(this);
 	SetFactory(Func, userdata);
 }
 
-GDataGrid::~GDataGrid()
+LDataGrid::~LDataGrid()
 {
 	DeleteObj(d);
 }
 
-bool GDataGrid::Remove(LListItem *Obj)
+bool LDataGrid::Remove(LListItem *Obj)
 {
 	if (Obj == d->Cur)
 	{
@@ -392,7 +392,7 @@ bool GDataGrid::Remove(LListItem *Obj)
 	return LList::Remove(Obj);
 }
 
-void GDataGrid::Empty()
+void LDataGrid::Empty()
 {
 	d->NewRecord = 0;
 	d->Cur = 0;
@@ -401,7 +401,7 @@ void GDataGrid::Empty()
 	LList::Empty();
 }
 
-void GDataGrid::OnItemSelect(GArray<LListItem*> &Items)
+void LDataGrid::OnItemSelect(GArray<LListItem*> &Items)
 {
 	if (Items.Length() == 1)
 	{
@@ -418,7 +418,7 @@ void GDataGrid::OnItemSelect(GArray<LListItem*> &Items)
 	LList::OnItemSelect(Items);
 }
 
-void GDataGrid::OnItemClick(LListItem *Item, LMouse &m)
+void LDataGrid::OnItemClick(LListItem *Item, LMouse &m)
 {
 	if (m.IsContextMenu())
 	{
@@ -475,13 +475,13 @@ void GDataGrid::OnItemClick(LListItem *Item, LMouse &m)
 	}
 }
 
-void GDataGrid::OnCreate()
+void LDataGrid::OnCreate()
 {
 	d->Create(0);
 	SetWindow(this);
 }
 
-GMessage::Result GDataGrid::OnEvent(GMessage *Msg)
+GMessage::Result LDataGrid::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -495,7 +495,7 @@ GMessage::Result GDataGrid::OnEvent(GMessage *Msg)
 	return LList::OnEvent(Msg);
 }
 
-int GDataGrid::OnNotify(LViewI *c, int f)
+int LDataGrid::OnNotify(LViewI *c, int f)
 {
 	switch (c->GetId())
 	{
@@ -514,21 +514,21 @@ int GDataGrid::OnNotify(LViewI *c, int f)
 	return LList::OnNotify(c, f);
 }
 
-void GDataGrid::SetColFlag(int Col, GDataGridFlags Flags, LVariant *Arg)
+void LDataGrid::SetColFlag(int Col, GDataGridFlags Flags, LVariant *Arg)
 {
 	d->Flags[Col] = Flags;
 	if (Arg)
 		d->ColumnArgs[Col] = *Arg;
 }
 
-bool GDataGrid::OnMouseWheel(double Lines)
+bool LDataGrid::OnMouseWheel(double Lines)
 {
 	LList::OnMouseWheel(Lines);
 	d->UpdatePos();
 	return true;
 }
 
-void GDataGrid::OnPaint(LSurface *pDC)
+void LDataGrid::OnPaint(LSurface *pDC)
 {
 	LList::OnPaint(pDC);
 
@@ -542,7 +542,7 @@ void GDataGrid::OnPaint(LSurface *pDC)
 	}
 }
 
-bool GDataGrid::OnLayout(LViewLayoutInfo &Inf)
+bool LDataGrid::OnLayout(LViewLayoutInfo &Inf)
 {
 	Inf.Width.Min = 16;
 	for (int i=0; i<GetColumns(); i++)
@@ -557,12 +557,12 @@ bool GDataGrid::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-bool GDataGrid::CanAddRecord()
+bool LDataGrid::CanAddRecord()
 {
 	return d->NewRecord != 0;
 }
 
-void GDataGrid::CanAddRecord(bool b)
+void LDataGrid::CanAddRecord(bool b)
 {
 	if (b)
 	{
@@ -575,40 +575,40 @@ void GDataGrid::CanAddRecord(bool b)
 	}
 }
 
-LListItem *GDataGrid::NewItem()
+LListItem *LDataGrid::NewItem()
 {
 	return d->NewItem();
 }
 
-void GDataGrid::SetFactory(ItemFactory Func, void *userdata)
+void LDataGrid::SetFactory(ItemFactory Func, void *userdata)
 {
 	d->Factory = Func;
 	d->UserData = userdata;
 }
 
-void GDataGrid::SetDndFormats(char *SrcFmt, char *AcceptFmt)
+void LDataGrid::SetDndFormats(char *SrcFmt, char *AcceptFmt)
 {
 	d->SrcFmt = SrcFmt;
 	d->AcceptFmt = AcceptFmt;
 }
 
-int GDataGrid::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
+int LDataGrid::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 {
 	Formats.Supports(d->AcceptFmt);
 	return Formats.GetSupported().Length() ? DROPEFFECT_COPY : DROPEFFECT_NONE;
 }
 
-GDataGrid::ItemArray *GDataGrid::GetDroppedItems()
+LDataGrid::ItemArray *LDataGrid::GetDroppedItems()
 {
 	return &d->Dropped;
 }
 
-GDataGrid::IndexArray *GDataGrid::GetDeletedItems()
+LDataGrid::IndexArray *LDataGrid::GetDeletedItems()
 {
 	return &d->Deleted;
 }
 
-int GDataGrid::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
+int LDataGrid::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 {
 	if (!d->AcceptFmt)
 		return DROPEFFECT_NONE;
@@ -637,12 +637,12 @@ int GDataGrid::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 	return DROPEFFECT_NONE;
 }
 
-void GDataGrid::OnItemBeginDrag(LListItem *Item, LMouse &m)
+void LDataGrid::OnItemBeginDrag(LListItem *Item, LMouse &m)
 {
 	Drag(this, m.Event, DROPEFFECT_COPY);
 }
 
-bool GDataGrid::GetFormats(GDragFormats &Formats)
+bool LDataGrid::GetFormats(GDragFormats &Formats)
 {
 	if (!d->SrcFmt)
 		return false;
@@ -651,7 +651,7 @@ bool GDataGrid::GetFormats(GDragFormats &Formats)
 	return true;
 }
 
-bool GDataGrid::GetData(GArray<GDragData> &Data)
+bool LDataGrid::GetData(GArray<GDragData> &Data)
 {
 	for (unsigned i=0; i<Data.Length(); i++)
 	{
@@ -675,14 +675,14 @@ bool GDataGrid::GetData(GArray<GDragData> &Data)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-class GDataGridFactory : public GViewFactory
+class GDataGridFactory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (Class &&
-			stricmp(Class, "GDataGrid") == 0)
+			stricmp(Class, "LDataGrid") == 0)
 		{
-			return new GDataGrid(0);
+			return new LDataGrid(0);
 		}
 
 		return 0;

@@ -26,7 +26,7 @@ public:
 	}
 };
 
-class CtNode : public GTreeItem
+class CtNode : public LTreeItem
 {
 	CtrlControlTreePriv *d;
 
@@ -80,7 +80,7 @@ public:
 	void Move(int Dir)
 	{
 		auto Cur = IndexOf();
-		GTreeNode *p = GetParent();
+		LTreeNode *p = GetParent();
 		if (!p)
 			p = GetTree();
 		if (Dir < 0)
@@ -209,7 +209,7 @@ public:
 
 CtrlControlTree::CtrlControlTree(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_ControlTree, load),
-	GTree(100, 0, 0, 100, 100)
+	LTree(100, 0, 0, 100, 100)
 {
 	d = new CtrlControlTreePriv(dlg);
 
@@ -226,7 +226,7 @@ CtrlControlTree::~CtrlControlTree()
 
 void CtrlControlTree::OnMouseClick(LMouse &m)
 {
-	GTree::OnMouseClick(m);
+	LTree::OnMouseClick(m);
 
 	if (!d->DiscardClick)
 	{
@@ -237,7 +237,7 @@ void CtrlControlTree::OnMouseClick(LMouse &m)
 
 void CtrlControlTree::OnMouseMove(LMouse &m)
 {
-	GTree::OnMouseMove(m);
+	LTree::OnMouseMove(m);
 	ResDialogCtrl::OnMouseMove(m);
 }
 
@@ -249,7 +249,7 @@ void CtrlControlTree::OnPaint(LSurface *pDC)
 		UpdateAllItems();
 	}
 
-	GTree::OnPaint(pDC);
+	LTree::OnPaint(pDC);
 }
 
 bool CtrlControlTree::GetFields(FieldTree &Fields)
@@ -285,7 +285,7 @@ bool CtrlControlTree::Serialize(FieldTree &Fields)
 	return Status;
 }
 
-void WriteTree(LXmlTag *t, GTreeNode *n)
+void WriteTree(LXmlTag *t, LTreeNode *n)
 {
 	CtNode *ct = dynamic_cast<CtNode*>(n);
 	if (ct)
@@ -295,7 +295,7 @@ void WriteTree(LXmlTag *t, GTreeNode *n)
 		t->SetAttr(VAL_ControlTag, ct->Tag);
 	}
 
-	for (GTreeNode *c = n->GetChild(); c; c = c->GetNext())
+	for (LTreeNode *c = n->GetChild(); c; c = c->GetNext())
 	{
 		LXmlTag *h = new LXmlTag;
 		WriteTree(h, c);
@@ -320,7 +320,7 @@ bool CtrlControlTree::GetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-void ReadTree(LXmlTag *t, GTreeNode *n, CtrlControlTreePriv *d, LView *v)
+void ReadTree(LXmlTag *t, LTreeNode *n, CtrlControlTreePriv *d, LView *v)
 {
 	CtNode *ct = dynamic_cast<CtNode*>(n);
 	if (ct && ct->Str)
@@ -336,7 +336,7 @@ void ReadTree(LXmlTag *t, GTreeNode *n, CtrlControlTreePriv *d, LView *v)
 		ReadTree(c, nw, d, v);
 		n->Insert(nw);
 
-		GTreeItem *it = dynamic_cast<GTreeItem*>(n);
+		LTreeItem *it = dynamic_cast<LTreeItem*>(n);
 		if (it) it->Expanded(true);
 	}
 }

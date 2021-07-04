@@ -6,7 +6,7 @@ class GMenuItem;
 class SubMenuImpl;
 class MenuImpl;
 
-#include "GPopup.h"
+#include "LPopup.h"
 
 class MenuClickImpl
 {
@@ -35,7 +35,7 @@ public:
 	virtual MenuImpl *IsMenu() { return 0; }
 };
 
-class SubMenuImpl : public GPopup, public MenuClickImpl
+class SubMenuImpl : public LPopup, public MenuClickImpl
 {
 	class SubMenuImplPrivate *d;
 
@@ -44,7 +44,7 @@ public:
 	~SubMenuImpl();
 	
 	const char *GetClass() { return "SubMenuImpl"; }
-	bool Visible() { return GPopup::Visible(); }
+	bool Visible() { return LPopup::Visible(); }
 	void Visible(bool b);
 	void Layout(int x, int y);
 	void OnPaint(LSurface *pDC);

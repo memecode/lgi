@@ -8,10 +8,11 @@
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/TableLayout.h"
 #include "lgi/common/ProgressView.h"
+#include "lgi/common/Button.h"
 
 /// Progress window pane, tracks one task.
 class LProgressDlg;
-class LgiClass LProgressPane : public Progress, public GLayout
+class LgiClass LProgressPane : public Progress, public LLayout
 {
 	friend class LProgressDlg;
 
@@ -19,12 +20,12 @@ class LgiClass LProgressPane : public Progress, public GLayout
 	LProgressDlg *Dlg;
 
 protected:
-	GTableLayout *t;
-	GTextLabel *Desc;
-	GTextLabel *ValText;
-	GTextLabel *Rate;
+	LTableLayout *t;
+	LTextLabel *Desc;
+	LTextLabel *ValText;
+	LTextLabel *Rate;
 	LProgressView *Bar;
-	GButton *But;
+	LButton *But;
 	bool UiDirty;
 
 public:

@@ -44,22 +44,22 @@ NameMap[] =
 {
 	// ID				Lgi's name		Resource editor name
 	{UI_DIALOG,			"LDialog",		Res_Dialog,			false},
-	{UI_TABLE,			"GTableLayout",	Res_Table,			true},
+	{UI_TABLE,			"LTableLayout",	Res_Table,			true},
 	{UI_TEXT,			"GText",		Res_StaticText,		true},
-	{UI_EDITBOX,		"GEdit",		Res_EditBox,		true},
+	{UI_EDITBOX,		"LEdit",		Res_EditBox,		true},
 	{UI_CHECKBOX,		"GCheckBox",	Res_CheckBox,		true},
 	{UI_BUTTON,			"GButton",		Res_Button,			true},
-	{UI_GROUP,			"GRadioGroup",	Res_Group,			true},
-	{UI_RADIO,			"GRadioButton",	Res_RadioBox,		true},
-	{UI_TABS,			"GTabView",		Res_TabView,		true},
-	{UI_TAB,			"GTabPage",		Res_Tab,			false},
+	{UI_GROUP,			"LRadioGroup",	Res_Group,			true},
+	{UI_RADIO,			"LRadioButton",	Res_RadioBox,		true},
+	{UI_TABS,			"LTabView",		Res_TabView,		true},
+	{UI_TAB,			"LTabPage",		Res_Tab,			false},
 	{UI_LIST,			"LList",		Res_ListView,		true},
 	{UI_COLUMN,			"LListColumn",	Res_Column,			false},
 	{UI_COMBO,			"GCombo",		Res_ComboBox,		true},
-	{UI_TREE,			"GTree",		Res_TreeView,		true},
+	{UI_TREE,			"LTree",		Res_TreeView,		true},
 	{UI_BITMAP,			"LBitmap",		Res_Bitmap,			true},
 	{UI_PROGRESS,		"LProgressView",	Res_Progress,		true},
-	{UI_SCROLL_BAR,		"GScrollBar",	Res_ScrollBar,		true},
+	{UI_SCROLL_BAR,		"LScrollBar",	Res_ScrollBar,		true},
 	{UI_CUSTOM,			"GCustom",		Res_Custom,			true},
 	{UI_CONTROL_TREE,	"GControlTree", Res_ControlTree,	true},
 
@@ -4271,7 +4271,7 @@ void ResDialogUi::OnPosChange()
 
 void ResDialogUi::OnCreate()
 {
-	Tools = new GToolBar;
+	Tools = new LToolBar;
 	if (Tools)
 	{
 		auto FileName = LFindFile("_DialogIcons.gif");
@@ -4299,7 +4299,7 @@ void ResDialogUi::OnCreate()
 		}
 	}
 
-	Status = new GStatusBar;
+	Status = new LStatusBar;
 	if (Status)
 	{
 		Status->Attach(this);
@@ -4322,7 +4322,7 @@ int ResDialogUi::CurrentTool()
 		auto It = Tools->IterateViews();
 		for (size_t i=0; i<It.Length(); i++)
 		{
-			GToolButton *But = dynamic_cast<GToolButton*>(It[i]);
+			LToolButton *But = dynamic_cast<LToolButton*>(It[i]);
 			if (But && But->Value())
 				return But->GetId();
 		}
@@ -4339,7 +4339,7 @@ void ResDialogUi::SelectTool(int i)
 		LViewI *w = It[i];
 		if (w)
 		{
-			GToolButton *But = dynamic_cast<GToolButton*>(w);
+			LToolButton *But = dynamic_cast<LToolButton*>(w);
 			if (But)
 				But->Value(true);
 		}

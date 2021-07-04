@@ -49,7 +49,7 @@ enum IconCacheType
 COLOUR Map(LSurface *pDC, COLOUR c);
 
 ////////////////////////////////////////////////////////////////////////
-GImageList *LgiLoadImageList(const char *File, int x, int y)
+LImageList *LLoadImageList(const char *File, int x, int y)
 {
 	if (x < 0 || y < 0)
 	{
@@ -89,12 +89,12 @@ GImageList *LgiLoadImageList(const char *File, int x, int y)
 		return NULL;
 	}
 
-	return new GImageList(x, y, pDC);
+	return new LImageList(x, y, pDC);
 }
 
-GToolBar *LgiLoadToolbar(LViewI *Parent, const char *File, int x, int y)
+LToolBar *LgiLoadToolbar(LViewI *Parent, const char *File, int x, int y)
 {
-	GToolBar *Toolbar = new GToolBar;
+	LToolBar *Toolbar = new LToolBar;
 	if (Toolbar)
 	{
 		GString FileName = LFindFile(File);
@@ -129,10 +129,10 @@ GToolBar *LgiLoadToolbar(LViewI *Parent, const char *File, int x, int y)
 #define ImgLst_Empty	0x40000000
 #define IgmLst_Add		0x80000000
 
-class GImageListPriv
+class LImageListPriv
 {
 public:
-	GImageList *ImgLst;
+	LImageList *ImgLst;
 	int Sx, Sy;
 	uint8_t DisabledAlpha;
 
@@ -199,7 +199,7 @@ public:
 		return dc;
 	}
 
-	GImageListPriv(GImageList *imglst, int x, int y)
+	LImageListPriv(LImageList *imglst, int x, int y)
 	{
 		ImgLst = imglst;
 		Sx = x;
@@ -207,7 +207,7 @@ public:
 		DisabledAlpha = 40;
 	}
 
-	~GImageListPriv()
+	~LImageListPriv()
 	{
 		Cache.DeleteObjects();
 	}
@@ -223,9 +223,9 @@ static bool HasPad(GColourSpace cs)
 	return false;
 }
 
-GImageList::GImageList(int x, int y, LSurface *pDC)
+LImageList::LImageList(int x, int y, LSurface *pDC)
 {
-	d = new GImageListPriv(this, x, y);
+	d = new LImageListPriv(this, x, y);
 
 	uint32_t Transparent = 0;
 
@@ -305,12 +305,12 @@ GImageList::GImageList(int x, int y, LSurface *pDC)
 	}
 }
 
-GImageList::~GImageList()
+LImageList::~LImageList()
 {
 	DeleteObj(d);
 }
 
-void GImageList::Draw(LSurface *pDC, int Dx, int Dy, int Image, GColour Background, bool Disabled)
+void LImageList::Draw(LSurface *pDC, int Dx, int Dy, int Image, GColour Background, bool Disabled)
 {
 	if (!pDC)
 		return;
@@ -319,7 +319,7 @@ void GImageList::Draw(LSurface *pDC, int Dx, int Dy, int Image, GColour Backgrou
 	rSrc.ZOff(d->Sx-1, d->Sy-1);
 	rSrc.Offset(Image * d->Sx, 0);
 
-	GImageListPriv::CacheDC *Cache = d->GetCache(Background, Disabled);
+	LImageListPriv::CacheDC *Cache = d->GetCache(Background, Disabled);
 	if (!Cache && Background.IsValid())
 	{
 		LRect rDst;
@@ -347,36 +347,36 @@ void GImageList::Draw(LSurface *pDC, int Dx, int Dy, int Image, GColour Backgrou
 	else LgiAssert(!"Impl me.");
 }
 
-int GImageList::TileX()
+int LImageList::TileX()
 {
 	return d->Sx;
 }
 
-int GImageList::TileY()
+int LImageList::TileY()
 {
 	return d->Sy;
 }
 
-int GImageList::GetItems()
+int LImageList::GetItems()
 {
 	return X() / d->Sx;
 }
 
-void GImageList::Update(int Flags)
+void LImageList::Update(int Flags)
 {
 }
 
-uint8_t GImageList::GetDisabledAlpha()
+uint8_t LImageList::GetDisabledAlpha()
 {
 	return d->DisabledAlpha;
 }
 
-void GImageList::SetDisabledAlpha(uint8_t alpha)
+void LImageList::SetDisabledAlpha(uint8_t alpha)
 {
 	d->DisabledAlpha = alpha;
 }
 
-LRect GImageList::GetIconRect(int Idx)
+LRect LImageList::GetIconRect(int Idx)
 {
 	LRect r(0, 0, -1, -1);
 	
@@ -389,7 +389,7 @@ LRect GImageList::GetIconRect(int Idx)
 	return r;
 }
 
-LRect *GImageList::GetBounds()
+LRect *LImageList::GetBounds()
 {
 	if (!d->Bounds.Length() && (*this)[0])
 	{
@@ -412,7 +412,7 @@ LRect *GImageList::GetBounds()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-class GToolBarPrivate
+class LToolBarPrivate
 {
 public:
 	int Bx, By;
@@ -421,7 +421,7 @@ public:
 	bool Text;
 	int LastIndex;
 	bool OwnImgList;
-	GImageList *ImgList;
+	LImageList *ImgList;
 	LFont *Font;
 	GToolTip *Tip;
 	
@@ -432,7 +432,7 @@ public:
 	// bitmap cache
 	GAutoPtr<LMemDC> IconCache;
 
-	GToolBarPrivate()
+	LToolBarPrivate()
 	{
 		Bx = By = 16;
 		Sx = Sy = 10;
@@ -449,15 +449,15 @@ public:
 		return (Text || !ImgList) && Font;
 	}
 
-	void FixSeparators(GToolBar *Tb)
+	void FixSeparators(LToolBar *Tb)
 	{
 		// Fix up separators so that no 2 separators are next to each other. I.e.
 		// all the buttons between them are switched off.
-		GToolButton *Last = 0;
+		LToolButton *Last = 0;
 		bool HasVis = false;
 		for (LViewI *v: Tb->IterateViews())
 		{
-			GToolButton *Btn = dynamic_cast<GToolButton*>(v);
+			LToolButton *Btn = dynamic_cast<LToolButton*>(v);
 			if (Btn)
 			{
 				if (Btn->Separator())
@@ -482,7 +482,7 @@ public:
 		}
 	}
 
-	void Customizable(GToolBar *Tb)
+	void Customizable(LToolBar *Tb)
 	{
 		LVariant v;
 		if (CustomDom)
@@ -501,7 +501,7 @@ public:
 				// Make all controls not visible.
 				for (auto v: Tb->IterateViews())
 				{
-					GToolButton *Btn = dynamic_cast<GToolButton*>(v);
+					LToolButton *Btn = dynamic_cast<LToolButton*>(v);
 					if (Btn) v->Visible(false);
 				}
 				
@@ -525,7 +525,7 @@ struct GToolButtonPriv
 	GArray<LDisplayString*> Text;
 };
 
-GToolButton::GToolButton(int Bx, int By)
+LToolButton::LToolButton(int Bx, int By)
 {
 	d = new GToolButtonPriv;
 	Type = TBT_PUSH;
@@ -545,23 +545,23 @@ GToolButton::GToolButton(int Bx, int By)
 	LResources::StyleElement(this);
 }
 
-GToolButton::~GToolButton()
+LToolButton::~LToolButton()
 {
 	d->Text.DeleteObjects();
 	delete d;
 }
 
-bool GToolButton::Name(const char *n)
+bool LToolButton::Name(const char *n)
 {
 	bool s = LView::Name(n);
 	d->Text.DeleteObjects();
 	return s;
 }
 
-void GToolButton::Layout()
+void LToolButton::Layout()
 {
 	auto Parent = GetParent();
-	GToolBar *ToolBar = dynamic_cast<GToolBar*>(Parent);
+	LToolBar *ToolBar = dynamic_cast<LToolBar*>(Parent);
 	if (!ToolBar)
 		return;
 
@@ -606,9 +606,9 @@ void GToolButton::Layout()
 	}
 }
 
-void GToolButton::OnPaint(LSurface *pDC)
+void LToolButton::OnPaint(LSurface *pDC)
 {
-	GToolBar *Par = dynamic_cast<GToolBar*>(GetParent());
+	LToolBar *Par = dynamic_cast<LToolBar*>(GetParent());
 	bool e = Enabled();
 
 	if (Par)
@@ -781,7 +781,7 @@ void GToolButton::OnPaint(LSurface *pDC)
 	#endif
 }
 
-void GToolButton::Image(int i)
+void LToolButton::Image(int i)
 {
 	if (ImgIndex != i)
 	{
@@ -790,7 +790,7 @@ void GToolButton::Image(int i)
 	}
 }
 
-void GToolButton::Value(int64 b)
+void LToolButton::Value(int64 b)
 {
 	switch (Type)
 	{
@@ -822,7 +822,7 @@ void GToolButton::Value(int64 b)
 				{						
 					for (ssize_t i=CurIdx-1; i>=0; i--)
 					{
-						GToolButton *But = dynamic_cast<GToolButton*>(it[i]);
+						LToolButton *But = dynamic_cast<LToolButton*>(it[i]);
 						if (But->Separator())
 							break;
 						if (But->Type == TBT_RADIO && But->Down)
@@ -831,7 +831,7 @@ void GToolButton::Value(int64 b)
 
 					for (size_t i=CurIdx+1; i<it.Length(); i++)
 					{
-						GToolButton *But = dynamic_cast<GToolButton*>(it[i]);
+						LToolButton *But = dynamic_cast<LToolButton*>(it[i]);
 						if (But->Separator())
 							break;
 						if (But->Type == TBT_RADIO && But->Down)
@@ -848,15 +848,15 @@ void GToolButton::Value(int64 b)
 	}
 }
 
-void GToolButton::SendCommand()
+void LToolButton::SendCommand()
 {
-	GToolBar *t = dynamic_cast<GToolBar*>(GetParent());
+	LToolBar *t = dynamic_cast<LToolBar*>(GetParent());
 	if (t) t->OnButtonClick(this);
 }
 
-void GToolButton::OnMouseClick(LMouse &m)
+void LToolButton::OnMouseClick(LMouse &m)
 {
-	GToolBar *ToolBar = dynamic_cast<GToolBar*>(GetParent());
+	LToolBar *ToolBar = dynamic_cast<LToolBar*>(GetParent());
 
 	#if 0
 	printf("tool button click %i,%i down=%i, left=%i right=%i middle=%i, ctrl=%i alt=%i shift=%i Double=%i\n",
@@ -939,7 +939,7 @@ void GToolButton::OnMouseClick(LMouse &m)
 	}
 }
 
-void GToolButton::OnMouseEnter(LMouse &m)
+void LToolButton::OnMouseEnter(LMouse &m)
 {
 	if (!Separator() && Enabled())
 	{
@@ -954,7 +954,7 @@ void GToolButton::OnMouseEnter(LMouse &m)
 	}
 	else
 	{
-		GToolBar *Bar = dynamic_cast<GToolBar*>(GetParent());
+		LToolBar *Bar = dynamic_cast<LToolBar*>(GetParent());
 		if (Bar)
 		{
 			Bar->OnMouseEnter(m);
@@ -968,17 +968,17 @@ void GToolButton::OnMouseEnter(LMouse &m)
 
 		if (GetParent())
 		{
-			GToolBar *ToolBar = dynamic_cast<GToolBar*>(GetParent());
+			LToolBar *ToolBar = dynamic_cast<LToolBar*>(GetParent());
 			if (ToolBar) ToolBar->PostDescription(this, Name());
 		}
 	}
 }
 
-void GToolButton::OnMouseMove(LMouse &m)
+void LToolButton::OnMouseMove(LMouse &m)
 {
 }
 
-void GToolButton::OnMouseExit(LMouse &m)
+void LToolButton::OnMouseExit(LMouse &m)
 {
 	if (Over)
 	{
@@ -993,15 +993,15 @@ void GToolButton::OnMouseExit(LMouse &m)
 	}
 	else if (GetParent())
 	{
-		GToolBar *ToolBar = dynamic_cast<GToolBar*>(GetParent());
+		LToolBar *ToolBar = dynamic_cast<LToolBar*>(GetParent());
 		if (ToolBar) ToolBar->PostDescription(this, "");
 	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-GToolBar::GToolBar()
+LToolBar::LToolBar()
 {
-	d = new GToolBarPrivate;
+	d = new LToolBarPrivate;
 	Name("LGI_Toolbar");
 	_BorderSize = 1;
 	_IsToolBar = 1;
@@ -1028,7 +1028,7 @@ GToolBar::GToolBar()
 	LResources::StyleElement(this);
 }
 
-GToolBar::~GToolBar()
+LToolBar::~LToolBar()
 {
 	DeleteObj(d->Tip);
 
@@ -1039,24 +1039,24 @@ GToolBar::~GToolBar()
 	DeleteObj(d);
 }
 
-void GToolBar::OnCreate()
+void LToolBar::OnCreate()
 {
 	#ifndef WIN32
 	AttachChildren();
 	#endif
 }
 
-int GToolBar::GetBx()
+int LToolBar::GetBx()
 {
 	return d->Bx;
 }
 
-int GToolBar::GetBy()
+int LToolBar::GetBy()
 {
 	return d->By;
 }
 
-void GToolBar::ContextMenu(LMouse &m)
+void LToolBar::ContextMenu(LMouse &m)
 {
 	if (IsCustomizable())
 	{
@@ -1068,7 +1068,7 @@ void GToolBar::ContextMenu(LMouse &m)
 			{
 				LViewI *v = *it;
 
-				GToolButton *Btn = dynamic_cast<GToolButton*>(v);
+				LToolButton *Btn = dynamic_cast<LToolButton*>(v);
 				if (Btn && Btn->Separator())
 				{
 					Sub->AppendSeparator();
@@ -1137,7 +1137,7 @@ void GToolBar::ContextMenu(LMouse &m)
 
 				for (auto v: Children)
 				{
-					GToolButton *b = dynamic_cast<GToolButton*>(v);
+					LToolButton *b = dynamic_cast<LToolButton*>(v);
 					if (b && b->TipId >= 0)
 					{
 						d->Tip->DeleteTip(b->TipId);
@@ -1151,44 +1151,44 @@ void GToolBar::ContextMenu(LMouse &m)
 	}
 }
 
-bool GToolBar::IsCustomizable()
+bool LToolBar::IsCustomizable()
 {
 	return d->CustomDom != 0 && d->CustomProp;
 }
 
-void GToolBar::Customizable(GDom *Store, const char *Option)
+void LToolBar::Customizable(GDom *Store, const char *Option)
 {
 	d->CustomDom = Store;
 	d->CustomProp = Option;
 	d->Customizable(this);
 }
 
-bool GToolBar::IsVertical()
+bool LToolBar::IsVertical()
 {
 	return d->Vertical;
 }
 
-void GToolBar::IsVertical(bool v)
+void LToolBar::IsVertical(bool v)
 {
 	d->Vertical = v;
 }
 
-bool GToolBar::TextLabels()
+bool LToolBar::TextLabels()
 {
 	return d->Text;
 }
 
-void GToolBar::TextLabels(bool i)
+void LToolBar::TextLabels(bool i)
 {
 	d->Text = i;
 }
 
-LFont *GToolBar::GetFont()
+LFont *LToolBar::GetFont()
 {
 	return d->Font;
 }
 
-bool GToolBar::OnLayout(LViewLayoutInfo &Inf)
+bool LToolBar::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (Inf.Width.Min == 0)
 	{
@@ -1211,7 +1211,7 @@ bool GToolBar::OnLayout(LViewLayoutInfo &Inf)
 							GetCss()->BorderSpacing().ToPx(X(), GetFont()) : \
 							1
 
-bool GToolBar::Pour(LRegion &r)
+bool LToolBar::Pour(LRegion &r)
 {
 	int BorderSpacing = GetBorderSpacing();
 	int EndX = 0;
@@ -1229,7 +1229,7 @@ bool GToolBar::Pour(LRegion &r)
 		if (But->Visible())
 		{
 			int Tx = 0, Ty = 0;
-			GToolButton *Btn = dynamic_cast<GToolButton*>(But);
+			LToolButton *Btn = dynamic_cast<LToolButton*>(But);
 
 			if (d->ShowTextLabels())
 			{
@@ -1371,7 +1371,7 @@ bool GToolBar::Pour(LRegion &r)
 	return false;
 }
 
-void GToolBar::OnButtonClick(GToolButton *Btn)
+void LToolBar::OnButtonClick(LToolButton *Btn)
 {
 	LViewI *w = (GetNotify()) ? GetNotify() : GetParent();
 	if (w && Btn)
@@ -1387,7 +1387,7 @@ void GToolBar::OnButtonClick(GToolButton *Btn)
 	}
 }
 
-int GToolBar::PostDescription(LView *Ctrl, const char *Text)
+int LToolBar::PostDescription(LView *Ctrl, const char *Text)
 {
 	if (GetParent())
 	{
@@ -1396,7 +1396,7 @@ int GToolBar::PostDescription(LView *Ctrl, const char *Text)
 	return 0;
 }
 
-GMessage::Result GToolBar::OnEvent(GMessage *Msg)
+GMessage::Result LToolBar::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -1411,7 +1411,7 @@ GMessage::Result GToolBar::OnEvent(GMessage *Msg)
 	return LView::OnEvent(Msg);
 }
 
-void GToolBar::OnPaint(LSurface *pDC)
+void LToolBar::OnPaint(LSurface *pDC)
 {
 	LRect c = GetClient();
 	GCssTools Tools(this);
@@ -1420,11 +1420,11 @@ void GToolBar::OnPaint(LSurface *pDC)
 	Tools.PaintContent(pDC, c);
 }
 
-void GToolBar::OnMouseClick(LMouse &m)
+void LToolBar::OnMouseClick(LMouse &m)
 {
 }
 
-void GToolBar::OnMouseEnter(LMouse &m)
+void LToolBar::OnMouseEnter(LMouse &m)
 {
 	if (!d->Tip)
 	{
@@ -1436,15 +1436,15 @@ void GToolBar::OnMouseEnter(LMouse &m)
 	}
 }
 
-void GToolBar::OnMouseExit(LMouse &m)
+void LToolBar::OnMouseExit(LMouse &m)
 {
 }
 
-void GToolBar::OnMouseMove(LMouse &m)
+void LToolBar::OnMouseMove(LMouse &m)
 {
 }
 
-bool GToolBar::SetBitmap(char *File, int bx, int by)
+bool LToolBar::SetBitmap(char *File, int bx, int by)
 {
 	bool Status = false;
 
@@ -1458,7 +1458,7 @@ bool GToolBar::SetBitmap(char *File, int bx, int by)
 	return Status;
 }
 
-bool GToolBar::SetDC(LSurface *pNewDC, int bx, int by)
+bool LToolBar::SetDC(LSurface *pNewDC, int bx, int by)
 {
 	if (d->OwnImgList)
 	{
@@ -1470,7 +1470,7 @@ bool GToolBar::SetDC(LSurface *pNewDC, int bx, int by)
 
 	if (pNewDC)
 	{
-		d->ImgList = new GImageList(bx, by, pNewDC);
+		d->ImgList = new LImageList(bx, by, pNewDC);
 		if (d->ImgList)
 		{
 			d->OwnImgList = true;
@@ -1480,12 +1480,12 @@ bool GToolBar::SetDC(LSurface *pNewDC, int bx, int by)
 	return false;
 }
 
-GImageList *GToolBar::GetImageList()
+LImageList *LToolBar::GetImageList()
 {
 	return d->ImgList;
 }
 
-bool GToolBar::SetImageList(GImageList *l, int bx, int by, bool Own)
+bool LToolBar::SetImageList(LImageList *l, int bx, int by, bool Own)
 {
 	if (d->OwnImgList)
 		DeleteObj(d->ImgList);
@@ -1498,11 +1498,11 @@ bool GToolBar::SetImageList(GImageList *l, int bx, int by, bool Own)
 	return d->ImgList != 0;
 }
 
-GToolButton *GToolBar::AppendButton(const char *Tip, int Id, int Type, int Enabled, int IconId)
+LToolButton *LToolBar::AppendButton(const char *Tip, int Id, int Type, int Enabled, int IconId)
 {
 	// bool HasIcon = IconId != TOOL_ICO_NONE;
 
-	GToolButton *But = new GToolButton(d->Bx, d->By);
+	LToolButton *But = new LToolButton(d->Bx, d->By);
 	if (But)
 	{
 		But->Name(Tip);
@@ -1529,9 +1529,9 @@ GToolButton *GToolBar::AppendButton(const char *Tip, int Id, int Type, int Enabl
 	return But;
 }
 
-bool GToolBar::AppendSeparator()
+bool LToolBar::AppendSeparator()
 {
-	GToolButton *But = new GToolButton(d->Bx, d->By);
+	LToolButton *But = new LToolButton(d->Bx, d->By);
 	if (But)
 	{
 		But->SetId(IDM_SEPARATOR);
@@ -1541,9 +1541,9 @@ bool GToolBar::AppendSeparator()
 	return false;
 }
 
-bool GToolBar::AppendBreak()
+bool LToolBar::AppendBreak()
 {
-	GToolButton *But = new GToolButton(d->Bx, d->By);
+	LToolButton *But = new LToolButton(d->Bx, d->By);
 	if (But)
 	{
 		But->SetId(IDM_BREAK);
@@ -1554,7 +1554,7 @@ bool GToolBar::AppendBreak()
 	return false;
 }
 
-bool GToolBar::AppendControl(LView *Ctrl)
+bool LToolBar::AppendControl(LView *Ctrl)
 {
 	bool Status = false;
 	if (Ctrl)
@@ -1566,7 +1566,7 @@ bool GToolBar::AppendControl(LView *Ctrl)
 	return Status;
 }
 
-void GToolBar::Empty()
+void LToolBar::Empty()
 {
 	for (auto But: Children)
 	{
@@ -1575,9 +1575,9 @@ void GToolBar::Empty()
 }
 
 #ifdef MAC
-bool GToolBar::Attach(LViewI *parent)
+bool LToolBar::Attach(LViewI *parent)
 {
-	return GLayout::Attach(parent);
+	return LLayout::Attach(parent);
 }
 #endif
 

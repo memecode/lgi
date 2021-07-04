@@ -40,7 +40,7 @@ GFindReplaceCommon::GFindReplaceCommon()
 class GFindDlgPrivate
 {
 public:
-	GEdit *Edit;
+	LEdit *Edit;
 	GFrCallback Callback;
 	void *CallbackData;
 };
@@ -60,33 +60,33 @@ GFindDlg::GFindDlg(LView *Parent, char *Init, GFrCallback Callback, void *UserDa
 	SetPos(r);
 	MoveSameScreen(Parent);
 
-    GTableLayout *t;
-    if (AddView(t = new GTableLayout(IDC_FIND_TABLE)))
+    LTableLayout *t;
+    if (AddView(t = new LTableLayout(IDC_FIND_TABLE)))
     {        
         int Row = 0;
         GLayoutCell *c = t->GetCell(0, Row);
-        c->Add(new GTextLabel(IDS_16, 14, 14, -1, -1, LgiLoadString(L_FR_FIND_WHAT, "Find what:")));
+        c->Add(new LTextLabel(IDS_16, 14, 14, -1, -1, LgiLoadString(L_FR_FIND_WHAT, "Find what:")));
         
         c = t->GetCell(1, Row);
-    	c->Add(d->Edit = new GEdit(IDC_TEXT, 91, 7, 168, 21, ""));
+    	c->Add(d->Edit = new LEdit(IDC_TEXT, 91, 7, 168, 21, ""));
     	
     	c = t->GetCell(2, Row++);
-    	c->Add(new GButton(IDOK, 294, 7, 70, 21, LgiLoadString(L_FR_FIND_NEXT, "Find Next")));
+    	c->Add(new LButton(IDOK, 294, 7, 70, 21, LgiLoadString(L_FR_FIND_NEXT, "Find Next")));
     	
     	c = t->GetCell(0, Row, true, 2, 1);
-    	c->Add(new GCheckBox(IDC_MATCH_WORD, 14, 42, -1, -1, LgiLoadString(L_FR_MATCH_WORD, "Match &whole word only")));
+    	c->Add(new LCheckBox(IDC_MATCH_WORD, 14, 42, -1, -1, LgiLoadString(L_FR_MATCH_WORD, "Match &whole word only")));
     	
     	c = t->GetCell(2, Row++);
-	    c->Add(new GButton(IDCANCEL, 294, 35, 70, 21, LgiLoadString(L_BTN_CANCEL, "Cancel")));
+	    c->Add(new LButton(IDCANCEL, 294, 35, 70, 21, LgiLoadString(L_BTN_CANCEL, "Cancel")));
 	    
 	    c = t->GetCell(0, Row++, true, 2, 1);
-	    c->Add(new GCheckBox(IDC_MATCH_CASE, 14, 63, -1, -1, LgiLoadString(L_FR_MATCH_CASE, "Match &case")));
+	    c->Add(new LCheckBox(IDC_MATCH_CASE, 14, 63, -1, -1, LgiLoadString(L_FR_MATCH_CASE, "Match &case")));
 	    
 	    c = t->GetCell(0, Row);
-	    c->Add(new GCheckBox(IDC_SELECTION_ONLY, 14, 84, -1, -1, LgiLoadString(L_FR_SELECTION_ONLY, "&Selection only")));
+	    c->Add(new LCheckBox(IDC_SELECTION_ONLY, 14, 84, -1, -1, LgiLoadString(L_FR_SELECTION_ONLY, "&Selection only")));
 
 	    c = t->GetCell(1, Row++);
-	    c->Add(new GCheckBox(IDC_SEARCH_UP, 0, 0, -1, -1, "Search &upwards"));
+	    c->Add(new LCheckBox(IDC_SEARCH_UP, 0, 0, -1, -1, "Search &upwards"));
 	    
 	    OnPosChange();
 	    
@@ -97,7 +97,7 @@ GFindDlg::GFindDlg(LView *Parent, char *Init, GFrCallback Callback, void *UserDa
 	    
 		int Over = TblY - UsedY;
 	    r = GetPos();
-        r.y2 -= Over - (GTableLayout::CellSpacing<<1);
+        r.y2 -= Over - (LTableLayout::CellSpacing<<1);
 	    SetPos(r);
 	}	
     
@@ -112,11 +112,11 @@ GFindDlg::~GFindDlg()
 
 void GFindDlg::OnPosChange()
 {
-    GTableLayout *t;
+    LTableLayout *t;
     if (GetViewById(IDC_FIND_TABLE, t))
     {
         LRect c = GetClient();
-        c.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
+        c.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
         t->SetPos(c);
     }
 }
@@ -205,44 +205,44 @@ GReplaceDlg::GReplaceDlg(LView *Parent, char *InitFind, char *InitReplace, GFrCa
 	SetPos(r);
 	MoveToCenter();
 	
-	GTableLayout *t;
-	if (AddView(t = new GTableLayout(IDC_FIND_TABLE)))
+	LTableLayout *t;
+	if (AddView(t = new LTableLayout(IDC_FIND_TABLE)))
 	{
 	    int Row = 0;
         GLayoutCell *c = t->GetCell(0, Row);
-    	c->Add(new GTextLabel(-1, 14, 14, -1, -1, LgiLoadString(L_FR_FIND_WHAT, "Find what:")));
+    	c->Add(new LTextLabel(-1, 14, 14, -1, -1, LgiLoadString(L_FR_FIND_WHAT, "Find what:")));
 
         c = t->GetCell(1, Row);
-    	c->Add(f = new GEdit(IDC_TEXT, 0, 0, 60, 20, ""));
+    	c->Add(f = new LEdit(IDC_TEXT, 0, 0, 60, 20, ""));
 
         c = t->GetCell(2, Row++);
-    	c->Add(new GButton(IDC_FR_FIND, 0, 0, -1, -1, LgiLoadString(L_FR_FIND_NEXT, "Find Next")));
+    	c->Add(new LButton(IDC_FR_FIND, 0, 0, -1, -1, LgiLoadString(L_FR_FIND_NEXT, "Find Next")));
 	
         c = t->GetCell(0, Row);	
-	    c->Add(new GTextLabel(-1, 0, 0, -1, -1, LgiLoadString(L_FR_REPLACE_WITH, "Replace with:")));
+	    c->Add(new LTextLabel(-1, 0, 0, -1, -1, LgiLoadString(L_FR_REPLACE_WITH, "Replace with:")));
 
         c = t->GetCell(1, Row);	
-    	c->Add(new GEdit(IDC_REPLACE_WITH, 0, 0, -1, -1, ""));
+    	c->Add(new LEdit(IDC_REPLACE_WITH, 0, 0, -1, -1, ""));
 
         c = t->GetCell(2, Row++);	
-    	c->Add(new GButton(IDC_FR_REPLACE, 0, 0, -1, -1, LgiLoadString(L_FR_REPLACE, "Replace")));
+    	c->Add(new LButton(IDC_FR_REPLACE, 0, 0, -1, -1, LgiLoadString(L_FR_REPLACE, "Replace")));
 
         c = t->GetCell(0, Row, true, 2);
-    	c->Add(new GCheckBox(IDC_MATCH_WORD, 14, 70, -1, -1, LgiLoadString(L_FR_MATCH_WORD, "Match whole &word only")));
+    	c->Add(new LCheckBox(IDC_MATCH_WORD, 14, 70, -1, -1, LgiLoadString(L_FR_MATCH_WORD, "Match whole &word only")));
 
         c = t->GetCell(2, Row++);	
-    	c->Add(new GButton(IDOK, 0, 0, -1, -1, LgiLoadString(L_FR_REPLACE_ALL, "Replace &All")));
+    	c->Add(new LButton(IDOK, 0, 0, -1, -1, LgiLoadString(L_FR_REPLACE_ALL, "Replace &All")));
 
         c = t->GetCell(0, Row, true, 2);
-    	c->Add(new GCheckBox(IDC_MATCH_CASE, 14, 91, -1, -1, LgiLoadString(L_FR_MATCH_CASE, "Match &case")));
+    	c->Add(new LCheckBox(IDC_MATCH_CASE, 14, 91, -1, -1, LgiLoadString(L_FR_MATCH_CASE, "Match &case")));
 
         c = t->GetCell(2, Row++);	
-    	c->Add(new GButton(IDCANCEL, 0, 0, -1, -1, LgiLoadString(L_BTN_CANCEL, "Cancel")));
+    	c->Add(new LButton(IDCANCEL, 0, 0, -1, -1, LgiLoadString(L_BTN_CANCEL, "Cancel")));
 
         c = t->GetCell(0, Row);
-	    c->Add(new GCheckBox(IDC_SELECTION_ONLY, 14, 112, -1, -1, LgiLoadString(L_FR_SELECTION_ONLY, "&Selection only")));
+	    c->Add(new LCheckBox(IDC_SELECTION_ONLY, 14, 112, -1, -1, LgiLoadString(L_FR_SELECTION_ONLY, "&Selection only")));
         c = t->GetCell(1, Row);
-    	c->Add(new GCheckBox(IDC_SEARCH_UP, 14, 91, -1, -1, "Search &upwards"));
+    	c->Add(new LCheckBox(IDC_SEARCH_UP, 14, 91, -1, -1, "Search &upwards"));
 
 	
 	    OnPosChange();
@@ -250,7 +250,7 @@ GReplaceDlg::GReplaceDlg(LView *Parent, char *InitFind, char *InitReplace, GFrCa
 	    LRect u = t->GetUsedArea();
 	    int Over = t->GetPos().Y() - u.Y();
 	    r = GetPos();
-        r.y2 -= Over - (GTableLayout::CellSpacing << 1);
+        r.y2 -= Over - (LTableLayout::CellSpacing << 1);
 	    SetPos(r);
 	}
 	
@@ -308,11 +308,11 @@ int GReplaceDlg::OnNotify(LViewI *Ctrl, int Flags)
 
 void GReplaceDlg::OnPosChange()
 {
-    GTableLayout *t;
+    LTableLayout *t;
     if (GetViewById(IDC_FIND_TABLE, t))
     {
         LRect c = GetClient();
-        c.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
+        c.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
         t->SetPos(c);
     }
 }

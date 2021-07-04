@@ -6,16 +6,16 @@
 #include "lgi/common/Layout.h"
 
 // Tab control
-class GTabPage;
-typedef List<GTabPage> TabPageList;
+class LTabPage;
+typedef List<LTabPage> TabPageList;
 
 /// A tab control that displays multiple pages of information in a small area.
-class LgiClass GTabView :
-	public GLayout,
+class LgiClass LTabView :
+	public LLayout,
 	public ResObject
 {
-	friend class GTabPage;
-	class GTabViewPrivate *d;
+	friend class LTabPage;
+	class LTabViewPrivate *d;
 
 protected:
 	int TabY();
@@ -30,16 +30,16 @@ public:
 	};
 
 	/// Creates the tab view object
-	GTabView(	int id = -1,
+	LTabView(	int id = -1,
 				int x = 0,
 				int y = 0,
 				int cx = 1000,
 				int cy = 1000,
 				const char *name = 0,
 				int Init = 0);
-	~GTabView();
+	~LTabView();
 	
-	const char *GetClass() { return "GTabView"; }
+	const char *GetClass() { return "LTabView"; }
 
 	/// Gets the selected tab
 	int64 Value();
@@ -50,16 +50,16 @@ public:
 	void SetPourChildren(bool b);
 
 	/// Append an existing tab
-	bool Append(GTabPage *Page, int Where = -1);
+	bool Append(LTabPage *Page, int Where = -1);
 	/// Append a new tab with the title 'name'
-	GTabPage *Append(const char *name, int Where = -1);
+	LTabPage *Append(const char *name, int Where = -1);
 	/// Delete a tab
-	bool Delete(GTabPage *Page);
+	bool Delete(LTabPage *Page);
 
 	///.Returns the tab at position 'i'
-	GTabPage *TabAt(int i);
+	LTabPage *TabAt(int i);
 	/// Gets a pointer to the current tab
-	GTabPage *GetCurrent();
+	LTabPage *GetCurrent();
 	/// Gets the number of tabs
 	size_t GetTabs();
 	
@@ -86,17 +86,17 @@ public:
 	void OnStyleChange();
 };
 
-class LgiClass GTabPage :
+class LgiClass LTabPage :
 	public LView,
 	public LResourceLoad,
 	public ResObject
 {
-	friend class GTabView;
-	struct GTabPagePriv *d;
+	friend class LTabView;
+	struct LTabPagePriv *d;
 	bool Attach(LViewI *parent) override;
 
 	// Vars
-	GTabView *TabCtrl;
+	LTabView *TabCtrl;
 	
 	// Position of the clickable UI element for selecting the tab.
 	LRect TabPos;
@@ -123,10 +123,10 @@ class LgiClass GTabPage :
 	virtual void OnTabClick(LMouse &m);
 
 public:
-	GTabPage(const char *name);
-	~GTabPage();
+	LTabPage(const char *name);
+	~LTabPage();
 
-	const char *GetClass() override { return "GTabPage"; }
+	const char *GetClass() override { return "LTabPage"; }
 	GColour GetBackground();
 
 	const char *Name() override;
@@ -135,7 +135,7 @@ public:
 	void Value(int64 v) override;
 	bool HasButton();
 	void HasButton(bool b);
-	GTabView *GetTabControl() { return TabCtrl; }
+	LTabView *GetTabControl() { return TabCtrl; }
 
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	void OnPaint(LSurface *pDC) override;

@@ -41,7 +41,7 @@ enum LgiMessages
 		M_PULSE,
 		M_SET_VISIBLE,
 		
-		/// Sent from a worker thread when calling GTextLabel::Name
+		/// Sent from a worker thread when calling LTextLabel::Name
 		M_TEXT_UPDATE_NAME,
 		
 	#elif defined(WINNATIVE)
@@ -72,7 +72,7 @@ enum LgiMessages
 		// lParam = Style
 		M_SET_WND_STYLE,
 
-		// lParam = GScrollBar *Obj
+		// lParam = LScrollBar *Obj
 		M_SCROLL_BAR_CHANGED,
 
 		// lParam = HWND of window under mouse
@@ -87,7 +87,7 @@ enum LgiMessages
 		// Set the visibility of the window
 		M_SET_VISIBLE,
 
-		/// Sent from a worker thread when calling GTextLabel::Name
+		/// Sent from a worker thread when calling LTextLabel::Name
 		M_TEXT_UPDATE_NAME,
 
 		/// Send when a window is losing it's mouse capture. Usually
@@ -167,7 +167,7 @@ enum LgiMessages
 	M_ASSERT_UI,
 	M_INVALIDATE, // A=(LRect*)Rectangle, B=(LView*)this
 	M_RESIZE_TO_CONTENT, // GItemContainer
-	M_SCROLL_TO, // GTreeItem->GTree
+	M_SCROLL_TO, // LTreeItem->LTree
 
 	#ifdef WINDOWS
 	M_USER = WM_APP + 200

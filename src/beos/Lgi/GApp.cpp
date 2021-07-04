@@ -1,6 +1,6 @@
 #include <Path.h>
 #include "Lgi.h"
-#include "GSkinEngine.h"
+#include "SkinEngine.h"
 #include "GFontCache.h"
 
 class GAppPrivate
@@ -37,7 +37,7 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 GApp *TheApp = 0;
-class GSkinEngine *GApp::SkinEngine = 0;
+class LSkinEngine *GApp::SkinEngine = 0;
 
 GApp *GApp::ObjInstance()
 {
@@ -116,7 +116,7 @@ GApp::GApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : B
 	#if 1
 	if (!GetOption("noskin"))
 	{
-		extern GSkinEngine *CreateSkinEngine(GApp *App);
+		extern LSkinEngine *CreateSkinEngine(GApp *App);
 		SkinEngine = CreateSkinEngine(this);
 	}
 	#endif

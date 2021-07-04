@@ -29,7 +29,7 @@ public:
 	~RLogEntry();
 };
 
-class RLogView : public GLayout
+class RLogView : public LLayout
 {
 friend class RLogEntry;
 friend class GLog;

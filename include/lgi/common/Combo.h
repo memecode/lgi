@@ -6,22 +6,22 @@
 #define __GCOMBO2_H
 
 /// Combo Box widget.
-class LgiClass GCombo :
+class LgiClass LCombo :
 	#ifdef WINNATIVE
-	public GControl,
+	public LControl,
 	#else
 	public LView,
 	#endif
 	public ResObject	
 {
 private:
-	class GComboPrivate *d;
+	class LComboPrivate *d;
 
 public:
 	static LRect Pad;
 
 	/// Constructor
-	GCombo
+	LCombo
 	(
 		/// The control ID
 		int id,
@@ -36,10 +36,10 @@ public:
 		/// The initial text
 		const char *name = NULL
 	);
-	~GCombo();
+	~LCombo();
 
 	// Properties
-	const char *GetClass() override { return "GCombo"; }
+	const char *GetClass() override { return "LCombo"; }
 	/// Returns whether to sort the list
 	bool Sort();
 	/// Sets whether to sort the list

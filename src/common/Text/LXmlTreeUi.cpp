@@ -32,11 +32,11 @@ struct Mapping
 		User = 0;
 	}
 
-	void LoadTree(GTreeNode *n, LXmlTag *t)
+	void LoadTree(LTreeNode *n, LXmlTag *t)
 	{
 		for (auto c: t->Children)
 		{
-			GTreeItem *i = TreeItemFactory(User);
+			LTreeItem *i = TreeItemFactory(User);
 			if (i)
 			{
 				i->XmlIo(c, false);
@@ -47,9 +47,9 @@ struct Mapping
 		}
 	}
 
-	void SaveTree(GTreeNode *n, LXmlTag *t)
+	void SaveTree(LTreeNode *n, LXmlTag *t)
 	{
-		for (GTreeItem *i = n->GetChild(); i; i = i->GetNext())
+		for (LTreeItem *i = n->GetChild(); i; i = i->GetNext())
 		{
 			LXmlTag *n = new LXmlTag(ChildElements.Str());
 			if (n)
@@ -196,13 +196,13 @@ int GetCtrlType(LViewI *v)
 		}
 		else if (dynamic_cast<GCheckBox*>(v) ||
 				dynamic_cast<GButton*>(v) ||
-				dynamic_cast<GRadioButton*>(v))
+				dynamic_cast<LRadioButton*>(v))
 		{
 			return GV_BOOL;
 		}
-		else if (dynamic_cast<GSlider*>(v) ||
+		else if (dynamic_cast<LSlider*>(v) ||
 				dynamic_cast<GCombo*>(v) ||
-				dynamic_cast<GRadioGroup*>(v))
+				dynamic_cast<LRadioGroup*>(v))
 		{
 			return GV_INT32;
 		}
@@ -290,7 +290,7 @@ bool LXmlTreeUi::Convert(GDom *Tag, LViewI *Ui, bool ToUI)
 						LXmlTag *t = Xml->GetChildTag(Map.key);
 						if (!t) continue;
 
-						GTree *Tree;
+						LTree *Tree;
 						if (!Ui->GetViewById(Map.value->Id, Tree)) continue;
 						Tree->Empty();
 
@@ -323,7 +323,7 @@ bool LXmlTreeUi::Convert(GDom *Tag, LViewI *Ui, bool ToUI)
 				}
 				else
 				{
-					GEdit *c;
+					LEdit *c;
 					if (Ui->GetViewById(Map.value->Id, c))
 						c->Name("");
 				}
@@ -366,13 +366,13 @@ bool LXmlTreeUi::Convert(GDom *Tag, LViewI *Ui, bool ToUI)
 							}
 							break;
 						}
-						case GV_CUSTOM: // GTree
+						case GV_CUSTOM: // LTree
 						{
 							if (!Xml) break;
 							LXmlTag *Child = Xml->GetChildTag(Map.key, true);
 							
 							if (!Child) break;
-							GTree *Tree = dynamic_cast<GTree*>(c);
+							LTree *Tree = dynamic_cast<LTree*>(c);
 							
 							if (!Tree) break;
 							Child->Empty(true);

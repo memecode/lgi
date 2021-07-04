@@ -18,7 +18,7 @@
 class ResMenu;
 class ResMenuUi;
 
-class ResMenuItem : public GTreeItem, public FieldSource
+class ResMenuItem : public LTreeItem, public FieldSource
 {
 	ResMenu *Menu;
 	bool Sep;
@@ -52,7 +52,7 @@ public:
 	bool OnNew();
 };
 
-class ResMenu : public Resource, public GTree
+class ResMenu : public Resource, public LTree
 {
 	friend class ResMenuItem;
 	friend class AppWnd;
@@ -78,10 +78,10 @@ public:
 	ResStringGroup *GetStringGroup() { return Group; }
 
 	// Tree
-	void OnItemClick(GTreeItem *Item, LMouse &m);
-	void OnItemBeginDrag(GTreeItem *Item, LMouse &m);
-	void OnItemExpand(GTreeItem *Item, bool Expand);
-	void OnItemSelect(GTreeItem *Item);
+	void OnItemClick(LTreeItem *Item, LMouse &m);
+	void OnItemBeginDrag(LTreeItem *Item, LMouse &m);
+	void OnItemExpand(LTreeItem *Item, bool Expand);
+	void OnItemSelect(LTreeItem *Item);
 
 	// Resource
 	LView *CreateUI();
@@ -95,11 +95,11 @@ public:
 	bool Write(LXmlTag *t, SerialiseContext &Ctx);
 };
 
-class ResMenuUi : public GLayout
+class ResMenuUi : public LLayout
 {
-	GToolBar *Tools;
+	LToolBar *Tools;
 	ResMenu *Menu;
-	GStatusBar *Status;
+	LStatusBar *Status;
 	GStatusPane *StatusInfo;
 
 public:

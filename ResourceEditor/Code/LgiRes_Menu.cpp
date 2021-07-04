@@ -279,7 +279,7 @@ bool ResMenuItem::Write(LXmlTag *t, int Tabs)
 //////////////////////////////////////////////////////////////////
 ResMenu::ResMenu(AppWnd *w, int type) :
 	Resource(w, type),
-	GTree(IDC_TREE, 0, 0, 200, 200, "Menu resource")
+	LTree(IDC_TREE, 0, 0, 200, 200, "Menu resource")
 {
 	Sunken(false);
 	Group = new ResStringGroup(w);
@@ -299,9 +299,9 @@ void ResMenu::OnShowLanguages()
 	}
 }
 
-void AddChildren(GTreeItem *i, List<ResMenuItem> &Items)
+void AddChildren(LTreeItem *i, List<ResMenuItem> &Items)
 {
-	for (GTreeItem *c = i->GetChild(); c; c = c->GetNext())
+	for (LTreeItem *c = i->GetChild(); c; c = c->GetNext())
 	{
 		ResMenuItem *m = dynamic_cast<ResMenuItem*>(c);
 		if (m)
@@ -312,9 +312,9 @@ void AddChildren(GTreeItem *i, List<ResMenuItem> &Items)
 	}
 }
 
-void AddChildren(GTree *i, List<ResMenuItem> &Items)
+void AddChildren(LTree *i, List<ResMenuItem> &Items)
 {
-	for (GTreeItem *c = i->GetChild(); c; c = c->GetNext())
+	for (LTreeItem *c = i->GetChild(); c; c = c->GetNext())
 	{
 		ResMenuItem *m = dynamic_cast<ResMenuItem*>(c);
 		if (m)
@@ -351,24 +351,24 @@ LView *ResMenu::CreateUI()
 	return Ui = new ResMenuUi(this);
 }
 
-void ResMenu::OnItemClick(GTreeItem *Item, LMouse &m)
+void ResMenu::OnItemClick(LTreeItem *Item, LMouse &m)
 {
-	GTree::OnItemClick(Item, m);
+	LTree::OnItemClick(Item, m);
 }
 
-void ResMenu::OnItemBeginDrag(GTreeItem *Item, LMouse &m)
+void ResMenu::OnItemBeginDrag(LTreeItem *Item, LMouse &m)
 {
-	GTree::OnItemBeginDrag(Item, m);
+	LTree::OnItemBeginDrag(Item, m);
 }
 
-void ResMenu::OnItemExpand(GTreeItem *Item, bool Expand)
+void ResMenu::OnItemExpand(LTreeItem *Item, bool Expand)
 {
-	GTree::OnItemExpand(Item, Expand);
+	LTree::OnItemExpand(Item, Expand);
 }
 
-void ResMenu::OnItemSelect(GTreeItem *Item)
+void ResMenu::OnItemSelect(LTreeItem *Item)
 {
-	GTree::OnItemSelect(Item);
+	LTree::OnItemSelect(Item);
 
 	if (AppWindow)
 	{
@@ -394,7 +394,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 		case IDM_NEW_SUB:
 		{
 			ResMenuItem *Item = dynamic_cast<ResMenuItem*>(Selection());
-			GTreeItem *New = 0;
+			LTreeItem *New = 0;
 
 			ResMenuItem *NewItem = new ResMenuItem(this);
 			if (NewItem && !NewItem->OnNew())
@@ -424,8 +424,8 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 				auto n = Item->IndexOf();
 				if (n >= 0) n++;
 
-				GTreeItem *Parent = Item->GetParent();
-				GTreeItem *New = 0;
+				LTreeItem *Parent = Item->GetParent();
+				LTreeItem *New = 0;
 				ResMenuItem *NewItem = new ResMenuItem(this);
 				if (NewItem && !NewItem->OnNew())
 				{
@@ -467,7 +467,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 			ResMenuItem *Item = dynamic_cast<ResMenuItem*>(Selection());
 			if (Item)
 			{
-				GTreeNode *Parent = 0;
+				LTreeNode *Parent = 0;
 				if (Item->GetParent())
 					Parent = Item->GetParent();
 				else
@@ -492,7 +492,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 			ResMenuItem *Item = dynamic_cast<ResMenuItem*>(Selection());
 			if (Item)
 			{
-				GTreeNode *Parent = 0;
+				LTreeNode *Parent = 0;
 				if (Item->GetParent())
 					Parent = Item->GetParent();
 				else
@@ -755,7 +755,7 @@ void ResMenuUi::OnPosChange()
 
 void ResMenuUi::OnCreate()
 {
-	Tools = new GToolBar;
+	Tools = new LToolBar;
 	if (Tools)
 	{
 		auto FileName = LFindFile("_MenuIcons.gif");
@@ -779,7 +779,7 @@ void ResMenuUi::OnCreate()
 		}
 	}
 
-	Status = new GStatusBar;
+	Status = new LStatusBar;
 	if (Status)
 	{
 		Status->Attach(this);
