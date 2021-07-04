@@ -235,6 +235,7 @@ class VcFolder : public GTreeItem
 	bool ParseCountToTip(int Result, GString s, ParseParams *Params);
 	bool ParseUpdateSubs(int Result, GString s, ParseParams *Params);
 	bool ParseRemoteFind(int Result, GString s, ParseParams *Params);
+	bool ParseStartBranch(int Result, GString s, ParseParams *Params);
 	void DoExpand();
 	
 public:
@@ -258,6 +259,7 @@ public:
 	void ListWorkingFolder();
 	void FolderStatus(const char *Path = NULL, VcLeaf *Notify = NULL);
 	void Commit(const char *Msg, const char *Branch, bool AndPush);
+	void StartBranch(const char *BranchName, const char *OnCreated = NULL);
 	void Push();
 	void Pull(int AndUpdate = -1, LoggingType Logging = LogNormal);
 	void Clean();

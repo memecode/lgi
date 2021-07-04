@@ -2,6 +2,7 @@
 #include "../Resources/resdefs.h"
 #include "GCombo.h"
 #include "GClipBoard.h"
+#include "LJson.h"
 
 #ifndef CALL_MEMBER_FN
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
@@ -3007,6 +3008,61 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 	return true;
 }
 
+bool VcFolder::ParseStartBranch(int Result, GString s, ParseParams *Params)
+{
+	switch (GetType())
+	{
+		case VcHg:
+		{
+			if (Result == 0 && Params && Params->Str)
+			{
+				LJson j(Params->Str);
+				auto cmd = j.Get("Command");
+				if (cmd.Equals("commit"))
+				{
+					auto Msg = j.Get("Msg");
+					auto AndPush = j.Get("AndPush").Int();
+					if (Msg)
+					{
+						Commit(Msg, NULL, AndPush > 0);
+					}
+				}
+			}
+			break;
+		}
+		default:
+		{
+			OnCmdError(NULL, "No commit impl for type.");
+			break;
+		}
+	}
+	
+	return true;
+}
+
+void VcFolder::StartBranch(const char *BranchName, const char *OnCreated)
+{
+	if (!BranchName)
+		return;
+	
+	switch (GetType())
+	{
+		case VcHg:
+		{
+			GString a;
+			a.Printf("branch \"%s\"", BranchName);
+
+			StartCmd(a, &VcFolder::ParseStartBranch, OnCreated ? new ParseParams(OnCreated) : NULL);
+			break;
+		}
+		default:
+		{
+			OnCmdError(NULL, "No commit impl for type.");
+			break;
+		}
+	}	
+}
+
 void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 {
 	GArray<VcFile*> Add;
@@ -3030,6 +3086,13 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 		int Response = LgiMsg(GetTree(), "Do you want to start a new branch?", AppName, MB_YESNO);
 		if (Response != IDYES)
 			return;
+
+		LJson j;
+		j.Set("Command", "commit");
+		j.Set("Msg", Msg);
+		j.Set("AndPush", (int64_t)AndPush);
+		StartBranch(Branch, j.GetJson());
+		return;
 	}
 
 	if (!IsCommit)
