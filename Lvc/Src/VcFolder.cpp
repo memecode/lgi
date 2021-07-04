@@ -3008,61 +3008,6 @@ bool VcFolder::ParseCommit(int Result, GString s, ParseParams *Params)
 	return true;
 }
 
-bool VcFolder::ParseStartBranch(int Result, GString s, ParseParams *Params)
-{
-	switch (GetType())
-	{
-		case VcHg:
-		{
-			if (Result == 0 && Params && Params->Str)
-			{
-				LJson j(Params->Str);
-				auto cmd = j.Get("Command");
-				if (cmd.Equals("commit"))
-				{
-					auto Msg = j.Get("Msg");
-					auto AndPush = j.Get("AndPush").Int();
-					if (Msg)
-					{
-						Commit(Msg, NULL, AndPush > 0);
-					}
-				}
-			}
-			break;
-		}
-		default:
-		{
-			OnCmdError(NULL, "No commit impl for type.");
-			break;
-		}
-	}
-	
-	return true;
-}
-
-void VcFolder::StartBranch(const char *BranchName, const char *OnCreated)
-{
-	if (!BranchName)
-		return;
-	
-	switch (GetType())
-	{
-		case VcHg:
-		{
-			GString a;
-			a.Printf("branch \"%s\"", BranchName);
-
-			StartCmd(a, &VcFolder::ParseStartBranch, OnCreated ? new ParseParams(OnCreated) : NULL);
-			break;
-		}
-		default:
-		{
-			OnCmdError(NULL, "No commit impl for type.");
-			break;
-		}
-	}	
-}
-
 void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 {
 	GArray<VcFile*> Add;
@@ -3202,22 +3147,88 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 	}
 }
 
-void VcFolder::Push()
+bool VcFolder::ParseStartBranch(int Result, GString s, ParseParams *Params)
+{
+	switch (GetType())
+	{
+		case VcHg:
+		{
+			if (Result == 0 && Params && Params->Str)
+			{
+				LJson j(Params->Str);
+				auto cmd = j.Get("Command");
+				if (cmd.Equals("commit"))
+				{
+					auto Msg = j.Get("Msg");
+					auto AndPush = j.Get("AndPush").Int();
+					if (Msg)
+					{
+						Commit(Msg, NULL, AndPush > 0);
+					}
+				}
+			}
+			break;
+		}
+		default:
+		{
+			OnCmdError(NULL, "No commit impl for type.");
+			break;
+		}
+	}
+	
+	return true;
+}
+
+void VcFolder::StartBranch(const char *BranchName, const char *OnCreated)
+{
+	if (!BranchName)
+		return;
+	
+	switch (GetType())
+	{
+		case VcHg:
+		{
+			GString a;
+			a.Printf("branch \"%s\"", BranchName);
+
+			StartCmd(a, &VcFolder::ParseStartBranch, OnCreated ? new ParseParams(OnCreated) : NULL);
+			break;
+		}
+		default:
+		{
+			OnCmdError(NULL, "No commit impl for type.");
+			break;
+		}
+	}	
+}
+
+void VcFolder::Push(bool NewBranchOk)
 {
 	GString Args;
 	bool Working = false;
 	switch (GetType())
 	{
 		case VcHg:
+		{
+			auto args = NewBranchOk ? "push --new-branch" : "push";
+			Working = StartCmd(args, &VcFolder::ParsePush, NULL, LogNormal);
+			break;
+		}
 		case VcGit:
+		{
 			Working = StartCmd("push", &VcFolder::ParsePush, NULL, LogNormal);
 			break;
+		}
 		case VcSvn:
+		{
 			// Nothing to do here.. the commit pushed the data already
 			break;
+		}
 		default:
+		{
 			OnCmdError(NULL, "No push impl for type.");
 			break;
+		}
 	}
 
 	if (d->Tabs && Working)
@@ -3233,6 +3244,19 @@ bool VcFolder::ParsePush(int Result, GString s, ParseParams *Params)
 	
 	if (Result)
 	{
+		bool hasErr = true;
+		if (GetType() == VcHg)
+		{
+			if (s.Find("push creates new remote branches") > 0)
+			{
+				if (LgiMsg(GetTree(), "Push will create a new remote branch. Is that ok?", AppName, MB_YESNO) == IDYES)
+				{
+					Push(true);
+					return false;
+				}
+			}
+		}
+		
 		OnCmdError(s, "Push failed.");
 	}
 	else

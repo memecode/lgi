@@ -1478,8 +1478,10 @@ GString BuildThread::FindExe()
 								LgiMakePath(f, sizeof(f), f, i->File);
 								if (LFileExists(f))
 									i->File = f;
+								/*
 								else
 									LgiAssert(0);
+								*/
 							}
 
 							if (!First)

@@ -2120,6 +2120,7 @@ int AppWnd::OnFixBuildErrors()
 	}
 
 	GString Raw = d->Output->Txt[AppWnd::BuildTab]->Name();
+	LgiTrace("Raw:%s\n", Raw.Get());
 	GString::Array Lines = Raw.Split("\n");
 	auto *Log = d->Output->Txt[AppWnd::OutputTab];
 
@@ -2129,8 +2130,9 @@ int AppWnd::OnFixBuildErrors()
 	GArray<LFileInfo> Files;
 	LHashTbl<StrKey<char>,bool> FixHistory;
 
-	for (auto Ln : Lines)
+	for (int Idx=0; Idx<Lines.Length(); Idx++)
 	{
+		auto Ln = Lines[Idx];
 		auto ErrPos = Ln.Find("error");
 		if (ErrPos >= 0)
 		{
@@ -2304,6 +2306,7 @@ int AppWnd::OnFixBuildErrors()
 						}
 						else
 						{
+							auto OldReplacements = Replacements;
 							for (auto i: Map)
 							{
 								for (int Offset = 0; (LineNo + Offset >= 1) && Offset >= -1; Offset--)
@@ -2311,12 +2314,18 @@ int AppWnd::OnFixBuildErrors()
 									GString &s = Fi->Lines[LineNo+Offset-1];
 									if (ReplaceWholeWord(s, i.key, i.value))
 									{
-										Log->Print("Renamed '%s' -> '%s' at %s:%i\n", i.key, i.value, Full.Get(), LineNo+Offset);
+										Log->Print("Renamed '%s' -> '%s' at %s:%i\n", i.key, i.value.Get(), Full.Get(), LineNo+Offset);
 										Fi->Dirty = true;
 										Replacements++;
 										Offset = -2;
 									}
 								}
+							}
+
+							if (OldReplacements == Replacements &&
+								Ln.Find("syntax error: id") > 0)
+							{
+								Log->Print("Unhandled: %s\n", Ln.Get());
 							}
 						}
 					}
@@ -3316,8 +3325,11 @@ class RenameDlg : public GDialog
 	AppWnd *App;
 
 public:
+	static RenameDlg *Inst;
+
 	RenameDlg(AppWnd *a)
 	{
+		Inst = this;
 		SetParent(App = a);
 		MoveSameScreen(a);
 
@@ -3328,28 +3340,40 @@ public:
 				SetCtrlValue(IDC_FIX_RENAMED, v.CastInt32());
 			if (App->GetOptions()->GetValue(OPT_RENAMED_SYM, v))
 				SetCtrlName(IDC_SYM, v.Str());
+
+			SetAlwaysOnTop(true);
+			DoModeless();
 		}
+	}
+
+	~RenameDlg()
+	{
+		Inst = NULL;
 	}
 
 	int OnNotify(GViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
-			case IDOK:
+			case IDC_APPLY:
 			{
 				GVariant v;
 				App->GetOptions()->SetValue(OPT_RENAMED_SYM, v = GetCtrlName(IDC_SYM));
 				App->GetOptions()->SetValue(OPT_FIX_RENAMED, v = GetCtrlValue(IDC_FIX_RENAMED));
+				App->GetOptions()->SerializeFile(true);
+				break;
 			}
-			case IDCANCEL:
+			case IDC_CLOSE:
 			{
-				EndModal(c->GetId() == IDOK);
+				EndModeless();
 				break;
 			}
 		}
 		return 0;
 	}
 };
+
+RenameDlg *RenameDlg::Inst = NULL;
 
 bool AppWnd::ShowInProject(const char *Fn)
 {
@@ -3836,8 +3860,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_RENAME_SYM:
 		{
-			RenameDlg Dlg(this);
-			Dlg.DoModal();
+			if (!RenameDlg::Inst)
+				new RenameDlg(this);
 			break;
 		}
 		case IDM_START_DEBUG:

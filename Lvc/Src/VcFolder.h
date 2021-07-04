@@ -260,7 +260,7 @@ public:
 	void FolderStatus(const char *Path = NULL, VcLeaf *Notify = NULL);
 	void Commit(const char *Msg, const char *Branch, bool AndPush);
 	void StartBranch(const char *BranchName, const char *OnCreated = NULL);
-	void Push();
+	void Push(bool NewBranchOk = false);
 	void Pull(int AndUpdate = -1, LoggingType Logging = LogNormal);
 	void Clean();
 	bool Revert(GString::Array &uris, const char *Revision = NULL);
