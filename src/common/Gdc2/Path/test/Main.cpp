@@ -1,6 +1,6 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "resdefs.h"
-#include "GPath.h"
+#include "lgi/common/Path.h"
 
 //////////////////////////////////////////////////////////////////
 const char *AppName = "GPathTest";
