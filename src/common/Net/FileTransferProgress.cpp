@@ -46,7 +46,7 @@ int PipeSize[] =
     0
 };
 
-class GPaneThrottle : public GStatusPane
+class GPaneThrottle : public LStatusPane
 {
 	LSlider *Slider;
 	GDom *App;
@@ -216,7 +216,7 @@ void GPaneThrottle::OnMouseClick(LMouse &m)
 #define MAX_SAMPLE				70
 #define HISTORY_DIV				1000
 
-class GPaneHistory : public GStatusPane
+class GPaneHistory : public LStatusPane
 {
 	GDom *App;
 	int64 Cur; // Current value
@@ -446,7 +446,7 @@ GMessage::Result FileTransferProgress::OnEvent(GMessage *m)
     {
         case IDM_SET_LIMITS:
         {			
-            SetRange(GRange(m->A(), m->B()));
+            SetRange(LRange(m->A(), m->B()));
             break;
         }
         case IDM_SET_START_VAL:
@@ -457,10 +457,10 @@ GMessage::Result FileTransferProgress::OnEvent(GMessage *m)
         }
     }
 
-    return GStatusPane::OnEvent(m);
+    return LStatusPane::OnEvent(m);
 }
 
-bool FileTransferProgress::SetRange(const GRange &r)
+bool FileTransferProgress::SetRange(const LRange &r)
 {
     if (!InThread())
     {

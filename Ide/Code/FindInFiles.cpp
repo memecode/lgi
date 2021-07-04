@@ -160,7 +160,7 @@ int FindInFiles::OnNotify(LViewI *v, int f)
 	{
 		case IDC_SET_DIR:
 		{
-			GFileSelect s;
+			LFileSelect s;
 			s.Parent(this);
 			s.InitialDir(GetCtrlName(IDC_DIR));
 			if (s.OpenFolder())

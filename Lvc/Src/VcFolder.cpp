@@ -92,7 +92,7 @@ int Ver2Int(GString v)
 
 int ToolVersion[VcMax] = {0};
 
-ReaderThread::ReaderThread(VersionCtrl vcs, GSubProcess *p, GStream *out) : LThread("ReaderThread")
+ReaderThread::ReaderThread(VersionCtrl vcs, LSubProcess *p, GStream *out) : LThread("ReaderThread")
 {
 	Vcs = vcs;
 	Process = p;
@@ -397,7 +397,7 @@ Result VcFolder::RunCmd(const char *Args, LoggingType Logging)
 
 	if (Uri.IsFile())
 	{
-		GSubProcess Process(Exe, Args);
+		LSubProcess Process(Exe, Args);
 		Process.SetInitFolder(LocalPath());
 		if (!Process.Start())
 		{
@@ -452,7 +452,7 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 
 	if (Uri.IsFile())
 	{
-		GAutoPtr<GSubProcess> Process(new GSubProcess(Exe, Args));
+		GAutoPtr<LSubProcess> Process(new LSubProcess(Exe, Args));
 		if (!Process)
 			return false;
 

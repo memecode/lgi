@@ -690,7 +690,7 @@ bool ProjectNode::Serialize(bool Write)
 										}
 										case 3: // Browse
 										{
-											GFileSelect s;
+											LFileSelect s;
 											s.Parent(Project->GetApp());
 											s.Type("Code", SourcePatterns);
 											if (s.Open())
@@ -732,7 +732,7 @@ bool ProjectNode::Serialize(bool Write)
 										}
 										case 3: // Browse
 										{
-											GFileSelect s;
+											LFileSelect s;
 											s.Parent(Project->GetApp());
 											s.Type("Code", SourcePatterns);
 											if (s.Open())
@@ -1020,7 +1020,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 			}
 			case IDM_INSERT:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(Tree);
 				s.Type("Source", SourcePatterns);
 				s.Type("Makefiles", "*makefile");
@@ -1058,7 +1058,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 			}
 			case IDM_IMPORT_FOLDER:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(Tree);
 
 				GAutoString Dir = Project->GetBasePath();

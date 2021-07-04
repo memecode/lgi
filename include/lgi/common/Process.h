@@ -2,7 +2,7 @@
 #ifndef _GPROCESS_H_
 #define _GPROCESS_H_
 
-#include "GStream.h"
+#include "lgi/common/Stream.h"
 
 extern bool LgiIsProcess(OsProcessId Pid);
 

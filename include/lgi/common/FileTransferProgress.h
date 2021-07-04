@@ -2,7 +2,7 @@
 #ifndef __FILE_TRANS_PROG_H
 #define __FILE_TRANS_PROG_H
 
-#include "GProgressStatusPane.h"
+#include "lgi/common/ProgressStatusPane.h"
 
 // Status bar panes
 #define	_STATUS_THROTTLE			0
@@ -19,12 +19,12 @@
 #define OPT_PipeSize				"PipeSize"	// (int)
 
 // Classes
-class FileTransferProgress : public GStatusPane, public Progress
+class FileTransferProgress : public LStatusPane, public Progress
 {
 	uint64 StartTime;
 	int64 StartPos;
 	GProgressStatusPane *ProgressPane;
-	GArray<GStatusPane*> StatusInfo;
+	GArray<LStatusPane*> StatusInfo;
 	
 	int64 DspVal;
 	void UpdateUi();
@@ -33,7 +33,7 @@ public:
 	FileTransferProgress(GDom *App, LStatusBar *Status, bool Limit = false);
 
 	// Progress Api (must be thread-safe)
-	bool SetRange(const GRange &r) override;
+	bool SetRange(const LRange &r) override;
 	void Value(int64 v) override;
 
 	// Parameters

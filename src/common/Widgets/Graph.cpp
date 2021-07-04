@@ -531,7 +531,7 @@ void LGraph::OnMouseClick(LMouse &m)
                     break;
                 }
 
-                GFileSelect s;
+                LFileSelect s;
                 s.Parent(this);
                 s.Name("average.csv");
                 char Desktop[MAX_PATH];

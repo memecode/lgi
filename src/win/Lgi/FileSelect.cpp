@@ -1,5 +1,5 @@
 /*hdr
-**      FILE:           GFileSelect.cpp
+**      FILE:           LFileSelect.cpp
 **      AUTHOR:         Matthew Allen
 **      DATE:           26/9/2001
 **      DESCRIPTION:    Common file/directory selection dialog
@@ -16,7 +16,7 @@
 
 class GFileSelectPrivate
 {
-	friend class GFileSelect;
+	friend class LFileSelect;
 
 	bool			CanMultiSelect;
 	bool			MultiSelected;
@@ -28,7 +28,7 @@ class GFileSelectPrivate
 	bool			WaitForMessage;
 	int				SelectedType;
 	LViewI			*ParentWnd;
-	List<GFileType> TypeList;
+	List<LFileType> TypeList;
 	List<char>		Files;
 	bool			ShowReadOnly;
 	bool			ReadOnly;
@@ -198,23 +198,23 @@ class GFileSelectPrivate
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-GFileSelect::GFileSelect()
+LFileSelect::LFileSelect()
 {
 	d = new GFileSelectPrivate;
 }
 
-GFileSelect::~GFileSelect()
+LFileSelect::~LFileSelect()
 {
 	ClearTypes();
 	DeleteObj(d);
 }
 
-const char *GFileSelect::Name()
+const char *LFileSelect::Name()
 {
 	return d->Files[0];
 }
 
-bool GFileSelect::Name(const char *n)
+bool LFileSelect::Name(const char *n)
 {
 	bool Status = FALSE;
 
@@ -227,39 +227,39 @@ bool GFileSelect::Name(const char *n)
 	return Status;
 }
 
-char *GFileSelect::operator [](size_t i)
+char *LFileSelect::operator [](size_t i)
 {
 	return d->Files[i];
 }
 
-size_t GFileSelect::Length()
+size_t LFileSelect::Length()
 {
 	return d->Files.Length();
 }
 
-size_t GFileSelect::Types()
+size_t LFileSelect::Types()
 {
 	return d->TypeList.Length();
 }
 
-ssize_t GFileSelect::SelectedType()
+ssize_t LFileSelect::SelectedType()
 {
 	return d->SelectedType;
 }
 
-GFileType *GFileSelect::TypeAt(ssize_t n)
+LFileType *LFileSelect::TypeAt(ssize_t n)
 {
 	return d->TypeList.ItemAt(n);
 }
 
-void GFileSelect::ClearTypes()
+void LFileSelect::ClearTypes()
 {
 	d->TypeList.DeleteObjects();
 }
 
-bool GFileSelect::Type(const char *Description, const char *Extension, int Data)
+bool LFileSelect::Type(const char *Description, const char *Extension, int Data)
 {
-	GFileType *Type = new GFileType;
+	LFileType *Type = new LFileType;
 	if (Type)
 	{
 		Type->Description(Description);
@@ -271,70 +271,70 @@ bool GFileSelect::Type(const char *Description, const char *Extension, int Data)
 	return Type != 0;
 }
 
-LViewI *GFileSelect::Parent()
+LViewI *LFileSelect::Parent()
 {
 	return d->ParentWnd;
 }
 
-void GFileSelect::Parent(LViewI *Window)
+void LFileSelect::Parent(LViewI *Window)
 {
 	d->ParentWnd = Window;
 }
 
-bool GFileSelect::ReadOnly()
+bool LFileSelect::ReadOnly()
 {
 	return d->ReadOnly;
 }
 
-void GFileSelect::ShowReadOnly(bool ro)
+void LFileSelect::ShowReadOnly(bool ro)
 {
 	d->ShowReadOnly = ro;
 }
 
-bool GFileSelect::MultiSelect()
+bool LFileSelect::MultiSelect()
 {
 	return d->CanMultiSelect;
 }
 
-void GFileSelect::MultiSelect(bool Multi)
+void LFileSelect::MultiSelect(bool Multi)
 {
 	d->CanMultiSelect = Multi;
 }
 
-char *GFileSelect::InitialDir()
+char *LFileSelect::InitialDir()
 {
 	return d->InitDir;
 }
 
-void GFileSelect::InitialDir(const char *InitDir)
+void LFileSelect::InitialDir(const char *InitDir)
 {
 	DeleteArray(d->InitDir);
 	d->InitDir = NewStr(InitDir);
 }
 
-char *GFileSelect::Title()
+char *LFileSelect::Title()
 {
 	return d->TitleStr;
 }
 
-void GFileSelect::Title(const char *Title)
+void LFileSelect::Title(const char *Title)
 {
 	DeleteArray(d->TitleStr);
 	d->TitleStr = NewStr(Title);
 }
 
-char *GFileSelect::DefaultExtension()
+char *LFileSelect::DefaultExtension()
 {
 	return d->DefExt;
 }
 
-void GFileSelect::DefaultExtension(const char *DefExt)
+void LFileSelect::DefaultExtension(const char *DefExt)
 {
 	DeleteArray(d->DefExt);
 	d->DefExt = NewStr(DefExt);
 }
 
-bool GFileSelect::Open()
+bool LFileSelect::Open()
 {
 	bool Status = FALSE;
 
@@ -361,7 +361,7 @@ int CALLBACK GFileSelectBrowseCallback(HWND hwnd, UINT uMsg, LPARAM lParam, LPAR
 	return 0;
 }
 
-bool GFileSelect::OpenFolder()
+bool LFileSelect::OpenFolder()
 {
 	#if 1
 
@@ -439,7 +439,7 @@ bool GFileSelect::OpenFolder()
 	return Status;
 }
 
-bool GFileSelect::Save()
+bool LFileSelect::Save()
 {
 	bool Status = FALSE;
 

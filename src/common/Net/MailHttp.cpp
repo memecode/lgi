@@ -1,13 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "Mail.h"
-#include "GToken.h"
-#include "GDocView.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Mail.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/DocView.h"
 
 //////////////////////////////////////////////////////////////////////////
-#include "IHttp.h"
+#include "lgi/common/Http.h"
 
 static char PopOverHttpSep[] = "\n-----------------[EndPopOverHttp]-----------------";
 

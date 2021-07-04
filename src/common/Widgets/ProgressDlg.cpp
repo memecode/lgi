@@ -159,7 +159,7 @@ LProgressPane::~LProgressPane()
 {
 }
 
-bool LProgressPane::SetRange(const GRange &r)
+bool LProgressPane::SetRange(const LRange &r)
 {
 	UiDirty = true;
 	Progress::SetRange(r);
@@ -539,14 +539,14 @@ void LProgressDlg::SetDescription(const char *d)
 		Panes.First()->SetDescription(d);
 }
 
-GRange LProgressDlg::GetRange()
+LRange LProgressDlg::GetRange()
 {
 	if (Panes.Length())
 		return Panes.First()->GetRange();
-	return GRange();
+	return LRange();
 }
 
-bool LProgressDlg::SetRange(const GRange &r)
+bool LProgressDlg::SetRange(const LRange &r)
 {
 	if (!Panes.Length())
 		return false;

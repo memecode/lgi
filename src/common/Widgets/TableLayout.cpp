@@ -1145,7 +1145,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		}
 	}
 	
-	// Fix: This if statement is needed to stop GFileSelect dialogs only growing in size, and
+	// Fix: This if statement is needed to stop LFileSelect dialogs only growing in size, and
 	// the Ok/Cancel shifting off the bottom of the dialog if you shrink the window.
 	if (Flags != SizeFill)
 	{

@@ -4,7 +4,7 @@
 #ifndef _GTAR_FILE_H_
 #define _GTAR_FILE_H_
 
-#include "GStringClass.h"
+#include "lgi/common/StringClass.h"
 
 /// Tar file parser
 class GTarParser

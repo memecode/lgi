@@ -94,7 +94,7 @@ void DocEdit::OnApplyStyles()
 	LProfile Prof("OnApplyStyles");
 	#endif
 	PROF("Lock");
-	GTextView3::GStyle Vis(STYLE_NONE);
+	LTextView3::LStyle Vis(STYLE_NONE);
 	GetVisible(Vis);
 	if (DocEditStyling::Lock(_FL))
 	{
@@ -115,8 +115,8 @@ void DocEdit::OnApplyStyles()
 				#endif
 				ssize_t CurLine = -1, DirtyStartLine = -1, DirtyEndLine = -1;
 				GetTextLine(Cursor, &CurLine);
-				GTextLine *Start = GetTextLine(Params.Dirty.Start, &DirtyStartLine);
-				GTextLine *End = GetTextLine(MIN(Size, Params.Dirty.End()), &DirtyEndLine);
+				LTextLine *Start = GetTextLine(Params.Dirty.Start, &DirtyStartLine);
+				LTextLine *End = GetTextLine(MIN(Size, Params.Dirty.End()), &DirtyEndLine);
 				if (CurLine >= 0 &&
 					DirtyStartLine >= 0 &&
 					DirtyEndLine >= 0)
@@ -235,7 +235,7 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 	char16 *e = s + p.Text.Length();
 		
 	PROF("Scan");
-	LUnrolledList<GTextView3::GStyle> Out;
+	LUnrolledList<LTextView3::LStyle> Out;
 	for (; ParentState != KCancel && s < e; s++)
 	{
 		switch (*s)
@@ -407,7 +407,7 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 		ParentState != KCancel &&
 		PrevStyle.Length())
 	{
-		GArray<GTextView3::GStyle*> Old, Cur;
+		GArray<LTextView3::LStyle*> Old, Cur;
 		for (auto s : PrevStyle)
 		{
 			if (s.Overlap(Vis))
@@ -425,7 +425,7 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 		for (int o=0; o<Old.Length(); o++)
 		{
 			bool Match = false;
-			GTextView3::GStyle *OldStyle = Old[o];
+			LTextView3::LStyle *OldStyle = Old[o];
 			for (int n=0; n<Cur.Length(); n++)
 			{
 				if (*OldStyle == *Cur[n])
@@ -678,7 +678,7 @@ void DocEditStyling::StyleDefault(StylingParams &p)
 						
 						if (type != KNone)
 						{
-							GAutoPtr<GStyle> st(new GTextView3::GStyle(STYLE_IDE));
+							GAutoPtr<LStyle> st(new LTextView3::LStyle(STYLE_IDE));
 							if (st)
 							{
 								st->View = this;
@@ -813,7 +813,7 @@ void DocEditStyling::StyleXml(StylingParams &p)
 						
 						if (type != KNone)
 						{
-							GAutoPtr<GStyle> st(new GTextView3::GStyle(STYLE_IDE));
+							GAutoPtr<LStyle> st(new LTextView3::LStyle(STYLE_IDE));
 							if (st)
 							{
 								st->View = this;
@@ -857,7 +857,7 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 	auto &Style = p.Styles;
 	GString Ext = LgiGetExtension(p.FileName);
 	DocType Type = CodeHtml;
-	GTextView3::GStyle *Cur = NULL;
+	LTextView3::LStyle *Cur = NULL;
 	#define START_CODE() \
 		if (Type != CodeHtml) \
 		{ \

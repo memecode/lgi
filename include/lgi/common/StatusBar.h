@@ -8,7 +8,7 @@
 
 class LgiClass LStatusBar : public LLayout
 {
-	friend class GStatusPane;
+	friend class LStatusPane;
 
 public:
 	LStatusBar();
@@ -19,11 +19,11 @@ public:
 	void OnPaint(LSurface *pDC);
 	void OnPosChange();
 
-	GStatusPane *AppendPane(const char *Text, int Width);
-	bool AppendPane(GStatusPane *Pane);
+	LStatusPane *AppendPane(const char *Text, int Width);
+	bool AppendPane(LStatusPane *Pane);
 };
 
-class LgiClass GStatusPane :
+class LgiClass LStatusPane :
 	public LView
 {
 	friend class LStatusBar;
@@ -34,10 +34,10 @@ protected:
 	LSurface *pDC;
 
 public:
-	GStatusPane();
-	~GStatusPane();
+	LStatusPane();
+	~LStatusPane();
 
-	const char *GetClass() { return "GStatusPane"; }
+	const char *GetClass() { return "LStatusPane"; }
 	const char *Name() { return LBase::Name(); }
 	bool Name(const char *n);
 	void OnPaint(LSurface *pDC);

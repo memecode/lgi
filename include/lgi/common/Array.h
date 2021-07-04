@@ -464,7 +464,7 @@ public:
 	/// Deletes a range.
 	/// This operation always maintains order. 
 	/// \returns the number of removed elements
-	ssize_t DeleteRange(GRange r)
+	ssize_t DeleteRange(LRange r)
 	{
 		// Truncate range to the size of this array
 		if (r.Start < 0)
@@ -715,11 +715,11 @@ public:
 	bool SwapRange
 	(
 		// The range of 'this' to swap out
-		GRange aRange,
+		LRange aRange,
 		// The other array to swap with
 		GArray<Type> &b,
 		// The range of 'b' to swap with this array
-		GRange bRange
+		LRange bRange
 	)
 	{
 		GArray<Type> Tmp;

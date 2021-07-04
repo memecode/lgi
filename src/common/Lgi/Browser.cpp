@@ -1,11 +1,11 @@
-#include "Lgi.h"
-#include "GBrowser.h"
-#include "GHtml.h"
-#include "INet.h"
-#include "IHttp.h"
-#include "LEdit.h"
-#include "LButton.h"
-#include "GToken.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Browser.h"
+#include "lgi/common/Html.h"
+#include "lgi/common/Net.h"
+#include "lgi/common/Http.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Token.h"
 
 #define M_LOADED		(M_USER+3000)
 #define M_BUSY			(M_USER+3001)

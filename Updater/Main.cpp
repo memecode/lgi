@@ -5,8 +5,8 @@
 #include <windows.h>
 #include <tchar.h>
 #include <stdio.h>
-#include "../include/common/LgiDefs.h"
-#include "../include/common/GArray.h"
+#include "../include/lgi/common/LgiDefs.h"
+#include "../include/lgi/common/Array.h"
 
 const TCHAR *AppName = _T("Updater");
 

@@ -3,10 +3,10 @@
 
 /// This class keeps an array of ranges in sorted order, merging 
 /// adjacent ranges when new ranges are added.
-class GRanges : public GArray<GRange>
+class GRanges : public GArray<LRange>
 {
 public:
-	GRanges &operator +=(const GRange &r)
+	GRanges &operator +=(const LRange &r)
 	{
 		// Insert at the right position
 		if (Length() == 0)
@@ -40,7 +40,7 @@ public:
 			{
 				// Overlapping?
 				auto us = MIN(r.Start, cur.Start);
-				GRange u(us, MAX(r.End(), cur.End()) - us);
+				LRange u(us, MAX(r.End(), cur.End()) - us);
 				cur = u;
 			}
 		}
@@ -49,9 +49,9 @@ public:
 	}
 
 	/// Returns the complete range, start to end, including any gaps.
-	GRange Union()
+	LRange Union()
 	{
-		GRange u;
+		LRange u;
 
 		if (Length() > 0)
 		{
@@ -79,7 +79,7 @@ public:
 				SortChk = false;
 				Sort
 				(
-					[](GRange *a, GRange *b) -> int
+					[](LRange *a, LRange *b) -> int
 					{
 						auto Diff = a->Start - b->Start;
 						if (Diff < 0) return -1;
@@ -137,9 +137,9 @@ public:
 		*/
 
 		// Overlapping insert test
-		GRange *r = NULL;
+		LRange *r = NULL;
 		FromString("10-20,30-40,50-60,70-80,90-100");
-		*this += GRange(55,10);
+		*this += LRange(55,10);
 		if (Length() != 5)
 			goto Error;
 		r = AddressOf(2);

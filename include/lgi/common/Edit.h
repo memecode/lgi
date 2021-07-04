@@ -6,7 +6,7 @@
 #define _GEDIT_H_
 
 #if !WINNATIVE
-#include "GTextView3.h"
+#include "LTextView3.h"
 #endif
 
 /// An edit box allowing the user to enter text
@@ -15,7 +15,7 @@ class LgiClass LEdit :
 	public LControl,
 	public ResObject
 	#else
-	public GTextView3
+	public LTextView3
 	#endif
 {
 protected:
@@ -67,7 +67,7 @@ public:
 	/// Selects a region of text
 	void Select(int Start = 0, int Len = -1);
 	/// Get the current selection in characters
-	GRange GetSelectionRange();
+	LRange GetSelectionRange();
 	/// Gets the Caret position in characters
 	ssize_t GetCaret(bool Cursor = true);
 	/// Sets the Caret position in characters

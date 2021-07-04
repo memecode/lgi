@@ -418,7 +418,7 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 				}
 				case IDM_IMPORT:
 				{
-					GFileSelect Select;
+					LFileSelect Select;
 					Select.Parent(Obj->App());
 					Select.Type("Text", "*.txt");
 					if (Select.Open())
@@ -578,7 +578,7 @@ void FieldView::Serialize(bool Write)
 	Ignore = false;
 }
 
-class TextViewEdit : public GTextView3
+class TextViewEdit : public LTextView3
 {
 public:
     bool Multiline;
@@ -589,7 +589,7 @@ public:
 					int cx,
 					int cy,
 					LFontType *FontInfo = 0) :
-		GTextView3(Id, x, y, cx, cy, FontInfo)
+		LTextView3(Id, x, y, cx, cy, FontInfo)
 	{
 	    Multiline = false;
 		#ifdef WIN32
@@ -604,7 +604,7 @@ public:
 			return false;
 		}
 
-		return GTextView3::OnKey(k);
+		return LTextView3::OnKey(k);
 	}
 };
 
@@ -795,7 +795,7 @@ int FieldView::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (!Ignore)
 	{
-		GTextView3 *Tv = dynamic_cast<GTextView3*>(Ctrl);
+		LTextView3 *Tv = dynamic_cast<LTextView3*>(Ctrl);
 		if (Tv && Flags == GNotifyCursorChanged)
 		{
 			return 0;
@@ -820,7 +820,7 @@ int FieldView::OnNotify(LViewI *Ctrl, int Flags)
 				}
 				else if (c->Id == -Ctrl->GetId())
 				{
-					GFileSelect s;
+					LFileSelect s;
 					s.Parent(this);
 					if (s.Open())
 					{
@@ -2235,7 +2235,7 @@ public:
 
 void AppWnd::Compare()
 {
-	GFileSelect s;
+	LFileSelect s;
 	s.Parent(this);
 	s.Type("Lgi Resource", "*.lr8");
 	if (s.Open())
@@ -2247,7 +2247,7 @@ void AppWnd::Compare()
 void AppWnd::ImportLang()
 {
 	// open dialog
-	GFileSelect Select;
+	LFileSelect Select;
 
 	Select.Parent(this);
 	Select.Type("Lgi Resources", "*.lr8;*.xml");
@@ -2549,7 +2549,7 @@ bool AppWnd::SaveFile(const char *FileName)
 	return false;
 }
 
-void AppWnd::GetFileTypes(GFileSelect *Dlg, bool Write)
+void AppWnd::GetFileTypes(LFileSelect *Dlg, bool Write)
 {
 	Dlg->Type("Lgi Resources", "*.lr8;*.xml");
 	if (!Write)
@@ -3434,7 +3434,7 @@ void TokLine(GArray<char*> &T, char *Line)
 bool AppWnd::LoadWin32(const char *FileName)
 {
 	bool Status = false;
-	GFileSelect Select;
+	LFileSelect Select;
 	LHashTbl<ConstStrKey<char,false>,bool> CtrlNames;
 	CtrlNames.Add("LTEXT", true);
 	CtrlNames.Add("EDITTEXT", true);

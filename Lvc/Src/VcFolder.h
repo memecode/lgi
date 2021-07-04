@@ -29,7 +29,7 @@ class ReaderThread : public LThread
 {
 	VersionCtrl Vcs;
 	GStream *Out;
-	GSubProcess *Process;
+	LSubProcess *Process;
 	int FilterCount;
 
 	int OnLine(char *s, ssize_t len);
@@ -38,7 +38,7 @@ class ReaderThread : public LThread
 public:
 	int Result;
 
-	ReaderThread(VersionCtrl vcs, GSubProcess *p, GStream *out);
+	ReaderThread(VersionCtrl vcs, LSubProcess *p, GStream *out);
 	~ReaderThread();
 
 	int Main();

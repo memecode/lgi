@@ -6,8 +6,8 @@
 	
 	Example:
 	
-		GSubProcess p1("ls", "-l");
-		GSubProcess p2("grep", "string");
+		LSubProcess p1("ls", "-l");
+		LSubProcess p2("grep", "string");
 		p1.Connect(&p2);
 		p1.Start(true, false);
 		int r;
@@ -41,7 +41,9 @@
 	#define GSUBPROCESS_ERROR	ERROR_PROCESS_ABORTED
 #endif
 
-class LgiClass GSubProcess : public GStream
+LgiExtern bool LIsProcess(OsProcessId Pid);
+
+class LgiClass LSubProcess : public GStream
 {
 public:
 	#if defined(WIN32)
@@ -86,12 +88,12 @@ protected:
 
 	Variable *GetEnvVar(const char *Var, bool Create = false);
 	bool Dupe(PipeHandle Old, PipeHandle New);
-	GSubProcess *Parent, *Child;
+	LSubProcess *Parent, *Child;
 
 public:
 	// Object
-	GSubProcess(const char *exe, const char *args = NULL, bool pseudoConsole = false);
-	~GSubProcess();
+	LSubProcess(const char *exe, const char *args = NULL, bool pseudoConsole = false);
+	~LSubProcess();
 
 	// Environment
 	void SetInitFolder(const char *f);
@@ -112,7 +114,7 @@ public:
 	bool IsRunning();
 	uint32_t GetErrorCode();
 	int32 GetExitValue();
-	void Connect(GSubProcess *child);
+	void Connect(LSubProcess *child);
 	bool Start(bool ReadAccess = true, bool WriteAccess = false, bool MapStderrToStdout = true);
 	int Wait();
 	bool Interrupt();

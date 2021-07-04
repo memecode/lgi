@@ -33,7 +33,7 @@
 
 #include "ntlm.h"
 #include "md4.h"
-#include "../../src/common/Hash/md5/md5.h"
+#include "../src/common/Hash/md5/md5.h"
 #include <assert.h>
 
 #include "des.h"

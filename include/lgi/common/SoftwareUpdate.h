@@ -1,7 +1,7 @@
 #ifndef _SOFTWARE_UPDATE_H_
 #define _SOFTWARE_UPDATE_H_
 
-#include "LDateTime.h"
+#include "lgi/common/DateTime.h"
 
 class GSoftwareUpdate
 {

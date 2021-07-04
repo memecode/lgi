@@ -1,5 +1,5 @@
 /*hdr
-**      FILE:           GFileSelect.cpp
+**      FILE:           LFileSelect.cpp
 **      AUTHOR:         Matthew Allen
 **      DATE:           18/7/98
 **      DESCRIPTION:    Common file/directory selection dialog
@@ -27,12 +27,12 @@ public:
 	char *TitleStr;
 	bool MultiSel;
 	BFilePanel *Panel;
-	List<GFileType> TypeList;
+	List<LFileType> TypeList;
 	LView *ParentWnd;
 	bool WaitForMessage;
 	BMessenger *Messenger;
 	
-	GFileSelectPrivate() : BHandler("GFileSelect")
+	GFileSelectPrivate() : BHandler("LFileSelect")
 	{
 		ParentWnd = 0;
 		WaitForMessage = false;
@@ -167,22 +167,22 @@ public:
 	}	
 };
 
-GFileSelect::GFileSelect()
+LFileSelect::LFileSelect()
 {
 	d = new GFileSelectPrivate;
 }
 
-GFileSelect::~GFileSelect()
+LFileSelect::~LFileSelect()
 {
 	DeleteObj(d);
 }
 
-char *GFileSelect::Name()
+char *LFileSelect::Name()
 {
 	return d->FileStr;
 }
 
-bool GFileSelect::Name(char *n)
+bool LFileSelect::Name(char *n)
 {
 	bool Status = FALSE;
 
@@ -194,18 +194,18 @@ bool GFileSelect::Name(char *n)
 	return Status;
 }
 
-char *GFileSelect::operator [](int i)
+char *LFileSelect::operator [](int i)
 {
 	return NULL;
 }
 
-int GFileSelect::Length()
+int LFileSelect::Length()
 {
 	return 1;
 }
 
 /*
-char *GFileSelect::File()
+char *LFileSelect::File()
 {
 	char *Ret = 0;
 	char *Last = FileStr;
@@ -218,7 +218,7 @@ char *GFileSelect::File()
 	return Last;
 }
 
-char *GFileSelect::Extension()
+char *LFileSelect::Extension()
 {
 	char *Ret = File();
 	char *Dot = strchr(Ret, '.');
@@ -230,24 +230,24 @@ char *GFileSelect::Extension()
 }
 */
 
-int GFileSelect::Types()
+int LFileSelect::Types()
 {
 	return d->TypeList.GetItems();
 }
 
-void GFileSelect::ClearTypes()
+void LFileSelect::ClearTypes()
 {
 	d->TypeList.DeleteObjects();
 }
 
-GFileType *GFileSelect::TypeAt(int n)
+LFileType *LFileSelect::TypeAt(int n)
 {
 	return d->TypeList[n];
 }
 
-bool GFileSelect::Type(char *Description, char *Extension, int Data)
+bool LFileSelect::Type(char *Description, char *Extension, int Data)
 {
-	GFileType *Type = new GFileType;
+	LFileType *Type = new LFileType;
 	if (Type)
 	{
 		Type->Description(Description);
@@ -258,75 +258,75 @@ bool GFileSelect::Type(char *Description, char *Extension, int Data)
 	return Type != 0;
 }
 
-int GFileSelect::SelectedType()
+int LFileSelect::SelectedType()
 {
 	return -1;
 }
 
-LView *GFileSelect::Parent()
+LView *LFileSelect::Parent()
 {
 	return d->ParentWnd;
 }
 
-void GFileSelect::Parent(LView *Window)
+void LFileSelect::Parent(LView *Window)
 {
 	d->ParentWnd = Window;
 }
 
-bool GFileSelect::MultiSelect()
+bool LFileSelect::MultiSelect()
 {
 	return d->MultiSel;
 }
 
-void GFileSelect::MultiSelect(bool Multi)
+void LFileSelect::MultiSelect(bool Multi)
 {
 	d->MultiSel = Multi;
 }
 
-char *GFileSelect::InitialDir()
+char *LFileSelect::InitialDir()
 {
 	return d->InitDir;
 }
 
-void GFileSelect::InitialDir(char *Dir)
+void LFileSelect::InitialDir(char *Dir)
 {
 	DeleteArray(d->InitDir);
 	d->InitDir = NewStr(Dir);
 }
 
-char *GFileSelect::Title()
+char *LFileSelect::Title()
 {
 	return d->TitleStr;
 }
 
-void GFileSelect::Title(char *title)
+void LFileSelect::Title(char *title)
 {
 	DeleteArray(d->TitleStr);
 	d->TitleStr = NewStr(title);
 }
 
-char *GFileSelect::DefaultExtension()
+char *LFileSelect::DefaultExtension()
 {
 	return d->DefExt;
 }
 
-void GFileSelect::DefaultExtension(char *DefExt)
+void LFileSelect::DefaultExtension(char *DefExt)
 {
 	DeleteArray(d->DefExt);
 	d->DefExt = NewStr(DefExt);
 }
 
-bool GFileSelect::Open()
+bool LFileSelect::Open()
 {
 	return d->DoDialog(B_OPEN_PANEL);
 }
 
-bool GFileSelect::OpenFolder()
+bool LFileSelect::OpenFolder()
 {
 	return d->DoDialog(B_OPEN_PANEL, B_DIRECTORY_NODE);
 }
 
-bool GFileSelect::Save()
+bool LFileSelect::Save()
 {
 	return d->DoDialog(B_SAVE_PANEL);
 }

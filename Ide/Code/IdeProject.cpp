@@ -158,7 +158,7 @@ class BuildThread : public LThread, public GStream
 	GString Makefile, CygwinPath;
 	bool Clean, Release, All;
 	int WordSize;
-	GAutoPtr<GSubProcess> SubProc;
+	GAutoPtr<LSubProcess> SubProc;
 	GString::Array BuildConfigs;
 	GString::Array PostBuild;
 
@@ -1420,7 +1420,7 @@ GString BuildThread::FindExe()
 						}
 						free(Buf);
 					#else
-						GSubProcess p(Path, "--version");
+						LSubProcess p(Path, "--version");
 						GStringPipe o;
 						if (p.Start())
 							p.Communicate(&o);
@@ -1868,7 +1868,7 @@ int BuildThread::Main()
 		{
 			GString a;
 			a.Printf("-list -project \"%s\"", Makefile.Get());
-			GSubProcess Ls(Exe, a);
+			LSubProcess Ls(Exe, a);
 			if (Ls.Start())
 			{
 				GStringPipe o;
@@ -1937,7 +1937,7 @@ int BuildThread::Main()
 		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (GMessage::Param)NewStr(Msg), 0);
 
 		LgiTrace("%s %s\n", Exe.Get(), TmpArgs.Get());
-		if (SubProc.Reset(new GSubProcess(Exe, TmpArgs)))
+		if (SubProc.Reset(new LSubProcess(Exe, TmpArgs)))
 		{
 			SubProc->SetNewGroup(false);
 			SubProc->SetInitFolder(InitDir);
@@ -1987,7 +1987,7 @@ int BuildThread::Main()
 						}
 						else
 						{
-							GSubProcess PostCmd(p[0], p.Length() > 1 ? p[1] : NULL);
+							LSubProcess PostCmd(p[0], p.Length() > 1 ? p[1] : NULL);
 							if (PostCmd.Start(true, false))
 							{
 								char Buf[256];
@@ -2303,7 +2303,7 @@ public:
 		{
 			if (Act == ExeDebug)
 			{
-				GSubProcess sub("kdbg", Exe);
+				LSubProcess sub("kdbg", Exe);
 				if (Path)
 					sub.SetInitFolder(Path);
 				if (sub.Start())
@@ -2359,7 +2359,7 @@ public:
 			}
 			else
 			{
-				GSubProcess sub(Exe, Args);
+				LSubProcess sub(Exe, Args);
 				if (Path)
 					sub.SetInitFolder(Path);
 				if (sub.Start())
@@ -2492,7 +2492,7 @@ bool IdeProject::FindDuplicateSymbols()
 		{
 			GString Args;
 			Args.Printf("--print-size --defined-only -C %s", s.Get());
-			GSubProcess Nm("nm", Args);
+			LSubProcess Nm("nm", Args);
 			if (Nm.Start(true, false))
 			{
 				char Buf[256];
@@ -3080,7 +3080,7 @@ bool IdeProject::SetClean()
 	{
 		if (!ValidStr(d->FileName))
 		{
-			GFileSelect s;
+			LFileSelect s;
 			s.Parent(Tree);
 			s.Name("Project.xml");
 			if (s.Save())
@@ -3243,7 +3243,7 @@ void IdeProject::OnMouseClick(LMouse &m)
 			}
 			case IDM_INSERT_DEP:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(Tree);
 				s.Type("Project", "*.xml");
 				if (s.Open())
@@ -3514,7 +3514,7 @@ bool IdeProject::BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool In
 				// Run config app to get the full path list...
 				p = p.Strip("`");
 				GString::Array a = p.Split(" ", 1);
-				GSubProcess Proc(a[0], a.Length() > 1 ? a[1].Get() : NULL);
+				LSubProcess Proc(a[0], a.Length() > 1 ? a[1].Get() : NULL);
 				GStringPipe Buf;
 				if (Proc.Start())
 				{

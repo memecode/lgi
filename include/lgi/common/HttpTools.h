@@ -1,7 +1,7 @@
 #ifndef __HTTP_TOOLS__
 #define __HTTP_TOOLS__
 
-#include "INet.h"
+#include "lgi/common/Net.h"
 
 extern LXmlTag *ExtractForms(char *Html, GStream *Log);
 extern void XmlToStream(GStream *s, LXmlTag *x, char *Css = 0);

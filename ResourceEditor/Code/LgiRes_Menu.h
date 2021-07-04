@@ -100,7 +100,7 @@ class ResMenuUi : public LLayout
 	LToolBar *Tools;
 	ResMenu *Menu;
 	LStatusBar *Status;
-	GStatusPane *StatusInfo;
+	LStatusPane *StatusInfo;
 
 public:
 	ResMenuUi(ResMenu *Res);

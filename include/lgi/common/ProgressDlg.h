@@ -33,7 +33,7 @@ public:
 	~LProgressPane();
 
 	void SetDescription(const char *d) override;
-	bool SetRange(const GRange &r) override;
+	bool SetRange(const LRange &r) override;
 	int64 Value() override { return Progress::Value(); }
 	void Value(int64 v) override;
 	LFont *GetFont() override;
@@ -90,9 +90,9 @@ public:
 	/// Sets the description of the first pane
 	void SetDescription(const char *d) override;
 	/// Returns the upper and lower limits of the first pane
-	GRange GetRange() override;
+	LRange GetRange() override;
 	/// Sets the upper and lower limits of the first pane
-	bool SetRange(const GRange &r) override;
+	bool SetRange(const LRange &r) override;
 	/// Returns the scaling factor of the first pane
 	double GetScale() override;
 	/// Sets the scaling factor of the first pane

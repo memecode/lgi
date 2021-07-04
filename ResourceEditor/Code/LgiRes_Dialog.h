@@ -245,7 +245,7 @@ class ResDialogUi : public LLayout
 	LToolBar *Tools;
 	ResDialog *Dialog;
 	LStatusBar *Status;
-	GStatusPane *StatusInfo;
+	LStatusPane *StatusInfo;
 
 public:
 	ResDialogUi(ResDialog *Res);

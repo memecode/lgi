@@ -59,12 +59,12 @@ public:
 		}
 	};
 	
-	struct SpellingError : public GRange
+	struct SpellingError : public LRange
 	{
 		GString::Array Suggestions;
 	};
 	
-	struct CheckText : public GRange
+	struct CheckText : public LRange
 	{
 		GString Text;
 		GArray<SpellingError> Errors;

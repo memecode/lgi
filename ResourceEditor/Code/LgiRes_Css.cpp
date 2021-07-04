@@ -15,7 +15,7 @@ class ResCssUi : public LTableLayout
 {
     ResCss *Css;
     LEdit *Name;
-    GTextView3 *Style;
+    LTextView3 *Style;
     
 public:
     ResCssUi(ResCss *css)
@@ -38,7 +38,7 @@ public:
 
         if ((c = GetCell(0, y++)))
         {
-            c->Add(Style = new GTextView3(IDC_STYLE, 0, 0, 80, 20, 0));
+            c->Add(Style = new LTextView3(IDC_STYLE, 0, 0, 80, 20, 0));
             Style->Name(Css->Style);
             Style->Sunken(true);
         }

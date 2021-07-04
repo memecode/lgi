@@ -1,7 +1,7 @@
-#include "GMem.h"
-#include "GFile.h"
-#include "GProperties.h"
-#include "LDateTime.h"
+#include "lgi/common/Mem.h"
+#include "lgi/common/File.h"
+#include "lgi/common/Properties.h"
+#include "lgi/common/DateTime.h"
 
 // From HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones
 

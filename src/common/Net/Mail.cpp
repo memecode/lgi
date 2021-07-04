@@ -13,18 +13,18 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "Lgi.h"
-#include "Mail.h"
-#include "GToken.h"
-#include "Base64.h"
-#include "INetTools.h"
-#include "LDateTime.h"
-#include "GDocView.h"
-#include "Store3Defs.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Mail.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Base64.h"
+#include "lgi/common/NetTools.h"
+#include "lgi/common/DateTime.h"
+#include "lgi/common/DocView.h"
+#include "lgi/common/Store3Defs.h"
+#include "lgi/common/LgiRes.h"
 #include "../Hash/md5/md5.h"
-#include "TextConvert.h"
-#include "GMime.h"
+#include "lgi/common/TextConvert.h"
+#include "lgi/common/Mime.h"
 
 const char *sTextPlain = "text/plain";
 const char *sTextHtml = "text/html";

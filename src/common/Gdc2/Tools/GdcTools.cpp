@@ -613,7 +613,7 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 	if (Prog)
 	{
 		Prog->SetDescription("Resampling image...");
-		Prog->SetRange(GRange(0, pDest->Y()));
+		Prog->SetRange(LRange(0, pDest->Y()));
 	}
 	
 	Sr.x1 <<= 8;

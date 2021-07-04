@@ -223,7 +223,7 @@ int GFindInFiles::OnNotify(LViewI *Ctrl, int Flags)
 	{
 		case IDC_WHERE_BROWSE:
 		{
-			GFileSelect s;
+			LFileSelect s;
 			s.Parent(this);
 			if (s.Open())
 			{

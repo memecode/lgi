@@ -3,16 +3,16 @@
 #include <unistd.h>
 #endif
 
-#include "Lgi.h"
-#include "GToken.h"
-#include "Mail.h"
-#include "Base64.h"
-#include "INetTools.h"
-#include "GDocView.h"
-#include "IHttp.h"
-#include "HttpTools.h"
-#include "OpenSSLSocket.h"
-#include "LJson.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Mail.h"
+#include "lgi/common/Base64.h"
+#include "lgi/common/NetTools.h"
+#include "lgi/common/DocView.h"
+#include "lgi/common/Http.h"
+#include "lgi/common/HttpTools.h"
+#include "lgi/common/OpenSSLSocket.h"
+#include "lgi/common/Json.h"
 
 #define DEBUG_OAUTH2				0
 #ifdef _DEBUG
@@ -30,7 +30,7 @@
 #if GPL_COMPATIBLE
 #include "AuthNtlm/Ntlm.h"
 #else
-#include "../../src/common/INet/libntlm-0.4.2/ntlm.h"
+#include "../src/common/Net/libntlm-0.4.2/ntlm.h"
 #endif
 #if HAS_LIBGSASL
 #include "gsasl.h"

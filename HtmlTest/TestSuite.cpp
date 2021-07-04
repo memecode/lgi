@@ -257,7 +257,7 @@ class AppWnd : public LWindow, public GDefaultDocumentEnv
 {
 	LList *Lst;
     HtmlScriptContext *Html;
-    GTextView3 *Text;
+    LTextView3 *Text;
 	char Base[256];
 	GAutoPtr<LScriptEngine> Script;
 	GAutoPtr<HtmlImageLoader> Worker;
@@ -343,7 +343,7 @@ public:
 				vert->AddView(Html = new HtmlScriptContext(IDC_HTML, this));
 				Html->SetCssStyle("height: 70%;");
 
-				vert->AddView(Text = new GTextView3(IDC_LOG, 0, 0, 100, 100));
+				vert->AddView(Text = new LTextView3(IDC_LOG, 0, 0, 100, 100));
 				
 				LBox::Spacer *sp = s->GetSpacer(0);
 				if (sp)
@@ -470,7 +470,7 @@ public:
 						FileDev->CreateFolder(OutPath);
 					
 					Prog.SetDescription("Saving renders...");
-					Prog.SetRange(GRange(0, Files.Length()));
+					Prog.SetRange(LRange(0, Files.Length()));
 					for (int i=0; i<Files.Length() && !Prog.IsCancelled(); i++)
 					{
 						char *File = Files[i];

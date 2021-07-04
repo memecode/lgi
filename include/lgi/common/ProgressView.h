@@ -27,7 +27,7 @@ public:
 	virtual ~LProgressView();
 
 	const char *GetClass() override { return "LProgressView"; }
-	bool SetRange(const GRange &r) override;
+	bool SetRange(const LRange &r) override;
 	void Value(int64 v) override;
 	int64 Value() override;
 	GMessage::Result OnEvent(GMessage *Msg) override;

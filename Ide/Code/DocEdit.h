@@ -87,22 +87,22 @@ protected:
 
 	struct StylingParams
 	{
-		GTextView3 *View;
+		LTextView3 *View;
 		size_t PourStart;
 		ssize_t PourSize;
 		GArray<char16> Text;
 		GString FileName;
-		LUnrolledList<GTextView3::GStyle> Styles;
-		GTextView3::GStyle Visible;
-		GTextView3::GStyle Dirty;
+		LUnrolledList<LTextView3::LStyle> Styles;
+		LTextView3::LStyle Visible;
+		LTextView3::LStyle Dirty;
 
-		StylingParams(GTextView3 *view) :
+		StylingParams(LTextView3 *view) :
 			Dirty(STYLE_NONE)
 		{
 			View = view;
 		}
 
-		void StyleString(char16 *&s, char16 *e, GColour c, LUnrolledList<GTextView3::GStyle> *Out = NULL)
+		void StyleString(char16 *&s, char16 *e, GColour c, LUnrolledList<LTextView3::LStyle> *Out = NULL)
 		{
 			if (!Out)
 				Out = &Styles;
@@ -132,7 +132,7 @@ protected:
 	// EndLock
 	// Thread only
 		Node Root;
-		LUnrolledList<GTextView3::GStyle> PrevStyle;
+		LUnrolledList<LTextView3::LStyle> PrevStyle;
 	// End Thread only
 
 	// Styling functions..
@@ -154,7 +154,7 @@ public:
 };
 
 class DocEdit :
-	public GTextView3,
+	public LTextView3,
 	public GDocumentEnv,
 	public DocEditStyling
 {
@@ -171,13 +171,13 @@ public:
 	~DocEdit();
 
 	const char *GetClass() override { return "DocEdit"; }
-	const char *Name() override { return GTextView3::Name(); }
-	bool Name(const char *s) override { return GTextView3::Name(s); }
+	const char *Name() override { return LTextView3::Name(); }
+	bool Name(const char *s) override { return LTextView3::Name(s); }
 	bool SetPourEnabled(bool b);
 	int GetTopPaddingPx();
 	void InvalidateLine(int Idx);
 	char *TemplateMerge(const char *Template, const char *Name, List<char> *Params);
-	bool GetVisible(GStyle &s);
+	bool GetVisible(LStyle &s);
 	void OnCreate() override;
 
 	// Overrides

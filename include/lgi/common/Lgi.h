@@ -68,7 +68,7 @@
 			<ul>
 				<li> General
 				<ul>
-					<li> [Optional, if using GTextView3] Additional Libraries: <b>imm32.lib</b>
+					<li> [Optional, if using LTextView3] Additional Libraries: <b>imm32.lib</b>
 				</ul>
 			</ul>
 		</ul>
@@ -165,7 +165,7 @@
 		<li> ::LgiMsg
 		<li> LAlert
 		<li> GInput
-		<li> GFileSelect
+		<li> LFileSelect
 		<li> LFontSelect
 		<li> GPrinter::Browse
 		<li> LProgressViewDlg

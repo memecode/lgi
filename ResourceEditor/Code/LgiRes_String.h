@@ -172,7 +172,7 @@ class ResStringUi : public LLayout
 	LToolBar *Tools;
 	ResStringGroup *StringGrp;
 	LStatusBar *Status;
-	GStatusPane *StatusInfo;
+	LStatusPane *StatusInfo;
 
 public:
 	ResStringUi(ResStringGroup *Res);

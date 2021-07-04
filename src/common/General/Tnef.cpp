@@ -1,6 +1,6 @@
-#include "Lgi.h"
-#include "GTnef.h"
-#include "LVariant.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Tnef.h"
+#include "lgi/common/Variant.h"
 
 #define TNEF_SIGNATURE  ((uint32_t) 0x223E9F78)
 

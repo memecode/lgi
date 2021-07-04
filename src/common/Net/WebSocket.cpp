@@ -1,9 +1,9 @@
 // https://tools.ietf.org/html/rfc6455
-#include "Lgi.h"
-#include "LWebSocket.h"
-#include "INetTools.h"
-#include "../../src/common/Hash/sha1/sha1.h"
-#include "Base64.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/WebSocket.h"
+#include "lgi/common/NetTools.h"
+#include "../Hash/sha1/sha1.h"
+#include "lgi/common/Base64.h"
 #ifdef LINUX
 	#include <netinet/tcp.h>
 	#include <unistd.h>
@@ -148,7 +148,7 @@ struct LWebSocketPriv
 	GArray<char> Data;
 	size_t Start, Used;
 	char Buf[512];
-	GArray<GRange> Msg;
+	GArray<LRange> Msg;
 	LWebSocket::OnMsg onMsg;
 
 	LWebSocketPriv(LWebSocket *ws, bool server) : Ws(ws), Server(server)

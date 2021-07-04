@@ -257,7 +257,7 @@ public:
 	IdeProject *RootProject();
 	IdeDoc *TopDoc();
 	IdeDoc *FocusDoc();
-	GTextView3 *FocusEdit();
+	LTextView3 *FocusEdit();
 	void AppendOutput(char *Txt, Channels Channel);
 	void OnFixBuildErrors();
 	void OnBuildStateChanged(bool NewState);

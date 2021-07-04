@@ -267,7 +267,7 @@ void LScrollBar::SetLimits(int64 Low, int64 High)
 	Update();
 }
 
-bool LScrollBar::SetRange(const GRange &r)
+bool LScrollBar::SetRange(const LRange &r)
 {
 	int64 h = r.End();
 	d->Shift = 0;

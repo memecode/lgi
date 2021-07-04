@@ -3,7 +3,7 @@
 #ifndef _GFILTER_UI_H_
 #define _GFILTER_UI_H_
 
-#include "LTree.h"
+#include "lgi/common/Tree.h"
 
 class LFilterViewPrivate;
 
@@ -35,7 +35,7 @@ typedef int (*FilterUi_Menu)(LFilterView *View,
 
 class LFilterItem : public LTreeItem, public GDragDropSource
 {
-	class GFilterItemPrivate *d;
+	class LFilterItemPrivate *d;
 
 protected:
 	void _PourText(LPoint &Size);

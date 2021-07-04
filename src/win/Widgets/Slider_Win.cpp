@@ -47,17 +47,17 @@ int64 LSlider::Value()
 	return Val;
 }
 
-GRange LSlider::GetRange()
+LRange LSlider::GetRange()
 {
 	if (Handle())
 	{
 		Min = SendMessage(Handle(), TBM_GETRANGEMIN, 0, 0);
 		Max = SendMessage(Handle(), TBM_GETRANGEMAX, 0, 0);
 	}
-	return GRange(Min, Max-Min+1);
+	return LRange(Min, Max-Min+1);
 }
 
-bool LSlider::SetRange(const GRange &r)
+bool LSlider::SetRange(const LRange &r)
 {
 	Min = r.Start;
 	Max = r.End();
@@ -78,7 +78,7 @@ void LSlider::GetLimits(int64 &min, int64 &max)
 
 void LSlider::SetLimits(int64 min, int64 max)
 {
-	SetRange(GRange(Min, max-min+1));
+	SetRange(LRange(Min, max-min+1));
 }
 
 GMessage::Result LSlider::OnEvent(GMessage *Msg)
@@ -147,7 +147,7 @@ GMessage::Result LSlider::OnEvent(GMessage *Msg)
 	{
 		case WM_CREATE:
 		{
-			SetRange(GRange(Min, Max-Min+1));
+			SetRange(LRange(Min, Max-Min+1));
 			Value(Val);
 			break;
 		}

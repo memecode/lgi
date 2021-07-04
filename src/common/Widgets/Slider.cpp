@@ -44,12 +44,12 @@ int64 LSlider::Value()
 	return Val;
 }
 
-GRange LSlider::GetRange()
+LRange LSlider::GetRange()
 {
-	return GRange(Min, Max-Min+1);
+	return LRange(Min, Max-Min+1);
 }
 
-bool LSlider::SetRange(const GRange &r)
+bool LSlider::SetRange(const LRange &r)
 {
 	Min = r.Start;
 	Max = r.End();

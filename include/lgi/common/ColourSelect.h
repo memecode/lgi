@@ -2,17 +2,16 @@
 /// \author Matthew Allen (fret@memecode.com)
 /// \brief A colour selector control
 
-#ifndef __GCOLOUR_SELECT_H
-#define __GCOLOUR_SELECT_H
+#pragma once
 
-#include "LPopup.h"
+#include "lgi/common/Popup.h"
 
 /// \brief 32-bit colour button.
-class GColourSelect :
+class LColourSelect :
 	public LDropDown,
 	public ResObject
 {
-	friend class GColourSelectPopup;
+	friend class LColourSelectPopup;
 
 	GColour c;
 	GArray<GColour> Presets;
@@ -23,7 +22,7 @@ public:
 		Transparent = 0
 	};
 
-	GColourSelect(GArray<GColour> *c32 = 0);
+	LColourSelect(GArray<GColour> *c32 = 0);
 
 	// Methods
 	void SetColourList(GArray<GColour> *c32 = 0);
@@ -36,4 +35,3 @@ public:
 	bool OnLayout(LViewLayoutInfo &Inf);
 };
 
-#endif

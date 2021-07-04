@@ -15,10 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "Lgi.h"
-#include "Lzw.h"
-#include "LVariant.h"
-#include "GPalette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Lzw.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Palette.h"
 
 // TIFF
 #define TIFF_USE_LZW

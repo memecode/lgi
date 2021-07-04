@@ -1,10 +1,10 @@
-#include "Lgi.h"
-#include "GTextLog.h"
-#include "OpenSSLSocket.h"
-#include "Base64.h"
-#include "INetTools.h"
-#include "LOAuth2.h"
-#include "LJson.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/TextLog.h"
+#include "lgi/common/OpenSSLSocket.h"
+#include "lgi/common/Base64.h"
+#include "lgi/common/NetTools.h"
+#include "lgi/common/OAuth2.h"
+#include "lgi/common/Json.h"
 
 //////////////////////////////////////////////////////////////////
 #define LOCALHOST_PORT		54900

@@ -4,7 +4,7 @@
 #define _DATE_TIME_CTRLS_
 
 #include "MonthView.h"
-#include "GNotifications.h"
+#include "lgi/common/Notifications.h"
 
 /// This is a popup window to select a time.
 class LTimePopup : public LPopup

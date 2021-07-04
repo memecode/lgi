@@ -8,7 +8,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Edit
-#include "GTextView3.h"
+#include "LTextView3.h"
 
 class _OsFontType : public LFontType
 {
@@ -46,7 +46,7 @@ LEdit::LEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	#if WINNATIVE
 	ResObject(Res_EditBox)
 	#else
-	GTextView3(id, x, y, cx, cy, &SysFontType)
+	LTextView3(id, x, y, cx, cy, &SysFontType)
 	#endif
 {
 	#if !WINNATIVE
@@ -86,17 +86,17 @@ void LEdit::SetEmptyText(const char *EmptyText)
 void LEdit::SendNotify(int Data)
 {
 	if (Data == GNotifyDocChanged)
-		return GTextView3::SendNotify(0);
+		return LTextView3::SendNotify(0);
 	else if (Data == LK_RETURN ||
 			Data == GNotify_EscapeKey)
-		return GTextView3::SendNotify(Data);
+		return LTextView3::SendNotify(Data);
 }
 
-GRange LEdit::GetSelectionRange()
+LRange LEdit::GetSelectionRange()
 {
-	GRange r;
-	ssize_t Sel = GTextView3::GetCaret(false);
-	ssize_t Cur = GTextView3::GetCaret();
+	LRange r;
+	ssize_t Sel = LTextView3::GetCaret(false);
+	ssize_t Cur = LTextView3::GetCaret();
 	if (Sel < Cur)
 	{
 		r.Start = Sel;
@@ -112,18 +112,18 @@ GRange LEdit::GetSelectionRange()
 
 void LEdit::Select(int Start, int Len)
 {
-	GTextView3::SetCaret(Start, false);
-	GTextView3::SetCaret(Start + (Len > 0 ? Len : 0x7fffffff) - 1, true);
+	LTextView3::SetCaret(Start, false);
+	LTextView3::SetCaret(Start + (Len > 0 ? Len : 0x7fffffff) - 1, true);
 }
 
 ssize_t LEdit::GetCaret(bool Cursor)
 {
-	return GTextView3::GetCaret(Cursor);
+	return LTextView3::GetCaret(Cursor);
 }
 
 void LEdit::SetCaret(size_t Pos, bool Select, bool ForceFullUpdate)
 {
-	GTextView3::SetCaret(Pos, Select, ForceFullUpdate);
+	LTextView3::SetCaret(Pos, Select, ForceFullUpdate);
 }
 
 void LEdit::Value(int64 i)
@@ -162,12 +162,12 @@ void LEdit::Password(bool m)
 bool LEdit::SetScrollBars(bool x, bool y)
 {
 	// Prevent scrollbars if the control is not multiline.
-	return GTextView3::SetScrollBars(x, y && d->Multiline);
+	return LTextView3::SetScrollBars(x, y && d->Multiline);
 }
 
 void LEdit::OnPaint(LSurface *pDC)
 {
-    GTextView3::OnPaint(pDC);
+    LTextView3::OnPaint(pDC);
 
     if (!ValidStr(Name()) && d->EmptyTxt && !Focus())
     {
@@ -235,13 +235,13 @@ bool LEdit::OnKey(LKey &k)
 		return d->NotificationProcessed;
 	}
 	
-	return GTextView3::OnKey(k);
+	return LTextView3::OnKey(k);
 }
 
 void LEdit::OnEnter(LKey &k)
 {
 	if (d->Multiline)
-		GTextView3::OnEnter(k);
+		LTextView3::OnEnter(k);
 	else
 		SendNotify(GNotify_ReturnKey);
 }
@@ -289,7 +289,7 @@ bool LEdit::Paste()
 	// insert text
 	size_t Len = StrlenW(t);
 	Insert(Cursor, t, Len);
-	GTextView3::SetCaret(Cursor+Len, false, true); // Multiline
+	LTextView3::SetCaret(Cursor+Len, false, true); // Multiline
 	
 	return true;
 }

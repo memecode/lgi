@@ -1,6 +1,6 @@
-#include "Lgi.h"
-#include "LDisplayString.h"
-#include "GDrawListSurface.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/DrawListSurface.h"
 
 struct LCmd
 {

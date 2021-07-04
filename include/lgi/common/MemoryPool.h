@@ -1,8 +1,8 @@
 #ifndef _GMEM_POOL_H_
 #define _GMEM_POOL_H_
 
-#include "GArray.h"
-#include "LgiInterfaces.h"
+#include "lgi/common/Array.h"
+#include "lgi/common/LgiInterfaces.h"
 
 class GMemoryPool : public LMemoryPoolI
 {

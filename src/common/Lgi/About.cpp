@@ -76,7 +76,7 @@ GAbout::GAbout(	LView *parent,
 		}
 	}
 
-	LView *Ctrl = LViewFactory::Create("GTextView3");
+	LView *Ctrl = LViewFactory::Create("LTextView3");
 	if (Ctrl)
 	{
 		auto c = Tbl->GetCell(x++, 0, true);

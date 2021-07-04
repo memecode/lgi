@@ -3,7 +3,7 @@
 #ifndef __YEAR_VIEW_H
 #define __YEAR_VIEW_H
 
-#include "LDateTime.h"
+#include "lgi/common/DateTime.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
 class YearView

@@ -306,7 +306,7 @@ public:
 		{
 			case IDC_BROWSE:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				GAutoString Dir = Proj->GetBasePath();
 				s.Parent(this);
 				s.InitialDir(Dir);

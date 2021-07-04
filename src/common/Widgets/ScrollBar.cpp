@@ -661,9 +661,9 @@ void LScrollBar::Value(int64 v)
 	d->SetValue(v);
 }
 
-GRange LScrollBar::GetRange() const
+LRange LScrollBar::GetRange() const
 {
-	return GRange(d->Min, d->Max - d->Min + 1);
+	return LRange(d->Min, d->Max - d->Min + 1);
 }
 
 void LScrollBar::Limits(int64 &Low, int64 &High)
@@ -672,7 +672,7 @@ void LScrollBar::Limits(int64 &Low, int64 &High)
 	High = d->Max;
 }
 
-bool LScrollBar::SetRange(const GRange &r)
+bool LScrollBar::SetRange(const LRange &r)
 {
 	SetLimits(r.Start, r.End());
 	return true;

@@ -5,19 +5,19 @@ LgiFunc bool LgiGetUsersLinks(GArray<GString> &Links);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // File select dialog
-class LgiClass GFileType : public LBase
+class LgiClass LFileType : public LBase
 {
 	char *Ext;
 	int _Data;
 
 public:
-	GFileType()
+	LFileType()
 	{
 		Ext = 0;
 		_Data = 0;
 	}
 
-	~GFileType()
+	~LFileType()
 	{
 		DeleteArray(Ext);
 	}
@@ -39,7 +39,7 @@ public:
 /// 
 /// A simple example of this class in action:
 /// \code
-/// GFileSelect s;
+/// LFileSelect s;
 /// s.Parent(MyWindow);
 /// s.Type("PNG Files", "*.png");
 /// if (s.Open())
@@ -47,14 +47,14 @@ public:
 /// 	LgiMsg(MyWindow, "The file selected is '%s'", "Example", MB_OK, s.Name());
 /// }
 /// \endcode
-class LgiClass GFileSelect :
+class LgiClass LFileSelect :
 	public LBase
 {
 	class GFileSelectPrivate *d;
 
 public:
-	GFileSelect();
-	~GFileSelect();
+	LFileSelect();
+	~LFileSelect();
 
 	// Properties
 	
@@ -98,7 +98,7 @@ public:
 	/// Returns the 0 based index of the type selected in the type list
 	ssize_t SelectedType();
 	/// Returns the type into at a given index
-	GFileType *TypeAt(ssize_t n);
+	LFileType *TypeAt(ssize_t n);
 	/// Adds a file type to the type filters list.
 	bool Type
 	(

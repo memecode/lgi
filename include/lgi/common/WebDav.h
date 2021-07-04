@@ -1,7 +1,7 @@
 #ifndef _LWEBDAV_H_
 #define _LWEBDAV_H_
 
-#include "IHttp.h"
+#include "lgi/common/Http.h"
 #include "OpenSSLSocket.h"
 
 extern bool LFindXml(GArray<LXmlTag*> &Results, LXmlTag *t, const char *Name);

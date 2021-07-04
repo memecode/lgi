@@ -418,7 +418,7 @@ LView *SystemFunctions::CastGView(LVariant &v)
 
 bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 {
-	GFileSelect s;
+	LFileSelect s;
 	
 	if (Args.Length() > 0)
 		s.Parent(CastGView(*Args[0]));
@@ -464,7 +464,7 @@ bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 
 bool SystemFunctions::SelectFolder(LScriptArguments &Args)
 {
-	GFileSelect s;
+	LFileSelect s;
 	
 	if (Args.Length() > 0)
 		s.Parent(CastGView(*Args[0]));
@@ -940,7 +940,7 @@ bool SystemFunctions::Execute(LScriptArguments &Args)
 	GStringPipe p;
 	char *Exe = Args[0]->CastString();
 	char *Arguments = Args[1]->CastString();
-	GSubProcess e(Exe, Arguments);
+	LSubProcess e(Exe, Arguments);
 	bool Status = e.Start();
 	if (Status)
 	{

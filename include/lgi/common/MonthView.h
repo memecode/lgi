@@ -3,7 +3,7 @@
 #ifndef __MONTH_VIEW_H
 #define __MONTH_VIEW_H
 
-#include "LDateTime.h"
+#include "lgi/common/DateTime.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
 extern const char *ShortDayNames[7];

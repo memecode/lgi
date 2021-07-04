@@ -28,7 +28,7 @@ public:
 	int Size;
 	GArray<GMruEntry*> Items;
 	LSubMenu *Parent;
-	GFileType *SelectedType;
+	LFileType *SelectedType;
 
 	GMruPrivate()	
 	{
@@ -82,7 +82,7 @@ bool GMru::SerializeEntry
 	return true;
 }
 
-void GMru::GetFileTypes(GFileSelect *Dlg, bool Write)
+void GMru::GetFileTypes(LFileSelect *Dlg, bool Write)
 {
 	Dlg->Type("All Files", LGI_ALL_FILES);
 }
@@ -94,7 +94,7 @@ char *GMru::_GetCurFile()
 	return NULL;
 }
 
-GFileType *GMru::GetSelectedType()
+LFileType *GMru::GetSelectedType()
 {
 	return d->SelectedType;
 }
@@ -124,7 +124,7 @@ bool GMru::_SaveFile(const char *FileName)
 		char File[MAX_PATH];
 		strcpy_s(File, sizeof(File), FileName);
 		
-		GFileType *st;
+		LFileType *st;
 		if (!LFileExists(File) &&
 			(st = GetSelectedType()) &&
 			st->Extension())
@@ -301,7 +301,7 @@ void GMru::RemoveFile(const char *FileName, bool Update)
 	}
 }
 
-bool GMru::DoFileDlg(GFileSelect &Select, bool Open)
+bool GMru::DoFileDlg(LFileSelect &Select, bool Open)
 {
 	GetFileTypes(&Select, false);
 	Select.ShowReadOnly(Open);
@@ -325,7 +325,7 @@ bool GMru::OnCommand(int Cmd)
 	LViewI *Wnd = d->Parent->GetMenu() ? d->Parent->GetMenu()->WindowHandle() : 0;
 	if (Wnd)
 	{
-		GFileSelect Select;
+		LFileSelect Select;
 		Select.Parent(Wnd);
 		Select.ClearTypes();
 		d->SelectedType = 0;

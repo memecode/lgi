@@ -665,7 +665,7 @@ public:
 					LEdit *e;
 					if (GetViewById(IDC_EDIT_BASE + BrowseIdx, e))
 					{
-						GFileSelect s;
+						LFileSelect s;
 						s.Parent(this);
 
 						GFile::Path Path(d->Project->GetBasePath());

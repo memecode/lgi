@@ -38,9 +38,9 @@ public:
 	int64 Value();
 
 	// Gets the range of the slider
-	GRange GetRange();
+	LRange GetRange();
 	/// Sets the range of the slider
-	bool SetRange(const GRange &r);
+	bool SetRange(const LRange &r);
 
 	bool OnLayout(LViewLayoutInfo &Inf);
 	GMessage::Result OnEvent(GMessage *Msg);

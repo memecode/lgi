@@ -1293,7 +1293,7 @@ enum DbgCtrls
 };
 
 struct LScriptVmDebuggerPriv;
-class GDebugView : public GTextView3
+class GDebugView : public LTextView3
 {
 	LScriptVmDebuggerPriv *d;
 	int CurLine;
@@ -1364,7 +1364,7 @@ struct LScriptVmDebuggerPriv
 	}
 };
 
-GDebugView::GDebugView(LScriptVmDebuggerPriv *priv) : GTextView3(IDC_TEXT, 0, 0, 100, 100)
+GDebugView::GDebugView(LScriptVmDebuggerPriv *priv) : LTextView3(IDC_TEXT, 0, 0, 100, 100)
 {
 	d = priv;
 	ErrorLine = -1;
@@ -1408,7 +1408,7 @@ int IsAddr(char16 *Ln)
 int GDebugView::GetAddr()
 {
 	ssize_t Index;
-	GTextLine *t = GetTextLine(Cursor, &Index);
+	LTextLine *t = GetTextLine(Cursor, &Index);
 	if (!t)
 		return -1;
 		
@@ -1439,7 +1439,7 @@ bool GDebugView::Breakpoint(int Addr)
 
 void GDebugView::OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour)
 {
-	GTextView3::OnPaintLeftMargin(pDC, r, colour);
+	LTextView3::OnPaintLeftMargin(pDC, r, colour);
 
 	pDC->Colour(GColour(192, 0, 0));
 	LFont *f = GetFont();
@@ -1478,10 +1478,10 @@ void GDebugView::OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour)
 
 void GDebugView::OnPaint(LSurface *pDC)
 {
-	GTextView3::OnPaint(pDC);
+	LTextView3::OnPaint(pDC);
 	if (Error)
 	{
-		GTextLine *Ln = Line[ErrorLine];
+		LTextLine *Ln = Line[ErrorLine];
 
 		LFont *f = GetFont();
 		LRect c = GetClient();
@@ -1498,7 +1498,7 @@ void GDebugView::OnPaint(LSurface *pDC)
 
 void GDebugView::PourText(size_t Start, ssize_t Len)
 {
-	GTextView3::PourText(Start, Len);
+	LTextView3::PourText(Start, Len);
 
 	CurLine = -1;
 	for (unsigned i=0; i<d->Blocks.Length(); i++)

@@ -14,28 +14,6 @@
 #endif
 #define IDM_STATIC				-1
 
-/////////////////////////////////////////////////////////////////////////////////////////
-class LDialog;
-#if defined WIN32
-class GDlgFunc;
-#endif
-class LListItem;
-class LTreeItem;
-
-class LButton;
-class LEdit;
-class LCheckBox;
-class LTextLabel;
-class LRadioGroup;
-class LRadioButton;
-class LTabView;
-class LTabPage;
-class LSlider;
-class LCombo;
-class LBitmap;
-class LList;
-class LTree;
-
 //////////////////////////////////////////////////////////////////////////////////////
 // Controls
 #if defined WIN32

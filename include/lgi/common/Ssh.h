@@ -49,7 +49,7 @@ protected:
 			Length = len;
 			if (s->Prog)
 			{
-				s->Prog->SetRange(GRange(0, Length));
+				s->Prog->SetRange(LRange(0, Length));
 				s->Prog->Colour(LProgressView::cPaused);
 			}
 		}

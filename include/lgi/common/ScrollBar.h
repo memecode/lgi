@@ -50,9 +50,9 @@ public:
 	void Value(int64 p);
 
 	// Gets the range of the scoll bar
-	GRange GetRange() const;
+	LRange GetRange() const;
 	/// Sets the range of the scroll bar
-	bool SetRange(const GRange &r);
+	bool SetRange(const LRange &r);
 	
 	/// Gets the page size
 	int64 Page();

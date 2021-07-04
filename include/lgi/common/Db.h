@@ -11,7 +11,7 @@
 #ifndef __GDB_H
 #define __GDB_H
 
-#include "LVariant.h"
+#include "lgi/common/Variant.h"
 
 #define Dom_IsConnected		"IsConnected"
 

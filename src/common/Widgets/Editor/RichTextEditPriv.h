@@ -720,12 +720,12 @@ public:
 			virtual bool GetPosFromIndex(BlockCursor *Cursor) = 0;
 			virtual bool OnLayout(Flow &f) = 0;
 			virtual void OnPaint(PaintContext &Ctx) = 0;
-			virtual bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, GRange *Rgn) = 0;
+			virtual bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rgn) = 0;
 			virtual bool OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY) = 0;
 			virtual int LineToOffset(int Line) = 0;
 			virtual int GetLines() = 0;
 			virtual ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params) = 0;
-			virtual void SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, GRange r) {}
+			virtual void SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, LRange r) {}
 			virtual void IncAllStyleRefs() {}
 			virtual void Dump() {}
 			virtual LNamedStyle *GetStyle(ssize_t At = -1) = 0;
@@ -1052,7 +1052,7 @@ public:
 		LNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
-		bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, GRange *Rng);
+		bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
 		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
@@ -1062,14 +1062,14 @@ public:
 		bool Seek(SeekType To, BlockCursor &Cursor);
 		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
 		void IncAllStyleRefs();
-		void SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, GRange r);
+		void SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, LRange r);
 		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
 		void DumpNodes(LTreeItem *Ti);
 		#endif
 		Block *Clone();
 		bool IsEmptyLine(BlockCursor *Cursor);
-		void UpdateSpellingAndLinks(Transaction *Trans, GRange r);
+		void UpdateSpellingAndLinks(Transaction *Trans, LRange r);
 
 		// Events
 		GMessage::Result OnEvent(GMessage *Msg);
@@ -1106,7 +1106,7 @@ public:
 		LNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
-		bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, GRange *Rng);
+		bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
 		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
@@ -1201,7 +1201,7 @@ public:
 		LNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
-		bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, GRange *Rng);
+		bool ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
 		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);

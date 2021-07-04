@@ -28,8 +28,8 @@ public:
 	Progress(char *desc, int64 l, int64 h, char *type = NULL, double scale = 1.0);
 	virtual ~Progress() {}
 
-	virtual bool SetRange(const GRange &r) { Low = r.Start; High = r.End(); return true; }
-	virtual GRange GetRange() { return GRange(Low, High - Low); }
+	virtual bool SetRange(const LRange &r) { Low = r.Start; High = r.End(); return true; }
+	virtual LRange GetRange() { return LRange(Low, High - Low); }
 	virtual GString GetDescription();
 	virtual void SetDescription(const char *d = 0);
 	virtual int64 Value() { return Val; }
@@ -49,7 +49,7 @@ public:
 	}
 	[[deprecated]] virtual void SetLimits(int64 l, int64 h)
 	{
-		SetRange(GRange(l, h - l + 1));
+		SetRange(LRange(l, h - l + 1));
 	}
 };
 

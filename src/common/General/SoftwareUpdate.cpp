@@ -1,11 +1,12 @@
-#include "Lgi.h"
-#include "GSoftwareUpdate.h"
-#include "INet.h"
-#include "IHttp.h"
-#include "GProgressDlg.h"
-#include "LTextLabel.h"
-#include "LButton.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/SoftwareUpdate.h"
+#include "lgi/common/Net.h"
+#include "lgi/common/Http.h"
+#include "lgi/common/ProgressDlg.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/Thread.h"
 
 static char sHttpDownloadFailed[] = "HTTP download failed.";
 static char sSocketConnectFailed[] = "Socket connect failed.";
@@ -150,7 +151,7 @@ struct GSoftwareUpdatePriv
 		}
 	};
 
-	class Spinner : public GDialog
+	class Spinner : public LDialog
 	{
 		UpdateThread *Watch;
 
@@ -213,7 +214,7 @@ struct GSoftwareUpdatePriv
 				}
 			}
 
-			return GDialog::OnNotify(c, f);
+			return LDialog::OnNotify(c, f);
 		}
 	};
 
@@ -352,7 +353,7 @@ bool GSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *W
 	}
 	Local.SetSize(0);
 
-	GProgressDlg *Dlg = new GProgressDlg;
+	LProgressDlg *Dlg = new LProgressDlg;
 	Dlg->SetDescription(LgiLoadString(L_SOFTUP_DOWNLOADING, "Downloading..."));
 	Dlg->SetType("KiB");
 	Dlg->SetScale(1.0 / 1024.0);

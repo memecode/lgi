@@ -4112,7 +4112,7 @@ void ResDialog::OnCommand(int Cmd)
 		}
 		case IDM_EXPORT:
 		{
-			GFileSelect Select;
+			LFileSelect Select;
 			Select.Parent(AppWindow);
 			Select.Type("Text", "*.txt");
 			if (Select.Save())

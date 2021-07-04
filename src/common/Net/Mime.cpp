@@ -1,10 +1,10 @@
 #include <stdio.h>
 
-#include "LgiNetInc.h"
-#include "Lgi.h"
-#include "GMime.h"
-#include "GToken.h"
-#include "Base64.h"
+#include "lgi/common/LgiNetInc.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Mime.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Base64.h"
 
 #define DEBUG_MIME						0
 #if DEBUG_MIME

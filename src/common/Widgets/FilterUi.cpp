@@ -1,13 +1,14 @@
 #include <math.h>
 
-#include "Lgi.h"
-#include "GFilterUi.h"
-#include "GPath.h"
-#include "LEdit.h"
-#include "GCombo.h"
-#include "GToken.h"
-#include "LDisplayString.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/FilterUi.h"
+#include "lgi/common/Path.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/Menu.h"
 
 #define FILTER_DRAG_FORMAT	"Scribe.FilterItem"
 #define IconSize			15
@@ -456,7 +457,7 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-class GFilterItemPrivate
+class LFilterItemPrivate
 {
 public:
 	GFilterNode Node;
@@ -471,9 +472,9 @@ public:
 	char *Field, *Value;
 	int Op;
 	LEdit *FieldEd, *ValueEd;
-	GCombo *OpCbo;
+	LCombo *OpCbo;
 
-	GFilterItemPrivate()
+	LFilterItemPrivate()
 	{
 		Not = false;
 		Data = 0;
@@ -485,7 +486,7 @@ public:
 		OpCbo = 0;
 	}
 
-	~GFilterItemPrivate()
+	~LFilterItemPrivate()
 	{
 		DeleteArray(Field);
 		DeleteArray(Value);
@@ -509,7 +510,7 @@ public:
 
 LFilterItem::LFilterItem(LFilterViewPrivate *Data, GFilterNode Node)
 {
-	d = new GFilterItemPrivate;
+	d = new LFilterItemPrivate;
 	d->Data = Data;
 	SetText("Node");
 	SetNode(Node);
@@ -869,7 +870,7 @@ void LFilterItem::ShowControls(bool s)
 		Cbo.Union(&d->OpDropBtn);
 
 		StartCtrl(d->FieldBtn, FieldEd, d->Field, LEdit);
-		StartCtrl(Cbo, OpCbo, 0, GCombo);
+		StartCtrl(Cbo, OpCbo, 0, LCombo);
 		StartCtrl(d->ValueBtn, ValueEd, d->Value, LEdit);
 		
 		if (d->OpCbo && !d->OpCbo->Length())

@@ -343,11 +343,11 @@ HtmlTag IsDefaultStyle(HtmlTag Id, LCss *Css)
 	return CONTENT;
 }
 
-bool LRichTextPriv::TextBlock::ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, GRange *Rng)
+bool LRichTextPriv::TextBlock::ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng)
 {
 	s.Print("<p>");
 
-	GRange All(0, Length());
+	LRange All(0, Length());
 	if (!Rng)
 		Rng = &All;
 
@@ -359,8 +359,8 @@ bool LRichTextPriv::TextBlock::ToHtml(GStream &s, GArray<GDocView::ContentMedia>
 		ssize_t tlen = t->Length();
 		if (!tlen)
 			continue;
-		GRange TxtRange(Pos, tlen);
-		GRange Common = TxtRange.Overlap(*Rng);
+		LRange TxtRange(Pos, tlen);
+		LRange Common = TxtRange.Overlap(*Rng);
 		if (Common.Valid())
 		{		
 			GString utf(
@@ -1436,7 +1436,7 @@ ssize_t LRichTextPriv::TextBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset
 	if (Deleted > 0)
 	{
 		// Adjust start of existing spelling styles
-		GRange r(BlkOffset, Deleted);
+		LRange r(BlkOffset, Deleted);
 		for (auto &Err : SpellingErrors)
 		{
 			if (Err.Overlap(r).Valid())
@@ -1450,7 +1450,7 @@ ssize_t LRichTextPriv::TextBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset
 		}
 
 		LayoutDirty = true;
-		UpdateSpellingAndLinks(Trans, GRange(BlkOffset, 0));
+		UpdateSpellingAndLinks(Trans, LRange(BlkOffset, 0));
 	}
 
 	IsValid();
@@ -1659,14 +1659,14 @@ bool LRichTextPriv::TextBlock::AddText(Transaction *Trans, ssize_t AtOffset, con
 	// Update layout and styling
 	LayoutDirty = true;	
 	IsValid();
-	UpdateSpellingAndLinks(Trans, GRange(InitialOffset, InChars));
+	UpdateSpellingAndLinks(Trans, LRange(InitialOffset, InChars));
 	
 	return true;
 }
 
 bool LRichTextPriv::TextBlock::OnDictionary(Transaction *Trans)
 {
-	UpdateSpellingAndLinks(Trans, GRange(0, Length()));
+	UpdateSpellingAndLinks(Trans, LRange(0, Length()));
 	return true;
 }
 
@@ -1762,7 +1762,7 @@ int ErrSort(GSpellCheck::SpellingError *a, GSpellCheck::SpellingError *b)
 	return (int) (a->Start - b->Start);
 }
 
-void LRichTextPriv::TextBlock::SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, GRange r)
+void LRichTextPriv::TextBlock::SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, LRange r)
 {
 	// LgiTrace("%s:%i - SetSpellingErrors " LPrintfSSizeT ", " LPrintfSSizeT ":" LPrintfSSizeT "\n", _FL, Errors.Length(), r.Start, r.End());
 
@@ -1786,7 +1786,7 @@ void LRichTextPriv::TextBlock::SetSpellingErrors(GArray<GSpellCheck::SpellingErr
 
 #define IsWordChar(ch) ( IsAlpha(ch) || (ch) == '\'' )
 
-void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange r)
+void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, LRange r)
 {
 	GArray<uint32_t> Text;
 	if (!CopyAt(0, Length(), &Text))
@@ -1796,7 +1796,7 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange
 	if (d->SpellCheck &&
 		d->SpellDictionaryLoaded)
 	{
-		GRange Rgn = r;
+		LRange Rgn = r;
 		while (Rgn.Start > 0 &&
 				IsWordChar(Text[Rgn.Start-1]))
 		{
@@ -1830,7 +1830,7 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange
 		r.Len++;
 
 	// Create array of words...
-	GArray<GRange> Words;
+	GArray<LRange> Words;
 	bool Ws = true;
 	for (int i = 0; i < r.Len; i++)
 	{
@@ -1840,13 +1840,13 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange
 			Ws = w;
 			if (!w)
 			{
-				GRange &w = Words.New();
+				LRange &w = Words.New();
 				w.Start = r.Start + i;
 				// printf("StartWord=%i, %i\n", w.Start, w.Len);
 			}
 			else if (Words.Length() > 0)
 			{
-				GRange &w = Words.Last();
+				LRange &w = Words.Last();
 				w.Len = r.Start + i - w.Start;
 				// printf("EndWord=%i, %i\n", w.Start, w.Len);
 			}
@@ -1854,7 +1854,7 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange
 	}
 	if (!Ws && Words.Length() > 0)
 	{
-		GRange &w = Words.Last();
+		LRange &w = Words.Last();
 		w.Len = r.Start + r.Len - w.Start;
 		// printf("TermWord=%i, %i Words=%i\n", w.Start, w.Len, Words.Length());
 	}
@@ -1862,7 +1862,7 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange
 	// For each word in the range of text
 	for (unsigned i = 0; i<Words.Length(); i++)
 	{
-		GRange w = Words[i];
+		LRange w = Words[i];
 
 		// Check there is a URL at the location
 		bool IsUrl = DetectUrl(Text.AddressOf(w.Start), w.Len);
@@ -2063,19 +2063,19 @@ ssize_t LRichTextPriv::TextBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, 
 
 bool LRichTextPriv::TextBlock::DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper)
 {
-	GRange Blk(0, Len);
-	GRange Inp(StartIdx, Chars < 0 ? Len - StartIdx : Chars);
-	GRange Change = Blk.Overlap(Inp);
+	LRange Blk(0, Len);
+	LRange Inp(StartIdx, Chars < 0 ? Len - StartIdx : Chars);
+	LRange Change = Blk.Overlap(Inp);
 
 	PreEdit(Trans);
 
-	GRange Run(0, 0);
+	LRange Run(0, 0);
 	bool Changed = false;
 	for (unsigned i=0; i<Txt.Length(); i++)
 	{
 		StyleText *st = Txt[i];
 		Run.Len = st->Length();
-		GRange Edit = Run.Overlap(Change);
+		LRange Edit = Run.Overlap(Change);
 		if (Edit.Len > 0)
 		{
 			uint32_t *s = st->At(Edit.Start - Run.Start);

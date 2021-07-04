@@ -22,7 +22,7 @@ enum DefnType
 	DefnVariable = 0x40,
 };
 
-extern bool ParseFunction(GRange &Return, GRange &Name, GRange &Args, const char *Defn);
+extern bool ParseFunction(LRange &Return, LRange &Name, LRange &Args, const char *Defn);
 
 class DefnInfo
 {
@@ -31,7 +31,7 @@ public:
 	GString Name;
 	GString File;
 	int Line;
-	GRange FnName;
+	LRange FnName;
 	
 	DefnInfo()
 	{
@@ -59,7 +59,7 @@ public:
 		Name = s.Strip();
 		if (Name && Type == DefnFunc)
 		{
-			GRange Return, Args;
+			LRange Return, Args;
 			if (ParseFunction(Return, FnName, Args, Name))
 			{
 				if (strlen(Name) > 42)

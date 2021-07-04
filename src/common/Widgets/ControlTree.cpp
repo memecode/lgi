@@ -574,7 +574,7 @@ int LControlTree::OnNotify(LViewI *c, int f)
 			Item *i = dynamic_cast<Item*>(Selection());
 			if (i)
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				if (s.Open())
 				{

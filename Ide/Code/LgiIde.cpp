@@ -302,7 +302,7 @@ public:
 			char Args[256];
 			sprintf(Args, "-d %s", File);
 			
-			GSubProcess p("readelf", Args);
+			LSubProcess p("readelf", Args);
 			if (p.Start())
 			{
 				p.Communicate(&Out);
@@ -420,7 +420,7 @@ public:
 	void PourText(size_t Start, ssize_t Len) override
 	{
 		auto Ts = LgiCurrentTime();
-		GTextView3::PourText(Start, Len);
+		LTextView3::PourText(Start, Len);
 		auto Dur = LgiCurrentTime() - Ts;
 		if (Dur > 1500)
 		{
@@ -507,8 +507,8 @@ public:
 
 	void PourStyle(size_t Start, ssize_t Length)
 	{
-		List<GTextLine>::I it = GTextView3::Line.begin();
-		for (GTextLine *ln = *it; ln; ln = *++it)
+		List<LTextLine>::I it = LTextView3::Line.begin();
+		for (LTextLine *ln = *it; ln; ln = *++it)
 		{
 			if (!ln->c.IsValid())
 			{
@@ -1262,7 +1262,7 @@ public:
 			return;
 
 		int64 Current = Output->Value();
-		GTextView3 *o = Current < CountOf(Output->Txt) ? Output->Txt[Current] : 0;
+		LTextView3 *o = Current < CountOf(Output->Txt) ? Output->Txt[Current] : 0;
 		if (!o)
 			return;
 
@@ -1781,7 +1781,7 @@ public:
 		ssize_t Rd;
 
 		const char *Prog = "c:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\dumpbin.exe";
-		GSubProcess s(Prog, Args);
+		LSubProcess s(Prog, Args);
 		if (!s.Start(true, false))
 		{
 			Out->Print("%s:%i - '%s' doesn't exist.\n", _FL, Prog);
@@ -3302,7 +3302,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_OPEN:
 		{
-			GFileSelect s;
+			LFileSelect s;
 			s.Parent(this);
 			if (s.Open())
 			{
@@ -3327,7 +3327,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			IdeDoc *Top = TopDoc();
 			if (Top)
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				if (s.Save())
 				{
@@ -3363,7 +3363,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		//
 		case IDM_UNDO:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
 				Doc->Undo();
@@ -3373,7 +3373,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_REDO:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
 				Doc->Redo();
@@ -3383,7 +3383,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_FIND:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
 				Doc->DoFind();
@@ -3393,7 +3393,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_FIND_NEXT:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
 				Doc->DoFindNext();
@@ -3403,7 +3403,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_REPLACE:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
 				Doc->DoReplace();
@@ -3413,7 +3413,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_GOTO:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 				Doc->DoGoto();
 			else
@@ -3436,21 +3436,21 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_CUT:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 				Doc->PostEvent(M_CUT);
 			break;
 		}
 		case IDM_COPY:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 				Doc->PostEvent(M_COPY);
 			break;
 		}
 		case IDM_PASTE:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 				Doc->PostEvent(M_PASTE);
 			break;
@@ -3476,7 +3476,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				LViewI *Focus = GetFocus();
 				if (Focus)
 				{
-					GTextView3 *Edit = dynamic_cast<GTextView3*>(Focus);
+					LTextView3 *Edit = dynamic_cast<LTextView3*>(Focus);
 					if (Edit && Edit->HasSelection())
 					{
 						GAutoString a(Edit->GetSelection());
@@ -3651,7 +3651,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_OPEN_PROJECT:
 		{
-			GFileSelect s;
+			LFileSelect s;
 			s.Parent(this);
 			s.Type("Projects", "*.xml");
 			if (s.Open())
@@ -3670,7 +3670,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			IdeProject *p = RootProject();
 			if (p)
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				s.Type("Developer Studio Project", "*.dsp");
 				if (s.Open())
@@ -4009,9 +4009,9 @@ IdeDoc *AppWnd::TopDoc()
 	return d->Mdi ? dynamic_cast<IdeDoc*>(d->Mdi->GetTop()) : NULL;
 }
 
-GTextView3 *AppWnd::FocusEdit()
+LTextView3 *AppWnd::FocusEdit()
 {
-	return dynamic_cast<GTextView3*>(GetWindow()->GetFocus());	
+	return dynamic_cast<LTextView3*>(GetWindow()->GetFocus());	
 }
 	
 IdeDoc *AppWnd::FocusDoc()
@@ -4101,8 +4101,8 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 	{
 		#if !defined(WINNATIVE)
 		// echo | gcc -v -x c++ -E -
-		GSubProcess sp1("echo");
-		GSubProcess sp2("gcc", "-v -x c++ -E -");
+		LSubProcess sp1("echo");
+		LSubProcess sp2("gcc", "-v -x c++ -E -");
 		sp1.Connect(&sp2);
 		sp1.Start(true, false);
 		

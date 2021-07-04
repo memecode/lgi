@@ -228,7 +228,7 @@ bool CompleteTextBlockState::Apply(LRichTextPriv *Ctx, bool Forward)
 		return false;
 
 	// Swap the local state with the block in the ctx
-	Blk->UpdateSpellingAndLinks(NULL, GRange(0, Blk->Length()));
+	Blk->UpdateSpellingAndLinks(NULL, LRange(0, Blk->Length()));
 	Ctx->Blocks[Index] = Blk.Release();
 	Blk.Reset(b);
 
@@ -258,7 +258,7 @@ bool MultiBlockState::Apply(LRichTextPriv *Ctx, bool Forward)
 	
 	// Undo: Swap 'Length' blocks Ctx->Blocks with Blks
 	ssize_t OldLen = Blks.Length();
-	bool Status = Blks.SwapRange(GRange(0, OldLen), Ctx->Blocks, GRange(Index, Length));
+	bool Status = Blks.SwapRange(LRange(0, OldLen), Ctx->Blocks, LRange(Index, Length));
 	if (Status)
 		Length = OldLen;
 	
@@ -2021,7 +2021,7 @@ bool LRichTextPriv::ToHtml(GArray<GDocView::ContentMedia> *Media, BlockCursor *F
 	for (size_t i=Start; i<=End; i++)
 	{
 		Block *b = Blocks[i];
-		GRange r;
+		LRange r;
 		if (i == Start)
 			r.Start = StartIdx;
 		if (i == End)

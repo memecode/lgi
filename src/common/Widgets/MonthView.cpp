@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "Gdc2.h"
-#include "MonthView.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/MonthView.h"
 
 const char *ShortDayNames[7] = {"Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"};
 const char *FullDayNames[7] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};

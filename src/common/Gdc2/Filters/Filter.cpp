@@ -433,7 +433,7 @@ GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, GStream *In)
 		if (Meter)
 		{
 			Meter->SetDescription("scanlines");
-			Meter->SetRange(GRange(0, pMem->y));
+			Meter->SetRange(LRange(0, pMem->y));
 		}
 		
 		GColourSpace SrcCs = CsNone;
@@ -730,7 +730,7 @@ GFilter::IoStatus GdcBmp::WriteImage(GStream *Out, LSurface *pDC)
 		if (Meter)
 		{
 			Meter->SetDescription("scanlines");
-			Meter->SetRange(GRange(0, pMem->y));
+			Meter->SetRange(LRange(0, pMem->y));
 		}
 
 		int Bytes = BMPWIDTH(pMem->x * UsedBits);

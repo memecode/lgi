@@ -11,7 +11,7 @@
 int DocEdit::LeftMarginPx = EDIT_LEFT_MARGIN;
 GAutoPtr<GDocFindReplaceParams> GlobalFindReplace;
 DocEdit::DocEdit(IdeDoc *d, LFontType *f) :
-	GTextView3(IDC_EDIT, 0, 0, 100, 100, f),
+	LTextView3(IDC_EDIT, 0, 0, 100, 100, f),
 	DocEditStyling(this)
 {
 	RefreshSize = 0;
@@ -60,7 +60,7 @@ DocEdit::~DocEdit()
 }
 void DocEdit::OnCreate()
 {
-	GTextView3::OnCreate();
+	LTextView3::OnCreate();
 	Run();
 }
 bool DocEdit::AppendItems(LSubMenu *Menu, const char *Param, int Base)
@@ -116,7 +116,7 @@ int DocEdit::GetTopPaddingPx()
 }
 void DocEdit::InvalidateLine(int Idx)
 {
-	GTextLine *Ln = GTextView3::Line[Idx];
+	LTextLine *Ln = LTextView3::Line[Idx];
 	if (Ln)
 	{
 		int PadPx = GetTopPaddingPx();
@@ -130,14 +130,14 @@ void DocEdit::InvalidateLine(int Idx)
 void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour)
 {
 	GColour GutterColour(0xfa, 0xfa, 0xfa);
-	GTextView3::OnPaintLeftMargin(pDC, r, GutterColour);
+	LTextView3::OnPaintLeftMargin(pDC, r, GutterColour);
 	int Y = ScrollYLine();
 		
 	int TopPaddingPx = GetTopPaddingPx();
 	pDC->Colour(GColour(200, 0, 0));
-	List<GTextLine>::I it = GTextView3::Line.begin(Y);
+	List<LTextLine>::I it = LTextView3::Line.begin(Y);
 	int DocOffset = (*it)->r.y1;
-	for (GTextLine *l = *it; l; l = *++it, Y++)
+	for (LTextLine *l = *it; l; l = *++it, Y++)
 	{
 		if (Doc->d->BreakPoints.Find(Y+1))
 		{
@@ -148,9 +148,9 @@ void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour)
 	bool DocMatch = Doc->IsCurrentIp();
 	{
 		// We have the current IP location
-		it = GTextView3::Line.begin();
+		it = LTextView3::Line.begin();
 		int Idx = 1;
-		for (GTextLine *ln = *it; ln; ln = *++it, Idx++)
+		for (LTextLine *ln = *it; ln; ln = *++it, Idx++)
 		{
 			if (DocMatch && Idx == IdeDoc::CurIpLine)
 			{
@@ -192,16 +192,16 @@ void DocEdit::OnMouseClick(LMouse &m)
 		LCss::Len PaddingTop = GetCss(true)->PaddingTop();
 		int TopPx = PaddingTop.ToPx(GetClient().Y(), f);
 		int Idx = ((m.y - TopPx) / f->GetHeight()) + Y + 1;
-		if (Idx > 0 && Idx <= GTextView3::Line.Length())
+		if (Idx > 0 && Idx <= LTextView3::Line.Length())
 		{
 			Doc->OnMarginClick(Idx);
 		}
 	}
-	GTextView3::OnMouseClick(m);
+	LTextView3::OnMouseClick(m);
 }
 void DocEdit::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 {
-	GTextView3::SetCaret(i, Select, ForceFullUpdate);
+	LTextView3::SetCaret(i, Select, ForceFullUpdate);
 		
 	if (IsAttached())
 	{
@@ -273,7 +273,7 @@ char *DocEdit::TemplateMerge(const char *Template, const char *Name, List<char> 
 	T.Push("\n");
 	return T.NewStr();
 }
-bool DocEdit::GetVisible(GStyle &s)
+bool DocEdit::GetVisible(LStyle &s)
 {
 	LRect c = GetClient();
 	auto a = HitText(c.x1, c.y1, false);
@@ -293,7 +293,7 @@ bool DocEdit::Pour(LRegion &r)
 bool DocEdit::Insert(size_t At, const char16 *Data, ssize_t Len)
 {
 	int Old = PourEnabled ? CountRefreshEdges(At, 0) : 0;
-	bool Status = GTextView3::Insert(At, Data, Len);
+	bool Status = LTextView3::Insert(At, Data, Len);
 	int New = PourEnabled ? CountRefreshEdges(At, Len) : 0;
 	if (Old != New)
 		Invalidate();
@@ -302,7 +302,7 @@ bool DocEdit::Insert(size_t At, const char16 *Data, ssize_t Len)
 bool DocEdit::Delete(size_t At, ssize_t Len)
 {
 	int Old = CountRefreshEdges(At, Len);
-	bool Status = GTextView3::Delete(At, Len);
+	bool Status = LTextView3::Delete(At, Len);
 	int New = CountRefreshEdges(At, 0);
 	if (Old != New)
 		Invalidate();
@@ -339,7 +339,7 @@ bool DocEdit::OnKey(LKey &k)
 			return true;
 		}
 	}
-	return GTextView3::OnKey(k); 
+	return LTextView3::OnKey(k); 
 }
 GMessage::Result DocEdit::OnEvent(GMessage *m)
 {
@@ -349,7 +349,7 @@ GMessage::Result DocEdit::OnEvent(GMessage *m)
 			OnApplyStyles();
 			break;
 	}
-	return GTextView3::OnEvent(m);
+	return LTextView3::OnEvent(m);
 }
 bool DocEdit::OnMenu(GDocView *View, int Id, void *Context)
 {

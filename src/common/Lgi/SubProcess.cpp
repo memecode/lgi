@@ -6,8 +6,8 @@
 	
 	Example:
 	
-		GSubProcess p1("ls", "-l");
-		GSubProcess p2("grep", "string");
+		LSubProcess p1("ls", "-l");
+		LSubProcess p2("grep", "string");
 		p1.Connect(&p2);
 		p1.Start(true, false);
 		int r;
@@ -46,12 +46,12 @@
 	#define INVALID_PID -1
 #endif
 
-GSubProcess::Pipe::Pipe()
+LSubProcess::Pipe::Pipe()
 {
 	Read = Write = NULL_PIPE;
 }
 	
-bool GSubProcess::Pipe::Create
+bool LSubProcess::Pipe::Create
 (
 	#ifdef WIN32
 	LPSECURITY_ATTRIBUTES pAttr
@@ -67,7 +67,7 @@ bool GSubProcess::Pipe::Create
 	#endif
 }
 
-void GSubProcess::Pipe::Close()
+void LSubProcess::Pipe::Close()
 {
 	if (Read != NULL_PIPE)
 	{
@@ -116,19 +116,19 @@ struct GSubProcessPriv
 	bool PseudoConsole;
 
 	bool EnvironmentChanged;
-	GArray<GSubProcess::Variable> Environment;
+	GArray<LSubProcess::Variable> Environment;
 	uint32_t ErrorCode;
 
-	GSubProcess::PipeHandle ExternIn, ExternOut;
-	GSubProcess::ProcessId ChildPid;
+	LSubProcess::PipeHandle ExternIn, ExternOut;
+	LSubProcess::ProcessId ChildPid;
 
 	#if defined(POSIX)
-		GSubProcess::Pipe Io;
+		LSubProcess::Pipe Io;
 		int ExitValue; // was uint32
 	#elif defined(WIN32)
 		HANDLE ChildHnd;
 		DWORD ExitValue;
-		GSubProcess::Pipe ChildOutput, ChildInput;
+		LSubProcess::Pipe ChildOutput, ChildInput;
 		HPCON hConsole;
 		GLibrary Kernel;
 		ProcCreatePseudoConsole CreatePseudoConsole;
@@ -165,7 +165,7 @@ struct GSubProcessPriv
 	}
 };
 
-GSubProcess::GSubProcess(const char *exe, const char *args, bool pseudoConsole)
+LSubProcess::LSubProcess(const char *exe, const char *args, bool pseudoConsole)
 {
 	d = new GSubProcessPriv(pseudoConsole);
 	Parent = Child = NULL;
@@ -173,7 +173,7 @@ GSubProcess::GSubProcess(const char *exe, const char *args, bool pseudoConsole)
 	d->Args.Add(NewStr(d->Exe));
 
 	#if DEBUG_SUBPROCESS
-	LgiTrace("%s:%i - %p::GSubProcess('%s','%s')\n", _FL, this, exe, args);
+	LgiTrace("%s:%i - %p::LSubProcess('%s','%s')\n", _FL, this, exe, args);
 	#endif
 	
 	char *s;
@@ -186,7 +186,7 @@ GSubProcess::GSubProcess(const char *exe, const char *args, bool pseudoConsole)
 	}
 }
 
-GSubProcess::~GSubProcess()
+LSubProcess::~LSubProcess()
 {
 	#if defined(POSIX)
 	d->Io.Close();
@@ -208,22 +208,22 @@ GSubProcess::~GSubProcess()
 extern char **environ;
 #endif
 
-bool GSubProcess::GetNewGroup()
+bool LSubProcess::GetNewGroup()
 {
 	return d->NewGroup;
 }
 
-void GSubProcess::SetNewGroup(bool ng)
+void LSubProcess::SetNewGroup(bool ng)
 {
 	d->NewGroup = ng;
 }
 
-GSubProcess::ProcessId GSubProcess::Handle()
+LSubProcess::ProcessId LSubProcess::Handle()
 {
 	return d->ChildPid;
 }
 
-GSubProcess::Variable *GSubProcess::GetEnvVar(const char *Var, bool Create)
+LSubProcess::Variable *LSubProcess::GetEnvVar(const char *Var, bool Create)
 {
 	if (d->Environment.Length() == 0)
 	{
@@ -284,7 +284,7 @@ GSubProcess::Variable *GSubProcess::GetEnvVar(const char *Var, bool Create)
 	return NULL;
 }
 
-bool GSubProcess::Dupe(PipeHandle Old, PipeHandle New)
+bool LSubProcess::Dupe(PipeHandle Old, PipeHandle New)
 {
 	#if defined(POSIX)
 		while ((dup2(Old, New) == -1) && (errno == EINTR))
@@ -299,7 +299,7 @@ bool GSubProcess::Dupe(PipeHandle Old, PipeHandle New)
 	#endif
 }
 
-bool GSubProcess::IsRunning()
+bool LSubProcess::IsRunning()
 {
 	#if defined(POSIX)
 		int Status = 0;
@@ -329,12 +329,12 @@ bool GSubProcess::IsRunning()
 	#endif
 }
 
-uint32_t GSubProcess::GetErrorCode()
+uint32_t LSubProcess::GetErrorCode()
 {
 	return d->ErrorCode;
 }
 
-int32 GSubProcess::GetExitValue()
+int32 LSubProcess::GetExitValue()
 {
 	#if defined(POSIX)
 	if (d->ChildPid != INVALID_PID)
@@ -346,18 +346,18 @@ int32 GSubProcess::GetExitValue()
 	return d->ExitValue;
 }
 
-void GSubProcess::SetInitFolder(const char *f)
+void LSubProcess::SetInitFolder(const char *f)
 {
 	d->InitialFolder = f;
 }
 
-const char *GSubProcess::GetEnvironment(const char *Var)
+const char *LSubProcess::GetEnvironment(const char *Var)
 {
 	Variable *v = GetEnvVar(Var);
 	return v ? v->Val.Get() : NULL;
 }
 
-bool GSubProcess::SetEnvironment(const char *Var, const char *Value)
+bool LSubProcess::SetEnvironment(const char *Var, const char *Value)
 {	
 	Variable *v = GetEnvVar(Var, true);
 	if (!v)
@@ -418,7 +418,7 @@ bool GSubProcess::SetEnvironment(const char *Var, const char *Value)
 	return true;
 }	
 
-bool GSubProcess::GetValue(const char *Var, ::LVariant &Value)
+bool LSubProcess::GetValue(const char *Var, ::LVariant &Value)
 {
 	switch (LgiStringToDomProp(Var))
 	{
@@ -450,17 +450,17 @@ bool GSubProcess::GetValue(const char *Var, ::LVariant &Value)
 	return true;
 }
 
-void GSubProcess::SetStdin(OsFile Hnd)
+void LSubProcess::SetStdin(OsFile Hnd)
 {
 	d->ExternIn = Hnd;
 }
 
-void GSubProcess::SetStdout(OsFile Hnd)
+void LSubProcess::SetStdout(OsFile Hnd)
 {
 	d->ExternOut = Hnd;
 }
 
-void GSubProcess::Connect(GSubProcess *child)
+void LSubProcess::Connect(LSubProcess *child)
 {
 	Child = child;
 	if (Child)
@@ -469,7 +469,7 @@ void GSubProcess::Connect(GSubProcess *child)
 	}
 }
 
-bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdout)
+bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdout)
 {
 	bool Status = false;
 
@@ -618,8 +618,8 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 	#else
 	
 		// Find the end of the process list
-		::GArray<GSubProcess*> p;
-		for (GSubProcess *s=this; s; s=s->Child)
+		::GArray<LSubProcess*> p;
+		for (LSubProcess *s=this; s; s=s->Child)
 		{
 			LgiAssert(!s->Child || s->Child->Parent == s);
 			p.Add(s);
@@ -652,7 +652,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			LgiTrace("%s:%i - *PARENT* pipe[%i].create %i,%i\n", _FL, i, Pipes[i].Read, Pipes[i].Write);
 			#endif
 			
-			GSubProcess *sp = p[i-1];
+			LSubProcess *sp = p[i-1];
 			sp->ChildPid = fork();
 
 			if (sp->ChildPid == INVALID_PID)
@@ -977,7 +977,7 @@ bool GSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 	return Status;
 }
 
-int32 GSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
+int32 LSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
 {
 	char Buf[1024];
 	ssize_t r;
@@ -1003,7 +1003,7 @@ int32 GSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
 	return GetExitValue();
 }
 
-int GSubProcess::Wait()
+int LSubProcess::Wait()
 {
 	int Status = -1;
 
@@ -1038,7 +1038,7 @@ int GSubProcess::Wait()
 	return Status;
 }
 
-bool GSubProcess::Interrupt()
+bool LSubProcess::Interrupt()
 {
 	#if defined(POSIX)
 		return Signal(SIGINT);
@@ -1085,7 +1085,7 @@ bool GSubProcess::Interrupt()
 	#endif
 }
 
-bool GSubProcess::Signal(int which)
+bool LSubProcess::Signal(int which)
 {
 	#if defined(POSIX)
 		if (d->ChildPid == INVALID_PID)
@@ -1116,7 +1116,7 @@ bool GSubProcess::Signal(int which)
 	return true;
 }
 
-bool GSubProcess::Kill()
+bool LSubProcess::Kill()
 {
 	#if defined(POSIX)
 		return Signal(SIGTERM);
@@ -1141,7 +1141,7 @@ bool GSubProcess::Kill()
 	return true;
 }
 
-GString GSubProcess::Read()
+GString LSubProcess::Read()
 {
 	GStringPipe p(512);
 	char Buf[512];
@@ -1158,7 +1158,7 @@ GString GSubProcess::Read()
 	return p.NewGStr();
 }
 
-ssize_t GSubProcess::Read(void *Buf, ssize_t Size, int TimeoutMs)
+ssize_t LSubProcess::Read(void *Buf, ssize_t Size, int TimeoutMs)
 {
 	#if defined(POSIX)
 		bool DoRead = true;
@@ -1196,7 +1196,7 @@ ssize_t GSubProcess::Read(void *Buf, ssize_t Size, int TimeoutMs)
 	#endif
 }
 
-int GSubProcess::Peek()
+int LSubProcess::Peek()
 {
 	#if defined(POSIX)
 		int bytesAvailable = 0;
@@ -1211,13 +1211,13 @@ int GSubProcess::Peek()
 	#endif	
 }
 
-bool GSubProcess::Write(GString s)
+bool LSubProcess::Write(GString s)
 {
 	auto Wr = Write(s.Get(), s.Length());
 	return Wr == s.Length();
 }
 
-ssize_t GSubProcess::Write(const void *Buf, ssize_t Size, int Flags)
+ssize_t LSubProcess::Write(const void *Buf, ssize_t Size, int Flags)
 {
 	#if defined(POSIX)
 		return (int)write(d->Io.Write, Buf, Size);
@@ -1229,3 +1229,65 @@ ssize_t GSubProcess::Write(const void *Buf, ssize_t Size, int Flags)
 	#endif
 }
 
+////////////////////////////////////////////////////////////////////////////////////
+bool LIsProcess(OsProcessId Pid)
+{
+	bool Status = false;
+
+	#if defined WIN32
+
+		HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION, false, Pid);
+		if (hProc)
+		{
+			DWORD ExitCode = 0;
+			if (GetExitCodeProcess(hProc, &ExitCode) &&
+				ExitCode == STILL_ACTIVE)
+			{
+				Status = true;
+			}
+			CloseHandle(hProc);
+		}
+		else LgiTrace("%s:%i - OpenProcess failed with 0x%x\n", _FL, GetLastError());
+	
+	#elif defined(MAC)
+	
+		#if LGI_COCOA
+	
+		NSRunningApplication* app = [NSRunningApplication runningApplicationWithProcessIdentifier: Pid];
+		return app != nil;
+	
+		#elif LGI_CARBON
+	
+        ProcessSerialNumber psn;
+        OSStatus e = GetProcessForPID(Pid, &psn);
+		return e == 0;
+	
+		#else
+	
+		#warning FIXME
+	
+		#endif
+
+	#elif defined(LINUX)
+
+		char ProcPath[256];
+		sprintf_s(ProcPath, sizeof(ProcPath), "/proc/%i", Pid);
+		Status = LDirExists(ProcPath);
+	
+	#elif defined BEOS
+	
+		BRoster r;
+		app_info a;
+		if (r.GetRunningAppInfo(Pid, &a) == B_OK)
+		{
+			Status = true;
+		}
+
+	#else
+
+		#error Impl me.
+
+	#endif
+
+	return Status;
+}

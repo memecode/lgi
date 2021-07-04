@@ -44,7 +44,7 @@ int FileNameSorter(char **a, char **b)
 	return stricmp(A?A:*a, B?B:*b);
 }
 
-EditTray::EditTray(GTextView3 *ctrl, IdeDoc *doc)
+EditTray::EditTray(LTextView3 *ctrl, IdeDoc *doc)
 {
 	Ctrl = ctrl;
 	Doc = doc;
@@ -1837,7 +1837,7 @@ bool IdeDoc::SetClean()
 			!LFileExists(LocalPath))
 		{
 			// We need a valid filename to save to...			
-			GFileSelect s;
+			LFileSelect s;
 			s.Parent(this);
 			if (Base)
 				s.InitialDir(Base);
@@ -1902,7 +1902,7 @@ bool IdeDoc::OnRequestClose(bool OsShuttingDown)
 }
 
 /*
-GTextView3 *IdeDoc::GetEdit()
+LTextView3 *IdeDoc::GetEdit()
 {
 	return d->Edit;
 }

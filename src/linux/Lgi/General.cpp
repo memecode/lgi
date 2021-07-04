@@ -9,7 +9,7 @@
 #include <time.h>
 
 #include "Lgi.h"
-#include "GSubProcess.h"
+#include "LSubProcess.h"
 #include "LTextLabel.h"
 #include "LButton.h"
 #ifndef LGI_SDL
@@ -235,7 +235,7 @@ bool LGetAppsForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
 		Mime, Limit, Args);
 	#endif
 
-	GSubProcess p("xdg-mime", Args);
+	LSubProcess p("xdg-mime", Args);
 	if (p.Start())
 	{
 		p.Communicate(&Output);

@@ -703,7 +703,7 @@ protected:
 	LSubMenu		*ViewMenu;
 
 	LStatusBar		*Status;
-	GStatusPane		*StatusInfo[STATUS_MAX];
+	LStatusPane		*StatusInfo[STATUS_MAX];
 
 	ShortCutView	*ShortCuts;
 
@@ -718,7 +718,7 @@ protected:
 	LHashTbl<ConstStrKey<char,false>, bool> ShowLanguages;
 
 	void SortDialogs();
-	void GetFileTypes(GFileSelect *Dlg, bool Write);
+	void GetFileTypes(LFileSelect *Dlg, bool Write);
 
 public:
 	AppWnd();

@@ -10,10 +10,10 @@
 
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GDb.h"
-#include "GToken.h"
-#include "GTextFile.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Db.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/TextFile.h"
 
 ///////////////////////////////////////////////////////////////////
 // Forward decl

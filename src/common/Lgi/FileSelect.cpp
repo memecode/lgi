@@ -1,5 +1,5 @@
 /*hdr
-**      FILE:           GFileSelect.cpp
+**      FILE:           LFileSelect.cpp
 **      AUTHOR:         Matthew Allen
 **      DATE:           20/5/2002
 **      DESCRIPTION:    Common file/directory selection dialog
@@ -118,7 +118,7 @@ GInlineBmp TreeIconsImg = { 308, 22, 8, Icons2 };
 
 
 //////////////////////////////////////////////////////////////////////////
-char *GFileType::DefaultExtension()
+char *LFileType::DefaultExtension()
 {
 	char *Status = 0;
 	GToken T(Extension(), ";");
@@ -165,12 +165,12 @@ public:
 // implementation of this class without effecting headers and applications.
 class GFileSelectPrivate
 {
-	friend class GFileSelect;
+	friend class LFileSelect;
 	friend class GFileSelectDlg;
 	friend class GFolderList;
 
 	LView *Parent;
-	GFileSelect *Select;
+	LFileSelect *Select;
 
 	DlgType Type;
 	char *Title;
@@ -178,7 +178,7 @@ class GFileSelectPrivate
 	bool MultiSelect;
 	List<char> Files;
 	int CurrentType;
-	List<GFileType> Types;
+	List<LFileType> Types;
 	List<char> History;
 	bool ShowReadOnly;
 	bool ReadOnly;
@@ -191,7 +191,7 @@ public:
 	static bool InitShowHiddenFiles;
 	static LRect InitSize;
 
-	GFileSelectPrivate(GFileSelect *select)
+	GFileSelectPrivate(LFileSelect *select)
 	{
 		ShowReadOnly = false;
 		ReadOnly = false;
@@ -993,7 +993,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	// Load types
 	if (!d->Types.Length())
 	{
-		GFileType *t = new GFileType;
+		LFileType *t = new LFileType;
 		if (t)
 		{
 			t->Description("All Files");
@@ -1223,7 +1223,7 @@ int GFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
 					// insert the new type if not already there
 					if (TypeIndex < 0)
 					{
-						GFileType *n = new GFileType;
+						LFileType *n = new LFileType;
 						if (n)
 						{
 							n->Description(f);
@@ -1308,7 +1308,7 @@ int GFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
 			if (d->Type == TypeSaveFile)
 			{
 				// change extension of current file
-				GFileType *Type = d->Types.ItemAt(d->CurrentType);
+				LFileType *Type = d->Types.ItemAt(d->CurrentType);
 				auto File = FileNameEdit->Name();
 				if (Type && File)
 				{
@@ -1981,7 +1981,7 @@ void GFolderList::OnFolder()
 	List<LListItem> New;
 
 	// Get current type
-	GFileType *Type = Dlg->d->Types.ItemAt(Dlg->d->CurrentType);
+	LFileType *Type = Dlg->d->Types.ItemAt(Dlg->d->CurrentType);
 	List<char> Ext;
 	if (Type)
 	{
@@ -2037,32 +2037,32 @@ void GFolderList::OnFolder()
 }
 
 //////////////////////////////////////////////////////////////////////////
-GFileSelect::GFileSelect()
+LFileSelect::LFileSelect()
 {
 	d = new GFileSelectPrivate(this);
 }
 
-GFileSelect::~GFileSelect()
+LFileSelect::~LFileSelect()
 {
 	DeleteObj(d);
 }
 
-void GFileSelect::ShowReadOnly(bool b)
+void LFileSelect::ShowReadOnly(bool b)
 {
 	d->ShowReadOnly = b;;
 }
 
-bool GFileSelect::ReadOnly()
+bool LFileSelect::ReadOnly()
 {
 	return d->ReadOnly;
 }
 
-const char *GFileSelect::Name()
+const char *LFileSelect::Name()
 {
 	return d->Files[0];
 }
 
-bool GFileSelect::Name(const char *n)
+bool LFileSelect::Name(const char *n)
 {
 	d->Files.DeleteArrays();
 	if (n)
@@ -2073,34 +2073,34 @@ bool GFileSelect::Name(const char *n)
 	return true;
 }
 
-char *GFileSelect::operator [](size_t i)
+char *LFileSelect::operator [](size_t i)
 {
 	return d->Files.ItemAt(i);
 }
 
-size_t GFileSelect::Length()
+size_t LFileSelect::Length()
 {
 	return d->Files.Length();
 }
 
-size_t GFileSelect::Types()
+size_t LFileSelect::Types()
 {
 	return d->Types.Length();
 }
 
-void GFileSelect::ClearTypes()
+void LFileSelect::ClearTypes()
 {
 	d->Types.DeleteObjects();
 }
 
-GFileType *GFileSelect::TypeAt(ssize_t n)
+LFileType *LFileSelect::TypeAt(ssize_t n)
 {
 	return d->Types.ItemAt(n);
 }
 
-bool GFileSelect::Type(const char *Description, const char *Extension, int Data)
+bool LFileSelect::Type(const char *Description, const char *Extension, int Data)
 {
-	GFileType *Type = new GFileType;
+	LFileType *Type = new LFileType;
 	if (Type)
 	{
 		Type->Description(Description);
@@ -2111,37 +2111,37 @@ bool GFileSelect::Type(const char *Description, const char *Extension, int Data)
 	return Type != 0;
 }
 
-ssize_t GFileSelect::SelectedType()
+ssize_t LFileSelect::SelectedType()
 {
 	return d->CurrentType;
 }
 
-LViewI *GFileSelect::Parent()
+LViewI *LFileSelect::Parent()
 {
 	return d->Parent;
 }
 
-void GFileSelect::Parent(LViewI *Window)
+void LFileSelect::Parent(LViewI *Window)
 {
 	d->Parent = dynamic_cast<LView*>(Window);
 }
 
-bool GFileSelect::MultiSelect()
+bool LFileSelect::MultiSelect()
 {
 	return d->MultiSelect;
 }
 
-void GFileSelect::MultiSelect(bool Multi)
+void LFileSelect::MultiSelect(bool Multi)
 {
 	d->MultiSelect = Multi;
 }
 
 #define CharPropImpl(Func, Var)				\
-	char *GFileSelect::Func()				\
+	char *LFileSelect::Func()				\
 	{										\
 		return Var;							\
 	}										\
-	void GFileSelect::Func(const char *i)	\
+	void LFileSelect::Func(const char *i)	\
 	{										\
 		DeleteArray(Var);					\
 		if (i)								\
@@ -2154,7 +2154,7 @@ CharPropImpl(InitialDir, d->InitPath);
 CharPropImpl(Title, d->Title);
 CharPropImpl(DefaultExtension, d->DefExt);
 
-bool GFileSelect::Open()
+bool LFileSelect::Open()
 {
 	GFileSelectDlg Dlg(d);
 
@@ -2166,7 +2166,7 @@ bool GFileSelect::Open()
 	return Dlg.DoModal() == IDOK;
 }
 
-bool GFileSelect::OpenFolder()
+bool LFileSelect::OpenFolder()
 {
 	GFileSelectDlg Dlg(d);
 
@@ -2179,7 +2179,7 @@ bool GFileSelect::OpenFolder()
 	return Dlg.DoModal() == IDOK;
 }
 
-bool GFileSelect::Save()
+bool LFileSelect::Save()
 {
 	GFileSelectDlg Dlg(d);
 	

@@ -357,7 +357,7 @@ public:
 
 	void PourStyle(size_t Start, ssize_t Length)
 	{
-		for (auto ln : GTextView3::Line)
+		for (auto ln : LTextView3::Line)
 		{
 			if (!ln->c.IsValid())
 			{
@@ -528,7 +528,7 @@ public:
 
 	void Browse(int EditId)
 	{
-		GFileSelect s;
+		LFileSelect s;
 		s.Parent(this);
 		if (s.Open())
 		{
@@ -841,7 +841,7 @@ public:
     int Main()
     {
         auto Path = LGetPath();
-        GSubProcess p("python", "/Users/matthew/CodeLib/test.py");
+        LSubProcess p("python", "/Users/matthew/CodeLib/test.py");
         
         auto t = GString(LGI_PATH_SEPARATOR).Join(Path);
         for (auto s: Path)
@@ -1053,7 +1053,7 @@ public:
 			Commit->GetCss(true)->Height("25%");
 			if (Commit->GetViewById(IDC_MSG, Msg))
 			{
-				GTextView3 *Tv = dynamic_cast<GTextView3*>(Msg);
+				LTextView3 *Tv = dynamic_cast<LTextView3*>(Msg);
 				if (Tv)
 				{
 					Tv->Sunken(true);
@@ -1182,7 +1182,7 @@ public:
 			}
 			case IDM_OPEN_DIFF:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				if (s.Open())
 				{
@@ -1289,7 +1289,7 @@ public:
 
 	void OpenLocalFolder(const char *Fld = NULL)
 	{
-		GFileSelect s;
+		LFileSelect s;
 
 		if (!Fld)
 		{

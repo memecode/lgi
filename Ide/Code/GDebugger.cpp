@@ -71,7 +71,7 @@ public:
 class Gdb : public GDebugger, public LThread, public Callback
 {
 	GDebugEvents *Events;
-	GAutoPtr<GSubProcess> Sp;
+	GAutoPtr<LSubProcess> Sp;
 	GString Exe, Args, InitDir;
 	GString ChildEnv;
 	bool RunAsAdmin;
@@ -484,7 +484,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 
 		printf("Starting Debugger: %s %s\n", a[0].Get(), a[1].Get());
 
-		if (!Sp.Reset(new GSubProcess(a[0], a[1])))
+		if (!Sp.Reset(new LSubProcess(a[0], a[1])))
 			return false;
 
 		if (InitDir)

@@ -3,7 +3,7 @@
 #include "INet.h"
 #include "lldb_callback.h"
 #include "LWebSocket.h"
-#include "GSubProcess.h"
+#include "LSubProcess.h"
 
 //////////////////////////////////////////////////////////////////
 const char *AppName = "lldb_callback";
@@ -19,7 +19,7 @@ class App : public LWindow, public LThread
 {
 	GTextLog *Log;
 	bool Loop;
-	GSubProcess LLDB;
+	LSubProcess LLDB;
 	LLDBState State;
 
 public:

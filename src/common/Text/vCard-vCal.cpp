@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "Lgi.h"
-#include "vCard-vCal.h"
-#include "GToken.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/vCard-vCal.h"
+#include "lgi/common/Token.h"
 #include "ScribeDefs.h"
-#include "LJson.h"
+#include "lgi/common/Json.h"
 
 #define DEBUG_LOGGING			0
 

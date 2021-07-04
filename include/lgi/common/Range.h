@@ -10,27 +10,27 @@
 #define MIN(a,b) ((a) < (b) ? a : b)
 #endif
 
-struct GRange
+struct LRange
 {
 	ssize_t Start;
 	ssize_t Len;
 
-	GRange(ssize_t s = 0, ssize_t l = 0)
+	LRange(ssize_t s = 0, ssize_t l = 0)
 	{
 		Start = s;
 		Len = l;
 	}
 
-	GRange &Set(ssize_t s, ssize_t l)
+	LRange &Set(ssize_t s, ssize_t l)
 	{
 		Start = s;
 		Len = l;
 		return *this;
 	}
 
-	GRange Overlap(const GRange &r)
+	LRange Overlap(const LRange &r)
 	{
-		GRange o;
+		LRange o;
 		if (r.Start >= End())
 			return o;
 		if (r.End() <= Start)
@@ -58,16 +58,16 @@ struct GRange
 		return Start >= 0 && Len > 0;
 	}
 
-	bool operator ==(const GRange &r) const { return Start == r.Start && Len == r.Len; }
-	bool operator !=(const GRange &r) const { return Start != r.Start || Len != r.Len; }
-	bool operator >(const GRange &r) const { return Start > r.Start; }
-	bool operator >=(const GRange &r) const { return Start >= r.Start; }
-	bool operator <(const GRange &r) const { return Start < r.Start; }
-	bool operator <=(const GRange &r) const { return Start < r.Start; }
+	bool operator ==(const LRange &r) const { return Start == r.Start && Len == r.Len; }
+	bool operator !=(const LRange &r) const { return Start != r.Start || Len != r.Len; }
+	bool operator >(const LRange &r) const { return Start > r.Start; }
+	bool operator >=(const LRange &r) const { return Start >= r.Start; }
+	bool operator <(const LRange &r) const { return Start < r.Start; }
+	bool operator <=(const LRange &r) const { return Start < r.Start; }
 
-	GRange &operator -=(const GRange &del)
+	LRange &operator -=(const LRange &del)
 	{
-		GRange o = Overlap(del);
+		LRange o = Overlap(del);
 		if (o.Valid())
 		{
 			assert(o.Len <= Len);
@@ -80,7 +80,7 @@ struct GRange
 		return *this;
 	}
 
-	GRange &operator =(const GRange &r)
+	LRange &operator =(const LRange &r)
 	{
 		this->Start = r.Start;
 		this->Len = r.Len;

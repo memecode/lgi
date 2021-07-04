@@ -85,7 +85,7 @@ public:
 					}
 					case LK_LEFT:
 					{
-						GRange r = GetSelectionRange();
+						LRange r = GetSelectionRange();
 						if (r.Len && GetCaret() ==  0)
 						{
 							d->MoveCell(-1);
@@ -95,7 +95,7 @@ public:
 					}
 					case LK_RIGHT:
 					{
-						GRange r = GetSelectionRange();
+						LRange r = GetSelectionRange();
 						if (r.Len == 0)
 							break;
 

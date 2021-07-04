@@ -61,7 +61,7 @@ bool LProgressView::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-bool LProgressView::SetRange(const GRange &r)
+bool LProgressView::SetRange(const LRange &r)
 {
 	Low = r.Start;
 	High = r.End();

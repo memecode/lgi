@@ -1,7 +1,7 @@
 
-#include "Lgi.h"
-#include "GSharedMemory.h"
-#include "LVariant.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/SharedMemory.h"
+#include "lgi/common/Variant.h"
 
 #ifndef BEOS // unsupported in Haik
 

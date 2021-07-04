@@ -37,7 +37,7 @@
 	#include <sys/types.h>
 	#include <pwd.h>
 	#include <sys/utsname.h>
-	#include "GSubProcess.h"
+	#include "LSubProcess.h"
 #endif
 
 #if defined(WIN32)
@@ -1740,7 +1740,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 						{
 							// Ask KDE where the current trash is...
 							GStringPipe o;
-							GSubProcess p("kde-config", "--userpath trash");
+							LSubProcess p("kde-config", "--userpath trash");
 							if (p.Start())
 							{
 								p.Communicate(&o);
@@ -1907,7 +1907,7 @@ GString LGetExeFile()
 					// sprintf_s(Cmd, sizeof(Cmd), "ps | grep \"%i\"", getpid());
 					
 					GStringPipe Ps;
-					GSubProcess p("ps");
+					LSubProcess p("ps");
 					if (p.Start())
 					{
 						p.Communicate(&Ps);

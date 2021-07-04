@@ -3,7 +3,7 @@
 
 // #include "ScribeDefs.h"
 #include "Store3.h"
-#include "GToken.h"
+#include "lgi/common/Token.h"
 
 #define FIELD_PERMISSIONS				2000
 

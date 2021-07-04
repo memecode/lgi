@@ -204,7 +204,7 @@ public:
 			}
 			else
 			{
-				GStatusPane *Wnd = dynamic_cast<GStatusPane*>(Prog);
+				LStatusPane *Wnd = dynamic_cast<LStatusPane*>(Prog);
 				LgiMsg(	Wnd,
 						"The input folders failed to load correctly.\n"
 						"Most likely because they are not v1 folders or\n"
@@ -223,7 +223,7 @@ public:
 
 bool ConvertStorage1To2(LView *Parent, char *InFile, char *OutFile)
 {
-	GFileSelect In;
+	LFileSelect In;
 	In.Parent(Parent);
 	In.Type("Mail folders", "*.mail");
 	if (!InFile &&
@@ -234,7 +234,7 @@ bool ConvertStorage1To2(LView *Parent, char *InFile, char *OutFile)
 
 	if (InFile)
 	{
-		GFileSelect Out;
+		LFileSelect Out;
 		Out.Parent(Parent);
 		Out.Type("Mail folders", "*.mail2");
 		if ((!OutFile || strlen(OutFile) == 0) &&

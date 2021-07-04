@@ -1,6 +1,6 @@
-#include "LgiInc.h"
+#include "lgi/common/LgiInc.h"
 #include "LgiOsDefs.h"
-#include "GSegmentTree.h"
+#include "lgi/common/SegmentTree.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 bool GSegment::Insert(GSegment *Seg, GSegment **Conflict)

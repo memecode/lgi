@@ -792,7 +792,7 @@ bool LRichTextEdit::ClearDirty(bool Ask, const char *FileName)
 									MB_YESNOCANCEL) : IDYES;
 		if (Answer == IDYES)
 		{
-			GFileSelect Select;
+			LFileSelect Select;
 			Select.Parent(this);
 			if (!FileName &&
 				Select.Save())
@@ -1582,7 +1582,7 @@ void LRichTextEdit::OnMouseMove(LMouse &m)
 	if (c.Overlap(m.x, m.y))
 	{
 		/*
-		GStyle *s = HitStyle(Hit);
+		LStyle *s = HitStyle(Hit);
 		TCHAR *c = (s) ? s->GetCursor() : 0;
 		if (!c) c = IDC_IBEAM;
 		::SetCursor(LoadCursor(0, MAKEINTRESOURCE(c)));
@@ -2849,11 +2849,11 @@ EmojiMenu::EmojiMenu(LRichTextPriv *priv, LPoint p) : LPopup(priv->View)
 	d->GetEmojiImage();
 
 	int MaxIdx = 0;
-	GRange EmojiBlocks[2] = { GRange(0x203c, 0x3299 - 0x203c + 1), GRange(0x1f004, 0x1f6c5 - 0x1f004 + 1) };
+	LRange EmojiBlocks[2] = { LRange(0x203c, 0x3299 - 0x203c + 1), LRange(0x1f004, 0x1f6c5 - 0x1f004 + 1) };
 	LHashTbl<IntKey<int>, int> Map;
 	for (int b=0; b<CountOf(EmojiBlocks); b++)
 	{
-		GRange &r = EmojiBlocks[b];
+		LRange &r = EmojiBlocks[b];
 		for (int i=0; i<r.Len; i++)
 		{
 			uint32_t u = (int)r.Start + i;

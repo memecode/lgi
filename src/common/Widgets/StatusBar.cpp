@@ -47,7 +47,7 @@ void LStatusBar::OnPosChange()
 
 	for (auto w: Children)
 	{
-		GStatusPane *Pane = dynamic_cast<GStatusPane*>(w);
+		LStatusPane *Pane = dynamic_cast<LStatusPane*>(w);
 		if (Pane)
 		{
 			#ifndef WIN32
@@ -81,12 +81,12 @@ void LStatusBar::OnPosChange()
 	}
 }
 
-GStatusPane *LStatusBar::AppendPane(const char *Text, int Width)
+LStatusPane *LStatusBar::AppendPane(const char *Text, int Width)
 {
-	GStatusPane *Pane = 0;
+	LStatusPane *Pane = 0;
 	if (Text)
 	{
-		Pane = new GStatusPane;
+		Pane = new LStatusPane;
 		if (Pane)
 		{
 			AddView(Pane);
@@ -97,7 +97,7 @@ GStatusPane *LStatusBar::AppendPane(const char *Text, int Width)
 	return Pane;
 }
 
-bool LStatusBar::AppendPane(GStatusPane *Pane)
+bool LStatusBar::AppendPane(LStatusPane *Pane)
 {
 	if (!Pane)
 		return false;
@@ -106,7 +106,7 @@ bool LStatusBar::AppendPane(GStatusPane *Pane)
 }
 
 // Pane
-GStatusPane::GStatusPane()
+LStatusPane::LStatusPane()
 {
 	SetParent(0);
 	Flags = 0;
@@ -117,12 +117,12 @@ GStatusPane::GStatusPane()
 	_BorderSize = 1;
 }
 
-GStatusPane::~GStatusPane()
+LStatusPane::~LStatusPane()
 {
 	DeleteObj(pDC)
 }
 
-bool GStatusPane::Name(const char *n)
+bool LStatusPane::Name(const char *n)
 {
 	bool Status = false;
 
@@ -144,7 +144,7 @@ bool GStatusPane::Name(const char *n)
 	return Status;
 }
 
-void GStatusPane::OnPaint(LSurface *pDC)
+void LStatusPane::OnPaint(LSurface *pDC)
 {
 	GAutoString t;
 	if (Lock(_FL))
@@ -174,12 +174,12 @@ void GStatusPane::OnPaint(LSurface *pDC)
 	}
 }
 
-int GStatusPane::GetWidth()
+int LStatusPane::GetWidth()
 {
 	return Width;
 }
 
-void GStatusPane::SetWidth(int x)
+void LStatusPane::SetWidth(int x)
 {
 	Width = x;
 	if (GetParent())
@@ -190,12 +190,12 @@ void GStatusPane::SetWidth(int x)
 	}
 }
 
-bool GStatusPane::Sunken()
+bool LStatusPane::Sunken()
 {
 	return TestFlag(Flags, GSP_SUNKEN);
 }
 
-void GStatusPane::Sunken(bool s)
+void LStatusPane::Sunken(bool s)
 {
 	bool Old = Sunken();
 	if (s) SetFlag(Flags, GSP_SUNKEN);
@@ -206,12 +206,12 @@ void GStatusPane::Sunken(bool s)
 	}
 }
 
-LSurface *GStatusPane::Bitmap()
+LSurface *LStatusPane::Bitmap()
 {
 	return pDC;
 }
 
-void GStatusPane::Bitmap(LSurface *pNewDC)
+void LStatusPane::Bitmap(LSurface *pNewDC)
 {
 	DeleteObj(pDC);
 	if (pNewDC)

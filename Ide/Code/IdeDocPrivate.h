@@ -20,13 +20,13 @@ class EditTray : public LLayout
 
 	LRect TextMsg;
 
-	GTextView3 *Ctrl;
+	LTextView3 *Ctrl;
 	IdeDoc *Doc;
 
 public:
 	int Line, Col;
 
-	EditTray(GTextView3 *ctrl, IdeDoc *doc);
+	EditTray(LTextView3 *ctrl, IdeDoc *doc);
 	~EditTray();
 	
 	const char *GetClass() override { return "EditTray"; }

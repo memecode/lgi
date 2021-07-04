@@ -2,7 +2,7 @@
 #define _GSEGMENT_TREE_H_
 
 #include "LgiDefs.h"
-#include "GMem.h"
+#include "lgi/common/Mem.h"
 
 class GSegment
 {

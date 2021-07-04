@@ -2,7 +2,7 @@
 #define _LWEBSOCKET_H_
 
 #include <functional>
-#include "INet.h"
+#include "lgi/common/Net.h"
 
 class LSelect
 {

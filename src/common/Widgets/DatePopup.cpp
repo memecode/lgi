@@ -1,7 +1,7 @@
-#include "Lgi.h"
-#include "LPopup.h"
-#include "GDateTimeCtrls.h"
-#include "LDisplayString.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Popup.h"
+#include "lgi/common/DateTimeCtrls.h"
+#include "lgi/common/DisplayString.h"
 
 LDatePopup::LDatePopup(LView *owner) : LPopup(owner)
 {

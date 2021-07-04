@@ -839,7 +839,7 @@ void GApp::OnCommandLine()
 			// So gnome has no clue... lets try 'file'
 			::GString args;
 			args.Printf("--mime-type \"%s\"", File);
-			GSubProcess sub("file", args);
+			LSubProcess sub("file", args);
 			if (sub.Start())
 			{
 				GStringPipe p;
@@ -938,7 +938,7 @@ void GApp::OnCommandLine()
 	GStringPipe Output;
 	char Args[256];
 	sprintf(Args, "-i \"%s\"", File);
-	GSubProcess p("file", Args);
+	LSubProcess p("file", Args);
 	if (p.Start())
 	{
 		p.Communicate(&Output);

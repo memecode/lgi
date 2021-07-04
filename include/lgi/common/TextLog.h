@@ -6,7 +6,7 @@
 #include "lgi/common/TextView3.h"
 #include "lgi/common/Net.h"
 
-class GTextLog : public GTextView3, public GStream
+class GTextLog : public LTextView3, public GStream
 {
 protected:
 	bool ProcessReturns;
@@ -31,7 +31,7 @@ protected:
 	}
 
 public:
-	GTextLog(int id) : GTextView3(id, 0, 0, 2000, 1000)
+	GTextLog(int id) : LTextView3(id, 0, 0, 2000, 1000)
 	{
 		ProcessReturns = true;
 		Pos = 0;
@@ -43,7 +43,7 @@ public:
 	
 	void OnCreate()
 	{
-		GTextView3::OnCreate();
+		LTextView3::OnCreate();
 		ProcessTxt();
 	}
 
@@ -135,7 +135,7 @@ public:
 			ProcessTxt();
 		}
 
-		return GTextView3::OnEvent(m);
+		return LTextView3::OnEvent(m);
 	}
 };
 

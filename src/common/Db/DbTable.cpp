@@ -467,7 +467,7 @@ LDbField &LDbRow::GetField(size_t Idx)
 	return d->Fields[Idx];
 }
 
-struct VarBlock : public GRange
+struct VarBlock : public LRange
 {
 	int Index;
 };

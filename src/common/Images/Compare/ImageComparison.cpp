@@ -308,7 +308,7 @@ class CompareView : public LLayout
 	CmpZoomView *AView, *BView, *CView;
 	GArray<ThreadLoader*> Threads;
 	LStatusBar *Status;
-	GStatusPane *Pane[3];
+	LStatusPane *Pane[3];
 	bool DraggingView;	
 	LPointF DocPos;
 	
@@ -321,9 +321,9 @@ public:
 		SetPourLargest(true);
 		
 		AddView(Status = new LStatusBar);
-		Status->AppendPane(Pane[0] = new GStatusPane);
-		Status->AppendPane(Pane[1] = new GStatusPane);
-		Status->AppendPane(Pane[2] = new GStatusPane);
+		Status->AppendPane(Pane[0] = new LStatusPane);
+		Status->AppendPane(Pane[1] = new LStatusPane);
+		Status->AppendPane(Pane[2] = new LStatusPane);
 		
 		if (FileA)
 		{

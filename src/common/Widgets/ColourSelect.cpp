@@ -1,10 +1,11 @@
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "LColourSelect.h"
-#include "LDisplayString.h"
-#include "LgiRes.h"
-#include "GNotifications.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ColourSelect.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/Notifications.h"
+#include "lgi/common/ColourSelect.h"
 
 class LColourSelectPopup : public LPopup
 {

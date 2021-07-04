@@ -218,7 +218,7 @@ public:
 			}
 			case IDC_LOAD_FILE:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				s.Type("Lgi Resource", "*.lr*");
 				if (s.Open())
@@ -229,7 +229,7 @@ public:
 			}
 			case IDOK:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				s.Type("Lgi Resource", "*.lr*");
 				if (s.Save())

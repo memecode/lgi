@@ -1,7 +1,7 @@
-#include "Lgi.h"
-#include "TextConvert.h"
-#include "GMime.h"
-#include "Base64.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/TextConvert.h"
+#include "lgi/common/Mime.h"
+#include "lgi/common/Base64.h"
 
 // return true if there are any characters with the 0x80 bit set
 bool Is8Bit(char *Text)

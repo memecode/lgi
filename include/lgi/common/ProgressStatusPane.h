@@ -2,8 +2,10 @@
 #ifndef __PROGRESS_STATUS_PANE
 #define __PROGRESS_STATUS_PANE
 
+#include "lgi/common/StatusBar.h"
+
 // Progress pane
-class GProgressStatusPane : public GStatusPane, public Progress, public DoEvery {
+class GProgressStatusPane : public LStatusPane, public Progress, public DoEvery {
 
 public:
 	GProgressStatusPane();

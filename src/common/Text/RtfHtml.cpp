@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "RtfHtml.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/RtfHtml.h"
 
 #define SkipWs(s) while (*s && strchr(Ws, *s)) s++;
 #define SkipNotWs(s) while (*s && !strchr(Ws, *s)) s++;

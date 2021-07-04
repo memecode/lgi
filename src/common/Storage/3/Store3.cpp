@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "Store3Defs.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Store3Defs.h"
 
 GString EmailFlagsToStr(int flags)
 {

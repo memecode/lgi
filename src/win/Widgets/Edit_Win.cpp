@@ -108,9 +108,9 @@ void LEdit::Select(int Start, int Len)
 	}
 }
 
-GRange LEdit::GetSelectionRange()
+LRange LEdit::GetSelectionRange()
 {
-	GRange r;
+	LRange r;
 	if (!_View)
 		return r;
 

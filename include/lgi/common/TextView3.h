@@ -19,7 +19,7 @@
 #define TAB_SIZE					4
 #define DEBUG_TIMES_MSG				8000 // a=0 b=(char*)Str
 
-enum GTextView3Messages
+enum LTextView3Messages
 {
 	M_TEXTVIEW_DEBUG_TEXT = M_USER + 0x3421,
 	M_TEXTVIEW_FIND,
@@ -29,9 +29,9 @@ enum GTextView3Messages
 
 extern char Delimiters[];
 
-class GTextView3;
+class LTextView3;
 
-enum GTextViewStyleOwners
+enum LTextViewStyleOwners
 {
 	STYLE_NONE,
 	STYLE_IDE,
@@ -43,28 +43,28 @@ enum GTextViewStyleOwners
 
 /// Unicode text editor control.
 class LgiClass
-	GTextView3 :
+	LTextView3 :
 	public GDocView,
 	public ResObject,
 	public GDragDropTarget
 {
-	friend struct GTextView3Undo;
+	friend struct LTextView3Undo;
 	friend bool Text3_FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User);
 
 public:
-	class GStyle
+	class LStyle
 	{
 	protected:
 		void RefreshLayout(size_t Start, ssize_t Len);
 
 	public:
 		/// The view the style is for
-		GTextView3 *View;
+		LTextView3 *View;
 		/// When you write several bits of code to do styling assign them
 		/// different owner id's so that they can manage the lifespan of their
-		/// own styles. GTextView3::PourStyle is owner '0', anything else it
+		/// own styles. LTextView3::PourStyle is owner '0', anything else it
 		/// will leave alone.
-		GTextViewStyleOwners Owner;
+		LTextViewStyleOwners Owner;
 		/// The start index into the text buffer of the region to style.
 		ssize_t Start;
 		/// The length of the styled region
@@ -84,7 +84,7 @@ public:
 		/// Application base data
 		LVariant Data;
 
-		GStyle(GTextViewStyleOwners owner = STYLE_NONE)
+		LStyle(LTextViewStyleOwners owner = STYLE_NONE)
 		{
 			Owner = owner;
 			View = NULL;
@@ -94,7 +94,7 @@ public:
 			Decor = LCss::TextDecorNone;
 		}
 
-		GStyle(const GStyle &s)
+		LStyle(const LStyle &s)
 		{
 			Owner = s.Owner;
 			View = s.View;
@@ -108,7 +108,7 @@ public:
 			Data = s.Data;
 		}
 		
-		GStyle &Construct(GTextView3 *view, GTextViewStyleOwners owner)
+		LStyle &Construct(LTextView3 *view, LTextViewStyleOwners owner)
 		{
 			View = view;
 			Owner = owner;
@@ -131,7 +131,7 @@ public:
 		}
 
 		/*
-		virtual ~GStyle() {}
+		virtual ~LStyle() {}
 
 		virtual bool OnMouseClick(LMouse *m) { return false; }
 		virtual bool OnMenu(LSubMenu *m) { return false; }
@@ -142,7 +142,7 @@ public:
 		size_t End() const { return Start + Len; }
 
 		/// \returns true if style is the same
-		bool operator ==(const GStyle &s)
+		bool operator ==(const LStyle &s)
 		{
 			return	Owner == s.Owner &&
 					Start == s.Start &&
@@ -153,7 +153,7 @@ public:
 		}
 
 		/// Returns true if this style overlaps the position of 's'
-		bool Overlap(GStyle &s)
+		bool Overlap(LStyle &s)
 		{
 			return Overlap(s.Start, s.Len);
 		}
@@ -168,7 +168,7 @@ public:
 			return true;
 		}
 
-		void Union(const GStyle &s)
+		void Union(const LStyle &s)
 		{
 			if (Start < 0)
 			{
@@ -183,7 +183,7 @@ public:
 		}
 	};
 
-	friend class GTextView3::GStyle;
+	friend class LTextView3::LStyle;
 
 protected:
 	// Internal classes
@@ -195,7 +195,7 @@ protected:
  		EndLine
 	};
 
-	class GTextLine : public GRange
+	class LTextLine : public LRange
 	{
 	public:
 		/*
@@ -206,13 +206,13 @@ protected:
 		GColour c;		// Colour of line... transparent = default colour
 		GColour Back;	// Background colour or transparent
 
-		GTextLine()
+		LTextLine()
 		{
 			Start = -1;
 			Len = 0;
 			r.ZOff(-1, -1);
 		}
-		virtual ~GTextLine() {}
+		virtual ~LTextLine() {}
 		bool Overlap(ssize_t i)
 		{
 			return i>=Start && i<=Start+Len;
@@ -227,8 +227,8 @@ protected:
 		}
 	};
 	
-	class GTextView3Private *d;
-	friend class GTextView3Private;
+	class LTextView3Private *d;
+	friend class LTextView3Private;
 
 	// Options
 	bool Dirty;
@@ -257,9 +257,9 @@ protected:
 							// but taking place in the GUI thread via timer.
 	bool AdjustStylePos;	// Insert/Delete moved styles automatically to match (default: true)
 
-	List<GTextLine> Line;
-	LUnrolledList<GStyle> Style;		// sorted in 'Start' order
-	typedef LUnrolledList<GStyle>::Iter StyleIter;
+	List<LTextLine> Line;
+	LUnrolledList<LStyle> Style;		// sorted in 'Start' order
+	typedef LUnrolledList<LStyle>::Iter StyleIter;
 
 	// For ::Name(...)
 	char *TextCache;
@@ -273,11 +273,11 @@ protected:
 	// Undo stuff
 	bool UndoOn;
 	GUndo UndoQue;
-	struct GTextView3Undo *UndoCur;
+	struct LTextView3Undo *UndoCur;
 
 	// private methods
-	List<GTextLine>::I GetTextLineIt(ssize_t Offset, ssize_t *Index = 0);
-	GTextLine *GetTextLine(ssize_t Offset, ssize_t *Index = 0) { return *GetTextLineIt(Offset, Index); }
+	List<LTextLine>::I GetTextLineIt(ssize_t Offset, ssize_t *Index = 0);
+	LTextLine *GetTextLine(ssize_t Offset, ssize_t *Index = 0) { return *GetTextLineIt(Offset, Index); }
 	ssize_t SeekLine(ssize_t Offset, GTextViewSeek Where);
 	int TextWidth(LFont *f, char16 *s, int Len, int x, int Origin);
 	bool ScrollToOffset(size_t Off);
@@ -288,9 +288,9 @@ protected:
 	void InternalPulse();
 
 	// styles
-	bool InsertStyle(GAutoPtr<GStyle> s);
-	GStyle *GetNextStyle(StyleIter &it, ssize_t Where = -1);
-	GStyle *HitStyle(ssize_t i);
+	bool InsertStyle(GAutoPtr<LStyle> s);
+	LStyle *GetNextStyle(StyleIter &it, ssize_t Where = -1);
+	LStyle *HitStyle(ssize_t i);
 	int GetColumn();
 	int SpaceDepth(char16 *Start, char16 *End);
 	int AdjustStyles(ssize_t Start, ssize_t Diff, bool ExtendStyle = false);
@@ -314,13 +314,13 @@ protected:
 
 public:
 	// Construction
-	GTextView3(	int Id,
+	LTextView3(	int Id,
 				int x = 0, int y = 0,
 				int cx = 100, int cy = 100,
 				LFontType *FontInfo = NULL);
-	~GTextView3();
+	~LTextView3();
 
-	const char *GetClass() override { return "GTextView3"; }
+	const char *GetClass() override { return "LTextView3"; }
 
 	// Data
 	const char *Name() override;
@@ -365,7 +365,7 @@ public:
 	size_t GetLines() override;
 	void GetTextExtent(int &x, int &y) override;
 	char *GetSelection() override;
-	GRange GetSelectionRange();
+	LRange GetSelectionRange();
 
 	// File IO
 	bool Open(const char *Name, const char *Cs = 0) override;
@@ -439,9 +439,9 @@ public:
 	virtual void OnEnter(LKey &k) override;
 	virtual void OnUrl(char *Url) override;
 	virtual void DoContextMenu(LMouse &m);
-	virtual bool OnStyleClick(GStyle *style, LMouse *m);
-	virtual bool OnStyleMenu(GStyle *style, LSubMenu *m);
-	virtual void OnStyleMenuClick(GStyle *style, int i);
+	virtual bool OnStyleClick(LStyle *style, LMouse *m);
+	virtual bool OnStyleMenu(LStyle *style, LSubMenu *m);
+	virtual void OnStyleMenuClick(LStyle *style, int i);
 };
 
 #endif

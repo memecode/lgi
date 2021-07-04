@@ -328,7 +328,7 @@ public:
 class App : public LWindow, public GCapabilityInstallTarget
 {
 	LBox *Split;
-	GTextView3 *Txt;
+	LTextView3 *Txt;
 	LList *Imgs;
 	LTabView *Tabs;
 	LTree *Tree;
@@ -440,7 +440,7 @@ public:
 						LBox *b = new LBox(IDC_HTML_BOX);
 						b->SetVertical(true);
 						
-						b->AddView(Txt = new GTextView3(IDC_HTML, 0, 0, 100, 100));
+						b->AddView(Txt = new LTextView3(IDC_HTML, 0, 0, 100, 100));
 						Txt->SetPourLargest(true);
 						b->AddView(Imgs = new LList(IDC_IMAGES));
 						Imgs->GetCss(true)->Height(LCss::Len("150px"));
@@ -581,7 +581,7 @@ public:
 			}
 			case IDC_SAVE_FILE:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				s.Type("HTML", "*.html");
 				if (s.Save())

@@ -46,7 +46,7 @@ public:
 		{
 			case IDC_BROWSE_OUTPUT:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				if (s.OpenFolder())
 					SetCtrlName(IDC_FOLDER, s.Name());
@@ -73,7 +73,7 @@ GString GetPython3()
 			printf("Got python '%s'\n", p.GetFull().Get());
 			
 			// But what version is it?
-			GSubProcess sp(p, "--version");
+			LSubProcess sp(p, "--version");
 			if (sp.Start())
 			{
 				GStringPipe out;
@@ -120,7 +120,7 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 	// Call the script
 	GString Args;
 	Args.Printf("\"%s\" \"%s\" \"%s\"", ScriptOut.GetFull().Get(), Template, Name);
-	GSubProcess p(Py3, Args);
+	LSubProcess p(Py3, Args);
 	if (!p.Start())
 	{
 		LgiTrace("%s:%i - Start process failed.\n", _FL);

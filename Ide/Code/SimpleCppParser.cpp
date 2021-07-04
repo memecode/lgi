@@ -79,7 +79,7 @@ bool IsFuncNameChar(char c)
 
 #define IsWhiteSpace(c) (strchr(" \r\t\n", c) != NULL)
 
-bool ParseFunction(GRange &Return, GRange &Name, GRange &Args, const char *Defn)
+bool ParseFunction(LRange &Return, LRange &Name, LRange &Args, const char *Defn)
 {
 	if (!Defn)
 		return false;

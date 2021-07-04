@@ -1,7 +1,7 @@
 #ifndef _GTABLEDB_H
 #define _GTABLEDB_H
 
-#include "LVariant.h"
+#include "lgi/common/Variant.h"
 
 #define ID(c)		c
 

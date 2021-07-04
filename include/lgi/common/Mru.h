@@ -22,9 +22,9 @@ protected:
 	virtual bool _SaveFile(const char *File);
 
 	virtual char *_GetCurFile();
-	virtual void GetFileTypes(GFileSelect *Dlg, bool Write);
-	virtual GFileType *GetSelectedType();
-	bool DoFileDlg(GFileSelect &Select, bool Open);
+	virtual void GetFileTypes(LFileSelect *Dlg, bool Write);
+	virtual LFileType *GetSelectedType();
+	bool DoFileDlg(LFileSelect &Select, bool Open);
 
 	/// This method converts the storage reference (which can contain user/pass credentials) 
 	/// between the display, raw and stored forms. Display and Raw are used at runtime and

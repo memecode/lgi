@@ -1488,7 +1488,7 @@ void ResStringGroup::OnCommand(int Cmd)
 	{
 		case IDM_IMPORT:
 		{
-			GFileSelect Select;
+			LFileSelect Select;
 			Select.Parent(AppWindow);
 			Select.Type("Text", "*.txt");
 			if (Select.Open())
@@ -1513,7 +1513,7 @@ void ResStringGroup::OnCommand(int Cmd)
 		}
 		case IDM_EXPORT:
 		{
-			GFileSelect Select;
+			LFileSelect Select;
 			Select.Parent(AppWindow);
 			Select.Type("Text", "*.txt");
 			if (Select.Save())

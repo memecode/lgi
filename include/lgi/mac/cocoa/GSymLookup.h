@@ -8,7 +8,7 @@
 #include <sys/uio.h>
 
 #include <cxxabi.h>
-#include "GSubProcess.h"
+#include "LSubProcess.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -303,7 +303,7 @@ public:
 							char Args[256];
 							sprintf(Args, "-n %.*s", (int) (c-Start), Start);
 							GStringPipe Out;
-							GSubProcess p("c++filt", Args);
+							LSubProcess p("c++filt", Args);
 							if (p.Start())
 							{
 								p.Communicate(&Out);
