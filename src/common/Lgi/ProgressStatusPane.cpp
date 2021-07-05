@@ -9,8 +9,8 @@
 */
 
 #include <stdio.h>
-#include "Lgi.h"
-#include "GProgressStatusPane.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ProgressStatusPane.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 GProgressStatusPane::GProgressStatusPane() : DoEvery(200)

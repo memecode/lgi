@@ -16,11 +16,12 @@
 #include <time.h>
 #include <stdarg.h>
 
-#include "Lgi.h"
-#include "FileTransferProgress.h"
-#include "LSlider.h"
-#include "LVariant.h"
-#include "LDisplayString.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/FileTransferProgress.h"
+#include "lgi/common/Slider.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/Menu.h"
 
 //////////////////////////////////////////////////////////////////
 #define THROTTLE_TEXT_WIDTH		80
