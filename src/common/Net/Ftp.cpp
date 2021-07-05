@@ -3,11 +3,11 @@
 #include <ctype.h>
 #include <time.h>
 
-#include "lgi\common\Gdc2.h"
-#include "lgi\common\Ftp.h"
-#include "lgi\common\Token.h"
-#include "lgi\common\String.h"
-#include "lgi\common\LgiCommon.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/Ftp.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/String.h"
+#include "lgi/common/LgiCommon.h"
 
 #include "FtpListParser.cpp"
 
