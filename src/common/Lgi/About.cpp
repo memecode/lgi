@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "lgi\common\Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "lgi\common\About.h"
 #include "lgi\common\DocView.h"
 #include "lgi\common\Bitmap.h"

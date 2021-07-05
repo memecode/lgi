@@ -1,4 +1,4 @@
-#include "lgi\common\LexCpp.h"
+#include "lgi/common/LexCpp.h"
 #include <ctype.h>
 #include <string.h>
 

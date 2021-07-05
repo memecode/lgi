@@ -1,5 +1,5 @@
 /// \file
-#include "lgi\common\Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "lgi\common\Scripting.h"
 #include "ScriptingPriv.h"
 #include "lgi\common\LexCpp.h"
