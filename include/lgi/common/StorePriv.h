@@ -20,7 +20,7 @@ class GSubFilePtr;
 class GSubFile : public GFile
 {
 	GSemaphore *Lck;
-	GArray<GSubFilePtr*> Ptrs;
+	LArray<GSubFilePtr*> Ptrs;
 	
 	#if GSUBFILE_NOBUFFERING
 	bool Buffer;

@@ -94,14 +94,14 @@ template<typename T, int BlockSize = 0>
 class KeyPool
 {
 protected:
-	struct Buf : public GArray<T>
+	struct Buf : public LArray<T>
 	{
 		size_t Used;
 		Buf(size_t Sz = 0) { this->Length(Sz); }
 		size_t Free() { return this->Length() - Used; }
 	};
 
-	GArray<Buf> Mem;
+	LArray<Buf> Mem;
 	Buf *GetMem(size_t Sz)
 	{
 		if (!Mem.Length() || Mem.Last().Free() < Sz)

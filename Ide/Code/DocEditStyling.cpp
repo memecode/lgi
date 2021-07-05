@@ -50,8 +50,8 @@ const char *CppTypes[] = {	"int", "char", "short", "long", "signed", "unsigned",
 							"int8", "int16", "int32", "int64",
 							"uint8", "uint16", "uint32", "uint64",
 							"char16", "wchar_t",
-							"GArray", "GHashTbl", "List", "GString", "GAutoString", "GAutoWString",
-							"GAutoPtr", "LHashTbl",
+							"LArray", "GHashTbl", "List", "LString", "LAutoString", "LAutoWString",
+							"LAutoPtr", "LHashTbl",
 							NULL};
 const char *CppEdges[] = {	"/*", "*/", "\"", NULL };
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -407,7 +407,7 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 		ParentState != KCancel &&
 		PrevStyle.Length())
 	{
-		GArray<LTextView3::LStyle*> Old, Cur;
+		LArray<LTextView3::LStyle*> Old, Cur;
 		for (auto s : PrevStyle)
 		{
 			if (s.Overlap(Vis))
@@ -678,7 +678,7 @@ void DocEditStyling::StyleDefault(StylingParams &p)
 						
 						if (type != KNone)
 						{
-							GAutoPtr<LStyle> st(new LTextView3::LStyle(STYLE_IDE));
+							LAutoPtr<LStyle> st(new LTextView3::LStyle(STYLE_IDE));
 							if (st)
 							{
 								st->View = this;
@@ -813,7 +813,7 @@ void DocEditStyling::StyleXml(StylingParams &p)
 						
 						if (type != KNone)
 						{
-							GAutoPtr<LStyle> st(new LTextView3::LStyle(STYLE_IDE));
+							LAutoPtr<LStyle> st(new LTextView3::LStyle(STYLE_IDE));
 							if (st)
 							{
 								st->View = this;
@@ -855,7 +855,7 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 	char16 *Text = p.Text.AddressOf();
 	char16 *e = Text + p.Text.Length();
 	auto &Style = p.Styles;
-	GString Ext = LgiGetExtension(p.FileName);
+	LString Ext = LgiGetExtension(p.FileName);
 	DocType Type = CodeHtml;
 	LTextView3::LStyle *Cur = NULL;
 	#define START_CODE() \

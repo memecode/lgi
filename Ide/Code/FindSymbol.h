@@ -5,7 +5,7 @@
 
 struct FindSymResult
 {
-	GString Symbol, File;
+	LString Symbol, File;
 	int Line;
 	int Score;
 	
@@ -73,8 +73,8 @@ struct FindSymResult
 struct FindSymRequest
 {
 	int SinkHnd;
-	GString Str;
-	GArray<FindSymResult*> Results;
+	LString Str;
+	LArray<FindSymResult*> Results;
 	
 	FindSymRequest(int sinkhnd)
 	{
@@ -103,14 +103,14 @@ public:
 	struct SymFileParams
 	{
 		SymAction Action;
-		GString File;
+		LString File;
 		int Platforms;
 	};
 
 	FindSymbolSystem(int AppHnd);
 	~FindSymbolSystem();
 	
-	bool SetIncludePaths(GString::Array &Paths);
+	bool SetIncludePaths(LString::Array &Paths);
 	bool OnFile(const char *Path, SymAction Action, int Platforms);
 	FindSymResult OpenSearchDlg(LViewI *Parent);
 	

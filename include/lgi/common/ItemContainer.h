@@ -13,7 +13,7 @@ class GItemContainer;
 class LgiClass GItem : virtual public LEventsI
 {
 protected:
-    GAutoPtr<LCss> Css;
+    LAutoPtr<LCss> Css;
 	int SelectionStart, SelectionEnd;
     
 public:
@@ -274,7 +274,7 @@ public:
 	
 	struct ColSizes
 	{
-		GArray<ColInfo> Info;
+		LArray<ColInfo> Info;
 		int FixedPx;
 		int ResizePx;
 	};
@@ -288,8 +288,8 @@ protected:
 	LMouse ColMouse;
 	GItemEdit *ItemEdit;
 
-	GArray<GItemColumn*> Columns;
-	GAutoPtr<GItemColumn> IconCol;
+	LArray<GItemColumn*> Columns;
+	LAutoPtr<GItemColumn> IconCol;
 	class GDragColumn *DragCol;
 
 	/// Returns size information for columns

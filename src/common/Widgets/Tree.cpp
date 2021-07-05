@@ -72,8 +72,8 @@ public:
 
 class LTreeItemPrivate
 {
-	GArray<LDisplayString*> Ds;
-	GArray<uint32_t> ColPx;
+	LArray<LDisplayString*> Ds;
+	LArray<uint32_t> ColPx;
 
 public:
 	LTreeItem *Item;
@@ -1884,7 +1884,7 @@ void LTree::OnPaint(LSurface *pDC)
 	pDC->SetOrigin(Ox + s.x, Oy + s.y);
 
 	// selection colour
-	GArray<int> ColPx;
+	LArray<int> ColPx;
 	GItem::ItemPaintCtx Ctx;
 	Ctx.pDC = pDC;
 	if (Columns.Length() > 0)

@@ -90,7 +90,7 @@ public:
 };
 
 LMutex JpegLibraryLock("JpegLibraryLock");
-GAutoPtr<LibJpeg> JpegLibrary;
+LAutoPtr<LibJpeg> JpegLibrary;
 #endif
 
 #include <stdio.h>
@@ -287,7 +287,7 @@ bool GetIccProfile(j_decompress_ptr cinfo, uchar **icc_data, uint *icc_datalen)
 struct JpegStream
 {
     LStream *f;
-    GArray<JOCTET> Buf;
+    LArray<JOCTET> Buf;
 };
 
 boolean j_fill_input_buffer(j_decompress_ptr cinfo)
@@ -528,13 +528,13 @@ GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 	if (!d->IsLoaded() &&
 		!d->Load(sLibrary)
 		#ifdef WIN32
-		&& !d->Load(GString(sLibrary).Strip("d"))
+		&& !d->Load(LString(sLibrary).Strip("d"))
 		#endif
 		)
 	{
 		if (Props)
 		{
-			GString s;
+			LString s;
 			s.Printf("libjpeg is missing (%s.%s)", sLibrary, LGI_LIBRARY_EXT);
 			Props->SetValue(LGI_FILTER_ERROR, v = s);
 		}
@@ -620,7 +620,7 @@ GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 		s.Print("Sub-sampling: ");
 		for (int i=0; i<cinfo.comps_in_scan; i++)
 			s.Print("%s%ix%i", i ? "_" : "", cinfo.comp_info[i].h_samp_factor, cinfo.comp_info[i].v_samp_factor);
-		GAutoString ss(s.NewStr());
+		LAutoString ss(s.NewStr());
 		Props->SetValue(LGI_FILTER_INFO, v = ss.Get());
 	}
 

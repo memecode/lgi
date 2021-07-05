@@ -432,9 +432,9 @@ GColour LScreenDC::Colour(GColour c)
 	return cPrev;
 }
 
-GString LScreenDC::Dump()
+LString LScreenDC::Dump()
 {
-	GString s;
+	LString s;
 	s.Printf("LScreenDC hnd=%p size=%i,%i\n", hDC, d->Sx, d->Sy);
 	return s;
 }

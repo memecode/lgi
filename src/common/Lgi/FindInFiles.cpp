@@ -45,8 +45,8 @@ public:
 class GHistory : public LDropDown, public ResObject
 {
 	friend class LHistoryPopup;
-	GString All;
-	GString::Array Strs;
+	LString All;
+	LString::Array Strs;
 	
 public:
 	GHistory(int Id) :
@@ -87,7 +87,7 @@ public:
 	
 	const char *Name()
 	{
-		GString Sep("\t");
+		LString Sep("\t");
 		All = Sep.Join(Strs);
 		return All;
 	}
@@ -122,7 +122,7 @@ LHistoryPopup::LHistoryPopup(GHistory *h) : LPopup(h)
 struct GFindInFilesPriv : public LXmlTreeUi
 {
 	LTableLayout *Tbl;
-	GAutoString Search;
+	LAutoString Search;
 	GDom *Store;
 	GHistory *SearchHistory, *WhereHistory, *TypesHistory;
 
@@ -147,7 +147,7 @@ struct GFindInFilesPriv : public LXmlTreeUi
 	}
 };
 	
-GFindInFiles::GFindInFiles(LViewI *Parent, GAutoString Search, GDom *Store)
+GFindInFiles::GFindInFiles(LViewI *Parent, LAutoString Search, GDom *Store)
 {
 	d = new GFindInFilesPriv;
 	d->Search = Search;

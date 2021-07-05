@@ -12,7 +12,7 @@
 template<typename T>
 class GlibWrapper
 {
-	::GArray<Gtk::gulong> Sigs;
+	::LArray<Gtk::gulong> Sigs;
 
 public:
 	T *obj;

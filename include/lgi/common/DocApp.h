@@ -113,7 +113,7 @@ public:
 	bool SetLanguage(char *LangId);
 
 	// Impl
-	void OnReceiveFiles(GArray<const char*> &Files);
+	void OnReceiveFiles(LArray<const char*> &Files);
 	bool OnRequestClose(bool OsShuttingDown);
 	int OnCommand(int Cmd, int Event, OsView Window);
 	GMessage::Result OnEvent(GMessage *m);

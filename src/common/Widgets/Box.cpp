@@ -19,7 +19,7 @@ struct LBoxPriv
 {
 public:
 	bool Vertical;
-	GArray<LBox::Spacer> Spacers;
+	LArray<LBox::Spacer> Spacers;
 	LBox::Spacer *Dragging;
 	LPoint DragOffset;
 	bool Dirty;
@@ -296,7 +296,7 @@ void LBox::OnPosChange()
 		return;
 	}
 
-	GArray<BoxRange> Sizes;
+	LArray<BoxRange> Sizes;
 
 	int SpacerPx = 0;
 
@@ -477,10 +477,10 @@ void LBox::OnMouseClick(LMouse &m)
 {
 	#if 0
 	{
-		GString::Array a;
+		LString::Array a;
 		for (LViewI *p = this; p; p = p->GetParent())
 			a.New() = p->GetClass();
-		m.Trace(GString("LBox::OnMouseClick-") + GString(".").Join(a));
+		m.Trace(LString("LBox::OnMouseClick-") + LString(".").Join(a));
 	}
 	#endif
 
@@ -516,10 +516,10 @@ void LBox::OnMouseMove(LMouse &m)
 
 	#if 0
 	{
-		GString::Array a;
+		LString::Array a;
 		for (LViewI *p = this; p; p = p->GetParent())
 			a.New().Printf("%s/%p", p->GetClass(), p);
-		m.Trace(GString("LBox::OnMouseMove-") + GString(".").Join(a));
+		m.Trace(LString("LBox::OnMouseMove-") + LString(".").Join(a));
 	}
 	#endif
 

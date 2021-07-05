@@ -28,7 +28,7 @@ public:
 	bool AddPair(char *x, char *y, void *UserData = 0);
 	void SetStyle(Style s);
 	Style GetStyle();
-	GArray<GGraphPair*> *GetSelection();
+	LArray<GGraphPair*> *GetSelection();
 
     // Impl
 	void OnPaint(LSurface *pDC);

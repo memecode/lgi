@@ -117,7 +117,7 @@ struct DnsUdpMessage : public DnsMethods
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // Functions
-bool GetDnsServers(GArray<char*> &Servers);
-bool IDnsResolve(GArray<char*> &Results, char *Name, int Type = DNS_TYPE_A, int theclass = DNS_CLASS_IN);
+bool GetDnsServers(LArray<char*> &Servers);
+bool IDnsResolve(LArray<char*> &Results, char *Name, int Type = DNS_TYPE_A, int theclass = DNS_CLASS_IN);
 
 #endif

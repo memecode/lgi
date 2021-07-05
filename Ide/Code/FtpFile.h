@@ -7,7 +7,7 @@ class FtpFile : public LListItem
 {
 	IFtpEntry *e;
 	LListItemCheckBox *v;
-	GAutoString Uri;
+	LAutoString Uri;
 	
 public:
 	FtpFile(IFtpEntry *entry, char *uri)

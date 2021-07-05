@@ -121,7 +121,7 @@ void GToken::Empty()
 	Length(0);
 }
 
-void GToken::AppendTokens(GArray<char*> *T)
+void GToken::AppendTokens(LArray<char*> *T)
 {
 	if (T)
 	{

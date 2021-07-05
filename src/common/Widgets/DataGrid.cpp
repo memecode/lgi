@@ -21,8 +21,8 @@ struct LDataGridPriv
 	LView *DeleteLater;
 	LListItem *Cur;
 	bool Dirty, PosDirty;
-	GArray<LDataGrid::GDataGridFlags> Flags;
-	GArray<LVariant> ColumnArgs;
+	LArray<LDataGrid::GDataGridFlags> Flags;
+	LArray<LVariant> ColumnArgs;
 	LListItem *NewRecord;
 	LDataGrid::ItemFactory Factory;
 	void *UserData;
@@ -401,7 +401,7 @@ void LDataGrid::Empty()
 	LList::Empty();
 }
 
-void LDataGrid::OnItemSelect(GArray<LListItem*> &Items)
+void LDataGrid::OnItemSelect(LArray<LListItem*> &Items)
 {
 	if (Items.Length() == 1)
 	{
@@ -443,7 +443,7 @@ void LDataGrid::OnItemClick(LListItem *Item, LMouse &m)
 					p.Print("\n");
 				}
 				GClipBoard cb(this);
-				GAutoString a(p.NewStr());
+				LAutoString a(p.NewStr());
 				cb.Text(a);
 				break;
 			}
@@ -608,7 +608,7 @@ LDataGrid::IndexArray *LDataGrid::GetDeletedItems()
 	return &d->Deleted;
 }
 
-int LDataGrid::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
+int LDataGrid::OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState)
 {
 	if (!d->AcceptFmt)
 		return DROPEFFECT_NONE;
@@ -651,7 +651,7 @@ bool LDataGrid::GetFormats(GDragFormats &Formats)
 	return true;
 }
 
-bool LDataGrid::GetData(GArray<GDragData> &Data)
+bool LDataGrid::GetData(LArray<GDragData> &Data)
 {
 	for (unsigned i=0; i<Data.Length(); i++)
 	{
@@ -660,7 +660,7 @@ bool LDataGrid::GetData(GArray<GDragData> &Data)
 			List<LListItem> s;
 			if (GetSelection(s))
 			{
-				GArray<LListItem*> a;
+				LArray<LListItem*> a;
 				for (auto it: s)
 				{
 					a.Add(it);

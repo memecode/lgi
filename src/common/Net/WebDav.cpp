@@ -2,7 +2,7 @@
 #include "lgi/common/WebDav.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-bool LFindXml(GArray<LXmlTag*> &Results, LXmlTag *t, const char *Name)
+bool LFindXml(LArray<LXmlTag*> &Results, LXmlTag *t, const char *Name)
 {
 	if (t->IsTag(Name))
 		Results.Add(t);
@@ -14,7 +14,7 @@ bool LFindXml(GArray<LXmlTag*> &Results, LXmlTag *t, const char *Name)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-LWebdav::LWebdav(GString endPoint, GString user, GString pass)
+LWebdav::LWebdav(LString endPoint, LString user, LString pass)
 {
 	EndPoint = endPoint;
 	User = user;
@@ -33,7 +33,7 @@ void LWebdav::PrettyPrint(LXmlTag &x)
 	LgiTrace("Pretty: %s\n", s.Get());
 }
 
-bool LWebdav::Request(Req &r, const char *Name, GString Resource)
+bool LWebdav::Request(Req &r, const char *Name, LString Resource)
 {
 	auto sock = GetSocket();
 	IHttp http;
@@ -46,7 +46,7 @@ bool LWebdav::Request(Req &r, const char *Name, GString Resource)
 	{
 		LStringPipe OutPipe, OutHdrsPipe;
 
-		GString Delim("/");
+		LString Delim("/");
 		auto Path = u.sPath.SplitDelimit(Delim);
 		Path += Resource.SplitDelimit(Delim);
 		auto Res = Delim + Delim.Join(Path);
@@ -65,9 +65,9 @@ bool LWebdav::Request(Req &r, const char *Name, GString Resource)
 	return r.Status;
 }
 
-GString::Array LWebdav::GetOptions(GString Resource)
+LString::Array LWebdav::GetOptions(LString Resource)
 {
-	GString::Array opts;
+	LString::Array opts;
 
 	Req r;
 	if (Request(r, "OPTIONS", Resource))
@@ -92,7 +92,7 @@ GString::Array LWebdav::GetOptions(GString Resource)
 	return opts;
 }
 
-bool LWebdav::PropFind(GArray<FileProps> &Files, GString Resource, int Depth)
+bool LWebdav::PropFind(LArray<FileProps> &Files, LString Resource, int Depth)
 {
 	Req r;
 	r.InBody = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
@@ -117,7 +117,7 @@ bool LWebdav::PropFind(GArray<FileProps> &Files, GString Resource, int Depth)
 
 	// PrettyPrint(&x);
 
-	GArray<LXmlTag*> Responses;
+	LArray<LXmlTag*> Responses;
 	if (!LFindXml(Responses, &x, "d:response"))
 		return false;
 
@@ -125,7 +125,7 @@ bool LWebdav::PropFind(GArray<FileProps> &Files, GString Resource, int Depth)
 	{
 		auto Href = r->GetChildTag("d:href");
 		LXmlTag *FileProps = NULL;
-		GArray<LXmlTag*> Props;
+		LArray<LXmlTag*> Props;
 		if (LFindXml(Props, r, "d:prop"))
 		{
 			for (auto p: Props)
@@ -163,7 +163,7 @@ bool LWebdav::PropFind(GArray<FileProps> &Files, GString Resource, int Depth)
 	return true;
 }
 
-bool LWebdav::Get(const char *Resource, GString &Data)
+bool LWebdav::Get(const char *Resource, LString &Data)
 {
 	Req r;
 
@@ -183,7 +183,7 @@ bool LWebdav::Get(const char *Resource, GString &Data)
 	return true;
 }
 
-bool LWebdav::Put(const char *Resource, GString &Data)
+bool LWebdav::Put(const char *Resource, LString &Data)
 {
 	Req r;
 	r.InBody = Data;

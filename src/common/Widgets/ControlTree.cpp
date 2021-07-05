@@ -24,7 +24,7 @@ public:
     }
 };
 
-LControlTree::Item::Item(int ctrlId, char *Txt, const char *opt, LVariantType type, GArray<LControlTree::EnumValue> *pEnum)
+LControlTree::Item::Item(int ctrlId, char *Txt, const char *opt, LVariantType type, LArray<LControlTree::EnumValue> *pEnum)
 {
 	if (ValidStr(opt))
 		Opt.Reset(NewStr(opt));
@@ -41,7 +41,7 @@ LControlTree::Item::~Item()
 {
 }
 
-void LControlTree::Item::SetEnum(GAutoPtr<EnumArr> e)
+void LControlTree::Item::SetEnum(LAutoPtr<EnumArr> e)
 {
 	Enum = e;
 	Type = GV_INT32;
@@ -326,8 +326,8 @@ void LControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 						EnumValue &e = (*Enum)[i];
 						
 						#if 0
-						GString s1 = e.Value.ToString();
-						GString s2 = Value.ToString();
+						LString s1 = e.Value.ToString();
+						LString s2 = Value.ToString();
 						LgiTrace("EnumMatch %s: %s - %s\n", e.Name, s1.Get(), s2.Get());
 						#endif
 						
@@ -425,9 +425,9 @@ bool LControlTree::Serialize(GDom *Store, bool Write)
 	return !Error;
 }
 
-LControlTree::Item *LControlTree::Resolve(bool Create, const char *Path, int CtrlId, LVariantType Type, GArray<EnumValue> *Enum)
+LControlTree::Item *LControlTree::Resolve(bool Create, const char *Path, int CtrlId, LVariantType Type, LArray<EnumValue> *Enum)
 {
-	auto t  = GString(Path).SplitDelimit(".");
+	auto t  = LString(Path).SplitDelimit(".");
 	if (t.Length() > 0)
 	{
 		LTreeNode *Cur = this;
@@ -474,7 +474,7 @@ LControlTree::Item *LControlTree::Resolve(bool Create, const char *Path, int Ctr
 	return 0;
 }
 
-LTreeItem *LControlTree::Insert(const char *DomPath, int CtrlId, LVariantType Type, LVariant *Value, GArray<EnumValue> *Enum)
+LTreeItem *LControlTree::Insert(const char *DomPath, int CtrlId, LVariantType Type, LVariant *Value, LArray<EnumValue> *Enum)
 {
 	LControlTree::Item *c = Resolve(true, DomPath, CtrlId, Type, Enum);
 	if (c)

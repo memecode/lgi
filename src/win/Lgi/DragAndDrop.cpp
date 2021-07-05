@@ -42,7 +42,7 @@ public:
 class GDndSourcePriv
 {
 public:
-	GArray<GDragData> CurData;
+	LArray<GDragData> CurData;
 	GDataObject *InDrag;
 
 	GDndSourcePriv()
@@ -72,7 +72,7 @@ int MapW32FlagsToLgi(int W32Flags)
 	return f;
 }
 
-int FormatToInt(GString s)
+int FormatToInt(LString s)
 {
 	if (s && stricmp(s, "CF_HDROP") == 0) return CF_HDROP;
 	return RegisterClipboardFormatA(s);
@@ -295,7 +295,7 @@ GDragDropSource::~GDragDropSource()
 	DeleteObj(d);
 }
 
-bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, GString::Array &Files)
+bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, LString::Array &Files)
 {
 	if (!OutputData || !Files.First())
 		return false;
@@ -305,7 +305,7 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, GString::
 	List<char16> NativeW;
 	for (auto File : Files)
 	{
-		GAutoWString f(Utf8ToWide(File));
+		LAutoWString f(Utf8ToWide(File));
 		if (f)
 		{
 			auto Len = StrlenW(f) + 1;
@@ -682,7 +682,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::DragLeave()
 }
 
 /*
-int GDragDropTarget::OnDrop(GArray<GDragData> &DropData,
+int GDragDropTarget::OnDrop(LArray<GDragData> &DropData,
 							LPoint Pt,
 							int KeyState)
 {
@@ -710,10 +710,10 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::Drop(IDataObject *pDataObject, DWORD 
 	ScreenToClient(To->Handle(), &p);
 	LPoint Pt(p.x, p.y);
 
-	GArray<GDragData> Data;	
+	LArray<GDragData> Data;	
 	for (auto FormatName: Formats.Formats)
 	{
-		GString Str;
+		LString Str;
 		bool IsStreamDrop = !_stricmp(FormatName, Str = LGI_StreamDropFormat);
 		bool IsFileContents = !_stricmp(FormatName, Str = CFSTR_FILECONTENTS);
 		GDragData &CurData = Data.New();
@@ -821,7 +821,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::Drop(IDataObject *pDataObject, DWORD 
 	return Result;
 }
 
-bool GDragDropTarget::OnDropFileGroupDescriptor(FILEGROUPDESCRIPTOR *Data, GString::Array &Files)
+bool GDragDropTarget::OnDropFileGroupDescriptor(FILEGROUPDESCRIPTOR *Data, LString::Array &Files)
 {
 	bool Status = false;
 
@@ -874,7 +874,7 @@ bool GDragDropTarget::OnDropFileGroupDescriptor(FILEGROUPDESCRIPTOR *Data, GStri
 				if (Ptr)
 				{
 					char Path[256];
-					GString Str;
+					LString Str;
 					LGetSystemPath(LSP_TEMP, Path, sizeof(Path));
 					LgiMakePath(Path, sizeof(Path), Path, Str = Data->fgd[i].cFileName);
 

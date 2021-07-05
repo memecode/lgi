@@ -55,9 +55,9 @@ class SvRecordset : public GDbRecordset
 	
 	SvDb *Parent;
 
-	GAutoString FileName;
-	GArray<SvField*> F;
-	GArray<SvRecord*> R;
+	LAutoString FileName;
+	LArray<SvField*> F;
+	LArray<SvRecord*> R;
 	unsigned Cur;
 	SvRecord *Temp;
 	SvRecord *New;
@@ -122,7 +122,7 @@ public:
 class SvRecord
 {
 	int RawLen;
-	GAutoString Raw;
+	LAutoString Raw;
 
 public:
 	SvRecordset *Rs;
@@ -293,11 +293,11 @@ public:
 class SvField : public GDbField
 {
 	int Index;
-	GAutoString FldName;
+	LAutoString FldName;
 	SvRecordset *Rs;
 
 public:
-	SvField(SvRecordset *rs, int i, GAutoString n)
+	SvField(SvRecordset *rs, int i, LAutoString n)
 	{
 		Index = i;
 		Rs = rs;
@@ -451,7 +451,7 @@ void SvRecordset::Read()
 	GTextFile f;
 	if (f.Open(FileName, O_READ|O_SHARE))
 	{
-		GArray<char16> Line;
+		LArray<char16> Line;
 		while (f.GetLine(Line))
 		{
 			SvRecord *r = new SvRecord(this, &Line[0]);			
@@ -463,7 +463,7 @@ void SvRecordset::Read()
 					for (int i=0; i<r->Fields; i++)
 					{
 						char *Name = r->Data[i];
-						GAutoString Field(TrimStr(Name, " \r\t\n\""));
+						LAutoString Field(TrimStr(Name, " \r\t\n\""));
 						if (Field)
 							F.Add(new SvField(this, i, Field));
 					}
@@ -476,7 +476,7 @@ void SvRecordset::Read()
 					{
 						char Name[32];
 						sprintf_s(Name, sizeof(Name), "Field%i", n);
-						GAutoString a(NewStr(Name));
+						LAutoString a(NewStr(Name));
 						F.Add(new SvField(this, n, a));
 					}
 					
@@ -590,7 +590,7 @@ GDbField *SvRecordset::InsertField(const char *Name, int Type, int Length, int I
 		Index = (int)F.Length();
 	}
 
-    GAutoString n(NewStr(Name));
+    LAutoString n(NewStr(Name));
 	SvField *f = new SvField(this, Index, n);
 	if (f)
 	{

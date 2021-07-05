@@ -12,7 +12,7 @@ public:
 	GFileSystem *FileSystem;
 	GLibrary *SkinLib;
 	GdcDevice *GdcSystem;
-	GAutoPtr<GFontCache> FontCache;
+	LAutoPtr<GFontCache> FontCache;
 	OsThreadId GuiThread;
 	bool FirstRun;
 
@@ -198,7 +198,7 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 
 void GApp::RefsReceived(BMessage *Msg)
 {
-	GArray<char*> Files;
+	LArray<char*> Files;
 	int32 Count = 0;
 	type_code Type = 0;
 	
@@ -229,7 +229,7 @@ void GApp::RefsReceived(BMessage *Msg)
 	Files.DeleteArrays();
 }
 
-void GApp::OnReceiveFiles(GArray<char*> &Files)
+void GApp::OnReceiveFiles(LArray<char*> &Files)
 {
 	if (AppWnd)
 	{
@@ -363,7 +363,7 @@ void GApp::OnCommandLine()
 {
 	char WhiteSpace[] = " \r\n\t";
 
-	GArray<char*> Files;
+	LArray<char*> Files;
 	for (int i = 1; i<d->Args.Args; i++)
 	{
 		const char *a = d->Args.Arg[i];
@@ -406,7 +406,7 @@ OsAppArguments *GApp::GetAppArgs()
 	return &d->Args;
 }
 
-bool GApp::GetOption(const char *Option, GAutoString &Buf)
+bool GApp::GetOption(const char *Option, LAutoString &Buf)
 {
 	if (IsOk() && Option)
 	{
@@ -481,10 +481,10 @@ void GApp::Exit(int Code)
 	}
 }
 
-GAutoString GApp::GetFileMimeType(const char *File)
+LAutoString GApp::GetFileMimeType(const char *File)
 {
 	LgiAssert(0);
-	return GAutoString();
+	return LAutoString();
 }
 
 LMouseHook *GApp::MouseHook = 0;
@@ -513,7 +513,7 @@ bool GApp::IsElevated()
 ////////////////////////////////////////////////////////////////////////////
 struct OsAppArgumentsPriv
 {
-	GArray<char*> Ptr;
+	LArray<char*> Ptr;
 	
 	~OsAppArgumentsPriv()
 	{

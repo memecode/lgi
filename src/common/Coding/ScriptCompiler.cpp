@@ -31,13 +31,13 @@ struct LinkFixup
 
 struct Node
 {
-	typedef GArray<Node> NodeExp;
+	typedef LArray<Node> NodeExp;
 	struct VariablePart
 	{
 		LVariant Name;
 		NodeExp Array;
 		bool Call;
-		GArray<NodeExp*> Args;
+		LArray<NodeExp*> Args;
 		
 		VariablePart()
 		{
@@ -58,15 +58,15 @@ struct Node
 	// -or-
 	bool Constant;
 	int Tok;
-	GArray<int> Lst;
+	LArray<int> Lst;
 	GTokenType ConstTok;
 	// -or-
 	LFunc *ContextFunc;
-	GArray<NodeExp> Args;
+	LArray<NodeExp> Args;
 	// -or-
 	LFunctionInfo *ScriptFunc;
 	// -or-
-	GArray<VariablePart> Variable;
+	LArray<VariablePart> Variable;
 	
 	// Used during building
 	GVarRef Reg;
@@ -99,7 +99,7 @@ struct Node
 		ConstTok = e;
 	}
 
-	void SetConst(GArray<int> &list_tokens, GTokenType e)
+	void SetConst(LArray<int> &list_tokens, GTokenType e)
 	{
 		Init();
 		Constant = true;
@@ -205,7 +205,7 @@ const char *LCompiledCode::AddrToSourceRef(size_t ObjAddr)
 
 	char *Dir = FileName ? strrchr(FileName, DIR_CHAR) : NULL;
 	size_t PathLen = Dir ? Dir - FileName : 0;
-	GString FileRef = FileName ? (PathLen > 24 ? Dir + 1 : FileName.Get()) : "(untitled)";
+	LString FileRef = FileName ? (PathLen > 24 ? Dir + 1 : FileName.Get()) : "(untitled)";
 
 	if (LineNum >= 0)
 		sprintf_s(	Status, sizeof(Status),
@@ -266,7 +266,7 @@ void UnEscape(T *t)
 
 class TokenRanges
 {
-	GArray<GString> FileNames;
+	LArray<LString> FileNames;
 
 	struct Range
 	{
@@ -275,7 +275,7 @@ class TokenRanges
 		int Line;
 	};
 
-	GArray<Range> Ranges;
+	LArray<Range> Ranges;
 	char fl[MAX_PATH + 32];
 
 public:
@@ -382,30 +382,30 @@ class LCompilerPriv :
 {
 	LHashTbl<ConstStrKey<char>, LVariantType> Types;
 	size_t JumpLoc;
-	GArray<GAutoPtr<LExternFunc>> FuncMem;
+	LArray<LAutoPtr<LExternFunc>> FuncMem;
 
 public:
 	LScriptContext *SysCtx;
 	LScriptContext *UserCtx;
 	LCompiledCode *Code;
 	LStream *Log;
-	GArray<char16*> Tokens;	
+	LArray<char16*> Tokens;	
 	TokenRanges Lines;
 	char16 *Script;
 	LHashTbl<StrKey<char>, LFunc*> Methods;
 	int Regs;
-	GArray<LVariables*> Scopes;
-	GArray<LinkFixup> Fixups;
+	LArray<LVariables*> Scopes;
+	LArray<LinkFixup> Fixups;
 	LHashTbl<StrKey<char16>, char16*> Defines;
 	LHashTbl<ConstStrKey<char16,false>, GTokenType> ExpTok;
 	GDom *ScriptArgs;
 	GVarRef ScriptArgsRef;
 	bool ErrShowFirstOnly;
-	GArray<GString> ErrLog;
+	LArray<LString> ErrLog;
 	bool Debug;
 
 	#ifdef _DEBUG
-	GArray<LVariant> RegAllocators;
+	LArray<LVariant> RegAllocators;
 	#endif
 
 	LCompilerPriv()
@@ -618,7 +618,7 @@ public:
 	}
 
 	/// Assemble 'n' length arg instruction
-	bool AsmN(int Tok, uint8_t Op, GArray<GVarRef> &Args)
+	bool AsmN(int Tok, uint8_t Op, LArray<GVarRef> &Args)
 	{
 		DebugInfo(Tok);
 
@@ -658,12 +658,12 @@ public:
 				ssize_t Len;
 				if (!StrnicmpW(t + 1, sInclude, Len = StrlenW(sInclude)))
 				{
-					GAutoWString Raw(LexCpp(s, LexStrdup));
-					GAutoWString File(TrimStrW(Raw, (char16*)L"\"\'"));
+					LAutoWString Raw(LexCpp(s, LexStrdup));
+					LAutoWString File(TrimStrW(Raw, (char16*)L"\"\'"));
 					if (File)
 					{
 						LVariant v;
-						GAutoString IncCode;
+						LAutoString IncCode;
 						v.OwnStr(File.Release());
 
 						if (UserCtx)
@@ -714,7 +714,7 @@ public:
 				}
 				else if (!StrnicmpW(t + 1, sDefine, Len = StrlenW(sDefine)))
 				{
-					GAutoWString Name(LexCpp(s, LexStrdup));
+					LAutoWString Name(LexCpp(s, LexStrdup));
 					if (Name && IsAlpha(*Name))
 					{
 						char16 *Start = s;
@@ -1359,7 +1359,7 @@ public:
 				for (++p; p<n.Variable.Length(); p++)
 				{
 					GVarRef Name, Arr;
-					GArray<GVarRef> Args;
+					LArray<GVarRef> Args;
 					Node::VariablePart &Part = n.Variable[p];
 					
 					char *nm = Part.Name.Str();
@@ -1402,7 +1402,7 @@ public:
 					{
 						DebugInfo(n.Tok);
 
-						GArray<GVarRef> Call;
+						LArray<GVarRef> Call;
 						Call[0] = Dst;
 						Call[1] = n.Reg;
 						Call[2] = Name;
@@ -1457,7 +1457,7 @@ public:
 									char16 *t = Tokens[n.Lst[i]];
 									if (!t)
 										break;
-									GAutoPtr<LVariant> a(new LVariant);
+									LAutoPtr<LVariant> a(new LVariant);
 									if (!ConvertStringToVariant(a, t))
 										break;
 									v->Value.Lst->Insert(a.Release());
@@ -1514,7 +1514,7 @@ public:
 				
 				DebugInfo(n.Tok);
 
-				GArray<GVarRef> a;
+				LArray<GVarRef> a;
 				for (unsigned i=0; i<n.Args.Length(); i++)
 				{
 					if (!AsmExpression(&a[i], n.Args[i]))
@@ -1583,7 +1583,7 @@ public:
 				
 				DebugInfo(n.Tok);
 
-				GArray<GVarRef> a;
+				LArray<GVarRef> a;
 				for (unsigned i=0; i<n.Args.Length(); i++)
 				{
 					if (!AsmExpression(&a[i], n.Args[i]))
@@ -1682,7 +1682,7 @@ public:
 				{
 					while (true)
 					{
-						GAutoPtr<Node::NodeExp> e(new Node::NodeExp);
+						LAutoPtr<Node::NodeExp> e(new Node::NodeExp);
 						if (!e)
 							return OnError(Cur, "Mem alloc error.");
 
@@ -1725,7 +1725,7 @@ public:
 	}
 
 	/// Parse expression into a node tree
-	bool Expression(uint32_t &Cur, GArray<Node> &n, int Depth = 0)
+	bool Expression(uint32_t &Cur, LArray<Node> &n, int Depth = 0)
 	{
 		if (Cur >= Tokens.Length())
 			return OnError(Cur, "Unexpected end of file.");
@@ -1895,7 +1895,7 @@ public:
 					else if (Tok == TStartCurlyBracket)
 					{
 						// List definition
-						GArray<int> Values;
+						LArray<int> Values;
 						Cur++;
 						int Index = 0;
 						while ((t = Tokens[Cur]))
@@ -2009,7 +2009,7 @@ public:
 		return c;
 	}
 
-	char *DumpExp(GArray<Node> &n)
+	char *DumpExp(LArray<Node> &n)
 	{
 		LStringPipe e;
 		for (unsigned i=0; i<n.Length(); i++)
@@ -2066,7 +2066,7 @@ public:
 		/// Where the result got stored
 		GVarRef *Result,
 		/// The nodes to create code for
-		GArray<Node> &n,
+		LArray<Node> &n,
 		/// The depth of recursion
 		int Depth = 0
 	)
@@ -2130,7 +2130,7 @@ public:
 				if (OpIdx < 0)
 				{	
 					#if 1
-					GAutoString e(DumpExp(n));
+					LAutoString e(DumpExp(n));
 					return OnError(n[0].Tok, "No operator found in expression '%s'.", e.Get());
 					#else
 					GVarRef *NullRef = NULL;
@@ -2240,7 +2240,7 @@ public:
 				else
 				{
 					GVarRef *NullRef = NULL;
-					GAutoPtr<GJumpZero> Jmp;
+					LAutoPtr<GJumpZero> Jmp;
 					
 					if (!TokenToVarRef(a, NullRef))
 						return OnError(a.Tok, "Can't convert left token to var ref.");
@@ -2331,7 +2331,7 @@ public:
 	/// Parses and assembles an expression
 	bool DoExpression(uint32_t &Cur, GVarRef *Result)
 	{
-		GArray<Node> n;
+		LArray<Node> n;
 		if (Expression(Cur, n))
 		{
 			bool Status = AsmExpression(Result, n);
@@ -2483,7 +2483,7 @@ public:
 					return OnError(Cur, "if missing body statement.");
 
 				// Output the jump instruction
-				GAutoPtr<GJumpZero> Jmp(new GJumpZero(this, ExpressionTok, Result));
+				LAutoPtr<GJumpZero> Jmp(new GJumpZero(this, ExpressionTok, Result));
 				if (!StricmpW(t, sStartCurlyBracket))
 				{
 					// Statement block
@@ -2580,7 +2580,7 @@ public:
 		return false;
 	}
 
-	GArray<uint8_t> &GetByteCode()
+	LArray<uint8_t> &GetByteCode()
 	{
 		return Code->ByteCode;
 	}
@@ -2749,7 +2749,7 @@ public:
 				return false;
 
 			// Store post expression code in temp variable
-			GArray<uint8_t> PostCode;
+			LArray<uint8_t> PostCode;
 			size_t PostCodeLen = Code->ByteCode.Length() - PostCodeStart;
 			if (PostCodeLen)
 			{
@@ -2814,7 +2814,7 @@ public:
 		char16 *t;
 		int StartTok = Cur;
 
-		GArray<Node> Exp;
+		LArray<Node> Exp;
 		if (!Expression(Cur, Exp))
 		{
 			return OnError(Cur, "Failed to compile return expression.");
@@ -2863,7 +2863,7 @@ public:
 			else OnError(Cur, "Mem alloc failed.");
 		}
 
-		GString FunctionName;
+		LString FunctionName;
 		LCustomType::Method *StructMethod = NULL; // Member function of script struct/class
 		LFunctionInfo *ScriptMethod = NULL; // Standalone scripting function
 		
@@ -2878,7 +2878,7 @@ public:
 			FunctionName = Name;
 		
 			// Parse parameters
-			GArray<GString> Params;
+			LArray<LString> Params;
 			Cur++;
 			while ((t = GetTok(Cur)))
 			{
@@ -2924,7 +2924,7 @@ public:
 				return OnError(Cur, "Expecting '{'.");
 
 			// Setup new scope(s)
-			GAutoPtr<LVariables> ObjectScope;
+			LAutoPtr<LVariables> ObjectScope;
 			if (Struct)
 			{
 				// The object scope has to be first so that local variables take
@@ -2987,7 +2987,7 @@ public:
 		return OnError(Cur, "Unexpected EOF in function.");
 	}
 	
-	LExternFunc::ExternType ParseExternType(GArray<const char16*> &Strs)
+	LExternFunc::ExternType ParseExternType(LArray<const char16*> &Strs)
 	{
 		LExternFunc::ExternType Type;
 		
@@ -3016,7 +3016,7 @@ public:
 			}
 			else
 			{
-				GAutoString u(WideToUtf8(t));
+				LAutoString u(WideToUtf8(t));
 				LVariantType tok_type = Types.Find(u);
 				if (tok_type != GV_NULL)
 				{
@@ -3034,7 +3034,7 @@ public:
 
 	bool DoExtern(uint32_t &Cur)
 	{
-		GArray<const char16*> Tok;
+		LArray<const char16*> Tok;
 		const char16 *t;
 		while ((t = GetTok(Cur)))
 		{
@@ -3060,7 +3060,7 @@ public:
 		Code->Externs.Add(e);
 		e->Type = ExternFunc;
 		char16 sQuotes[] = {'\'','\"',0};
-		GAutoWString LibName(TrimStrW(Tok[0], sQuotes));
+		LAutoWString LibName(TrimStrW(Tok[0], sQuotes));
 		e->Lib.Reset(WideToUtf8(LibName));
 		Tok.DeleteAt(0, true);
 
@@ -3116,9 +3116,9 @@ public:
 		}
 	};
 
-	int Evaluate(GArray<char16*> &Exp, size_t Start, size_t End)
+	int Evaluate(LArray<char16*> &Exp, size_t Start, size_t End)
 	{
-		GArray<ExpPart> p;		
+		LArray<ExpPart> p;		
 
 		// Find outer brackets
 		ssize_t e;
@@ -3348,7 +3348,7 @@ public:
 					// Array
 					Cur++;
 					
-					GArray<char16*> Exp;
+					LArray<char16*> Exp;
 					while ((t = GetTok(Cur)))
 					{
 						Cur++;
@@ -3505,7 +3505,7 @@ GCompiler::~GCompiler()
 
 bool GCompiler::Compile
 (
-	GAutoPtr<LCompiledCode> &Code,
+	LAutoPtr<LCompiledCode> &Code,
 	LScriptContext *SysContext,
 	LScriptContext *UserContext,
 	const char *FileName,
@@ -3629,7 +3629,7 @@ LCompiledCode *LScriptEngine::GetCurrentCode()
 	return d->Code;
 }
 
-bool LScriptEngine::Compile(GAutoPtr<LCompiledCode> &Obj, LScriptContext *UserContext, const char *Script, const char *FileName, GDom *Args)
+bool LScriptEngine::Compile(LAutoPtr<LCompiledCode> &Obj, LScriptContext *UserContext, const char *Script, const char *FileName, GDom *Args)
 {
 	if (!Script)
 	{
@@ -3669,7 +3669,7 @@ LExecutionStatus LScriptEngine::RunTemporary(LCompiledCode *Obj, char *Script, L
 	LCompiledCode *Code = dynamic_cast<LCompiledCode*>(Obj);
 	if (Script && Code)
 	{
-		GAutoPtr<LCompiledCode> Temp(new LCompiledCode(*Code));
+		LAutoPtr<LCompiledCode> Temp(new LCompiledCode(*Code));
 		uint32_t TempLen = (uint32_t) Temp->Length();
 		d->Code = Temp;
 		
@@ -3697,11 +3697,11 @@ bool LScriptEngine::EvaluateExpression(LVariant *Result, GDom *VariableSource, c
 	// Create trivial script to evaluate the expression
 	LStringPipe p;
 	p.Print("return %s;", Expression);
-	GAutoString a(p.NewStr());
+	LAutoString a(p.NewStr());
 	
 	// Compile the script
 	GCompiler Comp;
-	GAutoPtr<LCompiledCode> Obj;
+	LAutoPtr<LCompiledCode> Obj;
 	if (!Comp.Compile(Obj, NULL, NULL, NULL, a, VariableSource))
 	{
 		LgiAssert(0);

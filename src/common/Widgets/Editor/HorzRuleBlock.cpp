@@ -28,7 +28,7 @@ int LRichTextPriv::HorzRuleBlock::GetLines()
 	return 1;
 }
 
-bool LRichTextPriv::HorzRuleBlock::OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY)
+bool LRichTextPriv::HorzRuleBlock::OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY)
 {
 	if (ColX)
 		*ColX = Offset > 0;
@@ -60,7 +60,7 @@ ssize_t LRichTextPriv::HorzRuleBlock::Length()
 	return IsDeleted ? 0 : 1;
 }
 
-bool LRichTextPriv::HorzRuleBlock::ToHtml(LStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng)
+bool LRichTextPriv::HorzRuleBlock::ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rng)
 {
 	s.Print("<hr>\n");
 	return true;
@@ -134,12 +134,12 @@ bool LRichTextPriv::HorzRuleBlock::OnLayout(Flow &flow)
 	return true;
 }
 
-ssize_t LRichTextPriv::HorzRuleBlock::GetTextAt(ssize_t Offset, GArray<StyleText*> &t)
+ssize_t LRichTextPriv::HorzRuleBlock::GetTextAt(ssize_t Offset, LArray<StyleText*> &t)
 {
 	return 0;
 }
 
-ssize_t LRichTextPriv::HorzRuleBlock::CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text)
+ssize_t LRichTextPriv::HorzRuleBlock::CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text)
 {
 	return 0;
 }
@@ -227,7 +227,7 @@ bool LRichTextPriv::HorzRuleBlock::ChangeStyle(Transaction *Trans, ssize_t Offse
 	return false;
 }
 
-ssize_t LRichTextPriv::HorzRuleBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText)
+ssize_t LRichTextPriv::HorzRuleBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText)
 {
 	IsDeleted = BlkOffset == 0;
 	if (IsDeleted)

@@ -3,7 +3,7 @@
 #include "lgi\common\Lgi.h"
 #include "LgiIde.h"
 
-char *FindHeader(char *Short, GArray<GString> &Paths)
+char *FindHeader(char *Short, LArray<LString> &Paths)
 {
 	char *Status = 0;
 	
@@ -23,7 +23,7 @@ char *FindHeader(char *Short, GArray<GString> &Paths)
 	return Status;
 }
 
-bool BuildHeaderList(char *Cpp, GArray<char*> &Headers, GArray<GString> &IncPaths, bool Recurse)
+bool BuildHeaderList(char *Cpp, LArray<char*> &Headers, LArray<LString> &IncPaths, bool Recurse)
 {
 	char Include[] = "include";
 	

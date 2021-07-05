@@ -9,9 +9,9 @@
 
 struct LEmojiFontPriv
 {
-	GString Fn;
-	GAutoPtr<LSurface> Img, Scaled;
-	GArray<bool> Resampled;
+	LString Fn;
+	LAutoPtr<LSurface> Img, Scaled;
+	LArray<bool> Resampled;
 	int Cell;
 
 	LEmojiFontPriv()
@@ -115,7 +115,7 @@ void LEmojiFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int len, LRect 
 			if (priv->Scaled && !priv->Resampled[Idx])
 			{
 				priv->Resampled[Idx] = true;			
-				GAutoPtr<LSurface> s(priv->Scaled->SubImage(Icon));
+				LAutoPtr<LSurface> s(priv->Scaled->SubImage(Icon));
 				LRect Src(0, 0, EMOJI_CELL_SIZE-1, EMOJI_CELL_SIZE-1);
 				Src.Offset(Cx * EMOJI_CELL_SIZE, Cy * EMOJI_CELL_SIZE);
 				ResampleDC(s, priv->Img.Get(), &Src);

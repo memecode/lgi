@@ -108,7 +108,7 @@ char *GFileAssoc::GetExtension()
 	return d->Ext;
 }
 
-bool GFileAssoc::GetExtensions(GArray<char*> &Ext)
+bool GFileAssoc::GetExtensions(LArray<char*> &Ext)
 {
 	bool Status = false;
 
@@ -125,7 +125,7 @@ bool GFileAssoc::GetExtensions(GArray<char*> &Ext)
 	return Status;
 }
 
-bool GFileAssoc::GetActions(GArray<GFileAssocAction*> &Actions)
+bool GFileAssoc::GetActions(LArray<GFileAssocAction*> &Actions)
 {
 	bool Status = false;
 

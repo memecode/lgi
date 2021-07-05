@@ -68,9 +68,9 @@ void GPassword::Process(char *Out, const char *In, ssize_t Len)
 	}
 }
 
-GString GPassword::Get()
+LString GPassword::Get()
 {
-	GString p;
+	LString p;
 	
 	p.Length(Len);
 	Process(p, Data, Len);

@@ -3,7 +3,7 @@
 #define __XWidget_h
 
 #include "xevent.h"
-#include "GArray.h"
+#include "LArray.h"
 
 class XWidget;
 
@@ -149,6 +149,6 @@ public:
 		printf("%s:%i - using win = %p\n", __FILE__, __LINE__, var); \
 	}
 
-extern GArray<Window> Deleted;
+extern LArray<Window> Deleted;
 
 #endif

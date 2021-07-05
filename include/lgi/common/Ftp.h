@@ -89,10 +89,10 @@ public:
 	int Attributes;
 	LPermissions Perms;
 	int64 Size;
-	GString Name;
-	GString Path;
-	GString User;
-	GString Group;
+	LString Name;
+	LString Path;
+	LString User;
+	LString Group;
 	LDateTime Date;
 
 	// App specific fields
@@ -157,14 +157,14 @@ public:
 	virtual bool Close() = 0;
 	virtual bool IsOpen() = 0;
 	virtual void Noop() = 0;
-	virtual void GetHost(GString *Host, int *Port) = 0;
+	virtual void GetHost(LString *Host, int *Port) = 0;
 
 	// Directory
-	virtual GString GetDir() = 0;
+	virtual LString GetDir() = 0;
 	virtual bool SetDir(const char *Dir) = 0;
 	virtual bool CreateDir(const char *Dir) = 0;
 	virtual bool DeleteDir(const char *Dir) = 0;
-	virtual bool ListDir(GArray<IFtpEntry*> &Dir) = 0;
+	virtual bool ListDir(LArray<IFtpEntry*> &Dir) = 0;
 	virtual bool UpDir() = 0;
 	
 	// File
@@ -184,7 +184,7 @@ protected:
 	class IFtpPrivate *d;
 
 	/// The command connection
-	GAutoPtr<LSocketI> Socket;	// commands
+	LAutoPtr<LSocketI> Socket;	// commands
 
 	ssize_t WriteLine(char *Msg = 0);
 	ssize_t ReadLine(char *Msg = 0, ssize_t MsgSize = 0);
@@ -241,7 +241,7 @@ public:
 	/// Opens a new command connection to a remote server
 	FtpOpenStatus Open(LSocketI *S, char *RemoteHost, int Port, char *User, char *Password);
 	/// Returns the host and port
-	void GetHost(GString *Host, int *Port);
+	void GetHost(LString *Host, int *Port);
 	/// Closes the currently active connection
 	bool Close();
 	/// \returns true if the connection is open and active
@@ -249,7 +249,7 @@ public:
 	void Noop();
 
 	/// \returns the current remote folder.
-	GString GetDir();
+	LString GetDir();
 	/// Sets the current remote folder.
 	bool SetDir(const char *Dir);
 	/// Create a new sub-folder under the current remote folder.
@@ -257,8 +257,8 @@ public:
 	/// Delete a sub-folder under the current folder.
 	bool DeleteDir(const char *Dir);
 	/// List the current remote folder contents.
-	/// Caller is responsible for freeing the objects in Dir (e.g. use GArray::DeleteObjects).
-	bool ListDir(GArray<IFtpEntry*> &Dir);
+	/// Caller is responsible for freeing the objects in Dir (e.g. use LArray::DeleteObjects).
+	bool ListDir(LArray<IFtpEntry*> &Dir);
 	/// Move up to the parent remote folder.
 	bool UpDir();
 	

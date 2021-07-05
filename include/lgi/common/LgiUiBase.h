@@ -392,13 +392,13 @@ class LAppInfo
 {
 public:
 	/// The path to the executable for the app
-	GString Path;
+	LString Path;
 	/// Plain text name for the app
-	GString Name;
+	LString Name;
 	/// A path to an icon to display for the app
-	GString Icon;
+	LString Icon;
 	/// The params to call the app with
-	GString Params;
+	LString Params;
 };
 
 // Base class for GUI objects

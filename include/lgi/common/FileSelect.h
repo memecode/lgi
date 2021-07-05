@@ -1,7 +1,7 @@
 #ifndef __GFILE_SELECT_H
 #define __GFILE_SELECT_H
 
-LgiFunc bool LgiGetUsersLinks(GArray<GString> &Links);
+LgiFunc bool LgiGetUsersLinks(LArray<LString> &Links);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // File select dialog

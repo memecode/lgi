@@ -480,7 +480,7 @@ bool GdcApp8Set::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 						{
 							// Create colour lookup table
 							int LookupSize = 32 << 10;
-							GAutoPtr<uchar,true> Mem(new uchar[LookupSize]);
+							LAutoPtr<uchar,true> Mem(new uchar[LookupSize]);
 							if (Mem)
 							{
     							uchar *Lookup = Mem;

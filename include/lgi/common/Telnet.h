@@ -7,7 +7,7 @@
 class LTelnet : public LStream
 {
 	LSocket s;
-	GArray<uint8_t> buf;
+	LArray<uint8_t> buf;
 	ssize_t used;
 	
 public:
@@ -77,11 +77,11 @@ public:
 		return wr;
 	}
 	
-	GString Read()
+	LString Read()
 	{
 		char buf[512];
 		auto rd = Read(buf, sizeof(buf));
-		return GString(buf, rd);
+		return LString(buf, rd);
 	}
 
 	ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override
@@ -113,7 +113,7 @@ public:
 		return Size;
 	}
 	
-	ssize_t Write(GString s)
+	ssize_t Write(LString s)
 	{
 		return Write(s.Get(), s.Length());
 	}

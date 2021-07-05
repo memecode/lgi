@@ -28,8 +28,8 @@ class DefnInfo
 {
 public:
 	DefnType Type;
-	GString Name;
-	GString File;
+	LString Name;
+	LString File;
 	int Line;
 	LRange FnName;
 	
@@ -47,7 +47,7 @@ public:
 		Line = d.Line;
 	}
 	
-	void Set(DefnType type, const char *file, GString s, int line)
+	void Set(DefnType type, const char *file, LString s, int line)
 	{
 		if (s(0) == ')')
 			printf("%s:%i - Unexpected ')'.\n", _FL);
@@ -90,7 +90,7 @@ public:
 	int Find(const char *Str)
 	{
 		auto Slen = strlen(Str);
-		GString Src;
+		LString Src;
 
 		if (Type == DefnFunc)
 			Src = Name(FnName.Start, FnName.End());
@@ -132,16 +132,16 @@ extern bool BuildCppDefnList
 (
 	const char *FileName,
 	char16 *Cpp,
-	GArray<DefnInfo> &Funcs,
+	LArray<DefnInfo> &Funcs,
 	/// Use DefnType bits
 	int LimitTo,
 	bool Debug = false
 );
 
-extern bool BuildPyDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
-extern bool BuildJsDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
+extern bool BuildPyDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
+extern bool BuildJsDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
 
-inline bool BuildDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Funcs, int LimitTo, bool Debug = false)
+inline bool BuildDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Funcs, int LimitTo, bool Debug = false)
 {
 	auto Ext = LgiGetExtension(FileName);
 	auto Fn = BuildCppDefnList;

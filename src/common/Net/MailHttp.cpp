@@ -271,7 +271,7 @@ bool MailPhp::Get(LSocketI *S, char *Uri, LStream &Out, bool MailTransfer)
 				Http.SetProxy(d->ProxyServer, d->ProxyPort);
 			}
 			
-			GAutoPtr<LSocketI> s(new MailSocket(S, MailTransfer ? Transfer : 0, this));
+			LAutoPtr<LSocketI> s(new MailSocket(S, MailTransfer ? Transfer : 0, this));
 			if (Http.Open(s, Base))
 			{
 				LStringPipe Buf;
@@ -464,7 +464,7 @@ bool MailPhp::Close()
 	return true;
 }
 
-bool MailPhp::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks)
+bool MailPhp::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks)
 {
 	LStringPipe Cmd;
 
@@ -566,7 +566,7 @@ int MailPhp::Sizeof(int Message)
 	return m ? m->Size : 0;
 }
 
-bool MailPhp::GetSizes(GArray<int> &Sizes)
+bool MailPhp::GetSizes(LArray<int> &Sizes)
 {
 	for (auto m: d->Msgs)
 	{

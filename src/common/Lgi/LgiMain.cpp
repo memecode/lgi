@@ -128,8 +128,8 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
 		if (AppArgs.lpCmdLine) AppArgs.lpCmdLine++;
 
 		#else
-		GString::Array Mem;
-		GArray<char*> Args;
+		LString::Array Mem;
+		LArray<char*> Args;
 		char16 *Ws = L" \t\r\n";
 		for (char16 *c = CL; *c; )
 		{
@@ -140,14 +140,14 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
 		        char16 *end = StrchrW(c, delim);
 		        if (end)
 		        {
-					GString s(c, end-c);
+					LString s(c, end-c);
 					Mem.New() = s;
 		            Args.Add(s.Get());
 		            c = end + 1;
 		        }
 		        else
 		        {
-					GString s(c);
+					LString s(c);
 					Mem.New() = s;
 		            Args.Add(s.Get());
 		            break;
@@ -208,7 +208,7 @@ pascal OSErr AppEventHandler(const AppleEvent *ae, AppleEvent *reply, SRefCon ha
 				urlbuf[Used] = 0;
 				if (LgiApp && LgiApp->AppWnd)
 				{
-					LgiApp->AppWnd->PostEvent(M_URL, (GMessage::Param) new GString(urlbuf));
+					LgiApp->AppWnd->PostEvent(M_URL, (GMessage::Param) new LString(urlbuf));
 				}
 				else
 				{
@@ -262,7 +262,7 @@ int main(int Args, char **Arg)
 	
 		// This turns on fatal GKT warnings all the time... 
 		// Useful for debugging.
-		GArray<char*> a;
+		LArray<char*> a;
 		for (int i=0; i<AppArgs.Args; i++)
 			a[i] = AppArgs.Arg[i];
 		a.Add("--g-fatal-warnings");

@@ -11,7 +11,7 @@ void LgiSleep(uint32 i)
 	SDL_Delay(i);
 }
 
-bool LGetMimeTypeExtensions(const char *Mime, GArray<char*> &Ext)
+bool LGetMimeTypeExtensions(const char *Mime, LArray<char*> &Ext)
 {
 	int Start = Ext.Length();
 	char *e;
@@ -112,9 +112,9 @@ bool LgiGetFileMimeType(const char *File, char *Mime, int BufLen)
 	return Status;
 }
 
-bool _GetApps_Add(GArray<LAppInfo*> &Apps, char *In)
+bool _GetApps_Add(LArray<LAppInfo*> &Apps, char *In)
 {
-	GAutoString Path;
+	LAutoString Path;
 
 	if (!In)
 		return false;
@@ -218,7 +218,7 @@ bool _GetApps_Add(GArray<LAppInfo*> &Apps, char *In)
 	return false;
 }
 
-bool LGetAppsForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
+bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 
@@ -393,7 +393,7 @@ bool LgiGetAppForMimeType(const char *Mime, char *AppPath, int BufSize)
 	bool Status = false;
 	if (AppPath)
 	{
-		GArray<LAppInfo*> Apps;
+		LArray<LAppInfo*> Apps;
 		Status = LGetAppsForMimeType(Mime, Apps, 1);
 		if (Status)
 		{
@@ -460,9 +460,9 @@ static char *LgiFindArgsStart(char *File)
 
 #include <lmerr.h>
 
-GAutoString LgiErrorCodeToString(uint32 ErrorCode)
+LAutoString LgiErrorCodeToString(uint32 ErrorCode)
 {
-	GAutoString Str;
+	LAutoString Str;
     HMODULE hModule = NULL;
     LPSTR MessageBuffer;
     DWORD dwBufferLength;
@@ -498,7 +498,7 @@ GAutoString LgiErrorCodeToString(uint32 ErrorCode)
     return Str;
 }
 
-bool LExecute(const char *File, const char *Arguments, const char *Dir, GAutoString *ErrorMsg)
+bool LExecute(const char *File, const char *Arguments, const char *Dir, LAutoString *ErrorMsg)
 {
 	int Status = 0, Error = 0;
 	
@@ -508,9 +508,9 @@ bool LExecute(const char *File, const char *Arguments, const char *Dir, GAutoStr
 	uint64 Now = LgiCurrentTime();
 	if (LGetOs() == LGI_OS_WIN9X)
 	{
-		GAutoString f(LgiToNativeCp(File));
-		GAutoString a(LgiToNativeCp(Arguments));
-		GAutoString d(LgiToNativeCp(Dir));
+		LAutoString f(LgiToNativeCp(File));
+		LAutoString a(LgiToNativeCp(Arguments));
+		LAutoString d(LgiToNativeCp(Dir));
 		if (f)
 		{
 			Status = (NativeInt) ShellExecuteA(NULL, "open", f, a, d, 5);
@@ -520,9 +520,9 @@ bool LExecute(const char *File, const char *Arguments, const char *Dir, GAutoStr
 	}
 	else
 	{
-		GAutoWString f(Utf8ToWide(File));
-		GAutoWString a(Utf8ToWide(Arguments));
-		GAutoWString d(Utf8ToWide(Dir));
+		LAutoWString f(Utf8ToWide(File));
+		LAutoWString a(Utf8ToWide(Arguments));
+		LAutoWString d(Utf8ToWide(Dir));
 		if (f)
 		{
 			Status = (NativeInt) ShellExecuteW(NULL, L"open", f, a, d, 5);
@@ -807,10 +807,10 @@ bool GRegKey::GetValueNames(List<char> &n)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-GString WinGetSpecialFolderPath(int Id)
+LString WinGetSpecialFolderPath(int Id)
 {
 	GLibrary Shell("Shell32");
-	GString s;
+	LString s;
 	char16 wp[MAX_PATH] = { 0 };
 	pSHGetSpecialFolderPathW w = (pSHGetSpecialFolderPathW) Shell.GetAddress("SHGetSpecialFolderPathW");
 	if (w)
@@ -818,7 +818,7 @@ GString WinGetSpecialFolderPath(int Id)
 		BOOL result = w(0, wp, Id, false);
 		if (result && ValidStrW(wp))
 		{
-			GAutoString Tmp(WideToUtf8(wp));
+			LAutoString Tmp(WideToUtf8(wp));
 			s = Tmp;
 		}
 		else
@@ -836,7 +836,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 {
 	if (!b)
 	{
-		GString Msg;
+		LString Msg;
 		Msg.Printf("%s:%i - Assert failed:\n%s\n", file, line, test);
 		#ifdef WINDOWS
 		OutputDebugStringA(Msg.Get());

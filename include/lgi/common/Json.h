@@ -10,11 +10,11 @@ class LJson
 {
 	struct Key
 	{
-		GString Name;
+		LString Name;
 		
-		GString Str;
-		GArray<Key> Obj;
-		GArray<Key> Array;
+		LString Str;
+		LArray<Key> Obj;
+		LArray<Key> Array;
 
 		Key *Get(const char *name, bool create = false)
 		{
@@ -35,7 +35,7 @@ class LJson
 					if (Idx < 0)
 						return NULL;
 
-					GString n;
+					LString n;
 					n.Set(name, ArrStart - name);
 					if (n.IsEmpty())
 					{
@@ -67,11 +67,11 @@ class LJson
 			Obj.Length(0);
 		}
 
-		GString Print(int Depth = 0)
+		LString Print(int Depth = 0)
 		{
 			LStringPipe r(512);
-			GString s;
-			GString d("");
+			LString s;
+			LString d("");
 			if (Depth)
 			{
 				int bytes = Depth << 2;
@@ -87,7 +87,7 @@ class LJson
 			}
 			if (Str)
 			{
-				GString q = GString::Escape(Str, Str.Length(), "\"\\");
+				LString q = LString::Escape(Str, Str.Length(), "\"\\");
 				s.Printf("\"%s\"", q.Get());
 				r += s;
 			}
@@ -126,7 +126,7 @@ class LJson
 						r += ", ";
 					/*
 					if (k.Obj.Length())
-						s = GString("{") + k.Print() + "}";
+						s = LString("{") + k.Print() + "}";
 					else
 					*/
 						s = k.Print();
@@ -138,9 +138,9 @@ class LJson
 			return r.NewGStr();
 		}
 
-		Key *Deref(GString Addr, bool Create)
+		Key *Deref(LString Addr, bool Create)
 		{
-			GString::Array p = Addr.SplitDelimit(".");
+			LString::Array p = Addr.SplitDelimit(".");
 			Key *k = this;
 			for (unsigned i=0; k && i<p.Length(); i++)
 			{
@@ -154,7 +154,7 @@ class LJson
 	Key Root;
 	const char *Start;
 
-	bool ParseString(GString &s, const char *&c)
+	bool ParseString(LString &s, const char *&c)
 	{
 		SkipWs(c);
 
@@ -194,7 +194,7 @@ class LJson
 		return IsDigit(s) || strchr("-.e", s) != NULL;
 	}
 
-	bool ParseArray(GArray<Key> &Array, const char *&c)
+	bool ParseArray(LArray<Key> &Array, const char *&c)
 	{
 		if (*c != '[')
 		{
@@ -254,7 +254,7 @@ class LJson
 			SkipWs(c);
 			while (*c && *c != '}')
 			{
-				GString n;
+				LString n;
 				if (!ParseString(n, c))
 					return false;
 				if (!ParseChar(':', c))
@@ -313,7 +313,7 @@ class LJson
 		return false;
 	}
 
-	Key *Deref(GString Addr, bool Create)
+	Key *Deref(LString Addr, bool Create)
 	{
 		return Root.Deref(Addr, Create);
 	}
@@ -347,34 +347,34 @@ public:
 		return b;
 	}
 
-	GString GetJson()
+	LString GetJson()
 	{
-		GString s = Root.Print(0);
+		LString s = Root.Print(0);
 		#ifdef _DEBUG
 		LgiAssert(LIsUtf8(s));
 		#endif
 		return s;
 	}
 
-	GString Get(GString Addr)
+	LString Get(LString Addr)
 	{
 		Key *k = Deref(Addr, false);
-		return k ? k->Str : GString();
+		return k ? k->Str : LString();
 	}
 
 	struct Pair
 	{
-		GString key;
-		GString value;
+		LString key;
+		LString value;
 
 		Pair() { }
-		Pair(GString k, GString v) : key(k), value(v) { }
+		Pair(LString k, LString v) : key(k), value(v) { }
 	};
 
 	class Iter
 	{
 		LJson *j;
-		GArray<Key> *a;
+		LArray<Key> *a;
 
 	public:
 		struct IterPos
@@ -399,7 +399,7 @@ public:
 				return *this;
 			}
 
-			operator GString()
+			operator LString()
 			{
 				return (*It->a)[Pos].Str;
 			}
@@ -410,15 +410,15 @@ public:
 				return *this;
 			}
 
-			GString Get(GString Addr)
+			LString Get(LString Addr)
 			{
 				auto &Arr = *It->a;
 				if (Pos >= Arr.Length())
-					return GString();
+					return LString();
 				Key &k = Arr[Pos];
 				Key *v = k.Deref(Addr, false);
 				if (!v)
-					return GString();
+					return LString();
 
 				return v->Str;
 			}
@@ -436,7 +436,7 @@ public:
 				return Pair();
 			}
 
-			Iter GetArray(GString Addr)
+			Iter GetArray(LString Addr)
 			{
 				Iter a(It->j);
 
@@ -463,7 +463,7 @@ public:
 			j = J;
 		}
 
-		void Set(GArray<Key> *arr)
+		void Set(LArray<Key> *arr)
 		{
 			a = arr;
 		}
@@ -479,7 +479,7 @@ public:
 		}
 	};
 
-	Iter GetArray(GString Addr)
+	Iter GetArray(LString Addr)
 	{
 		Iter a(this);
 		Key *k = Deref(Addr, false);
@@ -489,7 +489,7 @@ public:
 		return a;
 	}
 
-	bool Set(GString Addr, const char *Val)
+	bool Set(LString Addr, const char *Val)
 	{
 		Key *k = Deref(Addr, true);
 		if (!k)
@@ -498,21 +498,21 @@ public:
 		return true;
 	}
 
-	bool Set(GString Addr, int64_t Int)
+	bool Set(LString Addr, int64_t Int)
 	{
 		char s[32];
 		sprintf_s(s, sizeof(s), LPrintfInt64, Int);
 		return Set(Addr, s);
 	}
 
-	bool Set(GString Addr, double Dbl)
+	bool Set(LString Addr, double Dbl)
 	{
 		char s[32];
 		sprintf_s(s, sizeof(s), "%f", Dbl);
 		return Set(Addr, s);
 	}
 
-	bool Set(GString Addr, GArray<GString> &Array)
+	bool Set(LString Addr, LArray<LString> &Array)
 	{
 		Key *k = Deref(Addr, true);
 		if (!k)
@@ -522,7 +522,7 @@ public:
 		return true;
 	}
 
-	bool Set(GString Addr, GArray<LJson> &Array)
+	bool Set(LString Addr, LArray<LJson> &Array)
 	{
 		Key *k = Deref(Addr, true);
 		if (!k)
@@ -535,10 +535,10 @@ public:
 		return true;
 	}
 
-	GArray<GString> GetKeys(const char *Addr = NULL)
+	LArray<LString> GetKeys(const char *Addr = NULL)
 	{
 		Key *k = Deref(Addr, true);
-		GArray<GString> a;
+		LArray<LString> a;
 		if (k)
 			for (auto &i : k->Obj)
 				a.Add(i.Name);

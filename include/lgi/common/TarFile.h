@@ -16,8 +16,8 @@ public:
 	/// in here with the appropriate parsing but I don't need them (yet).
 	struct GTarFile
 	{
-		GString Dir;
-		GString Name;
+		LString Dir;
+		LString Name;
 		LDateTime Modified;
 		int64 Size;
 
@@ -72,7 +72,7 @@ protected:
 	}
 
 	/// If this is set, output files to array
-	GArray<GTarFile> *Files;
+	LArray<GTarFile> *Files;
 	
 	/// If this is set, then extract the files to this folder
 	char *ExtractTo;
@@ -204,7 +204,7 @@ public:
 	}
 
 	/// Get a directory listing of the tar file
-	bool DirList(LStreamI *File, GArray<GTarFile> &Out)
+	bool DirList(LStreamI *File, LArray<GTarFile> &Out)
 	{
 		bool Status = false;
 		

@@ -766,7 +766,7 @@ public:
 		#if 0
 
 		// Save the List to an Array
-		GArray<T*> a;
+		LArray<T*> a;
 		a.Length(Length());
 		T **p = a.AddressOf();
 		for (LstBlk *i = FirstObj; i; i = i->Next)
@@ -1117,7 +1117,7 @@ public:
 	/// Writes bytes to the end of the container
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override;
 
-	bool Write(const GString &s) { return Write(s.Get(), s.Length()) == s.Length(); }
+	bool Write(const LString &s) { return Write(s.Get(), s.Length()) == s.Length(); }
 };
 
 /// A version of GBytePipe for strings. Adds some special handling for strings.
@@ -1137,14 +1137,14 @@ public:
 	~LStringPipe() {}
 
 	virtual ssize_t Pop(char *Str, ssize_t Chars);
-	virtual ssize_t Pop(GArray<char> &Buf);
-	virtual GString Pop();
+	virtual ssize_t Pop(LArray<char> &Buf);
+	virtual LString Pop();
 	virtual ssize_t Push(const char *Str, ssize_t Chars = -1);
 	virtual ssize_t Push(const char16 *Str, ssize_t Chars = -1);
 	char *NewStr() { return (char*)New(sizeof(char)); }
-	GString NewGStr();
+	LString NewGStr();
 	char16 *NewStrW() { return (char16*)New(sizeof(char16)); }
-	LStringPipe &operator +=(const GString &s) { Write(s.Get(), s.Length()); return *this; }
+	LStringPipe &operator +=(const LString &s) { Write(s.Get(), s.Length()); return *this; }
 
 	#ifdef _DEBUG
 	static bool UnitTest();
@@ -1175,7 +1175,7 @@ class LgiClass GMemFile : public LStream
 	Block *Local[GMEMFILE_BLOCKS];
 	
 	// Buf if they run out we can alloc some more.
-	GArray<Block*> Extra;
+	LArray<Block*> Extra;
 
 	Block *Get(int Index);
 	bool FreeBlock(Block *b);

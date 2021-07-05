@@ -54,12 +54,12 @@ public:
 class LWindowPrivate
 {
 public:
-	GArray<HookInfo> Hooks;
+	LArray<HookInfo> Hooks;
 	bool SnapToEdge;
 	bool AlwaysOnTop;
 	LWindowZoom Show;
 	bool InCreate;
-	GAutoPtr<WINDOWPLACEMENT> Wp;
+	LAutoPtr<WINDOWPLACEMENT> Wp;
 	LPoint Dpi;
 
 	// Focus stuff
@@ -151,14 +151,14 @@ LViewI *LWindow::GetFocus()
 	return d->Focus;
 }
 
-static GAutoString DescribeView(LViewI *v)
+static LAutoString DescribeView(LViewI *v)
 {
 	if (!v)
-		return GAutoString(NewStr("NULL"));
+		return LAutoString(NewStr("NULL"));
 
 	char s[512];
 	int ch = 0;
-	::GArray<LViewI*> p;
+	::LArray<LViewI*> p;
 	for (LViewI *i = v; i; i = i->GetParent())
 	{
 		p.Add(i);
@@ -168,7 +168,7 @@ static GAutoString DescribeView(LViewI *v)
 		v = p[n];
 		ch += sprintf_s(s + ch, sizeof(s) - ch, ">%s", v->GetClass());
 	}
-	return GAutoString(NewStr(s));
+	return LAutoString(NewStr(s));
 }
 
 static bool HasParentPopup(LViewI *v)
@@ -219,8 +219,8 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 						v->Invalidate();
 
 						#if DEBUG_SETFOCUS
-						GAutoString _set = DescribeView(ctrl);
-						GAutoString _foc = DescribeView(d->Focus);
+						LAutoString _set = DescribeView(ctrl);
+						LAutoString _foc = DescribeView(d->Focus);
 						LgiTrace("LWindow::SetFocus(%s, %s) refocusing: %s\n",
 							_set.Get(),
 							TypeName,
@@ -243,7 +243,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 				d->Focus->Invalidate();
 
 				#if DEBUG_SETFOCUS
-				GAutoString _foc = DescribeView(d->Focus);
+				LAutoString _foc = DescribeView(d->Focus);
 				LgiTrace(".....defocus: %s\n",
 					_foc.Get());
 				#endif
@@ -259,7 +259,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 				d->Focus->Invalidate();
 
 				#if DEBUG_SETFOCUS
-				GAutoString _set = DescribeView(d->Focus);
+				LAutoString _set = DescribeView(d->Focus);
 				LgiTrace("LWindow::SetFocus(%s, %s) focusing\n",
 					_set.Get(),
 					TypeName);
@@ -283,8 +283,8 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 						// view when we get focus again
 
 						#if DEBUG_SETFOCUS
-						GAutoString _ctrl = DescribeView(ctrl);
-						GAutoString _foc = DescribeView(d->Focus);
+						LAutoString _ctrl = DescribeView(ctrl);
+						LAutoString _foc = DescribeView(d->Focus);
 						LgiTrace("LWindow::SetFocus(%s, %s) keep_focus: %s\n",
 							_ctrl.Get(),
 							TypeName,
@@ -642,7 +642,7 @@ void LWindow::Visible(bool v)
 			LWindowZoom z = d->Show;
 			char *Cmd = 0;
 
-			GAutoPtr<WINDOWPLACEMENT> Wp(new WINDOWPLACEMENT);
+			LAutoPtr<WINDOWPLACEMENT> Wp(new WINDOWPLACEMENT);
 			if (Wp)
 			{
 				ZeroObj(*Wp.Get());
@@ -864,10 +864,10 @@ GMessage::Result LWindow::OnEvent(GMessage *Msg)
 		case M_ASSERT_UI:
 		{
 			int *Result = (int*)Msg->A();
-			GString *Str = (GString*)Msg->B();
+			LString *Str = (LString*)Msg->B();
 			if (Result)
 			{
-				extern int LgiAssertDlg(GString Msg);
+				extern int LgiAssertDlg(LString Msg);
 				*Result = LgiAssertDlg(Str ? *Str : "Error: no msg.");
 			}
 			else assert(!"Invalid param");
@@ -1070,7 +1070,7 @@ GMessage::Result LWindow::OnEvent(GMessage *Msg)
 			HDROP hDrop = (HDROP) Msg->a;
 			if (hDrop)
 			{
-				GArray<const char*> FileNames;
+				LArray<const char*> FileNames;
 				int Count = 0;
 				
 				Count = DragQueryFileW(hDrop, -1, NULL, 0);
@@ -1266,7 +1266,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 				State = GZoomMax;
 			}
 
-			GAutoPtr<WINDOWPLACEMENT> Wp(new WINDOWPLACEMENT);
+			LAutoPtr<WINDOWPLACEMENT> Wp(new WINDOWPLACEMENT);
 			if (Wp)
 			{
 				ZeroObj(*Wp.Get());
@@ -1295,7 +1295,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 				LRect DefaultPos(100, 100, 900, 700);
 				if (Position.Valid())
 				{
-					GArray<GDisplayInfo*> Displays;
+					LArray<GDisplayInfo*> Displays;
 					LRect AllDisplays;
 					bool PosOk = true;
 					if (LGetDisplays(Displays, &AllDisplays))

@@ -38,9 +38,9 @@ Progress::Progress(char *desc, int64 l, int64 h, char *type, double scale)
 	Scale = scale;
 }
 
-GString Progress::GetDescription()
+LString Progress::GetDescription()
 {
-	GString r;
+	LString r;
 
 	LMutex::Auto lck(this, _FL);
 	if (!lck)
@@ -64,9 +64,9 @@ void Progress::SetDescription(const char *d)
    		Description = d;
 }
 
-GString Progress::GetType()
+LString Progress::GetType()
 {
-	GString s;
+	LString s;
 	{
 		LMutex::Auto lck(this, _FL);
 		if (lck) s = Type.Get();
@@ -525,9 +525,9 @@ void LProgressDlg::SetCanCancel(bool cc)
 	CanCancel = cc;
 }
 
-GString LProgressDlg::GetDescription()
+LString LProgressDlg::GetDescription()
 {
-	GString s;
+	LString s;
 	if (Panes.Length())
 		s = Panes.First()->GetDescription();
 	return s;
@@ -619,7 +619,7 @@ void LProgressDlg::SetScale(double s)
 		Panes.First()->SetScale(s);
 }
 
-GString LProgressDlg::GetType()
+LString LProgressDlg::GetType()
 {
 	return Panes.Length() ? Panes.First()->GetType() : NULL;
 }

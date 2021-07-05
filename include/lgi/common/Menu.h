@@ -96,7 +96,7 @@ class LgiClass LSubMenu :
 		OsSubMenu Info;
 	#endif
 	#if LGI_COCOA
-		GAutoPtr<int> FloatResult;
+		LAutoPtr<int> FloatResult;
 		virtual void OnActivate(LMenuItem *item);
 	#endif
 
@@ -291,7 +291,7 @@ public:
 	// Dom impl
 	bool GetVariant(const char *Name, LVariant &Value, char *Arr = NULL);
 	bool SetVariant(const char *Name, LVariant &Value, char *Arr = NULL);
-	bool CallMethod(const char *MethodName, LVariant *ReturnValue, GArray<LVariant*> &Args);
+	bool CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args);
 };
 
 /// An item an a menu
@@ -313,7 +313,7 @@ private:
 	bool			Update();
 	#endif
 	#if defined(__GTK_H__) || defined(LGI_SDL)
-	GString			ShortCut;
+	LString			ShortCut;
 	#endif
 
 protected:
@@ -335,11 +335,11 @@ protected:
 
 	#if defined(__GTK_H__)
 		bool InSetCheck;
-		GAutoPtr<LMemDC> IconImg;
+		LAutoPtr<LMemDC> IconImg;
 		bool Replace(Gtk::GtkWidget *newWid);
 	public:
 		void Handle(Gtk::GtkMenuItem *mi);
-		void OnGtkEvent(GString Event);
+		void OnGtkEvent(LString Event);
 		void PaintIcon(Gtk::cairo_t *cr);
 	protected:
 	#else

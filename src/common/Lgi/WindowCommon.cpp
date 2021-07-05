@@ -36,7 +36,7 @@ void LWindow::BuildShortcuts(ShortcutMap &Map, LViewI *v)
 void LWindow::MoveOnScreen()
 {
 	LRect p = GetPos();
-	GArray<GDisplayInfo*> Displays;
+	LArray<GDisplayInfo*> Displays;
 	LRect Screen(0, 0, -1, -1);
 
 	if (
@@ -97,7 +97,7 @@ void LWindow::MoveOnScreen()
 void LWindow::MoveToCenter()
 {
 	LRect Screen(0, 0, GdcD->X()-1, GdcD->Y()-1);
-	::GArray<GDisplayInfo*> Displays;
+	::LArray<GDisplayInfo*> Displays;
 	LRect p = GetPos();
 
 	p.Offset(-p.x1, -p.y1);
@@ -170,7 +170,7 @@ int LWindow::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 	return true;
 }
 
-int LWindow::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
+int LWindow::OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState)
 {
 	int Status = DROPEFFECT_NONE;
 	

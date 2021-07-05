@@ -27,7 +27,7 @@ char *SkipEscape(char *c)
 	return c;
 }
 
-void DeEscape(GString &s)
+void DeEscape(LString &s)
 {
 	char *c = s, *out = s;
 	while (*c)

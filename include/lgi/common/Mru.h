@@ -35,11 +35,11 @@ protected:
 	virtual bool SerializeEntry
 	(
 		/// The displayable version of the reference (this should have any passwords blanked out)
-		GString *Display,
+		LString *Display,
 		/// The form passed to the client software to open/save. (passwords NOT blanked)
-		GString *Raw,
+		LString *Raw,
 		/// The form safe to write to disk, if a password is present it must be encrypted.
-		GString *Stored
+		LString *Stored
 	);
 
 

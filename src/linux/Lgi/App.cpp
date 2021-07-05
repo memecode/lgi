@@ -10,7 +10,7 @@
 
 #include "Lgi.h"
 #include "SkinEngine.h"
-#include "GArray.h"
+#include "LArray.h"
 #include "LVariant.h"
 #include "GToken.h"
 #include "GFontCache.h"
@@ -26,7 +26,7 @@ bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth = 0);
 ////////////////////////////////////////////////////////////////
 struct OsAppArgumentsPriv
 {
-	::GArray<char*> Ptr;
+	::LArray<char*> Ptr;
 	
 	~OsAppArgumentsPriv()
 	{
@@ -205,7 +205,7 @@ struct Msg
 class LMessageQue : public LMutex
 {
 public:
-	typedef ::GArray<Msg> MsgArray;
+	typedef ::LArray<Msg> MsgArray;
 
 	LMessageQue() : LMutex("LMessageQue")
 	{
@@ -626,7 +626,7 @@ void GApp::OnUrl(const char *Url)
 		AppWnd->OnUrl(Url);
 }
 
-void GApp::OnReceiveFiles(::GArray<const char*> &Files)
+void GApp::OnReceiveFiles(::LArray<const char*> &Files)
 {
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);
@@ -682,15 +682,15 @@ int GApp::KeyModFlags::FlagValue(const char *Name)
 	return 0;
 }
 
-::GString GApp::KeyModFlags::FlagsToString(int s)
+::LString GApp::KeyModFlags::FlagsToString(int s)
 {
-	::GString::Array a;
+	::LString::Array a;
 	for (int i=0; i<32; i++)
 	{
 		if (((1 << i) & s) != 0)
 			a.New() = FlagName(1 << i);
 	}
-	return ::GString(",").Join(a);
+	return ::LString(",").Join(a);
 }
 
 GApp::KeyModFlags *GApp::GetKeyModFlags()
@@ -705,7 +705,7 @@ const char *GApp::GetArgumentAt(int n)
 
 bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
 {
-	::GString Buf;
+	::LString Buf;
 	if (GetOption(Option, Buf))
 	{
 		if (Dest)
@@ -721,7 +721,7 @@ bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
 	return false;
 }
 
-bool GApp::GetOption(const char *Option, ::GString &Buf)
+bool GApp::GetOption(const char *Option, ::LString &Buf)
 {
 	if (IsOk() && Option)
 	{
@@ -779,7 +779,7 @@ bool GApp::GetOption(const char *Option, ::GString &Buf)
 
 void GApp::OnCommandLine()
 {
-	::GArray<const char*> Files;
+	::LArray<const char*> Files;
 
 	for (int i=1; i<GetAppArgs()->Args; i++)
 	{
@@ -800,9 +800,9 @@ void GApp::OnCommandLine()
 	Files.DeleteArrays();
 }
 
-::GString GApp::GetFileMimeType(const char *File)
+::LString GApp::GetFileMimeType(const char *File)
 {
-	::GString Status;
+	::LString Status;
 	char Full[MAX_PATH] = "";
 
 	if (!LFileExists(File))
@@ -837,7 +837,7 @@ void GApp::OnCommandLine()
 				return Status;
 				
 			// So gnome has no clue... lets try 'file'
-			::GString args;
+			::LString args;
 			args.Printf("--mime-type \"%s\"", File);
 			LSubProcess sub("file", args);
 			if (sub.Start())
@@ -973,7 +973,7 @@ void GApp::OnCommandLine()
 	return Status;
 }
 
-bool GApp::GetAppsForMimeType(char *Mime, ::GArray<::LAppInfo*> &Apps)
+bool GApp::GetAppsForMimeType(char *Mime, ::LArray<::LAppInfo*> &Apps)
 {
 	// Find alternative version of the MIME type (e.g. x-type and type).
 	char AltMime[256];
@@ -1061,7 +1061,7 @@ void GApp::SetClipBoardContent(OsView Hnd, ::LVariant &v)
 	d->ClipData = v;
 }
 
-bool GApp::GetClipBoardContent(OsView Hnd, ::LVariant &v, ::GArray<char*> &Types)
+bool GApp::GetClipBoardContent(OsView Hnd, ::LVariant &v, ::LArray<char*> &Types)
 {
 	return false;
 }
@@ -1142,11 +1142,11 @@ bool GApp::DesktopInfo::Serialize(bool Write)
 	}
 	else
 	{
-		::GString::Array Lines = f.Read().Split("\n");
+		::LString::Array Lines = f.Read().Split("\n");
 		Section *Cur = NULL;
 		for (unsigned i=0; i<Lines.Length(); i++)
 		{
-			::GString l = Lines[i].Strip();
+			::LString l = Lines[i].Strip();
 			if (l.Length() < 1)
 				continue;
 			int s = l.Find("[");
@@ -1198,7 +1198,7 @@ GApp::DesktopInfo::Section *GApp::DesktopInfo::GetSection(const char *Name, bool
 
 static const char *DefaultSection = "Desktop Entry";
 
-::GString GApp::DesktopInfo::Get(const char *Field, const char *Sect)
+::LString GApp::DesktopInfo::Get(const char *Field, const char *Sect)
 {
 	if (Field)
 	{
@@ -1213,7 +1213,7 @@ static const char *DefaultSection = "Desktop Entry";
 		}
 	}
 	
-	return ::GString();
+	return ::LString();
 }
 
 bool GApp::DesktopInfo::Set(const char *Field, const char *Value, const char *Sect)
@@ -1242,7 +1242,7 @@ GApp::DesktopInfo *GApp::GetDesktopInfo()
 	auto sExe = LGetExeFile();
 	::GFile::Path Exe(sExe);
 	::GFile::Path Desktop(LSP_HOME);
-	::GString Leaf;
+	::LString Leaf;
 	Leaf.Printf("%s.desktop", Exe.Last().Get());
 	
 	Desktop += ".local/share/applications";
@@ -1254,7 +1254,7 @@ GApp::DesktopInfo *GApp::GetDesktopInfo()
 	if (d->DesktopInfo.Reset(new DesktopInfo(Desktop)))
 	{
 		// Do a sanity check...
-		::GString s = d->DesktopInfo->Get("Name");
+		::LString s = d->DesktopInfo->Get("Name");
 		if (!s && Name())
 			d->DesktopInfo->Set("Name", Name());
 		
@@ -1283,7 +1283,7 @@ bool GApp::SetApplicationIcon(const char *FileName)
 	if (!di)
 		return false;
 	
-	::GString IcoPath = di->Get("Icon");
+	::LString IcoPath = di->Get("Icon");
 	if (IcoPath == FileName)
 		return true;
 	

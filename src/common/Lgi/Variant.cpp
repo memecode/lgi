@@ -1492,7 +1492,7 @@ GDom *GDom::ResolveObject(const char *Var, char *Name, char *Array)
 	GDom *Object = this;
 
 	// Tokenise the string
-	GArray<char*> t;
+	LArray<char*> t;
 	for (const char *s = Var; s && *s; )
 	{
 		const char *e = s;
@@ -1774,9 +1774,9 @@ bool LVariant::Add(LVariant *v, int Where)
 	return Value.Lst->Insert(v, Where);
 }
 
-GString LVariant::ToString()
+LString LVariant::ToString()
 {
-	GString s;
+	LString s;
 	switch (Type)
 	{
 		case GV_NULL:
@@ -1985,7 +1985,7 @@ LCustomType::Method *LCustomType::GetMethod(const char *Name)
 	return MethodMap.Find(Name);
 }
 
-LCustomType::Method *LCustomType::DefineMethod(const char *Name, GArray<GString> &Params, size_t Address)
+LCustomType::Method *LCustomType::DefineMethod(const char *Name, LArray<LString> &Params, size_t Address)
 {
 	Method *m = MethodMap.Find(Name);
 	if (m)
@@ -2335,7 +2335,7 @@ bool LCustomType::SetVariant(const char *Name, LVariant &Value, char *Array)
 	return false;
 }
 
-bool LCustomType::CallMethod(const char *MethodName, LVariant *ReturnValue, GArray<LVariant*> &Args)
+bool LCustomType::CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args)
 {
 	if (!MethodName || !ReturnValue)
 		return false;

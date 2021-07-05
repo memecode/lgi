@@ -105,8 +105,8 @@ enum VersionCtrl
 class VcFolder;
 struct ParseParams
 {
-	GString Str;
-	GString AltInitPath;
+	LString Str;
+	LString AltInitPath;
 	class VcLeaf *Leaf;
 	bool IsWorking;
 
@@ -118,7 +118,7 @@ struct ParseParams
 	}
 };
 
-typedef bool (VcFolder::*ParseFn)(int, GString, ParseParams*);
+typedef bool (VcFolder::*ParseFn)(int, LString, ParseParams*);
 class SshConnection;
 
 struct AppPriv
@@ -161,8 +161,8 @@ struct AppPriv
 			Diff->Name(NULL);		
 	}
 
-	GArray<class VcCommit*> GetRevs(GString::Array &Revs);
-	GString::Array GetCommitRange();
+	LArray<class VcCommit*> GetRevs(LString::Array &Revs);
+	LString::Array GetCommitRange();
 	
 	bool IsMenuChecked(int Item)
 	{
@@ -179,21 +179,21 @@ class SshConnection : public LSsh, public LEventTargetThread
 {
 	int GuiHnd;
 	LUri Host;
-	GAutoPtr<LStream> c;
-	GString Uri, Prompt;
+	LAutoPtr<LStream> c;
+	LString Uri, Prompt;
 	AppPriv *d;
 
 	GMessage::Result OnEvent(GMessage *Msg);
 	LStream *GetConsole();
-	bool WaitPrompt(LStream *c, GString *Data = NULL);
+	bool WaitPrompt(LStream *c, LString *Data = NULL);
 
 public:
 	LHashTbl<StrKey<char,false>,VersionCtrl> Types;
-	GArray<VcFolder*> TypeNotify;
+	LArray<VcFolder*> TypeNotify;
 	
 	SshConnection(GTextLog *log, const char *uri, const char *prompt);
 	bool DetectVcs(VcFolder *Fld);
-	bool Command(VcFolder *Fld, GString Exe, GString Args, ParseFn Parser, ParseParams *Params);
+	bool Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params);
 	
 	// This is the GUI thread message handler
 	static bool HandleMsg(GMessage *m);
@@ -204,7 +204,7 @@ class BlameUi : public LWindow
 	struct BlameUiPriv *d;
 
 public:
-	BlameUi(AppPriv *priv, VersionCtrl Vc, GString Output);
+	BlameUi(AppPriv *priv, VersionCtrl Vc, LString Output);
 	~BlameUi();
 };
 
@@ -217,14 +217,14 @@ public:
 	DropDownBtn();
 	~DropDownBtn();
 
-	GString::Array GetList();
-	bool SetList(int EditCtrl, GString::Array a);
+	LString::Array GetList();
+	bool SetList(int EditCtrl, LString::Array a);
 	bool OnLayout(LViewLayoutInfo &Inf);
 };
 
 extern bool ConvertEol(const char *Path, bool Cr);
 extern int GetEol(const char *Path);
-extern GString::Array GetProgramsInPath(const char *Program);
+extern LString::Array GetProgramsInPath(const char *Program);
 extern GColour GetPaletteColour(int i);
 
 #include "VcFile.h"

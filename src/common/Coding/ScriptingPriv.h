@@ -371,7 +371,7 @@ public:
 	/// Compile the source into byte code.
 	bool Compile
 	(
-		GAutoPtr<LCompiledCode> &Code,
+		LAutoPtr<LCompiledCode> &Code,
 		LScriptContext *SysContext,
 		LScriptContext *UserContext,
 		const char *FileName,

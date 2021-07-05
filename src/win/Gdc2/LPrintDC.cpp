@@ -6,7 +6,7 @@ class GPrintDCPrivate
 public:
 	bool PageOpen;
 	bool DocOpen;
-	GString OutputFileName;
+	LString OutputFileName;
 
 	GPrintDCPrivate()
 	{
@@ -32,8 +32,8 @@ LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterNa
 	if (hDC)
 	{
 		DOCINFO Info;
-		GAutoWString OutName;
-		GAutoWString DocName(Utf8ToWide(PrintJobName ? PrintJobName : "Lgi Print Job"));
+		LAutoWString OutName;
+		LAutoWString DocName(Utf8ToWide(PrintJobName ? PrintJobName : "Lgi Print Job"));
 
 		ZeroObj(Info);
 		Info.cbSize = sizeof(DOCINFO); 
@@ -43,7 +43,7 @@ LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterNa
 			stristr(PrinterName, "XPS"))
 		{
 			GFile::Path p(LSP_USER_DOCUMENTS);
-			GString FileName;
+			LString FileName;
 			FileName.Printf("%s.xps", PrintJobName);
 			p += FileName;
 			if (LFileExists(p.GetFull()))

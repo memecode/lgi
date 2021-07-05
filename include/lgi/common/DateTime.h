@@ -63,7 +63,7 @@
 ///
 /// \ingroup Time
 class LgiClass LDateTime // This class can't have a virtual table, because it's used in 
-						 // GArray's which initialize with all zero bytes.
+						 // LArray's which initialize with all zero bytes.
 {
 	/// 1 - DaysInMonth
 	int16 _Day;
@@ -215,8 +215,8 @@ public:
 	/// Sets the default format for the date when formatted as a string
 	static void SetDefaultFormat(uint16 f) { DefaultFormat = f; }
 
-	/// Gets the data and time as a GString
-	GString Get() const;
+	/// Gets the data and time as a LString
+	LString Get() const;
 	/// Gets the date and time as a string
 	/// \sa LDateTime::GetFormat()
 	void Get(char *Str, size_t SLen) const;
@@ -226,16 +226,16 @@ public:
 	/// \sa LDateTime::GetFormat()
 	/// \returns The number of characters written to 'Str'
 	int GetDate(char *Str, size_t SLen) const;
-	/// Gets just the date as a GString
+	/// Gets just the date as a LString
 	/// \sa LDateTime::GetFormat()
-	GString GetDate() const;
+	LString GetDate() const;
 	/// Gets just the time as a string
 	/// \sa LDateTime::GetFormat()
 	/// \returns The number of characters written to 'Str'
 	int GetTime(char *Str, size_t SLen) const;
-	/// Gets just the time as a GString
+	/// Gets just the time as a LString
 	/// \sa LDateTime::GetFormat()
-	GString GetTime() const;
+	LString GetTime() const;
 	
 	/// Returns the 64bit timestamp.
 	uint64 Ts() const;
@@ -257,11 +257,11 @@ public:
 	/// \sa LDateTime::GetFormat()
 	bool SetTime(const char *Str);
 	/// Parses the date time from a free form string
-	bool Parse(GString s);
+	bool Parse(LString s);
 	/// Describes the perios between this and 'to' in the form:
 	/// ##d ##h ##m ##s
 	/// Order of the dates isn't important.
-	GString DescribePeriod(LDateTime &to);
+	LString DescribePeriod(LDateTime &to);
 
 	/// \returns true if 'd' is on the same day as this object
 	bool IsSameDay(LDateTime &d) const;
@@ -318,7 +318,7 @@ public:
 	(
 		/// [Out] The array to receive DST info. At minimum one record will be returned
 		/// matching the TZ in place for the start datetime.
-		GArray<GDstInfo> &Out,
+		LArray<GDstInfo> &Out,
 		/// [In] The start date that you want DST info for.
 		LDateTime &Start,
 		/// [Optional In] The end of the period you want DST info for.
@@ -326,7 +326,7 @@ public:
 	);
 
 	/// Using the DST info this will convert 'dt' from UTC to local
-	static bool DstToLocal(GArray<GDstInfo> &Dst, LDateTime &dt);
+	static bool DstToLocal(LArray<GDstInfo> &Dst, LDateTime &dt);
 
 	/// Decodes an email date into the current instance
 	bool Decode(const char *In);
@@ -378,11 +378,11 @@ public:
 	///
 	/// Even though we don't inherit from a GDom class this class supports the same
 	/// interface for ease of use. Currently there are cases where LDateTime is used
-	/// in GArray's which don't implement calling a constructor (they init with all
+	/// in LArray's which don't implement calling a constructor (they init with all
 	/// zeros).
 	bool GetVariant(const char *Name, class LVariant &Value, char *Array = NULL);
 	bool SetVariant(const char *Name, class LVariant &Value, char *Array = NULL);
-	bool CallMethod(const char *Name, class LVariant *ReturnValue, GArray<class LVariant*> &Args);
+	bool CallMethod(const char *Name, class LVariant *ReturnValue, LArray<class LVariant*> &Args);
 };
 
 /// Time zone information

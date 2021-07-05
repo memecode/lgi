@@ -2,7 +2,7 @@
 #include "lgi/common/DropFiles.h"
 
 #ifdef MAC
-LgiFunc bool LMacFileToPath(GString &a)
+LgiFunc bool LMacFileToPath(LString &a)
 {
 	bool Status = true;
 

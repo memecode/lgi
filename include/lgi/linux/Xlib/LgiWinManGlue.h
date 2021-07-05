@@ -6,7 +6,7 @@
 
 #include "LgiDefs.h"
 #include "GMem.h"
-#include "GArray.h"
+#include "LArray.h"
 #include "LgiClass.h"
 
 /// A RGB colour
@@ -38,7 +38,7 @@ struct WmInitParams
 typedef bool (*Proc_LgiWmInit)(WmInitParams *Params);
 typedef bool (*Proc_LgiWmExit)();
 typedef bool (*Proc_LgiWmFileToMime)(char *Mime, char *File);
-typedef bool (*Proc_LgiWmMimeToApps)(char *Mime, GArray<LAppInfo*> &Apps, int Limit);
+typedef bool (*Proc_LgiWmMimeToApps)(char *Mime, LArray<LAppInfo*> &Apps, int Limit);
 typedef bool (*Proc_LgiWmGetSysFont)(char *Type, char *Font, int FontLen, int &PtSize);
 typedef bool (*Proc_LgiWmGetLanguage)(char *Lang);
 typedef bool (*Proc_LgiWmGetColour)(int Which, WmColour *Colour);

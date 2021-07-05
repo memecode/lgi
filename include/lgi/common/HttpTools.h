@@ -28,14 +28,14 @@ struct WebPage
 class FormValue
 {
 public:
-	GAutoString Field;
-	GAutoString Value;
+	LAutoString Field;
+	LAutoString Value;
 };
 
 struct FormPost
 {
 	LXmlTag *Form;
-	GArray<FormValue> Values;
+	LArray<FormValue> Values;
 	
 	FormPost(LXmlTag *f);
 	

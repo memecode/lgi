@@ -54,25 +54,25 @@ public:
 		int MyId;
 		NOTIFYICONDATAW	TrayIcon;
 		typedef HICON IconRef;
-		::GArray<IconRef> Icon;
+		::LArray<IconRef> Icon;
 	
 	#elif LGI_COCOA
 	
 		typedef LSurface *IconRef;
 		NSStatusItem *StatusItem;
-		GArray<NSImage*> Icon;
+		LArray<NSImage*> Icon;
 		LStatusItem *Handler;
 
 	#elif defined(__GTK_H__)
 	
-		::GArray<LSurface*> Images;
+		::LArray<LSurface*> Images;
 		#if USE_APPINDICATOR
 			AppIndicator *appind;
 		#else
 			GlibWrapper<GtkStatusIcon> tray_icon;
 		#endif
 		typedef GdkPixbuf *IconRef;
-		::GArray<IconRef> Icon;
+		::LArray<IconRef> Icon;
 		uint64 LastClickTime;
 		gint DoubleClickTime;
 	
@@ -120,7 +120,7 @@ public:
 	#else
 
 		typedef LSurface *IconRef;
-		::GArray<IconRef> Icon;
+		::LArray<IconRef> Icon;
 
 	#endif
 
@@ -268,7 +268,7 @@ bool GTrayIcon::Load(const TCHAR *Str)
 	
 	#elif LGI_COCOA
 	
-		GString File = LFindFile(Str);
+		LString File = LFindFile(Str);
 		if (!File)
 			return false;
 		NSString *nf = File.NsStr();
@@ -283,15 +283,15 @@ bool GTrayIcon::Load(const TCHAR *Str)
 		if (!Str)
 			return false;
 
-		::GString sStr = Str;
-		GAutoString File(LgiFindFile(sStr));
+		::LString sStr = Str;
+		LAutoString File(LgiFindFile(sStr));
 		if (!File)
 		{
 			LgiTrace("%s:%i - Can't find '%s'\n", _FL, sStr.Get());
 			return false;
 		}
 
-		GAutoPtr<LSurface> Ico(GdcD->Load(File));
+		LAutoPtr<LSurface> Ico(GdcD->Load(File));
 		if (!Ico)
 		{
 			LgiTrace("%s:%i - Failed to load '%s'\n", _FL, sStr.Get());
@@ -310,7 +310,7 @@ bool GTrayIcon::Load(const TCHAR *Str)
 	
 	#else
 	
-		GAutoString File(LgiFindFile(Str));
+		LAutoString File(LgiFindFile(Str));
 		if (File)
 		{
 			LSurface *i = GdcD->Load(File);

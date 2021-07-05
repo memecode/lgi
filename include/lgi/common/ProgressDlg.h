@@ -55,7 +55,7 @@ class LgiClass LProgressDlg : public LDialog, public Progress
 
 protected:
 	uint64 Ts, Timeout, YieldTs;
-	GArray<LProgressPane*> Panes;
+	LArray<LProgressPane*> Panes;
 	bool CanCancel;
 
 	void Resize();
@@ -86,7 +86,7 @@ public:
 	void SetCanCancel(bool cc);
 
 	/// Returns the description of the first pane
-	GString GetDescription() override;
+	LString GetDescription() override;
 	/// Sets the description of the first pane
 	void SetDescription(const char *d) override;
 	/// Returns the upper and lower limits of the first pane
@@ -102,7 +102,7 @@ public:
 	/// Sets the current value of the first pane
 	void Value(int64 v) override;
 	/// Returns the type description of the first pane
-	GString GetType() override;
+	LString GetType() override;
 	/// Sets the type description of the first pane
 	void SetType(const char *t) override;
 	/// Returns whether the user has cancelled the operation

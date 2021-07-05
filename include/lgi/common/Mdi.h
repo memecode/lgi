@@ -50,7 +50,7 @@ class GMdiParent : public LLayout
 	int GetNextOrder();
 	#endif
 	GMdiChild *IsChild(LViewI *v);
-	::GArray<GMdiChild*> &PrivChildren();
+	::LArray<GMdiChild*> &PrivChildren();
 
 public:
 	GMdiParent();
@@ -70,7 +70,7 @@ public:
 	LViewI *GetTop();
 
 	template<typename T>
-	bool GetChildren(::GArray<T*> &Views)
+	bool GetChildren(::LArray<T*> &Views)
 	{
 		for (auto c : PrivChildren())
 		{

@@ -35,7 +35,7 @@ public:
 	MYSQL_RES *Res;
 	MYSQL_ROW Row;
 	GHashTable Idx;
-	GArray<MysqlField*> Field;
+	LArray<MysqlField*> Field;
 	int Rows;
 	int Cursor;
 

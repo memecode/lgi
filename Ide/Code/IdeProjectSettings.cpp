@@ -180,10 +180,10 @@ public:
 	IdeProjectSettings *Parent;
 	LXmlTag Active;
 	LXmlTag Editing;
-	GAutoString CurConfig;
-	GArray<char*> Configs;
+	LAutoString CurConfig;
+	LArray<char*> Configs;
 	
-	GAutoString StrBuf; // Temporary storage for generated settings
+	LAutoString StrBuf; // Temporary storage for generated settings
 	
 	IdeProjectSettingsPriv(IdeProjectSettings *parent) :
 		Active(TagSettings)
@@ -282,7 +282,7 @@ class GSettingDetail : public LLayout, public ResObject
 		}
 	};
 	
-	GArray<CtrlInfo> Ctrls;
+	LArray<CtrlInfo> Ctrls;
 
 public:
 	GSettingDetail() : ResObject(Res_Custom)
@@ -678,7 +678,7 @@ public:
 						if (BrowseFolder ? s.OpenFolder() : s.Open())
 						{
 							const char *Base = GetCtrlName(IDC_PATH);
-							GAutoString Rel;
+							LAutoString Rel;
 							if (Base)
 							{
 								GFile::Path p = Base;
@@ -924,7 +924,7 @@ const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default,
 {
 	SettingInfo *s = d->Map.Find(Setting);
 	LgiAssert(s);
-	GArray<char*> Strs;
+	LArray<char*> Strs;
 	int Bytes = 0;
 	if (!s->Flag.PlatformSpecific)
 	{

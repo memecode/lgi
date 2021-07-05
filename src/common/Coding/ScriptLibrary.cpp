@@ -220,7 +220,7 @@ bool SystemFunctions::Sprintf(LScriptArguments &Args)
 	
 	// No support for sprintf with generated args... hack a string up
 	// Formatting widths etc not supported.
-	GArray<char> s;
+	LArray<char> s;
 	int i = 1;
 	for (char *f = Fmt; *f; f++)
 	{
@@ -263,7 +263,7 @@ bool SystemFunctions::Sprintf(LScriptArguments &Args)
 				case 'i':
 				{
 					// Int...
-					GString v;
+					LString v;
 					v.Printf("%i", Args[i]->CastInt32());
 					s.Add(v.Get(), v.Length());
 					break;
@@ -280,7 +280,7 @@ bool SystemFunctions::Sprintf(LScriptArguments &Args)
 	
 	#else
 	
-	GArray<UNativeInt> Params;
+	LArray<UNativeInt> Params;
 	va_list a;
 
 	unsigned i = 1;
@@ -494,7 +494,7 @@ bool SystemFunctions::ToString(LScriptArguments &Args)
 
 	for (unsigned i=0; i<Args.Length(); i++)
 	{
-		GString s = Args[i]->ToString();
+		LString s = Args[i]->ToString();
 		p.Print("%s%s", i?Sep:"", s.Get());
 	}
 
@@ -667,7 +667,7 @@ bool SystemFunctions::New(LScriptArguments &Args)
 			if (!c)
 				return false;
 
-			GAutoWString o(Utf8ToWide(sType));
+			LAutoWString o(Utf8ToWide(sType));
 			LCustomType *t = c->GetType(o);
 			if (t)
 			{
@@ -945,13 +945,13 @@ bool SystemFunctions::Execute(LScriptArguments &Args)
 	if (Status)
 	{
 		e.Communicate(&p);
-		GAutoString o(p.NewStr());
+		LAutoString o(p.NewStr());
 		*Args.GetReturn() = o;
 	}
 	else if (Log)
 	{
 		uint32_t ErrCode = e.GetErrorCode();
-		GString ErrMsg = LErrorCodeToString(ErrCode);
+		LString ErrMsg = LErrorCodeToString(ErrCode);
 		if (ErrMsg)
 			Log->Print("Error: Execute(\"%s\",\"%s\") failed with '%s'\n", Exe, Arguments, ErrMsg.Get());
 		else
@@ -980,7 +980,7 @@ bool SystemFunctions::OsName(LScriptArguments &Args)
 
 bool SystemFunctions::OsVersion(LScriptArguments &Args)
 {
-	GArray<int> Ver;
+	LArray<int> Ver;
 	LGetOs(&Ver);
 	Args.GetReturn()->SetList();
 	for (int i=0; i<3; i++)

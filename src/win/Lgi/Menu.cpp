@@ -36,7 +36,7 @@ public:
 	
 	LMenuPrivate()
 	{
-		GArray<int> Ver;
+		LArray<int> Ver;
 		int Os = LGetOs(&Ver);
 		if
 		(
@@ -320,7 +320,7 @@ public:
 	bool HasAccel;				// The last display string should be right aligned
 	List<LDisplayString> Strs;	// Draw each alternate display string with underline
 								// except the last in the case of HasAccel==true.
-	GString Shortcut;
+	LString Shortcut;
 
 	LMenuItemPrivate()
 	{
@@ -648,7 +648,7 @@ void LMenuItem::_Paint(LSurface *pDC, int Flags)
 
 bool LMenuItem::ScanForAccel()
 {
-	GString Accel;
+	LString Accel;
 
 	if (d->Shortcut)
 	{
@@ -817,8 +817,8 @@ bool LMenuItem::ScanForAccel()
 
 			if (AccelDirty)
 			{
-				d->Shortcut = GString("+").Join(Keys);
-				GString n = Name();
+				d->Shortcut = LString("+").Join(Keys);
+				LString n = Name();
 				LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 				d->UpdateStrings(Font, n);
 			}
@@ -922,7 +922,7 @@ bool LMenuItem::Name(const char *Txt)
 	bool Status = LBase::Name(Txt);
 	if (Status)
 	{
-		GString n = NewStr(Txt);
+		LString n = NewStr(Txt);
 		if (n)
 		{
 			// Set OS menu structure

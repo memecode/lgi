@@ -115,7 +115,7 @@ public:
 		return DROPEFFECT_MOVE;
 	}
 	
-	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
+	int OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState)
 	{
 		SelectDropTarget(NULL);
 		
@@ -187,18 +187,18 @@ class LFilterViewPrivate
 {
 public:
 	LFilterView *View;
-	GAutoPtr<LFilterTree> Tree;
+	LAutoPtr<LFilterTree> Tree;
 	bool ShowLegend;
 	LRect Info;
-	GArray<LSurface*> Icons;
+	LArray<LSurface*> Icons;
 	FilterUi_Menu Callback;
 	void *CallbackData;
-	GAutoPtr<LDisplayString> dsNot;
-	GAutoPtr<LDisplayString> dsAnd;
-	GAutoPtr<LDisplayString> dsOr;
-	GAutoPtr<LDisplayString> dsNew;
-	GAutoPtr<LDisplayString> dsLegend;
-	GArray<char*> OpNames;
+	LAutoPtr<LDisplayString> dsNot;
+	LAutoPtr<LDisplayString> dsAnd;
+	LAutoPtr<LDisplayString> dsOr;
+	LAutoPtr<LDisplayString> dsNew;
+	LAutoPtr<LDisplayString> dsLegend;
+	LArray<char*> OpNames;
 
 	LFilterViewPrivate(LFilterView *v)
 	{
@@ -875,7 +875,7 @@ void LFilterItem::ShowControls(bool s)
 		
 		if (d->OpCbo && !d->OpCbo->Length())
 		{
-			GArray<char*> Ops;
+			LArray<char*> Ops;
 			if (d->Data->Callback(	(LFilterView*) GetTree(),
 									this,
 									FMENU_OP,
@@ -930,7 +930,7 @@ bool LFilterItem::GetFormats(GDragFormats &Formats)
 	return true;
 }
 
-bool LFilterItem::GetData(GArray<GDragData> &Data)
+bool LFilterItem::GetData(LArray<GDragData> &Data)
 {
 	GDragData &dd = Data[0];
 	

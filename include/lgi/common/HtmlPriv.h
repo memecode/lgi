@@ -106,7 +106,7 @@ public:
 	bool OverlapY(GFlowRect *b) { return !(b->y2 < y1 || b->y1 > y2); }
 };
 
-class GArea : public GArray<GFlowRect*>
+class GArea : public LArray<GFlowRect*>
 {
 public:
 	~GArea();
@@ -119,8 +119,8 @@ public:
 
 struct GHtmlTableLayout
 {
-	typedef GArray<GTag*> CellArray;
-	GArray<CellArray> c;
+	typedef LArray<GTag*> CellArray;
+	LArray<CellArray> c;
 	GTag *Table;
 	LPoint s;
 	LCss::Len TableWidth;
@@ -132,8 +132,8 @@ struct GHtmlTableLayout
 	LRect TableBorder, TablePadding; // in Px
 
 	// The col and row sizes
-	GArray<int> MinCol, MaxCol, MaxRow;
-	GArray<LCss::Len> SizeCol;
+	LArray<int> MinCol, MaxCol, MaxRow;
+	LArray<LCss::Len> SizeCol;
 
 	GHtmlTableLayout(GTag *table);
 
@@ -172,7 +172,7 @@ public:
 	{
 		LStream *Out;
 		ssize_t PrevLineLen;
-		GArray<char> Buf;
+		LArray<char> Buf;
 	
 	public:
 		int Depth;
@@ -280,7 +280,7 @@ protected:
 	HtmlControlType CtrlType;
 
 	// Text
-	GAutoWString PreTxt;
+	LAutoWString PreTxt;
 
 	// Debug stuff
 	void _Dump(LStringPipe &Buf, int Depth);
@@ -306,10 +306,10 @@ protected:
 
 public:
 	// Object
-	GString::Array Class;
+	LString::Array Class;
 	const char *HtmlId;
 
-	GAutoString Condition;
+	LAutoString Condition;
 	int TipId;
 
 	// Heirarchy
@@ -327,7 +327,7 @@ public:
 	
 	// Images
 	bool ImageResized;
-	GAutoPtr<LSurface> Image;
+	LAutoPtr<LSurface> Image;
 	void SetImage(const char *uri, LSurface *i);
 	void LoadImage(const char *Uri); // Load just this URI
 	void LoadImages(); // Recursive load all image URI's
@@ -389,8 +389,8 @@ public:
 	void PreText(char16 *t) { PreTxt.Reset(t); TextPos.Empty(); }
 
 	ssize_t GetTextStart();
-	GAutoWString DumpW();
-	GAutoString DescribeElement();
+	LAutoWString DumpW();
+	LAutoString DescribeElement();
 	char16 *CleanText(const char *s, ssize_t len, const char *SourceCs, bool ConversionAllowed = true, bool KeepWhiteSpace = false);
 	char *ParseText(char *Doc);
 	bool ConvertToText(TextConvertState &State);
@@ -425,9 +425,9 @@ public:
 	void GetTagByPos(GTagHit &TagHit, int x, int y, int Depth, bool InBody, bool DebugLog = false);
 	GTag *GetTagByName(const char *Name);
 	void CopyClipboard(GMemQueue &p, bool &InSelection);
-	GTag *IsAnchor(GString *Uri);
+	GTag *IsAnchor(LString *Uri);
 	bool CreateSource(LStringPipe &p, int Depth = 0, bool LastWasBlock = true);
-	void Find(int TagType, GArray<GTag*> &Tags);
+	void Find(int TagType, LArray<GTag*> &Tags);
 	GTag *GetAnchor(char *Name);
 
 	// Control handling

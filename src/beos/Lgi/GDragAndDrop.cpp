@@ -16,7 +16,7 @@
 class GDndSourcePriv
 {
 public:
-	GAutoString CurrentFormat;
+	LAutoString CurrentFormat;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -36,7 +36,7 @@ bool GDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 	return false;
 }
 
-bool GDragDropSource::GetData(GArray<GDragData> &DragData)
+bool GDragDropSource::GetData(LArray<GDragData> &DragData)
 {
 	if (DragData.Length() == 0)
 		return false;
@@ -50,7 +50,7 @@ bool GDragDropSource::GetData(GArray<GDragData> &DragData)
 	return GetData(v, fmt);
 }
 
-bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, GString::Array &Files)
+bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, LString::Array &Files)
 {
 	if (OutputData && Files.First())
 	{
@@ -112,7 +112,7 @@ void GDragDropTarget::SetWindow(LView *to)
 	}
 }
 
-int GDragDropTarget::OnDrop(GArray<GDragData> &DropData,
+int GDragDropTarget::OnDrop(LArray<GDragData> &DropData,
 							LPoint Pt,
 							int KeyState)
 {

@@ -100,7 +100,7 @@ LRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, LSurface *img, L
 	yf = IntToFixed(y);
 }
 
-GAutoPtr<LRichTextPriv::DisplayStr> LRichTextPriv::EmojiDisplayStr::Clone(ssize_t Start, ssize_t Len)
+LAutoPtr<LRichTextPriv::DisplayStr> LRichTextPriv::EmojiDisplayStr::Clone(ssize_t Start, ssize_t Len)
 {
 	if (Len < 0)
 		Len = Chars - Start;
@@ -109,7 +109,7 @@ GAutoPtr<LRichTextPriv::DisplayStr> LRichTextPriv::EmojiDisplayStr::Clone(ssize_
 				Start < (int)Utf32.Length() &&
 				Start + Len <= (int)Utf32.Length());
 	#endif
-	GAutoPtr<DisplayStr> s(new EmojiDisplayStr(Src, Img, NULL,
+	LAutoPtr<DisplayStr> s(new EmojiDisplayStr(Src, Img, NULL,
 		#if defined(_MSC_VER)
 		&Utf32[Start]
 		#else
@@ -249,7 +249,7 @@ void LRichTextPriv::TextBlock::Dump()
 	for (unsigned i=0; i<Txt.Length(); i++)
 	{
 		StyleText *t = Txt[i];
-		GString s(t->Length() ?
+		LString s(t->Length() ?
 					#ifndef WINDOWS
 					(char16*)
 					#endif
@@ -268,7 +268,7 @@ LNamedStyle *LRichTextPriv::TextBlock::GetStyle(ssize_t At)
 {
 	if (At >= 0)
 	{
-		GArray<StyleText*> t;
+		LArray<StyleText*> t;
 		if (GetTextAt(At, t))
 			return t[0]->GetStyle();
 	}
@@ -343,7 +343,7 @@ HtmlTag IsDefaultStyle(HtmlTag Id, LCss *Css)
 	return CONTENT;
 }
 
-bool LRichTextPriv::TextBlock::ToHtml(LStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng)
+bool LRichTextPriv::TextBlock::ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rng)
 {
 	s.Print("<p>");
 
@@ -363,7 +363,7 @@ bool LRichTextPriv::TextBlock::ToHtml(LStream &s, GArray<GDocView::ContentMedia>
 		LRange Common = TxtRange.Overlap(*Rng);
 		if (Common.Valid())
 		{		
-			GString utf(
+			LString utf(
 				#ifndef WINDOWS
 				(char16*)
 				#endif
@@ -511,7 +511,7 @@ bool LRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 				else
 				{
 					// In the middle somewhere...
-					GAutoPtr<DisplayStr> Tmp = ds->Clone(0, CharOffset);
+					LAutoPtr<DisplayStr> Tmp = ds->Clone(0, CharOffset);
 					// LDisplayString Tmp(ds->GetFont(), *ds, CharOffset);
 					if (Tmp)
 						Cursor->Pos.x1 = r.x1 + FixedToInt(FixX + Tmp->FX());
@@ -783,7 +783,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 		LFont *Fnt = NULL;
 
 		#if DEBUG_NUMBERED_LAYOUTS
-		GString s;
+		LString s;
 		s.Printf("%i", Ctx.Index);
 		Ctx.Index++;
 		#endif
@@ -820,7 +820,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 			LRect r(0, 0, -1, -1);
 			if (Ctx.Cursor->Blk == (Block*)this)
 			{
-				GArray<StyleText*> CurStyle;
+				LArray<StyleText*> CurStyle;
 				if (GetTextAt(Ctx.Cursor->Offset, CurStyle) && Ds->Src == CurStyle.First())
 				{
 					r.ZOff(Ds->X()-1, Ds->Y()-1);
@@ -836,7 +836,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 				// Process string into parts based on the selection boundaries
 				ssize_t Ch = EndPoint[CurEndPoint] - CharPos;
 				int TmpPos = CharPos;
-				GAutoPtr<DisplayStr> ds1 = Ds->Clone(0, Ch);
+				LAutoPtr<DisplayStr> ds1 = Ds->Clone(0, Ch);
 						
 				// First part...
 				GColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
@@ -864,7 +864,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 					ssize_t Ch2 = EndPoint[CurEndPoint] - CharPos;
 
 					// Part 2
-					GAutoPtr<DisplayStr> ds2 = Ds->Clone(Ch, Ch2 - Ch);
+					LAutoPtr<DisplayStr> ds2 = Ds->Clone(Ch, Ch2 - Ch);
 					GColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
 					if (DsFnt)
 						DsFnt->Colour(Ctx.Type == Unselected && Cols.Fore.IsValid() ? Cols.Fore : Ctx.Fore(), Bk);
@@ -876,7 +876,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 					// Part 3
 					if (Ch2 < Ds->Length())
 					{
-						GAutoPtr<DisplayStr> ds3 = Ds->Clone(Ch2);
+						LAutoPtr<DisplayStr> ds3 = Ds->Clone(Ch2);
 						Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
 						if (DsFnt)
 							DsFnt->Colour(Ctx.Type == Unselected && Cols.Fore.IsValid() ? Cols.Fore : Ctx.Fore(), Bk);
@@ -887,7 +887,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 				else if (Ch < Ds->Chars)
 				{
 					// No... draw 2nd part
-					GAutoPtr<DisplayStr> ds2 = Ds->Clone(Ch);
+					LAutoPtr<DisplayStr> ds2 = Ds->Clone(Ch);
 					GColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
 					if (DsFnt)
 						DsFnt->Colour(Ctx.Type == Unselected && Cols.Fore.IsValid() ? Cols.Fore : Ctx.Fore(), Bk);
@@ -1029,7 +1029,7 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 	flow.CurY += Border.y1 + Padding.y1;
 
 	int FixX = 0; // Current x offset (fixed point) on the current line
-	GAutoPtr<TextLine> CurLine(new TextLine(flow.Left - Pos.x1, flow.X(), flow.CurY - Pos.y1));
+	LAutoPtr<TextLine> CurLine(new TextLine(flow.Left - Pos.x1, flow.X(), flow.CurY - Pos.y1));
 	if (!CurLine)
 		return flow.d->Error(_FL, "alloc failed.");
 
@@ -1106,7 +1106,7 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 					
 			// Add 't' to current line
 			ssize_t Chars = MIN(1024, e - s);
-			GAutoPtr<DisplayStr> Ds
+			LAutoPtr<DisplayStr> Ds
 			(
 				t->Emoji
 				?
@@ -1243,7 +1243,7 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 	return true;
 }
 		
-ssize_t LRichTextPriv::TextBlock::GetTextAt(ssize_t Offset, GArray<StyleText*> &Out)
+ssize_t LRichTextPriv::TextBlock::GetTextAt(ssize_t Offset, LArray<StyleText*> &Out)
 {
 	if (Txt.Length() == 0)
 		return 0;
@@ -1295,7 +1295,7 @@ int LRichTextPriv::TextBlock::GetLines()
 	return (int)Layout.Length();
 }
 
-bool LRichTextPriv::TextBlock::OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY)
+bool LRichTextPriv::TextBlock::OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY)
 {
 	if (LayoutDirty)
 		return false;
@@ -1377,7 +1377,7 @@ bool LRichTextPriv::TextBlock::PreEdit(Transaction *Trans)
 	return true;
 }
 
-ssize_t LRichTextPriv::TextBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText)
+ssize_t LRichTextPriv::TextBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText)
 {
 	ssize_t Pos = 0;
 	ssize_t Deleted = 0;
@@ -1472,14 +1472,14 @@ GMessage::Result LRichTextPriv::TextBlock::OnEvent(GMessage *Msg)
 				if (i >= 0 && i < (int)e->Suggestions.Length())
 				{
 					auto Start = e->Start;
-					GString s = e->Suggestions[i];
+					LString s = e->Suggestions[i];
 					AutoTrans t(new LRichTextPriv::Transaction);
 					
 					// Delete the old text...
 					DeleteAt(t, Start, e->Len); // 'e' might disappear here
 
 					// Insert the new text....
-					GAutoPtr<uint32_t,true> u((uint32_t*)LNewConvertCp("utf-32", s, "utf-8"));
+					LAutoPtr<uint32_t,true> u((uint32_t*)LNewConvertCp("utf-32", s, "utf-8"));
 					AddText(t, Start, u.Get(), Strlen(u.Get()));
 					
 					d->AddTrans(t);
@@ -1502,7 +1502,7 @@ bool LRichTextPriv::TextBlock::AddText(Transaction *Trans, ssize_t AtOffset, con
 
 	PreEdit(Trans);
 	
-	GArray<int> EmojiIdx;
+	LArray<int> EmojiIdx;
 	EmojiIdx.Length(InChars);
 	for (int i=0; i<InChars; i++)
 		EmojiIdx[i] = EmojiToIconIndex(InStr + i, InChars - i);
@@ -1710,7 +1710,7 @@ template<typename Char>
 bool DetectUrl(Char *t, ssize_t &len)
 {
 	#ifdef _DEBUG
-	GString str(t, len);
+	LString str(t, len);
 	//char *ss = str;
 	#endif
 	
@@ -1762,7 +1762,7 @@ int ErrSort(LSpellCheck::SpellingError *a, LSpellCheck::SpellingError *b)
 	return (int) (a->Start - b->Start);
 }
 
-void LRichTextPriv::TextBlock::SetSpellingErrors(GArray<LSpellCheck::SpellingError> &Errors, LRange r)
+void LRichTextPriv::TextBlock::SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r)
 {
 	// LgiTrace("%s:%i - SetSpellingErrors " LPrintfSSizeT ", " LPrintfSSizeT ":" LPrintfSSizeT "\n", _FL, Errors.Length(), r.Start, r.End());
 
@@ -1788,7 +1788,7 @@ void LRichTextPriv::TextBlock::SetSpellingErrors(GArray<LSpellCheck::SpellingErr
 
 void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, LRange r)
 {
-	GArray<uint32_t> Text;
+	LArray<uint32_t> Text;
 	if (!CopyAt(0, Length(), &Text))
 		return;
 
@@ -1809,8 +1809,8 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, LRange
 			Rgn.Len++;
 		}
 
-		GString s(Text.AddressOf(Rgn.Start), Rgn.Len);
-		GArray<LVariant> Params;
+		LString s(Text.AddressOf(Rgn.Start), Rgn.Len);
+		LArray<LVariant> Params;
 		Params[SpellBlockPtr] = (Block*)this;
 
 		// LgiTrace("%s:%i - Check(%s) " LPrintfSSizeT ":" LPrintfSSizeT "\n", _FL, s.Get(), Rgn.Start, Rgn.End());
@@ -1830,7 +1830,7 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, LRange
 		r.Len++;
 
 	// Create array of words...
-	GArray<LRange> Words;
+	LArray<LRange> Words;
 	bool Ws = true;
 	for (int i = 0; i < r.Len; i++)
 	{
@@ -1869,7 +1869,7 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, LRange
 		
 		#if 0
 		{
-			GString s(Text.AddressOf(w.Start), w.Len);
+			LString s(Text.AddressOf(w.Start), w.Len);
 			printf("DetectUrl(%s)=%i\n", s.Get(), IsUrl);
 		}
 		#endif
@@ -1884,7 +1884,7 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, LRange
 			}
 			
 			// Make it a link...
-			GString Link(Text.AddressOf(w.Start), w.Len);
+			LString Link(Text.AddressOf(w.Start), w.Len);
 			d->MakeLink(this, w.Start, w.Len, Link);
 			
 			// Also unlink any of the word after the URL
@@ -1969,7 +1969,7 @@ LRichTextPriv::Block *LRichTextPriv::TextBlock::Clone()
 	return new TextBlock(this);
 }
 
-ssize_t LRichTextPriv::TextBlock::CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text)
+ssize_t LRichTextPriv::TextBlock::CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text)
 {
 	if (!Text)
 		return 0;
@@ -2019,7 +2019,7 @@ ssize_t LRichTextPriv::TextBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, 
 						Match = !Strncmp(c, Str, InLen);
 					else
 					{
-						GArray<uint32_t> tmp;
+						LArray<uint32_t> tmp;
 						if (CopyAt(CharPos + (c - s), InLen, &tmp) &&
 							tmp.Length() == InLen)
 							Match = !Strncmp(&tmp[0], Str, InLen);
@@ -2042,7 +2042,7 @@ ssize_t LRichTextPriv::TextBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, 
 						Match = !Strnicmp(c, Str, InLen);
 					else
 					{
-						GArray<uint32_t> tmp;
+						LArray<uint32_t> tmp;
 						if (CopyAt(CharPos + (c - s), InLen, &tmp) &&
 							tmp.Length() == InLen)
 							Match = !Strnicmp(&tmp[0], Str, InLen);
@@ -2213,7 +2213,7 @@ bool LRichTextPriv::TextBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, s
 			LgiAssert(Inside >= 0);
 
 
-			GAutoPtr<LCss> TmpStyle(new LCss);
+			LAutoPtr<LCss> TmpStyle(new LCss);
 			if (Add)
 			{
 				if (t->GetStyle())
@@ -2302,8 +2302,8 @@ bool LRichTextPriv::TextBlock::Seek(SeekType To, BlockCursor &Cur)
 {
 	int XOffset = Cur.Pos.x1 - Pos.x1;
 	int CharPos = 0;
-	GArray<int> LineOffset;
-	GArray<int> LineLen;
+	LArray<int> LineOffset;
+	LArray<int> LineLen;
 	int CurLine = -1;
 	int CurLineScore = 0;
 	
@@ -2442,7 +2442,7 @@ bool LRichTextPriv::TextBlock::Seek(SeekType To, BlockCursor &Cur)
 #ifdef _DEBUG
 void LRichTextPriv::TextBlock::DumpNodes(LTreeItem *Ti)
 {
-	GString s;
+	LString s;
 	s.Printf("TextBlock, style=%s, pos=%s, ptr=%p", Style?Style->Name.Get():NULL, Pos.GetStr(), this);
 	Ti->SetText(s);
 
@@ -2454,7 +2454,7 @@ void LRichTextPriv::TextBlock::DumpNodes(LTreeItem *Ti)
 		{
 			StyleText *St = Txt[i];
 			ssize_t Len = St->Length();
-			GString u;
+			LString u;
 			if (Len)
 			{
 				LStringPipe p(256);

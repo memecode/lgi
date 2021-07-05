@@ -129,7 +129,7 @@ char *DecodeRfc2047(char *Str)
 			char *End    = Second ? strstr(Second + 1, "?=") : NULL;
 			if (End)
 			{
-				GString Cp(Start, First - Start);
+				LString Cp(Start, First - Start);
 				int Type = CONTENT_NONE;
 				bool StripUnderscores = false;
 				if (ToUpper(First[1]) == 'B')
@@ -176,7 +176,7 @@ char *DecodeRfc2047(char *Str)
 						}
 						else
 						{
-							GAutoString Utf8((char*)LNewConvertCp("utf-8", Block, Cp, Len));
+							LAutoString Utf8((char*)LNewConvertCp("utf-8", Block, Cp, Len));
 							if (Utf8)
 							{
 								if (LIsUtf8(Utf8))

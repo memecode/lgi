@@ -4,7 +4,7 @@
 class GPrinterPrivate
 {
 public:
-	GString Err;
+	LString Err;
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -39,7 +39,7 @@ bool GPrinter::Serialize(char *&Str, bool Write)
 	return false;
 }
 
-GString GPrinter::GetErrorMsg()
+LString GPrinter::GetErrorMsg()
 {
 	return d->Err;
 }

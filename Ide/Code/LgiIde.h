@@ -39,7 +39,7 @@ enum IdeMessages
 	M_LAST_MAKEFILE_CREATED,
 	
 	/// Find symbol results message:
-	/// GAutoPtr<FindSymRequest> Req((FindSymRequest*)Msg->A());
+	/// LAutoPtr<FindSymRequest> Req((FindSymRequest*)Msg->A());
 	M_FIND_SYM_REQUEST,
 	
 	/// Send a file to the worker thread...
@@ -47,7 +47,7 @@ enum IdeMessages
 	M_FIND_SYM_FILE,
 
 	/// Send a file to the worker thread...
-	/// GAutoPtr<GString::Array> Paths((GString::Array*)Msg->A());
+	/// LAutoPtr<LString::Array> Paths((LString::Array*)Msg->A());
 	M_FIND_SYM_INC_PATHS,
 
 	/// Styling is finished
@@ -165,8 +165,8 @@ class IdeDoc;
 class IdeProject;
 
 extern char AppName[];
-extern char *FindHeader(char *Short, GArray<GString> &Paths);
-extern bool BuildHeaderList(char *Cpp, GArray<char*> &Headers, GArray<GString> &IncPaths, bool Recurse);
+extern char *FindHeader(char *Short, LArray<LString> &Paths);
+extern bool BuildHeaderList(char *Cpp, LArray<char*> &Headers, LArray<LString> &IncPaths, bool Recurse);
 
 class NodeView;
 class NodeSource
@@ -183,7 +183,7 @@ public:
 	}
 	virtual ~NodeSource();
 
-	virtual GString GetFullPath() = 0;
+	virtual LString GetFullPath() = 0;
 	virtual bool IsWeb() = 0;
 	virtual const char *GetFileName() = 0;
 	virtual const char *GetLocalCache() = 0;
@@ -262,7 +262,7 @@ public:
 	void OnFixBuildErrors();
 	void OnBuildStateChanged(bool NewState);
 	void UpdateState(int Debugging = -1, int Building = -1);
-	void OnReceiveFiles(GArray<const char*> &Files) override;
+	void OnReceiveFiles(LArray<const char*> &Files) override;
 	int GetBuildMode();
 	LTree *GetTree();
 	GOptionsFile *GetOptions();
@@ -272,7 +272,7 @@ public:
 	IdeDoc *FindOpenFile(char *FileName);
 	IdeDoc *GotoReference(const char *File, int Line, bool CurIp, bool WithHistory = true);
 	void FindSymbol(int ResultsSinkHnd, const char *Sym, bool AllPlatforms);
-	bool GetSystemIncludePaths(GArray<GString> &Paths);
+	bool GetSystemIncludePaths(LArray<LString> &Paths);
 	bool IsReleaseMode();
 	bool ShowInProject(const char *Fn);
 	bool Build();

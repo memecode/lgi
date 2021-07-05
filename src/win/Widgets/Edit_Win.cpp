@@ -13,9 +13,9 @@
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/Widgets.h"
 
-GAutoWString LgiAddReturns(const char16 *n)
+LAutoWString LgiAddReturns(const char16 *n)
 {
-	GAutoWString w;
+	LAutoWString w;
 	
 	if (n && StrchrW(n, '\n'))
 	{
@@ -58,7 +58,7 @@ public:
 	bool NotificationProcessed;
 	bool InEmptyMode;
 	LCss::ColorDef NonEmptyColor;
-	GAutoWString EmptyText;
+	LAutoWString EmptyText;
 
 	LEditPrivate()
 	{
@@ -160,7 +160,7 @@ int LEdit::SysOnNotify(int Msg, int Code)
 	{
 		if (!d->InEmptyMode)
 		{
-			GAutoWString w = SysName();
+			LAutoWString w = SysName();
 			LBase::NameW(w);
 		}
 		
@@ -469,9 +469,9 @@ void LEdit::SetCaret(size_t Pos, bool Select, bool ForceFullUpdate)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-GAutoWString LEdit::SysName()
+LAutoWString LEdit::SysName()
 {
-	GAutoWString a;
+	LAutoWString a;
 	if (_View)
 	{
 		int Length = GetWindowTextLengthW(_View);
@@ -507,7 +507,7 @@ bool LEdit::SysName(const char16 *n)
 	if (!_View)
 		return false;
 
-	GAutoWString w = LgiAddReturns(n);
+	LAutoWString w = LgiAddReturns(n);
 	if (w)
 		n = w;
 
@@ -518,7 +518,7 @@ const char *LEdit::Name()
 {
 	if (Handle() && !d->InEmptyMode)
 	{
-		GAutoWString w = SysName();
+		LAutoWString w = SysName();
 		LBase::NameW(w);
 	}
 	
@@ -531,7 +531,7 @@ bool LEdit::Name(const char *n)
 	d->IgnoreNotify = true;
 
 	LBase::Name(n);
-	GAutoWString w = LgiAddReturns(LBase::NameW());
+	LAutoWString w = LgiAddReturns(LBase::NameW());
 	if (w)
 		LBase::NameW(w);
 	bool Status = SysEmptyText();
@@ -544,7 +544,7 @@ const char16 *LEdit::NameW()
 {
 	if (Handle() && !d->InEmptyMode)
 	{
-		GAutoWString w = SysName();
+		LAutoWString w = SysName();
 		LBase::NameW(w);
 	}
 
@@ -556,7 +556,7 @@ bool LEdit::NameW(const char16 *s)
 	bool Old = d->IgnoreNotify;
 	d->IgnoreNotify = true;
 
-	GAutoWString w = LgiAddReturns(s);
+	LAutoWString w = LgiAddReturns(s);
 	LBase::NameW(w ? w : s);
 	bool Status = SysEmptyText();
 

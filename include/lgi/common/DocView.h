@@ -66,7 +66,7 @@ class GDocView;
 class LgiClass
 GDocumentEnv : public LThreadOwner
 {
-	GArray<GDocView*> Viewers;
+	LArray<GDocView*> Viewers;
 
 public:
 	GDocumentEnv(GDocView *v = 0);
@@ -114,16 +114,16 @@ public:
 		PrefFormat Pref;
 
 		// Input data
-		GAutoString Uri;
-		GAutoString PostData;
+		LAutoString Uri;
+		LAutoString PostData;
 
 		// Output data
-		GAutoPtr<LStreamI> Stream;
-		GAutoPtr<LSurface> pDC;
-		GString Filename;
-		GString Error;
+		LAutoPtr<LStreamI> Stream;
+		LAutoPtr<LSurface> pDC;
+		LString Filename;
+		LString Error;
 		JobStatus Status;
-		GString MimeType, ContentId;
+		LString MimeType, ContentId;
 
 		LoadJob(LThreadTarget *o) : LThreadJob(o)
 		{
@@ -192,7 +192,7 @@ public:
 	/// If the GetContent implementation takes ownership of the job pointer then it should set 'j' to NULL.
 	virtual LoadType GetContent(LoadJob *&j) { return LoadNotImpl; }
 	/// After the env's thread loads the resource it calls this to pass it to the doc
-	void OnDone(GAutoPtr<LThreadJob> j);
+	void OnDone(LAutoPtr<LThreadJob> j);
 	
 	/// Handle a click on URI
 	virtual bool OnNavigate(GDocView *Parent, const char *Uri) { return false; }
@@ -240,7 +240,7 @@ class LgiClass GDocView :
 
 protected:
 	GDocumentEnv *Environment;
-	GString Charset;
+	LString Charset;
 
 public:
 	// Static
@@ -411,11 +411,11 @@ public:
 
 	struct ContentMedia
 	{
-		GString Id;
-		GString FileName;
-		GString MimeType;
+		LString Id;
+		LString FileName;
+		LString MimeType;
 		LVariant Data;
-		GAutoPtr<LStreamI> Stream;
+		LAutoPtr<LStreamI> Stream;
 
 		bool Valid()
 		{
@@ -435,16 +435,16 @@ public:
 		/// [In] The desired mime type of the content
 		const char *MimeType,
 		/// [Out] The content in the specified mime type
-		GString &Out,
+		LString &Out,
 		/// [Out/Optional] Any attached media files that the content references
-		GArray<ContentMedia> *Media = NULL
+		LArray<ContentMedia> *Media = NULL
 	)
 	{ return false; }
 };
 
 /// Detects links in text, returning their location and type
 template<typename T>
-bool LgiDetectLinks(GArray<GLinkInfo> &Links, T *Text, ssize_t TextCharLen = -1)
+bool LgiDetectLinks(LArray<GLinkInfo> &Links, T *Text, ssize_t TextCharLen = -1)
 {
 	if (!Text)
 		return false;

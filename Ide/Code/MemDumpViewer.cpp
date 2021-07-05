@@ -208,13 +208,13 @@ public:
 	void Load(const char *File)
 	{
 		LHashTbl<ConstStrKey<char,false>, bool> Except(0, false);
-		Except.Add("GString.cpp", true);
+		Except.Add("LString.cpp", true);
 		Except.Add("LVariant.cpp", true);
 		Except.Add("GContainers.cpp", true);
 		Except.Add("GContainers.h", true);
 		Except.Add("GFile.cpp", true);
 		Except.Add("Mail.h", true);
-		Except.Add("GArray.h", true);
+		Except.Add("LArray.h", true);
 
 		GFile f;
 		if (!f.Open(File, O_READ))
@@ -222,7 +222,7 @@ public:
 		else
 		{
 			LProgressDlg Prog(this, true);
-			GArray<char> Buf;
+			LArray<char> Buf;
 			Buf.Length(1 << 20);
 			ssize_t Pos = 0, Used = 0;
 			bool First = true;
@@ -261,7 +261,7 @@ public:
 					{
 						int Size = 0;
 						GToken Lines(Cur, "\r\n", true, End - Cur);
-						GArray<char*> Stack;
+						LArray<char*> Stack;
 						for (int i=0; i<Lines.Length(); i++)
 						{
 							char *n = Lines[i];

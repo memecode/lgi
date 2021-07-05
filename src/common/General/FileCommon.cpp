@@ -13,7 +13,7 @@ bool GFileSystem::SetCurrentFolder(const char *PathName)
 {
 	#ifdef WINDOWS
 		bool Status = false;
-		GAutoWString w(Utf8ToWide(PathName));
+		LAutoWString w(Utf8ToWide(PathName));
 		if (w)
 			Status = ::SetCurrentDirectoryW(w) != 0;
 		return Status;
@@ -22,9 +22,9 @@ bool GFileSystem::SetCurrentFolder(const char *PathName)
 	#endif
 }
 
-GString GFileSystem::GetCurrentFolder()
+LString GFileSystem::GetCurrentFolder()
 {
-	GString Cwd;
+	LString Cwd;
 
 	#ifdef WINDOWS
 		char16 w[DIR_PATH_SIZE+1];
@@ -82,7 +82,7 @@ bool GFile::SetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-bool GFile::CallMethod(const char *Name, LVariant *Dst, GArray<LVariant*> &Arg)
+bool GFile::CallMethod(const char *Name, LVariant *Dst, LArray<LVariant*> &Arg)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)
@@ -360,12 +360,12 @@ char *LgiGetLeaf(char *Path)
 	return l ? l + 1 : Path;
 }
 
-GString LGetPhysicalDevice(const char *Path)
+LString LGetPhysicalDevice(const char *Path)
 {
-	GString Ph;
+	LString Ph;
 
 	#ifdef WINDOWS
-	GAutoWString w(Utf8ToWide(Path));
+	LAutoWString w(Utf8ToWide(Path));
 	char16 VolPath[256];
 	if (GetVolumePathNameW(w, VolPath, CountOf(VolPath)))
 	{

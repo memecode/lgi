@@ -15,7 +15,7 @@ void LgiSleep(DWORD i)
 	::Sleep(i);
 }
 
-GString LCurrentUserName()
+LString LCurrentUserName()
 {
 	TCHAR username[256];
 	DWORD username_len = sizeof(username);
@@ -23,7 +23,7 @@ GString LCurrentUserName()
 	return username;
 }
 
-bool LGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
+bool LGetMimeTypeExtensions(const char *Mime, LArray<LString> &Ext)
 {
 	auto Start = Ext.Length();
 	char *e;
@@ -57,7 +57,7 @@ bool LGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
 	return Ext.Length() > Start;
 }
 
-GString LGetFileMimeType(const char *File)
+LString LGetFileMimeType(const char *File)
 {
 	if (File)
 	{
@@ -97,7 +97,7 @@ GString LGetFileMimeType(const char *File)
 
 					// This is a hack to get around file types without a MIME database entry
 					// but do have a .ext entry. LGetAppsForMimeType knows about the hack too.
-					GString MimeType;	
+					LString MimeType;	
 					MimeType.Printf("application/%s", Dot);
 					return MimeType;
 				}
@@ -111,12 +111,12 @@ GString LGetFileMimeType(const char *File)
 		return "application/octet-stream";
 	}
 
-	return GString();
+	return LString();
 }
 
-bool _GetApps_Add(GArray<LAppInfo*> &Apps, char *In)
+bool _GetApps_Add(LArray<LAppInfo*> &Apps, char *In)
 {
-	GAutoString Path;
+	LAutoString Path;
 
 	if (!In)
 		return false;
@@ -167,7 +167,7 @@ bool _GetApps_Add(GArray<LAppInfo*> &Apps, char *In)
 			// correct path for variables
 			TCHAR Temp[256];
 			UINT Ch = GetWindowsDirectory(Temp, CountOf(Temp));
-			GString Tmp = Temp;
+			LString Tmp = Temp;
 			if (Tmp(-1) != DIR_CHAR)
 				Tmp += DIR_STR;
 			p.Push(Tmp);
@@ -185,7 +185,7 @@ bool _GetApps_Add(GArray<LAppInfo*> &Apps, char *In)
 		{
 			Apps[Apps.Length()] = a;
 			
-			a->Params = GString(In).Strip();
+			a->Params = LString(In).Strip();
 			a->Path = p.NewGStr();
 			if (a->Path)
 			{
@@ -222,7 +222,7 @@ bool _GetApps_Add(GArray<LAppInfo*> &Apps, char *In)
 	return false;
 }
 
-bool LGetAppsForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
+bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 
@@ -393,10 +393,10 @@ bool LGetAppsForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
 	return Status;
 }
 
-GString LGetAppForMimeType(const char *Mime)
+LString LGetAppForMimeType(const char *Mime)
 {
-	GString App;
-	GArray<LAppInfo*> Apps;
+	LString App;
+	LArray<LAppInfo*> Apps;
 	if (LGetAppsForMimeType(Mime, Apps, 1))
 		App = Apps[0]->Path.Get();
 	Apps.DeleteObjects();
@@ -459,9 +459,9 @@ static char *LgiFindArgsStart(char *File)
 
 #include <lmerr.h>
 
-GString LErrorCodeToString(uint32_t ErrorCode)
+LString LErrorCodeToString(uint32_t ErrorCode)
 {
-	GString Str;
+	LString Str;
     HMODULE hModule = NULL;
     LPSTR MessageBuffer = NULL;
     DWORD dwBufferLength;
@@ -496,7 +496,7 @@ GString LErrorCodeToString(uint32_t ErrorCode)
     return Str;
 }
 
-bool LExecute(const char *File, const char *Arguments, const char *Dir, GString *ErrorMsg)
+bool LExecute(const char *File, const char *Arguments, const char *Dir, LString *ErrorMsg)
 {
 	int Error = 0;
 	HINSTANCE Status = NULL;
@@ -519,9 +519,9 @@ bool LExecute(const char *File, const char *Arguments, const char *Dir, GString 
 	}
 	else
 	{
-		GAutoWString f(Utf8ToWide(File));
-		GAutoWString a(Utf8ToWide(Arguments));
-		GAutoWString d(Utf8ToWide(Dir));
+		LAutoWString f(Utf8ToWide(File));
+		LAutoWString a(Utf8ToWide(Arguments));
+		LAutoWString d(Utf8ToWide(Dir));
 		if (f)
 		{
 			Status = ShellExecuteW(NULL, L"open", f, a, d, 5);
@@ -715,7 +715,7 @@ char *GRegKey::GetStr(const char *Name)
 	return s;
 }
 
-bool GRegKey::GetStr(const char *Name, GString &Str)
+bool GRegKey::GetStr(const char *Name, LString &Str)
 {
 	if (!k)
 	{
@@ -730,7 +730,7 @@ bool GRegKey::GetStr(const char *Name, GString &Str)
 		goto OnError;
 
 	{
-		GString Tmp((char*)NULL, Size);
+		LString Tmp((char*)NULL, Size);
 		Ret = RegQueryValueExA(k, Name, 0, &Type, (LPBYTE)Tmp.Get(), &Size);
 		if (Ret != ERROR_SUCCESS)
 			goto OnError;
@@ -824,10 +824,10 @@ bool GRegKey::GetValueNames(List<char> &n)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-GString WinGetSpecialFolderPath(int Id)
+LString WinGetSpecialFolderPath(int Id)
 {
 	GLibrary Shell("Shell32");
-	GString s;
+	LString s;
 	char16 wp[MAX_PATH] = { 0 };
 	pSHGetSpecialFolderPathW w = (pSHGetSpecialFolderPathW) Shell.GetAddress("SHGetSpecialFolderPathW");
 	if (w)
@@ -835,7 +835,7 @@ GString WinGetSpecialFolderPath(int Id)
 		BOOL result = w(0, wp, Id, false);
 		if (result && ValidStrW(wp))
 		{
-			GAutoString Tmp(WideToUtf8(wp));
+			LAutoString Tmp(WideToUtf8(wp));
 			s = Tmp;
 		}
 		else
@@ -850,7 +850,7 @@ GString WinGetSpecialFolderPath(int Id)
 
 //////////////////////////////////////////////////////////////////////
 #ifndef LGI_STATIC
-int LgiAssertDlg(GString Msg)
+int LgiAssertDlg(LString Msg)
 {
 	LAlert a(LgiApp ? LgiApp->AppWnd : NULL, "Assert Failed", Msg, "Abort", "Debug", "Ignore");
 	a.SetAppModal();
@@ -880,7 +880,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 
 			#ifdef _DEBUG
 
-			GString Msg;
+			LString Msg;
 			Msg.Printf("Assert failed, file: %s, line: %i\n%s", file, line, test);
 
 			int Result = 0;

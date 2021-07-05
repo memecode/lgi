@@ -59,7 +59,7 @@ class GZipFilePrivate
 {
 public:
 	GFile Zip;
-	GArray<ZipLocalHeader*> Files;
+	LArray<ZipLocalHeader*> Files;
 
 	GZipFilePrivate()
 	{
@@ -99,7 +99,7 @@ public:
 class GZipDir : public GDirectory
 {
 	int Cur;
-	GArray<ZipLocalHeader*> *Files;
+	LArray<ZipLocalHeader*> *Files;
 
 	ZipLocalHeader *c()
 	{
@@ -111,7 +111,7 @@ class GZipDir : public GDirectory
 	}
 
 public:
-	GZipDir(GArray<ZipLocalHeader*> *files)
+	GZipDir(LArray<ZipLocalHeader*> *files)
 	{
 		Cur = -1;
 		Files = files;

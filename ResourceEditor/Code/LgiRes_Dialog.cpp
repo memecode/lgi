@@ -3515,7 +3515,7 @@ void ResDialog::DrawSelection(LSurface *pDC)
 void ResDialog::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 {
 	// Create temp DC if needed...
-	GAutoPtr<LSurface> Local;
+	LAutoPtr<LSurface> Local;
 	if (!pDC)
 	{
 		if (!Local.Reset(new LScreenDC(this))) return;

@@ -86,7 +86,7 @@ void LView::_Delete()
 	LViewI *c;
 	#ifdef _DEBUG
 	// Sanity check..
-	// GArray<LViewI*> HasView;
+	// LArray<LViewI*> HasView;
 	for (c = Children.First(); c; c = Children.Next())
 	{
 		// LgiAssert(!HasView.HasItem(c));

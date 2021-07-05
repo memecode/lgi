@@ -10,8 +10,8 @@ class GPrintDCPrivate // : public GCups
 public:
 	class PrintPainter *p;
 	Gtk::GtkPrintContext *Handle;
-	GString PrintJobName;
-	GString PrinterName;
+	LString PrintJobName;
+	LString PrinterName;
 	int Pages;
 	GColour c;
 	LRect Clip;

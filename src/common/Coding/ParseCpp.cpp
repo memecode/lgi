@@ -76,7 +76,7 @@ class PreprocessBlock
 {
 	friend struct GSourceFile;
 	
-	GArray<int> Lines;
+	LArray<int> Lines;
 
 public:
 	/// The type of block this is.
@@ -94,7 +94,7 @@ public:
 	// Lexed data
 	int CurToken;
 	int Line;
-	GArray<char16*> Tokens;
+	LArray<char16*> Tokens;
 	
 	PreprocessBlock()
 	{
@@ -142,7 +142,7 @@ bool CmpToken(char16 *a, const char *b)
 	return !*a && !*b;
 }
 
-bool HasToken(GArray<char16*> &a, const char *b)
+bool HasToken(LArray<char16*> &a, const char *b)
 {
 	if (!a.Length() || !b)
 		return false;
@@ -158,17 +158,17 @@ bool HasToken(GArray<char16*> &a, const char *b)
 
 struct WorkUnit
 {
-	GArray<GAutoString> IncludePaths;
-	GArray<GCppParser::ValuePair*> PreDefines;
-	GArray<GAutoString> Source;
+	LArray<LAutoString> IncludePaths;
+	LArray<GCppParser::ValuePair*> PreDefines;
+	LArray<LAutoString> Source;
 
-	GAutoString SearchTerm;
+	LAutoString SearchTerm;
 	
 	WorkUnit
 	(
-		GArray<const char*> &IncPaths,
-		GArray<GCppParser::ValuePair*> &PreDefs,
-		GArray<char*> &Src
+		LArray<const char*> &IncPaths,
+		LArray<GCppParser::ValuePair*> &PreDefs,
+		LArray<char*> &Src
 	)
 	{
 		int i;
@@ -202,10 +202,10 @@ struct GSymbol
 	GSymbolType Type;
 	char *File;
 	uint32_t Line;
-	GArray<char16*> Tokens;
+	LArray<char16*> Tokens;
 	
 	GSymbol *Parent;
-	GArray<GSymbol*> Children;
+	LArray<GSymbol*> Children;
 	
 	const char *DefineFile;
 	int DefineLine;
@@ -244,7 +244,7 @@ struct GCppStringPool
 {
 	int Size;
 	int Used;
-	GArray<char16*> Mem;
+	LArray<char16*> Mem;
 	
 	GCppStringPool(int sz)
 	{
@@ -291,15 +291,15 @@ char16 *LexPoolAlloc(void *Context, const char16 *s, ssize_t len)
 struct GSourceFile
 {
 	uint32_t Id;
-	GAutoString Path;
+	LAutoString Path;
 	GCppStringPool Pool;
 
-	GAutoWString Raw;
+	LAutoWString Raw;
 	bool Active;
-	GArray<PreprocessState> Stack;
+	LArray<PreprocessState> Stack;
 
 	int CurBlock;
-	GArray<PreprocessBlock> Blocks;
+	LArray<PreprocessBlock> Blocks;
 	PreprocessBlock *Block;
 	
 	GSourceFile() : Pool(64 << 10)
@@ -335,7 +335,7 @@ struct GSourceFile
 		if (!Path.Reset(NewStr(path)))
 			return false;
 		
-		GAutoString f(ReadTextFile(Path));
+		LAutoString f(ReadTextFile(Path));
 		if (!f)
 			return false;
 
@@ -452,7 +452,7 @@ struct GSourceFile
 				r.InsertTag(c);
 				c->SetAttr("Line", b.BlockLine);
 				
-				GAutoString a(WideToUtf8(b.Start, b.Len));
+				LAutoString a(WideToUtf8(b.Start, b.Len));
 				c->SetContent(a);
 			}
 			
@@ -537,11 +537,11 @@ void AddHash(T tbl, const char *name, V type)
 struct GCppParserWorker : public GCompileTools
 {
 	GCppParserPriv *d;
-	GAutoPtr<WorkUnit> w;
+	LAutoPtr<WorkUnit> w;
 	GCppStringPool GeneralPool;
 	
-	GArray<GSourceFile*> Srcs;
-	GArray<GSourceScope*> Scopes; // from global to local
+	LArray<GSourceFile*> Srcs;
+	LArray<GSourceScope*> Scopes; // from global to local
 	
 	LHashTbl<StrKey<char16>, KeywordType> Keywords;
 	LHashTbl<StrKey<char16>, PreprocessSymbol> PreprocessSyms;
@@ -552,7 +552,7 @@ struct GCppParserWorker : public GCompileTools
 	
 	void InitScopes();
 	GSourceScope *CurrentScope() { return Scopes[Scopes.Length()-1]; }
-	GAutoWString GetSymbolName(GArray<char16*> &a, bool IsEnum = false);
+	LAutoWString GetSymbolName(LArray<char16*> &a, bool IsEnum = false);
 
 	GSymbol *ParseDecl(GSourceFile *sf, char16 *t);
 	GSymbol *ParseUserType(GSourceFile *sf, char16 *t);
@@ -565,7 +565,7 @@ public:
 	
 	GSourceFile *ParseCpp(const char *Path);	
 	GSymbol *Resolve(char16 *Symbol);
-	int Evaluate(GArray<char16*> &Exp);
+	int Evaluate(LArray<char16*> &Exp);
 	void DoWork(WorkUnit *wk);
 	int Main();
 	void Msg(MsgType Type, const char *Fmt, ...);
@@ -573,8 +573,8 @@ public:
 
 struct GCppParserPriv
 {
-	GArray<char*> IncPaths;
-	GAutoPtr<GCppParserWorker> Worker;
+	LArray<char*> IncPaths;
+	LAutoPtr<GCppParserWorker> Worker;
 };
 
 GCppParserWorker::GCppParserWorker(GCppParserPriv *priv) :
@@ -738,7 +738,7 @@ struct RoundBracket
 		HasPtr = false;
 	}
 	
-	void Parse(GArray<char16*> &a)
+	void Parse(LArray<char16*> &a)
 	{
 		for (int i=0; i<a.Length(); i++)
 		{
@@ -772,10 +772,10 @@ struct RoundBracket
 	}
 };
 
-GAutoWString GCppParserWorker::GetSymbolName(GArray<char16*> &in, bool IsEnum)
+LAutoWString GCppParserWorker::GetSymbolName(LArray<char16*> &in, bool IsEnum)
 {
-	GArray<char16*> a = in;
-	GAutoWString ret;
+	LArray<char16*> a = in;
+	LAutoWString ret;
 	LStringPipe p(64);
 	RoundBracket Rb;
 	int LastName = -1;
@@ -888,7 +888,7 @@ GAutoWString GCppParserWorker::GetSymbolName(GArray<char16*> &in, bool IsEnum)
 				else
 				{
 					// This can happen when you define a typedef to twice
-					GAutoWString Empty;
+					LAutoWString Empty;
 					return Empty;
 				}
 			}
@@ -941,7 +941,7 @@ GAutoWString GCppParserWorker::GetSymbolName(GArray<char16*> &in, bool IsEnum)
 	else
 	{
 		if (IsEnum && LastName < 0)
-			return GAutoWString();
+			return LAutoWString();
 		
 		LgiAssert(LastName >= 0);
 		t = a[LastName];
@@ -967,7 +967,7 @@ GSymbol *GCppParserWorker::Resolve(char16 *Symbol)
 	return NULL;
 }
 
-LVariant *GetArg(GArray<LVariant> &Values, int i)
+LVariant *GetArg(LArray<LVariant> &Values, int i)
 {
 	if (i < 0 || i >= Values.Length())
 		return NULL;
@@ -976,7 +976,7 @@ LVariant *GetArg(GArray<LVariant> &Values, int i)
 	return &Values[i];	
 }
 
-int FindMatchingBracket(GArray<char16*> &Exp, int Start)
+int FindMatchingBracket(LArray<char16*> &Exp, int Start)
 {
 	int Depth = 1;
 	for (int i = Start + 1; i<Exp.Length(); i++)
@@ -996,10 +996,10 @@ int FindMatchingBracket(GArray<char16*> &Exp, int Start)
 	return -1;	
 }
 
-int GCppParserWorker::Evaluate(GArray<char16*> &Exp)
+int GCppParserWorker::Evaluate(LArray<char16*> &Exp)
 {
 	bool Error = false;
-	GArray<LVariant> Values;
+	LArray<LVariant> Values;
 	
 	for (int i=0; i<Exp.Length(); i++)
 	{
@@ -1035,7 +1035,7 @@ int GCppParserWorker::Evaluate(GArray<char16*> &Exp)
 			}
 
 			// Create array of sub-expression tokens and then evaluate that			
-			GArray<char16*> Sub;
+			LArray<char16*> Sub;
 			for (int n=i+1; n<End; n++)
 			{
 				Sub.Add(Exp[n]);
@@ -1450,7 +1450,7 @@ GSourceFile *GCppParserWorker::ParseCpp(const char *Path)
 						{
 							if (sf->Active)
 							{
-								GAutoWString SymName = GetSymbolName(sym->Tokens, sym->Type == SymEnum);
+								LAutoWString SymName = GetSymbolName(sym->Tokens, sym->Type == SymEnum);
 								if (SymName)
 								{
 									if (CurrentScope()->Find(SymName))
@@ -1472,7 +1472,7 @@ GSourceFile *GCppParserWorker::ParseCpp(const char *Path)
 									#else
 									char Tmp[256];
 									sprintf_s(Tmp, CountOf(Tmp), "UnnamedEnum%i", Idx++);
-									GAutoWString Buf(Utf8ToWide(Tmp));
+									LAutoWString Buf(Utf8ToWide(Tmp));
 									#endif
 
 									if (CurrentScope()->Find(SymName))
@@ -1512,7 +1512,7 @@ GSourceFile *GCppParserWorker::ParseCpp(const char *Path)
 							GSymbol *sym = ParseTypedef(sf);
 							if (sym)
 							{
-								GAutoWString Name = GetSymbolName(sym->Tokens);
+								LAutoWString Name = GetSymbolName(sym->Tokens);
 								if (Name)
 								{
 									GSymbol *existing = CurrentScope()->Find(Name);
@@ -1549,7 +1549,7 @@ GSourceFile *GCppParserWorker::ParseCpp(const char *Path)
 									}
 									else
 									{
-										GAutoWString Name = GetSymbolName(sym->Tokens);
+										LAutoWString Name = GetSymbolName(sym->Tokens);
 										if (Name)
 										{
 											GSymbol *e = Scopes[0]->Find(Name);
@@ -1612,7 +1612,7 @@ GSymbol *GCppParserWorker::ParseDecl(GSourceFile *sf, char16 *t)
 	else
 		sym->Tokens.Add(t);
 
-	GArray<char16*> Temp;
+	LArray<char16*> Temp;
 	if (CmpToken(t, "template"))
 	{
 		Temp.Add(t);
@@ -2204,7 +2204,7 @@ bool GCppParserWorker::ParsePreprocessor(GSourceFile *sf)
 				break;
 			}
 			
-			GAutoString FileName8(WideToUtf8(t));
+			LAutoString FileName8(WideToUtf8(t));
 			if (!FileName8)
 			{
 				Status = false;
@@ -2312,9 +2312,9 @@ GCppParser::~GCppParser()
 
 void GCppParser::ParseCode
 (
-	GArray<const char*> &IncludePaths,
-	GArray<ValuePair*> &PreDefines,
-	GArray<char*> &Source
+	LArray<const char*> &IncludePaths,
+	LArray<ValuePair*> &PreDefines,
+	LArray<char*> &Source
 )
 {
 	WorkUnit *w = new WorkUnit(IncludePaths, PreDefines, Source);

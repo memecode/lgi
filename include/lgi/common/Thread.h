@@ -29,7 +29,7 @@ protected:
 	ThreadState State;
 	int ReturnValue;
 	OsThread hThread;
-	GString Name;
+	LString Name;
 	ThreadPriority Priority;
 	OsThreadId ThreadId;
 
@@ -117,7 +117,7 @@ public:
 	virtual void Detach();
 	
 	/// This function gets called when the job is finished
-	virtual void OnDone(GAutoPtr<LThreadJob> j) {}
+	virtual void OnDone(LAutoPtr<LThreadJob> j) {}
 };
 
 #undef AddJob
@@ -125,8 +125,8 @@ public:
 /// This parent class does the actual work of processing jobs.
 class LgiClass LThreadWorker : public LThread, public LMutex
 {
-	GArray<LThreadTarget*> Owners;
-	GArray<LThreadJob*> Jobs;
+	LArray<LThreadTarget*> Owners;
+	LArray<LThreadJob*> Jobs;
 	bool Loop;
 
 public:

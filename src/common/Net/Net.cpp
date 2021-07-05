@@ -138,7 +138,7 @@ void StopNetworkStack()
 #pragma comment(lib, "iphlpapi.lib")
 #endif
 
-bool LSocket::EnumInterfaces(GArray<Interface> &Out)
+bool LSocket::EnumInterfaces(LArray<Interface> &Out)
 {
 	bool Status = false;
 
@@ -239,7 +239,7 @@ public:
 	int			Timeout;
 	OsSocket	Socket;
 	int			LastError;
-	GString		ErrStr;
+	LString		ErrStr;
 	LCancel		*Cancel;
 
 	LSocketImplPrivate()
@@ -576,7 +576,7 @@ int LSocket::Open(const char *HostAddr, int Port)
 
 		if (ValidSocket(d->Socket))
 		{
-			GArray<char> Buf(512);
+			LArray<char> Buf(512);
 
 			#if !defined(MAC)
 			option_t i;
@@ -939,7 +939,7 @@ bool LSocket::Accept(LSocketI *c)
 			uint64 Now = LgiCurrentTime();
 			if (Now - Start >= d->Timeout)
 			{
-				GString s;
+				LString s;
 				s.Printf("Accept timeout after %.1f seconds.", ((double)(Now-Start)) / 1000.0);
 				OnInformation(s);
 				return false;
@@ -1506,9 +1506,9 @@ bool HaveNetConnection()
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GString LIpStr(uint32_t ip)
+LString LIpStr(uint32_t ip)
 {
-	GString s;
+	LString s;
 	s.Printf("%i.%i.%i.%i",
 			(ip>>24)&0xff,
 			(ip>>16)&0xff,
@@ -1517,7 +1517,7 @@ GString LIpStr(uint32_t ip)
 	return s;
 }
 
-uint32_t LIpHostInt(GString str)
+uint32_t LIpHostInt(LString str)
 {
 	auto p = str.Split(".");
 	if (p.Length() != 4)
@@ -1538,7 +1538,7 @@ uint32_t LIpHostInt(GString str)
 	return ip;
 }
 
-bool WhatsMyIp(GAutoString &Ip)
+bool WhatsMyIp(LAutoString &Ip)
 {
 	bool Status = false;
 

@@ -56,7 +56,7 @@ class GDataI;
 class GDataFolderI;
 class GDataStoreI;
 class GDataPropI;
-typedef GAutoPtr<LStreamI> GAutoStreamI;
+typedef LAutoPtr<LStreamI> GAutoStreamI;
 void ParseIdList(char *In, List<char> &Out);
 extern const char *Store3ItemTypeToMime(Store3ItemTypes type);
 
@@ -296,19 +296,19 @@ public:
 	/// \returns the options object
 	virtual GOptionsFile *GetOptions(bool Create = false) { return 0; }
 	/// A new item is available
-	virtual void OnNew(GDataFolderI *parent, GArray<GDataI*> &new_items, int pos, bool is_new) = 0;
+	virtual void OnNew(GDataFolderI *parent, LArray<GDataI*> &new_items, int pos, bool is_new) = 0;
 	/// When an item is deleted
-	virtual bool OnDelete(GDataFolderI *parent, GArray<GDataI*> &items) = 0;
+	virtual bool OnDelete(GDataFolderI *parent, LArray<GDataI*> &items) = 0;
 	/// When an item is moved to a new folder
-	virtual bool OnMove(GDataFolderI *new_parent, GDataFolderI *old_parent, GArray<GDataI*> &items) = 0;
+	virtual bool OnMove(GDataFolderI *new_parent, GDataFolderI *old_parent, LArray<GDataI*> &items) = 0;
 	/// When an item changes
-	virtual bool OnChange(GArray<GDataI*> &items, int FieldHint) = 0;
+	virtual bool OnChange(LArray<GDataI*> &items, int FieldHint) = 0;
 	/// Notifcation of property change
 	virtual void OnPropChange(GDataStoreI *Store, int Prop, LVariantType Type) {}
 	/// Get the logging stream
 	virtual LStreamI *GetLogger(GDataStoreI *store) { return 0; }
 	/// Search for a object by type and name
-	virtual bool Match(GDataStoreI *store, GDataPropI *Addr, int ObjectType, GArray<GDom*> &Matches) { return 0; }
+	virtual bool Match(GDataStoreI *store, GDataPropI *Addr, int ObjectType, LArray<GDom*> &Matches) { return 0; }
 };
 
 /// The virtual mail storage interface from which all mail stores inherit from.
@@ -355,7 +355,7 @@ public:
 		virtual ~GDsTransaction() {}
 	};
 
-	typedef GAutoPtr<GDsTransaction> StoreTrans;
+	typedef LAutoPtr<GDsTransaction> StoreTrans;
 
 	GDataStoreI()
 	{
@@ -396,7 +396,7 @@ public:
 		/// The folder to move the object to
 		GDataFolderI *NewFolder,
 		/// The object to move
-		GArray<GDataI*> &Items
+		LArray<GDataI*> &Items
 	) = 0;
 	
 	/// Deletes items, which results in either the items being moved to the local trash folder 
@@ -417,7 +417,7 @@ public:
 	virtual Store3Status Delete
 	(
 		/// The object to delete
-		GArray<GDataI*> &Items,
+		LArray<GDataI*> &Items,
 		/// Send to the trash or not...
 		bool ToTrash
 	) = 0;
@@ -435,7 +435,7 @@ public:
 	virtual Store3Status Change
 	(
 		/// The object to change
-		GArray<GDataI*> &Items,
+		LArray<GDataI*> &Items,
 		/// The property to change...
 		int PropId,
 		/// The value to assign
@@ -533,7 +533,7 @@ extern GDataStoreI *OpenImap
 	/// The identifier for the account
 	int AccoundId,
 	/// An interface into the persistant storage area.
-	GAutoPtr<class ProtocolSettingStore> store
+	LAutoPtr<class ProtocolSettingStore> store
 );
 
 #ifdef WIN32
@@ -577,7 +577,7 @@ class DIterator : public GDataIterator<TPub*>
 	int Cur;
 
 public:
-	GArray<TPriv*> a;
+	LArray<TPriv*> a;
 	Store3State State;
 	
 	DIterator()

@@ -23,19 +23,19 @@ enum Ctrls
 
 void GStringTest()
 {
-	GString a("This<TD>is<TD>a<TD>test");
+	LString a("This<TD>is<TD>a<TD>test");
 	a.RFind("<TD>");
-	GString f = a(8,10);
-	GString end = a(-5, -1);
+	LString f = a(8,10);
+	LString end = a(-5, -1);
 	
-	GString sep(", ");
-	GString::Array parts = GString("This is a test").Split(" ");
-	GString joined = sep.Join(parts);
+	LString sep(", ");
+	LString::Array parts = LString("This is a test").Split(" ");
+	LString joined = sep.Join(parts);
 	
-	GString src("  asdwer   ");
-	GString left = src.LStrip();
-	GString right = src.RStrip();
-	GString both = src.Strip();
+	LString src("  asdwer   ");
+	LString left = src.LStrip();
+	LString right = src.RStrip();
+	LString both = src.Strip();
 	
 }
 
@@ -102,7 +102,7 @@ class BltTest : public LWindow
 		}
 	};
 	
-	GArray<Test*> a;
+	LArray<Test*> a;
 
 public:
 	BltTest()
@@ -172,9 +172,9 @@ public:
 		return DROPEFFECT_COPY;
 	}
 
-	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
+	int OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState)
 	{
-		GString Keys;
+		LString Keys;
 		if (KeyState & LGI_EF_CTRL)
 			Keys += "LGI_EF_CTRL ";
 		if (KeyState & LGI_EF_ALT)
@@ -401,7 +401,7 @@ bool DbTesting()
 		m->SetStr(M_LABEL, c->GetAttr("Label"));
 		m->SetInt(M_COLOUR, c->GetAsInt("Colour"));
 		m->SetInt(M_SIZE, Atoi(c->GetAttr("Size")));
-		m->SetStr(M_FILENAME, GString(c->GetContent()).Strip());
+		m->SetStr(M_FILENAME, LString(c->GetContent()).Strip());
 	}
 	uint64 ConvertTime = LgiMicroTime() - Start;
 
@@ -417,7 +417,7 @@ bool DbTesting()
 	uint64 ReadTime = LgiMicroTime() - Start;
 
 	Start = LgiMicroTime();
-	GAutoPtr<DbArrayIndex> Idx(Test.Sort(M_FILENAME));
+	LAutoPtr<DbArrayIndex> Idx(Test.Sort(M_FILENAME));
 	uint64 SortTime = LgiMicroTime() - Start;
 	if (Idx)
 	{
@@ -427,7 +427,7 @@ bool DbTesting()
 			Out.SetSize(0);
 			for (unsigned i=0; i<Idx->Length(); i++)
 			{
-				GString s = Idx->ItemAt(i)->ToString();
+				LString s = Idx->ItemAt(i)->ToString();
 				s += "\n";
 				Out.Write(s);
 			}

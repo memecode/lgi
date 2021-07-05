@@ -297,7 +297,7 @@ public:
 
 class InitLibPng : public LMutex
 {
-	GAutoPtr<LibPng> Png;
+	LAutoPtr<LibPng> Png;
 
 public:
 	LibPng *Get()
@@ -686,7 +686,7 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 	#if LIBPNG_SHARED
 	if (!Lib->IsLoaded() && !Lib->Load(sLibrary))
 	{
-		GString s;
+		LString s;
 		s.Printf("libpng is missing (%s.%s)", sLibrary, LGI_LIBRARY_EXT);
 		if (Props)
 			Props->SetValue(LGI_FILTER_ERROR, v = s);
@@ -1291,7 +1291,7 @@ GFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 						if (Pal)
 						{
 							int Colours = Pal->GetSize();
-							GAutoPtr<png_color> PngPal(new png_color[Colours]);
+							LAutoPtr<png_color> PngPal(new png_color[Colours]);
 							if (PngPal)
 							{
 							    for (int i=0; i<Colours; i++)
@@ -1524,7 +1524,7 @@ GFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 					}
 				}
 				
-				GArray<png_bytep> row;
+				LArray<png_bytep> row;
 				if (row.Length(pDC->Y()))
 				{
 					for (int y=0; y<pDC->Y(); y++)

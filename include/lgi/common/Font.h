@@ -233,7 +233,7 @@ public:
 	bool CreateFromCss(LCss *Css);
 
 	/// Returns CSS styles to describe font
-	GString FontToCss();
+	LString FontToCss();
 
 	/// Clears any handles and memory associated with the object.
 	virtual bool Destroy();
@@ -255,7 +255,7 @@ public:
 	uchar *GetGlyphMap();
 
 	/// Converts printable characters to unicode.
-	GAutoString ConvertToUnicode(char16 *Input, ssize_t Len = -1);
+	LAutoString ConvertToUnicode(char16 *Input, ssize_t Len = -1);
 	
 	#if USE_CORETEXT
 	CFDictionaryRef GetAttributes();
@@ -274,7 +274,7 @@ protected:
 	#else
 	LTypeFace Info;
 	#endif
-	GString Buf;
+	LString Buf;
 
 public:
 	LFontType(const char *face = 0, int pointsize = 0);
@@ -403,8 +403,8 @@ class LgiClass LFontSystem : public GCapabilityClient
 
 private:
 	// System Font List
-	GString::Array AllFonts;
-	GString::Array SubFonts; // Fonts yet to be scanned for substitution
+	LString::Array AllFonts;
+	LString::Array SubFonts; // Fonts yet to be scanned for substitution
 
 	// Missing Glyph Substitution
 	uchar Lut[MAX_UNICODE+1];
@@ -420,7 +420,7 @@ public:
 	~LFontSystem();
 
 	/// Enumerate all installed fonts
-	bool EnumerateFonts(GString::Array &Fonts);
+	bool EnumerateFonts(LString::Array &Fonts);
 
 	/// Returns whether the current Lgi implementation supports glyph sub
 	bool GetGlyphSubSupport();
@@ -441,7 +441,7 @@ public:
 	/// when no font matches all characters in the string.
 	LFont *GetBestFont(char *Str);
 	/// Add a custom font to the glyph lookup table
-	bool AddFont(GAutoPtr<LFont> Fnt);
+	bool AddFont(LAutoPtr<LFont> Fnt);
 
 	#ifdef __GTK_H__
 	

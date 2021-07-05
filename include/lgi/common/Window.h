@@ -220,7 +220,7 @@ public:
 	virtual void OnTrayMenuResult(int MenuId) {}
 	
 	/// Called when files are dropped on the window.
-	virtual void OnReceiveFiles(GArray<const char*> &Files) {}
+	virtual void OnReceiveFiles(LArray<const char*> &Files) {}
 	
 	/// Called when a URL is sent to the window
 	virtual void OnUrl(const char *Url) {};
@@ -244,7 +244,7 @@ public:
 	
 	// D'n'd
 	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState) override;
-	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState) override;
+	int OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState) override;
 
 	#if !WINNATIVE
 	

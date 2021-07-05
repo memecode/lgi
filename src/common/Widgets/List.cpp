@@ -91,8 +91,8 @@ public:
 	bool Selected;
 	int ListItem_Image;
 	List<LListItemColumn> Cols;
-	GArray<char*> Str;
-	GArray<LDisplayString*> Display;
+	LArray<char*> Str;
+	LArray<LDisplayString*> Display;
 	int16 LayoutColumn;
 
 	LListItemPrivate()
@@ -299,7 +299,7 @@ void LListItem::Select(bool b)
 			d->Selected &&
 			!Parent->d->NoSelectEvent)
 		{
-			GArray<LListItem*> Items;
+			LArray<LListItem*> Items;
 			Items.Add(this);
 			Parent->OnItemSelect(Items);
 		}
@@ -539,7 +539,7 @@ void LListItem::OnPaint(GItem::ItemPaintCtx &Ctx)
 	    return;
 
 	int x = Ctx.x1;
-	GAutoPtr<ItemPaintCtx> Prev;
+	LAutoPtr<ItemPaintCtx> Prev;
 	if (GetCss())
 	{
 		Prev.Reset(new ItemPaintCtx(Ctx));
@@ -675,7 +675,7 @@ void LList::OnItemBeginDrag(LListItem *Item, LMouse &m)
 		Item->OnBeginDrag(m);
 }
 
-void LList::OnItemSelect(GArray<LListItem*> &It)
+void LList::OnItemSelect(LArray<LListItem*> &It)
 {
 	if (It.Length())
 	{
@@ -865,7 +865,7 @@ void LList::KeyScroll(int iTo, int iFrom, bool SelectItems)
 			i = 0;
 
 			d->NoSelectEvent = true;
-			GArray<LListItem*> Sel;
+			LArray<LListItem*> Sel;
 			ForAllItems(n)
 			{
 				bool s = i>=Min && i<=Max;
@@ -1420,7 +1420,7 @@ void LList::OnMouseClick(LMouse &m)
 						int n = 0;
 						int a = MIN(ItemIndex, Keyboard);
 						int b = MAX(ItemIndex, Keyboard);
-						GArray<LListItem*> Sel;
+						LArray<LListItem*> Sel;
 
 						ForAllItems(i)
 						{
@@ -1560,7 +1560,7 @@ void LList::OnMouseClick(LMouse &m)
 					{
 						bool Change = false;
 						
-						GArray<LListItem*> s;
+						LArray<LListItem*> s;
 						ForAllItems(i)
 						{
 							bool Sel = Item == i;
@@ -2143,7 +2143,7 @@ bool LList::Remove(LListItem *i)
 			{
 				if (Selected)
 				{
-					GArray<LListItem*> s;
+					LArray<LListItem*> s;
 					OnItemSelect(s);
 				}
 
@@ -2255,7 +2255,7 @@ void LList::RemoveAll()
 	{
 		if (Items.Length())
 		{
-			GArray<LListItem*> s;
+			LArray<LListItem*> s;
 			OnItemSelect(s);
 		}
 
@@ -2410,7 +2410,7 @@ void LList::PourAll()
 		int CurX = 0;
 		int CurY = 0;
 		int MaxX = 16;
-		GArray<LListItem*> Col;
+		LArray<LListItem*> Col;
 		d->Columns = 1;
 		d->VisibleColumns = 0;
 		int64 ScrollX = HScroll ? HScroll->Value() : 0;

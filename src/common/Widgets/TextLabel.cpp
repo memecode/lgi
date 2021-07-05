@@ -17,7 +17,7 @@ public:
 	/// When LTextLabel::Name(W) is called out of thread, the string is put
 	/// here first and then a message is posted over to the GUI thread
 	/// to load it into the ctrl.
-	GString ThreadName;
+	LString ThreadName;
 	int PrevX;
 
 	LTextPrivate(LTextLabel *ctrl) : LStringLayout(LgiApp->GetFontCache()), LMutex("LTextPrivate")
@@ -224,7 +224,7 @@ void LTextLabel::OnCreate()
 {
 	if (d->ThreadName)
 	{
-		GString s;
+		LString s;
 		s.Swap(d->ThreadName);
 		Name(s);
 	}
@@ -238,7 +238,7 @@ GMessage::Result LTextLabel::OnEvent(GMessage *Msg)
 		{
 			if (d->Lock(_FL))
 			{
-				GString s = d->ThreadName;
+				LString s = d->ThreadName;
 				d->ThreadName.Empty();
 				d->Unlock();
 				if (s)

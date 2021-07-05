@@ -91,7 +91,7 @@ public:
 
 class GdcLibTiff : public GFilter
 {
-	GAutoPtr<LibTiff> Lib;
+	LAutoPtr<LibTiff> Lib;
 
 public:
 	GdcLibTiff();
@@ -481,7 +481,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 			if (img.samplesperpixel == 5)
 			{
 				int rowlen = img.width * img.samplesperpixel * img.bitspersample / 8;
-				GArray<uint8_t> a;
+				LArray<uint8_t> a;
 				if (a.Length(rowlen) &&
 					pDC->Create(img.width, img.height, System32BitColourSpace))
 				{
@@ -536,7 +536,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 						}
 						case 1:
 						{
-							GArray<uint8_t> Buf;
+							LArray<uint8_t> Buf;
 							Buf.Length(img.width + 7 / 8);
 							
 							for (unsigned y=0; y<img.height; y++)
@@ -600,7 +600,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 						}
 						case 24:
 						{
-							GArray<GRgb24> Buf;
+							LArray<GRgb24> Buf;
 							Buf.Length(img.width);
 							GRgb24 *b = &Buf[0];
 							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
@@ -643,7 +643,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 						}
 						case 32:
 						{
-							GArray<uint32_t> Buf;
+							LArray<uint32_t> Buf;
 							Buf.Length(img.width);
 							uint32_t *b = &Buf[0];
 							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
@@ -714,7 +714,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 						}
 						case 48:
 						{
-							GArray<GRgb48> Buf;
+							LArray<GRgb48> Buf;
 							Buf.Length(img.width);
 							GRgb48 *b = &Buf[0];
 							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
@@ -746,7 +746,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 						}
 						case 64:
 						{
-							GArray<GRgba64> Buf;
+							LArray<GRgba64> Buf;
 							Buf.Length(img.width);
 							GRgba64 *b = &Buf[0];
 							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));

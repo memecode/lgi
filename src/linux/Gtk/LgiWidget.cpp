@@ -21,7 +21,7 @@ struct _LgiWidget
 	char *drop_format;
 	bool debug;
 
-	::GArray<GtkWidget*> child;
+	::LArray<GtkWidget*> child;
 };
 
 static void lgi_widget_class_init(LgiWidgetClass *klass);
@@ -264,7 +264,7 @@ static gboolean lgi_widget_mouse_enter_leave(GtkWidget *widget, GdkEventCrossing
 	return TRUE;
 }
 
-void BuildTabStops(LViewI *v, ::GArray<LViewI*> &a)
+void BuildTabStops(LViewI *v, ::LArray<LViewI*> &a)
 {
 	if (v->Enabled() &&
 		v->Visible() &&
@@ -408,7 +408,7 @@ gboolean lgi_widget_key_event(GtkWidget *wid, GdkEventKey *e)
 				k.Down())
 			{
 				// Do tab between controls
-				::GArray<LViewI*> a;
+				::LArray<LViewI*> a;
 				BuildTabStops(w, a);
 				int idx = a.IndexOf((LViewI*)v);
 				if (idx >= 0)
@@ -605,7 +605,7 @@ lgi_widget_drag_drop(GtkWidget	       *widget,
 	if (Result == DROPEFFECT_NONE)
 		return false;
 
-	::GString drop_format = Formats[0];
+	::LString drop_format = Formats[0];
 	#if DEBUG_DND
 	LgiTrace("lgi_widget_drag_drop, fmt=%s\n", drop_format);
 	#endif
@@ -678,7 +678,7 @@ lgi_widget_drag_data_received(	GtkWidget			*widget,
 		return;
 	}
 
-	::GArray<GDragData> dd;
+	::LArray<GDragData> dd;
 	dd[0].Format = Type;
 	dd[0].Data[0].SetBinary(Len, (void*)Ptr);
 	

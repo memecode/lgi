@@ -100,7 +100,7 @@ enum Cmds
 
 static char SelectWordDelim[] = " \t\n.,()[]<>=?/\\{}\"\';:+=-|!@#$%^&*";
 #ifndef WINDOWS
-static GArray<LTextView3*> Ctrls;
+static LArray<LTextView3*> Ctrls;
 #endif
 
 //////////////////////////////////////////////////////////////////////
@@ -110,8 +110,8 @@ class GDocFindReplaceParams3 :
 {
 public:
 	// Find/Replace History
-	GAutoWString LastFind;
-	GAutoWString LastReplace;
+	LAutoWString LastFind;
+	LAutoWString LastReplace;
 	bool MatchCase;
 	bool MatchWord;
 	bool SelectionOnly;
@@ -137,8 +137,8 @@ public:
 	GColour UrlColour;
 	bool CenterCursor;
 	ssize_t WordSelectMode;
-	GString Eol;
-	GString LastError;
+	LString Eol;
+	LString LastError;
 	
 	// If the scroll position is set before we get a scroll bar, store the index
 	// here and set it when the GNotifyScrollBar_Create arrives.
@@ -154,11 +154,11 @@ public:
 
 	// <RequiresLocking>
 		// Thread safe Name(char*) impl
-		GString SetName;
+		LString SetName;
 	// </RequiresLocking>
 
 	#ifdef _DEBUG
-	GString PourLog;
+	LString PourLog;
 	#endif
 
 	LTextView3Private(LTextView3 *view) : LMutex("LTextView3Private")
@@ -223,13 +223,13 @@ enum UndoType
 struct Change : public LRange
 {
 	UndoType Type;
-	GArray<char16> Txt;
+	LArray<char16> Txt;
 };
 
 struct LTextView3Undo : public GUndoEvent
 {
 	LTextView3 *View;
-	GArray<Change> Changes;
+	LArray<Change> Changes;
 
 	LTextView3Undo(LTextView3 *view)
 	{
@@ -1193,7 +1193,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 	bool ScrollChange = ScrollYNeeded ^ (VScroll != NULL);
 	d->LayoutDirty = WrapType != TEXTED_WRAP_NONE && ScrollChange;
 	#if PROFILE_POUR
-	static GString _s;
+	static LString _s;
 	_s.Printf("ScrollBars dirty=%i", d->LayoutDirty);
 	Prof.Add(_s);
 	#endif
@@ -1224,7 +1224,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 	#endif
 }
 
-bool LTextView3::InsertStyle(GAutoPtr<LStyle> s)
+bool LTextView3::InsertStyle(LAutoPtr<LStyle> s)
 {
 	if (!s)
 		return false;
@@ -1313,7 +1313,7 @@ LTextView3::LStyle *LTextView3::GetNextStyle(StyleIter &s, ssize_t Where)
 CURSOR_CHAR GetCursor()
 {
 	#ifdef WIN32
-	GArray<int> Ver;
+	LArray<int> Ver;
 	int Os = LGetOs(&Ver);
 	if ((Os == LGI_OS_WIN32 || Os == LGI_OS_WIN64) &&
 		Ver[0] >= 5)
@@ -1398,14 +1398,14 @@ void LTextView3::PourStyle(size_t Start, ssize_t EditSize)
 
 	if (UrlDetect)
 	{		
-		GArray<GLinkInfo> Links;		
+		LArray<GLinkInfo> Links;		
 		LgiAssert((ssize_t)Start + Length <= Size);		
 		if (LgiDetectLinks(Links, Text + Start, Length))
 		{
 			for (uint32_t i=0; i<Links.Length(); i++)
 			{
 				GLinkInfo &Inf = Links[i];
-                GAutoPtr<LTextView3::LStyle> Url(new LStyle(STYLE_URL));
+                LAutoPtr<LTextView3::LStyle> Url(new LStyle(STYLE_URL));
 				if (Url)
 				{
 					Url->View = this;
@@ -1487,7 +1487,7 @@ bool LTextView3::Insert(size_t At, const char16 *Data, ssize_t Len)
 			// Add the undo object...
 			if (UndoOn)
 			{
-				GAutoPtr<LTextView3Undo> Obj(new LTextView3Undo(this));
+				LAutoPtr<LTextView3Undo> Obj(new LTextView3Undo(this));
 				LTextView3Undo *u = UndoCur ? UndoCur : Obj;
 				if (u)
 					u->AddChange(At, Len, UndoInsert);
@@ -1631,7 +1631,7 @@ bool LTextView3::Delete(size_t At, ssize_t Len)
 			// do delete
 			if (UndoOn)
 			{
-				GAutoPtr<LTextView3Undo> Obj(new LTextView3Undo(this));
+				LAutoPtr<LTextView3Undo> Obj(new LTextView3Undo(this));
 				LTextView3Undo *u = UndoCur ? UndoCur : Obj;
 				if (u)
 					u->AddChange(At, Len, UndoDelete);
@@ -1779,16 +1779,16 @@ void LTextView3::Value(int64 i)
 	Name(Str);
 }
 
-GString LTextView3::operator[](ssize_t LineIdx)
+LString LTextView3::operator[](ssize_t LineIdx)
 {
 	if (LineIdx <= 0 || LineIdx > (ssize_t)GetLines())
-		return GString();
+		return LString();
 
 	LTextLine *Ln = Line[LineIdx-1];
 	if (!Ln)
-		return GString();
+		return LString();
 
-	GString s(Text + Ln->Start, Ln->Len);
+	LString s(Text + Ln->Start, Ln->Len);
 	return s; 
 }
 
@@ -2263,7 +2263,7 @@ bool LTextView3::Paste()
 {
 	GClipBoard Clip(this);
 
-	GAutoWString Mem;
+	LAutoWString Mem;
 	char16 *t = Clip.TextW();
 	if (!t) // ala Win9x
 	{
@@ -2445,7 +2445,7 @@ bool WriteToStream(GFile &out, T *in, size_t len, bool CrLf)
 	if (CrLf)
 	{
 		int BufLen = 1 << 20;
-		GAutoPtr<T,true> Buf(new T[BufLen]);
+		LAutoPtr<T,true> Buf(new T[BufLen]);
 		T *b = Buf;
 		T *e = Buf + BufLen;
 		T *c = in;
@@ -2491,7 +2491,7 @@ bool WriteToStream(GFile &out, T *in, size_t len, bool CrLf)
 bool LTextView3::Save(const char *Name, const char *CharSet)
 {
 	GFile f;
-	GString TmpName;
+	LString TmpName;
 	bool Status = false;
 	
 	d->LastError.Empty();
@@ -2531,7 +2531,7 @@ bool LTextView3::Save(const char *Name, const char *CharSet)
 				else
 				{
 					// 32->16 convert
-					GAutoPtr<uint16_t,true> c16((uint16_t*)LNewConvertCp(CharSet, Text, LGI_WideCharset, InSize));
+					LAutoPtr<uint16_t,true> c16((uint16_t*)LNewConvertCp(CharSet, Text, LGI_WideCharset, InSize));
 					if (c16)
 						Status = WriteToStream(f, c16.Get(), Strlen(c16.Get()), CrLf);
 				}
@@ -2546,14 +2546,14 @@ bool LTextView3::Save(const char *Name, const char *CharSet)
 				else
 				{
 					// 16->32 convert
-					GAutoPtr<uint32_t,true> c32((uint32_t*)LNewConvertCp(CharSet, Text, LGI_WideCharset, InSize));
+					LAutoPtr<uint32_t,true> c32((uint32_t*)LNewConvertCp(CharSet, Text, LGI_WideCharset, InSize));
 					if (c32)
 						Status = WriteToStream(f, c32.Get(), Strlen(c32.Get()), CrLf);
 				}
 			}
 			else
 			{
-				GAutoString c8((char*)LNewConvertCp(CharSet ? CharSet : DefaultCharset, Text, LGI_WideCharset, InSize));
+				LAutoString c8((char*)LNewConvertCp(CharSet ? CharSet : DefaultCharset, Text, LGI_WideCharset, InSize));
 				if (c8)
 					Status = WriteToStream(f, c8.Get(), strlen(c8), CrLf);
 			}
@@ -2565,7 +2565,7 @@ bool LTextView3::Save(const char *Name, const char *CharSet)
 	else
 	{
 		int Err = f.GetError();
-		GString sErr = LErrorCodeToString(Err);		
+		LString sErr = LErrorCodeToString(Err);		
 		d->LastError.Printf("Failed to open '%s' for writing: %i - %s\n", Name, Err, sErr.Get());
 	}
 
@@ -2640,7 +2640,7 @@ bool LTextView3::DoCase(bool Upper)
 		{
 			if (UndoOn)
 			{
-				GAutoPtr<LTextView3Undo> Obj(new LTextView3Undo(this));
+				LAutoPtr<LTextView3Undo> Obj(new LTextView3Undo(this));
 				LTextView3Undo *u = UndoCur ? UndoCur : Obj;
 				if (u)
 					u->AddChange(Min, Max - Min, UndoChange);
@@ -2770,14 +2770,14 @@ Text3_FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User)
 
 bool LTextView3::DoFind()
 {
-	GString u;
+	LString u;
 
 	if (HasSelection())
 	{
 		ssize_t Min = MIN(SelStart, SelEnd);
 		ssize_t Max = MAX(SelStart, SelEnd);
 
-		u = GString(Text + Min, Max - Min);
+		u = LString(Text + Min, Max - Min);
 	}
 	else
 	{
@@ -3007,7 +3007,7 @@ bool LTextView3::OnFind(const char16 *Find, bool MatchWord, bool MatchCase, bool
 	
 	while ((Loc = MatchText(Find, MatchWord, MatchCase, false, false)) != FirstLoc)
 	{
-		GAutoPtr<LStyle> s(new LStyle(STYLE_FIND_MATCHES));
+		LAutoPtr<LStyle> s(new LStyle(STYLE_FIND_MATCHES));
 		s->Start = Loc;
 		s->Len = FindLen;
 		s->Fore = LColour(L_FOCUS_SEL_FORE);
@@ -3146,7 +3146,7 @@ bool LTextView3::OnMultiLineTab(bool In)
 	Min = SeekLine(Min, StartLine);
 
 	int Ls = 0;
-	GArray<ssize_t> p;
+	LArray<ssize_t> p;
 	for (i=Min; i<Max && i<Size; i=SeekLine(i, NextLine))
 	{
 		p.Add(i);
@@ -3283,7 +3283,7 @@ int LTextView3::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 	return Formats.Length() ? DROPEFFECT_COPY : DROPEFFECT_NONE;
 }
 
-int LTextView3::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
+int LTextView3::OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState)
 {
 	int Status = DROPEFFECT_NONE;
 	
@@ -3307,7 +3307,7 @@ int LTextView3::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 					len++;
 				}
 				
-				GAutoWString w
+				LAutoWString w
 				(
 					(char16*)LNewConvertCp
 					(
@@ -3465,7 +3465,7 @@ void LTextView3::Redo()
 void LTextView3::DoContextMenu(LMouse &m)
 {
 	LSubMenu RClick;
-	GAutoString ClipText;
+	LAutoString ClipText;
 	{
 		GClipBoard Clip(this);
 		ClipText.Reset(NewStr(Clip.Text()));
@@ -3624,7 +3624,7 @@ bool LTextView3::OnStyleClick(LStyle *style, LMouse *m)
 				(m->Left() && m->Down() && m->Double())
 			)
 			{
-				GString s(Text + style->Start, style->Len);
+				LString s(Text + style->Start, style->Len);
 				if (s)
 					OnUrl(s);
 				return true;
@@ -3644,7 +3644,7 @@ bool LTextView3::OnStyleMenu(LStyle *style, LSubMenu *m)
 	{
 		case STYLE_URL:
 		{
-			GString s(Text + style->Start, style->Len);
+			LString s(Text + style->Start, style->Len);
 			if (LIsValidEmail(s))
 				m->AppendItem(LgiLoadString(L_TEXTCTRL_EMAIL_TO, "New Email to..."), IDM_NEW, true);
 			else
@@ -3666,7 +3666,7 @@ void LTextView3::OnStyleMenuClick(LStyle *style, int i)
 	{
 		case STYLE_URL:
 		{
-			GString s(Text + style->Start, style->Len);
+			LString s(Text + style->Start, style->Len);
 
 			switch (i)
 			{
@@ -5163,7 +5163,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 					pDC->Colour(Old);
 					pDC->LineStyle(Style);
 
-					GString s;
+					LString s;
 					s.Printf("%i, %i", Line.IndexOf(l), l->Start);
 					LDisplayString ds(SysFont, s);
 					SysFont->Transparent(true);
@@ -5379,7 +5379,7 @@ void LTextView3::OnUrl(char *Url)
 		LUri u(Url);
 		bool Email = LIsValidEmail(Url);
 		const char *Proto = Email ? "mailto" : u.sProtocol;
-		GString App = LGetAppForProtocol(Proto);
+		LString App = LGetAppForProtocol(Proto);
 		if (App)
 			LExecute(App, Url);
 		else

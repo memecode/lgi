@@ -11,8 +11,8 @@
 
 struct GMruEntry
 {
-	GString Display;
-	GString Raw;
+	LString Display;
+	LString Raw;
 	
 	GMruEntry &operator =(const GMruEntry &e)
 	{
@@ -26,7 +26,7 @@ class GMruPrivate
 {
 public:
 	int Size;
-	GArray<GMruEntry*> Items;
+	LArray<GMruEntry*> Items;
 	LSubMenu *Parent;
 	LFileType *SelectedType;
 
@@ -57,11 +57,11 @@ GMru::~GMru()
 bool GMru::SerializeEntry
 (
 	/// The displayable version of the reference (this should have any passwords blanked out)
-	GString *Display,
+	LString *Display,
 	/// The form passed to the client software to open/save. (passwords NOT blanked)
-	GString *Raw,
+	LString *Raw,
 	/// The form safe to write to disk, if a password is present it must be encrypted.
-	GString *Stored
+	LString *Stored
 )
 {
 	if (Raw && Raw->Get())
@@ -133,10 +133,10 @@ bool GMru::_SaveFile(const char *FileName)
 			if (!Cur)
 			{
 				// extract extension
-				GString::Array a = GString(st->Extension()).Split(LGI_PATH_SEPARATOR);
+				LString::Array a = LString(st->Extension()).Split(LGI_PATH_SEPARATOR);
 				for (auto e: a)
 				{
-					GString::Array p = e.RSplit(".", 1);
+					LString::Array p = e.RSplit(".", 1);
 					if (!p.Last().Equals("*"))
 					{
 						// bung the extension from the file type if not there
@@ -410,7 +410,7 @@ bool GMru::Serialize(GDom *Store, const char *Prefix, bool Write)
 				{
 					Saved.Add(e->Raw, true);
 					
-					GString Stored;
+					LString Stored;
 					if (SerializeEntry(NULL, &e->Raw, &Stored)) // Convert Raw -> Stored
 					{
 						sprintf_s(Key, sizeof(Key), "%s.Item%i", Prefix, Idx++);
@@ -441,10 +441,10 @@ bool GMru::Serialize(GDom *Store, const char *Prefix, bool Write)
 					LVariant File;
 					if (Store->GetValue(Key, File))
 					{
-						GString Stored = File.Str();
+						LString Stored = File.Str();
 						LgiAssert(Stored.Get() != NULL);
 						
-						GAutoPtr<GMruEntry> e(new GMruEntry);
+						LAutoPtr<GMruEntry> e(new GMruEntry);
 						if (SerializeEntry(&e->Display, &e->Raw, &Stored)) // Convert Stored -> Raw
 						{
 							d->Items.Add(e.Release());

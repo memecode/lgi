@@ -4,49 +4,49 @@
 #ifdef __cplusplus
 
 template<class X>
-class GAutoPtrRef
+class LAutoPtrRef
 {
-	typedef GAutoPtrRef<X> Self;
+	typedef LAutoPtrRef<X> Self;
 	Self& operator = (Self const&) {}
 
 public:    
 	X *Ptr;
 
 	explicit
-	GAutoPtrRef(X *p)
+	LAutoPtrRef(X *p)
 	{
 		Ptr = p;
 	}
 };
 
 template<class X, bool Arr = false>
-class GAutoPtr
+class LAutoPtr
 {
 	X *Ptr;
 
 public:
- 	explicit GAutoPtr(X* p=0)
+ 	explicit LAutoPtr(X* p=0)
 	{
 		Ptr = p;
 	}
 
-	GAutoPtr(GAutoPtr &ap)
+	LAutoPtr(LAutoPtr &ap)
 	{
 		Ptr = ap.Release();
 	}
 
-	GAutoPtr(GAutoPtrRef<X> apr)
+	LAutoPtr(LAutoPtrRef<X> apr)
 	{
 		Ptr = apr.Ptr;
 	}
 
-	GAutoPtr& operator=(GAutoPtr ap)
+	LAutoPtr& operator=(LAutoPtr ap)
 	{
 		Reset(ap.Release());
 		return *this;
 	}
 	
-	GAutoPtr& operator=(GAutoPtrRef<X> ap)
+	LAutoPtr& operator=(LAutoPtrRef<X> ap)
 	{
 		if (ap.Ptr != Ptr)
 		{
@@ -55,18 +55,18 @@ public:
 		return *this;
 	}
 
-	~GAutoPtr()
+	~LAutoPtr()
 	{
 		if (Arr)
 			delete [] Ptr;
 		else
 			delete Ptr;
 		
-		// This is needed to be able to use GAutoPtr inside GArray's.
+		// This is needed to be able to use LAutoPtr inside LArray's.
 		Ptr = 0;
 	}
 
-	void Swap(GAutoPtr<X,Arr> &p)
+	void Swap(LAutoPtr<X,Arr> &p)
 	{
 		LSwap(Ptr, p.Ptr);
 	}
@@ -108,20 +108,20 @@ public:
 	}
 
 	template<class Y>
-	operator GAutoPtrRef<Y>()
+	operator LAutoPtrRef<Y>()
 	{
-		return GAutoPtrRef<Y>(Release());
+		return LAutoPtrRef<Y>(Release());
 	}
 
 	template<class Y>
-	operator GAutoPtr<Y>()
+	operator LAutoPtr<Y>()
 	{
-		return GAutoPtr<Y>(Release());
+		return LAutoPtr<Y>(Release());
 	}
 };
 
-typedef GAutoPtr<char, true> GAutoString;
-typedef GAutoPtr<char16, true> GAutoWString;
+typedef LAutoPtr<char, true> LAutoString;
+typedef LAutoPtr<char16, true> LAutoWString;
 
 #endif // __cplusplus
 

@@ -70,7 +70,7 @@ protected:
 				Remain -= Mins * 60;
 				int Secs = Remain;
 
-				GString Msg, Time;
+				LString Msg, Time;
 				if (!Hrs)
 					Time.Printf("%im %is", Mins, Secs);
 				else
@@ -222,7 +222,7 @@ public:
 			if (local.IsOpen())
 			{
 				size_t BufLen = 1 << 20;
-				GArray<char> Buf(BufLen);
+				LArray<char> Buf(BufLen);
 				uint64_t i = 0;
 				IoProgress Meter(this);
 
@@ -271,7 +271,7 @@ public:
 		bool Status = false;
 
 		// Write the file...
-		auto Parts = GString(To).RSplit("/", 1);
+		auto Parts = LString(To).RSplit("/", 1);
 		ssh_scp Scp = ssh_scp_new(Ssh, SSH_SCP_WRITE, Parts[0]);
 		if (!Scp)
 		{
@@ -290,7 +290,7 @@ public:
 				if (in.IsOpen())
 				{
 					size_t BufLen = 128<<10;
-					GArray<char> Buf(BufLen);
+					LArray<char> Buf(BufLen);
 					int64_t i = 0;
 					IoProgress Meter(this);
 					Meter.SetLength(length);
@@ -327,15 +327,15 @@ public:
 		return Status;
 	}
 
-	GAutoPtr<LStream> CreateConsole()
+	LAutoPtr<LStream> CreateConsole()
 	{
-		GAutoPtr<LStream> con(new SshConsole(this));
+		LAutoPtr<LStream> con(new SshConsole(this));
 		return con;
 	}
 
 	bool RunCommands(LStream *Console, const char **Cmds, const char *Prompt = DEFAULT_PROMPT)
 	{
-		GString Buf;
+		LString Buf;
 		int CmdIdx = 0;
 		size_t logged = 0;
 
@@ -346,7 +346,7 @@ public:
 			if (Rd > 0)
 			{
 				Bytes[Rd] = 0;
-				Buf += GString(Bytes, Rd);
+				Buf += LString(Bytes, Rd);
 				DeEscape(Buf);
 
 				auto end = Buf.Find("\x1B");
@@ -370,7 +370,7 @@ public:
 					if (Cmds[CmdIdx])
 					{
 						// Send next command...
-						GString c = GString(Cmds[CmdIdx]) + "\n";
+						LString c = LString(Cmds[CmdIdx]) + "\n";
 						Console->Write(c, c.Length());
 						CmdIdx++;
 						Buf.Empty();

@@ -44,7 +44,7 @@
 	typedef int (__stdcall *pSHFileOperationA)(LPSHFILEOPSTRUCTA lpFileOp);
 	typedef int (__stdcall *pSHFileOperationW)(LPSHFILEOPSTRUCTW lpFileOp);
 	typedef int (__stdcall *p_vscprintf)(const char *format, va_list argptr);
-	LgiExtern class GString WinGetSpecialFolderPath(int Id);
+	LgiExtern class LString WinGetSpecialFolderPath(int Id);
 
 #else
 	#include <unistd.h>

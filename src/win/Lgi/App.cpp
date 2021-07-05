@@ -64,7 +64,7 @@ void OsAppArguments::Set(int Args, char **Arg)
 	{
 		p.Print("%s%s", i?" ":"", Arg[i]);
 	}
-	GAutoString s(p.NewStr());
+	LAutoString s(p.NewStr());
 	Set(s);
 }
 
@@ -110,7 +110,7 @@ LMouseHook *GApp::GetMouseHook()
 	return MouseHook;
 }
 
-static GAutoString ParseStr(GPointer &p, bool Pad = true)
+static LAutoString ParseStr(GPointer &p, bool Pad = true)
 {
 	char16 *Key = p.w;
 	// Skip 'key' string
@@ -125,10 +125,10 @@ static GAutoString ParseStr(GPointer &p, bool Pad = true)
 			p.u8++;
 	}
 
-	return GAutoString(WideToUtf8(Key));
+	return LAutoString(WideToUtf8(Key));
 }
 
-static GAutoString ParseVer(void *Resource, char *Part)
+static LAutoString ParseVer(void *Resource, char *Part)
 {
 	GToken Parts(Part, ".");
 	if (Parts.Length() == 3)
@@ -138,7 +138,7 @@ static GAutoString ParseVer(void *Resource, char *Part)
 		uint16 Len = *p.u16++;
 		uint16 ValueLen = *p.u16++;
 		uint16 Type = *p.u16++;
-		GAutoString Key = ParseStr(p);
+		LAutoString Key = ParseStr(p);
 
 		// Read VS_FIXEDFILEINFO structure
 		DWORD dwSig = *p.u32++;
@@ -167,7 +167,7 @@ static GAutoString ParseVer(void *Resource, char *Part)
 			uint16 fLength = *p.u16++;
 			uint16 fValueLength = *p.u16++;
 			uint16 fType = *p.u16++;
-			GAutoString fKey = ParseStr(p);
+			LAutoString fKey = ParseStr(p);
 			if (strcmp(fKey, "StringFileInfo"))
 				break;
 
@@ -178,7 +178,7 @@ static GAutoString ParseVer(void *Resource, char *Part)
 				uint16 tLength = *p.u16++;
 				uint16 tValueLength = *p.u16++;
 				uint16 tType = *p.u16++;
-				GAutoString tKey = ParseStr(p);
+				LAutoString tKey = ParseStr(p);
 
 				while (p.u8 < tStart + tLength)
 				{
@@ -187,8 +187,8 @@ static GAutoString ParseVer(void *Resource, char *Part)
 					uint16 sLength = *p.u16++;
 					uint16 sValueLength = *p.u16++;
 					uint16 sType = *p.u16++;
-					GAutoString sKey = ParseStr(p);
-					GAutoString sValue;
+					LAutoString sKey = ParseStr(p);
+					LAutoString sValue;
 					if (p.u8 < sStart + sLength)
 						sValue = ParseStr(p);
 
@@ -203,7 +203,7 @@ static GAutoString ParseVer(void *Resource, char *Part)
 		}
 	}
 
-	return GAutoString();
+	return LAutoString();
 }
 
 void LgiInvalidParam(const wchar_t * expression,
@@ -271,7 +271,7 @@ DumpTime("priv");
 		HRSRC hRsrc = ::FindResource(NULL, MAKEINTRESOURCE(VS_VERSION_INFO), RT_VERSION);
 		HGLOBAL hGlobal = ::LoadResource(NULL, hRsrc);
 		LPVOID pVersionResource = ::LockResource(hGlobal);
-		GAutoString ProductName, ProductVer;
+		LAutoString ProductName, ProductVer;
 
 		// replace "040904e4" with the language ID of your resources
 		if (pVersionResource)
@@ -314,7 +314,7 @@ DumpTime("exception handler");
 			)
 		*/
 			
-		GArray<int> Ver;
+		LArray<int> Ver;
 		LGetOs(&Ver);
 		if (Ver.Length() > 1)
 		{
@@ -517,7 +517,7 @@ const char *GApp::GetArgumentAt(int n)
 	return 0;
 }
 
-bool GApp::GetOption(const char *Option, GString &Buf)
+bool GApp::GetOption(const char *Option, LString &Buf)
 {
 	if (!ValidStr(Option))
 	{
@@ -572,7 +572,7 @@ bool GApp::GetOption(const char *Option, GString &Buf)
 
 bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
 {
-	GString Buf;
+	LString Buf;
 	if (GetOption(Option, Buf))
 	{
 		if (Dest)
@@ -597,7 +597,7 @@ void GApp::OnCommandLine()
 	if (ValidStr(CmdLine))
 	{
 		// LgiTrace("CmdLine='%s'\n", CmdLine);
-		GArray<const char*> Files;
+		LArray<const char*> Files;
 		
 		char *Delim = "\'\"";
 		char *s;
@@ -657,7 +657,7 @@ void GApp::OnUrl(const char *Url)
 		AppWnd->OnUrl(Url);
 }
 
-void GApp::OnReceiveFiles(GArray<const char*> &Files)
+void GApp::OnReceiveFiles(LArray<const char*> &Files)
 {
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);
@@ -863,12 +863,12 @@ void GApp::Exit(int Code)
 	}
 }
 
-GString GApp::GetFileMimeType(const char *File)
+LString GApp::GetFileMimeType(const char *File)
 {
 	return LGetFileMimeType(File);
 }
 
-bool GApp::GetAppsForMimeType(char *Mime, GArray<LAppInfo*> &Apps)
+bool GApp::GetAppsForMimeType(char *Mime, LArray<LAppInfo*> &Apps)
 {
 	LgiAssert(!"Not impl.");
 	return false;

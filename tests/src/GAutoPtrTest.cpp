@@ -13,16 +13,16 @@ GAutoPtrTest::~GAutoPtrTest()
 {
 }
 
-GAutoString CreateAutoString(char **Ptr)
+LAutoString CreateAutoString(char **Ptr)
 {
-	return GAutoString(*Ptr = NewStr("Something"));
+	return LAutoString(*Ptr = NewStr("Something"));
 }
 
 bool GAutoPtrTest::Run()
 {
 	char *Ptr;
-	GAutoString s1(Ptr = NewStr("string1"));
-	GAutoString s2 = s1;
+	LAutoString s1(Ptr = NewStr("string1"));
+	LAutoString s2 = s1;
 	if (s1.Get() != 0)
 	{
 		return FAIL(_FL, "Initial auto ptr should be zero now.");
@@ -33,7 +33,7 @@ bool GAutoPtrTest::Run()
 	}
 
 	char *Ptr2 = 0;
-	GAutoString s3 = CreateAutoString(&Ptr2);
+	LAutoString s3 = CreateAutoString(&Ptr2);
 	if (s3.Get() != Ptr2)
 	{
 		return FAIL(_FL, "Ptr not the same.");

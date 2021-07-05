@@ -61,13 +61,13 @@ bool JsonDecode(LXmlTag &t, const char *s)
 		SkipWhiteSpace(s);
 		if (*s != '\"')
 			break;
-		GAutoString Variable(LTokStr(s));
+		LAutoString Variable(LTokStr(s));
 		SkipWhiteSpace(s);
 		if (*s != ':')
 			return false;
 		s++;
 		SkipWhiteSpace(s);
-		GAutoString Value(LTokStr(s));
+		LAutoString Value(LTokStr(s));
 		SkipWhiteSpace(s);
 		
 		t.SetAttr(Variable, Value);
@@ -88,7 +88,7 @@ bool JsonDecode(LXmlTag &t, const char *s)
 #define SkipNonWhite(s)		while (*s && !strchr(WhiteSpace, *s)) s++;
 #define ExpectChar(ch)		if (*s != ch) return 0; s++
 
-ssize_t MailIMap::ParseImapResponse(char *Buffer, ssize_t BufferLen, GArray<StrRange> &Ranges, int Names)
+ssize_t MailIMap::ParseImapResponse(char *Buffer, ssize_t BufferLen, LArray<StrRange> &Ranges, int Names)
 {
 	Ranges.Length(0);
 
@@ -248,8 +248,8 @@ ssize_t MailIMap::ParseImapResponse(char *Buffer, ssize_t BufferLen, GArray<StrR
 
 ////////////////////////////////////////////////////////////////////////////
 bool MailIMap::Http(LSocketI *S,
-					GAutoString *OutHeaders,
-					GAutoString *OutBody,
+					LAutoString *OutHeaders,
+					LAutoString *OutBody,
 					int *StatusCode,
 					const char *InMethod,
 					const char *InUri,
@@ -271,7 +271,7 @@ bool MailIMap::Http(LSocketI *S,
 			InBody?strlen(InBody):0,
 			InBody?InBody:"");
 
-	GAutoString Req(p.NewStr());
+	LAutoString Req(p.NewStr());
 	size_t ReqLen = strlen(Req);
 
 	if (!S->Open(u.sHost, u.Port?u.Port:443))
@@ -282,7 +282,7 @@ bool MailIMap::Http(LSocketI *S,
 		return false;
 
 	char Buf[256];
-	GArray<char> Res;
+	LArray<char> Res;
 	ssize_t r;
 	ssize_t ContentLen = 0;
 	ssize_t HdrLen = 0;
@@ -303,7 +303,7 @@ bool MailIMap::Http(LSocketI *S,
 			if (Eoh)
 			{
 				HdrLen = Eoh - &Res[0];
-				GAutoString c(InetGetHeaderField(&Res[0], "Content-Length", HdrLen));
+				LAutoString c(InetGetHeaderField(&Res[0], "Content-Length", HdrLen));
 				if (c)
 				{
 					ContentLen = atoi(c);
@@ -350,7 +350,7 @@ bool MailIMap::Http(LSocketI *S,
 	return true;
 }
 
-GAutoString ImapBasicTokenize(char *&s)
+LAutoString ImapBasicTokenize(char *&s)
 {
 	if (s)
 	{
@@ -370,7 +370,7 @@ GAutoString ImapBasicTokenize(char *&s)
 			{
 				char *n = NewStr(s, e - s);
 				s = e + 1;
-				return GAutoString(n);
+				return LAutoString(n);
 			}
 		}
 		else
@@ -381,13 +381,13 @@ GAutoString ImapBasicTokenize(char *&s)
 			{
 				char *n = NewStr(s, e - s);
 				s = e + (*e != 0);
-				return GAutoString(n);
+				return LAutoString(n);
 			}
 		}
 	}
 
 	s += strlen(s);
-	return GAutoString();
+	return LAutoString();
 }
 
 char *Tok(char *&s)
@@ -515,7 +515,7 @@ char *EncodeImapString(const char *s)
 		else
 		{
 			// Encoded
-			GArray<uint16> Str;
+			LArray<uint16> Str;
 			Str[0] = c;
 			while ((c = LgiUtf8To32((uint8*&)s, Len)))
 			{
@@ -663,11 +663,11 @@ public:
 	char *Current;
 	char *Flags;
 	LHashTbl<StrKey<char,false>,bool> Capability;
-	GString WebLoginUri;
+	LString WebLoginUri;
 	LViewI *ParentWnd;
 	LCancel *Cancel;
 	OsThread InCommand;
-	GString LastWrite;
+	LString LastWrite;
 
 	MailIMapPrivate() : LMutex("MailImapSem")
 	{
@@ -796,7 +796,7 @@ bool MailIMap::WriteBuf(bool ObsurePass, const char *Buffer, bool Continuation)
 		d->LastWrite = Buffer;
 		if (!Continuation && d->InCommand)
 		{
-			GString Msg;
+			LString Msg;
 			Msg.Printf("%s:%i - WriteBuf failed(%s)\n", LgiGetLeaf(__FILE__), __LINE__, d->LastWrite.Strip().Get());
 			Socket->OnInformation(Msg);
 
@@ -806,7 +806,7 @@ bool MailIMap::WriteBuf(bool ObsurePass, const char *Buffer, bool Continuation)
 		/*
 		else
 		{
-			GString Msg;
+			LString Msg;
 			Msg.Printf("%s:%i - WriteBuf ok(%s)\n", LgiGetLeaf(__FILE__), __LINE__, d->LastWrite.Strip().Get());
 			Socket->OnInformation(Msg);
 		}
@@ -820,7 +820,7 @@ bool MailIMap::WriteBuf(bool ObsurePass, const char *Buffer, bool Continuation)
 				if (Sp)
 				{
 					Sp++;
-					GString s;
+					LString s;
 					s.Printf("%.*s********\r\n", Sp - Buffer, Buffer);
 					Log(s.Get(), LSocketI::SocketMsgSend);
 				}
@@ -1015,8 +1015,8 @@ class OAuthWebServer : public LThread, public LMutex
 	bool Loop;
 	int Port;
 	LSocket Listen;
-	GAutoString Req;
-	GString Resp;
+	LAutoString Req;
+	LString Resp;
 	bool Finished;
 
 public:
@@ -1049,9 +1049,9 @@ public:
 		return Port;
 	}
 
-	GString GetRequest(LCancel *Loop, uint64 TimeoutMs = 0)
+	LString GetRequest(LCancel *Loop, uint64 TimeoutMs = 0)
 	{
-		GString r;
+		LString r;
 		
 		uint64 Start = LgiCurrentTime();
 		while (!r && (!Loop || !Loop->IsCancelled()))
@@ -1093,7 +1093,7 @@ public:
 	
 	int Main()
 	{
-		GAutoPtr<LSocket> s;
+		LAutoPtr<LSocket> s;
 		Loop = true;
 		while (Loop)
 		{
@@ -1105,7 +1105,7 @@ public:
 					s.Reset();
 				else
 				{
-					GArray<char> Mem;
+					LArray<char> Mem;
 					ssize_t r;
 					char buf[512];
 					do 
@@ -1129,7 +1129,7 @@ public:
 					}
 					
 					// Wait for the response...
-					GString Response;
+					LString Response;
 					do
 					{
 						if (Lock(_FL))
@@ -1156,7 +1156,7 @@ public:
 	}
 };
 
-static void AddIfMissing(GArray<GString> &Auths, const char *a, GString *DefaultAuthType = NULL)
+static void AddIfMissing(LArray<LString> &Auths, const char *a, LString *DefaultAuthType = NULL)
 {
 	for (unsigned i=0; i<Auths.Length(); i++)
 	{
@@ -1173,7 +1173,7 @@ static void AddIfMissing(GArray<GString> &Auths, const char *a, GString *Default
 void MailIMap::CommandFinished()
 {
 	/*
-	GString Msg;
+	LString Msg;
 	Msg.Printf("%s:%i - CommandFinished(%s)\n", LgiGetLeaf(__FILE__), __LINE__, d->LastWrite.Strip().Get());
 	Socket->OnInformation(Msg);
 	*/
@@ -1233,7 +1233,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 		if (Socket->Open(Remote, Port))
 		{
 			bool IMAP4Server = false;
-			GArray<GString> Auths;
+			LArray<LString> Auths;
 
 			// check capability
 			int CapCmd = d->NextCmd++;
@@ -1278,7 +1278,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 				Log("CAPABILITY says not an IMAP4Server", LSocketI::SocketMsgError);
 			else
 			{
-				GString DefaultAuthType;
+				LString DefaultAuthType;
 				bool TryAllAuths =	Auths.Length() == 0
 									&&
 									!(
@@ -1769,7 +1769,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 						}
 
 						// Construct the XOAUTH2 parameter
-						GString s;
+						LString s;
 						s.Printf("user=%s\001auth=Bearer %s\001\001", User, AccessToken.Get());
 						#if DEBUG_OAUTH2
 						LgiTrace("%s:%i - s=%s.\n", _FL, s.Replace("\001", "%01").Get());
@@ -1778,7 +1778,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 
 						// Issue the IMAP command
 						int AuthCmd = d->NextCmd++;
-						GString AuthStr;
+						LString AuthStr;
 						AuthStr.Printf("A%4.4i AUTHENTICATE XOAUTH2 %s\r\n", AuthCmd, s.Get());
 						if (WriteBuf(false, AuthStr))
 						{
@@ -1873,11 +1873,11 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 						{
 							for (auto Dlg: Dialog)
 							{
-								GArray<GAutoString> t;
+								LArray<LAutoString> t;
 								char *s = Dlg;
 								while (*s)
 								{
-									GAutoString a = ImapBasicTokenize(s);
+									LAutoString a = ImapBasicTokenize(s);
 									if (a)
 										t.New() = a;
 									else
@@ -1944,7 +1944,7 @@ bool MailIMap::Close()
 	return Status;
 }
 
-bool MailIMap::GetCapabilities(GArray<char*> &s)
+bool MailIMap::GetCapabilities(LArray<char*> &s)
 {
 	// char *k = 0;
 	// for (bool p=d->Capability.First(&k); p; p=d->Capability.Next(&k))
@@ -1986,9 +1986,9 @@ bool MailIMap::SelectFolder(const char *Path, StrMap *Values)
 
 				if (Values)
 				{
-					for (GString Dlg: Dialog)
+					for (LString Dlg: Dialog)
 					{
-						GString::Array t = Dlg.SplitDelimit(" []");
+						LString::Array t = Dlg.SplitDelimit(" []");
 						if (t.Length() > 0 &&
 							t[0].Equals("*"))
 						{
@@ -2015,7 +2015,7 @@ bool MailIMap::SelectFolder(const char *Path, StrMap *Values)
 									ssize_t e = Dlg.Find(")", s + 1);
 									if (e >= 0)
 									{
-										GString Val = Dlg(s+1, e);
+										LString Val = Dlg(s+1, e);
 										Values->Add(t[i], Val);
 									}
 								}
@@ -2046,7 +2046,7 @@ int MailIMap::GetMessages(const char *Path)
 		StrMap f;
 		if (SelectFolder(Path, &f))
 		{
-			GString Exists = f.Find("exists");
+			LString Exists = f.Find("exists");
 			if (Exists && Exists.Int() >= 0)
 				Status = (int)Exists.Int();
 			else
@@ -2064,7 +2064,7 @@ int MailIMap::GetMessages()
 	return GetMessages("INBOX");
 }
 
-char *MailIMap::SequenceToString(GArray<int> *Seq)
+char *MailIMap::SequenceToString(LArray<int> *Seq)
 {
 	if (!Seq)
 		return NewStr("1:*");
@@ -2089,7 +2089,7 @@ char *MailIMap::SequenceToString(GArray<int> *Seq)
 	return p.NewStr();
 }
 
-static void RemoveBytes(GArray<char> &a, ssize_t &Used, ssize_t Bytes)
+static void RemoveBytes(LArray<char> &a, ssize_t &Used, ssize_t Bytes)
 {
 	if (Used >= Bytes)
 	{
@@ -2101,7 +2101,7 @@ static void RemoveBytes(GArray<char> &a, ssize_t &Used, ssize_t Bytes)
 	else LgiAssert(0);
 }
 
-static bool PopLine(GArray<char> &a, ssize_t &Used, GAutoString &Line)
+static bool PopLine(LArray<char> &a, ssize_t &Used, LAutoString &Line)
 {
 	for (ssize_t i=0; i<Used; i++)
 	{
@@ -2155,12 +2155,12 @@ int MailIMap::Fetch(bool ByUid,
 	p.Print("A%4.4i %sFETCH ", Cmd, ByUid ? "UID " : "");
 	p.Write(Seq, strlen(Seq));
 	p.Print(" (%s)\r\n", Parts);
-	GAutoString WrBuf(p.NewStr());
+	LAutoString WrBuf(p.NewStr());
 	if (WriteBuf(false, WrBuf))
 	{
 		ClearDialog();
 
-		GArray<char> Buf;
+		LArray<char> Buf;
 		Buf.Length(1024 + (SizeHint>0?(uint32)SizeHint:0));
 		ssize_t Used = 0;
 		ssize_t MsgSize;
@@ -2224,7 +2224,7 @@ int MailIMap::Fetch(bool ByUid,
 			}
 			
 			// See if we can parse out a single response
-			GArray<StrRange> Ranges;
+			LArray<StrRange> Ranges;
 			LgiAssert(Used < Buf.Length());
 			Buf[Used] = 0; // NULL terminate before we parse
 
@@ -2284,7 +2284,7 @@ int MailIMap::Fetch(bool ByUid,
 					{
 						char *Name = b + Ranges[i].Start;
 						Name[Ranges[i].Len()] = 0;							
-						GString Value(b + Ranges[i+1].Start, Ranges[i+1].Len());
+						LString Value(b + Ranges[i+1].Start, Ranges[i+1].Len());
 						Parts.Add(Name, Value);
 					}
 					
@@ -2315,7 +2315,7 @@ int MailIMap::Fetch(bool ByUid,
 			#endif
 			if (Used > 0 && Buf[0] != '*')
 			{
-				GAutoString Line;
+				LAutoString Line;
 				
 				while (PopLine(Buf, Used, Line))
 				{
@@ -2367,7 +2367,7 @@ bool IMapHeadersCallback(MailIMap *Imap, uint32_t Msg, MailIMap::StrMap &Parts, 
 	{
 		Parts.Delete(sRfc822Header);
 
-		GAutoString *Hdrs = (GAutoString*)UserData;
+		LAutoString *Hdrs = (LAutoString*)UserData;
 		Hdrs->Reset(s);
 	}
 	
@@ -2376,7 +2376,7 @@ bool IMapHeadersCallback(MailIMap *Imap, uint32_t Msg, MailIMap::StrMap &Parts, 
 
 char *MailIMap::GetHeaders(int Message)
 {
-	GAutoString Text;
+	LAutoString Text;
 	
 	if (Lock(_FL))
 	{
@@ -2441,7 +2441,7 @@ static bool IMapReceiveCallback(MailIMap *Imap, uint32_t Msg, MailIMap::StrMap &
 	return true;
 }
 
-bool MailIMap::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks)
+bool MailIMap::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks)
 {
 	bool Status = false;
 
@@ -2486,14 +2486,14 @@ bool MailIMap::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 	return Status;
 }
 
-bool MailIMap::Append(const char *Folder, ImapMailFlags *Flags, const char *Msg, GString &NewUid)
+bool MailIMap::Append(const char *Folder, ImapMailFlags *Flags, const char *Msg, LString &NewUid)
 {
 	bool Status = false;
 
 	if (Folder && Msg && Lock(_FL))
 	{
-		GAutoString Flag(Flags ? Flags->Get() : NULL);
-		GAutoString Path(EncodePath(Folder));
+		LAutoString Flag(Flags ? Flags->Get() : NULL);
+		LAutoString Path(EncodePath(Folder));
 
 		int Cmd = d->NextCmd++;
 		int Len = 0;
@@ -2567,11 +2567,11 @@ bool MailIMap::Append(const char *Folder, ImapMailFlags *Flags, const char *Msg,
 						sprintf_s(Tmp, sizeof(Tmp), "A%4.4i", Cmd);
 						for (auto Line: Dialog)
 						{
-							GAutoString c = ImapBasicTokenize(Line);
+							LAutoString c = ImapBasicTokenize(Line);
 							if (!c) break;
 							if (!strcmp(Tmp, c))
 							{
-								GAutoString a;
+								LAutoString a;
 
 								while ((a = ImapBasicTokenize(Line)).Get())
 								{
@@ -2674,7 +2674,7 @@ int MailIMap::Sizeof(int Message)
 
 bool ImapSizeCallback(MailIMap *Imap, uint32_t Msg, MailIMap::StrMap &Parts, void *UserData)
 {
-	GArray<int> *Sizes = (GArray<int>*) UserData;
+	LArray<int> *Sizes = (LArray<int>*) UserData;
 
 	char *Sz = Parts.Find(sRfc822Size);
 	if (!Sz)
@@ -2684,7 +2684,7 @@ bool ImapSizeCallback(MailIMap *Imap, uint32_t Msg, MailIMap::StrMap &Parts, voi
 	return true;
 }
 
-bool MailIMap::GetSizes(GArray<int> &Sizes)
+bool MailIMap::GetSizes(LArray<int> &Sizes)
 {
 	return Fetch(false, "1:*", sRfc822Size, ImapSizeCallback, &Sizes) != 0;	
 }
@@ -2775,7 +2775,7 @@ bool MailIMap::GetUidList(List<char> &Id)
 	return Status;
 }
 
-bool MailIMap::GetFolders(GArray<MailImapFolder*> &Folders)
+bool MailIMap::GetFolders(LArray<MailImapFolder*> &Folders)
 {
 	bool Status = false;
 
@@ -2793,7 +2793,7 @@ bool MailIMap::GetFolders(GArray<MailImapFolder*> &Folders)
 
 				for (auto d: Dialog)
 				{
-					GArray<GAutoString> t;
+					LArray<LAutoString> t;
 					char *s;
 					while ((s = LTokStr((const char*&)d)))
 					{
@@ -2949,8 +2949,8 @@ bool MailIMap::RenameFolder(const char *From, const char *To)
 	if (From && To && Lock(_FL))
 	{
 		int Cmd = d->NextCmd++;
-		GAutoString f(EncodePath(From));
-		GAutoString t(EncodePath(To));
+		LAutoString f(EncodePath(From));
+		LAutoString t(EncodePath(To));
 		sprintf_s(Buf, sizeof(Buf), "A%4.4i RENAME \"%s\" \"%s\"\r\n", Cmd, f.Get(), t.Get());
 		if (WriteBuf())
 		{
@@ -2987,7 +2987,7 @@ bool MailIMap::SetFolderFlags(MailImapFolder *f)
 	return Status;
 }
 
-bool MailIMap::SetFlagsByUid(GArray<uint32_t> &Uids, const char *Flags)
+bool MailIMap::SetFlagsByUid(LArray<uint32_t> &Uids, const char *Flags)
 {
 	bool Status = false;
 
@@ -3022,14 +3022,14 @@ bool MailIMap::SetFlagsByUid(GArray<uint32_t> &Uids, const char *Flags)
 	return Status;
 }
 
-bool MailIMap::CopyByUid(GArray<uint32_t> &InUids, const char *DestFolder)
+bool MailIMap::CopyByUid(LArray<uint32_t> &InUids, const char *DestFolder)
 {
 	bool Status = false;
 
 	if (Lock(_FL))
 	{
 		int Cmd = d->NextCmd++;
-		GAutoString Dest(EncodePath(DestFolder));
+		LAutoString Dest(EncodePath(DestFolder));
 
 		LStringPipe p(1024);
 		p.Print("A%04.4i UID COPY ", Cmd);
@@ -3040,7 +3040,7 @@ bool MailIMap::CopyByUid(GArray<uint32_t> &InUids, const char *DestFolder)
 		}
 		p.Print(" \"%s\"\r\n", Dest.Get());
 
-		GAutoString Buffer(p.NewStr());
+		LAutoString Buffer(p.NewStr());
 		if (Buffer && WriteBuf(false, Buffer))
 		{
 			ClearDialog();
@@ -3076,7 +3076,7 @@ bool MailIMap::ExpungeFolder()
 	return Status;
 }
 
-bool MailIMap::Search(bool Uids, GArray<GString> &SeqNumbers, const char *Filter)
+bool MailIMap::Search(bool Uids, LArray<LString> &SeqNumbers, const char *Filter)
 {
 	bool Status = false;
 
@@ -3095,7 +3095,7 @@ bool MailIMap::Search(bool Uids, GArray<GString> &SeqNumbers, const char *Filter
 						continue;
 
 					d++;
-					GAutoString s(Tok(d));
+					LAutoString s(Tok(d));
 					if (!s || _stricmp(s, "Search"))
 						continue;
 
@@ -3121,7 +3121,7 @@ bool MailIMap::Status(char *Path, int *Recent)
 
 	if (Path && Recent && Lock(_FL))
 	{
-		GAutoString Dest(EncodePath(Path));
+		LAutoString Dest(EncodePath(Path));
 
 		int Cmd = d->NextCmd++;
 		sprintf_s(Buf, sizeof(Buf), "A%4.4i STATUS %s (RECENT)\r\n", Cmd, Dest.Get());
@@ -3136,9 +3136,9 @@ bool MailIMap::Status(char *Path, int *Recent)
 						continue;
 
 					d++;
-					GAutoString Cmd = ImapBasicTokenize(d);
-					GAutoString Folder = ImapBasicTokenize(d);
-					GAutoString Fields = ImapBasicTokenize(d);
+					LAutoString Cmd = ImapBasicTokenize(d);
+					LAutoString Folder = ImapBasicTokenize(d);
+					LAutoString Fields = ImapBasicTokenize(d);
 					if (Cmd &&
 						Folder &&
 						Fields &&
@@ -3146,8 +3146,8 @@ bool MailIMap::Status(char *Path, int *Recent)
 						!_stricmp(Folder, Dest))
 					{
 						char *f = Fields;
-						GAutoString Field = ImapBasicTokenize(f);
-						GAutoString Value = ImapBasicTokenize(f);
+						LAutoString Field = ImapBasicTokenize(f);
+						LAutoString Value = ImapBasicTokenize(f);
 						if (Field &&
 							Value &&
 							!_stricmp(Field, "recent"))
@@ -3169,7 +3169,7 @@ bool MailIMap::Status(char *Path, int *Recent)
 	return Status;
 }
 
-bool MailIMap::Poll(int *Recent, GArray<GString> *New)
+bool MailIMap::Poll(int *Recent, LArray<LString> *New)
 {
 	bool Status = true;
 
@@ -3225,7 +3225,7 @@ bool MailIMap::StartIdle()
 	return Status;
 }
 
-bool MailIMap::OnIdle(int Timeout, GString::Array &Resp)
+bool MailIMap::OnIdle(int Timeout, LString::Array &Resp)
 {
 	bool Status = false;
 

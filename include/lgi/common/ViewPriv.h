@@ -123,12 +123,12 @@ public:
 	GViewFontType	FontOwnType;
 	
 	// Style
-	GAutoPtr<LCss>  Css;
+	LAutoPtr<LCss>  Css;
 	bool CssDirty;			// This is set when 'Styles' changes, the next call to GetCss(...) parses
 							// the styles into the 'Css' object.
-	GString			Styles; // Somewhat temporary object to store unparsed styles particular to
+	LString			Styles; // Somewhat temporary object to store unparsed styles particular to
 							// this view until runtime, where the view heirarchy is known.
-	GString::Array	Classes;
+	LString::Array	Classes;
 
 	// Event dispatch handle
 	int				SinkHnd;
@@ -140,7 +140,7 @@ public:
 		int				WndStyle;				// Win32 hWnd Style
 		int				WndExStyle;				// Win32 hWnd ExStyle
 		int				WndDlgCode;				// Win32 Dialog Code (WM_GETDLGCODE)
-		GString			WndClass;
+		LString			WndClass;
 		UINT_PTR		TimerId;
 		HTHEME			hTheme;
 		int				WantsPulse;
@@ -165,11 +165,11 @@ public:
 
 	#if defined(MAC)
 		#ifdef LGI_COCOA
-		GString ClassName;
+		LString ClassName;
 		bool AttachEvent;
 		#elif defined LGI_CARBON
 		EventHandlerRef DndHandler;
-		GAutoString AcceptedDropFormat;
+		LAutoString AcceptedDropFormat;
 		#endif
 	#endif
 	

@@ -461,7 +461,7 @@ GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 		if (Info.Compression == BI_BITFIELDS)
 		{
 			// Should we try and create a colour space from these fields?
-			GArray<MaskComp> Comps;
+			LArray<MaskComp> Comps;
 			Comps.New().Set(CtRed, Info.RedMask);
 			Comps.New().Set(CtGreen, Info.GreenMask);
 			Comps.New().Set(CtBlue, Info.BlueMask);
@@ -1380,7 +1380,7 @@ LSurface *GdcDevice::Load(const char *Name, bool UseOSLoader)
 	{
 		// Loading non-file resource...
 		#if WINNATIVE
-		GAutoWString WName(Utf8ToWide(Name));
+		LAutoWString WName(Utf8ToWide(Name));
 		// a resource... lock and load gentlemen
 		HRSRC hRsrc = FindResource(NULL, WName, RT_BITMAP);
 		if (hRsrc)
@@ -1426,7 +1426,7 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 		return NULL;
 	}
 
-	GAutoPtr<uchar, true> Hint(new uchar[16]);
+	LAutoPtr<uchar, true> Hint(new uchar[16]);
 	memset(Hint, 0, 16);
 	if (In->Read(Hint, 16) == 0)
 	{
@@ -1441,8 +1441,8 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 	}
 
 	LXmlTag Props;
-	GAutoPtr<GFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, Hint));
-	GAutoPtr<LSurface> pDC;
+	LAutoPtr<GFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, Hint));
+	LAutoPtr<LSurface> pDC;
 	if (Filter &&
 		pDC.Reset(new LMemDC))
 	{
@@ -1627,7 +1627,7 @@ bool GdcDevice::Save(LStream *Out, LSurface *In, const char *FileType)
 	if (!Out || !In || !FileType)
 		return false;
 
-	GAutoPtr<GFilter> F(GFilterFactory::New(FileType, FILTER_CAP_WRITE, 0));
+	LAutoPtr<GFilter> F(GFilterFactory::New(FileType, FILTER_CAP_WRITE, 0));
 	if (!F)
 	{
 		LgiTrace("%s:%i - No filter for '%s'\n", _FL, FileType);

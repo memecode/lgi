@@ -37,7 +37,7 @@ public:
 	GColour Colour();
 
 	#if WINNATIVE
-	GString CssStyles(const char *CssStyle = NULL);
+	LString CssStyles(const char *CssStyle = NULL);
 	#else
 	void OnPaint(LSurface *pDC) override;
 	#endif

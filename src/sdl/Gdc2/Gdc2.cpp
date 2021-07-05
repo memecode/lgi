@@ -433,7 +433,7 @@ GColourSpace PixelFormat2ColourSpace(SDL_PixelFormat *pf)
 	}
 	else
 	{
-		GArray<char> Bits;
+		LArray<char> Bits;
 		Bits.Length(pf->BitsPerPixel + 1);
 		Bits[pf->BitsPerPixel] = 0;
 		memset(&Bits[0], 'x', pf->BitsPerPixel);
@@ -545,11 +545,11 @@ public:
 	{
 		const SDL_VideoInfo *vi = SDL_GetVideoInfo();
 		LPoint ScreenSz(320, 240);
-		GString ScrOpt;
+		LString ScrOpt;
 		if (LgiApp->GetOption("screen", ScrOpt))
 		{
-			GString s = ScrOpt.Get();
-			GString::Array a = s.Split("x");
+			LString s = ScrOpt.Get();
+			LString::Array a = s.Split("x");
 			if (a.Length() == 2)
 			{
 				ScreenSz.x = a[0].Int();

@@ -49,7 +49,7 @@ class XmlPoolAlloc : public LXmlAlloc
 		}
 	};
 
-	GArray<Block> Mem;
+	LArray<Block> Mem;
 
 public:
 	XmlPoolAlloc()
@@ -131,11 +131,11 @@ public:
 	LXmlFactory *Factory;
 	LXmlTag *Current;
 	LStreamI *File;
-	GString Error;
+	LString Error;
 	int Flags;
 	LHashTbl<ConstStrKey<char,false>,char16> Entities;
 	LHashTbl<ConstStrKey<char,false>,bool> NoChildTags;
-	GArray<char> Buf;
+	LArray<char> Buf;
 	Progress *Prog;
 	
 	char *StyleFile;
@@ -334,7 +334,7 @@ char *LXmlTree::DecodeEntities(LXmlAlloc *Alloc, char *In, ssize_t Len)
 
 		if (c16)
 		{
-			GAutoString c8(WideToUtf8(&c16, 1));
+			LAutoString c8(WideToUtf8(&c16, 1));
 			if (c8)
 			{
 				for (char *c = c8; *c; c++)
@@ -470,7 +470,7 @@ bool LXmlTag::Copy(LXmlTag &t, bool Deep)
 	return true;
 }
 
-bool LXmlTag::XPath(GArray<LXmlTag*> &Results, const char *Path)
+bool LXmlTag::XPath(LArray<LXmlTag*> &Results, const char *Path)
 {
 	return false;
 }
@@ -874,7 +874,7 @@ bool LXmlTag::SetAttr(const char *n, int64 Value)
 	return false;
 }
 
-bool LXmlTag::SerializeAttr(const char *Attr, GString &s)
+bool LXmlTag::SerializeAttr(const char *Attr, LString &s)
 {
 	if (Write) // arg -> attr
 	{
@@ -1216,7 +1216,7 @@ ParsingStart:
 					PreContent->Content = Before.NewStr();
 				else
 				{
-					GAutoString Tmp(Before.NewStr());
+					LAutoString Tmp(Before.NewStr());
 					GAutoRefPtr<LXmlAlloc> LocalAlloc(new XmlNormalAlloc);
 					PreContent->Content = DecodeEntities(Tag ? Tag->Allocator : LocalAlloc, Tmp, strlen(Tmp));
 				}
@@ -1263,7 +1263,7 @@ ParsingStart:
 		{
 			if (TagName[0] == '?')
 			{
-				GAutoString TmpStr(NewStr(TagName, t - TagName));
+				LAutoString TmpStr(NewStr(TagName, t - TagName));
 				LXmlTag Temp(TmpStr, Alloc);
 				TmpStr.Reset();
 				bool bTrue = true;
@@ -1383,7 +1383,7 @@ bool LXmlTree::Read(LXmlTag *Root, LStreamI *File, LXmlFactory *Factory)
 		return false;
 	}
 	
-	GString t = Root->Tag;
+	LString t = Root->Tag;
 	Root->SetTag(NULL);	
 	GAutoRefPtr<LXmlAlloc> Allocator(new XmlPoolAlloc);
 	Root->Allocator = Allocator;
@@ -1420,7 +1420,7 @@ bool LXmlTree::Read(LXmlTag *Root, LStreamI *File, LXmlFactory *Factory)
 	{
 		bool NoChildren = true;
 		
-		GAutoPtr<LXmlTag> t
+		LAutoPtr<LXmlTag> t
 		(
 		    Parse(  First && !TestFlag(d->Flags, GXT_NO_DOM) ? Root : 0,
 					Allocator,

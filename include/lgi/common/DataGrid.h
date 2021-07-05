@@ -15,8 +15,8 @@ public:
 	};
 
 	typedef LListItem *(*ItemFactory)(void *userdata);
-	typedef GArray<LListItem*> ItemArray;
-	typedef GArray<int> IndexArray;
+	typedef LArray<LListItem*> ItemArray;
+	typedef LArray<int> IndexArray;
 
 	LDataGrid(int CtrlId, ItemFactory Func = 0, void *userdata = 0);
 	~LDataGrid();
@@ -30,7 +30,7 @@ public:
 	IndexArray *GetDeletedItems();
 
 	// Impl
-	void OnItemSelect(GArray<LListItem*> &Items);
+	void OnItemSelect(LArray<LListItem*> &Items);
 	void OnItemClick(LListItem *Item, LMouse &m);
 	void OnCreate();
 	GMessage::Result OnEvent(GMessage *Msg);
@@ -44,10 +44,10 @@ public:
 	// D'n'd
 	void SetDndFormats(char *SrcFmt, char *AcceptFmt);
 	void OnItemBeginDrag(LListItem *Item, LMouse &m);
-	bool GetData(GArray<GDragData> &Data);
+	bool GetData(LArray<GDragData> &Data);
 	bool GetFormats(GDragFormats &Formats);
 	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState);
-	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState);
+	int OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState);
 	ItemArray *GetDroppedItems();
 };
 

@@ -10,14 +10,14 @@ struct LParsePart
 
 	// if (Start != 0) -> The name of the parsed variable
 	// else -> The string literal
-	GString Str;
+	LString Str;
 
 	LParsePart()
 	{
 		Start = 0;
 	}
 
-	static GArray<LParsePart> Split
+	static LArray<LParsePart> Split
 	(
 		// String to parse
 		const char *In,
@@ -31,7 +31,7 @@ struct LParsePart
 		const char *SeparatorPairs
 	)
 	{
-		GArray<LParsePart> a;
+		LArray<LParsePart> a;
 		const char *c = In;
 		const char *prev = c;
 		char Lut[256] = {0};

@@ -7,16 +7,16 @@
 class LSelect
 {
 protected:
-	GArray<LSocket*> s;
-	int Select(GArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs);
+	LArray<LSocket*> s;
+	int Select(LArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs);
 
 public:
 	LSelect(LSocket *sock = NULL);
 	
 	LSelect &operator +=(LSocket *sock);
 	
-	GArray<LSocket*> Readable(int Timeout = -1);
-	GArray<LSocket*> Writeable(int Timeout = -1);
+	LArray<LSocket*> Readable(int Timeout = -1);
+	LArray<LSocket*> Writeable(int Timeout = -1);
 };
 
 class LWebSocket : public LSocket
@@ -28,10 +28,10 @@ public:
 	LWebSocket(bool Server = true, OnMsg onMsg = nullptr);
 	~LWebSocket();
 
-	bool InitFromHeaders(GString Data, OsSocket Sock);
+	bool InitFromHeaders(LString Data, OsSocket Sock);
 	void ReceiveHandler(OnMsg onMsg);
 	bool SendMessage(char *Data, uint64 Len);
-	bool SendMessage(GString s) { return SendMessage(s.Get(), s.Length()); }
+	bool SendMessage(LString s) { return SendMessage(s.Get(), s.Length()); }
 	bool OnData();
 };
 

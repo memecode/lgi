@@ -230,8 +230,8 @@ class GNativeString
 {
 	static bool WinNT;
 
-	GString n;
-	GAutoWString w;
+	LString n;
+	LAutoWString w;
 
 public:
 	GNativeString(const char *utf = NULL)
@@ -325,14 +325,14 @@ public:
 		return w;
 	}
 
-	GString GetString()
+	LString GetString()
 	{
 		if (w)
 			return LStrConvertCp("utf-8", w, LGI_WideCharset);
 		else if (n)
 			return n;
 
-		return GString();
+		return LString();
 	}
 
 	size_t GetSize()
@@ -379,7 +379,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 		}
 		else
 		{
-			GString::Array p = LGetEnv("PATH").Split(LGI_PATH_SEPARATOR);
+			LString::Array p = LGetEnv("PATH").Split(LGI_PATH_SEPARATOR);
 			for (auto Path : p)
 			{
 				char s[MAX_PATH];
@@ -490,7 +490,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 				}
 				else
 				{
-					GString u = NExe.GetString();
+					LString u = NExe.GetString();
 					if (u)
 					{
 						LgiTrimDir(u);
@@ -634,7 +634,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 		Pipe Write;
 		Pipe Error;
 		
-		GArray<char*> a;
+		LArray<char*> a;
 		a.Add((char*)Exe);
 		for (const char *s=Arguments; s && *s; )
 		{

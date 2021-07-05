@@ -9,18 +9,18 @@ class GAppPrivate
 public:
 	// Common
 	GApp *Owner;
-	GAutoPtr<LJson> Config;
+	LAutoPtr<LJson> Config;
 	GFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
 	GLibrary *SkinLib;
 	OsThread GuiThread;
 	int LinuxWine;
-	GAutoString Mime, ProductId;
+	LAutoString Mime, ProductId;
 	bool ThemeAware;
 
 	/// Any fonts needed for styling the elements
-	GAutoPtr<GFontCache> FontCache;
+	LAutoPtr<GFontCache> FontCache;
 
 	// Win32
 	bool QuitReceived;

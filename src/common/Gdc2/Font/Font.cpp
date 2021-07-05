@@ -64,18 +64,18 @@
 			return lib;
 		}
 		
-		GString GetVersion()
+		LString GetVersion()
 		{
 			FT_Int amajor = 0, aminor = 0, apatch = 0;
 			FT_Library_Version(lib, &amajor, &aminor, &apatch);
-			GString s;
+			LString s;
 			s.Printf("%i.%i.%i", amajor, aminor, apatch);
 			return s;
 		}
 		
 	} Freetype2;
 
-	GString GetFreetypeLibraryVersion()
+	LString GetFreetypeLibraryVersion()
 	{
 		return Freetype2.GetVersion();
 	}
@@ -136,7 +136,7 @@
 #include "FontPriv.h"
 
 #ifdef WINDOWS
-GAutoPtr<GLibrary> LFontPrivate::Gdi32;
+LAutoPtr<GLibrary> LFontPrivate::Gdi32;
 #endif
 
 LFont::LFont(const char *face, LCss::Len size)
@@ -230,7 +230,7 @@ bool LFont::CreateFromCss(LCss *Css)
 	return Create();
 }
 
-GString LFont::FontToCss()
+LString LFont::FontToCss()
 {
 	LCss c;
 	c.FontFamily(Face());
@@ -543,29 +543,29 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 
 	#if LGI_SDL
 	
-		GString FaceName;
+		LString FaceName;
 		#if defined(WIN32)
 		const char *Ext = "ttf";
-		GString FontPath = "c:\\Windows\\Fonts";
+		LString FontPath = "c:\\Windows\\Fonts";
 		#elif defined(LINUX)
 		const char *Ext = "ttf";
-		GString FontPath = "/usr/share/fonts/truetype";
+		LString FontPath = "/usr/share/fonts/truetype";
 		#elif defined(MAC)
 		const char *Ext = "ttc";
-		GString FontPath = "/System/Library/Fonts";
+		LString FontPath = "/System/Library/Fonts";
 		#else
 		#error "Put your font path here"
 		#endif
 		GFile::Path p = FontPath.Get();
 		FaceName.Printf("%s.%s", Face(), Ext);
 		p += FaceName;
-		GString Full = p.GetFull();
+		LString Full = p.GetFull();
 	
 		if (!LFileExists(Full))
 		{
-			GArray<char*> Files;
-			GArray<const char*> Extensions;
-			GString Pattern;
+			LArray<char*> Files;
+			LArray<const char*> Extensions;
+			LString Pattern;
 			Pattern.Printf("*.%s", Ext);
 			Extensions.Add(Pattern.Get());
 			LRecursiveFileSearch(FontPath, &Extensions, &Files, NULL, NULL, NULL, NULL);
@@ -651,7 +651,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 							(PointSize() == 8 || PointSize() == 9) &&
 							LTypeFace::d->_Underline;
 
-		GAutoWString wFace(Utf8ToWide(LTypeFace::d->_Face));
+		LAutoWString wFace(Utf8ToWide(LTypeFace::d->_Face));
 		if (Win32Height)
 			d->hFont = ::CreateFont(Win32Height,
 									0,
@@ -698,7 +698,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 			{
 				memset(d->GlyphMap, 0, Bytes);
 
-				GArray<int> OsVer;
+				LArray<int> OsVer;
 				int OsType = LGetOs(&OsVer);
 				if (OsType == LGI_OS_WIN9X ||
 					OsVer[0] < 5) // GetFontUnicodeRanges is supported on >= Win2k
@@ -858,7 +858,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		else
 		{
 			auto Sz = Size();
-			GString sFace = Face();
+			LString sFace = Face();
 			Gtk::pango_font_description_set_family(d->hFont, sFace);
 			if (Sz.Type == LCss::LenPt)
 				Gtk::pango_font_description_set_size(d->hFont, Sz.Value * PANGO_SCALE);
@@ -948,8 +948,8 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 				CFRelease(d->Attributes);
 
 			auto Sz = Size();
-			GString sFamily(Face());
-			GString sBold("Bold");
+			LString sFamily(Face());
+			LString sBold("Bold");
 			int keys = 1;
 			CFStringRef key[5]  = {	kCTFontFamilyNameAttribute };
 			CFTypeRef values[5] = {	sFamily.CreateStringRef() };
@@ -1089,7 +1089,7 @@ bool LFont::Create(LFontType *LogFont, LSurface *pSurface)
 	{
 		// set props
 		PointSize(WinHeightToPoint(LogFont->Info.lfHeight));
-		GString uFace = LogFont->Info.lfFaceName;
+		LString uFace = LogFont->Info.lfFaceName;
 		if (ValidStr(uFace))
 		{
 			Face(uFace);
@@ -1156,9 +1156,9 @@ char16 WinSymbolToUnicode[256] =
     /* 240 to 255 */ 8680, 8679, 8681, 8660, 8661, 8662, 8663, 8665, 8664, 0, 0, 10007, 10003, 9746, 9745, 0,
 };
 
-GAutoString LFont::ConvertToUnicode(char16 *Input, ssize_t Len)
+LAutoString LFont::ConvertToUnicode(char16 *Input, ssize_t Len)
 {
-	GAutoString a;
+	LAutoString a;
 	
 	if (LTypeFace::d->IsSymbol)
 	{
@@ -1182,7 +1182,7 @@ GAutoString LFont::ConvertToUnicode(char16 *Input, ssize_t Len)
 				c++;
 			}
 			
-			GAutoWString w(p.NewStrW());
+			LAutoWString w(p.NewStrW());
 			a.Reset(WideToUtf8(w));
 		}
 	}

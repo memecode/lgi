@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include "LgiInc.h"
 #include "LgiDefs.h"
-#include "GAutoPtr.h"
+#include "LAutoPtr.h"
 #include "pthread.h"
 
 //////////////////////////////////////////////////////////////////

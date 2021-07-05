@@ -9,7 +9,7 @@
 #define EDIT_TRAY_HEIGHT	(SysFont->GetHeight() + 10)
 #define EDIT_LEFT_MARGIN	16 // gutter for debug break points
 int DocEdit::LeftMarginPx = EDIT_LEFT_MARGIN;
-GAutoPtr<GDocFindReplaceParams> GlobalFindReplace;
+LAutoPtr<GDocFindReplaceParams> GlobalFindReplace;
 DocEdit::DocEdit(IdeDoc *d, LFontType *f) :
 	LTextView3(IDC_EDIT, 0, 0, 100, 100, f),
 	DocEditStyling(this)
@@ -79,11 +79,11 @@ bool DocEdit::DoGoto()
 	GInput Dlg(this, "", LgiLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
 	if (Dlg.DoModal() != IDOK || !ValidStr(Dlg.GetStr()))
 		return false;
-	GString s = Dlg.GetStr();
-	GString::Array p = s.SplitDelimit(":,");
+	LString s = Dlg.GetStr();
+	LString::Array p = s.SplitDelimit(":,");
 	if (p.Length() == 2)
 	{
-		GString file = p[0];
+		LString file = p[0];
 		int line = (int)p[1].Int();
 		Doc->GetApp()->GotoReference(file, line, false, true);
 	}

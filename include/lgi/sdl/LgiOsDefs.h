@@ -98,7 +98,7 @@ public:
 	~OsAppArguments();
 
 	void Set(const char *CmdLine);
-	bool Get(const char *Arg, class GString *Value = NULL);
+	bool Get(const char *Arg, class LString *Value = NULL);
 	OsAppArguments &operator =(OsAppArguments &a);
 };
 
@@ -551,7 +551,7 @@ typedef BOOL (__stdcall *pSHGetSpecialFolderPathA)(HWND hwndOwner, LPSTR lpszPat
 typedef BOOL (__stdcall *pSHGetSpecialFolderPathW)(HWND hwndOwner, LPWSTR lpszPath, int nFolder, BOOL fCreate);
 typedef int (__stdcall *pSHFileOperationA)(LPSHFILEOPSTRUCTA lpFileOp);
 typedef int (__stdcall *pSHFileOperationW)(LPSHFILEOPSTRUCTW lpFileOp);
-LgiExtern class GString WinGetSpecialFolderPath(int Id);
+LgiExtern class LString WinGetSpecialFolderPath(int Id);
 
 typedef int (__stdcall *p_vscprintf)(const char *format, va_list argptr);
 

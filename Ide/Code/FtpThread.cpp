@@ -191,8 +191,8 @@ public:
 struct FtpThreadPriv : public LMutex
 {
 	bool Loop;
-	GArray<FtpConn*> Conn;
-	GArray<FtpCmd*> Cmds;
+	LArray<FtpConn*> Conn;
+	LArray<FtpCmd*> Cmds;
 	FtpRedir *Redir;
 
 	FtpThreadPriv()

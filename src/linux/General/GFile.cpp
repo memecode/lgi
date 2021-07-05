@@ -29,7 +29,7 @@
 #include "GToken.h"
 #include "Gdc2.h"
 #include "LgiCommon.h"
-#include "GString.h"
+#include "LString.h"
 #include "LDateTime.h"
 #if defined(WIN32)
 #include "errno.h"
@@ -48,7 +48,7 @@
 
 /****************************** Globals ***********************************/
 
-GString GFile::Path::Sep(DIR_STR);
+LString GFile::Path::Sep(DIR_STR);
 
 struct ErrorCodeType
 {
@@ -533,7 +533,7 @@ struct GVolumePriv
 	int64 _Size, _Free;
 	int _Type, _Flags;
 	LgiSystemPath SysPath;
-	GString _Name, _Path;
+	LString _Name, _Path;
 	List<GVolume> _Sub;
 	List<GVolume>::I _It;
 
@@ -657,7 +657,7 @@ struct GVolumePriv
 								LSP_USER_PICTURES};
 			for (int i=0; i<CountOf(p); i++)
 			{
-				GString Path = LGetSystemPath(p[i]);
+				LString Path = LGetSystemPath(p[i]);
 				if (Path &&
 					(v = new GVolume(0)))
 				{
@@ -750,7 +750,7 @@ GVolume *GVolume::Next()
     return d->Next();
 }
 
-void GVolume::Insert(GAutoPtr<GVolume> v)
+void GVolume::Insert(LAutoPtr<GVolume> v)
 {
     d->_Sub.Insert(v.Release());
 }
@@ -795,7 +795,7 @@ GVolume *GFileSystem::GetRootVolume()
 
 bool GFileSystem::Copy(const char *From, const char *To, LError *Status, CopyFileCallback Callback, void *Token)
 {
-	GArray<char> Buf;
+	LArray<char> Buf;
 
 	if (Status)
 		*Status = 0;
@@ -847,7 +847,7 @@ bool GFileSystem::Copy(const char *From, const char *To, LError *Status, CopyFil
 	return false;
 }
 
-bool GFileSystem::Delete(GArray<const char*> &Files, GArray<LError> *Status, bool ToTrash)
+bool GFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, bool ToTrash)
 {
 	bool Error = false;
 
@@ -900,7 +900,7 @@ bool GFileSystem::Delete(const char *FileName, bool ToTrash)
 {
 	if (FileName)
 	{
-		GArray<const char*> f;
+		LArray<const char*> f;
 		f.Add(FileName);
 		return Delete(f, 0, ToTrash);
 	}
@@ -918,7 +918,7 @@ bool GFileSystem::CreateFolder(const char *PathName, bool CreateParentTree, LErr
 		if (CreateParentTree)
 		{
 			GFile::Path p(PathName);
-			GString dir = DIR_STR;
+			LString dir = DIR_STR;
 			for (size_t i=1; i<=p.Length(); i++)
 			{
 				GFile::Path Par(dir + dir.Join(p.Slice(0, i)));
@@ -1215,7 +1215,7 @@ const char *GDirectory::FullPath()
 	return s;
 }
 
-GString GDirectory::FileName() const
+LString GDirectory::FileName() const
 {
 	return GetName();
 }
@@ -1380,7 +1380,7 @@ bool GFile::IsOpen()
 
 #if DEBUG_OPEN_FILES
 LMutex Lck;
-GArray<GFile*> OpenFiles;
+LArray<GFile*> OpenFiles;
 #endif
 
 int GFile::Open(const char *File, int Mode)
@@ -1696,7 +1696,7 @@ GFileOps();
 //////////////////////////////////////////////////////////////////////////////
 bool GFile::Path::FixCase()
 {
-	GString Prev;
+	LString Prev;
 	bool Changed = false;
 	
 	// printf("FixCase '%s'\n", GetFull().Get());

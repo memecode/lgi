@@ -117,7 +117,7 @@ public:
 		if (!p || !s)
 			return;
 		
-		GArray<ProjectNode*> Matches, Nodes;
+		LArray<ProjectNode*> Matches, Nodes;
 
 		List<IdeProject> All;
 		p->GetChildProjects(All);
@@ -133,7 +133,7 @@ public:
 		for (auto m: Matches)
 		{
 			LListItem *li = new LListItem;
-			GString Fn = m->GetFileName();
+			LString Fn = m->GetFileName();
 			#ifdef WINDOWS
 			Fn = Fn.Replace("/","\\");
 			#else
@@ -544,7 +544,7 @@ public:
 	LTabPage *Ftp;
 	LList *FtpLog;
 	GTextLog *Txt[3];
-	GArray<char> Buf[3];
+	LArray<char> Buf[3];
 	LFont Small;
 	LFont Fixed;
 
@@ -878,7 +878,7 @@ public:
 		AttachChildren();
 	}
 
-	void RemoveAnsi(GArray<char> &a)
+	void RemoveAnsi(LArray<char> &a)
 	{
 		char *s = a.AddressOf();
 		char *e = s + a.Length();
@@ -933,7 +933,7 @@ public:
 			if (Size)
 			{
 				char *Utf = &Buf[Channel][0];
-				GAutoPtr<char16, true> w;
+				LAutoPtr<char16, true> w;
 
 				if (!LIsUtf8(Utf, (ssize_t)Size))
 				{
@@ -942,7 +942,7 @@ public:
 					// Clear out the invalid UTF?
 					uint8_t *u = (uint8_t*) Utf, *e = u + Size;
 					ssize_t len = Size;
-					GArray<wchar_t> out;
+					LArray<wchar_t> out;
 					while (u < e)
 					{
 						int32 u32 = LgiUtf8To32(u, len);
@@ -1001,7 +1001,7 @@ int DocSorter(IdeDoc *a, IdeDoc *b, NativeInt d)
 
 struct FileLoc
 {
-	GAutoString File;
+	LAutoString File;
 	int Line;
 	
 	void Set(const char *f, int l)
@@ -1029,16 +1029,16 @@ public:
 	bool FixBuildWait = false;
 	LSubMenu *WindowsMenu;
 	LSubMenu *CreateMakefileMenu;
-	GAutoPtr<FindSymbolSystem> FindSym;
-	GArray<GAutoString> SystemIncludePaths;
-	GArray<GDebugger::BreakPoint> BreakPoints;
+	LAutoPtr<FindSymbolSystem> FindSym;
+	LArray<LAutoString> SystemIncludePaths;
+	LArray<GDebugger::BreakPoint> BreakPoints;
 	
 	// Debugging
 	GDebugContext *DbgContext;
 	
 	// Cursor history tracking
 	int HistoryLoc;
-	GArray<FileLoc> CursorHistory;
+	LArray<FileLoc> CursorHistory;
 	bool InHistorySeek;
 	
 	void SeekHistory(int Direction)
@@ -1058,14 +1058,14 @@ public:
 	}
 	
 	// Find in files
-	GAutoPtr<FindParams> FindParameters;
-	GAutoPtr<FindInFilesThread> Finder;
+	LAutoPtr<FindParams> FindParameters;
+	LAutoPtr<FindInFilesThread> Finder;
 	int AppHnd;
 	
 	// Mru
-	GString::Array RecentFiles;
+	LString::Array RecentFiles;
 	LSubMenu *RecentFilesMenu;
-	GString::Array RecentProjects;
+	LString::Array RecentProjects;
 	LSubMenu *RecentProjectsMenu;
 
 	// Object
@@ -1118,7 +1118,7 @@ public:
 		DeleteObj(Icons);
 	}
 
-	bool FindSource(GAutoString &Full, char *File, char *Context)
+	bool FindSource(LAutoString &Full, char *File, char *Context)
 	{
 		if (!LgiIsRelativePath(File))
 		{
@@ -1158,7 +1158,7 @@ public:
 			List<IdeProject>::I Projs = Projects.begin();
 			for (IdeProject *p=*Projs; p; p=*++Projs)
 			{
-				GAutoString Base = p->GetBasePath();
+				LAutoString Base = p->GetBasePath();
 				if (Base)
 				{
 					char Path[MAX_PATH];
@@ -1195,7 +1195,7 @@ public:
 
 	void ViewMsg(char *File, int Line, char *Context)
 	{
-		GAutoString Full;
+		LAutoString Full;
 		if (FindSource(Full, File, Context))
 		{
 			App->GotoReference(Full, Line, false);
@@ -1252,7 +1252,7 @@ public:
 		
 	void SeekMsg(int Direction)
 	{
-		GString Comp;
+		LString Comp;
 		IdeProject *p = App->RootProject();
 		if (p)
 			p ->GetSettings()->GetStr(ProjCompiler);
@@ -1321,7 +1321,7 @@ public:
 		}
 						
 		// Store the filename
-		GAutoString File(WideToUtf8(Txt+Line, i-Line));
+		LAutoString File(WideToUtf8(Txt+Line, i-Line));
 		if (!File)
 			return;
 		char *Sep;
@@ -1334,7 +1334,7 @@ public:
 			NumIndex++;
 							
 		// Store the line number
-		GAutoString NumStr(WideToUtf8(Txt + i, NumIndex - i));
+		LAutoString NumStr(WideToUtf8(Txt + i, NumIndex - i));
 		if (!NumStr)
 			return;
 
@@ -1343,7 +1343,7 @@ public:
 		o->SetCaret(Line, false);
 		o->SetCaret(NumIndex + 1, true);
 								
-		GString Context8 = Context;
+		LString Context8 = Context;
 		ViewMsg(File, LineNumber, Context8);
 	}
 
@@ -1444,7 +1444,7 @@ public:
 	{
 		if (File)
 		{
-			GString::Array *Recent[3] = { &RecentProjects, &RecentFiles, 0 };
+			LString::Array *Recent[3] = { &RecentProjects, &RecentFiles, 0 };
 			for (int i=0; Recent[i]; i++)
 			{
 				auto &a = *Recent[i];
@@ -1498,7 +1498,7 @@ public:
 		return 0;
 	}
 
-	void SerializeStringList(const char *Opt, GString::Array *Lst, bool Write)
+	void SerializeStringList(const char *Opt, LString::Array *Lst, bool Write)
 	{
 		LVariant v;
 		if (Write)
@@ -1689,7 +1689,7 @@ Chk;
 	
 Chk;
 		#ifdef LINUX
-		GString f = LgiFindFile("lgiide.png");
+		LString f = LgiFindFile("lgiide.png");
 		if (f)
 		{
 			// Handle()->setIcon(f);
@@ -1759,11 +1759,11 @@ GDebugContext *AppWnd::GetDebugContext()
 struct DumpBinThread : public LThread
 {
 	LStream *Out;
-	GString InFile;
+	LString InFile;
 	bool IsLib;
 
 public:
-	DumpBinThread(LStream *out, GString file) : LThread("DumpBin.Thread")
+	DumpBinThread(LStream *out, LString file) : LThread("DumpBin.Thread")
 	{
 		Out = out;
 		InFile = file;
@@ -1775,7 +1775,7 @@ public:
 		Run();
 	}
 
-	bool DumpBin(GString Args, LStream *Str)
+	bool DumpBin(LString Args, LStream *Str)
 	{
 		char Buf[256];
 		ssize_t Rd;
@@ -1794,9 +1794,9 @@ public:
 		return true;
 	}
 
-	GString::Array Dependencies(const char *Executable, int Depth = 0)
+	LString::Array Dependencies(const char *Executable, int Depth = 0)
 	{
-		GString Args;
+		LString Args;
 		LStringPipe p;
 		Args.Printf("/dependents \"%s\"", Executable);
 		DumpBin(Args, &p);
@@ -1806,7 +1806,7 @@ public:
 		memset(Spaces, ' ', Len);
 		Spaces[Len] = 0;
 
-		GString::Array Files;
+		LString::Array Files;
 		auto Parts = p.NewGStr().Replace("\r", "").Split("\n\n");
 		if (Parts.Length() > 0)
 		{
@@ -1842,7 +1842,7 @@ public:
 						Files.SetFixedLength(false);
 						for (auto s: Deps)
 						{
-							GString p;
+							LString p;
 							p.Printf("%s%s", Spaces, s.Get());
 							Files.AddAt(++i, p);
 						}
@@ -1854,15 +1854,15 @@ public:
 		return Files;
 	}
 
-	GString GetArch()
+	LString GetArch()
 	{
-		GString Args;
+		LString Args;
 		LStringPipe p;
 		Args.Printf("/headers \"%s\"", InFile.Get());
 		DumpBin(Args, &p);
 	
 		const char *Key = " machine ";
-		GString Arch;
+		LString Arch;
 		auto Lines = p.NewGStr().SplitDelimit("\r\n");
 		int64 Machine = 0;
 		for (auto &Ln : Lines)
@@ -1888,9 +1888,9 @@ public:
 		return Arch;
 	}
 
-	GString GetExports()
+	LString GetExports()
 	{
-		GString Args;
+		LString Args;
 		LStringPipe p;
 
 		if (IsLib)
@@ -1899,13 +1899,13 @@ public:
 			Args.Printf("/exports \"%s\"", InFile.Get());
 		DumpBin(Args, &p);
 	
-		GString Exp;
+		LString Exp;
 
 		auto Sect = p.NewGStr().Replace("\r", "").Split("\n\n");
 
 		if (IsLib)
 		{
-			GString::Array Lines, Funcs;
+			LString::Array Lines, Funcs;
 			for (auto &s : Sect)
 			{
 				if (s.Find("COFF", 0, 100) == 0)
@@ -1928,7 +1928,7 @@ public:
 				}
 			}
 
-			Exp = GString("\n").Join(Funcs);
+			Exp = LString("\n").Join(Funcs);
 		}
 		else
 		{
@@ -1955,7 +1955,7 @@ public:
 		{
 			auto Deps = Dependencies(InFile);
 			if (Deps.Length())
-				Out->Print("Dependencies:\n\t%s\n\n", GString("\n\t").Join(Deps).Get());
+				Out->Print("Dependencies:\n\t%s\n\n", LString("\n\t").Join(Deps).Get());
 		}
 
 		auto Arch = GetArch();
@@ -1969,7 +1969,7 @@ public:
 	}
 };
 
-void AppWnd::OnReceiveFiles(GArray<const char*> &Files)
+void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 {
 	for (int i=0; i<Files.Length(); i++)
 	{
@@ -1997,7 +1997,7 @@ void AppWnd::OnReceiveFiles(GArray<const char*> &Files)
 		{
 			// dumpbin /exports csp.dll
 			GFile::Path Docs(LSP_USER_DOCUMENTS);
-			GString Name;
+			LString Name;
 			Name.Printf("%s.txt", Files[i]);
 			Docs += Name;
 			IdeDoc *Doc = NewDocWnd(NULL, NULL);
@@ -2035,7 +2035,7 @@ void AppWnd::OnDebugState(bool Debugging, bool Running)
 	PostEvent(M_DEBUG_ON_STATE, Debugging, Running);
 }
 
-bool IsVarChar(GString &s, ssize_t pos)
+bool IsVarChar(LString &s, ssize_t pos)
 {
 	if (pos < 0)
 		return false;
@@ -2045,7 +2045,7 @@ bool IsVarChar(GString &s, ssize_t pos)
 	return IsAlpha(i) || IsDigit(i) || i == '_';
 }
 
-bool ReplaceWholeWord(GString &Ln, GString Word, GString NewWord)
+bool ReplaceWholeWord(LString &Ln, LString Word, LString NewWord)
 {
 	ssize_t Pos = 0;
 	bool Status = false;
@@ -2059,7 +2059,7 @@ bool ReplaceWholeWord(GString &Ln, GString Word, GString NewWord)
 		ssize_t End = Pos + Word.Length();
 		if (!IsVarChar(Ln, Pos-1) && !IsVarChar(Ln, End))
 		{
-			GString NewLn = Ln(0,Pos) + NewWord + Ln(End,-1);
+			LString NewLn = Ln(0,Pos) + NewWord + Ln(End,-1);
 			Ln = NewLn;
 			Status = true;
 		}
@@ -2072,8 +2072,8 @@ bool ReplaceWholeWord(GString &Ln, GString Word, GString NewWord)
 
 struct LFileInfo
 {
-	GString Path;
-	GString::Array Lines;
+	LString Path;
+	LString::Array Lines;
 	bool Dirty;
 
 	LFileInfo()
@@ -2087,7 +2087,7 @@ struct LFileInfo
 		if (!f.Open(Path, O_WRITE))
 			return false;
 
-		GString NewFile = GString("\n").Join(Lines);
+		LString NewFile = LString("\n").Join(Lines);
 
 		f.SetSize(0);
 		f.Write(NewFile);
@@ -2100,11 +2100,11 @@ struct LFileInfo
 
 void AppWnd::OnFixBuildErrors()
 {
-	LHashTbl<StrKey<char>, GString> Map;
+	LHashTbl<StrKey<char>, LString> Map;
 	LVariant v;
 	if (GetOptions()->GetValue(OPT_RENAMED_SYM, v))
 	{
-		auto Lines = GString(v.Str()).Split("\n");
+		auto Lines = LString(v.Str()).Split("\n");
 		for (auto Ln: Lines)
 		{
 			auto p = Ln.SplitDelimit();
@@ -2120,14 +2120,14 @@ void AppWnd::OnFixBuildErrors()
 	}
 	else return;
 
-	GString Raw = d->Output->Txt[AppWnd::BuildTab]->Name();
-	GString::Array Lines = Raw.Split("\n");
+	LString Raw = d->Output->Txt[AppWnd::BuildTab]->Name();
+	LString::Array Lines = Raw.Split("\n");
 	auto *Log = d->Output->Txt[AppWnd::OutputTab];
 
 	Log->Name(NULL);
 	Log->Print("Parsing errors...\n");
 	int Replacements = 0;
-	GArray<LFileInfo> Files;
+	LArray<LFileInfo> Files;
 
 	for (auto Ln : Lines)
 	{
@@ -2136,9 +2136,9 @@ void AppWnd::OnFixBuildErrors()
 		{
 			Log->Print("Error pos = %i\n", (int)ErrPos);
 			#ifdef WINDOWS
-			GString::Array p = Ln.SplitDelimit(">()");
+			LString::Array p = Ln.SplitDelimit(">()");
 			#else
-			GString::Array p = Ln(0, ErrPos).Strip().SplitDelimit(":");
+			LString::Array p = Ln(0, ErrPos).Strip().SplitDelimit(":");
 			#endif
 			if (p.Length() <= 2)
 			{
@@ -2148,7 +2148,7 @@ void AppWnd::OnFixBuildErrors()
 			{
 				#ifdef WINDOWS
 				int Base = p[0].IsNumeric() ? 1 : 0;
-				GString Fn = p[Base];
+				LString Fn = p[Base];
 				if (Fn.Find("Program Files") >= 0)
 				{
 					Log->Print("Is prog file\n");
@@ -2156,11 +2156,11 @@ void AppWnd::OnFixBuildErrors()
 				}
 				auto LineNo = p[Base+1].Int();
 				#else
-				GString Fn = p[0];
+				LString Fn = p[0];
 				auto LineNo = p[1].Int();
 				#endif
 
-				GAutoString Full;
+				LAutoString Full;
 				if (!d->FindSource(Full, Fn, NULL))
 				{
 					Log->Print("Error: Can't find Fn='%s' Line=%i\n", Fn.Get(), (int)LineNo);
@@ -2196,7 +2196,7 @@ void AppWnd::OnFixBuildErrors()
 				{
 					if (LineNo <= Fi->Lines.Length())
 					{
-						GString &s = Fi->Lines[LineNo-1];
+						LString &s = Fi->Lines[LineNo-1];
 						for (auto i: Map)
 						{
 							if (ReplaceWholeWord(s, i.key, i.value))
@@ -2432,7 +2432,7 @@ void AppWnd::DumpHistory()
 }
 
 /*
-void CheckHistory(GArray<FileLoc> &CursorHistory)
+void CheckHistory(LArray<FileLoc> &CursorHistory)
 {
 	if (CursorHistory.Length() > 0)
 	{
@@ -2551,7 +2551,7 @@ IdeDoc *AppWnd::FindOpenFile(char *FileName)
 			IdeProject *p = i->GetProject();
 			if (p)
 			{
-				GAutoString Base = p->GetBasePath();
+				LAutoString Base = p->GetBasePath();
 				if (Base)
 				{
 					char Path[MAX_PATH];
@@ -2587,7 +2587,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 		return NULL;
 	}
 	
-	GString FullPath;
+	LString FullPath;
 	if (LgiIsRelativePath(File))
 	{
 		IdeProject *Proj = Src && Src->GetProject() ? Src->GetProject() : RootProject();
@@ -2602,7 +2602,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 				auto ProjPath = Project->GetBasePath();
 				char p[MAX_PATH];
 				LgiMakePath(p, sizeof(p), ProjPath, File);
-				GString Path = p;
+				LString Path = p;
 				if (Project->CheckExists(Path))
 				{
 					FullPath = Path;
@@ -2701,7 +2701,7 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 		return NULL;
 	}
 	
-	GString::Array Inc;
+	LString::Array Inc;
 	p->BuildIncludePaths(Inc, false, false, PlatformCurrent);
 	d->FindSym->SetIncludePaths(Inc);
 
@@ -3084,11 +3084,11 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 					LListItem *item = d->Output->CallStack->GetSelected();
 					if (item)
 					{
-						GAutoString File;
+						LAutoString File;
 						int Line;
 						if (d->DbgContext->ParseFrameReference(item->GetText(1), File, Line))
 						{
-							GAutoString Full;
+							LAutoString Full;
 							if (d->FindSource(Full, File, NULL))
 							{
 								GotoReference(Full, Line, false);
@@ -3110,7 +3110,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 			{
 				case GNotify_DeleteKey:
 				{
-					GArray<LTreeItem *> Sel;
+					LArray<LTreeItem *> Sel;
 					for (LTreeItem *c = d->Output->Watch->GetChild(); c; c = c->GetNext())
 					{
 						if (c->Select())
@@ -3148,7 +3148,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 					LListItem *item = d->Output->Threads->GetSelected();
 					if (item)
 					{
-						GString sId = item->GetText(0);
+						LString sId = item->GetText(0);
 						int ThreadId = (int)sId.Int();
 						if (ThreadId > 0)
 						{
@@ -3421,11 +3421,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				GInput Inp(this, NULL, LgiLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
 				if (Inp.DoModal())
 				{
-					GString s = Inp.GetStr();
-					GString::Array p = s.SplitDelimit(":,");
+					LString s = Inp.GetStr();
+					LString::Array p = s.SplitDelimit(":,");
 					if (p.Length() == 2)
 					{
-						GString file = p[0];
+						LString file = p[0];
 						int line = (int)p[1].Int();
 						GotoReference(file, line, false, true);
 					}
@@ -3479,7 +3479,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					LTextView3 *Edit = dynamic_cast<LTextView3*>(Focus);
 					if (Edit && Edit->HasSelection())
 					{
-						GAutoString a(Edit->GetSelection());
+						LAutoString a(Edit->GetSelection());
 						Dlg.Params->Text = a;
 					}
 				}
@@ -3487,7 +3487,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				IdeProject *p = RootProject();
 				if (p)
 				{
-					GAutoString Base = p->GetBasePath();
+					LAutoString Base = p->GetBasePath();
 					if (Base)
 						Dlg.Params->Dir = Base;
 				}
@@ -3503,13 +3503,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						Projects.Insert(p);
 						p->GetChildProjects(Projects);
 
-						GArray<ProjectNode*> Nodes;
+						LArray<ProjectNode*> Nodes;
 						for (auto p: Projects)
 							p->GetAllNodes(Nodes);
 
 						for (unsigned i=0; i<Nodes.Length(); i++)
 						{
-							GString s = Nodes[i]->GetFullPath();
+							LString s = Nodes[i]->GetFullPath();
 							if (s)
 								Dlg.Params->ProjectFiles.Add(s);
 						}
@@ -3575,7 +3575,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (c < 0)
 				break;
 
-			GString Txt = doc->Name();
+			LString Txt = doc->Name();
 			char *s = Txt.Get() + c;
 			char *e = s;
 			while (	s > Txt.Get() &&
@@ -3587,7 +3587,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (e <= s)
 				break;
 
-			GString Word(s, e - s);
+			LString Word(s, e - s);
 
 			if (!d->Finder)
 				d->Finder.Reset(new FindInFilesThread(d->AppHnd));
@@ -3601,11 +3601,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			Projects.Insert(p);
 			p->GetChildProjects(Projects);
 
-			GArray<ProjectNode*> Nodes;
+			LArray<ProjectNode*> Nodes;
 			for (auto p: Projects)
 				p->GetAllNodes(Nodes);
 
-			GAutoPtr<FindParams> Params(new FindParams);
+			LAutoPtr<FindParams> Params(new FindParams);
 			Params->Type = FifSearchSolution;
 			Params->MatchWord = true;
 			Params->Text = Word;
@@ -3853,7 +3853,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			IdeProject *p = RootProject();
 			if (p)
 			{
-				GString Exe = p->GetExecutable(GetCurrentPlatform());
+				LString Exe = p->GetExecutable(GetCurrentPlatform());
 				if (LFileExists(Exe))
 				{
 					Depends Dlg(this, Exe);
@@ -4042,7 +4042,7 @@ void AppWnd::OnProjectDestroy(IdeProject *Proj)
 
 void AppWnd::OnProjectChange()
 {
-	GArray<GMdiChild*> Views;
+	LArray<GMdiChild*> Views;
 	if (d->Mdi->GetChildren(Views))
 	{
 		for (unsigned i=0; i<Views.Length(); i++)
@@ -4095,7 +4095,7 @@ void AppWnd::FindSymbol(int ResultsSinkHnd, const char *Sym, bool AllPlatforms)
 }
 
 #include "lgi/common/SubProcess.h"
-bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
+bool AppWnd::GetSystemIncludePaths(::LArray<LString> &Paths)
 {
 	if (d->SystemIncludePaths.Length() == 0)
 	{
@@ -4128,7 +4128,7 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 			}
 			else if (InIncludeList)
 			{
-				GAutoString a(TrimStr(Buf));
+				LAutoString a(TrimStr(Buf));
 				d->SystemIncludePaths.New() = a;
 			}
 		}
@@ -4245,7 +4245,7 @@ int LgiMain(OsAppArguments &AppArgs)
 		// new SocketTest();
 		#if 0
 		auto s = "=?gb18030?B?0Nyz9sO7?=";
-		GAutoString out(DecodeRfc2047(NewStr(s)));
+		LAutoString out(DecodeRfc2047(NewStr(s)));
 		printf("out=%s\n", out.Get());
 		#endif
 

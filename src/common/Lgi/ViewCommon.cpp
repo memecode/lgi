@@ -240,7 +240,7 @@ int LView::AddDispatch()
 	return d->SinkHnd;
 }
 
-GString LView::CssStyles(const char *Set)
+LString LView::CssStyles(const char *Set)
 {
 	if (Set)
 	{
@@ -250,14 +250,14 @@ GString LView::CssStyles(const char *Set)
 	return d->Styles;
 }
 
-GString::Array *LView::CssClasses()
+LString::Array *LView::CssClasses()
 {
 	return &d->Classes;
 }
 
-GArray<LViewI*> LView::IterateViews()
+LArray<LViewI*> LView::IterateViews()
 {
-	GArray<LViewI*> a;
+	LArray<LViewI*> a;
 	for (auto c: Children)
 		a.Add(c);
 	return a;
@@ -527,7 +527,7 @@ void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 	*/
 
 	// Create temp DC if needed...
-	GAutoPtr<LSurface> Local;
+	LAutoPtr<LSurface> Local;
 	if (!pDC)
 	{
 		if (!Local.Reset(new LScreenDC(this)))
@@ -622,7 +622,7 @@ void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 {
 	// Create temp DC if needed...
-	GAutoPtr<LSurface> Local;
+	LAutoPtr<LSurface> Local;
 	if (!pDC)
 	{
 		Local.Reset(new LScreenDC(this));
@@ -1838,9 +1838,9 @@ bool LView::WindowVirtualOffset(LPoint *Offset)
 	return Status;
 }
 
-GString _ViewDesc(LViewI *v)
+LString _ViewDesc(LViewI *v)
 {
-	GString s;
+	LString s;
 	s.Printf("%s/%s/%i", v->GetClass(), v->Name(), v->GetId());
 	return s;
 }
@@ -2342,14 +2342,14 @@ void LView::_Dump(int Depth)
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-static GArray<LViewFactory*> *AllFactories = NULL;
+static LArray<LViewFactory*> *AllFactories = NULL;
 #if defined(WIN32)
 static HANDLE FactoryEvent;
 #else
 static pthread_once_t FactoryOnce = PTHREAD_ONCE_INIT;
 static void GFactoryInitFactories()
 {
-	AllFactories = new GArray<LViewFactory*>;
+	AllFactories = new LArray<LViewFactory*>;
 }
 #endif
 
@@ -2363,7 +2363,7 @@ LViewFactory::LViewFactory()
 	if (err != ERROR_ALREADY_EXISTS)
 	{
 		FactoryEvent = h;
-		AllFactories = new GArray<LViewFactory*>;
+		AllFactories = new LArray<LViewFactory*>;
 	}
 	else
 	{

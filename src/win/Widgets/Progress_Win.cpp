@@ -148,9 +148,9 @@ GMessage::Result LProgressView::OnEvent(GMessage *Msg)
 	return LControl::OnEvent(Msg);
 }
 
-GString LProgressView::CssStyles(const char *CssStyle)
+LString LProgressView::CssStyles(const char *CssStyle)
 {
-	GString Status = LControl::CssStyles(CssStyle);
+	LString Status = LControl::CssStyles(CssStyle);
 	if (Status && GetCss())
 	{
 		LCss::ColorDef f = GetCss()->Color();

@@ -102,9 +102,9 @@
 
 GDbField Null;
 
-GArray<char> Hex(char *h)
+LArray<char> Hex(char *h)
 {
-	GArray<char> r;
+	LArray<char> r;
 	GToken t(h, " ");
 	for (int i=0; i<t.Length(); i++)
 	{
@@ -113,9 +113,9 @@ GArray<char> Hex(char *h)
 	return r;
 }
 
-GArray<char> Sha1(GArray<char> &a, GArray<char> *b = 0)
+LArray<char> Sha1(LArray<char> &a, LArray<char> *b = 0)
 {
-	GArray<char> r;
+	LArray<char> r;
 	SHA1Context s;
 	SHA1Reset(&s);
 	SHA1Input(&s, (const unsigned char*) &a[0], a.Length());
@@ -147,7 +147,7 @@ struct MysqlDirectContext
 	{
 	public:
 		int Code;
-		GAutoString Err;
+		LAutoString Err;
 
 		ErrorSocket()
 		{
@@ -164,7 +164,7 @@ struct MysqlDirectContext
 	uint8 PacketIdx;
 	char ReadBuf[512];
 	int ReadPos, ReadUsed;
-	GAutoPtr<ErrorSocket> Socket;
+	LAutoPtr<ErrorSocket> Socket;
 
 	MysqlDirectContext()
 	{
@@ -219,7 +219,7 @@ class MysqlPacket
 	int Ptr;
 
 public:
-	GArray<char> Data;
+	LArray<char> Data;
 
 	MysqlPacket()
 	{
@@ -341,7 +341,7 @@ public:
 		Data.Length(Data.Length() + i);
 	}
 
-	int Read(GArray<char> &a, int Bytes)
+	int Read(LArray<char> &a, int Bytes)
 	{
 		int Remain = Data.Length() - Ptr;
 		int Cpy = min(Remain, Bytes);
@@ -350,18 +350,18 @@ public:
 		return Cpy;
 	}
 
-	GAutoString LenStr(uint8 Bytes = 0)
+	LAutoString LenStr(uint8 Bytes = 0)
 	{
 		if (!Bytes)
 			(*this) >> Bytes;
 
-		GAutoString a;
+		LAutoString a;
 		a.Reset(NewStr(&Data[Ptr], Bytes));
 		Ptr += Bytes;
 		return a;
 	}
 
-	int Write(GArray<char> &a)
+	int Write(LArray<char> &a)
 	{
 		Data.Add(&a[0], a.Length());
 		return a.Length();
@@ -378,7 +378,7 @@ public:
 	}
 
 	// Read operators
-	MysqlPacket &operator >>(GAutoString &a)
+	MysqlPacket &operator >>(LAutoString &a)
 	{
 		int e = Ptr;
 		while (e < Data.Length() && Data[e])
@@ -443,7 +443,7 @@ public:
 		return *this;
 	}
 
-	MysqlPacket &operator <<(GArray<char> &a)
+	MysqlPacket &operator <<(LArray<char> &a)
 	{
 		Data.Add(a);
 		return *this;
@@ -488,13 +488,13 @@ public:
 	uint8 type, decimals;
 	uint16 charset, flags;
 	uint32 length;
-	GAutoString cat;
-	GAutoString db;
-	GAutoString table;
-	GAutoString org_tbl;
-	GAutoString name;
-	GAutoString org_name;
-	GAutoString default_val;
+	LAutoString cat;
+	LAutoString db;
+	LAutoString table;
+	LAutoString org_tbl;
+	LAutoString name;
+	LAutoString org_name;
+	LAutoString default_val;
 
 	MysqlDirectField(MysqlDirectRs *rs);
 	operator char*();
@@ -514,13 +514,13 @@ public:
 class MysqlDirectRs : public GDbRecordset
 {
 public:
-	typedef GArray<GAutoString> Row;
+	typedef LArray<LAutoString> Row;
 
 	char *Sql;
-	GArray<MysqlDirectField*> Field;
+	LArray<MysqlDirectField*> Field;
 	GHashTbl<char*,MysqlDirectField*> Idx;
 	int Cursor;
-	GArray<Row> Rows;
+	LArray<Row> Rows;
 
 	MysqlDirectRs(char *s);
 	~MysqlDirectRs();
@@ -750,14 +750,14 @@ class MysqlDirectDb : public GDb, public MysqlDirectContext
 	char Err[1024];
 	
 	uint8 ProtocolVer;
-	GAutoString ServerVer;
+	LAutoString ServerVer;
 	uint32 ThreadId;
 	uint16 ServerCap;
 	uint8 ServerLang;
 	uint16 ServerStatus;
-	GArray<char> ScrambleBuf;
+	LArray<char> ScrambleBuf;
 	bool LoggedIn;
-	GArray<GAutoString> Dbs;
+	LArray<LAutoString> Dbs;
 
 public:
 	enum MysqlResponse
@@ -807,7 +807,7 @@ public:
 			if (Socket->Open(u.Host, u.Port))
 			{
 				// Read signon packet...
-				GAutoPtr<MysqlPacket> p(new MysqlPacket);
+				LAutoPtr<MysqlPacket> p(new MysqlPacket);
 				if (!p->Read(*this))
 				{
 					sprintf(Err, "Failed read signon packet.");
@@ -835,12 +835,12 @@ public:
 					p->Add(23);
 					*p << u.User;
 
-					GArray<char> Pass;
+					LArray<char> Pass;
 					Pass.Add(u.Pass, strlen(u.Pass));
-					GArray<char> stage1_hash = Sha1(Pass);
-					GArray<char> stage2_hash = Sha1(stage1_hash);
-					GArray<char> crypt = Sha1(ScrambleBuf, &stage2_hash);
-					GArray<char> token;
+					LArray<char> stage1_hash = Sha1(Pass);
+					LArray<char> stage2_hash = Sha1(stage1_hash);
+					LArray<char> crypt = Sha1(ScrambleBuf, &stage2_hash);
+					LArray<char> token;
 					LgiAssert(stage1_hash.Length() == crypt.Length());
 					for (int i=0; i<stage1_hash.Length(); i++)
 					{
@@ -870,7 +870,7 @@ public:
 							else
 							{
 								// Read in a list of databases
-								GAutoPtr<GDbRecordset> r(Open("show databases;"));
+								LAutoPtr<GDbRecordset> r(Open("show databases;"));
 								if (r)
 								{
 									for (bool b = r->MoveFirst(); b; b = r->MoveNext())
@@ -929,7 +929,7 @@ public:
 		if (r == 0xff)
 		{
 			uint16 Code;
-			GAutoString Desc;
+			LAutoString Desc;
 			*p >> Code >> Desc;
 			sprintf(Err, "Login failed: %i - %s", Code, Desc.Get());
 			Socket.Reset();
@@ -939,7 +939,7 @@ public:
 
 	bool InitDb(char *Name)
 	{
-		GAutoPtr<MysqlPacket> p(new MysqlPacket);
+		LAutoPtr<MysqlPacket> p(new MysqlPacket);
 		uint8 Cmd = COM_INIT_DB;
 		*p << Cmd;
 		PacketIdx = 0;
@@ -955,7 +955,7 @@ public:
 		if (!IsOk())
 			return 0;
 
-		GAutoPtr<MysqlPacket> p(new MysqlPacket);
+		LAutoPtr<MysqlPacket> p(new MysqlPacket);
 		
 		uint8 Cmd = COM_QUERY, Cols;
 		*p << Cmd;
@@ -964,7 +964,7 @@ public:
 		if (!p->Write(*this))
 			return false;
 
-		GAutoPtr<MysqlDirectRs> Rs(new MysqlDirectRs(Name));
+		LAutoPtr<MysqlDirectRs> Rs(new MysqlDirectRs(Name));
 		Cols = Response(p);
 		if (!ValidDataResponse(Cols))
 			return 0;
@@ -996,7 +996,7 @@ public:
 			MysqlDirectRs::Row *CurRow = &Rs->Rows.New();
 			for (int c=0; c<Cols; c++)
 			{
-				GAutoString &field = CurRow->New();
+				LAutoString &field = CurRow->New();
 				if (c)
 					*p >> r;
 

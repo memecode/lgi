@@ -8,7 +8,7 @@ class LgiClass GRegKey
 {
 	HKEY k, Root;
 	char s[256];
-	GString KeyName;
+	LString KeyName;
 
 public:
 	static bool AssertOnError;
@@ -43,7 +43,7 @@ public:
 		/// Name of the subkey or NULL for the default string.
 		const char *Name,
 		/// The string's value
-		GString &Str
+		LString &Str
 	);
 	/// Sets a string value
 	bool SetStr(const char *Name, const char *Value);

@@ -87,7 +87,7 @@ void IHttp::SetAuth(char *User, char *Pass)
 	AuthPassword = Pass;
 }
 
-bool IHttp::Open(GAutoPtr<LSocketI> S, const char *RemoteHost, int Port)
+bool IHttp::Open(LAutoPtr<LSocketI> S, const char *RemoteHost, int Port)
 {
 	Close();
 	Socket = S;
@@ -402,7 +402,7 @@ bool IHttp::Request
 	LStringPipe Cmd;
 	LUri u(Uri);
 	bool IsHTTPS = u.sProtocol && !_stricmp(u.sProtocol, "https");
-	GString EncPath = u.EncodeStr(u.sPath.Get() ? u.sPath.Get() : (char*)"/"), Mem;
+	LString EncPath = u.EncodeStr(u.sPath.Get() ? u.sPath.Get() : (char*)"/"), Mem;
 	char s[1024];
 	GLinePrefix EndHeaders("\r\n");
 	LStringPipe Headers;
@@ -414,7 +414,7 @@ bool IHttp::Request
 					"\r\n",
 					u.sHost.Get(), u.Port ? u.Port : HTTPS_PORT,
 					u.sHost.Get());
-		GAutoString c(Cmd.NewStr());
+		LAutoString c(Cmd.NewStr());
 		size_t cLen = strlen(c);
 		ssize_t r = Socket->Write(c, cLen);
 		if (r == cLen)
@@ -442,7 +442,7 @@ bool IHttp::Request
 				else break;
 			}
 			
-			GAutoString Hdr(Headers.NewStr());
+			LAutoString Hdr(Headers.NewStr());
 
 			LVariant v;
 			if (Socket)
@@ -542,25 +542,25 @@ bool IHttp::Request
 			}
 
 			// Process output
-			GAutoString h(Headers.NewStr());
+			LAutoString h(Headers.NewStr());
 			if (h)
 			{
 				#if DEBUG_LOGGING
 				Log.Print("HTTP res.hdrs=%s\n-------------------------------------\nHTTP res.body=", h);
 				#endif
 
-				GAutoString sContentLen(InetGetHeaderField(h, "Content-Length"));
+				LAutoString sContentLen(InetGetHeaderField(h, "Content-Length"));
 				int64 ContentLen = sContentLen ? atoi64(sContentLen) : -1;
 				bool IsChunked = false;
 				if (ContentLen > 0)
 					Out->SetSize(ContentLen);
 				else
 				{
-					GAutoString sTransferEncoding(InetGetHeaderField(h, "Transfer-Encoding"));
+					LAutoString sTransferEncoding(InetGetHeaderField(h, "Transfer-Encoding"));
 					IsChunked = sTransferEncoding && !_stricmp(sTransferEncoding, "chunked");
 					Out->SetSize(0);
 				}
-				GAutoString sContentEncoding(InetGetHeaderField(h, "Content-Encoding"));
+				LAutoString sContentEncoding(InetGetHeaderField(h, "Content-Encoding"));
 				ContentEncoding Encoding = EncodeRaw;
 				if (sContentEncoding && !_stricmp(sContentEncoding, "gzip"))
 					Encoding = EncodeGZip;
@@ -956,7 +956,7 @@ void ZLibFree(voidpf opaque, voidpf address)
 	// Do nothing... the memory is owned by an autoptr
 }
 
-bool LgiGetUri(LCancel *Cancel, LStreamI *Out, GString *OutError, const char *InUri, const char *InHeaders, LUri *InProxy)
+bool LgiGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *InUri, const char *InHeaders, LUri *InProxy)
 {
 	if (!InUri || !Out)
 	{
@@ -967,7 +967,7 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, GString *OutError, const char *In
 
 	IHttp Http;
 	int RedirectLimit = 10;
-	GAutoString Location;
+	LAutoString Location;
 
 	for (int i=0;
 		i<RedirectLimit &&
@@ -981,7 +981,7 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, GString *OutError, const char *In
 		if (InProxy)
 			Http.SetProxy(InProxy->sHost, InProxy->Port ? InProxy->Port : DefaultPort);
 
-		GAutoPtr<LSocketI> s;
+		LAutoPtr<LSocketI> s;
 		
 		if (IsHTTPS)
 		{
@@ -1017,13 +1017,13 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, GString *OutError, const char *In
 										"Accept-Language: en-US,en;q=0.5\r\n"
 										"Accept-Encoding: gzip, deflate\r\n"
 										"Connection: keep-alive\r\n";
-		GString InputHeaders;
+		LString InputHeaders;
 		if (InHeaders)
 		{
-			auto Hdrs = GString(InHeaders).SplitDelimit("\r\n");
+			auto Hdrs = LString(InHeaders).SplitDelimit("\r\n");
 			for (auto h: Hdrs)
 			{
-				GString s;
+				LString s;
 				s.Printf("%s\r\n", h.Get());
 				InputHeaders += s;
 			}
@@ -1042,8 +1042,8 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, GString *OutError, const char *In
 		int StatusCatagory = Status / 100;
 		if (StatusCatagory == 3)
 		{
-			GAutoString Headers(OutHeaders.NewStr());			
-			GAutoString Loc(InetGetHeaderField(Headers, "Location", -1));
+			LAutoString Headers(OutHeaders.NewStr());			
+			LAutoString Loc(InetGetHeaderField(Headers, "Location", -1));
 			if (!Loc)
 			{
 				if (OutError)
@@ -1096,7 +1096,7 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, GString *OutError, const char *In
 				return false;
 			}
 
-			GAutoPtr<uchar,true> Data(new uchar[(size_t)Len]);
+			LAutoPtr<uchar,true> Data(new uchar[(size_t)Len]);
 			if (!Data)
 			{
 				if (OutError)
@@ -1106,7 +1106,7 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, GString *OutError, const char *In
 
 			TmpFile.Read(Data, (int)Len);
 			
-			GAutoPtr<Zlib> z;
+			LAutoPtr<Zlib> z;
 			if (!z)
 				z.Reset(new Zlib);
 			else if (!z->IsLoaded())

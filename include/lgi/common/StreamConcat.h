@@ -17,7 +17,7 @@ class LStreamConcat : public LStreamI
 
 	unsigned Cur;
 	int64 Sz, Pos;
-	GArray<StreamBlock> a;
+	LArray<StreamBlock> a;
 
 public:
 	LStreamConcat()

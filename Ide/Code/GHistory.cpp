@@ -7,7 +7,7 @@ class LHistoryPopup : public LPopup
 {
 public:
 	LList *Lst;
-	GString Str;
+	LString Str;
 	int64 Index;
 	bool Ignore;
 	LHistoryPopup() : LPopup(0)

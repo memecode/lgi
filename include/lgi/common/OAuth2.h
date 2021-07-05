@@ -5,7 +5,7 @@
 #include "lgi/common/Net.h"
 
 /* Do this somewhere?
-GAutoString ErrorMsg;
+LAutoString ErrorMsg;
 StartSSL(ErrorMsg, NULL);
 */
 
@@ -23,13 +23,13 @@ public:
 			OAuthMicrosoft,
 		}	Provider;
 		
-		GString ClientID;
-		GString ClientSecret;
-		GString RedirURIs;
-		GString AuthUri;
-		GString ApiUri;
-		// GString RevokeUri;
-		GString Scope;
+		LString ClientID;
+		LString ClientSecret;
+		LString RedirURIs;
+		LString AuthUri;
+		LString ApiUri;
+		// LString RevokeUri;
+		LString Scope;
 		LUri Proxy;
 		
 		Params()
@@ -52,7 +52,7 @@ public:
 	LOAuth2(Params &params, const char *account, GDom *store, LCancel *cancel, LStream *log = NULL);
 	virtual ~LOAuth2();
 
-	GString GetAccessToken();
+	LString GetAccessToken();
 	bool Refresh();
 };
 

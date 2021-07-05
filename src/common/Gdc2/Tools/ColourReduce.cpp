@@ -50,7 +50,7 @@ int Cmp2(ImgColour **a, ImgColour **b)
 
 struct Box
 {
-	GArray<ImgColour*> Cols;
+	LArray<ImgColour*> Cols;
 	Range r[DIMENSIONS];
 	int Pixels;
 	
@@ -69,7 +69,7 @@ struct Box
 		FindLimits();
 	}
 
-	Box(GArray<ImgColour*> &c, int Start, int End)
+	Box(LArray<ImgColour*> &c, int Start, int End)
 	{
 		LgiAssert(End >= Start);
 		
@@ -142,7 +142,7 @@ struct Box
 		return Edge(Max, r[Max].Len());
 	}
 
-	bool Sort(GArray<ImgColour*> &Index, int Dim)
+	bool Sort(LArray<ImgColour*> &Index, int Dim)
 	{
 		Index = Cols;
 		if (Dim == 0)
@@ -379,7 +379,7 @@ public:
 		else
 		{
 			// Reduce the size of the colour set to fit
-			GArray<Box*> Boxes;
+			LArray<Box*> Boxes;
 			Box *b = new Box(Col, Cols);
 			Boxes.Add(b);
 			
@@ -406,7 +406,7 @@ public:
 				
 				// Split that box along the median
 				Box *b = Boxes[MaxBox];
-				GArray<ImgColour*> Index;
+				LArray<ImgColour*> Index;
 				if (b->Sort(Index, MaxEdge.Dimension))
 				{
 					// Find the median by picking an arbitrary mid-point
@@ -470,7 +470,7 @@ public:
 				else return false;
 			}
 			
-			GArray<GColour> Colours;
+			LArray<GColour> Colours;
 			for (unsigned i=0; i<Boxes.Length(); i++)
 			{
 				Box *in = Boxes[i];

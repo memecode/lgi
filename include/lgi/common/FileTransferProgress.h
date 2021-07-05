@@ -24,7 +24,7 @@ class FileTransferProgress : public LStatusPane, public Progress
 	uint64 StartTime;
 	int64 StartPos;
 	GProgressStatusPane *ProgressPane;
-	GArray<LStatusPane*> StatusInfo;
+	LArray<LStatusPane*> StatusInfo;
 	
 	int64 DspVal;
 	void UpdateUi();

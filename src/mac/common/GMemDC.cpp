@@ -22,7 +22,7 @@
 class CGImgPriv
 {
 public:
-	GAutoPtr<uint8> Data;
+	LAutoPtr<uint8> Data;
 	CGImageRef Img;
 	CGColorSpaceRef Cs;
 	CGDataProviderRef Prov;
@@ -198,8 +198,8 @@ public:
 	uchar *Data;
 	CGContextRef Bmp;
 	CGColorSpaceRef Cs;
-	GArray<LRect> Client;
-	GAutoPtr<uchar, true> BitsMem;
+	LArray<LRect> Client;
+	LAutoPtr<uchar, true> BitsMem;
 
 	LMemDCPrivate()
 	{
@@ -313,8 +313,8 @@ NSImage *LMemDC::NsImage(LRect *rc)
 	size_t bytesPerRow = (bitsPerPixel * r.X() + 7) / bitsPerComponent;
 	CGDataProviderRef provider = nil;
 	
-	GArray<uint8_t> Mem;
-	GAutoPtr<LSurface> Sub(SubImage(r));
+	LArray<uint8_t> Mem;
+	LAutoPtr<LSurface> Sub(SubImage(r));
 	if (!Sub)
 		return nil;
 	auto p = Sub->pMem;

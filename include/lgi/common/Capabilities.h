@@ -15,7 +15,7 @@ class GCapabilityTarget;
 class LgiClass GCapabilityClient
 {
 	friend class GCapabilityTarget;
-	GArray<GCapabilityTarget*> Targets;
+	LArray<GCapabilityTarget*> Targets;
 
 public:
 	virtual ~GCapabilityClient();
@@ -30,7 +30,7 @@ public:
 class LgiClass GCapabilityTarget
 {
 	friend class GCapabilityClient;
-	GArray<GCapabilityClient*> Clients;
+	LArray<GCapabilityClient*> Clients;
 
 public:
 	LHashTbl<ConstStrKey<char,false>, bool> Map;

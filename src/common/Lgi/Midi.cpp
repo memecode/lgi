@@ -37,10 +37,10 @@ struct GMidiPriv
 	#if defined(MAC)
 		MIDIClientRef Client;
 		MIDIPortRef InPort, OutPort;
-		GArray<MIDIDeviceRef> Devs;
-		GArray<MIDIEndpointRef> Srcs, Dsts;
+		LArray<MIDIDeviceRef> Devs;
+		LArray<MIDIEndpointRef> Srcs, Dsts;
 		MIDIEndpointRef Dst;
-		GArray<uint8_t> Data;
+		LArray<uint8_t> Data;
 	#elif defined(WINDOWS)
 		HMIDIIN hIn;
 		HMIDIOUT hOut;
@@ -49,7 +49,7 @@ struct GMidiPriv
 		GMidiNotifyWnd Notify;
 	#elif defined(LINUX)
 		int Hnd;
-		GAutoPtr<LThread> Reader;
+		LAutoPtr<LThread> Reader;
 	#endif
 	
 	GMidiPriv(GMidi *m)
@@ -73,7 +73,7 @@ struct GMidiPriv
 
 #if defined(MAC)
 
-	GAutoString PrintMIDIObjectInfo(MIDIObjectRef o)
+	LAutoString PrintMIDIObjectInfo(MIDIObjectRef o)
 	{
 		CFStringRef pName, pManuf, pModel;
 		SInt32 Id;
@@ -81,9 +81,9 @@ struct GMidiPriv
 		MIDIObjectGetStringProperty(o, kMIDIPropertyManufacturer, &pManuf);
 		MIDIObjectGetStringProperty(o, kMIDIPropertyModel, &pModel);
 		MIDIObjectGetIntegerProperty(o, kMIDIPropertyUniqueID, &Id);
-		GString Name = pName;
-		GString Man = pManuf;
-		GString Mod = pModel;
+		LString Name = pName;
+		LString Man = pManuf;
+		LString Mod = pModel;
 
 		char s[256];
 		sprintf(s, "%s, %s, %s, %x", Name.Get(), Man.Get(), Mod.Get(), (uint32)Id);
@@ -93,7 +93,7 @@ struct GMidiPriv
 		CFRelease(pManuf);
 		CFRelease(pModel);
 		
-		return GAutoString(NewStr(s));
+		return LAutoString(NewStr(s));
 	}
 
 	void MidiNotify(const MIDINotification *message, void *refCon)
@@ -107,7 +107,7 @@ struct GMidiPriv
 		GMidi *a = (GMidi*)readProcRefCon;
 		if (a)
 		{
-			GArray<uint8_t> *d = &a->d->Data;
+			LArray<uint8_t> *d = &a->d->Data;
 			
 			// Collect all data from the input stream
 			MIDIPacket *packet = (MIDIPacket*)pktlist->packet;
@@ -298,7 +298,7 @@ GMidi::GMidi() : LMutex("GMidi")
 		{
 			MIDIDeviceRef dev = MIDIGetDevice(i);
 			d->Devs[i] = dev;
-			GAutoString a = PrintMIDIObjectInfo(dev);
+			LAutoString a = PrintMIDIObjectInfo(dev);
 			In.New().Reset(NewStr(a));
 			Out.New().Reset(NewStr(a));
 
@@ -491,7 +491,7 @@ void GMidi::StoreMidi(uint8_t *ptr, int len)
 
 #endif
 
-bool GMidi::Connect(int InIdx, int OutIdx, GAutoString *ErrorMsg)
+bool GMidi::Connect(int InIdx, int OutIdx, LAutoString *ErrorMsg)
 {
 	if (IsMidiOpen())
 	{
@@ -617,8 +617,8 @@ bool GMidi::Connect(int InIdx, int OutIdx, GAutoString *ErrorMsg)
 			else if (ErrorMsg)
 			{
 				int e = errno;
-				GAutoString msg = LgiErrorCodeToString(e);
-				GString s;
+				LAutoString msg = LgiErrorCodeToString(e);
+				LString s;
 				s.Printf("Error opening the device: %i (%s)\n", e, msg.Get());
 				ErrorMsg->Reset(NewStr(s));
 			}
@@ -769,7 +769,7 @@ void GMidi::OnMidiOut(uint8_t *p, size_t len)
 	#endif
 }
 
-void GMidi::OnError(char *Func, GAutoString *ErrorMsg, uint32_t Code, char *File, int Line)
+void GMidi::OnError(char *Func, LAutoString *ErrorMsg, uint32_t Code, char *File, int Line)
 {
 	char m[256];
 	sprintf_s(m, sizeof(m), "%s failed with %i", Func, Code);

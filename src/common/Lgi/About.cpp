@@ -29,7 +29,7 @@ GAbout::GAbout(	LView *parent,
 	SetParent(parent);
 	if (!AppName) AppName = "Application";
 
-	GString n;
+	LString n;
 	n.Printf("About %s", AppName);
 	Name(n);
 
@@ -66,7 +66,7 @@ GAbout::GAbout(	LView *parent,
 
 	if (AboutGraphic)
 	{
-		GString FileName = LFindFile(AboutGraphic);
+		LString FileName = LFindFile(AboutGraphic);
 		if (FileName)
 		{
 			auto c = Tbl->GetCell(x++, 0, true);

@@ -88,9 +88,9 @@ DropDownBtn::~DropDownBtn()
 	DeleteObj(d);
 }
 
-GString::Array DropDownBtn::GetList()
+LString::Array DropDownBtn::GetList()
 {
-	GString::Array a;
+	LString::Array a;
 	if (Pu && Pu->Lst)
 	{
 		for (auto i: *Pu->Lst)
@@ -116,7 +116,7 @@ bool DropDownBtn::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-bool DropDownBtn::SetList(int EditCtrl, GString::Array a)
+bool DropDownBtn::SetList(int EditCtrl, LString::Array a)
 {
 	if (!Pu || !Pu->Lst)
 		return false;

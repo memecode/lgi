@@ -69,7 +69,7 @@ public:
 };
 
 static GColour cActiveCol(0x86, 0xba, 0xe9);
-static void FillStops(GArray<GColourStop> &Stops, LRect &r, bool Active)
+static void FillStops(LArray<GColourStop> &Stops, LRect &r, bool Active)
 {
 	if (Active)
 	{
@@ -174,7 +174,7 @@ void GItemContainer::PaintColumnHeadings(LSurface *pDC)
 	{
 		// Draw end section where there are no columns
 		#ifdef MAC
-			GArray<GColourStop> Stops;
+			LArray<GColourStop> Stops;
 			LRect j(cr.x1, cr.y1, cr.x2-1, cr.y2-1);
 		
 			FillStops(Stops, j, false);
@@ -482,7 +482,7 @@ GDragColumn::GDragColumn(GItemContainer *list, int col)
 
 		#if WINNATIVE
 		
-		GArray<int> Ver;
+		LArray<int> Ver;
 		bool Layered = (
 							LGetOs(&Ver) == LGI_OS_WIN32 ||
 							LGetOs(&Ver) == LGI_OS_WIN64
@@ -943,7 +943,7 @@ void GItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 	{
 		#ifdef MAC
 
-			GArray<GColourStop> Stops;
+			LArray<GColourStop> Stops;
 			LRect j(r.x1, r.y1, r.x2-1, r.y2-1);
 			FillStops(Stops, j, d->cMark != 0);
 			LgiFillGradient(pDC, j, true, Stops);

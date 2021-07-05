@@ -22,10 +22,10 @@ class GDocAppPrivate
 public:
 	// Data
 	LWindow				*App;
-	GString				OptionsFile;
-	GString				OptionsParam;
+	LString				OptionsFile;
+	LString				OptionsParam;
 	char				*AppName;
-	GString				CurFile;
+	LString				CurFile;
 	bool				Dirty;
 	GDocAppInstallMode	Mode;
 
@@ -44,10 +44,10 @@ public:
 		DeleteArray(AppName);
 	}
 	
-	GString GetOptionsFile(const char *Ext)
+	LString GetOptionsFile(const char *Ext)
 	{
 		// Get options file
-		GString Status;
+		LString Status;
 		char Opt[MAX_PATH];
 		if (LgiApp->GetOption("o", Opt, sizeof(Opt)))
 		{
@@ -74,7 +74,7 @@ public:
 				#endif
 				{
 					// unix apps have no '.' in their name
-					Status += GString(".") + Ext;
+					Status += LString(".") + Ext;
 				}
 				
 				char p[MAX_PATH];
@@ -501,7 +501,7 @@ void GDocApp<OptionsFmt>::SetCurFile(const char *f)
 			AddFile(f);
 	}
 
-	GString Display;
+	LString Display;
 	if (SerializeEntry(&Display, &d->CurFile, NULL))
 	{
 		char s[MAX_PATH + 100];
@@ -588,7 +588,7 @@ OptionsFmt *GDocApp<OptionsFmt>::GetOptions()
 }
 
 template <typename OptionsFmt>
-void GDocApp<OptionsFmt>::OnReceiveFiles(GArray<const char*> &Files)
+void GDocApp<OptionsFmt>::OnReceiveFiles(LArray<const char*> &Files)
 {
 	const char *f = Files.Length() ? Files[0] : 0;
 	if (f && _OpenFile(f, false))

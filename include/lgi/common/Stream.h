@@ -16,7 +16,7 @@
 #include "lgi/common/StringClass.h"
 
 /// Stream printf
-LgiExtern ssize_t LgiPrintf(GAutoString &Str, const char *Format, va_list &Arg);
+LgiExtern ssize_t LgiPrintf(LAutoString &Str, const char *Format, va_list &Arg);
 LgiFunc ssize_t LStreamPrintf(LStreamI *s, int flags, const char *Format, va_list &Arg);
 LgiFunc ssize_t LStreamPrint(LStreamI *s, const char *fmt, ...);
 
@@ -96,7 +96,7 @@ protected:
 	uint64 StartTime;
 	uint64 EndTime;
 	uint64 Total;
-	GArray<char> Buffer;
+	LArray<char> Buffer;
 
 public:
 	/// Constructor
@@ -232,7 +232,7 @@ class LgiClass GTempStream : public GProxyStream
 protected:
 	class GMemStream *Mem;
 	class GFile *Tmp;
-	GString TmpFolder;
+	LString TmpFolder;
 
 public:
 	GTempStream(const char *TmpFolder = 0, int maxMemSize = 1 << 20);

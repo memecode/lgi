@@ -1,6 +1,6 @@
 /*	Instantiation:
 
-	GAutoPtr<LFont> f(new LEmojiFont());
+	LAutoPtr<LFont> f(new LEmojiFont());
 	if (f && f->Create())
 		LFontSystem::Inst()->AddFont(f);
 */

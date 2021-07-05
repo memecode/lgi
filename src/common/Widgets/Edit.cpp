@@ -28,7 +28,7 @@ public:
 	bool Multiline;
 	bool Password;
 	bool NotificationProcessed;
-	GAutoString EmptyTxt;
+	LAutoString EmptyTxt;
 	
 	LEditPrivate()
 	{
@@ -250,7 +250,7 @@ bool LEdit::Paste()
 {
 	GClipBoard Clip(this);
 
-	GAutoWString Mem;
+	LAutoWString Mem;
 	char16 *t = Clip.TextW();
 	if (!t) // ala Win9x
 	{

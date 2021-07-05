@@ -16,8 +16,8 @@ public:
 	};
 
 private:
-	GString File;
-	GString Error;
+	LString File;
+	LString Error;
 	bool Dirty;
 	PortableType Mode;
 	

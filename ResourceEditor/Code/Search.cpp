@@ -193,7 +193,7 @@ GMessage::Result SearchThread::OnEvent(GMessage *Msg)
 	{
 		case M_SEARCH:
 		{
-			GAutoPtr<SearchParams> p;
+			LAutoPtr<SearchParams> p;
 			if (ReceiveA(p, Msg))
 				Params = *p;
 			else
@@ -642,7 +642,7 @@ Results::Results(AppWnd *app, Search *params)
 	
 	LResourceLoad r;
 	LRect p;
-	GAutoString n;
+	LAutoString n;
 	if (r.LoadFromResource(IDD_RESULTS, this, &p, &n))
 	{
 		SetPos(p);

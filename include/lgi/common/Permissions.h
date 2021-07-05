@@ -78,7 +78,7 @@ struct LPermissions
 		{
 			for
 			(
-				auto s : GString
+				auto s : LString
 						(
 							IsWindows
 							?

@@ -54,7 +54,7 @@ LImageList *LLoadImageList(const char *File, int x, int y)
 	if (x < 0 || y < 0)
 	{
 		// Detect dimensions in the filename.
-		auto leaf = GString(File).Split(DIR_STR).Last();
+		auto leaf = LString(File).Split(DIR_STR).Last();
 		auto parts = leaf.RSplit(".", 1);
 		auto last = parts[0].Split("-").Last();
 		auto dim = last.Split("x");
@@ -75,14 +75,14 @@ LImageList *LLoadImageList(const char *File, int x, int y)
 		}
 	}		
 
-	auto Path = LFileExists(File) ? GString(File) : LFindFile(File);
+	auto Path = LFileExists(File) ? LString(File) : LFindFile(File);
 	if (!Path)
 	{
 		LgiTrace("%s:%i - Couldn't find '%s'\n", _FL, File);
 		return NULL;
 	}
 
-	GAutoPtr<LSurface> pDC(GdcD->Load(Path));
+	LAutoPtr<LSurface> pDC(GdcD->Load(Path));
 	if (!pDC)
 	{
 		LgiTrace("%s:%i - Couldn't load '%s'\n", _FL, Path.Get());
@@ -97,7 +97,7 @@ LToolBar *LgiLoadToolbar(LViewI *Parent, const char *File, int x, int y)
 	LToolBar *Toolbar = new LToolBar;
 	if (Toolbar)
 	{
-		GString FileName = LFindFile(File);
+		LString FileName = LFindFile(File);
 		if (FileName)
 		{
 			bool Success = FileName && Toolbar->SetBitmap(FileName, x, y);
@@ -142,8 +142,8 @@ public:
 		GColour Back;
 	};
 
-	GArray<CacheDC*> Cache;
-	GArray<LRect> Bounds;
+	LArray<CacheDC*> Cache;
+	LArray<LRect> Bounds;
 
 	CacheDC *GetCache(GColour Back, bool Disabled)
 	{
@@ -430,7 +430,7 @@ public:
 	const char *CustomProp;
 
 	// bitmap cache
-	GAutoPtr<LMemDC> IconCache;
+	LAutoPtr<LMemDC> IconCache;
 
 	LToolBarPrivate()
 	{
@@ -522,7 +522,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 struct GToolButtonPriv
 {
-	GArray<LDisplayString*> Text;
+	LArray<LDisplayString*> Text;
 };
 
 LToolButton::LToolButton(int Bx, int By)

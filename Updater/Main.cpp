@@ -46,7 +46,7 @@ WCHAR *NewStr(WCHAR *s, size_t len = 0)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
-	GArray<WCHAR*> Files;
+	LArray<WCHAR*> Files;
 
 	// Parse the command line for the filename(s) to copy....
 	WCHAR *CmdLine = GetCommandLineW();

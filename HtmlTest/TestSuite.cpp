@@ -127,9 +127,9 @@ public:
 		return NULL;
 	}
 	
-	GAutoString GetDataFolder()
+	LAutoString GetDataFolder()
 	{
-		return GAutoString();
+		return LAutoString();
 	}
 };
 
@@ -140,7 +140,7 @@ GHostFunc HtmlScriptContext::Methods[] =
 
 class HtmlImageLoader : public LThread, public LMutex, public LCancel
 {
-	GArray<GDocumentEnv::LoadJob*> In;
+	LArray<GDocumentEnv::LoadJob*> In;
 
 public:
 	HtmlImageLoader() : LThread("HtmlImageLoader")
@@ -164,9 +164,9 @@ public:
 		}
 	}
 	
-	GAutoPtr<LSocketI> CreateSock(const char *Proto)
+	LAutoPtr<LSocketI> CreateSock(const char *Proto)
 	{
-		GAutoPtr<LSocketI> s;
+		LAutoPtr<LSocketI> s;
 		if (Proto && !_stricmp(Proto, "https"))
 		{
 			SslSocket *ss;
@@ -183,7 +183,7 @@ public:
 	{
 		while (!IsCancelled())
 		{
-			GAutoPtr<LThreadJob> j;
+			LAutoPtr<LThreadJob> j;
 			if (Lock(_FL))
 			{
 				if (In.Length())
@@ -214,16 +214,16 @@ public:
 				else
 				{
 					GMemQueue p(1024);
-					GString Err;
+					LString Err;
 					auto r = LgiGetUri(this, &p, &Err, Job->Uri);
 					if (r)
 					{
 						uchar Hint[16];
 						p.Peek(Hint, sizeof(Hint));
-						GAutoPtr<GFilter> Filter(GFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint));
+						LAutoPtr<GFilter> Filter(GFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint));
 						if (Filter)
 						{
-							GAutoPtr<LSurface> Img(new LMemDC);
+							LAutoPtr<LSurface> Img(new LMemDC);
 							GFilter::IoStatus Rd = Filter->ReadImage(Img, &p);
 							if (Rd == GFilter::IoSuccess)
 							{
@@ -259,9 +259,9 @@ class AppWnd : public LWindow, public GDefaultDocumentEnv
     HtmlScriptContext *Html;
     LTextView3 *Text;
 	char Base[256];
-	GAutoPtr<LScriptEngine> Script;
-	GAutoPtr<HtmlImageLoader> Worker;
-	GAutoPtr<LEmojiFont> Emoji;
+	LAutoPtr<LScriptEngine> Script;
+	LAutoPtr<HtmlImageLoader> Worker;
+	LAutoPtr<LEmojiFont> Emoji;
 
 	LoadType GetContent(LoadJob *&j)
 	{
@@ -272,11 +272,11 @@ class AppWnd : public LWindow, public GDefaultDocumentEnv
 			if (LgiMakePath(p, sizeof(p), Base, j->Uri) &&
 				LFileExists(p))
 			{
-				GString Ext = LgiGetExtension(p);
+				LString Ext = LgiGetExtension(p);
 				if (Ext.Equals("css") ||
 					Ext.Equals("html"))
 				{
-					GAutoPtr<GFile> f(new GFile);
+					LAutoPtr<GFile> f(new GFile);
 					if (f && f->Open(p, O_READ))
 					{
 						j->Stream.Reset(f.Release());
@@ -449,8 +449,8 @@ public:
 				
 				char p[MAX_PATH];
 				LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
-				GArray<const char*> Ext;
-				GArray<char*> Files;
+				LArray<const char*> Ext;
+				LArray<char*> Files;
 				Ext.Add("*.html");
 				Ext.Add("*.htm");				
 				if (LRecursiveFileSearch(p, &Ext, &Files))
@@ -474,7 +474,7 @@ public:
 					for (int i=0; i<Files.Length() && !Prog.IsCancelled(); i++)
 					{
 						char *File = Files[i];
-						GAutoString Content(ReadTextFile(File));
+						LAutoString Content(ReadTextFile(File));
 						if (!Content)
 						{
 							LgiAssert(0);
@@ -515,8 +515,8 @@ public:
 			{
 				char p[MAX_PATH];
 				LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
-				GArray<const char*> Ext;
-				GArray<char*> Files;
+				LArray<const char*> Ext;
+				LArray<char*> Files;
 				Ext.Add("*.png");
 				// if (LRecursiveFileSearch(p, &Ext, &Files))
 
@@ -572,7 +572,7 @@ public:
 					{
 						if (Text)
 						{
-							GAutoString s(Html->GetSelection());
+							LAutoString s(Html->GetSelection());
 							if (s)
 								Text->Name(s);
 							else

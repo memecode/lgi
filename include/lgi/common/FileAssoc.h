@@ -32,10 +32,10 @@ public:
 	char *GetExtension();
 
 	/// Gets the extensions that map to this assocaition.
-	bool GetExtensions(GArray<char*> &Ext);
+	bool GetExtensions(LArray<char*> &Ext);
 
 	/// Gets the action for this association.
-	bool GetActions(GArray<GFileAssocAction*> &Actions);
+	bool GetActions(LArray<GFileAssocAction*> &Actions);
 
 	/// Sets an action.
 	bool SetAction(GFileAssocAction *Action);

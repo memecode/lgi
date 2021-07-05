@@ -12,7 +12,7 @@
 #include <math.h>
 
 #include "Gdc2.h"
-#include "GString.h"
+#include "LString.h"
 using namespace Gtk;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -21,7 +21,7 @@ using namespace Gtk;
 class LMemDCPrivate
 {
 public:
-	::GArray<LRect> Client;
+	::LArray<LRect> Client;
 	// LRect Client;
 	cairo_t *cr;
 	LCairoSurfaceT Img;

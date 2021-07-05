@@ -116,7 +116,7 @@ enum RteCommands
 
 class LRichEditElem : public LHtmlElement
 {
-	LHashTbl<ConstStrKey<char,false>, GString> Attr;
+	LHashTbl<ConstStrKey<char,false>, LString> Attr;
 
 public:
 	LRichEditElem(LHtmlElement *parent) : LHtmlElement(parent)
@@ -128,7 +128,7 @@ public:
 		if (!attr)
 			return false;
 
-		GString s = Attr.Find(attr);
+		LString s = Attr.Find(attr);
 		if (!s)
 			return false;
 		
@@ -140,7 +140,7 @@ public:
 	{
 		if (!attr)
 			return;
-		Attr.Add(attr, GString(val));
+		Attr.Add(attr, LString(val));
 	}
 	
 	void SetStyle()
@@ -156,11 +156,11 @@ struct LRichEditElemContext : public LCss::ElementCallback<LRichEditElem>
 	/// Returns the document unque element ID
 	const char *GetAttr(LRichEditElem *obj, const char *Attr);
 	/// Returns the class
-	bool GetClasses(GString::Array &Classes, LRichEditElem *obj);
+	bool GetClasses(LString::Array &Classes, LRichEditElem *obj);
 	/// Returns the parent object
 	LRichEditElem *GetParent(LRichEditElem *obj);
 	/// Returns an array of child objects
-	GArray<LRichEditElem*> GetChildren(LRichEditElem *obj);
+	LArray<LRichEditElem*> GetChildren(LRichEditElem *obj);
 };
 
 class GDocFindReplaceParams3 : public GDocFindReplaceParams
@@ -192,7 +192,7 @@ public:
 struct LNamedStyle : public LCss
 {
 	int RefCount;
-	GString Name;
+	LString Name;
 
 	LNamedStyle()
 	{
@@ -203,18 +203,18 @@ struct LNamedStyle : public LCss
 class GCssCache
 {
 	int Idx;
-	GArray<LNamedStyle*> Styles;
-	GString Prefix;
+	LArray<LNamedStyle*> Styles;
+	LString Prefix;
 
 public:
 	GCssCache();
 	~GCssCache();
 
-	void SetPrefix(GString s) { Prefix = s; }
+	void SetPrefix(LString s) { Prefix = s; }
 	uint32_t GetStyles();
 	void ZeroRefCounts();
 	bool OutputStyles(LStream &s, int TabDepth);
-	LNamedStyle *AddStyleToCache(GAutoPtr<LCss> &s);
+	LNamedStyle *AddStyleToCache(LAutoPtr<LCss> &s);
 };
 
 class LRichTextPriv;
@@ -228,7 +228,7 @@ class SelectColour : public LPopup
 		LRect r;
 		GColour c;
 	};
-	GArray<Entry> e;
+	LArray<Entry> e;
 
 public:
 	SelectColour(LRichTextPriv *priv, LPoint p, LRichTextEdit::RectType t);
@@ -252,9 +252,9 @@ class EmojiMenu : public LPopup
 	struct Pane
 	{
 		LRect Btn;
-		GArray<Emoji> e;
+		LArray<Emoji> e;
 	};
-	GArray<Pane> Panes;
+	LArray<Pane> Panes;
 	static int Cur;
 
 public:
@@ -268,7 +268,7 @@ public:
 
 struct CtrlCap
 {
-	GString Name, Param;
+	LString Name, Param;
 
 	void Set(const char *name, const char *param)
 	{
@@ -285,11 +285,11 @@ struct ButtonState
 	uint8_t MouseOver : 1;
 };
 
-extern bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int Len);
+extern bool Utf16to32(LArray<uint32_t> &Out, const uint16_t *In, int Len);
 
 class GEmojiContext
 {
-	GAutoPtr<LSurface> EmojiImg;
+	LAutoPtr<LSurface> EmojiImg;
 
 public:
 	LSurface *GetEmojiImage();
@@ -340,14 +340,14 @@ public:
 	class Block;
 
 	LRichTextEdit *View;
-	GString OriginalText;
-	GAutoWString WideNameCache;
-	GAutoString UtfNameCache;
-	GAutoPtr<LFont> Font;
+	LString OriginalText;
+	LAutoWString WideNameCache;
+	LAutoString UtfNameCache;
+	LAutoPtr<LFont> Font;
 	bool WordSelectMode;
 	bool Dirty;
 	LPoint DocumentExtent; // Px
-	GString Charset;
+	LString Charset;
 	GHtmlStaticInst Inst;
 	int NextUid;
 	LStream *Log;
@@ -357,11 +357,11 @@ public:
 	// Spell check support
 	LSpellCheck *SpellCheck;
 	bool SpellDictionaryLoaded;
-	GString SpellLang, SpellDict;
+	LString SpellLang, SpellDict;
 
 	// This is set when the user changes a style without a selection,
 	// indicating that we should start a new run when new text is entered
-	GArray<LRichTextEdit::RectType> StyleDirty;
+	LArray<LRichTextEdit::RectType> StyleDirty;
 
 	// Toolbar
 	bool ShowTools;
@@ -376,10 +376,10 @@ public:
 	bool ScrollChange;
 
 	// Eat keys (OS bug work arounds)
-	GArray<uint32_t> EatVkeys;
+	LArray<uint32_t> EatVkeys;
 
 	// Debug stuff
-	GArray<LRect> DebugRects;
+	LArray<LRect> DebugRects;
 
 	// Constructor
 	LRichTextPriv(LRichTextEdit *view, LRichTextPriv **Ptr);
@@ -417,9 +417,9 @@ public:
 			return Right - Left + 1;
 		}
 		
-		GString Describe()
+		LString Describe()
 		{
-			GString s;
+			LString s;
 			s.Printf("Left=%i Right=%i CurY=%i", Left, Right, CurY);
 			return s;
 		}
@@ -437,14 +437,14 @@ public:
 	};
 
 	/// This is a run of text, all of the same style
-	class StyleText : public GArray<uint32_t>
+	class StyleText : public LArray<uint32_t>
 	{
 		LNamedStyle *Style; // owned by the CSS cache
 	
 	public:
 		ColourPair Colours;
 		HtmlTag Element;
-		GString Param;
+		LString Param;
 		bool Emoji;
 
 		StyleText(const StyleText *St);
@@ -464,7 +464,7 @@ public:
 
 		// Cursor stuff
 		int CurEndPoint;
-		GArray<ssize_t> EndPoints;
+		LArray<ssize_t> EndPoints;
 		
 		PaintContext()
 		{
@@ -601,7 +601,7 @@ public:
 	class Transaction
 	{
 	public:		
-		GArray<DocChange*> Changes;
+		LArray<DocChange*> Changes;
 
 		~Transaction()
 		{
@@ -626,11 +626,11 @@ public:
 		}
 	};
 
-	GArray<Transaction*> UndoQue;
+	LArray<Transaction*> UndoQue;
 	ssize_t UndoPos;
 	bool UndoPosLock;
 
-	bool AddTrans(GAutoPtr<Transaction> &t);
+	bool AddTrans(LAutoPtr<Transaction> &t);
 	bool SetUndoPos(ssize_t Pos);
 
 	template<typename T>
@@ -720,12 +720,12 @@ public:
 			virtual bool GetPosFromIndex(BlockCursor *Cursor) = 0;
 			virtual bool OnLayout(Flow &f) = 0;
 			virtual void OnPaint(PaintContext &Ctx) = 0;
-			virtual bool ToHtml(LStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rgn) = 0;
-			virtual bool OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY) = 0;
+			virtual bool ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rgn) = 0;
+			virtual bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY) = 0;
 			virtual int LineToOffset(int Line) = 0;
 			virtual int GetLines() = 0;
 			virtual ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params) = 0;
-			virtual void SetSpellingErrors(GArray<LSpellCheck::SpellingError> &Errors, LRange r) {}
+			virtual void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r) {}
 			virtual void IncAllStyleRefs() {}
 			virtual void Dump() {}
 			virtual LNamedStyle *GetStyle(ssize_t At = -1) = 0;
@@ -737,10 +737,10 @@ public:
 			virtual bool IsValid() { return false; }
 			virtual bool IsBusy(bool Stop = false) { return false; }
 			virtual Block *Clone() = 0;
-			virtual void OnComponentInstall(GString Name) {}
+			virtual void OnComponentInstall(LString Name) {}
 
 			// Copy some or all of the text out
-			virtual ssize_t CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text) { return false; }
+			virtual ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text) { return false; }
 
 			/// This method moves a cursor index.
 			/// \returns the new cursor index or -1 on error.
@@ -777,7 +777,7 @@ public:
 				Transaction *Trans,
 				ssize_t Offset,
 				ssize_t Chars,
-				GArray<uint32_t> *DeletedText = NULL
+				LArray<uint32_t> *DeletedText = NULL
 			)	{ return false; }
 
 			/// Changes the style of a range of characters
@@ -856,7 +856,7 @@ public:
 		#endif
 	};
 	
-	GAutoPtr<BlockCursor> Cursor, Selection;
+	LAutoPtr<BlockCursor> Cursor, Selection;
 
 	/// This is part or all of a Text run
 	struct DisplayStr : public LDisplayString
@@ -923,9 +923,9 @@ public:
 		}
 		
 		// Make a sub-string of this display string
-		virtual GAutoPtr<DisplayStr> Clone(ssize_t Start, ssize_t Len = -1)
+		virtual LAutoPtr<DisplayStr> Clone(ssize_t Start, ssize_t Len = -1)
 		{
-			GAutoPtr<DisplayStr> c;
+			LAutoPtr<DisplayStr> c;
 			auto WideW = WideLen();
 			if (WideW > 0 && Len != 0)
 			{
@@ -940,7 +940,7 @@ public:
 					LgiAssert(Str != NULL);
 					const char16 *s = Utf16Seek(Str, Start);
 					const char16 *e = Utf16Seek(s, Len);
-					GArray<uint32_t> Tmp;
+					LArray<uint32_t> Tmp;
 					if (Utf16to32(Tmp, (const uint16_t*)s, e - s))
 						c.Reset(new DisplayStr(Src, GetFont(), &Tmp[0], Tmp.Length(), pDC));
 					#else
@@ -970,14 +970,14 @@ public:
 	
 	struct EmojiDisplayStr : public DisplayStr
 	{
-		GArray<LRect> SrcRect;
+		LArray<LRect> SrcRect;
 		LSurface *Img;
 		#if defined(_MSC_VER)
-		GArray<uint32_t> Utf32;
+		LArray<uint32_t> Utf32;
 		#endif
 
 		EmojiDisplayStr(StyleText *src, LSurface *img, LFont *f, const uint32_t *s, ssize_t l = -1);
-		GAutoPtr<DisplayStr> Clone(ssize_t Start, ssize_t Len = -1);
+		LAutoPtr<DisplayStr> Clone(ssize_t Start, ssize_t Len = -1);
 		void Paint(LSurface *pDC, int &FixX, int FixY, GColour &Back);
 		double GetAscent();
 		ssize_t PosToIndex(int XPos, bool Nearest);
@@ -991,7 +991,7 @@ public:
 		LRect PosOff;
 
 		/// The array of display strings
-		GArray<DisplayStr*> Strs;
+		LArray<DisplayStr*> Strs;
 
 		/// Is '1' for lines that have a new line character at the end.
 		uint8_t NewLine;
@@ -1008,7 +1008,7 @@ public:
 	class TextBlock : public Block
 	{
 		LNamedStyle *Style;
-		GArray<LSpellCheck::SpellingError> SpellingErrors;
+		LArray<LSpellCheck::SpellingError> SpellingErrors;
 		int PaintErrIdx, ClickErrIdx;
 		LSpellCheck::SpellingError *SpErr;
 
@@ -1017,10 +1017,10 @@ public:
 	
 	public:
 		// Runs of characters in the same style: pre-layout.
-		GArray<StyleText*> Txt;
+		LArray<StyleText*> Txt;
 
 		// Runs of characters (display strings) of potentially different styles on the same line: post-layout.
-		GArray<TextLine*> Layout;
+		LArray<TextLine*> Layout;
 		// True if the 'Layout' data is out of date.
 		bool LayoutDirty;
 
@@ -1045,24 +1045,24 @@ public:
 		// No state change methods
 		const char *GetClass() { return "TextBlock"; }
 		int GetLines();
-		bool OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY);
+		bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY);
 		int LineToOffset(int Line);
 		LRect GetPos() { return Pos; }
 		void Dump();
 		LNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
-		bool ToHtml(LStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng);
+		bool ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
 		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
-		ssize_t GetTextAt(ssize_t Offset, GArray<StyleText*> &t);
-		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text);
+		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
+		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text);
 		bool Seek(SeekType To, BlockCursor &Cursor);
 		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
 		void IncAllStyleRefs();
-		void SetSpellingErrors(GArray<LSpellCheck::SpellingError> &Errors, LRange r);
+		void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r);
 		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
 		void DumpNodes(LTreeItem *Ti);
@@ -1077,7 +1077,7 @@ public:
 		// Transactional changes
 		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, LNamedStyle *Style = NULL);
 		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add);
-		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText = NULL);
+		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText = NULL);
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
 		Block *Split(Transaction *Trans, ssize_t AtOffset);
 		bool StripLast(Transaction *Trans, const char *Set = " \t\r\n"); // Strip trailing new line if present..
@@ -1099,20 +1099,20 @@ public:
 		// No state change methods
 		const char *GetClass() { return "HorzRuleBlock"; }
 		int GetLines();
-		bool OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY);
+		bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY);
 		int LineToOffset(int Line);
 		LRect GetPos() { return Pos; }
 		void Dump();
 		LNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
-		bool ToHtml(LStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng);
+		bool ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
 		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
-		ssize_t GetTextAt(ssize_t Offset, GArray<StyleText*> &t);
-		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text);
+		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
+		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text);
 		bool Seek(SeekType To, BlockCursor &Cursor);
 		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
 		void IncAllStyleRefs();
@@ -1128,7 +1128,7 @@ public:
 		// Transactional changes
 		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, LNamedStyle *Style = NULL);
 		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add);
-		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText = NULL);
+		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText = NULL);
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
 		Block *Split(Transaction *Trans, ssize_t AtOffset);
 	};
@@ -1140,8 +1140,8 @@ public:
 		struct ScaleInf
 		{
 			LPoint Sz;
-			GString MimeType;
-			GAutoPtr<LStreamI> Compressed;
+			LString MimeType;
+			LAutoPtr<LStreamI> Compressed;
 			int Percent;
 
 			ScaleInf()
@@ -1157,12 +1157,12 @@ public:
 		LNamedStyle *Style;
 		int Scale;
 		LRect SourceValid;
-		GString FileName;
-		GString ContentId;
-		GString StreamMimeType;
-		GString FileMimeType;
+		LString FileName;
+		LString ContentId;
+		LString StreamMimeType;
+		LString FileMimeType;
 
-		GArray<ScaleInf> Scales;
+		LArray<ScaleInf> Scales;
 		int ResizeIdx;
 		int ThreadBusy;
 		bool IsDeleted;
@@ -1174,9 +1174,9 @@ public:
 		
 
 	public:
-		GAutoPtr<LSurface> SourceImg, DisplayImg, SelectImg;
+		LAutoPtr<LSurface> SourceImg, DisplayImg, SelectImg;
 		LRect Margin, Border, Padding;
-		GString Source;
+		LString Source;
 		LPoint Size;
 		
 		bool LayoutDirty;
@@ -1190,24 +1190,24 @@ public:
 		bool IsValid();
 		bool IsBusy(bool Stop = false);
 		bool Load(const char *Src = NULL);
-		bool SetImage(GAutoPtr<LSurface> Img);
+		bool SetImage(LAutoPtr<LSurface> Img);
 
 		// No state change methods
 		int GetLines();
-		bool OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY);
+		bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY);
 		int LineToOffset(int Line);
 		LRect GetPos() { return Pos; }
 		void Dump();
 		LNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
-		bool ToHtml(LStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng);
+		bool ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
 		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
 		bool OnLayout(Flow &flow);
-		ssize_t GetTextAt(ssize_t Offset, GArray<StyleText*> &t);
-		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text);
+		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
+		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text);
 		bool Seek(SeekType To, BlockCursor &Cursor);
 		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
 		void IncAllStyleRefs();
@@ -1216,7 +1216,7 @@ public:
 		void DumpNodes(LTreeItem *Ti);
 		#endif
 		Block *Clone();
-		void OnComponentInstall(GString Name);
+		void OnComponentInstall(LString Name);
 
 		// Events
 		GMessage::Result OnEvent(GMessage *Msg);
@@ -1224,11 +1224,11 @@ public:
 		// Transactional changes
 		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, LNamedStyle *Style = NULL);
 		bool ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add);
-		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText = NULL);
+		ssize_t DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText = NULL);
 		bool DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper);
 	};
 	
-	GArray<Block*> Blocks;
+	LArray<Block*> Blocks;
 	Block *Next(Block *b);
 	Block *Prev(Block *b);
 
@@ -1240,18 +1240,18 @@ public:
 	void Empty();
 	bool Seek(BlockCursor *In, SeekType Dir, bool Select);
 	bool CursorFirst();
-	bool SetCursor(GAutoPtr<BlockCursor> c, bool Select = false);
+	bool SetCursor(LAutoPtr<BlockCursor> c, bool Select = false);
 	LRect SelectionRect();
-	bool GetSelection(GArray<char16> *Text, GAutoString *Html);
+	bool GetSelection(LArray<char16> *Text, LAutoString *Html);
 	ssize_t IndexOfCursor(BlockCursor *c);
 	ssize_t HitTest(int x, int y, int &LineHint, Block **Blk = NULL);
-	bool CursorFromPos(int x, int y, GAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx);
+	bool CursorFromPos(int x, int y, LAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx);
 	Block *GetBlockByIndex(ssize_t Index, ssize_t *Offset = NULL, int *BlockIdx = NULL, int *LineCount = NULL);
 	bool Layout(LScrollBar *&ScrollY);
 	void OnStyleChange(LRichTextEdit::RectType t);
 	bool ChangeSelectionStyle(LCss *Style, bool Add);
 	void PaintBtn(LSurface *pDC, LRichTextEdit::RectType t);
-	bool MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, GString Link);
+	bool MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, LString Link);
 	bool ClickBtn(LMouse &m, LRichTextEdit::RectType t);
 	bool InsertHorzRule();
 	void Paint(LSurface *pDC, LScrollBar *&ScrollY);
@@ -1261,14 +1261,14 @@ public:
 	bool Merge(Transaction *Trans, Block *a, Block *b);
 	bool DeleteSelection(Transaction *t, char16 **Cut);
 	LRichTextEdit::RectType PosToButton(LMouse &m);
-	void OnComponentInstall(GString Name);
+	void OnComponentInstall(LString Name);
 
 	struct CreateContext
 	{
 		TextBlock *Tb;
 		ImageBlock *Ib;
 		HorzRuleBlock *Hrb;
-		GArray<uint32_t> Buf;
+		LArray<uint32_t> Buf;
 		uint32_t LastChar;
 		GFontCache *FontCache;
 		LCss::Store StyleStore;
@@ -1336,9 +1336,9 @@ public:
 		}
 	};
 	
-	GAutoPtr<CreateContext> CreationCtx;
+	LAutoPtr<CreateContext> CreationCtx;
 
-	bool ToHtml(GArray<GDocView::ContentMedia> *Media = NULL, BlockCursor *From = NULL, BlockCursor *To = NULL);
+	bool ToHtml(LArray<GDocView::ContentMedia> *Media = NULL, BlockCursor *From = NULL, BlockCursor *To = NULL);
 	void DumpBlocks();
 	bool FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentStyle = NULL, int Depth = 0);
 
@@ -1361,8 +1361,8 @@ struct BlockCursorState
 struct CompleteTextBlockState : public LRichTextPriv::DocChange
 {
 	int Uid;
-	GAutoPtr<BlockCursorState> Cur, Sel;
-	GAutoPtr<LRichTextPriv::TextBlock> Blk;
+	LAutoPtr<BlockCursorState> Cur, Sel;
+	LAutoPtr<LRichTextPriv::TextBlock> Blk;
 
 	CompleteTextBlockState(LRichTextPriv *Ctx, LRichTextPriv::TextBlock *Tb);
 	bool Apply(LRichTextPriv *Ctx, bool Forward);
@@ -1373,7 +1373,7 @@ struct MultiBlockState : public LRichTextPriv::DocChange
 	LRichTextPriv *Ctx;
 	ssize_t Index; // Number of blocks before the edit
 	ssize_t Length; // Of the other version currently in the Ctx stack
-	GArray<LRichTextPriv::Block*> Blks;
+	LArray<LRichTextPriv::Block*> Blks;
 	
 	MultiBlockState(LRichTextPriv *ctx, ssize_t Start);
 	bool Apply(LRichTextPriv *Ctx, bool Forward);
@@ -1387,7 +1387,7 @@ LTreeItem *PrintNode(LTreeItem *Parent, const char *Fmt, ...);
 #endif
 
 typedef LRichTextPriv::BlockCursor BlkCursor;
-typedef GAutoPtr<LRichTextPriv::BlockCursor> AutoCursor;
-typedef GAutoPtr<LRichTextPriv::Transaction> AutoTrans;
+typedef LAutoPtr<LRichTextPriv::BlockCursor> AutoCursor;
+typedef LAutoPtr<LRichTextPriv::Transaction> AutoTrans;
 
 #endif

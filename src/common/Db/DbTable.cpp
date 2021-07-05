@@ -102,18 +102,18 @@ struct DbTablePriv
 	unsigned Fixed; // Count of fixed size fields.
 	unsigned FixedSz; // Byte size of fixed size fields.
 	unsigned Variable; // Count of variable sized fields.
-	GArray<LDbField> Fields;
-	GArray<int32> FixedOffsets;
+	LArray<LDbField> Fields;
+	LArray<int32> FixedOffsets;
 	LHashTbl<IntKey<int>, Info> Map;
 
 	// Rows
 	int Rows;
 	LDbRow *First, *Last;
-	GArray<char> Data;
+	LArray<char> Data;
 	bool Dirty;
 
 	// Indexes
-	GArray<DbIndex*> Indexes;
+	LArray<DbIndex*> Indexes;
 
 	// Methods
 	DbTablePriv() : Map(0, Info())
@@ -349,13 +349,13 @@ bool DbArrayIndex::Sort(LDbField *fld, bool ascend)
 	{
 		case GV_INT32:
 		case GV_INT64:
-			GArray<LDbRow*>::Sort(RowIntCompare, &p);
+			LArray<LDbRow*>::Sort(RowIntCompare, &p);
 			break;
 		case GV_STRING:
-			GArray<LDbRow*>::Sort(RowStrCompare, &p);
+			LArray<LDbRow*>::Sort(RowStrCompare, &p);
 			break;
 		case GV_DATETIME:
-			GArray<LDbRow*>::Sort(RowDateCompare, &p);
+			LArray<LDbRow*>::Sort(RowDateCompare, &p);
 			break;
 		default:
 			LgiAssert(0);
@@ -487,7 +487,7 @@ bool LDbRow::Compact()
 	if (Edit.Length())
 	{
 		// The variable sized fields can get fragmented, this function removes unused space.
-		GArray<VarBlock> v;
+		LArray<VarBlock> v;
 		for (unsigned i=0; i<d->Variable; i++)
 		{
 			if (Offsets[VariableOff][i] >= 0)
@@ -519,9 +519,9 @@ bool LDbRow::Compact()
 	return true;
 }
 
-GString LDbRow::ToString()
+LString LDbRow::ToString()
 {
-	GString::Array a;
+	LString::Array a;
 	a.SetFixedLength(false);
 	for (unsigned i=0; i<d->Fields.Length(); i++)
 	{
@@ -534,7 +534,7 @@ GString LDbRow::ToString()
 				break;
 			case GV_STRING:
 			{
-				GString s = GetStr(f.Id);
+				LString s = GetStr(f.Id);
 				if (s.Length() > 0)
 					a.New() = s;
 				else
@@ -556,7 +556,7 @@ GString LDbRow::ToString()
 		}
 	}
 
-	GString Sep(", ");
+	LString Sep(", ");
 	return Sep.Join(a);
 }
 
@@ -1043,18 +1043,18 @@ enum TestFields
 	TestString2,
 };
 
-GString LDbTable::ToString()
+LString LDbTable::ToString()
 {
-	GString::Array a;
+	LString::Array a;
 	a.SetFixedLength(false);
 
 	for (LDbRow *r = NULL; Iterate(r); )
 	{
-		GString s = r->ToString();
+		LString s = r->ToString();
 		a.Add(s);
 	}
 
-	GString Sep("\n");
+	LString Sep("\n");
 	return Sep.Join(a);
 }
 

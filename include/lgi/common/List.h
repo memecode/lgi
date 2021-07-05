@@ -181,7 +181,7 @@ public:
 	}
 
 	template<class T>
-	bool GetSelection(GArray<T*> &n)
+	bool GetSelection(LArray<T*> &n)
 	{
 		n.Empty();
 		for (auto i : Items)
@@ -210,7 +210,7 @@ public:
 	}
 
 	template<class T>
-	bool GetAll(GArray<T*> &n)
+	bool GetAll(LArray<T*> &n)
 	{
 		n.Empty();
 		for (auto i : Items)
@@ -336,7 +336,7 @@ public:
 	virtual void OnItemSelect
 	(
 		/// The item selected
-		GArray<LListItem*> &Items
+		LArray<LListItem*> &Items
 	);
 	/// Called when a column is dragged somewhere
 	virtual void OnColumnDrag

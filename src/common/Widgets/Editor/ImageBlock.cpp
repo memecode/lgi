@@ -12,13 +12,13 @@ int ImgScales[] = { 15, 25, 50, 75, 100 };
 
 class ImageLoader : public LEventTargetThread, public Progress
 {
-	GString File;
+	LString File;
 	LEventSinkI *Sink;
 	LSurface *Img;
-	GAutoPtr<GFilter> Filter;
+	LAutoPtr<GFilter> Filter;
 	bool SurfaceSent;
 	int64 Ts;
-	GAutoPtr<LStream> In;
+	LAutoPtr<LStream> In;
 
 public:
 	ImageLoader(LEventSinkI *s) : LEventTargetThread("ImageLoader")
@@ -74,7 +74,7 @@ public:
 		{
 			case M_IMAGE_LOAD_FILE:
 			{
-				GAutoPtr<GString> Str((GString*)Msg->A());
+				LAutoPtr<LString> Str((LString*)Msg->A());
 				File = *Str;
 
 				#if LOADER_THREAD_LOGGING
@@ -114,7 +114,7 @@ public:
 				{
 					if (Status == GFilter::IoComponentMissing)
 					{
-						GString *s = new GString(Filter->GetComponentName());
+						LString *s = new LString(Filter->GetComponentName());
 						#if LOADER_THREAD_LOGGING
 						LgiTrace("%s:%i - Thread.Send(M_IMAGE_COMPONENT_MISSING)\n", _FL);
 						#endif
@@ -143,8 +143,8 @@ public:
 			}
 			case M_IMAGE_LOAD_STREAM:
 			{
-				GAutoPtr<LStreamI> Stream((LStreamI*)Msg->A());
-				GAutoPtr<GString> FileName((GString*)Msg->B());
+				LAutoPtr<LStreamI> Stream((LStreamI*)Msg->A());
+				LAutoPtr<LString> FileName((LString*)Msg->B());
 				#if LOADER_THREAD_LOGGING
 				LgiTrace("%s:%i - Thread.Receive(M_IMAGE_LOAD_STREAM)\n", _FL);
 				#endif
@@ -180,7 +180,7 @@ public:
 				{
 					if (Status == GFilter::IoComponentMissing)
 					{
-						GString *s = new GString(Filter->GetComponentName());
+						LString *s = new LString(Filter->GetComponentName());
 						#if LOADER_THREAD_LOGGING
 						LgiTrace("%s:%i - Thread.Send(M_IMAGE_COMPONENT_MISSING)\n", _FL);
 						#endif
@@ -246,21 +246,21 @@ public:
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): invalid ptr\n", _FL);
 					#endif
-					PostSink(M_IMAGE_ERROR, (GMessage::Param) new GString("Invalid pointer."));
+					PostSink(M_IMAGE_ERROR, (GMessage::Param) new LString("Invalid pointer."));
 					break;
 				}
 				
-				GAutoPtr<GFilter> f(GFilterFactory::New("a.jpg", O_READ, NULL));
+				LAutoPtr<GFilter> f(GFilterFactory::New("a.jpg", O_READ, NULL));
 				if (!f)
 				{
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): No JPEG filter available\n", _FL);
 					#endif
-					PostSink(M_IMAGE_ERROR, (GMessage::Param) new GString("No JPEG filter available."));
+					PostSink(M_IMAGE_ERROR, (GMessage::Param) new LString("No JPEG filter available."));
 					break;
 				}
 
-				GAutoPtr<LSurface> scaled;
+				LAutoPtr<LSurface> scaled;
 				if (img->X() != si->Sz.x ||
 					img->Y() != si->Sz.y)
 				{
@@ -274,13 +274,13 @@ public:
 				f->Props = &Props;
 				Props.SetAttr(LGI_FILTER_QUALITY, RICH_TEXT_RESIZED_JPEG_QUALITY);
 				
-				GAutoPtr<GMemStream> jpg(new GMemStream(1024));
+				LAutoPtr<GMemStream> jpg(new GMemStream(1024));
 				if (!f->WriteImage(jpg, img))
 				{
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): Image compression failed\n", _FL);
 					#endif
-					PostSink(M_IMAGE_ERROR, (GMessage::Param) new GString("Image compression failed."));
+					PostSink(M_IMAGE_ERROR, (GMessage::Param) new LString("Image compression failed."));
 					break;
 				}
 
@@ -396,7 +396,7 @@ bool LRichTextPriv::ImageBlock::IsBusy(bool Stop)
 	return ThreadBusy != 0;
 }
 
-bool LRichTextPriv::ImageBlock::SetImage(GAutoPtr<LSurface> Img)
+bool LRichTextPriv::ImageBlock::SetImage(LAutoPtr<LSurface> Img)
 {
 	SourceImg = Img;
 	if (!SourceImg)
@@ -449,9 +449,9 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 	if (Src)
 		Source = Src;
 
-	GAutoPtr<LStreamI> Stream;
+	LAutoPtr<LStreamI> Stream;
 	
-	GString::Array a = Source.Strip().Split(":", 1);
+	LString::Array a = Source.Strip().Split(":", 1);
 	if (a.Length() > 1 &&
 		a[0].Equals("cid"))
 	{
@@ -508,7 +508,7 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 		#if LOADER_THREAD_LOGGING
 		LgiTrace("%s:%i - Posting M_IMAGE_LOAD_STREAM\n", _FL);
 		#endif
-		if (PostThreadEvent(GetThreadHandle(), M_IMAGE_LOAD_STREAM, (GMessage::Param)Stream.Release(), (GMessage::Param) (FileName ? new GString(FileName) : NULL)))
+		if (PostThreadEvent(GetThreadHandle(), M_IMAGE_LOAD_STREAM, (GMessage::Param)Stream.Release(), (GMessage::Param) (FileName ? new LString(FileName) : NULL)))
 		{
 			UpdateThreadBusy(_FL, 1);
 			return true;
@@ -520,7 +520,7 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 		#if LOADER_THREAD_LOGGING
 		LgiTrace("%s:%i - Posting M_IMAGE_LOAD_FILE\n", _FL);
 		#endif
-		if (PostThreadEvent(GetThreadHandle(), M_IMAGE_LOAD_FILE, (GMessage::Param)new GString(FileName)))
+		if (PostThreadEvent(GetThreadHandle(), M_IMAGE_LOAD_FILE, (GMessage::Param)new LString(FileName)))
 		{
 			UpdateThreadBusy(_FL, 1);
 			return true;
@@ -535,7 +535,7 @@ int LRichTextPriv::ImageBlock::GetLines()
 	return 1;
 }
 
-bool LRichTextPriv::ImageBlock::OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY)
+bool LRichTextPriv::ImageBlock::OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY)
 {
 	if (ColX)
 		*ColX = Offset > 0;
@@ -588,7 +588,7 @@ ssize_t LRichTextPriv::ImageBlock::Length()
 	return IsDeleted ? 0 : 1;
 }
 
-bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, GArray<GDocView::ContentMedia> *Media, LRange *Rng)
+bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rng)
 {
 	if (Media)
 	{
@@ -600,7 +600,7 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, GArray<GDocView::ContentMedia
 			ContentId.Printf("%u@memecode.com", Idx);
 		Cm.Id = ContentId;
 
-		GString Style;
+		LString Style;
 		ScaleInf *Si = ResizeIdx >= 0 && ResizeIdx < (int)Scales.Length() ? &Scales[ResizeIdx] : NULL;
 		if (Si && Si->Compressed)
 		{
@@ -878,13 +878,13 @@ bool LRichTextPriv::ImageBlock::OnLayout(Flow &flow)
 	return true;
 }
 
-ssize_t LRichTextPriv::ImageBlock::GetTextAt(ssize_t Offset, GArray<StyleText*> &t)
+ssize_t LRichTextPriv::ImageBlock::GetTextAt(ssize_t Offset, LArray<StyleText*> &t)
 {
 	// No text to get
 	return 0;
 }
 
-ssize_t LRichTextPriv::ImageBlock::CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text)
+ssize_t LRichTextPriv::ImageBlock::CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text)
 {
 	// No text to copy
 	return 0;
@@ -966,7 +966,7 @@ bool LRichTextPriv::ImageBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offse
 			{
 				ScaleInf &si = Scales[i];
 				
-				GString m;
+				LString m;
 				si.Sz.x = SourceImg->X() * ImgScales[i] / 100;
 				si.Sz.y = SourceImg->Y() * ImgScales[i] / 100;
 				si.Percent = ImgScales[i];
@@ -976,7 +976,7 @@ bool LRichTextPriv::ImageBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offse
 				{
 					char Sz[128];
 					LFormatSize(Sz, sizeof(Sz), si.Compressed->GetSize());
-					GString s;
+					LString s;
 					s.Printf(" (%s)", Sz);
 					m += s;
 				}
@@ -1000,7 +1000,7 @@ LRichTextPriv::Block *LRichTextPriv::ImageBlock::Clone()
 	return new ImageBlock(this);
 }
 
-void LRichTextPriv::ImageBlock::OnComponentInstall(GString Name)
+void LRichTextPriv::ImageBlock::OnComponentInstall(LString Name)
 {
 	if (Source && !SourceImg)
 	{
@@ -1169,7 +1169,7 @@ GMessage::Result LRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 		}
 		case M_IMAGE_COMPRESS:
 		{
-			GAutoPtr<GMemStream> Jpg((GMemStream*)Msg->A());
+			LAutoPtr<GMemStream> Jpg((GMemStream*)Msg->A());
 			ScaleInf *Si = (ScaleInf*)Msg->B();
 			if (!Jpg || !Si)
 			{
@@ -1194,7 +1194,7 @@ GMessage::Result LRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 		}
 		case M_IMAGE_ERROR:
 		{
-			GAutoPtr<GString> ErrMsg((GString*) Msg->A());
+			LAutoPtr<LString> ErrMsg((LString*) Msg->A());
 			#if LOADER_THREAD_LOGGING
 			LgiTrace("%s:%i - Received M_IMAGE_ERROR, posting M_CLOSE\n", _FL);
 			#endif
@@ -1203,7 +1203,7 @@ GMessage::Result LRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 		}
 		case M_IMAGE_COMPONENT_MISSING:
 		{
-			GAutoPtr<GString> Component((GString*) Msg->A());
+			LAutoPtr<LString> Component((LString*) Msg->A());
 			#if LOADER_THREAD_LOGGING
 			LgiTrace("%s:%i - Received M_IMAGE_COMPONENT_MISSING, posting M_CLOSE\n", _FL);
 			#endif
@@ -1220,7 +1220,7 @@ GMessage::Result LRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 		}
 		case M_IMAGE_SET_SURFACE:
 		{
-			GAutoPtr<LStream> File((LStream*)Msg->B());
+			LAutoPtr<LStream> File((LStream*)Msg->B());
 
 			#if LOADER_THREAD_LOGGING
 			LgiTrace("%s:%i - Received M_IMAGE_SET_SURFACE\n", _FL);
@@ -1305,7 +1305,7 @@ GMessage::Result LRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 			LgiTrace("%s:%i - Received %s\n", _FL, Msg->Msg()==M_IMAGE_ROTATE?"M_IMAGE_ROTATE":"M_IMAGE_FLIP");
 			#endif
 
-			GAutoPtr<LSurface> Img = SourceImg;
+			LAutoPtr<LSurface> Img = SourceImg;
 			UpdateThreadBusy(_FL, -1);
 			SetImage(Img);
 			break;
@@ -1329,7 +1329,7 @@ bool LRichTextPriv::ImageBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, 
 	return false;
 }
 
-ssize_t LRichTextPriv::ImageBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText)
+ssize_t LRichTextPriv::ImageBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText)
 {
 	// The image is one "character"
 	IsDeleted = BlkOffset == 0;
@@ -1348,7 +1348,7 @@ bool LRichTextPriv::ImageBlock::DoCase(Transaction *Trans, ssize_t StartIdx, ssi
 #ifdef _DEBUG
 void LRichTextPriv::ImageBlock::DumpNodes(LTreeItem *Ti)
 {
-	GString s;
+	LString s;
 	s.Printf("ImageBlock style=%s", Style?Style->Name.Get():NULL);
 	Ti->SetText(s);
 }

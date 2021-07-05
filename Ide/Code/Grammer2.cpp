@@ -1,9 +1,9 @@
 class ParseRule;
 class ParseContext;
 
-typedef GArray<int> IndexArr;
-typedef GArray<char16*> TokenArr;
-typedef GArray<ParseRule*> RuleArr;
+typedef LArray<int> IndexArr;
+typedef LArray<char16*> TokenArr;
+typedef LArray<ParseRule*> RuleArr;
 
 enum RuleTypes
 {
@@ -35,7 +35,7 @@ public:
 		return 0;
 	}
 	
-	GArray<RuleArr*> Cond;
+	LArray<RuleArr*> Cond;
 	
 	ParseRule(GToken &t, int &i);
 	ParseRule(char *s);

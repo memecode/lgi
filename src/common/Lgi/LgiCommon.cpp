@@ -52,7 +52,7 @@ namespace Gtk {
 //////////////////////////////////////////////////////////////////////////
 // Misc stuff
 #if LGI_COCOA || defined(__GTK_H__)
-	GString LgiArgsAppPath;
+	LString LgiArgsAppPath;
 #endif
 #if defined MAC
 	#import <foundation/foundation.h>
@@ -74,7 +74,7 @@ namespace Gtk {
 			{
 				if (_get_path_FSRef(Parent, a))
 				{
-					GAutoString u((char*)LNewConvertCp("utf-8", Name.unicode, "utf-16", Name.length * sizeof(Name.unicode[0]) ));
+					LAutoString u((char*)LNewConvertCp("utf-8", Name.unicode, "utf-16", Name.length * sizeof(Name.unicode[0]) ));
 
 					// printf("CatInfo = '%s' %x %x\n", u.Get(), Cat.nodeID, Cat.volume);
 					if (u && Cat.nodeID > 2)
@@ -89,15 +89,15 @@ namespace Gtk {
 			return false;
 		}
 
-		GAutoString FSRefPath(FSRef &fs)
+		LAutoString FSRefPath(FSRef &fs)
 		{
 			LStringPipe a;
 			if (_get_path_FSRef(fs, a))
 			{
-				return GAutoString(a.NewStr());
+				return LAutoString(a.NewStr());
 			}
 			
-			return GAutoString();
+			return LAutoString();
 		}
 	#endif
 #endif
@@ -239,7 +239,7 @@ bool RegisterActiveXControl(char *Dll)
 int LGetOs
 (
 	/// Returns the version of the OS or NULL if you don't care
-	GArray<int> *Ver
+	LArray<int> *Ver
 )
 {
 	#if defined(WIN32) || defined(WIN64)
@@ -371,8 +371,8 @@ const char *LGetOsName()
 #endif
 
 bool LRecursiveFileSearch(const char *Root,
-							GArray<const char*> *Ext,
-							GArray<char*> *Files,
+							LArray<const char*> *Ext,
+							LArray<char*> *Files,
 							uint64 *Size,
 							uint64 *Count,
 							RecursiveFileSearch_Callback Callback,
@@ -686,7 +686,7 @@ bool LgiTrimDir(char *Path)
 	return true;
 }
 
-GAutoString LgiMakeRelativePath(const char *Base, const char *Path)
+LAutoString LgiMakeRelativePath(const char *Base, const char *Path)
 {
 	LStringPipe Status;
 
@@ -727,7 +727,7 @@ GAutoString LgiMakeRelativePath(const char *Base, const char *Path)
 		}
 	}
 
-	return GAutoString(Status.NewStr());
+	return LAutoString(Status.NewStr());
 }
 
 bool LgiIsRelativePath(const char *Path)
@@ -770,7 +770,7 @@ bool LgiMakePath(char *Str, int StrSize, const char *Path, const char *File)
 
 		if (Path[0] == '~')
 		{
-			auto Parts = GString(Path).SplitDelimit(Dir, 2);
+			auto Parts = LString(Path).SplitDelimit(Dir, 2);
 			char *s = Str, *e = Str + StrSize;
 			for (auto p: Parts)
 			{
@@ -841,7 +841,7 @@ bool LGetSystemPath(LgiSystemPath Which, char *Dst, ssize_t DstSize)
 		return false;
 
 	GFile::Path p;
-	GString s = p.GetSystem(Which, 0);
+	LString s = p.GetSystem(Which, 0);
 	if (!s)
 		return false;
 
@@ -849,7 +849,7 @@ bool LGetSystemPath(LgiSystemPath Which, char *Dst, ssize_t DstSize)
 	return true;
 }
 
-GString LGetSystemPath(LgiSystemPath Which, int WordSize)
+LString LGetSystemPath(LgiSystemPath Which, int WordSize)
 {
 	GFile::Path p;
 	return p.GetSystem(Which, WordSize);
@@ -887,7 +887,7 @@ GFile::Path::State GFile::Path::Exists()
 	return TypeNone;
 }
 
-GString GFile::Path::PrintAll()
+LString GFile::Path::PrintAll()
 {
 	LStringPipe p;
 	
@@ -929,7 +929,7 @@ GString GFile::Path::PrintAll()
 				{ \
 					if ([paths count] > 0) \
 					{ \
-						GString s = [paths objectAtIndex:0]; \
+						LString s = [paths objectAtIndex:0]; \
 						p.Print("%s." #name ": '%s'\n", DomainName[i], s.Get()); \
 					} \
 					else p.Print("%s." #name ": null\n", DomainName[i]); \
@@ -972,9 +972,9 @@ GString GFile::Path::PrintAll()
 	return p.NewGStr();
 }
 
-GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
+LString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 {
-	GString Path;
+	LString Path;
 
 	#if defined(WIN32)
 		#ifndef CSIDL_PROFILE
@@ -1047,7 +1047,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 					HRESULT r = SHGetKnownFolderPath(FOLDERID_Downloads, 0, NULL, &ptr);
 					if (SUCCEEDED(r))
 					{
-						GAutoString u8(WideToUtf8(ptr));
+						LAutoString u8(WideToUtf8(ptr));
 						if (u8)
 							Path = u8;
 						CoTaskMemFree(ptr);
@@ -1064,7 +1064,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 			
 				if (!Path.Get())
 				{
-					GString MyDoc = WinGetSpecialFolderPath(CSIDL_MYDOCUMENTS);
+					LString MyDoc = WinGetSpecialFolderPath(CSIDL_MYDOCUMENTS);
 					if (MyDoc)
 					{
 						char Buf[MAX_PATH];
@@ -1076,7 +1076,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 
 				if (!Path.Get())
 				{
-					GString Profile = WinGetSpecialFolderPath(CSIDL_PROFILE);
+					LString Profile = WinGetSpecialFolderPath(CSIDL_PROFILE);
 					if (Profile)
 					{
 						char Buf[MAX_PATH];
@@ -1104,7 +1104,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 		}
 		case LSP_USER_LINKS:
 		{
-			GString Home = LGetSystemPath(LSP_HOME);
+			LString Home = LGetSystemPath(LSP_HOME);
 			
 			#if defined(WIN32)
 
@@ -1147,7 +1147,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 
 			// Default to ~/Pictures
 			char hm[MAX_PATH];
-			GString Home = LGetSystemPath(LSP_HOME);
+			LString Home = LGetSystemPath(LSP_HOME);
 			if (LgiMakePath(hm, sizeof(hm), Home, "Pictures"))
 				Path = hm;
 			break;
@@ -1178,7 +1178,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 
 			// Default to ~/Documents
 			char hm[MAX_PATH];
-			GString Home = LGetSystemPath(LSP_HOME);
+			LString Home = LGetSystemPath(LSP_HOME);
 			if (LgiMakePath(hm, sizeof(hm), Home, "Documents"))
 				Path = hm;
 			break;
@@ -1201,7 +1201,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
 				else
 				{
-					GAutoString a = FSRefPath(Ref);
+					LAutoString a = FSRefPath(Ref);
 					if (a)
 						Path = a.Get();
 				}
@@ -1221,7 +1221,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 			{
 				// Default to ~/Music
 				char p[MAX_PATH];
-				GString Home = LGetSystemPath(LSP_HOME);
+				LString Home = LGetSystemPath(LSP_HOME);
 				if (LgiMakePath(p, sizeof(p), Home, "Music"))
 					Path = p;
 			}
@@ -1245,7 +1245,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
 				else
 				{
-					GAutoString a = FSRefPath(Ref);
+					LAutoString a = FSRefPath(Ref);
 					if (a)
 						Path = a.Get();
 				}
@@ -1265,7 +1265,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 			{
 				// Default to ~/Video
 				char p[MAX_PATH];
-				GString Home = LGetSystemPath(LSP_HOME);
+				LString Home = LGetSystemPath(LSP_HOME);
 				if (LgiMakePath(p, sizeof(p), Home, "Video"))
 					Path = p;
 			}
@@ -1322,7 +1322,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				size_t Last = Path.RFind(DIR_STR);
 				if (Last > 0)
 				{
-					GString s = Path(Last, -1);
+					LString s = Path(Last, -1);
 					if
 					(
 						stristr(s,
@@ -1350,7 +1350,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 			if (!Name)
 			{
 				// Use the exe name?
-				GString Exe = LGetExeFile();
+				LString Exe = LGetExeFile();
 				char *l = LgiGetLeaf(Exe);
 				if (l)
 				{
@@ -1388,7 +1388,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 					}
 					else
 					{
-						GAutoString Base = FSRefPath(Ref);
+						LAutoString Base = FSRefPath(Ref);
 						Path = Base.Get();
 					}
 			
@@ -1445,7 +1445,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", __FILE__, __LINE__, e);
 				else
 				{
-					GAutoString u = FSRefPath(Ref);
+					LAutoString u = FSRefPath(Ref);
 					if (u)
 						Path = u.Get();
 				}
@@ -1492,7 +1492,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				char16 t[MAX_PATH];
 				if (GetTempPathW(CountOf(t), t) > 0)
 				{
-					GAutoString utf(WideToUtf8(t));
+					LAutoString utf(WideToUtf8(t));
 					if (utf)
 						Path = utf;
 				}
@@ -1504,7 +1504,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (e) LgiTrace("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
 				else
 				{
-					GAutoString u = FSRefPath(Ref);
+					LAutoString u = FSRefPath(Ref);
 					if (u)
 					{
 						Path = u.Get();
@@ -1652,7 +1652,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", __FILE__, __LINE__, e);
 				else
 				{
-					GAutoString u = FSRefPath(Ref);
+					LAutoString u = FSRefPath(Ref);
 					if (u)
 						Path = u.Get();
 				}
@@ -1769,7 +1769,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 					}
 					default:
 					{
-						GString Home = LGetSystemPath(LSP_HOME);
+						LString Home = LGetSystemPath(LSP_HOME);
 						if (!Home)
 						{
 							LgiTrace("%s:%i - Can't get LSP_HOME.\n", _FL);
@@ -1796,7 +1796,7 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (e) printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
 				else
 				{
-					GAutoString u = FSRefPath(Ref);
+					LAutoString u = FSRefPath(Ref);
 					if (u)
 						Path = u.Get();
 				}
@@ -1821,14 +1821,14 @@ GString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 	return Path;
 }
 
-GString LGetExeFile()
+LString LGetExeFile()
 {
 	#if defined WIN32
 
 		char16 Exe[MAX_PATH];
 		if (GetModuleFileNameW(NULL, Exe, CountOf(Exe)) > 0)
 		{
-			GString e = Exe;
+			LString e = Exe;
 			if (e)
 			{
 				return e;
@@ -1836,11 +1836,11 @@ GString LGetExeFile()
 			else
 			{
 				LgiMsg(0, "LgiFromNativeCp returned 0, ANSI CodePage=%i (%s)", "LgiGetExeFile Error", MB_OK, GetACP(), LAnsiToLgiCp());
-				return GString();
+				return LString();
 			}
 		}
 
-		GString m;
+		LString m;
 		m.Printf("GetModuleFileName failed err: %08.8X", GetLastError());
 		MessageBoxA(0, m, "LgiGetExeFile Error", MB_OK);
 		LgiExitApp();
@@ -1943,7 +1943,7 @@ GString LGetExeFile()
 		if (Status)
 			return ExePathCache;
 		
-		return GString();
+		return LString();
 	
 	#elif defined MAC
 	
@@ -1967,10 +1967,10 @@ GString LGetExeFile()
 			OSStatus s = GetProcessBundleLocation(&ps, &fs);
 			if (!s)
 			{
-				GAutoString u = FSRefPath(fs);
+				LAutoString u = FSRefPath(fs);
 				if (!e)
 				{
-					return GString(u);
+					return LString(u);
 				}
 				else printf("%s:%i - FSGetCatalogInfo failed (e=%i).\n", _FL, e);
 			}
@@ -1982,10 +1982,10 @@ GString LGetExeFile()
 		
 	#endif
 
-	return GString();
+	return LString();
 }
 
-GString LGetExePath()
+LString LGetExePath()
 {
 	return LGetSystemPath(LSP_EXE);
 }
@@ -2006,7 +2006,7 @@ char *LgiGetExtension(const char *File)
 
 #define DEBUG_FIND_FILE		0
 
-static void _LFindFile(const char *Name, GString *GStr, GAutoString *AStr)
+static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 {
 	#if DEBUG_FIND_FILE
 	printf("%s:%i - Name='%s'\n", __FILE__, __LINE__, Name);
@@ -2016,9 +2016,9 @@ static void _LFindFile(const char *Name, GString *GStr, GAutoString *AStr)
 		return;
 
 	#ifndef MAC
-	GString Exe = LGetExePath();
+	LString Exe = LGetExePath();
 	#else
-	GString Exe = LGetExeFile();
+	LString Exe = LGetExeFile();
 	#endif
 
 	#if DEBUG_FIND_FILE
@@ -2097,8 +2097,8 @@ static void _LFindFile(const char *Name, GString *GStr, GAutoString *AStr)
 	}
 
 	// General search fall back...
-	GArray<const char*> Ext;
-	GArray<char*> Files;
+	LArray<const char*> Ext;
+	LArray<char*> Files;
 	Ext.Add((char*)Name);
 	if (LRecursiveFileSearch(Exe, &Ext, &Files) &&
 		Files.Length())
@@ -2114,9 +2114,9 @@ static void _LFindFile(const char *Name, GString *GStr, GAutoString *AStr)
 	Files.DeleteArrays();
 }
 
-GString LFindFile(const char *Name)
+LString LFindFile(const char *Name)
 {
-	GString s;
+	LString s;
 	_LFindFile(Name, &s, NULL);
 	return s;
 }
@@ -2253,7 +2253,7 @@ bool LIsVolumeRoot(const char *Path)
 	return false;
 }
 
-GString LFormatSize(uint64 Size)
+LString LFormatSize(uint64 Size)
 {
 	char Buf[64];
 	LFormatSize(Buf, sizeof(Buf), Size);
@@ -2338,16 +2338,16 @@ char *LTokStr(const char *&s)
 	return Status;
 }
 
-GString LGetEnv(const char *Var)
+LString LGetEnv(const char *Var)
 {
 #ifdef _MSC_VER
 	char *s = NULL;
 	size_t sz;
 	errno_t err = _dupenv_s(&s, &sz, Var);
 	if (err)
-		return GString();
+		return LString();
 
-	GString ret(s);
+	LString ret(s);
 	free(s);
 	return ret;
 #else
@@ -2355,9 +2355,9 @@ GString LGetEnv(const char *Var)
 #endif
 }
 
-GString::Array LGetPath()
+LString::Array LGetPath()
 {
-	GString::Array Paths;
+	LString::Array Paths;
 
 	#ifdef MAC
 		// OMG, WHY?! Seriously?
@@ -2554,7 +2554,7 @@ void LProfile::Add(const char *File, int Line)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool LIsValidEmail(GString Email)
+bool LIsValidEmail(LString Email)
 {
 	// Local part
 	char buf[321];
@@ -2683,9 +2683,9 @@ bool LIsValidEmail(GString Email)
 }
 
 //////////////////////////////////////////////////////////////////////////
-GString LGetAppForProtocol(const char *Protocol)
+LString LGetAppForProtocol(const char *Protocol)
 {
-	GString App;
+	LString App;
 
 	if (!Protocol)
 		return App;
@@ -2697,7 +2697,7 @@ GString LGetAppForProtocol(const char *Protocol)
 			const char *p = k.GetStr();
 			if (p)
 			{
-				GAutoString a(LTokStr(p));
+				LAutoString a(LTokStr(p));
 				App = a.Get();
 			}
 		}
@@ -2707,8 +2707,8 @@ GString LGetAppForProtocol(const char *Protocol)
 			p = "xdg-email";
 		else
 			p = "xdg-open";
-		GString Path = LGetEnv("PATH");
-		GString::Array a = Path.SplitDelimit(LGI_PATH_SEPARATOR);
+		LString Path = LGetEnv("PATH");
+		LString::Array a = Path.SplitDelimit(LGI_PATH_SEPARATOR);
 		for (auto i : a)
 		{
 			GFile::Path t(i);
@@ -2723,7 +2723,7 @@ GString LGetAppForProtocol(const char *Protocol)
 		LgiAssert(!"What to do?");
 	#elif defined(MAC)
 		// Get the handler type
-		CFStringRef Type = GString(Protocol).CreateStringRef();
+		CFStringRef Type = LString(Protocol).CreateStringRef();
 		CFStringRef Handler = LSCopyDefaultHandlerForURLScheme(Type);
 		CFRelease(Type);
 		if (Handler)

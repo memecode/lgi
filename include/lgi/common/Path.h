@@ -786,7 +786,7 @@ protected:
 	
 	// Flattened representation
 	int Points;
-	GArray<int> Outline;
+	LArray<int> Outline;
 	LPointF *Point;
 
 	// Methods

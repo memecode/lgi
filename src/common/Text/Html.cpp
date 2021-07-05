@@ -146,9 +146,9 @@ public:
 	LPoint Content;
 	bool WordSelectMode;
 	bool LinkDoubleClick;
-	GAutoString OnLoadAnchor;
+	LAutoString OnLoadAnchor;
 	bool DecodeEmoji;
-	GAutoString EmojiImg;
+	LAutoString EmojiImg;
 	int NextCtrlId;
 	uint64 SetScrollTime;
 	int DeferredLoads;
@@ -158,7 +158,7 @@ public:
 	bool StyleDirty;
 	
 	// Find settings
-	GAutoWString FindText;
+	LAutoWString FindText;
 	bool MatchCase;
 	
 	GHtmlPrivate()
@@ -436,7 +436,7 @@ class GFlowRegion
 		int RightAbs;
 		int TopAbs;
 	};
-	GArray<GFlowStack> Stack;
+	LArray<GFlowStack> Stack;
 
 public:
 	GHtml *Html;
@@ -482,9 +482,9 @@ public:
 		InBody = r.InBody; 
 	}
 
-	GString ToString()
+	LString ToString()
 	{
-		GString s;
+		LString s;
 		s.Printf("Flow: x=%i(%i)%i y=%i,%i my=%i inline=%i",
 			x1, cx, x2,
 			y1, y2, my,
@@ -1400,7 +1400,7 @@ bool GTag::SetVariant(const char *Name, LVariant &Value, char *Array)
 			const char *s = Value.Str();
 			if (s)
 			{
-				GAutoWString w(CleanText(s, strlen(s), "utf-8", true, true));
+				LAutoWString w(CleanText(s, strlen(s), "utf-8", true, true));
 				Txt = w;
 				return true;
 			}
@@ -1605,7 +1605,7 @@ bool GTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 			}
 			
 			// Convert CSS props to a string and emit them...
-			GAutoString s = Css->ToString();
+			LAutoString s = Css->ToString();
 			if (ValidStr(s))
 			{			
 				// Clean off any trailing whitespace...
@@ -1816,7 +1816,7 @@ _DumpColour(LCss::ColorDef c)
 
 void GTag::_Dump(LStringPipe &Buf, int Depth)
 {
-	GString Tabs;
+	LString Tabs;
 	Tabs.Set(NULL, Depth);
 	memset(Tabs.Get(), '\t', Depth);	
 
@@ -1844,7 +1844,7 @@ void GTag::_Dump(LStringPipe &Buf, int Depth)
 	{
 		GFlowRect *Tr = TextPos[i];
 		
-		GAutoString Utf8(WideToUtf8(Tr->Text, Tr->Len));
+		LAutoString Utf8(WideToUtf8(Tr->Text, Tr->Len));
 		if (Utf8)
 		{
 			size_t Len = strlen(Utf8);
@@ -1875,17 +1875,17 @@ void GTag::_Dump(LStringPipe &Buf, int Depth)
 	}
 }
 
-GAutoWString GTag::DumpW()
+LAutoWString GTag::DumpW()
 {
 	LStringPipe Buf;
 	// Buf.Print("Html pos=%s\n", Html?Html->GetPos().GetStr():0);
 	_Dump(Buf, 0);
-	GAutoString a(Buf.NewStr());
-	GAutoWString w(Utf8ToWide(a));
+	LAutoString a(Buf.NewStr());
+	LAutoWString w(Utf8ToWide(a));
 	return w;
 }
 
-GAutoString GTag::DescribeElement()
+LAutoString GTag::DescribeElement()
 {
 	LStringPipe s(256);
 	s.Print("%s", Tag ? Tag.Get() : "CONTENT");
@@ -1893,7 +1893,7 @@ GAutoString GTag::DescribeElement()
 		s.Print("#%s", HtmlId);
 	for (unsigned i=0; i<Class.Length(); i++)
 		s.Print(".%s", Class[i].Get());
-	return GAutoString(s.NewStr());
+	return LAutoString(s.NewStr());
 }
 
 LFont *GTag::NewFont()
@@ -1986,7 +1986,7 @@ void GTag::Invalidate()
 	Html->Invalidate(&p);
 }
 
-GTag *GTag::IsAnchor(GString *Uri)
+GTag *GTag::IsAnchor(LString *Uri)
 {
 	GTag *a = 0;
 	for (GTag *t = this; t; t = ToTag(t->Parent))
@@ -2003,7 +2003,7 @@ GTag *GTag::IsAnchor(GString *Uri)
 		const char *u = 0;
 		if (a->Get("href", u))
 		{
-			GAutoWString w(CleanText(u, strlen(u), "utf-8"));
+			LAutoWString w(CleanText(u, strlen(u), "utf-8"));
 			if (w)
 			{
 				*Uri = w;
@@ -2020,7 +2020,7 @@ bool GTag::OnMouseClick(LMouse &m)
 
 	if (m.IsContextMenu())
 	{
-		GString Uri;
+		LString Uri;
 		const char *ImgSrc = NULL;
 		GTag *a = IsAnchor(&Uri);
 		bool IsImg = TagId == TAG_IMG;
@@ -2075,7 +2075,7 @@ bool GTag::OnMouseClick(LMouse &m)
 		#ifdef _DEBUG
 		if (m.Ctrl())
 		{
-			GAutoString Style = ToString();
+			LAutoString Style = ToString();
 			LStringPipe p(256);
 			p.Print("Tag: %s\n", Tag ? Tag.Get() : "CONTENT");
 			if (Class.Length())
@@ -2111,7 +2111,7 @@ bool GTag::OnMouseClick(LMouse &m)
 				{
 					Tmp.Print(".%s", t->Class[i].Get());
 				}
-				GAutoString Txt(Tmp.NewStr());
+				LAutoString Txt(Tmp.NewStr());
 				p.Print("%s", Txt.Get());
 				LDisplayString Ds(SysFont, Txt);
 				int Px = 170 - Ds.X();
@@ -2126,7 +2126,7 @@ bool GTag::OnMouseClick(LMouse &m)
 					t->Size.y);
 			}
 			
-			GAutoString a(p.NewStr());
+			LAutoString a(p.NewStr());
 			
 			LgiMsg(	Html,
 					"%s",
@@ -2137,7 +2137,7 @@ bool GTag::OnMouseClick(LMouse &m)
 		else
 		#endif
 		{
-			GString Uri;
+			LString Uri;
 			
 			if (Html &&
 				Html->Environment)
@@ -2522,7 +2522,7 @@ GTag *GTag::FindCtrlId(int Id)
 	return NULL;
 }
 
-void GTag::Find(int TagType, GArray<GTag*> &Out)
+void GTag::Find(int TagType, LArray<GTag*> &Out)
 {
 	if (TagId == TagType)
 	{
@@ -2566,7 +2566,7 @@ void GTag::SetImage(const char *Uri, LSurface *Img)
 			LRect r = XSubRect();
 			if (r.Valid())
 			{
-				GAutoPtr<LSurface> t(new LMemDC(r.X(), r.Y(), Image->GetColourSpace()));
+				LAutoPtr<LSurface> t(new LMemDC(r.X(), r.Y(), Image->GetColourSpace()));
 				if (t)
 				{
 					t->Blt(0, 0, Image, &r);
@@ -2618,14 +2618,14 @@ void GTag::LoadImage(const char *Uri)
 		const char *s = u.sPath;
 		if (*s++ != '/')
 			return;
-		GAutoString Type(LTokStr(s));
+		LAutoString Type(LTokStr(s));
 		if (*s++ != ',')
 			return;
-		auto p = GString(Type).SplitDelimit(",;:");
+		auto p = LString(Type).SplitDelimit(",;:");
 		if (p.Length() != 2 || !p.Last().Equals("base64"))
 			return;
-		GString Name = GString("name.") + p[0];
-		GAutoPtr<GFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, NULL));
+		LString Name = LString("name.") + p[0];
+		LAutoPtr<GFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, NULL));
 		if (!Filter)
 			return;
 
@@ -2731,7 +2731,7 @@ struct GTagElementCallback : public LCss::ElementCallback<GTag>
 		return NULL;
 	}
 	
-	bool GetClasses(GString::Array &Classes, GTag *obj) 
+	bool GetClasses(LString::Array &Classes, GTag *obj) 
 	{
 		Classes = obj->Class;
 		return Classes.Length() > 0;
@@ -2742,9 +2742,9 @@ struct GTagElementCallback : public LCss::ElementCallback<GTag>
 		return ToTag(obj->Parent);
 	}
 	
-	GArray<GTag*> GetChildren(GTag *obj)
+	LArray<GTag*> GetChildren(GTag *obj)
 	{
-		GArray<GTag*> c;
+		LArray<GTag*> c;
 		for (unsigned i=0; i<obj->Children.Length(); i++)
 			c.Add(ToTag(obj->Children[i]));
 		return c;
@@ -2788,7 +2788,7 @@ void GTag::Restyle()
 	#if DEBUG_RESTYLE && defined(_DEBUG)
 	if (Debug)
 	{
-		GAutoString Style = ToString();
+		LAutoString Style = ToString();
 		LgiTrace(">>>> %s <<<<:\n%s\n\n", Tag.Get(), Style.Get());
 	}
 	#endif
@@ -2884,7 +2884,7 @@ void GTag::SetStyle()
 							int Len = (int)s->GetSize();
 							if (Len > 0)
 							{
-								GAutoString a(new char[Len+1]);
+								LAutoString a(new char[Len+1]);
 								ssize_t r = s->Read(a, Len);
 								a[r] = 0;
 
@@ -3100,7 +3100,7 @@ void GTag::SetStyle()
 
 	if (Get("class", s))
 	{
-		Class = GString(s).SplitDelimit(" \t");
+		Class = LString(s).SplitDelimit(" \t");
 	}
 
 	Restyle();
@@ -3118,7 +3118,7 @@ void GTag::SetStyle()
 	    /*
 		case TAG_META:
 		{
-			GAutoString Cs;
+			LAutoString Cs;
 
 			const char *s;
 			if (Get("http-equiv", s) &&
@@ -3349,7 +3349,7 @@ void GTag::SetStyle()
 
 			const char *Type, *Value = NULL;
 			Get("value", Value);
-			GAutoWString CleanValue(Value ? CleanText(Value, strlen(Value), "utf-8", true, true) : NULL);
+			LAutoWString CleanValue(Value ? CleanText(Value, strlen(Value), "utf-8", true, true) : NULL);
 			if (CleanValue)
 			{
 				CtrlValue = CleanValue;
@@ -3370,7 +3370,7 @@ void GTag::SetStyle()
 					CtrlType == CtrlPassword)
 				{
 					LEdit *Ed;
-					GAutoString UtfCleanValue(WideToUtf8(CleanValue));
+					LAutoString UtfCleanValue(WideToUtf8(CleanValue));
 					Ctrl = Ed = new LEdit(Html->d->NextCtrlId++, 0, 0, 60, SysFont->GetHeight() + 8, UtfCleanValue);
 					if (Ctrl)
 					{
@@ -3381,7 +3381,7 @@ void GTag::SetStyle()
 				else if (CtrlType == CtrlButton ||
 						 CtrlType == CtrlSubmit)
 				{
-					GAutoString UtfCleanValue(WideToUtf8(CleanValue));
+					LAutoString UtfCleanValue(WideToUtf8(CleanValue));
 					if (UtfCleanValue)
 					{
 						Ctrl = new InputButton(this, Html->d->NextCtrlId++, UtfCleanValue);
@@ -3545,7 +3545,7 @@ char16 *GTag::CleanText(const char *s, ssize_t Len, const char *SourceCs,  bool 
 							e++;
 						}
 						
-						GAutoWString Var(NewStrW(i, e-i));							
+						LAutoWString Var(NewStrW(i, e-i));							
 						char16 Char = GHtmlStatic::Inst->VarMap.Find(Var);
 						if (Char)
 						{
@@ -3688,7 +3688,7 @@ char *GTag::ParseText(char *Doc)
 			
 			// Output text
 			Html->SetCharset(OriginalCp);
-			GAutoWString t(CleanText(s, e - s, NULL, false));
+			LAutoWString t(CleanText(s, e - s, NULL, false));
 			if (t)
 			{
 				Utf16.Push(t);
@@ -3730,7 +3730,7 @@ bool GTag::ConvertToText(TextConvertState &State)
 			State.Write("* ", 2);
 
 		LFont *f = GetFont();
-		GAutoString u;
+		LAutoString u;
 		if (f)
 			u = f->ConvertToUnicode(Txt);
 		else
@@ -3772,7 +3772,7 @@ bool GTag::ConvertToText(TextConvertState &State)
 						Href += 7;
 						
 					size_t HrefLen = strlen(Href);
-					GAutoWString h(CleanText(Href, HrefLen, "utf-8"));
+					LAutoWString h(CleanText(Href, HrefLen, "utf-8"));
 					if (h && StrcmpW(h, Txt) != 0)
 					{
 						// Href different from the text of the link
@@ -4067,7 +4067,7 @@ bool GTag::GetWidthMetrics(GTag *Table, uint16 &Min, uint16 &Max)
 				c.GetSize(s.x, s.y);
 
 				// Auto layout table
-				GArray<int> ColMin, ColMax;
+				LArray<int> ColMin, ColMax;
 				for (int y=0; y<s.y; y++)
 				{
 					for (int x=0; x<s.x;)
@@ -4125,7 +4125,7 @@ bool GTag::GetWidthMetrics(GTag *Table, uint16 &Min, uint16 &Max)
 	return Status;
 }
 
-static void DistributeSize(GArray<int> &a, int Start, int Span, int Size, int Border)
+static void DistributeSize(LArray<int> &a, int Start, int Span, int Size, int Border)
 {
 	// Calculate the current size of the cells
 	int Cur = -Border;
@@ -4150,7 +4150,7 @@ static void DistributeSize(GArray<int> &a, int Start, int Span, int Size, int Bo
 }
 
 template <class T>
-T Sum(GArray<T> &a)
+T Sum(LArray<T> &a)
 {
 	T s = 0;
 	for (unsigned i=0; i<a.Length(); i++)
@@ -4192,7 +4192,7 @@ void GHtmlTableLayout::AllocatePx(int StartCol, int Cols, int MinPx, bool HasToF
 	
 	// Allocate any remaining space...
 	int RemainingPx = MaxAdditionalPx;
-	GArray<int> Growable, NonGrowable, SizeInherit;
+	LArray<int> Growable, NonGrowable, SizeInherit;
 	int GrowablePx = 0;
 	for (int x=StartCol; x<StartCol+Cols; x++)
 	{
@@ -4334,7 +4334,7 @@ void GHtmlTableLayout::DeallocatePx(int StartCol, int Cols, int MaxPx)
 		return;
 	
 	int TrimPx = TotalPx - MaxPx;
-	GArray<ColInfo> Inf;
+	LArray<ColInfo> Inf;
 	int HalfMax = MaxPx >> 1;
 	unsigned Interesting = 0;
 	int InterestingPx = 0;
@@ -4660,7 +4660,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 
 	// Layout cell horizontally and then flow the contents to get 
 	// the height of all the cells
-	GArray<LRect> RowPad;
+	LArray<LRect> RowPad;
 	MaxRow.Length(s.y);
 	for (y=0; y<s.y; y++)
 	{
@@ -5123,12 +5123,12 @@ bool GTag::Serialize(LXmlTag *t, bool Write)
 					p.Print("%%%.4x", *c);
 			}
 			
-			GAutoString Tmp(p.NewStr());
+			LAutoString Tmp(p.NewStr());
 			t->SetContent(Tmp);
 		}
 		if (Props.Length())
 		{
-			GAutoString CssStyles = ToString();
+			LAutoString CssStyles = ToString();
 			LgiAssert(!strchr(CssStyles, '\"'));
 			t->SetAttr("style", CssStyles);
 		}
@@ -5356,7 +5356,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			// LCss::Len MaxX = MaxWidth();
 			LCss::Len MinY = MinHeight();
 			LCss::Len MaxY = MaxHeight();
-			GAutoPtr<LDisplayString> a;
+			LAutoPtr<LDisplayString> a;
 			int ImgX, ImgY;		
 			if (Image)
 			{
@@ -6192,7 +6192,7 @@ public:
 				
 				#if 0
 				static int count = 0;
-				GString file;
+				LString file;
 				file.Printf("c:\\temp\\img-%i.bmp", ++count);
 				GdcD->Save(file, Corners);
 				#endif
@@ -6203,7 +6203,7 @@ public:
 
 void GTag::PaintBorderAndBackground(LSurface *pDC, GColour &Back, LRect *BorderPx)
 {
-	GArray<LRect> r;
+	LArray<LRect> r;
 	LRect BorderPxRc;
 	bool DrawBackground = !Back.IsTransparent();
 
@@ -6276,7 +6276,7 @@ void GTag::PaintBorderAndBackground(LSurface *pDC, GColour &Back, LRect *BorderP
 		}
 
 		// If we are drawing rounded corners, draw them into a memory context
-		GAutoPtr<CornersImg> Corners;
+		LAutoPtr<CornersImg> Corners;
 		int Px = 0, Px2 = 0;
 		LCss::Len Radius = BorderRadius();
 		float RadPx = Radius.Type == LCss::LenPx ? Radius.Value : Radius.ToPx(Size.x, GetFont());
@@ -6550,7 +6550,7 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 						Image->AlphaDC())
 						Cs = System32BitColourSpace;
 					
-					GAutoPtr<LSurface> r(new LMemDC(Size.x, Size.y, Cs));
+					LAutoPtr<LSurface> r(new LMemDC(Size.x, Size.y, Cs));
 					if (r)
 					{
 						if (Cs == CsIndex8)
@@ -7014,7 +7014,7 @@ void GHtml::OnAddStyle(const char *MimeType, const char *Styles)
 		{
 			LStringPipe p;
 			CssStore.Dump(p);
-			GAutoString a(p.NewStr());
+			LAutoString a(p.NewStr());
 			GFile f;
 			if (f.Open("C:\\temp\\css.txt", O_WRITE))
 			{
@@ -7171,7 +7171,7 @@ void GHtml::ParseDocument(const char *Doc)
 
 bool GHtml::NameW(const char16 *s)
 {
-	GAutoPtr<char, true> utf(WideToUtf8(s));
+	LAutoPtr<char, true> utf(WideToUtf8(s));
 	return Name(utf);
 }
 
@@ -7288,7 +7288,7 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 								}
 								else if (j->Stream)
 								{
-									GAutoPtr<LSurface> pDC(GdcD->Load(dynamic_cast<LStream*>(j->Stream.Get())));
+									LAutoPtr<LSurface> pDC(GdcD->Load(dynamic_cast<LStream*>(j->Stream.Get())));
 									if (pDC)
 									{
 										r->SetImage(j->Uri, pDC.Release());
@@ -7310,7 +7310,7 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 										s->ChangeThread();
 
 										int Size = (int)s->GetSize();
-										GAutoString Style(new char[Size+1]);
+										LAutoString Style(new char[Size+1]);
 										ssize_t rd = s->Read(Style, Size);
 										if (rd > 0)
 										{
@@ -7539,7 +7539,7 @@ void GHtml::OnPaint(LSurface *ScreenDC)
 
 	if (d->OnLoadAnchor && VScroll)
 	{
-		GAutoString a = d->OnLoadAnchor;
+		LAutoString a = d->OnLoadAnchor;
 		GotoAnchor(a);
 		LgiAssert(d->OnLoadAnchor == 0);
 	}
@@ -7692,7 +7692,7 @@ bool GHtml::CompareTagPos(GTag *a, ssize_t AIdx, GTag *b, ssize_t BIdx)
 	}
 	else
 	{
-		GArray<GTag*> ATree, BTree;
+		LArray<GTag*> ATree, BTree;
 		for (GTag *t = a; t; t = ToTag(t->Parent))
 			ATree.AddAt(0, t);
 		for (GTag *t = b; t; t = ToTag(t->Parent))
@@ -7777,12 +7777,12 @@ bool GHtml::SetVariant(const char *Name, LVariant &Value, char *Array)
 
 bool GHtml::Copy()
 {
-	GAutoString s(GetSelection());
+	LAutoString s(GetSelection());
 	if (s)
 	{
 		GClipBoard c(this);
 		
-		GAutoWString w;
+		LAutoWString w;
 		#ifndef MAC
 		w.Reset(Utf8ToWide(s));
 		if (w) c.TextW(w);
@@ -7802,7 +7802,7 @@ static bool FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User)
 	return h->OnFind(Dlg);
 }
 
-void BuildTagList(GArray<GTag*> &t, GTag *Tag)
+void BuildTagList(LArray<GTag*> &t, GTag *Tag)
 {
 	t.Add(Tag);
 	for (unsigned i=0; i<Tag->Children.Length(); i++)
@@ -7873,7 +7873,7 @@ bool GHtml::OnSubmitForm(GTag *Form)
 			FormEncode(p, v.value);
 		}
 		
-		GAutoPtr<const char, true> Data(p.NewStr());
+		LAutoPtr<const char, true> Data(p.NewStr());
 		Status = Environment->OnPostForm(this, Action, Data);
 	}
 	else if (!_stricmp(Method, "get"))
@@ -7907,7 +7907,7 @@ bool GHtml::OnFind(GFindReplaceCommon *Params)
 
 	if (Cursor && d->FindText)
 	{
-		GArray<GTag*> Tags;
+		LArray<GTag*> Tags;
 		BuildTagList(Tags, Tag);
 		ssize_t Start = Tags.IndexOf(Cursor);
 		for (unsigned i=1; i<Tags.Length(); i++)
@@ -8249,7 +8249,7 @@ void GHtml::OnMouseClick(LMouse &m)
 							const char *ViewCs = GetCharset();
 							if (ViewCs)
 							{
-								GAutoWString w((char16*)LNewConvertCp(LGI_WideCharset, Source, ViewCs));
+								LAutoWString w((char16*)LNewConvertCp(LGI_WideCharset, Source, ViewCs));
 								if (w)
 									c.TextW(w);
 							}
@@ -8266,7 +8266,7 @@ void GHtml::OnMouseClick(LMouse &m)
 					{
 						if (Tag)
 						{
-							GAutoWString s = Tag->DumpW();
+							LAutoWString s = Tag->DumpW();
 							if (s)
 							{
 								GClipBoard c(this);
@@ -8306,7 +8306,7 @@ void GHtml::OnMouseClick(LMouse &m)
 						
 						F.SetSize(0);
 
-						GAutoWString SrcMem;
+						LAutoWString SrcMem;
 						const char *ViewCs = GetCharset();
 						if (ViewCs)
 							SrcMem.Reset((char16*)LNewConvertCp(LGI_WideCharset, Source, ViewCs));
@@ -8374,7 +8374,7 @@ void GHtml::OnMouseClick(LMouse &m)
 											
 											Ex.Push(L"file:///");
 											
-											GAutoWString w(Utf8ToWide(File));
+											LAutoWString w(Utf8ToWide(File));
 											Ex.Push(w);
 										}
 										s = e;
@@ -8396,14 +8396,14 @@ void GHtml::OnMouseClick(LMouse &m)
 						if (!Error)
 						{
 							int64 WideChars = Ex.GetSize() / sizeof(char16);
-							GAutoWString w(Ex.NewStrW());
+							LAutoWString w(Ex.NewStrW());
 							
-							GAutoString u(WideToUtf8(w, WideChars));
+							LAutoString u(WideToUtf8(w, WideChars));
 							if (u)
 								F.Write(u, strlen(u));
 							F.Close();
 							
-							GString Err;
+							LString Err;
 							if (!LExecute(Path, NULL, NULL, &Err))
 							{
 								LgiMsg(	this,
@@ -8524,7 +8524,7 @@ LgiCursor GHtml::GetCursor(int x, int y)
 	GTag *Tag = GetTagByPos(x, y + Offset, &Index, &LocalCoords);
 	if (Tag)
 	{
-		GString Uri;
+		LString Uri;
 		if (LocalCoords.x >= 0 &&
 			LocalCoords.y >= 0 &&
 			Tag->IsAnchor(&Uri))
@@ -8565,7 +8565,7 @@ void GHtml::OnMouseMove(LMouse &m)
 	if (!Hit.Direct && !Hit.NearestText)
 		return;
 
-	GString Uri;
+	LString Uri;
 	GTag *HitTag = Hit.NearestText && Hit.Near == 0 ? Hit.NearestText : Hit.Direct;
 	if (HitTag &&
 		HitTag->TipId == 0 &&
@@ -8739,7 +8739,7 @@ void GHtml::SetLinkDoubleClick(bool b)
 	d->LinkDoubleClick = b;
 }
 
-bool GHtml::GetFormattedContent(const char *MimeType, GString &Out, GArray<GDocView::ContentMedia> *Media)
+bool GHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<GDocView::ContentMedia> *Media)
 {
 	if (!MimeType)
 	{
@@ -8750,7 +8750,7 @@ bool GHtml::GetFormattedContent(const char *MimeType, GString &Out, GArray<GDocV
 	if (!_stricmp(MimeType, "text/html"))
 	{
 		// We can handle this type...
-		GArray<GTag*> Imgs;
+		LArray<GTag*> Imgs;
 		if (Media)
 		{
 			// Find all the image tags...
@@ -8849,7 +8849,7 @@ bool GHtml::EvaluateCondition(const char *Cond)
 	// in a fairly large dependency on the HTML control. However user
 	// apps that already have that could reimplement this virtual function
 	// if they feel like it.
-	GArray<char*> Str;
+	LArray<char*> Str;
 	for (const char *c = Cond; *c; )
 	{
 		if (IsAlpha(*c))
@@ -9333,7 +9333,7 @@ bool GHtmlTableLayout::Set(GTag *t)
 
 void GTagHit::Dump(const char *Desc)
 {
-	GArray<GTag*> d, n;
+	LArray<GTag*> d, n;
 	GTag *t = Direct;
 	unsigned i;
 	for (i=0; i<3 && t; t = ToTag(t->Parent), i++)

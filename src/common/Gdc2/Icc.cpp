@@ -407,7 +407,7 @@ public:
 class LocalUnicodeDom : public GDom
 {
 	IccMultiLocalUnicode *h;
-	GArray<GDom*> Dom;
+	LArray<GDom*> Dom;
 
 public:
 	LocalUnicodeDom(IccMultiLocalUnicode *header)
@@ -457,7 +457,7 @@ public:
 class TagDom : public GDom
 {
 	IccTag *h;
-	GArray<GDom*> Dom;
+	LArray<GDom*> Dom;
 	char *Txt;
 
 public:
@@ -469,7 +469,7 @@ public:
 class HeaderDom : public GDom
 {
 	IccProfileHeader *h;
-	GArray<GDom*> Dom;
+	LArray<GDom*> Dom;
 
 public:
 	HeaderDom(IccProfileHeader *header)
@@ -603,7 +603,7 @@ public:
 class ChildDom : public GDom
 {
 public:
-	GArray<GDom*> Dom;
+	LArray<GDom*> Dom;
 	char *Txt;
 
 	ChildDom()
@@ -797,7 +797,7 @@ bool TagDom::GetVariant(const char *Name, LVariant &Value, char *Array)
 class TagTableDom : public GDom
 {
 	IccTagTable *t;
-	GArray<GDom*> Dom;
+	LArray<GDom*> Dom;
 
 public:
 	TagTableDom(IccTagTable *table, char *header)
@@ -860,7 +860,7 @@ public:
 	#if USE_LCMS
 	cmsHPROFILE Profile;
 	#endif
-	GArray<GDom*> Dom;
+	LArray<GDom*> Dom;
 
 	GIccProfilePrivate()
 	{

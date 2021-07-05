@@ -398,7 +398,7 @@ public:
 	{
 		ColorType Type;
 		uint32_t Rgb32;
-		GArray<ColorStop> Stops;
+		LArray<ColorStop> Stops;
 
 		ColorDef(ColorType ct = ColorInherit, uint32_t rgb32 = 0)
 		{
@@ -524,7 +524,7 @@ public:
 	struct LgiClass ImageDef
 	{
 		ImageType Type;
-		GString Uri;
+		LString Uri;
 		LSurface *Img;
 
 		ImageDef(const char *Init = NULL)
@@ -554,7 +554,7 @@ public:
 		ImageDef &operator =(const ImageDef &o);
 	};
 
-	class StringsDef : public GArray<char*>
+	class StringsDef : public LArray<char*>
 	{
 	public:
 		StringsDef(const char *init = 0)
@@ -634,7 +634,7 @@ public:
 					
 					if (s > Start)
 					{
-						GAutoString n(NewStr(Start, s-Start));
+						LAutoString n(NewStr(Start, s-Start));
 						if (ValidStr(n))
 						{
 							if (_stricmp(n, "inherit"))
@@ -652,7 +652,7 @@ public:
 
 					if (s > Start)
 					{
-						GAutoString n(NewStr(Start, s-Start));
+						LAutoString n(NewStr(Start, s-Start));
 						if (ValidStr(n))
 						{
 							if (_stricmp(n, "inherit"))
@@ -708,8 +708,8 @@ public:
 		struct Part
 		{
 			PartType Type;
-			GAutoString Value;
-			GAutoString Param;
+			LAutoString Value;
+			LAutoString Param;
 			int Media;
 			
 			Part()
@@ -739,21 +739,21 @@ public:
 			}
 		};
 		
-		GArray<Part> Parts;
-		GArray<ssize_t> Combs;
+		LArray<Part> Parts;
+		LArray<ssize_t> Combs;
 		char *Style;
 		int SourceIndex;
-		GAutoString Raw;
-		GAutoPtr<class Store> Children;
+		LAutoString Raw;
+		LAutoPtr<class Store> Children;
 
 		Selector()
 		{
 			Style = NULL;
 			SourceIndex = 0;
 		}
-		bool TokString(GAutoString &a, const char *&s);
+		bool TokString(LAutoString &a, const char *&s);
 		const char *PartTypeToString(PartType p);
-		GAutoString Print();
+		LAutoString Print();
 		bool Parse(const char *&s);
 		size_t GetSimpleIndex() { return Combs.Length() ? Combs[Combs.Length()-1] + 1 : 0; }
 		bool IsAtMedia();
@@ -764,7 +764,7 @@ public:
 	};
 
 	/// This hash table stores arrays of selectors by name.
-	typedef GArray<LCss::Selector*> SelArray;
+	typedef LArray<LCss::Selector*> SelArray;
 	typedef LHashTbl<ConstStrKey<char,false>,SelArray*> SelMap;
 	class SelectorMap : public SelMap
 	{
@@ -801,11 +801,11 @@ public:
 		/// Returns the document unque element ID
 		virtual const char *GetAttr(T *obj, const char *Attr) = 0;
 		/// Returns the class
-		virtual bool GetClasses(GString::Array &Classes, T *obj) = 0;
+		virtual bool GetClasses(LString::Array &Classes, T *obj) = 0;
 		/// Returns the parent object
 		virtual T *GetParent(T *obj) = 0;
 		/// Returns an array of child objects
-		virtual GArray<T*> GetChildren(T *obj) = 0;
+		virtual LArray<T*> GetChildren(T *obj) = 0;
 	};
 	
 	/// This class parses and stores the CSS selectors and styles.
@@ -854,12 +854,12 @@ public:
 						if (!e)
 							return false;
 
-						GAutoString Var(NewStr(p.Value, e - p.Value));
+						LAutoString Var(NewStr(p.Value, e - p.Value));
 						const char *TagVal = Context->GetAttr(Obj, Var);
 						if (!TagVal)
 							return false;
 
-						GAutoString Val(NewStr(e + 1));
+						LAutoString Val(NewStr(e + 1));
 						if (_stricmp(Val, TagVal))
 							return false;
 						break;
@@ -867,7 +867,7 @@ public:
 					case LCss::Selector::SelClass:
 					{
 						// Check the class matches
-						GString::Array Class;
+						LString::Array Class;
 						if (!Context->GetClasses(Class, Obj))
 							return false;
 
@@ -1016,7 +1016,7 @@ public:
 
 		// This stores the unparsed style strings. More than one selector
 		// may reference this memory.
-		GArray<char*> Styles;
+		LArray<char*> Styles;
 		
 		// Sort the styles into less specific to more specific order
 		void SortStyles(LCss::SelArray &Styles);
@@ -1024,7 +1024,7 @@ public:
 	public:
 		SelectorMap TypeMap, ClassMap, IdMap;
 		SelArray Other;
-		GString Error;
+		LString Error;
 
 		~Store()
 		{
@@ -1059,7 +1059,7 @@ public:
 				return false;
 			
 			// An array of potential selector matches...
-			GArray<SelArray*> Maps;
+			LArray<SelArray*> Maps;
 
 			// Check element type
 			const char *Type = Context->GetElement(Obj);
@@ -1072,7 +1072,7 @@ public:
 				Maps.Add(s);
 			
 			// Check all the classes
-			GString::Array Classes;
+			LString::Array Classes;
 			if (Context->GetClasses(Classes, Obj))
 			{
 				for (unsigned i=0; i<Classes.Length(); i++)
@@ -1211,7 +1211,7 @@ public:
 	LCss &operator +=(const LCss &c) { CopyStyle(c); return *this; }
 	LCss &operator -=(const LCss &c);
 	void *PropAddress(PropType p) { return Props.Find(p); }
-	GAutoString ToString();
+	LAutoString ToString();
 	const char *ToString(DisplayType dt);
 	bool HasFontStyle();
 	void FontBold(bool b) { FontWeight(b ? FontWeightBold : FontWeightNormal); }
@@ -1235,7 +1235,7 @@ public:
 	}
 
     // Inheritance calculation
-    typedef GArray<void*> PropArray;
+    typedef LArray<void*> PropArray;
     typedef LHashTbl<IntKey<PropType,PropNull>, PropArray*> PropMap;
 	
 	/// Copies valid properties from the node 'c' into the property collection 'Contrib'.

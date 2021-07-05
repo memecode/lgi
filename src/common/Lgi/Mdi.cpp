@@ -104,7 +104,7 @@ public:
 	bool Btn;
 	LRect Tabs;
 	LRect Content;
-	::GArray<GMdiChild*> Children;
+	::LArray<GMdiChild*> Children;
 	
 	GMdiParentPrivate()
 	{
@@ -656,7 +656,7 @@ void GMdiParent::HasButton(bool b)
 	if (IsAttached())
 		Invalidate();
 }
-::GArray<GMdiChild*> &GMdiParent::PrivChildren()
+::LArray<GMdiChild*> &GMdiParent::PrivChildren()
 {
 	return d->Children;
 }
@@ -692,7 +692,7 @@ void GMdiParent::OnPaint(LSurface *pDC)
 	
 	int MarginPx = 10;
 	
-	::GArray<GMdiChild*> Views;
+	::LArray<GMdiChild*> Views;
 	GMdiChild *Last = dynamic_cast<GMdiChild*>(d->Children.Last());
 	GetChildren(Views);
 	GColour cActive(L_WORKSPACE);
@@ -809,7 +809,7 @@ bool GMdiParent::OnViewKey(LView *View, LKey &Key)
 		#endif
 		if (Child)
 		{
-			::GArray<GMdiChild*> Views;
+			::LArray<GMdiChild*> Views;
 			GetChildren(Views);
 			auto Idx = Views.IndexOf(Child);
 			int Inc = Key.Shift() ? -1 : 1;
@@ -827,7 +827,7 @@ bool GMdiParent::OnViewKey(LView *View, LKey &Key)
 #if MDI_TAB_STYLE
 void GMdiParent::OnMouseClick(LMouse &m)
 {
-	::GArray<GMdiChild*> Views;
+	::LArray<GMdiChild*> Views;
 	if (GetChildren(Views))
 	{
 		for (int i=0; i<Views.Length(); i++)

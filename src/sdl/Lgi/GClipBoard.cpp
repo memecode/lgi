@@ -52,13 +52,13 @@ char *GClipBoard::Text()
 
 bool GClipBoard::TextW(char16 *Str, bool AutoEmpty)
 {
-    GAutoString u(WideToUtf8(Str));
+    LAutoString u(WideToUtf8(Str));
     return Text(u, AutoEmpty);
 }
 
 char16 *GClipBoard::TextW()
 {
-    GAutoString u(Text());
+    LAutoString u(Text());
     return Utf8ToWide(u);
 }
 
@@ -84,7 +84,7 @@ bool GClipBoard::Binary(FormatType Format, uint8 *Ptr, ssize_t Len, bool AutoEmp
 	return Status;
 }
 
-bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8> &Ptr, ssize_t *Len)
+bool GClipBoard::Binary(FormatType Format, LAutoPtr<uint8> &Ptr, ssize_t *Len)
 {
 	bool Status = false;
 

@@ -69,7 +69,7 @@ uint16 LDateTime::GetDefaultFormat()
 		if (GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SSHORTDATE, s, sizeof(s)))
 		{
 			char Sep[] = { DefaultSeparator, '/', '\\', '-', '.', 0 };
-			GString Str = s;
+			LString Str = s;
 			GToken t(Str, Sep);
 			for (int i=0; i<t.Length(); i++)
 			{
@@ -290,7 +290,7 @@ int GDateCmp(LDateTime *a, LDateTime *b)
 
 #elif defined POSIX
 
-static bool ParseValue(char *s, GAutoString &var, GAutoString &val)
+static bool ParseValue(char *s, LAutoString &var, LAutoString &val)
 {
 	if (!s)
 		return false;
@@ -309,7 +309,7 @@ static bool ParseValue(char *s, GAutoString &var, GAutoString &val)
 
 /* Testing code...
 	LDateTime Start, End;
-	GArray<LDateTime::GDstInfo> Info;
+	LArray<LDateTime::GDstInfo> Info;
 
 	Start.Set("1/1/2010");
 	End.Set("31/12/2014");
@@ -324,7 +324,7 @@ static bool ParseValue(char *s, GAutoString &var, GAutoString &val)
 		dt.Get(s);
 		p.Print("%s, %i\n", s, Info[i].Offset);
 	}
-	GAutoString s(p.NewStr());
+	LAutoString s(p.NewStr());
 	LgiMsg(0, s, "Test");
 */
 
@@ -369,11 +369,11 @@ struct MonthHash : public LHashTbl<ConstStrKey<char,false>,int>
 	}
 };
 
-GString::Array Zdump;
+LString::Array Zdump;
 
 #define DEBUG_DST_INFO		0
 
-bool LDateTime::GetDaylightSavingsInfo(GArray<GDstInfo> &Info, LDateTime &Start, LDateTime *End)
+bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start, LDateTime *End)
 {
 	bool Status = false;
 	
@@ -483,7 +483,7 @@ bool LDateTime::GetDaylightSavingsInfo(GArray<GDstInfo> &Info, LDateTime &Start,
 				}		
 				fclose(f);
 				
-				GString ps = p.NewGStr();
+				LString ps = p.NewGStr();
 				Zdump = ps.Split("\n");
 			}
 		}
@@ -538,7 +538,7 @@ bool LDateTime::GetDaylightSavingsInfo(GArray<GDstInfo> &Info, LDateTime &Start,
 				Utc.Day(atoi(l[3]));
 				Utc.Month(m);
 
-				GAutoString Var, Val;
+				LAutoString Var, Val;
 				if (!ParseValue(l[14], Var, Val) ||
 					stricmp(Var, "isdst"))
 				{
@@ -601,7 +601,7 @@ bool LDateTime::GetDaylightSavingsInfo(GArray<GDstInfo> &Info, LDateTime &Start,
 	return Status;
 }
 
-bool LDateTime::DstToLocal(GArray<GDstInfo> &Dst, LDateTime &dt)
+bool LDateTime::DstToLocal(LArray<GDstInfo> &Dst, LDateTime &dt)
 {
 	if (dt.GetTimeZone())
 	{
@@ -734,11 +734,11 @@ void LDateTime::SetNow()
 #define Convert24HrTo12Hr(h)			( (h) == 0 ? 12 : (h) > 12 ? (h) % 12 : (h) )
 #define Convert24HrToAmPm(h)		( (h) >= 12 ? "p" : "a" )
 
-GString LDateTime::GetDate() const
+LString LDateTime::GetDate() const
 {
 	char s[32];
 	int Ch = GetDate(s, sizeof(s));
-	return GString(s, Ch);
+	return LString(s, Ch);
 }
 
 int LDateTime::GetDate(char *Str, size_t SLen) const
@@ -771,11 +771,11 @@ int LDateTime::GetDate(char *Str, size_t SLen) const
 	return Ch;
 }
 
-GString LDateTime::GetTime() const
+LString LDateTime::GetTime() const
 {
 	char s[32];
 	int Ch = GetTime(s, sizeof(s));
-	return GString(s, Ch);
+	return LString(s, Ch);
 }
 
 int LDateTime::GetTime(char *Str, size_t SLen) const
@@ -952,13 +952,13 @@ bool LDateTime::Get(uint64 &s) const
 	#endif
 }
 
-GString LDateTime::Get() const
+LString LDateTime::Get() const
 {
 	char buf[32];
 	int Ch = GetDate(buf, sizeof(buf));
 	buf[Ch++] = ' ';
 	Ch += GetTime(buf+Ch, sizeof(buf)-Ch);
-	return GString(buf, Ch);
+	return LString(buf, Ch);
 }
 
 void LDateTime::Get(char *Str, size_t SLen) const
@@ -1181,7 +1181,7 @@ bool LDateTime::SetTime(const char *Str)
 
 	if (T.Length() > 3)
 	{
-		GString t = "0.";
+		LString t = "0.";
 		t += s;
 		_Thousands = (int) (t.Float() * 1000);
 	}
@@ -1214,9 +1214,9 @@ int LDateTime::IsMonth(const char *s)
 	return -1;
 }
 
-bool LDateTime::Parse(GString s)
+bool LDateTime::Parse(LString s)
 {
-	GString::Array a = s.Split(" ");
+	LString::Array a = s.Split(" ");
 
 	Empty();
 
@@ -1227,7 +1227,7 @@ bool LDateTime::Parse(GString s)
 		{
 			if (strchr(c, ':'))
 			{
-				GString::Array t = a[i].Split(":");
+				LString::Array t = a[i].Split(":");
 				if (t.Length() == 3)
 				{
 					Hours((int)t[0].Int());
@@ -1237,7 +1237,7 @@ bool LDateTime::Parse(GString s)
 			}
 			else if (strchr(c, '-') || strchr(c, '/'))
 			{
-				GString::Array t = a[i].SplitDelimit("-/");
+				LString::Array t = a[i].SplitDelimit("-/");
 				if (t.Length() == 3)
 				{
 					// What order are they in?
@@ -1739,7 +1739,7 @@ void LDateTime::AddMonths(int64 Months)
 		_Day = DaysInMonth();
 }
 
-GString LDateTime::DescribePeriod(LDateTime &to)
+LString LDateTime::DescribePeriod(LDateTime &to)
 {
 	auto ThisTs = Ts();
 	auto ToTs = to.Ts();
@@ -1753,7 +1753,7 @@ GString LDateTime::DescribePeriod(LDateTime &to)
 	int days = hrs / 24;
 	hrs -= days * 24;
 	
-	GString s;
+	LString s;
 	s.Printf("%id %ih %im %is", days, hrs, mins, (int)seconds);
 	return s;
 }
@@ -1795,7 +1795,7 @@ bool LDateTime::Decode(const char *In)
 	bool Status = false;
 
 	// Tokenize delimited by whitespace
-	GString::Array T = GString(In).SplitDelimit(", \t\r\n");
+	LString::Array T = LString(In).SplitDelimit(", \t\r\n");
 	if (T.Length() < 2)
 	{
 		if (T[0].IsNumeric())
@@ -1820,9 +1820,9 @@ bool LDateTime::Decode(const char *In)
 
 		for (unsigned i=0; i<T.Length(); i++)
 		{
-			GString &s = T[i];
+			LString &s = T[i];
 				
-			GString::Array Date;
+			LString::Array Date;
 			if (!GotDate)
 				Date = s.SplitDelimit(".-/\\");
 			if (Date.Length() == 3)
@@ -1891,7 +1891,7 @@ bool LDateTime::Decode(const char *In)
 
 				if (Valid)
 				{
-					GString::Array Time = s.Split(":");
+					LString::Array Time = s.Split(":");
 					if (Time.Length() == 2 ||
 						Time.Length() == 3)
 					{
@@ -2134,7 +2134,7 @@ bool LDateTime::SetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-bool LDateTime::CallMethod(const char *Name, LVariant *ReturnValue, GArray<LVariant*> &Args)
+bool LDateTime::CallMethod(const char *Name, LVariant *ReturnValue, LArray<LVariant*> &Args)
 {
 	switch (LgiStringToDomProp(Name))
 	{
@@ -2189,7 +2189,7 @@ bool LDateTime_Test()
 	LDateTime t2;
 	t2.SetFormat(GDTF_DAY_MONTH_YEAR);
 	t2.Set(i2);
-	GString s = t2.Get();
+	LString s = t2.Get();
 	LgiTrace("Set='%s'\n", s.Get());
 	DATE_ASSERT(!stricmp(s, "2/1/2017 12:00:00a") ||
 				!stricmp(s, "2/01/2017 12:00:00a"));

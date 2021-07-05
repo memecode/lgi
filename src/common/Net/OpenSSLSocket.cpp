@@ -210,7 +210,7 @@ public:
 	DynFunc2(int, RAND_bytes, unsigned char *, buf, int, num);
 };
 
-typedef GArray<int> SslVer;
+typedef LArray<int> SslVer;
 
 SslVer ParseSslVersion(const char *v)
 {
@@ -282,8 +282,8 @@ class OpenSSL :
 
 public:
 	SSL_CTX *Client;
-	GArray<LMutex*> Locks;
-	GAutoString ErrorMsg;
+	LArray<LMutex*> Locks;
+	LAutoString ErrorMsg;
 
     bool IsLoaded()
     {
@@ -297,8 +297,8 @@ public:
     bool InitLibrary(SslSocket *sock)
     {
 		LStringPipe Err;
-		GArray<int> Ver;
-		GArray<int> MinimumVer = ParseSslVersion(MinimumVersion);
+		LArray<int> Ver;
+		LArray<int> MinimumVer = ParseSslVersion(MinimumVersion);
 		GToken t;
 		int Len = 0;
 		const char *v = NULL;
@@ -504,7 +504,7 @@ SSL_id_function()
 	return (unsigned long) GetCurrentThreadId();
 }
 
-bool StartSSL(GAutoString &ErrorMsg, SslSocket *sock)
+bool StartSSL(LAutoString &ErrorMsg, SslSocket *sock)
 {
 	static LMutex Lock;
 	
@@ -549,8 +549,8 @@ struct SslSocketPriv : public LCancel
 	LStreamI *Logger;
 
 	// This is for the connection logging.
-	GAutoString LogFile;
-	GAutoPtr<LStream> LogStream;
+	LAutoString LogFile;
+	LAutoPtr<LStream> LogStream;
 	int LogFormat;
 
 	SslSocketPriv()
@@ -579,7 +579,7 @@ SslSocket::SslSocket(LStreamI *logger, GCapabilityClient *caps, bool sslonconnec
 	d->Logger = logger;
 	d->IsBlocking = true;
 	
-	GAutoString ErrMsg;
+	LAutoString ErrMsg;
 	if (StartSSL(ErrMsg, this))
 	{
 		if (Library->IsOk(this))
@@ -598,7 +598,7 @@ SslSocket::SslSocket(LStreamI *logger, GCapabilityClient *caps, bool sslonconnec
 				OnInformation(s);
 			}
 			#else
-			GString fp = Library->GetFullPath();
+			LString fp = Library->GetFullPath();
 			if (fp)
 			{
 				sprintf_s(s, sizeof(s), "Using '%s'", fp.Get());
@@ -768,14 +768,14 @@ bool SslSocket::IsOpen()
 	return Bio != 0 && !d->Cancel->IsCancelled();
 }
 
-GString SslGetErrorAsString(OpenSSL *Library)
+LString SslGetErrorAsString(OpenSSL *Library)
 {
 	BIO *bio = Library->BIO_new (Library->BIO_s_mem());
 	Library->ERR_print_errors (bio);
 	
 	char *buf = NULL;
 	size_t len = Library->BIO_get_mem_data (bio, &buf);
-	GString s(buf, len);
+	LString s(buf, len);
 	Library->BIO_free (bio);
 	return s;
 }
@@ -822,7 +822,7 @@ DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
 							#if OPENSSL_VERSION_NUMBER < 0x10100000L
 							Library->BIO_set_conn_int_port(Bio, &Port);
 							#else
-							GString sPort;
+							LString sPort;
 							sPort.Printf("%i", Port);
 							Library->BIO_set_conn_port(Bio, sPort.Get());
 							#endif
@@ -880,7 +880,7 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 							}
 							else
 							{
-								GString Err = SslGetErrorAsString(Library).Strip();
+								LString Err = SslGetErrorAsString(Library).Strip();
 								if (!Err)
 									Err.Printf("BIO_do_connect(%s:%i) failed.", HostAddr, Port);
 								SslError(_FL, Err);
@@ -1417,7 +1417,7 @@ DebugTrace("%s:%i - SSL_get_error = %i\n", _FL, Err);
 void SslSocket::OnError(int ErrorCode, const char *ErrorDescription)
 {
 DebugTrace("%s:%i - OnError=%i,%s\n", _FL, ErrorCode, ErrorDescription);
-	GString s;
+	LString s;
 	s.Printf("Error %i: %s\n", ErrorCode, ErrorDescription);
 	Log(s, s.Length(), SocketMsgError);
 }
@@ -1447,7 +1447,7 @@ void SslSocket::OnInformation(const char *Str)
 {
 	while (Str && *Str)
 	{
-		GAutoString a;
+		LAutoString a;
 		const char *nl = Str;
 		while (*nl && *nl != '\n')
 			nl++;
@@ -1470,9 +1470,9 @@ void SslSocket::OnInformation(const char *Str)
 	}
 }
 
-GString SslSocket::Random(int Len)
+LString SslSocket::Random(int Len)
 {
-	GString s;
+	LString s;
 	s.Length(Len);
 	auto r = Library ? Library->RAND_bytes((uint8_t*) s.Get(), Len) : 0;
 	return r ? s : NULL;

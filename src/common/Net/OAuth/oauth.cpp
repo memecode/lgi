@@ -3,9 +3,9 @@
 
 struct OAuthPriv
 {
-	GAutoString ClientId;
-	GAutoString ClientSecret;
-	GAutoString RedirectURI;
+	LAutoString ClientId;
+	LAutoString ClientSecret;
+	LAutoString RedirectURI;
 };
 
 OAuth::OAuth(const char *ClientId, const char *ClientSecret, const char *RedirectURI)

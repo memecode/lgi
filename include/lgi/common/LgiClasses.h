@@ -142,7 +142,7 @@ LgiFunc int LgiMsg
 );
 
 /// This is like LgiMsg but displays the text in a scrollable view.
-LgiFunc void LDialogTextMsg(LViewI *Parent, const char *Title, GString Txt);
+LgiFunc void LDialogTextMsg(LViewI *Parent, const char *Title, LString Txt);
 
 /// Contains all the information about a display/monitor attached to the system.
 /// \sa LGetDisplays
@@ -157,11 +157,11 @@ struct GDisplayInfo
 	/// The refresh rate
 	int Refresh;
 	/// The device's path, system specific
-	GString Device;
+	LString Device;
 	/// A descriptive name of the device, usually the video card
-	GString Name;
+	LString Name;
 	/// The name of any attached monitor
-	GString Monitor;
+	LString Monitor;
 	/// The dots per inch of the display
 	LPoint Dpi;
 
@@ -181,7 +181,7 @@ LgiFunc bool LGetDisplays
 (
 	/// [out] The array of display info structures. The caller should free these
 	/// objects using Displays.DeleteObjects().
-	GArray<GDisplayInfo*> &Displays,
+	LArray<GDisplayInfo*> &Displays,
 	/// [out] Optional bounding rectangle of all displays. Can be NULL if your don't
 	/// need that information.
 	LRect *AllDisplays = 0
@@ -202,7 +202,7 @@ class LgiClass LProfile
 		}
 	};
 	
-	GArray<Sample> s;
+	LArray<Sample> s;
 	char *Buf;
 	int Used;
 	int MinMs;

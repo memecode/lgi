@@ -25,10 +25,10 @@
 
 class NativeTip : public LPopup
 {
-	GAutoPtr<LDisplayString> s;
+	LAutoPtr<LDisplayString> s;
 	
 public:
-	static GArray<NativeTip*> All;
+	static LArray<NativeTip*> All;
 	static NativeTip *PulseRunning;
 	static LPoint Padding;
 
@@ -173,7 +173,7 @@ LPoint NativeTip::Padding(8, 4);
 LPoint NativeTip::Padding(4, 2);
 #endif
 NativeTip *NativeTip::PulseRunning = NULL;
-GArray<NativeTip*> NativeTip::All;
+LArray<NativeTip*> NativeTip::All;
 
 #endif
 

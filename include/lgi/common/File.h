@@ -151,7 +151,7 @@ public:
 	
 	/// Gets the name of the current entry. (Doesn't include the path).
 	virtual char *GetName() const;
-	virtual GString FileName() const;
+	virtual LString FileName() const;
 	
 	/// Gets the user id of the current entry. (Doesn't have any meaning on Win32).
 	virtual int GetUser
@@ -228,7 +228,7 @@ public:
 	virtual GVolume *First();
 	virtual GVolume *Next();
 	virtual GDirectory *GetContents();
-	virtual void Insert(GAutoPtr<GVolume> v);
+	virtual void Insert(LAutoPtr<GVolume> v);
 };
 
 typedef int (*CopyFileCallback)(void *token, int64 Done, int64 Total);
@@ -277,9 +277,9 @@ public:
 	bool Delete
 	(
 		/// The list of files to delete
-		GArray<const char*> &Files,
+		LArray<const char*> &Files,
 		/// A list of status codes where 0 means success and non-zero is an error code, usually an OS error code. NULL if not required.
-		GArray<LError> *Status = NULL,
+		LArray<LError> *Status = NULL,
 		/// true if you want the files moved to the trash folder, false if you want them deleted directly
 		bool ToTrash = true
 	);
@@ -296,7 +296,7 @@ public:
 		bool Recurse = false
 	);
 	
-	GString GetCurrentFolder();
+	LString GetCurrentFolder();
 	bool SetCurrentFolder(const char *PathName);
 
 	/// Moves a file to a new location. Only works on the same device.
@@ -445,7 +445,7 @@ public:
 	virtual ssize_t WriteStr(char *Buf, ssize_t Size);
 
 	// Helpers
-	bool Write(GString s)
+	bool Write(LString s)
 	{
 		return Write(s.Get(), s.Length()) == s.Length();
 	}
@@ -462,12 +462,12 @@ public:
 	// GDom impl
 	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL) override;
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL) override;
-	bool CallMethod(const char *Name, LVariant *ReturnValue, GArray<LVariant*> &Args) override;
+	bool CallMethod(const char *Name, LVariant *ReturnValue, LArray<LVariant*> &Args) override;
 
 	// Path handling
-	class LgiClass Path : public GString::Array
+	class LgiClass Path : public LString::Array
 	{
-		GString Full;
+		LString Full;
 		
 	public:
 		enum State
@@ -477,7 +477,7 @@ public:
 			TypeFile = 2,
 		};
 		
-		static GString Sep;
+		static LString Sep;
 
 		Path(const char *init = NULL, const char *join = NULL)
 		{
@@ -488,14 +488,14 @@ public:
 				*this += join;
 		}
 
-		Path(GAutoString Init)
+		Path(LAutoString Init)
 		{
 			SetFixedLength(false);
 			if (Init)
 				*this = Init.Get();
 		}
 		
-		Path(GString Init)
+		Path(LString Init)
 		{
 			SetFixedLength(false);
 			if (Init)
@@ -510,22 +510,22 @@ public:
 
 		Path &operator =(const char *p)
 		{
-			GString s(p);
-			*((GString::Array*)this) = s.SplitDelimit("\\/");
+			LString s(p);
+			*((LString::Array*)this) = s.SplitDelimit("\\/");
 			SetFixedLength(false);
 			return *this;
 		}
 
-		Path &operator =(const GString &s)
+		Path &operator =(const LString &s)
 		{
-			*((GString::Array*)this) = s.SplitDelimit("\\/");
+			*((LString::Array*)this) = s.SplitDelimit("\\/");
 			SetFixedLength(false);
 			return *this;
 		}
 		
-		Path &operator =(const GArray<GString> &p)
+		Path &operator =(const LArray<LString> &p)
 		{
-			*((GArray<GString>*)this) = p;
+			*((LArray<LString>*)this) = p;
 			Full.Empty();
 			SetFixedLength(false);
 			return *this;
@@ -540,7 +540,7 @@ public:
 
 			for (unsigned i=0; i<a.Length(); i++)
 			{
-				GString &s = a[i];
+				LString &s = a[i];
 				if (!_stricmp(s, "."))
 					;
 				else if (!_stricmp(s, ".."))
@@ -552,7 +552,7 @@ public:
 			return *this;
 		}
 
-		Path Join(const GString p)
+		Path Join(const LString p)
 		{
 			Path a(p);
 			if (a.Length() == 0)
@@ -563,7 +563,7 @@ public:
 			return *this;
 		}
 
-		Path &operator +=(const GString &p)
+		Path &operator +=(const LString &p)
 		{
 			Path a(p);
 			*this += a;
@@ -594,7 +594,7 @@ public:
 			return GetFull();
 		}
 
-		GString GetFull()
+		LString GetFull()
 		{
 			#if !defined(WINDOWS)
 			if (!IsRelative())
@@ -637,14 +637,14 @@ public:
 		State Exists();
 		bool IsFile() { return Exists() == TypeFile; }
 		bool IsFolder() { return Exists() == TypeFolder; }
-		static GString GetSystem(LgiSystemPath Which, int WordSize = 0);
-		static GString PrintAll();
+		static LString GetSystem(LgiSystemPath Which, int WordSize = 0);
+		static LString PrintAll();
 	};
 
 	/// Read the whole file into a string
-	GString Read()
+	LString Read()
 	{
-		GString s;
+		LString s;
 		int64 sz = GetSize();
 		NativeInt nsz = (NativeInt)sz;
 		if (nsz > 0 &&
@@ -695,7 +695,7 @@ LgiFunc bool LgiTrimDir(char *Path);
 LgiExtern const char *LgiGetLeaf(const char *Path);
 LgiExtern char *LgiGetLeaf(char *Path);
 LgiFunc bool LgiIsRelativePath(const char *Path);
-LgiClass GAutoString LgiMakeRelativePath(const char *Base, const char *Path);
+LgiClass LAutoString LgiMakeRelativePath(const char *Base, const char *Path);
 LgiFunc bool LgiMakePath(char *Str, int StrBufLen, const char *Dir, const char *File);
 LgiFunc char *LgiGetExtension(const char *File);
 LgiFunc bool LgiIsFileNameExecutable(const char *FileName);
@@ -711,6 +711,6 @@ LgiFunc void LgiShowFileProperties(OsView Parent, const char *Filename);
 LgiFunc bool LgiBrowseToFile(const char *Filename);
 
 /// Returns the physical device a file resides on
-LgiExtern GString LGetPhysicalDevice(const char *Path);
+LgiExtern LString LGetPhysicalDevice(const char *Path);
 
 #endif

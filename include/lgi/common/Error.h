@@ -43,7 +43,7 @@ class LgiClass LError
 {
 	// This error code is defined by the operating system
 	int Code;
-	GString Msg;
+	LString Msg;
 	
 public:
 	LError(int code = 0, const char *msg = NULL)
@@ -65,7 +65,7 @@ public:
 
 	int GetCode() { return Code; }
 
-	GString GetMsg()
+	LString GetMsg()
 	{
 		if (!Msg)
 			Msg = GetErrorName(Code);

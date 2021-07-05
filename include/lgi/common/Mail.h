@@ -33,12 +33,12 @@
 extern void TokeniseStrList(char *Str, List<char> &Output, const char *Delim);
 extern char ConvHexToBin(char c);
 #define ConvBinToHex(i) (((i)<10)?'0'+(i):'A'+(i)-10)
-extern void DecodeAddrName(const char *Start, GAutoString &Name, GAutoString &Addr, const char *DefaultDomain);
+extern void DecodeAddrName(const char *Start, LAutoString &Name, LAutoString &Addr, const char *DefaultDomain);
 extern int MaxLineLen(char *Text);
 extern char *EncodeImapString(const char *s);
 extern char *DecodeImapString(const char *s);
-extern bool UnBase64Str(GString &s);
-extern bool Base64Str(GString &s);
+extern bool UnBase64Str(LString &s);
+extern bool Base64Str(LString &s);
 
 extern const char *sTextPlain;
 extern const char *sTextHtml;
@@ -57,7 +57,7 @@ class MailProtocol;
 struct MailProtocolError
 {
 	int Code;
-	GString ErrMsg;
+	LString ErrMsg;
 
 	MailProtocolError()
 	{
@@ -97,7 +97,7 @@ class LogEntry
 	GColour c;
 
 public:
-	GArray<char16> Txt;
+	LArray<char16> Txt;
 	LogEntry(GColour col);
 
 	GColour GetColour() { return c; }
@@ -122,7 +122,7 @@ protected:
 
 	// Write to memory
 	uchar *Data;
-	GAutoPtr<LStream> DataStream;
+	LAutoPtr<LStream> DataStream;
 
 public:
 	FileDescriptor(LStreamI *embed, int64 Offset, int64 Size, char *Name);
@@ -198,7 +198,7 @@ class MailProtocol
 protected:
 	char Buffer[4<<10];
 	LMutex SocketLock;
-	GAutoPtr<LSocketI> Socket;
+	LAutoPtr<LSocketI> Socket;
 	LOAuth2::Params OAuth2;
 	GDom *SettingStore;
 
@@ -219,11 +219,11 @@ public:
 
 	// Settings
 	int ErrMsgId; /// \sa #L_ERROR_ESMTP_NO_AUTHS, #L_ERROR_ESMTP_UNSUPPORTED_AUTHS
-	GString ErrMsgFmt; /// The format for the printf
-	GString ErrMsgParam; /// The arguments for the printf
+	LString ErrMsgFmt; /// The format for the printf
+	LString ErrMsgParam; /// The arguments for the printf
 	
-	GString ProgramName;
-	GString ExtraOutgoingHeaders;
+	LString ProgramName;
+	LString ExtraOutgoingHeaders;
 	List<char> CharsetPrefs;
 
 	// Object
@@ -536,7 +536,7 @@ public:
 	(
 		/// An array of messages to receive. The MailTransaction objects contains the index of the message to receive
 		/// and various status values returned after the operation.
-		GArray<MailTransaction*> &Trans,
+		LArray<MailTransaction*> &Trans,
 		/// An optional set of callback functions.
 		MailCallbacks *Callbacks = 0
 	) = 0;
@@ -545,7 +545,7 @@ public:
 	/// Gets the size of the message on the server
 	virtual int Sizeof(int Message) = 0;
 	/// Gets the size of all the messages on the server
-	virtual bool GetSizes(GArray<int> &Sizes) { return false; }
+	virtual bool GetSizes(LArray<int> &Sizes) { return false; }
 	/// Gets the unique identifier of the message
 	virtual bool GetUid(int Message, char *Id, int IdLen) = 0;
 	/// Gets the unique identifiers of a list of messages
@@ -620,10 +620,10 @@ public:
 
 	// Commands available while connected
 	int GetMessages();
-	bool Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
+	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
 	bool Delete(int Message);
 	int Sizeof(int Message);
-	bool GetSizes(GArray<int> &Sizes);
+	bool GetSizes(LArray<int> &Sizes);
 	bool GetUid(int Message, char *Id, int IdLen);
 	bool GetUidList(List<char> &Id);
 	char *GetHeaders(int Message);
@@ -644,7 +644,7 @@ public:
 
 	// Commands available while connected
 	int GetMessages();
-	bool Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
+	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
 	bool Delete(int Message);
 	int Sizeof(int Message);
 	bool GetUid(int Message, char *Id, int IdLen);
@@ -669,10 +669,10 @@ public:
 
 	// Commands available while connected
 	int GetMessages();
-	bool Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
+	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
 	bool Delete(int Message);
 	int Sizeof(int Message);
-	bool GetSizes(GArray<int> &Sizes);
+	bool GetSizes(LArray<int> &Sizes);
 	bool GetUid(int Message, char *Id, int IdLen);
 	bool GetUidList(List<char> &Id);
 	char *GetHeaders(int Message);
@@ -728,7 +728,7 @@ protected:
 	void CommandFinished();
 
 public:
-	typedef LHashTbl<ConstStrKey<char,false>,GString> StrMap;
+	typedef LHashTbl<ConstStrKey<char,false>,LString> StrMap;
 
 	struct StrRange
 	{
@@ -746,8 +746,8 @@ public:
 	// Typedefs
 	struct Untagged
 	{
-		GString Cmd;
-		GString Param;
+		LString Cmd;
+		LString Param;
 		int Id;
 	};
 	
@@ -785,24 +785,24 @@ public:
 	const char *GetWebLoginUri();
 	void SetParentWindow(LViewI *wnd);
 	void SetCancel(LCancel *Cancel);
-	ssize_t ParseImapResponse(char *Buffer, ssize_t BufferLen, GArray<StrRange> &Ranges, int Names);
+	ssize_t ParseImapResponse(char *Buffer, ssize_t BufferLen, LArray<StrRange> &Ranges, int Names);
 
 	// Connection
 	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags = 0);
 	bool Close(); // Non-threadsafe soft close (normal operation)
-	bool GetCapabilities(GArray<char*> &s);
+	bool GetCapabilities(LArray<char*> &s);
 
 	// Commands available while connected
-	bool Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
+	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
 	int GetMessages();
 	bool Delete(int Message);
 	bool Delete(bool ByUid, const char *Seq);
 	int Sizeof(int Message);
-	bool GetSizes(GArray<int> &Sizes);
+	bool GetSizes(LArray<int> &Sizes);
 	bool GetUid(int Message, char *Id, int IdLen);
 	bool GetUidList(List<char> &Id);
 	char *GetHeaders(int Message);
-	char *SequenceToString(GArray<int> *Seq);
+	char *SequenceToString(LArray<int> *Seq);
 
 	// Imap specific commands
 
@@ -836,10 +836,10 @@ public:
 		/// The rfc822 body of the message
 		const char *Msg,
 		/// [Out] The UID of the message appended (if known, can be empty if not known)
-		GString &NewUid
+		LString &NewUid
 	);
 
-	bool GetFolders(GArray<MailImapFolder*> &Folders);
+	bool GetFolders(LArray<MailImapFolder*> &Folders);
 	bool SelectFolder(const char *Path, StrMap *Values = 0);
 	char *GetSelectedFolder();
 	int GetMessages(const char *Path);
@@ -852,23 +852,23 @@ public:
 	bool ExpungeFolder();
 	
 	// Uid methods
-	bool CopyByUid(GArray<uint32_t> &InUids, const char *DestFolder);
-	bool SetFlagsByUid(GArray<uint32_t> &Uids, const char *Flags);
+	bool CopyByUid(LArray<uint32_t> &InUids, const char *DestFolder);
+	bool SetFlagsByUid(LArray<uint32_t> &Uids, const char *Flags);
 
 	/// Idle processing...
 	/// \returns true if something happened
 	bool StartIdle();
-	// bool OnIdle(int Timeout, GArray<Untagged> &Resp);
-	bool OnIdle(int Timeout, GString::Array &Resp);
+	// bool OnIdle(int Timeout, LArray<Untagged> &Resp);
+	bool OnIdle(int Timeout, LString::Array &Resp);
 	bool FinishIdle();
-	bool Poll(int *Recent = 0, GArray<GString> *New = 0);
+	bool Poll(int *Recent = 0, LArray<LString> *New = 0);
 	bool Status(char *Path, int *Recent);
-	bool Search(bool Uids, GArray<GString> &SeqNumbers, const char *Filter);
+	bool Search(bool Uids, LArray<LString> &SeqNumbers, const char *Filter);
 
 	// Utility
 	static bool Http(LSocketI *S,
-					GAutoString *OutHeaders,
-					GAutoString *OutBody,
+					LAutoString *OutHeaders,
+					LAutoString *OutBody,
 					int *StatusCode,
 					const char *InMethod,
 					const char *InUri,

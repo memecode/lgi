@@ -252,7 +252,7 @@ void LRichTextEdit::Value(int64 i)
 	Name(Str);
 }
 
-bool LRichTextEdit::GetFormattedContent(const char *MimeType, GString &Out, GArray<ContentMedia> *Media)
+bool LRichTextEdit::GetFormattedContent(const char *MimeType, LString &Out, LArray<ContentMedia> *Media)
 {
 	if (!MimeType || _stricmp(MimeType, "text/html"))
 		return false;
@@ -412,7 +412,7 @@ const char16 *LRichTextEdit::NameW()
 
 bool LRichTextEdit::NameW(const char16 *s)
 {
-	GAutoString a(WideToUtf8(s));
+	LAutoString a(WideToUtf8(s));
 	return Name(a);
 }
 
@@ -421,7 +421,7 @@ char *LRichTextEdit::GetSelection()
 	if (!HasSelection())
 		return NULL;
 
-	GArray<char16> Text;
+	LArray<char16> Text;
 	if (!d->GetSelection(&Text, NULL))
 		return NULL;
 	
@@ -460,7 +460,7 @@ void LRichTextEdit::UnSelectAll()
 	}
 }
 
-void LRichTextEdit::SetStylePrefix(GString s)
+void LRichTextEdit::SetStylePrefix(LString s)
 {
 	d->SetPrefix(s);
 }
@@ -504,7 +504,7 @@ int LRichTextEdit::GetLine()
 	}
 	else
 	{
-		GArray<int> BlockLine;
+		LArray<int> BlockLine;
 		if (d->Cursor->Blk->OffsetToLine(d->Cursor->Offset, NULL, &BlockLine))
 			Count += BlockLine.First();
 		else
@@ -558,7 +558,7 @@ bool LRichTextEdit::GetLineColumnAtIndex(LPoint &Pt, ssize_t Index)
 		return false;
 
 	int Cols;
-	GArray<int> Lines;
+	LArray<int> Lines;
 	if (b->OffsetToLine(Offset, &Cols, &Lines))
 		return false;
 	
@@ -640,8 +640,8 @@ bool LRichTextEdit::Copy()
 	if (!HasSelection())
 		return false;
 
-	GArray<char16> PlainText;
-	GAutoString Html;
+	LArray<char16> PlainText;
+	LAutoString Html;
 	if (!d->GetSelection(&PlainText, &Html))
 		return false;
 
@@ -654,9 +654,9 @@ bool LRichTextEdit::Copy()
 
 bool LRichTextEdit::Paste()
 {
-	GString Html;
-	GAutoWString Text;
-	GAutoPtr<LSurface> Img;
+	LString Html;
+	LAutoWString Text;
+	LAutoPtr<LSurface> Img;
 
 	{
 		GClipBoard Cb(this);	
@@ -729,7 +729,7 @@ bool LRichTextEdit::Paste()
 	}
 	else if (Text)
 	{
-		GAutoPtr<uint32_t,true> Utf32((uint32_t*)LNewConvertCp("utf-32", Text, LGI_WideCharset));
+		LAutoPtr<uint32_t,true> Utf32((uint32_t*)LNewConvertCp("utf-32", Text, LGI_WideCharset));
 		ptrdiff_t Len = Strlen(Utf32.Get());
 		if (!d->Cursor->Blk->AddText(Trans, d->Cursor->Offset, Utf32.Get(), (int)Len))
 		{
@@ -936,7 +936,7 @@ bool LRichTextEdit::DoGoto()
 	GInput Dlg(this, "", LgiLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");
 	if (Dlg.DoModal() == IDOK)
 	{
-		GString s = Dlg.GetStr();
+		LString s = Dlg.GetStr();
 		int64 i = s.Int();
 		if (i >= 0)
 			SetLine((int)i);
@@ -971,10 +971,10 @@ RichText_FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User)
 ////////////////////////////////////////////////////////////////////////////////// FIND
 bool LRichTextEdit::DoFind()
 {
-	GArray<char16> Sel;
+	LArray<char16> Sel;
 	if (HasSelection())
 		d->GetSelection(&Sel, NULL);
-	GAutoString u(Sel.Length() ? WideToUtf8(&Sel.First()) : NULL);
+	LAutoString u(Sel.Length() ? WideToUtf8(&Sel.First()) : NULL);
 	GFindDlg Dlg(this, u, RichText_FindCallback, this);
 	Dlg.DoModal();	
 	Focus(true);
@@ -989,7 +989,7 @@ bool LRichTextEdit::OnFind(GFindReplaceCommon *Params)
 		return false;
 	}
 	
-	GAutoPtr<uint32_t,true> w((uint32_t*)LNewConvertCp("utf-32", Params->Find, "utf-8", Params->Find.Length()));
+	LAutoPtr<uint32_t,true> w((uint32_t*)LNewConvertCp("utf-32", Params->Find, "utf-8", Params->Find.Length()));
 	ssize_t Idx = d->Blocks.IndexOf(d->Cursor->Blk);
 	if (Idx < 0)
 	{
@@ -1037,7 +1037,7 @@ void LRichTextEdit::SelectWord(size_t From)
 	if (!b)
 		return;
 
-	GArray<uint32_t> Txt;
+	LArray<uint32_t> Txt;
 	if (!b->CopyAt(0, b->Length(), &Txt))
 		return;
 
@@ -1099,7 +1099,7 @@ int LRichTextEdit::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 	return Formats.Length() ? DROPEFFECT_COPY : DROPEFFECT_NONE;
 }
 
-int LRichTextEdit::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
+int LRichTextEdit::OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState)
 {
 	int Effect = DROPEFFECT_NONE;
 
@@ -1116,7 +1116,7 @@ int LRichTextEdit::OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
 			for (unsigned n=0; n<Df.Length(); n++)
 			{
 				const char *f = Df[n];
-				GString Mt = LGetFileMimeType(f);
+				LString Mt = LGetFileMimeType(f);
 				if (Mt && Mt.Find("image/") == 0)
 				{
 					if (AddIndex < 0)
@@ -1250,7 +1250,7 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 {
 	LMenuItem *i;
 	LSubMenu RClick;
-	GAutoString ClipText;
+	LAutoString ClipText;
 	{
 		GClipBoard Clip(this);
 		ClipText.Reset(NewStr(Clip.Text()));
@@ -1544,7 +1544,7 @@ void LRichTextEdit::OnMouseMove(LMouse &m)
 					if (!d->CursorFirst())
 					{
 						// Extend towards the end of the doc...
-						GArray<uint32_t> Txt;
+						LArray<uint32_t> Txt;
 						if (c->Blk->CopyAt(0, c->Blk->Length(), &Txt))
 						{
 							while
@@ -1558,7 +1558,7 @@ void LRichTextEdit::OnMouseMove(LMouse &m)
 					else
 					{
 						// Extend towards the start of the doc...
-						GArray<uint32_t> Txt;
+						LArray<uint32_t> Txt;
 						if (c->Blk->CopyAt(0, c->Blk->Length(), &Txt))
 						{
 							while
@@ -1659,7 +1659,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 						LNamedStyle *AddStyle = NULL;
 						if (d->StyleDirty.Length() > 0)
 						{
-							GAutoPtr<LCss> Mod(new LCss);
+							LAutoPtr<LCss> Mod(new LCss);
 							if (Mod)
 							{
 								// Get base styles at the cursor..
@@ -1691,7 +1691,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 						else if (b->Length() == 0)
 						{
 							// We have no existing style to modify, so create one from scratch.
-							GAutoPtr<LCss> Mod(new LCss);
+							LAutoPtr<LCss> Mod(new LCss);
 							if (Mod)
 							{
 								// Apply dirty toolbar styles...
@@ -2495,7 +2495,7 @@ GMessage::Result LRichTextEdit::OnEvent(GMessage *Msg)
 		case M_BLOCK_MSG:
 		{
 			LRichTextPriv::Block *b = (LRichTextPriv::Block*)Msg->A();
-			GAutoPtr<GMessage> msg((GMessage*)Msg->B());
+			LAutoPtr<GMessage> msg((GMessage*)Msg->B());
 			if (d->Blocks.HasItem(b) && msg)
 			{
 				b->OnEvent(msg);
@@ -2505,7 +2505,7 @@ GMessage::Result LRichTextEdit::OnEvent(GMessage *Msg)
 		}
 		case M_ENUMERATE_LANGUAGES:
 		{
-			GAutoPtr< GArray<LSpellCheck::LanguageId> > Languages((GArray<LSpellCheck::LanguageId>*)Msg->A());
+			LAutoPtr< LArray<LSpellCheck::LanguageId> > Languages((LArray<LSpellCheck::LanguageId>*)Msg->A());
 			if (!Languages)
 			{
 				LgiTrace("%s:%i - M_ENUMERATE_LANGUAGES no param\n", _FL);
@@ -2531,7 +2531,7 @@ GMessage::Result LRichTextEdit::OnEvent(GMessage *Msg)
 		}
 		case M_ENUMERATE_DICTIONARIES:
 		{
-			GAutoPtr< GArray<LSpellCheck::DictionaryId> > Dictionaries((GArray<LSpellCheck::DictionaryId>*)Msg->A());
+			LAutoPtr< LArray<LSpellCheck::DictionaryId> > Dictionaries((LArray<LSpellCheck::DictionaryId>*)Msg->A());
 			if (!Dictionaries)
 				break;
 	
@@ -2572,7 +2572,7 @@ GMessage::Result LRichTextEdit::OnEvent(GMessage *Msg)
 		}
 		case M_CHECK_TEXT:
 		{
-			GAutoPtr<LSpellCheck::CheckText> Ct((LSpellCheck::CheckText*)Msg->A());
+			LAutoPtr<LSpellCheck::CheckText> Ct((LSpellCheck::CheckText*)Msg->A());
 			if (!Ct || Ct->User.Length() > 1)
 			{
 				LgiAssert(0);
@@ -2611,7 +2611,7 @@ GMessage::Result LRichTextEdit::OnEvent(GMessage *Msg)
 		}
 		case M_COMPONENT_INSTALLED:
 		{
-			GAutoPtr<GString> Comp((GString*)Msg->A());
+			LAutoPtr<LString> Comp((LString*)Msg->A());
 			if (Comp)
 				d->OnComponentInstall(*Comp);
 			break;
@@ -2723,7 +2723,7 @@ bool LRichTextEdit::OnLayout(LViewLayoutInfo &Inf)
 }
 
 #if _DEBUG
-void LRichTextEdit::SelectNode(GString Param)
+void LRichTextEdit::SelectNode(LString Param)
 {
 	LRichTextPriv::Block *b = (LRichTextPriv::Block*) Param.Int(16);
 	bool Valid = false;
@@ -2924,7 +2924,7 @@ EmojiMenu::EmojiMenu(LRichTextPriv *priv, LPoint p) : LPopup(priv->View)
 
 void EmojiMenu::OnPaint(LSurface *pDC)
 {
-	GAutoPtr<GDoubleBuffer> DblBuf;
+	LAutoPtr<GDoubleBuffer> DblBuf;
 	if (!pDC->SupportsAlphaCompositing())
 		DblBuf.Reset(new GDoubleBuffer(pDC));
 
@@ -2940,7 +2940,7 @@ void EmojiMenu::OnPaint(LSurface *pDC)
 		{
 			Pane &p = Panes[i];
 			
-			GString s;
+			LString s;
 			s.Printf("%i", i);
 			LDisplayString Ds(SysFont, s);
 			if (Cur == i)

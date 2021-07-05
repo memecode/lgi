@@ -475,7 +475,7 @@ GMimeBuf::GMimeBuf(LStreamI *src, LStreamEnd *end)
 	Src->SetPos(0);
 }
 
-ssize_t GMimeBuf::Pop(GArray<char> &Out)
+ssize_t GMimeBuf::Pop(LArray<char> &Out)
 {
 	ssize_t Ret = 0;
 
@@ -1203,7 +1203,7 @@ int LMime::GMimeText::GMimeDecode::Parse(LStringPipe *Source, ParentState *State
 	// Get various bits out of the header
 	char *Encoding = Mime->GetEncoding();
 	char *Boundary = Mime->GetBoundary();
-	GAutoString MimeType(Mime->GetMimeType());
+	LAutoString MimeType(Mime->GetMimeType());
 	LOG("%s:%i - Encoding=%s, MimeType=%s, Boundary=%s\n", _FL, Encoding, MimeType.Get(), Boundary);
 
 	LStream *Decoder = 0;
@@ -1498,7 +1498,7 @@ ssize_t LMime::GMimeText::GMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 		// Write children
 		if (Mime->Children.Length() && Boundary)
 		{
-			GAutoString Mt(Mime->GetMimeType());
+			LAutoString Mt(Mime->GetMimeType());
 			if (Mt && !_stricmp(Mt, "multipart/alternative"))
 			{
 				// Sort the children to order richer content at the bottom...

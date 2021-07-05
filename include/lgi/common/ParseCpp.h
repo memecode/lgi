@@ -36,11 +36,11 @@ class GCppParser
 	struct GCppParserPriv *d;
 
 public:
-	typedef void (*SearchResultsCb)(void *CallbackData, GArray<GSymbolResult*> &Syms);
+	typedef void (*SearchResultsCb)(void *CallbackData, LArray<GSymbolResult*> &Syms);
 	
 	struct ValuePair
 	{
-		GAutoString Var, Val;
+		LAutoString Var, Val;
 		
 		ValuePair(const char *var = NULL, const char *val = NULL)
 		{
@@ -62,11 +62,11 @@ public:
 	void ParseCode
 	(
 		/// All the include paths for this group of source code files
-		GArray<const char*> &IncludePaths,
+		LArray<const char*> &IncludePaths,
 		/// Any pre-defined values
-		GArray<ValuePair*> &PreDefines,
+		LArray<ValuePair*> &PreDefines,
 		/// All the source code files to parse
-		GArray<char*> &Source
+		LArray<char*> &Source
 	);
 	
 	/// Do a search for a symbol

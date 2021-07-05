@@ -45,7 +45,7 @@ public:
 		bool Io(uint16 &i16, GPointer &p, bool write);
 		bool Io(uint32_t &i32, GPointer &p, bool write);
 		bool Io(uint64 &i64, GPointer &p, bool write);
-		bool Io(GAutoString &str, GPointer &p, bool write);
+		bool Io(LAutoString &str, GPointer &p, bool write);
 	};
 
 	class Field : public Base
@@ -58,7 +58,7 @@ public:
 		char Null;
 		uint8_t Type;
 		uint8_t Flags;
-		GAutoString Name;
+		LAutoString Name;
 		
 		Field();
 		Field(int id, int type, const char *name, int flags = 0);
@@ -69,7 +69,7 @@ public:
 		Field &operator=(const Field &b);
 	};
 	
-	typedef GArray<Field> Schema;
+	typedef LArray<Field> Schema;
 	
 	/// \returns TRUE if the schemas are the same.
 	static bool CompareSchema(Schema &a, Schema &b);
@@ -142,7 +142,7 @@ public:
 	void SetLogStream(LStream *log);
 	
 	/// An array of available tables
-	GArray<Table*> &Tables();
+	LArray<Table*> &Tables();
 
 	/// Get a specific table
 	Table *GetTable(const char *Name);

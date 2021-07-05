@@ -78,7 +78,7 @@ public:
 	void Value(int64 i) { Colour->Value(i); }
 };
 
-LColourSelect::LColourSelect(GArray<GColour> *cols) :
+LColourSelect::LColourSelect(LArray<GColour> *cols) :
 	LDropDown(-1, 0, 0, 10, 10, 0), ResObject(Res_Custom)
 {
 	c.Rgb(0, 0, 255);
@@ -88,7 +88,7 @@ LColourSelect::LColourSelect(GArray<GColour> *cols) :
 		SetColourList(cols);
 }
 
-void LColourSelect::SetColourList(GArray<GColour> *cols)
+void LColourSelect::SetColourList(LArray<GColour> *cols)
 {
 	if (cols)
 	{

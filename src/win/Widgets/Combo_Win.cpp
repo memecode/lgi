@@ -18,15 +18,15 @@ class LComboPrivate
 public:
 	bool SortItems;
 	int SubType;
-	GAutoString Buffer;
+	LAutoString Buffer;
 	LRect Pos;
 	
 	// Initialization data
 	size_t Len;
 	bool Init;
 	int64 Value;
-	GString Name;
-	GArray<GString> Strs;
+	LString Name;
+	LArray<LString> Strs;
 
 	LComboPrivate()
 	{
@@ -53,7 +53,7 @@ LCombo::LCombo(int id, int x, int y, int cx, int cy, const char *name) :
 	SetStyle(GetStyle() | CBS_DROPDOWNLIST | CBS_DISABLENOSCROLL);
 
 	#if 0
-	GString Cls = WC_COMBOBOX;
+	LString Cls = WC_COMBOBOX;
 	SetClassW32(Cls);
 	#else
 	SetClassW32(GetClass());
@@ -79,7 +79,7 @@ void LCombo::OnAttach()
 		d->Init = true;
 		for (unsigned n=0; n<d->Strs.Length(); n++)
 		{
-			GAutoWString s(Utf8ToWide(d->Strs[n]));
+			LAutoWString s(Utf8ToWide(d->Strs[n]));
 			SendMessage(Handle(), CB_INSERTSTRING, n, (LPARAM) (s ? s.Get() : L"(NULL)"));
 		}
 
@@ -277,7 +277,7 @@ bool LCombo::Insert(const char *p, int Index)
 
 	if (_View && d->Init)
 	{
-		GAutoWString n(Utf8ToWide(p));
+		LAutoWString n(Utf8ToWide(p));
 		if (!n)
 			return false;
 
@@ -426,7 +426,7 @@ GMessage::Result LCombo::OnEvent(GMessage *Msg)
 				d->Init = true;
 				for (unsigned n=0; n<d->Strs.Length(); n++)
 				{
-					GAutoWString s(Utf8ToWide(d->Strs[n]));
+					LAutoWString s(Utf8ToWide(d->Strs[n]));
 					SendMessage(Handle(), CB_INSERTSTRING, n, (LPARAM) (s ? s.Get() : L"(NULL)"));
 				}
 

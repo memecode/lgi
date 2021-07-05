@@ -31,7 +31,7 @@ struct HndInfo
 	int Line;
 };
 
-static GArray<HndInfo> Handles;
+static LArray<HndInfo> Handles;
 LgiFunc void LgiTrace(char *Format, ...);
 
 class GdiCleanup

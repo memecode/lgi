@@ -276,7 +276,7 @@ public:
 			{
 				char *c = Sym;
 				char Binary[256];
-				GAutoString Method;
+				LAutoString Method;
 				char *End = 0;
 				int Idx = 0;
 				

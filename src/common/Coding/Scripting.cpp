@@ -36,27 +36,27 @@ struct GCode
 		/// Index of the expression to evaluate
 		int Condition;
 		/// The code to execute if the expression is true
-		GArray<GCode> Block;
+		LArray<GCode> Block;
 	};
-	typedef GArray<GConditionBlock> GCondBlockArr;
+	typedef LArray<GConditionBlock> GCondBlockArr;
 
 	/// The type of statement
 	GStatementType	Type;
 	/// The start token for the statement
 	int				Start;
 	/// Child code element
-	GArray<GCode>	Code;
+	LArray<GCode>	Code;
 
 	union
 	{
 		struct
 		{
 			/// Index of the statement executed at the start of the loop
-			GArray<GCode> *PreStatement;
+			LArray<GCode> *PreStatement;
 			/// The index of the condition expression
 			int Condition;
 			/// Index of the statement to execute after the loop body is executed
-			GArray<GCode> *PostStatement;
+			LArray<GCode> *PostStatement;
 
 		}	For;
 
@@ -71,7 +71,7 @@ struct GCode
 			/// The command to call
 			LFunc *Method;
 			/// Indexes to the start of each argument expression
-			GArray<int> *Args;
+			LArray<int> *Args;
 
 		}	MethodCall;
 
@@ -120,7 +120,7 @@ class GExternType
 {
 public:
 	LVariantType Simple;
-	GArray<GExternType*> Struct;
+	LArray<GExternType*> Struct;
 
 	int Sizeof()
 	{
@@ -161,7 +161,7 @@ struct LExternFunc : public LFunc
 	LScriptEnginePrivate *Priv;
 	char *Library;
 	GExternType Return;
-	GArray<GExternType*> Args;
+	LArray<GExternType*> Args;
 
 	LExternFunc(LScriptEnginePrivate *p) : LFunc(0, ExternFunc)
 	{
@@ -180,9 +180,9 @@ struct LExternFunc : public LFunc
 
 struct LScriptFunc : public LFunc
 {
-	GArray<GCode> *BodyArr;
+	LArray<GCode> *BodyArr;
 	int	BodyIdx;
-	GArray<char*> Args;
+	LArray<char*> Args;
 	LScriptEnginePrivate *Priv;
 
 	LScriptFunc(LScriptEnginePrivate *p, char *meth = 0) : LFunc(meth, ScriptFunc)
@@ -214,7 +214,7 @@ struct GDomPart
 
 struct GDomAddr
 {
-	GArray<GDomPart> Parts;
+	LArray<GDomPart> Parts;
 
 	char16 *operator[](int i)
 	{
@@ -246,7 +246,7 @@ struct GDomAddr
 			if (i)
 				printf(".");
 				
-			GAutoString PartsName(LgiNewUtf16To8(Parts[i].Name));
+			LAutoString PartsName(LgiNewUtf16To8(Parts[i].Name));
 			if (Parts[i].Array)
 				printf("%s[%i]", PartsName.Get(), Parts[i].Array);
 			else
@@ -409,14 +409,14 @@ public:
 	LStringPipe Term;
 	LViewI *Parent;
 	char16 *Script;
-	GArray<StackFrame*> Stack;
+	LArray<StackFrame*> Stack;
 	LScriptContext *Context;
 	GHashTbl<const char*, LFunc*> Methods;
 	bool IsCompiling;
 
-	GArray<GCode> Compiled;
-	GArray<char16*> Tokens;
-	GArray<int> Lines;
+	LArray<GCode> Compiled;
+	LArray<char16*> Tokens;
+	LArray<int> Lines;
 
 	LScriptEnginePrivate(GScriptEngine1 *e)
 	{
@@ -436,7 +436,7 @@ public:
 		return (char*) (IsCompiling ? "CompileError" : "ExecuteError");
 	}
 
-	LExecutionStatus Call(LFunc *Fn, LVariant *Ret, GArray<int> *Idx)
+	LExecutionStatus Call(LFunc *Fn, LVariant *Ret, LArray<int> *Idx)
 	{
 		if (!Fn)
 			return ScriptError;
@@ -460,7 +460,7 @@ public:
 		if (!Deleting)
 			Stack.Add(new StackFrame);
 
-		GArray<LFunc*> Del;
+		LArray<LFunc*> Del;
 		for (void *v = Methods.First(); v; v = Methods.Next())
 		{
 			LFunc *i = (LFunc*)v;
@@ -476,7 +476,7 @@ public:
 		}
 	}
 
-	void DumpCode(GArray<GCode> &c, int Depth = 0)
+	void DumpCode(LArray<GCode> &c, int Depth = 0)
 	{
 		char Tabs[265];
 		memset(Tabs, '\t', Depth);
@@ -573,7 +573,7 @@ public:
 		return false;
 	}
 
-	bool CompileTo(GArray<GCode> &Compiled, char *script)
+	bool CompileTo(LArray<GCode> &Compiled, char *script)
 	{
 		bool Status = false;
 
@@ -601,7 +601,7 @@ public:
 		return Status;
 	}
 
-	void ProcessArguments(ArgumentArray &Args, ArgumentArray &Mem, GArray<int> *Idx);
+	void ProcessArguments(ArgumentArray &Args, ArgumentArray &Mem, LArray<int> *Idx);
 	int FindEndOfBlock(int Cur);
 	LVariant *Var(char16 *name, bool create = true);
 	bool ToVar(LVariant &v, char16 *s);
@@ -616,11 +616,11 @@ public:
 	// Compiling of code	
 	bool	Compile_MethodCall(int &Cur);
 	bool	Compile_Expression(int &Cur, int Depth = 0);
-	bool    Compile_Statement(GArray<GCode> &To, int &Cur);
+	bool    Compile_Statement(LArray<GCode> &To, int &Cur);
 
 	// Execution of code
 	LVariant *Execute_Expression(int &Cur, GDom *Src = 0, int Depth = 0);
-	LExecutionStatus Execute_Statement(GArray<GCode> &To);
+	LExecutionStatus Execute_Statement(LArray<GCode> &To);
 };
 
 bool GDomRef::Get(LScriptEnginePrivate *Priv, LVariant &v)
@@ -1206,7 +1206,7 @@ LExecutionStatus GScriptEngine1::RunTemporary(char *Script)
 	{
 		ScriptTokenState State(d);
 
-		GArray<GCode> Compiled;
+		LArray<GCode> Compiled;
 		if (d->CompileTo(Compiled, Script))
 		{
 			if (Compiled.Length() > 0)
@@ -1583,7 +1583,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 
 	if (Cur >= 0 && Cur < Tokens.Length())
 	{
-		GArray<LVariant*> Args;
+		LArray<LVariant*> Args;
 		int StartToken = Cur;
 		int PrevIsOp = -1;
 
@@ -1671,7 +1671,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 						Method = (LFunc*) Methods.Find(Name);
 						if (Method)
 						{
-							GArray<int> Idx;
+							LArray<int> Idx;
 							ArgumentArray Arg, Mem;
 							LVariant *Ret = new LVariant;
 
@@ -1729,7 +1729,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 								// Using variable source
 
 								// Set up the variable name as a NULL terminated wide string
-								GArray<char16> a;
+								LArray<char16> a;
 								for (int i=Start; i<Cur; i++)
 								{
 									char16 *k = Tokens[i];
@@ -2402,8 +2402,8 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LVariant *Ret, ArgumentA
 		return ScriptError;
 
 	LExecutionStatus Status = ScriptError;
-	GArray<uint32> ArgVal;
-	GArray<char*> Mem;
+	LArray<uint32> ArgVal;
+	LArray<char*> Mem;
 
 	for (int i=0; i<In.Length(); i++)
 	{
@@ -2567,7 +2567,7 @@ LExecutionStatus LScriptFunc::Call(LScriptContext *Ctx, LVariant *Ret, ArgumentA
 	return Status;
 }
 
-void LScriptEnginePrivate::ProcessArguments(ArgumentArray &Args, ArgumentArray &Mem, GArray<int> *Idx)
+void LScriptEnginePrivate::ProcessArguments(ArgumentArray &Args, ArgumentArray &Mem, LArray<int> *Idx)
 {
 	if (Idx)
 	{
@@ -2602,7 +2602,7 @@ void LScriptEnginePrivate::ProcessArguments(ArgumentArray &Args, ArgumentArray &
 	}
 }
 
-LExecutionStatus LScriptEnginePrivate::Execute_Statement(GArray<GCode> &To)
+LExecutionStatus LScriptEnginePrivate::Execute_Statement(LArray<GCode> &To)
 {
 	LExecutionStatus Status = ScriptError;
 
@@ -2906,7 +2906,7 @@ LExecutionStatus LScriptEnginePrivate::Execute_Statement(GArray<GCode> &To)
 	return ScriptSuccess;
 }
 
-bool LScriptEnginePrivate::Compile_Statement(GArray<GCode> &To, int &Cur)
+bool LScriptEnginePrivate::Compile_Statement(LArray<GCode> &To, int &Cur)
 {
 	bool Status = false;
 
@@ -3228,7 +3228,7 @@ bool LScriptEnginePrivate::Compile_Statement(GArray<GCode> &To, int &Cur)
 			else
 			{
 				// Execute the initial statement
-				if ((Code.For.PreStatement = new GArray<GCode>) != NULL &&
+				if ((Code.For.PreStatement = new LArray<GCode>) != NULL &&
 					Compile_Statement(*Code.For.PreStatement, Cur))
 				{
 					// Store the start position of the condition tokens
@@ -3240,7 +3240,7 @@ bool LScriptEnginePrivate::Compile_Statement(GArray<GCode> &To, int &Cur)
 					if (Require(Cur, ";"))
 					{
 						// Skip over the post statement
-						if ((Code.For.PostStatement = new GArray<GCode>) != NULL &&
+						if ((Code.For.PostStatement = new LArray<GCode>) != NULL &&
 							Compile_Statement(*Code.For.PostStatement, Cur))
 						{
 							// See the start of the block...
@@ -3305,7 +3305,7 @@ bool LScriptEnginePrivate::Compile_Statement(GArray<GCode> &To, int &Cur)
 						{
 							if (!Code.MethodCall.Args)
 							{
-								Code.MethodCall.Args = new GArray<int>;
+								Code.MethodCall.Args = new LArray<int>;
 							}
 							if (Code.MethodCall.Args)
 							{

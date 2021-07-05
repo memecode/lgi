@@ -31,7 +31,7 @@ class FileProps : public LDialog
 {
 public:
 	NodeType Type;
-	GString Charset;
+	LString Charset;
 	int Platforms;
 
 	FileProps(LView *p, char *m, NodeType t, int plat, const char *charset)
@@ -326,7 +326,7 @@ bool ProjectNode::HasNode(ProjectNode *Node)
 	return false;
 }
 
-void ProjectNode::AddNodes(GArray<ProjectNode*> &Nodes)
+void ProjectNode::AddNodes(LArray<ProjectNode*> &Nodes)
 {
 	Nodes.Add(this);
 
@@ -371,7 +371,7 @@ bool ProjectNode::GetFormats(GDragFormats &Formats)
 	return true;
 }
 
-bool ProjectNode::GetData(GArray<GDragData> &Data)
+bool ProjectNode::GetData(LArray<GDragData> &Data)
 {
 	for (unsigned i=0; i<Data.Length(); i++)
 	{
@@ -456,7 +456,7 @@ void ProjectNode::AutoDetectType()
 
 void ProjectNode::SetFileName(const char *f)
 {
-	GString Rel;
+	LString Rel;
 
 	if (sFile && Project)
 		Project->OnNode(sFile, this, false);
@@ -651,13 +651,13 @@ bool ProjectNode::Serialize(bool Write)
 				else
 				{
 					// File doesn't exist... has it moved???
-					GAutoString Path = Project->GetBasePath();
+					LAutoString Path = Project->GetBasePath();
 					if (Path)
 					{
 						// Find the file.
 						char *d = strrchr(p, DIR_CHAR);
-						GArray<char*> Files;
-						GArray<const char*> Ext;
+						LArray<char*> Files;
+						LArray<const char*> Ext;
 						Ext.Add(d ? d + 1 : p.Get());
 						if (LRecursiveFileSearch(Path, &Ext, &Files))
 						{
@@ -761,9 +761,9 @@ bool ProjectNode::Serialize(bool Write)
 	return true;
 }
 
-GString ProjectNode::GetFullPath()
+LString ProjectNode::GetFullPath()
 {
-	GString FullPath;
+	LString FullPath;
 	
 	if (LgiIsRelativePath(sFile))
 	{
@@ -1027,7 +1027,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 				s.Type("All Files", LGI_ALL_FILES);
 				s.MultiSelect(true);
 
-				GAutoString Dir = Project->GetBasePath();
+				LAutoString Dir = Project->GetBasePath();
 				if (Dir)
 				{
 					s.InitialDir(Dir);
@@ -1061,7 +1061,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 				LFileSelect s;
 				s.Parent(Tree);
 
-				GAutoString Dir = Project->GetBasePath();
+				LAutoString Dir = Project->GetBasePath();
 				if (Dir)
 				{
 					s.InitialDir(Dir);
@@ -1069,8 +1069,8 @@ void ProjectNode::OnMouseClick(LMouse &m)
 
 				if (s.OpenFolder())
 				{
-					GArray<char*> Files;
-					GArray<const char*> Ext;
+					LArray<char*> Files;
+					LArray<const char*> Ext;
 					GToken e(SourcePatterns, ";");
 					for (int i=0; i<e.Length(); i++)
 					{
@@ -1281,7 +1281,7 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 			
 			if (LgiIsRelativePath(sFile))
 			{
-				GAutoString Base = Project->GetBasePath();
+				LAutoString Base = Project->GetBasePath();
 				if (Base)
 					LgiMakePath(Full, sizeof(Full), Base, sFile);
 				else
@@ -1292,10 +1292,10 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 				strcpy_s(Full, sizeof(Full), sFile);
 			}
 			
-			GString MyPath(Full);
-			GString::Array MyArr = MyPath.Split(DIR_STR);
-			GString InPath(In);
-			GString::Array InArr = InPath.Split(DIR_STR);
+			LString MyPath(Full);
+			LString::Array MyArr = MyPath.Split(DIR_STR);
+			LString InPath(In);
+			LString::Array InArr = InPath.Split(DIR_STR);
 			auto Common = MIN(MyArr.Length(), InArr.Length());
 			Match = true;
 			for (int i = 0; i < Common; i++)
@@ -1325,7 +1325,7 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 			{
 				if (sFile(0) == '.')
 				{
-					GAutoString Base = Project->GetBasePath();
+					LAutoString Base = Project->GetBasePath();
 					if (Base)
 					{
 						char f[256];

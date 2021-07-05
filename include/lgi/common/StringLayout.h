@@ -8,7 +8,7 @@
 /// Section of text with the same style.
 struct LLayoutRun : public LCss
 {
-	GString Text;
+	LString Text;
 
 	LLayoutRun(LCss *Style)
 	{
@@ -73,8 +73,8 @@ protected:
 	bool AmpersandToUnderline;
 
 	// Array of display strings...
-	GArray<LLayoutRun*> Text;
-	GArray<LDisplayString*> Strs;
+	LArray<LLayoutRun*> Text;
+	LArray<LDisplayString*> Strs;
 	LRect Bounds;
 
 public:
@@ -89,7 +89,7 @@ public:
 	void SetWrap(bool b) { Wrap = b; }
 	LPoint GetMin() { return Min; }
 	LPoint GetMax() { return Max; }
-	GArray<LDisplayString*> *GetStrs() { return &Strs; }
+	LArray<LDisplayString*> *GetStrs() { return &Strs; }
 	LRect GetBounds() { return Bounds; }
 
 	/// Adds a run of text with the same style

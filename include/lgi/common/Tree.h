@@ -118,7 +118,7 @@ protected:
 	int GetColumnSize(int Col);
 
 protected:
-	GArray<GAutoString> Str;
+	LArray<LAutoString> Str;
 	int Sys_Image;
 
 public:
@@ -253,7 +253,7 @@ public:
 
 	/// Gets the whole selection and puts it in 'n'
 	template<class T>
-	bool GetSelection(GArray<T*> &n)
+	bool GetSelection(LArray<T*> &n)
 	{
 		n.Empty();
 		auto s = GetSelLst();
@@ -268,7 +268,7 @@ public:
 	
 	/// Gets an array of all items
 	template<class T>
-	bool GetAll(GArray<T*> &n)
+	bool GetAll(LArray<T*> &n)
 	{
 		n.Empty();
 		return ForAllItems([&n](LTreeItem *item)

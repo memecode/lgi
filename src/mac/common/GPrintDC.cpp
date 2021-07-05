@@ -9,8 +9,8 @@ public:
 	bool PageOpen;
 	bool DocOpen;
 	CGContextRef Ctx;
-	GString PrintJobName;
-	GString PrinterName;
+	LString PrintJobName;
+	LString PrinterName;
 
 	GPrintDCPrivate()
 	{

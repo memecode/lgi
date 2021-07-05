@@ -20,7 +20,7 @@ public:
 	virtual class LTableLayout *GetTable() = 0;
 	virtual bool Add(LView *v) = 0;
 	virtual bool Remove(LView *v) = 0;
-	virtual GArray<LView*> GetChildren() = 0;
+	virtual LArray<LView*> GetChildren() = 0;
 };
 
 /// A table layout control. This uses techniques similar to HTML table layout to set the position

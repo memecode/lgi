@@ -248,8 +248,8 @@ class LgiResourcesPrivate
 public:
 	bool Ok;
 	ResFileFormat Format;
-	GString File;
-	GString ThemeFolder;
+	LString File;
+	LString ThemeFolder;
 	LHashTbl<IntKey<int>, LgiStringRes*> StrRef;
 	LHashTbl<IntKey<int>, LgiStringRes*> Strings;
 	LHashTbl<IntKey<int>, LgiStringRes*> DlgStrings;
@@ -269,7 +269,7 @@ public:
 
 /// A collection of resources
 /// \ingroup Resources
-class GResourceContainer : public GArray<LResources*>
+class GResourceContainer : public LArray<LResources*>
 {
 public:
 	~GResourceContainer()
@@ -289,8 +289,8 @@ LResources::LResources(const char *FileName, bool Warn, const char *ThemeFolder)
 	// global pointer list
 	ResourceOwner.Add(this);
 
-	GString File;
-	GString FullPath;
+	LString File;
+	LString FullPath;
 
 #if DEBUG_RES_FILE
 LgiTrace("%s:%i - Filename='%s'\n", _FL, FileName);
@@ -357,8 +357,8 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 	LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 	#endif
 
-	GString BaseFile = File;
-	GString AltFile = File.Replace(".");
+	LString BaseFile = File;
+	LString AltFile = File.Replace(".");
 	BaseFile += ".lr8";
 	AltFile += ".lr8";
 
@@ -540,7 +540,7 @@ bool LResources::Load(const char *FileName)
 	}
 
 	LXmlTree x(0);
-	GAutoPtr<LXmlTag> Root(new LXmlTag);
+	LAutoPtr<LXmlTag> Root(new LXmlTag);
 	if (!x.Read(Root, &F, 0))
 	{
 		LgiTrace("%s:%i - ParseXmlFile failed: %s\n", _FL, x.GetErrorMsg());
@@ -685,7 +685,7 @@ char *LResources::StringFromRef(int Ref)
 
 class GMissingCtrl : public LLayout, public ResObject
 {
-    GAutoString n;
+    LAutoString n;
 
 public:
     GMissingCtrl(char *name) : ResObject(Res_Custom)
@@ -907,7 +907,7 @@ struct ResObjectCallback : public LCss::ElementCallback<ResObject>
 		return v.Str();
 	}
 	
-	bool GetClasses(GString::Array &Classes, ResObject *obj)
+	bool GetClasses(LString::Array &Classes, ResObject *obj)
 	{
 		if (Props->GetValue("class", v))
 			Classes.New() = v.Str();
@@ -920,9 +920,9 @@ struct ResObjectCallback : public LCss::ElementCallback<ResObject>
 		return NULL;
 	}
 	
-	GArray<ResObject*> GetChildren(ResObject *obj)
+	LArray<ResObject*> GetChildren(ResObject *obj)
 	{
-		GArray<ResObject*> a;
+		LArray<ResObject*> a;
 		return a;
 	}
 };
@@ -945,9 +945,9 @@ bool LResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 
 	if (Props->GetValue("class", i))
 	{
-		GString::Array *a = v->CssClasses();
+		LString::Array *a = v->CssClasses();
 		if (a)
-			(*a) = GString(i.Str()).SplitDelimit(" \t");
+			(*a) = LString(i.Str()).SplitDelimit(" \t");
 	}
 
 	if (Props->GetValue("image", i))
@@ -1224,7 +1224,7 @@ bool LgiMenuRes::Read(LXmlTag *t, ResFileFormat Format)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Dialog
-bool LResourceLoad::LoadFromResource(int Resource, LViewI *Parent, LRect *Pos, GAutoString *Name, char *TagList)
+bool LResourceLoad::LoadFromResource(int Resource, LViewI *Parent, LRect *Pos, LAutoString *Name, char *TagList)
 {
 	LgiGetResObj();
 
@@ -1366,7 +1366,7 @@ const char *LgiLoadString(int Res, const char *Default)
 	return Default;
 }
 
-bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, GAutoString *Name, LEventsI *Engine, char *TagList)
+bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, LAutoString *Name, LEventsI *Engine, char *TagList)
 {
 	bool Status = false;
 
@@ -1406,7 +1406,7 @@ bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, GAutoStrin
 						Dpi = Wnd->GetDpi();
 					else
 					{
-						GArray<GDisplayInfo*> Displays;
+						LArray<GDisplayInfo*> Displays;
 						if (LGetDisplays(Displays))
 						{
 							for (auto d: Displays)

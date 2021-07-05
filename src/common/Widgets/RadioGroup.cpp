@@ -115,7 +115,7 @@ bool LRadioGroup::OnLayout(LViewLayoutInfo &Inf)
 		
 		for (LViewI *w: children)
 		{
-			GAutoPtr<LViewLayoutInfo> c(new LViewLayoutInfo);
+			LAutoPtr<LViewLayoutInfo> c(new LViewLayoutInfo);
 			if (w->OnLayout(*c))
 			{
 				// Layout enabled control

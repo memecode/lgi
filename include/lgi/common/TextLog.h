@@ -13,7 +13,7 @@ protected:
 	size_t Pos;
 	
 	LMutex Sem;
-	GArray<char16> Txt;
+	LArray<char16> Txt;
 
 	void ProcessTxt()
 	{
@@ -21,7 +21,7 @@ protected:
 			return;
 		if (Sem.Lock(_FL))
 		{
-			GString msg;
+			LString msg;
 			msg.Printf("GTextLog::ProcessTxt(%" PRIu64 ")", (uint64)Txt.Length());
 			LProfile p(msg, 100);
 			Add(Txt.AddressOf(), Txt.Length());
@@ -102,14 +102,14 @@ public:
 		return 0;
 	}
 
-	bool Write(const GString &s)
+	bool Write(const LString &s)
 	{
 		return Write(s.Get(), s.Length()) == s.Length();
 	}
 	
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0)
 	{
-		GAutoWString w(Utf8ToWide((char*)Buffer, Size));
+		LAutoWString w(Utf8ToWide((char*)Buffer, Size));
 		if (!w)
 			return 0;
 

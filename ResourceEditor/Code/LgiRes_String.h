@@ -51,14 +51,14 @@ protected:
 	char IdStr[16];
 	char **GetIndex(int i);
 	StrLang *GetLang(GLanguageId i);
-	GAutoString Define;		// #define used in code to reference
+	LAutoString Define;		// #define used in code to reference
 	int Ref;			// globally unique
 	int Id;				// numerical value used in code to reference
 
 public:
 	char *Tag;			// Optional component tag, for turning off features.
 	List<StrLang> Items;
-	GArray<class ResDialogCtrl*> Refs;
+	LArray<class ResDialogCtrl*> Refs;
 	LView *UpdateWnd;
 
 	ResString(ResStringGroup *group, int init_ref = -1);
@@ -110,8 +110,8 @@ class ResStringGroup : public Resource, public LList
 protected:
 	ResStringUi *Ui;
 	List<ResString> Strs;
-	GArray<GLanguage*> Lang;
-	GArray<GLanguage*> Visible;
+	LArray<GLanguage*> Lang;
+	LArray<GLanguage*> Visible;
 	int SortCol;
 	int SortAscend;
 
@@ -164,7 +164,7 @@ public:
 
 	// LList
 	void OnItemClick(LListItem *Item, LMouse &m);
-	void OnItemSelect(GArray<LListItem*> &Items);
+	void OnItemSelect(LArray<LListItem*> &Items);
 };
 
 class ResStringUi : public LLayout

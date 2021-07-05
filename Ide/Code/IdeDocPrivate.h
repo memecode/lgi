@@ -43,8 +43,8 @@ public:
 
 class IdeDocPrivate : public NodeView, public LMutex
 {
-	GString FileName;
-	GString Buffer;
+	LString FileName;
+	LString Buffer;
 
 public:
 	IdeDoc *Doc;
@@ -57,13 +57,13 @@ public:
 	class ProjFilePopup *FilePopup;
 	class ProjMethodPopup *MethodPopup;
 	class ProjSymPopup *SymPopup;
-	GString::Array WriteBuf;
-	GAutoPtr<LThread> Build;
+	LString::Array WriteBuf;
+	LAutoPtr<LThread> Build;
 	
 	IdeDocPrivate(IdeDoc *d, AppWnd *a, NodeSource *src, const char *file);
 	void OnDelete();
 	void UpdateName();
-	GString GetDisplayName();
+	LString GetDisplayName();
 	bool IsFile(const char *File);
 	const char *GetLocalFile();
 	void SetFileName(const char *f);

@@ -15,7 +15,7 @@ class LgiClass GInput : public LDialog
 	LEdit *Edit;
 	GInputCallback Callback;
 	void *CallbackParam;
-	GString Str;
+	LString Str;
 
 public:
 	/// Constructs the dialog.
@@ -39,6 +39,6 @@ public:
 	);
 	
 	int OnNotify(LViewI *Ctrl, int Flags);
-	GString GetStr() { return Str; }
+	LString GetStr() { return Str; }
 };
 

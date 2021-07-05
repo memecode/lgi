@@ -117,7 +117,7 @@ public:
 	int DataSize;
 	int64 Size;
 	BNode *Root;
-	GArray<uint8> Bmp;
+	LArray<uint8> Bmp;
 
 	GDiskBTreePrivate()
 	{

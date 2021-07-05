@@ -180,7 +180,7 @@ public:
 	}
 };
 
-bool TnefReadIndex(LStreamI *Tnef, GArray<TnefFileInfo*> &Index)
+bool TnefReadIndex(LStreamI *Tnef, LArray<TnefFileInfo*> &Index)
 {
 	bool Status = false;
 
@@ -197,7 +197,7 @@ bool TnefReadIndex(LStreamI *Tnef, GArray<TnefFileInfo*> &Index)
 		{
 			uint8_t b;
 			bool Done = false;
-			GArray<uint32_t> Tags;
+			LArray<uint32_t> Tags;
 			while (!Done && Tnef->Read(&b, sizeof(b)) == sizeof(b))
 			{
 				switch (b)

@@ -1064,15 +1064,15 @@ T *DupeString(T *s, ssize_t Len = -1)
 	return ns;
 }
 
-GString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t InLen)
+LString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t InLen)
 {
 	if (!OutCp || !In || !InCp)
-		return GString();
+		return LString();
 
 	GCharset *InInfo = LgiGetCpInfo(InCp);
 	GCharset *OutInfo = LgiGetCpInfo(OutCp);
 	if (!InInfo || !OutInfo)
-		return GString();
+		return LString();
 
 	if (InLen < 0)
 	{
@@ -1091,7 +1091,7 @@ GString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 				InLen = StringLen((uint32_t*)In) << 2;
 				break;
 			default:
-				return GString();
+				return LString();
 		}
 	}
 
@@ -1105,12 +1105,12 @@ GString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 		case CpWindowsDb:
 		case CpUtf32:
 		default:
-			LgiAssert(!"GString doesn't >8bit char (yet).");
-			return GString();
+			LgiAssert(!"LString doesn't >8bit char (yet).");
+			return LString();
 	}
 
 	if (!stricmp(InCp, OutCp))
-		return GString((char*)In, InLen);
+		return LString((char*)In, InLen);
 
 	LStringPipe b;
 	if (InInfo->Type == CpIconv ||
@@ -1448,7 +1448,7 @@ const char *LgiDetectCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
 {
 	const char *Status = "utf-8"; // The default..
 
-	GAutoWString Utf((char16*)LNewConvertCp(LGI_WideCharset, Utf8, "utf-8", Len));
+	LAutoWString Utf((char16*)LNewConvertCp(LGI_WideCharset, Utf8, "utf-8", Len));
 	if (Utf)
 	{
 		if (Prefs)
@@ -1494,10 +1494,10 @@ const char *LgiDetectCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
 	return Status;
 }
 
-GString LToNativeCp(const char *In, ssize_t InLen)
+LString LToNativeCp(const char *In, ssize_t InLen)
 {
 	const char *Cp = LAnsiToLgiCp();
-	GString s;
+	LString s;
 
 	#ifdef WIN32
 	GCharset *CpInfo = LgiGetCpInfo(Cp);
@@ -1512,7 +1512,7 @@ GString LToNativeCp(const char *In, ssize_t InLen)
 			if (InLen < 0)
 				InLen = strlen(In);
 
-			GAutoWString Wide(Utf8ToWide(In, InLen));
+			LAutoWString Wide(Utf8ToWide(In, InLen));
 			if (Wide)
 			{
 				size_t Converted;
@@ -1533,10 +1533,10 @@ GString LToNativeCp(const char *In, ssize_t InLen)
 	return s;
 }
 
-GString LFromNativeCp(const char *In, ssize_t InLen)
+LString LFromNativeCp(const char *In, ssize_t InLen)
 {
 	const char *Cp = LAnsiToLgiCp();
-	GString s;
+	LString s;
 
 	#ifdef WIN32
 	GCharset *CpInfo = LgiGetCpInfo(Cp);
@@ -1582,7 +1582,7 @@ GString LFromNativeCp(const char *In, ssize_t InLen)
 			size_t Len = mbstowcs_s(&Converted, NULL, 0, In, 0);
 			if (Len)
 			{
-				GAutoWString Buf(new char16[Len+1]);
+				LAutoWString Buf(new char16[Len+1]);
 				if (Buf)
 				{
 					mbstowcs_s(&Converted, Buf, Len, In, Len);

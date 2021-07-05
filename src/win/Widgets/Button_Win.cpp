@@ -225,7 +225,7 @@ GMessage::Result LButton::OnEvent(GMessage *Msg)
 
 			if (IsWin7 < 0)
 			{
-				GArray<int> Ver;
+				LArray<int> Ver;
 				int Os = LGetOs(&Ver);
 				if (Os == LGI_OS_WIN32 ||
 					Os == LGI_OS_WIN64)

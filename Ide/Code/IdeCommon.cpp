@@ -76,7 +76,7 @@ IdePlatform GetCurrentPlatform()
 	#endif
 }
 
-void IdeCommon::CollectAllSource(GArray<GString> &c, IdePlatform Platform)
+void IdeCommon::CollectAllSource(LArray<LString> &c, IdePlatform Platform)
 {
 	for (auto i:*this)
 	{
@@ -94,7 +94,7 @@ void IdeCommon::CollectAllSource(GArray<GString> &c, IdePlatform Platform)
 				int Flags = p->GetPlatforms();
 				if (Flags & (1 << Platform))
 				{
-					GString path = p->GetFullPath();
+					LString path = p->GetFullPath();
 					if (path)
 					{
 						c.Add(path);
@@ -147,8 +147,8 @@ bool IdeCommon::AddFiles(AddFilesProgress *Prog, const char *Path)
 	bool IsDir = LDirExists(Path);
 	if (IsDir)
 	{
-		GString s = Path;
-		GString::Array a = s.Split(DIR_STR);
+		LString s = Path;
+		LString::Array a = s.Split(DIR_STR);
 		IdeCommon *Sub = GetSubFolder(Project, a.Last(), true);
 		if (Sub)
 		{

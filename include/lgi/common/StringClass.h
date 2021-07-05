@@ -35,14 +35,14 @@
 	#define IsDigit(ch) ((ch) >= '0' && (ch) <= '9')
 #endif
 
-LgiExtern int LgiPrintf(class GString &Str, const char *Format, va_list &Arg);
+LgiExtern int LgiPrintf(class LString &Str, const char *Format, va_list &Arg);
 
 /// A pythonic string class.
-class GString
+class LString
 {
 protected:
 	/// This structure holds the string's data itself and is shared
-	/// between one or more GString instances.
+	/// between one or more LString instances.
 	struct RefStr
 	{
 		/// A reference count
@@ -55,7 +55,7 @@ protected:
 		char Str[1];
 	}	*Str;
 
-	inline void _strip(GString &ret, const char *set, bool left, bool right)
+	inline void _strip(LString &ret, const char *set, bool left, bool right)
 	{
 		if (!Str)
 			return;
@@ -87,10 +87,10 @@ public:
 	#endif
 
 	/// A copyable array of strings
-	class Array : public GArray<GString>
+	class Array : public LArray<LString>
 	{
 	public:
-		Array(size_t PreAlloc = 0) : GArray<GString>(PreAlloc) {}
+		Array(size_t PreAlloc = 0) : LArray<LString>(PreAlloc) {}
 		Array(const Array &a)
 		{
 			*this = (Array&)a;
@@ -99,7 +99,7 @@ public:
 		Array &operator =(const Array &a)
 		{
 			SetFixedLength(false);
-			*((GArray<GString>*)this) = a;
+			*((LArray<LString>*)this) = a;
 			SetFixedLength(true);
 			return *this;
 		}
@@ -114,14 +114,14 @@ public:
 	};
 
 	/// Empty constructor
-	GString()
+	LString()
 	{
 		Str = NULL;
 	}
 
 	// This odd looking constructor allows the object to be used as the value type
 	// in a GHashTable, where the initialiser is '0', an integer.
-	GString(int i)
+	LString(int i)
 	{
 		Str = NULL;
 	}
@@ -129,28 +129,28 @@ public:
 	#ifndef _MSC_VER
 	// This odd looking constructor allows the object to be used as the value type
 	// in a GHashTable, where the initialiser is '0', an integer.
-	GString(long int i)
+	LString(long int i)
 	{
 		Str = NULL;
 	}
 	#endif
 	
 	/// String constructor
-	GString(const char *str, ptrdiff_t bytes)
+	LString(const char *str, ptrdiff_t bytes)
 	{
 		Str = NULL;
 		Set(str, bytes);
 	}
 
 	/// const char* constructor
-	GString(const char *str)
+	LString(const char *str)
 	{
 		Str = NULL;
 		Set(str);
 	}
 
 	/// const char16* constructor
-	GString(const wchar_t *str, ptrdiff_t wchars = -1)
+	LString(const wchar_t *str, ptrdiff_t wchars = -1)
 	{
 		Str = NULL;
 		SetW(str, wchars);
@@ -158,7 +158,7 @@ public:
 
 	#if defined(_WIN32) || defined(MAC)
 	/// const uint32* constructor
-	GString(const uint32_t *str, ptrdiff_t chars = -1)
+	LString(const uint32_t *str, ptrdiff_t chars = -1)
 	{
 		Str = NULL;
 
@@ -192,15 +192,15 @@ public:
 	}
 	#endif
 
-	/// GString constructor
-	GString(const GString &s)
+	/// LString constructor
+	LString(const LString &s)
 	{
 		Str = s.Str;
 		if (Str)
 			Str->Refs++;
 	}
 	
-	~GString()
+	~LString()
 	{
 		Empty();
 	}
@@ -335,7 +335,7 @@ public:
 	}
 
 	/// Equality operator (case sensitive)
-	bool operator ==(const GString &s)
+	bool operator ==(const LString &s)
 	{
 		const char *a = Get();
 		const char *b = s.Get();
@@ -346,7 +346,7 @@ public:
 		return !strcmp(a, b);
 	}
 
-	bool operator !=(const GString &s)
+	bool operator !=(const LString &s)
 	{
 		return !(*this == s);
 	}
@@ -363,7 +363,7 @@ public:
 	}
 	
 	// Equality function (default: case insensitive, as the operator== is case sensitive)
-	bool Equals(const GString &s, bool CaseInsensitive = true) const
+	bool Equals(const LString &s, bool CaseInsensitive = true) const
 	{
 		const char *a = Get();
 		const char *b = s.Get();
@@ -375,7 +375,7 @@ public:
 	}
 
 	/// Assignment operator to copy one string to another
-	GString &operator =(const GString &s)
+	LString &operator =(const LString &s)
 	{
 		if (this != &s)
 		{
@@ -404,7 +404,7 @@ public:
 	}
 	
 	/// Assignment operators
-	GString &operator =(const char *s)
+	LString &operator =(const char *s)
 	{
 		if (Str == NULL ||
 			s < Str->Str ||
@@ -425,13 +425,13 @@ public:
 		return *this;
 	}
 	
-	GString &operator =(const wchar_t *s)
+	LString &operator =(const wchar_t *s)
 	{
 		SetW(s);
 		return *this;
 	}
 
-	GString &operator =(int val)
+	LString &operator =(int val)
 	{
 		char n[32];
 		sprintf_s(n, sizeof(n), "%i", val);
@@ -439,7 +439,7 @@ public:
 		return *this;
 	}
 
-	GString &operator =(int64 val)
+	LString &operator =(int64 val)
 	{
 		char n[32];
 		sprintf_s(n, sizeof(n), "%" PRId64, (int64_t)val);
@@ -453,15 +453,15 @@ public:
 		return Str ? Str->Str : NULL;
 	}
 	
-	int operator -(const GString &s) const
+	int operator -(const LString &s) const
 	{
 		return Stricmp(Get(), s.Get());
 	}
 
 	/// Concatenation operator
-	GString operator +(const GString &s)
+	LString operator +(const LString &s)
 	{
-		GString Ret;
+		LString Ret;
 		size_t Len = Length() + s.Length();
 		if (Ret.Set(NULL, Len))
 		{
@@ -486,7 +486,7 @@ public:
 	}
 
 	/// Concatenation / assignment operator
-	GString &operator +=(const GString &s)
+	LString &operator +=(const LString &s)
 	{
 		ssize_t Len = Length() + s.Length();
 		ssize_t Alloc = sizeof(RefStr) + Len;
@@ -611,7 +611,7 @@ public:
 			const char *s = Get();
 			size_t SepLen = strlen(Sep);
 			
-			GArray<const char*> seps;
+			LArray<const char*> seps;
 			
 			while ((s = CaseSen ? strstr(s, Sep) : Stristr(s, Sep)))
 			{
@@ -620,7 +620,7 @@ public:
 			}
 			
 			ssize_t i, Last = seps.Length() - 1;
-			GString p;
+			LString p;
 			for (i=Last; i>=0; i--)
 			{
 				const char *part = seps[i] + SepLen;
@@ -694,9 +694,9 @@ public:
 	}
 	
 	/// Joins an array of strings using a separator
-	GString Join(const GArray<GString> &a)
+	LString Join(const LArray<LString> &a)
 	{
-		GString ret;
+		LString ret;
 		
 		if (a.Length() == 0)
 			return ret;
@@ -704,7 +704,7 @@ public:
 		char *Sep = Get();
 		size_t SepLen = Sep ? strlen(Sep) : 0;
 		size_t Bytes = SepLen * (a.Length() - 1);
-		GArray<size_t> ALen;
+		LArray<size_t> ALen;
 		for (unsigned i=0; i<a.Length(); i++)
 		{
 			ALen[i] = a.ItemAt(i).Length();
@@ -733,9 +733,9 @@ public:
 	}
 
 	// Replaces a sub-string with another
-	GString Replace(const char *Old, const char *New = NULL, int Count = -1, bool CaseSen = false)
+	LString Replace(const char *Old, const char *New = NULL, int Count = -1, bool CaseSen = false)
 	{
-		GString s;
+		LString s;
 		
 		if (Old && Str)
 		{
@@ -743,7 +743,7 @@ public:
 			size_t OldLen = strlen(Old);
 			size_t NewLen = New ? strlen(New) : 0;
 			char *Match = Str->Str;
-			GArray<char*> Matches;
+			LArray<char*> Matches;
 			while ((Match = (CaseSen ? strstr(Match, Old) : Stristr(Match, Old))))
 			{
 				Matches.Add(Match);
@@ -853,9 +853,9 @@ public:
 	}
 	
 	/// Reverses all the characters in the string
-	GString Reverse()
+	LString Reverse()
 	{
-		GString s;
+		LString s;
 		
 		if (Length() > 0)
 		{
@@ -924,24 +924,24 @@ public:
 	}
 
 	/// Returns a copy of the string with all the characters converted to lower case
-	GString Lower()
+	LString Lower()
 	{
-		GString s;
+		LString s;
 		if (Str && s.Set(Str->Str, Str->Len))
 			Strlwr(s.Get());
 		return s;
 	}
 	
 	/// Returns a copy of the string with all the characters converted to upper case
-	GString Upper()
+	LString Upper()
 	{
-		GString s;
+		LString s;
 		if (Str && s.Set(Str->Str, Str->Len))
 			Strupr(s.Get());
 		return s;
 	}
 
-	void Swap(GString &s)
+	void Swap(LString &s)
 	{
 		LSwap(Str, s.Str);
 	}
@@ -967,9 +967,9 @@ public:
 	}
 	
 	/// Gets the string between at 'start' and 'end' (not including the end'th character)
-	GString operator() (ptrdiff_t start, ptrdiff_t end)
+	LString operator() (ptrdiff_t start, ptrdiff_t end)
 	{
-		GString s;
+		LString s;
 		if (Str)
 		{
 			ptrdiff_t start_idx = start < 0 ? Str->Len + start + 1 : start;
@@ -984,25 +984,25 @@ public:
 	}
 
 	/// Strip off any leading and trailing characters from 'set' (or whitespace if NULL)	
-	GString Strip(const char *set = NULL)
+	LString Strip(const char *set = NULL)
 	{
-		GString ret;
+		LString ret;
 		_strip(ret, set, true, true);
 		return ret;
 	}
 
 	/// Strip off any leading characters from 'set' (or whitespace if NULL)	
-	GString LStrip(const char *set = NULL)
+	LString LStrip(const char *set = NULL)
 	{
-		GString ret;
+		LString ret;
 		_strip(ret, set, true, false);
 		return ret;
 	}	
 
 	/// Strip off any trailing characters from 'set' (or whitespace if NULL)	
-	GString RStrip(const char *set = NULL)
+	LString RStrip(const char *set = NULL)
 	{
-		GString ret;
+		LString ret;
 		_strip(ret, set, false, true);
 		return ret;
 	}
@@ -1025,9 +1025,9 @@ public:
 		return LgiPrintf(*this, Fmt, Arg);
 	}
 	
-	static GString Escape(const char *In, ssize_t Len = -1, const char *Chars = "\r\n\b\\\'\"")
+	static LString Escape(const char *In, ssize_t Len = -1, const char *Chars = "\r\n\b\\\'\"")
 	{
-		GString s;
+		LString s;
 	
 		if (In && Chars)
 		{
@@ -1082,9 +1082,9 @@ public:
 	}
 
 	template<typename T>
-	static GString UnEscape(const T *In, ssize_t Len = -1)
+	static LString UnEscape(const T *In, ssize_t Len = -1)
 	{
-		GString s;
+		LString s;
 		if (In)
 		{
 			T Buf[256];
@@ -1149,19 +1149,19 @@ public:
 		return s;
 	}
 
-	static GString UnEscape(GString s) { return UnEscape(s.Get(), s.Length()); }
+	static LString UnEscape(LString s) { return UnEscape(s.Get(), s.Length()); }
 
 	#if defined(__GTK_H__)
 
 	#elif defined(MAC) // && __COREFOUNDATION_CFBASE__
 
-	GString(const CFStringRef r)
+	LString(const CFStringRef r)
 	{
 		Str = NULL;
 		*this = r;
 	}
 	
-	GString &operator =(CFStringRef r)
+	LString &operator =(CFStringRef r)
 	{
 		if (r)
 		{
@@ -1215,7 +1215,7 @@ public:
 		return !IsEmpty();
 	}
 
-	GString(NSString *const s)
+	LString(NSString *const s)
 	{
 		Str = NULL;
 		*this = [s UTF8String];

@@ -564,7 +564,7 @@ bool LView::_Mouse(LMouse &m, bool Move)
 	#if DEBUG_MOUSE_CLICK
 	if (!Move)
 	{
-		GString s;
+		LString s;
 		s.Printf("%s.Click Capture=%s", GetClass(), _Capturing?_Capturing->GetClass():"(none)");
 		m.Trace(s);
 	}

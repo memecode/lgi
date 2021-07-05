@@ -542,7 +542,7 @@ public:
 	}
 };
 
-::GArray<LPopup*> LPopup::CurrentPopups;
+::LArray<LPopup*> LPopup::CurrentPopups;
 
 LPopup::LPopup(LView *owner)
 	#if LGI_CARBON

@@ -251,7 +251,7 @@ bool MacGetSystemFont(LTypeFace &Info, CTFontUIFontType Which)
 	if (name)
 	{
 		CGFloat sz = CTFontGetSize(ref);
-		GString face(name);
+		LString face(name);
 
 		Info.Face(face);
 		Info.PointSize((int)sz + MAC_FONT_SIZE_OFFSET);
@@ -285,7 +285,7 @@ bool LFontType::GetSystemFont(const char *Which)
 	NONCLIENTMETRICS info;
 	info.cbSize = sizeof(info);
 	#if (WINVER >= 0x0600)
-	GArray<int> Ver;
+	LArray<int> Ver;
 	if (LGetOs(&Ver) == LGI_OS_WIN32 &&
 		Ver[0] <= 5)
 		info.cbSize -= 4;
@@ -326,20 +326,20 @@ bool LFontType::GetSystemFont(const char *Which)
 		LgiMakePath(p, sizeof(p), p, ".lgi.conf");
 		if (LFileExists(p))
 		{
-			GAutoString a(ReadTextFile(p));
+			LAutoString a(ReadTextFile(p));
 			if (a)
 			{
-				GString s;
+				LString s;
 				s = a.Get();
-				GString::Array Lines = s.Split("\n");
+				LString::Array Lines = s.Split("\n");
 				for (int i=0; i<Lines.Length(); i++)
 				{
 					if (Lines[i].Find("=")>=0)
 					{
-						GString::Array p = Lines[i].Split("=", 1);
+						LString::Array p = Lines[i].Split("=", 1);
 						if (!_stricmp(p[0].Lower(), "font"))
 						{
-							GString::Array d = p[1].Split(":");
+							LString::Array d = p[1].Split(":");
 							if (d.Length() > 1)
 							{
 								strcpy_s(DefFont, sizeof(DefFont), d[0]);

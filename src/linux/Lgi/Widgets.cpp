@@ -115,7 +115,7 @@ void GDialog::OnPosChange()
 
 bool GDialog::LoadFromResource(int Resource, char *TagList)
 {
-	GAutoString n;
+	LAutoString n;
 	LRect p;
 	LProfile Prof("GDialog::LoadFromResource");
 

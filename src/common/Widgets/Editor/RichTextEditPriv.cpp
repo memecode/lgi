@@ -6,7 +6,7 @@
 #include "lgi/common/Menu.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Utf16to32(GArray<uint32_t> &Out, const uint16_t *In, int WordLen)
+bool Utf16to32(LArray<uint32_t> &Out, const uint16_t *In, int WordLen)
 {
 	if (WordLen == 0)
 	{
@@ -55,13 +55,13 @@ const char *LRichEditElemContext::GetAttr(LRichEditElem *obj, const char *Attr)
 	return a;
 }
 
-bool LRichEditElemContext::GetClasses(GString::Array &Classes, LRichEditElem *obj)
+bool LRichEditElemContext::GetClasses(LString::Array &Classes, LRichEditElem *obj)
 {
 	const char *c;
 	if (!obj->Get("class", c))
 		return false;
 		
-	GString cls = c;
+	LString cls = c;
 	Classes = cls.Split(" ");
 	return Classes.Length() > 0;
 }
@@ -71,9 +71,9 @@ LRichEditElem *LRichEditElemContext::GetParent(LRichEditElem *obj)
 	return dynamic_cast<LRichEditElem*>(obj->Parent);
 }
 
-GArray<LRichEditElem*> LRichEditElemContext::GetChildren(LRichEditElem *obj)
+LArray<LRichEditElem*> LRichEditElemContext::GetChildren(LRichEditElem *obj)
 {
-	GArray<LRichEditElem*> a;
+	LArray<LRichEditElem*> a;
 	for (unsigned i=0; i<obj->Children.Length(); i++)
 		a.Add(dynamic_cast<LRichEditElem*>(obj->Children[i]));
 	return a;
@@ -121,9 +121,9 @@ bool GCssCache::OutputStyles(LStream &s, int TabDepth)
 		{
 			s.Print("%s.%s {\n", Tabs, ns->Name.Get());
 				
-			GAutoString a = ns->ToString();
-			GString all = a.Get();
-			GString::Array lines = all.Split("\n");
+			LAutoString a = ns->ToString();
+			LString all = a.Get();
+			LString::Array lines = all.Split("\n");
 			for (unsigned n=0; n<lines.Length(); n++)
 			{
 				s.Print("%s%s\n", Tabs, lines[n].Get());
@@ -136,7 +136,7 @@ bool GCssCache::OutputStyles(LStream &s, int TabDepth)
 	return true;
 }
 
-LNamedStyle *GCssCache::AddStyleToCache(GAutoPtr<LCss> &s)
+LNamedStyle *GCssCache::AddStyleToCache(LAutoPtr<LCss> &s)
 {
 	if (!s)
 		return NULL;
@@ -159,7 +159,7 @@ LNamedStyle *GCssCache::AddStyleToCache(GAutoPtr<LCss> &s)
 		Styles.Add(ns);
 
 		#if 0 // _DEBUG
-		GAutoString ss = ns->ToString();
+		LAutoString ss = ns->ToString();
 		if (ss)
 			LgiTrace("%s = %s\n", ns->Name.Get(), ss.Get());
 		#endif
@@ -179,7 +179,7 @@ BlockCursorState::BlockCursorState(bool cursor, LRichTextPriv::BlockCursor *c)
 
 bool BlockCursorState::Apply(LRichTextPriv *Ctx, bool Forward)
 {
-	GAutoPtr<LRichTextPriv::BlockCursor> &Bc = Cursor ? Ctx->Cursor : Ctx->Selection;
+	LAutoPtr<LRichTextPriv::BlockCursor> &Bc = Cursor ? Ctx->Cursor : Ctx->Selection;
 	if (!Bc)
 		return false;
 
@@ -395,8 +395,8 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 	if (!Cursor || !Selection)
 		return false;
 
-	GArray<uint32_t> DeletedText;
-	GArray<uint32_t> *DelTxt = Cut ? &DeletedText : NULL;
+	LArray<uint32_t> DeletedText;
+	LArray<uint32_t> *DelTxt = Cut ? &DeletedText : NULL;
 
 	bool Cf = CursorFirst();
 	LRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
@@ -410,7 +410,7 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 		{
 			// Delete entire block
 			ssize_t i = Blocks.IndexOf(Start->Blk);
-			GAutoPtr<MultiBlockState> MultiState(new MultiBlockState(this, i));
+			LAutoPtr<MultiBlockState> MultiState(new MultiBlockState(this, i));
 			MultiState->Cut(i);
 			MultiState->Length = 0;
 			Start->Set(NextBlk, 0, 0);
@@ -426,7 +426,7 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 		// Multi-block delete...
 		ssize_t i = Blocks.IndexOf(Start->Blk);
 		ssize_t e = Blocks.IndexOf(End->Blk);
-		GAutoPtr<MultiBlockState> MultiState(new MultiBlockState(this, i));
+		LAutoPtr<MultiBlockState> MultiState(new MultiBlockState(this, i));
 
 		// 1) Delete all the content to the end of the first block
 		ssize_t StartLen = Start->Blk->Length();
@@ -516,7 +516,7 @@ LRichTextPriv::Block *LRichTextPriv::Prev(Block *b)
 	return Blocks[--Idx];
 }
 
-bool LRichTextPriv::AddTrans(GAutoPtr<Transaction> &t)
+bool LRichTextPriv::AddTrans(LAutoPtr<Transaction> &t)
 {
 	if (t)
 	{
@@ -607,11 +607,11 @@ bool LRichTextPriv::Error(const char *file, int line, const char *fmt, ...)
 {
 	va_list Arg;
 	va_start(Arg, fmt);
-	GString s;
+	LString s;
 	LgiPrintf(s, fmt, Arg);
 	va_end(Arg);
 
-	GString Err;
+	LString Err;
 	Err.Printf("%s:%i - Error: %s\n", file, line, s.Get());
 	Log->Write(Err, Err.Length());
 
@@ -632,7 +632,7 @@ void LRichTextPriv::UpdateStyleUI()
 
 	TextBlock *b = dynamic_cast<TextBlock*>(Cursor->Blk);
 
-	GArray<StyleText*> Styles;
+	LArray<StyleText*> Styles;
 	if (b)
 		b->GetTextAt(Cursor->Offset, Styles);
 	StyleText *st = Styles.Length() ? Styles.First() : NULL;
@@ -727,7 +727,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 	if (!In || !In->Blk || Blocks.Length() == 0)
 		return Error(_FL, "Not a valid 'In' cursor, Blks=%i", Blocks.Length());
 		
-	GAutoPtr<BlockCursor> c;
+	LAutoPtr<BlockCursor> c;
 
 	bool Status = false;
 	switch (Dir)
@@ -808,7 +808,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 
 			if (c->Offset > 0)
 			{
-				GArray<int> Ln;
+				LArray<int> Ln;
 				c->Blk->OffsetToLine(c->Offset, NULL, &Ln);
 				if (Ln.Length() == 2 &&
 					c->LineHint == Ln.Last())
@@ -858,7 +858,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 
 			if (c->Offset > 0)
 			{
-				GArray<uint32_t> a;
+				LArray<uint32_t> a;
 				c->Blk->CopyAt(0, c->Offset, &a);
 					
 				ssize_t i = c->Offset;
@@ -869,7 +869,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 
 				c->Offset = i;
 
-				GArray<int> Ln;
+				LArray<int> Ln;
 				if (c->Blk->OffsetToLine(c->Offset, NULL, &Ln))
 					c->LineHint = Ln[0];
 
@@ -888,7 +888,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 
 			if (c->Offset < c->Blk->Length())
 			{
-				GArray<int> Ln;
+				LArray<int> Ln;
 				if (c->Blk->OffsetToLine(c->Offset, NULL, &Ln) &&
 					Ln.Length() == 2 &&
 					c->LineHint == Ln.First())
@@ -932,7 +932,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 
 			if (c->Offset < c->Blk->Length())
 			{
-				GArray<uint32_t> a;
+				LArray<uint32_t> a;
 				ssize_t RemainingCh = c->Blk->Length() - c->Offset;
 				c->Blk->CopyAt(c->Offset, RemainingCh, &a);
 					
@@ -944,7 +944,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 
 				c->Offset += i;
 				
-				GArray<int> Ln;
+				LArray<int> Ln;
 				if (c->Blk->OffsetToLine(c->Offset, NULL, &Ln))
 					c->LineHint = Ln.Last();
 				else
@@ -1033,7 +1033,7 @@ bool LRichTextPriv::CursorFirst()
 	return Cursor->Offset < Selection->Offset;
 }
 	
-bool LRichTextPriv::SetCursor(GAutoPtr<BlockCursor> c, bool Select)
+bool LRichTextPriv::SetCursor(LAutoPtr<BlockCursor> c, bool Select)
 {
 	LRect InvalidRc(0, 0, -1, -1);
 
@@ -1177,7 +1177,7 @@ LSurface *GEmojiContext::GetEmojiImage()
 {
 	if (!EmojiImg)
 	{
-		GString p = LGetSystemPath(LSP_APP_INSTALL);
+		LString p = LGetSystemPath(LSP_APP_INSTALL);
 		if (!p)
 		{
 			LgiTrace("%s:%i - No app install path.\n", _FL);
@@ -1186,7 +1186,7 @@ LSurface *GEmojiContext::GetEmojiImage()
 
 		char File[MAX_PATH] = "";
 		LgiMakePath(File, sizeof(File), p, "..\\src\\common\\Text\\Emoji\\EmojiMap.png");
-		GString a;
+		LString a;
 		if (!LFileExists(File))
 			a = LFindFile("EmojiMap.png");
 		
@@ -1246,7 +1246,7 @@ ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk)
 	return -1;
 }
 	
-bool LRichTextPriv::CursorFromPos(int x, int y, GAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx)
+bool LRichTextPriv::CursorFromPos(int x, int y, LAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx)
 {
 	int CharPos = 0;
 	HitTestResult r(x, y);
@@ -1425,7 +1425,7 @@ bool LRichTextPriv::ChangeSelectionStyle(LCss *Style, bool Add)
 	if (!Selection)
 		return false;
 
-	GAutoPtr<Transaction> Trans(new Transaction);
+	LAutoPtr<Transaction> Trans(new Transaction);
 	bool Cf = CursorFirst();
 	LRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
 	LRichTextPriv::BlockCursor *End = Cf ? Selection : Cursor;
@@ -1549,16 +1549,16 @@ void LRichTextPriv::PaintBtn(LSurface *pDC, LRichTextEdit::RectType t)
 	}
 }
 
-bool LRichTextPriv::MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, GString Link)
+bool LRichTextPriv::MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, LString Link)
 {
 	if (!tb)
 		return false;
 
-	GArray<StyleText*> st;
+	LArray<StyleText*> st;
 	if (!tb->GetTextAt(Offset, st))
 		return false;
 	
-	GAutoPtr<LNamedStyle> ns(new LNamedStyle);
+	LAutoPtr<LNamedStyle> ns(new LNamedStyle);
 	if (ns)
 	{
 		if (st.Last()->GetStyle())
@@ -1566,7 +1566,7 @@ bool LRichTextPriv::MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, GString
 		ns->TextDecoration(LCss::TextDecorUnderline);
 		ns->Color(LCss::ColorDef(LCss::ColorRgb, GColour::Blue.c32()));
 		
-		GAutoPtr<Transaction> Trans(new Transaction);
+		LAutoPtr<Transaction> Trans(new Transaction);
 
 		tb->ChangeStyle(Trans, Offset, Len, ns, true);
 
@@ -1588,7 +1588,7 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 	{
 		case LRichTextEdit::FontFamilyBtn:
 		{
-			GString::Array Fonts;
+			LString::Array Fonts;
 			if (!LFontSystem::Inst()->EnumerateFonts(Fonts))
 				return Error(_FL, "EnumerateFonts failed.");
 
@@ -1600,7 +1600,7 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 			char Last = 0;
 			for (unsigned i=0; i<Fonts.Length(); i++)
 			{
-				GString &f = Fonts[i];
+				LString &f = Fonts[i];
 				if (f(0) == '@')
 				{
 					Fonts.DeleteAt(i--);
@@ -1609,7 +1609,7 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 				{
 					if (f(0) != Last || Cur == NULL)
 					{
-						GString str;
+						LString str;
 						str.Printf("%c...", Last = f(0));
 						Cur = s.AppendSub(str);
 					}
@@ -1680,7 +1680,7 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 			if (!tb)
 				break;
 
-			GArray<StyleText*> st;
+			LArray<StyleText*> st;
 			if (!tb->GetTextAt(Cursor->Offset, st))
 				break;
 
@@ -1726,7 +1726,7 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 			if (!tb)
 				break;
 
-			GArray<StyleText*> st;
+			LArray<StyleText*> st;
 			if (!tb->GetTextAt(Cursor->Offset, st))
 				break;
 
@@ -1737,7 +1737,7 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 				a->Element = CONTENT;
 				a->Param.Empty();
 
-				GAutoPtr<LCss> s(new LCss);
+				LAutoPtr<LCss> s(new LCss);
 				LNamedStyle *Ns = a->GetStyle();
 				if (Ns)
 					*s = *Ns;
@@ -1795,7 +1795,7 @@ bool LRichTextPriv::InsertHorzRule()
 	if (!tb)
 		return false;
 
-	GAutoPtr<Transaction> Trans(new Transaction);
+	LAutoPtr<Transaction> Trans(new Transaction);
 
 	DeleteSelection(Trans, NULL);
 
@@ -1824,7 +1824,7 @@ bool LRichTextPriv::InsertHorzRule()
 	AddTrans(Trans);
 	InvalidateDoc(NULL);
 
-	GAutoPtr<BlockCursor> c(new BlockCursor(Hr, 0, 0));
+	LAutoPtr<BlockCursor> c(new BlockCursor(Hr, 0, 0));
 	return SetCursor(c);
 }
 	
@@ -1984,7 +1984,7 @@ LHtmlElement *LRichTextPriv::CreateElement(LHtmlElement *Parent)
 	return new LRichEditElem(Parent);
 }
 
-bool LRichTextPriv::ToHtml(GArray<GDocView::ContentMedia> *Media, BlockCursor *From, BlockCursor *To)
+bool LRichTextPriv::ToHtml(LArray<GDocView::ContentMedia> *Media, BlockCursor *From, BlockCursor *To)
 {
 	UtfNameCache.Reset();
 	if (!Blocks.Length())
@@ -2031,7 +2031,7 @@ bool LRichTextPriv::ToHtml(GArray<GDocView::ContentMedia> *Media, BlockCursor *F
 	}
 		
 	p.Print("</body>\n</html>\n");
-	GAutoString a(p.NewStr());
+	LAutoString a(p.NewStr());
 	UtfNameCache = a;
 	return UtfNameCache.Get() != NULL;
 }
@@ -2065,13 +2065,13 @@ struct HtmlElementCb : public LCss::ElementCallback<LHtmlElement>
 		return obj->Get(Attr, Val) ? Val : NULL;
 	}
 
-	bool GetClasses(GString::Array &Classes, LHtmlElement *obj)
+	bool GetClasses(LString::Array &Classes, LHtmlElement *obj)
 	{
 		const char *Cls = NULL;
 		if (!obj->Get("class", Cls))
 			return false;
 
-		Classes = GString(Cls).SplitDelimit();
+		Classes = LString(Cls).SplitDelimit();
 		return true;
 	}
 
@@ -2080,7 +2080,7 @@ struct HtmlElementCb : public LCss::ElementCallback<LHtmlElement>
 		return obj->Parent;
 	}
 
-	GArray<LHtmlElement*> GetChildren(LHtmlElement *obj)
+	LArray<LHtmlElement*> GetChildren(LHtmlElement *obj)
 	{
 		return obj->Children;
 	}
@@ -2096,7 +2096,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 	for (unsigned i = 0; i < e->Children.Length(); i++)
 	{
 		LHtmlElement *c = e->Children[i];
-		GAutoPtr<LCss> Style;
+		LAutoPtr<LCss> Style;
 		if (ParentStyle)
 			Style.Reset(new LCss(*ParentStyle));
 
@@ -2363,12 +2363,12 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 	return true;
 }
 
-bool LRichTextPriv::GetSelection(GArray<char16> *Text, GAutoString *Html)
+bool LRichTextPriv::GetSelection(LArray<char16> *Text, LAutoString *Html)
 {
 	if (!Text && !Html)
 		return false;
 
-	GArray<uint32_t> Utf32;
+	LArray<uint32_t> Utf32;
 
 	bool Cf = CursorFirst();
 	LRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
@@ -2443,7 +2443,7 @@ LRichTextEdit::RectType LRichTextPriv::PosToButton(LMouse &m)
 	return LRichTextEdit::MaxArea;
 }
 
-void LRichTextPriv::OnComponentInstall(GString Name)
+void LRichTextPriv::OnComponentInstall(LString Name)
 {
 	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
@@ -2481,7 +2481,7 @@ void LRichTextPriv::DumpNodes(LTree *Root)
 		Block *b = Blocks[i];
 		b->DumpNodes(ti);
 
-		GString s;
+		LString s;
 		s.Printf("[%i] %s", i, ti->GetText());
 		ti->SetText(s);
 
@@ -2492,7 +2492,7 @@ void LRichTextPriv::DumpNodes(LTree *Root)
 LTreeItem *PrintNode(LTreeItem *Parent, const char *Fmt, ...)
 {
 	LTreeItem *i = new LTreeItem;
-	GString s;
+	LString s;
 
 	va_list Arg;
 	va_start(Arg, Fmt);

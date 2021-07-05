@@ -359,7 +359,7 @@ bool LView::_Mouse(LMouse &m, bool Move)
 	if (!Move)
 	{
 		m.Trace("_Mouse");
-		::GArray<LViewI*> _m;
+		::LArray<LViewI*> _m;
 		for (LViewI *i=this; i; i=i->GetParent())
 		{
 			_m.Add(i);
@@ -699,7 +699,7 @@ GMessage::Param LView::OnEvent(GMessage *Msg)
 		{
 			if ((LView*)this == (LView*)Msg->B())
 			{
-				GAutoPtr<LRect> r((LRect*)Msg->A());
+				LAutoPtr<LRect> r((LRect*)Msg->A());
 				Invalidate(r);
 			}
 			break;

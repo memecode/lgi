@@ -208,8 +208,8 @@ public:
 			BtnIcons = new LImageList(16, 16, FileSelectIcons.Create(0xF81F));
 		if (!TreeIcons)
 		{
-			GAutoPtr<LSurface> a(TreeIconsImg.Create(0xF81F));
-			GAutoPtr<LMemDC> m(new LMemDC(a->X(), a->Y(), System32BitColourSpace));
+			LAutoPtr<LSurface> a(TreeIconsImg.Create(0xF81F));
+			LAutoPtr<LMemDC> m(new LMemDC(a->X(), a->Y(), System32BitColourSpace));
 			if (a && m)
 			{
 				GColour fore(128, 128, 128);
@@ -400,7 +400,7 @@ public:
 
 class GFolderList : public LList, public GFolderView
 {
-	GString FilterKey;
+	LString FilterKey;
 
 public:
 	GFolderList(GFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy);
@@ -410,7 +410,7 @@ public:
 
 	void OnFolder();
 	bool OnKey(LKey &k);
-	void SetFilterKey(GString s) { FilterKey = s; OnFolder(); }
+	void SetFilterKey(LString s) { FilterKey = s; OnFolder(); }
 };
 
 #define IDC_STATIC					-1
@@ -459,13 +459,13 @@ class FolderCtrl : public LView
 {
 	struct Part
 	{
-		GAutoPtr<LDisplayString> ds;
+		LAutoPtr<LDisplayString> ds;
 		LRect Arrow;
 		LRect Text;
 	};
 	
 	LEdit *e;
-	GArray<Part> p;
+	LArray<Part> p;
 	Part *Over;
 	ssize_t Cursor;
 
@@ -517,9 +517,9 @@ public:
 		return true;
 	}
 
-	GString NameAt(ssize_t Level)
+	LString NameAt(ssize_t Level)
 	{
-		GString n;
+		LString n;
 		#ifndef WINDOWS
 		n += "/";
 		#endif
@@ -534,7 +534,7 @@ public:
 
 	const char *Name()
 	{
-		GString n = NameAt(Cursor);
+		LString n = NameAt(Cursor);
 		LBase::Name(n);
 		return LBase::Name();
 	}
@@ -547,8 +547,8 @@ public:
 		bool b = LView::Name(n);
 		
 		Over = NULL;
-		GString Nm(n);
-		GString::Array a = Nm.SplitDelimit(DIR_STR);
+		LString Nm(n);
+		LString::Array a = Nm.SplitDelimit(DIR_STR);
 		p.Length(0);
 		for (size_t i=0; i<a.Length(); i++)
 		{
@@ -666,7 +666,7 @@ public:
 					{
 						e->Attach(this);
 
-						GString s = Name();
+						LString s = Name();
 						e->Name(s);
 						e->SetCaret(s.Length());
 						e->Focus(true);
@@ -736,11 +736,11 @@ public:
 		if (Level <= 0)
 			return false;
 
-		GString dir = NameAt(Level-1);
+		LString dir = NameAt(Level-1);
 		LSubMenu s;
 		GDirectory d;
 
-		GString::Array Opts;
+		LString::Array Opts;
 		for (int b = d.First(dir); b; b = d.Next())
 		{
 			if (d.IsDir())
@@ -756,7 +756,7 @@ public:
 		int Cmd = s.Float(this, pt.x, pt.y, true);
 		if (Cmd)
 		{
-			GString np;
+			LString np;
 			np = dir + DIR_STR + Opts[Cmd-1];
 			Name(np);
 			PostEvent(M_NOTIFY_VALUE_CHANGED);
@@ -777,8 +777,8 @@ class GFileSelectDlg :
 {
 	LRect OldPos;
 	LRect MinSize;
-	GArray<GString> Links;
-	GArray<GFolderItem*> Hidden;
+	LArray<LString> Links;
+	LArray<GFolderItem*> Hidden;
 	
 public:
 	GFileSelectPrivate *d;
@@ -1430,7 +1430,7 @@ int GFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
 class GFileSystemItem : public LTreeItem
 {
 	class GFileSystemPopup *Popup;
-	GString Path;
+	LString Path;
 
 public:
 	GFileSystemItem(GFileSystemPopup *popup, GVolume *vol, char *path = 0);
@@ -2194,9 +2194,9 @@ bool LFileSelect::Save()
 #if defined(LINUX)
 #include "INet.h"
 #endif
-bool LgiGetUsersLinks(GArray<GString> &Links)
+bool LgiGetUsersLinks(LArray<LString> &Links)
 {
-	GString Folder = LGetSystemPath(LSP_USER_LINKS);
+	LString Folder = LGetSystemPath(LSP_USER_LINKS);
 	if (!Folder)
 		return false;
 	
@@ -2226,15 +2226,15 @@ bool LgiGetUsersLinks(GArray<GString> &Links)
 		if (!LFileExists(p))
 			return false;
 			
-		GAutoString Txt(ReadTextFile(p));
+		LAutoString Txt(ReadTextFile(p));
 		if (!Txt)
 		{
 			LgiTrace("%s:%i - failed to read '%s'\n", _FL, p);
 			return false;
 		}
 
-		GString s = Txt.Get();
-		GString::Array a = s.Split("\n");
+		LString s = Txt.Get();
+		LString::Array a = s.Split("\n");
 		for (unsigned i=0; i<a.Length(); i++)
 		{
 			LUri u(a[i]);

@@ -149,8 +149,8 @@ public:
 
 class GCellStore
 {
-	typedef GArray<GTag*> CellArray;
-	GArray<CellArray> c;
+	typedef LArray<GTag*> CellArray;
+	LArray<CellArray> c;
 
 public:
 	GCellStore(GTag *Table);
@@ -190,7 +190,7 @@ protected:
 	HtmlControlType CtrlType;
 
 	// Text
-	GAutoWString Txt, PreTxt;
+	LAutoWString Txt, PreTxt;
 
 	// Debug stuff
 	void _Dump(LStringPipe &Buf, int Depth);
@@ -223,7 +223,7 @@ public:
 	GToken Class;
 	const char *HtmlId;
 
-	GAutoString Condition;
+	LAutoString Condition;
 	GInfo *Info;
 	int TipId;
 	bool WasClosed;
@@ -245,7 +245,7 @@ public:
 	LFont *Font;
 	
 	// Images
-	GAutoPtr<LSurface> Image;
+	LAutoPtr<LSurface> Image;
 	void SetImage(const char *uri, LSurface *i);
 	void LoadImage(const char *Uri); // Load just this URI
 	void LoadImages(); // Recursive load all image URI's
@@ -315,9 +315,9 @@ public:
 	void GetTagByPos(GTagHit &hit, int x, int y);
 	GTag *GetTagByName(const char *Name);
 	void CopyClipboard(GMemQueue &p);
-	GTag *IsAnchor(GAutoString *Uri);
+	GTag *IsAnchor(LAutoString *Uri);
 	bool CreateSource(LStringPipe &p, int Depth = 0, bool LastWasBlock = true);
-	void Find(int TagType, GArray<GTag*> &Tags);
+	void Find(int TagType, LArray<GTag*> &Tags);
 	GTag *GetAnchor(char *Name);
 
 	// Control handling

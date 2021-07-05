@@ -7,7 +7,7 @@ class GPrinterPrivate
 {
 public:
 	PRINTDLG Info;
-	GString Err;
+	LString Err;
 	bool NeedsDC;
 
 	GPrinterPrivate()
@@ -29,7 +29,7 @@ GPrinter::~GPrinter()
 	DeleteObj(d);
 }
 
-GString GPrinter::GetErrorMsg()
+LString GPrinter::GetErrorMsg()
 {
 	return d->Err;
 }
@@ -79,7 +79,7 @@ bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages, 
 		return false;
 	}
 	
-	GString PrinterName;
+	LString PrinterName;
 	if (d->Info.hDevNames)
 	{
 		DEVNAMES *Name = (DEVNAMES*)GlobalLock(d->Info.hDevNames);
@@ -105,7 +105,7 @@ bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages, 
 	bool Status = false;
 
 	DOCINFO Info;
-	GAutoWString DocName(Utf8ToWide(PrintJobName ? PrintJobName : "Lgi Print Job"));
+	LAutoWString DocName(Utf8ToWide(PrintJobName ? PrintJobName : "Lgi Print Job"));
 
 	ZeroObj(Info);
 	Info.cbSize = sizeof(DOCINFO); 
@@ -129,7 +129,7 @@ bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages, 
 		}
 	}
 	
-	GString OutputFile = dc.GetOutputFileName();
+	LString OutputFile = dc.GetOutputFileName();
 	if (LFileExists(OutputFile))
 	{
 		LgiBrowseToFile(OutputFile);
@@ -156,7 +156,7 @@ bool GPrinter::Browse(LView *Parent)
 }
 
 /*
-bool GPrinter::GetPageRange(GArray<int> &p)
+bool GPrinter::GetPageRange(LArray<int> &p)
 {
 	if (d->Info.Flags & PD_PAGENUMS)
 	{
@@ -174,7 +174,7 @@ bool GPrinter::GetPageRange(GArray<int> &p)
 #define MAGIC_DEVMODE					0xAAFF0101
 #define MAGIC_DEVNAMES					0xAAFF0102
 
-bool GPrinter::Serialize(GString &Str, bool Write)
+bool GPrinter::Serialize(LString &Str, bool Write)
 {
 	int Size = sizeof(d->Info);
 	if (Write)

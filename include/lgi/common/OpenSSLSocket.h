@@ -26,7 +26,7 @@ class SslSocket :
 	LMutex Lock;
 	BIO *Bio;
 	SSL *Ssl;
-	GString ErrMsg;
+	LString ErrMsg;
 
 	// Local stuff
 	virtual void Log(const char *Str, ssize_t Bytes, SocketMsgType Type);
@@ -36,7 +36,7 @@ class SslSocket :
 
 public:
 	static bool DebugLogging;
-	static GString Random(int Len);
+	static LString Random(int Len);
 
 	SslSocket(LStreamI *logger = NULL, GCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false);
 	~SslSocket();
@@ -75,7 +75,7 @@ public:
 	const char *GetErrorString();
 };
 
-extern bool StartSSL(GAutoString &ErrorMsg, SslSocket *Sock);
+extern bool StartSSL(LAutoString &ErrorMsg, SslSocket *Sock);
 extern void EndSSL();
 
 #endif

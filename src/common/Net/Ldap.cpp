@@ -240,7 +240,7 @@ bool ILdap::Search(GDom *Results, const char *BaseDn, const char *UserFilter, co
 				// int Entries = ldap_count_entries(Ldap, Msg);
 				// Ldap_Trace("ldap_search_s('%s'), ldap_count_entries=%i\n", Str, Entries);
 
-				GArray<LVariant*> Args;
+				LArray<LVariant*> Args;
 				for (LDAPMessage *m = ldap_first_entry(Ldap, Msg);
 					m;
 					m = ldap_next_entry(Ldap, m))

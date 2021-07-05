@@ -161,7 +161,7 @@ class IStreamWrap : public LStream
 	IStream *s;
 	
 public:
-	GAutoPtr<FILEDESCRIPTORW> Desc;
+	LAutoPtr<FILEDESCRIPTORW> Desc;
 
 	IStreamWrap(IStream *str) { s = str; }	
 	~IStreamWrap() { Close(); }
@@ -268,11 +268,11 @@ public:
 class LStreamWrap : public GUnknownImpl<IStream>
 {
 	bool Own;
-	GString FileName;
+	LString FileName;
 	LStreamI *s;
 
 public:
-	LStreamWrap(GString fileName, LStreamI *src, bool own = true)
+	LStreamWrap(LString fileName, LStreamI *src, bool own = true)
 	{
 		FileName = fileName;
 		s = src;
@@ -364,7 +364,7 @@ public:
 		if (pstatstg->pwcsName &&
 			FileName)
 		{
-			GAutoWString w(Utf8ToWide(FileName));
+			LAutoWString w(Utf8ToWide(FileName));
 			Strcpy(pstatstg->pwcsName, 256, w.Get());
 		}
 		

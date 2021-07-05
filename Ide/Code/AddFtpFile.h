@@ -11,7 +11,7 @@ class AddFtpFile : public LDialog, public FtpCallback
 	FtpThread *Thread;
 
 public:
-	GArray<char*> Uris;
+	LArray<char*> Uris;
 
 	AddFtpFile(LViewI *p, char *ftp);
 	~AddFtpFile();

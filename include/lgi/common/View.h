@@ -237,7 +237,7 @@ public:
 	bool AddView(LViewI *v, int Where = -1) override;
 	bool DelView(LViewI *v) override;
 	bool HasView(LViewI *v) override;
-	GArray<LViewI*> IterateViews() override;
+	LArray<LViewI*> IterateViews() override;
 	
 	/// \brief Attaches the view to a parent view.
 	///
@@ -483,9 +483,9 @@ public:
 	const char *GetClass() override;
 
 	/// The array of CSS class names.
-	GString::Array *CssClasses() override;
+	LString::Array *CssClasses() override;
 	/// Any element level styles
-	GString CssStyles(const char *Set = NULL) override;
+	LString CssStyles(const char *Set = NULL) override;
 
 	/// \brief Captures all mouse events to this view
 	///

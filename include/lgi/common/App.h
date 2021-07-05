@@ -58,7 +58,7 @@ struct GAppArguments
 		NoSkin = false;
 		NoCrashHandler = false;
 
-		auto a = GString(init).SplitDelimit(",");
+		auto a = LString(init).SplitDelimit(",");
 		for (auto o: a)
 			if (o.Equals("NoCrashHandler"))
 				NoCrashHandler = true;
@@ -117,7 +117,7 @@ protected:
 	
 	#elif defined LGI_COCOA
 	
-	GAutoPtr<LMenu> Default;
+	LAutoPtr<LMenu> Default;
 	
 	#elif defined WIN32
 
@@ -134,7 +134,7 @@ protected:
 	// virtual void OnEvents();
 	void DeleteMeLater(LViewI *v);
 	void SetClipBoardContent(OsView Hnd, LVariant &v);
-	bool GetClipBoardContent(OsView Hnd, LVariant &v, GArray<char*> &Types);
+	bool GetClipBoardContent(OsView Hnd, LVariant &v, LArray<char*> &Types);
 	
 	#endif
 
@@ -212,7 +212,7 @@ public:
 	void OnCommandLine();
 	
 	/// Event called to process files dropped on the application
-	void OnReceiveFiles(GArray<const char*> &Files);
+	void OnReceiveFiles(LArray<const char*> &Files);
 
 	/// Event called to process URLs given to the application
 	void OnUrl(const char *Url);
@@ -231,7 +231,7 @@ public:
 		/// The option to look for.
 		const char *Option,
 		/// String to receive the value (if any) of the option
-		GString &Value
+		LString &Value
 	);
 
 	/// \brief Parses the command line for a switch
@@ -247,10 +247,10 @@ public:
 	);
 
 	/// Return the path to the Lgi config file... (not the same as the application options, more global Lgi apps settings)
-	::GString GetConfigPath();
+	::LString GetConfigPath();
 	
 	/// Gets the application conf stored in lgi.conf
-	::GString GetConfig(const char *Variable);
+	::LString GetConfig(const char *Variable);
 
 	/// Sets a single tag in the config. (Not written to disk)
 	void SetConfig(const char *Variable, const char *Value);
@@ -260,14 +260,14 @@ public:
 	
 	/// Gets the MIME type of a file
 	/// \returns the mime type or NULL if unknown.
-	GString GetFileMimeType
+	LString GetFileMimeType
 	(
 		/// The file to identify
 		const char *File
 	);
 
     /// Gets the applications that can handle a file of a certain mime type
-	bool GetAppsForMimeType(char *Mime, GArray<LAppInfo*> &Apps);
+	bool GetAppsForMimeType(char *Mime, LArray<LAppInfo*> &Apps);
 		
 	/// Get a system metric
 	int32 GetMetric
@@ -305,7 +305,7 @@ public:
 		void CaptureMouse(bool capture);
 		
 		/// Returns the freetype version as a string.
-		GString GetFreetypeVersion();
+		LString GetFreetypeVersion();
 	
 	#elif defined(WIN32)
 
@@ -324,17 +324,17 @@ public:
 		{
 			friend class GApp;
 			
-			GString File;
+			LString File;
 			bool Dirty;
 			
 			struct KeyPair
 			{
-				GString Key, Value;
+				LString Key, Value;
 			};
 			struct Section
 			{
-				GString Name;
-				GArray<KeyPair> Values;
+				LString Name;
+				LArray<KeyPair> Values;
 				
 				KeyPair *Get(const char *Name, bool Create, bool &Dirty)
 				{
@@ -354,7 +354,7 @@ public:
 					return NULL;
 				}
 			};
-			GArray<Section> Data;
+			LArray<Section> Data;
 			
 			bool Serialize(bool Write);
 			Section *GetSection(const char *Name, bool Create);
@@ -362,7 +362,7 @@ public:
 		public:			
 			DesktopInfo(const char *file);
 			
-			GString Get(const char *Field, const char *Section = NULL);
+			LString Get(const char *Field, const char *Section = NULL);
 			bool Set(const char *Field, const char *Value, const char *Section = NULL);
 			bool Update() { return Dirty ? Serialize(true) : true; }
 			const char *GetFile() { return File; }
@@ -395,7 +395,7 @@ public:
 			
 			const char *FlagName(int Flag); // Single flag to string
 			int FlagValue(const char *Name); // Single name to bitmask
-			::GString FlagsToString(int Flags); // Turn multiple flags to string
+			::LString FlagsToString(int Flags); // Turn multiple flags to string
 		};	
 		
 		KeyModFlags *GetKeyModFlags();

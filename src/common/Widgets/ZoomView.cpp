@@ -64,7 +64,7 @@ typedef ZoomTile *SuperTilePtr;
 class GZoomViewPriv // : public LThread, public LMutex
 {
 	int Zoom;
-	GAutoPtr<LMemDC> TileCache;
+	LAutoPtr<LMemDC> TileCache;
 
 public:
 	/// If this is true, then we own the pDC object.

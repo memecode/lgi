@@ -24,7 +24,7 @@ protected:
 	#if WINNATIVE
 	void OnCreate();
 
-	GAutoWString	SysName();
+	LAutoWString	SysName();
 	bool			SysName(const char16 *Name);
 	int				SysOnNotify(int Msg, int Code);
 	bool			SysEmptyText();

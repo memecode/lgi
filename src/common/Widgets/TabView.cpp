@@ -93,7 +93,7 @@ public:
 		ResSelectedFocused,
 		ResMax
 	};
-	GAutoPtr<LSurface> Corners[ResMax];
+	LAutoPtr<LSurface> Corners[ResMax];
 	GColour cBack, cBorder, cFill, cSelUnfoc, cTopEdge, cBottomEdge;
 	
 	// Scrolling
@@ -135,7 +135,7 @@ public:
 		return c;
 	}
 
-	bool DrawCircle(GAutoPtr<LSurface> &Dc, GColour c)
+	bool DrawCircle(LAutoPtr<LSurface> &Dc, GColour c)
 	{
 		if (Dc)
 			return true;
@@ -172,9 +172,9 @@ public:
 
 	void CreateCorners()
 	{
-		GAutoPtr<LSurface> &White = Corners[ResWorkspace];
-		GAutoPtr<LSurface> &Unfoc = Corners[ResSelectedUnfocused];
-		GAutoPtr<LSurface> &Sel = Corners[ResSelectedFocused];
+		LAutoPtr<LSurface> &White = Corners[ResWorkspace];
+		LAutoPtr<LSurface> &Unfoc = Corners[ResSelectedUnfocused];
+		LAutoPtr<LSurface> &Sel = Corners[ResSelectedFocused];
 
 		DrawCircle(White, LColour(L_WORKSPACE));
 		DrawCircle(Unfoc, cSelUnfoc);
@@ -186,7 +186,7 @@ struct LTabPagePriv
 {
 	LTabPage *Tab;
 	bool NonDefaultFont;
-	GAutoPtr<LDisplayString> Ds;
+	LAutoPtr<LDisplayString> Ds;
 
 	LTabPagePriv(LTabPage *t) : Tab(t)
 	{
@@ -228,7 +228,7 @@ struct LTabPagePriv
 	}
 };
 
-class TabIterator : public GArray<LTabPage*>
+class TabIterator : public LArray<LTabPage*>
 {
 public:
 	TabIterator(List<LViewI> &l)
@@ -1494,7 +1494,7 @@ bool LTabPage::OnKey(LKey &k)
 
 bool LTabPage::LoadFromResource(int Res)
 {
-	GAutoString n;
+	LAutoString n;
 
 	auto ch = IterateViews();
 	LViewI *v;

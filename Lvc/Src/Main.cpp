@@ -41,7 +41,7 @@ SshConnection::SshConnection(GTextLog *log, const char *uri, const char *prompt)
 	d = NULL;
 
 	LVariant Ret;
-	GArray<LVariant*> Args;
+	LArray<LVariant*> Args;
 	if (Wnd->CallMethod(METHOD_GetContext, &Ret, Args))
 	{
 		if (Ret.Type == GV_VOID_PTR)
@@ -51,17 +51,17 @@ SshConnection::SshConnection(GTextLog *log, const char *uri, const char *prompt)
 
 bool SshConnection::DetectVcs(VcFolder *Fld)
 {
-	GAutoPtr<GString> p(new GString(Fld->GetUri().sPath(1, -1)));
+	LAutoPtr<LString> p(new LString(Fld->GetUri().sPath(1, -1)));
 	TypeNotify.Add(Fld);
 	return PostObject(GetHandle(), M_DETECT_VCS, p);
 }
 
-bool SshConnection::Command(VcFolder *Fld, GString Exe, GString Args, ParseFn Parser, ParseParams *Params)
+bool SshConnection::Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params)
 {
 	if (!Fld || !Exe || !Parser)
 		return false;
 
-	GAutoPtr<SshParams> p(new SshParams(this));
+	LAutoPtr<SshParams> p(new SshParams(this));
 	p->f = Fld;
 	p->Exe = Exe;
 	p->Args = Args;
@@ -119,10 +119,10 @@ public:
 	}
 };
 
-bool SshConnection::WaitPrompt(LStream *con, GString *Data)
+bool SshConnection::WaitPrompt(LStream *con, LString *Data)
 {
 	char buf[1024];
-	GString out;
+	LString out;
 	auto Ts = LgiCurrentTime();
 	int64 Count = 0, Total = 0;
 	ProgressListItem *Prog = NULL;
@@ -139,7 +139,7 @@ bool SshConnection::WaitPrompt(LStream *con, GString *Data)
 			continue;
 		}
 				
-		out += GString(buf, rd);
+		out += LString(buf, rd);
 		Count += rd;
 		Total += rd;
 		DeEscape(out);
@@ -151,7 +151,7 @@ bool SshConnection::WaitPrompt(LStream *con, GString *Data)
 			{
 				lines.DeleteAt(0, true);
 				lines.PopLast();
-				*Data = GString("\n").Join(lines);
+				*Data = LString("\n").Join(lines);
 			}
 			break;
 		}
@@ -182,7 +182,7 @@ bool SshConnection::HandleMsg(GMessage *m)
 	if (m->Msg() != M_RESPONSE)
 		return false;
 
-	GAutoPtr<SshParams> u((SshParams*)m->A());
+	LAutoPtr<SshParams> u((SshParams*)m->A());
 	if (!u || !u->c)
 		return false;
 
@@ -220,7 +220,7 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 	{
 		case M_DETECT_VCS:
 		{
-			GAutoPtr<GString> p;
+			LAutoPtr<LString> p;
 			if (!ReceiveA(p, Msg))
 				break;
 
@@ -228,7 +228,7 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 			if (!con)
 				break;
 
-			GString ls, out;
+			LString ls, out;
 			ls.Printf("find \"%s\" -maxdepth 1 -printf \"%%f\n\"\n", p->Get());
 			auto wr = con->Write(ls, ls.Length());
 			auto pr = WaitPrompt(con, &out);
@@ -248,7 +248,7 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 			}
 			if (Vcs)
 			{
-				GAutoPtr<SshParams> r(new SshParams(this));
+				LAutoPtr<SshParams> r(new SshParams(this));
 				r->Path = *p;
 				r->Vcs = Vcs;
 				PostObject(GuiHnd, M_RESPONSE, r);
@@ -257,7 +257,7 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 		}
 		case M_RUN_CMD:
 		{
-			GAutoPtr<SshParams> p;
+			LAutoPtr<SshParams> p;
 			if (!ReceiveA(p, Msg))
 				break;
 
@@ -265,7 +265,7 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 			if (!con)
 				break;
 
-			GString cmd;
+			LString cmd;
 			cmd.Printf("cd \"%s\"\n", p->Path.Get());
 			auto wr = con->Write(cmd, cmd.Length());
 			auto pr = WaitPrompt(con);
@@ -276,7 +276,7 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 			
 			// Log->Print("Ssh: %s\n%s\n", cmd.Get(), p->Output.Get());
 
-			GString result;
+			LString result;
 			cmd = "echo $?\n";
 			wr = con->Write(cmd, cmd.Length());
 			pr = WaitPrompt(con, &result);
@@ -390,7 +390,7 @@ class ToolBar : public LLayout, public LResourceLoad
 public:
 	ToolBar()
 	{
-		GAutoString Name;
+		LAutoString Name;
 		LRect Pos;
 		if (LoadFromResource(IDD_TOOLBAR, this, &Pos, &Name))
 		{
@@ -442,7 +442,7 @@ class CommitCtrls : public LLayout, public LResourceLoad
 public:
 	CommitCtrls()
 	{
-		GAutoString Name;
+		LAutoString Name;
 		LRect Pos;
 		if (LoadFromResource(IDD_COMMIT, this, &Pos, &Name))
 		{
@@ -479,15 +479,15 @@ public:
 	}
 };
 
-GString::Array GetProgramsInPath(const char *Program)
+LString::Array GetProgramsInPath(const char *Program)
 {
-	GString::Array Bin;
-	GString Prog = Program;
+	LString::Array Bin;
+	LString Prog = Program;
 	#ifdef WINDOWS
 	Prog += LGI_EXECUTABLE_EXT;
 	#endif
 
-	GString::Array a = LGetPath();
+	LString::Array a = LGetPath();
 	for (auto p : a)
 	{
 		GFile::Path c(p, Prog);
@@ -544,7 +544,7 @@ public:
 		
 		LSubMenu s;
 
-		GString::Array Bins = GetProgramsInPath(Bin);
+		LString::Array Bins = GetProgramsInPath(Bin);
 		for (unsigned i=0; i<Bins.Length(); i++)
 		{
 			s.AppendItem(Bins[i], 1000+i);
@@ -567,7 +567,7 @@ public:
 				default:
 					if (Cmd >= 1000)
 					{
-						GString Bin = Bins[Cmd - 1000];
+						LString Bin = Bins[Cmd - 1000];
 						if (Bin)
 							SetCtrlName(EditId, Bin);
 					}
@@ -613,13 +613,13 @@ int CommitDataCmp(VcCommit **_a, VcCommit **_b)
 	return a->GetTs().Compare(&b->GetTs());
 }
 
-GString::Array AppPriv::GetCommitRange()
+LString::Array AppPriv::GetCommitRange()
 {
-	GString::Array r;
+	LString::Array r;
 
 	if (Commits)
 	{
-		GArray<VcCommit*> Sel;
+		LArray<VcCommit*> Sel;
 		Commits->GetSelection(Sel);
 		if (Sel.Length() > 1)
 		{
@@ -637,9 +637,9 @@ GString::Array AppPriv::GetCommitRange()
 	return r;
 }
 
-GArray<VcCommit*> AppPriv::GetRevs(GString::Array &Revs)
+LArray<VcCommit*> AppPriv::GetRevs(LString::Array &Revs)
 {
-	GArray<VcCommit*> a;
+	LArray<VcCommit*> a;
 	
 	for (auto i = Commits->begin(); i != Commits->end(); i++)
 	{
@@ -667,10 +667,10 @@ public:
 	{
 	}
 
-	void SelectRevisions(GString::Array &Revs, const char *BranchHint = NULL)
+	void SelectRevisions(LString::Array &Revs, const char *BranchHint = NULL)
 	{
 		VcCommit *Scroll = NULL;
-		GArray<VcCommit*> Matches;
+		LArray<VcCommit*> Matches;
 		for (auto i: *this)
 		{
 			VcCommit *item = dynamic_cast<VcCommit*>(i);
@@ -728,7 +728,7 @@ public:
 			{
 				if (k.Down())
 				{
-					GArray<VcCommit*> Sel;
+					LArray<VcCommit*> Sel;
 					GetSelection(Sel);
 					if (Sel.Length())
 					{
@@ -751,7 +751,7 @@ public:
 			{
 				if (k.Down())
 				{
-					GArray<VcCommit*> Sel;
+					LArray<VcCommit*> Sel;
 					GetSelection(Sel);
 					if (Sel.Length())
 					{
@@ -759,7 +759,7 @@ public:
 						for (auto s:Sel)
 							Map.Add(s->GetRev(), s);
 						
-						GString::Array n;
+						LString::Array n;
 						for (auto it = begin(); it != end(); it++)
 						{
 							VcCommit *c = dynamic_cast<VcCommit*>(*it);
@@ -843,7 +843,7 @@ public:
         auto Path = LGetPath();
         LSubProcess p("python", "/Users/matthew/CodeLib/test.py");
         
-        auto t = GString(LGI_PATH_SEPARATOR).Join(Path);
+        auto t = LString(LGI_PATH_SEPARATOR).Join(Path);
         for (auto s: Path)
             printf("s: %s\n", s.Get());
         p.SetEnvironment("PATH", t);
@@ -865,7 +865,7 @@ class RemoteFolderDlg : public LDialog
 	LXmlTreeUi Ui;
 
 public:
-	GString Uri;
+	LString Uri;
 
 	RemoteFolderDlg(App *application);
 	~RemoteFolderDlg();
@@ -876,10 +876,10 @@ public:
 class VcDiffFile : public LTreeItem
 {
 	AppPriv *d;
-	GString File;
+	LString File;
 	
 public:
-	VcDiffFile(AppPriv *priv, GString file) : d(priv), File(file)
+	VcDiffFile(AppPriv *priv, LString file) : d(priv), File(file)
 	{
 	}
 	
@@ -897,12 +897,12 @@ public:
 			d->Diff->Name(NULL);
 			
 			GFile in(File, O_READ);
-			GString s = in.Read();
+			LString s = in.Read();
 			if (!s)
 				return;
 			
-			GString::Array a = s.Replace("\r").Split("\n");
-			GString Diff;
+			LString::Array a = s.Replace("\r").Split("\n");
+			LString Diff;
 			VcFile *f = NULL;
 			bool InPreamble = false;
 			bool InDiff = false;
@@ -920,7 +920,7 @@ public:
 					InDiff = false;
 					InPreamble = false;
 
-					GString Fn = a[i].Split(":", 1).Last().Strip();
+					LString Fn = a[i].Split(":", 1).Last().Strip();
 
 					f = d->FindFile(Fn);
 					if (!f)
@@ -964,10 +964,10 @@ public:
 
 class App : public LWindow, public AppPriv
 {
-	GAutoPtr<LImageList> ImgLst;
+	LAutoPtr<LImageList> ImgLst;
 	LBox *FoldersBox;
 
-	bool CallMethod(const char *MethodName, LVariant *ReturnValue, GArray<LVariant*> &Args)
+	bool CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args)
 	{
 		if (!Stricmp(MethodName, METHOD_GetContext))
 		{
@@ -983,7 +983,7 @@ public:
 	{
 		FoldersBox = NULL;
 		
-		GString AppRev;
+		LString AppRev;
 		AppRev.Printf("%s v%s", AppName, APP_VERSION);
 		Name(AppRev);
 
@@ -1157,7 +1157,7 @@ public:
 		return LWindow::OnEvent(Msg);
 	}
 
-	void OnReceiveFiles(GArray<const char*> &Files)
+	void OnReceiveFiles(LArray<const char*> &Files)
 	{
 		for (auto f : Files)
 		{
@@ -1201,7 +1201,7 @@ public:
 				GInput i(this, "", "Search string:");
 				if (i.DoModal())
 				{
-					GString::Array Revs;
+					LString::Array Revs;
 					Revs.Add(i.GetStr());
 
 					CommitList *cl;
@@ -1218,7 +1218,7 @@ public:
 
 				mi->Checked(!mi->Checked());
 
-				GArray<VcFolder*> Flds;
+				LArray<VcFolder*> Flds;
 				Tree->GetSelection(Flds);
 				for (auto f : Flds)
 				{
@@ -1228,7 +1228,7 @@ public:
 			}
 			case IDM_REFRESH:
 			{
-				GArray<VcFolder*> Flds;
+				LArray<VcFolder*> Flds;
 				Tree->GetSelection(Flds);
 				for (auto f: Flds)
 					f->Refresh();
@@ -1236,7 +1236,7 @@ public:
 			}
 			case IDM_PULL:
 			{
-				GArray<VcFolder*> Flds;
+				LArray<VcFolder*> Flds;
 				Tree->GetSelection(Flds);
 				for (auto f: Flds)
 					f->Pull();
@@ -1244,7 +1244,7 @@ public:
 			}
 			case IDM_PUSH:
 			{
-				GArray<VcFolder*> Flds;
+				LArray<VcFolder*> Flds;
 				Tree->GetSelection(Flds);
 				for (auto f: Flds)
 					f->Push();
@@ -1252,7 +1252,7 @@ public:
 			}
 			case IDM_STATUS:
 			{
-				GArray<VcFolder*> Flds;
+				LArray<VcFolder*> Flds;
 				Tree->GetSelection(Flds);
 				for (auto f: Flds)
 					f->FolderStatus();
@@ -1260,7 +1260,7 @@ public:
 			}
 			case IDM_UPDATE_SUBS:
 			{
-				GArray<VcFolder*> Flds;
+				LArray<VcFolder*> Flds;
 				Tree->GetSelection(Flds);
 				for (auto f: Flds)
 					f->UpdateSubs();
@@ -1302,7 +1302,7 @@ public:
 		{
 			// Check the folder isn't already loaded...
 			bool Has = false;
-			GArray<VcFolder*> Folders;
+			LArray<VcFolder*> Folders;
 			Tree->GetAll(Folders);
 			for (auto f: Folders)
 			{
@@ -1481,7 +1481,7 @@ public:
 			}
 			case IDC_PULL_ALL:
 			{
-				GArray<VcFolder*> Folders;
+				LArray<VcFolder*> Folders;
 				Tree->GetAll(Folders);
 				bool AndUpdate = GetCtrlValue(IDC_UPDATE) != 0;
 				
@@ -1493,7 +1493,7 @@ public:
 			}
 			case IDC_STATUS:
 			{
-				GArray<VcFolder*> Folders;
+				LArray<VcFolder*> Folders;
 				Tree->GetAll(Folders);
 				for (auto f : Folders)
 				{
@@ -1505,7 +1505,7 @@ public:
 			{
 				if (flag == GNotifyValueChanged)
 				{
-					auto Revs = GString(c->Name()).SplitDelimit();
+					auto Revs = LString(c->Name()).SplitDelimit();
 
 					CommitList *cl;
 					if (GetViewById(IDC_LIST, cl))
@@ -1531,7 +1531,7 @@ public:
 						if (!f)
 							break;
 
-						GArray<VcCommit*> s;
+						LArray<VcCommit*> s;
 						if (Commits->GetSelection(s) && s.Length() == 1)
 							f->OnUpdate(s[0]->GetRev());
 						break;
@@ -1548,7 +1548,7 @@ public:
 struct SshHost : public LTreeItem
 {
 	LXmlTag *t;
-	GString Host, User, Pass;
+	LString Host, User, Pass;
 
 	SshHost(LXmlTag *tag = NULL)
 	{

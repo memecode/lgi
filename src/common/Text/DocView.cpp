@@ -36,7 +36,7 @@ int GDocumentEnv::NextUid()
 	return Uid;
 }
 
-void GDocumentEnv::OnDone(GAutoPtr<LThreadJob> j)
+void GDocumentEnv::OnDone(LAutoPtr<LThreadJob> j)
 {
 	LoadJob *ld = dynamic_cast<LoadJob*>(j.Get());
 	if (ld)
@@ -145,7 +145,7 @@ GDocumentEnv::LoadType GDefaultDocumentEnv::GetContent(LoadJob *&j)
 
 	if (LFileExists(FullPath))
 	{
-		GString Mt = LGetFileMimeType(FullPath);
+		LString Mt = LGetFileMimeType(FullPath);
 		if (Mt.Find("image/") == 0)
 		{
 			j->pDC.Reset(GdcD->Load(p));
@@ -175,7 +175,7 @@ bool GDefaultDocumentEnv::OnNavigate(GDocView *Parent, const char *Uri)
 		)
 		{
 			// email
-			GArray<LAppInfo*> Apps;
+			LArray<LAppInfo*> Apps;
 			if (LGetAppsForMimeType("application/email", Apps))
 			{
 				LAppInfo *First = Apps[0];
@@ -194,10 +194,10 @@ bool GDefaultDocumentEnv::OnNavigate(GDocView *Parent, const char *Uri)
 					a.Print(" %s", Uri);
 				}
 
-				GAutoString Exe(TrimStr(First->Path, "\"\'"));
-				GAutoString Args(a.NewStr());
+				LAutoString Exe(TrimStr(First->Path, "\"\'"));
+				LAutoString Args(a.NewStr());
 
-				GString ErrorMsg;
+				LString ErrorMsg;
 				if (LExecute(Exe, Args, ".", &ErrorMsg))
 					return true;
 
@@ -211,7 +211,7 @@ bool GDefaultDocumentEnv::OnNavigate(GDocView *Parent, const char *Uri)
 		else
 		{
 			// webpage
-			GString ErrorMsg;
+			LString ErrorMsg;
 			if (LExecute(Uri, NULL, NULL, &ErrorMsg))
 				return true;
 

@@ -52,7 +52,7 @@ const char *FlagToString(CellFlag f)
 }
 
 template <class T>
-T CountRange(GArray<T> &a, ssize_t Start, ssize_t End)
+T CountRange(LArray<T> &a, ssize_t Start, ssize_t End)
 {
 	T c = 0;
 	for (ssize_t i=Start; i<=End; i++)
@@ -77,9 +77,9 @@ int Cmp(UnderInfo *a, UnderInfo *b)
 }
 
 static void
-DistributeUnusedSpace(	GArray<int> &Min,
-						GArray<int> &Max,
-						GArray<CellFlag> &Flags,
+DistributeUnusedSpace(	LArray<int> &Min,
+						LArray<int> &Max,
+						LArray<CellFlag> &Flags,
 						int Total,
 						int CellSpacing,
 						LStream *Debug = NULL)
@@ -93,7 +93,7 @@ DistributeUnusedSpace(	GArray<int> &Min,
 	int i, Avail = Total - Sum;
 
 	// Do growable ones first
-	GArray<UnderInfo> Unders;
+	LArray<UnderInfo> Unders;
 	int UnknownGrow = 0;
 	for (i=0; i<Min.Length(); i++)
 	{
@@ -169,8 +169,8 @@ DistributeUnusedSpace(	GArray<int> &Min,
 }
 
 static void
-DistributeSize(	GArray<int> &a,
-				GArray<CellFlag> &Flags,
+DistributeSize(	LArray<int> &a,
+				LArray<CellFlag> &Flags,
 				int Start, int Span,
 				int Size,
 				int Border,
@@ -188,7 +188,7 @@ DistributeSize(	GArray<int> &a,
 		return;
 
 	// Get list of growable cells
-	GArray<int> Grow, Fill, Fixed, Unknown;
+	LArray<int> Grow, Fill, Fixed, Unknown;
 	int ExistingGrowPx = 0;
 	int ExistingFillPx = 0;
 	int UnknownPx = 0;
@@ -314,15 +314,15 @@ public:
 	LRect Cell;		// Cell position
 	LRect Pos;		// Pixel position
 	LRect Padding;	// Cell padding from CSS styles
-	GArray<Child> Children;
+	LArray<Child> Children;
 	LCss::DisplayType Disp;
-	GString ClassName;
+	LString ClassName;
 
 	TableCell(LTableLayout *t, int Cx, int Cy);
 	LTableLayout *GetTable() { return Table; }
 	bool Add(LView *v);	
 	bool Remove(LView *v);
-	GArray<LView*> GetChildren();
+	LArray<LView*> GetChildren();
 	bool RemoveAll();
 	Child *HasView(LView *v);
 
@@ -351,8 +351,8 @@ class GTableLayoutPrivate
 public:
 	LPoint PrevSize, Dpi;
 	bool LayoutDirty;
-	GArray<double> Rows, Cols;
-	GArray<TableCell*> Cells;
+	LArray<double> Rows, Cols;
+	LArray<TableCell*> Cells;
 	int BorderSpacing;
 	LRect LayoutBounds;
 	int LayoutMinX, LayoutMaxX;
@@ -366,7 +366,7 @@ public:
 	bool IsInLayout() { return InLayout; }
 	TableCell *GetCellAt(int cx, int cy);
 	void Empty(LRect *Range = NULL);
-    bool CollectRadioButtons(GArray<LRadioButton*> &Btns);
+    bool CollectRadioButtons(LArray<LRadioButton*> &Btns);
     void InitBorderSpacing();
 	double Scale()
 	{
@@ -386,9 +386,9 @@ public:
 
 	// Layout temporary values
 	LStringPipe Dbg;
-	GArray<int> MinCol, MaxCol;
-	GArray<int> MinRow, MaxRow;
-	GArray<CellFlag> ColFlags, RowFlags;
+	LArray<int> MinCol, MaxCol;
+	LArray<int> MinRow, MaxRow;
+	LArray<CellFlag> ColFlags, RowFlags;
 
 	// Layout staged methods, call in order to complete the layout
 	void LayoutHorizontal(LRect &Client, int *MinX = NULL, int *MaxX = NULL, CellFlag *Flag = NULL);
@@ -440,9 +440,9 @@ TableCell::Child *TableCell::HasView(LView *v)
 	return NULL;
 }
 
-GArray<LView*> TableCell::GetChildren()
+LArray<LView*> TableCell::GetChildren()
 {
-	GArray<LView*> a;
+	LArray<LView*> a;
 	for (auto &c: Children)
 		a.Add(c.View);
 	return a;
@@ -1161,7 +1161,7 @@ void TableCell::PostLayout()
 	int Cy = Padding.y1;
 	int MaxY = Padding.y1;
 	int RowStart = 0;
-	GArray<LRect> New;
+	LArray<LRect> New;
 	int WidthPx = Pos.X() - Padding.x1 - Padding.x2;
 	int HeightPx = Pos.Y() - Padding.y1 - Padding.y2;
 
@@ -1382,7 +1382,7 @@ GTableLayoutPrivate::~GTableLayoutPrivate()
 	Empty();
 }
 
-bool GTableLayoutPrivate::CollectRadioButtons(GArray<LRadioButton*> &Btns)
+bool GTableLayoutPrivate::CollectRadioButtons(LArray<LRadioButton*> &Btns)
 {
     for (LViewI *i: Ctrl->IterateViews())
     {
@@ -1441,9 +1441,9 @@ void GTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, 
 	// responsible for doing pre layout stuff for an entire control of cells.
 	int Cx, Cy, i;
 
-	GString::Array Ps;
+	LString::Array Ps;
 	Ps.SetFixedLength(false);
-	GAutoPtr<LProfile> Prof(/*Debug ? new LProfile("Layout") :*/ NULL);
+	LAutoPtr<LProfile> Prof(/*Debug ? new LProfile("Layout") :*/ NULL);
 
 	// Zero everything to start with
 	MinCol.Length(0);
@@ -1475,7 +1475,7 @@ void GTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, 
 				{
 					if (Prof)
 					{
-						GString &s = Ps.New();
+						LString &s = Ps.New();
 						s.Printf("pre layout %i,%i", c->Cell.x1, c->Cell.y1);
 						Prof->Add(s);
 					}
@@ -1525,7 +1525,7 @@ void GTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, 
 					
 					if (Prof)
 					{
-						GString &s = Ps.New();
+						LString &s = Ps.New();
 						s.Printf("spanned %i,%i", c->Cell.x1, c->Cell.y1);
 						Prof->Add(s);
 					}
@@ -1750,7 +1750,7 @@ void GTableLayoutPrivate::LayoutVertical(LRect &Client, int *MinY, int *MaxY, Ce
 					c->Layout(WidthPx, MinY, MaxY, RowFlag);
 
 					// This code stops the max being set on spanned cells.
-					GArray<int> AddTo;
+					LArray<int> AddTo;
 					for (int y=c->Cell.y1; y<=c->Cell.y2; y++)
 					{
 						if
@@ -1981,9 +1981,9 @@ void GTableLayoutPrivate::Layout(LRect &Client)
 	int64 Start = LgiCurrentTime();
 	#endif
 
-	GString s;
+	LString s;
 	s.Printf("Layout %i x %i", Client.X(), Client.Y());
-	GAutoPtr<LProfile> Prof(/*Debug ? new LProfile(s) :*/ NULL);
+	LAutoPtr<LProfile> Prof(/*Debug ? new LProfile(s) :*/ NULL);
 
 	if (Prof) Prof->Add("Horz");
 
@@ -2198,7 +2198,7 @@ bool LTableLayout::GetVariant(const char *Name, LVariant &Value, char *Array)
 	return false;
 }
 
-bool ConvertNumbers(GArray<double> &a, char *s)
+bool ConvertNumbers(LArray<double> &a, char *s)
 {
 	GToken t(s, ",");
 	for (int i=0; i<t.Length(); i++)
@@ -2226,7 +2226,7 @@ bool LTableLayout::SetVariant(const char *Name, LVariant &Value, char *Array)
 		}
 		case TableLayoutCell:
 		{
-			auto Coords = GString(Array).SplitDelimit(",");
+			auto Coords = LString(Array).SplitDelimit(",");
 			if (Coords.Length() != 2)
 				return false;
 
@@ -2300,7 +2300,7 @@ int LTableLayout::OnNotify(LViewI *c, int f)
 
 int64 LTableLayout::Value()
 {
-    GArray<LRadioButton*> Btns;
+    LArray<LRadioButton*> Btns;
     if (d->CollectRadioButtons(Btns))
     {
         for (int i=0; i<Btns.Length(); i++)
@@ -2314,7 +2314,7 @@ int64 LTableLayout::Value()
 
 void LTableLayout::Value(int64 v)
 {
-    GArray<LRadioButton*> Btns;
+    LArray<LRadioButton*> Btns;
     if (d->CollectRadioButtons(Btns))
     {
         if (v >= 0 && v < (ssize_t)Btns.Length())

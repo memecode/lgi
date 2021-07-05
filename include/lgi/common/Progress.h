@@ -15,7 +15,7 @@ class LgiClass Progress :
 	virtual public GDom
 {
 protected:
-	GString Description, Type;
+	LString Description, Type;
 	int64 Start;
 	int64 Val;
 	int64 Low, High;
@@ -30,13 +30,13 @@ public:
 
 	virtual bool SetRange(const LRange &r) { Low = r.Start; High = r.End(); return true; }
 	virtual LRange GetRange() { return LRange(Low, High - Low); }
-	virtual GString GetDescription();
+	virtual LString GetDescription();
 	virtual void SetDescription(const char *d = 0);
 	virtual int64 Value() { return Val; }
 	virtual void Value(int64 v) { Val = v; }
 	virtual double GetScale() { return Scale; }
 	virtual void SetScale(double s) { Scale = s; }
-	virtual GString GetType();
+	virtual LString GetType();
 	virtual void SetType(const char *t);
 	
 	Progress &operator =(Progress &p);

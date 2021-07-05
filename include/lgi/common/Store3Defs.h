@@ -150,7 +150,7 @@ enum EmailFlags
 												// is not damaged.
 };
 
-extern GString EmailFlagsToStr(int flags);
+extern LString EmailFlagsToStr(int flags);
 
 enum EmailAddressType
 {

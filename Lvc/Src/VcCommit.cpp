@@ -242,9 +242,9 @@ const char *VcCommit::GetText(int Col)
 	return (char*)GetFieldText(Folder->Fields[Col]);
 }
 
-bool VcCommit::GitParse(GString s, bool RevList)
+bool VcCommit::GitParse(LString s, bool RevList)
 {
-	GString::Array lines = s.Split("\n");
+	LString::Array lines = s.Split("\n");
 	if (lines.Length() < 3)
 		return false;
 
@@ -259,7 +259,7 @@ bool VcCommit::GitParse(GString s, bool RevList)
 
 		for (int i=0; i<lines.Length(); i++)
 		{
-			GString &Ln = lines[i];
+			LString &Ln = lines[i];
 			if (IsWhiteSpace(Ln(0)))
 			{
 				if (Msg)
@@ -282,7 +282,7 @@ bool VcCommit::GitParse(GString s, bool RevList)
 	{
 		for (unsigned ln = 0; ln < lines.Length(); ln++)
 		{
-			GString &l = lines[ln];
+			LString &l = lines[ln];
 			if (ln == 0)
 				Rev = l.SplitDelimit().Last();
 			else if (l.Find("Author:") >= 0)
@@ -302,7 +302,7 @@ bool VcCommit::GitParse(GString s, bool RevList)
 	return Author && Rev;
 }
 
-bool VcCommit::CvsParse(LDateTime &Dt, GString Auth, GString Message)
+bool VcCommit::CvsParse(LDateTime &Dt, LString Auth, LString Message)
 {
 	Ts = Dt;
 	Ts.ToLocal();
@@ -322,15 +322,15 @@ void VcCommit::OnParse()
 	NodeColour = Folder->BranchColour(Branch);
 }
 
-bool VcCommit::HgParse(GString s)
+bool VcCommit::HgParse(LString s)
 {
-	GString::Array Lines = s.SplitDelimit("\n");
+	LString::Array Lines = s.SplitDelimit("\n");
 	if (Lines.Length() < 1)
 		return false;
 
 	for (auto Ln: Lines)
 	{
-		GString::Array f = Ln.Split(":", 1);
+		LString::Array f = Ln.Split(":", 1);
 		if (f.Length() == 2)
 		{
 			if (f[0].Equals("changeset"))
@@ -359,18 +359,18 @@ bool VcCommit::HgParse(GString s)
 	return Rev.Get() != NULL;
 }
 
-bool VcCommit::SvnParse(GString s)
+bool VcCommit::SvnParse(LString s)
 {
-	GString::Array lines = s.Split("\n");
+	LString::Array lines = s.Split("\n");
 	if (lines.Length() < 1)
 		return false;
 
 	for (unsigned ln = 0; ln < lines.Length(); ln++)
 	{
-		GString &l = lines[ln];
+		LString &l = lines[ln];
 		if (ln == 0)
 		{
-			GString::Array a = l.Split("|");
+			LString::Array a = l.Split("|");
 			if (a.Length() > 3)
 			{
 				Rev = a[0].Strip(" \tr");
@@ -452,7 +452,7 @@ void VcCommit::OnMouseClick(LMouse &m)
 
 	if (m.IsContextMenu())
 	{
-		GArray<VcCommit*> Sel;
+		LArray<VcCommit*> Sel;
 		GetList()->GetSelection(Sel);
 
 		LSubMenu s;
@@ -496,25 +496,25 @@ void VcCommit::OnMouseClick(LMouse &m)
 			{
 				GClipBoard c(GetList());
 
-				GString::Array a;
+				LString::Array a;
 				a.SetFixedLength(false);
 				for (auto i: Sel)
 					a.New() = i->GetRev();
 
-				c.Text(GString(",").Join(a));
+				c.Text(LString(",").Join(a));
 				break;
 			}
 			case IDM_COPY_INDEX:
 			{
 				GClipBoard c(GetList());
-				GString b;
+				LString b;
 				b.Printf(LPrintfInt64, Index);
 				c.Text(b);
 				break;
 			}
 			case IDM_RENAME_BRANCH:
 			{
-				GArray<VcCommit*> Revs;
+				LArray<VcCommit*> Revs;
 				if (GetList()->GetSelection(Revs))
 				{
 					GInput Inp(GetList(), "", "New branch name:", AppName);

@@ -192,20 +192,20 @@ int CALLBACK _EnumFonts(ENUMLOGFONT FAR *lpelf,
 						int FontType,
 						LPARAM lParam)
 {
-	GString::Array *p = (GString::Array*) lParam;
+	LString::Array *p = (LString::Array*) lParam;
 	if (p)
 		p->New() = lpelf->elfLogFont.lfFaceName;
 	return true;
 }
 #endif
 
-int StringSort(GString *a, GString *b)
+int StringSort(LString *a, LString *b)
 {
 	if (a && b) return stricmp(*a, *b);
 	return 0;
 }
 
-bool LFontSystem::EnumerateFonts(GString::Array &Fonts)
+bool LFontSystem::EnumerateFonts(LString::Array &Fonts)
 {
 	Fonts.SetFixedLength(false);
 	if (!AllFonts.Length())
@@ -324,7 +324,7 @@ bool LFontSystem::HasIconv(bool Quiet)
 #elif defined LGI_COCOA
 	static CFStringEncoding CharsetToEncoding(const char *cs)
 	{
-		GString s = cs;
+		LString s = cs;
 		auto r = s.CreateStringRef();
 		auto e = CFStringConvertIANACharSetNameToEncoding(r);
 		CFRelease(r);
@@ -550,14 +550,14 @@ LFont *LFontSystem::GetBestFont(char *Str)
 }
 
 typedef LHashTbl<ConstStrKey<char,false>,int> FontMap;
-DeclGArrayCompare(FontNameCmp, GString, FontMap)
+DeclGArrayCompare(FontNameCmp, LString, FontMap)
 {
 	int ap = param->Find(*a);
 	int bp = param->Find(*b);
 	return bp - ap;
 }
 
-bool LFontSystem::AddFont(GAutoPtr<LFont> Fnt)
+bool LFontSystem::AddFont(LAutoPtr<LFont> Fnt)
 {
 	if (!Fnt)
 		return false;
@@ -706,7 +706,7 @@ LFont *LFontSystem::GetGlyph(uint32_t u, LFont *UserFont)
 			int Used = d->Used;
 			while (SubFonts.Length() > 0 && (LgiCurrentTime() - Start) < 10)
 			{
-				GString f = SubFonts[0];
+				LString f = SubFonts[0];
 				SubFonts.DeleteAt(0, true);
 
 				if (d->Used >= CountOf(Font))
@@ -716,7 +716,7 @@ LFont *LFontSystem::GetGlyph(uint32_t u, LFont *UserFont)
 					break;
 				}
 
-				GAutoPtr<LFont> Fnt(new LFont);
+				LAutoPtr<LFont> Fnt(new LFont);
 				if (Fnt)
 				{
 					*Fnt.Get() = *UserFont;

@@ -115,7 +115,7 @@ protected:
 		ssize_t Bytes;
 		ssize_t ArrayLen;
 		LVariantType Type;
-		GString Name;
+		LString Name;
 		LCustomType *Nested;
 
 		ssize_t Sizeof();
@@ -125,8 +125,8 @@ protected:
 public:
 	struct Method : public GDom
 	{
-		GString Name;
-		GArray<GString> Params;
+		LString Name;
+		LArray<LString> Params;
 		size_t Address;
 		int FrameSize;
 		
@@ -141,14 +141,14 @@ protected:
 	// Global vars
 	int Pack;
 	size_t Size;
-	GString Name;
+	LString Name;
 
 	// Fields
-	GArray<CustomField*> Flds;
+	LArray<CustomField*> Flds;
 	LHashTbl<ConstStrKey<char,false>, int> FldMap;
 	
 	// Methods
-	GArray<Method*> Methods;
+	LArray<Method*> Methods;
 	LHashTbl<ConstStrKey<char,false>, Method*> MethodMap;
 	
 	// Private methods
@@ -166,7 +166,7 @@ public:
 	int IndexOf(const char *Field);
 	bool DefineField(const char *Name, LVariantType Type, int Bytes, int ArrayLen = 1);
 	bool DefineField(const char *Name, LCustomType *Type, int ArrayLen = 1);
-	Method *DefineMethod(const char *Name, GArray<GString> &Params, size_t Address);
+	Method *DefineMethod(const char *Name, LArray<LString> &Params, size_t Address);
 	Method *GetMethod(const char *Name);
 
 	// Field access. You can't use the GDom interface to get/set member variables because
@@ -178,7 +178,7 @@ public:
 	// Which doesn't need a 'This' pointer.
 	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL);
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL);
-	bool CallMethod(const char *MethodName, LVariant *ReturnValue, GArray<LVariant*> &Args);
+	bool CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args);
 };
 
 /// A class that can be different types
@@ -429,7 +429,7 @@ public:
 	/// Converts an operator to a string
 	static const char *OperatorToString(GOperator op);
 	/// Converts the varient value to a string
-	GString ToString();
+	LString ToString();
 };
 
 #endif

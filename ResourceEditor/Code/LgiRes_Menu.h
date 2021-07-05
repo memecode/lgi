@@ -23,7 +23,7 @@ class ResMenuItem : public LTreeItem, public FieldSource
 	ResMenu *Menu;
 	bool Sep;
 	bool Enabled;
-	GAutoString Short;
+	LAutoString Short;
 	ResString *_Str;
 
 public:

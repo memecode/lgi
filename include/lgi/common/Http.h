@@ -14,13 +14,13 @@ class IHttp
 	int BufferLen;
 	char *Buffer;
 	
-	GAutoPtr<LSocketI> Socket;	// commands
+	LAutoPtr<LSocketI> Socket;	// commands
 	size_t ResumeFrom;
-	GAutoString FileLocation;
+	LAutoString FileLocation;
 	char *Headers;
 	bool NoCache;
-	GString AuthUser, AuthPassword;
-	GString ErrorMsg;
+	LString AuthUser, AuthPassword;
+	LString ErrorMsg;
 
 public:
 	enum ContentEncoding
@@ -46,11 +46,11 @@ public:
 	char *GetHeaders() { return Headers; }
 	
 	// Connection
-	bool Open(GAutoPtr<LSocketI> S, const char *RemoteHost, int Port = 0);
+	bool Open(LAutoPtr<LSocketI> S, const char *RemoteHost, int Port = 0);
 	bool Close();
 	bool IsOpen();
 	LSocketI *GetSocket() { return Socket; }
-	GString GetErrorString() { return ErrorMsg; }
+	LString GetErrorString() { return ErrorMsg; }
 
 	// General
 	bool Request(	const char *Type,
@@ -106,7 +106,7 @@ bool LgiGetUri
 	/// The output stream to put the data
 	LStreamI *Out,
 	/// Any error message
-	GString *OutError,
+	LString *OutError,
 	/// The input URI to retreive
 	const char *InUri,
 	/// [Optional] Extra headers to use

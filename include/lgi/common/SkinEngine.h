@@ -31,12 +31,12 @@
 // Drawing state
 class LSkinState
 {
-	GArray<LDisplayString*> Tmp;
+	LArray<LDisplayString*> Tmp;
 	
 public:
 	int Size;						// Class size, for version checking
 	LSurface *pScreen;				// Output surface
-	GArray<LDisplayString*> *aText;	// Array of display strings for the view
+	LArray<LDisplayString*> *aText;	// Array of display strings for the view
 	LDisplayString **ptrText;		// Ptr to ptr for display string
 	LRect Rect;						// Region to paint (if relevant)
 	bool MouseOver;					// TRUE if the mouse is over the view
@@ -85,7 +85,7 @@ public:
 		return NULL;
 	}
 	
-	GArray<LDisplayString*> *AllText()
+	LArray<LDisplayString*> *AllText()
 	{
 		if (aText)
 			return aText;

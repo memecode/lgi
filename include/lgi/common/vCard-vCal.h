@@ -13,8 +13,8 @@ class VIo
 public:
 	struct Parameter
 	{
-		GString Field;
-		GString Value;
+		LString Field;
+		LString Value;
 		
 		void Set(const char *f, const char *v)
 		{
@@ -27,25 +27,25 @@ public:
 	{
 		int From, To;
 		LDateTime Start;
-		GString Rule;
+		LString Rule;
 	};
 	
 	struct TimeZoneInfo
 	{
-		GString Name;
+		LString Name;
 		TimeZoneSection Normal;
 		TimeZoneSection Daylight;
 	};
 
-	class ParamArray : public GArray<Parameter>
+	class ParamArray : public LArray<Parameter>
 	{
 	public:
 		ParamArray(const char *Init = NULL)
 		{
 			if (Init)
 			{
-				GString s = Init;
-				GString::Array a = s.SplitDelimit(",");
+				LString s = Init;
+				LString::Array a = s.SplitDelimit(",");
 				for (unsigned i=0; i<a.Length(); i++)
 					New().Set("type", a[i]);
 			}
@@ -78,7 +78,7 @@ protected:
 	char *Unfold(char *In);
 	char *UnMultiLine(char *In);
 
-	bool ReadField(LStreamI &s, GString &Name, ParamArray *Type, GString &Data);
+	bool ReadField(LStreamI &s, LString &Name, ParamArray *Type, LString &Data);
 	void WriteField(LStreamI &s, const char *Name, ParamArray *Type, const char *Data);
 
 public:

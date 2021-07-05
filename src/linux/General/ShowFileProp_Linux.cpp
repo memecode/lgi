@@ -14,7 +14,7 @@ bool LgiBrowseToFile(const char *Filename)
 	if (!LGetAppForMimeType("inode/directory", Browser, sizeof(Browser)))
 		return false;
 	
-	GString f;
+	LString f;
 	if (strchr(Filename, ' '))
 		f.Printf("\"%s\"", Filename);
 	else

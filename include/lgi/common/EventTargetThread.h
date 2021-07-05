@@ -185,17 +185,17 @@ class LgiClass LEventTargetThread :
 	public GMappedEventSink,
 	public LEventTargetI // Sub-class has to implement OnEvent
 {
-	GArray<GMessage*> Msgs;
+	LArray<GMessage*> Msgs;
 	LThreadEvent Event;
 	bool Loop;
 
 	// This makes the event name unique on windows to 
 	// prevent multiple instances clashing.
-	GString ProcessName(GString obj, const char *desc)
+	LString ProcessName(LString obj, const char *desc)
 	{
 		OsProcessId process = LgiGetCurrentProcess();
 		OsThreadId thread = GetCurrentThreadId();
-		GString s;
+		LString s;
 		s.Printf("%s.%s.%i.%i", obj.Get(), desc, process, thread);
 		return s;
 	}
@@ -207,7 +207,7 @@ protected:
 	uint64 TimerTs; // Time for next tick
 
 public:
-	LEventTargetThread(GString Name, bool RunImmediately = true) :
+	LEventTargetThread(LString Name, bool RunImmediately = true) :
 		LThread(Name + ".Thread"),
 		LMutex(Name + ".Mutex"),
 		Event(ProcessName(Name, "Event"))
@@ -342,7 +342,7 @@ public:
 			LThreadEvent::WaitStatus s = Event.Wait(WaitLength);
 			if (s == LThreadEvent::WaitSignaled)
 			{
-				GArray<GMessage*> m;
+				LArray<GMessage*> m;
 				if (Lock(_FL))
 				{
 					if (Msgs.Length())
@@ -378,7 +378,7 @@ public:
 	}
 
 	template<typename T>
-	bool PostObject(int Hnd, int Cmd, GAutoPtr<T> A)
+	bool PostObject(int Hnd, int Cmd, LAutoPtr<T> A)
 	{
 		uint64 Start = LgiCurrentTime();
 		bool Status;
@@ -393,7 +393,7 @@ public:
 	}
 
 	template<typename T>
-	bool PostObject(int Hnd, int Cmd, GMessage::Param A, GAutoPtr<T> B)
+	bool PostObject(int Hnd, int Cmd, GMessage::Param A, LAutoPtr<T> B)
 	{
 		uint64 Start = LgiCurrentTime();
 		bool Status;
@@ -408,7 +408,7 @@ public:
 	}
 
 	template<typename T>
-	bool PostObject(int Hnd, int Cmd, GAutoPtr<T> A, GAutoPtr<T> B)
+	bool PostObject(int Hnd, int Cmd, LAutoPtr<T> A, LAutoPtr<T> B)
 	{
 		uint64 Start = LgiCurrentTime();
 		bool Status;
@@ -426,13 +426,13 @@ public:
 	}
 
 	template<typename T>
-	bool ReceiveA(GAutoPtr<T> &Obj, GMessage *m)
+	bool ReceiveA(LAutoPtr<T> &Obj, GMessage *m)
 	{
 		return Obj.Reset((T*)m->A());
 	}
 
 	template<typename T>
-	bool ReceiveB(GAutoPtr<T> &Obj, GMessage *m)
+	bool ReceiveB(LAutoPtr<T> &Obj, GMessage *m)
 	{
 		return Obj.Reset((T*)m->B());
 	}

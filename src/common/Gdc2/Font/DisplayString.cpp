@@ -63,7 +63,7 @@ struct Block : public LRect
 struct GDisplayStringPriv
 {
 	LDisplayString *Ds;
-	GArray<Block> Blocks;
+	LArray<Block> Blocks;
 	bool Debug;	
 	int LastTabOffset;
 
@@ -471,7 +471,7 @@ void LDisplayString::Layout(bool Debug)
 			return;
 		
 		// Create an array of glyph indexes
-		GArray<uint32> Glyphs;
+		LArray<uint32> Glyphs;
 		for (OsChar *s = Str; *s; s++)
 		{
 			FT_UInt index = FT_Get_Char_Index(Fnt, *s);

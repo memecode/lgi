@@ -65,7 +65,7 @@ public:
 			LFontSystem *s = LFontSystem::Inst();
 			if (s)
 			{
-				GString::Array Fonts;
+				LString::Array Fonts;
 				if (s->EnumerateFonts(Fonts))
 				{
 					for (auto &f : Fonts)

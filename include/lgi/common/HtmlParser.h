@@ -11,9 +11,9 @@ class GHtmlParser
 
 protected:
 	GDocView *View;
-	GAutoString Source;
-	GArray<LHtmlElement*> OpenTags;
-	GAutoString DocCharSet;
+	LAutoString Source;
+	LArray<LHtmlElement*> OpenTags;
+	LAutoString DocCharSet;
 	bool DocAndCsTheSame;
 
 	void CloseTag(LHtmlElement *t)
@@ -47,7 +47,7 @@ public:
 	static bool ParseColour(const char *s, LCss::ColorDef &c);
 	static bool Is8Bit(char *s);
 	char *ParsePropValue(char *s, char16 *&Value);
-	char *ParseName(char *s, GAutoString &Name);
+	char *ParseName(char *s, LAutoString &Name);
 	char *ParseName(char *s, char **Name);
 	char *ParsePropList(char *s, LHtmlElement *Obj, bool &Closed);
 	void SkipNonDisplay(char *&s);

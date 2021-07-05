@@ -13,13 +13,13 @@ class FindParams
 {
 public:
 	FifSearchType Type;
-	GString Text;
-	GString Ext;
-	GString Dir;
+	LString Text;
+	LString Ext;
+	LString Dir;
 	bool MatchWord;
 	bool MatchCase;
 	bool SubDirs;
-	GArray<GString> ProjectFiles;
+	LArray<LString> ProjectFiles;
 	
 	FindParams(const FindParams *Set = NULL)
 	{
@@ -43,7 +43,7 @@ public:
 	{
 		Type = p->Type;
 		
-		// Make explicit copies of the GString's to ensure thread safety.
+		// Make explicit copies of the LString's to ensure thread safety.
 		Text = p->Text.Get();
 		Ext = p->Ext.Get();
 		Dir = p->Dir.Get();

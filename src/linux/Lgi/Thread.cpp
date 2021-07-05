@@ -29,7 +29,7 @@ void *ThreadEntryPoint(void *i)
 		
 		pthread_detach(Thread->hThread);
 		
-		GString Nm = Thread->Name;
+		LString Nm = Thread->Name;
 		if (Nm)
 			pthread_setname_np(pthread_self(), Nm);
 

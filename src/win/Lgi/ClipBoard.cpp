@@ -7,15 +7,15 @@
 class GClipBoardPriv
 {
 public:
-	GString Utf8;
-	GAutoWString Wide;
+	LString Utf8;
+	LAutoWString Wide;
 };
 
 #if 0
 class LFileEnum : public GUnknownImpl<IEnumFORMATETC>
 {
 	int Idx;
-	GArray<GClipBoard::FormatType> Types;
+	LArray<GClipBoard::FormatType> Types;
 
 public:
 	LFileEnum(GClipBoard::FormatType type)
@@ -89,9 +89,9 @@ class LFileData : public GUnknownImpl<IDataObject>
 	GClipBoard::FormatType Type, PrefDrop, ShellIdList;
 
 public:
-	GString::Array Files;
+	LString::Array Files;
 
-	LFileData(GString::Array &files) : Files(files)
+	LFileData(LString::Array &files) : Files(files)
 	{
 		// TraceRefs = true;
 		Type = GClipBoard::StrToFmt(CFSTR_FILENAMEA);
@@ -110,7 +110,7 @@ public:
 
 	HRESULT STDMETHODCALLTYPE GetData(FORMATETC *Fmt, STGMEDIUM *Med)
 	{
-		GString sFmt = GClipBoard::FmtToStr(Fmt->cfFormat);
+		LString sFmt = GClipBoard::FmtToStr(Fmt->cfFormat);
 		LgiTrace("%s:%i - GetData(%s) starting...\n", _FL, sFmt.Get());
 		
 		if (!Med)
@@ -206,7 +206,7 @@ public:
 			Fmt->cfFormat == CF_HDROP)
 			return S_OK;
 		
-		GString sFmt = GClipBoard::FmtToStr(Fmt->cfFormat);
+		LString sFmt = GClipBoard::FmtToStr(Fmt->cfFormat);
 		LgiTrace("%s:%i - QueryGetData(%s) not supported.\n", _FL, sFmt.Get());
 		return DV_E_FORMATETC;
 	}
@@ -219,7 +219,7 @@ public:
 
 	HRESULT STDMETHODCALLTYPE SetData(FORMATETC *Fmt, STGMEDIUM *pmedium, BOOL fRelease)
 	{
-		GString sFmt = GClipBoard::FmtToStr(Fmt->cfFormat);
+		LString sFmt = GClipBoard::FmtToStr(Fmt->cfFormat);
 		LgiTrace("%s:%i - SetData(%s)\n", _FL, sFmt.Get());		
 		return S_OK;
 	}
@@ -261,9 +261,9 @@ public:
 };
 #endif
 
-GString::Array GClipBoard::Files()
+LString::Array GClipBoard::Files()
 {
-	GString::Array f;
+	LString::Array f;
 
 	if (Open)
 	{
@@ -275,7 +275,7 @@ GString::Array GClipBoard::Files()
 	auto r = OleGetClipboard(&pObj);
 	if (SUCCEEDED(r))
 	{
-		GArray<CLIPFORMAT> Fmts;
+		LArray<CLIPFORMAT> Fmts;
 		IEnumFORMATETC *pEnum = NULL;
 		r = pObj->EnumFormatEtc(DATADIR_GET, &pEnum);
 		if (SUCCEEDED(r))
@@ -354,7 +354,7 @@ GString::Array GClipBoard::Files()
 	}
 	else
 	{
-		GArray<FormatType> Fmts;
+		LArray<FormatType> Fmts;
 		if (EnumFormats(Fmts))
 		{
 			for (auto f : Fmts)
@@ -368,7 +368,7 @@ GString::Array GClipBoard::Files()
 	return f;
 }
 
-bool GClipBoard::Files(GString::Array &Paths, bool AutoEmpty)
+bool GClipBoard::Files(LString::Array &Paths, bool AutoEmpty)
 {
 	GDragDropSource Src;
 	GDragData Output;
@@ -398,7 +398,7 @@ bool GClipBoard::Files(GString::Array &Paths, bool AutoEmpty)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GString GClipBoard::FmtToStr(FormatType Fmt)
+LString GClipBoard::FmtToStr(FormatType Fmt)
 {
 	TCHAR n[256] = {0};
 	int r = GetClipboardFormatName(Fmt, n, CountOf(n));
@@ -423,7 +423,7 @@ GString GClipBoard::FmtToStr(FormatType Fmt)
 	return n;
 }
 
-GClipBoard::FormatType GClipBoard::StrToFmt(GString Fmt)
+GClipBoard::FormatType GClipBoard::StrToFmt(LString Fmt)
 {
 	return RegisterClipboardFormatA(Fmt);
 }
@@ -454,7 +454,7 @@ GClipBoard &GClipBoard::operator =(GClipBoard &c)
     return *this;
 }
 
-bool GClipBoard::EnumFormats(GArray<FormatType> &Formats)
+bool GClipBoard::EnumFormats(LArray<FormatType> &Formats)
 {
 	UINT Idx = 0;
 	UINT Fmt;
@@ -496,7 +496,7 @@ bool GClipBoard::Text(const char *Str, bool AutoEmpty)
 char *GClipBoard::Text()
 {
 	ssize_t Len = 0;
-	GAutoPtr<uint8_t,true> Str;
+	LAutoPtr<uint8_t,true> Str;
 	if (Binary(CF_TEXT, Str, &Len))
 	{
 		d->Utf8 = LFromNativeCp((char*)Str.Get());
@@ -520,7 +520,7 @@ bool GClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 char16 *GClipBoard::TextW()
 {
 	ssize_t Len = 0;
-	GAutoPtr<uint8_t,true> Str;
+	LAutoPtr<uint8_t,true> Str;
 	if (Binary(CF_UNICODETEXT, Str, &Len))
 	{
 		d->Wide.Reset(NewStrW((char16*) Str.Get(), Len / 2));
@@ -539,7 +539,7 @@ bool GClipBoard::Html(const char *Doc, bool AutoEmpty)
 	if (!Doc)
 		return false;
 
-	GString s;
+	LString s;
 	s.Printf("Version:0.9\n"
 			"StartHTML:000000\n"
 			"EndHTML:000000\n"
@@ -551,7 +551,7 @@ bool GClipBoard::Html(const char *Doc, bool AutoEmpty)
 	if (p.Length() != 3)
 		return false;
 
-	GString n;
+	LString n;
 	n.Printf("%06i", (int)Start);
 	s = p[0] + n;
 	n.Printf("%06i", (int)End);
@@ -561,14 +561,14 @@ bool GClipBoard::Html(const char *Doc, bool AutoEmpty)
 	return Binary(CF_HTML, (uchar*) s.Get(), s.Length(), AutoEmpty);
 }
 
-GString GClipBoard::Html()
+LString GClipBoard::Html()
 {
-	GAutoPtr<uint8_t,true> Buf;
+	LAutoPtr<uint8_t,true> Buf;
 	ssize_t Len;
 	if (!Binary(CF_HTML, Buf, &Len))
 		return NULL;
 
-	GString Txt((char*)Buf.Get(), Len);
+	LString Txt((char*)Buf.Get(), Len);
 	auto Ln = Txt.Split("\n", 20);
 	ssize_t Start = -1, End = -1;
 	for (auto l : Ln)
@@ -846,7 +846,7 @@ bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	return Status;
 }
 
-bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8_t,true> &Ptr, ssize_t *Length)
+bool GClipBoard::Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t *Length)
 {
 	bool Status = false;
 

@@ -7,7 +7,7 @@ GDragFormats::GDragFormats(bool source)
 	Source = source;
 }
 
-GString GDragFormats::ToString()
+LString GDragFormats::ToString()
 {
 	LStringPipe p(256);
 	p.Print("{");
@@ -38,7 +38,7 @@ bool GDragFormats::HasFormat(const char *Fmt)
 	return false;
 }
 
-void GDragFormats::Supports(GString Fmt)
+void GDragFormats::Supports(LString Fmt)
 {
 	if (Source)
 	{
@@ -57,9 +57,9 @@ void GDragFormats::Supports(GString Fmt)
 	}
 }
 
-GString::Array GDragFormats::GetSupported()
+LString::Array GDragFormats::GetSupported()
 {
-	GString::Array a;
+	LString::Array a;
 	a.SetFixedLength(false);
 	for (auto &f: Formats)
 		if (f.Val)

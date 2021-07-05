@@ -93,8 +93,8 @@ protected:
 	bool AcceptChildren;
 	bool Movable;
 	bool Vis;
-	GAutoString CssClass;
-	GAutoString CssStyle;
+	LAutoString CssClass;
+	LAutoString CssStyle;
 
 	LMouse MapToDialog(LMouse m);
 
@@ -163,7 +163,7 @@ protected:
 	void DrawSelection(LSurface *pDC);
 
 public:
-	GAutoPtr<LSurface> DebugOverlay;
+	LAutoPtr<LSurface> DebugOverlay;
 
 	ResDialog(AppWnd *w, int type = TYPE_DIALOG);
 	~ResDialog();
@@ -343,7 +343,7 @@ public:
 
 class CtrlButton : public ResDialogCtrl, public LView
 {
-	GString Image;
+	LString Image;
 	bool IsToggle;
 
 public:

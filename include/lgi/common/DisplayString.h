@@ -60,7 +60,7 @@ protected:
 	
 	#if defined(LGI_SDL)
 	
-	GAutoPtr<LMemDC> Img;
+	LAutoPtr<LMemDC> Img;
 	
 	#elif defined(__GTK_H__)
 
@@ -106,7 +106,7 @@ protected:
 			return LgiUtf16To32(s, l);
 		}
 	};
-	GArray<CharInfo> Info;
+	LArray<CharInfo> Info;
 
 	#endif
 

@@ -29,7 +29,7 @@ static GColour Blue(0, 30, 222);
 
 /////////////////////////////////////////////////////////////////////
 struct Pair { int Pos, Size; };
-void CalcCell(GArray<Pair> &p, GArray<double> &s, int Total)
+void CalcCell(LArray<Pair> &p, LArray<double> &s, int Total)
 {
 	int CurI = 0;
 	for (int i=0; i<s.Length(); i++)
@@ -45,7 +45,7 @@ void CalcCell(GArray<Pair> &p, GArray<double> &s, int Total)
 /////////////////////////////////////////////////////////////////////
 // Table layout
 template<class T>
-T SumElements(GArray<T> &a, ssize_t start, ssize_t end)
+T SumElements(LArray<T> &a, ssize_t start, ssize_t end)
 {
 	T Sum = 0;
 	for (auto i=start; i<=end; i++)
@@ -55,7 +55,7 @@ T SumElements(GArray<T> &a, ssize_t start, ssize_t end)
 	return Sum;
 }
 
-void MakeSumUnity(GArray<double> &a)
+void MakeSumUnity(LArray<double> &a)
 {
 	double s = SumElements<double>(a, 0, a.Length()-1);
 	double Diff = s - 1.0;
@@ -90,11 +90,11 @@ public:
 	LRect Cell;	// Cell location
 	LRect Pos;	// Pixels
 	bool Selected;
-	GArray<ResDialogCtrl*> Ctrls;
+	LArray<ResDialogCtrl*> Ctrls;
 	TableAlign AlignX;
 	TableAlign AlignY;
-	GAutoString Class; // CSS class for styling
-	GAutoString Style; // CSS styles
+	LAutoString Class; // CSS class for styling
+	LAutoString Style; // CSS styles
 
 	ResTableCell(CtrlTable *table, ssize_t cx, ssize_t cy)
 	{
@@ -417,15 +417,15 @@ public:
 	// The cell container
 	CtrlTable *Table;
 	ssize_t CellX, CellY;
-	GArray<ResTableCell*> Cells;
+	LArray<ResTableCell*> Cells;
 	ResTableCell *AttachTo;
 
 	// Column + Row sizes
-	GArray<double> ColSize;
-	GArray<double> RowSize;
+	LArray<double> ColSize;
+	LArray<double> RowSize;
 
 	// Goobers for editing the cell layout
-	GArray<OpHandle> Handles;
+	LArray<OpHandle> Handles;
 
 	int DragRowSize;
 	int DragColSize;
@@ -454,7 +454,7 @@ public:
 		Cells.DeleteObjects();
 	}
 
-	bool GetSelected(GArray<ResTableCell*> &s)
+	bool GetSelected(LArray<ResTableCell*> &s)
 	{
 		for (int i=0; i<Cells.Length(); i++)
 		{
@@ -504,7 +504,7 @@ public:
 			int AvailX = c.X();
 			int AvailY = c.Y();
 
-			GArray<Pair> XPair, YPair;
+			LArray<Pair> XPair, YPair;
 			CalcCell(XPair, ColSize, AvailX);
 			CalcCell(YPair, RowSize, AvailY);
 			XPair[CellX].Pos = AvailX;
@@ -745,7 +745,7 @@ bool CtrlTable::GetFields(FieldTree &Fields)
 {
 	bool Status = ResDialogCtrl::GetFields(Fields);
 	
-	GArray<ResTableCell*> s;
+	LArray<ResTableCell*> s;
 	if (d->GetSelected(s) == 1)
 	{
 		int Id = 150;
@@ -760,7 +760,7 @@ bool CtrlTable::Serialize(FieldTree &Fields)
 {
 	bool Status = ResDialogCtrl::Serialize(Fields);
 	
-	GArray<ResTableCell*> s;
+	LArray<ResTableCell*> s;
 	ResTableCell *c;
 	if (d->GetSelected(s) == 1 && ((c = s[0])) != NULL)
 	{
@@ -814,7 +814,7 @@ bool CtrlTable::GetVariant(const char *Name, LVariant &Value, char *Array)
 		}
 		case TableLayoutCell:
 		{
-			auto Coords = GString(Array).SplitDelimit(",");
+			auto Coords = LString(Array).SplitDelimit(",");
 			if (Coords.Length() != 2)
 				return false;
 
@@ -870,7 +870,7 @@ bool CtrlTable::SetVariant(const char *Name, LVariant &Value, char *Array)
 		}
 		case TableLayoutCell:
 		{
-			auto Coords = GString(Array).SplitDelimit(",");
+			auto Coords = LString(Array).SplitDelimit(",");
 			if (Coords.Length() != 2)
 				return false;
 
@@ -1087,7 +1087,7 @@ void CtrlTable::OnMouseMove(LMouse &m)
 
 	if (IsCapturing())
 	{
-		GArray<Pair> p;
+		LArray<Pair> p;
 
 		int Fudge = 6;
 		if (d->DragRowSize >= 0)
@@ -1482,8 +1482,8 @@ class TableLayoutTest : public LDialog
 	LView *Msg;
 	LTree *Tree;
 	class DlgContainer *View;
-	GAutoPtr<LThread> Worker;
-	GAutoString Base;
+	LAutoPtr<LThread> Worker;
+	LAutoString Base;
 	
 public:
 	TableLayoutTest(LViewI *par);
@@ -1532,11 +1532,11 @@ static bool HasTableLayout(LXmlTag *t)
 class Lr8Item : public LTreeItem
 {
     TableLayoutTest *Wnd;
-	GString File;
-	GAutoPtr<LResources> Res;
+	LString File;
+	LAutoPtr<LResources> Res;
 
 public:
-	Lr8Item(TableLayoutTest *w, GAutoPtr<LResources> res, char *file)
+	Lr8Item(TableLayoutTest *w, LAutoPtr<LResources> res, char *file)
 	{
 	    Wnd = w;
 		Res = res;
@@ -1588,14 +1588,14 @@ public:
 	
 	int Main()
 	{
-		GArray<const char*> Ext;
-		GArray<char*> Files;
+		LArray<const char*> Ext;
+		LArray<char*> Files;
 		Ext.Add("*.lr8");
 		if (LRecursiveFileSearch(Base, &Ext, &Files))
 		{
 			for (int i=0; i<Files.Length(); i++)
 			{
-            	GAutoPtr<LResources> Res;
+            	LAutoPtr<LResources> Res;
     			if (Res.Reset(new LResources(Files[i])))
     			{
 				    List<LgiDialogRes>::I d = Res->GetDialogs();
@@ -1610,7 +1610,7 @@ public:
 				    }
 				    if (HasTl)
 				    {
-			            GAutoString r = LgiMakeRelativePath(Base, Files[i]);
+			            LAutoString r = LgiMakeRelativePath(Base, Files[i]);
 			            Tree->Insert(new Lr8Item(Wnd, Res, r));
 				    }
 				}

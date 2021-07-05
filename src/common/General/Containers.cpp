@@ -23,7 +23,7 @@
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-int ACmp(GString *a, GString *b)
+int ACmp(LString *a, LString *b)
 {
 	return stricmp(*a, *b);
 }
@@ -33,7 +33,7 @@ int LCmp(char *a, char *b, NativeInt d)
 	return stricmp(a, b);
 }
 
-void UnitTest_CreateList(GArray<GString> &a, List<char> &l, int sz = 100)
+void UnitTest_CreateList(LArray<LString> &a, List<char> &l, int sz = 100)
 {
 	a.Empty();
 	for (int i=0; i<sz; i++)
@@ -51,14 +51,14 @@ bool UnitTest_Err(const char *Fmt, ...)
 	return false;
 }
 
-bool UnitTest_Check(GArray<GString> &a, List<char> &l)
+bool UnitTest_Check(LArray<LString> &a, List<char> &l)
 {
 	if (a.Length() != l.Length())
 		return UnitTest_Err("Wrong size.");
 	int n = 0;
 	for (auto s : l)
 	{
-		GString t = s;
+		LString t = s;
 		if (t.Equals(a[n]))
 			;//printf("%i: %s\n", n, s);
 		else
@@ -72,7 +72,7 @@ bool UnitTest_Check(GArray<GString> &a, List<char> &l)
 
 bool UnitTest_ListClass()
 {
-	GArray<GString> a;
+	LArray<LString> a;
 	List<char> l;
 	
 	// Create test..
@@ -428,9 +428,9 @@ ssize_t GMemQueue::Write(const void *Ptr, ssize_t Size, int Flags)
 }
 
 //////////////////////////////////////////////////////////////////////////
-GString LStringPipe::NewGStr()
+LString LStringPipe::NewGStr()
 {
-	GString s;
+	LString s;
 	
 	int64 Sz = GetSize();
 	if (Sz > 0)
@@ -504,7 +504,7 @@ ssize_t LStringPipe::SaveToBuffer(char *Start, ssize_t BufSize, ssize_t Chars)
 	return Str - Start;
 }
 
-ssize_t LStringPipe::Pop(GArray<char> &Buf)
+ssize_t LStringPipe::Pop(LArray<char> &Buf)
 {
 	ssize_t Chars = LineChars();
 	if (Chars > 0)
@@ -520,9 +520,9 @@ ssize_t LStringPipe::Pop(GArray<char> &Buf)
 	return Chars;
 }
 
-GString LStringPipe::Pop()
+LString LStringPipe::Pop()
 {
-	GString s;
+	LString s;
 	ssize_t Chars = LineChars();
 	if (Chars > 0 &&
 		s.Length(Chars))
@@ -587,7 +587,7 @@ bool LStringPipe::UnitTest()
 
 	p.Empty();
 	p.Write(s, sizeof(s)-1);
-	GString r;
+	LString r;
 	r = p.Pop();
 	if (!r.Equals("1234567890abc"))
 		return false;

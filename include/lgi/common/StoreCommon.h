@@ -20,7 +20,7 @@ class GSubFilePtr;
 class GSubFile : public GFile
 {
 	LMutex *Lck;
-	GArray<GSubFilePtr*> Ptrs;
+	LArray<GSubFilePtr*> Ptrs;
 	
 	#if GSUBFILE_NOBUFFERING
 	bool Buffer;
@@ -35,7 +35,7 @@ class GSubFile : public GFile
 	#endif
 	
 public:
-	typedef GAutoPtr<LMutex::Auto> SubLock;
+	typedef LAutoPtr<LMutex::Auto> SubLock;
 
 	GSubFile(LMutex *lock, bool Buffering = true);
 	~GSubFile();

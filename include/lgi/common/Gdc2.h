@@ -546,7 +546,7 @@ public:
 	/// Returns a pointer to the start of a scanline, or NULL if not available
 	virtual uchar *operator[](int y);
 	/// Dumps various debug information
-	virtual GString Dump() { return GString("Not implemented."); }
+	virtual LString Dump() { return LString("Not implemented."); }
 
 	/// Returns true if this surface supports alpha compositing when using Blt
 	virtual bool SupportsAlphaCompositing() { return false; }
@@ -668,12 +668,12 @@ public:
 	);
 	
 	/// Describes the image
-	virtual GString GetStr();
+	virtual LString GetStr();
 
 	// GDom interface
 	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL);
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL);
-	bool CallMethod(const char *Name, LVariant *ReturnValue, GArray<LVariant*> &Args);
+	bool CallMethod(const char *Name, LVariant *ReturnValue, LArray<LVariant*> &Args);
 };
 
 #if defined(MAC) && !defined(__GTK_H__)
@@ -779,7 +779,7 @@ public:
 	COLOUR Colour();
 	COLOUR Colour(COLOUR c, int Bits = 0);
 	GColour Colour(GColour c);
-	GString Dump();
+	LString Dump();
 
 	int Op();
 	int Op(int Op, NativeInt Param = -1);
@@ -1390,7 +1390,7 @@ struct GColourStop
 };
 
 /// Draws a horizontal or vertical gradient
-LgiFunc void LgiFillGradient(LSurface *pDC, LRect &r, bool Vert, GArray<GColourStop> &Stops);
+LgiFunc void LgiFillGradient(LSurface *pDC, LRect &r, bool Vert, LArray<GColourStop> &Stops);
 
 #ifdef WIN32
 /// Draws a windows HICON onto a surface at Dx, Dy

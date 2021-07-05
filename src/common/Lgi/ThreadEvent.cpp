@@ -99,7 +99,7 @@ LThreadEvent::LThreadEvent(const char *name)
 	
 	#elif defined(WIN32)
 	
-		GString nm;
+		LString nm;
 		nm.Printf("%s.%p", name, this);
 
 		Event = CreateEventA(NULL, false, false, nm);

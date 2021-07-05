@@ -18,7 +18,7 @@ public:
 
 	bool IsValid() { return Data && Len > 0; }
 	void Get(char *Buf);
-	GString Get();
+	LString Get();
 	void Set(const char *Buf);
 	
 	// bool Serialize(ObjProperties *Options, char *Option, int Write);

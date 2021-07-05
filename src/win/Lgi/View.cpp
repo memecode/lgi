@@ -181,7 +181,7 @@ bool CastHwnd(T *&Ptr, HWND hWnd)
 	{
 		TCHAR ClsName[256] = {0};
 		int Ch = GetClassName(hWnd, ClsName, CountOf(ClsName));
-		GString Cls = ClsName;
+		LString Cls = ClsName;
 		// LgiTrace("%s:%i - Error: hWnd=%p/%s, GWL_LGI_MAGIC=%i\n", _FL, hWnd, Cls.Get(), magic);
 		return false;
 	}
@@ -380,7 +380,7 @@ bool LWindowsClass::SubClass(char *Parent)
 	if (!Class.lpszClassName)
 	{
 		HBRUSH hBr = Class.hbrBackground;
-		GAutoWString p(Utf8ToWide(Parent));
+		LAutoWString p(Utf8ToWide(Parent));
 		if (p)
 		{
 			if (GetClassInfoExW(LgiProcessInst(), p, &Class))
@@ -477,7 +477,7 @@ void LView::_Delete()
 
 	#ifdef _DEBUG
 	// Sanity check..
-	// GArray<LViewI*> HasView;
+	// LArray<LViewI*> HasView;
 	for (auto c: Children)
 	{
 		// LgiAssert(!HasView.HasItem(c));
@@ -668,7 +668,7 @@ bool LView::Attach(LViewI *p)
 			ExStyle &= ~(WS_EX_CLIENTEDGE | WS_EX_WINDOWEDGE);
 							
 		auto Text = LBase::NameW();
-		GAutoWString WCls(Utf8ToWide(ClsName));
+		LAutoWString WCls(Utf8ToWide(ClsName));
 
 		_View = CreateWindowExW(ExStyle,
 								WCls,
@@ -850,7 +850,7 @@ bool LgiToWindowsCursor(OsView Hnd, LgiCursor Cursor)
 			break;
 		case LCUR_PointingHand:
 		{
-			GArray<int> Ver;
+			LArray<int> Ver;
 			int Os = LGetOs(&Ver);
 			if
 			(
@@ -1840,7 +1840,7 @@ GMessage::Result LView::OnEvent(GMessage *Msg)
 					Ms.Target = this;
 				
 				#if DEBUG_MOUSE_CLICKS
-				GString Msg;
+				LString Msg;
 				Msg.Printf("%s.Click", Ms.Target->GetClass());
 				Ms.Trace(Msg);
 				#endif
@@ -1869,7 +1869,7 @@ GMessage::Result LView::OnEvent(GMessage *Msg)
 					Ms.Target = this;
 
 				#if DEBUG_MOUSE_CLICKS
-				GString Msg;
+				LString Msg;
 				Msg.Printf("%s.Click", Ms.Target->GetClass());
 				Ms.Trace(Msg);
 				#endif

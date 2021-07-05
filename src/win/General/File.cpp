@@ -38,7 +38,7 @@
 #define FLOPPY_3_5				(FLOPPY_720K | FLOPPY_1_4M)
 
 /****************************** Helper Functions ****************************************************************************/
-GString GFile::Path::Sep(DIR_STR);
+LString GFile::Path::Sep(DIR_STR);
 
 bool GFile::Path::FixCase()
 {
@@ -81,7 +81,7 @@ bool LFileExists(const char *Name, char *CorrectCase)
 	{
 		HANDLE hFind = INVALID_HANDLE_VALUE;
 		
-		GAutoWString n(Utf8ToWide(Name));
+		LAutoWString n(Utf8ToWide(Name));
 		if (n)
 		{
 			WIN32_FIND_DATAW Info;
@@ -102,7 +102,7 @@ bool LFileExists(const char *Name, char *CorrectCase)
 
 bool LDirExists(const char *Dir, char *CorrectCase)
 {
-	GAutoWString n(Utf8ToWide(Dir));
+	LAutoWString n(Utf8ToWide(Dir));
 	DWORD e = GetFileAttributesW(n);
 	return e != 0xFFFFFFFF && TestFlag(e, FILE_ATTRIBUTE_DIRECTORY);
 }
@@ -363,7 +363,7 @@ bool LgiGetDriveInfo
 
 	if (Path)
 	{
-		GAutoWString w(Utf8ToWide(Path));
+		LAutoWString w(Utf8ToWide(Path));
 		if (w)
 		{
 			char16 *d = StrchrW(w, DIR_CHAR);
@@ -388,14 +388,14 @@ bool LgiGetDriveInfo
 /****************************** Classes ***************************************/
 struct GVolumePriv
 {
-	GString Name;
-	GString Path;
+	LString Name;
+	LString Path;
 	int Type;			// VT_??
 	int Flags;			// VA_??
 	int64 Size;
 	int64 Free;
 	LgiSystemPath SysPath;
-	GAutoPtr<LSurface> Icon;
+	LAutoPtr<LSurface> Icon;
 	List<GVolume> Sub;
 	List<GVolume>::I It;
 
@@ -533,7 +533,7 @@ bool GVolume::SetMounted(bool Mount)
 	return Mount;
 }
 
-void GVolume::Insert(GAutoPtr<GVolume> v)
+void GVolume::Insert(LAutoPtr<GVolume> v)
 {
 	d->Sub.Insert(v.Release());		
 }
@@ -547,7 +547,7 @@ GVolume *GVolume::First()
 		const char   *Names[] = {"Home",   "Documents",        "Music",        "Video",        "Downloads",        "Pictures"};
 		for (unsigned i=0; i<CountOf(Paths); i++)
 		{
-			GAutoPtr<GVolume> a(new GVolume(Paths[i], Names[i]));
+			LAutoPtr<GVolume> a(new GVolume(Paths[i], Names[i]));
 			Insert(a);
 		}
 
@@ -719,16 +719,16 @@ bool GFileSystem::Copy(const char *From, const char *To, LError *ErrorCode, Copy
 	return i == Size;
 }
 
-bool GFileSystem::Delete(GArray<const char*> &Files, GArray<LError> *Status, bool ToTrash)
+bool GFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, bool ToTrash)
 {
 	bool Ret = true;
 
 	if (ToTrash)
 	{
-		GArray<char16> Name;
+		LArray<char16> Name;
 		for (int i=0; i<Files.Length(); i++)
 		{
-			GAutoPtr<wchar_t> w(Utf8ToWide(Files[i]));
+			LAutoPtr<wchar_t> w(Utf8ToWide(Files[i]));
 			auto Chars = StrlenW(w);
 			auto Len = Name.Length();
 			Name.Length(Len + Chars + 1);
@@ -759,7 +759,7 @@ bool GFileSystem::Delete(GArray<const char*> &Files, GArray<LError> *Status, boo
 		{
 			DWORD e = 0;
 
-			GAutoWString n(Utf8ToWide(Files[i]));
+			LAutoWString n(Utf8ToWide(Files[i]));
 			if (n)
 			{
 				SetFileAttributesW(n, FILE_ATTRIBUTE_ARCHIVE);
@@ -785,14 +785,14 @@ bool GFileSystem::Delete(const char *FileName, bool ToTrash)
 	if (!FileName)
 		return false;
 
-	GArray<const char*> Files;
+	LArray<const char*> Files;
 	Files.Add(FileName);
 	return Delete(Files, 0, ToTrash);
 }
 
 bool GFileSystem::CreateFolder(const char *PathName, bool CreateParentFoldersIfNeeded, LError *Err)
 {
-	GAutoWString w(Utf8ToWide(PathName));
+	LAutoWString w(Utf8ToWide(PathName));
 	bool Status = ::CreateDirectoryW(w, NULL) != 0;
 	if (!Status)
 	{
@@ -813,11 +813,11 @@ bool GFileSystem::CreateFolder(const char *PathName, bool CreateParentFoldersIfN
 			}
 			while (!LDirExists(Base));
 			
-			GString::Array Parts = GString(PathName + strlen(Base)).SplitDelimit(DIR_STR);
+			LString::Array Parts = LString(PathName + strlen(Base)).SplitDelimit(DIR_STR);
 			for (int i=0; i<Parts.Length(); i++)
 			{
 				LgiMakePath(Base, sizeof(Base), Base, Parts[i]);
-				GAutoWString w(Utf8ToWide(Base));
+				LAutoWString w(Utf8ToWide(Base));
 				Status = ::CreateDirectoryW(w, NULL) != 0;
 				if (!Status)
 				{
@@ -859,7 +859,7 @@ bool GFileSystem::RemoveFolder(const char *PathName, bool Recurse)
 	}
 
 	#ifdef UNICODE
-	GAutoWString w(Utf8ToWide(PathName));
+	LAutoWString w(Utf8ToWide(PathName));
 	if (!::RemoveDirectory(w))
 	#else
 	if (!::RemoveDirectory(PathName))
@@ -883,8 +883,8 @@ bool GFileSystem::Move(const char *OldName, const char *NewName, LError *Err)
 		return false;
 	}
 		
-	GAutoWString New(Utf8ToWide(NewName));
-	GAutoWString Old(Utf8ToWide(OldName));
+	LAutoWString New(Utf8ToWide(NewName));
+	LAutoWString Old(Utf8ToWide(OldName));
 	if (!New || !Old)
 	{
 		if (Err) Err->Set(LErrorNoMem);
@@ -1082,7 +1082,7 @@ struct GDirectoryPriv
 	char			BasePath[DIR_PATH_SIZE];
 	char			*BaseEnd;
 	int				BaseRemaining;
-	GString			Utf;
+	LString			Utf;
 	HANDLE			Handle;
 	WIN32_FIND_DATAW Data;
 
@@ -1337,7 +1337,7 @@ char *GDirectory::GetName() const
 	return d->Utf;
 }
 
-GString GDirectory::FileName() const
+LString GDirectory::FileName() const
 {
 	if (!d->Utf)
 	    d->Utf = d->Data.cFileName;
@@ -1417,7 +1417,7 @@ class GFilePrivate
 {
 public:
 	OsFile		hFile;
-	GString		Name;
+	LString		Name;
 	int			Attributes;
 	bool		Swap;
 	bool		Status;
@@ -1521,9 +1521,9 @@ int GFile::GetBlockSize()
 	DWORD TotalNumberOfClusters;
 	
 	#ifdef UNICODE
-	GAutoWString n(Utf8ToWide(GetName()));
+	LAutoWString n(Utf8ToWide(GetName()));
 	#else
-	GAutoString n(NewStr(GetName()));
+	LAutoString n(NewStr(GetName()));
 	#endif
 	if (n)
 	{
@@ -1558,7 +1558,7 @@ int GFile::Open(const char *File, int Mode)
 			return false;
 		}
 		
-		GAutoWString n(Utf8ToWide(File));
+		LAutoWString n(Utf8ToWide(File));
 		if (n)
 		{
 			d->hFile = CreateFileW(	n,

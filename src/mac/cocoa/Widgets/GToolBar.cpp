@@ -675,7 +675,7 @@ public:
 		// all the buttons between them are switched off.
 		LToolButton *Last = 0;
 		bool HasVis = false;
-		GAutoPtr<GViewIterator> It(Tb->IterateViews());
+		LAutoPtr<GViewIterator> It(Tb->IterateViews());
 		for (LViewI *v = It->First(); v; v = It->Next())
 		{
 			LToolButton *Btn = dynamic_cast<LToolButton*>(v);
@@ -721,7 +721,7 @@ public:
 				
 				// Make all controls not visible.
 				LViewI *v;
-				GAutoPtr<GViewIterator> It(Tb->IterateViews());
+				LAutoPtr<GViewIterator> It(Tb->IterateViews());
 				for (v = It->First(); v; v = It->Next())
 				{
 					LToolButton *Btn = dynamic_cast<LToolButton*>(v);
@@ -2087,7 +2087,7 @@ LToolButton *LToolBar::AppendButton(char *Tip, int Id, int Type, int Enabled, in
 				{
 					LRect Sub(0, 0, d->ImgList->TileX()-1, d->ImgList->TileY()-1);
 					Sub.Offset(IconId * d->ImgList->TileX(), 0);
-					GAutoPtr<CGImg> Img(d->ImgList->GetImg(&Sub));
+					LAutoPtr<CGImg> Img(d->ImgList->GetImg(&Sub));
 
 					Icon = GetIconRefFromCGImage(*Img);
 					if (Icon)

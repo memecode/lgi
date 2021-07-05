@@ -158,7 +158,7 @@ char16 *GHtmlParser::DecodeEntities(const char *s, ssize_t len)
 						e++;
 					}
 					
-					GAutoWString Var(Utf8ToWide(i, e-i));
+					LAutoWString Var(Utf8ToWide(i, e-i));
 					uint32_t Char = GHtmlStatic::Inst->VarMap.Find(Var);
 					if (Char)
 					{
@@ -236,14 +236,14 @@ char *GHtmlParser::ParsePropValue(char *s, char16 *&Value)
 
 char *GHtmlParser::ParseName(char *s, char **Name)
 {
-	GAutoString a;
+	LAutoString a;
 	s = ParseName(s, a);
 	if (Name)
 		*Name = a.Release();
 	return s;
 }
 
-char *GHtmlParser::ParseName(char *s, GAutoString &Name)
+char *GHtmlParser::ParseName(char *s, LAutoString &Name)
 {
 	SkipWhiteSpace(s);
 	char *Start = s;
@@ -447,10 +447,10 @@ char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 							char *e = s - 1;
 							while (e > Start && IsWhiteSpace(*e)) e--;
 							e++;
-							GAutoString Code(NewStr(Start, e - Start));
+							LAutoString Code(NewStr(Start, e - Start));
 							if (Code)
 							{
-								GAutoString Result(View->GetEnv()->OnDynamicContent(View, Code));
+								LAutoString Result(View->GetEnv()->OnDynamicContent(View, Code));
 								if (Result)
 								{
 									// Save the dynamic code to the source pipe
@@ -625,7 +625,7 @@ char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 									LgiTrace("Open tags:\n");
 									for (LHtmlElement *e = *it; e; e = *++it)
 									{
-										GAutoString a = e->DescribeElement();
+										LAutoString a = e->DescribeElement();
 										LgiTrace("\t%s\n", a.Get());
 									}
 									#endif
@@ -659,7 +659,7 @@ char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 						}
 						if (Elem->TagId == TAG_META)
 						{
-							GAutoString Cs;
+							LAutoString Cs;
 
 							const char *s;
 							if (Elem->Get("http-equiv", s) &&
@@ -769,7 +769,7 @@ char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 							{
 								if (View)
 								{
-									GAutoString Css(NewStr(s, End - s));
+									LAutoString Css(NewStr(s, End - s));
 									if (Css)
 									{
 										View->OnAddStyle("text/css", Css);
@@ -798,7 +798,7 @@ char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 					#if FEATURE_REATTACH_ELEMENTS
 					if (Elem->Info->Reattach)
 					{
-						GArray<int> ParentTags;
+						LArray<int> ParentTags;
 						bool CloseExisting = false;
 						switch (Elem->TagId)
 						{
@@ -969,7 +969,7 @@ char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 										uint64 Len = s->GetSize();
 										if (Len > 0)
 										{
-											GAutoString a(new char[(size_t)Len+1]);
+											LAutoString a(new char[(size_t)Len+1]);
 											ssize_t r = s->Read(a, (int)Len);
 											a[r] = 0;
 											
@@ -977,7 +977,7 @@ char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 											if (Child)
 											{
 												bool BackOut = false;
-												GArray<LHtmlElement*> ot = OpenTags;
+												LArray<LHtmlElement*> ot = OpenTags;
 
 												ParseHtml(Child, a, Depth + 1, false, &BackOut);
 
@@ -1049,7 +1049,7 @@ char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 					char *e = EndBracket;
 					while (e > s && strchr(WhiteSpace, e[-1]))
 						e--;
-					GAutoString Name(NewStr(s, e - s));
+					LAutoString Name(NewStr(s, e - s));
 					LHtmlElement *Open = GetOpenTag(Name);					
 					if (Open)
 					{
@@ -1126,7 +1126,7 @@ char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 			PlainText:
 			char *n = NextTag(s);
 			ssize_t Len = n ? n - s : strlen(s);
-			GAutoWString WStr(CleanText(s, Len, true, InPreTag));
+			LAutoWString WStr(CleanText(s, Len, true, InPreTag));
 			if (WStr && *WStr)
 			{
 				// This loop processes the text into lengths that need different treatment
@@ -1159,7 +1159,7 @@ char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 						if (c > Start)
 						{
 							// Emit the text before the point of interest...
-							GAutoWString Cur;
+							LAutoWString Cur;
 							if (Start == WStr && !*c)
 							{
 								// Whole string
@@ -1381,7 +1381,7 @@ char16 *GHtmlParser::CleanText(const char *s, ssize_t Len, bool ConversionAllowe
 								e++;
 							}
 							
-							GAutoWString Var(NewStrW(i, e-i));							
+							LAutoWString Var(NewStrW(i, e-i));							
 							char16 Char = GHtmlStatic::Inst->VarMap.Find(Var);
 							if (Char)
 							{
@@ -1529,7 +1529,7 @@ bool GHtmlParser::ParseColour(const char *s, LCss::ColorDef &c)
 			if (*s == '(')
 			{
 				s++;
-				GArray<uint8_t> Col;
+				LArray<uint8_t> Col;
 				while (Col.Length() < 3)
 				{
 					SkipWhiteSpace(s);

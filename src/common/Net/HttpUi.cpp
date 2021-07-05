@@ -95,7 +95,7 @@ GHttpThread::GHttpThread(LSocket *sock, GHttpServerPriv *priv)
 
 int GHttpThread::Main()
 {
-	GArray<char> Buf;
+	LArray<char> Buf;
 	int Block = 4 << 10, Used = 0, ContentLen = 0;
 	int HeaderLen = 0;
 	Buf.Length(Block);

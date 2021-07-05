@@ -15,7 +15,7 @@ struct ConsoleLog : public LStream
 class App : public GApp, public LScriptContext, public LVmDebuggerCallback
 {
 	LScriptEngine *Engine;
-	GAutoString SrcFile;
+	LAutoString SrcFile;
 	ConsoleLog Log;
 
 	LVmDebugger *AttachVm(LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly)
@@ -23,7 +23,7 @@ class App : public GApp, public LScriptContext, public LVmDebuggerCallback
 		return new LVmDebuggerWnd(NULL, this, Vm, Code, Assembly);
 	}
 
-	bool CompileScript(GAutoPtr<LCompiledCode> &Output, const char *FileName, const char *Source)
+	bool CompileScript(LAutoPtr<LCompiledCode> &Output, const char *FileName, const char *Source)
 	{
 		return false;
 	}
@@ -45,7 +45,7 @@ public:
 	GHostFunc *GetCommands() { return NULL; }
 	void SetEngine(LScriptEngine *Eng) { Engine = Eng; }
 
-	void OnReceiveFiles(GArray<const char*> &Files)
+	void OnReceiveFiles(LArray<const char*> &Files)
 	{
 		for (int i=0; i<Files.Length(); i++)
 		{
@@ -87,14 +87,14 @@ public:
 		LScriptEngine Eng(NULL, NULL, this);
 		Eng.SetConsole(&Log);
 
-		GAutoString Src(::ReadTextFile(SrcFile));
+		LAutoString Src(::ReadTextFile(SrcFile));
 		if (!Src)
 		{
 			printf("Error: Failed to read '%s'.\n", SrcFile.Get());
 			return false;
 		}
 		
-		GAutoPtr<LCompiledCode> Obj;
+		LAutoPtr<LCompiledCode> Obj;
 		if (!Eng.Compile(Obj, NULL, Src, File))
 		{
 			printf("Error: Compilation failed '%s'.\n", SrcFile.Get());
@@ -124,12 +124,12 @@ public:
 		
 		if (Disassemble)
 		{
-			GString f = File;
+			LString f = File;
 			int Idx = f.RFind(".");
 			if (Idx > 0)
 			{
 				f = f(0, Idx) + ".asm";
-				GAutoString a(ReadTextFile(f));
+				LAutoString a(ReadTextFile(f));
 				if (a)
 				{
 					printf("%s\n", a.Get());

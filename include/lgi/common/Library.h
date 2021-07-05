@@ -45,7 +45,7 @@ public:
 	bool Load(const char *File, bool Quiet = false);
 	bool Unload();
 	void *GetAddress(const char *Resource);
-	GString GetFullPath();
+	LString GetFullPath();
 };
 
 // Runtime linking macros

@@ -8,20 +8,20 @@ class LgiClass GClipBoard
 	class GClipBoardPriv *d;
 	LView *Owner;
 	bool Open;
-	GAutoPtr<LSurface> pDC;
+	LAutoPtr<LSurface> pDC;
 
 	#if LGI_COCOA
-	GString Txt;
+	LString Txt;
 	#else
-	GAutoString Txt;
+	LAutoString Txt;
 	#endif
-	GAutoWString wTxt;
+	LAutoWString wTxt;
 
 public:
 	/// On windows, this equates to a CF_TEXT, CF_BITMAP, CF_DIB type #define
 	typedef uint32_t FormatType;
-	static GString FmtToStr(FormatType Fmt);
-	static FormatType StrToFmt(GString Fmt);
+	static LString FmtToStr(FormatType Fmt);
+	static FormatType StrToFmt(LString Fmt);
 
 	/// Creates the clipboard access object.
 	GClipBoard(LView *o);
@@ -32,7 +32,7 @@ public:
 
 	/// Empties the clipboard of it's current content.
 	bool Empty();
-	bool EnumFormats(GArray<FormatType> &Formats);
+	bool EnumFormats(LArray<FormatType> &Formats);
 
 	// Text
 	bool Text(const char *Str, bool AutoEmpty = true);
@@ -43,7 +43,7 @@ public:
 
 	// HTML
 	bool Html(const char *doc, bool AutoEmpty = true);
-	GString Html();
+	LString Html();
 
 	// Bitmap
 	bool Bitmap(LSurface *pDC, bool AutoEmpty = true);
@@ -53,12 +53,12 @@ public:
 	#endif
 
 	// Files
-	GString::Array Files();
-	bool Files(GString::Array &Paths, bool AutoEmpty = true);
+	LString::Array Files();
+	bool Files(LString::Array &Paths, bool AutoEmpty = true);
 
 	// Binary
 	bool Binary(FormatType Format, uint8_t *Ptr, ssize_t Len, bool AutoEmpty);	// Set
-	bool Binary(FormatType Format, GAutoPtr<uint8_t,true> &Ptr, ssize_t *Len);	// Get
+	bool Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t *Len);	// Get
 };
 
 #ifdef __OBJC__
@@ -70,9 +70,9 @@ public:
 	}
 	@property(assign) NSData *data;
 
-	- (id)init:(GString)format ptr:(uchar*)ptr len:(ssize_t)Len;
+	- (id)init:(LString)format ptr:(uchar*)ptr len:(ssize_t)Len;
 	- (id)init:(NSData*)data;
-	- (bool)getData:(GString*)format data:(GAutoPtr<uint8,true>*)Ptr len:(ssize_t*)Len var:(LVariant*)var;
+	- (bool)getData:(LString*)format data:(LAutoPtr<uint8,true>*)Ptr len:(ssize_t*)Len var:(LVariant*)var;
 
 	// Writer
 	- (nullable id)pasteboardPropertyListForType:(NSString *)type;

@@ -90,8 +90,8 @@ protected:
 		LTextView3 *View;
 		size_t PourStart;
 		ssize_t PourSize;
-		GArray<char16> Text;
-		GString FileName;
+		LArray<char16> Text;
+		LString FileName;
 		LUnrolledList<LTextView3::LStyle> Styles;
 		LTextView3::LStyle Visible;
 		LTextView3::LStyle Dirty;

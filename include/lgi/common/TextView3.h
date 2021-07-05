@@ -288,7 +288,7 @@ protected:
 	void InternalPulse();
 
 	// styles
-	bool InsertStyle(GAutoPtr<LStyle> s);
+	bool InsertStyle(LAutoPtr<LStyle> s);
 	LStyle *GetNextStyle(StyleIter &it, ssize_t Where = -1);
 	LStyle *HitStyle(ssize_t i);
 	int GetColumn();
@@ -331,7 +331,7 @@ public:
 	void Value(int64 i) override;
 	const char *GetMimeType() override { return "text/plain"; }
 	size_t Length() { return Size; }
-	GString operator[](ssize_t LineIdx);
+	LString operator[](ssize_t LineIdx);
 
 	ssize_t HitText(int x, int y, bool Nearest);
 	void DeleteSelection(char16 **Cut = 0);
@@ -430,7 +430,7 @@ public:
 	int OnHitTest(int x, int y) override;
 	bool OnLayout(LViewLayoutInfo &Inf) override;
 	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState) override;
-	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState) override;
+	int OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState) override;
 	LgiCursor GetCursor(int x, int y) override;
 
 	// Virtuals

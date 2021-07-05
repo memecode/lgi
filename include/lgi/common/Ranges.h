@@ -3,7 +3,7 @@
 
 /// This class keeps an array of ranges in sorted order, merging 
 /// adjacent ranges when new ranges are added.
-class GRanges : public GArray<LRange>
+class GRanges : public LArray<LRange>
 {
 public:
 	GRanges &operator +=(const LRange &r)
@@ -101,7 +101,7 @@ public:
 		return true;
 	}
 
-	GString ToString()
+	LString ToString()
 	{
 		LStringPipe p;
 		for (auto r : *this)
@@ -109,7 +109,7 @@ public:
 		return p.NewGStr();
 	}
 
-	bool FromString(GString s)
+	bool FromString(LString s)
 	{
 		Length(0);
 		auto Rngs = s.SplitDelimit(",");

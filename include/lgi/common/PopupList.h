@@ -91,7 +91,7 @@ public:
 	// ------------------------------------------------------------------------
 	
 	/// Override this to convert an object to a string for the list items
-	virtual GString ToString(T *Obj) = 0;
+	virtual LString ToString(T *Obj) = 0;
 	
 	/// Override this to handle the selection of an object
 	virtual void OnSelect(T *Obj) = 0;
@@ -117,7 +117,7 @@ public:
 		SetPos(r);				
 	}
 	
-	bool SetItems(GArray<T*> &a)
+	bool SetItems(LArray<T*> &a)
 	{
 		Lst->Empty();
 		
@@ -129,7 +129,7 @@ public:
 				Item *li = new Item(obj);
 				if (li)
 				{
-					GString s = ToString(obj);
+					LString s = ToString(obj);
 					if (s)
 					{
 						li->SetText(s);
@@ -231,7 +231,7 @@ public:
 			return false;
 
 		#if 0
-		GString s;
+		LString s;
 		s.Printf("%s:%i - OnViewKey vis=%i", _FL, Visible());
 		k.Trace(s);
 		#endif

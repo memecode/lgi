@@ -62,7 +62,7 @@ bool LgiIsNumber(T *p)
 LgiFunc char *LgiSkipDelim(char *p, const char *Delimiter = " \r\n\t", bool NotDelim = false);
 
 /// A simple token parser
-class GToken : public GArray<char*>
+class GToken : public LArray<char*>
 {
 	char *Raw;
 
@@ -163,7 +163,7 @@ public:
 	}
 
 	/// Appends some tokens on the end of this list.
-	void AppendTokens(GArray<char*> *T)
+	void AppendTokens(LArray<char*> *T)
 	{
 		if (T)
 		{
@@ -215,7 +215,7 @@ public:
 	char *&operator [](size_t i)
 	{
 		if (i < Length())
-			return GArray<char*>::operator[](i);
+			return LArray<char*>::operator[](i);
 
 		static char *Null = 0;
 		return Null;

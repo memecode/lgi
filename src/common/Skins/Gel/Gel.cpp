@@ -425,7 +425,7 @@ class GelSkin : public LSkinEngine
 
 		LRegion Rgn;
 		Rgn = rcFill;
-		GArray<LDisplayString*> *Text = State->AllText();
+		LArray<LDisplayString*> *Text = State->AllText();
 		LSurface *pDC = State->pScreen;
 		if (Text && Text->Length() > 0 && rcFill.X() > 3)
 		{
@@ -636,7 +636,7 @@ public:
 		
 		LSurface *Out = &Mem;
 		
-		GArray<LDisplayString*> *Txt = State->AllText();
+		LArray<LDisplayString*> *Txt = State->AllText();
 
 		int ContentX = 0;
 		int SpacingPx = 4;

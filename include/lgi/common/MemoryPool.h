@@ -29,7 +29,7 @@ class GMemoryPool : public LMemoryPoolI
 	};
 
 	size_t BlockSize;
-	GArray<Block> Mem;
+	LArray<Block> Mem;
 
 public:
 	GMemoryPool(int block_size = 32 << 10)

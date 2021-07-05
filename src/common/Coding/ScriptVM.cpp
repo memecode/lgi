@@ -216,8 +216,8 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 		return ScriptError;
 	}
 
-	GArray<NativeInt> Val;
-	GArray<char*> Mem;
+	LArray<NativeInt> Val;
+	LArray<char*> Mem;
 	bool UnsupportedArg = false;
 
 	Val.Length(Args.Length() << 1);
@@ -392,13 +392,13 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 struct CodeBlock
 {
 	unsigned SrcLine;
-	GArray<unsigned> AsmAddr;
+	LArray<unsigned> AsmAddr;
 	unsigned ViewLine;
 
-	GAutoString Source;
+	LAutoString Source;
 	int SrcLines;
 
-	GAutoString Asm;
+	LAutoString Asm;
 	int AsmLines;
 };
 
@@ -440,9 +440,9 @@ public:
 	LExecutionStatus Status;
 	GPtr c;
 	LVariant Reg[MAX_REGISTER];
-	GArray<LVariant> Locals;
+	LArray<LVariant> Locals;
 	LVariant *Scope[SCOPE_MAX];
-	GArray<StackFrame> Frames;
+	LArray<StackFrame> Frames;
 	RunType StepType;
 	LVmDebuggerCallback *DbgCallback;
 	bool DebuggerEnabled;
@@ -450,8 +450,8 @@ public:
 	LVirtualMachine *Vm;
 	LScriptArguments *ArgsOutput;
 	bool BreakCpp;
-	GArray<ssize_t> BreakPts;
-	GString TempPath;
+	LArray<ssize_t> BreakPts;
+	LString TempPath;
 
 	LVirtualMachinePriv(LVirtualMachine *vm, LVmDebuggerCallback *Callback)
 	{
@@ -601,18 +601,18 @@ public:
 		{
 			if (!Debugger->GetCode())
 			{
-				GAutoPtr<LCompiledCode> Cp(new LCompiledCode(*Code));
+				LAutoPtr<LCompiledCode> Cp(new LCompiledCode(*Code));
 				Debugger->OwnCompiledCode(Cp);
 				
 				LStringPipe AsmBuf;
 				Decompile(Code->UserContext, Code, &AsmBuf);
-				GAutoString Asm(AsmBuf.NewStr());
+				LAutoString Asm(AsmBuf.NewStr());
 				Debugger->SetSource(Asm);
 			}
 			
 			Debugger->OnAddress(Address);
 			
-			GString m;
+			LString m;
 			m.Printf("%s (%s:%i)", Msg, LgiGetLeaf(File), Line);
 			Debugger->OnError(m);
 			
@@ -747,7 +747,7 @@ public:
 		}
 		else
 		{
-			GAutoString DataPath;
+			LAutoString DataPath;
 			if (Code->UserContext)
 				DataPath = Code->UserContext->GetDataFolder();
 			if (!DataPath)
@@ -797,7 +797,7 @@ public:
 
 					if (Debugger)
 					{
-						GAutoString a(p.NewStr());
+						LAutoString a(p.NewStr());
 						Debugger->OnAddress(CurrentScriptAddress);
 						Debugger->SetSource(a);
 					}
@@ -1299,9 +1299,9 @@ class GDebugView : public LTextView3
 	int CurLine;
 	
 	int ErrorLine;
-	GString Error;
+	LString Error;
 	
-	GArray<int> BreakPts;
+	LArray<int> BreakPts;
 	
 public:
 	GDebugView(LScriptVmDebuggerPriv *priv);
@@ -1321,13 +1321,13 @@ struct LScriptVmDebuggerPriv
 {
 	// Current script
 	bool OwnVm;
-	GAutoPtr<LVirtualMachine> Vm;
+	LAutoPtr<LVirtualMachine> Vm;
 	LVmDebuggerCallback *Callback;
-	GString Script, Assembly;
-	GArray<CodeBlock> Blocks;
+	LString Script, Assembly;
+	LArray<CodeBlock> Blocks;
 	size_t CurrentAddr;
-	GArray<bool> LineIsAsm;
-	GAutoPtr<LCompiledCode> Obj;
+	LArray<bool> LineIsAsm;
+	LAutoPtr<LCompiledCode> Obj;
 	LVariant Return;
 	bool AcceptNotify;
 
@@ -1458,7 +1458,7 @@ void GDebugView::OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour)
 	{
 		int OffY = (Ln - Start) * f->GetHeight();
 		/*
-		GString Num;
+		LString Num;
 		Num.Printf("%i", Ln);
 		LDisplayString Ds(f, Num);
 		Ds.Draw(pDC, 0, r.y1+OffY);
@@ -1729,7 +1729,7 @@ void LVmDebuggerWnd::OwnVm(bool Own)
 	d->OwnVm = Own;
 }
 
-void LVmDebuggerWnd::OwnCompiledCode(GAutoPtr<LCompiledCode> Cc)
+void LVmDebuggerWnd::OwnCompiledCode(LAutoPtr<LCompiledCode> Cc)
 {
 	d->Obj = Cc;
 }
@@ -1859,7 +1859,7 @@ void LVmDebuggerWnd::SetSource(const char *Mixed)
 			d->LineIsAsm[n-1] = true;
 	}
 	
-	GAutoString a(Txt.NewStr());
+	LAutoString a(Txt.NewStr());
 	d->Text->Name(a);
 	#else
 	d->Text->Name(Mixed);
@@ -1880,7 +1880,7 @@ void LVmDebuggerWnd::UpdateVariables(LList *Lst, LVariant *Arr, ssize_t Len, cha
 		LVariant *v = Arr + i;
 		LStringPipe p(64);
 		d->Vm->d->DumpVariant(&p, *v);
-		GAutoString a(p.NewStr());
+		LAutoString a(p.NewStr());
 		char nm[32];
 		sprintf_s(nm, sizeof(nm), "%c" LPrintfSSizeT, Prefix, i);
 		
@@ -2091,12 +2091,12 @@ int LVmDebuggerWnd::OnNotify(LViewI *Ctrl, int Flags)
 				{
 					d->Stack->Empty();
 					
-					GArray<LVirtualMachinePriv::StackFrame> &Frames = d->Vm->d->Frames;
+					LArray<LVirtualMachinePriv::StackFrame> &Frames = d->Vm->d->Frames;
 					for (int i=(int)Frames.Length()-1; i>=0; i--)
 					{
 						LVirtualMachinePriv::StackFrame &Sf = Frames[i];
 						LListItem *li = new LListItem;
-						GString s;
+						LString s;
 						s.Printf("%p/%i", Sf.ReturnIp, Sf.ReturnIp);
 						li->SetText(s, 0);
 						
@@ -2149,7 +2149,7 @@ bool LScriptArguments::Throw(const char *File, int Line, const char *Msg, ...)
 	va_list Arg;
 	va_start(Arg, Msg);
 
-	GString s;
+	LString s;
 	s.Printf(Arg, Msg);
 
 	va_end(Arg);

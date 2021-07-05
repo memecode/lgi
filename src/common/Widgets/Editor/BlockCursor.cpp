@@ -40,7 +40,7 @@ LRichTextPriv::BlockCursor &LRichTextPriv::BlockCursor::operator =(const BlockCu
 		
 void LRichTextPriv::BlockCursor::Set(ssize_t off)
 {
-	GArray<int> Ln;
+	LArray<int> Ln;
 	if (!Blk->OffsetToLine(off, NULL, &Ln))
 		Ln.Add(-1);
 
@@ -58,7 +58,7 @@ void LRichTextPriv::BlockCursor::Set(LRichTextPriv::Block *b, ssize_t off, int l
 
 			#if DEBUG_LOG_CURSOR_COUNT
 			{
-				GArray<char16> Text;
+				LArray<char16> Text;
 				Blk->CopyAt(0, 20, &Text);
 				Text.Add(0);
 				LgiTrace("%s:%i - %i del cursor %p (%.20S)\n", _FL, Blk->Cursors, Blk, &Text.First());
@@ -76,7 +76,7 @@ void LRichTextPriv::BlockCursor::Set(LRichTextPriv::Block *b, ssize_t off, int l
 
 			#if DEBUG_LOG_CURSOR_COUNT
 			{
-				GArray<char16> Text;
+				LArray<char16> Text;
 				Blk->CopyAt(0, 20, &Text);
 				Text.Add(0);
 				LgiTrace("%s:%i - %i add cursor %p (%.20S)\n", _FL, Blk->Cursors, Blk, &Text.First());

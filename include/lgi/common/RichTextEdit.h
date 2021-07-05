@@ -28,7 +28,7 @@ enum RichEditMsgs
 	M_IMAGE_ROTATE,
 	M_IMAGE_FLIP,
 	M_IMAGE_LOAD_STREAM,
-	M_COMPONENT_INSTALLED, // A = GString *ComponentName
+	M_COMPONENT_INSTALLED, // A = LString *ComponentName
 };
 
 extern char Delimiters[];
@@ -95,7 +95,7 @@ public:
 	bool DeleteSelection(char16 **Cut = 0);
 	bool SetSpellCheck(class LSpellCheck *sp);
 	
-	bool GetFormattedContent(const char *MimeType, GString &Out, GArray<ContentMedia> *Media = NULL);
+	bool GetFormattedContent(const char *MimeType, LString &Out, LArray<ContentMedia> *Media = NULL);
 
 	// Dom	
 	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL);
@@ -157,7 +157,7 @@ public:
 	size_t GetLines();
 	void GetTextExtent(int &x, int &y);
 	char *GetSelection();
-	void SetStylePrefix(GString s);
+	void SetStylePrefix(LString s);
 
 	// File IO
 	bool Open(const char *Name, const char *Cs = 0);
@@ -219,7 +219,7 @@ public:
 
 	// D'n'd target
 	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState);
-	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState);
+	int OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState);
 
 	// Virtuals
 	virtual bool Insert(int At, char16 *Data, int Len);
@@ -230,7 +230,7 @@ public:
 
 	#if _DEBUG
 	void DumpNodes(LTree *Root);
-	void SelectNode(GString Param);
+	void SelectNode(LString Param);
 	#endif
 };
 

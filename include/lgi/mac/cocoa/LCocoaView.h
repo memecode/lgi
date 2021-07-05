@@ -44,9 +44,9 @@ LgiExtern LRect LScreenFlip(LRect r);
 @interface LCocoaAssert : NSObject
 {
 }
-@property GString msg;
+@property LString msg;
 @property NSModalResponse result;
-- (id)init:(GString)m;
+- (id)init:(LString)m;
 @end
 
 // This class wraps a Cocoa NSView and redirects all the calls to LGI's LWindow object.
@@ -56,7 +56,7 @@ LgiExtern LRect LScreenFlip(LRect r);
 	struct DndEvent *dnd;
 }
 @property LView *w;
-@property GString WndClass;
+@property LString WndClass;
 
 // Object life time
 - (id)init:(LView*)wnd;

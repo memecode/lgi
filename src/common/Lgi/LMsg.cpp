@@ -99,7 +99,7 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 	int Res = 0;
 	va_list Arg;
 	va_start(Arg, Type);
-	GString Msg;
+	LString Msg;
 	Msg.Printf(Arg, Str);
 	va_end(Arg);
 
@@ -137,7 +137,7 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 	
 	NSAlert *alert = [[NSAlert alloc] init];
 	auto msg = Msg.NsStr();
-	auto title = GString(Title).NsStr();
+	auto title = LString(Title).NsStr();
 	[alert setMessageText:msg];
 	[alert setInformativeText:title];
 	switch (Type & ~MB_SYSTEMMODAL)
@@ -425,9 +425,9 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 }
 
 #if !LGI_STATIC
-void LDialogTextMsg(LViewI *Parent, const char *Title, GString Txt)
+void LDialogTextMsg(LViewI *Parent, const char *Title, LString Txt)
 {
-	GAutoPtr<LDialog> d(new LDialog);
+	LAutoPtr<LDialog> d(new LDialog);
 	if (d)
 	{
 		GTextLog *Log = NULL;

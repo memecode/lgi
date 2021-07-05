@@ -30,7 +30,7 @@ class LgiClass LPopup :
 	friend class LMouseHookPrivate;
     friend class LView;
 
-    static GArray<LPopup*> CurrentPopups;
+    static LArray<LPopup*> CurrentPopups;
 
 protected:
 	class GPopupPrivate *d;

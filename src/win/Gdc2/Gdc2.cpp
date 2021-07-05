@@ -33,7 +33,7 @@ void LgiDrawIcon(LSurface *pDC, int Dx, int Dy, HICON ico)
 	BITMAP bm, msk;
 	GetObject(iconinfo.hbmColor, sizeof(bm), &bm);
 	GetObject(iconinfo.hbmMask, sizeof(msk), &msk);
-	GArray<uint8_t> bits, mask;
+	LArray<uint8_t> bits, mask;
 	int bmp_bpp = bm.bmPlanes * bm.bmBitsPixel;
 	int msk_bpp = msk.bmPlanes * msk.bmBitsPixel;
 	bits.Length(bm.bmWidthBytes * bm.bmHeight);
@@ -375,7 +375,7 @@ bool GPalette::Load(GFile &F)
 {
 	#if 1
 
-	GString::Array Lines = F.Read().SplitDelimit("\r\n");
+	LString::Array Lines = F.Read().SplitDelimit("\r\n");
 	if (Lines.Length() < 2)
 	{
 		LgiAssert(0);
@@ -403,7 +403,7 @@ bool GPalette::Load(GFile &F)
 
 	for (int i=2; i<Lines.Length(); i++)
 	{
-		GString::Array p = Lines[i].SplitDelimit(" \t");
+		LString::Array p = Lines[i].SplitDelimit(" \t");
 		if (p.Length() == 3)
 		{
 			auto e = (*this)[i-2];

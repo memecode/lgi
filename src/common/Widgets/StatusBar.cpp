@@ -146,7 +146,7 @@ bool LStatusPane::Name(const char *n)
 
 void LStatusPane::OnPaint(LSurface *pDC)
 {
-	GAutoString t;
+	LAutoString t;
 	if (Lock(_FL))
 	{
 		t.Reset(NewStr(Name()));

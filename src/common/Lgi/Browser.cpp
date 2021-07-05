@@ -24,7 +24,7 @@ class GBrowserPriv;
 class GBrowserThread : public LThread, public LMutex
 {
 	GBrowserPriv *d;
-	GArray<GAutoString> Work;
+	LArray<LAutoString> Work;
 	bool Loop;
 
 public:
@@ -51,7 +51,7 @@ public:
 		}
 	};
 
-	typedef GAutoPtr<FileLock> FilePtr;
+	typedef LAutoPtr<FileLock> FilePtr;
 
 private:
 	Collection Files; // requires locking to access
@@ -59,14 +59,14 @@ private:
 public:
 	GBrowser *Wnd;
 	Html1::GHtml *Html;
-	GAutoPtr<GBrowserThread> Thread;
+	LAutoPtr<GBrowserThread> Thread;
 	LEdit *UriEdit;
 	LEdit *SearchEdit;
 	LButton *Back;
 	LButton *Forward;
 	LButton *Stop;
 	LButton *Search;
-	GArray<GString> History;
+	LArray<LString> History;
 	ssize_t CurHistory;
 	bool Loading;
 	GBrowser::GBrowserEvents *Events;
@@ -92,7 +92,7 @@ public:
 	void LoadStream(LStream *s)
 	{
 		int len = (int) s->GetSize();
-		GArray<char> txt;
+		LArray<char> txt;
 		txt.Length(len);
 		s->Read(&txt[0], len);
 		txt.Add(0);
@@ -145,7 +145,7 @@ public:
 		
 		if (IsFile)
 		{
-			GAutoString txt(ReadTextFile(u.sPath));
+			LAutoString txt(ReadTextFile(u.sPath));
 			if (txt)
 			{
 				Html->Name(txt);
@@ -164,7 +164,7 @@ public:
 			Html->GotoAnchor(u.sAnchor);
 		}
 
-		GString a = u.ToString();
+		LString a = u.ToString();
 		UriEdit->Name(a);
 
 		Wnd->SetCtrlEnabled(IDC_BACK, CurHistory > 0);
@@ -334,7 +334,7 @@ int GBrowserThread::Main()
 
 	while (Loop)
 	{
-		GAutoString Uri;
+		LAutoString Uri;
 		if (Lock(_FL))
 		{
 			if (Work.Length())
@@ -358,14 +358,14 @@ int GBrowserThread::Main()
 				u.Port = HTTP_PORT;
 
 			int Status = 0;
-			GAutoPtr<LStream> p(new LStringPipe);
+			LAutoPtr<LStream> p(new LStringPipe);
 			if (p)
 			{
 				LProxyUri Proxy;
 				if (Proxy.sHost)
 					d->Http.SetProxy(Proxy.sHost, Proxy.Port);
 
-				GAutoPtr<LSocketI> Sock(new LSocket);
+				LAutoPtr<LSocketI> Sock(new LSocket);
 				if (d->Http.Open(Sock, u.sHost, u.Port))
 				{
 					IHttp::ContentEncoding Enc;

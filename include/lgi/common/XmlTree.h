@@ -91,10 +91,10 @@ public:
 	/// The parent element/tag.
 	LXmlTag *Parent;
 	/// A list of attributes that this tag has
-	GArray<LXmlAttr> Attr;
+	LArray<LXmlAttr> Attr;
 	/// A list of child tags. Don't edit this list yourself, use the
 	/// InsertTag and RemoveTag methods.
-	GArray<LXmlTag*> Children;
+	LArray<LXmlTag*> Children;
 	
 	/// Construct the object
 	LXmlTag
@@ -151,8 +151,8 @@ public:
 	bool SerializeAttr(const char *Attr, char *&Str);
 	/// Read/write a native C double into an attribute
 	bool SerializeAttr(const char *Attr, double &Dbl);
-	/// Read/write a GString into an attribute
-	bool SerializeAttr(const char *Attr, GString &s);
+	/// Read/write a LString into an attribute
+	bool SerializeAttr(const char *Attr, LString &s);
 	
 	/// Gets the current tag
 	const char *GetTag();
@@ -178,7 +178,7 @@ public:
 	bool Copy(LXmlTag &t, bool Deep = false);
 	
 	/// Retrieve elements using XPath notation.
-	bool XPath(GArray<LXmlTag*> &Results, const char *Path);
+	bool XPath(LArray<LXmlTag*> &Results, const char *Path);
 };
 
 /// In the case your inheriting objects from LXmlTag you need to instantiate your

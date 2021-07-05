@@ -23,9 +23,9 @@ public:
 	int Sx, Sy;
 	bool Dynamic;
 	LKey LastKey;
-	::GArray<HookInfo> Hooks;
+	::LArray<HookInfo> Hooks;
 	bool SnapToEdge;
-	::GString Icon;
+	::LString Icon;
 	
 	// State
 	bool HadCreateEvent;
@@ -101,7 +101,7 @@ LWindow::~LWindow()
 
 bool LWindow::SetIcon(const char *FileName)
 {
-	GAutoString a;
+	LAutoString a;
 	if (Wnd)
 	{
 		if (!FileExists(FileName))
@@ -796,7 +796,7 @@ int LWindow::OnDrop(char *Format, ::LVariant *Data, LPoint Pt, int KeyState)
 	{
 		if (stricmp(Format, LGI_FileDropFormat) == 0)
 		{
-			::GArray<char*> Files;
+			::LArray<char*> Files;
 			if (Data->IsBinary())
 			{
 				GToken Uri(	(char*)Data->Value.Binary.Data,
@@ -913,14 +913,14 @@ LWindow *LWindow::PopWindow()
 }
 
 #if DEBUG_SETFOCUS
-static GAutoString DescribeView(LViewI *v)
+static LAutoString DescribeView(LViewI *v)
 {
 	if (!v)
-		return GAutoString(NewStr("NULL"));
+		return LAutoString(NewStr("NULL"));
 
 	char s[512];
 	int ch = 0;
-	::GArray<LViewI*> p;
+	::LArray<LViewI*> p;
 	for (LViewI *i = v; i; i = i->GetParent())
 	{
 		p.Add(i);
@@ -934,7 +934,7 @@ static GAutoString DescribeView(LViewI *v)
 		
 		ch += sprintf_s(s + ch, sizeof(s) - ch, "%s>%s", Buf, v->GetClass());
 	}
-	return GAutoString(NewStr(s));
+	return LAutoString(NewStr(s));
 }
 #endif
 
@@ -957,7 +957,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 			if (d->Focus == ctrl)
 			{
 				#if DEBUG_SETFOCUS
-				GAutoString _ctrl = DescribeView(ctrl);
+				LAutoString _ctrl = DescribeView(ctrl);
 				LgiTrace("SetFocus(%s, %s) already has focus.\n", _ctrl.Get(), TypeName);
 				#endif
 				return;
@@ -969,7 +969,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 				if (gv)
 				{
 					#if DEBUG_SETFOCUS
-					GAutoString _foc = DescribeView(d->Focus);
+					LAutoString _foc = DescribeView(d->Focus);
 					LgiTrace(".....defocus LView: %s\n", _foc.Get());
 					#endif
 					gv->_Focus(false);
@@ -977,7 +977,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 				else if (IsActive())
 				{
 					#if DEBUG_SETFOCUS
-					GAutoString _foc = DescribeView(d->Focus);
+					LAutoString _foc = DescribeView(d->Focus);
 					LgiTrace(".....defocus view: %s (active=%i)\n", _foc.Get(), IsActive());
 					#endif
 					d->Focus->OnFocus(false);
@@ -993,7 +993,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 				if (gv)
 				{
 					#if DEBUG_SETFOCUS
-					GAutoString _set = DescribeView(d->Focus);
+					LAutoString _set = DescribeView(d->Focus);
 					LgiTrace("LWindow::SetFocus(%s, %s) focusing LView %p\n",
 						_set.Get(),
 						TypeName,
@@ -1005,7 +1005,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 				else if (IsActive())
 				{			
 					#if DEBUG_SETFOCUS
-					GAutoString _set = DescribeView(d->Focus);
+					LAutoString _set = DescribeView(d->Focus);
 					LgiTrace("LWindow::SetFocus(%s, %s) focusing nonGView %p (active=%i)\n",
 						_set.Get(),
 						TypeName,
@@ -1022,8 +1022,8 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 		case LoseFocus:
 		{
 			#if DEBUG_SETFOCUS
-			GAutoString _Ctrl = DescribeView(d->Focus);
-			GAutoString _Focus = DescribeView(d->Focus);
+			LAutoString _Ctrl = DescribeView(d->Focus);
+			LAutoString _Focus = DescribeView(d->Focus);
 			LgiTrace("LWindow::SetFocus(%s, %s) d->Focus=%s\n",
 				_Ctrl.Get(),
 				TypeName,
@@ -1040,7 +1040,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 			if (ctrl == d->Focus)
 			{
 				#if DEBUG_SETFOCUS
-				GAutoString _Ctrl = DescribeView(d->Focus);
+				LAutoString _Ctrl = DescribeView(d->Focus);
 				LgiTrace("LWindow::SetFocus(%s, %s) on delete\n",
 					_Ctrl.Get(),
 					TypeName);

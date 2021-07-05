@@ -11,12 +11,12 @@
 #include "lgi/common/Token.h"
 #elif defined MAC
 #include "lgi/common/Net.h"
-LgiFunc bool LMacFileToPath(GString &a);
+LgiFunc bool LMacFileToPath(LString &a);
 #endif
 
-class GDropFiles : public GArray<const char*>
+class GDropFiles : public LArray<const char*>
 {
-	GString Fmt;
+	LString Fmt;
 
 public:
 	GDropFiles(GDragData &dd)
@@ -72,7 +72,7 @@ public:
 	
 			if (v.IsBinary())
 			{
-				GString s((char*)v.Value.Binary.Data, v.Value.Binary.Length);
+				LString s((char*)v.Value.Binary.Data, v.Value.Binary.Length);
 				auto Uri = s.SplitDelimit("\r\n");
 				for (int i=0; i<Uri.Length(); i++)
 				{
@@ -123,7 +123,7 @@ public:
 
 		#elif defined MAC
 
-			GArray<LVariant*> a;
+			LArray<LVariant*> a;
 			if (v.Type == GV_LIST)
 			{
 				for (auto f: *v.Value.Lst)
@@ -139,7 +139,7 @@ public:
 			for (int i=0; i<a.Length(); i++)
 			{
 				LVariant *v = a[i];
-				GString s;
+				LString s;
 				if (v->Type == GV_STRING)
 					s = v->Str();
 				else if (v->Type == GV_BINARY)
@@ -189,7 +189,7 @@ public:
 						)
 					)
 					{
-						GString a = u.DecodeStr(u.sPath);
+						LString a = u.DecodeStr(u.sPath);
 						
 						if (a.Get() && !strncasecmp(a, "/.file/", 7))
 							LMacFileToPath(a);
@@ -209,7 +209,7 @@ public:
 	}
 };
 
-class GDropStreams : public GArray<LStreamI*>
+class GDropStreams : public LArray<LStreamI*>
 {
 public:
 	GDropStreams(GDragData &dd)

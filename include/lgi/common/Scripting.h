@@ -10,7 +10,7 @@ class LScriptEnginePrivate;
 class LVmDebuggerCallback;
 class LVirtualMachine;
 
-class LScriptArguments : public GArray<LVariant*>
+class LScriptArguments : public LArray<LVariant*>
 {
 	friend class LScriptEngine;
 	friend class LVirtualMachine;
@@ -76,7 +76,7 @@ enum LFuncType
 struct LFunc
 {
 	LFuncType Type;
-	GString Method;
+	LString Method;
 	bool InUse;
 
 	LFunc(const char *m = 0, LFuncType t = NullFunc)
@@ -99,7 +99,7 @@ struct LFunc
 struct GHostFunc : public LFunc
 {
 	LScriptContext *Context;
-	GString Args;
+	LString Args;
 	ScriptCmd Func;
 	
 	GHostFunc(const GHostFunc &f)
@@ -130,9 +130,9 @@ struct LExternFunc : public LFunc
 		LVariantType Base;
 	};
 
-	GAutoString Lib;
+	LAutoString Lib;
 	ExternType ReturnType;
-	GArray<ExternType> ArgType;
+	LArray<ExternType> ArgType;
 
 	LExecutionStatus Call(LScriptContext *Ctx, LScriptArguments &Args) override;
 };
@@ -145,16 +145,16 @@ class LFunctionInfo : public GRefCount
 	static int _Infos;
 
 	int32 StartAddr;
-	GString Name;
+	LString Name;
 
 	// The reason why this is a pointer is because during the function compilation the frame
 	// size is actually unknown. If the function calls itself then it won't know what
 	// frame size to insert in the assembly (this is NULL).
 	// In which case it has to insert a post compilation fix-up for the frame size.
-	GAutoPtr<uint16> FrameSize;
+	LAutoPtr<uint16> FrameSize;
 
 	// The number and names of the parameters to the function.
-	GArray<GString> Params;
+	LArray<LString> Params;
 
 public:
 	LFunctionInfo(const char *name)
@@ -215,7 +215,7 @@ public:
 	
 	virtual GHostFunc *GetCommands() = 0;
 	virtual char *GetIncludeFile(char *FileName) = 0;
-	virtual GAutoString GetDataFolder() { return GAutoString(); }
+	virtual LAutoString GetDataFolder() { return LAutoString(); }
 	virtual LStream *GetLog() { return NULL; }
 	virtual bool SetLog(LStream *Log) { return false; }
 
@@ -226,7 +226,7 @@ public:
 	// Where you return true if successful or false on error.
 };
 
-class LVariables : public GArray<LVariant>
+class LVariables : public LArray<LVariant>
 {
 	friend class LVirtualMachinePriv;
 
@@ -292,20 +292,20 @@ class LCompiledCode
 	LVariables Globals;
 	
 	/// The byte code of all the instructions
-	GArray<uint8_t> ByteCode;
+	LArray<uint8_t> ByteCode;
 	
 	/// All the methods defined in the byte code and their arguments.
-	GArray< GAutoRefPtr<LFunctionInfo> > Methods;
+	LArray< GAutoRefPtr<LFunctionInfo> > Methods;
 	
 	/// All the externs defined in the code.
-	GArray<LExternFunc*> Externs;
+	LArray<LExternFunc*> Externs;
 	
 	/// All the user types defined
 	LHashTbl<StrKey<char16>, class LCustomType*> Types;
 	
 	/// The original script details
-	GString FileName;
-	GString Source;
+	LString FileName;
+	LString Source;
 	
 	/// The system context (all the system functions)
 	LScriptContext *SysContext;
@@ -362,7 +362,7 @@ public:
 	bool SetConsole(LStream *t);
 
 	LCompiledCode *GetCurrentCode();
-	bool Compile(	GAutoPtr<LCompiledCode> &Obj,
+	bool Compile(	LAutoPtr<LCompiledCode> &Obj,
 					LScriptContext *UserContext,
 					const char *Script,
 					const char *FileName = NULL,
@@ -382,7 +382,7 @@ public:
 	/// Set the VM ownership flag.
 	virtual void OwnVm(bool Own) = 0;
 	/// Makes the debugger the owner of the compiled code
-	virtual void OwnCompiledCode(GAutoPtr<LCompiledCode> Cc) = 0;
+	virtual void OwnCompiledCode(LAutoPtr<LCompiledCode> Cc) = 0;
 	/// Gets the code owned by the debugger
 	virtual LCompiledCode *GetCode() = 0;
 	/// Set the source and asm
@@ -405,7 +405,7 @@ public:
 	/// Start a debugger instance to handle the execution in 'Vm'
 	virtual LVmDebugger *AttachVm(LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly) = 0;
 	/// Compile a new script
-	virtual bool CompileScript(GAutoPtr<LCompiledCode> &Output, const char *FileName, const char *Source) = 0;
+	virtual bool CompileScript(LAutoPtr<LCompiledCode> &Output, const char *FileName, const char *Source) = 0;
 };
 
 /// Debugger for vm script
@@ -430,7 +430,7 @@ public:
 	GMessage::Param OnEvent(GMessage *Msg);
 	void LoadFile(const char *File);
 	LStream *GetLog();
-	void OwnCompiledCode(GAutoPtr<LCompiledCode> Cc);
+	void OwnCompiledCode(LAutoPtr<LCompiledCode> Cc);
 	LCompiledCode *GetCode();
 	
 	void Run();

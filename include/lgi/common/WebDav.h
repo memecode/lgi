@@ -4,16 +4,16 @@
 #include "lgi/common/Http.h"
 #include "OpenSSLSocket.h"
 
-extern bool LFindXml(GArray<LXmlTag*> &Results, LXmlTag *t, const char *Name);
+extern bool LFindXml(LArray<LXmlTag*> &Results, LXmlTag *t, const char *Name);
 
 class LWebdav
 {
 protected:
-	GString EndPoint, EndPointPath, User, Pass;
+	LString EndPoint, EndPointPath, User, Pass;
 
-	GAutoPtr<LSocketI> GetSocket()
+	LAutoPtr<LSocketI> GetSocket()
 	{
-		GAutoPtr<LSocketI> s;
+		LAutoPtr<LSocketI> s;
 
 		SslSocket *ssl = new SslSocket();
 		if (ssl)
@@ -30,8 +30,8 @@ protected:
 		bool Status;
 		int ProtocolStatus;
 		IHttp::ContentEncoding Encoding;
-		GString InHdrs, InBody;
-		GString OutHdrs, OutBody;
+		LString InHdrs, InBody;
+		LString OutHdrs, OutBody;
 
 		Req()
 		{
@@ -42,15 +42,15 @@ protected:
 	};
 
 	void PrettyPrint(LXmlTag &x);
-	bool Request(Req &r, const char *Name, GString Resource);
+	bool Request(Req &r, const char *Name, LString Resource);
 
 public:
 	struct FileProps
 	{
-		GString Href, LastMod, Tag, ContentType, Data;
+		LString Href, LastMod, Tag, ContentType, Data;
 		int64_t Length;
 
-		GString GetContentType()
+		LString GetContentType()
 		{
 			return ContentType.SplitDelimit(";")[0].Strip();
 		}
@@ -68,12 +68,12 @@ public:
 		}
 	};
 
-	LWebdav(GString endPoint, GString user, GString pass);
+	LWebdav(LString endPoint, LString user, LString pass);
 
-	GString::Array GetOptions(GString Resource);
-	bool PropFind(GArray<FileProps> &Files, GString Resource, int Depth = 1);
-	bool Get(const char *Resource, GString &Data);
-	bool Put(const char *Resource, GString &Data);
+	LString::Array GetOptions(LString Resource);
+	bool PropFind(LArray<FileProps> &Files, LString Resource, int Depth = 1);
+	bool Get(const char *Resource, LString &Data);
+	bool Put(const char *Resource, LString &Data);
 	bool Delete(const char *Resource);
 };
 

@@ -1544,7 +1544,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 		LRect Bounds(0, 0, Cx-1, Cy-1);
 		int PadCellX = Cx << 1;
 		#define UsedCell(x, y) Used[(PadCellX * y) + x]
-		GArray<bool> Used;
+		LArray<bool> Used;
 
 		int x = 0, y = 0;
 		for (auto Tr: Tag->Children)

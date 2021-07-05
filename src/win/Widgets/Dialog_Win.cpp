@@ -129,7 +129,7 @@ LDialog::~LDialog()
 
 bool LDialog::LoadFromResource(int Resource, char *TagList)
 {
-	GAutoString n;
+	LAutoString n;
 	bool Status = LResourceLoad::LoadFromResource(Resource, this, &Pos, &n, TagList);
 	if (Status && n)
 		Name(n);

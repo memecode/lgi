@@ -213,7 +213,7 @@ bool LRadioGroup::OnLayout(LViewLayoutInfo &Inf)
         Inf.Width.Max = RADIO_GRID + BORDER_PX * 2;
 	    for (LViewI *w: it)
 	    {
-	        GAutoPtr<LViewLayoutInfo> c(new LViewLayoutInfo);
+	        LAutoPtr<LViewLayoutInfo> c(new LViewLayoutInfo);
             if (w->OnLayout(*c))
             {
                 // Layout enabled control

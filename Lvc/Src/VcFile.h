@@ -23,14 +23,14 @@ private:
 	AppPriv *d;
 	VcFolder *Owner;
 	bool LoadDiff;
-	GString Diff;
-	GString Revision;
+	LString Diff;
+	LString Revision;
 	LUri Uri;
 	LListItemCheckBox *Chk;
 	FileStatus Status;
 
 public:
-	VcFile(AppPriv *priv, VcFolder *owner, GString revision, bool working = false);
+	VcFile(AppPriv *priv, VcFolder *owner, LString revision, bool working = false);
 	~VcFile();
 
 	int Checked(int Set = -1);
@@ -38,11 +38,11 @@ public:
 	const char *GetDiff() { return Diff; }
 	const char *GetFileName() { return GetText(COL_FILENAME); }
 	FileStatus GetStatus();
-	GString GetUri();
-	void SetUri(GString uri);
+	LString GetUri();
+	void SetUri(LString uri);
 	void SetStatus(FileStatus s) { Status = s; Update(); }
 	
-	void SetDiff(GString d);
+	void SetDiff(LString d);
 	void Select(bool b);
 	void OnMouseClick(LMouse &m);
 };

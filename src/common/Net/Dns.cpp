@@ -8,7 +8,7 @@
 #include <arpa/inet.h>
 #endif
 
-bool GetDnsServers(GArray<char*> &Servers)
+bool GetDnsServers(LArray<char*> &Servers)
 {
 	bool Status = false;
 
@@ -123,7 +123,7 @@ uchar *DnsMethods::WriteLabel(uchar *s, char *Label)
 }
 
 // Functions
-bool IDnsResolve(GArray<char*> &Results, char *Name, int Type, int Class)
+bool IDnsResolve(LArray<char*> &Results, char *Name, int Type, int Class)
 {
 	LgiAssert(sizeof(DnsHeader) == 12);
 
@@ -132,7 +132,7 @@ bool IDnsResolve(GArray<char*> &Results, char *Name, int Type, int Class)
 
 	int NameLen = strlen(Name);
 
-	GArray<char*> Ns;
+	LArray<char*> Ns;
 	if (!GetDnsServers(Ns))
 		return false;
 

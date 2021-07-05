@@ -19,7 +19,7 @@ class GMidi : public LMutex
 {
 	struct GMidiPriv *d;
 
-	void OnError(char *Func, GAutoString *Error, uint32_t Code, char *File, int Line);
+	void OnError(char *Func, LAutoString *Error, uint32_t Code, char *File, int Line);
 
 	#if defined WIN32
 	friend class GMidiNotifyWnd;
@@ -30,10 +30,10 @@ class GMidi : public LMutex
 
 protected:
 	// Lock the object before accessing this
-	GArray<uint8_t> MidiIn;
+	LArray<uint8_t> MidiIn;
 
 	// Arrays of device names
-	GArray<GAutoString> In, Out;
+	LArray<LAutoString> In, Out;
     
     #ifdef MAC
     friend void MidiNotify(const MIDINotification *message, void *refCon);
@@ -50,7 +50,7 @@ public:
 	virtual LStream *GetLog() { return NULL; }
 
 	bool IsMidiOpen();
-	bool Connect(int InIdx, int OutIdx, GAutoString *ErrorMsg = NULL);
+	bool Connect(int InIdx, int OutIdx, LAutoString *ErrorMsg = NULL);
 	void SendMidi(uint8_t *ptr, size_t len, bool quiet);
 	void CloseMidi();
 

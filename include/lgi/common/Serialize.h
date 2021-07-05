@@ -102,7 +102,7 @@ class LSerialize
 	uint16 ObjectId;
 	bool ToStream;
 	LStreamI *Stream;
-	GArray<char> FieldMem;
+	LArray<char> FieldMem;
 	LHashTbl<IntKey<int>, ssize_t> Fields;
 	uint32_t Bytes;
 
@@ -149,7 +149,7 @@ protected:
 		return true;
 	}
 
-	bool String(uint16 Id, GString &s)
+	bool String(uint16 Id, LString &s)
 	{
 		if (ToStream)
 		{
@@ -297,7 +297,7 @@ public:
 					return (float)atof(f->s.u);
 				else if (f->Size == 2)
 				{
-					GString s(f->s.w);
+					LString s(f->s.w);
 					return (float)s.Float();
 				}
 				else

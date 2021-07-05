@@ -75,7 +75,7 @@ public:
 		Visible(true);
 	}
     
-	void OnReceiveFiles(GArray<const char*> &Files)
+	void OnReceiveFiles(LArray<const char*> &Files)
 	{
 		Log->Print("Got %i files...\n", Files.Length());
 		for (unsigned i=0; i<Files.Length(); i++)
@@ -89,7 +89,7 @@ public:
 				GFile f;
 				if (f.Open(File, O_READ))
 				{
-					GString::Array a = f.Read().Split("\n");
+					LString::Array a = f.Read().Split("\n");
 					f.Close();
 					
 					double FileVersion = 0.0;
@@ -99,12 +99,12 @@ public:
 					{
 						if (a[i].Find("File, Format Version") >= 0)
 						{
-							GString::Array p = a[i].Split(" ");
+							LString::Array p = a[i].Split(" ");
 							FileVersion = p.Last().Float();
 						}
 						else if (a[i](0) == '#')
 						{
-							GString::Array p = a[i].Split(" ");
+							LString::Array p = a[i].Split(" ");
 							for (auto s : p)
 							{
 								auto i = s.Int();
@@ -127,7 +127,7 @@ public:
 					{
 						// C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\devenv.exe
 						GFile::Path p(LSP_USER_APPS, 32);
-						GString v;
+						LString v;
 
 						if (VsVersion >= 16.0)
 							v.Printf("Microsoft Visual Studio\\%" PRIi64 "\\Community", VsYear);

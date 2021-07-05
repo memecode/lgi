@@ -26,11 +26,11 @@ public:
 		bool Added;
 
 		// Use File:Line
-		GString File;
+		LString File;
 		ssize_t Line;
 		// -or-
 		// A symbol reference
-		GString Symbol;
+		LString Symbol;
 		
 		BreakPoint()
 		{
@@ -68,10 +68,10 @@ public:
 			Global
 		}	Scope;
 		
-		GString Name;
-		GString Type;
+		LString Name;
+		LString Type;
 		LVariant Value;
-		GString Detail;
+		LString Detail;
 	};
 	
 	virtual ~GDebugger() {}
@@ -80,22 +80,22 @@ public:
 	virtual bool Restart() = 0;
 	virtual bool Unload() = 0;
 	
-	virtual bool GetCallStack(GArray<GAutoString> &Stack) = 0;
-	virtual bool GetThreads(GArray<GString> &Threads, int *CurrentThread) = 0;
+	virtual bool GetCallStack(LArray<LAutoString> &Stack) = 0;
+	virtual bool GetThreads(LArray<LString> &Threads, int *CurrentThread) = 0;
 	virtual bool SetCurrentThread(int ThreadId) = 0;
-	virtual bool GetFrame(int &Frame, GAutoString &File, int &Line) = 0;
+	virtual bool GetFrame(int &Frame, LAutoString &File, int &Line) = 0;
 	virtual bool SetFrame(int Frame) = 0;
 
 	virtual bool SetBreakPoint(BreakPoint *bp) = 0;
 	virtual bool RemoveBreakPoint(BreakPoint *bp) = 0;
-	virtual bool GetBreakPoints(GArray<BreakPoint> &bps) = 0;
+	virtual bool GetBreakPoints(LArray<BreakPoint> &bps) = 0;
 
-	virtual bool GetVariables(bool Locals, GArray<Variable> &vars, bool Detailed) = 0;
+	virtual bool GetVariables(bool Locals, LArray<Variable> &vars, bool Detailed) = 0;
 	virtual bool PrintObject(const char *Var, LStream *Output) = 0;
-	virtual bool ReadMemory(GString &BaseAddr, int Length, GArray<uint8_t> &OutBuf, GString *ErrorMsg = NULL) = 0;
+	virtual bool ReadMemory(LString &BaseAddr, int Length, LArray<uint8_t> &OutBuf, LString *ErrorMsg = NULL) = 0;
 	virtual bool GetRegisters(LStream *Out) = 0;
 
-	virtual bool GetLocation(GAutoString &File, int &Line) = 0;
+	virtual bool GetLocation(LAutoString &File, int &Line) = 0;
 	virtual bool SetLocation(const char *File, int Line) = 0;
 
 	virtual bool GetRunning() = 0;

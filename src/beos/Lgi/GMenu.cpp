@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include "Lgi.h"
-#include "GString.h"
+#include "LString.h"
 #include "GToken.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -448,7 +448,7 @@ GMenuItem::GMenuItem(GMenu *m, GSubMenu *p, const char *txt, int Pos, const char
 	ShortcutKey = 0;
 	ShortcutMod = 0;
 	
-	GAutoString str(NewStrLessAnd(txt));
+	LAutoString str(NewStrLessAnd(txt));
 	
 	if (Info = new LgiMenuItem(this, str, d->Msg = new BMessage(M_COMMAND)))
 		ScanForAccel();
@@ -689,7 +689,7 @@ bool GMenuItem::Checked()
 bool GMenuItem::Name(const char *n)
 {
 	bool Status = false;
-	GAutoString p((n) ? NewStrLessAnd(n) : NewStr(""));
+	LAutoString p((n) ? NewStrLessAnd(n) : NewStr(""));
 	if (p)
 	{
 		Status = LBase::Name(p);

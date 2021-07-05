@@ -20,7 +20,7 @@ public:
 	(
 		/// You'll get pairs of ints, each pair is the start and end page
 		/// number of a range to print. i.e. [5, 10], [14, 16]
-		GArray<int> &p
+		LArray<int> &p
 	);
 	*/
 
@@ -54,10 +54,10 @@ public:
 	);
 	
 	/// Gets any available error message...
-	GString GetErrorMsg();
+	LString GetErrorMsg();
 
 	/// Write the user selected printer to a string for storage
-	bool Serialize(GString &Str, bool Write);
+	bool Serialize(LString &Str, bool Write);
 };
 
 #endif

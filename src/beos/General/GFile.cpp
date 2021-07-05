@@ -21,7 +21,7 @@
 #include <errno.h>
 
 #include "GFile.h"
-#include "GString.h"
+#include "LString.h"
 
 /****************************** Defines *************************************************************************************/
 
@@ -268,7 +268,7 @@ public:
 		return Dir;
 	}
 	
-	void Insert(GAutoPtr<GVolume> v)
+	void Insert(LAutoPtr<GVolume> v)
 	{
 		c.Insert(v.Release());
 	}

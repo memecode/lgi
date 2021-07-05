@@ -3,7 +3,7 @@
 
 void UnitTests()
 {
-	GArray<UnitTest*> Tests;
+	LArray<UnitTest*> Tests;
 
 	Tests.Add(new LRangeTest);
 	Tests.Add(new GContainers);

@@ -46,14 +46,14 @@ _CRTIMP void __cdecl qsort_s(void *_Base,
 /// will remain the same over time either. However when objects are deleted from the
 /// array their destructors WILL be called. This allows you to have simple objects that
 /// have dynamically allocated pointers that are freed properly. A good example of this
-/// type of object is the LVariant or GAutoString class.
+/// type of object is the LVariant or LAutoString class.
 ///
 /// If you want to store objects with a virtual table, or that need their constructor
-/// to be called then you should create the GArray with pointers to the objects instead
-/// of inline objects. And to clean up the memory you can call GArray::DeleteObjects or
-/// GArray::DeleteArrays.
+/// to be called then you should create the LArray with pointers to the objects instead
+/// of inline objects. And to clean up the memory you can call LArray::DeleteObjects or
+/// LArray::DeleteArrays.
 template <class Type>
-class GArray
+class LArray
 {
 	Type *p;
 	size_t len;
@@ -71,7 +71,7 @@ public:
 	typedef Type ItemType;
 
 	/// Constructor
-	GArray(size_t PreAlloc = 0)
+	LArray(size_t PreAlloc = 0)
 	{
 		p = 0;
 		alloc = len = PreAlloc;
@@ -91,7 +91,7 @@ public:
 		}
 	}
 
-	GArray(std::initializer_list<Type> il)
+	LArray(std::initializer_list<Type> il)
 	{
 		p = NULL;
 		alloc = len = 0;
@@ -104,7 +104,7 @@ public:
 		}
 	}
 
-	GArray(const GArray<Type> &c)
+	LArray(const LArray<Type> &c)
 	{
 		p = 0;
 		alloc = len = 0;
@@ -113,7 +113,7 @@ public:
 	}
 
 	/// Destructor	
-	~GArray()
+	~LArray()
 	{
 		Length(0);
 	}	
@@ -229,7 +229,7 @@ public:
 		return true;
 	}
 
-	GArray<Type> &operator =(const GArray<Type> &a)
+	LArray<Type> &operator =(const LArray<Type> &a)
 	{
 		Length(a.Length());
 		if (p && a.p)
@@ -544,7 +544,7 @@ public:
 	bool Add
 	(
 		/// Array to insert
-		const GArray<Type> &a
+		const LArray<Type> &a
 	)
 	{
 		ssize_t old = len;
@@ -557,7 +557,7 @@ public:
 		return true;
 	}
 
-	GArray<Type> &operator +(GArray<Type> &a)
+	LArray<Type> &operator +(LArray<Type> &a)
 	{
 		Add(a);
 		return *this;
@@ -596,7 +596,7 @@ public:
 		/// Item to insert before
 		size_t Index,
 		/// Array to insert
-		const GArray<Type> &a
+		const LArray<Type> &a
 	)
 	{
 		// Make room
@@ -683,7 +683,7 @@ public:
 	/// \returns a reference to a new object on the end of the array
 	///
 	/// Never assign this to an existing variable. e.g:
-	///		GArray<MyObject> a;
+	///		LArray<MyObject> a;
 	///		MyObject &o = a.New();
 	///		o.Type = something;
 	///		o = a.New();
@@ -704,7 +704,7 @@ public:
 		return Ptr;
 	}
 
-	void Swap(GArray<Type> &other)
+	void Swap(LArray<Type> &other)
 	{
 		LSwap(p, other.p);
 		LSwap(len, other.len);
@@ -717,12 +717,12 @@ public:
 		// The range of 'this' to swap out
 		LRange aRange,
 		// The other array to swap with
-		GArray<Type> &b,
+		LArray<Type> &b,
 		// The range of 'b' to swap with this array
 		LRange bRange
 	)
 	{
-		GArray<Type> Tmp;
+		LArray<Type> Tmp;
 
 		// Store entries in this that will be swapped
 		Tmp.Add(AddressOf(aRange.Start), aRange.Len);
@@ -778,20 +778,20 @@ public:
 	template <class T>
 	class Iter
 	{
-		friend class ::GArray<T>;
+		friend class ::LArray<T>;
 		ssize_t i;
 		char each_dir;
-		GArray<T> *a;
+		LArray<T> *a;
 
 	public:
-		Iter(GArray<T> *arr) // 'End' constructor
+		Iter(LArray<T> *arr) // 'End' constructor
 		{
 			i = -1;
 			a = arr;
 			each_dir = 0;
 		}
 
-		Iter(GArray<T> *arr, size_t pos)
+		Iter(LArray<T> *arr, size_t pos)
 		{
 			i = pos;
 			a = arr;
@@ -842,9 +842,9 @@ public:
 		return DeleteAt(It.i, true);
 	}
 
-	GArray<Type> Slice(ssize_t Start, ssize_t End = -1)
+	LArray<Type> Slice(ssize_t Start, ssize_t End = -1)
 	{
-		GArray<Type> a;
+		LArray<Type> a;
 
 		if (Start < 0) Start = 0;
 		if (End < 0) End = len + End + 1;

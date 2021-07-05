@@ -23,7 +23,7 @@ using namespace Gtk;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-static ::GArray<LSubMenu*> Active;
+static ::LArray<LSubMenu*> Active;
 
 void SubMenuDestroy(LSubMenu *Item)
 {
@@ -417,7 +417,7 @@ public:
 	bool HasAccel;				// The last display string should be right aligned
 	List<LDisplayString> Strs;	// Draw each alternate display string with underline
 								// except the last in the case of HasAccel==true.
-	::GString Shortcut;
+	::LString Shortcut;
 
 	LMenuItemPrivate()
 	{
@@ -486,7 +486,7 @@ public:
 	}
 };
 
-static GAutoString MenuItemParse(const char *s)
+static LAutoString MenuItemParse(const char *s)
 {
 	char buf[256], *out = buf;
 	const char *in = s;
@@ -516,7 +516,7 @@ static GAutoString MenuItemParse(const char *s)
 		*tab++ = 0;
 	}
 	
-	return GAutoString(NewStr(buf));
+	return LAutoString(NewStr(buf));
 }
 
 static void MenuItemActivate(GtkMenuItem *MenuItem, LMenuItem *Item)
@@ -529,7 +529,7 @@ static void MenuItemDestroy(GtkWidget *widget, LMenuItem *Item)
 	Item->OnGtkEvent("destroy");
 }
 
-void LMenuItem::OnGtkEvent(::GString Event)
+void LMenuItem::OnGtkEvent(::LString Event)
 {
 	if (Event.Equals("activate"))
 	{
@@ -584,7 +584,7 @@ LMenuItem::LMenuItem()
 LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int id, int Pos, const char *shortcut)
 {
 	d = NULL;
-	GAutoString Txt = MenuItemParse(txt);
+	LAutoString Txt = MenuItemParse(txt);
 	LBase::Name(txt);
 	Info = NULL;
 
@@ -922,7 +922,7 @@ bool LMenuItem::ScanForAccel()
 
 bool LMenuItem::ScanForAccel()
 {
-	::GString Accel;
+	::LString Accel;
 
 	if (d->Shortcut)
 	{
@@ -1341,7 +1341,7 @@ void LMenuItem::Checked(bool c)
 		if (!GTK_IS_CHECK_MENU_ITEM(Info.obj) && c)
 		{
 			// Create a checkable menu item...
-			GAutoString Txt = MenuItemParse(Name());
+			LAutoString Txt = MenuItemParse(Name());
 			GtkWidget *w = gtk_check_menu_item_new_with_mnemonic(Txt);
 
 			// Attach our signal
@@ -1379,7 +1379,7 @@ bool LMenuItem::Name(const char *n)
 	
 	#if GtkVer(2, 16)
 	LgiAssert(Info);
-	GAutoString Txt = MenuItemParse(n);
+	LAutoString Txt = MenuItemParse(n);
 	ScanForAccel();
 	gtk_menu_item_set_label(Info, Txt);
 	#else

@@ -130,7 +130,7 @@ public:
 		SysFont->Colour(GColour::White, GColour::Red);
 		SysFont->Transparent(true);
 
-		GString s = "Missing components: ";
+		LString s = "Missing components: ";
 		// const char *k;
 		// for (bool b = Caps->First(&k); b; b = Caps->Next(&k))
 		for (auto k : *Caps)
@@ -178,9 +178,9 @@ public:
 		{
 			case M_INSTALL:
 			{
-				GAutoPtr<GString> Component((GString*)m->A());
+				LAutoPtr<LString> Component((LString*)m->A());
 				const char *Base = "http://memecode.com/components/lookup.php?app=Scribe&wordsize=%i&component=%s&os=win64&version=2.2.0";
-				GString s;
+				LString s;
 				s.Printf(Base, sizeof(NativeInt)*8, Component->Get());
 				#if _MSC_VER == _MSC_VER_VS2013
 				s += "&tags=vc12";
@@ -189,7 +189,7 @@ public:
 				#endif
 
 				GMemStream o(1024);
-				GString err;
+				LString err;
 				int Installed = 0;
 				if (!LgiGetUri(this, &o, &err, s))
 				{
@@ -230,7 +230,7 @@ public:
 								f.SetSize(0);
 								if (f.Write(File.GetBasePtr(), File.GetSize()) == File.GetSize())
 								{
-									GAutoPtr<GString> comp(new GString(*Component));
+									LAutoPtr<LString> comp(new LString(*Component));
 									PostObject(AppHnd, M_INSTALL, comp);
 									Installed++;
 								}
@@ -258,7 +258,7 @@ public:
 class MediaItem : public LListItem
 {
 	GDocView::ContentMedia *Cm;
-	GString sSize;
+	LString sSize;
 
 public:
 	MediaItem(GDocView::ContentMedia *cm)
@@ -336,12 +336,12 @@ class App : public LWindow, public GCapabilityInstallTarget
 
 	EditCtrl *Edit;
 
-	GAutoPtr<LSpellCheck> Speller;
+	LAutoPtr<LSpellCheck> Speller;
 	CapsBar *Bar;
 	GCapabilityTarget::CapsHash Caps;
-	GAutoPtr<LEventTargetThread> Installer;
+	LAutoPtr<LEventTargetThread> Installer;
 	GOptionsFile Options;
-	GArray<GDocView::ContentMedia> Media;
+	LArray<GDocView::ContentMedia> Media;
 
 public:
 	App() : Options(GOptionsFile::PortableMode, AppName)
@@ -422,7 +422,7 @@ public:
 					LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
 					LgiMakePath(p, sizeof(p), p, "Test");
 					LgiMakePath(p, sizeof(p), p, SrcFileName);
-					GAutoString html(ReadTextFile(p));
+					LAutoString html(ReadTextFile(p));
 					if (html)
 						Edit->Name(html);
 					#endif
@@ -511,7 +511,7 @@ public:
 			// for (bool b = Caps->First(&c); b; b = Caps->Next(&c))
 			for (auto c : *Caps)
 			{
-				GAutoPtr<GString> s(new GString(c.key));
+				LAutoPtr<LString> s(new LString(c.key));
 				Installer->PostObject(Installer->GetHandle(), M_INSTALL, s);
 			}
 		}
@@ -525,7 +525,7 @@ public:
 			// const char *k;
 			// for (bool b = Caps->First(&k); b; b = Caps->Next(&k))
 			for (auto k : *Caps)
-				Edit->PostEvent(M_COMPONENT_INSTALLED, new GString(k.key));
+				Edit->PostEvent(M_COMPONENT_INSTALLED, new LString(k.key));
 		}
 		PourAll();
 	}
@@ -547,7 +547,7 @@ public:
 			{
 				Tabs->Value(0);
 
-				GString Out;
+				LString Out;
 				Imgs->Empty();
 				Media.Empty();
 				if (Edit->GetFormattedContent("text/html", Out, &Media))
@@ -592,8 +592,8 @@ public:
 			{
 				if (Edit)
 				{
-					GString Html;
-					GArray<GDocView::ContentMedia> Media;
+					LString Html;
+					LArray<GDocView::ContentMedia> Media;
 					if (Edit->GetFormattedContent("text/html", Html, &Media))
 					{
 						GFile::Path p(LSP_APP_INSTALL);
@@ -608,7 +608,7 @@ public:
 							f.Write(Html);
 							f.Close();
 							
-							GString FileName = p.GetFull();
+							LString FileName = p.GetFull();
 							
 							for (unsigned i=0; i<Media.Length(); i++)
 							{
@@ -662,13 +662,13 @@ public:
 				GNotifyType ft = (GNotifyType)f;
 				LTreeItem *i = Tree->Selection();
 				
-				LHashTbl<ConstStrKey<char>,GString> vars;
+				LHashTbl<ConstStrKey<char>,LString> vars;
 				if (i)
 				{
-					auto p = GString(i->GetText()).Split(",");
+					auto p = LString(i->GetText()).Split(",");
 					for (auto i : p)
 					{
-						GString::Array a = i.Strip().Split("=");
+						LString::Array a = i.Strip().Split("=");
 						if (a.Length() == 2)
 							vars.Add(a[0], a[1]);
 					}
@@ -679,7 +679,7 @@ public:
 					case GNotifyItem_Select:
 					{
 						#ifdef _DEBUG
-						GString Ptr = vars.Find("ptr");
+						LString Ptr = vars.Find("ptr");
 						if (Ptr)
 							Edit->SelectNode(Ptr);
 						#endif
@@ -695,11 +695,11 @@ public:
 		return 0;
 	}
 	
-	void OnReceiveFiles(GArray<const char*> &Files)
+	void OnReceiveFiles(LArray<const char*> &Files)
 	{
 		if (Edit && Files.Length() > 0)
 		{
-			GAutoString t(ReadTextFile(Files[0]));
+			LAutoString t(ReadTextFile(Files[0]));
 			if (t)
 				Edit->Name(t);
 		}
@@ -709,7 +709,7 @@ public:
 	{
 		if (m->Msg() == M_INSTALL)
 		{
-			GAutoPtr<GString> c((GString*)m->A());
+			LAutoPtr<LString> c((LString*)m->A());
 			if (c)
 			{
 				GCapabilityTarget::CapsHash h;

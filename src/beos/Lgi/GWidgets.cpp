@@ -103,7 +103,7 @@ void LDialog::OnPosChange()
 
 bool LDialog::LoadFromResource(int Resource, char *Param)
 {
-	GAutoString n;
+	LAutoString n;
 	LRect p;
 	bool Status = GLgiRes::LoadFromResource(Resource, this, &p, &n);
 	if (Status)

@@ -65,9 +65,9 @@ typedef int SOCKET;
 
 // Functions
 LgiNetFunc bool HaveNetConnection();
-LgiNetFunc bool WhatsMyIp(GAutoString &Ip);
-LgiExtern GString LIpStr(uint32_t ip);
-LgiExtern uint32_t LIpHostInt(GString str);
+LgiNetFunc bool WhatsMyIp(LAutoString &Ip);
+LgiExtern LString LIpStr(uint32_t ip);
+LgiExtern uint32_t LIpHostInt(LString str);
 
 /// Make md5 hash
 LgiNetFunc void MDStringToDigest
@@ -195,7 +195,7 @@ public:
 		int Flags = 0
 	);
 
-	ssize_t Write(const GString &s) { return Write(s.Get(), s.Length()); }
+	ssize_t Write(const LString &s) { return Write(s.Get(), s.Length()); }
 	
 	/// \brief Reads data from the remote host.
 	/// \return the number of bytes read or <= 0 on error.
@@ -277,7 +277,7 @@ public:
 	/// Enumerates the current interfaces
 	struct Interface
 	{
-		GString Name;
+		LString Name;
 		uint32_t Ip4; // Host order...
 		uint32_t Netmask4;
 
@@ -320,15 +320,15 @@ public:
 		}
 	};
 
-	static bool EnumInterfaces(GArray<Interface> &Out);
+	static bool EnumInterfaces(LArray<Interface> &Out);
 };
 
 class LgiNetClass LSocks5Socket : public LSocket
 {
-	GAutoString Proxy;
+	LAutoString Proxy;
 	int Port;
-	GAutoString UserName;
-	GAutoString Password;
+	LAutoString UserName;
+	LAutoString Password;
 
 protected:
 	bool Socks5Connected;
@@ -358,13 +358,13 @@ public:
 class LgiNetClass LUri
 {
 public:
-	GString sProtocol;
-	GString sUser;
-	GString sPass;
-	GString sHost;
+	LString sProtocol;
+	LString sUser;
+	LString sPass;
+	LString sHost;
 	int Port;
-	GString sPath;
-	GString sAnchor;
+	LString sPath;
+	LString sAnchor;
 
 	/// Parser for URI's.
 	LUri
@@ -377,7 +377,7 @@ public:
 	bool IsProtocol(const char *p) { return sProtocol.Equals(p); }
 	bool IsHttp() { return sProtocol.Equals("http") || sProtocol.Equals("https"); }
 	bool IsFile() { return sProtocol.Equals("file"); }
-	void SetFile(GString Path) { Empty(); sProtocol = "file"; sPath = Path; }
+	void SetFile(LString Path) { Empty(); sProtocol = "file"; sPath = Path; }
 	const char *LocalPath();
 	operator bool();
 
@@ -385,13 +385,13 @@ public:
 	bool Set(const char *uri);
 
 	/// Re-constructs the URI
-	GString ToString();
+	LString ToString();
 
 	/// Empty this object...
 	void Empty();
 
 	/// URL encode
-	GString EncodeStr
+	LString EncodeStr
 	(
 		/// The string to encode
 		const char *s,
@@ -400,10 +400,10 @@ public:
 	);
 
 	/// URL decode
-	GString DecodeStr(const char *s);
+	LString DecodeStr(const char *s);
 
 	/// Separate args into map
-	typedef LHashTbl<StrKey<char,false>,GString> StrMap;
+	typedef LHashTbl<StrKey<char,false>,LString> StrMap;
 	StrMap Params();
 
 	LUri &operator =(const LUri &u);
@@ -423,10 +423,10 @@ public:
 class LUdpListener : public LSocket
 {
 	LStream *Log;
-	GString Context;
+	LString Context;
 
 public:
-	LUdpListener(GArray<uint32_t> interface_ips, uint32_t mc_ip, uint16_t port, LStream *log = NULL) : Log(log)
+	LUdpListener(LArray<uint32_t> interface_ips, uint32_t mc_ip, uint16_t port, LStream *log = NULL) : Log(log)
 	{
 		//SetBroadcast();
 		SetUdp(true);
@@ -469,7 +469,7 @@ public:
 
 	}
 
-	bool ReadPacket(GString &d, uint32_t &Ip, uint16_t &Port)
+	bool ReadPacket(LString &d, uint32_t &Ip, uint16_t &Port)
 	{
 		if (!IsReadable(10))
 			return false;
@@ -492,7 +492,7 @@ public:
 
 class LUdpBroadcast : public LSocket
 {
-	GArray<Interface> Intf;
+	LArray<Interface> Intf;
 	uint32_t SelectIf;
 
 public:
@@ -503,7 +503,7 @@ public:
 		EnumInterfaces(Intf);
 	}
 
-	bool BroadcastPacket(GString Data, uint32_t Ip, uint16_t Port)
+	bool BroadcastPacket(LString Data, uint32_t Ip, uint16_t Port)
 	{
 		return BroadcastPacket(Data.Get(), Data.Length(), Ip, Port);
 	}

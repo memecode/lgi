@@ -6,7 +6,7 @@
 #include "lgi/common/Stream.h"
 
 //////////////////////////////////////////////////////////////////////
-int LgiPrintf(GString &Str, const char *Format, va_list &Arg)
+int LgiPrintf(LString &Str, const char *Format, va_list &Arg)
 {
 	int Bytes = 0;
 	
@@ -27,7 +27,7 @@ int LgiPrintf(GString &Str, const char *Format, va_list &Arg)
 	return Bytes;
 }
 
-ssize_t LgiPrintf(GAutoString &Str, const char *Format, va_list &Arg)
+ssize_t LgiPrintf(LAutoString &Str, const char *Format, va_list &Arg)
 {
 	ssize_t Bytes = 0;
 	
@@ -53,7 +53,7 @@ ssize_t LStreamPrintf(LStreamI *Stream, int Flags, const char *Format, va_list &
 	if (!Stream || !Format)
 		return 0;
 
-	GAutoString a;
+	LAutoString a;
 	ssize_t Bytes = LgiPrintf(a, Format, Arg);
 	if (!a || Bytes == 0)
 		return 0;

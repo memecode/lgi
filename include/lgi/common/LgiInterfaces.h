@@ -36,7 +36,7 @@ public:
 
 	virtual bool GetValue(const char *Var, LVariant &Value) { return false; }
 	virtual bool SetValue(const char *Var, LVariant &Value) { return false; }
-	virtual bool CallMethod(const char *MethodName, LVariant *ReturnValue, GArray<LVariant*> &Args) { return false; }
+	virtual bool CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args) { return false; }
 };
 
 /// Stream interface class
@@ -214,7 +214,7 @@ public:
 	virtual int Error(void *Param) { return 0; }
 	virtual const char *GetErrorString() { return NULL; }
 	
-	GString LocalIp()
+	LString LocalIp()
 	{
 		char Ip[32];
 		return GetLocalIp(Ip) ? Ip : NULL;
@@ -266,7 +266,7 @@ public:
 	virtual void OnCommandLine() = 0;
 	
 	/// Event called to process files dropped on the application
-	virtual void OnReceiveFiles(GArray<const char*> &Files) = 0;
+	virtual void OnReceiveFiles(LArray<const char*> &Files) = 0;
 
 	/// Event called to process URLs given to the application
 	virtual void OnUrl(const char *Url) = 0;
@@ -285,7 +285,7 @@ public:
 		/// The option to look for.
 		const char *Option,
 		/// String to receive the value (if any) of the option
-		GString &Value
+		LString &Value
 	) = 0;
 
 	/// \brief Parses the command line for a switch
@@ -301,7 +301,7 @@ public:
 	) = 0;
 	
 	/// Gets the application conf stored in lgi.conf
-	virtual GString GetConfig(const char *Tag) = 0;
+	virtual LString GetConfig(const char *Tag) = 0;
 
 	/// Sets a single tag in the config. (Not written to disk)
 	virtual void SetConfig(const char *Var, const char *Val) = 0;
@@ -310,7 +310,7 @@ public:
 	virtual LViewI *GetFocus() = 0;
 	
 	/// Gets the MIME type of a file
-	virtual GString GetFileMimeType
+	virtual LString GetFileMimeType
 	(
 		/// The file to identify
 		const char *File
@@ -419,7 +419,7 @@ public:
 	virtual bool AddView(LViewI *v, int Where = -1) = 0;
 	virtual bool DelView(LViewI *v) = 0;
 	virtual bool HasView(LViewI *v) = 0;
-	virtual GArray<LViewI*> IterateViews() = 0;
+	virtual LArray<LViewI*> IterateViews() = 0;
 
 	// Threading
 	virtual bool Lock(const char *file, int line, int TimeOut = -1) = 0;
@@ -449,8 +449,8 @@ public:
     virtual LCss *GetCss(bool Create = false) = 0;
     virtual void SetCss(LCss *css) = 0;
     virtual bool SetColour(GColour &c, bool Fore) = 0;
-	virtual GString CssStyles(const char *Set = NULL) { return GString(); }
-	virtual GString::Array *CssClasses() { return NULL; }
+	virtual LString CssStyles(const char *Set = NULL) { return LString(); }
+	virtual LString::Array *CssClasses() { return NULL; }
 	virtual LFont *GetFont() = 0;
 	virtual void SetFont(LFont *Fnt, bool OwnIt = false) = 0;
 

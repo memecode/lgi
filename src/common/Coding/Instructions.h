@@ -86,7 +86,7 @@ case ICast:
 		}
 		default:
 		{
-			GString s;
+			LString s;
 			s.Printf("%s ICast warning: unknown type %i/%s\n",
 							Code->AddrToSourceRef(CurrentScriptAddress),
 							Var->Type,
@@ -653,7 +653,7 @@ case ICallScript:
 	Scope[SCOPE_LOCAL] = Locals.AddressOf(LocalsPos);
 	
 	// Put the arguments of the function call into the local array
-	GArray<LVariant*> Arg;
+	LArray<LVariant*> Arg;
 	
 	#else
 	
@@ -828,7 +828,7 @@ case IArrayGet:
 		}
 		default:
 		{
-			GString s;
+			LString s;
 			s.Printf("%s IArrayGet warning: Can't array deref variant type %i\n",
 					Code->AddrToSourceRef(CurrentScriptAddress),
 					Var->Type);
@@ -876,7 +876,7 @@ case IArraySet:
 		}
 		default:
 		{
-			GString s;
+			LString s;
 			s.Printf("%s IArraySet warning: Can't dereference type '%s'\n",
 					Code->AddrToSourceRef(CurrentScriptAddress),
 					LVariant::TypeToString(Var->Type));
@@ -979,7 +979,7 @@ case IDomGet:
 				{
 					Dst->Empty();
 
-					GString s;
+					LString s;
 					s.Printf("%s IDomGet warning: Unexpected %s member '%s'.\n",
 							Code->AddrToSourceRef(CurrentScriptAddress),
 							LVariant::TypeToString(Dom->Type),
@@ -1001,7 +1001,7 @@ case IDomGet:
 				if (!Ret)
 				{
 					Dst->Empty();
-					GString s;
+					LString s;
 					s.Printf("%s IDomGet warning: Unexpected %s member '%s'.\n",
 							Code->AddrToSourceRef(CurrentScriptAddress),
 							LVariant::TypeToString(Dom->Type),
@@ -1084,7 +1084,7 @@ case IDomGet:
 					default:
 					{
 						Dst->Empty();
-						GString s;
+						LString s;
 						s.Printf("%s IDomGet warning: Unexpected string member '%s'.\n",
 								Code->AddrToSourceRef(CurrentScriptAddress),
 								sName);
@@ -1100,7 +1100,7 @@ case IDomGet:
 			}
 			case GV_NULL:
 			{
-				GString s;
+				LString s;
 				s.Printf("%s IDomGet warning: Can't deref NULL object.\n",
 						Code->AddrToSourceRef(CurrentScriptAddress));
 				if (Log)
@@ -1112,7 +1112,7 @@ case IDomGet:
 			}
 			default:
 			{
-				GString s;
+				LString s;
 				s.Printf("%s IDomGet warning: Unexpected type %s (Src=%s:%i IP=0x%x).\n",
 						Code->AddrToSourceRef(CurrentScriptAddress),
 						LVariant::TypeToString(Dom->Type),
@@ -1329,7 +1329,7 @@ case IDomCall:
 		size_t i = LocalsBase;
 		Locals[i++] = *Dom; // this pointer...
 		#if DEBUG_CUSTOM_METHOD_CALL
-		GString s = Locals[i-1].ToString();
+		LString s = Locals[i-1].ToString();
 		LgiTrace("This=%s, ", s.Get());
 		#endif
 		size_t end = i + ArgCount;
@@ -1355,7 +1355,7 @@ case IDomCall:
 		break;
 	}	
 
-	GArray<LVariant*> Arg;
+	LArray<LVariant*> Arg;
 	Arg.Length(ArgCount);
 	for (int i=0; i<ArgCount; i++)
 	{

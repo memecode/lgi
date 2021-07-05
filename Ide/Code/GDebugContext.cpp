@@ -18,16 +18,16 @@ public:
 	AppWnd *App;
 	IdeProject *Proj;
 	bool InDebugging;
-	GAutoPtr<GDebugger> Db;
-	GString Exe, Args;
+	LAutoPtr<GDebugger> Db;
+	LString Exe, Args;
 	
-	GString SeekFile;
+	LString SeekFile;
 	int SeekLine;
 	bool SeekCurrentIp;
 	
-	GString MemDumpAddr;
+	LString MemDumpAddr;
 	NativeInt MemDumpStart;
-	GArray<uint8_t> MemDump;
+	LArray<uint8_t> MemDump;
 
 	GDebugContextPriv(GDebugContext *ctx) : LMutex("GDebugContextPriv")
 	{
@@ -59,7 +59,7 @@ public:
 			return;
 		}
 		
-		GArray<GString> Threads;
+		LArray<LString> Threads;
 		int CurrentThread = -1;
 		if (!Db->GetThreads(Threads, &CurrentThread))
 		{
@@ -98,7 +98,7 @@ public:
 	{
 		if (Db && Ctx->CallStack && InDebugging)
 		{
-			GArray<GAutoString> Stack;
+			LArray<LAutoString> Stack;
 			if (Db->GetCallStack(Stack))
 			{
 				Ctx->CallStack->Empty();
@@ -207,7 +207,7 @@ GMessage::Param GDebugContext::OnEvent(GMessage *m)
 			#if DEBUG_SESSION_LOGGING
 			LgiTrace("GDebugContext::OnEvent(M_FILE_LINE)\n");
 			#endif
-			GString File;
+			LString File;
 			{
 				LMutex::Auto a(d, _FL);
 				File = d->SeekFile;
@@ -254,7 +254,7 @@ bool GDebugContext::UpdateLocals()
 	if (!Locals || !d->Db || !d->InDebugging)
 		return false;
 
-	GArray<GDebugger::Variable> Vars;
+	LArray<GDebugger::Variable> Vars;
 	if (!d->Db->GetVariables(true, Vars, false))
 		return false;
 	
@@ -316,7 +316,7 @@ bool GDebugContext::UpdateLocals()
 				{
 					it->SetText(v.Type ? v.Type.Get() : "wstring", 1);
 					#ifdef MAC
-					GAutoString tmp(WideToUtf8(v.Value.Value.WString));
+					LAutoString tmp(WideToUtf8(v.Value.Value.WString));
 					sprintf_s(s, sizeof(s), "%s", tmp.Get());
 					#else
 					sprintf_s(s, sizeof(s), "%S", v.Value.Value.WString);
@@ -351,7 +351,7 @@ bool GDebugContext::UpdateLocals()
 
 bool GDebugContext::UpdateWatches()
 {
-	GArray<GDebugger::Variable> Vars;
+	LArray<GDebugger::Variable> Vars;
 	for (LTreeItem *i = Watch->GetChild(); i; i = i->GetNext())
 	{
 		GDebugger::Variable &v = Vars.New();
@@ -408,7 +408,7 @@ bool GDebugContext::SelectThread(int ThreadId)
 	return d->Db->SetCurrentThread(ThreadId);
 }
 
-bool GDebugContext::ParseFrameReference(const char *Frame, GAutoString &File, int &Line)
+bool GDebugContext::ParseFrameReference(const char *Frame, LAutoString &File, int &Line)
 {
 	if (!Frame)
 		return false;
@@ -664,7 +664,7 @@ void GDebugContext::OnMemoryDump(const char *Addr, int WordSize, int Width, bool
 	if (MemoryDump && d->Db)
 	{
 		MemoryDump->Name(NULL);
-		GString ErrMsg;		
+		LString ErrMsg;		
 		if (d->Db->ReadMemory(d->MemDumpAddr = Addr, 1024, d->MemDump, &ErrMsg))
 		{
 			d->MemDumpStart = (int)d->MemDumpAddr.Int(16);

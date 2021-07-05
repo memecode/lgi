@@ -352,7 +352,7 @@ void LFlatBorder(LSurface *pDC, LRect &r, int Width)
 	}
 }
 
-void LgiFillGradient(LSurface *pDC, LRect &r, bool Vert, GArray<GColourStop> &Stops)
+void LgiFillGradient(LSurface *pDC, LRect &r, bool Vert, LArray<GColourStop> &Stops)
 {
 	int CurStop = 0;
 	GColourStop *This = Stops.Length() > CurStop ? &Stops[CurStop] : 0;
@@ -747,7 +747,7 @@ GColourSpace GStringToColourSpace(const char *c)
 		}
 		else
 		{
-			GArray<GComponentType> Comp;
+			LArray<GComponentType> Comp;
 			while (*c)
 			{
 				switch (tolower(*c))

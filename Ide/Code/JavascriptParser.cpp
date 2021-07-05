@@ -27,14 +27,14 @@ Known bugs:
 	while (*c && (IsAlpha(*c) || IsDigit(*c) || strchr("_",*c))) \
 		c++;
 
-bool BuildJsDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug)
+bool BuildJsDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Defns, int LimitTo, bool Debug)
 {
 	if (!Source)
 		return false;
 
 	int Depth = 0;
 	int Line = 1;
-	GString CurClass;
+	LString CurClass;
 
 	for (auto *c = Source; *c; c++)
 	{
@@ -99,7 +99,7 @@ bool BuildJsDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Def
 							Start++;
 						}
 
-						GString Fn(Start, c - Start);
+						LString Fn(Start, c - Start);
 
 						auto &d = Defns.New();
 						d.Type = DefnFunc;
@@ -126,7 +126,7 @@ bool BuildJsDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Def
 
 					auto &d = Defns.New();
 					d.Type = DefnClass;
-					CurClass = GString(Start, c - Start);
+					CurClass = LString(Start, c - Start);
 					d.Name = CurClass;
 					d.File = FileName;
 					d.Line = Line;
@@ -164,7 +164,7 @@ bool BuildJsDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Def
 						c++;
 					}
 
-					GString FnDecl = GString(Start, c - Start);
+					LString FnDecl = LString(Start, c - Start);
 					d.Name = FnDecl;
 					d.File = FileName;
 					d.Line = Line;

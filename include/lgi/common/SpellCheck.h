@@ -35,22 +35,22 @@ public:
 
 	struct LanguageId
 	{
-		GString LangCode;
-		GString EnglishName;
-		GString NativeName;
+		LString LangCode;
+		LString EnglishName;
+		LString NativeName;
 	};
 	
 	struct DictionaryId
 	{
-		GString Lang;
-		GString Dict;
+		LString Lang;
+		LString Dict;
 	};
 
 	struct Params
 	{
 		GOptionsFile::PortableType IsPortable;
-		GString OptionsPath;
-		GString Lang, Dict;
+		LString OptionsPath;
+		LString Lang, Dict;
 		GCapabilityTarget *CapTarget;
 		
 		Params()
@@ -61,16 +61,16 @@ public:
 	
 	struct SpellingError : public LRange
 	{
-		GString::Array Suggestions;
+		LString::Array Suggestions;
 	};
 	
 	struct CheckText : public LRange
 	{
-		GString Text;
-		GArray<SpellingError> Errors;
+		LString Text;
+		LArray<SpellingError> Errors;
 
 		// Application specific data
-		GArray<LVariant> User;
+		LArray<LVariant> User;
 		
 		CheckText()
 		{
@@ -78,14 +78,14 @@ public:
 	};
 
 
-	LSpellCheck(GString Name) : LEventTargetThread(Name) {}
+	LSpellCheck(LString Name) : LEventTargetThread(Name) {}
 	virtual ~LSpellCheck() {}
 
 	// Impl OnEvent in your subclass:
 	// GMessage::Result OnEvent(GMessage *Msg);
 
 	/// Sends a M_ENUMERATE_LANGUAGES event to 'ResponseHnd' with a heap
-	/// allocated GArray<LanguageId>.
+	/// allocated LArray<LanguageId>.
 	bool EnumLanguages(int ResponseHnd)
 	{
 		SPELL_CHK_VALID_HND(ResponseHnd);
@@ -94,16 +94,16 @@ public:
 	}
 
 	/// Sends a M_ENUMERATE_DICTIONARIES event to 'ResponseHnd' with a heap
-	/// allocated GArray<DictionaryId>.
+	/// allocated LArray<DictionaryId>.
 	bool EnumDictionaries(int ResponseHnd, const char *Lang)
 	{
 		SPELL_CHK_VALID_HND(ResponseHnd);
 		return PostEvent(M_ENUMERATE_DICTIONARIES,
 						(GMessage::Param)ResponseHnd,
-						(GMessage::Param)new GString(Lang));
+						(GMessage::Param)new LString(Lang));
 	}
 
-	bool SetParams(GAutoPtr<Params> p)
+	bool SetParams(LAutoPtr<Params> p)
 	{
 		return PostObject(GetHandle(), M_SET_PARAMS, p);
 	}
@@ -112,7 +112,7 @@ public:
 	{
 		SPELL_CHK_VALID_HND(ResponseHnd);
 		
-		GAutoPtr<DictionaryId> i(new DictionaryId);
+		LAutoPtr<DictionaryId> i(new DictionaryId);
 		if (!i)
 			return false;
 		i->Lang = Lang;
@@ -125,16 +125,16 @@ public:
 	}
 
 	bool Check(	int ResponseHnd,
-				GString s,
+				LString s,
 				ssize_t Start, ssize_t Len,
-				GArray<LVariant> *User = NULL /* see 'SpellCheckParams' */)
+				LArray<LVariant> *User = NULL /* see 'SpellCheckParams' */)
 	{
 		SPELL_CHK_VALID_HND(ResponseHnd);
 		
 		if (s.Length() == 0)
 			return false;
 
-		GAutoPtr<CheckText> c(new CheckText);
+		LAutoPtr<CheckText> c(new CheckText);
 		c->Text = s;
 		c->Start = Start;
 		c->Len = Len;
@@ -152,8 +152,8 @@ public:
 
 // These are the various implementations of the this object. You have to include the
 // correct C++ source to get this to link.
-extern GAutoPtr<LSpellCheck> CreateWindowsSpellCheck();		// Available on Windows 8.0 and greater
-extern GAutoPtr<LSpellCheck> CreateAppleSpellCheck();		// Available on Mac OS X
-extern GAutoPtr<LSpellCheck> CreateAspellObject();			// Available anywhere.
+extern LAutoPtr<LSpellCheck> CreateWindowsSpellCheck();		// Available on Windows 8.0 and greater
+extern LAutoPtr<LSpellCheck> CreateAppleSpellCheck();		// Available on Mac OS X
+extern LAutoPtr<LSpellCheck> CreateAspellObject();			// Available anywhere.
 
 #endif

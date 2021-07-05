@@ -60,7 +60,7 @@ bool GClipBoard::Empty()
 	return false;
 }
 
-bool GClipBoard::EnumFormats(::GArray<FormatType> &Formats)
+bool GClipBoard::EnumFormats(::LArray<FormatType> &Formats)
 {
 	return false;
 }
@@ -70,9 +70,9 @@ bool GClipBoard::Html(const char *doc, bool AutoEmpty)
 	return false;
 }
 
-::GString GClipBoard::Html()
+::LString GClipBoard::Html()
 {
-	return ::GString();
+	return ::LString();
 }
 
 bool GClipBoard::Text(const char *Str, bool AutoEmpty)
@@ -121,13 +121,13 @@ char *GClipBoard::Text()
 
 bool GClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 {
-	GAutoString u(WideToUtf8(Str));
+	LAutoString u(WideToUtf8(Str));
 	return Text(u, AutoEmpty);
 }
 
 char16 *GClipBoard::TextW()
 {
-	GAutoString u(Text());
+	LAutoString u(Text());
 	return Utf8ToWide(u);
 }
 
@@ -156,7 +156,7 @@ bool GClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 	return Status;
 }
 
-void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, GAutoPtr<LSurface> *Out)
+void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LAutoPtr<LSurface> *Out)
 {
 	auto chan = gdk_pixbuf_get_n_channels(Img);
 	auto alpha = gdk_pixbuf_get_has_alpha(Img);
@@ -178,7 +178,7 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, GAutoPtr<LS
 	}
 
 	auto x = gdk_pixbuf_get_width(Img), y = gdk_pixbuf_get_height(Img);
-	GAutoPtr<LMemDC> m(new LMemDC(x, y, cs));
+	LAutoPtr<LMemDC> m(new LMemDC(x, y, cs));
 	if (m)
 	{
 		auto px = gdk_pixbuf_get_pixels(Img);
@@ -342,20 +342,20 @@ bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	return r;
 }
 
-::GString::Array GClipBoard::Files()
+::LString::Array GClipBoard::Files()
 {
-	::GString::Array a;
+	::LString::Array a;
 	return a;
 }
 
-bool GClipBoard::Files(::GString::Array &a, bool AutoEmpty)
+bool GClipBoard::Files(::LString::Array &a, bool AutoEmpty)
 {
 	return false;
 }
 
 struct ReceiveData
 {
-	GAutoPtr<uint8_t,true> *Ptr;
+	LAutoPtr<uint8_t,true> *Ptr;
 	ssize_t *Len;
 };
 
@@ -394,7 +394,7 @@ void LgiClipboardReceivedFunc(GtkClipboard *clipboard,
 	#endif
 }
 
-bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8_t,true> &Ptr, ssize_t *Len)
+bool GClipBoard::Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t *Len)
 {
 	ReceiveData r = {&Ptr, Len};
 

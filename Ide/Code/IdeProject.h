@@ -90,7 +90,7 @@ public:
 	IdeProject *GetProject() { return Project; }
 	bool OnOpen(LProgressDlg *Prog, LXmlTag *Src);	
 	void CollectAllSubProjects(List<IdeProject> &c);
-	void CollectAllSource(GArray<GString> &c, IdePlatform Platform);
+	void CollectAllSource(LArray<LString> &c, IdePlatform Platform);
 	void SortChildren();
 	void InsertTag(LXmlTag *t) override;
 	bool RemoveTag() override;
@@ -133,20 +133,20 @@ public:
 	int GetPlatforms();
 
 	const char *GetFileName(); // Can be a relative path
-	GAutoString GetFullPath(); // Always a complete path
-	GAutoString GetBasePath(); // A non-relative path to the folder containing the project
+	LAutoString GetFullPath(); // Always a complete path
+	LAutoString GetBasePath(); // A non-relative path to the folder containing the project
 
 	AppWnd *GetApp();
-	GString GetExecutable(IdePlatform Platform);
+	LString GetExecutable(IdePlatform Platform);
 	const char *GetExeArgs();
 	const char *GetIncludePaths();
 	const char *GetPreDefinedValues();
 
 	LXmlTag *Create(char *Tag);
 	void Empty();
-	GString GetMakefile(IdePlatform Platform);
+	LString GetMakefile(IdePlatform Platform);
 	bool GetExePath(char *Path, int Len);
-	bool RelativePath(GString &Out, const char *In, bool Debug = false);
+	bool RelativePath(LString &Out, const char *In, bool Debug = false);
 	void Build(bool All, bool Release);
 	void StopBuild();
 	void Clean(bool All, bool Release);
@@ -158,20 +158,20 @@ public:
 	const char *GetFunctionComment();
 	bool IsMakefileUpToDate();
 	bool CreateMakefile(IdePlatform Platform, bool BuildAfterwards);
-	GString GetTargetName(IdePlatform Platform);
-	GString GetTargetFile(IdePlatform Platform);
-	bool BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool IncludeSystem, IdePlatform Platform);
+	LString GetTargetName(IdePlatform Platform);
+	LString GetTargetFile(IdePlatform Platform);
+	bool BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool IncludeSystem, IdePlatform Platform);
 	void ShowFileProperties(const char *File);
 	bool GetExpanded(int Id);
 	void SetExpanded(int Id, bool Exp);
 	int AllocateId();
-	bool CheckExists(GString &p, bool Debug = false);
-	bool CheckExists(GAutoString &p, bool Debug = false);
+	bool CheckExists(LString &p, bool Debug = false);
+	bool CheckExists(LAutoString &p, bool Debug = false);
 	void OnMakefileCreated();
 	
 	// Nodes
 	char *FindFullPath(const char *File, class ProjectNode **Node = NULL);
-	bool GetAllNodes(GArray<ProjectNode*> &Nodes);
+	bool GetAllNodes(LArray<ProjectNode*> &Nodes);
 	bool HasNode(ProjectNode *Node);
 
 	// Project heirarchy
@@ -190,8 +190,8 @@ public:
 	void ImportDsp(const char *File);
 
 	// Dependency calculation
-	bool GetAllDependencies(GArray<char*> &Files, IdePlatform Platform);
-	bool GetDependencies(const char *SourceFile, GArray<GString> &IncPaths, GArray<char*> &Files, IdePlatform Platform);
+	bool GetAllDependencies(LArray<char*> &Files, IdePlatform Platform);
+	bool GetDependencies(const char *SourceFile, LArray<LString> &IncPaths, LArray<char*> &Files, IdePlatform Platform);
 	
 	// Settings
 	IdeProjectSettings *GetSettings();
@@ -212,7 +212,7 @@ public:
 	void OnCreate();
 	void OnDragExit();
 	int WillAccept(GDragFormats &Formats, LPoint p, int KeyState);
-	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState);
+	int OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState);
 };
 
 extern const char TagSettings[];

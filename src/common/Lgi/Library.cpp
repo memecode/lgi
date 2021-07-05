@@ -55,7 +55,7 @@ bool GLibrary::Load(const char *File, bool Quiet)
 
 			SetErrorMode(SEM_NOOPENFILEERRORBOX | SEM_FAILCRITICALERRORS);
 
-			GAutoWString w(Utf8ToWide(f));
+			LAutoWString w(Utf8ToWide(f));
 			if (w)
 			{
 				hLib = LoadLibraryW(w);
@@ -316,7 +316,7 @@ const char * pathname_for_handle(void *handle)
 #include <link.h>
 #endif
 
-GString GLibrary::GetFullPath()
+LString GLibrary::GetFullPath()
 {
 	#if defined(MAC)
 		if (hLib)

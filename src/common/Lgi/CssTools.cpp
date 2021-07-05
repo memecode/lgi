@@ -5,18 +5,18 @@
 
 struct CssImageCache
 {
-	GArray<GAutoPtr<LSurface>> Store;
+	LArray<LAutoPtr<LSurface>> Store;
 	LHashTbl<ConstStrKey<char, false>, LSurface*> Map;
 
 	LSurface *Get(const char *uri)
 	{
-		auto Uri = GString(uri).Strip("\'\"");
+		auto Uri = LString(uri).Strip("\'\"");
 		auto i = Map.Find(Uri);
 		if (i)
 			return i;
 
 		// Check theme folder first...
-		GString File;
+		LString File;
 		auto Res = LgiGetResObj();
 		auto ThemeFolder = Res ? Res->GetThemeFolder() : NULL;
 		if (ThemeFolder)
@@ -33,7 +33,7 @@ struct CssImageCache
 		if (!File)
 			return NULL;
 
-		GAutoPtr<LSurface> img(GdcD->Load(File));
+		LAutoPtr<LSurface> img(GdcD->Load(File));
 		if (!img)
 			return NULL;
 
@@ -413,7 +413,7 @@ void GCssTools::PaintContent(LSurface *pDC, LRect &in, const char *utf8, LSurfac
 
 	if (utf8 || img)
 	{
-		GAutoPtr<LDisplayString> Ds;
+		LAutoPtr<LDisplayString> Ds;
 		auto Fnt = View ? View->GetFont() : SysFont;
 		if (utf8)
 		{

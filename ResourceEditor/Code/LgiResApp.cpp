@@ -692,7 +692,7 @@ void FieldView::OnSelect(FieldSource *s)
 			int Row = 0;
 			GLayoutCell *Cell;
 
-			GArray<FieldTree::FieldArr*> a;
+			LArray<FieldTree::FieldArr*> a;
 			Fields.GetAll(a);
 			for (int i=0; i<a.Length(); i++)
 			{
@@ -801,7 +801,7 @@ int FieldView::OnNotify(LViewI *Ctrl, int Flags)
 			return 0;
 		}
 
-		GArray<FieldTree::FieldArr*> a;
+		LArray<FieldTree::FieldArr*> a;
 		Fields.GetAll(a);
 		for (int i=0; i<a.Length(); i++)
 		{
@@ -829,7 +829,7 @@ int FieldView::OnNotify(LViewI *Ctrl, int Flags)
 						{
 							GFile::Path p = File;
 							p--;
-							GAutoString Rel = LgiMakeRelativePath(p, s.Name());
+							LAutoString Rel = LgiMakeRelativePath(p, s.Name());
 							if (Rel)
 								SetCtrlName(c->Id, Rel);
 							else
@@ -1012,7 +1012,7 @@ void AppWnd::OnCreate()
 
 	DropTarget(true);
 
-	GString Open;
+	LString Open;
 	if (LgiApp->GetOption("o", Open))
 		LoadLgi(Open);
 }
@@ -1151,7 +1151,7 @@ void AppWnd::SetCurLang(GLanguage *L)
 	}
 }
 
-GArray<GLanguage*> *AppWnd::GetLanguages()
+LArray<GLanguage*> *AppWnd::GetLanguages()
 {
 	return &Languages;
 }
@@ -1590,7 +1590,7 @@ int AppWnd::GetUniqueStrRef(int	Start)
 		return -1;
 
 	LHashTbl<IntKey<int>, ResString*> Map;
-	GArray<ResString*> Dupes;
+	LArray<ResString*> Dupes;
 
 	for (auto r: l)
 	{
@@ -1694,7 +1694,7 @@ ResStringGroup *AppWnd::GetDialogSymbols()
 	return NULL;
 }
 
-void AppWnd::OnReceiveFiles(GArray<const char*> &Files)
+void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 {
 	auto f = Files.Length() ? Files[0] : 0;
 	if (f)
@@ -1991,7 +1991,7 @@ void AppWnd::OnResourceSelect(Resource *r)
 char *TagName(LXmlTag *t)
 {
 	static char Buf[1024];
-	GArray<LXmlTag*> Tags;
+	LArray<LXmlTag*> Tags;
 	for (; t; t = t->Parent)
 	{
 		Tags.AddAt(0, t);
@@ -2014,7 +2014,7 @@ public:
 	{
 		Lst = 0;
 		LRect p;
-		GAutoString n;
+		LAutoString n;
 
 		if (LoadFromResource(IDD_COMPARE, this, &p, &n))
 		{
@@ -2150,7 +2150,7 @@ public:
 
 		if (t1->IsTag("string-group"))
 		{
-			GArray<LXmlTag*> r1, r2;
+			LArray<LXmlTag*> r1, r2;
 			for (auto t: t1->Children)
 			{
 				char *Ref;
@@ -2745,7 +2745,7 @@ void SerialiseContext::PostLoad(AppWnd *App)
 		Log.Print("Repaired CtrlId of string ref %i to %i\n", s->GetRef(), Id);
 	}
 	
-	GAutoString a(Log.NewStr());
+	LAutoString a(Log.NewStr());
 	if (ValidStr(a))
 	{
 		LgiMsg(App, "%s", "Load Warnings", MB_OK, a.Get());
@@ -3000,7 +3000,7 @@ bool AppWnd::WriteDefines(GFile &Defs)
 		}
 
 		// write the list out
-		GArray<DefinePair> Pairs;
+		LArray<DefinePair> Pairs;
 		// char *s = 0;
 		// for (int i = Def.First(&s); i; i = Def.Next(&s))
 		for (auto i : Def)
@@ -3405,7 +3405,7 @@ public:
 	}
 };
 
-void TokLine(GArray<char*> &T, char *Line)
+void TokLine(LArray<char*> &T, char *Line)
 {
 	if (Line)
 	{
@@ -3526,7 +3526,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 				Defines.ProcessLine(Line);
 
 				// Tokenize
-				GArray<char*> T;
+				LArray<char*> T;
 				TokLine(T, Line);
 
 				// Process line
@@ -4520,8 +4520,8 @@ void FindShortCuts(LList *Out, LViewI *In)
 			if (a && a[1] != '&')
 			{
 				LListItem *li = new LListItem;
-				GString s(++a, 1);
-				GString id;
+				LString s(++a, 1);
+				LString id;
 				id.Printf("%i", rdc->GetStr()->GetRef());
 				li->SetText(s.Upper(), 0);
 				li->SetText(id, 1);
@@ -4546,7 +4546,7 @@ int ShortCutView::OnNotify(LViewI *Ctrl, int Flags)
 				LListItem *li = Lst->GetSelected();
 				if (li)
 				{
-					GString s = li->GetText(1);
+					LString s = li->GetText(1);
 					ResDialogCtrl *c = (ResDialogCtrl*) li->_UserPtr;
 					if (c)
 						App->GotoObject(c->GetStr(), NULL, c->GetDlg(), NULL, c);

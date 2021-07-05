@@ -62,8 +62,8 @@ struct GBlockArray
 {
 	struct Block
 	{
-		GAutoString File;
-		GAutoPtr<char> Data;
+		LAutoString File;
+		LAutoPtr<char> Data;
 		uint32 Id;
 		uint32 Used;
 		
@@ -74,7 +74,7 @@ struct GBlockArray
 		}
 	};
 
-	GArray<Block*> b;
+	LArray<Block*> b;
 	GHashTbl<int, Block*> m;
 
 	uint32 BlockSize;
@@ -82,7 +82,7 @@ struct GBlockArray
 	uint8 HasRecordHdrs : 1;
 	uint8 Sorted : 1;
 	
-	GAutoString Base;
+	LAutoString Base;
 	const char *Ext;
 	
 	GBlockArray(uint32 size, uint8 keytype, const char *base, const char *ext);
@@ -94,8 +94,8 @@ struct GBlockArray
 
 struct GTableDbPriv
 {
-	GAutoString BasePath;
-	GArray<GTableDb::Table*> Tables;
+	LAutoString BasePath;
+	LArray<GTableDb::Table*> Tables;
 	LStream *Log;
 	
 	GTableDbPriv();	
@@ -105,8 +105,8 @@ struct GTableDbPriv
 struct GTablePriv
 {
 	GTableDbPriv *Db;
-	GArray<GTableDb::Field> Fields;
-	GAutoPtr<GBlockArray> Data;
+	LArray<GTableDb::Field> Fields;
+	LAutoPtr<GBlockArray> Data;
 	
 	GTablePriv(GTableDbPriv *db);
 	~GTablePriv();
@@ -117,7 +117,7 @@ struct GTablePriv
 struct GFileBase
 {
 	GTablePriv *Table;
-	GAutoString FileName;
+	LAutoString FileName;
 	
 	GFileBase(GTablePriv *t, const char *fn);	
 	virtual ~GFileBase();
@@ -133,7 +133,7 @@ struct GDataFile : public GFileBase
 struct GIndexFile : public GFileBase
 {
 	GTablePriv *Table;
-	GArray<uint8*> Blocks;
+	LArray<uint8*> Blocks;
 	
 	GIndexFile(GTablePriv *t, const char *fn);
 	~GIndexFile();	

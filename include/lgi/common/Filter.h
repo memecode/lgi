@@ -45,7 +45,7 @@ LgiFunc int FindHeader(int Offset, const char *Str, LStream *f);
 /// GFilterFactory.
 class LgiClass GFilter : public GDom
 {
-	GArray<uint8_t> Buf;
+	LArray<uint8_t> Buf;
 
 protected:
 	GBmpMem *GetSurface(LSurface *pDC) { return pDC->pMem; }

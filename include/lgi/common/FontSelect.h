@@ -33,7 +33,7 @@ class LFontSelect : public LDialog
 
 public:
 	/// The face of the font selected
-	GString Face;
+	LString Face;
 	/// The point size of the font selected
 	int Size;
 	/// True if the font should be bold

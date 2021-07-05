@@ -44,7 +44,7 @@ class GMimeBuf : public LStringPipe
 public:
 	GMimeBuf(LStreamI *src, LStreamEnd *end);
 
-	ssize_t Pop(GArray<char> &Buf) override;
+	ssize_t Pop(LArray<char> &Buf) override;
 	ssize_t Pop(char *Str, ssize_t BufSize) override;
 };
 
@@ -63,7 +63,7 @@ class LMime
 	// Other info
 	char *TmpPath;
 	LMime *Parent;
-	GArray<LMime*> Children;
+	LArray<LMime*> Children;
 
 	// Private methods
 	bool Lock();

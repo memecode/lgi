@@ -281,7 +281,7 @@ void LToolTabBar::OnPaint(LSurface *pScreen)
 	pDC->Rectangle(&r);
 
 	// Draw tabs
-	GArray<LToolTab*> Down;
+	LArray<LToolTab*> Down;
 	for (auto It = Children.rbegin(); It != Children.end(); It--)
 	{
 		LToolTab *Tab = dynamic_cast<LToolTab*>(*It);

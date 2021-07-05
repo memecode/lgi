@@ -10,11 +10,11 @@ class LSoftwareUpdate
 public:
 	struct UpdateInfo
 	{
-		GAutoString Name;
-		GAutoString Version;
-		GAutoString Build;
-		GAutoString Uri;
-		GAutoString Proxy;
+		LAutoString Name;
+		LAutoString Version;
+		LAutoString Build;
+		LAutoString Uri;
+		LAutoString Proxy;
 		LDateTime Date;
 		bool Cancel;
 		

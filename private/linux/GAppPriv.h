@@ -14,7 +14,7 @@
 
 #include "LgiWinManGlue.h"
 
-typedef GArray<LAppInfo*> AppArray;
+typedef LArray<LAppInfo*> AppArray;
 using namespace Gtk;
 
 class GAppPrivate : public LSymLookup
@@ -23,8 +23,8 @@ public:
 	// Common
 	GApp *Owner;
 	GtkApplication *App;
-	GAutoPtr<LJson> Config;
-	GAutoPtr<GApp::KeyModFlags> ModFlags;
+	LAutoPtr<LJson> Config;
+	LAutoPtr<GApp::KeyModFlags> ModFlags;
 	GFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
@@ -40,16 +40,16 @@ public:
 	int MessageLoopDepth;
 	int CurEvent;
 	#if DEBUG_MSG_TYPES
-	GArray<int> Types;
+	LArray<int> Types;
 	#endif
-	::GArray<LViewI*> DeleteLater;
+	::LArray<LViewI*> DeleteLater;
 	LMouse LastMove;
-	GAutoString Name;
-	::GArray<Gtk::guint> IdleId;
+	LAutoString Name;
+	::LArray<Gtk::guint> IdleId;
 	
 	#if defined(LINUX)
 	/// Desktop info
-	GAutoPtr<GApp::DesktopInfo> DesktopInfo;
+	LAutoPtr<GApp::DesktopInfo> DesktopInfo;
 	#endif
 
 	#if HAS_LIB_MAGIC
@@ -58,7 +58,7 @@ public:
 	#endif
 
 	/// Any fonts needed for styling the elements
-	GAutoPtr<GFontCache> FontCache;
+	LAutoPtr<GFontCache> FontCache;
 	
 	// Clipboard handling
 	int Clipboard, Utf8, Utf8String;

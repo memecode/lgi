@@ -12,7 +12,7 @@ public:
 	LWindow *Wnd;
 	LView *View;
 	LRect Rc;
-	GArray<LRect> Stack;
+	LArray<LRect> Stack;
 	GColour c;
 	int Bits;
 	int Op;
@@ -155,12 +155,12 @@ LScreenDC::~LScreenDC()
 	DeleteObj(d);
 }
 
-GString LScreenDC::Dump()
+LString LScreenDC::Dump()
 {
 	auto Ctx = Handle();
 	CGAffineTransform t = CGContextGetCTM(Ctx);
 	LRect cr = CGContextGetClipBoundingBox(Ctx);
-	GString s;
+	LString s;
 	s.Printf("ScreenDC transform=%g,%g,%g,%g-%g,%g clip=%s",
 			t.a, t.b, t.c, t.d, t.tx, t.ty,
 			cr.GetStr());

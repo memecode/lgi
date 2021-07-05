@@ -100,9 +100,9 @@ const char *CastEmpty(char *s)
 	return s ? s : "";
 }
 
-bool FindInPath(GString &Exe)
+bool FindInPath(LString &Exe)
 {
-	GString::Array Path = GString(getenv("PATH")).Split(LGI_PATH_SEPARATOR);
+	LString::Array Path = LString(getenv("PATH")).Split(LGI_PATH_SEPARATOR);
 	for (unsigned i=0; i<Path.Length(); i++)
 	{
 		char p[MAX_PATH];
@@ -117,9 +117,9 @@ bool FindInPath(GString &Exe)
 	return false;
 }
 
-GAutoString ToNativePath(const char *s)
+LAutoString ToNativePath(const char *s)
 {
-	GAutoString a(NewStr(s));
+	LAutoString a(NewStr(s));
 	if (a)
 	{
 		if (strnicmp(a, "ftp://", 6))
@@ -155,12 +155,12 @@ class ProjectNode;
 class BuildThread : public LThread, public LStream
 {
 	IdeProject *Proj;
-	GString Makefile, CygwinPath;
+	LString Makefile, CygwinPath;
 	bool Clean, Release, All;
 	int WordSize;
-	GAutoPtr<LSubProcess> SubProc;
-	GString::Array BuildConfigs;
-	GString::Array PostBuild;
+	LAutoPtr<LSubProcess> SubProc;
+	LString::Array BuildConfigs;
+	LString::Array PostBuild;
 
 	enum CompilerType
 	{
@@ -192,8 +192,8 @@ public:
 	~BuildThread();
 	
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override;
-	GString FindExe();
-	GAutoString WinToMingWPath(const char *path);
+	LString FindExe();
+	LAutoString WinToMingWPath(const char *path);
 	int Main() override;
 };
 
@@ -203,18 +203,18 @@ public:
 	AppWnd *App;
 	IdeProject *Project;
 	bool Dirty, UserFileDirty;
-	GString FileName;
+	LString FileName;
 	IdeProject *ParentProject;
 	IdeProjectSettings Settings;
-	GAutoPtr<BuildThread> Thread;
+	LAutoPtr<BuildThread> Thread;
 	LHashTbl<ConstStrKey<char,false>, ProjectNode*> Nodes;
 	int NextNodeId;
 
 	// Threads
-	GAutoPtr<class MakefileThread> CreateMakefile;
+	LAutoPtr<class MakefileThread> CreateMakefile;
 
 	// User info file
-	GString UserFile;
+	LString UserFile;
 	LHashTbl<IntKey<int>,int> UserNodeFlags;
 
 	IdeProjectPrivate(AppWnd *a, IdeProject *project) :
@@ -228,7 +228,7 @@ public:
 		NextNodeId = 1;
 	}
 
-	void CollectAllFiles(LTreeNode *Base, GArray<ProjectNode*> &Files, bool SubProjects, int Platform);
+	void CollectAllFiles(LTreeNode *Base, LArray<ProjectNode*> &Files, bool SubProjects, int Platform);
 };
 
 class MakefileThread : public LThread, public LCancel
@@ -280,11 +280,11 @@ public:
 		const char *PlatformLibraryExt = NULL;
 		const char *PlatformStaticLibExt = NULL;
 		const char *PlatformExeExt = "";
-		GString LinkerFlags;
+		LString LinkerFlags;
 		const char *TargetType = d->Settings.GetStr(ProjTargetType, NULL, Platform);
 		const char *CompilerName = d->Settings.GetStr(ProjCompiler);
-		GString CCompilerBinary = "gcc";
-		GString CppCompilerBinary = "g++";
+		LString CCompilerBinary = "gcc";
+		LString CppCompilerBinary = "g++";
 		LStream *Log = d->App->GetBuildLog();
 		bool IsExecutableTarget = TargetType && !stricmp(TargetType, "Executable");
 		bool IsDynamicLibrary	= TargetType && !stricmp(TargetType, "DynamicLibrary");
@@ -340,7 +340,7 @@ public:
 		{
 			if (!stricmp(CompilerName, "cross"))
 			{
-				GString CBin = d->Settings.GetStr(ProjCCrossCompiler, NULL, Platform);
+				LString CBin = d->Settings.GetStr(ProjCCrossCompiler, NULL, Platform);
 				if (CBin && !LFileExists(CBin))
 					FindInPath(CBin);
 				if (CBin && LFileExists(CBin))
@@ -348,7 +348,7 @@ public:
 				else
 					Log->Print("%s:%i - Error: C cross compiler '%s' not found.\n", _FL, CBin.Get());
 				
-				GString CppBin = d->Settings.GetStr(ProjCppCrossCompiler, NULL, Platform);
+				LString CppBin = d->Settings.GetStr(ProjCppCrossCompiler, NULL, Platform);
 				if (CppBin && !LFileExists(CppBin))
 					FindInPath(CppBin);
 				if (CppBin && LFileExists(CppBin))
@@ -381,7 +381,7 @@ public:
 				CppCompilerBinary.Get());
 
 		// Collect all files that require building
-		GArray<ProjectNode*> Files;
+		LArray<ProjectNode*> Files;
 		d->CollectAllFiles
 		(
 			Proj,
@@ -390,17 +390,17 @@ public:
 			1 << Platform
 		);
 		
-		GAutoString Base = Proj->GetBasePath();
+		LAutoString Base = Proj->GetBasePath();
 		if (IsExecutableTarget)
 		{
-			GString Exe = Proj->GetExecutable(Platform);
+			LString Exe = Proj->GetExecutable(Platform);
 			if (Exe)
 			{
 				if (LgiIsRelativePath(Exe))
 					m.Print("Target = %s\n", Exe.Get());
 				else
 				{
-					GAutoString RelExe = LgiMakeRelativePath(Base, Exe);
+					LAutoString RelExe = LgiMakeRelativePath(Base, Exe);
 					if (Base && RelExe)
 					{
 						m.Print("Target = %s\n", RelExe.Get());
@@ -420,7 +420,7 @@ public:
 		}
 		else
 		{
-			GString Target = Proj->GetTargetName(Platform);
+			LString Target = Proj->GetTargetName(Platform);
 			if (Target)
 				m.Print("Target = %s\n", Target.Get());
 			else
@@ -438,9 +438,9 @@ public:
 				"endif\n",
 				BuildModeName);
 		
-		GString sDefines[2];
-		GString sLibs[2];
-		GString sIncludes[2];
+		LString sDefines[2];
+		LString sLibs[2];
+		LString sIncludes[2];
 		const char *ExtraLinkFlags = NULL;
 		const char *ExeFlags = NULL;
 		if (Platform == PlatformWin)
@@ -493,20 +493,20 @@ public:
 				GToken Defs(PDefs, " ;,\r\n");
 				for (int i=0; i<Defs.Length(); i++)
 				{
-					GString s;
+					LString s;
 					s.Printf(" -D%s", Defs[i]);
 					sDefines[Cfg] += s;
 				}
 			}
 		
 			// Collect all dependencies, output their lib names and paths
-			GString PLibPaths = d->Settings.GetStr(ProjLibraryPaths, NULL, Platform);
+			LString PLibPaths = d->Settings.GetStr(ProjLibraryPaths, NULL, Platform);
 			if (ValidStr(PLibPaths))
 			{
-				GString::Array LibPaths = PLibPaths.Split("\n");
+				LString::Array LibPaths = PLibPaths.Split("\n");
 				for (unsigned i=0; i<LibPaths.Length(); i++)
 				{
-					GString s, in = LibPaths[i].Strip();
+					LString s, in = LibPaths[i].Strip();
 					if (!in.Length())
 						continue;
 					
@@ -516,11 +516,11 @@ public:
 					}
 					else
 					{
-						GAutoString Rel;
+						LAutoString Rel;
 						if (!LgiIsRelativePath(in))
 							Rel = LgiMakeRelativePath(Base, in);
 
-						GString Final = Rel ? Rel.Get() : in.Get();
+						LString Final = Rel ? Rel.Get() : in.Get();
 						if (!Proj->CheckExists(Final))
 							OnError("%s:%i - Library path '%s' doesn't exist (from %s).\n",
 								_FL, Final.Get(),
@@ -539,9 +539,9 @@ public:
 				GToken Libs(PLibs, "\r\n");
 				for (int i=0; i<Libs.Length(); i++)
 				{
-					GString l = Libs[i];
+					LString l = Libs[i];
 
-					GString s;
+					LString s;
 					if (l(0) == '`' || l(0) == '-')
 						s.Printf(" \\\n\t\t%s", l.Get());
 					else
@@ -555,7 +555,7 @@ public:
 
 			for (auto dep: Deps)
 			{
-				GString Target = dep->GetTargetName(Platform);
+				LString Target = dep->GetTargetName(Platform);
 				if (Target)
 				{
 					char t[MAX_PATH];
@@ -566,7 +566,7 @@ public:
 					if (dot)
 						*dot = 0;
 													
-					GString s, sTarget = t;
+					LString s, sTarget = t;
 					Proj->CheckExists(sTarget);
 					s.Printf(" \\\n\t\t-l%s$(Tag)", ToUnixPath(sTarget));
 					sLibs[Cfg] += s;
@@ -574,12 +574,12 @@ public:
 					auto DepBase = dep->GetBasePath();
 					if (DepBase)
 					{
-						GString DepPath = DepBase.Get();
+						LString DepPath = DepBase.Get();
 						
-						GAutoString Rel;
+						LAutoString Rel;
 						Rel = LgiMakeRelativePath(Base, DepPath);
 
-						GString Final = Rel ? Rel.Get() : DepPath.Get();
+						LString Final = Rel ? Rel.Get() : DepPath.Get();
 						Proj->CheckExists(Final);
 						s.Printf(" \\\n\t\t-L%s/$(BuildDir)", ToUnixPath(Final.RStrip("/\\")));
 						sLibs[Cfg] += s;
@@ -599,7 +599,7 @@ public:
 				for (int i=0; i<Paths.Length(); i++)
 				{
 					char *p = Paths[i];
-					GAutoString pn = ToNativePath(p);					
+					LAutoString pn = ToNativePath(p);					
 					if (pn.Get()[0] != '`' && !Proj->CheckExists(pn))
 						OnError("%s:%i - Include path '%s' doesn't exist.\n", _FL, pn.Get());
 					else if (!Inc.Find(pn))
@@ -614,7 +614,7 @@ public:
 				for (int i=0; i<Paths.Length(); i++)
 				{
 					char *p = Paths[i];
-					GAutoString pn = ToNativePath(p);
+					LAutoString pn = ToNativePath(p);
 					if (pn.Get()[0] != '`' && !Proj->CheckExists(pn))
 						OnError("%s:%i - System include path '%s' doesn't exist (from %s).\n",
 							_FL, pn.Get(),
@@ -635,7 +635,7 @@ public:
 					char *e = LgiGetExtension(n->GetFileName());
 					if (e && stricmp(e, "h") == 0)
 					{
-						GString Fn = n->GetFileName();
+						LString Fn = n->GetFileName();
 						for (char *Dir = Fn; *Dir; Dir++)
 						{
 							if (*Dir == '/' || *Dir == '\\')
@@ -649,13 +649,13 @@ public:
 
 						LgiTrimDir(Path);
 					
-						GString Rel;
+						LString Rel;
 						if (!Proj->RelativePath(Rel, Path))
 							Rel = Path;
 						
 						if (stricmp(Rel, ".") != 0)
 						{
-							GAutoString RelN = ToNativePath(Rel);
+							LAutoString RelN = ToNativePath(Rel);
 							if (!Proj->CheckExists(RelN))
 								OnError("Header include path '%s' doesn't exist.\n", RelN.Get());
 							else if (!Inc.Find(RelN))
@@ -665,14 +665,14 @@ public:
 				}
 			}
 
-			GString::Array Incs;
+			LString::Array Incs;
 			for (auto i: Inc)
 				Incs.New() = i.key;
 			Incs.Sort();
 			
 			for (auto i: Incs)
 			{
-				GString s;
+				LString s;
 				if (*i == '`')
 					s.Printf(" \\\n\t\t%s", i.Get());
 				else
@@ -709,7 +709,7 @@ public:
 		
 		if (Files.Length())
 		{
-			GArray<GString> IncPaths;
+			LArray<LString> IncPaths;
 			if (Proj->BuildIncludePaths(IncPaths, false, false, Platform))
 			{
 				// Do dependencies
@@ -721,7 +721,7 @@ public:
 					ProjectNode *n = Files[c];
 					if (n->GetType() == NodeSrc)
 					{
-						GAutoString f = ToNativePath(n->GetFileName());
+						LAutoString f = ToNativePath(n->GetFileName());
 						char *d = f ? strrchr(f, DIR_CHAR) : 0;
 						char *file = d ? d + 1 : f;
 						d = file ? strrchr(file, '.') : 0;
@@ -764,7 +764,7 @@ public:
 							
 							if (DepBase && Base && TargetFile)
 							{
-								GString Rel;
+								LString Rel;
 								if (!Proj->RelativePath(Rel, DepBase))
 									Rel = DepBase;
 								ToUnixPath(Rel);
@@ -777,7 +777,7 @@ public:
 								sprintf(Buf, "%s/$(BuildDir)/%s", Rel.Get(), TargetFile.Get());
 								m.Print(" %s", Buf);
 								
-								GArray<char*> AllDeps;
+								LArray<char*> AllDeps;
 								Dep->GetAllDependencies(AllDeps, Platform);
 								LgiAssert(AllDeps.Length() > 0);
 								AllDeps.Sort(StrSort);
@@ -788,7 +788,7 @@ public:
 									if (i)
 										Rules.Print(" \\\n\t");
 									
-									GString DepRel;
+									LString DepRel;
 									char *f = Proj->RelativePath(DepRel, AllDeps[i]) ? DepRel.Get() : AllDeps[i];
 									ToUnixPath(f);
 									Rules.Print("%s", f);
@@ -847,10 +847,10 @@ public:
 							}							
 						}
 						
-						GString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);
+						LString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);
 						if (ValidStr(PostBuildCmds))
 						{
-							GString::Array a = PostBuildCmds.Split("\n");
+							LString::Array a = PostBuildCmds.Split("\n");
 							for (unsigned i=0; i<a.Length(); i++)
 								m.Print("\t%s\n", a[i].Strip().Get());
 						}
@@ -858,7 +858,7 @@ public:
 						m.Print("	@echo Done.\n"
 								"\n");
 
-						GAutoString r(Rules.NewStr());
+						LAutoString r(Rules.NewStr());
 						if (r)
 						{
 							m.Write(r, strlen(r));
@@ -888,11 +888,11 @@ public:
 							auto mk = d->GetMakefile(Platform);
 							if (mk)
 							{
-								GAutoString my_base = Proj->GetBasePath();
-								GAutoString dep_base = d->GetBasePath();
+								LAutoString my_base = Proj->GetBasePath();
+								LAutoString dep_base = d->GetBasePath();
 								d->CheckExists(dep_base);
 
-								GAutoString rel_dir = LgiMakeRelativePath(my_base, dep_base);
+								LAutoString rel_dir = LgiMakeRelativePath(my_base, dep_base);
 								d->CheckExists(rel_dir);
 								
 								char *mk_leaf = strrchr(mk, DIR_CHAR);
@@ -918,10 +918,10 @@ public:
 								ValidStr(ExtraLinkFlags) ? "-Wl" : "", ExtraLinkFlags,
 								LinkerFlags.Get());
 
-						GString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);
+						LString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);
 						if (ValidStr(PostBuildCmds))
 						{
-							GString::Array a = PostBuildCmds.Split("\n");
+							LString::Array a = PostBuildCmds.Split("\n");
 							for (unsigned i=0; i<a.Length(); i++)
 								m.Print("\t%s\n", a[i].Strip().Get());
 						}
@@ -950,10 +950,10 @@ public:
 								"	ar rcs $(BuildDir)/$(TargetFile) $(addprefix $(BuildDir)/,$(Depends))\n",
 								PlatformStaticLibExt);
 
-						GString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);
+						LString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);
 						if (ValidStr(PostBuildCmds))
 						{
-							GString::Array a = PostBuildCmds.Split("\n");
+							LString::Array a = PostBuildCmds.Split("\n");
 							for (unsigned i=0; i<a.Length(); i++)
 								m.Print("\t%s\n", a[i].Strip().Get());
 						}
@@ -992,7 +992,7 @@ public:
 							char *Dot = strrchr(Part, '.');
 							if (Dot) *Dot = 0;
 
-							GString Rel;							
+							LString Rel;							
 							if (Platform != PlatformHaiku)
 							{
 								if (!Proj->RelativePath(Rel, Src))
@@ -1009,7 +1009,7 @@ public:
 							
 							m.Print("%s.o : %s ", Part, ToUnixPath(Rel));
 
-							GArray<char*> SrcDeps;
+							LArray<char*> SrcDeps;
 							if (Proj->GetDependencies(Src, IncPaths, SrcDeps, Platform))
 							{
 								for (int i=0; i<SrcDeps.Length() && !IsCancelled(); i++)
@@ -1045,7 +1045,7 @@ public:
 				// Do remaining include file dependencies
 				bool Done = false;
 				LHashTbl<StrKey<char,false>,bool> Processed;
-				GAutoString Base = Proj->GetBasePath();
+				LAutoString Base = Proj->GetBasePath();
 				while (!Done)
 				{
 					Done = true;
@@ -1058,7 +1058,7 @@ public:
 							continue;
 
 						Done = false;
-						GString Path = it.key;
+						LString Path = it.key;
 						Proj->CheckExists(Path);
 						Processed.Add(Path, true);
 						
@@ -1071,7 +1071,7 @@ public:
 						else
 						{
 							strcpy_s(Full, sizeof(Full), Path);
-							GAutoString a = LgiMakeRelativePath(Base, Path);
+							LAutoString a = LgiMakeRelativePath(Base, Path);
 							if (a)
 							{
 								strcpy_s(Rel, sizeof(Rel), a);
@@ -1085,10 +1085,10 @@ public:
 							}
 						}
 						
-						GAutoString c8(ReadTextFile(Full));
+						LAutoString c8(ReadTextFile(Full));
 						if (c8)
 						{
-							GArray<char*> Headers;
+							LArray<char*> Headers;
 							if (BuildHeaderList(c8, Headers, IncPaths, false))
 							{
 								m.Print("%s : ", ToUnixPath(Rel));
@@ -1099,7 +1099,7 @@ public:
 									
 									if (n) m.Print(" \\\n\t");
 									
-									GString Rel;
+									LString Rel;
 									if (!Proj->RelativePath(Rel, i))
 										Rel = i;
 									Proj->CheckExists(Rel);
@@ -1129,13 +1129,13 @@ public:
 				IncPaths.Sort();
 				for (int i=0; i<IncPaths.Length() && !IsCancelled(); i++)
 				{
-					GString p = IncPaths[i];
+					LString p = IncPaths[i];
 					Proj->CheckExists(p);
 					if (p && !strchr(p, '`'))
 					{
 						if (!LgiIsRelativePath(p))
 						{
-							GAutoString a = LgiMakeRelativePath(Base, p);
+							LAutoString a = LgiMakeRelativePath(Base, p);
 							m.Print("\t%s \\\n", a?a.Get():p.Get());
 						}
 						else
@@ -1227,7 +1227,7 @@ DeclGArrayCompare(XmlSort, LXmlTag*, NativeInt)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-bool ReadVsProjFile(GString File, GString &Ver, GString::Array &Configs)
+bool ReadVsProjFile(LString File, LString &Ver, LString::Array &Configs)
 {
 	const char *Ext = LgiGetExtension(File);
 	if (!Ext || _stricmp(Ext, "vcxproj"))
@@ -1273,7 +1273,7 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, bool rele
 	Arch = DefaultArch;
 	Compiler = DefaultCompiler;
 
-	GString Cmds = proj->d->Settings.GetStr(ProjPostBuildCommands, NULL);
+	LString Cmds = proj->d->Settings.GetStr(ProjPostBuildCommands, NULL);
 	if (ValidStr(Cmds))
 		PostBuild = Cmds.SplitDelimit("\r\n");
 
@@ -1371,22 +1371,22 @@ ssize_t BuildThread::Write(const void *Buffer, ssize_t Size, int Flags)
 
 struct ProjInfo
 {
-	GString Guid, Name, File;
+	LString Guid, Name, File;
 	LHashTbl<StrKey<char>,ssize_t> Configs;
 };
 
-GString BuildThread::FindExe()
+LString BuildThread::FindExe()
 {
-	GString::Array p = LGetPath();
+	LString::Array p = LGetPath();
 
 	if (Compiler == PythonScript)
 	{
 		#if defined(WINDOWS)
 		uint32_t BestVer = 0;
 		#else
-		GString BestVer;
+		LString BestVer;
 		#endif
-		static GString Best;
+		static LString Best;
 
 		if (!Best)
 		{
@@ -1454,19 +1454,19 @@ GString BuildThread::FindExe()
 			GFile f;
 			if (f.Open(Makefile, O_READ))
 			{
-				GString ProjKey = "Project(";
-				GString StartSection = "GlobalSection(";
-				GString EndSection = "EndGlobalSection";
-				GString Section;
+				LString ProjKey = "Project(";
+				LString StartSection = "GlobalSection(";
+				LString EndSection = "EndGlobalSection";
+				LString Section;
 				ssize_t Pos;
 
-				GString::Array Ln = f.Read().SplitDelimit("\r\n");
+				LString::Array Ln = f.Read().SplitDelimit("\r\n");
 				for (size_t i = 0; i < Ln.Length(); i++)
 				{
-					GString s = Ln[i].Strip();
+					LString s = Ln[i].Strip();
 					if ((Pos = s.Find(ProjKey)) >= 0)
 					{
-						GString::Array p = s.SplitDelimit("(),=");
+						LString::Array p = s.SplitDelimit("(),=");
 						if (p.Length() > 5)
 						{
 							ProjInfo *i = new ProjInfo;
@@ -1531,7 +1531,7 @@ GString BuildThread::FindExe()
 
 			#ifdef _MSC_VER
 			// Nmake file..
-			GString NmakePath;
+			LString NmakePath;
 			switch (_MSC_VER)
 			{
 				#ifdef _MSC_VER_VS2013
@@ -1572,7 +1572,7 @@ GString BuildThread::FindExe()
 		/*
 		if (ProjFile && LFileExists(ProjFile))
 		{
-			GString sVer;
+			LString sVer;
 			if (ReadVsProjFile(ProjFile, sVer, BuildConfigs))
 			{
 				fVer = sVer.Float();
@@ -1606,7 +1606,7 @@ GString BuildThread::FindExe()
 		{
 			for (int i=0; i<CountOf(VsBinaries); i++)
 			{
-				GString p;
+				LString p;
 				p.Printf("C:\\Program Files (x86)\\Microsoft Visual Studio %.1f\\Common7\\IDE\\%s", fVer, VsBinaries[i]);
 				if (LFileExists(p))
 				{
@@ -1619,19 +1619,19 @@ GString BuildThread::FindExe()
 	{
 		// const char *Def = "c:\\Program Files (x86)\\IAR Systems\\Embedded Workbench 7.0\\common\\bin\\IarBuild.exe";
 		
-		GString ProgFiles = LGetSystemPath(LSP_USER_APPS, 32);
+		LString ProgFiles = LGetSystemPath(LSP_USER_APPS, 32);
 		char p[MAX_PATH];
 		if (!LgiMakePath(p, sizeof(p), ProgFiles, "IAR Systems"))
-			return GString();
+			return LString();
 		GDirectory d;
 		double LatestVer = 0.0;
-		GString Latest;
+		LString Latest;
 		for (int b = d.First(p); b; b = d.Next())
 		{
 			if (d.IsDir())
 			{
-				GString n(d.GetName());
-				GString::Array p = n.Split(" ");
+				LString n(d.GetName());
+				LString::Array p = n.Split(" ");
 				if (p.Length() == 3 &&
 					p[2].Float() > LatestVer)
 				{
@@ -1658,7 +1658,7 @@ GString BuildThread::FindExe()
 		GRegKey k(false, "HKEY_CURRENT_USER\\Software\\Cygwin\\Installations");
 		List<char> n;
 		k.GetValueNames(n);
-		GString s;
+		LString s;
 		for (auto i:n)
 		{
 			s = k.GetStr(i);
@@ -1709,10 +1709,10 @@ GString BuildThread::FindExe()
 		}
 	}
 	
-	return GString();
+	return LString();
 }
 
-GAutoString BuildThread::WinToMingWPath(const char *path)
+LAutoString BuildThread::WinToMingWPath(const char *path)
 {
 	GToken t(path, "\\");
 	LStringPipe a(256);
@@ -1727,7 +1727,7 @@ GAutoString BuildThread::WinToMingWPath(const char *path)
 		}
 		a.Print("/%s", p);				
 	}
-	return GAutoString(a.NewStr());
+	return LAutoString(a.NewStr());
 }
 
 int BuildThread::Main()
@@ -1735,12 +1735,12 @@ int BuildThread::Main()
 	const char *Err = 0;
 	char ErrBuf[256];
 
-	GString Exe = FindExe();
+	LString Exe = FindExe();
 	if (Exe)
 	{
 		bool Status = false;
-		GString MakePath = Makefile.Get();
-		GString InitDir = Makefile.Get();
+		LString MakePath = Makefile.Get();
+		LString InitDir = Makefile.Get();
 		LVariant Jobs;
 		if (!Proj->GetApp()->GetOptions()->GetValue(OPT_Jobs, Jobs) || Jobs.CastInt32() < 1)
 			Jobs = 2;
@@ -1749,18 +1749,18 @@ int BuildThread::Main()
 		if (Pos)
 			InitDir.Length(Pos);
 
-		GString TmpArgs, Include, Lib, LibPath, Path;
+		LString TmpArgs, Include, Lib, LibPath, Path;
 		
 		if (Compiler == VisualStudio)
 		{
 			// TmpArgs.Printf("\"%s\" /make \"All - Win32 Debug\"", Makefile.Get());
-			GString BuildConf = "All - Win32 Debug";
+			LString BuildConf = "All - Win32 Debug";
 			if (BuildConfigs.Length())
 			{
 				const char *Key = Release ? "Release" : "Debug";
 				for (size_t i=0; i<BuildConfigs.Length(); i++)
 				{
-					GString c = BuildConfigs[i];
+					LString c = BuildConfigs[i];
 					if (c.Find(Key) >= 0)
 					{
 						BuildConf = c;
@@ -1779,7 +1779,7 @@ int BuildThread::Main()
 				"C:\\Program Files (x86)\\Windows Kits\\8.1\\include\\um",
 				"C:\\Program Files (x86)\\Windows Kits\\8.1\\include\\winrt"
 			};
-			GString f;
+			LString f;
 
 			#define ADD_PATHS(out, in) \
 				for (unsigned i=0; i<CountOf(in); i++) \
@@ -1846,7 +1846,7 @@ int BuildThread::Main()
 		}
 		else if (Compiler == IAR)
 		{
-			GString Conf;
+			LString Conf;
 
 			GFile f;
 			if (f.Open(Makefile, O_READ))
@@ -1866,14 +1866,14 @@ int BuildThread::Main()
 		}
 		else if (Compiler == Xcode)
 		{
-			GString a;
+			LString a;
 			a.Printf("-list -project \"%s\"", Makefile.Get());
 			LSubProcess Ls(Exe, a);
 			if (Ls.Start())
 			{
 				LStringPipe o;
 				auto ret = Ls.Communicate(&o);
-				GString Cfgs = o.NewGStr();
+				LString Cfgs = o.NewGStr();
 
 				return 0;
 			}
@@ -1889,7 +1889,7 @@ int BuildThread::Main()
 
 			if (Compiler == MingW)
 			{
-				GString a;
+				LString a;
 				char *Dir = strrchr(MakePath, DIR_CHAR);
 				#if 1
 				TmpArgs.Printf("/C \"%s\"", Exe.Get());
@@ -1932,7 +1932,7 @@ int BuildThread::Main()
 				TmpArgs += " Build=Release";
 		}
 
-		GString Msg;
+		LString Msg;
 		Msg.Printf("Making: %s\n", MakePath.Get());
 		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (GMessage::Param)NewStr(Msg), 0);
 
@@ -1949,8 +1949,8 @@ int BuildThread::Main()
 				SubProc->SetEnvironment("LIBPATHS", LibPath);
 			if (Path)
 			{
-				GString Cur = getenv("PATH");
-				GString New = Cur + LGI_PATH_SEPARATOR + Path;
+				LString Cur = getenv("PATH");
+				LString New = Cur + LGI_PATH_SEPARATOR + Path;
 				SubProc->SetEnvironment("PATH", New);
 			}
 			// SubProc->SetEnvironment("DLL", "1");
@@ -2004,7 +2004,7 @@ int BuildThread::Main()
 			else
 			{
 				// Create a nice error message.
-				GString ErrStr = LErrorCodeToString(SubProc->GetErrorCode());
+				LString ErrStr = LErrorCodeToString(SubProc->GetErrorCode());
 				if (ErrStr)
 				{
 					char *e = ErrStr.Get() + ErrStr.Length();
@@ -2063,7 +2063,7 @@ bool IdeProject::OnNode(const char *Path, ProjectNode *Node, bool Add)
 	char Full[MAX_PATH];
 	if (LgiIsRelativePath(Path))
 	{
-		GAutoString Base = GetBasePath();
+		LAutoString Base = GetBasePath();
 		if (LgiMakePath(Full, sizeof(Full), Base, Path))
 		{
 			Path = Full;
@@ -2076,7 +2076,7 @@ bool IdeProject::OnNode(const char *Path, ProjectNode *Node, bool Add)
 	else
 		Status = d->Nodes.Delete(Path);
 	
-	GString p = Path;
+	LString p = Path;
 	if (Status && CheckExists(p))
 		d->App->OnNode(p, Node, Add ? FindSymbolSystem::FileAdd : FindSymbolSystem::FileRemove);
 
@@ -2119,7 +2119,7 @@ bool IdeProject::GetChildProjects(List<IdeProject> &c)
 	return c.Length() > 0;
 }
 
-bool IdeProject::RelativePath(GString &Out, const char *In, bool Debug)
+bool IdeProject::RelativePath(LString &Out, const char *In, bool Debug)
 {
 	if (!In)
 		return false;
@@ -2196,7 +2196,7 @@ bool IdeProject::GetExePath(char *Path, int Len)
 	{
 		if (LgiIsRelativePath(PExe))
 		{
-			GAutoString Base = GetBasePath();
+			LAutoString Base = GetBasePath();
 			if (Base)
 			{
 				LgiMakePath(Path, Len, Base, PExe);
@@ -2213,15 +2213,15 @@ bool IdeProject::GetExePath(char *Path, int Len)
 	else return false;
 }
 
-GString IdeProject::GetMakefile(IdePlatform Platform)
+LString IdeProject::GetMakefile(IdePlatform Platform)
 {
-	GString Path;
+	LString Path;
 	const char *PMakefile = d->Settings.GetStr(ProjMakefile, NULL, Platform);
 	if (PMakefile)
 	{
 		if (LgiIsRelativePath(PMakefile))
 		{
-			GAutoString Base = GetBasePath();
+			LAutoString Base = GetBasePath();
 			if (Base)
 			{
 				char p[MAX_PATH];
@@ -2270,7 +2270,7 @@ char *QuoteStr(char *s)
 class ExecuteThread : public LThread, public LStream
 {
 	IdeProject *Proj;
-	GString Exe, Args, Path;
+	LString Exe, Args, Path;
 	int Len;
 	ExeAction Act;
 
@@ -2312,7 +2312,7 @@ public:
 			else if (Act == ExeValgrind)
 			{
 				#ifdef LINUX
-				GString ExePath = Proj->GetExecutable(GetCurrentPlatform());
+				LString ExePath = Proj->GetExecutable(GetCurrentPlatform());
 				if (ExePath)
 				{
 					char Path[MAX_PATH];
@@ -2389,7 +2389,7 @@ public:
 
 GDebugContext *IdeProject::Execute(ExeAction Act)
 {
-	GAutoString Base = GetBasePath();
+	LAutoString Base = GetBasePath();
 	if (d->Settings.GetStr(ProjExe) &&
 		Base)
 	{
@@ -2400,7 +2400,7 @@ GDebugContext *IdeProject::Execute(ExeAction Act)
 			{
 				const char *Args = d->Settings.GetStr(ProjArgs);
 				const char *Env = d->Settings.GetStr(ProjEnv);
-				GString InitDir = d->Settings.GetStr(ProjInitDir);
+				LString InitDir = d->Settings.GetStr(ProjInitDir);
 				int RunAsAdmin = d->Settings.GetInt(ProjDebugAdmin);
 				if (Act == ExeDebug)
 				{
@@ -2487,10 +2487,10 @@ bool IdeProject::FindDuplicateSymbols()
 	int Found = 0;
 	for (auto p: Proj)
 	{
-		GString s = p->GetExecutable(GetCurrentPlatform());
+		LString s = p->GetExecutable(GetCurrentPlatform());
 		if (s)
 		{
-			GString Args;
+			LString Args;
 			Args.Printf("--print-size --defined-only -C %s", s.Get());
 			LSubProcess Nm("nm", Args);
 			if (Nm.Start(true, false))
@@ -2499,11 +2499,11 @@ bool IdeProject::FindDuplicateSymbols()
 				LStringPipe q;
 				for (ssize_t Rd = 0; (Rd = Nm.Read(Buf, sizeof(Buf))); )
 					q.Write(Buf, Rd);
-				GString::Array a = q.NewGStr().SplitDelimit("\r\n");
+				LString::Array a = q.NewGStr().SplitDelimit("\r\n");
 				LHashTbl<StrKey<char,false>,bool> Local(200000);
 				for (auto &Ln: a)
 				{
-					GString::Array p = Ln.SplitDelimit(" \t", 3);
+					LString::Array p = Ln.SplitDelimit(" \t", 3);
 					if (!Local.Find(p.Last()))
 					{
 						Local.Add(p.Last(), true);
@@ -2625,10 +2625,10 @@ const char *IdeProject::GetExeArgs()
 	return d->Settings.GetStr(ProjArgs);
 }
 
-GString IdeProject::GetExecutable(IdePlatform Platform)
+LString IdeProject::GetExecutable(IdePlatform Platform)
 {
-	GString Bin = d->Settings.GetStr(ProjExe, NULL, Platform);
-	GAutoString Base = GetBasePath();
+	LString Bin = d->Settings.GetStr(ProjExe, NULL, Platform);
+	LAutoString Base = GetBasePath();
 
 	if (Bin)
 	{
@@ -2643,7 +2643,7 @@ GString IdeProject::GetExecutable(IdePlatform Platform)
 	}
 
 	// Create binary name from target:	
-	GString Target = GetTargetName(Platform);
+	LString Target = GetTargetName(Platform);
 	if (Target)
 	{
 		int BuildMode = d->App->GetBuildMode();
@@ -2672,7 +2672,7 @@ GString IdeProject::GetExecutable(IdePlatform Platform)
 			{
 				LgiAssert(0);
 				printf("%s:%i - Unknown platform.\n", _FL);
-				return GString();
+				return LString();
 			}
 		}
 		
@@ -2680,7 +2680,7 @@ GString IdeProject::GetExecutable(IdePlatform Platform)
 		if (!Base)
 		{
 			printf("%s:%i - GetBasePath failed.\n", _FL);
-			return GString();
+			return LString();
 		}
 			
 		char Path[MAX_PATH];
@@ -2695,7 +2695,7 @@ GString IdeProject::GetExecutable(IdePlatform Platform)
 		return Bin;
 	}
 	
-	return GString();
+	return LString();
 }
 
 const char *IdeProject::GetFileName()
@@ -2708,16 +2708,16 @@ int IdeProject::GetPlatforms()
 	return PLATFORM_ALL;
 }
 	
-GAutoString IdeProject::GetFullPath()
+LAutoString IdeProject::GetFullPath()
 {
-	GAutoString Status;
+	LAutoString Status;
 	if (!d->FileName)
 	{
 		// LgiAssert(!"No path.");
 		return Status;
 	}
 
-	GArray<const char*> sections;
+	LArray<const char*> sections;
 	IdeProject *proj = this;
 	while (	proj &&
 			proj->GetFileName() &&
@@ -2748,7 +2748,7 @@ GAutoString IdeProject::GetFullPath()
 	return Status;
 }
 
-GAutoString IdeProject::GetBasePath()
+LAutoString IdeProject::GetBasePath()
 {
 	auto a = GetFullPath();
 	LgiTrimDir(a);
@@ -2819,7 +2819,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	Prof.Add("FileOpen");
 
 	GFile f;
-	GString FullPath = d->FileName.Get();
+	LString FullPath = d->FileName.Get();
 	if (CheckExists(FullPath) &&
 		!f.Open(FullPath, O_READWRITE))
 	{
@@ -2856,10 +2856,10 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 		GFile Uf;
 		if (Uf.Open(d->UserFile, O_READ))
 		{
-			GString::Array Ln = Uf.Read().SplitDelimit("\n");
+			LString::Array Ln = Uf.Read().SplitDelimit("\n");
 			for (unsigned i=0; i<Ln.Length(); i++)
 			{
-				GString::Array p = Ln[i].SplitDelimit(",");
+				LString::Array p = Ln[i].SplitDelimit(",");
 				if (p.Length() == 2)
 					d->UserNodeFlags.Add((int)p[0].Int(), (int)p[1].Int(16));
 			}
@@ -2990,7 +2990,7 @@ int IdeProject::AllocateId()
 }
 
 template<typename T, typename Fn>
-bool CheckExists(GAutoString Base, T &p, Fn Setter, bool Debug)
+bool CheckExists(LAutoString Base, T &p, Fn Setter, bool Debug)
 {
 	GFile::Path Full;
 	bool WasRel = LgiIsRelativePath(p);
@@ -3037,7 +3037,7 @@ bool CheckExists(GAutoString Base, T &p, Fn Setter, bool Debug)
 		
 		if ((Ret = Full.Exists()))
 		{
-			GString Old = p.Get();
+			LString Old = p.Get();
 			if (WasRel)
 			{
 				auto r = LgiMakeRelativePath(Base, Full);
@@ -3059,16 +3059,16 @@ bool CheckExists(GAutoString Base, T &p, Fn Setter, bool Debug)
 	return Ret;
 }
 
-bool IdeProject::CheckExists(GString &p, bool Debug)
+bool IdeProject::CheckExists(LString &p, bool Debug)
 {
-	return ::CheckExists(GetBasePath(), p, [](GString &o, const char *i) {
+	return ::CheckExists(GetBasePath(), p, [](LString &o, const char *i) {
 			o = i;
 		}, Debug);
 }
 
-bool IdeProject::CheckExists(GAutoString &p, bool Debug)
+bool IdeProject::CheckExists(LAutoString &p, bool Debug)
 {
-	return ::CheckExists(GetBasePath(), p, [](GAutoString &o, const char *i) {
+	return ::CheckExists(GetBasePath(), p, [](LAutoString &o, const char *i) {
 			o.Reset(NewStr(i));
 		}, Debug);
 }
@@ -3297,7 +3297,7 @@ bool IdeProject::HasNode(ProjectNode *Node)
 	return false;
 }
 
-bool IdeProject::GetAllNodes(GArray<ProjectNode*> &Nodes)
+bool IdeProject::GetAllNodes(LArray<ProjectNode*> &Nodes)
 {
 	for (auto i:*this)
 	{
@@ -3470,7 +3470,7 @@ IdeProjectSettings *IdeProject::GetSettings()
 	return &d->Settings;
 }
 
-bool IdeProject::BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool IncludeSystem, IdePlatform Platform)
+bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool IncludeSystem, IdePlatform Platform)
 {
 	List<IdeProject> Projects;
 	if (Recurse)
@@ -3483,17 +3483,17 @@ bool IdeProject::BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool In
 	
 	for (auto p: Projects)
 	{
-		GString ProjInclude = d->Settings.GetStr(ProjIncludePaths, NULL, Platform);
-		GAutoString Base = p->GetBasePath();
+		LString ProjInclude = d->Settings.GetStr(ProjIncludePaths, NULL, Platform);
+		LAutoString Base = p->GetBasePath();
 		
 		const char *Delim = ",;\r\n";
-		GString::Array In, Out;
-		GString::Array a = ProjInclude.SplitDelimit(Delim);
+		LString::Array In, Out;
+		LString::Array a = ProjInclude.SplitDelimit(Delim);
 		In = a;
 		
 		if (IncludeSystem)
 		{
-			GString SysInclude = d->Settings.GetStr(ProjSystemIncludes, NULL, Platform);
+			LString SysInclude = d->Settings.GetStr(ProjSystemIncludes, NULL, Platform);
 			a = SysInclude.SplitDelimit(Delim);
 			In.SetFixedLength(false);
 			In.Add(a);
@@ -3501,7 +3501,7 @@ bool IdeProject::BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool In
 		
 		for (unsigned i=0; i<In.Length(); i++)
 		{
-			GString p;
+			LString p;
 			#if DIR_CHAR == '\\'
 			p = In[i].Replace("/", "\\").Strip();
 			#else
@@ -3513,14 +3513,14 @@ bool IdeProject::BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool In
 			{
 				// Run config app to get the full path list...
 				p = p.Strip("`");
-				GString::Array a = p.Split(" ", 1);
+				LString::Array a = p.Split(" ", 1);
 				LSubProcess Proc(a[0], a.Length() > 1 ? a[1].Get() : NULL);
 				LStringPipe Buf;
 				if (Proc.Start())
 				{
 					Proc.Communicate(&Buf);
 
-					GString result = Buf.NewGStr();
+					LString result = Buf.NewGStr();
 					a = result.Split(" \t\r\n");
 					for (int i=0; i<a.Length(); i++)
 					{
@@ -3587,7 +3587,7 @@ bool IdeProject::BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool In
 
 		// Add paths for the headers in the project... bit of a hack but it'll
 		// help it find them if the user doesn't specify the paths in the project.
-		GArray<ProjectNode*> Nodes;
+		LArray<ProjectNode*> Nodes;
 		if (p->GetAllNodes(Nodes))
 		{
 			auto Base = p->GetFullPath();
@@ -3628,7 +3628,7 @@ bool IdeProject::BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool In
 	return true;
 }
 
-void IdeProjectPrivate::CollectAllFiles(LTreeNode *Base, GArray<ProjectNode*> &Files, bool SubProjects, int Platform)
+void IdeProjectPrivate::CollectAllFiles(LTreeNode *Base, LArray<ProjectNode*> &Files, bool SubProjects, int Platform)
 {
 	for (auto i:*Base)
 	{
@@ -3660,9 +3660,9 @@ void IdeProjectPrivate::CollectAllFiles(LTreeNode *Base, GArray<ProjectNode*> &F
 	}
 }
 
-GString IdeProject::GetTargetName(IdePlatform Platform)
+LString IdeProject::GetTargetName(IdePlatform Platform)
 {
-	GString Status;
+	LString Status;
 	const char *t = d->Settings.GetStr(ProjTargetName, NULL, Platform);
 	if (ValidStr(t))
 	{
@@ -3696,10 +3696,10 @@ GString IdeProject::GetTargetName(IdePlatform Platform)
 	return Status;
 }
 
-GString IdeProject::GetTargetFile(IdePlatform Platform)
+LString IdeProject::GetTargetFile(IdePlatform Platform)
 {
-	GString Ret;
-	GString Target = GetTargetName(PlatformCurrent);
+	LString Ret;
+	LString Target = GetTargetName(PlatformCurrent);
 	if (Target)
 	{
 		const char *TargetType = d->Settings.GetStr(ProjTargetType);
@@ -3734,7 +3734,7 @@ GString IdeProject::GetTargetFile(IdePlatform Platform)
 struct Dependency
 {
 	bool Scanned;
-	GAutoString File;
+	LAutoString File;
 	
 	Dependency(const char *f)
 	{
@@ -3743,20 +3743,20 @@ struct Dependency
 	}
 };
 
-bool IdeProject::GetAllDependencies(GArray<char*> &Files, IdePlatform Platform)
+bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 {
 	if (!GetTree()->Lock(_FL))
 		return false;
 		
 	LHashTbl<StrKey<char>, Dependency*> Deps;
-	GAutoString Base = GetBasePath();
+	LAutoString Base = GetBasePath();
 	
 	// Build list of all the source files...
-	GArray<GString> Src;
+	LArray<LString> Src;
 	CollectAllSource(Src, Platform);
 	
 	// Get all include paths
-	GArray<GString> IncPaths;
+	LArray<LString> IncPaths;
 	BuildIncludePaths(IncPaths, false, false, Platform);
 	
 	// Add all source to dependencies
@@ -3769,7 +3769,7 @@ bool IdeProject::GetAllDependencies(GArray<char*> &Files, IdePlatform Platform)
 	}
 	
 	// Scan all dependencies for includes
-	GArray<Dependency*> Unscanned;
+	LArray<Dependency*> Unscanned;
 	do
 	{
 		// Find all the unscanned dependencies
@@ -3795,7 +3795,7 @@ bool IdeProject::GetAllDependencies(GArray<char*> &Files, IdePlatform Platform)
 				Src = Full;
 			}
 
-			GArray<char*> SrcDeps;
+			LArray<char*> SrcDeps;
 			if (GetDependencies(Src, IncPaths, SrcDeps, Platform))
 			{
 				for (int n=0; n<SrcDeps.Length(); n++)
@@ -3832,27 +3832,27 @@ bool IdeProject::GetAllDependencies(GArray<char*> &Files, IdePlatform Platform)
 	return true;
 }
 
-bool IdeProject::GetDependencies(const char *InSourceFile, GArray<GString> &IncPaths, GArray<char*> &Files, IdePlatform Platform)
+bool IdeProject::GetDependencies(const char *InSourceFile, LArray<LString> &IncPaths, LArray<char*> &Files, IdePlatform Platform)
 {
-	GString SourceFile = InSourceFile;
+	LString SourceFile = InSourceFile;
 	if (!CheckExists(SourceFile))
 	{
 		LgiTrace("%s:%i - can't read '%s'\n", _FL, SourceFile.Get());
 		return false;
 	}
 
-	GAutoString c8(ReadTextFile(SourceFile));
+	LAutoString c8(ReadTextFile(SourceFile));
 	if (!c8)
 		return false;
 
-	GArray<char*> Headers;
+	LArray<char*> Headers;
 	if (!BuildHeaderList(c8, Headers, IncPaths, false))
 		return false;
 	
 	for (int n=0; n<Headers.Length(); n++)
 	{
 		char *i = Headers[n];
-		GString p;
+		LString p;
 		if (!RelativePath(p, i))
 			p = i;
 		ToUnixPath(p);
@@ -3955,7 +3955,7 @@ int IdeTree::WillAccept(GDragFormats &Formats, LPoint p, int KeyState)
 	return DROPEFFECT_MOVE;
 }
 
-int IdeTree::OnDrop(GArray<GDragData> &Data, LPoint p, int KeyState)
+int IdeTree::OnDrop(LArray<GDragData> &Data, LPoint p, int KeyState)
 {
 	int Ret = DROPEFFECT_NONE;
 	SelectDropTarget(NULL);
@@ -4048,7 +4048,7 @@ AddFilesProgress::AddFilesProgress(LViewI *par)
 	MoveSameScreen(par);
 	Name("Importing files...");
 
-	GString::Array a = GString(DefaultExt).SplitDelimit(",");
+	LString::Array a = LString(DefaultExt).SplitDelimit(",");
 	for (unsigned i=0; i<a.Length(); i++)
 	{
 		Exts.Add(a[i], true);

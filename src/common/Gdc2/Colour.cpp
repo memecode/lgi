@@ -579,7 +579,7 @@ bool GColour::SetStr(const char *str)
 	if (!str)
 		return false;
 
-	GString Str = str;
+	LString Str = str;
 	if (*str == '#')
 	{
 		// Web colour
@@ -613,7 +613,7 @@ bool GColour::SetStr(const char *str)
 
 	*s = 0;
 	*e = 0;
-	GString::Array Comp = GString(s+1).Split(",");
+	LString::Array Comp = LString(s+1).Split(",");
 	if (!Stricmp(Str.Get(), "rgb"))
 	{
 		if (Comp.Length() == 3)
@@ -727,7 +727,7 @@ void GColour::OnChange()
 	char PropName[] = "gtk-color-scheme";
 	Gtk::gchararray Value = 0;
 	Gtk::g_object_get(set, PropName, &Value, NULL);
-	GString::Array Lines = GString(Value).SplitDelimit("\n");
+	LString::Array Lines = LString(Value).SplitDelimit("\n");
 	Gtk::g_free(Value);
 	g_object_unref(set);
 

@@ -50,7 +50,7 @@ public:
 		/// The size of the view in the resource
 		LRect *Pos = 0,
 		/// The name of the window
-		GAutoString *Name = 0,
+		LAutoString *Name = 0,
 		/// [Optional] List of tags to exclude/include items
 		char *TagList = 0
 	);
@@ -134,7 +134,7 @@ class LgiClass LResources : public ResFactory
 	LEventsI *ScriptEngine;
 
 	/// Array of languages available in the loaded file.
-	GArray<GLanguageId> Languages; 
+	LArray<GLanguageId> Languages; 
 	
 	/// Add a language to the Languages array
 	void AddLang(GLanguageId id);
@@ -186,7 +186,7 @@ public:
 		/// [Optional] The size of the dialog if needed
 		LRect *Pos = NULL,
 		/// [Optional] The name of the window.
-		GAutoString *Name = NULL,
+		LAutoString *Name = NULL,
 		/// [Optional] A scripting engine interface
 		LEventsI *ScriptEngine = NULL,
 		/// [Optional] The current tags list for optional 
@@ -216,7 +216,7 @@ public:
 	char *GetFileName();
 	
 	/// \returns the languages in the file.
-	GArray<GLanguageId> *GetLanguages() { return &Languages; }
+	LArray<GLanguageId> *GetLanguages() { return &Languages; }
 	
 	/// \returns an iterator for all the dialogs in the resource collection.
 	List<LgiDialogRes>::I GetDialogs() { return Dialogs.begin(); }
@@ -292,9 +292,9 @@ public:
 		return NULL;
 	}
 	
-	bool GetClasses(GString::Array &Classes, LViewI *obj)
+	bool GetClasses(LString::Array &Classes, LViewI *obj)
 	{
-		GString::Array *a = obj->CssClasses();
+		LString::Array *a = obj->CssClasses();
 		if (!a)
 			return false;
 		Classes = *a;
@@ -306,7 +306,7 @@ public:
 		return obj->GetParent();
 	}
 	
-	GArray<LViewI*> GetChildren(LViewI *obj)
+	LArray<LViewI*> GetChildren(LViewI *obj)
 	{
 		return obj->IterateViews();
 	}

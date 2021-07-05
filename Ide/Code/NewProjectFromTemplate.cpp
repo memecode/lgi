@@ -5,7 +5,7 @@
 #include "lgi\common\SubProcess.h"
 #include "lgi\common\FileSelect.h"
 
-static GString TemplatesPath;
+static LString TemplatesPath;
 class NewProjFromTemplate : public LDialog
 {
 public:
@@ -61,7 +61,7 @@ public:
 		return 0;
 	}
 };
-GString GetPython3()
+LString GetPython3()
 {
 	auto Path = LGetPath();
 	for (auto i: Path)
@@ -86,7 +86,7 @@ GString GetPython3()
 		}
 	}
 	
-	return GString();
+	return LString();
 }
 bool CreateProject(const char *Name, const char *Template, const char *Folder)
 {
@@ -118,7 +118,7 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 		return false;
 	}
 	// Call the script
-	GString Args;
+	LString Args;
 	Args.Printf("\"%s\" \"%s\" \"%s\"", ScriptOut.GetFull().Get(), Template, Name);
 	LSubProcess p(Py3, Args);
 	if (!p.Start())

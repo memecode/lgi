@@ -309,7 +309,7 @@ int LTimePopup::OnNotify(LViewI *c, int f)
 	return 0;
 }
 
-GString LTimePopup::GetTime()
+LString LTimePopup::GetTime()
 {
 	if (Times)
 	{
@@ -317,7 +317,7 @@ GString LTimePopup::GetTime()
 		if (s)
 			return s->GetText(0);
 	}
-	return GString();
+	return LString();
 }
 
 void LTimePopup::SetTime(LDateTime *t)

@@ -343,7 +343,7 @@ bool RotateDC(LSurface *pDC, double Angle, Progress *Prog)
 	if (!pDC)
 		return false;
 
-	GAutoPtr<LSurface> pOld(new LMemDC(pDC));
+	LAutoPtr<LSurface> pOld(new LMemDC(pDC));
 
 	// do the rotation
 	if (Angle == 180)

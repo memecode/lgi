@@ -17,11 +17,11 @@ static char sUpdateError[] = "Update script error: %s";
 
 struct LSoftwareUpdatePriv
 {
-	GAutoString Name;
-	GAutoString UpdateUri;
-	GAutoString Proxy;
-	GAutoString Error;
-	GAutoString TempPath;
+	LAutoString Name;
+	LAutoString UpdateUri;
+	LAutoString Proxy;
+	LAutoString Error;
+	LAutoString TempPath;
 
 	void SetError(int Id, const char *Def = 0)
 	{
@@ -69,7 +69,7 @@ struct LSoftwareUpdatePriv
 				LUri Uri(d->UpdateUri);
 				char Dir[256];
 				int WordSize = sizeof(size_t) << 3;
-				GString OsName = LGetOsName();
+				LString OsName = LGetOsName();
 				int Os = LGetOs();
 				if (Os == LGI_OS_WIN32 ||
 					Os == LGI_OS_WIN64 ||
@@ -81,7 +81,7 @@ struct LSoftwareUpdatePriv
 				sprintf_s(Dir, sizeof(Dir), "%s?name=%s&os=%s&betas=%i", Uri.sPath.Get(), (char*)d->Name, OsName.Get(), IncBetas);
 				Uri.sPath = Dir;
 
-				GString GetUri = Uri.ToString();
+				LString GetUri = Uri.ToString();
 				
 				#ifdef _DEBUG
 				LgiTrace("UpdateURI=%s\n", GetUri.Get());
@@ -96,7 +96,7 @@ struct LSoftwareUpdatePriv
 				
 				LStringPipe RawXml;
 				int ProtocolStatus = 0;
-				GAutoPtr<LSocketI> s(new LSocket);
+				LAutoPtr<LSocketI> s(new LSocket);
 				if (Http.Open(s, Uri.sHost, Uri.Port))
 				{
 					IHttp::ContentEncoding Enc;
@@ -224,7 +224,7 @@ struct LSoftwareUpdatePriv
 		LUri *Uri;
 		LUri *Proxy;
 		LStream *Local;
-		GAutoString *Err;
+		LAutoString *Err;
 		int *Status;
 
 	public:
@@ -234,7 +234,7 @@ struct LSoftwareUpdatePriv
 		                LUri *uri,
 		                LUri *proxy,		                
 		                LStream *local,
-		                GAutoString *err,
+		                LAutoString *err,
 		                int *status) : LThread("UpdateDownload"), GProxyStream(local)
 		{
 			Info = info;
@@ -267,7 +267,7 @@ struct LSoftwareUpdatePriv
 			if (Proxy->sHost)
 				Http.SetProxy(Proxy->sHost, Proxy->Port?Proxy->Port:HTTP_PORT);
 
-			GAutoPtr<LSocketI> s(new LSocket);
+			LAutoPtr<LSocketI> s(new LSocket);
 			IHttp::ContentEncoding Enc;
 			if (!Http.Open(s, Uri->sHost, Uri->Port))
 			{

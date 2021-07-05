@@ -30,7 +30,7 @@
 
 /// Returns the system path specified
 /// \ingroup Base
-LgiExtern GString LGetSystemPath(
+LgiExtern LString LGetSystemPath(
 	/// Which path to retreive
 	LgiSystemPath Which,
 	int WordSize = 0
@@ -38,15 +38,15 @@ LgiExtern GString LGetSystemPath(
 
 /// Gets the path of the currently running executable
 /// \ingroup Base
-LgiExtern GString LGetExePath();
+LgiExtern LString LGetExePath();
 
 /// Gets the file of the currently running executable
 /// \ingroup Base
-LgiExtern GString LGetExeFile();
+LgiExtern LString LGetExeFile();
 
 /// Returns the mime type of the file
 /// \ingroup Mime
-LgiExtern GString LGetFileMimeType
+LgiExtern LString LGetFileMimeType
 (
 	/// File to find mime type for
 	const char *File
@@ -54,49 +54,49 @@ LgiExtern GString LGetFileMimeType
 
 /// Finds a file in the applications directory or nearby
 /// \ingroup Base
-LgiExtern GString LFindFile(const char *Name);
+LgiExtern LString LFindFile(const char *Name);
 
 /// Returns the application associated with the mime type
 /// \ingroup Mime
-LgiExtern GString LGetAppForMimeType
+LgiExtern LString LGetAppForMimeType
 (
 	/// Type of the file to find and app for
 	const char *Mime
 );
 
 /// \return a formatted file size
-LgiExtern GString LFormatSize(uint64 Size);
+LgiExtern LString LFormatSize(uint64 Size);
 
 /// URL encode a string
-LgiExtern GString LUrlEncode(const char *s, const char *delim);
+LgiExtern LString LUrlEncode(const char *s, const char *delim);
 
 /// URL decode a string
-LgiExtern GString LUrlDecode(const char *s);
+LgiExtern LString LUrlDecode(const char *s);
 
 /// Gets the current user
-LgiExtern GString LCurrentUserName();
+LgiExtern LString LCurrentUserName();
 
 /// Returns an environment variable.
-LgiExtern GString LGetEnv(const char *Var);
+LgiExtern LString LGetEnv(const char *Var);
 
 /// Gets the system path..
-LgiExtern GString::Array LGetPath();
+LgiExtern LString::Array LGetPath();
 
 /// Check for a valid email string
-LgiExtern bool LIsValidEmail(GString Email);
+LgiExtern bool LIsValidEmail(LString Email);
 
 /// Finds an application to handle a protocol request (e.g. 'mailto', 'http' etc)
-LgiExtern GString LGetAppForProtocol(const char *Protocol);
+LgiExtern LString LGetAppForProtocol(const char *Protocol);
 
 /// Converts a string to the native 8bit charset of the OS from utf-8
 /// \ingroup Text
-LgiExtern GString LToNativeCp(const char *In, ssize_t InLen = -1);
+LgiExtern LString LToNativeCp(const char *In, ssize_t InLen = -1);
 
 /// Converts a string from the native 8bit charset of the OS to utf-8
 /// \ingroup Text
-LgiExtern GString LFromNativeCp(const char *In, ssize_t InLen = -1);
+LgiExtern LString LFromNativeCp(const char *In, ssize_t InLen = -1);
 
-LgiExtern GString LStrConvertCp
+LgiExtern LString LStrConvertCp
 (
 	/// Output charset
 	const char *OutCp,
@@ -109,7 +109,7 @@ LgiExtern GString LStrConvertCp
 );
 
 /// Converts an OS error code into a text string
-LgiExtern GString LErrorCodeToString(uint32_t ErrorCode);
+LgiExtern LString LErrorCodeToString(uint32_t ErrorCode);
 
 #ifdef __cplusplus
 extern "C"
@@ -212,7 +212,7 @@ LgiFunc char *LEncodeUri
 
 // Path
 #if LGI_COCOA || defined(__GTK_H__)
-	LgiExtern GString LgiArgsAppPath;
+	LgiExtern LString LgiArgsAppPath;
 #endif
 
 /// Returns the system path specified
@@ -239,9 +239,9 @@ LgiFunc bool LRecursiveFileSearch
 	/// Start search in this dir
 	const char *Root,
 	/// Extensions to match
-	GArray<const char*> *Ext = NULL,
+	LArray<const char*> *Ext = NULL,
 	/// [optional] Output filenames
-	GArray<char*> *Files = NULL,
+	LArray<char*> *Files = NULL,
 	/// [optional] Output total size
 	uint64 *Size = NULL,
 	/// [optional] File count
@@ -263,7 +263,7 @@ LgiFunc struct GLanguage *LGetLanguageId();
 /// Gets the current operating system and optionally it's version.
 /// \returns One of the defines starting with #LGI_OS_UNKNOWN in LgiDefs.h
 /// \ingroup Base
-LgiFunc int LGetOs(GArray<int> *Ver = 0);
+LgiFunc int LGetOs(LArray<int> *Ver = 0);
 
 /// Gets the current operation systems name.
 /// \ingroup Base
@@ -289,7 +289,7 @@ LgiFunc bool LExecute
 	/// The directory to run in
 	const char *Dir = 0,
 	/// An error message
-	GString *ErrorMsg = NULL
+	LString *ErrorMsg = NULL
 );
 
 /// Initializes the random number generator
@@ -328,12 +328,12 @@ LgiExtern bool LGetMimeTypeExtensions
 	/// The returned mime type
 	const char *Mime,
 	/// The extensions
-	GArray<GString> &Ext
+	LArray<LString> &Ext
 );
 
 inline bool LGetAppForMimeType(const char *Mime, char *AppPath, int BufSize)
 {
-	GString p = LGetAppForMimeType(Mime);
+	LString p = LGetAppForMimeType(Mime);
 	if (AppPath && p) strcpy_s(AppPath, BufSize, p);
 	return p.Length() > 0;
 }
@@ -349,7 +349,7 @@ LgiFunc bool LGetAppsForMimeType
 	/// - application/browser get the default web browser
 	const char *Mime,
 	/// The applications that can handle the 
-	GArray<LAppInfo*> &Apps,
+	LArray<LAppInfo*> &Apps,
 	/// Limit the length of the results, i.e. stop looking after 'Limit' matches.
 	/// -1 means return all matches.
 	int Limit = -1

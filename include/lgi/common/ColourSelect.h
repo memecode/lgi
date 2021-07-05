@@ -14,7 +14,7 @@ class LColourSelect :
 	friend class LColourSelectPopup;
 
 	GColour c;
-	GArray<GColour> Presets;
+	LArray<GColour> Presets;
 
 public:
 	enum
@@ -22,10 +22,10 @@ public:
 		Transparent = 0
 	};
 
-	LColourSelect(GArray<GColour> *c32 = 0);
+	LColourSelect(LArray<GColour> *c32 = 0);
 
 	// Methods
-	void SetColourList(GArray<GColour> *c32 = 0);
+	void SetColourList(LArray<GColour> *c32 = 0);
 
 	// LView
 	int64 Value();

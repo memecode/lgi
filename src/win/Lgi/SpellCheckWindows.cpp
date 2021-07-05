@@ -30,17 +30,17 @@ class WindowsSpellCheck : public LSpellCheck
 
 	struct Lang
 	{
-		GString Id;
-		GString English;
-		GString Native;
-		GString::Array Dictionaries;
+		LString Id;
+		LString English;
+		LString Native;
+		LString::Array Dictionaries;
 	};
 
 	LHashTbl<ConstStrKey<char,false>, Lang*> Languages;
 
 	bool ReadCsv()
 	{
-		GString File = __FILE__;
+		LString File = __FILE__;
 		File = File.Replace(".cpp", ".csv");
 		if (!LFileExists(File))
 		{
@@ -51,10 +51,10 @@ class WindowsSpellCheck : public LSpellCheck
 		GFile f;
 		if (!f.Open(File, O_READ))
 			return false;
-		GString::Array Lines = f.Read().SplitDelimit("\r\n");
+		LString::Array Lines = f.Read().SplitDelimit("\r\n");
 		for (auto Ln: Lines)
 		{
-			GString::Array v = Ln.Split(",");
+			LString::Array v = Ln.Split(",");
 			if (v.Length() > 1)
 			{
 				Lang *l = Languages.Find(v[0].Strip());
@@ -122,8 +122,8 @@ public:
 				LPOLESTR Str;
 				while (SUCCEEDED((r = Value->Next(1, &Str, NULL))) && Str)
 				{
-					GString s = Str;			
-					GString::Array a = s.Split("-", 1);
+					LString s = Str;			
+					LString::Array a = s.Split("-", 1);
 					if (a.Length() == 2)
 					{
 						Lang *l = Languages.Find(a[0]);
@@ -158,7 +158,7 @@ public:
 			return NULL;
 		}
 		
-		GAutoWString WLang(Utf8ToWide(Lang));
+		LAutoWString WLang(Utf8ToWide(Lang));
 		HRESULT r = Factory->CreateSpellChecker(WLang, &Sc);
 		if (FAILED(r))
 		{
@@ -182,7 +182,7 @@ public:
 				}
 
 				int ResponseHnd = (int)Msg->A();
-				GAutoPtr< GArray<LanguageId> > Langs(new GArray<LanguageId>);
+				LAutoPtr< LArray<LanguageId> > Langs(new LArray<LanguageId>);
 
 				// const char *Id;
 				// for (Lang *l = Languages.First(&Id); l; l = Languages.Next(&Id))
@@ -204,7 +204,7 @@ public:
 			case M_ENUMERATE_DICTIONARIES:
 			{
 				int ResponseHnd = (int)Msg->A();
-				GAutoPtr<GString> Param((GString*)Msg->B());
+				LAutoPtr<LString> Param((LString*)Msg->B());
 
 				if (!GetFactory())
 				{
@@ -212,7 +212,7 @@ public:
 					break;
 				}
 
-				GAutoPtr< GArray<DictionaryId> > Out(new GArray<DictionaryId>);
+				LAutoPtr< LArray<DictionaryId> > Out(new LArray<DictionaryId>);
 				Lang *l = Languages.Find(*Param);
 				if (!l)
 				{
@@ -222,8 +222,8 @@ public:
 				
 				for (unsigned i=0; i<l->Dictionaries.Length(); i++)
 				{
-					GString &d = l->Dictionaries[i];
-					GString::Array a = d.Split("-", 1);
+					LString &d = l->Dictionaries[i];
+					LString::Array a = d.Split("-", 1);
 					if (a.Length() == 2)
 					{
 						DictionaryId &id = Out->New();
@@ -242,11 +242,11 @@ public:
 			case M_SET_DICTIONARY:
 			{
 				int ResponseHnd = (int)Msg->A();
-				GAutoPtr<DictionaryId> Dict((DictionaryId*)Msg->B());
+				LAutoPtr<DictionaryId> Dict((DictionaryId*)Msg->B());
 				bool Success = false;
 				if (Dict)
 				{
-					GString Lang;
+					LString Lang;
 					Lang.Printf("%s-%s", Dict->Lang.Get(), Dict->Dict.Get());
 					Success = GetSpellCheck(Lang) != NULL;
 				}
@@ -257,7 +257,7 @@ public:
 			case M_CHECK_TEXT:
 			{
 				int ResponseHnd = (int)Msg->A();
-				GAutoPtr<CheckText> Ct((CheckText*)Msg->B());
+				LAutoPtr<CheckText> Ct((CheckText*)Msg->B());
 				if (!Ct)
 				{
 					LgiTrace("%s:%i - No text specified.\n", _FL);
@@ -269,7 +269,7 @@ public:
 					break;
 				}
 
-				GAutoWString WTxt(Utf8ToWide(Ct->Text));
+				LAutoWString WTxt(Utf8ToWide(Ct->Text));
 				IEnumSpellingError *ErrEnum = NULL;
 				HRESULT r = Sc->Check(WTxt, &ErrEnum);
 				if (FAILED(r))
@@ -297,7 +297,7 @@ public:
 					Se.Len = Len;
 					if (Action == CORRECTIVE_ACTION_GET_SUGGESTIONS)
 					{
-						GAutoWString Word(NewStrW(WTxt + Start, Len));
+						LAutoWString Word(NewStrW(WTxt + Start, Len));
 						IEnumString *Strs = NULL;
 						r = Sc->Suggest(Word, &Strs);
 						if (SUCCEEDED(r))
@@ -326,9 +326,9 @@ public:
 
 #endif
 
-GAutoPtr<LSpellCheck> CreateWindowsSpellCheck()
+LAutoPtr<LSpellCheck> CreateWindowsSpellCheck()
 {
-	GAutoPtr<LSpellCheck> p;
+	LAutoPtr<LSpellCheck> p;
 	#ifdef __spellcheck_h__
 	p.Reset(new WindowsSpellCheck);
 	#endif

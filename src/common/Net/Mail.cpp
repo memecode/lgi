@@ -57,7 +57,7 @@ bool LogEntry::Add(const char *t, ssize_t len)
 		len--;
 	*/
 
-	GAutoWString w(Utf8ToWide(t, len));
+	LAutoWString w(Utf8ToWide(t, len));
 	if (!w)
 		return false;
 
@@ -65,9 +65,9 @@ bool LogEntry::Add(const char *t, ssize_t len)
 	return Txt.Add(w, ch);	
 }
 	
-bool Base64Str(GString &s)
+bool Base64Str(LString &s)
 {
-	GString b64;
+	LString b64;
 	ssize_t Base64Len = BufferLen_BinTo64(s.Length());
 	if (!b64.Set(NULL, Base64Len))
 		return false;
@@ -81,9 +81,9 @@ bool Base64Str(GString &s)
 	return true;
 }
 
-bool UnBase64Str(GString &s)
+bool UnBase64Str(LString &s)
 {
-	GString Bin;
+	LString Bin;
 	ssize_t BinLen = BufferLen_64ToBin(s.Length());
 	if (!Bin.Set(NULL, BinLen))
 		return false;
@@ -259,12 +259,12 @@ static CharPair Pairs[] =
 
 struct MailAddrPart
 {
-    GAutoString Part;
+    LAutoString Part;
     bool Brackets;
     bool ValidEmail;
     
 
-    GAutoString RemovePairs(char *Str, ssize_t Len, CharPair *Pairs)
+    LAutoString RemovePairs(char *Str, ssize_t Len, CharPair *Pairs)
     {
 	    char *s = Str;
 	    if (Len < 0)
@@ -276,7 +276,7 @@ struct MailAddrPart
 	    }
 
 	    if (!*s)
-		    return GAutoString();
+		    return LAutoString();
 
 	    // Get the end of the string...
 	    char *e = s;
@@ -306,9 +306,9 @@ struct MailAddrPart
 
 	    Len = e - s;
 	    if (Len < 0)
-		    return GAutoString();
+		    return LAutoString();
 
-	    return GAutoString(NewStr(s, Len));
+	    return LAutoString(NewStr(s, Len));
     }
 
     MailAddrPart(char *s, ssize_t len)
@@ -339,12 +339,12 @@ struct MailAddrPart
     }
 };
 
-int PartCmp(GAutoPtr<MailAddrPart> *a, GAutoPtr<MailAddrPart> *b)
+int PartCmp(LAutoPtr<MailAddrPart> *a, LAutoPtr<MailAddrPart> *b)
 {
     return (*b)->Score() - (*a)->Score();
 }
 
-void DecodeAddrName(const char *Str, GAutoString &Name, GAutoString &Addr, const char *DefaultDomain)
+void DecodeAddrName(const char *Str, LAutoString &Name, LAutoString &Addr, const char *DefaultDomain)
 {
 	/* Testing code
 	char *Input[] =
@@ -368,7 +368,7 @@ void DecodeAddrName(const char *Str, GAutoString &Name, GAutoString &Addr, const
 		0
 	};
 
-	GAutoString Name, Addr;
+	LAutoString Name, Addr;
 	for (char **i = Input; *i; i++)
 	{
 		Name.Reset();
@@ -381,12 +381,12 @@ void DecodeAddrName(const char *Str, GAutoString &Name, GAutoString &Addr, const
 	if (!Str)
 		return;
 
-	GArray< GAutoPtr<MailAddrPart> > Parts;
+	LArray< LAutoPtr<MailAddrPart> > Parts;
 
-	GString s = Str;
-	GString non;
-	GString email;
-	GString::Array a = s.SplitDelimit("<>");
+	LString s = Str;
+	LString non;
+	LString email;
+	LString::Array a = s.SplitDelimit("<>");
 	for (unsigned i=0; i<a.Length(); i++)
 	{
 		if (LIsValidEmail(a[i]))
@@ -896,7 +896,7 @@ bool MailProtocol::Write(const char *Buf, bool LogWrite)
 	}											\
 }
 
-void Reorder(GArray<GString> &a, const char *s)
+void Reorder(LArray<LString> &a, const char *s)
 {
 	for (unsigned i=0; i<a.Length(); i++)
 	{
@@ -948,7 +948,7 @@ bool MailSmtp::Open(LSocketI *S,
 				Port = SMTP_PORT;
 		}
 
-		GAutoString Server(TrimStr(Str));
+		LAutoString Server(TrimStr(Str));
 		if (Server)
 		{
 			if (SocketLock.Lock(_FL))
@@ -981,7 +981,7 @@ bool MailSmtp::Open(LSocketI *S,
 				bool Authed = false;
 				bool NoAuthTypes = false;
 				bool SupportsStartTLS = false;
-				GArray<GString> AuthTypes;
+				LArray<LString> AuthTypes;
 
 				// Look through the response for the auth line
 				char *Response = Str.NewStr();
@@ -1172,7 +1172,7 @@ bool MailSmtp::Open(LSocketI *S,
 							auto Tok = Authenticator.GetAccessToken();
 							if (Tok)
 							{
-								GString s;
+								LString s;
 								s.Printf("user=%s\001auth=Bearer %s\001\001\0", UserName, Tok.Get());
 								Base64Str(s);
 
@@ -1200,7 +1200,7 @@ bool MailSmtp::Open(LSocketI *S,
 							SetError(L_ERROR_ESMTP_NO_AUTHS, "The server didn't return the authentication methods it supports.");
 						else
 						{
-							GString p;
+							LString p;
 							for (auto i : AuthTypes)
 							{
 								if (p.Get())
@@ -1834,7 +1834,7 @@ int MailReceiveFolder::GetMessages()
 	return (int)d->Mail.Length();
 }
 
-bool MailReceiveFolder::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks)
+bool MailReceiveFolder::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks)
 {
 	bool Status = false;
 
@@ -2287,7 +2287,7 @@ bool MailPop3::MailIsEnd(char *Ptr, ssize_t Len)
 	return false;
 }
 
-bool MailPop3::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks)
+bool MailPop3::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks)
 {
 	bool Status = false;
 
@@ -2509,7 +2509,7 @@ bool MailPop3::Receive(GArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 	return Status;
 }
 
-bool MailPop3::GetSizes(GArray<int> &Sizes)
+bool MailPop3::GetSizes(LArray<int> &Sizes)
 {
 	if (Socket)
 	{

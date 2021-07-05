@@ -6,7 +6,7 @@ class WebFldDlg : public LDialog
 {
 public:
 	char *Name;
-	GString Ftp;
+	LString Ftp;
 	char *Www;
 
 	WebFldDlg(LViewI *p, char *name, char *ftp, char *www);

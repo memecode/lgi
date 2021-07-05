@@ -155,7 +155,7 @@ LFont *LStringLayout::GetFont()
 	return Strs[0]->GetFont();
 }
 
-typedef GArray<LLayoutString*> LayoutArray;
+typedef LArray<LLayoutString*> LayoutArray;
 
 // Pre-layout min/max calculation
 void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
@@ -167,7 +167,7 @@ void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
 	if (!Text.Length() || !f)
 		return;
 
-	GArray<LayoutArray> Lines;
+	LArray<LayoutArray> Lines;
 	int Line = 0;
 
 	for (auto Run: Text)
@@ -292,7 +292,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 
 	// By definition these potential break points are all
 	// on the same line. Clear the array on each new line.
-	GArray<Break> Breaks;
+	LArray<Break> Breaks;
 	
 	/// Index of the display string starting the line
 	ssize_t StartLine = 0;
@@ -395,7 +395,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 
 							// Calc line width from 'StartLine' to 'Break[i]'
 							int FixX = 0;
-							GAutoPtr<LLayoutString> Broken;
+							LAutoPtr<LLayoutString> Broken;
 							size_t k;
 							for (k=StartLine; k<Strs.Length(); k++)
 							{

@@ -10,7 +10,7 @@ class LgiClass GFindReplaceCommon : public LDialog
 
 public:
 	/// The string to find
-	GString Find;
+	LString Find;
 	/// Whether to match a whole word
 	bool MatchWord;
 	/// Whether to match the case
@@ -61,7 +61,7 @@ class LgiClass GReplaceDlg : public GFindReplaceCommon
 	class GReplaceDlgPrivate *d;
 
 public:
-	GString Replace;
+	LString Replace;
 
 	/// Constructor
 	GReplaceDlg

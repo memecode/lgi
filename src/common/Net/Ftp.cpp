@@ -26,14 +26,14 @@ public:
 	char InBuf[256];
 	List<char> In;
 	FtpTransferMode CurMode;
-	GAutoPtr<LSocket> Listen;	// listen for data
-	GAutoPtr<LSocketI> Data;	// get data
+	LAutoPtr<LSocket> Listen;	// listen for data
+	LAutoPtr<LSocketI> Data;	// get data
 	GFile *F;
 	char *Charset;
-	GString ErrBuf;
+	LString ErrBuf;
 	IFtpCallback *Callback;
 	
-	GAutoString Host;
+	LAutoString Host;
 	int Port;
 
 	IFtpPrivate(IFtpCallback *cb) : Callback(cb)
@@ -235,7 +235,7 @@ IFtpEntry::IFtpEntry(char *Entry, const char *Cs)
 					for (; *n && strchr(Ws, *n); n++);
 				}
 				
-				GAutoString Utf((char*) LNewConvertCp("utf-8", n, Cs));
+				LAutoString Utf((char*) LNewConvertCp("utf-8", n, Cs));
 				Name = Utf.Get();
 			}
 
@@ -433,7 +433,7 @@ bool IFtp::IsOpen()
 	return Socket ? Socket->IsOpen() : false;
 }
 
-void IFtp::GetHost(GString *Host, int *Port)
+void IFtp::GetHost(LString *Host, int *Port)
 {
 	*Host = d->Host.Get();
 	*Port = d->Port;
@@ -560,9 +560,9 @@ void IFtp::Noop()
 	}
 }
 
-GString IFtp::GetDir()
+LString IFtp::GetDir()
 {
-	GString p;
+	LString p;
 
 	try
 	{
@@ -711,7 +711,7 @@ bool IFtp::UpDir()
 #define IsHeapOk() (-1)
 #endif
 
-bool IFtp::ListDir(GArray<IFtpEntry*> &Dir)
+bool IFtp::ListDir(LArray<IFtpEntry*> &Dir)
 {
 	bool Status = false;
 
@@ -767,7 +767,7 @@ bool IFtp::ListDir(GArray<IFtpEntry*> &Dir)
 			d->Listen.Reset();
 			
 			// Parse the results
-			GString Text = Buf.NewGStr();
+			LString Text = Buf.NewGStr();
 			if (Status)
 			{
 				if (Text)
@@ -781,12 +781,12 @@ bool IFtp::ListDir(GArray<IFtpEntry*> &Dir)
 					}
 					#endif
 
-					GString::Array Ln = Text.Split("\n");
+					LString::Array Ln = Text.Split("\n");
 
 					// Parse lines...
 					for (unsigned i=0; i<Ln.Length(); i++)
 					{
-						GString Line = Ln[i].Strip();
+						LString Line = Ln[i].Strip();
 
 						#if 1					
 						struct ftpparse fp;					

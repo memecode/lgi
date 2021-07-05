@@ -27,7 +27,7 @@ LSelect &LSelect::operator +=(LSocket *sock)
 	return *this;
 }
 	
-int LSelect::Select(GArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs)
+int LSelect::Select(LArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs)
 {
 	if (s.Length() == 0)
 		return 0;
@@ -38,7 +38,7 @@ int LSelect::Select(GArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs)
 	// closed elsewhere we have to do something different... damn Linux,
 	// why can't you just like do the right thing?
 		
-	::GArray<struct pollfd> fds;
+	::LArray<struct pollfd> fds;
 	fds.Length(s.Length());
 	for (unsigned i=0; i<s.Length(); i++)
 	{
@@ -106,16 +106,16 @@ int LSelect::Select(GArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs)
 	#endif
 }
 
-GArray<LSocket*> LSelect::Readable(int TimeoutMs)
+LArray<LSocket*> LSelect::Readable(int TimeoutMs)
 {
-	GArray<LSocket*> r;
+	LArray<LSocket*> r;
 	Select(r, true, false, TimeoutMs);
 	return r;
 }
 
-GArray<LSocket*> LSelect::Writeable(int TimeoutMs)
+LArray<LSocket*> LSelect::Writeable(int TimeoutMs)
 {
-	GArray<LSocket*> r;
+	LArray<LSocket*> r;
 	Select(r, false, true, TimeoutMs);
 	return r;
 }
@@ -144,11 +144,11 @@ struct LWebSocketPriv
 	bool Server;
 
 	WebSocketState State;
-	GString InHdr, OutHdr;
-	GArray<char> Data;
+	LString InHdr, OutHdr;
+	LArray<char> Data;
 	size_t Start, Used;
 	char Buf[512];
-	GArray<LRange> Msg;
+	LArray<LRange> Msg;
 	LWebSocket::OnMsg onMsg;
 
 	LWebSocketPriv(LWebSocket *ws, bool server) : Ws(ws), Server(server)
@@ -302,15 +302,15 @@ struct LWebSocketPriv
 		// Create the response hdr and send it...
 		static const char *Key = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
-		GAutoString Upgrade(InetGetHeaderField(InHdr, "Upgrade", InHdr.Length()));
+		LAutoString Upgrade(InetGetHeaderField(InHdr, "Upgrade", InHdr.Length()));
 		if (!Upgrade || stricmp(Upgrade, "websocket"))
 			return false;
 
-		GAutoString SecWebSocketKey(InetGetHeaderField(InHdr, "Sec-WebSocket-Key", InHdr.Length()));
+		LAutoString SecWebSocketKey(InetGetHeaderField(InHdr, "Sec-WebSocket-Key", InHdr.Length()));
 		if (!SecWebSocketKey)
 			return Error("No Sec-WebSocket-Key header");
 		
-		GString s = SecWebSocketKey.Get();
+		LString s = SecWebSocketKey.Get();
 		s += Key;
 
 		SHA1Context Ctx;
@@ -387,7 +387,7 @@ bool LWebSocket::SendMessage(char *Data, uint64 Len)
 		*p.u64++ = htonll(Len);
 	}
 
-	GAutoPtr<uint8_t> MaskData;
+	LAutoPtr<uint8_t> MaskData;
 	if (Masked)
 	{
 		uint8_t *Mask = p.u8;
@@ -412,7 +412,7 @@ bool LWebSocket::SendMessage(char *Data, uint64 Len)
 	return true;
 }
 
-bool LWebSocket::InitFromHeaders(GString Data, OsSocket Sock)
+bool LWebSocket::InitFromHeaders(LString Data, OsSocket Sock)
 {
 	bool HasMsg = false;
 
@@ -446,7 +446,7 @@ bool LWebSocket::OnData()
 	{
 		if (d->State == WsReceiveHdr)
 		{
-			d->InHdr += GString(d->Buf, Rd);
+			d->InHdr += LString(d->Buf, Rd);
 			auto End = d->InHdr.Find("\r\n\r\n");
 			if (End >= 0)
 			{

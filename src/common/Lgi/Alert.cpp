@@ -20,7 +20,7 @@ LAlert::LAlert(	LViewI *parent,
 				const char *Btn2,
 				const char *Btn3)
 {
-	GArray<const char*> Names;
+	LArray<const char*> Names;
 	if (Btn1) Names.Add(Btn1);
 	if (Btn2) Names.Add(Btn2);
 	if (Btn3) Names.Add(Btn3);

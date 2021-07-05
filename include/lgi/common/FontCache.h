@@ -6,8 +6,8 @@
 class GFontCache
 {
 	LFont *DefaultFont;
-	GArray<LFont*> Fonts;
-	LHashTbl<ConstStrKey<char>, GString> FontName;
+	LArray<LFont*> Fonts;
+	LHashTbl<ConstStrKey<char>, LString> FontName;
 	
 public:
 	/// Constructor for font cache
@@ -41,9 +41,9 @@ public:
 	/// different available fonts.
 	void DefineFontName(const char *Label, const char *FontFace)
 	{
-		GString s = FontName.Find(Label);
+		LString s = FontName.Find(Label);
 		if (!s.Get())
-			FontName.Add(Label, GString(FontFace));
+			FontName.Add(Label, LString(FontFace));
 	}
 	
 	LFont *AddFont(	const char *Face,
@@ -111,7 +111,7 @@ public:
 		bool FamHasDefFace = false;
 		for (unsigned i=0; i<Fam.Length(); i++)
 		{
-			GString s = FontName.Find(Fam[i]);
+			LString s = FontName.Find(Fam[i]);
 			if (s.Get())
 			{
 				// Resolve label here...

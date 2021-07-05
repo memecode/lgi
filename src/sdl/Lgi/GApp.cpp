@@ -11,7 +11,7 @@
 #include "Lgi.h"
 #include "LSubProcess.h"
 #include "SkinEngine.h"
-#include "GArray.h"
+#include "LArray.h"
 #include "LVariant.h"
 #if defined(WIN32)
 #include "../win32/LSymLookup.h"
@@ -34,7 +34,7 @@ extern LHashTbl<PtrKey<LView*>,bool> ViewMap;
 ////////////////////////////////////////////////////////////////
 struct OsAppArgumentsPriv
 {
-	GArray<char*> Ptr;
+	LArray<char*> Ptr;
 	
 	~OsAppArgumentsPriv()
 	{
@@ -60,7 +60,7 @@ OsAppArguments::~OsAppArguments()
 	DeleteObj(d);
 }
 
-bool OsAppArguments::Get(const char *Name, GString *Value)
+bool OsAppArguments::Get(const char *Name, LString *Value)
 {
 	if (!Name)
 		return false;
@@ -150,7 +150,7 @@ void LgiCrashHandler(int Sig)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-typedef GArray<LAppInfo*> AppArray;
+typedef LArray<LAppInfo*> AppArray;
 
 #ifndef XK_Num_Lock
 #define XK_Num_Lock                      0xff7f
@@ -181,12 +181,12 @@ public:
 	int MessageLoopDepth;
 	int CurEvent;
 	#if DEBUG_MSG_TYPES
-	GArray<int> Types;
+	LArray<int> Types;
 	#endif
-	GArray<LViewI*> DeleteLater;
+	LArray<LViewI*> DeleteLater;
 	LMouse LastMove;
-	GAutoString Name;
-	GAutoPtr<GFontCache> FontCache;
+	LAutoString Name;
+	LAutoPtr<GFontCache> FontCache;
 
 	// Update handling (lock before using)
 	LRegion Dirty;
@@ -195,7 +195,7 @@ public:
 	SDL_TimerID CaptureId;
 
 	// Window stack
-	GArray<LWindow*> Stack;
+	LArray<LWindow*> Stack;
 	
 	// Clipboard handling
 	int Clipboard, Utf8, Utf8String;
@@ -611,7 +611,7 @@ void GApp::OnSDLEvent(GMessage *m)
 				case M_CHANGE:
 				{
 					LView *v = (LView*)m->Event.user.data1;
-					GAutoPtr<GMessage::EventParams> p((GMessage::EventParams*)m->Event.user.data2);
+					LAutoPtr<GMessage::EventParams> p((GMessage::EventParams*)m->Event.user.data2);
 					
 					if (!ViewMap.Find(v))
 						break;
@@ -630,7 +630,7 @@ void GApp::OnSDLEvent(GMessage *m)
 				default:
 				{
 					LView *v = (LView*)m->Event.user.data1;
-					GAutoPtr<GMessage::EventParams> p((GMessage::EventParams*)m->Event.user.data2);
+					LAutoPtr<GMessage::EventParams> p((GMessage::EventParams*)m->Event.user.data2);
 
 					if (!ViewMap.Find(v))
 						break;
@@ -703,7 +703,7 @@ void GApp::OnUrl(const char *Url)
 		AppWnd->OnUrl(Url);
 }
 
-void GApp::OnReceiveFiles(GArray<char*> &Files)
+void GApp::OnReceiveFiles(LArray<char*> &Files)
 {
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);
@@ -783,7 +783,7 @@ const char *GApp::GetArgumentAt(int n)
 
 bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
 {
-	GString Buf;
+	LString Buf;
 	if (GetOption(Option, Buf))
 	{
 		if (Dest)
@@ -799,7 +799,7 @@ bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
 	return false;
 }
 
-bool GApp::GetOption(const char *Option, GString &Buf)
+bool GApp::GetOption(const char *Option, LString &Buf)
 {
 	if (IsOk() && Option)
 	{
@@ -859,7 +859,7 @@ void GApp::OnCommandLine()
 {
 	char WhiteSpace[] = " \r\n\t";
 
-	GArray<char*> Files;
+	LArray<char*> Files;
 
 	for (int i=1; i<GetAppArgs()->Args; i++)
 	{
@@ -898,9 +898,9 @@ void GApp::Exit(int Code)
 	}
 }
 
-GAutoString GApp::GetFileMimeType(const char *File)
+LAutoString GApp::GetFileMimeType(const char *File)
 {
-	GAutoString Status;
+	LAutoString Status;
 	char Full[300] = "";
 
 	if (!FileExists(File))
@@ -984,7 +984,7 @@ GAutoString GApp::GetFileMimeType(const char *File)
 	return Status;
 }
 
-bool GApp::GetAppsForMimeType(char *Mime, GArray<LAppInfo*> &Apps)
+bool GApp::GetAppsForMimeType(char *Mime, LArray<LAppInfo*> &Apps)
 {
 	// Find alternative version of the MIME type (e.g. x-type and type).
 	char AltMime[256];
@@ -1130,8 +1130,8 @@ void GApp::CaptureMouse(bool capture)
 	}
 }
 
-extern GString GetFreetypeLibraryVersion();
-GString GApp::GetFreetypeVersion()
+extern LString GetFreetypeLibraryVersion();
+LString GApp::GetFreetypeVersion()
 {
 	return GetFreetypeLibraryVersion();
 }

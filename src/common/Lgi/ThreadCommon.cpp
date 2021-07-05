@@ -102,7 +102,7 @@ int LThreadWorker::Main()
 {
 	while (Loop)
 	{
-		GAutoPtr<LThreadJob> j;
+		LAutoPtr<LThreadJob> j;
 		if (Lock(_FL))
 		{
 			if (Jobs.Length())

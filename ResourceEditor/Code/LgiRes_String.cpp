@@ -1012,7 +1012,7 @@ void ResStringGroup::OnItemClick(LListItem *Item, LMouse &m)
 	LList::OnItemClick(Item, m);
 }
 
-void ResStringGroup::OnItemSelect(GArray<LListItem*> &Items)
+void ResStringGroup::OnItemSelect(LArray<LListItem*> &Items)
 {
 	if (IsAttached())
 	{

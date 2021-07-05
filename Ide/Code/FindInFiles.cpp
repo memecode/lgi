@@ -53,7 +53,7 @@ void SerializeHistory(GHistory *h, const char *opt, GOptionsFile *p, bool Write)
 {
 	if (h && p)
 	{
-		GString last;
+		LString last;
 		last.Printf("%sSelect", opt);
 		LViewI *Edit = NULL;
 		h->GetWindow()->GetViewById(h->GetTargetId(), Edit);
@@ -65,11 +65,11 @@ void SerializeHistory(GHistory *h, const char *opt, GOptionsFile *p, bool Write)
 		LVariant v;
 		if (Write)
 		{
-			GString::Array a;
+			LString::Array a;
 			a.SetFixedLength(false);
 			int64 i = 0;
 			int64 Selected = h->Value();
-			GString EdTxt;
+			LString EdTxt;
 			if (Edit)
 				EdTxt = Edit->Name();
 
@@ -87,7 +87,7 @@ void SerializeHistory(GHistory *h, const char *opt, GOptionsFile *p, bool Write)
 				i++;
 			}
 
-			GString strs = GString("|").Join(a);
+			LString strs = LString("|").Join(a);
 			p->SetValue(opt, v = strs.Get());
 			#if DEBUG_HIST
 			LgiTrace("\tstrs='%s'\n", strs.Get());
@@ -102,8 +102,8 @@ void SerializeHistory(GHistory *h, const char *opt, GOptionsFile *p, bool Write)
 		{
 			if (p->GetValue(opt, v))
 			{
-				GString raw(v.Str());
-				GString::Array t = raw.Split("|");
+				LString raw(v.Str());
+				LString::Array t = raw.Split("|");
 				h->DeleteArrays();
 				for (unsigned i=0; i<t.Length(); i++)
 				{
@@ -213,7 +213,7 @@ class FindInFilesThreadPrivate
 {
 public:
 	int AppHnd;
-	GAutoPtr<FindParams> Params;
+	LAutoPtr<FindParams> Params;
 	bool Loop, Busy;
 	LStringPipe Pipe;
 	int64 Last;
@@ -246,7 +246,7 @@ void FindInFilesThread::SearchFile(char *File)
 	GFile f;
 	if (!f.Open(File, O_READ))
 	{
-		GString s;
+		LString s;
 		s.Printf("Couldn't Read file '%s'\n", File);
 		Log(NewStr(s));
 		return;
@@ -370,14 +370,14 @@ GMessage::Result FindInFilesThread::OnEvent(GMessage *Msg)
 				Log(NULL);
 				Log(NewStr(Msg));
 
-				GArray<const char*> Ext;
+				LArray<const char*> Ext;
 				GToken e(d->Params->Ext, ";, ");
 				for (int i=0; i<e.Length(); i++)
 				{
 					Ext.Add(e[i]);
 				}
 		
-				GArray<char*> Files;
+				LArray<char*> Files;
 				if (d->Params->Type == FifSearchSolution)
 				{
 					// Do the extension filtering...

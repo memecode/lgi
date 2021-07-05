@@ -165,18 +165,18 @@ class LHtmlElement : public GDom, public LCss
 	friend class HtmlEdit;
 
 protected:
-	GAutoWString Txt;
+	LAutoWString Txt;
 	uint8_t WasClosed : 1;
 	GCssStyle StyleDom;
 
 public:
 	HtmlTag TagId;
-	GAutoString Tag;
+	LAutoString Tag;
 	GHtmlElemInfo *Info;
-	GAutoString Condition;
+	LAutoString Condition;
 	
 	LHtmlElement *Parent;
-	GArray<LHtmlElement*> Children;
+	LArray<LHtmlElement*> Children;
 	
 	LHtmlElement(LHtmlElement *parent);
 	~LHtmlElement();
@@ -193,13 +193,13 @@ public:
 	virtual bool Get(const char *attr, const char *&val) { return false; }
 	virtual void Set(const char *attr, const char *val) {}
 	virtual void SetStyle() {}
-	virtual GAutoString DescribeElement() { return GAutoString(); }
+	virtual LAutoString DescribeElement() { return LAutoString(); }
 	virtual void OnStyleChange(const char *name) {}
 
 	// Helper
 	void Set(const char *attr, const char16 *val)
 	{
-		GAutoString utf8(WideToUtf8(val));
+		LAutoString utf8(WideToUtf8(val));
 		Set(attr, utf8);
 	}
 

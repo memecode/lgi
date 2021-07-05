@@ -74,7 +74,7 @@ bool LGetFileMimeType(const char *File, char *Mime)
 	return Status;
 }
 
-bool LgiGetsAppForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
+bool LgiGetsAppForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 	if (Mime)
@@ -131,7 +131,7 @@ bool LPlaySound(char *FileName, int ASync)
 	return Status;
 }
 
-bool LExecute(const char *File, const char *Args, const char *Dir, GAutoString *ErrorMsg)
+bool LExecute(const char *File, const char *Args, const char *Dir, LAutoString *ErrorMsg)
 {
 	if (File)
 	{
@@ -191,11 +191,11 @@ bool LExecute(const char *File, const char *Args, const char *Dir, GAutoString *
 	return false;
 }
 
-GAutoString LgiErrorCodeToString(uint32 Code)
+LAutoString LgiErrorCodeToString(uint32 Code)
 {
 	char e[32];
 	sprintf_s(e, sizeof(e), "Err(%i)", Code);
-	GAutoString s(NewStr(e));
+	LAutoString s(NewStr(e));
 	return s;
 }
 
@@ -220,7 +220,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 
 			LStringPipe p;
 			p.Print("Assert failed, file: %s, line: %i\n%s", file, line, test);
-			GAutoPtr<char,true> Msg(p.NewStr());
+			LAutoPtr<char,true> Msg(p.NewStr());
 			
 			BAlert *a = new BAlert("Assert Failed", Msg, "Abort", "Debug", "Ignore");
 			int Btn = a->Go();
@@ -251,14 +251,14 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 }
 
 bool LGetAppsForMimeType(const char *Mime,
-							GArray<LAppInfo*> &Apps,
+							LArray<LAppInfo*> &Apps,
 							int Limit = -1)
 {
 	LgiAssert(!"Impl me.");
 	return false;
 }
 
-bool LGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
+bool LGetMimeTypeExtensions(const char *Mime, LArray<LString> &Ext)
 {
 	LgiAssert(!"Impl me.");
 	return false;

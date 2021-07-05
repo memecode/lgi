@@ -109,7 +109,7 @@ void ResMenuItem::OnMouseClick(LMouse &m)
 					}
 					case IDM_NEW_ID:
 					{
-						GArray<ResMenuItem*> Sel;
+						LArray<ResMenuItem*> Sel;
 						if (GetTree() &&
 							GetTree()->GetSelection(Sel))
 						{

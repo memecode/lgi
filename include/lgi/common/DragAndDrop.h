@@ -46,10 +46,10 @@ LgiFunc const char *LMimeToUti(const char *Mime);
 //////////////////////////////////////////////////////////////////////////////
 struct LgiClass GDragData
 {
-	GString Format;
-	GArray<LVariant> Data;
+	LString Format;
+	LArray<LVariant> Data;
 	
-	bool IsFormat(GString Fmt)
+	bool IsFormat(LString Fmt)
 	{
 		return	Format.Get() != NULL &&
 				Fmt != NULL &&
@@ -71,7 +71,7 @@ struct LgiClass GDragData
 		return IsFormat(LGI_StreamDropFormat);
 	}
 	
-	bool AddFileStream(const char *LeafName, const char *MimeType, GAutoPtr<LStreamI> Stream)
+	bool AddFileStream(const char *LeafName, const char *MimeType, LAutoPtr<LStreamI> Stream)
 	{
 		if (!LeafName || !MimeType || !Stream)
 			return false;
@@ -97,7 +97,7 @@ class LgiClass GDragFormats
 
 	bool Source;
 	
-	struct Fmt : public GString
+	struct Fmt : public LString
 	{
 		bool Val;
 		Fmt()
@@ -106,14 +106,14 @@ class LgiClass GDragFormats
 		}
 	};
 	
-	GArray<Fmt> Formats;
+	LArray<Fmt> Formats;
 
 public:
 	GDragFormats(bool source);
 
 	bool IsSource() { return Source; }
 	void SetSource(bool s) { Source = s; }
-	GString ToString();
+	LString ToString();
 	size_t Length() { return Formats.Length(); }
 	void Empty() { Formats.Empty(); }
 	const char *operator[](ssize_t Idx) { return Formats.IdxCheck(Idx) ? Formats[Idx].Get() : NULL; }
@@ -122,8 +122,8 @@ public:
 
 	void SupportsFileDrops();
 	void SupportsFileStreams();
-	void Supports(GString Fmt);
-	GString::Array GetSupported();
+	void Supports(LString Fmt);
+	LString::Array GetSupported();
 };
 
 /// A drag source class
@@ -188,7 +188,7 @@ public:
 	virtual bool GetData
 	(
 		/// Fill out as many GDragData structures as you need.
-		GArray<GDragData> &Data
+		LArray<GDragData> &Data
 	) { return false; }
 
 	/// This is called to see what formats your support
@@ -216,7 +216,7 @@ public:
 	{ return false; }
 
 	/// Creates a file drop
-	static bool CreateFileDrop(GDragData *OutputData, LMouse &m, GString::Array &Files);
+	static bool CreateFileDrop(GDragData *OutputData, LMouse &m, LString::Array &Files);
 };
 
 /// A drag target class
@@ -232,7 +232,7 @@ private:
 	#ifdef __GTK_H__
 	friend Gtk::gboolean LWindowDragDataDrop(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::guint time, class LWindow *Wnd);
 	friend void LWindowDragDataReceived(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::GtkSelectionData *data, Gtk::guint info, Gtk::guint time, LWindow *Wnd);
-	GArray<GDragData> Data;
+	LArray<GDragData> Data;
 	#endif
 
 	#ifdef WIN32
@@ -258,7 +258,7 @@ protected:
 	IDataObject *DataObject;
 
 	// Tools
-	bool OnDropFileGroupDescriptor(FILEGROUPDESCRIPTOR *Data, GString::Array &Files);
+	bool OnDropFileGroupDescriptor(FILEGROUPDESCRIPTOR *Data, LString::Array &Files);
 	#endif
 
 public:
@@ -302,7 +302,7 @@ public:
 	virtual int OnDrop
 	(
 		/// All the available data formats for this drop
-		GArray<GDragData> &Data,
+		LArray<GDragData> &Data,
 		/// The mouse coords
 		LPoint Pt,
 		/// The keyboard modifiers

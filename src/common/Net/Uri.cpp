@@ -87,7 +87,7 @@ const char *LUri::LocalPath()
 	return s;
 }
 
-GString LUri::ToString()
+LString LUri::ToString()
 {
 	LStringPipe p;
 	if (sProtocol)
@@ -238,7 +238,7 @@ bool LUri::Set(const char *uri)
 	return sHost || sPath;
 }
 
-GString LUri::EncodeStr(const char *s, const char *ExtraCharsToEncode)
+LString LUri::EncodeStr(const char *s, const char *ExtraCharsToEncode)
 {
 	LStringPipe p(256);
 	if (s)
@@ -270,7 +270,7 @@ LUri::StrMap LUri::Params()
 		const char *q = strchr(sPath, '?');
 		if (q++)
 		{
-			auto Parts = GString(q).SplitDelimit("&");
+			auto Parts = LString(q).SplitDelimit("&");
 			for (auto p : Parts)
 			{
 				auto Var = p.Split("=", 1);
@@ -283,7 +283,7 @@ LUri::StrMap LUri::Params()
 	return m;
 }
 
-GString LUri::DecodeStr(const char *s)
+LString LUri::DecodeStr(const char *s)
 {
 	LStringPipe p(256);
 	if (s)

@@ -42,7 +42,7 @@ class LDbRow : public GDataPropI
 	// When editing a record, it can grow in size, so we copy the
 	// Read-only data in the table into an edit buffer own by this
 	// record.
-	GArray<char> Edit;
+	LArray<char> Edit;
 
 	// This pointers to the record data.
 	// Format
@@ -78,7 +78,7 @@ public:
 	// Row level op
 	bool Delete();
 	uint32_t Size(uint32_t Set = 0);
-	GString ToString();
+	LString ToString();
 
 	// Data access
 	bool CopyProps(GDataPropI &p);
@@ -107,7 +107,7 @@ public:
 	virtual bool OnDelete(LDbRow *r) = 0;
 };
 
-class DbArrayIndex : public DbIndex, public GArray<LDbRow*>
+class DbArrayIndex : public DbIndex, public LArray<LDbRow*>
 {
 	friend class LDbTable;
 
@@ -152,7 +152,7 @@ public:
 	bool Serialize(const char *Path, bool Write);
 
 	// Testing
-	GString ToString();
+	LString ToString();
 	static bool UnitTests();
 };
 

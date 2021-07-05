@@ -35,7 +35,7 @@ enum CmpCtrls
 };
 
 #ifdef DIFF_CENTER
-GArray<uint32> RDiff, GDiff, BDiff;
+LArray<uint32> RDiff, GDiff, BDiff;
 #endif
 
 template<typename Px>
@@ -119,16 +119,16 @@ void CompareRgba(LSurface *A, LSurface *B, uint8_t *c, LPoint size, int threshol
 	}
 }
 
-GAutoPtr<LMemDC> CreateDiff(LViewI *Parent, LSurface *A, LSurface *B)
+LAutoPtr<LMemDC> CreateDiff(LViewI *Parent, LSurface *A, LSurface *B)
 {
-	GAutoPtr<LMemDC> C;
+	LAutoPtr<LMemDC> C;
 	int Cx = MIN(A->X(), B->X()), Cy = MIN(A->Y(), B->Y());
 	if (A->GetColourSpace() != B->GetColourSpace())
 	{
 		LStringPipe p;
 		p.Print("The bit depths of the images are different: %i (left), %i (right).",
 				A->GetBits(), B->GetBits());
-		GAutoString a(p.NewStr());
+		LAutoString a(p.NewStr());
 		LgiMsg(Parent, "%s", "Image Compare", MB_OK, a.Get());
 	}
 	else if (C.Reset(new LMemDC(Cx, Cy, CsIndex8)) &&
@@ -241,13 +241,13 @@ GAutoPtr<LMemDC> CreateDiff(LViewI *Parent, LSurface *A, LSurface *B)
 class ThreadLoader : public LThread
 {
 	LView *Owner;
-	GAutoString File;
+	LAutoString File;
 	
 public:
-	GAutoPtr<LSurface> Img;
+	LAutoPtr<LSurface> Img;
 	GMessage::Param Param;
 
-	ThreadLoader(LView *owner, GAutoString file, GMessage::Param param) : LThread("ThreadLoader")
+	ThreadLoader(LView *owner, LAutoString file, GMessage::Param param) : LThread("ThreadLoader")
 	{
 		Owner = owner;
 		File = file;
@@ -304,9 +304,9 @@ class CompareView : public LLayout
 {
 	GZoomViewCallback *Callback;
 	LEdit *AName, *BName, *CName;
-	GAutoPtr<LSurface> A, B, C;
+	LAutoPtr<LSurface> A, B, C;
 	CmpZoomView *AView, *BView, *CView;
-	GArray<ThreadLoader*> Threads;
+	LArray<ThreadLoader*> Threads;
 	LStatusBar *Status;
 	LStatusPane *Pane[3];
 	bool DraggingView;	
@@ -327,12 +327,12 @@ public:
 		
 		if (FileA)
 		{
-			GAutoString a(NewStr(FileA));
+			LAutoString a(NewStr(FileA));
 			Threads.Add(new ThreadLoader(this, a, 0));
 		}
 		if (FileB)
 		{
-			GAutoString a(NewStr(FileB));
+			LAutoString a(NewStr(FileB));
 			Threads.Add(new ThreadLoader(this, a, 1));
 		}
 		
@@ -402,7 +402,7 @@ public:
 				if (A &&
 					B)
 				{
-					GAutoPtr<LMemDC> pDC = CreateDiff(this, A, B);
+					LAutoPtr<LMemDC> pDC = CreateDiff(this, A, B);
 					if (pDC)
 					{
 						if (C.Reset(pDC.Release()))
@@ -575,7 +575,7 @@ public:
 		Diff->a = p->a;
 	}
 
-	GAutoString DescribePixel(LSurface *pDC, LPoint Pos, GRgba64 *Diff)
+	LAutoString DescribePixel(LSurface *pDC, LPoint Pos, GRgba64 *Diff)
 	{
 		char s[256] = "No Data";
 		int ch = 0;
@@ -624,7 +624,7 @@ public:
 				break;
 		}
 		
-		return GAutoString(NewStr(s));
+		return LAutoString(NewStr(s));
 	}
 	
 	/*
@@ -716,10 +716,10 @@ public:
 				ZeroObj(ap);
 				ZeroObj(bp);
 				
-				GAutoString Apix = DescribePixel(a, LPoint(m.x, m.y), &ap);
+				LAutoString Apix = DescribePixel(a, LPoint(m.x, m.y), &ap);
 				Pane[0]->Name(Apix);
 
-				GAutoString Bpix = DescribePixel(b, LPoint(m.x, m.y), &bp);
+				LAutoString Bpix = DescribePixel(b, LPoint(m.x, m.y), &bp);
 				Pane[2]->Name(Bpix);
 
 				int Channels = GColourSpaceChannels(a->GetColourSpace());
@@ -807,8 +807,8 @@ struct CompareThread : public LThread
 			{
 				const char *left = i->GetText(0);
 				const char *right = i->GetText(1);
-				GAutoPtr<LSurface> left_img(GdcD->Load(left));
-				GAutoPtr<LSurface> right_img(GdcD->Load(right));
+				LAutoPtr<LSurface> left_img(GdcD->Load(left));
+				LAutoPtr<LSurface> right_img(GdcD->Load(right));
 				if (left_img && right_img)
 				{
 					if (left_img->X() == right_img->X() &&
@@ -855,7 +855,7 @@ struct ImageCompareDlgPriv : public GZoomViewCallback
 	LCombo *l, *r;
 	LList *lst;
 	LTabView *tabs;
-	GAutoPtr<CompareThread> Thread;
+	LAutoPtr<CompareThread> Thread;
 
 	ImageCompareDlgPriv()
 	{

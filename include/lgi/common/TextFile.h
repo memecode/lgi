@@ -20,8 +20,8 @@ protected:
 	bool InEndOfLine;
 	GPointer Pos;
 	EncodingType Type;
-	GArray<uint8_t> Buf;
-	GAutoString Charset;
+	LArray<uint8_t> Buf;
+	LAutoString Charset;
 
 public:
 	GTextFile(const char *charset = NULL)
@@ -66,13 +66,13 @@ public:
 	}
 	
 	/// Read the whole file as utf-8
-	GAutoString Read()
+	LAutoString Read()
 	{
-		GAutoString Ret;
+		LAutoString Ret;
 		size_t Sz = (size_t)GetSize();
 		if (Sz > 0)
 		{
-			GAutoPtr<uint8_t, true> Buf(new uint8_t[Sz]);
+			LAutoPtr<uint8_t, true> Buf(new uint8_t[Sz]);
 			if (Buf)
 			{
 				ssize_t Rd = Read(Buf, (ssize_t)Sz);
@@ -92,13 +92,13 @@ public:
 	}
 	
 	/// Read the whole file as wchar_t
-	GAutoWString ReadW()
+	LAutoWString ReadW()
 	{
-		GAutoWString Ret;
+		LAutoWString Ret;
 		int Sz = (int)GetSize();
 		if (Sz > 0)
 		{
-			GAutoPtr<uint8_t, true> Buf(new uint8_t[Sz]);
+			LAutoPtr<uint8_t, true> Buf(new uint8_t[Sz]);
 			if (Buf)
 			{
 				ssize_t Rd = Read(Buf, Sz);
@@ -234,7 +234,7 @@ public:
 	}
 	
 	template<typename T>
-	int GetLine(GArray<T> &Out)
+	int GetLine(LArray<T> &Out)
 	{
 		uint8_t *End = NULL;
 		

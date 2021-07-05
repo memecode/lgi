@@ -932,14 +932,14 @@ char *LEncodeUri(const char *uri, int len)
 	return p.NewStr();
 }
 
-GString LUrlEncode(const char *s, const char *delim)
+LString LUrlEncode(const char *s, const char *delim)
 {
 	if (!s || !*s)
-		return GString();
+		return LString();
 
 	char buf[256];
 	int ch = 0;
-	GString out;
+	LString out;
 	while (*s)
 	{
 		if (*s == '%' || strchr(delim, *s))
@@ -960,14 +960,14 @@ GString LUrlEncode(const char *s, const char *delim)
 	return out;
 }
 
-GString LUrlDecode(const char *s)
+LString LUrlDecode(const char *s)
 {
 	if (!s || !*s)
-		return GString();
+		return LString();
 
 	char buf[256];
 	int ch = 0;
-	GString out;
+	LString out;
 	while (*s)
 	{
 		if (*s == '%')

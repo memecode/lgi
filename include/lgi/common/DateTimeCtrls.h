@@ -20,7 +20,7 @@ public:
 	const char *GetClass() { return "LTimePopup"; }
 
 	void SetTime(LDateTime *t);
-	GString GetTime();
+	LString GetTime();
 
 	void OnCreate();
 	void OnPaint(LSurface *pDC);

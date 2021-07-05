@@ -16,7 +16,7 @@ LXmlTag *GetFormField(LXmlTag *Form, char *Field)
 	if (Form && Field)
 	{
 		char *Ast = strchr(Field, '*');
-		GArray<LXmlTag*> Matches;
+		LArray<LXmlTag*> Matches;
 
 		for (auto x: Form->Children)
 		{
@@ -632,7 +632,7 @@ FormValue *FormPost::Get(char *Field, bool Create)
 {
 	char *Ast = strchr(Field, '*');
 
-	GArray<FormValue*> Matches;
+	LArray<FormValue*> Matches;
 	for (unsigned i=0; i<Values.Length(); i++)
 	{
 		if (Ast)
@@ -710,7 +710,7 @@ char *HttpTools::Fetch(char *uri, LStream *Log, LViewI *Dump, CookieJar *Cookies
 		if (!u.Port)
 			u.Port = HTTP_PORT;
 
-		GAutoPtr<LSocketI> Sock(new LSocket);
+		LAutoPtr<LSocketI> Sock(new LSocket);
 		if (h.Open(Sock, u.sHost))
 		{
 			int ProtocolStatus = 0;
@@ -1101,7 +1101,7 @@ LSurface *GetHttpImage(char *Uri)
 			Http.SetProxy(p.sHost, p.Port);
 
 		LUri u(Uri);
-		GAutoPtr<LSocketI> Sock(new LSocket);
+		LAutoPtr<LSocketI> Sock(new LSocket);
 		if (Http.Open(Sock, u.sHost))
 		{
 			LStringPipe Data;

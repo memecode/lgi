@@ -98,7 +98,7 @@ typedef int (__stdcall *p_vscprintf)(const char *format, va_list argptr);
 
 class LgiClass OsAppArguments
 {
-	GAutoWString CmdLine;
+	LAutoWString CmdLine;
 
 	void _Default();
 
@@ -268,10 +268,10 @@ LgiFunc class LViewI *LWindowFromHandle(OsView hWnd);
 LgiFunc int GetMouseWheelLines();
 LgiFunc int WinPointToHeight(int Pt, HDC hDC = NULL);
 LgiFunc int WinHeightToPoint(int Ht, HDC hDC = NULL);
-LgiExtern class GString WinGetSpecialFolderPath(int Id);
+LgiExtern class LString WinGetSpecialFolderPath(int Id);
 
 /// Convert a string d'n'd format to an OS dependant integer.
-LgiFunc int FormatToInt(GString s);
+LgiFunc int FormatToInt(LString s);
 /// Convert a Os dependant integer d'n'd format to a string.
 LgiFunc char *FormatToStr(int f);
 extern bool LgiToWindowsCursor(OsView Hnd, LgiCursor Cursor);

@@ -59,7 +59,7 @@ bool _lgi_check_file(char *Path)
 	return false;
 }
 
-GString LCurrentUserName()
+LString LCurrentUserName()
 {
 	struct passwd *pw = getpwuid(geteuid());
 	if (pw)
@@ -158,7 +158,7 @@ GMessage CreateMsg(int m, int a, int b)
 	return Msg;
 }
 
-bool LGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
+bool LGetMimeTypeExtensions(const char *Mime, LArray<LString> &Ext)
 {
 	int Start = Ext.Length();
 	char *e;
@@ -177,7 +177,7 @@ bool LGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
 	return Ext.Length() > Start;
 }
 
-GString LGetFileMimeType(const char *File)
+LString LGetFileMimeType(const char *File)
 {
 	return LgiApp->GetFileMimeType(File);
 }
@@ -218,7 +218,7 @@ bool _GetSystemFont(char *FontType, char *Font, int FontBufSize, int &PointSize)
 	return Status;
 }
 
-bool LGetAppsForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
+bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 
@@ -239,7 +239,7 @@ bool LGetAppsForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
 	if (p.Start())
 	{
 		p.Communicate(&Output);
-		GAutoString o(Output.NewStr());
+		LAutoString o(Output.NewStr());
 
 		#if DEBUG_GET_APPS_FOR_MIMETYPE
 		printf("Output:\n%s\n", o.Get());
@@ -255,8 +255,8 @@ bool LGetAppsForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
 			{
 				if (LFileExists(p))
 				{
-					GAutoString txt(ReadTextFile(p));
-					GAutoString Section;
+					LAutoString txt(ReadTextFile(p));
+					LAutoString Section;
 
 					#if DEBUG_GET_APPS_FOR_MIMETYPE
 					printf("Reading '%s', got %i bytes\n", p, strlen(txt));
@@ -293,7 +293,7 @@ bool LGetAppsForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
 									*Value++ = 0;
 									if (!stricmp(Var, "Exec"))
 									{
-										GAutoString exe(TrimStr(Value));
+										LAutoString exe(TrimStr(Value));
 										char *sp = strchr(exe, ' ');
 										if (sp)
 											ai->Path.Reset(NewStr(exe, sp-exe));
@@ -328,10 +328,10 @@ bool LGetAppsForMimeType(const char *Mime, GArray<LAppInfo*> &Apps, int Limit)
 	return Status;
 }
 
-GString LGetAppForMimeType(const char *Mime)
+LString LGetAppForMimeType(const char *Mime)
 {
-	GString App;
-	GArray<LAppInfo*> Apps;
+	LString App;
+	LArray<LAppInfo*> Apps;
 	if (LGetAppsForMimeType(Mime, Apps, 1))
 		App = Apps[0]->Path.Get();
 	Apps.DeleteObjects();
@@ -343,15 +343,15 @@ int LRand(int Limit)
 	return rand() % Limit;
 }
 
-GString LErrorCodeToString(uint32_t ErrorCode)
+LString LErrorCodeToString(uint32_t ErrorCode)
 {
-	GString e = strerror(ErrorCode);
+	LString e = strerror(ErrorCode);
 	if (!e)
 		e.Printf("UnknownError(%i)", ErrorCode);
 	return e;
 }
 
-bool LExecute(const char *File, const char *Args, const char *Dir, GString *Error)
+bool LExecute(const char *File, const char *Args, const char *Dir, LString *Error)
 {
 	if (File)
 	{
@@ -440,10 +440,10 @@ bool LExecute(const char *File, const char *Args, const char *Dir, GString *Erro
 		if (App[0])
 		{
 			bool FileAdded = false;
-			GString AppPath;
-			GString EscFile = GString::Escape(File, -1, " &");
+			LString AppPath;
+			LString EscFile = LString::Escape(File, -1, " &");
 
-			GString a = App;
+			LString a = App;
 			int Pos;
 			while ((Pos = a.Find("%")) >= 0)
 			{
@@ -464,7 +464,7 @@ bool LExecute(const char *File, const char *Args, const char *Dir, GString *Erro
 						if (IsUrl)
 							a = a(0,Pos) + EscFile + a(Pos+2,-1);
 						else
-							a = a(0,Pos) + GString("file:") + EscFile + a(Pos+2,-1);
+							a = a(0,Pos) + LString("file:") + EscFile + a(Pos+2,-1);
 						FileAdded = true;
 						break;
 					}

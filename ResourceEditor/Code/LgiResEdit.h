@@ -148,20 +148,20 @@ class ResMenuItem;
 struct ErrorInfo
 {
 	ResString *Str;
-	GAutoString Msg;
+	LAutoString Msg;
 };
 
 class ErrorCollection
 {
 public:
-	GArray<ErrorInfo> StrErr;
+	LArray<ErrorInfo> StrErr;
 };
 
 struct SerialiseContext
 {
 	ResFileFormat Format;
 	LStringPipe Log;
-	GArray<ResString*> FixId;
+	LArray<ResString*> FixId;
 	
 	SerialiseContext() : Log(512)
 	{
@@ -302,8 +302,8 @@ public:
 	{
 		// Global
 		FieldTree *Tree;
-		GAutoString Label;
-		GAutoString Name;
+		LAutoString Label;
+		LAutoString Name;
 		int Type;
 		int Id;
 		bool Multiline;
@@ -319,7 +319,7 @@ public:
 		}
 	};
 
-	typedef GArray<Field*> FieldArr;
+	typedef LArray<Field*> FieldArr;
 
 protected:
 	int &NextId;
@@ -518,7 +518,7 @@ public:
 		}
 	}
 
-	void Serialize(void *Token, const char *FieldName, GAutoString &s)
+	void Serialize(void *Token, const char *FieldName, LAutoString &s)
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;
@@ -548,7 +548,7 @@ public:
 		}
 	}
 
-	void Serialize(void *Token, const char *FieldName, GString &s)
+	void Serialize(void *Token, const char *FieldName, LString &s)
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;
@@ -615,7 +615,7 @@ public:
 		return (**a)[0]->Id - (**b)[0]->Id;
 	}
 
-	void GetAll(GArray<FieldArr*> &Fields)
+	void GetAll(LArray<FieldArr*> &Fields)
 	{
 		// for (FieldArr *a = f.First(0); a; a = f.Next(0))
 		for (auto a : f)
@@ -714,7 +714,7 @@ protected:
 	
 	// Languages
 	int				CurLang;
-	GArray<GLanguage*> Languages;
+	LArray<GLanguage*> Languages;
 	LHashTbl<ConstStrKey<char,false>, bool> ShowLanguages;
 
 	void SortDialogs();
@@ -729,7 +729,7 @@ public:
 	void ShowLang(GLanguageId Lang, bool Show);
 	GLanguage *GetCurLang();
 	void SetCurLang(GLanguage *L);
-	GArray<GLanguage*> *GetLanguages();
+	LArray<GLanguage*> *GetLanguages();
 	void OnLanguagesChange(GLanguageId Lang, bool Add, bool Update = false);
 
 	// ---------------------------------------------------------------------
@@ -779,7 +779,7 @@ public:
 	int OnNotify(LViewI *Ctrl, int Flags);
 	GMessage::Result OnEvent(GMessage *m);
 	int OnCommand(int Cmd, int Event, OsView Handle);
-	void OnReceiveFiles(GArray<const char*> &Files);
+	void OnReceiveFiles(LArray<const char*> &Files);
 	void OnCreate();
 };
 
@@ -788,12 +788,12 @@ public:
 
 struct SearchParams
 {
-	GString Text;
+	LString Text;
 	#if NEW_UI
 	bool LimitToText;
 	bool LimitToDefine;
 	#else
-	GString Define;
+	LString Define;
 	#endif
 	GLanguageId InLang;
 	GLanguageId NotInLang;
@@ -835,7 +835,7 @@ public:
 class Search : public LDialog, public SearchParams
 {
 	AppWnd *App;
-	GAutoPtr<SearchThread> Thread;
+	LAutoPtr<SearchThread> Thread;
 	void OnCheck();
 
 public:
@@ -873,7 +873,7 @@ class ResCss : public Resource, public LLayout
     
 protected:
 	class ResCssUi *Ui;
-	GAutoString Style;
+	LAutoString Style;
 
 public:
 	ResCss(AppWnd *w, int type = TYPE_CSS);

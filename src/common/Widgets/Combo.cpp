@@ -40,7 +40,7 @@ public:
 	LRect Arrow;
 	List<char> Items;
 	uint64 LastKey;
-	GAutoString Find;
+	LAutoString Find;
 	LSubMenu *Menu;
 	LCombo::SelectedState SelState;
 	bool LayoutDirty;
@@ -358,7 +358,7 @@ void LCombo::DoMenu()
 							*n++ = '.';
 							*n++ = '.';
 							*n++ = 0;
-							GAutoString a(WideToUtf8(Name));
+							LAutoString a(WideToUtf8(Name));
 							m = RClick.AppendSub(a);
 						}
 					}
@@ -478,7 +478,7 @@ bool LCombo::OnKey(LKey &k)
 					}
 
 					size_t Len = d->Find ? strlen(d->Find) : 0;
-					GAutoString n(new char[Len+2]);
+					LAutoString n(new char[Len+2]);
 					if (n)
 					{
 						if (d->Find) strcpy(n, d->Find);

@@ -5,12 +5,12 @@
 #define OPT_WND_STATE		"BlameUiState"
 struct BlameUiPriv
 {
-	GString Output;
+	LString Output;
 	AppPriv *Priv;
 	GTextLog *Log;
 };
 
-BlameUi::BlameUi(AppPriv *priv, VersionCtrl Vc, GString Output)
+BlameUi::BlameUi(AppPriv *priv, VersionCtrl Vc, LString Output)
 {
 	d = new BlameUiPriv;
 	d->Log = NULL;

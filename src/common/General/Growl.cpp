@@ -7,9 +7,9 @@ class GGrowlPriv : public LThread, public LMutex
 {
 	bool Loop;
 	bool Async;
-	GString AppName;
-	GAutoPtr<GGrowl::GRegister> Reg;
-	GArray<GGrowl::GNotify*> Notes;
+	LString AppName;
+	LAutoPtr<GGrowl::GRegister> Reg;
+	LArray<GGrowl::GNotify*> Notes;
 	
 public:
 	GGrowlPriv(bool async) : LThread("GGrowl"), LMutex("GGrowlSem")
@@ -33,7 +33,7 @@ public:
 		Notes.DeleteObjects();
 	}
 	
-	bool Register(GAutoPtr<GGrowl::GRegister> p)
+	bool Register(LAutoPtr<GGrowl::GRegister> p)
 	{
 		if (!Lock(_FL))
 			return false;
@@ -45,7 +45,7 @@ public:
 		}
 		else
 		{
-		    GAutoPtr<GGrowl::GNotify> n;
+		    LAutoPtr<GGrowl::GNotify> n;
 		    Status = Process(p, n);
 		}
 		
@@ -53,7 +53,7 @@ public:
 		return Status;
 	}
 
-	bool Notify(GAutoPtr<GGrowl::GNotify> n)
+	bool Notify(LAutoPtr<GGrowl::GNotify> n)
 	{
 		if (!Lock(_FL))
 			return false;
@@ -65,7 +65,7 @@ public:
 		}
 		else
 		{
-		    GAutoPtr<GGrowl::GRegister> r;
+		    LAutoPtr<GGrowl::GRegister> r;
 		    Status = Process(r, n);
 		}
 		
@@ -73,10 +73,10 @@ public:
 		return Status;
 	}
 	
-	bool Process(GAutoPtr<GGrowl::GRegister> &reg,
-			     GAutoPtr<GGrowl::GNotify> &note)
+	bool Process(LAutoPtr<GGrowl::GRegister> &reg,
+			     LAutoPtr<GGrowl::GNotify> &note)
 	{
-		GAutoPtr<LSocket> Sock(new LSocket);
+		LAutoPtr<LSocket> Sock(new LSocket);
 		Sock->SetTimeout(5000);
 		if (!Sock->Open("localhost", 23053))
 		    return false;
@@ -139,7 +139,7 @@ public:
 		
 		p.Print("\r\n");
 		
-		GAutoString Cmd(p.NewStr());
+		LAutoString Cmd(p.NewStr());
 		int CmdLen = (int) strlen(Cmd);
 		ssize_t w = Sock->Write(Cmd, CmdLen);
 		if (w == CmdLen)
@@ -152,7 +152,7 @@ public:
 					break;
 				p.Write(In, r);
 			}
-			GAutoString Resp(p.NewStr());
+			LAutoString Resp(p.NewStr());
 		}
 		
 		return true;
@@ -164,8 +164,8 @@ public:
 		
 		while (Loop)
 		{
-			GAutoPtr<GGrowl::GRegister> reg;
-			GAutoPtr<GGrowl::GNotify> note;
+			LAutoPtr<GGrowl::GRegister> reg;
+			LAutoPtr<GGrowl::GNotify> note;
 
 			if (LockWithTimeout(100, _FL))
 			{
@@ -203,12 +203,12 @@ GGrowl::~GGrowl()
 	DeleteObj(d);
 }
 
-bool GGrowl::Register(GAutoPtr<GRegister> r)
+bool GGrowl::Register(LAutoPtr<GRegister> r)
 {
 	return d->Register(r);
 }
 
-bool GGrowl::Notify(GAutoPtr<GNotify> n)
+bool GGrowl::Notify(LAutoPtr<GNotify> n)
 {
 	return d->Notify(n);
 }

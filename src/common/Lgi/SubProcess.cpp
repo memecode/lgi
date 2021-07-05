@@ -109,14 +109,14 @@ char *ArgTok(const char *&s)
 
 struct LSubProcessPriv
 {
-	GString Exe;
-	GString InitialFolder;
-	GArray<char*> Args;
+	LString Exe;
+	LString InitialFolder;
+	LArray<char*> Args;
 	bool NewGroup;
 	bool PseudoConsole;
 
 	bool EnvironmentChanged;
-	GArray<LSubProcess::Variable> Environment;
+	LArray<LSubProcess::Variable> Environment;
 	uint32_t ErrorCode;
 
 	LSubProcess::PipeHandle ExternIn, ExternOut;
@@ -257,7 +257,7 @@ LSubProcess::Variable *LSubProcess::GetEnvVar(const char *Var, bool Create)
 		#else
 		for (int i=0; environ[i]; i++)
 		{
-			auto p = GString(environ[i]).Split("=", 1);
+			auto p = LString(environ[i]).Split("=", 1);
 			if (p.Length() == 2)
 			{
 				Variable &v = d->Environment.New();
@@ -537,13 +537,13 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			
 			if (d->Environment.Length())
 			{
-				GString::Array Vars, Path;
-				GArray<char*> Env;
+				LString::Array Vars, Path;
+				LArray<char*> Env;
                 
 				Vars.SetFixedLength(false);
 				for (auto v : d->Environment)
 				{
-					GString &s = Vars.New();
+					LString &s = Vars.New();
 					s.Printf("%s=%s", v.Var.Get(), v.Val.Get());
 					Env.Add(s.Get());
                     
@@ -618,7 +618,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 	#else
 	
 		// Find the end of the process list
-		::GArray<LSubProcess*> p;
+		::LArray<LSubProcess*> p;
 		for (LSubProcess *s=this; s; s=s->Child)
 		{
 			LgiAssert(!s->Child || s->Child->Parent == s);
@@ -636,7 +636,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		#endif		
 		
 		#if defined(POSIX)
-		::GArray<Pipe> Pipes;
+		::LArray<Pipe> Pipes;
 		Pipes.Length(Kids);
 		Pipes[0].Create(&Attr);
 		#if DEBUG_SUBPROCESS
@@ -761,7 +761,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		
 		#elif defined(WIN32)
 		
-		GAutoWString WExe;
+		LAutoWString WExe;
 		if (LFileExists(d->Exe))
 		{
 			WExe.Reset(Utf8ToWide(d->Exe));
@@ -812,7 +812,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		for (unsigned i=0; i<d->Args.Length(); i++)
 		{
 			char *a = d->Args[i];
-			GAutoWString aw(Utf8ToWide(a));
+			LAutoWString aw(Utf8ToWide(a));
 			
 			if (i > 0)
 			{
@@ -911,21 +911,21 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 					Info.hStdError = d->ChildOutput.Write;
 			}
 			
-			GAutoWString WInitialFolder(Utf8ToWide(d->InitialFolder));
+			LAutoWString WInitialFolder(Utf8ToWide(d->InitialFolder));
 
 			#if DEBUG_SUBPROCESS
 			LgiTrace("%s:%i - WInitialFolder=%S\n", _FL, WInitialFolder.Get());
 			#endif
 
-			GAutoWString WEnv;
+			LAutoWString WEnv;
 			if (d->EnvironmentChanged)
 			{
 				GMemQueue q(256);
 				for (unsigned i=0; i<d->Environment.Length(); i++)
 				{
 					Variable &v = d->Environment[i];
-					GAutoWString Var(Utf8ToWide(v.Var));
-					GAutoWString Val(Utf8ToWide(v.Val));
+					LAutoWString Var(Utf8ToWide(v.Var));
+					LAutoWString Val(Utf8ToWide(v.Val));
 					q.Write(Var, sizeof(char16)*(StrlenW(Var)));
 					q.Write(L"=", sizeof(char16));
 					q.Write(Val, sizeof(char16)*(StrlenW(Val)+1));
@@ -1141,7 +1141,7 @@ bool LSubProcess::Kill()
 	return true;
 }
 
-GString LSubProcess::Read()
+LString LSubProcess::Read()
 {
 	LStringPipe p(512);
 	char Buf[512];
@@ -1211,7 +1211,7 @@ int LSubProcess::Peek()
 	#endif	
 }
 
-bool LSubProcess::Write(GString s)
+bool LSubProcess::Write(LString s)
 {
 	auto Wr = Write(s.Get(), s.Length());
 	return Wr == s.Length();

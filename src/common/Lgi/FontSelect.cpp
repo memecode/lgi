@@ -159,7 +159,7 @@ int SortFunc(LListItem *a, LListItem *b, NativeInt Data)
 
 void LFontSelect::EnumerateFonts()
 {
-	GString::Array Fonts;
+	LString::Array Fonts;
 	if (LFontSystem::Inst()->EnumerateFonts(Fonts))
 	{
 		for (auto &n : Fonts)

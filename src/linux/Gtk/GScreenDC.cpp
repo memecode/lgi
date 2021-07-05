@@ -129,9 +129,9 @@ OsPainter LScreenDC::Handle()
 	return d->cr;
 }
 
-::GString LScreenDC::Dump()
+::LString LScreenDC::Dump()
 {
-	::GString s;
+	::LString s;
 	s.Printf("LScreenDC size=%i,%i\n", d->x, d->y);
 	return s;
 }

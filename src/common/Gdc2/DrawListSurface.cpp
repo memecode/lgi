@@ -8,7 +8,7 @@ struct LCmd
 	virtual bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC) = 0;
 };
 
-struct GDrawListSurfacePriv : public GArray<LCmd*>
+struct GDrawListSurfacePriv : public LArray<LCmd*>
 {
 	int x, y, Bits;
 	int DpiX, DpiY;

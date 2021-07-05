@@ -13,7 +13,7 @@
 #include <math.h>
 
 #include "Gdc2.h"
-#include "GString.h"
+#include "LString.h"
 #include "LVariant.h"
 #include "GPalette.h"
 

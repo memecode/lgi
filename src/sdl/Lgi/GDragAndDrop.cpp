@@ -19,7 +19,7 @@ static LHashTbl<ConstStrKey<char,false>, int> DndTypes(0, -1);
 class GDndSourcePriv
 {
 public:
-	GAutoString CurrentFormat;
+	LAutoString CurrentFormat;
 	
 	GDndSourcePriv()
 	{
@@ -47,7 +47,7 @@ bool GDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 	return false;
 }
 
-bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, GString::Array &Files)
+bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, LString::Array &Files)
 {
 	if (OutputData && Files.First())
 	{
@@ -60,7 +60,7 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, GString::
 			p.Push(s);
 		}
 
-		GAutoString s(p.NewStr());
+		LAutoString s(p.NewStr());
 		if (s)
 		{
 			OutputData->Format = LGI_FileDropFormat;

@@ -1,7 +1,7 @@
 #include "Lvc.h"
 #include "lgi/common/ClipBoard.h"
 
-VcFile::VcFile(AppPriv *priv, VcFolder *owner, GString revision, bool working)
+VcFile::VcFile(AppPriv *priv, VcFolder *owner, LString revision, bool working)
 {
 	d = priv;
 	LoadDiff = false;
@@ -50,7 +50,7 @@ VcFile::FileStatus VcFile::GetStatus()
 	return Status;
 }
 
-GString VcFile::GetUri()
+LString VcFile::GetUri()
 {
 	const char *File = GetText(COL_FILENAME);
 	LUri u = Uri || !Owner ? Uri : Owner->GetUri();
@@ -59,7 +59,7 @@ GString VcFile::GetUri()
 	return u.ToString();
 }
 
-void VcFile::SetUri(GString uri)
+void VcFile::SetUri(LString uri)
 {
 	Uri.Set(uri);
 }
@@ -75,7 +75,7 @@ int VcFile::Checked(int Set)
 	return (int)Chk->Value();
 }
 
-void VcFile::SetDiff(GString diff)
+void VcFile::SetDiff(LString diff)
 {
 	auto n = LFromNativeCp(diff);
 	Diff = n;
@@ -111,7 +111,7 @@ void VcFile::OnMouseClick(LMouse &m)
 	{
 		LSubMenu s;
 		const char *File = GetText(COL_FILENAME);
-		GString LocalPath;
+		LString LocalPath;
 
 		if (Uri.IsProtocol("file"))
 		{
@@ -120,9 +120,9 @@ void VcFile::OnMouseClick(LMouse &m)
 			LocalPath = p.GetFull();
 		}
 		
-		GArray<VcFile*> Files;
+		LArray<VcFile*> Files;
 		GetList()->GetSelection(Files);
-		GString::Array Uris;
+		LString::Array Uris;
 		for (auto f: Files)
 			Uris.New() = f->GetUri();
 
@@ -175,8 +175,8 @@ void VcFile::OnMouseClick(LMouse &m)
 		}
 
 		s.AppendSeparator();
-		GString Fn;
-		auto FileParts = GString(File).SplitDelimit("/\\");
+		LString Fn;
+		auto FileParts = LString(File).SplitDelimit("/\\");
 		if (FileParts.Length() > 1)
 		{
 			Fn.Printf("Copy '%s'", FileParts.Last().Get());
@@ -269,7 +269,7 @@ bool ConvertEol(const char *Path, bool Cr)
 	GFile f;
 	if (!f.Open(Path, O_READWRITE))
 		return false;
-	GString s = f.Read();
+	LString s = f.Read();
 	s = s.Replace("\r");
 	if (Cr)
 		s = s.Replace("\n", "\r\n");
@@ -283,7 +283,7 @@ int GetEol(const char *Path)
 	GFile f;
 	if (!f.Open(Path, O_READ))
 		return false;
-	GString s = f.Read();
+	LString s = f.Read();
 	int Cr = 0, Lf = 0;
 	if (s)
 	{

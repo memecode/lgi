@@ -36,7 +36,7 @@ bool LSubMenu::SetVariant(const char *Name, LVariant &Value, char *Array)
 	return false;
 }
 
-bool LSubMenu::CallMethod(const char *MethodName, LVariant *ReturnValue, GArray<LVariant*> &Args)
+bool LSubMenu::CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args)
 {
 	GDomProperty Method = LgiStringToDomProp(MethodName);	
 	switch (Method)

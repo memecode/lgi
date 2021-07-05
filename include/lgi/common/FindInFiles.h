@@ -10,7 +10,7 @@ class GFindInFiles : public LDialog
 	struct GFindInFilesPriv *d;
 	
 public:
-	GFindInFiles(LViewI *Parent, GAutoString Search, GDom *Store);
+	GFindInFiles(LViewI *Parent, LAutoString Search, GDom *Store);
 	~GFindInFiles();
 	
 	int OnNotify(LViewI *Ctrl, int Flags);

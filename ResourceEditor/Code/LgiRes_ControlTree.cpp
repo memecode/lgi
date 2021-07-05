@@ -32,8 +32,8 @@ class CtNode : public LTreeItem
 
 public:
 	ResString *Str;
-	GAutoString Type;
-	GAutoString Tag;
+	LAutoString Type;
+	LAutoString Tag;
 
 	CtNode(CtrlControlTreePriv *priv, LView *update, int StringRef)
 	{

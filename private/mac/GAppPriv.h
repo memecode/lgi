@@ -4,7 +4,7 @@
 #include "LSymLookup.h"
 #include "GFontCache.h"
 
-typedef GArray<LAppInfo*> AppArray;
+typedef LArray<LAppInfo*> AppArray;
 
 class GAppPrivate
 {
@@ -14,7 +14,7 @@ public:
 	int RunDepth;
 
 	// Common
-	GAutoPtr<LJson> Config;
+	LAutoPtr<LJson> Config;
 	GFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
@@ -23,12 +23,12 @@ public:
 	OsThread GuiThread;
 	OsThreadId GuiThreadId;
 	LSymLookup SymLookup;
-	GAutoString Mime;
-	GAutoString Name;
-	GAutoString UrlArg;
+	LAutoString Mime;
+	LAutoString Name;
+	LAutoString UrlArg;
 	
 	/// Any fonts needed for styling the elements
-	GAutoPtr<GFontCache> FontCache;
+	LAutoPtr<GFontCache> FontCache;
 	
 	GAppPrivate(GApp *owner) : Owner(owner)
 	{

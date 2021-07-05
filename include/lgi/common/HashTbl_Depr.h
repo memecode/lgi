@@ -3,8 +3,8 @@
 
 #include <ctype.h>
 #include "GMem.h"
-#include "GArray.h"
-#include "GString.h"
+#include "LArray.h"
+#include "LString.h"
 #include "LgiClass.h"
 
 #ifndef GHASHTBL_MAX_SIZE
@@ -115,7 +115,7 @@ class GHashTbl
 
 	bool Pool;
 	
-	typedef GArray<KeyPool<Key>*> KeyPoolArr;
+	typedef LArray<KeyPool<Key>*> KeyPoolArr;
 	KeyPoolArr Pools;
 	KeyPool<Key> *GetPool(bool CreateNew = false)
 	{

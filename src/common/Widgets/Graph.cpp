@@ -18,17 +18,17 @@ struct LGraphPriv
 	LVariantType XType, YType;
 	LVariant MaxX, MinX;
 	LVariant MaxY, MinY;
-    GArray<LGraph::GGraphPair> Val;
+    LArray<LGraph::GGraphPair> Val;
 	LGraph::Style Style;
 	
 	// Averages
 	bool Average;
-    GArray<GraphAv> Ave;
+    LArray<GraphAv> Ave;
     int BucketSize;
     
     // Selection
-    GAutoPtr<LPoint> Select;
-    GArray<LGraph::GGraphPair*> Selection;
+    LAutoPtr<LPoint> Select;
+    LArray<LGraph::GGraphPair*> Selection;
 	
 	LGraphPriv()
 	{
@@ -231,7 +231,7 @@ struct LGraphPriv
 
 		SysFont->Colour(L_TEXT, L_WORKSPACE);
 
-		GArray<LVariant> Values;
+		LArray<LVariant> Values;
 		while (Loop)
 		{
 			Values.Add(v);
@@ -591,7 +591,7 @@ void LGraph::OnMouseClick(LMouse &m)
     }
 }
 
-GArray<LGraph::GGraphPair*> *LGraph::GetSelection()
+LArray<LGraph::GGraphPair*> *LGraph::GetSelection()
 {
     return &d->Selection;
 }

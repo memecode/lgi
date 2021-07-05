@@ -52,12 +52,12 @@ public:
 	TAttachment *&Root;
 	TAttachment *MsgText;
 	TAttachment *MsgHtml;
-	GArray<TAttachment*> MsgHtmlRelated;
+	LArray<TAttachment*> MsgHtmlRelated;
 	TAttachment *Related;
 	TAttachment *Alternative;
 	TAttachment *Mixed;
-	GArray<TAttachment*> Attachments;
-	GArray<TAttachment*> Unknown;
+	LArray<TAttachment*> Attachments;
+	LArray<TAttachment*> Unknown;
 	
 	Store3MimeTree(TMail *mail, TAttachment *&root) : Root(root)
 	{
@@ -300,8 +300,8 @@ public:
 
 			Store3MimeTree<TStore, TMail, TAttachment> t(Mail, Root);
 			
-			GString Src = Tests[i];
-			GString::Array Lines = Src.SplitDelimit(" \t\r\n");
+			LString Src = Tests[i];
+			LString::Array Lines = Src.SplitDelimit(" \t\r\n");
 			for (unsigned ln = 0; ln < Lines.Length(); ln++)
 			{
 				TAttachment *a = new TAttachment(Store);
@@ -334,7 +334,7 @@ public:
 
 			for (unsigned n = 0; n < Lines.Length(); n++)
 			{
-				GArray<TAttachment*> Results;
+				LArray<TAttachment*> Results;
 				if (!Root->FindSegs(Lines[n], Results))
 				{
 					LgiTrace("%s:%i - Failed to find '%s' in test %i:\n%s\n", _FL, Lines[n].Get(), i, Tests[i]);

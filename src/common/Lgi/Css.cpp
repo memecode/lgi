@@ -472,7 +472,7 @@ const char *LCss::ToString(DisplayType dt)
 	}
 }
 
-GAutoString LCss::ToString()
+LAutoString LCss::ToString()
 {
 	LStringPipe p;
 
@@ -772,7 +772,7 @@ GAutoString LCss::ToString()
 		}
 	}
 
-	return GAutoString(p.NewStr());
+	return LAutoString(p.NewStr());
 }
 
 bool LCss::InheritCollect(LCss &c, PropMap &Contrib)
@@ -1629,7 +1629,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 							else
 							{
 								// Point size...?
-								GAutoPtr<Len> Pt(new Len);
+								LAutoPtr<Len> Pt(new Len);
 								if (Pt->Parse(s, ApplySize ? PropFontSize : PropLineHeight, Type))
 								{
 									if (ApplySize)
@@ -1642,7 +1642,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 										 !ParseFontWeight(PropFontWeight, s))
 								{
 									// Face name...
-									GAutoPtr<StringsDef> Fam(new StringsDef);
+									LAutoPtr<StringsDef> Fam(new StringsDef);
 									if (Fam->Parse(s))
 										FontFamily(*Fam);
 									else
@@ -1661,11 +1661,11 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 			}
 			case TypeLen:
 			{
-				GArray<Len*> Lengths;
+				LArray<Len*> Lengths;
 				SkipWhite(s);
 				while (*s && *s != ';')
 				{
-					GAutoPtr<Len> t(new Len);
+					LAutoPtr<Len> t(new Len);
 					if (t->Parse(s, PropId, PropId == PropZIndex ? ParseRelaxed : Type))
 					{
 						Lengths.Add(t.Release());
@@ -1849,7 +1849,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 			}
 			case TypeColor:
 			{
-				GAutoPtr<ColorDef> t(new ColorDef);
+				LAutoPtr<ColorDef> t(new ColorDef);
 				if (t->Parse(s) || OnUnhandledColor(t, s))
 				{
 					switch (PropId)
@@ -1888,7 +1888,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 			}
 			case TypeStrings:
 			{
-				GAutoPtr<StringsDef> t(new StringsDef);
+				LAutoPtr<StringsDef> t(new StringsDef);
 				if (t->Parse(s))
 				{
 					StringsDef *e = (StringsDef*)Props.Find(PropId);
@@ -1926,7 +1926,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 				}
 				else
 				{				
-					GAutoPtr<BorderDef> t(new BorderDef);
+					LAutoPtr<BorderDef> t(new BorderDef);
 					if (t->Parse(this, s))
 					{
 						ReleasePropOnSave(BorderDef, PropId);
@@ -1947,7 +1947,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 							s++;
 						if (*s == ')')
 						{
-							GString tmp(Start, s - Start);
+							LString tmp(Start, s - Start);
 							r.SetStr(tmp);
 							s++;
 
@@ -1962,7 +1962,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 			}
 			case TypeImage:
 			{
-				GAutoPtr<ImageDef> Img(new ImageDef);
+				LAutoPtr<ImageDef> Img(new ImageDef);
 				if (Img->Parse(s))
 				{
 					ImageDef *i = (ImageDef*)Props.Find(PropId);
@@ -2172,7 +2172,7 @@ bool LCss::ColorDef::Parse(const char *&s)
 	}
 	else if (ParseWord(s, "-webkit-gradient("))
 	{
-		GAutoString GradientType(ParseString(s));
+		LAutoString GradientType(ParseString(s));
 		ParseExpect(s, ',');
 		if (!GradientType)
 			return false;
@@ -2198,7 +2198,7 @@ bool LCss::ColorDef::Parse(const char *&s)
 				}
 				else
 				{
-					GAutoString Stop(ParseString(s));
+					LAutoString Stop(ParseString(s));
 					if (!Stop) return false;
 					if (!stricmp(Stop, "from"))
 					{
@@ -2384,7 +2384,7 @@ LCss::Selector &LCss::Selector::operator =(const LCss::Selector &s)
 	return *this;
 }
 
-bool LCss::Selector::TokString(GAutoString &a, const char *&s)
+bool LCss::Selector::TokString(LAutoString &a, const char *&s)
 {
 	// const char *Init = s;
 	const char *e = s;
@@ -2438,7 +2438,7 @@ const char *LCss::Selector::PartTypeToString(PartType p)
 	return "<error>";
 };
 
-GAutoString LCss::Selector::Print()
+LAutoString LCss::Selector::Print()
 {
 	LStringPipe p;
 	for (int i=0; i<Parts.Length(); i++)
@@ -2446,7 +2446,7 @@ GAutoString LCss::Selector::Print()
 		Part &n = Parts[i];
 		p.Print("%s %s, ", PartTypeToString(n.Type), n.Value.Get());
 	}
-	return GAutoString(p.NewStr());
+	return LAutoString(p.NewStr());
 }
 
 bool LCss::Selector::IsAtMedia()
@@ -2550,7 +2550,7 @@ bool LCss::Selector::Parse(const char *&s)
 		return false;
 
 	const char *Start = s, *Prev = s;
-	GArray<int> Offsets;
+	LArray<int> Offsets;
 	LStringPipe p;
 	while (*s)
 	{
@@ -2644,7 +2644,7 @@ bool LCss::Selector::Parse(const char *&s)
 
 			Part &n = Parts.New();
 			n.Media = MediaNull;
-			GAutoString Str;
+			LAutoString Str;
 			if (!TokString(Str, s))
 				return false;
 			if (!Str)
@@ -2896,7 +2896,7 @@ bool LCss::Store::Parse(const char *&c, int Depth)
 		}
 
 		// read selector
-		GArray<GAutoPtr<LCss::Selector>> Selectors;
+		LArray<LAutoPtr<LCss::Selector>> Selectors;
 		LCss::Selector *Cur = new LCss::Selector;
 
 		if (Cur->Parse(c))

@@ -11,14 +11,14 @@
 #define OPT_AccessToken		"AccessToken"
 #define OPT_RefreshToken	"RefreshToken"
 
-static GString GetHeaders(LSocketI *s)
+static LString GetHeaders(LSocketI *s)
 {
 	char Buf[256];
 	ssize_t Rd;
-	GString p;
+	LString p;
 	while ((Rd = s->Read(Buf, sizeof(Buf))) > 0)
 	{
-		p += GString(Buf, Rd);
+		p += LString(Buf, Rd);
 		if (p.Find("\r\n\r\n") >= 0)
 			return p;
 	}
@@ -27,9 +27,9 @@ static GString GetHeaders(LSocketI *s)
 	return NULL;
 }
 
-ssize_t ChunkSize(ssize_t &Pos, GString &Buf, GString &Body)
+ssize_t ChunkSize(ssize_t &Pos, LString &Buf, LString &Body)
 {
-	static GString Eol("\r\n");
+	static LString Eol("\r\n");
 	auto End = Buf.Find(Eol, Pos);
 	if (End > Pos)
 	{
@@ -51,14 +51,14 @@ ssize_t ChunkSize(ssize_t &Pos, GString &Buf, GString &Body)
 	return -1;
 }
 
-static bool GetHttp(LSocketI *s, GString &Hdrs, GString &Body, bool IsResponse)
+static bool GetHttp(LSocketI *s, LString &Hdrs, LString &Body, bool IsResponse)
 {
-	GString Resp = GetHeaders(s);
+	LString Resp = GetHeaders(s);
 
 	char Buf[512];
 	ssize_t Rd;
 	auto BodyPos = Resp.Find("\r\n\r\n");
-	GAutoString Len(InetGetHeaderField(Resp, "Content-Length", BodyPos));
+	LAutoString Len(InetGetHeaderField(Resp, "Content-Length", BodyPos));
 	if (Len)
 	{
 		int Bytes = atoi(Len);
@@ -68,13 +68,13 @@ static bool GetHttp(LSocketI *s, GString &Hdrs, GString &Body, bool IsResponse)
 			Rd = s->Read(Buf, sizeof(Buf));
 			if (Rd > 0)
 			{
-				Resp += GString(Buf, Rd);
+				Resp += LString(Buf, Rd);
 			}
 		}
 	}
 	else if (s->IsOpen() && IsResponse)
 	{
-		GAutoString Te(InetGetHeaderField(Resp, "Transfer-Encoding", BodyPos));
+		LAutoString Te(InetGetHeaderField(Resp, "Transfer-Encoding", BodyPos));
 		bool Chunked = Te && !_stricmp(Te, "chunked");
 
 		if (Chunked)
@@ -82,7 +82,7 @@ static bool GetHttp(LSocketI *s, GString &Hdrs, GString &Body, bool IsResponse)
 			ssize_t Pos = 0;
 
 			Hdrs = Resp(0, BodyPos);
-			GString Raw = Resp(BodyPos + 4, -1);
+			LString Raw = Resp(BodyPos + 4, -1);
 			Body.Empty();
 
 			while (s->IsOpen())
@@ -94,7 +94,7 @@ static bool GetHttp(LSocketI *s, GString &Hdrs, GString &Body, bool IsResponse)
 				{
 					Rd = s->Read(Buf, sizeof(Buf));
 					if (Rd > 0)
-						Raw += GString(Buf, Rd);
+						Raw += LString(Buf, Rd);
 					else
 						break;
 				}
@@ -105,7 +105,7 @@ static bool GetHttp(LSocketI *s, GString &Hdrs, GString &Body, bool IsResponse)
 		else
 		{
 			while ((Rd = s->Read(Buf, sizeof(Buf))) > 0)
-				Resp += GString(Buf, Rd);
+				Resp += LString(Buf, Rd);
 		}
 	}
 
@@ -115,7 +115,7 @@ static bool GetHttp(LSocketI *s, GString &Hdrs, GString &Body, bool IsResponse)
 	return true;
 }
 
-static GString UrlFromHeaders(GString Hdrs)
+static LString UrlFromHeaders(LString Hdrs)
 {
 	auto Lines = Hdrs.Split("\r\n", 1);
 	auto p = Lines[0].SplitDelimit();
@@ -127,7 +127,7 @@ static GString UrlFromHeaders(GString Hdrs)
 	return p[1];
 }
 
-static bool Write(LSocketI *s, GString b)
+static bool Write(LSocketI *s, LString b)
 {
 	for (size_t i = 0; i < b.Length(); )
 	{
@@ -139,7 +139,7 @@ static bool Write(LSocketI *s, GString b)
 	return true;
 }
 
-static GString FormEncode(const char *s, bool InValue = true)
+static LString FormEncode(const char *s, bool InValue = true)
 {
 	LStringPipe p;
 	for (auto c = s; *c; c++)
@@ -163,15 +163,15 @@ static GString FormEncode(const char *s, bool InValue = true)
 struct LOAuth2Priv
 {
 	LOAuth2::Params Params;
-	GString Id;
+	LString Id;
 	LStream *Log;
-	GString Token;
-	GString CodeVerifier;
+	LString Token;
+	LString CodeVerifier;
 	LStringPipe LocalLog;
 	GDom *Store;
 	LCancel *Cancel;
 
-	GString AccessToken, RefreshToken;
+	LString AccessToken, RefreshToken;
 	int64 ExpiresIn;
 
 	struct Server : public LSocket
@@ -181,8 +181,8 @@ struct LOAuth2Priv
 		LSocket s;
 
 	public:
-		LHashTbl<ConstStrKey<char,false>,GString> Params;
-		GString Body;
+		LHashTbl<ConstStrKey<char,false>,LString> Params;
+		LString Body;
 
 		Server(LOAuth2Priv *cd) : d(cd)
 		{
@@ -204,7 +204,7 @@ struct LOAuth2Priv
 					Listen.Accept(&s))
 				{
 					// Read access code out of response
-					GString Hdrs;
+					LString Hdrs;
 					if (GetHttp(&s, Hdrs, Body, false))
 					{
 						auto Url = UrlFromHeaders(Hdrs);
@@ -233,7 +233,7 @@ struct LOAuth2Priv
 
 		bool Response(const char *Txt)
 		{
-			GString Msg;
+			LString Msg;
 			Msg.Printf("HTTP/1.0 200 OK\r\n"
 						"\r\n"
 						"<html>\n"
@@ -244,23 +244,23 @@ struct LOAuth2Priv
 		}
 	};
 
-	GString Base64(GString s)
+	LString Base64(LString s)
 	{
-		GString b;
+		LString b;
 		b.Length(BufferLen_BinTo64(s.Length()));
 		ConvertBinaryToBase64(b.Get(), b.Length(), (uchar*)s.Get(), s.Length());
 		b.Get()[b.Length()] = 0;
 		return b;
 	}
 
-	GString ToText(GString Bin)
+	LString ToText(LString Bin)
 	{
-		GArray<char> t;
+		LArray<char> t;
 		for (char i='0'; i<='9'; i++) t.Add(i);
 		for (char i='a'; i<='z'; i++) t.Add(i);
 		for (char i='A'; i<='Z'; i++) t.Add(i);
 		t.Add('-'); t.Add('.'); t.Add('_'); t.Add('~');
-		GString Txt;
+		LString Txt;
 		Txt.Length(Bin.Length());
 		int Pos = 0;
 		for (int i=0; i<Bin.Length(); i++)
@@ -279,12 +279,12 @@ struct LOAuth2Priv
 			return true;
 
 		Server Svr(this);
-		GString Endpoint;
+		LString Endpoint;
 		Endpoint.Printf(Params.ApiUri, Id.Get());
 		CodeVerifier = ToText(SslSocket::Random(48));
 
 		LUri u(Endpoint);
-		GString Uri, Redir, RedirEnc, Scope;
+		LString Uri, Redir, RedirEnc, Scope;
 		Redir.Printf("http://localhost:%i", LOCALHOST_PORT);
 		Scope = u.EncodeStr(Params.Scope);
 		RedirEnc = u.EncodeStr(Redir, ":/");
@@ -320,7 +320,7 @@ struct LOAuth2Priv
 				return NULL;
 			}
 		
-			GString Body, Http;
+			LString Body, Http;
 			Body.Printf("code=%s&"
 						"client_id=%s&"
 						"redirect_uri=http://localhost:%i&"
@@ -353,7 +353,7 @@ struct LOAuth2Priv
 				return false;
 			}
 
-			GString Hdrs;
+			LString Hdrs;
 			if (!GetHttp(&sock, Hdrs, Body, true))
 			{
 				return false;
@@ -387,7 +387,7 @@ struct LOAuth2Priv
 			return NULL;
 		}
 		
-		GString Body, Http;
+		LString Body, Http;
 		Body.Printf("refresh_token=%s&"
 					"client_id=%s&"
 					"client_secret=%s&"
@@ -413,7 +413,7 @@ struct LOAuth2Priv
 			return false;
 		}
 
-		GString Hdrs;
+		LString Hdrs;
 		if (!GetHttp(&sock, Hdrs, Body, true))
 		{
 			return false;
@@ -443,7 +443,7 @@ struct LOAuth2Priv
 			return false;
 
 		LVariant v;
-		GString Key, kAccTok, kRefreshTok;
+		LString Key, kAccTok, kRefreshTok;
 		Key.Printf("%s.%s", Params.Scope.Get(), Id.Get());
 		auto KeyB64 = Base64(Key);
 		kAccTok.Printf("OAuth2-%s-%s", OPT_AccessToken, KeyB64.Get());
@@ -487,7 +487,7 @@ bool LOAuth2::Refresh()
 	return d->Refresh();
 }
 
-GString LOAuth2::GetAccessToken()
+LString LOAuth2::GetAccessToken()
 {
 	if (d->AccessToken)
 		return d->AccessToken;
@@ -503,5 +503,5 @@ GString LOAuth2::GetAccessToken()
 	}
 	else d->Log->Print("No token.\n");
 
-	return GString();
+	return LString();
 }

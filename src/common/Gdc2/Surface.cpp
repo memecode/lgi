@@ -103,9 +103,9 @@ LSurface::~LSurface()
 	}
 }
 
-GString LSurface::GetStr()
+LString LSurface::GetStr()
 {
-	GString::Array s;
+	LString::Array s;
 	s.SetFixedLength(false);
 	s.New().Printf("Size(%ix%i)", X(), Y());
 	s.New().Printf("ColourSpace(%s)", GColourSpaceToString(ColourSpace));
@@ -117,7 +117,7 @@ GString LSurface::GetStr()
 	s.New().Printf("Op(%i)", Op());
 	s.New().Printf("GetRowStep(" LPrintfSizeT ")", GetRowStep());
 	
-	return GString(" ").Join(s);
+	return LString(" ").Join(s);
 }
 
 LSurface *LSurface::SubImage(LRect r)
@@ -131,7 +131,7 @@ LSurface *LSurface::SubImage(LRect r)
 	if (!clip.Valid())
 		return NULL;
 
-	GAutoPtr<LSurface> s(new LSurface);
+	LAutoPtr<LSurface> s(new LSurface);
 	if (!s)
 		return NULL;
 	
@@ -1930,7 +1930,7 @@ bool LSurface::SetVariant(const char *Name, LVariant &Value, char *Array)
 	return false;
 }
 
-bool LSurface::CallMethod(const char *Name, LVariant *ReturnValue, GArray<LVariant*> &Args)
+bool LSurface::CallMethod(const char *Name, LVariant *ReturnValue, LArray<LVariant*> &Args)
 {
 	return false;
 }

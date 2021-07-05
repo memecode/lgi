@@ -56,7 +56,7 @@ protected:
 	struct GJobSem : public LMutex
 	{
     	// Data that has to be accessed under Lock
-	    GArray<GDocumentEnv::LoadJob*> Jobs;	    
+	    LArray<GDocumentEnv::LoadJob*> Jobs;	    
 	    GJobSem() : LMutex("GJobSem") {}
 	} JobSem;
 
@@ -84,7 +84,7 @@ public:
 
 	// Html
 	const char *GetClass() { return "GHtml2"; }
-	bool GetFormattedContent(const char *MimeType, GString &Out, GArray<GDocView::ContentMedia> *Media = 0);
+	bool GetFormattedContent(const char *MimeType, LString &Out, LArray<GDocView::ContentMedia> *Media = 0);
 
 	/// Get the tag at an x,y location
 	GTag *GetTagByPos(int x, int y, int *Index);

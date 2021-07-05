@@ -90,8 +90,8 @@ public:
 		Current = 0;
 
 		// load all the plugins...
-		GArray<char*> Files;
-		GArray<const char*> Ext;
+		LArray<char*> Files;
+		LArray<const char*> Ext;
 		Ext.Add("*.spi");
 
 		char PluginDir[256];

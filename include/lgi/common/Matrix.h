@@ -108,7 +108,7 @@ struct GMatrix
 		return true;
 	}
 	
-	GAutoString GetStr(const char *format)
+	LAutoString GetStr(const char *format)
 	{
 		LStringPipe p(256);
 		for (int y=0; y<Ys; y++)
@@ -120,7 +120,7 @@ struct GMatrix
 			}
 			p.Print("\n");
 		}
-		return GAutoString(p.NewStr());
+		return LAutoString(p.NewStr());
 	}
 	
 	inline bool IsNumeric(char s)
@@ -167,7 +167,7 @@ struct GMatrix
 	
 	void Trace(const char *format)
 	{
-		GAutoString a = GetStr(format);
+		LAutoString a = GetStr(format);
 		LgiTrace("%s", a.Get());
 	}
 	

@@ -55,9 +55,9 @@ const char *GtkGetDndFormat(int Type)
 class GDndSourcePriv
 {
 public:
-	GAutoString CurrentFormat;
+	LAutoString CurrentFormat;
 	Gtk::GdkDragContext *Ctx;
-	GAutoPtr<LSurface> Ico;
+	LAutoPtr<LSurface> Ico;
 
 	OsView SignalWnd;
 	
@@ -80,7 +80,7 @@ struct SignalInfo
 	gulong Sig;
 };
 
-static ::GArray<SignalInfo> ExistingSignals;
+static ::LArray<SignalInfo> ExistingSignals;
 
 void RemoveExistingSignals(OsView w)
 {
@@ -119,7 +119,7 @@ bool GDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 	return false;
 }
 
-bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, ::GString::Array &Files)
+bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, ::LString::Array &Files)
 {
 	if (!OutputData || !Files.First())
 		return false;
@@ -133,7 +133,7 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, ::GString
 		p.Push(s);
 	}
 
-	GAutoString s(p.NewStr());
+	LAutoString s(p.NewStr());
 	if (s)
 	{
 		OutputData->Data[0].SetBinary(strlen(s), s);
@@ -174,7 +174,7 @@ LgiDragDataGet(GtkWidget        *widget,
 	Gtk::GList *node;
 	if (targets)
 	{
-		::GArray<GDragData> dd;
+		::LArray<GDragData> dd;
 		for (node = g_list_first(targets); node != NULL; node = ((node) ? (((Gtk::GList *)(node))->next) : NULL))
         {
 			gchar *format = gdk_atom_name((GdkAtom)node->data);
@@ -279,7 +279,7 @@ int GDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 		return -1;
 	}
 	
-	::GArray<GtkTargetEntry> e;
+	::LArray<GtkTargetEntry> e;
 	for (auto f: Formats.Formats)
 	{
 		Gtk::GtkTargetEntry &entry = e.New();
