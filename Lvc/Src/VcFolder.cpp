@@ -3112,13 +3112,16 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 				{				
 					a.New().Printf("commit -m \"%s\"", Msg);
 				}
-				for (auto pf: Add)
+				if (Partial)
 				{
-					GString s = pf->GetFileName();
-					if (s.Find(" ") >= 0)
-						a.New().Printf("\"%s\"", s.Get());
-					else
-						a.New() = s;
+					for (auto pf: Add)
+					{
+						GString s = pf->GetFileName();
+						if (s.Find(" ") >= 0)
+							a.New().Printf("\"%s\"", s.Get());
+						else
+							a.New() = s;
+					}
 				}
 
 				Args = GString(" ").Join(a);
