@@ -3,6 +3,7 @@
 #define _GMUTEX_H_
 
 #include "lgi/common/CurrentTime.h"
+#include "lgi/common/LgiUiBase.h"
 
 /// This is a re-enterant mutex class for thread locking.
 class LgiClass LMutex

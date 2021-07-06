@@ -1,12 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "LVariant.h"
-#include "LSkinEngine.h"
-#include "LCombo.h"
-#include "LDisplayString.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/Menu.h"
 
 #define COMBO_HEIGHT			20
 

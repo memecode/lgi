@@ -27,7 +27,7 @@
 		<Node Name="Ftp" Type="1" Platforms="15" Open="0" Id="4">
 			<Node File="./Code/FtpThread.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/FtpThread.h" Type="3" Platforms="15" />
-			<Node File="../src/common/INet/IFtp.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Net/Ftp.cpp" Type="2" Platforms="15" />
 			<Node File="..\include\lgi\common\Ftp.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Projects" Type="1" Platforms="15" Id="1">
@@ -55,8 +55,8 @@
 			<Node File="./Code/SimpleCppParser.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Source Code" Type="1" Platforms="15" Open="1" Id="6">
-			<Node File="..\src\common\Coding\GLexCpp.cpp" Type="2" Platforms="15" />
-			<Node File="..\src\common\Coding\GParseCpp.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Coding/LexCpp.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Coding/ParseCpp.cpp" Type="2" Platforms="15" />
 			<Node File=".\Code\SysCharSupport.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node File=".\Code\IdeCommon.cpp" Type="2" Platforms="15" />
@@ -68,25 +68,30 @@
 		<Node File=".\Code\SpaceTabConv.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Lgi" Type="1" Platforms="15" Open="1" Id="7">
-		<Node File="..\src\common\Text\GDocView.cpp" Type="2" Platforms="15" />
-		<Node File="..\src\common\Lgi\Mdi.cpp" Type="2" Platforms="15" />
-		<Node File="..\src\common\INet\IHttp.cpp" Type="2" Platforms="15" />
-		<Node File="..\src\common\Lgi\LgiMain.cpp" Type="2" Platforms="15" />
-		<Node File="..\include\lgi\common\Mdi.h" Type="3" Platforms="15" />
-		<Node File="..\src\common\INet\OpenSSLSocket.cpp" Type="2" Platforms="15" />
-		<Node File="..\src\common\Gdc2\Filters\Png.cpp" Type="2" Platforms="15" />
-		<Node File="..\include\lgi\common\PopupList.h" Type="3" Platforms="15" />
-		<Node File="..\src\common\Text\TextConvert.cpp" Type="2" Platforms="15" />
-		<Node File="..\include\lgi\common\TextLog.h" Type="3" Platforms="15" />
-		<Node File="..\include\lgi\common\TrayIcon.h" Type="3" Platforms="15" />
+		<Node File="../src/common/Text/DocView.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Lgi/Mdi.cpp" Type="2" Platforms="15" />
+		<Node Name="Html" Type="1" Platforms="15" Id="1">
+			<Node File="../src/common/Text/Html.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Text/HtmlCommon.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
+		</Node>
+		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
+		<Node File="../include/lgi/common/Mdi.h" Type="3" Platforms="15" />
+		<Node File="../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
+		<Node File="../include/lgi/common/PopupList.h" Type="3" Platforms="15" />
+		<Node File="../src/common/Text/TextConvert.cpp" Type="2" Platforms="15" />
+		<Node File="../include/lgi/common/TextLog.h" Type="3" Platforms="15" />
+		<Node File="../include/lgi/common/TrayIcon.h" Type="3" Platforms="15" />
+		<Node File="../src/common/Net/Http.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Open="1" Id="8">
-		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
-		<Node File="./Makefile.linux" Type="3" Platforms="15" />
-		<Node File="./Resources/resource.h" Type="3" Platforms="15" />
 		<Node Name="Test" Type="1" Platforms="15" Id="1" />
+		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
+		<Node File="./Makefile.linux" Type="9" Platforms="15" />
+		<Node File="./Resources/resource.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" />
 	<Settings>
 		<General>
 			<Makefile>
@@ -129,8 +134,6 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -149,11 +152,12 @@ WINNATIVE</Release>
 /local/include</Release>
 				</Windows>
 				<Linux>
-					<Debug>../include/linux
-../include/linux/Gtk
+					<Debug>../include/lgi/linux
+../include/lgi/linux/Gtk
 </Debug>
-					<Release>../include/linux
-../include/linux/Gtk</Release>
+					<Release>../include/lgi/linux
+../include/lgi/linux/Gtk
+</Release>
 				</Linux>
 				<Haiku>
 					<Debug>../include/beos</Debug>
@@ -179,14 +183,12 @@ pthread
 					<Debug>be</Debug>
 					<Release>be</Release>
 				</Haiku>
-				<All />
 			</Libraries>
 			<LibraryPaths>
 				<All>
 					<Debug>..\Debug</Debug>
 					<Release>..\Release</Release>
 				</All>
-				<Windows />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -220,10 +222,6 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<ApplicationIcon>
 				<Haiku>./Code/icon-haiku</Haiku>
 			</ApplicationIcon>
-			<Defines>
-				<All />
-				<Windows />
-			</Defines>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -238,28 +236,12 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
-		<Advanced>
-			<PostBuildCommands>
-				<Windows />
-			</PostBuildCommands>
-			<OtherMakefileRules />
-		</Advanced>
 		<Debug>
 			<Environment>
 				<All>SOME_TEST=testing</All>
 			</Environment>
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
 		</Debug>
+		<Advanced />
 	</Settings>
 </Project>

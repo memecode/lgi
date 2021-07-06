@@ -1,9 +1,9 @@
-#include "lgi\common\Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Tree.h"
+#include "lgi/common/SubProcess.h"
+#include "lgi/common/FileSelect.h"
 #include "LgiIde.h"
-#include "lgi\common\Tree.h"
 #include "resdefs.h"
-#include "lgi\common\SubProcess.h"
-#include "lgi\common\FileSelect.h"
 
 static LString TemplatesPath;
 class NewProjFromTemplate : public LDialog

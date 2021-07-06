@@ -1,4 +1,4 @@
-#include "lgi\common\Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiIde.h"
 #include "DocEdit.h"
 #define COMP_STYLE				1

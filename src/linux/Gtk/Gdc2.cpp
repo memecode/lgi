@@ -5,8 +5,8 @@
 #include <string.h>
 #include <math.h>
 
-#include "Lgi.h"
-#include "GPalette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Palette.h"
 
 #define LGI_PI				3.141592654
 #define LGI_RAD				(360/(2*LGI_PI))

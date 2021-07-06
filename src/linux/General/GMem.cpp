@@ -11,10 +11,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "LgiDefs.h"
+#include "lgi/common/LgiDefs.h"
 #include "LgiOsDefs.h"
-#include "GMem.h"
-#include "LMutex.h"
+#include "lgi/common/Mem.h"
+#include "lgi/common/Mutex.h"
 
 #ifdef MEMORY_DEBUG
 

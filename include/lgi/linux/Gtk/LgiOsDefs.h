@@ -9,7 +9,7 @@
 
 #include <string.h>
 #include "assert.h"
-#include "LgiDefs.h"
+#include "lgi/common/LgiDefs.h"
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -70,7 +70,7 @@
 
 #undef stricmp
 
-#include "LgiInc.h"
+#include "lgi/common/LgiInc.h"
 #ifdef MAC
 	#include <sys/stat.h>
 	#include <netinet/in.h>
@@ -177,7 +177,7 @@ LgiFunc OsThreadId					GetCurrentThreadId();
 
 #endif
 
-#include "GMessage.h"
+#include "lgi/common/Message.h"
 
 // Sockets
 #define ValidSocket(s)				((s)>=0)

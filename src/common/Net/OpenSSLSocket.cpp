@@ -16,15 +16,15 @@
 #include <unistd.h>
 #endif
 
-#include "lgi\common\Lgi.h"
-#include "lgi\common\OpenSSLSocket.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/OpenSSLSocket.h"
 #include <openssl/rand.h>
 #ifdef WIN32
 #include <mmsystem.h>
 #endif
-#include "lgi\common\Token.h"
-#include "lgi\common\Variant.h"
-#include "lgi\common\Net.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Net.h"
 
 #define PATH_OFFSET					"../"
 #ifdef WIN32

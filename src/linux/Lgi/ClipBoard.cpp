@@ -1,7 +1,7 @@
 // Clipboard Implementation
-#include "Lgi.h"
-#include "LVariant.h"
-#include "GClipBoard.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/ClipBoard.h"
 
 #define DEBUG_CLIPBOARD					0
 #define VAR_COUNT						16

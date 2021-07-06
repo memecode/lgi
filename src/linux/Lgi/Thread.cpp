@@ -1,4 +1,4 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include <errno.h>
 #include <unistd.h>
 #include <sys/syscall.h>

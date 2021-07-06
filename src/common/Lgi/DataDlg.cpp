@@ -11,9 +11,9 @@
 
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GPassword.h"
-#include "GDataDlg.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Password.h"
+#include "lgi/common/DataDlg.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 DataDlgField::DataDlgField(int type, int ctrlid, char *opt, char *desc)

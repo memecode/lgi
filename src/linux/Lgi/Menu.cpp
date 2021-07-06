@@ -9,9 +9,11 @@
 */
 #include <math.h>
 
-#include "Lgi.h"
-#include "GToken.h"
-#include "LDisplayString.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/ToolBar.h"
 
 using namespace Gtk;
 #define DEBUG_MENUS		0

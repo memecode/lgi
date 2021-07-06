@@ -1,14 +1,14 @@
-#include "lgi\common\Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiIde.h"
 #include "IdeProject.h"
-#include "lgi\common\TableLayout.h"
+#include "lgi/common/TableLayout.h"
 #include "resdefs.h"
-#include "lgi\common\TextLabel.h"
-#include "lgi\common\Edit.h"
-#include "lgi\common\CheckBox.h"
-#include "lgi\common\Combo.h"
-#include "lgi\common\Button.h"
-#include "lgi\common\FileSelect.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/FileSelect.h"
 
 const char TagSettings[] = "Settings";
 

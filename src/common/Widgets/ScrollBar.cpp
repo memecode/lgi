@@ -509,7 +509,7 @@ int LScrollBar::GetScrollSize()
 
 bool LScrollBar::Attach(LViewI *p)
 {
-	bool Status = GControl::Attach(p);
+	bool Status = LControl::Attach(p);
 	
 	#if 0
 	printf("%p::Attach scroll bar to %s, Status=%i, _View=%p, Vis=%i\n",

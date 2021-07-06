@@ -11,18 +11,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Lgi.h"
-#include "LPopup.h"
-#include "GToken.h"
-#include "LList.h"
-#include "LTextLabel.h"
-#include "LEdit.h"
-#include "LButton.h"
-#include "GCheckBox.h"
-#include "GCombo.h"
-#include "LTree.h"
-#include "LTableLayout.h"
-#include "LBox.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Popup.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/List.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/Tree.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/Box.h"
+#include "lgi/common/FileSelect.h"
+#include "lgi/common/Menu.h"
 
 #define FSI_FILE			0
 #define FSI_DIRECTORY		1
@@ -773,7 +775,7 @@ public:
 
 
 class GFileSelectDlg :
-	public GDialog
+	public LDialog
 {
 	LRect OldPos;
 	LRect MinSize;
@@ -803,10 +805,10 @@ public:
 	LTextLabel *Ctrl8;
 	LTextLabel *Ctrl9;
 	LEdit *FileNameEdit;
-	GCombo *FileTypeCbo;
+	LCombo *FileTypeCbo;
 	LButton *SaveBtn;
 	LButton *CancelBtn;
-	GCheckBox *ShowHidden;
+	LCheckBox *ShowHidden;
 	LEdit *FilterEdit;
 
 	GFileSelectDlg(GFileSelectPrivate *Select);
@@ -948,7 +950,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	
 	// Filter / search row
 	c = t->GetCell(0, 0);
-	c->Add(new GCheckBox(IDC_FILTER_CLEAR, 0, 0, -1, -1, "Filter items:"));
+	c->Add(new LCheckBox(IDC_FILTER_CLEAR, 0, 0, -1, -1, "Filter items:"));
 	c->VerticalAlign(LCss::Len(LCss::VerticalMiddle));
 	c = t->GetCell(1, 0);
 	c->Add(FilterEdit = new LEdit(IDC_FILTER, 0, 0, 60, 20));
@@ -971,14 +973,14 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	c->Add(Ctrl9 = new LTextLabel(IDC_STATIC, 14, 303, -1, -1, "Files of type:"));
 	c = Tbl->GetCell(x, y, true, 2);
 	x += 2;
-	c->Add(FileTypeCbo = new GCombo(IDC_TYPE, 100, 296, 266, 21, ""));
+	c->Add(FileTypeCbo = new LCombo(IDC_TYPE, 100, 296, 266, 21, ""));
 	c = Tbl->GetCell(x++, y, true, 3);
 	c->Add(CancelBtn = new LButton(IDCANCEL, 392, 296, 70, 21, "Cancel"));
 
 	// 5th row
 	x = 0; y++;
 	c = Tbl->GetCell(x++, y, true, 6);
-	c->Add(ShowHidden = new GCheckBox(IDC_SHOWHIDDEN, 14, 326, -1, -1, "Show hidden files."));
+	c->Add(ShowHidden = new LCheckBox(IDC_SHOWHIDDEN, 14, 326, -1, -1, "Show hidden files."));
 
 	// Init
 	if (BackBtn)
@@ -2192,7 +2194,7 @@ bool LFileSelect::Save()
 
 ///////////////////////////////////////////////////////////////////////////////////
 #if defined(LINUX)
-#include "INet.h"
+#include "lgi/common/Net.h"
 #endif
 bool LgiGetUsersLinks(LArray<LString> &Links)
 {

@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 using namespace Gtk;
 
 class LScreenPrivate

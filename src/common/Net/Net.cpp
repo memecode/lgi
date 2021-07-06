@@ -71,7 +71,7 @@
 	#include <netdb.h>
 	#include <errno.h>
 	#include <netinet/tcp.h>
-    #include "LgiCommon.h"
+    #include "lgi/common/LgiCommon.h"
 	#include <ifaddrs.h>
 	
 	#define SOCKET_ERROR -1

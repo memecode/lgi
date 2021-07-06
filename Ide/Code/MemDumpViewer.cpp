@@ -1,12 +1,12 @@
 #include <stdio.h>
-#include "lgi\common\Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/ProgressDlg.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Splitter.h"
+#include "lgi/common/FileSelect.h"
 #include "LgiIde.h"
-#include "lgi\common\Token.h"
-#include "lgi\common\Edit.h"
-#include "lgi\common\ProgressDlg.h"
-#include "lgi\common\List.h"
-#include "lgi\common\Splitter.h"
-#include "lgi\common\FileSelect.h"
 
 #define IDC_LIST 100
 
@@ -383,4 +383,4 @@ public:
 void NewMemDumpViewer(AppWnd *App, const char *File)
 {
 	new DumpView(App, File);
-}
+}

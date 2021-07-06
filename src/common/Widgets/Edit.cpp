@@ -1,14 +1,14 @@
 // \file
 // \author Matthew Allen (fret@memecode.com)
-#include "Lgi.h"
-#include "LEdit.h"
-#include "GClipBoard.h"
-#include "LDisplayString.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/LgiRes.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Edit
-#include "LTextView3.h"
+#include "lgi/common/TextView3.h"
 
 class _OsFontType : public LFontType
 {

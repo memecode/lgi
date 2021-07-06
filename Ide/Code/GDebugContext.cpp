@@ -1,8 +1,8 @@
-#include "lgi\common\Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/TextLog.h"
+#include "lgi/common/List.h"
 #include "LgiIde.h"
 #include "IdeProject.h"
-#include "lgi\common\TextLog.h"
-#include "lgi\common\List.h"
 
 enum DebugMessages
 {
@@ -770,4 +770,4 @@ bool GDebugContext::OnBreakPoint(GDebugger::BreakPoint &b, bool Add)
 		return d->Db->SetBreakPoint(&b);
 	else
 		return d->Db->RemoveBreakPoint(&b);
-}
+}

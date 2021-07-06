@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "lgi\common\Gdc2.h"
-#include "lgi\common\Http.h"
-#include "lgi\common\Token.h"
-#include "lgi\common\LgiCommon.h"
-#include "lgi\common\NetTools.h"
-#include "lgi\common\String.h"
-#include "lgi\common\Base64.h"
-#include "lgi\common\Variant.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/Http.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/LgiCommon.h"
+#include "lgi/common/NetTools.h"
+#include "lgi/common/String.h"
+#include "lgi/common/Base64.h"
+#include "lgi/common/Variant.h"
 
 #define DEBUG_LOGGING		0
 
@@ -946,10 +946,10 @@ LgiTrace("IHTTP::Post ResponseBody.Read=%i\n", r);
 #endif
 
 ///////////////////////////////////////////////////////////////////////////
-#include "lgi\common\OpenSSLSocket.h"
-#include "lgi\common\Net.h"
+#include "lgi/common/OpenSSLSocket.h"
+#include "lgi/common/Net.h"
 #define COMP_FUNCTIONS 1
-#include "lgi\common\ZlibWrapper.h"
+#include "lgi/common/ZlibWrapper.h"
 
 void ZLibFree(voidpf opaque, voidpf address)
 {

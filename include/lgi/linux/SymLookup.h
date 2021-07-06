@@ -4,7 +4,7 @@
 #define _GSYMLOOKUP_H_
 
 #include "execinfo.h"
-#include "LSubProcess.h"
+#include "lgi/common/SubProcess.h"
 
 /// Lookup the file/line information for an instruction pointer value
 class LSymLookup

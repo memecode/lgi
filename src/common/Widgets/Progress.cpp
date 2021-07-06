@@ -12,7 +12,7 @@ LProgressView::LProgressView(int id, int x, int y, int cx, int cy, const char *n
 	SetId(id);
 	LRect r(x, y, x+cx, y+cy);
 	SetPos(r);
-	if (name) GControl::Name(name);
+	if (name) LControl::Name(name);
 
 	c = cNormal;
 }

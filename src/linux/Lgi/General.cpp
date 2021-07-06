@@ -8,14 +8,14 @@
 #define _POSIX_TIMERS
 #include <time.h>
 
-#include "Lgi.h"
-#include "LSubProcess.h"
-#include "LTextLabel.h"
-#include "LButton.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/SubProcess.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Button.h"
 #ifndef LGI_SDL
 #include "LgiWinManGlue.h"
 #endif
-#include "GToken.h"
+#include "lgi/common/Token.h"
 
 #include <errno.h>
 #include <pwd.h>
@@ -296,7 +296,7 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 										LAutoString exe(TrimStr(Value));
 										char *sp = strchr(exe, ' ');
 										if (sp)
-											ai->Path.Reset(NewStr(exe, sp-exe));
+											ai->Path.Set(exe, sp-exe);
 										else
 											ai->Path = exe;
 										
@@ -305,7 +305,7 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 									else if (!stricmp(Var, "Name") ||
 											!stricmp(Var, LangName))
 									{
-										ai->Name.Reset(TrimStr(Value));
+										ai->Name = Value;
 									}
 								}
 							}

@@ -1,4 +1,4 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 
 void LgiShowFileProperties(OsView Parent, const char *Filename)
 {

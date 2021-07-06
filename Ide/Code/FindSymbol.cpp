@@ -1,17 +1,17 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "lgi\common\Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/EventTargetThread.h"
+#include "lgi/common/TextFile.h"
 #include "LgiIde.h"
 #include "FindSymbol.h"
-#include "lgi\common\List.h"
-#include "lgi\common\Token.h"
-#include "lgi\common\EventTargetThread.h"
-#include "lgi\common\TextFile.h"
 #include "ParserCommon.h"
 
 #if 1
-#include "lgi\common\ParseCpp.h"
+#include "lgi/common/ParseCpp.h"
 #endif
 
 #include "resdefs.h"

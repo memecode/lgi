@@ -3,14 +3,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "LSkinEngine.h"
-#include "LButton.h"
-#include "LDisplayString.h"
-#include "LTableLayout.h"
-#include "LgiRes.h"
-#include "LStringLayout.h"
-#include "GCssTools.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/StringLayout.h"
+#include "lgi/common/CssTools.h"
 
 #define DOWN_MOUSE		0x1
 #define DOWN_KEY		0x2

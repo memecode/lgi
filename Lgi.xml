@@ -185,15 +185,17 @@
 				<Node File=".\include\lgi\common\PixelRops.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Font" Type="1" Platforms="15" Open="0" Id="44">
-				<Node File=".\src\common\Gdc2\Font\DisplayString.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\DisplayString.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Gdc2\Font\Font.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\Font.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\StringLayout.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\FontCache.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Gdc2\Font\FontCodePages.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\Font\FontSystem.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\Font\StringLayout.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Font/DisplayString.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/DisplayString.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Gdc2/Font/Font.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/Font.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/StringLayout.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/FontCache.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Gdc2/Font/FontCodePages.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Font/FontSystem.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Font/StringLayout.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Font/TypeFace.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Font/FontType.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Applicators" Type="1" Platforms="15" Open="0" Id="45">
 				<Node File="./src/common/Gdc2/15Bit.cpp" Type="2" Platforms="15" />
@@ -408,25 +410,19 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable>
-				<Windows />
-			</Executable>
-			<CCrossCompiler />
-			<CppCrossCompiler />
+			<Executable />
 		</General>
 		<Build>
 			<IncludePaths>
 				<All>
-					<Debug>include</Debug>
-					<Release>include</Release>
+					<Debug>./include</Debug>
+					<Release>./include</Release>
 				</All>
 				<Linux>
-					<Debug>include/linux
-include/linux/Gtk
-private/linux</Debug>
-					<Release>include/linux
-include/linux/Gtk
-private/linux</Release>
+					<Debug>include/lgi/linux
+include/lgi/linux/Gtk</Debug>
+					<Release>include/lgi/linux
+include/lgi/linux/Gtk</Release>
 				</Linux>
 				<Windows>
 					<Debug>include/lgi/win</Debug>
@@ -442,7 +438,6 @@ private/linux</Release>
 /usr/include/libappindicator3-0.1
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
-				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -455,54 +450,26 @@ appindicator3
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
-				<All />
-				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
-				<Windows />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
-			<Defines>
-				<All />
-				<Windows />
-			</Defines>
-			<LibraryPaths>
-				<All />
-				<Windows />
-			</LibraryPaths>
-			<ApplicationIcon />
+			<LibraryPaths />
+			<Defines />
 		</Build>
 		<Advanced>
-			<PostBuildCommands>
-				<Windows />
-			</PostBuildCommands>
-			<OtherMakefileRules />
+			<PostBuildCommands />
 		</Advanced>
 		<Debug>
-			<Arguments>
-				<All />
-			</Arguments>
-			<Environment />
-			<DebugAdmin />
-			<InitialDir />
+			<Arguments />
 		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
-		<Editor>
-			<TabSize />
-			<IndentSize />
-			<ShowWhiteSpace />
-			<UseHardTabs />
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
+		<Remote />
+		<Editor />
 	</Settings>
 </Project>

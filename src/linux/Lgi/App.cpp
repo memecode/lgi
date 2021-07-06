@@ -8,12 +8,12 @@
 #endif
 #include <ctype.h>
 
-#include "Lgi.h"
-#include "SkinEngine.h"
-#include "LArray.h"
-#include "LVariant.h"
-#include "GToken.h"
-#include "GFontCache.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/Array.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/FontCache.h"
 #include "GAppPriv.h"
 
 #define DEBUG_MSG_TYPES				0

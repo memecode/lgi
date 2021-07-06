@@ -1689,7 +1689,7 @@ Chk;
 	
 Chk;
 		#ifdef LINUX
-		LString f = LgiFindFile("lgiide.png");
+		auto f = LFindFile("lgiide.png");
 		if (f)
 		{
 			// Handle()->setIcon(f);

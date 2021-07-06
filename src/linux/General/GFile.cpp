@@ -23,14 +23,14 @@
 #include <unistd.h>
 #endif
 
-#include "LgiDefs.h"
-#include "GFile.h"
-#include "GContainers.h"
-#include "GToken.h"
-#include "Gdc2.h"
-#include "LgiCommon.h"
-#include "LString.h"
-#include "LDateTime.h"
+#include "lgi/common/LgiDefs.h"
+#include "lgi/common/File.h"
+#include "lgi/common/Containers.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/LgiCommon.h"
+#include "lgi/common/String.h"
+#include "lgi/common/DateTime.h"
 #if defined(WIN32)
 #include "errno.h"
 #endif

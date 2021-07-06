@@ -2,8 +2,8 @@
 #ifndef _LGI_SCRIPTING_H_
 #define _LGI_SCRIPTING_H_
 
-#include "lgi\common\Variant.h"
-#include "lgi\common\List.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/List.h"
 
 class LScriptContext;
 class LScriptEnginePrivate;

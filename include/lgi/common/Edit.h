@@ -6,7 +6,7 @@
 #define _GEDIT_H_
 
 #if !WINNATIVE
-#include "LTextView3.h"
+#include "lgi/common/TextView3.h"
 #endif
 
 /// An edit box allowing the user to enter text

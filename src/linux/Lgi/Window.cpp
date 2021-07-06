@@ -1,13 +1,14 @@
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GDragAndDrop.h"
-#include "GToken.h"
-#include "LPopup.h"
-#include "LPanel.h"
-#include "GNotifications.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Popup.h"
+#include "lgi/common/Panel.h"
+#include "lgi/common/Notifications.h"
+#include "lgi/common/ViewPriv.h"
+#include "lgi/common/Menu.h"
 
-#include "GViewPriv.h"
 using namespace Gtk;
 #undef Status
 #include "LgiWidget.h"
@@ -33,7 +34,7 @@ enum LAttachState
 	LDetaching,
 };
 
-class GWindowPrivate
+class LWindowPrivate
 {
 public:
 	int Sx, Sy;
@@ -56,7 +57,7 @@ public:
 	LViewI *Focus;
 	bool Active;
 
-	GWindowPrivate()
+	LWindowPrivate()
 	{
 		AttachState = LUnattached;
 		DestroySig = 0;
@@ -104,7 +105,7 @@ public:
 
 LWindow::LWindow(GtkWidget *w) : LView(0)
 {
-	d = new GWindowPrivate;
+	d = new LWindowPrivate;
 	_QuitOnClose = false;
 	Menu = NULL;
 	Wnd = GTK_WINDOW(w);
@@ -161,12 +162,12 @@ static void PixbufDestroyNotify(guchar *pixels, LSurface *data)
 
 bool LWindow::SetIcon(const char *FileName)
 {
-	LAutoString a;
+	LString a;
 	if (Wnd)
 	{
 		if (!LFileExists(FileName))
 		{
-			if (a.Reset(LgiFindFile(FileName)))
+			if (a = LFindFile(FileName))
 				FileName = a;
 		}
 
@@ -284,7 +285,7 @@ void LWindow::OnGtkDelete()
 	}
 	#endif
 	
-	// These will be destroyed by GTK after returning from GWindowCallback
+	// These will be destroyed by GTK after returning from LWindowCallback
 	Wnd = NULL;
 	#ifndef __GTK_H__
 	_View = NULL;
@@ -669,9 +670,9 @@ GtkRootResize(GtkWidget *widget, GdkRectangle *alloc, LView *This)
 }
 
 void
-GWindowUnrealize(GtkWidget *widget, LWindow *wnd)
+LWindowUnrealize(GtkWidget *widget, LWindow *wnd)
 {
-	// printf("%s:%i - GWindowUnrealize %s\n", _FL, wnd->GetClass());
+	// printf("%s:%i - LWindowUnrealize %s\n", _FL, wnd->GetClass());
 }
 
 bool DndPointMap(LViewI *&v, LPoint &p, GDragDropTarget *&t, LWindow *Wnd, int x, int y)
@@ -699,25 +700,25 @@ bool DndPointMap(LViewI *&v, LPoint &p, GDragDropTarget *&t, LWindow *Wnd, int x
 }
 
 void
-GWindowDragBegin(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
+LWindowDragBegin(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 {
 	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 }
 
 void
-GWindowDragDataDelete(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
+LWindowDragDataDelete(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 {
 	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 }
 
 void
-GWindowDragDataGet(GtkWidget *widget, GdkDragContext *context, GtkSelectionData *data, guint info, guint time, LWindow *Wnd)
+LWindowDragDataGet(GtkWidget *widget, GdkDragContext *context, GtkSelectionData *data, guint info, guint time, LWindow *Wnd)
 {
 	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 }
 
 void
-GWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint y, GtkSelectionData *data, guint info, guint time, LWindow *Wnd)
+LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint y, GtkSelectionData *data, guint info, guint time, LWindow *Wnd)
 {
 	LPoint p;
 	LViewI *v;
@@ -768,7 +769,7 @@ int GetAcceptFmts(::LString::Array &Formats, GdkDragContext *context, GDragDropT
 }
 
 gboolean
-GWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd)
+LWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd)
 {
 	// Map the point to a view...
 	LPoint p;
@@ -809,26 +810,26 @@ GWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, 
 }
 
 void
-GWindowDragEnd(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
+LWindowDragEnd(GtkWidget *widget, GdkDragContext *context, LWindow *Wnd)
 {
 	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 }
 
 gboolean
-GWindowDragFailed(GtkWidget *widget, GdkDragContext *context, GtkDragResult result, LWindow *Wnd)
+LWindowDragFailed(GtkWidget *widget, GdkDragContext *context, GtkDragResult result, LWindow *Wnd)
 {
 	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 	return false;
 }
 
 void
-GWindowDragLeave(GtkWidget *widget, GdkDragContext *context, guint time, LWindow *Wnd)
+LWindowDragLeave(GtkWidget *widget, GdkDragContext *context, guint time, LWindow *Wnd)
 {
 	LgiTrace("%s:%i - %s %s\n", _FL, Wnd->GetClass(), __func__);
 }
 
 gboolean
-GWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd)
+LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, guint time, LWindow *Wnd)
 {
 	LPoint p;
 	LViewI *v;
@@ -883,17 +884,17 @@ bool LWindow::Attach(LViewI *p)
 		g_signal_connect(Obj, "visibility-notify-event",G_CALLBACK(GtkViewCallback), i);
 
 		g_signal_connect(Obj, "realize",				G_CALLBACK(GtkWindowRealize), i);							
-		g_signal_connect(Obj, "unrealize",				G_CALLBACK(GWindowUnrealize), i);
+		g_signal_connect(Obj, "unrealize",				G_CALLBACK(LWindowUnrealize), i);
 
-		g_signal_connect(Obj, "drag-begin",				G_CALLBACK(GWindowDragBegin), i);
-		g_signal_connect(Obj, "drag-data-delete",		G_CALLBACK(GWindowDragDataDelete), i);
-		g_signal_connect(Obj, "drag-data-get",			G_CALLBACK(GWindowDragDataGet), i);
-		g_signal_connect(Obj, "drag-data-received",		G_CALLBACK(GWindowDragDataReceived), i);
-		g_signal_connect(Obj, "drag-drop",				G_CALLBACK(GWindowDragDataDrop), i);
-		g_signal_connect(Obj, "drag-end",				G_CALLBACK(GWindowDragEnd), i);
-		g_signal_connect(Obj, "drag-failed",			G_CALLBACK(GWindowDragFailed), i);
-		g_signal_connect(Obj, "drag-leave",				G_CALLBACK(GWindowDragLeave), i);
-		g_signal_connect(Obj, "drag-motion",			G_CALLBACK(GWindowDragMotion), i);
+		g_signal_connect(Obj, "drag-begin",				G_CALLBACK(LWindowDragBegin), i);
+		g_signal_connect(Obj, "drag-data-delete",		G_CALLBACK(LWindowDragDataDelete), i);
+		g_signal_connect(Obj, "drag-data-get",			G_CALLBACK(LWindowDragDataGet), i);
+		g_signal_connect(Obj, "drag-data-received",		G_CALLBACK(LWindowDragDataReceived), i);
+		g_signal_connect(Obj, "drag-drop",				G_CALLBACK(LWindowDragDataDrop), i);
+		g_signal_connect(Obj, "drag-end",				G_CALLBACK(LWindowDragEnd), i);
+		g_signal_connect(Obj, "drag-failed",			G_CALLBACK(LWindowDragFailed), i);
+		g_signal_connect(Obj, "drag-leave",				G_CALLBACK(LWindowDragLeave), i);
+		g_signal_connect(Obj, "drag-motion",			G_CALLBACK(LWindowDragMotion), i);
 
 		#if 0
 		g_signal_connect(Obj, "button-press-event",		G_CALLBACK(GtkViewCallback), i);
@@ -1205,7 +1206,7 @@ void LWindow::Raise()
 }
 
 
-GWindowZoom LWindow::GetZoom()
+LWindowZoom LWindow::GetZoom()
 {
 	switch (d->State)
 	{
@@ -1220,7 +1221,7 @@ GWindowZoom LWindow::GetZoom()
 	return GZoomNormal;
 }
 
-void LWindow::SetZoom(GWindowZoom i)
+void LWindow::SetZoom(LWindowZoom i)
 {
 	if (!Wnd)
 	{
@@ -1373,7 +1374,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 		if (Store->GetValue(FieldName, v) && v.Str())
 		{
 			LRect Position(0, 0, -1, -1);
-			GWindowZoom State = GZoomNormal;
+			LWindowZoom State = GZoomNormal;
 
 // printf("SerializeState load %s\n", v.Str());
 
@@ -1388,7 +1389,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 					*Value++ = 0;
 
 					if (stricmp(Var, "State") == 0)
-						State = (GWindowZoom) atoi(Value);
+						State = (LWindowZoom) atoi(Value);
 					else if (stricmp(Var, "Pos") == 0)
 						Position.SetStr(Value);
 				}
@@ -1408,7 +1409,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 	else
 	{
 		char s[256];
-		GWindowZoom State = GetZoom();
+		LWindowZoom State = GetZoom();
 		sprintf(s, "State=%i;Pos=%s", State, GetPos().GetStr());
 
 		::LVariant v = s;

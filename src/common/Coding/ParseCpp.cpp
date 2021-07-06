@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <wchar.h>
 
-#include "lgi\common\Lgi.h"
-#include "lgi\common\ParseCpp.h"
-#include "lgi\common\ThreadEvent.h"
-#include "lgi\common\LexCpp.h"
-#include "lgi\common\Variant.h"
-#include "lgi\common\XmlTree.h"
-#include "lgi\common\Token.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ParseCpp.h"
+#include "lgi/common/ThreadEvent.h"
+#include "lgi/common/LexCpp.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/XmlTree.h"
+#include "lgi/common/Token.h"
 #include "ScriptingPriv.h"
 
 #define CheckToken(t)	if (!t) { Error = true; break; }
@@ -2336,4 +2336,3 @@ void GCppParser::Search(const char *Str, SearchResultsCb Callback, void *Callbac
 		d->Worker->DoWork(w);
 	}
 }
-

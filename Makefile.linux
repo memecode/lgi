@@ -17,7 +17,7 @@ BuildDir = $(Build)
 Flags = -fPIC -w -fno-inline -fpermissive
 
 ifeq ($(Build),Debug)
-	Flags += -g -std=c++11
+	Flags += -g -std=c++14
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
@@ -26,20 +26,19 @@ ifeq ($(Build),Debug)
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
-		-Iprivate/linux \
-		-Iinclude/linux/Gtk \
-		-Iinclude/linux \
-		-Iinclude/common \
+		-Iinclude/lgi/linux/Gtk \
+		-Iinclude/lgi/linux \
 		`pkg-config --cflags gtk+-3.0` \
 		-I/usr/include/libappindicator3-0.1 \
 		-I/usr/include/gstreamer-1.0 \
 		-I./src/common/Hash/sha1 \
 		-I./src/common/Hash/md5 \
 		-I./private/linux \
-		-I./include/linux/Gtk \
-		-I./include/common
+		-I./include/lgi/linux/Gtk \
+		-I./include/lgi/common \
+		-I./include
 else
-	Flags += -s -Os -std=c++11
+	Flags += -s -Os -std=c++14
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
 		-lmagic \
@@ -47,134 +46,134 @@ else
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
-		-Iprivate/linux \
-		-Iinclude/linux/Gtk \
-		-Iinclude/linux \
-		-Iinclude/common \
+		-Iinclude/lgi/linux/Gtk \
+		-Iinclude/lgi/linux \
 		`pkg-config --cflags gtk+-3.0` \
 		-I/usr/include/libappindicator3-0.1 \
 		-I/usr/include/gstreamer-1.0 \
 		-I./src/common/Hash/sha1 \
 		-I./src/common/Hash/md5 \
 		-I./private/linux \
-		-I./include/linux/Gtk \
-		-I./include/common
+		-I./include/lgi/linux/Gtk \
+		-I./include/lgi/common \
+		-I./include
 endif
 
 # Dependencies
-Depends =	LDateTime.o \
-			GDragAndDrop.o \
-			GDragAndDropCommon.o \
+Depends =	DateTime.o \
+			DragAndDrop.o \
+			DragAndDropCommon.o \
 			GFile.o \
 			ShowFileProp_Linux.o \
-			GExeCheck.o \
-			GFileCommon.o \
-			GApp.o \
-			GGeneral.o \
-			GView.o \
-			GWindow.o \
+			ExeCheck.o \
+			FileCommon.o \
+			App.o \
+			General.o \
+			View.o \
+			Window.o \
 			LgiWidget.o \
-			GWindowCommon.o \
-			GViewCommon.o \
-			GAppCommon.o \
-			GLibrary.o \
+			WindowCommon.o \
+			ViewCommon.o \
+			AppCommon.o \
+			Library.o \
 			GMem.o \
-			GProperties.o \
-			GContainers.o \
-			LMenu.o \
-			LMenuCommon.o \
-			GSubProcess.o \
+			Properties.o \
+			Containers.o \
+			Menu.o \
+			MenuCommon.o \
+			SubProcess.o \
 			LgiRes.o \
 			Res.o \
 			Gel.o \
-			GPath.o \
-			GMemStream.o \
-			GStream.o \
-			LThread.o \
-			LMutex.o \
-			LThreadCommon.o \
-			LThreadEvent.o \
-			GVariant.o \
-			GGuiUtils.o \
-			GObject.o \
-			GToolTip.o \
-			GTrayIcon.o \
+			Path.o \
+			MemStream.o \
+			Stream.o \
+			Thread.o \
+			Mutex.o \
+			ThreadCommon.o \
+			ThreadEvent.o \
+			Variant.o \
+			GuiUtils.o \
+			Object.o \
+			ToolTip.o \
+			TrayIcon.o \
 			LgiCommon.o \
-			LgiMsg.o \
-			GFileSelect.o \
-			GAlert.o \
-			GFindReplace.o \
-			GFontSelect.o \
-			GInput.o \
+			LMsg.o \
+			FileSelect.o \
+			Alert.o \
+			FindReplace.o \
+			FontSelect.o \
+			Input.o \
 			Gdc2.o \
-			GColour.o \
-			GColourReduce.o \
+			Colour.o \
+			ColourReduce.o \
 			GdcCommon.o \
 			GdcTools.o \
-			GDisplayString.o \
-			GFont.o \
-			GFont_W.o \
-			GFontCodePages.o \
-			GFontSystem.o \
-			LStringLayout.o \
+			DisplayString.o \
+			Font.o \
+			FontCodePages.o \
+			FontSystem.o \
+			StringLayout.o \
+			TypeFace.o \
+			FontType.o \
 			15Bit.o \
 			16Bit.o \
 			24Bit.o \
 			32Bit.o \
 			8Bit.o \
 			Alpha.o \
-			GFilter.o \
-			GRect.o \
+			Filter.o \
+			Rect.o \
 			GMemDC.o \
 			GPrintDC.o \
 			GScreenDC.o \
-			GPrinter.o \
-			GSurface.o \
-			GClipBoard.o \
-			GDataDlg.o \
-			GPassword.o \
+			Printer.o \
+			Surface.o \
+			ClipBoard.o \
+			DataDlg.o \
+			Password.o \
 			md5.o \
 			sha1.o \
-			GMru.o \
+			Mru.o \
 			Base64.o \
-			GOptionsFile.o \
-			LgiRand.o \
-			GString.o \
-			GToken.o \
-			GUnicode.o \
-			GUtf8.o \
-			GXmlTree.o \
-			GBitmap.o \
-			GButton.o \
-			GCheckBox.o \
-			GCombo.o \
-			GDocView.o \
-			GEdit.o \
-			GItemContainer.o \
-			GPanel.o \
-			GPopup.o \
-			GProgress.o \
-			GProgressDlg.o \
-			GRadioGroup.o \
-			GScrollBar.o \
-			GSlider.o \
-			GStatusBar.o \
-			GTabView.o \
-			GTextLabel.o \
-			GTextView3.o \
-			GToolBar.o \
-			GTree.o \
-			LList.o \
-			GCss.o \
-			GCssTools.o \
-			GBox.o \
-			GSplitter.o \
-			GTableLayout.o \
-			GLayout.o \
-			GWidgets.o \
-			GUri.o \
-			INet.o \
-			INetTools.o \
+			OptionsFile.o \
+			Rand.o \
+			String.o \
+			Token.o \
+			Unicode.o \
+			Utf8.o \
+			XmlTree.o \
+			Bitmap.o \
+			Button.o \
+			CheckBox.o \
+			Combo.o \
+			DocView.o \
+			Edit.o \
+			ItemContainer.o \
+			Panel.o \
+			Popup.o \
+			Progress.o \
+			ProgressDlg.o \
+			RadioGroup.o \
+			ScrollBar.o \
+			Slider.o \
+			StatusBar.o \
+			TabView.o \
+			TextLabel.o \
+			TextView3.o \
+			ToolBar.o \
+			Tree.o \
+			List.o \
+			Css.o \
+			CssTools.o \
+			Box.o \
+			Splitter.o \
+			TableLayout.o \
+			Layout.o \
+			Widgets.o \
+			Uri.o \
+			Net.o \
+			NetTools.o \
 			MDStringToDigest.o
 
 # Target
@@ -197,516 +196,527 @@ clean :
 	rm -f $(BuildDir)/*.o $(BuildDir)/$(TargetFile)
 	@echo Cleaned $(BuildDir)
 
-LDateTime.o : ./src/common/General/LDateTime.cpp ./include/common/Lgi.h \
-	./include/common/LDateTime.h \
-	./include/common/GToken.h \
-	./include/common/GDocView.h
+DateTime.o : ./src/common/General/DateTime.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/DateTime.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/DocView.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GDragAndDrop.o : ./src/linux/Lgi/GDragAndDrop.cpp ./include/common/Lgi.h \
-	./include/common/GDragAndDrop.h
+DragAndDrop.o : ./src/linux/Lgi/DragAndDrop.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/DragAndDrop.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GDragAndDropCommon.o : ./src/common/Lgi/GDragAndDropCommon.cpp ./include/common/Lgi.h \
-	./include/common/GDragAndDrop.h
+DragAndDropCommon.o : ./src/common/Lgi/DragAndDropCommon.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/DragAndDrop.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GFile.o : ./src/linux/General/GFile.cpp ./include/common/LgiDefs.h \
-	./include/common/GFile.h \
-	./include/common/GContainers.h \
-	./include/common/GToken.h \
-	./include/common/Gdc2.h \
-	./include/common/LgiCommon.h \
-	./include/common/GString.h \
-	./include/common/LDateTime.h
+GFile.o : ./src/linux/General/GFile.cpp ./include/lgi/common/LgiDefs.h \
+	./include/lgi/common/File.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/Gdc2.h \
+	./include/lgi/common/LgiCommon.h \
+	./include/lgi/common/String.h \
+	./include/lgi/common/DateTime.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-ShowFileProp_Linux.o : ./src/linux/General/ShowFileProp_Linux.cpp ./include/common/Lgi.h
+ShowFileProp_Linux.o : ./src/linux/General/ShowFileProp_Linux.cpp ./include/lgi/common/Lgi.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GExeCheck.o : ./src/common/General/GExeCheck.cpp ./include/common/Lgi.h
+ExeCheck.o : ./src/common/General/ExeCheck.cpp ./include/lgi/common/Lgi.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GFileCommon.o : ./src/common/General/GFileCommon.cpp ./include/common/Lgi.h \
-	./include/common/GVariant.h
+FileCommon.o : ./src/common/General/FileCommon.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Variant.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GApp.o : ./src/linux/Lgi/GApp.cpp ./include/common/Lgi.h \
-	./include/common/GSkinEngine.h \
-	./include/common/GArray.h \
-	./include/common/GVariant.h \
-	./include/common/GToken.h \
-	./include/common/GFontCache.h \
+App.o : ./src/linux/Lgi/App.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/SkinEngine.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/FontCache.h \
 	./private/linux/GAppPriv.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GGeneral.o : ./src/linux/Lgi/GGeneral.cpp ./include/common/Lgi.h \
-	./include/common/GSubProcess.h \
-	./include/common/GTextLabel.h \
-	./include/common/GButton.h \
-	./include/linux/Gtk/LgiWinManGlue.h \
-	./include/common/GToken.h
+General.o : ./src/linux/Lgi/General.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/SubProcess.h \
+	./include/lgi/common/TextLabel.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/linux/Gtk/LgiWinManGlue.h \
+	./include/lgi/common/Token.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GView.o : ./src/linux/Lgi/GView.cpp ./include/common/Lgi.h \
-	./include/common/GDragAndDrop.h \
-	./include/common/GEdit.h \
-	./include/common/GViewPriv.h \
-	./include/common/GPopup.h \
-	./include/common/GCss.h \
-	./include/linux/Gtk/LgiWidget.h
+View.o : ./src/linux/Lgi/View.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/DragAndDrop.h \
+	./include/lgi/common/Edit.h \
+	./include/lgi/common/ViewPriv.h \
+	./include/lgi/common/Popup.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/linux/Gtk/LgiWidget.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GWindow.o : ./src/linux/Lgi/GWindow.cpp ./include/common/Lgi.h \
-	./include/common/GDragAndDrop.h \
-	./include/common/GToken.h \
-	./include/common/GPopup.h \
-	./include/common/GPanel.h \
-	./include/common/GNotifications.h \
-	./include/common/GViewPriv.h \
-	./include/linux/Gtk/LgiWidget.h
+Window.o : ./src/linux/Lgi/Window.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/DragAndDrop.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/Popup.h \
+	./include/lgi/common/Panel.h \
+	./include/lgi/common/Notifications.h \
+	./include/lgi/common/ViewPriv.h \
+	./include/lgi/common/Menu.h \
+	./include/lgi/linux/Gtk/LgiWidget.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-LgiWidget.o : ./src/linux/Gtk/LgiWidget.cpp ./include/common/Lgi.h \
-	./include/common/GDragAndDrop.h \
-	./include/common/GViewPriv.h \
-	./include/linux/Gtk/LgiWidget.h
+LgiWidget.o : ./src/linux/Gtk/LgiWidget.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/DragAndDrop.h \
+	./include/lgi/common/ViewPriv.h \
+	./include/lgi/linux/Gtk/LgiWidget.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GWindowCommon.o : ./src/common/Lgi/GWindowCommon.cpp ./include/common/Lgi.h \
-	./include/common/INet.h \
-	./include/common/GDropFiles.h
+WindowCommon.o : ./src/common/Lgi/WindowCommon.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Net.h \
+	./include/lgi/common/DropFiles.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GViewCommon.o : ./src/common/Lgi/GViewCommon.cpp ./include/common/Lgi.h \
-	./include/common/GViewPriv.h \
-	./include/common/GDragAndDrop.h \
-	./include/common/GTableLayout.h \
-	./include/common/GButton.h \
-	./include/common/GCss.h \
-	./include/common/LgiRes.h \
-	./include/common/GEventTargetThread.h \
-	./include/common/GPopup.h \
-	./include/common/GCssTools.h \
-	./include/linux/Gtk/LgiWidget.h
+ViewCommon.o : ./src/common/Lgi/ViewCommon.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/ViewPriv.h \
+	./include/lgi/common/DragAndDrop.h \
+	./include/lgi/common/TableLayout.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/EventTargetThread.h \
+	./include/lgi/common/Popup.h \
+	./include/lgi/common/CssTools.h \
+	./include/lgi/linux/Gtk/LgiWidget.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GAppCommon.o : ./src/common/Lgi/GAppCommon.cpp ./include/common/Lgi.h \
+AppCommon.o : ./src/common/Lgi/AppCommon.cpp ./include/lgi/common/Lgi.h \
 	./private/linux/GAppPriv.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GLibrary.o : ./src/common/Lgi/GLibrary.cpp ./include/common/Lgi.h \
-	./include/common/GToken.h
+Library.o : ./src/common/Lgi/Library.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Token.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GMem.o : ./src/linux/General/GMem.cpp ./include/common/LgiDefs.h \
-	./include/linux/Gtk/LgiOsDefs.h \
-	./include/common/GMem.h \
-	./include/common/LMutex.h
+GMem.o : ./src/linux/General/GMem.cpp ./include/lgi/common/LgiDefs.h \
+	./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/Mutex.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GProperties.o : ./src/common/General/GProperties.cpp ./include/linux/Gtk/LgiOsDefs.h \
-	./include/common/GFile.h \
-	./include/common/GProperties.h \
-	./include/common/GString.h \
-	./include/common/GVariant.h
+Properties.o : ./src/common/General/Properties.cpp ./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/common/File.h \
+	./include/lgi/common/Properties.h \
+	./include/lgi/common/String.h \
+	./include/lgi/common/Variant.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GContainers.o : ./src/common/General/GContainers.cpp ./include/common/GMem.h \
-	./include/common/GContainers.h \
-	./include/common/GString.h \
-	./include/common/LgiCommon.h
+Containers.o : ./src/common/General/Containers.cpp ./include/lgi/common/Mem.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/String.h \
+	./include/lgi/common/LgiCommon.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-LMenu.o : ./src/linux/Lgi/LMenu.cpp ./include/common/Lgi.h \
-	./include/common/GToken.h \
-	./include/common/GDisplayString.h
+Menu.o : ./src/linux/Lgi/Menu.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/Menu.h \
+	./include/lgi/common/ToolBar.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-LMenuCommon.o : ./src/common/Lgi/LMenuCommon.cpp ./include/common/Lgi.h
+MenuCommon.o : ./src/common/Lgi/MenuCommon.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Menu.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GSubProcess.o : ./src/common/Lgi/GSubProcess.cpp ./include/common/Lgi.h \
-	./include/common/GSubProcess.h \
-	./include/common/GToken.h
+SubProcess.o : ./src/common/Lgi/SubProcess.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/SubProcess.h \
+	./include/lgi/common/Token.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-LgiRes.o : ./src/common/Resource/LgiRes.cpp ./include/common/Lgi.h \
-	./include/common/GToken.h \
-	./include/common/LList.h \
-	./include/common/GTableLayout.h \
-	./include/linux/Gtk/LgiWinManGlue.h \
-	./include/common/GVariant.h \
-	./include/common/GDisplayString.h \
-	./include/common/LgiRes.h \
-	./include/common/GTextLabel.h \
-	./include/common/GEdit.h \
-	./include/common/GCheckBox.h \
-	./include/common/GButton.h \
-	./include/common/GRadioGroup.h \
-	./include/common/GTabView.h \
-	./include/common/GCombo.h \
-	./include/common/GBitmap.h \
-	./include/common/GSlider.h \
-	./include/common/GScrollBar.h \
-	./include/common/GTree.h
+LgiRes.o : ./src/common/Resource/LgiRes.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/List.h \
+	./include/lgi/common/TableLayout.h \
+	./include/lgi/linux/Gtk/LgiWinManGlue.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/Menu.h \
+	./include/lgi/common/ProgressView.h \
+	./include/lgi/common/TextLabel.h \
+	./include/lgi/common/Edit.h \
+	./include/lgi/common/CheckBox.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/common/RadioGroup.h \
+	./include/lgi/common/TabView.h \
+	./include/lgi/common/Combo.h \
+	./include/lgi/common/Bitmap.h \
+	./include/lgi/common/Slider.h \
+	./include/lgi/common/ScrollBar.h \
+	./include/lgi/common/Tree.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-Res.o : ./src/common/Resource/Res.cpp ./include/common/Lgi.h \
-	./include/common/Res.h \
-	./include/common/GVariant.h \
-	./include/common/GToken.h
+Res.o : ./src/common/Resource/Res.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Res.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/Token.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-Gel.o : ./src/common/Skins/Gel/Gel.cpp ./include/common/Lgi.h \
-	./include/common/GSkinEngine.h \
-	./include/common/GPath.h \
-	./include/common/GButton.h \
-	./include/common/GCombo.h \
-	./include/common/GCheckBox.h \
-	./include/common/GRadioGroup.h \
-	./include/common/GDisplayString.h \
-	./include/common/GCssTools.h \
-	./include/common/LStringLayout.h
+Gel.o : ./src/common/Skins/Gel/Gel.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/SkinEngine.h \
+	./include/lgi/common/Path.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/common/Combo.h \
+	./include/lgi/common/CheckBox.h \
+	./include/lgi/common/RadioGroup.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/CssTools.h \
+	./include/lgi/common/StringLayout.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GPath.o : ./src/common/Gdc2/Path/GPath.cpp ./include/common/Lgi.h \
-	./include/common/GPath.h \
-	./include/common/GdiLeak.h \
-	./include/common/GDisplayString.h
+Path.o : ./src/common/Gdc2/Path/Path.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Path.h \
+	./include/lgi/common/GdiLeak.h \
+	./include/lgi/common/DisplayString.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GMemStream.o : ./src/common/Lgi/GMemStream.cpp ./include/common/Lgi.h \
-	./include/common/GStream.h
+MemStream.o : ./src/common/Lgi/MemStream.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Stream.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GStream.o : ./src/common/Lgi/GStream.cpp ./include/common/Lgi.h \
-	./include/common/GStream.h
+Stream.o : ./src/common/Lgi/Stream.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Stream.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-LThread.o : ./src/linux/Lgi/LThread.cpp ./include/common/Lgi.h
+Thread.o : ./src/linux/Lgi/Thread.cpp ./include/lgi/common/Lgi.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-LMutex.o : ./src/common/Lgi/LMutex.cpp ./include/common/Lgi.h
+Mutex.o : ./src/common/Lgi/Mutex.cpp ./include/lgi/common/Lgi.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-LThreadCommon.o : ./src/common/Lgi/LThreadCommon.cpp ./include/common/Lgi.h \
-	./include/common/GEventTargetThread.h
+ThreadCommon.o : ./src/common/Lgi/ThreadCommon.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/EventTargetThread.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-LThreadEvent.o : ./src/common/Lgi/LThreadEvent.cpp ./include/common/Lgi.h \
-	./include/common/LThreadEvent.h
+ThreadEvent.o : ./src/common/Lgi/ThreadEvent.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/ThreadEvent.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GVariant.o : ./src/common/Lgi/GVariant.cpp ./include/common/Lgi.h \
-	./include/common/GVariant.h \
-	./include/common/GToken.h \
-	./include/common/LDomFields.h
+Variant.o : ./src/common/Lgi/Variant.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/DomFields.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GGuiUtils.o : ./src/common/Lgi/GGuiUtils.cpp ./include/common/Lgi.h \
-	./include/common/GSkinEngine.h \
-	./include/common/GToken.h \
-	./include/linux/Gtk/LgiWinManGlue.h
+GuiUtils.o : ./src/common/Lgi/GuiUtils.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/SkinEngine.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/linux/Gtk/LgiWinManGlue.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GObject.o : ./src/common/Lgi/GObject.cpp ./include/common/Gdc2.h \
-	./include/common/LgiCommon.h \
-	./include/common/GString.h
+Object.o : ./src/common/Lgi/Object.cpp ./include/lgi/common/Gdc2.h \
+	./include/lgi/common/LgiCommon.h \
+	./include/lgi/common/String.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GToolTip.o : ./src/common/Lgi/GToolTip.cpp ./include/common/Lgi.h \
-	./include/common/GDisplayString.h \
-	./include/common/GPopup.h
+ToolTip.o : ./src/common/Lgi/ToolTip.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/ToolTip.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/Popup.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GTrayIcon.o : ./src/common/Lgi/GTrayIcon.cpp ./include/common/Lgi.h
+TrayIcon.o : ./src/common/Lgi/TrayIcon.cpp ./include/lgi/common/Lgi.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-LgiCommon.o : ./src/common/Lgi/LgiCommon.cpp ./include/common/GRegKey.h \
-	./include/common/Lgi.h \
-	./include/common/GToken.h \
-	./include/common/GCapabilities.h \
-	./include/linux/Gtk/LgiWinManGlue.h \
-	./include/common/GSubProcess.h \
-	./include/win32/GSymLookup.h \
-	./include/linux/GSymLookup.h \
-	./include/common/GLibrary.h \
-	./include/linux/Gtk/LgiWidget.h
+LgiCommon.o : ./src/common/Lgi/LgiCommon.cpp ./include/lgi/common/RegKey.h \
+	./include/lgi/common/Lgi.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/Capabilities.h \
+	./include/lgi/linux/Gtk/LgiWinManGlue.h \
+	./include/lgi/common/SubProcess.h \
+	./include/lgi/linux/SymLookup.h \
+	./include/lgi/common/Library.h \
+	./include/lgi/linux/Gtk/LgiWidget.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-LgiMsg.o : ./src/common/Lgi/LgiMsg.cpp ./include/common/Lgi.h \
-	./include/common/GTextLog.h \
-	./include/common/GTableLayout.h \
-	./include/common/GButton.h \
-	./include/common/GTextLabel.h
+LMsg.o : ./src/common/Lgi/LMsg.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/TextLog.h \
+	./include/lgi/common/TableLayout.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/common/TextLabel.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GFileSelect.o : ./src/common/Lgi/GFileSelect.cpp ./include/common/Lgi.h \
-	./include/common/GPopup.h \
-	./include/common/GToken.h \
-	./include/common/LList.h \
-	./include/common/GTextLabel.h \
-	./include/common/GEdit.h \
-	./include/common/GButton.h \
-	./include/common/GCheckBox.h \
-	./include/common/GCombo.h \
-	./include/common/GTree.h \
-	./include/common/GTableLayout.h \
-	./include/common/GBox.h \
-	./include/common/INet.h
+FileSelect.o : ./src/common/Lgi/FileSelect.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Popup.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/List.h \
+	./include/lgi/common/TextLabel.h \
+	./include/lgi/common/Edit.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/common/CheckBox.h \
+	./include/lgi/common/Combo.h \
+	./include/lgi/common/Tree.h \
+	./include/lgi/common/TableLayout.h \
+	./include/lgi/common/Box.h \
+	./include/lgi/common/FileSelect.h \
+	./include/lgi/common/Menu.h \
+	./include/lgi/common/Net.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GAlert.o : ./src/common/Lgi/GAlert.cpp ./include/common/Lgi.h \
-	./include/common/GTextLabel.h \
-	./include/common/GButton.h \
-	./include/common/GDisplayString.h \
-	./include/common/GTableLayout.h
+Alert.o : ./src/common/Lgi/Alert.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/TextLabel.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/TableLayout.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GFindReplace.o : ./src/common/Lgi/GFindReplace.cpp ./include/common/Lgi.h \
-	./include/common/GTextView3.h \
-	./include/common/GTextLabel.h \
-	./include/common/GEdit.h \
-	./include/common/GCheckBox.h \
-	./include/common/GButton.h \
-	./include/common/GTableLayout.h \
-	./include/common/LgiRes.h
+FindReplace.o : ./src/common/Lgi/FindReplace.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/TextView3.h \
+	./include/lgi/common/TextLabel.h \
+	./include/lgi/common/Edit.h \
+	./include/lgi/common/CheckBox.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/common/TableLayout.h \
+	./include/lgi/common/LgiRes.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GFontSelect.o : ./src/common/Lgi/GFontSelect.cpp ./include/common/Lgi.h \
-	./include/common/GFontSelect.h \
-	./include/common/GToken.h \
-	./include/common/GCheckBox.h \
-	./include/common/GButton.h \
-	./include/common/LList.h \
-	./include/common/GRadioGroup.h \
-	./include/common/GEdit.h \
-	./include/common/GCombo.h \
-	./include/common/GBitmap.h \
-	./include/common/GTextLabel.h \
-	./include/common/GDisplayString.h \
-	./include/common/GdiLeak.h \
-	./include/common/GTableLayout.h \
-	./include/common/LgiRes.h
+FontSelect.o : ./src/common/Lgi/FontSelect.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/FontSelect.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/CheckBox.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/common/List.h \
+	./include/lgi/common/RadioGroup.h \
+	./include/lgi/common/Edit.h \
+	./include/lgi/common/Combo.h \
+	./include/lgi/common/Bitmap.h \
+	./include/lgi/common/TextLabel.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/GdiLeak.h \
+	./include/lgi/common/TableLayout.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/Widgets.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GInput.o : ./src/common/Lgi/GInput.cpp ./include/common/Lgi.h \
-	./include/common/GTextLabel.h \
-	./include/common/GEdit.h \
-	./include/common/GButton.h \
-	./include/common/GDisplayString.h \
-	./include/common/LgiRes.h \
-	./include/common/GTableLayout.h
+Input.o : ./src/common/Lgi/Input.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/TextLabel.h \
+	./include/lgi/common/Edit.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/TableLayout.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-Gdc2.o : ./src/linux/Gtk/Gdc2.cpp ./include/common/Lgi.h \
-	./include/common/GPalette.h
+Gdc2.o : ./src/linux/Gtk/Gdc2.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Palette.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GColour.o : ./src/common/Gdc2/GColour.cpp ./include/common/Lgi.h \
-	./include/common/GPalette.h \
-	./include/common/GSkinEngine.h \
-	./include/common/LJson.h
+Colour.o : ./src/common/Gdc2/Colour.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Palette.h \
+	./include/lgi/common/SkinEngine.h \
+	./include/lgi/common/Json.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GColourReduce.o : ./src/common/Gdc2/Tools/GColourReduce.cpp ./include/common/Gdc2.h \
-	./include/common/GPalette.h
+ColourReduce.o : ./src/common/Gdc2/Tools/ColourReduce.cpp ./include/lgi/common/Gdc2.h \
+	./include/lgi/common/Palette.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GdcCommon.o : ./src/common/Gdc2/GdcCommon.cpp ./include/common/Lgi.h \
-	./include/common/GPalette.h \
-	./include/common/GRops.h \
-	./src/common/Gdc2/GRopsCases.cpp
+GdcCommon.o : ./src/common/Gdc2/GdcCommon.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Palette.h \
+	./include/lgi/common/Rops.h \
+	./src/common/Gdc2/RopsCases.cpp
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GdcTools.o : ./src/common/Gdc2/Tools/GdcTools.cpp ./include/common/Gdc2.h \
-	./include/common/GdcTools.h \
-	./include/common/GPalette.h
+GdcTools.o : ./src/common/Gdc2/Tools/GdcTools.cpp ./include/lgi/common/Gdc2.h \
+	./include/lgi/common/GdcTools.h \
+	./include/lgi/common/Palette.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GDisplayString.o : ./src/common/Gdc2/Font/GDisplayString.cpp ./include/common/Lgi.h \
-	./include/common/GVariant.h \
-	./include/common/GFontSelect.h \
-	./include/common/GdiLeak.h \
-	./include/common/GDisplayString.h \
-	./include/common/GPixelRops.h \
-	./include/common/LUnicodeString.h
+DisplayString.o : ./src/common/Gdc2/Font/DisplayString.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/FontSelect.h \
+	./include/lgi/common/GdiLeak.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/PixelRops.h \
+	./include/lgi/common/UnicodeString.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GFont.o : ./src/common/Gdc2/Font/GFont.cpp ./include/common/Lgi.h \
-	./include/common/GVariant.h \
-	./include/common/GFontSelect.h \
-	./include/common/GDisplayString.h \
-	./include/common/GdiLeak.h \
-	./include/common/GStringClass.h \
-	./include/common/GCss.h
+Font.o : ./src/common/Gdc2/Font/Font.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/GdiLeak.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/FontSelect.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GFont_W.o : ./src/common/Gdc2/Font/GFont_W.cpp ./include/common/Lgi.h \
-	./include/common/GFontSelect.h \
-	./include/common/GdiLeak.h
+FontCodePages.o : ./src/common/Gdc2/Font/FontCodePages.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/Font.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GFontCodePages.o : ./src/common/Gdc2/Font/GFontCodePages.cpp ./include/common/Lgi.h \
-	./include/common/GToken.h \
-	./include/common/GFont.h
+FontSystem.o : ./src/common/Gdc2/Font/FontSystem.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/Library.h \
+	./include/lgi/common/LibraryUtils.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GFontSystem.o : ./src/common/Gdc2/Font/GFontSystem.cpp ./include/common/Lgi.h \
-	./include/common/GToken.h \
-	./include/common/GLibrary.h \
-	./include/common/GLibraryUtils.h
+StringLayout.o : ./src/common/Gdc2/Font/StringLayout.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/StringLayout.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-LStringLayout.o : ./src/common/Gdc2/Font/LStringLayout.cpp ./include/common/Lgi.h \
-	./include/common/LStringLayout.h
+TypeFace.o : ./src/common/Gdc2/Font/TypeFace.cpp ./include/lgi/common/Lgi.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-15Bit.o : ./src/common/Gdc2/15Bit.cpp ./include/common/Gdc2.h \
-	./include/common/GPalette.h
+FontType.o : ./src/common/Gdc2/Font/FontType.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/FontSelect.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-16Bit.o : ./src/common/Gdc2/16Bit.cpp ./include/common/Gdc2.h \
-	./include/common/GPalette.h
+15Bit.o : ./src/common/Gdc2/15Bit.cpp ./include/lgi/common/Gdc2.h \
+	./include/lgi/common/Palette.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-24Bit.o : ./src/common/Gdc2/24Bit.cpp ./include/common/Gdc2.h \
-	./include/common/GPalette.h
+16Bit.o : ./src/common/Gdc2/16Bit.cpp ./include/lgi/common/Gdc2.h \
+	./include/lgi/common/Palette.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-32Bit.o : ./src/common/Gdc2/32Bit.cpp ./include/common/Gdc2.h \
-	./include/common/GPalette.h \
-	./include/common/GPixelRops.h
+24Bit.o : ./src/common/Gdc2/24Bit.cpp ./include/lgi/common/Gdc2.h \
+	./include/lgi/common/Palette.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-8Bit.o : ./src/common/Gdc2/8Bit.cpp ./include/common/Gdc2.h \
-	./include/common/GPalette.h
+32Bit.o : ./src/common/Gdc2/32Bit.cpp ./include/lgi/common/Gdc2.h \
+	./include/lgi/common/Palette.h \
+	./include/lgi/common/PixelRops.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-Alpha.o : ./src/common/Gdc2/Alpha.cpp ./include/common/Gdc2.h \
-	./include/common/GPath.h \
-	./include/common/GPixelRops.h \
-	./include/common/GPalette.h
+8Bit.o : ./src/common/Gdc2/8Bit.cpp ./include/lgi/common/Gdc2.h \
+	./include/lgi/common/Palette.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GFilter.o : ./src/common/Gdc2/Filters/GFilter.cpp ./include/common/Lgi.h \
-	./include/common/GString.h \
-	./include/common/GVariant.h \
-	./include/common/GClipBoard.h \
-	./include/common/GToken.h \
-	./include/common/GPalette.h
+Alpha.o : ./src/common/Gdc2/Alpha.cpp ./include/lgi/common/Gdc2.h \
+	./include/lgi/common/Path.h \
+	./include/lgi/common/PixelRops.h \
+	./include/lgi/common/Palette.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GRect.o : ./src/common/Gdc2/GRect.cpp ./include/common/Gdc2.h \
-	./include/common/GToken.h
+Filter.o : ./src/common/Gdc2/Filters/Filter.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/String.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/ClipBoard.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/Palette.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GMemDC.o : ./src/linux/Gtk/GMemDC.cpp ./include/common/Gdc2.h \
-	./include/common/GString.h
+Rect.o : ./src/common/Gdc2/Rect.cpp ./include/lgi/common/Gdc2.h \
+	./include/lgi/common/Token.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GPrintDC.o : ./src/linux/Gtk/GPrintDC.cpp ./include/common/Lgi.h
+GMemDC.o : ./src/linux/Gtk/GMemDC.cpp ./include/lgi/common/Gdc2.h \
+	./include/lgi/common/String.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GScreenDC.o : ./src/linux/Gtk/GScreenDC.cpp ./include/common/Lgi.h
+GPrintDC.o : ./src/linux/Gtk/GPrintDC.cpp ./include/lgi/common/Lgi.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GPrinter.o : ./src/linux/Lgi/GPrinter.cpp ./include/common/Lgi.h \
-	./include/common/LList.h \
-	./include/common/GButton.h \
-	./include/common/GPrinter.h
+GScreenDC.o : ./src/linux/Gtk/GScreenDC.cpp ./include/lgi/common/Lgi.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GSurface.o : ./src/common/Gdc2/GSurface.cpp ./include/common/Gdc2.h \
-	./include/common/GdiLeak.h \
-	./include/common/GPalette.h \
-	./include/common/GVariant.h
+Printer.o : ./src/linux/Lgi/Printer.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/List.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/common/Printer.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GClipBoard.o : ./src/linux/Lgi/GClipBoard.cpp ./include/common/Lgi.h \
-	./include/common/GVariant.h \
-	./include/common/GClipBoard.h
+Surface.o : ./src/common/Gdc2/Surface.cpp ./include/lgi/common/Gdc2.h \
+	./include/lgi/common/GdiLeak.h \
+	./include/lgi/common/Palette.h \
+	./include/lgi/common/Variant.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GDataDlg.o : ./src/common/Lgi/GDataDlg.cpp ./include/common/Lgi.h \
-	./include/common/GPassword.h \
-	./include/common/GDataDlg.h
+ClipBoard.o : ./src/linux/Lgi/ClipBoard.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/ClipBoard.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GPassword.o : ./src/common/General/GPassword.cpp ./include/common/Lgi.h \
-	./include/common/GPassword.h \
-	./include/common/GVariant.h
+DataDlg.o : ./src/common/Lgi/DataDlg.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Password.h \
+	./include/lgi/common/DataDlg.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
+Password.o : ./src/common/General/Password.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Password.h \
+	./include/lgi/common/Variant.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -718,986 +728,1007 @@ sha1.o : ./src/common/Hash/sha1/sha1.c ./src/common/Hash/sha1/sha1.h
 	@echo $(<F) [$(Build)]
 	$(CC) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GMru.o : ./src/common/Lgi/GMru.cpp ./include/common/Lgi.h \
-	./include/common/GMru.h \
-	./include/common/GVariant.h
+Mru.o : ./src/common/Lgi/Mru.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Mru.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/Menu.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-Base64.o : ./src/common/INet/Base64.cpp ./include/common/GMem.h \
-	./include/common/LgiInc.h \
-	./include/common/Base64.h \
-	./include/common/GRange.h
+Base64.o : ./src/common/Net/Base64.cpp ./include/lgi/common/Mem.h \
+	./include/lgi/common/LgiInc.h \
+	./include/lgi/common/Base64.h \
+	./include/lgi/common/Range.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GOptionsFile.o : ./src/common/Lgi/GOptionsFile.cpp ./include/common/Lgi.h \
-	./include/common/GOptionsFile.h
+OptionsFile.o : ./src/common/Lgi/OptionsFile.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/OptionsFile.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-LgiRand.o : ./src/common/Lgi/LgiRand.cpp ./include/common/GMem.h \
-	./include/common/GFile.h \
-	./include/common/GContainers.h \
-	./include/common/LgiCommon.h
+Rand.o : ./src/common/Lgi/Rand.cpp ./include/lgi/common/Mem.h \
+	./include/lgi/common/File.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/LgiCommon.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GString.o : ./src/common/Text/GString.cpp ./include/common/GMem.h \
-	./include/linux/Gtk/LgiOsDefs.h \
-	./include/common/LgiClass.h \
-	./include/common/GString.h \
-	./include/common/GContainers.h \
-	./include/common/LgiCommon.h
+String.o : ./src/common/Text/String.cpp ./include/lgi/common/Mem.h \
+	./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/common/String.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/LgiCommon.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GToken.o : ./src/common/Text/GToken.cpp ./include/common/GMem.h \
-	./include/common/GContainers.h \
-	./include/common/GToken.h \
-	./include/common/GString.h
+Token.o : ./src/common/Text/Token.cpp ./include/lgi/common/Mem.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/String.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GUnicode.o : ./src/common/Text/GUnicode.cpp ./include/common/Lgi.h \
-	./include/common/GUnicode.h
+Unicode.o : ./src/common/Text/Unicode.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Unicode.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GUtf8.o : ./src/common/Text/GUtf8.cpp ./include/common/Lgi.h
+Utf8.o : ./src/common/Text/Utf8.cpp ./include/lgi/common/Lgi.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GXmlTree.o : ./src/common/Text/GXmlTree.cpp ./include/common/Lgi.h \
-	./include/common/GXmlTree.h \
-	./include/common/GVariant.h \
-	./include/common/GToken.h
+XmlTree.o : ./src/common/Text/XmlTree.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/XmlTree.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/Token.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GBitmap.o : ./src/common/Widgets/GBitmap.cpp ./include/common/Lgi.h \
-	./include/common/GBitmap.h \
-	./include/common/GTableLayout.h \
-	./include/common/LgiRes.h
+Bitmap.o : ./src/common/Widgets/Bitmap.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Bitmap.h \
+	./include/lgi/common/TableLayout.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/Thread.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GButton.o : ./src/common/Widgets/GButton.cpp ./include/common/Lgi.h \
-	./include/common/GSkinEngine.h \
-	./include/common/GButton.h \
-	./include/common/GDisplayString.h \
-	./include/common/GTableLayout.h \
-	./include/common/LgiRes.h \
-	./include/common/LStringLayout.h \
-	./include/common/GCssTools.h
+Button.o : ./src/common/Widgets/Button.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/SkinEngine.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/TableLayout.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/StringLayout.h \
+	./include/lgi/common/CssTools.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GCheckBox.o : ./src/common/Widgets/GCheckBox.cpp ./include/common/Lgi.h \
-	./include/common/GSkinEngine.h \
-	./include/common/GCheckBox.h \
-	./include/common/GDisplayString.h \
-	./include/common/LStringLayout.h \
-	./include/common/LgiRes.h
+CheckBox.o : ./src/common/Widgets/CheckBox.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/SkinEngine.h \
+	./include/lgi/common/CheckBox.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/StringLayout.h \
+	./include/lgi/common/LgiRes.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GCombo.o : ./src/common/Widgets/GCombo.cpp ./include/common/Lgi.h \
-	./include/common/GVariant.h \
-	./include/common/GSkinEngine.h \
-	./include/common/GCombo.h \
-	./include/common/GDisplayString.h \
-	./include/common/LgiRes.h
+Combo.o : ./src/common/Widgets/Combo.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/SkinEngine.h \
+	./include/lgi/common/Combo.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/Menu.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GDocView.o : ./src/common/Text/GDocView.cpp ./include/common/Lgi.h \
-	./include/common/GDocView.h \
-	./include/common/INet.h
+DocView.o : ./src/common/Text/DocView.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/DocView.h \
+	./include/lgi/common/Net.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GEdit.o : ./src/common/Widgets/GEdit.cpp ./include/common/Lgi.h \
-	./include/common/GEdit.h \
-	./include/common/GClipBoard.h \
-	./include/common/GDisplayString.h \
-	./include/common/LgiRes.h \
-	./include/common/GTextView3.h
+Edit.o : ./src/common/Widgets/Edit.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Edit.h \
+	./include/lgi/common/ClipBoard.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/TextView3.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GItemContainer.o : ./src/common/Widgets/GItemContainer.cpp ./include/common/Lgi.h \
-	./include/common/GItemContainer.h \
-	./include/common/GDisplayString.h \
-	./include/common/GSkinEngine.h \
-	./include/common/GScrollBar.h \
-	./include/common/GEdit.h \
-	./include/common/GCssTools.h
+ItemContainer.o : ./src/common/Widgets/ItemContainer.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/ItemContainer.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/SkinEngine.h \
+	./include/lgi/common/ScrollBar.h \
+	./include/lgi/common/Edit.h \
+	./include/lgi/common/CssTools.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GPanel.o : ./src/common/Widgets/GPanel.cpp ./include/common/Lgi.h \
-	./include/common/GPanel.h \
-	./include/common/GDisplayString.h \
-	./include/common/LgiRes.h \
-	./include/common/GCssTools.h
+Panel.o : ./src/common/Widgets/Panel.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Panel.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/CssTools.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GPopup.o : ./src/common/Widgets/GPopup.cpp ./include/common/Lgi.h \
-	./include/common/GPopup.h \
-	./include/common/GSkinEngine.h \
-	./include/common/GDisplayString.h \
-	./include/common/LThreadEvent.h \
-	./include/linux/Gtk/LgiWidget.h
+Popup.o : ./src/common/Widgets/Popup.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Popup.h \
+	./include/lgi/common/SkinEngine.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/Thread.h \
+	./include/lgi/common/ThreadEvent.h \
+	./include/lgi/common/Menu.h \
+	./include/lgi/linux/Gtk/LgiWidget.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GProgress.o : ./src/common/Widgets/GProgress.cpp ./include/common/Lgi.h \
-	./include/common/GProgress.h \
-	./include/common/GCss.h
+Progress.o : ./src/common/Widgets/Progress.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/ProgressView.h \
+	./include/lgi/common/Css.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GProgressDlg.o : ./src/common/Widgets/GProgressDlg.cpp ./include/common/Lgi.h \
-	./include/common/GProgressDlg.h \
-	./include/common/GTextLabel.h \
-	./include/common/GButton.h \
-	./include/common/GTableLayout.h \
-	./include/common/LgiRes.h
+ProgressDlg.o : ./src/common/Widgets/ProgressDlg.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/ProgressDlg.h \
+	./include/lgi/common/TextLabel.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/common/TableLayout.h \
+	./include/lgi/common/LgiRes.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GRadioGroup.o : ./src/common/Widgets/GRadioGroup.cpp ./include/common/Lgi.h \
-	./include/common/GSkinEngine.h \
-	./include/common/GRadioGroup.h \
-	./include/common/GCheckBox.h \
-	./include/common/GDisplayString.h \
-	./include/common/LgiRes.h \
-	./include/common/LStringLayout.h
+RadioGroup.o : ./src/common/Widgets/RadioGroup.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/SkinEngine.h \
+	./include/lgi/common/RadioGroup.h \
+	./include/lgi/common/CheckBox.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/StringLayout.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GScrollBar.o : ./src/common/Widgets/GScrollBar.cpp ./include/common/Lgi.h \
-	./include/common/GScrollBar.h \
-	./include/common/LgiRes.h
+ScrollBar.o : ./src/common/Widgets/ScrollBar.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/ScrollBar.h \
+	./include/lgi/common/LgiRes.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GSlider.o : ./src/common/Widgets/GSlider.cpp ./include/common/Lgi.h \
-	./include/common/GSlider.h
+Slider.o : ./src/common/Widgets/Slider.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Slider.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GStatusBar.o : ./src/common/Widgets/GStatusBar.cpp ./include/common/Lgi.h \
-	./include/common/GDisplayString.h \
-	./include/common/LgiRes.h
+StatusBar.o : ./src/common/Widgets/StatusBar.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/StatusBar.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GTabView.o : ./src/common/Widgets/GTabView.cpp ./include/common/Lgi.h \
-	./include/common/GTabView.h \
-	./include/common/GSkinEngine.h \
-	./include/common/GDisplayString.h \
-	./include/common/GTableLayout.h \
-	./include/common/LgiRes.h \
-	./include/common/GCssTools.h \
-	./include/common/GPath.h
+TabView.o : ./src/common/Widgets/TabView.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/TabView.h \
+	./include/lgi/common/SkinEngine.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/TableLayout.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/CssTools.h \
+	./include/lgi/common/Path.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GTextLabel.o : ./src/common/Widgets/GTextLabel.cpp ./include/common/Lgi.h \
-	./include/common/GTextLabel.h \
-	./include/common/LStringLayout.h \
-	./include/common/GVariant.h \
-	./include/common/GNotifications.h \
-	./include/common/LgiRes.h \
-	./include/common/GCssTools.h
+TextLabel.o : ./src/common/Widgets/TextLabel.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/TextLabel.h \
+	./include/lgi/common/StringLayout.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/Notifications.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/CssTools.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GTextView3.o : ./src/common/Text/GTextView3.cpp ./include/common/Lgi.h \
-	./include/common/GTextView3.h \
-	./include/common/GInput.h \
-	./include/common/GScrollBar.h \
-	./include/common/GClipBoard.h \
-	./include/common/GDisplayString.h \
-	./include/common/GViewPriv.h \
-	./include/common/GCssTools.h \
-	./include/common/LgiRes.h \
-	./include/common/Mail.h
+TextView3.o : ./src/common/Text/TextView3.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/TextView3.h \
+	./include/lgi/common/Input.h \
+	./include/lgi/common/ScrollBar.h \
+	./include/lgi/common/ClipBoard.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/ViewPriv.h \
+	./include/lgi/common/CssTools.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/Mail.h \
+	./include/lgi/common/FileSelect.h \
+	./include/lgi/common/Menu.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GToolBar.o : ./src/common/Widgets/GToolBar.cpp ./include/common/Lgi.h \
-	./include/common/GToken.h \
-	./include/common/GVariant.h \
-	./include/common/GDisplayString.h \
-	./include/common/GPalette.h \
-	./include/common/GNotifications.h \
-	./include/common/LgiRes.h \
-	./include/common/GCssTools.h
+ToolBar.o : ./src/common/Widgets/ToolBar.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/Palette.h \
+	./include/lgi/common/Notifications.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/CssTools.h \
+	./include/lgi/common/ToolBar.h \
+	./include/lgi/common/ToolTip.h \
+	./include/lgi/common/Menu.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GTree.o : ./src/common/Widgets/GTree.cpp ./include/common/Lgi.h \
-	./include/common/GTree.h \
-	./include/common/GScrollBar.h \
-	./include/common/GDisplayString.h \
-	./include/common/GPalette.h \
-	./include/common/LgiRes.h \
-	./include/common/GCssTools.h
+Tree.o : ./src/common/Widgets/Tree.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Tree.h \
+	./include/lgi/common/ScrollBar.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/Palette.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/CssTools.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-LList.o : ./src/common/Widgets/LList.cpp ./include/common/Lgi.h \
-	./include/common/GSkinEngine.h \
-	./include/common/LList.h \
-	./include/common/GScrollBar.h \
-	./include/common/GDisplayString.h \
-	./include/common/LgiRes.h \
-	./include/common/GCssTools.h
+List.o : ./src/common/Widgets/List.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/SkinEngine.h \
+	./include/lgi/common/List.h \
+	./include/lgi/common/ScrollBar.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/CssTools.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GCss.o : ./src/common/Lgi/GCss.cpp ./include/common/Lgi.h \
-	./include/common/LgiCommon.h
+Css.o : ./src/common/Lgi/Css.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/LgiCommon.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GCssTools.o : ./src/common/Lgi/GCssTools.cpp ./include/common/Lgi.h \
-	./include/common/GCssTools.h \
-	./include/common/GDisplayString.h \
-	./include/common/LgiRes.h
+CssTools.o : ./src/common/Lgi/CssTools.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/CssTools.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/LgiRes.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GBox.o : ./src/common/Widgets/GBox.cpp ./include/common/Lgi.h \
-	./include/common/GBox.h \
-	./include/common/GCssTools.h \
-	./include/common/LgiRes.h \
-	./include/common/GPopup.h \
-	./include/common/GNotifications.h
+Box.o : ./src/common/Widgets/Box.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Box.h \
+	./include/lgi/common/CssTools.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/Popup.h \
+	./include/lgi/common/Notifications.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GSplitter.o : ./src/common/Widgets/GSplitter.cpp ./include/common/Lgi.h \
-	./include/common/LgiRes.h \
-	./include/common/GCssTools.h
+Splitter.o : ./src/common/Widgets/Splitter.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/CssTools.h \
+	./include/lgi/common/Splitter.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GTableLayout.o : ./src/common/Widgets/GTableLayout.cpp ./include/common/Lgi.h \
-	./include/common/GTableLayout.h \
-	./include/common/GCssTools.h \
-	./include/common/GDisplayString.h \
-	./include/common/LgiRes.h \
-	./include/common/GToken.h \
-	./include/common/GVariant.h \
-	./include/common/GTextLabel.h \
-	./include/common/GButton.h \
-	./include/common/GEdit.h \
-	./include/common/GCombo.h \
-	./include/common/LList.h \
-	./include/common/GTree.h \
-	./include/common/GCheckBox.h \
-	./include/common/GRadioGroup.h \
-	./include/common/GBitmap.h \
-	./include/common/GTabView.h \
-	./include/common/GScrollBar.h \
-	./include/common/GCss.h
+TableLayout.o : ./src/common/Widgets/TableLayout.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/TableLayout.h \
+	./include/lgi/common/CssTools.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/LgiRes.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/TextLabel.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/common/Edit.h \
+	./include/lgi/common/Combo.h \
+	./include/lgi/common/List.h \
+	./include/lgi/common/Tree.h \
+	./include/lgi/common/CheckBox.h \
+	./include/lgi/common/RadioGroup.h \
+	./include/lgi/common/Bitmap.h \
+	./include/lgi/common/TabView.h \
+	./include/lgi/common/ScrollBar.h \
+	./include/lgi/common/Css.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GLayout.o : ./src/linux/Lgi/GLayout.cpp ./include/common/Lgi.h \
-	./include/common/GScrollBar.h \
-	./include/common/GNotifications.h
+Layout.o : ./src/linux/Lgi/Layout.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/ScrollBar.h \
+	./include/lgi/common/Notifications.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GWidgets.o : ./src/linux/Lgi/GWidgets.cpp ./include/common/Lgi.h \
-	./include/common/GSlider.h \
-	./include/common/GBitmap.h \
-	./include/common/GTableLayout.h \
-	./include/common/GDisplayString.h \
-	./include/common/GButton.h \
-	./include/linux/Gtk/LgiWidget.h
+Widgets.o : ./src/linux/Lgi/Widgets.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Slider.h \
+	./include/lgi/common/Bitmap.h \
+	./include/lgi/common/TableLayout.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/linux/Gtk/LgiWidget.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GUri.o : ./src/common/INet/GUri.cpp ./include/common/Lgi.h \
-	./include/common/INet.h \
-	./include/common/GRegKey.h
+Uri.o : ./src/common/Net/Uri.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Net.h \
+	./include/lgi/common/RegKey.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-INet.o : ./src/common/INet/INet.cpp ./include/common/GFile.h \
-	./include/common/INet.h \
-	./include/common/GToken.h \
-	./include/common/GString.h \
-	./include/common/LgiCommon.h \
-	./include/linux/Gtk/LgiOsClasses.h \
-	./include/common/GRegKey.h \
-	./include/common/LgiNetInc.h
+Net.o : ./src/common/Net/Net.cpp ./include/lgi/common/File.h \
+	./include/lgi/common/Net.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/String.h \
+	./include/lgi/common/LgiCommon.h \
+	./include/lgi/linux/Gtk/LgiOsClasses.h \
+	./include/lgi/common/RegKey.h \
+	./include/lgi/common/LgiNetInc.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-INetTools.o : ./src/common/INet/INetTools.cpp ./include/common/GMem.h \
-	./include/linux/Gtk/LgiOsDefs.h \
-	./include/common/INetTools.h \
-	./include/common/GString.h
+NetTools.o : ./src/common/Net/NetTools.cpp ./include/lgi/common/Mem.h \
+	./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/common/NetTools.h \
+	./include/lgi/common/String.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-MDStringToDigest.o : ./src/common/INet/MDStringToDigest.cpp ./include/common/Lgi.h \
-	./include/common/INet.h
+MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Net.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-./include/common/GStream.h : ./include/common/GDom.h \
-	./include/common/GStringClass.h
+./include/lgi/common/ToolTip.h : 
 
-./include/common/GStringClass.h : ./include/common/GUnicode.h \
-	./include/common/GArray.h \
-	./include/common/LgiClass.h
+./include/lgi/common/Panel.h : ./include/lgi/common/DisplayString.h \
+	./include/lgi/common/Layout.h
 
-./include/common/GTextLog.h : ./include/common/GTextView3.h \
-	./include/common/INet.h
+./include/lgi/common/Variant.h : ./include/lgi/common/Dom.h \
+	./include/lgi/common/DateTime.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/HashTable.h \
+	./include/lgi/common/String.h
 
-./include/common/GTabView.h : 
+./include/lgi/common/Bitmap.h : 
 
-./include/common/GRange.h : 
+./include/lgi/common/DisplayString.h : ./include/lgi/common/Font.h
+
+./include/lgi/common/GdcTools.h : 
 
-./include/common/GRegKey.h : ./include/common/GContainers.h
+./include/lgi/common/Lgi.h : ./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/common/LgiMsgs.h \
+	./include/lgi/common/LgiDefs.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/String.h \
+	./include/lgi/common/File.h \
+	./include/lgi/common/Gdc2.h \
+	./include/lgi/common/Font.h \
+	./include/lgi/common/LgiClasses.h \
+	./include/lgi/common/LgiCommon.h
+
+./include/lgi/common/Gdc2.h : ./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/common/LgiInc.h \
+	./include/lgi/common/LgiUiBase.h \
+	./include/lgi/common/File.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/Core.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/Capabilities.h \
+	./include/lgi/common/RefCount.h \
+	./include/lgi/common/Palette.h \
+	./include/lgi/common/Library.h \
+	./include/lgi/common/ColourSpace.h \
+	./include/lgi/common/Rect.h \
+	./include/lgi/common/Point.h \
+	./include/lgi/common/Colour.h \
+	./include/lgi/common/CairoSurface.h \
+	./include/lgi/common/Filter.h
+
+./include/lgi/common/Point.h : 
+
+./include/lgi/common/Combo.h : 
+
+./include/lgi/common/ThreadEvent.h : 
 
-./include/common/GPanel.h : ./include/common/GDisplayString.h
+./include/lgi/common/StringLayout.h : ./include/lgi/common/DisplayString.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/FontCache.h
 
-./include/common/GVariant.h : ./include/common/GDom.h \
-	./include/common/LDateTime.h \
-	./include/common/GContainers.h \
-	./include/common/LHashTable.h \
-	./include/common/GString.h
+./include/lgi/common/RegKey.h : ./include/lgi/common/Containers.h
 
-./include/common/LUnicodeString.h : ./include/common/GUnicode.h
+./include/lgi/linux/Gtk/LgiOsClasses.h : 
 
-./include/common/GCombo.h : 
+./include/lgi/common/Rect.h : ./include/lgi/common/Point.h
 
-./include/common/GTextView3.h : ./include/common/GDocView.h \
-	./include/common/GUndo.h \
-	./include/common/GDragAndDrop.h \
-	./include/common/GCss.h \
-	./include/common/LUnrolledList.h
+./include/lgi/common/ColourSpace.h : 
 
-./include/common/Gdc2.h : ./include/linux/Gtk/LgiOsDefs.h \
-	./include/common/LgiInc.h \
-	./include/common/LgiClass.h \
-	./include/common/Progress.h \
-	./include/common/GFile.h \
-	./include/common/GMem.h \
-	./include/common/Core.h \
-	./include/common/GContainers.h \
-	./include/common/GCapabilities.h \
-	./include/common/GRefCount.h \
-	./include/common/GPalette.h \
-	./include/common/GLibrary.h \
-	./include/common/GColourSpace.h \
-	./include/common/GRect.h \
-	./include/common/LPoint.h \
-	./include/common/GColour.h \
-	./include/common/LCairoSurface.h \
-	./include/common/GFilter.h
+./include/lgi/common/Slider.h : 
 
-./include/common/LDomFields.h : 
+./include/lgi/common/DomFields.h : 
 
-./include/common/GSlider.h : 
+./include/lgi/common/Button.h : 
 
-./include/common/LgiInc.h : 
+./include/lgi/common/FontCache.h : ./include/lgi/common/App.h \
+	./include/lgi/common/Font.h
 
-./include/common/GArray.h : ./include/common/GRange.h
+./include/lgi/common/Input.h : ./include/lgi/common/Dialog.h \
+	./include/lgi/common/Edit.h
 
-./include/common/LMutex.h : ./include/common/LCurrentTime.h
+./include/lgi/common/Mail.h : ./include/lgi/common/Net.h \
+	./include/lgi/common/Base64.h \
+	./include/lgi/common/Progress.h \
+	./include/lgi/common/Variant.h \
+	./include/lgi/common/OAuth2.h
 
-./include/common/LCurrentTime.h : 
+./include/lgi/common/Variant.h : ./include/lgi/common/Dom.h \
+	./include/lgi/common/DateTime.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/HashTable.h \
+	./include/lgi/common/String.h
 
-./include/common/GPath.h : ./include/common/GMatrix.h \
-	./include/common/LPoint.h \
-	./include/common/LRectF.h
+./include/lgi/common/LgiDefs.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/common/AutoPtr.h
 
-./include/common/LPoint.h : 
+./include/lgi/common/AutoPtr.h : 
 
-./include/common/GButton.h : 
+./include/lgi/common/DragAndDrop.h : ./include/lgi/common/Variant.h
 
-./include/common/GRange.h : 
+./include/lgi/common/FontCache.h : ./include/lgi/common/App.h \
+	./include/lgi/common/Font.h
 
-./include/common/LThreadEvent.h : 
+./include/lgi/common/ProgressDlg.h : ./include/lgi/common/TextLabel.h \
+	./include/lgi/common/TableLayout.h \
+	./include/lgi/common/ProgressView.h \
+	./include/lgi/common/Button.h
 
-./include/common/GSkinEngine.h : ./include/common/LList.h
+./include/lgi/common/SkinEngine.h : ./include/lgi/common/List.h \
+	./include/lgi/common/Button.h \
+	./include/lgi/common/TextLabel.h \
+	./include/lgi/common/CheckBox.h \
+	./include/lgi/common/RadioGroup.h \
+	./include/lgi/common/TabView.h \
+	./include/lgi/common/Slider.h \
+	./include/lgi/common/Bitmap.h \
+	./include/lgi/common/ProgressView.h \
+	./include/lgi/common/Tree.h \
+	./include/lgi/common/Combo.h
 
-./include/common/LStringLayout.h : ./include/common/GDisplayString.h \
-	./include/common/GCss.h \
-	./include/common/GFontCache.h
+./include/lgi/common/TabView.h : ./include/lgi/common/Layout.h
 
-./include/common/Mail.h : ./include/common/INet.h \
-	./include/common/Base64.h \
-	./include/common/Progress.h \
-	./include/common/GVariant.h \
-	./include/common/LOAuth2.h
+./include/lgi/common/Containers.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/common/Stream.h
 
-./include/common/Base64.h : ./include/common/LgiDefs.h
+./include/lgi/common/Net.h : ./include/lgi/common/LgiNetInc.h \
+	./include/lgi/common/LgiInterfaces.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/Stream.h \
+	./include/lgi/common/String.h \
+	./include/lgi/common/Cancel.h \
+	./include/lgi/common/HashTable.h
 
-./include/common/LgiNetInc.h : 
+./include/lgi/linux/SymLookup.h : ./include/lgi/common/SubProcess.h
 
-./include/common/GArray.h : ./include/common/GRange.h
+./include/lgi/common/DocView.h : ./include/lgi/common/Variant.h \
+	./include/lgi/common/Notifications.h \
+	./include/lgi/common/Thread.h \
+	./include/lgi/common/Layout.h
 
-./include/common/INet.h : ./include/common/LgiNetInc.h \
-	./include/common/LgiInterfaces.h \
-	./include/common/GMem.h \
-	./include/common/GContainers.h \
-	./include/common/GStream.h \
-	./include/common/GString.h \
-	./include/common/LCancel.h \
-	./include/common/LHashTable.h
+./include/lgi/common/Notifications.h : 
 
-./include/common/LgiNetInc.h : 
+./include/lgi/common/List.h : ./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/Popup.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/ItemContainer.h \
+	./include/lgi/common/UnrolledList.h
 
-./include/common/GInput.h : 
+./include/lgi/common/UnrolledList.h : 
 
-./include/common/GDocView.h : ./include/common/GVariant.h \
-	./include/common/GNotifications.h
+./include/lgi/common/Slider.h : 
 
-./include/common/GRect.h : ./include/common/LPoint.h
+./include/lgi/common/LgiInc.h : 
 
-./include/common/GDragAndDrop.h : ./include/common/GVariant.h
+./include/lgi/linux/Gtk/LgiWinManGlue.h : ./include/lgi/common/LgiDefs.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h
 
-./include/common/GFontCache.h : 
+./include/lgi/common/CairoSurface.h : 
 
-./include/common/GTree.h : ./include/common/GItemContainer.h
+./include/lgi/common/Layout.h : 
 
-./include/common/GProgressDlg.h : ./include/common/GTextLabel.h \
-	./include/common/GTableLayout.h
+./include/lgi/common/TableLayout.h : ./include/lgi/common/Css.h \
+	./include/lgi/common/Notifications.h \
+	./include/lgi/common/Layout.h
 
-./include/common/LgiRes.h : ./include/common/Res.h \
-	./include/common/GContainers.h \
-	./include/common/GCss.h \
-	./include/common/GAutoPtr.h \
-	./include/common/GFontCache.h
+./include/lgi/common/Button.h : 
 
-./include/common/GRadioGroup.h : 
+./include/lgi/common/Tree.h : ./include/lgi/common/ItemContainer.h
 
-./include/common/GDocView.h : ./include/common/GVariant.h \
-	./include/common/GNotifications.h
+./include/lgi/common/RadioGroup.h : 
 
-./include/common/GSubProcess.h : 
+./include/lgi/common/ToolBar.h : ./include/lgi/common/ImageList.h \
+	./include/lgi/common/Layout.h
 
-./include/linux/GSymLookup.h : ./include/common/GSubProcess.h
+./src/common/Hash/md5/md5.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/common/LgiDefs.h
 
-./include/common/GProperties.h : ./include/common/GContainers.h \
-	./include/common/LgiClass.h \
-	./include/common/GString.h
+./include/lgi/common/SubProcess.h : 
 
-./include/common/LgiInterfaces.h : ./include/common/GMem.h \
-	./include/common/GArray.h \
-	./include/linux/Gtk/LgiOsDefs.h \
-	./include/common/GColour.h \
-	./include/common/LCancel.h \
-	./include/common/GStringClass.h
+./include/lgi/common/Properties.h : ./include/lgi/common/Containers.h \
+	./include/lgi/common/String.h
 
-./include/common/GCssTools.h : ./include/common/GCss.h
+./include/lgi/common/Mem.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/linux/Gtk/LgiOsDefs.h
 
-./src/common/Hash/md5/md5.h : ./include/common/LgiInc.h \
-	./include/common/LgiDefs.h
+./include/lgi/common/Colour.h : ./include/lgi/common/ColourSpace.h
 
-./include/common/GContainers.h : ./include/common/LgiInc.h \
-	./include/linux/Gtk/LgiOsDefs.h \
-	./include/common/GStream.h
+./include/lgi/common/CssTools.h : ./include/lgi/common/Css.h
 
-./include/common/LgiCommon.h : ./include/common/GMem.h \
-	./include/common/GArray.h \
-	./include/common/LgiClass.h \
-	./include/common/GString.h \
-	./include/common/GStringClass.h \
-	./include/common/LCurrentTime.h
+./include/lgi/common/GdiLeak.h : 
 
-./include/common/GViewPriv.h : ./include/common/LThreadEvent.h
+./src/common/Gdc2/RopsCases.cpp : 
 
-./include/common/GLibraryUtils.h : 
+./include/lgi/common/LgiInc.h : 
 
-./include/common/GPassword.h : 
+./include/lgi/common/DisplayString.h : ./include/lgi/common/Font.h
 
-./src/common/Hash/sha1/sha1.h : ./include/common/LgiInc.h
+./include/lgi/common/ClipBoard.h : 
 
-./include/common/GDisplayString.h : ./include/common/GFont.h
+./include/lgi/common/TextLabel.h : 
 
-./include/common/GFont.h : ./include/common/GRect.h \
-	./include/linux/Gtk/LgiOsClasses.h \
-	./include/common/GColour.h \
-	./include/common/GCapabilities.h \
-	./include/common/GCss.h
+./include/lgi/common/Net.h : ./include/lgi/common/LgiNetInc.h \
+	./include/lgi/common/LgiInterfaces.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/Stream.h \
+	./include/lgi/common/String.h \
+	./include/lgi/common/Cancel.h \
+	./include/lgi/common/HashTable.h
 
-./include/common/Core.h : 
+./include/lgi/common/LgiInterfaces.h : ./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/common/Colour.h \
+	./include/lgi/common/Cancel.h \
+	./include/lgi/common/StringClass.h
 
-./include/common/GClipBoard.h : 
+./include/lgi/common/StringClass.h : ./include/lgi/common/Unicode.h \
+	./include/lgi/common/Array.h
 
-./include/common/Res.h : ./include/common/GXmlTree.h
+./include/lgi/common/Unicode.h : ./include/lgi/common/LgiInc.h
 
-./include/common/GXmlTree.h : ./include/common/GHashTable.h \
-	./include/common/GRefCount.h \
-	./include/common/GDom.h
+./src/common/Hash/sha1/sha1.h : ./include/lgi/common/LgiInc.h
 
-./include/common/GTextLabel.h : 
+./include/lgi/common/TextLabel.h : 
 
-./include/linux/Gtk/LgiWidget.h : 
+./include/lgi/common/LgiRes.h : ./include/lgi/common/Res.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/AutoPtr.h \
+	./include/lgi/common/FontCache.h
 
-./include/common/LOAuth2.h : ./include/common/INet.h
+./include/lgi/common/Res.h : ./include/lgi/common/XmlTree.h
 
-./include/common/GPopup.h : 
+./include/lgi/common/ViewPriv.h : ./include/lgi/common/ThreadEvent.h
 
-./include/common/GHashTable.h : ./include/common/GMem.h \
-	./include/common/GArray.h \
-	./include/common/GString.h \
-	./include/common/LgiClass.h
+./include/lgi/common/Popup.h : ./include/lgi/common/Layout.h
 
-./include/common/Res.h : ./include/common/GXmlTree.h
+./include/lgi/common/LibraryUtils.h : 
 
-./include/common/GFile.h : ./include/common/GMem.h \
-	./include/common/LgiClass.h \
-	./include/common/GStream.h \
-	./include/common/GArray.h \
-	./include/common/GRefCount.h \
-	./include/common/GStringClass.h \
-	./include/common/LError.h
+./include/lgi/common/ImageList.h : 
 
-./include/common/LError.h : 
+./include/lgi/common/Widgets.h : 
 
-./include/common/GEventTargetThread.h : ./include/common/LThread.h \
-	./include/common/LMutex.h \
-	./include/common/LThreadEvent.h \
-	./include/common/LCancel.h \
-	./include/common/LHashTable.h
+./include/lgi/common/Palette.h : ./include/lgi/common/ColourSpace.h \
+	./include/lgi/common/File.h
 
-./include/common/LMutex.h : ./include/common/LCurrentTime.h
+./include/lgi/common/Password.h : 
 
-./include/common/LThread.h : ./include/common/LMutex.h
+./include/lgi/common/EventTargetThread.h : ./include/lgi/common/Thread.h \
+	./include/lgi/common/Mutex.h \
+	./include/lgi/common/ThreadEvent.h \
+	./include/lgi/common/Cancel.h \
+	./include/lgi/common/HashTable.h
 
-./include/common/GXmlTree.h : ./include/common/GHashTable.h \
-	./include/common/GRefCount.h \
-	./include/common/GDom.h
+./include/lgi/common/XmlTree.h : ./include/lgi/common/HashTable.h \
+	./include/lgi/common/RefCount.h \
+	./include/lgi/common/Dom.h
 
-./include/common/GColour.h : ./include/common/GColourSpace.h
+./include/lgi/common/Dom.h : ./include/lgi/common/LgiInterfaces.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/DomFields.h
 
-./include/common/GToken.h : ./include/common/GArray.h \
-	./include/common/GString.h
+./include/lgi/common/DomFields.h : 
 
-./include/common/GDisplayString.h : ./include/common/GFont.h
+./include/lgi/common/Token.h : ./include/lgi/common/Array.h \
+	./include/lgi/common/String.h
 
-./include/common/GFont.h : ./include/common/GRect.h \
-	./include/linux/Gtk/LgiOsClasses.h \
-	./include/common/GColour.h \
-	./include/common/GCapabilities.h \
-	./include/common/GCss.h
+./include/lgi/common/Mutex.h : ./include/lgi/common/CurrentTime.h \
+	./include/lgi/common/LgiUiBase.h
 
-./include/common/LList.h : ./include/common/GMem.h \
-	./include/common/GArray.h \
-	./include/common/GPopup.h \
-	./include/common/GDisplayString.h \
-	./include/common/GCss.h \
-	./include/common/GItemContainer.h \
-	./include/common/LUnrolledList.h
+./include/lgi/common/CurrentTime.h : 
 
-./include/common/GAutoPtr.h : 
+./include/lgi/common/ItemContainer.h : ./include/lgi/common/Popup.h \
+	./include/lgi/common/Notifications.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/ImageList.h
 
-./include/common/GMem.h : ./include/common/LgiInc.h \
-	./include/linux/Gtk/LgiOsDefs.h \
-	./include/common/LgiClass.h
+./include/lgi/common/ThreadEvent.h : 
 
-./include/common/Base64.h : ./include/common/LgiDefs.h
+./include/lgi/common/Edit.h : ./include/lgi/common/TextView3.h
 
-./include/linux/Gtk/LgiWinManGlue.h : ./include/common/LgiDefs.h \
-	./include/common/GMem.h \
-	./include/common/GArray.h \
-	./include/common/LgiClass.h
+./include/lgi/linux/Gtk/LgiOsDefs.h : ./include/lgi/common/LgiDefs.h \
+	./include/lgi/common/LgiInc.h \
+	./include/lgi/common/Message.h
 
-./include/common/Lgi.h : ./include/linux/Gtk/LgiOsDefs.h \
-	./include/common/LgiMsgs.h \
-	./include/common/LgiDefs.h \
-	./include/common/GMem.h \
-	./include/common/GString.h \
-	./include/common/LgiClass.h \
-	./include/common/Progress.h \
-	./include/common/GFile.h \
-	./include/common/Gdc2.h \
-	./include/common/GFont.h \
-	./include/common/LgiClasses.h \
-	./include/common/LgiCommon.h
+./include/lgi/common/File.h : ./include/lgi/common/Mem.h \
+	./include/lgi/common/Stream.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/RefCount.h \
+	./include/lgi/common/StringClass.h \
+	./include/lgi/common/Error.h
 
-./include/common/LgiClasses.h : ./include/common/LMutex.h \
-	./include/linux/Gtk/LgiOsClasses.h \
-	./include/common/GMem.h \
-	./include/common/GArray.h \
-	./include/common/LgiCommon.h \
-	./include/common/GXmlTree.h \
-	./include/common/GDragAndDrop.h \
-	./include/common/LPoint.h \
-	./include/common/GApp.h \
-	./include/common/GView.h \
-	./include/common/GLayout.h \
-	./include/common/LMenu.h \
-	./include/common/GWindow.h \
-	./include/common/GToolTip.h \
-	./include/common/LgiWidgets.h \
-	./include/common/Progress.h \
-	./include/common/GProgress.h \
-	./include/common/GFileSelect.h \
-	./include/common/GFindReplaceDlg.h \
-	./include/common/GToolBar.h \
-	./include/common/LThread.h \
-	./include/common/GSplitter.h \
-	./include/common/GStatusBar.h \
-	./include/common/GTrayIcon.h \
-	./include/common/GInput.h
+./include/lgi/common/Mem.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/linux/Gtk/LgiOsDefs.h
 
-./include/common/LgiCommon.h : ./include/common/GMem.h \
-	./include/common/GArray.h \
-	./include/common/LgiClass.h \
-	./include/common/GString.h \
-	./include/common/GStringClass.h \
-	./include/common/LCurrentTime.h
+./include/lgi/common/LgiClasses.h : ./include/lgi/common/Mutex.h \
+	./include/lgi/linux/Gtk/LgiOsClasses.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/DragAndDrop.h \
+	./include/lgi/common/TrayIcon.h \
+	./include/lgi/common/Input.h
 
-./include/common/LgiWidgets.h : 
+./include/lgi/linux/Gtk/LgiOsClasses.h : 
 
-./include/common/GFileSelect.h : 
+./include/lgi/common/Input.h : ./include/lgi/common/Dialog.h \
+	./include/lgi/common/Edit.h
 
-./include/common/GToolBar.h : ./include/common/GImageList.h
+./include/lgi/common/Res.h : ./include/lgi/common/XmlTree.h
 
-./include/common/GApp.h : 
+./include/lgi/common/Font.h : ./include/lgi/common/Rect.h \
+	./include/lgi/linux/Gtk/LgiOsClasses.h \
+	./include/lgi/common/Colour.h \
+	./include/lgi/common/Capabilities.h \
+	./include/lgi/common/Css.h
 
-./include/common/GLayout.h : 
+./include/lgi/linux/Gtk/LgiOsDefs.h : ./include/lgi/common/LgiDefs.h \
+	./include/lgi/common/LgiInc.h \
+	./include/lgi/common/Message.h
 
-./include/common/GView.h : 
+./include/lgi/common/Notifications.h : 
 
-./include/common/GdiLeak.h : 
+./include/lgi/common/LgiUiBase.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/common/LgiDefs.h \
+	./include/lgi/common/AutoPtr.h \
+	./include/lgi/common/StringClass.h \
+	./include/lgi/common/Point.h
 
-./include/common/LgiMsgs.h : 
+./include/lgi/common/Library.h : 
 
-./include/common/GBitmap.h : 
+./include/lgi/common/TextLog.h : ./include/lgi/common/TextView3.h \
+	./include/lgi/common/Net.h
 
-./include/linux/Gtk/LgiOsClasses.h : 
+./include/lgi/common/TabView.h : ./include/lgi/common/Layout.h
 
-./include/common/GColourSpace.h : 
+./include/lgi/common/DateTime.h : ./include/lgi/common/StringClass.h
 
-./include/common/GNotifications.h : 
+./include/lgi/common/Range.h : 
 
-./include/common/LDateTime.h : ./include/common/GStringClass.h
+./include/lgi/common/DragAndDrop.h : ./include/lgi/common/Variant.h
 
-./include/common/LCancel.h : 
+./include/lgi/common/Dialog.h : ./include/lgi/common/Window.h \
+	./include/lgi/common/LgiRes.h
 
-./include/common/GToolTip.h : 
+./include/lgi/common/LgiRes.h : ./include/lgi/common/Res.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/AutoPtr.h \
+	./include/lgi/common/FontCache.h
 
-./include/common/GVariant.h : ./include/common/GDom.h \
-	./include/common/LDateTime.h \
-	./include/common/GContainers.h \
-	./include/common/LHashTable.h \
-	./include/common/GString.h
+./include/lgi/common/ProgressView.h : ./include/lgi/common/Progress.h
 
-./include/common/GFontCache.h : 
+./include/lgi/common/Stream.h : ./include/lgi/common/Dom.h \
+	./include/lgi/common/StringClass.h
 
-./include/common/LRectF.h : 
+./include/lgi/common/Array.h : ./include/lgi/common/Range.h
 
-./include/common/GFindReplaceDlg.h : 
+./include/lgi/common/LgiDefs.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/common/AutoPtr.h
 
-./include/common/GNotifications.h : 
+./include/lgi/common/Thread.h : ./include/lgi/common/Mutex.h
 
-./include/common/INetTools.h : ./include/common/GContainers.h \
-	./include/common/LgiNetInc.h
+./include/lgi/common/StatusBar.h : ./include/lgi/common/Layout.h
 
-./include/common/Progress.h : ./include/common/LMutex.h \
-	./include/common/LCancel.h \
-	./include/common/GStringClass.h \
-	./include/common/GDom.h
+./include/lgi/common/Gdc2.h : ./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/common/LgiInc.h \
+	./include/lgi/common/LgiUiBase.h \
+	./include/lgi/common/File.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/Core.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/Capabilities.h \
+	./include/lgi/common/RefCount.h \
+	./include/lgi/common/Palette.h \
+	./include/lgi/common/Library.h \
+	./include/lgi/common/ColourSpace.h \
+	./include/lgi/common/Rect.h \
+	./include/lgi/common/Point.h \
+	./include/lgi/common/Colour.h \
+	./include/lgi/common/CairoSurface.h \
+	./include/lgi/common/Filter.h
 
-./include/common/GTableLayout.h : ./include/common/GCss.h \
-	./include/common/GNotifications.h
+./include/lgi/common/Core.h : 
 
-./include/common/GScrollBar.h : 
+./include/lgi/common/Popup.h : ./include/lgi/common/Layout.h
 
-./include/common/LDateTime.h : ./include/common/GStringClass.h
+./include/lgi/common/Base64.h : ./include/lgi/common/LgiDefs.h
 
-./include/common/GRops.h : ./include/common/GPixelRops.h
+./include/lgi/common/ScrollBar.h : 
 
-./include/common/GPixelRops.h : 
+./include/lgi/common/RadioGroup.h : 
 
-./include/common/GFontSelect.h : 
+./include/lgi/common/ProgressView.h : ./include/lgi/common/Progress.h
 
-./include/common/GMem.h : ./include/common/LgiInc.h \
-	./include/linux/Gtk/LgiOsDefs.h \
-	./include/common/LgiClass.h
+./include/lgi/common/Progress.h : ./include/lgi/common/Mutex.h \
+	./include/lgi/common/Cancel.h \
+	./include/lgi/common/StringClass.h \
+	./include/lgi/common/Dom.h
 
-./include/linux/Gtk/LgiOsDefs.h : ./include/common/LgiDefs.h \
-	./include/common/LgiInc.h \
-	./include/common/GMessage.h
+./include/lgi/common/Bitmap.h : 
 
-./include/common/GMessage.h : 
+./include/lgi/common/SubProcess.h : 
 
-./include/common/LgiInc.h : 
+./include/lgi/common/TrayIcon.h : 
 
-./include/common/GString.h : ./include/common/LgiDefs.h \
-	./include/linux/Gtk/LgiOsDefs.h
+./include/lgi/common/Mutex.h : ./include/lgi/common/CurrentTime.h \
+	./include/lgi/common/LgiUiBase.h
 
-./include/common/GUnicode.h : ./include/common/LgiInc.h
+./include/lgi/common/Css.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/Gdc2.h \
+	./include/lgi/common/AutoPtr.h \
+	./include/lgi/common/String.h \
+	./include/lgi/common/HashTable.h
 
-./include/common/GBox.h : ./include/common/GCss.h
+./include/lgi/common/Filter.h : ./include/lgi/common/Containers.h \
+	./include/lgi/common/Progress.h
 
-./include/common/GUndo.h : 
+./include/lgi/common/Path.h : ./include/lgi/common/Matrix.h \
+	./include/lgi/common/Point.h \
+	./include/lgi/common/RectF.h
 
-./include/common/GItemContainer.h : ./include/common/GPopup.h \
-	./include/common/GNotifications.h \
-	./include/common/GCss.h
+./include/lgi/common/Message.h : 
 
-./include/common/LMenu.h : ./include/common/LMenuImpl.h \
-	./include/common/GXmlTree.h \
-	./include/common/Res.h \
-	./include/common/GImageList.h
+./include/lgi/common/Json.h : ./include/lgi/common/Array.h \
+	./include/lgi/common/StringClass.h
 
-./include/common/LMenuImpl.h : ./include/common/GPopup.h
+./include/lgi/common/Stream.h : ./include/lgi/common/Dom.h \
+	./include/lgi/common/StringClass.h
 
-./include/common/GTextLabel.h : 
+./include/lgi/common/Matrix.h : 
 
-./include/common/GProgress.h : 
+./include/lgi/common/CheckBox.h : 
 
-./include/common/GSubProcess.h : 
+./include/lgi/common/Box.h : ./include/lgi/common/Css.h
 
-./include/common/GTrayIcon.h : 
+./include/lgi/common/Thread.h : ./include/lgi/common/Mutex.h
 
-./include/common/GPrinter.h : 
+./include/lgi/common/ItemContainer.h : ./include/lgi/common/Popup.h \
+	./include/lgi/common/Notifications.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/ImageList.h
 
-./include/common/GUnicode.h : ./include/common/LgiInc.h
+./include/lgi/common/Base64.h : ./include/lgi/common/LgiDefs.h
 
-./include/common/GTextView3.h : ./include/common/GDocView.h \
-	./include/common/GUndo.h \
-	./include/common/GDragAndDrop.h \
-	./include/common/GCss.h \
-	./include/common/LUnrolledList.h
+./include/lgi/common/LgiMsgs.h : 
 
-./include/common/GFilter.h : ./include/common/GContainers.h
+./include/lgi/common/Rops.h : ./include/lgi/common/PixelRops.h
 
-./include/common/LJson.h : ./include/common/GArray.h \
-	./include/common/GStringClass.h
+./include/lgi/common/TextView3.h : ./include/lgi/common/DocView.h \
+	./include/lgi/common/Undo.h \
+	./include/lgi/common/DragAndDrop.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/UnrolledList.h \
+	./include/lgi/common/FindReplaceDlg.h
 
-./include/common/GImageList.h : 
+./include/lgi/common/FindReplaceDlg.h : 
 
-./include/common/GDropFiles.h : ./include/common/GVariant.h \
-	./include/common/GArray.h \
-	./include/common/GXmlTree.h \
-	./include/common/GToken.h \
-	./include/common/INet.h
+./include/lgi/common/Undo.h : 
 
-./include/common/GPalette.h : ./include/common/GColourSpace.h \
-	./include/common/GFile.h
+./include/lgi/common/Printer.h : 
 
-./include/common/GMatrix.h : 
+./include/lgi/common/Unicode.h : ./include/lgi/common/LgiInc.h
 
-./include/common/LgiDefs.h : ./include/common/LgiInc.h \
-	./include/common/GAutoPtr.h
+./include/lgi/common/Tree.h : ./include/lgi/common/ItemContainer.h
 
-./include/common/GCapabilities.h : ./include/common/LHashTable.h
+./include/lgi/common/TextView3.h : ./include/lgi/common/DocView.h \
+	./include/lgi/common/Undo.h \
+	./include/lgi/common/DragAndDrop.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/UnrolledList.h \
+	./include/lgi/common/FindReplaceDlg.h
 
-./include/common/GStream.h : ./include/common/GDom.h \
-	./include/common/GStringClass.h
+./include/lgi/common/FontSelect.h : 
 
-./include/common/GDom.h : ./include/common/LgiInterfaces.h \
-	./include/common/GMem.h \
-	./include/common/GArray.h \
-	./include/common/LDomFields.h
+./include/lgi/common/String.h : ./include/lgi/common/LgiDefs.h \
+	./include/lgi/linux/Gtk/LgiOsDefs.h
 
-./include/common/GSplitter.h : 
+./include/lgi/common/DropFiles.h : ./include/lgi/common/Variant.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/XmlTree.h \
+	./include/lgi/common/Token.h \
+	./include/lgi/common/Net.h
 
-./include/linux/Gtk/LgiOsClasses.h : 
+./include/lgi/common/Token.h : ./include/lgi/common/Array.h \
+	./include/lgi/common/String.h
 
-./include/common/GDataDlg.h : ./include/common/GProperties.h \
-	./include/common/GScrollBar.h \
-	./include/common/GTextLabel.h
+./include/lgi/common/Range.h : 
 
-./include/common/GProperties.h : ./include/common/GContainers.h \
-	./include/common/LgiClass.h \
-	./include/common/GString.h
+./include/lgi/common/List.h : ./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/Popup.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/ItemContainer.h \
+	./include/lgi/common/UnrolledList.h
 
-./include/common/GInput.h : 
+./include/lgi/common/DataDlg.h : ./include/lgi/common/Properties.h \
+	./include/lgi/common/ScrollBar.h \
+	./include/lgi/common/TextLabel.h
 
-./include/common/GPalette.h : ./include/common/GColourSpace.h \
-	./include/common/GFile.h
+./include/lgi/common/ScrollBar.h : 
 
-./private/linux/GAppPriv.h : ./include/common/LJson.h \
-	./include/win32/GSymLookup.h \
-	./include/linux/GSymLookup.h \
-	./include/linux/Gtk/LgiWinManGlue.h
+./include/lgi/common/Properties.h : ./include/lgi/common/Containers.h \
+	./include/lgi/common/String.h
 
-./include/linux/GSymLookup.h : ./include/common/GSubProcess.h
+./include/lgi/common/Capabilities.h : ./include/lgi/common/HashTable.h
 
-./include/common/LJson.h : ./include/common/GArray.h \
-	./include/common/GStringClass.h
+./include/lgi/common/Palette.h : ./include/lgi/common/ColourSpace.h \
+	./include/lgi/common/File.h
 
-./include/win32/GSymLookup.h : 
+./include/lgi/common/OAuth2.h : ./include/lgi/common/Net.h
 
-./include/common/GdcTools.h : 
+./include/lgi/common/Error.h : 
 
-./include/common/GItemContainer.h : ./include/common/GPopup.h \
-	./include/common/GNotifications.h \
-	./include/common/GCss.h
+./include/lgi/common/PixelRops.h : 
 
-./include/common/Gdc2.h : ./include/linux/Gtk/LgiOsDefs.h \
-	./include/common/LgiInc.h \
-	./include/common/LgiClass.h \
-	./include/common/Progress.h \
-	./include/common/GFile.h \
-	./include/common/GMem.h \
-	./include/common/Core.h \
-	./include/common/GContainers.h \
-	./include/common/GCapabilities.h \
-	./include/common/GRefCount.h \
-	./include/common/GPalette.h \
-	./include/common/GLibrary.h \
-	./include/common/GColourSpace.h \
-	./include/common/GRect.h \
-	./include/common/LPoint.h \
-	./include/common/GColour.h \
-	./include/common/LCairoSurface.h \
-	./include/common/GFilter.h
+./include/lgi/common/Css.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/Gdc2.h \
+	./include/lgi/common/AutoPtr.h \
+	./include/lgi/common/String.h \
+	./include/lgi/common/HashTable.h
 
-./include/win32/GSymLookup.h : 
+./include/lgi/common/Combo.h : 
 
-./include/common/GCss.h : ./include/common/LgiInc.h \
-	./include/linux/Gtk/LgiOsDefs.h \
-	./include/common/GMem.h \
-	./include/common/Gdc2.h \
-	./include/common/GAutoPtr.h \
-	./include/common/GString.h \
-	./include/common/LHashTable.h
+./include/lgi/common/PixelRops.h : 
 
-./include/common/GPixelRops.h : 
+./private/linux/GAppPriv.h : ./include/lgi/common/Json.h \
+	./include/lgi/linux/SymLookup.h \
+	./include/lgi/linux/Gtk/LgiWinManGlue.h
 
-./include/common/GStringClass.h : ./include/common/GUnicode.h \
-	./include/common/GArray.h \
-	./include/common/LgiClass.h
+./include/lgi/common/Json.h : ./include/lgi/common/Array.h \
+	./include/lgi/common/StringClass.h
 
-./include/common/GContainers.h : ./include/common/LgiInc.h \
-	./include/linux/Gtk/LgiOsDefs.h \
-	./include/common/GStream.h
+./include/lgi/linux/Gtk/LgiWinManGlue.h : ./include/lgi/common/LgiDefs.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h
 
-./include/common/LHashTable.h : ./include/common/GMem.h \
-	./include/common/GArray.h \
-	./include/common/GString.h \
-	./include/common/LgiClass.h
+./include/lgi/common/Capabilities.h : ./include/lgi/common/HashTable.h
 
-./include/common/LThreadEvent.h : 
+./include/lgi/common/FileSelect.h : 
 
-./include/common/LList.h : ./include/common/GMem.h \
-	./include/common/GArray.h \
-	./include/common/GPopup.h \
-	./include/common/GDisplayString.h \
-	./include/common/GCss.h \
-	./include/common/GItemContainer.h \
-	./include/common/LUnrolledList.h
+./include/lgi/common/Array.h : ./include/lgi/common/Range.h
 
-./include/common/LgiClass.h : ./include/common/LgiInc.h \
-	./include/common/LgiDefs.h \
-	./include/common/LPoint.h \
-	./include/common/GAutoPtr.h
+./include/lgi/common/DateTime.h : ./include/lgi/common/StringClass.h
 
-./include/common/GCapabilities.h : ./include/common/LHashTable.h
+./include/lgi/common/String.h : ./include/lgi/common/LgiDefs.h \
+	./include/lgi/linux/Gtk/LgiOsDefs.h
 
-./include/common/GProgress.h : 
+./include/lgi/common/DocView.h : ./include/lgi/common/Variant.h \
+	./include/lgi/common/Notifications.h \
+	./include/lgi/common/Thread.h \
+	./include/lgi/common/Layout.h
 
-./include/common/GLibrary.h : 
+./include/lgi/common/RefCount.h : ./include/lgi/common/LgiUiBase.h
 
-./include/common/GMru.h : ./include/common/GProperties.h
+./include/lgi/common/LgiNetInc.h : 
 
-./include/common/LgiClass.h : ./include/common/LgiInc.h \
-	./include/common/LgiDefs.h \
-	./include/common/LPoint.h \
-	./include/common/GAutoPtr.h
+./include/lgi/common/Containers.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/common/Stream.h
 
-./include/common/GTableLayout.h : ./include/common/GCss.h \
-	./include/common/GNotifications.h
+./include/lgi/common/UnicodeString.h : ./include/lgi/common/Unicode.h
 
-./include/common/GCheckBox.h : 
+./include/lgi/common/LgiNetInc.h : 
 
-./include/common/GString.h : ./include/common/LgiDefs.h \
-	./include/linux/Gtk/LgiOsDefs.h
+./include/lgi/common/Mru.h : ./include/lgi/common/FileSelect.h
 
-./include/common/GLibrary.h : 
+./include/lgi/common/FileSelect.h : 
 
-./include/common/GDragAndDrop.h : ./include/common/GVariant.h
+./include/lgi/common/Window.h : ./include/lgi/common/View.h
 
-./include/common/GEdit.h : ./include/common/GTextView3.h
+./include/lgi/common/View.h : 
 
-./include/common/LUnrolledList.h : 
+./include/lgi/common/NetTools.h : ./include/lgi/common/Containers.h \
+	./include/lgi/common/LgiNetInc.h
 
-./include/common/LDomFields.h : 
+./include/lgi/linux/Gtk/LgiWidget.h : 
 
-./include/common/GRefCount.h : 
+./include/lgi/common/TableLayout.h : ./include/lgi/common/Css.h \
+	./include/lgi/common/Notifications.h \
+	./include/lgi/common/Layout.h
 
-./include/linux/Gtk/LgiWinManGlue.h : ./include/common/LgiDefs.h \
-	./include/common/GMem.h \
-	./include/common/GArray.h \
-	./include/common/LgiClass.h
+./include/lgi/common/Library.h : 
 
-./include/common/GStatusBar.h : 
+./include/lgi/common/Cancel.h : 
 
-./include/common/LCairoSurface.h : 
+./include/lgi/common/File.h : ./include/lgi/common/Mem.h \
+	./include/lgi/common/Stream.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/RefCount.h \
+	./include/lgi/common/StringClass.h \
+	./include/lgi/common/Error.h
 
-./include/common/GScrollBar.h : 
+./include/lgi/linux/SymLookup.h : ./include/lgi/common/SubProcess.h
 
-./include/linux/Gtk/LgiOsDefs.h : ./include/common/LgiDefs.h \
-	./include/common/LgiInc.h \
-	./include/common/GMessage.h
+./include/lgi/common/Font.h : ./include/lgi/common/Rect.h \
+	./include/lgi/linux/Gtk/LgiOsClasses.h \
+	./include/lgi/common/Colour.h \
+	./include/lgi/common/Capabilities.h \
+	./include/lgi/common/Css.h
 
-./include/common/GPopup.h : 
+./include/lgi/common/App.h : 
 
-./include/common/GOptionsFile.h : ./include/common/GVariant.h \
-	./include/common/GXmlTree.h \
-	./include/common/LMutex.h
+./include/lgi/common/CheckBox.h : 
 
-./include/common/INet.h : ./include/common/LgiNetInc.h \
-	./include/common/LgiInterfaces.h \
-	./include/common/GMem.h \
-	./include/common/GContainers.h \
-	./include/common/GStream.h \
-	./include/common/GString.h \
-	./include/common/LCancel.h \
-	./include/common/LHashTable.h
+./include/lgi/common/OptionsFile.h : ./include/lgi/common/Variant.h \
+	./include/lgi/common/XmlTree.h \
+	./include/lgi/common/Mutex.h
 
-./include/common/GWindow.h : 
+./include/lgi/common/Splitter.h : ./include/lgi/common/Layout.h
 
-./include/common/LgiDefs.h : ./include/common/LgiInc.h \
-	./include/common/GAutoPtr.h
+./include/lgi/common/Edit.h : ./include/lgi/common/TextView3.h
 
-./include/common/GFile.h : ./include/common/GMem.h \
-	./include/common/LgiClass.h \
-	./include/common/GStream.h \
-	./include/common/GArray.h \
-	./include/common/GRefCount.h \
-	./include/common/GStringClass.h \
-	./include/common/LError.h
+./include/lgi/common/XmlTree.h : ./include/lgi/common/HashTable.h \
+	./include/lgi/common/RefCount.h \
+	./include/lgi/common/Dom.h
 
-./include/common/GToken.h : ./include/common/GArray.h \
-	./include/common/GString.h
+./include/lgi/common/LgiCommon.h : ./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/String.h \
+	./include/lgi/common/StringClass.h \
+	./include/lgi/common/CurrentTime.h \
+	./include/lgi/common/LgiUiBase.h
 
-./src/common/Gdc2/GRopsCases.cpp : 
+./include/lgi/common/Menu.h : ./include/lgi/common/XmlTree.h \
+	./include/lgi/common/Res.h \
+	./include/lgi/common/ImageList.h
 
-./include/common/GCss.h : ./include/common/LgiInc.h \
-	./include/linux/Gtk/LgiOsDefs.h \
-	./include/common/GMem.h \
-	./include/common/Gdc2.h \
-	./include/common/GAutoPtr.h \
-	./include/common/GString.h \
-	./include/common/LHashTable.h
+./include/lgi/common/HashTable.h : ./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/String.h
+
+./include/lgi/common/RectF.h : 
+
+./include/lgi/common/LgiCommon.h : ./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/String.h \
+	./include/lgi/common/StringClass.h \
+	./include/lgi/common/CurrentTime.h \
+	./include/lgi/common/LgiUiBase.h
 
 VPATH=%.cpp \
 	./src/common/Hash/sha1 \
 	./src/common/Hash/md5 \
 	./private/linux \
-	./include/linux/Gtk \
-	./include/linux \
-	./include/common \
+	./include/lgi/linux/Gtk \
+	./include/lgi/linux \
+	./include/lgi/common \
+	./include \
 	$(BuildDir)
 

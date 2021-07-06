@@ -11,6 +11,7 @@
 #include "lgi/common/Bitmap.h"
 #include "lgi/common/ProgressView.h"
 #include "lgi/common/Tree.h"
+#include "lgi/common/Combo.h"
 
 // Feature support flags
 #define GSKIN_COLOUR		0x00000001

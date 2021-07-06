@@ -27,6 +27,7 @@
 #include "lgi/common/String.h"
 #include "lgi/common/StringClass.h"
 #include "lgi/common/CurrentTime.h"
+#include "lgi/common/LgiUiBase.h"
 
 /// Returns the system path specified
 /// \ingroup Base

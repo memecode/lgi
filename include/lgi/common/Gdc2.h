@@ -912,7 +912,7 @@ public:
 #endif
 
 #ifdef __GTK_H__
-#include "LCairoSurface.h"
+#include "lgi/common/CairoSurface.h"
 #endif
 
 /// \brief An implemenation of LSurface to draw into a memory bitmap.

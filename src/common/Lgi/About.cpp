@@ -2,12 +2,12 @@
 #include <stdio.h>
 
 #include "lgi/common/Lgi.h"
-#include "lgi\common\About.h"
-#include "lgi\common\DocView.h"
-#include "lgi\common\Bitmap.h"
-#include "lgi\common\Button.h"
-#include "lgi\common\Css.h"
-#include "lgi\common\TableLayout.h"
+#include "lgi/common/About.h"
+#include "lgi/common/DocView.h"
+#include "lgi/common/Bitmap.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Css.h"
+#include "lgi/common/TableLayout.h"
 
 //////////////////////////////////////////////////////////////////////////////
 enum Ctrls

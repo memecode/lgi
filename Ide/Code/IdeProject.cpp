@@ -5,27 +5,27 @@
 #endif
 #include <stdio.h>
 
-#include "lgi\common\Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiIde.h"
-#include "lgi\common\DragAndDrop.h"
-#include "lgi\common\Token.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/Token.h"
 #include "resdefs.h"
-#include "lgi\common\Combo.h"
-#include "lgi\common\Net.h"
-#include "lgi\common\ListItemCheckBox.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/Net.h"
+#include "lgi/common/ListItemCheckBox.h"
 #include "FtpThread.h"
-#include "lgi\common\ClipBoard.h"
-#include "lgi\common\DropFiles.h"
-#include "lgi\common\SubProcess.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/DropFiles.h"
+#include "lgi/common/SubProcess.h"
 #include "ProjectNode.h"
 #include "WebFldDlg.h"
-#include "lgi\common\Css.h"
-#include "lgi\common\TableLayout.h"
-#include "lgi\common\TextLabel.h"
-#include "lgi\common\Button.h"
-#include "lgi\common\RegKey.h"
-#include "lgi\common\FileSelect.h"
-#include "lgi\common\Menu.h"
+#include "lgi/common/Css.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/RegKey.h"
+#include "lgi/common/FileSelect.h"
+#include "lgi/common/Menu.h"
 
 extern const char *Untitled;
 const char SourcePatterns[] = "*.c;*.h;*.cpp;*.cc;*.java;*.d;*.php;*.html;*.css;*.js";
@@ -4104,4 +4104,3 @@ int AddFilesProgress::OnNotify(LViewI *c, int f)
 		Cancel = true;
 	return 0;
 }
-

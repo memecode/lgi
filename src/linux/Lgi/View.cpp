@@ -11,12 +11,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Lgi.h"
-#include "GDragAndDrop.h"
-#include "LEdit.h"
-#include "GViewPriv.h"
-#include "LPopup.h"
-#include "LCss.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/ViewPriv.h"
+#include "lgi/common/Popup.h"
+#include "lgi/common/Css.h"
 
 using namespace Gtk;
 #include "LgiWidget.h"

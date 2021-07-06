@@ -31,7 +31,7 @@ extern LRect GtkGetPos(Gtk::GtkWidget *w);
 #endif
 
 #if !WINNATIVE
-#include "LThreadEvent.h"
+#include "lgi/common/ThreadEvent.h"
 
 class GPulseThread : public LThread
 {

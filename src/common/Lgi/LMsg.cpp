@@ -15,8 +15,8 @@ void MsgCb(Gtk::GtkDialog *dialog, Gtk::gint response_id, Gtk::gpointer user_dat
 #endif
 
 #if defined(__GTK_H__) || defined(MAC) || defined(LGI_SDL)
-#include "LTextLabel.h"
-#include "LButton.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Button.h"
 
 #if LGI_COCOA
 #import <Cocoa/Cocoa.h>

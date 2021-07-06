@@ -1,4 +1,4 @@
-#include "lgi\common\Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiIde.h"
 #include "resdefs.h"
 #include "ProjectNode.h"
@@ -248,4 +248,4 @@ IdeCommon *IdeCommon::GetSubFolder(IdeProject *Project, char *Name, bool Create)
 	}
 
 	return 0;
-}
+}

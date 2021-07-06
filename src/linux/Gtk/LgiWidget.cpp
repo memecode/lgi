@@ -1,6 +1,6 @@
-#include "Lgi.h"
-#include "GDragAndDrop.h"
-#include "GViewPriv.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/ViewPriv.h"
 
 #define DEBUG_KEY_EVENT		0
 

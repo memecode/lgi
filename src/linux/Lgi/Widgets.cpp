@@ -11,12 +11,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "LSlider.h"
-#include "LBitmap.h"
-#include "LTableLayout.h"
-#include "LDisplayString.h"
-#include "LButton.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Slider.h"
+#include "lgi/common/Bitmap.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/Button.h"
 
 using namespace Gtk;
 #include "LgiWidget.h"
@@ -24,14 +24,14 @@ using namespace Gtk;
 ///////////////////////////////////////////////////////////////////////////////////////////
 #define GreyBackground()
 
-struct GDialogPriv
+struct LDialogPriv
 {
 	int ModalStatus;
 	int BtnId;
 	bool IsModal, IsModeless;
 	bool Resizable;
 	
-	GDialogPriv()
+	LDialogPriv()
 	{
 		IsModal = false;
 		IsModeless = false;
@@ -42,7 +42,7 @@ struct GDialogPriv
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GDialog::GDialog()
+LDialog::LDialog()
 	:
 	#ifdef __GTK_H__
 	// , LWindow(gtk_dialog_new())
@@ -50,27 +50,27 @@ GDialog::GDialog()
 	#endif
 	ResObject(Res_Dialog)
 {
-	d = new GDialogPriv();
+	d = new LDialogPriv();
 	Name("Dialog");
 	_SetDynamic(false);
 }
 
-GDialog::~GDialog()
+LDialog::~LDialog()
 {
 	DeleteObj(d);
 }
 
-bool GDialog::IsModal()
+bool LDialog::IsModal()
 {
 	return d->IsModal;
 }
 
-int GDialog::GetButtonId()
+int LDialog::GetButtonId()
 {
 	return d->BtnId;
 }
 
-int GDialog::OnNotify(LViewI *Ctrl, int Flags)
+int LDialog::OnNotify(LViewI *Ctrl, int Flags)
 {
 	LButton *b = dynamic_cast<LButton*>(Ctrl);
 	if (b)
@@ -87,7 +87,7 @@ int GDialog::OnNotify(LViewI *Ctrl, int Flags)
 }
 
 
-void GDialog::Quit(bool DontDelete)
+void LDialog::Quit(bool DontDelete)
 {
 	if (d->IsModal)
 		EndModal(0);
@@ -95,7 +95,7 @@ void GDialog::Quit(bool DontDelete)
 		LView::Quit(DontDelete);
 }
 
-void GDialog::OnPosChange()
+void LDialog::OnPosChange()
 {
 	LWindow::OnPosChange();
     if (Children.Length() == 1)
@@ -113,13 +113,13 @@ void GDialog::OnPosChange()
     }
 }
 
-bool GDialog::LoadFromResource(int Resource, char *TagList)
+bool LDialog::LoadFromResource(int Resource, char *TagList)
 {
 	LAutoString n;
 	LRect p;
-	LProfile Prof("GDialog::LoadFromResource");
+	LProfile Prof("LDialog::LoadFromResource");
 
-	bool Status = GLgiRes::LoadFromResource(Resource, this, &p, &n, TagList);
+	bool Status = LResourceLoad::LoadFromResource(Resource, this, &p, &n, TagList);
 	if (Status)
 	{
 		Prof.Add("Name.");
@@ -130,7 +130,7 @@ bool GDialog::LoadFromResource(int Resource, char *TagList)
 	return Status;
 }
 
-bool GDialog::OnRequestClose(bool OsClose)
+bool LDialog::OnRequestClose(bool OsClose)
 {
 	if (d->IsModal)
 	{
@@ -141,17 +141,17 @@ bool GDialog::OnRequestClose(bool OsClose)
 	return true;
 }
 
-bool GDialog::IsResizeable()
+bool LDialog::IsResizeable()
 {
     return d->Resizable;
 }
 
-void GDialog::IsResizeable(bool r)
+void LDialog::IsResizeable(bool r)
 {
 	d->Resizable = r;
 }
 
-bool GDialog::SetupDialog(bool Modal)
+bool LDialog::SetupDialog(bool Modal)
 {
 	if (IsResizeable())
 	{
@@ -172,7 +172,7 @@ bool GDialog::SetupDialog(bool Modal)
 	return true;
 }
 
-int GDialog::DoModal(OsView OverrideParent)
+int LDialog::DoModal(OsView OverrideParent)
 {
 	d->ModalStatus = -1;
 	
@@ -191,7 +191,7 @@ int GDialog::DoModal(OsView OverrideParent)
 	return d->ModalStatus;
 }
 
-void GDialog::EndModal(int Code)
+void LDialog::EndModal(int Code)
 {
 	if (d->IsModal)
 	{
@@ -205,7 +205,7 @@ void GDialog::EndModal(int Code)
 	}
 }
 
-int GDialog::DoModeless()
+int LDialog::DoModeless()
 {
 	d->IsModal = false;
 	d->IsModeless = true;
@@ -213,34 +213,34 @@ int GDialog::DoModeless()
 	return 0;
 }
 
-void GDialog::EndModeless(int Code)
+void LDialog::EndModeless(int Code)
 {
 	Quit(Code);
 }
 
 extern LButton *FindDefault(LView *w);
 
-GMessage::Param GDialog::OnEvent(GMessage *Msg)
+GMessage::Param LDialog::OnEvent(GMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GControl::GControl(OsView view) : LView(view)
+LControl::LControl(OsView view) : LView(view)
 {
 	Pos.ZOff(10, 10);
 }
 
-GControl::~GControl()
+LControl::~LControl()
 {
 }
 
-GMessage::Param GControl::OnEvent(GMessage *Msg)
+GMessage::Param LControl::OnEvent(GMessage *Msg)
 {
 	return 0;
 }
 
-LPoint GControl::SizeOfStr(const char *Str)
+LPoint LControl::SizeOfStr(const char *Str)
 {
 	int y = SysFont->GetHeight();
 	LPoint Pt(0, 0);

@@ -1,5 +1,5 @@
-#include "lgi\common\Mem.h"
-#include "lgi\common\Containers.h"
+#include "lgi/common/Mem.h"
+#include "lgi/common/Containers.h"
 char *SpacesToTabs(const char *Text, int TabSize)
 {
 	LStringPipe p(4 << 10);

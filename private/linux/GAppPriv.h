@@ -1,10 +1,10 @@
 #pragma once
 
-#include "LJson.h"
+#include "lgi/common/Json.h"
 #if defined(WIN32) && defined(__GTK_H__)
-#include "../win32/LSymLookup.h"
+	#include "../win32/SymLookup.h"
 #else
-#include "LSymLookup.h"
+	#include "SymLookup.h"
 #endif
 
 #if HAS_LIB_MAGIC

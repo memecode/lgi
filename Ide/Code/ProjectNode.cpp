@@ -1,15 +1,15 @@
-#include "lgi\common\Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/FileSelect.h"
 #include "LgiIde.h"
 #include "IdeProject.h"
 #include "ProjectNode.h"
 #include "AddFtpFile.h"
-#include "lgi\common\Token.h"
-#include "lgi\common\Combo.h"
 #include "WebFldDlg.h"
-#include "lgi\common\ClipBoard.h"
-#include "lgi\common\TableLayout.h"
-#include "lgi\common\Menu.h"
-#include "lgi\common\FileSelect.h"
 
 #define DEBUG_SHOW_NODE_COUNTS		0
 

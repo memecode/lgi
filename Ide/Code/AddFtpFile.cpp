@@ -1,4 +1,4 @@
-#include "lgi\common\Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "AddFtpFile.h"
 #include "resdefs.h"
 #include "FtpFile.h"
@@ -88,4 +88,4 @@ int AddFtpFile::OnNotify(LViewI *c, int f)
 		}
 	}
 	return 0;
-}
+}

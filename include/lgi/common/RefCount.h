@@ -1,6 +1,8 @@
 #ifndef _REF_COUNT_H_
 #define _REF_COUNT_H_
 
+#include "lgi/common/LgiUiBase.h"
+
 class GRefCount
 {
 	#if defined(_WIN32)

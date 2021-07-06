@@ -1,7 +1,7 @@
-#include "lgi\common\Lgi.h"
-#include "lgi\common\Mdi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Mdi.h"
 #include <stdio.h>
-#include "lgi\common\DisplayString.h"
+#include "lgi/common/DisplayString.h"
 #define DEBUG_MDI			0
 enum GMdiDrag
 {

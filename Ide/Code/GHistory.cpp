@@ -1,6 +1,7 @@
-#include "lgi\common\Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/List.h"
 #include "GHistory.h"
-#include "lgi\common\List.h"
+
 //////////////////////////////////////////////////////////////
 // LHistoryPopup
 class LHistoryPopup : public LPopup

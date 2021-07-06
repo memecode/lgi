@@ -4,10 +4,9 @@
 #ifndef __LGI_WINDOWN_MANAGER_GLUE_H__
 #define __LGI_WINDOWN_MANAGER_GLUE_H__
 
-#include "LgiDefs.h"
-#include "GMem.h"
-#include "LArray.h"
-#include "LgiClass.h"
+#include "lgi/common/LgiDefs.h"
+#include "lgi/common/Mem.h"
+#include "lgi/common/Array.h"
 
 /// A RGB colour
 struct WmColour

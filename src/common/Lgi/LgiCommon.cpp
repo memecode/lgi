@@ -37,7 +37,7 @@
 	#include <sys/types.h>
 	#include <pwd.h>
 	#include <sys/utsname.h>
-	#include "LSubProcess.h"
+	#include "lgi/common/SubProcess.h"
 #endif
 
 #include "SymLookup.h"

@@ -9,9 +9,9 @@
 */
 
 #include <stdio.h>
-#include "Lgi.h"
-#include "LScrollBar.h"
-#include "GNotifications.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/Notifications.h"
 
 #define M_SET_SCROLL		(M_USER + 0x2000)
 
