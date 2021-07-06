@@ -284,7 +284,7 @@ bool GTrayIcon::Load(const TCHAR *Str)
 			return false;
 
 		::GString sStr = Str;
-		GAutoString File(LgiFindFile(sStr));
+		::GString File = LFindFile(sStr);
 		if (!File)
 		{
 			LgiTrace("%s:%i - Can't find '%s'\n", _FL, sStr.Get());

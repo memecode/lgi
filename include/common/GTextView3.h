@@ -105,6 +105,7 @@ public:
 			Fore = s.Fore;
 			Back = s.Back;
 			Data = s.Data;
+			Cursor = s.Cursor;
 		}
 		
 		GStyle &Construct(GTextView3 *view, GTextViewStyleOwners owner)
@@ -128,15 +129,6 @@ public:
 		{
 			return Start >= 0 && Len > 0;
 		}
-
-		/*
-		virtual ~GStyle() {}
-
-		virtual bool OnMouseClick(GMouse *m) { return false; }
-		virtual bool OnMenu(LSubMenu *m) { return false; }
-		virtual void OnMenuClick(int i) {}
-		virtual CURSOR_CHAR GetCursor()  { return 0; }
-		*/
 
 		size_t End() const { return Start + Len; }
 

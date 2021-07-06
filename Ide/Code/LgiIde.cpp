@@ -1359,6 +1359,10 @@ public:
 			RecentFilesMenu->Empty();
 			int n=0;
 
+<<<<<<< working copy
+			if (RecentFiles.Length() == 0)
+				RecentFilesMenu->AppendItem(None, 0, false);
+=======
 			auto It = RecentFiles.begin();
 			char *f = *It;
 			if (f)
@@ -1371,10 +1375,10 @@ public:
 						RecentFiles.Delete(It);
 				}
 			}
+>>>>>>> destination
 			else
-			{
-				RecentFilesMenu->AppendItem(None, 0, false);
-			}
+				for (size_t i=0; i<RecentFiles.Length(); i++)
+					RecentFilesMenu->AppendItem(RecentFiles[i], IDM_RECENT_FILE+i);
 		}
 
 		if (RecentProjectsMenu)
@@ -1382,19 +1386,11 @@ public:
 			RecentProjectsMenu->Empty();
 			int n=0;
 
-			auto It = RecentProjects.begin();
-			auto f = *It;
-			if (f)
-			{
-				for (; f; f = *(++It))
-				{
-					RecentProjectsMenu->AppendItem(f, IDM_RECENT_PROJECT+n++, true);
-				}
-			}
-			else
-			{
+			if (RecentProjects.Length() == 0)
 				RecentProjectsMenu->AppendItem(None, 0, false);
-			}
+			else
+				for (size_t i=0; i<RecentProjects.Length(); i++)
+					RecentProjectsMenu->AppendItem(RecentProjects[i], IDM_RECENT_PROJECT+i);
 		}
 		
 		if (WindowsMenu)
@@ -1416,26 +1412,63 @@ public:
 			}
 		}
 	}
+
+	void Dump(GString::Array &a)
+	{
+		for (auto i: a)
+			printf("  %s\n", i.Get());
+	}
 	
 	void OnFile(const char *File, bool IsProject = false)
 	{
 		if (!File)
 			return;
 
+<<<<<<< working copy
+		auto &Recent = IsProject ? RecentProjects : RecentFiles;
+		Recent.SetFixedLength(false);
+		for (size_t i=0; i<Recent.Length(); i++)
+=======
 		auto *Recent = IsProject ? &RecentProjects : &RecentFiles;
 		for (auto &f: *Recent)
+>>>>>>> destination
 		{
+<<<<<<< working copy
+			if (!FileExists(Recent[i]))
+=======
 			if (f && LFileCompare(f, File) == 0)
+>>>>>>> destination
 			{
+<<<<<<< working copy
+				Recent.DeleteAt(i--, true);
+=======
 				f = File;
 				UpdateMenus();
 				return;
+>>>>>>> destination
 			}
+<<<<<<< working copy
+			else if (LFileCompare(Recent[i], File) == 0)
+			{
+				Recent.DeleteAt(i, true);
+				Recent.AddAt(0, File);
+
+				UpdateMenus();
+				return;
+			}
+=======
+>>>>>>> destination
 		}
 
+<<<<<<< working copy
+		Recent.AddAt(0, File);
+		if (Recent.Length() > 10)
+			Recent.Length(10);
+=======
 		Recent->AddAt(0, File);
 		if (Recent->Length() > 10)
 			Recent->Length(10);
+>>>>>>> destination
 
 		UpdateMenus();
 	}
@@ -1501,30 +1534,28 @@ public:
 	void SerializeStringList(const char *Opt, GString::Array *Lst, bool Write)
 	{
 		GVariant v;
+		GString Sep = ":";
 		if (Write)
 		{
-			GMemQueue p;
-			for (auto s: *Lst)
+			if (Lst->Length() > 0)
 			{
-				p.Write((uchar*)s.Get(), s.Length()+1);
+				auto s = Sep.Join(*Lst);
+				Options.SetValue(Opt, v = s.Get());
+				// printf("Saving '%s' to %s\n", s.Get(), Opt);
 			}
-			
-			ssize_t Size = (ssize_t)p.GetSize();
-			
-			v.SetBinary(Size, p.New(), true);
-			Options.SetValue(Opt, v);
+			else
+				Options.DeleteValue(Opt);
 		}
-		else
+		else if (Options.GetValue(Opt, v))
 		{
-			Lst->DeleteArrays();
-
-			if (Options.GetValue(Opt, v) && v.Type == GV_BINARY)
-			{
-				char *Data = (char*)v.Value.Binary.Data;
-				for (char *s=Data; (NativeInt)s<(NativeInt)Data+v.Value.Binary.Length; s += strlen(s) + 1)
-					Lst->New() = s;
-			}
+			auto files = GString(v.Str()).Split(Sep);
+			Lst->Length(0);
+			for (auto f: files)
+				if (f.Length() > 0)
+					Lst->Add(f);
+			// printf("Reading '%s' to %s, file.len=%i %s\n", v.Str(), Opt, (int)files.Length(), v.Str());
 		}
+		// else printf("%s:%i - No option '%s' to read.\n", _FL, Opt);
 	}
 };
 

@@ -161,14 +161,11 @@ static void PixbufDestroyNotify(guchar *pixels, GSurface *data)
 
 bool GWindow::SetIcon(const char *FileName)
 {
-	GAutoString a;
+	::GString a;
 	if (Wnd)
 	{
 		if (!LFileExists(FileName))
-		{
-			if (a.Reset(LgiFindFile(FileName)))
-				FileName = a;
-		}
+			FileName = a = LFindFile(FileName);
 
 		if (!LFileExists(FileName))
 		{
